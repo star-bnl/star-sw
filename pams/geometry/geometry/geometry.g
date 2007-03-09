@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.150 2007/02/23 21:45:40 potekhin Exp $
+* $Id: geometry.g,v 1.151 2007/03/09 21:40:48 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.151  2007/03/09 21:40:48  potekhin
+* UPGR13 modifications: (a) FSTD is out (b) modified SSD with carbon parts,
+* for R&D purposes (c) modified IST with single sided inner layer for the
+* April proposal
+*
 * Revision 1.150  2007/02/23 21:45:40  potekhin
 * a) re-instated the calls to IGT codes to keep a degree
 * of backward compatibility (for early UPGRXX tags)
@@ -3113,17 +3118,17 @@ If LL>1
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 55;
+                     SisdConfig = 65;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
                    pixl=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
                    istb=on;  "IST barrel"
-                   IstbConfig=3;
+                   IstbConfig=7;
 
-                   fstd=on;  "new pixel based forward tracker disk"
-                   FstdConfig=2;
+                   fstd=off;  "no pixel based forward tracker in this tag"
+                   FstdConfig=0;
 
 * Forward STAR tracker disk
                    fgtd=on;  "GEM forward tracker"
@@ -3411,6 +3416,8 @@ If LL>1
             call sisdgeo4
          elseif (sisd_level.eq.5) then
             call sisdgeo5
+         elseif (sisd_level.eq.6) then
+            call sisdgeo6
          else ! Unimplemented level
             write(*,*) '******************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ******************'
             if (IPRIN==0) stop 'You better stop here to avoid problems'     
@@ -3561,6 +3568,7 @@ If LL>1
    if (istb.and.IstbConfig==4) Call istbgeo3
    if (istb.and.IstbConfig==5) Call istbgeo4
    if (istb.and.IstbConfig==6) Call istbgeo5
+   if (istb.and.IstbConfig==7) Call istbgeo6
 
 
    if (gemb.and.GembConfig>0)  Call gembgeo
