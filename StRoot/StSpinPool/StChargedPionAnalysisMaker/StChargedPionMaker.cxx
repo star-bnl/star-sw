@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.3 2007/03/10 16:26:43 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.4 2007/03/10 16:30:45 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.4  2007/03/10 16:30:45  kocolosk
+* correction to 1.3
+*
 * Revision 1.3  2007/03/10 16:26:43  kocolosk
 * log each new file in job
 *
@@ -113,7 +116,7 @@ Int_t StChargedPionMaker::Make()
 	TString inputFile(chain->GetFile()->GetName());
 	if(currentFile !=  inputFile){
 		LOG_INFO << "finished " << currentFile << "and opened " << inputFile << endm;
-		currentFile = inputfile;
+		currentFile = inputFile;
 	}
 	
 	//now for the tracks
