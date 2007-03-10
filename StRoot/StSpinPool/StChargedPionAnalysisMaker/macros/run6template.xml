@@ -7,9 +7,9 @@
 		root4star -b -q /star/u/kocolosk/mit/analysis/run6/mar08/StRoot/StSpinPool/StChargedPionAnalysisMaker/macros/justTheTracks.C\(\"$SCRATCH\",\"&run;\",\"$FILELIST\",$INPUTFILECOUNT,2000000\)
 	</command>
  
-	<output fromScratch="*.tracks.root" toURL="file:/star/u/kocolosk/mit/analysis/run6/mar08/tracks/" />
-	<stdout URL="file:/star/u/kocolosk/mit/analysis/run6/mar08/out/&run;.out"/>
-	<stderr URL="file:/star/u/kocolosk/mit/analysis/run6/mar08/err/&run;.err"/>
+	<output fromScratch="chargedPions_*" toURL="file:/star/u/kocolosk/mit/analysis/run6/mar08/tracks/" />
+	<stdout URL="file:/star/u/kocolosk/mit/analysis/run6/mar08/out/&run;.$JOBID.out"/>
+	<stderr URL="file:/star/u/kocolosk/mit/analysis/run6/mar08/err/&run;.$JOBID.err"/>
 		
 	<SandBox>
 		<Package>
