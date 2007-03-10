@@ -21,9 +21,9 @@ void justTheTracks(const char* dir="/star/institutions/mit/kocolosk/analysis/tes
 	cout<<"add my maker"<<endl;
 	
 	TString outfile(dir);
-	outfile += "/";
+	outfile += "/chargedPions_";
 	outfile += name;
-	outfile += ".tracks.root";
+	outfile += ".tree.root";
 	StChargedPionMaker* pionMaker = new StChargedPionMaker("chargedPionMaker",outfile.Data());
 
 	cout<<"try to init"<<endl;

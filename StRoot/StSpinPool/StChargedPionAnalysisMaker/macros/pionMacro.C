@@ -4,8 +4,8 @@ void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
 			   int nFiles = 1,
 			   int nEvents = 200000000)
 {
-	gROOT->Macro("$STAR/StRoot/macros/LoadLogger.C");
-	gROOT->Macro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+	gROOT->Macro("LoadLogger.C");
+	gROOT->Macro("loadMuDst.C");
     gSystem->Load("StarMagField.so");
     gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
@@ -48,17 +48,17 @@ void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
 	cout<<"start adding locally compiled makers"<<endl;
 	
 	TString jetSkimFile(dir);
-	jetSkimFile += "/";
+	jetSkimFile += "/jetSkim_";
 	jetSkimFile += name;
-	jetSkimFile += ".jetskim.root";
+	jetSkimFile += ".tree.root";
 	StJetSkimEventMaker *jetSkim = new StJetSkimEventMaker("jetSkimMaker",muDstMaker,jetSkimFile.Data());
 		
 	cout<<"add my maker"<<endl;
 	
 	TString outfile(dir);
-	outfile += "/";
+	outfile += "/chargedPions_";
 	outfile += name;
-	outfile += ".tracks.root";
+	outfile += ".tree.root";
 //	StChargedPionAnalysisMaker* pionMaker = new StChargedPionAnalysisMaker("pionMaker",outfile.Data());
 //	pionMaker->isRealData = true;
 	StChargedPionMaker* pionMaker = new StChargedPionMaker("chargedPionMaker",outfile.Data());
