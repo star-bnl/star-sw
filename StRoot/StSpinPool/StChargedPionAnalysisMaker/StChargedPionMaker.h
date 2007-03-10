@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.h,v 1.2 2007/03/08 22:13:59 kocolosk Exp $
+* $Id: StChargedPionMaker.h,v 1.3 2007/03/10 16:28:28 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.h,v $
+* Revision 1.3  2007/03/10 16:28:28  kocolosk
+* log each new file in job
+*
 * Revision 1.2  2007/03/08 22:13:59  kocolosk
 * stores StMuTracks directly
 *
@@ -44,7 +47,7 @@ public:
 	virtual Int_t Finish();
 	
 	virtual const char* GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.2 2007/03/08 22:13:59 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.3 2007/03/10 16:28:28 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
 	
 private:
 	TFile *mFile;				//!
@@ -55,6 +58,8 @@ private:
 	Int_t mNTracks;				//!
 	TClonesArray *mPrimaries;	//!
 	TClonesArray *mGlobals;		//!
+	
+	TString currentFile;		//!
 
 	//pointers to makers - get them in Init()
 	StMuDstMaker* muDstMaker;	//!
