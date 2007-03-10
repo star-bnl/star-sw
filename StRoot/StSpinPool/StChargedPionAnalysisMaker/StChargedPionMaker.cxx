@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.2 2007/03/08 22:13:59 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.3 2007/03/10 16:26:43 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.3  2007/03/10 16:26:43  kocolosk
+* log each new file in job
+*
 * Revision 1.2  2007/03/08 22:13:59  kocolosk
 * stores StMuTracks directly
 *
@@ -105,6 +108,13 @@ Int_t StChargedPionMaker::Make()
 	//basic event info
 	mRun	= event->runNumber();
 	mEvent	= event->eventNumber();
+	
+	//have we changed files?
+	TString inputFile(chain->GetFile()->GetName());
+	if(currentFile !=  inputFile){
+		LOG_INFO << "finished " << currentFile << "and opened " << inputFile << endm;
+		currentFile = inputfile;
+	}
 	
 	//now for the tracks
 	unsigned int nVertices = muDst->numberOfPrimaryVertices();
