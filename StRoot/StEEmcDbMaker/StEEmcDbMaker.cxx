@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.53 2007/01/26 20:45:58 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.54 2007/03/11 01:25:47 balewski Exp $
  
 
 #include <time.h>
@@ -404,7 +404,7 @@ int  StEEmcDbMaker::mOptimizeMapping(int is){
   eemcDbADCconf_st *t= mDbADCconf[is];
   
   if(t==0) return -2; // it is fatal error
-  LOG_INFO <<"      chanMap="<< t->comment <<endm;
+  LOG_INFO <<"mapping="<< t->comment <<endm;
   
   int j;
   for(j=0;j<EEMCDbMaxAdc; j++) { // loop over channels
@@ -467,18 +467,18 @@ void StEEmcDbMaker::mOptimizeOthers(int is){
   assert(secID>0);
 
   eemcDbPMTcal_st  *calT=mDbPMTcal[is];  
-  if(calT)  LOG_INFO <<"    calibTw="<<calT->comment<<endm;
+  if(calT)  LOG_INFO <<"tower calib="<<calT->comment<<endm;
   eemcDbPMTname_st *tubeTw=mDbPMTname[is];
-  if(tubeTw) LOG_INFO <<"  tubeName="<<tubeTw->comment<<endm;
+  if(tubeTw) LOG_INFO <<"PMT names="<<tubeTw->comment<<endm;
 
   eemcDbPIXcal_st  *calM= mDbPIXcal[is];
-  if(calM) LOG_INFO <<"    calMAPMT="<<calM->comment<<endm;
+  if(calM) LOG_INFO <<"MAPMT calib="<<calM->comment<<endm;
 
   eemcDbPMTped_st  *ped=mDbPMTped[is];
-  if(ped) LOG_INFO <<"       pedAll="<<ped->comment<<endm;
+  if(ped) LOG_INFO <<"ped tower & MAPMT="<<ped->comment<<endm;
 
   eemcDbPMTstat_st *stat=mDbPMTstat[is];
-  if(stat) LOG_INFO <<"     statAll="<<stat->comment<<endm;
+  if(stat) LOG_INFO <<"status tower & MAPMT="<<stat->comment<<endm;
   
   int key; 
   for(key=ix1;key<ix2; key++) { // loop  in this sector
@@ -1084,6 +1084,9 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.54  2007/03/11 01:25:47  balewski
+// nicer printouts
+//
 // Revision 1.53  2007/01/26 20:45:58  balewski
 // now we have pure new Logger, thanks Jason, Jan
 //
