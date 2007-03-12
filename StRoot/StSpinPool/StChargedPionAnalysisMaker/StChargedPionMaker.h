@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.h,v 1.3 2007/03/10 16:28:28 kocolosk Exp $
+* $Id: StChargedPionMaker.h,v 1.4 2007/03/12 15:01:50 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.h,v $
+* Revision 1.4  2007/03/12 15:01:50  kocolosk
+* use StChargedPionTrack instead of StMuTrack so we can read the trees offline
+*
 * Revision 1.3  2007/03/10 16:28:28  kocolosk
 * log each new file in job
 *
@@ -31,10 +34,12 @@
 class TFile;
 class TTree;
 class TClonesArray;
+class TString;
 
 class StMuDstMaker;
 class StMuTrack;
 
+class StChargedPionTrack;
 
 class StChargedPionMaker : public StMaker {
 public:
@@ -47,11 +52,14 @@ public:
 	virtual Int_t Finish();
 	
 	virtual const char* GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.3 2007/03/10 16:28:28 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.4 2007/03/12 15:01:50 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
 	
 private:
 	TFile *mFile;				//!
 	TTree *mTree;				//!
+	
+	TH1	*mBadTracks;			//!
+	enum badTrackTypes {kFlagged=1, kBadHelix, kBadOuterHelix, kMissingGlobal};
 	
 	Int_t mRun;					//!
 	Int_t mEvent;				//!
@@ -63,6 +71,9 @@ private:
 
 	//pointers to makers - get them in Init()
 	StMuDstMaker* muDstMaker;	//!
+	
+	//translate StMuTrack into StChargedPionTrack so we can read it anywhere
+	StChargedPionTrack & chargedPionTrack(StMuTrack *track);
 	
 	ClassDef(StChargedPionMaker,1)
 };

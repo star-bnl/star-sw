@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.4 2007/03/10 16:30:45 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.5 2007/03/12 15:01:49 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.5  2007/03/12 15:01:49  kocolosk
+* use StChargedPionTrack instead of StMuTrack so we can read the trees offline
+*
 * Revision 1.4  2007/03/10 16:30:45  kocolosk
 * correction to 1.3
 *
@@ -43,18 +46,24 @@
 #include "StMessMgr.h"
 
 //my headers
+#include "StChargedPionTrack.h"
 #include "StChargedPionMaker.h"
 
 ClassImp(StChargedPionMaker)
 
 StChargedPionMaker::StChargedPionMaker(const char *name, const char *outputfile) 
 {
-	LOG_DEBUG << "calling constructor" << endm;
+	LOG_INFO << "calling constructor" << endm;
+	
+	StChargedPionTrack::Class()->IgnoreTObjectStreamer();
 	
 	mFile = new TFile(outputfile,"RECREATE");
+
+	mBadTracks = new TH1D("badTracks","tracks failing quality cuts",4,0.5,4.5);
+
 	mTree = new TTree("chargedPionTree","charged pions from data");
-	mPrimaries = new TClonesArray("StMuTrack",10);
-	mGlobals = new TClonesArray("StMuTrack",10);
+	mPrimaries = new TClonesArray("StChargedPionTrack",10);
+	mGlobals = new TClonesArray("StChargedPionTrack",10);
 	
 	mTree->Branch("run",&mRun,"run/I");
 	mTree->Branch("event",&mEvent,"event/I");
@@ -67,7 +76,8 @@ StChargedPionMaker::StChargedPionMaker(const char *name, const char *outputfile)
 	mTree->SetMaxTreeSize(autosave);	
 	muDstMaker = NULL;
 	
-	LOG_DEBUG << "finished constructor" << endm; 
+		
+	LOG_INFO << "finished constructor" << endm; 
 }
 
 StChargedPionMaker::~StChargedPionMaker()
@@ -115,7 +125,7 @@ Int_t StChargedPionMaker::Make()
 	//have we changed files?
 	TString inputFile(chain->GetFile()->GetName());
 	if(currentFile !=  inputFile){
-		LOG_INFO << "finished " << currentFile << "and opened " << inputFile << endm;
+		LOG_INFO << "opened file " << inputFile << endm;
 		currentFile = inputFile;
 	}
 	
@@ -132,23 +142,36 @@ Int_t StChargedPionMaker::Make()
 			track = muDst->primaryTracks(i);
 			global = track->globalTrack();
 			
+			//sanity checks
+			switch(track->bad()){
+				case(0):
+					break;
+				case(10):
+					mBadTracks->Fill(kFlagged);
+				case(20):
+					mBadTracks->Fill(kBadHelix);
+				case(30):
+					mBadTracks->Fill(kBadOuterHelix);
+					continue;
+			}
+			
 			if(!global){
-				LOG_WARN << "no global found for R"<<mRun<< ", event "<<mEvent<<", key "<<track->id()<<", so skip it"<<endm;
+				mBadTracks->Fill(kMissingGlobal);
 				continue;
 			}
 			
 			//cuts
-			if(track->pt() < 2.)					continue;
-			if(TMath::Abs(track->eta()) > 1.)		continue;
-			if(track->dca(vertex_index).mag() > 1.)	continue;
-			if(track->nHitsFit() < 20)				continue;
+			if(track->pt() < 2.)				continue;
+			if(TMath::Abs(track->eta()) > 1.5)	continue;
+			if(track->dca().mag() > 3.)			continue;
+			if(track->nHitsFit() < 20)			continue;
 			
-			new ( (*mPrimaries)[mPrimaries->GetLast()+1] )	StMuTrack(*track);
-			new ( (*mGlobals)[mGlobals->GetLast()+1] )		StMuTrack(*global);
+			new ( (*mPrimaries)[mPrimaries->GetLast()+1] )	StChargedPionTrack(this->chargedPionTrack(track));
+			new ( (*mGlobals)[mGlobals->GetLast()+1] )		StChargedPionTrack(this->chargedPionTrack(global));
 			mNTracks++;
 		}
 	}
-	
+
 	mTree->Fill();
 	
 	return StMaker::Make();
@@ -158,7 +181,47 @@ Int_t StChargedPionMaker::Finish()
 {
 	mFile->cd();
 	mTree->Write();
+	mBadTracks->Write();
 	mFile->Close();
 	LOG_INFO << "finished OK"<<endm;
 	return StMaker::Finish();
+}
+
+StChargedPionTrack & StChargedPionMaker::chargedPionTrack(StMuTrack *muTrack)
+{
+	StChargedPionTrack *cpTrack = new StChargedPionTrack();
+	
+	cpTrack->setId(muTrack->id());
+	cpTrack->setFlag(muTrack->flag());
+	cpTrack->setVertexIndex(muTrack->vertexIndex());
+	cpTrack->setNHits(muTrack->nHits());
+	cpTrack->setNHitsPoss(muTrack->nHitsPoss());
+	cpTrack->setNHitsDedx(muTrack->nHitsDedx());
+	cpTrack->setNHitsFit(muTrack->nHitsFit());
+	cpTrack->setPidProbElectron(muTrack->pidProbElectron());
+	cpTrack->setPidProbPion(muTrack->pidProbPion());
+	cpTrack->setPidProbKaon(muTrack->pidProbKaon());
+	cpTrack->setPidProbProton(muTrack->pidProbProton());
+	cpTrack->setNSigmaElectron(muTrack->nSigmaElectron());
+	cpTrack->setNSigmaPion(muTrack->nSigmaPion());
+	cpTrack->setNSigmaKaon(muTrack->nSigmaKaon());
+	cpTrack->setNSigmaProton(muTrack->nSigmaProton());
+	cpTrack->setDedx(muTrack->dEdx());
+	cpTrack->setChi2(muTrack->chi2());
+	cpTrack->setChi2prob(muTrack->chi2prob());
+	cpTrack->setPt(muTrack->pt());
+	cpTrack->setPhi(muTrack->phi());
+	cpTrack->setEta(muTrack->eta());
+	cpTrack->setCharge(muTrack->charge());		
+	cpTrack->setP(muTrack->p());
+	cpTrack->setFirstPoint(muTrack->firstPoint());
+	cpTrack->setLastPoint(muTrack->lastPoint());
+	cpTrack->setHelix(muTrack->helix());
+	cpTrack->setOuterHelix(muTrack->outerHelix());
+	cpTrack->setDca(muTrack->dca());
+	cpTrack->setSigmaDcaD(muTrack->sigmaDcaD());
+	cpTrack->setSigmaDcaZ(muTrack->sigmaDcaZ());
+	cpTrack->setProbPidTraits(muTrack->probPidTraits());
+	
+	return (*cpTrack);
 }
