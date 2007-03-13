@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_TestQATable.h,v 2.1 2000/08/25 16:04:10 genevb Exp $
+// $Id: QAhlist_QA_TestQATable.h,v 2.2 2007/03/13 18:37:53 genevb Exp $
 // $Log: QAhlist_QA_TestQATable.h,v $
+// Revision 2.2  2007/03/13 18:37:53  genevb
+// simplified names
+//
 // Revision 2.1  2000/08/25 16:04:10  genevb
 // Introduction of files
 //
@@ -10,5 +13,5 @@
 // Note: Editing this file means that StAnalysisUtilities/StHistUtil
 // must be recompiled
 
-     "TabQaVtxX",
-     "TabQaVtxY"
+     "QaVtxX",
+     "QaVtxY"
