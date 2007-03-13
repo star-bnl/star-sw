@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.5 2006/05/18 16:38:03 genevb Exp $
+// $Id: StHistUtil.h,v 2.6 2007/03/13 18:42:28 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.6  2007/03/13 18:42:28  genevb
+// Add Svt list, simplified hlist include files, handle StMultiH2F, store dirName
+//
 // Revision 2.5  2006/05/18 16:38:03  genevb
 // Introduce StHistUtil::GetRunYear()
 //
@@ -74,6 +77,7 @@ class StHistUtil {
   TH1**   newHist;      //! array of new histograms that other will be copied into
   Bool_t  debug;
   Int_t   m_RunYear;    // Run year
+  Char_t  m_dirName[256];//! Directory name for histograms in StIO tree
 
 
  protected:
@@ -86,24 +90,24 @@ class StHistUtil {
   virtual        ~StHistUtil();
   virtual void    SetDebug(Bool_t dbg=kTRUE) { debug=dbg; }
   virtual Bool_t  Debug() { return debug; }
-  virtual Int_t   DrawHists(Char_t *dirName="QA");
-  virtual Int_t   ListHists(Char_t *dirName="QA");
-  virtual TList*  FindHists(Char_t *dirName="QA");
+  virtual Int_t   DrawHists(Char_t *dirName="EventQA");
+  virtual Int_t   ListHists(Char_t *dirName="EventQA");
+  virtual TList*  FindHists(Char_t *dirName="EventQA");
   virtual Int_t   CopyHists(TList  *dirList);
   virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=-1);
   virtual Int_t   PrintInfoHists(TList  *dirList,  const Char_t *fname="printinfo.out");
 
-  virtual void    SetDefaultLogYList(Char_t *dirName="QA");
+  virtual void    SetDefaultLogYList(Char_t *dirName="EventQA");
   virtual Int_t   AddToLogYList(const Char_t *HistName="");
   virtual Int_t   RemoveFromLogYList(const Char_t *HistName="");
   virtual Int_t   ExamineLogYList();
 
-  virtual void    SetDefaultLogXList(Char_t *dirName="QA");
+  virtual void    SetDefaultLogXList(Char_t *dirName="EventQA");
   virtual Int_t   AddToLogXList(const Char_t *HistName="");
   virtual Int_t   RemoveFromLogXList(const Char_t *HistName="");
   virtual Int_t   ExamineLogXList();
 
-  virtual void    SetDefaultPrintList(Char_t *dirName="QA",Char_t *analType="FullTable");
+  virtual void    SetDefaultPrintList(Char_t *dirName="EventQA",Char_t *analType="FullTable");
   virtual Int_t   AddToPrintList(const Char_t *HistName="");
   virtual Int_t   RemoveFromPrintList(const Char_t *HistName="");
   virtual Int_t   ExaminePrintList();
@@ -131,7 +135,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.5 2006/05/18 16:38:03 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.6 2007/03/13 18:42:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
