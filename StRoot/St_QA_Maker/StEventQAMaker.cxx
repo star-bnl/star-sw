@@ -11,8 +11,8 @@
 #include "TMath.h"
 #include "SystemOfUnits.h"
 #include "StQABookHist.h"
-#include "TH1.h"
 #include "TH2.h"
+#include "TH3.h"
 //#include "TSpectrum.h"
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
@@ -103,7 +103,9 @@ Int_t StEventQAMaker::Init() {
 Int_t StEventQAMaker::InitRun(int runnumber) {
   
   if(! mHitHist){
-    mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",
+    TString hname = QAMakerType;
+    hname += "QaDedxAllSectors";
+    mHitHist = new HitHistograms(hname.Data(),"dE/dx for all TPC sectors",
                                  100,0.,1.e-5,2,this);
   }
   
@@ -1817,6 +1819,10 @@ void StEventQAMaker::MakeHistPoint() {
     totalHits += tpcHits->numberOfHits();
   }
   if (svtHits) {
+    Int_t SvtLaser1 = 0;
+    Int_t SvtLaser2 = 0;
+    Float_t SvtLaser1t[32];
+    Float_t SvtLaser2t[32];
     ULong_t totalSvtHits = 0;
     for (UInt_t i=0; i<svtHits->numberOfBarrels(); i++) {
       StSvtBarrelHitCollection* svtbarrel = svtHits->barrel(i);
@@ -1846,13 +1852,25 @@ void StEventQAMaker::MakeHistPoint() {
             // barrel 3, ladder 15, wafer 7
             if (i==2 && j==14 && k==6 && svthit->hybrid() == 1 &&
                 svthit->anode() >= 195 && svthit->anode() <= 201 &&
-                svthit->timebucket() >= 90)
+                svthit->timebucket() >= 90) {
               hists->m_pnt_svtLaser->Fill(eventCount,svthit->timebucket());
+              SvtLaser1t[SvtLaser1] = svthit->timebucket();
+              for (Int_t m=0;m<SvtLaser1;m++)
+                hists->m_pnt_svtLaserDiff->Fill(eventCount,
+                  TMath::Abs(SvtLaser1t[SvtLaser1]-SvtLaser1t[m]),0);
+              SvtLaser1++;
+            }
             // barrel 3, ladder 7, wafer 1
             if (i==2 && j==6 && k==0 && svthit->hybrid() == 2 &&
                 svthit->anode() >= 195 && svthit->anode() <= 200 &&
-                svthit->timebucket() >= 90 && svthit->timebucket() <= 110)
+                svthit->timebucket() >= 90) {
               hists->m_pnt_svtLaser->Fill(eventCount,svthit->timebucket()/2.);
+              SvtLaser2t[SvtLaser2] = svthit->timebucket();
+              for (Int_t m=0;m<SvtLaser2;m++)
+                hists->m_pnt_svtLaserDiff->Fill(eventCount,
+                  TMath::Abs(SvtLaser2t[SvtLaser2]-SvtLaser2t[m]),1);
+              SvtLaser2++;
+            }
 	  }
         }
       }
@@ -2221,8 +2239,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.72 2007/02/26 20:45:01 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.73 2007/03/13 18:47:22 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.73  2007/03/13 18:47:22  genevb
+// Added Svt Laser Diff
+//
 // Revision 2.72  2007/02/26 20:45:01  genevb
 // SVT drift hist
 //

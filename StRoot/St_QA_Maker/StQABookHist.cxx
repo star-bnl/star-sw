@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.52 2007/02/26 20:45:01 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.53 2007/03/13 18:46:28 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.53  2007/03/13 18:46:28  genevb
+// Added Svt Laser Diff
+//
 // Revision 2.52  2007/02/26 20:45:01  genevb
 // SVT drift hist
 //
@@ -695,7 +698,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   // east and west on separate plots
   m_pnt_ftpcE=0;   //! number of hits ftpcE
   m_pnt_ftpcW=0;   //! number of hits ftpcW
-  m_pnt_svtLaser=0;   //! laser spots in svt
+  m_pnt_svtLaser=0;     //! laser spots in svt
+  m_pnt_svtLaserDiff=0; //! diff of laser spots in svt
 
 // for method MakeHistRich
   m_rich_tot=0;   //! number of rich hits
@@ -722,11 +726,11 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   for (i=0; i<8; i++) m_fpd_sums[i] = 0;
 
 // for PMD
-  for (i=0; i<3; i++) {
+  for (i=0; i<12; i++) {
     m_pmd_sm_adc[i] = 0;
     m_pmd_sm_hit[i] = 0;
   }
-  for (i=0; i<6; i++) {
+  for (i=0; i<24; i++) {
     m_pmd_chain_adc[i] = 0;
     m_pmd_chain_hit[i] = 0;
   }
@@ -1782,6 +1786,11 @@ void StQABookHist::BookHistPoint(){
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
   m_pnt_svtLaser= QAH::H2F("QaPointSvtLaser","point: laser spots, svt ",150,0,600,65,0.,130.);
   m_pnt_svtLaser->SetXTitle("event in file");
+  m_pnt_svtLaserDiff= QAH::MH2F("QaPointSvtLaserDiff","point: diff of laser spots, svt ",150,0,600,101,9.8,50.2,2);
+  m_pnt_svtLaserDiff->SetXTitle("event in file");
+  m_pnt_svtLaserDiff->SetYTitle("time buckets");
+  m_pnt_svtLaserDiff->Rebin(0,"Laser 1");
+  m_pnt_svtLaserDiff->Rebin(1,"Laser 2");
   m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt",96,-16,16,96,-16,16);
   m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
   m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);
