@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.12 2007/03/05 18:51:02 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.13 2007/03/13 15:09:10 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.13  2007/03/13 15:09:10  dongx
+ * Remove breaking of failure on number of return rows during db I/O for tofTotCorr and tofZCorr
+ *
  * Revision 1.12  2007/03/05 18:51:02  dongx
  * updated for Run V CuCu calibration
  *  - INL correction moved in this maker
@@ -504,10 +507,11 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
 
     if(numRows!=mNTOFr5+mNPVPD) {
       gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotCorr table! Return! " << endm;
-      return kStErr;
+      //      return kStErr;
     }
 
-    for (Int_t i=0;i<numRows;i++) {
+    //    for (Int_t i=0;i<numRows;i++) {
+    for(Int_t i=0;i<mNTOFr5+mNPVPD;i++) {
       short trayId = totCorr[i].trayId;
       short moduleId = totCorr[i].moduleId;
       short cellId = totCorr[i].cellId;
@@ -542,10 +546,11 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
 
     if(numRows!=mNTOFr5) {   // only for TOFr5 tray
       gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofZCorr table! Return! " << endm;
-      return kStErr;
+      //      return kStErr;
     }
 
-    for (Int_t i=0;i<numRows;i++) {
+    //    for (Int_t i=0;i<numRows;i++) {
+    for (Int_t i=0;i<mNTOFr5;i++) {
       short trayId = zCorr[i].trayId;
       short moduleId = zCorr[i].moduleId;
       short cellId = zCorr[i].cellId;
