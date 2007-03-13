@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.31 2007/02/26 20:45:00 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.32 2007/03/13 18:42:27 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.32  2007/03/13 18:42:27  genevb
+// Add Svt list, simplified hlist include files, handle StMultiH2F, store dirName
+//
 // Revision 2.31  2007/02/26 20:45:00  genevb
 // SVT drift hist
 //
@@ -145,8 +148,6 @@ char* possibleSuffixes[9] = {
 int sizeOfCharPtr = sizeof(Char_t*);
 int sizeOfTH1Ptr = sizeof(TH1*);
 
-TH1* hobjradialW = NULL;
-TH1* hobjradialE = NULL;
 
 ClassImp(StHistUtil)
   
@@ -169,6 +170,7 @@ StHistUtil::StHistUtil(){
   maxHistCopy = 512;
   newHist = new TH1ptr[maxHistCopy];
   memset(newHist,0,maxHistCopy*sizeOfTH1Ptr);
+  m_dirName[0] = 0;
 
 }
 //_____________________________________________________________________________
@@ -337,7 +339,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
   // Now find the histograms
   // get the TList pointer to the histograms:
-  TList* dirList = FindHists(dirName);
+  if (dirName) strcpy(m_dirName,dirName);
+  TList* dirList = FindHists(m_dirName);
   if (!dirList) cout << " DrawHists - histograms not available! " << endl;
 
   TIter nextHist(dirList);
@@ -345,6 +348,11 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   Int_t histReadCounter = 0;
   Bool_t started = kFALSE;
 
+
+  TH1* hobj1 = NULL;
+  TH1* hobj2 = NULL;
+  TH1* hobjradialW = NULL;
+  TH1* hobjradialE = NULL;
 
   TObject *obj = 0;
   Int_t chkdim=0;
@@ -445,7 +453,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 // Limit x range for some histograms
           if (oName.EndsWith("QaPointTpc") ||
               oName.EndsWith("QaPointSvt") ||
-              oName.EndsWith("QaPointSvtLaser") ||
+              oName.Contains("QaPointSvtLaser") ||
               oName.EndsWith("QaPointSsd") ||
               oName.EndsWith("QaPointFtpc") ||
               oName.EndsWith("QaRichTot") ||
@@ -487,10 +495,12 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           chkdim = hobj->GetDimension();
 
           // actually draw,print
-          if ((chkdim == 2) && (oName.EndsWith("SvtLoc"))) {
-            obj->Draw("col");
+          if ((chkdim == 3) && (obj->InheritsFrom("StMultiH2F"))) {
+            obj->Draw("Box");
+          } else if ((chkdim == 2) && (oName.EndsWith("SvtLoc"))) {
+            obj->Draw("Col");
           } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
-            obj->Draw("box");
+            obj->Draw("Box");
 	    if ((oName.EndsWith("trkGoodF"))||(oName.EndsWith("VtxSvtvsTpc"))) {
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
@@ -504,35 +514,24 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             }
 	    hobj->SetLineWidth(2);
             if (oName.EndsWith("Mass")) hobj->Draw("e");
-	    else if (!oName.CompareTo("fcl_radialW") ||
-                     !oName.CompareTo("fcl_radialE")) {
-	      if (!oName.CompareTo("fcl_radialW")) hobjradialW = (TH1*) obj;
-	      if (!oName.CompareTo("fcl_radialE")) hobjradialE = (TH1*) obj;
-	      if ( hobjradialW || hobjradialE) {
+	    else if (oName.BeginsWith("fcl_radial")) {
+	      if (oName.EndsWith("W")) hobjradialW = hobj;
+	      else hobjradialE = hobj;
+	      hobj->SetStats(kFALSE);     
+              hobj->GetXaxis()->SetRangeUser(7.0,9.0);
+              hobj->SetTitle("FTPCW+E cluster radial position");
 	      if ( hobjradialW && hobjradialE) {
-		hobjradialW->SetStats(kFALSE);     
-		hobjradialW->GetXaxis()->SetRangeUser(7.0,9.0);
-		hobjradialE->SetStats(kFALSE);     
-		hobjradialE->GetXaxis()->SetRangeUser(7.0,9.0);
 		if ( hobjradialW->GetMaximum() >= hobjradialE->GetMaximum()) {     
-                  hobjradialW->SetTitle((TString)"FTPCW+E cluster radial position");
-                  hobjradialE->SetTitle(hobjradialW->GetTitle());
-		  hobjradialW->Draw();
-		  gPad->Modified();
-		  ruler.SetLineColor(kBlack);
-                  ruler.SetLineWidth(2);
-                  ruler.DrawLine(7.8,0.,7.8,hobjradialW->GetMaximum());
-	          hobjradialE->Draw("Same");
-	        } else {
-                  hobjradialE->SetTitle((TString)"FTPCE+W cluster radial position");
-                  hobjradialW->SetTitle(hobjradialE->GetTitle());
-                  hobjradialE->Draw();
-		  gPad->Modified();
-                  hobjradialW->Draw("Same");
-		  ruler.SetLineColor(kBlack);
-                  ruler.SetLineWidth(2);
-                  ruler.DrawLine(7.8,0.,7.8,hobjradialE->GetMaximum());
-	        }		  
+                  hobj1 = hobjradialW; hobj2 = hobjradialE;
+                } else {
+                  hobj1 = hobjradialE; hobj2 = hobjradialW;
+                }
+		hobj1->Draw();
+		gPad->Modified();
+		ruler.SetLineColor(kBlack);
+                ruler.SetLineWidth(2);
+                ruler.DrawLine(7.8,0.,7.8,hobj1->GetMaximum());
+	        hobj2->Draw("Same");
 
                 // make a legend
                 TLegend *legend = new TLegend(0.75,0.85,0.98,0.95);
@@ -544,7 +543,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                 legend->Draw();
 	      } else {
 	        padAdvance = kFALSE; // wait for both histograms before drawing
-	      }
 	      }
             }
 	    else hobj->Draw();
@@ -595,7 +593,8 @@ TList* StHistUtil::FindHists(Char_t *dirName)
 //     have to check if there's really anything there (so use First method)
 
 //
-  StMaker *temp = m_PntrToMaker->GetMaker(dirName);
+  if (dirName) strcpy(m_dirName,dirName);
+  StMaker *temp = m_PntrToMaker->GetMaker(m_dirName);
     if (temp) {
       cout << "FindHists - found pointer to maker" << endl;
       dList = temp->Histograms();
@@ -636,7 +635,7 @@ TList* StHistUtil::FindHists(Char_t *dirName)
 // use TString to append "Hist" to the dirName
 // += is overloaded operator of TString
 
-    TString hBN(dirName);
+    TString hBN(m_dirName);
     hBN += "Hist";
     
 //find particular branch
@@ -681,7 +680,8 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
 
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
-  dirList = FindHists(dirName);
+  if (dirName) strcpy(m_dirName,dirName);
+  dirList = FindHists(m_dirName);
 
   if (!dirList) cout << " ListHists - histograms not available! " << endl;
 
@@ -1058,12 +1058,8 @@ Int_t StHistUtil::AddToPrintList(const Char_t *HistName){
 // create TObjString on heap
    TObjString *HistNameObj = new TObjString(HistName);
 
-// - check if it's already on the list - use FindObject method of TList
-    TObject *lobj = 0;
-    lobj = m_ListOfPrint->FindObject(HistName);
-
 // now can use Add method of TList
-    if (!lobj) {
+    if (!m_ListOfPrint->Contains(HistName)) {
        m_ListOfPrint->Add(HistNameObj);
        if (Debug())
          cout << " StHistUtil::AddToPrintList: " << HistName  <<endl;
@@ -1178,11 +1174,13 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
     cout << " **** Now in StHistUtil::SetDefaultLogYList  **** " << endl;
 
 
+  if (dirName) strcpy(m_dirName,dirName);
   TString type;
-
-  if (!strcmp(dirName,"QA"))
+  if (!strcmp(m_dirName,"QA"))
     type = "Tab";
-  if (!strcmp(dirName,"EventQA"))
+  else if (!strcmp(m_dirName,"EventQA"))
+    type = "StE";
+  else // default for now
     type = "StE";
 
   Char_t* sdefList[] = {
@@ -1193,22 +1191,13 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
   Int_t numLog = 0;
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
-    TString listString;
-    if (strcmp(sdefList[ilg],"QaInnerSectorDeDx") &&
-	strcmp(sdefList[ilg],"QaOuterSectorDeDx") &&
-	strcmp(sdefList[ilg],"QaDedxAllSectors") &&
-	strcmp(sdefList[ilg],"fcl_chargestepW") &&
-	strcmp(sdefList[ilg],"fcl_chargestepE") &&
-        strcmp(sdefList[ilg],"fcl_radialW") &&
-	strcmp(sdefList[ilg],"fcl_radialE")) {
+    TString listString = sdefList[ilg];
+    if (!listString.BeginsWith("fcl")) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogYList(listString.Data());
       }
-    } else {
-      listString = sdefList[ilg];
-      numLog = AddToLogYList(listString.Data());
-    }
+    } else numLog = AddToLogYList(listString.Data());
   }
 
   cout <<  " !!!  StHistUtil::SetDefaultLogYList, # histogram put in list " << numLog << endl;
@@ -1227,11 +1216,13 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
   if (Debug())
     cout << " **** Now in StHistUtil::SetDefaultLogXList  **** " << endl;
 
+  if (dirName) strcpy(m_dirName,dirName);
   TString type;
-
-  if (!strcmp(dirName,"QA"))
+  if (!strcmp(m_dirName,"QA"))
     type = "Tab";
-  if (!strcmp(dirName,"EventQA"))
+  else if (!strcmp(m_dirName,"EventQA"))
+    type = "StE";
+  else // default for now
     type = "StE";
 
   Char_t* sdefList[] = {
@@ -1242,27 +1233,19 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
   Int_t numLog = 0;
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
-    TString listString;
-    if (strcmp(sdefList[ilg],"QaInnerSectorDeDx") &&
-	strcmp(sdefList[ilg],"QaOuterSectorDeDx") &&
-	strcmp(sdefList[ilg],"QaDedxAllSectors") &&
-	strcmp(sdefList[ilg],"fcl_chargestepW") &&
-	strcmp(sdefList[ilg],"fcl_chargestepE") &&
-        strcmp(sdefList[ilg],"fcl_radialW") &&
-	strcmp(sdefList[ilg],"fcl_radialE")) {
+    TString listString = sdefList[ilg];
+    if (!listString.BeginsWith("fcl")) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogXList(listString.Data());
       }
-    } else {
-      listString = sdefList[ilg];
-      numLog = AddToLogXList(listString.Data());
-    }
+    } else numLog = AddToLogXList(listString.Data());
   }
 
   cout <<  " !!!  StHistUtil::SetDefaultLogXList, # histogram put in list " << numLog << endl;
 
 }
+
 
 //_____________________________________________________________________________
 // Method SetDefaultPrintList
@@ -1276,6 +1259,15 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   Char_t **sdefList=0;
   Int_t lengofList = 0;
 
+  if (dirName) strcpy(m_dirName,dirName);
+  TString type;
+  if (!strcmp(m_dirName,"QA"))
+    type = "Tab";
+  else if (!strcmp(m_dirName,"EventQA"))
+    type = "StE";
+  else // default for now
+    type = "StE";
+
 
 // If not analysis Type is set, then don't setup a list
   if ((!strcmp(analType,"")) || (!strcmp(analType,"All")) ) {
@@ -1284,90 +1276,95 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // Cosmic Data Table QA list .................................................
-  if ((!strcmp(dirName,"QA")) && (!strcmp(analType,"Cosmic"))) {
-    Char_t* sdefList1[] = {
-      #include "St_QA_Maker/QAhlist_QA_Cosmic.h"
-    };
-    sdefList = sdefList1;
-    lengofList = sizeof(sdefList1)/sizeOfCharPtr;
+  Char_t* sdefList1[] = {
+    #include "St_QA_Maker/QAhlist_QA_Cosmic.h"
+  };
+  if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"Cosmic"))) {
+    sdefList = sdefList1; lengofList = sizeof(sdefList1)/sizeOfCharPtr;
   }
 
 // Test Table QA list.........................................................
-  if ((!strcmp(dirName,"QA")) && (!strcmp(analType,"TestQATable"))) {
-    Char_t* sdefList2[] = {
-      #include "St_QA_Maker/QAhlist_QA_TestQATable.h"
-    };
-    sdefList = sdefList2;
-    lengofList = sizeof(sdefList2)/sizeOfCharPtr;
+  Char_t* sdefList2[] = {
+    #include "St_QA_Maker/QAhlist_QA_TestQATable.h"
+  };
+  if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"TestQATable"))) {
+    sdefList = sdefList2; lengofList = sizeof(sdefList2)/sizeOfCharPtr;
   }
 
 // FTPC Table QA list.........................................................
-  if ((!strcmp(dirName,"QA")) && (!strcmp(analType,"Ftpc"))) {
-    Char_t* sdefList3[] = {
-      #include "St_QA_Maker/QAhlist_QA_Ftpc.h"
-    };
-    sdefList = sdefList3;
-    lengofList = sizeof(sdefList3)/sizeOfCharPtr;
+  Char_t* sdefList3[] = {
+    #include "St_QA_Maker/QAhlist_QA_Ftpc.h"
+  };
+  if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"Ftpc"))) {
+    sdefList = sdefList3; lengofList = sizeof(sdefList3)/sizeOfCharPtr;
   }
 
 // FTPC Table QA list.........................................................
-  if ((!strcmp(dirName,"FlowTag")) && (!strcmp(analType,"MDC3"))) {
-    Char_t* sdefList4[] = {
-      #include "St_QA_Maker/QAhlist_QA_MDC3.h"
-    };
-    sdefList = sdefList4;
-    lengofList = sizeof(sdefList4)/sizeOfCharPtr;
+  Char_t* sdefList4[] = {
+    #include "St_QA_Maker/QAhlist_QA_MDC3.h"
+  };
+  if ((!strcmp(m_dirName,"FlowTag")) && (!strcmp(analType,"MDC3"))) {
+    sdefList = sdefList4; lengofList = sizeof(sdefList4)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms without svt and ftpc histograms.....................
-  if ((!strcmp(dirName,"QA")) && (!strcmp(analType,"year1"))) {
-    Char_t* sdefList5[] = {
-      #include "St_QA_Maker/QAhlist_QA_year1.h"
-    };
-    sdefList = sdefList5;
-    lengofList = sizeof(sdefList5)/sizeOfCharPtr;
+  Char_t* sdefList5[] = {
+    #include "St_QA_Maker/QAhlist_QA_year1.h"
+  };
+  if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"year1"))) {
+    sdefList = sdefList5; lengofList = sizeof(sdefList5)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms without the svt and ftpc histograms.................
-  if ((!strcmp(dirName,"EventQA")) && (!strcmp(analType,"year1"))) {
-    Char_t* sdefList6[] = {
-      #include "St_QA_Maker/QAhlist_EventQA_year1.h"
-    };
-    sdefList = sdefList6;
-    lengofList = sizeof(sdefList6)/sizeOfCharPtr;
+  Char_t* sdefList6[] = {
+    #include "St_QA_Maker/QAhlist_EventQA_year1.h"
+  };
+  if ((!strcmp(m_dirName,"EventQA")) && (!strcmp(analType,"year1"))) {
+    sdefList = sdefList6; lengofList = sizeof(sdefList6)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms for QA shift........................................
-  if ((!strcmp(dirName,"QA")) && (!strcmp(analType,"qa_shift"))) {
-    Char_t* sdefList7[] = {
-      #include "St_QA_Maker/QAhlist_QA_qa_shift.h"
-    };
-    sdefList = sdefList7;
-    lengofList = sizeof(sdefList7)/sizeOfCharPtr;
+  Char_t* sdefList7[] = {
+    #include "St_QA_Maker/QAhlist_QA_qa_shift.h"
+  };
+  if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"qa_shift"))) {
+    sdefList = sdefList7; lengofList = sizeof(sdefList7)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms for QA shift........................................
-  if ((!strcmp(dirName,"EventQA")) && (!strcmp(analType,"qa_shift"))) {
-    Char_t* sdefList8[] = {
-      #include "St_QA_Maker/QAhlist_EventQA_qa_shift.h"
-    };
-    sdefList = sdefList8;
-    lengofList = sizeof(sdefList8)/sizeOfCharPtr;
+  Char_t* sdefList8[] = {
+    #include "St_QA_Maker/QAhlist_EventQA_qa_shift.h"
+  };
+  if ((!strcmp(m_dirName,"EventQA")) && (!strcmp(analType,"qa_shift"))) {
+    sdefList = sdefList8; lengofList = sizeof(sdefList8)/sizeOfCharPtr;
   }
 
 // St_QA_Maker histograms for tpcSectors......................................
-  if ((!strcmp(dirName,"EventQA")) && (!strcmp(analType,"tpcSectors"))) {
-    Char_t* sdefList9[] = {
-      #include "St_QA_Maker/QAhlist_tpcSectors.h"
-    };
-    sdefList = sdefList9;
-    lengofList = sizeof(sdefList9)/sizeOfCharPtr;
+  Char_t* sdefList9[] = {
+    #include "St_QA_Maker/QAhlist_tpcSectors.h"
+  };
+  if ((!strcmp(m_dirName,"EventQA")) && (!strcmp(analType,"tpcSectors"))) {
+    sdefList = sdefList9; lengofList = sizeof(sdefList9)/sizeOfCharPtr;
+  }
+
+// St_QA_Maker histograms for Svt.............................................
+  Char_t* sdefList10[] = {
+    #include "St_QA_Maker/QAhlist_Svt.h"
+  };
+  if (!strcmp(analType,"Svt")) {
+    sdefList = sdefList10; lengofList = sizeof(sdefList10)/sizeOfCharPtr;
   }
 
   Int_t numPrt = 0;
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
-    numPrt = AddToPrintList(sdefList[ilg]);
+    TString listString = sdefList[ilg];
+    if (!listString.BeginsWith("fcl")) {
+      for (Int_t k=0; k<numOfPosPrefixes; k++) {
+        ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
+        numPrt = AddToPrintList(listString.Data());
+      }
+    } else numPrt = AddToPrintList(listString.Data());
     if (Debug())
       cout <<  " !!! adding histogram " << sdefList[ilg] << " to print list "  << endl ;
   }
@@ -1387,10 +1384,11 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
   cout << " **** Now in StHistUtil::Overlay1D **** " << endl;
 
   Int_t n1dHists = 0;
+  if (dirName) strcpy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
   TList  *dirList = 0;
-  dirList = FindHists(dirName);
+  dirList = FindHists(m_dirName);
 
 // check that directory exists
   if (!dirList)
@@ -1508,10 +1506,11 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
   cout << " **** Now in StHistUtil::Overlay2D **** " << endl;
 
   Int_t n2dHists = 0;
+  if (dirName) strcpy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
   TList  *dirList = 0;
-  dirList = FindHists(dirName);
+  dirList = FindHists(m_dirName);
 
 // check that directory exists
   if (!dirList)
