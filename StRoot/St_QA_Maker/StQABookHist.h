@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.22 2007/02/26 20:45:01 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.23 2007/03/13 18:46:29 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.23  2007/03/13 18:46:29  genevb
+// Added Svt Laser Diff
+//
 // Revision 2.22  2007/02/26 20:45:01  genevb
 // SVT drift hist
 //
@@ -83,6 +86,7 @@
 #include "TObject.h"
 class TH1F;
 class TH2F;
+class TH3F;
 class StMaker;
 
 class StQABookHist : public TObject {
@@ -99,7 +103,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.22 2007/02/26 20:45:01 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.23 2007/03/13 18:46:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -630,7 +634,8 @@ class StQABookHist : public TObject {
   TH1F     *m_pnt_ftpcE;   //! number of hits ftpcE
   TH1F     *m_pnt_ftpcW;   //! number of hits ftpcW
 
-  TH2F     *m_pnt_svtLaser; //! laser spots in svt
+  TH2F     *m_pnt_svtLaser;     //! laser spots in svt
+  TH3F     *m_pnt_svtLaserDiff; //! diff of laser spots in svt
     
 // for method MakeHistRich
   TH1F     *m_rich_tot;   //! number of rich hits
