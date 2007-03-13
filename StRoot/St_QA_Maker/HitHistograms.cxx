@@ -32,8 +32,8 @@ HitHistograms::HitHistograms(const char *name,const char *title,
   //double xmax = 1.e-4;
   double xmax = 1.e-5;
   int xbins = 100;
-  char* name1 = "QaInnerSectorDeDx";
-  char* name2 = "QaOuterSectorDeDx";
+  char* name1 = "StEQaInnerSectorDeDx";
+  char* name2 = "StEQaOuterSectorDeDx";
   char* title1 = "Inner Sector De/Dx Distribution";
   char* title2 = "Outer Sector De/Dx Distribution";
 
@@ -93,8 +93,11 @@ TH1F* HitHistograms::outerSectorDeDxHist() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.cxx,v 1.9 2006/05/22 18:27:34 genevb Exp $
+// $Id: HitHistograms.cxx,v 1.10 2007/03/13 18:43:43 genevb Exp $
 // $Log: HitHistograms.cxx,v $
+// Revision 1.10  2007/03/13 18:43:43  genevb
+// Use StE prefix
+//
 // Revision 1.9  2006/05/22 18:27:34  genevb
 // Remove patch to observe fast offline issues
 //
