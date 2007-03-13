@@ -1,5 +1,8 @@
-// $Id: QAH.h,v 2.3 2004/12/13 15:52:36 genevb Exp $ 
+// $Id: QAH.h,v 2.4 2007/03/13 18:44:07 genevb Exp $ 
 // $Log: QAH.h,v $
+// Revision 2.4  2007/03/13 18:44:07  genevb
+// Added StMultiH2F support
+//
 // Revision 2.3  2004/12/13 15:52:36  genevb
 // Numerous updates: PMD, primtrk, FPD, QAShift lists
 //
@@ -22,6 +25,7 @@
 #include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TH3.h"
 class StMaker;
 
 class QAH {
@@ -54,11 +58,15 @@ class QAH {
   // several similar multi 1d-hists
   static void MMH1F(TH2F** histp, Int_t nhist, const Text_t* name, const Text_t* title,
 		    Int_t nbinsx, Axis_t xlow, Axis_t xup, Int_t nbinsy, Int_t first=0);
+  // methods for multi 2d-hists
+  static TH3F* MH2F(const Text_t* name, const Text_t* title,
+              Int_t nbinsx, Axis_t xlow, Axis_t xup, Int_t nbinsy, Axis_t ylow, Axis_t yup,
+              Int_t nbinsz);
 
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: QAH.h,v 2.3 2004/12/13 15:52:36 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: QAH.h,v 2.4 2007/03/13 18:44:07 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
