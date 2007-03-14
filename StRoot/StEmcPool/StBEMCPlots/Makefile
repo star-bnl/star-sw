@@ -1,7 +1,7 @@
 all:
-	make -f Makefile_plots
-	make -f Makefile_presenter
+	-$(MAKE) -f Makefile_plots
+	-$(MAKE) -f Makefile_presenter
 
 clean:
-	make -f Makefile_plots clean
-	make -f Makefile_presenter clean
+	-$(MAKE) -f Makefile_plots clean
+	-$(MAKE) -f Makefile_presenter clean

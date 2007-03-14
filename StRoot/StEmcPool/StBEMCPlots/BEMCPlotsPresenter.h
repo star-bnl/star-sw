@@ -1,20 +1,16 @@
 #ifndef BEMCPlotsPresenter_H
 #define BEMCPlotsPresenter_H
 
-class TH1F;
-class TH2F;
-class TFile;
 class TPad;
-
 
 #ifdef IN_PANITKIN
 // This is called from PPlots
-class TMapFile;
-typedef TMapFile  FileType;
+class GenericFile;
+typedef GenericFile FileType;
 #else
 // This is called from Jan's online QA
 class TFile;
-typedef TFile  FileType;
+typedef TFile FileType;
 #endif
 
 class BEMCPlotsPresenter {
