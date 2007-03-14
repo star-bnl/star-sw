@@ -16,16 +16,14 @@ endif
 
 ROOTCFLAGS    = $(shell root-config --cflags) 
 ROOTLIBS      = $(shell root-config --libs) -lNew
-#
+
 OBJS   = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
 
-#
 CFLAGS   = -Wall $(DEBUG) $(DEFINES) -fPIC $(ROOTCFLAGS)
 
-CXXFLAGS = $(CFLAGS)  -I../../../StRoot  -I/RTS/src/EVP_READER -I/RTS/include -I../../St_base -I$(STAR)/StRoot -I$(STAR)/StRoot/St_base
+CXXFLAGS = $(CFLAGS) -I../../../Infrastructure -I../../../StRoot -I/RTS/src/EVP_READER -I/RTS/include -I../../St_base -I$(STAR)/StRoot -I$(STAR)/StRoot/St_base
 
-LDFLAGS  = -shared 
-
+LDFLAGS  = -shared
 
 all:	$(LIBNAME)
 

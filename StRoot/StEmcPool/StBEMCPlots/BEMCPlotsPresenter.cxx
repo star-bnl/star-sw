@@ -3,7 +3,6 @@
 using namespace std;
 #include <TH1F.h>
 #include <TH2F.h>
-#include <TFile.h>
 #include <TCanvas.h>
 #include <TLine.h>
 #include <TArrow.h>
@@ -12,12 +11,13 @@ using namespace std;
 #include <TBox.h>
 
 #ifdef IN_PANITKIN
-#include <TMapFile.h>
+#include <Infrastructure/GenericFile.h>
 #else
 #include <TFile.h>
 #endif
 
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include <StDaqLib/EMC/StEmcDecoder.h>
+
 #include "BEMCPlotsNames.h"
 
 #define min(A, B) (((A) < (B)) ? (A) : (B))
