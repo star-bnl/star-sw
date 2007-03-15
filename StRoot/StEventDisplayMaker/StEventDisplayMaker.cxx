@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.123 2007/02/22 03:51:06 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.124 2007/03/15 16:27:29 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -105,6 +105,7 @@
 #include "StGlobalFilterABC.h"
 #include "StEventHelper.h"
 #include "StEventDisplayInfo.h"
+#include "StObject.h"
 
 #ifdef R__QT
 #  include <qfont.h>
@@ -1082,9 +1083,9 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 //      else           {sel.Append(pos[1],keyLen);} 
       sel.Append(pos[1],keyLen); 
       sel += ".*Hit$";
-      stevs = mEventHelper->SelHits  (sel.Data(),kase);
+      stevs = mEventHelper->SelHits  (sel.Data(),kase, (IsMarkedDrawn()? kMark2Draw : 0));
       sel.ReplaceAll(".*Hit",".*Point");
-      stevz = mEventHelper->SelHits  (sel.Data(),kase);
+      stevz = mEventHelper->SelHits  (sel.Data(),kase, (IsMarkedDrawn() ? kMark2Draw : 0) );
       if (!stevs){ stevs = stevz; break;}
       if ( stevz){ stevs->AddAll(stevz); delete stevz;}
       break;
@@ -1099,7 +1100,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
     case      kEGB|kHIT|kTHT:;
     case      kTPT|kHIT|kTHT:;
       if (kase&kHIT) kase |=kHRR;
-      stevz = mEventHelper->SelTracks("",kase);
+      stevz = mEventHelper->SelTracks("",kase || (IsMarkedDrawn()?kMark2Draw : 0));
       stevs = mEventHelper->ExpandAndFilter(stevz,-1);
       break;
 
@@ -1113,7 +1114,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
     case kXI |kTHT|kHIT:;
       if (kase&kHIT) kase |=kHRR;
       sel.Append(pos[1],keyLen); sel +="Vertex$";
-      stevz = mEventHelper->SelVertex(sel.Data(),kase);
+      stevz = mEventHelper->SelVertex(sel.Data(),kase || (IsMarkedDrawn()?kMark2Draw : 0) );
       stevs = mEventHelper->ExpandAndFilter(stevz,-1);
       delete stevz;
       break;
@@ -1470,6 +1471,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.124  2007/03/15 16:27:29  fine
+// Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
+//
 // Revision 1.123  2007/02/22 03:51:06  fine
 // Rescan event if empty
 //

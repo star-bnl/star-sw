@@ -22,6 +22,7 @@
 #include "TView.h"
 
 #include "StEvent.h"
+#include "StObject.h"
 #include "StHit.h"
 #include "StTrack.h"
 #include "StTrackNode.h"
@@ -367,7 +368,9 @@ int trackTypes[]= {global, primary, tpt, secondary, estGlobal, estPrimary,-1};
         if (!(flag&bty))	continue;
         trk=tn->track(ity);
 	if (!trk)		continue;
-	if (trk->IsZombie()) 	break;
+   // See:  StRoot/St_base/StObject.h also
+	if (trk->IsZombie() || ( (flag& kMark2Draw) 
+         && trk->TestBit(flag & kMark2Draw )) ) 	break;
 	traks->Add(trk);	break;
       }//end track types
     }//end StTrackNode's
@@ -376,12 +379,12 @@ int trackTypes[]= {global, primary, tpt, secondary, estGlobal, estPrimary,-1};
   return traks;
 }
 //______________________________________________________________________________
-TObjArray *StEventHelper::SelHits(const char *RegEx, Int_t un)
+TObjArray *StEventHelper::SelHits(const char *RegEx, Int_t un, Int_t flag)
 {
 //		un == used +2*nonused
 
   TObjArray *conts = SelConts(RegEx);
-  TObjArray *hits = new TObjArray();
+  TObjArray *hits  = new TObjArray();
   Int_t ilast = conts->GetLast();
   
   for (int idx=0;idx<=ilast;idx++) {
@@ -395,16 +398,19 @@ TObjArray *StEventHelper::SelHits(const char *RegEx, Int_t un)
       if (!hit) 	continue;
       int used = (hit->trackReferenceCount()!=0);
       int take = 0;
-      if ( used && (un&kUSE)) take++;
-      if (!used && (un&kUNU)) take++;
-      if (take) hits->Add(hit);
+      // See:  StRoot/St_base/StObject.h also
+      if ( !(flag& kMark2Draw) || hit->TestBit(flag& kMark2Draw) ) {
+         if ( used && (un&kUSE)) take++;
+         if (!used && (un&kUNU)) take++;
+         if (take) hits->Add(hit);
+      }
     }
   }         
   delete conts;
   return hits;
 }
 //______________________________________________________________________________
-TObjArray *StEventHelper::SelVertex(const char *sel,Int_t)
+TObjArray *StEventHelper::SelVertex(const char *sel,Int_t flag)
 {
   
   TObjArray *conts = SelConts(sel);
@@ -419,8 +425,11 @@ TObjArray *StEventHelper::SelVertex(const char *sel,Int_t)
     for (int ivx=0; ivx<sz; ivx++) {
       StVertex *vx = (StVertex*)arr->at(ivx);
       if (!vx) 	continue;
-      verts->Add(vx);
-      nvtx++;
+      // See:  StRoot/St_base/StObject.h also
+      if ( !(flag& kMark2Draw) || vx->TestBit(flag& kMark2Draw) ) {
+        verts->Add(vx);
+        nvtx++;
+      }
     }
   }
   delete conts;

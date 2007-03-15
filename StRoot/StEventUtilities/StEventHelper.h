@@ -224,7 +224,7 @@ public:
     virtual ~StEventHelper();
     TObjArray *SelConts (const char *sel=".*");
     TObjArray *SelTracks(const char *sel=0, Int_t th=0);
-    TObjArray *SelHits  (const char *RegEx, Int_t un=0);
+    TObjArray *SelHits  (const char *RegEx, Int_t un=0,Int_t flag=0);
     TObjArray *SelVertex(const char *sel,   Int_t th=0);
     TObjArray *ExpandAndFilter(const TObject   *evobjs,int flag,TObjArray *out=0);
     TObjArray *MakePoints     (      TObjArray *evobjs,int flag);

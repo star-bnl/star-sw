@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.41 2007/02/22 03:51:06 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.42 2007/03/15 16:27:30 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.42  2007/03/15 16:27:30  fine
+// Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
+//
 // Revision 1.41  2007/02/22 03:51:06  fine
 // Rescan event if empty
 //
@@ -110,7 +113,7 @@ class TQtRootViewer3D;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.41 2007/02/22 03:51:06 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.42 2007/03/15 16:27:30 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -144,9 +147,10 @@ static StEventDisplayInfo *fgInfo;
 
     TVolume *fColCash[kCOLORS];
     TQtRootViewer3D *f3DViewer; //! external 3D viewer;
-    Bool_t          fNeedsClear3DView;
+    Bool_t        fNeedsClear3DView;
     Int_t         fGeomType;  // Flag to define where the geom comes from G3/ STI
-    Bool_t        fEventNeedRescan; // Shoudl we rescan the event
+    Bool_t        fEventNeedRescan; // Should we rescan the event
+    Bool_t        fDrawMarkedObject; // Should we render the marked StEvent items only
     
     void          DrawObject(TObject *,Option_t *option="",Bool_t first=kFALSE);
     Int_t         MakeTable(const char   **positions);
@@ -186,6 +190,7 @@ static StEventDisplayInfo *fgInfo;
    virtual TVolume     *GetEventsNode() const { return m_EventsNode;}
    virtual Int_t        GeomType()      const  { return fGeomType;}
    virtual Color_t      GetColorAttribute(Int_t adc);
+           Bool_t       IsMarkedDrawn()  const;
    virtual void         PrintFilterStatus(); // *MENU*
    virtual void         PrintNames();   // *MENU*
    virtual void         PrintVolumes(); // *MENU*
@@ -194,6 +199,7 @@ static StEventDisplayInfo *fgInfo;
    virtual void         RemoveName(const char *name); // *MENU*
    virtual void         RemoveVolume(const char *name); // *MENU*
            void         SetGeomType(Int_t type=0) { fGeomType = type;} // *MENU*
+           void         SetDrawMarked(Bool_t draw=kTRUE); // *MENU* 
    virtual void         TurnOn() { SetMode(); }  // *MENU*
    virtual void         TurnOff(){ SetMode(1); } // *MENU*
    static  Int_t        MakeLoop(Int_t flag);
@@ -225,7 +231,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.41 2007/02/22 03:51:06 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.42 2007/03/15 16:27:30 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
@@ -244,7 +250,13 @@ inline TVirtualPad *StEventDisplayMaker::GetEventPad()
   return (TVirtualPad *)m_PadBrowserCanvas;
 };
 
+//______________________________________________________________________________
+inline void  StEventDisplayMaker::SetDrawMarked(Bool_t draw) 
+{  fDrawMarkedObject = draw ;}
 
+//______________________________________________________________________________
+inline Bool_t  StEventDisplayMaker::IsMarkedDrawn()  const
+{ return  fDrawMarkedObject ;}
 
 
 
