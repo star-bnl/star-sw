@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.151 2007/03/09 21:40:48 potekhin Exp $
+* $Id: geometry.g,v 1.152 2007/03/15 19:56:16 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.152  2007/03/15 19:56:16  potekhin
+* Provide versioning for the thicker active Si layer
+* in pixlgeo3, via setting the structure elements
+*
 * Revision 1.151  2007/03/09 21:40:48  potekhin
 * UPGR13 modifications: (a) FSTD is out (b) modified SSD with carbon parts,
 * for R&D purposes (c) modified IST with single sided inner layer for the
@@ -3122,7 +3126,7 @@ If LL>1
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
                    pixl=on;        " put the pixel detector in"
-                   PixlConfig=4;   " newest version by Andrew Rose"
+                   PixlConfig=5;   " newest version, thicker active Si"
 
                    istb=on;  "IST barrel"
                    IstbConfig=7;
@@ -3561,6 +3565,12 @@ If LL>1
    if (pixl.and.PixlConfig==2) Call pixlgeo1
    if (pixl.and.PixlConfig==3) Call pixlgeo2
    if (pixl.and.PixlConfig==4) Call pixlgeo3
+   if (pixl.and.PixlConfig==5) then
+         call AgDETP new ('PIXL')
+         call AgDETP add ('PIXG.PassiveThk=',0.021,1)
+         call AgDETP add ('PIXG.ActiveThk=', 0.003,1)
+         call pixlgeo3
+   endif
 
    if (istb.and.IstbConfig==1) Call istbgeo
    if (istb.and.IstbConfig==2) Call istbgeo1
