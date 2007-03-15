@@ -137,24 +137,30 @@ int getFEEpedestal(float towerPedestal, float pedestalShift, bool debug) {
     if {$operationBit == 0} {set value [expr ($value1&0x0F)]}
     return $value
     */
+    char buffer[10];
     int scale10bits = 4;
     int operationBit = 1;
-    float ped1 = towerPedestal - pedestalShift;
+    double ped1 = towerPedestal - pedestalShift;
     if (ped1 < 0) {
 	ped1 = -ped1;
 	operationBit = 0;
     }
-    float value2 = ped1 / scale10bits;
-    int value1 = int(value2);
-    value2 = ped1 - (value1 * scale10bits);
+    double value2 = ped1 / scale10bits;
+    sprintf(buffer, "%3.0f", value2);
+    int value1 = atoi(buffer);
+    value2 = ped1 - value1 * scale10bits;
     if (value2 > 2) {
 	value2 = value1 + 1;
-	value1 = int(value2);
+	sprintf(buffer, "%3.0f", value2);
+	value1 = atoi(buffer);
     }
     if (value1 > 15) {
-	int value3 = scale10bits * int(float(value1 - 11) / float(scale10bits));
+        sprintf(buffer, "%3.0f", double(value1 - 11) / scale10bits);
+	int value3 = atoi(buffer);
+	value3 *= scale10bits;
 	value2 = value1 - value3;
-	value1 = int(value2);
+	sprintf(buffer, "%3.0f", value2);
+	value1 = atoi(buffer);
     }
     int value = 0;
     if (operationBit == 1) {
