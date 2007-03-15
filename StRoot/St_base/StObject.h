@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.13 2002/11/26 02:23:38 perev Exp $
+// $Id: StObject.h,v 1.14 2007/03/15 16:27:32 fine Exp $
 // $Log: StObject.h,v $
+// Revision 1.14  2007/03/15 16:27:32  fine
+// Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
+//
 // Revision 1.13  2002/11/26 02:23:38  perev
 // new ROOT adoptation
 //
@@ -27,15 +30,22 @@ class StXRefMain;
 class StRefArray;
 class StStrArray;
 
+enum EStObjectDrawBit { kMark2Draw = BIT(24)}; // mark object to be rendered by "EventDisplay"
+                                               // See StRoot/StEventUtilities/StEventHelper.h also
+
+  
 //_____________________________________________________________________________
 class StObject : public TObject {
 
 public:
   virtual ~StObject();
   virtual void Browse(TBrowser *b);
+  
   virtual Bool_t IsFolder() const;
   virtual TObject *clone() const {return ((TObject*)this)->Clone();}
   Int_t   isZombie() const {return IsZombie();}
+//  Int_t   IsMarked2Draw() const { return TestBit(kMark2Draw) ;}
+//  void    Mark2Draw(int flag=1) { if (flg) SetBit(kMark2Draw) else ResetBit(kMark2Draw) ;}
   virtual void makeZombie(int flg=1)
     {if (flg) {MakeZombie();} else {((UInt_t*)this)[1] &=~(kZombie);}} 
   UInt_t  Ztreamer(TBuffer &R__b);
