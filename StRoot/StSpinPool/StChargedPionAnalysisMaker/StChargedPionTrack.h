@@ -15,7 +15,8 @@
 class StChargedPionTrack : public TObject
 {
 public:
-	StChargedPionTrack() { /*no-op*/ };
+	StChargedPionTrack();
+	StChargedPionTrack(const StChargedPionTrack& t);
 	
 	short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
     short flag() const; ///< Returns flag, (see StEvent manual for type information) 
@@ -126,6 +127,7 @@ inline short StChargedPionTrack::id() const {return mId;}
 inline short StChargedPionTrack::flag() const {return mFlag;}
 inline int StChargedPionTrack::vertexIndex() const {return mVertexIndex;}
 inline unsigned short StChargedPionTrack::nHits() const {return mNHits;}
+inline unsigned short StChargedPionTrack::nHitsPoss() const {return mNHitsPoss;}
 inline unsigned short StChargedPionTrack::nHitsDedx() const {return mNHitsDedx;}
 inline unsigned short StChargedPionTrack::nHitsFit() const {return mNHitsFit;}
 inline double StChargedPionTrack::pidProbElectron() const {return unPack(mPidProbElectron,__PROB_SCALE__);}
@@ -151,6 +153,7 @@ inline StThreeVectorF StChargedPionTrack::firstPoint() const {return mFirstPoint
 inline StThreeVectorF StChargedPionTrack::lastPoint() const {return mLastPoint;}
 inline StPhysicalHelixD StChargedPionTrack::helix() const {return mHelix;}
 inline StPhysicalHelixD StChargedPionTrack::outerHelix() const {return mOuterHelix;}
+inline StMuProbPidTraits StChargedPionTrack::probPidTraits() const {return mProbPidTraits;}
 
 inline void StChargedPionTrack::setId(short aId) {mId = aId;}
 inline void StChargedPionTrack::setFlag(short aFlag) {mFlag = aFlag;}

@@ -56,12 +56,17 @@ void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
 	cout<<"add my maker"<<endl;
 	
 	TString outfile(dir);
-	outfile += "/chargedPions_";
+	outfile += "/chargedPionAnalysis_";
 	outfile += name;
 	outfile += ".tree.root";
-//	StChargedPionAnalysisMaker* pionMaker = new StChargedPionAnalysisMaker("pionMaker",outfile.Data());
-//	pionMaker->isRealData = true;
-	StChargedPionMaker* pionMaker = new StChargedPionMaker("chargedPionMaker",outfile.Data());
+	StChargedPionAnalysisMaker* pionMaker = new StChargedPionAnalysisMaker("pionMaker",outfile.Data());
+	pionMaker->isRealData = true;
+
+	TString chargedPionFile(dir);
+	chargedPionFile += "/chargedPions_";
+	chargedPionFile += name;
+	chargedPionFile += ".tree.root";	
+	StChargedPionMaker* pionMaker = new StChargedPionMaker("chargedPionMaker",chargedPionFile.Data());
 
 	
 	cout<<"try to init"<<endl;
