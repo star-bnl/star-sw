@@ -4,20 +4,20 @@
 		/bin/ln -s .sl305_gcc323 .$STAR_HOST_SYS
 		/bin/ls -lah
 		/star/u/starlib/ROOT/xrootd/bin/preStageFileList ${FILELIST}
-		root4star -b -q /star/u/kocolosk/mit/analysis/run6/mar08/StRoot/StSpinPool/StChargedPionAnalysisMaker/macros/justTheTracks.C\(\"$SCRATCH\",\"&run;\",\"$FILELIST\",$INPUTFILECOUNT,2000000\)
+		root4star -b -q /star/u/kocolosk/mit/analysis/run6/mar15/StRoot/StSpinPool/StChargedPionAnalysisMaker/macros/justTheTracks.C\(\"$SCRATCH\",\"&run;\",\"$FILELIST\",$INPUTFILECOUNT,2000000\)
 	</command>
  
-	<output fromScratch="chargedPions_*" toURL="file:/star/u/kocolosk/mit/analysis/run6/mar08/tracks/" />
-	<stdout URL="file:/star/u/kocolosk/mit/analysis/run6/mar08/out/&run;.$JOBID.out"/>
-	<stderr URL="file:/star/u/kocolosk/mit/analysis/run6/mar08/err/&run;.$JOBID.err"/>
+	<output fromScratch="chargedPions_*" toURL="file:/star/u/kocolosk/mit/analysis/run6/mar15/tracks/" />
+	<output fromScratch="jetSkim_*" toURL="file:/star/u/kocolosk/mit/analysis/run6/mar15/jetSkim/" />
+	<stdout URL="file:/star/u/kocolosk/mit/analysis/run6/mar15/out/&run;.$JOBID.out"/>
+	<stderr URL="file:/star/u/kocolosk/mit/analysis/run6/mar15/err/&run;.$JOBID.err"/>
 		
 	<SandBox>
 		<Package>
-			<File>file:/star/u/kocolosk/mit/analysis/run6/mar08/StRoot/StSpinPool/StChargedPionAnalysisMaker/macros/log4j.xml</File>
-			<File>file:/star/u/kocolosk/mit/analysis/run6/mar08/.sl305_gcc323</File>
+			<File>file:/star/u/kocolosk/afsdir/logger_configs/log4j.xml</File>
+			<File>file:/star/u/kocolosk/mit/analysis/run6/mar15/.sl305_gcc323</File>
 		</Package>
 	</SandBox>
 	
-	<input URL="catalog:star.bnl.gov?sanity=1,filename~st_physics,filetype=daq_reco_mudst,runnumber=&run;" nFiles="all" />
-
+	<input URL="catalog:star.bnl.gov?sanity=1,production=P06ie,filename~st_physics,filetype=daq_reco_mudst,runnumber=&run;" nFiles="all" />
 </job>
