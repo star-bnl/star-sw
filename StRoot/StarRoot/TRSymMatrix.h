@@ -26,7 +26,7 @@ class TRSymMatrix : public TRArray {
   virtual void    Print(Option_t *opt="") const;
   Double_t       &operator()(Int_t i)                    {return TRArray::operator[](i);}
   Double_t       &operator()(Int_t i,Int_t j);
-  Double_t       &operator()(Int_t i,Int_t j) const;
+//  Double_t       &operator()(Int_t i,Int_t j) const;
  protected:
   Int_t     fNrows;            // number of rows 
  public:
