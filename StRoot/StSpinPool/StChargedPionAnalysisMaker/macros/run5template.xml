@@ -21,6 +21,6 @@
 		</Package>
 	</SandBox>
 	
-	<input URL="catalog:star.bnl.gov?sanity=1,filename~st_physics,filetype=daq_reco_mudst,runnumber=&run;" nFiles="all" />
+	<input URL="catalog:star.bnl.gov?sanity=1,production=P05if,filename~st_physics,filetype=daq_reco_mudst,runnumber=&run;" nFiles="all" />
 
 </job>

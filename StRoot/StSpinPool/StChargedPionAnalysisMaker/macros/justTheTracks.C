@@ -7,9 +7,9 @@ void justTheTracks(const char* dir="/star/institutions/mit/kocolosk/analysis/tes
 	gROOT->Macro("LoadLogger.C");
 	gROOT->Macro("loadMuDst.C");
    
-    gSystem->Load("StMcEvent");
-	gSystem->Load("StEmcTriggerMaker");
-	gSystem->Load("StSpinDbMaker");
+//	gSystem->Load("StMcEvent");
+//	gSystem->Load("StEmcTriggerMaker");
+//	gSystem->Load("StSpinDbMaker");
 		
 	gSystem->Load("StChargedPionAnalysisMaker");
 	
