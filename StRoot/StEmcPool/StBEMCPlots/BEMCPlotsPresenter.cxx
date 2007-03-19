@@ -100,7 +100,7 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, Int_
     Int_t *boxMinSoftId = psd ? pmtbxMinSoftId : crateMinSoftId;
     Int_t *boxMaxSoftId = psd ? pmtbxMaxSoftId : crateMaxSoftId;
     const Char_t *boxLabelFormat = psd ? "%i" : "0x%.2X";
-    Int_t numBoxes = psd ? (sizeof(pmtbxMinSoftId)/sizeof(pmtbxMinSoftId[0])) : (sizeof(crateMinSoftId)/sizeof(crateMinSoftId));
+    Int_t numBoxes = psd ? (sizeof(pmtbxMinSoftId)/sizeof(pmtbxMinSoftId[0])) : (sizeof(crateMinSoftId)/sizeof(crateMinSoftId[0]));
 
     c->cd(1);
     if (HistRawAdc1) {
