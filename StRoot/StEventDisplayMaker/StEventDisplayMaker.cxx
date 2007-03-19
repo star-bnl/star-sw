@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.125 2007/03/19 00:40:36 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.126 2007/03/19 14:35:45 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -93,7 +93,6 @@
 #include "TTableSorter.h"
 #include "tables/St_tpt_track_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
-#include "TEmcTower.h"
 #include "TCoinEmcTower.h"
 #include "TDataProvider.h"
 
@@ -498,8 +497,8 @@ void StEventDisplayMaker::ClearEvents()
 	else 
        m_PadBrowserCanvas->Clear();
 
-    TEmcTowers *emchits = dynamic_cast<TEmcTowers *>(GetDataSet("emchits"));
-    if (emchits) emchits->ResetProviders();
+    // vf TEmcTowers *emchits = dynamic_cast<TEmcTowers *>(GetDataSet("emchits"));
+    // vf if (emchits) emchits->ResetProviders();
 
     delete m_EventsView;
     m_EventsView = 0;
@@ -1491,6 +1490,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.126  2007/03/19 14:35:45  fine
+// Remove  the obsolete refs to TEmcTower class
+//
 // Revision 1.125  2007/03/19 00:40:36  fine
 // Complete the direct rendering and Emc Towers
 //
