@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.42 2007/03/15 16:27:30 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.43 2007/03/19 00:40:36 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.43  2007/03/19 00:40:36  fine
+// Complete the direct rendering and Emc Towers
+//
 // Revision 1.42  2007/03/15 16:27:30  fine
-// Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
+//  Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
 //
 // Revision 1.41  2007/02/22 03:51:06  fine
 // Rescan event if empty
@@ -110,10 +113,12 @@ class StGlobalFilterABC;
 class StPoints3DABC;
 class StEventDisplayInfo;
 class TQtRootViewer3D;
+class TCoinEmcTowers;
+class TDataProvider;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.42 2007/03/15 16:27:30 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.43 2007/03/19 00:40:36 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -151,7 +156,10 @@ static StEventDisplayInfo *fgInfo;
     Int_t         fGeomType;  // Flag to define where the geom comes from G3/ STI
     Bool_t        fEventNeedRescan; // Should we rescan the event
     Bool_t        fDrawMarkedObject; // Should we render the marked StEvent items only
-    
+    Bool_t        fCoin3DReady; // Coin3d-based viewer was loaded
+    TCoinEmcTowers *fEmcTowers;  // Emc barrel geometry
+    TDataProvider  *fColorProvider;
+    TDataProvider  *fSizeProvider;
     void          DrawObject(TObject *,Option_t *option="",Bool_t first=kFALSE);
     Int_t         MakeTable(const char   **positions);
     Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const char   *keyColumn,const char   *keyPositions[]);
@@ -231,7 +239,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.42 2007/03/15 16:27:30 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.43 2007/03/19 00:40:36 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
