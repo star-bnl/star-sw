@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.124 2007/03/15 16:27:29 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.125 2007/03/19 00:40:36 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -94,6 +94,7 @@
 #include "tables/St_tpt_track_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
 #include "TEmcTower.h"
+#include "TCoinEmcTower.h"
 #include "TDataProvider.h"
 
 #include "StEventControlPanel.h"
@@ -116,6 +117,8 @@
 #  include "TQtRootViewer3D.h"
 #  include "TGQt.h"
     StEventControlPanel *fEventControlPanel=0;  //!
+// #define CAN_RENDER_PAD_DIRECTLY
+#  include "TQGLViewerImp.h"
 #endif 
 
 // StVirtualEventFilter hitsOffFilter(0);
@@ -192,10 +195,15 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   m_VolumeList       = 0;
   mFilterList        = 0;
   memset(fColCash,0,sizeof(fColCash));
-  f3DViewer= 0;
+  f3DViewer          = 0;
+  fCoin3DReady       = kFALSE;
   SetGeomType();
-  fEventNeedRescan = kFALSE;
-  fNeedsClear3DView = kFALSE;
+  fEmcTowers         = 0;
+  fColorProvider     = 0; 
+  fSizeProvider      = 0;
+  
+  fEventNeedRescan   = kFALSE;
+  fNeedsClear3DView  = kFALSE;
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
   for (i =0;i<kEndOfEventList;i++) {
@@ -485,7 +493,10 @@ void StEventDisplayMaker::ClearEvents()
   if (f3DViewer) fNeedsClear3DView  = kTRUE;
   if (m_EventsNode) {
     if (!GetEventPad()) CreateCanvas();
-    else                m_PadBrowserCanvas->Clear();
+    else if (f3DViewer) 
+       f3DViewer->BeginScene(0); // to clear the primitivies
+	else 
+       m_PadBrowserCanvas->Clear();
 
     TEmcTowers *emchits = dynamic_cast<TEmcTowers *>(GetDataSet("emchits"));
     if (emchits) emchits->ResetProviders();
@@ -507,7 +518,9 @@ void StEventDisplayMaker::ClearEvents()
 void StEventDisplayMaker::ClearCanvas()
 {
   // Clear canvas from the TBrowser Context Menu
-  if (m_PadBrowserCanvas) {
+  if (f3DViewer)
+    Clear();
+  else if (m_PadBrowserCanvas) {
     Clear();
     m_PadBrowserCanvas->Modified();
     m_PadBrowserCanvas->Update();
@@ -544,22 +557,26 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
       m_PadBrowserCanvas->SetFillColor(kBlack);
       // Add three TPad's for GetRunNumber/GetEventNumber()/GetDateTime/
 #ifdef R__QT      
-#ifdef CAN_RENDER_PAD_DIRECTLY           
-      f3DViewer = 0; // (TQtRootViewer3D*)TVirtualViewer3D::Viewer3D(0,"ogl");
-   
+#ifdef CAN_RENDER_PAD_DIRECTLY    
+      if (f3DViewer) 
+         ((TQtRootViewer3D*)f3DViewer)->DisconnectPad();    
+      f3DViewer = (TQtRootViewer3D*)TVirtualViewer3D::Viewer3D(0,"oiv");
+      LOG_INFO << f3DViewer->ClassName() << endm;
       if (f3DViewer) {
          // Create Open GL viewer
-         TGQt::SetCoinFlag(0);
-         f3DViewer->BeginScene(m_PadBrowserCanvas);
-         f3DViewer->EndScene();
+         TGQt::SetCoinFlag(1);
+         fCoin3DReady = kTRUE;
+//  vf          f3DViewer->BeginScene(m_PadBrowserCanvas);
+         f3DViewer->BeginScene(0);
+// vf 16.03.2007          f3DViewer->EndScene();
 #if 0         
-         TQtGLViewerImp *viewerImp = f3DViewer->GetViewerImp();
+         TGLViewerImp *viewerImp = f3DViewer->GetViewerImp();
          if (viewerImp) 
          {
          
-             connect(viewerImp,SIGNAL( ObjectSelected(TObject *, const QPoint&))
-                , this, SLOT(ObjectSelected(TObject *, const QPoint &)));
-             connect(viewerImp,SIGNAL(destroyed()), this, SLOT(Disconnect3DViewer()));
+            QObject::connect(&viewerImp->Signals(),SIGNAL( ObjectSelected(TObject *, const QPoint&))
+                 , this, SLOT(ObjectSelected(TObject *, const QPoint &)));
+            QObject::connect(&viewerImp->Signals(),SIGNAL(destroyed()), this, SLOT(Disconnect3DViewer()));
          }
 #endif         
       }
@@ -587,16 +604,24 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
 
    if (!m_ShortView) BuildGeometry();
    if (m_ShortView) { DrawObject(m_ShortView); }
-   TDataSet *ds = GetDataSet("emchitsView");
-   if (ds) {
-      TEmcTowers *emchits = dynamic_cast<TEmcTowers *>(GetDataSet("emchits"));
-      if (emchits) emchits->ResetProviders();
-#ifdef EMCHITS      
-      DrawObject(ds);
-#endif      
+   
+   // Draw the Emc tower if present
+   if (fSizeProvider) {
+#ifdef STAR_COIN   
+   if (f3DViewer && !fEmcTowers && fCoin3DReady) {
+           fEmcTowers = new TCoinEmcTowers();
+           fEmcTowers->SetColorProvider(fColorProvider);
+           fEmcTowers->SetSizeProvider(fSizeProvider);
+           f3DViewer ->AddRawObject(ULong_t(fEmcTowers->GetBarrel()),(unsigned int)TGLViewerImp::kRaw);
+
+       }
+       if (f3DViewer && fEmcTowers)  fEmcTowers->UpdateShape("");
+#endif
    }
-   m_PadBrowserCanvas->Modified();
-   m_PadBrowserCanvas->Update();
+   if (!f3DViewer) {
+      m_PadBrowserCanvas->Modified();
+      m_PadBrowserCanvas->Update();
+   }
    return m_PadBrowserCanvas;
 }
 //_____________________________________________________________________________
@@ -630,12 +655,12 @@ void StEventDisplayMaker::DrawObject(TObject *object,Option_t *option,Bool_t fir
                f3DViewer ->AddObjectFirst(object, option);
            else
                f3DViewer ->AddObject(object, option);
+           printf("object %s viewer %s \n", object->GetName(),f3DViewer->ClassName() );
 #endif
         }
      }
   }
 }
-
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::Make()
 {
@@ -647,6 +672,8 @@ Int_t StEventDisplayMaker::Make()
 //  const Int_t maxTrackCounter = 9;
   if (!m_EventsNode) return kStErr;
   if (m_Mode == 1)   return  kStOK;
+  
+  if (f3DViewer) f3DViewer->SetUpdatesEnabled(kFALSE);
   CreateCanvas();
   if (Debug()) PrintInfo();
   //_______________________________________
@@ -772,8 +799,10 @@ Int_t StEventDisplayMaker::Make()
      printf(" updating view of %d objects\n",totalCounter);
      if (!totalCounter) fEventNeedRescan=kFALSE;
 
-     m_PadBrowserCanvas->Modified();
-     m_PadBrowserCanvas->Update();
+     if (!f3DViewer) {
+        m_PadBrowserCanvas->Modified();
+        m_PadBrowserCanvas->Update();
+     }
    }
 #if 0
    printf("StEventDisplayMaker::EventLoop Started\n");
@@ -786,22 +815,14 @@ Int_t StEventDisplayMaker::Make()
    } 
 #endif 
    fgEventLoop = 0;
+   if (f3DViewer) {  f3DViewer->EndScene(); f3DViewer->SetUpdatesEnabled(); /*f3DViewer->Update();*/ }
    gSystem->DispatchOneEvent(1);
    return kStOK;
 }
 //_____________________________________________________________________________
 void  StEventDisplayMaker::MakeEmcTowers()
 {
-   // Create Emc towers geometry
-   TEmcTowers *towers = 0;
-#ifndef EMCTOWER   
-   towers = new TEmcTowers("emchits","emchits",251,  292.1,    20,   60);
-   TVolumeView *towersview = new TVolumeView(*towers);
-   towersview->SetName("emchitsView");
-   AddConst(towers);
-   AddConst(towersview); 
-#endif   
-   // add the fake propvides to test
+// add the fake EMC providers to test
 //_____________________________________________________________________________
 class TEmcSizeProvider : public TDataProvider {
 protected :
@@ -916,13 +937,8 @@ public:
     }
 };
 // -------------------
-    if (towers) {
-         TEmcSizeProvider *fSizeProvider = new TEmcSizeProvider();
-         towers->SetSizeProvider( fSizeProvider  );
-         TEmcColorProvider *fColorProvider = new TEmcColorProvider ();
-         towers->SetColorProvider( fColorProvider );
-    }
- 
+         fSizeProvider = new TEmcSizeProvider();
+         fColorProvider = new TEmcColorProvider (); 
 }
 
 //_____________________________________________________________________________
@@ -1216,8 +1232,12 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
          // }
      // Make sure the event goes first
      // tracksShape->Draw();
+      if ( !f3DViewer) {
         m_PadBrowserCanvas->GetListOfPrimitives()->AddFirst( tracksShape );
         m_PadBrowserCanvas->Modified();
+     } else {
+        DrawObject( tracksShape );
+     }
     m_TrackCollector->Add(tracksShape);
 }
 //_____________________________________________________________________________
@@ -1471,8 +1491,11 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.125  2007/03/19 00:40:36  fine
+// Complete the direct rendering and Emc Towers
+//
 // Revision 1.124  2007/03/15 16:27:29  fine
-// Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
+//  Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
 //
 // Revision 1.123  2007/02/22 03:51:06  fine
 // Rescan event if empty
