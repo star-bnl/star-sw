@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 2.4 2006/05/24 17:28:19 ullrich Exp $
+ * $Id: StGlobalTrack.cxx,v 2.5 2007/03/20 20:56:19 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
+ * Revision 2.5  2007/03/20 20:56:19  perev
+ * LeakFix StDcaGeometry was not deleted at all
+ *
  * Revision 2.4  2006/05/24 17:28:19  ullrich
  * Added track-at-DCA geometry.
  *
@@ -33,7 +36,7 @@
 
 ClassImp(StGlobalTrack)
 
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.4 2006/05/24 17:28:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.5 2007/03/20 20:56:19 perev Exp $";
 
 StGlobalTrack::StGlobalTrack() {mDcaGeometry = 0;}
 
@@ -41,19 +44,21 @@ StGlobalTrack::StGlobalTrack(const dst_track_st& track) : StTrack(track) {mDcaGe
 
 StGlobalTrack::StGlobalTrack(const StGlobalTrack& track) : StTrack(track)
 {
-    mDcaGeometry = new StDcaGeometry(*(track.mDcaGeometry));
+    mDcaGeometry=0;
+    if (track.mDcaGeometry) mDcaGeometry = new StDcaGeometry(*(track.mDcaGeometry));
 }
 
 StGlobalTrack& StGlobalTrack::operator=(const StGlobalTrack& track)
 {
     if (this != &track) {
-        static_cast<StTrack&>(*this) = track;
-        mDcaGeometry = new StDcaGeometry(*(track.mDcaGeometry));
+        delete mDcaGeometry; mDcaGeometry=0;
+	static_cast<StTrack&>(*this) = track;
+        if (track.mDcaGeometry) mDcaGeometry = new StDcaGeometry(*(track.mDcaGeometry));
     }
     return *this;
 }
 
-StGlobalTrack::~StGlobalTrack() {/* noop */}
+StGlobalTrack::~StGlobalTrack() {delete mDcaGeometry;}
 
 StTrackType StGlobalTrack::type() const { return global; }
 
