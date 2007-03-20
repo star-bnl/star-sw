@@ -11,7 +11,7 @@ using namespace std;
 #include <TBox.h>
 
 #ifdef IN_PANITKIN
-#include <Infrastructure/GenericFile.h>
+#include <GenericFile.h>
 #else
 #include <TFile.h>
 #endif
