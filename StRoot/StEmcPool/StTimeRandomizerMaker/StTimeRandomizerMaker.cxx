@@ -67,10 +67,7 @@ Int_t StTimeRandomizerMaker::Init() {
         result = kStWarn;
     }
     this->mRandom.SetSeed(this->getSeed());
-    this->mNormalizedEventsCounter = 0;
-    if (this->getNormalizeEventsTotal() != 0) {
-	this->mNormalizedEventsCounter = this->mRandom.Uniform(0, this->mEventsTotal / this->getNormalizeEventsTotal());
-    }
+    this->mNormalizedEventsCounter = this->mRandom.Uniform(0, this->mEventsTotal); // init at random position in the list
     {LOG_DEBUG << "Finished Init()" << endm;}
     return result;
 }
