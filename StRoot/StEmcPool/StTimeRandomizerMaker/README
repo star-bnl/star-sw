@@ -16,7 +16,7 @@ B. Travels the file sequentially (if normalizeEventsTotal is not zero) by
 a fixed step in such a way that after normalizeEventsTotal events the whole
 file is covered.
 The step is sum(Number of events in file)/normalizeEventsTotal and before
-beginning the counter in initialized to a random number from 0 to step.
+beginning the counter in initialized to a random position in the list.
 This way after running many jobs of normalizeEventsTotal events each the
 whole time period is sampled according to the event numbers specified in
 the file, and run number does not change often.
