@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.9 2005/01/04 19:31:08 subhasis Exp $
+ * $Id: StPmdGeom.h,v 1.10 2007/03/21 16:40:10 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -16,6 +16,9 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
+ * Revision 1.10  2007/03/21 16:40:10  rashmi
+ * StPmdGeom after new mapping (run7) and with DrawPmd function for viewing PMD Geometry
+ *
  * Revision 1.9  2005/01/04 19:31:08  subhasis
  * Mapping for year2005 Run, Code from Rashmi's area
  *
@@ -80,7 +83,10 @@ class StPmdGeom {
   void Cell_eta_phi(Float_t,Float_t,Float_t&,Float_t&);
   void readBoardDetail();      // function for defining constant values
   void readBoardDetail(Int_t runno1);      // function for defining constant values
+  void GetRunYear(Int_t, Int_t&,Int_t&);
 
+  void drawPMD(Int_t,Int_t,Int_t);
+  void DrawRhombus(Int_t,Int_t,Int_t,Int_t,Int_t,Int_t&,Float_t*,Float_t*);
 
   Int_t ChainMapping(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&);
   Int_t ChainMapping(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
