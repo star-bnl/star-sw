@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.7 2005/07/23 03:37:34 perev Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.8 2007/03/21 17:25:51 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.8  2007/03/21 17:25:51  fisyak
+ * Ivan Kotov's drift velocities, TGeoHMatrix
+ *
  * Revision 1.7  2005/07/23 03:37:34  perev
  * IdTruth + Cleanup
  *
@@ -28,7 +31,7 @@
  **************************************************************************/
 #include <string.h>
 #include "StSvtElectronCloud.hh"
-
+#include "TMath.h"
 ClassImp(StSvtElectronCloud)
 
 //#define EL_CL_DEBUG 
