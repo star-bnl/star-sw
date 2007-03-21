@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.36 2007/03/08 23:04:42 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.37 2007/03/21 17:19:12 fisyak Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.37  2007/03/21 17:19:12  fisyak
+// use TGeoHMatrix for coordinate transformation, eliminate ssdWafersPostion, ake NTuples only for Debug()>1
+//
 // Revision 1.36  2007/03/08 23:04:42  bouchet
 // add WriteMatchedStrips() method : fill the characteristics of the strips from matched clusters ; Small change for the writing of tuples
 //
@@ -141,7 +144,9 @@
 
 #include "StEvent.h"
 #include "StSsdHitCollection.h"
-
+#include "StSsdDbMaker/StSsdDbMaker.h"
+#include "TMath.h"
+#include "StBFChain.h"
 ClassImp(StSsdPointMaker)
 
 //_____________________________________________________________________________
@@ -291,9 +296,7 @@ ClassImp(StSsdPointMaker)
     matchisto_20->SetXTitle("PSide ADC count");
     matchisto_20->SetYTitle("NSide ADC count");
     matchisto_20->SetZTitle("(1p-1n) hits");
-
-    flag = 0;             // flag=0->the tuple are not filled
-    //DeclareNtuple(&flag); // flag=1->the tuple are filled :this lign to decomment or not
+    if (Debug() > 1) DeclareNtuple();
   }
   return StMaker::Init();
 }
@@ -358,6 +361,7 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber)
 	{
 	  LOG_ERROR <<"InitRun: Can not found the calibration db.."<<endm;
 	}
+#ifdef config_position_dimensions
       else
 	{
 	  m_noise2 = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
@@ -396,7 +400,8 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber)
       if ((!dimensions)||(!config)){
         LOG_ERROR << "InitRun : No geometry or configuration parameters " << endm;
         return kStErr;
-      } 
+      }
+#endif /* config_position_dimensions */
     }
   else // No access to databases -> read tables
     {
@@ -407,23 +412,24 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber)
 
 //_____________________________________________________________________________
 
-void StSsdPointMaker::DeclareNtuple(Int_t *flag){
-  mFile = new TFile("PhysicsFile.root","RECREATE");
-  string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag:idClusP:idClusN";
-  mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
-  nFile = new TFile("Clusters.root","RECREATE");
-  string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc:FirstAdc:LastAdc:TotNoise";
-  nHitNtuple     = new TNtuple("ClusTuple","All Clusters stored",varlist3.c_str()); 
-  qFile = new TFile("Strips.root","RECREATE");
-  string varlist4     = "side:ladder:wafer:nstrip:pedestal:signal:noise:snratio";
-  qHitNtuple          = new TNtuple("Strips","All Strips stored",varlist4.c_str());
-  pFile = new TFile("Clusters_in.root","RECREATE");
-  pHitNtuple     = new TNtuple("ClustupleIn","Clusters in hits",varlist3.c_str()); 
-  rFile = new TFile("Strips_in.root","RECREATE");
-  rHitNtuple          = new TNtuple("StripsIn","Strips in hits",varlist4.c_str()); 
-  *flag =  1;
+void StSsdPointMaker::DeclareNtuple(){
+  StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+  TFile *f = 0;
+  if (chain) {
+    f = chain->GetTFile();
+    if (f)     {
+      f->cd();
+      string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag:idClusP:idClusN:position_0:position_1:xl:yl";
+      mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
+      string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc:FirstAdc:LastAdc:TotNoise";
+      nHitNtuple     = new TNtuple("ClusTuple","All Clusters stored",varlist3.c_str()); 
+      string varlist4     = "side:ladder:wafer:nstrip:pedestal:signal:noise:snratio";
+      qHitNtuple          = new TNtuple("Strips","All Strips stored",varlist4.c_str());
+      pHitNtuple     = new TNtuple("ClustupleIn","Clusters in hits",varlist3.c_str()); 
+      rHitNtuple          = new TNtuple("StripsIn","Strips in hits",varlist4.c_str()); 
+    }
+  }
 }
-
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Make()
 {
@@ -486,9 +492,8 @@ Int_t StSsdPointMaker::Make()
   LOG_INFO<<"####     START OF NEW SSD POINT MAKER        ####"<<endm;
   LOG_INFO<<"####        SSD BARREL INITIALIZATION        ####"<<endm;
   LOG_INFO<<"####          BEGIN INITIALIZATION           ####"<<endm; 
-  StSsdBarrel *mySsd = new StSsdBarrel(dimensions,config);
-  //mySsd->initLadders(m_wafpos); 
-  mySsd->initLadders(position);
+  StSsdBarrel *mySsd =gStSsdDbMaker->GetSsd();
+  mySsd->setClusterControl(mClusterControl);
   //The full SSD object is built only if we are processing physics data
   if((! spa_ped_strip || spa_ped_strip->GetNRows()==0) && (spa_strip->GetNRows()!=0))
     {
@@ -510,7 +515,7 @@ Int_t StSsdPointMaker::Make()
       Int_t nClusterPerSide[2];
       nClusterPerSide[0] = 0;
       nClusterPerSide[1] = 0;
-      mySsd->doSideClusterisation(nClusterPerSide,mClusterControl);
+      mySsd->doSideClusterisation(nClusterPerSide);
       LOG_INFO<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endm;
       LOG_INFO<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endm;
       mySsd->sortListCluster();
@@ -521,10 +526,10 @@ Int_t StSsdPointMaker::Make()
       //PrintClusterDetails(mySsd,8310); 
       makeScfCtrlHistograms(mySsd);
       //debugUnPeu(mySsd);
-      Int_t nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
+      Int_t nPackage = mySsd->doClusterMatching();
       LOG_INFO<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endm;
       mySsd->convertDigitToAnalog(mDynamicControl);
-      mySsd->convertUFrameToOther(dimensions);
+      mySsd->convertUFrameToOther();
       PrintPointSummary(mySsd);
       //Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
       /*
@@ -552,12 +557,12 @@ Int_t StSsdPointMaker::Make()
 	LOG_INFO<<"####        END OF SSD NEW POINT MAKER       ####"<<endm;
 	LOG_INFO<<"#################################################"<<endm;
       }
-      if(flag==1){ 
-	WriteStripTuple(mySsd);
-	WriteScfTuple(mySsd);
-	WriteScmTuple(mySsd);
-	WriteMatchedStrips(mySsd);
-	WriteMatchedClusters(mySsd);
+      if(Debug() > 1){ 
+	if (qHitNtuple) WriteStripTuple(mySsd);
+	if (nHitNtuple) WriteScfTuple(mySsd);
+	if (mHitNtuple) WriteScmTuple(mySsd);
+	if (rHitNtuple) WriteMatchedStrips(mySsd);
+	if (pHitNtuple) WriteMatchedClusters(mySsd);
       }
       if (nSptWritten) res = kStOK;
     }
@@ -569,8 +574,7 @@ Int_t StSsdPointMaker::Make()
 	  mySsd->writeNoiseToFile(spa_ped_strip,myLabel);
 	}
     }
-  delete mySsd;
-  
+  mySsd->Reset();
   if(res!=kStOK){
     LOG_WARN <<"Make : no output" << endm;;
     return kStWarn;
@@ -1038,6 +1042,10 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 	      
 	      hitNtuple[9] = cluster_P_j->getStripMean();
 	      hitNtuple[10]= cluster_N_j->getStripMean();
+	      hitNtuple[11] = pSpt->getPositionU(0);
+	      hitNtuple[12] = pSpt->getPositionU(1);
+	      hitNtuple[13] = pSpt->getXl(0);
+	      hitNtuple[14] = pSpt->getXl(1);
 	      mHitNtuple->Fill(hitNtuple);		 
 	      pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
 		} 
@@ -1257,7 +1265,7 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer)
 //_____________________________________________________________________________
 void StSsdPointMaker::PrintInfo()
 {
-  if (Debug()==true) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero)
@@ -1531,26 +1539,8 @@ Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
     LOG_DEBUG << "Number of n-side clusters in hits = " << clusN << endm ;
 }
 //____________________________________________________________________________
-void StSsdPointMaker::WriteTuple() {
-  LOG_INFO << "Write the Tuple ..."<< endm;
-  mFile->Write();
-  mFile->Close();  
-  nFile->Write();
-  nFile->Close();
-  qFile->Write();
-  qFile->Close(); 
-  pFile->Write();
-  pFile->Close();   
-  rFile->Write();
-  rFile->Close();
-}
-//____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {
   LOG_INFO << Form("Finish() ...") << endm;
-  if (flag)
-    {
-      WriteTuple();
-    }
   return kStOK;
 }
 
