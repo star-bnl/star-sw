@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.10 2005/07/06 19:10:34 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.11 2007/03/21 16:39:05 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.11  2007/03/21 16:39:05  fisyak
+ * TpcCoordinate transformation via TGeoHMatrix
+ *
  * Revision 1.10  2005/07/06 19:10:34  fisyak
  * Add TpcCoordinate transormation classes to dictionary, use templated StThreeVector
  *
@@ -106,8 +109,9 @@
 #include "StGlobals.hh"
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
+#if 0
 #include "StMatrix.hh"
-
+#endif
 #include "StTpcDb/StTpcDb.h"
 #include "StObject.h"
 
@@ -204,19 +208,22 @@ public:
     // Utilities
     double      rad2deg(double)        const; //radians to degrees (should be in global?)
     int         nearestInteger(double) const;
+#if 0
   const StMatrix<double>      &TpcToGlobalRotation() const {return *&mTpcToGlobalRotation;}
   const StMatrix<double>      &GlobalToTpcRotation() const {return *&mGlobalToTpcRotation;}
   const StThreeVector<double> &TpcPositionInGlobal() const {return *&mTpcPositionInGlobal;}
-      
+#endif      
 private:
     double    mCosForSector[24];
     double    mSinForSector[24];
+#if 0
     StMatrix<double>  mRotation;  // (2x2)
     StMatrix<double>  mRotate;    // (2x1)
     StMatrix<double>  mResult;    // (2x1)
     StMatrix<double>  mTpcToGlobalRotation; // (3X3)
     StMatrix<double>  mGlobalToTpcRotation; // (3X3)
     StThreeVector<double> mTpcPositionInGlobal; 
+#endif
   double    mInnerPositionOffsetX[24]; // sector alignment
   double    mOuterPositionOffsetX[24]; // 
   double    mInnerRotation[24];        // rad
