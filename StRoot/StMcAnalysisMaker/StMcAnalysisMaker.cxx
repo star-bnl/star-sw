@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.31 2006/06/20 02:39:38 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.32 2007/03/21 17:14:36 fisyak Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.32  2007/03/21 17:14:36  fisyak
+ * Add keys for switch off Tpc, Svt and Ssd NTuples
+ *
  * Revision 1.31  2006/06/20 02:39:38  calderon
  * Fixed several changes from the last version which made this package not
  * executable using the default StAssociator.C macro.
@@ -155,9 +158,7 @@
 
 #include "StMessMgr.h"
 
-//#include "StBFChain.h"
-//#include "St_DataSet.h"
-//#include "St_DataSetIter.h"
+#include "StBFChain.h"
 
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StAssociationMaker/StTrackPairInfo.hh"
@@ -261,10 +262,10 @@ Int_t StMcAnalysisMaker::Init()
     
     SetZones();  // This is my method to set the zones for the canvas.
 
-    //    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-    //if (chain) mNtupleFile = chain->GetTFile();
-    //if (mNtupleFile) {mNtupleFile->cd(); mNtupleFile = 0;}
-    //else {mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");}
+    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+    if (chain) mNtupleFile = chain->GetTFile();
+    if (mNtupleFile) {mNtupleFile->cd(); mNtupleFile = 0;}
+    else {mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");}
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",
 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
@@ -300,13 +301,18 @@ Int_t StMcAnalysisMaker::Init()
     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ:mcTrkId:mostCommIdTruth:nHitsIdTruth:nMcHits:nFitPts:nDetPts:quality";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
     mTrackNtuple->SetAutoSave(100000000);
-
-    mTpcHitNtuple = new TNtuple("TpcHitNtuple","the TPC hit pairs Info",vTpcHitMRPair);
-    mTpcHitNtuple->SetAutoSave(100000000);
-    mSvtHitNtuple = new TNtuple("SvtHitNtuple","the SVT hit pairs Info",vSvtHitMRPair);
-    mSvtHitNtuple->SetAutoSave(100000000);
-    mSsdHitNtuple = new TNtuple("SsdHitNtuple","the SSD hit pairs Info",vSsdHitMRPair);
-    mSsdHitNtuple->SetAutoSave(100000000);
+    if (! m_Mode || m_Mode & 0x1) {
+      mTpcHitNtuple = new TNtuple("TpcHitNtuple","the TPC hit pairs Info",vTpcHitMRPair);
+      mTpcHitNtuple->SetAutoSave(100000000);
+    }
+    if (! m_Mode || m_Mode & 0x2) {
+      mSvtHitNtuple = new TNtuple("SvtHitNtuple","the SVT hit pairs Info",vSvtHitMRPair);
+      mSvtHitNtuple->SetAutoSave(100000000);
+    }
+    if (! m_Mode || m_Mode & 0x4) {
+      mSsdHitNtuple = new TNtuple("SsdHitNtuple","the SSD hit pairs Info",vSsdHitMRPair);
+      mSsdHitNtuple->SetAutoSave(100000000);
+    }
     return StMaker::Init();
 }
 //_________________________________________________
@@ -397,7 +403,7 @@ Int_t StMcAnalysisMaker::Make()
   
   float DeltaX;
   float DeltaZ;
-  if (theHitMap) {// TPC
+  if (theHitMap && mTpcHitNtuple) {// TPC
     StTpcHitCollection* recHits = rEvent->tpcHitCollection();
     StMcTpcHitCollection* mcHits = mEvent->tpcHitCollection();
     assert (recHits || mcHits);
@@ -503,7 +509,7 @@ Int_t StMcAnalysisMaker::Make()
       }
     }
   }
-  if (svtHitMap && svtMcHitMap) {  // svt hits
+  if (svtHitMap && svtMcHitMap && mSvtHitNtuple) {  // svt hits
     StSvtHitCollection* recHits = rEvent->svtHitCollection();
     StMcSvtHitCollection* mcHits = mEvent->svtHitCollection();
     if (recHits && mcHits) {
@@ -610,7 +616,7 @@ Int_t StMcAnalysisMaker::Make()
       }
     }
   }
-  if (ssdHitMap && ssdMcHitMap) {  // ssd hits
+  if (ssdHitMap && ssdMcHitMap && mSsdHitNtuple) {  // ssd hits
     StSsdHitCollection* recHits = rEvent->ssdHitCollection();
     StMcSsdHitCollection* mcHits = mEvent->ssdHitCollection();
     if (recHits && mcHits) {
