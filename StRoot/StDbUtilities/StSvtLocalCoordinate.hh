@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtLocalCoordinate.hh,v 1.4 2003/09/02 17:57:51 perev Exp $
+ * $Id: StSvtLocalCoordinate.hh,v 1.5 2007/03/21 16:41:07 fisyak Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StSvtLocalCoordinate.hh,v $
+ * Revision 1.5  2007/03/21 16:41:07  fisyak
+ * Use Ivan Kotov's drift velocities
+ *
  * Revision 1.4  2003/09/02 17:57:51  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -37,56 +40,37 @@
 
 #include "StThreeVector.hh"
 
-class StSvtLocalCoordinate
-{
-public:
-    StSvtLocalCoordinate();
-    StSvtLocalCoordinate(const double, const double, const double);
-    StSvtLocalCoordinate(const StThreeVector<double>&);
+class StSvtLocalCoordinate {
+ public:
+  StSvtLocalCoordinate();
+  StSvtLocalCoordinate(const double, const double, const double);
+  StSvtLocalCoordinate(const StThreeVector<double>&);
+  
+  virtual ~StSvtLocalCoordinate();
+  
+  int operator==(const StSvtLocalCoordinate&) const;
+  int operator!=(const StSvtLocalCoordinate&) const;
 
-    virtual ~StSvtLocalCoordinate();
-    //StSvtLocalCoordinate(const StTpcLocalCoordinate&);
-    //StSvtLocalCoordinate& operator=(const StTpcLocalCoordinate&);
-    
-    int operator==(const StSvtLocalCoordinate&) const;
-    int operator!=(const StSvtLocalCoordinate&) const;
-
-    // access functions provided by StThreeVector
-    const StThreeVector<double>& position()  const;
-    StThreeVector<double>& position();
-    const int layer()       const;
-    const int ladder()      const;
-    const int wafer()       const;
-    const int hybrid()      const;
-    void setPosition(const StThreeVector<double>&);
-    void setLayer(int);
-    void setLadder(int);
-    void setWafer(int);
-    void setHybrid(int);
-protected:
-    StThreeVector<double> mPosition;
-    int mLayer;
-    int mLadder;
-    int mWafer;
-    int mHybrid;
-
+  // access functions provided by StThreeVector
+  const StThreeVector<double>& position()  const  { return(mPosition); }
+  StThreeVector<double>& position()               { return(mPosition); }
+  const int barrel()      const  {return((mLayer-1)/2+1);}
+  const int layer()       const  {return(mLayer);}
+  const int ladder()      const  {return(mLadder);}
+  const int wafer()       const  {return(mWafer);}
+  const int hybrid()      const  {return(mHybrid);}
+  void setPosition(const StThreeVector<double>& val) { mPosition = val; }
+  void setLayer(int l)   {mLayer  = l;}
+  void setLadder(int d)  {mLadder = d;}
+  void setWafer(int  w)  {mWafer  = w;}
+  void setHybrid(int h)  {mHybrid  = h;}
+ protected:
+  StThreeVector<double> mPosition;
+  int mLayer;
+  int mLadder;
+  int mWafer;
+  int mHybrid;
 };
-
-inline const StThreeVector<double>& StSvtLocalCoordinate::position() const { return(mPosition); }
-inline StThreeVector<double>& StSvtLocalCoordinate::position() { return(mPosition); }
-inline void StSvtLocalCoordinate::setPosition(const StThreeVector<double>& val) { mPosition = val; }
-const inline int StSvtLocalCoordinate::layer()   const {return(mLayer);}
-const inline int StSvtLocalCoordinate::ladder()  const {return(mLadder);}
-const inline int StSvtLocalCoordinate::wafer()   const {return(mWafer);}
-const inline int StSvtLocalCoordinate::hybrid()   const {return(mHybrid);}
-
-inline void StSvtLocalCoordinate::setLayer(int l)  {mLayer  = l;}
-inline void StSvtLocalCoordinate::setLadder(int d) {mLadder = d;}
-inline void StSvtLocalCoordinate::setWafer(int w)  {mWafer  = w;}
-inline void StSvtLocalCoordinate::setHybrid(int h)  {mHybrid  = h;}
-
-
-// Non-member
 ostream& operator<<(ostream&, const StSvtLocalCoordinate&);
 #endif
     
