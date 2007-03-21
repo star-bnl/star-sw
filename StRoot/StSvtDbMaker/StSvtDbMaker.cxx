@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.17 2007/03/21 17:23:24 fisyak Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.18 2007/03/21 23:02:13 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.18  2007/03/21 23:02:13  fisyak
+ * add StSvtGeometry to const area
+ *
  * Revision 1.17  2007/03/21 17:23:24  fisyak
  * Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
  *
@@ -452,9 +455,8 @@ StSvtConfig* StSvtDbMaker::getConfiguration()
   gMessMgr->Info() << "numberOfWafersPerLadder[2] = "  << config->numberOfWafersPerLadder[2] << endm;
   gMessMgr->Info() << "numberOfHybridsPerWafer = "  << config->numberOfHybridsPerWafer << endm;
 
-  if (!mSvtConfig)
+  if (!mSvtConfig) 
     mSvtConfig = new StSvtConfig();
-
   mSvtConfig->setNumberOfBarrels(config->numberOfBarrels);
 
   for (int i=0; i<config->numberOfBarrels; i++) {
@@ -773,9 +775,14 @@ StSvtGeometry* StSvtDbMaker::getGeometry()
   svtDimensions_st *dimension = dimensions->GetTable();
 
   // Create all pedestal objects
-  if (!mSvtGeom)  
+  if (!mSvtGeom) {
+    TDataSet *svtSetGeom = GetDataSet("StSvtGeometry");
+    if ( svtSetGeom ) delete svtSetGeom;
+    svtSetGeom = new St_ObjectSet("StSvtGeometry");
     mSvtGeom = new StSvtGeometry(mSvtConfig);
-
+    svtSetGeom->SetObject(mSvtGeom);
+    AddConst(svtSetGeom);  
+  };
   mSvtGeom->setBarrelRadius(dimension->barrelRadius);
   mSvtGeom->setWaferLength(dimension->waferLength);
   mSvtGeom->setWaferThickness(dimension->waferThickness);
