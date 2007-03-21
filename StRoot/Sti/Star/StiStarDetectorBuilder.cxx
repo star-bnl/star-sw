@@ -10,6 +10,7 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/Star/StiStarDetectorBuilder.h"
 #include "Sti/StiElossCalculator.h"
+#include "TMath.h"
 //________________________________________________________________________________
 void StiStarDetectorBuilder::buildDetectors(StMaker&s) {
   assert(StiVMCToolKit::GetVMC());

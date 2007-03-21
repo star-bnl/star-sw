@@ -1,5 +1,6 @@
 #ifndef StiTrackFinder_H
 #define StiTrackFinder_H 1
+#include <vector>
 class StiHit;
 class StiTrack;
 class StiVertexFinder;

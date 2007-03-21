@@ -98,7 +98,7 @@ template <class Concrete, class Abstract>
 StiFactory<Concrete,Abstract>::StiFactory():Factory<Abstract>("")
 {
   fHTop=0;fBTop=0;
-  setName(typeid(*this).name());
+  this->setName(typeid(*this).name());
   printf("*** Factory created *** %s\n",this->getName().c_str());
 }
 template <class Concrete, class Abstract>

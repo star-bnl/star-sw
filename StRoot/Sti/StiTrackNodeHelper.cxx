@@ -4,7 +4,11 @@
 #include "StiTrackNodeHelper.h"
 #include "StiElossCalculator.h"
 #include "StiHitErrorCalculator.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 
 #define NICE(a) ( ((a) <= -M_PI)? ((a)+2*M_PI) :\
                   ((a) >   M_PI)? ((a)-2*M_PI) : (a))
