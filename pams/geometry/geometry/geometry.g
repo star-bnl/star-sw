@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.152 2007/03/15 19:56:16 potekhin Exp $
+* $Id: geometry.g,v 1.153 2007/03/21 21:08:05 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.153  2007/03/21 21:08:05  potekhin
+* A cleaner version of managing the HFT (pixlgeo) versions
+*
 * Revision 1.152  2007/03/15 19:56:16  potekhin
 * Provide versioning for the thicker active Si layer
 * in pixlgeo3, via setting the structure elements
@@ -3567,8 +3570,7 @@ If LL>1
    if (pixl.and.PixlConfig==4) Call pixlgeo3
    if (pixl.and.PixlConfig==5) then
          call AgDETP new ('PIXL')
-         call AgDETP add ('PIXG.PassiveThk=',0.021,1)
-         call AgDETP add ('PIXG.ActiveThk=', 0.003,1)
+         call AgDETP add ('PXLV.LadVer=',2.0,1)
          call pixlgeo3
    endif
 
