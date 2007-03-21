@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.79 2006/12/19 19:46:09 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.80 2007/03/21 17:51:36 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.80  2007/03/21 17:51:36  fisyak
+ * adjust for ROOT 5.14
+ *
  * Revision 2.79  2006/12/19 19:46:09  perev
  * Filling pull tracks added
  *
@@ -399,7 +402,12 @@
  *
  **************************************************************************/
 //ROOT
+#include "RVersion.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 //std
 #include "Stiostream.h"
 #include <algorithm>
