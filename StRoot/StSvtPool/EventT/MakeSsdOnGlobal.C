@@ -8,6 +8,7 @@ struct data_t {
 };
 data_t Data[] = {
 #if 0
+#if 0
   { 20, 163.93,14.68, 186.40, 1.24,-325.13,12.82,  -0.43, 0.01,  -0.01, 0.00,  -0.39, 0.06, 6020062, 20050120,101458, 9965.6,-1, "CuCu200RF"},
   { 21,  36.89, 3.34, 223.35, 2.26,-331.49,23.54,  -0.22, 0.00,  -0.04, 0.01,  -0.38, 0.10, 6021012, 20050121,103145,  714.4,-1, "CuCu200RF"},
   { 25, 317.98, 5.08, 443.98, 5.18,-323.08, 4.45,  -0.47, 0.01,  -0.08, 0.01,  -0.35, 0.02, 6025041, 20050125, 91811, 4633.9,-1, "CuCu200RF"},
@@ -31,6 +32,10 @@ data_t Data[] = {
   { 65, 184.57, 6.24,  69.27, 0.81,-114.15, 5.50,  -0.13, 0.02,  -0.16, 0.01,  -0.32, 0.02, 6065045, 20050306,194324,20629.7, 0, "NoFieldB"  } 
   //  { 65,1207.03, 6.42, 717.66, 6.35,1118.89, 5.85,  -0.12, 0.01,  -0.18, 0.02,  -0.18, 0.03, 6065045, 20050306,194324,20629.7, 0, "NoFieldC" }//6065045C
 #endif
+#else
+  { 20, 52.67, 3.94 ,113.41, 3.46,-110.53, 3.80,-0.12, 0.01, 0.42, 0.02,-0.59, 0.02, 6020062, 20050120, 0, 9965.6,-1, "CuCu200RF"},
+  { 48,-86.76, 3.45,-105.29, 3.23,-103.13, 3.35, 0.13, 0.01, 0.42, 0.01,-0.23, 0.01, 6048024, 20050217, 0, 7511.3, 1, "CuCu200FF"}
+#endif
 };
 const Int_t N = sizeof(Data)/sizeof(data_t);
 
@@ -49,8 +54,7 @@ void MakeSsdOnGlobal(){
     header->SetDateTime(20050101,i+1);
     chain->MakeEvent();
     db->SetDateTime(Data[i].date,Data[i].time); 
-    TDataSet *set = chain->GetDataBase("Geometry/ssd");
-    St_Survey *SsdOnGlobal = (St_Survey *) set->Find("SsdOnGlobal");
+    St_Survey *SsdOnGlobal = (St_Survey *) chain->GetDataBase("Geometry/ssd/SsdOnGlobal");
     if (! SsdOnGlobal)  {cout << "SsdOnGlobal has not been found"  << endl; return 0;}
     const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();  cout << "Tpc2Global\t"; Tpc2Global.Print();
     TGeoHMatrix GL;
