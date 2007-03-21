@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.35 2006/03/16 18:27:40 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.36 2007/03/21 17:28:25 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.36  2007/03/21 17:28:25  fisyak
+//New coordinate transformation
+//
 //Revision 1.35  2006/03/16 18:27:40  caines
 //Add t0 shift when checking timebucket of hit against largest possible timebucket for flagging hits as bad
 //
@@ -78,6 +81,7 @@
 #include "svt/St_srs_am_Module.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
+#include "StDbUtilities/St_svtHybridDriftVelocityC.h"
 ClassImp(St_srs_Maker)
 
 //_____________________________________________________________________________
@@ -253,10 +257,15 @@ Int_t St_srs_Maker::Make()
   dataSet = GetDataSet("StSvtT0");
   StSvtT0 *T0 = (StSvtT0*)dataSet->GetObject();
   dataSet = GetDataSet("StSvtDriftVelocity");
+#if 0
   StSvtHybridCollection *DriftVel = (StSvtHybridCollection*)
     dataSet->GetObject();
-  if(GeomDataBase)   mCoordTransform->setParamPointers(GeomDataBase, mConfig,
-						       DriftVel, T0);
+#else
+  St_svtHybridDriftVelocityC *DriftVel = St_svtHybridDriftVelocityC::instance();
+  assert(DriftVel);
+#endif
+  if(GeomDataBase)   mCoordTransform->setParamPointers(GeomDataBase, mConfig, 0, T0);
+						       //YF	       DriftVel, T0);
   
   // cope with pile up events and fill hit collection
 //VPunused   srs_srspar_st* mSvtSrsPar = m_srs_srspar->GetTable();
@@ -285,7 +294,7 @@ Int_t St_srs_Maker::Make()
 						      spc->x[2]));	 
 
 	//cout << GlobalCoord ;
-	mCoordTransform->operator()(GlobalCoord,WaferCoord);
+	mCoordTransform->operator()(GlobalCoord,WaferCoord,spc->id_wafer);
 
 	//Fill hit collection
 	index = mSvtAnalColl->getHybridIndex(WaferCoord.barrel(),
@@ -294,10 +303,14 @@ Int_t St_srs_Maker::Make()
 					     WaferCoord.hybrid());
 	
 	if( index <0) continue;
+#if 0
 	MaxTimeBucket = (int)(3.*T0->getFsca()/
 			      ((StSvtHybridDriftVelocity*)
 			       DriftVel->at(index))->getV3(1)+T0->getT0());
-	
+#else
+	MaxTimeBucket = (int)(3.*T0->getFsca()/DriftVel->DriftVelocity(WaferCoord.barrel(),WaferCoord.ladder(),WaferCoord.wafer(),WaferCoord.hybrid())
+			       +T0->getT0());
+#endif	
 	
 	WaferCoord.setTimeBucket(WaferCoord.timebucket()+TimeBucketShift);
 	
