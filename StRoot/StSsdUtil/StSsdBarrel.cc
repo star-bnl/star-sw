@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.2 2007/03/21 17:20:40 fisyak Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.2  2007/03/21 17:20:40  fisyak
+// use TGeoHMatrix for coordinate transformation
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -83,15 +86,22 @@
 #include "StSsdUtil/StSsdCluster.hh"
 #include "StSsdUtil/StSsdPointList.hh"
 #include "StSsdUtil/StSsdPoint.hh"
-
+#include "SystemOfUnits.h"
+#include "StarMagField.h"
+#include "TMath.h"
+#include "StMessMgr.h"
+StSsdBarrel* StSsdBarrel::fSsdBarrel = 0;
 //________________________________________________________________________________
 /*!
 Constructor using the ssdDimensions_st and ssdConfiguration_st tables from the db
  */
-StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *config)
+StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *config) : mDebug(0)
 {
   memset (first, 0, last-first);
+  fSsdBarrel = this;
   setSsdParameters(dimensions);
+  LOG_INFO << "Set the Lorentz shift for holes and electrons" << endm;
+  setLorentzShift(dimensions);
   if (config) {
     mNLadder         = config[0].nMaxLadders;
     for (Int_t i=0;i<mNLadder;i++) {
@@ -101,14 +111,16 @@ StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *con
     }
   }
   mLadders = new StSsdLadder*[mNLadder];
-  for (Int_t iLad=0; iLad < mNLadder; iLad++)    
+  for (Int_t iLad=0; iLad < mNLadder; iLad++){
     mLadders[iLad] = new StSsdLadder(iLad,mSsdLayer,mNWaferPerLadder,mNStripPerSide);
+    if (Debug()) mLadders[iLad]->SetDebug(Debug());
+  }
 }
 //________________________________________________________________________________
-StSsdBarrel::~StSsdBarrel(){for (Int_t iLad = 0 ; iLad < mNLadder; iLad++) delete mLadders[iLad];}
+StSsdBarrel::~StSsdBarrel(){for (Int_t iLad = 0 ; iLad < mNLadder; iLad++) delete mLadders[iLad]; fSsdBarrel = 0;}
 //________________________________________________________________________________
 void StSsdBarrel::setSsdParameters(ssdDimensions_st *geom_par){
-  
+  mDimensions          = geom_par;
   mSsdLayer            = 7; // all layers : 1->7
   mDetectorLargeEdge   = 2.*geom_par[0].waferHalfActLength;
   mDetectorSmallEdge   = 2.*geom_par[0].waferHalfActWidth;
@@ -119,6 +131,33 @@ void StSsdBarrel::setSsdParameters(ssdDimensions_st *geom_par){
   mTheta               = geom_par[0].stereoAngle;
 }
 //________________________________________________________________________________
+void StSsdBarrel::setLorentzShift(ssdDimensions_st *geom_par){
+  Float_t center[3];
+  Float_t B[3];
+  center[0] = 0.0;
+  center[1] = 0.0;
+  center[2] = 0.0;
+  B[0]      = 0.0;
+  B[1]      = 0.0;
+  B[2]      = 0.0;
+  //we take the BField at the point (0,0,0)
+  StarMagField::Instance()->BField(center,B);
+#if 0
+  Float_t drift_hole   = centimeter2*470;
+  Float_t drift_elec   = centimeter2*1417;
+  Float_t tan_theta_h  = 0.7*drift_hole*B[2]*0.1;
+  Float_t tan_theta_e  = 1.15*drift_elec*B[2]*0.1;
+#endif
+  // 03/06/2007 : test : use the values from CMS
+  Float_t scale                = 1.61;
+  Float_t tan_theta_h          = scale*TMath::ATan(TMath::Tan(21*2*TMath::Pi()/360)*(B[2]/40.));
+  Float_t tan_theta_e          = scale*TMath::ATan(TMath::Tan( 8*2*TMath::Pi()/360)*(B[2]/40.));
+  mShift_hole          = geom_par[0].waferHalfThickness*tan_theta_h;
+  mShift_elec          = geom_par[0].waferHalfThickness*tan_theta_e;
+  LOG_INFO <<Form("mShift_hole=%f mShift_elec=%f",mShift_hole,mShift_elec)<<endm;
+}
+//________________________________________________________________________________
+
 void StSsdBarrel::debugUnPeu (Int_t monladder, Int_t monwafer){
   for (Int_t i=0;i<this->getNumberOfLadders();i++)
     {
@@ -131,6 +170,8 @@ void StSsdBarrel::debugUnPeu (Int_t monladder, Int_t monwafer){
 }
 //________________________________________________________________________________
 void StSsdBarrel::initLadders(St_ssdWafersPosition *wafpos) {for (Int_t iLad = 0; iLad < mNLadder; iLad++) mLadders[iLad]->initWafers(wafpos);}
+//________________________________________________________________________________
+void StSsdBarrel::Reset() {for (Int_t iLad = 0; iLad < mNLadder; iLad++) mLadders[iLad]->Reset();}
 //________________________________________________________________________________
 Int_t StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip){
   spa_strip_st *strip = spa_strip->GetTable();
@@ -676,7 +717,7 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
   return inTable;
 }
 //________________________________________________________________________________
-void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster, StSsdClusterControl *clusterControl){
+void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster){
   //  Int_t *wafNumbOfCluster = new int[2];
   Int_t wafNumbOfCluster[2];
   wafNumbOfCluster[0] = 0;
@@ -685,26 +726,27 @@ void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster, StSsdClusterC
   for (Int_t iLad = 0 ; iLad < mNLadder; iLad++)
     for (Int_t iWaf = 0 ; iWaf < mNWaferPerLadder; iWaf++)
       {
-	mLadders[iLad]->mWafers[iWaf]->doClusterisation(wafNumbOfCluster, clusterControl);
+	mLadders[iLad]->mWafers[iWaf]->doClusterisation(wafNumbOfCluster, mClusterControl);
 	barrelNumbOfCluster[0] += wafNumbOfCluster[0];
 	barrelNumbOfCluster[1] += wafNumbOfCluster[1];
       }
   //  delete[] wafNumbOfCluster;
 }
 //________________________________________________________________________________
-Int_t StSsdBarrel::doClusterMatching(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl){
+Int_t StSsdBarrel::doClusterMatching(){
   Int_t NumberOfPackage = 0;
   Int_t nSolved = 0;
   Int_t nPerfect = 0;
   for (Int_t iLad = 0; iLad < mNLadder; iLad++)
     for (Int_t iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       { 
-	NumberOfPackage += mLadders[iLad]->mWafers[iWaf]->doFindPackage(dimensions, clusterControl);
-	nPerfect  =  mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(dimensions, clusterControl);
+	mLadders[iLad]->mWafers[iWaf]->doLorentzShift(mDimensions,mShift_hole,mShift_elec);
+	NumberOfPackage += mLadders[iLad]->mWafers[iWaf]->doFindPackage(mDimensions, mClusterControl);
+	nPerfect  =  mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(mDimensions, mClusterControl);
 	nSolved  += nPerfect;
 	if (!nPerfect) continue;
-	            mLadders[iLad]->mWafers[iWaf]->doStatPerfect(nPerfect, clusterControl);
-	nSolved  += mLadders[iLad]->mWafers[iWaf]->doSolvePackage(dimensions, clusterControl);
+	            mLadders[iLad]->mWafers[iWaf]->doStatPerfect(nPerfect, mClusterControl);
+	nSolved  += mLadders[iLad]->mWafers[iWaf]->doSolvePackage(mDimensions, mClusterControl);
       }
   cout<<"****       Remark: "<<nSolved<<"  solved packages     ****\n";
   return NumberOfPackage;
@@ -722,11 +764,11 @@ void StSsdBarrel::convertDigitToAnalog(StSsdDynamicControl *dynamicControl){
       mLadders[iLad]->mWafers[iWaf]->convertDigitToAnalog(convFactor);
 }
 //________________________________________________________________________________
-void StSsdBarrel::convertUFrameToOther(ssdDimensions_st *dimensions){
+void StSsdBarrel::convertUFrameToOther(){
   for (Int_t iLad = 0; iLad < mNLadder; iLad++)
     for (Int_t iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       {
-	mLadders[iLad]->mWafers[iWaf]->convertUFrameToLocal(dimensions);
+	mLadders[iLad]->mWafers[iWaf]->convertUFrameToLocal(mDimensions);
 	mLadders[iLad]->mWafers[iWaf]->convertLocalToGlobal();
       }
 }
@@ -872,7 +914,9 @@ void StSsdBarrel::convertToStrip(Double_t pairCreationEnergy,
 						    parIndRightP,
 						    parIndRightN,
 						    parIndLeftP,
-						    parIndLeftN);
+						    parIndLeftN,
+						    mShift_hole,
+						    mShift_elec);
     }
 }
 //________________________________________________________________________________

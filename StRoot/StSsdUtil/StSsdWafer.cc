@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.cc,v 1.2 2007/03/01 22:32:18 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.3 2007/03/21 17:20:41 fisyak Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.3  2007/03/21 17:20:41  fisyak
+// use TGeoHMatrix for coordinate transformation
+//
 // Revision 1.2  2007/03/01 22:32:18  bouchet
 // bug fixed : fill the StSsdPointList with space points with the higher configuration probability
 //
@@ -30,8 +33,9 @@
 #include "StSsdUtil/StSsdWafer.hh"
 #include <Stiostream.h>
 #include "TMath.h"
+#include "StMessMgr.h"
 //________________________________________________________________________________
-StSsdWafer::StSsdWafer(Int_t nid) {
+StSsdWafer::StSsdWafer(Int_t nid) : TGeoHMatrix(), mDebug(0) {
   memset(first, 0, last-first);
   mId       = nid;
   
@@ -56,6 +60,25 @@ StSsdWafer::~StSsdWafer() {
   delete    mPoint;
 }
 //________________________________________________________________________________
+void StSsdWafer::Reset() {
+  delete    mStripP;
+  delete    mStripN;
+  delete    mNoiseP;
+  delete    mNoiseN;
+  delete    mClusterP;
+  delete    mClusterN;
+  delete    mPackage;
+  delete    mPoint;
+  mStripP   = new StSsdStripList();
+  mStripN   = new StSsdStripList();
+  mNoiseP   = new StSpaListNoise();
+  mNoiseN   = new StSpaListNoise();
+  mClusterP = new StSsdClusterList();
+  mClusterN = new StSsdClusterList();
+  mPackage  = new StSsdPackageList();
+  mPoint    = new StSsdPointList();  
+}
+//________________________________________________________________________________
 /*!
 The wafer initialisation. The geom info is taken from the method arguments. The lists are built.
 Only the WafersPosition are used at the moment. This part should be updated to take into account
@@ -63,19 +86,17 @@ the relative position of the ladders, sectors and barrel.
  */
 void StSsdWafer::init(Int_t rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX)
 {
-  if (rId != mId)
-    cout<<" Can not initialize wafer number : "<<mId<<" with "<<rId<<"\n";
-  else
-    {
-//       cout<<" Okay to initialize wafer number : "<<mId<<" with "<<rId<<"\n";
-      for (Int_t i = 0; i < 3; i++)
-	{
-	  mD[i] = (float)rD[i];
-	  mT[i] = (float)rT[i];
-	  mN[i] = (float)rN[i];
-	  mX[i] = (float)rX[i];
-	}
-    }
+  if (rId != mId) cout<<" Can not initialize wafer number : "<<mId<<" with "<<rId<<"\n";
+  else {
+    SetName(Form("R%04i",rId));
+    Double_t rot[9] = {
+      rD[0],  rT[0], rN[0],
+      rD[1],  rT[1], rN[1],
+      rD[2],  rT[2], rN[2]
+    };
+    SetRotation(rot);
+    SetTranslation(rX);
+  }
 }
 //________________________________________________________________________________
 void StSsdWafer::debugStrips()
@@ -353,6 +374,54 @@ Int_t StSsdWafer::doClusterSplitting(StSsdClusterControl *clusterControl, Int_t 
     }
   CurrentClusterList->renumCluster();
   return CurrentClusterList->getSize();
+}
+
+//________________________________________________________________________________
+/*!
+Does the loretnz shift of the mean strip of the cluster
+Up->Up+2.47um
+Un->Un+12,45 um
+ */
+void StSsdWafer::doLorentzShift(ssdDimensions_st *dimensions,Float_t mShift_hole,Float_t mShift_elec)
+{
+  Int_t rejected_sideP = 0 ;
+  Int_t rejected_sideN = 0 ;
+  Int_t iSide = 0;
+  if (Debug())  LOG_DEBUG <<Form("in doLorentzShift ShiftHole =%f ShiftElec =%f",mShift_hole,mShift_elec)<<endm;
+  rejected_sideP = doLorentzShiftSide(iSide,mShift_hole,dimensions);
+  iSide = 1;
+  rejected_sideN = doLorentzShiftSide(iSide,mShift_elec,dimensions);
+  if (Debug())  LOG_DEBUG<<Form("Rejected side P = %d Rejected side N =%d",rejected_sideP,rejected_sideN)<<endm;
+}
+//___________________________________________________________________________________________
+Int_t StSsdWafer::doLorentzShiftSide(Int_t side,Float_t shift,ssdDimensions_st *dimensions){
+  StSsdClusterList *CurrentClusterList =  0;
+  Float_t pitch          = dimensions[0].stripPitch;
+  Float_t waferActLength = dimensions[0].waferHalfActLength;
+  switch (side)
+    {
+    case 0:
+      CurrentClusterList =  mClusterP;
+      break;
+    case 1:
+      CurrentClusterList =  mClusterN;
+      break;
+    }
+  //printf("pitch=%f shift=%f ratio=%f\n",pitch,shift,shift/pitch);
+  Int_t ClusterListSize = CurrentClusterList->getSize();
+  if(!ClusterListSize) return 0;
+  Int_t iCluster   = 0;
+  Int_t n_rejected = 0;
+  StSsdCluster *CurrentCluster = CurrentClusterList->first();
+  
+  for(iCluster = 0 ; iCluster < ClusterListSize ; iCluster++)
+    {   
+      Float_t StripMean = CurrentCluster->getStripMean();
+      CurrentCluster->setStripMean(StripMean-(shift/pitch));
+      if(CurrentCluster->getStripMean()*pitch>waferActLength) {n_rejected++;}
+      CurrentCluster = CurrentClusterList->next(CurrentCluster);
+    }
+  return n_rejected;
 }
 //________________________________________________________________________________
 /*!
@@ -2382,6 +2451,7 @@ Int_t StSsdWafer::convertUFrameToLocal(ssdDimensions_st *dimensions)
   StSsdPoint *currentPoint = mPoint->first();
   while(currentPoint)
     {
+      //      printf("posU(0)=%f posU(1)=%f\n",currentPoint->getPositionU(0),currentPoint->getPositionU(1));
       currentPoint->setXl(currentPoint->getPositionU(0)/2.+currentPoint->getPositionU(1)/2.-dimensions[0].waferHalfActLength+dimensions[0].waferHalfActWidth*tan(dimensions[0].stereoAngle),0);
       currentPoint->setXl((currentPoint->getPositionU(1)-currentPoint->getPositionU(0))/(2*tan(dimensions[0].stereoAngle)),1);
       currentPoint = mPoint->next(currentPoint);
@@ -2389,73 +2459,34 @@ Int_t StSsdWafer::convertUFrameToLocal(ssdDimensions_st *dimensions)
   return 1;
 }
 //________________________________________________________________________________
-Int_t StSsdWafer::convertLocalToGlobal()
-{
+Int_t StSsdWafer::convertLocalToGlobal() {
   StSsdPoint *currentPoint = mPoint->first();
-  Float_t B[3],wD[3],wT[3],wN[3],tempXl[3];
-  Float_t delta = 0;
-  while(currentPoint)
-    {
-      // sign (-) of B[0] : temporarily fixed - order of strip readout has to be reversed 
-      B[0]=-currentPoint->getXl(0)+mD[0]*mX[0]+mD[1]*mX[1]+mD[2]*mX[2];
-      B[1]=currentPoint->getXl(1)+mT[0]*mX[0]+mT[1]*mX[1]+mT[2]*mX[2]; 
-      B[2]=currentPoint->getXl(2)+mN[0]*mX[0]+mN[1]*mX[1]+mN[2]*mX[2];
-
-//   Xl[0]=mDv.Xgv-mDv.Xv        ( mD[0] mD[1] mD[2] ) (Xg[0]) = (B[0])
-//   Xl[1]=mTv.Xgv-mTv.Xv  i.e.  ( mT[0] mT[1] mT[2] ) (Xg[1])   (B[1])
-//   Xl[2]=mNv.Xgv-mNv.Xv        ( mN[0] mN[1] mN[2] ) (Xg[2])   (B[2])
-
-//   ( wD[0] wD[1] wD[2] ) (B[0]) = (tempXl[0])
-//   ( wT[0] wT[1] wT[2] ) (B[1]) = (tempXl[1])
-//   ( wN[0] wN[1] wN[2] ) (B[2]) = (tempXl[2])
-
-      delta = mD[0]*mT[1]*mN[2]-mD[0]*mT[2]*mN[1]-mD[1]*mT[0]*mN[2]+mD[2]*mT[0]*mN[1]+mD[1]*mT[2]*mN[0]-mD[2]*mT[1]*mN[0]; // change frame =>delta = -1 !..
-
-      wD[0] = mT[1]*mN[2]-mT[2]*mN[1];
-      wD[1] = mD[2]*mN[1]-mD[1]*mN[2];
-      wD[2] = mD[1]*mT[2]-mD[2]*mT[1];
-      wT[0] = mT[2]*mN[0]-mT[0]*mN[2];
-      wT[1] = mD[0]*mN[2]-mD[2]*mN[0];
-      wT[2] = mD[2]*mT[0]-mD[0]*mT[2];
-      wN[0] = mT[0]*mN[1]-mT[1]*mN[0];
-      wN[1] = mD[1]*mN[0]-mD[0]*mN[1];
-      wN[2] = mD[0]*mT[1]-mD[1]*mT[0];
-
-      tempXl[0] = wD[0]*B[0]+wD[1]*B[1]+wD[2]*B[2];
-      tempXl[1] = wT[0]*B[0]+wT[1]*B[1]+wT[2]*B[2];
-      tempXl[2] = wN[0]*B[0]+wN[1]*B[1]+wN[2]*B[2];
-
-      currentPoint->setXg(tempXl[0]/delta,0);
-      currentPoint->setXg(tempXl[1]/delta,1);
-      currentPoint->setXg(tempXl[2]/delta,2);
-
-      currentPoint = mPoint->next(currentPoint);
-    }
+  Double_t xg[3];
+  while(currentPoint) {
+    // sign (-) of B[0] : temporarily fixed - order of strip readout has to be reversed 
+    Double_t  xl[3] = {-currentPoint->getXl(0), currentPoint->getXl(1), currentPoint->getXl(2)};
+    LocalToMaster(xl,xg);
+    currentPoint->setXg(xg[0],0);
+    currentPoint->setXg(xg[1],1);
+    currentPoint->setXg(xg[2],2);
+    currentPoint = mPoint->next(currentPoint);
+  }
   return 1;
 }
 //________________________________________________________________________________
-Int_t StSsdWafer::convertGlobalToLocal()
-{
+Int_t StSsdWafer::convertGlobalToLocal() {
   Int_t localSize = (this->mPoint)->getSize();
-
   if (!localSize) return 0;
-
-  Float_t *xtemp = new float[3];  
   StSsdPoint *temp = mPoint->first();
-  for (Int_t i = 0; i < localSize; i++)
-    {
-      xtemp[0] = temp->getXg(0) - mX[0];
-      xtemp[1] = temp->getXg(1) - mX[1];
-      xtemp[2] = temp->getXg(2) - mX[2];
-
-      // sign (-) of B[0] : temporarily fixed - order of strip readout has to be reversed 	
-      temp->setXl(-((xtemp[0] * mD[0]) + (xtemp[1] * mD[1]) + (xtemp[2] * mD[2])), 0) ;
-      temp->setXl(  (xtemp[0] * mT[0]) + (xtemp[1] * mT[1]) + (xtemp[2] * mT[2]),  1) ;
-      temp->setXl(  (xtemp[0] * mN[0]) + (xtemp[1] * mN[1]) + (xtemp[2] * mN[2]),  2) ;
-      
-      temp = mPoint->next(temp);
-    }
-  delete [] xtemp;
+  for (Int_t i = 0; i < localSize; i++) {
+    Double_t xg[3] = {temp->getXg(0), temp->getXg(1), temp->getXg(2)};
+    Double_t xl[3];
+    MasterToLocal(xg,xl);
+    temp->setXl(-xl[0], 0);
+    temp->setXl( xl[1], 1);
+    temp->setXl( xl[2], 2);
+    temp = mPoint->next(temp);
+  }
   return 1;
 }
 //________________________________________________________________________________
@@ -2499,16 +2530,21 @@ void StSsdWafer::convertToStrip(Float_t Pitch,
 				Double_t parIndRightP,
 				Double_t parIndRightN,
 				Double_t parIndLeftP,
-				Double_t parIndLeftN)
+				Double_t parIndLeftN,
+				Float_t  mShift_hole,
+				Float_t  mShift_elec)
 {
-  convertHitToStrip(Pitch, nStripPerSide,
-			  nstripInACluster,
-			  parDiffP,
-			  parDiffN,
-			  parIndRightP,
-			  parIndRightN,
-			  parIndLeftP,
-			  parIndLeftN);
+  convertHitToStrip(Pitch, 
+		    nStripPerSide,
+		    nstripInACluster,
+		    parDiffP,
+		    parDiffN,
+		    parIndRightP,
+		    parIndRightN,
+		    parIndLeftP,
+		    parIndLeftN,
+		    mShift_hole,
+		    mShift_elec);
   convertAnalogToDigit(pairCreationEnergy);
   mStripP->sortStrip();
   mStripN->sortStrip();
@@ -2518,62 +2554,29 @@ Int_t StSsdWafer::printborder()
 {
   if (mId==7101){
     printf("Wafer = %d \n",mId);
-    Float_t activeXs[4],BXs[4],tempXls[4];
-    Float_t activeYs[4],BYs[4],tempYls[4];
-    Float_t activeZs[4],BZs[4],tempZls[4];
-    Float_t activeXe[4],BXe[4],tempXle[4];
-    Float_t activeYe[4],BYe[4],tempYle[4];
-    Float_t activeZe[4],BZe[4],tempZle[4];
-    Float_t wD[3],wT[3],wN[3];
-    Float_t delta = 0;
+    Double_t actives[4][3],templs[4][3];
+    Double_t activee[4][3],temple[4][3];
 
-    activeXs[0]=-3.65,activeXs[1]= 3.65,activeXs[2]= 3.65,activeXs[3]=-3.65;
-    activeYs[0]= 2.00,activeYs[1]= 2.00,activeYs[2]=-2.00,activeYs[3]=-2.00;
-    activeZs[0]= 0.00,activeZs[1]= 0.00,activeZs[2]= 0.00,activeZs[3]= 0.00;
+    actives[0][0]=-3.65,actives[1][0]= 3.65,actives[2][0]= 3.65,actives[3][0]=-3.65;
+    actives[0][1]= 2.00,actives[1][1]= 2.00,actives[2][1]=-2.00,actives[3][1]=-2.00;
+    actives[0][2]= 0.00,actives[1][2]= 0.00,actives[2][2]= 0.00,actives[3][2]= 0.00;
 
-    activeXe[0]= 3.65,activeXe[1]= 3.65,activeXe[2]=-3.65,activeXe[3]=-3.65;
-    activeYe[0]= 2.00,activeYe[1]=-2.00,activeYe[2]=-2.00,activeYe[3]= 2.00;
-    activeZe[0]= 0.00,activeZe[1]= 0.00,activeZe[2]= 0.00,activeZe[3]= 0.00;
-
-    wD[0] = mT[1]*mN[2]-mT[2]*mN[1];
-    wD[1] = mD[2]*mN[1]-mD[1]*mN[2];
-    wD[2] = mD[1]*mT[2]-mD[2]*mT[1];
-    wT[0] = mT[2]*mN[0]-mT[0]*mN[2];
-    wT[1] = mD[0]*mN[2]-mD[2]*mN[0];
-    wT[2] = mD[2]*mT[0]-mD[0]*mT[2];
-    wN[0] = mT[0]*mN[1]-mT[1]*mN[0];
-    wN[1] = mD[1]*mN[0]-mD[0]*mN[1];
-    wN[2] = mD[0]*mT[1]-mD[1]*mT[0];
-    for(Int_t i=0;i<5;i++)
-      {
-	BXs[i]=activeXs[i]+mD[0]*mX[0]+mD[1]*mX[1]+mD[2]*mX[2];
-	BYs[i]=activeYs[i]+mT[0]*mX[0]+mT[1]*mX[1]+mT[2]*mX[2]; 
-	BZs[i]=activeZs[i]+mN[0]*mX[0]+mN[1]*mX[1]+mN[2]*mX[2];
-
-	BXe[i]=activeXe[i]+mD[0]*mX[0]+mD[1]*mX[1]+mD[2]*mX[2];
-	BYe[i]=activeYe[i]+mT[0]*mX[0]+mT[1]*mX[1]+mT[2]*mX[2]; 
-	BZe[i]=activeZe[i]+mN[0]*mX[0]+mN[1]*mX[1]+mN[2]*mX[2];
-
-	tempXls[i] = wD[0]*BXs[i]+wD[1]*BYs[i]+wD[2]*BZs[i];
-	tempYls[i] = wT[0]*BXs[i]+wT[1]*BYs[i]+wT[2]*BZs[i];
-	tempZls[i] = wN[0]*BXs[i]+wN[1]*BYs[i]+wN[2]*BZs[i];
-
-	tempXle[i] = wD[0]*BXe[i]+wD[1]*BYe[i]+wD[2]*BZe[i];
-	tempYle[i] = wT[0]*BXe[i]+wT[1]*BYe[i]+wT[2]*BZe[i];
-	tempZle[i] = wN[0]*BXe[i]+wN[1]*BYe[i]+wN[2]*BZe[i];
-
-      }
-    delta = mD[0]*mT[1]*mN[2]-mD[0]*mT[2]*mN[1]-mD[1]*mT[0]*mN[2]+mD[2]*mT[0]*mN[1]+mD[1]*mT[2]*mN[0]-mD[2]*mT[1]*mN[0]; // change frame =>delta = -1 !..
-
-
-
-    printf("xsSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempXls[0]/delta,tempXls[1]/delta,tempXls[2]/delta,tempXls[3]/delta);
-    printf("xeSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempXle[0]/delta,tempXle[1]/delta,tempXle[2]/delta,tempXle[3]/delta);
-    printf("ysSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempYls[0]/delta,tempYls[1]/delta,tempYls[2]/delta,tempYls[3]/delta);
-    printf("yeSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempYle[0]/delta,tempYle[1]/delta,tempYle[2]/delta,tempYle[3]/delta);
-    printf("zsSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempZls[0]/delta,tempZls[1]/delta,tempZls[2]/delta,tempZls[3]/delta);
-    printf("zeSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempZle[0]/delta,tempZle[1]/delta,tempZle[2]/delta,tempZle[3]/delta);
-
+    activee[0][0]= 3.65,activee[1][0]= 3.65,activee[2][0]=-3.65,activee[3][0]=-3.65;
+    activee[0][1]= 2.00,activee[1][1]=-2.00,activee[2][1]=-2.00,activee[3][1]= 2.00;
+    activee[0][2]= 0.00,activee[1][2]= 0.00,activee[2][2]= 0.00,activee[3][2]= 0.00;
+    for (Int_t j = 0; j < 4; j++) {
+      LocalToMaster(actives[j], templs[j]);
+      LocalToMaster(activee[j], temple[j]);
+    }
+    Char_t *xyz[3] = {"x","y","z"};
+    for (Int_t i = 0; i < 3; i++) {
+      printf("%ssSsdLadder%d set {",xyz[i],mId-7100);
+      for (Int_t j = 0; j < 4; j++)  printf("%.2f ",templs[j][i]);
+      printf("}\n");
+      printf("%seSsdLadder%d set {",xyz[i],mId-7100);
+      for (Int_t j = 0; j < 4; j++)  printf("%.2f ",temple[j][i]);
+      printf("}\n");
+    }
   }
   return 1;
 }
@@ -2594,16 +2597,9 @@ StSsdWafer::StSsdWafer(const StSsdWafer & originalWafer)
 StSsdWafer& StSsdWafer::operator=(const StSsdWafer originalWafer) {
   memset(first, 0, last-first);
   mId         = originalWafer.mId;
-//   mDeadStripP = originalWafer.mDeadStripP;
-//   mDeadStripN = originalWafer.mDeadStripN;
-
-  for(Int_t i = 0; i < 3; i++)
-    {
-      mD[i]   = originalWafer.mD[i]; 
-      mT[i]   = originalWafer.mT[i]; 
-      mN[i]   = originalWafer.mN[i]; 
-      mX[i]   = originalWafer.mX[i];
-    } 
+  SetName(originalWafer.GetName());
+  SetRotation(originalWafer.GetRotationMatrix());
+  SetTranslation(originalWafer.GetTranslation());
   return *this;
 }
 //________________________________________________________________________________
@@ -2739,7 +2735,9 @@ void StSsdWafer::convertHitToStrip(Float_t Pitch,
 				   Double_t parIndRightP,
 				   Double_t parIndRightN,
 				   Double_t parIndLeftP,
-				   Double_t parIndLeftN)
+				   Double_t parIndLeftN,
+				   Float_t mShift_hole,
+				   Float_t mShift_elec)
 {
   const Double_t parDiff[2]={parDiffP/Pitch,parDiffN/Pitch};
   const Double_t parIndRight[2]={parIndRightP,parIndRightN};
@@ -2759,11 +2757,16 @@ void StSsdWafer::convertHitToStrip(Float_t Pitch,
 	      tabInd[v] = 0 ;
 	      tabDe[v]  = 0.;
 	    }
-	  tabInd[0] = (int)(ptr->getPositionU(iSide)/Pitch + 1.);
+	  if (Debug())	  LOG_DEBUG<<Form("Before Lorentz Shift")<<endm;
+	  if (Debug())	  LOG_DEBUG<<Form("position of the hit : strip P=%f stripN=%f Pitch=%f",ptr->getPositionU(0),ptr->getPositionU(1),Pitch)<<endm;
+	  UndoLorentzShift(ptr,iSide,mShift_hole,mShift_elec,Pitch);
+	  if (Debug())	  LOG_DEBUG<<Form("After Lorentz Shift\n");
+	  if (Debug())	  LOG_DEBUG<<Form("position of the hit : strip P=%f stripN=%f Pitch=%f",ptr->getPositionU(0),ptr->getPositionU(1),Pitch)<<endm;
+	  tabInd[0] = (int)(ptr->getPositionU(iSide)/Pitch + 1.);//getPositionU(iSide)->getPositionU(iSide)+shift
 	  tabInd[1] = tabInd[0]+1;
 	  tabInd[2] = tabInd[0]-1;
 	  tabInd[3] = tabInd[0]+2;
-	  
+	  if (Debug())	  LOG_DEBUG<<Form("Mean strip=%d strip1=%d strip2=%d strip3=%d",tabInd[0],tabInd[1],tabInd[2],tabInd[3])<<endm;
 	  Double_t rest = (double)(ptr->getPositionU(iSide)/Pitch) - (double)(tabInd[0]-1);
 	  Double_t Result=0.5*(1.+myErf((rest-0.5)/sqrt(2.)/parDiff[iSide]) );
 	  Float_t TmpDe0 = 0.;
@@ -2836,15 +2839,15 @@ float* StSsdWafer::findAngle(Float_t *p, Float_t *alpha)
 
   for (i = 0; i < 3; i++)
     {
-      spN  += mN[i]*p[i]  ;
-      spT  += mT[i]*p[i]  ;
-      spD  += mD[i]*p[i]  ;
+      spN  += n(i)*p[i]  ;
+      spT  += t(i)*p[i]  ;
+      spD  += d(i)*p[i]  ;
     }
   for (i = 0; i < 3; i++)
     {
-      pN[i] = mN[i]*spN  ;
-      pT[i] = mT[i]*spT  ;
-      pD[i] = mD[i]*spD  ;
+      pN[i] = n(i)*spN  ;
+      pT[i] = t(i)*spT  ;
+      pD[i] = d(i)*spD  ;
     }
 
   npT = sqrt(pT[0]*pT[0]+pT[1]*pT[1]+pT[2]*pT[2]);
@@ -2922,4 +2925,15 @@ void StSsdWafer::updateStripList()
   mStripN->updateStripList(mNoiseN); 
 }
 //________________________________________________________________________________
+void StSsdWafer::UndoLorentzShift(StSsdPoint *ptr,Int_t iSide,Float_t mShift_hole,Float_t mShift_elec,Float_t pitch)
+{
+  Float_t tempPosition = ptr->getPositionU(iSide);
+  if(iSide==0){
+    ptr->setPositionU(tempPosition+mShift_hole,iSide);
+  }
+  else
+    if(iSide==1){
+      ptr->setPositionU(tempPosition+mShift_elec,iSide);
+    }
+}
 

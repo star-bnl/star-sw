@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.1 2006/10/16 16:43:30 bouchet Exp $
+// $Id: StSsdWafer.hh,v 1.2 2007/03/21 17:20:42 fisyak Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.2  2007/03/21 17:20:42  fisyak
+// use TGeoHMatrix for coordinate transformation
+//
 // Revision 1.1  2006/10/16 16:43:30  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -53,18 +56,26 @@ The Clusters are first found on both sides of the wafer. The clusters are then c
 #include "StSsdUtil/StSsdPoint.hh"
 #include "StSsdUtil/StSsdClusterControl.h"
 #include "StSsdDynamicControl.h"
+#include "TGeoMatrix.h"
 
-class StSsdWafer
-{
+class StSsdWafer: public TGeoHMatrix {
  public:
-//                  StSsdWafer(Int_t id, Int_t *deadStripP, Int_t *deadStripN);
-                    StSsdWafer(Int_t id);
-                   ~StSsdWafer();
-                    StSsdWafer(const StSsdWafer & originalWafer);
-                    StSsdWafer& operator=(const StSsdWafer originalWafer);
+  //                  StSsdWafer(Int_t id, Int_t *deadStripP, Int_t *deadStripN);
+  StSsdWafer(Int_t id);
+  ~StSsdWafer();
+  StSsdWafer(const StSsdWafer & originalWafer);
+  StSsdWafer& operator=(const StSsdWafer originalWafer);
 
   void              init(Int_t rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX);
 
+  void setID(Int_t i){mId = i;}
+  void setDriftDirection(Double_t x1, Double_t x2, Double_t x3)      
+  {Double_t *r = GetRotationMatrix();  r[0] = x1; r[3] = x2; r[6] = x3;}
+  void setTransverseDirection(Double_t x1, Double_t x2, Double_t x3) 
+  {Double_t *r = GetRotationMatrix();  r[1] = x1; r[4] = x2; r[7] = x3;}
+  void setNormalDirection(Double_t x1, Double_t x2, Double_t x3)     
+  {Double_t *r = GetRotationMatrix();  r[2] = x1; r[5] = x2; r[8] = x3;}
+  void setCenterPosition(Double_t x1, Double_t x2, Double_t x3)  {Double_t *t = GetTranslation(); t[0] = x1; t[1] = x2; t[2] = x3;}
   StSsdClusterList* getClusterP() { return mClusterP; } //!< Returns the P-side cluster list attached to this wafer
   StSsdClusterList* getClusterN() { return mClusterN; } //!< Returns the N-side cluster list attached to this wafer
   StSsdPointList*   getDeadHits(Float_t ActiveLargeEdge, Float_t ActiveSmallEdge,Float_t Test);
@@ -72,14 +83,14 @@ class StSsdWafer
   StSsdPointList*   getNonActivePointTriangle(Float_t Test);
   StSsdStripList*   getStripP()   { return mStripP; }   //!< Returns the P-side strip list attached to this wafer
   StSsdStripList*   getStripN()   { return mStripN; }   //!< Returns the N-side strip list attached to this wafer
-  StSsdPackageList* getPackage()  {  return mPackage; } //!< Returns the package list attached to this wafer
-  StSsdPointList*   getPoint()    {  return mPoint; }   //!< Returns the point list attached to this wafer
-  Int_t             getIdWafer(){ return mId; } 
-  Int_t             getId() {return getIdWafer();}
-  Float_t*          getD(){  return mD; }
-  Float_t*          getT(){  return mT; }
-  Float_t*          getN(){  return mN; }
-  Float_t*          getX(){  return mX; }
+  StSsdPackageList* getPackage()  { return mPackage; } //!< Returns the package list attached to this wafer
+  StSsdPointList*   getPoint()    { return mPoint; }   //!< Returns the point list attached to this wafer
+  Int_t             getIdWafer()  { return mId; } 
+  Int_t             getId()       {return getIdWafer();}
+  Double_t d(Int_t i){Double_t *r = GetRotationMatrix(); return r[3*i];  }
+  Double_t t(Int_t i){Double_t *r = GetRotationMatrix(); return r[3*i+1];}
+  Double_t n(Int_t i){Double_t *r = GetRotationMatrix(); return r[3*i+2];}
+  Double_t x(Int_t i){Double_t *t = GetTranslation();    return t[i];    }
 
   void              addCluster(StSsdCluster *ptr, Int_t iSide); //!< Attaches the ptr cluster on the iSide of the wafer
   void              addHit(Int_t rNId , Int_t rMcHit, Int_t rMcTrack, Float_t *rXg , Float_t rDe, Float_t *p);
@@ -96,7 +107,7 @@ class StSsdWafer
   Int_t             setMatcheds(ssdDimensions_st *dimensions, StSsdPoint *Point, StSsdCluster *pMatched, StSsdCluster *nMatched);
   void              setPedestalSigmaStrip(Int_t iStrip, Int_t iSide, Int_t iPedestal, Int_t iSigma, StSsdDynamicControl *dynamicControl);
 
-  
+  void              Reset();
   void              sortCluster();
   void              sortNoise();
   void              sortPoint();
@@ -109,7 +120,8 @@ class StSsdWafer
   Int_t             doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl);
   Int_t             doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl);
   void              doStatPerfect(Int_t nPerfectPoint, StSsdClusterControl *clusterControl);
-
+  void              doLorentzShift(ssdDimensions_st *dimensions,Float_t mShift_hole,Float_t mShift_elec);
+  Int_t             doLorentzShiftSide(Int_t side,Float_t shift,ssdDimensions_st *dimensions);
   void              convertAnalogToDigit(Double_t pairCreationEnergy);
   void              convertAnalogToDigit(Long_t nElectronInAMip,Long_t adcDynamic,Long_t nbitEncoding, Float_t daqCutValue);
   Int_t             convertDigitToAnalog(Double_t pairCreationEnergy);
@@ -125,7 +137,10 @@ class StSsdWafer
 				      Double_t parIndRightP,
 				      Double_t parIndRightN,
 				      Double_t parIndLeftP,
-				      Double_t parIndLeftN);
+				      Double_t parIndLeftN,
+				      Float_t  mShift_hole,
+				      Float_t  mShift_elec
+				      );
   void              convertToStrip(Float_t Pitch,  
 				   Int_t nStripPerSide,
 				   Double_t pairCreationEnergy,
@@ -135,7 +150,10 @@ class StSsdWafer
 				   Double_t parIndRightP,
 				   Double_t parIndRightN,
 				   Double_t parIndLeftP,
-				   Double_t parIndLeftN);
+				   Double_t parIndLeftN,
+				   Float_t  mShift_hole,
+				   Float_t  mShift_elec
+				   );
   void              debugStrips();
   void              debugClusters();
   Float_t*          findAngle(Float_t *p, Float_t *alpha);
@@ -143,14 +161,13 @@ class StSsdWafer
   Int_t             printborder();
   void              updateStripList();
   void              zeroSubstraction();
+  void              UndoLorentzShift(StSsdPoint *ptr, Int_t iSide,Float_t mShift_hole,Float_t mShift_elec,Float_t pitch);
+  void  SetDebug(Int_t k = 0) {mDebug = k;}
+  Int_t Debug() {return mDebug;}
   
  private:
   Char_t               first[1];
   Int_t                mId;              //!< Id of the wafer
-  Float_t              mD[3];            //!< Vector defining the drift direction
-  Float_t              mT[3];            //!< Vector defining the transverse direction
-  Float_t              mN[3];            //!< Vector defining the normal direction
-  Float_t              mX[3];            //!< Vector defining the center of the wafer
   Float_t              mPerfectMean;
   Float_t              mPerfectSigma;
 //   Int_t            *mDeadStripP;
@@ -164,6 +181,7 @@ class StSsdWafer
   StSsdClusterList  *mClusterN;
   StSsdPackageList  *mPackage;
   StSsdPointList    *mPoint;
+  Int_t    mDebug;
   Char_t             last[1];
 };
 #endif
