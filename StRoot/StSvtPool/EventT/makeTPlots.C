@@ -75,6 +75,8 @@ void makeTPlots(const Char_t *tag = "dEdx") {
   if (Tag.Contains("dEdx",TString::kIgnoreCase)) {
     t.SetdEdxCut(4.e-6,40.);
   }  
+  //  t.SetRCut(1.0);
+  t.SetRCut(0.5);
   t.SetMinNoFitPoints(25);
   Out += "NFP25";
   Out += Form("rCut%3.1fcm",t.GetRCut());
