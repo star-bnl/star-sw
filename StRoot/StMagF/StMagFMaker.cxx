@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.13 2005/08/29 22:54:26 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.14 2007/03/21 17:12:58 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.14  2007/03/21 17:12:58  fisyak
+// Zero Field is 1G
+//
 // Revision 1.13  2005/08/29 22:54:26  fisyak
 // switch to StarMagField
 //
@@ -88,6 +91,7 @@ Int_t StMagFMaker::InitRun(Int_t RunNo){
     fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
   }
   Float_t       fScale = (*fMagFactor)[0].ScaleFactor;
+  if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
   gMessMgr->Info() << "StMagFMaker::InitRun active mode ";
   if (! StarMagField::Instance()) {
     new StarMagField ( StarMagField::kMapped, fScale);
