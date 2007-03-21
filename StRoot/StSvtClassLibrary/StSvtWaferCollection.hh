@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtWaferCollection.hh,v 1.1 2001/08/16 21:02:04 munhoz Exp $
+ * $Id: StSvtWaferCollection.hh,v 1.2 2007/03/21 17:22:21 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtWaferCollection.hh,v $
+ * Revision 1.2  2007/03/21 17:22:21  fisyak
+ * Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
+ *
  * Revision 1.1  2001/08/16 21:02:04  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
@@ -27,7 +30,7 @@ class StSvtHybridObject;
 class StSvtConfig;
 class TString;
 
-class StSvtWaferCollection: public StStrArray
+class StSvtWaferCollection: public StRefArray
 {
 public:
   StSvtWaferCollection();

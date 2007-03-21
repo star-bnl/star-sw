@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.11 2004/07/31 00:50:23 munhoz Exp $
+ * $Id: StSvtDbMaker.h,v 1.12 2007/03/21 17:23:24 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.12  2007/03/21 17:23:24  fisyak
+ * Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
+ *
  * Revision 1.11  2004/07/31 00:50:23  munhoz
  * adding anode drift veloc correction factor
  *
@@ -55,11 +58,15 @@
 
 class StChain;
 
-class St_SvtDb_Reader;
-class StSvtDbReader;
-class StSvtDbWriter;
 class StSvtHybridCollection;
+class StSvtHybridDriftVelocity;
+class StSvtHybridDriftCurve;
+class StSvtConfig;
 class StSvtGeometry;
+class StSvtT0;
+class StSvtDaq;
+#include "THashList.h"
+class TGeoHMatrix;
 
 
 #ifndef __CINT__
@@ -74,12 +81,21 @@ int type_of_call SvtGtoL_(float *x, float *xp,  int *index);
 #endif
 class StSvtDbMaker : public StMaker {
  private:
+  Char_t                   beg;
   Text_t *mTimeStamp;        //!
   Int_t   mUnixTimeStamp;    //!
-
-  St_SvtDb_Reader *m_Reader; //!
-  StSvtDbReader *mReader;    //!
-  StSvtDbWriter *mWriter;    //!
+  StSvtConfig* mSvtConfig;      //!
+  StSvtHybridCollection *mSvtDriftVeloc; //!
+  StSvtHybridCollection *mSvtDriftCurve; //!
+  StSvtHybridCollection *mSvtAnodeDriftCorr; //!
+  StSvtHybridCollection* mSvtPed; //!
+  StSvtHybridCollection* mSvtRms; //!
+  StSvtGeometry* mSvtGeom;        //!
+  StSvtHybridCollection* mSvtBadAnodes; //!
+  StSvtT0* mSvtT0;                //!
+  StSvtDaq* mSvtDaq;              //!
+  Char_t          end;
+  static THashList *fRotList;
 
  protected:
 
@@ -91,14 +107,10 @@ class StSvtDbMaker : public StMaker {
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   Clear(const char *opt);
+  virtual THashList *GetRotations() {return fRotList;}
 
   void setTimeStamp(Text_t *timestamp) {mTimeStamp = timestamp;}
   void setUnixTimeStamp(Int_t timestamp) {mUnixTimeStamp = timestamp;}
-  void setSvtDb_Reader();
-  void setSvtDbReader(Text_t *timestamp);
-  void setSvtDbReader(int unixTime);
-  void setSvtDbWriter(Text_t *timestamp);
-  void setSvtDbWriter(int unixTime);
 
   void setSvtConfig();
   void readSvtConfig();
@@ -120,17 +132,24 @@ class StSvtDbMaker : public StMaker {
   void readSvtT0();
   void setSvtDaqParameters();
   void readSvtDaqParameters();
+  StSvtConfig* getConfiguration();
 
-  void writeSvtDriftVelocity(StSvtHybridCollection* driftVeloc=0);
-  void writeSvtPedestals(StSvtHybridCollection* pedestals=0);
-  void writeSvtRms(StSvtHybridCollection* rms=0);
-
-  St_SvtDb_Reader* get_SvtDb_Reader(){return m_Reader;}
-  StSvtDbReader* getSvtDbReader(){return mReader;}
-  StSvtDbWriter* getSvtDbWriter(){return mWriter;}  
+  StSvtHybridCollection* getDriftVelocity();
+  StSvtHybridDriftVelocity* getDriftVelocity(int barrel, int ladder, int wafer, int hybrid);
+  void getDriftVelocityAverage(StSvtHybridCollection* svtColl);
+  StSvtHybridCollection* getDriftCurve();
+  StSvtHybridCollection* getAnodeDriftCorr();
+  StSvtHybridCollection* getPedestals();
+  StSvtHybridCollection* getRms();
+  StSvtGeometry* getGeometry();
+  StSvtHybridCollection* getBadAnodes();
+  int getElectronics();
+  StSvtT0* getT0();
+  StSvtDaq* getDaqParameters();
+  static THashList *RotMatrices() {return fRotList;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.11 2004/07/31 00:50:23 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.12 2007/03/21 17:23:24 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSvtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
