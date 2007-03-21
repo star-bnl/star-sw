@@ -7,7 +7,6 @@
 #include "StSvtClassLibrary/StSvtGeometry.hh"
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtDbMaker/StSvtDbMaker.h"
-#include "StSvtDbMaker/St_SvtDb_Reader.hh"
 #include "StDbUtilities/St_svtRDOstrippedC.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
@@ -87,6 +86,7 @@
     6     13       5     6
     6     15       5     7
  */
+static Int_t _debug = 0;
 StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, const string & inputFile)
   : StiDetectorBuilder("Svt",active,inputFile), _siMat(0), _hybridMat(0)
 {
@@ -148,7 +148,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
     setNSectors(layer,nSectors); 
     // calculate generic params for this layer
     // number of ladders per layer (not barrel) & phi increment between ladders
-    float fDeltaPhi = M_PI/nSectors;
+    //    float fDeltaPhi = M_PI/nSectors;
     // width of gap between the edges of 2 adjacent ladders:
     //   first, the angle subtended by 1/2 of the ladder
     float fLadderRadius  = _geometry->getBarrelRadius(svtLayer);
@@ -162,22 +162,24 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
       index1 = _geometry->getWaferIndex(svtBarrel,svtLadder,wafer);
       assert (index1 >= 0);
       waferGeom = (StSvtWaferGeometry*) _geometry->at(index1);
+      if (_debug) waferGeom->print();
       StThreeVectorD centerVector(waferGeom->x(0), waferGeom->x(1), waferGeom->x(2) );
-      if (2*wafer == nWafers) {
+      if ( nWafers%2 == 0) {
 	index2 = _geometry->getWaferIndex(svtBarrel,svtLadder,wafer-1);
 	assert(index2 >= 0);
 	waferGeom2 = (StSvtWaferGeometry*) _geometry->at(index2);
 	StThreeVectorD centerVector2(waferGeom2->x(0), waferGeom2->x(1), waferGeom2->x(2) );
+	if (_debug) waferGeom2->print();
 	centerVector += centerVector2;
 	centerVector *= 0.5;
       }
       StThreeVectorD normalVector(waferGeom->n(0), waferGeom->n(1), waferGeom->n(2) );
-      Double_t prod = centerVector*normalVector;
+      Double_t prod = centerVector.x()*normalVector.x() + centerVector.y()*normalVector.y();
       if (prod < 0) normalVector *= -1;
       double phi  = centerVector.phi();
       double phiD = normalVector.phi();
       double r = centerVector.perp();
-      cout <<"Det Nber = "<<waferGeom->getID()<<"\tcv\t:"<<centerVector<<"\tphi:\t"<<phi<<"\tr:\t"<<r<<endl;
+      cout <<"Det Id = "<<waferGeom->getID()<<"\tcv\t:"<<centerVector<<"\tphi:\t"<<phi<<"\tr:\t"<<r<<"\tz:\t" << centerVector.z() << endl;
       StiPlacement *pPlacement = new StiPlacement;
       pPlacement->setZcenter(centerVector.z());
       pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
