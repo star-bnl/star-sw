@@ -20,7 +20,25 @@
 //////////////////////////////////////////////////////////////////////////
 #include "StChain.h"
 #include "TFile.h"
-#include "tables/St_Bfc_Table.h"
+#include "TTable.h"
+#include "Ttypes.h"
+
+/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.37 2007/03/21 16:57:32 fisyak Exp $ */
+struct Bfc_st {
+  Char_t       Key[63];      /* nick name */
+  Char_t       Name[63];     /* maker name */
+  Char_t       Chain[63];    /* its chain */
+  Char_t       Opts[127];    /* required options */
+  Char_t       Maker[63];    /* required Makers */
+  Char_t       Libs[127];    /* libraries to be loaded */
+  Char_t       Comment[257];  
+  Char_t       Flag;         /* F/T to use it in chain */
+};
+class St_Bfc : public TTable {
+ public:
+  ClassDefTable(St_Bfc,Bfc_st)
+  ClassDef(St_Bfc,1) //C++ container for VMC detector path
+};
 //_____________________________________________________________________
 
 class StFileI;
@@ -39,9 +57,10 @@ class StBFChain : public StChain {
   Int_t               FTimeS;     // floating timestamp time (DateTime)
   Int_t               fNoChainOptions;
   St_Bfc             *fchainOpt;
+  Int_t               fkChain;    // Master chain option
  public:
   StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE) :
-  StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0)  {}
+  StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
   StBFChain(Int_t mode, const char *name="bfc",const Bool_t UseOwnHeader = kFALSE) :
     StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0) {}
   void Setup(Int_t mode=1);
@@ -87,7 +106,7 @@ class StBFChain : public StChain {
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.36 2006/08/08 19:06:45 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.37 2007/03/21 16:57:32 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
