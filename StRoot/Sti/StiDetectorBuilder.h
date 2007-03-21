@@ -12,6 +12,7 @@
 #include "Sti/Base/Loadable.h"
 #include "StThreeVector.hh"
 #include "StiVMCToolKit.h"
+#include "TMath.h"
 class StiDetector;
 class StiMaterial;
 class StiShape;

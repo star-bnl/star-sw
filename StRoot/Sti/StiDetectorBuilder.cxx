@@ -80,6 +80,12 @@ StiDetector * StiDetectorBuilder::add(unsigned int row, unsigned int sector, Sti
 {
   setNSectors(row,sector+1);
   _detectors[row][sector] = detector;
+  if (_debug ) {
+    cout << "StiDetectorBuilder::add(" << row << "," << sector << ") detector ";
+    if (detector) cout << detector->getName();
+    else          cout << " NULL ??";
+    cout <<endl;
+  }
   return add(detector);
 }
 
