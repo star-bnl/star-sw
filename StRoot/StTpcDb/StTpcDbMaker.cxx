@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.36 2006/02/27 19:20:53 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.37 2007/03/21 17:27:02 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.37  2007/03/21 17:27:02  fisyak
+ * use TGeoHMatrix, change mode for switching drift velocities
+ *
  * Revision 1.36  2006/02/27 19:20:53  fisyak
  * Set simu flag for tpcISTimeOffsets and tpcOSTimeOffsets tables
  *
@@ -111,7 +114,6 @@
 
 #define StTpc_STATIC_ARRAYS
 #include <assert.h>
-#include "TCL.h"
 #include "StTpcDbMaker.h"
 #include "StChain.h"
 #include "StTpcDb.h"
@@ -122,6 +124,11 @@
 #include "math_constants.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 ClassImp(StTpcDbMaker)
 
 //
@@ -403,7 +410,7 @@ int type_of_call tpc_hit_error_table_(int *i, int*j, int *k,float *val){
 }
 
 //_____________________________________________________________________________
-StTpcDbMaker::StTpcDbMaker(const char *name): StMaker(name), m_TpcDb(0), m_tpg_pad_plane(0), m_tpg_detector(0), m_dvtype(0) {}
+StTpcDbMaker::StTpcDbMaker(const char *name): StMaker(name), m_TpcDb(0), m_tpg_pad_plane(0), m_tpg_detector(0) {}
 //_____________________________________________________________________________
 StTpcDbMaker::~StTpcDbMaker(){
   //delete m_TpcDb;
@@ -432,32 +439,36 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     }
 
   // Set Table Flavors
-   if (m_Mode==1){
+   if (m_Mode%1000000==1){
      const Char_t *tabNames[4] = {"tpcGlobalPosition","tpcSectorPosition", "tpcISTimeOffsets", "tpcOSTimeOffsets"};
      for (Int_t i = 0; i < 4; i++) {
        SetFlavor("sim",tabNames[i]); 
        gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for table " << "\t" << tabNames[i] << endm;
      }
    }
-   if (m_dvtype==0) {
+   if ((m_Mode/1000000)%10==0) {
    SetFlavor("ofl+laserDV","tpcDriftVelocity");
    gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
    }
-   else if (m_dvtype==1) {
+   else if ((m_Mode/1000000)%10==1) {
    SetFlavor("ofl","tpcDriftVelocity");
    gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from T0 analysis" << endm;
    }
-   else if (m_dvtype==2) {
+   else if ((m_Mode/1000000)%10==2) {
    SetFlavor("laserDV","tpcDriftVelocity");
    gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from laser analysis" << endm;
+   }
+   else if ((m_Mode/1000000)%10==3) {
+   SetFlavor("NewlaserDV","tpcDriftVelocity");
+   gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from New laser analysis" << endm;
    }
    else {
      gMessMgr->Info() << "StTpcDbMaker::Undefined drift velocity flavor requested" << endm;
    }
-
+   
  
 //
-  if (m_Mode!=1){
+  if (m_Mode%1000000 != 1){
    if (gFactor<-0.8) {
      gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
      SetFlavor("FullMagFNegative","tpcGlobalPosition");
@@ -481,10 +492,11 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   }
 
   m_TpcDb = new StTpcDb(this); if (Debug()) m_TpcDb->SetDebug(Debug());
-  if (m_Mode & 2) {
+  if (m_Mode%1000000 & 2) {
     Int_t option = (m_Mode & 0xfffc) >> 2;
     m_TpcDb->SetExB(new StMagUtilities(gStTpcDb, RunLog, option));
   }
+  SetTpc2Global();
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
   m_tpg_pad_plane->SetNRows(1);
   m_tpg_detector = new St_tpg_detector("tpg_detector",1);
@@ -535,10 +547,11 @@ Int_t StTpcDbMaker::Make(){
 
   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
   if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
-   Update_tpg_pad_plane();
+    Update_tpg_pad_plane();
   if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
       tpcDbInterface()->DriftVelocity()) 
-   Update_tpg_detector();
+    Update_tpg_detector();
+  SetTpc2Global();
   return kStOK;
 }
 
@@ -579,7 +592,23 @@ void StTpcDbMaker::Update_tpg_detector(){
      pp[0].vdrift = tpcDbInterface()->DriftVelocity();
  }
 }
-
+//_____________________________________________________________________________
+void StTpcDbMaker::SetTpc2Global() {
+  double phi   = 0.0;  //large uncertainty, so set to 0
+  double theta = m_TpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisY()*180./TMath::Pi();
+  double psi   = m_TpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisX()*180./TMath::Pi();
+  TGeoHMatrix Tpc2Global("Tpc2Global");
+  Tpc2Global.RotateX(-psi);
+  Tpc2Global.RotateY(-theta);
+  Tpc2Global.RotateZ(-phi);
+  Double_t xyz[3] = {
+    m_TpcDb->GlobalPosition()->TpcCenterPositionX(),
+    m_TpcDb->GlobalPosition()->TpcCenterPositionY(),
+    m_TpcDb->GlobalPosition()->TpcCenterPositionZ()
+  };
+  Tpc2Global.SetTranslation(xyz);
+  m_TpcDb->SetTpc2GlobalMatrix(&Tpc2Global);
+}
 
 
 

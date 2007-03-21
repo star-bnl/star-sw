@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.40 2005/07/06 22:26:53 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.41 2007/03/21 17:27:01 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.41  2007/03/21 17:27:01  fisyak
+ * use TGeoHMatrix, change mode for switching drift velocities
+ *
  * Revision 1.40  2005/07/06 22:26:53  fisyak
  * dEdx_t=>dEdxY2_t
  *
@@ -156,6 +159,7 @@ StTpcDb::StTpcDb(St_DataSet* input) : m_Debug(0) {
  gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
  dvelcounter = 0;
  mExB = 0;
+ mTpc2GlobalMatrix = new TGeoHMatrix("Default Tpc2Global"); 
  gStTpcDb = this;
 }
 
@@ -167,6 +171,7 @@ StTpcDb::StTpcDb(StMaker* maker) : m_Debug(0) {
  if (maker) GetDataBase(maker);
  gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
  dvelcounter=0;
+ mTpc2GlobalMatrix = new TGeoHMatrix("Default Tpc2Global"); 
  gStTpcDb = this;
 }
 
@@ -218,6 +223,7 @@ for (int i = 0;i<24;i++) {
 }
  delete  mPedestal; mPedestal = 0;
  delete  mGain; mGain = 0;
+ SafeDelete(mTpc2GlobalMatrix);
 gStTpcDb = 0;
 }
 //_____________________________________________________________________________
@@ -554,7 +560,13 @@ St_tpcPadResponseC     *StTpcDb::PadResponse() {
   }
   return mPadResponse;
 }
-
+//________________________________________________________________________________
+void StTpcDb::SetTpc2GlobalMatrix(TGeoHMatrix *m) {
+  if (m) {
+    if (! mTpc2GlobalMatrix)  mTpc2GlobalMatrix = new TGeoHMatrix("Default Tpc2Global"); 
+    *mTpc2GlobalMatrix = *m;
+  }
+}
 
 
 

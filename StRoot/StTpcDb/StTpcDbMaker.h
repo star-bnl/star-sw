@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.17 2004/01/14 22:54:31 fisyak Exp $
+ * $Id: StTpcDbMaker.h,v 1.18 2007/03/21 17:27:02 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.18  2007/03/21 17:27:02  fisyak
+ * use TGeoHMatrix, change mode for switching drift velocities
+ *
  * Revision 1.17  2004/01/14 22:54:31  fisyak
  * Add hooks for Pedestal and tpcGain
  *
@@ -168,7 +171,6 @@ class StTpcDbMaker : public StMaker {
   StTpcDb* m_TpcDb;               //! tpc database class
   St_tpg_pad_plane* m_tpg_pad_plane; //!
   St_tpg_detector* m_tpg_detector; //! 
-  Int_t m_dvtype;  //! 0= use all, 1=only StTpcT0Maker, 2=only laser;
  protected:
  public: 
                   StTpcDbMaker(const char *name="TpcDb");
@@ -179,21 +181,19 @@ class StTpcDbMaker : public StMaker {
    virtual void Clear(const char *opt);
    virtual void Update_tpg_pad_plane();
    virtual void Update_tpg_detector();
-   virtual void UseOnlyLaserDriftVelocity();
-   virtual void UseOnlyCathodeDriftVelocity();
-   virtual void UseAnyDriftVelocity();
+   virtual void UseOnlyLaserDriftVelocity()   {m_Mode = m_Mode%1000000 + 2000000;}
+   virtual void UseOnlyCathodeDriftVelocity() {m_Mode = m_Mode%1000000 + 1000000;}
+   virtual void UseAnyDriftVelocity()         {m_Mode = m_Mode%1000000;}
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+   virtual void SetTpc2Global();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.17 2004/01/14 22:54:31 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.18 2007/03/21 17:27:02 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 inline StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
-inline void StTpcDbMaker::UseOnlyLaserDriftVelocity() {m_dvtype=2;}
-inline void StTpcDbMaker::UseOnlyCathodeDriftVelocity() {m_dvtype=1;}
-inline void StTpcDbMaker::UseAnyDriftVelocity() {m_dvtype=0;}
 
 #endif
 

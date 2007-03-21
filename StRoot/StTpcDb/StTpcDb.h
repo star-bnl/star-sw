@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.26 2004/10/27 21:44:28 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.27 2007/03/21 17:27:01 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.27  2007/03/21 17:27:01  fisyak
+ * use TGeoHMatrix, change mode for switching drift velocities
+ *
  * Revision 1.26  2004/10/27 21:44:28  fisyak
  * Add debug print for tables Validities, add access to ExB correction
  *
@@ -113,6 +116,7 @@
 #include "St_tpcGainC.h"
 #include "St_tpcPadResponseC.h"
 #include "StDbUtilities/StMagUtilities.h"
+#include "TGeoMatrix.h"
 class StMaker;
 class St_tpcDriftVelocity;
 class St_trgTimeOffset;
@@ -142,8 +146,9 @@ class StTpcDb {
  St_tpcPedestalC*      mPedestal;      //!
  St_tpcGainC*          mGain;          //!
  St_tpcPadResponseC*   mPadResponse;   //!
- StMagUtilities*       mExB;           //!   
+ StMagUtilities*       mExB;           //!
  Int_t                 m_Debug;        //!
+ TGeoHMatrix          *mTpc2GlobalMatrix;//!
  protected:
    StTpcDb() {}
    void GetDataBase(StMaker* maker);
@@ -174,8 +179,10 @@ class StTpcDb {
    int dvelcounter;
    StMagUtilities* ExB() {return mExB;}
    void SetExB(StMagUtilities *m) {mExB = m;}
+   void SetTpc2GlobalMatrix(TGeoHMatrix *m);
    void SetDebug(Int_t m) {m_Debug = m;}
    Int_t Debug() {return m_Debug;}
+   const TGeoHMatrix &Tpc2GlobalMatrix() const {return *mTpc2GlobalMatrix;}
 #ifdef __ROOT__
    ClassDef(StTpcDb,0)
 #endif
