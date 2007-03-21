@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include "TNamed.h"
 #include "TString.h"
-
+#include "TList.h"
 class TAttr: public TList
 {
 public:
