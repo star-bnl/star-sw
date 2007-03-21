@@ -11,7 +11,7 @@
 #include "TDirectory.h"
 #include "TF1.h"
 #include "TError.h" 
-
+#include "TMath.h"
 #define  PrP(A)  cout << "\t" << (#A) << " = \t" << ( A )
 
 ClassImp(dEdxParameterization)
