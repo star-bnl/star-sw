@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.16 2006/08/28 16:57:09 fisyak Exp $
+ * $Id: summarizeEvent.cc,v 2.17 2007/03/21 16:49:38 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.17  2007/03/21 16:49:38  fisyak
+ * Add print out for RnD hits
+ *
  * Revision 2.16  2006/08/28 16:57:09  fisyak
  * Add print out for Beam Background tracks and short track pointing to EEMC
  *
@@ -71,7 +74,7 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.16 2006/08/28 16:57:09 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.17 2007/03/21 16:49:38 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -273,9 +276,10 @@ summarizeEvent(StEvent& event, const int &nevents)
           }
        }
     }
-    LOG_QA   << "# TPC hits:          " << TotalNoOfTpcHits 
-		       << ":\tdeconvoluted:     " << noBadTpcHits 
-		       << ":\tUsed in Fit:      " << noTpcHitsUsedInFit << endm;
+    if (TotalNoOfTpcHits)
+      LOG_QA   << "# TPC hits:          " << TotalNoOfTpcHits 
+	       << ":\tdeconvoluted:     " << noBadTpcHits 
+	       << ":\tUsed in Fit:      " << noTpcHitsUsedInFit << endm;
     
     UInt_t TotalNoOfSvtHits = 0, noBadSvtHits = 0, noSvtHitsUsedInFit = 0;
     StSvtHitCollection* svthits = event.svtHitCollection();
@@ -302,10 +306,10 @@ summarizeEvent(StEvent& event, const int &nevents)
 	       }
       }
     }
-    LOG_QA << "# SVT hits:          " << TotalNoOfSvtHits 
-		       << ":\tBad ones(flag >3): " << noBadSvtHits 
-		       << ":\tUsed in Fit:      " << noSvtHitsUsedInFit << endm;
-    
+    if (TotalNoOfSvtHits) 
+      LOG_QA << "# SVT hits:          " << TotalNoOfSvtHits 
+	     << ":\tBad ones(flag >3): " << noBadSvtHits 
+	     << ":\tUsed in Fit:      " << noSvtHitsUsedInFit << endm;
     UInt_t TotalNoOfSsdHits = 0, noBadSsdHits = 0, noSsdHitsUsedInFit = 0;
     StSsdHitCollection* ssdhits = event.ssdHitCollection();
     if (ssdhits) {
@@ -327,9 +331,10 @@ summarizeEvent(StEvent& event, const int &nevents)
 	}
       }
     }
-    LOG_QA << "# SSD hits:          " << TotalNoOfSsdHits 
-		       << ":\tBad ones(flag>3): " << noBadSsdHits 
-		       << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
+    if (TotalNoOfSsdHits) 
+      LOG_QA << "# SSD hits:          " << TotalNoOfSsdHits 
+	     << ":\tBad ones(flag>3): " << noBadSsdHits 
+	     << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
     
     UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
     StFtpcHitCollection* ftpchits = event.ftpcHitCollection();
@@ -368,7 +373,47 @@ summarizeEvent(StEvent& event, const int &nevents)
 	}
       }
     }
-    LOG_QA << "# FTPC hits:         " << TotalNoOfFtpcHits 
-		       << ":\tBad ones(!bit0): " << noBadFtpcHits 
-		       << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
+    if (TotalNoOfFtpcHits) 
+      LOG_QA << "# FTPC hits:         " << TotalNoOfFtpcHits 
+	     << ":\tBad ones(!bit0): " << noBadFtpcHits 
+	     << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
+    StRnDHitCollection* rndhits = event.rndHitCollection();
+    if (rndhits) {
+      StSPtrVecRnDHit&  hits = rndhits->hits();
+      Int_t NoHits =  rndhits->numberOfHits();
+      if (NoHits) {
+	struct NoHits_t {
+	  StDetectorId kId;
+	  Char_t     *Name;
+	  Int_t       TotalNoOfHits;
+	  Int_t       noBadHits;
+	  Int_t       noHitsUsedInFit;
+	};
+	const Int_t NHtypes = 7;
+	NoHits_t Hits[7] = {
+	  {kHftId, "Hft", 0, 0, 0},
+	  {kIstId, "Ist", 0, 0, 0},           
+	  {kIgtId, "Igt", 0, 0, 0},           
+	  {kFstId, "Fst", 0, 0, 0},           
+	  {kFgtId, "Fgt", 0, 0, 0},           
+	  {kHpdId, "Hpd", 0, 0, 0},
+	  {kUnknownId,"UnKnown", 0, 0, 0}
+	};           
+	StRnDHit* hit;
+	for (Int_t i = 0; i < NoHits; i++) {
+	  hit = hits[i];
+          Int_t j = 0;
+          for (j = 0; j < NHtypes-1; j++) if ( Hits[j].kId == hit->detector()) break;
+	  Hits[j].TotalNoOfHits++;
+	  if (hit->flag())  Hits[j].noBadHits++;
+	  if (hit->usedInFit()) Hits[j].noHitsUsedInFit++;
+	}
+	for (Int_t j = 0; j < NoHits; j++) {
+	  if (Hits[j].TotalNoOfHits) 
+	    LOG_QA << "# " << Hits[j].Name << " hits:         " << Hits[j].TotalNoOfHits
+		   << ":\tBad ones: " << Hits[j].noBadHits
+		   << ":\tUsed in Fit:      " << Hits[j].noHitsUsedInFit << endm;
+	}
+      }
+    }
 }
