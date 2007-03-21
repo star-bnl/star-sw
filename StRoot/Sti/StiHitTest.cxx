@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "TVectorD.h"
 #include "TMatrixDSym.h"
+#include "TMath.h"
 //______________________________________________________________________________
 void StiHitTest::reset()
 {
@@ -63,14 +64,14 @@ double StiHitTest::yAngle() const
 {
    double dy = fV[2][1]; double dx = fV[2][0];
    if (dx<0) {dx=-dx;dy=-dy;}
-   return atan2(dy,dx);
+   return TMath::ATan2(dy,dx);
 }
 //______________________________________________________________________________
 double StiHitTest::zAngle() const
 {
    double dz = fV[2][2]; double dx = fV[2][0];
    if (dx<0) {dx=-dx;dz=-dz;}
-   return atan2(dz,dx);
+   return TMath::ATan2(dz,dx);
 }
 
 
