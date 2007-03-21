@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixelsD.cc,v 1.3 2005/07/23 03:37:33 perev Exp $
+ * $Id: StSvtHybridPixelsD.cc,v 1.4 2007/03/21 17:22:21 fisyak Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -19,7 +19,7 @@
 
 #include "Stiostream.h"
 #include "StSvtHybridPixelsD.hh"
-
+#include "TMath.h"
 
 ClassImp(StSvtHybridPixelsD)
 
@@ -120,9 +120,9 @@ void StSvtHybridPixelsD::addToPixel(int index, double x, int trackId)
   sum = x1 + x;
   AddAt(sum,index);
 
-  if (fabs(x)<=0) return;
+  if (TMath::Abs(x)<=0) return;
   if (!mTruthTmp) mTruthTmp = new StMCPivotTruthMap;
-  mTruthTmp->Add(index,trackId,fabs(x));
+  mTruthTmp->Add(index,trackId,TMath::Abs(x));
 }
 
 //_____________________________________________________________________________

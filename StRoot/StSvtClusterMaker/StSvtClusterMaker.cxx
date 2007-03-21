@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.11 2005/08/04 04:06:38 perev Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.12 2007/03/21 17:22:58 fisyak Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.12  2007/03/21 17:22:58  fisyak
+// Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
+//
 // Revision 1.11  2005/08/04 04:06:38  perev
 // clear of collection added
 //
@@ -53,6 +56,7 @@
 #include "StSvtClassLibrary/StSvtData.hh"
 #include "StSvtHybridCluster.hh"
 #include "StSvtClusterMaker.h"
+#include "StDbUtilities/St_svtRDOstrippedC.h"
 
 
 
@@ -147,6 +151,9 @@ Int_t StSvtClusterMaker::SetHybridClusters()
      //cout<<mSvtEvent->getNumberOfLadders(barrel)<<endl;
       for (int wafer = 1;wafer <= mSvtEvent->getNumberOfWafers(barrel);wafer++) {
 	// cout<<mSvtEvent->getNumberOfWafers(barrel)<<endl;
+
+	if (St_svtRDOstrippedC::instance()->svtRDOstrippedStatus(barrel,ladder,wafer)) continue; // bad or missing wafer
+
 	for (int hybrid = 1;hybrid <=mSvtEvent->getNumberOfHybrids();hybrid++){
           //cout<<mSvtEvent->getNumberOfHybrids()<<endl;  
            

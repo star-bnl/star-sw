@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.37 2006/05/08 13:52:11 fisyak Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.38 2007/03/21 17:22:58 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.38  2007/03/21 17:22:58  fisyak
+ * Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
+ *
  * Revision 1.37  2006/05/08 13:52:11  fisyak
  * Fill StSvtHits directly into StEvent (if it exists), add local coordinate, add handle for drift velocity hack correction
  *
@@ -149,6 +152,7 @@
 #include "StEvent.h"
 #include "StEventTypes.h"
 #include "StDbUtilities/St_svtCorrectionC.h"
+#include "StDbUtilities/St_svtHybridDriftVelocityC.h"
 
 ClassImp(StSvtHitMaker)
 //___________________________________________________________________________
@@ -402,7 +406,6 @@ Int_t StSvtHitMaker::GetSvtT0()
     return kStOK;
   }
 
-  m_t0 =  0;
   m_t0 = (StSvtT0*)dataSet->GetObject();
   
   return kStOK;
@@ -458,10 +461,12 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   //   if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_t0);
   St_svtCorrectionC *driftVelocityCor = 0;
   TDataSet *svt_calib  = StMaker::GetChain()->GetDataBase("Calibrations/svt");
+#if 0
   if (svt_calib) {
     St_svtCorrection *corr = ( St_svtCorrection*) svt_calib->Find("svtDriftCorrection");
     if (corr) driftVelocityCor = new St_svtCorrectionC(corr);
   }
+#endif
   if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_driftCurve, m_t0,driftVelocityCor );
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
@@ -470,12 +475,14 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   StEvent *pEvent = (StEvent*) GetInputDS("StEvent");
 
   //here is applied laser correction for temperature variations;
-
+#if 0
   dst_mon_soft_svt_st* drift_vel =  svt_drift_mon->GetTable();
   drift_vel->res_drf_svt = LaserTemperatureCorrection();
   svt_drift_mon->SetNRows(1);
   SvtGeomTrans.setVelocityScale(drift_vel->res_drf_svt);
-
+#endif
+  St_svtHybridDriftVelocityC *driftVel = St_svtHybridDriftVelocityC::instance();
+  assert(driftVel);
   Int_t index2 = -1;
   for(int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
 
@@ -488,7 +495,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	  
 	  index = mSvtData->getHybridIndex(barrel,ladder,wafer,hybrid);
 	  if(index < 0) continue;
-	  
+	  if (! driftVel->p(barrel,ladder,wafer,hybrid)) continue;
 	  mSvtBigHit = (StSvtAnalysedHybridClusters*)mSvtCluColl->at(index);
 	  if( !mSvtBigHit) continue;
 	  
@@ -533,7 +540,6 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    //	    cout << "local x = " << localCoord.position().x() <<  ", local y = " << localCoord.position().y() <<  ", local z = " << localCoord.position().z() << endl; 
 	    //cout << "global x = " << globalCoord.position().x() <<  ", global y = " << globalCoord.position().y() <<  ", global z = " << globalCoord.position().z() << endl; 
 
-	    if(mSvtBigHit->svtHit()[clu].flag() < 4) GoodHit++; 
 	    if (pEvent) {
 	      Int_t hw_position, svtx, svty;
 	      Float_t covx, covy, covz;
@@ -560,6 +566,10 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	      svtHit->setPeak(dat->peakAdc);
 	      svtHit->setCharge(hit->charge());
 	      svtHit->setFlag(hit->flag()); 
+	      if (driftVelocityCor) {
+		if (! driftVelocityCor->pCorrection(svtHit->layer(), svtHit->ladder(), svtHit->wafer(), svtHit->hybrid()))
+		  svtHit->setFlag(hit->flag()+100); 
+	      }
 	      svtHit->setFitFlag(0);
 	      svtHit->setPosition(mSvtBigHit->svtHit()[clu].position());
 	      
@@ -576,6 +586,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    }
 	    
 	    if (! pEvent) SaveIntoTable(mSvtBigHit->numOfHits(), index);
+	    if(mSvtBigHit->svtHit()[clu].flag() < 4) GoodHit++; 
 	    
 	    if( iWrite > 0){
 	      SaveIntoNtuple(mSvtBigHit->numOfHits(),index);

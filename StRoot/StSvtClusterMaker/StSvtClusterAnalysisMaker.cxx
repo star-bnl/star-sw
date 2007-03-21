@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.29 2005/08/04 04:06:08 perev Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.30 2007/03/21 17:22:58 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.30  2007/03/21 17:22:58  fisyak
+ * Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
+ *
  * Revision 1.29  2005/08/04 04:06:08  perev
  * clear of collection added
  *
@@ -403,9 +406,9 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 	  }
 
           mHybridCluster = (StSvtHybridCluster*)mSvtClusterColl->at(index); 
-
+	  if (! mHybridCluster) continue;
           mHybridRawData = (StSvtHybridData *)mSvtRawEventColl->at(index);
-
+	  if (! mHybridRawData) continue;
           mNumOfClusters = mHybridCluster->getNumberOfClusters(); 
  
 	  mSvtBadAnode=0;
@@ -440,7 +443,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 	  // Fill hitograms and ntuples.
 	  for( int clu=0; clu<mSvtAnalysis->GetnSvtClu(); clu++){
 	    //if( mSvtAnalysis->GetCluFlag(clu) < 4){
-	      if(Debug()) m_sumADC[index]->Fill(mSvtAnalysis->GetCluCharge(clu));
+	      if(Debug() && m_sumADC[index]) m_sumADC[index]->Fill(mSvtAnalysis->GetCluCharge(clu));
 	      m_SumADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluCharge(clu));
 
 	      m_PeakADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluPeakAdc(clu));
@@ -606,10 +609,9 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
          m_time_anode_raw[index]->Reset();
 
          mHybridAdjData = (StSvtHybridData *)mSvtAdjEvent->at(index); 
-
 	 if( !mHybridAdjData) continue;
          mHybridCluster = (StSvtHybridCluster*)mSvtClusterColl->at(index); 
-
+	 if ( !mHybridCluster) continue;
          mNumOfClusters = mHybridCluster->getNumberOfClusters(); 
 
 	 TotalClusters+=mNumOfClusters;
