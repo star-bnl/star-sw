@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.12 2007/01/17 18:14:37 bouchet Exp $
+ * $Id: St_sls_Maker.cxx,v 1.13 2007/03/21 17:19:56 fisyak Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.13  2007/03/21 17:19:56  fisyak
+ * use new StSsdBarrel
+ *
  * Revision 1.12  2007/01/17 18:14:37  bouchet
  * replace printf, cout statements with LOG statements
  *
@@ -50,17 +53,12 @@
 //#include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_slsCtrl_Table.h"
 #include "tables/St_ssdConfiguration_Table.h"
+#include "StSsdUtil/StSsdBarrel.hh"
 
 ClassImp(St_sls_Maker);
 //_____________________________________________________________________________
-St_sls_Maker::St_sls_Maker(const char *name):StMaker(name),m_dimensions(0),m_positions(0),m_config(0),m_ctrl(0),mySsd(0){}
-//_____________________________________________________________________________
-St_sls_Maker::~St_sls_Maker(){}
-//_____________________________________________________________________________
-Int_t St_sls_Maker::Init(){return StMaker::Init();}
-//_____________________________________________________________________________
 Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
-// 		geometry parameters
+  assert(StSsdBarrel::Instance());
   TDataSet *ssdparams = GetInputDB("Geometry/ssd");
   if (! ssdparams) {
     LOG_ERROR << "No  access to Geometry/ssd parameters" << endm;
@@ -68,24 +66,10 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
   }
   TDataSetIter    local(ssdparams);
   m_ctrl        = (St_slsCtrl           *)local("slsCtrl");
-  m_dimensions    = (St_ssdDimensions     *)local("ssdDimensions"); 
-  m_positions        = (St_ssdWafersPosition *)local("ssdWafersPosition");
-  
   if (!m_ctrl) {
     LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;
   }   
-  if ((!m_dimensions)||(!m_positions)) {
-    LOG_ERROR << "No  access to geometry parameters" << endm;
-    return kStFatal;
-  }  
-  St_ssdConfiguration* configTable = (St_ssdConfiguration*) local("ssdConfiguration");
-  if (!configTable) {
-    LOG_ERROR << "InitRun : No access to ssdConfiguration database" << endm;
-    return kStFatal;
-  }
-  //mConfig = new StSsdConfig();
-  m_config = (ssdConfiguration_st*) configTable->GetTable() ; 
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -101,17 +85,12 @@ Int_t St_sls_Maker::Make()
    St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
    St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
 
-   ssdDimensions_st *dimensions = m_dimensions->GetTable();
    slsCtrl_st *ctrl = m_ctrl->GetTable();
 
    LOG_INFO<<"#################################################"<<endm;
    LOG_INFO<<"####       START OF SSD LAZY SIMULATOR       ####"<<endm;
    LOG_INFO<<"####        SSD BARREL INITIALIZATION        ####"<<endm;
-   mySsd = new StSsdBarrel(dimensions, m_config);
    LOG_INFO<<"####        SSD WAFERS INITIALIZATION        ####"<<endm;
-   //mySsd->initWafers(m_positions);
-   //with this same constructor for spt with the ladder class
-   mySsd->initLadders(m_positions);
    Int_t nSsdHits;
    if (g2t_ssd_hit)
      {
@@ -125,7 +104,7 @@ Int_t St_sls_Maker::Make()
          }
      }    
    LOG_INFO <<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endm;
-   mySsd->convertGlobalFrameToOther();
+   StSsdBarrel::Instance()->convertGlobalFrameToOther();
    Int_t inactiveHit;
    if (g2t_ssd_hit)
      {
@@ -145,7 +124,7 @@ Int_t St_sls_Maker::Make()
    LOG_INFO<<"####    -> "<<nSsdStrips<<" FIRED STRIPS INTO TABLE     ####"<<endm;
    LOG_INFO<<"####        END OF SSD LAZY SIMULATOR        ####"<<endm;
    LOG_INFO<<"#################################################"<<endm;
-   delete mySsd;
+   StSsdBarrel::Instance()->Reset();//   delete mySsd;
    if (nSsdStrips) res = kStOK;
 
    if(res!=kStOK){
@@ -171,7 +150,7 @@ Int_t St_sls_Maker::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit) {
   // LOG_INFO<< "NumberOfRows = " <<  g2t_ssd_hit->GetNRows() << " size " <<  g2t_ssd_hit->GetTableSize() << endm ;
   // g2t_ssd_hit->Print(0,g2t_ssd_hit->GetNRows());
 
-  Int_t minWaf      = mySsd->getSsdLayer()*1000;
+  Int_t minWaf      = StSsdBarrel::Instance()->getSsdLayer()*1000;
   Int_t currWafId   = 0;
   Int_t currWafNumb = 0;
   Int_t currLadder  = 0;
@@ -184,10 +163,10 @@ Int_t St_sls_Maker::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit) {
       currWafId=g2t[i].volume_id;
       if (currWafId > minWaf)	{
 	counter++;
-	currLadder=mySsd->idWaferToLadderNumb(currWafId);
-	currWafNumb=mySsd->idWaferToWafer(currWafId);
+	currLadder=StSsdBarrel::Instance()->idWaferToLadderNumb(currWafId);
+	currWafNumb=StSsdBarrel::Instance()->idWaferToWafer(currWafId);
 	for (j = 0; j<3; j++) {p[j] = g2t[i].p[j];}
-	mySsd->mLadders[currLadder]->mWafers[currWafNumb]->
+	StSsdBarrel::Instance()->mLadders[currLadder]->mWafers[currWafNumb]->
 	  addHit(g2t[i].id, g2t[i].id, g2t[i].track_p, g2t[i].x, g2t[i].de, p);
       }
   }
@@ -197,14 +176,14 @@ Int_t St_sls_Maker::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit) {
 
 Int_t St_sls_Maker::removeInactiveHitInTable(St_g2t_ssd_hit *g2t_ssd_hit) {
   g2t_ssd_hit_st *g2t = g2t_ssd_hit->GetTable();
-  StSsdPointList *inactiveHits = mySsd->getInactiveHitList();
+  StSsdPointList *inactiveHits = StSsdBarrel::Instance()->getInactiveHitList();
   Int_t localSize = 0;
   localSize=inactiveHits->getSize();
   if (localSize)
     {
       Int_t firstSsdPoint=0;
       Int_t iP1 = 0;
-      for (iP1 = 0; ((iP1 < g2t_ssd_hit->GetNRows())&&(g2t[iP1].volume_id < mySsd->getSsdLayer()*1000)) ; iP1++) 
+      for (iP1 = 0; ((iP1 < g2t_ssd_hit->GetNRows())&&(g2t[iP1].volume_id < StSsdBarrel::Instance()->getSsdLayer()*1000)) ; iP1++) 
 	                                                                                  firstSsdPoint=iP1;
       firstSsdPoint++;
       Int_t isG2tSorted = 1;
@@ -267,14 +246,14 @@ Int_t St_sls_Maker::removeInactiveHitInTable(St_g2t_ssd_hit *g2t_ssd_hit) {
 	    }
 	}
     }
-  mySsd->renumHitAfterRemove();
+  StSsdBarrel::Instance()->renumHitAfterRemove();
   delete inactiveHits;
   return localSize;  
 }
 //________________________________________________________________________________
 void St_sls_Maker::chargeSharingOverStrip(slsCtrl_st  *ctrl)
 {
-  mySsd->convertToStrip(ctrl[0].pairCreationEnergy,
+  StSsdBarrel::Instance()->convertToStrip(ctrl[0].pairCreationEnergy,
 			ctrl[0].nstripInACluster,
 			ctrl[0].parDiffP,
 			ctrl[0].parDiffN,
@@ -289,11 +268,11 @@ Int_t St_sls_Maker::writeStripToTable(St_sls_strip *sls_strip) {
   
   Int_t currRecord = 0;
   
-  for (Int_t iLad = 0; iLad < mySsd->getNumberOfLadders(); iLad++)
-    for (Int_t iWaf = 0; iWaf < mySsd->getNWaferPerLadder(); iWaf++) {
-      StSsdWafer *wafer = mySsd->getLadder(iLad)->getWafer(iWaf);
-      //Int_t idCurrentWaf = mySsd->waferNumbToIdWafer(iWaf);
-      Int_t idCurrentWaf = mySsd->getSsdLayer()*1000 +((iWaf+1)*100)+(iLad+1);
+  for (Int_t iLad = 0; iLad < StSsdBarrel::Instance()->getNumberOfLadders(); iLad++)
+    for (Int_t iWaf = 0; iWaf < StSsdBarrel::Instance()->getNWaferPerLadder(); iWaf++) {
+      StSsdWafer *wafer = StSsdBarrel::Instance()->getLadder(iLad)->getWafer(iWaf);
+      //Int_t idCurrentWaf = StSsdBarrel::Instance()->waferNumbToIdWafer(iWaf);
+      Int_t idCurrentWaf = StSsdBarrel::Instance()->getSsdLayer()*1000 +((iWaf+1)*100)+(iLad+1);
       StSsdStripList *stripP = wafer->getStripP();
       StSsdStripList *stripN = wafer->getStripN();
       
