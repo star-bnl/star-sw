@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.69 2006/12/16 23:45:38 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.70 2007/03/21 16:36:09 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.70  2007/03/21 16:36:09  fisyak
+ * zero field mean 1G
+ *
  * Revision 1.69  2006/12/16 23:45:38  jhthomas
  * Add ShortedManualRing() for Gene, and protect against B=0 field ... instead set to 0.25 gauss as minimum
  *
@@ -368,6 +371,7 @@ void StMagUtilities::GetMagFactor ()
 { 
   St_MagFactor *fMagFactor  =  (St_MagFactor *) thedb2->Find("MagFactor");  assert(fMagFactor) ;
   gFactor        =  (*fMagFactor)[0].ScaleFactor ;         // Set the magnetic field scale factor
+  if (TMath::Abs(gFactor) < 1.e-3) gFactor = 1.e-3;
 }
 
 void StMagUtilities::GetTPCParams ()  
