@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.23 2007/03/08 23:04:42 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.24 2007/03/21 17:19:12 fisyak Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.24  2007/03/21 17:19:12  fisyak
+// use TGeoHMatrix for coordinate transformation, eliminate ssdWafersPostion, ake NTuples only for Debug()>1
+//
 // Revision 1.23  2007/03/08 23:04:42  bouchet
 // add WriteMatchedStrips() method : fill the characteristics of the strips from matched clusters ; Small change for the writing of tuples
 //
@@ -130,8 +133,12 @@ class StEventInfo;
 
 class StSsdPointMaker : public StMaker {
  public:
-  StSsdPointMaker(const char *name="SsdPoint") : StMaker(name), position(0), dimensions(0), config(0),
-    m_noise2(0), m_dimensions(0), m_configuration(0), m_wafpos(0) {}
+  StSsdPointMaker(const char *name="SsdPoint") : StMaker(name), m_noise2(0)
+#ifdef config_position_dimensions
+			    ,position(0), dimensions(0), config(0),
+			    m_dimensions(0), m_configuration(0), m_wafpos(0)
+#endif /* config_position_dimensions */
+			    ,mHitNtuple(0), nHitNtuple(0), qHitNtuple(0),  pHitNtuple(0), rHitNtuple(0) {}
   virtual       ~StSsdPointMaker() {}
   virtual Int_t  Init();
   virtual Int_t  InitRun(Int_t runumber);
@@ -140,31 +147,28 @@ class StSsdPointMaker : public StMaker {
   virtual void   PrintInfo();
  private:
   TDataSet* DbConnector;
+  St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
+#ifdef config_position_dimensions
   St_ssdWafersPosition  *position;
   ssdDimensions_st      *dimensions;
   ssdConfiguration_st   *config;
-  St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
   St_ssdDimensions      *m_dimensions;    //!< Pointer to the ssdDimensions table (wafer size)
   St_ssdConfiguration   *m_configuration; //!< Pointer to the ssdConfiguration table (ladder on/off)
   St_ssdWafersPosition  *m_wafpos;        //!< Pointer to the ssdWaferPosition table (wafer positions)
+#endif /* config_position_dimensions */
   Float_t Strips_hits[15];
   Float_t ClusterNtuple[15];
   Float_t ClustupleIn[15];
   Float_t hitNtuple[15]; 
   Float_t StripsIn[15]; 
-  TFile   *mFile;
   TNtuple *mHitNtuple;
-  TFile   *nFile;
   TNtuple *nHitNtuple;
-  TFile   *qFile;
   TNtuple *qHitNtuple;
-  TFile   *pFile;
   TNtuple *pHitNtuple;
-  TFile   *rFile;
   TNtuple *rHitNtuple;
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
-  void DeclareNtuple(Int_t *flag);
+  void DeclareNtuple();
   void debugUnPeu(StSsdBarrel *mySsd); 
   void PrintStripSummary(StSsdBarrel *mySsd); //!
   void PrintClusterSummary(StSsdBarrel *mySsd); //!
@@ -179,7 +183,6 @@ class StSsdPointMaker : public StMaker {
   void Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero);
   void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
   void WriteMatchedStrips(StSsdBarrel *mySsd);//! 
-  void WriteTuple();
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -225,11 +228,10 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto_18; //! (1p-1n) packages control matching
   TH2S  *matchisto_19; //! (1p-1n) packages control matching  
   TH2S  *matchisto_20; //! (1p-1n) packages control matching.
-  Int_t flag ;         // this flag is used to switch on the filling of tuple   
   Int_t Zero;
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.23 2007/03/08 23:04:42 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.24 2007/03/21 17:19:12 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
