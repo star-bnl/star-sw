@@ -1,4 +1,4 @@
-#pragma link off all globals;
+<<<#pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
 #pragma link C++ class TMemStat-;
@@ -19,9 +19,9 @@
 #pragma link C++ enum TRArray::ETRMatrixType;
 #pragma link C++ enum TRArray::ETRMatrixCreatorsOp;
 
-#pragma link C++ function operator-=(TRArray &, const Double_t &);
-#pragma link C++ function operator+=(TRArray &, const Double_t &);
-#pragma link C++ function operator*=(TRArray &, const Double_t &);
+#pragma link C++ function operator-=(TRArray &, const Double_t);
+#pragma link C++ function operator+=(TRArray &, const Double_t);
+#pragma link C++ function operator*=(TRArray &, const Double_t);
 #pragma link C++ function operator*(const TRArray &, const TRArray &);
 #pragma link C++ function operator-=(TRArray &, const TRArray &);
 #pragma link C++ function operator+=(TRArray &, const TRArray &);
@@ -33,5 +33,21 @@
 #pragma link C++ function operator<<(ostream &, const TRMatrix &);
 #pragma link C++ function operator<<(ostream &, const TRSymMatrix &);
 #pragma link C++ function operator<<(ostream &, const TRVector &);
+
+#pragma link C++ function operator*(const TRMatrix &, Double_t);
+#pragma link C++ function operator*(Double_t,const TRMatrix &);
+#pragma link C++ function operator/(const TRMatrix &, Double_t);
+#pragma link C++ function operator+(const TRMatrix &, Double_t);
+#pragma link C++ function operator+(Double_t,const TRMatrix &);
+#pragma link C++ function operator-(const TRMatrix &, Double_t);
+#pragma link C++ function operator-(Double_t,const TRMatrix &);
+
+#pragma link C++ function operator*(const TRVector &, Double_t);
+#pragma link C++ function operator*(Double_t,const TRVector &);
+#pragma link C++ function operator/(const TRVector &, Double_t);
+#pragma link C++ function operator+(const TRVector &, Double_t);
+#pragma link C++ function operator+(Double_t,const TRVector &);
+#pragma link C++ function operator-(const TRVector &, Double_t);
+#pragma link C++ function operator-(Double_t,const TRVector &);
 
 #pragma link C++ class StCheckQtEnv;

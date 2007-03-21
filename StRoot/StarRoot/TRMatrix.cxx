@@ -5,22 +5,6 @@
 #include "TString.h"
 ClassImp(TRMatrix);
 //________________________________________________________________________________
-TRMatrix::TRMatrix(Int_t nrows,Int_t ncols):
-    TRArray(nrows*ncols), fNrows(nrows), fNcols(ncols) {}
-//________________________________________________________________________________
-TRMatrix::TRMatrix(Int_t nrows,Int_t ncols,const Double_t *Array):
-    TRArray(nrows*ncols,Array), fNrows(nrows), fNcols(ncols) {;}
-//________________________________________________________________________________
-TRMatrix::TRMatrix(Int_t nrows,Int_t ncols,const Float_t *Array):
-  TRArray(nrows*ncols,Array), fNrows(nrows), fNcols(ncols) {}
-//________________________________________________________________________________
-TRMatrix::TRMatrix(Int_t nrows,Int_t ncols,const Char_t *s):
-    TRArray(nrows*ncols,s), fNrows(nrows), fNcols(ncols) {;}
-//________________________________________________________________________________
-TRMatrix::TRMatrix(const TRMatrix &matrix) : 
-  TRArray(matrix.GetNrows()*matrix.GetNcols(),matrix.GetArray()), 
-  fNrows(matrix.GetNrows()), fNcols(matrix.GetNcols()) { }
-//________________________________________________________________________________
 TRMatrix::TRMatrix(const TRMatrix &S, Int_t NI, Int_t NJ, Int_t I, Int_t J){
   if (NI == 0) NI = S.NI();
   if (NJ == 0) NJ = S.NJ();
@@ -291,7 +275,11 @@ ostream& operator<<(ostream& s,const TRMatrix &target) {
     s.setf(ios::fixed,ios::scientific);
     s.setf(ios::showpos);
     for (int i = 0; i< Nrows; i++) {
-      for (int j = 0; j < Ncols; j++) s << Form("%10.3f",Array[j + i*Ncols]);
+      Int_t Nzeros = 0;
+      for (int j = Ncols-1; j >= 0; j--) if (Array[j + i*Ncols] == 0.0) {Nzeros++;} else break;
+      if (Nzeros == 1) Nzeros = 0;
+      for (int j = 0; j < Ncols-Nzeros; j++) s << Form("%10.3f",Array[j + i*Ncols]);
+      if (Nzeros) s << Form("%8i*0",Nzeros);
       s << endl;
     }
     s.unsetf(ios::showpos);

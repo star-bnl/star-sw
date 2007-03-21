@@ -1,8 +1,14 @@
 #include <stdarg.h>
 #include <iomanip>
 #include "TRArray.h"
-#include "TCL.h"
 #include "TString.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
+#include "TObjString.h"
+#include "TObjArray.h"
 ClassImp(TRArray);
 //________________________________________________________________________________
 TRArray::TRArray(Int_t N,const Float_t *Array):  TArrayD(N), fValid(kTRUE) {
@@ -14,13 +20,15 @@ TRArray::TRArray(Int_t N,Double_t va_(a0), ...) : TArrayD(N), fValid(kTRUE) {
 }
 //________________________________________________________________________________
 TRArray::TRArray(Int_t N,const Char_t *s): TArrayD(N), fValid(kTRUE) {
-#ifdef R__SSTREAM
-      istringstream ins((char *) s);
-#else
-      istrstream ins((char *) s);
-#endif
-    for (int i=0; i < N; i++) ins >> fArray[i]; 
-  }
+  static TString separator = "([^\t ;,]+)";
+  TString opt(s);
+  TObjArray *array = opt.Tokenize(separator);
+  TIter next(array);
+  TObjString *objs;
+  Int_t i = 0;
+  while ((objs = (TObjString *) next()) && i < N) {fArray[i++] = objs->GetString().Atof();}
+  delete array;
+}
 //________________________________________________________________________________
 ostream& operator<<(ostream& s,const TRArray &target) {
   s << "Size \t" << target.fN << endl;
