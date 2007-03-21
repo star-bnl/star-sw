@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.38 2006/05/09 16:17:41 fisyak Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.39 2007/03/21 16:41:07 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -32,10 +32,11 @@
 #include "TString.h"
 #include "TMath.h"
 #include "St_svtCorrectionC.h"
+#include "St_svtHybridDriftVelocityC.h"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
-
+static Int_t _debug = 0;
 
 //_____________________________________________________________________________
 StSvtCoordinateTransform::StSvtCoordinateTransform() {
@@ -70,7 +71,7 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mgeom = new StSvtGeometry(param, geom, shape);
   mFlag |=1;
   mconfig = config;
-  mDriftVelocity = driftVeloc;
+  mDriftVelocity = 0;//YF  driftVeloc;
   mDriftCurve = NULL;
   mT0 = T0;
   mdriftVelCorr = 0; 
@@ -89,8 +90,8 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mgeom = new StSvtGeometry(param, geom, shape);
   mFlag |=1;
   mconfig = config;
-  mDriftVelocity = driftVeloc;
-  mDriftCurve = driftCurve;
+  mDriftVelocity = 0;//YF driftVeloc;
+  mDriftCurve = 0;//YF  driftCurve;
   mT0 = T0;
   mdriftVelCorr = 0; 
 }
@@ -106,7 +107,7 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
 						 StSvtT0* T0){
   mgeom = geom;
   mconfig = config;
-  mDriftVelocity = driftVeloc;
+  mDriftVelocity = 0; //driftVeloc;
   mDriftCurve = NULL;
   mT0 = T0;
   mdriftVelCorr = 0; 
@@ -120,8 +121,8 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
 						 StSvtT0* T0){
   mgeom = geom;
   mconfig = config;
-  mDriftVelocity = driftVeloc;
-  mDriftCurve = driftCurve;
+  mDriftVelocity = 0;//YF  driftVeloc;
+  mDriftCurve = 0;//YF driftCurve;
   mT0 = T0;
   mdriftVelCorr = 0; 
 
@@ -136,8 +137,8 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
 						 St_svtCorrectionC*  driftVelCorr){
   mgeom = geom;
   mconfig = config;
-  mDriftVelocity = driftVeloc;
-  mDriftCurve = driftCurve;
+  mDriftVelocity = 0;//YF driftVeloc;
+  mDriftCurve = 0;//YF driftCurve;
   mT0 = T0;
   mdriftVelCorr = driftVelCorr; 
 
@@ -161,13 +162,13 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StGloba
 
 //     Global Coordinate  --> Raw data
 
-void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a, StSvtWaferCoordinate& c)
+void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a, StSvtWaferCoordinate& c, Int_t Id)
 {
 
   StSvtLocalCoordinate b;
 
  
-  this->operator()(a,b);
+  this->operator()(a,b, Id);
 
   this->operator()(b,c);
   return;
@@ -190,11 +191,17 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
   b.setWafer(a.wafer());
   b.setHybrid(a.hybrid());
 
-
+#if 0
   double t = a.timebucket() - t0;
 
   b.setPosition(StThreeVector<double>(CalcDriftLength(a,t),
 				      CalcTransLength(a.anode()),0.0));
+#else
+  St_svtHybridDriftVelocityC *d = St_svtHybridDriftVelocityC::instance();
+  b.setPosition(StThreeVector<double>(d->CalcDriftLength(a.barrel(),a.ladder(),a.wafer(),a.hybrid(),a.timebucket()),
+				      d->CalcTransLength(a.anode()),
+				      0.0));
+#endif
   
   //  int idShape = 0;
   
@@ -218,13 +225,13 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
     b.position().setX( mgeom->getWaferLength() - b.position().x());
     b.position().setY( mgeom->getWaferWidth() - b.position().y());
   }
-
+#if 0
   if (mdriftVelCorr) {
     Double_t u = b.position().x();
     Double_t du = mdriftVelCorr->CalcCorrection(b.layer(),b.ladder(),b.wafer(),b.hybrid(),u);
     b.position().setX(u - du);
   }
-
+#endif
   return;
 }
 //_____________________________________________________________________________
@@ -271,11 +278,15 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWa
   }
   
 
-
+#if 0
   double t = UnCalcDriftLength(a,pos.x()) + t0;
   b.setTimeBucket(t);
   b.setAnode(UnCalcTransLength(pos.y()));
-
+#else
+  St_svtHybridDriftVelocityC *d = St_svtHybridDriftVelocityC::instance();
+  b.setTimeBucket(d->UnCalcDriftLength(b.barrel(),b.ladder(),b.wafer(),b.hybrid(),pos.x()));
+  b.setAnode(d->UnCalcTransLength(pos.y()));
+#endif
   return;
 
 }
@@ -299,92 +310,14 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StGloba
 
 // Svt Global --> Local
 
-void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLocalCoordinate& b)
+void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLocalCoordinate& b, Int_t Id)
 {
-
-  int barrel, HardWarePos, Found;
-  int iladder, ibarrel, NWafer;
-  int ladderRangeLo, ladderRangeHi, ladderMax;
-
-
-  // Find out what barrel hit is on
-
-  double r = (a.position().x()*a.position().x() +
-	      a.position().y()*a.position().y());
-
-  if     ( r > 169) 	barrel = 3;
-  else if( r >  75) 	barrel = 2;
-  else 			barrel = 1;
-
-
-  //Exception for year1 ladder Only one ladder which is wrongly labelled as barrel 3
-  //even though its at r=10.4
-
-  //  if( mgeom[0].id > 5000) barrel = 3;
-  if( TString(mconfig->getConfiguration()) == "Y1L") barrel = 3;    
-
-  // Find out what wafer hit is on
-
-     HardWarePos = 1000*(2*barrel)+1;
-
-     for( NWafer=1; NWafer<= mconfig->getNumberOfWafers(barrel); NWafer++){
-
-       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer  )) break;
-       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer+1)) break;
-     }
-
-     b.setWafer(NWafer);
-
-
-static const int tbRange[3][4][3] = {
-{{4, 6,0},{2,4,0},{ 6, 8,0},{1,2, 8}},	//barrel=1
-{{6, 9,0},{3,6,0},{ 9,12,0},{1,3,12}},	//barrel=2
-{{8,12,0},{4,8,0},{12,16,0},{1,4,16}}};	//barrel=3
-
-     ladderRangeLo = -1; ladderRangeHi = -1; ladderMax = -1;
-     int yx = 0;
-     if (a.position().x() > 0) yx |=1;
-     if (a.position().y() > 0) yx |=2;
-     if (barrel>0 && barrel<=3) {
-        ladderRangeLo = tbRange[barrel-1][yx][0];
-        ladderRangeHi = tbRange[barrel-1][yx][1];
-        ladderMax     = tbRange[barrel-1][yx][2];
-     }
-    
-  //Exception for year1 ladder Only one ladder which is wrongly labelled as barrel 3
-  // ladder 1even though its at r=10.4 at 12 0'Clock
-  
-  //  if( mgeom[0].id > 5000) ladderRangeLo = 1; 
-  if( TString(mconfig->getConfiguration()) == "Y1L") ladderRangeLo = 1;
-
-  Found = 0;
-  ibarrel = (barrel*2)-1;
-  do{
-    for( iladder=ladderRangeLo; iladder<=ladderRangeHi; iladder++){
-      HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
-      if( IsOnWaferR(a.position(),HardWarePos)) {
-	Found = 1;
-	break;
-      }
-    }
-    if( Found) break;
-    ibarrel++;
-  }while (ibarrel<=barrel*2);
-  
-  if( !Found && ladderMax !=0){
-    
-    for(  ibarrel=(barrel*2)-1; ibarrel<=barrel*2; ibarrel++){
-      iladder = ladderMax; 
-      HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
-      if( IsOnWaferR(a.position(),HardWarePos)) {
-	Found = 1;
-	break;
-      }
-    }
-  }
-
-  if( !Found){
-
+  // Id = 1000*layer + 100*wafer + ladder;
+  Int_t layer = Id/1000;
+  //  Int_t barrel = (layer - 1)/2 + 1;
+  Int_t ladder = Id%100;
+  Int_t wafer  = (Id - 1000*layer)/100;
+  if (! IsOnWaferR(a.position(),Id) ) {
     b.setWafer(-99);
     b.setLayer(-99);
     b.setLadder(-99);
@@ -393,16 +326,13 @@ static const int tbRange[3][4][3] = {
     b.position().setZ(-99);
   }
   else{
-
-    b.setLayer(ibarrel);
-    b.setLadder(iladder);
-    
-    GlobaltoLocal( a.position(), b, HardWarePos, -1);
-
+    b.setLayer(layer);
+    b.setLadder(ladder);
+    b.setWafer(wafer);
+    GlobaltoLocal( a.position(), b, Id, -1);
     b.setHybrid(2);
     if( b.position().x() < 0) b.setHybrid(1);
   }
-
 }
 
 //_____________________________________________________________________________
@@ -433,59 +363,35 @@ int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThr
 
   //     Error Conditions: none
 
-  float xl[3];
-
-  /*
-  int  HardWarePos, Gotit=0;
-
-
-  if( index < 0){
-    HardWarePos = 1000*a.layer()+100*a.wafer()+a.ladder();
-    for( index=0; index< 216; index++){
-      if( mgeom[index].id ==  HardWarePos) {
-	Gotit++;
-	break;
-      }
-    }
-    
-    if( !Gotit) {
-      x.setX(-999);
-      x.setY(-999);
-      x.setZ(-999);
-      return 0;
-      
-      
-    }
-  }
-  */
-
-  StSvtWaferGeometry* waferGeom = NULL;
 
   if( index < 0){
     index = mgeom->getWaferIndex(mgeom->getBarrelID(a.layer(),a.ladder()),(int)a.ladder(),(int)a.wafer());
 
   }
+  StSvtWaferGeometry *waferGeom = 0;
   if (index >= 0 && index < 216)
     waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
-
   if (!waferGeom) {
     x.setX(-999);
     x.setY(-999);
     x.setZ(-999);
     return 0;
   }
+  if (_debug) waferGeom->print();
       
-  xl[0] = a.position().x();
-  xl[1] = a.position().y();
-  xl[2] = a.position().z();
-  
-  //  x.setX(mgeom[index].x[0] + xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].t[0] + xl[2]*mgeom[index].n[0]); 
-  //  x.setY(mgeom[index].x[1] + xl[0]*mgeom[index].d[1] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].n[1]);
-  //  x.setZ(mgeom[index].x[2] + xl[0]*mgeom[index].d[2] + xl[1]*mgeom[index].t[2] + xl[2]*mgeom[index].n[2]); 
-  
+  Double_t xl[3] = {a.position().x(), a.position().y(), a.position().z()};
+  if (_debug) cout << "xl \t" << xl[0] << "\t" << xl[1] << "\t" << xl[2] << endl;
+  Double_t xg[3];
+  waferGeom->LocalToMaster(xl,xg);
+  if (_debug) cout << "xg \t" << xg[0] << "\t" << xg[1] << "\t" << xg[2] << endl;
+#if 0  
   x.setX(waferGeom->x(0) + xl[0]*waferGeom->d(0) + xl[1]*waferGeom->t(0) + xl[2]*waferGeom->n(0)); 
   x.setY(waferGeom->x(1) + xl[0]*waferGeom->d(1) + xl[1]*waferGeom->t(1) + xl[2]*waferGeom->n(1));
   x.setZ(waferGeom->x(2) + xl[0]*waferGeom->d(2) + xl[1]*waferGeom->t(2) + xl[2]*waferGeom->n(2)); 
+#else
+  x.setX(xg[0]); x.setY(xg[1]); x.setZ(xg[2]); 
+#endif
+  if (_debug) cout << "x \t" << x.x() << "\t" << x.y() << "\t" << x.z() << endl;
   
   return index;
 }
@@ -518,33 +424,10 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
        c     Error Conditions: none
        c
 */
-
-  //  int Gotit=0;
-  float  xl[3];
   
   //     Executable Code
   //     ===============
   
-
-  /*
-  if( index < 0){
-    for( index=0; index< 216; index++){
-      if( mgeom[index].id == HardWarePos ) {
-	Gotit++;
-	break;
-      }
-    }
-    
-    
-    if( !Gotit) {
-      b.position().setX(-998);
-      b.position().setY(-998);
-      b.position().setZ(-998);
-      return -1;
-    }
-    
-  }
-  */
   
   StSvtWaferGeometry* waferGeom = NULL;
 
@@ -571,7 +454,15 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
   //  b.position().setX(xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].d[1] + xl[2]*mgeom[index].d[2]);
   //  b.position().setY(xl[0]*mgeom[index].t[0] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].t[2]);
   //  b.position().setZ(xl[0]*mgeom[index].n[0] + xl[1]*mgeom[index].n[1] + xl[2]*mgeom[index].n[2]);
- 
+
+  Double_t xg[3] = {x.x(), x.y(), x.z()};
+  Double_t xl[3];
+  if (_debug) waferGeom->print();
+  if (_debug) cout << "xg \t" << xg[0] << "\t" << xg[1] << "\t" << xg[2] << endl;
+  
+  waferGeom->MasterToLocal(xg,xl);
+  if (_debug) cout << "xl \t" << xl[0] << "\t" << xl[1] << "\t" << xl[2] << endl;
+#if 0 
   xl[0] = x.x() - waferGeom->x(0);
   xl[1] = x.y() - waferGeom->x(1);
   xl[2] = x.z() - waferGeom->x(2);
@@ -579,7 +470,10 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
   b.position().setX(xl[0]*waferGeom->d(0) + xl[1]*waferGeom->d(1) + xl[2]*waferGeom->d(2));
   b.position().setY(xl[0]*waferGeom->t(0) + xl[1]*waferGeom->t(1) + xl[2]*waferGeom->t(2));
   b.position().setZ(xl[0]*waferGeom->n(0) + xl[1]*waferGeom->n(1) + xl[2]*waferGeom->n(2));
- 
+#else
+  b.position().setX(xl[0]); b.position().setY(xl[1]); b.position().setZ(xl[2]); 
+#endif 
+  if (_debug) cout << "x \t" << b.position().x() << "\t" << b.position().y() << "\t" << b.position().z() << endl;
 
   // cout << index << " " << b.position() <<  " " << waferGeom->x(0) << " " <<   waferGeom->x(1) << " " << waferGeom->x(2)  << "  " << x.x() << " "
 //        << x.y() << " " << x.z() << endl;
@@ -648,14 +542,14 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   float vd = -1;
   int index;
 
-#if 1
+#if 0
   int anode;
   float td = -1;
   double Ratio = 1;
   if (mDriftVelocity && mDriftCurve) 
     {
       index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
-      if (index >= 0)
+      if (index >= 0 && mDriftVelocity->at(index))
 	{
 	  vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
 	    mDeltaDriftVelocity;
@@ -700,7 +594,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
    {
       //       gMessMgr->Warning() << "mDriftCurve is NULL: " << x << endm;
       index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
-      if (index >= 0)
+      if (index >= 0 && mDriftVelocity->at(index))
 	{
 	  vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
 	    mDeltaDriftVelocity;
@@ -770,7 +664,7 @@ double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a
   float vd = -1;
   if (mDriftVelocity) {
     int index = mDriftVelocity->getHybridIndex(barrel,a.ladder(),a.wafer(),a.hybrid());
-    if (index >= 0)
+    if (index >= 0 && mDriftVelocity->at(index))
       vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
 	mDeltaDriftVelocity;
   }
@@ -832,7 +726,7 @@ int StSvtCoordinateTransform::IsOnWaferR(   const StThreeVector<double>& GlobalP
 
 
   if( fabs(LocalPosition.position().x()) < 3.1525    &&
-      fabs(LocalPosition.position().z()) < .05  ) return 1;
+      fabs(LocalPosition.position().z()) < 0.15  ) return 1;
   return 0;
 }
 

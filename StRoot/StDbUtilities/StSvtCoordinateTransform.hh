@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.15 2006/05/08 13:49:48 fisyak Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.16 2007/03/21 16:41:07 fisyak Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -58,7 +58,7 @@ public:
   
   //      Raw Data          <-->  Global Coordinate
   void  operator()(const StSvtWaferCoordinate&, StGlobalCoordinate&);
-  void  operator()(const StGlobalCoordinate&, StSvtWaferCoordinate&);
+  void  operator()(const StGlobalCoordinate&, StSvtWaferCoordinate&, Int_t Id);
   
   //      Raw Data          <--> Svt Local Coordinates
   
@@ -68,7 +68,7 @@ public:
   
   // Svt Local <--> Global
   void  operator()(const StSvtLocalCoordinate&, StGlobalCoordinate&);
-  void  operator()(const  StGlobalCoordinate& ,StSvtLocalCoordinate&);
+  void  operator()(const  StGlobalCoordinate& ,StSvtLocalCoordinate&, Int_t Id);
   void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL, StSvtT0* T0=NULL);
   void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL, StSvtHybridCollection* driftCurve=NULL, StSvtT0* T0=NULL);
   void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL, StSvtT0* T0=NULL);
