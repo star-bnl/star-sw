@@ -19,24 +19,15 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-class StSsdBarrel;
-class St_ssdDimensions;
-class St_ssdWafersPosition;
-class St_slsCtrl;
-class slsCtrl_st;
-class StSsdBarrel;
 class St_g2t_ssd_hit;
 class St_g2t_svt_hit;
 class St_sls_strip;
-class ssdConfiguration_st;
+class slsCtrl_st;
+class St_slsCtrl;
+
 class St_sls_Maker : public StMaker {
  private:
-  St_ssdDimensions      *m_dimensions;//!
-  St_ssdWafersPosition  *m_positions;//!
-  ssdConfiguration_st   *m_config;//!
-  St_slsCtrl            *m_ctrl;//!
-  StSsdBarrel           *mySsd;//!
-  
+ 
   Int_t readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit);
   Int_t readPointFromTable(St_g2t_svt_hit *g2t_svt_hit) {
     return readPointFromTable((St_g2t_ssd_hit *) g2t_svt_hit);}
@@ -45,29 +36,31 @@ class St_sls_Maker : public StMaker {
     return removeInactiveHitInTable((St_g2t_ssd_hit *) g2t_svt_hit);}
   void  chargeSharingOverStrip(slsCtrl_st  *ctrl);
   Int_t   writeStripToTable(St_sls_strip *sls_strip);
-
+  St_slsCtrl           *m_ctrl;
  public: 
-	          St_sls_Maker(const char *name="sls_strip");
-   virtual       ~St_sls_Maker();
-   virtual Int_t  Init();
-   virtual Int_t  InitRun(Int_t runNumber);
-   virtual Int_t  Make();
-   virtual Int_t  Finish();
-   virtual void   PrintInfo();
-
-   virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.9 2006/10/16 16:36:08 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
+  St_sls_Maker(const char *name="sls_strip") : StMaker(name), m_ctrl(0) {}
+  virtual       ~St_sls_Maker() {}
+  virtual Int_t  InitRun(Int_t runNumber);
+  virtual Int_t  Make();
+  virtual Int_t  Finish();
+  virtual void   PrintInfo();
+  
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.10 2007/03/21 17:19:56 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
-   ClassDef(St_sls_Maker, 1)   //StAF chain virtual base class for Makers
+
+  ClassDef(St_sls_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 
  /**************************************************************************
- * $Id: St_sls_Maker.h,v 1.9 2006/10/16 16:36:08 bouchet Exp $
+ * $Id: St_sls_Maker.h,v 1.10 2007/03/21 17:19:56 fisyak Exp $
  *
  * $Log: St_sls_Maker.h,v $
+ * Revision 1.10  2007/03/21 17:19:56  fisyak
+ * use new StSsdBarrel
+ *
  * Revision 1.9  2006/10/16 16:36:08  bouchet
  * Unify classes : Remove StSlsStrip, StSlsPoint, StSpaStrip, StSpaNoise by the same classes used in StSsdPointMaker (StSsdStrip,StSsdPoint) ; The methods for these classes are in StSsdUtil
  *
