@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.31 2005/10/21 02:46:07 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.32 2007/03/21 17:25:51 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.32  2007/03/21 17:25:51  fisyak
+ * Ivan Kotov's drift velocities, TGeoHMatrix
+ *
  * Revision 1.31  2005/10/21 02:46:07  caines
  * Improve PASA shift to 220 microns to place hit residuals in MC closer to zero
  *
@@ -131,6 +134,8 @@ using namespace std;
 //#include "StSvtConversionTable.h"
 
 #include "StSvtSimulationMaker.h"
+#include "StDbUtilities/St_svtCorrectionC.h"
+#include "StDbUtilities/St_svtHybridDriftVelocityC.h"
 
 ClassImp(StSvtSimulationMaker)
 
@@ -531,6 +536,9 @@ Int_t StSvtSimulationMaker::Make()
   StSvtLocalCoordinate localCoord (0,0,0);
   StGlobalCoordinate globalCor(0,0,0);
 
+  St_svtHybridDriftVelocityC *driftVel = St_svtHybridDriftVelocityC::instance();
+  assert(driftVel);
+  
   //
   //################  get geant hit table ##########################
   // 
@@ -578,9 +586,16 @@ Int_t StSvtSimulationMaker::Make()
       double  energy = trk_st[j].de*1e9; 
       globalCor.setPosition(VecG);
 
-      mCoordTransform->operator()(globalCor,waferCoord);
-      
+      mCoordTransform->operator()(globalCor,localCoord,volId);
+      if (! driftVel->p(localCoord.barrel(),localCoord.ladder(),localCoord.wafer(),localCoord.hybrid())) continue;
+      VecL.setX(localCoord.position().x());
+      VecL.setY(localCoord.position().y());
+      VecL.setZ(localCoord.position().z());
 
+
+      mCoordTransform->operator()(localCoord,waferCoord);
+      
+      barrel = waferCoord.barrel();
       layer = waferCoord.layer(); ladder = waferCoord.ladder();
       wafer = waferCoord.wafer(); hybrid = waferCoord.hybrid();     
       time = waferCoord.timebucket();
@@ -590,11 +605,7 @@ Int_t StSvtSimulationMaker::Make()
     
       if(driftTime < 0.0 || time > 128.0 || anode < 0.0 || anode > 240.0)
 	{ tmpBadCount++; continue;}
-      
-      mCoordTransform->operator()(globalCor,localCoord);
-      VecL.setX(localCoord.position().x());
-      VecL.setY(localCoord.position().y());
-      VecL.setZ(localCoord.position().z());
+ #if 0     
       
       
       //########### get barrel and ladder numbers correctly #################
@@ -609,7 +620,7 @@ static const int barrels[]={3,1,1,2,2};
       }	   
         
       //if(Debug()) mNTuple->Fill(time,anode,trk_st[j].x[0],trk_st[j].x[1],trk_st[j].x[2],0 ,0,0,0,0,0);
-      
+#endif      
       if( 1000*layer+100*wafer+ladder != volId){
         cout << "trouble - skipping hit" << volId <<"\t"<< trk_st[j].x[0] << "\t" 
              << trk_st[j].x[1] <<"\t and our calc"<<"\t" << layer << " " 
@@ -624,16 +635,20 @@ static const int barrels[]={3,1,1,2,2};
       mSvtAngles->calcAngles(mSvtGeom,px,py,pz,layer,ladder,wafer);
       double theta = mSvtAngles->getTheta();
       double phi = mSvtAngles->getPhi();
-
       //seting drift speed for simulation
-      double vd=0;
-      if (mDriftSpeedColl){
+      double vd=-1;
+#if 0
+      if (mDriftSpeedColl && mDriftSpeedColl->at(index)){
         vd = ((StSvtHybridDriftVelocity*)mDriftSpeedColl->at(index))->getV3(1);
         if (vd<=0) vd=mDefaultDriftVelocity;
         else vd=vd*1e-5;
       }
       //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
-     
+#else
+      vd = driftVel->DriftVelocity(barrel,ladder,wafer,hybrid)*1e-5;
+#endif
+
+      if (vd <= 0) continue;
       // double PasaShift=0.1/vd*25.; //100 um shift from pasa
       double PasaShift=0.22/vd*25.; //220 um shift from pasa
 
