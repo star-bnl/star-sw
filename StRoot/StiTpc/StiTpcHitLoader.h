@@ -27,12 +27,20 @@ class StiTpcHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
   virtual void loadHits(StEvent* source,
 			Filter<StiTrack> * trackFilter, 
 			Filter<StiHit> * hitFilter);
-  void         setMinRow(int r= 1) {_minRow = r;}
-  void         setMaxRow(int r=45) {_maxRow = r;}
+  void         setMinRow(UInt_t r= 1) {_minRow = r;}
+  void         setMaxRow(UInt_t r=45) {_maxRow = r;}
+  void         setMinSector(UInt_t r= 1) {_minSector = r;}
+  void         setMaxSector(UInt_t r=24) {_maxSector = r;}
+  UInt_t        minRow() {return _minRow;}
+  UInt_t        maxRow() {return _maxRow;}
+  UInt_t        minSector() {return _minSector;}
+  UInt_t        maxSector() {return _maxSector;}
   
  protected:
-  int         _minRow;
-  int         _maxRow;
+  UInt_t         _minRow;
+  UInt_t         _maxRow;
+  UInt_t         _minSector;
+  UInt_t         _maxSector;
 };
 
 #endif

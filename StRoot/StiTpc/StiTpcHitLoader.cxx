@@ -16,12 +16,14 @@
 #include "StiTpcHitLoader.h"
 #include "Sti/StiHitTest.h"
 //________________________________________________________________________________
-StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), _minRow(1), _maxRow(45) {}
+StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), 
+				    _minRow(1), _maxRow(45), _minSector(1), _maxSector(24) {}
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
                                  Factory<StiHit>*hitFactory,
                                  StiDetectorBuilder * detector)
-: StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector), _minRow(1), _maxRow(45) {}
+: StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector), 
+				    _minRow(1), _maxRow(45), _minSector(1), _maxSector(24) {}
 //________________________________________________________________________________
 void StiTpcHitLoader::loadHits(StEvent* source,
                                Filter<StiTrack> * trackFilter,
@@ -38,7 +40,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
   const StTpcHitCollection* tpcHits = source->tpcHitCollection();
   if (!tpcHits) return;
   unsigned int stiSector;
-  for (unsigned int sector=0; sector<24; sector++)    {
+  for (unsigned int sector=_minSector-1; sector<_maxSector; sector++)    {
 #if 0
     stiSector = sector;
 #else
@@ -51,6 +53,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       break;
     }
     //    for (unsigned int row=0; row<45; row++)
+    Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(); // cm/mkmsec
     for (unsigned int row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
@@ -69,7 +72,10 @@ void StiTpcHitLoader::loadHits(StEvent* source,
         stiHit->reset();
         stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(), hit->position().z(),hit->charge());
         hitTest.add(hit->position().x(),hit->position().y(), hit->position().z());
+	if (hit->sector() <= 12) stiHit->setVz( driftvel);
+	else                     stiHit->setVz(-driftvel);
         _hitContainer->add( stiHit );
+	
       }
       if (hitTest.width()>0.1) {
 	printf("**** TPC hits too wide (%g) sector=%d row%d\n"
