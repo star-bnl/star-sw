@@ -1,6 +1,9 @@
-// $Id: StSsdLadder.hh,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSsdLadder.hh,v 1.2 2007/03/21 17:20:41 fisyak Exp $
 //
 // $Log: StSsdLadder.hh,v $
+// Revision 1.2  2007/03/21 17:20:41  fisyak
+// use TGeoHMatrix for coordinate transformation
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -41,6 +44,9 @@ class StSsdLadder
   Int_t        idWaferToWafer(Int_t idWafer) {return (idWafer-7000)/100-1;}
   Int_t idWaferToWaferNumb(Int_t idWafer);
   Int_t waferNumbToIdWafer(Int_t waferNumb);
+  void         Reset();
+  void  SetDebug(Int_t k = 0) {mDebug = k;}
+  Int_t Debug() {return mDebug;}
  private:
   Char_t   first[1];
  public:
@@ -50,6 +56,7 @@ class StSsdLadder
   Int_t    mSsdLayer;
   Int_t    mNWaferPerLadder;
   Int_t    mNStripPerSide;
+  Int_t    mDebug;
   Char_t   last[1];
 };
 

@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSsdBarrel.hh,v 1.2 2007/03/21 17:20:41 fisyak Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.2  2007/03/21 17:20:41  fisyak
+// use TGeoHMatrix for coordinate transformation
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -70,13 +73,13 @@ class StSsdBarrel
   Int_t writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster);    
   Int_t writeStripToTable(St_spa_strip * spa_strip); //
   Int_t writeStripToTable(St_spa_strip * spa_strip,St_sls_strip *sls_strip); //
-  void  doSideClusterisation(Int_t *numberOfCluster,StSsdClusterControl *clusterControl);   
-  Int_t doClusterMatching(ssdDimensions_st *dimensions,StSsdClusterControl *clusterControl);
+  void  doSideClusterisation(Int_t *numberOfCluster);   
+  Int_t doClusterMatching();
   void  doDaqSimulation(slsCtrl_st* ctrl); //
   
   void  convertDigitToAnalog(StSsdDynamicControl *dynamicControl);
   void  convertGlobalFrameToOther();
-  void  convertUFrameToOther(ssdDimensions_st *dimensions);
+  void  convertUFrameToOther();
   void  convertToStrip(Double_t pairCreationEnergy,
 		       Int_t nstripInACluster,
 		       Double_t parDiffP,
@@ -84,17 +87,21 @@ class StSsdBarrel
 		       Double_t parIndRightP,
 		       Double_t parIndRightN,
 		       Double_t parIndLeftP,
-		       Double_t parIndLeftN);
+		       Double_t parIndLeftN
+		       );
   void  sortListStrip();
   void  sortListCluster();
   Int_t getNumberOfLadders() { return mNLadder;}
   Int_t getNWaferPerLadder() { return mNWaferPerLadder;}
   Int_t getSsdLayer() { return mSsdLayer;}
   StSsdLadder *getLadder(Int_t i=0) {return mLadders[i];}
+  ssdDimensions_st *getDimensions() {return mDimensions;}
+  StSsdClusterControl *getClusterControl() {return mClusterControl;}
   Int_t isActiveLadder(Int_t i);
   void  debugUnPeu(Int_t monLadder, Int_t monwafer);
   void  setSsdParameters(ssdDimensions_st *geom_par);
-
+  void  setLorentzShift(ssdDimensions_st *geom_par);
+  void  setClusterControl(StSsdClusterControl *clusterControl) {mClusterControl = clusterControl;}
   void  initWafers(St_ssdWafersPosition *geom_class) {initLadders(geom_class);}
   void  renumHitAfterRemove();
   
@@ -103,12 +110,14 @@ class StSsdBarrel
   Int_t waferNumbToIdWafer(Int_t waferNumb);// waferNumb = mNWaferPerLadder*(ladder-1) + waf - 1 => idwafer
   Int_t idWaferToWafer(Int_t idWafer) {return (idWafer-7000)/100-1;}
   StSsdPointList *getInactiveHitList();
-
+  void  Reset();
+  void  SetDebug(Int_t k = 0) {mDebug = k;}
+  Int_t Debug() {return mDebug;}
  private:
   Char_t   first[1];
  public:
   StSsdLadder** mLadders;
-  
+  static StSsdBarrel* Instance() {return fSsdBarrel;}
  private:
   Int_t    mSsdLayer;
   Int_t    mNLadder;
@@ -119,6 +128,12 @@ class StSsdBarrel
   Float_t  mDetectorSmallEdge;
   Float_t  mStripPitch;
   Float_t  mTheta;
+  Float_t  mShift_hole;
+  Float_t  mShift_elec;
+  ssdDimensions_st *mDimensions;
+  StSsdClusterControl *mClusterControl;
+  Int_t    mDebug;
   Char_t   last[1];
+  static   StSsdBarrel* fSsdBarrel;
 };
 #endif

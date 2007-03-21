@@ -1,6 +1,9 @@
-// $Id: StSsdLadder.cc,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSsdLadder.cc,v 1.2 2007/03/21 17:20:41 fisyak Exp $
 //
 // $Log: StSsdLadder.cc,v $
+// Revision 1.2  2007/03/21 17:20:41  fisyak
+// use TGeoHMatrix for coordinate transformation
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -14,7 +17,7 @@
 #include "StSsdUtil/StSsdLadder.hh"
 #include <Stiostream.h>
 
-StSsdLadder::StSsdLadder(Int_t rLadderNumb,Int_t rSsdLayer,Int_t rNWaferPerLadder,Int_t rNStripPerSide)
+StSsdLadder::StSsdLadder(Int_t rLadderNumb,Int_t rSsdLayer,Int_t rNWaferPerLadder,Int_t rNStripPerSide) : mDebug(0)
 {
   // Note          iWaf = 0->15 whereas iW = 1->16 !
   // mLadderNumb = iLad = 0->19 whereas iL = 1->20 !
@@ -33,6 +36,7 @@ StSsdLadder::StSsdLadder(Int_t rLadderNumb,Int_t rSsdLayer,Int_t rNWaferPerLadde
     {
       idWaf   = waferNumbToIdWafer(iWaf);
       mWafers[iWaf] = new StSsdWafer(idWaf);
+      if (Debug()) mWafers[iWaf]->SetDebug(Debug());
     }
 }
 
@@ -59,6 +63,9 @@ void StSsdLadder::initWafers(St_ssdWafersPosition *Position)
     }
 }
 
+void StSsdLadder::Reset(){
+  for (Int_t iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)mWafers[iWaf]->Reset();
+}
 
 
 Int_t StSsdLadder::idWaferToWaferNumb(Int_t idWafer)
