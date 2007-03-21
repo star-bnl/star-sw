@@ -7,7 +7,12 @@
 #include "TObject.h"
 #include "TArrayD.h"
 #include "TMath.h"
+#include "Varargs.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #ifndef __CINT__
 #define __VA_LIST__(name) \
   va_list args;     \
@@ -23,8 +28,8 @@
 
 class TRArray : public TArrayD {
  public:
-  enum ETRMatrixType {kUndefined, kVector, kRectangular, kSemiPosDefinedSymMatrix};
-  enum ETRMatrixCreatorsOp { kZero, kUnit, kTransposed, kInverted, kInvertedPosDef,
+  enum ETRMatrixType {kUndefined, kVector, kRectangular, kSemiPosDefinedSymMatrix, kDiagonalMatrix};
+  enum ETRMatrixCreatorsOp { kZero, kUnit, kTransposed, kInverted, kInvertedPosDef, kInvertedA,
 			     kMult, 
 			     kAxB, kAxBT, kATxB, kATxBT,
 			     kAxBxAT, kATxBxA, 
@@ -53,9 +58,10 @@ class TRArray : public TArrayD {
   virtual Bool_t IsValid()                           const {return fValid;}
   virtual void   SetValid(Bool_t Valid=kTRUE)              {fValid = Valid;}
   virtual Double_t &operator()(Int_t i)                    {return operator[](i);}
-  friend TRArray &operator-=(TRArray &target, const Double_t &scalar) {
+  virtual Double_t operator()(Int_t i) const               {return operator[](i);}
+  friend TRArray &operator-=(TRArray &target, Double_t scalar) {
     for (int i=0; i<target.fN; i++) target.fArray[i] -= scalar; return target;}
-  friend TRArray &operator+=(TRArray &target, const Double_t &scalar) {
+  friend TRArray &operator+=(TRArray &target, Double_t scalar) {
     for (int i=0; i<target.fN; i++) target.fArray[i] += scalar; return target;
   }
   friend Double_t operator*(const TRArray &target, const TRArray &source) {
@@ -64,10 +70,10 @@ class TRArray : public TArrayD {
     const Double_t *sArray = source.GetArray();
     for (int i=0; i<target.fN; i++) sum += target.fArray[i]*sArray[i]; return sum;
   }
-  friend TRArray &operator*=(TRArray &target, const Double_t &scalar) {
+  friend TRArray &operator*=(TRArray &target, Double_t scalar) {
     for (int i=0; i<target.fN; i++) target.fArray[i] *= scalar; return target;
   }
-  friend TRArray &operator/=(TRArray &target, const Double_t &scalar) {
+  friend TRArray &operator/=(TRArray &target, Double_t scalar) {
     for (int i=0; i<target.fN; i++) target.fArray[i] /= scalar; return target;
   }
   friend TRArray &operator-=(TRArray &target, const TRArray &A) {
@@ -83,7 +89,7 @@ class TRArray : public TArrayD {
     return target;
   }
   
-  friend Bool_t operator==(TRArray &target, const Double_t &scalar) {
+  friend Bool_t operator==(TRArray &target, Double_t scalar) {
     for (int i=0; i<target.fN; i++) if (target.fArray[i] != scalar) return kFALSE; 
     return kTRUE;
   }

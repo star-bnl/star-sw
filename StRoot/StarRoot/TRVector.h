@@ -13,12 +13,18 @@ class TRVector : public TRMatrix {
   TRVector(Int_t nrows,const Char_t *s);
   TRVector(const TRSymMatrix &S, ETRMatrixCreatorsOp kop,const TRVector& A);
   TRVector(const TRVector& A, ETRMatrixCreatorsOp kop,const TRSymMatrix &S);
+  friend TRVector operator*(const TRVector &source, Double_t scalar) {TRVector s(source); s *= scalar; return s;}
+  friend TRVector operator*(Double_t scalar, const TRVector &source) {TRVector s(source); s *= scalar; return s;}
+  friend TRVector operator/(const TRVector &source, Double_t scalar) {TRVector s(source); s /= scalar; return s;}
+  friend TRVector operator+(const TRVector &source, Double_t scalar) {TRVector s(source); s += scalar; return s;}
+  friend TRVector operator+(Double_t scalar, const TRVector &source) {TRVector s(source); s += scalar; return s;}
+  friend TRVector operator-(const TRVector &source, Double_t scalar) {TRVector s(source); s -= scalar; return s;}
+  friend TRVector operator-(Double_t scalar, const TRVector &source) {TRVector s(source); s -= scalar; return s;}
 #ifndef __CINT__
   TRVector(Int_t nrows,Double_t a0, ...);
 #endif
   virtual ~TRVector(){;}
   ETRMatrixType GetMatrixType() const {return kVector;}
-  virtual  Double_t       &operator()(Int_t i) {return TArrayD::operator[](i);}
   //  void Add(const TRMatrix& A, ETRMatrixCreatorsOp kop,con.xst  TRVector& B); 
   //  void Substruct(const TRMatrix& A, ETRMatrixCreatorsOp kop,const  TRVector& B); 
   virtual void   Print(Option_t *opt="") const;
