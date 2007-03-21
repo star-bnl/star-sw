@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.26 2006/10/17 20:18:05 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.27 2007/03/21 17:53:38 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.27  2007/03/21 17:53:38  fisyak
+// make use for new StSsdBarrel
+//
 // Revision 1.26  2006/10/17 20:18:05  fisyak
 // Add handle when SVTT mother volume is missing
 //
@@ -52,7 +55,7 @@ using namespace std;
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiSsd/StiSsdIsActiveFunctor.h" 
 #include "StiSsd/StiSsdDetectorBuilder.h" 
-
+#include "StSsdUtil/StSsdBarrel.hh"
 
 StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active, const string & inputFile)
     : StiDetectorBuilder("Ssd",active,inputFile), _siMat(0), _hybridMat(0)
@@ -70,40 +73,13 @@ StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
 void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 {
     char name[50];  
-    int nRows = 1 ;
     assert(StiVMCToolKit::GetVMC());
     gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
     load(_inputFile, source);
-    
+    StSsdBarrel *mySsd = StSsdBarrel::Instance();
+    assert(mySsd);
+    int nRows = 1 ;
     setNRows(nRows);
-    TDataSet *dbSet = source.GetDataBase("Geometry/ssd");
-    assert( dbSet);
-    St_ssdDimensions *_dimensions = (St_ssdDimensions *) dbSet->Find("ssdDimensions");
-    if (_dimensions) 
-      gMessMgr->Info()<< "StiSsdDetectorBuilder : SSD Dimensions loaded..."<<endm;
-    else
-	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - _dimensions==0");
-    ssdDimensions_st *dimensions = _dimensions->GetTable();
-    St_ssdConfiguration *_config = (St_ssdConfiguration *) dbSet->Find("ssdConfiguration");
-    if (_config) 
-      gMessMgr->Info() <<"StiSsdDetectorBuilder : SSD Configuration loaded..." << endm;
-    else
-	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - _config==0");
-    ssdConfiguration_st *config = _config->GetTable();
-
-    St_ssdWafersPosition *_wafers = (St_ssdWafersPosition *) dbSet->Find("ssdWafersPosition");
-    if (_wafers) 
-      gMessMgr->Info() <<"StiSsdDetectorBuilder : SSD Wafers position loaded..." << endm;
-    else
-	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - _wafers==0");
-    ssdWafersPosition_st *wafers = _wafers->GetTable();
-          
-    /*! buildMaterials : _gasMat is the gas the SSD lives in 
-      _siMat corresponds to Silicon Wafers. 
-      _hybridMat corresponds to Hybrids.
-      all SSD materials (average).
-    */
-    //gMessMgr->Info() << "StiSsdDetectorBuilder::buildMaterials() - I - Started "<<endm;
     if (! _gasMat)
       _gasMat     = add(new StiMaterial("SsdAir",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
     if (! _siMat)
@@ -117,36 +93,48 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildMaterials() - I - Done "<<endm;  
     cout << "StiSsdDetectorBuilder::buildMaterials() - I - Done "<<endl;  
-    Int_t nWafers = config->nMaxWafers/config->nMaxLadders;
+    ssdDimensions_st *dimensions = mySsd->getDimensions();
+    Int_t NL = mySsd->getNumberOfLadders();
+    Int_t NW = mySsd->getNWaferPerLadder();
+    StSsdLadder *Ladder = mySsd->getLadder(0);
+    assert(Ladder);
+    StSsdWafer *Wafer1 = Ladder->getWafer(0);
+    StSsdWafer *Wafer2 = Ladder->getWafer(NW-1);
+    assert(Wafer1 && Wafer2);
+    Double_t width = TMath::Abs(Wafer1->x(2) - Wafer2->x(2))/2. + 2;
     StiPlanarShape *ladderShape = new StiPlanarShape(name,
-						     nWafers*dimensions->waferHalfWidth, 
+						     width,
 						     dimensions->waferHalfThickness,
 						     dimensions->waferHalfLength );
     add(ladderShape);
     Int_t layer = 0;
-    setNSectors(layer,config->nMaxLadders); 
+    setNSectors(layer,NL); 
     /*! Placement of Ssd Modules is currently done by reading the geom.C table. 
       Ladders are placed according to the coordinates of its first module number 	  
       int idwafer = 7*1000+wafer*100+ladder;      	
       ----> ladder # 1  ===> module 7101 
       ----> ladder # 20 ===> module 7120
     */
-    Int_t N = _wafers->GetNRows();
-    for (Int_t i = 0; i < N; i++, wafers++) {
-      Int_t ladder = wafers->id%100;
-      Int_t Layer  = wafers->id/1000; if (Layer > 7) Layer = 7;
-      Int_t Wafer  = (wafers->id - 1000*Layer)/100;
-      if (Wafer != 1) continue;//this gives us the first wafer on the ladder
-      StThreeVectorD centerVector(wafers->centerPosition[0],wafers->centerPosition[1],wafers->centerPosition[2]);
-      StThreeVectorD normalVector(wafers->normalDirection[0],wafers->normalDirection[1],wafers->normalDirection[2]);
+    for (Int_t ladder = 0; ladder < NL; ladder++) {
+      Ladder = mySsd->getLadder(ladder);
+      if (! Ladder) continue;
+      Wafer1 = Ladder->getWafer(0);
+      Wafer2 = Ladder->getWafer(NW-1);
+      if (! Wafer1 || ! Wafer2) continue; 
+      StThreeVectorD centerVector1(Wafer1->x(0),Wafer1->x(1),Wafer1->x(2));
+      StThreeVectorD normalVector1(Wafer1->n(0),Wafer1->n(1),Wafer1->n(2));
+      StThreeVectorD centerVector2(Wafer2->x(0),Wafer2->x(1),Wafer2->x(2));
+      StThreeVectorD normalVector2(Wafer2->n(0),Wafer2->n(1),Wafer2->n(2));
+      StThreeVectorD centerVector = centerVector1 + centerVector2; centerVector *= 0.5;
+      StThreeVectorD normalVector = normalVector1 + normalVector2; normalVector *= 0.5;
       Double_t prod = centerVector*normalVector;
       if (prod < 0) normalVector *= -1;
       double phi  = centerVector.phi();
       double phiD = normalVector.phi();
       double r = centerVector.perp();
-      cout <<"Det Nber = "<<wafers->id<<"\tcv\t:"<<centerVector<<"\tphi:\t"<<phi<<"\tr:\t"<<r<<endl;
+      cout <<"Det Id = "<<Wafer1->getId()<<"\tcv\t:"<<centerVector<<"\tphi:\t"<<phi<<"\tr:\t"<<r<<"\tz:\t" << centerVector.z()<< endl;
       StiPlacement *pPlacement = new StiPlacement;
-      pPlacement->setZcenter(0.);
+      pPlacement->setZcenter(centerVector.z());
       pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
       pPlacement->setLayerAngle(phi); //this is only used for ordering in detector container...
       pPlacement->setRegion(StiPlacement::kMidRapidity);
@@ -167,7 +155,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       pLadder->setKey(1,0);
       pLadder->setKey(2,ladder-1);
       pLadder->setElossCalculator(siElossCalculator);
-      add(layer,ladder-1,pLadder); 
+      add(layer,ladder,pLadder); 
     }
     useVMCGeometry();
 }
