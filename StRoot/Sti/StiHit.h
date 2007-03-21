@@ -63,55 +63,49 @@ public:
     ///Default destructor.
     ~StiHit();
 
-    ///Return the local x value.
-    const float &x() const;
-    ///Return the local y value.
-    const float &y() const;
-    ///Return the local/global z value.
-    const float &z() const;
-    ///Return the global x value.
-    float x_g() const;
-    ///Return the global y value.
-    float y_g() const;
-    ///Return the local/global z value.
-    float z_g() const;
-    ///Return the (x,x) component of the error matrix.
-    float sxx() const;
-    ///Return the (y,y) component of the error matrix.
-    float syy() const;
-    ///Return the (z,z) component of the error matrix.
-    float szz() const;
-    ///Return the (x,y) component of the error matrix.
-    float sxy() const;
-    ///Return the (x,z) component of the error matrix.
-    float sxz() const;
-    ///Return the (y,z) component of the error matrix.
-    float syz() const;
-const float *errMtx() const   		{return &msxx;}
+    ///Return the local x, y, z values.
+    const float &x() const {return mx;}
+    const float &y() const {return my;}
+    const float &z() const {return mz;}
+    const float  y(float time) const {return my + _vy*time;}
+    const float  z(float time) const {return mz + _vz*time;}
+    ///Return the global x, y, z values.
+    float x_g() const {return _xg;}
+    float y_g() const {return _yg;}
+    float z_g() const {return _zg;}
+    
+    ///Return components of the error matrix.
+    float sxx() const {return msxx;}
+    float syy() const {return msyy;}
+    float szz() const {return mszz;}
+    float sxy() const {return msxy;}
+    float sxz() const {return msxz;}
+    float syz() const {return msyz;}
+    const float *errMtx() const   		{return &msxx;}
     ///Return the energy deposition associated with this point 
     float getEloss();
     ///Return the refAngle of the detector plane from which the hit arose.
-    float refangle() const;
+    float refangle() const {return mrefangle;}
     ///Return the position of the detector plane from whcih the hit arose.
-    float position() const;
+    float position() const {return mposition;}
     ///Return a const pointer to the StiDetector object from which the hit
     ///arose.
-    const StiDetector* detector() const;
+    const StiDetector* detector() const {return mdetector;}
     ///Test for DCA.  Fake hit for dca calculation
     int isDca() const;
     ///Make fake hit for dca calculation
     void makeDca();
     ///Return a const pointer to the StHit object corresponding to this StiHit
     ///instance
-    //const StHit* stHit() const;
-    const StMeasuredPoint * stHit() const;
+    //const StHit* stHit() const 
+    const StMeasuredPoint * stHit() const {return msthit;}
 
     ///If we are running in simulated mode, return a const pointer to the
     /// StMcHit associated with this StiHit.
     //const StMcHit* stMcHit() const;
 
     ///Return the number of times this hit was assigned to a track
-    unsigned int timesUsed() const;
+    unsigned int timesUsed() const { return mTimesUsed;}
     
     ///Return a boolean that marks whether or not this hit is assigned to a
     ///track.
@@ -149,11 +143,15 @@ const float *errMtx() const   		{return &msxx;}
     void setStHit(const StMeasuredPoint*hit){msthit=hit;}
     ///Set the number of times used
     void setTimesUsed(unsigned int);
+    void setVz(float vz) {_vz = vz;}
+    void setVy(float vy) {_vy = vy;}
     void reset();
     void unset(){;}
     void rotate(double angle);
     double getValue(int key) const;
     double getPseudoRapidity() const;
+    float  vz() const {return _vz;}
+    float  vy() const {return _vy;}
     friend ostream& operator<<(ostream& os, const StiHit& h);
 private:
     char  mBeg[1];
@@ -174,28 +172,13 @@ private:
     const StiDetector* mdetector;
     const StMeasuredPoint * msthit;
     float _energy;
+    // drift velocities cm/mksec( 0 for non driting )
+    float _vy, _vz;
+    
     char  mEnd[1];
 public:
     int mCount;
 };
-inline const float &StiHit::x()   const {return mx;}
-inline const float &StiHit::y()   const {return my;}
-inline const float &StiHit::z()   const {return mz;}
-inline float StiHit::x_g() const {return _xg;}
-inline float StiHit::y_g() const {return _yg;}
-inline float StiHit::z_g() const {return _zg;}
-inline float StiHit::sxx() const {return msxx;}
-inline float StiHit::syy() const {return msyy;}
-inline float StiHit::szz() const {return mszz;}
-inline float StiHit::sxy() const {return msxy;}
-inline float StiHit::sxz() const {return msxz;}
-inline float StiHit::syz() const {return msyz;}
-inline float StiHit::refangle() const {return mrefangle;}
-inline float StiHit::position() const {return mposition;}
-inline const StMeasuredPoint* StiHit::stHit() const {return msthit;}
-inline const StiDetector* StiHit::detector() const {return mdetector;}
-inline unsigned int StiHit::timesUsed() const { return mTimesUsed;}
-
 
 //Functors for ordering hits
 struct StiHitRadiusLessThan
