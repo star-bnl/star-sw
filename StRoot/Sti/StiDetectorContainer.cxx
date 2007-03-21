@@ -134,7 +134,7 @@ StiDetector* StiDetectorContainer::getCurrentDetector() const
   return det;
 }
 
-
+#if 0
 bool StiDetectorContainer::moveToNextRegion()
 {
   //cout <<"StiDetectorContainer::moveToNextRegion()"<<endl;
@@ -177,7 +177,7 @@ bool StiDetectorContainer::moveToPreviousRegion()
   mphi_it = (*mradial_it)->begin();
   return true;
 }
-
+#endif
 /*! A call to moveIn() may not always alter the StiDetector to which the
 container points.  Notably, if there is nowhere else to 'move in to', then
 moveIn() will have no action.  So, to see if the action succeeded, one must
@@ -229,7 +229,7 @@ bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
     }
   return true;
 }
-
+#if 0
 /*! A call to moveOut() may not always alter the StiDetector to which the
 container points.  Notably, if there is nowhere else to 'move out to', then
 moveOut() will have no action.  So, to see if the action succeeded, one must
@@ -295,7 +295,7 @@ void StiDetectorContainer::moveMinusPhi()
   }
   --mphi_it;
 }
-
+#endif
 /*! Recursively load all detector definition files from the given directory.
 There is internal protection to avoid building the detector representation
 more than once.
