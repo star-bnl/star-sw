@@ -1,5 +1,10 @@
 #include "StiPullEvent.h"
+#include "RVersion.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "StEvent/StEnumerations.h"
 ClassImp(StiPullTrk)
 ClassImp(StiPullHit)
