@@ -5,37 +5,41 @@
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TSystem.h"
+#include "TMath.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "TRandom.h"
 #include "TRandom2.h"
 #include "THelixTrack.h"
 #include "StMatrixD.hh"
-#include <complex>
-
+#include "TComplex.h"
+#include "TH1.h"
 // Complex numbers
-typedef std::complex<double > Complex;
-const Complex Im(0,1);
+//const TComplex Im(0,1);
 //_____________________________________________________________________________
-inline static double dot(const Complex &a,const Complex &b)
-{return a.real()*b.real()+a.imag()*b.imag();}
+inline static double dot(const TComplex &a,const TComplex &b)
+{return a.Re()*b.Re()+a.Im()*b.Im();}
 //_____________________________________________________________________________
-Complex expOne(Complex x)
+TComplex expOne(TComplex x)
 {
-  double a = std::abs(x);
+  double a = TComplex::Abs(x);
   if (a<0.01) {
     return 1.+x*((1/2.) + x*((1/6.)+ x*(1/24.)));
   } else {
-    return (std::exp(x)-1.)/x;
+    return (TComplex::Exp(x)-1.)/x;
   }
 }
 //_____________________________________________________________________________
-Complex expOneD(Complex x)
+TComplex expOneD(TComplex x)
 {
-  double a = std::abs(x);
+  double a = TComplex::Abs(x);
   if (a<0.01) {
     return (1/2. + x*((1/3.)+ x*((1/8.)+x*(1/30.))));
   } else {
-    return (std::exp(x)*(x-1.)+1.)/(x*x);
+    return (TComplex::Exp(x)*(x-1.)+1.)/(x*x);
   }
 }
 
@@ -45,7 +49,7 @@ Complex expOneD(Complex x)
 
 
 const double Zero = 1.e-6;
-static Complex sgCX1,sgCX2,sgCD1,sgCD2,sgImTet,sgCOne,sgCf1;
+static TComplex sgCX1,sgCX2,sgCD1,sgCD2,sgImTet,sgCOne,sgCf1;
 #if 0
 //_____________________________________________________________________________
 static int myEqu(double *s, int na, double *b,int nb)
@@ -88,24 +92,24 @@ static void Eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 #endif //0
 //_____________________________________________________________________________
-static Complex MyFactor(double rho,double drho,double s)
+static TComplex MyFactor(double rho,double drho,double s)
 {
 // Integral exp(i*Phi)*dL where Phi = rho*L + 0.5*drho*L**2
 // Let it is equal  exp(i*Phi)*A(L) + const
 // then dA/dL + i*(rho+drho*L)*A = 1
 // Solve this equation for Taylor representation of A(L)
 // static int Iter=0;
-  Complex arr[3],add;
-  Complex Sum; //
+  TComplex arr[3],add;
+  TComplex Sum; //
   Sum = 0.0;
   arr[0] = 1.; arr[1] = 0.;
   drho = drho/rho;
   double ss = s;
   for (int j=2;1;j++) {
-    arr[2] = -Im*rho*(arr[1]+drho*arr[0])/double(j);
+    arr[2] = -TComplex(0,1)*rho*(arr[1]+drho*arr[0])/double(j);
     ss *=s; add = ss*arr[2]; Sum += add;
-    if (std::norm(Sum)*1.e-12>std::norm(add)) break;
-//    printf(" Iter=%d %d %g\n",Iter++,j-1,std::abs(add));
+    if (1e-12*Sum.Rho2() > add.Rho2()) break;
+//    printf(" Iter=%d %d %g\n",Iter++,j-1,TComplex::Abs(add));
     arr[0]=arr[1]; arr[1]=arr[2]; 
   }
   return Sum;
@@ -587,8 +591,8 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 {
 
     static int nCount=0; nCount++;
-    Complex cpnt(point[0]-fX[0],point[1]-fX[1]);
-    Complex cdir(fP[0],fP[1]); cdir /=std::abs(cdir);
+    TComplex cpnt(point[0]-fX[0],point[1]-fX[1]);
+    TComplex cdir(fP[0],fP[1]); cdir /=TComplex::Abs(cdir);
     double step[3]={0,0,0};
 //		Z estimated step 
 
@@ -601,15 +605,15 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 //		R estimated step
     {
       cpnt /= cdir;
-      if (fabs(cpnt.real()*fRho) < 0.01) {
-        step[2]=cpnt.real();
+      if (fabs(cpnt.Re()*fRho) < 0.01) {
+        step[2]=cpnt.Re();
       } else {
         double rho = fRho;
         for (int i=0;i<2;i++) {
-          Complex ctst = (1.+Im*rho*cpnt);
-	  ctst /=std::abs(ctst);
-	  ctst = std::log(ctst);
-	  step[2]= ctst.imag()/rho;
+          TComplex ctst = (1.+TComplex(0,1)*rho*cpnt);
+	  ctst /=TComplex::Abs(ctst);
+	  ctst = TComplex::Log(ctst);
+	  step[2]= ctst.Im()/rho;
           if (!fDRho) break;
 	  rho = fRho+ 0.5*fDRho*step[2];
         }
@@ -781,11 +785,11 @@ void THelixTrack::Rot(double angle)
 //______________________________________________________________________________
 void THelixTrack::Rot(double cosa,double sina)
 {
-  Complex CX(fX[0],fX[1]),CP(fP[0],fP[1]);
-  Complex A (cosa,sina);
-  CX *=A; fX[0] = CX.real(); fX[1]=CX.imag();
+  TComplex CX(fX[0],fX[1]),CP(fP[0],fP[1]);
+  TComplex A (cosa,sina);
+  CX *=A; fX[0] = CX.Re(); fX[1]=CX.Im();
   CP *=A;
-  fP[0] = CP.real(); fP[1]=CP.imag();
+  fP[0] = CP.Re(); fP[1]=CP.Im();
 }
 //_____________________________________________________________________________
 void THelixTrack::Streamer(TBuffer &){}
@@ -870,15 +874,15 @@ double THelixTrack::Eval(double step, double *xyz, double *dir) const
   double ztep = step*fCosL;
   double teta = ztep*(fRho+0.5*ztep*fDRho);
 
-  sgCX1=Complex(fX[0]  ,fX[1]  );
-  sgCD1=Complex(fP[0],fP[1]);
-  sgCD1 /=std::abs(sgCD1);
-  sgImTet = Complex(0,teta);
-  Complex ImRho(0,fRho);
-  if (fabs(sgImTet.imag()) > 0.01)	{
-//    Complex sgCf1 = std::exp(sgImTet)-1.;
-    Complex hlf = std::exp(0.5*sgImTet);
-    sgCf1 = 2.*Im*hlf*hlf.imag();
+  sgCX1=TComplex(fX[0]  ,fX[1]  );
+  sgCD1=TComplex(fP[0],fP[1]);
+  sgCD1 /=TComplex::Abs(sgCD1);
+  sgImTet = TComplex(0,teta);
+  TComplex ImRho(0,fRho);
+  if (fabs(sgImTet.Im()) > 0.01)	{
+//    TComplex sgCf1 = TComplex::Exp(sgImTet)-1.;
+    TComplex hlf = TComplex::Exp(0.5*sgImTet);
+    sgCf1 = 2.*TComplex(0,1)*hlf*hlf.Im();
     sgCD2 = sgCD1 + sgCD1*sgCf1;
     sgCX2 = sgCD1*sgCf1/(ImRho);
     if (fDRho) {//
@@ -892,13 +896,13 @@ double THelixTrack::Eval(double step, double *xyz, double *dir) const
     sgCX2 = sgCD1*ztep*sgCOne;
   }
   if (xyz) {
-    xyz[0] = sgCX1.real()+sgCX2.real();
-    xyz[1] = sgCX1.imag()+sgCX2.imag();
+    xyz[0] = sgCX1.Re()+sgCX2.Re();
+    xyz[1] = sgCX1.Im()+sgCX2.Im();
     xyz[2] = fX[2]+fP[2]*step;
   } 
   if (dir) {
-    dir[0] = sgCD2.real()*fCosL;
-    dir[1] = sgCD2.imag()*fCosL;
+    dir[0] = sgCD2.Re()*fCosL;
+    dir[1] = sgCD2.Im()*fCosL;
     dir[2] = fP[2];
   }
 
@@ -1027,15 +1031,15 @@ void TCircle::Print(const char* txt) const
 //______________________________________________________________________________
 double TCircle::Path(const double *pnt) const
 {
-  Complex CX1(pnt[0]-fX[0],pnt[1]-fX[1]);
-  Complex CP(fD[0],fD[1]);
-  Complex CXP = Im*CX1/CP;
-  Complex CXPRho = CXP*fRho;
+  TComplex CX1(pnt[0]-fX[0],pnt[1]-fX[1]);
+  TComplex CP(fD[0],fD[1]);
+  TComplex CXP = TComplex(0,1)*CX1/CP;
+  TComplex CXPRho = CXP*fRho;
   double s;
-  if (std::abs(CXPRho)>0.001) {
-    s = std::log(1.+CXPRho).imag()/fRho;
+  if (TComplex::Abs(CXPRho)>0.001) {
+    s = TComplex::Log(1.+CXPRho).Im()/fRho;
   } else {
-    s = (CXP*(1.-CXPRho*(0.5-CXPRho*(1/3.-CXPRho*0.25)))).imag();
+    s = (CXP*(1.-CXPRho*(0.5-CXPRho*(1/3.-CXPRho*0.25)))).Im();
   }
 //   Check
   double x[2],d[2];
@@ -1047,20 +1051,20 @@ double TCircle::Path(const double *pnt) const
 double TCircle::Eval(double step,double *X, double *D) const
 {
   
-  sgCX1		=Complex(fX[0],fX[1]);
-  sgCD1		=Complex(fD[0],fD[1]);		//  exp(I*Fi0)
-  sgImTet	=Complex(0,step*fRho);		//  I*Rho*L
+  sgCX1		=TComplex(fX[0],fX[1]);
+  sgCD1		=TComplex(fD[0],fD[1]);		//  exp(I*Fi0)
+  sgImTet	=TComplex(0,step*fRho);		//  I*Rho*L
   sgCOne        =expOne(sgImTet);
   sgCf1 	=sgImTet*sgCOne;
   
   sgCD2 = sgCD1*sgCf1+sgCD1; 			// exp(I*Fi0+I*Rho*L)
   sgCX2 = sgCD1*sgCOne*step;			// exp(I*Fi0)*(exp(I*Rho*L)-1)/(I*Rho)
-  X[0] = sgCX2.real()+sgCX1.real();
-  X[1] = sgCX2.imag()+sgCX1.imag();
+  X[0] = sgCX2.Re()+sgCX1.Re();
+  X[1] = sgCX2.Im()+sgCX1.Im();
   if (D) {
-    sgCD2/= std::abs(sgCD2);
-    D[0] = sgCD2.real();
-    D[1] = sgCD2.imag();
+    sgCD2/= TComplex::Abs(sgCD2);
+    D[0] = sgCD2.Re();
+    D[1] = sgCD2.Im();
   }
   return step;
 }
@@ -1078,9 +1082,9 @@ void TCircle::MoveErrs(double l)
 {
   double F[3][3],oErr[6];
   memset(F[0],0,sizeof(F));
-  F[0][0] = sgCf1.real()+1.;
-  F[0][1] = l*sgCOne.real();
-  F[0][2] = l*l*expOneD(-sgImTet).real();
+  F[0][0] = sgCf1.Re()+1.;
+  F[0][1] = l*sgCOne.Re();
+  F[0][2] = l*l*expOneD(-sgImTet).Re();
   
   F[1][1] = 1;
   F[1][2] = l;
@@ -1096,11 +1100,11 @@ void TCircle::Rot(double angle)
 //______________________________________________________________________________
 void TCircle::Rot(double cosa,double sina)
 {
-  Complex CX(fX[0],fX[1]),CP(fD[0],fD[1]);
-  Complex A (cosa,sina);
-  CX *=A; fX[0] = CX.real(); fX[1]=CX.imag();
-  CP *=A; CP/=std::abs(CP);
-  fD[0] = CP.real(); fD[1]=CP.imag();
+  TComplex CX(fX[0],fX[1]),CP(fD[0],fD[1]);
+  TComplex A (cosa,sina);
+  CX *=A; fX[0] = CX.Re(); fX[1]=CX.Im();
+  CP *=A; CP/=TComplex::Abs(CP);
+  fD[0] = CP.Re(); fD[1]=CP.Im();
 }
 //______________________________________________________________________________
 void TCircle::Backward()
@@ -2759,7 +2763,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.26 2007/01/26 19:56:24 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.27 2007/03/21 17:41:32 fisyak Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2775,6 +2779,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.27  2007/03/21 17:41:32  fisyak
+ * replace complex by TComplex
+ *
  * Revision 1.26  2007/01/26 19:56:24  perev
  * tune up
  *
