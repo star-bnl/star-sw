@@ -46,15 +46,20 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.24 2006/12/18 01:29:11 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.25 2007/03/21 17:51:17 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
-		void load(TDataSet *);
+    void load(TDataSet *);
 
-private:
+ protected:
+    virtual TDataSet  *FindDataSet (const char* logInput,
+                                    const StMaker *uppMk=0,
+                                    const StMaker *dowMk=0) const ;
+  TDataSet*   fVolume;   //!
+    
+ private:
     void  MyClear();
-private:
 
     double 		 runField;
     bool                 eventIsFinished;

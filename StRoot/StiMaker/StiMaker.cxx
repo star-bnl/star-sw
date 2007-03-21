@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.174  2007/03/21 17:51:17  fisyak
+// add option for EastOff and WestOff, FindDataSet for Sti Geometry
+//
 // Revision 1.173  2006/12/18 01:29:00  perev
 // +noTreeSearch flag & pulls
 //
@@ -296,7 +299,11 @@ More detailed: 				<br>
 #include <string>
 #include "TSystem.h"
 #include "TTree.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "StChain.h"
 #include "TDataSet.h"
 #include "TDataSetIter.h"
@@ -343,9 +350,9 @@ More detailed: 				<br>
 #include "tables/St_KalmanTrackFinderParameters_Table.h"
 #include "tables/St_KalmanTrackFitterParameters_Table.h"
 #include "tables/St_HitError_Table.h"
-
+#include "TGeometry.h"
 #include "Sti/StiTimer.h"
-
+#include "StiDetectorVolume.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -357,6 +364,7 @@ ClassImp(StiMaker)
 //_____________________________________________________________________________
 StiMaker::StiMaker(const Char_t *name) : 
     StMaker(name),
+    fVolume(0),
     _initialized(false),
     _toolkit(0),
     _hitLoader(0),
@@ -380,6 +388,8 @@ StiMaker::StiMaker(const Char_t *name) :
   SetAttr("activeTpc"		,kTRUE);
   SetAttr("useSvt"		,kTRUE); 
 //SetAttr("activeSvt"		,kTRUE);
+  SetAttr("useSsd"		,kTRUE); 
+//SetAttr("activeSsd"		,kTRUE);
 //SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
   SetAttr("useEventFiller"      ,kTRUE);
   SetAttr("useTracker"          ,kTRUE);
@@ -467,10 +477,22 @@ Int_t StiMaker::InitDetectors()
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
       _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"),SAttr("tpcInputFile")));
       group->setGroupId(kTpcId);
+      StiTpcHitLoader* hitLoader = (StiTpcHitLoader*) group->hitLoader();
       if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row 
-	((StiTpcHitLoader*)group->hitLoader())->setMinRow(2);
-	cout << "StiMaker::InitDetectors() -I- Ignore hits in the first pad row"<<endl;
+	hitLoader->setMinRow(2);
       }
+      if (IAttr("EastOff")) {
+	hitLoader->setMinSector(1);
+	hitLoader->setMaxSector(12);
+      }
+      if (IAttr("WestOff")) {
+	hitLoader->setMinSector(13);
+	hitLoader->setMaxSector(24);
+      }
+      cout << "StiMaker::InitDetectors() -I- use hits in sectors[" 
+	   << hitLoader->minSector() << "," << hitLoader->maxSector() << "] and rows["
+	   << hitLoader->minRow() << "," <<  hitLoader->maxRow() << "]" << endl;
+      
     }
   if (IAttr("useSvt"))
     {
@@ -699,3 +721,28 @@ Int_t StiMaker::FillPulls()
   if (k>1000000) return kStSTOP;
   return kStOK;  
 }  
+//_____________________________________________________________________________
+TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
+                                        const StMaker *dowMk) const 
+{
+  TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
+  
+  if (ds || strcmp(logInput,"STIGEOM")) return ds;
+  
+//  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit->getDetectorBuilder(), kActive);
+  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit, TString(), kActive);
+  
+  if (fVolume) { 
+     if (gGeometry) {
+        TList *listOfVolume = gGeometry->GetListOfNodes();
+
+        // Remove hall from the list of ROOT nodes to make it free of ROOT control
+        listOfVolume->Remove(fVolume);
+        listOfVolume->Remove(fVolume);
+     }
+     // Add "hall" into ".const" area of this maker
+     ((StiMaker *)this)->AddConst(fVolume);
+     if (Debug()) fVolume->ls(3);
+  }
+  return fVolume;
+}
