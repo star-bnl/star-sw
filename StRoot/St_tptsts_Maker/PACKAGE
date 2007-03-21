@@ -1,5 +1,0 @@
-# $Id $
-# package St_tptsts_Maker
-# author: 
-Library:libSt_tptsts_Maker.so:LIBS +=   -lStChain  -l_St_tpc  -ltpc_Tables
-#Library:libSt_tptsts_Maker.so:LIBS +=   -lStChain  -lSt_tpc  -ltpc_Tables

@@ -1,4 +1,0 @@
-# $Id $
-# package StTofUtil
-# author: 
-Library:libStTofUtil.so:LIBS +=   -lStEvent
