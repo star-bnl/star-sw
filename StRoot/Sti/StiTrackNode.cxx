@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "StiTrackNode.h"
-#include "TCL.h"
+#include "TMath.h"
 #include "TRMatrix.h"
 #include "TRVector.h"
 int StiTrackNode::mgFlag=0;
@@ -108,22 +108,21 @@ int StiHitContino::getNHits() const
 { int n=0; for(int i=0;i<kMaxSize;i++) {if (mHits[i]) n++;}; return n;}	
 //______________________________________________________________________________
 
-#include <complex>
-typedef std::complex<double > Complex;
-const Complex Im(0,1);
+#include "TComplex.h"
+const TComplex Im(0,1);
 //______________________________________________________________________________
 int StiTrackNode::cylCross(double r, const double dx[4],double Rho,double out[4])
 {
 //  dx[0] == cosCA; dx[1] == sinCA;dx[2] == _x; dx[3]==_y
 
-  Complex d(dx[0],dx[1]),n(-dx[1],dx[0]),x(dx[2],dx[3]);
-  Complex res[2];
-  Complex xd = x/d;
-  double R2 = x.real()*x.real()+x.imag()*x.imag();
+  TComplex d(dx[0],dx[1]),n(-dx[1],dx[0]),x(dx[2],dx[3]);
+  TComplex res[2];
+  TComplex xd = x/d;
+  double R2 = x.Re()*x.Re()+x.Im()*x.Im();
 
   if (R2*Rho*Rho< 1e-4) {// Low curvature approx
-    double a = (1.+xd.imag()*Rho);
-    double b = xd.real();
+    double a = (1.+xd.Im()*Rho);
+    double b = xd.Re();
     double c = (R2-r*r);
     double dis = b*b - a*c;
     if (dis<0.) 		return 1;
@@ -137,20 +136,23 @@ int StiTrackNode::cylCross(double r, const double dx[4],double Rho,double out[4]
 
   } else {	//General case
 
-    Complex Q = Rho*x+n;
-    double a1Q = ((x.real()*n.real()+x.imag()*n.imag())*2 + R2*Rho);
+    TComplex Q = Rho*x+n;
+    double a1Q = ((x.Re()*n.Re()+x.Im()*n.Im())*2 + R2*Rho);
     double aQ = a1Q*Rho+1;
-    double q = std::log(Q).imag();
+    double q = TComplex::Log(Q).Im();
  //       cos(Al-q) = ((Rho*r)**2 +Q**2-1)/(2*Q*r*Rho)
     double mycos = (r*r*Rho+a1Q)/(2*aQ*r);
     if (fabs(mycos)>1) 		return 1;
     double ang = acos(mycos);
-    res[0] = r*std::exp(Im*(q+ang));
-    res[1] = r*std::exp(Im*(q-ang));
+    res[0] = r*TComplex::Exp(Im*(q+ang));
+    res[1] = r*TComplex::Exp(Im*(q-ang));
   }
-  if (res[0].real() < res[1].real()) {//swap
+  if (res[0].Re() < res[1].Re()) {//swap
     xd = res[0]; res[0]=res[1]; res[1]=xd;}
-  memcpy(out,res,sizeof(res));
+  out[0] = res[0].Re();
+  out[1] = res[0].Im();
+  out[2] = res[1].Re();
+  out[3] = res[1].Im();
   return 0;
 }
 
