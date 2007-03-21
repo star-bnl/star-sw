@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.104 2006/12/24 02:16:36 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.105 2007/03/21 17:47:24 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.105  2007/03/21 17:47:24  fisyak
+ * Time of Flight
+ *
  * Revision 2.104  2006/12/24 02:16:36  perev
  * _inf=0 added in copy constructor
  *
@@ -322,11 +325,16 @@ using namespace std;
 #include "StiTrackNodeHelper.h"
 #include "StiFactory.h"
 #include "TString.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "THelixTrack.h"
 #include "TRMatrix.h"
 #include "TRVector.h"
 #include "StarMagField.h"
+#include "TMath.h"
 #define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
 #define PrPP(A,B) {cout << "=== StiKalmanTrackNode::" << (#A); PrP((B)); cout << endl;}
 // Local Track Model
@@ -492,10 +500,11 @@ void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
 //______________________________________________________________________________
 double StiKalmanTrackNode::getHz() const
 {
+  static const Double_t EC = 2.99792458e-4;
    if (mHz) return mHz;
    double h[3];
    StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
-   h[2] = 0.000299792458*h[2];
+   h[2] = EC*h[2];
    if (fabs(h[2]) < 3e-33) h[2]=3e-33;
    mHz = h[2];
    return mHz;
@@ -1199,15 +1208,16 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double deltaL = deltaX/mFP._cosCA;
   double deltaY = mFP._sinCA *deltaL;
   double deltaZ = mFP._tanl  *deltaL;
-
-  double dyt=(mFP._y-hit->y()) + deltaY;
-  double dzt=(mFP._z-hit->z()) + deltaZ;
+  float time = 0;
+  if (hit->vz() || hit->vy()) time = getTime();
+  double dyt=(mFP._y-hit->y(time)) + deltaY;
+  double dzt=(mFP._z-hit->z(time)) + deltaZ;
   double cc= (dyt*r00*dyt + 2*r01*dyt*dzt + dzt*r11*dzt)/_det;
 
 #ifdef Sti_DEBUG
   if (debug() & 4) {
     TRSymMatrix G(R,TRArray::kInverted);
-    TRVector r(2,hit->y()-mFP._y,hit->z()-mFP._z);
+    TRVector r(2,hit->y(time)-mFP._y,hit->z(time)-mFP._z);
     Double_t chisq = G.Product(r,TRArray::kATxSxA);
     Double_t diff = chisq - cc;
     Double_t sum  = chisq + cc;
@@ -1245,11 +1255,12 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 {  
   propagateCurv(previousNode);
   double pt = getPt();
+#if 0
   if (pt>=1e3) {
     mPP() = mFP; mPE() = mFE;
     return;
   }
-
+#endif
   double relRadThickness;
   // Half path length in previous node
   double pL1,pL2,pL3,d1,d2,d3,dxEloss=0;
@@ -1316,6 +1327,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 					dxEloss += d3*pL3;
 				}
     }
+  if (pt > 0.350 && TMath::Abs(getHz()) < 1e-3) pt = 0.350;
   double p2=(1.+mFP._tanl*mFP._tanl)*pt*pt;
   double m=pars->massHypothesis;
   double m2=m*m;
@@ -1413,8 +1425,10 @@ static int nCall=0; nCall++;
   double k20=mFE._cEY*r00+mFE._cEZ*r01, k21=mFE._cEY*r01+mFE._cEZ*r11;
   double k30=mFE._cPY*r00+mFE._cPZ*r01, k31=mFE._cPY*r01+mFE._cPZ*r11;
   double k40=mFE._cTY*r00+mFE._cTZ*r01, k41=mFE._cTY*r01+mFE._cTZ*r11;
-  double dyt  = getHit()->y() - mFP._y;
-  double dzt  = getHit()->z() - mFP._z;
+  float time = 0;
+  if (getHit()->vz() || getHit()->vy()) time = getTime();
+  double dyt  = getHit()->y(time) - mFP._y;
+  double dzt  = getHit()->z(time) - mFP._z;
   double dp3  = k30*dyt + k31*dzt;
   double dp2  = k20*dyt + k21*dzt;
   double dp4  = k40*dyt + k41*dzt;
@@ -1696,7 +1710,7 @@ int StiKalmanTrackNode::locate()
   if (fabs(mFP._z)>200. || fabs(mFP._y)>200. ) return -1;
   edge  = 2.;
   if (mFP._x<50.)      edge  = 0.3;  
-  edge = 0; //VP the meaning of edge is not clear
+  //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
   Int_t shapeCode  = sh->getShapeCode();
   switch (shapeCode) {
   case kDisk:
@@ -2137,5 +2151,19 @@ void StiKalmanTrackNode::setUntouched()
 {
   mUnTouch.set(mPP(),mPE());
 }
-
+//________________________________________________________________________________
+float StiKalmanTrackNode::getTime() {
+  double pt = getPt();
+  double p2=(1.+mFP._tanl*mFP._tanl)*pt*pt;
+  double m=pars->massHypothesis;
+  double m2=m*m;
+  double e2=p2+m2;
+  double beta2=p2/e2;
+  double beta = TMath::Sqrt(beta2);
+  TCircle tc(&mFP._x,&mFP._cosCA,mFP._curv);
+  double xy[2] = {0,0};
+  double s = tc.Path(xy); 
+  double time = TMath::Abs(s)/(TMath::Ccgs()*beta*1e-6); // mksec  
+  return time;
+}
 
