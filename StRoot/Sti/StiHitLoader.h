@@ -1,6 +1,8 @@
 #ifndef StiHitLoader_H
 #define StiHitLoader_H
 
+#include "Riostream.h"
+
 #include "Sti/Base/Factory.h"
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Filter.h"
