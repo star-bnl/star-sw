@@ -545,7 +545,6 @@ void StEmcSimulatorMaker::addBemcAndBprsHit(Int_t module,Int_t eta,Int_t sub,Int
 
     emchBemc = new StMcCalorimeterHit(module,eta,sub,de); // Don't trace for track
 
-    emchBprs = 0;         // For safety
     StMcEmcHitCollection::EAddHit bemcNew = mEmcMcHits[BEMC-1]->addHit(emchBemc);
 
     if (bemcNew == StMcEmcHitCollection::kNew)
@@ -560,16 +559,15 @@ void StEmcSimulatorMaker::addBemcAndBprsHit(Int_t module,Int_t eta,Int_t sub,Int
     }
     else if(bemcNew == StMcEmcHitCollection::kErr)
     {
-        delete emchBemc;
-        emchBprs = 0;
+        delete emchBemc; emchBemc = 0;
         LOG_WARN <<" Bad hit in Bemc collection " << endm;
     }
 
     if(detector == BPRS && emchBprs)
     {
         StMcEmcHitCollection::EAddHit bprsNew = mEmcMcHits[BPRS-1]->addHit(emchBprs);
-        if(bprsNew != StMcEmcHitCollection::kNew)
-            delete emchBprs; emchBprs=0;
+        if(bprsNew != StMcEmcHitCollection::kNew) delete emchBprs;
+        emchBprs=0;
     }
     delete emchBemc;
     delete emchBprs;
@@ -1233,8 +1231,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.40 2007/03/22 21:51:36 perev Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.41 2007/03/22 22:48:28 perev Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.41  2007/03/22 22:48:28  perev
+// Small old bug fix, thanx to Oleksandr
+//
 // Revision 1.40  2007/03/22 21:51:36  perev
 // Leak of StMcCalorimeterHit fix
 //
