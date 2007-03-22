@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.h,v 1.5 2007/02/25 18:10:58 bouchet Exp $
+// $Id: StSsdDaqMaker.h,v 1.6 2007/03/22 01:58:17 bouchet Exp $
 //
 // $Log: StSsdDaqMaker.h,v $
+// Revision 1.6  2007/03/22 01:58:17  bouchet
+// add a method to fill pedestal and noise of the strips in a tuple
+//
 // Revision 1.5  2007/02/25 18:10:58  bouchet
 // Remove a histogram and add more precise histograms for the particular status of strips : count the number of strips per wafer where pedestal = 0 or 255 (adc) and rms = 0 or 255 (adc)
 //
@@ -55,12 +58,17 @@ class St_ssdPedStrip;
 class TH1F;
 class TH1S;
 class TH2S;
+class TFile;
+class TNtuple;
 class StSsdDaqMaker : public StMaker {
  private:
   // Private method declaration if any
   // St_spa_strip   *spa_strip;
   // St_ssdPedStrip *ssdPedStrip;
- 
+  Float_t PedestalNTuple[10];
+  TFile *pFile;
+  TNtuple *pTuple;
+  void DeclareNTuple(); 
  protected:
   // Protected method if any
   StSsdConfig*  mConfig;
@@ -80,7 +88,7 @@ class StSsdDaqMaker : public StMaker {
   TH2S *noise_zero_ladN; //number of strips of n-side wafers for which noise = 0
   TH2S *noise_high_ladP; //number of strips of p-side wafers for which noise = 255
   TH2S *noise_high_ladN; //number of strips of n-side wafers for which noise = 255
-
+  int  mPedOut;          //to turn the fill of TNtuple on and off
  public: 
   StSsdDaqMaker(const char *name="StSsdDaqMaker");
   virtual       ~StSsdDaqMaker();
@@ -93,7 +101,7 @@ class StSsdDaqMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.5 2007/02/25 18:10:58 bouchet Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.6 2007/03/22 01:58:17 bouchet Exp $ built "__DATE__" "__TIME__; 
     return cvs;
   }
 

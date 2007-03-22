@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.14 2007/02/25 18:10:58 bouchet Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.15 2007/03/22 01:58:17 bouchet Exp $
 //
 // $log$
 //
@@ -38,7 +38,8 @@
 #include "StSsdUtil/StSsdConfig.hh"
 #include "TH1.h"
 #include "TH2.h"
-
+#include "TFile.h"
+#include "TNtuple.h"
 ClassImp(StSsdDaqMaker)
 
 //_____________________________________________________________________________
@@ -129,7 +130,11 @@ Int_t StSsdDaqMaker::Init(){
     noise_high_ladP->SetYTitle("Wafer");
     noise_high_ladN->SetXTitle("Ladder");
     noise_high_ladN->SetYTitle("Wafer");
-
+    mPedOut = 0;//default : we do not wite the Tuple
+    if(mPedOut)
+      {
+	DeclareNTuple();
+      }    
   }
   LOG_INFO << "Init() - Done " << endm;
   
@@ -196,6 +201,16 @@ Int_t StSsdDaqMaker::InitRun(int runumber)
   return kStOk;
 
 }
+
+//_____________________________________________________________________________
+
+void StSsdDaqMaker::DeclareNTuple(){
+  pFile = new TFile("PedestalFile.root","RECREATE");
+  string varlist = "side:ladder:wafer:strip:pedestal:noise:chip:id_wafer:tot_strip";
+  pTuple     = new TNtuple("PedestalNTuple","Pedestal Ntuple",varlist.c_str());
+  LOG_INFO << "StSsdDaqMaker::DeclareNtuple - Done - "<<endm;
+}
+
 //_____________________________________________________________________________
 // Make - this method is called in loop for each event
 // 
@@ -219,6 +234,9 @@ Int_t StSsdDaqMaker::Make(){
   // mConfig->getTotalNumberOfLadders()=20;
   // mConfig->getNumberOfStrips()=768;
   // mConfig->getNumberOfWafers()=16;
+  for (Int_t i=0;i<9;i++){
+    PedestalNTuple[i] = 0;
+  }
   maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers();
   TDataSet *daq = GetDataSet("StDAQReader");                 
   if (!daq) {
@@ -378,6 +396,20 @@ Int_t StSsdDaqMaker::Make(){
 			  if(pedestal==255)ped_high_ladP->Fill(iLad,iWaf);
 			  if(noise==0)noise_zero_ladP->Fill(iLad,iWaf);
 			  if(noise==255)noise_high_ladP->Fill(iLad,iWaf);
+
+			  //store the pedestal and noise if mPedOut is on
+			  if(mPedOut){
+			    PedestalNTuple[0]=0;
+			    PedestalNTuple[1]=iLad; 
+			    PedestalNTuple[2]=iWaf; 
+			    PedestalNTuple[3]=nStrip+1;
+			    PedestalNTuple[4]=out_ped_strip.pedestal; 
+			    PedestalNTuple[5]=out_ped_strip.noise; 
+			    PedestalNTuple[6]=(nStrip/128)+1;
+			    PedestalNTuple[7]=id_wafer;
+			    PedestalNTuple[8]=nStrip+(iWaf-1)*768;
+			    pTuple->Fill(PedestalNTuple);
+			  }
 			}
 			else {
 			  ladderCountN[ladder]++;
@@ -391,6 +423,18 @@ Int_t StSsdDaqMaker::Make(){
 			  if(pedestal==255)ped_high_ladN->Fill(iLad,iWaf);
 			  if(noise==0)noise_zero_ladN->Fill(iLad,iWaf);
 			  if(noise==255)noise_high_ladN->Fill(iLad,iWaf);
+			  if(mPedOut){
+			    PedestalNTuple[0]=1;
+			    PedestalNTuple[1]=iLad; 
+			    PedestalNTuple[2]=iWaf;
+			    PedestalNTuple[3]=nStrip-1;
+			    PedestalNTuple[4]=out_ped_strip.pedestal; 
+			    PedestalNTuple[5]=out_ped_strip.noise;
+			    PedestalNTuple[6]=(nStrip/128)+1;
+			    PedestalNTuple[7]=id_wafer;
+			    PedestalNTuple[8]=nStrip+(iWaf-1)*768;
+			    pTuple->Fill(PedestalNTuple);
+			  }
 			}   
 			count++;
 			for (int i=0;i<20;i++)
@@ -446,6 +490,11 @@ Int_t StSsdDaqMaker::Make(){
 Int_t StSsdDaqMaker::Finish() 
 {
   LOG_INFO << Form("Finish()") << endm;
+  if(mPedOut){
+    LOG_INFO << "Write Pedestal tuple"<< endm;
+    pFile->Write();
+    pFile->Close();
+  }
   return kStOK;
 }
 //_____________________________________________________________________________
