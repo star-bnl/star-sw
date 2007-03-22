@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.102 2007/03/09 20:01:03 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.103 2007/03/22 04:27:47 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.103  2007/03/22 04:27:47  perev
+// BugFix for user time
+//
 // Revision 1.102  2007/03/09 20:01:03  perev
 // Request by user defined time now allowed
 //
@@ -824,7 +827,12 @@ TDataSet *St_db_Maker::GetDataBase(const char* logInput,const TDatime *td)
       TTable *tb = (TTable *)vs->fDat;
       myVS->fDat = TTable::New(tb->GetName(),tb->GetType(),0,0);
     }
+    TDataSetIter next(vs);
+    TDataSet *to=0;
+    while ((to=(TDataSet*)next())){ myVS->Add(to);}
+
     UpdateValiSet(myVS,*td);
+    myVS->GetList()->Clear("nodelete");
     if (myVS->fGood) { //object is found
      myVS->fDat->Add(myVS);
      return myVS->fDat;
