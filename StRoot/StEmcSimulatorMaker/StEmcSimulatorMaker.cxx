@@ -544,18 +544,19 @@ void StEmcSimulatorMaker::addBemcAndBprsHit(Int_t module,Int_t eta,Int_t sub,Int
     StMcCalorimeterHit *emchBemc = NULL, *emchBprs = NULL;
 
     emchBemc = new StMcCalorimeterHit(module,eta,sub,de); // Don't trace for track
-    //if (emchBprs) delete emchBprs;
+
     emchBprs = 0;         // For safety
     StMcEmcHitCollection::EAddHit bemcNew = mEmcMcHits[BEMC-1]->addHit(emchBemc);
 
     if (bemcNew == StMcEmcHitCollection::kNew)
     {
+        emchBemc=0;
         if(detector == BPRS)
             emchBprs = new StMcCalorimeterHit(module,eta,sub,de);
     }
     else if(bemcNew == StMcEmcHitCollection::kAdd)
     {
-        emchBprs = emchBemc;
+        emchBprs = emchBemc;  emchBemc=0;
     }
     else if(bemcNew == StMcEmcHitCollection::kErr)
     {
@@ -568,9 +569,10 @@ void StEmcSimulatorMaker::addBemcAndBprsHit(Int_t module,Int_t eta,Int_t sub,Int
     {
         StMcEmcHitCollection::EAddHit bprsNew = mEmcMcHits[BPRS-1]->addHit(emchBprs);
         if(bprsNew != StMcEmcHitCollection::kNew)
-            delete emchBprs;
+            delete emchBprs; emchBprs=0;
     }
-    //if ( emchBemc) delete emchBemc;
+    delete emchBemc;
+    delete emchBprs;
 }
 Int_t StEmcSimulatorMaker::makeBemcAndBprsMcHits()
 {
@@ -1231,8 +1233,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.39 2007/01/23 20:38:59 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.40 2007/03/22 21:51:36 perev Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.40  2007/03/22 21:51:36  perev
+// Leak of StMcCalorimeterHit fix
+//
 // Revision 1.39  2007/01/23 20:38:59  kocolosk
 // logger update
 //
