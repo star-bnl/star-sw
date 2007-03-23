@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.18 2007/02/16 04:08:43 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.19 2007/03/23 03:26:23 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -38,7 +38,7 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   SetEmcCollectionLocal(false);
   mLocalStEmcCollection=0;
   mevIN= new EEmcMCData;
-  meeve=new EEeventDst;
+  meeve= new EEeventDst;
 
   
   mfixTgain=new float [kEEmcNumEtas];
@@ -292,6 +292,9 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.19  2007/03/23 03:26:23  balewski
+// Corretions from Victor
+//
 // Revision 1.18  2007/02/16 04:08:43  balewski
 // bug fix: adc was not limitted to [0,4095], fixed for all layers
 //
