@@ -192,7 +192,18 @@ Int_t St_trg_Maker::Make(){
 
   St_DataSet *DAQdset = GetDataSet("StDAQReader");
   if(DAQdset) {
-    switch(YearOfData(DAQdset)) {
+    //
+    // Starting from 2006+, see StEvent and StEventMaker filling of
+    // L0, l1, L2 from StTriggerData structure. 
+    // StL0Trigger::set(const StTriggerData* t)
+    //
+    int yy=YearOfData(DAQdset);
+    if (yy >= 2007 ){
+      printf("St_trg_Maker:: Make() : trg is obsolete for years >= 2007\n");
+      return kStOk;
+    }
+
+    switch(yy) {
       case 2000:
         (void) printf("St_trg_Maker:: Make()  : analyzing year 2000 trigger data.\n");
         if(!initializationDone) { 
@@ -233,7 +244,8 @@ Int_t St_trg_Maker::Make(){
       case 0: 
 	return kStWarn;
 
-      default: assert(0);
+      default: 
+	assert(0);
     }
 
   } else {
@@ -1058,8 +1070,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.52 2005/01/07 15:26:54 jeromel Exp $
+// $Id: St_trg_Maker.cxx,v 1.53 2007/03/23 17:27:24 jeromel Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.53  2007/03/23 17:27:24  jeromel
+// Added protection from use if data version > 2007
+//
 // Revision 1.52  2005/01/07 15:26:54  jeromel
 // Assume same decoding 2005=2004 .
 //
