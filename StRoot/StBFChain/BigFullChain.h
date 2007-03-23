@@ -106,6 +106,9 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 #ifndef __CLEANUP__
+  // ATTENTION
+  // - Removal of trg for years < 2003 will not allow bacward compatibility
+  // - Removal of trg for years >= 2003 (2003 TBC) will need trgd instead
   {"Physics"     ,"","","trg"                                        ,"","","Select Physics events",kFALSE},
   {"LaserTest"   ,"","","trg"                                          ,"","","Select Laser events",kFALSE},
   {"PulserSvt"   ,"","","trg"                                     ,"","","Select SVT Pulser events",kFALSE},
