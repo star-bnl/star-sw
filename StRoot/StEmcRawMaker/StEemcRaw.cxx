@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.11 2006/12/22 15:20:59 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.12 2007/03/23 02:18:00 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -36,8 +36,7 @@ StEemcRaw::~StEemcRaw()
 //____________________________________________________
 //____________________________________________________
 //____________________________________________________
-Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent)
-{//, StEmcRawData *raw, int token
+Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){
     //  printf("JB make()  EEMC\n");
 
     if (hs[0])
@@ -68,7 +67,9 @@ Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent)
         return false;
     }
 
+
     int token=trg->triggerToken();
+    // printf("\nStL0Trigger::token=%d\n",token);
     int runId=mEvent->runId();
 
     if( headersAreSick(eemcRaw, token,  runId) )
@@ -159,9 +160,13 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId)
         if(fiber->type=='S' && runId<6000000)
             errFlag=0x28;  // bug in box firmawer prior to 2005
 
+	//HACK^2 - disable token check, March 22, 2007
+	token=block.getToken();
+	// end of hack, Jan B.
+
         int trigCommand=4; // physics, 9=laser/LED, 8=??
         int sanity=block.isHeadValid(token,fiber->crIDswitch,lenCount,trigCommand,errFlag);
-
+	//printf("Endcap crate=%d token=%d\n",fiber->crID,block.getToken());
         int i;
         for(i=0;i<8;i++)
         {// examin & histo all sanity bits
@@ -381,6 +386,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.12  2007/03/23 02:18:00  balewski
+// drop token check, temporay hack
+//
 // Revision 1.11  2006/12/22 15:20:59  balewski
 // more printouts
 //
