@@ -199,7 +199,7 @@ Int_t St_trg_Maker::Make(){
     //
     int yy=YearOfData(DAQdset);
     if (yy >= 2007 ){
-      printf("St_trg_Maker:: Make() : trg is obsolete for years >= 2007\n");
+      (void) printf("St_trg_Maker:: Make() : trg is obsolete for years %d >= 2007\n",yy);
       return kStOk;
     }
 
@@ -1070,10 +1070,10 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.53 2007/03/23 17:27:24 jeromel Exp $
+// $Id: St_trg_Maker.cxx,v 1.54 2007/03/23 17:28:56 jeromel Exp $
 // $Log: St_trg_Maker.cxx,v $
-// Revision 1.53  2007/03/23 17:27:24  jeromel
-// Added protection from use if data version > 2007
+// Revision 1.54  2007/03/23 17:28:56  jeromel
+// One more small modif (print year)
 //
 // Revision 1.52  2005/01/07 15:26:54  jeromel
 // Assume same decoding 2005=2004 .
