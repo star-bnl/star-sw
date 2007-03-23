@@ -28,6 +28,7 @@ ClassImp(StEEmcMixerMaker)
 //-------------------------------------------------------------------
 StEEmcMixerMaker::StEEmcMixerMaker(const char *name):StMaker(name){
     panicOff=false; // once activated disables Endcap embedding
+    mEEDb = 0;
 }
 
 //-------------------------------------------------------------------
@@ -53,6 +54,7 @@ StEEmcMixerMaker::Init(){
     LOG_FATAL<< "::Init()\n\n Fatal Error - Eemc_DbMaker is not in the chain,\n  panicOff="<<panicOff<<endm;
     return  kStErr;
   }
+  assert(!strcmp(mEEDb->ClassName(),"StEEmcDbMaker"));
   return StMaker::Init();
 }  
 
@@ -160,7 +162,7 @@ into the first StEmcCollection in event for all EEMC subdetectors
     if(!detectorB) 
       LOG_WARN<<"detectorB not loaded"<<endm;
     
-    if(!detectorA  ||  !detectorB) continue;// nothing to mix for such leyer 
+    if(!detectorA  ||  !detectorB) continue;// nothing to mix for such layer 
     for(int secID=1; secID<=kEEmcNumSectors; secID++){ 
       //    if(secID!=6) continue;//tmp
       StEmcModule* sectorA = detectorA->module(secID);
@@ -181,7 +183,7 @@ into the first StEmcCollection in event for all EEMC subdetectors
       
       for(UInt_t k1=0;k1<rawHitA.size();k1++)    {
 	/* do not bother with differences between BEMC & EEMC
-	   numbereing scheme, pretend it is barrel */
+	   numbering scheme, pretend it is barrel */
 	uint Bmod=rawHitA[k1]->module();
 
 	if((int)Bmod==!secID) {
@@ -253,8 +255,11 @@ into the first StEmcCollection in event for all EEMC subdetectors
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.5 2007/02/07 02:24:34 balewski Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.6 2007/03/23 03:26:23 balewski Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.6  2007/03/23 03:26:23  balewski
+// Corretions from Victor
+//
 // Revision 1.5  2007/02/07 02:24:34  balewski
 // fix logic error found by Wei-Ming
 //

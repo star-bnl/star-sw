@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.10 2007/01/24 21:07:02 balewski Exp $
+// $Id: StEEmcFastMaker.h,v 1.11 2007/03/23 03:26:23 balewski Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -97,17 +97,10 @@ class StEEmcFastMaker : public StMaker {
 
  private:
 
-  EEmcMCData  *mevIN; ///< decoded raw .fzd event
-  EEeventDst *meeve;    ///<  result stored in TTRee 
-
   void mEE2ST(EEeventDst*, StEmcCollection* emcC); ///< TTree-->StEvent
 
-  float * mfixTgain; ///<  (adc=g*de )ideal gains for Towers
 
-  StEmcCollection *mLocalStEmcCollection; // for special uses (embedding)
-  bool mEmcCollectionIsLocal;
-
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.10 2007/01/24 21:07:02 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.11 2007/03/23 03:26:23 balewski Exp $";
   
  protected:
  public: 
@@ -123,9 +116,17 @@ class StEEmcFastMaker : public StMaker {
   StEmcCollection * GetLocalEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.10 2007/01/24 21:07:02 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.11 2007/03/23 03:26:23 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
+ private:
+
+  EEmcMCData  *mevIN; 		///< decoded raw .fzd event
+  EEeventDst  *meeve;    	///<  result stored in TTRee 
+  float   *mfixTgain; 		///<  (adc=g*de )ideal gains for Towers
+
+  StEmcCollection *mLocalStEmcCollection; // for special uses (embedding)
+  bool mEmcCollectionIsLocal;
   
   ClassDef(StEEmcFastMaker,0)   
 };
@@ -134,6 +135,9 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.11  2007/03/23 03:26:23  balewski
+// Corretions from Victor
+//
 // Revision 1.10  2007/01/24 21:07:02  balewski
 // 1) no cout or printf, only new Logger
 // 2) EndcapMixer:
