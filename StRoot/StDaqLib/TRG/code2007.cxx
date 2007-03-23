@@ -11,7 +11,7 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   assert(pTRGP->header.ByteOrder==0x01020304 ||
 	 pTRGP->header.ByteOrder==0x04030201);
   if(pTRGP->header.ByteOrder==0x04030201) {
-    swap=0;
+    swap=1;
     returnValue=0;
   }else{
     swap=1;
@@ -21,22 +21,28 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
     printf("TRG_Reader::UnpackTrg2007: Swap Header error %s %d.\n",__FILE__,__LINE__);    
     assert(0);
   }
+  printf("TRG_Reader::UnpackTrg2007: Token from Bank=%d\n",pTRGP->header.Token);
 
   //Get lengthes
-  int size_head = 40;
+  int size_bank = pTRGP->header.BankLength * 4;
+  int size_off  = pTRGP->theData.offset * 4;
+  int size_head = sizeof(pTRGP->header);
   int size_trg  = sizeof(TrgDataType2007);
   int size_desc = sizeof(EvtDescData2007);
   int size_sum  = sizeof(TrgSumData2007);
   int size_raw  = sizeof(RawTrgDet2007);
+  //  printf("TRG_Reader::UnpackTrg2007: Size of bank, offset, header, trg, desc, sum, raw = %d %d %d %d %d %d %d\n",
+  //	 size_bank,size_off,size_head,size_trg,size_desc,size_sum,size_raw);
   
   //Create memory space for unpacked trigger bank
   if(pBankUnp!=0) delete[] pBankUnp;
-  int sizeUnp = size_head + size_trg;
+  int sizeUnp = size_off + size_head + size_trg;
   pBankUnp = new char[sizeUnp];  
-  char *trgd = pBankUnp + size_head; //pointer for trgdata
+  char *trgd = pBankUnp + size_off + size_head; //pointer for trgdata
+  TrgDataType2007* p=(TrgDataType2007*)trgd;
   
   //Copy Header, EvtDesc and TrgSum and byte swap
-  memcpy(pBankUnp, pTRGP, size_head+size_desc+size_sum);
+  memcpy(pBankUnp, pTRGP, size_off+size_head+size_desc+size_sum);
   
   //Swap  EvtDesc and TrgSum
   if(swap){
@@ -46,10 +52,24 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
       return -1;
     }
   }
+  npre  = p->EvtDesc.npre;
+  npost = p->EvtDesc.npost;
+  //printf("TRG_Reader::UnpackTrg2007: TCUdataBytes = %d\n",p->EvtDesc.TCUdataBytes);
+  printf("TRG_Reader::UnpackTrg2007: Token = %d\n",p->EvtDesc.TrgToken);
+  printf("TRG_Reader::UnpackTrg2007: Npre=%d Npost=%d\n",npre,npost);
+
+  if(p->EvtDesc.TrgToken>4096) {
+    printf("TRG_Reader::UnpackTrg2007: Found Token beyond 4096\n");
+    assert(0);
+  }
+  if(npre>5 || npre<0 || npost>5 || npost<0) {
+    printf("TRG_Reader::UnpackTrg2007: Trigger data has more than 5 pre/post\n");
+    assert(0);
+  }
 
   //Set pointers for daq data and new unpacked data
-  char* p_daq = (char *)pTRGP    + size_head + size_desc + size_sum;
-  char* p_unp = (char *)pBankUnp + size_head + size_desc + size_sum;
+  char* p_daq = (char *)pTRGP    + size_off + size_head + size_desc + size_sum;
+  char* p_unp = (char *)pBankUnp + size_off + size_head + size_desc + size_sum;
   
   //Zero out all raw data memory before copying partial data
   memset(p_unp, 0, 11*size_raw);
@@ -58,8 +78,10 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   for(int i=0; i<1+npre+npost; i++){
     unsigned short *nbytes = (unsigned short *)p_daq;
     if(swap) pTRGD->swapHerb2bytes(nbytes,1); //byte swap for # of bytes
-    memcpy(p_unp, p_daq, *nbytes);
+    unsigned short n = *nbytes;
+    printf("TRG_Reader::UnpackTrg2007: Nprepost=%d   RawDat Size=%d (byte)\n",i,n);
     if(swap) pTRGD->swapHerb2bytes(nbytes,1); //swap back so that later whole things will swap correctly
+    memcpy(p_unp, p_daq, n);
     p_daq += *nbytes;
     p_unp += size_raw;
   }
