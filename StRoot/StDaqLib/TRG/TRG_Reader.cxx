@@ -147,9 +147,9 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
 
     case 2007:
       S_mode = 0;
-      // Since 2007 run, trigger data has vvariable length. 
+      // Since 2007 run, trigger data has variable length. 
       // Also byte swap accordingly
-      if(UnpackTrg2007(pTRGP) < 0){
+      if(UnpackTrg2007(pBankTRGP) < 0){
         mErr = 2007;
         (void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__);
       }
