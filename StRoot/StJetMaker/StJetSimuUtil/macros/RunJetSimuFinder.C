@@ -8,18 +8,18 @@ int total=0;
 #include <string>
 
 void RunJetSimuFinder(
-		      const char *dir ="",
-		      //const char* file="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.MuDst.root",
-                      //const char *fname="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.event.root",
-		      const char* file="/star/institutions/lbl/kiryluk/Herwig_test/rcf1250_*.MuDst.root",
-                      const char *fname="/star/institutions/lbl/kiryluk/Herwig_test/rcf1250_*.event.root",
-		      const char *filter = "",
+                     int nevents = 100,
+		      const char* file="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.MuDst.root",
+                      const char *fname="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.event.root",
+		      //const char* file="/star/institutions/lbl/kiryluk/Herwig_test/rcf1250_*.MuDst.root",
+                      //const char *fname="/star/institutions/lbl/kiryluk/Herwig_test/rcf1250_*.event.root",
                       const char *outfile="Jets_out.root",
                       const char *soutfile="Simu_out.root"
 		      )
 
 {
-  int nevents = 10000000;
+  const char *dir ="";
+  const char *filter = "";
 
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libStar");
@@ -45,6 +45,7 @@ void RunJetSimuFinder(
   gSystem->Load("StEEmcUtil");// needed by EEMC-Db
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEmcTriggerMaker");
+  gSystem->Load("StSpinDbMaker");
   gSystem->Load("StJetFinder");    
   gSystem->Load("StJetMaker");
   
