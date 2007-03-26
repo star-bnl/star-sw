@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.cxx,v 2.2 2007/02/23 17:16:38 ullrich Exp $
+ * $Id: StTriggerData2007.cxx,v 2.3 2007/03/26 19:57:30 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.cxx,v $
+ * Revision 2.3  2007/03/26 19:57:30  ullrich
+ * New map for ZDC-SMD.
+ *
  * Revision 2.2  2007/02/23 17:16:38  ullrich
  * Changed L2RESULTS_... to L2RESULTS_2007_...
  *
@@ -236,22 +239,6 @@ unsigned short  StTriggerData2007::ctb(int pmt, int prepost) const
     int v=0;
     int add=prepostAddress(prepost);
     if(add>=0) v=mData->rawTriggerDet[add].CTB[ctbMap[pmt]];
-    if(mRun>7000000 && mRun<7151026){
-      if     (add== 76){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[7];} 
-      else if(add== 75){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[6];} 
-      else if(add== 74){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[5];} 
-      else if(add==166){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[4];} 
-      else if(add==165){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[3];} 
-      else if(add==164){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[2];} 
-    }
-    else if(mRun>=7151026){
-      if     (add==  4){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[7];} 
-      else if(add==  3){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[6];} 
-      else if(add==  2){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[5];} 
-      else if(add==238){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[4];} 
-      else if(add==237){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[3];} 
-      else if(add==236){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[2];} 
-    }
     return v;
 }
 
@@ -285,22 +272,6 @@ unsigned short StTriggerData2007::ctbTraySlat(int tray, int slat, int prepost) c
     int v=0;
     int add=prepostAddress(prepost);    
     if(add>=0) v=mData->rawTriggerDet[add].CTB[ctbMap[slat][tray]];
-    if(mRun>7000000 && mRun<7151026){
-      if     (tray== 46 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[7];} 
-      else if(tray== 47 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[6];} 
-      else if(tray== 48 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[5];} 
-      else if(tray== 66 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[4];} 
-      else if(tray== 67 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[3];} 
-      else if(tray== 68 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[2];} 
-    }
-    else if(mRun>=7151026){
-      if     (tray==  8 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[7];} 
-      else if(tray==  9 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[6];} 
-      else if(tray== 10 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[5];} 
-      else if(tray==104 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[4];} 
-      else if(tray==105 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[3];} 
-      else if(tray==106 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[2];} 
-    }
     return v;
 }
 
@@ -592,29 +563,17 @@ unsigned short StTriggerData2007::zdcHardwareSum(int prepost) const
 
 unsigned short StTriggerData2007::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const
 {
+    // new map from Gang Wang (gwang@physics.ucla.edu) 2007 March 26
     static const int zdcsmd_map[2][2][8] ={
-	// wrong mapping
-	//{ { 6, 5, 4, 3, 2, 1, 0, 7} ,  
-	//  {15,14,13,12,11,10, 9, 8} } ,
-	//{ {22,21,20,19,18,17,16,23} ,
-	//  {31,30,29,28,27,26,25,24} }
-	// correct mapping from Xzb
-	{ { 7, 6, 5, 4, 3, 2, 1, 11} ,  
-	  { 0,15,14,13,12,8,10, 9} } ,
-	{ {23,22,21,20,19,18,17,24} ,
-	  {16,31,30,29,28,27,26,25} }
-    };
-    static const int zdcsmd_map2006[2][2][8] ={
-	{ {23,22,21,20,-1,-1,1,14} ,  
-	  {19,18,17,16,-1,-1,13,8} } ,
-	{ {31,30,29,28,-1,-1,0,15} ,
-	  {27,26,25,24,-1,-1,12,9} }
+	{ { 7, 6, 5, 4, 3, 2, 1,11} ,  
+	  { 0,15,14,13,12,8, 10, 9} } ,
+	{ {23,22,21,20,19,18,17,26} ,
+	  {16,31,30,29,28,27,24,25} }
     };
     if (verthori<0 || verthori>1) return 0;
     if (strip<1 || strip>8) return 0;  //the last one in vertical strips is for LED. Could be used for Forward counter later. T.A.H.
     int add=-1;    
-    if(mRun<7000000) {add=zdcsmd_map[eastwest][verthori][strip-1];}
-    else            {add=zdcsmd_map2006[eastwest][verthori][strip-1];}
+    add=zdcsmd_map[eastwest][verthori][strip-1];    
     if(add>=0) return mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[add];
     else return 0;
 };
