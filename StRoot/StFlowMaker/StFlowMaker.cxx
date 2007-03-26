@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.111 2007/02/06 18:57:55 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.112 2007/03/26 20:36:04 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -261,7 +261,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.111 2007/02/06 18:57:55 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.112 2007/03/26 20:36:04 aihong Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -629,8 +629,8 @@ Int_t StFlowMaker::ReadZDCSMDFile() {
         int zdcsmd_map[2][2][8] = {
         { { 7, 6, 5, 4, 3, 2, 1, 11} ,
           { 0,15,14,13,12,8,10, 9} } ,
-        { {23,22,21,20,19,18,17,24} ,
-          {16,31,30,29,28,27,26,25} }
+        { {23,22,21,20,19,18,17,(mRealRunID < 8083000)?24:26} ,
+          {16,31,30,29,28,27,(mRealRunID < 8083000)?26:24,25} }
         };
         for (int i=0;i<2;i++) {for (int j=0;j<2;j++){for (int k=0;k<8;k++) {
           mZDCSMDPed[i][j][k] = mZDCSMDPed2D->GetBinContent(zdcsmd_map[i][j][k]+1,
@@ -2358,6 +2358,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.112  2007/03/26 20:36:04  aihong
+// west ZDCSMD H7 (readout as 26 in the trigger array) was swapped with LED (readout as 24 in trigger array), to avoid abnormal pedestal in the electronic channel associated with 26 in the trigger array. The swap happened on 03/25/07
+//
 // Revision 1.111  2007/02/06 18:57:55  posk
 // In Lee Yang Zeros method, introduced recentering of Q vector.
 // Reactivated eta symmetry cut.
