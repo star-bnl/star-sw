@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.17 2007/03/21 16:49:38 fisyak Exp $
+ * $Id: summarizeEvent.cc,v 2.18 2007/03/27 22:17:58 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.18  2007/03/27 22:17:58  fisyak
+ * Add {} to handle LOG_QA
+ *
  * Revision 2.17  2007/03/21 16:49:38  fisyak
  * Add print out for RnD hits
  *
@@ -74,346 +77,351 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.17 2007/03/21 16:49:38 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.18 2007/03/27 22:17:58 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
 {
   static const UInt_t NoFitPointCutForGoodTrack = 15;
-    LOG_QA << "StAnalysisMaker,  Reading Event: " << nevents
-	   << "  Type: " << event.type()
-	   << "  Run: " << event.runId() 
-	   << "  EventId: " << event.id() <<   endm;
-    
-    StSPtrVecTrackNode& trackNode = event.trackNodes();
-    UInt_t nTracks = trackNode.size();
-    StTrackNode *node = 0;
-    UInt_t nGoodTracks = 0;
-    UInt_t nTpcTracks = 0;
-    UInt_t nGoodTpcTracks = 0;
-    UInt_t nGoodFtpcTracks = 0;
-    UInt_t nBeamBackTracks = 0;
-    UInt_t nGoodBeamBackTracks = 0;
-    UInt_t nShortTrackForEEmc = 0;
-    for (unsigned int i=0; i < nTracks; i++) {
-      node = trackNode[i]; if (!node) continue;
-      StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
-      if (! gTrack) continue;
-      if (TMath::Abs(gTrack->flag())%100 == 11) nShortTrackForEEmc++;
-      if (gTrack->flag()/100 == 9) {
-	nBeamBackTracks++;
-	if (! gTrack->bad()) nGoodBeamBackTracks++;
-      }
-      if (gTrack->flag() >= 700 && gTrack->flag() < 900) nGoodFtpcTracks++;
-      if (gTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
-      nGoodTracks++;
+  LOG_QA << "StAnalysisMaker,  Reading Event: " << nevents
+	 << "  Type: " << event.type()
+	 << "  Run: " << event.runId() 
+	 << "  EventId: " << event.id() <<   endm;
+  
+  StSPtrVecTrackNode& trackNode = event.trackNodes();
+  UInt_t nTracks = trackNode.size();
+  StTrackNode *node = 0;
+  UInt_t nGoodTracks = 0;
+  UInt_t nTpcTracks = 0;
+  UInt_t nGoodTpcTracks = 0;
+  UInt_t nGoodFtpcTracks = 0;
+  UInt_t nBeamBackTracks = 0;
+  UInt_t nGoodBeamBackTracks = 0;
+  UInt_t nShortTrackForEEmc = 0;
+  for (unsigned int i=0; i < nTracks; i++) {
+    node = trackNode[i]; if (!node) continue;
+    StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
+    if (! gTrack) continue;
+    if (TMath::Abs(gTrack->flag())%100 == 11) nShortTrackForEEmc++;
+    if (gTrack->flag()/100 == 9) {
+      nBeamBackTracks++;
+      if (! gTrack->bad()) nGoodBeamBackTracks++;
     }
-    LOG_QA << "# track nodes:   \t"
-	   <<  nTracks << ":\tglobals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks 
-	   << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
-    if (nBeamBackTracks || nShortTrackForEEmc) 
-      LOG_QA  << "BeamBack tracks:\t" << nBeamBackTracks << ":\tgood ones:\t" << nGoodBeamBackTracks
-	      << ":\tShort tracks pointing to EEMC :\t" << nShortTrackForEEmc
-	      << endm;
-    // Report for jobTracking Db        
+    if (gTrack->flag() >= 700 && gTrack->flag() < 900) nGoodFtpcTracks++;
+    if (gTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
+    nGoodTracks++;
+  }
+  LOG_QA << "# track nodes:   \t"
+	 <<  nTracks << ":\tglobals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks 
+	 << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
+  if (nBeamBackTracks || nShortTrackForEEmc) {
+    LOG_QA  << "BeamBack tracks:\t" << nBeamBackTracks << ":\tgood ones:\t" << nGoodBeamBackTracks
+	    << ":\tShort tracks pointing to EEMC :\t" << nShortTrackForEEmc
+	    << endm;
+  }
+  // Report for jobTracking Db        
 #ifdef OLDTRACKING    
-    if (nTracks) {
-       LOG_QA << "Events=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",StepContext=" << "'nodes all',"  << "MessageId='='"
-              << ",ProgrammMessage='" <<  nTracks 
-              << "'" << endm;
-    }
-
-    if (nGoodTracks) { 
-       LOG_QA << "Events=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",StepContext=" << "'nodes good',"  << "MessageId='='"
-              << ",ProgrammMessage='" << nGoodTracks 
-              << "'" << endm;
-    }
+  if (nTracks) {
+    LOG_QA << "Events=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",StepContext=" << "'nodes all',"  << "MessageId='='"
+	   << ",ProgrammMessage='" <<  nTracks 
+	   << "'" << endm;
+  }
+  
+  if (nGoodTracks) { 
+    LOG_QA << "Events=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",StepContext=" << "'nodes good',"  << "MessageId='='"
+	   << ",ProgrammMessage='" << nGoodTracks 
+	   << "'" << endm;
+  }
 #else
-    if (nTracks) {
-       LOG_QA << "SequenceValue=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",MessageType=" << "'nodes all',"  << "MessageClass='='"
-              << ",Message='" <<  nTracks 
-              << "'" << endm;
-    }
-
-    if (nGoodTracks) { 
-       LOG_QA << "SequenceValue=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",MessageType=" << "'nodes good',"  << "MessageClass='='"
-              << ",Message='" << nGoodTracks 
-              << "'" << endm;
-    }
+  if (nTracks) {
+    LOG_QA << "SequenceValue=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",MessageType=" << "'nodes all',"  << "MessageClass='='"
+	   << ",Message='" <<  nTracks 
+	   << "'" << endm;
+  }
+  
+  if (nGoodTracks) { 
+    LOG_QA << "SequenceValue=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",MessageType=" << "'nodes good',"  << "MessageClass='='"
+	   << ",Message='" << nGoodTracks 
+	   << "'" << endm;
+  }
 #endif    
-
-    StPrimaryVertex *pVertex=0;
-    for (int ipr=0;(pVertex=event.primaryVertex(ipr));ipr++) {
-       StThreeVectorD primPos = pVertex->position();
-       unsigned int nDaughters = pVertex->numberOfDaughters();
-       nGoodTracks = 0;nGoodTpcTracks = 0;nTpcTracks = 0;
-       for (unsigned int i=0; i < nDaughters; i++) {
-          StPrimaryTrack* pTrack = (StPrimaryTrack*)pVertex->daughter(i);
-          int good = (pTrack->fitTraits().numberOfFitPoints() >=  NoFitPointCutForGoodTrack);
-          nGoodTracks+=good;
-          if (pTrack->fitTraits().numberOfFitPoints(kTpcId)) {
-             nTpcTracks++; nGoodTpcTracks+=good;
-          } 
-       }
-       LOG_QA << "# primary vertex("<<ipr<<"): \t"<<primPos<<endm;
-       
-       LOG_QA << "# primary tracks:\t"
-	      << nDaughters << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTracks << endm;
-     // Report for jobTracking Db   (non-zero entry only)    
+  
+  StPrimaryVertex *pVertex=0;
+  for (int ipr=0;(pVertex=event.primaryVertex(ipr));ipr++) {
+    StThreeVectorD primPos = pVertex->position();
+    unsigned int nDaughters = pVertex->numberOfDaughters();
+    nGoodTracks = 0;nGoodTpcTracks = 0;nTpcTracks = 0;
+    for (unsigned int i=0; i < nDaughters; i++) {
+      StPrimaryTrack* pTrack = (StPrimaryTrack*)pVertex->daughter(i);
+      int good = (pTrack->fitTraits().numberOfFitPoints() >=  NoFitPointCutForGoodTrack);
+      nGoodTracks+=good;
+      if (pTrack->fitTraits().numberOfFitPoints(kTpcId)) {
+	nTpcTracks++; nGoodTpcTracks+=good;
+      } 
+    }
+    LOG_QA << "# primary vertex("<<ipr<<"): \t"<<primPos<<endm;
+    
+    LOG_QA << "# primary tracks:\t"
+	   << nDaughters << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTracks << endm;
+    // Report for jobTracking Db   (non-zero entry only)    
 #ifdef OLDTRACKING       
-     if (nDaughters) {
-        LOG_QA << "Events=" << nevents
-               << ",StepEventId='EventFinish'"
-               << ",StepContext=" << "'primary all',"  << "MessageId='='"
-               << ",ProgrammMessage='" <<  nDaughters
-               << "'" << endm;
-      }
-     if (nGoodTracks) {
-        LOG_QA << "Events=" << nevents
-               << ",StepEventId='EventFinish'"
-               << ",StepContext=" << "'primary good',"  << "MessageId='='"
-               << ",ProgrammMessage='" << nGoodTracks
-               << "'" << endm;
-     }
+    if (nDaughters) {
+      LOG_QA << "Events=" << nevents
+	     << ",StepEventId='EventFinish'"
+	     << ",StepContext=" << "'primary all',"  << "MessageId='='"
+	     << ",ProgrammMessage='" <<  nDaughters
+	     << "'" << endm;
+    }
+    if (nGoodTracks) {
+      LOG_QA << "Events=" << nevents
+	     << ",StepEventId='EventFinish'"
+	     << ",StepContext=" << "'primary good',"  << "MessageId='='"
+	     << ",ProgrammMessage='" << nGoodTracks
+	     << "'" << endm;
+    }
 #else
-      if (nDaughters) {
-        LOG_QA << "SequenceValue=" << nevents
-               << ",StepEventId='EventFinish'"
-               << ",MessageType=" << "'primary all',"  << "MessageClass='='"
-               << ",Message='" <<  nDaughters
-               << "'" << endm;
-      }
-     if (nGoodTracks) {
-        LOG_QA << "SequenceValue=" << nevents
-               << ",StepEventId='EventFinish'"
-               << ",MessageType=" << "'primary good',"  << "MessageClass='='"
-               << ",Message='" << nGoodTracks
-               << "'" << endm;
-     }
+    if (nDaughters) {
+      LOG_QA << "SequenceValue=" << nevents
+	     << ",StepEventId='EventFinish'"
+	     << ",MessageType=" << "'primary all',"  << "MessageClass='='"
+	     << ",Message='" <<  nDaughters
+	     << "'" << endm;
+    }
+    if (nGoodTracks) {
+      LOG_QA << "SequenceValue=" << nevents
+	     << ",StepEventId='EventFinish'"
+	     << ",MessageType=" << "'primary good',"  << "MessageClass='='"
+	     << ",Message='" << nGoodTracks
+	     << "'" << endm;
+    }
 #endif     
-     if (NoFitPointCutForGoodTrack && nGoodTpcTracks) 
-       LOG_QA << "# primary TPC tracks:\t"
-		         << nTpcTracks << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTpcTracks << endm;
-    }// end prim vtx    
-    
-    LOG_QA << "# V0 vertices:       "
-		       << event.v0Vertices().size() << endm;
-             
-    LOG_QA << "# Xi vertices:       "
-		       << event.xiVertices().size() << endm;
-    
-    LOG_QA << "# Kink vertices:       "
-		       << event.kinkVertices().size() << endm;
+    if (NoFitPointCutForGoodTrack && nGoodTpcTracks) {
+      LOG_QA << "# primary TPC tracks:\t"
+	     << nTpcTracks << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTpcTracks << endm;
+    }
+  }// end prim vtx    
+  
+  LOG_QA << "# V0 vertices:       "
+	 << event.v0Vertices().size() << endm;
+  
+  LOG_QA << "# Xi vertices:       "
+	 << event.xiVertices().size() << endm;
+  
+  LOG_QA << "# Kink vertices:       "
+	 << event.kinkVertices().size() << endm;
 #ifdef OLDTRACKING             
-    // Report for jobTracking Db   (non-zero entry only)      
-    if (event.v0Vertices()  .size()) {
-       LOG_QA << "Events=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",StepContext=" << "'V0Vertices', " << "MessageId='='," << "ProgrammMessage=" << event.v0Vertices()  .size() << endm;
-    }
-    if (event.xiVertices()  .size()) {
-       LOG_QA << "Events=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",StepContext=" << "'XiVertices', " << "MessageId='='," << "ProgrammMessage="<< event.xiVertices()  .size()  << endm;
-    }
-    
-    if (event.kinkVertices().size()) {
-       LOG_QA << "Events=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",StepContext=" << "'KinkVertices'," << "MessageId='='," << "ProgrammMessage="<< event.kinkVertices().size() << endm;
-    }
+  // Report for jobTracking Db   (non-zero entry only)      
+  if (event.v0Vertices()  .size()) {
+    LOG_QA << "Events=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",StepContext=" << "'V0Vertices', " << "MessageId='='," << "ProgrammMessage=" << event.v0Vertices()  .size() << endm;
+  }
+  if (event.xiVertices()  .size()) {
+    LOG_QA << "Events=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",StepContext=" << "'XiVertices', " << "MessageId='='," << "ProgrammMessage="<< event.xiVertices()  .size()  << endm;
+  }
+  
+  if (event.kinkVertices().size()) {
+    LOG_QA << "Events=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",StepContext=" << "'KinkVertices'," << "MessageId='='," << "ProgrammMessage="<< event.kinkVertices().size() << endm;
+  }
 #else
-    // Report for jobTracking Db   (non-zero entry only)      
-    if (event.v0Vertices()  .size()) {
-       LOG_QA << "SequenceValue=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",MessageType=" << "'V0Vertices', " << "MessageClass='='," << "Message=" << event.v0Vertices()  .size() << endm;
-    }
-    if (event.xiVertices()  .size()) {
-       LOG_QA << "SequenceValue=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",MessageType=" << "'XiVertices', " << "MessageClass='='," << "Message="<< event.xiVertices()  .size()  << endm;
-    }
-    
-    if (event.kinkVertices().size()) {
-       LOG_QA << "SequenceValue=" << nevents 
-              << ",StepEventId='EventFinish'"
-              << ",MessageType=" << "'KinkVertices'," << "MessageClass='='," << "Message="<< event.kinkVertices().size() << endm;
-    }
+  // Report for jobTracking Db   (non-zero entry only)      
+  if (event.v0Vertices()  .size()) {
+    LOG_QA << "SequenceValue=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",MessageType=" << "'V0Vertices', " << "MessageClass='='," << "Message=" << event.v0Vertices()  .size() << endm;
+  }
+  if (event.xiVertices()  .size()) {
+    LOG_QA << "SequenceValue=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",MessageType=" << "'XiVertices', " << "MessageClass='='," << "Message="<< event.xiVertices()  .size()  << endm;
+  }
+  
+  if (event.kinkVertices().size()) {
+    LOG_QA << "SequenceValue=" << nevents 
+	   << ",StepEventId='EventFinish'"
+	   << ",MessageType=" << "'KinkVertices'," << "MessageClass='='," << "Message="<< event.kinkVertices().size() << endm;
+  }
 #endif    
-    
-    UInt_t TotalNoOfTpcHits = 0, noBadTpcHits = 0, noTpcHitsUsedInFit = 0;
-    StTpcHitCollection* TpcHitCollection = event.tpcHitCollection();
-    if (TpcHitCollection) {
-       UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
-       for (UInt_t i = 0; i< numberOfSectors; i++) {
-          StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
-          if (sectorCollection) {
-	          Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
-             for (int j = 0; j< numberOfPadrows; j++) {
-	             StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
-	             if (rowCollection) {
-                   StSPtrVecTpcHit &hits = rowCollection->hits();
-                   UInt_t NoHits = hits.size();
-                   for (UInt_t k = 0; k < NoHits; k++) {
-                      StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
-                      if (tpcHit) {
-                         TotalNoOfTpcHits++;
-                         if ( tpcHit->flag()) noBadTpcHits++;
-                        if (tpcHit->usedInFit()) noTpcHitsUsedInFit++;
-                      }
- 	                }
-                }
-             }
-          }
-       }
-    }
-    if (TotalNoOfTpcHits)
-      LOG_QA   << "# TPC hits:          " << TotalNoOfTpcHits 
-	       << ":\tdeconvoluted:     " << noBadTpcHits 
-	       << ":\tUsed in Fit:      " << noTpcHitsUsedInFit << endm;
-    
-    UInt_t TotalNoOfSvtHits = 0, noBadSvtHits = 0, noSvtHitsUsedInFit = 0;
-    StSvtHitCollection* svthits = event.svtHitCollection();
-    if (svthits) {
-       StSvtHit* hit;
-       for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel) {
-          StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
-          if (!barrelhits) continue;
-          for (unsigned int ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder) {
-             StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
-             if (!ladderhits) continue;
-             for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
-                StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
-                if (!waferhits) continue;
-                const StSPtrVecSvtHit& hits = waferhits->hits();
-                for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it) {
-                   hit = static_cast<StSvtHit*>(*it);
-                   if (!hit) continue;
-                   TotalNoOfSvtHits++;
-                   if (hit->flag() >3)   noBadSvtHits++;
-                   if (hit->usedInFit()) noSvtHitsUsedInFit++;
-                }
-             }
-	       }
+  
+  UInt_t TotalNoOfTpcHits = 0, noBadTpcHits = 0, noTpcHitsUsedInFit = 0;
+  StTpcHitCollection* TpcHitCollection = event.tpcHitCollection();
+  if (TpcHitCollection) {
+    UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
+    for (UInt_t i = 0; i< numberOfSectors; i++) {
+      StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
+      if (sectorCollection) {
+	Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
+	for (int j = 0; j< numberOfPadrows; j++) {
+	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
+	  if (rowCollection) {
+	    StSPtrVecTpcHit &hits = rowCollection->hits();
+	    UInt_t NoHits = hits.size();
+	    for (UInt_t k = 0; k < NoHits; k++) {
+	      StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+	      if (tpcHit) {
+		TotalNoOfTpcHits++;
+		if ( tpcHit->flag()) noBadTpcHits++;
+		if (tpcHit->usedInFit()) noTpcHitsUsedInFit++;
+	      }
+	    }
+	  }
+	}
       }
     }
-    if (TotalNoOfSvtHits) 
-      LOG_QA << "# SVT hits:          " << TotalNoOfSvtHits 
-	     << ":\tBad ones(flag >3): " << noBadSvtHits 
-	     << ":\tUsed in Fit:      " << noSvtHitsUsedInFit << endm;
-    UInt_t TotalNoOfSsdHits = 0, noBadSsdHits = 0, noSsdHitsUsedInFit = 0;
-    StSsdHitCollection* ssdhits = event.ssdHitCollection();
-    if (ssdhits) {
-      StSsdHit* hit;
-      for (unsigned int ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
-	StSsdLadderHitCollection* ladderhits = ssdhits->ladder(ladder);
+  }
+  if (TotalNoOfTpcHits) {
+    LOG_QA   << "# TPC hits:          " << TotalNoOfTpcHits 
+	     << ":\tdeconvoluted:     " << noBadTpcHits 
+	     << ":\tUsed in Fit:      " << noTpcHitsUsedInFit << endm;
+  }
+  UInt_t TotalNoOfSvtHits = 0, noBadSvtHits = 0, noSvtHitsUsedInFit = 0;
+  StSvtHitCollection* svthits = event.svtHitCollection();
+  if (svthits) {
+    StSvtHit* hit;
+    for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel) {
+      StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
+      if (!barrelhits) continue;
+      for (unsigned int ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder) {
+	StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
 	if (!ladderhits) continue;
 	for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
-	  StSsdWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+	  StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
 	  if (!waferhits) continue;
-	  const StSPtrVecSsdHit& hits = waferhits->hits();
-	  for (const_StSsdHitIterator it=hits.begin(); it!=hits.end(); ++it) {
-	    hit = static_cast<StSsdHit*>(*it);
+	  const StSPtrVecSvtHit& hits = waferhits->hits();
+	  for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	    hit = static_cast<StSvtHit*>(*it);
 	    if (!hit) continue;
-	    TotalNoOfSsdHits++;
-	    if (hit->flag() >3) noBadSsdHits++;
-	    if (hit->usedInFit()) noSsdHitsUsedInFit++;
+	    TotalNoOfSvtHits++;
+	    if (hit->flag() >3)   noBadSvtHits++;
+	    if (hit->usedInFit()) noSvtHitsUsedInFit++;
 	  }
 	}
       }
     }
-    if (TotalNoOfSsdHits) 
-      LOG_QA << "# SSD hits:          " << TotalNoOfSsdHits 
-	     << ":\tBad ones(flag>3): " << noBadSsdHits 
-	     << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
-    
-    UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
-    StFtpcHitCollection* ftpchits = event.ftpcHitCollection();
-    if (ftpchits) {
-      StFtpcHit* hit;
-      for (unsigned int plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
-	StFtpcPlaneHitCollection* planehits = ftpchits->plane(plane);
-	if (!planehits) continue;
-	for (unsigned int sector=0; sector<planehits->numberOfSectors(); ++sector) {
-	  StFtpcSectorHitCollection* sectorhits = planehits->sector(sector);
-	  if (!sectorhits) continue;
-	  const StSPtrVecFtpcHit& hits = sectorhits->hits();
-	  for (const_StFtpcHitIterator it=hits.begin(); it!=hits.end(); ++it) {
-	    hit = static_cast<StFtpcHit*>(*it);
-	    if (!hit) continue;
-	    TotalNoOfFtpcHits++;
-	    /*
-	      bit0:unfolded
-	      bit1:unfold failed
-	      bit2:saturated
-	      bit3:bad shape
-	      bit4:cut off
-	      bit5:tracked
-	      bit6:global coords
-	      bit7:don't use for tracking
-	      
-	      I assume good hits have bit 0 and 5 (if included on a track) on
-	      
-	      Joern and Marcus - is this correct?
-	      
-	      Janet
-	     */
-	    if (! ( hit->flag() & 1 || hit->flag() & (1 << 5))) noBadFtpcHits++;
-	    else if (hit->flag() & (1 << 5))  noFtpcHitsUsedInFit++;
-	  }
+  }
+  if (TotalNoOfSvtHits) {
+    LOG_QA << "# SVT hits:          " << TotalNoOfSvtHits 
+	   << ":\tBad ones(flag >3): " << noBadSvtHits 
+	   << ":\tUsed in Fit:      " << noSvtHitsUsedInFit << endm;
+  }
+  UInt_t TotalNoOfSsdHits = 0, noBadSsdHits = 0, noSsdHitsUsedInFit = 0;
+  StSsdHitCollection* ssdhits = event.ssdHitCollection();
+  if (ssdhits) {
+    StSsdHit* hit;
+    for (unsigned int ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
+      StSsdLadderHitCollection* ladderhits = ssdhits->ladder(ladder);
+      if (!ladderhits) continue;
+      for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+	StSsdWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+	if (!waferhits) continue;
+	const StSPtrVecSsdHit& hits = waferhits->hits();
+	for (const_StSsdHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	  hit = static_cast<StSsdHit*>(*it);
+	  if (!hit) continue;
+	  TotalNoOfSsdHits++;
+	  if (hit->flag() >3) noBadSsdHits++;
+	  if (hit->usedInFit()) noSsdHitsUsedInFit++;
 	}
       }
     }
-    if (TotalNoOfFtpcHits) 
-      LOG_QA << "# FTPC hits:         " << TotalNoOfFtpcHits 
-	     << ":\tBad ones(!bit0): " << noBadFtpcHits 
-	     << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
-    StRnDHitCollection* rndhits = event.rndHitCollection();
-    if (rndhits) {
-      StSPtrVecRnDHit&  hits = rndhits->hits();
-      Int_t NoHits =  rndhits->numberOfHits();
-      if (NoHits) {
-	struct NoHits_t {
-	  StDetectorId kId;
-	  Char_t     *Name;
-	  Int_t       TotalNoOfHits;
-	  Int_t       noBadHits;
-	  Int_t       noHitsUsedInFit;
-	};
-	const Int_t NHtypes = 7;
-	NoHits_t Hits[7] = {
-	  {kHftId, "Hft", 0, 0, 0},
-	  {kIstId, "Ist", 0, 0, 0},           
-	  {kIgtId, "Igt", 0, 0, 0},           
-	  {kFstId, "Fst", 0, 0, 0},           
-	  {kFgtId, "Fgt", 0, 0, 0},           
-	  {kHpdId, "Hpd", 0, 0, 0},
-	  {kUnknownId,"UnKnown", 0, 0, 0}
-	};           
-	StRnDHit* hit;
-	for (Int_t i = 0; i < NoHits; i++) {
-	  hit = hits[i];
-          Int_t j = 0;
-          for (j = 0; j < NHtypes-1; j++) if ( Hits[j].kId == hit->detector()) break;
-	  Hits[j].TotalNoOfHits++;
-	  if (hit->flag())  Hits[j].noBadHits++;
-	  if (hit->usedInFit()) Hits[j].noHitsUsedInFit++;
-	}
-	for (Int_t j = 0; j < NoHits; j++) {
-	  if (Hits[j].TotalNoOfHits) 
-	    LOG_QA << "# " << Hits[j].Name << " hits:         " << Hits[j].TotalNoOfHits
-		   << ":\tBad ones: " << Hits[j].noBadHits
-		   << ":\tUsed in Fit:      " << Hits[j].noHitsUsedInFit << endm;
+  }
+  if (TotalNoOfSsdHits) {
+    LOG_QA << "# SSD hits:          " << TotalNoOfSsdHits 
+	   << ":\tBad ones(flag>3): " << noBadSsdHits 
+	   << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
+  }
+  UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
+  StFtpcHitCollection* ftpchits = event.ftpcHitCollection();
+  if (ftpchits) {
+    StFtpcHit* hit;
+    for (unsigned int plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
+      StFtpcPlaneHitCollection* planehits = ftpchits->plane(plane);
+      if (!planehits) continue;
+      for (unsigned int sector=0; sector<planehits->numberOfSectors(); ++sector) {
+	StFtpcSectorHitCollection* sectorhits = planehits->sector(sector);
+	if (!sectorhits) continue;
+	const StSPtrVecFtpcHit& hits = sectorhits->hits();
+	for (const_StFtpcHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	  hit = static_cast<StFtpcHit*>(*it);
+	  if (!hit) continue;
+	  TotalNoOfFtpcHits++;
+	  /*
+	    bit0:unfolded
+	    bit1:unfold failed
+	    bit2:saturated
+	    bit3:bad shape
+	    bit4:cut off
+	    bit5:tracked
+	    bit6:global coords
+	    bit7:don't use for tracking
+	    
+	    I assume good hits have bit 0 and 5 (if included on a track) on
+	    
+	    Joern and Marcus - is this correct?
+	    
+	    Janet
+	  */
+	  if (! ( hit->flag() & 1 || hit->flag() & (1 << 5))) noBadFtpcHits++;
+	  else if (hit->flag() & (1 << 5))  noFtpcHitsUsedInFit++;
 	}
       }
     }
+  }
+  if (TotalNoOfFtpcHits) {
+    LOG_QA << "# FTPC hits:         " << TotalNoOfFtpcHits 
+	   << ":\tBad ones(!bit0): " << noBadFtpcHits 
+	   << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
+  }
+  StRnDHitCollection* rndhits = event.rndHitCollection();
+  if (rndhits) {
+    StSPtrVecRnDHit&  hits = rndhits->hits();
+    Int_t NoHits =  rndhits->numberOfHits();
+    if (NoHits) {
+      struct NoHits_t {
+	StDetectorId kId;
+	Char_t     *Name;
+	Int_t       TotalNoOfHits;
+	Int_t       noBadHits;
+	Int_t       noHitsUsedInFit;
+      };
+      const Int_t NHtypes = 7;
+      NoHits_t Hits[7] = {
+	{kHftId, "Hft", 0, 0, 0},
+	{kIstId, "Ist", 0, 0, 0},           
+	{kIgtId, "Igt", 0, 0, 0},           
+	{kFstId, "Fst", 0, 0, 0},           
+	{kFgtId, "Fgt", 0, 0, 0},           
+	{kHpdId, "Hpd", 0, 0, 0},
+	{kUnknownId,"UnKnown", 0, 0, 0}
+      };           
+      StRnDHit* hit;
+      for (Int_t i = 0; i < NoHits; i++) {
+	hit = hits[i];
+	Int_t j = 0;
+	for (j = 0; j < NHtypes-1; j++) if ( Hits[j].kId == hit->detector()) break;
+	Hits[j].TotalNoOfHits++;
+	if (hit->flag())  Hits[j].noBadHits++;
+	if (hit->usedInFit()) Hits[j].noHitsUsedInFit++;
+      }
+      for (Int_t j = 0; j < NoHits; j++) {
+	if (Hits[j].TotalNoOfHits) {
+	  LOG_QA << "# " << Hits[j].Name << " hits:         " << Hits[j].TotalNoOfHits
+		 << ":\tBad ones: " << Hits[j].noBadHits
+		 << ":\tUsed in Fit:      " << Hits[j].noHitsUsedInFit << endm;
+	}
+      }
+    }
+  }
 }
