@@ -6,6 +6,7 @@ using namespace std;
 #include <TROOT.h>
 #include <TSystem.h>
 #include <TFile.h>
+#include <TString.h>
 
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
@@ -54,16 +55,10 @@ void swapline(char*pointer)
 	pointer[6] = T[10];
 	pointer[7] = T[11];
 }
-char* makeString(unsigned char* data,int nb)
+void makeString(unsigned char* data,int nb, TString &result)
 {
-	TString a = "";
-	char byte[8];
-	for(int i=0;i<nb;i++)
-	{
-		sprintf(byte,"%08c",(short)data[i]);
-		a+=byte;
-	}
-	return (char*)a.Data();
+	result = "";
+	for(int i=0;i<nb;i++) for (Int_t j = 7;j >= 0;j--) result += (((short)data[i] & (1 << j)) ? "1" : "0");
 }
 void loadTriggerMasks(char* file,int start)
 {
@@ -74,8 +69,11 @@ void loadTriggerMasks(char* file,int start)
 	  char * pointer = (char*)mask;
 		fread(pointer,(int)sizeof(unsigned char)*16,1,W);
 		swapline(pointer);
-		sprintf(BITMASK[dsm-1],"%s",makeString((unsigned char*) pointer,16));
+		TString result;
+		makeString((unsigned char*) pointer,16, result);
+		sprintf(BITMASK[dsm-1],"%s",result.Data());
 		//for(int i=0;i<16;i++) cout <<hex<<(unsigned int)mask[i]<<" "; cout <<dec<<endl;
+		//cout << "<" << result << ">" << endl;
 	}
 	cout <<"Decoding the data "<<endl;
 	for(int patch = 1; patch<=150;patch++)
@@ -88,7 +86,7 @@ void loadTriggerMasks(char* file,int start)
 		if(pa==63) PA[patch-1+start] = 1; else PA[patch-1+start] = 0;
 		
 		//cout <<endl; 
-		//cout <<"Patch = "<<patch+start<<" DSM = "<<dsm<<"  BIT = "<<bit
+		//cout <<"Patch = "<<patch-1+start<<" DSM = "<<dsm<<"  BIT = "<<bit
 		//     <<"  htv = "<<ht<<"  pav = "<<pa 
 		//     <<"  HT = "<<HT[patch-1+start]<<"  PA = "<<PA[patch-1+start]<<endl;
 		//cout <<"00000000011111111112222222222333333333344444444445555555555666666666677777777778888888888999999999900000000001111111111222222222\n";
@@ -97,10 +95,12 @@ void loadTriggerMasks(char* file,int start)
 	fclose(W);
 }
 
-void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal, bool lut, bool saveDB, char* startrg2, char* sc3, char* bemcStatusCopy) {
+void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal, bool lut, bool saveDB, char* startrg2, char* sc3, char* bemcStatusCopy, char *bceTable, char *bcwTable) {
   cout <<"startrg2 dir = "<<startrg2<<endl;
   cout <<"sc3 dir      = "<<sc3<<endl;
   cout <<"bemcStatusCopy = "<<bemcStatusCopy<<endl;
+  cout <<"bceTable       = "<< bceTable <<endl;
+  cout <<"bcwTable       = "<< bcwTable <<endl;
 	
 	TString FILENAME;
 	
@@ -110,11 +110,17 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 	// load the files bcw_table.txt and bce_table.txt
 	// used in John Nelson's conv_lut program
 	
-	ifstream inw("bcw_table.txt");
-	for(int i=0;i<150;i++) inw >> PATCH[i]>>DSM[i]>>BIT[i];
+	ifstream inw(bcwTable);
+	for(int i=0;i<150;i++) {
+	    inw >> PATCH[i]>>DSM[i]>>BIT[i];
+	    //DSM[i] = ((PATCH[i] - 1) / 10) + 1;
+	}
 	inw.close();
-	ifstream ine("bce_table.txt");
-	for(int i=0;i<150;i++) ine >> PATCH[i+150]>>DSM[i+150]>>BIT[i+150];
+	ifstream ine(bceTable);
+	for(int i=0;i<150;i++) {
+	    ine >> PATCH[i+150]>>DSM[i+150]>>BIT[i+150];
+	    //DSM[i+150] = ((PATCH[i+150] - 1) / 10) + 1;
+	}
 	ine.close();
 	
 	FILENAME = startrg2; FILENAME+="/bcw.lut.bin";
@@ -128,8 +134,8 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 	
 	for(int i=0;i<300;i++)
 	{
-	//  if(HT[i]==0) cout <<"High Tower "<<i+1<<" masked out\n";
-	//  if(PA[i]==0) cout <<"Patch sum  "<<i+1<<" masked out\n";
+	  if(HT[i]==0) cout <<"High Tower "<<i<<" masked out\n";
+	  if(PA[i]==0) cout <<"Patch sum  "<<i<<" masked out\n";
 	  if(HT[i]==0) NHT++;
 	  if(PA[i]==0) NPA++;
 	}
@@ -305,17 +311,14 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 		int triggerPatch;
 		if (decoder->GetTriggerPatchFromCrate(crate, tower, triggerPatch)) {
 		    towerData[softId - 1][6] = triggerPatch;
-		    int _crate, crateSeq;
-		    if (decoder->GetCrateAndSequenceFromTriggerPatch(triggerPatch, _crate, crateSeq)) {
-			towerData[softId - 1][1] = ((HT[triggerPatch]) >> (tower - crateSeq)) & 0x1;
-			towerData[softId - 1][2] = ((PA[triggerPatch]) >> (tower - crateSeq)) & 0x1;
-		    }
+		    towerData[softId - 1][1] = HT[triggerPatch];
+		    towerData[softId - 1][2] = PA[triggerPatch];
 		}
 	    }
 	}
     }
     bemcStatusStream << "#" << endl;
-    bemcStatusStream << "# SoftId\tCrate\tCrate seq\tTower unmasked?\tPatch masked in HT?\tPatch masked in sum?\tPedestal\ttriggerPatch" << endl;
+    bemcStatusStream << "# SoftId\tCrate\tCrate seq\tTower unmasked?\tPatch unmasked in HT?\tPatch unmasked in sum?\tPedestal\ttriggerPatch" << endl;
     for (int i = 0;i < 4800;i++) {
 	bemcStatusStream << "SoftId " << (i + 1) << "\t" << towerData[i][4] << "\t" << towerData[i][5] << "\t" << towerData[i][0] << "\t" << towerData[i][1] << "\t" << towerData[i][2] << "\t" << (Float_t(towerData[i][3]) / 100.0) << "\t" << towerData[i][6] << endl;
     }
@@ -324,7 +327,7 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
     bemcStatusStream << "TriggerPedestalShift " << (float(PEDSHIFT)/100.0) << endl;
     bemcStatusStream << "#" << endl;
     
-    bemcStatusStream << "# triggerPatch\tCrate\tCrate patch\tMasked in HT?\tMasked in sum?\tBit conversion mode\tLUT formula and parameters" << endl;
+    bemcStatusStream << "# triggerPatch\tCrate\tCrate patch\tUnmasked in HT?\tUnmasked in sum?\tBit conversion mode\tLUT formula and parameters" << endl;
     for(int crate = 1;crate <= 30;crate++) {
 	for(int patch = 0;patch < 10;patch++) {
 	    int triggerPatch;
