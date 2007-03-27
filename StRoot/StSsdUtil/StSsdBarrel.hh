@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.2 2007/03/21 17:20:41 fisyak Exp $
+// $Id: StSsdBarrel.hh,v 1.3 2007/03/27 23:11:48 bouchet Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.3  2007/03/27 23:11:48  bouchet
+// Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
+//
 // Revision 1.2  2007/03/21 17:20:41  fisyak
 // use TGeoHMatrix for coordinate transformation
 //
@@ -45,6 +48,7 @@ class St_ssdStripCalib;
 class StSsdClusterControl;
 class StSsdDynamicControl;
 class StSsdHitCollection;
+class St_ssdGainCalibWafer;
 
 class StSsdBarrel
 {
@@ -74,7 +78,7 @@ class StSsdBarrel
   Int_t writeStripToTable(St_spa_strip * spa_strip); //
   Int_t writeStripToTable(St_spa_strip * spa_strip,St_sls_strip *sls_strip); //
   void  doSideClusterisation(Int_t *numberOfCluster);   
-  Int_t doClusterMatching();
+  Int_t doClusterMatching(Float_t CalibArray[320]);
   void  doDaqSimulation(slsCtrl_st* ctrl); //
   
   void  convertDigitToAnalog(StSsdDynamicControl *dynamicControl);
@@ -132,6 +136,7 @@ class StSsdBarrel
   Float_t  mShift_elec;
   ssdDimensions_st *mDimensions;
   StSsdClusterControl *mClusterControl;
+
   Int_t    mDebug;
   Char_t   last[1];
   static   StSsdBarrel* fSsdBarrel;

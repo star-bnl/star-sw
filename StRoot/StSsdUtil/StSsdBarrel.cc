@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.2 2007/03/21 17:20:40 fisyak Exp $
+// $Id: StSsdBarrel.cc,v 1.3 2007/03/27 23:11:48 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.3  2007/03/27 23:11:48  bouchet
+// Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
+//
 // Revision 1.2  2007/03/21 17:20:40  fisyak
 // use TGeoHMatrix for coordinate transformation
 //
@@ -90,6 +93,9 @@
 #include "StarMagField.h"
 #include "TMath.h"
 #include "StMessMgr.h"
+
+#include "tables/St_ssdGainCalibWafer_Table.h"
+
 StSsdBarrel* StSsdBarrel::fSsdBarrel = 0;
 //________________________________________________________________________________
 /*!
@@ -733,21 +739,23 @@ void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster){
   //  delete[] wafNumbOfCluster;
 }
 //________________________________________________________________________________
-Int_t StSsdBarrel::doClusterMatching(){
+Int_t StSsdBarrel::doClusterMatching(Float_t *CalibArray){
   Int_t NumberOfPackage = 0;
-  Int_t nSolved = 0;
-  Int_t nPerfect = 0;
-  for (Int_t iLad = 0; iLad < mNLadder; iLad++)
+  Int_t nSolved         = 0;
+  Int_t nPerfect        = 0;
+  
+  //for(Int_t i=0 ; i<mNLadder*mNWaferPerLadder;i++) {printf("i=%d gain=%f\n",i,CalibArray[i]);}
+  for (Int_t iLad = 0; iLad < mNLadder; iLad++){
     for (Int_t iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       { 
 	mLadders[iLad]->mWafers[iWaf]->doLorentzShift(mDimensions,mShift_hole,mShift_elec);
 	NumberOfPackage += mLadders[iLad]->mWafers[iWaf]->doFindPackage(mDimensions, mClusterControl);
-	nPerfect  =  mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(mDimensions, mClusterControl);
-	nSolved  += nPerfect;
+	nPerfect  =  mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(mDimensions, mClusterControl,CalibArray[(iLad*mNWaferPerLadder)+iWaf]);
 	if (!nPerfect) continue;
-	            mLadders[iLad]->mWafers[iWaf]->doStatPerfect(nPerfect, mClusterControl);
-	nSolved  += mLadders[iLad]->mWafers[iWaf]->doSolvePackage(mDimensions, mClusterControl);
+	mLadders[iLad]->mWafers[iWaf]->doStatPerfect(nPerfect, mClusterControl);
+	nSolved  += mLadders[iLad]->mWafers[iWaf]->doSolvePackage(mDimensions, mClusterControl,CalibArray[(iLad*mNWaferPerLadder)+iWaf]);
       }
+  }
   cout<<"****       Remark: "<<nSolved<<"  solved packages     ****\n";
   return NumberOfPackage;
 }
@@ -1142,3 +1150,4 @@ void  StSsdBarrel::doDaqSimulation(slsCtrl_st *ctrl){
       mLadders[iLad]->mWafers[iWaf]->updateStripList();
     }  
 }
+//____________________________________________________________________

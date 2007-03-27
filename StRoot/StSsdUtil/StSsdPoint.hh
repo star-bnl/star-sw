@@ -1,6 +1,9 @@
-// $Id: StSsdPoint.hh,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSsdPoint.hh,v 1.2 2007/03/27 23:11:48 bouchet Exp $
 //
 // $Log: StSsdPoint.hh,v $
+// Revision 1.2  2007/03/27 23:11:48  bouchet
+// Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -27,6 +30,7 @@ class StSsdPoint
   void        setAngle(Float_t rAngle, Int_t iR) { mAngle[iR] = rAngle; }
   void        setDe(Float_t rEnergyLoss, Int_t iR) {   mDe[iR] = rEnergyLoss; }
   void        setEnergyLoss(Float_t adcP, Float_t adcN) {setDe((adcP + adcN)/2.,0);  setDe((adcP - adcN)/2.,1); }
+  void        setEnergyLossCorrected(Float_t adcP,Float_t adcN, Float_t gain);
   void        setFlag(Int_t rFlag) {  mFlag = rFlag; }
   void        setIdClusterP(Int_t iIdClusterP) {  mIdClusterP = iIdClusterP; }
   void        setIdClusterN(Int_t iIdClusterN) {  mIdClusterN = iIdClusterN; }
