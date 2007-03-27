@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.2 2007/03/21 17:20:42 fisyak Exp $
+// $Id: StSsdWafer.hh,v 1.3 2007/03/27 23:11:49 bouchet Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.3  2007/03/27 23:11:49  bouchet
+// Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
+//
 // Revision 1.2  2007/03/21 17:20:42  fisyak
 // use TGeoHMatrix for coordinate transformation
 //
@@ -57,6 +60,7 @@ The Clusters are first found on both sides of the wafer. The clusters are then c
 #include "StSsdUtil/StSsdClusterControl.h"
 #include "StSsdDynamicControl.h"
 #include "TGeoMatrix.h"
+class St_ssdGainCalib;
 
 class StSsdWafer: public TGeoHMatrix {
  public:
@@ -117,8 +121,8 @@ class StSsdWafer: public TGeoHMatrix {
   Int_t             doClusterSplitting(StSsdClusterControl *clusterControl, Int_t iSide);
   Int_t             doFindCluster(StSsdClusterControl *clusterControl, Int_t iSide);      //!< Does the cluster finding
   Int_t             doFindPackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl); 
-  Int_t             doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl);
-  Int_t             doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl);
+  Int_t             doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl,Float_t CalibArray);
+  Int_t             doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl,Float_t CalibArray);
   void              doStatPerfect(Int_t nPerfectPoint, StSsdClusterControl *clusterControl);
   void              doLorentzShift(ssdDimensions_st *dimensions,Float_t mShift_hole,Float_t mShift_elec);
   Int_t             doLorentzShiftSide(Int_t side,Float_t shift,ssdDimensions_st *dimensions);

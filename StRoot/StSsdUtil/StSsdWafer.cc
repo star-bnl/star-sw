@@ -1,6 +1,10 @@
-// $Id: StSsdWafer.cc,v 1.3 2007/03/21 17:20:41 fisyak Exp $
+
+// $Id: StSsdWafer.cc,v 1.4 2007/03/27 23:11:48 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.4  2007/03/27 23:11:48  bouchet
+// Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
+//
 // Revision 1.3  2007/03/21 17:20:41  fisyak
 // use TGeoHMatrix for coordinate transformation
 //
@@ -438,6 +442,8 @@ Int_t StSsdWafer::doFindPackage(ssdDimensions_st *dimensions, StSsdClusterContro
   StSsdCluster     *lastMatchedN       = 0;
   StSsdCluster     *nextMatchedN       = 0;
 
+
+
   Int_t maxMatchedInPackage = clusterControl->getClusterTreat();
   Int_t numPackage         = 0;
   Int_t numUnMatched       = 0;
@@ -544,7 +550,7 @@ Int_t StSsdWafer::doFindPackage(ssdDimensions_st *dimensions, StSsdClusterContro
   return numPackage;
 }
 //________________________________________________________________________________
-Int_t StSsdWafer::doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl)
+Int_t StSsdWafer::doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl,Float_t CalibArray)
 {
   Int_t nPerfect = 0;
   StSsdPackage *currentPackage = 0;
@@ -563,7 +569,7 @@ Int_t StSsdWafer::doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterContr
           StSsdPoint *newPoint = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 11);
           newPoint->setFlag(100);
           setMatcheds(dimensions, newPoint, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPoint->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPoint->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPoint);
           nPerfect++;
 	}
@@ -596,7 +602,7 @@ void StSsdWafer::doStatPerfect(Int_t nPerfectPoint, StSsdClusterControl *cluster
   mPerfectSigma = store/nPerfectPoint;
 }
 //________________________________________________________________________________
-Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl)
+Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl,Float_t CalibArray)
 {
   Int_t nSolved = 0;
   StSsdPackage *currentPackage = 0;
@@ -617,13 +623,13 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
  	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 12);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0]-Adc[2], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0]-Adc[2], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  12);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0]-Adc[1], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[1], Adc[2],CalibArray);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
 	  nSolved++;
@@ -633,13 +639,13 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
  	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  21);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1]-Adc[2],CalibArray);
           newPointA->setFlag(100);
  	  mPoint->addNewPoint(newPointA);
 
  	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  21);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
- 	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]);
+ 	  newPointB->setEnergyLossCorrected(Adc[2], Adc[1]-Adc[0],CalibArray);
           newPointB->setFlag(100);
  	  mPoint->addNewPoint(newPointB);
           nSolved++;
@@ -649,19 +655,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
  	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 13);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0]-Adc[2]-Adc[3], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0]-Adc[2]-Adc[3], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  13);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0]-Adc[1]-Adc[3], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[1]-Adc[3], Adc[2],CalibArray);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  13);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
- 	  newPointC->setEnergyLoss(Adc[0]-Adc[1]-Adc[2], Adc[3]);
+ 	  newPointC->setEnergyLossCorrected(Adc[0]-Adc[1]-Adc[2], Adc[3],CalibArray);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 	  nSolved++;
@@ -671,19 +677,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
  	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]-Adc[4]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1]-Adc[2]-Adc[4],CalibArray);
           newPointA->setFlag(100);
  	  mPoint->addNewPoint(newPointA);
 
  	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
- 	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]-Adc[4]);
+ 	  newPointB->setEnergyLossCorrected(Adc[2], Adc[1]-Adc[0]-Adc[4],CalibArray);
           newPointB->setFlag(100);
  	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(4), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[4], Adc[1]-Adc[0]-Adc[2]);
+ 	  newPointC->setEnergyLossCorrected(Adc[4], Adc[1]-Adc[0]-Adc[2],CalibArray);
           newPointC->setFlag(100);
  	  mPoint->addNewPoint(newPointC);
           nSolved++;
@@ -693,13 +699,13 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
  	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  221);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  221);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
 	  nSolved++;
@@ -709,13 +715,13 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  222);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  222);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  newPointB->setEnergyLoss(Adc[2], Adc[4]);
+ 	  newPointB->setEnergyLossCorrected(Adc[2], Adc[4],CalibArray);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
           nSolved++;
@@ -725,22 +731,22 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
  	  //mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
  	  //mPoint->addNewPoint(newPointD);
 
 // traitement propre aux space points..(probabilite)
@@ -797,12 +803,12 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
-  	  newPointB->setEnergyLoss(Adc[0]-Adc[1], Adc[2]);
+  	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[1], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
-  	  newPointC->setEnergyLoss(Adc[3]-Adc[5], Adc[2]);
+  	  newPointC->setEnergyLossCorrected(Adc[3]-Adc[5], Adc[2],CalibArray);
  	  //mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
@@ -830,16 +836,16 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 	  newPointC->setFlag(int(100*probACD));
 	  if (probABD > probACD)
 	    {
-	      newPointA->setEnergyLoss(Adc[0]-Adc[2],Adc[1]);
-	      newPointD->setEnergyLoss(Adc[3], Adc[5]);
+	      newPointA->setEnergyLossCorrected(Adc[0]-Adc[2],Adc[1],CalibArray);
+	      newPointD->setEnergyLossCorrected(Adc[3], Adc[5],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointD);
 	    }
 	  else
 	    {
-	      newPointA->setEnergyLoss(Adc[0], Adc[1]);
-	      newPointD->setEnergyLoss(Adc[3]-Adc[2], Adc[5]);
+	      newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
+	      newPointD->setEnergyLossCorrected(Adc[3]-Adc[2], Adc[5],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
@@ -856,12 +862,12 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
-   	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]);
+   	  newPointB->setEnergyLossCorrected(Adc[2], Adc[1]-Adc[0],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
-   	  newPointC->setEnergyLoss(Adc[2], Adc[4]-Adc[5]);
+   	  newPointC->setEnergyLossCorrected(Adc[2], Adc[4]-Adc[5],CalibArray);
  	  //mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
@@ -889,16 +895,16 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 	  newPointC->setFlag(int(100*probACD));
 	  if (probABD > probACD)
 	    {
-	      newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]);
-	      newPointD->setEnergyLoss(Adc[5], Adc[4]);
+	      newPointA->setEnergyLossCorrected(Adc[0], Adc[1]-Adc[2],CalibArray);
+	      newPointD->setEnergyLossCorrected(Adc[5], Adc[4],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointD);
 	    }
 	  else
 	    {
-	      newPointA->setEnergyLoss(Adc[0], Adc[1]);
-	      newPointD->setEnergyLoss(Adc[5], Adc[4]-Adc[2]);
+	      newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
+	      newPointD->setEnergyLossCorrected(Adc[5], Adc[4]-Adc[2],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
@@ -915,12 +921,12 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
-  	  newPointB->setEnergyLoss(Adc[0]-Adc[1], Adc[2]);
+  	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[1], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
-  	  newPointC->setEnergyLoss(Adc[0]-Adc[1], Adc[3]);
+  	  newPointC->setEnergyLossCorrected(Adc[0]-Adc[1], Adc[3],CalibArray);
  	  //mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
@@ -958,8 +964,8 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 	  newPointE->setFlag(int(100*(probABE+probADE)));
 	  if ((probABE > probACD)&&(probABE > probADE))
 	    {
-	      newPointA->setEnergyLoss(Adc[0]-Adc[2],Adc[1]);
-	      newPointE->setEnergyLoss(Adc[4],Adc[3]);
+	      newPointA->setEnergyLossCorrected(Adc[0]-Adc[2],Adc[1],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[4],Adc[3],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
@@ -967,17 +973,17 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 	    }
 	  else if ((probACD > probABE)&&(probACD > probADE))
 	    {
-	      newPointA->setEnergyLoss(Adc[0]-Adc[3],Adc[1]);
-	      newPointD->setEnergyLoss(Adc[4],Adc[2]);
+	      newPointA->setEnergyLossCorrected(Adc[0]-Adc[3],Adc[1],CalibArray);
+	      newPointD->setEnergyLossCorrected(Adc[4],Adc[2],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointD);
 	    }
 	  else if ((probADE > probABE)&&(probADE > probACD))
 	    {
-	      newPointA->setEnergyLoss(Adc[0],Adc[1]);
-	      newPointD->setEnergyLoss(Adc[4]-Adc[3],Adc[2]);
-	      newPointE->setEnergyLoss(Adc[4]-Adc[2],Adc[3]);
+	      newPointA->setEnergyLossCorrected(Adc[0],Adc[1],CalibArray);
+	      newPointD->setEnergyLossCorrected(Adc[4]-Adc[3],Adc[2],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[4]-Adc[2],Adc[3],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
@@ -994,7 +1000,7 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
-  	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]);
+  	  newPointB->setEnergyLossCorrected(Adc[2], Adc[1]-Adc[0],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
@@ -1003,7 +1009,7 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(1));
-  	  newPointD->setEnergyLoss(Adc[5], Adc[1]-Adc[0]);
+  	  newPointD->setEnergyLossCorrected(Adc[5], Adc[1]-Adc[0],CalibArray);
  	  //mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
@@ -1037,25 +1043,25 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 	  newPointE->setFlag(int(100*(probABE+probACE)));
 	  if ((probABE > probACD)&&(probABE > probACE))
 	    {
-	      newPointA->setEnergyLoss(Adc[0],Adc[1]-Adc[2]);
-	      newPointE->setEnergyLoss(Adc[5],Adc[4]);
+	      newPointA->setEnergyLossCorrected(Adc[0],Adc[1]-Adc[2],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[5],Adc[4],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
 	    }
 	  else if ((probACD > probABE)&&(probACD > probACE))
 	    {
-	      newPointA->setEnergyLoss(Adc[0],Adc[1]-Adc[5]);
-	      newPointC->setEnergyLoss(Adc[2],Adc[4]);
+	      newPointA->setEnergyLossCorrected(Adc[0],Adc[1]-Adc[5],CalibArray);
+	      newPointC->setEnergyLossCorrected(Adc[2],Adc[4],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointD);
 	    }
 	  else if ((probACE > probABE)&&(probACE > probACD))
 	    {
-	      newPointA->setEnergyLoss(Adc[0],Adc[1]);
-	      newPointC->setEnergyLoss(Adc[2],Adc[4]-Adc[5]);
-	      newPointE->setEnergyLoss(Adc[5],Adc[4]-Adc[2]);
+	      newPointA->setEnergyLossCorrected(Adc[0],Adc[1],CalibArray);
+	      newPointC->setEnergyLossCorrected(Adc[2],Adc[4]-Adc[5],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[5],Adc[4]-Adc[2],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
@@ -1075,12 +1081,12 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
-  	  newPointC->setEnergyLoss(Adc[3]-Adc[6],Adc[1]);
+  	  newPointC->setEnergyLossCorrected(Adc[3]-Adc[6],Adc[1],CalibArray);
  	  //mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
-  	  newPointD->setEnergyLoss(Adc[3]-Adc[6], Adc[2]);
+  	  newPointD->setEnergyLossCorrected(Adc[3]-Adc[6], Adc[2],CalibArray);
  	  //mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
@@ -1115,25 +1121,25 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 	  newPointD->setFlag(int(100*probADE));
 	  if ((probABE > probADE)&&(probABE > probBCE))
 	    {
-	      newPointA->setEnergyLoss(Adc[0]-Adc[2],Adc[1]);
-	      newPointB->setEnergyLoss(Adc[0]-Adc[1],Adc[2]);
-	      newPointE->setEnergyLoss(Adc[3],Adc[6]);
+	      newPointA->setEnergyLossCorrected(Adc[0]-Adc[2],Adc[1],CalibArray);
+	      newPointB->setEnergyLossCorrected(Adc[0]-Adc[1],Adc[2],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[3],Adc[6],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
 	    }
 	  else if ((probADE > probABE)&&(probADE > probBCE))
 	    {
-	      newPointA->setEnergyLoss(Adc[0],Adc[1]);
-	      newPointE->setEnergyLoss(Adc[3]-Adc[2],Adc[6]);
+	      newPointA->setEnergyLossCorrected(Adc[0],Adc[1],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[3]-Adc[2],Adc[6],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointE);
 	    }
 	  else if ((probBCE > probABE)&&(probBCE > probADE))
 	    {
-	      newPointB->setEnergyLoss(Adc[0],Adc[2]);
-	      newPointE->setEnergyLoss(Adc[3]-Adc[1],Adc[6]);
+	      newPointB->setEnergyLossCorrected(Adc[0],Adc[2],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[3]-Adc[1],Adc[6],CalibArray);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointE); 
@@ -1149,7 +1155,7 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0]-Adc[6], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[6], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
@@ -1158,7 +1164,7 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[3]-Adc[6], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[3]-Adc[6], Adc[2],CalibArray);
  	  //mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
@@ -1193,25 +1199,25 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
 	  newPointD->setFlag(int(100*probADE));
 	  if ((probACE > probADE)&&(probACE > probBCE))
 	    {
-	      newPointA->setEnergyLoss(Adc[0],Adc[1]-Adc[3]);
-	      newPointC->setEnergyLoss(Adc[3],Adc[1]-Adc[0]);
-	      newPointE->setEnergyLoss(Adc[6],Adc[2]);
+	      newPointA->setEnergyLossCorrected(Adc[0],Adc[1]-Adc[3],CalibArray);
+	      newPointC->setEnergyLossCorrected(Adc[3],Adc[1]-Adc[0],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[6],Adc[2],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointE); 
 	    }
 	  else if ((probADE > probACE)&&(probADE > probBCE))
 	    {
-	      newPointA->setEnergyLoss(Adc[0],Adc[1]);
-	      newPointE->setEnergyLoss(Adc[6],Adc[2]-Adc[3]); 
+	      newPointA->setEnergyLossCorrected(Adc[0],Adc[1],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[6],Adc[2]-Adc[3],CalibArray); 
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointE); 
 	    }
 	  else if ((probBCE > probACE)&&(probBCE > probADE))
 	    {
-	      newPointB->setEnergyLoss(Adc[3],Adc[1]);
-	      newPointE->setEnergyLoss(Adc[6],Adc[2]-Adc[0]);
+	      newPointB->setEnergyLossCorrected(Adc[3],Adc[1],CalibArray);
+	      newPointE->setEnergyLossCorrected(Adc[6],Adc[2]-Adc[0],CalibArray);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointE); 
@@ -1223,19 +1229,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  newPointC->setEnergyLoss(Adc[2]-Adc[5], Adc[4]);
+ 	  newPointC->setEnergyLossCorrected(Adc[2]-Adc[5], Adc[4],CalibArray);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
- 	  newPointD->setEnergyLoss(Adc[2]-Adc[4], Adc[5]);
+ 	  newPointD->setEnergyLossCorrected(Adc[2]-Adc[4], Adc[5],CalibArray);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
 
@@ -1246,19 +1252,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[2]-Adc[5]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[2]-Adc[5],CalibArray);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(2)); // Fixed thanks to Lilian !
- 	  newPointD->setEnergyLoss(Adc[5], Adc[2]-Adc[3]);
+ 	  newPointD->setEnergyLossCorrected(Adc[5], Adc[2]-Adc[3],CalibArray);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
 
@@ -1269,19 +1275,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0]-Adc[2], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0]-Adc[2], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0]-Adc[1], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[1], Adc[2],CalibArray);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(5));
- 	  newPointD->setEnergyLoss(Adc[4], Adc[3]);
+ 	  newPointD->setEnergyLossCorrected(Adc[4], Adc[3],CalibArray);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
 
@@ -1292,19 +1298,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1]-Adc[2],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
- 	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]);
+ 	  newPointB->setEnergyLossCorrected(Adc[2], Adc[1]-Adc[0],CalibArray);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(6));
- 	  newPointD->setEnergyLoss(Adc[4], Adc[6]);
+ 	  newPointD->setEnergyLossCorrected(Adc[4], Adc[6],CalibArray);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
 
@@ -1457,19 +1463,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
 	  newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(5));
- 	  newPointE->setEnergyLoss(Adc[6], Adc[5]);
+ 	  newPointE->setEnergyLossCorrected(Adc[6], Adc[5],CalibArray);
 	  newPointE->setFlag(100);
  	  mPoint->addNewPoint(newPointE);
 
@@ -1480,19 +1486,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
+ 	  newPointC->setEnergyLossCorrected(Adc[2], Adc[4],CalibArray);
 	  newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(7));
- 	  newPointE->setEnergyLoss(Adc[5], Adc[7]);
+ 	  newPointE->setEnergyLossCorrected(Adc[5], Adc[7],CalibArray);
 	  newPointE->setFlag(100);
  	  mPoint->addNewPoint(newPointE);
 
@@ -1503,28 +1509,28 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  newPointA->setFlag(100);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(5));
- 	  newPointD->setEnergyLoss(Adc[3], Adc[5]);
+ 	  newPointD->setEnergyLossCorrected(Adc[3], Adc[5],CalibArray);
 	  //mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(2));
- 	  newPointE->setEnergyLoss(Adc[6], Adc[2]);
+ 	  newPointE->setEnergyLossCorrected(Adc[6], Adc[2],CalibArray);
  	  //mPoint->addNewPoint(newPointE);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(5));
- 	  newPointF->setEnergyLoss(Adc[6], Adc[5]);
+ 	  newPointF->setEnergyLossCorrected(Adc[6], Adc[5],CalibArray);
  	  //mPoint->addNewPoint(newPointF);
 
 // traitement propre aux space points..(probabilite)
@@ -1564,28 +1570,28 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  newPointA->setFlag(100);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
+ 	  newPointC->setEnergyLossCorrected(Adc[2], Adc[4],CalibArray);
 	  //mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
- 	  newPointD->setEnergyLoss(Adc[2], Adc[5]);
+ 	  newPointD->setEnergyLossCorrected(Adc[2], Adc[5],CalibArray);
 	  //mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(4));
- 	  newPointE->setEnergyLoss(Adc[6], Adc[4]);
+ 	  newPointE->setEnergyLossCorrected(Adc[6], Adc[4],CalibArray);
  	  //mPoint->addNewPoint(newPointE);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(5));
- 	  newPointF->setEnergyLoss(Adc[6], Adc[5]);
+ 	  newPointF->setEnergyLossCorrected(Adc[6], Adc[5],CalibArray);
  	  //mPoint->addNewPoint(newPointF);
 
 // traitement propre aux space points..(probabilite)
@@ -1625,27 +1631,27 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
  	  //mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(8));
- 	  newPointF->setEnergyLoss(Adc[6], Adc[8]);
+ 	  newPointF->setEnergyLossCorrected(Adc[6], Adc[8],CalibArray);
  	  newPointF->setFlag(100);
  	  //mPoint->addNewPoint(newPointF);
 
@@ -1687,27 +1693,27 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
  	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
  	  //mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(6));
- 	  newPointF->setEnergyLoss(Adc[7], Adc[6]);
+ 	  newPointF->setEnergyLossCorrected(Adc[7], Adc[6],CalibArray);
           newPointF->setNMatched(33);
  	  newPointF->setFlag(100);
  	  //mPoint->addNewPoint(newPointF);
@@ -1750,19 +1756,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[4], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
           newPointD->setFlag(100);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(3));
- 	  newPointF->setEnergyLoss(Adc[7], Adc[3]);
+ 	  newPointF->setEnergyLossCorrected(Adc[7], Adc[3],CalibArray);
           newPointF->setFlag(100);
 	  mPoint->addNewPoint(newPointF);
 
@@ -1774,19 +1780,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  newPointD->setEnergyLoss(Adc[2], Adc[4]);
+ 	  newPointD->setEnergyLossCorrected(Adc[2], Adc[4],CalibArray);
           newPointD->setFlag(100);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(5), currentPackage->getMatched(8));
- 	  newPointF->setEnergyLoss(Adc[5], Adc[8]);
+ 	  newPointF->setEnergyLossCorrected(Adc[5], Adc[8],CalibArray);
           newPointF->setFlag(100);
 	  mPoint->addNewPoint(newPointF);
 
@@ -1798,28 +1804,28 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[4], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(3));
- 	  newPointE->setEnergyLoss(Adc[4], Adc[3]);
+ 	  newPointE->setEnergyLossCorrected(Adc[4], Adc[3],CalibArray);
 	  //mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(2));
- 	  newPointF->setEnergyLoss(Adc[7], Adc[2]);
+ 	  newPointF->setEnergyLossCorrected(Adc[7], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(3));
- 	  newPointG->setEnergyLoss(Adc[7], Adc[3]);
+ 	  newPointG->setEnergyLossCorrected(Adc[7], Adc[3],CalibArray);
 	  //mPoint->addNewPoint(newPointG);
 
 // traitement propre aux space points..(probabilite)
@@ -1861,28 +1867,28 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
+ 	  newPointC->setEnergyLossCorrected(Adc[2], Adc[4],CalibArray);
 	  //mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
- 	  newPointD->setEnergyLoss(Adc[2], Adc[5]);
+ 	  newPointD->setEnergyLossCorrected(Adc[2], Adc[5],CalibArray);
 	  //mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(4));
- 	  newPointF->setEnergyLoss(Adc[6], Adc[4]);
+ 	  newPointF->setEnergyLossCorrected(Adc[6], Adc[4],CalibArray);
 	  //mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(6), currentPackage->getMatched(5));
- 	  newPointG->setEnergyLoss(Adc[6], Adc[5]);
+ 	  newPointG->setEnergyLossCorrected(Adc[6], Adc[5],CalibArray);
 	  //mPoint->addNewPoint(newPointG);
 
 // traitement propre aux space points..(probabilite)
@@ -1924,27 +1930,27 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(6), currentPackage->getMatched(9));
- 	  newPointG->setEnergyLoss(Adc[6], Adc[9]);
+ 	  newPointG->setEnergyLossCorrected(Adc[6], Adc[9],CalibArray);
           newPointG->setFlag(100);
 	  //mPoint->addNewPoint(newPointG);
 
@@ -1987,27 +1993,27 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
- 	  newPointD->setEnergyLoss(Adc[4], Adc[1]);
+ 	  newPointD->setEnergyLossCorrected(Adc[4], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
- 	  newPointE->setEnergyLoss(Adc[4], Adc[2]);
+ 	  newPointE->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(3));
- 	  newPointG->setEnergyLoss(Adc[8], Adc[3]);
+ 	  newPointG->setEnergyLossCorrected(Adc[8], Adc[3],CalibArray);
           newPointG->setFlag(100);
 	  //mPoint->addNewPoint(newPointG);
 
@@ -2050,19 +2056,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
+ 	  newPointC->setEnergyLossCorrected(Adc[2], Adc[4],CalibArray);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(5));
- 	  newPointE->setEnergyLoss(Adc[6], Adc[5]);
+ 	  newPointE->setEnergyLossCorrected(Adc[6], Adc[5],CalibArray);
           newPointE->setFlag(100);
 	  mPoint->addNewPoint(newPointE);
 
@@ -2073,19 +2079,19 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(7));
- 	  newPointE->setEnergyLoss(Adc[5], Adc[7]);
+ 	  newPointE->setEnergyLossCorrected(Adc[5], Adc[7],CalibArray);
           newPointE->setFlag(100);
 	  mPoint->addNewPoint(newPointE);
 
@@ -2096,37 +2102,37 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
 	  //mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
- 	  newPointE->setEnergyLoss(Adc[3], Adc[6]);
+ 	  newPointE->setEnergyLossCorrected(Adc[3], Adc[6],CalibArray);
 	  //mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(2));
- 	  newPointF->setEnergyLoss(Adc[7], Adc[2]);
+ 	  newPointF->setEnergyLossCorrected(Adc[7], Adc[2],CalibArray);
 	  //mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(6));
- 	  newPointG->setEnergyLoss(Adc[7], Adc[6]);
+ 	  newPointG->setEnergyLossCorrected(Adc[7], Adc[6],CalibArray);
 	  //mPoint->addNewPoint(newPointG);
 
 // traitement propre aux space points..(probabilite)
@@ -2185,42 +2191,42 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
- 	  newPointC->setEnergyLoss(Adc[0], Adc[3]);
+ 	  newPointC->setEnergyLossCorrected(Adc[0], Adc[3],CalibArray);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
- 	  newPointD->setEnergyLoss(Adc[4], Adc[1]);
+ 	  newPointD->setEnergyLossCorrected(Adc[4], Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
- 	  newPointE->setEnergyLoss(Adc[4], Adc[2]);
+ 	  newPointE->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
- 	  newPointF->setEnergyLoss(Adc[4], Adc[3]);
+ 	  newPointF->setEnergyLossCorrected(Adc[4], Adc[3],CalibArray);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(2));
- 	  newPointG->setEnergyLoss(Adc[8], Adc[2]);
+ 	  newPointG->setEnergyLossCorrected(Adc[8], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointG);
 
 	  StSsdPoint *newPointH = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointH, currentPackage->getMatched(8), currentPackage->getMatched(3));
- 	  newPointH->setEnergyLoss(Adc[8], Adc[3]);
+ 	  newPointH->setEnergyLossCorrected(Adc[8], Adc[3],CalibArray);
 	  mPoint->addNewPoint(newPointH);
 
 // traitement propre aux space points..(probabilite)
@@ -2264,42 +2270,42 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0],  Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0],  Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
+ 	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
+ 	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
- 	  newPointE->setEnergyLoss(Adc[3], Adc[6]);
+ 	  newPointE->setEnergyLossCorrected(Adc[3], Adc[6],CalibArray);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(1));
- 	  newPointF->setEnergyLoss(Adc[7], Adc[1]);
+ 	  newPointF->setEnergyLossCorrected(Adc[7], Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(2));
- 	  newPointG->setEnergyLoss(Adc[7], Adc[2]);
+ 	  newPointG->setEnergyLossCorrected(Adc[7], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointG);
 
 	  StSsdPoint *newPointH = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointH, currentPackage->getMatched(7), currentPackage->getMatched(6));
- 	  newPointH->setEnergyLoss(Adc[7], Adc[6]);
+ 	  newPointH->setEnergyLossCorrected(Adc[7], Adc[6],CalibArray);
 	  mPoint->addNewPoint(newPointH);
 
 // traitement propre aux space points..(probabilite)
@@ -2343,47 +2349,47 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
+ 	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
- 	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
+ 	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
- 	  newPointC->setEnergyLoss(Adc[0], Adc[3]);
+ 	  newPointC->setEnergyLossCorrected(Adc[0], Adc[3],CalibArray);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
- 	  newPointD->setEnergyLoss(Adc[4], Adc[1]);
+ 	  newPointD->setEnergyLossCorrected(Adc[4], Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
- 	  newPointE->setEnergyLoss(Adc[4], Adc[2]);
+ 	  newPointE->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
- 	  newPointF->setEnergyLoss(Adc[4], Adc[3]);
+ 	  newPointF->setEnergyLossCorrected(Adc[4], Adc[3],CalibArray);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(1));
- 	  newPointG->setEnergyLoss(Adc[8], Adc[1]);
+ 	  newPointG->setEnergyLossCorrected(Adc[8], Adc[1],CalibArray);
 	  mPoint->addNewPoint(newPointG);
 
 	  StSsdPoint *newPointH = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointH, currentPackage->getMatched(8), currentPackage->getMatched(2));
- 	  newPointH->setEnergyLoss(Adc[8], Adc[2]);
+ 	  newPointH->setEnergyLossCorrected(Adc[8], Adc[2],CalibArray);
 	  mPoint->addNewPoint(newPointH);
 
 	  StSsdPoint *newPointI = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointI, currentPackage->getMatched(8), currentPackage->getMatched(3));
- 	  newPointI->setEnergyLoss(Adc[8], Adc[3]);
+ 	  newPointI->setEnergyLossCorrected(Adc[8], Adc[3],CalibArray);
 	  mPoint->addNewPoint(newPointI);
 
 // traitement propre aux space points..(probabilite)

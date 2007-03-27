@@ -1,6 +1,9 @@
-// $Id: StSsdPoint.cc,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSsdPoint.cc,v 1.2 2007/03/27 23:11:48 bouchet Exp $
 //
 // $Log: StSsdPoint.cc,v $
+// Revision 1.2  2007/03/27 23:11:48  bouchet
+// Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -13,6 +16,9 @@
 
 #include <string.h>
 #include "StSsdUtil/StSsdPoint.hh"
+#include "TMath.h"
+#include "TVector2.h"
+#include "StMessMgr.h"
 
 StSsdPoint::StSsdPoint(Int_t rNPoint, Int_t rNWafer, Int_t rNumPackage, Int_t rKindPackage)
 {
@@ -116,3 +122,27 @@ StSsdPoint* StSsdPoint::giveCopy()
   return ptrClone;
 }
 
+void StSsdPoint::setEnergyLossCorrected(Float_t adcP, Float_t adcN, Float_t gain)
+{
+  // the gain is the ratio adcN/adcP
+  // in the frame {pulseP,pulseN}, we have the relation adcN = ATan(gain)*adcP (+offset)   
+  // the correction consists in a rotation of the hit of coordinates {pulseP,pulseN} by an angle = ratio
+  // opposite sign is the gain > 1   
+  Double_t angle  = 0;
+  if (gain==0) gain = 1;
+  //printf("for this wafer, the gain is %f\n",gain);
+  // gain=0 means we don't have any value forthis wafer then we don't do any rotation
+  // newAdcp=adcP and newAdcN=adcN since the sin gives 0
+  angle           = TMath::ATan(gain);
+  //angle           = TMath::Abs(45 - (angle*360)/(TMath::Pi()*2));
+  //angle = TMath::Abs(TMath::Pi()/4 - angle) ;//radians
+  angle = TMath::Pi()/4 - angle;
+  TVector2 pulse;
+  TVector2 newpulse;
+  pulse.Set(adcP,adcN);
+  newpulse = pulse.Rotate(angle); 
+  //printf("old adcP =%f old adcN=%f\n",pulse.X(),pulse.Y());
+  //printf("new adcP =%f new adcN=%f\n",newpulse.X(),newpulse.Y());
+  setDe((newpulse.X() + newpulse.Y())/2.,0);
+  setDe((newpulse.X() - newpulse.Y())/2.,1);
+}
