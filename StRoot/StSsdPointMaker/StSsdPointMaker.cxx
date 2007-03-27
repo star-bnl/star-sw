@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.37 2007/03/21 17:19:12 fisyak Exp $
+// $Id: StSsdPointMaker.cxx,v 1.38 2007/03/27 18:30:04 fisyak Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.38  2007/03/27 18:30:04  fisyak
+// recover lost access to ssdStripCalib table
+//
 // Revision 1.37  2007/03/21 17:19:12  fisyak
 // use TGeoHMatrix for coordinate transformation, eliminate ssdWafersPostion, ake NTuples only for Debug()>1
 //
@@ -301,117 +304,54 @@ ClassImp(StSsdPointMaker)
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t StSsdPointMaker::InitRun(Int_t runumber)
-{
+Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   //    mDbMgr = StDbManager::Instance();
   //    mDbMgr->setVerbose(false);
-
+  
   //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
-
-
-  TDataSet *DbConnector = GetDataBase("Geometry/ssd");
-
-  if (DbConnector) 
-    {
-      LOG_INFO << "InitRun : SSD Databases respond " << endm;
-      St_slsCtrl* slsCtrlTable = (St_slsCtrl*) DbConnector->Find("slsCtrl");
-      slsCtrl_st*      control      = (slsCtrl_st*) slsCtrlTable->GetTable();
-      if (!control){
-	LOG_ERROR << "InitRun : No access to slsCtrl table" << endm;}
-      else
-	{
-	  mDynamicControl = new StSsdDynamicControl();
-	  mDynamicControl -> setnElectronInAMip(control->nElectronInAMip);
-	  mDynamicControl -> setadcDynamic(control->adcDynamic);
-	  mDynamicControl -> seta128Dynamic(control->a128Dynamic);
-	  mDynamicControl -> setnbitEncoding(control->nbitEncoding);
-	  mDynamicControl -> setnstripInACluster(control->nstripInACluster);
-	  mDynamicControl -> setpairCreationEnergy(control->pairCreationEnergy);
-	  mDynamicControl -> setparDiffP(control->parDiffP);
-	  mDynamicControl -> setparDiffN(control->parDiffN);
-	  mDynamicControl -> setparIndRightP(control->parIndRightP);
-	  mDynamicControl -> setparIndRightN(control->parIndRightN);
-	  mDynamicControl -> setparIndLeftP(control->parIndLeftP);
-	  mDynamicControl -> setparIndLeftN(control->parIndLeftN);
-	  mDynamicControl -> setdaqCutValue(control->daqCutValue);
-	  mDynamicControl -> printParameters();
-	}
-      St_clusterControl* clusterCtrlTable = (St_clusterControl*) DbConnector->Find("clusterControl");
-      clusterControl_st *clusterCtrl  = (clusterControl_st*) clusterCtrlTable->GetTable() ;
-      if (!clusterCtrl){
-	LOG_ERROR << "InitRun : No access to clusterControl table" << endm;}
-      else 
-	{
-	  mClusterControl = new StSsdClusterControl();
-	  mClusterControl -> setHighCut(clusterCtrl->highCut);  
-	  mClusterControl -> setTestTolerance(clusterCtrl->testTolerance);
-	  mClusterControl -> setClusterTreat(clusterCtrl->clusterTreat);
-	  mClusterControl -> setAdcTolerance(clusterCtrl->adcTolerance);
-	  mClusterControl -> setMatchMean(clusterCtrl->matchMean);
-	  mClusterControl -> setMatchSigma(clusterCtrl->matchSigma);
-	  mClusterControl -> printParameters();
-	}    
-      
-      //      TDataSet *svtparams = GetInputDB("svt");
-      //      TDataSetIter local(svtparams);
-      //      m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
-      
-      TDataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
-      if (!CalibDbConnector)
-	{
-	  LOG_ERROR <<"InitRun: Can not found the calibration db.."<<endm;
-	}
-#ifdef config_position_dimensions
-      else
-	{
-	  m_noise2 = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
-	  if (!m_noise2)
-	    {
-	      LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;
-	    }
-	  else
-	    {
-	      if(m_noise2)
-		{
-		  LOG_WARN<<"InitRun : printing few pedestal/noise values"<<endm;
-		  Read_Strip(m_noise2,&Zero); 
-		}
-	    }
-	}
-      // Get once the information for configuration, wafersposition and dimensions
-      St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration"); 
-      config  = (ssdConfiguration_st*) configTable->GetTable() ;
-      if (!config) {
-        LOG_FATAL << "InitRun : No access to ssdConfiguration database" << endm;
-	return kStFatal;
-      }
-      
-      position = (St_ssdWafersPosition*) DbConnector->Find("ssdWafersPosition");
-      if (!position) {
-        LOG_FATAL << "InitRun : No access to ssdWafersPosition database" << endm;
-	return kStFatal;
-      }
-      
-      St_ssdDimensions* dimensionsTable = (St_ssdDimensions*) DbConnector->Find("ssdDimensions");
-      dimensions  = (ssdDimensions_st*) dimensionsTable->GetTable() ;
-      if (!dimensions) 
-        {LOG_ERROR << "InitRun : No access to ssdDimensions database" << endm;}
-      
-      if ((!dimensions)||(!config)){
-        LOG_ERROR << "InitRun : No geometry or configuration parameters " << endm;
-        return kStErr;
-      }
-#endif /* config_position_dimensions */
-    }
-  else // No access to databases -> read tables
-    {
-      LOG_ERROR << "InitRun : No connection to the database in StSsdPointMaker" << endm;
-    }
+  St_slsCtrl* slsCtrlTable = (St_slsCtrl*) GetDataBase("Geometry/ssd/slsCtrl");
+  if (! slsCtrlTable) {LOG_ERROR << "InitRun : No access to slsCtrl table" << endm;}
+  else  {
+    mDynamicControl = new StSsdDynamicControl();
+    slsCtrl_st*      control      = (slsCtrl_st*) slsCtrlTable->GetTable();
+    mDynamicControl -> setnElectronInAMip(control->nElectronInAMip);
+    mDynamicControl -> setadcDynamic(control->adcDynamic);
+    mDynamicControl -> seta128Dynamic(control->a128Dynamic);
+    mDynamicControl -> setnbitEncoding(control->nbitEncoding);
+    mDynamicControl -> setnstripInACluster(control->nstripInACluster);
+    mDynamicControl -> setpairCreationEnergy(control->pairCreationEnergy);
+    mDynamicControl -> setparDiffP(control->parDiffP);
+    mDynamicControl -> setparDiffN(control->parDiffN);
+    mDynamicControl -> setparIndRightP(control->parIndRightP);
+    mDynamicControl -> setparIndRightN(control->parIndRightN);
+    mDynamicControl -> setparIndLeftP(control->parIndLeftP);
+    mDynamicControl -> setparIndLeftN(control->parIndLeftN);
+    mDynamicControl -> setdaqCutValue(control->daqCutValue);
+    mDynamicControl -> printParameters();
+  }
+  St_clusterControl* clusterCtrlTable = (St_clusterControl*) GetDataBase("Geometry/ssd/clusterControl");
+  if (!clusterCtrlTable) {LOG_ERROR << "InitRun : No access to clusterControl table" << endm;}
+  else {
+    mClusterControl = new StSsdClusterControl();
+    clusterControl_st *clusterCtrl  = (clusterControl_st*) clusterCtrlTable->GetTable() ;
+    mClusterControl -> setHighCut(clusterCtrl->highCut);  
+    mClusterControl -> setTestTolerance(clusterCtrl->testTolerance);
+    mClusterControl -> setClusterTreat(clusterCtrl->clusterTreat);
+    mClusterControl -> setAdcTolerance(clusterCtrl->adcTolerance);
+    mClusterControl -> setMatchMean(clusterCtrl->matchMean);
+    mClusterControl -> setMatchSigma(clusterCtrl->matchSigma);
+    mClusterControl -> printParameters();
+  }    
+  
+  m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
+  if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
+  else {
+    LOG_WARN<<"InitRun : printing few pedestal/noise values"<<endm;
+    Read_Strip(m_noise2,&Zero); 
+  }
   return kStOk;
 }
-
 //_____________________________________________________________________________
-
 void StSsdPointMaker::DeclareNtuple(){
   StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
   TFile *f = 0;
