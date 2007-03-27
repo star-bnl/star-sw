@@ -536,8 +536,8 @@ void BEMCPlots::processEvent( char *datap
 		    }
 		}
 		for (int i = 0;i < 300;i++) {
-		    if (this->mPatchData[i][0] != 0) this->mDsmSimuHighTower[i] = 0;
-		    if (this->mPatchData[i][1] != 0) {
+		    if (this->mPatchData[i][0] == 0) this->mDsmSimuHighTower[i] = 0;
+		    if (this->mPatchData[i][1] == 0) {
 			this->mDsmSimuPatchSum[i] = 0;
 		    } else {
 			int lut;
