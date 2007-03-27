@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.18 2007/03/21 23:02:13 fisyak Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.19 2007/03/27 20:01:22 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.19  2007/03/27 20:01:22  fisyak
+ * remove senseless print outs
+ *
  * Revision 1.18  2007/03/21 23:02:13  fisyak
  * add StSvtGeometry to const area
  *
@@ -543,10 +546,6 @@ StSvtHybridCollection* StSvtDbMaker::getDriftCurve()
 	    gMessMgr->Message("Error Finding SVT drift velocity curve","E");
 	    return NULL;
 	  }
-	  else {
-	    gMessMgr->Message("Error Finding SVT Calibration Db","E");
-            return NULL;
-          }
 	  
           driftCurve = driftVelocityCurve->GetTable();
 	  
@@ -623,11 +622,6 @@ StSvtHybridCollection* StSvtDbMaker::getAnodeDriftCorr()
 	    gMessMgr->Message("Error Finding SVT bad anodes","E");
 	    return 0;
 	  }
-	  else {
-	    gMessMgr->Message("Error Finding SVT Calibration Db","E");
-	    return 0;
-	  }
-
 	  driftCorr = anodeDriftCorr->GetTable();
 
 	  hybridAnodeDriftCorr = (StSvtHybridAnodeDriftCorr*)mSvtAnodeDriftCorr->at(index);
@@ -659,10 +653,6 @@ StSvtHybridCollection* StSvtDbMaker::getPedestals()
   St_svtPedestals *pedestals = (St_svtPedestals*)GetDataBase("Calibrations/svt/svtPedestals");
   if (!(pedestals && pedestals->HasData()) ){
     gMessMgr->Message("Error Finding SVT Pedestals","E");
-    return 0;
-  }
-  else {
-    gMessMgr->Message("Error Finding SVT Calibration Db","E");
     return 0;
   }
 
@@ -714,10 +704,6 @@ StSvtHybridCollection* StSvtDbMaker::getRms()
   St_svtRms *st_rms = (St_svtRms*)GetDataBase("Calibrations/svt/svtRms");
   if (!(st_rms && st_rms->HasData()) ){
     gMessMgr->Message("Error Finding SVT RMS","E");
-    return 0;
-  }
-  else {
-    gMessMgr->Message("Error Finding SVT Calibration Db","E");
     return 0;
   }
 
@@ -984,10 +970,6 @@ StSvtHybridCollection* StSvtDbMaker::getBadAnodes()
 	  badAnodes = (St_svtBadAnodes*) GetDataBase(Path);
 	  if (!(badAnodes && badAnodes->HasData()) ){
 	    gMessMgr->Message("Error Finding SVT bad anodes","E");
-	    return 0;
-	  }
-	  else {
-	    gMessMgr->Message("Error Finding SVT Calibration Db","E");
 	    return 0;
 	  }
 
