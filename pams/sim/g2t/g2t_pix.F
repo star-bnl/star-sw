@@ -18,10 +18,10 @@
        Local  = Idigi.ge.2
 
        Do While (G2R_GET_HIT('pix') .eq. 0)
-          print *,i,id,trac,next,volume,
-     >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
-     >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
-     >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
+*          print *,i,id,trac,next,volume,
+*     >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
+*     >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
+*     >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
 
          i=i+1
          g2t_pix_hit_h.nok            = i
