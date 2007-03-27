@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.38 2007/03/27 18:30:04 fisyak Exp $
+// $Id: StSsdPointMaker.cxx,v 1.39 2007/03/27 23:15:09 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.39  2007/03/27 23:15:09  bouchet
+// Add a switch to use the gain calibration
+//
 // Revision 1.38  2007/03/27 18:30:04  fisyak
 // recover lost access to ssdStripCalib table
 //
@@ -144,7 +147,7 @@
 #include "tables/St_ssdSectorsPosition_Table.h"
 #include "tables/St_ssdBarrelPosition_Table.h"
 #include "tables/St_ssdStripCalib_Table.h"
-
+#include "tables/St_ssdGainCalibWafer_Table.h"
 #include "StEvent.h"
 #include "StSsdHitCollection.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
@@ -309,8 +312,11 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   //    mDbMgr->setVerbose(false);
   
   //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
+
+  UseCalibration = 1;
+  printf("UseCalibration=%d\n",UseCalibration);
   St_slsCtrl* slsCtrlTable = (St_slsCtrl*) GetDataBase("Geometry/ssd/slsCtrl");
-  if (! slsCtrlTable) {LOG_ERROR << "InitRun : No access to slsCtrl table" << endm;}
+  if(! slsCtrlTable){LOG_ERROR << "InitRun : No access to slsCtrl table" << endm;}
   else  {
     mDynamicControl = new StSsdDynamicControl();
     slsCtrl_st*      control      = (slsCtrl_st*) slsCtrlTable->GetTable();
@@ -342,13 +348,14 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
     mClusterControl -> setMatchSigma(clusterCtrl->matchSigma);
     mClusterControl -> printParameters();
   }    
-  
   m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
   if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
   else {
-    LOG_WARN<<"InitRun : printing few pedestal/noise values"<<endm;
+    LOG_INFO<<"InitRun : printing few pedestal/noise values"<<endm;
     Read_Strip(m_noise2,&Zero); 
   }
+  (UseCalibration==1)?FillCalibTable():FillDefaultCalibTable();
+ 
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -466,7 +473,7 @@ Int_t StSsdPointMaker::Make()
       //PrintClusterDetails(mySsd,8310); 
       makeScfCtrlHistograms(mySsd);
       //debugUnPeu(mySsd);
-      Int_t nPackage = mySsd->doClusterMatching();
+      Int_t nPackage = mySsd->doClusterMatching(CalibArray);
       LOG_INFO<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endm;
       mySsd->convertDigitToAnalog(mDynamicControl);
       mySsd->convertUFrameToOther();
@@ -1477,6 +1484,36 @@ Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
       }
     LOG_DEBUG << "Number of p-side clusters in hits = " << clusP << endm ;
     LOG_DEBUG << "Number of n-side clusters in hits = " << clusN << endm ;
+}
+//_____________________________________________________________________________
+void StSsdPointMaker::FillCalibTable(){
+  mGain          = (St_ssdGainCalibWafer*)GetDataBase("Calibrations/ssd/ssdGainCalibWafer"); 
+  if(mGain){ 
+    ssdGainCalibWafer_st *g  = mGain->GetTable() ;
+    Int_t size = mGain->GetNRows();
+    LOG_INFO<<Form("Size of gain table = %d",mGain->GetNRows())<<endm;
+    for(Int_t i=0; i<size;i++){
+      //LOG_INFO<<Form(" Print entry %d : ladder=%d gain =%lf wafer=%d",i,g[i].nLadder,g[i].nGain,g[i].nWafer)<<endm;
+      CalibArray[i] = g[i].nGain;
+    }
+  }
+  else { 
+    LOG_WARN << "InitRun : No access to Gain Calib - will use the default gain" << endm;
+    LOG_WARN << "We will use the default table" <<endm;
+    for(Int_t i=0; i<320;i++){
+      CalibArray[i] = 1;
+      //LOG_INFO << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm; 
+    
+    }
+  }
+}
+//_____________________________________________________________________________
+void StSsdPointMaker::FillDefaultCalibTable(){
+  LOG_INFO << " The calibration gain will not be used." << endm;
+  for(Int_t i=0; i<320;i++){
+    CalibArray[i] = 1;
+    //LOG_INFO << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm; 
+  }
 }
 //____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {

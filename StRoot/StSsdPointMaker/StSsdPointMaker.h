@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.24 2007/03/21 17:19:12 fisyak Exp $
+// $Id: StSsdPointMaker.h,v 1.25 2007/03/27 23:15:09 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.25  2007/03/27 23:15:09  bouchet
+// Add a switch to use the gain calibration
+//
 // Revision 1.24  2007/03/21 17:19:12  fisyak
 // use TGeoHMatrix for coordinate transformation, eliminate ssdWafersPostion, ake NTuples only for Debug()>1
 //
@@ -109,6 +112,7 @@ class St_ssdDimensions;
 class St_ssdConfiguration;
 class St_ssdWafersPosition;
 class St_ssdStripCalib;
+class St_ssdGainCalibWafer;
 
 class StEvent;
 class StSsdHitCollection;
@@ -148,6 +152,7 @@ class StSsdPointMaker : public StMaker {
  private:
   TDataSet* DbConnector;
   St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
+  St_ssdGainCalibWafer  *mGain;           //!< Pointer to the ssdGainCalib table (calibration gain)) 
 #ifdef config_position_dimensions
   St_ssdWafersPosition  *position;
   ssdDimensions_st      *dimensions;
@@ -183,6 +188,8 @@ class StSsdPointMaker : public StMaker {
   void Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero);
   void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
   void WriteMatchedStrips(StSsdBarrel *mySsd);//! 
+  void FillCalibTable();
+  void FillDefaultCalibTable();
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -229,10 +236,11 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto_19; //! (1p-1n) packages control matching  
   TH2S  *matchisto_20; //! (1p-1n) packages control matching.
   Int_t Zero;
-
-   virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.24 2007/03/21 17:19:12 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
-};
+  Int_t UseCalibration ;
+  Float_t CalibArray[320];
+  virtual const char *GetCVS() const 
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.25 2007/03/27 23:15:09 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  
+  ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
+    };
 #endif
