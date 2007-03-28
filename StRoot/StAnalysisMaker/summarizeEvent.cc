@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.18 2007/03/27 22:17:58 fisyak Exp $
+ * $Id: summarizeEvent.cc,v 2.19 2007/03/28 20:58:02 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.19  2007/03/28 20:58:02  fisyak
+ * Fix print out for RnD hits
+ *
  * Revision 2.18  2007/03/27 22:17:58  fisyak
  * Add {} to handle LOG_QA
  *
@@ -77,7 +80,7 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.18 2007/03/27 22:17:58 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.19 2007/03/28 20:58:02 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -415,7 +418,7 @@ summarizeEvent(StEvent& event, const int &nevents)
 	if (hit->flag())  Hits[j].noBadHits++;
 	if (hit->usedInFit()) Hits[j].noHitsUsedInFit++;
       }
-      for (Int_t j = 0; j < NoHits; j++) {
+      for (Int_t j = 0; j < NHtypes; j++) {
 	if (Hits[j].TotalNoOfHits) {
 	  LOG_QA << "# " << Hits[j].Name << " hits:         " << Hits[j].TotalNoOfHits
 		 << ":\tBad ones: " << Hits[j].noBadHits
