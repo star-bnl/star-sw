@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.12 2006/12/21 18:11:59 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.13 2007/03/28 13:33:45 mmiller Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.13  2007/03/28 13:33:45  mmiller
+ * Removed cout/printf's.
+ *
  * Revision 1.12  2006/12/21 18:11:59  wleight
  * Fixed UPGR09 compatibility so it works with all versions
  *
@@ -234,7 +237,7 @@ Int_t StPixelFastSimMaker::Make()
 		  gGeoManager->RestoreMasterVolume();
 		  gGeoManager->cd(Path);
 		  TGeoNode* node=gGeoManager->GetCurrentNode();
-		  cout<<"hit location: "<<mcH->position()<<endl;
+		  //MLM cout<<"hit location: "<<mcH->position()<<endl;
 		  double pos[3]={mcH->position().x(),mcH->position().y(),mcH->position().z()};
 		  double localpos[3]={0,0,0};
 		  gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
@@ -244,7 +247,7 @@ Int_t StPixelFastSimMaker::Make()
 		  if(mcI->layer()==1) pos[2]=distortHit(pos[2],resZIst1,100);
 		  else pos[2]=distortHit(pos[2],resZIst2,100);
 		  StThreeVectorF smearedpos(pos);
-		  cout<<"smeared hit location: "<<smearedpos<<endl;
+		  //MLM cout<<"smeared hit location: "<<smearedpos<<endl;
 		  StRnDHit* tempHit = new StRnDHit(smearedpos, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		  tempHit->setDetectorId(kIstId); 
 		  tempHit->setVolumeId(mcH->volumeId());                   
