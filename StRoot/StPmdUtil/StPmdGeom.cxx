@@ -1,6 +1,6 @@
-/********************************************************
+/*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.16 2007/03/21 16:39:58 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.17 2007/03/29 04:54:52 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.17  2007/03/29 04:54:52  rashmi
+ * BoardDetail of access on 29/03/07 added
+ *
  * Revision 1.16  2007/03/21 16:39:58  rashmi
  * StPmdGeom after new mapping (run7) and with DrawPmd function for viewing PMD Geometry
  *
@@ -300,7 +303,6 @@ void StPmdGeom::Sim2Detmap(Int_t& nmod,Int_t& row,Int_t& col)
     col = col;
     break;
   case 9:
-    
     nmod = 3;
     row = row;
     col = col;
@@ -324,7 +326,7 @@ void StPmdGeom::Sim2Detmap(Int_t& nmod,Int_t& row,Int_t& col)
     nmod = 6;
     row = row;
     col = col;
-    break;      
+    break;    
   case 14:
     nmod = 5;
     row = row;
@@ -1683,8 +1685,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       for(Int_t i=24;i<27;i++)status[47][i]=0;
     }
   
-  if(rn >=1 && year==8)
-    {
+  if(rn >=1 && year==8){
       // RR 06/03/2007 Since some chains extend beyond 27 mapped boards
       // Setting status for boards beyond 27 for 
       // all chains except 1,7,19,20,23,24 to status 0 
@@ -1860,13 +1861,21 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       //chain 43
       status[42][7]=0;
       //chain 44
-      
+    
       //chain 45
       for(Int_t i=10;i<27;i++)status[44][i]=0;      
       //chain 46
       //chain 47
       //chain 48
-   }
+
+				}
+  if(rn>87&&year==8){
+    //chain 33 board 7
+    status[32][6]=0;
+    // chain 46 board 18,19
+    status[45][17]=0;
+    status[45][18]=0;
+  }
   
   for(Int_t i=0;i<48;i++){
     for(Int_t ib=0;ib<36;ib++){
