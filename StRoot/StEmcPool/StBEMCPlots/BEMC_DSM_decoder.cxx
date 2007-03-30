@@ -197,7 +197,74 @@ void simulateFEEaction(int adc, int ped, int bitConv, int &ht, int &pa, bool deb
     if (debug) cout << "; HT = " << ht << ", PA = " << pa << endl;
 }
 
+// This function calculates lookup table (LUT)
+// Originally written in TCL (emc.tcl)
 void simulateFEELUT(int sum, int formula, int lutScale, int lutPed, int lutSigma, int lutUsePowerup, int parameter4, int parameter5, int numberOfMaskedTowers, int pedestalShift, int &lut, bool debug) {
+/*
+proc getLUTscale { board patch } {    global lutScale lutPed lutSigma lutUseMask lutUsePowerup
+    global triggermask1 triggermask2
+
+    set patchLutScale $lutScale
+    if {$lutUseMask == 1} {
+        if {$patch == 0} {set triggerMask $triggermask1($board)} else {set triggerMask $triggermask2($board)}
+        set numberOfMaskedChannels 0
+        for {set bit 1} {$bit <= 0xffff} {set bit [expr $bit * 2]} {
+            if {[expr ($triggerMask & $bit)] == 0} {incr numberOfMaskedChannels}
+        }
+        if {$numberOfMaskedChannels != 16} {
+            set patchLutScale [expr $lutScale * ((16.0 - $numberOfMaskedChannels) / 16.0)]
+        } else {
+            set patchLutScale 1
+        }
+    }
+    return $patchLutScale
+}
+
+proc getLUTped { board patch } {
+    global lutScale lutPed lutSigma lutUseMask lutUsePowerup
+    global triggermask1 triggermask2 PedestalShift
+
+    set ped $lutPed([expr $patch+1],$board)
+    if {$lutUsePowerup} {set ped [expr $ped + 15]}
+    if {$lutUseMask == 2} {
+        set triggerMask 0xffff
+        if {$patch == 0} {set triggerMask $triggermask1($board)}
+        if {$patch == 1} {set triggerMask $triggermask2($board)}
+        set numberOfMaskedChannels 0
+        for {set bit 1} {$bit <= 0xffff} {set bit [expr $bit * 2]} {
+            if {[expr ($triggerMask & $bit)] == 0} {incr numberOfMaskedChannels}
+        }
+        set ped [expr $ped - ($numberOfMaskedChannels) * (($PedestalShift - 8) / 16)]
+    }
+    return $ped
+}
+
+proc getLUTrange { board patch fast } {
+    global lutScale lutPed lutSigma lutUseMask lutUsePowerup
+    global triggermask1 triggermask2
+
+    set ped [getLUTped $board $patch]
+    set patchLutScale [getLUTscale $board $patch]
+    set range [expr $patchLutScale * ($ped + 62)]
+    if {$range < 78} {set range 78}
+    if {$fast == "slow"} {set range 4096}
+    return $range
+}
+
+proc getLUTvalue { board patch index } {
+    global lutScale lutPed lutSigma lutUseMask lutUsePowerup
+    global triggermask1 triggermask2
+
+    set ped [getLUTped $board $patch]
+    set nsigma $lutSigma([expr $patch+1],$board)
+    set patchLutScale [getLUTscale $board $patch]
+    set value [expr ($index - $ped) / $patchLutScale]
+    if {$value < 0} then {set value 0}
+    if {$value > 62} then {set value 62}
+    if {[expr $index - $ped] < $nsigma} then {set value 0}
+    return [expr round($value)]
+}
+*/
     float scale = lutScale;
     if (formula == 1) {
 	scale *= (16.0 - numberOfMaskedTowers) / 16.0;
@@ -213,7 +280,7 @@ void simulateFEELUT(int sum, int formula, int lutScale, int lutPed, int lutSigma
     if (value < 0) value = 0;
     if (value > 62) value = 62;
     if (sum - ped < lutSigma) value = 0;
-    lut = int(value);
+    lut = int((value >= 0.0) ? (value + 0.5) : (value - 0.5));
     if (debug) cout << "Simulating LUT: sum = " << sum << ", formula = " << formula << ", lutPed = " << lutPed << ", lutScale = " << lutScale << ", lutUsePowerup = " << lutUsePowerup << ", numberOfMaskedTowers = " << numberOfMaskedTowers << ", pedestalShift = " << pedestalShift << "; LUT = " << lut << endl;
 }
 
