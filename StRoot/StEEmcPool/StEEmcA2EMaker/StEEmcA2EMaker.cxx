@@ -7,8 +7,8 @@
  * as input. 
  *
  * \author Jason C. Webb
- * $Date: 2006/01/13 18:59:18 $
- * $Revision: 1.2 $
+ * $Date: 2007/03/30 20:06:44 $
+ * $Revision: 1.3 $
  *
  */
 
@@ -31,6 +31,8 @@
 #include "StEvent/StEmcModule.h"
 #include "StEvent/StEmcRawHit.h"
 #include "StEvent/StEmcCollection.h"
+
+#include "StMessMgr.h"
 
 #include <iostream>
 
@@ -230,6 +232,10 @@ Bool_t StEEmcA2EMaker::fillFromMuDst( StMuEmcCollection *emc )
 
   assert(emc);
 
+  LOG_DEBUG<<GetName()<<"::fillFromMuDst() N tower ADC = "<<emc -> getNEndcapTowerADC()<<endm;
+
+
+
   /// Loop over all towers
   for ( Int_t ihit = 0; ihit < emc -> getNEndcapTowerADC(); ihit++ ) {
 
@@ -247,6 +253,8 @@ Bool_t StEEmcA2EMaker::fillFromMuDst( StMuEmcCollection *emc )
     addTowerHit(sec,sub,eta,adc,0);
 
   }
+
+  LOG_DEBUG<<GetName()<<"::fillFromMuDst() N pre/post ADC = "<<emc -> getNEndcapPrsHits()<<endm;
 
   /// Loop over all pre/postshower elements
   for ( Int_t ihit = 0; ihit < emc -> getNEndcapPrsHits(); ihit++ ) {
@@ -322,6 +330,9 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
   mTowers[index][layer].fail( dbitem -> fail );
   mTowers[index][layer].stat( dbitem -> stat );
 
+  /// Raw ADC should always be here
+  mTowers[index][layer].raw(adc);
+
   /// Abort if the db has this marked as a bad or questionable channel
 #if 1
   if ( dbitem -> fail ) return;  
@@ -337,7 +348,6 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
   mHits[sec][layer]++; 
 
   /// Raw and ped subtracted adc
-  mTowers[index][layer].raw(adc);
   mTowers[index][layer].adc(adc-ped);
 
   /// Make sure gain is positive, nonzero
@@ -390,6 +400,9 @@ void StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc
   mStrips[sec][plane][strip].fail( dbitem -> fail );
   mStrips[sec][plane][strip].stat( dbitem -> stat );
 
+  /// Raw ADC should always be here
+  mStrips[sec][plane][strip].raw(adc);
+
   /// Abort if the db has this marked as bad or questionable 
   if ( dbitem -> fail ) return;
   //if ( dbitem -> stat ) return;
@@ -403,7 +416,6 @@ void StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc
   mHits[sec][plane+4]++; 
 
   /// Set raw and ped subtracted ADC
-  mStrips[sec][plane][strip].raw(adc);
   mStrips[sec][plane][strip].adc(adc-ped);
 
  /// Make sure gain is positive, nonzero
