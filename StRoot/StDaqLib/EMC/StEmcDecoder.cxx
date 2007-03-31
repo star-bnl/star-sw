@@ -415,7 +415,7 @@ int StEmcDecoder::GetTowerBugCorrectionShift(int id_original,int& id_shift)
 }
 //--------------------------------------------------------
 /*!
-Copy of StEmcGeom version
+Updated method is aware of the tower mapping bug.
 \param TowerId is the software id for towers
 \param module is the module number
 \param eta is the eta division for towers
@@ -423,8 +423,9 @@ Copy of StEmcGeom version
 */
 int StEmcDecoder::GetTowerBin(const int TowerId,int &module,int &eta,int &sub)
 {
-
-    int rid=TowerId;
+	int shift;
+	GetTowerBugCorrectionShift(TowerId,shift);
+    int rid = TowerId + shift;
 
     if(rid<1 || rid>4800)
         return 0;
