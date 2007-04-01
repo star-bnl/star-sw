@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.14 2006/09/20 01:50:35 mvl Exp $
+ * $Id: StMuEvent.h,v 1.15 2007/04/01 21:38:48 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -9,6 +9,7 @@
 
 #include "TObject.h"
 #include "TArrayI.h"
+#include "TVector2.h"
 #include "StMuL3EventSummary.h"
 #include "StMuEmcCollection.h"
 #include "StMuTriggerIdCollection.h"
@@ -75,12 +76,6 @@ class StMuEvent : public TObject {
   unsigned short refMultFtpcWest(int vtx_id = -1);
   /// Reference multiplicity of particles in the east+west FTPC as defined in StEventUtilities/StuFtpcRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
   unsigned short refMultFtpc(int vtx_id = -1);
-  /// Currently not filled properly.
-  double reactionPlane(unsigned short);
-  void   setReactionPlane(unsigned short, double v);
-  /// Currently not filled properly.
-  double reactionPlanePtWgt(unsigned short);
-  void   setReactionPlanePtWgt(unsigned short, double v);
   double magneticField();
   double zdcAdcAttentuatedSumWest();
   double zdcAdcAttentuatedSumEast();
@@ -89,6 +84,31 @@ class StMuEvent : public TObject {
   StThreeVectorF primaryVertexPosition();
   StThreeVectorF primaryVertexErrors();
   TArrayI& L2Result(); // Raw L2Result[] array
+
+  /// Number of tracks used in QA
+  unsigned short  multQA();
+  /// Number of tracks used in QB
+  unsigned short  multQB();
+  unsigned short  multQNegEastA();
+  unsigned short  multQNegEastB();
+  unsigned short  multQNegWestA();
+  unsigned short  multQNegWestB();
+  unsigned short  multQPosEastA();
+  unsigned short  multQPosEastB();
+  unsigned short  multQPosWestA();
+  unsigned short  multQPosWestB();
+  /// pt-weighted Q-vector for random subevent A
+  TVector2&  QA();
+  /// pt-weighted Q-vector for random subevent B
+  TVector2&  QB();
+  TVector2&  QNegEastA();
+  TVector2&  QNegEastB();
+  TVector2&  QNegWestA();
+  TVector2&  QNegWestB();
+  TVector2&  QPosEastA();
+  TVector2&  QPosEastB();
+  TVector2&  QPosWestA();
+  TVector2&  QPosWestB();
 
  protected:
   void clear();
@@ -113,17 +133,40 @@ class StMuEvent : public TObject {
   UShort_t mRefMultNeg;
   UShort_t mRefMultFtpcEast;
   UShort_t mRefMultFtpcWest;
-  Float_t mReactionPlane[2];              
-  Float_t mReactionPlanePtWgt[2];              
 
   StThreeVectorF mPrimaryVertexError;
 
   TArrayI mL2Result; // Raw L2 info
+
+  // pt-weighted Q-vectors for different subevents
+  // mMultQx stores the multiplicity of used tracks
+  // For track cuts, see StMuDstMaker::setQvectors
+  unsigned short mMultQA;  ///> Multiplicity of tracks used in QA
+  unsigned short mMultQB;
+  unsigned short mMultQNegEastA;
+  unsigned short mMultQNegEastB;
+  unsigned short mMultQPosEastA;
+  unsigned short mMultQPosEastB;
+  unsigned short mMultQNegWestA;
+  unsigned short mMultQNegWestB;
+  unsigned short mMultQPosWestA;
+  unsigned short mMultQPosWestB;
+  TVector2 mQA;
+  TVector2 mQB;
+  TVector2 mQNegEastA;
+  TVector2 mQNegEastB;
+  TVector2 mQPosEastA;
+  TVector2 mQPosEastB;
+  TVector2 mQNegWestA;
+  TVector2 mQNegWestB;
+  TVector2 mQPosWestA;
+  TVector2 mQPosWestB;
+
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,7)
+  ClassDef(StMuEvent,8)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -143,10 +186,6 @@ inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;}
 // special classes for muDst
 inline StMuL3EventSummary& StMuEvent::l3EventSummary() {return mL3EventSummary;}
 inline StMuTriggerIdCollection& StMuEvent::triggerIdCollection(){return mTriggerIdCollection;}
-inline double StMuEvent::reactionPlane(unsigned short s) {return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
-inline void StMuEvent::setReactionPlane(unsigned short s, double v) {(s==0) ? mReactionPlane[0]=v : mReactionPlane[1]=v;}
-inline double StMuEvent::reactionPlanePtWgt(unsigned short s) {return (s==0) ? mReactionPlanePtWgt[0] : mReactionPlanePtWgt[1];}
-inline void StMuEvent::setReactionPlanePtWgt(unsigned short s, double v) {(s==0) ? mReactionPlanePtWgt[0]=v : mReactionPlanePtWgt[1]=v;}
 inline double StMuEvent::magneticField() { return mEventSummary.magneticField();}
 inline double StMuEvent::zdcAdcAttentuatedSumWest() { return mZdcTriggerDetector.adc(10);}
 inline double StMuEvent::zdcAdcAttentuatedSumEast() { return mZdcTriggerDetector.adc(13);}
@@ -162,11 +201,36 @@ inline double StMuEvent::ctbMultiplicity() {
 inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.primaryVertexPosition();}
 inline StThreeVectorF StMuEvent::primaryVertexErrors() { return mPrimaryVertexError;}
 inline TArrayI &StMuEvent::L2Result() { return mL2Result; }
+inline unsigned short StMuEvent::multQA() { return mMultQA; }
+inline unsigned short StMuEvent::multQB() { return mMultQB; }
+inline unsigned short StMuEvent::multQNegEastA() { return mMultQNegEastA; }
+inline unsigned short StMuEvent::multQNegEastB() { return mMultQNegEastB; }
+inline unsigned short StMuEvent::multQNegWestA() { return mMultQNegWestA; }
+inline unsigned short StMuEvent::multQNegWestB() { return mMultQNegWestB; }
+inline unsigned short StMuEvent::multQPosEastA() { return mMultQPosEastA; }
+inline unsigned short StMuEvent::multQPosEastB() { return mMultQPosEastB; }
+inline unsigned short StMuEvent::multQPosWestA() { return mMultQPosWestA; }
+inline unsigned short StMuEvent::multQPosWestB() { return mMultQPosWestB; }
+inline TVector2& StMuEvent::QA() { return mQA; }
+inline TVector2& StMuEvent::QB() { return mQB; }
+inline TVector2& StMuEvent::QNegEastA() { return mQNegEastA; }
+inline TVector2& StMuEvent::QNegEastB() { return mQNegEastB; }
+inline TVector2& StMuEvent::QNegWestA() { return mQNegWestA; }
+inline TVector2& StMuEvent::QNegWestB() { return mQNegWestB; }
+inline TVector2& StMuEvent::QPosEastA() { return mQPosEastA; }
+inline TVector2& StMuEvent::QPosEastB() { return mQPosEastB; }
+inline TVector2& StMuEvent::QPosWestA() { return mQPosWestA; }
+inline TVector2& StMuEvent::QPosWestB() { return mQPosWestB; }
 
 #endif
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.15  2007/04/01 21:38:48  mvl
+ * Added Q-vectors in StMuEvent. The pt-weieghtd Q-vectors are calculated in two random subevents (A and B) when filling the MuDst from StEvent in StMuDstMaker.
+ * A total of 10 Q-vectors are stored: 2 (A and B) for the entire event (with track-cuts in StMuDstMaker::setQvectors) and 8 for four different subevents (pos/neg and east/west and A/B).
+ * A flag (mQvectorFlag) is added in StMuTrack to signal which Q-vectors the track participates in. StMuTrack::isinQA() etc can be used to decode the flag.
+ *
  * Revision 1.14  2006/09/20 01:50:35  mvl
  * Added data member and code for L2Result array (TArrayI).
  *

@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.12 2006/09/20 17:23:39 mvl Exp $
+ * $Id: StMuEvent.cxx,v 1.13 2007/04/01 21:38:48 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -39,8 +39,10 @@ ClassImp(StMuEvent)
 //-----------------------------------------------------------------------
 StMuEvent::StMuEvent() : mPrimaryVertexError(-999.,-999.,-999) { 
   DEBUGMESSAGE("");
-  int n = (char*)mReactionPlanePtWgt - (char*)&mRefMultPos+sizeof(mReactionPlanePtWgt);
+  int n = (char*)&mRefMultFtpcWest - (char*)&mRefMultPos+sizeof(mRefMultFtpcWest);
   memset(&mRefMultPos,0,n);
+  n = (char*)&mMultQPosWestB - (char*)&mMultQA+sizeof(mMultQPosWestB);
+  memset(&mMultQA,0,n);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -168,6 +170,11 @@ unsigned short StMuEvent::refMultFtpc(int vtx_id) {return refMultFtpcEast(vtx_id
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.13  2007/04/01 21:38:48  mvl
+ * Added Q-vectors in StMuEvent. The pt-weieghtd Q-vectors are calculated in two random subevents (A and B) when filling the MuDst from StEvent in StMuDstMaker.
+ * A total of 10 Q-vectors are stored: 2 (A and B) for the entire event (with track-cuts in StMuDstMaker::setQvectors) and 8 for four different subevents (pos/neg and east/west and A/B).
+ * A flag (mQvectorFlag) is added in StMuTrack to signal which Q-vectors the track participates in. StMuTrack::isinQA() etc can be used to decode the flag.
+ *
  * Revision 1.12  2006/09/20 17:23:39  mvl
  * Added protected for events with StTriggerData (e.g. simulation)
  *
