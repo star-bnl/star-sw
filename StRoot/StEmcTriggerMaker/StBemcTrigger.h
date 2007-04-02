@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.h,v 1.10 2007/01/22 19:13:43 kocolosk Exp $
+// $Id: StBemcTrigger.h,v 1.11 2007/04/02 22:22:55 rfatemi Exp $
 //
 //
 
@@ -75,6 +75,7 @@ private:
     int mHTTP2006arrayHTADC[kNPatches];
     int mHTTP2006arrayTP[kNPatches];
     int mHTTP2006arrayTPADC[kNPatches];
+    int mBL12006arrayADC[kNJet];
 
     int mIs2003HT1;
     int mIs2004HT1;
@@ -148,6 +149,7 @@ private:
     int BHTTP_2006_HT_ADC[kNPatches];
     int BHTTP_2006_TP[kNPatches];
     int BHTTP_2006_TP_ADC[kNPatches];
+    int BL1_ADC_2006[kNJet/2];
 
 public:
     StBemcTrigger();
@@ -260,6 +262,10 @@ public:
     int*         getHTTP2006arrayTPADC()
       {
 	return mHTTP2006arrayTPADC;
+      }
+    int*         getBL12006arrayADC()
+      { 
+	return mBL12006arrayADC;
       }
 
     emcTrigger     getTrigger()

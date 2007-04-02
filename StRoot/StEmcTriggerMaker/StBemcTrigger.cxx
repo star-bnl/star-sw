@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.23 2007/03/06 00:25:49 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.24 2007/04/02 22:22:55 rfatemi Exp $
 //
 //
 
@@ -110,6 +110,11 @@ void StBemcTrigger::resetConf(){
       mJP12006array[i]=-1;
       mJP22006array[i]=-1;
     }
+
+    for (int i=0;i<kNJet/2;i++){
+      BL1_ADC_2006[i]=-1;
+    }
+
     for (int i=0;i<8;i++){
       mnumHT[i]=0;
       mnumJP[i]=0;
@@ -347,7 +352,7 @@ int StBemcTrigger::makeTrigger()
 
     //2005 BETOT
     mDsmAdc[14]=BETOT_DSM_2006;
-
+    for (int i=0; i<(kNJet/2); i++){mBL12006arrayADC[i]=BL1_ADC_2006[i];}
 
     return kStOK;
 }
@@ -1510,22 +1515,24 @@ int StBemcTrigger::get2006Trigger()
     //check if bit 6 or higher == 1
     mTrigger.Et = 0;
     int EtotSum[6];
-    for(int i = 0;i<6; i++)
-      {
-	Int_t j=2*i;
-	Int_t TempSum=0;
-	Int_t EtotHigh=0;
-	TempSum=mTrigger.Jet[j]+mTrigger.Jet[j+1];
-	TempSum=TempSum >> 2;
-	EtotHigh = TempSum >> 5;
-	int B5  = 0;
-	if(EtotHigh>0) B5 = 1;
-        EtotSum[i]=(TempSum & 0x1F);
-	EtotSum[i]+=B5<<5;
-	mTrigger.Et+=EtotSum[i];
-      }
+    for(int i = 0;i<6; i++) {
+      EtotSum[i]=0;
+      BL1_ADC_2006[i]=0;
+      Int_t j=2*i;
+      Int_t TempSum=0;
+      Int_t EtotHigh=0;
+      TempSum=mTrigger.Jet[j]+mTrigger.Jet[j+1];
+      TempSum=TempSum >> 2;
+      EtotHigh = TempSum >> 5;
+      int B5  = 0;
+      if(EtotHigh>0) B5 = 1;
+      EtotSum[i]=(TempSum & 0x1F);
+      EtotSum[i]+=B5<<5;
+      mTrigger.Et+=EtotSum[i];
+      BL1_ADC_2006[i]=EtotSum[i];
+    }
     BETOT_DSM_2006=mTrigger.Et;
-
+    
     //
     // Making Jpsi trigger
     // See http://www.star.bnl.gov/STAR/html/trg_l/TSL/Software/EMC.pdf

@@ -110,6 +110,8 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
       HT22006array[i]=-1;
     }
 
+    for (int i=0;i<(kNJet/2);i++){ BL1_2006_arrayADC[i]=-1;}
+
     for (int i=0; i<kNPatches; i++){
       HTTP2006arrayTP[i]=-1;
       HTTP2006arrayTPADC[i]=-1;
@@ -179,6 +181,8 @@ Int_t StEmcTriggerMaker::Make()
     int *HTTP2006arrayHTADC = mBemcTrigger->getHTTP2006arrayHTADC();
     int *HTTP2006arrayTP = mBemcTrigger->getHTTP2006arrayTP();
     int *HTTP2006arrayTPADC = mBemcTrigger->getHTTP2006arrayTPADC();
+    int *BL12006arrayADC=mBemcTrigger->getBL12006arrayADC();
+
 
     //2003 HT1 ==  1101
     mIs2003HT1=isTrig[0];
@@ -299,8 +303,9 @@ Int_t StEmcTriggerMaker::Make()
 
     //2006 BETOT
     BETOT_DSM_2006=DsmAdc[14];
-
-
+    for (int i=0;i<kNJet/2;i++){
+      BL1_2006_arrayADC[i]=BL12006arrayADC[i];
+    }
     //access TP 6 bit DSMsum
     for (int j=0;j<300;j++)
     {
@@ -393,6 +398,9 @@ void StEmcTriggerMaker::get2006HTTP_HT_ADC(int index, int *id){
   if (index<kNPatches) *id=HTTP_2006_arrayHT_ADC[index];
 }
 
-
+void StEmcTriggerMaker::get2006BL1_ADC(int index, int *id){
+  *id=-1;
+  if (index<kNJet/2) *id=BL1_2006_arrayADC[index];
+}
 
 
