@@ -1,5 +1,8 @@
-// $Id: StBemcTables.h,v 1.2 2006/01/24 16:32:20 suaide Exp $
+// $Id: StBemcTables.h,v 1.3 2007/04/02 13:29:17 kocolosk Exp $
 // $Log: StBemcTables.h,v $
+// Revision 1.3  2007/04/02 13:29:17  kocolosk
+// added methods from Pibero to access trigger database information
+//
 // Revision 1.2  2006/01/24 16:32:20  suaide
 // added method to correct database for bug in tower map
 //
@@ -34,6 +37,7 @@ This class handles all the BEMC database requests
 #include "tables/St_smdGain_Table.h"
 #include "tables/St_emcTriggerStatus_Table.h"
 #include "tables/St_emcTriggerPed_Table.h"
+#include "tables/St_emcTriggerLUT_Table.h"
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -62,6 +66,7 @@ class StBemcTables : public TObject
    smdGain_st*             mSmdpG;
    emcTriggerStatus_st*    mTrigS;
    emcTriggerPed_st*       mTrigP;
+   emcTriggerLUT_st*       mTrigL;
    
    StEmcDecoder*           mDecoder;
    Bool_t                  mBtowMapFix;  
@@ -90,6 +95,9 @@ class StBemcTables : public TObject
    void                    getTriggerTowerStatus(Int_t,Int_t,Int_t&); ///< Return trigger single tower status
    void                    getTriggerPedestal(Int_t,Int_t,Float_t&); ///< Return tower pedestal loaded in trigger
    void                    getTriggerBitConv(Int_t,Int_t,Int_t&); ///< Return 6 bits conversion mode
+   void                    getTriggerPedestalShift(Int_t& pedestalShift); ///< Return target pedestal shift
+   void                    getTriggerFormulaTag(Int_t crate, Int_t index, Int_t& formula); ///< Return LUT formula
+   void                    getTriggerFormulaParameters(Int_t crate, Int_t index, Int_t* parameters); ///< Return LUT formula parameters
   ClassDef(StBemcTables, 1)  
 };
 
