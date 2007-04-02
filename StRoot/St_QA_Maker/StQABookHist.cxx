@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.53 2007/03/13 18:46:28 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.54 2007/04/02 05:36:23 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.54  2007/04/02 05:36:23  genevb
+// PMD always in now
+//
 // Revision 2.53  2007/03/13 18:46:28  genevb
 // Added Svt Laser Diff
 //
@@ -761,7 +764,7 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistDE();
   BookHistPID();
   BookHistVertex();
-  if (histsSet==StQA_AuAu) BookHistPMD();
+  BookHistPMD();
   if (histsSet==StQA_MC) BookHistEval();
   
 }
