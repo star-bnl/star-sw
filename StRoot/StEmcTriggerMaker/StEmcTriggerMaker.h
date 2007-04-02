@@ -65,7 +65,7 @@ private:
     int               HTTP2006arrayTP[kNPatches];//array of TP which are part of a HTTP trigger
     int               HTTP2006arrayHTADC[kNPatches];//array of HT ADC which are part of a HTTP trigger
     int               HTTP2006arrayTPADC[kNPatches];//array of TP ADC which are part of a HTTP trigger
-
+    int               BL12006arrayADC[kNJet/2];//array of level 1 DSM 5 bit ADC from 2x1 PATCH sum
 
     int mIs2003HT1;
     int mIs2004HT1;
@@ -138,6 +138,7 @@ private:
     int HTTP_2006_arrayHT[kNPatches];
     int HTTP_2006_arrayTP_ADC[kNPatches];
     int HTTP_2006_arrayHT_ADC[kNPatches];
+    int BL1_2006_arrayADC[kNJet/2];
 
 protected:
 public:
@@ -225,6 +226,7 @@ public:
     void              get2006HTTP_HT_ADC(int, int*);//array of HT ADC for each HTTP
     void              get2006HTTP_TP_ADC(int, int*);//array of TP ADC  for each HTTP
     int               get2006HTTP_NTP() {return numHTTP_2006;}//# HTTP passing trigger
+    void              get2006BL1_ADC(int, int*);//array of DSM_L1 ADC values
 
     StBemcTrigger*    getTrigger()
     {
