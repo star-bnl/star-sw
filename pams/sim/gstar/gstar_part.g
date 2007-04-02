@@ -1,6 +1,13 @@
-* $Id: gstar_part.g,v 1.16 2007/03/05 20:53:57 potekhin Exp $
+* $Id: gstar_part.g,v 1.17 2007/04/02 18:09:27 potekhin Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.17  2007/04/02 18:09:27  potekhin
+* For the pi0 "embedding" studies, we need to enrich the
+* pi0 sample with Dalitz decays to enhance statistics.
+* To this end, we have created a particle "DALITZ", which
+* is identical to pi0 except that it goes into gamma gamma
+* and Dalitz in 50%/50% proprotion
+*
 * Revision 1.16  2007/03/05 20:53:57  potekhin
 * Corrected the B decay definitions as per Mark Heinz
 *
@@ -108,6 +115,10 @@
   Particle B0_bar    code=73         TrkTyp=4 mass=5.279  charge=0 tlife=1.536e-12,
                      pdg=-511 bratio= { 0.72, 0.28}  mode= { 600304, 350304}
 
+************************************************************************************ 
+* special pi0 decay: 50% normal, 50% dalitz
+  Particle Dalitz    code=149        TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
+                     pdg=111  bratio= { 0.5, 0.5}  mode= { 101, 10203}
 ************************************************************************************ 
   Particle omega     code=150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
                      pdg=223  bratio  = { .888, .085, .021 },  
