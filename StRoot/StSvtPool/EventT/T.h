@@ -76,7 +76,13 @@ class TT : public TBase {
 
   virtual void     Loop() {Loop(0);}
   virtual void     Loop(Int_t Nevents);
+  virtual void     Loop4BadAnodes() {Loop4BadAnodes(0);}
+  virtual void     Loop4BadAnodes(Int_t Nevents);
   virtual void     MakeNt();
+  static  Int_t    IsNotValidHybrid(const Char_t *hybrid, Int_t run, Double_t anode);
+  static  Int_t    IsNotValidHybrid(Int_t barrel, Int_t ladder, Int_t wafer, Int_t hybrid, Int_t run, Double_t anode) {
+    return IsNotValidHybrid(Form("B%iL%02iW%iH%i",barrel,ladder,wafer,hybrid),run,anode);
+  }
   virtual void     SetOutFileName(const Char_t *name="Out.root") {fOutFileName = name;}
   virtual void     SetuMinMax(Double_t min, Double_t max) {uMin = min; uMax = max;}
   virtual void     SetvMinMax(Double_t min, Double_t max) {vMin = min; vMax = max;}
