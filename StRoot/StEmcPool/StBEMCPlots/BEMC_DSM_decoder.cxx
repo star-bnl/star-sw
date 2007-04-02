@@ -267,12 +267,16 @@ proc getLUTvalue { board patch index } {
 */
     float scale = lutScale;
     if (formula == 1) {
-	scale *= (16.0 - numberOfMaskedTowers) / 16.0;
+	if (numberOfMaskedTowers != 16) {
+	    scale *= (16.0 - numberOfMaskedTowers) / 16.0;
+	} else {
+	    scale = 1;
+	}
     }
     float ped = lutPed;
     if (lutUsePowerup) ped += 15;
     if (formula == 2) {
-	ped -= numberOfMaskedTowers * ((pedestalShift - 8) / 16);
+	ped -= numberOfMaskedTowers * ((pedestalShift - 8.0) / 16.0);
     }
     float range = scale * (ped + 62);
     if (range < 78) range = 78;

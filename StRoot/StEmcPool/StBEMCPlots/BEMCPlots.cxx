@@ -155,7 +155,7 @@ BEMCPlots::BEMCPlots(TObjArray *list)
 	this->mTowerData[i][1] = 0; // ped
 	this->mTowerData[i][2] = 0; // FEE ped
     }
-    this->mTriggerPedestalShift = 24;
+    this->mTriggerPedestalShift = 24 * 100;
     for (int i = 0;i < 300;i++) {
 	this->mPatchData[i][0] = 1; // mask HT
 	this->mPatchData[i][1] = 1; // mask PA
@@ -273,7 +273,7 @@ void BEMCPlots::clear(const char *bemcStatus) {
 	this->mTowerData[i][1] = 0; // ped
 	this->mTowerData[i][2] = 0; // FEE ped
     }
-    this->mTriggerPedestalShift = 24;
+    this->mTriggerPedestalShift = 24 * 100;
     for (int i = 0;i < 300;i++) {
 	this->mPatchData[i][0] = 1; // mask HT
 	this->mPatchData[i][1] = 1; // mask PA
@@ -541,7 +541,7 @@ void BEMCPlots::processEvent( char *datap
 			this->mDsmSimuPatchSum[i] = 0;
 		    } else {
 			int lut;
-			simulateFEELUT(this->mDsmSimuPatchSum[i], this->mPatchData[i][3], this->mPatchData[i][4], this->mPatchData[i][5], this->mPatchData[i][6], this->mPatchData[i][7], this->mPatchData[i][8], this->mPatchData[i][9], this->mPatchData[i][10], this->mTriggerPedestalShift, lut, (i == 27300));
+			simulateFEELUT(this->mDsmSimuPatchSum[i], this->mPatchData[i][3], this->mPatchData[i][4], this->mPatchData[i][5], this->mPatchData[i][6], this->mPatchData[i][7], this->mPatchData[i][8], this->mPatchData[i][9], this->mPatchData[i][10], this->mTriggerPedestalShift / 100.0, lut, (i == 27300));
 			this->mDsmSimuPatchSum[i] = lut;
 		    }
 		    //cout << "Trigger patch " << i;
