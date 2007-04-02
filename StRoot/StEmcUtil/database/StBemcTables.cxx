@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcTables.cxx,v 1.3 2006/01/24 17:15:51 suaide Exp $
+// $Id: StBemcTables.cxx,v 1.4 2007/04/02 13:29:17 kocolosk Exp $
 // $Log: StBemcTables.cxx,v $
+// Revision 1.4  2007/04/02 13:29:17  kocolosk
+// added methods from Pibero to access trigger database information
+//
 // Revision 1.3  2006/01/24 17:15:51  suaide
 // small bug fix
 //
@@ -49,6 +52,7 @@ StBemcTables::StBemcTables(Bool_t btowMapFix):TObject()
   mSmdpG = NULL;
   mTrigS = NULL;
   mTrigP = NULL;
+  mTrigL = NULL;
   mBtowMapFix = btowMapFix;
   mDecoder = NULL;
 }
@@ -190,12 +194,15 @@ void StBemcTables::loadTables(StMaker* maker)
   
   mTrigS = NULL;
   mTrigP = NULL;
+  mTrigL = NULL;
   if(DB)
   {
     St_emcTriggerStatus* s = (St_emcTriggerStatus*)DB->Find("bemcTriggerStatus");
     if(s) mTrigS = s->GetTable();
     St_emcTriggerPed* p = (St_emcTriggerPed*)DB->Find("bemcTriggerPed");
-    if(s) mTrigP = p->GetTable();
+    if(p) mTrigP = p->GetTable();
+    St_emcTriggerLUT* l = (St_emcTriggerLUT*)DB->Find("bemcTriggerLUT");
+    if(l) mTrigL = l->GetTable();
   }
   
 }  
@@ -355,9 +362,34 @@ void StBemcTables::getTriggerBitConv(Int_t crate,Int_t patch, Int_t& BIT)
   if(mTrigP && crate>0 && crate<=MAXCRATES && patch>=0 && patch<NPATCHESPERCRATE) 
     BIT = (Int_t)mTrigP[0].BitConversionMode[crate-1][patch];
 }
-
-
-
-
-
-
+//_____________________________________________________________________________
+/*!
+  Get target pedestal shift
+*/
+void StBemcTables::getTriggerPedestalShift(Int_t& pedestalShift)
+{
+  if (mTrigP) pedestalShift = (Int_t)mTrigP->PedShift / 100;
+}
+//_____________________________________________________________________________
+/*!
+  Get LUT formula
+*/
+void StBemcTables::getTriggerFormulaTag(Int_t crate, Int_t index, Int_t& formula)
+{
+  if (mTrigL) formula = (Int_t)mTrigL->FormulaTag[crate-1][index];
+}
+//_____________________________________________________________________________
+/*!
+  Get LUT formula parameters
+*/
+void StBemcTables::getTriggerFormulaParameters(Int_t crate, Int_t index, Int_t* parameters)
+{
+  if (mTrigL) {
+    parameters[0] = (Int_t)mTrigL->FormulaParameter0[crate-1][index];
+    parameters[1] = (Int_t)mTrigL->FormulaParameter1[crate-1][index];
+    parameters[2] = (Int_t)mTrigL->FormulaParameter2[crate-1][index];
+    parameters[3] = (Int_t)mTrigL->FormulaParameter3[crate-1][index];
+    parameters[4] = (Int_t)mTrigL->FormulaParameter4[crate-1][index];
+    parameters[5] = (Int_t)mTrigL->FormulaParameter5[crate-1][index];
+  }
+}
