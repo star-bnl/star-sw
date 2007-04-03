@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.16 2006/09/20 00:44:56 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.17 2007/04/03 20:10:49 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.17  2007/04/03 20:10:49  ullrich
+ * Added access function for VPD data.
+ *
  * Revision 2.16  2006/09/20 00:44:56  ullrich
  * Modified method to return length of L2 results.
  *
@@ -169,6 +172,12 @@ public:
     virtual unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
     virtual unsigned short fpdSum(StBeamDirection eastwest, int module) const;
 
+    // VPD
+    virtual unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned short vpdTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned short vpdEarliestTDC(StBeamDirection eastwest) const;
+    virtual unsigned short vpdTimeDifference() const;
+
     // auxiliary information
     float zdcVertexZ() const;
     void  setZdcVertexZ(float);
@@ -261,6 +270,10 @@ inline unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, in
 inline unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
 inline unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
 inline unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
+inline unsigned short StTriggerData::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest) const {return 0;}
+inline unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
 inline int StTriggerData::L2ResultsOffset(StL2AlgorithmId id) const {return -1;}  
 inline bool StTriggerData::isL2Triggered(StL2TriggerResultType id) const {return false;}  
 
