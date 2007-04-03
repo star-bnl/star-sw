@@ -1,5 +1,6 @@
 #include "BEMC_DSM_decoder.h"
 
+#include <math.h>
 #include <iostream>
 using namespace std;
 
@@ -284,7 +285,7 @@ proc getLUTvalue { board patch index } {
     if (value < 0) value = 0;
     if (value > 62) value = 62;
     if (sum - ped < lutSigma) value = 0;
-    lut = int((value >= 0.0) ? (value + 0.5) : (value - 0.5));
+    lut = int(round(value));
     if (debug) cout << "Simulating LUT: sum = " << sum << ", formula = " << formula << ", lutPed = " << lutPed << ", lutScale = " << lutScale << ", lutUsePowerup = " << lutUsePowerup << ", numberOfMaskedTowers = " << numberOfMaskedTowers << ", pedestalShift = " << pedestalShift << "; LUT = " << lut << endl;
 }
 
