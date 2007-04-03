@@ -151,14 +151,14 @@ BEMCPlots::BEMCPlots(TObjArray *list)
 #endif
 
     for (int i = 0;i < 4800;i++) {
-	this->mTowerData[i][0] = 1; // mask
+	this->mTowerData[i][0] = 1; // unmask
 	this->mTowerData[i][1] = 0; // ped
 	this->mTowerData[i][2] = 0; // FEE ped
     }
     this->mTriggerPedestalShift = 24 * 100;
     for (int i = 0;i < 300;i++) {
-	this->mPatchData[i][0] = 1; // mask HT
-	this->mPatchData[i][1] = 1; // mask PA
+	this->mPatchData[i][0] = 1; // unmask HT
+	this->mPatchData[i][1] = 1; // unmask PA
 	this->mPatchData[i][2] = 3; // bit conversion mode
 	this->mPatchData[i][3] = 2; // formula
 	this->mPatchData[i][4] = 1; // formula parameter 0
@@ -269,14 +269,14 @@ void BEMCPlots::clear(const char *bemcStatus) {
     if (this->mHistTriggerCorruptionPatchSumCorr) this->mHistTriggerCorruptionPatchSumCorr->Reset();
 
     for (int i = 0;i < 4800;i++) {
-	this->mTowerData[i][0] = 1; // mask
+	this->mTowerData[i][0] = 1; // unmask
 	this->mTowerData[i][1] = 0; // ped
 	this->mTowerData[i][2] = 0; // FEE ped
     }
     this->mTriggerPedestalShift = 24 * 100;
     for (int i = 0;i < 300;i++) {
-	this->mPatchData[i][0] = 1; // mask HT
-	this->mPatchData[i][1] = 1; // mask PA
+	this->mPatchData[i][0] = 1; // unmask HT
+	this->mPatchData[i][1] = 1; // unmask PA
 	this->mPatchData[i][2] = 3; // bit conversion mode
 	this->mPatchData[i][3] = 2; // formula
 	this->mPatchData[i][4] = 1; // formula parameter 0
@@ -305,27 +305,27 @@ void BEMCPlots::clear(const char *bemcStatus) {
 	    } while (ifstr.good() && (token != "SoftId") && (token != "triggerPatch") && (token != "TriggerPedestalShift"));
 	    if (ifstr.good()) {
 		if (token == "SoftId") {
-		    int softId, crate, crateSeq, maskTower, maskHT, maskPA;
+		    int softId, crate, crateSeq, unmaskTower, unmaskHT, unmaskPA;
 		    float ped;
-		    ifstr >> softId >> crate >> crateSeq >> maskTower >> maskHT >> maskPA >> ped;
-		    if (mDebug >= 2) cout << "Read: " << token << " " << softId << "\t" << crate << "\t" << crateSeq << "\t" << maskTower << "\t" << maskHT << "\t" << maskPA << "\t" << ped << endl;
+		    ifstr >> softId >> crate >> crateSeq >> unmaskTower >> unmaskHT >> unmaskPA >> ped;
+		    if (mDebug >= 2) cout << "Read: " << token << " " << softId << "\t" << crate << "\t" << crateSeq << "\t" << unmaskTower << "\t" << unmaskHT << "\t" << unmaskPA << "\t" << ped << endl;
 		    if ((softId >= 1) && (softId <= 4800)) {
-			this->mTowerData[softId - 1][0] = maskTower;
+			this->mTowerData[softId - 1][0] = unmaskTower;
 			this->mTowerData[softId - 1][1] = int(ped * 100.0);
 			int triggerPatch;
-			if ((maskTower == 0) && BEMCDecoder && BEMCDecoder->GetTriggerPatchFromCrate(crate, crateSeq, triggerPatch)) {
+			if ((unmaskTower == 0) && BEMCDecoder && BEMCDecoder->GetTriggerPatchFromCrate(crate, crateSeq, triggerPatch)) {
 			    if ((triggerPatch >= 0) && (triggerPatch < 300)) {
 				this->mPatchData[triggerPatch][10] += 1;
 			    }
 			}
 		    }
 		} else if (token == "triggerPatch") {
-		    int triggerPatch, crate, crateSeq, maskHT, maskPA, bitConv, formula, formulaParam0, formulaParam1, formulaParam2, formulaParam3, formulaParam4, formulaParam5;
-		    ifstr >> triggerPatch >> crate >> crateSeq >> maskHT >> maskPA >> bitConv >> formula >> formulaParam0 >> formulaParam1 >> formulaParam2 >> formulaParam3 >> formulaParam4 >> formulaParam5;
-		    if (mDebug >= 2) cout << "Read: " << token << " " << triggerPatch << "\t" << crate << "\t" << crateSeq << "\t" << maskHT << "\t" << maskPA << "\t" << bitConv << "\t" << formula << "\t" << formulaParam0 << "\t" << formulaParam1 << "\t" << formulaParam2 << "\t" << formulaParam3 << "\t" << formulaParam4 << "\t" << formulaParam5 << endl;
+		    int triggerPatch, crate, crateSeq, unmaskHT, unmaskPA, bitConv, formula, formulaParam0, formulaParam1, formulaParam2, formulaParam3, formulaParam4, formulaParam5;
+		    ifstr >> triggerPatch >> crate >> crateSeq >> unmaskHT >> unmaskPA >> bitConv >> formula >> formulaParam0 >> formulaParam1 >> formulaParam2 >> formulaParam3 >> formulaParam4 >> formulaParam5;
+		    if (mDebug >= 2) cout << "Read: " << token << " " << triggerPatch << "\t" << crate << "\t" << crateSeq << "\t" << unmaskHT << "\t" << unmaskPA << "\t" << bitConv << "\t" << formula << "\t" << formulaParam0 << "\t" << formulaParam1 << "\t" << formulaParam2 << "\t" << formulaParam3 << "\t" << formulaParam4 << "\t" << formulaParam5 << endl;
 		    if ((triggerPatch >= 0) && (triggerPatch < 300)) {
-			this->mPatchData[triggerPatch][0] = maskHT;
-			this->mPatchData[triggerPatch][1] = maskPA;
+			this->mPatchData[triggerPatch][0] = unmaskHT;
+			this->mPatchData[triggerPatch][1] = unmaskPA;
 			this->mPatchData[triggerPatch][2] = bitConv;
 			this->mPatchData[triggerPatch][3] = formula;
 			this->mPatchData[triggerPatch][4] = formulaParam0;
