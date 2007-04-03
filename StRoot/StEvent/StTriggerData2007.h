@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.h,v 2.1 2007/02/22 20:31:24 ullrich Exp $
+ * $Id: StTriggerData2007.h,v 2.2 2007/04/03 20:10:50 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.h,v $
+ * Revision 2.2  2007/04/03 20:10:50  ullrich
+ * Added access function for VPD data.
+ *
  * Revision 2.1  2007/02/22 20:31:24  ullrich
  * Initial Revision.
  *
@@ -35,9 +38,9 @@ public:
     unsigned int numberOfPostXing() const;  
     
     // generic Trigger infomations
-    unsigned int token() const;
-    unsigned int triggerWord() const;
-    unsigned int actionWord() const;      
+    unsigned int   token() const;
+    unsigned int   triggerWord() const;
+    unsigned int   actionWord() const;      
     unsigned short busyStatus() const;
     unsigned short dsmInput() const;
     unsigned short trgToken() const;
@@ -46,7 +49,7 @@ public:
     unsigned short bcData(int channel) const;
     
     //L2 offsets
-    int L2ResultsOffset(StL2AlgorithmId id) const;  
+    int  L2ResultsOffset(StL2AlgorithmId id) const;  
     bool isL2Triggered(StL2TriggerResultType id) const;
     
     // bunch and spin bits
@@ -113,14 +116,20 @@ public:
     unsigned char bemcHighestTowerADC(int prepost=0) const;
     unsigned char eemcHighestTowerADC(int prepost=0) const;
 
+    // VPD
+    unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short vpdTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short vpdEarliestTDC(StBeamDirection eastwest) const;
+    unsigned short vpdTimeDifference() const;
+
     // experts only
-    char* getTriggerStructure();
-    TrgDataType2007* getTriggerStructure2007();  
-    int getRawSize() const;
-    unsigned      char * getDsm0_EEMC(int prepost=0) const;
-    unsigned short int * getDsm1_EEMC(int prepost=0) const;
-    unsigned short int * getDsm2_EMC()  const;
-    unsigned short int * getDsm3()      const;
+    char*                getTriggerStructure();
+    TrgDataType2007*     getTriggerStructure2007();  
+    int                  getRawSize() const;
+    unsigned      char*  getDsm0_EEMC(int prepost=0) const;
+    unsigned short int*  getDsm1_EEMC(int prepost=0) const;
+    unsigned short int*  getDsm2_EMC()  const;
+    unsigned short int*  getDsm3()      const;
     unsigned int         l2ResultLength() const;
     const unsigned int*  l2Result() const;
     

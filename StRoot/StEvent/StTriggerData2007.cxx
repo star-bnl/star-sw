@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.cxx,v 2.3 2007/03/26 19:57:30 ullrich Exp $
+ * $Id: StTriggerData2007.cxx,v 2.4 2007/04/03 20:10:50 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.cxx,v $
+ * Revision 2.4  2007/04/03 20:10:50  ullrich
+ * Added access function for VPD data.
+ *
  * Revision 2.3  2007/03/26 19:57:30  ullrich
  * New map for ZDC-SMD.
  *
@@ -847,4 +850,45 @@ unsigned int StTriggerData2007::l2ResultLength() const
 const unsigned int* StTriggerData2007::l2Result() const
 {
     return mData->TrgSum.L2Result;
+}
+
+unsigned short StTriggerData2007::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const
+{
+    static const int map[2][16] = {
+	{  7,   6,  5,  4,  3,  2,  1,  0, 
+	   23, 22, 21, 20, 19, 18, 17, 16} ,  
+	{  39, 38, 37, 36, 35, 34, 33, 32,
+	   55, 54, 53, 52, 51, 50, 49, 48} 
+    };
+    return mData->rawTriggerDet[prepostAddress(prepost)].VPD[map[eastwest][pmt-1]];
+}
+
+unsigned short StTriggerData2007::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const
+{
+    static const int map[2][16] = {
+	{  15, 14, 13, 12, 11, 10,  9,  8,
+	   31, 30, 29, 28, 27, 26, 25, 24} ,
+	{  47, 46, 45, 44, 43, 42, 41, 40,
+	   63, 62, 61, 60, 59, 58, 57, 56}
+    };
+    return mData->rawTriggerDet[prepostAddress(prepost)].VPD[map[eastwest][pmt-1]];
+}
+
+unsigned short StTriggerData2007::vpdEarliestTDC(StBeamDirection eastwest) const
+{
+    int t1, t2;
+    if (eastwest==east){
+	t1 = mData->TrgSum.DSMdata.VPD[6]%256;
+	t2 = mData->TrgSum.DSMdata.VPD[2]%256;
+    }
+    else {
+	t1 = mData->TrgSum.DSMdata.VPD[4]%256;
+	t2 = mData->TrgSum.DSMdata.VPD[0]%256;
+    }
+    return (t1>t2) ? t1 : t2;  
+}
+
+unsigned short StTriggerData2007::vpdTimeDifference() const
+{
+    return mData->TrgSum.DSMdata.CTB[3]%512;
 }
