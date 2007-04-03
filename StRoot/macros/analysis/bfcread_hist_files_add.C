@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.15 2004/09/01 14:41:23 jeromel Exp $
+// $Id: bfcread_hist_files_add.C,v 2.16 2007/04/03 21:15:13 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.16  2007/04/03 21:15:13  genevb
+// Minor fix for StIOMaker/StFile pairing
+//
 // Revision 2.15  2004/09/01 14:41:23  jeromel
 // Thanks to Janet S., some correction to broken macro
 //  fin logic change
@@ -128,8 +131,8 @@ void bfcread_hist_files_add(
   Int_t ifl=0;
   Int_t hCCount=0;
 
-  StFile fff(fList);
-  StIOMaker *IOMk = new StIOMaker("IO","r",&fff,TopDirTree);
+  StFile* fff = new StFile(fList);
+  StIOMaker *IOMk = new StIOMaker("IO","r",fff,TopDirTree);
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
   IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
