@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCollection.cxx,v 2.7 2005/04/11 22:35:25 calderon Exp $
+ * $Id: StTofCollection.cxx,v 2.8 2007/04/03 18:16:48 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.cxx,v $
+ * Revision 2.8  2007/04/03 18:16:48  ullrich
+ * Add new data members and methods in preperation for new ToF.
+ *
  * Revision 2.7  2005/04/11 22:35:25  calderon
  * Tof Classes for Run 5.  Modifications and additions from Xin to
  * take care of new TOF daq and electronics.  Added StTofRawData and
@@ -40,7 +43,7 @@
  **************************************************************************/
 #include "StTofCollection.h"
 
-static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.7 2005/04/11 22:35:25 calderon Exp $";
+static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.8 2007/04/03 18:16:48 ullrich Exp $";
 
 ClassImp(StTofCollection)
     
@@ -108,12 +111,6 @@ StTofCollection::tofRawData()
   return mTofRawData;
 }
 
-// void
-// StTofCollection::addUnit(const StTofUnit* aUnit)  
-// {
-//     if (aUnit) mTofUnits.push_back(aUnit);
-// }
-
 void
 StTofCollection::addCell(const StTofCell* aCell)  
 {
@@ -175,3 +172,22 @@ StTofCollection::rawdataPresent() const
     return mTofRawData.size();
 }
 
+unsigned int
+StTofCollection::numberOfVpdEast() const
+{
+    unsigned int num = 0;
+    for(int i=0;i<32;i++) {
+	num += mVpdEast & (1<<i);
+    }
+    return num;
+}
+
+unsigned int
+StTofCollection::numberOfVpdWest() const
+{
+    unsigned int num = 0;
+    for(int i=0;i<32;i++) {
+	num += mVpdWest & (1<<i);
+    }
+    return num;
+}
