@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdTriggerDetector.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $
+ * $Id: StVpdTriggerDetector.cxx,v 2.5 2007/04/03 20:11:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVpdTriggerDetector.cxx,v $
+ * Revision 2.5  2007/04/03 20:11:41  ullrich
+ * Modified for actual VPD used in 2007.
+ *
  * Revision 2.4  2001/04/05 04:00:59  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -26,86 +29,92 @@
 #include <algorithm>
 #include "StVpdTriggerDetector.h"
 #include "tables/St_dst_TrgDet_Table.h"
+#include "StTriggerData.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.5 2007/04/03 20:11:41 ullrich Exp $";
 
 ClassImp(StVpdTriggerDetector)
 
 StVpdTriggerDetector::StVpdTriggerDetector()
 {
-    fill_n(mAdc, static_cast<int>(mMaxVpdCounter), 0);
-    fill_n(mTime, static_cast<int>(mMaxVpdCounter), 0);
-    fill_n(mMinimumTime, 2, 0);
-    mVertexZ = 0;
+    memset(*mADC,0,mMaxVpdCounter*sizeof(short));
+    memset(*mTDC,0,mMaxVpdCounter*sizeof(short));
+    //fill_n(mADC, static_cast<short>(mMaxVpdCounter), 0);
+    //fill_n(mTDC, static_cast<short>(mMaxVpdCounter), 0);
+    //fill_n(mEarliestTDC, 2, 0);
+    mEarliestTDC[0]=0;
+    mEarliestTDC[1]=0;
+    mTimeDifference = 0;
 }
 
-StVpdTriggerDetector::StVpdTriggerDetector(const dst_TrgDet_st& t)
+StVpdTriggerDetector::StVpdTriggerDetector(const dst_TrgDet_st&)
 {
-    copy(t.adcVPD+0, t.adcVPD+mMaxVpdCounter, mAdc);
-    copy(t.timeVPD+0, t.timeVPD+mMaxVpdCounter, mTime);
-    mMinimumTime[east] = t.TimeEastVpd;
-    mMinimumTime[west] = t.TimeWestVpd;
-    mVertexZ = t.vertexZ;
+    // old legacy code removed - was wrong in the
+    // first place (tu, April 3, 2007)
 }
+
+StVpdTriggerDetector::StVpdTriggerDetector(const StTriggerData& t)
+{
+    int i;
+    mYear = t.year();
+    if (mYear<2007) return;
+    
+    for (i=0; i<mMaxVpdCounter; i++){
+	mADC[1][i] = t.vpdADC(east, i+1);
+	mTDC[1][i] = t.vpdTDC(east, i+1);
+	mADC[2][i] = t.vpdADC(west, i+1);
+	mTDC[2][i] = t.vpdTDC(west, i+1);
+    }
+    mEarliestTDC[east] = t.vpdEarliestTDC(east);
+    mEarliestTDC[west] = t.vpdEarliestTDC(west);
+    mTimeDifference    = t.vpdTimeDifference();
+}
+
 
 StVpdTriggerDetector::~StVpdTriggerDetector() {/* noop */}
 
 unsigned int
 StVpdTriggerDetector::numberOfVpdCounters() const {return mMaxVpdCounter;}
 
-float
-StVpdTriggerDetector::adc(unsigned int i) const
+unsigned short
+StVpdTriggerDetector::ADC(StBeamDirection eastwest, unsigned int i) const
 {
-    if (i < mMaxVpdCounter)
-        return mAdc[i];
+    if (i <= mMaxVpdCounter && i!=0)
+        return mADC[eastwest][i-1];
     else
         return 0;
 }
 
-float
-StVpdTriggerDetector::time(unsigned int i) const
+unsigned short
+StVpdTriggerDetector::TDC(StBeamDirection eastwest, unsigned int i) const
 {
-    if (i < mMaxVpdCounter)
-        return mTime[i];
+    if (i <= mMaxVpdCounter && i!=0)
+        return mTDC[eastwest][i-1];
     else
         return 0;
 }
 
-float
-StVpdTriggerDetector::minimumTime(StBeamDirection dir) const
+unsigned short
+StVpdTriggerDetector::EarliestTDC(StBeamDirection eastwest) const
 {
-    return mMinimumTime[dir];
-}
-
-float
-StVpdTriggerDetector::vertexZ() const {return mVertexZ;}
-
-void
-StVpdTriggerDetector::setAdc(unsigned int i, float val)
-{
-    if (i < mMaxVpdCounter)
-        mAdc[i] = val;
+    return mEarliestTDC[eastwest];
 }
 
 void
-StVpdTriggerDetector::setTime(unsigned int i, float val)
+StVpdTriggerDetector::setADC(StBeamDirection eastwest, unsigned int i, unsigned short v)
 {
-    if (i < mMaxVpdCounter)
-        mTime[i] = val;
+    if (i <= mMaxVpdCounter && i!=0)
+        mADC[eastwest][i-1] = v;
 }
 
 void
-StVpdTriggerDetector::setMinimumTime(StBeamDirection dir, float val)
+StVpdTriggerDetector::setTDC(StBeamDirection eastwest, unsigned int i, unsigned short v)
 {
-    mMinimumTime[dir] = val;
+    if (i <= mMaxVpdCounter && i!=0)
+        mTDC[eastwest][i-1] = v;
 }
 
-void
-StVpdTriggerDetector::setVertexZ(float val)
-{
-    mVertexZ = val;
-}

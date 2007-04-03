@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVpdTriggerDetector.h,v 2.3 2002/02/22 22:56:53 jeromel Exp $
+ * $Id: StVpdTriggerDetector.h,v 2.4 2007/04/03 20:11:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StVpdTriggerDetector.h,v $
+ * Revision 2.4  2007/04/03 20:11:41  ullrich
+ * Modified for actual VPD used in 2007.
+ *
  * Revision 2.3  2002/02/22 22:56:53  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -31,33 +34,35 @@
 #include "StEnumerations.h"
 
 class dst_TrgDet_st;
+class StTriggerData;
 
 class StVpdTriggerDetector : public StObject {
 public:
     StVpdTriggerDetector();
     StVpdTriggerDetector(const dst_TrgDet_st&);
-    // StVpdTriggerDetector(const StVpdTriggerDetector&);            use default
+    StVpdTriggerDetector(const StTriggerData&);
     // StVpdTriggerDetector& operator=(const StVpdTriggerDetector&); use default
     virtual ~StVpdTriggerDetector();
     
-    unsigned int  numberOfVpdCounters() const;
-    float         adc(unsigned int) const;
-    float         time(unsigned int) const;
-    float         minimumTime(StBeamDirection) const;
-    float         vertexZ() const;
+    unsigned int   numberOfVpdCounters() const;
+    unsigned short ADC(StBeamDirection eastwest, unsigned int pmt) const;
+    unsigned short TDC(StBeamDirection eastwest, unsigned int pmt) const;
+    unsigned short EarliestTDC(StBeamDirection eastwest) const;
+    unsigned short TimeDifference() const {return mTimeDifference;};
 
-    void setAdc(unsigned int, float);
-    void setTime(unsigned int, float);
-    void setMinimumTime(StBeamDirection, float);
-    void setVertexZ(float);
-    
+    void setADC(StBeamDirection eastwest, unsigned int pmt, unsigned short v);
+    void setTDC(StBeamDirection eastwest, unsigned int pmt, unsigned short v);
+    void setEarliestTDC(StBeamDirection eastwest, unsigned short v) {mEarliestTDC[eastwest]=v;}
+    void setTmeDifference(unsigned short v) {mTimeDifference = v;}   
+
 protected:
-    enum {mMaxVpdCounter = 48};
-    Float_t  mAdc[mMaxVpdCounter];
-    Float_t  mTime[mMaxVpdCounter];
-    Float_t  mMinimumTime[2];
-    Float_t  mVertexZ;
-    
-    ClassDef(StVpdTriggerDetector,1)
+    enum {mMaxVpdCounter = 16};
+    unsigned short mADC[2][mMaxVpdCounter];
+    unsigned short mTDC[2][mMaxVpdCounter];
+    unsigned short mEarliestTDC[2];
+    unsigned short mTimeDifference;
+    unsigned short mYear;
+
+    ClassDef(StVpdTriggerDetector,2)
 };
 #endif
