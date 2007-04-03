@@ -250,6 +250,43 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 //cout << "!!!!!! " << bit6[patch][board-1] << endl;
 				}
 			}
+			if (!in.eof()) {
+			    for(int board = 0; board<=5;board++) {
+				in >> tmp; // inrun
+				in >> tmp; // ht
+				if (board >= 1) {
+				    Bool_t boardHT = atoi(tmp);
+				    if (!boardHT) {
+					cout << "Board " << board << " HT peds not configured" << endl;
+					// zero out pedestals
+				    }
+				}
+				in >> tmp; // jp
+				if (board >= 1) {
+				    Bool_t boardJP = atoi(tmp);
+				    if (!boardJP) {
+					cout << "Board " << board << " LUT not configured" << endl;
+					formula[0][board-1] = 0; // LUT formula = 0
+					formula[1][board-1] = 0; // LUT formula = 0
+					par[0][board-1][0] = 1; // LUT scale = 1
+					par[1][board-1][0] = 1; // LUT scale = 1
+					par[0][board-1][1] = 0; // LUT ped = 0
+					par[1][board-1][1] = 0; // LUT ped = 0
+					par[0][board-1][2] = 0; // LUT sigma = 0
+					par[1][board-1][2] = 0; // LUT sigma = 0
+					par[0][board-1][3] = 1; // LUT powerup = 0
+					par[1][board-1][3] = 1; // LUT powerup = 0
+					par[0][board-1][4] = 0; // LUT par4 = 0
+					par[1][board-1][4] = 0; // LUT par4 = 0
+					par[0][board-1][5] = 0; // LUT par5 = 0
+					par[1][board-1][5] = 0; // LUT par5 = 0
+				    }
+				}
+				in >> tmp; // checkconfig
+				in >> tmp; // checkped
+				in >> tmp; // checklut
+			    }
+			}
 			for(int i=0;i<160;i++)
 			{
 				int board = i/32+1;
