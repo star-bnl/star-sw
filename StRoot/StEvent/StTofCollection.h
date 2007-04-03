@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCollection.h,v 2.8 2005/04/11 22:35:25 calderon Exp $
+ * $Id: StTofCollection.h,v 2.9 2007/04/03 18:16:48 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.h,v $
+ * Revision 2.9  2007/04/03 18:16:48  ullrich
+ * Add new data members and methods in preperation for new ToF.
+ *
  * Revision 2.8  2005/04/11 22:35:25  calderon
  * Tof Classes for Run 5.  Modifications and additions from Xin to
  * take care of new TOF daq and electronics.  Added StTofRawData and
@@ -59,12 +62,21 @@
 #include "StTofRawData.h"
 
 class StTofCollection : public StObject {
-public:
+public: 
     StTofCollection();
     ~StTofCollection();
 
-    //const StSPtrVecTofUnit&    tofUnits() const;
-    //StSPtrVecTofUnit&          tofUnits();
+    unsigned int    numberOfVpdEast() const;
+    unsigned int    numberOfVpdWest() const;
+    unsigned int    vpdEast() const;
+    unsigned int    vpdWest() const;
+    float           tstart() const;
+    float           tdiff() const;
+
+    void setVpdEast(unsigned int);
+    void setVpdWest(unsigned int);
+    void setTstart(float);
+    void setTdiff(float);
 
     const StSPtrVecTofCell&    tofCells() const;
     StSPtrVecTofCell&          tofCells();
@@ -94,12 +106,34 @@ public:
     bool rawdataPresent()  const;
     
 private:
+    UInt_t   mVpdEast;
+    UInt_t   mVpdWest;
+    Float_t  mTstart;
+    Float_t  mTdiff;
+
     StSPtrVecTofSlat           mTofSlats;
     StSPtrVecTofCell           mTofCells;
     StSPtrVecTofHit            mTofHits;
     StSPtrVecTofData           mTofData;
     StSPtrVecTofRawData        mTofRawData;
   
-    ClassDef(StTofCollection, 4)
+    ClassDef(StTofCollection, 5)
 };
+
+inline unsigned int StTofCollection::vpdEast() const { return mVpdEast; }
+
+inline unsigned int StTofCollection::vpdWest() const { return mVpdWest; }
+
+inline void StTofCollection::setVpdEast(unsigned int i) { mVpdEast = i; }
+
+inline void StTofCollection::setVpdWest(unsigned int i) { mVpdWest = i; }
+
+inline float StTofCollection::tstart() const { return mTstart; }
+
+inline float StTofCollection::tdiff() const { return mTdiff; }
+
+inline void StTofCollection::setTstart(float t) { mTstart = t; }
+
+inline void StTofCollection::setTdiff(float t)  { mTdiff = t;}
+
 #endif
