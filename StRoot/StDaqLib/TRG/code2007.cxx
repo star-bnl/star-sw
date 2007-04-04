@@ -24,15 +24,15 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   printf("TRG_Reader::UnpackTrg2007: Token from Bank=%d\n",pTRGP->header.Token);
 
   //Get lengthes
-  int size_bank = pTRGP->header.BankLength * 4;
+  // int size_bank = pTRGP->header.BankLength * 4;
   int size_off  = pTRGP->theData.offset * 4;
   int size_head = sizeof(pTRGP->header);
   int size_trg  = sizeof(TrgDataType2007);
   int size_desc = sizeof(EvtDescData2007);
   int size_sum  = sizeof(TrgSumData2007);
   int size_raw  = sizeof(RawTrgDet2007);
-  //  printf("TRG_Reader::UnpackTrg2007: Size of bank, offset, header, trg, desc, sum, raw = %d %d %d %d %d %d %d\n",
-  //	 size_bank,size_off,size_head,size_trg,size_desc,size_sum,size_raw);
+  //  printf("TRG_Reader::UnpackTrg2007: offset, header, trg, desc, sum, raw = %d %d %d %d %d %d\n",
+  //	 ,size_off,size_head,size_trg,size_desc,size_sum,size_raw);
   
   //Create memory space for unpacked trigger bank
   if(pBankUnp!=0) delete[] pBankUnp;

@@ -58,7 +58,11 @@ int TRG_Reader::YearOfData(char *data) {
   if(*data==0x20) return 2003; // trgStructures.h versions (eg, trgStructures2003.h).
   if(*data==0x21) return 2004; // trgStructures.h versions (eg, trgStructures2004.h).
   if(*data==0x22) return 2005; // trgStructures.h versions (eg, trgStructures2005.h).
+  //This version 30 had problem and fixed 20070404 by version 31.
+  //Data before 20070404 have version 30, but will read correctly when casted to version 31
   if(*data==0x30) return 2007; // trgStructures.h versions (eg, trgStructures2007.h).
+  //Fixed version of 2007 trigger structure
+  if(*data==0x31) return 2007; // trgStructures.h versions (eg, trgStructures2007.h).
   
   (void) printf("TRG_Reader::YearOfData : value %d=0x%x not treated\n",*data,*data);
   //assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
