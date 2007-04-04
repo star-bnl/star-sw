@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.3 2004/08/19 17:31:45 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.4 2007/04/04 17:32:11 kocolosk Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.4  2007/04/04 17:32:11  kocolosk
+ * Added softId-based versions of getEta, getTheta, and getPhi.  Also added getId(phi,eta,&softId).  Implemented const-correctness and used meaningful argument names in method declarations to improve readability
+ *
  * Revision 1.3  2004/08/19 17:31:45  pavlinov
  * getBin(const Float_t phi, const Float_t eta, Int_t &m,Int_t &e,Int_t &s) works bsmde too - request of Dmitry Arkhipkin
  *
@@ -107,6 +110,7 @@
 #include <TString.h>
 #include "tables/St_calb_calg_Table.h"
 #include "tables/St_calb_calr_Table.h"
+#include "StMessMgr.h"
 
 class StMaker;
 class TDataSet;
@@ -125,9 +129,9 @@ private:
   void    defineDefaultCommonConstants();
   void    defineCommonConstants();
   void    defineModuleGridOnPhi();
-  Float_t relativeError(Float_t, Float_t);
+  Float_t relativeError(Float_t, Float_t) const;
   //  static Int_t   getIndex(const Float_t x, TArrayF &arr);
-  Int_t   getIndex(const Float_t x, TArrayF &arr);
+  Int_t   getIndex(const Float_t &x, const TArrayF &arr) const;
 
 
 protected:
@@ -159,96 +163,107 @@ protected:
   Int_t   mMaxAdc;    // Range of ADC for each detector
 
 public: 
-  StEmcGeom(const Int_t );
-  StEmcGeom(const Char_t*);
-  StEmcGeom(const Int_t ,const Char_t*);
+	StEmcGeom(const Int_t );
+	StEmcGeom(const Char_t*);
+	StEmcGeom(const Int_t ,const Char_t*);
 
-  static StEmcGeom *instance(const Int_t det);
-  static StEmcGeom *getEmcGeom(const Int_t det);
-  static StEmcGeom *instance(const Char_t* cdet);
-  static StEmcGeom *getEmcGeom(const Char_t* cdet);
-  static StEmcGeom *instance(const Int_t det, const Char_t* mode);
-  static StEmcGeom *getEmcGeom(const Int_t det, const Char_t* mode);
+	static StEmcGeom *instance(const Int_t det);
+	static StEmcGeom *getEmcGeom(const Int_t det);
+	static StEmcGeom *instance(const Char_t* cdet);
+	static StEmcGeom *getEmcGeom(const Char_t* cdet);
+	static StEmcGeom *instance(const Int_t det, const Char_t* mode);
+	static StEmcGeom *getEmcGeom(const Int_t det, const Char_t* mode);
 
-  static Int_t getDetNumFromName(const Char_t *cdet);
+	static Int_t getDetNumFromName(const Char_t *cdet);
 
-  virtual ~StEmcGeom();
-  
-  TString* Mode();
-  Int_t    Detector() const;
-  Int_t    NModule()  const;
-  Int_t    NEta()  const;
-  Int_t    NSub()  const;
-  Int_t    Nes()  const;
-  Int_t    NRaw()  const;
-  Float_t  Radius()  const;
-  Float_t  YWidth() const;
-  Float_t  EtaMax() const;
-  Float_t  EtaMin() const;
-  Float_t* PhiModule();
-  Float_t* PhiOffset();
-  Float_t* PhiStep();
-  Float_t* PhiBound();
-  Float_t* Zlocal(); 
-  Float_t* Eta();
-  Float_t* Ylocal();  
-  Float_t* Phi();
-  
-  Float_t* EtaB(); // Eta boundaries AASUAIDE
-  Float_t* PhiB(); // Phi boundaries AASUAIDE
+	virtual ~StEmcGeom();
 
-  void     setDetector(const Int_t);
-  void     setRadius(const Float_t);
-  void     setYWidth(const Float_t);
+	const TString* Mode() const;
+	Int_t    Detector() const;
+	Int_t    NModule()  const;
+	Int_t    NEta()  const;
+	Int_t    NSub()  const;
+	Int_t    Nes()  const;
+	Int_t    NRaw()  const;
+	Float_t  Radius()  const;
+	Float_t  YWidth() const;
+	Float_t  EtaMax() const;
+	Float_t  EtaMin() const;
+	const Float_t* PhiModule() const;
+	const Float_t* PhiOffset() const;
+	const Float_t* PhiStep() const;
+	const Float_t* PhiBound() const;
+	const Float_t* Zlocal() const; 
+	const Float_t* Eta() const;
+	const Float_t* Ylocal() const;  
+	const Float_t* Phi() const;
 
-  Int_t    checkModule(const Int_t );
-  Int_t    checkEta(const Int_t );
-  Int_t    checkSub(const Int_t );
-  Int_t    checkId(const Int_t );
+	const Float_t* EtaB() const; // Eta boundaries AASUAIDE
+	const Float_t* PhiB() const; // Phi boundaries AASUAIDE
 
-  Int_t    getBin(const Float_t phi, const Float_t eta, Int_t &m,Int_t &e,Int_t &s);
-  Int_t    getBin(const Int_t rid, Int_t &m, Int_t &e, Int_t &s);
-  Int_t    getId(const Int_t m,const Int_t e,const Int_t s,Int_t &rid);
+	void     setDetector(const Int_t val);
+	void     setRadius(const Float_t val);
+	void     setYWidth(const Float_t val);
 
-  Int_t    getVolIdBemc(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
-  Int_t    getVolIdBsmd(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
-  Int_t    getVolId(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
-  
-  Int_t    getZlYl(const Int_t,Float_t &,Float_t &);
-  void     getXYZ(const Int_t,const Int_t,const Int_t,
-                  Float_t &,Float_t &,Float_t &);
-  Int_t    getXYZ(const Int_t, Float_t &,Float_t &,Float_t &);
-  Int_t    getXYZfromGeant(const Int_t, Float_t &,Float_t &,Float_t &);
+	//check that the supplied value is in an acceptable range
+	Int_t    checkModule(const Int_t m) const;
+	Int_t    checkEta(const Int_t e) const;
+	Int_t    checkSub(const Int_t s) const;
+ 	Int_t    checkId(const Int_t softId) const;
 
-  Int_t    getEta(const Int_t, const Int_t, Float_t &);
-  Int_t    getTheta(const Int_t, const Int_t, Float_t &);
-  Int_t    getPhi(const Int_t, const Int_t, Float_t &);
-  Int_t    getEtaPhi(const Int_t, Float_t &,  Float_t &);
-  Int_t    getPhiModule(const Int_t, Float_t &);
+	//convert (eta,phi) to (m,e,s) or softId
+	Int_t    getBin(const Float_t phi, const Float_t eta, Int_t &m, Int_t &e, Int_t &s) const;
+	Int_t    getId(const Float_t phi, const Float_t eta, Int_t &softId) const;
 
-  Int_t    getMaxAdc() {return mMaxAdc;}
+	//convert (m,e,s) <-> softId
+	Int_t    getBin(const Int_t softId, Int_t &m, Int_t &e, Int_t &s) const;
+	Int_t    getId(const Int_t m, const Int_t e, const Int_t s, Int_t &softId) const;
 
-  void     initGeom(const Int_t);
-  void     initBEMCorBPRS();
-  void     initBSMDE();
-  void     initBSMDP();
-  void     initEEMCorEPRS();
-  void     initESMDE();
-  void     initESMDP();
-  void     printGeom();
-  void     print() {printGeom();}
-  void     compare(StEmcGeom &, Bool_t);
-  void     compare(StEmcGeom *g, Bool_t key) {compare(*g,key);};
-  void     printError(Float_t);
+	Int_t    getVolIdBemc(const Int_t ivid, Int_t &module, Int_t &eta, Int_t &sub, Int_t &detector);
+	Int_t    getVolIdBsmd(const Int_t ivid, Int_t &module, Int_t &eta, Int_t &sub, Int_t &detector);
+	Int_t    getVolId(const Int_t ivid, Int_t &module, Int_t &eta, Int_t &sub, Int_t &det);
 
-  Float_t  toDeg(const Float_t angR) {return C_DEG_PER_RAD*angR;} // Service
-  Float_t  toRad(const Float_t angD) {return angD/C_DEG_PER_RAD;} // functions
-  void     getGeantGeometryTable();
+	Int_t    getZlYl(const Int_t softId, Float_t &zl, Float_t &yl) const;
+	void     getXYZ(const Int_t m, const Int_t e, const Int_t s, Float_t &x, Float_t &y, Float_t &z) const;
+	Int_t    getXYZ(const Int_t softId, Float_t &x, Float_t &y, Float_t &z) const;
+	Int_t    getXYZfromGeant(const Int_t ivid, Float_t &x, Float_t &y, Float_t &z);
 
-  ClassDef(StEmcGeom,1)                      // Standard Root macro;
+	Int_t    getEta(const Int_t m, const Int_t e, Float_t &eta) const;
+	Int_t    getEta(const Int_t softId, Float_t &eta) const;
+	
+	Int_t    getTheta(const Int_t m, const Int_t e, Float_t &theta) const;
+	Int_t    getTheta(const Int_t softId, Float_t &theta) const;
+	
+	Int_t    getPhi(const Int_t m, const Int_t s, Float_t &phi) const;
+	Int_t    getPhi(const Int_t softId, Float_t &phi) const;
+		
+	Int_t    getEtaPhi(const Int_t softId, Float_t &eta, Float_t &phi) const;
+	
+	Int_t    getPhiModule(const Int_t m, Float_t &phi) const;
+
+	Int_t    getMaxAdc() const {return mMaxAdc;}
+
+	void     initGeom(const Int_t);
+	void     initBEMCorBPRS();
+	void     initBSMDE();
+	void     initBSMDP();
+	void     initEEMCorEPRS();
+	void     initESMDE();
+	void     initESMDP();
+	void     printGeom() const;
+	void     print() const {printGeom();}
+	void     compare(const StEmcGeom &, Bool_t) const;
+	void     compare(const StEmcGeom * const g, Bool_t key) const {compare(*g,key);};
+	void     printError(Float_t) const;
+
+	Float_t  toDeg(const Float_t angR) const {return C_DEG_PER_RAD*angR;} // Service
+	Float_t  toRad(const Float_t angD) const {return angD/C_DEG_PER_RAD;} // functions
+	void     getGeantGeometryTable();
+
+ 	ClassDef(StEmcGeom,1)                      // Standard Root macro;
 };
 
-inline TString* StEmcGeom::Mode() {return &mMode;}
+inline const TString* StEmcGeom::Mode() const {return &mMode;}
 inline Int_t   StEmcGeom::Detector() const {return mDetector;}
 inline Int_t   StEmcGeom::NModule()  const {return mNModule;}
 inline Int_t   StEmcGeom::NEta()     const {return mNEta;}
@@ -259,49 +274,48 @@ inline Float_t StEmcGeom::Radius()   const {return mRadius;}
 inline Float_t StEmcGeom::YWidth()   const {return mYWidth;}
 inline Float_t StEmcGeom::EtaMax()   const {return mEtaMax;}
 inline Float_t StEmcGeom::EtaMin()   const {return mEtaMin;}
-inline Float_t* StEmcGeom::PhiModule() {return mPhiModule.GetArray();} 
-inline Float_t* StEmcGeom::PhiOffset() {return mPhiOffset.GetArray();}
-inline Float_t* StEmcGeom::PhiStep()   {return mPhiStep.GetArray();}
-inline Float_t* StEmcGeom::PhiBound()  {return mPhiBound.GetArray();}
-inline Float_t* StEmcGeom::Zlocal() {return mZlocal.GetArray();} 
-inline Float_t* StEmcGeom::Eta() {return mEta.GetArray();} 
-inline Float_t* StEmcGeom::Ylocal()  {return mYlocal.GetArray();}
-inline Float_t* StEmcGeom::Phi() {return mPhi.GetArray();} 
+inline const Float_t* StEmcGeom::PhiModule() const {return mPhiModule.GetArray();} 
+inline const Float_t* StEmcGeom::PhiOffset() const {return mPhiOffset.GetArray();}
+inline const Float_t* StEmcGeom::PhiStep() const {return mPhiStep.GetArray();}
+inline const Float_t* StEmcGeom::PhiBound() const {return mPhiBound.GetArray();}
+inline const Float_t* StEmcGeom::Zlocal() const {return mZlocal.GetArray();} 
+inline const Float_t* StEmcGeom::Eta() const {return mEta.GetArray();} 
+inline const Float_t* StEmcGeom::Ylocal() const {return mYlocal.GetArray();}
+inline const Float_t* StEmcGeom::Phi() const {return mPhi.GetArray();} 
 
-inline Float_t* StEmcGeom::EtaB() {return mEtaB.GetArray();}
-inline Float_t* StEmcGeom::PhiB() {return mPhiB.GetArray();}
+inline const Float_t* StEmcGeom::EtaB() const {return mEtaB.GetArray();}
+inline const Float_t* StEmcGeom::PhiB() const {return mPhiB.GetArray();}
 
 inline void    StEmcGeom::setDetector(const Int_t val) { mDetector = val;} 
 inline void    StEmcGeom::setRadius(const Float_t val) { mRadius = val;}
 inline void    StEmcGeom::setYWidth(const Float_t val) { mYWidth = val;}
 
 // _____________________________________________________________________
-inline Int_t   StEmcGeom::checkModule(const Int_t m)
+inline Int_t StEmcGeom::checkModule(const Int_t m) const
 {
   if(m>=1 && m<=mNModule) return 0;
-  else cout<<" Bad module# "<<m<<"/"<<mNModule<<" in Detector "<<mDetector<<endl; return 1;
+  else {LOG_ERROR<<" Bad module# "<<m<<"/"<<mNModule<<" in Detector "<<mDetector<<endm; return 1;}
 }
 // _____________________________________________________________________
-inline Int_t   StEmcGeom::checkEta(const Int_t e)
+inline Int_t StEmcGeom::checkEta(const Int_t e) const
 {
   if(e>=1 && e<=mNEta) return 0;
-  else cout<<" Bad eta# "<<e<<endl; return 1;
+  else {LOG_ERROR<<" Bad eta# "<<e<<endm; return 1;}
 }
 // _____________________________________________________________________
-inline Int_t   StEmcGeom::checkSub(const Int_t s)
+inline Int_t StEmcGeom::checkSub(const Int_t s) const
 {
   if(s>=1 && s<=mNSub) return 0;
-  else cout<<" Bad sub# "<<s<<endl; return 1;
+  else {LOG_ERROR<<" Bad sub# "<<s<<endm; return 1;}
 }
 // _____________________________________________________________________
-inline Int_t   StEmcGeom::checkId(const Int_t rid)
+inline Int_t StEmcGeom::checkId(const Int_t softId) const
 {
-  if(rid>=1 && rid<=mNRaw) return 0; // 15-mar-2001 => use Jose scheme
-  else cout<<" Bad raw# "<<rid<<endl; return 1;
+	if(softId>=1 && softId<=mNRaw) return 0;
+	else {LOG_ERROR<<" Bad raw# "<<softId<<endm; return 1;}
 }
-
 // _____________________________________________________________________
-inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, Int_t &e, Int_t &s)
+inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, Int_t &e, Int_t &s) const
 {
 //
 /// Transition from phi and eta to bin # => 3-Aug-1999 for StTbmMaker
@@ -337,15 +351,21 @@ inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, I
     return 0;
 
   } else return 1;                      // Out of Bemc
-
 }
-
 // _____________________________________________________________________
-inline Int_t StEmcGeom::getZlYl(const Int_t rid, Float_t &zl, Float_t &yl)
+inline Int_t StEmcGeom::getId(const Float_t phi, const Float_t eta, Int_t &softId) const
+{
+	Int_t m,e,s;
+	if(getBin(phi,eta,m,e,s) == 0) {
+		return getId(m,e,s,softId);
+	}
+	return 1;
+}
+// _____________________________________________________________________
+inline Int_t StEmcGeom::getZlYl(const Int_t softId, Float_t &zl, Float_t &yl) const
 {
   Int_t m, e, s;
-
-  if(!getBin(rid,  m,  e, s)){
+  if(!getBin(softId,  m,  e, s)){
     zl = mZlocal[e-1]; 
     yl = mYlocal[s-1];
     return 0;
@@ -353,8 +373,7 @@ inline Int_t StEmcGeom::getZlYl(const Int_t rid, Float_t &zl, Float_t &yl)
   else return 1;
 } 
 // _____________________________________________________________________
-inline void StEmcGeom::getXYZ(const Int_t m, const Int_t e, const Int_t s,
-                               Float_t &x,Float_t &y,Float_t &z)
+inline void StEmcGeom::getXYZ(const Int_t m, const Int_t e, const Int_t s, Float_t &x,Float_t &y,Float_t &z) const
 {
   Float_t phi;
   if(m<=60) z = mZlocal[e-1];
@@ -364,10 +383,10 @@ inline void StEmcGeom::getXYZ(const Int_t m, const Int_t e, const Int_t s,
   y = mRadius*sin(phi);
 }
 // _____________________________________________________________________
-inline Int_t StEmcGeom::getXYZ(const Int_t rid, Float_t &x,Float_t &y,Float_t &z)
+inline Int_t StEmcGeom::getXYZ(const Int_t softId, Float_t &x,Float_t &y,Float_t &z) const
 {
   Int_t m, e, s;
-  if(!getBin(rid,  m,  e, s)){
+  if(!getBin(softId,  m,  e, s)){
     getXYZ(m,e,s, x,y,z);
     return 0;
   }
@@ -384,7 +403,7 @@ inline Int_t StEmcGeom::getXYZfromGeant(const Int_t ivid,Float_t &x,Float_t &y,F
   else return 1;
 }
 // _____________________________________________________________________
-inline Int_t StEmcGeom::getEta(const Int_t m, const Int_t  e, Float_t &eta)
+inline Int_t StEmcGeom::getEta(const Int_t m, const Int_t  e, Float_t &eta) const
 {
   if(!checkModule(m) && !checkEta(e)){
     if(m <= mNModule/2) eta =  mEta[e-1];  // West part of EMC
@@ -394,14 +413,32 @@ inline Int_t StEmcGeom::getEta(const Int_t m, const Int_t  e, Float_t &eta)
   else return 1;
 }
 // _____________________________________________________________________
-inline Int_t StEmcGeom::getTheta(const Int_t m, const Int_t  e, Float_t &theta)
+inline Int_t StEmcGeom::getEta(const Int_t softId, Float_t &eta) const
+{
+	Int_t m,e,s;
+	if(getBin(softId,m,e,s) == 0) {
+		return getEta(m,e,eta);
+	}
+	return 1;
+}
+// _____________________________________________________________________
+inline Int_t StEmcGeom::getTheta(const Int_t m, const Int_t  e, Float_t &theta) const
 {
   Float_t etaw;
   if(!getEta(m,e, etaw)) { theta = 2.*atan(exp(-etaw)); return 0;}  
   else return 1; 
 }
 // _____________________________________________________________________
-inline Int_t StEmcGeom::getPhi(const Int_t m, const Int_t  s, Float_t &phi)
+inline Int_t StEmcGeom::getTheta(const Int_t softId, Float_t &theta) const
+{
+	Int_t m,e,s;
+	if(getBin(softId,m,e,s) == 0) {
+		return getTheta(m,e,theta);
+	}
+	return 1;
+}
+// _____________________________________________________________________
+inline Int_t StEmcGeom::getPhi(const Int_t m, const Int_t  s, Float_t &phi) const
 {
   //
   // -pi <= phi < pi
@@ -426,25 +463,33 @@ inline Int_t StEmcGeom::getPhi(const Int_t m, const Int_t  s, Float_t &phi)
   else return 1;
 }
 // _____________________________________________________________________
-inline Int_t StEmcGeom::getPhiModule(const Int_t m, Float_t &phi)
+inline Int_t StEmcGeom::getPhi(const Int_t softId, Float_t &phi) const
 {
-  if(!checkModule(m)) { phi=mPhiModule[m-1]; return 0;}
-  else return 1;
+	Int_t m,e,s;
+	if(getBin(softId,m,e,s) == 0) {
+		return getPhi(m,s,phi);
+	}
+	return 1;
 }
 // _____________________________________________________________________
-inline Int_t StEmcGeom::getEtaPhi(const Int_t rid, Float_t &eta, Float_t &phi)
+inline Int_t StEmcGeom::getEtaPhi(const Int_t softId, Float_t &eta, Float_t &phi) const
 {
   Int_t m=0, e=0, s=0;
-  if(!getBin(rid, m, e, s)) {
+  if(!getBin(softId, m, e, s)) {
     getEta(m, e, eta);
     getPhi(m, s, phi);
     return 0;
   }
   else return 1;
 }
-
-inline Int_t 
-StEmcGeom::getIndex(const Float_t x, TArrayF &arr)
+// _____________________________________________________________________
+inline Int_t StEmcGeom::getPhiModule(const Int_t m, Float_t &phi) const
+{
+  if(!checkModule(m)) { phi=mPhiModule[m-1]; return 0;}
+  else return 1;
+}
+// _____________________________________________________________________
+inline Int_t StEmcGeom::getIndex(const Float_t &x, const TArrayF &arr) const
 {
   // Arr is array of boundaries
   for(Int_t i=1; i<arr.GetSize(); i++){
@@ -454,27 +499,24 @@ StEmcGeom::getIndex(const Float_t x, TArrayF &arr)
 }
 
 #ifndef WSUJoseMarch
-inline Int_t 
-StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s,Int_t &rid)
+inline Int_t StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s, Int_t &softId) const
 {
-// 7-aug-2001 - "new" Jose numbering scheme (similar old offline scheme, but not the same)
-  if(!checkModule(m) && !checkEta(e) && !checkSub(s)){
-    rid = mNes*(m-1) + mNEta*(s-1) + e;
+  if(!checkModule(m) && !checkEta(e) && !checkSub(s)) {
+    softId = mNes*(m-1) + mNEta*(s-1) + e;
     return 0;
   }
   else {
-    printf("<W> getId(2001 Aug Scheme) | Det %i bad index m %i e %i s %i \n",mDetector,m,e,s); 
+    LOG_WARN << Form("<W> getId(2001 Aug Scheme) | Det %i bad index m %i e %i s %i ",mDetector,m,e,s) << endm; 
     return 1;
   }
 }
 
 inline Int_t 
-StEmcGeom::getBin(const Int_t rid,Int_t &m,Int_t &e,Int_t &s)
+StEmcGeom::getBin(const Int_t softId, Int_t &m, Int_t &e, Int_t &s) const
 {
-// 7-aug-2001 -> transition from raw # to bin #
   static Int_t j, wid;
-  if(!checkId(rid)) { 
-    wid = rid - 1;  // from 0 to MAX-1
+  if(!checkId(softId)) { 
+    wid = softId - 1;  // from 0 to MAX-1
     m = wid/mNes + 1;
     j = wid - mNes*(m-1);
     s = j/mNEta  + 1;

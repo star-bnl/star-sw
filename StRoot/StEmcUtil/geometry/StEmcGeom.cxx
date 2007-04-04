@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.5 2004/08/19 17:31:45 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.6 2007/04/04 17:32:11 kocolosk Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.6  2007/04/04 17:32:11  kocolosk
+ * Added softId-based versions of getEta, getTheta, and getPhi.  Also added getId(phi,eta,&softId).  Implemented const-correctness and used meaningful argument names in method declarations to improve readability
+ *
  * Revision 1.5  2004/08/19 17:31:45  pavlinov
  * getBin(const Float_t phi, const Float_t eta, Int_t &m,Int_t &e,Int_t &s) works bsmde too - request of Dmitry Arkhipkin
  *
@@ -183,7 +186,7 @@ StEmcGeom::getDetNumFromName(const Char_t *cdet)
   else if(!strcmp(cdet,"eprs")) {det=6;}
   else if(!strcmp(cdet,"esmde")){det=7;}
   else if(!strcmp(cdet,"esmdp")){det=8;}
-  else {printf(" StEmcGeom: Bad value of cdet %s \n", cdet);}
+  else {LOG_ERROR << Form(" StEmcGeom: Bad value of cdet %s ", cdet) << endm;}
   return det;
 }
 
@@ -238,7 +241,7 @@ void StEmcGeom::initGeom(const Int_t det)
     initESMDP();
     break;
   default:
-    printf(" StEmcGeom: Bad value of mDetector %i \n", mDetector);
+    LOG_FATAL << Form(" StEmcGeom: Bad value of mDetector %i ", mDetector) << endm;
     assert(0);
   }
   mGeom[det-1] = this; // 19-aug-04
@@ -253,12 +256,12 @@ StEmcGeom::StEmcGeom(const Int_t det, const Char_t *mode)
   else mMode.Append(" : wrong option !!! "); 
 
   if(!(mMode=="geant")){
-    printf("<W> Something wrong(%s)=> using default\n",mMode.Data());
+    LOG_WARN << Form("<W> Something wrong(%s)=> using default",mMode.Data()) << endm;
     initGeom(det); 
     return;
   }
 
-  printf("<I> Used Geant Geometry for BEMC, version %5.2f \n",mCalg_st->version);
+  LOG_INFO << Form("<I> Used Geant Geometry for BEMC, version %5.2f ",mCalg_st->version) << endm;
   mDetector = det;
   mPhiOffset.Set(2); mPhiStep.Set(2); mPhiBound.Set(2);
 
@@ -296,7 +299,7 @@ StEmcGeom::StEmcGeom(const Int_t det, const Char_t *mode)
     initESMDP();
     break;
   default:
-    printf(" StEmcGeom: Bad value of mDetector %i \n", mDetector);
+    LOG_ERROR << Form(" StEmcGeom: Bad value of mDetector %i ", mDetector) << endm;
   }
 }
 
@@ -316,7 +319,6 @@ StEmcGeom::defineDefaultCommonConstants()
   mPhiBound[0] = 75. /180. * C_PI;
   mPhiBound[1] = 105./180. * C_PI;
   mPhiStepHalf = 3. * C_PI/180.;
-
 }
 
 void 
@@ -372,7 +374,7 @@ StEmcGeom::defineModuleGridOnPhi()
     mPhiModule[i] = phiW;
     Int_t cond = getBin(mPhiModule[i], etaw, mw,ew,sw);
     if   (!cond) mPhiModule[mw-1] = phiW; // Second barrel
-    else printf("<W> Something wrong in StEmcGeom::defineModuleGridOnPhi()\n");
+    else {LOG_WARN << "<W> Something wrong in StEmcGeom::defineModuleGridOnPhi()" << endm;}
   }
 }
 
@@ -543,8 +545,7 @@ void StEmcGeom::initBSMDP()
   }
 }
 // _____________________________________________________________________
-Int_t StEmcGeom::getVolIdBemc(const Int_t ivid, Int_t &module,Int_t &eta,
-Int_t &sub, Int_t &detector)
+Int_t StEmcGeom::getVolIdBemc(const Int_t ivid, Int_t &module,Int_t &eta,Int_t &sub, Int_t &detector)
 {
   // Transition from Geant Volume Id to usual for BEMC and BPRS
   // See  emc/util/volid_bemc.F
@@ -571,7 +572,7 @@ Int_t &sub, Int_t &detector)
     case 2: 
       detector = BEMC; break;
     default:
-      printf("<W> StEmcGeom::getVolIdBemc => wrong value of dep %i \n",dep);
+      LOG_WARN << Form("<W> StEmcGeom::getVolIdBemc => wrong value of dep %i ",dep) << endm;
     }
     if     (rl==1) {
       //      cout<<" Phi 1 "<<phi<<endl;
@@ -591,14 +592,12 @@ Int_t &sub, Int_t &detector)
       sub   =(sub+1)%2+1;
     }
     else{
-    printf("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i; rl=%i\n",
-    ivid, rl);
+    LOG_ERROR << Form("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i; rl=%i", ivid, rl) << endm;
     return 1;
     }
   }
   else {
-    printf("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i=>%i\n",
-    ivid, ividw);
+    LOG_ERROR << Form("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i=>%i", ivid, ividw) << endm;
     return 1;
   }
   //  printf(" vid %i m %3i eta %3i sub %3i dep %3i \n",
@@ -606,8 +605,7 @@ Int_t &sub, Int_t &detector)
   return 0;
 }
 // _____________________________________________________________________
-Int_t StEmcGeom::getVolIdBsmd(const Int_t ivid, Int_t &module,Int_t &eta,
-Int_t &sub, Int_t &detector)
+Int_t StEmcGeom::getVolIdBsmd(const Int_t ivid, Int_t &module,Int_t &eta,Int_t &sub, Int_t &detector)
 {
   // Transition from Geant Volume Id to usual for BSMDE and BSMDP
   // See  emc/util/volid_bsmd.F
@@ -642,8 +640,7 @@ Int_t &sub, Int_t &detector)
       module=phi+60;
     }
     else{
-      printf("<E> getVolIdBsmd -- error decoding BSMD Geant volume Id %i; rl=%i\n",
-      ivid, rl);
+      LOG_ERROR << Form("<E> getVolIdBsmd -- error decoding BSMD Geant volume Id %i; rl=%i", ivid, rl) << endm;
       return 1;
     }
     if     (t==1){
@@ -663,13 +660,12 @@ Int_t &sub, Int_t &detector)
       sub  = 16 - strip; // 28-jul-2001
     }
     else {
-      printf("<E> getVolIdBsmd: Type mismatch %i \n",t);
+		LOG_ERROR << Form("<E> getVolIdBsmd: Type mismatch %i ",t) << endm;
       return 1;
     }
   }
   else {
-    printf("<E> getVolIdBsmd -- error decoding BSMD Geant volume Id %i=>%i\n",
-    ivid, ividw);
+    LOG_ERROR << Form("<E> getVolIdBsmd -- error decoding BSMD Geant volume Id %i=>%i", ivid, ividw) << endm;
     return 1;
   }
   //  printf(" vid %i m %3i eta %3i sub %3i type %3i \n",
@@ -677,13 +673,12 @@ Int_t &sub, Int_t &detector)
   return 0;
 }
 // _____________________________________________________________________
-Int_t StEmcGeom::getVolId(const Int_t ivid, Int_t &module,Int_t &eta,
-Int_t &sub, Int_t &det)
+Int_t StEmcGeom::getVolId(const Int_t ivid, Int_t &module,Int_t &eta,Int_t &sub, Int_t &det)
 {
   if     (mDetector==1||mDetector==2) return getVolIdBemc(ivid,module,eta,sub,det);
   else if(mDetector==3||mDetector==4) return getVolIdBsmd(ivid,module,eta,sub,det);
   else {
-    printf("<E> getVolId -- wrong detectot number %i \n",mDetector);
+    LOG_ERROR << Form("<E> getVolId -- wrong detectot number %i ",mDetector) << endm;
     return 0;
   }
 }
@@ -793,7 +788,7 @@ void StEmcGeom::initESMDP()  //wrong Need to update
   }
 }
 // _____________________________________________________________________
-void  StEmcGeom::printGeom()
+void  StEmcGeom::printGeom() const
 {
   cout<<" mMode      "<<mMode.Data()<<endl;
   cout<<" mDetector  "<<mDetector<<endl;
@@ -847,7 +842,7 @@ void  StEmcGeom::printGeom()
   }
 }
 // _____________________________________________________________________
-void  StEmcGeom::compare(StEmcGeom &g, Bool_t key=kFALSE)
+void  StEmcGeom::compare(const StEmcGeom &g, Bool_t key=kFALSE) const
 {
   Float_t err;
   Int_t i;
@@ -931,7 +926,7 @@ void  StEmcGeom::compare(StEmcGeom &g, Bool_t key=kFALSE)
   mDetector, g.mDetector);
 }
 // _____________________________________________________________________
-Float_t  StEmcGeom::relativeError(Float_t a, Float_t b)
+Float_t  StEmcGeom::relativeError(Float_t a, Float_t b) const
 {
   Float_t sum = fabs(a) + fabs(b), perr;
   if(sum == 0.0) return 0.0; // Both zero
@@ -942,51 +937,53 @@ Float_t  StEmcGeom::relativeError(Float_t a, Float_t b)
 }
 
 void  
-StEmcGeom::printError(Float_t err)
+StEmcGeom::printError(Float_t err) const
 {
-  if(err>perr) printf(" | perr=%6.3f%% \n",err);
-  else printf("\n");
+  	if(err>perr) {LOG_INFO << Form(" | perr=%6.3f%% ",err) << endm;}
+	else {LOG_INFO << " " << endm; }
 }
 
 void 
 StEmcGeom::getGeantGeometryTable()
 {
-  // 24-apr-2000 for MDC4
-  // Will be work if BFC has name "bfc" !!! Be carefull
-  mGeantGeom = NULL;
-  mCalg = 0;
-  mCalr = 0;
-  mCalg_st = 0;
-  mCalr_st = 0;
-  StMaker maker;
-  mChain = maker.GetChain();
+// 24-apr-2000 for MDC4
+// Will be work if BFC has name "bfc" !!! Be carefull
+	mGeantGeom = NULL;
+	mCalg = 0;
+	mCalr = 0;
+	mCalg_st = 0;
+	mCalr_st = 0;
+	StMaker maker;
+	mChain = maker.GetChain();
 
-  if(mChain) mGeantGeom = mChain->GetDataSet(".const/geom");
+	if(mChain) mGeantGeom = mChain->GetDataSet(".const/geom");
 
-  if(mGeantGeom) {
-    mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
-    if(mCalg) {
-      mCalg_st = mCalg->GetTable();
-      printf("calb_calr get from Geant::"); 
-      for(Int_t i=0;i<2;i++) printf(" Barrel %i Angle shift %6.0f ", i+1, mCalg_st->shift[i]);
-      printf("\n");
-      mCalr = (St_calb_calr   *) mGeantGeom->Find("calb_calr");
-      if(mCalr) mCalr_st = mCalr->GetTable(); // BARREL EMC RADIUSES
-    }
-  }
-  if(!mCalg_st || !mCalr_st) {
-    mMode.Append(" : No table");
-        printf("StEmcGeom::getGeantGeometryTable() could not find geom\n");
-    printf("StEmcGeom::getGeantGeometryTable() create own calb_calg/r\n");
-    mCalg = new St_calb_calg("calg", 1);
-    mCalr = new St_calb_calr("calr", 1);
-    mCalg_st = mCalg->GetTable();
-    mCalr_st = mCalr->GetTable();
-    // For year2001 configuration only
-    //mCalg_st[0].shift[0]=21.0;
-    //mCalg_st[0].shift[1]=0.0;
-    // For year2003 configuration only
-    mCalg_st[0].shift[0]=75.0;
-    mCalg_st[0].shift[1]=105.0;
-  }
+	TString line;
+	
+	if(mGeantGeom) {
+		mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
+		if(mCalg) {
+			mCalg_st = mCalg->GetTable();
+			printf("calb_calr get from Geant::"); 
+			for(Int_t i=0;i<2;i++) printf(" Barrel %i Angle shift %6.0f ", i+1, mCalg_st->shift[i]);
+			printf("\n");
+			mCalr = (St_calb_calr   *) mGeantGeom->Find("calb_calr");
+			if(mCalr) mCalr_st = mCalr->GetTable(); // BARREL EMC RADIUSES
+		}
+	}
+	if(!mCalg_st || !mCalr_st) {
+		mMode.Append(" : No table");
+		LOG_INFO << Form("StEmcGeom::getGeantGeometryTable() could not find geom") << endm;
+		LOG_INFO << Form("StEmcGeom::getGeantGeometryTable() create own calb_calg/r") << endm;
+		mCalg = new St_calb_calg("calg", 1);
+		mCalr = new St_calb_calr("calr", 1);
+		mCalg_st = mCalg->GetTable();
+		mCalr_st = mCalr->GetTable();
+	// For year2001 configuration only
+	//mCalg_st[0].shift[0]=21.0;
+	//mCalg_st[0].shift[1]=0.0;
+	// For year2003 configuration only
+		mCalg_st[0].shift[0]=75.0;
+		mCalg_st[0].shift[1]=105.0;
+	}
 }
