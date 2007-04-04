@@ -39,36 +39,36 @@ class StEmcPosition : public TObject
              StEmcPosition();
     virtual  ~StEmcPosition();
 
-    Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StTrack*,Double_t,Double_t=225.405,Int_t=1);    ///< Track projection utility
-    Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StMuTrack*,Double_t,Double_t=225.405,Int_t=1);    ///< Track projection utility
-    Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StMcTrack*,Double_t,Double_t=225.405,Int_t=1);  ///< Track projection utility
-    Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StPhysicalHelixD*,Double_t,Double_t=225.405,Int_t=1);  ///< Track projection utility
+    Bool_t            projTrack(StThreeVectorD* atFinal,StThreeVectorD* momentumAtFinal,const StTrack* const track,Double_t magField,Double_t radius=225.405,Int_t option=1) const;    ///< Track projection utility
+    Bool_t            projTrack(StThreeVectorD* atFinal,StThreeVectorD* momentumAtFinal,const StMuTrack* const track,Double_t magField,Double_t radius=225.405,Int_t option=1) const;    ///< Track projection utility
+    Bool_t            projTrack(StThreeVectorD* atFinal,StThreeVectorD* momentumAtFinal,const StMcTrack* const mcTrack,Double_t magField,Double_t radius=225.405,Int_t option=1) const;  ///< Track projection utility
+    Bool_t            projTrack(StThreeVectorD* atFinal,StThreeVectorD* momentumAtFinal,const StPhysicalHelixD* const helix,Double_t magField,Double_t radius=225.405,Int_t option=1) const;  ///< Track projection utility
     
-    Bool_t            trackOnEmc(StThreeVectorD*,StThreeVectorD*,StTrack*,Double_t,Double_t=225.405);   ///< Track projection utility
-    Bool_t            trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMuTrack*,Double_t,Double_t=225.405);   ///< Track projection utility
-    Bool_t            trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,Double_t,Double_t=225.405); ///< Track projection utility
+    Bool_t            trackOnEmc(StThreeVectorD* position,StThreeVectorD* momentum,const StTrack* const track,Double_t magField,Double_t emcRadius=225.405) const;   ///< Track projection utility
+    Bool_t            trackOnEmc(StThreeVectorD* position,StThreeVectorD* momentum,const StMuTrack* const track,double magField,double emcRadius=225.405) const;   ///< Track projection utility
+    Bool_t            trackOnEmc(StThreeVectorD* position,StThreeVectorD* momentum,const StMcTrack* const mcTrack,Double_t magField,Double_t emcRadius=225.405) const; ///< Track projection utility
     
-    Int_t             getTowerEtaPhi(Double_t, Double_t, Float_t*, Float_t*);                                 ///< Return tower eta/phi
+    Int_t             getTowerEtaPhi(Double_t eta, Double_t phi, Float_t* towerEta, Float_t* towerPhi) const; ///< Return tower eta/phi
 
-    Int_t             getNextTowerId(Float_t, Float_t, Int_t, Int_t);                                         ///< Return neighbor tower id's
-    Int_t             getNextTowerId(Int_t,Int_t,Int_t);                                                      ///< Return neighbor tower id's
-    Int_t             getNextTowerId(Int_t,Int_t,Int_t,Int_t,Int_t);                                          ///< Return neighbor tower id's
-		Int_t             getNextId(Int_t,Int_t,Int_t,Int_t,Int_t,Int_t);                                         ///< Return neighbor id (works for all detectors 1=bemc, 2=bprs, 3=bsmde, 4=bsmdp)
+    Int_t             getNextTowerId(Float_t eta, Float_t phi, Int_t nTowersdEta, Int_t nTowersdPhi) const; ///< Return neighbor tower id's
+    Int_t             getNextTowerId(Int_t softId, Int_t nTowersdEta, Int_t nTowersdPhi) const; ///< Return neighbor tower id's
+    Int_t             getNextTowerId(Int_t m, Int_t e, Int_t s, Int_t nTowersdEta, Int_t nTowersdPhi) const; ///< Return neighbor tower id's
+	Int_t             getNextId(Int_t det, Int_t m, Int_t e, Int_t s, Int_t nEta, Int_t nPhi) const; ///< Return neighbor id (works for all detectors 1=bemc, 2=bprs, 3=bsmde, 4=bsmdp)
 
-		Float_t           getDistTowerToTrack(Double_t, Double_t, Int_t, Int_t);                                  ///< Return distance from track to center of one tower
+	Float_t           getDistTowerToTrack(Double_t trackEta, Double_t trackPhi, Int_t nTowersdEta, Int_t nTowersdPhi) const; ///< Return distance from track to center of one tower
 
-    StThreeVectorF    getPosFromVertex(StVertex*,Int_t);        ///< Return Position from collision vertex
-    StThreeVectorF    getPosFromVertex(const StThreeVectorF&,Int_t);        ///< Return Position from collision vertex
-    StThreeVectorF    getPosFromVertex(StMcVertex*,Int_t);      ///< Return position from collision vertex
-    Float_t           getThetaFromVertex(StVertex*,Int_t);      ///< Return theta of the tower considering the collision vertex
-    Float_t           getThetaFromVertex(const StThreeVectorF&,Int_t);      ///< Return theta of the tower considering the collision vertex
-    Float_t           getThetaFromVertex(StMcVertex*,Int_t);    ///< Return theta of the tower considering the collision vertex
-    Float_t           getEtaFromVertex(StVertex*,Int_t);        ///< Return eta of the tower considering the collision vertex
-    Float_t           getEtaFromVertex(const StThreeVectorF&,Int_t);        ///< Return eta of the tower considering the collision vertex
-    Float_t           getEtaFromVertex(StMcVertex*,Int_t);      ///< Return eta of the tower considering the collision vertex
-    Float_t           getPhiFromVertex(StVertex*,Int_t);        ///< Return phi of the tower considering the collision vertex
-    Float_t           getPhiFromVertex(const StThreeVectorF&,Int_t);        ///< Return phi of the tower considering the collision vertex
-    Float_t           getPhiFromVertex(StMcVertex*,Int_t);      ///< Return phi of the tower considering the collision vertex
+    StThreeVectorF    getPosFromVertex(const StVertex* const vertex, Int_t TowerId) const; ///< Return Position from collision vertex
+    StThreeVectorF    getPosFromVertex(const StThreeVectorF& position, Int_t TowerId) const; ///< Return Position from collision vertex
+    StThreeVectorF    getPosFromVertex(const StMcVertex* const vertex, Int_t TowerId) const; ///< Return position from collision vertex
+    Float_t           getThetaFromVertex(const StVertex* const vertex, Int_t TowerId) const; ///< Return theta of the tower considering the collision vertex
+    Float_t           getThetaFromVertex(const StThreeVectorF& vertex, Int_t TowerId) const; ///< Return theta of the tower considering the collision vertex
+    Float_t           getThetaFromVertex(const StMcVertex* const vertex, Int_t TowerId) const; ///< Return theta of the tower considering the collision vertex
+    Float_t           getEtaFromVertex(const StVertex* const vertex, Int_t TowerId) const; ///< Return eta of the tower considering the collision vertex
+    Float_t           getEtaFromVertex(const StThreeVectorF& vertex, Int_t TowerId) const; ///< Return eta of the tower considering the collision vertex
+    Float_t           getEtaFromVertex(const StMcVertex* const vertex, Int_t TowerId) const; ///< Return eta of the tower considering the collision vertex
+    Float_t           getPhiFromVertex(const StVertex* const vertex, Int_t TowerId) const; ///< Return phi of the tower considering the collision vertex
+    Float_t           getPhiFromVertex(const StThreeVectorF& vertex, Int_t TowerId) const; ///< Return phi of the tower considering the collision vertex
+    Float_t           getPhiFromVertex(const StMcVertex* const vertex, Int_t TowerId) const; ///< Return phi of the tower considering the collision vertex
 
   protected:     
 

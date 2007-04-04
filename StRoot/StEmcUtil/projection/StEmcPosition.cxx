@@ -40,7 +40,7 @@ StEmcPosition::~StEmcPosition()
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-								StMuTrack* track, double magField, double radius, int option)
+								const StMuTrack* const track, double magField, double radius, int option) const
 {
     StThreeVectorD Zero(0,0,0);
     *atFinal=Zero;
@@ -93,7 +93,7 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-                            StPhysicalHelixD* helix, Double_t magField, Double_t radius, Int_t option)
+                            const StPhysicalHelixD* const helix, Double_t magField, Double_t radius, Int_t option) const
 {
   StThreeVectorD Zero(0,0,0);
   *atFinal=Zero;
@@ -137,7 +137,7 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
 
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-                            StTrack* track, Double_t magField, Double_t radius, Int_t option)
+                            const StTrack* const track, Double_t magField, Double_t radius, Int_t option) const 
 {
   StThreeVectorD Zero(0,0,0);
   *atFinal=Zero;
@@ -185,7 +185,7 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-                            StMcTrack* mcTrack, Double_t magField, Double_t radius, Int_t option)
+                            const StMcTrack* const mcTrack, Double_t magField, Double_t radius, Int_t option) const 
 {
   StThreeVectorD Zero(0,0,0);
   *atFinal=Zero;
@@ -232,7 +232,7 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
   return goProj;
 }
 //------------------------------------------------------------------------------
-Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum, StMuTrack* track, double magField, double emcRadius )
+Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum, const StMuTrack* const track, double magField, double emcRadius ) const
 {  
     // There's no check for primary or secondary tracks
 	
@@ -268,7 +268,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum,
-                            StTrack* track, Double_t magField, Double_t emcRadius )
+                            const StTrack* const track, Double_t magField, Double_t emcRadius ) const
 {  
   // There's no check for primary or secondary tracks
   
@@ -294,7 +294,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum,
-                            StMcTrack* mcTrack, Double_t magField, Double_t emcRadius )
+                            const StMcTrack* const mcTrack, Double_t magField, Double_t emcRadius ) const
 {  
   Float_t startVertexX = mcTrack->startVertex()->position().x();
   Float_t startVertexY = mcTrack->startVertex()->position().y();
@@ -336,8 +336,8 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
   return kFALSE;
 }
 //------------------------------------------------------------------------------
-Int_t StEmcPosition::getTowerEtaPhi( Double_t eta, Double_t phi, 
-                                  Float_t* towerEta, Float_t* towerPhi )
+Int_t StEmcPosition::getTowerEtaPhi(const Double_t eta, const Double_t phi, 
+                                  Float_t* towerEta, Float_t* towerPhi ) const
 {
   *towerEta = 0; *towerPhi = 0;
   Float_t tempTowerEta = 0, tempTowerPhi = 0;
@@ -353,10 +353,10 @@ Int_t StEmcPosition::getTowerEtaPhi( Double_t eta, Double_t phi,
   return 0;
 }
 //------------------------------------------------------------------------------
-Int_t StEmcPosition::getNextTowerId(Float_t Eta, Float_t Phi, Int_t nTowersdEta, Int_t nTowersdPhi)
+Int_t StEmcPosition::getNextTowerId(const Float_t eta, const Float_t phi, const Int_t nTowersdEta, const Int_t nTowersdPhi) const
 {
   Int_t m,e,s;
-  mGeom[0]->getBin( Phi, Eta, m, e, s );
+  mGeom[0]->getBin( phi, eta, m, e, s );
 	if(m>0 && m<=120)
 	{
 		if(s<0) s=1;
@@ -365,15 +365,15 @@ Int_t StEmcPosition::getNextTowerId(Float_t Eta, Float_t Phi, Int_t nTowersdEta,
 	return 0;
 }
 //------------------------------------------------------------------------------
-Int_t StEmcPosition::getNextTowerId(Int_t id, Int_t nTowersdEta, Int_t nTowersdPhi)
+Int_t StEmcPosition::getNextTowerId(const Int_t softId, const Int_t nTowersdEta, const Int_t nTowersdPhi) const
 {
-	if(id<1 || id>4800) return 0;
+	if(softId<1 || softId>4800) return 0;
 	Int_t m,e,s;
-	mGeom[0]->getBin(id,m,e,s);
+	mGeom[0]->getBin(softId,m,e,s);
 	return getNextTowerId(m,e,s,nTowersdEta,nTowersdPhi);
 }
 //------------------------------------------------------------------------------
-Int_t StEmcPosition::getNextTowerId(Int_t m, Int_t e, Int_t s, Int_t nTowersdEta, Int_t nTowersdPhi)
+Int_t StEmcPosition::getNextTowerId(const Int_t m, const Int_t e, const Int_t s, const Int_t nTowersdEta, const Int_t nTowersdPhi) const
 {
 	if(m<1 || m>120) return 0;
 	if(e<1 || e>20) return 0;
@@ -381,7 +381,7 @@ Int_t StEmcPosition::getNextTowerId(Int_t m, Int_t e, Int_t s, Int_t nTowersdEta
 	return getNextId(1,m,e,s,nTowersdEta,nTowersdPhi);
 }
 //------------------------------------------------------------------------------
-Int_t StEmcPosition::getNextId(Int_t det,Int_t m, Int_t e, Int_t s, Int_t nEta, Int_t nPhi)
+Int_t StEmcPosition::getNextId(const Int_t det, const Int_t m, const Int_t e, const Int_t s, const Int_t nEta, const Int_t nPhi) const
 {
 	if(det<1 || det>4) return 0;
 	if(m<1 || m>120) return 0;
@@ -437,7 +437,7 @@ Int_t StEmcPosition::getNextId(Int_t det,Int_t m, Int_t e, Int_t s, Int_t nEta, 
 }
 //------------------------------------------------------------------------------
 Float_t StEmcPosition::getDistTowerToTrack( Double_t trackEta, Double_t trackPhi, 
-                                         Int_t nTowersdEta, Int_t nTowersdPhi )
+                                         Int_t nTowersdEta, Int_t nTowersdPhi ) const
 
 {     
   Int_t towerId = 0;
@@ -461,7 +461,7 @@ Float_t StEmcPosition::getDistTowerToTrack( Double_t trackEta, Double_t trackPhi
     return -1;
 }
 //------------------------------------------------------------------------------
-StThreeVectorF StEmcPosition::getPosFromVertex( StVertex* vertex,Int_t TowerId )
+StThreeVectorF StEmcPosition::getPosFromVertex( const StVertex* const vertex,Int_t TowerId ) const
 {
   StThreeVectorF Zero(0,0,0);
   if(TowerId<1 || TowerId>4800) return Zero;
@@ -475,7 +475,7 @@ StThreeVectorF StEmcPosition::getPosFromVertex( StVertex* vertex,Int_t TowerId )
   return PositionFromVertex;
 }
 //------------------------------------------------------------------------------
-StThreeVectorF StEmcPosition::getPosFromVertex( const StThreeVectorF& position,int TowerId )
+StThreeVectorF StEmcPosition::getPosFromVertex( const StThreeVectorF& position,int TowerId ) const
 {
     StThreeVectorF Zero(0,0,0);
     if(TowerId<1 || TowerId>4800) return Zero;
@@ -489,7 +489,7 @@ StThreeVectorF StEmcPosition::getPosFromVertex( const StThreeVectorF& position,i
     return PositionFromVertex;
 }
 //------------------------------------------------------------------------------
-StThreeVectorF StEmcPosition::getPosFromVertex( StMcVertex* vertex,Int_t TowerId )
+StThreeVectorF StEmcPosition::getPosFromVertex( const StMcVertex* const vertex,Int_t TowerId ) const
 {
   StThreeVectorF Zero(0,0,0);
   if(TowerId<1 || TowerId>4800) return Zero;
@@ -503,55 +503,55 @@ StThreeVectorF StEmcPosition::getPosFromVertex( StMcVertex* vertex,Int_t TowerId
   return PositionFromVertex;
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getThetaFromVertex( StVertex* vertex,Int_t TowerId )
+Float_t StEmcPosition::getThetaFromVertex( const StVertex* const vertex,Int_t TowerId ) const
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
   return p.theta();
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getThetaFromVertex( const StThreeVectorF& vertex,int TowerId )
+Float_t StEmcPosition::getThetaFromVertex( const StThreeVectorF& vertex,int TowerId ) const
 {
     StThreeVectorF p=getPosFromVertex(vertex,TowerId );
     return p.theta();
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getThetaFromVertex( StMcVertex* vertex,Int_t TowerId )
+Float_t StEmcPosition::getThetaFromVertex( const StMcVertex* const vertex,Int_t TowerId ) const
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
   return p.theta();
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getEtaFromVertex( StVertex* vertex,Int_t TowerId )
+Float_t StEmcPosition::getEtaFromVertex( const StVertex* const vertex,Int_t TowerId ) const
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
   return p.pseudoRapidity();
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getEtaFromVertex( const StThreeVectorF& vertex,int TowerId )
+Float_t StEmcPosition::getEtaFromVertex( const StThreeVectorF& vertex,int TowerId ) const
 {
     StThreeVectorF p=getPosFromVertex(vertex,TowerId );
     return p.pseudoRapidity();
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getEtaFromVertex( StMcVertex* vertex,Int_t TowerId )
+Float_t StEmcPosition::getEtaFromVertex( const StMcVertex* const vertex,Int_t TowerId ) const
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
   return p.pseudoRapidity();
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getPhiFromVertex( StVertex* vertex,Int_t TowerId )
+Float_t StEmcPosition::getPhiFromVertex( const StVertex* const vertex,Int_t TowerId ) const
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
   return p.phi();
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getPhiFromVertex( const StThreeVectorF& vertex,int TowerId )
+Float_t StEmcPosition::getPhiFromVertex( const StThreeVectorF& vertex,int TowerId ) const
 {
     StThreeVectorF p=getPosFromVertex(vertex,TowerId );
     return p.phi();
 }
 //------------------------------------------------------------------------------
-Float_t StEmcPosition::getPhiFromVertex( StMcVertex* vertex,Int_t TowerId )
+Float_t StEmcPosition::getPhiFromVertex( const StMcVertex* const vertex,Int_t TowerId ) const
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
   return p.phi();
