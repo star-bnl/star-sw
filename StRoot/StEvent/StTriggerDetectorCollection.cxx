@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.9 2006/09/14 00:02:16 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 2.10 2007/04/04 16:40:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
+ * Revision 2.10  2007/04/04 16:40:18  ullrich
+ * Add setup of VPD data to constructor.
+ *
  * Revision 2.9  2006/09/14 00:02:16  ullrich
  * Removed argument (run) in constructor. Not needed anymore.
  *
@@ -45,7 +48,7 @@
 #include "StTriggerData.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.9 2006/09/14 00:02:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.10 2007/04/04 16:40:18 ullrich Exp $";
 
 ClassImp(StTriggerDetectorCollection)
 
@@ -54,9 +57,8 @@ StTriggerDetectorCollection::StTriggerDetectorCollection() {/* noop */}
 StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t) :
     mCtb(t), mMwc(t), mVpd(t), mZdc(t), mBbc(t), mEmc(t), mFpd(t) {/* noop */}
 
-// Note: VPD and MWC are purposely not filled here. tu 2/10/2004
 StTriggerDetectorCollection::StTriggerDetectorCollection(const StTriggerData& t) :
-    mCtb(t), mZdc(t), mBbc(t), mEmc(t), mFpd(t) {/* noop */}
+    mCtb(t), mVpd(t), mZdc(t), mBbc(t), mEmc(t), mFpd(t) {/* noop */}
 
 StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
 
