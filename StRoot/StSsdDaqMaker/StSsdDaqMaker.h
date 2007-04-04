@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.h,v 1.6 2007/03/22 01:58:17 bouchet Exp $
+// $Id: StSsdDaqMaker.h,v 1.7 2007/04/04 01:20:33 bouchet Exp $
 //
 // $Log: StSsdDaqMaker.h,v $
+// Revision 1.7  2007/04/04 01:20:33  bouchet
+// Cosmetic changes to print the active ladders according to the ssdConfiguration Table
+//
 // Revision 1.6  2007/03/22 01:58:17  bouchet
 // add a method to fill pedestal and noise of the strips in a tuple
 //
@@ -69,6 +72,7 @@ class StSsdDaqMaker : public StMaker {
   TFile *pFile;
   TNtuple *pTuple;
   void DeclareNTuple(); 
+  void PrintConfiguration(Int_t runumber,ssdConfiguration_st *config);
  protected:
   // Protected method if any
   StSsdConfig*  mConfig;
@@ -101,7 +105,7 @@ class StSsdDaqMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.6 2007/03/22 01:58:17 bouchet Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.7 2007/04/04 01:20:33 bouchet Exp $ built "__DATE__" "__TIME__; 
     return cvs;
   }
 

@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.15 2007/03/22 01:58:17 bouchet Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.16 2007/04/04 01:20:33 bouchet Exp $
 //
 // $log$
 //
@@ -130,7 +130,7 @@ Int_t StSsdDaqMaker::Init(){
     noise_high_ladP->SetYTitle("Wafer");
     noise_high_ladN->SetXTitle("Ladder");
     noise_high_ladN->SetYTitle("Wafer");
-    mPedOut = 0;//default : we do not wite the Tuple
+    mPedOut = 0;//default : we do not write the Tuple
     if(mPedOut)
       {
 	DeclareNTuple();
@@ -144,9 +144,8 @@ Int_t StSsdDaqMaker::Init(){
 //_____________________________________________________________________________
 Int_t StSsdDaqMaker::InitRun(int runumber)
 {
-
   LOG_INFO <<"InitRun(int runumber) - Read now Databases"<<endm;
- 
+  Int_t run = (runumber/1000000)-1;
   
   TDataSet *DbConnector = GetDataBase("Geometry/ssd");
   if (!DbConnector){
@@ -154,34 +153,29 @@ Int_t StSsdDaqMaker::InitRun(int runumber)
     return 0;
   }
   
-  
   St_ssdConfiguration *configuration = (St_ssdConfiguration*)DbConnector->Find("ssdConfiguration");
   if (!configuration){
-    LOG_ERROR << "InitRun(int runumber) - ERROR - ssdConfiguration==0"<<endm;
+    LOG_ERROR << "InitRun("<<runumber<<") - ERROR - ssdConfiguration==0"<<endm;
     return 0;
   }
-
   ssdConfiguration_st *config  = (ssdConfiguration_st*) configuration->GetTable() ;
   if (!config){
-    LOG_ERROR <<"InitRun(int runumber) - ERROR - config==0"<<endm;
+    LOG_ERROR <<"InitRun("<<runumber<<") - ERROR - config==0"<<endm;
     return 0;
   }
-
+  
   mConfig = new StSsdConfig();
-
+  
   int totLadderPresent = 0;
-
+  
   for (int ladder = 1; ladder<=config->nMaxLadders;ladder++) 
     {
-      LOG_INFO <<" Run-IV : Ladder = "<< ladder 
-	  << " on sector = " << config->ladderIsPresent[ladder-1] 
-	  << endm;
+      LOG_INFO<< " on sector = " << config->ladderIsPresent[ladder-1];
       if (config->ladderIsPresent[ladder-1] != 0)
 	totLadderPresent++;
       mConfig->setLadderIsActive(ladder,config->ladderIsPresent[ladder-1]);
     }
-
-  LOG_INFO << " Run-IV : totLadderPresent = "<<totLadderPresent<<endm;  
+  PrintConfiguration(run,config);
   mConfig->setNumberOfLadders(totLadderPresent);
   mConfig->setNumberOfWafers(config->nMaxWafers/config->nMaxLadders);
   mConfig->setNumberOfHybrids(2);
@@ -498,3 +492,41 @@ Int_t StSsdDaqMaker::Finish()
   return kStOK;
 }
 //_____________________________________________________________________________
+void StSsdDaqMaker::PrintConfiguration(Int_t runumber,ssdConfiguration_st *config)
+{
+  switch(runumber){
+  case 4 : {
+    LOG_INFO <<"Configuration of ladders for run IV" <<endm;
+    break;
+  }
+  case 5 : {
+    LOG_INFO <<"Configuration of ladders for run V" << endm;
+    break;
+  }
+  case 6 : {
+    LOG_INFO <<"Configuration of ladders  for run VI"<< endm;
+    break;
+  }
+  case 7 : {
+    LOG_INFO <<"Configuration of ladders  for run VII" << endm;
+    break;
+  }
+  }
+  Int_t i =0;
+  Int_t totladderPresent =0;
+  LOG_INFO << "PrintLadderSummary:ladder id                 :";
+  for (i=1;i<=config->nMaxLadders;i++){ 
+    gMessMgr->width(3);
+    *gMessMgr<<i;
+  }
+  *gMessMgr<<endm;
+  LOG_INFO << "PrintLadderSummary:Active Ladders on sectors: ";
+  for (i=1;i<=config->nMaxLadders;i++){ 
+    gMessMgr->width(3);
+    *gMessMgr<<mConfig->getLadderIsActive(i);
+    if(mConfig->getLadderIsActive(i)>0)totladderPresent++;
+
+  }
+  *gMessMgr<<endm;
+  LOG_INFO << "totLadderActive = "<<totladderPresent<<endm; 
+}
