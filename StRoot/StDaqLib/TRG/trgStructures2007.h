@@ -50,6 +50,8 @@
  *              Commented out xx_SUM_LEN where xx is L0, L1, L2; and L0_REG_LEN.  Unused?
  *              Since these are significant changes, Format changed to 3.0
  *  05Jan07 JMN Changed CPA[32] to MTD[8],VPD[8],CPA[16]
+ *  29Mar07 JMN Updated L2_Results offsets for CP
+ *  03Apr07 JMN Order MTD,VPD,CPA is changed to CPA,MTD,VPD to reflect order of DSMs in the L1 crate
  */
 
 #ifndef trgStructures2007_h
@@ -57,7 +59,7 @@
 
 #define y7MAX_L0_DATA_BLOCKS    11              /* Maximum number of L0 Data Blocks:  current + npre + npost */
 #define y7MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
-#define y7FORMAT_VERSION      0x30              /* Format Version number for trigger data */
+#define y7FORMAT_VERSION      0x31              /* Format Version number for trigger data */
 #define y7EV_DESC_LEN      sizeof(EvtDescData)  /* Number of bytes in event descriptor */
 #define y7L0DSM_DATA_LEN   sizeof(L0_DSM_Data)  /* Size of data block in L0 DSM Tree */
 #define y7RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from DSM clients and QT boards */
@@ -73,7 +75,7 @@
 #define L2RESULTS_2007_OFFSET_EMC_PED     1
 #define L2RESULTS_2007_OFFSET_PIG         2
 #define L2RESULTS_2007_OFFSET_UPS         6
-#define L2RESULTS_2007_OFFSET_DISPVER    12
+#define L2RESULTS_2007_OFFSET_DISPVER    14
 
 #define y7ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
 #define y7ADD_BIT_FORCE          5              /* Force store of this event */
@@ -112,9 +114,9 @@ typedef struct {
 /* L0 DSM data structures */
 
 typedef struct {
+  unsigned short     CPA[16];                 /* Contents of 2 CTB DSM Input Buffers (IB's) - coarse pixel array */
   unsigned short     MTD[8];                  /* TAC values for MTD's MRPCs and overlapping CTB trays */
   unsigned short     VPD[8];                  /* ADC & TAC values for VPD detectors*/
-  unsigned short     CPA[16];                 /* Contents of 2 CTB DSM Input Buffers (IB's) - coarse pixel array */
   unsigned short     CTB[8];                  /* CTB ADC sums and topology for East & West combined */
   unsigned short     lastDSM[8];              /* Contents of last DSM IB - results of all DSM trees */
   unsigned short     VTX[8];                  /* Separate ZDC and BBC DSMs have been replaced with this one */
