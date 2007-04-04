@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <Stiostream.h>
 #include <stdio.h>
+#include "StMessMgr.h"
 
 //--------------------------------------------------------
 /*!
@@ -43,7 +44,7 @@ void StEmcDecoder::SetDateTime(unsigned int date, unsigned int time)
     this->Init(date, time);
 }
 //--------------------------------------------------------
-bool StEmcDecoder::GetFixTowerMapBug(void)
+bool StEmcDecoder::GetFixTowerMapBug(void) const
 {
     return this->fixTowerMap;
 }
@@ -407,7 +408,7 @@ the tower index (software) in the original map
 \param id_original is the soft_id in the original map
 \param id_shift is the shift that should be applied to the id. In this case, id_corrected = Id_original+id_shift
 */
-int StEmcDecoder::GetTowerBugCorrectionShift(int id_original,int& id_shift)
+int StEmcDecoder::GetTowerBugCorrectionShift(int id_original,int& id_shift) const
 {
     int id_new = TowerBugFixIndex[id_original - 1];
     id_shift = id_new-id_original;
@@ -421,9 +422,8 @@ Copy of StEmcGeom version
 \param eta is the eta division for towers
 \param sub is the sub division for towers
 */
-int StEmcDecoder::GetTowerBin(const int TowerId,int &module,int &eta,int &sub)
+int StEmcDecoder::GetTowerBin(const int TowerId,int &module,int &eta,int &sub) const
 {
-
     int rid=TowerId;
 
     if(rid<1 || rid>4800)
@@ -442,7 +442,7 @@ int StEmcDecoder::GetTowerBin(const int TowerId,int &module,int &eta,int &sub)
 \param TDC is the TDC channel number
 \param crate is the crate number
 */
-int StEmcDecoder::GetTowerCrateFromTDC(int TDC, int& crate)
+int StEmcDecoder::GetTowerCrateFromTDC(int TDC, int& crate) const
 {
     if(TDC>=0 && TDC<30)
     {
@@ -456,7 +456,7 @@ int StEmcDecoder::GetTowerCrateFromTDC(int TDC, int& crate)
 \param crate is the crate number
 \param TDC is the TDC channel number
 */
-int StEmcDecoder::GetTowerTDCFromCrate(int crate, int& TDC)
+int StEmcDecoder::GetTowerTDCFromCrate(int crate, int& TDC) const
 {
     if(crate>0 && crate<31)
     {
@@ -470,7 +470,7 @@ int StEmcDecoder::GetTowerTDCFromCrate(int crate, int& TDC)
 \param RDO is the DAQ id
 \param TDC is the TDC channel number
 */
-int StEmcDecoder::GetTowerTDCFromDaqId(int RDO, int& TDC)
+int StEmcDecoder::GetTowerTDCFromDaqId(int RDO, int& TDC) const
 {
     if(RDO>=0 && RDO<=4799)
     {
@@ -485,7 +485,7 @@ int StEmcDecoder::GetTowerTDCFromDaqId(int RDO, int& TDC)
 \param crate is the crate number
 \param crate_sequency is the position of the tower inside the crate
 */
-int StEmcDecoder::GetTowerCrateFromDaqId(int RDO, int& crate, int& crate_sequency)
+int StEmcDecoder::GetTowerCrateFromDaqId(int RDO, int& crate, int& crate_sequency) const
 {
     int tdc=RDO%30;
     crate_sequency=RDO/30;
@@ -494,7 +494,7 @@ int StEmcDecoder::GetTowerCrateFromDaqId(int RDO, int& crate, int& crate_sequenc
     return 0;
 }
 //--------------------------------------------------------
-int StEmcDecoder::Getjose_towerWest(int start,int crate_seq)
+int StEmcDecoder::Getjose_towerWest(int start,int crate_seq) const
 {
     int card=crate_seq/32;
     int card_seq=31-(crate_seq%32);
@@ -506,7 +506,7 @@ int StEmcDecoder::Getjose_towerWest(int start,int crate_seq)
     return jose_tower;
 }
 //--------------------------------------------------------
-int StEmcDecoder::Getjose_towerEast(int start,int crate_seq)
+int StEmcDecoder::Getjose_towerEast(int start,int crate_seq) const
 {
     int card=crate_seq/32;
     int card_seq=31-(crate_seq%32);
@@ -522,7 +522,7 @@ int StEmcDecoder::Getjose_towerEast(int start,int crate_seq)
 \param RDO is the DAQ id
 \param TowerId is the software id for towers
 */
-int StEmcDecoder::GetTowerIdFromDaqId(int RDO,int& TowerId)
+int StEmcDecoder::GetTowerIdFromDaqId(int RDO,int& TowerId) const
 {
     //RDO from 0 to 4799
     if(RDO<0 || RDO>4799)
@@ -530,7 +530,6 @@ int StEmcDecoder::GetTowerIdFromDaqId(int RDO,int& TowerId)
 
     int crate_seq=0;
     int Crate;
-    int tdc;
     GetTowerCrateFromDaqId(RDO,Crate,crate_seq);
     return GetTowerIdFromCrate(Crate,crate_seq,TowerId);
 }
@@ -539,7 +538,7 @@ int StEmcDecoder::GetTowerIdFromDaqId(int RDO,int& TowerId)
 \param TowerId is the software id for towers
 \param RDO is the DAQ id
 */
-int StEmcDecoder::GetDaqIdFromTowerId(int TowerId,int& RDO)
+int StEmcDecoder::GetDaqIdFromTowerId(int TowerId,int& RDO) const
 {
     if(TowerId<1 || TowerId >4800)
         return 0; // 0 is bad
@@ -554,7 +553,7 @@ int StEmcDecoder::GetDaqIdFromTowerId(int TowerId,int& RDO)
 \param crate_sequency is the position of the tower inside the crate
 \param TowerId is the software id for towers
 */
-int StEmcDecoder::GetTowerIdFromCrate(int crate,int crate_sequency, int& TowerId)
+int StEmcDecoder::GetTowerIdFromCrate(int crate,int crate_sequency, int& TowerId) const
 {
     if(crate>15 && crate<31)
     {
@@ -582,7 +581,7 @@ int StEmcDecoder::GetTowerIdFromCrate(int crate,int crate_sequency, int& TowerId
 \param tdc_sequency is the position of the tower inside the crate
 \param TowerId is the software id for towers
 */
-int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency, int& TowerId)
+int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency, int& TowerId) const
 {
 
     int Crate;
@@ -597,7 +596,7 @@ int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency, int& TowerId)
 \param crate_seq is the position of the tower inside the crate (0 <= crate_seq <=159)
 \param patchId is the software id for towers
 */
-int StEmcDecoder::GetTriggerPatchFromCrate(int CRATE,int crate_seq, int& patchId)
+int StEmcDecoder::GetTriggerPatchFromCrate(int CRATE,int crate_seq, int& patchId) const
 {
     if(CRATE<1 || CRATE>30)
         return 0;
@@ -612,7 +611,7 @@ int StEmcDecoder::GetTriggerPatchFromCrate(int CRATE,int crate_seq, int& patchId
 \param CRATE is the crate number
 \param crate_seq is the position of the tower inside the crate (0 <= crate_seq <=159)
 */
-int StEmcDecoder::GetCrateAndSequenceFromTriggerPatch(int PATCH,int& CRATE,int& crate_seq)
+int StEmcDecoder::GetCrateAndSequenceFromTriggerPatch(int PATCH,int& CRATE,int& crate_seq) const
 {
     if(PATCH<0 || PATCH>299)
         return 0;
@@ -639,7 +638,7 @@ int StEmcDecoder::GetCrateAndSequenceFromTriggerPatch(int PATCH,int& CRATE,int& 
 \param jetPatch_seq is the trigger patch position within the jet patch (0 <= jetPatch_seq <= 24)
 \param triggerPatch is the trigger patch id (0 <= triggerPatch <=299)
 */
-int StEmcDecoder::GetTriggerPatchFromJetPatch(int jetPatch, int jetPatch_seq, int &triggerPatch)
+int StEmcDecoder::GetTriggerPatchFromJetPatch(int jetPatch, int jetPatch_seq, int &triggerPatch) const
 {
     if (jetPatch<0 || jetPatch>=12 || jetPatch_seq<0 || jetPatch_seq>=25)
         return 0;
@@ -652,7 +651,7 @@ int StEmcDecoder::GetTriggerPatchFromJetPatch(int jetPatch, int jetPatch_seq, in
 \param jetPatch_seq is the trigger patch position within the jet patch (0 <= jetPatch_seq <= 24)
 \param triggerPatch is the trigger patch id (0 <= triggerPatch <=299)
 */
-int StEmcDecoder::GetJetPatchAndSequenceFromTriggerPatch(int triggerPatch, int &jetPatch, int &jetPatch_seq)
+int StEmcDecoder::GetJetPatchAndSequenceFromTriggerPatch(int triggerPatch, int &jetPatch, int &jetPatch_seq) const
 {
     if (triggerPatch<0 || triggerPatch>=300)
         return 0;
@@ -670,7 +669,7 @@ int StEmcDecoder::GetJetPatchAndSequenceFromTriggerPatch(int triggerPatch, int &
 \param RDO is the SMD fiber number
 \param index is the position in the fiber
 */
-int StEmcDecoder::GetSmdRDO(int detector,int module, int eta, int sub, int& RDO, int& index)
+int StEmcDecoder::GetSmdRDO(int detector,int module, int eta, int sub, int& RDO, int& index) const
 {
     if(module<1 || module >120)
         return 0;
@@ -704,7 +703,7 @@ int StEmcDecoder::GetSmdRDO(int detector,int module, int eta, int sub, int& RDO,
 \param sub is the sub division for towers
 \param print enables/disables some printout information
 */
-int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub,bool print)
+int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub,bool print) const
 {
     int wire, A_value;
     return GetSmdCoord(RDO,index,detector,module,eta,sub,wire,A_value,print);
@@ -721,7 +720,7 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
 \param A_value is the A_value in the FEE card
 \param print enables/disables some printout information
 */
-int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub,int& wire, int& A_value,bool print)
+int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub,int& wire, int& A_value,bool print) const
 {
 
     if(RDO<0 || RDO>7)
@@ -856,7 +855,7 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
 \param S_value is the connector in the SMD crate
 \param module is the module number
 */
-int StEmcDecoder::getSmdModule(int RDO, int S_value,int& module)
+int StEmcDecoder::getSmdModule(int RDO, int S_value,int& module) const
 
 {
     module=SmdModules[RDO][S_value-1];
@@ -866,7 +865,7 @@ int StEmcDecoder::getSmdModule(int RDO, int S_value,int& module)
 /*!
 \param fiberno is the fiber number in each SMD crate connector
 */
-int StEmcDecoder::checkDummy(int fiberno)
+int StEmcDecoder::checkDummy(int fiberno) const
 {
     int dummy=0;
     if(fiberno==1 || fiberno==17 || fiberno==33 || fiberno==49 || fiberno==65)
@@ -886,7 +885,7 @@ int StEmcDecoder::checkDummy(int fiberno)
 \param fiberno is the fiber number in each SMD crate connector
 \param pin is the pin number
 */
-int StEmcDecoder::getSmdPin(int detector,int half,int fiberno,int& pin)
+int StEmcDecoder::getSmdPin(int detector,int half,int fiberno,int& pin) const
 
 {
     int gap=(fiberno-1)/16;
@@ -907,7 +906,7 @@ Converts the pin number in eta and sub divisions for SMDP
 \param eta is the eta division for towers
 \param sub is the sub division for towers
 */
-int StEmcDecoder::getSmdpStrip(int pin,int& eta,int& sub)
+int StEmcDecoder::getSmdpStrip(int pin,int& eta,int& sub) const
 {
     eta=(pin-1)%10+1;
     sub=15-(pin-1)/10;
@@ -923,7 +922,7 @@ int StEmcDecoder::getSmdpStrip(int pin,int& eta,int& sub)
 The Pre Shower and SMD crates are identical and they share almost
 the same decoder.
 */
-int StEmcDecoder::GetPsdId(int RDO,int index, int& id,bool print)
+int StEmcDecoder::GetPsdId(int RDO,int index, int& id,bool print) const
 {
     int wire, A_value, PMT;
     return GetPsdId(RDO,index,id,PMT,wire,A_value,print);
@@ -941,7 +940,7 @@ int StEmcDecoder::GetPsdId(int RDO,int index, int& id,bool print)
 The Pre Shower and SMD crates are identical and they share almost
 the same decoder.
 */
-int StEmcDecoder::GetPsdId(int RDO,int index, int& id, int& PMTBox, int& wire, int& A_value,bool print)
+int StEmcDecoder::GetPsdId(int RDO,int index, int& id, int& PMTBox, int& wire, int& A_value,bool print) const
 {
     id=0;
     if(RDO<0 || RDO>3)
@@ -995,8 +994,12 @@ int StEmcDecoder::GetPsdId(int RDO,int index, int& id, int& PMTBox, int& wire, i
     int half;
     if(A_value==1)
         half=40;
-    if(A_value==2)
+    else if(A_value==2)
         half=0;
+	else {
+		LOG_WARN << "Bad A_value -- " << A_value << " -- result for PSD softId is wrong" << endm;
+		half = -10000;
+	}
 
     PMTBox = PsdModules[RDO][S_value-1];
     int start  = PsdStart[PMTBox-1];
@@ -1022,7 +1025,7 @@ int StEmcDecoder::GetPsdId(int RDO,int index, int& id, int& PMTBox, int& wire, i
 \param RDO is the PSD fiber number
 \param index is the position in the fiber
 */
-int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index)
+int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index) const
 {
     RDO=0;
     index=0;
@@ -1033,7 +1036,7 @@ int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index)
     return 1;
 }
 //--------------------------------------------------
-void StEmcDecoder::PrintTowerMap(ofstream *out)
+void StEmcDecoder::PrintTowerMap(ofstream *out) const
 {
     *out <<"TDC channels connections\n";
     *out <<"-----------------------------------------------------------\n";
@@ -1056,7 +1059,7 @@ void StEmcDecoder::PrintTowerMap(ofstream *out)
     *out <<endl;
 }
 //--------------------------------------------------
-void StEmcDecoder::PrintSmdMap(ofstream *out)
+void StEmcDecoder::PrintSmdMap(ofstream *out) const
 {
     *out <<"Modules connected to SMD crate\n";
     *out <<"-----------------------------------------------------------\n";
@@ -1087,7 +1090,7 @@ void StEmcDecoder::PrintSmdMap(ofstream *out)
     *out <<endl;
 }
 //--------------------------------------------------
-void StEmcDecoder::PrintPsdMap(ofstream *out)
+void StEmcDecoder::PrintPsdMap(ofstream *out) const
 {
     *out <<"PMT Boxes connected to PSD crate\n";
     *out <<"-----------------------------------------------------------\n";
@@ -1117,9 +1120,55 @@ void StEmcDecoder::PrintPsdMap(ofstream *out)
     }
     *out <<endl;
 }
+//--------------------------------------------------
+int StEmcDecoder::GetCrateFromTowerId(int softId, int &crate, int &sequence) const
+{
+	int RDO;
+	if(GetDaqIdFromTowerId(softId,RDO)) {
+		return GetTowerCrateFromDaqId(RDO,crate,sequence);
+	}
+	return 0;
+}
+//--------------------------------------------------
+int StEmcDecoder::GetTDCFromTowerId(int softId, int &TDC) const
+{
+	int RDO;
+	if(GetDaqIdFromTowerId(softId,RDO)) {
+		return GetTowerTDCFromDaqId(RDO,TDC);
+	}
+	return 0;
+}
+//--------------------------------------------------
+int StEmcDecoder::GetTriggerPatchFromTowerId(int softId, int &patchId) const
+{
+	int crate, sequence;
+	if(GetCrateFromTowerId(softId,crate,sequence)) {
+		return GetTriggerPatchFromCrate(crate,sequence,patchId);
+	}
+	return 0;
+}
+//--------------------------------------------------
+int StEmcDecoder::GetJetPatchFromTowerId(int softId, int &jetPatch) const
+{
+	int triggerPatch, sequence;
+	if(GetTriggerPatchFromTowerId(softId,triggerPatch)) {
+		return GetJetPatchAndSequenceFromTriggerPatch(triggerPatch,jetPatch,sequence);
+	}
+	return 0;
+}
+//--------------------------------------------------
+int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
+{
+	if( (m<1) || (m>120) ) return 0;
+	if( (e<1) || (e>20)  ) return 0;
+	if( (s<1) || (s>2)   ) return 0;
+	softId = 40*(m-1) + 20*(s-1) + e;
+	return 1;
+}
 
-
-
-
-
-
+// $Id: StEmcDecoder.cxx,v 2.44 2007/04/04 17:35:11 kocolosk Exp $
+//
+// $Log: StEmcDecoder.cxx,v $
+// Revision 2.44  2007/04/04 17:35:11  kocolosk
+// Added methods GetCrateFromTowerId, GetTDCFromTowerId, GetTDCFromTowerId, GetTriggerPatchFromTowerId, GetJetPatchFromTowerId, and GetTowerIdFromBin.  Also implemented const-correctness and used meaningful argument names in method declarations to improve readability.
+//
