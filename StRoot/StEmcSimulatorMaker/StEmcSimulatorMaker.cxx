@@ -337,7 +337,7 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
     {
         // For SMDE only
         Int_t neta = mGeom[i]->NEta(), iw1, iw2;
-        Float_t* eb = mGeom[i]->Eta();
+        const Float_t* eb = mGeom[i]->Eta();
         TArrayD xb(2*neta+1);
         xb[neta]   = 0.0;
         for(Int_t ik=0; ik<neta; ik++)
@@ -1231,8 +1231,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.41 2007/03/22 22:48:28 perev Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.42 2007/04/05 19:04:33 kocolosk Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.42  2007/04/05 19:04:33  kocolosk
+// fix AutoBuild warning
+//
 // Revision 1.41  2007/03/22 22:48:28  perev
 // Small old bug fix, thanx to Oleksandr
 //
