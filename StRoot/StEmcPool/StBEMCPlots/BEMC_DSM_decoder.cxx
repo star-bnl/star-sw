@@ -266,6 +266,19 @@ proc getLUTvalue { board patch index } {
     return [expr round($value)]
 }
 */
+    if (!((sum + lutPed) & ~0x7F) && (formula == 2) && (lutScale == 1) && (!lutSigma) && (lutUsePowerup) && (pedestalShift == 24)) {
+	// The usual running mode
+	static int commonLUT[] = {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+				 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+				 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+				 60, 61, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 
+				 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 
+				 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62}; 
+				 // more than 0x7F + 16 elements
+	lut = commonLUT[sum + lutPed + numberOfMaskedTowers];
+	return;
+    }
+
     float scale = lutScale;
     if (formula == 1) {
 	if (numberOfMaskedTowers != 16) {
@@ -279,8 +292,6 @@ proc getLUTvalue { board patch index } {
     if (formula == 2) {
 	ped -= numberOfMaskedTowers * ((pedestalShift - 8.0) / 16.0);
     }
-    float range = scale * (ped + 62);
-    if (range < 78) range = 78;
     float value = (sum - ped) / scale;
     if (value < 0) value = 0;
     if (value > 62) value = 62;
