@@ -1,6 +1,6 @@
 /*
  *  StFixedVertexFinder.cxx
- *  $Id: StFixedVertexFinder.cxx,v 1.4 2006/05/18 19:14:24 lbarnby Exp $
+ *  $Id: StFixedVertexFinder.cxx,v 1.4.4.1 2007/04/05 20:24:52 jeromel Exp $
  *
  *  Author Lee Barnby (University of Birmingham) May 2006.
  *
@@ -72,7 +72,7 @@ void StFixedVertexFinder::printInfo(ostream& os)const{
 }
 
 void StFixedVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight){
-    LOG_WARN << "StFixedVertexFinder::UseVertexConstraint() - vertex beam constraint NOT implemented in context of fixed vertex finder" << endm;
+    gMessMgr->Info() << "StFixedVertexFinder::UseVertexConstraint() - vertex beam constraint NOT implemented in context of fixed vertex finder" << endm;
 
 }
 
@@ -84,6 +84,9 @@ void StFixedVertexFinder::SetVertexPosition(double x, double y, double z){
 
 /*
  * $Log: StFixedVertexFinder.cxx,v $
+ * Revision 1.4.4.1  2007/04/05 20:24:52  jeromel
+ * Added to SL05
+ *
  * Revision 1.4  2006/05/18 19:14:24  lbarnby
  * Added SetVertexPosition function. Tidied up comments/docs
  *
