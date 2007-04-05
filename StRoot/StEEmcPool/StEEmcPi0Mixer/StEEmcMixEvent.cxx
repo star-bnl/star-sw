@@ -45,6 +45,7 @@ void StEEmcMixEvent::setEvent( StMuEvent *event )
 void StEEmcMixEvent::Clear(Option_t *o)
 {
   nPairs=0;
+  /***
   for ( Int_t i=0;i<MAX_PAIRS;i++ )
   {
       mMass[i]=0.;
@@ -71,8 +72,42 @@ void StEEmcMixEvent::Clear(Option_t *o)
       mNumberU[i]=0;
       mNumberV[i]=0;
   } 
+  **/
+
+  mMass.clear();
+  mPT.clear();
+  mEta.clear();
+  mPhi.clear();
+  mZgg.clear();
+  mPhigg.clear();
+  mEnergy.clear();
+  mEpre1.clear();
+  mEpre2.clear();
+  mEpost.clear();
+  mEsmdu.clear();
+  mEsmdv.clear();
+  mZvertex.clear();
+  
+  mTower1.clear();
+  mTower2.clear();
+  mEnergy1.clear();
+  mEnergy2.clear();
+  
+  mNumberT.clear();
+  mNumberR.clear();
+  mNumberU.clear();
+  mNumberV.clear();
+
+  mNumberOfTracks.clear();
+  mNumberOfPoints.clear();
+
+  mNumberOfTowerClusters.clear();
+  mNumberOfSmduClusters.clear();
+  mNumberOfSmdvClusters.clear();
+
   for ( Int_t ii=0;ii<720;ii++ ) {
     mADC[ii]=0.;
+    mGain[ii]=-1.;
     mStat[ii]=0;
   }
     
@@ -90,47 +125,52 @@ void StEEmcMixEvent::Clear(Option_t *o)
 // ----------------------------------------------------------------------------
 void StEEmcMixEvent::addPair ( StEEmcPair  p ) { 
 
-    if ( nPairs >= MAX_PAIRS ) return;  
-    mMass[nPairs]   = p.mass();
-    mPT[nPairs]     = p.pt();
-    mEta[nPairs]    = p.momentum().Eta();
-    mPhi[nPairs]    = p.momentum().Phi(); 
-    mZgg[nPairs]    = p.zgg();
-    mPhigg[nPairs]  = p.phigg(); 
-    mEnergy[nPairs] = p.energy();
+  //    mMass[nPairs]   = p.mass();
 
-    Float_t esmdu=0.;
-    Float_t esmdv=0.; 
-    esmdu += p.point(0).cluster(0).energy();
-    esmdu += p.point(1).cluster(0).energy();
-    esmdv += p.point(0).cluster(1).energy();
-    esmdv += p.point(1).cluster(1).energy();
-    Float_t epre1 = 0.;
-    epre1 += p.point(0).energy(1);
-    epre1 += p.point(1).energy(1);
-    Float_t epre2 = 0.;
-    epre2 += p.point(0).energy(2);
-    epre2 += p.point(1).energy(2);
-    Float_t epost = 0.;
-    epost += p.point(0).energy(3);
-    epost += p.point(1).energy(3);
+  mMass.push_back ( p.mass() );
+  mPT.push_back( p.pt() );
+  mEta.push_back( p.momentum().Eta() );
+  mPhi.push_back( p.momentum().Phi() );
+  mPhigg.push_back( p.phigg() );
+  mZgg.push_back( p.zgg() );
+  mEnergy.push_back( p.energy() );
 
-    mEpre1[nPairs]=epre1;
-    mEpre2[nPairs]=epre2;
-    mEpost[nPairs]=epost;
-    mEsmdu[nPairs]=esmdu;
-    mEsmdv[nPairs]=esmdv; 
+  Float_t esmdu=0.;
+  Float_t esmdv=0.;
+  esmdu += p.point(0).cluster(0).energy();
+  esmdu += p.point(1).cluster(0).energy();
+  esmdv += p.point(0).cluster(1).energy();
+  esmdv += p.point(1).cluster(1).energy();
 
-    mZvertex[nPairs]=p.vertex().Z(); 
+  Int_t index1=p.point(0).tower(0).index();
+  Int_t index2=p.point(1).tower(0).index();
 
-    mTower1[nPairs] = p.point(0).tower(0).index();
-    mEnergy1[nPairs]= p.point(0).energy();
+  Float_t epre1 = 0.;
+  epre1 += p.point(0).energy(1);
+  if (index1!=index2) epre1 += p.point(1).energy(1);
 
-    mTower2[nPairs] = p.point(1).tower(0).index();
-    mEnergy2[nPairs] = p.point(1).energy(); 
+  Float_t epre2 = 0.;
+  epre2 += p.point(0).energy(2);
+  if (index1!=index2) epre2 += p.point(1).energy(2);
 
+  Float_t epost = 0.;
+  epost += p.point(0).energy(3);
+  if (index1!=index2) epost += p.point(1).energy(3);
 
-    nPairs++; 
+  mEpre1.push_back( epre1 );
+  mEpre2.push_back( epre2 );
+  mEpost.push_back( epost );
+  mEsmdu.push_back( esmdu );
+  mEsmdv.push_back( esmdv );
+
+  mZvertex.push_back( p.vertex().Z() );
+
+  mTower1.push_back( p.point(0).tower(0).index() );
+  mTower2.push_back( p.point(1).tower(0).index() );
+  mEnergy1.push_back( p.point(0).energy() );
+  mEnergy2.push_back( p.point(1).energy() );
+
+  nPairs++; 
 
 }
 

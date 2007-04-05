@@ -50,7 +50,10 @@ class StEEmcMixEvent : public TObject {
 
   /// Ped subtracted ADC values from mEEanalysis.
   /// Index is etawise
-  Float_t mADC[720];
+
+  Float_t mADC  [720];
+  Float_t mGain [720];
+
   UShort_t mStat[720];
   Float_t sum3x3(Int_t index);
   Float_t sum3x3();
@@ -72,24 +75,24 @@ class StEEmcMixEvent : public TObject {
   
   /// From EEMC point-maker
   Int_t         nPairs;
-  Float_t       mMass[MAX_PAIRS]; //[nPairs]
-  Float_t       mPT[MAX_PAIRS];   //[nPairs]
-  Float_t       mEta[MAX_PAIRS];   //[nPairs] 
-  Float_t       mPhi[MAX_PAIRS];   //[nPairs] 
-  Float_t       mZgg[MAX_PAIRS];  //[nPairs];
-  Float_t       mEnergy[MAX_PAIRS]; //[nPairs]
-  Float_t       mEpre1[MAX_PAIRS];  //[nPairs]
-  Float_t       mEpre2[MAX_PAIRS];  //[nPairs]
-  Float_t       mEpost[MAX_PAIRS];  //[nPairs]
-  Float_t       mEsmdu[MAX_PAIRS];  //[nPairs]
-  Float_t       mEsmdv[MAX_PAIRS];  //[nPairs]
-  Float_t       mZvertex[MAX_PAIRS]; //[nPairs]
-  Float_t       mPhigg[MAX_PAIRS]; //[nPairs] 
+  std::vector<Float_t>       mMass; 
+  std::vector<Float_t>       mPT;   
+  std::vector<Float_t>       mEta;    
+  std::vector<Float_t>       mPhi;    
+  std::vector<Float_t>       mZgg;
+  std::vector<Float_t>       mEnergy; 
+  std::vector<Float_t>       mEpre1;  
+  std::vector<Float_t>       mEpre2;  
+  std::vector<Float_t>       mEpost;  
+  std::vector<Float_t>       mEsmdu;  
+  std::vector<Float_t>       mEsmdv;  
+  std::vector<Float_t>       mZvertex; 
+  std::vector<Float_t>       mPhigg;  
 
-  Int_t         mTower1[MAX_PAIRS]; //[nPairs]
-  Int_t         mTower2[MAX_PAIRS]; //[nPairs] 
-  Float_t       mEnergy1[MAX_PAIRS]; //[nPairs]
-  Float_t       mEnergy2[MAX_PAIRS]; //[nPairs] 
+  std::vector<Int_t>         mTower1; 
+  std::vector<Int_t>         mTower2;  
+  std::vector<Float_t>       mEnergy1; 
+  std::vector<Float_t>       mEnergy2;  
 
   Float_t       mTotalEnergyT;
   Float_t       mTotalEnergyP;
@@ -98,14 +101,25 @@ class StEEmcMixEvent : public TObject {
   Float_t       mTotalEnergyU;
   Float_t       mTotalEnergyV; 
 
-  Int_t mNumberT[MAX_PAIRS];
-  Int_t mNumberR[MAX_PAIRS];
-  Int_t mNumberU[MAX_PAIRS];
-  Int_t mNumberV[MAX_PAIRS];
+  std::vector<Int_t> mNumberT;
+  std::vector<Int_t> mNumberR;
+  std::vector<Int_t> mNumberU;
+  std::vector<Int_t> mNumberV;
+
+  std::vector<Int_t> mNumberOfTracks; /**< number of tracks pointing at pi0 candidate tower cluster */
+  std::vector<Int_t> mNumberOfPoints; /**< number of points matching pi0 candidate tower cluster */
+
+  std::vector<Int_t> mNumberOfTowerClusters;
+  std::vector<Int_t> mNumberOfSmduClusters;
+  std::vector<Int_t> mNumberOfSmdvClusters;
+
+
+
+
 
  private:
  protected:
-  ClassDef(StEEmcMixEvent,1);
+  ClassDef(StEEmcMixEvent,2);
 
 };
 
