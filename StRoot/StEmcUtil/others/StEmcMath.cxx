@@ -79,25 +79,26 @@ StEmcMath::getPhiPlusMinusPi(const Double_t phi)
 
 TArrayD  *StEmcMath::binForSmde(Bool_t kprint)
 {
-  // Calculate correct eta binnig for smd eta
-  StEmcGeom* geom = StEmcGeom::getEmcGeom(3);   // For SMDE
-  Int_t neta = geom->NEta(), iw1, iw2;
-  Float_t *eb = geom->Eta();
-  TArrayD *xb = new TArrayD(2*neta+1); 
-  (*xb)[neta]   = 0.0;
-  for(Int_t ik=0; ik<neta; ik++){
-    iw1 = neta + 1 + ik;
-    iw2 = neta-ik-1;
-    Float_t x1 = eb[ik], x2, xw;
-    if(ik<neta-1) {
-      x2 = eb[ik+1];
-      xw = (x1+x2)*0.5;
-    }
-    else xw = 0.99;
-    (*xb)[iw1] = +xw;
-    (*xb)[iw2] = -xw;
-    if(kprint)
-    printf(" iw1 %i %f => iw2 %i %f => eta %f\n", iw1,(*xb)[iw1], iw2,(*xb)[iw2], eb[ik]);
-  }
-  return xb;
+// Calculate correct eta binnig for smd eta
+	StEmcGeom* geom = StEmcGeom::getEmcGeom(3);   // For SMDE
+	const Int_t neta = geom->NEta();
+	Int_t iw1, iw2;
+	const Float_t *eb = geom->Eta();
+	TArrayD *xb = new TArrayD(2*neta+1); 
+	(*xb)[neta]   = 0.0;
+	for(Int_t ik=0; ik<neta; ik++){
+		iw1 = neta + 1 + ik;
+		iw2 = neta-ik-1;
+		Float_t x1 = eb[ik], x2, xw;
+		if(ik<neta-1) {
+			x2 = eb[ik+1];
+			xw = (x1+x2)*0.5;
+		}
+		else xw = 0.99;
+		(*xb)[iw1] = +xw;
+		(*xb)[iw2] = -xw;
+		if(kprint)
+			printf(" iw1 %i %f => iw2 %i %f => eta %f\n", iw1,(*xb)[iw1], iw2,(*xb)[iw2], eb[ik]);
+	}
+	return xb;
 }
