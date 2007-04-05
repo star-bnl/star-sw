@@ -112,7 +112,7 @@ private:
   void SanityCheck2007(char*, int);        //!
 
   int  UnpackTrg2007(Bank_TRGP*);          //!
-  int  Swap2007_DescSum(char*, int, int);  //!
+  int  Swap2007_DescSum(char*);            //!
   int  Swap2007_Raw(char*);                //!
 };
 
