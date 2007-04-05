@@ -48,10 +48,20 @@ void StDetectorDbRichScalers::update(StMaker* maker){
         
     if(maker){
 		
-	TDataSet* dataSet = maker->GetDataBase("Calibrations/rich");
+      TTable* scalerTable = 0;
+      TDataSet* dataSet = 0;
+
+      if(maker->GetMode() != 30) {
+          // First look for trigDetSums table in the DAQ file
+            dataSet = maker->GetChain()->GetDataSet("inputStream_DAQ");
+          if(dataSet) scalerTable = dynamic_cast<TTable*>(dataSet->Find("trigDetSums"));
+      }
+
+      dataSet = maker->GetDataBase("Calibrations/rich");
 
 	if(dataSet){
-	    TTable* scalerTable = dynamic_cast<TTable*>(dataSet->Find("trigDetSums"));
+	    // If trigDetSums was not found from DAQ, find from DB
+	    if(!scalerTable) scalerTable = dynamic_cast<TTable*>(dataSet->Find("trigDetSums"));
 	    TTable* voltTable   = dynamic_cast<TTable*>(dataSet->Find("richvoltages"));
 	
 	    // Get Scaler Table
@@ -62,7 +72,7 @@ void StDetectorDbRichScalers::update(StMaker* maker){
 	    if(voltTable){
 		mVolts = (richvoltages_st*)(voltTable->GetArray());
 	    }
-	    // If niether exit, may be year 1 data, so get y1Mult table
+	    // If niether exist, may be year 1 data, so get y1Mult table
 	    if(!scalerTable && !voltTable){
 		TTable* y1multTable   = dynamic_cast<TTable*>(dataSet->Find("y1Mult"));
 		if(y1multTable){
