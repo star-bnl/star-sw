@@ -46,7 +46,7 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   
   //Swap  EvtDesc and TrgSum
   if(swap){
-    Swap2007_DescSum(trgd,npre,npost);
+    res=Swap2007_DescSum(trgd);
     if(res<0) {
       printf("TRG_Reader::UnpackTrg2007: Swap DescSum error %s %d.\n",__FILE__,__LINE__);
       return -1;
@@ -101,7 +101,7 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   return 0;
 };
 
-int TRG_Reader::Swap2007_DescSum(char *ptr, int npre, int npost){
+int TRG_Reader::Swap2007_DescSum(char *ptr){
   TrgDataType2007* p=(TrgDataType2007*)ptr;
 
   pTRGD->swapHerb2bytes(&(p->EvtDesc.TCUdataBytes),1);
@@ -144,8 +144,8 @@ int TRG_Reader::Swap2007_DescSum(char *ptr, int npre, int npost){
   pTRGD->swapHerb2bytes(&(p->TrgSum.L2SumHeader),1);
   pTRGD->swapHerb4bytes(&(p->TrgSum.L2Result[0]),64);
 
-  npre  = p->EvtDesc.npre;
-  npost = p->EvtDesc.npost;
+  int npre  = p->EvtDesc.npre;
+  int npost = p->EvtDesc.npost;
   if(npre<0 || npre>5 || npost<0 || npost>5) return -1;
 
   return 0;
