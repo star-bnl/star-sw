@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.1 2005/08/24 16:16:56 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.1.2.1 2007/04/05 20:28:00 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -994,10 +994,14 @@ Bfc_st BFC2[] = { // ITTF Chains
   // in ITTF mode, all options may apply
   {"beamLine"    ,""  ,"","",""                                ,"","... Beam line constraint in ON",kFALSE},
   {"CtbMatchVtx" ,""  ,"","",""                         ,"","... CTB Matching ON in Vertex Finding",kFALSE},
-  {"VFMinuit"      ,""  ,"","",""                       ,"","... Generic VF will use Minuit method",kFALSE},
-  {"VFppLMV"       ,""  ,"","",""                        ,"","... Generic VF will use ppLMV method",kFALSE},
-  {"VFppLMV5"      ,""  ,"","",""                ,"","... Generic VF will use ppLMV method (tuned)",kFALSE},
-  {"VFPPV"      ,""  ,"","",""                                  ,"","... Pilup proof vertex finder",kFALSE},
+  {"VFMinuit"    ,""  ,"","",""                         ,"","... Generic VF will use Minuit method",kFALSE},
+  {"VFppLMV"     ,""  ,"","",""                          ,"","... Generic VF will use ppLMV method",kFALSE},
+  {"VFppLMV5"    ,""  ,"","",""                  ,"","... Generic VF will use ppLMV method (tuned)",kFALSE},
+  {"VFPPV"       ,""  ,"","",""                                 ,"","... Pilup proof vertex finder",kFALSE},
+  {"VFPPVnoCTB"  ,""  ,"","",""                        ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
+  {"VFFV"        ,""  ,"","",""                                     ,"","... Fixed dummy VF method",kFALSE},
+  {"VFMCE"       ,""  ,"","",""                                 ,"","... Fixed vertex from MCEvent",kFALSE},
+
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
@@ -1678,10 +1682,13 @@ Int_t StBFChain::Instantiate()
 	      int                   VtxOpt = 0;
 
 	      // VertexFinder methods
-	      if ( GetOption("VFMinuit") ){  VtxOpt |= (0x1 << 0);} // 1
-	      if ( GetOption("VFppLMV") ){   VtxOpt |= (0x1 << 1);} // 2
-	      if ( GetOption("VFppLMV5") ){  VtxOpt |= (0x1 << 2);} // 4
-	      if ( GetOption("VFPPV") ){     VtxOpt |= (0x1 << 3);} // 8
+	      if ( GetOption("VFMinuit") ){  VtxOpt |= (0x1 << 0);} //  1
+	      if ( GetOption("VFppLMV") ){   VtxOpt |= (0x1 << 1);} //  2 0X02
+	      if ( GetOption("VFppLMV5") ){  VtxOpt |= (0x1 << 2);} //  4 0X04
+	      if ( GetOption("VFPPV") ){     VtxOpt |= (0x1 << 3);} //  8 0X08
+	      if ( GetOption("VFPPVNOCTB") ){VtxOpt |= (0x1 << 4);} // 16 0X10
+	      if ( GetOption("VFFV") ){      VtxOpt |= (0x1 << 5);} // 32 0x20
+	      if ( GetOption("VFMCE") ){     VtxOpt |= (0x1 << 6);} // 64 0x40
 	      gvtxMk->SetMode(VtxOpt);
 
 	      // All VertexFinders implement those (or not)
