@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.477 2005/08/12 00:21:11 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.477.2.1 2007/04/05 20:15:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -368,10 +368,13 @@ Int_t StBFChain::Instantiate()
 	      int                   VtxOpt = 0;
 
 	      // VertexFinder methods
-	      if ( GetOption("VFMinuit") ){  VtxOpt |= (0x1 << 0);} // 1
-	      if ( GetOption("VFppLMV") ){   VtxOpt |= (0x1 << 1);} // 2
-	      if ( GetOption("VFppLMV5") ){  VtxOpt |= (0x1 << 2);} // 4
-	      if ( GetOption("VFPPV") ){     VtxOpt |= (0x1 << 3);} // 8
+	      if ( GetOption("VFMinuit") ){  VtxOpt |= (0x1 << 0);} //  1
+	      if ( GetOption("VFppLMV") ){   VtxOpt |= (0x1 << 1);} //  2 0X02
+	      if ( GetOption("VFppLMV5") ){  VtxOpt |= (0x1 << 2);} //  4 0X04
+	      if ( GetOption("VFPPV") ){     VtxOpt |= (0x1 << 3);} //  8 0X08
+	      if ( GetOption("VFPPVNOCTB") ){VtxOpt |= (0x1 << 4);} // 16 0X10
+	      if ( GetOption("VFFV") ){      VtxOpt |= (0x1 << 5);} // 32 0x20
+	      if ( GetOption("VFMCE") ){     VtxOpt |= (0x1 << 6);} // 64 0x40
 	      gvtxMk->SetMode(VtxOpt);
 
 	      // All VertexFinders implement those (or not)

@@ -307,10 +307,14 @@
   // in ITTF mode, all options may apply
   {"beamLine"    ,""  ,"","",""                                ,"","... Beam line constraint in ON",kFALSE},
   {"CtbMatchVtx" ,""  ,"","",""                         ,"","... CTB Matching ON in Vertex Finding",kFALSE},
-  {"VFMinuit"      ,""  ,"","",""                       ,"","... Generic VF will use Minuit method",kFALSE},
-  {"VFppLMV"       ,""  ,"","",""                        ,"","... Generic VF will use ppLMV method",kFALSE},
-  {"VFppLMV5"      ,""  ,"","",""                ,"","... Generic VF will use ppLMV method (tuned)",kFALSE},
-  {"VFPPV"      ,""  ,"","",""                                  ,"","... Pilup proof vertex finder",kFALSE},
+  {"VFMinuit"    ,""  ,"","",""                         ,"","... Generic VF will use Minuit method",kFALSE},
+  {"VFppLMV"     ,""  ,"","",""                          ,"","... Generic VF will use ppLMV method",kFALSE},
+  {"VFppLMV5"    ,""  ,"","",""                  ,"","... Generic VF will use ppLMV method (tuned)",kFALSE},
+  {"VFPPV"       ,""  ,"","",""                                 ,"","... Pilup proof vertex finder",kFALSE},
+  {"VFPPVnoCTB"  ,""  ,"","",""                        ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
+  {"VFFV"        ,""  ,"","",""                                     ,"","... Fixed dummy VF method",kFALSE},
+  {"VFMCE"       ,""  ,"","",""                                 ,"","... Fixed vertex from MCEvent",kFALSE},
+
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
