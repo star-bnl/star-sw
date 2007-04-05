@@ -88,7 +88,7 @@ Int_t StMyPointMaker::Make()
 	  /*
 	   * Attempt to split clusters and, if successful, rerun assocation
 	   */
-	  if ( mAllowSplitting )
+	  if ( mAllowSplitting && cluster.momentum().Perp() > mSplitMinimumET )
 	    {
 	      if ( SplitClusters( clusters1, clusters2 ) )
 		{
