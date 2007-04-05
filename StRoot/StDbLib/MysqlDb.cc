@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.32 2006/04/26 20:08:39 deph Exp $
+ * $Id: MysqlDb.cc,v 1.31 2005/12/15 03:14:27 jeromel Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
- * Revision 1.32  2006/04/26 20:08:39  deph
- * Added assert for no db connection.
- *
  * Revision 1.31  2005/12/15 03:14:27  jeromel
  * Mem Leak fixes / Missing delete in new and stream context.
  *
@@ -245,13 +242,6 @@ bool MysqlDb::reConnect(){
       wm<<mysql_error(&mData)<<".  Will re-try with timeout set at \n==> ";
       wm<<timeOutConnect<<" seconds <==";
       StDbManager::Instance()->printInfo((wm.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); 
-      if (timeOutConnect > 128)
-	{
-	  StString tmm;
-	  tmm << " Can't get a database connection, please email sofi hypernews ";
-	  StDbManager::Instance()->printInfo((tmm.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
-	  assert(connected);
-	}
     }
   }      
 

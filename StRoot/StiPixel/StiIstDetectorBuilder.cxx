@@ -24,7 +24,7 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFi
     _trackingParameters.setName("IstTrackingParameters");
     _calculator.setName("IstHitErrors");
     //_calculator = new StiDefaultHitErrorCalculator();
-    _calculator.set(1.e-2, 0., 0., 1.e-2, 0., 0.);
+    _calculator.set(1.e-4, 0., 0., 1.e-4, 0., 0.);
     //StiTrackingParameters * trackingPars = getTrackingParameters();
 
 
@@ -122,15 +122,9 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
 		    //double psi = phi + tilt;
 		    //double rtrue = sqrt(rlad*rlad + parOffset*parOffset);
 
-		    //pPlacement->setCenterRep(anglepos,radii[row],tiltAngle);
-		    pPlacement->setNormalRep(anglepos-tiltAngle,
-					     radii[row]*cos(tiltAngle),
-					     radii[row]*sin(tiltAngle)) ;
-		    pPlacement->setLayerRadius(radii[row]*cos(tiltAngle));
-		    
+		    pPlacement->setCenterRep(anglepos,radii[row],tiltAngle); 
+		    pPlacement->setLayerRadius(radii[row]);
 		    pPlacement->setRegion(StiPlacement::kMidRapidity);
-      		    pPlacement->setLayerAngle(anglepos);
-
 		    sprintf(name, "Ist/Layer_%d/Ladder_%d", row, sector);
 		    cout<<"\tbuild detector with name:\t "<<name<<endl;
 		    StiDetector *pDetector = _detectorFactory->getInstance();

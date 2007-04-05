@@ -1,10 +1,7 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.13 2006/04/19 19:49:47 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.12 2006/02/23 00:22:54 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
- * Revision 1.13  2006/04/19 19:49:47  andrewar
- * Added call to setLayerAngle, needed for detector container sort.
- *
  * Revision 1.12  2006/02/23 00:22:54  andrewar
  * Set Detector Id to kHftId, corrected Ist*pars -> Pixel*pars
  *
@@ -115,7 +112,6 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
 	       << "     dY:"<<dY<<endl;
 	  pPlacement->setNormalRep(phi, r, dY); 
 	  pPlacement->setLayerRadius(r);
-	  pPlacement->setLayerAngle(phi);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  sprintf(name, "Pixel/Layer_%d/Ladder_%d", row, sector);
 	  StiDetector *pDetector = _detectorFactory->getInstance();
@@ -143,9 +139,6 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
 	      pDetector->setKey(2,sector-18);
 	      add(0,(sector-18),pDetector);
 	    }
-
-	  cout << "Setting detector: " << name << " with key values: "
-	       << pDetector->getKey(1) << " "  << pDetector->getKey(2) << endl;
 	}
     }
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Done" << endl;
