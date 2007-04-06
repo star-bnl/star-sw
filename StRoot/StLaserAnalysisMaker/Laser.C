@@ -384,7 +384,7 @@ void Slopes(Int_t n1 = 1, Int_t n2 = 9999) {
       if (SSp) SSp->Draw("same");
       if (fit) fit->Draw("same");
       if (l && DVAll[l][0] > 0) {
-	if (DVAll[l] > 5.5 &&  dDVAll[l][0] > 0 && dDVAll[l][0]< 1e-3) MakeTable();
+	if (DVAll[l][0] > 5.5 &&  dDVAll[l][0] > 0 && dDVAll[l][0]< 1e-3) MakeTable();
 	else {
 	  cout << "File " << f->GetName() << " fails =============================" << endl;
 	  leg->AddEntry(fit, "Rejected");
