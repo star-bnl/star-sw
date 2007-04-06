@@ -50,8 +50,10 @@ void StMultiH1F::Draw(Option_t *option) {
   legend->SetMargin(0.25);
 
   Int_t ybin;
-  Double_t maxval = -999999.;
+  Double_t maxval = -1e31;
+  Double_t minval = 1e31;
   Int_t maxbin = -1;
+  Int_t minbin = -1;
   Float_t offset = fMOffset;
   if (fMOffset && gPad->GetLogy()) {
     Float_t max_offset = ::pow(
@@ -84,16 +86,24 @@ void StMultiH1F::Draw(Option_t *option) {
     }
 
     Double_t binmax = temp[ybin]->GetMaximum();
-    if (binmax > maxval) {
-      maxval = binmax;
-      maxbin = ybin;
-    }
+    Double_t binmin = temp[ybin]->GetMinimum();
+    if (binmax > maxval) { maxval = binmax; maxbin = ybin; }
+    if (binmin < minval) { minval = binmin; minbin = ybin; }
     legend->AddEntry(temp[ybin],n0.Data(),"l");
   }
 
   // can't use the option argument in Draw() since this is called from
   // StHistUtil::DrawHists(), which defaults 2D histograms to a box plot
-  temp[maxbin]->Draw();
+  if (maxbin == minbin) {
+    temp[maxbin]->Draw();
+  } else {
+    TH1F* tempb = new TH1F(*(temp[maxbin]));
+    tempb->SetBinContent(1,maxval);
+    tempb->SetBinContent(2,minval);
+    tempb->SetMarkerStyle(1); tempb->SetMarkerColor(0);
+    tempb->Draw("p");
+    maxbin = -1;
+  }
   for (ybin=0; ybin<ybins; ybin++) {
     if (ybin != maxbin) temp[ybin]->Draw("same");
   }
@@ -185,8 +195,11 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
   return maximum;
 }
 
-// $Id: StMultiH1F.cxx,v 1.9 2003/09/02 17:59:20 perev Exp $
+// $Id: StMultiH1F.cxx,v 1.10 2007/04/06 20:05:30 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.10  2007/04/06 20:05:30  genevb
+// Allow for lower minima
+//
 // Revision 1.9  2003/09/02 17:59:20  perev
 // gcc 3.2 updates + WarnOff
 //
