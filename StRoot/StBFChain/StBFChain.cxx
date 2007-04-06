@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.509 2007/03/21 16:57:32 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.510 2007/04/06 00:20:27 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -452,6 +452,10 @@ Int_t StBFChain::Instantiate()
     if (maker == "StLaserEventMaker"){
       // Bill stuff - Empty place-holder
     }
+    if (maker == "StDetectorDbMaker") {
+      if ( GetOption("DbRichSca") ) mk->SetMode(1);
+    }
+
     if (maker == "St_tpt_Maker" && (GetOption("MINIDAQ") || GetOption("Eval"))) {
       TString cmd(Form("St_tpt_Maker *tptMk = (St_tpt_Maker *) %p;",mk));
       if (GetOption("MINIDAQ")) cmd += "tptMk->Set_final(kTRUE);";// Turn on the final ntuple.
