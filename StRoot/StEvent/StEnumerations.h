@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.31.2.1 2007/04/05 20:14:53 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.31.2.2 2007/04/06 02:29:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.31.2.2  2007/04/06 02:29:52  jeromel
+ * Dropped Id restored
+ *
  * Revision 2.31.2.1  2007/04/05 20:14:53  jeromel
  * Patched from SL05f_1, branch SL05f_2
  *
@@ -143,7 +146,8 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kTpcSsdSvtId = kTpcSsdSvtIdentifier,
                    kSsdSvtId    = kSsdSvtIdentifier,
                    kPhmdCpvId   = kPhmdCpvIdentifier,
-                   kPhmdId      = kPhmdIdentifier};
+                   kPhmdId      = kPhmdIdentifier,
+                   kMaxId};
 
 /*!
  * \enum StTrackType
