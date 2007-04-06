@@ -30,7 +30,10 @@
 #include "StSsdHitCollection.h"
 #include "StDbUtilities/St_svtRDOstrippedC.h"
 #include "StDedxPidTraits.h"
-
+// #include "StDbUtilities/StSvtCoordinateTransform.hh"
+// #include "StDbUtilities/StSvtLocalCoordinate.hh"
+// #include "StDbUtilities/StSvtWaferCoordinate.hh"
+#include "StDbUtilities/St_svtHybridDriftVelocityC.h"
 ClassImp(EventTHeader);
 ClassImp(EventT);
 ClassImp(TrackT);
@@ -432,7 +435,7 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
     W = ht->wafer();
     H = ht->hybrid();
     h->SetId(B,L,l,W,H);
-    h->SetLM(ht->localPosition(0), ht->localPosition(1));			
+    h->SetuvD(ht->localPosition(0), ht->localPosition(1));			
     h->SetAnode(ht->anode());
     h->SetTimeB(ht->timebucket());
     for (Int_t r = 0; r < NRDOS; r++) {
@@ -442,6 +445,12 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
       }
     }
     if (rdo) h->SetRDO(rdo);
+    St_svtHybridDriftVelocityC *d = St_svtHybridDriftVelocityC::instance();
+    if (d && d->p(B,l,W,H)) {
+      h->SetLM(d->CalcU(B,l,W,H,ht->timebucket()),
+	       d->CalcV(H,ht->anode()));
+      h->SetuHat(d->uHat(B,l,W,H,ht->timebucket()));
+    }
   }
   if (hit->detector() == kSsdId) {
     StSsdHit *ht = (StSsdHit *) hit;
@@ -451,6 +460,7 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
     W = ht->wafer();
     h->SetId(B,L,l,W,H);
     h->SetLM(-ht->localPosition(0), ht->localPosition(1));			
+    h->SetuHat(-ht->localPosition(0));
     h->SetAnode(0);
     h->SetTimeB(0);
   }

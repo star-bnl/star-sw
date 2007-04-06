@@ -57,10 +57,10 @@ class Bichsel;
 Int_t npeaks = 1;
 TCanvas *c1, *c2;
 TPad *selold = 0;
-
+static const Double_t WaferLength = 2.9928;
 static const Char_t *plotName[] = {
   "duuP", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
-  "dvuP", "dvvP", "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 10
+  "dvuP", /*"dvvP",*/ "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 9
   "dXvsZ","dYvsZ","dZvsZ",
   //  "dXvsX","dXvsY","dYvsX",
   //  "dYvsY","dZvsX","dZvsY",
@@ -74,7 +74,7 @@ static const Char_t *plotName[] = {
   "dZ4da","dZ4db","dZ4dg"};
 const Int_t noHist = sizeof(plotName)/sizeof(Char_t *);//34;// 26;
 const Int_t firstHL = 0;
-const Int_t firstHG = 10;
+const Int_t firstHG = 9; //10;
 const Int_t firstHP = firstHG + 3;
 Int_t firstH = firstHG;
 Int_t lastH  = noHist - 1; 
@@ -475,12 +475,12 @@ Double_t STcheb(Int_t N, Double_t *par, Double_t x) {// N polynome degree, dimen
 //________________________________________________________________________________
 Double_t STchebN(Double_t *x, Double_t *par) {
   Int_t N = (Int_t) par[0];
-  return STcheb(N,par+1,-x[0]/3);
+  return STcheb(N,par+1,-x[0]-0.1);
 }
 //________________________________________________________________________________
 Double_t STchebP(Double_t *x, Double_t *par) {
   Int_t N = (Int_t) par[0];
-  return STcheb(N,par+1,x[0]/3);
+  return STcheb(N,par+1,x[0]-0.1);
 }
 //________________________________________________________________________________
 void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, TF1 *gp, ofstream &out,
@@ -648,6 +648,7 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
 
     Int_t ij = i + nx*(j-firstH) + 1;
     c1->cd(ij)->SetLogz(1);
+    h->SetMinimum(1);
 #if 0
     if (h) h->DrawCopy("colz");
     if (prof) prof->DrawCopy("same");
@@ -876,6 +877,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
       Int_t Id = ladder + 100*(wafer + 10*layer);
       h = (TH2 *) gDirectory->Get(Form("%s%04i",plotName[j],Id));
       if (! h) continue;
+      h->SetMinimum(1);
       h->SetXTitle(gDirectory->GetName());
       Int_t ij = i + nx*(j-firstH) + 1;
       c1->cd(ij)->SetLogz(1);
@@ -1107,7 +1109,7 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
 //   gStyle->SetPadLeftMargin( 0.01);
 //   gStyle->SetPadRightMargin( 0.01);
 //   gStyle->SetPadBottomMargin( 0.01);
- 
+  TH1D *fitPN[2];
   c1 = new TCanvas(Form("Drift_Barrel_%i",barrel),Form("Barrel %i, Ladder %i, Wafer %i",barrel,ladder,wafer) ,10,10,10+scaleX*nx,10+scaleY*ny);
   cout << "nx/ny = " << nx << "/" << ny << endl;
 
@@ -1126,7 +1128,7 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
   else                              outC.open(Out, ios::app);
   TH2 *h = 0;
   Int_t head = 0;
-  const Int_t NPol1 = 13;
+  const Int_t NPol1 = 5;
   const Int_t NPMax = NPol1;
   Double_t params[NPol1];
   Double_t dparams[NPol1];
@@ -1137,9 +1139,16 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
     if (! head) {
       outC << "struct data_t {" << endl;
       outC << "\tInt_t type, idx, nrows, barrel, layer, ladder, wafer, hybrid, Npar;" << endl;
-      outC << "\tDouble_t param[" << NPol1 - 1 << "];"<< endl;
-      outC << "\tDouble_t dparam[" << NPol1 - 1 << "];"<< endl;
-      outC << "\tChar_t *Comment;" << endl;
+      outC << "\tDouble_t "; 
+      for (Int_t i = 0; i <  NPol1 - 1; i++) {
+	outC << "v" << i; 
+	if (i < NPol1 - 2) {outC << ", ";} 
+	else               {outC << ";";} 
+      }
+      outC << endl;
+      //      outC << "\tDouble_t param[" << NPol1 - 1 << "];"<< endl;
+      //      outC << "\tDouble_t dparam[" << NPol1 - 1 << "];"<< endl;
+      outC << "\tChar_t Comment[10];" << endl;
       outC << "};" << endl;
       outC << "data_t Data[] = {" << endl;
     }
@@ -1154,8 +1163,8 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
     for (Int_t k = 0; k < 2; k++) {
       f[k] = (TF1 *) gROOT->GetFunction(funName[k]);
       if (! f[k]) {
-	if (k == 0) f[k] = new TF1(funName[k],STchebN,-2.98,-0.02,NPol1);
-	else        f[k] = new TF1(funName[k],STchebP, 0.02, 2.98,NPol1);
+	if (k == 0) f[k] = new TF1(funName[k],STchebN,-1.2, 0.0,NPol1);
+	else        f[k] = new TF1(funName[k],STchebP, 0.0, 1.2,NPol1);
       }
       f[k]->FixParameter(0,1); // N == 1
       f[k]->SetParameter(1,0);
@@ -1164,7 +1173,7 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
       f[k]->SetLineColor(2*k+1);
       //      f[k]->Print();
     }
-    TH1 *py, *fit;
+    TH1D *py, *fit;
     TProfile *prof;
     Double_t xmin, xmax;
     for (Int_t j = 0; j < ny; j++) {
@@ -1173,6 +1182,8 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
       wafer = w1 + j;
       Int_t Id = ladder + 100*(wafer + 10*layer);
       h = (TH2 *) gDirectory->Get(Form("duuP%04i",Id));
+      if (!h) continue;
+      h->SetMinimum(1);
       prof = 0;
       fit = 0;
       leg = 0;
@@ -1188,7 +1199,7 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
       prof->SetMarkerStyle(24);
       prof->SetMarkerColor(6);
       SlicesYFit(h,0,0,10,"qnig3");
-      fit = (TH1 *) gDirectory->Get(Form("%s_1",h->GetName()));
+      fit = (TH1D *) gDirectory->Get(Form("%s_1",h->GetName()));
       if (! fit) goto ENDL; 
       Ymnx[0] = fit->GetMinimum();
       Ymnx[1] = fit->GetMaximum();
@@ -1203,9 +1214,11 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
       yax->SetRange(yax->FindBin(-.25),yax->FindBin(0.25));
       fit->SetMarkerStyle(20);
       fit->SetMarkerColor(1);
+      fitPN[0] = new TH1D(*fit);
+      fitPN[1] = new TH1D(*fit);
       for (Int_t k = 0; k < 2 ; k++) {
-	if (k == 0) {py = h->ProjectionY("_py1",1,nybins/2-1,"e");      xmin = -2.9; xmax = -0.1;}
-	else        {py = h->ProjectionY("_py2",nybins/2+2,nybins,"e"); xmin =  0.1; xmax =  2.9;}
+	if (k == 0) {py = h->ProjectionY("_py1",1,nybins/2-1,"e");}
+	else        {py = h->ProjectionY("_py2",nybins/2+2,nybins,"e");}
 	if (py->GetEntries() > 100 || py->GetRMS() < 0.9*(ymax-ymin)/TMath::Sqrt(12.)) {
 #ifdef __PROB_SELECTION__
 	  Double_t oldProb = 0;
@@ -1217,7 +1230,7 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
 	  for (Int_t n = 0; n < NPMax-1; n++) {
 	    f[k]->FixParameter(0,n);
 	    f[k]->ReleaseParameter(n+1);
-	    fit->Fit(f[k],"erq");
+	    fitPN[k]->Fit(f[k],"erq");
 	    if (f[k]->GetNumberFitPoints() < 10) break;
 #ifdef __PROB_SELECTION__
 	    Double_t prob = f[k]->GetProb();
@@ -1241,7 +1254,7 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
 #endif
 	  }
 	  f[k]->FixParameter(0,np);
-	  fit->Fit(f[k],"erq");
+	  fitPN[k]->Fit(f[k],"erq");
 	  if (f[k]->GetNumberFitPoints() >= 10) {
 	    Int_t NPar = (Int_t) f[k]->GetParameter(0);
 	    memset (params, 0, NPol1*sizeof(Double_t));
@@ -1260,10 +1273,12 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
 	    }
 	    leg->AddEntry(f[k],lTitle);
 	    static const Int_t type = 2, idx = 0, nrows = 0;
-	    lineC = Form("\t{%1i,%1i,%1i,%1i,%1i,%2i,%2i,%2i,%2i,\n{",type,idx,nrows,barrel, layer, ladder, wafer, k+1, NPar);
-	    for (Int_t l = 1; l < NPol1; l++) {lineC += Form("%8.5f",params[l]);  if (l != NPol1 - 1) lineC += ",";} lineC += "},\n{";
-	    for (Int_t l = 1; l < NPol1; l++) {lineC += Form("%8.5f",dparams[l]); if (l != NPol1 - 1) lineC += ",";} lineC += "},\n";
-	    lineC += "\""; lineC += h->GetName(); lineC += "\"},";
+	    //	    lineC = Form("\t{%1i,%1i,%1i,%1i,%1i,%2i,%2i,%2i,%2i,\n{",type,idx,nrows,barrel, layer, ladder, wafer, k+1, NPar);
+	    lineC = Form("\t{%1i,%1i,%1i,%1i,%1i,%2i,%2i,%2i,%2i,",type,idx,nrows,barrel, layer, ladder, wafer, k+1, NPar);
+	    //	    for (Int_t l = 1; l < NPol1; l++) {lineC += Form("%8.5f",params[l]);  if (l != NPol1 - 1) lineC += ",";} lineC += "},\n{";
+	    for (Int_t l = 1; l < NPol1; l++) {lineC += Form("%8.5f",params[l]);  if (l != NPol1 - 1) lineC += ",";} lineC += "";
+	    //	    for (Int_t l = 1; l < NPol1; l++) {lineC += Form("%8.5f",dparams[l]); if (l != NPol1 - 1) lineC += ",";} lineC += "},\n";
+	    lineC += ",\""; lineC += h->GetName(); lineC += "\"},";
 	    outC << lineC << endl;
 	  }
 	}
@@ -1273,15 +1288,14 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
       h->DrawCopy("colz");
       if (prof) prof->DrawCopy("same");
       if (fit) {
-	fit->DrawCopy("same");
-	for (Int_t k = 0; k < 2; k++) f[k]->DrawCopy("same");
+	
+	for (Int_t k = 0; k < 2; k++) {fitPN[k]->DrawCopy("same"); f[k]->DrawCopy("same");}
       }
 #else
       h->Draw("colz");
       if (prof) prof->Draw("same");
       if (fit) {
-	fit->Draw("same");
-	for (Int_t k = 0; k < 2; k++) f[k]->Draw("same");
+	for (Int_t k = 0; k < 2; k++) {fitPN[k]->Draw("same"); f[k]->Draw("same");}
       }
 #endif
       if (leg) leg->Draw();
