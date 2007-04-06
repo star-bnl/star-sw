@@ -1,4 +1,4 @@
-void makeTPlots(const Char_t *tag = "dEdx") {
+void makeTPlots(const Char_t *tag = ""){//"dEdx") {
   TString FileN(gDirectory->GetName());
   gInterpreter->ProcessLine(".L Chain.C");
   TChain *theChain = Chain();

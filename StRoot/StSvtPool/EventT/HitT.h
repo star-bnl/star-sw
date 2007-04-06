@@ -36,6 +36,8 @@ class HitT : public TObject {
   Double32_t uM, vM;
   Double32_t anode, timeb;
   Int_t      NoHitPerTrack;
+  Double32_t uD, vD;
+  Double32_t uHat;
   Char_t end;
  public:
   HitT(Int_t B = 0, Int_t L = 0, Int_t l = 0, Int_t W = 0, Int_t H = 0,
@@ -75,7 +77,7 @@ class HitT : public TObject {
   void SetDirG(const Double_t *x) {Double32_t *dirPG = &cxPG;for (Int_t i = 0; i < 3; i++) dirPG[i] = x[i];}
   void SetXyzL(const Double_t *x) {Double32_t *xyzPL = &xPL; for (Int_t i = 0; i < 3; i++) xyzPL[i] = x[i];}
   void SetRDO(Int_t r) {rdo = r;}
-
+  void SetuvD(Double_t u, Double_t v) {uD = u; vD = v;};
 #ifdef __USE_GLOBAL__
   void SetUVPredGl(Double32_t u, Double32_t v) {uPGl = u; vPGl = v;}
   void SettUVPredGl(Double32_t tu, Double32_t tv) {tuPGl = tu; tvPGl = tv;}
@@ -84,8 +86,11 @@ class HitT : public TObject {
   void SetXyzGlL(const Double_t *x) {Double32_t *xyzPL = &xPGlL; for (Int_t i = 0; i < 3; i++) xyzPL[i] = x[i];}
 #endif
   void SetHitPerTrack(Int_t k) {NoHitPerTrack = k;}
+  void SetuHat(Double_t u) {uHat = u;}
   Double32_t  GetU()           const {return u;}
   Double32_t  GetV()           const {return v;}
+  Double32_t  GetuD()          const {return uD;}
+  Double32_t  GetvD()          const {return vD;}
   Double32_t *GetXyzP()              {return &xPG;}
   Double32_t *GetXyzL()              {return &xPL;}
   Double32_t *GetXyzW()              {return &xPL;}
