@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.14 2007/04/06 14:55:11 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.15 2007/04/06 21:46:36 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.15  2007/04/06 21:46:36  andrewar
+ * Removed some debug messages.
+ *
  * Revision 1.14  2007/04/06 14:55:11  andrewar
  * Shift of HFT hit to face of ladder.
  *
@@ -193,7 +196,7 @@ Int_t StPixelFastSimMaker::Make()
     //Get MC Pixel hit collection. This contains all pixel hits.
   const StMcPixelHitCollection* pixHitCol = mcEvent->pixelHitCollection();			     
 
-  bool pileupOut=true;
+  bool pileupOut=false;
   if(pileupOut)
     {
       fstream file_op("pileup.dat",ios::app);
@@ -341,12 +344,14 @@ Int_t StPixelFastSimMaker::Make()
 	  }							 
      
       cout <<"StPixelFastSimMaker::Make() -I- Loaded Ist  "
-	   <<nhits<<"pixel hits. "<<endl;
+	   <<nhits<<"ist  hits. "<<endl;
     }									 
   else
     {
       cout <<"No Ist hits found."<<endl;
     }
+
+    
     const StMcHpdHitCollection* hpdHitCol = mcEvent->hpdHitCollection();	       			
     if (hpdHitCol)							
     {									
@@ -390,6 +395,8 @@ Int_t StPixelFastSimMaker::Make()
     {
       cout <<"No hpd hits found."<<endl;
     }
+
+    
    const StMcIgtHitCollection* igtHitCol= mcEvent->igtHitCollection();					
     
       if (igtHitCol)							
@@ -626,7 +633,7 @@ void StPixelFastSimMaker::smearGaus(StThreeVectorD &mError,
 
 int StPixelFastSimMaker::sector(int layer, int ladder)
 {
-  printf("Layer %i ladder %i\n",layer, ladder);
+  //printf("Layer %i ladder %i\n",layer, ladder);
   if (layer ==1)
     {
       if ( ladder < 4 ) return 1;
@@ -724,7 +731,7 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
   Path = Form("/HALL_1/CAVE_1/PXMO_1/PSEC_%i/PLMO_%i/PLAC_1",
 	      sector(layer,ladder),secLadder(layer,ladder));
   gGeoManager->RestoreMasterVolume();
-   printf("Master volume.\n");
+  //printf("Master volume.\n");
  
   gGeoManager->CdTop();
   gGeoManager->cd(Path);
@@ -735,7 +742,7 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
   double pos[3]={position.x(),position.y(),position.z()};
   double localpos[3]={0,0,0};
   gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
-    printf("old hit: %g %g %g\n",localpos[0],localpos[1],localpos[2]);
+  //printf("old hit: %g %g %g\n",localpos[0],localpos[1],localpos[2]);
  
   //get ladder phi 
   //TGeoHMatrix  *hmat   = (TGeoHMatrix*)(node->GetMatrix());
@@ -759,7 +766,7 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
  
   //momentum mag, pt and z stay the same; angle changes 
   momUnit.setPhi( momUnit.phi() - phiForLadder(layer,ladder)*3.141592654/180.);
-  printf("Mom dir: %g\n",momUnit.phi());
+  //printf("Mom dir: %g\n",momUnit.phi());
   
   // shift = x + y * tan(phi)
   //.006 is the half thickness of the active area. Hardcoded; not good; blah, blah.
@@ -770,7 +777,7 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
   localpos[1] = localpos[1] - .006; //this isn't exactly right. The local position is just off of radius -.006, but it's close (~1-5 um).
    
 
-  printf("new hit: %g %g %g\n",localpos[0],localpos[1],localpos[2]);
+  //printf("new hit: %g %g %g\n",localpos[0],localpos[1],localpos[2]);
 
   if ( fabs( localpos[0] ) > 2. ) 
     printf("StPixelFastSimMaker::shiftHit -E- shifted hit too far!!!! value=%g\n", localpos[0]);
@@ -780,6 +787,6 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
 
   gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,pos);
 
-  printf("exit shift code.\n");
+  //printf("exit shift code.\n");
 
 }
