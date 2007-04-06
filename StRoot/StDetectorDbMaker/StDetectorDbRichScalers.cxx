@@ -51,7 +51,7 @@ void StDetectorDbRichScalers::update(StMaker* maker){
       TTable* scalerTable = 0;
       TDataSet* dataSet = 0;
 
-      if(maker->GetMode() != 30) {
+      if(maker->GetMode() != 1) {
           // First look for trigDetSums table in the DAQ file
             dataSet = maker->GetChain()->GetDataSet("inputStream_DAQ");
           if(dataSet) scalerTable = dynamic_cast<TTable*>(dataSet->Find("trigDetSums"));
