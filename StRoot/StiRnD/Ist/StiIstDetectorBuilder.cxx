@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.13 2006/12/14 22:01:47 wleight Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.14 2007/04/06 15:58:21 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.14  2007/04/06 15:58:21  wleight
+// Changed some cout statements to LOG_INFO
+//
 // Revision 1.13  2006/12/14 22:01:47  wleight
 // Changed hit errors so that they are obtained from the database and are different for each layer
 //
@@ -9,23 +12,8 @@
 //
 // Revision 1.11  2006/10/20 18:43:12  wleight
 // Changes to make perfect hits in the IST work with UPGR05
-//
-// Revision 1.23  2006/06/28 18:51:46  fisyak
-// Add loading of tracking and hit error parameters from DB
-//
-// Revision 1.22  2006/05/31 04:00:02  fisyak
-// remove SSD ladder mother volume
-//
-// Revision 1.21  2005/06/21 16:35:01  lmartin
-// DetectorBuilder updated with the correct methods from StSsdUtil
-//
-// Revision 1.20  2005/06/21 15:31:47  lmartin
-// CVS tags added
-//
 /*!
- * \class StiSsdDetectorBuilder
- * \author Christelle Roy
- * \date 02/27/04
+ * \class StiIstDetectorBuilder
  */
 
 #include <stdio.h>
@@ -131,7 +119,7 @@ void StiIstDetectorBuilder::useVMCGeometry() {
 }
 
 void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
-  if (debug()) {cout << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;}
+  LOG_DEBUG << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endm;
   // decode detector ------------------------------
   TString nameP(nodeP->GetName());
   nameP.ReplaceAll("HALL_1/CAVE_1/","");
@@ -279,7 +267,7 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   //  add(2*(layer-1)+side-1,wafer-1,pDetector);
   add(2*(layer-1)+side-1,ladder,pDetector);  
   //add(2*ladder-3+side,0,pDetector);
-  cout<<"layer/ladder/wafer/side "<< layer << "/" << ladder << "/" << wafer << "/" << side << endl;
-  cout<<"the numbers defining this volume are 2*(layer-1)+side-1: "<<2*(layer-1)+side-1<<" and "<<ladder<<endl;
+  LOG_INFO<<"layer/ladder/wafer/side "<< layer << "/" << ladder << "/" << wafer << "/" << side << endm;
+  LOG_INFO<<"the numbers defining this volume are 2*(layer-1)+side-1: "<<2*(layer-1)+side-1<<" and "<<ladder<<endm;
 }
 
