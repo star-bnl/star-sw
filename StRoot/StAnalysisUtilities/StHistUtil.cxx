@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.32 2007/03/13 18:42:27 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.33 2007/04/07 04:39:04 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.33  2007/04/07 04:39:04  genevb
+// Use ZCol for PointXYTpc
+//
 // Revision 2.32  2007/03/13 18:42:27  genevb
 // Add Svt list, simplified hlist include files, handle StMultiH2F, store dirName
 //
@@ -285,6 +288,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   gStyle->SetOptStat(111111);
   gStyle->SetStatStyle(0);
   gStyle->SetOptDate(0);
+  gStyle->SetPalette(1);
 
   
   //setup canvas
@@ -497,8 +501,10 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           // actually draw,print
           if ((chkdim == 3) && (obj->InheritsFrom("StMultiH2F"))) {
             obj->Draw("Box");
-          } else if ((chkdim == 2) && (oName.EndsWith("SvtLoc"))) {
-            obj->Draw("Col");
+          } else if ((chkdim == 2) &&
+                     (oName.EndsWith("SvtLoc") ||
+                      oName.Contains("PointXYTpc"))) {
+            obj->Draw("ZCol");
           } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
             obj->Draw("Box");
 	    if ((oName.EndsWith("trkGoodF"))||(oName.EndsWith("VtxSvtvsTpc"))) {
