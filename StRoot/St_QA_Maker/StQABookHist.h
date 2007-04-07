@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.23 2007/03/13 18:46:29 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.24 2007/04/07 04:40:30 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.24  2007/04/07 04:40:30  genevb
+// Remove fit pnts/tot; retitle log as log10
+//
 // Revision 2.23  2007/03/13 18:46:29  genevb
 // Added Svt Laser Diff
 //
@@ -103,7 +106,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.23 2007/03/13 18:46:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.24 2007/04/07 04:40:30 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -201,9 +204,6 @@ class StQABookHist : public TObject {
   TH1F     *m_fit_pointTS;   //! number of track points used for fitting - tpc+svt
   TH2F     *m_fit_pointTTS;  //! number of track points used for fitting - tpc,tpc+svt
   TH1F     *m_glb_sptsTS;  //! number of track pnts on svt - tpc+svt
-  TH1F     *m_glb_ratioT;    //! ratio of n fit pnts over tot n pnts - tpc
-  TH1F     *m_glb_ratioTS;   //! ratio of n fit pnts over tot n pnts - tpc+svt
-  TH2F     *m_glb_ratioTTS;  //! ratio of n fit pnts over tot n pnts - tpc,tpc+svt
   TH2F     *m_glb_ratiomTTS; //! ratio of n fit pnts over max n pnts - tpc,tpc+svt
   TH1F     *m_glb_ratiomT;   //! ratio of n fit pnts over max n pnts - tpc
   TH1F     *m_glb_ratiomTS;  //! ratio of n fit pnts over max n pnts - tpc+svt

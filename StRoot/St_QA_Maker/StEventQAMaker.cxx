@@ -608,8 +608,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_yfT->Fill(firstPoint.y());
         hists->m_glb_zfT->Fill(firstPoint.z());
         hists->m_glb_radfT->Fill(radf);
-        hists->m_glb_ratioT->Fill(nfitntot);
-        hists->m_glb_ratioTTS->Fill(nfitntot,1.);
         hists->m_glb_ratiomT->Fill(nfitnmax);
         hists->m_glb_ratiomTTS->Fill(nfitnmax,1.);
         hists->m_psiT->Fill(psi);
@@ -730,8 +728,6 @@ void StEventQAMaker::MakeHistGlob() {
 	}
 	
         hists->m_glb_radfTS->Fill(radf);
-        hists->m_glb_ratioTS->Fill(nfitntot);
-        hists->m_glb_ratioTTS->Fill(nfitntot,0.);
         hists->m_glb_ratiomTS->Fill(nfitnmax);
         hists->m_glb_ratiomTTS->Fill(nfitnmax,0.);
         hists->m_psiTS->Fill(psi);
@@ -2239,8 +2235,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.73 2007/03/13 18:47:22 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.74 2007/04/07 04:40:30 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.74  2007/04/07 04:40:30  genevb
+// Remove fit pnts/tot; retitle log as log10
+//
 // Revision 2.73  2007/03/13 18:47:22  genevb
 // Added Svt Laser Diff
 //
