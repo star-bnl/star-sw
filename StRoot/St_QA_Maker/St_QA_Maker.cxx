@@ -416,7 +416,6 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_glb_yfT->Fill(t->x_first[1]);
         hists->m_glb_zfT->Fill(t->x_first[2]);
         hists->m_glb_radfT->Fill(radf);
-        hists->m_glb_ratioT->Fill(nfitntot);
         hists->m_glb_ratiomT->Fill(nfitnmax);
         hists->m_psiT->Fill(t->psi);
         hists->m_tanlT->Fill(t->tanl);
@@ -488,7 +487,6 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_glb_yfTS->Fill(t->x_first[1]);
         hists->m_glb_zfTS->Fill(t->x_first[2]);
         hists->m_glb_radfTS->Fill(radf);
-        hists->m_glb_ratioTS->Fill(nfitntot);
         hists->m_glb_ratiomTS->Fill(nfitnmax);
         hists->m_psiTS->Fill(t->psi);
         hists->m_tanlTS->Fill(t->tanl);
@@ -1350,8 +1348,11 @@ void St_QA_Maker::MakeHistEval(){
 }
 
 //_____________________________________________________________________________
-// $Id: St_QA_Maker.cxx,v 2.21 2004/12/13 15:52:37 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.22 2007/04/07 04:40:31 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.22  2007/04/07 04:40:31  genevb
+// Remove fit pnts/tot; retitle log as log10
+//
 // Revision 2.21  2004/12/13 15:52:37  genevb
 // Numerous updates: PMD, primtrk, FPD, QAShift lists
 //

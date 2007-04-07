@@ -1,5 +1,8 @@
-// $Id: QAhlist_Svt.h,v 2.1 2007/03/13 18:37:54 genevb Exp $
+// $Id: QAhlist_Svt.h,v 2.2 2007/04/07 04:40:30 genevb Exp $
 // $Log: QAhlist_Svt.h,v $
+// Revision 2.2  2007/04/07 04:40:30  genevb
+// Remove fit pnts/tot; retitle log as log10
+//
 // Revision 2.1  2007/03/13 18:37:54  genevb
 // simplified names
 //
@@ -21,7 +24,6 @@
   "QaGtrkFlag",
   "QaGtrkGoodTTS",
   "QaGtrkDetId",
-  "QaGtrkRnfTTS",
   "QaGtrkRnmfTTS",
   "QaGtrkPsiTTS",
   "QaGtrkEtaTTS",

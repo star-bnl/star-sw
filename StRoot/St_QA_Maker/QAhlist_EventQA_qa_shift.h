@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.28 2007/03/13 18:37:53 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.29 2007/04/07 04:40:29 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.29  2007/04/07 04:40:29  genevb
+// Remove fit pnts/tot; retitle log as log10
+//
 // Revision 2.28  2007/03/13 18:37:53  genevb
 // simplified names
 //
@@ -125,7 +128,6 @@
   "QaGtrkXfYfFW",
   "QaGtrkPadfTEW",
   "QaGtrkRTS",
-  "QaGtrkRnfTTS",
   "QaGtrkRnmfTTS",
   "QaGtrkPsiTTS",
   "QaGtrkPtTTS",
