@@ -1,4 +1,4 @@
-// $Id: StVMCMaker.h,v 1.5 2007/01/09 04:53:52 potekhin Exp $
+// $Id: StVMCMaker.h,v 1.6 2007/04/07 19:33:00 perev Exp $
 
 #ifndef STAR_StVMCMaker
 #define STAR_StVMCMaker
@@ -34,7 +34,7 @@ class StVMCMaker : public StMaker {
   virtual void   SetDateTime(Int_t idat=0,Int_t itim=0);
   virtual void   SetRunNo(Int_t m ) {fRunNo = m < 1 || m >= 1000000 ? 1 : m;}
   virtual void   Skip(Int_t nskip);
-  virtual void   SetInputFile(const Char_t *fileName) {fInputFile = fileName;}
+  virtual int    SetInputFile(const Char_t *fileName);
   virtual void   SetInputMode(const Char_t *fileMode) {fInputMode = fileMode;}
   const Char_t  *InputFile() const {return fInputFile.Data();}
   static StarVMCApplication* GetStarVMCApplication() {return fgStarVMCApplication;}
@@ -60,7 +60,7 @@ class StVMCMaker : public StMaker {
 
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.5 2007/01/09 04:53:52 potekhin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.6 2007/04/07 19:33:00 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -71,6 +71,9 @@ class StVMCMaker : public StMaker {
 
 
 // $Log: StVMCMaker.h,v $
+// Revision 1.6  2007/04/07 19:33:00  perev
+// Check for input file added
+//
 // Revision 1.5  2007/01/09 04:53:52  potekhin
 // Add new methods
 //

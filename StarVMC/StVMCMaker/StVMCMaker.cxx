@@ -1,7 +1,10 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.6 2007/01/09 04:53:20 potekhin Exp $
+// $Id: StVMCMaker.cxx,v 1.7 2007/04/07 19:33:09 perev Exp $
 // $Log: StVMCMaker.cxx,v $
+// Revision 1.7  2007/04/07 19:33:09  perev
+// Check for input file added
+//
 // Revision 1.6  2007/01/09 04:53:20  potekhin
 // New input modes
 //
@@ -262,4 +265,19 @@ TDataSet  *StVMCMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   if (ds || strcmp(logInput,"HALL")) return ds;
   return fVolume;
 
+}
+//_____________________________________________________________________________
+int StVMCMaker::SetInputFile(const Char_t *fileName)
+{
+  fInputFile = fileName;
+  gSystem->ExpandPathName(fInputFile);
+  if (!fInputFile.Contains(".")) {
+    Error("SetInputFile","File %s has no extention",fInputFile.Data());
+    return 1;
+  }
+  if (gSystem->AccessPathName(fInputFile,kReadPermission)) {
+    Error("SetInputFile","File %s is not readable",fInputFile.Data());
+    return 2;
+  }
+  return 0;
 }
