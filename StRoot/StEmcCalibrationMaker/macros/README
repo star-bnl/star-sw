@@ -35,12 +35,14 @@ Those are EMC-related, likely to change from time to time, better to have local 
 cvs co StRoot/StDaqLib # this is needed for StEmcDecoder
 cvs co StRoot/StEmcUtil # this is needed for StEmcGeom
 cvs co StRoot/StEmcOnlineUtil # this is needed for the EVP_READER-based event reader
-cvs co StRoot/StEmcCalibrationMaker # ped monitoring itself, checkout this if you want to change something
+cvs co StRoot/StEmcCalibrationMaker # ped monitoring itself, checkout this
 
 2. Configure
+chmod a+x ./StRoot/StEmcCalibrationMaker/macros/configure.emconline_ped
 ./StRoot/StEmcCalibrationMaker/macros/configure.emconline_ped
 or, if there is no local copy
 $(STAR)/StRoot/StEmcCalibrationMaker/macros/configure.emconline_ped
+(don't know what to do if it is not executable)
 
 The following files are created:
     .emconline_ped.cfg.sh - configuration file
