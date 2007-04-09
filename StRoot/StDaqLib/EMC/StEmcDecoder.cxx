@@ -311,7 +311,7 @@ PSDTables:
         for(int i=0;i<10;i++)
             TriggerSequence[i] = TriggerSequence_tmp[i];
 
-        int JPSTART[12] =           {0,30,50,80,100,130,150,180,200,230,250,280};
+/*        int JPSTART[12] =           {0,30,50,80,100,130,150,180,200,230,250,280};
         int JPEXTRA[12][5] =       {{21, 23, 25, 27, 29},
                                     {20, 22, 24, 26, 28},
                                     {71, 73, 75, 77, 79},
@@ -323,7 +323,21 @@ PSDTables:
                                     {221, 223, 225, 227, 229},
                                     {220, 222, 224, 226, 228},
                                     {271, 273, 275, 277, 279},
-                                    {270, 272, 274, 276, 278}};
+                                    {270, 272, 274, 276, 278}};*/
+		int JPSTART[12] =           {0,30,50,80,100,130,150,170,190,220,240,270};
+        int JPEXTRA[12][5] =       {{21, 23, 25, 27, 29},
+                                    {20, 22, 24, 26, 28},
+                                    {71, 73, 75, 77, 79},
+                                    {70, 72, 74, 76, 78},
+                                    {121, 123, 125, 127, 129},
+                                    {120, 122, 124, 126, 128},
+                                    {161, 163, 165, 167, 169},
+                                    {160, 162, 164, 166, 168},
+                                    {211, 213, 215, 217, 219},
+                                    {210, 212, 214, 216, 218},
+                                    {261, 263, 265, 267, 269},
+                                    {260, 262, 264, 266, 268}};
+		
         for(int jetPatch = 0;jetPatch < 12;jetPatch++)
         {
             for(int seq = 0;seq < 25;seq++)
@@ -332,6 +346,8 @@ PSDTables:
                 if ((jetPatch % 2) == 0)
                 {
                     triggerPatch = (seq < 20) ? (JPSTART[jetPatch] + seq) : (JPEXTRA[jetPatch][seq - 20]);
+					//JP 6 is a special case
+					if(jetPatch == 6 && seq>9 && seq<20) triggerPatch = 280 + seq;
                 }
                 else
                 {
@@ -1166,9 +1182,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.44 2007/04/04 17:35:11 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.45 2007/04/09 13:23:23 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.45  2007/04/09 13:23:23  kocolosk
+// fixed TP -> JP mapping in East barrel
+//
 // Revision 2.44  2007/04/04 17:35:11  kocolosk
 // Added methods GetCrateFromTowerId, GetTDCFromTowerId, GetTDCFromTowerId, GetTriggerPatchFromTowerId, GetJetPatchFromTowerId, and GetTowerIdFromBin.  Also implemented const-correctness and used meaningful argument names in method declarations to improve readability.
 //
