@@ -77,7 +77,7 @@ void StEmcEqualMaker::equalize(int mode,int DeltaEta,bool Et)
 	float avg[18000];
 	float MIN = 20;
 	float MAX = 500;
-	TF1 *f= new TF1("slopes","28.5*TMath::Sin(x)");
+	TF1 *f= new TF1("slopes","22*TMath::Sin(x)");
 
 	for(int eta0 = -Neta; eta0<Neta; eta0+=DeltaEta)
 	{
@@ -326,7 +326,7 @@ void StEmcEqualMaker::equalizeToFunction(int channel,TF1 *func)
 	
   if(channel<=2400)
 	{
-//		float I2 = h2->Integral(h2->FindBin(MIN),h2->FindBin(MAX));
+		float I2 = h2->Integral(h2->FindBin(MIN),h2->FindBin(MAX));
 		h2->Fit(f,"RQN");
 		m2 = f->GetParameter(1);
 		A2 = f->GetParameter(0);

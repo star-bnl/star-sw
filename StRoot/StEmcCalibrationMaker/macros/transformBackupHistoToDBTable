@@ -1,0 +1,37 @@
+#!/bin/bash
+
+export EMCONLINE_PED_DIR=${0}
+export EMCONLINE_PED_DIR=${EMCONLINE_PED_DIR%/*}
+if [[ -f ./.emconline_ped.cfg.sh ]]
+then
+    source ./.emconline_ped.cfg.sh
+elif [[ -f ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh ]]
+then
+    source ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh
+else
+    /bin/echo "EMC Online environment is not configured, please run configure.emconline_ped"
+    exit 1
+fi
+
+export FILELIST=${1}
+export LOG=./log_transform.txt
+
+if [[ "${FILELIST}" == "" ]];
+then
+    /bin/echo "No file list given, taking all files in ${EMCONLINE_PED_BACKUP_DIR}"
+    export FILELIST=${EMCONLINE_PED_BACKUP_DIR}/*.root
+fi
+
+/bin/echo "Script: ${EMCONLINE_PED_TABLES_SCRIPT}"
+/bin/echo "File list: ${FILELIST}"
+/bin/echo "Output tables dir: ${EMCONLINE_PED_TABLES_DIR}"
+/bin/echo "Log file: ${LOG}"
+
+/bin/mkdir -p ${EMCONLINE_PED_TABLES_DIR}
+
+for FILENAME in ${FILELIST};
+do
+    /bin/echo "Processing ${FILENAME} ..."
+    root -b -q ${EMCONLINE_PED_TABLES_SCRIPT}\(\"${FILENAME}\",\"${EMCONLINE_PED_TABLES_DIR}\"\) >> ${LOG} 2>&1
+done
+

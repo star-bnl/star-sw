@@ -1,11 +1,14 @@
 #ifndef STAR_StEmcMipMaker
 #define STAR_StEmcMipMaker
-#include "StMaker.h"
-#include "TH2.h"
-#include "TH1.h"
+
+#include <TString.h>
+#include <TF1.h>
+#include <TH2.h>
+#include <TH1.h>
+
+#include <StMaker.h>
+
 #include "StEmcCalibrationMaker.h"
-#include "TString.h"
-#include "TF1.h"
 #include "StEmcCalibMaker.h"
 
 #define MAXTRACK 10000

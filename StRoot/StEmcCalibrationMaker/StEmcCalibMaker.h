@@ -1,11 +1,14 @@
 #ifndef STAR_StEmcCalibMaker
 #define STAR_StEmcCalibMaker
-#include "StMaker.h"
-#include "TH2.h"
-#include "TH1.h"
+
+#include <TString.h>
+#include <TF1.h>
+#include <TH2.h>
+#include <TH1.h>
+
+#include <StMaker.h>
+
 #include "StEmcCalibrationMaker.h"
-#include "TString.h"
-#include "TF1.h"
 
 #define MAXTRACK 10000
 #define MAXBEMC 4
@@ -14,9 +17,8 @@
 
 class StEmcGeom;
 
-class StEmcCalibMaker : public StMaker 
-{
-  protected: 		
+class StEmcCalibMaker : public StMaker {
+protected: 		
     StEmcCalibrationMaker       *mCalib;
     
     TH2F                        *mSpec;
@@ -27,11 +29,10 @@ class StEmcCalibMaker : public StMaker
     int                         mNEvents;    
     int                         mDate;
     int                         mTime;
-		long                        mZDCMin;
-		long                        mZDCMax;
-		long                        mCTBMin;
-		long                        mCTBMax;
-		
+    long                        mZDCMin;
+    long                        mZDCMax;
+    long                        mCTBMin;
+    long                        mCTBMax;		
     
     int                         mDetector;
     int                         mNChannel;
@@ -41,12 +42,12 @@ class StEmcCalibMaker : public StMaker
     TString                     mSpecName;        
     TString                     mAcceptName;        
 		
-		bool                        mAutoSaveDB;          
-		bool                        mDebug;          
+    bool                        mAutoSaveDB;          
+    bool                        mDebug;          
                             
-  public:
+public:
      
-                                StEmcCalibMaker(const char *name="EmcCalib");
+                                StEmcCalibMaker(const Char_t *name="EmcCalib");
    virtual                      ~StEmcCalibMaker();
    virtual    Int_t             Init();
    virtual    Int_t             Make();
@@ -61,27 +62,27 @@ class StEmcCalibMaker : public StMaker
 							
          StEmcCalibrationMaker* getCalib() { return mCalib;}
          
-              TH2F*             getSpec() { return mSpec;}
-              TH1D*             getSpec(int id,char* name="id") { if(mSpec) return mSpec->ProjectionY(name,id,id); else return NULL;}
+              TH2F*             getSpec() const { return mSpec;}
+              TH1D*             getSpec(int id,const Char_t *name = "id") const {return mSpec ? mSpec->ProjectionY(name, id, id) : NULL;}
               
                      
-              void              saveHist(char*);     
-              void              loadHist(char*);
-              void              addHist(char*);
-              int               getNChannel() { return mNChannel;}
-              int               getNEvents()  { return mNEvents;}
-              int               getDate()     { return mDate;}
-              int               getTime()     { return mTime;}
-              int               getDetector() { return mDetector;}
-							void              getMeanAndRms(TH1D*,float,float,float*,float*);
-							void              getLogMeanAndRms(TH1D*,float,float,float*,float*);
-							float             getTimeInterval(int,int);
-							StEmcGeom*        getGeom();
+              void              saveHist(const Char_t *filename);
+              void              loadHist(const Char_t *filename);
+              void              addHist(const Char_t *filename);
+              int               getNChannel() const { return mNChannel;}
+              int               getNEvents() const  { return mNEvents;}
+              int               getDate() const     { return mDate;}
+              int               getTime() const     { return mTime;}
+              int               getDetector() const { return mDetector;}
+	      void              getMeanAndRms(TH1D*,float,float,float*,float*);
+	      void              getLogMeanAndRms(TH1D*,float,float,float*,float*);
+	      float             getTimeInterval(int,int);
+	      StEmcGeom*        getGeom();
 							
-							bool              isAutoSaveDB() { return mAutoSaveDB;}
-							bool              isDebug() { return mDebug;}
+	      bool              isAutoSaveDB() { return mAutoSaveDB;}
+	      bool              isDebug() { return mDebug;}
               
-              void              setFile(char* f)        { mFileName = f;}   
+              void              setFile(const Char_t *f)        { mFileName = f; }
               void              setDetector(int det)    { mDetector = det; if(mDetector<3) mNChannel = 4800; else mNChannel=18000;}
               void              setMinTracks(int t)     { mNMinTracks = t;}              
               void              setMaxTracks(int t)     { mNMaxTracks = t;} 
@@ -91,8 +92,8 @@ class StEmcCalibMaker : public StMaker
               void              setZDCMax(int t)        { mZDCMax = t;} 
               void              setRange(float range)   { mRange = range;}       
 							
-							void              setAutoSaveDB(bool a)   { mAutoSaveDB = a;}      
-							void              setDebug(bool a)        { mDebug = a;}      
+	      void              setAutoSaveDB(bool a)   { mAutoSaveDB = a;}      
+	      void              setDebug(bool a)        { mDebug = a;}      
    ClassDef(StEmcCalibMaker, 1)  
 };
 

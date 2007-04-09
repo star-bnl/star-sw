@@ -1,9 +1,11 @@
 #ifndef STAR_StEmcCalibrationMaker
 #define STAR_StEmcCalibrationMaker
-#include "StMaker.h"
-#include "TH2.h"
-#include "TH1.h"
-#include "TString.h"
+
+#include <TH2.h>
+#include <TH1.h>
+#include <TString.h>
+
+#include <StMaker.h>
 
 class StEvent;
 class StEmcCollection;
@@ -28,7 +30,7 @@ class StEmcCalibrationMaker : public StMaker
               unsigned char     mCap[MAXBEMC][MAXCHANNEL];
               unsigned char     mNTracksTower[MAXCHANNEL];
               bool              mIsIsolatedTower[MAXCHANNEL];
-							bool              mHasDetector[MAXBEMC];
+	      bool              mHasDetector[MAXBEMC];
               
               int               mNChannel[MAXBEMC];
               
