@@ -1,37 +1,40 @@
 #include "StEmcCalibMaker.h"
-#include "TFile.h"
-#include "TROOT.h"
-#include "TF1.h"
-#include "StEventTypes.h"
-#include "StEvent.h"
-#include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StEmcUtil/voltageCalib/VoltCalibrator.h"
-#include "StDbLib/StDbManager.hh"
-#include "StDbLib/StDbTable.h"
-#include "StDbLib/StDbConfigNode.hh"
-#include "tables/St_emcCalib_Table.h"
+
+#include <TFile.h>
+#include <TROOT.h>
+#include <TF1.h>
+
+#include <StEventTypes.h>
+#include <StEvent.h>
+#include <StEmcUtil/geometry/StEmcGeom.h>
+#include <StEmcUtil/voltageCalib/VoltCalibrator.h>
+#include <StDbLib/StDbManager.hh>
+#include <StDbLib/StDbTable.h>
+#include <StDbLib/StDbConfigNode.hh>
+#include <tables/St_emcCalib_Table.h>
 
 ClassImp(StEmcCalibMaker)
 
 //_____________________________________________________________________________
-StEmcCalibMaker::StEmcCalibMaker(const char *name):StMaker(name)
-{
+StEmcCalibMaker::StEmcCalibMaker(const Char_t *name)
+    :StMaker(name)
+    {
   mCalib = NULL;
-	mAccept = NULL;
+  mAccept = NULL;
   mSpec = NULL;
   mDate = 20330101;
   mNMinTracks = 0;
   mNMaxTracks = 100000;
-	mDebug = false;
+  mDebug = false;
   setDetector(1);
   setRange(200);
-	mZDCMin = -1000000;
-	mZDCMax =  1000000;
-	mCTBMin = -1000000;
-	mCTBMax =  1000000;
+  mZDCMin = -1000000;
+  mZDCMax =  1000000;
+  mCTBMin = -1000000;
+  mCTBMax =  1000000;
   mSpecName = "mSpec";
   mAcceptName = "mAccept";
-	setFile("spec.root");
+  setFile("spec.root");
 }
 //_____________________________________________________________________________
 StEmcCalibMaker::~StEmcCalibMaker()
@@ -86,28 +89,29 @@ bool StEmcCalibMaker::accept()
 	
   
   mNEvents++;
-  if(mNEvents%100==0) saveHist((char*)mFileName.Data());
+  if(mNEvents%100==0) saveHist(mFileName.Data());
   
-	LOG_DEBUG <<"Processing event number "<<mNEvents<<" for maker "<<GetName()<<endm;
+	cout <<"Processing event number "<<mNEvents<<" for maker "<<GetName()<<endl;
 	return true;
 }
 //_____________________________________________________________________________
 Int_t StEmcCalibMaker::Finish()
 {
-  saveHist((char*)mFileName.Data());
+  saveHist(mFileName.Data());
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
-void StEmcCalibMaker::saveHist(char* file)
+void StEmcCalibMaker::saveHist(const Char_t *file)
 {
-  TFile *f = new TFile(file,"RECREATE");
+  cout << "Saving spec to file " << file << endl;
+  TFile *f = new TFile(file, "RECREATE");
   mSpec->Write();
   f->Close();
   delete f;
   return ;
 }
 //_____________________________________________________________________________
-void StEmcCalibMaker::loadHist(char* file)
+void StEmcCalibMaker::loadHist(const Char_t *file)
 {
 	TFile *f = new TFile(file);
   TString N = mSpec->GetName();
@@ -119,7 +123,7 @@ void StEmcCalibMaker::loadHist(char* file)
   return ;
 }
 //_____________________________________________________________________________
-void StEmcCalibMaker::addHist(char* file)
+void StEmcCalibMaker::addHist(const Char_t *file)
 {
   TFile *f = new TFile(file);
   TString N = mSpec->GetName();
@@ -244,7 +248,7 @@ void StEmcCalibMaker::calcVoltages(TH1F *gain, char* refFile, char* voltageInput
 	
 	ofstream out(GainShift);
 	ifstream inp(voltageInput);
-//  TH1F *h = new TH1F("Gain","Current Gain Distribution",100,0,0.02);
+  TH1F *h = new TH1F("Gain","Current Gain Distribution",100,0,0.02);
 	do
 	{
 	  int a,b,c,d,e,f,id;

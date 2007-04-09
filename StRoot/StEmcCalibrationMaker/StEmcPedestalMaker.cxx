@@ -1,26 +1,29 @@
 #include "StEmcPedestalMaker.h"
-#include "TFile.h"
-#include "TROOT.h"
-#include "TF1.h"
-#include "StEventTypes.h"
-#include "StEvent.h"
-#include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StDbLib/StDbManager.hh"
-#include "StDbLib/StDbTable.h"
-#include "StDbLib/StDbConfigNode.hh"
-#include "tables/St_emcPed_Table.h"
-#include "tables/St_smdPed_Table.h"
+
+#include <TFile.h>
+#include <TROOT.h>
+#include <TF1.h>
+
+#include <StEventTypes.h>
+#include <StEvent.h>
+#include <StEmcUtil/geometry/StEmcGeom.h>
+#include <StDbLib/StDbManager.hh>
+#include <StDbLib/StDbTable.h>
+#include <StDbLib/StDbConfigNode.hh>
+#include <tables/St_emcPed_Table.h>
+#include <tables/St_smdPed_Table.h>
 
 ClassImp(StEmcPedestalMaker)
 
 //_____________________________________________________________________________
-StEmcPedestalMaker::StEmcPedestalMaker(const char *name):StEmcCalibMaker(name)
-{
-  setRange(300);
-  setMaxTracks(100);
-	mLastPedDate = 2000;
-	mLastPedTime = 0;
-	setNPedEvents(2000);
+StEmcPedestalMaker::StEmcPedestalMaker(const Char_t *name)
+    : StEmcCalibMaker(name)
+    {
+    setRange(300);
+    setMaxTracks(100);
+    mLastPedDate = 2000;
+    mLastPedTime = 0;
+    setNPedEvents(2000);
 }
 //_____________________________________________________________________________
 StEmcPedestalMaker::~StEmcPedestalMaker()
@@ -36,6 +39,9 @@ Int_t StEmcPedestalMaker::Init()
 
   mSpecName = "mSpecPed";
   mAcceptName = "mAcceptPed";
+  
+  mStarted = false;
+  
   return StEmcCalibMaker::Init();
 }
 //_____________________________________________________________________________
@@ -58,7 +64,7 @@ Int_t StEmcPedestalMaker::Make()
 		}
 		else
 		{
-			if(isDebug()) cout <<"Time remaining for a new pedestal run is "
+			/*if(isDebug())*/ cout <<"Time remaining for a new pedestal run is "
 			                   <<mPedInterval-getTimeInterval(mLastPedDate,mLastPedTime)
 					               <<" hours for detector number "<<getDetector()<<endl;
 		}
@@ -87,7 +93,6 @@ Int_t StEmcPedestalMaker::Make()
 //_____________________________________________________________________________
 Int_t StEmcPedestalMaker::Finish()
 {
-  //saveHist((char*)mFileName.Data());
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
@@ -164,51 +169,70 @@ void StEmcPedestalMaker::calcPedestals()
    
 }
 //_____________________________________________________________________________
-void StEmcPedestalMaker::saveToDb(char* timeStamp)
-{   
-  cout <<"=================================================\n";
-	cout <<"Saving pedestal table for detector "<<getDetector()<<endl;
-	cout <<"TimeStamp = "<<timeStamp<<endl;
-	
-	emcPed_st tnew;
-  smdPed_st snew;
-  for(int i=0;i<getNChannel();i++)
-  {
-    int id = i+1;
-    float ped = getPedestal(id);
-    float rms = getRms(id);
-    float chi = getChi(id);
-    int status = (int)getStatus(id);
-    if(getDetector()<3)
-    {
-      tnew.Status[i] = (char)status;
-			tnew.AdcPedestal[i] = (short)(ped*100.0);
-			tnew.AdcPedestalRMS[i] = (short)(rms*100.0);
-			tnew.ChiSquare[i] = chi;
+void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp) const {
+    cout << "=================================================" << endl;
+    cout << "Saving pedestal table for detector " << getDetector() << endl;
+    cout << "TimeStamp = " << timeStamp << endl;
+    
+    TString n[] = {"bemcPed", "bprsPed", "bsmdePed", "bsmdpPed"};
+    
+    St_emcPed *pedT_t = new St_emcPed(n[getDetector() - 1].Data(), 1);
+    emcPed_st *tnew = pedT_t ? pedT_t->GetTable() : 0;
+    
+    St_smdPed *pedS_t = new St_smdPed(n[getDetector() - 1].Data(), 1);
+    smdPed_st *snew = pedS_t ? pedS_t->GetTable() : 0;
+    
+    for (int i = 0;i < getNChannel();i++) {
+	int id = i + 1;
+	float ped = getPedestal(id);
+	float rms = getRms(id);
+	float chi = getChi(id);
+	int status = (int)getStatus(id);
+	if (getDetector() < 3) {
+	    if (tnew) {
+    		tnew->Status[i] = (char)status;
+		tnew->AdcPedestal[i] = (short)(ped * 100.0);
+		tnew->AdcPedestalRMS[i] = (short)(rms * 100.0);
+		tnew->ChiSquare[i] = chi;
+		cout << "tnew i = " << i << ": Status " << (Int_t)tnew->Status[i] << ", ped " << tnew->AdcPedestal[i] << ", rms " << tnew->AdcPedestalRMS[i] << ", chi " << tnew->ChiSquare[i] << endl;
+	    }
+	} else {
+	    if (snew) {
+		snew->Status[i] = (char)status;
+		snew->AdcPedestal[i][0] = (short)(ped * 100.0);
+		snew->AdcPedestalRMS[i][0] = (short)(rms * 100.0);
+		snew->AdcPedestal[i][1] = 0;
+		snew->AdcPedestalRMS[i][1] = 0;
+		snew->AdcPedestal[i][2] = 0;
+		snew->AdcPedestalRMS[i][2] = 0;
+		cout << "snew i = " << i << ": Status " << (Int_t)snew->Status[i] << ", ped " << snew->AdcPedestal[i][0] << ", rms " << snew->AdcPedestalRMS[i][0] << endl;
+	    }
+	}
     }
-    else
-    {
-      snew.Status[i] = (char)status;
-			snew.AdcPedestal[i][0] = (short)(ped*100.0);
-			snew.AdcPedestalRMS[i][0] = (short)(rms*100.0);
-			snew.AdcPedestal[i][1] = 0;
-			snew.AdcPedestalRMS[i][1] = 0;
-			snew.AdcPedestal[i][2] = 0;
-			snew.AdcPedestalRMS[i][2] = 0;
+    StDbManager* mgr = StDbManager::Instance();
+    cout << "mgr = " << mgr << endl;
+    StDbConfigNode* node = mgr ? mgr->initConfig(dbCalibrations, dbEmc) : 0;
+    cout << "node = " << node << endl;
+    StDbTable* table = node ? node->addDbTable(n[getDetector() - 1].Data()) : 0;
+    cout << "table = " << table << endl;
+    if (table) {
+	if (getDetector() < 3) {
+	    table->SetTable((char*)tnew, 1);
+	} else {
+	    table->SetTable((char*)snew, 1);
+	}
     }
-  }   
-  TString n[] = {"bemcPed","bprsPed","bsmdePed","bsmdpPed"};
-  StDbManager* mgr=StDbManager::Instance();
-	StDbConfigNode* node=mgr->initConfig(dbCalibrations,dbEmc);
-  StDbTable* table = node->addDbTable(n[getDetector()-1].Data());
-	if(getDetector()<3) table->SetTable((char*)&tnew,1);
-  else table->SetTable((char*)&snew,1);
-  mgr->setStoreTime(timeStamp);
-  mgr->storeDbTable(table);
-  return;
+    cout << "table set" << endl;
+    if (mgr) {
+	cout << "setStoreTime " << timeStamp << endl;
+	mgr->setStoreTime(timeStamp);
+	cout << "Storing " << n[getDetector() - 1] << " " << timeStamp << endl;
+	mgr->storeDbTable(table);
+	cout << "Stored." << endl;
+    }
 }
 //_____________________________________________________________________________
-void StEmcPedestalMaker::saveToDb(int date,int time)
+void StEmcPedestalMaker::saveToDb(Int_t date, Int_t time) const
 {   
   Int_t year  = (Int_t)(date/10000);
   Int_t month = (Int_t)(date-year*10000)/100; 
@@ -216,17 +240,18 @@ void StEmcPedestalMaker::saveToDb(int date,int time)
   Int_t hour  = (Int_t)(time/10000);
   Int_t minute= (Int_t)(time-hour*10000)/100;
   Int_t second= (Int_t)(time-hour*10000-minute*100);
-	char ts[100];
-	sprintf(ts,"%04d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,minute,second);
+	Char_t ts[1024]; ts[0] = 0;
+	sprintf(ts,"%04d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,minute,second+22);
 	saveToDb(ts);
 }
 //_____________________________________________________________________________
-void StEmcPedestalMaker::savePedestals(int date,int time, bool DB)
+void StEmcPedestalMaker::savePedestals(Int_t date, Int_t time, Bool_t DB) const
 {   
-	char ts[100];
-  TString n[] = {"bemcPed","bprsPed","bsmdePed","bsmdpPed"};
-	if (DB) sprintf(ts,"$EMCONLINE/pedestal/backup/%s.%08d.%06d.root",n[getDetector()-1].Data(),date,time);
-	else sprintf(ts,"$EMCONLINE/pedestal/backup/%s.%08d.%06d.NO_DB.root",n[getDetector()-1].Data(),date,time);
+	Char_t ts[1024]; ts[0] = 0;
+	TString n[] = {"bemcPed","bprsPed","bsmdePed","bsmdpPed"};
+	if (DB) sprintf(ts,"%s/%s.%08d.%06d.root", getSavePath(), n[getDetector()-1].Data(), date, time);
+	else sprintf(ts,"%s/%s.%08d.%06d.NO_DB.root", getSavePath(), n[getDetector()-1].Data(), date, time);
+	cout << "Saving pedestal histograms to " << ts << endl;
 	TFile *f = new TFile(ts,"RECREATE");
 	if(getSpec()) getSpec()->Write();
 	if(mPedestal) mPedestal->Write();
@@ -235,10 +260,9 @@ void StEmcPedestalMaker::savePedestals(int date,int time, bool DB)
 	if(mStatus) mStatus->Write();
 	f->Close();
 	delete f;
-	return;
 }
 //_____________________________________________________________________________
-void StEmcPedestalMaker::loadPedestals(char* file)
+void StEmcPedestalMaker::loadPedestals(const Char_t* file)
 {   
 	TFile *f = new TFile(file);
 	if(getSpec()) getSpec()->Reset();

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+export EMCONLINE_PED_DIR=${0}
+export EMCONLINE_PED_DIR=${EMCONLINE_PED_DIR%/*}
+if [[ -f ./.emconline_ped.cfg.sh ]]
+then
+    source ./.emconline_ped.cfg.sh
+elif [[ -f ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh ]]
+then
+    source ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh
+else
+    /bin/echo "EMC Online environment is not configured, please run configure.emconline_ped"
+    exit 1
+fi
+
+${EMCONLINE_PED_UPDATE} $@ &> ${EMCONLINE_PED_LOG_FILE}
+
+/bin/mkdir -p ${EMCONLINE_PED_LOGS_DIR}
+export LOG_TIMESTAMP=${EMCONLINE_PED_LOGS_DIR}/log_`/bin/date +%Y.%m.%d_%H.%M.%S.txt`
+/bin/cp -f ${EMCONLINE_PED_LOG_FILE} ${LOG_TIMESTAMP}
+gzip ${LOG_TIMESTAMP}

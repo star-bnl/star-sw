@@ -1,13 +1,16 @@
 #include "StEmcCalibrationMaker.h"
+
+#include <math.h>
+
+#include <TFile.h>
+
 #include "StEventTypes.h"
 #include "StEvent.h"
 #include "Stiostream.h"
 #include "Stsstream.h"
-#include <math.h>
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/filters/StEmcFilter.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
-#include "TFile.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
 #include "StarClassLibrary/StElectron.hh"
 #include "tables/St_emcStatus_Table.h" 
@@ -380,5 +383,7 @@ void StEmcCalibrationMaker::makeStatus(bool t, bool p, bool se, bool sp)
 		mgr->storeDbTable(tab4);
 	}
 	
+	delete dec;
+	dec = 0;
   
 }

@@ -1,55 +1,63 @@
 #ifndef STAR_StEmcPedestalMaker
 #define STAR_StEmcPedestalMaker
-#include "StMaker.h"
-#include "TH2.h"
-#include "TH1.h"
-#include "StEmcCalibrationMaker.h"
-#include "TString.h"
-#include "TF1.h"
+
+#include <TString.h>
+#include <TF1.h>
+#include <TH2.h>
+#include <TH1.h>
+
 #include "StEmcCalibMaker.h"
+#include "StEmcCalibrationMaker.h"
 
 #define MAXTRACK 10000
 #define MAXBEMC 4
 #define MAXCHANNEL 18000
 #define MAXTOWERCHANNEL 18000
 
-class StEmcPedestalMaker : public StEmcCalibMaker 
-{
-  protected: 		
+class StEmcPedestalMaker : public StEmcCalibMaker {
+protected: 		
     TH1F*                       mPedestal;
     TH1F*                       mRms;
     TH1F*                       mChi;
     TH1F*                       mStatus;
     
-    int                         mNPedEvents;
-    float                       mPedInterval;
-		int                         mLastPedTime;
-		int                         mLastPedDate;
-		bool                        mStarted;
+    Int_t                       mNPedEvents;
+    Float_t                     mPedInterval;
+    Int_t                       mLastPedTime;
+    Int_t                       mLastPedDate;
+    Bool_t                      mStarted;
+    TString                     mSavePath;
                             
-  public:
+public:
      
-                                StEmcPedestalMaker(const char *name="EmcPedestal");
+                                StEmcPedestalMaker(const Char_t *name="EmcPedestal");
    virtual                      ~StEmcPedestalMaker();
    virtual    Int_t             Init();
    virtual    Int_t             Make();
    virtual    Int_t             Finish();
    virtual    void              Clear(Option_t *option=""); 
+
+              Float_t           getPedestal(Int_t id) const {return mPedestal->GetBinContent(id);}
+              Float_t           getRms(Int_t id) const  {return mRms->GetBinContent(id);}
+              Float_t           getChi(Int_t id) const {return mChi->GetBinContent(id);}
+              Float_t           getStatus(Int_t id) const {return mStatus->GetBinContent(id);}
+
+              Int_t             getNPedEvents() const {return mNPedEvents;}
+              void              setNPedEvents(Int_t a) {mNPedEvents = a;}
+
+              Float_t           getPedInterval() const {return mPedInterval;}
+              void              setPedInterval(Float_t time) {mPedInterval = time;}
+
+	      const Char_t     *getSavePath() const {return mSavePath;}
+	      void              setSavePath(const Char_t *path) {mSavePath = path ? path : "";}
 	    
               void              calcPedestals();
-              void              saveToDb(char*); 
-              void              saveToDb(int,int);
-							void              savePedestals(int,int,bool = false); 
-							void              loadPedestals(char*); 
-              void              setNPedEvents(int a) { mNPedEvents = a;}
-              void              setPedInterval(float time) { mPedInterval = time;}
-              float             getPedestal(int id) {return mPedestal->GetBinContent(id);}
-              float             getRms(int id) {return mRms->GetBinContent(id);}
-              float             getChi(int id) {return mChi->GetBinContent(id);}
-              float             getStatus(int id) {return mStatus->GetBinContent(id);}
-              int               getNPedEvents() { return mNPedEvents;}
+              void              saveToDb(const Char_t *timestamp) const;
+              void              saveToDb(Int_t date, Int_t time) const;
+	      void              savePedestals(Int_t date, Int_t time, Bool_t DB = false) const;
+	      void              loadPedestals(const Char_t *filename); 
                             
-   ClassDef(StEmcPedestalMaker, 1)  
+   ClassDef(StEmcPedestalMaker, 2)  
 };
 
 #endif

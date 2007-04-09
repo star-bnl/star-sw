@@ -1,0 +1,25 @@
+#!/bin/bash
+
+export EMCONLINE_PED_DIR=${0}
+export EMCONLINE_PED_DIR=${EMCONLINE_PED_DIR%/*}
+if [[ -f ./.emconline_ped.cfg.sh ]]
+then
+    source ./.emconline_ped.cfg.sh
+elif [[ -f ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh ]]
+then
+    source ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh
+else
+    /bin/echo "EMC Online environment is not configured, please run configure.emconline_ped"
+    exit 1
+fi
+
+export RUNMODE=${1}
+export RUNMODE=`/bin/echo ${RUNMODE}`
+
+if [[ "${RUNMODE}" != "" ]]
+then
+    /bin/rm -f ${EMCONLINE_PED_RUNMODE_FILE}
+    /bin/echo ${RUNMODE} > ${EMCONLINE_PED_RUNMODE_FILE}
+fi
+
+echo "EMC Online pedestal monitoring status: `cat ${EMCONLINE_PED_RUNMODE_FILE}`"

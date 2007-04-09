@@ -1,0 +1,90 @@
+#!/bin/bash
+
+export EMCONLINE_PED_DIR=${0}
+export EMCONLINE_PED_DIR=${EMCONLINE_PED_DIR%/*}
+if [[ -f ./.emconline_ped.cfg.sh ]]
+then
+    source ./.emconline_ped.cfg.sh
+elif [[ -f ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh ]]
+then
+    source ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh
+else
+    /bin/echo "EMC Online environment is not configured, please run configure.emconline_ped"
+    exit 1
+fi
+
+export FILE=`/bin/echo ${1}`
+export MODE=`/bin/echo ${2}`
+export DAY=`/bin/echo ${3}`
+export year=`/bin/echo ${4}`
+
+if [[ "${FILE}" == "" ]]
+then
+    if [[ "${MODE}" == "" ]]
+    then
+	export MODE=`/bin/cat ${EMCONLINE_PED_RUNMODE_FILE}`
+	export MODE=`/bin/echo ${MODE}`
+    fi
+    export FILELIST=${EMCONLINE_PED_FILELIST_FILE}
+    export LIST=true
+
+    if [[ "${MODE}" == "RUN" ]]
+    then
+	if [[ "${DAY}" == "" ]]
+	then
+    	    # find last day number
+    	    export DAY=`/bin/date +%-j`
+    	    export DAY=$(( ${DAY} - 1 ))
+    	    if (( ${DAY} < 100 ))
+    	    then
+		if (( ${DAY} < 10 ))
+		then
+		    export DAY=00${DAY}
+		else
+		    export DAY=0${DAY}
+		fi
+	    fi
+	fi
+
+	if [[ "${year}" == "" ]]
+	then
+	    # find STAR year number
+    	    export year=`/bin/date +%-y`
+    	    export year=$(( ${year} + 1 ))
+	fi
+
+        # sets the run prefix
+        export RUNPREFIX=${year}${DAY}
+        echo "Run prefix is ${RUNPREFIX}"
+
+        # create file list
+        /bin/rm -f ${FILELIST}
+        /bin/ls -1d ${EVP_DIR}/a/${RUNPREFIX}* > ${FILELIST}
+        /bin/ls -1d ${EVP_DIR}/b/${RUNPREFIX}* >> ${FILELIST}
+        /bin/ls -1d ${EVP_DIR}/c/${RUNPREFIX}* >> ${FILELIST}
+        /bin/ls -1d ${EVP_DIR}/d/${RUNPREFIX}* >> ${FILELIST}
+
+	/bin/cat ${FILELIST}
+    fi
+else
+    export MODE=RUN
+    export FILELIST=${FILE}
+    export LIST=false
+fi
+
+export DATE=`date`
+/bin/rm -f ${EMCONLINE_PED_LASTRUN_FILE}
+/bin/echo "LAST TIME IT WAS EXECUTED = ${DATE}" > ${EMCONLINE_PED_LASTRUN_FILE}
+/bin/echo "FILE LIST = ${FILELIST}" >> ${EMCONLINE_PED_LASTRUN_FILE}
+/bin/echo "IS LIST = ${LIST}" >> ${EMCONLINE_PED_LASTRUN_FILE}
+/bin/echo "RUN MODE = ${MODE} " >> ${EMCONLINE_PED_LASTRUN_FILE}
+
+/bin/cat ${EMCONLINE_PED_LASTRUN_FILE}
+
+if [[ "${MODE}" == "RUN" ]]
+then
+    /bin/mkdir -p ${EMCONLINE_PED_BACKUP_DIR}
+    /bin/mkdir -p ${EMCONLINE_PED_TEMP_DIR}
+    starver ${EMCONLINE_PED_STARVER}
+    root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}\",${LIST},\"${EVP_DIR}\",\"${EMCONLINE_PED_BACKUP_DIR}\",\"${EMCONLINE_PED_TEMP_DIR}\",\"${EVP_READER_LIB}\",${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB}\)
+fi
