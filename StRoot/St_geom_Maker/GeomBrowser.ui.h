@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.16 2007/03/06 00:28:17 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.17 2007/04/09 04:13:52 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -745,6 +745,7 @@ TVirtualViewer3D *GeomBrowser::viewCoin3D()
            TGLViewerImp *viewerImp = v->GetViewerImp();
            if (viewerImp) 
            {
+               viewerImp->MakeCurrent();
                connect(&viewerImp->Signals(),SIGNAL( ObjectSelected(TObject *, const QPoint&))
                  , this, SLOT(ObjectSelected(TObject *, const QPoint &)));
            }
