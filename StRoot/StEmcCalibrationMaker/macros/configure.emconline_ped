@@ -16,7 +16,7 @@
             export CONFIGURE_EMCONLINE_PED='yes'
         elif [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$OPT ;
         elif [[ "$DST_PATH" == "" ]] ; then export DST_PATH=$OPT ;
-        else /bin/echo "Skipping unknown option $OPT" ; fi
+        else echo "Skipping unknown option $OPT" ; fi
     done
 
     if [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$SRC_PATH_DEFAULT ; fi
@@ -30,53 +30,57 @@
     export DST_PATH=`pwd`
     popd > /dev/null
 
-    /bin/echo "Code directory:            $SRC_PATH"
-    /bin/echo "Working directory:         $DST_PATH"
+    echo "Code directory:            $SRC_PATH"
+    echo "Working directory:         $DST_PATH"
 
     if [[ "${CONFIGURE_EMCONLINE_PED}" != "no" ]]    
     then
-        /bin/chmod a+x $SRC_PATH/macros/configure.emconline_ped
-        /bin/chmod a+x $SRC_PATH/macros/.emconline_ped.cfg.sh
-        /bin/chmod a+x $SRC_PATH/macros/job.emconline_ped
-        /bin/chmod a+x $SRC_PATH/macros/status.emconline_ped
-        /bin/chmod a+x $SRC_PATH/macros/update.emconline_ped
+        chmod a+x $SRC_PATH/macros/configure.emconline_ped
+        chmod a+x $SRC_PATH/macros/.emconline_ped.cfg.sh
+        chmod a+x $SRC_PATH/macros/job.emconline_ped
+        chmod a+x $SRC_PATH/macros/status.emconline_ped
+        chmod a+x $SRC_PATH/macros/update.emconline_ped
 
-	/bin/cp $SRC_PATH/macros/.emconline_ped.cfg.sh $DST_PATH
-        /bin/ln -sf $SRC_PATH/macros/job.emconline_ped $DST_PATH
-        /bin/ln -sf $SRC_PATH/macros/status.emconline_ped $DST_PATH
-        /bin/ln -sf $SRC_PATH/macros/update.emconline_ped $DST_PATH
+	cp -f $SRC_PATH/macros/.emconline_ped.cfg.sh $DST_PATH
+        ln -sf $SRC_PATH/macros/job.emconline_ped $DST_PATH
+        ln -sf $SRC_PATH/macros/status.emconline_ped $DST_PATH
+        ln -sf $SRC_PATH/macros/update.emconline_ped $DST_PATH
 
-        /bin/ln -sf $SRC_PATH/macros/transformBackupHistoToDBTable $DST_PATH
+        ln -sf $SRC_PATH/macros/transformBackupHistoToDBTable $DST_PATH
 
-        /bin/ln -sf $SRC_PATH/macros/*.C $DST_PATH
+        ln -sf $SRC_PATH/macros/*.C $DST_PATH
 
 	export CRONTAB_FILE=$DST_PATH/crontab.emconline_ped
-	/bin/rm -f $CRONTAB_FILE
-	/bin/echo "00 4 * * * /bin/csh -c \"/bin/bash $DST_PATH/job.emconline_ped\"" >> $CRONTAB_FILE
+	rm -f $CRONTAB_FILE
+	echo "00 3 * * * csh -c \"bash $DST_PATH/job.emconline_ped\"" >> $CRONTAB_FILE
+
+	ln -sf $SRC_PATH/macros/README* $DST_PATH
 
 	### The rest is for backward compatibility only, otherwise can be safely skipped
 	#
-	/bin/rm -f $DST_PATH/job
-        /bin/echo "/bin/csh -c \"/bin/bash $DST_PATH/job.emconline_ped\"" > $DST_PATH/job
-	/bin/chmod a+x $DST_PATH/job
+	export JOBFILE=$DST_PATH/job
+	rm -f $JOBFILE
+        echo "" > $JOBFILE
+        #echo "csh -c \"bash $DST_PATH/job.emconline_ped\"" > $JOBFILE
+	chmod a+x $JOBFILE
 
 	export STARTFILE=$DST_PATH/startOnlinePed
-	/bin/echo '#!/bin/bash' > $STARTFILE
-	/bin/echo './status.emconline_ped RUN' >> $STARTFILE
-        /bin/chmod a+x $STARTFILE
+	rm -f $STARTFILE
+	echo './status.emconline_ped RUN' > $STARTFILE
+        chmod a+x $STARTFILE
 
 	export STOPFILE=$DST_PATH/stopOnlinePed
-	/bin/echo '#!/bin/bash' > $STOPFILE
-	/bin/echo './status.emconline_ped STOP' >> $STOPFILE
-        /bin/chmod a+x $STOPFILE
+	rm -f $STOPFILE
+	echo './status.emconline_ped STOP' > $STOPFILE
+        chmod a+x $STOPFILE
 
-        /bin/ln -sf $SRC_PATH/macros/update.emconline_ped $DST_PATH/updateOnlinePed
+        ln -sf $DST_PATH/update.emconline_ped $DST_PATH/updateOnlinePed
 
-        /bin/ln -sf $DST_PATH/RUNMODE.emconline_ped $DST_PATH/RUNMODE
+        ln -sf $DST_PATH/RUNMODE.emconline_ped $DST_PATH/RUNMODE
 
-        /bin/ln -sf $DST_PATH/LAST_TIME_RUN.emconline_ped $DST_PATH/LAST_TIME_RUN
+        ln -sf $DST_PATH/LAST_TIME_RUN.emconline_ped $DST_PATH/LAST_TIME_RUN
 
-        /bin/ln -sf $DST_PATH/runlist.emconline_ped.txt $DST_PATH/runlist.txt
+        ln -sf $DST_PATH/runlist.emconline_ped.txt $DST_PATH/runlist.txt
 	#
 	###
 

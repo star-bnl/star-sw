@@ -9,17 +9,21 @@ elif [[ -f ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh ]]
 then
     source ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh
 else
-    /bin/echo "EMC Online environment is not configured, please run configure.emconline_ped"
+    echo "EMC Online environment is not configured, please run configure.emconline_ped"
     exit 1
 fi
 
+cd ${EMCONLINE_PED_DIR}
+
 export RUNMODE=${1}
-export RUNMODE=`/bin/echo ${RUNMODE}`
+export RUNMODE=`echo ${RUNMODE}`
 
 if [[ "${RUNMODE}" != "" ]]
 then
-    /bin/rm -f ${EMCONLINE_PED_RUNMODE_FILE}
-    /bin/echo ${RUNMODE} > ${EMCONLINE_PED_RUNMODE_FILE}
+    rm -f ${EMCONLINE_PED_RUNMODE_FILE}
+    echo ${RUNMODE} > ${EMCONLINE_PED_RUNMODE_FILE}
 fi
 
 echo "EMC Online pedestal monitoring status: `cat ${EMCONLINE_PED_RUNMODE_FILE}`"
+echo "Last run:"
+cat ${EMCONLINE_PED_LASTRUN_FILE}

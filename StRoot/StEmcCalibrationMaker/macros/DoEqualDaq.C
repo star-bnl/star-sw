@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: DoEqualDaq.C,v 1.1 2007/04/09 20:54:14 ogrebeny Exp $
+// $Id: DoEqualDaq.C,v 1.2 2007/04/10 11:36:24 ogrebeny Exp $
 // Author: Thomas Ullrich, Oct 2000
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -10,10 +10,8 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // $Log: DoEqualDaq.C,v $
-// Revision 1.1  2007/04/09 20:54:14  ogrebeny
-// 1. Reshaped the infrastructure, provided the setup script to install the monitoring on a fresh machine, provided the configuration file to change the settings without touching code.
-// 2. Fixed memory leaks, memory consumption dropped from 1.2Gb(!) to <400Mb per job.
-// 3. Fixed the DB tables handling, now uses table based containers.
+// Revision 1.2  2007/04/10 11:36:24  ogrebeny
+// Bug fixes
 //
 // Revision 3.1  2000/10/13 19:23:46  ullrich
 // Initial Revision
