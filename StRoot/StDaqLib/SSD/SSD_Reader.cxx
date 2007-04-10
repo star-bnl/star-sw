@@ -114,116 +114,170 @@ SSD_Reader::SSD_Reader(EventReader *er) {
   unsigned int UTime = er->getEventInfo().UnixTime;
   struct tm *time=gmtime((time_t*) &UTime);
 
-  LDate = (((1900+time->tm_year)*100 + 1 + time->tm_mon)*100 + time->tm_mday)*100;
+  //LDate = (((1900+time->tm_year)*100 + 1 + time->tm_mon)*100 + time->tm_mday)*100;
+  //LDate = yyyymmdd
+  //year 2005 = 105 
+  //month : starts from 0
+  LDate = (1900+time->tm_year)*10000 + (1 + time->tm_mon)*100 + time->tm_mday;
   LTime = (time->tm_hour*100 + time->tm_min)*100 + time->tm_sec;
-
+  //cout << "year=" << time->tm_year << " month = " << time->tm_mon << " day=" << time->tm_mday << endl;
   ssdReader(datap); // call the "event pool" code
 
 }
 
-
-
-
-
 int SSD_Reader::SSDDaqLadder(char eastWest, int ladder)
 {
   int daqLadder=-1;
-   
-  if ( LDate < 20040731 && LTime < 1){
-     // Year4 data format stops on July 31st 2004 
-     // cout << "SSD_Reader::SSDDaqLadder : Year4 data " << endl;
-     switch(eastWest) {
-      case 'E':
-	switch(ladder) {
-	 case   1: daqLadder=38; break;
-	 case   2: daqLadder=36; break;
-	 case   3: daqLadder=39; break;
-	 case   9: daqLadder=29; break;
-	 case  10: daqLadder=26; break;
-	 case  11: daqLadder=28; break;
-	 case  12: daqLadder=23; break;
-	 case  13: daqLadder=20; break;
-	 case  19: daqLadder=30; break;
-	 case  20: daqLadder=33; break;
-	}
-	break;
-	
-      case 'W':
-	switch(ladder) {
-	 case   1: daqLadder=18; break;
-	 case   2: daqLadder=16; break;
-	 case   3: daqLadder=19; break;
-	 case   9: daqLadder= 9; break;
-	 case  10: daqLadder= 6; break;
-	 case  11: daqLadder= 8; break;
-	 case  12: daqLadder= 3; break;
-	 case  13: daqLadder= 0; break;
-	 case  19: daqLadder=10; break;
-	 case  20: daqLadder=13; break;
-	}
-	break;
-      default: assert(0); // Someone called this function with a bad value of eastWest.
-     }
-     
-  } else {
-     // Year 2005 data format post July 31st 2004
-    // cout << "SSD_Reader::SSDDaqLadder : Year5 data " << endl;
-     switch(eastWest) {
-      case 'E':
-	switch(ladder) {
-	 case   1: daqLadder=27; break;
-	 case   2: daqLadder=29; break;
-	 case   3: daqLadder=26; break;
-	 case   4: daqLadder=28; break;
-	 case   5: daqLadder=25; break;
-	 case   6: daqLadder=22; break;
-	 case   7: daqLadder=24; break;
-	 case   8: daqLadder=21; break;
-	 case   9: daqLadder=23; break;
-	 case  10: daqLadder=20; break;
-	 case  11: daqLadder=30; break;
-	 case  12: daqLadder=33; break;
-	 case  13: daqLadder=31; break;
-	 case  14: daqLadder=34; break;
-	 case  15: daqLadder=32; break;
-	 case  16: daqLadder=35; break;
-	 case  17: daqLadder=38; break;
-	 case  18: daqLadder=36; break;
-	 case  19: daqLadder=39; break;
-	 case  20: daqLadder=37; break;
-	}
-	break;
-	
-      case 'W':
-	switch(ladder) {
-	 case   1: daqLadder=7; break;
-	 case   2: daqLadder=9; break;
-	 case   3: daqLadder=6; break;
-	 case   4: daqLadder=8; break;
-	 case   5: daqLadder=5; break;
-	 case   6: daqLadder=2; break;
-	 case   7: daqLadder=4; break;
-	 case   8: daqLadder=1; break;
-	 case   9: daqLadder=3; break;
-	 case  10: daqLadder=0; break;
-	 case  11: daqLadder=10; break;
-	 case  12: daqLadder=13; break;
-	 case  13: daqLadder=11; break;
-	 case  14: daqLadder=14; break;
-	 case  15: daqLadder=12; break;
-	 case  16: daqLadder=15; break;
-	 case  17: daqLadder=18; break;
-	 case  18: daqLadder=16; break;
-	 case  19: daqLadder=19; break;
-	 case  20: daqLadder=17; break;
-	}
-	break;
-      default: assert(0); // Someone called this function with a bad value of eastWest.
-     }
-     
+  //cout <<"LDate ="   << LDate << endl;
+  if ( (LDate < 20040731) && (LTime < 1)){
+    // Year4 data format stops on July 31st 2004 
+    // cout << "SSD_Reader::SSDDaqLadder : Year4 data " << endl;
+    switch(eastWest) {
+    case 'E':
+      switch(ladder) {
+      case   1: daqLadder=38; break;
+      case   2: daqLadder=36; break;
+      case   3: daqLadder=39; break;
+      case   9: daqLadder=29; break;
+      case  10: daqLadder=26; break;
+      case  11: daqLadder=28; break;
+      case  12: daqLadder=23; break;
+      case  13: daqLadder=20; break;
+      case  19: daqLadder=30; break;
+      case  20: daqLadder=33; break;
+      }
+      break;
+      
+    case 'W':
+      switch(ladder) {
+      case   1: daqLadder=18; break;
+      case   2: daqLadder=16; break;
+      case   3: daqLadder=19; break;
+      case   9: daqLadder= 9; break;
+      case  10: daqLadder= 6; break;
+      case  11: daqLadder= 8; break;
+      case  12: daqLadder= 3; break;
+      case  13: daqLadder= 0; break;
+      case  19: daqLadder=10; break;
+      case  20: daqLadder=13; break;
+      }
+      break;
+    default: assert(0); // Someone called this function with a bad value of eastWest.
+    } 
   }
-   
-
+  if ((LDate >= 20040731) && (LDate <= 20050731))
+    {
+      // Year 2005 data format post July 31st 2004
+      //cout << "SSD_Reader::SSDDaqLadder : Year5 data " << endl;
+      switch(eastWest) {
+      case 'E':
+	switch(ladder) {
+	case   1: daqLadder=27; break;
+	case   2: daqLadder=29; break;
+	case   3: daqLadder=26; break;
+	case   4: daqLadder=28; break;
+	case   5: daqLadder=25; break;
+	case   6: daqLadder=22; break;
+	case   7: daqLadder=24; break;
+	case   8: daqLadder=21; break;
+	case   9: daqLadder=23; break;
+	case  10: daqLadder=20; break;
+	case  11: daqLadder=30; break;
+	case  12: daqLadder=33; break;
+	case  13: daqLadder=31; break;
+	case  14: daqLadder=34; break;
+	case  15: daqLadder=32; break;
+	case  16: daqLadder=35; break;
+	case  17: daqLadder=38; break;
+	case  18: daqLadder=36; break;
+	case  19: daqLadder=39; break;
+	case  20: daqLadder=37; break;
+	}
+	break;
+	
+      case 'W':
+	switch(ladder) {
+	case   1: daqLadder=7; break;
+	case   2: daqLadder=9; break;
+	case   3: daqLadder=6; break;
+	case   4: daqLadder=8; break;
+	case   5: daqLadder=5; break;
+	case   6: daqLadder=2; break;
+	case   7: daqLadder=4; break;
+	case   8: daqLadder=1; break;
+	case   9: daqLadder=3; break;
+	case  10: daqLadder=0; break;
+	case  11: daqLadder=10; break;
+	case  12: daqLadder=13; break;
+	case  13: daqLadder=11; break;
+	case  14: daqLadder=14; break;
+	case  15: daqLadder=12; break;
+	case  16: daqLadder=15; break;
+	case  17: daqLadder=18; break;
+	case  18: daqLadder=16; break;
+	case  19: daqLadder=19; break;
+	case  20: daqLadder=17; break;
+	}
+	break;
+      default: assert(0); // Someone called this function with a bad value of eastWest.
+      }
+    }
+  if(LDate > 20060731) {
+    // Year 2007 data format post July 31st 2006
+    //cout << "SSD_Reader::SSDDaqLadder : Year7 data " << endl;
+    switch(eastWest) {
+    case 'E':
+      switch(ladder) {
+      case   1: daqLadder=27; break;
+      case   2: daqLadder=29; break;
+      case   3: daqLadder=26; break;
+      case   4: daqLadder=28; break;
+      case   5: daqLadder=25; break;
+      case   6: daqLadder=22; break;
+      case   7: daqLadder=24; break;
+      case   8: daqLadder=21; break;
+      case   9: daqLadder=23; break;
+      case  10: daqLadder=20; break;
+      case  11: daqLadder=30; break;
+      case  12: daqLadder=33; break;
+      case  13: daqLadder=31; break;
+      case  14: daqLadder=34; break;
+      case  15: daqLadder=32; break;
+      case  16: daqLadder=35; break;
+      case  17: daqLadder=38; break;
+      case  18: daqLadder=36; break;
+      case  19: daqLadder=39; break;
+      case  20: daqLadder=37; break;
+      }
+      break;
+      
+    case 'W':
+      switch(ladder) {
+      case   1: daqLadder=17; break;
+      case   2: daqLadder=19; break;
+      case   3: daqLadder=16; break;
+      case   4: daqLadder=18; break;
+      case   5: daqLadder=15; break;
+      case   6: daqLadder=12; break;
+      case   7: daqLadder=14; break;
+      case   8: daqLadder=11; break;
+      case   9: daqLadder=13; break;
+      case  10: daqLadder=10; break;
+      case  11: daqLadder=0; break;
+      case  12: daqLadder=3; break;
+      case  13: daqLadder=1; break;
+      case  14: daqLadder=4; break;
+      case  15: daqLadder=2; break;
+      case  16: daqLadder=5; break;
+      case  17: daqLadder=8; break;
+      case  18: daqLadder=6; break;
+      case  19: daqLadder=9; break;
+     case  20: daqLadder=7; break;
+      }
+      break;
+    default: assert(0); // Someone called this function with a bad value of eastWest.
+    }  
+  }
   // Check ladder and eastWest args.  Also check completeness of above switches.
   assert(daqLadder>=0 && daqLadder < 40); 
   return daqLadder;
