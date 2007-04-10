@@ -262,7 +262,7 @@ void StEmcPedestalMaker::saveToDb(Int_t date, Int_t time) const
 	Char_t ts[1024]; ts[0] = 0;
 	Char_t tf[1024]; tf[0] = 0;
 	TString n[] = {"bemcPed","bprsPed","bsmdePed","bsmdpPed"};
-	sprintf(ts,"%04d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,minute,second+2);
+	sprintf(ts,"%04d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,minute,second);
 	//sprintf(ts,"%04d%02d%02d%02d%02d%02d",year,month,day,hour,minute,second);
 	sprintf(tf, "%s/%s.%08d.%06d.root", getTablesPath(), n[getDetector() - 1].Data(), date, time);
 	saveToDb(ts, tf);
