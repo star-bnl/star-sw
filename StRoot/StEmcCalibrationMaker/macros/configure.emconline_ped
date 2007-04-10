@@ -61,7 +61,12 @@
 	rm -f $CRONTAB_FILE
 	echo "00 3 * * * csh -c \"bash $DST_PATH/job.emconline_ped\"" >> $CRONTAB_FILE
 
-	ln -sf $SRC_PATH/macros/README* $DST_PATH
+	ln -sf $SRC_PATH/macros/README.emconline_ped $DST_PATH
+
+	touch $DST_PATH/README
+	date >> $DST_PATH/README
+	cat $SRC_PATH/macros/README >> $DST_PATH/README
+	echo "" >> $DST_PATH/README
 
 	touch $DST_PATH/LAST_TIME_RUN.emconline_ped
 
