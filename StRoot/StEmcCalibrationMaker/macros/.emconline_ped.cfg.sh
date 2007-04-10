@@ -1,6 +1,3 @@
-#!/bin/bash
-
-export EMCONLINE_PED_DIR=/home/emc/online/emc/pedestal
 
 export EMCONLINE_PED_SCRIPT=${EMCONLINE_PED_DIR}/makeOnlinePed.C
 
