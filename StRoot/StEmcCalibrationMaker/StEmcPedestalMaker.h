@@ -27,6 +27,8 @@ protected:
     Int_t                       mLastPedDate;
     Bool_t                      mStarted;
     TString                     mSavePath;
+    TString                     mTablesPath;
+    Bool_t			mSaveTables;
                             
 public:
      
@@ -51,8 +53,14 @@ public:
 	      const Char_t     *getSavePath() const {return mSavePath;}
 	      void              setSavePath(const Char_t *path) {mSavePath = path ? path : "";}
 	    
+	      const Char_t     *getTablesPath() const {return mTablesPath;}
+	      void              setTablesPath(const Char_t *path) {mTablesPath = path ? path : "";}
+	    
+	      Bool_t 		getSaveTables() const {return mSaveTables;}
+	      void 		setSaveTables(Bool_t save) {mSaveTables = save;}
+	    
               void              calcPedestals();
-              void              saveToDb(const Char_t *timestamp) const;
+              void              saveToDb(const Char_t *timestamp, const Char_t *tableFilename = 0) const;
               void              saveToDb(Int_t date, Int_t time) const;
 	      void              savePedestals(Int_t date, Int_t time, Bool_t DB = false) const;
 	      void              loadPedestals(const Char_t *filename); 
