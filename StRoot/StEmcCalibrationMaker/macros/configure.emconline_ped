@@ -35,13 +35,20 @@
 
     if [[ "${CONFIGURE_EMCONLINE_PED}" != "no" ]]    
     then
+	echo "Configuring the EMC Online pedestal monitoring"
+
         chmod a+x $SRC_PATH/macros/configure.emconline_ped
         chmod a+x $SRC_PATH/macros/.emconline_ped.cfg.sh
         chmod a+x $SRC_PATH/macros/job.emconline_ped
         chmod a+x $SRC_PATH/macros/status.emconline_ped
         chmod a+x $SRC_PATH/macros/update.emconline_ped
 
-	cp -f $SRC_PATH/macros/.emconline_ped.cfg.sh $DST_PATH
+	export CFG_FILE=$DST_PATH/.emconline_ped.cfg.sh
+	rm -f $CFG_FILE
+	echo "export EMCONLINE_PED_DIR=$DST_PATH" > $CFG_FILE
+    	cat $SRC_PATH/macros/.emconline_ped.cfg.sh >> $CFG_FILE
+	chmod a+x $CFG_FILE
+
         ln -sf $SRC_PATH/macros/job.emconline_ped $DST_PATH
         ln -sf $SRC_PATH/macros/status.emconline_ped $DST_PATH
         ln -sf $SRC_PATH/macros/update.emconline_ped $DST_PATH
@@ -55,6 +62,12 @@
 	echo "00 3 * * * csh -c \"bash $DST_PATH/job.emconline_ped\"" >> $CRONTAB_FILE
 
 	ln -sf $SRC_PATH/macros/README* $DST_PATH
+
+	touch $DST_PATH/LAST_TIME_RUN.emconline_ped
+
+	touch $DST_PATH/runlist.emconline_ped.txt
+
+	$DST_PATH/status.emconline_ped STOP &> /dev/null
 
 	### The rest is for backward compatibility only, otherwise can be safely skipped
 	#

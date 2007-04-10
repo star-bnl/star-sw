@@ -25,5 +25,4 @@ then
 fi
 
 echo "EMC Online pedestal monitoring status: `cat ${EMCONLINE_PED_RUNMODE_FILE}`"
-echo "Last run:"
 cat ${EMCONLINE_PED_LASTRUN_FILE}

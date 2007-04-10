@@ -16,7 +16,7 @@ fi
 cd ${EMCONLINE_PED_DIR}
 
 export FILELIST=${1}
-export LOG=./log_transform.txt
+export LOG=${EMCONLINE_PED_DIR}/log_transform.txt
 
 if [[ "${FILELIST}" == "" ]];
 then
