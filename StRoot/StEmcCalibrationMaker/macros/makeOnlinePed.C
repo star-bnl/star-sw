@@ -83,10 +83,12 @@ void makeOnlinePed(char* list = "./runlist.txt"
 		, bool isList = true
 		, char* dir = "/evp"
 		, char *savePath = "./backup"
+		, char *tablesPath = "./tables"
 		, char *tempPath = "./tmp"
 		, char *EVP_READER_LIB = "libevpSO.2.0.so"
 		, Int_t nevents = 2000
 		, Bool_t saveDb = true
+		, Bool_t saveTables = true
 		) {
     TDatime startTime;
     TStopwatch timer;
@@ -112,13 +114,16 @@ void makeOnlinePed(char* list = "./runlist.txt"
  			
     memory.PrintMem(0);
     TString savePathStr = savePath;
+    TString tablesPathStr = tablesPath;
     TString tempPathStr = tempPath;
     NEVENTS = nevents;
     cout << "Backup directory: " << savePathStr << endl;
+    cout << "Backup tables directory: " << tablesPathStr << endl;
     cout << "Temp directory: " << tempPathStr << endl;
     cout << "Event pool: " << dir << endl;	    
     cout << "Number of events to process: " << NEVENTS << endl;
     cout << "Save tables to DB: " << saveDb << endl;
+    cout << "Save tables locally: " << saveTables << endl;
     
     // create chain ///////////////////////////////////////////////    
     chain = new StChain("StChain"); 
@@ -147,6 +152,8 @@ void makeOnlinePed(char* list = "./runlist.txt"
 		ped[i]->setAutoSaveDB(saveDb);
 		//ped[i]->setCTBMax(3000);
 		ped[i]->setSavePath(savePathStr.Data());
+		ped[i]->setTablesPath(tablesPathStr.Data());
+		ped[i]->setSaveTables(saveTables);
 	}
 
     memory.PrintMem(0);

@@ -79,8 +79,8 @@ public:
 	      float             getTimeInterval(int,int);
 	      StEmcGeom*        getGeom();
 							
-	      bool              isAutoSaveDB() { return mAutoSaveDB;}
-	      bool              isDebug() { return mDebug;}
+	      bool              isAutoSaveDB() const { return mAutoSaveDB;}
+	      bool              isDebug() const { return mDebug;}
               
               void              setFile(const Char_t *f)        { mFileName = f; }
               void              setDetector(int det)    { mDetector = det; if(mDetector<3) mNChannel = 4800; else mNChannel=18000;}

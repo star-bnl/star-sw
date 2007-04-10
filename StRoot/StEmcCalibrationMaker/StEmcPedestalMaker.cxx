@@ -24,6 +24,7 @@ StEmcPedestalMaker::StEmcPedestalMaker(const Char_t *name)
     mLastPedDate = 2000;
     mLastPedTime = 0;
     setNPedEvents(2000);
+    setSaveTables(false);
 }
 //_____________________________________________________________________________
 StEmcPedestalMaker::~StEmcPedestalMaker()
@@ -84,7 +85,7 @@ Int_t StEmcPedestalMaker::Make()
   {
     calcPedestals();
 		savePedestals(mLastPedDate,mLastPedTime,isAutoSaveDB());
-		if(isAutoSaveDB()) saveToDb(mLastPedDate,mLastPedTime);
+		if(isAutoSaveDB() || getSaveTables()) saveToDb(mLastPedDate,mLastPedTime);
 		mStarted = false;
   }
   
@@ -169,7 +170,7 @@ void StEmcPedestalMaker::calcPedestals()
    
 }
 //_____________________________________________________________________________
-void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp) const {
+void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFilename) const {
     cout << "=================================================" << endl;
     cout << "Saving pedestal table for detector " << getDetector() << endl;
     cout << "TimeStamp = " << timeStamp << endl;
@@ -209,26 +210,44 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp) const {
 	    }
 	}
     }
-    StDbManager* mgr = StDbManager::Instance();
-    cout << "mgr = " << mgr << endl;
-    StDbConfigNode* node = mgr ? mgr->initConfig(dbCalibrations, dbEmc) : 0;
-    cout << "node = " << node << endl;
-    StDbTable* table = node ? node->addDbTable(n[getDetector() - 1].Data()) : 0;
-    cout << "table = " << table << endl;
-    if (table) {
-	if (getDetector() < 3) {
-	    table->SetTable((char*)tnew, 1);
-	} else {
-	    table->SetTable((char*)snew, 1);
+    if (isAutoSaveDB()) {
+	StDbManager* mgr = StDbManager::Instance();
+	cout << "mgr = " << mgr << endl;
+	StDbConfigNode* node = mgr ? mgr->initConfig(dbCalibrations, dbEmc) : 0;
+	cout << "node = " << node << endl;
+	StDbTable* table = node ? node->addDbTable(n[getDetector() - 1].Data()) : 0;
+	cout << "table = " << table << endl;
+	if (table) {
+	    table->setFlavor("ofl");
+	    if (getDetector() < 3) {
+		table->SetTable((char*)tnew, 1);
+	    } else {
+		table->SetTable((char*)snew, 1);
+	    }
+	}
+	cout << "table set" << endl;
+	if (mgr && table) {
+	    cout << "setStoreTime " << timeStamp << endl;
+	    mgr->setStoreTime(timeStamp);
+	    cout << "Storing " << n[getDetector() - 1] << " " << timeStamp << endl;
+	    mgr->storeDbTable(table);
+	    cout << "Stored." << endl;
 	}
     }
-    cout << "table set" << endl;
-    if (mgr) {
-	cout << "setStoreTime " << timeStamp << endl;
-	mgr->setStoreTime(timeStamp);
-	cout << "Storing " << n[getDetector() - 1] << " " << timeStamp << endl;
-	mgr->storeDbTable(table);
-	cout << "Stored." << endl;
+    if (getSaveTables() && tableFilename) {
+	cout << "Saving DB table into " << tableFilename << endl;
+	TFile *f = new TFile(tableFilename, "RECREATE");
+	if (f) {
+	    if (getDetector() < 3) {
+		pedT_t->AddAt(tnew, 0);
+		pedT_t->Write();
+	    } else {
+		pedS_t->AddAt(snew, 0);
+		pedS_t->Write();
+	    }
+	    f->Close();
+	    delete f; f = 0;
+	}
     }
 }
 //_____________________________________________________________________________
@@ -241,8 +260,12 @@ void StEmcPedestalMaker::saveToDb(Int_t date, Int_t time) const
   Int_t minute= (Int_t)(time-hour*10000)/100;
   Int_t second= (Int_t)(time-hour*10000-minute*100);
 	Char_t ts[1024]; ts[0] = 0;
-	sprintf(ts,"%04d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,minute,second+22);
-	saveToDb(ts);
+	Char_t tf[1024]; tf[0] = 0;
+	TString n[] = {"bemcPed","bprsPed","bsmdePed","bsmdpPed"};
+	sprintf(ts,"%04d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,minute,second+2);
+	//sprintf(ts,"%04d%02d%02d%02d%02d%02d",year,month,day,hour,minute,second);
+	sprintf(tf, "%s/%s.%08d.%06d.root", getTablesPath(), n[getDetector() - 1].Data(), date, time);
+	saveToDb(ts, tf);
 }
 //_____________________________________________________________________________
 void StEmcPedestalMaker::savePedestals(Int_t date, Int_t time, Bool_t DB) const
