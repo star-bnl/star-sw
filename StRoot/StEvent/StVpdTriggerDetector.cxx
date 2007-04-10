@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdTriggerDetector.cxx,v 2.5 2007/04/03 20:11:41 ullrich Exp $
+ * $Id: StVpdTriggerDetector.cxx,v 2.6 2007/04/10 20:13:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVpdTriggerDetector.cxx,v $
+ * Revision 2.6  2007/04/10 20:13:41  ullrich
+ * Fixed bug in array subscript (Akio).
+ *
  * Revision 2.5  2007/04/03 20:11:41  ullrich
  * Modified for actual VPD used in 2007.
  *
@@ -35,7 +38,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.5 2007/04/03 20:11:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.6 2007/04/10 20:13:41 ullrich Exp $";
 
 ClassImp(StVpdTriggerDetector)
 
@@ -64,10 +67,10 @@ StVpdTriggerDetector::StVpdTriggerDetector(const StTriggerData& t)
     if (mYear<2007) return;
     
     for (i=0; i<mMaxVpdCounter; i++){
-	mADC[1][i] = t.vpdADC(east, i+1);
-	mTDC[1][i] = t.vpdTDC(east, i+1);
-	mADC[2][i] = t.vpdADC(west, i+1);
-	mTDC[2][i] = t.vpdTDC(west, i+1);
+	mADC[east][i] = t.vpdADC(east, i+1);
+	mTDC[east][i] = t.vpdTDC(east, i+1);
+	mADC[west][i] = t.vpdADC(west, i+1);
+	mTDC[west][i] = t.vpdTDC(west, i+1);
     }
     mEarliestTDC[east] = t.vpdEarliestTDC(east);
     mEarliestTDC[west] = t.vpdEarliestTDC(west);
