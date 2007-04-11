@@ -95,16 +95,28 @@ void loadTriggerMasks(char* file,int start)
 	fclose(W);
 }
 
-void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal, bool lut, bool saveDB, char* startrg2, char* sc3, char* bemcStatusCopy, char *bceTable, char *bcwTable) {
-  cout <<"startrg2 dir = "<<startrg2<<endl;
-  cout <<"sc3 dir      = "<<sc3<<endl;
-  cout <<"bemcStatusCopy = "<<bemcStatusCopy<<endl;
-  cout <<"bceTable       = "<< bceTable <<endl;
-  cout <<"bcwTable       = "<< bcwTable <<endl;
+void StOnlineTriggerMonitoring::saveTrigger(
+    const Char_t *TS
+    , Bool_t status
+    , Bool_t pedestal
+    , Bool_t lut
+    , Bool_t saveDB
+    , Bool_t saveTables
+    , const Char_t *tables_dir
+    , const Char_t *saved_dir
+    , const Char_t *bemcStatusCopy
+    , const Char_t *bceTable
+    , const Char_t *bcwTable
+) {
+  cout << "tables dir     = " << tables_dir << endl;
+  cout << "saved dir      = " << saved_dir << endl;
+  cout << "bemcStatusCopy = " << bemcStatusCopy << endl;
+  cout << "bceTable       = " << bceTable << endl;
+  cout << "bcwTable       = " << bcwTable << endl;
 	
 	TString FILENAME;
 	
-	cout <<"Saving trigger tables in offline DB for TS = "<<TS<<endl;
+	cout << "Saving trigger tables in offline DB for TS = "<< TS <<endl;
 	
 	// trigger decoding map
 	// load the files bcw_table.txt and bce_table.txt
@@ -123,10 +135,10 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 	}
 	ine.close();
 	
-	FILENAME = startrg2; FILENAME+="/bcw.lut.bin";
+	FILENAME = saved_dir; FILENAME += "/bcw.lut.bin";
 	cout <<"Loading trigger masks from "<<FILENAME.Data()<<endl;
 	loadTriggerMasks((char*)FILENAME.Data(),0);
-	FILENAME = startrg2; FILENAME+="/bce.lut.bin";
+	FILENAME = saved_dir; FILENAME += "/bce.lut.bin";
 	cout <<"Loading trigger masks from "<<FILENAME.Data()<<endl;
 	loadTriggerMasks((char*)FILENAME.Data(),150);
 	
@@ -146,7 +158,7 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 	
 	for(int crate = 1;crate<=30;crate++)
 	{
-		FILENAME = sc3;
+		FILENAME = saved_dir;
 		FILENAME+="/pedestal_crate0x";
 		char str[10];
 		sprintf(str,"%02x",crate);
@@ -173,7 +185,7 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 	}
 	
 	// reading BemcConfig.dat
-	FILENAME = sc3; FILENAME+="/BemcConfig.dat";
+	FILENAME = saved_dir; FILENAME+="/BemcConfig.dat";
 	ifstream bemcConf(FILENAME.Data());
 	PEDSHIFT = 0;
 	char line[4096];
@@ -194,7 +206,7 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 	// reading single tower masks and trigger bit conversion mode
 	for(int crate = 1;crate<=30;crate++)
 	{
-		FILENAME = sc3; FILENAME+= "/config_crate0x";
+		FILENAME = saved_dir; FILENAME+= "/config_crate0x";
 		char str[10];
 		sprintf(str,"%02x",crate);
 		FILENAME+=str;
@@ -435,7 +447,7 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 	}
 
 	if (status) {
-	    if (saveDB && mgr) {
+	    if (saveDB && mgr && status_st) {
 		t = node ? node->addDbTable("bemcTriggerStatus") : 0;
 		if (t) {
 		    t->setFlavor("ofl");
@@ -444,16 +456,20 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 		    mgr->storeDbTable(t);
 		}
 	    }
-	    FILENAME = "StarDb/Calibrations/emc/trigger/bemcTriggerStatus."; FILENAME+=TS; FILENAME+=".root";
-	    TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
-	    FF->cd();
-	    status_t->AddAt(status_st,0);
-	    status_t->Write();
-	    FF->Close();
-	    delete FF;		
+	    if (saveTables && status_t && status_st) {
+		FILENAME = tables_dir; FILENAME += "/bemcTriggerStatus."; FILENAME+=TS; FILENAME+=".root";
+		TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
+		if (FF) {
+		    FF->cd();
+		    status_t->AddAt(status_st,0);
+		    status_t->Write();
+		    FF->Close();
+		    delete FF;
+		}
+	    }
 	}
 	if (pedestal) {
-	    if (saveDB && mgr) {
+	    if (saveDB && mgr && pedestals_st) {
 		t = node ? node->addDbTable("bemcTriggerPed") : 0;
 	        if (t) {
 		    t->setFlavor("ofl");
@@ -462,16 +478,20 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 		    mgr->storeDbTable(t);
 		}
 	    }
-	    FILENAME = "StarDb/Calibrations/emc/trigger/bemcTriggerPed."; FILENAME+=TS; FILENAME+=".root";
-	    TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
-	    FF->cd();
-	    pedestals_t->AddAt(pedestals_st,0);
-	    pedestals_t->Write();
-	    FF->Close();
-	    delete FF;		
+	    if (saveTables && pedestals_t && pedestals_st) {
+		FILENAME = tables_dir; FILENAME += "/bemcTriggerPed."; FILENAME+=TS; FILENAME+=".root";
+		TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
+		if (FF) {
+		    FF->cd();
+		    pedestals_t->AddAt(pedestals_st,0);
+		    pedestals_t->Write();
+		    FF->Close();
+		    delete FF;
+		}
+	    }
 	}
 	if (lut) {
-	    if(saveDB) {
+	    if(saveDB && mgr && lut_st) {
 		t = node ? node->addDbTable("bemcTriggerLUT") : 0;
 		if (t) {
 		    t->setFlavor("ofl");
@@ -480,13 +500,17 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 		    mgr->storeDbTable(t);
 		}
 	    }
-	    FILENAME = "StarDb/Calibrations/emc/trigger/bemcTriggerLUT."; FILENAME+=TS; FILENAME+=".root";
-	    TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
-	    FF->cd();
-	    lut_t->AddAt(lut_st,0);
-	    lut_t->Write();
-	    FF->Close();
-	    delete FF;
+	    if (saveTables && lut_t && lut_st) {
+		FILENAME = tables_dir; FILENAME += "/bemcTriggerLUT."; FILENAME+=TS; FILENAME+=".root";
+		TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
+		if (FF) {
+		    FF->cd();
+		    lut_t->AddAt(lut_st,0);
+		    lut_t->Write();
+		    FF->Close();
+		    delete FF;
+		}
+	    }
 	}
 }
 

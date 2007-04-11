@@ -1,0 +1,21 @@
+#!/bin/bash
+
+export EMCONLINE_TRG_DIR=${0}
+export EMCONLINE_TRG_DIR=${EMCONLINE_TRG_DIR%/*}
+if [[ -f ./.emconline_trg.cfg.sh ]]
+then
+    source ./.emconline_trg.cfg.sh
+elif [[ -f ${EMCONLINE_TRG_DIR}/.emconline_trg.cfg.sh ]]
+then
+    source ${EMCONLINE_TRG_DIR}/.emconline_trg.cfg.sh
+else
+    echo "EMC Online environment is not configured, please run configure.emconline_trg"
+    exit 1
+fi
+
+${EMCONLINE_TRG_UPDATE} "$@" &> ${EMCONLINE_TRG_LOG_FILE}
+
+mkdir -p ${EMCONLINE_TRG_LOGS_DIR}
+export LOG_TIMESTAMP=${EMCONLINE_TRG_LOGS_DIR}/log_`date -u +%Y.%m.%d_%H.%M.%S.txt`
+cp -f ${EMCONLINE_TRG_LOG_FILE} ${LOG_TIMESTAMP}
+gzip ${LOG_TIMESTAMP}

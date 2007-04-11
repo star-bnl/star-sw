@@ -5,7 +5,18 @@
 
 class StOnlineTriggerMonitoring {
 public:
-    void saveTrigger(char* TS="", bool status=true, bool pedestal=true, bool lut=true, bool saveDB = true, char* startrg2 = "startrg2.saved", char* sc3 = "sc3.saved", char* bemcStatusCopy = "./bemcStatus.txt", char *bceTable = "./bce_table.txt", char *bcwTable = "./bcw_table.txt");
+    void saveTrigger(const Char_t *TS = ""
+		    , Bool_t status = true
+		    , Bool_t pedestal = true
+		    , Bool_t lut = true
+		    , Bool_t saveDB = true
+		    , Bool_t saveTables = true
+		    , const Char_t *tables_dir = "tables.emconline_trg"
+		    , const Char_t *saved_dir = "last_conf.emconline_trg"
+		    , const Char_t *bemcStatusCopy = "bemcStatus.txt"
+		    , const Char_t *bceTable = "bce_table.txt"
+		    , const Char_t *bcwTable = "bcw_table.txt"
+		    );
     ClassDef(StOnlineTriggerMonitoring, 1)
 };
 

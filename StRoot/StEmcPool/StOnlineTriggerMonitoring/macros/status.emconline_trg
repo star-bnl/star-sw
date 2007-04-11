@@ -1,0 +1,27 @@
+#!/bin/bash
+
+export EMCONLINE_TRG_DIR=${0}
+export EMCONLINE_TRG_DIR=${EMCONLINE_TRG_DIR%/*}
+if [[ -f ./.emconline_trg.cfg.sh ]]
+then
+    source ./.emconline_trg.cfg.sh
+elif [[ -f ${EMCONLINE_TRG_DIR}/.emconline_trg.cfg.sh ]]
+then
+    source ${EMCONLINE_TRG_DIR}/.emconline_trg.cfg.sh
+else
+    echo "EMC Online environment is not configured, please run configure.emconline_trg"
+    exit 1
+fi
+
+cd ${EMCONLINE_TRG_DIR}
+
+export RUNMODE=${1}
+
+if [[ "${RUNMODE}" != "" ]]
+then
+    rm -f ${EMCONLINE_TRG_RUNMODE_FILE}
+    echo ${RUNMODE} > ${EMCONLINE_TRG_RUNMODE_FILE}
+fi
+
+echo "EMC Online trigger monitoring status: `cat ${EMCONLINE_TRG_RUNMODE_FILE}`"
+cat ${EMCONLINE_TRG_LASTRUN_FILE}
