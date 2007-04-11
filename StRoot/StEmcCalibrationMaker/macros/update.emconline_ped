@@ -15,10 +15,11 @@ fi
 
 cd ${EMCONLINE_PED_DIR}
 
-export FILE=`echo ${1}`
-export MODE=`echo ${2}`
-export DAY=`echo ${3}`
-export year=`echo ${4}`
+export FILE=${1}
+export MODE=${2}
+export DAY=${3}
+export year=${4}
+export RUNID=${5}
 
 if [[ "${FILE}" == "" ]]
 then
@@ -34,17 +35,22 @@ then
     then
 	if [[ "${DAY}" == "" ]]
 	then
-    	    # find last day number
-    	    export DAY=`date -u +%-j`
-    	    export DAY=$(( ${DAY} - 1 ))
-    	    if (( ${DAY} < 100 ))
-    	    then
-		if (( ${DAY} < 10 ))
-		then
-		    export DAY=00${DAY}
-		else
-		    export DAY=0${DAY}
+	    if [[ "${EMCONLINE_PED_LASTDAYONLY}" == "true" ]]
+	    then
+    		# find last day number
+    		export DAY=`date -u +%-j`
+    		export DAY=$(( ${DAY} - 1 ))
+    		if (( ${DAY} < 100 ))
+    	        then
+		    if (( ${DAY} < 10 ))
+		    then
+			export DAY=00${DAY}
+		    else
+			export DAY=0${DAY}
+		    fi
 		fi
+	    else
+		export DAY='???'
 	    fi
 	fi
 
@@ -56,15 +62,20 @@ then
 	fi
 
         # sets the run prefix
-        export RUNPREFIX=${year}${DAY}
+        export RUNPREFIX=${year}${DAY}${RUNID}
         echo "Run prefix is ${RUNPREFIX}"
 
         # create file list
         rm -f ${FILELIST}
-        ls -1d ${EVP_DIR}/a/${RUNPREFIX}* > ${FILELIST}
-        ls -1d ${EVP_DIR}/b/${RUNPREFIX}* >> ${FILELIST}
-        ls -1d ${EVP_DIR}/c/${RUNPREFIX}* >> ${FILELIST}
-        ls -1d ${EVP_DIR}/d/${RUNPREFIX}* >> ${FILELIST}
+        ls -1d ${EVP_DIR}/*/${RUNPREFIX}* > ${FILELIST}
+        #ls -1d ${EVP_DIR}/b/${RUNPREFIX}* >> ${FILELIST}
+        #ls -1d ${EVP_DIR}/c/${RUNPREFIX}* >> ${FILELIST}
+        #ls -1d ${EVP_DIR}/d/${RUNPREFIX}* >> ${FILELIST}
+
+	touch ${EMCONLINE_PED_FILELIST_VETO_FILE}
+	rm -f ${FILELIST}.tmp
+	grep -v -f ${EMCONLINE_PED_FILELIST_VETO_FILE} ${FILELIST} > ${FILELIST}.tmp
+	mv -f ${FILELIST}.tmp ${FILELIST}
 
 	cat ${FILELIST}
     fi
@@ -87,7 +98,37 @@ cat ${EMCONLINE_PED_LASTRUN_FILE}
 if [[ "${MODE}" == "RUN" ]]
 then
     mkdir -p ${EMCONLINE_PED_BACKUP_DIR}
+    mkdir -p ${EMCONLINE_PED_TABLES_DIR}
+    mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bemc
+    mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bprs
+    mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bsmde
+    mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bsmdp
     mkdir -p ${EMCONLINE_PED_TEMP_DIR}
+
     starver ${EMCONLINE_PED_STARVER}
-    root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}\",${LIST},\"${EVP_DIR}\",\"${EMCONLINE_PED_BACKUP_DIR}\",\"${EMCONLINE_PED_TABLES_DIR}\",\"${EMCONLINE_PED_TEMP_DIR}\",\"${EVP_READER_LIB}\",${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES}\)
+
+    if [[ ( "${EMCONLINE_PED_TABLEPERRUN}" == "true" ) && ( "${LIST}" == "true" ) ]]
+    then
+	for FILE in `cat ${FILELIST}`
+	do
+	    rm -f ${FILELIST}.tmp
+	    echo ${FILE} > ${FILELIST}.tmp
+	    if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}.tmp\",${LIST},\"${EVP_DIR}\",\"${EMCONLINE_PED_BACKUP_DIR}\",\"${EMCONLINE_PED_TABLES_DIR}\",\"${EMCONLINE_PED_TEMP_DIR}\",\"${EVP_READER_LIB}\",${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES}\))
+	    then
+		touch ${EMCONLINE_PED_FILELIST_VETO_FILE}
+		echo ${FILE} >> ${EMCONLINE_PED_FILELIST_VETO_FILE}
+	    fi
+	    rm -f ${FILELIST}.tmp
+	done
+    else
+	if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}\",${LIST},\"${EVP_DIR}\",\"${EMCONLINE_PED_BACKUP_DIR}\",\"${EMCONLINE_PED_TABLES_DIR}\",\"${EMCONLINE_PED_TEMP_DIR}\",\"${EVP_READER_LIB}\",${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES}\))
+	then
+	    if [[ "$LIST" == "true" ]]
+	    then
+		touch ${EMCONLINE_PED_FILELIST_VETO_FILE}
+	        grep -v -f ${EMCONLINE_PED_FILELIST_VETO_FILE} ${FILELIST} >> ${EMCONLINE_PED_FILELIST_VETO_FILE}
+	    fi
+	fi
+    fi
+    
 fi

@@ -30,6 +30,10 @@ echo "Output tables dir: ${EMCONLINE_PED_TABLES_DIR}"
 echo "Log file: ${LOG}"
 
 mkdir -p ${EMCONLINE_PED_TABLES_DIR}
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bemc
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bprs
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bsmde
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bsmdp
 
 for FILENAME in ${FILELIST};
 do

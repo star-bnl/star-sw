@@ -13,7 +13,7 @@ else
     exit 1
 fi
 
-${EMCONLINE_PED_UPDATE} $@ &> ${EMCONLINE_PED_LOG_FILE}
+${EMCONLINE_PED_UPDATE} "$@" &> ${EMCONLINE_PED_LOG_FILE}
 
 mkdir -p ${EMCONLINE_PED_LOGS_DIR}
 export LOG_TIMESTAMP=${EMCONLINE_PED_LOGS_DIR}/log_`date -u +%Y.%m.%d_%H.%M.%S.txt`

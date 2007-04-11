@@ -91,7 +91,7 @@ bool StEmcCalibMaker::accept()
   mNEvents++;
   if(mNEvents%100==0) saveHist(mFileName.Data());
   
-	cout <<"Processing event number "<<mNEvents<<" for maker "<<GetName()<<endl;
+	//cout <<"Processing event number "<<mNEvents<<" for maker "<<GetName()<<endl;
 	return true;
 }
 //_____________________________________________________________________________

@@ -38,24 +38,27 @@ void transformBackupHistoToDBTable(Char_t *hist_filename = "./backup.emconline_p
 	delete dirNames;
     }
 
-    if (outputFilename.Length() != 0) {
-	outputFilename.Prepend("/");
-	outputFilename.Prepend(tables_path);
-    }
+    if (outputFilename.Length() != 0) outputFilename.Prepend("/");
 
     int detector = 0;
     if (tableName == "bemcPed") {
 	detector = 1;
+	if (outputFilename.Length() != 0) outputFilename.Prepend("/y3bemc");
     }
     if (tableName == "bsmdePed") {
 	detector = 2;
+	if (outputFilename.Length() != 0) outputFilename.Prepend("/y3bsmde");
     }
     if (tableName == "bsmdpPed") {
 	detector = 3;
+	if (outputFilename.Length() != 0) outputFilename.Prepend("/y3bsmdp");
     }
     if (tableName == "bprsPed") {
 	detector = 4;
+	if (outputFilename.Length() != 0) outputFilename.Prepend("/y3bprs");
     }
+
+    if (outputFilename.Length() != 0) outputFilename.Prepend(tables_path);
 
     cout << "Output filename is " << outputFilename.Data() << endl;
     cout << "Output table name is " << tableName.Data() << endl;

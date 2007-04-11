@@ -64,13 +64,14 @@
 	ln -sf $SRC_PATH/macros/README.emconline_ped $DST_PATH
 
 	touch $DST_PATH/README
-	date >> $DST_PATH/README
-	cat $SRC_PATH/macros/README >> $DST_PATH/README
+	echo "`date`: EMC Online pedestal monitoring installed, see README.emconline_ped" >> $DST_PATH/README
 	echo "" >> $DST_PATH/README
 
 	touch $DST_PATH/LAST_TIME_RUN.emconline_ped
 
 	touch $DST_PATH/runlist.emconline_ped.txt
+
+	touch $DST_PATH/runlist_veto.emconline_ped.txt
 
 	$DST_PATH/status.emconline_ped STOP &> /dev/null
 

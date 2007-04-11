@@ -65,7 +65,7 @@ Int_t StEmcPedestalMaker::Make()
 		}
 		else
 		{
-			/*if(isDebug())*/ cout <<"Time remaining for a new pedestal run is "
+			if(isDebug()) cout <<"Time remaining for a new pedestal run is "
 			                   <<mPedInterval-getTimeInterval(mLastPedDate,mLastPedTime)
 					               <<" hours for detector number "<<getDetector()<<endl;
 		}
@@ -195,7 +195,7 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 		tnew->AdcPedestal[i] = (short)(ped * 100.0);
 		tnew->AdcPedestalRMS[i] = (short)(rms * 100.0);
 		tnew->ChiSquare[i] = chi;
-		cout << "tnew i = " << i << ": Status " << (Int_t)tnew->Status[i] << ", ped " << tnew->AdcPedestal[i] << ", rms " << tnew->AdcPedestalRMS[i] << ", chi " << tnew->ChiSquare[i] << endl;
+		//cout << "tnew i = " << i << ": Status " << (Int_t)tnew->Status[i] << ", ped " << tnew->AdcPedestal[i] << ", rms " << tnew->AdcPedestalRMS[i] << ", chi " << tnew->ChiSquare[i] << endl;
 	    }
 	} else {
 	    if (snew) {
@@ -206,7 +206,7 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 		snew->AdcPedestalRMS[i][1] = 0;
 		snew->AdcPedestal[i][2] = 0;
 		snew->AdcPedestalRMS[i][2] = 0;
-		cout << "snew i = " << i << ": Status " << (Int_t)snew->Status[i] << ", ped " << snew->AdcPedestal[i][0] << ", rms " << snew->AdcPedestalRMS[i][0] << endl;
+		//cout << "snew i = " << i << ": Status " << (Int_t)snew->Status[i] << ", ped " << snew->AdcPedestal[i][0] << ", rms " << snew->AdcPedestalRMS[i][0] << endl;
 	    }
 	}
     }
@@ -261,10 +261,11 @@ void StEmcPedestalMaker::saveToDb(Int_t date, Int_t time) const
   Int_t second= (Int_t)(time-hour*10000-minute*100);
 	Char_t ts[1024]; ts[0] = 0;
 	Char_t tf[1024]; tf[0] = 0;
+	TString d[] = {"bemc","bprs","bsmde","bsmdp"};
 	TString n[] = {"bemcPed","bprsPed","bsmdePed","bsmdpPed"};
 	sprintf(ts,"%04d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,minute,second);
 	//sprintf(ts,"%04d%02d%02d%02d%02d%02d",year,month,day,hour,minute,second);
-	sprintf(tf, "%s/%s.%08d.%06d.root", getTablesPath(), n[getDetector() - 1].Data(), date, time);
+	sprintf(tf, "%s/y3%s/%s.%08d.%06d.root", getTablesPath(), d[getDetector() - 1].Data(), n[getDetector() - 1].Data(), date, time);
 	saveToDb(ts, tf);
 }
 //_____________________________________________________________________________

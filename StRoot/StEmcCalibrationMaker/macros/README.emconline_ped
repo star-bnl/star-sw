@@ -3,20 +3,30 @@ EMC Online pedestal monitoring
 ----------------------------------------------------------------------
 INSTALLATION
 
+Requirements:
+A. The Event Pool directory
+The event pool must be mounted and EVP_DIR variable must contain its name in the
+filesystem, the default is "/evp".
+
+B. The EVP_READER library
+Reading data from the event pool requires EVP_READER library. Please ask DAQ or EMC
+experts how to compile it, here we assume it is already installed on your computer.
+The environment variable EVP_READER_LIB must contain either the full path and name
+of the library or only the name if it is in LD_LIBRARY_PATH.
+The default name is "libevpSO.2.0.so", it can later be changed in the 
+configuration file .emconline_ped.cfg.sh:
+export EVP_READER_LIB=libevpSO.2.0.so
+
+C. The STAR computing environment
+It must be set up for the user who will be running this monitoring job, it can
+be AFS-based or a completely local installation.
+
+If the requirements are met you can proceed to the installation.
 Create a new directory
 mkdir ./emconline_ped
 cd ./emconline_ped
 
-The EVP_READER library
-Reading data from the event pool requires EVP_READER library.
-Please ask DAQ or EMC experts how to compile it, here we assume it is already
-installed in LD_LIBRARY_PATH on your computer.
-The default name is "libevpSO.2.0.so", it can later be changed in the 
-configuration file .emconline_ped.cfg.sh:
-export EVP_READER_LIB=libevpSO.2.0.so
-If it is not in LD_LIBRARY_PATH the full path and name must be specified.
-
-1. To setup the local copy:
+1. Set up the local copy:
 -----------------------------
 Those are usually stable and available from afs, no need to download
 cvs co StRoot/St_base
@@ -60,25 +70,7 @@ Files created for backward compatibility:
     filelist.txt
 
 Configuration file settings:
-EMCONLINE_PED_DIR=<root working directory>
-EMCONLINE_PED_SCRIPT=${EMCONLINE_PED_DIR}makeOnlinePed.C
-EMCONLINE_PED_START="${EMCONLINE_PED_DIR}/status.emconline_ped RUN"
-EMCONLINE_PED_STOP="${EMCONLINE_PED_DIR}/status.emconline_ped STOP"
-EMCONLINE_PED_UPDATE=${EMCONLINE_PED_DIR}/update.emconline_ped
-EMCONLINE_PED_LOG_FILE=${EMCONLINE_PED_DIR}/last_log.emconline_ped.txt
-EMCONLINE_PED_RUNMODE_FILE=${EMCONLINE_PED_DIR}/RUNMODE.emconline_ped
-EMCONLINE_PED_FILELIST_FILE=${EMCONLINE_PED_DIR}/runlist.emconline_ped.txt
-EMCONLINE_PED_LASTRUN_FILE=${EMCONLINE_PED_DIR}/LAST_TIME_RUN.emconline_ped
-EMCONLINE_PED_BACKUP_DIR=${EMCONLINE_PED_DIR}/backup.emconline_ped
-EMCONLINE_PED_LOGS_DIR=${EMCONLINE_PED_DIR}/logs.emconline_ped
-EMCONLINE_PED_TABLES_DIR=${EMCONLINE_PED_DIR}/tables.emconline_ped
-EMCONLINE_PED_TABLES_SCRIPT=${EMCONLINE_PED_DIR}transformBackupHistoToDBTable.C
-EMCONLINE_PED_TEMP_DIR=${EMCONLINE_PED_DIR}/tmp.emconline_ped
-EMCONLINE_PED_STARVER=dev # It's better to change to latest stable release and freeze
-EMCONLINE_PED_NEVENTS=2000 # Number of events for pedestal calculation
-EMCONLINE_PED_SAVEDB=true # Save tables into DB, besides local backup copy
-EVP_READER_LIB=libevpSO.2.0.so # EVP_READER library, specify the full name if not in LD_LIBRARY_PATH
-EVP_DIR=/evp # Directory where the event pool is mounted on thie machine
+See .emconline_ped.cfg.sh file.
 
 3. Compile
 The StEmcOnlineUtil requires evpReader.hh to compile, so the RTS path
@@ -95,7 +87,6 @@ crontab crontab.emconline_ped
 or
 crontab -e
 and insert the contents of crontab.emconline_ped
-The user who will run this cron job must have the STAR environment installed in ~/.cshrc
 
 ----------------------------------------------------------------------
 USAGE
@@ -112,10 +103,11 @@ or force, if monitoring is currently stopped
 ./job.emconline_ped "" RUN
 or run over one file
 ./job.emconline_ped <file>
-or run over data from specific year and day, if there is any in the event pool directory
-./job.emconline_ped "" RUN <day> <year>
+or run over data from specific year and day and run, if it is still in the event pool directory
+./job.emconline_ped "" RUN [day] [year] [runId]
 
-Backup ROOT files are saved in ./backup.emconline_ped, gzipped logs in ./logs.emconline_ped
+Backup ROOT files are saved in ./backup.emconline_ped, gzipped logs in ./logs.emconline_ped,
+DB tables in ./tables.emconline_ped.
 Files left after the last running:
     LAST_TIME_RUN.emconline_ped - short summary
     last_log.emconline_ped.txt  - log file, stdout and stderr
