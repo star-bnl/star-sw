@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.13 2007/03/27 16:53:42 balewski Exp $
+// $Id: StEmcRawMaker.cxx,v 1.14 2007/04/11 03:29:11 balewski Exp $
 
 #include <math.h>
 
@@ -158,7 +158,7 @@ Int_t StEmcRawMaker::Make()
 
     //cleanup B+EmcRawCollection
     
-     if(0&& mEvent->id()%555 ) {// clear raw data from StEvent for most of events
+     if( mEvent->id()%555 ) {// clear raw data from StEvent for most of events
       int i;
       StEmcRawData *eemcRaw = mEvent->emcCollection()->eemcRawData();
       for (i=0; i<eemcRaw->getNBlocks();i++) eemcRaw->deleteBank(i);
@@ -292,6 +292,10 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.14  2007/04/11 03:29:11  balewski
+// undo hacks,
+// Endcap code is now in default configuration
+//
 // Revision 1.13  2007/03/27 16:53:42  balewski
 // disable RawEndcap hits filtering
 //
