@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.39 2007/03/27 23:15:09 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.40 2007/04/11 22:45:22 perev Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.40  2007/04/11 22:45:22  perev
+// 1/0 avoided
+//
 // Revision 1.39  2007/03/27 23:15:09  bouchet
 // Add a switch to use the gain calibration
 //
@@ -559,8 +562,10 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 	    {  
 	      stpClusP->Fill(pClusterP->getClusterSize());
 	      totChrgP->Fill(convAdcToE*pClusterP->getTotAdc());
-	      noisDisP->Fill(pClusterP->getTotNoise()/pClusterP->getClusterSize());
-	      snRatioP->Fill((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
+	      if (pClusterP->getClusterSize()>0) 
+	        noisDisP->Fill(pClusterP->getTotNoise()/pClusterP->getClusterSize());
+	      if (pClusterP->getTotNoise()>0) 
+	        snRatioP->Fill((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
 	      pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);	
 	    }
 	    StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
