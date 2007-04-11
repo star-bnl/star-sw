@@ -8,19 +8,47 @@ export EMCONLINE_PED_UPDATE=${EMCONLINE_PED_DIR}/update.emconline_ped
 export EMCONLINE_PED_LOG_FILE=${EMCONLINE_PED_DIR}/last_log.emconline_ped.txt
 export EMCONLINE_PED_RUNMODE_FILE=${EMCONLINE_PED_DIR}/RUNMODE.emconline_ped
 export EMCONLINE_PED_FILELIST_FILE=${EMCONLINE_PED_DIR}/runlist.emconline_ped.txt
+export EMCONLINE_PED_FILELIST_VETO_FILE=${EMCONLINE_PED_DIR}/runlist_veto.emconline_ped.txt
 export EMCONLINE_PED_LASTRUN_FILE=${EMCONLINE_PED_DIR}/LAST_TIME_RUN.emconline_ped
 
 export EMCONLINE_PED_BACKUP_DIR=${EMCONLINE_PED_DIR}/backup.emconline_ped
 export EMCONLINE_PED_LOGS_DIR=${EMCONLINE_PED_DIR}/logs.emconline_ped
 export EMCONLINE_PED_TEMP_DIR=${EMCONLINE_PED_DIR}/tmp.emconline_ped
 
-export EMCONLINE_PED_TABLES_DIR=${EMCONLINE_PED_DIR}/tables.emconline_ped
+export EMCONLINE_PED_TABLES_DIR=${EMCONLINE_PED_DIR}/tables.emconline_ped/StarDb/Calibrations/emc
 export EMCONLINE_PED_TABLES_SCRIPT=${EMCONLINE_PED_DIR}/transformBackupHistoToDBTable.C
 
 export EMCONLINE_PED_STARVER=dev
 export EMCONLINE_PED_NEVENTS=2000
 export EMCONLINE_PED_SAVEDB=true
 export EMCONLINE_PED_SAVETABLES=true
+export EMCONLINE_PED_TABLEPERRUN=false
+export EMCONLINE_PED_LASTDAYONLY=true
 
-export EVP_READER_LIB=libevpSO.2.0.so
-export EVP_DIR=/evp
+##################################################################
+# Most recent real configuration in the control room
+
+# EVP_READER_ library location
+if [[ "${EVP_READER_LIB}" == "" ]] ; then export EVP_READER_LIB='/home/emc/online/emc/libevpSO.2.0.so' ; fi
+
+# Event pool mounting point
+if [[ "${EVP_DIR}" == "" ]] ; then export EVP_DIR='/evp' ; fi
+##################################################################
+
+##################################################################
+# External setup required for this monitoring to run
+
+# EVP_READER library location
+if [[ "${EVP_READER_LIB}" == "" ]]
+then
+    export EVP_READER_LIB='libevpSO.2.0.so'
+    echo "EVP_READER library location is not specified, assuming ${EVP_READER_LIB}"
+fi
+
+# Event pool directory mount point
+if [[ "${EVP_DIR}" == "" ]]
+then
+    export EVP_DIR='/evp'
+    echo "Event pool directory is not specified, assuming ${EVP_DIR}"
+fi
+##################################################################

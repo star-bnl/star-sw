@@ -41,10 +41,11 @@ bool processFile(char* line, char* dir)
       			if(istat==0) 
       			{	 
         			for(int i=0;i<4;i++) if(ped[i]) NE[i] =  ped[i]->getNEvents();
-				if(nEventsProc%2==0)
+				if(nEventsProc%100==0)
 				{ 
-					cout << "---------------------- Online Calibration Event : " << nEventsProc+1 << " ----------------------" << endl;							
-				 	for(int i=0;i<4;i++) if(ped[i]) cout <<"  NEvents for "<<ped[i]->GetName()<<" = "<< NE[i] <<endl;
+					//cout << "---------------------- Online Calibration Event : " << nEventsProc+1 << " ----------------------" << endl;							
+				 	//for(int i=0;i<4;i++) if(ped[i]) cout <<"  NEvents for "<<ped[i]->GetName()<<" = "<< NE[i] <<endl;
+					cout << "Event " << nEventsProc << endl;
 				}
 				if(dbMk)   dbMk->Make();
 				if(calib)  calib->Make();
@@ -97,7 +98,6 @@ void makeOnlinePed(char* list = "./runlist.txt"
     memory.PrintMem(0);
     	   
     // Load needed shared libs
-    //gSystem->Load("/home/emc/online/emc/libevpSO.2.0.so");
     gSystem->Load(EVP_READER_LIB);
     gSystem->Load("St_base");
     gSystem->Load("St_Tables");

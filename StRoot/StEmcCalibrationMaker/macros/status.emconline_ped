@@ -16,7 +16,6 @@ fi
 cd ${EMCONLINE_PED_DIR}
 
 export RUNMODE=${1}
-export RUNMODE=`echo ${RUNMODE}`
 
 if [[ "${RUNMODE}" != "" ]]
 then
