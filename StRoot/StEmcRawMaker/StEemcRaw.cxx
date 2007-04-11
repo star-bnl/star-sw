@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.12 2007/03/23 02:18:00 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.13 2007/04/11 03:29:11 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -161,7 +161,7 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId)
             errFlag=0x28;  // bug in box firmawer prior to 2005
 
 	//HACK^2 - disable token check, March 22, 2007
-	token=block.getToken();
+	//token=block.getToken();
 	// end of hack, Jan B.
 
         int trigCommand=4; // physics, 9=laser/LED, 8=??
@@ -386,6 +386,10 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.13  2007/04/11 03:29:11  balewski
+// undo hacks,
+// Endcap code is now in default configuration
+//
 // Revision 1.12  2007/03/23 02:18:00  balewski
 // drop token check, temporay hack
 //
