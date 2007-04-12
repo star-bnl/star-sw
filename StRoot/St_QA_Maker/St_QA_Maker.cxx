@@ -1099,7 +1099,6 @@ void St_QA_Maker::MakeHistVertex(){
         }
       }
     }
-    hists->m_vtx_z->Fill(z_tpc-z_svt);
   }
 
   // V0 vertices
@@ -1308,8 +1307,11 @@ void St_QA_Maker::MakeHistEval(){
 }
 
 //_____________________________________________________________________________
-// $Id: St_QA_Maker.cxx,v 2.23 2007/04/12 20:39:49 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.24 2007/04/12 20:42:05 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.24  2007/04/12 20:42:05  genevb
+// Cleanup (removal) of CalibVtx histograms (forgot one last time)
+//
 // Revision 2.23  2007/04/12 20:39:49  genevb
 // Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
 //
