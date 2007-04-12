@@ -29,7 +29,6 @@
 #include "tables/St_dst_dedx_Table.h"          // dst_dedx
 #include "tables/St_dst_TrgDet_Table.h"        // TrgDet (1 row)
 #include "tables/St_dst_tkf_vertex_Table.h"    // kinkVertex
-#include "tables/St_g2t_rch_hit_Table.h"       // g2t_rch_hit
 #include "tables/St_tpt_track_Table.h"         // l3Track
 
 #include "tables/St_dst_mon_soft_tpc_Table.h"  // TPC software monitor
@@ -348,7 +347,6 @@ void St_QA_Maker::MakeHistGlob(){
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-        Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt)+1.e-10);
         Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt)+1.e-10);
         Float_t x0s  = t->r0 * TMath::Cos(t->phi0*degree);
         Float_t y0s  = t->r0 * TMath::Sin(t->phi0*degree);
@@ -425,7 +423,6 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_momT->Fill(gmom);
         hists->m_lengthT->Fill(t->length);
         hists->m_chisq0T->Fill(chisq0);
-        hists->m_chisq1T->Fill(chisq1);
 	
 // these are for tpc & ftpc
 	if (t->x_first[2]<0)
@@ -441,16 +438,10 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_tanl_zfT->Fill(t->x_first[2]-primVtxZ,t->tanl);
         hists->m_mom_trklengthT->Fill(t->length,lmevmom);
         hists->m_chisq0_momT->Fill(lmevmom,chisq0);
-        hists->m_chisq1_momT->Fill(lmevmom,chisq1);
         hists->m_chisq0_etaT->Fill(eta,chisq0);
-        hists->m_chisq1_etaT->Fill(eta,chisq1);
         hists->m_chisq0_dipT->Fill(t->tanl,chisq0);
-        hists->m_chisq1_dipT->Fill(t->tanl,chisq1);
         hists->m_chisq0_zfT->Fill(t->x_first[2],chisq0);
-        hists->m_chisq1_zfT->Fill(t->x_first[2],chisq1);
         hists->m_chisq0_phiT->Fill(t->phi0,chisq0);
-        hists->m_nfptonpt_momT->Fill(lmevmom,nfitntot);
-        hists->m_nfptonpt_etaT->Fill(eta,nfitntot);
         hists->m_psi_phiT->Fill(t->phi0,t->psi);
         break; }
 
@@ -496,7 +487,6 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_momTS->Fill(gmom);
         hists->m_lengthTS->Fill(t->length);
         hists->m_chisq0TS->Fill(chisq0);
-        hists->m_chisq1TS->Fill(chisq1);
 	
         hists->m_globtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
         hists->m_eta_trklengthTS->Fill(eta,t->length);
@@ -507,16 +497,10 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_tanl_zfTS->Fill(t->x_first[2],t->tanl);
         hists->m_mom_trklengthTS->Fill(t->length,lmevmom);
         hists->m_chisq0_momTS->Fill(lmevmom,chisq0);
-        hists->m_chisq1_momTS->Fill(lmevmom,chisq1);
         hists->m_chisq0_etaTS->Fill(eta,chisq0);
-        hists->m_chisq1_etaTS->Fill(eta,chisq1);
         hists->m_chisq0_dipTS->Fill(t->tanl,chisq0);
-        hists->m_chisq1_dipTS->Fill(t->tanl,chisq1);
         hists->m_chisq0_zfTS->Fill(t->x_first[2],chisq0);
-        hists->m_chisq1_zfTS->Fill(t->x_first[2],chisq1);
         hists->m_chisq0_phiTS->Fill(t->phi0,chisq0);
-        hists->m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
-        hists->m_nfptonpt_etaTS->Fill(eta,nfitntot);
         hists->m_psi_phiTS->Fill(t->phi0,t->psi);
         break; }
 
@@ -742,7 +726,6 @@ void St_QA_Maker::MakeHistPrim(){
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-        Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt )+1.e-10);
         Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt)+1.e-10);
         Float_t logCurvature = TMath::Log10(t->curvature); 
 
@@ -820,7 +803,6 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_prim_yfT->Fill(t->x_first[1]);
         hists->m_prim_zfT->Fill(t->x_first[2]);
         hists->m_prim_radfT->Fill(radf);
-        hists->m_prim_ratioT->Fill(nfitntot);
         hists->m_prim_ratiomT->Fill(nfitnmax);
         hists->m_ppsiT->Fill(t->psi);
         hists->m_ptanlT->Fill(t->tanl);
@@ -830,7 +812,6 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pmomT->Fill(gmom);
         hists->m_plengthT->Fill(t->length);
         hists->m_pchisq0T->Fill(chisq0);
-        hists->m_pchisq1T->Fill(chisq1);
 	
 // these are for tpc & ftpc
 	if (t->x_first[2]<0)
@@ -846,15 +827,9 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_ptanl_zfT->Fill(t->x_first[2]-primVtxZ,t->tanl);
         hists->m_pmom_trklengthT->Fill(t->length,lmevmom);
         hists->m_pchisq0_momT->Fill(lmevmom,chisq0);
-        hists->m_pchisq1_momT->Fill(lmevmom,chisq1);
         hists->m_pchisq0_etaT->Fill(eta,chisq0);
-        hists->m_pchisq1_etaT->Fill(eta,chisq1);
         hists->m_pchisq0_dipT->Fill(t->tanl,chisq0);
-        hists->m_pchisq1_dipT->Fill(t->tanl,chisq1);
         hists->m_pchisq0_zfT->Fill(t->x_first[2],chisq0);
-        hists->m_pchisq1_zfT->Fill(t->x_first[2],chisq1);
-        hists->m_pnfptonpt_momT->Fill(lmevmom,nfitntot);
-        hists->m_pnfptonpt_etaT->Fill(eta,nfitntot);
         hists->m_ppsi_phiT->Fill(t->phi0,t->psi);
         break; }
 
@@ -888,7 +863,6 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_prim_yfTS->Fill(t->x_first[1]);
         hists->m_prim_zfTS->Fill(t->x_first[2]);
         hists->m_prim_radfTS->Fill(radf);
-        hists->m_prim_ratioTS->Fill(nfitntot);
         hists->m_prim_ratiomTS->Fill(nfitnmax);
         hists->m_ppsiTS->Fill(t->psi);
         hists->m_ptanlTS->Fill(t->tanl);
@@ -898,7 +872,6 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pmomTS->Fill(gmom);
         hists->m_plengthTS->Fill(t->length);
         hists->m_pchisq0TS->Fill(chisq0);
-        hists->m_pchisq1TS->Fill(chisq1);
 	
         hists->m_primtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
         hists->m_peta_trklengthTS->Fill(eta,t->length);
@@ -909,15 +882,9 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_ptanl_zfTS->Fill(t->x_first[2]-primVtxZ,t->tanl);
         hists->m_pmom_trklengthTS->Fill(t->length,lmevmom);
         hists->m_pchisq0_momTS->Fill(lmevmom,chisq0);
-        hists->m_pchisq1_momTS->Fill(lmevmom,chisq1);
         hists->m_pchisq0_etaTS->Fill(eta,chisq0);
-        hists->m_pchisq1_etaTS->Fill(eta,chisq1);
         hists->m_pchisq0_dipTS->Fill(t->tanl,chisq0);
-        hists->m_pchisq1_dipTS->Fill(t->tanl,chisq1);
         hists->m_pchisq0_zfTS->Fill(t->x_first[2],chisq0);
-        hists->m_pchisq1_zfTS->Fill(t->x_first[2],chisq1);
-        hists->m_pnfptonpt_momTS->Fill(lmevmom,nfitntot);
-        hists->m_pnfptonpt_etaTS->Fill(eta,nfitntot);
         hists->m_ppsi_phiTS->Fill(t->phi0,t->psi);
         break; }
 
@@ -1279,13 +1246,6 @@ void St_QA_Maker::MakeHistPoint(){
 }
 
 //_____________________________________________________________________________
-void St_QA_Maker::MakeHistRich(){
-  if (Debug()) cout << " *** in St_QA_Maker - filling Rich histograms " << endl;
-  // RICH information is written directly to StEvent now.
-}
-
-
-//_____________________________________________________________________________
 void St_QA_Maker::MakeHistEval(){
   if (Debug()) cout << " *** in St_QA_Maker - filling geant,reco eval histograms " << endl;
 
@@ -1348,8 +1308,11 @@ void St_QA_Maker::MakeHistEval(){
 }
 
 //_____________________________________________________________________________
-// $Id: St_QA_Maker.cxx,v 2.22 2007/04/07 04:40:31 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.23 2007/04/12 20:39:49 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.23  2007/04/12 20:39:49  genevb
+// Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
+//
 // Revision 2.22  2007/04/07 04:40:31  genevb
 // Remove fit pnts/tot; retitle log as log10
 //

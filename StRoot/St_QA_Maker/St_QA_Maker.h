@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.h,v 2.2 2003/02/19 06:38:29 genevb Exp $
+// $Id: St_QA_Maker.h,v 2.3 2007/04/12 20:39:49 genevb Exp $
 // $Log: St_QA_Maker.h,v $
+// Revision 2.3  2007/04/12 20:39:49  genevb
+// Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
+//
 // Revision 2.2  2003/02/19 06:38:29  genevb
 // Rework trigger and mult/event class sections
 //
@@ -46,12 +49,11 @@ class St_QA_Maker : public StQAMakerBase {
   virtual void   MakeHistPID();
   virtual void   MakeHistVertex();
   virtual void   MakeHistPoint();
-  virtual void   MakeHistRich();
   virtual void   MakeHistEval();
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 2.2 2003/02/19 06:38:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 2.3 2007/04/12 20:39:49 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker,0)
 };
