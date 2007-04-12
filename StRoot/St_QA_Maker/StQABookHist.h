@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.24 2007/04/07 04:40:30 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.25 2007/04/12 20:39:48 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.25  2007/04/12 20:39:48  genevb
+// Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
+//
 // Revision 2.24  2007/04/07 04:40:30  genevb
 // Remove fit pnts/tot; retitle log as log10
 //
@@ -106,7 +109,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.24 2007/04/07 04:40:30 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.25 2007/04/12 20:39:48 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -215,7 +218,6 @@ class StQABookHist : public TObject {
   TH2F     *m_glb_chargeF;   //! particle charge in units of |e| - ftpc
   TH1F     *m_glb_chargeFE;  //! particle charge in units of |e| - ftpc east
   TH1F     *m_glb_chargeFW;  //! particle charge in units of |e| - ftpc west
-  TH1F     *m_glb_layerfTS;  //! layer of first point on trk, tpc+svt
   TH1F     *m_glb_r0T;       //! radius at start (cm), tpc 
   TH1F     *m_glb_r0TS;      //! radius at start (cm), tpc+svt
   TH1F     *m_glb_phi0T;     //! azimuthal angle at start (deg), tpc
@@ -258,7 +260,6 @@ class StQABookHist : public TObject {
   TH1F     *m_glb_phifTS;    //! phi dist. of first point on trk, tpc+svt
   TH1F     *m_lengthTS;      //! length of track, tpc+svt
   TH1F     *m_chisq0TS;      //! chi square [0], tpc+svt
-  TH1F     *m_chisq1TS;      //! chi square [1], tpc+svt
   TH2F     *m_glb_impactTS;  //! log impact parameter from primary vertex, tpc+svt
   TH2F     *m_glb_simpactTS; //! signed impact parameter from primary vertex, tpc+svt
   TH2F     *m_glb_impactTTS; //! log impact parameter from primary vertex, tpc,tpc+svt
@@ -308,8 +309,6 @@ class StQABookHist : public TObject {
   TH2F     *m_chisq1F;       //! chi square [1], ftpc
   TH1F     *m_chisq1FE;      //! chi square [1], ftpc east
   TH1F     *m_chisq1FW;      //! chi square [1], ftpc west
-  TH1F     *m_chisq1T;       //! chi square [1], tpc
-  TH2F     *m_chisq1TTS;     //! chi square [1], tpc,svt
   TH2F     *m_glb_impactT;   //! log impact parameter from primary vertex, tpc
   TH2F     *m_glb_simpactT;  //! signed impact parameter from primary vertex, tpc
   TH1F     *m_glb_impactrT;  //! impact parameter from primary vertex, tpc
@@ -344,26 +343,14 @@ class StQABookHist : public TObject {
   TH2F     *m_npoint_lengthFW; //! tot num points vs length, ftpc west
   TH2F     *m_chisq0_momT;     //! chisq0 vs momentum, tpc
   TH2F     *m_chisq0_momTS;    //! chisq0 vs momentum, tpc+svt
-  TH2F     *m_chisq1_momT;     //! chisq1 vs momentum, tpc
-  TH2F     *m_chisq1_momTS;    //! chisq1 vs momentum, tpc+svt
   TH2F     *m_chisq0_etaT;     //! chisq0 vs eta, tpc
   TH2F     *m_chisq0_etaTS;    //! chisq0 vs eta, tpc+svt
-  TH2F     *m_chisq1_etaT;     //! chisq1 vs eta, tpc
-  TH2F     *m_chisq1_etaTS;    //! chisq1 vs eta, tpc+svt
   TH2F     *m_chisq0_dipT;     //! chisq0 vs dip angle, tpc
   TH2F     *m_chisq0_dipTS;    //! chisq0 vs dip angle, tpc+svt
-  TH2F     *m_chisq1_dipT;     //! chisq1 vs dip angle, tpc
-  TH2F     *m_chisq1_dipTS;    //! chisq1 vs dip angle, tpc+svt
   TH2F     *m_chisq0_zfT;      //! chisq0 vs zfirst, tpc 
   TH2F     *m_chisq0_zfTS;     //! chisq0 vs zfirst, tpc+svt
-  TH2F     *m_chisq1_zfT;      //! chisq1 vs zfirst, tpc 
-  TH2F     *m_chisq1_zfTS;     //! chisq1 vs zfirst, tpc+svt
   TH2F     *m_chisq0_phiT;     //! chisq0 vs phi, tpc
   TH2F     *m_chisq0_phiTS;    //! chisq0 vs phi, tpc+svt
-  TH2F     *m_nfptonpt_momT;   //! mom vs ratio of n fit pnts over n pnts, tpc
-  TH2F     *m_nfptonpt_momTS;  //! mom vs ratio of n fit pnts over n pnts, tpc+svt
-  TH2F     *m_nfptonpt_etaT;   //! eta vs ratio of n fit pnts over n pnts, tpc
-  TH2F     *m_nfptonpt_etaTS;  //! eta vs ratio of n fit pnts over n pnts, tpc+svt
   TH2F     *m_psi_phiT;        //! psi vs phi, tpc
   TH2F     *m_psi_phiTS;       //! psi vs phi, tpc+svt
 
@@ -412,8 +399,6 @@ class StQABookHist : public TObject {
   TH1F     *m_pmax_pointFW;   //! number of max possible track points - ftpc west
   TH1F     *m_pfit_pointT;    //! number of track points used for fitting - tpc
   TH1F     *m_pfit_pointTS;   //! number of track points used for fitting - tpc+svt
-  TH1F     *m_prim_ratioT;    //! ratio of n fit pnts over tot n pnts - tpc
-  TH1F     *m_prim_ratioTS;   //! ratio of n fit pnts over tot n pnts - tpc+svt
   TH2F     *m_prim_ratioF;    //! ratio of n fit pnts over tot n pnts - ftpc
   TH1F     *m_prim_ratioFE;   //! ratio of n fit pnts over tot n pnts - ftpc east
   TH1F     *m_prim_ratioFW;   //! ratio of n fit pnts over tot n pnts - ftpc west
@@ -506,9 +491,6 @@ class StQABookHist : public TObject {
   TH2F     *m_pchisq1F;       //! chi square [1], ftpc
   TH1F     *m_pchisq1FE;      //! chi square [1], ftpc east
   TH1F     *m_pchisq1FW;      //! chi square [1], ftpc west
-  TH1F     *m_pchisq1T;       //! chi square [1], tpc
-  TH1F     *m_pchisq1TS;      //! chi square [1], tpc+svt
-  TH2F     *m_pchisq1TTS;     //! chi square [1], tpc,tpc+svt
 
   TH2F     *m_prim_f0;          //! overlayed hist of first point - helix point
   TH2F     *m_prim_f0TS;        //! overlayed hist of first point - helix point
@@ -538,24 +520,12 @@ class StQABookHist : public TObject {
   TH2F     *m_pnpoint_lengthFW; //! tot num points vs length, ftpc west
   TH2F     *m_pchisq0_momT;     //! chisq0 vs momentum, tpc
   TH2F     *m_pchisq0_momTS;    //! chisq0 vs momentum, tpc+svt
-  TH2F     *m_pchisq1_momT;     //! chisq1 vs momentum, tpc
-  TH2F     *m_pchisq1_momTS;    //! chisq1 vs momentum, tpc+svt
   TH2F     *m_pchisq0_etaT;     //! chisq0 vs eta, tpc
   TH2F     *m_pchisq0_etaTS;    //! chisq0 vs eta, tpc+svt
-  TH2F     *m_pchisq1_etaT;     //! chisq1 vs eta, tpc
-  TH2F     *m_pchisq1_etaTS;    //! chisq1 vs eta, tpc+svt
   TH2F     *m_pchisq0_dipT;     //! chisq0 vs dip angle, tpc
   TH2F     *m_pchisq0_dipTS;    //! chisq0 vs dip angle, tpc+svt
-  TH2F     *m_pchisq1_dipT;     //! chisq1 vs dip angle, tpc
-  TH2F     *m_pchisq1_dipTS;    //! chisq1 vs dip angle, tpc+svt
   TH2F     *m_pchisq0_zfT;      //! chisq0 vs zfirst, tpc 
   TH2F     *m_pchisq0_zfTS;     //! chisq0 vs zfirst, tpc+svt
-  TH2F     *m_pchisq1_zfT;      //! chisq1 vs zfirst, tpc 
-  TH2F     *m_pchisq1_zfTS;     //! chisq1 vs zfirst, tpc+svt
-  TH2F     *m_pnfptonpt_momT;   //! mom vs ratio of n fit pnts over n pnts, tpc
-  TH2F     *m_pnfptonpt_momTS;  //! mom vs ratio of n fit pnts over n pnts, tpc+svt
-  TH2F     *m_pnfptonpt_etaT;   //! eta vs ratio of n fit pnts over n pnts, tpc
-  TH2F     *m_pnfptonpt_etaTS;  //! eta vs ratio of n fit pnts over n pnts, tpc+svt
   TH2F     *m_ppsi_phiT;        //! psi vs phi, tpc
   TH2F     *m_ppsi_phiTS;       //! psi vs phi, tpc+svt
 
@@ -579,10 +549,6 @@ class StQABookHist : public TObject {
   TH2F     *m_pv_xy;    //! x versus y
   TH1F     *m_pv_pchi2; //! row1-chisq per dof of vertex fit
   TH1F     *m_pv_r;     //! radius to primary vertex
-  TH2F     *m_pv_SvtvsTpc;   //! SVT prim vtx vs TPC prim vtx
-
-  TH1F     *m_vtx_z;    //! resolution of SVT vertex finder relative
-                        //! to main vertex finder
 
   TH1F     *m_vtx_phi_dist;  //! azimuthal distribution of V0s relative to primVtx
   TH1F     *m_vtx_r_dist;  //! radial distribution of V0s relative to primVtx
@@ -637,9 +603,6 @@ class StQABookHist : public TObject {
   TH2F     *m_pnt_svtLaser;     //! laser spots in svt
   TH3F     *m_pnt_svtLaserDiff; //! diff of laser spots in svt
     
-// for method MakeHistRich
-  TH1F     *m_rich_tot;   //! number of rich hits
-
   // for method MakeHistEval
   TH1F *m_geant_reco_pvtx_x;  //! prim vtx x, diff geant - reco
   TH1F *m_geant_reco_pvtx_y;  //! prim vtx y, diff geant - reco
@@ -715,7 +678,6 @@ class StQABookHist : public TObject {
   virtual void   BookHistPID();
   virtual void   BookHistVertex();
   virtual void   BookHistPoint();
-  virtual void   BookHistRich();
   virtual void   BookHistEMC();
   virtual void   BookHistEval();
   virtual void   BookHistBBC();

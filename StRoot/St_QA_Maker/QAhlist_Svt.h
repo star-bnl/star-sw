@@ -1,5 +1,8 @@
-// $Id: QAhlist_Svt.h,v 2.2 2007/04/07 04:40:30 genevb Exp $
+// $Id: QAhlist_Svt.h,v 2.3 2007/04/12 20:39:48 genevb Exp $
 // $Log: QAhlist_Svt.h,v $
+// Revision 2.3  2007/04/12 20:39:48  genevb
+// Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
+//
 // Revision 2.2  2007/04/07 04:40:30  genevb
 // Remove fit pnts/tot; retitle log as log10
 //
@@ -38,4 +41,3 @@
   "QaPtrkMeanEtaTTS",
   "QaPtrkPsiTTS",
   "QaPtrkRZf0TS",
-  "QaVtxSvtvsTpc"

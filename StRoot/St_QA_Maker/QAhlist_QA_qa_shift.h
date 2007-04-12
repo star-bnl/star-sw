@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_qa_shift.h,v 2.8 2007/03/13 18:37:53 genevb Exp $
+// $Id: QAhlist_QA_qa_shift.h,v 2.9 2007/04/12 20:39:48 genevb Exp $
 // $Log: QAhlist_QA_qa_shift.h,v $
+// Revision 2.9  2007/04/12 20:39:48  genevb
+// Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
+//
 // Revision 2.8  2007/03/13 18:37:53  genevb
 // simplified names
 //
@@ -39,7 +42,6 @@
      "fcl_radialW",
      "fcl_radialE",
 
-     "QaGtrkRnfT",
      "QaGtrkR0T",
      "QaGtrkPhi0T",
      "QaGtrkZ0T",
@@ -59,13 +61,10 @@
      "QaGtrkFitPntLengthT",
      "QaGtrkChi0EtaT",
      "QaGtrkChi0PhiT",
-     "QaGtrkRPntMomT",
-     "QaGtrkRPntEtaT",
      "QaPtrkTot",
      "QaPtrkGood",
      "QaPtrkNPntT",
      "QaPtrkNPntFitT",
-     "QaPtrkRnfT",
      "QaPtrkPhi0T",
      "QaPtrkXfT",
      "QaPtrkYfT",
@@ -76,7 +75,6 @@
      "QaPtrkTanlT",
      "QaPtrkPtT",
      "QaPtrkChisq0T",
-     "QaPtrkChisq1T",
      "QaPtrkImpactT",
      "QaPtrkImpactrT",
      "QaPtrkPtVsEtaT",
@@ -84,9 +82,6 @@
      "QaPtrkLengthVEtaT",
      "QaPtrkNPntLengthT",
      "QaPtrkChi0EtaT",
-     "QaPtrkChi1EtaT",
-     "QaPtrkRPntMomT",
-     "QaPtrkRPntEtaT",
      "QaPtrkPsiPhiT",
      "QaPidGlobtrkDstdedxPVsDedx",
      "QaVtxNum",

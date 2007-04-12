@@ -440,8 +440,6 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t lmevmom = TMath::Log10(1e-30+gmom*1000.0);
       Float_t chisq0 = fTraits.chi2(0);
       Float_t chisq1 = fTraits.chi2(1);
-      Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints())) /
-	(Float_t(detInfo->numberOfPoints())+1.e-10);
       Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
 	(Float_t(globtrk->numberOfPossiblePoints())+1.e-10);
       const StThreeVectorF& firstPoint = detInfo->firstPoint();
@@ -622,8 +620,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_lengthT->Fill(globtrk->length());
         hists->m_chisq0T->Fill(chisq0);
         hists->m_chisq0TTS->Fill(chisq0,1.);
-        hists->m_chisq1T->Fill(chisq1);
-        hists->m_chisq1TTS->Fill(chisq1,1.);
 	
 	if (firstPoint.z()<0)
 	  hists->m_globtrk_xf_yfTE->Fill(firstPoint.x(),
@@ -651,16 +647,10 @@ void StEventQAMaker::MakeHistGlob() {
 	}
         hists->m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
         hists->m_chisq0_momT->Fill(lmevmom,chisq0);
-        hists->m_chisq1_momT->Fill(lmevmom,chisq1);
         hists->m_chisq0_etaT->Fill(eta,chisq0);
-        hists->m_chisq1_etaT->Fill(eta,chisq1);
         hists->m_chisq0_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq0);
-        hists->m_chisq1_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq1);
         hists->m_chisq0_zfT->Fill(firstPoint.z(),chisq0);
-        hists->m_chisq1_zfT->Fill(firstPoint.z(),chisq1);
 	hists->m_chisq0_phiT->Fill(orphi,chisq0);
-        hists->m_nfptonpt_momT->Fill(lmevmom,nfitntot);
-        hists->m_nfptonpt_etaT->Fill(eta,nfitntot);
         hists->m_psi_phiT->Fill(orphi,psi);
       }
       
@@ -698,14 +688,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_impactTTS->Fill(logImpact,0.);
         hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),0.);
 	
-	// SVT barrel histogram - causes segmentation violation currently
-	//   => use m_glb_radfTS for now. -CPL
-	//StSvtCoordinateTransform transformer;
-	//StGlobalCoordinate globalHitPosition(firstPoint);
-	//StSvtLocalCoordinate layerCoord;
-	//transformer(globalHitPosition,layerCoord);
-        //hists->m_glb_layerfTS->Fill(layerCoord.layer())
-	
         hists->m_pointTS->Fill(detInfo->numberOfPoints());
         hists->m_max_pointTS->Fill(globtrk->numberOfPossiblePoints());
         hists->m_fit_pointTS->Fill(fTraits.numberOfFitPoints());
@@ -742,8 +724,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_lengthTS->Fill(globtrk->length());
         hists->m_chisq0TS->Fill(chisq0);
         hists->m_chisq0TTS->Fill(chisq0,0.);
-        hists->m_chisq1TS->Fill(chisq1);
-        hists->m_chisq1TTS->Fill(chisq1,0.);
         hists->m_globtrk_xf_yfTS->Fill(firstPoint.x(),
 				       firstPoint.y());
         hists->m_eta_trklengthTS->Fill(eta,globtrk->length());
@@ -772,17 +752,11 @@ void StEventQAMaker::MakeHistGlob() {
 	}
         hists->m_mom_trklengthTS->Fill(globtrk->length(),lmevmom);
         hists->m_chisq0_momTS->Fill(lmevmom,chisq0);
-        hists->m_chisq1_momTS->Fill(lmevmom,chisq1);
         hists->m_chisq0_etaTS->Fill(eta,chisq0);
-        hists->m_chisq1_etaTS->Fill(eta,chisq1);
         hists->m_chisq0_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq0);
-        hists->m_chisq1_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq1);
         hists->m_chisq0_zfTS->Fill(firstPoint.z(),chisq0);
-        hists->m_chisq1_zfTS->Fill(firstPoint.z(),chisq1);
 	hists->m_chisq0_phiTS->Fill(orphi,chisq0);
 	
-        hists->m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
-        hists->m_nfptonpt_etaTS->Fill(eta,nfitntot);
         hists->m_psi_phiTS->Fill(orphi,psi);
       }
       
@@ -1041,8 +1015,6 @@ void StEventQAMaker::MakeHistPrim() {
 	Float_t chisq1 = fTraits.chi2(1);
 	Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
 	  (Float_t(primtrk->numberOfPossiblePoints())+1.e-10);
-        Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints()))/
-	  (Float_t(detInfo->numberOfPoints())+1.e-10);
 	Float_t logCurvature = TMath::Log10(1e-30+geom->curvature());
 	
         const StThreeVectorF& firstPoint = detInfo->firstPoint();
@@ -1167,7 +1139,6 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_yfT->Fill(firstPoint.y());
 	  hists->m_prim_zfT->Fill(firstPoint.z());
 	  hists->m_prim_radfT->Fill(radf);
-	  hists->m_prim_ratioT->Fill(nfitntot);
 	  hists->m_prim_ratiomT->Fill(nfitnmax);
 	  hists->m_ppsiT->Fill(psi);
 	  hists->m_ppsiTTS->Fill(psi,1.);
@@ -1180,9 +1151,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomT->Fill(gmom);
 	  hists->m_plengthT->Fill(primtrk->length());
 	  hists->m_pchisq0T->Fill(chisq0);
-	  hists->m_pchisq1T->Fill(chisq1);
 	  hists->m_pchisq0TTS->Fill(chisq0,1.);
-	  hists->m_pchisq1TTS->Fill(chisq1,1.);
 	  
 	  // these are for TPC & FTPC
 	  if (firstPoint.z()<0)
@@ -1210,15 +1179,9 @@ void StEventQAMaker::MakeHistPrim() {
 				   Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthT->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momT->Fill(lmevmom,chisq0);
-	  hists->m_pchisq1_momT->Fill(lmevmom,chisq1);
 	  hists->m_pchisq0_etaT->Fill(eta,chisq0);
-	  hists->m_pchisq1_etaT->Fill(eta,chisq1);
 	  hists->m_pchisq0_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq0);
-	  hists->m_pchisq1_dipT->Fill(TMath::Tan(geom->dipAngle()),chisq1);
 	  hists->m_pchisq0_zfT->Fill(firstPoint.z(),chisq0);
-	  hists->m_pchisq1_zfT->Fill(firstPoint.z(),chisq1);
-	  hists->m_pnfptonpt_momT->Fill(lmevmom,nfitntot);
-	  hists->m_pnfptonpt_etaT->Fill(eta,nfitntot);
 	  hists->m_ppsi_phiT->Fill(orphi,psi);
 	}
 	
@@ -1256,7 +1219,6 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_yfTS->Fill(firstPoint.y());
 	  hists->m_prim_zfTS->Fill(firstPoint.z());
 	  hists->m_prim_radfTS->Fill(radf);
-	  hists->m_prim_ratioTS->Fill(nfitntot);
 	  hists->m_prim_ratiomTS->Fill(nfitnmax);
 	  hists->m_ppsiTS->Fill(psi);
 	  hists->m_ppsiTTS->Fill(psi,0.);
@@ -1269,9 +1231,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomTS->Fill(gmom);
 	  hists->m_plengthTS->Fill(primtrk->length());
 	  hists->m_pchisq0TS->Fill(chisq0);
-	  hists->m_pchisq1TS->Fill(chisq1);
 	  hists->m_pchisq0TTS->Fill(chisq0,0.);
-	  hists->m_pchisq1TTS->Fill(chisq1,0.);
 	  
 	  hists->m_primtrk_xf_yfTS->Fill(firstPoint.x(),
 					 firstPoint.y());
@@ -1297,15 +1257,9 @@ void StEventQAMaker::MakeHistPrim() {
 		 Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthTS->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momTS->Fill(lmevmom,chisq0);
-	  hists->m_pchisq1_momTS->Fill(lmevmom,chisq1);
 	  hists->m_pchisq0_etaTS->Fill(eta,chisq0);
-	  hists->m_pchisq1_etaTS->Fill(eta,chisq1);
 	  hists->m_pchisq0_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq0);
-	  hists->m_pchisq1_dipTS->Fill(TMath::Tan(geom->dipAngle()),chisq1);
 	  hists->m_pchisq0_zfTS->Fill(firstPoint.z(),chisq0);
-	  hists->m_pchisq1_zfTS->Fill(firstPoint.z(),chisq1);
-	  hists->m_pnfptonpt_momTS->Fill(lmevmom,nfitntot);
-	  hists->m_pnfptonpt_etaTS->Fill(eta,nfitntot);
 	  hists->m_ppsi_phiTS->Fill(orphi,psi);
 
           // SVT drift plots
@@ -1343,7 +1297,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomF->Fill(gmom,0.);
 	  hists->m_plengthF->Fill(primtrk->length(),0.);
 	  hists->m_pchisq0F->Fill(chisq0,0.);	
-          hists->m_pchisq1F->Fill(chisq1,0.);
+	  hists->m_pchisq1F->Fill(chisq1,0.);
 	  // east and west in separate histograms
 	  hists->m_ppointFE->Fill(detInfo->numberOfPoints());
 	  hists->m_pmax_pointFE->Fill(primtrk->numberOfPossiblePoints());
@@ -1359,7 +1313,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomFE->Fill(gmom);
 	  hists->m_plengthFE->Fill(primtrk->length());
 	  hists->m_pchisq0FE->Fill(chisq0);
-          hists->m_pchisq1FE->Fill(chisq1);
+	  hists->m_pchisq1FE->Fill(chisq1);
 	  
 	  // these are for TPC & FTPC
 	  hists->m_ppT_eta_recFE->Fill(eta,lmevpt);
@@ -1577,12 +1531,8 @@ void StEventQAMaker::MakeHistVertex() {
     }
   }
   
-  float z_svt = 999.;
-  float z_tpc = -999.;
   for (UInt_t j=0; j<event->numberOfCalibrationVertices(); j++) {
     StCalibrationVertex *aCalibVtx = event->calibrationVertex(j);
-    if (aCalibVtx->flag() == 101) z_tpc = aCalibVtx->position().z();
-    if (aCalibVtx->flag() == 201) z_svt = aCalibVtx->position().z();
     if (aCalibVtx->type() == 6 ) {
       hists->m_vtx_FtpcEastTpc_xy->Fill(aCalibVtx->position().x() - pvert.x(),
 					aCalibVtx->position().y() - pvert.y());
@@ -1593,10 +1543,6 @@ void StEventQAMaker::MakeHistVertex() {
 					aCalibVtx->position().y() - pvert.y());
       hists->m_vtx_FtpcWestTpc_z->Fill(aCalibVtx->position().z() - pvert.z());
     }
-  }
-  if (z_svt != 999. && z_tpc != -999.) {
-    hists->m_vtx_z->Fill(z_tpc-z_svt);
-    hists->m_pv_SvtvsTpc->Fill(z_svt,z_tpc);
   }
   
   // V0 vertices
@@ -1847,7 +1793,7 @@ void StEventQAMaker::MakeHistPoint() {
             // Laser spots:
             // barrel 3, ladder 15, wafer 7
             if (i==2 && j==14 && k==6 && svthit->hybrid() == 1 &&
-                svthit->anode() >= 195 && svthit->anode() <= 201 &&
+                svthit->anode() >= 196 && svthit->anode() <= 204 &&
                 svthit->timebucket() >= 90) {
               hists->m_pnt_svtLaser->Fill(eventCount,svthit->timebucket());
               SvtLaser1t[SvtLaser1] = svthit->timebucket();
@@ -1858,7 +1804,7 @@ void StEventQAMaker::MakeHistPoint() {
             }
             // barrel 3, ladder 7, wafer 1
             if (i==2 && j==6 && k==0 && svthit->hybrid() == 2 &&
-                svthit->anode() >= 195 && svthit->anode() <= 200 &&
+                svthit->anode() >= 196 && svthit->anode() <= 204 &&
                 svthit->timebucket() >= 90) {
               hists->m_pnt_svtLaser->Fill(eventCount,svthit->timebucket()/2.);
               SvtLaser2t[SvtLaser2] = svthit->timebucket();
@@ -2235,8 +2181,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.74 2007/04/07 04:40:30 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.75 2007/04/12 20:39:48 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.75  2007/04/12 20:39:48  genevb
+// Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
+//
 // Revision 2.74  2007/04/07 04:40:30  genevb
 // Remove fit pnts/tot; retitle log as log10
 //

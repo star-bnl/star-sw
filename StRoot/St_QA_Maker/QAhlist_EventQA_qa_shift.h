@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.29 2007/04/07 04:40:29 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.30 2007/04/12 20:39:48 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.30  2007/04/12 20:39:48  genevb
+// Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
+//
 // Revision 2.29  2007/04/07 04:40:29  genevb
 // Remove fit pnts/tot; retitle log as log10
 //
@@ -119,7 +122,6 @@
   "QaPointPadrowT",
   "QaPointBarrelS",
   "QaPointPlaneF",
-  "QaRichTot",
   "QaGtrkZfTS",
   "QaGtrkPhifTS",
   "QaGtrkZfT",
@@ -137,7 +139,6 @@
   "QaGtrkEtaF",
   "QaGtrkPF",
   "QaGtrkChisq0T",
-  "QaGtrkChisq1T",
   "QaGtrkFlag",
   "QaGtrkGoodTot",
   "QaGtrkNPntFitTTS",
@@ -163,14 +164,12 @@
   "QaPtrkMeanEtaF",
   "QaPtrkGoodTTS",
   "QaPtrkChisq0TTS",
-  "QaPtrkChisq1TTS",
   "QaPtrkFlag",
   "QaPtrkGlob",
   "QaPtrkFitPntLTTS",
   "QaNullPrimVtxMult",
   "QaVtxPrXY",
   "QaVtxPrZ",
-  "QaVtxSvtvsTpc",
   "QaVtxFtpcETpcXY",
   "QaVtxFtpcETpcZ",
   "QaVtxFtpcWTpcXY",
