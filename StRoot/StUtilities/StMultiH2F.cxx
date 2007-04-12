@@ -84,6 +84,7 @@ void StMultiH2F::Draw(Option_t *option) {
   // Draw statistics for full set if stats are turned on
   if (!TestBit(kNoStats)) {
     temp[0] = XYProjection(GetName());
+    temp[0]->Reset();
     temp[0]->SetEntries(GetEntries());
     temp[0]->SetStats(kTRUE);
     temp[0]->Draw(sameoption.Data());
@@ -113,8 +114,11 @@ TH2D* StMultiH2F::XYProjection(const char* name, Int_t zbin) {
   return temp;
 }
 
-// $Id: StMultiH2F.cxx,v 1.1 2007/03/13 16:22:31 genevb Exp $
+// $Id: StMultiH2F.cxx,v 1.2 2007/04/12 22:39:13 genevb Exp $
 // $Log: StMultiH2F.cxx,v $
+// Revision 1.2  2007/04/12 22:39:13  genevb
+// Remove drawing of underflows
+//
 // Revision 1.1  2007/03/13 16:22:31  genevb
 // Introduce StMultiH2F class
 //
