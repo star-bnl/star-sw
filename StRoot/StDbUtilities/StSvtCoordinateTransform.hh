@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.16 2007/03/21 16:41:07 fisyak Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.17 2007/04/13 16:10:34 fisyak Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -77,10 +77,6 @@ public:
   void setVelocityScale( double deltaV);
   int  LocaltoGlobal(const StSvtLocalCoordinate&,   StThreeVector<double>& x, int Index);
   int  GlobaltoLocal(const StThreeVector<double>& x , StSvtLocalCoordinate&, int HardWarePos, int Index );
-  double CalcDriftLength(const StSvtWaferCoordinate&, double x);
-  double UnCalcDriftLength(const StSvtLocalCoordinate&, double x);
-  double CalcTransLength(double x);
-  double UnCalcTransLength(double x);
   int IsOnWaferZ( const StThreeVector<double>& x, int HardWarePos);
   int IsOnWaferR(const StThreeVector<double>& x, int HardWarePos);
   void setDriftVelocity();

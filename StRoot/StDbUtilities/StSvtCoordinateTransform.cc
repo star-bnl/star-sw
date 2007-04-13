@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.39 2007/03/21 16:41:07 fisyak Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.40 2007/04/13 16:10:34 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -180,58 +180,15 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a, StSvtWafe
 void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLocalCoordinate& b)
 
 {
-  double t0;
-  if (mT0)
-    t0=mT0->getT0();
-  else
-    t0 = 0;
-
   b.setLayer(a.layer());
   b.setLadder(a.ladder());
   b.setWafer(a.wafer());
   b.setHybrid(a.hybrid());
 
-#if 0
-  double t = a.timebucket() - t0;
-
-  b.setPosition(StThreeVector<double>(CalcDriftLength(a,t),
-				      CalcTransLength(a.anode()),0.0));
-#else
   St_svtHybridDriftVelocityC *d = St_svtHybridDriftVelocityC::instance();
-  b.setPosition(StThreeVector<double>(d->CalcDriftLength(a.barrel(),a.ladder(),a.wafer(),a.hybrid(),a.timebucket()),
-				      d->CalcTransLength(a.anode()),
+  b.setPosition(StThreeVector<double>(d->CalcU(a.barrel(),a.ladder(),a.wafer(),a.hybrid(),a.timebucket(),a.anode()),
+				      d->CalcV(a.hybrid(),a.anode()),
 				      0.0));
-#endif
-  
-  //  int idShape = 0;
-  
-  
-  // Shift position because it is the North hybrid. Place relative to the center of the wafer, hybrid=1, anode 1=East
-  if( a.hybrid() == 1 ){
-    
-    //    b.position().setX( b.position().x() - mshape[idShape].shape[0]);
-    //    b.position().setY( b.position().y() - mshape[idShape].shape[1]);
-    b.position().setX( b.position().x() - mgeom->getWaferLength());
-    b.position().setY( b.position().y() - mgeom->getWaferWidth());
-  }
-  
-  //Shift position because it is South hybrid. Place relative to the center of the wafer. Hybrid=2, anode 1=West
-  
-  
-  if( a.hybrid() == 2){
-    
-    //    b.position().setX( mshape[idShape].shape[0] - b.position().x());
-    //    b.position().setY( mshape[idShape].shape[1] - b.position().y());
-    b.position().setX( mgeom->getWaferLength() - b.position().x());
-    b.position().setY( mgeom->getWaferWidth() - b.position().y());
-  }
-#if 0
-  if (mdriftVelCorr) {
-    Double_t u = b.position().x();
-    Double_t du = mdriftVelCorr->CalcCorrection(b.layer(),b.ladder(),b.wafer(),b.hybrid(),u);
-    b.position().setX(u - du);
-  }
-#endif
   return;
 }
 //_____________________________________________________________________________
@@ -241,12 +198,6 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 
 void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWaferCoordinate& b)
 {
-  double t0;
-  if (mT0)
-    t0=mT0->getT0();
-  else
-    t0 = 0;
-
   StThreeVector<double> pos(0,0,0);
 
   b.setLayer(a.layer());
@@ -255,38 +206,13 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWa
   b.setHybrid(a.hybrid());
   
   //  int idShape = 0;
-  
-  
-  // Shift position because it is the North hybrid. Local coords are placed relative to the center of the wafer, hybrid=1, anode 1=East so undo this
-  if( a.hybrid() == 1 ){
-    
-    //   pos.setX( a.position().x() + mshape[idShape].shape[0]);
-    //   pos.setY( a.position().y() + mshape[idShape].shape[1]);
-    pos.setX( a.position().x() + mgeom->getWaferLength());
-    pos.setY( a.position().y() + mgeom->getWaferWidth());
-  }
-  
-  //Shift position because it is South hybrid. Local coords are placed relative to the center of the wafer. Hybrid=2, anode 1=West so undo this
-  
-  
-  if( a.hybrid() == 2){
-    
-    //    pos.setX( mshape[idShape].shape[0] - a.position().x());
-    //    pos.setY( mshape[idShape].shape[1] - a.position().y());
-    pos.setX( mgeom->getWaferLength() - a.position().x());
-    pos.setY( mgeom->getWaferWidth() - a.position().y());
-  }
-  
-
-#if 0
-  double t = UnCalcDriftLength(a,pos.x()) + t0;
-  b.setTimeBucket(t);
-  b.setAnode(UnCalcTransLength(pos.y()));
-#else
   St_svtHybridDriftVelocityC *d = St_svtHybridDriftVelocityC::instance();
-  b.setTimeBucket(d->UnCalcDriftLength(b.barrel(),b.ladder(),b.wafer(),b.hybrid(),pos.x()));
-  b.setAnode(d->UnCalcTransLength(pos.y()));
-#endif
+  b.setTimeBucket(-99);
+  b.setAnode(-99);
+  if (d) {
+    b.setTimeBucket(d->UnCalcU(b.barrel(),b.ladder(),b.wafer(),b.hybrid(),pos.x()));
+    b.setAnode(d->UnCalcV(b.hybrid(),pos.y()));
+  }
   return;
 
 }
@@ -384,13 +310,7 @@ int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThr
   Double_t xg[3];
   waferGeom->LocalToMaster(xl,xg);
   if (_debug) cout << "xg \t" << xg[0] << "\t" << xg[1] << "\t" << xg[2] << endl;
-#if 0  
-  x.setX(waferGeom->x(0) + xl[0]*waferGeom->d(0) + xl[1]*waferGeom->t(0) + xl[2]*waferGeom->n(0)); 
-  x.setY(waferGeom->x(1) + xl[0]*waferGeom->d(1) + xl[1]*waferGeom->t(1) + xl[2]*waferGeom->n(1));
-  x.setZ(waferGeom->x(2) + xl[0]*waferGeom->d(2) + xl[1]*waferGeom->t(2) + xl[2]*waferGeom->n(2)); 
-#else
   x.setX(xg[0]); x.setY(xg[1]); x.setZ(xg[2]); 
-#endif
   if (_debug) cout << "x \t" << x.x() << "\t" << x.y() << "\t" << x.z() << endl;
   
   return index;
@@ -462,17 +382,7 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
   
   waferGeom->MasterToLocal(xg,xl);
   if (_debug) cout << "xl \t" << xl[0] << "\t" << xl[1] << "\t" << xl[2] << endl;
-#if 0 
-  xl[0] = x.x() - waferGeom->x(0);
-  xl[1] = x.y() - waferGeom->x(1);
-  xl[2] = x.z() - waferGeom->x(2);
-
-  b.position().setX(xl[0]*waferGeom->d(0) + xl[1]*waferGeom->d(1) + xl[2]*waferGeom->d(2));
-  b.position().setY(xl[0]*waferGeom->t(0) + xl[1]*waferGeom->t(1) + xl[2]*waferGeom->t(2));
-  b.position().setZ(xl[0]*waferGeom->n(0) + xl[1]*waferGeom->n(1) + xl[2]*waferGeom->n(2));
-#else
   b.position().setX(xl[0]); b.position().setY(xl[1]); b.position().setZ(xl[2]); 
-#endif 
   if (_debug) cout << "x \t" << b.position().x() << "\t" << b.position().y() << "\t" << b.position().z() << endl;
 
   // cout << index << " " << b.position() <<  " " << waferGeom->x(0) << " " <<   waferGeom->x(1) << " " << waferGeom->x(2)  << "  " << x.x() << " "
@@ -482,222 +392,6 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
 }
 
 //_____________________________________________________________________________
-
-double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, double x){
-
-  //Gives drift distance of spt in cm in local coords from timebuckets
-
-
-  // There is a smaller drift velocity in the focusing region 
-  //  This has to be used when having only the average drift velocity across 
-  //  the all detector 
-       
-  //  mparam->vd = average velocity from y=0 to y=3cm
-  //   v2 = velocity in drift region ( y > ofoc cm)
-  //   v1 = velocity in focusing region ( y < ofoc cm)
-  //     a,b = parameters from Sanjeev's fit 
-
-  //double aa,bb,cc,v2,v1,t;
-  double distance;
-  
-  //double a=1.80;
-  //double b=240000;
-  // Correct value double d=0.27;
-  //double d = 0.;
-  //double l=mshape[0].shape[0];
-
-
-
-//   aa=l/mparam->vd;
-//   bb=(b*l/mparam->vd-l-a*d+d);
-//   cc=(d*b-b*l);
-//   v2=(-bb+::sqrt(::pow(bb,2)-4*aa*cc))/(2*aa);
-//   v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
-  
-//   v1=v1*0.8;  
-  
-//   t=x/mparam->fsca;
-  
-  
-//   distance= (v1*t);
-    
-//   if (distance>d) distance=d+v2*(t-d/v1);
-  
-  // hard wired for the time being (07/29/2001) MM
-  //float vd = 675000;
-  //float fsca = 25000000;
-
-  float fsca;
-  if (mT0)
-    fsca = mT0->getFsca();
-  else
-    fsca = 25000000;
-
-  int barrel=-1;
-  if (a.layer()>0) barrel = (a.layer()+1)/2;
-  int ladder = a.ladder();
-  int wafer = a.wafer();
-  int hybrid = a.hybrid();
-
-  float vd = -1;
-  int index;
-
-#if 0
-  int anode;
-  float td = -1;
-  double Ratio = 1;
-  if (mDriftVelocity && mDriftCurve) 
-    {
-      index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
-      if (index >= 0 && mDriftVelocity->at(index))
-	{
-	  vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
-	    mDeltaDriftVelocity;
-	  td = 3.0*10e5 / vd;  // time for longest drift (3 cm)
-	  if (a.anode()<=80)
-	    anode=1;  // anode 40 fit
-	  else if (a.anode()>80 && a.anode()<=160)
-	    anode=2;  // anode 120 fit
-	  else if (a.anode()>160)
-	    anode=3;  // anode 200 fit
-	  else
-	    gMessMgr->Warning() << "Error: non-sensical anode number: " << x << endm;
-	
-// 	  cout << "Working on anode: " << a.anode() << endl;
-
-	  for(Int_t j=1; j<=10; j++)
-	    {
-	      mPoly9->SetParameter(j-1,((StSvtHybridDriftCurve*)mDriftCurve->at(index))->getParameter(anode,j));
-	      // gMessMgr->Info() << "got parameter (" << j-1 << "): " << mPoly9->GetParameter(j-1) << " for index " << index <<  endm;
-	      
-	    }
-	  
-	  double NewDist= mPoly9->Eval(td); // get bench distance at datas 3cm drift
-	  Ratio = 3.0*10/(NewDist); // Richard stores in mm/Mus must fix that some time
-	  distance = mPoly9->Eval(x*Ratio*10e5/fsca)/10;
-	  //cout << " Full drift " << mPoly9->Eval(td*Ratio)/10 << " new distance " << distance << " original distance " <<  vd*x/fsca << endl;
-	  if( TMath::Abs(distance-vd*x/fsca) > 0.03) {
-	    //cout << " index = " << index << "Got crazy result using data drift vel " << 
-	    // distance << " " << vd*x/fsca <<  endl;
-	   
-	    return vd*x/fsca;
-	  }
-	  //cout << "Got good result " << 
-	  // distance << " index = " << index <<" " << vd*x/fsca <<  endl;
-	  return distance;
-	  
-	}
-    }
-  else 
-#endif
-    if (mDriftVelocity) 
-   {
-      //       gMessMgr->Warning() << "mDriftCurve is NULL: " << x << endm;
-      index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
-      if (index >= 0 && mDriftVelocity->at(index))
-	{
-	  vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
-	    mDeltaDriftVelocity;
-	}
-    
-    }
-  if (vd < 0)
-    vd = 675000*mDeltaDriftVelocity;
-
-  
-
-  //cout << "index = " << index << ", vd = " << vd << endl;
-
-  //distance = mparam->vd*x/mparam->fsca;
-  distance = vd*x/fsca;
-  return distance;
-  
-}
-
-//_____________________________________________________________________________
-
-double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a, double x){
-
-  //Gives drift distance of spt in timebuckets from cm in local coords
-
-
-
-  // There is a smaller drift velocity in the focusing region 
-  //  This has to be used when having only the average drift velocity across 
-  //  the all detector 
-       
-  //  mparam->vd = average velocity from y=0 to y=3cm
-  //   v2 = velocity in drift region ( y > ofoc cm)
-  //   v1 = velocity in focusing region ( y < ofoc cm)
-  //     a,b = parameters from Sanjeev's fit 
-
- //  double aa,bb,cc,v2,v1,t;
-  
-//   double a=1.80;
-//   double b=240000;
-//   //COrrect in principle double d=0.27;
-//   double d=0;
-//   double l=mshape[0].shape[0];
-
-
-
-//   aa=l/mparam->vd;
-//   bb=(b*l/mparam->vd-l-a*d+d);
-//   cc=(d*b-b*l);
-//   v2=(-bb+::sqrt(::pow(bb,2)-4*aa*cc))/(2*aa);
-//   v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
-  
-//   v1=v1*0.8;  
-  
-//   t= x/v1;
-
-//   if (x>d) t = (x-d)/v2 + d/v1;
-
-  // hard wired for the time being (07/29/2001) MM
-  //float vd = 675000;
-  //float fsca = 25000000;
-
-  float fsca = (mT0)? mT0->getFsca():25000000;
-
-  int barrel = (a.layer()>0) ? (a.layer()+1)/2 : -1;
-
-  float vd = -1;
-  if (mDriftVelocity) {
-    int index = mDriftVelocity->getHybridIndex(barrel,a.ladder(),a.wafer(),a.hybrid());
-    if (index >= 0 && mDriftVelocity->at(index))
-      vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
-	mDeltaDriftVelocity;
-  }
-  if (vd < 0)
-    vd = 675000*mDeltaDriftVelocity;
-
-  double t;
-  //t = x/mparam->vd;
-  t = x/vd;
-  
-  //return (t*mparam->fsca);
-  return (t*fsca);
-
-}
-//_____________________________________________________________________________
-
-double StSvtCoordinateTransform::CalcTransLength(double x){
-
-  // Gives transverse distance of spt in cm in local coords (anode dir)
-  //       return x*mparam->pitch;
-  return x*mgeom->getAnodePitch();
-}
-
-
-//_____________________________________________________________________________
-
-double StSvtCoordinateTransform::UnCalcTransLength(double x){
-
-  // Gives transverse distance of spt in cm in local coords (anode dir)
-  //       return x/mparam->pitch;
-  return x/mgeom->getAnodePitch();
-}
-
 //_____________________________________________________________________________
 
 int StSvtCoordinateTransform::IsOnWaferZ(   const StThreeVector<double>& GlobalPosition,
