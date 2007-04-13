@@ -9,7 +9,7 @@
 //  \author Jan Balewski, IUCF
 //  \author Adam Kocoloski, MIT
 //
-// $Id: bfcMixer_pp2006.C,v 1.1 2007/01/25 01:37:57 kocolosk Exp $
+// $Id: bfcMixer_pp2006.C,v 1.2 2007/04/13 14:28:48 kocolosk Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -123,12 +123,6 @@ void bfcMixer_pp2006( Int_t Nevents=10,
     chain3->AddAfter("EEmcFastSim",slowSim); 
     slowSim->setEmbeddingMode();
   }
-  
-  // Use 'sim' flavor for Endcap embedding (slow or fast simu) in 2006 data since the ofl gains are not in DB yet, should be taken out later, JB
-  stDb=(St_db_Maker*)chain->GetMaker("db"); assert(stDb);
-  stDb->SetFlavor("sim","eemcPMTcal");
-  stDb->SetFlavor("sim","eemcPIXcal");
-  // the lines above will go out , Jan
 
   //............. end of EMC embedding makers................
   
