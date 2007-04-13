@@ -59,8 +59,10 @@ TCanvas *c1, *c2;
 TPad *selold = 0;
 static const Double_t WaferLength = 2.9928;
 static const Char_t *plotName[] = {
-  "duuP", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
-  "dvuP", /*"dvvP",*/ "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 9
+  "duuH", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
+  "dvuP", "duvH", "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 10
+   //  "duuP", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
+   //  "dvuP",/* "duvH",*/ "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 9
   "dXvsZ","dYvsZ","dZvsZ",
   //  "dXvsX","dXvsY","dYvsX",
   //  "dYvsY","dZvsX","dZvsY",
@@ -74,7 +76,8 @@ static const Char_t *plotName[] = {
   "dZ4da","dZ4db","dZ4dg"};
 const Int_t noHist = sizeof(plotName)/sizeof(Char_t *);//34;// 26;
 const Int_t firstHL = 0;
-const Int_t firstHG = 9; //10;
+const Int_t firstHG = 10;
+//const Int_t firstHG = 9;
 const Int_t firstHP = firstHG + 3;
 Int_t firstH = firstHG;
 Int_t lastH  = noHist - 1; 
@@ -1088,7 +1091,8 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
   outC.close();
 }
 //________________________________________________________________________________
-void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift velocity 
+//void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift velocity 
+void TDrawD(const Char_t *tag="duuP", Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift velocity 
   static const Int_t NlPerBarrel[3] = {8, 12, 16};
   static const Int_t NwPerBarrel[3] = {4,  6,  7};
   if (barrel < 1 || barrel > 3) {cout << "Wrong barrel no. " << barrel << endl; return;}
@@ -1175,13 +1179,12 @@ void TDrawD(Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift v
     }
     TH1D *py, *fit;
     TProfile *prof;
-    Double_t xmin, xmax;
     for (Int_t j = 0; j < ny; j++) {
       Int_t ij = i + nx*j + 1;
       c1->cd(ij)->SetLogz(1);
       wafer = w1 + j;
       Int_t Id = ladder + 100*(wafer + 10*layer);
-      h = (TH2 *) gDirectory->Get(Form("duuP%04i",Id));
+      h = (TH2 *) gDirectory->Get(Form("%s%04i",tag,Id));
       if (!h) continue;
       h->SetMinimum(1);
       prof = 0;
@@ -1312,12 +1315,18 @@ void TDraw(Int_t k = 0) {
     return;
   }
   if (k == 10) {
-    for (Int_t i = 1; i <= 3; i++) TDrawD(i);
+    for (Int_t i = 1; i <= 3; i++) TDrawD("duuH",i);
     return;
   }
+  if (k == 20) {
+    for (Int_t i = 1; i <= 3; i++) TDrawD("duvH",i);
+    return;
+  }
+#if 0
   TInterpreter::EErrorCode error = TInterpreter::kNoError;
   TDrawL(-1,4); gInterpreter->ProcessLine(Form("TQtCanvas2Html d1((TPad *) %p,900,650);",c1), &error);
   for (Int_t i = 1; i <= 3; i++) {
-    TDrawD(i); gInterpreter->ProcessLine(Form("TQtCanvas2Html d((TPad *) %p,900,650);",c1), &error);
+    TDrawD("duuP",i); gInterpreter->ProcessLine(Form("TQtCanvas2Html d((TPad *) %p,900,650);",c1), &error);
   }
+#endif
 }

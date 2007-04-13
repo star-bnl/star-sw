@@ -117,11 +117,12 @@ public :
    Double32_t      fHits_timeb[kMaxfHits];   //[fHits_]
    Int_t           fHits_NoHitPerTrack[kMaxfHits];   //[fHits_]
    Char_t          fHits_end[kMaxfHits];   //[fHits_]
-   TRef            fLastTrackT;
-   TRef            fLastHitT;
+   //   TRef            fLastTrackT;
+   //   TRef            fLastHitT;
    Double32_t      fHits_uD[kMaxfHits];   //[fHits_]
    Double32_t      fHits_vD[kMaxfHits];   //[fHits_]
    Double32_t      fHits_uHat[kMaxfHits];   //[fHits_]
+   //   Double32_t      fHits_vHat[kMaxfHits];   //[fHits_]
    Bool_t          fIsValid;
 
    // List of branches
@@ -223,9 +224,10 @@ public :
    TBranch        *b_fHits_uD;   //!
    TBranch        *b_fHits_vD;   //!
    TBranch        *b_fHits_uHat;   //!
+   //   TBranch        *b_fHits_vHat;   //!
    TBranch        *b_fHits_end;   //!
-   TBranch        *b_EventT_fLastTrackT;   //!
-   TBranch        *b_EventT_fLastHitT;   //!
+   //   TBranch        *b_EventT_fLastTrackT;   //!
+   //   TBranch        *b_EventT_fLastHitT;   //!
    TBranch        *b_EventT_fIsValid;   //!
 
    TBase(TTree *tree=0);
@@ -398,9 +400,10 @@ void TBase::Init(TTree *tree)
    fChain->SetBranchAddress("fHits.uD", fHits_uD, &b_fHits_uD);
    fChain->SetBranchAddress("fHits.vD", fHits_vD, &b_fHits_vD);
    fChain->SetBranchAddress("fHits.uHat", fHits_uHat, &b_fHits_uHat);
+   //   fChain->SetBranchAddress("fHits.vHat", fHits_vHat, &b_fHits_vHat);
    fChain->SetBranchAddress("fHits.end", fHits_end, &b_fHits_end);
-   fChain->SetBranchAddress("fLastTrackT", &fLastTrackT, &b_EventT_fLastTrackT);
-   fChain->SetBranchAddress("fLastHitT", &fLastHitT, &b_EventT_fLastHitT);
+   //   fChain->SetBranchAddress("fLastTrackT", &fLastTrackT, &b_EventT_fLastTrackT);
+   //   fChain->SetBranchAddress("fLastHitT", &fLastHitT, &b_EventT_fLastHitT);
    fChain->SetBranchAddress("fIsValid", &fIsValid, &b_EventT_fIsValid);
    Notify();
 }

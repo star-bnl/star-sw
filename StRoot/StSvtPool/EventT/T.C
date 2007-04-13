@@ -266,7 +266,7 @@ or
   //   Double_t Radii[7] = { 6.37, 7.38, 10.38, 11.27, 14.19, 15.13, 23.80};
   static Double_t Du[2] = {3.000, 3.65};
   static Double_t Sv[2] = {6.305, 4.35};
-  const  PlotName_t plotNameD[9] = {// plots for drift
+  const  PlotName_t plotNameD[10] = {// plots for drift
      {"dutuP","<u - uP>       versus  tuP =>  dw for Drift", { 0.5, 0.5}},                    //  0
      {"dvtvP","<v - vP>       versus  tvP =>  dw for Drift", { 2.5, 2.5}},                    //  1
      {"duvP", "<u - uP>       versus    v =>  gamma for Drift", { -2, -2}},                   //  2 z
@@ -275,8 +275,8 @@ or
      {"dvOvertvPvP","<(v - vP)/tvP> versus  v => alpha for Drift", { -2, -2}},                //  5 z
      {"duOvertuPuP","<(u - uP)/tuP> versus  u => -beta for Drift", { -1, -1}},                //  6
      {"dvOvertvPuP","<(v - vP)/tvP> versus  u => -beta for Drift", { -1, -1}},                //  7
-     {"duuP"      , "<u - uP>       versus  uHat for Drift",     { 1.2, -1}}                 //  8 
-     //     {"dvvP", "<v - vP>       versus   v for Drift", { -2, -2}}                              //  9 z
+     {"duuH"       , "<u - uP>       versus  uHat for Drift",      {1.2, -1}},                //  8 
+     {"duvH"       , "<u - uP>       versus  vHat for Drift",      {1.2, -2}}                 //  9 z
   };
   const  PlotName_t plotName[37] = {
     {"dutuP","<u - uP>       versus  tuP =>  dw", { 0.5, 0.5}},                    //  0
@@ -338,10 +338,10 @@ or
 			      Form("Matrix and right part for Least Squred Fit for barrel %i",barrel),
 			      BL[barrel-1]*28,0,BL[barrel-1]*28);
    //             T  B  l    W
-  //  TH2F *LocPlots[10][4][20][17];
-  TH2F *LocPlots[9][4][20][17];
-  //  memset(LocPlots,0,10*4*20*17*sizeof(TH2F *));
-  memset(LocPlots,0,9*4*20*17*sizeof(TH2F *));
+  TH2F *LocPlots[10][4][20][17];
+  memset(LocPlots,0,10*4*20*17*sizeof(TH2F *));
+  //  TH2F *LocPlots[9][4][20][17];
+  //  memset(LocPlots,0,9*4*20*17*sizeof(TH2F *));
    for (Int_t L = 0; L < NoLayers; L++) {// over Layers
      Int_t barrel = SvtSsdConfig[L].Barrel;
      Int_t layer  = SvtSsdConfig[L].Layer;
@@ -352,7 +352,7 @@ or
        if (barrel <= 3 && (ladder-1)%2 != layer%2) continue;
        for (Int_t wafer = 0; wafer <= NoWafers; wafer++) {// wafer == 0 for whole ladder
 	 Int_t Id = ladder + 100*(wafer + 10*layer);
-	 for (Int_t t = 0; t < 9; t++) {
+	 for (Int_t t = 0; t < 10; t++) {
 	   if (NoWafers > 2 && wafer != 0) {
 	     Name = Form("%s%04i",plotNameD[t].Name,Id);
 	     Title = Form("%s for barrel %i, layer %i ladder %i, ",plotNameD[t].Title,barrel,layer,ladder);
@@ -377,7 +377,7 @@ or
 		<< "\txmax " << plotNameD[t].xmax[0] << "\t" <<  plotNameD[t].xmax[1]
 		<< "\txmax = " << xmax << endl;
 #endif
-	   if (xmax > 0 && t == 8 && ! (NoWafers > 2 && wafer != 0)) xmax = -1;
+	   if (xmax > 0 && t >= 8 && ! (NoWafers > 2 && wafer != 0)) xmax = -1;
 	   if (xmax < 0) {
 	     Int_t m = - (Int_t) xmax;
 	     if (m == 1) xmax = Du[k];
@@ -571,6 +571,11 @@ or
 	 Double32_t uHat = fHits_uHat[k];       
 	 if (hybrid == 1) uHat -= 0.1;
 	 if (hybrid == 2) uHat += 0.1;
+	 //	 Double32_t vHat = fHits_vHat[k];       
+	 Double32_t vHat = 1. - anode/240.;
+	 if (hybrid == 1) vHat = - vHat;
+	 if (hybrid == 1) vHat -= 0.1;
+	 if (hybrid == 2) vHat += 0.1;
 	 Double32_t zL = fHits_zL[k];
 	 if (barrel <= 3) {zPL -= 23.5250; zL -= 23.5250;}
 	 Double32_t xL = fHits_xL[k];
@@ -719,7 +724,7 @@ or
 	     LocPlots[6][barrel-1][ladder-1][wafer]->Fill(-uP,duOvertuP);
 	     LocPlots[7][barrel-1][ladder-1][wafer]->Fill(-uP,dvOvertvP);
 	     LocPlots[8][barrel-1][ladder-1][wafer]->Fill(-uP,du);
-	     //	     LocPlots[9][barrel-1][ladder-1][wafer]->Fill( vP,dv);
+	     LocPlots[9][barrel-1][ladder-1][wafer]->Fill( vP,dv);
 	   } else {
 	     LocPlots[0][barrel-1][ladder-1][wafer]->Fill(tuP,du);
 	     LocPlots[1][barrel-1][ladder-1][wafer]->Fill(tvP,dv);
@@ -730,7 +735,7 @@ or
 	     LocPlots[6][barrel-1][ladder-1][wafer]->Fill( u ,duOvertuP);
 	     LocPlots[7][barrel-1][ladder-1][wafer]->Fill( u ,dvOvertvP);
 	     LocPlots[8][barrel-1][ladder-1][wafer]->Fill( uHat ,du);
-	     //	     LocPlots[9][barrel-1][ladder-1][wafer]->Fill( v ,dv);
+	     LocPlots[9][barrel-1][ladder-1][wafer]->Fill( vHat ,du);
 	   }
 	 } else {
 	   wafer = 1;
@@ -744,7 +749,7 @@ or
 	   LocPlots[6][barrel-1][ladder-1][wafer]->Fill(-uP,duOvertuP);
 	   LocPlots[7][barrel-1][ladder-1][wafer]->Fill(-uP,dvOvertvP);
 	   LocPlots[8][barrel-1][ladder-1][wafer]->Fill(-uP,du);
-	   //	   LocPlots[9][barrel-1][ladder-1][wafer]->Fill( zPL,dv);
+	   LocPlots[9][barrel-1][ladder-1][wafer]->Fill( zPL,dv);
 	 }
 	 //       vP = vP + Sv[m]*(wafer - NoWafers/2 - 0.5);
 	 wafer = 0;

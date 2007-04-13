@@ -38,6 +38,12 @@ class HitT : public TObject {
   Int_t      NoHitPerTrack;
   Double32_t uD, vD;
   Double32_t uHat;
+  Double32_t vHat;
+  Int_t      NofHits; // total no. of hits per wafer
+  Int_t      NofFHits;// total no. of fitted hits per wafer
+  Int_t      isFitted;
+  Int_t      isTrack; 
+  Int_t      isUsedInFit;
   Char_t end;
  public:
   HitT(Int_t B = 0, Int_t L = 0, Int_t l = 0, Int_t W = 0, Int_t H = 0,
@@ -87,6 +93,12 @@ class HitT : public TObject {
 #endif
   void SetHitPerTrack(Int_t k) {NoHitPerTrack = k;}
   void SetuHat(Double_t u) {uHat = u;}
+  void SetvHat(Double_t v) {vHat = v;}
+  void SetNofHits(Int_t n) {NofHits = n;}
+  void SetNofFHits(Int_t n) {NofFHits = n;}
+  void SetisFitted(Int_t k=1) {isFitted = k;}
+  void SetisTrack(Int_t k=1) {isTrack = k;}
+  void SetUsedInFit(Int_t k=0) {isUsedInFit = k;}
   Double32_t  GetU()           const {return u;}
   Double32_t  GetV()           const {return v;}
   Double32_t  GetuD()          const {return uD;}
