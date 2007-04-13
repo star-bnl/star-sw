@@ -139,6 +139,9 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
     UInt_t Nsp = dInfo->numberOfPoints(ids[0]) + dInfo->numberOfPoints(ids[1]);
     if (MinNoHits > 0 && Nsp < MinNoHits) continue;
     UInt_t npoints = dInfo->numberOfPoints() + 100*(dInfo->numberOfPoints(ids[0]) + 10*dInfo->numberOfPoints(ids[1]));
+    UInt_t nPpoints = 
+      pTrackT->numberOfPossiblePoints() + 
+      100*(pTrackT->numberOfPossiblePoints(ids[0]) + 10*pTrackT->numberOfPossiblePoints(ids[1]));
     StThreeVectorD g3 = pTrackT->geometry()->momentum();
 #ifdef __USE_GLOBAL__
     StThreeVectorD g3Gl = gTrackT->geometry()->momentum();
@@ -187,10 +190,12 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
     track->SetTanLGl(TanLGl);
     Double_t RhoGl = - EC*InvpT*field;
     track->SetRhoGl(RhoGl);
+    track->SetNPpoint(nPpoints);
 #endif
 
     track->SetN(0);
     track->SetNpoint(npoints);
+    track->SetNPpoint(nPpoints);
 #if 0
     const Double_t XyzDirRho[6] = {fVertex[0], fVertex[1], fVertex[2], track->GetTanL(), track->GetPhi(), track->GetRho()};
     const Double_t XyzDirRhoGl[6] = {fVertex[0], fVertex[1], fVertex[2], track->GetTanL(), track->GetPhi(), track->GetRho()};
@@ -204,10 +209,10 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
       if (! combName.BeginsWith("R")) continue;
       Int_t Id;
       sscanf(comb->GetName()+1,"%04i",&Id);
-      Int_t Ladder = Id%100;
-      Int_t Layer  = Id/1000; if (Layer > 7) Layer = 7;
-      Int_t Wafer  = (Id - 1000*Layer)/100;
-      Int_t Barrel = (Layer - 1)/2 + 1;
+      UInt_t Ladder = Id%100;
+      UInt_t Layer  = Id/1000; if (Layer > 7) Layer = 7;
+      UInt_t Wafer  = (Id - 1000*Layer)/100;
+      UInt_t Barrel = (Layer - 1)/2 + 1;
       if (_debug) {
 	cout << comb->GetName() << "\tLayer/Ladder/Wafer = " << Layer << "/" << Ladder << "/" << Wafer << endl;
 	comb->Print();
@@ -278,6 +283,43 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
       
       if (TMath::Abs(uvPred[0]) > dx[k] + 1.0) continue;
       if (TMath::Abs(uvPred[1]) > dz[k] + 1.0) continue;
+      StPtrVecHit &hvec = pTrackT->detectorInfo()->hits();
+      UInt_t NoHits = hvec.size();
+      StHit *hit = 0;
+      for (UInt_t j = 0; j < NoHits; j++) {
+	StHit *hitc = hvec[j];
+	if (! hitc) continue;
+	if (hitc->detector() == kSvtId) {
+	  StSvtHit *htSvt = (StSvtHit *) hitc;
+	  if (htSvt->barrel() == Barrel &&
+	      htSvt->ladder() == Ladder &&
+	      htSvt->wafer()  == Wafer) {hit = hitc; break;}
+	}
+	if (hitc->detector() == kSsdId) {
+	  StSsdHit *htSsd = (StSsdHit *) hitc;
+	  if (htSsd->ladder() == Ladder &&
+	      htSsd->wafer()  == Wafer) {hit = hitc; break;}
+	}
+      }
+      HitT *ht = AddHitT();
+      UInt_t Hybrid = 1;
+      if (uvPred[0] >= 0) Hybrid = 2;
+      ht->SetId(Barrel,Layer,Ladder,Wafer,Hybrid);
+      ht->SetisTrack(t+1);
+      ht->SetUVPred (uvPred[0],uvPred[1]);
+      ht->SettUVPred(tuvPred[0],tuvPred[1]);
+      ht->SetXyzG(xyzGPred);
+      ht->SetDirG(dirGPred);
+#ifdef __USE_GLOBAL__
+      ht->SetUVPredGl (uvPredGl[0],uvPredGl[1]);
+      ht->SettUVPredGl(tuvPredGl[0],tuvPredGl[1]);
+      ht->SetXyzGl(xyzGPredGl);
+      ht->SetDirGl(dirGPredGl);
+#endif
+      if (hit) {
+	SetHitT(ht, hit, comb, track);
+	ht->SetisFitted(t+1);
+      }
       StSPtrVecSvtHit *hitsvt = 0;
       StSPtrVecSsdHit *hitssd = 0;
       Int_t NoHitPerTrack = 0;
@@ -301,12 +343,13 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
 	hitssd = &waferCollection->hits();
       }
       if (! hitsvt && ! hitssd) continue;
-      UInt_t NoHits = 0;
       if (hitsvt) NoHits = hitsvt->size();
       if (hitssd) NoHits = hitssd->size();
+      ht->SetNofHits(NoHits);
       if (! NoHits) continue;
+
       for (UInt_t l = 0; l < NoHits; l++) {
-	StHit *hit = 0;
+	hit = 0;
 	if (hitsvt) hit = (*hitsvt)[l];
 	if (hitssd) hit = (*hitssd)[l];
 	if (hit) {
@@ -348,7 +391,6 @@ TrackT *EventT::AddTrackT()
   TClonesArray &tracks = *fTracks;
   TrackT *track = new(tracks[fNtrack++]) TrackT();
   //Save reference to last TrackT in the collection of Tracks
-  fLastTrackT = track;
   return track;
 }
 //______________________________________________________________________________
@@ -363,7 +405,6 @@ HitT *EventT::AddHitT()
   TClonesArray &hits = *fHits;
   HitT *hit = new(hits[fNhit++]) HitT();
   //Save reference to last HitT in the collection of Hits
-  fLastHitT = hit;
   return hit;
 }
 
@@ -447,11 +488,12 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
     if (rdo) h->SetRDO(rdo);
     St_svtHybridDriftVelocityC *d = St_svtHybridDriftVelocityC::instance();
     if (d && d->p(B,l,W,H)) {
-      h->SetLM(d->CalcU(B,l,W,H,ht->timebucket()),
+      h->SetLM(d->CalcU(B,l,W,H,ht->timebucket(),ht->anode()),
 	       d->CalcV(H,ht->anode()));
       h->SetuHat(d->uHat(B,l,W,H,ht->timebucket()));
     }
   }
+  h->SetUsedInFit(hit->usedInFit());
   if (hit->detector() == kSsdId) {
     StSsdHit *ht = (StSsdHit *) hit;
     B = 4;

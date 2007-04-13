@@ -19,7 +19,8 @@ class TrackT : public TObject {
   Double32_t      fPhiGl;
   Double32_t      fRhoGl;
 #endif
-  UInt_t          fNpoint;       //Number of points for this track
+  UInt_t          fNpoint;       //Number of fitted points for this track
+  UInt_t          fNPpoint;      //Number of possible points for this track
   Short_t         fValid;        //Validity criterion
   UInt_t          fNsp;          //Number of points for this track with a special value
   UInt_t          fIdHitT[NSP];   //Index of HitT in fHitT array
@@ -41,6 +42,7 @@ class TrackT : public TObject {
   Double32_t    GetpT()      { return TMath::Abs(fInvpT) > 1.e-7 ? 1./TMath::Abs(fInvpT): 1e7; }
   Double32_t    GetMomentum(){ return GetpT()*TMath::Sqrt(1. + fTanL*fTanL);}
   UInt_t        GetNpoint()  { return fNpoint; }
+  UInt_t        GetNPpoint()  { return fNPpoint; }
   Short_t       GetCharge()  { return (Short_t) TMath::Sign(1., fInvpT); }
   Short_t       GetValid()   { return fValid; }
   UInt_t        GetN()       { return fNsp; }
@@ -62,6 +64,7 @@ class TrackT : public TObject {
   virtual void SetRhoGl(Double32_t p)  {fRhoGl = p; }
 #endif
   virtual void SetNpoint(UInt_t p)     {fNpoint = p; }
+  virtual void SetNPpoint(UInt_t p)    {fNPpoint = p; }
   virtual void SetValid(Short_t p=1)   {fValid = p; }
   virtual void SetN(UInt_t n) {if (n <= NSP) fNsp = n; else fNsp = NSP;}
   virtual void SetHitTId(UInt_t i) {fIdHitT[fNsp] = i+1; if ( fNsp < NSP) fNsp++;}

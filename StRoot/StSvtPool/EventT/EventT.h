@@ -42,8 +42,6 @@ class EventT : public TObject {
   Double32_t     fCovariantMatrix[6];//
   TClonesArray  *fTracks;            //->array with all tracks
   TClonesArray  *fHits;              //->array with all hits
-  TRef           fLastTrackT;         //reference pointer to last track
-  TRef           fLastHitT;         //reference pointer to last track
   Bool_t         fIsValid;           //
   
   static TClonesArray *fgTracks;
@@ -75,8 +73,6 @@ class EventT : public TObject {
   const Double32_t *GetCovMatrix() const {return fCovariantMatrix;}
   TClonesArray     *GetTracks() const {return fTracks;}
   TClonesArray     *GetHits() const {return fHits;}
-  TrackT           *GetLastTrackT() const {return (TrackT*)fLastTrackT.GetObject();}
-  HitT             *GetLastHitT() const {return (HitT*)fLastHitT.GetObject();}
   TrackT           *GetTrackT(UInt_t i=0) const {return fTracks && i < fNtrack ? (TrackT*) fTracks->At(i): 0;}
   HitT             *GetHitT(UInt_t i=0) const {return fHits && i < fNhit ? (HitT*) fHits->At(i): 0;}
   Int_t             GetIndexOfTrackT(const TrackT *obj) const {return fgTracks->IndexOf(obj);}
