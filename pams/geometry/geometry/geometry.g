@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.153 2007/03/21 21:08:05 potekhin Exp $
+* $Id: geometry.g,v 1.154 2007/04/13 17:54:58 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.154  2007/04/13 17:54:58  potekhin
+* Based on a comment by Akio, remove the PHMD (photon
+* multiplicity detector) from the Y2006 configuration, to
+* reflect the actual setup for that year. The new tag is Y2006C
+*
 * Revision 1.153  2007/03/21 21:08:05  potekhin
 * A cleaner version of managing the HFT (pixlgeo) versions
 *
@@ -2088,6 +2093,76 @@ If LL>1
 
                 }
 
+****************************************************************************************
+  on Y2006C   { Y2006B without the PHMD
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+                     BtofConfig=8;
+* Full barrel in 2006
+                  "calb" 
+                     ems=on ;
+                     CalbConfig = 2
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 2 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=off;
+                     PhmdConfig = 0;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 55; "fifth version, full barrel newly corrected radii and dead area"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "Muon Trigger System"
+                     mutd = on;
+                     MutdConfig = 1;
+                  "We need a bigger Cave"
+                     CaveConfig = 3;
+                }
 ****************************************************************************************
   on Y2006B   { Y2006A + improved SSD with dead area + improved CALB
                   "svt: 3 layers ";
