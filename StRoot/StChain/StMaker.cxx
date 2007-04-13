@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.191 2007/03/12 17:51:19 perev Exp $
+// $Id: StMaker.cxx,v 1.192 2007/04/13 17:48:11 potekhin Exp $
 //
 //
 /*!
@@ -161,6 +161,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane"},
   {"y2006a",      20051201,     1, "y2006a",   "y2006+new FPD"},
   {"y2006b",      20051201,     2, "y2006b",   "y2006+new FPD+SSD5/CALB2"},// code versions indicated
+  {"y2006c",      20051201,     3, "y2006c",   "y2006+new FPD+SSD5/CALB2+noPMD"},// 
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
@@ -1720,6 +1721,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.192  2007/04/13 17:48:11  potekhin
+// Added a stub for y2006c
+//
 // Revision 1.191  2007/03/12 17:51:19  perev
 // new signature of GetDataBase()
 //
