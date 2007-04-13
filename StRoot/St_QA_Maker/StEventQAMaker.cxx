@@ -1793,7 +1793,7 @@ void StEventQAMaker::MakeHistPoint() {
             // Laser spots:
             // barrel 3, ladder 15, wafer 7
             if (i==2 && j==14 && k==6 && svthit->hybrid() == 1 &&
-                svthit->anode() >= 196 && svthit->anode() <= 204 &&
+                svthit->anode() >= 195 && svthit->anode() <= 204 &&
                 svthit->timebucket() >= 90) {
               hists->m_pnt_svtLaser->Fill(eventCount,svthit->timebucket());
               SvtLaser1t[SvtLaser1] = svthit->timebucket();
@@ -1804,7 +1804,7 @@ void StEventQAMaker::MakeHistPoint() {
             }
             // barrel 3, ladder 7, wafer 1
             if (i==2 && j==6 && k==0 && svthit->hybrid() == 2 &&
-                svthit->anode() >= 196 && svthit->anode() <= 204 &&
+                svthit->anode() >= 195 && svthit->anode() <= 204 &&
                 svthit->timebucket() >= 90) {
               hists->m_pnt_svtLaser->Fill(eventCount,svthit->timebucket()/2.);
               SvtLaser2t[SvtLaser2] = svthit->timebucket();
@@ -2181,8 +2181,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.75 2007/04/12 20:39:48 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.76 2007/04/13 21:25:06 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.76  2007/04/13 21:25:06  genevb
+// Modify window for SVT lasers
+//
 // Revision 2.75  2007/04/12 20:39:48  genevb
 // Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
 //
