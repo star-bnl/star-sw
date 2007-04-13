@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.15 2007/04/06 21:46:36 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.16 2007/04/13 19:17:15 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.16  2007/04/13 19:17:15  andrewar
+ * Removed misleading errors. Changed cout and printf to gMessMgr.
+ *
  * Revision 1.15  2007/04/06 21:46:36  andrewar
  * Removed some debug messages.
  *
@@ -185,7 +188,7 @@ Int_t StPixelFastSimMaker::Make()
     StRnDHitCollection *col = new StRnDHitCollection;
     if (!col ) 
       {
-        printf("StPixelFastSimMaker -E- no RnDHitCollection!\n");
+        gMessMgr->Info()<<"StPixelFastSimMaker -E- no RnDHitCollection!\n";
         abort();
       }
 
@@ -276,12 +279,12 @@ Int_t StPixelFastSimMaker::Make()
 		}                                                           
 	      }								 
 	}									 
-      cout <<"StPixelFastSimMaker::Make() -I- Loaded "
-	   <<nhits<<"pixel hits. "<<endl;
+      gMessMgr->Info() <<"StPixelFastSimMaker::Make() -I- Loaded "
+	   <<nhits<<"pixel hits. \n";
     }
   else
     {
-      cout <<"No pixel hits found."<<endl;
+      gMessMgr->Info() <<"No pixel hits found.\n";
     }
 
     const StMcIstHitCollection* istHitCol = mcEvent->istHitCollection();					
@@ -633,7 +636,7 @@ void StPixelFastSimMaker::smearGaus(StThreeVectorD &mError,
 
 int StPixelFastSimMaker::sector(int layer, int ladder)
 {
-  //printf("Layer %i ladder %i\n",layer, ladder);
+ 
   if (layer ==1)
     {
       if ( ladder < 4 ) return 1;
@@ -756,7 +759,7 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
   Double_t     *rot    = hmat->GetRotationMatrix();
   if (! rot )
     {
-      printf("Can't shift hit - no rotation matrix.\n");
+      gMessMgr->Info()<<"Can't shift hit - no rotation matrix.\n";
     }
  
   StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
@@ -776,15 +779,6 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
   localpos[2] = localpos[2] - dz;
   localpos[1] = localpos[1] - .006; //this isn't exactly right. The local position is just off of radius -.006, but it's close (~1-5 um).
    
-
-  //printf("new hit: %g %g %g\n",localpos[0],localpos[1],localpos[2]);
-
-  if ( fabs( localpos[0] ) > 2. ) 
-    printf("StPixelFastSimMaker::shiftHit -E- shifted hit too far!!!! value=%g\n", localpos[0]);
-      
-  if ( fabs( localpos[2] ) > 20. ) 
-    printf("StPixelFastSimMaker::shiftHit -E- shifted hit too far!!!! value=%g\n", localpos[2]);
-
   gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,pos);
 
   //printf("exit shift code.\n");
