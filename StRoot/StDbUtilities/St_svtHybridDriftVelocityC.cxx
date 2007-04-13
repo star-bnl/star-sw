@@ -8,6 +8,7 @@ St_svtHybridDriftVelocityC *St_svtHybridDriftVelocityC::fgsvtHybridDriftVelocity
 Double_t St_svtHybridDriftVelocityC::mAnodePitch  = 0.0250;
 Double_t St_svtHybridDriftVelocityC::mWaferLength = 2.9928;
 Double_t St_svtHybridDriftVelocityC::mWaferWidth  = 3.0000;
+Double_t St_svtHybridDriftVelocityC::mNoAnodes    = 2*St_svtHybridDriftVelocityC::mWaferWidth/St_svtHybridDriftVelocityC::mAnodePitch;
 Double_t St_svtHybridDriftVelocityC::mSamplingFrequency = 25000000.0;
 static const Int_t NB    =  3;
 static const Int_t NL    = 16;
@@ -15,6 +16,25 @@ static const Int_t NW    =  7;
 static const Int_t NH    =  2;
 static svtHybridDriftVelocity_st *pointers[3][16][7][2];
 static svtHybridDriftVelocity_st *DataOld = 0;
+//________________________________________________________________________________
+Double_t St_svtHybridDriftVelocityC::STcheb(Int_t N, Double_t *par, Double_t x) {// N polynome degree, dimension is par[N+1]
+  if (N < 0 || N > 12) return 0;
+  Double_t T0 = 1;
+  Double_t T1 = 2*x - 1;
+  Double_t T2;
+  Double_t Sum = par[0]*T0;
+  if (N >= 1) {
+    T1 = 2*x - 1;
+    Sum += par[1]*T1;
+    for (int n = 2; n <= N; n++) {
+      T2 = 2*(2*x - 1)*T1 - T0;
+      Sum += par[n]*T2;
+      T0 = T1;
+      T1 = T2;
+    }
+  }
+  return Sum;
+}
 //________________________________________________________________________________
 St_svtHybridDriftVelocityC::St_svtHybridDriftVelocityC (St_svtHybridDriftVelocity *table) : TChair(table) {
   if (fgsvtHybridDriftVelocityC) delete fgsvtHybridDriftVelocityC; fgsvtHybridDriftVelocityC = this;
@@ -49,10 +69,33 @@ svtHybridDriftVelocity_st *St_svtHybridDriftVelocityC::p(Int_t barrel, Int_t lad
   return p;
 }
 //________________________________________________________________________________
-Double_t St_svtHybridDriftVelocityC::CalcDriftLength(svtHybridDriftVelocity_st *p, Double_t timeBin) {
+Double_t St_svtHybridDriftVelocityC::uHat(svtHybridDriftVelocity_st *p, Double_t timeBin) {
   if (! p) return -99;
-  Double_t t = TMath::Min(p->tmax,TMath::Max(p->tmin,timeBin));
-  return mWaferLength*(t - p->tmin)/(p->tmax - p->tmin);
+  Double_t u = 1 - (timeBin - p->tmin)/(p->tmax - p->tmin);
+  if (p->hybrid == 1) u = -u;
+  return u;
+}
+//________________________________________________________________________________
+Double_t St_svtHybridDriftVelocityC::vHat(svtHybridDriftVelocity_st *p, Double_t anode) {
+  if (! p) return -99;
+  Double_t v = 1 - anode/mNoAnodes;
+  if (p->hybrid == 1) v = -v;
+  return v;
+}
+//________________________________________________________________________________
+Double_t St_svtHybridDriftVelocityC::CalcDriftLength(svtHybridDriftVelocity_st *p, Double_t timeBin, Double_t anode) {
+  if (! p) return -99;
+  Double_t u  = uHat(p,timeBin);
+  Double_t uD = mWaferLength*u;
+  Double_t *coef =  &p->v0;
+  Int_t nu = p->npar%10;
+  if (nu > 0) uD -= STcheb(nu-1, coef, TMath::Abs(u));
+  Int_t nv = (p->npar/10)%10;
+  if (nv > 0) {
+    Double_t v  = vHat(p,anode);
+     uD -= STcheb(nv-1, &coef[nu], TMath::Abs(v));
+  }
+  return uD;
 }
 //________________________________________________________________________________
 Double_t St_svtHybridDriftVelocityC::UnCalcDriftLength(svtHybridDriftVelocity_st *p, Double_t x) {
@@ -63,4 +106,27 @@ Double_t St_svtHybridDriftVelocityC::UnCalcDriftLength(svtHybridDriftVelocity_st
 //________________________________________________________________________________
 Double_t St_svtHybridDriftVelocityC::DriftVelocity(svtHybridDriftVelocity_st *p) {
   return p ? mSamplingFrequency*mWaferLength/(p->tmax - p->tmin): -1;
+}
+//________________________________________________________________________________
+Double_t St_svtHybridDriftVelocityC::CalcU(Int_t barrel, Int_t ladder, Int_t wafer, Int_t hybrid, Double_t timeBin, Double_t anode) {
+  return CalcDriftLength(barrel, ladder, wafer, hybrid, timeBin, anode);
+}
+//________________________________________________________________________________
+Double_t St_svtHybridDriftVelocityC::CalcV(Int_t hybrid, Double_t x) {
+  Double_t vd = CalcTransLength(x);
+  if (hybrid == 1) vd = vd - WaferWidth();
+  else             vd = WaferWidth()  - vd;
+  return vd;
+}
+//________________________________________________________________________________
+Double_t St_svtHybridDriftVelocityC::UnCalcU(Int_t barrel, Int_t ladder, Int_t wafer, Int_t hybrid, Double_t ud) {
+  if (hybrid == 1) ud = ud + WaferLength();
+  else             ud = WaferLength() - ud;
+  return UnCalcDriftLength(barrel, ladder, wafer, hybrid, ud);
+}
+//________________________________________________________________________________
+Double_t St_svtHybridDriftVelocityC::UnCalcV(Int_t hybrid, Double_t vd) {
+  if (hybrid == 1) vd = vd + WaferWidth();
+  else             vd = WaferWidth()  - vd;
+  return UnCalcTransLength(vd);
 }
