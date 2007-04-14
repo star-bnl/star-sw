@@ -151,6 +151,7 @@ void StiHit::setGlobal(const StiDetector * detector,
       if (fabs(dif) > 1.1*22) {
 printf("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****\n"
       ,detector->getName().c_str(),myAngle,centerAngle,dif);
+assert( fabs(dif) <33 );     // 30 for sixangle
       }
       double normalAngle = placement->getNormalRefAngle()*togra;
       dif = myAngle-normalAngle;
