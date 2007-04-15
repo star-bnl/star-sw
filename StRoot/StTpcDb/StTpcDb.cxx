@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.41 2007/03/21 17:27:01 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.42 2007/04/15 20:57:01 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.42  2007/04/15 20:57:01  fisyak
+ * Add drift velocity interpolation between two measurement in time
+ *
  * Revision 1.41  2007/03/21 17:27:01  fisyak
  * use TGeoHMatrix, change mode for switching drift velocities
  *
@@ -114,7 +117,7 @@
 #include "tables/St_tpcDriftVelocity_Table.h"
 #include "tables/St_trgTimeOffset_Table.h"
 #include "tables/St_dst_L0_Trigger_Table.h"
-
+#include "TUnixTime.h"
 StTpcDb* gStTpcDb = 0;
 
 // C++ routines:
@@ -474,20 +477,65 @@ St_Table *StTpcDb::getTpcTable(int i){
 
 //-----------------------------------------------------------------------------
 float StTpcDb::DriftVelocity(){
-  if(!dvel){              // get drift velocity table
-   const int dbIndex = kCalibration;
-   if (tpctrg[dbIndex]){
-     //    St_DataSet* tpd = tpctrg[dbIndex]->Find("tpcDriftVelocity");
-     St_DataSet *tpd = FindTable("tpcDriftVelocity",dbIndex);
-    if (!(tpd && tpd->HasData()) ){
-     gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
-     return 0;
+  static UInt_t u = 0;  // current time (secs)
+  static UInt_t u0 = 0; // beginTime of current Table
+  static UInt_t u1 = 0; // beginTime for next Table
+  static St_tpcDriftVelocity *dvel0 = 0;
+  static St_tpcDriftVelocity *dvel1 = 0;
+  static Float_t driftvel = 0;
+  static TDatime t[2];
+  UInt_t uc = TUnixTime(StMaker::GetChain()->GetDateTime(),1).GetUTime();
+  if (! dvel0 ) {
+    dvel0 = (St_tpcDriftVelocity *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcDriftVelocity");
+    if (! dvel0) {
+      gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
+      return 0;
     }
-    dvel = (St_tpcDriftVelocity*)tpd;
-   }
+    if (StMaker::GetChain()->GetValidity(dvel0,t) < 0) {
+      gMessMgr->Message("StTpcDb::Error Wrong Validity Tpc DriftVelocity","E");
+      return 0;
+    }
+    u0 = TUnixTime(t[0],1).GetUTime();
+    u1 = TUnixTime(t[1],1).GetUTime();
+    SafeDelete(dvel1);
+    dvel1 = (St_tpcDriftVelocity *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
+    if (! dvel1) {
+      gMessMgr->Message("StTpcDb::Error Finding next Tpc DriftVelocity","W");
+    }
   }
-  float driftvel = 1e6*(*dvel)[0].laserDriftVelocityEast;
-  if (driftvel<=0.0) driftvel = 1e6*(*dvel)[0].cathodeDriftVelocityEast;
+  if (! u || u != uc) {
+    u = uc;
+    if (StMaker::GetChain()->GetValidity(dvel0,t) < 0) {
+      gMessMgr->Message("StTpcDb::Error Wrong Validity Tpc DriftVelocity","E");
+      return 0;
+    }
+    UInt_t u0n = TUnixTime(t[0],1).GetUTime();
+    UInt_t u1n = TUnixTime(t[1],1).GetUTime();
+    if (u0n != u0 || u1n != u1) {
+      SafeDelete(dvel1);
+      dvel1 = (St_tpcDriftVelocity *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
+      if (! dvel1) {
+	gMessMgr->Message("StTpcDb::Error Finding next Tpc DriftVelocity","W");
+      }
+    }
+    if (u0 > u || u >= u1) {
+      gMessMgr->Message("StTpcDb::Error Wrong validities Tpc DriftVelocity","E");
+    }
+    else {
+      tpcDriftVelocity_st *d0 = dvel0->GetTable();
+      if (dvel1) {
+	tpcDriftVelocity_st *d1 = dvel1->GetTable();
+	driftvel = 1e6*(d0->laserDriftVelocityEast + 
+			(d1->laserDriftVelocityEast - d0->laserDriftVelocityEast)*(u - u0)/(u1 - u0));
+	if (driftvel<=0.0) 
+	driftvel = 1e6*(d0->cathodeDriftVelocityEast + 
+			(d1->cathodeDriftVelocityEast - d0->cathodeDriftVelocityEast)*(u - u0)/(u1 - u0));
+      } else {
+	driftvel = 1e6*d0->laserDriftVelocityEast;
+	if (driftvel<=0.0) driftvel = 1e6*d0->cathodeDriftVelocityEast;
+      }
+    }
+  }
   return driftvel;
 }
 
