@@ -25,7 +25,7 @@ The MuDst's should show up on /star/data09/reco/ (or whatever the current
 directory for fast offline is).  Once this happens, create a file list
 for every run you generated.  e.g.
 
-$ ls /star/data09/reco/EEMCtcdScan/FullField/dev/2007/081/8081035/ > 8081035.list
+$ ls /star/data09/reco/EEMCtcdScan/FullField/dev/2007/081/8081035/*.MuDst.root > 8081035.list
 
 The name and location  of the file is important -- <run number>.list in your
 working directory.  Don't prefix it with an "R", and don't put it in a 
@@ -58,17 +58,24 @@ died.
 $ root4star
 root.exe [0] .x plotEEmcTimimg.C
 
-To save the plots to a gif (integrated) or jpeg (channel-wise), type
-root.exe [1] doprint = true;
+-------------------------------------------------------------------------------
 
-Then 
-root.exe [2] drawCrates();
+If you don't like where the legends are output on the plots:
+    Find the line which looks like this 
+    TLegend *legend=new TLegend(0.125,0.6,0.325,0.85);
+    and play around with the numbers until it's where you want it.
+    THe numbers are x1, x2, y1 and y2 in "fractions of the axis". 
 
-to redraw the timing curves integrated over all channels.  To draw
-timing curves for each individual channel, you can call
+If you want to create an ascii file containting the names of tubes, 
+the computed pedestals, integrals and slopes
+    Uncomment the line
+    timing->dumpAsciiFile(dtfile);
+    in runEEmcTiming.C 
 
-root.exe [3] towerChannels(0) ; // 0-5 for crates 1-6
-root.exe [4] mapmtChannels(0) ; // 0-47 for crates 1-48
+If you want to create a PDF file with ADC spectra for all detectors
+    Uncomment the line
+    timing->dumpPDF( psfile );
+    in runEEmcTiming.C 
 
-The first time through, you won't want to have printing enabled. 
 
+ 
