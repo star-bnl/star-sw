@@ -9,7 +9,7 @@
 #
 # this script follows the steps bellow
 #
-# 1. check the file RUNMODE. If content is STOP, exit the
+# 1. check the file RUNMODE. If content is not "RUN", exit the
 #    program. This is done if, for some reason, we
 #    want to stop the script from updating the DB
 #
@@ -70,6 +70,15 @@ cd ${EMCONLINE_TRG_DIR}
 
 echo "EMC Online trigger monitoring"
 
+export STATUS=""
+if [[ -f ${EMCONLINE_TRG_RUNSTATUS_FILE} ]] ; then export STATUS=`cat ${EMCONLINE_TRG_RUNSTATUS_FILE}` ; fi
+export STATUS=`echo ${STATUS}`
+if [[ "${STATUS}" != "" ]]
+then
+    echo "Another instance is already running (see ${EMCONLINE_TRG_RUNSTATUS_FILE}), exit this now..."
+    exit
+fi
+
 export TIMESTAMP=${1}
 export FORCE=${2}
 export MODE=${3}
@@ -83,7 +92,7 @@ else
 fi
 if [[ "${MODE}" == "" ]]
 then
-    export MODE=`cat ${EMCONLINE_TRG_RUNMODE_FILE}`
+    if [[ -f ${EMCONLINE_TRG_RUNMODE_FILE} ]] ; then export MODE=`cat ${EMCONLINE_TRG_RUNMODE_FILE}` ; fi
     export MODE=`echo ${MODE}`
 fi
 if [[ "${FORCE}" == "" ]]
@@ -104,6 +113,7 @@ cat ${EMCONLINE_TRG_LASTRUN_FILE}
 
 if [[ "${MODE}" != "RUN" ]]
 then
+    echo "Monitoring is disabled, exit now"
     exit
 fi
 
@@ -112,12 +122,17 @@ mkdir -p ${EMCONLINE_TRG_LASTCONF_DIR}
 mkdir -p ${EMCONLINE_TRG_BACKUP_DIR}
 
 echo "Copying the files to this machine..."
+echo "Copying files to this machine" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+update_desktop_icon_trg
+
 rm -fr ${EMCONLINE_TRG_CURRCONF_DIR}/*
 ${SCP} ${EMCONLINE_SLOWCTRL_PED_DIR}/${CRATE_PEDESTAL_FILES_MASK} ${EMCONLINE_TRG_CURRCONF_DIR}
 ${SCP} ${EMCONLINE_SLOWCTRL_CFG_DIR}/${CRATE_CONFIG_FILES_MASK} ${EMCONLINE_TRG_CURRCONF_DIR}
 ${SCP} ${EMCONLINE_SLOWCTRL_CFG_DIR}/${CRATES_CONFIG_FILE_MASK} ${EMCONLINE_TRG_CURRCONF_DIR}
 ${SCP} ${EMCONLINE_SLOWCTRL_DSMMASK_DIR}/${DSM_MASK_FILES_MASK} ${EMCONLINE_TRG_CURRCONF_DIR}
 
+echo "Checking files" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+update_desktop_icon_trg
 # start checking
 export SAVE=false
 export UPDATESTATUS=false
@@ -224,6 +239,9 @@ echo "  LUT       = ${UPDATELUT}"
 if [[ "${SAVE}" == "true" ]]
 then
 
+    echo "Running" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+    update_desktop_icon_trg
+
     echo "Making backup of files with TS = ${TIMESTAMP}"
     mkdir -p ${EMCONLINE_TRG_BACKUP_DIR}/${TIMESTAMP}
     cp -rf ${EMCONLINE_TRG_CURRCONF_DIR}/* ${EMCONLINE_TRG_BACKUP_DIR}/${TIMESTAMP}/
@@ -249,6 +267,8 @@ then
 
     if [[ -f ${EMCONLINE_TRG_BEMCSTATUS_FILE} ]]
     then
+	echo "Delivering bemcStatus.txt" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+	update_desktop_icon_trg
 	echo "Copying bemcStatus.txt to consumers"
 	for consumer in ${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}
 	do
@@ -258,8 +278,14 @@ then
     fi
     
 else
+    echo "Nothing to do" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+    update_desktop_icon_trg
+
     echo "Removing files from current directory"
     rm -rf ${EMCONLINE_TRG_CURRCONF_DIR}/*
 
     echo "Nothing happened. Exiting..."
 fi
+
+echo "" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+update_desktop_icon_trg
