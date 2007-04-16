@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.16 2007/04/13 19:17:15 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.17 2007/04/16 19:10:52 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.17  2007/04/16 19:10:52  wleight
+ * Added IST simulation (digitization but no clustering)
+ *
  * Revision 1.16  2007/04/13 19:17:15  andrewar
  * Removed misleading errors. Changed cout and printf to gMessMgr.
  *
@@ -288,67 +291,244 @@ Int_t StPixelFastSimMaker::Make()
     }
 
     const StMcIstHitCollection* istHitCol = mcEvent->istHitCollection();					
-    if (istHitCol)							
-    {									
-      Int_t nhits = istHitCol->numberOfHits();
-      if (nhits)								
-	{						 			
-	  Int_t id = 0;							
-	  //StSPtrVecHit *cont = new StSPtrVecHit();				
-	  //rcEvent->addHitCollection(cont, # Name );				
-	  for (UInt_t k=0; k<istHitCol->numberOfLayers(); k++)		       
-	    if (istHitCol->layer(k))						
-	      {								
-		UInt_t nh = istHitCol->layer(k)->hits().size();	
-		for (UInt_t i = 0; i < nh; i++) { 
-		  StMcHit *mcH = istHitCol->layer(k)->hits()[i];
-		  /*StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
-		  tempHit->setDetectorId(kIstId); 
-		  tempHit->setVolumeId(mcH->volumeId());                   
-		  tempHit->setKey(mcH->key());   */                          
-		                                                 
-		  //		  char path[100];
-		  TString Path("");
-		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
-		  if(((StBFChain *)GetChain())->GetOption("UPGR09",kFALSE)){
-		    Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",1,mcI->ladder(),mcI->wafer(),mcI->side());
-		  }
-		  else{
-		    if(mcI->layer()==1) Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
-		    else                Path = Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
-		  }
+  int nLadders[2]={19,27};
+  int nWafers[2]={10,13};
+  double pitch=.006; //note, all lengths in centimeters unless explicitly noted
+  int nStrips=640;
+  double spacing=.01686; //spacing between inner and outer halves of a layer
+  int ladderCount;
+  int waferCount;
+  double icept;
+  double sTotE;
+  double pos[3];
+  double localpos[3];
+  double gpos[3];
+  int id=0;
+	
+  TString PathIn("");
+  TString PathOut("");
+  if(istHitCol){
+    LOG_INFO<<"ist hit collection found"<<endm;
+    int nhits=istHitCol->numberOfHits();
+    vector<StMcIstHit*> ladderHits;
+    multimap<int, int> stripToKey;
+    multimap<int, int> strip2ToKey;
+    istStrip strips1[640];
+    istStrip strips2[640];
+    istStrip sStrips[1280];
+    if(nhits){
+      for(int i=0;i<2;i++){
+	if(istHitCol->layer(i)){
+	  ladderCount=1;
+	  for(int jj=0;jj<nLadders[i];jj++){
+	    LOG_DEBUG<<"now dealing with ladder "<<ladderCount<<endm;
+	    waferCount=1;
+	    for(int kk=0;kk<istHitCol->layer(i)->hits().size();kk++){
+	      StMcHit *mcH = istHitCol->layer(i)->hits()[kk];
+	      StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
+	      if(mcI->ladder()==ladderCount) ladderHits.push_back(mcI);
+	    }
+	    for(int ll=0;ll<nWafers[i];ll++){
+	      LOG_DEBUG<<"now dealing with wafer "<<waferCount<<endm;
+	      if(i+1==1) PathIn = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",i+1,ladderCount,waferCount,1);
+	      else{
+		PathIn = Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",i+1,ladderCount,waferCount,1);
+		PathOut= Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",i+1,ladderCount,waferCount,2);
+	      }
+	      for(int nn=0;nn<ladderHits.size();nn++){
+		if(ladderHits[nn]->wafer()==waferCount){
+		  StMcIstHit* mcIw=ladderHits[nn];
+		  pos[0]=mcIw->position().x();
+		  pos[1]=mcIw->position().y();
+		  pos[2]=mcIw->position().z();
+		  localpos[0]=0;
+		  localpos[1]=0;
+		  localpos[2]=0;
 		  gGeoManager->RestoreMasterVolume();
-		  gGeoManager->cd(Path);
+		  if(mcIw->side()==1){
+		    gGeoManager->cd(PathIn);
+		    LOG_DEBUG<<"pathIn: "<<PathIn<<endm;
+		  }
+		  if(mcIw->side()==2){
+		    gGeoManager->cd(PathOut);
+		    LOG_DEBUG<<"pathOut: "<<PathOut<<endm;
+		  }
 		  TGeoNode* node=gGeoManager->GetCurrentNode();
-		  //MLM cout<<"hit location: "<<mcH->position()<<endl;
-		  double pos[3]={mcH->position().x(),mcH->position().y(),mcH->position().z()};
-		  double localpos[3]={0,0,0};
 		  gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
-		  if(mcI->layer()==1) localpos[0]=distortHit(localpos[0],resXIst1,100);
-		  else localpos[0]=distortHit(localpos[0],resXIst2,100);
-		  gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,pos);
-		  if(mcI->layer()==1) pos[2]=distortHit(pos[2],resZIst1,100);
-		  else pos[2]=distortHit(pos[2],resZIst2,100);
-		  StThreeVectorF smearedpos(pos);
-		  //MLM cout<<"smeared hit location: "<<smearedpos<<endl;
-		  StRnDHit* tempHit = new StRnDHit(smearedpos, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
-		  tempHit->setDetectorId(kIstId); 
-		  tempHit->setVolumeId(mcH->volumeId());                   
-		  tempHit->setKey(mcH->key());    
-		  if(mcI){
-		    tempHit->setLayer(mcI->layer());           
-		    tempHit->setLadder(mcI->ladder());           
-		    tempHit->setWafer(mcI->wafer());           
-		    tempHit->setExtraByte0(mcI->side());         
-		  }                                                         
-		  col->addHit(tempHit);                                 
-		}                                                           
-	      }	
-	  }							 
-     
-      cout <<"StPixelFastSimMaker::Make() -I- Loaded Ist  "
-	   <<nhits<<"ist  hits. "<<endl;
-    }									 
+		  double x=localpos[0];
+		  double z=localpos[2];
+		  //note that in these local coordinates the strips give good resolution in the x coordinate in layer 1 and layer 2 side 1 and z in layer 2 side 2
+		  if(fabs(z)<1.92 && fabs(x)<1.92){
+		    if(i==0){
+		      LOG_DEBUG<<"layer 1: local x: "<<localpos[0]<<"; local y: "<<localpos[1]<<"; local z: "<<localpos[2]<<endm;
+		      stripHit sh;
+		      sh.localX=x;
+		      sh.e=mcIw->dE();
+		      int sindex;
+		      sindex=x/pitch;
+		      sindex=sindex+nStrips/2+1;
+		      if(0<sindex && sindex<641){
+			if(z<0){
+			  sStrips[sindex-1].stripHits.push_back(sh);
+			}
+			else{
+			  sindex=sindex+640;
+			  sStrips[sindex-1].stripHits.push_back(sh);
+			}
+			stripToKey.insert(std::pair<int,int>(sindex,mcIw->key()));
+												
+		      }
+		      else{ LOG_INFO<<"bad strip index! "<<sindex<<endm;}
+		      LOG_DEBUG<<"stripHit created with local x value "<<localpos[0]<<" and e value "<<mcIw->dE()<<" and assigned to strip "<<sindex<<endm;
+		    }
+		    else{
+		      LOG_DEBUG<<"layer 2 side "<<mcIw->side()<<"; local x: "<<localpos[0]<<"; local y: "<<localpos[1]<<"; local z: "<<localpos[2]<<endm;
+		      if(mcIw->side()==2){
+			stripHit sh;
+			sh.localX=z;
+			sh.e=mcIw->dE();
+			int sindex; 
+			sindex=z/pitch;
+			sindex=sindex+nStrips/2+1;
+			if(0<sindex && sindex<641){
+			  strips2[sindex-1].stripHits.push_back(sh);
+			  strip2ToKey.insert(std::pair<int,int>(sindex,mcIw->key()));
+			}
+			else{ LOG_INFO<<"bad strip index! "<<sindex<<endm;}
+			LOG_DEBUG<<"stripHit created with local z value "<<localpos[2]<<" and e value "<<mcIw->dE()<<" and assigned to strip "<<sindex<<endm;
+		      }
+		      if(mcIw->side()==1){
+			stripHit sh;
+			sh.localX=x;
+			sh.e=mcIw->dE();
+			int sindex;
+			sindex=x/pitch;
+			sindex=sindex+nStrips/2+1;
+			if(0<sindex && sindex<641){
+			  strips1[sindex-1].stripHits.push_back(sh);
+			}
+			else{ LOG_INFO<<"bad strip index! "<<sindex<<endm;}
+			LOG_DEBUG<<"stripHit created with local x value "<<localpos[0]<<" and e value "<<mcIw->dE()<<" and assigned to strip "<<sindex<<endm;
+		      }											
+		    }
+		  }
+		}
+	      }
+	      if(i==0){
+		for(int oo=0;oo<1280;oo++){
+		  icept=0;
+		  sTotE=0;
+		  if(sStrips[oo].stripHits.size()){
+		    for(int pp=0;pp<sStrips[oo].stripHits.size();pp++){
+		      icept=icept+sStrips[oo].stripHits[pp].localX*sStrips[oo].stripHits[pp].e;
+		      sTotE=sTotE+sStrips[oo].stripHits[pp].e;
+		    }
+		    sStrips[oo].intercept=icept/sTotE;
+		    double smearedX;
+		    double smearedZ;
+		    smearedX=distortHit(sStrips[oo].intercept,pitch/sqrt(12.),100);
+		    gGeoManager->RestoreMasterVolume();
+		    gGeoManager->cd(PathIn);
+		    TGeoNode* node=gGeoManager->GetCurrentNode();
+		    localpos[0]=smearedX;
+		    if(oo>639) localpos[2]=distortHit(.96,1.92/sqrt(12.),100);
+		    else localpos[2]=distortHit(-.96,.96/sqrt(12.),100);
+		    localpos[1]=-.0005;
+		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
+		    LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
+		    LOG_DEBUG<<"path: "<<PathIn<<endm;
+		    gpos[0]=0;
+		    gpos[1]=0;
+		    gpos[2]=0;
+		    gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,gpos);
+		    StThreeVectorF gposv(gpos);
+		    StRnDHit* tempHit = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
+		    tempHit->setDetectorId(kIstId); 
+		    tempHit->setVolumeId(0);
+		    multimap<int,int>::iterator iter=stripToKey.find(oo+1);
+		    if(iter!=stripToKey.end()){
+		      tempHit->setKey((*iter).second);
+		      stripToKey.erase(iter);
+		    }
+		    else tempHit->setKey(99999);
+		    tempHit->setLayer(i+1);           
+		    tempHit->setLadder(ladderCount);           
+		    tempHit->setWafer(waferCount);
+		    tempHit->setExtraByte0(1);                                                                
+		    col->addHit(tempHit);
+		  }
+		}
+	      }
+	      if(i==1){
+		for(int o=0;o<640;o++){
+		  icept=0;
+		  sTotE=0;
+		  if(strips1[o].stripHits.size()){
+		    for(int p=0;p<strips1[o].stripHits.size();p++){
+		      icept=icept+strips1[o].stripHits[p].localX*strips1[o].stripHits[p].e;
+		      sTotE=sTotE+strips1[o].stripHits[p].e;
+		    }
+		    strips1[o].intercept=icept/sTotE;
+		    for(int q=0;q<640;q++){
+		      icept=0;
+		      sTotE=0;
+		      if(strips2[q].stripHits.size()){
+			for(int s=0;s<strips2[q].stripHits.size();s++){
+			  icept=icept+strips2[q].stripHits[s].localX*strips2[q].stripHits[s].e;
+			  sTotE=sTotE+strips2[q].stripHits[s].e;
+			}
+			strips2[q].intercept=icept/sTotE;
+			gGeoManager->RestoreMasterVolume();
+			gGeoManager->cd(PathIn);
+			TGeoNode* node=gGeoManager->GetCurrentNode();
+			localpos[0]=distortHit(strips1[o].intercept,pitch/sqrt(12.),100);
+			localpos[2]=distortHit(strips2[q].intercept,pitch/sqrt(12.),100);
+			localpos[1]=.0005;
+			LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
+			LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
+			LOG_DEBUG<<"path: "<<PathIn<<endm;
+			gpos[0]=0;
+			gpos[1]=0;
+			gpos[2]=0;
+			gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,gpos);
+			StThreeVectorF gposv(gpos);
+			StRnDHit* tempHit = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
+			tempHit->setDetectorId(kIstId); 
+			tempHit->setVolumeId(0);
+			multimap<int,int>::iterator iter=strip2ToKey.find(o+1);
+			if(iter!=strip2ToKey.end()){
+			  tempHit->setKey((*iter).second);
+			  strip2ToKey.erase(iter);
+			}
+			else tempHit->setKey(99999);
+			tempHit->setLayer(i+1);           
+			tempHit->setLadder(ladderCount);           
+			tempHit->setWafer(waferCount);
+			tempHit->setExtraByte0(1);                                                                
+			col->addHit(tempHit);
+		      }
+		    }
+		  }
+		}
+	      }
+	      waferCount++;
+	      for(int kl=0;kl<1280;kl++){
+		if(kl<640){
+		  strips1[kl].stripHits.clear();
+		  strips2[kl].stripHits.clear();
+		}
+		sStrips[kl].stripHits.clear();
+	      }
+	      stripToKey.clear();
+	      strip2ToKey.clear();
+	    }
+	    ladderCount++;
+	    ladderHits.clear();
+	  }
+	}
+      }
+    }
+  }									 
   else
     {
       cout <<"No Ist hits found."<<endl;
