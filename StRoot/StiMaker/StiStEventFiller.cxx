@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.80 2007/03/21 17:51:36 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.81 2007/04/16 22:47:18 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.81  2007/04/16 22:47:18  perev
+ * aux.mPt is +ve
+ *
  * Revision 2.80  2007/03/21 17:51:36  fisyak
  * adjust for ROOT 5.14
  *
@@ -1357,7 +1360,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
 
   // invariant
   aux.mCurv   = mFP._curv;
-  aux.mPt     = 1./mFP._ptin;
+  aux.mPt     = fabs(1./mFP._ptin);
   aux.mChi2   = node->getChi2();
   aux.mNormalRefAngle = alfa;
   aux.mHardwarePosition=0;
