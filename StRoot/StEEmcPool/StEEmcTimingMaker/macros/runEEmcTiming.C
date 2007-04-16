@@ -34,11 +34,15 @@ StEEmcA2EMaker *mEEanalysis   = 0;
 Int_t           count         = 0;
 Int_t           stat          = 0; 
 
-void runEEmcTiming( Int_t nevents = 50,
-		    Char_t *name = "8081048.list",
-		    Char_t *ofile= "test.root", 
-		    Float_t tower_delay=0.0,
-		    Float_t mapmt_delay=0.0,
+Int_t nzeros = 0;
+Int_t max_zero_count = 100;
+
+
+void runEEmcTiming( Int_t nevents = 30000,
+		    Char_t *name = "8095104.list",
+		    Char_t *ofile= "8095104.root", 
+		    Float_t tower_delay=19.,
+		    Float_t mapmt_delay=65.,
 		    Int_t nfiles = 1000
 		    )
 {
@@ -91,14 +95,15 @@ void runEEmcTiming( Int_t nevents = 50,
   mEEanalysis=new StEEmcA2EMaker("AandE");
   mEEanalysis->database("eemcdb");          // sets db connection
   mEEanalysis->source("MuDst",1);           // sets mudst as input
-  for ( int ii=0;ii<6;ii++ ) mEEanalysis->threshold(-3.0,ii);
+  // set a negative threshold for each channel 
+  for ( int ii=0;ii<6;ii++ ) mEEanalysis->threshold(-300.0,ii);
 
 
   
   StEEmcTimingMaker *timing=new StEEmcTimingMaker("timing");
   timing->setRunNumber( atoi( name ) );
   timing->setTiming( tower_delay, mapmt_delay );
-  timing->setTowerCuts( 50, 150 );
+  timing->setTowerCuts( 25, 75  );
   timing->setMapmtCuts( 50, 150 );
 
   mChain->ls(3);
@@ -132,6 +137,22 @@ void runEEmcTiming( Int_t nevents = 50,
     //--
     stat = mChain -> Make();
 
+    
+    //--
+    //-- Check that EEMC data are valid and terminate if not
+    //--
+    Int_t sum=0;
+    for ( Int_t i=0;i<720;i++ )
+      {
+	StEEmcTower t=mEEanalysis->tower(i,0);
+	sum+=t.raw();
+      }    
+    if (sum==0)nzeros++;
+    if ( nzeros > max_zero_count ) {
+      std::cout << "ADC sum for EEMC zero for > max events" << std::endl;
+      break;
+    }
+
     //--
     //-- Set to printout on every 10th event
     //--
@@ -150,7 +171,7 @@ void runEEmcTiming( Int_t nevents = 50,
 	StEEmcTower t=mEEanalysis->tower(i,0);
 	std::cout << t.raw() << " ";
 	if ( !((i+1)%24) ) std::cout << std::endl;
-      }
+      }    
     std::cout << std::endl;
 
 
@@ -171,6 +192,11 @@ void runEEmcTiming( Int_t nevents = 50,
   //--
   mChain -> Finish(); 
 
+  TString psfile=ofile;psfile.ReplaceAll("root","ps");
+  TString dtfile=ofile;dtfile.ReplaceAll("root","dat");
+
+//  timing->dumpPDF( psfile );
+  timing->dumpAsciiFile(dtfile);
 
   //--
   //-- Output the QA histograms to disk

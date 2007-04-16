@@ -62,19 +62,24 @@ void plotEEmcTiming( const Char_t *input_dir="timing_files/")
 
   // draw timing scan curves for tower crates
   //  drawCrates();
-
-  //for ( Int_t ii=0;ii<MaxTwCrates;ii++ ) drawChannels(ii);
-  //for ( Int_t ii=0;ii<MaxMapmtCrates;ii++ ) drawMapmt(ii);
+  for ( Int_t ii=0;ii<MaxTwCrates;ii++ ) towerChannels(ii);
+  for ( Int_t ii=0;ii<MaxMapmtCrates;ii++ ) mapmtChannels(ii);
 
   std::cout << "--------------------------------------------------------" << std::endl;
   std::cout << "to view timing curves for any crate" << std::endl;
   std::cout << std::endl;
   std::cout << "towerChannels(icrate) -- icrate = 0-5 for tower crates 1-6"<<std::endl;
   std::cout << "mapmtChannels(icrate) -- icrate = 0-47 for mapmt crates 1-48"<<std::endl;
+  std::cout << "print()               -- make gif files for all crates"<<std::endl;
 
 }
 // ----------------------------------------------------------------------------
-
+void print()
+{
+  drawCrates();
+  for ( Int_t ii=0;ii<MaxTwCrates;ii++ ) drawChannels(ii);
+  for ( Int_t ii=0;ii<MaxMapmtCrates;ii++ ) drawMapmt(ii);
+}
 
 // ----------------------------------------------------------------------------
 void drawCrates()
@@ -156,11 +161,20 @@ void mapmtChannels( Int_t crate )
   
   static const Int_t stride=16;
   Int_t crateid = MinMapmtCrateID+crate;
+
+
+  TString fname="mapmt-crate-";fname+=crate+MinMapmtCrateID;fname+=".ps";
+  TCanvas *canvas=new TCanvas("canvas","canvas",850/2,1100/2);
+  canvas->Divide(1,2);
+  Int_t icanvas=0;
+
+
   for ( Int_t ich=0;ich<192;ich+=stride ) 
     {
 
-      TString aname="crate";aname+=crateid;aname+=" channels ";aname+=ich;aname+=" to ";aname+=ich+stride-1;
-      TCanvas *c = new TCanvas(aname,aname,400,300);
+      canvas->cd(1+icanvas%2);
+      icanvas++;
+
 
       TString pname="crate";
       pname+=crateid;
@@ -213,6 +227,7 @@ void mapmtChannels( Int_t crate )
 	    mapmtChanCurves[crate][index]->GetXaxis()->SetRangeUser(0.,ymax*1.05);
 	  mapmtChanCurves[crate][index]->SetMarkerColor(38+jch);
 	  mapmtChanCurves[crate][index]->SetLineColor(38+jch);	  
+	  mapmtChanCurves[crate][index]->SetMinimum(0.);	  
 	  mapmtChanCurves[crate][index]->Draw(opts[jch]);
 	  
 	  TString label="crate ";label+=crate+1;label+=" chan ";label+=index;
@@ -220,11 +235,19 @@ void mapmtChannels( Int_t crate )
 
 	}
       legend->Draw();
+      canvas->Update();
 
-      if(doprint)c->Print(pname+".gif");
-
+      //      if(doprint)c->Print(pname+".gif");
+      if ( !(icanvas%2) ){
+	canvas->Print(fname+"(");
+	canvas->Clear();
+	canvas->Divide(1,2);
+      }
+      //      if(doprint)c->Print(pname+".gif");
 
     }
+  canvas->Print(fname+")");
+  gSystem->Exec(TString("ps2pdf ")+fname);
 
 }
 // ----------------------------------------------------------------------------
@@ -233,11 +256,19 @@ void towerChannels( Int_t crate )
 
   static  const  Int_t stride=12;
 
+  TString fname="tower-crate-";fname+=crate+1;fname+=".ps";
+  TCanvas *canvas=new TCanvas("canvas","canvas",850/2,1100/2);
+  canvas->Divide(1,2);
+  Int_t icanvas=0;
+
   for ( Int_t ich=0;ich<120;ich+=stride )
     {
 
-      TString aname="crate";aname+=crate;aname+=" channels ";aname+=ich;aname+=" to ";aname+=ich+stride-1;
-      TCanvas *c = new TCanvas(aname,aname,400,300);
+      canvas->cd(1+icanvas%2);
+      icanvas++;
+
+      //    TString aname="crate";aname+=crate;aname+=" channels ";aname+=ich;aname+=" to ";aname+=ich+stride-1;
+      //    TCanvas *c = new TCanvas(aname,aname,400,300);
 
       TString pname="crate";
       pname+=crate+1;
@@ -253,6 +284,7 @@ void towerChannels( Int_t crate )
       Double_t max=0.;
       for ( Int_t jch=0;jch<stride;jch++ ) // loop over channels in this one graph
 	{
+
 	  Int_t index=ich+jch;
 	  Double_t *Y=towerChanCurves[crate][index]->GetY();
 	  for ( Int_t ipoint=0;ipoint<npoints;ipoint++ ) sum[jch]+=Y[ipoint];
@@ -260,9 +292,10 @@ void towerChannels( Int_t crate )
 	}
       if ( max <= 0. ) continue; // meh?
 
-      TLegend *legend=new TLegend(0.125,0.5,0.325,0.85);
+      TLegend *legend=new TLegend(0.125,0.15,0.325,0.45);
       for ( Int_t jch=0;jch<stride;jch++ )
 	{
+
 	  Int_t index=ich+jch;
 	  towerChanCurves[crate][index]->SetMarkerSize(0.75);
 	  // offset X axis of each of these
@@ -279,6 +312,7 @@ void towerChannels( Int_t crate )
 	    EY[ip]*=max/sum[jch];
 	    //	    std::cout << "ip="<<ip<<" y="<<yy<<" y'="<<Y[ip]<<std::endl;
 	  }
+
 	  towerChanCurves[crate][index]->Sort();
 	  towerChanCurves[crate][index]->SetMinimum(0.);	  
 	  towerChanCurves[crate][index]->SetMarkerColor(38+jch);
@@ -290,10 +324,18 @@ void towerChannels( Int_t crate )
 
 	}
       legend->Draw();
+      canvas->Update();
 
-      if(doprint)c->Print(pname+".gif");
+      //      if(doprint)c->Print(pname+".gif");
+      if ( !(icanvas%2) ){
+	canvas->Print(fname+"(");
+	canvas->Clear();
+	canvas->Divide(1,2);
+      }
 
     }
+  canvas->Print(fname+")");
+  gSystem->Exec(TString("ps2pdf ")+fname);
 
 }
 
