@@ -7,6 +7,10 @@
 #include <TLine.h>
 #include <TPaveStats.h>
 #include <TTree.h>
+#include <TPDF.h>
+#include <TCanvas.h>
+#include <TChain.h>
+
 #include <vector>
 
 #include "StMessMgr.h"
@@ -15,8 +19,9 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
-
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
+
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
 ClassImp(StEEmcTimingMaker);
 
@@ -28,21 +33,103 @@ StEEmcTimingMaker::StEEmcTimingMaker(const Char_t *name):StMaker(name)
   mTowerMax=125; // max number of ADC > ped
   mMapmtMin=50;
   mMapmtMax=150;
-
+  mSupressZero=false;
 }
+
+void StEEmcTimingMaker::supressZeroAdc(){ mSupressZero=true; }
 // ----------------------------------------------------------------------------
 void StEEmcTimingMaker::setRunNumber( Int_t r )
 {
   mRunNumber=r;
 }
 
+// once DB has been initialized, rename/title the histograms
 Int_t StEEmcTimingMaker::InitRun(Int_t run){ 
   assert(run==mRunNumber);
+
+  StEEmcA2EMaker *adcmk = (StEEmcA2EMaker*)GetMaker("AandE");
+  if ( !adcmk ) {
+    std::cout << "No ADC to E maker" <<std::endl;
+    return kStWarn;
+  }
+
+  StEEmcDbMaker *dbmk=(StEEmcDbMaker*)GetMaker("eemcdb");
+  if ( !dbmk ) {
+    std::cout << "No database maker" << std::endl;
+    return kStFatal;
+  }
+
+
+  Int_t ilayer=0;
+  for ( Int_t itower=0;itower<720;itower++ )
+    {
+      StEEmcTower tow = adcmk->tower(itower,ilayer);
+      const EEmcDbItem *dbitem=dbmk->getByIndex( EEname2Index(tow.name()) );
+      assert(dbitem);
+      Int_t crate=dbitem->crate;
+      Int_t channel=dbitem->chan;
+      TString twname=dbitem->name;
+      TString tbname=dbitem->tube;
+      TString title=
+	Form("ADC spectrum run=%i, name=%s, cr/chan=%3.3d/%3.3d, tube=%s, ",run,twname.Data(),crate,channel,tbname.Data());
+      TString hname="h";hname+=twname;
+      hTower[crate-1][channel]->SetTitle(title);
+      hTower[crate-1][channel]->SetName(hname);
+    }
+
+#if 1
+  for ( ilayer=1; ilayer<4;ilayer++ ) {
+    for ( Int_t itower=0;itower<720;itower++ )
+      {
+	StEEmcTower tow = adcmk->tower(itower,ilayer);
+	const EEmcDbItem *dbitem=dbmk->getByIndex( EEname2Index(tow.name()) );
+	assert(dbitem);
+	Int_t crate=dbitem->crate;
+	Int_t channel=dbitem->chan;
+	TString twname=dbitem->name;
+	TString tbname=dbitem->tube;
+	TString title=Form("ADC spectrum run=%i, name=%s, cr/chan=%3.3d/%3.3d, tube=%s, ",run,twname.Data(),crate,channel,tbname.Data());
+	TString hname="h";hname+=twname;
+	hMapmt[crate-MinMapmtCrateID][channel]->SetTitle(title);
+	hMapmt[crate-MinMapmtCrateID][channel]->SetName(hname);
+    }
+  }
+#endif
+
+#if 1
+  for ( Int_t isector=0;isector<12;isector++ )
+    for ( Int_t iplane=0;iplane<2;iplane++ )
+      {
+	for ( Int_t index=0;index<288;index++ ) {
+	  StEEmcStrip strip=adcmk->strip(isector,iplane,index);
+	  const EEmcDbItem *dbitem=dbmk->getByIndex( EEname2Index(strip.name()) );
+	  if (!dbitem) continue;
+	  Int_t crate=dbitem->crate;
+	  Int_t channel=dbitem->chan;
+	  TString twname=dbitem->name;
+	  TString tbname=dbitem->tube;
+	  TString title=
+	    Form("ADC spectrum run=%i, name=%s, cr/chan=%3.3d/%3.3d, tube=%s, ",run,twname.Data(),crate,channel,tbname.Data());
+	  TString hname="h";hname+=twname;
+	  hMapmt[crate-MinMapmtCrateID][channel]->SetTitle(title);
+	  hMapmt[crate-MinMapmtCrateID][channel]->SetName(hname);
+	}
+      }
+#endif
+  LOG_INFO<<GetName()<<"::InitRun("<<run<<") histograms renamed"<<endm;
+
   return kStOK; 
 }
 
+// Initialize histograms.  By default, names will be [Tw or Ma][crate][chn].
+// Once DB has been initialized in InitRun, we rename using, eg, h01TA01
+// naming convention.  Note that hw channels which map to no detector will
+// hold the old naming convention.
 Int_t StEEmcTimingMaker::Init()
 {
+
+  hCounter=new TH1F("hCounter","Event counter;status",1,0.,1.);
+  hCounter->SetBit(TH1::kCanRebin);
 
 #if 1
 
@@ -78,12 +165,14 @@ Int_t StEEmcTimingMaker::Init()
     for ( Int_t ichan=0;ichan<MaxTwCrateCh;ichan++ )
       {
 	mTowerChanYield[icrate][ichan]=0;
+	mTowerChanSlope[icrate][ichan]=0.;
       }
 
   for ( Int_t icrate=0;icrate<MaxMapmtCrates;icrate++ )
     for ( Int_t ichan=0;ichan<MaxMapmtCrateCh;ichan++ )
       {
 	mMapmtChanYield[icrate][ichan]=0;
+	mMapmtChanSlope[icrate][ichan]=0.;
       }
   
       
@@ -92,8 +181,11 @@ Int_t StEEmcTimingMaker::Init()
   return kStOk;; /* moves histograms to .hist */
 }
 // ----------------------------------------------------------------------------
+// fill raw ADC for each valid detector
 Int_t StEEmcTimingMaker::Make()
 {
+
+  hCounter->Fill("Nevents",1.);
   
   StEEmcA2EMaker *adcmk = (StEEmcA2EMaker*)GetMaker("AandE");
   if ( !adcmk ) {
@@ -101,11 +193,15 @@ Int_t StEEmcTimingMaker::Make()
     return kStWarn;
   }
 
+  hCounter->Fill("Nadc2e",1.0);
+
   StEEmcDbMaker *dbmk=(StEEmcDbMaker*)GetMaker("eemcdb");
   if ( !dbmk ) {
     std::cout << "No database maker" << std::endl;
     return kStWarn;
   }
+
+  hCounter->Fill("Ndb",1.0);
 
   mTotalYield++;
 
@@ -154,7 +250,7 @@ Int_t StEEmcTimingMaker::Make()
 Int_t StEEmcTimingMaker::Finish()
 {
 
-  std::vector<TH1F*> histos;
+  std::vector<TH1F*> histos;  
 
   for ( Int_t icrate=0;icrate<MaxTwCrates;icrate++ )
     for ( Int_t ichan=0;ichan<MaxTwCrateCh;ichan++ )
@@ -193,24 +289,28 @@ Int_t StEEmcTimingMaker::Finish()
 
       for ( Int_t ichan=0;ichan<MaxTwCrateCh;ichan++ )
 	{
+
 	  TH1F *h=hTower[icrate][ichan];
+	  TString htitle=h->GetTitle(); 
+	  LOG_INFO<<"Fitting "<<htitle<<endl;
+
 	  TF1  *f=(TF1*)h->GetListOfFunctions()->At(0);
 	  if ( !f ) continue;// no fit
-	  if ( f->IsA() != TF1::Class() ) continue;// object not a fit
+	  if ( f->IsA() != TF1::Class() ) {
+	    LOG_WARN<<" somebody inserted something into "<<h->GetName()<<"'s list of functions, and it's messing up the output"<<endm;
+	    continue;// object not a fit
+	  }
 	  Float_t xmean = f->GetParameter(1);
+	  Float_t xwidth= f->GetParameter(2);
 	  Float_t xmin  = xmean+mTowerMin;
 	  Float_t xmax  = xmean+mTowerMax;
 	  h->GetXaxis()->SetRangeUser(xmin,xmax);
 	  Float_t sum=h->Integral();
 	  mTowerCrateYield[icrate]+=(Int_t)sum;
 	  mTowerChanYield[icrate][ichan]+=(Int_t)sum;
-	  h->GetXaxis()->UnZoom();
+	  
+	  h->GetXaxis()->SetRangeUser(xmin-2.0*mTowerMin,xmax+mTowerMin);
 	  h->Draw();
-
-	  Char_t buf[128];
-	  sprintf(buf,"Integral [%5.1f,%5.1f] = %i",xmin,xmax,mTowerChanYield[icrate][ichan]);
-	  TString title=h->GetTitle();title+=" ";title+=buf;
-	  h->SetTitle(title);
 
 	  TLine *l1=new TLine( xmin, -0.05*h->GetMaximum(), xmin, +0.05*h->GetMaximum() );l1->SetLineColor(2);
 	  TLine *l2=new TLine( xmax, -0.05*h->GetMaximum(), xmax, +0.05*h->GetMaximum() );l2->SetLineColor(2);
@@ -221,6 +321,19 @@ Int_t StEEmcTimingMaker::Finish()
 	    {
 	      hSumTowers->Fill( ((Float_t)ii) - xmean, h->GetBinContent(ii) );
 	    }
+
+	  TF1 *slope=new TF1("slope","expo",0.,512.);
+	  slope->SetLineColor(2); 
+	  h->Fit(slope,"RQ+","",xmin,xmax);
+	  if ( slope->GetParameter(1) != 0. )
+	    mTowerChanSlope[icrate][ichan]=1.0/slope->GetParameter(1);
+
+	  htitle+=Form("ped=%6.2f, ",xmean);
+	  htitle+=Form("width=%6.4f, ",xwidth);
+	  htitle+=Form("xmin=%5.1f, xmax=%5.1f, Integral=%i, ",xmin,xmax,mTowerChanYield[icrate][ichan]);
+	  htitle+=Form("inv. slope=%8.5g+/-%8.5g, ",slope->GetParameter(1),slope->GetParError(1));
+
+	  h->SetTitle(htitle);
 	  
 	}
       AddHist(hSumTowers,".hist");
@@ -240,17 +353,27 @@ Int_t StEEmcTimingMaker::Finish()
       for ( Int_t ichan=0;ichan<MaxMapmtCrateCh;ichan++ )
 	{
 	  TH1F *h=hMapmt[icrate][ichan];
+	  TString htitle=h->GetTitle();
+	  LOG_INFO<<"Fitting "<<htitle<<endl;
+
 	  TF1  *f=(TF1*)h->GetListOfFunctions()->At(0);
 	  if ( !f ) continue;// no fit
-	  if ( f->IsA() != TF1::Class() ) continue;// object not a fit
+	  if ( f->IsA() != TF1::Class() ) {
+	    LOG_WARN<<" somebody inserted something into "<<h->GetName()<<"'s list of functions, and it's messing up the output"<<endm;
+	    continue;// object not a fit
+	  }
+
 	  Float_t xmean = f->GetParameter(1);
+	  Float_t xwidth = f->GetParameter(2);
 	  Float_t xmin  = xmean+mMapmtMin;
 	  Float_t xmax  = xmean+mMapmtMax;
 	  h->GetXaxis()->SetRangeUser(xmin,xmax);
 	  Float_t sum=h->Integral();
+
+
 	  mMapmtCrateYield[icrate]+=(Int_t)sum;
 	  mMapmtChanYield[icrate][ichan]+=(Int_t)sum;
-	  h->GetXaxis()->UnZoom();
+	  h->GetXaxis()->SetRangeUser(xmin-2.0*mMapmtMin,xmax+mMapmtMin);
 	  h->Draw();
 
 	  Char_t buf[128];
@@ -268,6 +391,18 @@ Int_t StEEmcTimingMaker::Finish()
 	      hSumMapmt->Fill( ((Float_t)ii) - xmean, h->GetBinContent(ii) );
 	    }
 	  
+	  TF1 *slope=new TF1("slope","expo",0.,512.);
+	  slope->SetLineColor(2); 
+	  h->Fit(slope,"RQ+","",xmin,xmax);
+	  if ( slope->GetParameter(1) != 0. )
+	    mMapmtChanSlope[icrate][ichan]=1.0/slope->GetParameter(1);
+
+	  htitle+=Form("ped=%6.2f, ",xmean);
+	  htitle+=Form("width=%6.4f, ",xwidth);
+	  htitle+=Form("xmin=%5.1f, xmax=%5.1f, Integral=%i, ",xmin,xmax,mMapmtChanYield[icrate][ichan]);
+	  htitle+=Form("inv. slope=%8.5g+/-%8.5g, ",slope->GetParameter(1),slope->GetParError(1));
+	  h->SetTitle(htitle);
+
 	}
       AddHist(hSumMapmt,".hist");
 
@@ -299,6 +434,8 @@ Int_t StEEmcTimingMaker::Finish()
 
   tree->Branch("mTowerChanYield",mTowerChanYield,"mTowerChanYield[nTowerCrateChannels]/I");
   tree->Branch("mMapmtChanYield",mMapmtChanYield,"mMapmtChanYield[nMapmtCrateChannels]/I");
+  //  tree->Branch("mTowerChanSlope",mTowerChanSlope,"mTowerChanSlope[nTowerCrateChannels]/F");
+  //  tree->Branch("mMapmtChanSlope",mMapmtChanSlope,"mMapmtChanSlope[nMapmtCrateChannels]/F");
 
   tree->Branch("mTowerMin",&mTowerMin,"mTowerMin/I");
   tree->Branch("mTowerMax",&mTowerMax,"mTowerMax/I");
@@ -326,11 +463,216 @@ void StEEmcTimingMaker::setTiming( Float_t t, Float_t m )
 void StEEmcTimingMaker::setTowerCuts(Int_t min, Int_t max)
 {
   mTowerMin=min;mTowerMax=max;
-  LOG_INFO<<GetName()<<" set tower cuts: [ped+"<<min<<",ped+"<<max<<endm;
+  LOG_INFO<<GetName()<<" set tower cuts: ped+"<<min<<",ped+"<<max<<endm;
 }
 void StEEmcTimingMaker::setMapmtCuts(Int_t min, Int_t max)
 {
   mMapmtMin=min;mMapmtMax=max;
-  LOG_INFO<<GetName()<<" set mapmt cuts: [ped+"<<min<<",ped+"<<max<<endm;
+  LOG_INFO<<GetName()<<" set mapmt cuts: ped+"<<min<<",ped+"<<max<<endm;
 }
 				    
+// ----------------------------------------------------------------------------
+void StEEmcTimingMaker::dumpAsciiFile( const Char_t *fname )
+{
+
+
+  LOG_INFO<<GetName()<<"::dumpAsciiFile("<<fname<<");"<<endm;
+
+  ofstream ofile(fname);
+  ofile << "Run number: " << mRunNumber << endl;
+
+
+#if 0
+  StMuDstMaker *mumk=(StMuDstMaker*)GetMaker("MuDst");
+  if ( mumk ) {
+    ofile << "Number of entries: " << mumk->chain()->GetEntries() << endl;
+    TObjArray *oa=mumk->chain()->GetListOfFiles();
+    Int_t n=oa->GetEntries();
+    for ( Int_t i=0;i<n;i++ ) {
+      TNamed *named=(TNamed*)oa->At(i);
+      if(named)
+	ofile << "+ "<<named->GetName()<<endl;
+    }
+  }
+  ofile<<endl;
+
+  ofile<<"Tower cuts: "<<mTowerMin<<" "<<mTowerMax<<endl;
+  ofile<<"Mapmt cuts: "<<mMapmtMin<<" "<<mMapmtMax<<endl;
+  ofile<<endl;
+#endif
+
+#if 1
+  const Char_t *sn[]={"01","02","03","04","05","06","07","08","09","10","11","12"};
+  const Char_t *ln[]={"T","P","Q","R"};
+  const Char_t *bn[]={"A","B","C","D","E"};
+
+  for ( Int_t lay=0;lay<4;lay++ ){
+    for ( Int_t sec=0;sec<12;sec++ ){
+      for ( Int_t sub=0;sub<5;sub++ ){
+	{
+	  for ( Int_t eta=0;eta<12;eta++ )
+	    {
+	      TString tname=sn[sec];tname+=ln[lay];tname+=bn[sub];tname+=sn[eta];
+	      TString hname="h";hname+=tname;
+	      TH1F *h=(TH1F*)GetHist(hname);   
+	      ofile << h->GetTitle() <<endl;
+	    }
+	}
+      }
+    }
+  }
+
+  const Char_t *pn[]={"U","V"};
+  for ( Int_t pln=0;pln<2;pln++ )
+    for ( Int_t sec=0;sec<12;sec++ )
+      {
+	for ( Int_t strip=0;strip<288;strip+=16 ) {
+	  for ( Int_t i=0;i<16;i++ ) {
+	    Int_t istrip=strip+i;
+	    TString tname =sn[sec];
+	    tname+=pn[pln];
+	    if (istrip+1<100) tname+="0";
+	    if (istrip+1<10)  tname+="0";
+	    tname+=(istrip+1);
+	    TString hname="h";hname+=tname;
+	    TH1F *h=(TH1F*)GetHist(hname);	  
+	    ofile<<h->GetTitle()<<endl;
+	  }
+	}
+      }
+
+  
+#endif
+
+}
+
+// ----------------------------------------------------------------------------
+void StEEmcTimingMaker::dumpPDF( const Char_t *fname )
+{
+
+
+
+  TCanvas *c1=new TCanvas("c1","c1",850,1100);
+  c1->Divide(3,4);
+  c1->SetLogy();
+
+  const Char_t *sn[]={"01","02","03","04","05","06","07","08","09","10","11","12"};
+  const Char_t *ln[]={"T","P","Q","R"};
+  const Char_t *bn[]={"A","B","C","D","E"};
+
+  c1->Print(TString(fname)+"("); // print and leave open
+  for ( Int_t lay=0;lay<4;lay++ ){
+    for ( Int_t sec=0;sec<12;sec++ ){
+      for ( Int_t sub=0;sub<5;sub++ ){
+	{
+	  for ( Int_t eta=0;eta<12;eta++ )
+	    {
+	      c1->cd(eta+1);
+	      c1->cd(eta+1)->SetLogy();
+	      TString tname=sn[sec];tname+=ln[lay];tname+=bn[sub];tname+=sn[eta];
+	      TString hname="h";hname+=tname;
+	      TH1F *h=(TH1F*)GetHist(hname);	
+	      if (h)h->Draw();
+	    }
+	  c1->Print(TString(fname)+"("); // print and leave open
+	  
+	}	
+      }
+    }
+  }
+
+  c1->Clear();
+  c1->Divide(4,4);
+  c1->SetLogy();
+
+  const Char_t *pn[]={"U","V"};
+  for ( Int_t pln=0;pln<2;pln++ )
+    for ( Int_t sec=0;sec<12;sec++ )
+      {
+	for ( Int_t strip=0;strip<288;strip+=16 ) {
+	  for ( Int_t i=0;i<16;i++ ) {
+	    Int_t istrip=strip+i;
+	    c1->cd(i+1);
+	    c1->cd(i+1)->SetLogy();
+	    TString tname =sn[sec];
+	    tname+=pn[pln];
+	    if (istrip+1<100) tname+="0";
+	    if (istrip+1<10)  tname+="0";
+	    tname+=(istrip+1);
+	    TString hname="h";hname+=tname;
+	    TH1F *h=(TH1F*)GetHist(hname);	  
+	    if(h)h->Draw();
+	  }
+	  c1->Print(TString(fname)+"("); // print and leave open
+	}
+      }
+  c1->Clear();
+  c1->Print(TString(fname)+")"); // print and close
+
+
+
+
+#if 0
+
+  TCanvas *c1=new TCanvas("c1","c1",850,1100);
+  TPDF *pdf=new TPDF(fname,111);
+  c1->Divide(3,4);
+  c1->SetLogy();
+ 
+   const Char_t *sn[]={"01","02","03","04","05","06","07","08","09","10","11","12"};
+  const Char_t *ln[]={"T","P","Q","R"};
+  const Char_t *bn[]={"A","B","C","D","E"};
+
+  // loop ovEr towers and write pdf file
+  Int_t i=1;
+
+  for ( Int_t lay=0;lay<4;lay++ )
+    for ( Int_t sec=0;sec<12;sec++ )
+      for ( Int_t sub=0;sub<5;sub++ )
+	for ( Int_t eta=0;eta<12;eta++ )
+	  {
+	    if ( !(i%12) ) {
+	      c1->Update();
+	      pdf->NewPage();
+	    }
+	    TString tname=sn[sec];tname+=ln[lay];tname+=bn[sub];tname+=sn[eta];
+	    TString hname="h";hname+=tname;
+	    TH1F *h=(TH1F*)GetHist(hname);
+	    c1->cd((i++ % 12));
+	    if(h) h->Draw();
+
+	  }
+
+  // loop over SMD 
+  c1=new TCanvas("c1","c1",850,1100);
+  c1->Divide(4,4);
+  c1->SetLogy();
+
+
+  const Char_t *pn[]={"U","V"};
+
+  i=1;
+  pdf->NewPage();
+  for ( Int_t sec=0;sec<12;sec++ )
+    for ( Int_t pln=0;pln<2;pln++ ) 
+      for ( Int_t strip=0;strip<288;strip++ )
+	{
+	  if ( !(i%16) ) {
+	    c1->Update();
+	    pdf->NewPage();
+	  }
+	  TString tname =sn[sec];
+	  	  tname+=pn[pln];
+	  if (strip+1<100) tname+="0";
+	  if (strip+1<10)  tname+="0";
+	  tname+=(strip+1);
+	  TString hname="h";hname+=tname;
+	  TH1F *h=(TH1F*)GetHist(hname);
+	  c1->cd((i++ % 16));
+	  if(h) h->Draw();
+	  
+	}
+#endif
+
+
+}

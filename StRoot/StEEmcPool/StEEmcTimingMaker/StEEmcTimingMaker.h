@@ -29,9 +29,17 @@ class StEEmcTimingMaker : public StMaker
   void setTowerCuts( Int_t min, Int_t max );
   void setMapmtCuts( Int_t min, Int_t max );
 
+  /// Do not fill histograms with ADC=0
+  void supressZeroAdc();
+
+  void dumpAsciiFile(const Char_t *fname="eemcTimingFile.dat" );
+  void dumpPDF( const Char_t *fname="eemcTimingFile.pdf" );
+
  private:
  protected:
   
+  Bool_t mSupressZero;
+
   Int_t   mRunNumber;
   Float_t mTowerDelay;
   Float_t mMapmtDelay;
@@ -43,6 +51,9 @@ class StEEmcTimingMaker : public StMaker
   Int_t   mTowerChanYield[ MaxTwCrates ][ MaxTwCrateCh ];
   Int_t   mMapmtChanYield[ MaxMapmtCrates ][ MaxMapmtCrateCh ];
 
+  Float_t mTowerChanSlope[ MaxTwCrates ][ MaxTwCrateCh ];
+  Float_t mMapmtChanSlope[ MaxMapmtCrates ][ MaxMapmtCrateCh ];
+
   Int_t   mTowerMin;
   Int_t   mTowerMax;
   Int_t   mMapmtMin;
@@ -50,6 +61,8 @@ class StEEmcTimingMaker : public StMaker
 
   TH1F *hTower[ MaxTwCrates ][ MaxTwCrateCh ];
   TH1F *hMapmt[ MaxMapmtCrates ][ MaxMapmtCrateCh ];
+
+  TH1F *hCounter;
 
   ClassDef(StEEmcTimingMaker,1);
 
