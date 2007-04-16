@@ -72,6 +72,11 @@
 
 	$DST_PATH/status.emconline_trg STOP &> /dev/null
 
+	touch $DST_PATH/RUNSTATUS.emconline_trg
+
+	source $DST_PATH/.emconline_trg.cfg.sh
+	update_desktop_icon_trg
+
 	### The rest is for backward compatibility only, otherwise can be safely skipped
 	#
 	export JOBFILE=$DST_PATH/job

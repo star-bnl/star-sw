@@ -45,6 +45,11 @@ Files created for backward compatibility:
     LAST_TIME_RUN
     RUNMODE
 
+The "Trigger monitoring" icon also appears on the GNOME desktop showing the current status of the job.
+
+Configuration file settings:
+See .emconline_trg.cfg.sh file.
+
 3. Compile
 cons
 Don't forget to compile under the correct star level which you specified in the configuration file.
