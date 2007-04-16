@@ -69,6 +69,8 @@ Files created for backward compatibility:
     RUNMODE
     filelist.txt
 
+The "Pedestal monitoring" icon also appears on the GNOME desktop showing the current status of the job.
+
 Configuration file settings:
 See .emconline_ped.cfg.sh file.
 
@@ -111,7 +113,8 @@ DB tables in ./tables.emconline_ped.
 Files left after the last running:
     LAST_TIME_RUN.emconline_ped - short summary
     last_log.emconline_ped.txt  - log file, stdout and stderr
-    runlist.emconline_ped.txt   - list of runs that were used
+    runlist.emconline_ped.txt   - list of runs that were used last time
+    runlist_veto.emconline_ped.txt - list of runs that were already processed, to be excluded
 
 ----------------------------------------------------------------------
 Oleksandr Grebenyuk

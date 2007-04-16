@@ -75,6 +75,9 @@
 
 	$DST_PATH/status.emconline_ped STOP &> /dev/null
 
+        source $DST_PATH/.emconline_ped.cfg.sh
+	update_desktop_icon_ped
+
 	### The rest is for backward compatibility only, otherwise can be safely skipped
 	#
 	export JOBFILE=$DST_PATH/job
