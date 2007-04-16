@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.6 2007/04/06 14:55:33 andrewar Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.7 2007/04/16 19:10:52 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.7  2007/04/16 19:10:52  wleight
+ * Added IST simulation (digitization but no clustering)
+ *
  * Revision 1.6  2007/04/06 14:55:33  andrewar
  * Shift of HFT to face of ladder.
  *
@@ -115,7 +118,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.6 2007/04/06 14:55:33 andrewar Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.7 2007/04/16 19:10:52 wleight Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -149,6 +152,17 @@ class StPixelFastSimMaker : public StMaker {
   
   ClassDef(StPixelFastSimMaker,1)   //StAF chain virtual base class for Makers
 };
+
+struct stripHit{
+	double localX;
+	double e;
+};
+
+struct istStrip{
+	vector<stripHit> stripHits;
+	double intercept;
+};
+
 #endif
 
 
