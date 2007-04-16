@@ -97,9 +97,11 @@ class StMyClusterMaker : public StEEmcGenericClusterMaker, public StMyClusterPar
   void  Clear(Option_t *opts="");
 
   /// Sets SMD seed threshold
-  void setSmdSeedEnergy( Float_t e ) { mSmdSeedEnergy = e; }
+  void setSmdSeedEnergy( Float_t e, Float_t s=0. ) { seed_threshold=e; seed_slope=s; }
+
   /// Sets minimum energy to add an SMD strip to a cluster
   void setSmdMinimumEnergy( Float_t e ) { mSmdMinEnergy = e; } 
+
   /// Sets maximum number of strips to add on each side of the cluster
   void setSmdMaximumSize( Int_t m ) { mMaxExtent = m; } 
   /// Clusters are truncated if the energy of the cluster does not incrase
@@ -127,11 +129,15 @@ class StMyClusterMaker : public StEEmcGenericClusterMaker, public StMyClusterPar
   /// control flag which activates the cut.
   void setFloor( Float_t relative_yield, Float_t width ){ mFloorParams[0]=relative_yield; mFloorParams[1]=width; }
 
+
  private:
  protected:
 
   StMuDstMaker *mMuDst;
   TFile *mFile;
+
+  Float_t seed_threshold;
+  Float_t seed_slope;
 
   Float_t mSmdSeedEnergy; /**< SMD seed threshold   */
   Float_t mSmdMinEnergy;  /**< SMD minimum energy   */
