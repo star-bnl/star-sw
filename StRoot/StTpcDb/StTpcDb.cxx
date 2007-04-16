@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.42 2007/04/15 20:57:01 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.43 2007/04/16 22:51:03 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.43  2007/04/16 22:51:03  fisyak
+ * Add protection from infinit endTime
+ *
  * Revision 1.42  2007/04/15 20:57:01  fisyak
  * Add drift velocity interpolation between two measurement in time
  *
@@ -480,6 +483,7 @@ float StTpcDb::DriftVelocity(){
   static UInt_t u = 0;  // current time (secs)
   static UInt_t u0 = 0; // beginTime of current Table
   static UInt_t u1 = 0; // beginTime for next Table
+  static UInt_t umax = TUnixTime(20250101,0,1).GetUTime(); // maximum time allowed for next table
   static St_tpcDriftVelocity *dvel0 = 0;
   static St_tpcDriftVelocity *dvel1 = 0;
   static Float_t driftvel = 0;
@@ -498,7 +502,8 @@ float StTpcDb::DriftVelocity(){
     u0 = TUnixTime(t[0],1).GetUTime();
     u1 = TUnixTime(t[1],1).GetUTime();
     SafeDelete(dvel1);
-    dvel1 = (St_tpcDriftVelocity *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
+    if (u1 < umax) 
+      dvel1 = (St_tpcDriftVelocity *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
     if (! dvel1) {
       gMessMgr->Message("StTpcDb::Error Finding next Tpc DriftVelocity","W");
     }
@@ -511,7 +516,8 @@ float StTpcDb::DriftVelocity(){
     }
     UInt_t u0n = TUnixTime(t[0],1).GetUTime();
     UInt_t u1n = TUnixTime(t[1],1).GetUTime();
-    if (u0n != u0 || u1n != u1) {
+    if ((u0n != u0 || u1n != u1) && u1n < umax) {
+      u1 = u1n;
       SafeDelete(dvel1);
       dvel1 = (St_tpcDriftVelocity *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
       if (! dvel1) {
