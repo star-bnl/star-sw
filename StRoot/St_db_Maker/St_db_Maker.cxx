@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.104 2007/04/15 20:57:42 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.105 2007/04/16 00:20:23 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.105  2007/04/16 00:20:23  perev
+// Feature in TTable workaround
+//
 // Revision 1.104  2007/04/15 20:57:42  fisyak
 // By pass bug in TTable::New
 //
@@ -828,9 +831,9 @@ TDataSet *St_db_Maker::GetDataBase(const char* logInput,const TDatime *td)
     myVS->Modified(1);
     if (vs->fParId) { 
       TTable *tb = (TTable *)vs->fDat;
-      TString type(tb->GetType());
-      type.ReplaceAll("_st","");
-      myVS->fDat = TTable::New(tb->GetName(),type,0,0);
+      TString ty(tb->GetType()); 
+      if (ty.EndsWith("_st")) ty.Remove(ty.Length()-3,99);
+      myVS->fDat = TTable::New(tb->GetName(),ty,0,0);
       myVS->fDat->SetUniqueID(myVS->fTabId);
     }
     TDataSetIter next(vs);
