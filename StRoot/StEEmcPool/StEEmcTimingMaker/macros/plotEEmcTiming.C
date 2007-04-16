@@ -31,8 +31,8 @@ TGraphErrors *mapmtChanCurves[MaxMapmtCrates][MaxMapmtCrateCh];
 // enables printing of output files (gif) for documentation
 // figures will appear in same subdirector as input files, 
 // specified below.
-//Bool_t doprint = true;
-Bool_t doprint = false;
+Bool_t doprint = true;
+//Bool_t doprint = false;
 
 void plotEEmcTiming( const Char_t *input_dir="timing_files/")
 {  
@@ -61,7 +61,7 @@ void plotEEmcTiming( const Char_t *input_dir="timing_files/")
     }
 
   // draw timing scan curves for tower crates
-  //  drawCrates();
+  drawCrates();
   for ( Int_t ii=0;ii<MaxTwCrates;ii++ ) towerChannels(ii);
   for ( Int_t ii=0;ii<MaxMapmtCrates;ii++ ) mapmtChannels(ii);
 
@@ -70,7 +70,7 @@ void plotEEmcTiming( const Char_t *input_dir="timing_files/")
   std::cout << std::endl;
   std::cout << "towerChannels(icrate) -- icrate = 0-5 for tower crates 1-6"<<std::endl;
   std::cout << "mapmtChannels(icrate) -- icrate = 0-47 for mapmt crates 1-48"<<std::endl;
-  std::cout << "print()               -- make gif files for all crates"<<std::endl;
+//  std::cout << "print()               -- make gif files for all crates"<<std::endl;
 
 }
 // ----------------------------------------------------------------------------
