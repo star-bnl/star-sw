@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.38 2006/12/18 01:26:32 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.39 2007/04/16 22:45:34 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.39  2007/04/16 22:45:34  perev
+ * endl added
+ *
  * Revision 2.38  2006/12/18 01:26:32  perev
  * StiNodeInf factory added
  *
@@ -252,7 +255,7 @@ Factory<StiDetector>* StiDefaultToolkit::getDetectorFactory()
 {
   if (_detectorFactory)
     return _detectorFactory;
-  cout << "StiDefaultToolkit::getDetectorFactory() -I- Instantiating Detector Factory"; 
+  cout << "StiDefaultToolkit::getDetectorFactory() -I- Instantiating Detector Factory"<<endl; 
     _detectorFactory = StiFactory<StiDetector,StiDetector>::myInstance();
   return _detectorFactory;
 }
