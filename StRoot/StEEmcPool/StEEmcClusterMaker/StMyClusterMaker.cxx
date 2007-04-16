@@ -136,7 +136,7 @@ Int_t StMyClusterMaker::buildLayer(Int_t layer )
       for ( UInt_t j=0;j<hits.size();j++ )
 	{
 	  tow=hits[j];
-
+	  
 	  if ( used[ tow.index() ] ) continue; // next hit
 	  if ( tow.fail()          ) continue; // bad channel
 
@@ -197,7 +197,27 @@ Int_t StMyClusterMaker::buildSmdClusters()
 
   LOG_INFO << " building SMD clusters" << endm;
     
-  for ( Int_t sector=0;sector<12;sector++ )
+  for ( Int_t sector=0;sector<12;sector++ ) {
+
+    Float_t etmax = 0.;
+    for ( UInt_t ii=0;ii<mTowerClusters[sector][0].size();ii++ )
+      {
+	StEEmcCluster c = mTowerClusters[sector][0][ii];
+	if ( c.momentum().Perp() > etmax ) etmax = c.momentum().Perp();
+      }
+
+
+    if ( etmax >= 4.5 ) {
+      mSmdSeedEnergy = ( seed_threshold + seed_slope * (etmax-4.5) ) / 1000.0;
+      mSmdMinEnergy  = 0.1 * mSmdSeedEnergy;
+    }
+    else {
+      mSmdSeedEnergy = seed_threshold / 1000.0;
+      mSmdMinEnergy  = 0.1 * mSmdSeedEnergy;
+    }
+
+    LOG_INFO<<GetName()<<" sector="<<sector<<" seed energy="<<mSmdSeedEnergy<<endm;
+
     for ( Int_t plane=0;plane<2;plane++ ) 
       {
 
@@ -417,6 +437,7 @@ Int_t StMyClusterMaker::buildSmdClusters()
 
 
       }
+  }
 
 
   return kStOK;
