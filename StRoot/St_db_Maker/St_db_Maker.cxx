@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.105 2007/04/16 00:20:23 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.106 2007/04/17 01:37:05 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.106  2007/04/17 01:37:05  perev
+// assert improved
+//
 // Revision 1.105  2007/04/16 00:20:23  perev
 // Feature in TTable workaround
 //
@@ -514,8 +517,8 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat
   
   // small debug statement
   if ( val[0].Get() >= val[1].Get()) {
-    printf("val[0].Get() = %d >= val[1].Get() = %d\n",val[0].Get(),val[1].Get());
-    printf("UpdateTable: Table %s.%s Suspicious Ranges Date/Time %d/%d->%d/%d\n",
+    Error("UpdateTable","val[0].Get() = %d >= val[1].Get() = %d\n",val[0].Get(),val[1].Get());
+    Error("UpdateTable:","Table %s.%s Suspicious Ranges Date/Time %d/%d->%d/%d\n",
 	    dat->GetName(),dat->GetTitle(),d1,t1,d2,t2);
     Error("UpdateTable","Table %s.%s Suspicious Ranges Date/Time %d/%d->%d/%d",
 	  dat->GetName(),dat->GetTitle(),d1,t1,d2,t2);
@@ -574,9 +577,11 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   return kPrune;  
 }
 //_____________________________________________________________________________
-int St_db_Maker::UpdateValiSet(StValiSet *val,const TDatime &currenTime)
+int St_db_Maker::UpdateValiSet(StValiSet *val,const TDatime &currenTimep)
 {
 static int nCall=0; nCall++;
+  TDatime currenTime(currenTimep);
+  if (currenTime.GetDate() >=kMaxTime) currenTime.Set(kMaxTime-1,0);
   TDataSet *left;
   TDatime valsCINT[2],valsSQL[2];
   UInt_t uevent = currenTime.Get();
