@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.17 2005/04/12 17:33:18 dongx Exp $
+ * $Id: StTofMaker.cxx,v 1.18 2007/04/17 23:00:41 dongx Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.18  2007/04/17 23:00:41  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.17  2005/04/12 17:33:18  dongx
  * update for year 5 new data format. Store into TofRawData from now on.
  *
@@ -82,6 +85,7 @@
 */
 #include "StTofMaker.h"
 #include <stdlib.h>
+#include "StMessMgr.h"
 #include "StEventTypes.h"
 #include "StEvent/StTofData.h"
 #include "StEvent/StTofRawData.h"
@@ -118,10 +122,9 @@ Int_t StTofMaker::Init(){
 }
 
 
-
 /// InitRun method, (re)initialize TOFp data from STAR dBase
 Int_t StTofMaker::InitRun(int runnumber){
-  cout << "StTofMaker::InitRun  -- initializing TofGeometry --" << endl;
+  LOG_INFO << "StTofMaker::InitRun  -- initializing TofGeometry --" << endm;
   mTofGeom = new StTofGeometry();
   mTofGeom->init(this);
   return kStOK;
@@ -131,7 +134,7 @@ Int_t StTofMaker::InitRun(int runnumber){
 
 /// FinishRun method, clean up TOFp dBase entries
 Int_t StTofMaker::FinishRun(int runnumber){
-  cout << "StTofMaker::FinishRun -- cleaning up TofGeometry --" << endl;
+  LOG_INFO << "StTofMaker::FinishRun -- cleaning up TofGeometry --" << endm;
   if (mTofGeom) delete mTofGeom;
   mTofGeom=0;
   return 0;
@@ -143,7 +146,7 @@ Int_t StTofMaker::FinishRun(int runnumber){
 /// Make method, check for collections; create and fill them according to m_Mode
 Int_t StTofMaker::Make(){
   // 
-  cout << "StTofMaker::Make() -- All Your Base Are Belong To Us --"  << endl;
+  LOG_INFO << "StTofMaker::Make() -- All Your Base Are Belong To Us --"  << endm;
   StTofDataCollection myDataCollection;
   mDataCollection = &myDataCollection; 
   mTofCollectionPresent  = 0;
@@ -159,60 +162,60 @@ Int_t StTofMaker::Make(){
   tofTag = -99;
   mEvent = (StEvent *) GetInputDS("StEvent");
   if (mEvent) {
-    cout << "StTofMaker Checking for Tof and TofData collections ..." << endl;
+    LOG_INFO << "StTofMaker Checking for Tof and TofData collections ..." << endm;
     mTheTofCollection = mEvent->tofCollection();
     if(mTheTofCollection) {
       mTofCollectionPresent = 1;
-      cout << " + tofCollection Exists" << endl;
+      LOG_INFO << " + tofCollection Exists" << endm;
 //--
       if(mTheTofCollection->dataPresent()) {
-	cout << " + tofDataCollection Exists" << endl;
+	LOG_INFO << " + tofDataCollection Exists" << endm;
 	mDataCollectionPresent = 1;
       } else if(mTheTofCollection->rawdataPresent()) {
 	mRawDataCollectionPresent = 1;  //RunV
       }
-      else cout << " - tofDataCollection & tofRawDataCollection does not exist" << endl;
+      else LOG_INFO << " - tofDataCollection & tofRawDataCollection does not exist" << endm;
       //--
     } else {
-      cout << " - tofCollection does not exist" << endl;
-      cout << " - tofDataCollection & tofRawDataCollection does not exist" << endl;	 //RunV
+      LOG_INFO << " - tofCollection does not exist" << endm;
+      LOG_INFO << " - tofDataCollection & tofRawDataCollection does not exist" << endm;	 //RunV
     }
     //-- create tofcollection...
     if (!mTheTofCollection){
-      cout << "StTofMaker Creating tofCollection in StEvent ... ";
+      LOG_INFO << "StTofMaker Creating tofCollection in StEvent ... ";
       mTheTofCollection = new StTofCollection();
       mEvent->setTofCollection(mTheTofCollection);
       mTheTofCollection = mEvent->tofCollection();
-      if (mTheTofCollection) cout << "OK"<< endl;
-      else                   cout << "FAILED" << endl;
+      if (mTheTofCollection) LOG_INFO << "OK"<< endm;
+      else                   LOG_INFO << "FAILED" << endm;
     } 	// end !mTheTofCollection check
   }   	// end mEvent check
-  else cout << "StTofMaker   No StEvent structures detected ... not good!" << endl;
+  else LOG_INFO << "StTofMaker   No StEvent structures detected ... not good!" << endm;
   //
   //--- end check for collections....
 
   // check if slatCollection not already available, get data if not
   if(!mDataCollectionPresent) {
     if (m_Mode ==0) {             // default DAQ-reader setting 
-      cout << "StTofMaker Will get real data from TOFpDAQ Reader ... " << endl;
+      LOG_INFO << "StTofMaker Will get real data from TOFpDAQ Reader ... " << endm;
       mTheTofData = GetDataSet("StDAQReader");
       if (!mTheTofData) {
-	cout << "StTofMaker No StDAQReader dataset. Event skipped" << endl;
+	LOG_INFO << "StTofMaker No StDAQReader dataset. Event skipped" << endm;
 	return kStWarn;
       }
       mTheDataReader = (StDAQReader*)(mTheTofData->GetObject()); 
       if (!mTheDataReader) {
-	cout << "StTofMaker No StDAQReader object. Event skipped" << endl;
+	LOG_INFO << "StTofMaker No StDAQReader object. Event skipped" << endm;
 	return kStWarn;
       }
       if (!(mTheDataReader->TOFPresent())) {
-	cout << "StTofMaker TOF is not in datastream. Event skipped" << endl;
+	LOG_INFO << "StTofMaker TOF is not in datastream. Event skipped" << endm;
 	return kStWarn;
       }
       //
       mTheTofReader = mTheDataReader->getTOFReader();
       if (!mTheTofReader) {
-	cout << "StTofMaker Failed to getTofReader()...." << endl;
+	LOG_INFO << "StTofMaker Failed to getTofReader()...." << endm;
 	return kStWarn;
       }
       
@@ -221,10 +224,10 @@ Int_t StTofMaker::Make(){
 #ifdef TOFP_DEBUG
       TOF_Reader* MyTest = dynamic_cast<TOF_Reader*>(mTheDataReader->getTOFReader());
       if (MyTest) MyTest->printRawData();
-      if (MyTest->year2Data()) cout << "StTofMaker: year2 data - TOFp+pVPD" << endl;
-      if (MyTest->year3Data()) cout << "StTofMaker: year3 data - TOFp+pVPD+TOFr" << endl;
-      if (MyTest->year4Data()) cout << "StTofMaker: year4 data - TOFp+pVPD+TOFrprime" << endl;
-      if (MyTest->year5Data()) cout << "StTofMaker: year5 data - TOFr5+pVPD  " << endl;
+      if (MyTest->year2Data()) LOG_INFO << "StTofMaker: year2 data - TOFp+pVPD" << endm;
+      if (MyTest->year3Data()) LOG_INFO << "StTofMaker: year3 data - TOFp+pVPD+TOFr" << endm;
+      if (MyTest->year4Data()) LOG_INFO << "StTofMaker: year4 data - TOFp+pVPD+TOFrprime" << endm;
+      if (MyTest->year5Data()) LOG_INFO << "StTofMaker: year5 data - TOFr5+pVPD  " << endm;
 #endif
       
       //
@@ -300,13 +303,13 @@ Int_t StTofMaker::Make(){
 	//
 	//--- 
 	if (iStrobe>4) {
-	  cout << "StTofMaker ... Strobe Event:" << iStrobe << endl;
+	  LOG_INFO << "StTofMaker ... Strobe Event:" << iStrobe << endm;
 	  tofTag = -1;     	// set tag to show this was a strobe event   
 	  nAdcHitHisto->Fill(-1.);
 	  nTdcHitHisto->Fill(-1.);
 	} else {
-	  cout << "StTofMaker ... Beam Event: ~" << nadchit << " ADC and ~" 
-	       << ntdchit << " TDC Raw Hits in TRAY" << endl;
+	  LOG_INFO << "StTofMaker ... Beam Event: ~" << nadchit << " ADC and ~" 
+	       << ntdchit << " TDC Raw Hits in TRAY" << endm;
 	  tofTag = nadchit;	// set tag to show this was physics event (tofTag>=0)
 	  nAdcHitHisto->Fill(nadchit);
 	  nTdcHitHisto->Fill(ntdchit);
@@ -345,10 +348,10 @@ Int_t StTofMaker::Make(){
       } // end year5
 
     } else if(m_Mode == 1)        // no action
-      cout << "StTofMaker No special action required for DataCollection"<<endl;
+      LOG_INFO << "StTofMaker No special action required for DataCollection"<<endm;
     else {
-      cout << "WRONG SetMode (" << m_Mode << ")! "
-	   << "... should be either 0 (DAQ reader) or 1(no action, SIM)" << endl;
+      LOG_INFO << "WRONG SetMode (" << m_Mode << ")! "
+	   << "... should be either 0 (DAQ reader) or 1(no action, SIM)" << endm;
       return kStOK;
     }
     //--- end m_mode check....  
@@ -357,14 +360,14 @@ Int_t StTofMaker::Make(){
   
  //--- end section if !mDataCollectionPresent
   
-  cout << "StTofMaker tofTag = " << tofTag << endl;
+  LOG_INFO << "StTofMaker tofTag = " << tofTag << endm;
   if (mEvent) storeTag();
   
   //--- fill StEvent, clean-up, and return...
   //
   if (mEvent) this->fillStEvent();
   mDataCollection=0;
-  cout << "StTofMaker::Make() -- see you next event --" << endl;
+  LOG_INFO << "StTofMaker::Make() -- see you next event --" << endm;
   
   return kStOK;
 }
@@ -374,7 +377,7 @@ Int_t StTofMaker::Make(){
 /// Fill and store TOF Collections in StEvent. Create TofCollection if necessary
 void StTofMaker::fillStEvent() {
 
-  cout << "StTofMaker::fillStEvent() Starting..." << endl;
+  LOG_INFO << "StTofMaker::fillStEvent() Starting..." << endm;
 
 //--- make sure we have a tofcollection
   if(!mTheTofCollection){
@@ -384,12 +387,12 @@ void StTofMaker::fillStEvent() {
 
   //--- fill mTheTofCollection with ALL RAW DATA 
   if(mDataCollectionPresent != 1) {
-    cout << "StTofMaker::fillStEvent()  Size of mDataCollection = " << mDataCollection->size() << endl;
+    LOG_INFO << "StTofMaker::fillStEvent()  Size of mDataCollection = " << mDataCollection->size() << endm;
     for(size_t jj = 0; jj < mDataCollection->size(); jj++)
       mTheTofCollection->addData(mDataCollection->getData(jj));
   }
   if(mRawDataCollectionPresent != 1) {
-    cout << "StTofMaker::fillStEvent()  Size of mRawDataCollection = " << mRawDataCollection->size() << endl;
+    LOG_INFO << "StTofMaker::fillStEvent()  Size of mRawDataCollection = " << mRawDataCollection->size() << endm;
     for(size_t jj = 0; jj < mRawDataCollection->size(); jj++)
       mTheTofCollection->addRawData(mRawDataCollection->getRawData(jj));
   }
@@ -401,26 +404,26 @@ void StTofMaker::fillStEvent() {
   // collections) Here, we would just make sure that raw data is really in
   // TofCollection.  WMZ
   //
-  cout << "StTofMaker::fillStEvent() Verifying TOF StEvent data ..." << endl;
+  LOG_INFO << "StTofMaker::fillStEvent() Verifying TOF StEvent data ..." << endm;
   StTofCollection* mmTheTofCollection = mEvent->tofCollection();
   if(mmTheTofCollection){
-    cout << " + StEvent tofCollection Exists" << endl;
+    LOG_INFO << " + StEvent tofCollection Exists" << endm;
     if(mmTheTofCollection->dataPresent()) {
-      cout << " + StEvent TofDataCollection Exists" << endl;
+      LOG_INFO << " + StEvent TofDataCollection Exists" << endm;
       StSPtrVecTofData& rawTofVec = mmTheTofCollection->tofData();
 #ifdef TOFP_DEBUG
       for (size_t i = 0; i < rawTofVec.size(); i++) {
 	StTofData* p = rawTofVec[i];
-	cout << *p;
+	LOG_INFO << *p;
       }
 #endif                      
-      cout << "   StEvent TofDataCollection has " << rawTofVec.size() << " entries..." << endl;
+      LOG_INFO << "   StEvent TofDataCollection has " << rawTofVec.size() << " entries..." << endm;
     }
-    else cout << " - StEvent TofDataCollection does not Exist" << endl;
+    else LOG_INFO << " - StEvent TofDataCollection does not Exist" << endm;
   }
   else {
-    cout << " - StEvent tofCollection does not Exist" << endl;
-    cout << " - StEvent tofDataCollection does not Exist" << endl;
+    LOG_INFO << " - StEvent tofCollection does not Exist" << endm;
+    LOG_INFO << " - StEvent tofDataCollection does not Exist" << endm;
   }
 }
 
@@ -438,10 +441,10 @@ void StTofMaker::storeTag(){
 
   if (pTofTag) {
     pTofTag->tofEventType = tofTag;
-    cout << "StTofMaker::storeTag()  tofTag stored" << endl;
+    LOG_INFO << "StTofMaker::storeTag()  tofTag stored" << endm;
   }
   else
-    cout << "StTofMaker::storeTag()  unable to store tofTag" << endl;
+    LOG_INFO << "StTofMaker::storeTag()  unable to store tofTag" << endm;
 
 }
 

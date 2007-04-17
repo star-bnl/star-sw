@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.7 2007/02/06 20:20:44 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.8 2007/04/17 23:01:52 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.8  2007/04/17 23:01:52  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.7  2007/02/06 20:20:44  dongx
  * update for tofr5Maptable I/O (new release)
  *
@@ -93,7 +96,7 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
       mModuleId[id] = (Int_t)(moduleConf[0].iModule[i]);
       mCellId[id] = j+1;
       if(maker->Debug()) {
-	cout << " id=" << id << "  tray=" << mTrayId[id] << " module=" << mModuleId[id] << "  cell=" << mCellId[id] << endl;
+	LOG_INFO << " id=" << id << "  tray=" << mTrayId[id] << " module=" << mModuleId[id] << "  cell=" << mCellId[id] << endm;
       }
     }
   }
@@ -152,7 +155,7 @@ void StTofrDaqMap::initFromDbaseY5(StMaker *maker) {
       mGlobalTDCChan[i]=(Int_t)(maptable[0].tdigchan[i]);
       mGlobalModuleChan[i]=(Int_t)(maptable[0].modulechan[i]);
       if(maker->Debug()) {
-      cout << " i=" << i << "  TDC chan =" << mGlobalTDCChan[i] << " module chan=" <<mGlobalModuleChan[i]<<endl;
+      LOG_INFO << " i=" << i << "  TDC chan =" << mGlobalTDCChan[i] << " module chan=" <<mGlobalModuleChan[i]<<endm;
       }
   }
 
@@ -181,7 +184,7 @@ IntVec StTofrDaqMap::DaqChan2Cell( const Int_t iTofrDaq )
   IntVec map;
   map.clear();
   if ( iTofrDaq<0 || iTofrDaq>=mNTOFR ) {
-    cout << " ERROR! Uncorrected iTofrDaq number for Tofr! " << endl;
+    LOG_INFO << " ERROR! Uncorrected iTofrDaq number for Tofr! " << endm;
     return map;
   }
 
@@ -258,7 +261,7 @@ Int_t StTofrDaqMap::Cell2TDCChan( const Int_t iTray , const Int_t iModule, const
 Int_t StTofrDaqMap::DaqChan2ADCChan( const Int_t iTofrDaq )
 {
   if(iTofrDaq<0 || iTofrDaq>=mNTOFR ) {
-    cout << " ERROR! Uncorrected iTofrDaq number for Tofr! " << endl;
+    LOG_INFO << " ERROR! Uncorrected iTofrDaq number for Tofr! " << endm;
     return -1;
   }
 
@@ -268,7 +271,7 @@ Int_t StTofrDaqMap::DaqChan2ADCChan( const Int_t iTofrDaq )
 Int_t StTofrDaqMap::DaqChan2TDCChan( const Int_t iTofrDaq )
 {
   if(iTofrDaq<0 || iTofrDaq>=mNTOFR ) {
-    cout << " ERROR! Uncorrected iTofrDaq number for Tofr! " << endl;
+    LOG_INFO << " ERROR! Uncorrected iTofrDaq number for Tofr! " << endm;
     return -1;
   }
 
@@ -309,7 +312,7 @@ IntVec StTofrDaqMap::Tofr5TDCChan2Cell( const Int_t iTdc)
   map.clear();
 
   if ( iTdc<0 || iTdc>=mNTOFR5 ) {
-    cout << " ERROR! Uncorrected TDC Channel number for Tofr5! " << endl;
+    LOG_INFO << " ERROR! Uncorrected TDC Channel number for Tofr5! " << endm;
     return map;
   }
 
@@ -328,22 +331,22 @@ Int_t StTofrDaqMap::Tofr5Cell2TDCChan( const Int_t iTray , const Int_t iModule, 
 {
 
   if(iTray!=93 ) {
-    cout<<"ERROR!!! Wrong tray number !"<<endl;
+    LOG_INFO<<"ERROR!!! Wrong tray number !"<<endm;
     return -1;
   }
   if(iModule<1 || iModule>32 ) {
-    cout<<"ERROR!!! Wrong module number !"<<endl;
+    LOG_INFO<<"ERROR!!! Wrong module number !"<<endm;
     return -1;
   }
   if(iCell <1 || iCell > 6) {
-    cout<<"ERROR!!! Wrong cell number ! "<<endl; 
+    LOG_INFO<<"ERROR!!! Wrong cell number ! "<<endm; 
     return -1;
   }
 
   Int_t modulechan = (iModule-1)*6+(iCell-1);
 
   if (modulechan<1 || modulechan>=mNTOFR5) {
-    cout<<"ERROR!!! Wrong Module Cell channel number!"<<endl;
+    LOG_INFO<<"ERROR!!! Wrong Module Cell channel number!"<<endm;
     return -1;
   }
 

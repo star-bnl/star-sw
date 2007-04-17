@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpNtupleMaker.cxx,v 1.5 2004/04/10 04:36:25 dongx Exp $
+ * $Id: StTofpNtupleMaker.cxx,v 1.6 2007/04/17 23:01:28 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpNtupleMaker.cxx,v $
+ * Revision 1.6  2007/04/17 23:01:28  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.5  2004/04/10 04:36:25  dongx
  * additional update for AdcLoRes in ntuple
  *
@@ -85,14 +88,14 @@ Int_t StTofpNtupleMaker::Finish(){
   if (!(mTupleFileName=="")){
    mTupleFile->Write();
    mTupleFile->Close();
-   cout << "StTofpNtupleMaker::Finish() ntuple file " 
-	<< mTupleFileName  << " closed." << endl;
+   LOG_INFO << "StTofpNtupleMaker::Finish() ntuple file " 
+	<< mTupleFileName  << " closed." << endm;
   }
 
-  cout << "StTofpNtupleMaker -- statistics" << endl;
-  cout << " accepted events     : " << mAcceptedEvents << endl;
-  cout << " pVPD entries        : " << mPvpdEntries << endl;
-  cout << " TOFp entries/events : " << mTofpEntries << "/" << mTofpEvents << endl;
+  LOG_INFO << "StTofpNtupleMaker -- statistics" << endm;
+  LOG_INFO << " accepted events     : " << mAcceptedEvents << endm;
+  LOG_INFO << " pVPD entries        : " << mPvpdEntries << endm;
+  LOG_INFO << " TOFp entries/events : " << mTofpEntries << "/" << mTofpEvents << endm;
   return kStOK;
 }
 
@@ -100,7 +103,7 @@ Int_t StTofpNtupleMaker::Finish(){
 //---------------------------------------------------------------------------
 /// get tofp slat, pvpd rawdata and global data from StEvent and store in flat TTrees (ntuples)
 Int_t StTofpNtupleMaker::Make(){
-  cout << "StTofpNtupleMaker -- welcome" << endl;
+  LOG_INFO << "StTofpNtupleMaker -- welcome" << endm;
 
   StEvent *event = (StEvent *) GetInputDS("StEvent");
 
@@ -110,7 +113,7 @@ Int_t StTofpNtupleMaker::Make(){
       !event->tofCollection() ||
       !event->tofCollection()->dataPresent() ||
       !event->primaryVertex()){
-    cout << "StTofpNtupleMaker -- nothing to do ... bye-bye"<< endl;
+    LOG_INFO << "StTofpNtupleMaker -- nothing to do ... bye-bye"<< endm;
     return kStOK;
   }
 
@@ -160,11 +163,11 @@ Int_t StTofpNtupleMaker::Make(){
   else
     refmult = uncorrectedNumberOfPrimaries(*event);
   if (Debug()){
-    cout << " #Tracks           :" << event->summary()->numberOfTracks()
+    LOG_INFO << " #Tracks           :" << event->summary()->numberOfTracks()
 	 << "\n #goodPrimaryTracks:" << event->summary()->numberOfGoodPrimaryTracks()
-	 << "\n #uncorr.prim.tracks  :" << refmult << endl;
+	 << "\n #uncorr.prim.tracks  :" << refmult << endm;
     if (!richTofMuDST)
-      cout << " #goodTracks (global):" << event->summary()->numberOfGoodTracks() << endl;
+      LOG_INFO << " #goodTracks (global):" << event->summary()->numberOfGoodTracks() << endm;
   }
 
   //-- Check and fill local copy of TOFx+pVPD ADC and TDC data
@@ -182,7 +185,7 @@ Int_t StTofpNtupleMaker::Make(){
     if (adcValid && tdcValid)  nAdcTdcTofp++;
   }
   if (Debug())
-    cout << " TOFp #Adc:" << nAdcTofp << "   #Tdc:" << nTdcTofp << endl;
+    LOG_INFO << " TOFp #Adc:" << nAdcTofp << "   #Tdc:" << nTdcTofp << endm;
 
 
 
@@ -208,7 +211,7 @@ Int_t StTofpNtupleMaker::Make(){
     for (int i=0;i<NPVPD;i++) tuple[k++] = mPvpdAdc[i];
     for (int i=0;i<NPVPD;i++) tuple[k++] = mPvpdAdcLoRes[i];
 
-    cout << " pVPD update ..." << endl;
+    LOG_INFO << " pVPD update ..." << endm;
     mPvpdTuple->Fill(tuple);
     mPvpdEntries++;
   }
@@ -316,7 +319,7 @@ Int_t StTofpNtupleMaker::Make(){
       entriesThisEvent++;
     }
 
-    cout << " TOFp update: " << entriesThisEvent << " entries" <<endl;
+    LOG_INFO << " TOFp update: " << entriesThisEvent << " entries" <<endm;
   }
 
 
@@ -327,11 +330,11 @@ Int_t StTofpNtupleMaker::Make(){
   }
   if (doPrintCpuInfo) {
     timer.stop();
-    cout << "CPU time for StEventMaker::Make(): "
-	 << timer.elapsedTime() << " sec\n" << endl;
+    LOG_INFO << "CPU time for StEventMaker::Make(): "
+	 << timer.elapsedTime() << " sec\n" << endm;
   }
 
-  cout << "StTofpNtupleMaker -- bye-bye" << endl;
+  LOG_INFO << "StTofpNtupleMaker -- bye-bye" << endm;
   return kStOK;
 }
 
@@ -345,13 +348,13 @@ Int_t StTofpNtupleMaker::getTofData(StTofCollection* tofCollection){
 
   // perform consistency check
   bool dataOK(true);
-  if (Debug()) cout << "TOF raw data consistency test ..."<< endl;
+  if (Debug()) LOG_INFO << "TOF raw data consistency test ..."<< endm;
   for (int i=0;i<48;i++){
     if (tofData[i]->dataIndex()  != mTofGeom->daqToSlatId(i)) {
       dataOK = false;
-      cout << "getTofData===>WARNING: " << tofData[i]->dataIndex() << " " << mTofGeom->daqToSlatId(i) << endl;
+      LOG_INFO << "getTofData===>WARNING: " << tofData[i]->dataIndex() << " " << mTofGeom->daqToSlatId(i) << endm;
     }
-    //if (Debug()) cout << *tofData[i];
+    //if (Debug()) LOG_INFO << *tofData[i];
   }
   
   for (int i=0;i<NTOFP;i++){
@@ -382,8 +385,8 @@ Int_t StTofpNtupleMaker::getTofData(StTofCollection* tofCollection){
 /// create and initialize ntuple and TTrees
 void StTofpNtupleMaker::bookNtuples(){
   mTupleFile = new TFile(mTupleFileName.c_str(), "RECREATE");
-  cout << "StTofpNtupleMaker::bookNtuples()  file "
-       << mTupleFileName << " opened" << endl;
+  LOG_INFO << "StTofpNtupleMaker::bookNtuples()  file "
+       << mTupleFileName << " opened" << endm;
 
   // pVPD timing
   string varList = "run:evt:trgwrd:magfield:zvtx:zvtxchi2:ctbsum"

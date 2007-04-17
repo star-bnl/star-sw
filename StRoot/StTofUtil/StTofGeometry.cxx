@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.11 2005/05/13 19:37:36 perev Exp $
+ * $Id: StTofGeometry.cxx,v 1.12 2007/04/17 23:01:51 dongx Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.12  2007/04/17 23:01:51  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.11  2005/05/13 19:37:36  perev
  * Defence agains 1/0 added
  *
@@ -71,6 +74,7 @@
 
 */
 //VP#include "St_XDFFile.h"
+#include "StMessMgr.h"
 #include "St_DataSetIter.h"
 #include "PhysicalConstants.h"
 #include "ctf/St_ctg_Module.h"
@@ -114,12 +118,12 @@ void StTofGeometry::init(StMaker* maker){
 /// initialize TOF Slat parameters from XDF file
 void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
 #if 0
-  cout << "StTofGeometry: loading dBase from " << InputXdfFile << endl;
+  LOG_INFO << "StTofGeometry: loading dBase from " << InputXdfFile << endm;
   St_XDFFile xdf(InputXdfFile);
   St_DataSet *ctfg = xdf.NextEventGet();
   St_DataSetIter gime(ctfg);
   if (!ctfg){
-    cout << " ERROR: unable read from file" << endl;
+    LOG_INFO << " ERROR: unable read from file" << endm;
     assert(0);
     return;
   }
@@ -154,7 +158,7 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
     mTofParam.tray_phi_zero     = geo->tray_phi_zero;
   }
   else {
-    cout << " ERROR: unable to read TOF param table" << endl;
+    LOG_INFO << " ERROR: unable to read TOF param table" << endm;
     return;
   }
 
@@ -176,7 +180,7 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
     }
   }
   else {
-    cout << " ERROR: unable to read TOF eta table" << endl;
+    LOG_INFO << " ERROR: unable to read TOF eta table" << endm;
     return;
   }
 
@@ -193,7 +197,7 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
     }
   }
   else {
-    cout << " ERROR: unable to read TOF phi table" << endl;
+    LOG_INFO << " ERROR: unable to read TOF phi table" << endm;
     return;
   }
 
@@ -205,7 +209,7 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
     else if (iEta== 9) {iPhiMin= 6 ; iPhiMax= 9;}  // 2nd 4-wide row
     else if (iEta < 9) {iPhiMin=10 ; iPhiMax=13;}  // all other 4-wide rows
     else {
-      cout << "StTofGeometry: slat eta out of range " << iEta << endl;
+      LOG_INFO << "StTofGeometry: slat eta out of range " << iEta << endm;
       iPhiMin=0; iPhiMax=-1;}
     for (int j=iPhiMin-1;j<iPhiMax;j++){
       tofSlatGeom_st* tofSlat = new tofSlatGeom_st;
@@ -235,10 +239,10 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
 /// initialize TOF Slat parameters from STAR dBase
 void StTofGeometry::initGeomFromDbase(StMaker *maker){
   if (!maker){
-    cout << "StTofGeometry: unable to initialize without maker" << endl;
+    LOG_INFO << "StTofGeometry: unable to initialize without maker" << endm;
     return;
   }
-  cout << "StTofGeometry: eventtime = ";
+  LOG_INFO << "StTofGeometry: eventtime = ";
   maker->GetDateTime().Print();
   
   TDataSet* mDbDataSet;
@@ -249,7 +253,7 @@ void StTofGeometry::initGeomFromDbase(StMaker *maker){
   assert(mSlatGeom);
   tofSlatGeom_st *mslats= static_cast<tofSlatGeom_st*>(mSlatGeom->GetArray());
   int numRows=mSlatGeom->GetNRows(); // should be 41 rows...
-  cout << "StTofGeometry: numRows = " << numRows << endl;
+  LOG_INFO << "StTofGeometry: numRows = " << numRows << endm;
   for (int i=0;i<numRows;i++) mTofSlatVec.push_back(mslats[i]);
 
 
@@ -286,7 +290,7 @@ tofSlatGeom_st StTofGeometry::tofSlat(const Int_t slatId) const {
   if(slatId > 0) 
     thisSlat = mTofSlatVec[slatId-1];
   else 
-    cout << "StTofGeometry:  Warning: slatId ("<< slatId <<") seriously out of range" << endl;
+    LOG_INFO << "StTofGeometry:  Warning: slatId ("<< slatId <<") seriously out of range" << endm;
   return thisSlat;
 }
 
@@ -294,7 +298,7 @@ tofSlatGeom_st StTofGeometry::tofSlat(const Int_t slatId) const {
 
 /// set-up the default Daq-to-SlatId and Slat-to-DaqId mappings
 void StTofGeometry::initDaqMap(){
-  cout << "StTofGeometry: Initializing default DAQ and SlatId mappings" << endl;
+  LOG_INFO << "StTofGeometry: Initializing default DAQ and SlatId mappings" << endm;
 
   // tray...
   mTofDaqMap[ 0]=37; mTofDaqMap[ 1]=38; mTofDaqMap[ 2]=39; mTofDaqMap[ 3]=40; mTofDaqMap[ 4]=41; 
@@ -369,47 +373,47 @@ StThreeVectorD StTofGeometry::tofPlaneNormPoint(Int_t slatId) const {
 
 /// print global geometry parameters
 void StTofGeometry::printGeo(ostream& os) const {
-  os << "------StTofGeometry::printGeo()------" << endl;
+  os << "------StTofGeometry::printGeo()------" << endm;
   os << "eta id max & min        = " << mTofParam.i_eta_max << " "
-                                     << mTofParam.i_eta_min << endl;
+                                     << mTofParam.i_eta_min << endm;
   os << "phi id max & min        = " << mTofParam.i_phi_max << " "
-                                     << mTofParam.i_phi_min << endl;
+                                     << mTofParam.i_phi_min << endm;
   os << "counters/trays/eta(phi) = " << mTofParam.n_counter_eta  << " "
-                                     << mTofParam.n_counter_phi << endl;
+                                     << mTofParam.n_counter_phi << endm;
   os << "trays in eta & phi      = " << mTofParam.n_tray_eta << " "
-                                     << mTofParam.n_tray_phi << endl;
+                                     << mTofParam.n_tray_phi << endm;
   os << "slat thickness & width  = " << mTofParam.counter_thickness << " "
-                                     << mTofParam.counter_width << endl;
-  os << "mean counter radius     = " << mTofParam.r  << endl;
+                                     << mTofParam.counter_width << endm;
+  os << "mean counter radius     = " << mTofParam.r  << endm;
   os << "tray height & width     = " << mTofParam.tray_height << " "
-                                     << mTofParam.tray_width << endl;
+                                     << mTofParam.tray_width << endm;
   os << "tray length & phi0      = " << mTofParam.tray_length << " "
-                                     << mTofParam.tray_phi_zero << endl;
-  cout << "---------------------------------------" << endl;
+                                     << mTofParam.tray_phi_zero << endm;
+  LOG_INFO << "---------------------------------------" << endm;
 }
 
 
 
 /// print slat-specific geometry parameters
 void StTofGeometry::printSlat(const Int_t slatId, ostream& os) const {
-  os << "------StTofGeometry::printSlat()------" << endl;
+  os << "------StTofGeometry::printSlat()------" << endm;
   os << "Slat: id, tray, eta, phi    = " << " " << slatId << " "
      << tofSlat(slatId).trayId  << " " << tofSlat(slatId).ieta
-     << " " << tofSlat(slatId).iphi << endl;
+     << " " << tofSlat(slatId).iphi << endm;
   os << "ieta, cosang                = "<< tofSlat(slatId).ieta<< " "
-       << tofSlat(slatId).cosang<< endl;
+       << tofSlat(slatId).cosang<< endm;
   os << "eta, eta_max, etamin        = " << tofSlat(slatId).eta<< " "
                                          << tofSlat(slatId).eta_max<< " " 
-                                         << tofSlat(slatId).eta_min<< endl;
+                                         << tofSlat(slatId).eta_min<< endm;
   os << "r, z, z_max, z_min          = " << tofSlat(slatId).r<< " "
                                          << tofSlat(slatId).z<< " " 
                                          << tofSlat(slatId).z_max<< " " 
-                                         << tofSlat(slatId).z_min<< endl;
+                                         << tofSlat(slatId).z_min<< endm;
   os << "iphi, phi, phi_max, phi_min  = "<< tofSlat(slatId).iphi<< " "
                                          << tofSlat(slatId).phi<< " " 
                                          << tofSlat(slatId).phi_max << " " 
-                                         << tofSlat(slatId).phi_min<< endl;
-  cout << "------------------------------------" << endl;
+                                         << tofSlat(slatId).phi_min<< endm;
+  LOG_INFO << "------------------------------------" << endm;
 }
 
 
@@ -460,7 +464,7 @@ int StTofGeometry::tofSlatCrossId(const int volumeId) const {
     else
       phiId = phiId * 4 - counterPhi + 1;   // 4w rows
     etaId = counterEta + 10 ;
-    cout << "StTofGeometry: WARNING TOFp tray not in EAST barrel" << endl;
+    LOG_INFO << "StTofGeometry: WARNING TOFp tray not in EAST barrel" << endm;
   }
   else if (trayEta==2) {
     phiId = trayPhi - 42 ;
@@ -472,7 +476,7 @@ int StTofGeometry::tofSlatCrossId(const int volumeId) const {
     etaId = 11 - counterEta ;
   }
   else
-    cout<<" StTofGeometry::tofSlatCrossId  unknown trayId  "<<trayEta<<endl ;
+    LOG_INFO<<" StTofGeometry::tofSlatCrossId  unknown trayId  "<<trayEta<<endm ;
   
   int slatId = calcSlatId(counterPhi,etaId);
   return slatId;
@@ -570,18 +574,18 @@ tofSlatHitVector StTofGeometry::tofHelixToArray(const StPhysicalHelixD& helix,
  	// save fired slat in slatHitVec which will be returned at the end  
 	  if (numberOfHitLayers>0) {
 	    slatHit.hitProfile = 0;
-	    if (Debug()) cout << "L(0-"<<mMaxSlatLayers-1<<"): ";
+	    if (Debug()) LOG_INFO << "L(0-"<<mMaxSlatLayers-1<<"): ";
 	    for  (unsigned int ll=0;ll<mMaxSlatLayers;ll++){
 	      slatHit.hitProfile = 2*slatHit.hitProfile + layer[ll]*1;
-	      if (Debug()) cout <<layer[ll];
+	      if (Debug()) LOG_INFO <<layer[ll];
 	    }
-	    if (Debug()) cout << endl;
+	    if (Debug()) LOG_INFO << endm;
 
 	    unsigned int innerLayer(0), outerLayer(mMaxSlatLayers-1);
 	    // boundary control not really necessary since anyLayer guarantees at least one layer
 	    while (!layer[innerLayer] && (innerLayer<=mMaxSlatLayers)) innerLayer++;
 	    while (!layer[outerLayer] && (outerLayer>= 0            )) outerLayer--;
-	    if (Debug()) cout << "Li="<<innerLayer<< " Lo="<<outerLayer<<" nLx="<<numberOfHitLayers<<endl;
+	    if (Debug()) LOG_INFO << "Li="<<innerLayer<< " Lo="<<outerLayer<<" nLx="<<numberOfHitLayers<<endm;
 
 
 	    float s(0);
@@ -642,8 +646,8 @@ float StTofGeometry::slatHitPosition(StThreeVectorD* hitPoint){
     float max_distance = (zmax-zmin)/cosang ;
 
     if (length>max_distance || length<0){
-      cout <<  "HitPositionCorrection:  length="<<length<<" max="<<max_distance
-	   << " zmin="<<zmin<<" zmax="<<zmax<<" cosang="<<cosang<<endl;
+      LOG_INFO <<  "HitPositionCorrection:  length="<<length<<" max="<<max_distance
+	   << " zmin="<<zmin<<" zmax="<<zmax<<" cosang="<<cosang<<endm;
       this->printSlat(slatId);
     }
 
@@ -651,8 +655,8 @@ float StTofGeometry::slatHitPosition(StThreeVectorD* hitPoint){
   }
 
   // return very negative value to indicate bad slatId.
-  cout << "slatHitPosition: hit point out of range;"
-       << " phi=" << hitPoint->phi() << "  z=" << hitPoint->z() << endl;
+  LOG_INFO << "slatHitPosition: hit point out of range;"
+       << " phi=" << hitPoint->phi() << "  z=" << hitPoint->z() << endm;
   return -100.;
 }
 
@@ -750,8 +754,8 @@ float StTofGeometry::slatPhiPosition(StThreeVectorD* hitPoint){
     float max_deltaphi = (phimax-phimin);
 
     if (philoc>max_deltaphi || philoc<0){
-      cout <<  "slatHitPhiPosition:  phi="<<philoc<<" max="<<max_deltaphi
-	   << " phimin="<<phimin<<" phimax="<<phimax<<endl;
+      LOG_INFO <<  "slatHitPhiPosition:  phi="<<philoc<<" max="<<max_deltaphi
+	   << " phimin="<<phimin<<" phimax="<<phimax<<endm;
       this->printSlat(slatId);
     }
 
@@ -759,8 +763,8 @@ float StTofGeometry::slatPhiPosition(StThreeVectorD* hitPoint){
   }
 
   // return very negative value to indicate bad slatId.
-  cout << "slatHitPhiPosition: hit point out of range;"
-       << " phi=" << hitPoint->phi() << "  z=" << hitPoint->z() << endl;
+  LOG_INFO << "slatHitPhiPosition: hit point out of range;"
+       << " phi=" << hitPoint->phi() << "  z=" << hitPoint->z() << endm;
   return -100.;
 }
 
@@ -802,11 +806,11 @@ Bool_t StTofGeometry::projTrayVector(const StHelixD &helix, idVector &trayVec) c
     trayVec.push_back(itray_west2);
   }
 
-//   cout << " proj tray id = ";
+//   LOG_INFO << " proj tray id = ";
 //   for(size_t it=0;it<trayVec.size();it++) {
-//     cout << trayVec[it] << " ";
+//     LOG_INFO << trayVec[it] << " ";
 //   }
-//   cout << endl;
+//   LOG_INFO << endm;
   
   if(trayVec.size()>0) return kTRUE;
   else return kFALSE;

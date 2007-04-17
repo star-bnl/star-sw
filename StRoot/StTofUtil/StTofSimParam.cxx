@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofSimParam.cxx,v 1.4 2003/09/02 17:59:10 perev Exp $
+ * $Id: StTofSimParam.cxx,v 1.5 2007/04/17 23:01:52 dongx Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofSimParam.cxx,v $
+ * Revision 1.5  2007/04/17 23:01:52  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.4  2003/09/02 17:59:10  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -40,6 +43,7 @@
 */
 #include "StTofSimParam.h"
 #include <Stiostream.h>
+#include "StMessMgr.h"
 //#include "St_XDFFile.h"
 //#include "St_DataSetIter.h"
 
@@ -88,24 +92,24 @@ void StTofSimParam::init(){
 }  
 
 void StTofSimParam::print(){
-  cout << "------StTofSimParam::print()------" << endl;
-  cout << " adc_overflow       = " << m_adc_overflow       << endl; 
-  cout << " attlen             = " << m_attlen             << endl; 
-  cout << " cath_eff           = " << m_cath_eff           << endl; 
-  cout << " cath_surf          = " << m_cath_surf          << endl; 
-  cout << " delay              = " << m_delay              << endl; 
-  cout << " elec_noise         = " << m_elec_noise         << endl; 
-  cout << " gate_t0            = " << m_gate_t0            << endl; 
-  cout << " gate_width         = " << m_gate_width         << endl; 
-  cout << " geo_from_geant     = " << m_geo_from_geant     << endl; 
-  cout << " GeV_2_n_photons    = " << m_GeV_2_n_photons    << endl; 
-  cout << " nphe_to_adc        = " << m_nphe_to_adc        << endl; 
-  cout << " phys_noise         = " << m_phys_noise         << endl;
-  cout << " position_tolerance = " << m_position_tolerance << endl; 
-  cout << " slat_para          = " << m_slat_para          << endl; 
-  cout << " start_res          = " << m_start_res          << endl; 
-  cout << " surf_loss          = " << m_surf_loss          << endl; 
-  cout << " tdc_overflow       = " << m_tdc_overflow       << endl; 
-  cout << " time_res           = " << m_time_res           << endl; 
-  cout << "----------------------------------" << endl;
+  LOG_INFO << "------StTofSimParam::print()------" << endm;
+  LOG_INFO << " adc_overflow       = " << m_adc_overflow       << endm; 
+  LOG_INFO << " attlen             = " << m_attlen             << endm; 
+  LOG_INFO << " cath_eff           = " << m_cath_eff           << endm; 
+  LOG_INFO << " cath_surf          = " << m_cath_surf          << endm; 
+  LOG_INFO << " delay              = " << m_delay              << endm; 
+  LOG_INFO << " elec_noise         = " << m_elec_noise         << endm; 
+  LOG_INFO << " gate_t0            = " << m_gate_t0            << endm; 
+  LOG_INFO << " gate_width         = " << m_gate_width         << endm; 
+  LOG_INFO << " geo_from_geant     = " << m_geo_from_geant     << endm; 
+  LOG_INFO << " GeV_2_n_photons    = " << m_GeV_2_n_photons    << endm; 
+  LOG_INFO << " nphe_to_adc        = " << m_nphe_to_adc        << endm; 
+  LOG_INFO << " phys_noise         = " << m_phys_noise         << endm;
+  LOG_INFO << " position_tolerance = " << m_position_tolerance << endm; 
+  LOG_INFO << " slat_para          = " << m_slat_para          << endm; 
+  LOG_INFO << " start_res          = " << m_start_res          << endm; 
+  LOG_INFO << " surf_loss          = " << m_surf_loss          << endm; 
+  LOG_INFO << " tdc_overflow       = " << m_tdc_overflow       << endm; 
+  LOG_INFO << " time_res           = " << m_time_res           << endm; 
+  LOG_INFO << "----------------------------------" << endm;
 }

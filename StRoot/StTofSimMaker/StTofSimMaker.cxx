@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.10 2006/12/08 18:55:26 dongx Exp $
+ * $Id: StTofSimMaker.cxx,v 1.11 2007/04/17 23:02:36 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.11  2007/04/17 23:02:36  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.10  2006/12/08 18:55:26  dongx
  * Update to avoid zero tdc value in denominator - modified by Jing Liu
  *
@@ -123,7 +126,7 @@ Int_t StTofSimMaker::Init(){
 
 /// InitRun method, (re)initialize TOFp data from STAR dBase
 Int_t StTofSimMaker::InitRun(int runnumber){
-  cout << "StTofSimMaker::InitRun  -- initializing TofGeometry --" << endl;
+  LOG_INFO << "StTofSimMaker::InitRun  -- initializing TofGeometry --" << endm;
   mGeomDb = new StTofGeometry();
   mGeomDb->init(this);
   return kStOK;
@@ -133,7 +136,7 @@ Int_t StTofSimMaker::InitRun(int runnumber){
 
 /// FinishRun method, clean up TOFp dBase entries
 Int_t StTofSimMaker::FinishRun(int runnumber){
-  cout << "StTofSimMaker::FinishRun -- cleaning up TofGeometry --" << endl;
+  LOG_INFO << "StTofSimMaker::FinishRun -- cleaning up TofGeometry --" << endm;
   if (mGeomDb) delete mGeomDb;
   mGeomDb=0;
   return 0;
@@ -143,7 +146,7 @@ Int_t StTofSimMaker::FinishRun(int runnumber){
 
 /// read in GSTAR table and create TOF SlatCollection
 Int_t StTofSimMaker::Make(){
-  cout << "StTofSimMaker  Make() starts" << endl;
+  LOG_INFO << "StTofSimMaker  Make() starts" << endm;
 
   StTofSlatCollection *mSlatCollection =  new StTofSlatCollection;
   tofMCSlatVector tofMC;
@@ -158,7 +161,7 @@ Int_t StTofSimMaker::Make(){
     if (g2t_tof_hit){
       g2t_ctf_hit_st* tof_hit = g2t_tof_hit->GetTable();
       int numberOfTofHits = g2t_tof_hit->GetNRows();
-      cout << "TOF #hits: " << numberOfTofHits << endl;
+      LOG_INFO << "TOF #hits: " << numberOfTofHits << endm;
       
       tofMCSlatVector MCSlatVec;
       MCSlatVec.clear();
@@ -205,8 +208,8 @@ Int_t StTofSimMaker::Make(){
 	
 	slatTempVec = slatErasedVec;
       }
-      cout << "StTofSimMaker::make()  vector size from " << MCSlatVec.size()
-	   << " to " << tofMC.size() << endl;
+      LOG_INFO << "StTofSimMaker::make()  vector size from " << MCSlatVec.size()
+	   << " to " << tofMC.size() << endm;
 	
       //////
 	
@@ -216,22 +219,22 @@ Int_t StTofSimMaker::Make(){
       for (unsigned int i=0;i<tofMC.size(); i++){
 	StTofMCSlat *MCSlatPtr = new StTofMCSlat();
 	*MCSlatPtr = tofMC[i];
-	//cout << *MCSlatPtr ;
+	//LOG_INFO << *MCSlatPtr ;
 	mSlatCollection->push_back(MCSlatPtr);
       }
     }
     else
-      cout << "StTofSimMaker Make()  no TOF hits found" << endl;
+      LOG_INFO << "StTofSimMaker Make()  no TOF hits found" << endm;
 
     // pVPD section hits
     St_g2t_vpd_hit *g2t_vpd_hit = (St_g2t_vpd_hit*) geantIter("g2t_vpd_hit");
     if (g2t_vpd_hit){
       //   g2t_vpd_hit_st* vpd_hit = g2t_vpd_hit->GetTable();
       int numberOfVpdHits = g2t_vpd_hit->GetNRows();
-      cout << "VPD #hits: " << numberOfVpdHits << endl;
+      LOG_INFO << "VPD #hits: " << numberOfVpdHits << endm;
     }
     else
-      cout << "StTofSimMaker Make()  no VPD hits found" << endl;    
+      LOG_INFO << "StTofSimMaker Make()  no VPD hits found" << endm;    
   }
 
 
@@ -255,7 +258,7 @@ Int_t StTofSimMaker::Make(){
 	//	StTofData *rawTofData = new  StTofData(indexSlat,tempSlat->adc(),tempSlat->tdc(),0,0);
 	// update for year 5 new format
 	StTofData *rawTofData = new  StTofData(indexSlat,tempSlat->adc(),tempSlat->tdc(),0,0,0,0);
-	if (Debug()) cout << indexSlat << ":  A" << tempSlat->adc() << "  T" << tempSlat->tdc() << endl;
+	if (Debug()) LOG_INFO << indexSlat << ":  A" << tempSlat->adc() << "  T" << tempSlat->tdc() << endm;
 	mDataCollection->push_back(rawTofData);
       }
     }
@@ -272,32 +275,32 @@ Int_t StTofSimMaker::Make(){
   mEvent = (StEvent*) GetInputDS("StEvent");
   if (mEvent) mEvent->setTofCollection(mTheTofCollection);
   else{
-    cout << "StTofSimMaker: Where is StEvent !?! Unable to store data" << endl;
+    LOG_INFO << "StTofSimMaker: Where is StEvent !?! Unable to store data" << endm;
     return kStWarn;
   }
 
 
   // verify existence of tofCollection in StEvent (mEvent) 
-  cout << "StTofSimMaker: verifying TOF StEvent data ..." << endl;
+  LOG_INFO << "StTofSimMaker: verifying TOF StEvent data ..." << endm;
   StTofCollection *mmTheTofCollection = mEvent->tofCollection();
   if(mmTheTofCollection) {
-    cout << " + StEvent tofCollection Exists" << endl;
+    LOG_INFO << " + StEvent tofCollection Exists" << endm;
     if(mmTheTofCollection->slatsPresent())
-      cout << " + StEvent TofSlatCollection Exists" << endl;
+      LOG_INFO << " + StEvent TofSlatCollection Exists" << endm;
     else
-      cout << " - StEvent TofSlatCollection DOES NOT Exist" << endl;
+      LOG_INFO << " - StEvent TofSlatCollection DOES NOT Exist" << endm;
     if(mmTheTofCollection->hitsPresent())
-      cout << " + StEvent TofHitCollection Exists" << endl;
+      LOG_INFO << " + StEvent TofHitCollection Exists" << endm;
     else
-      cout << " - StEvent TofHitCollection DOES NOT Exist" << endl;
+      LOG_INFO << " - StEvent TofHitCollection DOES NOT Exist" << endm;
   }
   else {
-    cout << " - StEvent tofCollection DOES NOT Exist" << endl;
-    cout << " - StEvent TofSlatCollection DOES NOT Exist" << endl;
-    cout << " - StEvent TofHitCollection DOES NOT Exist" << endl;
+    LOG_INFO << " - StEvent tofCollection DOES NOT Exist" << endm;
+    LOG_INFO << " - StEvent TofSlatCollection DOES NOT Exist" << endm;
+    LOG_INFO << " - StEvent TofHitCollection DOES NOT Exist" << endm;
   }
 
-  cout << "StTofSimMaker  Make() finished" << endl;
+  LOG_INFO << "StTofSimMaker  Make() finished" << endm;
   return kStOK;
 }
 
@@ -307,14 +310,14 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
 {
   if(Debug()){
     // dump the g2t structure ...
-    cout << " " <<setw( 3) << tof_hit->id      << " " <<setw( 4) << tof_hit->next_tr_hit_p
+    LOG_INFO << " " <<setw( 3) << tof_hit->id      << " " <<setw( 4) << tof_hit->next_tr_hit_p
 	 << " " <<setw( 4) << tof_hit->track_p << " " <<setw( 8) << tof_hit->volume_id
 	 << " " <<setw(13) << tof_hit->de      << " " <<setw(11) << tof_hit->ds
 	 << " " <<setw(12) << tof_hit->p[0]    << " " <<setw(12) << tof_hit->p[1]
 	 << " " <<setw(12) << tof_hit->p[2]    << " " <<setw( 7) << tof_hit->s_track
 	 << " " <<setw(13) << tof_hit->tof     << " " <<setw(10) << tof_hit->x[0]
 	 << " " <<setw(10) << tof_hit->x[1]    << " " <<setw(10) << tof_hit->x[2]
-	 << endl;
+	 << endm;
   }
     // skip the consistency checks for now,
 
@@ -327,8 +330,8 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     int volId = (int) mGeomDb->tofSlatCrossId(tof_hit->volume_id);
 
     if (slatId != volId){
-      cout << "StTofSimMaker::Make  Warning: volume_id ("<< volId 
-           << ") and hit ("<<slatId<<") inconsistent. Switching to volumeid."<< endl;
+      LOG_INFO << "StTofSimMaker::Make  Warning: volume_id ("<< volId 
+           << ") and hit ("<<slatId<<") inconsistent. Switching to volumeid."<< endm;
       slatId=volId;
     }
 
@@ -341,8 +344,8 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     float max_distance = (zmax-zmin)/cosang ;
 	
     if (length>max_distance || length<0){
-      cout <<  "StTofSimMaker:  length="<<length<<" max="<<max_distance
-	   << " zmin="<<zmin<<" zmax="<<zmax<<" coasng="<<cosang<<endl;
+      LOG_INFO <<  "StTofSimMaker:  length="<<length<<" max="<<max_distance
+	   << " zmin="<<zmin<<" zmax="<<zmax<<" coasng="<<cosang<<endm;
       mGeomDb->printSlat(slatId);
     }
 
@@ -350,8 +353,8 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     // do the slat response modelling similar to cts
     long numberOfPhotoelectrons;
     if (mSimDb->slat_para()){
-      cout << "StTofSimMaker  Slat Response Table not implemented yet. "
-      << " Switching to exponential model instead" <<endl;
+      LOG_INFO << "StTofSimMaker  Slat Response Table not implemented yet. "
+      << " Switching to exponential model instead" <<endm;
     }
     //numberOfPhotoelectrons = long (tof_hit->de * slatResponseExp(length));
     numberOfPhotoelectrons = long (tof_hit->de * mSimDb->GeV_2_n_photons()
@@ -422,15 +425,15 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     }
 
     if (Debug()){
-      cout << "StTofmcInfo slatId " << slatId << "  " << slatData;
-      cout << "    a:" << adc << " t:" << tdc << " dE:"<< slatData.mDe << " dS:"<<  slatData.mDs 
+      LOG_INFO << "StTofmcInfo slatId " << slatId << "  " << slatData;
+      LOG_INFO << "    a:" << adc << " t:" << tdc << " dE:"<< slatData.mDe << " dS:"<<  slatData.mDs 
 	   << " mTof:" <<  slatData.mTof << " mTime:"<<  slatData.mTime << " mMTime:"<<slatData.mMTime
 	   << " mMTimeL:"<< slatData.mMTimeL << " mSLength:" << slatData.mSLength
-	   << " mPTot:" << slatData.mPTot  << endl;
+	   << " mPTot:" << slatData.mPTot  << endm;
     }
 
     // this part considers X-talk between slats (based on parameter below) ...
-    //    cout << "PHYSNOISE PARAMETER: " << mSimDb->phys_noise() << endl;
+    //    LOG_INFO << "PHYSNOISE PARAMETER: " << mSimDb->phys_noise() << endm;
   
     return slat;
 }
@@ -451,7 +454,7 @@ float StTofSimMaker::slatResponseExp(float& dz)
 Int_t StTofSimMaker::Finish(){
 
   if(m_Mode){
-    cout << "StTofSimMaker::Finish  writing tofsim.root ...";
+    LOG_INFO << "StTofSimMaker::Finish  writing tofsim.root ...";
     TFile theFile("tofsim.root","RECREATE","tofsim");
     theFile.cd();
     mdE->Write();
@@ -463,7 +466,7 @@ Int_t StTofSimMaker::Finish(){
     mPMlength->Write();
     mAdc->Write();
     mTdc->Write();
-    cout << "done"<<endl;
+    LOG_INFO << "done"<<endm;
   }
   return kStOK;
 }

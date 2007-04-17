@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.13 2007/02/28 23:31:59 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.14 2007/04/17 23:02:20 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.14  2007/04/17 23:02:20  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.13  2007/02/28 23:31:59  dongx
  * completion for Run V matching
  *   - trailing tdc and leading tdc stored as adc and tdc in StTofCell
@@ -582,7 +585,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
             global[1]=crossVec[i].y();
             global[2]=crossVec[i].z();
             mTofrGeom->DecodeCellId(idVec[i], icell, imodule, itray);
-	    //	    cout << " decode " << idVec[i] << "  to tray#" << itray << " module#" << imodule << " cell#" << icell << endl;
+	    //	    LOG_INFO << " decode " << idVec[i] << "  to tray#" << itray << " module#" << imodule << " cell#" << icell << endm;
 	    StTofrGeomSensor* sensor = 
                   mTofrGeom->GetGeomSensor(imodule,itray);
 	    if(!sensor) {
@@ -1012,7 +1015,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 	  //	     << "\t#trkp=" <<theTrack->detectorInfo()->numberOfPoints(kTpcId)
 	     << " \tdedx=" << dedx
 	     << " \tdca="<< globalTrack->geometry()->helix().distance(mEvent->primaryVertex()->position())<<" and "<<theTrackGeometry->helix().distance(mEvent->primaryVertex()->position());
-	if (cherang!=0) cout  << " \trich="<< cherang << " (" << cherang_nph << ")";
+	if (cherang!=0) LOG_INFO  << " \trich="<< cherang << " (" << cherang_nph << ")";
 	gMessMgr->Info("","OS") << endm;
       }
 
@@ -1215,7 +1218,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
             global[1]=crossVec[i].y();
             global[2]=crossVec[i].z();
             mTofrGeom->DecodeCellId(idVec[i], icell, imodule, itray);
-	    cout << " decode " << idVec[i] << "  to tray#" << itray << " module#" << imodule << " cell#" << icell << endl;
+	    LOG_INFO << " decode " << idVec[i] << "  to tray#" << itray << " module#" << imodule << " cell#" << icell << endm;
 	    StTofrGeomSensor* sensor = 
                   mTofrGeom->GetGeomSensor(imodule,itray);
 	    if(!sensor) {
@@ -1636,7 +1639,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
 	  //	     << "\t#trkp=" <<theTrack->detectorInfo()->numberOfPoints(kTpcId)
 	     << " \tdedx=" << dedx
 	     << " \tdca="<< globalTrack->geometry()->helix().distance(mEvent->primaryVertex()->position())<<" and "<<theTrackGeometry->helix().distance(mEvent->primaryVertex()->position());
-	if (cherang!=0) cout  << " \trich="<< cherang << " (" << cherang_nph << ")";
+	if (cherang!=0) LOG_INFO  << " \trich="<< cherang << " (" << cherang_nph << ")";
 	gMessMgr->Info("","OS") << endm;
       }
 
