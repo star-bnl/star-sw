@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.175  2007/04/17 05:11:45  perev
+// GetTFile()==>StMaker. Jerome request
+//
 // Revision 1.174  2007/03/21 17:51:17  fisyak
 // add option for EastOff and WestOff, FindDataSet for Sti Geometry
 //
@@ -678,7 +681,7 @@ Int_t StiMaker::InitPulls()
   
   StBFChain *bfc = dynamic_cast<StBFChain*>(GetChain());
   assert(bfc);
-  TFile *tfile  = bfc->GetTFile();
+  TFile *tfile  = GetTFile();
   if (!tfile) {
     TString ts  = bfc->GetFileIn();
     ts= gSystem->BaseName(ts);

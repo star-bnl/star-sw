@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.57 2007/01/25 14:56:14 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.58 2007/04/17 05:11:21 perev Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -33,7 +33,6 @@
 #include "BetheBloch.h"
 #include "StBichsel/Bichsel.h"
 // St_base, StChain
-#include "StBFChain.h"
 // tables
 #include "tables/St_dst_dedx_Table.h"
 #ifdef AnodeSum
@@ -185,11 +184,9 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
     DoOnce = 1;
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       if (Debug()) gMessMgr->Warning() << "StdEdxY2Maker::InitRun Calibration Mode is On (make calibration histograms)" << endm;
-      StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-      TFile *f = 0;
-      if (chain) {
-	f = chain->GetTFile();
-	if (f)     f->cd();
+      TFile *f = GetTFile();
+      if (f) {
+	f->cd();
 	if ((TESTBIT(m_Mode, kGASHISTOGRAMS))) {
 	  if (Debug()) gMessMgr->Warning() << "StdEdxY2Maker::InitRun Gas Histograms is ON" << endm;
 	  TrigHistos();
@@ -2417,8 +2414,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
   if (! gTrack) {
     TFile *f = 0;
     if (TESTBIT(m_Mode, kCalibration)) {
-      StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-      if (chain) f = chain->GetTFile();
+      f = GetTFile();
       if (f) f->cd();
     }
     if (!first) {

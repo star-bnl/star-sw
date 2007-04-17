@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.40 2007/04/11 22:45:22 perev Exp $
+// $Id: StSsdPointMaker.cxx,v 1.41 2007/04/17 05:09:25 perev Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.41  2007/04/17 05:09:25  perev
+// GetTFile()==>StMaker. Jerome request
+//
 // Revision 1.40  2007/04/11 22:45:22  perev
 // 1/0 avoided
 //
@@ -155,7 +158,6 @@
 #include "StSsdHitCollection.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
 #include "TMath.h"
-#include "StBFChain.h"
 ClassImp(StSsdPointMaker)
 
 //_____________________________________________________________________________
@@ -363,21 +365,18 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::DeclareNtuple(){
-  StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-  TFile *f = 0;
-  if (chain) {
-    f = chain->GetTFile();
-    if (f)     {
-      f->cd();
-      string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag:idClusP:idClusN:position_0:position_1:xl:yl";
-      mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
-      string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc:FirstAdc:LastAdc:TotNoise";
-      nHitNtuple     = new TNtuple("ClusTuple","All Clusters stored",varlist3.c_str()); 
-      string varlist4     = "side:ladder:wafer:nstrip:pedestal:signal:noise:snratio";
-      qHitNtuple          = new TNtuple("Strips","All Strips stored",varlist4.c_str());
-      pHitNtuple     = new TNtuple("ClustupleIn","Clusters in hits",varlist3.c_str()); 
-      rHitNtuple          = new TNtuple("StripsIn","Strips in hits",varlist4.c_str()); 
-    }
+
+  TFile *f = GetTFile();
+  if (f) {
+    f->cd();
+    string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag:idClusP:idClusN:position_0:position_1:xl:yl";
+    mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
+    string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc:FirstAdc:LastAdc:TotNoise";
+    nHitNtuple     = new TNtuple("ClusTuple","All Clusters stored",varlist3.c_str()); 
+    string varlist4     = "side:ladder:wafer:nstrip:pedestal:signal:noise:snratio";
+    qHitNtuple          = new TNtuple("Strips","All Strips stored",varlist4.c_str());
+    pHitNtuple     = new TNtuple("ClustupleIn","Clusters in hits",varlist3.c_str()); 
+    rHitNtuple          = new TNtuple("StripsIn","Strips in hits",varlist4.c_str()); 
   }
 }
 //_____________________________________________________________________________
@@ -855,7 +854,7 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
 void StSsdPointMaker::WriteStripTuple(StSsdBarrel *mySsd)
 {
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
-  Int_t found;
+  Int_t found=0; if(found){}
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {

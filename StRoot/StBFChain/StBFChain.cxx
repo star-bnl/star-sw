@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.511 2007/04/07 19:53:10 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.512 2007/04/17 05:07:14 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -846,7 +846,8 @@ Int_t StBFChain::Finish()
   int ians = StMaker::Finish();
   SafeDelete(fchainOpt);
   fBFC = 0;
-  if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
+  TFile *tf = GetTFile();
+  if (tf) {tf->Write(); tf->Flush(); tf->Close(); delete tf; SetTFile(0);}
   return ians;
 }
 
@@ -1332,7 +1333,7 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
     }
   }
   if (fFileOut != "")  gMessMgr->QAInfo() << "Output root file name " <<  fFileOut.Data() << endm;
-  if (!fTFile) {
+  if (!GetTFile()) {
     if (GetOption("tags")  && fFileOut != "" ||
 	GetOption("lana") ||  GetOption("Laser")) {
       TString TagsName = fFileOut;
@@ -1341,7 +1342,7 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
       } else {
 	TagsName.ReplaceAll(".root",".tags.root");
       }
-      fTFile = new TFile(TagsName.Data(),"RECREATE");
+      SetTFile(new TFile(TagsName.Data(),"RECREATE"));
     }
   }
   //    gSystem->Exit(1);

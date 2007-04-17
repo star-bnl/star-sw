@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.192 2007/04/13 17:48:11 potekhin Exp $
+// $Id: StMaker.cxx,v 1.193 2007/04/17 05:07:41 perev Exp $
 //
 //
 /*!
@@ -50,6 +50,7 @@
 StMaker     *StMaker::fgStChain     = 0;
 StMaker     *StMaker::fgFailedMaker = 0;
 StTestMaker *StMaker::fgTestMaker   = 0;
+TFile       *StMaker::fgTFile       = 0;
 Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
 /* geometry version from Maxim 09/29/2005
@@ -1721,6 +1722,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.193  2007/04/17 05:07:41  perev
+// GetTFile()==>StMaker. Jerome request
+//
 // Revision 1.192  2007/04/13 17:48:11  potekhin
 // Added a stub for y2006c
 //
