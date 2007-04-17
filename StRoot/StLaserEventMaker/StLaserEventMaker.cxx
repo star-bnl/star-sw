@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.34 2005/02/03 16:17:28 jecc Exp $
+// $Id: StLaserEventMaker.cxx,v 1.35 2007/04/17 05:08:18 perev Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.35  2007/04/17 05:08:18  perev
+// GetTFile()==>StMaker. Jerome request
+//
 // Revision 1.34  2005/02/03 16:17:28  jecc
 // Correct for laser travel time from first to last mirror.
 // Select narrow range around laser z peak position to determine <z>.
@@ -107,9 +110,7 @@
  */
 #include <Stiostream.h>
 #include "StLaserEventMaker.h"
-#include "StBFChain.h"
 #include "St_DataSetIter.h"
-//VP#include "St_XDFFile.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_Module.h"
@@ -124,6 +125,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StDetectorDbMaker/StDetectorDbClock.h"
 #include "TMath.h"
+#include "TFile.h"
 ClassImp(StLaserEventMaker)
 
 //_____________________________________________________________________________
@@ -180,7 +182,7 @@ Int_t StLaserEventMaker::InitRun(int RunId){
   //  Create a root tree. (let controlling Macro make the file?)
   cout << "Making the laser TTree" << endl;
   event = new StLaserEvent();
-  ((StBFChain* )GetChain())->GetTFile()->cd();
+  GetTFile()->cd();
   m_laser = new TTree("laser","Tpc laser track tree");
   m_laser->SetAutoSave(100000000); //Save every 100 MB
   Int_t bufsize= 64000;
@@ -859,7 +861,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.34 2005/02/03 16:17:28 jecc Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.35 2007/04/17 05:08:18 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

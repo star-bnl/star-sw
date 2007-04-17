@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.32 2007/03/21 17:14:36 fisyak Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.33 2007/04/17 05:08:36 perev Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.33  2007/04/17 05:08:36  perev
+ * GetTFile()==>StMaker. Jerome request
+ *
  * Revision 1.32  2007/03/21 17:14:36  fisyak
  * Add keys for switch off Tpc, Svt and Ssd NTuples
  *
@@ -158,8 +161,6 @@
 
 #include "StMessMgr.h"
 
-#include "StBFChain.h"
-
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StAssociationMaker/StTrackPairInfo.hh"
 
@@ -262,8 +263,7 @@ Int_t StMcAnalysisMaker::Init()
     
     SetZones();  // This is my method to set the zones for the canvas.
 
-    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-    if (chain) mNtupleFile = chain->GetTFile();
+    mNtupleFile = GetTFile();
     if (mNtupleFile) {mNtupleFile->cd(); mNtupleFile = 0;}
     else {mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");}
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).

@@ -23,7 +23,7 @@
 #include "TTable.h"
 #include "Ttypes.h"
 
-/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.38 2007/03/23 14:06:36 jeromel Exp $ */
+/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.39 2007/04/17 05:07:19 perev Exp $ */
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
@@ -46,7 +46,6 @@ class TObjArray;
 
 class StBFChain : public StChain {
  private:
-  TFile               *fTFile;    // TFile associated with the chain
   Bfc_st              *fBFC;      // Private chain
   StFileI             *fSetFiles; //
   TString             fInFile;    //
@@ -60,9 +59,9 @@ class StBFChain : public StChain {
   Int_t               fkChain;    // Master chain option
  public:
   StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE) :
-  StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
+  StChain(name,UseOwnHeader),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
   StBFChain(Int_t mode, const char *name="bfc",const Bool_t UseOwnHeader = kFALSE) :
-    StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0) {}
+    StChain(name,UseOwnHeader),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0) {}
   void Setup(Int_t mode=1);
    virtual            ~StBFChain();
    virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
@@ -94,9 +93,7 @@ class StBFChain : public StChain {
    virtual void        SetOption(const TString* Opt, const Char_t *chain="Chain") {SetOption(kOpt(Opt),chain);}
    virtual void        SetOptionOff(const Char_t*  Opt, const Char_t *chain="Chain") {SetOption(-kOpt(Opt),chain);}
    virtual void        SetOptionOff(const TString* Opt, const Char_t *chain="Chain") {SetOption(-kOpt(Opt),chain);}
-   virtual void        SetTFile(TFile *m) {fTFile = m;}
    virtual Int_t       Finish();
-   virtual TFile      *GetTFile() {return fTFile;}
    virtual Option_t*   GetOption() const{return TObject::GetOption();}
    virtual Bool_t      GetOption(const Int_t k)  const;
    virtual Bool_t      GetOption(const TString *Opt, Bool_t Check = kTRUE) const {return GetOption(kOpt(Opt,Check));}
@@ -106,7 +103,7 @@ class StBFChain : public StChain {
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.38 2007/03/23 14:06:36 jeromel Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.39 2007/04/17 05:07:19 perev Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class

@@ -1,11 +1,14 @@
 //*-- Author :Y.Fisyak 01/26/07
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.10 2007/03/06 16:31:55 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.11 2007/04/17 05:12:06 perev Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.11  2007/04/17 05:12:06  perev
+// GetTFile()==>StMaker. Jerome request
+//
 // Revision 1.10  2007/03/06 16:31:55  fisyak
 // Before Selection of good runs
 //
-#include "StBFChain.h"
+#include "TFile.h"
 #include "StEventTypes.h"
 #include "StLaserAnalysisMaker.h"
 #include "LaserBeams.h"
@@ -21,19 +24,15 @@ static LaserB *Lasers[12][6][7];
 //_____________________________________________________________________________
 Int_t StLaserAnalysisMaker::Init(){
   event = new LaserEvent();
-  StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-  TFile *f = 0;
-  if (chain) {
-    f = chain->GetTFile();
-    if (f)     {
-      f->cd();
-      m_laser = new TTree("laser","Tpc laser track tree");
-      m_laser->SetAutoSave(100000000); //Save every 100 MB
-      Int_t bufsize= 64000;
-      Int_t split = 99;
-      if (split)  bufsize /= 4;
-      m_laser->Branch("event", "LaserEvent",&event, bufsize, split);
-    }
+  TFile *f = GetTFile();
+  if (f) {
+    f->cd();
+    m_laser = new TTree("laser","Tpc laser track tree");
+    m_laser->SetAutoSave(100000000); //Save every 100 MB
+    Int_t bufsize= 64000;
+    Int_t split = 99;
+    if (split)  bufsize /= 4;
+    m_laser->Branch("event", "LaserEvent",&event, bufsize, split);
   }
   return StMaker::Init();
 }

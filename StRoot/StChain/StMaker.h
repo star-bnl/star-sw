@@ -36,6 +36,7 @@ class TTable;
 class TMemStat;
 class StEvtHddr;
 class TAttr;
+class TFile;
 
 class StTurnLogger;
 
@@ -84,7 +85,8 @@ protected:
    Int_t           fStatus;             //!Maker status
    mutable StMessMgr      *fLogger;             // This object logger instance
    mutable StTurnLogger   *fLoggerHold;         // hold the pointer to the previous StMessMgr
-
+protected:
+static TFile *fgTFile;
 protected:
 //   inline StMessMgr    *GetLogger(){return fLogger;}
    inline StMessMgr    *GetLogger() const {return fLogger;}
@@ -221,12 +223,14 @@ public:
    static      Int_t    AliasTime(const char *alias);
    static      Char_t  *AliasGeometry(const char *alias);
    static const DbAlias_t  *GetDbAliases();
-   static      void     SetTestMaker(StTestMaker *mk){fgTestMaker=mk;}
+   static      void     SetTestMaker(StTestMaker *mk)	{fgTestMaker=mk;}
+   static      void     SetTFile(TFile *tf) 		{fgTFile    =tf;}
+   static     TFile    *GetTFile() 			{return fgTFile;}
 
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.81 2007/03/12 17:51:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.82 2007/04/17 05:07:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -288,8 +292,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.81 2007/03/12 17:51:19 perev Exp $
+// $Id: StMaker.h,v 1.82 2007/04/17 05:07:48 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.82  2007/04/17 05:07:48  perev
+// GetTFile()==>StMaker. Jerome request
+//
 // Revision 1.81  2007/03/12 17:51:19  perev
 // new signature of GetDataBase()
 //

@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.17 2006/10/17 19:18:39 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.18 2007/04/17 05:09:41 perev Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.18  2007/04/17 05:09:41  perev
+// GetTFile()==>StMaker. Jerome request
+//
 // Revision 1.17  2006/10/17 19:18:39  fisyak
 // add Check that this chain is BFC one
 //
@@ -276,11 +279,11 @@ Int_t StTagsMaker::InitTags() {
   if (!fTree) {
     StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
     if (chain) {
-      TFile *f = chain->GetTFile();
+      TFile *f = GetTFile();
       if (f) {
 	f->cd();
 	fTree = new TTree("Tag","BFC chain Tags");
-	GetChain()->Pass(GetTags);
+	chain->Pass(GetTags);
       }
     }
   }
