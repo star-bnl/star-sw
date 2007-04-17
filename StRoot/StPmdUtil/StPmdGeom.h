@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.10 2007/03/21 16:40:10 rashmi Exp $
+ * $Id: StPmdGeom.h,v 1.11 2007/04/17 11:19:53 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -16,6 +16,9 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
+ * Revision 1.11  2007/04/17 11:19:53  rashmi
+ * Chain19 mapping corrected, functions to return nboards in a chain/SMs added
+ *
  * Revision 1.10  2007/03/21 16:40:10  rashmi
  * StPmdGeom after new mapping (run7) and with DrawPmd function for viewing PMD Geometry
  *
@@ -84,6 +87,8 @@ class StPmdGeom {
   void readBoardDetail();      // function for defining constant values
   void readBoardDetail(Int_t runno1);      // function for defining constant values
   void GetRunYear(Int_t, Int_t&,Int_t&);
+  Int_t GetNBoardsChain(Int_t);
+  void GetNBoardsSM(Int_t,Int_t*);
 
   void drawPMD(Int_t,Int_t,Int_t);
   void DrawRhombus(Int_t,Int_t,Int_t,Int_t,Int_t,Int_t&,Float_t*,Float_t*);

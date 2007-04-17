@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.17 2007/03/29 04:54:52 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.18 2007/04/17 11:19:47 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.18  2007/04/17 11:19:47  rashmi
+ * Chain19 mapping corrected, functions to return nboards in a chain/SMs added
+ *
  * Revision 1.17  2007/03/29 04:54:52  rashmi
  * BoardDetail of access on 29/03/07 added
  *
@@ -352,7 +355,7 @@ void StPmdGeom::Sim2Detmap(Int_t& nmod,Int_t& row,Int_t& col)
 // Function used for mapping from Chain#, Channel# to Detector SM, Col, Row
 Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t&chmod)
 {
-  
+ 
   //  cout<<"picking chainmapping for year 5"<<endl;
   //Bedanga and pawan changed the chain mapping conditions
   
@@ -426,7 +429,6 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     if(supmod==5) {row = row1 -24; supmod = 6;} 
     if(supmod==7) {row = row1 + 24;}	
     break;
-    
   case 14:
     chain5(chtemp,supmod,col,row);
     supmod = 8;
@@ -438,7 +440,6 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain5(chtemp,supmod,col1,row1);
     supmod = 8; col = col1 -24; row =row1;
     break;
-    
   case 17:
     chain17(chtemp,supmod,col,row);
     break;
@@ -482,27 +483,27 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     row = 49 - col1;
     if(supmod==15){ row = 73 - col1;}
     break;
-  case 28: 
+  case 28:
     chain5(chtemp,supmod,col1,row1);
     supmod = 14; col = 73 - row1; row = 49 - col1 +24;
     break;
-  case 29: 
+  case 29:
     chain2(chtemp,supmod,col1,row1);
     supmod = 15; col = 49 - row1; row = 73 - col1;
     break;
-  case 30: 
+  case 30:
     chain5(chtemp,supmod,col1,row1);
     supmod = 16; col = 73 - row1; row = 49 - col1;
     break;
-  case 31: 
+  case 31:
     chain5(chtemp,supmod,col1,row1);
     supmod = 16; col = 73 - row1; row = 49 - col1 +24;
     break;
-  case 32: 
+  case 32:
     chain5(chtemp,supmod,col1,row1);
     supmod = 17; col = row1; row = col1 -24; 
     break;
-  case 33: 
+  case 33:
     chain22(chtemp,supmod,col1,row1);
     row =row1;col =col1;
     if(supmod==11){
@@ -516,22 +517,22 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
       row = 97 - col1;
     }
     break;
-  case 34: 
+  case 34:
     chain34(chtemp,supmod,col,row);
     break;
-  case 35: 
+  case 35:
     chain34(chtemp,supmod,col1,row1);
     row =row1;col =col1;
     if(supmod == 16){ col = col1 - 24;}
     if(supmod == 18){ row = row1 + 24;}
     break;
-  case 36: 
+  case 36:
     chain34(chtemp,supmod,col1,row1);
     row =row1;col =col1;
     if(supmod == 16) {col = 121-col1;row = 97 - row1;}
     supmod = supmod + 1;
     break;
-  case 37: 
+  case 37:
     chain34(chtemp,supmod,col1,row1);
     row =row1;col =col1;
     if(supmod==18){row = row1 + 24;supmod = 19;}
@@ -577,17 +578,17 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     if(supmod==24){col = col1; row = row1;}
     break;
   case 47:
-      chain45(chtemp,supmod,col1,row1);
-      row =row1;col =col1;
-      if(supmod ==22){col = 49 - col1; row = 73 -row1;}
-      if(supmod==24){col = 48 + col1; row = row1 - 48;}
-      supmod = 24;
+    chain45(chtemp,supmod,col1,row1);
+    row =row1;col =col1;
+    if(supmod ==22){col = 49 - col1; row = 73 -row1;}
+    if(supmod==24){col = 48 + col1; row = row1 - 48;}
+    supmod = 24;
     break;
   case 48:
-      chain2(chtemp,supmod,col1,row1);
-      supmod = 24; col = 72 + row1; row = col1;
-      break;
-
+    chain2(chtemp,supmod,col1,row1);
+    supmod = 24; col = 72 + row1; row = col1;
+    break;
+    
   }
   return kStOk;
 }
@@ -595,7 +596,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
 // SM1 has been mounted worngly in the STAND, so mapping has been changed accordingly.
 void StPmdGeom::chain1(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
 {
-  supmod = 1;
+ supmod = 1;
   int zone = ch/192;
   switch(zone){
   case 0:
@@ -636,7 +637,6 @@ void StPmdGeom::chain1(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
     break;
   }
 }
-
 
 void StPmdGeom::chain2(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
 {
@@ -955,7 +955,6 @@ void StPmdGeom:: chain17(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
   }
 }
 
-
 void StPmdGeom::chain21(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
 {
   supmod = 10;
@@ -1243,7 +1242,7 @@ void StPmdGeom::chain46(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
   case 4:
     col = 48 + jnorm[ch-4*192]; row = 24 + inorm[ch-4*192];
     supmod = 24;
-    break;    	   
+    break;    	
   case 5:
     col = 9 - jnorm[ch-5*192] + 56; row = 49 - inorm[ch-5*192];
     supmod = 24;
@@ -1251,7 +1250,7 @@ void StPmdGeom::chain46(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
   case 6:
     col = 9 - jnorm[ch-6*192] + 56; row = 73 - inorm[ch-6*192];
     supmod = 24;
-    break;    	   
+    break;    	
   case 7:
     col = jnorm[ch-7*192] + 64; row = 48 + inorm[ch-7*192];
     supmod = 24;
@@ -1259,7 +1258,7 @@ void StPmdGeom::chain46(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
   case 8:
     col = jnorm[ch-8*192] + 64; row = 24 + inorm[ch-8*192];
     supmod = 24;
-    break;    	   
+    break;    	
   }
 }
 void StPmdGeom::ADC2Edep(Int_t ADC, Float_t& Edep)
@@ -1272,10 +1271,10 @@ void StPmdGeom::ADC2Edep(Int_t ADC, Float_t& Edep)
 
 void StPmdGeom::readBoardDetail()
 {
-  
+ 
   for(Int_t i=0;i<48;i++){
     //   for(Int_t ib=0;ib<27;ib++){
-   for(Int_t ib=0;ib<36;ib++){  
+   for(Int_t ib=0;ib<36;ib++){ 
      status[i][ib]=1;
    }
   }
@@ -1316,8 +1315,6 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
   
   //  cout<<"runid="<<runno1<<" run#="<<rn<<" year="<<year<<endl;
   
-
-
   if(year==5){  // 2004 run
     // Once the day is known choose the mapping file
     //     if( rn >=1 && rn <21)
@@ -1377,7 +1374,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
 	status[31][8]=0;
 	//chain38 
 	status[38][24]=0;status[38][25]=0;
-	//chain39 
+	//chain39
 	status[39][24]=0;
 	//chain40 
 	status[40][7]=0;
@@ -1396,7 +1393,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
 	status[38][5]=0;
 	//chain43 
 	status[43][20]=0;
-	//chain44 
+	//chain44
 	for(Int_t i=18;i<27;i++)status[44][i]=0;
 	//chain45 
 	for(Int_t i=3;i<6;i++)status[45][i]=0;
@@ -1752,6 +1749,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       status[11][9]=0;
       status[11][12]=0;
       status[11][13]=0;
+      for(Int_t i=18;i<27;i++)status[11][i]=0;
       //chain 13
       status[12][6]=0;
       status[12][10]=0;
@@ -1771,6 +1769,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       status[17][20]=0;
       //chain 19
       for(Int_t i=3;i<6;i++)status[18][i]=0;
+      status[18][9]=0;
       for(Int_t i=15;i<18;i++)status[18][i]=0;
       status[18][34]=0;
       status[18][35]=0;
@@ -1867,8 +1866,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       //chain 46
       //chain 47
       //chain 48
-
-				}
+  }
   if(rn>87&&year==8){
     //chain 33 board 7
     status[32][6]=0;
@@ -1905,10 +1903,9 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
       brdCount+=status[chainno-1][ibrd];
     }
   }
-  
   chtemp=ch+missing*64;
   chmod=chtemp;
-  //  cout<<"ch,chtemp,missing="<<ch<<","<<chtemp<<","<<missing<<endl;
+  //  cout<<"year,ch,chtemp,missing="<<year<<","<<ch<<","<<chtemp<<","<<missing<<endl;
   
   if(year==8){
     if(chain==1 || chain==7 || chain==19 || chain==20 || chain==23 || chain==24) {
@@ -1918,10 +1915,13 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
       //      if(chtemp>=1728) cout<<"ch,chtemp="<<ch<<","<<chtemp<<endl;
       if(chtemp >=1728){return kStWarn;}
     }
+    //    Non existent chains
+    if(chain==6 || chain==17 || chain == 21 ){return kStWarn;}
   }else{
     //      if(chtemp>=1728) cout<<"ch,chtemp="<<ch<<","<<chtemp<<endl;
     if(chtemp>=1728){ return kStWarn;}
   }
+  
   switch(chain){
     
   case 1:
@@ -2005,34 +2005,34 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
   case 27:
     chain27(chtemp,supmod,col,row,year);
     break;
-  case 28: 
+  case 28:
     chain28(chtemp,supmod,col,row,year);
     break;
-  case 29: 
+  case 29:
     chain29(chtemp,supmod,col,row,year);
     break;
-  case 30: 
+  case 30:
     chain30(chtemp,supmod,col,row,year);
     break;
-  case 31: 
+  case 31:
     chain31(chtemp,supmod,col,row,year);
     break;
-  case 32: 
+  case 32:
     chain32(chtemp,supmod,col,row,year);
     break;
-  case 33: 
+  case 33:
     chain33(chtemp,supmod,col,row,year);
     break;
-  case 34: 
+  case 34:
     chain34(chtemp,supmod,col,row,year);
     break;
-  case 35: 
+  case 35:
     chain35(chtemp,supmod,col,row,year);
     break;
-  case 36: 
+  case 36:
     chain36(chtemp,supmod,col,row,year);
     break;
-  case 37: 
+  case 37:
     chain37(chtemp,supmod,col,row,year);
     break;
   case 38:
@@ -2069,6 +2069,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain48(chtemp,supmod,col,row,year);
     break;
   }
+  //  cout<<"chain = "<<chain<<" chtemp="<<chtemp<<" supmod="<<supmod<<endl;
   return kStOk;
 }
 
@@ -2079,47 +2080,47 @@ void StPmdGeom::chain1(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
   switch(year){
     /*
       case 5: {
-    supmod = 1;
-    switch(zone){
-    case 0:
+      supmod = 1;
+      switch(zone){
+      case 0:
       col = inorm[ch] + 24; row = jnorm[ch]; //old
       //    col = 25 - inorm[ch]; row = 9 - jnorm[ch];
       break;
-    case 1:
+      case 1:
       col = inorm[ch-192]; row = jnorm[ch-192]; //old
       // col = 25 - inorm[ch-192]+ 24; row = 9 - jnorm[ch-192];
       break;
-    case 2:
+      case 2:
       col = 25 - inorm[ch-2*192]; row = 9 - jnorm[ch-2*192] + 8; //old
       //col = inorm[ch-2*192] + 24; row = jnorm[ch-2*192] + 8;  
       break;
-    case 3:
+      case 3:
       col = 25 - inorm[ch-3*192] + 24; row = 9 - jnorm[ch-3*192] + 8; //old
       //col = inorm[ch-3*192]; row = jnorm[ch -3*192] + 8;
       break;
-    case 4:
+      case 4:
       col = inorm[ch-4*192] + 24; row = jnorm[ch - 4*192] + 16; //old
       //col = 25 - inorm[ch-4*192]; row = 9 - jnorm[ch-4*192] + 16;
       break;
-    case 5:
+      case 5:
       col = inorm[ch-5*192]; row = jnorm[ch-5*192] + 16; //old
       //col = 25 - inorm[ch-5*192]+ 24; row = 9 - jnorm[ch-5*192] + 16;
       break;
-    case 6:
+      case 6:
       col = inorm[ch-6*192]; row = jnorm[ch-6*192] + 24; //old
       //col = 25 - inorm[ch-6*192]; row = 9 - jnorm[ch-6*192] + 24;
       break;
-    case 7:
+      case 7:
       col =  25 - inorm[ch-7*192]; row = 9 - jnorm[ch-7*192] + 24 + 8; //old
       //col = inorm[ch-7*192]; row = jnorm[ch-7*192] + 24 + 8;
       break;
-    case 8:
+      case 8:
       col = inorm[ch-8*192]; row = jnorm[ch-8*192] + 24 + 16; //old
       //col = 25 - inorm[ch-8*192]; row = 9 - jnorm[ch-8*192] + 24 + 16;
       break;
-    }
-  }
-    break;
+      }
+      }
+      break;
     */
   case 6: {
     
@@ -2226,7 +2227,7 @@ void StPmdGeom::chain2(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
   Int_t zone = ch/192;
   switch(year){
   case 6:
-
+    
     switch(zone)
       {
       case 0:
@@ -2543,8 +2544,6 @@ void StPmdGeom::chain4(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 	supmod = 2;
 	break;
       }
-
-
 
   }
 }
@@ -2927,7 +2926,7 @@ void StPmdGeom::chain9(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 	supmod = 6;
 	break;
       case 5:
-	col =  24 + inorm[ch-5*192];
+	col  = 24 + inorm[ch-5*192];
 	row =  8  + jnorm[ch-5*192];
 	supmod = 6;
 	break;
@@ -3001,6 +3000,7 @@ void StPmdGeom::chain9(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
     break;
   }
 }
+
 void StPmdGeom::chain10(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
   Int_t zone = ch/192;
@@ -3219,7 +3219,6 @@ void StPmdGeom::chain11(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   }
 }
 
-
 void StPmdGeom::chain12(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
   Int_t zone = ch/192;
@@ -3407,6 +3406,7 @@ void StPmdGeom::chain13(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   }
 }
+
 void StPmdGeom::chain14(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
   Int_t zone = ch/192;
@@ -3863,36 +3863,44 @@ void StPmdGeom::chain19(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
 	supmod = 11;
 	break;
       case 5:
-	col =  24 + inorm[ch-5*192];
-	row =  24 + jnorm[ch-5*192];
+	col = inorm[ch-5*192];
+	row = 16 + jnorm[ch-5*192];
 	supmod = 11;
 	break;
       case 6:
-	col =  inorm[ch-6*192];
-	row = 24 + jnorm[ch-6*192];
+	col =  24 + inorm[ch-6*192];
+	row =  24 + jnorm[ch-6*192];
 	supmod = 11;
 	break;
       case 7:
-	col= 25 - inorm[ch-7*192];
-	row= 41 - jnorm[ch-7*192];
+	col =  inorm[ch-7*192];
+	row = 24 + jnorm[ch-7*192];
 	supmod = 11;
 	break;
       case 8:
-	col= 49 - inorm[ch-8*192];
+	col= 25 - inorm[ch-8*192];
 	row= 41 - jnorm[ch-8*192];
 	supmod = 11;
 	break;
       case 9:
-	col =  24 + inorm[ch-9*192];
-	row =  40 + jnorm[ch-9*192];
+	col= 49 - inorm[ch-9*192];
+	row= 41 - jnorm[ch-9*192];
+	supmod = 11;
+	break;
+      case 10:
+	col =  24 + inorm[ch-10*192];
+	row =  40 + jnorm[ch-10*192];
+	supmod = 11;
+	break;
+      case 11:
+	col = inorm[ch-11*192];
+	row = 40 + jnorm[ch-11*192];
 	supmod = 11;
 	break;
       }
     break;
   }
-
 }
-
 
 void StPmdGeom::chain20(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
@@ -4402,6 +4410,7 @@ void StPmdGeom::chain25(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
       break;
     }
 }
+
 void StPmdGeom::chain26(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
   Int_t zone = ch/192;
@@ -4647,6 +4656,7 @@ void StPmdGeom::chain30(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
       row = 8 + imirr[ch-5*192];
       supmod = 4+12;
       break;
+      
     case 6:
       col = 73 - jmirr[ch-6*192];
       row = 25 - imirr[ch-6*192];
@@ -4664,6 +4674,7 @@ void StPmdGeom::chain30(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
       break;
     }
 }
+
 void StPmdGeom::chain31(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
   Int_t zone = ch/192;
@@ -4715,7 +4726,10 @@ void StPmdGeom::chain31(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
       supmod = 4+12;
       break;
     }
+  
 }
+
+
 void StPmdGeom::chain32(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
   Int_t zone = ch/192;
@@ -4768,6 +4782,11 @@ void StPmdGeom::chain32(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
       break;
     }
 }
+
+
+
+                                                                                                             
+                                                                                                             
 void StPmdGeom::chain33(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
   Int_t zone = ch/192;
@@ -5187,6 +5206,7 @@ void StPmdGeom::chain40(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
       break;
     }
 }
+
 void StPmdGeom::chain41(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
   Int_t zone = ch/192;
@@ -5494,7 +5514,7 @@ void StPmdGeom::chain46(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   switch(year){
   case 6:
     
-    switch(zone)
+   switch(zone)
       {
       case 0:
 	col = 25 - jmirr[ch];
@@ -5886,7 +5906,7 @@ void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
       }
     }
   }
-  pmdC->Print("Pmd.ps","ps");
+  pmdC->Print("Pmd.gif","gif");
   
 }
 
@@ -5952,4 +5972,41 @@ void StPmdGeom::GetRunYear(Int_t runno,Int_t&rn,Int_t&year){
   rn = Int_t(rest/1000);
 
   cout<<"rn="<<rn<<" year="<<year<<endl;
+}
+
+Int_t StPmdGeom::GetNBoardsChain(Int_t chain){
+
+  Int_t aliveboard = 0;
+  for(Int_t i=0;i<36;i++){
+    if (status[chain-1][i]==1) aliveboard++;
+  }
+  //  cout<<"aliveboards in chain "<<chain<<" are "<<aliveboard<<endl;
+  return aliveboard;
+  
+}
+
+void StPmdGeom::GetNBoardsSM(Int_t year , Int_t * aliveboard){
+
+  Int_t channel;
+  //  Int_t aliveboard[24];
+  for(Int_t i=0;i<24;i++){
+    aliveboard[i] = 0;
+  }
+
+  for(Int_t chain = 1;chain<=48;chain++){
+    for(Int_t brd = 0;brd<27;brd++){
+      channel = brd*64 + 10; // 10th channel of every board is studied
+      Int_t supmod,col,row,chmod;
+      Int_t mapcheck;
+      if (year==5){
+	mapcheck = ChainMapping(chain,channel,supmod,col,row,chmod);
+      }else{
+        mapcheck = ChainMapping(chain,channel,supmod,col,row,chmod,year);
+      }
+      if(mapcheck==kStOk && supmod > 0) {
+	aliveboard[supmod-1]++;
+      }
+    }
+  }
+  //  return aliveboard;
 }
