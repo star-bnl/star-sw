@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.7 2007/02/28 23:28:17 dongx Exp $
+ * $Id: StTofrGeometry.cxx,v 1.8 2007/04/17 23:01:52 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.8  2007/04/17 23:01:52  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.7  2007/02/28 23:28:17  dongx
  * R_tof used for pre-match calculation updated to ~215cm
  *
@@ -151,7 +154,7 @@ void StTofrNode::CalcMatrix(StTofrNode* son,
 
    //  son->TNode::UpdateMatrix();
    //   son->GetpView()->UpdateMatrix();
-   //   cout << "StTofrNode::CalcMatrix" << endl;
+   //   LOG_INFO << "StTofrNode::CalcMatrix" << endm;
 
    xl[0] = 0;  xl[1] = 0;  xl[2] = 0;
    ConvertPos(son,xl, mother,xm);
@@ -205,13 +208,13 @@ void  StTofrNode::BuildMembers()
    Double_t xl[3];
    Double_t xg[3];
    TBRIK *brik = dynamic_cast<TBRIK*>(GetShape());
-   //   cout << " Get shape ready" << endl;
-   if(!brik) { cout << " no brik " << endl; return; }
+   //   LOG_INFO << " Get shape ready" << endm;
+   if(!brik) { LOG_INFO << " no brik " << endm; return; }
    //   Double_t dx = brik->GetDx();
    Double_t dy = brik->GetDy();
    Double_t dz = brik->GetDz();
 
-   //   cout << " size = " <<dx << " " << dy << " " << dz << endl;
+   //   LOG_INFO << " size = " <<dx << " " << dy << " " << dz << endm;
    /*
    //center point
    Double_t xc[3];
@@ -266,7 +269,7 @@ void StTofrNode::Local2Master(const Double_t* local, Double_t* master)
    //
    //  pView->UpdateMatrix();
    if (!mTransFlag) {
-     if (!mMasterNode) { cout << " no Master! " << endl; return;}
+     if (!mMasterNode) { LOG_INFO << " no Master! " << endm; return;}
      TVolumeView *son = GetfView();
      TVolumeView *mrs = GetTopNode();
      
@@ -298,7 +301,7 @@ void StTofrNode::Master2Local(const Double_t* master, Double_t* local)
    //  pView->UpdateMatrix();
    //   pView->Master2Local(master, local);
    if (!mTransFlag) {
-     cout << " and No TVolumePosition::Master2Local is wrong, so do nothing" << endl;
+     LOG_INFO << " and No TVolumePosition::Master2Local is wrong, so do nothing" << endm;
       return;
    }
 
@@ -417,19 +420,19 @@ Bool_t StTofrNode::HelixCross(const StHelixD &helix, Double_t &pathLen,
 void StTofrNode::Print(Option_t *opt) const
 {
    TBRIK *brik = dynamic_cast<TBRIK*> (GetShape());
-   cout << "Name=" << GetName() << "\t TBRIK-dimension=" << brik->GetDx()
+   LOG_INFO << "Name=" << GetName() << "\t TBRIK-dimension=" << brik->GetDx()
         << " : " << brik->GetDy() << " : " << brik->GetDz()
         // << "\n Center Rxy:Eta:Phi=" << mCenterRxy << " : "
         // << mCenterEta << " : " << mCenterPhi
         << "\n EtaRange=" << mEtaMin << " : " << mEtaMax
         << "\t PhiRange=" << mPhiMin << " : " << mPhiMax
-        << endl;
-   cout <<"trans[0-2]=" << mTransMRS[0] <<" " <<mTransMRS[1]
+        << endm;
+   LOG_INFO <<"trans[0-2]=" << mTransMRS[0] <<" " <<mTransMRS[1]
                                          <<" " <<mTransMRS[2]
         <<"\nmRotMRS[0-2]=" <<mRotMRS[0] <<" " <<mRotMRS[1] <<" " <<mRotMRS[2]
         <<"\nmRotMRS[3-5]=" <<mRotMRS[3] <<" " <<mRotMRS[4] <<" " <<mRotMRS[5]
         <<"\nmRotMRS[6-8]=" <<mRotMRS[6] <<" " <<mRotMRS[7] <<" " <<mRotMRS[8]
-        <<endl;
+        <<endm;
 }
 
 #if 0
@@ -668,9 +671,9 @@ void StTofrGeomNode::Master2Local(const Double_t* master, Double_t* local)
    //
 
    if (!mTransFlag) {
-      cout << "Warning in StTofrGeomNode::Master2Local\n"
+      LOG_INFO << "Warning in StTofrGeomNode::Master2Local\n"
            << " StTofrGeomNode::UpdateMatrix not yet invoked\n"
-           << " and TNode::Master2Local is wrong, so do nothing" << endl;
+           << " and TNode::Master2Local is wrong, so do nothing" << endm;
       return;
    }
 
@@ -793,19 +796,19 @@ void StTofrGeomNode::Print(Option_t *opt) const
 const
 {
    TBRIK *brik = dynamic_cast<TBRIK*> (GetShape());
-   cout << "Name=" << GetName() << "\t TBRIK-dimension=" << brik->GetDx()
+   LOG_INFO << "Name=" << GetName() << "\t TBRIK-dimension=" << brik->GetDx()
         << " : " << brik->GetDy() << " : " << brik->GetDz()
         // << "\n Center Rxy:Eta:Phi=" << mCenterRxy << " : "
         // << mCenterEta << " : " << mCenterPhi
         << "\n EtaRange=" << mEtaMin << " : " << mEtaMax
         << "\t PhiRange=" << mPhiMin << " : " << mPhiMax
-        << endl;
-   cout <<"trans[0-2]=" << mTransMRS[0] <<" " <<mTransMRS[1]
+        << endm;
+   LOG_INFO <<"trans[0-2]=" << mTransMRS[0] <<" " <<mTransMRS[1]
                                          <<" " <<mTransMRS[2]
         <<"\nmRotMRS[0-2]=" <<mRotMRS[0] <<" " <<mRotMRS[1] <<" " <<mRotMRS[2]
         <<"\nmRotMRS[3-5]=" <<mRotMRS[3] <<" " <<mRotMRS[4] <<" " <<mRotMRS[5]
         <<"\nmRotMRS[6-8]=" <<mRotMRS[6] <<" " <<mRotMRS[7] <<" " <<mRotMRS[8]
-        <<endl;
+        <<endm;
 }
 #endif
 
@@ -970,7 +973,7 @@ StTofrGeomSensor* StTofrGeomTray::GetSensor(const Int_t imodule) const
    TVolumeView *volume = GetfView();
    //   TList *list = fView->Nodes();
    if ( !(volume->GetListSize()) ) {
-     cout << " No Modules in this tray " << endl;
+     LOG_INFO << " No Modules in this tray " << endm;
      return sensor;
    }
    //   list->Delete();
@@ -992,7 +995,7 @@ StTofrGeomSensor* StTofrGeomTray::GetSensor(const Int_t imodule) const
 //_____________________________________________________________________________
 void StTofrGeomTray::Print(const Option_t *opt) const
 {
-   cout << "StTofrGeomTray, tray#=" << mTrayIndex << endl;
+   LOG_INFO << "StTofrGeomTray, tray#=" << mTrayIndex << endm;
    StTofrNode::Print(opt);
 }
 
@@ -1065,8 +1068,8 @@ const
 {
    Double_t ret = 0;
    if (icell<=0 || icell>mCells) {
-      cout << "cell#=" << icell <<" is out range=[0," << mCells << "]"
-           << endl;
+      LOG_INFO << "cell#=" << icell <<" is out range=[0," << mCells << "]"
+           << endm;
    } else ret = mCellY[icell-1];
 
    return ret;
@@ -1078,8 +1081,8 @@ const
 {
    Double_t ret = 0;
    if (icell<=0 || icell>mCells) {
-      cout << "cell#=" << icell <<" is out range=[0," << mCells << "]"
-           << endl;
+      LOG_INFO << "cell#=" << icell <<" is out range=[0," << mCells << "]"
+           << endm;
    } else ret = mCellY[icell];
 
    return ret;
@@ -1109,7 +1112,7 @@ StThreeVectorD StTofrGeomSensor::GetCellPosition(const Int_t icell)
       xl[2] = 0;
       Local2Master(xl,xg);
    } else {  //invalid cell, return (0.,0.,0.)
-      cout << "Warning in " << where <<" Invalid cell# =" << icell << endl;
+      LOG_INFO << "Warning in " << where <<" Invalid cell# =" << icell << endm;
       xg[0] = 0.;
       xg[1] = 0.;
       xg[2] = 0.;
@@ -1144,12 +1147,12 @@ Int_t StTofrGeomSensor::FindCellIndex(const Double_t* local)
 //_____________________________________________________________________________
 void StTofrGeomSensor::Print(const Option_t *opt) const
 {
-   cout << "StTofrGeomSensor, module#=" << mModuleIndex << endl;
+   LOG_INFO << "StTofrGeomSensor, module#=" << mModuleIndex << endm;
    StTofrNode::Print(opt);
 
-   cout << " Cells=" << mCells << "\t Y range for cells=\n";
-   for (Int_t i=0; i<=mCells; i++) cout << " : " << mCellY[i];
-   cout << endl;
+   LOG_INFO << " Cells=" << mCells << "\t Y range for cells=\n";
+   for (Int_t i=0; i<=mCells; i++) LOG_INFO << " : " << mCellY[i];
+   LOG_INFO << endm;
 }
 
 
@@ -1192,9 +1195,9 @@ StTofrGeometry::StTofrGeometry(const char* name, const char* title)
    //We only need one instance of StTofrGeometry
    //
    if (gTofrGeometry) {
-      cout << "Warning !! There is already StTofrGeometry at pointer="
+      LOG_INFO << "Warning !! There is already StTofrGeometry at pointer="
            << (void*)gTofrGeometry << ", so it is deleted"
-           << endl;
+           << endm;
       delete gTofrGeometry;
    }
    gTofrGeometry = this;
@@ -1203,8 +1206,8 @@ StTofrGeometry::StTofrGeometry(const char* name, const char* title)
 //_____________________________________________________________________________
 StTofrGeometry::~StTofrGeometry()
 {
-   cout << "Warning !! StTofrGeometry at pointer =" << (void*)gTofrGeometry
-        << " is deleted" << endl;
+   LOG_INFO << "Warning !! StTofrGeometry at pointer =" << (void*)gTofrGeometry
+        << " is deleted" << endm;
    gTofrGeometry = 0;
 
    for(int i=0;i<mNTrays;i++) {
@@ -1254,10 +1257,10 @@ void StTofrGeometry::Init(TVolume *starHall)
    //   //
    //   //InitFromXdf(file);
    //   //Xdf2Geometry();
-   //   cout << "StTofrGeom::Init, sorry! option \"xdf\" not yet ready" << endl;
+   //   LOG_INFO << "StTofrGeom::Init, sorry! option \"xdf\" not yet ready" << endm;
    //} else {
-   //   cout << "StTofrGeom::Init, Warning!! not yet implemented option="
-   //        << option << endl;
+   //   LOG_INFO << "StTofrGeom::Init, Warning!! not yet implemented option="
+   //        << option << endm;
    //}
 
    ////resume gGeometry back to the value at the beginning
@@ -1396,10 +1399,10 @@ Bool_t StTofrGeometry::ContainOthers(TVolume *element)
   TVolumeView *elementView = new TVolumeView(*element,1);
   TList *list = elementView->GetListOfShapes();
   if ( list ) {
-    cout << " yes list in " << element->GetName() << endl;
+    LOG_INFO << " yes list in " << element->GetName() << endm;
     return kTRUE;
   } else {
-    cout << " no list in " << element->GetName() << endl;
+    LOG_INFO << " no list in " << element->GetName() << endm;
     return kFALSE;
   }
 }
@@ -1484,8 +1487,8 @@ Bool_t  StTofrGeometry::InitFromRoot(const char* geofile)
          //gDebugger.Print(mDebug,"%s, itray=%d copied as %d tray\n",where,
 	 //                      itray, ntray);
          if (!tray) {
-            cout << "StTofrGeometry::InitFromRoot, Warning!!"
-                 << "failed in CopyNode=" <<node->GetName() << endl;
+            LOG_INFO << "StTofrGeometry::InitFromRoot, Warning!!"
+                 << "failed in CopyNode=" <<node->GetName() << endm;
             break;
          }
          tray->cd();
@@ -1587,9 +1590,9 @@ void StTofrGeometry::GetPrefixNodes(const TNode* topNode,
 Bool_t StTofrGeometry::LackThis(const char* fromWhere)
 {
    if (gTofrGeometry == 0) {
-      cout << " !! Warning from " << fromWhere
+      LOG_INFO << " !! Warning from " << fromWhere
            << "\n no StTofrGeometry existing, create one instance first"
-           << endl;
+           << endm;
       return kTRUE;
    } else return kFALSE;
 }
@@ -2033,8 +2036,8 @@ const
 //_____________________________________________________________________________
 void StTofrGeometry::Print(Option_t *opt)  const
 {
-   cout << "Trays=" << mTrays <<"\t ModulesInTray=" << mModulesInTray
-        << "\t CellsInModule=" << mCellsInModule << endl;
+   LOG_INFO << "Trays=" << mTrays <<"\t ModulesInTray=" << mModulesInTray
+        << "\t CellsInModule=" << mCellsInModule << endm;
 }
 
 //_____________________________________________________________________________
@@ -2060,7 +2063,7 @@ const
      if ( mTofrTray[i]->IsGlobalPointIn(point) ) {
        itray = mTofrTray[i]->Index();
        if ( !(mTofrTray[i]->GetfView()->GetListSize()) ) {
-	 cout << " No sensors in tray " << itray << endl;
+	 LOG_INFO << " No sensors in tray " << itray << endm;
 	 return cellId;
        }
        
@@ -2090,7 +2093,7 @@ const
        itray = tray->Index();
 
        if ( !(tray->GetfView()->GetListSize()) ) {
-	 cout << " No sensors in tray " << tray->Index() << endl;
+	 LOG_INFO << " No sensors in tray " << tray->Index() << endm;
 	 delete tray;
 	 return cellId;
        }
@@ -2212,7 +2215,7 @@ const
      }
      if(!itrayFind) continue;
 
-     //     cout << " Helix cross sensitive tray " << trayId << endl;
+     //     LOG_INFO << " Helix cross sensitive tray " << trayId << endm;
 
      for(int j=0;j<mNValidModules;j++) {
        if(!mTofrSensor[i][j]) continue;
@@ -2255,7 +2258,7 @@ const
      if ( !mTofrConf ) {
        int trayindex = ibtoh * mSectorsInBTOH + sectorVolume->GetPosition()->GetId();
        if ( trayindex!=mY03TrayIndex ) {
-	 //       	 cout << " skip tray " << trayindex << endl;
+	 //       	 LOG_INFO << " skip tray " << trayindex << endm;
 	 continue;
        }
      }
@@ -2264,7 +2267,7 @@ const
      //     TVolumeView *trayVolume = tray->GetfView();
      if ( tray->HelixCross(helix,pathLen,cross) ) {
 
-       cout << " Helix cross tray # = " << tray->Index() << endl;
+       LOG_INFO << " Helix cross tray # = " << tray->Index() << endm;
        if (!tray->GetfView()->GetListSize()) {
 	 delete tray;
 	 return kFALSE;
@@ -2278,7 +2281,7 @@ const
 	 StTofrGeomSensor *sensor = new StTofrGeomSensor(sensorVolume, mTopNode);
 	 if ( sensor->HelixCross(helix,pathLen,cross) ) {
 	   
-	   //	   cout << "   hit the sensor volume " << endl;
+	   //	   LOG_INFO << "   hit the sensor volume " << endm;
 	   Double_t global[3], local[3];
 	   global[0] = cross.x();
 	   global[1] = cross.y();
@@ -2396,11 +2399,11 @@ Bool_t StTofrGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
     trayVec.push_back(itray_west2);
   }
 
-//   cout << " proj tray id = ";
+//   LOG_INFO << " proj tray id = ";
 //   for(size_t it=0;it<trayVec.size();it++) {
-//     cout << trayVec[it] << " ";
+//     LOG_INFO << trayVec[it] << " ";
 //   }
-//   cout << endl;
+//   LOG_INFO << endm;
   
   if(trayVec.size()>0) return kTRUE;
   else return kFALSE;
@@ -2415,9 +2418,9 @@ Bool_t StTofrGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 Bool_t lackTofrgeometry(const char* fromWhere)
 {
    if (gTofrGeometry == 0) {
-      cout << " !! Warning from " << fromWhere
+      LOG_INFO << " !! Warning from " << fromWhere
            << "\n no StTofrGeometry existing, create one instance first"
-           << endl;
+           << endm;
       return kTRUE;
    } else return kFALSE;
 }
