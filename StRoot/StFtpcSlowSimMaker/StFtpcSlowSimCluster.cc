@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.10 2007/01/15 15:02:19 jcs Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.11 2007/04/17 04:59:22 perev Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.11  2007/04/17 04:59:22  perev
+// Remove garbage at the end of include
+//
 // Revision 1.10  2007/01/15 15:02:19  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -47,7 +50,7 @@
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 #include "StMessMgr.h"
-#include "StMessMgr.h"i
+#include "StMessMgr.h"
 
 StFtpcSlowSimCluster::StFtpcSlowSimCluster(StFtpcParamReader *paramReader,
                                            StFtpcDbReader *dbReader,
