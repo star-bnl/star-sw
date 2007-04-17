@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.4 2004/04/12 16:17:03 dongx Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.5 2007/04/17 23:11:12 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.5  2007/04/17 23:11:12  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.4  2004/04/12 16:17:03  dongx
  * add AdcLoRes in the ntuple
  *
@@ -131,8 +134,8 @@ Int_t StTofrNtupleMaker::InitRun(int runnumber) {
     mStrobeTdcMin[ii] = strobeDef[i].strobeTdcMin;
     mStrobeTdcMax[ii] = strobeDef[i].strobeTdcMax;
     if (Debug())
-      cout << "tube " << strobeDef[i].id << "  min:"<< strobeDef[i].strobeTdcMin
-	   <<" max:"<< strobeDef[i].strobeTdcMax<< endl;
+      LOG_INFO << "tube " << strobeDef[i].id << "  min:"<< strobeDef[i].strobeTdcMin
+	   <<" max:"<< strobeDef[i].strobeTdcMax<< endm;
   }
   
   return kStOK;
@@ -154,14 +157,14 @@ Int_t StTofrNtupleMaker::Finish() {
   if (!(mTupleFileName=="")){
     mTupleFile->Write();
     mTupleFile->Close();
-    cout << "StTofrNtupleMaker::Finish() ntuple file " 
-	 << mTupleFileName  << " closed." << endl;
+    LOG_INFO << "StTofrNtupleMaker::Finish() ntuple file " 
+	 << mTupleFileName  << " closed." << endm;
   }
   
-  cout << "StTofrNtupleMaker -- statistics" << endl;
-  cout << " accepted events     : " << mAcceptedEvents << endl;
-  cout << " pVPD entries        : " << mPvpdEntries << endl;
-  cout << " Tofr entries/events : " << mTofrEntries << "/" << mTofrEvents << endl;
+  LOG_INFO << "StTofrNtupleMaker -- statistics" << endm;
+  LOG_INFO << " accepted events     : " << mAcceptedEvents << endm;
+  LOG_INFO << " pVPD entries        : " << mPvpdEntries << endm;
+  LOG_INFO << " Tofr entries/events : " << mTofrEntries << "/" << mTofrEvents << endm;
   return kStOK;
 }
 
@@ -169,7 +172,7 @@ Int_t StTofrNtupleMaker::Finish() {
 //---------------------------------------------------------------------------
 /// get tofr slat, pvpd rawdata and global data from StEvent and store in flat TTrees (ntuples)
 Int_t StTofrNtupleMaker::Make(){
-  cout << "StTofrNtupleMaker -- welcome" << endl;
+  LOG_INFO << "StTofrNtupleMaker -- welcome" << endm;
 
   StEvent *event = (StEvent *) GetInputDS("StEvent");
 
@@ -178,7 +181,7 @@ Int_t StTofrNtupleMaker::Make(){
   if (!event || !event->primaryVertex() ||
       !event->tofCollection() ||
       !event->tofCollection()->dataPresent()){
-    cout << "StTofrNtupleMaker -- nothing to do ... bye-bye"<< endl;
+    LOG_INFO << "StTofrNtupleMaker -- nothing to do ... bye-bye"<< endm;
     return kStOK;
   }
 
@@ -228,11 +231,11 @@ Int_t StTofrNtupleMaker::Make(){
   else
     refmult = uncorrectedNumberOfPrimaries(*event);
   if (Debug()){
-    cout << " #Tracks           :" << event->summary()->numberOfTracks()
+    LOG_INFO << " #Tracks           :" << event->summary()->numberOfTracks()
 	 << "\n #goodPrimaryTracks:" << event->summary()->numberOfGoodPrimaryTracks()
-	 << "\n #uncorr.prim.tracks  :" << refmult << endl;
+	 << "\n #uncorr.prim.tracks  :" << refmult << endm;
     if (!richTofMuDST)
-      cout << " #goodTracks (global):" << event->summary()->numberOfGoodTracks() << endl;
+      LOG_INFO << " #goodTracks (global):" << event->summary()->numberOfGoodTracks() << endm;
   }
 
   //-- read in pVPD info
@@ -298,7 +301,7 @@ Int_t StTofrNtupleMaker::Make(){
     for (int i=0;i<mNPVPD;i++) tuple[k++] = mPvpdAdc[i];
     for (int i=0;i<mNPVPD;i++) tuple[k++] = mPvpdAdcLoRes[i];
 
-    cout << " pVPD update ..." << endl;
+    LOG_INFO << " pVPD update ..." << endm;
     mPvpdTuple->Fill(tuple);
     mPvpdEntries++;
   }
@@ -466,7 +469,7 @@ Int_t StTofrNtupleMaker::Make(){
       entriesThisEvent++;
     }
 
-    cout << " Tofr update: " << entriesThisEvent << " entries" <<endl;
+    LOG_INFO << " Tofr update: " << entriesThisEvent << " entries" <<endm;
   }
 
 
@@ -477,11 +480,11 @@ Int_t StTofrNtupleMaker::Make(){
   }
   if (doPrintCpuInfo) {
     timer.stop();
-    cout << "CPU time for StEventMaker::Make(): "
-	 << timer.elapsedTime() << " sec\n" << endl;
+    LOG_INFO << "CPU time for StEventMaker::Make(): "
+	 << timer.elapsedTime() << " sec\n" << endm;
   }
 
-  cout << "StTofrNtupleMaker -- bye-bye" << endl;
+  LOG_INFO << "StTofrNtupleMaker -- bye-bye" << endm;
   return kStOK;
 }
 
@@ -490,8 +493,8 @@ Int_t StTofrNtupleMaker::Make(){
 /// create and initialize ntuple and TTrees
 void StTofrNtupleMaker::bookNtuples(){
   mTupleFile = new TFile(mTupleFileName.c_str(), "RECREATE");
-  cout << "StTofrNtupleMaker::bookNtuples()  file "
-       << mTupleFileName << " opened" << endl;
+  LOG_INFO << "StTofrNtupleMaker::bookNtuples()  file "
+       << mTupleFileName << " opened" << endm;
 
   // pVPD timing
   string varList = "run:evt:trgwrd:magfield:zvtx:zvtxchi2:ctbsum"

@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StTofpMcAnalysisMaker.cxx,v 1.2 2005/10/06 19:58:15 fisyak Exp $
+ * $Id: StTofpMcAnalysisMaker.cxx,v 1.3 2007/04/17 23:11:04 dongx Exp $
  * $Log: StTofpMcAnalysisMaker.cxx,v $
+ * Revision 1.3  2007/04/17 23:11:04  dongx
+ * replaced with standard STAR Loggers
+ *
  * Revision 1.2  2005/10/06 19:58:15  fisyak
  * Adjust for persistent StMcEvent
  *
@@ -105,7 +108,7 @@ StTofpMcAnalysisMaker::StTofpMcAnalysisMaker(const char *name, const char *title
 StTofpMcAnalysisMaker::~StTofpMcAnalysisMaker()
 {
   //  StTofpMcAnalysisMaker Destructor
-  if (Debug()) cout << "Inside StTofpMcAnalysisMaker Destructor" << endl;
+  if (Debug()) LOG_INFO << "Inside StTofpMcAnalysisMaker Destructor" << endm;
 }
 
 //_____________________________________________________________________________
@@ -302,7 +305,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
   mcTrackMapType* mcTrackMap = 0;
   mcTrackMap = assoc->mcTrackMap();
   if (!mcTrackMap){
-    cout << "No mcTrackMap!!! " << endl;
+    LOG_INFO << "No mcTrackMap!!! " << endm;
     return 0;
   }
 
@@ -316,16 +319,16 @@ Int_t StTofpMcAnalysisMaker::Make(){
   StThreeVectorD VertexPos(0,0,0);
   if (rEvent->primaryVertex()) {
     VertexPos = rEvent->primaryVertex()->position();
-    cout << "Position of Primary Vertex from StEvent:" << endl;
-    cout << VertexPos << endl;
+    LOG_INFO << "Position of Primary Vertex from StEvent:" << endm;
+    LOG_INFO << VertexPos << endm;
   }
   else {
-    cout << "----------- WARNING ------------" << endl;
-    cout << "No primary vertex from StEvent!!" << endl;
-    cout << "Assume it is at (0,0,0)         " << endl;
+    LOG_INFO << "----------- WARNING ------------" << endm;
+    LOG_INFO << "No primary vertex from StEvent!!" << endm;
+    LOG_INFO << "Assume it is at (0,0,0)         " << endm;
   }
-  cout << "Position of Primary Vertex from StMcEvent:" << endl;
-  cout << mEvent->primaryVertex()->position() << endl;
+  LOG_INFO << "Position of Primary Vertex from StMcEvent:" << endm;
+  LOG_INFO << mEvent->primaryVertex()->position() << endm;
     
   if (!theTrackMap) {
     gMessMgr->Warning() << "----------WARNING----------\n"
@@ -391,15 +394,15 @@ Int_t StTofpMcAnalysisMaker::Make(){
 	}
 
 	if (Debug()){ 
-	  cout << "B: trackid=";
+	  LOG_INFO << "B: trackid=";
 	  idVectorIter ij = slatHitVec[ii].trackIdVec.begin();
-	  while (ij != slatHitVec[ii].trackIdVec.end()) {cout << " " << *ij; ij++;}
-	  cout << "\tind=" << mTofGeom->slatIdToDaq(slatHitVec[ii].slatIndex)
+	  while (ij != slatHitVec[ii].trackIdVec.end()) {LOG_INFO << " " << *ij; ij++;}
+	  LOG_INFO << "\tind=" << mTofGeom->slatIdToDaq(slatHitVec[ii].slatIndex)
 	       << "\thitprof="<< slatHitVec[ii].hitProfile 
 	       << "\ts="<<slatHitVec[ii].s << "\tthxy="<<slatHitVec[ii].theta_xy 
 	       << "\tthzr="<<slatHitVec[ii].theta_zr;
-	  if (slatHitVec.size()>1) cout << " M" << endl;
-	  else cout << endl;
+	  if (slatHitVec.size()>1) LOG_INFO << " M" << endm;
+	  else LOG_INFO << endm;
 	}
       }
     } // existing global track
@@ -494,19 +497,19 @@ Int_t StTofpMcAnalysisMaker::Make(){
 
       // debugging output
       if (Debug()) {
-	cout << "D: ind=" << mTofGeom->slatIdToDaq(slatHit.slatIndex)
+	LOG_INFO << "D: ind=" << mTofGeom->slatIdToDaq(slatHit.slatIndex)
 	     << "\thitprof="<< slatHit.hitProfile << "\ts="<<slatHit.s
 	     << "\tthxy="<<slatHit.theta_xy << "\tthzr="<<slatHit.theta_zr << "\ttrackid:";
 	idVectorIter ij=trackIdVec.begin();
-	while (ij != trackIdVec.end()) { cout << " " << *ij; ij++; }
-	cout <<endl;
+	while (ij != trackIdVec.end()) { LOG_INFO << " " << *ij; ij++; }
+	LOG_INFO <<endm;
       }
     }
     else if (nTracks>1){
       // for multiple hit slats either discard (yes) or
       // find the most likely candidate.
     } else
-       gMessMgr->Warning("","OST")  << "D: no tracks extrapolate to matched slat ... should not happen!" << endl;
+       gMessMgr->Warning("","OST")  << "D: no tracks extrapolate to matched slat ... should not happen!" << endm;
 
     tempVec = erasedVec;
   }
@@ -575,12 +578,12 @@ Int_t StTofpMcAnalysisMaker::Make(){
 
       // debugging output
       if (Debug()) {
-	cout << "E: ind=" << mTofGeom->slatIdToDaq(slatHit.slatIndex)
+	LOG_INFO << "E: ind=" << mTofGeom->slatIdToDaq(slatHit.slatIndex)
 	     << "\thitprof="<< slatHit.hitProfile << "\ts="<<slatHit.s
 	     << "\tthxy="<<slatHit.theta_xy << "\tthzr="<<slatHit.theta_zr << "\ttrackid:";
 	idVectorIter ij=vTrackId.begin();
-	while (ij != vTrackId.end()) { cout << " " << *ij; ij++; }
-	cout <<endl;
+	while (ij != vTrackId.end()) { LOG_INFO << " " << *ij; ij++; }
+	LOG_INFO <<endm;
       }
     }
     else if (nSlats>1){   // for multiple hit slats  find the most likely candidate.
@@ -591,10 +594,10 @@ Int_t StTofpMcAnalysisMaker::Make(){
       int weight(0);
       vector<int> weightCandidates;
       thisMatchFlag = 1;
-      if (Debug()) cout << "E: find ... weight ";
+      if (Debug()) LOG_INFO << "E: find ... weight ";
       for (int i=0;i<nSlats;i++){
 	int hitWeight = vLayerHitPositions[i].size();
-	if (Debug()) cout << mTofGeom->slatIdToDaq(slatIndex[i]) << "("<<hitWeight<<")"<<" ";
+	if (Debug()) LOG_INFO << mTofGeom->slatIdToDaq(slatIndex[i]) << "("<<hitWeight<<")"<<" ";
 	if (hitWeight>weight) {
 	  weight=hitWeight;
 	  weightCandidates.clear();
@@ -606,7 +609,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
 	thiscandidate = weightCandidates[0];
 	int daqId = mTofGeom->slatIdToDaq(slatIndex[thiscandidate]);
 	if (mHisto) hTofpSlatIdE2->Fill(daqId);
-	if (Debug()) cout << "candidate =" << daqId << endl;
+	if (Debug()) LOG_INFO << "candidate =" << daqId << endm;
       }
 
       // 2. if still undecided check on ss
@@ -614,10 +617,10 @@ Int_t StTofpMcAnalysisMaker::Make(){
 	Float_t ss(0);
 	vector<int> ssCandidates;
 	thisMatchFlag = 2;
-	if (Debug()) cout << " ss ";
+	if (Debug()) LOG_INFO << " ss ";
 	for (unsigned int i=0;i<weightCandidates.size();i++){
 	  int ii=weightCandidates[i];	  
-	  if (Debug()) cout << mTofGeom->slatIdToDaq(slatIndex[ii]) << " ";
+	  if (Debug()) LOG_INFO << mTofGeom->slatIdToDaq(slatIndex[ii]) << " ";
 	  if (vS[ii]>ss){
 	    ss = vS[ii];
 	    ssCandidates.clear();
@@ -629,7 +632,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
 	  thiscandidate = ssCandidates[0];
 	  int daqId = mTofGeom->slatIdToDaq(slatIndex[thiscandidate]);
 	  if (mHisto) hTofpSlatIdE3->Fill(daqId);
-    	  if (Debug()) cout << "candidate =" << daqId << endl;
+    	  if (Debug()) LOG_INFO << "candidate =" << daqId << endm;
 	}
 
 	// 3. if still undecided go for closest/first hit
@@ -637,10 +640,10 @@ Int_t StTofpMcAnalysisMaker::Make(){
 	  Int_t hitprof(0);
 	  vector<int> profileCandidates;
 	  thisMatchFlag = 3;
-	  if (Debug()) cout << " hprof ";
+	  if (Debug()) LOG_INFO << " hprof ";
 	  for (unsigned int i=0;i<ssCandidates.size();i++){
 	    int ii=ssCandidates[i];
-	    if (Debug()) cout << mTofGeom->slatIdToDaq(slatIndex[ii]) << " ";
+	    if (Debug()) LOG_INFO << mTofGeom->slatIdToDaq(slatIndex[ii]) << " ";
 	    if (vHitProfile[ii]>hitprof){
 	      hitprof = vHitProfile[ii];
 	      profileCandidates.clear();
@@ -652,26 +655,26 @@ Int_t StTofpMcAnalysisMaker::Make(){
 	    thiscandidate = profileCandidates[0];
 	    int daqId = mTofGeom->slatIdToDaq(slatIndex[thiscandidate]);
 	    if (mHisto) hTofpSlatIdE4->Fill(daqId);
-	    if (Debug()) cout << "candidate =" << daqId << endl;
+	    if (Debug()) LOG_INFO << "candidate =" << daqId << endm;
 	  }
 	  else
-	    if (Debug()) cout << "none" << endl;
+	    if (Debug()) LOG_INFO << "none" << endm;
 	}
 
 
 	// forget it, and let user know of the non-decision
 	if (thiscandidate == -99 && Debug()){
-	  cout << "E: ind=";
+	  LOG_INFO << "E: ind=";
 	  for (unsigned int ii=0;ii<slatIndex.size();ii++) 
-	    cout << mTofGeom->slatIdToDaq(slatIndex[ii]) << " ";
-	  cout << "\ttrkid:" << vTrackId[0] << " Unable to decide. "; 
-	  cout << "(hitprofs:";
+	    LOG_INFO << mTofGeom->slatIdToDaq(slatIndex[ii]) << " ";
+	  LOG_INFO << "\ttrkid:" << vTrackId[0] << " Unable to decide. "; 
+	  LOG_INFO << "(hitprofs:";
 	  for (unsigned int ii=0;ii<slatIndex.size();ii++) 
-	    cout << vHitProfile[ii] << " ";
-	  cout << " ss:";
+	    LOG_INFO << vHitProfile[ii] << " ";
+	  LOG_INFO << " ss:";
 	  for (unsigned int ii=0;ii<slatIndex.size();ii++) 
-	    cout << vS[ii] << " ";
-	  cout << ")" << endl;
+	    LOG_INFO << vS[ii] << " ";
+	  LOG_INFO << ")" << endm;
 	}
 
       }
@@ -698,10 +701,10 @@ Int_t StTofpMcAnalysisMaker::Make(){
 	
 	// debugging output
 	if (Debug()) {
-	  cout << "E: ind=" << mTofGeom->slatIdToDaq(slatHit.slatIndex)
+	  LOG_INFO << "E: ind=" << mTofGeom->slatIdToDaq(slatHit.slatIndex)
 	       << "\thitprof="<< slatHit.hitProfile << "\ts="<<slatHit.s
 	       << "\tthxy="<<slatHit.theta_xy << "\tthzr="<<slatHit.theta_zr << "\ttrackid:"
-	       << vTrackId[thiscandidate] << endl;
+	       << vTrackId[thiscandidate] << endm;
 	}
       }
     } else
@@ -732,7 +735,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
     //int jj = daqId-1;
 
     if (allMatchedSlatsVec[ii].trackIdVec.size()!=1)
-       gMessMgr->Warning("","OST") << "F: WHAT!?!  mult.matched slat in single slat list " << daqId << endl;
+       gMessMgr->Warning("","OST") << "F: WHAT!?!  mult.matched slat in single slat list " << daqId << endm;
 
     // 1. fill valid single track AND valid tdc histograms
     //if (validTdc(mTofpTdc[jj])) nValidSingleHitSlats++;
@@ -815,19 +818,19 @@ Int_t StTofpMcAnalysisMaker::Make(){
 
       // dump debug data
       if (Debug()){
-	cout << "F: ind=" << mTofGeom->slatIdToDaq(allMatchedSlatsVec[ii].slatIndex) 
+	LOG_INFO << "F: ind=" << mTofGeom->slatIdToDaq(allMatchedSlatsVec[ii].slatIndex) 
 	     << "\ttrackid:";
 	idVectorIter ij=allMatchedSlatsVec[ii].trackIdVec.begin();
-	while (ij != allMatchedSlatsVec[ii].trackIdVec.end()) { cout << " " << *ij; ij++; }
-	cout << "\tR=" << 1/(theTrackGeometry->helix().curvature())
+	while (ij != allMatchedSlatsVec[ii].trackIdVec.end()) { LOG_INFO << " " << *ij; ij++; }
+	LOG_INFO << "\tR=" << 1/(theTrackGeometry->helix().curvature())
 	     << "\tpT=" << momentum.perp() << "\tp=" << momentum.mag()
 	     << "\thits="<< nHitsPerTrack << "\ts="<< pathLength
 	     << "\t#fitp=" <<theTrack->fitTraits().numberOfFitPoints(kTpcId)
 	     << "\t#trkp=" <<theTrack->detectorInfo()->numberOfPoints(kTpcId)
 	     << " \tdedx=" << dedx 
 	     << " \tdca="<< theTrack->geometry()->helix().distance(event->primaryVertex()->position());
-	if (cherang!=0) cout  << " \trich="<< cherang << " (" << cherang_nph << ")";
-	cout << endl;
+	if (cherang!=0) LOG_INFO  << " \trich="<< cherang << " (" << cherang_nph << ")";
+	LOG_INFO << endm;
       }
 
     } // track exists 
@@ -846,7 +849,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
 
 
   const StSPtrVecMcTrack& mcTracks = mEvent->primaryVertex()->daughters();
-  if (Debug()) cout << "mcTrack Loop: "<< mcTracks.size() << " entries" << endl;
+  if (Debug()) LOG_INFO << "mcTrack Loop: "<< mcTracks.size() << " entries" << endm;
   StMcTrack* mcTrack;
   StTrack* rcTrack = 0;
 
@@ -870,7 +873,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
     else if (mcTrack->particleDefinition()->pdgEncoding()==-321)  hMcKaonMin->Fill(mcP.perp(),mcP.pseudoRapidity());
     else if (mcTrack->particleDefinition()->pdgEncoding()== 2212) hMcProton->Fill(mcP.perp(),mcP.pseudoRapidity());
     else if (mcTrack->particleDefinition()->pdgEncoding()==-2212) hMcAntiProton->Fill(mcP.perp(),mcP.pseudoRapidity());
-    else cout << "mcTracks has wrong pdgEncoding: "<< mcTrack->particleDefinition()->pdgEncoding() << endl; 
+    else LOG_INFO << "mcTracks has wrong pdgEncoding: "<< mcTrack->particleDefinition()->pdgEncoding() << endm; 
 
     //-- get associated reconstructed rctrack
     rcTrack = partnerTrack(mcTrackMap,mcTrack);
@@ -896,7 +899,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
     else if (mcTrack->particleDefinition()->pdgEncoding()== -321) hRcKaonMin->Fill(rcP.perp(),rcP.pseudoRapidity());
     else if (mcTrack->particleDefinition()->pdgEncoding()== 2212) hRcProton->Fill(rcP.perp(),rcP.pseudoRapidity());
     else if (mcTrack->particleDefinition()->pdgEncoding()==-2212) hRcAntiProton->Fill(rcP.perp(),rcP.pseudoRapidity());
-    else cout << "cannot fill rc histo" << endl;
+    else LOG_INFO << "cannot fill rc histo" << endm;
     float diff = (mcP.mag()-rcP.mag()) / mcP.mag();	      
     if (mcTrack->particleDefinition()->pdgEncoding()==-211) hMomResPtPion->Fill(mcP.perp(),diff);
 
@@ -906,7 +909,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
     //-- Loop over matched slats from Stage 1 (allMatchedSlatsVec) and look for similar trackKey
     //
 
-    if (Debug()) cout  << "RC/MC track Id="<< rcTrack->key() << "/" << mcTrack->key() << endl;
+    if (Debug()) LOG_INFO  << "RC/MC track Id="<< rcTrack->key() << "/" << mcTrack->key() << endm;
 
     //    Note on trackId vs. StTrack->key():
     //      these are *not* the same. trackId (based on the StEvent->trackNodes
@@ -922,7 +925,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
       //- All matches from Stage I should have one and only one associated track
       if (matchedSlat->trackIdVec.size()!=1){
 	gMessMgr->Warning() << "Slat with " << matchedSlat->trackIdVec.size() 
-			    << "track matches? Should not happen!" << endl;
+			    << "track matches? Should not happen!" << endm;
 	continue;
       }
 
@@ -930,11 +933,11 @@ Int_t StTofpMcAnalysisMaker::Make(){
       unsigned int thisTrackId = matchedSlat->trackIdVec[0];
       unsigned int thisKey = nodes[thisTrackId]->track(global)->key();
 
-      if (Debug()) cout << " match trackKey (trackId): " << thisKey 
+      if (Debug()) LOG_INFO << " match trackKey (trackId): " << thisKey 
 			<< " (" << thisTrackId << ")";
       
       if (thisKey == rcTrack->key()){
-	if (Debug()) cout << "RC-MC-TOFp match";
+	if (Debug()) LOG_INFO << "RC-MC-TOFp match";
 
 	nMatch++;
 
@@ -946,9 +949,9 @@ Int_t StTofpMcAnalysisMaker::Make(){
 	else if (mcTrack->particleDefinition()->pdgEncoding()== -321) hMatchKaonMin->Fill(rcP.perp(),rcP.pseudoRapidity());
 	else if (mcTrack->particleDefinition()->pdgEncoding()== 2212) hMatchProton->Fill(rcP.perp(),rcP.pseudoRapidity());
 	else if (mcTrack->particleDefinition()->pdgEncoding()==-2212) hMatchAntiProton->Fill(rcP.perp(),rcP.pseudoRapidity());
-	else cout << "cannot fill match histo" << endl;
+	else LOG_INFO << "cannot fill match histo" << endm;
       }
-      if (Debug()) cout << endl;
+      if (Debug()) LOG_INFO << endm;
 
     }
 
@@ -966,10 +969,10 @@ Int_t StTofpMcAnalysisMaker::Make(){
 //    if (hitVec.size()==0) continue;
 //
 //    {
-//	cout << "TOF HitVec ("<< hitVec.size() << ") slatIn reads:";
+//	LOG_INFO << "TOF HitVec ("<< hitVec.size() << ") slatIn reads:";
 //	for (tofSlatHitVectorIter ii=hitVec.begin();ii!=hitVec.end();ii++)
-//	  cout << " " << ii->slatIndex;
-//	cout << endl;
+//	  LOG_INFO << " " << ii->slatIndex;
+//	LOG_INFO << endm;
 //    }
 //
 //
@@ -982,8 +985,8 @@ Int_t StTofpMcAnalysisMaker::Make(){
 //	tofSlatHitVectorIter allHits = allMatchedSlatsVec.begin();
 //	while (allHits!=allMatchedSlatsVec.end()){
 //	  if (thisHit->slatIndex == allHits->slatIndex){
-//	    cout << "TOF found it in allHits "
-//		 <<  allHits->trackIdVec.size() << endl;
+//	    LOG_INFO << "TOF found it in allHits "
+//		 <<  allHits->trackIdVec.size() << endm;
 //	    if (allHits->trackIdVec.size()==1){
 //	      singleHit=true;
 //	      if (thisHit->hitProfile == 31) profiledSingleHit=true;
@@ -993,10 +996,10 @@ Int_t StTofpMcAnalysisMaker::Make(){
 //	}
 //	thisHit++;
 //    }
-//    if (!singleHit) {cout << "TOF multiple hit"<<endl;continue;}
-//    cout << "TOF single hit"<< endl;
+//    if (!singleHit) {LOG_INFO << "TOF multiple hit"<<endm;continue;}
+//    LOG_INFO << "TOF single hit"<< endm;
 //    //if (!profiledSingleHit) continue;
-//    //cout << "TOF profiled single hit"<< endl;
+//    //LOG_INFO << "TOF profiled single hit"<< endm;
 
           
   }
@@ -1039,7 +1042,7 @@ bool StTofpMcAnalysisMaker::validTofTrack(StTrack *track){
   //if (mHisto) hTofpDCATrackprimVertex->Fill(DCA*charge);
   double mMaxDCA = 999.;
   if (DCA > mMaxDCA) {
-    gMessMgr->Info("","OST") << "dca>max:" << DCA<< endl;
+    gMessMgr->Info("","OST") << "dca>max:" << DCA<< endm;
     return false;
   }
 
