@@ -43,8 +43,12 @@ class StEEmcElement : public TObject {
 
   /// Return the status bit for this element
   unsigned stat();
+  unsigned stat() const; 
+
   /// Return the fail bit for this element
   unsigned fail();
+  unsigned fail() const; 
+
   /// Return the name of this element
   const Char_t *name();
 
@@ -92,6 +96,8 @@ inline Float_t StEEmcElement::energy() const { return (mFail)?0.:mEnergy; }
 
 inline unsigned StEEmcElement::stat(){ return mStat; }
 inline unsigned StEEmcElement::fail(){ return mFail; }
+inline unsigned StEEmcElement::stat() const { return mStat; }
+inline unsigned StEEmcElement::fail() const { return mFail; }
 inline const Char_t *StEEmcElement::name() { return mName.Data(); }
 
 inline void StEEmcElement::stemc( StEmcRawHit *h ){ mstRawHit=h; }
