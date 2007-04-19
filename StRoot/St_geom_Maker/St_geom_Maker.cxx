@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.11 2001/06/01 03:04:25 perev Exp $
+// $Id: St_geom_Maker.cxx,v 1.12 2007/04/19 23:27:58 fine Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.12  2007/04/19 23:27:58  fine
+// replace printf with LOG macro
+//
 // Revision 1.11  2001/06/01 03:04:25  perev
 // overloaded GetDataSet -> FindDataSet
 //
@@ -132,7 +135,7 @@ Int_t St_geom_Maker::Init() {
   TGeometry *star = (TGeometry *)f->Get("STAR");
   star->SetName("STARGEOMNODE");
   if (!star) {
-    printf("Sorry, STAR was not found !\n");
+    LOG_ERROR << "Sorry, STAR was not found !" << endm;
     return kStErr;
   }
 //--
