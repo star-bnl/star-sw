@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.33 2007/04/07 04:39:04 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.34 2007/04/20 01:11:11 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.34  2007/04/20 01:11:11  genevb
+// ZCol on Dedx; printf -> LOG_INFO
+//
 // Revision 2.33  2007/04/07 04:39:04  genevb
 // Use ZCol for PointXYTpc
 //
@@ -125,6 +128,7 @@
 #include "TLegend.h"
 #include "TDatime.h"
 #include "TLine.h"
+#include "StMessMgr.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -368,8 +372,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
       const char* oname = obj->GetName();
       TString oName = oname;
       histReadCounter++;
-      printf(" %d. Reading ... %s::%s; Title=\"%s\"\n",
-        histReadCounter,obj->ClassName(),oname, obj->GetTitle());
+      LOG_INFO << Form(" %d. Reading ... %s::%s; Title=\"%s\"\n",
+        histReadCounter,obj->ClassName(),oname, obj->GetTitle()) << endm;
       if (!started && (m_FirstHistName.CompareTo("*")==0 ||
                        m_FirstHistName.CompareTo(oName)==0))
         started = kTRUE;
@@ -387,8 +391,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	if (!m_ListOfPrint || (m_ListOfPrint->FindObject(oname))) {
 
           // this histogram will actually be printed/drawn!!
-          printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
-	    histCounter,obj->ClassName(),oname, obj->GetTitle());
+          LOG_INFO << Form("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
+	    histCounter,obj->ClassName(),oname, obj->GetTitle()) << endm;
 
           // Switch to a new page...............................
 	  if (CheckOutFile(oname)) {
@@ -503,6 +507,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             obj->Draw("Box");
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
+                      oName.EndsWith("PVsDedx") ||
                       oName.Contains("PointXYTpc"))) {
             obj->Draw("ZCol");
           } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
@@ -705,7 +710,7 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
  
       histReadCount++;
 //  \n means newline, \" means print a quote
-//      printf(" %d. Have histogram Type %s, Name %s with Title=\"%s\"\n",histReadCount,obj->ClassName(),obj->GetName(),obj->GetTitle());
+//      LOG_INFO << Form(" %d. Have histogram Type %s, Name %s with Title=\"%s\"\n",histReadCount,obj->ClassName(),obj->GetName(),obj->GetTitle()) << endm;
             cout << " ListHists: Hist No. " << histReadCount << ", Type: " << obj->ClassName() 
            << ", Name: " << obj->GetName() << ", Title \"" << obj->GetTitle() << "\"  "<< endl; 
     }
