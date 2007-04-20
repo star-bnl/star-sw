@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.39 2006/02/07 03:26:08 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.40 2007/04/20 06:25:21 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -231,6 +231,7 @@ StEvent* StMuDst::createStEvent() {
   //   ev->setTofCollection(StTofCollection*);
   //ev->setTofCollection( new StTofCollection() );
   StTriggerDetectorCollection *trg_coll=new StTriggerDetectorCollection();
+  trg_coll->vpd()=mu->vpdTriggerDetector();
   trg_coll->bbc()=mu->bbcTriggerDetector();
   trg_coll->ctb()=mu->ctbTriggerDetector();
   trg_coll->emc()=mu->emcTriggerDetector();
@@ -441,6 +442,10 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.40  2007/04/20 06:25:21  mvl
+ * Removed Q-vectors (will implement utility class).
+ * Added Vpd info.
+ *
  * Revision 1.39  2006/02/07 03:26:08  mvl
  * Changed createStEvent (use by MuDst2StEventmaker) to only copy primary tracks
  * that belong to the first primary vertex. This prevents segvio for events with
