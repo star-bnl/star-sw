@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.34 2007/04/20 01:11:11 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.35 2007/04/20 03:42:35 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.35  2007/04/20 03:42:35  genevb
+// cout -> LOG_INFO
+//
 // Revision 2.34  2007/04/20 01:11:11  genevb
 // ZCol on Dedx; printf -> LOG_INFO
 //
@@ -221,7 +224,7 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
     else if (m_OutFileName.EndsWith(".xpm")) m_OutType="xpm";
     else if (m_OutFileName.EndsWith(".png")) m_OutType="png";
     else {
-      cout << "SetHistUtil::SetOutFile(): unknown type, assuming ps" << endl;
+      LOG_INFO << "SetHistUtil::SetOutFile(): unknown type, assuming ps" << endm;
       m_OutType = "ps";
       m_OutFileName.Append(".ps");
     }
@@ -231,9 +234,9 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
   m_OutMultiPage = !(m_OutType.CompareTo("ps")
                   && m_OutType.CompareTo("pdf") );
   if (m_OutMultiPage)
-    cout << "StHistUtil::SetOutFile(): Multipage output" << endl;
+    LOG_INFO << "StHistUtil::SetOutFile(): Multipage output" << endm;
   else
-    cout << "StHistUtil::SetOutFile(): Single page output" << endl;
+    LOG_INFO << "StHistUtil::SetOutFile(): Single page output" << endm;
 }
 //_____________________________________________________________________________
 void StHistUtil::CloseOutFile() {
@@ -243,7 +246,7 @@ void StHistUtil::CloseOutFile() {
     if (m_OutMultiPage) m_CurFileName.Append(")");
     m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
   } else {
-    cout << "StHistUtil::CloseOutFile(): No output file" << endl;
+    LOG_INFO << "StHistUtil::CloseOutFile(): No output file" << endm;
   }
 }
 //_____________________________________________________________________________
@@ -282,7 +285,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 // Method DrawHists -->
 // Plot the selected  histograms and generate the postscript file as well 
   
-  cout << " **** Now in StHistUtil::DrawHists  **** " << endl;
+  LOG_INFO << " **** Now in StHistUtil::DrawHists  **** " << endm;
 
 
   //set Style of Plots
@@ -349,7 +352,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   // get the TList pointer to the histograms:
   if (dirName) strcpy(m_dirName,dirName);
   TList* dirList = FindHists(m_dirName);
-  if (!dirList) cout << " DrawHists - histograms not available! " << endl;
+  if (!dirList) LOG_INFO << " DrawHists - histograms not available! " << endm;
 
   TIter nextHist(dirList);
   Int_t histCounter = 0;
@@ -446,7 +449,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           if (m_ListOfLogY && m_ListOfLogY->FindObject(oname) &&
 	     hobj->GetEntries() && hobj->GetMaximum() ) {
 	    gPad->SetLogy(1);
-            cout << "       -- Will draw in logY scale: " << oname <<endl;
+            LOG_INFO << "       -- Will draw in logY scale: " << oname <<endm;
 	  }
 
 
@@ -455,7 +458,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	  if (m_ListOfLogX && m_ListOfLogX->FindObject(oname) &&
 	     hobj->GetEntries() && hobj->GetMaximum() ) {
 	    gPad->SetLogx(1);
-            cout << "       -- Will draw in logX scale: " << oname <<endl;
+            LOG_INFO << "       -- Will draw in logX scale: " << oname <<endm;
 	  }
 
 // Limit x range for some histograms
@@ -594,7 +597,7 @@ TList* StHistUtil::FindHists(Char_t *dirName)
 
   TList *dList=0;
 
-  cout << " Beg: FindHists, dList pointer = " << dList << endl;
+  LOG_INFO << " Beg: FindHists, dList pointer = " << dList << endm;
 
 //---- First look under Maker for histograms ==>
 //They  should show up in your Maker's directory, so search for them there,
@@ -607,7 +610,7 @@ TList* StHistUtil::FindHists(Char_t *dirName)
   if (dirName) strcpy(m_dirName,dirName);
   StMaker *temp = m_PntrToMaker->GetMaker(m_dirName);
     if (temp) {
-      cout << "FindHists - found pointer to maker" << endl;
+      LOG_INFO << "FindHists - found pointer to maker" << endm;
       dList = temp->Histograms();
     }
 
@@ -616,18 +619,18 @@ TList* StHistUtil::FindHists(Char_t *dirName)
   TObject *test=0;
   if (dList) test = dList->First();
   if (test){ 
-      cout << " FindHists - found hist. in Maker-Branch " << endl;
+      LOG_INFO << " FindHists - found hist. in Maker-Branch " << endm;
      }
 
-    cout << " Mid: FindHists, dList pointer = " << dList << endl;
-    cout << " Mid: FindHists, test pointer =  " << test << endl;
+    LOG_INFO << " Mid: FindHists, dList pointer = " << dList << endm;
+    LOG_INFO << " Mid: FindHists, test pointer =  " << test << endm;
 
 // If you have the pointer but the hist. really aren't here, set
 //  the pointer back to zero
   if (!test) dList = 0;
 
-  cout << " Mid2: FindHists, dList pointer = " << dList << endl;
-  cout << " Mid2: FindHists, test pointer =  " << test << endl;
+  LOG_INFO << " Mid2: FindHists, dList pointer = " << dList << endm;
+  LOG_INFO << " Mid2: FindHists, test pointer =  " << test << endm;
 
 
   if (!dList) {
@@ -663,17 +666,17 @@ TList* StHistUtil::FindHists(Char_t *dirName)
 
 // now have we found them?
   if (dList){ 
-      cout << " FindHists - found hist. in histBranch, with name:  " 
-	   << dirName <<  endl;
+      LOG_INFO << " FindHists - found hist. in histBranch, with name:  " 
+	   << dirName <<  endm;
      }
   else { 
-         cout << " FindHists - histogram branch has not been found for branch --> "
-	   << dirName <<  endl;
+         LOG_INFO << " FindHists - histogram branch has not been found for branch --> "
+	   << dirName <<  endm;
      }
 
   }
 
-  cout << " FindHists, dList pointer = " << dList << endl;
+  LOG_INFO << " FindHists, dList pointer = " << dList << endm;
   
  
  return dList;
@@ -687,14 +690,14 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
 // List of all histograms
 
   if (Debug())
-    cout << " **** Now in StHistUtil::ListHists **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::ListHists **** " << endm;
 
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
   if (dirName) strcpy(m_dirName,dirName);
   dirList = FindHists(m_dirName);
 
-  if (!dirList) cout << " ListHists - histograms not available! " << endl;
+  if (!dirList) LOG_INFO << " ListHists - histograms not available! " << endm;
 
 //Now want to loop over all histograms
 // Create an iterator
@@ -711,12 +714,12 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
       histReadCount++;
 //  \n means newline, \" means print a quote
 //      LOG_INFO << Form(" %d. Have histogram Type %s, Name %s with Title=\"%s\"\n",histReadCount,obj->ClassName(),obj->GetName(),obj->GetTitle()) << endm;
-            cout << " ListHists: Hist No. " << histReadCount << ", Type: " << obj->ClassName() 
-           << ", Name: " << obj->GetName() << ", Title \"" << obj->GetTitle() << "\"  "<< endl; 
+            LOG_INFO << " ListHists: Hist No. " << histReadCount << ", Type: " << obj->ClassName() 
+           << ", Name: " << obj->GetName() << ", Title \"" << obj->GetTitle() << "\"  "<< endm; 
     }
   }
 
-  cout << " ListHists: Total No. Histograms Booked  = " << histReadCount <<endl;
+  LOG_INFO << " ListHists: Total No. Histograms Booked  = " << histReadCount <<endm;
   return histReadCount;
 }
 
@@ -726,12 +729,12 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
 Int_t StHistUtil::PrintInfoHists(TList *dirList,  const Char_t *fname )
 {  
 
-  cout << " **** Now in StHistUtil::PrintInfoHists **** " << endl;
-  cout << " output file = " << fname << endl;
+  LOG_INFO << " **** Now in StHistUtil::PrintInfoHists **** " << endm;
+  LOG_INFO << " output file = " << fname << endm;
 
   ofstream fout(fname);
 
-  if (!dirList) cout << " PrintInfoHists - histograms not available! " << endl;
+  if (!dirList) LOG_INFO << " PrintInfoHists - histograms not available! " << endm;
 
   Int_t histInfoCount = 0;
 
@@ -742,7 +745,7 @@ Int_t StHistUtil::PrintInfoHists(TList *dirList,  const Char_t *fname )
     TIter nextObj(dirList);
     TObject *obj = 0;
 
-    cout << " Hist #, Name, #Entries, Mean, RMS " << endl;
+    LOG_INFO << " Hist #, Name, #Entries, Mean, RMS " << endm;
     fout << " Hist #, Name, #Entries, Mean, RMS " << endl;
 
 // use = instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
@@ -754,13 +757,13 @@ Int_t StHistUtil::PrintInfoHists(TList *dirList,  const Char_t *fname )
  
         histInfoCount++;
 
-        cout << 
+        LOG_INFO << 
               histInfoCount << " " <<
               obj->GetName() << " " <<
               ((TH1 *)obj)->GetEntries() << " " <<
               ((TH1 *)obj)->GetMean() << " " <<
               ((TH1 *)obj)->GetRMS() << " " <<
-              endl;
+              endm;
 
         fout << 
               histInfoCount << " " <<
@@ -774,7 +777,7 @@ Int_t StHistUtil::PrintInfoHists(TList *dirList,  const Char_t *fname )
     }
   } // if dirList
 
-  cout << " PrintInfoHists: # hist read  = " << histInfoCount <<endl;
+  LOG_INFO << " PrintInfoHists: # hist read  = " << histInfoCount <<endm;
 
   return histInfoCount;
 }
@@ -786,9 +789,9 @@ Int_t StHistUtil::PrintInfoHists(TList *dirList,  const Char_t *fname )
 Int_t StHistUtil::CopyHists(TList *dirList)
 {  
   if (Debug())
-    cout << " **** Now in StHistUtil::CopyHists **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::CopyHists **** " << endm;
 
-  if (!dirList) cout << " StHistUtil::CopyHists - histogram Pointer not set! " << endl;
+  if (!dirList) LOG_INFO << " StHistUtil::CopyHists - histogram Pointer not set! " << endm;
 
 // create array of pointers to the new histograms I will create
 
@@ -816,17 +819,17 @@ Int_t StHistUtil::CopyHists(TList *dirList)
     }    // while obj
   }      // if dirList
 
-  cout << " ListHists: Total No. Histograms Copied  = " << 
-        histCopyCount <<endl;
+  LOG_INFO << " ListHists: Total No. Histograms Copied  = " << 
+        histCopyCount <<endm;
 
 // Now see if we can find these copies:
  // Int_t imk = 0;
  //for (imk=0;imk<histCopyCount;imk++) {
  //  if (newHist[imk]->InheritsFrom("TH1")) {       
- //        cout << " !!! NEW Type: " << newHist[imk]->ClassName() << 
+ //        LOG_INFO << " !!! NEW Type: " << newHist[imk]->ClassName() << 
  //             ", Name: "    << newHist[imk]->GetName() << 
  //             ", Title: "   << newHist[imk]->GetTitle() << 
- //	    ", Max: " << ((TH1 *)newHist[imk])->GetMaximum() << endl; 
+ //	    ", Max: " << ((TH1 *)newHist[imk])->GetMaximum() << endm; 
  //  }
  //} 
 
@@ -843,11 +846,11 @@ Int_t StHistUtil::CopyHists(TList *dirList)
 Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 {  
   if (Debug())
-    cout << " **** Now in StHistUtil::AddHists **** " << endl;
-  //  cout << " num hists to copy = " << numHistCopy << endl;
+    LOG_INFO << " **** Now in StHistUtil::AddHists **** " << endm;
+  //  LOG_INFO << " num hists to copy = " << numHistCopy << endm;
 
-  if (!dirList) cout << 
-        " StHistUtil::AddHists - histogram Pointer not set! " << endl;
+  if (!dirList) LOG_INFO << 
+        " StHistUtil::AddHists - histogram Pointer not set! " << endm;
 
   Int_t histAddCount = 0;
 
@@ -863,10 +866,10 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 	for (imk=0;imk<numHistCopy;imk++) {
           if (newHist[imk]) {		
 	     if (strcmp( (newHist[imk]->GetName()), (obj->GetName()) )==0) {
-	       //cout << "  ---- hist num to add --- " << imk << endl;
+	       //LOG_INFO << "  ---- hist num to add --- " << imk << endm;
 	       newHist[imk]->Add((TH1 *)obj);
 	       histAddCount++;
-	       //cout << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endl;
+	       //LOG_INFO << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endm;
 	     } // strcmp
 	  }  // if newHist[imk] exists   
 	}  // loop over imk
@@ -874,8 +877,8 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
     }    //while
   } //dirlist
 
-  cout << " StHistUtil::AddHists: Total No. Histograms Added  = " << 
-        histAddCount <<endl;
+  LOG_INFO << " StHistUtil::AddHists: Total No. Histograms Added  = " << 
+        histAddCount <<endm;
 
 
   return histAddCount;
@@ -890,7 +893,7 @@ Int_t StHistUtil::ExamineLogYList()
 // List of all histograms that will be drawn with logy scale
 
   if (Debug())
-    cout << " **** Now in StHistUtil::ExamineLogYList **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::ExamineLogYList **** " << endm;
 
 // m_ListOfLogY -  is a list of log plots
 // construct a TObject
@@ -902,12 +905,12 @@ Int_t StHistUtil::ExamineLogYList()
 // use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
   while ((obj = nextObj())) {
 
-    if (Debug()) cout << " StHistUtil::ExamineLogYList has hist " <<  obj->GetName() << endl;
+    if (Debug()) LOG_INFO << " StHistUtil::ExamineLogYList has hist " <<  obj->GetName() << endm;
     LogYCount++;
 
   }
 
-  cout << " Now in StHistUtil::ExamineLogYList, No. Hist. in LogY scale = " << LogYCount <<endl;
+  LOG_INFO << " Now in StHistUtil::ExamineLogYList, No. Hist. in LogY scale = " << LogYCount <<endm;
   return LogYCount;
 }
 
@@ -920,7 +923,7 @@ Int_t StHistUtil::ExamineLogXList()
 // List of all histograms that will be drawn with logX scale
 
   if (Debug())
-    cout << " **** Now in StHistUtil::ExamineLogXList **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::ExamineLogXList **** " << endm;
 
 // m_ListOfLogX -  is a list of log plots
 // construct a TObject
@@ -933,12 +936,12 @@ Int_t StHistUtil::ExamineLogXList()
   while ((obj = nextObj())) {
 
     if (Debug())
-      cout << " StHistUtil::ExamineLogXList has hist " <<  obj->GetName() << endl;
+      LOG_INFO << " StHistUtil::ExamineLogXList has hist " <<  obj->GetName() << endm;
     LogXCount++;
 
   }
 
-  cout << " Now in StHistUtil::ExamineLogXList, No. Hist. in LogX scale = " << LogXCount <<endl;
+  LOG_INFO << " Now in StHistUtil::ExamineLogXList, No. Hist. in LogX scale = " << LogXCount <<endm;
   return LogXCount;
 }
 
@@ -951,13 +954,13 @@ Int_t StHistUtil::ExaminePrintList()
 // List of all histograms that will be drawn,printed
 
   if (Debug())
-    cout << " **** Now in StHistUtil::ExaminePrintList **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::ExaminePrintList **** " << endm;
 
 // m_ListOfPrint -  is a list of hist to print,draw
 
 // check if there is a list
   if (!m_ListOfPrint){
-    cout << "      no subset print list was setup - all hist in directory will be printed " << endl;
+    LOG_INFO << "      no subset print list was setup - all hist in directory will be printed " << endm;
     //    return PrintCount;
     return 0;
   }
@@ -973,12 +976,12 @@ Int_t StHistUtil::ExaminePrintList()
   while ((obj = nextObj())) {
 
     if (Debug())
-      cout << " StHistUtil::ExaminePrintList has hist " <<  obj->GetName() << endl;
+      LOG_INFO << " StHistUtil::ExaminePrintList has hist " <<  obj->GetName() << endm;
     PrintCount++;
 
   }
 
-  cout << " Now in StHistUtil::ExaminePrintList, No. Hist. to Print,Draw = " << PrintCount <<endl;
+  LOG_INFO << " Now in StHistUtil::ExaminePrintList, No. Hist. to Print,Draw = " << PrintCount <<endm;
   return m_ListOfPrint->GetSize();
 }
 
@@ -990,7 +993,7 @@ Int_t StHistUtil::AddToLogYList(const Char_t *HistName){
 //   making list of all histograms that we want drawn with LogY scale
 
    if (Debug())
-     cout << " **** Now in StHistUtil::AddToLogYList  **** " << endl;
+     LOG_INFO << " **** Now in StHistUtil::AddToLogYList  **** " << endm;
 
 // Since I'm creating a new list, must delete it in the destructor!!
 //make a new TList on heap(persistant); have already defined m_ListOfLogY in header file
@@ -1007,9 +1010,9 @@ Int_t StHistUtil::AddToLogYList(const Char_t *HistName){
     if (!lobj) {
        m_ListOfLogY->Add(HistNameObj);
        if (Debug())
-         cout << " StHistUtil::AddToLogYList: " << HistName  <<endl;
+         LOG_INFO << " StHistUtil::AddToLogYList: " << HistName  <<endm;
     }
-    else  cout << " StHistUtil::AddToLogYList: " << HistName << " already in list - not added" <<endl;
+    else  LOG_INFO << " StHistUtil::AddToLogYList: " << HistName << " already in list - not added" <<endm;
  
 // return using a method of TList (inherits GetSize from TCollection)
   return m_ListOfLogY->GetSize();
@@ -1024,7 +1027,7 @@ Int_t StHistUtil::AddToLogXList(const Char_t *HistName){
 //   making list of all histograms that we want drawn with LogX scale
 
    if (Debug())
-     cout << " **** Now in StHistUtil::AddToLogXList  **** " << endl;
+     LOG_INFO << " **** Now in StHistUtil::AddToLogXList  **** " << endm;
 
 // Since I'm creating a new list, must delete it in the destructor!!
 //make a new TList on heap(persistant); have already defined m_ListOfLogX in header file
@@ -1041,9 +1044,9 @@ Int_t StHistUtil::AddToLogXList(const Char_t *HistName){
     if (!lobj) {
        m_ListOfLogX->Add(HistNameObj);
        if (Debug())
-         cout << " StHistUtil::AddToLogXList: " << HistName  <<endl;
+         LOG_INFO << " StHistUtil::AddToLogXList: " << HistName  <<endm;
     }
-    else  cout << " StHistUtil::AddToLogXList: " << HistName << " already in list - not added" <<endl;
+    else  LOG_INFO << " StHistUtil::AddToLogXList: " << HistName << " already in list - not added" <<endm;
  
 // return using a method of TList (inherits GetSize from TCollection)
  return m_ListOfLogX->GetSize();
@@ -1059,7 +1062,7 @@ Int_t StHistUtil::AddToPrintList(const Char_t *HistName){
 //   making list of all histograms that we want drawn,printed
 
   if (Debug())
-    cout << " **** Now in StHistUtil::AddToPrintList  **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::AddToPrintList  **** " << endm;
 
 // Since I'm creating a new list, must delete it in the destructor!!
 //make a new TList on heap(persistant); have already defined m_ListOfPrint in header file
@@ -1073,9 +1076,9 @@ Int_t StHistUtil::AddToPrintList(const Char_t *HistName){
     if (!m_ListOfPrint->Contains(HistName)) {
        m_ListOfPrint->Add(HistNameObj);
        if (Debug())
-         cout << " StHistUtil::AddToPrintList: " << HistName  <<endl;
+         LOG_INFO << " StHistUtil::AddToPrintList: " << HistName  <<endm;
     }
-    else  cout << " StHistUtil::AddToPrintList: " << HistName << " already in list - not added" <<endl;
+    else  LOG_INFO << " StHistUtil::AddToPrintList: " << HistName << " already in list - not added" <<endm;
  
 // return using a method of TList (inherits GetSize from TCollection)
  return m_ListOfPrint->GetSize();
@@ -1089,7 +1092,7 @@ Int_t StHistUtil::RemoveFromLogYList(const Char_t *HistName){
 //   remove hist from  list  that we want drawn with LogY scale
 
   if (Debug())
-    cout << " **** Now in StHistUtil::RemoveFromLogYList  **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::RemoveFromLogYList  **** " << endm;
 
 // check if list exists:
   if (m_ListOfLogY) {
@@ -1102,9 +1105,9 @@ Int_t StHistUtil::RemoveFromLogYList(const Char_t *HistName){
     if (lobj) {
       m_ListOfLogY->Remove(lobj);
       if (Debug())
-        cout << " RemoveLogYList: " << HistName << " has been removed from list" <<endl;
+        LOG_INFO << " RemoveLogYList: " << HistName << " has been removed from list" <<endm;
     }
-    else  cout << " RemoveLogYList: " << HistName << " not on list - not removing" <<endl;
+    else  LOG_INFO << " RemoveLogYList: " << HistName << " not on list - not removing" <<endm;
 
   } 
 // return using a method of TList (inherits GetSize from TCollection)
@@ -1119,7 +1122,7 @@ Int_t StHistUtil::RemoveFromLogXList(const Char_t *HistName){
 //   remove hist from  list  that we want drawn with LogX scale
 
   if (Debug())
-    cout << " **** Now in StHistUtil::RemoveFromLogXList  **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::RemoveFromLogXList  **** " << endm;
 
 // check if list exists:
   if (m_ListOfLogX) {
@@ -1132,9 +1135,9 @@ Int_t StHistUtil::RemoveFromLogXList(const Char_t *HistName){
     if (lobj) {
       m_ListOfLogX->Remove(lobj);
       if (Debug())
-        cout << " RemoveLogXList: " << HistName << " has been removed from list" <<endl;
+        LOG_INFO << " RemoveLogXList: " << HistName << " has been removed from list" <<endm;
     }
-    else  cout << " RemoveLogXList: " << HistName << " not on list - not removing" <<endl;
+    else  LOG_INFO << " RemoveLogXList: " << HistName << " not on list - not removing" <<endm;
 
   } 
 // return using a method of TList (inherits GetSize from TCollection)
@@ -1149,7 +1152,7 @@ Int_t StHistUtil::RemoveFromPrintList(const Char_t *HistName){
 //   remove hist from  list  that we want drawn,printed
 
   if (Debug())
-    cout << " **** Now in StHistUtil::RemoveFromPrintList  **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::RemoveFromPrintList  **** " << endm;
 
 // check if list exists:
   if (m_ListOfPrint) {
@@ -1162,9 +1165,9 @@ Int_t StHistUtil::RemoveFromPrintList(const Char_t *HistName){
     if (lobj) {
       m_ListOfPrint->Remove(lobj);
       if (Debug())
-        cout << " RemovePrintList: " << HistName << " has been removed from list" <<endl;
+        LOG_INFO << " RemovePrintList: " << HistName << " has been removed from list" <<endm;
     }
-    else  cout << " RemovePrintList: " << HistName << " not on list - not removing" <<endl;
+    else  LOG_INFO << " RemovePrintList: " << HistName << " not on list - not removing" <<endm;
 
   } 
 // return using a method of TList (inherits GetSize from TCollection)
@@ -1182,7 +1185,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
 //    - create default list of histograms we want plotted in LogY scale
 
   if (Debug())
-    cout << " **** Now in StHistUtil::SetDefaultLogYList  **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::SetDefaultLogYList  **** " << endm;
 
 
   if (dirName) strcpy(m_dirName,dirName);
@@ -1211,7 +1214,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
     } else numLog = AddToLogYList(listString.Data());
   }
 
-  cout <<  " !!!  StHistUtil::SetDefaultLogYList, # histogram put in list " << numLog << endl;
+  LOG_INFO <<  " !!!  StHistUtil::SetDefaultLogYList, # histogram put in list " << numLog << endm;
 
 }
 
@@ -1225,7 +1228,7 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
 //    - create default list of histograms we want plotted in LogX scale
 
   if (Debug())
-    cout << " **** Now in StHistUtil::SetDefaultLogXList  **** " << endl;
+    LOG_INFO << " **** Now in StHistUtil::SetDefaultLogXList  **** " << endm;
 
   if (dirName) strcpy(m_dirName,dirName);
   TString type;
@@ -1253,7 +1256,7 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
     } else numLog = AddToLogXList(listString.Data());
   }
 
-  cout <<  " !!!  StHistUtil::SetDefaultLogXList, # histogram put in list " << numLog << endl;
+  LOG_INFO <<  " !!!  StHistUtil::SetDefaultLogXList, # histogram put in list " << numLog << endm;
 
 }
 
@@ -1265,7 +1268,7 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
 void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 {  
 
-  cout << " **** Now in StHistUtil::SetDefaultPrintList  **** " << endl;
+  LOG_INFO << " **** Now in StHistUtil::SetDefaultPrintList  **** " << endm;
 
   Char_t **sdefList=0;
   Int_t lengofList = 0;
@@ -1282,7 +1285,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 
 // If not analysis Type is set, then don't setup a list
   if ((!strcmp(analType,"")) || (!strcmp(analType,"All")) ) {
-    cout << " All histograms in directory will be printed/drawn, no list set" << endl;
+    LOG_INFO << " All histograms in directory will be printed/drawn, no list set" << endm;
     return;
   }
 
@@ -1377,10 +1380,10 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
       }
     } else numPrt = AddToPrintList(listString.Data());
     if (Debug())
-      cout <<  " !!! adding histogram " << sdefList[ilg] << " to print list "  << endl ;
+      LOG_INFO <<  " !!! adding histogram " << sdefList[ilg] << " to print list "  << endm ;
   }
   
-  cout <<  " !!!  StHistUtil::SetDefaultPrintList, # histogram put in list " << numPrt << endl;
+  LOG_INFO <<  " !!!  StHistUtil::SetDefaultPrintList, # histogram put in list " << numPrt << endm;
 
 }
 
@@ -1392,7 +1395,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
 			    Char_t *inHist2) {
 
-  cout << " **** Now in StHistUtil::Overlay1D **** " << endl;
+  LOG_INFO << " **** Now in StHistUtil::Overlay1D **** " << endm;
 
   Int_t n1dHists = 0;
   if (dirName) strcpy(m_dirName,dirName);
@@ -1405,7 +1408,7 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
   if (!dirList)
     return kStErr;
 
-  cout << "Histogram directory exists -> Find and overlay histograms" << endl;
+  LOG_INFO << "Histogram directory exists -> Find and overlay histograms" << endm;
 // Now want to loop over all histograms
 // Create an iterator
   TIter nextObj(dirList);
@@ -1423,9 +1426,9 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
     if (obj->InheritsFrom("TH1")) {
       if (obj->GetName() == (TString)inHist1 ||
 	  obj->GetName() == (TString)inHist2) {
-	cout << " Found Histogram: Type '" << obj->ClassName() << "', Name '"
+	LOG_INFO << " Found Histogram: Type '" << obj->ClassName() << "', Name '"
 	     << obj->GetName() << "', Title '" << obj->GetTitle() << "'"
-	     << endl;
+	     << endm;
 
 // check on type of histogram and make copies
 	if (obj->ClassName() == (TString)"TH1F") {
@@ -1439,7 +1442,7 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
 	  }
 	}
 	else
-	  cout << " ERROR: histogram not of type TH1F !!!" << endl;
+	  LOG_INFO << " ERROR: histogram not of type TH1F !!!" << endm;
       }
     }
   }
@@ -1514,7 +1517,7 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
 Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
 			    Char_t *inHist2) {
 
-  cout << " **** Now in StHistUtil::Overlay2D **** " << endl;
+  LOG_INFO << " **** Now in StHistUtil::Overlay2D **** " << endm;
 
   Int_t n2dHists = 0;
   if (dirName) strcpy(m_dirName,dirName);
@@ -1527,7 +1530,7 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
   if (!dirList)
     return kStErr;
 
-  cout << "Histogram directory exists -> Find and overlay histograms" << endl;
+  LOG_INFO << "Histogram directory exists -> Find and overlay histograms" << endm;
 // Now want to loop over all histograms
 // Create an iterator
   TIter nextObj(dirList);
@@ -1545,9 +1548,9 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
     if (obj->InheritsFrom("TH1")) {
       if (obj->GetName() == (TString)inHist1 ||
 	  obj->GetName() == (TString)inHist2) {
-	cout << " Found Histogram: Type '" << obj->ClassName() << "', Name '"
+	LOG_INFO << " Found Histogram: Type '" << obj->ClassName() << "', Name '"
 	     << obj->GetName() << "', Title '" << obj->GetTitle() << "'"
-	     << endl;
+	     << endm;
 
 // check on type of histogram and make copies
 	if (obj->ClassName() == (TString)"TH2F") {
@@ -1561,7 +1564,7 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
 	  }
 	}
 	else
-	  cout << " ERROR: histogram is not of type TH2F !!!" << endl;
+	  LOG_INFO << " ERROR: histogram is not of type TH2F !!!" << endm;
       }
     }
   }
