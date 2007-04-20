@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.22 2007/04/01 21:38:47 mvl Exp $
+ * $Id: StMuTrack.h,v 1.23 2007/04/20 06:23:46 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -98,21 +98,8 @@ class StMuTrack : public TObject {
     StPhysicalHelixD helix() const; ///< Returns inner helix (first measured point)
     StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
     StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
-    unsigned short QvectorFlag() const; ///< Flags whether track is used in Q-vectors
-    // Utility functions to decode Q-vector flag
-    unsigned short isinQA() const;
-    unsigned short isinQB() const;
-    unsigned short isinQNegEastA() const;
-    unsigned short isinQNegEastB() const;
-    unsigned short isinQNegWestA() const;
-    unsigned short isinQNegWestB() const;
-    unsigned short isinQPosEastA() const;
-    unsigned short isinQPosEastB() const;
-    unsigned short isinQPosWestA() const;
-    unsigned short isinQPosWestB() const;
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
-    void setQvectorFlag(unsigned short flag); 
 protected:
   Short_t mId;
   Short_t mType;
@@ -153,8 +140,7 @@ protected:
   StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyak pid probabilities.
   Float_t mSigmaDcaD;
   Float_t mSigmaDcaZ;
-  unsigned short mQvectorFlag; ///< flag for inclusion in qVector: 0 none, 1xx random A, 2xx random B and xx=00 to 08 for different subevents (neg,pos,east,west,A,B) 
-  
+
   void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
   void setVertexIndex(int i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
@@ -168,7 +154,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,10)
+  ClassDef(StMuTrack,9)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -219,20 +205,8 @@ inline StThreeVectorF StMuTrack::lastPoint() const {return mLastPoint;}
 //!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
 //!inline StPhysicalHelixD StMuTrack::outerHelix() const {return mOuterHelix;}
 inline StMuProbPidTraits StMuTrack::probPidTraits() const { return mProbPidTraits;} ///< Returns Yuri Fisyak new pid probabilities. 
-inline unsigned short StMuTrack::QvectorFlag() const { return mQvectorFlag;} 
-inline unsigned short StMuTrack::isinQA() const { return mQvectorFlag/100==1;} 
-inline unsigned short StMuTrack::isinQB() const { return mQvectorFlag/100==2;} 
-inline unsigned short StMuTrack::isinQNegEastA() const { return mQvectorFlag%100==1;} 
-inline unsigned short StMuTrack::isinQNegEastB() const { return mQvectorFlag%100==2;} 
-inline unsigned short StMuTrack::isinQNegWestA() const { return mQvectorFlag%100==3;} 
-inline unsigned short StMuTrack::isinQNegWestB() const { return mQvectorFlag%100==4;} 
-inline unsigned short StMuTrack::isinQPosEastA() const { return mQvectorFlag%100==5;} 
-inline unsigned short StMuTrack::isinQPosEastB() const { return mQvectorFlag%100==6;} 
-inline unsigned short StMuTrack::isinQPosWestA() const { return mQvectorFlag%100==7;} 
-inline unsigned short StMuTrack::isinQPosWestB() const { return mQvectorFlag%100==8;} 
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
 inline void StMuTrack::setProbabilityPidCentrality(double cent) { mProbabilityPidCentrality = cent;}
-inline void StMuTrack::setQvectorFlag(unsigned short flag) { mQvectorFlag=flag;} 
 
 inline StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
 inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
@@ -243,10 +217,8 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
- * Revision 1.22  2007/04/01 21:38:47  mvl
- * Added Q-vectors in StMuEvent. The pt-weieghtd Q-vectors are calculated in two random subevents (A and B) when filling the MuDst from StEvent in StMuDstMaker.
- * A total of 10 Q-vectors are stored: 2 (A and B) for the entire event (with track-cuts in StMuDstMaker::setQvectors) and 8 for four different subevents (pos/neg and east/west and A/B).
- * A flag (mQvectorFlag) is added in StMuTrack to signal which Q-vectors the track participates in. StMuTrack::isinQA() etc can be used to decode the flag.
+ * Revision 1.23  2007/04/20 06:23:46  mvl
+ * Removed Q-vector flag (will implement utility class)
  *
  * Revision 1.21  2007/01/29 18:34:44  mvl
  * Updates to use StDcaGeometry for global DCA and momentum.

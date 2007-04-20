@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.29 2007/04/01 21:38:47 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.30 2007/04/20 06:23:46 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -27,7 +27,7 @@ double StMuTrack::mProbabilityPidCentrality=0;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.), mQvectorFlag(0) {
+StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.) {
 
   const StGlobalTrack* globalTrack = dynamic_cast<const StGlobalTrack*>(track->node()->track(global));
 
@@ -399,10 +399,8 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
- * Revision 1.29  2007/04/01 21:38:47  mvl
- * Added Q-vectors in StMuEvent. The pt-weieghtd Q-vectors are calculated in two random subevents (A and B) when filling the MuDst from StEvent in StMuDstMaker.
- * A total of 10 Q-vectors are stored: 2 (A and B) for the entire event (with track-cuts in StMuDstMaker::setQvectors) and 8 for four different subevents (pos/neg and east/west and A/B).
- * A flag (mQvectorFlag) is added in StMuTrack to signal which Q-vectors the track participates in. StMuTrack::isinQA() etc can be used to decode the flag.
+ * Revision 1.30  2007/04/20 06:23:46  mvl
+ * Removed Q-vector flag (will implement utility class)
  *
  * Revision 1.28  2007/01/29 18:34:44  mvl
  * Updates to use StDcaGeometry for global DCA and momentum.
