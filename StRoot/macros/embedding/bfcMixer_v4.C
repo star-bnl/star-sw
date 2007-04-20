@@ -1,14 +1,16 @@
 //////////////////////////////////////////////////////////////////////////
 //
+//
 // Macro for running chain with different inputs
 //
-// Owner:  Yuri Fisyak
+// owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4.C,v 1.1 2007/04/20 00:11:13 andrewar Exp $
 //
+//
+// $Id: bfcMixer_v4.C,v 1.2 2007/04/20 00:12:32 andrewar Exp $
 //////////////////////////////////////////////////////////////////////////
 
-//TBrowser *b = 0;
+TBrowser *b = 0;
 class StChain;
 class StBFChain;
 StChain  *chain=0;
@@ -29,124 +31,96 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
   gSystem->Load("StBFChain");
-  //Extra things to load for the acceptance filter
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StAnalysisUtilities");
-  gSystem->Load("StV0AccMaker.so");
-
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer_v4(const Int_t Nevents=10,
-             const Char_t *file1="/beta/starprod/daq/2001/ProductionMinBias/FullField/st_physics_2275002_raw_0001.daq",
-	     const Char_t *file2="/home/starofl/embedding/GSTAR/GSTAR.test.2275002_0001.13350.fz",
-             const Char_t *file3="/home/starofl/embedding/P02ge/st_physics_2275002_raw_0001.vertices.dat",
-             const Float_t zvertex_low=-100.0,
-             const Float_t zvertex_high=100.0,
-	     const Char_t *mode="strange",
-	     const Char_t *acc_mode="off" )
+void bfcMixer_v4(const Int_t Nevents=25,
+             const Char_t *kind1="fz",
+             const Char_t *file1="ppvertices.fz",
+             const Char_t *kind2="trs",
+             const Char_t *file2="/beta/starprod/abortgap/mixer3004016.trs",
+             const Char_t *file3="/auto/pdsfdv09/starprod/tags/P02ge/2001/hijingabort_3004016_realvtx.6228.tags.root",
+             const Float_t zvertex_low=-50.0,
+             const Float_t zvertex_high=50.0)
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
-
-  // Create the main chain object
-  chain = new StChain("Embedding");
+  chain = new StChain("Embedding");   // Create the main chain object
 
   StMaker *saveMk = 0;
-
-  // Create chain1 object
-  chain1 = new StBFChain("One");
-  saveMk = chain1->cd();
-  chain1->SetFlags("in Physics NoDefault");
-  chain1->Set_IO_Files(file1);
-  chain1->Load();
-  chain1->Instantiate();
-
-  saveMk->cd();
-  
-  // Create chain2 object
-  chain2 = new StBFChain("Two");
-  saveMk = chain2->cd();
-  chain2->SetFlags("fzin gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
-  chain2->Set_IO_Files(file2);
-  chain2->Load();
-  chain2->Instantiate();
-  St_geant_Maker *geantMk = chain2->GetMaker("geant");
-  if (geantMk) geantMk->SetMode(1);   // Mixer mode - do not modify EvtHddr
-  
-  // Add the acceptance filter maker before TRS  
-  if (!strcmp(mode,"strange")){
-    if (!strcmp(acc_mode,"on")){
-      
-      Char_t *extraMaker = "StV0AccMaker";
-      if (gClassTable->GetID(extraMaker) < 0) gSystem->Load(extraMaker);
-      StMaker *extraMk = (StMaker *)chain1->GetMaker(extraMaker);
-      if(extraMk) delete extraMk;
-      extraMk = chain->New(extraMaker,"before");
-      if (extraMk) {
-	Char_t *before = "Trs";
-	StMaker *trsmk = chain1->GetMaker(before);
-	if (trsmk) chain1->AddBefore(before,extraMk);
-	StV0AccCuts *cuts = ((StV0AccMaker *)extraMk)->GetCutsPtr();
-	cuts->SetFilter();
-	cuts->SetV0MinDecayLen(0.);
-	cuts->SetV0DaughterMinImpact(0);
-	cuts->SetV0DaughterMinHit(10.);
-	cuts->SetXiV0MaxImpact(5);
-	cuts->SetXiMinDecayLen(2.);
-	cuts->SetXiV0PiMinImpact(0.);
-	cuts->SetXiDaughterMinHit(10.);
-	cuts->SetKinkMinDecayRad(128.);
-	cuts->SetKinkMaxDecayRad(184.);
-      }
-    }
+  // File2 -> trs or daq
+  if (!strcmp(kind2,"trs")) {
+    chain2 = new StBFChain("Two");
+    saveMk = chain2->cd();
+    chain2->SetFlags("NoInput tpcDB tpc trs -tcl -tpt -PreVtx -tpc_daq"); //  
+    chain2->Set_IO_Files(0);
+    chain2->Load();
+    chain2->Instantiate();
+    StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Two");
+    trsMk->readFile(file2);
+    saveMk->cd();
   }
-  // end additional maker code
-
-  saveMk->cd();
+  if (!strcmp(kind2,"daq")) {
+    chain2 = new StBFChain("Two");
+    saveMk = chain2->cd();
+    //    chain2->SetFlags("in db"); // P00hm 
+    //    chain2->SetFlags("in db NoDefault"); // P01he gstar for P00hm 
+    //    chain2->SetFlags("in DbV0523 HalfField db NoDefault"); // P01he  
+    chain2->SetFlags("in db NoDefault"); // P01hj  
+    chain2->Set_IO_Files(file2);
+    chain2->Load();
+    chain2->Instantiate();
+    saveMk->cd();
+  }
+  if (!strcmp(kind1,"fz")) {
+    kind1="trs";
+    chain1 = new StBFChain("One");
+    saveMk = chain1->cd();
+    chain1->SetFlags("fzin gen_T geomT sim_T tpc trs rrs -tcl -tpt -PreVtx -tpc_daq -Mixer"); // 
+    chain1->Set_IO_Files(file1);
+    chain1->Load();
+    chain1->Instantiate();
+    saveMk->cd();
+  }
 
   // Mixer
   gSystem->Load("StMixerMaker");
-  StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
-  chain1->SetInput("Input1","StDAQReader");
-  chain2->SetInput("Input2","Event");
+  StMixerMaker  *mixer = new StMixerMaker("Mixer",kind1,kind2);
+
+  cout << "Load the rich mixer maker" << endl;
+  gSystem->Load("StEvent");
+  gSystem->Load("StRichMixerMaker");
+  StRichMixerMaker *richmixer = new StRichMixerMaker("richMixer");
+
+  chain1->SetInput("Input1","Event");
+  if (!strcmp(kind2,"trs")) {
+    chain2->SetInput("Input2","Event");
+  }
+  if (!strcmp(kind2,"daq")) {
+    chain2->SetInput("Input2","StDAQReader");
+  }
   mixer->writeFile("mixer.trs",Nevents);
 
-  // Create chain3 object
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  chain3->SetFlags("Simu DbV20020226 NoDefault NoInput db tpc_daq tpc global dst Kalman event QA Tree GeantOut evout"); // removed -nohits option on 20/2/03 - MACL
-  //  chain3->SetFlags("Simu ppOpt DbV20020402 beamline NoDefault NoInput db tpc_daq tpc global dst Kalman Cdst event QA Tree GeantOut"); 
-    printf ("ELH mark1\n");
+  // P00hm:
+  //     chain3->SetFlags("NoInput in tpc_daq tpc global dst Kalman Tree GeantOut");
+  // P01he:
+     //  chain3->SetFlags("NoInput HalfField DbV0523 tpc_daq tpc global dst Kalman Tree GeantOut"); 
+  // P01hj: (took out DbV1007 rich tags Physics evout Nohits, etc.)
+  chain3->SetFlags("Simu ppOpt DbV20020402 beamLine NoDefault NoInput db tpc_daq tpc global dst Kalman Cdst Tree GeantOut evout"); 
 
-  TString OutputFileName(gSystem->BaseName(file1));
-    printf ("ELH mark1\n");
+  TString OutputFileName(gSystem->BaseName(file2));
   OutputFileName.ReplaceAll("*","");
-    printf ("ELH mark1\n");
   OutputFileName.ReplaceAll(".daq","");
-    printf ("ELH mark1\n");
   OutputFileName.Append(".root");
-    printf ("ELH mark1\n");
   chain3->Set_IO_Files(0,OutputFileName.Data());
-    printf ("ELH mark1\n");
   chain3->Load();
-    printf ("ELH mark1\n");
   chain3->Instantiate();
-    printf ("ELH mark1\n");
-  St_geant_Maker *geantMk = (St_geant_Maker *) chain->GetMaker("geant");
-    printf ("ELH mark1\n");
+  St_geant_Maker *geantMk = chain->GetMaker("geant");
   geantMk->SetActive(kTRUE);
-    printf ("ELH mark1\n");
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
-    printf ("ELH mark1\n");
-
-    //  if(chain3->GetOption("ittf")){
-    //    printf ("ITTF option active\n");
-    //  }else{
-    //    printf ("ITTF option not active\n");
-    //  }
-
-  tpcdaqMk->SetMode(1);   // Trs
+  tpcdaqMk->SetMode(1); // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
   saveMk->cd();
   {
@@ -158,77 +132,72 @@ void bfcMixer_v4(const Int_t Nevents=10,
         gSystem->WorkingDirectory());
   printf ("QAInfo: with %s\n", chain->GetCVS());
 
-  // Init the chain and all its makers
+// Init the chain and all its makers
   if (Nevents >= 0) {
     Int_t iInit = chain->Init();
   }
-  // chain->SetDEBUG();
+  //chain->SetDEBUG();
   treeMk = chain->GetMaker("tree");
   TBenchmark evnt;
   Int_t iMake = 0, i = 1, iBad = 0;
 
-  StIOMaker *inpMk = (StIOMaker *)chain1->GetMaker("inputStream");
+  StIOMaker *inpMk = (StIOMaker *)chain2->GetMaker("inputStream");
   FILE *fp = fopen(file3,"r");
   Float_t x, y, z;
   Int_t ncols, eventnumber, mult, skip=0, oldskip = 0, skiptest=0;
   printf("zvertex_low = %f zvertex_high = %f\n",zvertex_low, zvertex_high);
 
-  vtxMk = (StVertexMaker*) chain3->GetMaker("Vertex");
+  primMk = (StPrimaryMaker*) chain3->GetMaker("primary");
 
-EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
+ EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
    evnt->Reset();
    evnt->Start("QAInfo:");
    chain->Clear();
-   
-   ncols = fscanf(fp,"%d %d %d %f %f %f",&eventnumber,&skip,&mult,&x,&y,&z);
-   if(ncols<0) break;
 
-   printf("\nEvent number: %d Multiplicity = %d\n",eventnumber,mult);
-   printf("vertex in bfcMixer: %16f %16f %16f\n",x,y,z);
+   //   ncols = fscanf(fp,"%d %d %d %f %f %f",&eventnumber,&skip,&mult,&x,&y,&z);
+   //   if(ncols<0) break;
 
-   // skip events in chain1 (daq file) only.
+   //   printf("\nEvent number: %d Multiplicity = %d\n",eventnumber,mult);
+   //   printf("vertex in bfcMixer: %16f %16f %16f\n",x,y,z);
+
+   // skip events in chain2 (daq file) only.
    // fz file does not have these events.
    // strange initialization due to details of inpMk->Skip
    // ...not well understood.  elh
 
-   printf ("bfcMixer: i = %i\n",i);
-   printf ("bfcMixer: skip = %i\n",skip);
-   printf ("bfcMixer: oldskip = %i\n",oldskip);
-   if (inpMk && skip>0) {
-     if(i == 1) {skip++;}
-     skiptest = inpMk->Skip(skip-oldskip-1);
-     skiptest = inpMk->Skip();
-     printf("bfcMixer: skiptest = %i\n",skiptest);
-     if(i == 1) {skip--;}
-   }
-   oldskip = skip;
+   //   printf ("bfcMixer: skip = %i\n",skip);
+   //   printf ("bfcMixer: oldskip = %i\n",oldskip);
+   //   if (inpMk && skip>0) {
+   //     if(i == 1) {skip++;}
+   //     skiptest = inpMk->Skip(skip-oldskip-1);
+   //     printf("bfcMixer: skiptest = %i\n",skiptest);
+   //     if(i == 1) {skip--;}
+   //   }
+   //   oldskip = skip;
 
-   // use this to force the vertex position to match:
-   vtxMk->FixVertex(x,y,z);
-   printf ("bfcMixer: fixing vertex to %f %f %f\n",x,y,z);
+   //  use this to force the vertex position to match:
+   //   primMk->FixVertex(x,y,z);
 
    iMake = chain->Make(i);
    if (treeMk && iMake == kStErr) {treeMk->Make(i); iBad++;}
    StEvtHddr *fEvtHddr = (StEvtHddr*)chain->GetDataSet("EvtHddr");
-   StEvtHddr *fEvtHddrDaq = (StEvtHddr*)chain1->GetDataSet("EvtHddr");
+   StEvtHddr *fEvtHddrDaq = (StEvtHddr*)chain2->GetDataSet("EvtHddr");
    *fEvtHddr = *fEvtHddrDaq;
-   // gSystem->Exec("ps ux");
+   //    gSystem->Exec("ps ux");
    evnt->Stop("QAInfo:");
-   // evnt->Show("QAInfo:");
+   //evnt->Show("QAInfo:");
    printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time%d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n", i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
 	  iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
 
-   chain->ls(9);
-
    // Be sure to get the same event from daq and fz files...  elh
-   if(eventnumber == chain->GetEventNumber()){
-     printf("bfcMixer:  Event number %d found in both .fz file and .daq file\n",eventnumber);
-   }else{
-     printf("bfcMixer: Error! Event number from .fz file: %d\n",eventnumber);
-     printf("bfcMixer: Error! Event number from .daq file: %d\n",chain->GetEventNumber());
-     printf("bfcMixer: Error! Events are out-of-sync, exiting!\n");
-     break;
-   }
+   //   if(eventnumber == chain->GetEventNumber()){
+   //     printf("bfcMixer:  Event number %d found in both .fz file and .daq file\n",eventnumber);
+   //   }else{
+   //     printf("bfcMixer: Error! Event number from .fz file: %d\n",eventnumber);
+   //     printf("bfcMixer: Error! Event number from .daq file: %d\n",chain->GetEventNumber());
+   //     printf("bfcMixer: Error! Events are out-of-sync, exiting!\n");
+   //     break;
+   //   }
    i++;
    goto EventLoop;
  }
@@ -242,5 +211,4 @@ EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
     printf ("\nQAInfo:Run is finished at Date/Time%i/%i\n",t.GetDate(),t.GetTime());
   }
 }
-
 
