@@ -1,11 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.79 2007/04/01 21:38:47 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.80 2007/04/20 06:26:00 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
 #include "TRegexp.h"
-#include "TRandom.h"
 #include "Stiostream.h"
 #include "Stsstream.h"
 #include "StChain.h"
@@ -72,10 +71,9 @@
 #include "TChain.h"
 #include "TStreamerInfo.h"
 #include "TClonesArray.h"
-#include "TObjArray.h"
 #include "TEventList.h"
-#include "TVector2.h"
 
+#include "THack.h"
 ClassImp(StMuDstMaker)
 
 #if !(ST_NO_NAMESPACES)
@@ -126,70 +124,18 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil || ! mEzTree )
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
+
   createArrays();
+
 
   setProbabilityPidFile();
   StMuL3Filter* l3Filter = new StMuL3Filter(); setL3TrackFilter(l3Filter);
   StMuFilter* filter = new StMuFilter();       setTrackFilter(filter);
   FORCEDDEBUGMESSAGE("ATTENTION: use standard MuFilter");
   FORCEDDEBUGMESSAGE("ATTENTION: use standard l3 MuFilter");
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StIOInterFace(name),
-  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
-  mIOMaker(0), mTreeMaker(0),
-  mIoMode(mode), mIoNameMode(nameMode),
-  mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
-  mEventList(0), mTrackType(256), mReadTracks(1),
-  mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
-  mSplit(99), mCompression(9), mBufferSize(65536*4),
-  mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mPmdCollectionArray(0), mPmdCollection(0)
-{
-  assignArrays();
-  streamerOff();
-  zeroArrays();
-  createArrays();
-  if (mIoMode==ioRead) openRead();
-  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
 
-  setProbabilityPidFile();
 
-  mEventCounter=0;
-  mStMuDst = new StMuDst();
-  mEmcUtil = new StMuEmcUtil();
-  mPmdUtil = new StMuPmdUtil();
-  mTofUtil = new StMuTofUtil();
-  mEzTree  = new StMuEzTree();
 }
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-StMuDstMaker::~StMuDstMaker() {
-  DEBUGMESSAGE1("");
-  //clear(999);
-  delete mStMuDst;
-  delete mTofUtil;
-  DEBUGMESSAGE3("after arrays");
-  saveDelete(mProbabilityPidAlgorithm);
-  saveDelete(mTrackFilter);
-  saveDelete(mL3TrackFilter);
-  DEBUGMESSAGE3("after filter");
-  if (mIoMode== ioWrite ) closeWrite();
-  if (mIoMode== ioRead ) closeRead();
-  DEBUGMESSAGE3("after close");
-  saveDelete(mChain);
-//VP  saveDelete(mTTree);
-  delete mEmcCollectionArray;
-  delete mPmdCollectionArray;
-  DEBUGMESSAGE3("out");
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
 
 /*! 
  * This method assigns individual TCloneArrays location from one
@@ -291,6 +237,60 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
   }
   if (mIoMode==ioRead)
     setBranchAddresses(mChain);
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StIOInterFace(name),
+  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
+  mIOMaker(0), mTreeMaker(0),
+  mIoMode(mode), mIoNameMode(nameMode), 
+  mDirName(dirName), mFileName(fileName), mFilter(filter), 
+  mMaxFiles(maxFiles), mEventList(0),
+  mTrackType(256), mReadTracks(1),
+  mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
+  mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
+  mSplit(99), mCompression(9), mBufferSize(65536*4),
+  mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
+  mPmdCollectionArray(0), mPmdCollection(0)
+{
+  assignArrays();
+  streamerOff();
+  zeroArrays();
+  createArrays();
+  if (mIoMode==ioRead) openRead();
+  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
+
+  setProbabilityPidFile();
+
+  mEventCounter=0;
+  mStMuDst = new StMuDst();
+  mEmcUtil = new StMuEmcUtil();
+  mPmdUtil = new StMuPmdUtil();
+  mTofUtil = new StMuTofUtil();
+  mEzTree  = new StMuEzTree();
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+StMuDstMaker::~StMuDstMaker() {
+  DEBUGMESSAGE1("");
+  //clear(999);
+  delete mStMuDst;
+  delete mTofUtil;
+  DEBUGMESSAGE3("after arrays");
+  saveDelete(mProbabilityPidAlgorithm);
+  saveDelete(mTrackFilter);
+  saveDelete(mL3TrackFilter);
+  DEBUGMESSAGE3("after filter");
+  if (mIoMode== ioWrite ) closeWrite();
+  if (mIoMode== ioRead ) closeRead();
+  DEBUGMESSAGE3("after close");
+  saveDelete(mChain);
+//VP  saveDelete(mTTree);
+  delete mEmcCollectionArray;
+  delete mPmdCollectionArray;
+  DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -621,7 +621,6 @@ void StMuDstMaker::read(){
     int bytes = mChain->GetEntry(mEventCounter++);
     while (bytes==0 ) {
       DEBUGVALUE3(mEventCounter);
-      DEBUGVALUE3(mChain->GetEntries());
       if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
       bytes = mChain->GetEntry(mEventCounter++);
       DEBUGVALUE3(bytes);
@@ -752,7 +751,6 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     e.print();
     throw e;
   }
-  setQvectors();
 }
 
 
@@ -949,106 +947,6 @@ void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
   for (StSPtrVecTrackNodeConstIterator iter=nodes.begin(); iter!=nodes.end(); iter++) {
     addTrackNode(ev, *iter, cut, mArrays[muGlobal], mArrays[muPrimary], mArrays[muOther], false);
   }
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::calcQvectors(TObjArray &tracks, Int_t qIdx, TVector2 &qA, unsigned short &multA, TVector2 &qB, unsigned short &multB) {
-
-  // Can be replaced with tracks.Randomize() in ROOT >= 5.14
-  int iLast = tracks.GetLast();
-  for (Int_t i=0;i<iLast;i++) {
-    Int_t k = (Int_t)gRandom->Uniform(0,iLast);
-    if (k == i) continue;
-    TObject *obj = tracks[i];
-    tracks.AddAt(tracks[k],i);
-    tracks.AddAt(obj,k);
-  }
-  // end of TObjArray::Randomize();
-
-  TIter iter(&tracks);
-  Int_t i=0;
-  qA.Set(0.,0.);
-  qB.Set(0.,0.);
-  multA = 0;
-  multB = 0;
-  while (StMuTrack *track = (StMuTrack*) iter()) {
-    if (i%2) {
-      multB++;
-      qB.Set(qB.X()+track->pt()*cos(2*track->phi()),
-	     qB.Y()+track->pt()*sin(2*track->phi()));
-      if (qIdx == 0)
-	track->setQvectorFlag(track->QvectorFlag()+100);
-      else
-	track->setQvectorFlag(track->QvectorFlag()+1);
-    }
-    else {
-      multA++;
-      qA.Set(qA.X()+track->pt()*cos(2*track->phi()),
-	     qA.Y()+track->pt()*sin(2*track->phi()));
-    }
-    i++;
-  }
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::setQvectors() {
-  DEBUGMESSAGE2("");
-  StTimer timer;
-  timer.start();
-
-  TObjArray qTracks;
-  TObjArray qNegEastTracks;
-  TObjArray qPosEastTracks;
-  TObjArray qNegWestTracks;
-  TObjArray qPosWestTracks;
-  
-  //TIter iter(StMuDst::primaryTracks());
-  TIter iter(StMuDst::array(muPrimary));
-
-  while (StMuTrack *track = (StMuTrack *) iter()) {
-    if (track->vertexIndex() == 0 &&
-	track->nHitsFit() > 15 &&
-	track->nHitsFit() > 0.52*track->nHitsPoss() &&
-	track->dcaGlobal().mag() < 2 && 
-	fabs(track->eta()) < 1 &&
-        track->pt() > 0.15 &&
-        track->pt() < 2.0) {
-      qTracks.Add(track);
-      track->setQvectorFlag(100);
-      if (track->charge() > 0) {
-	if (track->eta() < 0) {
-	  qPosEastTracks.Add(track);
-          track->setQvectorFlag(105);
-        }
-	else {
-	  qPosWestTracks.Add(track);
-          track->setQvectorFlag(107);
-        }
-      }
-      else {
-	if (track->eta() < 0) {
-	  qNegEastTracks.Add(track);
-          track->setQvectorFlag(101);
-        }
-	else {
-	  qNegWestTracks.Add(track);
-          track->setQvectorFlag(103);
-        }
-      }
-    }
-  }
-
-  StMuEvent *event = StMuDst::event(); 
-  calcQvectors(qTracks, 0, event->mQA, event->mMultQA, event->mQB, event->mMultQB);
-  calcQvectors(qNegEastTracks, 1, event->mQNegEastA, event->mMultQNegEastA, event->mQNegEastB, event->mMultQNegEastB);
-  calcQvectors(qNegWestTracks, 1, event->mQNegWestA, event->mMultQNegWestA, event->mQNegWestB, event->mMultQNegWestB);
-  calcQvectors(qPosEastTracks, 1, event->mQPosEastA, event->mMultQPosEastA, event->mQPosEastB, event->mMultQPosEastB);
-  calcQvectors(qPosWestTracks, 1, event->mQPosWestA, event->mMultQPosWestA, event->mQPosWestB, event->mMultQPosWestB);
-
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
@@ -1381,10 +1279,8 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.79  2007/04/01 21:38:47  mvl
- * Added Q-vectors in StMuEvent. The pt-weieghtd Q-vectors are calculated in two random subevents (A and B) when filling the MuDst from StEvent in StMuDstMaker.
- * A total of 10 Q-vectors are stored: 2 (A and B) for the entire event (with track-cuts in StMuDstMaker::setQvectors) and 8 for four different subevents (pos/neg and east/west and A/B).
- * A flag (mQvectorFlag) is added in StMuTrack to signal which Q-vectors the track participates in. StMuTrack::isinQA() etc can be used to decode the flag.
+ * Revision 1.80  2007/04/20 06:26:00  mvl
+ * Removed Q-vector calculation. Will implement utility class instead.
  *
  * Revision 1.78  2007/02/07 07:53:09  mvl
  * Added SetEventList function to read only pre-selected events (by J. Webb)

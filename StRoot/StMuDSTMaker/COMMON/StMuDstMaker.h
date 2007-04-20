@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.44 2007/04/01 21:38:48 mvl Exp $
+ * $Id: StMuDstMaker.h,v 1.45 2007/04/20 06:26:01 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -77,7 +77,6 @@ class TTree;
 class TChain;
 class TClonesArray;
 class TEventList;
-class TVector2;
 
 /**
    \class StMuDstMaker
@@ -153,7 +152,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.44 2007/04/01 21:38:48 mvl Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.45 2007/04/20 06:26:01 mvl Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -163,10 +162,6 @@ protected:
   /// routine to set up connection between mEmcCollection and Emc arrays
   void connectEmcCollection();
   void connectPmdCollection();
-
-  void calcQvectors(TObjArray &tracks, int qIdx, TVector2 &qA, unsigned short &multA, TVector2 &qB, unsigned short &multB);
-  void setQvectors();
-  
   enum ioMode {ioRead, ioWrite};
   /** Specifies the way the output file name is contructed when creating muDsts.
       ioFix = use filename specified in when calling the constructor, right in the
@@ -343,10 +338,8 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
- * Revision 1.44  2007/04/01 21:38:48  mvl
- * Added Q-vectors in StMuEvent. The pt-weieghtd Q-vectors are calculated in two random subevents (A and B) when filling the MuDst from StEvent in StMuDstMaker.
- * A total of 10 Q-vectors are stored: 2 (A and B) for the entire event (with track-cuts in StMuDstMaker::setQvectors) and 8 for four different subevents (pos/neg and east/west and A/B).
- * A flag (mQvectorFlag) is added in StMuTrack to signal which Q-vectors the track participates in. StMuTrack::isinQA() etc can be used to decode the flag.
+ * Revision 1.45  2007/04/20 06:26:01  mvl
+ * Removed Q-vector calculation. Will implement utility class instead.
  *
  * Revision 1.43  2007/02/07 07:53:09  mvl
  * Added SetEventList function to read only pre-selected events (by J. Webb)
