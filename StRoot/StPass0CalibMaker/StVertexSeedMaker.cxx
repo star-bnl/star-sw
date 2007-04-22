@@ -162,13 +162,13 @@ Int_t StVertexSeedMaker::Make(){
 
   // Currently only finds database values for first event
   if (a[0] == -888) {
-    gMessMgr->Info("StVertexSeedMaker: Reading db values at the start...");
+    LOG_INFO << "Reading db values at the start..." << endm;
     Int_t status = FillAssumed();
     if (status != kStOk) return status;
   }
 
   if (CheckTriggers()) {   // returns false for good events
-    gMessMgr->Info("StVertexSeedMaker: event does not satisfy triggers");
+    LOG_INFO << "event does not satisfy triggers" << endm;
     return kStOk;
   }
 
@@ -176,15 +176,15 @@ Int_t StVertexSeedMaker::Make(){
   if (eventResult != kStOk) return eventResult;
 
   if (zvertex<-998) {
-    gMessMgr->Info("StVertexSeedMaker: No primary vertex");
+    LOG_INFO << "No primary vertex" << endm;
     return kStOk;
   }
 
   // Calculate guessed vertex x & y from assumed params and measured z
   xguess = a[0] + (a[1] * zvertex);
   yguess = a[2] + (a[3] * zvertex);
-  gMessMgr->Info() << "StVertexSeedMaker::x guess = " << xguess << endm; 
-  gMessMgr->Info() << "StVertexSeedMaker::y guess = " << yguess << endm; 
+  LOG_INFO << "x guess = " << xguess << endm; 
+  LOG_INFO << "y guess = " << yguess << endm; 
 
   // Check to see if vertex is good for use in the fit
   float r2vertex = xvertex*xvertex + yvertex*yvertex;
@@ -214,7 +214,7 @@ Bool_t StVertexSeedMaker::CheckTriggers() {
   StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
   St_DataSet *daqReaderSet = GetDataSet("StDAQReader");
   if (!daqReaderSet) {
-    gMessMgr->Error("StVertexSeedMaker: No StDAQReader!");
+    LOG_ERROR << "No StDAQReader!" << endm;
     return kStErr;
   }
   StTrigSummary* trigSummary =
@@ -386,13 +386,13 @@ Int_t StVertexSeedMaker::GetEventData() {
   // Get primary vertex from evr
   TDataSet *ds=GetDataSet("dst/vertex");
   if (!ds) {
-    gMessMgr->Error("StVertexSeedMaker: Cannot locate vertex dataset!");
+    LOG_ERROR << "Cannot locate vertex dataset!" << endm;
     return kStErr;
   }
   TDataSetIter dsiter(ds);
   St_dst_vertex *vert = (St_dst_vertex *) dsiter.Find("vertex");
   if (!vert) {
-    gMessMgr->Error("StVertexSeedMaker: Cannot locate vertex table!");
+    LOG_ERROR << "Cannot locate vertex table!" << endm;
     return kStErr;
   }
   dst_vertex_st *sth = vert->GetTable();
@@ -413,24 +413,22 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
   if (nverts >= minEntries){
     FitData();
     if (ep[0] > maxX0Err){
-      gMessMgr->Error() << "StVertexSeedMaker::x unstable. x0 error = " <<
-        ep[0] << " cm." << endm;
+      LOG_ERROR << "x unstable. x0 error = " << ep[0] << " cm." << endm;
     }
     if (ep[2] > maxY0Err){
-      gMessMgr->Error() << "StVertexSeedMaker::y unstable. y0 error = " <<
-        ep[2] << " cm." << endm;
+      LOG_ERROR << "y unstable. y0 error = " << ep[2] << " cm." << endm;
     }
     if ((ep[0] <= maxX0Err) && (ep[2] <= maxY0Err)) {
       if (checkDb) {
         // Do comparison of this data with data from database to see if
         // values have changed or improved.
-        gMessMgr->Info("StVertexSeedMaker: Reading db values at the end...");
+        LOG_INFO << "Reading db values at the end..." << endm;
         Int_t status = FillAssumed();
         if (status == kStOk) {
           if (ChangedValues() || BetterErrors()) writeIt = kTRUE;
-          else gMessMgr->Info("StVertexSeedMaker: Values have not changed/improved.");
+          else { LOG_INFO << "Values have not changed/improved." << endm; }
         } else {
-          gMessMgr->Warning("StVertexSeedMaker: Could not get db values.");
+          LOG_WARN << "Could not get db values." << endm;
           writeIt = kTRUE;
         }
       } else {
@@ -438,20 +436,20 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
       }
     }
   } else {
-    gMessMgr->Error() << "StVertexSeedMaker: Insufficient stats for " <<
+    LOG_ERROR << "Insufficient stats for " <<
      "mean vertex determination.\n  Only " << nverts << " entries." << endm;
   }
 
   if (writeIt) WriteTableToFile();
-  else gMessMgr->Warning("StVertexSeedMaker: Not writing table!!!!!");
+  else { LOG_WARN << "Not writing table!!!!!" << endm; }
 
   if (mHistOut) WriteHistFile();
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.32 2006/09/01 22:27:16 genevb Exp $\n");
-  printf("**************************************************************\n");
+  LOG_INFO << "\n**************************************************************"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.33 2007/04/22 04:25:59 genevb Exp $"
+           << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
 }
@@ -460,12 +458,12 @@ void StVertexSeedMaker::WriteTableToFile(){
   char filename[80]; 
   if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
   sprintf(filename,"%svertexSeed.%08d.%06d.C",defDir.Data(),date,time);
-  gMessMgr->Info() << "StVertexSeedMaker: Writing new table to:\n  "
+  LOG_INFO << "Writing new table to:\n  "
     << filename << endm;
   TString dirname = gSystem->DirName(filename);
   if (gSystem->OpenDirectory(dirname.Data())==0) { 
     if (gSystem->mkdir(dirname.Data())) {
-      gMessMgr->Warning() << "Directory creation failed for:\n  " << dirname
+      LOG_WARN << "Directory creation failed for:\n  " << dirname
       << "\n  Putting table file in current directory" << endm;
       for (int i=0;i<80;i++){filename[i]=0;}
       sprintf(filename,"vertexSeed.%08d.%06d.C",date,time);
@@ -496,19 +494,19 @@ St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteHistFile(){
   if (resNtuple->GetEntries() == 0) {
-    gMessMgr->Info("StVertexSeedMaker: Not writing histograms - no entries!!!");
+    LOG_INFO << "Not writing histograms - no entries!!!" << endm;
     return;
   }
   char filename[80]; 
   // .ROOT is NOT a typo !!!
   if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
   sprintf(filename,"%svertexseedhist.%08d.%06d.ROOT",defDir.Data(),date,time);
-  gMessMgr->Info() << "StVertexSeedMaker: Writing new histograms to:\n  "
+  LOG_INFO << "Writing new histograms to:\n  "
     << filename << endm;
   TString dirname = gSystem->DirName(filename);
   if (gSystem->OpenDirectory(dirname.Data())==0) { 
     if (gSystem->mkdir(dirname.Data())) {
-      gMessMgr->Warning() << "Directory creation failed for:\n  " << dirname
+      LOG_WARN << "Directory creation failed for:\n  " << dirname
       << "\n  Putting histogram file in current directory" << endm;
       for (int i=0;i<80;i++){filename[i]=0;}
       sprintf(filename,"vertexseedhist.%08d.%06d.ROOT",date,time);
@@ -523,13 +521,13 @@ void StVertexSeedMaker::WriteHistFile(){
 Int_t StVertexSeedMaker::FillAssumed(){
   TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
   if (!dbDataSet) {
-    gMessMgr->Error("StVertexSeedMaker: Could not find Calibrations/rhic database");
+    LOG_ERROR << "Could not find Calibrations/rhic database" << endm;
     return kStErr;
   }
   St_vertexSeed* dbTableC =
     (St_vertexSeed*) (dbDataSet->FindObject("vertexSeed"));
   if (!dbTableC) {
-    gMessMgr->Error("StVertexSeedMaker: Could not find vertexSeed in database");
+    LOG_ERROR << "Could not find vertexSeed in database" << endm;
     return kStErr;
   }
   vertexSeed_st* dbTable = dbTableC->GetTable();
@@ -541,7 +539,7 @@ Int_t StVertexSeedMaker::FillAssumed(){
   ea[1] = dbTable->err_dxdz;
   ea[2] = dbTable->err_y0;
   ea[3] = dbTable->err_dydz;
-  gMessMgr->Info() << "StVertexSeedMaker: Assumed values:"
+  LOG_INFO << "Assumed values:"
     << "\n     x0 assumed = " << a[0] << " +/- " << ea[0]
     << "\n   dxdz assumed = " << a[1] << " +/- " << ea[1]
     << "\n     y0 assumed = " << a[2] << " +/- " << ea[2]
@@ -554,7 +552,7 @@ Bool_t StVertexSeedMaker::BetterErrors(){
   Bool_t better = kFALSE;
   if ((ep[0] < ea[0]) || (ep[1] < ea[1]) ||
       (ep[2] < ea[2]) || (ep[3] < ea[3])) better = kTRUE;
-  if (better) gMessMgr->Info("StVertexSeedMaker: Values have improved");
+  if (better) { LOG_INFO << "Values have improved" << endm; }
   return better;
 }
 //_____________________________________________________________________________
@@ -564,15 +562,15 @@ Bool_t StVertexSeedMaker::ChangedValues(){
     double diff = TMath::Abs(p[i] - a[i]);
     if ((diff >= ep[i]) || (diff >= ea[i])) changed = kTRUE;
   }
-  if (changed) gMessMgr->Info("StVertexSeedMaker: Values have changed");
+  if (changed) { LOG_INFO << "Values have changed" << endm; }
   return changed;
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::FillDateTime() {
   date = GetDate();
   time = GetTime();
-  gMessMgr->Info() << "StVertexSeedMaker: event date = " << date << endm;
-  gMessMgr->Info() << "StVertexSeedMaker: event time = " << time << endm;
+  LOG_INFO << "event date = " << date << endm;
+  LOG_INFO << "event time = " << time << endm;
   if (!useEventDateTime) GetFillDateTime();
 }
 //_____________________________________________________________________________
@@ -598,8 +596,7 @@ void StVertexSeedMaker::GetFillDateTime() {
   if (ts) {
     // Find earliest entry for this fill
     run = *(int*) (tab->getDataValue("runNumber",0));
-    gMessMgr->Info() << "StVertexSeedMaker: " << tdstr << " is from run "
-      << run << endm;
+    LOG_INFO << tdstr << " is from run " << run << endm;
     float thisFill = *(float*) (tab->getDataValue("blueFillNumber",0));
     sprintf(queryStr,
       " where blueFillNumber=%f and deactive=0 order by beginTime asc limit 1",
@@ -613,19 +610,18 @@ void StVertexSeedMaker::GetFillDateTime() {
     start[8] = 0;
     date = atoi(start);
 
-    gMessMgr->Info() << "StVertexSeedMaker: Using fill no.  = " << fill << endm;
-    gMessMgr->Info() << "StVertexSeedMaker: Using fill date = " << date << endm;
-    gMessMgr->Info() << "StVertexSeedMaker: Using fill time = " << time << endm;
+    LOG_INFO << "Using fill no.  = " << fill << endm;
+    LOG_INFO << "Using fill date = " << date << endm;
+    LOG_INFO << "Using fill time = " << time << endm;
   } else {
-    gMessMgr->Warning() <<
-      "StVertexSeedMaker: Could not find beamInfo in database\n" <<
+    LOG_WARN << "Could not find beamInfo in database\n" <<
       "  Using event date/time." << endm;
     UseEventDateTime();
   }
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::FitData() {
-   gMessMgr->Info() << "StVertexSeedMaker: Now fitting the data..." <<
+   LOG_INFO << "Now fitting the data..." <<
      "\n  *****************************************************" << endm;
    TVirtualFitter *minuit = TVirtualFitter::Fitter(0,4);
    minuit->SetFCN(fnch);
@@ -645,7 +641,7 @@ void StVertexSeedMaker::FitData() {
    arglist[0] = 500;
    int status = minuit->ExecuteCommand("MIGRAD", arglist ,1);
    if (status) {
-     gMessMgr->Error() << "StVertexMaker: error on migrad call, err = "
+     LOG_ERROR << "StVertexMaker: error on migrad call, err = "
        << status << endm;
      return;
    }
@@ -654,8 +650,7 @@ void StVertexSeedMaker::FitData() {
    int nvpar,nparx;
    minuit->GetStats(amin,edm,errdef,nvpar,nparx);
    chi = amin/((double) (nverts-4));
-   gMessMgr->Info() << "StVertexSeedMaker: chisq = " << amin
-     << ", chisq/dof = " << chi <<
+   LOG_INFO << "chisq = " << amin << ", chisq/dof = " << chi <<
      "\n  *****************************************************" << endm;
    
    char pname[10];
@@ -702,7 +697,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
     time = atoi(dateTime.Remove(0,9).Remove(6).Data());
     GetFillDateTime();
     if ((currentFile) && (fill != fillf)) {
-      gMessMgr->Info() << "StVertexSeedMaker: Fill number has changed\n"
+      LOG_INFO << "Fill number has changed\n"
         << "  Processing data from previous fill before continuing" << endm;
       int fillp = fill;
       int datep = date;
@@ -719,8 +714,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
       time = timep;
     }
 
-    gMessMgr->Info() << "StVertexSeedMaker: Now opening file:\n  "
-      << fileName << endm;
+    LOG_INFO << "Now opening file:\n  " << fileName << endm;
     if (currentFile) currentFile->Close();
     currentFile = new TFile(fileName);
     TNtuple* curNtuple = (TNtuple*) currentFile->Get("resNtuple");
@@ -734,25 +728,25 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
         addVert(vals[1],vals[2],vals[3],vals[4]);
         weight += vals[4];
       } else {
-        gMessMgr->Info() << "StVertexSeedMaker: Invalid trigger: "
-          << tid << endm;
+        LOG_INFO << "Invalid trigger: " << tid << endm;
       }
     }
-    gMessMgr->Info() << "StVertexSeedMaker: Current statistics: "
-      << nverts << endm;
+    LOG_INFO << "Current statistics: " << nverts << endm;
   }
   if (currentFile) {
     currentFile->Close();
     currentFile = 0;
     FindResult(kFALSE);
   }
-  gMessMgr->Info() << "StVertexSeedMaker: Examined "
-    << nfiles << " files" << endm;
+  LOG_INFO << "Examined " << nfiles << " files" << endm;
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.32 2006/09/01 22:27:16 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.33 2007/04/22 04:25:59 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.33  2007/04/22 04:25:59  genevb
+// printf, gMessMgr ==> STAR Logger
+//
 // Revision 1.32  2006/09/01 22:27:16  genevb
 // More detailed info in ntuple
 //
