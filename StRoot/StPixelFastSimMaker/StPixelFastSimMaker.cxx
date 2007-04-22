@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.17 2007/04/16 19:10:52 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.18 2007/04/22 22:57:23 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.18  2007/04/22 22:57:23  wleight
+ * The two hits in the 17 cm layer are no longer combined into 1
+ *
  * Revision 1.17  2007/04/16 19:10:52  wleight
  * Added IST simulation (digitization but no clustering)
  *
@@ -295,7 +298,6 @@ Int_t StPixelFastSimMaker::Make()
   int nWafers[2]={10,13};
   double pitch=.006; //note, all lengths in centimeters unless explicitly noted
   int nStrips=640;
-  double spacing=.01686; //spacing between inner and outer halves of a layer
   int ladderCount;
   int waferCount;
   double icept;
@@ -313,6 +315,7 @@ Int_t StPixelFastSimMaker::Make()
     vector<StMcIstHit*> ladderHits;
     multimap<int, int> stripToKey;
     multimap<int, int> strip2ToKey;
+    multimap<int, int> strip1ToKey;
     istStrip strips1[640];
     istStrip strips2[640];
     istStrip sStrips[1280];
@@ -406,6 +409,7 @@ Int_t StPixelFastSimMaker::Make()
 			sindex=sindex+nStrips/2+1;
 			if(0<sindex && sindex<641){
 			  strips1[sindex-1].stripHits.push_back(sh);
+			  strip1ToKey.insert(std::pair<int,int>(sindex,mcIw->key()));
 			}
 			else{ LOG_INFO<<"bad strip index! "<<sindex<<endm;}
 			LOG_DEBUG<<"stripHit created with local x value "<<localpos[0]<<" and e value "<<mcIw->dE()<<" and assigned to strip "<<sindex<<endm;
@@ -469,45 +473,71 @@ Int_t StPixelFastSimMaker::Make()
 		      sTotE=sTotE+strips1[o].stripHits[p].e;
 		    }
 		    strips1[o].intercept=icept/sTotE;
-		    for(int q=0;q<640;q++){
-		      icept=0;
-		      sTotE=0;
-		      if(strips2[q].stripHits.size()){
-			for(int s=0;s<strips2[q].stripHits.size();s++){
-			  icept=icept+strips2[q].stripHits[s].localX*strips2[q].stripHits[s].e;
-			  sTotE=sTotE+strips2[q].stripHits[s].e;
-			}
-			strips2[q].intercept=icept/sTotE;
-			gGeoManager->RestoreMasterVolume();
-			gGeoManager->cd(PathIn);
-			TGeoNode* node=gGeoManager->GetCurrentNode();
-			localpos[0]=distortHit(strips1[o].intercept,pitch/sqrt(12.),100);
-			localpos[2]=distortHit(strips2[q].intercept,pitch/sqrt(12.),100);
-			localpos[1]=.0005;
-			LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
-			LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
-			LOG_DEBUG<<"path: "<<PathIn<<endm;
-			gpos[0]=0;
-			gpos[1]=0;
-			gpos[2]=0;
-			gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,gpos);
-			StThreeVectorF gposv(gpos);
-			StRnDHit* tempHit = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
-			tempHit->setDetectorId(kIstId); 
-			tempHit->setVolumeId(0);
-			multimap<int,int>::iterator iter=strip2ToKey.find(o+1);
-			if(iter!=strip2ToKey.end()){
-			  tempHit->setKey((*iter).second);
-			  strip2ToKey.erase(iter);
-			}
-			else tempHit->setKey(99999);
-			tempHit->setLayer(i+1);           
-			tempHit->setLadder(ladderCount);           
-			tempHit->setWafer(waferCount);
-			tempHit->setExtraByte0(1);                                                                
-			col->addHit(tempHit);
-		      }
+		    gGeoManager->RestoreMasterVolume();
+		    gGeoManager->cd(PathIn);
+		    TGeoNode* node=gGeoManager->GetCurrentNode();
+		    localpos[0]=distortHit(strips1[o].intercept,pitch/sqrt(12.),100);
+		    localpos[2]=distortHit(0,3.84/sqrt(12.),100);
+		    localpos[1]=.0005;
+		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
+		    LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
+		    LOG_DEBUG<<"path: "<<PathIn<<endm;
+		    gpos[0]=0;
+		    gpos[1]=0;
+		    gpos[2]=0;
+		    gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,gpos);
+		    StThreeVectorF gposv(gpos);
+		    StRnDHit* tempHit = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
+		    tempHit->setDetectorId(kIstId); 
+		    tempHit->setVolumeId(0);
+		    multimap<int,int>::iterator iter=strip1ToKey.find(o+1);
+		    if(iter!=strip1ToKey.end()){
+		      tempHit->setKey((*iter).second);
+		      strip1ToKey.erase(iter);
 		    }
+		    else tempHit->setKey(99999);
+		    tempHit->setLayer(i+1);           
+		    tempHit->setLadder(ladderCount);           
+		    tempHit->setWafer(waferCount);
+		    tempHit->setExtraByte0(1);                                                                
+		    col->addHit(tempHit);
+		  }
+		  icept=0;
+		  sTotE=0;
+		  if(strips2[o].stripHits.size()){
+		    for(int s=0;s<strips2[o].stripHits.size();s++){
+		      icept=icept+strips2[o].stripHits[s].localX*strips2[o].stripHits[s].e;
+		      sTotE=sTotE+strips2[o].stripHits[s].e;
+		    }
+		    strips2[o].intercept=icept/sTotE;
+		    gGeoManager->RestoreMasterVolume();
+		    gGeoManager->cd(PathIn);
+		    TGeoNode* node=gGeoManager->GetCurrentNode();
+		    localpos[0]=distortHit(0,3.84/sqrt(12.),100);
+		    localpos[2]=distortHit(strips2[o].intercept,pitch/sqrt(12.),100);
+		    localpos[1]=-.0005;
+		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
+		    LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
+		    LOG_DEBUG<<"path: "<<PathIn<<endm;
+		    gpos[0]=0;
+		    gpos[1]=0;
+		    gpos[2]=0;
+		    gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,gpos);
+		    StThreeVectorF gposv(gpos);
+		    StRnDHit* tempHit2 = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
+		    tempHit2->setDetectorId(kIstId); 
+		    tempHit2->setVolumeId(0);
+		    multimap<int,int>::iterator iter=strip2ToKey.find(o+1);
+		    if(iter!=strip2ToKey.end()){
+		      tempHit2->setKey((*iter).second);
+		      strip2ToKey.erase(iter);
+		    }
+		    else tempHit2->setKey(99999);
+		    tempHit2->setLayer(i+1);           
+		    tempHit2->setLadder(ladderCount);           
+		    tempHit2->setWafer(waferCount);
+		    tempHit2->setExtraByte0(1);                                                                
+		    col->addHit(tempHit2);
 		  }
 		}
 	      }
@@ -521,6 +551,7 @@ Int_t StPixelFastSimMaker::Make()
 	      }
 	      stripToKey.clear();
 	      strip2ToKey.clear();
+	      strip1ToKey.clear();
 	    }
 	    ladderCount++;
 	    ladderHits.clear();
@@ -535,7 +566,7 @@ Int_t StPixelFastSimMaker::Make()
     }
 
     
-    const StMcHpdHitCollection* hpdHitCol = mcEvent->hpdHitCollection();	       			
+  /*const StMcHpdHitCollection* hpdHitCol = mcEvent->hpdHitCollection();	       			
     if (hpdHitCol)							
     {									
       Int_t nhits = hpdHitCol->numberOfHits();
@@ -578,7 +609,7 @@ Int_t StPixelFastSimMaker::Make()
     {
       cout <<"No hpd hits found."<<endl;
     }
-
+  */
     
    const StMcIgtHitCollection* igtHitCol= mcEvent->igtHitCollection();					
     
