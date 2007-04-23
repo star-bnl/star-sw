@@ -1,13 +1,13 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.20 2007/04/23 17:47:31 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.21 2007/04/23 18:11:30 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
- * Revision 1.20  2007/04/23 17:47:31  andrewar
- * Added initialized values to remove warnings.
+ * Revision 1.21  2007/04/23 18:11:30  andrewar
+ * Removed references to Hpd (includes were obsolete)
  *
  * Revision 1.19  2007/04/23 16:32:47  wleight
  * Added explicit casting for double to int in calculating strip number
@@ -73,7 +73,7 @@
 #include "StMcEvent.hh"
 #include "StMcHit.hh"
 #include "StMcIstHit.hh"
-#include "StMcHpdHit.hh"
+
 #include "StMcPixelHit.hh"
 #include "StMcEventTypes.hh"
 #include "Sti/Base/Factory.h"
@@ -110,21 +110,7 @@ int StPixelFastSimMaker::Init()
   myRandom=new StRandom();
   myRandom->setSeed(seed);
 
-  // Define various HPD specific geom. variables
-  resXHpd = 0.0012;
-  resZHpd = 0.0120;
-  double raddeg = acos(-1.)/180.0;
-  tiltAngleHpd = 60.*raddeg;
-  int nLadders = 48;
-  rotAngleHpd = 360*raddeg/(double)nLadders;
-  offsetAngleHpd = 3.75*raddeg;
-  radiusHpd = 9.1;
-  double activeLength = 1.36;
-  double guardLength = 0.112/2.;
-  double pLength = 0.001/2.;
-  double cellLength = activeLength+2*guardLength+pLength;
-  waferLengthHpd = 5*cellLength;
-  ladderWidthHpd = 1.28;
+ 
   mSmear=1;
   return kStOk;
 }
@@ -134,12 +120,8 @@ int StPixelFastSimMaker::InitRun(int RunNo)
 {
 
   // Define various HPD hit errors from database
+
   TDataSet *set = GetDataBase("Calibrations/tracker");
-  St_HitError *tableSet = (St_HitError *)set->Find("hpdHitError");
-  HitError_st* hitError = tableSet->GetTable();
-  resXHpd = sqrt(hitError->coeff[0]);
-  resZHpd = sqrt(hitError->coeff[3]);
- 
   St_HitError *ist1TableSet = (St_HitError *)set->Find("ist1HitError");
   St_HitError *ist2TableSet = (St_HitError *)set->Find("ist2HitError");
   HitError_st* ist1HitError = ist1TableSet->GetTable();
@@ -743,80 +725,6 @@ double StPixelFastSimMaker::distortHit(double x, double res, double detLength){
   else return x;
 }
 //____________________________________________________________
-StThreeVectorF StPixelFastSimMaker::global2LocalHpd(const StThreeVectorF& global, int ladder){
-  // Local X direction is in r/phi of STAR global coords.
-  // Local Z is in STAR's Z direction
-  // Local Y is into the thickness of the wafer and ==0
-  StThreeVectorF local;
-
-   // Find mid point of detector
-
-  double x0 = radiusHpd*cos(rotAngleHpd*(double)ladder+offsetAngleHpd);
-  double y0 = radiusHpd*sin(rotAngleHpd*(double)ladder+offsetAngleHpd);
-
-  double x = global.x()-x0;
-  double y = global.y()-y0;
-
-
-  // Rotate coords by tilt angle
-  local.setX(x*cos(tiltAngleHpd) + y*sin(tiltAngleHpd));
-  local.setY(y*cos(tiltAngleHpd) - x*sin(tiltAngleHpd));   
-
-  x = local.x();
-  y = local.y();
-  // Rotate coords by global rotation angle and shift to average radius
-
-
-   local.setX(x*cos(rotAngleHpd*(double)ladder+offsetAngleHpd) +
-  	     y*sin(rotAngleHpd*(double)ladder+offsetAngleHpd));
-  
-   local.setY(y*cos(rotAngleHpd*(double)ladder+offsetAngleHpd) -
-	      x*sin(rotAngleHpd*(double)ladder+offsetAngleHpd));
-
-
-  // Z stays z
-   // local.setZ(global.z()-z0);
-   local.setZ(global.z());
-   return local;
-}
-
-//__________________________________________________________________________
-StThreeVectorF StPixelFastSimMaker::local2GlobalHpd(const StThreeVectorF& local, int ladder){
-  // Local X direction is in r/phi of STAR global coords.
-  // Local Z is in STAR's Z direction
-  // Local Y is into the thickness of the wafer and ==0
-  StThreeVectorF global;
-
-  // Find mid point of detector
-  double x0 = radiusHpd*cos(rotAngleHpd*(double)ladder+offsetAngleHpd);
-  double y0 = radiusHpd*sin(rotAngleHpd*(double)ladder+offsetAngleHpd);
-
-  // Rotate coords by global rotation angle and shift to average radius
-
-
-  global.setX(local.x()*cos(rotAngleHpd*(double)ladder+offsetAngleHpd) -
-	      local.y()*sin(rotAngleHpd*(double)ladder+offsetAngleHpd));
-  
-  global.setY(local.x()*sin(rotAngleHpd*(double)ladder+offsetAngleHpd) +
-	      local.y()*cos(rotAngleHpd*(double)ladder+offsetAngleHpd));
-  
-
-  // Rotate coords by tilt angle
-
-  double x = global.x();
-  double y = global.y();
-  global.setX(x*cos(tiltAngleHpd) - y*sin(tiltAngleHpd));
-  global.setY(x*sin(tiltAngleHpd) + y*cos(tiltAngleHpd)); 
-
-  global.setX(global.x()+ x0);
-  global.setY(global.y()+ y0);
-
-  // Z stays z
-  global.setZ(local.z() );
-  
-  return global;
-
-}
 
 
 //____________________________________________________________

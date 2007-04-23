@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.7 2007/04/16 19:10:52 wleight Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.8 2007/04/23 18:11:48 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.8  2007/04/23 18:11:48  andrewar
+ * Removed references to Hpd (includes were obsolete)
+ *
  * Revision 1.7  2007/04/16 19:10:52  wleight
  * Added IST simulation (digitization but no clustering)
  *
@@ -103,9 +106,6 @@ class StPixelFastSimMaker : public StMaker {
   /* \brief Accept method for monte carlo event. */
   virtual Bool_t accept(StMcEvent* event);
 
-  //Routines for transforming HPD hits
-  StThreeVectorF local2GlobalHpd(const StThreeVectorF& local, int ladder);
-  StThreeVectorF global2LocalHpd(const StThreeVectorF& global, int ladder);
 
   //Routine to smear hit by resolution with gaussian, mean zero and width res
   double distortHit(double x, double res, double detLength);
@@ -118,7 +118,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.7 2007/04/16 19:10:52 wleight Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.8 2007/04/23 18:11:48 andrewar Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -130,18 +130,12 @@ class StPixelFastSimMaker : public StMaker {
 
  protected:
   StRandom* myRandom;
-  double resXHpd;
-  double resZHpd;
+
   double resXIst1;
   double resZIst1;
   double resXIst2;
   double resZIst2;
-  double tiltAngleHpd;
-  double rotAngleHpd;
-  double offsetAngleHpd;
-  double radiusHpd;
-  double waferLengthHpd;
-  double ladderWidthHpd;
+
 
 
 
