@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.24 2007/04/02 22:22:55 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.25 2007/04/23 19:59:07 rfatemi Exp $
 //
 //
 
@@ -127,7 +127,7 @@ void StBemcTrigger::zero()
     for(int i=0;i<kNPatches;i++)
     {
         mTrigger.HT[i] = 0;
-	mTrigger.HTID[i]=0;
+        mTrigger.HTID[i]=0;
         mTrigger.Patch[i]= 0;
     }
 
@@ -142,6 +142,9 @@ void StBemcTrigger::zero()
 
 
 void StBemcTrigger::PatchMap()
+  ///This is only used for trigger years before 2006 and is WRONG on the EAST BEMC for these years. 
+  ///For year 2006 the TP->tower mapping is taken directly from EmcDecoder
+
 {
 
     for (int i=0;i<20;i++)
@@ -220,6 +223,23 @@ void StBemcTrigger::PatchMap()
        10       3701-4100                 08
        11       4101-4500                 10                            
     **************************************************************************/
+
+
+   /*
+    int renee[12];
+    renee[0] = 5;
+    renee[1] = 0;
+    renee[2] = 1;
+    renee[3] = 2;
+    renee[4] = 3;
+    renee[5] = 4;
+    renee[6] = 7;
+    renee[7] = 6;
+    renee[8] = 11;
+    renee[9] = 10;
+    renee[10] = 9;
+    renee[11] = 8;
+    */
 
 }
 
@@ -1198,6 +1218,7 @@ int StBemcTrigger::get2006Trigger()
         LOG_WARN << "StBemcTrigger::make2006Trigger() -- no StEvent!" << endm;
         return kStWarn;
     }
+    
     StEmcCollection *emc = mEvent->emcCollection();
     if(!emc)
     {
@@ -1210,13 +1231,16 @@ int StBemcTrigger::get2006Trigger()
     int adc10[kNTowers];
     int adc08[kNTowers];
     int ped10[kNTowers];
-    for(int i=0;i<kNTowers;i++){
+    for(int i = 0; i < kNTowers; ++i)
+    {
+    
         adc12[i] = 0;
         adc10[i] = 0;
         adc08[i] = 0;
         ped10[i] = 0;
-	HT2_2006_array[i]=-1;
-        mHT22006array[i]=-1;
+        HT2_2006_array[i] = -1;
+        mHT22006array[i] = -1;
+    
     }
 
     mnumHT[5]=0;
@@ -1224,20 +1248,24 @@ int StBemcTrigger::get2006Trigger()
     mnumJP[6]=0;
 
     
-    for (int i=0;i<kNJet;i++){
-      JP1_2006_array[i]=-1;
-      JP2_2006_array[i]=-1;
-      mJP12006array[i]=-1;
-      mJP22006array[i]=-1;
-      mJPSI2006adc[i]=-1;
-      mJPSI2006id[i]=-1;
-     }
+    for(int i = 0; i < kNJet; ++i)
+    {
     
-    for (int i=0;i<kNPatches;i++){
-      BHTTP_2006_HT[i]=-1;
-      BHTTP_2006_HT_ADC[i]=-1;
-      BHTTP_2006_TP[i]=-1;
-      BHTTP_2006_TP_ADC[i]=-1;
+        JP1_2006_array[i] = -1;
+        JP2_2006_array[i] = -1;
+        mJP12006array[i] = -1;
+        mJP22006array[i] = -1;
+        mJPSI2006adc[i] = -1;
+        mJPSI2006id[i] = -1;
+      
+    }
+    
+    for(int i = 0; i < kNPatches; ++i)
+    {
+        BHTTP_2006_HT[i]=-1;
+        BHTTP_2006_HT_ADC[i]=-1;
+        BHTTP_2006_TP[i]=-1;
+        BHTTP_2006_TP_ADC[i]=-1;
     }
 
     numHT2_2006=0;
@@ -1253,66 +1281,80 @@ int StBemcTrigger::get2006Trigger()
     StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
     if(detector)
     {
-        for(Int_t m=1;m<=120;m++)
+        
+        for(Int_t m = 1; m <= 120; ++m)
         {
+        
             StEmcModule* module = detector->module(m);
             if(module)
             {
+            
                 StSPtrVecEmcRawHit& rawHit=module->hits();
-                for(UInt_t k=0;k<rawHit.size();k++)
-		  {
+                for(UInt_t k = 0; k < rawHit.size(); ++k)
+                {
+                
                     if(rawHit[k])
-		      {
-			Int_t did;
-			Int_t mod=rawHit[k]->module();
-			Int_t e=rawHit[k]->eta();
-			Int_t s=abs(rawHit[k]->sub());
-			mGeo->getId(mod,e,s,did);
-			if(mTrigger.TowerStatus[did-1]==1)
-			  {
-			    adc12[did-1]=rawHit[k]->adc();
-			    adc10[did-1] = adc12[did-1]>>2;
-			    
-			    float NEWped=-1;
-			    float NEWrms=-1;
-			    mTables ->getPedestal(BTOW,did,0,NEWped,NEWrms);
-			    ped12bit=(int) NEWped;
-
-			    operation = 1;
-			    ped10[did-1] = ped12bit >> 2;
-			    val12bit = ped12bit - pedestalTargetValue2006;
-			    
-			    if(val12bit < 0)
-			      {
-				val12bit = -val12bit;
-				operation = 0;
-			      }
-			    int val10bit = val12bit/4;
-			    if(val12bit - val10bit*4 > 2) val10bit+=1;
-			    
-			    if(val10bit > 15)
-			      {
-				// can't subtract/add more than 15 on 10-bit level
-				val10bit = val10bit - 4*((val10bit-11)/4);
-			      }
-			    
-			    if(operation==1)
-			      {
-			      adc10[did-1] -= val10bit;
-			      ped10[did-1] -= val10bit;
-			      }
-			    else
-			      {
-				adc10[did-1] += val10bit;
-				ped10[did-1] += val10bit;
-			      }
-			  
-			    adc08[did-1] = adc10[did-1]>>2;// adc10[],adc08[] are pedestal-adjusted
-			  }
-		      }
-		  }
-	    }
-	}
+                    {
+                    
+                        Int_t did;
+                        Int_t mod=rawHit[k]->module();
+                        Int_t e=rawHit[k]->eta();
+                        Int_t s=abs(rawHit[k]->sub());
+                        mGeo->getId(mod,e,s,did);
+                        
+                        if(mTrigger.TowerStatus[did-1] == 1)
+                        {
+                        
+                            adc12[did-1]=rawHit[k]->adc();
+                            adc10[did-1] = adc12[did-1]>>2;
+                            
+                            float NEWped=-1;
+                            float NEWrms=-1;
+                            mTables ->getPedestal(BTOW,did,0,NEWped,NEWrms);
+                            ped12bit=(int) NEWped;
+                            
+                            operation = 1;
+                            ped10[did-1] = ped12bit >> 2;
+                            val12bit = ped12bit - pedestalTargetValue2006;
+                            
+                            if(val12bit < 0)
+                            {
+                                val12bit = -val12bit;
+                                operation = 0;
+                            }
+                            
+                            int val10bit = val12bit/4;
+                            if(val12bit - val10bit*4 > 2) val10bit+=1;
+                            
+                            if(val10bit > 15)
+                            {
+                                // can't subtract/add more than 15 on 10-bit level
+                                val10bit = val10bit - 4*((val10bit-11)/4);
+                            }
+                            
+                            if(operation==1)
+                            {
+                                adc10[did-1] -= val10bit;
+                                ped10[did-1] -= val10bit;
+                            }
+                            else
+                            {
+                                adc10[did-1] += val10bit;
+                                ped10[did-1] += val10bit;
+                            }
+                            
+                            adc08[did-1] = adc10[did-1]>>2;// adc10[],adc08[] are pedestal-adjusted
+                            
+                        }
+                        
+                    }
+                    
+                }
+                    
+            }
+            
+        }
+    
     }
     else
     {
@@ -1330,207 +1372,239 @@ int StBemcTrigger::get2006Trigger()
     float rped12bit;
     int HTmax=0;
     int HTmaxID=-1;
-    for(int i = 0;i<kNPatches;i++) {
+    
+    for(int i = 0; i < kNPatches; ++i) 
+    {
 
-      if(mTrigger.PatchStatus[i]==1) {
-
-	int crate = 0;
-	int seq  = 0;
-	int HT = 0;
-	int PA = 0;
-	int HTID = -1;
-	int id;
-	int patchPed = 0;
-	mDecoder->GetCrateAndSequenceFromTriggerPatch(i,crate,seq);
-	mTables->getTriggerPedestal(crate,seq,rped12bit);
-
-	//loop over each tower(j) in the trigger patch (i)
-	for(int j=seq;j<seq+16;j++)
-	  {
-	    int stat = mDecoder->GetTowerIdFromCrate(crate,j,id);
-	    if(stat==1)
-	      {
-		if(adc10[id-1]>=HT)
-		  {
-		    HT = adc10[id-1];
-		    HTID = id;
-		  }
-		patchPed+= (ped10[id-1]>>2);
-		PA+=adc08[id-1];
-	      }
-	    
-	  }
+        if(mTrigger.PatchStatus[i]==1) 
+        {
+        
+            int crate = 0;
+            int seq  = 0;
+            int HT = 0;
+            int PA = 0;
+            int HTID = -1;
+            int id;
+            int patchPed = 0;
+            
+            mDecoder->GetCrateAndSequenceFromTriggerPatch(i,crate,seq);
+            mTables->getTriggerPedestal(crate,seq,rped12bit);
+            
+            //loop over each tower(j) in the trigger patch (i)
+            for(int j = seq; j < seq + 16; ++j)
+            {
+            
+                int stat = mDecoder->GetTowerIdFromCrate(crate,j,id);
+                if(stat == 1)
+                {
+            
+                    if(adc10[id-1]>=HT)
+                    {
+                        HT = adc10[id-1];
+                        HTID = id;
+                    }
+                    
+                    patchPed += ped10[id-1] >> 2;
+                    PA += adc08[id-1];
+                }
+            
+            }
 	
-	
-	// now HT=10 bits and patch=12 bits
-	// convert patch sum to 6 bits using LUT
-	// during 2006 LUT's looked like this:
-	// 0,0,0,...,0,1,2,3,...,63,63,63 -- total 4096 entries
-	// <-- ped -->
-	// the number of 0's is equal to patchPed_12bit
-	if(PA >= patchPed){
-	  
-	  mTrigger.Patch[i] = PA - (patchPed-1);
-	  if(mTrigger.Patch[i] > 62)  mTrigger.Patch[i] = 62;
-	}
-	if(PA<patchPed) mTrigger.Patch[i]=1;
-	
-	// for HT need to:
-	//1) drop lowest bits (depends on calibration)
-	//2) take next 6 LSB as HT 6 bit adc
-	//3) if 6 or higher bit ==1 need to set all bits high (63)
-	HT = HT >> mTrigger.HTBits - 1;
-	int HTL = HT & 0x1F;//5 LSB
-	int HTH = HT >> 5;  //>= 6 LSB
-	int B5  = 0;
-	if(HTH>0) B5 = 1;
-	mTrigger.HT[i] = HTL+(B5<<5);
-	mTrigger.HTID[i] = HTID;
-	{ LOG_DEBUG <<"Patch number "<<i<<" Tower id = "<<mTrigger.HTID[i]<<" adc12 = "<<adc12[HTID-1]
-		<<" adc10 = "<<adc10[HTID-1]<<" adc08 = "<<adc08[HTID-1]<<" HT10 = "<<HT<<" PA12 = "<<PA
-		<<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm; }
-	
-	if (mTrigger.HT[i]>HTmax){
-	  HTmax=mTrigger.HT[i];
-	  HTmaxID=HTID;
-	}
-	
-	if (mTrigger.HT[i]>HT2_TH_2006){
-	  HT2_2006_array[numHT2_2006]=HTID;
-	  numHT2_2006++;
-	}
-      }
+            // now HT=10 bits and patch=12 bits
+            // convert patch sum to 6 bits using LUT
+            // during 2006 LUT's looked like this:
+            // 0,0,0,...,0,1,2,3,...,63,63,63 -- total 4096 entries
+            // <-- ped -->
+            // the number of 0's is equal to patchPed_12bit
+            if(PA >= patchPed)
+            {
+            
+                mTrigger.Patch[i] = PA - (patchPed - 1);
+                if(mTrigger.Patch[i] > 62)  mTrigger.Patch[i] = 62;
+            }
+            else
+            {
+                mTrigger.Patch[i] = 1;
+            }
+            
+            // for HT need to:
+            //1) drop lowest bits (depends on calibration)
+            //2) take next 6 LSB as HT 6 bit adc
+            //3) if 6 or higher bit ==1 need to set all bits high (63)
+            HT = HT >> mTrigger.HTBits - 1;
+            int HTL = HT & 0x1F;//5 LSB
+            int HTH = HT >> 5;  //>= 6 LSB
+            int B5  = 0;
+            if(HTH>0) B5 = 1;
+            mTrigger.HT[i] = HTL+(B5<<5);
+            mTrigger.HTID[i] = HTID;
+            
+            { 
+            LOG_DEBUG <<"Patch number "<<i<<" Tower id = "<<mTrigger.HTID[i]<<" adc12 = "<<adc12[HTID-1]
+            <<" adc10 = "<<adc10[HTID-1]<<" adc08 = "<<adc08[HTID-1]<<" HT10 = "<<HT<<" PA12 = "<<PA
+            <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm; 
+            }
+            
+            if(mTrigger.HT[i]>HTmax)
+            {
+                HTmax=mTrigger.HT[i];
+                HTmaxID=HTID;
+            }
+            
+            if(mTrigger.HT[i]>HT2_TH_2006)
+            {
+                HT2_2006_array[numHT2_2006]=HTID;
+                numHT2_2006++;
+            }
+        
+        }
+            
     }
-
+            
     //making HT trigger
-    if (HTmax>HT2_TH_2006)
-      {
+    if(HTmax > HT2_TH_2006)
+    {
         mIs2006HT2=1;
         HT2_ID_2006=HTmaxID;
         HT2_DSM_2006=HTmax;
-      }
+    }
     else
-      {
+    {
         mIs2006HT2=0;
         HT2_ID_2006=HTmaxID;
         HT2_DSM_2006=HTmax;
-      }
-
+    }
+    
     // making HTTP trigger
     int BHTTPcounter=0;
     mIs2006BHTTP=0;
-    for (int i=0; i<kNPatches; i++){
-      int HTBIT=-1;
-      int TPBIT=-1;
+    for(int i = 0; i < kNPatches; ++i)
+    {
     
-      if (mTrigger.HT[i] < HT0_TH_2006) HTBIT=0;
-      if (mTrigger.HT[i] > HT0_TH_2006) HTBIT=1;
-      if (mTrigger.HT[i] > HT1_TH_2006) HTBIT=2;
-      if (mTrigger.HT[i] > HT2_TH_2006) HTBIT=3;
-
-
-      if (mTrigger.Patch[i] < HTTP0_TH_2006) TPBIT=0;
-      if (mTrigger.Patch[i] > HTTP0_TH_2006) TPBIT=1;
-      if (mTrigger.Patch[i] > HTTP1_TH_2006) TPBIT=2;
-      if (mTrigger.Patch[i] > HTTP2_TH_2006) TPBIT=3;
-
-
-      if ((TPBIT>=2)&&(HTBIT>=2)){
-	mIs2006BHTTP=1;
-	BHTTP_2006_TP[BHTTPcounter]=i;
-	BHTTP_2006_TP_ADC[BHTTPcounter]=mTrigger.Patch[i];
-	BHTTP_2006_HT[BHTTPcounter]=mTrigger.HTID[i];
-	BHTTP_2006_HT_ADC[BHTTPcounter]=mTrigger.HT[i];
-
-	BHTTPcounter++;
-      }
+        int HTBIT = -1;
+        int TPBIT = -1;
+        
+        if (mTrigger.HT[i] < HT0_TH_2006) HTBIT = 0;
+        if (mTrigger.HT[i] > HT0_TH_2006) HTBIT = 1;
+        if (mTrigger.HT[i] > HT1_TH_2006) HTBIT = 2;
+        if (mTrigger.HT[i] > HT2_TH_2006) HTBIT = 3;
+        
+        if (mTrigger.Patch[i] < HTTP0_TH_2006) TPBIT = 0;
+        if (mTrigger.Patch[i] > HTTP0_TH_2006) TPBIT = 1;
+        if (mTrigger.Patch[i] > HTTP1_TH_2006) TPBIT = 2;
+        if (mTrigger.Patch[i] > HTTP2_TH_2006) TPBIT = 3;
+        
+        if( TPBIT >= 2 && HTBIT >= 2)
+        {
+            mIs2006BHTTP = 1;
+            BHTTP_2006_TP[BHTTPcounter] = i;
+            BHTTP_2006_TP_ADC[BHTTPcounter] = mTrigger.Patch[i];
+            BHTTP_2006_HT[BHTTPcounter] = mTrigger.HTID[i];
+            BHTTP_2006_HT_ADC[BHTTPcounter] = mTrigger.HT[i];
+            
+            BHTTPcounter++;
+        }
+        
     }
+    
     numHTTP_2006=BHTTPcounter;
     
-    // making JP trigger
-    // loop over TP as defined by Patch()
-    int JPmax=0;
-    int JPid=0;
-    for(int i = 0;i<kNJet; i++)
-    {
-        int p0 = 0;
-        int p1 = p0+25;
-
-        mTrigger.Jet[i]= 0;
-        for (int j=p0;j<p1;j++)
-        {
-            int k=JP_TP[i][j];
-            mTrigger.Jet[i]+=mTrigger.Patch[k];
-        }
-
-        if (mTrigger.Jet[i]>JPmax)
-        {
-            JPmax=mTrigger.Jet[i];
-            JPid=i;
-        }
-
-        if (mTrigger.Jet[i]>JP1_TH_2006)
-        {
-	  JP1_2006_array[numJP1_2006]=i;
-          numJP1_2006++;
-        }
-
-       if (mTrigger.Jet[i]>JP2_TH_2006)
-        {
-	  JP2_2006_array[numJP2_2006]=i;
-          numJP2_2006++;
-        }
-    }
-
-    if (JPmax>JP1_TH_2006)
-    {
+    // Clear jet patch variables
+    int JPmax = 0;
+    int JPid = 0;
+    
+    for(int i = 0; i < kNJet; ++i)
+      {
+        
+        mTrigger.Jet[i] = 0;
+        
+        for(int sequence = 0; sequence < kN_sequences; ++sequence)
+	  {
+            
+            int k = 0;
+            mDecoder->GetTriggerPatchFromJetPatch(i, sequence, k);
+            mTrigger.Jet[i] += mTrigger.Patch[k];
+            
+	  }
+        
+      }
+    
+    // Check jet patch triggers
+    for(int i = 0; i < kNJet; ++i)
+      {
+	
+        if(mTrigger.Jet[i] > JPmax)
+	  {
+            JPmax = mTrigger.Jet[i];
+            JPid = i;
+	  }
+	
+        if(mTrigger.Jet[i] > JP1_TH_2006)
+	  {
+            JP1_2006_array[numJP1_2006] = i;
+            ++numJP1_2006;
+	  }
+	
+        if(mTrigger.Jet[i] > JP2_TH_2006)
+	  {
+            JP2_2006_array[numJP2_2006] = i;
+            ++numJP2_2006;
+	  }
+        
+      }
+    
+    if(JPmax > JP1_TH_2006)
+      {
         mIs2006JP1=1;
         JP1_ID_2006=JPid;
         JP1_DSM_2006=JPmax;
-    }
+      }
     else
-    {
+      {
         mIs2006JP1=0;
         JP1_ID_2006=JPid;
         JP1_DSM_2006=JPmax;
-    }
-
- 
-    if (JPmax>JP2_TH_2006)
-    {
+      }
+    
+    
+    if(JPmax > JP2_TH_2006)
+      {
         mIs2006JP2=1;
         JP2_ID_2006=JPid;
         JP2_DSM_2006=JPmax;
-    }
+      }
     else
-    {
+      {
         mIs2006JP2=0;
         JP2_ID_2006=JPid;
         JP2_DSM_2006=JPmax;
-    }
-
+      }
+    
     //making ETOT trigger
     //combine 2 JP to form 13 bit adc
     //drop 2 LSB 
     //check if bit 6 or higher == 1
     mTrigger.Et = 0;
     int EtotSum[6];
-    for(int i = 0;i<6; i++) {
-      EtotSum[i]=0;
-      BL1_ADC_2006[i]=0;
-      Int_t j=2*i;
-      Int_t TempSum=0;
-      Int_t EtotHigh=0;
-      TempSum=mTrigger.Jet[j]+mTrigger.Jet[j+1];
-      TempSum=TempSum >> 2;
-      EtotHigh = TempSum >> 5;
-      int B5  = 0;
-      if(EtotHigh>0) B5 = 1;
-      EtotSum[i]=(TempSum & 0x1F);
-      EtotSum[i]+=B5<<5;
-      mTrigger.Et+=EtotSum[i];
-      BL1_ADC_2006[i]=EtotSum[i];
-    }
+    for(int i = 0; i < 6; ++i) 
+      {
+	
+	EtotSum[i] = 0;
+	BL1_ADC_2006[i] = 0;
+	Int_t j = 2*i;
+	Int_t TempSum = 0;
+	Int_t EtotHigh = 0;
+	TempSum = mTrigger.Jet[j] + mTrigger.Jet[j+1];
+	TempSum = TempSum >> 2;
+	EtotHigh = TempSum >> 5;
+	int B5  = 0;
+	if(EtotHigh > 0) B5 = 1;
+	EtotSum[i] = (TempSum & 0x1F);
+	EtotSum[i] += B5<<5;
+	mTrigger.Et += EtotSum[i];
+	BL1_ADC_2006[i] = EtotSum[i];
+	
+      }
     BETOT_DSM_2006=mTrigger.Et;
     
     //
@@ -1538,32 +1612,45 @@ int StBemcTrigger::get2006Trigger()
     // See http://www.star.bnl.gov/STAR/html/trg_l/TSL/Software/EMC.pdf
     //
     int JpsiPatch[kNJet];
-    for(int i = 0;i<kNJet; i++)
-    {
+    for(int i = 0; i < kNJet; ++i)
+      {
+	
         int p0 = 0;
         int p1 = p0+25;
-
+        
         JPSI_2006_ADC[i]=0;
-	JPSI_2006_ID[i]=0;
-	JpsiPatch[i]=0;
-        for (int j=p0;j<p1;j++)
+        JPSI_2006_ID[i]=0;
+        JpsiPatch[i]=0;
+        
+        for(int j = p0; j < p1; ++j)
         {
+        
             int k=JP_TP[i][j];
-	    if (mTrigger.HT[k]>JPSI_2006_ADC[i]) {
-	      JPSI_2006_ADC[i]=mTrigger.HT[k];
-	      JPSI_2006_ID[i]=mTrigger.HTID[k];
-	    }
-	    LOG_DEBUG<<"Jet id="<<i<<" Patch id="<<j<<" PatchHT="<<mTrigger.HT[k]<<" PatchHTID="<<mTrigger.HTID[k]<<" JPSI_2006_ADC="<<JPSI_2006_ADC[i]<<endm;
+            if(mTrigger.HT[k] > JPSI_2006_ADC[i]) 
+            {
+                JPSI_2006_ADC[i]=mTrigger.HT[k];
+                JPSI_2006_ID[i]=mTrigger.HTID[k];
+            }
+            
+            LOG_DEBUG << "Jet id=" << i << " Patch id=" << j << " PatchHT=" << mTrigger.HT[k] << " PatchHTID="
+                      << mTrigger.HTID[k] << " JPSI_2006_ADC=" << JPSI_2006_ADC[i] << endm;
+        
         }
-	if (i < 6) {
-	  // BEMC West
-	  if (JPSI_2006_ADC[i]>JPSI_WEST_TH_2006) JpsiPatch[i]=1;
-	}
-	else {
-	  // BEMC East
-	  if (JPSI_2006_ADC[i]>JPSI_EAST_TH_2006) JpsiPatch[i]=1;
-	}
-	LOG_DEBUG<<"Final JetPatchHT for JP"<<i<<" is TowID="<<JPSI_2006_ID[i]<<"  with ADC= "<<JPSI_2006_ADC[i]<<" and flag="<<JpsiPatch[i]<<endm;
+        
+        if(i < 6) 
+        {
+            // BEMC West
+            if(JPSI_2006_ADC[i] > JPSI_WEST_TH_2006) JpsiPatch[i] = 1;
+        }
+        else 
+        {
+            // BEMC East
+            if(JPSI_2006_ADC[i] > JPSI_EAST_TH_2006) JpsiPatch[i] = 1;
+        }
+        
+        LOG_DEBUG << "Final JetPatchHT for JP" << i << " is TowID=" << JPSI_2006_ID[i] << "  with ADC= "
+                  << JPSI_2006_ADC[i] << " and flag=" << JpsiPatch[i] << endm;
+                  
     }
 
     //
@@ -1582,9 +1669,8 @@ int StBemcTrigger::get2006Trigger()
     ht_jpsi[5] = JpsiPatch[0] || JpsiPatch[6];
 
     mIs2006JPSI = ((ht_jpsi[0] && (ht_jpsi[2] || ht_jpsi[3] || ht_jpsi[4])) ||
-		   (ht_jpsi[1] && (ht_jpsi[3] || ht_jpsi[4] || ht_jpsi[5])) ||
-		   (ht_jpsi[2] && (ht_jpsi[4] || ht_jpsi[5])) ||
-		   (ht_jpsi[3] &&  ht_jpsi[5]));
+		          (ht_jpsi[1] && (ht_jpsi[3] || ht_jpsi[4] || ht_jpsi[5])) ||
+		          (ht_jpsi[2] && (ht_jpsi[4] || ht_jpsi[5])) || (ht_jpsi[3] &&  ht_jpsi[5]));
 
     delete mDecoder;
     return kStOK;
