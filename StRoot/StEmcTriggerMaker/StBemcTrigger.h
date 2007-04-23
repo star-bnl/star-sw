@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.h,v 1.11 2007/04/02 22:22:55 rfatemi Exp $
+// $Id: StBemcTrigger.h,v 1.12 2007/04/23 20:00:07 rfatemi Exp $
 //
 //
 
@@ -17,6 +17,7 @@
 #define kNJet 12
 #define kNTowers 4800
 #define k12bits 4096
+#define kN_sequences 25 //# TP inside a JP as defined by StEmcDecoder
 
 class StEmcGeom;
 class StEmcDecoder;
@@ -152,128 +153,49 @@ private:
     int BL1_ADC_2006[kNJet/2];
 
 public:
+        
     StBemcTrigger();
     virtual        ~StBemcTrigger();
 
-    int            makeTrigger();
-    void           zero();
-    void           resetConf();
-    void           setEvent(StEvent* e)
-    {
-        mEvent = e;
-    }
-    void           setPrint(bool a)
-    {
-		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
-    }///< Obsolete function; users can control messages with logger config file.
-    void           setDbMaker(St_db_Maker* dbMaker)
-    {
-        mDbMaker = dbMaker;
-    }
-    void           setTableMaker(StBemcTables *tab)
-    {
-        mTables =tab;
-    }
+    int     makeTrigger();
+    void    zero();
+    void    resetConf();
+    void    setEvent(StEvent* e) { mEvent = e; }
+    void    setPrint(bool a) {
+                LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
+                    }///< Obsolete function; users can control messages with logger config file.
+    void    setDbMaker(St_db_Maker* dbMaker) { mDbMaker = dbMaker; }
+    void    setTableMaker(StBemcTables *tab) { mTables =tab; }
 
     //1==true, 0==false, -1==problems
-    int*          isTrigEvent()
-      {
-        return mIsTrig;
-      }
+    int*    isTrigEvent() { return mIsTrig; }
     //return JPID/towID -1==problems
-    int*           getTowPatchId()
-      {
-        return mTowJetId;
-      }
+    int*    getTowPatchId() { return mTowJetId; }
     //DSM 6bit ADC
-    int*           getTowPatchDSM()
-      {
-        return mDsmAdc;
-      }
-    int*          getNHT()
-      {
-	return mnumHT;
-      }
-    int*         getNJP()
-      {
-	return mnumJP;
-      }
-    int *        getNHTTP()
-      {
-	return mnumHTTP;
-      }
-    int*          getHT12005array()
-      {
-	return mHT12005array;
-      }
-   int*          getHT22005array()
-      {	
-	return mHT22005array;
+    int*    getTowPatchDSM() { return mDsmAdc; }
+    int*    getNHT() { return mnumHT; }
+    int*    getNJP() { return mnumJP; }
+    int*    getNHTTP() { return mnumHTTP; }
+    int*    getHT12005array() { return mHT12005array; }
+    int*    getHT22005array() {	return mHT22005array; }
+    int*    getJP12005array(){ return mJP12005array; }
+    int*    getJP22005array() { return mJP22005array; }
+    int*    getJPSI2005adc() { return mJPSI2005adc; }
+    int*    getJPSI2005id() { return mJPSI2005id; }
+    int*    getHT22006array() { return mHT22006array; }
+    int*    getJP12006array() { return mJP12006array; }
+    int*    getJP22006array() { return mJP22006array; }
+    int*    getJPSI2006adc() { return mJPSI2006adc; }
+    int*    getJPSI2006id() { return mJPSI2006id; }
+    int*    getHTTP2006arrayHT() { return mHTTP2006arrayHT; }
+    int*    getHTTP2006arrayHTADC() { return mHTTP2006arrayHTADC; }
+    int*    getHTTP2006arrayTP() { return mHTTP2006arrayTP; }
+    int*    getHTTP2006arrayTPADC() { return mHTTP2006arrayTPADC; }
+    int*    getBL12006arrayADC() { return mBL12006arrayADC; }
 
-      }
-    int*         getJP12005array()
-      {
-	return mJP12005array;
-      }
-    int*         getJP22005array()
-      {
-	return mJP22005array;
-      }
-    int*         getJPSI2005adc()
-      {
-	return mJPSI2005adc;
-      }
-    int*         getJPSI2005id()
-      {
-	return mJPSI2005id;
-      }
-    int*          getHT22006array()
-      {
-	return mHT22006array;
-      }
-    int*         getJP12006array()
-      {
-	return mJP12006array;
-      }
-    int*         getJP22006array()
-      {
-	return mJP22006array;
-      }
-    int*         getJPSI2006adc()
-      {
-	return mJPSI2006adc;
-      }
-    int*         getJPSI2006id()
-      {
-	return mJPSI2006id;
-      }
-    int*         getHTTP2006arrayHT()
-      {
-	return mHTTP2006arrayHT;
-      }
-    int*         getHTTP2006arrayHTADC()
-      {
-	return mHTTP2006arrayHTADC;
-      }
-    int*         getHTTP2006arrayTP()
-      {
-	return mHTTP2006arrayTP;
-      }
-    int*         getHTTP2006arrayTPADC()
-      {
-	return mHTTP2006arrayTPADC;
-      }
-    int*         getBL12006arrayADC()
-      { 
-	return mBL12006arrayADC;
-      }
+    emcTrigger     getTrigger() { return mTrigger; }
 
-    emcTrigger     getTrigger()
-    {
-        return mTrigger;
-    }
-
-    int            trgPatch[300];//just for testing purposes!
+    int     trgPatch[300];//just for testing purposes!
 
     ClassDef(StBemcTrigger, 1)
 };
