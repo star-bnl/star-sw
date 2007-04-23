@@ -10,11 +10,11 @@ St_HitError *tableSet = new St_HitError("someHitError",1);
 //
 memset(&row,0,tableSet->GetRowSize());
     row.coeff[0]	 =     0.0004; // *;
-    row.coeff[1]	 = 0.00112499;
-    row.coeff[2]	 = 0.01801719;
-    row.coeff[3]	 = 0.0008519469;
-    row.coeff[4]	 = 0.00511018;
-    row.coeff[5]	 = 0.01485295;
+    row.coeff[1]	 = 0.001151268;
+    row.coeff[2]	 = 0.01763031;
+    row.coeff[3]	 = 0.0009341515;
+    row.coeff[4]	 = 0.005178082;
+    row.coeff[5]	 = 0.01498472;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
