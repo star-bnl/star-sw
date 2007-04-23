@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.14 2007/04/06 15:58:21 wleight Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.15 2007/04/23 00:44:58 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.15  2007/04/23 00:44:58  wleight
+// Made all layers, not just inner ones, active
+//
 // Revision 1.14  2007/04/06 15:58:21  wleight
 // Changed some cout statements to LOG_INFO
 //
@@ -52,6 +55,7 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFi
     _trackingParameters.setName("istTrackingParameters");
     _hitCalculator1.setName("ist1HitError");
     _hitCalculator2.setName("ist2HitError");
+    //_hitCalculator3.setName("ist3HitError");
 }
 
 StiIstDetectorBuilder::~StiIstDetectorBuilder()
@@ -61,6 +65,7 @@ void StiIstDetectorBuilder::loadDS(TDataSet& ds){
   cout<<"StiIstDetectorBuilder::loadDS(TDataSet& ds) -I- started: "<<endl;
   _hitCalculator1.loadDS(ds);
   _hitCalculator2.loadDS(ds);
+  //_hitCalculator3.loadDS(ds);
 }
 
 
@@ -251,10 +256,10 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector = getDetectorFactory()->getInstance();
   pDetector->setName(nameP.Data());
   pDetector->setIsOn(false);
-  if(side==1)
-    pDetector->setIsActive(new StiIstIsActiveFunctor);
-  else 
-    pDetector->setIsActive(new StiNeverActiveFunctor);
+  //if(side==1)
+  pDetector->setIsActive(new StiIstIsActiveFunctor);
+  //else 
+  //pDetector->setIsActive(new StiNeverActiveFunctor);
   pDetector->setIsContinuousMedium(false);
   pDetector->setIsDiscreteScatterer(true);
   pDetector->setShape(sh);
@@ -263,7 +268,8 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
   if(layer==1) pDetector->setHitErrorCalculator(&_hitCalculator1);
-  else pDetector->setHitErrorCalculator(&_hitCalculator2);
+  if(layer==2 && side==1) pDetector->setHitErrorCalculator(&_hitCalculator2);
+  if(layer==2 && side==2) pDetector->setHitErrorCalculator(&_hitCalculator2);
   //  add(2*(layer-1)+side-1,wafer-1,pDetector);
   add(2*(layer-1)+side-1,ladder,pDetector);  
   //add(2*ladder-3+side,0,pDetector);
