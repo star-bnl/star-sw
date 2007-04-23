@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.19 2007/04/23 16:32:47 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.20 2007/04/23 17:47:31 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.20  2007/04/23 17:47:31  andrewar
+ * Added initialized values to remove warnings.
+ *
  * Revision 1.19  2007/04/23 16:32:47  wleight
  * Added explicit casting for double to int in calculating strip number
  *
@@ -823,7 +826,10 @@ void StPixelFastSimMaker::smearGaus(StThreeVectorD &mError,
 
     // smear hit in transverse plane, 
     // sigma's are in microns
-    double u1, u2, v1, v2;
+    double u1=-1;
+    double u2=-1.; 
+    double v1=-1.;
+    double v2=-1.;;
     double r = 2.;
     double z1 = 10.;
     double z2 = 10.;
