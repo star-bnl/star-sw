@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.18 2007/04/22 22:57:23 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.19 2007/04/23 16:32:47 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.19  2007/04/23 16:32:47  wleight
+ * Added explicit casting for double to int in calculating strip number
+ *
  * Revision 1.18  2007/04/22 22:57:23  wleight
  * The two hits in the 17 cm layer are no longer combined into 1
  *
@@ -298,8 +301,8 @@ Int_t StPixelFastSimMaker::Make()
   int nWafers[2]={10,13};
   double pitch=.006; //note, all lengths in centimeters unless explicitly noted
   int nStrips=640;
-  int ladderCount;
-  int waferCount;
+  unsigned int ladderCount;
+  unsigned int waferCount;
   double icept;
   double sTotE;
   double pos[3];
@@ -320,13 +323,13 @@ Int_t StPixelFastSimMaker::Make()
     istStrip strips2[640];
     istStrip sStrips[1280];
     if(nhits){
-      for(int i=0;i<2;i++){
+      for(unsigned int i=0;i<2;i++){
 	if(istHitCol->layer(i)){
 	  ladderCount=1;
 	  for(int jj=0;jj<nLadders[i];jj++){
 	    LOG_DEBUG<<"now dealing with ladder "<<ladderCount<<endm;
 	    waferCount=1;
-	    for(int kk=0;kk<istHitCol->layer(i)->hits().size();kk++){
+	    for(unsigned int kk=0;kk<istHitCol->layer(i)->hits().size();kk++){
 	      StMcHit *mcH = istHitCol->layer(i)->hits()[kk];
 	      StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
 	      if(mcI->ladder()==ladderCount) ladderHits.push_back(mcI);
@@ -338,7 +341,7 @@ Int_t StPixelFastSimMaker::Make()
 		PathIn = Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",i+1,ladderCount,waferCount,1);
 		PathOut= Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",i+1,ladderCount,waferCount,2);
 	      }
-	      for(int nn=0;nn<ladderHits.size();nn++){
+	      for(unsigned int nn=0;nn<ladderHits.size();nn++){
 		if(ladderHits[nn]->wafer()==waferCount){
 		  StMcIstHit* mcIw=ladderHits[nn];
 		  pos[0]=mcIw->position().x();
@@ -356,7 +359,7 @@ Int_t StPixelFastSimMaker::Make()
 		    gGeoManager->cd(PathOut);
 		    LOG_DEBUG<<"pathOut: "<<PathOut<<endm;
 		  }
-		  TGeoNode* node=gGeoManager->GetCurrentNode();
+		  //TGeoNode* node=gGeoManager->GetCurrentNode();
 		  gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
 		  double x=localpos[0];
 		  double z=localpos[2];
@@ -368,7 +371,7 @@ Int_t StPixelFastSimMaker::Make()
 		      sh.localX=x;
 		      sh.e=mcIw->dE();
 		      int sindex;
-		      sindex=x/pitch;
+		      sindex=static_cast<int>(x/pitch);
 		      sindex=sindex+nStrips/2+1;
 		      if(0<sindex && sindex<641){
 			if(z<0){
@@ -391,7 +394,7 @@ Int_t StPixelFastSimMaker::Make()
 			sh.localX=z;
 			sh.e=mcIw->dE();
 			int sindex; 
-			sindex=z/pitch;
+			sindex=static_cast<int>(z/pitch);
 			sindex=sindex+nStrips/2+1;
 			if(0<sindex && sindex<641){
 			  strips2[sindex-1].stripHits.push_back(sh);
@@ -405,7 +408,7 @@ Int_t StPixelFastSimMaker::Make()
 			sh.localX=x;
 			sh.e=mcIw->dE();
 			int sindex;
-			sindex=x/pitch;
+			sindex=static_cast<int>(x/pitch);
 			sindex=sindex+nStrips/2+1;
 			if(0<sindex && sindex<641){
 			  strips1[sindex-1].stripHits.push_back(sh);
@@ -419,21 +422,20 @@ Int_t StPixelFastSimMaker::Make()
 		}
 	      }
 	      if(i==0){
-		for(int oo=0;oo<1280;oo++){
+		for(unsigned int oo=0;oo<1280;oo++){
 		  icept=0;
 		  sTotE=0;
 		  if(sStrips[oo].stripHits.size()){
-		    for(int pp=0;pp<sStrips[oo].stripHits.size();pp++){
+		    for(unsigned int pp=0;pp<sStrips[oo].stripHits.size();pp++){
 		      icept=icept+sStrips[oo].stripHits[pp].localX*sStrips[oo].stripHits[pp].e;
 		      sTotE=sTotE+sStrips[oo].stripHits[pp].e;
 		    }
 		    sStrips[oo].intercept=icept/sTotE;
 		    double smearedX;
-		    double smearedZ;
 		    smearedX=distortHit(sStrips[oo].intercept,pitch/sqrt(12.),100);
 		    gGeoManager->RestoreMasterVolume();
 		    gGeoManager->cd(PathIn);
-		    TGeoNode* node=gGeoManager->GetCurrentNode();
+		    //TGeoNode* node=gGeoManager->GetCurrentNode();
 		    localpos[0]=smearedX;
 		    if(oo>639) localpos[2]=distortHit(.96,1.92/sqrt(12.),100);
 		    else localpos[2]=distortHit(-.96,.96/sqrt(12.),100);
@@ -464,18 +466,18 @@ Int_t StPixelFastSimMaker::Make()
 		}
 	      }
 	      if(i==1){
-		for(int o=0;o<640;o++){
+		for(unsigned int o=0;o<640;o++){
 		  icept=0;
 		  sTotE=0;
 		  if(strips1[o].stripHits.size()){
-		    for(int p=0;p<strips1[o].stripHits.size();p++){
+		    for(unsigned int p=0;p<strips1[o].stripHits.size();p++){
 		      icept=icept+strips1[o].stripHits[p].localX*strips1[o].stripHits[p].e;
 		      sTotE=sTotE+strips1[o].stripHits[p].e;
 		    }
 		    strips1[o].intercept=icept/sTotE;
 		    gGeoManager->RestoreMasterVolume();
 		    gGeoManager->cd(PathIn);
-		    TGeoNode* node=gGeoManager->GetCurrentNode();
+		    //TGeoNode* node=gGeoManager->GetCurrentNode();
 		    localpos[0]=distortHit(strips1[o].intercept,pitch/sqrt(12.),100);
 		    localpos[2]=distortHit(0,3.84/sqrt(12.),100);
 		    localpos[1]=.0005;
@@ -505,14 +507,14 @@ Int_t StPixelFastSimMaker::Make()
 		  icept=0;
 		  sTotE=0;
 		  if(strips2[o].stripHits.size()){
-		    for(int s=0;s<strips2[o].stripHits.size();s++){
+		    for(unsigned int s=0;s<strips2[o].stripHits.size();s++){
 		      icept=icept+strips2[o].stripHits[s].localX*strips2[o].stripHits[s].e;
 		      sTotE=sTotE+strips2[o].stripHits[s].e;
 		    }
 		    strips2[o].intercept=icept/sTotE;
 		    gGeoManager->RestoreMasterVolume();
 		    gGeoManager->cd(PathIn);
-		    TGeoNode* node=gGeoManager->GetCurrentNode();
+		    //TGeoNode* node=gGeoManager->GetCurrentNode();
 		    localpos[0]=distortHit(0,3.84/sqrt(12.),100);
 		    localpos[2]=distortHit(strips2[o].intercept,pitch/sqrt(12.),100);
 		    localpos[1]=-.0005;
@@ -542,7 +544,7 @@ Int_t StPixelFastSimMaker::Make()
 		}
 	      }
 	      waferCount++;
-	      for(int kl=0;kl<1280;kl++){
+	      for(unsigned int kl=0;kl<1280;kl++){
 		if(kl<640){
 		  strips1[kl].stripHits.clear();
 		  strips2[kl].stripHits.clear();
