@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.25 2007/04/12 20:39:48 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.26 2007/04/24 00:33:59 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.26  2007/04/24 00:33:59  genevb
+// SSD hists
+//
 // Revision 2.25  2007/04/12 20:39:48  genevb
 // Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
 //
@@ -109,7 +112,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.25 2007/04/12 20:39:48 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.26 2007/04/24 00:33:59 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -666,6 +669,11 @@ class StQABookHist : public TObject {
 
   // Hists for SVT
   TH2F* m_svt_loc;             //! SVT drift
+
+  // Hists for SSD
+  TH1F* m_pnt_phiSSD;          //!
+  TH2F* m_pnt_lwSSD;           //!
+  TH1F* m_glb_ssd_phi;         //!
 
   // ********************** Members For Internal Use *************************
  protected:

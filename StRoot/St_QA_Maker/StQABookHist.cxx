@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.56 2007/04/12 20:39:48 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.57 2007/04/24 00:33:58 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.57  2007/04/24 00:33:58  genevb
+// SSD hists
+//
 // Revision 2.56  2007/04/12 20:39:48  genevb
 // Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
 //
@@ -706,6 +709,12 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pmd_total_adc = 0;
   m_cpv_total_hit = 0;
   m_cpv_total_adc = 0;
+
+// for SSD
+  m_pnt_phiSSD = 0;
+  m_pnt_lwSSD = 0;
+  m_glb_ssd_phi = 0;
+
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHist(Int_t histsSet){
@@ -970,6 +979,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_rzl0TS->Rebin(1,"z_{dif}");
   m_glb_rzl0TS->SetStats(kFALSE);
   m_glb_phifTS   = QAH::H1F("QaGtrkPhifTS",   "globtrk: phi of first point on track, svt",64,0,360);
+  m_glb_ssd_phi  = QAH::H1F("QaGtrkPhifSSD",  "globtrk: phi of first point on track, ssd",64,0,360);
   m_lengthTS     = QAH::H1F("QaGtrkLengthTS", "globtrk: track length, tpc+svt", 50,0.,300.);
   m_psiTS        = QAH::H1F("QaGtrkPsiTS",    "globtrk: psi, tpc+svt (deg) ", 64, 0.,360.);
   m_tanlTS       = QAH::H1F("QaGtrkTanlTS",   "globtrk: tanl, tpc+svt",32,-4.,4.);
@@ -1642,7 +1652,7 @@ void StQABookHist::BookHistPoint(){
   m_pnt_svtLaserDiff->SetYTitle("time buckets");
   m_pnt_svtLaserDiff->Rebin(0,"Laser 1");
   m_pnt_svtLaserDiff->Rebin(1,"Laser 2");
-  m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt",96,-16,16,96,-16,16);
+  m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt,ssd",125,-25,25,125,-25,25);
   m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
   m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
@@ -1661,6 +1671,11 @@ void StQABookHist::BookHistPoint(){
   m_pnt_barrelS = QAH::H1F("QaPointBarrelS","point: barrel distribution of hits, svt",3,0.5,3.5);
   m_pnt_barrelS->SetXTitle("barrel number");
 
+  m_pnt_phiSSD  = QAH::H1F("QaPointPhiSSD","point: #phi of hits, ssd",36,0,360);
+  m_pnt_lwSSD   = QAH::H2F("QaPointLWSSD","point: wafer id vs ladder id, ssd",20,0.5,20.5,16,0.5,16.5);
+  m_pnt_lwSSD->SetXTitle("Ladder #");
+  m_pnt_lwSSD->SetYTitle("Wafer #");
+
   m_pnt_xyFE    = QAH::H2F("QaPointXYFtpcE","point: x-y distribution of hits, ftpcE",70,-35,35,70,-35,35);
   m_pnt_xyFW    = QAH::H2F("QaPointXYFtpcW","point: x-y distribution of hits, ftpcW",70,-35,35,70,-35,35);
   m_pnt_planeF  = QAH::MH1F("QaPointPlaneF","point: plane distribution of hits, ftpc",20,0.5,20.5,2);
@@ -1674,6 +1689,7 @@ void StQABookHist::BookHistPoint(){
   m_pnt_padtimeFW    = QAH::H2F("QaPointPadTimeFtpcW","point: #pads vs #timebins of hits, ftpcW",12,0.5,12.5,10,0.5,10.5);
   m_pnt_padtimeFW->SetXTitle("#timebins");
   m_pnt_padtimeFW->SetYTitle("#pads");
+
 
 }
 //_____________________________________________________________________________
