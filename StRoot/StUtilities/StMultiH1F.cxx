@@ -31,11 +31,17 @@ StMultiH1F::StMultiH1F(const char *name,const char *title,Int_t nbinsx,
 void StMultiH1F::Draw(Option_t *option) {
 
   TAxis* axis = GetXaxis();
+  Int_t x0 = axis->GetFirst();
+  Int_t x1 = axis->GetLast();
+  axis->SetRange();
   Int_t ybins = GetNbinsY();
   if (ybins == 1) {
     TH1F* temp0 = XProjection(GetName());
     temp0->SetStats((!TestBit(kNoStats)));
-    axis->Copy(*(temp0->GetXaxis()));
+    TAxis* taxis = temp0->GetXaxis();
+    axis->Copy(*taxis);
+    taxis->SetRange(x0,x1);
+    axis->SetRange(x0,x1);
     temp0->Draw();
     return;
   }
@@ -73,7 +79,9 @@ void StMultiH1F::Draw(Option_t *option) {
     temp[ybin] = XProjection(n0.Data(),slice);
     temp[ybin]->SetLineStyle(slice);
     temp[ybin]->SetStats(kFALSE);
-    axis->Copy(*(temp[ybin]->GetXaxis()));
+    TAxis* taxis = temp[ybin]->GetXaxis();
+    axis->Copy(*taxis);
+    taxis->SetRange(x0,x1);
 
     if (fMOffset && ybin) {
       temp[ybin]->SetLineColor(slice);
@@ -119,6 +127,8 @@ void StMultiH1F::Draw(Option_t *option) {
   }
 
   legend->Draw();
+
+  axis->SetRange(x0,x1);
 }
 
 TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
@@ -195,8 +205,11 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
   return maximum;
 }
 
-// $Id: StMultiH1F.cxx,v 1.10 2007/04/06 20:05:30 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.11 2007/04/24 17:45:32 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.11  2007/04/24 17:45:32  genevb
+// Patched for problems with limited axis ranges
+//
 // Revision 1.10  2007/04/06 20:05:30  genevb
 // Allow for lower minima
 //
