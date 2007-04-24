@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.35 2007/04/20 03:42:35 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.36 2007/04/24 00:33:06 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.36  2007/04/24 00:33:06  genevb
+// SSD hists; Logz for Dedx
+//
 // Revision 2.35  2007/04/20 03:42:35  genevb
 // cout -> LOG_INFO
 //
@@ -461,6 +464,13 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             LOG_INFO << "       -- Will draw in logX scale: " << oname <<endm;
 	  }
 
+
+// Set logZ scale
+          if (oName.EndsWith("PVsDedx")) {
+            gPad->SetLogz(1);
+            LOG_INFO << "       -- Will draw in logZ scale: " << oname <<endm;
+          }
+
 // Limit x range for some histograms
           if (oName.EndsWith("QaPointTpc") ||
               oName.EndsWith("QaPointSvt") ||
@@ -511,6 +521,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
                       oName.EndsWith("PVsDedx") ||
+                      oName.EndsWith("SSD") ||
+                      oName.EndsWith("PointXYSvt") ||
                       oName.Contains("PointXYTpc"))) {
             obj->Draw("ZCol");
           } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
