@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.46 2004/11/11 19:58:14 jeromel Exp $
+ * $Id: StDAQReader.cxx,v 1.47 2007/04/24 17:10:57 akio Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.47  2007/04/24 17:10:57  akio
+ * correct byte swapping issue
+ *
  * Revision 1.46  2004/11/11 19:58:14  jeromel
  * Added thereIsTriggerData() check and logic for return kStErr (BT 478)
  *
@@ -474,7 +477,7 @@ StTRGReader *StDAQReader::getTRGReader()
   if (!TRGPresent()) return 0;
   if (!fTRGReader) {
     fTRGReader = new StTRGReader(this);
-    fTRGReader->Update();
+    //fTRGReader->Update();
   }
   return fTRGReader;
 }
