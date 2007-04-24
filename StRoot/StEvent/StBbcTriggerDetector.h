@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.h,v 2.7 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StBbcTriggerDetector.h,v 2.8 2007/04/24 14:52:23 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.h,v $
+ * Revision 2.8  2007/04/24 14:52:23  ullrich
+ * Fixed bug in BBC unpacking (Akio).
+ *
  * Revision 2.7  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -74,13 +77,7 @@ public:
     unsigned short mip(unsigned int id) const;
     unsigned short mipWidth(unsigned int id) const;
     
-    int   nHitEast();
-    int   nHitWest();
-    int   nHitEastLarge();
-    int   nHitWestLarge();
-    int   nHit();
-    int   nHitLarge();
-    int   nHitAll();
+
     int   adcSumEast(); 
     int   adcSumWest();
     int   adcSumEastLarge(); 
@@ -88,11 +85,23 @@ public:
     int   adcSum();
     int   adcSumLarge();
     int   adcSumAll();
+    unsigned short onlineTimeDifference() const; // z vertex from Layer2 DSM in channel 
+
+  /////////////////////////////////////////////
+  // No longer supported after 2003. Do not use
+    int   nHitEast();
+    int   nHitWest();
+    int   nHitEastLarge();
+    int   nHitWestLarge();
+    int   nHit();
+    int   nHitLarge();
+    int   nHitAll();
     int   tdcEarliestEast(); // 2002 = common start = smaller channel is earlier
     int   tdcEarliestWest(); // 2003 = common stop  = larger channel os earlier
     float zVertex(); //z vertex in cm
-    unsigned short onlineTimeDifference() const; // z vertex from Layer2 DSM in channel 
- 
+  // No longer supported after 2003. Do not use
+  //////////////////////////////////////////////
+
     void  setAdc(unsigned int, unsigned short);
     void  setTdc(unsigned int, unsigned short);
     void  setRegister(unsigned int, unsigned short);
@@ -106,10 +115,10 @@ public:
     
 protected:
     enum {
-	mMaxPMTs = 48,
-	mMaxRegisters = 2,
-	mMaxPedData = 128,
-	mMaxScalars = 32
+        mMaxPMTs = 48,
+        mMaxRegisters = 2,
+        mMaxPedData = 128,
+        mMaxScalars = 32
     };
     UShort_t mAdc[mMaxPMTs];
     UShort_t mTdc[mMaxPMTs];
