@@ -30,12 +30,24 @@ void StMultiH2F::Draw(Option_t *option) {
 
   TAxis* axisX = GetXaxis();
   TAxis* axisY = GetYaxis();
+  Int_t x0 = axisX->GetFirst();
+  Int_t x1 = axisX->GetLast();
+  Int_t y0 = axisY->GetFirst();
+  Int_t y1 = axisY->GetLast();
+  axisX->SetRange();
+  axisY->SetRange();
   Int_t zbins = GetNbinsZ();
   if (zbins == 1) {
     TH2D* temp0 = XYProjection(GetName());
     temp0->SetStats((!TestBit(kNoStats)));
-    axisX->Copy(*(temp0->GetXaxis()));
-    axisY->Copy(*(temp0->GetYaxis()));
+    TAxis* taxisX = temp0->GetXaxis();
+    TAxis* taxisY = temp0->GetYaxis();
+    axisX->Copy(*taxisX);
+    axisY->Copy(*taxisY);
+    taxisX->SetRange(x0,x1);
+    taxisY->SetRange(y0,y1);
+    axisX->SetRange(x0,x1);
+    axisY->SetRange(y0,y1);
     temp0->Draw(option);
     return;
   }
@@ -64,9 +76,13 @@ void StMultiH2F::Draw(Option_t *option) {
     temp[zbin] = XYProjection(n0.Data(),slice);
     temp[zbin]->SetLineColor(60+40*(zbin/(zbins-1)));
     temp[zbin]->SetStats(kFALSE);
-    axisX->Copy(*(temp[zbin]->GetXaxis()));
-    axisY->Copy(*(temp[zbin]->GetYaxis()));
-
+    TAxis* taxisX = temp[zbin]->GetXaxis();
+    TAxis* taxisY = temp[zbin]->GetYaxis();
+    axisX->Copy(*taxisX);
+    axisY->Copy(*taxisY);
+    taxisX->SetRange(x0,x1);
+    taxisY->SetRange(y0,y1);
+  
     Double_t binmax = temp[zbin]->GetMaximum();
     if (binmax > maxval) {
       maxval = binmax;
@@ -75,6 +91,7 @@ void StMultiH2F::Draw(Option_t *option) {
     legend->AddEntry(temp[zbin],n0.Data(),"l");
   }
 
+  temp[maxbin]->SetTitle(GetTitle());
   temp[maxbin]->Draw(option);
   TString sameoption = option; sameoption += "same";
   for (zbin=0; zbin<zbins; zbin++) {
@@ -93,6 +110,9 @@ void StMultiH2F::Draw(Option_t *option) {
   }
 
   legend->Draw();
+
+  axisX->SetRange(x0,x1);
+  axisY->SetRange(y0,y1);
 }
 
 TH2D* StMultiH2F::XYProjection(const char* name, Int_t zbin) {
@@ -111,11 +131,16 @@ TH2D* StMultiH2F::XYProjection(const char* name, Int_t zbin) {
   TAttLine::Copy(*temp);
   TAttFill::Copy(*temp);
   TAttMarker::Copy(*temp);
+  temp->GetXaxis()->SetRange(GetXaxis()->GetFirst(),GetXaxis()->GetLast());
+  temp->GetYaxis()->SetRange(GetYaxis()->GetFirst(),GetYaxis()->GetLast());
   return temp;
 }
 
-// $Id: StMultiH2F.cxx,v 1.2 2007/04/12 22:39:13 genevb Exp $
+// $Id: StMultiH2F.cxx,v 1.3 2007/04/24 17:45:33 genevb Exp $
 // $Log: StMultiH2F.cxx,v $
+// Revision 1.3  2007/04/24 17:45:33  genevb
+// Patched for problems with limited axis ranges
+//
 // Revision 1.2  2007/04/12 22:39:13  genevb
 // Remove drawing of underflows
 //
