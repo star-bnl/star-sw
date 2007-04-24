@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.8 2004/11/02 21:20:20 ullrich Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.9 2007/04/24 14:52:23 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.9  2007/04/24 14:52:23  ullrich
+ * Fixed bug in BBC unpacking (Akio).
+ *
  * Revision 2.8  2004/11/02 21:20:20  ullrich
  * Modifications by Akio for Run 5.
  *
@@ -40,7 +43,7 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.8 2004/11/02 21:20:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.9 2007/04/24 14:52:23 ullrich Exp $";
 
 ClassImp(StBbcTriggerDetector)
     
@@ -119,9 +122,11 @@ StBbcTriggerDetector::StBbcTriggerDetector(const StTriggerData& t)
 	mTdc[i   ] = (unsigned short) t.bbcTDC(east, i+1); 
 	mTdc[i+24] = (unsigned short) t.bbcTDC(west, i+1); 
     }
+    for (i=maxt; i<24; i++){ 
+        mTdc[i   ] = 0;
+        mTdc[i+24] = 0;
+    }
     
-    for (i=16;i<24; i++)            mTdc[i] = 0;
-    for (i=40;i<48; i++)            mTdc[i] = 0;
     for (i=0; i<mMaxRegisters; i++) mReg[i] = 0;
     for (i=0; i<mMaxPedData; i++)   mPed[i] = 0;
     for (i=0; i<mMaxScalars; i++)   mScl[i] = 0;
@@ -215,6 +220,9 @@ StBbcTriggerDetector::nHitEast()
     else if (mYear==2003) {
         for (int i=0; i<16; i++) {if (adc(i)>5)                {nhit++;}}
     }
+    else {
+        cerr << "StBbcTriggerDetector::nHitEast: No longer supported after 2003. Do not use!" << endl;
+    }
     return nhit;
 }
 
@@ -227,6 +235,9 @@ StBbcTriggerDetector::nHitWest()
     }
     else if (mYear==2003) {
         for (int i=0; i<16; i++) {if (adc(i+24)>5)                   {nhit++;}}
+    }
+    else{
+        cerr << "StBbcTriggerDetector::nHitWest: No longer supported after 2003. Do not use!" << endl;
     }
     return nhit;
 }
@@ -241,6 +252,9 @@ StBbcTriggerDetector::nHitEastLarge()
     else if (mYear==2003) {
         for (int i=16; i<24; i++) {if (adc(i)>5)                {nhit++;}}
     }
+    else{
+        cerr << "StBbcTriggerDetector::nHitEastlarge: No longer supported after 2003. Do not use!" << endl;
+    }
     return nhit;
 }
 
@@ -253,6 +267,9 @@ StBbcTriggerDetector::nHitWestLarge()
     } 
     else if (mYear==2003) {
         for (int i=16; i<24; i++) {if (adc(i+24)>5)                   {nhit++;}}
+    }
+    else {
+        cerr << "StBbcTriggerDetector::nHitWestLarge: No longer supported after 2003. Do not use!" << endl;
     }
     return nhit;
 }
@@ -273,7 +290,7 @@ StBbcTriggerDetector::adcSumEast()
     if (mYear==2002)      {
         for (int i=0; i<8;  i++){sum+=adc(i);}
     }
-    else if (mYear==2003) {
+    else if (mYear>=2003) {
         for (int i=0; i<16; i++){sum+=adc(i);}
     }
     return sum;
@@ -286,7 +303,7 @@ StBbcTriggerDetector::adcSumWest()
     if (mYear==2002)      {
         for (int i=0; i<8;  i++){sum+=adc(i+16);}
     }
-    else if (mYear==2003) {
+    else if (mYear>=2003) {
         for (int i=0; i<16; i++){sum+=adc(i+24);}
     }
     return sum;
@@ -299,7 +316,7 @@ StBbcTriggerDetector::adcSumEastLarge()
     if (mYear==2002)      {
         for (int i=8;  i<15; i++){sum+=adc(i);}   //exclude 15 = clock
     }
-    else if (mYear==2003) {
+    else if (mYear>=2003) {
         for (int i=16; i<24; i++){sum+=adc(i);}
     }
     return sum;
@@ -312,7 +329,7 @@ StBbcTriggerDetector::adcSumWestLarge()
     if (mYear==2002)      {
         for (int i=8;  i<15; i++){sum+=adc(i);}    //exclude 15 = clock
     }
-    else if (mYear==2003) {
+    else if (mYear>=2003) {
         for (int i=16; i<24; i++){sum+=adc(i+24);}
     }
     return sum;
@@ -350,6 +367,9 @@ StBbcTriggerDetector::tdcEarliestEast()
 	else
 	    return -9999;
     }
+    else{
+        cerr << "StBbcTriggerDetector::tdcEarliestEast: No longer supported after 2003. Do not use!" << endl;
+    }
     return -9999;
 }
 
@@ -376,6 +396,9 @@ StBbcTriggerDetector::tdcEarliestWest()
 	else
 	    return -8888;
     }
+    else{
+        cerr << "StBbcTriggerDetector::tdcEarliestWest: No longer supported after 2003. Do not use!" << endl;
+    }
     return -8888;
 }
 
@@ -385,16 +408,19 @@ StBbcTriggerDetector::zVertex()
     unsigned short east=tdcEarliestEast();
     unsigned short west=tdcEarliestWest();
     if (mYear==2002){
-	if (east<2000 && west<2000 && east!=0 && west!=0)
-	    return (float(east-west))*5.0; //sign for common start
-	else
-	    return -9999.0;			       
+        if (east<2000 && west<2000 && east!=0 && west!=0)
+	  return (float(east-west))*5.0; //sign for common start
+        else
+	  return -9999.0;			       
     }
     else if (mYear==2003){
-	if (east>0 && west>0)
-	    return float(west-east)*3.0; //sign for common stop 
-	else
-	    return -9999.0;
+        if (east>0 && west>0)
+	  return float(west-east)*3.0; //sign for common stop 
+        else
+	  return -9999.0;
+    }
+    else{
+        cerr << "StBbcTriggerDetector::zVertex: No longer supported after 2003. Do not use" << endl;
     }
     return -9999.0;
 }
@@ -405,34 +431,34 @@ StBbcTriggerDetector::dump()
     unsigned int i;
     cout << "BBC data (" << mYear << ") dump" << endl;
     if (mYear==2002){
-	cout << "East small tile ADC "; for (i=0; i<8; i++){cout << adc(i)    << " ";}; cout << endl;
-	cout << "East large tile ADC "; for (i=0; i<8; i++){cout << adc(i+8)  << " ";}; cout << endl;
-	cout << "West small tile ADC "; for (i=0; i<8; i++){cout << adc(i+16) << " ";}; cout << endl;
-	cout << "West large tile ADC "; for (i=0; i<8; i++){cout << adc(i+24) << " ";}; cout << endl;
-	cout << "East small tile TDC "; for (i=0; i<8; i++){cout << tdc(i)    << " ";}; cout << endl;
-	cout << "East large tile TDC "; for (i=0; i<8; i++){cout << tdc(i+8)  << " ";}; cout << endl;
-	cout << "West small tile TDC "; for (i=0; i<8; i++){cout << tdc(i+16) << " ";}; cout << endl;
-	cout << "West large tile TDC "; for (i=0; i<8; i++){cout << tdc(i+24) << " ";}; cout << endl;
-	cout << "Number of hits east " << nHitEast() << " west " << nHitWest() << " Total " << nHit() << endl;
-	cout << "ADC sum east " << adcSumEast() << " west " << adcSumWest() << " Total " << adcSum() << endl;
-	cout << "z vertex position = " << zVertex() << " cm" << endl;
-	cout << "Registers = "; for (i=0; i<mMaxRegisters; i++){cout << bbcRegister(i) << " ";}; cout << endl;
-	cout << "Scalars = "; for (i=0; i<mMaxScalars; i++){cout << scalar(i) << " ";}; cout << endl;
+        cout << "East small tile ADC "; for (i=0; i<8; i++){cout << adc(i)    << " ";}; cout << endl;
+        cout << "East large tile ADC "; for (i=0; i<8; i++){cout << adc(i+8)  << " ";}; cout << endl;
+        cout << "West small tile ADC "; for (i=0; i<8; i++){cout << adc(i+16) << " ";}; cout << endl;
+        cout << "West large tile ADC "; for (i=0; i<8; i++){cout << adc(i+24) << " ";}; cout << endl;
+        cout << "East small tile TDC "; for (i=0; i<8; i++){cout << tdc(i)    << " ";}; cout << endl;
+        cout << "East large tile TDC "; for (i=0; i<8; i++){cout << tdc(i+8)  << " ";}; cout << endl;
+        cout << "West small tile TDC "; for (i=0; i<8; i++){cout << tdc(i+16) << " ";}; cout << endl;
+        cout << "West large tile TDC "; for (i=0; i<8; i++){cout << tdc(i+24) << " ";}; cout << endl;
+        cout << "Number of hits east " << nHitEast() << " west " << nHitWest() << " Total " << nHit() << endl;
+        cout << "ADC sum east " << adcSumEast() << " west " << adcSumWest() << " Total " << adcSum() << endl;
+        cout << "z vertex position = " << zVertex() << " cm" << endl;
+        cout << "Registers = "; for (i=0; i<mMaxRegisters; i++){cout << bbcRegister(i) << " ";}; cout << endl;
+        cout << "Scalars = "; for (i=0; i<mMaxScalars; i++){cout << scalar(i) << " ";}; cout << endl;
     }
     else if (mYear>2002) {
-	cout << "East small tile ADC "; for (i=0; i<16; i++){cout << adc(i)    << " ";}; cout << endl;
-	cout << "West small tile ADC "; for (i=0; i<16; i++){cout << adc(i+24) << " ";}; cout << endl;
-	cout << "East small tile TDC "; for (i=0; i<16; i++){cout << tdc(i)    << " ";}; cout << endl;
-	cout << "West small tile TDC "; for (i=0; i<16; i++){cout << tdc(i+24) << " ";}; cout << endl;
-	cout << "East large tile ADC "; for (i=0; i<8; i++) {cout << adc(i+16) << " ";}; cout << endl;
-	cout << "West large tile ADC "; for (i=0; i<8; i++) {cout << adc(i+40) << " ";}; cout << endl;
-	if (mYear>2004) {
+        cout << "East small tile ADC "; for (i=0; i<16; i++){cout << adc(i)    << " ";}; cout << endl;
+        cout << "West small tile ADC "; for (i=0; i<16; i++){cout << adc(i+24) << " ";}; cout << endl;
+        cout << "East small tile TDC "; for (i=0; i<16; i++){cout << tdc(i)    << " ";}; cout << endl;
+        cout << "West small tile TDC "; for (i=0; i<16; i++){cout << tdc(i+24) << " ";}; cout << endl;
+        cout << "East large tile ADC "; for (i=0; i<8; i++) {cout << adc(i+16) << " ";}; cout << endl;
+        cout << "West large tile ADC "; for (i=0; i<8; i++) {cout << adc(i+40) << " ";}; cout << endl;
+        if (mYear>2004) {
 	  cout << "East large tile TDC "; for (i=0; i<8; i++) {cout << tdc(i+16) << " ";}; cout << endl;
 	  cout << "West large tile TDC "; for (i=0; i<8; i++) {cout << tdc(i+40) << " ";}; cout << endl;
-	}
-	cout << "Number of hits east " << nHitEast() << " west " << nHitWest() << " Total " << nHit() << endl;
-	cout << "ADC sum east " << adcSumEast() << " west " << adcSumWest() << " Total " << adcSum() << endl;
-	cout << "Earliest TDC east " << tdcEarliestEast() << " west " << tdcEarliestWest() << endl;
-	cout << "z vertex position = " << zVertex() << " cm" << endl;
+        }
+        cout << "Number of hits east " << nHitEast() << " west " << nHitWest() << " Total " << nHit() << endl;
+        cout << "ADC sum east " << adcSumEast() << " west " << adcSumWest() << " Total " << adcSum() << endl;
+        cout << "Earliest TDC east " << tdcEarliestEast() << " west " << tdcEarliestWest() << endl;
+        cout << "z vertex position = " << zVertex() << " cm" << endl;
     }
 }
