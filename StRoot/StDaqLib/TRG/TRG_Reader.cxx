@@ -157,6 +157,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
         mErr = 2007;
         (void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__);
       }
+      pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
       break;
 
     default: 
