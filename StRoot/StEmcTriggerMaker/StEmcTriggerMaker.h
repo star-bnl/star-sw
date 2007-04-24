@@ -15,6 +15,11 @@
 // StEemcTrigger classes which mock up the BEMC/EEMC FEE + L0 DSM trigger algorithms.
 // Interface to L2 should also take place in this class.
 //
+// $Id: StEmcTriggerMaker.h,v 1.15 2007/04/24 15:53:18 kocolosk Exp $
+//
+// $Log: StEmcTriggerMaker.h,v $
+// Revision 1.15  2007/04/24 15:53:18  kocolosk
+// added new interface methods to get trigger thresholds and decisions based on trigId
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -30,6 +35,9 @@
 #include "StBemcTrigger.h"
 #include "StEmcUtil/database/StBemcTables.h"
 #include "StMessMgr.h"
+
+#include <map>
+using namespace std;
 
 #define kNPatches 300
 #define kNJet 12
@@ -154,6 +162,37 @@ public:
     void              saveHistograms(char*);
     void              setSaveStEvent(bool a) {mSaveStEvent = a;}
     void              setPrint(bool a) { LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm; }///< Obsolete function; users can control messages with logger config file.
+
+    ///1==Yes,0==No,-1==Don't Know.  Same convention holds for other methods where appropriate.
+    int             isTrigger(int trigId);
+
+    ///Tower ADC > threshold required to fire trigger.
+    int             barrelTowerThreshold(int trigId, int softId=1);
+    ///Trigger Patch ADC > threshold required to fire trigger.
+    int             barrelTriggerPatchThreshold(int trigId, int patchId=1);
+    ///Jet Patch ADC > threshold required to fire trigger.
+    int             barrelJetPatchThreshold(int trigId, int patchId=1);
+
+    ///map contains (key,value) = (softId,ADC) of all towers above DSM threshold.  map is empty if threshold = 0,-1.
+    map<int,int>    barrelTowersAboveThreshold(int trigId);
+    ///map contains (key,value) = (patchId,ADC) of all TP above DSM threshold.  map is empty if threshold = 0,-1.
+    map<int,int>    barrelTriggerPatchesAboveThreshold(int trigId);
+    ///map contains (key,value) = (patchId,ADC) of all JP above DSM threshold.  map is empty if threshold = 0,-1.
+    map<int,int>    barrelJetPatchesAboveThreshold(int trigId);
+
+    int             endcapTowerThreshold(int trigId);
+    int             endcapTriggerPatchThreshold(int trigId);
+    int             endcapJetPatchThreshold(int trigId);
+
+    map<int,int>    endcapTowersAboveThreshold(int trigId);
+    map<int,int>    endcapTriggerPatchesAboveThreshold(int trigId);
+    map<int,int>    endcapJetPatchesAboveThreshold(int trigId);
+
+    ///DSM ADC threshold for ETOT trigger.  ADC > threshold required to fire trigger.
+    int             totalEnergyThreshold(int trigId);
+    ///ADC calculated for ETOT trigger.
+    int             totalEnergy();
+
 
     int               is2003HT1() {return mIs2003HT1;}//1=true,0=false,-1=problem
     int               is2004HT1() {return mIs2004HT1;}
