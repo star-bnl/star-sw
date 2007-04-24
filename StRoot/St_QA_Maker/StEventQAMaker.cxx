@@ -449,6 +449,8 @@ void StEventQAMaker::MakeHistGlob() {
       if (psi<0) psi+=360;
       Float_t orphi = origin.phi()/degree;
       if (orphi<0) orphi+=360;
+      Float_t fphi = firstPoint.phi()/degree;
+      if (fphi<0) fphi+=360;
       StPhysicalHelixD hx = geom->helix();
       // get the helix position closest to the first point on track
       double sFirst = hx.pathLength(firstPoint);
@@ -586,17 +588,11 @@ void StEventQAMaker::MakeHistGlob() {
 	
 	if (firstPoint.z() < 0) {
 	  hists->m_glb_padfTEW->Fill(padCoord.row(),0.);
-	  if (firstPoint.phi() < 0)
-	    hists->m_glb_phifT->Fill(360+firstPoint.phi()/degree,0.);
-	  else
-	    hists->m_glb_phifT->Fill(firstPoint.phi()/degree,0.);
+	  hists->m_glb_phifT->Fill(fphi,0.);
 	}
 	else if (firstPoint.z() > 0) {
 	  hists->m_glb_padfTEW->Fill(padCoord.row(),1.);
-	  if (firstPoint.phi() < 0)
-	    hists->m_glb_phifT->Fill(360+firstPoint.phi()/degree,1.);
-	  else
-	    hists->m_glb_phifT->Fill(firstPoint.phi()/degree,1.);
+	  hists->m_glb_phifT->Fill(fphi,1.);
 	}
 	
         hists->m_glb_z0T->Fill(origin.z());
@@ -654,9 +650,19 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_psi_phiT->Fill(orphi,psi);
       }
       
-      // now fill all TPC+SVT histograms --------------------------------------------
+      // now fill all TPC+(SVT or SSD) histograms -----------------------------------
       
-      else if (map.trackTpcSvt()) {
+      else if (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId)) {
+
+        if (map.hasHitInDetector(kSsdId)) {
+          if (TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
+              map.numberOfHits(kTpcId)>15) {
+            hists->m_glb_ssd_phi->Fill(fphi);
+          }
+        } // SSD Requirement
+
+        if (map.trackTpcSvt()) {
+        // now fill all TPC+SVT histograms ------------------------------------------
 	
 	cnttrkgTS++;
 	cnttrkgTTS++;
@@ -703,10 +709,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_yfTS->Fill(firstPoint.y());
         if (radf<40) {
 	  hists->m_glb_zfTS->Fill(firstPoint.z());
-	  if (firstPoint.phi() < 0)
-	    hists->m_glb_phifTS->Fill(360+firstPoint.phi()/degree);
-	  else
-	    hists->m_glb_phifTS->Fill(firstPoint.phi()/degree);
+	  hists->m_glb_phifTS->Fill(fphi);
 	}
 	
         hists->m_glb_radfTS->Fill(radf);
@@ -758,7 +761,8 @@ void StEventQAMaker::MakeHistGlob() {
 	hists->m_chisq0_phiTS->Fill(orphi,chisq0);
 	
         hists->m_psi_phiTS->Fill(orphi,psi);
-      }
+      } // SVT requirement
+      } // SVT || SSD requirement
       
       // now fill all FTPC East histograms ------------------------------------------
       else if (map.trackFtpcEast()) {
@@ -1727,25 +1731,20 @@ void StEventQAMaker::MakeHistPoint() {
 	  Float_t x   = hitPos.x();
 	  Float_t y   = hitPos.y();
 	  Float_t z   = hitPos.z();
-	  Float_t phi = hitPos.phi();
+	  Float_t phi = hitPos.phi()/degree;
+          if (phi<0) phi+=360.;
 	  hists->m_z_hits->Fill(z);
           // TPC East is sectors 13-24, and z<0
           // TPC West is sectors  1-12, and z>0
           // In StEvent, sectors are mapped starting at 0 instead of 1
 	  if (i>11) {
             rotator = 11-i;
-	    if (phi<0)
-	      hists->m_pnt_phiT->Fill(360+phi/degree,0.);
-	    else
-	      hists->m_pnt_phiT->Fill(phi/degree,0.);
+	    hists->m_pnt_phiT->Fill(phi,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
 	    hists->m_pnt_xyTE->Fill(x,y);
 	  } else {
             rotator = i-11;
-	    if (phi<0)
-	      hists->m_pnt_phiT->Fill(360+phi/degree,1.);
-	    else
-	      hists->m_pnt_phiT->Fill(phi/degree,1.);
+	    hists->m_pnt_phiT->Fill(phi,1.);
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
 	    hists->m_pnt_xyTW->Fill(x,y);
 	  }
@@ -1779,12 +1778,10 @@ void StEventQAMaker::MakeHistPoint() {
 	      Float_t x = hitPos.x();
 	      Float_t y = hitPos.y();
 	      Float_t z = hitPos.z();
-	      Float_t phi = hitPos.phi();
+	      Float_t phi = hitPos.phi()/degree;
+              if (phi<0) phi+=360.;
 	      hists->m_pnt_zS->Fill(z);
-	      if (phi<0)
-	        hists->m_pnt_phiS->Fill(360+phi/degree);
-	      else
-	        hists->m_pnt_phiS->Fill(phi/degree);
+	      hists->m_pnt_phiS->Fill(phi);
 	      hists->m_pnt_barrelS->Fill(i+1); // physical barrel numbering starts at 1
 	      hists->m_pnt_xyS->Fill(x,y);
               totalSvtHits++;
@@ -1820,6 +1817,25 @@ void StEventQAMaker::MakeHistPoint() {
     // totalSvtHits = svtHits->numberOfHits();
     hists->m_pnt_svt->Fill(totalSvtHits);
     totalHits += totalSvtHits;
+  }
+  if (ssdHits) {
+    for (UInt_t j=0; j<ssdHits->numberOfLadders(); j++) {
+      StSsdLadderHitCollection* ssdladder = ssdHits->ladder(j);
+      for (UInt_t k=0; k<ssdladder->numberOfWafers(); k++) {
+        StSPtrVecSsdHit& ssdwaferhits = ssdladder->wafer(k)->hits();
+        for (UInt_t l=0; l<ssdwaferhits.size(); l++) {
+          StSsdHit* ssdhit = ssdwaferhits[l];
+          hitPos = ssdhit->position();
+	  Float_t x = hitPos.x();
+	  Float_t y = hitPos.y();
+	  Float_t phi = hitPos.phi()/degree;
+	  if (phi<0) phi += 360.;
+	  hists->m_pnt_phiSSD->Fill(phi);
+	  hists->m_pnt_lwSSD->Fill(j+1,k+1);
+	  hists->m_pnt_xyS->Fill(x,y);
+        }
+      }
+    }
   }
   if (ftpcHits) {
     // StFtpcHitCollection doesn't differentiate between W and E FTPCs
@@ -2181,8 +2197,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.76 2007/04/13 21:25:06 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.77 2007/04/24 00:33:58 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.77  2007/04/24 00:33:58  genevb
+// SSD hists
+//
 // Revision 2.76  2007/04/13 21:25:06  genevb
 // Modify window for SVT lasers
 //
