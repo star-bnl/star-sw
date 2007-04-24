@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.cxx,v 2.4 2007/04/03 20:10:50 ullrich Exp $
+ * $Id: StTriggerData2007.cxx,v 2.5 2007/04/24 14:51:59 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.cxx,v $
+ * Revision 2.5  2007/04/24 14:51:59  ullrich
+ * Fixed bug in VPD unpacking (Akio).
+ *
  * Revision 2.4  2007/04/03 20:10:50  ullrich
  * Added access function for VPD data.
  *
@@ -51,8 +54,7 @@ StTriggerData2007::StTriggerData2007(const TrgDataType2007* data, int run)
     assert(npost>=0);    
     assert(npost<=5);    
     int size = sizeof(EvtDescData2007)+sizeof(TrgSumData2007)
-        + sizeof(RawTrgDet2007)*(npre+npost+1);
-    
+        + sizeof(RawTrgDet2007)*(npre+npost+1);    
     memcpy(mData,data,size); 
     memset((char*)mData+size,0,sizeof(TrgDataType2007)-size);
 }
@@ -876,19 +878,42 @@ unsigned short StTriggerData2007::vpdTDC(StBeamDirection eastwest, int pmt, int 
 
 unsigned short StTriggerData2007::vpdEarliestTDC(StBeamDirection eastwest) const
 {
-    int t1, t2;
-    if (eastwest==east){
-	t1 = mData->TrgSum.DSMdata.VPD[6]%256;
-	t2 = mData->TrgSum.DSMdata.VPD[2]%256;
-    }
-    else {
-	t1 = mData->TrgSum.DSMdata.VPD[4]%256;
-	t2 = mData->TrgSum.DSMdata.VPD[0]%256;
-    }
-    return (t1>t2) ? t1 : t2;  
+  int map[2][2] = {{2, 0},{6, 4}};
+  int i1 = map[eastwest][0];
+  int i2 = map[eastwest][1];
+  bool b1 = (mData->TrgSum.DSMdata.VPD[i1] >> 8) & 0x1;
+  bool b2 = (mData->TrgSum.DSMdata.VPD[i2] >> 8) & 0x1;
+  int  t1 = mData->TrgSum.DSMdata.VPD[i1] & 0xFF;
+  int  t2 = mData->TrgSum.DSMdata.VPD[i2] & 0xFF;
+  if(b1 && b2)  {return (t1>t2) ? t1 : t2;}
+  else if(b1)   {return t1;}
+  else if(b2)   {return t2;}
+  else          {return 0;}
 }
 
 unsigned short StTriggerData2007::vpdTimeDifference() const
 {
-    return mData->TrgSum.DSMdata.CTB[3]%512;
+    return mData->TrgSum.DSMdata.CTB[4] & 0x1FF;
+}
+
+unsigned short StTriggerData2007::nQTdata(int prepost) const
+{
+  return mData->rawTriggerDet[prepostAddress(prepost)].QQTdataBytes/4;
+}
+ 
+unsigned int* StTriggerData2007::QTdata(int prepost) const
+{
+  return mData->rawTriggerDet[prepostAddress(prepost)].QQTdata;
+}
+
+unsigned char* StTriggerData2007::getDsm_FMS(int prepost) const {return mData->rawTriggerDet[prepostAddress(prepost)].FPDW;}
+unsigned char* StTriggerData2007::getDsm01_FMS(int prepost) const {return mData->rawTriggerDet[prepostAddress(prepost)].FPDEastNSLayer0;}
+unsigned char* StTriggerData2007::getDsm02_FMS(int prepost) const {return mData->rawTriggerDet[prepostAddress(prepost)].FPDEastTBLayer0;}
+unsigned short int* StTriggerData2007::getDsm1_FMS(int prepost) const {return mData->rawTriggerDet[prepostAddress(prepost)].FPDEastNSLayer1;}
+unsigned short int* StTriggerData2007::getDsm2_FMS() const {return mData->TrgSum.DSMdata.FPD;}
+
+unsigned short StTriggerData2007::mtdAtAddress(int address, int prepost) const
+{
+  if (address>=0 && address<32){ return mData->rawTriggerDet[prepostAddress(prepost)].MTD[address]; }
+  return 0;
 }

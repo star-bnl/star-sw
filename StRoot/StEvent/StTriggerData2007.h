@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.h,v 2.2 2007/04/03 20:10:50 ullrich Exp $
+ * $Id: StTriggerData2007.h,v 2.3 2007/04/24 14:51:59 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.h,v $
+ * Revision 2.3  2007/04/24 14:51:59  ullrich
+ * Fixed bug in VPD unpacking (Akio).
+ *
  * Revision 2.2  2007/04/03 20:10:50  ullrich
  * Added access function for VPD data.
  *
@@ -95,7 +98,11 @@ public:
     // FPD
     unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
     unsigned short fpdSum(StBeamDirection eastwest, int module) const;
-    
+ 
+    // FMS
+    unsigned short nQTdata(int prepost=0) const;
+    unsigned int*  QTdata(int prepost=0) const;    
+
     //ZDC
     unsigned short zdcAtChannel(int channel, int prepost=0) const;
     unsigned short zdcAtAddress(int address, int prepost=0) const;
@@ -122,6 +129,9 @@ public:
     unsigned short vpdEarliestTDC(StBeamDirection eastwest) const;
     unsigned short vpdTimeDifference() const;
 
+    //MTD
+    unsigned short mtdAtAddress(int address, int prepost=0) const;
+
     // experts only
     char*                getTriggerStructure();
     TrgDataType2007*     getTriggerStructure2007();  
@@ -130,12 +140,17 @@ public:
     unsigned short int*  getDsm1_EEMC(int prepost=0) const;
     unsigned short int*  getDsm2_EMC()  const;
     unsigned short int*  getDsm3()      const;
+    unsigned      char*  getDsm_FMS(int prepost=0) const;
+    unsigned      char*  getDsm01_FMS(int prepost=0) const;
+    unsigned      char*  getDsm02_FMS(int prepost=0) const;
+    unsigned short int*  getDsm1_FMS(int prepost=0) const;
+    unsigned short int*  getDsm2_FMS() const;
     unsigned int         l2ResultLength() const;
     const unsigned int*  l2Result() const;
     
 protected:
     TrgDataType2007 *mData;
-    
+
     ClassDef(StTriggerData2007,1) 
 };
 
