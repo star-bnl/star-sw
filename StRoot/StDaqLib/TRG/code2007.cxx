@@ -54,7 +54,7 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   }
   npre  = p->EvtDesc.npre;
   npost = p->EvtDesc.npost;
-  //printf("TRG_Reader::UnpackTrg2007: TCUdataBytes = %d\n",p->EvtDesc.TCUdataBytes);
+  printf("TRG_Reader::UnpackTrg2007: TCUdataBytes = %d\n",p->EvtDesc.TCUdataBytes);
   printf("TRG_Reader::UnpackTrg2007: Token = %d\n",p->EvtDesc.TrgToken);
   printf("TRG_Reader::UnpackTrg2007: Npre=%d Npost=%d\n",npre,npost);
 
@@ -178,6 +178,13 @@ int TRG_Reader::Swap2007_Raw(char *ptr) {
     pTRGD->swapHerb2bytes(&(p->rawTriggerDet[i].QQTdataBytes),1);
     pTRGD->swapHerb4bytes(&(p->rawTriggerDet[i].QQTfiller),1);
     pTRGD->swapHerb4bytes(&(p->rawTriggerDet[i].QQTdata[0]),1600);
+    int nqt = p->rawTriggerDet[i].QQTdataBytes;
+    int ac10 = p->rawTriggerDet[i].QQTdata[nqt-1];
+    printf("NQTdata = %d, AC10 = 0x%x\n",nqt,ac10);
+    if(nqt>0 && ac10 != 0xAC10){
+      printf("Last word of QT data is not 0xAC10 but 0x%x\n ",ac10);
+      return -1; 
+    }
   }
   return 0;
 };
