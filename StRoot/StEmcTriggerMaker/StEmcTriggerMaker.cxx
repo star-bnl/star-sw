@@ -403,4 +403,276 @@ void StEmcTriggerMaker::get2006BL1_ADC(int index, int *id){
   if (index<kNJet/2) *id=BL1_2006_arrayADC[index];
 }
 
+int StEmcTriggerMaker::isTrigger(int trigId) {
+    switch(trigId) {
+        case(117211):case(117212):case(127212):case(127213):case(137213):
+            return is2006HT2();
+        case(117221):case(127221):case(137221):case(137222):
+            return is2006JP1();
+        case(117585):case(127585):case(137585):
+            return is2006JP2();
+        case(117201):case(117611):case(127611):case(137611):
+            return is2006HTTP();
+        case(117705):case(137705):
+            return is2006JPSI();
+            
+        case(96201): return is2005HT1();
+        case(96211): return is2005HT2();
+        case(96221): return is2005JP1();
+        case(96233): return is2005JP2();
+    }
+    
+    //if we got here then we don't know how to interpret the trigger
+    return -1;
+}
 
+int StEmcTriggerMaker::barrelTowerThreshold(int trigId, int softId) {
+    switch(trigId) {
+        //high tower
+        case(117211):case(117212): return 22;
+        case(127213):case(137213): return 24;
+        case(127212): return (softId > 2400) ? 24:22;
+        
+        //jet patch
+        case(117221):case(127221):case(137221):case(137222):
+        case(117585):case(127585):case(137585): return 0;
+        
+        //http
+        case(117201):case(117611):case(127611): return 12;
+        case(137611): return 16;
+        
+        //jpsi
+        case(117705):case(137705): return 5;
+        
+        //run 5
+        case(96201): return 13;
+        case(96211): return 17;
+        case(96221): case(96233): return 0;
+    }
+    
+    //if we got here then we don't know how to interpret the trigger
+    return -1;
+}
+
+int StEmcTriggerMaker::barrelTriggerPatchThreshold(int trigId, int patchId) {
+    switch(trigId) {
+        //high tower
+        case(117211):case(117212):case(127212):
+        case(127213):case(137213): return 0;
+        
+        //jet patch
+        case(117221):case(127221):case(137221):case(137222):
+        case(117585):case(127585):case(137585): return 0;
+        
+        //http
+        case(117201):case(117611):case(127611): return 17;
+        case(137611): return 19;
+        
+        //jpsi
+        case(117705):case(137705): return 0;
+        
+        //run 5
+        case(96201): case(96211): case(96221): case(96233): return 0;
+    }
+    
+    //if we got here then we don't know how to interpret the trigger
+    return -1;
+}
+
+int StEmcTriggerMaker::barrelJetPatchThreshold(int trigId, int patchId) {
+    switch(trigId) {
+        //high tower
+        case(117211):case(117212):case(127212):
+        case(127213):case(137213): return 0;
+        
+        //jet patch
+        case(117221):case(127221):case(137221): return 58;
+        case(137222): return 60;
+        case(117585):case(127585):case(137585): return 120;
+        
+        //http
+        case(117201):case(117611):case(127611):
+        case(137611): return 0;
+        
+        //jpsi
+        case(117705):case(137705): return 0;
+        
+        //run 5
+        case(96201): case(96211): return 0;
+        case(96221): return 66;
+        case(96233): return 83;
+    }
+    
+    //if we got here then we don't know how to interpret the trigger
+    return -1;
+}
+
+map<int,int> StEmcTriggerMaker::barrelTowersAboveThreshold(int trigId) {
+    map<int,int> towers;
+    int counter,softId,adc;
+    
+    switch(trigId) {
+        //high tower
+        case(117211):case(117212):case(127212):case(127213):case(137213):
+            counter = get2006HT2_NTOWS();
+            for(int i=0; i<counter; i++) {
+                get2006HT2_TOWS(i,&softId);
+                adc = -1;
+                if(softId == get2006HT2_ID()) adc = get2006HT2_ADC();
+                towers[softId] = adc;
+            }
+        break;
+        
+        //http
+        case(117201):case(117611):case(127611):case(137611):
+            counter = get2006HTTP_NTP();
+            for(int i=0; i<counter; i++) {
+                get2006HTTP_HT(i,&softId);
+                get2006HTTP_HT_ADC(i,&adc);
+                towers[softId] = adc;
+            }
+        break;
+        
+        case(96201):
+            counter = get2005HT1_NTOWS();
+            for(int i=0; i<counter; i++) {
+                get2005HT1_TOWS(i,&softId);
+                adc = -1;
+                if(softId == get2005HT1_ID()) adc = get2005HT1_ADC();
+                towers[softId] = adc;
+            }
+        break;
+        
+        case(96211):
+            counter = get2005HT2_NTOWS();
+            for(int i=0; i<counter; i++) {
+                get2005HT2_TOWS(i,&softId);
+                adc = -1;
+                if(softId == get2005HT2_ID()) adc = get2005HT2_ADC();
+                towers[softId] = adc;
+            }
+        break;
+            
+        //jpsi
+        //confused -- how to get counter?
+        break;
+    }
+    
+    return towers;
+}
+
+map<int,int> StEmcTriggerMaker::barrelTriggerPatchesAboveThreshold(int trigId) {
+    map<int,int> patches;
+    int counter,softId,adc;
+    
+    switch(trigId) {
+        //http
+        case(117201):case(117611):case(127611):case(137611):
+            counter = get2006HTTP_NTP();
+            for(int i=0; i<counter; i++) {
+                get2006HTTP_TP(i,&softId);
+                get2006HTTP_TP_ADC(i,&adc);
+                patches[softId] = adc;
+            }
+        break;
+    }
+    
+    return patches;
+}
+
+map<int,int> StEmcTriggerMaker::barrelJetPatchesAboveThreshold(int trigId) {
+    map<int,int> patches;
+    int counter,softId,adc;
+    
+    switch(trigId) {
+        case(117221):case(127221):case(137221): case(137222):
+            counter = get2006JP1_NPATCHES();
+            for(int i=0; i<counter; i++) {
+                get2006JP1_PATCHES(i,&softId);
+                adc = -1;
+                if(softId == get2006JP1_ID()) adc = get2006JP1_ADC();
+                patches[softId] = adc;
+            }
+        break;
+        
+        case(117585):case(127585):case(137585):
+            counter = get2006JP2_NPATCHES();
+            for(int i=0; i<counter; i++) {
+                get2006JP2_PATCHES(i,&softId);
+                adc = -1;
+                if(softId == get2006JP2_ID()) adc = get2006JP2_ADC();
+                patches[softId] = adc;
+            }
+        break;
+        
+        case(96221):
+            counter = get2005JP1_NPATCHES();
+            for(int i=0; i<counter; i++) {
+                get2005JP1_PATCHES(i,&softId);
+                adc = -1;
+                if(softId == get2005JP1_ID()) adc = get2005JP1_ADC();
+                patches[softId] = adc;
+            }
+        break;
+        
+        case(96233):
+            counter = get2005JP2_NPATCHES();
+            for(int i=0; i<counter; i++) {
+                get2005JP2_PATCHES(i,&softId);
+                adc = -1;
+                if(softId == get2005JP2_ID()) adc = get2005JP2_ADC();
+                patches[softId] = adc;
+            }
+        break;
+    }
+    
+    return patches;
+}
+
+int StEmcTriggerMaker::totalEnergyThreshold(int trigId) {
+    switch(trigId) {
+        case(117575):case(127575):case(137575):
+        case(117621):case(117622):case(127622):case(137622):
+        case(117651):case(117652):case(127652):case(137652): return 109;
+        default: return 0;
+    }
+}
+
+int	StEmcTriggerMaker::totalEnergy() {
+	return get2006BETOT_ADC();
+}
+
+//the remaining methods still need underlying functionality before they can be implemented
+int	StEmcTriggerMaker::endcapTowerThreshold(int trigId) {
+	return -1;
+}
+
+int	StEmcTriggerMaker::endcapTriggerPatchThreshold(int trigId) {
+	return -1;
+}
+
+int StEmcTriggerMaker::endcapJetPatchThreshold(int trigId) {
+	return -1;
+}
+
+map<int,int> StEmcTriggerMaker::endcapTowersAboveThreshold(int trigId) {
+	map<int,int> towers;
+	return towers;
+}
+
+map<int,int> StEmcTriggerMaker::endcapTriggerPatchesAboveThreshold(int trigId) {
+	map<int,int> trigPatches;
+	return trigPatches;
+}
+
+map<int,int> StEmcTriggerMaker::endcapJetPatchesAboveThreshold(int trigId) {
+	map<int,int> jetPatches;
+	return jetPatches;
+}
+
+// $Id: StEmcTriggerMaker.cxx,v 1.17 2007/04/24 15:53:17 kocolosk Exp $
+//
+// $Log: StEmcTriggerMaker.cxx,v $
+// Revision 1.17  2007/04/24 15:53:17  kocolosk
+// added new interface methods to get trigger thresholds and decisions based on trigId
+//
