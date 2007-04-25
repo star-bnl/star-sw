@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.26 2007/04/24 00:33:59 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.27 2007/04/25 18:35:57 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.27  2007/04/25 18:35:57  genevb
+// Additional SSD hists
+//
 // Revision 2.26  2007/04/24 00:33:59  genevb
 // SSD hists
 //
@@ -112,7 +115,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.26 2007/04/24 00:33:59 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.27 2007/04/25 18:35:57 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -674,6 +677,9 @@ class StQABookHist : public TObject {
   TH1F* m_pnt_phiSSD;          //!
   TH2F* m_pnt_lwSSD;           //!
   TH1F* m_glb_ssd_phi;         //!
+  TH1F* m_prim_ssd_phi;        //!
+  TH2F* m_pnt_sizeSSD;         //!
+  TH1F* m_pnt_eSSD;            //!
 
   // ********************** Members For Internal Use *************************
  protected:

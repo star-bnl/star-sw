@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.57 2007/04/24 00:33:58 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.58 2007/04/25 18:35:57 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.58  2007/04/25 18:35:57  genevb
+// Additional SSD hists
+//
 // Revision 2.57  2007/04/24 00:33:58  genevb
 // SSD hists
 //
@@ -714,6 +717,9 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_phiSSD = 0;
   m_pnt_lwSSD = 0;
   m_glb_ssd_phi = 0;
+  m_prim_ssd_phi = 0;
+  m_pnt_sizeSSD = 0;
+  m_pnt_eSSD = 0;
 
 }
 //_____________________________________________________________________________
@@ -979,7 +985,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_rzl0TS->Rebin(1,"z_{dif}");
   m_glb_rzl0TS->SetStats(kFALSE);
   m_glb_phifTS   = QAH::H1F("QaGtrkPhifTS",   "globtrk: phi of first point on track, svt",64,0,360);
-  m_glb_ssd_phi  = QAH::H1F("QaGtrkPhifSSD",  "globtrk: phi of first point on track, ssd",64,0,360);
+  m_glb_ssd_phi  = QAH::H1F("QaGtrkPhifSSD",  "globtrk: phi of ssd point",64,0,360);
   m_lengthTS     = QAH::H1F("QaGtrkLengthTS", "globtrk: track length, tpc+svt", 50,0.,300.);
   m_psiTS        = QAH::H1F("QaGtrkPsiTS",    "globtrk: psi, tpc+svt (deg) ", 64, 0.,360.);
   m_tanlTS       = QAH::H1F("QaGtrkTanlTS",   "globtrk: tanl, tpc+svt",32,-4.,4.);
@@ -1372,6 +1378,7 @@ void StQABookHist::BookHistPrim(){
   m_ppTTS         = QAH::H1F("QaPtrkPtTS",     "primtrk: pT, tpc+svt",50,0.,5.);
   m_pmomTS        = QAH::H1F("QaPtrkPTS",      "primtrk: momentum, tpc+svt",50,0.,5.);
   m_pchisq0TS     = QAH::H1F("QaPtrkChisq0TS", "primtrk: chisq0, tpc+svt", 50, 0.,5.);
+  m_prim_ssd_phi  = QAH::H1F("QaPtrkPhifSSD",  "primtrk: phi of ssd point",64,0,360);
 
 // 2D - tpc + silicon (svt + ssd)
   m_ppT_eta_recTS = QAH::H2F("QaPtrkPtVsEtaTS","primtrk: log10 pT vs eta, tpc+svt", 20,-2.,2.,40,1.,4.);
@@ -1675,6 +1682,11 @@ void StQABookHist::BookHistPoint(){
   m_pnt_lwSSD   = QAH::H2F("QaPointLWSSD","point: wafer id vs ladder id, ssd",20,0.5,20.5,16,0.5,16.5);
   m_pnt_lwSSD->SetXTitle("Ladder #");
   m_pnt_lwSSD->SetYTitle("Wafer #");
+  m_pnt_sizeSSD = QAH::MH1F("QaPointSizeSSD","point: size of clusters, ssd",10,0.5,10.5,2);
+  m_pnt_sizeSSD->Rebin(0,"P-side");
+  m_pnt_sizeSSD->Rebin(1,"N-side");
+  m_pnt_sizeSSD->SetStats(kFALSE);
+  m_pnt_eSSD = QAH::H1F("QaPointESSD","point: log10(energy) of hits, ssd",90,-5,-2);
 
   m_pnt_xyFE    = QAH::H2F("QaPointXYFtpcE","point: x-y distribution of hits, ftpcE",70,-35,35,70,-35,35);
   m_pnt_xyFW    = QAH::H2F("QaPointXYFtpcW","point: x-y distribution of hits, ftpcW",70,-35,35,70,-35,35);

@@ -650,19 +650,22 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_psi_phiT->Fill(orphi,psi);
       }
       
-      // now fill all TPC+(SVT or SSD) histograms -----------------------------------
+      // now fill all TPC+(SVT or SSD) histograms ------------------------------
       
       else if (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId)) {
 
         if (map.hasHitInDetector(kSsdId)) {
           if (TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
               map.numberOfHits(kTpcId)>15) {
-            hists->m_glb_ssd_phi->Fill(fphi);
+            StPtrVecHit ssd_hits = detInfo->hits(kSsdId);
+            Float_t sphi = ssd_hits[0]->position().phi()/degree;
+            if (sphi<0) sphi+=360.;
+            hists->m_glb_ssd_phi->Fill(sphi);
           }
         } // SSD Requirement
 
         if (map.trackTpcSvt()) {
-        // now fill all TPC+SVT histograms ------------------------------------------
+        // now fill all TPC+SVT histograms -------------------------------------
 	
 	cnttrkgTS++;
 	cnttrkgTTS++;
@@ -1189,10 +1192,23 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_ppsi_phiT->Fill(orphi,psi);
 	}
 	
-	// now fill all TPC+SVT histograms --------------------------------------------
+        // now fill all TPC+(SVT or SSD) histograms ------------------------------
+      
+        else if (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId)) {
+
+          if (map.hasHitInDetector(kSsdId)) {
+            if (TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
+                map.numberOfHits(kTpcId)>15) {
+              StPtrVecHit ssd_hits = detInfo->hits(kSsdId);
+              Float_t sphi = ssd_hits[0]->position().phi()/degree;
+              if (sphi<0) sphi+=360.;
+              hists->m_prim_ssd_phi->Fill(sphi);
+            }
+          } // SSD Requirement
+
+          if (map.trackTpcSvt()) {
+          // now fill all TPC+SVT histograms -------------------------------------
 	
-        else if (map.trackTpcSvt()) {
-	  
 	  cnttrkgTS++;
 	  mean_ptTS += geom->momentum().perp();
 	  mean_etaTS += eta;
@@ -1274,7 +1290,8 @@ void StEventQAMaker::MakeHistPrim() {
               hists->m_svt_loc->Fill(svt_hit->timebucket(),svt_hit->index());
 	    }
 	  }
-	}
+	} // SVT Requirement
+	} // SVT || SSD Requirement
 	
 	// now fill all FTPC East histograms ------------------------------------------
         else if (map.trackFtpcEast()) {
@@ -1833,6 +1850,9 @@ void StEventQAMaker::MakeHistPoint() {
 	  hists->m_pnt_phiSSD->Fill(phi);
 	  hists->m_pnt_lwSSD->Fill(j+1,k+1);
 	  hists->m_pnt_xyS->Fill(x,y);
+          hists->m_pnt_sizeSSD->Fill(ssdhit->clusterSizePSide(),0);
+          hists->m_pnt_sizeSSD->Fill(ssdhit->clusterSizeNSide(),1);
+          hists->m_pnt_eSSD->Fill(TMath::Log10(ssdhit->charge()));
         }
       }
     }
@@ -2197,8 +2217,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.77 2007/04/24 00:33:58 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.78 2007/04/25 18:35:56 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.78  2007/04/25 18:35:56  genevb
+// Additional SSD hists
+//
 // Revision 2.77  2007/04/24 00:33:58  genevb
 // SSD hists
 //
