@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.21 2007/04/23 18:11:30 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.22 2007/04/25 17:44:59 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.22  2007/04/25 17:44:59  wleight
+ * Corrected error in assignment of reconstructed IST hits
+ *
  * Revision 1.21  2007/04/23 18:11:30  andrewar
  * Removed references to Hpd (includes were obsolete)
  *
@@ -498,14 +501,14 @@ Int_t StPixelFastSimMaker::Make()
 		    }
 		    strips2[o].intercept=icept/sTotE;
 		    gGeoManager->RestoreMasterVolume();
-		    gGeoManager->cd(PathIn);
+		    gGeoManager->cd(PathOut);
 		    //TGeoNode* node=gGeoManager->GetCurrentNode();
 		    localpos[0]=distortHit(0,3.84/sqrt(12.),100);
 		    localpos[2]=distortHit(strips2[o].intercept,pitch/sqrt(12.),100);
 		    localpos[1]=-.0005;
 		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
 		    LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
-		    LOG_DEBUG<<"path: "<<PathIn<<endm;
+		    LOG_DEBUG<<"path: "<<PathOut<<endm;
 		    gpos[0]=0;
 		    gpos[1]=0;
 		    gpos[2]=0;
