@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.176  2007/04/26 04:23:54  perev
+// Remove StBFChain dependency
+//
 // Revision 1.175  2007/04/17 05:11:45  perev
 // GetTFile()==>StMaker. Jerome request
 //
@@ -311,7 +314,7 @@ More detailed: 				<br>
 #include "TDataSet.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
-#include "StBFChain.h"
+#include "StChainOpt.h"
 #include "SystemOfUnits.h"
 #include "TMemStat.h"
 #include "PhysicalConstants.h"
@@ -679,7 +682,7 @@ Int_t StiMaker::InitPulls()
 {
   if (!IAttr("makePulls")) 	return 0;
   
-  StBFChain *bfc = dynamic_cast<StBFChain*>(GetChain());
+  const StChainOpt *bfc = GetChainOpt();
   assert(bfc);
   TFile *tfile  = GetTFile();
   if (!tfile) {
