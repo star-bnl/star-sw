@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdAbsClustering.cxx,v 1.5 2004/06/24 13:47:09 subhasis Exp $
+ * $Id: StPmdAbsClustering.cxx,v 1.6 2007/04/26 04:09:53 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.cxx,v $
+ * Revision 1.6  2007/04/26 04:09:53  perev
+ * Remove StBFChain dependency
+ *
  * Revision 1.5  2004/06/24 13:47:09  subhasis
  * several changes in clustering code
  *
@@ -36,7 +39,6 @@
 
 #include <TTableSorter.h>
 
-#include "StBFChain.h"
 #include "StPmdUtil/StPmdHit.h"
 #include "StPmdAbsClustering.h"
 #include "StPmdClusterMaker.h"

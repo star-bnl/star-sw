@@ -35,7 +35,6 @@ constants are then stored in calibration database
 #include<StMessMgr.h>
 #include<TFile.h>
 #include<TF1.h>
-#include "StBFChain.h"
 #include "StPmdUtil/StPmdGeom.h"
 #include "StPmdCalibConstMaker.h"
 #include "StPmdUtil/StPmdDetector.h" //! will be obtained 

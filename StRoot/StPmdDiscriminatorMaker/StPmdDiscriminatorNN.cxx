@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdDiscriminatorNN.cxx,v 1.3 2003/09/02 17:58:48 perev Exp $
+ * $Id: StPmdDiscriminatorNN.cxx,v 1.4 2007/04/26 04:13:46 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -12,6 +12,9 @@
  ******************************************************
  *
  * $Log: StPmdDiscriminatorNN.cxx,v $
+ * Revision 1.4  2007/04/26 04:13:46  perev
+ * Remove StBFChain dependency
+ *
  * Revision 1.3  2003/09/02 17:58:48  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -35,7 +38,6 @@
 #include<StMessMgr.h>
 #include<TFile.h>
 
-#include "StBFChain.h"
 #include "StPmdUtil/StPmdGeom.h"
 #include "StPmdUtil/StPmdDetector.h"
 #include "StPmdDiscriminatorMaker.h"

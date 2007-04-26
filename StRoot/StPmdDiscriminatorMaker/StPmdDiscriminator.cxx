@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdDiscriminator.cxx,v 1.6 2004/07/16 14:29:49 subhasis Exp $
+ * $Id: StPmdDiscriminator.cxx,v 1.7 2007/04/26 04:12:10 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -12,6 +12,9 @@
  ******************************************************
  *
  * $Log: StPmdDiscriminator.cxx,v $
+ * Revision 1.7  2007/04/26 04:12:10  perev
+ * Remove StBFChain dependency
+ *
  * Revision 1.6  2004/07/16 14:29:49  subhasis
  * more checks on edep Discriminate
  *
@@ -37,7 +40,6 @@
 #include<StMessMgr.h>
 #include<TFile.h>
 
-#include "StBFChain.h"
 #include "StPmdUtil/StPmdGeom.h"
 #include "StPmdUtil/StPmdDetector.h"
 #include "StPmdDiscriminatorMaker.h"

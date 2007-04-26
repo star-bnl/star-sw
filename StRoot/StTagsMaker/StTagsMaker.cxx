@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.18 2007/04/17 05:09:41 perev Exp $
+// $Id: StTagsMaker.cxx,v 1.19 2007/04/26 04:15:40 perev Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.19  2007/04/26 04:15:40  perev
+// Remove StBFChain dependency
+//
 // Revision 1.18  2007/04/17 05:09:41  perev
 // GetTFile()==>StMaker. Jerome request
 //
@@ -57,7 +60,6 @@
 
 #include "StTagsMaker.h"
 #include "StEvtHddr.h"
-#include "StBFChain.h"
 #include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -277,14 +279,12 @@ EDataSetPass StTagsMaker::GetTags (TDataSet* ds)
 //_____________________________________________________________________________
 Int_t StTagsMaker::InitTags() {
   if (!fTree) {
-    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-    if (chain) {
-      TFile *f = GetTFile();
-      if (f) {
-	f->cd();
-	fTree = new TTree("Tag","BFC chain Tags");
-	chain->Pass(GetTags);
-      }
+    StMaker *chain = GetChain();
+    TFile *f = chain->GetTFile();
+    if (f) {
+      f->cd();
+      fTree = new TTree("Tag","BFC chain Tags");
+      chain->Pass(GetTags);
     }
   }
   return 0;

@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.cxx,v 1.9 2005/10/21 00:54:06 subhasis Exp $
+ * $Id: StPmdDiscriminatorMaker.cxx,v 1.10 2007/04/26 04:13:19 perev Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -9,6 +9,9 @@
  *
  ****************************************************************
  * $Log: StPmdDiscriminatorMaker.cxx,v $
+ * Revision 1.10  2007/04/26 04:13:19  perev
+ * Remove StBFChain dependency
+ *
  * Revision 1.9  2005/10/21 00:54:06  subhasis
  * fillStEvent crash due to mismatch in length of pmdclust and phmdclust fixed
  *
@@ -44,7 +47,6 @@
 #include<StMessMgr.h>
 #include<TFile.h>
 
-#include "StBFChain.h"
 #include "StPmdDiscriminator.h"
 #include "StPmdDiscriminatorMaker.h"
 #include "StPmdDiscriminatorNN.h"
