@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.91  2007/04/26 11:06:11  jcs
+// Use the bfc option "debug" to create and fill the FTPC cluster tuning histograms
+//
 // Revision 1.90  2007/02/01 11:57:04  jcs
 // move unessential output from INFO to DEBUG
 //
@@ -510,20 +513,22 @@ Int_t StFtpcClusterMaker::Init(){
   m_hitsvstime = NULL;
 
   if (IAttr(".histos")) {
-     m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,8,0.,8.);
-     m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
-     m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
-     m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
-     //m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
-     //m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
-     //m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
      m_maxadc_West = new TH1F("fcl_maxadcW","FTPCW MaxAdc",50,0.5,50.5);
      m_maxadc_East = new TH1F("fcl_maxadcE","FTPCE MaxAdc",50,0.5,50.5);
      m_charge_West = new TH1F("fcl_chargeW","FTPCW charge",50,0.5,500.5);
      m_charge_East = new TH1F("fcl_chargeE","FTPCE charge",50,0.5,500.5);
-     m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
-     m_hitsvspad = new TH2F("fcl_hitsvspad","#hits vs. padlength",10,0.5,10.5,11,0.5,11.5);
-     m_hitsvstime = new TH2F("fcl_hitsvstime","#hits vs. timelength",12,0.5,12.5,11,0.5,11.5);
+     if (Debug()){
+        m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,8,0.,8.);
+        m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
+        m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
+        m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
+        //m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
+        //m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
+        //m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
+        //m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
+        m_hitsvspad = new TH2F("fcl_hitsvspad","#hits vs. padlength",10,0.5,10.5,11,0.5,11.5);
+        m_hitsvstime = new TH2F("fcl_hitsvstime","#hits vs. timelength",12,0.5,12.5,11,0.5,11.5);
+     }
   }   
 
   return StMaker::Init();
@@ -885,7 +890,7 @@ void StFtpcClusterMaker::MakeHistograms()
        }	  
     } //end if hit->GetPadRow() >=11
 
-    if (IAttr(".histos")) {
+    if (IAttr(".histos") && Debug()) {
        Int_t flag = hit->GetFlags();
        if (flag > 0) {
           Int_t bin = 7;
