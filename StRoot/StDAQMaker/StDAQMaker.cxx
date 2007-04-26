@@ -9,7 +9,6 @@
 #include "StDAQMaker.h"
 #include "StDAQReader.h"
 #include "StTPCReader.h"
-#include "StBFChain.h"
 
 ClassImp(StDAQMaker)
 

@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.12 2004/09/22 19:24:56 perev Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.13 2007/04/26 04:14:57 perev Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -11,6 +11,9 @@
  * filling StPmdCollection    : Dipak
  *
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.13  2007/04/26 04:14:57  perev
+ * Remove StBFChain dependency
+ *
  * Revision 1.12  2004/09/22 19:24:56  perev
  * Leak fixed + mess with i,j indexes
  *
@@ -64,7 +67,6 @@
 #include "StPmdUtil/StPmdHit.h"
 #include "StPmdUtil/StPmdModule.h"
 #include "StPmdUtil/StPmdMapUtil.h"
-#include "StBFChain.h"
 #include "tables/St_g2t_pmd_hit_Table.h" //!for PMD information
 #include "tables/St_g2t_track_Table.h"   //!for track information 
 #include <TTableSorter.h>

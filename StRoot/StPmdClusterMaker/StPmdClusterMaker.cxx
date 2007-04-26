@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.16 2006/02/16 08:35:26 subhasis Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.17 2007/04/26 04:10:34 perev Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.17  2007/04/26 04:10:34  perev
+ * Remove StBFChain dependency
+ *
  * Revision 1.16  2006/02/16 08:35:26  subhasis
  * fillstevent: mod-1 fixed for CPV
  *
@@ -60,7 +63,6 @@
 #include<StMessMgr.h>
 #include<TFile.h>
 
-#include "StBFChain.h"
 #include "StPmdUtil/StPmdGeom.h"
 #include "StPmdClusterMaker.h"
 #include "StPmdAbsClustering.h"

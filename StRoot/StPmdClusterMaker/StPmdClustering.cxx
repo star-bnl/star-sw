@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.23 2005/06/09 19:43:54 perev Exp $
+ * $Id: StPmdClustering.cxx,v 1.24 2007/04/26 04:11:11 perev Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.24  2007/04/26 04:11:11  perev
+ * Remove StBFChain dependency
+ *
  * Revision 1.23  2005/06/09 19:43:54  perev
  * Avoid FloatPointException
  *
@@ -90,7 +93,6 @@
 
 #include <TTableSorter.h>
 
-#include "StBFChain.h"
 #include "StPmdUtil/StPmdGeom.h"
 #include "StPmdUtil/StPmdHit.h"
 #include "StPmdClustering.h"

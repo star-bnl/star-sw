@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.16 2006/02/16 21:36:08 perev Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.17 2007/04/26 04:14:27 perev Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.17  2007/04/26 04:14:27  perev
+ *Remove StBFChain dependency
+ *
  *Revision 1.16  2006/02/16 21:36:08  perev
  *No delete pmdCollection. It is deleted in Clear()
  *
@@ -84,7 +87,6 @@
 // added for StEvent
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
-#include "StBFChain.h"
 //
 ClassImp(StPmdReadMaker) // macro
 //-----------------------------------------------------------------

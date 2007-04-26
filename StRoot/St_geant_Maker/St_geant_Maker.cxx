@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.114 2007/03/07 16:46:04 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.115 2007/04/26 04:18:27 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.115  2007/04/26 04:18:27  perev
+// Remove StBFChain dependency
+//
 // Revision 1.114  2007/03/07 16:46:04  fine
 // Add the warning
 //
@@ -413,9 +416,6 @@
 #include <TGiant3.h>
 #else
 #include "TGiant3.h"
-#endif
-#if 0
-#include "StBFChain.h"
 #endif
 #include "StarMagField.h"
 //#include "tables/St_g2t_run_Table.h"

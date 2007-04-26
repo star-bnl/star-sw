@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.22 2007/04/25 17:44:59 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.23 2007/04/26 04:08:41 perev Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.23  2007/04/26 04:08:41  perev
+ * Remove StBFChain dependency
+ *
  * Revision 1.22  2007/04/25 17:44:59  wleight
  * Corrected error in assignment of reconstructed IST hits
  *
@@ -99,7 +102,6 @@ using namespace std;
 #include "Sti/StiVMCToolKit.h"
 #include "StarClassLibrary/StRandom.hh"
 #include "tables/St_HitError_Table.h"
-#include "StBFChain.h"
 #include <fstream.h>
 
 ClassImp(StPixelFastSimMaker)
