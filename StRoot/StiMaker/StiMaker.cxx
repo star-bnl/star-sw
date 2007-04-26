@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.154.2.1  2007/04/26 16:08:59  jeromel
+// Imported patch from VP for minimal error on vertex
+//
 // Revision 1.154  2005/10/06 20:38:46  fisyak
 // Clean up
 //
@@ -239,6 +242,11 @@
 #include "tables/St_HitError_Table.h"
 
 #include "Sti/StiTimer.h"
+/// Definion of minimal primary vertex errors.
+/// Typical case,vertex got from simulations with zero errors.
+/// But zero errors could to unpredicted problems
+/// Now minimal possible error is 1 micron
+static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 
 ClassImp(StiMaker)
   
@@ -468,6 +476,21 @@ Int_t StiMaker::Make()
 	  if (vertices && vertices->size())
 //	  if (vertex)
 	    {
+              //Set minimal errors
+	      for (size_t i=0;i<vertices->size();i++) {
+	        StiHit *vtx=(*vertices)[i];
+                StMatrixF vtxErr(3,3);
+                vtxErr[0][0] = vtx->sxx();
+                vtxErr[1][1] = vtx->syy();
+                vtxErr[2][2] = vtx->szz();
+                if (vtxErr[0][0]>MIN_VTX_ERR2
+                &&  vtxErr[1][1]>MIN_VTX_ERR2
+                &&  vtxErr[2][2]>MIN_VTX_ERR2) continue;
+                vtxErr[0][0]=MIN_VTX_ERR2;
+                vtxErr[1][1]=MIN_VTX_ERR2;
+                vtxErr[2][2]=MIN_VTX_ERR2;
+                vtx->setError(vtxErr);
+              }
 	      //cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
 	      _tracker->extendTracksToVertices(*vertices);
 //	      _tracker->extendTracksToVertex(vertex);
