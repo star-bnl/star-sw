@@ -48,9 +48,6 @@ class StEEmcMixQAMaker : public StMaker
   Float_t zVertexMin;/**<-- minimum z vertex */
   Float_t zVertexMax;/**<-- maximum z vertex */
 
-  Float_t minZgg; /**<-- minimum zgg */
-  Float_t maxZgg; /**<-- maximum zgg */
-
   /// add a pT bin from the last boundary added to this value 
   void addBin(Float_t b){ assert(b>mBins.back()); mBins.push_back(b); }
 
@@ -63,7 +60,6 @@ class StEEmcMixQAMaker : public StMaker
   Bool_t mBackground; /**<-- specifies whether or not we are histograming a mixed event background */
 
   TH1F *hNcandidates; /**<-- number of reconstructed pi0 candidates per event */
-  TH1F *hNcandidatesR; /**<-- number of reconstructed pi0 candidtaes per sector [0.1,0.18] */ 
 
   /// Y vs X of pi0 pairs
   std::vector<TH2F *> hYXpair;  //! Y vs X of pi0 pair

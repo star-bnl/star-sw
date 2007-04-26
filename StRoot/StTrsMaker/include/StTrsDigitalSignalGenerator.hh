@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.hh,v 1.8 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsDigitalSignalGenerator.hh,v 1.7 2003/12/24 13:44:51 fisyak Exp $
  *
  * Author: brian, October 1998 
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.hh,v $
- * Revision 1.8  2005/09/09 22:12:48  perev
- * Bug fix + IdTruth added
- *
  * Revision 1.7  2003/12/24 13:44:51  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -87,9 +84,13 @@ protected:
     StTpcElectronics*   mElectronicsDb;
     StTrsSector*        mSector;
     StTrsDigitalSector* mDigitalSector;
-    int                 mSectorNo;
+  int                 mSectorNo;
 
-vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator mTimeSequenceIterator;
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+      vector<StTrsAnalogSignal>::iterator mTimeSequenceIterator;
+#else
+    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator mTimeSequenceIterator;
+#endif
 };
 
 #endif

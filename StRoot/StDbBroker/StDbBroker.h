@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.28 2005/08/29 21:43:15 fisyak Exp $
+ * $Id: StDbBroker.h,v 1.27 2004/07/14 18:46:51 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,9 +12,6 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
- * Revision 1.28  2005/08/29 21:43:15  fisyak
- * replace UInt_t to Int_t for m_runNumber to avoid problem with undefined run no.
- *
  * Revision 1.27  2004/07/14 18:46:51  perev
  * UInt=>Int for new ROOT
  *
@@ -162,7 +159,7 @@ struct oldDescriptor {
     UInt_t       m_endTimeStamp; // unix endTime
     UInt_t       m_requestTimeStamp; // unix requestTime
 
-    Int_t        m_runNumber;  // run number of queries of runlog
+    UInt_t       m_runNumber;  // run number of queries of runlog
 
     char*        m_tableVersion; // name of the version of the table
     char*        m_database;     // name of the database for this table
@@ -245,7 +242,7 @@ const char *GetFlavor();
     };
 
     void   SetDateTime(Int_t  date,Int_t  time);
-    void   SetRunNumber(Int_t runNumber)  {m_runNumber=runNumber;};
+    void   SetRunNumber(UInt_t runNumber)  {m_runNumber=runNumber;};
     void   SetDictionary(UInt_t nElements, Descriptor *D)
                                      {m_nElements=nElements; mdescriptor = D;}
     void   SetDictionary(Descriptor *D)

@@ -2,6 +2,7 @@
 #ifdef __ROOT__
 #include "TBuffer.h"
 #include "TClass.h"
+ClassImpT(StThreeVector,double);
 ClassImpT(StThreeVector,float);
 //________________________________________________________________________________
 template <> void StThreeVector<float>::Streamer(TBuffer &R__b)

@@ -1,5 +1,5 @@
 //*-- Author : Renee Fatemi 
-// $Id: StJetSimuWeightMaker.cxx,v 1.2 2005/09/28 18:18:12 mmiller Exp $
+// $Id: StJetSimuWeightMaker.cxx,v 1.3 2005/10/07 13:58:59 mmiller Exp $
 
 #include "TFile.h"
 #include "StJetMaker/StJetSimuUtil/StJetSimuWeightMaker.h"
@@ -26,7 +26,7 @@ Int_t StJetSimuWeightMaker::Init(){
  
   //get Makers
   mcEventMaker=(StMcEventMaker *)GetMaker("StMcEvent");
-  assert(mcEventMaker);
+  //assert(mcEventMaker);
   trigMaker=(StJetSimuTrigMaker *)GetMaker("SimuTrig");
   assert(trigMaker);
 

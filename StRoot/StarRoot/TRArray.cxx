@@ -57,13 +57,9 @@ Bool_t TRArray::Verify(const TRArray &A, Double_t zeru, Int_t Level) const {
       fails++;
       if (Level) 
 	cout << "Failed:[" << i << "]\t" << aArray[i] << "\t" << fArray[i] << "\tdiff\t" << diff << endl;
-      continue;
     }
     else if (Level > 1) 
       cout << "Passed:[" << i << "]\t" << aArray[i] << "\t" << fArray[i] << "\tdiff\t" << diff << endl;
-  }
-  if (fails) {
-    cout << "Failed " << fails << " times" << endl;
   }
   return fails != 0;
 }

@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.14 2005/09/19 21:43:32 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.12 2005/02/02 01:36:50 balewski Exp $
  
 #include <stdio.h>
 #include <string.h>
@@ -203,12 +203,6 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
-// Revision 1.14  2005/09/19 21:43:32  balewski
-// I was wrong, there was no bug
-//
-// Revision 1.13  2005/09/19 21:41:51  balewski
-// bug : '&' was missing in importAscii()
-//
 // Revision 1.12  2005/02/02 01:36:50  balewski
 // few more access methods + sigPed visible in EEmcDbItem
 //

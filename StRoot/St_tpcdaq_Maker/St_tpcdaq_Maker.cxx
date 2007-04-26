@@ -35,23 +35,21 @@
 ClassImp(St_tpcdaq_Maker)
 
 #define PP printf
+#define ALLOC 1.2  // Must be > 1.0.  Larger runs faster, but wastes memory.
+#define NSECT 24
+#define NROW  45
+#define DEBUG_ACTIVE_ROW 33
 #define HISTOGRAMS
-
-enum myNUMB { NSECT=24, NROW =45,DEBUG_ACTIVE_ROW =33,MAXPADROWSPERBANK=50};
 
 #include "StDAQMaker/StDAQReader.h"
 StDAQReader *victorPrelim=0;
 StTPCReader *victor;
-int gSector=-1;
-enum myCORR {kGainCorr=1, kNoiseElim=2, kAsicTHold=4};
-enum myDAQF {kPadRaw  =1, kDAQ100   =2              };
-
+int gSector;
 // #define DEVELOPMENT
 //________________________________________________________________________________
 int St_tpcdaq_Maker::GetCorrection(void) {
   return mCorrectionMask;
 }
-//________________________________________________________________________________
 void St_tpcdaq_Maker::SetCorrection(int mask) {
   // bit 0  =   do GAIN_CORRECTION
   // bit 1  =   do NOISE_ELIM
@@ -60,13 +58,12 @@ void St_tpcdaq_Maker::SetCorrection(int mask) {
   // To switch OFF all corrections use mask = 0.
   mCorrectionMask=mask;
 }
-//________________________________________________________________________________
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
   alreadySet=0; // FALSE
   daq_flag = 1; // default value for DAQ Reading is to use pad_raw table filling
-  mCorrectionMask = kGainCorr | kNoiseElim | kAsicTHold;
+  mCorrectionMask=7;
 }
 //________________________________________________________________________________
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
@@ -94,19 +91,19 @@ Int_t St_tpcdaq_Maker::Init() {
 Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
   St_DataSet *herb; 
   //int junk;
-  if(mCorrectionMask&kNoiseElim) { SetNoiseEliminationStuff(); /*WriteStructToScreenAndExit();*/ }
-  if(mCorrectionMask&kAsicTHold) {
+  if(mCorrectionMask&0x02) { SetNoiseEliminationStuff(); /*WriteStructToScreenAndExit();*/ }
+  if(mCorrectionMask&0x04) {
     TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc");
     assert(tpc_calib);
     St_asic_thresholds *asic = (St_asic_thresholds *) tpc_calib->Find("asic_thresholds");
     assert(asic);
     St_asic_thresholds &kasic = *asic;
-    mThreshLo = kasic[0].thresh_lo;
-    mThreshHi = kasic[0].thresh_hi;
-    mNseqLo   = kasic[0].n_seq_lo;
-    mNseqHi   = kasic[0].n_seq_hi;
+    mThreshLo=kasic[0].thresh_lo;
+    mThreshHi=kasic[0].thresh_hi;
+    mNseqLo=kasic[0].n_seq_lo;
+    mNseqHi=kasic[0].n_seq_hi;
   }
-
+  //junk=log10to8_table[0]; /* to eliminate the warnings from the compiler. */
   if(m_Mode == 0 || m_Mode == 2) { // Update this for embedding.
     herb=GetDataSet("StDAQReader");
     assert(herb);
@@ -120,6 +117,10 @@ Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
   }
   PP("end of St_tpcdaq_Maker::Init\n");
   return StMaker::InitRun(RunNumber);
+}
+//________________________________________________________________________________
+void St_tpcdaq_Maker::PrintErr(int number,char letter) {
+  printf("Severe error %d(%c) in St_tpcdaq_Maker.\n",number,letter);
 }
 //________________________________________________________________________________
 char *St_tpcdaq_Maker::NameOfSector(int isect) {
@@ -191,40 +192,44 @@ void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
 }
 //________________________________________________________________________________
 void St_tpcdaq_Maker::PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
-      int seqOffset,int nseq,int timeWhere,int pad)
-{
+      int seqOffset,int nseq,int timeWhere,int pad) {
+  int nAlloc,nUsed;
   raw_pad_st singlerow;
   singlerow.PadOffset=padOffset;
   singlerow.SeqOffset=seqOffset;
   singlerow.nseq=nseq;
   singlerow.SeqModBreak=timeWhere;
   singlerow.PadId=pad;
-  assert(raw_pad_gen->GetNRows()==padR);
-  raw_pad_gen->AddAt(&singlerow);
+  nAlloc=raw_pad_gen->GetTableSize(); nUsed=raw_pad_gen->GetNRows();
+  if(nUsed>nAlloc-10) { raw_pad_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
+  raw_pad_gen->AddAt(&singlerow,padR);
 }
 //________________________________________________________________________________
 inline void St_tpcdaq_Maker::PixelWrite(St_type_shortdata *pixel_data_gen,St_type_shortdata *pixel_indx_gen,
-      int rownum,unsigned short datum, unsigned short id) 
-{
+      int rownum,unsigned short datum, unsigned short id) {
+  int nAlloc,nUsed;
   type_shortdata_st singlerow;
   singlerow.data=datum;
   type_shortdata_st singleid;
   singleid.data=id;
-  assert(pixel_data_gen->GetNRows()==rownum);
-  pixel_data_gen->AddAt(&singlerow);
-  assert(pixel_indx_gen->GetNRows()==rownum);
-  pixel_indx_gen->AddAt(&singleid);
+  nAlloc=pixel_data_gen->GetTableSize(); nUsed=pixel_data_gen->GetNRows();
+  if(nUsed>nAlloc-10) { pixel_data_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
+  pixel_data_gen->AddAt(&singlerow,rownum);
+  nAlloc=pixel_indx_gen->GetTableSize(); nUsed=pixel_indx_gen->GetNRows();
+  if(nUsed>nAlloc-10) { pixel_indx_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
+  pixel_indx_gen->AddAt(&singleid,rownum);
 }
 //________________________________________________________________________________
 void St_tpcdaq_Maker::SeqWrite(St_raw_seq *raw_seq_gen,int rownumber,
-    int startTimeBin,int numberOfBinsInSequence) 
-{
+    int startTimeBin,int numberOfBinsInSequence) {
+  int nAlloc,nUsed;
   raw_seq_st singlerow;
   if(startTimeBin>=0x100) mErr=1;
   singlerow.m=startTimeBin;
   singlerow.i=numberOfBinsInSequence-1;
-  assert(raw_seq_gen->GetNRows()==rownumber);
-  raw_seq_gen->AddAt(&singlerow);
+  nAlloc=raw_seq_gen->GetTableSize(); nUsed=raw_seq_gen->GetNRows();
+  if(nUsed>nAlloc-10) { raw_seq_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
+  raw_seq_gen->AddAt(&singlerow,rownumber);
 }
 //________________________________________________________________________________
 void St_tpcdaq_Maker::RowWrite(St_raw_row *raw_row_gen,int rownumber,
@@ -242,15 +247,14 @@ void St_tpcdaq_Maker::RowWrite(St_raw_row *raw_row_gen,int rownumber,
   singlerow.PadModBreak=pixTblWhere;
   singlerow.PadRef='L';
   singlerow.RowId=ipadrow+1;
-  assert(raw_row_gen->GetNRows()==rownumber);
-  raw_row_gen->AddAt(&singlerow);
+  raw_row_gen->AddAt(&singlerow,rownumber);
 }
 //________________________________________________________________________________
 int St_tpcdaq_Maker::getSector(Int_t isect) {
   int rv=0;
-  if(m_Mode != 1) {    	// Use DAQ.
+  if(m_Mode != 1) {         // Use DAQ.
     gSector=isect;
-  } else          {     // Use TRS.
+  } else {           // Use TRS.
     mZsr=mTdr->getZeroSuppressedReader(isect);
     if(!mZsr) rv=5; /* Either there are no hits for this sector, or there is an error. */
   }
@@ -258,11 +262,12 @@ int St_tpcdaq_Maker::getSector(Int_t isect) {
 }
 //________________________________________________________________________________
 int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
-  int rv=0; 
+  int rv; unsigned char *padlistPrelim;
   if(m_Mode != 1) { // Use DAQ.
     // enforce recorded merge sequence flag
     victor->SetSequenceMerging(mMergeSequences);              
-    rv=victor->getPadList(gSector,whichPadRow,*padlist);
+    rv=victor->getPadList(gSector,whichPadRow,padlistPrelim);
+    *padlist=padlistPrelim;
     return rv;
   } else {           // Use TRS.
     assert(mZsr);
@@ -271,67 +276,55 @@ int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
   return rv;
 }
 //________________________________________________________________________________
-void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst,int ***idt)
-{
-  static vector<StSequence, allocator<StSequence> > seqArr;
-  static vector<int*      , allocator<int*      > > idtArr;
-  if(mNseqLo<0) return; 	/* There is no asic.tpcdaq file. */
-  seqArr.resize(0);idtArr.resize(0);
-
-  for(int iseq=0;iseq<*nseqOld;iseq++) {
-    StSequence seqNew; seqNew.length=0;
-    StSequence *seqOld = (*lst)+iseq;
-    int npix = seqOld->length;  
-    int inSeq=0,numberAboveThresh=0;
-    int *idtNew=0;
-    for(int ipix=0;ipix<=npix;ipix++) {
-      float conversion = (ipix<npix)? gain*seqOld->firstAdc[ipix]:0;
-      int kase = inSeq;
-      if(conversion> mThreshLo) kase |= 2;
-      if(conversion> mThreshHi) kase |= 4;
-      switch (kase) {
-        case     0: break;
-
-        case 0+2+0: ;
-        case 4+2+0: inSeq=1;
-        numberAboveThresh=0;
-	seqNew.length=0; 
-	seqNew.firstAdc=seqOld->firstAdc+ipix;
-	seqNew.startTimeBin=seqOld->startTimeBin+ipix;
-        if (*idt) idtNew = (*idt)[iseq]+ipix;
-        case 0+2+1:;
-        case 4+2+1:;
-	seqNew.length++;
-	if (kase&4) numberAboveThresh++;
-        break;
-	
-        case 0+0+1: inSeq=0;
-        if(seqNew.length<=mNseqLo) 	break;
-        if(numberAboveThresh<=mNseqHi) 	break;
-        seqArr.push_back(seqNew);
-        if (*idt) idtArr.push_back(idtNew);
-        break;
-	
-	default: assert(0);
-      }//end case
-    }//end pixels loop
-  }//end seq loop
-  *nseqOld=seqArr.size(); *lst=&seqArr[0];
-  if (*idt) *idt = &idtArr[0];
+#define MSSPS 600 /* MSSPS = max sub sequences per sequence */
+void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
+  static StSequence *pp=0; /* The new sequences are held here. */
+  static int numberAllocated=0,call=0;
+  unsigned char *pointerToAdc,*beg[MSSPS],*end[MSSPS],*tmp;
+  int npp=0,iss,nss; /* nss = Number of SubSequences */
+  int numberAboveThresh,npix,ipix,iseq,length;
+  unsigned short conversion;
+  char inSeq; /* boolean (true/false) value */
+  if(mNseqLo<0) return; /* There is no asic.tpcdaq file. */
+  call++;
+  for(iseq=0;iseq<*nseqOld;iseq++) {
+    npix=(*lst)[iseq].length; pointerToAdc=(*lst)[iseq].firstAdc; nss=0; inSeq=0;
+    for(ipix=0;ipix<npix;ipix++) {
+      conversion=(unsigned short) (gain*(*pointerToAdc));
+      if(conversion> mThreshLo&&!inSeq) { inSeq=7; assert(nss<MSSPS); beg[nss  ]=pointerToAdc;   }
+      if(conversion<=mThreshLo&& inSeq) { inSeq=0; assert(nss<MSSPS); end[nss++]=pointerToAdc-1; }
+      pointerToAdc++;
+    }
+    if(inSeq) { inSeq=0; assert(nss<MSSPS); end[nss++]=pointerToAdc-1; }
+    for(iss=0;iss<nss;iss++) { /* loop over candidate sequences */
+      length=end[iss]-beg[iss]+1;
+      if(length<=mNseqLo) continue; numberAboveThresh=0;
+      for(tmp=beg[iss];tmp<=end[iss];tmp++) { if(gain*(*tmp)>mThreshHi) numberAboveThresh++; }
+      if(numberAboveThresh<=mNseqHi) continue;
+      if(npp>=numberAllocated) { /* allocate extra memory if necessary */
+        numberAllocated=(int)(numberAllocated*1.3+5);
+        pp=(StSequence*)realloc(pp,(size_t)(numberAllocated*sizeof(StSequence))); assert(pp);
+      }
+      pp[npp].length=length;
+      pp[npp].firstAdc=beg[iss];
+      pp[npp].startTimeBin=(*lst)[iseq].startTimeBin+(int)(beg[iss]-(*lst)[iseq].firstAdc);
+      npp++;
+    }
+  }
+  *nseqOld=npp; *lst=pp;
 }
 //________________________________________________________________________________
-int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst, int ***listOfIdt)
-{
-  if(listOfIdt)  *listOfIdt=0;
-  int rv=0; TPCSequence *lstPrelim;
+int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst, int ***listOfIds) {
+  int rv,nseqPrelim; TPCSequence *lstPrelim;
   if(m_Mode != 1) { // Use DAQ.
-    rv=victor->getSequences(gSector,row,pad,*nseq,lstPrelim);
+    rv=victor->getSequences(gSector,row,pad,nseqPrelim,lstPrelim);
+    *nseq=nseqPrelim;
     *lst=(StSequence*)lstPrelim;
   } else {           // Use TRS.
     assert(sizeof(Sequence)==sizeof(StSequence));
-    rv=mZsr->getSequences(row,pad,nseq,lst,listOfIdt);
+    rv=mZsr->getSequences(row,pad,nseq,lst,listOfIds);
   }
-  if(mCorrectionMask&kAsicTHold) AsicThresholds(gain,nseq,lst,listOfIdt);
+  if(mCorrectionMask&0x04) AsicThresholds(gain,nseq,lst);
   return rv; // < 0 means serious error.
 }
 
@@ -339,13 +332,16 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 /// Method to set the DAQ Reading mode.
 void St_tpcdaq_Maker::SetDAQFlag(Int_t mode)
 {
+#ifdef DEVELOPMENT
+  if(7) return;
+#endif
   daq_flag = mode;
   cout << "St_tpcdaq_Maker::SetDAQFlag : Setting mandatory DAQ flag to ";
   if (daq_flag == 0){
     cout << " no table filling ";
-  } else if (daq_flag & kPadRaw ){
+  } else if (daq_flag & 0x01 ){
     cout << " Using pad_raw ";
-  } else if (daq_flag & kDAQ100 ){
+  } else if (daq_flag & 0x02 ){
     cout << " Using Clusters (DAQ100) ";
   } else {
     cout << " Unknown option" << daq_flag << endl;
@@ -499,7 +495,7 @@ int St_tpcdaq_Maker::Output() {
   int isect,pixSave,pixR;
   unsigned long int nPixelThisPadRow;
   StSequence *listOfSequences;
-  int       **listOfIdt = 0;
+  int       **listOfIds = 0;
   St_raw_sec_m  *raw_sec_m;
 
   raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
@@ -510,7 +506,7 @@ int St_tpcdaq_Maker::Output() {
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
   for(isect=1;isect<=NSECT;isect++) {
-    if(mCorrectionMask&kGainCorr) SetGainCorrectionStuff(isect);
+    if(mCorrectionMask&0x01) SetGainCorrectionStuff(isect);
     dataOuter[isect-1]=0; dataInner[isect-1]=0;
 
     sector=raw_data_tpc(NameOfSector(isect));
@@ -543,9 +539,9 @@ int St_tpcdaq_Maker::Output() {
 
       pixOffset=0;
       // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
-      for( ipad=0 ; ipad<npad ; ipad++) {
-        pad=padlist[ipad];
-        if(mCorrectionMask&kNoiseElim) {
+      if(npad>0) pad=padlist[0];
+      for( ipad=0 ; ipad<npad ; pad=padlist[++ipad] ) {
+        if(mCorrectionMask&0x02) {
           skip=0;
           for(lgg=0;lgg<noiseElim[isect-1].npad;lgg++) {
             if(noiseElim[isect-1].row[lgg]==ipadrow+1&&noiseElim[isect-1].pad[lgg]==pad) { skip=7; break; }
@@ -553,14 +549,16 @@ int St_tpcdaq_Maker::Output() {
           if(skip) continue;
         }
         nPixelThisPad=0;
-        float gain = (mCorrectionMask&kGainCorr)? fGain[ipadrow][pad-1]:1.;
-        seqStatus=getSequences(gain,ipadrow+1,pad,&nseq,&listOfSequences,&listOfIdt);
-
-        if(seqStatus<0) { Warning("Output","%d A",seqStatus); mErr=2; return 1; }
-        if(!nseq) continue;
-
-        numPadsWithSignal++; 
-        if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
+        if(mCorrectionMask&0x01) {
+          seqStatus=getSequences(fGain[ipadrow][pad-1],ipadrow+1,pad,&nseq,&listOfSequences, &listOfIds);
+        } else {
+          seqStatus=getSequences(                  1.0,ipadrow+1,pad,&nseq,&listOfSequences, &listOfIds);
+        }
+        if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=2; return 1; }
+        if(nseq) {
+          numPadsWithSignal++; 
+          if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
+        } else continue; // So we don't write meaningless rows in pad table.
         timeOff=0; timeWhere=0; prevStartTimeBin=-123;
 #ifdef HISTOGRAMS
         m_pad_numSeq->Fill((Float_t)nseq);
@@ -568,11 +566,11 @@ int St_tpcdaq_Maker::Output() {
         numberOfUnskippedSeq=0;
         for(iseq=0;iseq<nseq;iseq++) {
           startTimeBin=listOfSequences[iseq].startTimeBin;
-          if(startTimeBin<  0) startTimeBin=  0;
+          if(startTimeBin<0) startTimeBin=0;
           if(startTimeBin>511) startTimeBin=511;
           if(prevStartTimeBin>startTimeBin) { mErr=3; return 2; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
-          if(mCorrectionMask&kNoiseElim) {
+          if(mCorrectionMask&0x02) {
             skip=0;
             for(lgg=0;lgg<noiseElim[isect-1].nbin;lgg++) {
               hj=startTimeBin;
@@ -593,18 +591,18 @@ int St_tpcdaq_Maker::Output() {
           m_seq_padRowNumber->Fill((Float_t)(ipadrow+1));
 #endif
           Double_t gaincorrection = 1; // L3
-          if(mCorrectionMask&kGainCorr) {
+          if(mCorrectionMask&0x01) {
             assert(pad>0&&pad<=182);
             if (fGain[ipadrow][pad-1] < 0.125 || fGain[ipadrow][pad-1] > 8.0)  continue;
 //          if (m_Mode == 2) gaincorrection = 1; // Trs
 	    if (m_Mode == 0) gaincorrection = fGain[ipadrow][pad-1];
-//yf (not ready yet to use uncorrected Trs)     if(mCorrectionMask&kGainCorr) gaincorrection = fGain[ipadrow][pad-1];
+//yf (not ready yet to use uncorrected Trs)     if(mCorrectionMask&0x01) gaincorrection = fGain[ipadrow][pad-1];
           }
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++; conversion=log8to10_table[*(pointerToAdc++)];
-	    int idt = (listOfIdt)? listOfIdt[iseq][ibin]:0; 
-            if(mCorrectionMask&kGainCorr) {
+	    unsigned short id =  0; if (listOfIds && listOfIds[iseq]) {id = *listOfIds[iseq]; listOfIds[iseq]++;}
+            if(mCorrectionMask&0x01) {
               if(fGain[ipadrow][pad-1]>22.0) {
                 printf("Fatal error in %s, line %d.\n",__FILE__,__LINE__);
                 printf("ipadrow=%d, pad-1=%d, fgain=%g\n",ipadrow,pad-1,fGain[ipadrow][pad-1]);
@@ -613,9 +611,9 @@ int St_tpcdaq_Maker::Output() {
               conversion=(short unsigned int)(0.5+gaincorrection*conversion);
             }
 #ifdef HISTOGRAMS
-            m_pix_AdcValue->Fill((double)(conversion));
+            m_pix_AdcValue->Fill((Float_t)(conversion));
 #endif
-            PixelWrite(pixel_data_gen,pixel_indx_gen,pixR++,conversion,idt);
+            PixelWrite(pixel_data_gen,pixel_indx_gen,pixR++,conversion,id);
             nPixelThisPadRow++; nPixelThisPad++;
           }
           seqR++;
@@ -659,7 +657,6 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
  mTdr = new StTrsDetectorReader(mEvent);
  return 0;
 }
-//________________________________________________________________________________
 unsigned short int St_tpcdaq_Maker::Swap2(char doSwap,unsigned short int x) {
   char *hh,temp[2];
   if(!doSwap) return x;
@@ -667,7 +664,6 @@ unsigned short int St_tpcdaq_Maker::Swap2(char doSwap,unsigned short int x) {
   temp[0]=hh[1]; temp[1]=hh[0];
   return *((unsigned short int*)temp);
 }
-//________________________________________________________________________________
 unsigned int St_tpcdaq_Maker::Swap4(char doSwap,unsigned int x) {
   char *hh,temp[4];
   if(!doSwap) return x;
@@ -683,9 +679,11 @@ char St_tpcdaq_Maker::WhetherToSwap(unsigned int x) {
   return 0; // To silence Insure++.
 }
 //________________________________________________________________________________
+#define MAXPADROWSPERBANK 50
 void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int receiverBoard,unsigned int mezzanine,
       unsigned int sectorCntsFrom1,char swap,
       const unsigned int *data) {
+  int nAlloc,nUsed;
   unsigned int wordNumber[MAXPADROWSPERBANK],npadrow,ipadrow;
   unsigned int padrow,numClusters,icluster;
   unsigned int numberOfClustersInPreviousChunk,numberOfWordsInPreviousChunk;
@@ -733,9 +731,9 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int receiverBoard,unsigned int m
       singlerow.charge=Swap2(swap,*charge);
       singlerow.flag=Swap2(swap,*flag);
       singlerow.rb_mz=receiverBoard+100*mezzanine; // 0 < = rb_mz <= 211
-      assert(daq100cl->GetNRows()==totalRowCount);
-      daq100cl->AddAt(&singlerow);
-      totalRowCount++;
+      nAlloc=daq100cl->GetTableSize(); nUsed=daq100cl->GetNRows();
+      if(nUsed>nAlloc-10) { daq100cl->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
+      daq100cl->AddAt(&singlerow,totalRowCount++);
     }
   }
 }
@@ -816,8 +814,7 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
   // as described in the section on TPCSECLP on page 17 of the DAQ Format doc.
 }
 //________________________________________________________________________________
-Int_t St_tpcdaq_Maker::Make() 
-{
+Int_t St_tpcdaq_Maker::Make() {
   int output,errorCode; const char *pTPCP;
   printf("St_tpcdaq_Maker::Make() method called in Mode=%d DAQ=%d\n",m_Mode,daq_flag); 
 #ifdef DEVELOPMENT
@@ -842,7 +839,7 @@ Int_t St_tpcdaq_Maker::Make()
     return kStErr;
   }
   assert(!m_DataSet->GetList());
-  if(daq_flag & kPadRaw) { // Sometimes this causes us to skip the corruption check, but it's not im-
+  if(daq_flag & 0x01) { // Sometimes this causes us to skip the corruption check, but it's not im-
                         // portant because the data that would've gotten checked probably won't be used.
     output=Output();
     if(output==4321) printf("St_tpcdaq_Maker::Make() TPC data is missing this event, but do not skip event\n");
@@ -851,12 +848,12 @@ Int_t St_tpcdaq_Maker::Make()
       return kStErr; // See comment 66f.
     }
   }
-  if(daq_flag & kDAQ100) { // Herb Oct 2002 for DAQ100.
+  if(daq_flag & 0x02) { // Herb Oct 2002 for DAQ100.
     if(m_Mode != 1) {
       pTPCP=(const char*)(victor->ptrTPCP); // StDaqLib's memory.  We have been set up as
          // a friend class to StDaqLib.  Let's be worthy of the trust and
          // use "const" to help us avoid modification of this borrowed memory.
-      assert(strncmp(pTPCP,"TPCP",4)==0);
+      assert(pTPCP[0]=='T'&&pTPCP[1]=='P'&&pTPCP[2]=='C'&&pTPCP[3]=='P');
       DAQ100clOutput((const unsigned int*)pTPCP);
     }
   }
@@ -870,7 +867,6 @@ Int_t St_tpcdaq_Maker::Make()
 }
 
 
-//________________________________________________________________________________
 /*!
  *  Records the Sequence merging mode (and keep it once as this is a real
  *  callable maker unlike StDAQmaker() instantiated from StIOMaker() and
@@ -878,7 +874,6 @@ Int_t St_tpcdaq_Maker::Make()
  *  to enforce the same setting in StTPCReader via the similar SetSequenceMerging()
  *  method.
  */
-//________________________________________________________________________________
 char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 {
   mMergeSequences=mergeSequences;
@@ -893,9 +888,6 @@ char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
-// Revision 1.90  2005/09/09 22:14:11  perev
-// IdTruth added
-//
 // Revision 1.89  2005/07/19 22:26:23  perev
 // Redundant assert removed
 //

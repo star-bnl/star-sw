@@ -1,8 +1,5 @@
-// $Id: St_geant_Maker.h,v 1.36 2005/08/29 21:47:09 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.35 2005/04/13 22:27:11 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
-// Revision 1.36  2005/08/29 21:47:09  fisyak
-// Changes for VMC
-//
 // Revision 1.35  2005/04/13 22:27:11  fisyak
 // Add Hit description extractor (AgstHits)
 //
@@ -91,20 +88,13 @@ public:
    virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
-#if 0
-   virtual void   SetDateTime(int idat=0,int itim=0);//
-#endif
-           void   SetFieldOpt(const char *opt) {mFieldOpt = opt;}
    virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
-   virtual void   Draw(const char* opt="IN");
+   virtual void   Draw(const char*);
    virtual Int_t  Make();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
-   virtual void   SetNwGEANT (Int_t n=2) {fNwGeant = n;}
-   virtual void   SetNwPAW   (Int_t n=0) {fNwPaw   = n;}
-   virtual void   SetIwtype  (Int_t n=0) {fIwType  = n;}
-   virtual Int_t  GetNwGEANT () {return fNwGeant;}
-   virtual Int_t  GetNwPAW   () {return fNwPaw  ;}
-   virtual Int_t  GetIwtype  () {return fIwType ;}
+   virtual void   SetNwGEANT (Int_t n=2);
+   virtual void   SetNwPAW   (Int_t n=0);
+   virtual void   SetIwtype  (Int_t n=0);
    virtual Int_t  Skip(Int_t Nskip=1);                        // *MENU*
    virtual TDataSet *Work();
    virtual void   Mark(TVolume *topvol);
@@ -152,11 +142,8 @@ public:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
                                     const StMaker *dowMk=0) const ;
-   static TDataSet   *fgGeom; //!
+   static TDataSet *fgGeom; //!
    static TGiant3    *geant3; //!
-   static St_geant_Maker *fgGeantMk; //!
-   TString           mInitialization; // !
-   TString           mFieldOpt; // !
 
    // histogram pointers:
   TH1F     *m_histvx;        //! geant g2t_vertex table, x of prim vtx
@@ -166,7 +153,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.36 2005/08/29 21:47:09 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.35 2005/04/13 22:27:11 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 

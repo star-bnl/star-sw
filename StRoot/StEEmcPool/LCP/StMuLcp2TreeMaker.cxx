@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StMuLcp2TreeMaker.cxx,v 1.5 2005/08/23 21:09:23 balewski Exp $
+// $Id: StMuLcp2TreeMaker.cxx,v 1.6 2005/10/11 17:28:30 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -191,7 +191,7 @@ Int_t StMuLcp2TreeMaker::Make(){
   eve_id=info.id();
   eve_bx48 = trig.bunchCrossingId();
   eve_bx120 =(trig.bunchCrossingId()+off48 )%120;
-  eve_sb=trig.spinBits();
+  eve_sb=trig.spinBits(info.runId());
  
   // test for false vertex
   //eve_cosm=rejector->acceptEvent(dst);
@@ -366,6 +366,9 @@ void StMuLcp2TreeMaker::examinCut(StMuTrack*lcp0){
 
 
 // $Log: StMuLcp2TreeMaker.cxx,v $
+// Revision 1.6  2005/10/11 17:28:30  balewski
+// fix related L0trig code change
+//
 // Revision 1.5  2005/08/23 21:09:23  balewski
 // fix to follow muDst evolution
 //

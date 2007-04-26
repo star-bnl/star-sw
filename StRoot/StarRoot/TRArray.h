@@ -52,7 +52,7 @@ class TRArray : public TArrayD {
   virtual ETRMatrixType GetMatrixType()              const {return kUndefined;}
   virtual Bool_t IsValid()                           const {return fValid;}
   virtual void   SetValid(Bool_t Valid=kTRUE)              {fValid = Valid;}
-  virtual Double_t &operator()(Int_t i)                    {return operator[](i);}
+  virtual Double_t &operator()(Int_t i)                    {return operator[](i-1);}
   friend TRArray &operator-=(TRArray &target, const Double_t &scalar) {
     for (int i=0; i<target.fN; i++) target.fArray[i] -= scalar; return target;}
   friend TRArray &operator+=(TRArray &target, const Double_t &scalar) {
@@ -93,7 +93,7 @@ class TRArray : public TArrayD {
     for (int i=0; i<target.fN; i++) if (target.fArray[i] != fB[i]) return kFALSE; return kTRUE;
   }
   
-  Bool_t Verify(const TRArray &A, const Double_t zeru=5.e-7, Int_t Level=1) const;
+  Bool_t Verify(const TRArray &A, const Double_t zeru=1.e-7, Int_t Level=1) const;
   virtual void   Print(Option_t *opt="") const;
  protected:
   Bool_t fValid;

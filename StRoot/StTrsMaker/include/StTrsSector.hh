@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.hh,v 1.6 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsSector.hh,v 1.5 2000/06/23 00:12:24 snelling Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.hh,v $
- * Revision 1.6  2005/09/09 22:12:48  perev
- * Bug fix + IdTruth added
- *
  * Revision 1.5  2000/06/23 00:12:24  snelling
  * Removed dependence on local files now pointed to StDbUtilities
  *
@@ -60,11 +57,19 @@ using std::vector;
 
 #include "StDbUtilities/StTpcPadCoordinate.hh"
 
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+typedef vector<StTrsAnalogSignal>  tpcTimeBins;
+typedef vector<tpcTimeBins>        tpcPadRow;
+typedef vector<tpcPadRow>          tpcSector;
+
+typedef vector<StTrsAnalogSignal>::iterator timeBinIterator;
+#else
 typedef vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> > tpcTimeBins;
 typedef vector<tpcTimeBins, allocator<tpcTimeBins> >             tpcPadRow;
 typedef vector<tpcPadRow, allocator<tpcPadRow> >                 tpcSector;
 
 typedef vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator timeBinIterator;
+#endif
 
 typedef tpcPadRow::iterator                 padRowIterator;
 typedef tpcSector::iterator                 rowIterator;
@@ -93,7 +98,6 @@ public:
 
     void assignTimeBins(int, int, tpcTimeBins&);
     void assignTimeBins(StTpcPadCoordinate&, tpcTimeBins&);
-    int  sort();
 
 private:
     tpcSector mSector;

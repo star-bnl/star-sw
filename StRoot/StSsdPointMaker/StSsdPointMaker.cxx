@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.22 2005/09/26 15:49:54 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.23 2005/09/30 14:28:30 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.23  2005/09/30 14:28:30  lmartin
+// add a 0 to myTime if GetTime()<100000
+//
 // Revision 1.22  2005/09/26 15:49:54  bouchet
 // adding a method to the point maker to check which ssdStripCalib is picked
 //
@@ -395,11 +398,14 @@ Int_t StSsdPointMaker::Make()
   char* myLabel  = new char[100];
   char* myTime = new char[100]; 
   char* myDate = new char[100];
-
-  sprintf(myTime,"%d",GetTime());
+  
+  if (GetTime()>99999)
+    sprintf(myTime,"%d",GetTime());
+  else
+    sprintf(myTime,"0%d",GetTime());
   sprintf(myDate,"%d%s",GetDate(),".");
   sprintf(myLabel,"%s%s",myDate,myTime);
-  
+
  // two different tables can exist (physics data or pedestal data)
   St_spa_strip *spa_strip = (St_spa_strip *)GetDataSet("spa_strip");
   St_ssdPedStrip *spa_ped_strip = (St_ssdPedStrip *)GetDataSet("ssdPedStrip");

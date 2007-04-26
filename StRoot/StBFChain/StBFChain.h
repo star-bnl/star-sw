@@ -31,30 +31,28 @@ class StBFChain : public StChain {
   TFile               *fTFile;    // TFile associated with the chain
   Bfc_st              *fBFC;      // Private chain
   StFileI             *fSetFiles; //
-  TString             fInFile;    //
-  TString             fFileOut;   //
+  TString             *fInFile;   //
+  TString             *fFileOut;  //
   Int_t               FDate;      // floating timestamp date (MaxDateTime)
   Int_t               FTime;      // floating timestamp time (unused)
   Int_t               FDateS;     // floating timestamp date (DateTime)
   Int_t               FTimeS;     // floating timestamp time (DateTime)
 
+  Int_t               NoChainOptions;
+
  public:
-  StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE) :
-    StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut("") {}
-  StBFChain(Int_t mode, const char *name="bfc",const Bool_t UseOwnHeader = kFALSE) :
-    StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut("") {}
-  void Setup(Int_t mode=1);
+                       StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE);
+                       StBFChain(Int_t, const char *name="bfc");
    virtual            ~StBFChain();
    virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
    virtual Int_t       Make(){return StChain::Make();};
            Int_t       Skip(int nskip);      //Skip events
    virtual Int_t       Load();             
    virtual Int_t       Instantiate();      
-   virtual Int_t       Init();      
    virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1);
    virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);}
    virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);}
-   static  Int_t       ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort=kFALSE);
+   static  Int_t       ParseString (const TString &tChain, TObjArray &Opt);
    void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    void                SetInputFile(const Char_t *infile=0);                          // *MENU
@@ -64,8 +62,8 @@ class StBFChain : public StChain {
 			     );                                                       // *MENU
 
    void                SetOutputFile(const Char_t *outfile=0);                        // *MENU
-   virtual Int_t       kOpt(const TString *Tag, Bool_t Check = kTRUE) const;
-   virtual Int_t       kOpt(const Char_t  *Tag, Bool_t Check = kTRUE) const;
+   virtual Int_t       kOpt(const TString *Tag) const;
+   virtual Int_t       kOpt(const Char_t  *Tag) const;
    virtual void        SetDbOptions();
    virtual void        SetGeantOptions();
    virtual void        SetTreeOptions();
@@ -82,11 +80,8 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) const {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual Char_t     *GetOptionString(const Char_t  *);
-   virtual const TString &GetFileIn()  const {return *(&fInFile);}
-   virtual const TString &GetFileOut() const {return *(&fFileOut);}
-   virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.34 2005/08/29 21:45:57 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.33.2.1 2007/04/26 17:35:58 jeromel Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class

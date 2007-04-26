@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.hh,v 1.6 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsZeroSuppressedReader.hh,v 1.5 2005/08/12 19:11:34 fisyak Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -32,11 +32,8 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.hh,v $
- * Revision 1.6  2005/09/09 22:12:48  perev
- * Bug fix + IdTruth added
- *
- * Revision 1.4  2005/07/19 22:23:04  perev
- * Bug fix
+ * Revision 1.5  2005/08/12 19:11:34  fisyak
+ * Move SL05e to HEAD (wait till Victor will fix his fixes)
  *
  * Revision 1.3  2003/12/24 13:44:52  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
@@ -57,20 +54,16 @@
 
 #include "StSequence.hh"
 #include "StDaqLib/GENERIC/EventReader.hh"
-#include <vector>
+// struct StTrsSequence : public Sequence {
+//   StTrsSequence() : Sequence(), FirstId(0) {}
+//   int*           FirstId;           // ptr to the first simulated track id in the sequence           
+// };
 
 class StTpcRawDataEvent;
 class StTrsRawDataEvent;
 class StTrsDigitalSector;
 
 class StTrsZeroSuppressedReader {//: public ZeroSuppressedReader {
-
-typedef std::vector<StSequence> 	VecSequence;
-typedef std::vector<int*> 		VecIds;
-typedef std::vector<unsigned char> 	VecPads;
-typedef std::vector<unsigned char> 	VecUChar;
-typedef std::vector<int> 	        VecInt;
-
 public:
     StTrsZeroSuppressedReader();
     StTrsZeroSuppressedReader(StTpcRawDataEvent*);
@@ -80,8 +73,10 @@ public:
 
     int getPadList(int padRow, unsigned char **padList);
   //    int getSequences(int padRow, int Pad, int *nSeq, StTrsSequence*& SeqData);
-    int getSequences(int padRow, int Pad, int *nSeq, StSequence** SeqData, int ***Id=0);
-    int getSequences(int padRow, int Pad, int *nSeq, Sequence**   SeqData, int ***Id=0);
+    int getSequences(int padRow, int Pad, int *nSeq, StSequence** SeqData, int ***Id);
+    int getSequences(int padRow, int Pad, int *nSeq, StSequence** SeqData);
+    int getSequences(int padRow, int Pad, int *nSeq, Sequence** SeqData, int ***Id);
+    int getSequences(int padRow, int Pad, int *nSeq, Sequence** SeqData);
 #if 0
     int getSpacePts(int, int*, SpacePt**);
     int MemUsed();
@@ -96,9 +91,8 @@ private:
 
     int                 mSector;
     StTrsDigitalSector* mTheSector;
-    VecPads             mPadList;
-    VecSequence         mSequence;
-    VecIds              mIds;
+    unsigned char*      mPadList;
+    StSequence*         mSequence;
     StTrsRawDataEvent*  mTrsEvent;
 
 };

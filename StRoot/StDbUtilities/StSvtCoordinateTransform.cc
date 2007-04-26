@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.36 2005/09/09 21:34:36 perev Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.35 2005/07/06 19:10:34 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -285,9 +285,9 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   double r = (a.position().x()*a.position().x() +
 	      a.position().y()*a.position().y());
 
-  if     ( r > 169) 	barrel = 3;
-  else if( r >  75) 	barrel = 2;
-  else 			barrel = 1;
+  if( r > 169) barrel = 3;
+  else if( r > 75) barrel = 2;
+  else barrel = 1;
 
 
   //Exception for year1 ladder Only one ladder which is wrongly labelled as barrel 3
@@ -302,27 +302,91 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 
      for( NWafer=1; NWafer<= mconfig->getNumberOfWafers(barrel); NWafer++){
 
-       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer  )) break;
+       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer)) break;
        if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer+1)) break;
      }
 
      b.setWafer(NWafer);
 
 
-static const int tbRange[3][4][3] = {
-{{4, 6,0},{2,4,0},{ 6, 8,0},{1,2, 8}},	//barrel=1
-{{6, 9,0},{3,6,0},{ 9,12,0},{1,3,12}},	//barrel=2
-{{8,12,0},{4,8,0},{12,16,0},{1,4,16}}};	//barrel=3
+  switch (barrel){
+    
+  case 1:
+      
+      if( a.position().x() >= 0 && a.position().y() >= 0){
+	ladderRangeLo = 1;
+	ladderRangeHi = 2;
+	ladderMax = 8;
+      }
+      else if(a.position().x() >= 0 && a.position().y() < 0){
+	ladderRangeLo = 2;
+	ladderRangeHi = 4;
+	ladderMax = 0;
+      }
+      else if(a.position().x() < 0 && a.position().y() < 0){
+	ladderRangeLo = 4;
+	ladderRangeHi = 6;
+	ladderMax = 0;
+      }
+      else if(a.position().x() < 0 && a.position().y() >= 0){
+	ladderRangeLo = 6;
+	ladderRangeHi = 8;
+	ladderMax = 0;
+      }
+    
+    
+    break;
+   
+  case 2:
+      
+    if( a.position().x() > 0 && a.position().y() > 0){
+      ladderRangeLo = 1;
+      ladderRangeHi = 3;
+      ladderMax = 12;
+    }
+    else if(a.position().x() > 0 && a.position().y() < 0){
+      ladderRangeLo = 3;
+      ladderRangeHi = 6;
+      ladderMax = 0;
+    }
+    else if(a.position().x() < 0 && a.position().y() < 0){
+      ladderRangeLo = 6;
+      ladderRangeHi = 9;
+      ladderMax = 0;
+    }
+    else if(a.position().x() < 0 && a.position().y() > 0){
+      ladderRangeLo = 9;
+      ladderRangeHi = 12;
+      ladderMax = 0;
+    }
+    
+    
+    break;
+    
+  case 3:
+   if( a.position().x() > 0 && a.position().y() > 0){
+      ladderRangeLo = 1;
+      ladderRangeHi = 4;
+      ladderMax = 16;
+    }
+    else if(a.position().x() > 0 && a.position().y() < 0){
+      ladderRangeLo = 4;
+      ladderRangeHi = 8;
+      ladderMax = 0;
+    }
+    else if(a.position().x() < 0 && a.position().y() < 0){
+      ladderRangeLo = 8;
+      ladderRangeHi = 12;
+      ladderMax = 0;
+    }
+    else if(a.position().x() < 0 && a.position().y() > 0){
+      ladderRangeLo = 12;
+      ladderRangeHi = 16;
+      ladderMax = 0;
+    }
 
-     ladderRangeLo = -1; ladderRangeHi = -1; ladderMax = -1;
-     int yx = 0;
-     if (a.position().x() > 0) yx |=1;
-     if (a.position().y() > 0) yx |=2;
-     if (barrel>0 && barrel<=3) {
-        ladderRangeLo = tbRange[barrel-1][yx][0];
-        ladderRangeHi = tbRange[barrel-1][yx][1];
-        ladderMax     = tbRange[barrel-1][yx][2];
-     }
+      break;
+  }
     
   //Exception for year1 ladder Only one ladder which is wrongly labelled as barrel 3
   // ladder 1even though its at r=10.4 at 12 0'Clock
@@ -612,8 +676,10 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   else
     fsca = 25000000;
 
-  int barrel=-1;
-  if (a.layer()>0) barrel = (a.layer()+1)/2;
+  int barrel;
+  if ((a.layer()==1) || (a.layer()==2)) barrel = 1;
+  if ((a.layer()==3) || (a.layer()==4)) barrel = 2;
+  if ((a.layer()==5) || (a.layer()==6)) barrel = 3;
   int ladder = a.ladder();
   int wafer = a.wafer();
   int hybrid = a.hybrid();
@@ -738,13 +804,21 @@ double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a
   //float vd = 675000;
   //float fsca = 25000000;
 
-  float fsca = (mT0)? mT0->getFsca():25000000;
+  float fsca;
+  if (mT0)
+    fsca = mT0->getFsca();
+  else
+    fsca = 25000000;
 
-  int barrel = (a.layer()>0) ? (a.layer()+1)/2 : -1;
+  int barrel;
+  if ((a.layer()==1) || (a.layer()==2)) barrel = 1;
+  if ((a.layer()==3) || (a.layer()==4)) barrel = 2;
+  if ((a.layer()==5) || (a.layer()==6)) barrel = 3;
 
   float vd = -1;
+  int index;
   if (mDriftVelocity) {
-    int index = mDriftVelocity->getHybridIndex(barrel,a.ladder(),a.wafer(),a.hybrid());
+    index = mDriftVelocity->getHybridIndex(barrel,a.ladder(),a.wafer(),a.hybrid());
     if (index >= 0)
       vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
 	mDeltaDriftVelocity;
@@ -791,7 +865,10 @@ int StSvtCoordinateTransform::IsOnWaferZ(   const StThreeVector<double>& GlobalP
 
   GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos, -1);
 
-  return (fabs(LocalPosition.position().y()) <3.1525)? 1:0;
+  if( LocalPosition.position().y() > -3.1525 && LocalPosition.position().y() < 3.1525)
+    return 1;
+  else
+    return 0;
 }
 
 //_____________________________________________________________________________
@@ -806,8 +883,12 @@ int StSvtCoordinateTransform::IsOnWaferR(   const StThreeVector<double>& GlobalP
   GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos, -1);
 
 
-  if( fabs(LocalPosition.position().x()) < 3.1525    &&
-      fabs(LocalPosition.position().z()) < .05  ) return 1;
-  return 0;
+  if( LocalPosition.position().x() > -3.1525    &&
+      LocalPosition.position().x() < 3.1525     &&
+      LocalPosition.position().z() > -.05   &&
+      LocalPosition.position().z() < .05    )
+    return 1;
+  else
+    return 0;
 }
 

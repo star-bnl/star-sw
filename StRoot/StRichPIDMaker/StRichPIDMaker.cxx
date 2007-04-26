@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.54 2004/02/11 22:33:13 perev Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.55 2005/10/06 20:10:24 fisyak Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.55  2005/10/06 20:10:24  fisyak
+ * persistent StMcEvent
+ *
  * Revision 2.54  2004/02/11 22:33:13  perev
  * defence agains huge number
  *
@@ -312,8 +315,8 @@ using std::less;
 
 #ifdef myRICH_WITH_MC
 // StMCEvent
-#include "StMcEvent/StMcEventTypes.hh"
-#include "StMcEventMaker/StMcEventMaker.h"
+#include "StMcEventTypes.hh"
+#include "StMcEvent.hh"
 
 // StAssociationMaker
 #include "StAssociationMaker/StAssociationMaker.h"
@@ -337,7 +340,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.54 2004/02/11 22:33:13 perev Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.55 2005/10/06 20:10:24 fisyak Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -474,7 +477,7 @@ Int_t StRichPIDMaker::Make() {
 #ifdef myRICH_WITH_MC
     // StMcEvent
     mEvent = 0;
-    mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+    mEvent = ((StMcEvent*) GetDataSet("StMcEvent");
     if (!mEvent) {
 	cout << "StRichPIDMaker:Make() ---> No StMcEvent! Return kStWarn." << endl;
 	return kStWarn;

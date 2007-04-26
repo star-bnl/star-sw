@@ -30,7 +30,7 @@ if ( -e "$REL/BFC.h" && -e "$REL/BFC2.h"){
     open(FIN,">$REL/doc/StBFChain.cxx_doc") || die "Cannot open $REL/doc/StBFChain.cxx_doc\n";
     while ( defined($line = <SRC>) ){
 	chomp($line);
-	if ($line =~ m/^(\/\/.include\s*\")(.*)(\"\s*)/) {
+	if ($line =~ m/^(.include\s*\")(.*)(\"\s*)/) {
 	    if ( -e "$REL/$2" && $2 ne "StBFChain.h"){   # Any found include but not the class def
 		print "\tAdding $REL/$2 --> [$line] [$2]\n";
 		open(INT,"$REL/$2");

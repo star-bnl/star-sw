@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.23 2005/08/17 21:57:29 perev Exp $
+ * $Id: StEnumerations.h,v 2.31.2.2 2007/04/06 02:29:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,8 +16,11 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.23  2005/08/17 21:57:29  perev
- * kMaxId == max number of detectors+1
+ * Revision 2.31.2.2  2007/04/06 02:29:52  jeromel
+ * Dropped Id restored
+ *
+ * Revision 2.31.2.1  2007/04/05 20:14:53  jeromel
+ * Patched from SL05f_1, branch SL05f_2
  *
  * Revision 2.22  2005/06/15 21:46:21  ullrich
  * Added StVertexFinderId enum.
@@ -144,7 +147,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kSsdSvtId    = kSsdSvtIdentifier,
                    kPhmdCpvId   = kPhmdCpvIdentifier,
                    kPhmdId      = kPhmdIdentifier,
-		   kMaxId};
+                   kMaxId};
 
 /*!
  * \enum StTrackType
@@ -283,6 +286,8 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         pplmvVertexFinder,
                         egrVertexFinder,
                         minuitVertexFinder,
-                        ppvVertexFinder};
+                        ppvVertexFinder,
+                        ppvNoCtbVertexFinder,
+                        mcEventVertexFFinder};
 
 #endif

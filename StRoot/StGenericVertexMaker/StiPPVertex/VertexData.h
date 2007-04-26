@@ -1,7 +1,7 @@
 #ifndef VertexData_h
 #define VertexData_h
 /*********************************************************************
- * $Id: VertexData.h,v 1.2 2005/08/30 22:08:43 balewski Exp $
+ * $Id: VertexData.h,v 1.1 2005/07/11 20:38:13 balewski Exp $
  *********************************************************************
  * full description of found vertex
  */
@@ -20,16 +20,13 @@ class VertexData {
   
   // methods
   VertexData();
-  void print(ostream& os) const;
+  void print(ostream& os);
 };
 #endif
 
 
 /*
  * $Log: VertexData.h,v $
- * Revision 1.2  2005/08/30 22:08:43  balewski
- * drop '*' from declaration of   mTrackData &  mVertexData
- *
  * Revision 1.1  2005/07/11 20:38:13  balewski
  * PPV added for real
  *

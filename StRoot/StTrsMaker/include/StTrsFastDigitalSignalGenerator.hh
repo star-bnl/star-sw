@@ -25,15 +25,16 @@ public:
     //StTrsFastDigitalSignalGenerator(const StTrsFastDigitalSignalGenerator&);
     //StTrsFastDigitalSignalGenerator& operator=(const StTrsFastDigitalSignalGenerator&);
 
-    static StTrsDigitalSignalGenerator* instance(StTpcElectronics* el=0, StTrsSector* se=0,double simpleConv=0);
+    static StTrsDigitalSignalGenerator* instance();
+    static StTrsDigitalSignalGenerator* instance(StTpcElectronics*, StTrsSector*);
     
     void digitizeSignal()    ;
     void addWhiteNoise()     ;
     void addCorrelatedNoise();
 private :  
     unsigned char do10to8Translation(int ) const;  
-public:
-    StTrsFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*,double simpleConversion);
+protected:
+    StTrsFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
 
 private:
     static StTrsDigitalSignalGenerator* mInstance;

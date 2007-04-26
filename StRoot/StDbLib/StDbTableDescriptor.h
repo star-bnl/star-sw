@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.9 2005/09/07 22:04:02 deph Exp $
+ * $Id: StDbTableDescriptor.h,v 1.8 2001/12/05 17:16:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
- * Revision 1.9  2005/09/07 22:04:02  deph
- * update to correct padding issue for packed tables
- *
  * Revision 1.8  2001/12/05 17:16:35  porter
  * stand-alone make file no longer had "DLINUX" in compile but this is still needed
  * and returned. Also retrieve elementID list  in query by whereClause for plotting
@@ -64,6 +61,7 @@
 #include "StTableDescriptorI.h"
 #include "StDbBuffer.h"
 
+
 struct tableDescriptor {
   StTypeE type;      // enumerated basic type
   char name[60];     //  element name
@@ -91,8 +89,6 @@ protected:
  // db unique ids
  int mstructID;
  int mschemaID;
-//MPD
-  static int rowSizeTT;
  bool misValid;  // schema has been filled
  bool mhasDouble;
 
@@ -123,17 +119,14 @@ public:
   virtual unsigned int getElementLength(int elementNum) const;
   virtual unsigned int getElementNumDimensions(int elementNum) const;
   virtual unsigned int getElementIndexLength(int elementNum, int dimensionNum) const;
-  
-   
+
   int getSchemaID() const;
   int getStructID() const;
   void setSchemaID(int id);
   void setStructID(int id);
   bool IsValid() const;
   int getCurrentInternalSize();
-  int getTrowSize() ;  
   void endRowPadding();
-  void storeRowSize(int rowSize);
 
 };
 
@@ -205,9 +198,6 @@ inline void StDbTableDescriptor::setSchemaID(int id) { mschemaID=id; }
 inline void StDbTableDescriptor::setStructID(int id) { mstructID=id; }
 inline bool StDbTableDescriptor::IsValid() const { return misValid; }
 inline int  StDbTableDescriptor::getCurrentInternalSize() { return mMax; };
-inline void StDbTableDescriptor::storeRowSize(int rowSize) { rowSizeTT = rowSize; }
-inline int  StDbTableDescriptor::getTrowSize() { return rowSizeTT; };
-
 
 #endif
 

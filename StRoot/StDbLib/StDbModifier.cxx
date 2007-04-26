@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.5 2005/09/07 22:04:02 deph Exp $
+ * $Id: StDbModifier.cxx,v 1.4 2003/09/02 17:57:49 perev Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
- * Revision 1.5  2005/09/07 22:04:02  deph
- * update to correct padding issue for packed tables
- *
  * Revision 1.4  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -41,7 +38,6 @@
 #include "StDbLib/StDbConfigNode.hh"
 #include "StDbLib/StDbTable.h"
 #include "StDbLib/StDbDefs.hh"
-#include "StDbLib/StDbTableDescriptor.h"
 
 #include "StDbModifier.h"
 
@@ -205,17 +201,6 @@ Int_t StDbModifier::WriteDataToDB()
 
   void* cstruct = table -> GetArray();      // Get pointer of table and copy to c-structure
   Int_t   nrows = table -> GetNRows();      // Get number of raws in the table
- //MPD - below is need TTable info to correct c-array 8 byte padding issue
- //could have broke it out - but I chose to keep all the TTable (root) stuff together
-
-   Int_t  rowSize  = table -> GetRowSize();   // Get the size (in bytes) of each row - fixes gap/padding problem
-//   Int_t nCols  = table -> GetNumberOfColumns();
-  
- StDbTableDescriptor* TD = new StDbTableDescriptor();
-  TD->storeRowSize(rowSize); 
-   //table -> Print(0,2);  //uncomment for debugging
-
-
 
   StDbManager* mgr = StDbManager::Instance();               // Get the singleton manager
   if ( fDebug == 1 ){ 
@@ -232,8 +217,6 @@ Int_t StDbModifier::WriteDataToDB()
     dbtable = configNode -> addDbTable(fTableName,fVersionName);
     // Add a table to the container with descriptor given by Database with wsing version name specified .
   }
-
-     
 
   if ( dbtable == 0 ){                            // If table asigned by fTableName does not exist in Dababase,
     cout << " No Table : " << fTableName << endl; // program is stoped and exit from this function.
@@ -274,7 +257,6 @@ Int_t StDbModifier::WriteDataToDB()
   int retVal=0;
   if(mgr -> storeDbTable(dbtable)) retVal=1;             // Fetch the data 
   if(eidList) delete [] eidList;
-
 
   return retVal;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleDefinition.hh,v 1.4 2005/09/22 20:09:20 fisyak Exp $
+ * $Id: StParticleDefinition.hh,v 1.3 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StParticleDefinition.hh,v $
- * Revision 1.4  2005/09/22 20:09:20  fisyak
- * Make StLorentzVector persistent
- *
  * Revision 1.3  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -29,9 +26,6 @@
  **************************************************************************/
 #ifndef StParticleDefinition_hh
 #define StParticleDefinition_hh
-#ifdef __ROOT__
-#include "Rtypes.h"
-#endif
 
 #include <string>
 #include <Stiostream.h>
@@ -118,9 +112,6 @@ private:
     double   mPDGLifeTime;        // related to the decay width of the particle. The mean
                                   // life time is given in seconds.
     StParticleTable *mParticleTable;
-#ifdef __ROOT__
-  ClassDef(StParticleDefinition,1)
-#endif
 };
 
 ostream& operator<<(ostream&, const StParticleDefinition&);

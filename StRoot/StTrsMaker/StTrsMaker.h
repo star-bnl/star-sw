@@ -1,11 +1,8 @@
-// $Id: StTrsMaker.h,v 1.23 2005/09/09 22:12:48 perev Exp $
+// $Id: StTrsMaker.h,v 1.22 2005/08/12 19:11:32 fisyak Exp $
 //
 // $Log: StTrsMaker.h,v $
-// Revision 1.23  2005/09/09 22:12:48  perev
-// Bug fix + IdTruth added
-//
-// Revision 1.21  2005/07/19 22:21:06  perev
-// Bug fix
+// Revision 1.22  2005/08/12 19:11:32  fisyak
+// Move SL05e to HEAD (wait till Victor will fix his fixes)
 //
 // Revision 1.20  2003/12/24 13:44:47  fisyak
 // Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
@@ -134,19 +131,17 @@ class StTrsRawDataEvent;
 
 class TFile;
 class TNtuple;
-class g2t_tpc_hit_st;
 
 class StTrsMaker : public StMaker {
  private:
     StTrsMaker(const StTrsMaker&);
     StTrsMaker& operator=(const StTrsMaker&);
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.23 2005/09/09 22:12:48 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.22 2005/08/12 19:11:32 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
 
     // DataBases
-    char                         mBeg[1];
     StTpcGeometry               *mGeometryDb; //!
     StTpcSlowControl            *mSlowControlDb; //!
     StMagneticField             *mMagneticFieldDb;//!
@@ -171,15 +166,15 @@ class StTrsMaker : public StMaker {
     int                          mFirstSectorToProcess;
     int                          mLastSectorToProcess;
     // should be a boolean
-    int                          mProcessPseudoPadRows;
-    int                          mWriteToFile;
-    int                          mReadFromFile;
+    int                         mProcessPseudoPadRows;
+    int                         mWriteToFile;
+    int                         mReadFromFile;
     
     // Which Algorithm to be used:
-    int                          mUseParameterizedSignalGenerator;
+  int                           mUseParameterizedSignalGenerator;
 
    //  Gain normalization Factor
-    double 			 mNormalFactor; 
+    double normalFactor; 
 
 protected:
 
@@ -189,9 +184,6 @@ public:
     TNtuple* mContinuousAnalogNtuple;
     TNtuple* mDiscreteAnalogNtuple; //!
     TNtuple* mDigitalNtuple; //!
-    char     mEnd[1];
-
-public:
     StTrsMaker(const char *name="Trs");
     ~StTrsMaker();
     Int_t  Init();
@@ -210,14 +202,12 @@ public:
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.23 2005/09/09 22:12:48 perev Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.22 2005/08/12 19:11:32 fisyak Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker,0)   //StAF chain virtual base class for Makers
 
 private:
     void whichSector(int, int*, int*, int*);
-    void CheckTruth(int no_tpc_hits, g2t_tpc_hit_st *tpc_hit);
-
 };
 
 #endif

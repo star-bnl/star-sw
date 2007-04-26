@@ -12,7 +12,7 @@ extern "C" {
     int i=0;   if (*k<Margc) i=strlen(Margv[*k]);  if (i>n) i=n;
     strncpy(args,Margv[*k],i); memset (args+i,' ',n-i); return 0;
   }
-}
+};
 //______________________________________________________________________________
 int main(int argc, char **argv)
 {

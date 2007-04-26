@@ -1,7 +1,6 @@
-#if 0 // obsolete
 /***************************************************************************
  *
- * $Id: StTrsOldDigitalSignalGenerator.cc,v 1.5 2005/09/09 22:12:49 perev Exp $
+ * $Id: StTrsOldDigitalSignalGenerator.cc,v 1.4 2003/12/24 13:44:53 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -11,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTrsOldDigitalSignalGenerator.cc,v $
- * Revision 1.5  2005/09/09 22:12:49  perev
- * Bug fix + IdTruth added
- *
  * Revision 1.4  2003/12/24 13:44:53  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -285,4 +281,3 @@ void StTrsOldDigitalSignalGenerator::addWhiteNoise()
     cerr << "StTrsOldDigitalSignalGenerator::addWhiteNoise()" << endl;
     cerr << "Not Implemented!" << endl;    
 }
-#endif //0 

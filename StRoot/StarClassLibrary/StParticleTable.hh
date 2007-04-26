@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.hh,v 1.5 2005/09/22 20:09:20 fisyak Exp $
+ * $Id: StParticleTable.hh,v 1.4 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.hh,v $
- * Revision 1.5  2005/09/22 20:09:20  fisyak
- * Make StLorentzVector persistent
- *
  * Revision 1.4  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -33,9 +30,6 @@
  **************************************************************************/
 #ifndef StParticleTable_hh
 #define StParticleTable_hh
-#ifdef __ROOT__
-#include "Rtypes.h"
-#endif
 
 #include <Stiostream.h>
 #include <string>
@@ -48,11 +42,13 @@ using std::map;
 using std::string;
 #endif
 
+#ifndef __CINT__
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StParticleDefinition*, allocator<StParticleDefinition*> > StVecPtrParticleDefinition;
 #else
 typedef vector<StParticleDefinition*> StVecPtrParticleDefinition;
 #endif
+#endif // __CINT__
 
 class StParticleTable {
 public:
@@ -87,6 +83,7 @@ private:
     
     static StParticleTable *mParticleTable;
 
+#ifndef __CINT__
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
     // as soon as Sun CC4.2 is gone this goes as well
     typedef map<int, int, less<int>,
@@ -103,13 +100,11 @@ private:
     typedef map<int, StParticleDefinition*>    mPdgMapType;
     typedef map<string, StParticleDefinition*> mNameMapType;
 #endif
+#endif // __CINT__
     
     mGeantPdgMapType   mGeantPdgMap;     // Geant3 IDs only
     mPdgMapType        mPdgMap;          // PDG IDs only
     mNameMapType       mNameMap;         // complete list
-#ifdef __ROOT__
-  ClassDef(StParticleTable,1)
-#endif
 };
 #endif
 

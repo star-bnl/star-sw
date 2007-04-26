@@ -3,58 +3,80 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.165 2005/08/29 22:44:14 fisyak Exp $
+// $Id: bfc.C,v 1.164 2005/02/22 00:01:09 fine Exp $
 //////////////////////////////////////////////////////////////////////////
-#if !defined(__CINT__) || defined(__MAKECINT__)
-#include "Stiostream.h"
+#ifndef __CINT__
 #include "TSystem.h"
+#include "TBrowser.h"
+#include "TBenchmark.h"
 #include "TClassTable.h"
-#include "TApplication.h"
-#include "TInterpreter.h"
 #include "StBFChain.h"
-#else 
-class StBFChain;        
-#endif
-StBFChain    *chain=0; 
+#include "St_tcl_Maker/St_tcl_Maker.h"
+#include "St_tpt_Maker/St_tpt_Maker.h"
+#include "StEvent.h"
+#include "St_geant_Maker/St_geant_Maker.h"
+#include "StIOMaker/StIOMaker.h"
+#include "StEventDisplayMaker/StEventDisplayMaker.h"
+#include "StEventMaker/StEventMaker.h"
+#include "StAssociationMaker/StMcParameterDB.h"
+#include "St_dst_Maker/StV0Maker.h"
+#include "StPass0CalibMaker/StTpcT0Maker.h" 
 void Usage();
+void Load();
+#else 
+class StMaker;        
+class StBFChain;        
+class StEvent;
+class St_geant_Maker;
+class StIOMaker;
+class StEventDisplayMaker; 
+class StEventMaker; 
+class StTpcT0Maker;
+#endif
+TBrowser *b = 0;
+StBFChain  *chain=0; 
+StMaker    *treeMk=0;
+StEvent *Event=0;
+St_geant_Maker *geant = 0;
+StEventDisplayMaker *dsMk = 0;
+StTpcT0Maker *t0mk = 0;
 //_____________________________________________________________________
-void Load(const Char_t *options=0){
-  cout << "Load system libraries" << endl;
-  if ( gClassTable->GetID("TGiant3") < 0) { // ! root4star
-    cout << endl << "Load ";
-    if (gSystem->Getenv("PGI")) {
-      gSystem->Load("libpgf77VMC"); cout << " libpgf77VMC + ";
-    }
-    gSystem->Load("libminicern"); cout << "libminicern";
-    gSystem->Load("/usr/lib/libmysqlclient.so"); cout << " + /usr/lib/libmysqlclient.so" << endl;
-  }
-  if (gClassTable->GetID("TTable")  < 0) gSystem->Load("libTable");
-  if (gClassTable->GetID("TRArray") < 0) gSystem->Load("StarRoot");//  TMemStat::PrintMem("load StarRoot");
+void Load(const Char_t *options=""){
+  if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
+  gSystem->Load("StarRoot");
+  TMemStat::PrintMem("load StarRoot");
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
-  if (!TString(options).Contains("-logger")) {
+  if (TString(options).Contains("logger")) {
       needLogger = gSystem->Load("liblog4cxx.so"); 
       if (!needLogger) {
-	needLogger = kTRUE;//         TMemStat::PrintMem("load log4cxx");
+         needLogger = kTRUE;
+         TMemStat::PrintMem("load log4cxx");
       }
       else {
          fprintf(stderr," Could not load log4cxx shared library\n");         
       }
   }
-  gSystem->Load("St_base");//  TMemStat::PrintMem("load St_base");
+  gSystem->Load("St_base");
+  TMemStat::PrintMem("load St_base");
   if (needLogger) {
     gSystem->Load("StStarLogger.so");
-    //    gInterpreter->ProcessLine("StLoggerManager::StarLoggerInit();");//    TMemStat::PrintMem("load StStarLogger");
-    gROOT->ProcessLine("StLoggerManager::StarLoggerInit();");//    TMemStat::PrintMem("load StStarLogger");
+    StLoggerManager::StarLoggerInit();   
+    TMemStat::PrintMem("load StStarLogger");
  }
-  gSystem->Load("StChain");//  TMemStat::PrintMem("load StChain");
-  gSystem->Load("StUtilities");//  TMemStat::PrintMem("load StUtilities");
-  gSystem->Load("StBFChain");//  TMemStat::PrintMem("load StBFChain");
-  gSystem->Load("StChallenger");//  TMemStat::PrintMem("load StChallenger");
+  gSystem->Load("StChain");
+  TMemStat::PrintMem("load StChain");
+  gSystem->Load("StUtilities");
+  TMemStat::PrintMem("load StUtilities");
+  gSystem->Load("StBFChain");
+  TMemStat::PrintMem("load StBFChain");
+  gSystem->Load("StChallenger");
+  TMemStat::PrintMem("load StChallenger");
 }
 //_____________________________________________________________________
-void bfc(const Int_t First, const Int_t Last,
-	 const Char_t *Chain="gstar,Y2004,trs,srs,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,evout,GeantOut,miniMcMk,clearmem,StarMagField,FieldOn",
+void bfc(const Int_t First,
+	 const Int_t Last,
+	 const Char_t *Chain="gstar Cy2b tfs -NoHits",
 	 const Char_t *infile=0,
 	 const Char_t *outfile=0,
 	 const Char_t *TreeFile=0)
@@ -64,24 +86,34 @@ void bfc(const Int_t First, const Int_t Last,
   // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load(Chain);
-  chain = new StBFChain();
+  if (chain) delete chain;
+
+  // This was added on March 19th 2002 for ITTF //-chain setup
+  // Weak case-implementation (no mix case).
+  if( strstr(Chain,"ITTF") || strstr(Chain,"ittf") ){  
+    chain = new StBFChain(2);   // Create the main chain object
+  } else {
+    chain = new StBFChain(1);   // Create the main chain object
+  }
+
   if (!chain) gSystem->Exit(1);
-  chain->SetDebug(1);
   chain->SetFlags(Chain);
-  chain->Set_IO_Files(infile,outfile);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
   printf ("QAInfo:Process [First=%6i/Last=%6i/Total=%6i] Events\n",First,Last,Last-First+1);
-  if (Last < -2) return;
+  chain->Set_IO_Files(infile,outfile);
   if (chain->Load() > kStOk) 
     {printf("Error:Problems with loading of shared library(ies)\n"); gSystem->Exit(1);}
   if (Last < -1) return;
   if (chain->Instantiate() > kStOk) 
     {printf("Error:Problems with instantiation of Maker(s)\n"); gSystem->Exit(1);}
+  if (Last <  0) return;
+  if (chain->GetOption("DISPLAY")) dsMk = (StEventDisplayMaker *) chain->GetMaker("EventDisplay");
 #if 0
   // Insert your maker before "tpc_hits"
   Char_t *myMaker = "St_TLA_Maker";
   if (gClassTable->GetID(myMaker) < 0) {
-	  gSystem->Load(myMaker);//  TString ts("load "; ts+=myMaker; TMemStat::PrintMem(ts.Data());
+	  gSystem->Load(myMaker);
+          TString ts("load "; ts+=myMaker; TMemStat::PrintMem(ts.Data());
   }
   StMaker *myMk = chain->GetMaker(myMaker);
   if (myMk) delete myMk;
@@ -98,6 +130,24 @@ void bfc(const Int_t First, const Int_t Last,
     StMaker *tclmk = chain->GetMaker(after);
     if (tclmk) chain->AddAfter(after,myMk);
   }
+#endif
+#ifdef __CINT__      
+  if (chain->GetOption("TCL") && chain->GetOption("Eval")) {
+    St_tcl_Maker *tclMk= (St_tcl_Maker *) chain->GetMaker("tpc_hits");
+    if (tclMk) {
+      tclMk->tclPixTransOn(); //Turn on flat adcxyz table
+      tclMk->tclEvalOn();     //Turn on the hit finder evaluation
+    }
+  }
+  if (chain->GetOption("TPT")) {
+    St_tpt_Maker *tptMk = (St_tpt_Maker *) chain->GetMaker("tpc_tracks");
+    if (tptMk && chain->GetOption("MINIDAQ"))  tptMk->Set_final(kTRUE);// Turn on the final ntuple.
+    if (tptMk && chain->GetOption("Eval")) {
+      tptMk->tteEvalOn();   //Turn on the tpc evaluation
+      tptMk->tptResOn();    // Turn on the residual table
+    }
+  }
+#if 0
   // this block is meant as an example ONLY
   // The default values are set in StRoot/StPass0CalibMaker/ StTpcT0Maker 
   // constructor and are suitable for production. You can change it here
@@ -105,6 +155,30 @@ void bfc(const Int_t First, const Int_t Last,
   if (chain->GetOption("TpcT0")) {
     StTpcT0Maker *t0mk = (StTpcT0Maker *) chain->GetMaker("TpcT0");
     if (t0mk) t0mk->SetDesiredEntries(10);
+  }
+#endif
+  if (chain->GetOption("McAss")) {
+    // Define the cuts for the Associations
+    cout << "Setting the Parameters for the Association Maker in bfc" << endl;
+    StMcParameterDB* parameterDB = StMcParameterDB::instance();  
+    // TPC
+    parameterDB->setXCutTpc(.5); // 5 mm
+    parameterDB->setYCutTpc(.5); // 5 mm
+    parameterDB->setZCutTpc(.5); // 5 mm
+    parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
+    // FTPC
+    parameterDB->setRCutFtpc(.3); // 3 mm
+    parameterDB->setPhiCutFtpc(5*(3.1415927/180.0)); // 5 degrees
+    parameterDB->setReqCommonHitsFtpc(3); // Require 3 hits in common for tracks to be associated
+    // SVT
+    parameterDB->setXCutSvt(.08); // 800 um
+    parameterDB->setYCutSvt(.08); // 800 um
+    parameterDB->setZCutSvt(.08); // 800 um
+    parameterDB->setReqCommonHitsSvt(1); // Require 1 hits in common for tracks to be associated
+  }
+  if (chain->GetOption("V0") && chain->GetOption("Eval")) {
+    StV0Maker    *v0Mk = (StV0Maker *) chain->GetMaker("v0");
+    if (v0Mk) 	v0Mk->ev0EvalOn();   //Turn on the ev0 evaluatio
   }
 #endif
   {
@@ -118,6 +192,7 @@ void bfc(const Int_t First, const Int_t Last,
   
   // Init the chain and all its makers
   Int_t iTotal = 0, iBad = 0;
+  Int_t iMake = 0, i = First;
 
   chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
@@ -125,13 +200,13 @@ void bfc(const Int_t First, const Int_t Last,
 
   if (Last < 0) return;
   Int_t iInit = chain->Init();
-  if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return;}
-  if (Last == 0) return;
+  if (iInit >=  kStEOF) {chain->Fatal(iInit,"on init"); return;}
+    
   StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
   if (hd) hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
     // skip if any
   chain->Skip(First-1);
-  StMaker *treeMk = chain->GetMaker("outputStream");
+  treeMk = chain->GetMaker("outputStream");
   chain->EventLoop(First,Last,treeMk);
   printf ("QAInfo:Run completed ");
   gSystem->Exec("date");
@@ -142,9 +217,8 @@ void bfc(const Int_t First, const Int_t Last,
   }
 }
 //_____________________________________________________________________
-void bfc(const Int_t Last, 
-	  //	  const Char_t *Chain="gstar,Y2004,tfs,srs,SvtSlowSim,tpc,Physics,Cdst,Kalman,tags,Tree,evout,miniMcMk,StarMagField,FieldOn",
-	  const Char_t *Chain="gstar,Y2004,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,evout,miniMcMk,StarMagField,FieldOn",
+void bfc (const Int_t Last, 
+	  const Char_t *Chain="gstar Cy2b tfs evout -NoHits",
 	  const Char_t *infile=0, 
 	  const Char_t *outfile=0, 
 	  const Char_t *TreeFile=0)
@@ -152,119 +226,29 @@ void bfc(const Int_t Last,
   bfc(1,Last,Chain,infile,outfile,TreeFile);
 }
 //_____________________________________________________________________
-void bfc (const Char_t *ChainShort="",
-	  const Int_t  Last=1,
+void bfc (const Char_t *Chain="",
 	  const Char_t *infile=0, 
 	  const Char_t *outfile=0, 
-	  const Char_t *TreeFile=0) {
-  struct Chain_t {
-    Char_t *Name;
-    Char_t *Opts;
-    Char_t *Input;
-  };
-  const Chain_t Chains[] = {
-    // tpc only 
-    {"trsz","fzin,Y2004,trs,tpc,Physics,Cdst,Kalman,tags,Tree,evout,miniMcMk",0},
-    {"trsc" ,"gstar,Y2004,trs,SvtSlowSim,tpc,Physics,Cdst,Kalman,tags,Tree,evout,miniMcMk",0}, // root4star
-    {"tfsc" ,"gstar,Y2004,tfs,SvtSlowSim,tpc,Physics,Cdst,Kalman,tags,Tree,evout,miniMcMk",0}, // root4star
-    {"trsic",
-     "gstar,Y2004,MakeEvent,trs,srs,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,evout,GeantOut,miniMcMk,clearmem",0},  // root4star
-    {"trsic","gstar,Y2004,MakeEvent,trs,srs,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,evout,GeantOut,miniMcMk,clearmem",0}, // root4star
-    {"vmcc","VMC,Y2004,FieldON,MakeEvent,trs,srs,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,evout,GeantOut,miniMcMk,clearmem,StarMagField,debug",0},  // root.exe
-    {"vmcctfs","VMC,Y2004,FieldON,MakeEvent,tfs,srs,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,evout,GeantOut,miniMcMk,clearmem,StarMagField,debug",0},  // root.exe
-    {"vmcct","VMC,Y2004,FieldON,MakeEvent,trs,srs,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,evout,GeantOut,miniMcMk,clearmem,StarMagField,debug","/star/simu/simu/gstardata/evgenRoot/evgen.3.root"},
-    {"vmcc4","VMC,Y2004,FieldON,MakeEvent,trs,srs,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,evout,GeantOut,miniMcMk,clearmem,StarMagField,debug","/star/data07/calib/fisyak/evgen/4prong.nt"},
-    {"vmcg","VMC,Y2004,FieldON,MakeEvent,tfs,tcl,tpcI,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,evout,GeantOut,miniMcMk,clearmem",0},
-    {"vmctrsc","VMC,Y2004,FieldON,MakeEvent,tfs,tpc,Physics,Cdst,tags,Tree,evout,miniMcMk,StarMagField",
-     "/star/data07/calib/fisyak/evgen/4prong.root"},
-    {"vmctfsc","VMC,Y2004,FieldON,MakeEvent,tfs,tpc,Physics,Cdst,tags,Tree,evout,miniMcMk,StarMagField",
-     "/star/data07/calib/fisyak/evgen/4prong.root"},
-    {"vmc","VMC,Y2004,FieldON,StarMagField",0},
-    {"vmcnt","VMC,Y2004x,FieldON,debug,phys_off,StarMagField","/star/simu/simu/gstardata/evgenRoot/evgen.3.root"},
-    {"vmcnt4","VMC,Y2004x,FieldON,debug,phys_off,StarMagField","/star/data07/calib/fisyak/evgen/4prong.root"},
-    {"ntin","ntin,y2004x,phys_off,paw,StarMagField","/star/simu/evgen/dau200/hijing_382/b0_20/minbias/evgen.3.nt"},
-    {"ntin4","ntin,y2004x,phys_off,paw,StarMagField","/star/data07/calib/fisyak/evgen/4prong.nt"},
-    // Test chains
-    {"year_1h_central"	,"p2000","/star/rcf/test/daq/2000/09/st_physics_1248022_raw_0001.daq"},
-    {"year_1h_hc_standard"	
-     ,"trs,mdc3,v0,xi,big,evout,-dstout,fzin",
-     "/star/rcf/simu/cocktail/hadronic/default/standard/year_1h/half_field/hadronic_on/Gstardata/hc_standard.40_evts.fz"},
-    {"year_1h_minbias"	,"p2000","/star/rcf/test/daq/2000/08/st_physics_1229021_raw_0003.daq"},
-    {"year_2001_central"	,"P2001a,v0,xi,ZDCvtx,-dstout,CMuDst","/star/rcf/test/daq/2001/327/st_physics_2327038_raw_0010.daq"},
-    {"year_2001_hc_highdensity"	,"trs,srs,rrs,fss,y2001n,C2default,v0,xi,GeantOut,-dstout,CMuDst,big,fzin","/star/rcf/simu/cocktail/hadronic/default/highdensity/year2001/hadronic_on/Gstardata/hc_highdensity.16_evts.fz"},
-    {"year_2001_hc_lowdensity"	,"trs,srs,rrs,fss,y2001n,C2default,v0,xi,GeantOut,-dstout,CMuDst,big,fzin","/star/rcf/simu/cocktail/hadronic/default/lowdensity/year2001/hadronic_on/Gstardata/hc_lowdensity.400_evts.fz"},
-    {"year_2001_hc_standard"	,"trs,srs,rrs,fss,y2001n,C2default,v0,xi,GeantOut,-dstout,CMuDst,big,fzin","/star/rcf/simu/cocktail/hadronic/default/standard/year2001/hadronic_on/Gstardata/hc_standard.40_evts.fz"},
-    {"year_2001_minbias"	,"P2001a,v0,xi,ZDCvtx,-dstout,CMuDst","/star/rcf/test/daq/2001/295/st_physics_2295030_raw_0010.daq"},
-    //    {"year_2001_ppl_minbias"	,"ppMDC4,v0,xi,fss","pds0200_04_12812evts.fzd; gfile B pds0200_01_28950evts.fzd;  mode SVTT back  22122; mode FTPC back 000; mode TPCE back 1881188; gback 188 188 0.0213 213. 2.5 "},
-    {"year_2001_pp_minbias"	,"trs,rrs,fss,y2001n,C2default,v0,xi,GeantOut,-dstout,CMuDst,big,fzin","/star/rcf/simu/pp200/pythia/default/minbias/year2001/hadronic_on/gstardata/pds0200_04_12812evts.fzd"},
-    {"year_2001_ppMinBias"	,"pp2001a,v0,xi,fpd,beamLine,est,-dstout,CMuDst","/star/rcf/test/daq/2002/008/st_physics_3008016_raw_0001.daq"},
-    {"year_2003_dAuMinBias"	,"DbV20040520,dau2003i,ITTF,SvtIT,-dstout,in","/star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq"},
-    {"year_2003_dAuMinBias"	,"DbV20040520, dau2003,v0,xi,l3onl,est,beamLine,-dstout,CMuDst","/star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq"},
-    {"year_2003_dAuMinBias"	,"DbV20040520,dau2003,v0,xi,l3onl,est,beamLine,-dstout,CMuDst","/star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq"},
-    {"year_2003_dau_minbias"	,"dAuMDCa,v0,xi,tofsim,Eefs,beamLine,-dstout,CMuDst,fzin","/star/rcf/simu/rcf1197_05_5940evts.fzd"},
-    {"year_2003_ppMinBias"	,"pp2003,v0,xi,l3onl,beamLine,est,eemcD,-dstout,CMuDst","/star/rcf/test/daq/2003/095/st_physics_4095050_raw_0010002.daq"},
-    {"year_2004_AuAuMinBias"	,"P2004,DbV20050312,EST,-dstout,svtdEdx,Xi2,xiSvt,Kink2,pmdRaw,CMuDst","/star/rcf/test/daq/2004/028/st_physics_5028066_raw_1010003.daq"},
-    {"year_2004_AuAuMinBias"	,"P2004,DbV20050312,ITTF,-dstout,pmdRaw","/star/rcf/test/daq/2004/028/st_physics_5028066_raw_1010003.daq"},
-    {"year_2004_auau_minbias"	,"trs,srs,fss,y2004,Idst,l0,tpcI,fcf,ftpc,Tree,SvtCL,svtDb,ITTF,Sti,genvtx,geant,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,fzin,MiniMcMk,SvtIt,clearmem","/star/rcf/simu/rcf1207_01_225evts.fzd"},
-    {"year_2004_auau_minbias"	,"trs,srs,fss,y2004,tpc,l0,ftpc,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,EventQA,est,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin","/star/rcf/simu/rcf1207_01_225evts.fzd"},
-    {"year_2004_auau_minbias"	,"trs,SvtSlowSim,SvtD,fss,y2004,tpc,l0,ftpc,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,EventQA,est,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin","/star/rcf/simu/rcf1207_01_225evts.fzd"},
-    {"year_2004_AuAu_prodHigh"	,"P2004,DbV20050312,EST,-dstout,svtdEdx,Xi2,xiSvt,Kink2,pmdRaw,CMuDst","/star/rcf/test/daq/2004/044/st_physics_5044102_raw_1010003.daq"},
-    {"year_2004_AuAu_prodHigh"	,"P2004,DbV20050312,ITTF,-dstout,pmdRaw","/star/rcf/test/daq/2004/044/st_physics_5044102_raw_1010003.daq"},
-    {"year_2004_AuAu_prodLow"	,"P2004,DbV20050312,EST,-dstout,svtdEdx,Xi2,xiSvt,Kink2,pmdRaw,CMuDst","/star/rcf/test/daq/2004/044/st_physics_5044116_raw_3010002.daq"},
-    {"year_2004_AuAu_prodLow"	,"P2004,DbV20050312,ITTF,-dstout,pmdRaw","/star/rcf/test/daq/2004/044/st_physics_5044116_raw_3010002.daq"},
-    {"year_2004_prodPP"	,"pp2004,DbV20050312,beamLine,ITTF,-dstout","/star/rcf/test/daq/2004/134/st_physics_5134013_raw_2010010.daq"},
-    {"year_2004_prodPP"	,"pp2004,DbV20050312,EST,-dstout,svtdEdx,Xi2,xiSvt,Kink2,beamLine,pmdRaw,CMuDst","/star/rcf/test/daq/2004/134/st_physics_5134013_raw_2010010.daq"},
-    {"year_2005_CuCu200_HighTower"	,"P2005,ToF,ITTF,pmdRaw,OShortR,OSpaceZ2","/star/rcf/test/daq/2005/054/st_physics_6054016_raw_1020005.daq"},
-    {"year_2005_CuCu200_HighTower"	,"P2005,ToF,svt_daq,svtD,EST,pmdRaw,Xi2,V02,Kink2,-dstout,CMuDst,OShortR,OSpaceZ2","/star/rcf/test/daq/2005/054/st_physics_6054016_raw_1020005.daq"},
-    {"year_2005_CuCu200_MinBias"	,"P2005,ToF,ITTF,pmdRaw,OShortR,OSpaceZ2","/star/rcf/test/daq/2005/048/st_physics_6048025_raw_1020002.daq"},
-    {"year_2005_CuCu200_MinBias"	,"P2005,ToF,svt_daq,svtD,EST,pmdRaw,Xi2,V02,Kink2,-dstout,CMuDst,OShortR,OSpaceZ2","/star/rcf/test/daq/2005/048/st_physics_6048025_raw_1020002.daq"},
-    {"year_2005_CuCu22_MinBias"	,"P2005,ToF,ITTF,pmdRaw,OShortR,OSpaceZ2","/star/rcf/test/daq/2005/083/st_physics_6083006_raw_1040002.daq"},
-    {"year_2005_CuCu22_MinBias"	,"P2005,ToF,svt_daq,svtD,EST,pmdRaw,Xi2,V02,Kink2,-dstout,CMuDst,OShortR,OSpaceZ2","/star/rcf/test/daq/2005/083/st_physics_6083006_raw_1040002.daq"},
-    {"year_2005_CuCu62_MinBias"	,"P2005,ToF,ITTF,pmdRaw,OShortR,OSpaceZ2","/star/rcf/test/daq/2005/080/st_physics_6080011_raw_1020004.daq"},
-    {"year_2005_CuCu62_MinBias"	,"P2005,ToF,svt_daq,svtD,EST,pmdRaw,Xi2,V02,Kink2,-dstout,CMuDst,OShortR,OSpaceZ2","/star/rcf/test/daq/2005/080/st_physics_6080011_raw_1020004.daq"}
-  };
-  Int_t NChains = sizeof(Chains)/sizeof(Chain_t);
-  TString Chain(ChainShort);
-  if (Chain == "") {
-    Usage(); 
-    cout << ("============= \t Examples =============\n");
-    for (Int_t i = 0; i < NChains; i++) {
-      cout << "bfc(\"" << Chains[i].Name 
-	   << "\",Last,input,output,TreeFile) => [Default] " << endl;
-      cout << "\tbfc.C(1,\"" << Chains[i].Opts;
-      if (Chains[i].Input)   cout << "\"," << Chains[i].Input;// << "[D]";
-      cout << "\")" << endl;
-    }  
-    gSystem->Exit(1);
-  }
-  Chain.ToLower();
-
-  for (Int_t i = 0; i < NChains; i++) {
-    TString name(Chains[i].Name);
-    name.ToLower();
-    if (name == Chain) {
-      Char_t *inp = (Char_t *) infile;
-      if (inp == 0) inp = Chains[i].Input;
-      bfc(Last,Chains[i].Opts,inp,outfile,TreeFile);
-      return;
-    }
+	  const Char_t *TreeFile=0)
+{
+  if (!Chain || !strlen(Chain)) {
+    Usage();
   }
 }
-
 //____________________________________________________________
 void Usage() {
 #if 0
   printf ("============= \tImportant two changes:\n"
 	  "              \tIt is required exact matching in Chain definition\n"
 	  "              \tAll Chain options set in supplyed order\n"); 
+#endif
   if (gClassTable->GetID("StBFChain") < 0) Load();
   chain = new StBFChain;
   chain->SetFlags("");
-#endif
   printf ("============= \t U S A G E =============\n");
-  printf ("bfc(Int_t First, Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile, Char_t *TreeFile)\n");
+  printf ("bfc(Int_t First, Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile,, Char_t *TreeFile)\n");
   printf ("bfc(Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile, Char_t *TreeFile)\n");
-  printf ("bfc(Char_t *ChainShort, Int_t Last, Char_t *infile, Char_t *outfile)\n");
+  printf ("bfc(Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
   printf ("where\n");
   printf (" First   \t- First event to process \t(Default = 1)\n");
   printf (" Last    \t- Last  event to process \t(Default = 1)\n");
@@ -272,5 +256,32 @@ void Usage() {
   printf ("         \t                         \t with    First || Last: Default is \"gstar tfs\")\n");
   printf (" infile  \t- Name of Input file     \t(Default = 0, i.e. use preset file names depending on Chain)\n"); 
   printf (" outfile \t- Name of Output file    \t(Default = 0, i.e. define Output file name from Input one)\n");
-  printf ("ChainShort\t- Short cut for chain    \t(Default = "" -> print out of this message)\n");
+  printf ("Examples:\n"); 
+  printf (" root4star  bfc.C                   \t// Create this message\n");
+  printf (" root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"\n");
+  printf (" root4star 'bfc.C(1,1)'             \t// the same\n");
+  printf ("\n root4star 'bfc.C(1,\"off tdaq tpc HalfField global dst display\",\"/star/rcf/daq/1999/12/st_cluster2_0351027_raw_0001.daq\")'\n");
+  printf ("                                    \t// create a DST by processing a DAQ data from <st_cluster2_0351027_raw_0001.daq>\n\n");
+  printf (" root4star 'bfc.C(2,40,\"Cy1b fzin\")'\t// run for configuration year_1b, \n");
+  printf ("                                    \t// reading /star/rcf/disk1/star/test/psc0050_01_40evts.fzd\n");
+  printf ("                                    \t// skipping the 1-st event and processing the remaining 39 events\n");
+  printf (" root4star 'bfc.C(40,\"Cy1b fzin\",\"/star/rcf/disk1/star/test/psc0050_01_40evts.fzd\")'\n");
+  printf (" root4star 'bfc.C(40,\"Cy1b fzin\")'\t// the same as  above\n");
+  printf (" root4star 'bfc.C(2,40,\"Cy1b fzin -l3t\")'//the as above but remove L3T from chain\n");
+  printf (" root4star 'bfc.C(40,\"Cy2a fzin\",\"/star/rcf/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
+  printf (" root4star 'bfc.C(40,\"Cy2a fzin\")'\t// the same as  above\n");
+  printf ("                                    \t// skipping the 4 events and processing the remaining 6 events\n");
+  printf (" root4star 'bfc.C(1,\"gstar Cy1a tfs allevent\")' \t// run gstar and write all event into file branches\n");
+  printf (" root4star 'bfc.C(1,\"off in Cy1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
+  printf (" root4star 'bfc.C(1,\"tdaq display\",\"/star/rcf/disk1/star/daq/990727.3002.01.daq\")' \n");
+  printf (" \t//Cosmics (56) events with full magnetic field, TPC only \n");
+  printf (" root4star 'bfc.C(1,\"tdaq FieldOn\",\"/star/rcf/disk1/star/daq/990624.306.daq\")' \n");
+  printf (" \t//Cosmics (56) events with full magnetic field \n");
+  printf (" root4star 'bfc.C(1,\"tdaq HalfField\",\"/star/rcf/disk1/star/daq/990630.602.daq\")' \n");
+  printf (" \t//Laser (10) events with half magnetic field \n");
+  printf (" root4star 'bfc.C(1,\"tdaq FieldOff\",\"/star/rcf/disk1/star/daq/990701.614.daq\")' \n");
+  printf (" \t//Laser (12) events with no magnetic field \n");
+  printf (" root4star 'bfc.C(1,\"tdaq FieldOff logger\",\"/star/rcf/disk1/star/daq/990701.614.daq\")' \n");
+  printf (" \t//As above but all program messages are controled by the log4cxx package \n");
+  gSystem->Exit(1);
 }

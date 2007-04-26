@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcPoint.h,v 2.9 2005/08/31 18:25:41 perev Exp $
+ * $Id: StEmcPoint.h,v 2.8 2005/07/19 21:32:50 perev Exp $
  *
  * Author: Akio Ogawa, Mar 2000
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.h,v $
- * Revision 2.9  2005/08/31 18:25:41  perev
- * Class version increased by 1
- *
  * Revision 2.8  2005/07/19 21:32:50  perev
  * Remove clash with IdTruth
  *
@@ -116,7 +113,7 @@ protected:
     StPtrVecTrack      mTracks;
     int                myQuality;
     int getDetId(const StDetectorId) const;
-    ClassDef(StEmcPoint,2)
+    ClassDef(StEmcPoint,1)
 };
 #endif
 

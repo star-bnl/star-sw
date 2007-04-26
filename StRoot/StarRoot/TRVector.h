@@ -18,7 +18,7 @@ class TRVector : public TRMatrix {
 #endif
   virtual ~TRVector(){;}
   ETRMatrixType GetMatrixType() const {return kVector;}
-  virtual  Double_t       &operator()(Int_t i) {return TArrayD::operator[](i);}
+  virtual  Double_t       &operator()(Int_t i) {return TArrayD::operator[](i-1);}
   //  void Add(const TRMatrix& A, ETRMatrixCreatorsOp kop,con.xst  TRVector& B); 
   //  void Substruct(const TRMatrix& A, ETRMatrixCreatorsOp kop,const  TRVector& B); 
   virtual void   Print(Option_t *opt="") const;

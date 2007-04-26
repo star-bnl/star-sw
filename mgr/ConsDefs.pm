@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.85 2005/08/29 21:37:04 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.84 2005/07/18 22:19:25 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -17,7 +17,8 @@
     *topnlink = *File::Find::topnlink;
 
     #use strict;
-    if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
+    if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; }
+
     if ( !$STAR_SYS ) {
         $STAR_SYS = `sys`;
         chop($STAR_SYS);
@@ -109,7 +110,7 @@
     $CXXFLAGS     .= $CPPCERN;
     $EXTRA_FFLAGS  = "";
 
-    $CPP           = $CC . " -E -P";
+    $CPP           = $FC . " -E -P";
 
     $AR            = "ar";
     $ARFLAGS       = "rvu";
@@ -137,11 +138,11 @@
     if ( !$ROOTSYS )    { print "ROOT_SYS   has to be defined\n"; exit 1;}
  $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
  my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
- # if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
- if ($RLIBMAP) {
-   my ($M,$S,$V) = split('.',$ROOT_LEVEL);
-   if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
- }
+ if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
+# if ($RLIBMAP) {
+#   my ($M,$S,$V) = split('.',$ROOT_LEVEL);
+#   if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
+# }
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $LIBS          = "";
     $Libraries     = "";
@@ -276,22 +277,16 @@
       $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
 #      print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
-        chomp($CXX_VERSION);
-      ($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;#  print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n"; 
+        chomp($CXX_VERSION);# print "CXX_VERSION : $CXX_VERSION\n";
         $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";
 	my $optflags = "";
         if ($CXX_VERSION < 3) {
-	  $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
-	}
-      # else {$OSFID .= " ST_NO_MEMBER_TEMPLATES";}
+            $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
+        } else {
             # ansi works only with gcc3.2 actually ...
 	    # may be removed later ...
-      $CXXFLAGS    .= " -ansi";
-      if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; } # -fpermissive ?
-      #	  else {
-      #	  print "CXXFLAGS = $CXXFLAGS\n"; die;
-      #	}
-      $CXXFLAGS    .= " -Wno-long-long"; 
+	    $CXXFLAGS    .= " -ansi -pedantic -Wno-long-long";
+	}
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
 	  $DEBUG = "-O -g";
 	  $FDEBUG = "-O -g";

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.26 2005/09/07 22:04:02 deph Exp $
+ * $Id: StDbTable.h,v 1.25 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
- * Revision 1.26  2005/09/07 22:04:02  deph
- * update to correct padding issue for packed tables
- *
  * Revision 1.25  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -326,8 +323,7 @@ public:
 
 inline bool  StDbTable::IsTable() const { return true; };
 inline unsigned int StDbTable::getTableSize() const { 
-if(mhasDescriptor && !mdescriptor->getTrowSize()) return mdescriptor->getTotalSizeInBytes();
-if(mhasDescriptor) return mdescriptor->getTrowSize();
+if(mhasDescriptor) return mdescriptor->getTotalSizeInBytes();
 return 0;
 }
 inline char* StDbTable::printCstructName() { return mstructName; }

@@ -67,7 +67,7 @@ channel.
 #define EEMCFAIL_GARBG  0x0001  // faulty channel
 #define EEMCFAIL_HVOFF  0x0002  // HV was off or varied
 #define EEMCFAIL_NOFIB  0x0004  // signal fiber is broken
-#define EEMCFAIL_CPYCT  0x0008  // stuck in copyCat mode 
+
 
 #endif 
  

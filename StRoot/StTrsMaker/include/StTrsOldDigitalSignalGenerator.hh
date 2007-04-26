@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOldDigitalSignalGenerator.hh,v 1.4 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsOldDigitalSignalGenerator.hh,v 1.3 2003/12/24 13:44:51 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTrsOldDigitalSignalGenerator.hh,v $
- * Revision 1.4  2005/09/09 22:12:48  perev
- * Bug fix + IdTruth added
- *
  * Revision 1.3  2003/12/24 13:44:51  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -45,8 +42,6 @@
  * Initial Revision
  *
  **************************************************************************/
-
-#define ST_TRS_FAST_DIGITAL_SIGNAL_GENERATOR_HH  //to ignore
 #ifndef ST_TRS_FAST_DIGITAL_SIGNAL_GENERATOR_HH
 #define ST_TRS_FAST_DIGITAL_SIGNAL_GENERATOR_HH
 

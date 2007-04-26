@@ -1,10 +1,7 @@
 /*
- * $Id: csallo.c,v 1.4 2005/08/30 14:26:25 fisyak Exp $
+ * $Id: csallo.c,v 1.3 2004/09/24 19:35:14 fisyak Exp $
  *
  * $Log: csallo.c,v $
- * Revision 1.4  2005/08/30 14:26:25  fisyak
- * CERNLIB_QX_SC ==> CERNLIB_QXNO_SC
- *
  * Revision 1.3  2004/09/24 19:35:14  fisyak
  * Remove  change in csfree, conversion from words to char is done in mhfree already
  *
@@ -63,12 +60,14 @@ unsigned long iqpntr = (unsigned long)MDPOOL.iq;
 # include <stdlib.h>
 #endif
 
+#if defined(CERNLIB_QX_SC)
+int type_of_call csallo_(lenb)
+#endif
 #if defined(CERNLIB_QXNO_SC)
 int type_of_call csallo(lenb)
-#elsif defined(CERNLIB_QXCAPT)
+#endif
+#if defined(CERNLIB_QXCAPT)
 int type_of_call CSALLO(lenb)
-#else 
-int type_of_call csallo_(lenb)
 #endif
  int *lenb;
 {
@@ -81,12 +80,14 @@ int type_of_call csallo_(lenb)
   return pntr;
 }
 
+#if defined(CERNLIB_QX_SC)
+void type_of_call csfree_(mpntr)
+#endif
 #if defined(CERNLIB_QXNO_SC)
 void type_of_call csfree(mpntr)
-#elsif defined(CERNLIB_QXCAPT)
+#endif
+#if defined(CERNLIB_QXCAPT)
 void type_of_call CSFREE(mpntr)
-#else
-void type_of_call csfree_(mpntr)
 #endif
 unsigned  mpntr[];
 {

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.16 2005/08/26 21:37:23 oldi Exp $
+// $Id: StFlowConstants.cxx,v 1.15 2005/03/03 17:21:58 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -24,9 +24,9 @@ ClassImp(Flow)
 
   Int_t Flow::cent200Full[nCents] = {14,30,56,94,146,217,312,431,510};
   Int_t Flow::cent200Half[nCents] = {14,32,59,98,149,216,302,409,474};
-  Int_t Flow::cent200Year4Full[nCents] = {14,31,57,96,150,222,319,441,520};
-  Int_t Flow::cent200Year4Full15003[nCents] = {14,30,56,94,146,217,312,431,510};//preliminary - not sure why/where needed (MDO 08/26/2005)
-  Int_t Flow::cent200Year4Half[nCents] = {14,30,56,94,146,217,312,431,510};
+  Int_t Flow::cent200Year4Full[nCents] = {14,30,56,94,146,217,312,431,510};//preliminary
+  Int_t Flow::cent200Year4Full15003[nCents] = {14,30,56,94,146,217,312,431,510};//preliminary
+  Int_t Flow::cent200Year4Half[nCents] = {14,30,56,94,146,217,312,431,510};//preliminary
   Int_t Flow::cent130[nCents]     = {20,100,180,270,360,460,560,660,870};
   Int_t Flow::cent62[nCents]	  = {9,20,38,65,102,154,222,313,373};
   Int_t Flow::cent22[nCents]      = {8,16,30,51,80,120,173,240,284}; // Cebra
@@ -55,9 +55,6 @@ ClassImp(Flow)
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.cxx,v $
-// Revision 1.16  2005/08/26 21:37:23  oldi
-// Year 4 centrlity bins corrected (see http://www.star.bnl.gov/protected/common/common2004/trigger2004/200gev/200gevFaq.html) for details).
-//
 // Revision 1.15  2005/03/03 17:21:58  posk
 // Initialized pFlowEvent in the constructors.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.94 2005/08/26 19:00:15 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.93 2005/08/05 20:13:35 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -189,7 +189,7 @@ Int_t StFlowAnalysisMaker::Init() {
   // Trigger
   mHistTrigger = new TH1F("Flow_Trigger", "Flow_Trigger",
       nTriggerBins, triggerMin, triggerMax);
-  mHistTrigger->SetXTitle("Trig: 0 mb+cen, 1 mb, 2 central, 3 laser, 10 other");
+  mHistTrigger->SetXTitle("Trigger: 0 mb+cen 1 minbias, 2 central, 3 laser, 10 other");
   mHistTrigger->SetYTitle("Counts");
 
   // Charge
@@ -537,8 +537,8 @@ Int_t StFlowAnalysisMaker::Init() {
     
   // CTB versus ZDC
   mHistCTBvsZDC2D = new TH2F("Flow_CTBvsZDC2D", "Flow_CTBvsZDC2D",
-			       125, 0, 500,
-			       125, 0, 50000);
+			       125, 0, 250,
+			       125, 0, 25000);
   mHistCTBvsZDC2D->SetXTitle("ZDC sum");
   mHistCTBvsZDC2D->SetYTitle("CTB sum");
 
@@ -1180,7 +1180,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.94 2005/08/26 19:00:15 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.93 2005/08/05 20:13:35 posk Exp $");
 
   return StMaker::Init();
 }
@@ -2320,9 +2320,6 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
-// Revision 1.94  2005/08/26 19:00:15  posk
-// plot style back to bold
-//
 // Revision 1.93  2005/08/05 20:13:35  posk
 // Improved first guess for qDist fit.
 //

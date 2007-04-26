@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.59 2005/09/28 21:30:51 fisyak Exp $
+ * $Id: StMcEventMaker.cxx,v 1.60 2005/10/07 20:39:02 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.60  2005/10/07 20:39:02  fisyak
+ * Restore comment field from particle table
+ *
  * Revision 1.59  2005/09/28 21:30:51  fisyak
  * Persistent StMcEvent
  *
@@ -272,7 +275,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.59 2005/09/28 21:30:51 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.60 2005/10/07 20:39:02 fisyak Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -765,7 +768,7 @@ Int_t StMcEventMaker::Make()
 
 	long motherIndex = -1;  // Set it to some unused number. 
 	{for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
-	    if (particleTable[gtrk].isthep > 3) continue; // skip comment fields
+	    //	    if (particleTable[gtrk].isthep > 3) continue; // skip comment fields
 	    egTrk = new StMcTrack(&(particleTable[gtrk]));
 	    egTrk->setEventGenLabel(gtrk+1);
 	    ttempParticle[gtrk] = egTrk;

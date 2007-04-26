@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.cc,v 1.6 2005/09/09 22:12:49 perev Exp $
+ * $Id: StTrsAnalogSignal.cc,v 1.5 2003/12/24 13:44:52 fisyak Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,9 +10,6 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.cc,v $
- * Revision 1.6  2005/09/09 22:12:49  perev
- * Bug fix + IdTruth added
- *
  * Revision 1.5  2003/12/24 13:44:52  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -35,37 +32,27 @@
 #include <Stiostream.h>
 #include "StTrsAnalogSignal.hh"
 
-//______________________________________________________________________________
 StTrsAnalogSignal::StTrsAnalogSignal(float t, float amp, int id) 
 {
     mId                  = id;
-    mTime  = t;
-    mAmp = amp;
+    mAnalogSignal.first  = t;
+    mAnalogSignal.second = amp;
 }
 
-//______________________________________________________________________________
 StTrsAnalogSignal::StTrsAnalogSignal()
 {
     mId                  = 0;
-    mTime  = 0;
-    mAmp = 0;
+    mAnalogSignal.first  = 0;
+    mAnalogSignal.second = 0;
 }
 
-//______________________________________________________________________________
 StTrsAnalogSignal::~StTrsAnalogSignal() { /* nopt */}
 
 
-//______________________________________________________________________________
 // Non-member Function for printing
 //template<class T>
 ostream& operator<<(ostream& os, const StTrsAnalogSignal& sig)
 {
     return os << '(' << sig.time() << ", " << sig.amplitude() << ')';
-}
-//______________________________________________________________________________
-StTrsAnalogSignal& StTrsAnalogSignal::operator+=(const StTrsAnalogSignal& other)
-{
-   assert(mTime == other.mTime); 
-   mAmp += other.mAmp;  return *this;
 }
 

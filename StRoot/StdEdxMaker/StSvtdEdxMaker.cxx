@@ -247,7 +247,7 @@ Int_t StSvtdEdxMaker::Make()
 	   u_ab_z*waferGeom->n(2) ;
 	 
 	 
-	 pathLength[index]        = fabs((float)(0.03/(cos_theta+1e-10)));
+	 pathLength[index]        = fabs((float)(0.03/cos_theta));
 	 
 	 spacePointsCharge[index] = (ionization[index]/pathLength[index]);
 	 

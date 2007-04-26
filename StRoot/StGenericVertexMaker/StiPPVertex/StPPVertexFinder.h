@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.5 2005/08/30 22:08:43 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.4 2005/08/12 18:35:28 balewski Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -30,8 +30,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t, float z);
   void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t, float rxy);
   bool matchTrack2Membrane(const StiKalmanTrack*, TrackData &t);
-  vector<TrackData>  mTrackData;
-  vector<VertexData> mVertexData;
+  vector<TrackData> *mTrackData;
+  vector<VertexData> *mVertexData;
   bool buildLikelihood();
   bool findVertex(VertexData &);
   bool evalVertex(VertexData &);
@@ -98,9 +98,6 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
- * Revision 1.5  2005/08/30 22:08:43  balewski
- * drop '*' from declaration of   mTrackData &  mVertexData
- *
  * Revision 1.4  2005/08/12 18:35:28  balewski
  * more accurate calculation of Z-vertex error
  * by accounting for average weight of tracks contributing to the likelihood,

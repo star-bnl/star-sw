@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.169 2005/09/09 21:32:32 perev Exp $
+// $Id: StMaker.cxx,v 1.167 2005/07/18 19:04:53 fine Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -17,6 +17,7 @@
  *                                                                     
  */
 #define STAR_LOGGER 1
+
 #include "Stiostream.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -117,8 +118,6 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fLogger(
    fMemStatMake  = 0;
    fMemStatClear = 0;
    memset(fTallyMaker,0,(kStFatal+1)*sizeof(Int_t));
-   fStatus = 0;
-   SetActive();
    StMkDeb::Register(this);
 }
 
@@ -336,8 +335,9 @@ TList *StMaker::GetMakeList() const
 //______________________________________________________________________________
 TString StMaker::GetAlias(const char* log,const char* dir) const
 {
+  TString act;
   int nspn = strcspn(log," /");
-  TString act(log,nspn);
+  act.Prepend(log,nspn);
   TDataSet *in = GetData(act,dir);
   act ="";
   if (in) {act = in->GetTitle(); act += log+nspn;}
@@ -412,7 +412,7 @@ int icol,islas;
 DOWN: if (!(dir = Find(".make"))) goto UP;
 
   nextMk.Reset(dir);
-  while ((mk = (StMaker* )nextMk()))
+  while ((mk = (StMaker*)nextMk()))
   {
     if (mk==dowMk) continue;
     dataset = mk->FindDataSet(actInput,this,0);
@@ -488,17 +488,17 @@ void StMaker::Clear(Option_t *option)
    TIter next(GetMakeList(),kIterBackward);
    StMaker *maker;
    int curr = StMkDeb::GetCurrent();
-   while ((maker = (StMaker* )next())) {
-      Assert(maker->TestBIT(kCleaBeg)==0);
+   while ((maker = (StMaker*)next())) {
+      Assert(maker->TestBit(kCleaBeg)==0);
       StMkDeb::SetCurrent(maker,3);
-      maker->SetBIT(kCleaBeg);
+      maker->SetBit(kCleaBeg);
       maker->StartTimer();
       if (maker->fMemStatClear && GetNumber()>20) maker->fMemStatClear->Start();
       TURN_LOGGER(maker);
       maker->Clear(option);
       if (maker->fMemStatClear && GetNumber()>20) maker->fMemStatClear->Stop();
       maker->StopTimer();
-      maker->ResetBIT(kCleaBeg);
+      maker->ResetBit(kCleaBeg);
       StMkDeb::SetCurrent(curr);
    }
    TCollection::EmptyGarbageCollection();
@@ -521,7 +521,7 @@ Int_t StMaker::Init()
    TIter nextMaker(tl);
    StMaker *maker;
    int curr = StMkDeb::GetCurrent();
-   while ((maker = (StMaker* )nextMaker())) {
+   while ((maker = (StMaker*)nextMaker())) {
 
       TURN_LOGGER(maker);
       // save last created histogram in current Root directory
@@ -530,9 +530,9 @@ Int_t StMaker::Init()
 
       // Initialise maker
 
-      Assert(maker->TestBIT(kInitBeg)|maker->TestBIT(kInitEnd)==0);
+      Assert(maker->TestBit(kInitBeg|kInitEnd)==0);
       StMkDeb::SetCurrent(maker,1);
-      maker->SetBIT(kInitBeg);
+      maker->SetBit(kInitBeg);
       maker->StartTimer();
       
       if (GetDebug()) {
@@ -574,8 +574,8 @@ Int_t StMaker::Init()
         maker->AddHist((TH1*)objHist);
       }
       ::doPs(maker->GetName(),"Init");
-      maker->ResetBIT(kInitBeg);
-      maker->SetBIT  (kInitEnd);
+      maker->ResetBit(kInitBeg);
+      maker->SetBit  (kInitEnd);
       StMkDeb::SetCurrent(curr);
     }
   return kStOK; 
@@ -643,7 +643,7 @@ void StMaker::EndMaker(int ierr)
  */
 Int_t StMaker::Finish()
 {
-   if (TestBIT(kFiniEnd)) return 1;
+   if (TestBit(kFiniEnd)) return 1;
    TURN_LOGGER(this);
 
    int nerr = 0;
@@ -654,7 +654,7 @@ Int_t StMaker::Finish()
    StMaker *maker;
    Double_t totalCpuTime = 0;
    Double_t totalRealTime = 0;   
-   while ((maker = (StMaker* )next())) 
+   while ((maker = (StMaker*)next())) 
    {
       totalCpuTime  += maker->CpuTime();
       totalRealTime += maker->RealTime();      
@@ -687,10 +687,10 @@ Int_t StMaker::Finish()
              ,100*maker->CpuTime()/totalCpuTime) << endm;
 
       static const char *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
-      TString tail("");
+      TString tail;
       for (int j=0;j<=kStFatal;j++) {
         if (fTallyMaker[j]) tail += Form(" %s=%d",ee[j],fTallyMaker[j]);}
-      if (tail != "") LOG_QA << (const char *) tail << endm;     
+      LOG_QA << (const char *) tail << endm;     
 #else
      if (fst) {
         fst=0;
@@ -714,29 +714,28 @@ Int_t StMaker::Finish()
 
    next.Reset();
    int curr = StMkDeb::GetCurrent();
-   while ((maker = (StMaker* )next())) 
+   while ((maker = (StMaker*)next())) 
    {
       TURN_LOGGER(maker);
 
-      if (maker->TestBIT(kFiniEnd)) {
+      if (maker->TestBit(kFiniEnd)) {
         maker->Warning("Finish","maker %s.%s Finished twice"
                ,maker->GetName(),maker->ClassName());
         continue;}
       StMkDeb::SetCurrent(maker,4);
-      maker->SetBIT(kFiniBeg);
+      maker->SetBit(kFiniBeg);
       if ( maker->Finish() ) nerr++;
-      maker->ResetBIT(kFiniBeg);
-      maker->SetBIT  (kFiniEnd);
+      maker->ResetBit(kFiniBeg);
+      maker->SetBit  (kFiniEnd);
       StMkDeb::SetCurrent(curr);
    }
    if (!GetParent()) {// Only for top maker
 #ifdef STAR_LOGGER     
      LOG_INFO << "--------------Error Codes-------------------------" << endm;
      LOG_INFO << "     nStOK   nStWarn    nStEOF    nStErr  nStFatal" << endm;
-     TString tail("");
+     TString tail;
      for( int i=0; i<=kStFatal; i++) tail += Form("%10d",fgTallyMaker[i]); 
-     if (tail != "") 
-       LOG_INFO << (const char *)tail << endm;
+     LOG_INFO << (const char *)tail << endm;
      LOG_INFO << "--------------------------------------------------" << endm;
 #else
      printf("\n--------------Error Codes-------------------------\n");
@@ -775,11 +774,11 @@ Int_t StMaker::Make()
    StMaker *maker;
    fgFailedMaker = 0;
    int curr = StMkDeb::GetCurrent();
-   while ((maker = (StMaker* )nextMaker())) {
+   while ((maker = (StMaker*)nextMaker())) {
      if (!maker->IsActive()) continue;
      TURN_LOGGER(maker);
-     Assert(maker->TestBIT(kMakeBeg)==0);
-     maker->SetBIT(kMakeBeg);
+     Assert(maker->TestBit(kMakeBeg)==0);
+     maker->SetBit(kMakeBeg);
      StMkDeb::SetCurrent(maker,2);
      oldrun = maker->m_LastRun;
      if (hd && hd->GetRunNumber()!=oldrun) {
@@ -807,14 +806,14 @@ Int_t StMaker::Make()
      
      if (Debug() || ret) 
 #ifdef STAR_LOGGER     
-        LOG_INFO << "*** " << maker->ClassName() << "::Make() == " 
+        LOG_ERROR << "*** " << maker->ClassName() << "::Make() == " 
                   << RetCodeAsString(ret) << "(" << ret << ") ***" 
                   << endm;
 #else
         printf("*** %s::Make() == %s(%d) ***\n"
                         ,maker->ClassName(),RetCodeAsString(ret),ret);
 #endif     
-     maker->ResetBIT(kMakeBeg);
+     maker->ResetBit(kMakeBeg);
      StMkDeb::SetCurrent(curr);
      if ((ret%10)>kStWarn) { //something unusual
        if ((ret%10) != kStERR) 		return ret;
@@ -847,7 +846,7 @@ StMaker *StMaker::GetMaker(const TDataSet *ds)
 { 
   const TDataSet *par = ds;
   while (par && (par = par->GetParent()) && strncmp(".maker",par->GetTitle(),6)) {}
-  return ( StMaker*) par;
+  return (StMaker*)par;
 }
 
 //_____________________________________________________________________________
@@ -887,7 +886,7 @@ void StMaker::PrintInfo()
 //     Print info for all defined Makers
    TIter next(GetMakeList());
    StMaker *maker;
-   while ((maker = (StMaker* )next())) {
+   while ((maker = (StMaker*)next())) {
       maker->PrintInfo();
    }
 }
@@ -925,7 +924,7 @@ StMaker     *StMaker::GetParentChain() const
 {
     const StMaker *mk = GetParentMaker();
     while(mk && !mk->IsChain()) {mk = mk->GetParentMaker();}
-    return (StMaker*) mk;
+    return (StMaker*)mk;
 }
 //_____________________________________________________________________________
 TDatime  StMaker::GetDateTime() const 
@@ -1095,11 +1094,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  * MakeDoc - creates the HTML doc for this class and for the base classes
  *           (if baseClasses == kTRUE):
  *
-#ifndef __noXDF__
- *         *  St_XDFFile   
-#endif
- *         *                 St_Module      TTable       * 
- *         *  TDataSet   St_DataSetIter St_FileSet       *
+ *         *  St_XDFFile   St_Module      TTable       *
+ *         *  TDataSet   St_DataSetIter St_FileSet     *
  *         *  StMaker      StChain        StEvent        *
  *         *  St_TLA_Maker                               *
  *
@@ -1112,9 +1108,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  *            $(stardir)
  *            $(stardir) + "StRoot/St_base"
  *            $(stardir) + "StRoot/StChain"
-#ifndef __noXDF__
  *            $(stardir) + "StRoot/xdf2root"
-#endif
  *            $(stardir) + "StRoot/StarClassLibrary"
  *            $(stardir) + "StRoot/StEvent"
  *            $(stardir) + ".share/tables"
@@ -1150,11 +1144,9 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   //                       | ----------------------  | ------------  | ------------------ |
   //                       | Directory name             Class name     Share library name |
   //                       | ----------------------  | ------------  | ------------------ |
-  const Char_t *source[] = {"StRoot/St_base"         , "TDataSet"  ,      "St_base"
+  const Char_t *source[] = {"StRoot/St_base"         , "St_DataSet"  ,    "St_base"
                            ,"StRoot/StChain"         , "StMaker"     ,    "StChain"
-#ifndef __noXDF__
-			    ,"StRoot/xdf2root"        , "St_XDFFile"  ,    "xdf2root"
-#endif
+                           ,"StRoot/xdf2root"        , "St_XDFFile"  ,    "xdf2root"
 			    //,"StRoot/StUtilities"     , "StMessage"   ,    "StUtilities"
                            ,"StRoot/StarClassLibrary", ""            ,    ""
                            ,"StRoot/StEvent"         , "StEvent"     ,    "StEvent"
@@ -1211,12 +1203,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
-  Char_t *classes[] = { 
-#ifndef __noXDF__
-    "St_XDFFile",
-#endif
-			"St_Module",      "TTable"
-                       ,"TDataSet",    "TDataSetIter",   "TFileSet"
+  Char_t *classes[] = { "St_XDFFile",  "St_Module",      "St_Table"
+                       ,"St_DataSet",  "St_DataSetIter", "St_FileSet"
                        ,"StMaker",     "StChain"
                        ,"table_head_st"
                       };
@@ -1250,7 +1238,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
    if (tl) {
      TIter nextMaker(tl);
      StMaker *maker;
-     while ((maker = (StMaker* )nextMaker())) 
+     while ((maker = (StMaker*)nextMaker())) 
          maker->MakeDoc(stardir,outdir,kFALSE);
    }
 }
@@ -1313,7 +1301,7 @@ void StMaker::SetDEBUG(Int_t l)
    
    TIter nextMaker(tl);
    StMaker *maker;
-   while ((maker = (StMaker* )nextMaker())) maker->SetDEBUG(l);
+   while ((maker = (StMaker*)nextMaker())) maker->SetDEBUG(l);
 }
 //_____________________________________________________________________________
 /*!
@@ -1524,7 +1512,7 @@ AGAIN: switch (fState) {
 
     case 1: 	// Recursive iteration
       ds = fMakerIter->NextMaker();
-      if (ds) return (StMaker* )ds;
+      if (ds) return (StMaker*)ds;
       fState = 0;		goto AGAIN;	//no more in downstaires,go curren
      
     case 2:
@@ -1539,7 +1527,7 @@ AGAIN: switch (fState) {
       fItWas = fMaker; fMaker = 0;
       if (!par) 				return 0;
       if (strcmp(".make",par->GetName()))	return 0;
-      fMaker = (StMaker* )par->GetParent();
+      fMaker = (StMaker*)par->GetParent();
       if (!fMaker)				return 0;
       delete fIter; fIter = new TDataSetIter(par);
       fState = 0; goto AGAIN;
@@ -1600,12 +1588,6 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
-// Revision 1.169  2005/09/09 21:32:32  perev
-// ERROR message ==> INFO
-//
-// Revision 1.168  2005/08/29 21:42:21  fisyak
-// switch from fBits to fStatus for StMaker control bits
-//
 // Revision 1.167  2005/07/18 19:04:53  fine
 // get rid of an unvisible redundant blank after end of like. Caused ICC compilatiion error
 //

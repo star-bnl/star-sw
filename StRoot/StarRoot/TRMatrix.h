@@ -29,8 +29,8 @@ class TRMatrix : public TRArray {
   Int_t NJ()        const       {return fNcols;}
   void  SetMatrix(Int_t nrows,Int_t ncols,const  Double_t *array=0);  
   ETRMatrixType GetMatrixType() const {return kRectangular;}
-  Double_t       &operator()(Int_t i)         {return TRArray::operator[](i);}
   Double_t       &operator()(Int_t i,Int_t j);
+  Double_t       &operator()(Int_t i) {return TRArray::operator()(i);}
  protected:
   Int_t     fNrows;            // number of rows 
   Int_t     fNcols;            // number of columns
@@ -42,16 +42,16 @@ class TRMatrix : public TRArray {
 };
 ostream& operator<<(ostream& s,const TRMatrix &target);
 inline Double_t &TRMatrix::operator()(Int_t i,Int_t j){
-  if (j < 0 || j >= fNcols) {
+  if (j < 1 || j > fNcols) {
     ::Error("TRMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
 	    j, fNcols, this); 
-    j = 0;
+    j = 1;
   }
-  if (i < 0 || i >= fNrows) {
+  if (i < 1 || i > fNrows) {
     ::Error("TRMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
 	    i, fNrows, this); 
-    i = 0;
+    i = 1;
   }
-  return TArrayD::operator[](j + i*fNcols);
+  return TArrayD::operator[](j-1 + (i-1)*fNcols);
 }
 #endif

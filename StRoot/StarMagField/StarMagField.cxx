@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.6 2005/09/12 13:56:27 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.3 2005/07/28 19:46:01 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,15 +11,6 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
- * Revision 1.6  2005/09/12 13:56:27  fisyak
- * Fix B[0] = B[1] = 0 at r = 0
- *
- * Revision 1.5  2005/08/31 15:45:43  fisyak
- * Make agufld a function to have comis happy (FPE)
- *
- * Revision 1.4  2005/08/29 22:59:56  fisyak
- * Fix printouts
- *
  * Revision 1.3  2005/07/28 19:46:01  fisyak
  * Add:
  * -  frindge magnetic field from P.Nevski extrapolation,
@@ -57,7 +48,7 @@
 
 A package of Bfield. Methods included to read the correct Bfield map and scale it 
 according to a scale factor provided during instantiation.
-The statement from W.Love is that the Bfield map accuracy FWHM = 1 G.
+
 <p>
 
 An enumerated argument provided at the time of instantiation selects
@@ -98,10 +89,9 @@ StarMagField *StarMagField::fgInstance = 0;
 #define agufld           F77_NAME(agufld,AGUFLD)
 #define mfldgeo          F77_NAME(mfldgeo,MFLDGEO)
 R__EXTERN  "C" {
-  Float_t type_of_call agufld(Float_t *x, Float_t *bf) {
+  void type_of_call agufld(Float_t *x, Float_t *bf) {
     if (! StarMagField::Instance()) new StarMagField();
     StarMagField::Instance()->BField(x,bf);
-    return 0;
   }
   void type_of_call mfldgeo() {
     printf("request for StarMagField from mfldgeo\n");
@@ -342,10 +332,11 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
   }
   if (z >= ZList[0] && z <= ZList[nZ-1] && r <= Radius[nR-1]) { // within Map
     Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
+    B[0] = Br_value ;
     B[2] = Bz_value ;
     if ( r != 0.0 )      {
-      B[0] = Br_value * (x[0]/r) ;
-      B[1] = Br_value * (x[1]/r) ;
+      B[1] = B[0] * (x[1]/r) ;
+      B[0] = B[0] * (x[0]/r) ;
     }
     return;
   }
@@ -363,10 +354,11 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
     Br_value = (1-w)*BrI + w*Br_value;
     Bz_value = (1-w)*BzI + w*Bz_value;
   }  
+  B[0] = Br_value ;
   B[2] = Bz_value ;
   if ( r != 0.0 )      {
-    B[0] = Br_value * (x[0]/r) ;
-    B[1] = Br_value * (x[1]/r) ;
+    B[1] = B[0] * (x[1]/r) ;
+    B[0] = B[0] * (x[0]/r) ;
   }
   return;
 }
@@ -484,8 +476,8 @@ void StarMagField::ReadField( )
       exit(1) ;
     }
       
-  printf("StarMagField::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.Data(),fFactor);
-  printf("StarMagField::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),fFactor*fRescale);
+  printf("StMagUtilities::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.Data(),fFactor);
+  printf("StMagUtilities::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),fFactor*fRescale);
   
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;

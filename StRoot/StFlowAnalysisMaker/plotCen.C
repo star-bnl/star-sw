@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.24 2005/08/26 19:00:26 posk Exp $
+// $Id: plotCen.C,v 1.23 2005/08/05 20:13:44 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -36,8 +36,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
-  //gROOT->SetStyle("Pub");                              // set style
-  gROOT->SetStyle("Bold");                              // set style
+  gROOT->SetStyle("Pub");                              // set style
   gROOT->ForceStyle();
 
   int canvasWidth = 600, canvasHeight = 780;             // portrait
@@ -116,16 +115,16 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_Mul_Sel",
     "Flow_Phi_East_Sel",
     "Flow_Phi_Flat_East_Sel",
-    //"Flow_Phi_Weight_East_Sel",
+    "Flow_Phi_Weight_East_Sel",
     "Flow_Phi_West_Sel",
     "Flow_Phi_Flat_West_Sel",
-    //"Flow_Phi_Weight_West_Sel",
+    "Flow_Phi_Weight_West_Sel",
     "Flow_Phi_FtpcEast_Sel",
     "Flow_Phi_Flat_FtpcEast_Sel",
-    //"Flow_Phi_Weight_FtpcEast_Sel",
+    "Flow_Phi_Weight_FtpcEast_Sel",
     "Flow_Phi_FtpcWest_Sel",
     "Flow_Phi_Flat_FtpcWest_Sel",
-    //"Flow_Phi_Weight_FtpcWest_Sel",
+    "Flow_Phi_Weight_FtpcWest_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
     "Flow_Psi_Sub_Corr_Sel",
@@ -502,7 +501,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       gStyle->SetOptStat(0);
       hist->Draw();
     } else if (strstr(shortName[pageNumber],"_v")!=0 ) {      // v 1D
-      TLine* lineZeroHar = new TLine(0.5, 0., 4.5, 0.);
+      TLine* lineZeroHar = new TLine(0.5, 0., 3.5, 0.);
       hist->SetMaximum(10.);
       gStyle->SetOptStat(0);
       hist->Draw();
@@ -592,9 +591,6 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
-// Revision 1.24  2005/08/26 19:00:26  posk
-// plot style back to bold
-//
 // Revision 1.23  2005/08/05 20:13:44  posk
 // Improved first guess for qDist fit.
 //

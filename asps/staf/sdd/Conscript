@@ -26,7 +26,7 @@ if ($LD eq 'g++') {
   $LD = "gcc";
 }
 my $LDFLAGS   = $env->{LDFLAGS};
-if ($LD eq 'gcc' and $STAR_SYS !~ /^sl4/) {$LDFLAGS = "-Wl,-Bstatic";}
+if ($LD eq 'gcc') {$LDFLAGS = "-Wl,-Bstatic";}
 
 $env2 = $env->clone('CPPPATH'      => $CPPPATH, 
 		    'LD'           => $LD,

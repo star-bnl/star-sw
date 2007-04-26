@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StarClassLibraryLinkDef.hh,v 1.9 2005/09/22 20:09:21 fisyak Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.8 2005/07/06 18:49:57 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -23,9 +23,6 @@
  ***************************************************************************
  *
  * $Log: StarClassLibraryLinkDef.hh,v $
- * Revision 1.9  2005/09/22 20:09:21  fisyak
- * Make StLorentzVector persistent
- *
  * Revision 1.8  2005/07/06 18:49:57  fisyak
  * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
  *
@@ -67,15 +64,14 @@
 
 #pragma link C++ class StThreeVector<float>-;
 #pragma link C++ class StThreeVector<double>-;
-#pragma link C++ class StLorentzVector<float>+;
-#pragma link C++ class StLorentzVector<double>+;
+#pragma link C++ class StLorentzVector<float>-;
+#pragma link C++ class StLorentzVector<double>-;
 #pragma link C++ class StMatrix<float>-;
 #pragma link C++ class StMatrix<double>-;
 #pragma link C++ class StHelix+;
 #pragma link C++ class StPhysicalHelix+;
 
-#pragma link C++ function abs(const StThreeVector<float>&);                                      
-#pragma link C++ function abs(const StThreeVector<double>&);                                      
+#pragma link C++ function abs(const StThreeVector&);                                      
 #pragma link C++ function cross_product(const StThreeVector<float>&, const StThreeVector<float>&); 
 #pragma link C++ function cross_product(const StThreeVector<float>&, const StThreeVector<double>&); 
 #pragma link C++ function operator+ (const StThreeVector<float>&, const StThreeVector<float>&);    
