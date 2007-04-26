@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.13 2003/09/13 00:42:27 perev Exp $
+// $Id: StChargeStepMaker.cxx,v 1.14 2007/04/26 04:03:40 perev Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.14  2007/04/26 04:03:40  perev
+// Remove redundant GetMaker()
+//
 // Revision 1.13  2003/09/13 00:42:27  perev
 // XDF obsolete + small fixes
 //
@@ -61,7 +64,6 @@
 #include "TSystem.h"
 #include "TH1.h"
 #include "StTpcDb/StTpcDb.h"
-#include "StTpcDb/StTpcDbMaker.h"
 
 ClassImp(StChargeStepMaker)
   static const char *eRegions_names[] = {"innerWest",
@@ -336,7 +338,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.13 2003/09/13 00:42:27 perev Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.14 2007/04/26 04:03:40 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -368,7 +370,7 @@ Int_t StChargeStepMaker::Finish() {
 //----------------------------------------------------------------------
 
 void StChargeStepMaker::InitHistograms() {
-theDb = ((StTpcDbMaker*)GetMaker("tpcDB"))->tpcDbInterface();
+theDb = gStTpcDb;
 assert(theDb);
 //Figure out approximately where the zero point is:
  cout << "TPC length = " << theDb->Dimensions()->outerEffectiveDriftDistance() << endl;
