@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChainOpt:$Name:  $:$Id: StBFChainOpt.cxx,v 1.1 2007/04/26 04:01:53 perev Exp $
+// @(#)StRoot/StBFChainOpt:$Name:  $:$Id: StBFChainOpt.cxx,v 1.2 2007/04/26 20:38:00 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -11,11 +11,11 @@ StBFChainOpt::StBFChainOpt(StBFChain *bfc):StChainOpt("StBFChainOpt")
 {
   fBFChain = bfc;
 }
-//_____________________________________________________________________
-Int_t StBFChainOpt::kOpt(const char *Tag) const
-{
-  return fBFChain->kOpt(Tag,0);
-}
+// //_____________________________________________________________________
+// Int_t StBFChainOpt::kOpt(const char *Tag) const
+// {
+//   return fBFChain->kOpt(Tag,0);
+// }
 //_____________________________________________________________________
 const TString &StBFChainOpt::GetFileIn() const
 {

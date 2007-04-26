@@ -114,6 +114,12 @@ Int_t StChain::MakeEvent()
   return StMaker::IMake(GetNumber()+1);
 }
 //_____________________________________________________________________________
+const StChainOpt *StChain::GetChainOpt()    const
+{
+  if (mChainOpt) return mChainOpt;
+  return StMaker::GetChainOpt();
+}
+//_____________________________________________________________________________
 Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk) 
 {
   TBenchmark evnt;
@@ -247,8 +253,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.63 2006/07/03 04:13:38 fine Exp $
+// $Id: StChain.cxx,v 1.64 2007/04/26 20:36:49 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.64  2007/04/26 20:36:49  perev
+// Some ChainOpt fixes
+//
 // Revision 1.63  2006/07/03 04:13:38  fine
 // new Job tracking Db activated
 //
