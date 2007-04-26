@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.39 2007/03/03 00:35:43 fine Exp $
+// $Id: St_geant_Maker.h,v 1.40 2007/04/26 15:51:31 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.40  2007/04/26 15:51:31  fisyak
+// Move creation of TGiant3 in ctor (fix byg 942)
+//
 // Revision 1.39  2007/03/03 00:35:43  fine
 // Fix the leak of the ROOT objects and introduce the method to return the source code filename  for the arbitrary geometry node
 //
@@ -66,6 +69,10 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
+//#define DetectorIndex
+#ifdef DetectorIndex
+#include "TArrayI.h"
+#endif
 class TVolume;
 class TGiant3;
 class TRotMatrix;
@@ -163,6 +170,10 @@ public:
 			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
    
   TGeoVolume* Ag2Geom();
+#ifdef DetectorIndex
+  void        DetSetIndex();
+  void        DumpIndex(const Char_t *name, const Char_t *vers, const Char_t *fmt, TArrayI &NVmax, TArrayI &Ids);
+#endif
   TString GetVolumeSrcFile(const char *volumeName) const;
  protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
@@ -182,7 +193,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.39 2007/03/03 00:35:43 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.40 2007/04/26 15:51:31 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 

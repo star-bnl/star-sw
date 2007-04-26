@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.115 2007/04/26 04:18:27 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.116 2007/04/26 15:51:31 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.116  2007/04/26 15:51:31  fisyak
+// Move creation of TGiant3 in ctor (fix byg 942)
+//
 // Revision 1.115  2007/04/26 04:18:27  perev
 // Remove StBFChain dependency
 //
@@ -367,7 +370,6 @@
 //               St_geant_Maker class for Makers                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
 #include "St_geant_Maker.h"
 #include "StChain.h"
 #include "TDataSetIter.h"
@@ -467,12 +469,16 @@
 #include "StarCallf77.h" 
 #include "StMagF.h"
 #include "StMessMgr.h"
+#ifdef DetectorIndex
+#include "StarG2T2VMCMap.h"
+#endif
 #ifdef F77_NAME
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
 #define    agstroot	 F77_NAME(agstroot,AGSTROOT)
 #define    csaddr	 F77_NAME(csaddr,CSADDR)
 #define    csjcal	 F77_NAME(csjcal,CSJCAL)
 #define    g2t_volume_id F77_NAME(g2t_volume_id,G2T_VOLUME_ID)
+#define    g2r_get_sys F77_NAME(g2r_get_sys,G2R_GET_SYS)
 #define    gfrotm	 F77_NAME(gfrotm,GFROTM)
 #define    gfxzrm	 F77_NAME(gfxzrm,GFXZRM)
 #define    dzddiv	 F77_NAME(dzddiv,DZDDIV)
@@ -481,6 +487,7 @@
 #define    agvolume      F77_NAME(agvolume,AGVOLUME)
 #define    agvoluma      F77_NAME(agvoluma,AGVOLUMA)
 #define    uhtoc         F77_NAME(uhtoc,UHTOC)
+#define    agfpath       F77_NAME(agfpath,UHTOC)
 #if 0
 #define    mfldgeo       F77_NAME(mfldgeo,MFLDGEO)
 #endif
@@ -501,6 +508,7 @@ R__EXTERN "C" {
 			       ...);         /* other narg arguments       */
   
   Int_t type_of_call g2t_volume_id (DEFCHARD, int* DEFCHARL);
+  void type_of_call g2r_get_sys (DEFCHARD, DEFCHARD, int&, int& DEFCHARL DEFCHARL);
   void type_of_call gfrotm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
   void type_of_call gfxzrm   (Int_t &NLEV_0,Float_t &X,Float_t &Y,Float_t &Z,
 			      Float_t &TET1,Float_t &PHI1,
@@ -540,6 +548,7 @@ R__EXTERN "C" {
 #if 0
   Char_t type_of_call *acfromr(Float_t r=8009359);
 #endif
+  void  type_of_call agfpath(Int_t *);
 }
 Char_t type_of_call *acfromr(Float_t r=8009359);
 
@@ -582,6 +591,21 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
   fgGeom  = new TDataSet("geom");  
   m_ConstSet->Add(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
+  // Initialize GEANT
+  if (! geant3) {
+    PrintInfo();
+    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+    assert(geant3);
+    cquest = (Quest_t  *) geant3->Quest();
+    clink  = (Gclink_t *) geant3->Gclink();
+    cflag  = (Gcflag_t *) geant3->Gcflag();
+    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+    cnum   = (Gcnum_t  *) geant3->Gcnum();
+    z_iq   = (Int_t    *) geant3->Iq();
+    z_lq   = (Int_t    *) geant3->Lq();
+    z_q    = (Float_t  *) geant3->Q();
+    csets  = (Gcsets_t *) geant3->Gcsets();
+  }
 }
 //_____________________________________________________________________________
 TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
@@ -649,21 +673,6 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
-  // Initialize GEANT
-  if (! geant3) {
-    PrintInfo();
-    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
-    assert(geant3);
-    cquest = (Quest_t  *) geant3->Quest();
-    clink  = (Gclink_t *) geant3->Gclink();
-    cflag  = (Gcflag_t *) geant3->Gcflag();
-    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
-    cnum   = (Gcnum_t  *) geant3->Gcnum();
-    z_iq   = (Int_t    *) geant3->Iq();
-    z_lq   = (Int_t    *) geant3->Lq();
-    z_q    = (Float_t  *) geant3->Q();
-    csets  = (Gcsets_t *) geant3->Gcsets();
-  }
   TString InputFile(fInputFile);
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
@@ -2354,3 +2363,144 @@ Int_t St_geant_Maker::AgstHits() {
   }
   return kStOK;
 }
+#ifdef DetectorIndex
+//________________________________________________________________________________
+void St_geant_Maker::DetSetIndex() {
+  TString vers = mInitialization;
+  vers.ReplaceAll("detp geometry ","");
+  cout << "St_geant_Maker::DetSetIndex for geometry version " << vers << endl;
+  Int_t JSET = clink->jset;
+  if (JSET <= 0) return;
+  Int_t  NSET=z_iq[JSET-1];
+  Char_t Uset[5], Udet[5], Uvol[5];
+  memset (Uset, 0, 5);
+  memset (Udet, 0, 5);
+  memset (Uvol, 0, 5);
+  for (Int_t ISET=1;ISET<=NSET;ISET++) {
+    Int_t JS=z_lq[JSET-ISET];
+    if (JS <= 0) continue;
+    Int_t NDET=z_iq[JS-1];
+    memcpy (Uset, &z_iq[JSET+ISET], 4);
+    TString set(Uset);
+    set.ToLower();
+    for (Int_t IDET=1;IDET<=NDET;IDET++) {
+      Int_t JD=z_lq[JS-IDET];
+      if (JD <=0) continue;
+      memcpy (Udet, &z_iq[JS+IDET], 4);
+      agfdig0(Uset,Udet,strlen(Uset),strlen(Udet));
+      Int_t JDU = z_lq[JD-3];
+      if (JDU > 0) {
+	Int_t i1      = (int) z_q[JDU+3];
+	Int_t i2      = (int) z_q[JDU+5];
+	Int_t Nva     = (int) z_q[JDU+4]; 
+	Int_t Nvb     = (int) z_q[JDU+6]; 
+	cout << "  Set " << Uset << " Detector " << Udet << "\tNva = " << Nva << "\tNvb = " << Nvb << endl;
+	TArrayI NVmax(Nvb);
+	Int_t ivv = 0;
+	TString fmt("");
+	for (Int_t i = i1; i < i2; i += 3) {
+	  Int_t j     = JDU+i;
+	  Int_t iv    = (int) z_q[j+1];
+	  Int_t Ncopy = (int) z_q[j+2];
+	  Int_t Nam   = (int) z_iq[clink->jvolum+iv];
+	  Int_t Nb    = (int) z_q[j+3];
+	  memcpy (&Uvol[0], &Nam, 4);
+	  //	  cout <<  Uvol << " copy " << Ncopy << " bits " << Nb << endl;  
+	  fmt += "/";
+	  fmt += Uvol;
+	  if (Nb <= 0) fmt += "_1";
+	  else {NVmax[ivv] = Ncopy; ivv++; fmt += "_%d";}
+	}
+	TString CSYS("");
+	TString Vol(Uvol);
+	for (Int_t i = 0; i < NoDetectors; i++) 
+	  if (TString(Detectors[i].det) == Vol && TString(Detectors[i].set) != "") {
+	    CSYS = Detectors[i].Csys;
+	    break;
+	  }
+	if (CSYS == "") {
+	  TArrayI Ids0;
+	  DumpIndex(Uvol, vers, fmt, NVmax, Ids0);
+	  continue;
+	}
+        Int_t Nelem = 1;
+	cout << "format: " << fmt << endl;
+	cout << "NVmax";
+	for (Int_t i = 0; i < Nvb; i++) {Nelem *= NVmax[i]; cout << "[" << NVmax[i] << "]";}
+	cout << endl;
+	Int_t numbv[15];
+	memset (numbv, 0, 15*sizeof(Int_t));
+	TArrayI Ids(Nelem);
+	for (Int_t elem = 0; elem < Nelem; elem++) {
+	  Int_t e = elem;
+	  for (Int_t i = Nvb-1; i >= 0; i--) {
+	    numbv[i] = e%NVmax[i] + 1;
+	    e = e/NVmax[i];
+	  }
+	  //	  Int_t volid = G2t_volume_id(set.Data(), numbv);
+	  Int_t volid = G2t_volume_id(CSYS.Data(), numbv);
+	  if (volid < 0) volid = 0;
+	  Ids[elem] = volid;
+	}
+	DumpIndex(Uvol, vers, fmt, NVmax, Ids);
+      }
+    }
+  }
+  return;
+}
+//________________________________________________________________________________
+void St_geant_Maker::DumpIndex(const Char_t *name, const Char_t *vers, const Char_t *fmt, TArrayI &NVmax, TArrayI &Ids) {
+
+  TString fOut(name);
+  fOut += ".";
+  fOut += vers;
+  fOut += ".C";
+  ofstream out;
+  cout << "Create " << fOut << endl;
+  out.open(fOut.Data());
+  out << "TDataSet *CreateTable() {" << endl;
+  out << "  if (!gROOT->GetClass(\"StarVMCDetector\")) return 0;" << endl;
+  Int_t NV = NVmax.GetSize();
+  Int_t Nelem = Ids.GetSize();
+  if (NV > 0) {
+    out << "  Int_t NVmax[" << NV << "] = {";
+    for (Int_t i = 0; i < NV; i++) {
+      out << NVmax[i];
+      if (i < NV - 1) out << ",";
+      else           out << "};";
+    }
+    out << endl;
+    
+    if (Nelem > 0) {
+      out << "  Int_t Ids[" << Nelem << "] = {" << endl;
+      out << "\t";
+      Int_t nn = 20;
+      if (Ids[0] > 0 && TMath::Log10(Ids[0]) > 7) nn = 10;
+      Int_t nvl = NVmax[NV-1];
+      if (nvl > 5 && nvl < nn) nn = NVmax[NV-1];
+      if (nn >= nvl) nvl = Nelem;
+      Int_t j = 0;
+      for (Int_t i = 0; i < Nelem; i++) {
+	out << Ids[i];
+	j++;
+	if (i < Nelem - 1) {
+	  out << ",";
+	  if (j % nn  == 0 || (i+1) % nvl == 0) {out << endl; out << "\t"; j = 0;}
+	}
+	else               out << "};";
+      }
+      out << endl;
+    }
+  }
+  out << "  StarVMCDetector *Set = new StarVMCDetector(\"" << name << "\");" << endl; 
+  if (NV > 0) {
+    out << "  Set->SetNVmax(" << NV << ", NVmax);" << endl;
+    if (Nelem > 0) out << "  Set->SetIds(" << Nelem << ", Ids);" << endl;
+    else           out << "  Set->SetIds();" << endl;
+  }
+  out << "  Set->SetFMT(\"" << fmt << "\");" << endl;
+  out << "  return (TDataSet *)Set;" << endl;
+  out << "}" << endl;
+  out.close(); 
+}
+#endif
