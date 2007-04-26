@@ -335,8 +335,8 @@ void StJetReader::exampleFastAna()
 	for (int i=0; i<nTrigs; ++i) {
 		StJetSkimTrig* trig = static_cast<StJetSkimTrig*>( (*trigs)[i] );
 		assert(trig);
-		if (trig->isSatisfied != 0) {
-			cout <<"\tTriggerd:\t"<<trig->trigId<<"\twith prescale:\t"<<trig->prescale<<endl;
+		if (trig->didFire() != 0) {
+//			cout <<"\tTriggerd:\t"<<trig->trigId()<<"\twith prescale:\t"<<trig->prescale()<<endl;
 		}
 	}
 		
