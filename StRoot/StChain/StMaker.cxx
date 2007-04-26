@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.194 2007/04/26 03:59:16 perev Exp $
+// $Id: StMaker.cxx,v 1.195 2007/04/26 15:57:18 fisyak Exp $
 //
 //
 /*!
@@ -632,7 +632,7 @@ void StMaker::Clear(Option_t *option)
 
   m_MakeReturn = 0;
   if(option){};
-  if (m_DataSet) m_DataSet->Delete();
+  if (m_DataSet) {m_DataSet->Delete(); m_DataSet = 0;}
 
 //  Reset lists of event objects
    
@@ -950,7 +950,6 @@ Int_t StMaker::Make()
      }
 // 		Call Maker
      if (fgTestMaker) { fgTestMaker->SetNext(maker); fgTestMaker->Make();}
-
      maker->StartMaker();
      ret = maker->Make();
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
@@ -1796,6 +1795,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.195  2007/04/26 15:57:18  fisyak
+// reset to zero m_DataSet after deletion
+//
 // Revision 1.194  2007/04/26 03:59:16  perev
 // new WhiteBoard methods
 //
