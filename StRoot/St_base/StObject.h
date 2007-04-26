@@ -1,7 +1,10 @@
-// $Id: StObject.h,v 1.14 2007/03/15 16:27:32 fine Exp $
+// $Id: StObject.h,v 1.15 2007/04/26 04:16:41 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.15  2007/04/26 04:16:41  perev
+// Remove senseless comment
+//
 // Revision 1.14  2007/03/15 16:27:32  fine
-// Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
+//  Allow user to select the arbitrary StEvent object to be drawn with StEventDisplay
 //
 // Revision 1.13  2002/11/26 02:23:38  perev
 // new ROOT adoptation
@@ -31,9 +34,7 @@ class StRefArray;
 class StStrArray;
 
 enum EStObjectDrawBit { kMark2Draw = BIT(24)}; // mark object to be rendered by "EventDisplay"
-                                               // See StRoot/StEventUtilities/StEventHelper.h also
 
-  
 //_____________________________________________________________________________
 class StObject : public TObject {
 
