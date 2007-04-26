@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.477.2.1 2007/04/05 20:15:48 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.477.2.2 2007/04/26 17:36:05 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -57,7 +57,7 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
 // NoChainOptions -> Number of chain options auto-calculated
-Int_t NoChainOptions;
+//Int_t NoChainOptions;
 Int_t NoChainOptions1 = sizeof (BFC1)/sizeof (Bfc_st);
 Int_t NoChainOptions2 = sizeof (BFC2)/sizeof (Bfc_st);
 
@@ -75,6 +75,7 @@ ClassImp(StBFChain)
 StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
   StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0) {
 
+  NoChainOptions = 0;
   gMessMgr->Info("StBFChain::StBFChain Default Constructor called.");
   fBFC = new Bfc_st[NoChainOptions1];
   memcpy (fBFC, &BFC1, sizeof (BFC1));
@@ -98,6 +99,7 @@ StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
 StBFChain::StBFChain(Int_t mode, const char *name):
   StChain(name,kFALSE),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0) {
 
+  NoChainOptions = 0;
   if(mode == 2){
     gMessMgr->Info("StBFChain::StBFChain Special Constructor called using chain-setup 2");
     fBFC = new Bfc_st[NoChainOptions2];

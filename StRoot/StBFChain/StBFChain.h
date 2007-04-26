@@ -38,6 +38,8 @@ class StBFChain : public StChain {
   Int_t               FDateS;     // floating timestamp date (DateTime)
   Int_t               FTimeS;     // floating timestamp time (DateTime)
 
+  Int_t               NoChainOptions;
+
  public:
                        StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE);
                        StBFChain(Int_t, const char *name="bfc");
@@ -79,7 +81,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.33 2004/09/16 02:14:29 perev Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.33.2.1 2007/04/26 17:35:58 jeromel Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
