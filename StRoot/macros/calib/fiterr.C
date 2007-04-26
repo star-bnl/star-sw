@@ -26,11 +26,11 @@
 #define EXP_FAKE
 #define SQ(X) ((X)*(X))
 
-enum {kNOBAGR=0,kNDETS=4};
+enum {kNOBAGR=0,kNDETS=4,kMINHITS=50};
 static const double WINDOW_NSTD=3;
 
 static const double kAGREE=1e-7,kSMALL=1e-9,kBIG=1.,kDAMPR=0.1;
-static const int    MinErr[4][2] = {{200,200},{200,200},{5,500},{20,20}};
+static const int    MinErr[4][2] = {{200,200},{200,200},{30,500},{20,20}};
 class MyPull;
 class HitPars_t;
 int fiterr(const char *opt);
@@ -56,7 +56,7 @@ TH1F *hx=0;
 TH1F    *hh[100];
 TCanvas *C[10];
 
-class xTCL {
+class myTCL {
 public:
 static double vmaxa (const double   *a, int na);
 static double vmaxa (const TVectorD &a);
@@ -1021,10 +1021,9 @@ void LogErf::Test()
 //______________________________________________________________________________
 void Init(HitPars_t &hiterr)
 {
-  
   hiterr[0] = 0.0;
   for (int iDet=0;iDet<kNDETS;iDet++) {
-    if (numRes[iDet]<50) continue;
+    if (numRes[iDet]<kMINHITS) continue;
     int n = (iDet<=1)? 3:1;
     hiterr.Set(iDet,0,n,pSTI[iDet*2+0]);
     hiterr.Set(iDet,1,n,pSTI[iDet*2+1]);
@@ -1089,7 +1088,7 @@ void FitState_t::Deriv(const std::vector<MyPull> &MyVect)
     if (fabs(g[i])>der) { ider = i; der = fabs(g[i]);}
   }
   der/=npt;
-  double myMax=xTCL::vmaxa(G.GetMatrixArray(),G.GetNoElements());
+  double myMax=myTCL::vmaxa(G.GetMatrixArray(),G.GetNoElements());
   fak = pow(2.,-int(log(myMax)/log(2.)));
   G*=fak; g*=fak; 
   if (neg>=0) { //Check positiveness
@@ -1164,7 +1163,7 @@ int FitState_t::FixWeak( TVectorD &g, TMatrixD &G)
 {
   int n = g.GetNrows();
   int nfix = 0;
-  double ave = xTCL::vasum(g)/n;
+  double ave = myTCL::vasum(g)/n;
   for (int i=0;i<n;i++) {
     if (fabs(g[i])>=ave) continue;
     nfix++; g[i]=0;
@@ -1231,7 +1230,7 @@ static int rnd=0; rnd++;
       for (int jAkt=iAkt;jAkt<2;jAkt++) {
         iAkt = jAkt;
         TVectorD P1(P0);
-        con = xTCL::SqProgSimple(P1,Now.g,Now.G 
+        con = myTCL::SqProgSimple(P1,Now.g,Now.G 
 		                ,TVectorD(nPars,&Now.Min(0))		   
 		                ,TVectorD(nPars,&Now.Max(0)),jAkt);
         if (con<0)  	continue;
@@ -1242,7 +1241,6 @@ static int rnd=0; rnd++;
         Now.Pars() = Best.Pars()+add;
         break;
       } 
-//??      if (xTCL::vmaxa(add)<kAGREE) 	{Best=Now;ifail=0; break;}
   }// End Iters
 
   if (ifail==0 || ifail==99) Best.MakeErrs();
@@ -1280,8 +1278,20 @@ void AveRes()
      TCL::vadd(aveTrk[jdx][1],ha.A[1],aveTrk[jdx][1],3);
 
   }
+//		CleanUp
+  int ihit=0;
+  for (int jhit=0; jhit<(int)MyVect.size(); jhit++) {
+     MyPull &myRes = MyVect[jhit];
+     int jdx = kind(myRes.xyz[0]);
+     if (numRes[jdx]<kMINHITS) continue;
+     aveRes[jdx][0]+= myRes.ypul*myRes.ypul;
+     if (ihit!=jhit) MyVect[ihit]=MyVect[jhit];
+     ihit++;
+  }
+  MyVect.resize(ihit);
+
   for(int jdx=0;jdx<4;jdx++) {
-    if (!numRes[jdx]) continue;
+    if (numRes[jdx]<kMINHITS) continue;
     double f = 1./numRes[jdx];
     TCL::vscale(aveRes[jdx],f,aveRes[jdx],6);
     TCL::vscale(aveTrk[jdx][0],f,aveTrk[jdx][0],6);
@@ -1404,7 +1414,7 @@ void DbDflt()
 
   for (int idb=0;idb<4;idb++) 
   {
-    if (numRes[idb]<50) continue;
+    if (numRes[idb]<kMINHITS) continue;
     double *d = (double *)dbTab[idb]->GetArray();
     if (d[0]<=0) {d[0]=aveRes[idb][0];d[3]=aveRes[idb][1];}
     TCL::ucopy(d+0,pSTI[idb*2+0],3);
@@ -1418,7 +1428,7 @@ void DbEnd()
   for (int idb=0;idb<kNDETS;idb++) 
   {
     memset(par,0,sizeof(par));
-    if (numRes[idb]< 50) 	continue;
+    if (!HitErr.mPars[idb][0])	continue;
     if (!HitErr.Len(idb))	continue;
     TString ts(dbFile[idb]);
     ts +=".BAK";
@@ -1531,8 +1541,8 @@ HitPars_t::HitPars_t ()
    memset(this,0,sizeof(HitPars_t));
    mNPars=1;
    int n = sizeof(mMin)/sizeof(*mMin);
-   xTCL::vfill(mMin,kSMALL,n);
-   xTCL::vfill(mMax,kBIG  ,n);
+   myTCL::vfill(mMin,kSMALL,n);
+   myTCL::vfill(mMax,kBIG  ,n);
    mMax[0] = 3;
    mDat[0] = 0.1;
 }
@@ -1694,6 +1704,8 @@ double HitPars_t::Deriv(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij) co
   assert(pt[0].xyz[0]<pt[npt-1].xyz[0]);
   for (int ipt=0;ipt<npt;ipt++) {
     HitCond(pt[ipt],ha);
+    int iDet = ha.iDet;
+    if (!mPars[iDet][0]) continue;
     double nowCurv=pt[ipt].curv;
     nowXyz[0] = pt[ipt].grf*cos(pt[ipt].gpf);
     nowXyz[1] = pt[ipt].grf*sin(pt[ipt].gpf);
@@ -1719,7 +1731,7 @@ double HitPars_t::Deriv(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij) co
 //    pfz.Add(len,dz,1./(wz[ipt]*fake));//????
 //    double emx[3]={1./(wy[ipt]*fake),0,1./(wy[ipt]*fake)};
 //    cf.Add(len,dy,emx);//????
-    int n,ipar,iDet = ha.iDet;
+    int n,ipar;
     for (int jk=0;jk<2;jk++) { 
       int ip = 1 +ipt + jk*npt;
       ipar = IPar(iDet,jk,&n);
@@ -1845,7 +1857,7 @@ static int testIt=1;
 
   Di = toPars*dW;
 //  Dij = (toPars*dWW)*(toPars.T());
-  xTCL::mxmlrtS(toPars,dWW,Dij);
+  myTCL::mxmlrtS(toPars,dWW,Dij);
   for (int i=0;i<mNPars;i++) {
     for (int j=0;j<i;j++) {
       assert(fabs(dWW[i][j]-dWW[j][i])<1e-10);}}
@@ -2249,24 +2261,24 @@ return 0;
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
-double xTCL::vmaxa(const double *a,int na)
+double myTCL::vmaxa(const double *a,int na)
 { 
   double r=0;
   for (int i=0;i<na;i++){if (r < fabs(a[i])) r = fabs(a[i]);}
   return r;
 }
 //______________________________________________________________________________
-double xTCL::vmaxa(const TVectorD &a)
+double myTCL::vmaxa(const TVectorD &a)
 { 
   return vmaxa(a.GetMatrixArray(),a.GetNrows());
 }
 //______________________________________________________________________________
-void xTCL::vfill(double *a,double f,int na) 
+void myTCL::vfill(double *a,double f,int na) 
 {
   for (int i=0;i<na;i++) {a[i]=f;}
 }
 //_____________________________________________________________________________
-void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
+void myTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 {
 
   double spur = err[0]+err[2];
@@ -2290,16 +2302,16 @@ void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: fiterr.C,v 1.4 2007/02/27 03:44:08 perev Exp $
+* $Id: fiterr.C,v 1.5 2007/04/26 04:25:32 perev Exp $
 *
 * $Log: fiterr.C,v $
-* Revision 1.4  2007/02/27 03:44:08  perev
-* Tuneup
+* Revision 1.5  2007/04/26 04:25:32  perev
+* Cleanup
 *
 * Revision 1.1.1.1  1996/04/01 15:02:13  mclareni
 * Mathlib gen
 */
-double  xTCL::simpson(const double *F,double A,double B,int NP)
+double  myTCL::simpson(const double *F,double A,double B,int NP)
 {
   int N2=NP-1;
   assert(N2>0 && !(N2&1));
@@ -2312,7 +2324,7 @@ double  xTCL::simpson(const double *F,double A,double B,int NP)
   return H;
 }
 //______________________________________________________________________________
-void xTCL::mxmlrt(const TMatrixD &A,const TMatrixD &B,TMatrixD &X)  
+void myTCL::mxmlrt(const TMatrixD &A,const TMatrixD &B,TMatrixD &X)  
 {
   int nRowA = A.GetNrows();
   int nColA = A.GetNcols();
@@ -2325,7 +2337,7 @@ void xTCL::mxmlrt(const TMatrixD &A,const TMatrixD &B,TMatrixD &X)
 
 }
 //______________________________________________________________________________
-void xTCL::mxmlrtS(const double *A,const double *B,double *X,int nra,int nca)  
+void myTCL::mxmlrtS(const double *A,const double *B,double *X,int nra,int nca)  
 {
    TCL::vzero(X,nra*nra);
    for (int i=0,ii=0;i<nra;i++,ii+=nca) 	{
@@ -2341,7 +2353,7 @@ void xTCL::mxmlrtS(const double *A,const double *B,double *X,int nra,int nca)
    for (int k=0;k<i  ;k++){X[k*nra+i] = X[i*nra+k];}}
 }       
 //______________________________________________________________________________
-void xTCL::mxmlrtS(const TMatrixD &A,const TMatrixD &B,TMatrixD &X)  
+void myTCL::mxmlrtS(const TMatrixD &A,const TMatrixD &B,TMatrixD &X)  
 {
   int nRowA = A.GetNrows();
   int nColA = A.GetNcols();
@@ -2349,24 +2361,24 @@ void xTCL::mxmlrtS(const TMatrixD &A,const TMatrixD &B,TMatrixD &X)
   int nColB = B.GetNcols(); if(nColB){}
   assert(nColA ==nRowB);
   X.ResizeTo(nRowA,nRowA);
-  xTCL::mxmlrtS(A.GetMatrixArray(),B.GetMatrixArray()
+  myTCL::mxmlrtS(A.GetMatrixArray(),B.GetMatrixArray()
 	       ,X.GetMatrixArray(),nRowA,nColA);
 
 }
 //______________________________________________________________________________
-double xTCL::vasum(const double *a, int na)
+double myTCL::vasum(const double *a, int na)
 {
   double sum = 0;
   for (int i=0;i<na;i++) { sum += fabs(a[i]);}
   return sum;
 }
 //______________________________________________________________________________
-double xTCL::vasum(const TVectorD &a)
+double myTCL::vasum(const TVectorD &a)
 {
   return vasum(a.GetMatrixArray(),a.GetNrows());
 }
 //______________________________________________________________________________
-int xTCL::SqProgSimple(      TVectorD &x
+int myTCL::SqProgSimple(      TVectorD &x
                       ,const TVectorD &g,const TMatrixD &G 
 		      ,const TVectorD &Min		   
 		      ,const TVectorD &Max, int iAktp)
