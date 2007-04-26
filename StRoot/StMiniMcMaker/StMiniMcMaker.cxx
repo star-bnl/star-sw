@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.25 2007/04/17 05:09:07 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.26 2007/04/26 04:08:05 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.26  2007/04/26 04:08:05  perev
+ * Hide StBFChain dependency
+ *
  * Revision 1.25  2007/04/17 05:09:07  perev
  * GetTFile()==>StMaker. Jerome request
  *
@@ -127,6 +130,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.26  2007/04/26 04:08:05  perev
+ * Hide StBFChain dependency
+ *
  * Revision 1.25  2007/04/17 05:09:07  perev
  * GetTFile()==>StMaker. Jerome request
  *
@@ -242,7 +248,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.25 2007/04/17 05:09:07 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.26 2007/04/26 04:08:05 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -269,7 +275,7 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StParticleDefinition.hh"
 #include "StMatrixF.hh"
-#include "StBFChain.h"
+#include "StChainOpt.h"
 /*
 #include "StPionPlus.hh"
 #include "StPionMinus.hh"
@@ -471,9 +477,9 @@ StMiniMcMaker::Init()
   cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
   
   if (mInFileName == "") {
-    StBFChain *chain = dynamic_cast<StBFChain *>(StMaker::GetChain());
+    const StChainOpt *chain = GetChainOpt();
     assert(chain);
-    if (chain) mInFileName = chain->GetFileOut();
+    mInFileName = chain->GetFileOut();
   }
   return StMaker::Init();
 }   
@@ -2199,6 +2205,9 @@ size_t StMiniMcMaker::getIndex(size_t mult) {
 }
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.26  2007/04/26 04:08:05  perev
+// Hide StBFChain dependency
+//
 // Revision 1.25  2007/04/17 05:09:07  perev
 // GetTFile()==>StMaker. Jerome request
 //
