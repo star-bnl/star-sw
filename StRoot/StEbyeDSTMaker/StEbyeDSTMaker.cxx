@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.cxx,v 1.5 2002/02/10 18:37:37 perev Exp $
+ * $Id: StEbyeDSTMaker.cxx,v 1.6 2007/04/26 04:05:37 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.cxx,v $
+ * Revision 1.6  2007/04/26 04:05:37  perev
+ * Cleanup
+ *
  * Revision 1.5  2002/02/10 18:37:37  perev
  * Outdated SetFormat removed
  *
@@ -327,9 +330,7 @@ Int_t StEbyeDSTMaker::Init() {
   mEbyeEvent = new StEbyeEvent();
 
   // get input file name
-  TString* makerName = new TString("IO");
-  mIOMaker = (StIOMaker*)GetMaker(makerName->Data());
-  delete makerName;
+  mIOMaker = (StIOMaker*)GetMaker("IO");
 
   if (mIOMaker) mCurrentInputFilename = strrchr(mIOMaker->GetFile(),'/')+1;
 
