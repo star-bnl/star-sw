@@ -56,17 +56,19 @@ class StChain : public StMaker {
    Int_t              GetNTotal()      const 				{return mNTotal;}
    Int_t              GetNFailed()     const 				{return mNFailed;}
    void               SetChainOpt(StChainOpt *opt) 			{mChainOpt=opt;}
-virtual const StChainOpt *GetChainOpt()    const;
-virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.43 2007/04/26 03:57:14 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   virtual const char *GetCVS() const 
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.44 2007/04/26 15:56:22 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
 #endif
 
 
-// $Id: StChain.h,v 1.43 2007/04/26 03:57:14 perev Exp $
+// $Id: StChain.h,v 1.44 2007/04/26 15:56:22 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.44  2007/04/26 15:56:22  fisyak
+// Remove non implemented GetChainOpt method (use default from StMaker)
+//
 // Revision 1.43  2007/04/26 03:57:14  perev
 // StChainOpt interface to hide StBFChain dependency
 //
