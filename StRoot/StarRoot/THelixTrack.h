@@ -18,7 +18,8 @@ const double* Dir() const 	{return fD;  }
       void    Nor(double *norVec) const; 
       void    SetEmx(const double *err);
 const double* Emx() const 	{return fEmx;  } 
-double Path(const double *pnt) const;
+double Path(const double pnt[2]) const;
+double Path(const double pnt[2],const double exy[3]) const;
 double Move(double step);
 void   Rot(double angle);
 void   Rot(double cosa,double sina);
@@ -76,11 +77,11 @@ int    Used() const 			{return fNuse;}
 void   Add (double x,double y,const double *errs=0); 
 void   Add (double x,double y,double z); 
 void   AddErr(const double *errs,double errz=0); 
-void   Skip(int idx);
 void   AddZ(double z,double err2z=0);
 double Fit();   
 void   MakeErrs();
-void   FixAt(const double vals[5],int flag); 
+double FixAt(const double vals[5],int flag); 
+void   Skip(int idx); 
 double FitZ ();   
 double GetZ0() const			{return fZ0    ;}
 double GetTanL() const			{return fTanL  ;}
@@ -89,6 +90,7 @@ int    GetCase() const			{return fKase  ;}
 double Chi2() 	const 			{return fChi2  ;}
 int    Ndf() 	const 			{return fNdf   ;}
 double Chi2Z () const 			{return fChi2Z ;}
+void   SetNdf(int ndf);		        
 double EvalChi2();
 void   Clear(const char *opt ="");
 void   Print(const char* chopt = "") const;
@@ -100,7 +102,7 @@ static void Test(int iTest);
 static void Test();
 static void TestCorr(int kode=0);
 private:
-double Weight(int idx);
+//double Weight(int idx);
 
 private:
 TArrayD fArr;
@@ -154,39 +156,64 @@ public:
 	void StiEmx(double emx[21]) const;
         void GetSpot(const double axis[3][3],double emx[3]) const;
 	void Fill  (TCircle &circ) const;
+///		Change direction
 	void Backward();
+///		Obsolete
 	double Fit(const double *pnts,int npnts, int size = 3);
+///		Move along helix
 	double Move(double step);
+///		Evaluate params with given step along helix
 	double Eval(double step, double *xyz, double *dir,double &rho) const;
 	double Step(double step, double *xyz, double *dir,double &rho) const
        {return Eval(       step,         xyz,         dir,        rho);}
+///		Get current parameters
         void   Get (double *xyz, double *dir,double &rho) const {Step(0.,xyz,dir,rho);}
 	double Eval(double step, double *xyz, double *dir=0) const;
 	double Step(double step, double *xyz, double *dir=0) const
        {return Eval(       step,         xyz,         dir  );}
         void   Get (double *xyz, double *dir=0) const {Step(0.,xyz,dir);}
+///		Distance to crossing 2nd order surface
+///             surf[0]+surf[1]*x+surf[2]*y+surf[3]*z
+///            +surf[4]*x*x +surf[5]*y*y+surf[6]*z*z
+///            +surf[7]*x*y +surf[8]*y*z+surf[9]*z*x  == 0
+///            nearest==0 search alon direction, else the nearest
         double Step(double stmax, const double *surf, int nsurf
 	           ,double *x=0, double *dir=0, int nearest=0) const;
+        double Path(double stmax, const double *surf, int nsurf
+	           ,double *x=0, double *dir=0, int nearest=0) const
+                   {return Step(stmax,surf,nsurf,x,dir,nearest);}
+
+///		Distance to nearest point to given space point
         double Step(const double point[3],double *xyz=0, double *dir=0) const;
         double Path(const double point[3],double *xyz=0, double *dir=0) const 
 	           {return Step(point,xyz,dir);}
+///		DCA to given space point (with error matrix)
         double Dca(const double point[3],double *dcaErr=0) const;
+
+///		Distance to nearest point to given 2dim point
         double Path(double x,double y) const ;
-//??        double Dca(double x,double y,double *dcaErr=0) const ;
+///		DCA to given 2dim point (with error matrix)
+        double Dca(double x,double y,double *dcaErr=0) const ;
+
+
+///		distance and DCAxy and DCAz to given space point (with error matrix)
         double Dca(const double point[3]
                   ,double &dcaXY,double &dcaZ,double dcaEmx[3]) const;
+
         double GetDCA  () const;
         double GetDCAz () const;
         double GetDCAxy() const;
         double GetDCA  (double xx,double yy) const;
-        const double *GetXYZ() const {return fX;}
-        const double *Pos()    const {return fX;}
-        const double *GetDir() const {return fP;}
-        const double *Dir()    const {return fP;}
-        double GetRho() const {return fRho ;}
-        double GetDRho()const {return fDRho ;}
-        double GetCos() const {return fCosL;}
-        double GetSin() const {return fP[2];}
+        const double *GetXYZ() 	const {return fX;}
+        const double *Pos()    	const {return fX;}
+              double *Pos()           {return fX;}
+        const double *GetDir() 	const {return fP;}
+        const double *Dir()    	const {return fP;}
+              double *Dir()           {return fP;}
+        double GetRho() 	const {return fRho ;}
+        double GetDRho()	const {return fDRho ;}
+        double GetCos() 	const {return fCosL;}
+        double GetSin() 	const {return fP[2];}
         double GetPeriod() const ;
         void Rot(double angle);
         void Rot(double cosa,double sina);
@@ -196,6 +223,7 @@ public:
 static  void Test1();
 static  void Test2();
 static  void Test3();
+static  void Test4();
 private:
 static  int  SqEqu(double *, double *);
 protected:
@@ -225,10 +253,10 @@ int    Size() const 			{return fCircleFitter.Size();}
 int    Used() const 			{return fCircleFitter.Used();}
 void   Add (double x,double y,double z); 
 void   AddErr(const double *err2xy,double err2z); 
-void   Skip(int idx);
 double Fit();   
 void   MakeErrs();
-void   FixAt(const double vals[5],int flag); 
+double FixAt(const double vals[5],int flag=1); 
+void   Skip(int idx); 
 void   SetCase(int kase=0) 		{fCircleFitter.SetCase(kase);}
 int    GetCase() const			{return fCircleFitter.GetCase();}
 double Chi2() const 			{return fChi2;}
