@@ -18,7 +18,7 @@ class StChainOpt : public TNamed {
  public:
   StChainOpt(const char *name="StChainOpt"):TNamed(name,""){;}
    virtual ~StChainOpt(){};
-   virtual Int_t kOpt(const char *Tag)	const =0;
+//   virtual Int_t kOpt(const char *Tag)	const =0;
    virtual const TString &GetFileIn()  		const =0;
    virtual const TString &GetFileOut() 		const =0;
    virtual TFile *GetTFile()                    const =0;

@@ -18,7 +18,7 @@ class StBFChainOpt : public StChainOpt {
 public:
 StBFChainOpt(StBFChain *bfc);
 virtual ~StBFChainOpt(){};
-Int_t kOpt(const char *Tag)	const;
+//Int_t kOpt(const char *Tag)	const;
 const TString &GetFileIn()  	const;
 const TString &GetFileOut() 	const;
       TFile   *GetTFile()	const;
