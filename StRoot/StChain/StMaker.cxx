@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.193 2007/04/17 05:07:41 perev Exp $
+// $Id: StMaker.cxx,v 1.194 2007/04/26 03:59:16 perev Exp $
 //
 //
 /*!
@@ -38,6 +38,7 @@
 #include "TBrowser.h"
 
 #include "StMaker.h"
+#include "StChainOpt.h"
 #include "TObjectSet.h"
 #include "StChain.h"
 #include "TTable.h"
@@ -50,7 +51,6 @@
 StMaker     *StMaker::fgStChain     = 0;
 StMaker     *StMaker::fgFailedMaker = 0;
 StTestMaker *StMaker::fgTestMaker   = 0;
-TFile       *StMaker::fgTFile       = 0;
 Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
 /* geometry version from Maxim 09/29/2005
@@ -348,12 +348,17 @@ TDataSet *StMaker::AddData(TDataSet *ds, const char* dir)
   int dotMake = (strcmp(dir,".make")==0);
   int inhMake = ds->InheritsFrom(StMaker::Class());
   if (dotMake!=inhMake) {
-     Warning("AddData","Add to %s is NOT allowed: %s.%s\n"
+     Error("AddData","Add to %s is NOT allowed: %s.%s\n"
              ,dir,ds->ClassName(),ds->GetName());
      return 0;}
 
   TList *tl = set->GetList();
-  if (!tl || !tl->FindObject(ds)) set->Add(ds);
+  if (!tl || !tl->FindObject(ds->GetName())) {
+    set->Add(ds);
+  } else {
+    Error("AddData","Data %s is not added. ***Name clash***",ds->GetName());
+    return 0;
+  }
   return set;
 }
 //______________________________________________________________________________
@@ -362,6 +367,45 @@ TDataSet  *StMaker::GetData(const char *name, const char* dir) const
   TDataSet *set = Find(dir);
   if (!set) return 0;
   return set->Find(name);
+}
+//______________________________________________________________________________
+void StMaker::ToWhiteBoard(const char *name, void *dat)
+{
+   TObjectSet *envelop = new TObjectSet(name,(TObject*)dat,0);
+   envelop->SetTitle(".envelop");
+   AddData(envelop,".data");
+}
+//______________________________________________________________________________
+void StMaker::ToWhiteConst(const char *name, void *dat)
+{
+   TObjectSet *envelop = new TObjectSet(name,(TObject*)dat,0);
+   envelop->SetTitle(".envelop");
+   AddData(envelop,".const");
+}
+//______________________________________________________________________________
+void StMaker::ToWhiteBoard(const char *name, TObject *dat, int owner)
+{
+   TObjectSet *envelop = new TObjectSet(name,dat,owner);
+   envelop->SetTitle(".envelop");
+   AddData(envelop,".data");
+}
+//______________________________________________________________________________
+void StMaker::ToWhiteConst(const char *name, TObject *dat, int owner)
+{
+   TObjectSet *envelop = new TObjectSet(name,dat,owner);
+   envelop->SetTitle(".envelop");
+   AddData(envelop,".const");
+}
+//______________________________________________________________________________
+void *StMaker::WhiteBoard(const char *name, void *v) const
+{
+  void **dat = (void **)v;
+  *dat = 0;
+  TDataSet *ds = GetDataSet(name);
+  if (!ds) return 0;
+  if (strcmp(".envelop",ds->GetTitle())==0) {*dat = ds->GetObject();}
+  else					    {*dat = ds             ;}
+  return ds->GetObject();
 }
 //______________________________________________________________________________
 void StMaker::AddAlias(const char* log, const char* act,const char* dir)
@@ -1068,6 +1112,22 @@ void StMaker::PrintTimer(Option_t *option)
            ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
 #endif
 }
+void StMaker::lsMakers(const StMaker *top)
+{
+  TDataSetIter   iter((TDataSet*)top,20);
+  int N=0;
+  for(const TDataSet *mk=top;mk;mk = iter.Next()) {
+    if(strncmp(".maker",mk->GetTitle(),6)!=0) continue;
+    int l=iter.GetDepth();
+    N++;
+    char space[20]; memset(space,' ',sizeof(space));space[l]=0;
+    
+    printf("%3d(%d) - %s %s::%s\n",N,l/2,space,mk->ClassName(),mk->GetName());
+  }
+}
+
+
+
 #if 0
 //_____________________________________________________________________________
 static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0)
@@ -1689,6 +1749,20 @@ Char_t *StMaker::AliasGeometry(const char *alias)
 //_____________________________________________________________________________
 const DbAlias_t *StMaker::GetDbAliases() {return fDbAlias;}
 //_____________________________________________________________________________
+const StChainOpt *StMaker::GetChainOpt()    const
+{
+  StMaker *mk = GetMaker(this);
+  if (!mk) return 0;
+  return  mk->GetChainOpt();
+}
+//_____________________________________________________________________________
+TFile *StMaker::GetTFile() const 			
+{
+  const StChainOpt *opt = GetChainOpt();
+  if (!opt) return 0;
+  return opt->GetTFile();
+}
+
 ClassImp(StTestMaker)
 //_____________________________________________________________________________
 StTestMaker::StTestMaker(const char *name):StMaker(name)
@@ -1722,6 +1796,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.194  2007/04/26 03:59:16  perev
+// new WhiteBoard methods
+//
 // Revision 1.193  2007/04/17 05:07:41  perev
 // GetTFile()==>StMaker. Jerome request
 //

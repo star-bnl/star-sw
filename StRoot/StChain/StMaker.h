@@ -41,6 +41,7 @@ class TFile;
 class StTurnLogger;
 
 class StTestMaker;
+class StChainOpt;
 
 struct DbAlias_t {
   Char_t *tag;
@@ -86,8 +87,6 @@ protected:
    mutable StMessMgr      *fLogger;             // This object logger instance
    mutable StTurnLogger   *fLoggerHold;         // hold the pointer to the previous StMessMgr
 protected:
-static TFile *fgTFile;
-protected:
 //   inline StMessMgr    *GetLogger(){return fLogger;}
    inline StMessMgr    *GetLogger() const {return fLogger;}
 public:
@@ -123,6 +122,17 @@ public:
    ///  User methods
    virtual TDataSet   *AddData (TDataSet *data=0,const char *dir=".data");
    virtual TObjectSet *AddObj  (TObject *obj,const char *dir);
+   virtual void  ToWhiteBoard(const char *name, void *dat);
+   virtual void  ToWhiteBoard(const char *name, TObject *dat, int owner);
+   virtual void  ToWhiteConst(const char *name, void *dat);
+   virtual void  ToWhiteConst(const char *name, TObject *dat, int owner);
+
+//  called WhiteBoard(name,&ptr)
+   virtual void *WhiteBoard  (const char *name, void *v=0) const;
+//______________________________________________________________________________
+
+
+
    virtual void         AddConst(TDataSet *data=0){AddData(data,".const");}
    virtual void         AddHist(TH1 *h,const char *dir=0);
    virtual void         AddGarb (TDataSet *data=0){AddData(data,".garb");};
@@ -203,6 +213,8 @@ public:
    virtual void         SetNotify(const char *about,StMaker *mk);
    virtual Int_t        GetMode() { return m_Mode;}
    virtual Int_t        GetDebug(){ return m_DebugLevel;}
+   virtual const StChainOpt *GetChainOpt()    const;
+   virtual TFile *GetTFile() const; 			
 
    virtual void         NotifyEm(const char *about,const void *ptr);
 
@@ -224,13 +236,11 @@ public:
    static      Char_t  *AliasGeometry(const char *alias);
    static const DbAlias_t  *GetDbAliases();
    static      void     SetTestMaker(StTestMaker *mk)	{fgTestMaker=mk;}
-   static      void     SetTFile(TFile *tf) 		{fgTFile    =tf;}
-   static     TFile    *GetTFile() 			{return fgTFile;}
 
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.82 2007/04/17 05:07:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.83 2007/04/26 03:59:20 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -238,6 +248,7 @@ protected:
 
 public:
 static int Cleanup(TDataSet *&ds);
+static void lsMakers(const StMaker *top);
 
 private:
   TAttr *m_Attr;		
@@ -292,8 +303,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.82 2007/04/17 05:07:48 perev Exp $
+// $Id: StMaker.h,v 1.83 2007/04/26 03:59:20 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.83  2007/04/26 03:59:20  perev
+// new WhiteBoard methods
+//
 // Revision 1.82  2007/04/17 05:07:48  perev
 // GetTFile()==>StMaker. Jerome request
 //
