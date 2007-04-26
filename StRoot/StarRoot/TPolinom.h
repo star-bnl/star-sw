@@ -2,6 +2,7 @@
 #define TPOLINOM_H
 #include "TObject.h"
 #include "TArrayD.h"
+#include "TMatrixD.h"
 
 class TPolinom : public TObject
 {
@@ -47,12 +48,12 @@ public:
 virtual ~TPoliFitter(){;}
 void   Add(double x, double y,double err2=1);
 void   AddErr(double err2);
-void   Skip(int idx);
 const double *GetX(int i=0) const; 	
       double *GetX(int i=0); 		
 double Fit();   
 void   MakeErrs();
 double Chi2() const 			{return fChi2;}
+int    NPts() const 			{return fN/3 ;}
 int    Ndf()  const 			{return fNdf ;}
 int    Size() const 			{return fNuse;}
 double Wtot() const                     {return fWtot;}
@@ -63,8 +64,11 @@ double EvalChi2();
 void   Clear(const char *opt ="");
 void   Print(const char* chopt = "") const;
 void   Show() const;
-void   FixY0(double y);
-void   DCoeDy(int iy,double *dcoe);
+double FixAt(double x,double y);
+void   Skip(int idx);
+void   DCoeDy(int iy,double *dcoe) const;
+void   SetNdf(int ndf); 			
+double MakeMatrix(TMatrixD &Aij) const;
 static void Test(int kase=0);
 static void TestCorr();
 static void Dest(int kase=0);

@@ -200,17 +200,6 @@ void TPoliFitter::Add(double x, double y,double err2)
   fN+=kXYW;fNuse++;
 }
 //_____________________________________________________________________________
-void TPoliFitter::Skip(int idx)
-{
-   fWtot -= fArr[idx*kXYW+kW]*fWtot;
-   fArr[idx*kXYW+kW]=0;
-   double norm=0;
-   for (int l=0;l<fN;l+=kXYW) {norm+=fArr[l+kW];}
-   for (int l=0;l<fN;l+=kXYW) {fArr[l+kW]/=norm;}
-   fNuse--;
-   fNdf--;
-}
-//_____________________________________________________________________________
 void TPoliFitter::AddErr(double err2)
 {
   fArr[fN-kXYW+kW]=1./err2;
@@ -235,7 +224,11 @@ void TPoliFitter::Print(const char* tit) const
 
   Info(tit,"NPoints %d Wtot=%g",fN/kXYW,fWtot);
   for (int l=0;l<fN;l+=kXYW) {
-    printf("%d - \tX=%g \tY=%g \tW=%g\n",l/kXYW,fDat[l+kX],fDat[l+kY],fDat[l+kW]);
+    double dy = fDat[l+kY]-Eval(fDat[l+kX]);
+    double dXi2 = dy*dy*fDat[l+kW]*fWtot;
+    printf("%d - \tX=%g \tY=%g \tW=%g \tdY=%g \tdXi2=%g\n"
+          ,l/kXYW,fDat[l+kX],fDat[l+kY],fDat[l+kW]
+          ,dy,dXi2);
   }
   TPolinom::Print();
 }
@@ -334,10 +327,14 @@ double TPoliFitter::EvalChi2()
   return Xi2;
 }
 //_____________________________________________________________________________
-void TPoliFitter::FixY0(double y0) 
+double TPoliFitter::FixAt(double x, double y) 
 {
    assert(fEmx);
-   double lamda = (y0-fCoe[0])/fEmx[0];
+   if (fabs(x)>1e-8) Move(x);
+
+   double emx0 = fEmx[0];
+   double h    = y-fCoe[0];
+   double lamda = h/emx0;
    double *e = fEmx;
    for (int i=0,n=1;i<=fNP;i++,e+=n++) {fCoe[i]+= e[0]*lamda;}
    TCL::trsinv(fEmx,fEmx,fNP+1);
@@ -347,9 +344,26 @@ void TPoliFitter::FixY0(double y0)
    TCL::trsinv(fEmx,fEmx,fNP+1);
    fEmx[0]=0;
    fNdf++;
+   double addXi2 = h*h/emx0;
+   fChi2 += (addXi2-fChi2)/fNdf;
+   if (fabs(x)>1e-8) Move(-x);
+   return fChi2;
 }
 //_____________________________________________________________________________
-void TPoliFitter::DCoeDy(int iy,double *dcoe)
+void TPoliFitter::Skip(int idx) 
+{
+  fDat[kXYW*idx+kW]=-1;
+  SetNdf(fNdf-1);
+}
+//_____________________________________________________________________________
+void TPoliFitter::SetNdf(int ndf) 
+{
+  fChi2*=fNdf;
+  if (ndf) fChi2/=ndf;
+  fNdf=ndf;
+}
+//_____________________________________________________________________________
+void TPoliFitter::DCoeDy(int iy,double *dcoe) const
 {
 //      derivative dCoe/dY[idat]
   TCL::vzero(dcoe,fNP+1);
@@ -372,12 +386,40 @@ double TPoliFitter::EvalOrt(int idx,double x) const
   return Eval(x,idx,fP+lp);
 }  
 //_____________________________________________________________________________
+double TPoliFitter::MakeMatrix(TMatrixD &Akj) const
+{
+//  Create matrix such that sum(Akj*Yk*Yj) == Chi2
+
+  int N = NPts();
+  Akj.ResizeTo(N,N); 
+  for (int k=0;k<N;k++) {
+    double Xk = GetX(k)[0];
+    double Wk = GetX(k)[2];
+    for (int j=0;j<=k;j++) {
+      double Xj = GetX(j)[0];
+      double Wj = GetX(j)[2];
+      double Fkj=0;
+      for (int i=0;i<=fNP;i++) {//loop over ort polinoms       
+        double Fik = EvalOrt(i,Xk);
+        double Fij = EvalOrt(i,Xj);
+        Fkj+= Fik*Fij;
+      }//end i
+      Akj[k][j] = -Fkj*Wk*Wj*fWtot;
+      Akj[j][k] = Akj[k][j];
+     }//end j
+     Akj[k][k]+= Wk*fWtot;
+   }//end k
+   return fChi2*fNdf;
+}
+
+//_____________________________________________________________________________
 //_____________________________________________________________________________
 #include "TCanvas.h"
 #include "TH1F.h"
 #include "TGraph.h"
 #include "TSystem.h"
 #include "TRandom.h"
+#include "TVectorD.h"
 //_____________________________________________________________________________
 //______________________________________________________________________________
 void TPoliFitter::Show() const
@@ -420,7 +462,7 @@ static TGraph  *ciGraph  = 0;
 void TPoliFitter::Test(int kase)   
 {
 static TCanvas* myCanvas=0;
-static TH1F *hh[5]={0,0,0,0,0};
+static TH1F *hh[6]={0};
 static const char *hNams[]={"dA0","dA1","dA2","dY","Xi2","Xi2E",0};
   if(!myCanvas)  myCanvas=new TCanvas("C1","",600,800);
   myCanvas->Clear();
@@ -452,12 +494,11 @@ static const char *hNams[]={"dA0","dA1","dA2","dY","Xi2","Xi2E",0};
       pf.Add(x,y+dy,0.1*0.1);
     }
     double Xi2 = pf.Fit();
-    hh[4]->Fill(Xi2);
     pf.MakeErrs();
     if (kase==1) { pf.Move(5)    ;}
-    if (kase==2) { pf.FixY0(A[0]);}
+    if (kase==2) { pf.FixAt(0.,A[0]);}
     double Xi2E = pf.EvalChi2();
-    if (kase==2) Xi2E*=(nPts-3.)/(nPts-2.);
+    hh[4]->Fill(Xi2);
     hh[5]->Fill(Xi2E);
 
 
@@ -582,65 +623,41 @@ void TPoliFitter::Test2()
 {
   enum {nPts=10};
   double A[3]={1,2,3};
-  double G[nPts][nPts],Y[nPts],D[nPts];
+  TMatrixD G(nPts,nPts);
+  TVectorD Y(nPts),D(nPts),Y1(nPts),D1(nPts);
   int np = 2;
-  int once = 0;
-  for (int ievt=0;ievt <10; ievt++) {
   
-    TPoliFitter pf(np);
-    for (int ix=0;ix<nPts;ix++) {
-      double x = ix;
-      double y = A[0]+x*(A[1]+x*A[2]);
-      double err = 0.1*sqrt(ix+1.);
-      double dy = gRandom->Gaus(0,err);
-      Y[ix]=y+dy;
-      pf.Add(x,y+dy,err*err);
-    }
-    double Xi2 = pf.Fit();
-    pf.MakeErrs();
-    if (!once) {
-printf("Make g[][] matrix\n");
-    once = 1;
-    double wtot = pf.Wtot();
-    double Xk,Wk,Xj,Wj,Fik,Fij;
-    memset(G,0,sizeof(G));
-    for (int khit=0;khit<nPts;khit++) {
-      Xk = pf.GetX(khit)[0];
-      Wk = pf.GetX(khit)[2];
-      G[khit][khit] = wtot*Wk;
-      for (int jhit=0;jhit<nPts;jhit++) {
-        Xj = pf.GetX(jhit)[0];
-        Wj = pf.GetX(jhit)[2];
-        double Fkj=0;
-        for (int i=0;i<=np;i++) {//loop over ort polinoms       
-          Fik = pf.EvalOrt(i,Xk);
-          Fij = pf.EvalOrt(i,Xj);
-          Fkj+= Fik*Fij;
-        }//end i
-        G[khit][jhit]-= wtot*Fkj*Wk*Wj;
-      }//end jhit
-    }//end khit
-    }
-    double myXi2=0;
-    TCL::mxmlrt(Y,G[0],&myXi2,1,nPts);
-    myXi2/=pf.Ndf();
-    printf("Xi2=%g myXi2=%g\n",Xi2,myXi2);
-    double delta =0.001;
-    double Xi2m = 0;
-    int ider = 9;
-    int kase=0;
-    if (kase==0) {
-      pf.GetX(ider)[1]+=delta;
-      Xi2m = pf.Fit();
-    } else {
-      Y[ider]+=delta;
-      TCL::mxmlrt(Y,G[0],&Xi2m,1,nPts);
-      Xi2m/=pf.Ndf();
-    }
-    TCL::mxmpy(G[0],Y,D,nPts,nPts,1);
-    double der = (Xi2m-Xi2)/delta;
-    printf ("Xi2= %g %g Deriv = %g %g\n",Xi2,Xi2m,der,2*D[ider]/pf.Ndf());
-
+  TPoliFitter pf(np);
+  for (int ix=0;ix<nPts;ix++) {
+    double x = ix;
+    double y = A[0]+x*(A[1]+x*A[2]);
+    double err = 0.1*sqrt(ix+1.);
+    double dy = gRandom->Gaus(0,err);
+    Y[ix]=y+dy;
+    pf.Add(x,y+dy,err*err);
+  }
+  double Xi2 = pf.Fit();
+  pf.MakeErrs();
+  printf("Make Akj[][] matrix\n");
+  Xi2= pf.MakeMatrix(G);
+  double myXi2 = (Y*(G*Y));
+  D = 2.*(G*Y);
+  Y1 = Y;
+  printf("TPoliFitter::Test2() Xi2=%g myXi2=%g\n",Xi2,myXi2);
+  for (int ix=0;ix<nPts;ix++) {
+    double sav = pf.GetX(ix)[1];
+    double delta = sav*1e-3;
+    pf.GetX(ix)[1] = sav + delta;
+    Y1[ix]         = sav + delta;
+    D1 = 2.*(G*Y1);
+    double Xi21 = pf.Fit()*pf.Ndf();
+    pf.GetX(ix)[1] = sav;
+    Y1[ix]         = sav;
+    double num = (Xi21-Xi2)/delta;
+    double ana = 0.5*(D[ix]+D1[ix]);
+    double dif = 200*fabs(num-ana)/(fabs(num)+fabs(ana)+1e-10);
+    printf("TPoliFitter::Test2() d/d[%d] \tAna=%g \tNum=%g \tDif=%g\n"
+            ,ix,ana,num,dif);
   }
 
 }
