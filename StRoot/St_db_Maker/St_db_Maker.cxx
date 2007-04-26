@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.106 2007/04/17 01:37:05 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.107 2007/04/26 04:17:45 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.107  2007/04/26 04:17:45  perev
+// Correct printout
+//
 // Revision 1.106  2007/04/17 01:37:05  perev
 // assert improved
 //
@@ -517,7 +520,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat
   
   // small debug statement
   if ( val[0].Get() >= val[1].Get()) {
-    Error("UpdateTable","val[0].Get() = %d >= val[1].Get() = %d\n",val[0].Get(),val[1].Get());
+    Error("UpdateTable","val[0].Get() = %u >= val[1].Get() = %u\n",val[0].Get(),val[1].Get());
     Error("UpdateTable:","Table %s.%s Suspicious Ranges Date/Time %d/%d->%d/%d\n",
 	    dat->GetName(),dat->GetTitle(),d1,t1,d2,t2);
     Error("UpdateTable","Table %s.%s Suspicious Ranges Date/Time %d/%d->%d/%d",
