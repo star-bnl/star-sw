@@ -22,7 +22,9 @@
 #include "StMaker.h"
 #endif
 
+
 class StEvtHddr;
+class StChainOpt;
 enum EChainBits {  
   kIsCalibrated = BIT(24)   // if the TObject has been created after calibration 
 };
@@ -35,7 +37,8 @@ class StChain : public StMaker {
    Int_t               mNTotal;   	//Total   events processed
    Int_t               mNFailed;   	//Failed events processed
  protected:
-   StEvtHddr         *m_EvtHddr;     	//Header of event
+   StEvtHddr          *m_EvtHddr;     	//Header of event
+   StChainOpt         *mChainOpt;
  public:
                       StChain(const char *name="bfcChain", const Bool_t UseOwnHeader = kFALSE);
    virtual           ~StChain();
@@ -47,22 +50,26 @@ class StChain : public StMaker {
    virtual Int_t      IsChain() const {return 1;}
    virtual Int_t      MakeEvent(); // *MENU*
    virtual Int_t      EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk=0); 
-   virtual Int_t      EventLoop(Int_t jEnd=1000000, StMaker *outMk=0) {return EventLoop(1,jEnd,outMk);}
-   Int_t              GetVersion()     const {return m_Version;}
-   Int_t              GetVersionDate() const {return m_VersionDate;}
-   Int_t              GetNTotal()      const {return mNTotal;}
-   Int_t              GetNFailed()     const {return mNFailed;}
-
- virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.42 2005/08/29 21:42:21 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   virtual Int_t      EventLoop(Int_t jEnd=1000000, StMaker *outMk=0) 	{return EventLoop(1,jEnd,outMk);}
+   Int_t              GetVersion()     const 				{return m_Version;}
+   Int_t              GetVersionDate() const 				{return m_VersionDate;}
+   Int_t              GetNTotal()      const 				{return mNTotal;}
+   Int_t              GetNFailed()     const 				{return mNFailed;}
+   void               SetChainOpt(StChainOpt *opt) 			{mChainOpt=opt;}
+virtual const StChainOpt *GetChainOpt()    const;
+virtual const char *GetCVS() const 
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.43 2007/04/26 03:57:14 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
 #endif
 
 
-// $Id: StChain.h,v 1.42 2005/08/29 21:42:21 fisyak Exp $
+// $Id: StChain.h,v 1.43 2007/04/26 03:57:14 perev Exp $
 // $Log: StChain.h,v $
+// Revision 1.43  2007/04/26 03:57:14  perev
+// StChainOpt interface to hide StBFChain dependency
+//
 // Revision 1.42  2005/08/29 21:42:21  fisyak
 // switch from fBits to fStatus for StMaker control bits
 //

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.512 2007/04/17 05:07:14 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.513 2007/04/26 03:55:50 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -10,6 +10,7 @@
 #include "TClassTable.h"
 #include "TMemStat.h"
 #include "StBFChain.h"
+#include "StBFChainOpt.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
@@ -748,6 +749,8 @@ Int_t StBFChain::Instantiate()
 }
 //_____________________________________________________________________
 Int_t StBFChain::Init() {
+
+  SetChainOpt(new StBFChainOpt(this));
   SetDbOptions();
   SetGeantOptions();
   Int_t iok = StChain::Init();
