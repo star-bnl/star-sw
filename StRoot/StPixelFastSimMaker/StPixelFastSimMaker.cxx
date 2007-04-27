@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.24 2007/04/27 14:59:10 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.25 2007/04/27 18:41:29 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.25  2007/04/27 18:41:29  wleight
+ * Removed smearing of the coordinate not controlled by the strips in the 17cm layer
+ *
  * Revision 1.24  2007/04/27 14:59:10  wleight
  * Corrected another error in the creation of new hits
  *
@@ -472,7 +475,7 @@ Int_t StPixelFastSimMaker::Make()
 		    gGeoManager->cd(PathIn);
 		    //TGeoNode* node=gGeoManager->GetCurrentNode();
 		    localpos[0]=distortHit(strips1[o].intercept,pitch/sqrt(12.),100);
-		    localpos[2]=distortHit(0,3.84/sqrt(12.),100);
+		    localpos[2]=0.;
 		    localpos[1]=.0005;
 		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
 		    LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
@@ -508,7 +511,7 @@ Int_t StPixelFastSimMaker::Make()
 		    gGeoManager->RestoreMasterVolume();
 		    gGeoManager->cd(PathOut);
 		    //TGeoNode* node=gGeoManager->GetCurrentNode();
-		    localpos[0]=distortHit(0,3.84/sqrt(12.),100);
+		    localpos[0]=0.;
 		    localpos[2]=distortHit(strips2[o].intercept,pitch/sqrt(12.),100);
 		    localpos[1]=-.0005;
 		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
