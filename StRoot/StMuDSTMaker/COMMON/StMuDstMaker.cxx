@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.80 2007/04/20 06:26:00 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.81 2007/04/27 17:07:01 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -866,7 +866,8 @@ void StMuDstMaker::fillEzt(StEvent* ev) {
 
   if(eztArrayStatus[muEztTrig]) {
     EztTrigBlob* trig = mEzTree->copyTrig(ev);
-    addType(mEztArrays[muEztTrig], *trig);
+    if (trig)
+      addType(mEztArrays[muEztTrig], *trig);
   }
 
   if(eztArrayStatus[muEztFpd]) {
@@ -1279,6 +1280,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.81  2007/04/27 17:07:01  mvl
+ * Added protection against StEvent::triggerData() == 0 in EZTREE.
+ *
  * Revision 1.80  2007/04/20 06:26:00  mvl
  * Removed Q-vector calculation. Will implement utility class instead.
  *
