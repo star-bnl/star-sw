@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.166.2.1  2007/04/27 01:21:34  jeromel
+// Patches for SL06b: VFMCE implement, vertex errors, bug fix in BFChain and enum
+//
 // Revision 1.166  2006/04/14 22:51:26  perev
 // Option useFakeVertex added
 //
@@ -266,6 +269,11 @@
 #include "tables/St_HitError_Table.h"
 
 #include "Sti/StiTimer.h"
+/// Definion of minimal primary vertex errors.
+/// Typical case,vertex got from simulations with zero errors.
+/// But zero errors could to unpredicted problems
+/// Now minimal possible error is 1 micron
+static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 
 ClassImp(StiMaker)
   
@@ -532,6 +540,21 @@ Int_t StiMaker::Make()
 
 	  if (vertexes && vertexes->size())
 	    {
+              //Set minimal errors
+	      for (size_t i=0;i<vertexes->size();i++) {
+	        StiHit *vtx=(*vertexes)[i];
+                StMatrixF vtxErr(3,3);
+                vtxErr[0][0] = vtx->sxx();
+                vtxErr[1][1] = vtx->syy();
+                vtxErr[2][2] = vtx->szz();
+                if (vtxErr[0][0]>MIN_VTX_ERR2
+                &&  vtxErr[1][1]>MIN_VTX_ERR2
+                &&  vtxErr[2][2]>MIN_VTX_ERR2) continue;
+                vtxErr[0][0]=MIN_VTX_ERR2;
+                vtxErr[1][1]=MIN_VTX_ERR2;
+                vtxErr[2][2]=MIN_VTX_ERR2;
+                vtx->setError(vtxErr);
+              }
 	      //cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
 	      _tracker->extendTracksToVertices(*vertexes);
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 

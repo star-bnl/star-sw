@@ -23,6 +23,7 @@
 
 #include "StGenericVertexFinder.h"
 #include "StppLMVVertexFinder.h"
+#include "StFixedVertexFinder.h"
 
 #include "StTreeMaker/StTreeMaker.h"
 
@@ -76,6 +77,10 @@ StGenericVertexMaker::~StGenericVertexMaker()
   m_Mode = 0x1     Minuit
   m_Mode = 0x2     ppLMV4  This will not be able to run in parrallele of ppLMV5
   m_Mode = 0x4     ppLMV5  This will not be able to run in parrallele of ppLMV4
+  m_Mode = 0x8     PPV with CTB matching
+  m_Mode = 0x10    PPV without CTB matching
+  m_Mode = 0x20    Fixed vertex finder
+  m_Mode = 0x40    Fixed vertex finder, read from MC event
 
   Default          Minuit  (to preserver backward compatibility)
 
@@ -108,6 +113,16 @@ Int_t StGenericVertexMaker::Init()
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
       ((StPPVertexFinder*) theFinder)->setMC(true);
     }
+
+  } else if ( m_Mode & 0x20 || m_Mode & 0x40) {
+    theFinder = new StFixedVertexFinder();
+    if ( m_Mode & 0x40){
+      gMessMgr->Info() << "StGenericVertexMaker::Init: fixed vertex using MC vertex" << endm;
+      theFinder->SetMode(1);
+    } else {
+      gMessMgr->Info() << "StGenericVertexMaker::Init: fixed vertex 'finder' selected" << endm;
+    }
+
   } else {
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .

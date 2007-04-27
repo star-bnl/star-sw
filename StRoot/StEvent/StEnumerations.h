@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.29 2006/04/26 14:41:22 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.29.2.1 2007/04/27 01:21:33 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.29.2.1  2007/04/27 01:21:33  jeromel
+ * Patches for SL06b: VFMCE implement, vertex errors, bug fix in BFChain and enum
+ *
  * Revision 2.29  2006/04/26 14:41:22  jeromel
  * doxygenized
  *
@@ -307,7 +310,8 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         egrVertexFinder,
                         minuitVertexFinder,
                         ppvVertexFinder,
-                        ppvNoCtbVertexFinder};
+                        ppvNoCtbVertexFinder,
+                        mcEventVertexFFinder};
 
 
 /*!
