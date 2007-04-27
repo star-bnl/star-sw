@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.15 2003/09/24 02:20:08 hippolyt Exp $
+ * $Id: StRchMaker.cxx,v 2.16 2007/04/27 11:26:45 hippolyt Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,7 @@
 
 #include <Stiostream.h>
 #include "Stiostream.h"
+#include "StMessMgr.h"
 
 #include "StRchMaker.h"
 #include "StChain.h"
@@ -148,7 +149,8 @@ StRchMaker::~StRchMaker() {}
 //-----------------------------------------------------------------
 
 Int_t StRchMaker::Init() {
-    cout << "StRchMaker::init()" << endl;
+
+  { LOG_INFO << "StRchMaker::Init()" << endm; }
     //
     // either DAQ or SIM data.  MACRO switchable!
     //
@@ -201,8 +203,7 @@ Int_t StRchMaker::Init() {
 	ifstream pedfile;
 	pedfile.open(mPedestalFile);
 	if (!pedfile) {
-	    cout << "StRchMaker::Make()\n";
-	    cout << "\tCan not open ped file: " << mPedestalFile << endl;
+	  { LOG_ERROR << "StRchMaker::Init(): Can not open ped file: " << mPedestalFile << endm; }
 	}
 	else {
 	    for (unsigned int channelnum=0; channelnum<960; ++channelnum) {
@@ -212,13 +213,10 @@ Int_t StRchMaker::Init() {
 		}
 	    }
 	    pedfile.close();
-	    cout << "StRchMaker::Init() ";
-	    cout << " Read pedestals" << endl;
-	    
+	    { LOG_INFO << "StRchMaker::Init(): Read pedestals " << endm; }
   	    for (unsigned int pad=0; pad < 160; ++pad) {
   		for (unsigned int row=0; row < 96; ++row) {
-		    cout << " pad " << pad << " row " << row
-			 << " ped " << mPedestal[pad][row] << " sig " << mSigma[pad][row] << endl;
+		  { LOG_DEBUG << " pad " << pad << " row " << row<< " ped " << mPedestal[pad][row] << " sig " << mSigma[pad][row] << endm; }
   		}
   	    }
 	}
@@ -242,11 +240,7 @@ int StRchMaker::adcDecoder(unsigned long code,
 //-----------------------------------------------------------------
 
 Int_t StRchMaker::Make() {
-#ifdef RCH_DEBUG
-    ofstream raw("./rchMaker.txt");
-#endif
-    cout << "RchMaker::Make()" << endl;
-
+  { LOG_INFO << "StRchMaker::Make()" << endm; }
     //
     // Initialize Flags
     //
@@ -291,12 +285,7 @@ Int_t StRchMaker::Make() {
     // Interogate StEvent structure
     //
     if(!mEvent) {
-	cout << "ERROR\n";
-	cout << "StRchMaker::Make()\n";
-	cout << "****** StEvent structure does not exist\n";
-	cout << "****** Processing of RICH DATA CANNOT OCCUR\n";
-	cout << "****** StEventMaker must run before StRchMaker\n";
-	cout << "****** Aborting..." << endl;
+	  { LOG_ERROR <<"StEvent structure does not exist %n - Processing of RICH DATA CANNOT OCCUR %n - StEventMaker must run before StRchMaker %n - Aborting..." << endm; }
 	abort();
     }
     mTheRichCollection = mEvent->richCollection();
@@ -311,35 +300,30 @@ Int_t StRchMaker::Make() {
 	    (St_ObjectSet*)GetDataSet("richMixer/.data/richMixedEvent");
 
 	if(!embeddedData) {
-	    cout << "\tNo RICH Embedded data" << endl;
-	    cout << "\tStEvent richCollection DOES NOT Exist" << endl;
-	    cout << "\tStEvent RichPixelCollection DOES NOT Exist" << endl;
-	    cout << "\tStEvent RichClusterCollection DOES NOT Exist" << endl;
-	    cout << "\tStEvent RichHitCollection DOES NOT Exist" << endl;
+	  { LOG_ERROR << "No RICH Embedded data %n StEvent richCollection DOES NOT Exist %n StEvent RichPixelCollection DOES NOT Exist %n \tStEvent RichClusterCollection DOES NOT Exist %n StEvent RichHitCollection DOES NOT Exist" << endm; }
 	}
 	else {
 	    mTheRichCollection = (StRichCollection*)(embeddedData->GetObject());
 	    if(mTheRichCollection->pixelsPresent()) {
 		mPixelCollectionPresent = 1;
-		cout << '\t' << (mTheRichCollection->getRichPixels().size())
-		     << " pixels from the StRichMixerMaker" << endl;
+		{ LOG_INFO << " %l : " << (mTheRichCollection->getRichPixels().size()) << "pixels from the StRichMixerMaker" << endm; }
 	    }
 	}
     } // check the rich collection
     else {
 	if(mTheRichCollection->pixelsPresent()) {
-	    cout << "StEvent RichPixelCollection Exists" << endl;
-	    mPixelCollectionPresent = 1;
+	  { LOG_INFO << "StEvent RichPixelCollection Exists" << endm; }
+	  mPixelCollectionPresent = 1;
 	}
 	else {
-	    cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
+	  { LOG_ERROR << "StEvent RichPixelCollection DOES NOT Exist" << endm; }
 	}
 	if(mTheRichCollection->clustersPresent()) {
-	    cout << "StEvent RichClusters Exists" << endl;
-	    mClusterCollectionPresent = 1;
+	  { LOG_INFO << "StEvent RichClusters Exist" << endm; }
+	  mClusterCollectionPresent = 1;
 	}
 	else {
-	    cout << "** StEvent RichClusters DOES NOT Exist" << endl;
+	  { LOG_ERROR << "StEvent RichClusters DO NOT Exist" << endm; }
 	}
     }
 
@@ -347,15 +331,13 @@ Int_t StRchMaker::Make() {
     // If there are no pixels, get the interface access to the data
     //
     if(!mPixelCollectionPresent) {
-	cout << " No Pixel Collection!!!  -->  TRY GET THE DATA SETS!" << endl;
+	  { LOG_INFO << " %F No Pixel Collection!!!  -->  TRY GET THE DATA SETS!" << endm; }
 	if(!mDaq) {
-	    cout << "Sim Mode" << endl;
+	  { LOG_DEBUG << "Simulation Mode" << endm; }
 	    St_ObjectSet *rrsEvent =
 		(St_ObjectSet*)GetDataSet("Rrs/.const/richPixels");
 	    if(!rrsEvent) {
-		cout << "StRchMaker::Maker()\n";
-		cout << "\tDataSet: rrsEvent not there\n";
-		cout << "\tSkip this event\n" << endl;
+	      { LOG_INFO << "StRchMaker::Maker() %n DataSet: rrsEvent not there %n Skip this event" << endm; }
 		this->clearPadMonitor();
 		return kStWarn;
 	    }
@@ -363,53 +345,43 @@ Int_t StRchMaker::Make() {
 	    StRichPadPlane* theRichSimData =
 		(StRichPadPlane*)(rrsEvent->GetObject());
 	    if(!theRichSimData) {
-		cout << "StRchMaker::Maker()\n";
-		cout << "\tRichSimData: not there\n";
-		cout << "\tSkip this event\n" << endl;
-		this->clearPadMonitor();
-		return kStWarn;
+	      { LOG_INFO << "StRchMaker::Maker() %n RichSimData: not there %n Skip this event" << endm; }
+	      this->clearPadMonitor();
+	      return kStWarn;
 	    }
 	    mTheRichReader = new StRrsReader(theRichSimData, -9);
 	}
 	else {
-	    cout << "DAQ" << endl;
+	  { LOG_DEBUG << "DAQ Mode" << endm; }
 	    mTheRichData   = GetDataSet("StDAQReader");
 	    if(!mTheRichData) {
-		cout << "StRchMaker::Maker()\n";
-		cout << "\t DataSet: StDAQReader not there\n";
-		cout << "\tSkip this event\n" << endl;
-		this->clearPadMonitor();
+	      { LOG_INFO << "StRchMaker::Maker() %n DataSet: StDAQReader not there %n Skip this event" << endm; }
+	      this->clearPadMonitor();
 		
-		return kStWarn;
+	      return kStWarn;
 	    }
 
 	    mTheDataReader = (StDAQReader*)(mTheRichData->GetObject());
 	    if(!mTheDataReader) {
-		cout << "StRchMaker::Maker()\n";
-		cout << "\tStDAQReader*: not there\n";
-		cout << "\tSkip this event\n" << endl;
-		this->clearPadMonitor();
-		return kStWarn;
+	      { LOG_INFO << "StRchMaker::Maker() %n DataSet: StDAQReader not there %n Skip this event" << endm; }
+	      this->clearPadMonitor();
+	      return kStWarn;
 	    }
 	    if (!(mTheDataReader->RICHPresent())) {
-		cout << "StRchMaker::Maker()\n";
-		cout << "\tRICH not in datastream\n";
-		cout << "\tSkip this event\n" << endl;
-		this->clearPadMonitor();
-		return kStWarn;
+	      { LOG_INFO << "StRchMaker::Maker() %n RICH not in datastream %n Skip this event" << endm; }
+	      this->clearPadMonitor();
+	      return kStWarn;
 	    }
 	    mTheRichReader = mTheDataReader->getRICHReader();
 	}
 
 	if(mTheRichReader) {
-	    cout << "Got the Reader " << endl;
+	  { LOG_DEBUG << "Got the reader" << endm; }
 	}
 	else {
-	    cout << "StRchMaker::Make()\n";
-	    cout << "\tCould not get a Reader\n";
-	    cout << "\tSkip Event" << endl;
-	    this->clearPadMonitor();
-	    return kStWarn;
+	  { LOG_INFO << "StRchMaker::Maker() %n Could not get a Reader %n Skip this event" << endm; }
+	  this->clearPadMonitor();
+	  return kStWarn;
 	}
 
 	//
@@ -420,7 +392,7 @@ Int_t StRchMaker::Make() {
 	// saturated pad if the 11th bit is set
 	//
 	if (mRemovePicketFencePixels) {
-	    cout << "StRchMaker::Make(): removing picket fence pixels" << endl;
+	  { LOG_INFO << "StRchMaker::Make(): removing picket fence pixels" << endm; }
 	}
 	
 	bool saturatedPad = false;
@@ -630,7 +602,7 @@ Int_t StRchMaker::Make() {
     mClusterFinder->setBorderFlags();
     
 #ifdef RICH_WITH_PAD_MONITOR
-    cout << "Try get the pad monitor" << endl;   
+    { LOG_INFO << "Try get the pad monitor" << endm; }
     StRichPadMonitor* thePadMonitor = StRichPadMonitor::getInstance(mGeometryDb);
     //
     // Clears The Old Data. Must be done here and RRS maker
@@ -664,14 +636,14 @@ Int_t StRchMaker::Make() {
     // Do the hit finding
     //
     if(!mClusterFinder->simpleHitsFromClusters()) {
-	cout << "==> simple hits from clusters failed!" << endl;
+    { LOG_INFO << "==> simple hits from clusters failed!" << endm; }
     }
     
     mClusterFinder->calculateHitsInLocalCoordinates();
     mClusterFinder->calculateHitsInGlobalCoordinates();
     
 #ifdef RCH_DEBUG
-    cout << "Dump Hit Info==>size: " << mClusterFinder->getHits().size() << endl;
+    { LOG_DEBUG << "Dump Hit Info==>size: " << mClusterFinder->getHits().size() << endm; }
     mClusterFinder->dumpHitInformation(raw);
 #endif
 
@@ -686,7 +658,7 @@ Int_t StRchMaker::Make() {
 
 #ifdef RICH_WITH_PAD_MONITOR
     for(unsigned int jj=0; jj<mTheHits.size(); jj++) {
-	//cout << "StRchMaker::drawHit() " << *mTheHits[jj] << endl;
+      { LOG_INFO << "StRchMaker::drawHit() " << *mTheHits[jj] << endm; }
 	thePadMonitor->drawHit(mTheHits[jj]);
     }
     thePadMonitor->update();
@@ -813,21 +785,21 @@ Int_t StRchMaker::Make() {
 
 void StRchMaker::fillStEvent()
 {
-    //
-    // This function means there is a dependency on the
-    // StEvent classes
-    //
-    cout << "\nStRchMaker::fillStEvent()" << endl;
-    StRichCollection *richCollection;
+  //
+  // This function means there is a dependency on the
+  // StEvent classes
+  //
+  { LOG_INFO << "StRchMaker::fillStEvent()" << endm; }
+  StRichCollection *richCollection;
 
-    if(!mTheRichCollection) {
-	cout << " StRchMaker::Make a new collection" << endl;
-	richCollection = new StRichCollection();
-    }
-    else {
-	cout << " StRchMaker::use the already existing collection" << endl;
-	richCollection = mTheRichCollection;
-    }
+  if(!mTheRichCollection) {
+  { LOG_INFO << "StRchMaker::Make a new collection" << endm; }
+    richCollection = new StRichCollection();
+  }
+  else {
+  { LOG_INFO << "StRchMaker::Make use the already existing collection" << endm; }
+  richCollection = mTheRichCollection;
+  }
 
     //
     // Add all the pixels...ordered from the ClusterFinder
@@ -850,7 +822,7 @@ void StRchMaker::fillStEvent()
 	    
 	}
 	
-	cout << " StRchMaker::fillStEvent() pixels " << thePixels.size() << endl;
+	{ LOG_INFO << " StRchMaker::fillStEvent() pixels " << thePixels.size() << endm; }
 	for(size_t ii=0; ii<thePixels.size(); ii++) {
  	    unsigned long codedValue = 0;
  	    unsigned long adc = static_cast<unsigned long>(thePixels[ii]->charge());
@@ -891,7 +863,7 @@ void StRchMaker::fillStEvent()
 //    if(!richCollection->clustersPresent()) {
     if(1) {
 	theClusters = mClusterFinder->getClusters();
-	cout << " StRchMaker::fillStEvent() clusters " << theClusters.size() << endl;
+	{ LOG_INFO << " StRchMaker::fillStEvent() clusters " << theClusters.size() << endm; }
 	for(size_t ii=0; ii<theClusters.size(); ii++) {
 	    StRichCluster* thePersistentCluster = new StRichCluster(theClusters[ii]->numberOfPads(),
 								    theClusters[ii]->numberOfLocalMax(),
@@ -912,7 +884,7 @@ void StRchMaker::fillStEvent()
     //
 //     if(!richCollection->hitsPresent()) {
     if(1) {
-	cout << " StRchMaker::fillStEvent() hits " << mTheHits.size() <<endl;
+      { LOG_INFO << " StRchMaker::fillStEvent() hits " << mTheHits.size() << endm; }
 	for(size_t ii=0; ii<mTheHits.size(); ii++) {
 	    if(dynamic_cast<StRichSimpleMCHit*>(mTheHits[ii])) {
 		//cout << "mchit ";
@@ -977,7 +949,7 @@ void StRchMaker::fillStEvent()
 
     //
     // Store the rich collection into StEvent
-    cout << "Write to StEvent" << endl;
+    { LOG_INFO << "Write to StEvent" << endm; }
     //PR(richCollection);
     //PR(mEvent);
     mEvent->setRichCollection(richCollection);
@@ -998,25 +970,18 @@ void StRchMaker::fillStEvent()
 	    theMonitor->setTotalCharge(totalCharge);
 	}
 	else {
-	    cout << "StRchMaker::fillStEvent()\n";
-	    cout << "\tERROR\n";
-	    cout << "\tStRichSoftwareMonitor Does not Exist" << endl;
+	  { LOG_ERROR <<"StRichSoftwareMonitor Does not Exist" << endm; }
 	}
     }
     else {
-	cout << "StRchMaker::fillStEvent()\n";
-	cout << "\tERROR\n";
-	cout << "\tStSoftwareMonitor Does not Exist" << endl;
+	  { LOG_ERROR <<"StRichSoftwareMonitor Does not Exist" << endm; }
     }
     
 }
 //-----------------------------------------------------------------
 void StRchMaker::PrintInfo() 
 {
-    printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.15 2003/09/24 02:20:08 hippolyt Exp $\n");
-    printf("**************************************************************\n");
-    if (Debug()) StMaker::PrintInfo();
+  { LOG_INFO <<"* $Id: StRchMaker.cxx,v 2.16 2007/04/27 11:26:45 hippolyt Exp $\n"<<endm; }
 }
 
 //-----------------------------------------------------------------
@@ -1024,14 +989,12 @@ void StRchMaker::PrintInfo()
 
 Int_t StRchMaker::Finish() {
 
-    cout << "StRchMaker::Finish()" << endl;
-
-    cout << "Delete the cluster finder" << endl;
+  { LOG_INFO << "StRchMaker::Finish() - Delete the cluster finder" << endm; }
     delete mClusterFinder;
     mClusterFinder = 0;
 	
 #ifdef RCH_HISTOGRAM
-    cout << "close the Histogram files!!!!!!" << endl;
+  { LOG_INFO << "Close the Histogram files!!!!!!" << endm; }
     mRchNTupleFile->Write();
     mRchNTupleFile->Close();
 #endif
@@ -1059,6 +1022,9 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.16  2007/04/27 11:26:45  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.15  2003/09/24 02:20:08  hippolyt
  * init pointers and arrays
  *
