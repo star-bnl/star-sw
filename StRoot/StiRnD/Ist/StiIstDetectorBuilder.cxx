@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.16 2007/04/23 14:42:10 wleight Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.17 2007/04/27 18:44:03 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.17  2007/04/27 18:44:03  wleight
+// Corrected a problem with incorrect assignment of hit errors
+//
 // Revision 1.16  2007/04/23 14:42:10  wleight
 // Added new hit error calculator for outer half of 17cm layer
 //
@@ -268,8 +271,8 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
   if(layer==1) pDetector->setHitErrorCalculator(&_hitCalculator1);
-  if(layer==2 && side==1) pDetector->setHitErrorCalculator(&_hitCalculator2);
-  if(layer==2 && side==2) pDetector->setHitErrorCalculator(&_hitCalculator3);
+  if(layer==2 && side==1) pDetector->setHitErrorCalculator(&_hitCalculator3);
+  if(layer==2 && side==2) pDetector->setHitErrorCalculator(&_hitCalculator2);
   //  add(2*(layer-1)+side-1,wafer-1,pDetector);
   add(2*(layer-1)+side-1,ladder,pDetector);  
   //add(2*ladder-3+side,0,pDetector);
