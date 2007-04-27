@@ -1,7 +1,10 @@
 //*-- Author : Iwona Sakrejda
-// 
-// $Id: StTpcTagMaker.cxx,v 1.6 2001/04/25 19:09:17 perev Exp $
+//
+// $Id: StTpcTagMaker.cxx,v 1.7 2007/04/27 16:47:50 jeromel Exp $
 // $Log: StTpcTagMaker.cxx,v $
+// Revision 1.7  2007/04/27 16:47:50  jeromel
+// No change - this is a test
+//
 // Revision 1.6  2001/04/25 19:09:17  perev
 // HPcorrs
 //
@@ -69,8 +72,8 @@ Int_t StTpcTagMaker::Make(){
   // Create a data set and add the table to it.
   St_TpcTag *tagtab= new St_TpcTag("TpcTag",1); m_DataSet->Add(tagtab);
   //
-  TpcTag_st *tagtab_st = (TpcTag_st *) tagtab->GetTable();  
- 
+  TpcTag_st *tagtab_st = (TpcTag_st *) tagtab->GetTable();
+
   // Fill the Tpc Tags
 
   tagtab_st->n_clus_tpc_tot = tpc_mon_data_st->n_clus_tpc_tot;
