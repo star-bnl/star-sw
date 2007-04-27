@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.81 2007/04/27 15:39:28 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.82 2007/04/27 17:04:27 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.82  2007/04/27 17:04:27  jcs
+// forgot to check if bfc option debug is on before filling vertex by sector histograms
+//
 // Revision 1.81  2007/04/27 15:39:28  jcs
 // Removed obsolete histogram (fpt_theta)
 // Only create and fill FTPC vertex by sector histograms if bfc debug option is on
@@ -750,7 +753,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
       //			     tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
       //m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());    
       
-      if (IAttr(".histos")) {
+      if (IAttr(".histos") && Debug()) {
          for (Int_t i = 1; i <= 6; i++) { // east
 	   vertex = tracker->EstimateVertex(tracker->GetVertex(), -1, i, 1);
 	   m_vertex_east_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
@@ -898,7 +901,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.81 2007/04/27 15:39:28 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.82 2007/04/27 17:04:27 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
