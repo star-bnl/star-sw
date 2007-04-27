@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.19 2004/01/14 22:50:43 fisyak Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.20 2007/04/27 13:11:48 hippolyt Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.20  2007/04/27 13:11:48  hippolyt
+ * Star logger recommendations
+ *
  * Revision 1.19  2004/01/14 22:50:43  fisyak
  * Add include of <algorithm>
  *
@@ -309,7 +312,7 @@ Int_t StRichSpectraMaker::Init() {
     mTemperatureGradient = 7./mYExtreme;
     PR(mTemperatureGradient);
     
-    cerr << "Freon Index in maker " << mIndex << endl;
+    { LOG_ERROR << "Freon Index in maker " << mIndex << endm; }
     
     ////////////////////////////////////////////////////////////////////////
     double ii;
@@ -784,9 +787,7 @@ Int_t StRichSpectraMaker::Make() {
 //-----------------------------------------------------------------
 void StRichSpectraMaker::PrintInfo() 
 {
-    printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.19 2004/01/14 22:50:43 fisyak Exp $\n");
-    printf("**************************************************************\n");
+  { LOG_INFO << "************************************************************** %n * $Id: StRichSpectraMaker.cxx,v 1.20 2007/04/27 13:11:48 hippolyt Exp $ %n **************************************************************" << endm; }
     if (Debug()) StMaker::PrintInfo();
 }
 
@@ -795,23 +796,18 @@ void StRichSpectraMaker::PrintInfo()
 
 Int_t StRichSpectraMaker::Finish() {
 
-    cout << "StRichSpectraMaker::Finish()" << endl;
-
-    cout << mNumberOfGood2GevTracks << " Good 2.0-2.5 GeV tracks in" << endl;
-    cout << mNumberOfEvents         << " Events." << endl;
+  { LOG_DEBUG << "StRichSpectraMaker::Finish() : " << mNumberOfGood2GevTracks << " Good 2.0-2.5 GeV tracks in " << mNumberOfEvents << " Events." << endm; }
 	
     this->printCutParameters();
 
 	
 #ifdef RICH_SPECTRA_HISTOGRAM
     if(mFile) {
-	cout << "StRichSpectraMaker::Finish()\n";
-	cout << "\tClose the Histogram files!!!!!!" << endl;
-
-	mFile->Write();
-	mFile->Close();
-	delete mFile;
-	mFile = 0;
+      { LOG_DEBUG << "StRichSpectraMaker::Finish() %n Close the Histogram files!!!!!!" << endm; }
+      mFile->Write();
+      mFile->Close();
+      delete mFile;
+      mFile = 0;
     }
 #endif
 
@@ -827,48 +823,37 @@ bool StRichSpectraMaker::checkTrack(StTrack* track) const {
     //
     bool status = true;
     if (!track) {
-	cout << "StRichSpectraMaker::checkTrack()";
-	cout << " --> !track" << endl;
-	status = false;
+      { LOG_DEBUG << "StRichSpectraMaker::checkTrack() --> !track" << endm; }
+      status = false;
     }
     if (track->flag()<0) {
-	cout << "StRichSpectraMaker::checkTrack() --> ";
-	cout << "track->flag()<0 (" << track->flag() << ")" << endl;
-	status = false;
+      { LOG_DEBUG << "StRichSpectraMaker::checkTrack() --> track->flag()<0 (" << track->flag() << ")" << endm; }
+      status = false;
     }
 
     if (!track->geometry()) {
-	cout << "StRichSpectraMaker::checkTrack() --> ";
-	cout << "!track->geometry()" << endl;
-	status = false;
+      {	LOG_DEBUG << "StRichSpectraMaker::checkTrack() --> !track->geometry()" << endm; }
+      status = false;
     }
 
     if(track->geometry()->helix().distance(mVertexPos)>mDcaCut) {
-	cout << "StRichSpectraMaker::checkTrack() --> ";
-	cout << "mDcaCut ("
-	     << track->geometry()->helix().distance(mVertexPos) << ")" << endl;
-	status = false;
+      { LOG_DEBUG << "StRichSpectraMaker::checkTrack() --> mDcaCut (" << track->geometry()->helix().distance(mVertexPos) << ")" << endm; }
+      status = false;
     }
 	
     if(track->fitTraits().numberOfFitPoints(kTpcId) < mFitPointsCut) {
-	cout << "StRichSpectraMaker::checkTrack() --> ";
-	cout << "mFitPointsCut ("
-	     << track->fitTraits().numberOfFitPoints(kTpcId) << endl;
-	status = false;
+      { LOG_DEBUG << "StRichSpectraMaker::checkTrack() --> mFitPointsCut (" << track->fitTraits().numberOfFitPoints(kTpcId) << endm; }
+      status = false;
     }
 
     if( fabs(track->geometry()->momentum().pseudoRapidity()) > mEtaCut ) {
-	cout << "StRichSpectraMaker::checkTrack() --> ";
-	cout << "mEtaCut ("
-	     << track->geometry()->momentum().pseudoRapidity() << ")" << endl;
-	status = false;
+      { LOG_DEBUG << "StRichSpectraMaker::checkTrack() --> mEtaCut (" << track->geometry()->momentum().pseudoRapidity() << ")" << endm; }
+      status = false;
     }
 
     if (track->geometry()->momentum().perp() < mPtCut) {
-  	cout << "StRichSpectraMaker::checkTrack() --> ";
-	cout << "mPtCut ("
-	     << track->geometry()->momentum().perp() << ")" << endl;
-	status = false;
+      { LOG_DEBUG << "StRichSpectraMaker::checkTrack() --> mPtCut (" << track->geometry()->momentum().perp() << ")" << endm; }
+      status = false;
     }
     
     return status;
@@ -934,10 +919,8 @@ StRichSpectraMaker::expectedCerenkov(float p, int pid) const
 	break;
 
     default:
-	cout << "StRichSpectraMaker::expectedNumberOfPhotons()\n";
-	cout << "\tWARNING\n";
-	cout << "\tBad Pid number (" << pid << ") " << endl;
-	return values;
+      { LOG_WARN << "StRichSpectraMaker::expectedNumberOfPhotons() %n WARNING %n Bad Pid number (" << pid << ") " << endm; }
+      return values;
     }
 
     float beta2 = p*p/(p*p + mass*mass);
@@ -997,7 +980,7 @@ bool StRichSpectraMaker::evaluateEvent() {
 // ----------------------------------------------------
 void StRichSpectraMaker::qualityAssessment() {
 
-    cout << "StRichSpectraMaker::qualityAssessment()\n";
+  { LOG_DEBUG << "StRichSpectraMaker::qualityAssessment()" << endm; }
 
 #ifndef P00hm 
     //vertex
@@ -1008,8 +991,7 @@ void StRichSpectraMaker::qualityAssessment() {
     PR(richTracks.size());
 
     for(size_t ii=0; ii<richTracks.size(); ii++) {
-	cout << " ptr: " << richTracks[ii] << endl;
-	cout << " p:   " << richTracks[ii]->geometry()->momentum().mag() << endl;
+      { LOG_DEBUG << " ptr: " << richTracks[ii] << "%n p:   " << richTracks[ii]->geometry()->momentum().mag() << endm; }
 	
 	const StPtrVecTrackPidTraits&
 	    thePidTraits = richTracks[ii]->pidTraits(kRichId);
@@ -1022,14 +1004,13 @@ void StRichSpectraMaker::qualityAssessment() {
 		dynamic_cast<StRichPidTraits*>(thePidTraits[jj]);
 
 	    if(!theRichPidTraits) {
-		cout << "Bad pid traits" << endl;
-		continue;
+	      { LOG_WARN << "Bad pid traits" << endm; }
+	      continue;
 	    }
  	    PR(theRichPidTraits[jj].productionVersion());
 
  	    if(!theRichPidTraits[jj].associatedMip()) {
- 		cout << "\tNo Associated MIP\n";
- 		cout << "\tNo MIP Residual" << endl;
+	      { LOG_WARN << "No Associated MIP %n No MIP Residual" << endm; }
  	    }
  	    else {
  		PR(theRichPidTraits[jj].associatedMip()->local());
@@ -1040,15 +1021,15 @@ void StRichSpectraMaker::qualityAssessment() {
  	    PR(theRichPidTraits[jj].signedDca2d());
  	    PR(theRichPidTraits[jj].signedDca3d());
 
-	    cout << " *** Try get the pids" << endl;
+	    { LOG_DEBUG << " *** Try get the pids" << endm; }
  	    const StSPtrVecRichPid& theRichPids =
  		theRichPidTraits[jj].getAllPids();
 
 	    PR(theRichPids.size());
  	    for(size_t kk=0; kk<theRichPids.size(); kk++) {
- 		cout << "kk= " << kk << " ";
- 		PR(theRichPids[kk]->getParticleNumber());
-		PR(theRichPids[kk]->getMipResidual());
+ 	      { LOG_DEBUG << "kk= " << kk << " " <<  endm; }
+	      PR(theRichPids[kk]->getParticleNumber());
+	      PR(theRichPids[kk]->getMipResidual());
 		
 		const StSPtrVecRichPhotonInfo& photonInfo =
 		    theRichPids[kk]->getPhotonInfo();
@@ -1067,7 +1048,7 @@ void StRichSpectraMaker::qualityAssessment() {
     }
 #endif
     //loop over these tracks
-    cout << "========= END ::qualityAssessment =====" << endl;
+    { LOG_INFO << "========= END ::qualityAssessment =====" << endm; }
 }
 
 // ----------------------------------------------------
@@ -1104,21 +1085,18 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 	    dynamic_cast<StRichPidTraits*>(thePidTraits[jj]);
 
 	if(!theRichPidTraits) {
-	    cout << "StRichSpectraMaker::doIdentification()\n";
-	    cout << "\tBad pid traits.  Continuing..." << endl;
+	  { LOG_WARN << "StRichSpectraMaker::doIdentification() %n Bad pid traits.  Continuing..." << endm; }
 	    continue;
 	}
 #ifndef P00hm
  	if(!theRichPidTraits[jj].associatedMip()) {
-	    cout << "StRichSpectraMaker::doIdentification()\n";
-	    cout << "\tNo Associated MIP\n";
-	    cout << "\tNo MIP Residual" << endl;
+	  { LOG_WARN << "StRichSpectraMaker::doIdentification() %n No Associated MIP %n No MIP Residual" << endm; }
 	    if(richHits.size()) {
-		cout << "try association" << endl;
-		doAssociation = true;
+	      { LOG_INFO << "try association" << endm; }
+	      doAssociation = true;
 	    }
 	    else {
-		trackMip =  theRichPidTraits[jj].associatedMip()->local();
+	      trackMip =  theRichPidTraits[jj].associatedMip()->local();
 	    }
 	}
 #endif
@@ -1163,8 +1141,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 	    assert(hits.size() == photonInfo.size());
 	    
 	    if(!hits.size()) {
-		cout << "StRichSpectraMaker:doIdentification()\n";
-		cout << "\tNo hits in (" << kk << ")...next StRichPid" << endl;
+	      { LOG_WARN << "StRichSpectraMaker:doIdentification() %n No hits in (" << kk << ")...next StRichPid" << endm; }
 		continue;
 	    }
 
@@ -1226,8 +1203,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
     if(doAssociation) {
 	extrapolateTrack.assignMIP(&richHits);
 	if(!extrapolateTrack.getAssociatedMIP()) {
-	    cout << "StRichSpectraMaker::doIdentification()\n";
-	    cout << "\tCannot get an associated Track";
+	  { LOG_WARN << "StRichSpectraMaker::doIdentification() %n Cannot get an associated Track" << endm; }
 	}
 	else {
 	    trackMip = extrapolateTrack.getAssociatedMIP()->local();
@@ -1375,7 +1351,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 void StRichSpectraMaker::calculateResidual(StTrack* track)
 {
     // never called
-    cout << "StRichSpectraMaker::calculateResidual()" << endl;
+  { LOG_WARN << "StRichSpectraMaker::calculateResidual()" << endm; }
     abort();
     StRichTrack mattTrack(track,mMagField);
     PR(mattTrack.getImpactPoint());
@@ -1421,16 +1397,15 @@ void StRichSpectraMaker::calculateResidual(StTrack* track)
 // ----------------------------------------------------
 void StRichSpectraMaker::calculateIndex(double y)
 {
-    cout << "StRichSpectraMaker::calculateIndex()" << endl;
+  { LOG_DEBUG << "StRichSpectraMaker::calculateIndex()" << endm; }
     PR(y);
     
     double ypos = (y<0) ? (y+mYExtreme) : y;
     double deltaT    = mTemperatureGradient*ypos;
     
     mTheIndex = (mIndex*(1-mAlpha*deltaT));
-    PR(mTheIndex);
-    
-}
+    PR(mTheIndex);}
+  
 
 // ----------------------------------------------------
 StThreeVectorF StRichSpectraMaker::calculateRadiationPoint(StTrack* track, StThreeVectorF& thePlane)
@@ -1552,9 +1527,7 @@ bool StRichSpectraMaker::assignMipResidual(StTrack* track) {
     
     StThreeVectorF projectedMIP  = richTrack->getProjectedMIP();
     if(!richTrack->getAssociatedMIP()) {
-	cout << "StRichSpectraMaker::Make()\n";
-	cout << "\tNo Associated MIP\n";
-	cout << "\tSkip this track" << endl;
+      { LOG_DEBUG << "StRichSpectraMaker::Make() %n No Associated MIP %n Skip this track" << endm; }
 	delete richTrack;
 	richTrack=0;
 	return false;
@@ -1605,9 +1578,7 @@ void StRichSpectraMaker::drawRichPixels(StRichCollection* collection) const
 #ifdef RICH_WITH_PAD_MONITOR
     const StSPtrVecRichPixel&  pixels = collection->getRichPixels();
     if(!pixels.size()) {
-	cout << "StRichSpectraMaker::drawRichPixels()";
-	cout << "\tNo Pixels in the Collection\n";
-	cout << "\tReturning" << endl;
+      { LOG_INFO << "StRichSpectraMaker::drawRichPixels() : No Pixels in the Collection %n Returning" << endm; }
 	return;
     }
 
@@ -1626,9 +1597,7 @@ void StRichSpectraMaker::drawRichHits(StRichCollection* collection) const
 #ifdef RICH_WITH_PAD_MONITOR
     const StSPtrVecRichHit&  hits = collection->getRichHits();
     if(!hits.size()) {
-	cout << "StRichSpectraMaker::drawRichHits()";
-	cout << "\tNo Hits in the Collection\n";
-	cout << "\tReturning" << endl;
+      { LOG_INFO << "StRichSpectraMaker::drawRichHits() : No Hits in the Collection %n Returning" << endm; }
 	return;
     }
 

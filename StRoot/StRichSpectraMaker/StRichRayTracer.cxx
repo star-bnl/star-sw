@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.11  2007/04/27 13:11:48  hippolyt
+ * Star logger recommendations
+ *
  * Revision 1.10  2003/09/02 17:58:55  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -48,15 +51,14 @@
 #include "StRichRayTracer.h"
 #include <float.h>
 #include "StGlobals.hh"
+#include "StMessMgr.h"
 
 #include "StRrsMaker/StRichGeometryDb.h"
 #include "StRichPIDMaker/StRichMaterialsDb.h"
 
 StRichRayTracer::StRichRayTracer()
 {
-    cout << "StRichRayTracer::StRichRayTracer()\n";
-    cout << "\tERROR\n";
-    cout << "\tCANNOT call. Must specify a mean wavelength and freon index." << endl;
+  { LOG_ERROR << "StRichRayTracer::StRichRayTracer() %n ERROR %n CANNOT call. Must specify a mean wavelength and freon index." << endm; }
     abort();
     
 }
@@ -91,7 +93,7 @@ void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
     mExpectedQuartzRadiationPoint = quartzRadiationPoint;
 
     mIndexFreon = index;
-    cout << "Resetting index " << mIndexFreon << endl;
+    { LOG_INFO << "Resetting index " << mIndexFreon << endm; }
 //     PR(mRadiationPlanePoint);
 //     PR(mQuartzRadiationPlanePoint);
 
@@ -111,7 +113,7 @@ void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
 // ----------------------------------------------------
 void StRichRayTracer::init(double wavelength, double freonIndex)
 {
-//     cout << "StRichRayTracer::init()" << endl;
+  { LOG_DEBUG << "StRichRayTracer::init()" << endm; }
 
     mMeanWavelength = wavelength;
 //     PR(mMeanWavelength);
@@ -134,7 +136,7 @@ void StRichRayTracer::init(double wavelength, double freonIndex)
      PR(mIndexFreon);
      PR(mIndexQuartz);
      PR(mIndexCH4);
-     cerr << "Freon Index in Tracer " << mIndexFreon << endl;
+    { LOG_ERROR << "Freon Index in Tracer " << mIndexFreon << endm; }
      
      double mLower = 165.*nanometer;
      mnF1 = materialsDb->indexOfRefractionOfC6F14At(mLower);
@@ -186,19 +188,15 @@ void StRichRayTracer::init(double wavelength, double freonIndex)
 // ----------------------------------------------------
 void StRichRayTracer::setxyPrecision(double p) {
 
-    cout << "StRichRayTracer::setxyPrecision()\n";
-    cout << "\tWARNING:\n";
-    cout << "\tDo you know what you are doing?\n" << endl;
-    cout << "\t" << (mxyPrecision/millimeter) << " mm changing to ";
-
-    mxyPrecision = p;
-    cout << (mxyPrecision/millimeter) << " mm" << endl;
+  { LOG_WARN << "StRichRayTracer::setxyPrecision() %n WARNING : %n Do you know what you are doing? %n" << (mxyPrecision/millimeter) << " mm changing to " << endm; }
+  mxyPrecision = p;
+  { LOG_WARN << (mxyPrecision/millimeter) << " mm" << endm; }
 }
 
 // ----------------------------------------------------
 void StRichRayTracer::calculateGeometry()
 {
-//     cout << "StRichRayTracer::calculateGeometry()" << endl;
+  { LOG_DEBUG << "StRichRayTracer::calculateGeometry()" << endm; }
 
     mDetectorNormal     = StThreeVectorF(0., 0., 1.);
     mBottomQuartzPoint  = StThreeVectorF(0., 0., mGapThickness);
@@ -226,7 +224,7 @@ void StRichRayTracer::calculateTrackAngle()
 // ----------------------------------------------------
 void StRichRayTracer::setPhotonPosition(StThreeVectorF& pos)
 {
-//     cout << "StRichRayTracer::setPhotonPosition()" << endl;
+  { LOG_DEBUG << "StRichRayTracer::setPhotonPosition()" << endm; }
 
     mLocalPhotonPosition = pos;
 
@@ -283,7 +281,7 @@ StThreeVectorF StRichRayTracer::rotateToTrackInclination(double angle, StThreeVe
 // ----------------------------------------------------
 void StRichRayTracer::traceDown()
 {
-    cout << "********StRichRayTracer::traceDown()*******" << endl;
+  { LOG_INFO << "********StRichRayTracer::traceDown()*******" << endm; }
     StThreeVectorF unrotatedPhotonPropagator(sin(mCerenkovAngle)*cos(mPhi),
 					     sin(mCerenkovAngle)*sin(mPhi),
 					     -cos(mCerenkovAngle));
@@ -324,8 +322,7 @@ void StRichRayTracer::traceDown()
     double incidentAngle = M_PI - openingAngle;
     double sinr = mIndexFreon*sin(incidentAngle)/mIndexQuartz;
     if(sinr>1) {
-	cout << "StRichRayTracer::traceDown()\n";
-	cout << "ERROR --> freon/quartz refraction: sinr = " << sinr << ")" << endl;
+      { LOG_ERROR << "StRichRayTracer::traceDown() %n ERROR --> freon/quartz refraction: sinr = " << sinr << ")" << endm; }
 	return;
     }
 	    
@@ -342,8 +339,7 @@ void StRichRayTracer::traceDown()
     incidentAngle = M_PI - openingAngle;
     sinr = mIndexQuartz*sin(incidentAngle)/mIndexCH4;
     if(sinr>1) {
-	cout << "StRichRayTracer::traceDown()\n";
-	cout << "ERROR --> CH4/quartz refraction: sinr = " << sinr << ")" << endl;
+      { LOG_ERROR << "StRichRayTracer::traceDown() %n ERROR --> CH4/quartz refraction: sinr = " << sinr << ")" << endm; }
 	return;
     }
 	    
@@ -365,7 +361,7 @@ void StRichRayTracer::traceDown()
 // -------------------------------------------------------
 void StRichRayTracer::traceUp()
 {
-    cout << "\nStRichRayTracer::traceUp()" << endl;
+  { LOG_INFO << "\nStRichRayTracer::traceUp()" << endm; }
 
     PR(mGapPropagator);
     StThreeVectorF propagator = mGapPropagator;
@@ -440,7 +436,7 @@ void StRichRayTracer::traceUp()
 // ----------------------------------------------------
 bool StRichRayTracer::initialPropagator()
 {
-//     cout << "\nStRichRayTracer::initalPropagator()" << endl;
+  { LOG_DEBUG << "\nStRichRayTracer::initalPropagator()" << endm; }
 
     //
     // Take an initial guess at the angle the photon
@@ -615,7 +611,7 @@ bool StRichRayTracer::findCerenkovAngle()
 {
 //     cout << "StRichRayTracer::findCerenkovAngle()" << endl;
     if(!this->initialPropagator()) {
-	cout << "initialPropagator is BAD***" << endl;
+      { LOG_WARN << "initialPropagator is BAD***" << endm; }
 	return false;
     }
     else {
@@ -626,16 +622,14 @@ bool StRichRayTracer::findCerenkovAngle()
     // the first iteration to get a starting point
     //
     if(!this->propagateToRadiator()) {
-	cout << "StRichRayTracer::findCerenkovAngle()\n";
-	cout << "FATAL::1st iteration of propagateToRadiator()" << endl;
+      { LOG_WARN << "StRichRayTracer::findCerenkovAngle() %n FATAL::1st iteration of propagateToRadiator()" << endm; }
 	return false;
     };
 
     StThreeVectorF oldRadiationPoint = mTheCalculatedRadiationPoint;
 
     if(this->checkConvergence(oldRadiationPoint)) {
- 	cout << "*StRichRayTracer::findCerenkovAngle()\n";
- 	cout << "\tConvergence in first iteration" << endl;
+      {	LOG_INFO << "*StRichRayTracer::findCerenkovAngle() %n Convergence in first iteration" << endm; }
 	return true;
     }
     
@@ -659,8 +653,7 @@ bool StRichRayTracer::findCerenkovAngle()
 	iteration++;
 
 	if(!this->propagateToRadiator()) {
-	    cout << "StRichRayTracer::findCerenekovAngle()\n";
-	    cout << "FATAL ERROR 2 on iteration (" << iteration << ")" << endl;
+	  { LOG_ERROR << "StRichRayTracer::findCerenekovAngle() %n FATAL ERROR 2 on iteration (" << iteration << ")" << endm; }
 	    return false;
 	}
 	
@@ -755,9 +748,8 @@ bool StRichRayTracer::propagateToQuartz()
 	propagator.setTheta(quartzAngle);
     }
     else {
-	cout << "StRichRayTracer::propagateToQuartz()\n";
-	cout << "\tInternally reflected" << endl;
-	return false;
+      { LOG_ERROR << "StRichRayTracer::propagateToQuartz() %n Internally reflected" << endm; }
+      return false;
     }
 
     //
@@ -792,16 +784,14 @@ bool StRichRayTracer::findQuartzCerenkovAngle()
     //
 
     if(!this->propagateToQuartz()) {
-	cout << "StRichRayTracer::findQuartzCerenkovAngle()\n";
-	cout << "FATAL::1st iteration of propagateToQuartz()" << endl;
-	return false;
+      { LOG_ERROR << "StRichRayTracer::findQuartzCerenkovAngle() %n FATAL::1st iteration of propagateToQuartz()" << endm; }
+      return false;
     };
 
     StThreeVectorF oldRadiationPoint = mTheCalculatedQuartzRadiationPoint;
     
     if(this->checkQuartzConvergence(oldRadiationPoint)) {
- 	cout << "*StRichRayTracer::findQuartzCerenkovAngle()\n";
- 	cout << "\tConvergence in first iteration" << endl;
+      { LOG_INFO << "*StRichRayTracer::findQuartzCerenkovAngle() %n Convergence in first iteration" << endm; }
 	return true;
     }
     
@@ -826,8 +816,7 @@ bool StRichRayTracer::findQuartzCerenkovAngle()
 	iteration++;
 
 	if(!this->propagateToQuartz()) {
-	    cout << "StRichRayTracer::findQuartzCerenekovAngle()\n";
-	    cout << "FATAL ERROR 2 on iteration (" << iteration << ")" << endl;
+	  { LOG_ERROR << "StRichRayTracer::findQuartzCerenekovAngle() %n FATAL ERROR 2 on iteration (" << iteration << ")" << endm; }
 	    return false;
 	}
 	
@@ -870,14 +859,7 @@ bool StRichRayTracer::findQuartzCerenkovAngle()
 // ----------------------------------------------------
 void StRichRayTracer::status() const
 {
-    cout << "StRichRayTracer::status()\n";
-    cout << "-------------------------------------------" << endl;
-    cout << "CerenkovAngle   Azimuth    Quartz Cerenkov" << endl;
-    cout << "-------------------------------------------" << endl;
-    cout << (this->cerenkovAngle()/degree) << '\t'
-	 << (this->azimuth()/degree)     << '\t'
-	 << (this->quartzCerenkovAngle()/degree) << endl;
-    cout << "===========================================" << endl;
+  { LOG_INFO << "StRichRayTracer::status() %n ------------------------------------------- %n CerenkovAngle   Azimuth    Quartz Cerenkov %n ------------------------------------------- %n" << (this->cerenkovAngle()/degree) << "   " << (this->azimuth()/degree)     << "   " << (this->quartzCerenkovAngle()/degree) << "%n ===========================================" << endm; }
 }
 
 // ----------------------------------------------------
@@ -920,7 +902,7 @@ StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
     }
     else if(radPt.z() == 9.0) {
 	// intermediate value
-	cout << "intermediate" << endl;
+      { LOG_DEBUG << "intermediate" << endm; }
 	nF = mIndexFreon;
 	nQ = mIndexQuartz;
 	nG = mIndexCH4;
