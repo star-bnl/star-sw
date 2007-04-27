@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixelCollection.cxx,v 2.0 2000/08/09 16:22:13 gans Exp $
+ * $Id: StRichSinglePixelCollection.cxx,v 2.1 2007/04/27 11:26:45 hippolyt Exp $
  *
  * Description:
  *  Container for cluster finder which allows access in
@@ -11,6 +11,9 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixelCollection.cxx,v $
+ * Revision 2.1  2007/04/27 11:26:45  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.0  2000/08/09 16:22:13  gans
  * Cosmetic Changes. Naming convention for TDrawable objects
  *
@@ -27,6 +30,7 @@
  ****************************************************************/
 
 #include <memory>
+#include "StMessMgr.h"
 //#include <string.h>  // only for memcpy and memset functions
 
 #include "StGlobals.hh"
@@ -66,11 +70,7 @@ StRichSinglePixelCollection::StRichSinglePixelCollection(const StRichSinglePixel
 
     mPixelArray  = new StRichSinglePixel*[newx*newy];
     if(!mPixelArray) {
-	cerr << "StRichSinglePixelCollection::StRichSinglePixelCollection(const StRichSinglePixelCollection&)\n";
-	cerr << "\tFATAL:\n";
-	cerr << "\tCannot allocate memory for array.";
-	cerr << "\tAborting..." << endl;
-	abort();
+      { LOG_ERROR << "StRichSinglePixelCollection::StRichSinglePixelCollection(const StRichSinglePixelCollection&) %n FATAL: %n Cannot allocate memory for array. %n Aborting..." << endm; }
     }
     
     StRichSinglePixel* fillValue = 0;
@@ -110,10 +110,7 @@ StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection& old)
 	
 	mPixelArray  = new StRichSinglePixel* [newx*newy];
 	if(!mPixelArray) {
-	    cerr << "StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection&)\n";
-	    cerr << "\tFATAL:\n";
-	    cerr << "\tCannot allocate memory for array.";
-	    cerr << "\tAborting..." << endl;
+	  { LOG_ERROR << "StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection&) %n FATAL: %n Cannot allocate memory for array. %n Aborting..." << endm; }
 	    abort();
 	}
 	StRichSinglePixel* fillValue = 0;
@@ -137,17 +134,10 @@ StRichSinglePixelCollection::resize(size_t x, size_t y)
 {
     //cout << "StRichSinglePixelCollection::resize()" << endl;
     if(x<0 || y<0) { //cannot have a -ive array size
-	cerr << "StRichSinglePixelCollection::resize():\n"
-	     << "\tERROR\n"
-	     << "\tIllegal size of (" << x << ", " << y << ")"
-	     << "\tRequest Ignored!" << endl;
+      { LOG_ERROR << "StRichSinglePixelCollection::resize(): %n ERROR %n Illegal size of (" << x << ", " << y << ")  Request Ignored!" << endm; }
     }
     if(x<mMaxX || y<mMaxY) { //make array smaller
-	cerr << "StRichSinglePixelCollection::resize():\n"
-	     << "\tWARNING\n"
-	     << "\tResize request of (" << x << ", " << y << ")"
-	     << "\tis smaller than existing array"
-	     << "\tContinuing..." << endl;
+      { LOG_ERROR << "StRichSinglePixelCollection::resize(): %n WARNING %n Resize request of (" << x << ", " << y << ")  is smaller than existing array... Continuing..." << endm; }
     }
 
     mMaxX = x+mMinX-1;
@@ -161,10 +151,7 @@ StRichSinglePixelCollection::resize(size_t x, size_t y)
 
     mPixelArray = new StRichSinglePixel* [newsize];
     if(!mPixelArray) {
-	cerr << "StRichSinglePixelCollection::resize():\n"
-	     << "\tERROR\n"
-	     << "\tCannot allocate memory for 2-d array."
-	     << "\tAborting" << endl;
+      { LOG_ERROR << "StRichSinglePixelCollection::resize(): %n ERROR %n Cannot allocate memory for 2-d array. Aborting" << endm; }
 	abort();
     }
 
@@ -297,10 +284,8 @@ StRichSinglePixelCollection::operator[](size_t i)
 	return(mPixelVector[i]);
     else {
 	// should throw exception
-	cerr << "StRichSinglePixelCollection::operator[]";
-	cerr << "\tERROR:";
-	cerr << "\tOut of Bounds";
-	return mZero;
+      { LOG_ERROR << "StRichSinglePixelCollection::operator[] %n ERROR: Out of Bounds" << endm; }
+      return mZero;
     }
 }
 
@@ -311,10 +296,8 @@ StRichSinglePixelCollection::operator[](size_t i) const
 	return(mPixelVector[i]);
     else {
 	// should throw exception
-	cerr << "StRichSinglePixelCollection::operator[]";
-	cerr << "\tERROR:";
-	cerr << "\tOut of Bounds";
-	return mZero;
+      { LOG_ERROR << "StRichSinglePixelCollection::operator[] %n ERROR: Out of Bounds" << endm; }
+      return mZero;
     }
 }
 
