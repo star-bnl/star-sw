@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.80 2007/02/28 13:31:27 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.81 2007/04/27 15:39:28 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.81  2007/04/27 15:39:28  jcs
+// Removed obsolete histogram (fpt_theta)
+// Only create and fill FTPC vertex by sector histograms if bfc debug option is on
+//
 // Revision 1.80  2007/02/28 13:31:27  jcs
 // temporary fix: add explanation why accessing ftpcDimensions and ftpcPadRowZ
 // in Init doesn't cause problems
@@ -449,7 +453,6 @@ if (m_Mode >= 2) {
 //			      100, -10., 10.);
 
   if (IAttr(".histos")) {
-     m_theta        = new TH1F("fpt_theta", "FTPC theta", 100, -5.0, 5.0 );
      m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 
 			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
@@ -474,24 +477,26 @@ if (m_Mode >= 2) {
      m_phires_vs_r_west = new TH2F("fpt_phi_res_vs_r_west", "FTPC west phi residuals vs. r", 
 				   100, -0.01, 0.01, 100, 6.5, 31.);
 
-     m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", 
- 				          "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 
-				          6, 0.5, 6.5,  80,  -2.,  2.);
-     m_vertex_east_y_vs_sector = new TH2F("fpt_vertex_east_y_vs_sector", 
-				          "FTPC east vertex y estimation vs. sector with resp. to TPC vertex", 
-				          6, 0.5, 6.5,  80,  -2.,  2.);
-     m_vertex_east_z_vs_sector = new TH2F("fpt_vertex_east_z_vs_sector", 
-				          "FTPC east vertex z estimation vs. sector with resp. to TPC vertex", 
-				          6, 0.5, 6.5, 100, -10., 10.);
-     m_vertex_west_x_vs_sector = new TH2F("fpt_vertex_west_x_vs_sector", 
-				          "FTPC west vertex x estimation vs. sector with resp. to TPC vertex", 
-				          6, 0.5, 6.5,  80,  -2.,  2.);
-     m_vertex_west_y_vs_sector = new TH2F("fpt_vertex_west_y_vs_sector", 
-				          "FTPC west vertex y estimation vs. sector with resp. to TPC vertex", 
-				          6, 0.5, 6.5,  80,  -2.,  2.);
-     m_vertex_west_z_vs_sector = new TH2F("fpt_vertex_west_z_vs_sector", 
-				          "FTPC west vertex z estimation vs. sector with resp. to TPC vertex", 
-				          6, 0.5, 6.5, 100, -10., 10.);
+     if (Debug()) {
+        m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", 
+ 	            		             "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 
+				             6, 0.5, 6.5,  80,  -2.,  2.);
+        m_vertex_east_y_vs_sector = new TH2F("fpt_vertex_east_y_vs_sector", 
+				             "FTPC east vertex y estimation vs. sector with resp. to TPC vertex", 
+				             6, 0.5, 6.5,  80,  -2.,  2.);
+        m_vertex_east_z_vs_sector = new TH2F("fpt_vertex_east_z_vs_sector", 
+				             "FTPC east vertex z estimation vs. sector with resp. to TPC vertex", 
+				             6, 0.5, 6.5, 100, -10., 10.);
+        m_vertex_west_x_vs_sector = new TH2F("fpt_vertex_west_x_vs_sector", 
+				             "FTPC west vertex x estimation vs. sector with resp. to TPC vertex", 
+				             6, 0.5, 6.5,  80,  -2.,  2.);
+        m_vertex_west_y_vs_sector = new TH2F("fpt_vertex_west_y_vs_sector", 
+				             "FTPC west vertex y estimation vs. sector with resp. to TPC vertex", 
+				             6, 0.5, 6.5,  80,  -2.,  2.);
+        m_vertex_west_z_vs_sector = new TH2F("fpt_vertex_west_z_vs_sector", 
+				             "FTPC west vertex z estimation vs. sector with resp. to TPC vertex", 
+				             6, 0.5, 6.5, 100, -10., 10.);
+     }
   }  //end if IAttr(".histos")
 
   return StMaker::Init();
@@ -770,7 +775,6 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
        TObjArray   *fhits = (TObjArray*) track->GetHits();
     
        m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
-       m_theta->Fill(track->GetTheta());
     
        for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
       
@@ -894,7 +898,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.80 2007/02/28 13:31:27 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.81 2007/04/27 15:39:28 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
