@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: tform.cxx,v 2.1 2003/09/02 17:58:58 perev Exp $
+ * $Id: tform.cxx,v 2.2 2007/04/27 13:53:30 hippolyt Exp $
  * Description:
  *  Stand-alone test module
  *
  * $Log: tform.cxx,v $
+ * Revision 2.2  2007/04/27 13:53:30  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.1  2003/09/02 17:58:58  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -28,7 +31,7 @@
 #ifdef RICH_HISTOGRAM
 #include "StHbook.hh"
 #endif
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include <string>
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
@@ -42,7 +45,7 @@ using std::string;
 int main()
 {
 #ifdef RICH_HISTOGRAM
-    cout << "Histogram" << endl;
+    { LOG_INFO << "Histogram" << endm; }
     
     //
     //  Open histogram file and book tuple
@@ -111,8 +114,8 @@ int main()
     int endRow   = myGeometryDb->numberOfRowsInAColumn();
     int startPad = 0;
     int endPad = myGeometryDb->numberOfPadsInARow();
-    cout << "ROWS: " << startRow << " - " << endRow << endl;
-    cout << "PADS: " << startPad << " - " << endPad << endl;
+    { LOG_INFO << "ROWS: " << startRow << " - " << endRow << endm; }
+    { LOG_INFO << "PADS: " << startPad << " - " << endPad << endm; }
     for(int iRow=startRow; iRow<endRow; iRow++) {
 	raw.setRow(iRow);
 	for(int iPad=startPad; iPad<endPad; iPad++) {
@@ -169,7 +172,7 @@ int main()
     delete myPhysicsDb;
 
 #ifdef RICH_HISTOGRAM
-    cout << "Save and close " << endl;
+    { LOG_INFO << "Save and close " << endm; }
     hbookFile->saveAndClose();
 #endif  
     return 0;

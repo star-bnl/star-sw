@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 2.5 2006/08/15 21:42:11 jeromel Exp $
+ * $Id: StRrsMaker.cxx,v 2.6 2007/04/27 13:52:50 hippolyt Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 2.6  2007/04/27 13:52:50  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.5  2006/08/15 21:42:11  jeromel
  * Fix rhic -> rhic.bnl.gov
  *
@@ -102,7 +105,7 @@
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 
-//#include <Stiostream.h>
+#include "StMessMgr.h"
 #include <string>
 
 #ifndef ST_NO_NAMESPACES
@@ -235,12 +238,12 @@ Int_t StRrsMaker::Init()
     mGeometryDb = StRichGeometryDb::getDb();
 
     if ( !mGeometryDb ) {
-      cerr << "Geometry database could not be initialized. Aborting!!!\n";
+      { LOG_ERROR << "Geometry database could not be initialized. Aborting!!!" << endm; }
       return 1;
     }
 
     if ( !mPhysicsDb ) {
-      cerr << "Physics database could not be initialized. Aborting!!!\n";
+      { LOG_ERROR << "Physics database could not be initialized. Aborting!!!" << endm; }
       return 1;
     }
 
@@ -269,7 +272,7 @@ Int_t StRrsMaker::Init()
     mWriter = StRichWriter::getInstance(mPadPlane);
 
     if ( !mWriter ) {
-      cerr << "Output module could not be initialized. Aborting!!!\n";
+      { LOG_ERROR << "Output module could not be initialized. Aborting!!!" << endm; }
       return 1;
     }
 
@@ -299,7 +302,7 @@ Int_t StRrsMaker::Init(int useHistos)
 {
 #ifdef RICH_WITH_VIEWER
     // Viewer is here
-    cout << "Try make a viewer" << endl;
+  { LOG_DEBUG << "Try make a viewer" << endm; }
     StRichViewer* view = 0;
     StRichViewer::histograms = useHistos;
     //StRichViewer::foo = useHistos;
@@ -307,7 +310,7 @@ Int_t StRrsMaker::Init(int useHistos)
 	view = StRichViewer::getView();
 
     if ( !view ) {
-	cerr << "No histograming will be done.\n";
+      { LOG_ERROR << "No histograming will be done." << endm; }
 	StRichViewer::histograms = 0;
     }
 #endif
@@ -339,7 +342,7 @@ int StRrsMaker::whichVolume(int val, string* vName)
 	break;	
     default:
 	*vName = string("");
-	cerr << "StRrsMaker::whicVolume() UNKNOWN Volume" << endl;
+	{ LOG_ERROR << "StRrsMaker::whichVolume() UNKNOWN Volume" << endm; }
 	break;
     }
     int volumeNumber = (val - (volume*1000));
@@ -348,7 +351,7 @@ int StRrsMaker::whichVolume(int val, string* vName)
 
 Int_t StRrsMaker::Make()
 {
-    cout << " -- Begin RRS Processing --" << endl;
+  { LOG_DEBUG << " -- Begin RRS Processing --" << endm; }
 
 //       cout << "-- Press return to continue -- ";
 //       char c = cin.get();
@@ -391,7 +394,7 @@ Int_t StRrsMaker::Make()
     //
     if (mReadFromFile) {
 	//mInputStream->fillTrsEvent(mPadPlane);
-	cout << "Done Filling mPadPlane from File" << endl;
+      { LOG_WARN << "Done Filling mPadPlane from File" << endm; }
     }
     //
     // or do the normal processing of RRS from GEANT
@@ -412,9 +415,7 @@ Int_t StRrsMaker::Make()
 		static_cast<St_g2t_track *>(geant("g2t_track"));
 
  	    if(!g2t_track){
- 		cout << "StRrsMaker::Make()";
- 		cout << "\tNo g2t_track pointer";
- 		cout << "\treturn from StRrsMaker::Make()" << endl;
+	      { LOG_WARN << "StRrsMaker::Make() %n No g2t_track pointer %n return from StRrsMaker::Make()" << endm; }
  		return kStWarn;
  	    }
 
@@ -429,9 +430,7 @@ Int_t StRrsMaker::Make()
 		static_cast<St_g2t_tpc_hit *>(geant("g2t_tpc_hit"));
 
 	    if(!g2t_tpc_hit){
-		cout << "StRrsMaker::Make()";
-		cout << "\tNo g2t_tpc_hit pointer";
-		cout << "\treturn from StRrsMaker::Make()" << endl;
+	      { LOG_WARN << "StRrsMaker::Make() %n No g2t_tpc_hit pointer %n return from StRrsMaker::Make()" << endm; }
 		return kStWarn;
 	    }
 
@@ -450,9 +449,7 @@ Int_t StRrsMaker::Make()
 	    }
 
 	    if(!g2t_rch_hit){
-		cout << "StRrsMaker::Make()";
-		cout << "\tNo g2t_rch_hit pointer";
-		cout << "\treturn from StRrsMaker::Make()" << endl;
+	      { LOG_WARN << "StRrsMaker::Make() %n No g2t_rch_hit pointer %n return from StRrsMaker::Make()" << endm; }
 		return kStWarn;
 	    }
 	    
@@ -674,8 +671,7 @@ Int_t StRrsMaker::Make()
     mWriter->cleanUpMCInfo();
     
     if(mWriteToFile) {
-	cout << "StRrsMaker::Maker()";
-	cout << "\tWrite DATA out" << endl; 
+      { LOG_INFO << "StRrsMaker::Maker() - Write DATA out" << endm; }
 	//mOutPutStream->writeRrsEvent(mPadPlane);
     }
 
@@ -699,14 +695,14 @@ Int_t StRrsMaker::Make()
     anIDList::const_iterator listIter;
 #endif
 #ifdef RICH_WITH_PAD_MONITOR
-    cout << "Get Instance of Pad Monitor" << endl;
+    { LOG_DEBUG << "Get Instance of Pad Monitor" << endm; }
     StRichPadMonitor* thePadMonitor = StRichPadMonitor::getInstance(mGeometryDb);
     cout << "Try Clear" << endl;    
     thePadMonitor->clearAll();  
 #endif  // Pad Monitor
     
     StRrsReader theReader(mPadPlane,version);
-    cout << "DECODER " << endl;
+    { LOG_DEBUG << "DECODER " << endm; }
     for(int iRow=0; iRow<(mGeometryDb->numberOfRowsInAColumn()); iRow++) {
 	for(int iCol=0; iCol<(mGeometryDb->numberOfPadsInARow()); iCol++) {
 	    
@@ -719,7 +715,7 @@ Int_t StRrsMaker::Make()
  		for(listIter  = aListOfMCInfo.begin();
  		    listIter != aListOfMCInfo.end();
  		    listIter++) {
- 		    cout << "\t" << *listIter << endl;
+		  { LOG_DEBUG << " - - " << *listIter << endm; }
  		}
 #endif // DIAGNOSTIC
 		

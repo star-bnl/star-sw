@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRichASCIIReader.cxx,v 2.0 2000/08/09 16:16:58 gans Exp $
+ * $Id: StRichASCIIReader.cxx,v 2.1 2007/04/27 13:52:49 hippolyt Exp $
  *
  * Description:
  *******************************************************
  * $Log: StRichASCIIReader.cxx,v $
+ * Revision 2.1  2007/04/27 13:52:49  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.0  2000/08/09 16:16:58  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -30,22 +33,22 @@
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
-    
+
+#include "StMessMgr.h"    
 #include "StRichASCIIReader.h"
 #include "StRichGHit.h"
 
 StRichASCIIReader::StRichASCIIReader()
 {
-    cout << "StRichASCIIReader::StRichASCIIReader()" << endl;
-    abort();
+  { LOG_DEBUG << "StRichASCIIReader::StRichASCIIReader()" << endm; }
+  abort();
 }
 
 StRichASCIIReader::StRichASCIIReader(string& file)
     : mIfs(file.c_str())
 {
     if(!mIfs || mIfs.bad()) {
-	cout << "StRichASCIIReader::StRichASCIIReader(string&)" << endl;
-	cout << "Cannot Open file " << file.c_str() << endl;
+      { LOG_WARN << "StRichASCIIReader::StRichASCIIReader(string&) %n Cannot Open file " << file.c_str() << endm; }
 	abort();
     }
 }
@@ -89,7 +92,7 @@ int StRichASCIIReader::whichVolume(int val)
         break;
     default:
         mGV = string("");
-        cerr << "StRchMaker::whicVolume() UNKNOWN Volume" << endl;
+        { LOG_ERROR << "StRchMaker::whicVolume() UNKNOWN Volume" << endm; }
         break;
     }
     int volumeNumber = (val - (volume*1000));

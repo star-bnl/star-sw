@@ -1,10 +1,13 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 2.2 2003/09/02 17:58:56 perev Exp $
+ * $Id: StRichWriter.cxx,v 2.3 2007/04/27 13:52:50 hippolyt Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
+ * Revision 2.3  2007/04/27 13:52:50  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.2  2003/09/02 17:58:56  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -54,7 +57,7 @@
  ******************************************************/
 
 // STL
-#include <Stiostream.h>
+#include "StMessMgr.h"
 
 // ROOT
 #ifdef __ROOT__
@@ -73,7 +76,7 @@ StRichWriter* StRichWriter::p2Instance = 0;
 StRichWriter::StRichWriter()
     : mStorage(0), mPhysicsDb(0)
 { /* NEVER CAN CALL */
-    cerr << "StRichWriter::StRichWriter()--> Never called" << endl;
+  { LOG_ERROR << "StRichWriter::StRichWriter()--> Never called" << endm; }
     abort();
 }
 
@@ -88,7 +91,7 @@ StRichWriter* StRichWriter::getInstance()
 {
     //cerr << "WARNING::StRichWriter::getInstance()" << endl;
     if(!p2Instance)
-	cerr << "An Instance of StRichPadPlane must exist!" << endl;
+      { LOG_ERROR << "An Instance of StRichPadPlane must exist!" << endm; }
     return p2Instance;
 }
 
