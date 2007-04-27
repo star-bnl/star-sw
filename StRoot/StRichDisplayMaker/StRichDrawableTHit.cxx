@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableTHit.cxx,v 2.2 2003/09/02 17:58:52 perev Exp $
+ * $Id: StRichDrawableTHit.cxx,v 2.3 2007/04/27 11:39:12 hippolyt Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTHit.cxx,v $
+ * Revision 2.3  2007/04/27 11:39:12  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.2  2003/09/02 17:58:52  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -32,8 +35,7 @@
  * Initial Revision
  *
  ***************************************************************/
-#include <Stiostream.h>
-#include "Stiostream.h"
+#include "StMessMgr.h"
 #ifdef __ROOT__
 #include "StRichDrawableTHit.h"
 #include "StRchMaker/StRichSimpleHit.h"
@@ -90,13 +92,13 @@ StRichHit* StRichDrawableTHit::getRichHit() const {return mRichHit;}
 //     switch(event) {
 
 //     case kMouseEnter:
-// 	cerr <<"i did it";
+// 	{LOG_ERROR <<"i did it" endm;}
 // 	break;
 //     case kButton2Down:
-// 	cerr <<"i did it";
+// 	{LOG_ERROR <<"i did it" endm;}
 // 	break;
 //     case kMouseLeave:
-// 	cerr << "work!!!";
+// 	{LOG_ERROR <<"work!!!" endm;}
 //     default:
 // 	break;
 //     }
