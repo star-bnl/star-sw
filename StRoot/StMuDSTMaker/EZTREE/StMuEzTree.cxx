@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StMuEzTree.cxx,v 1.3 2004/11/29 15:55:07 mvl Exp $
+ * $Id: StMuEzTree.cxx,v 1.4 2007/04/27 17:07:16 mvl Exp $
  *
  * Author: Wei-Ming Zhang             KSU  Aug. 2004
  *
@@ -69,6 +69,8 @@ EztTrigBlob* StMuEzTree::copyTrig(StEvent* ev){
   EztTrigBlob * trigBlob = new EztTrigBlob;
   
   StTriggerData* trigData = ev->triggerData();
+  if (trigData == 0)
+     return 0;
   char *rawData= trigData->getTriggerStructure();
   int rawSize=trigData->getRawSize();
 
