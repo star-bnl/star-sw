@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.23 2007/04/26 04:08:41 perev Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.24 2007/04/27 14:59:10 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.24  2007/04/27 14:59:10  wleight
+ * Corrected another error in the creation of new hits
+ *
  * Revision 1.23  2007/04/26 04:08:41  perev
  * Remove StBFChain dependency
  *
@@ -528,7 +531,7 @@ Int_t StPixelFastSimMaker::Make()
 		    tempHit2->setLayer(i+1);           
 		    tempHit2->setLadder(ladderCount);           
 		    tempHit2->setWafer(waferCount);
-		    tempHit2->setExtraByte0(1);                                                                
+		    tempHit2->setExtraByte0(2);                                                                
 		    col->addHit(tempHit2);
 		  }
 		}
