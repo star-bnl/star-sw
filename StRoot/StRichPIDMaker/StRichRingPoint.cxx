@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.9 2003/11/19 18:12:33 perev Exp $
+ * $Id: StRichRingPoint.cxx,v 2.10 2007/04/27 12:03:28 hippolyt Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
+ *  Revision 2.10  2007/04/27 12:03:28  hippolyt
+ *  Star logger recommendations
+ *
  *  Revision 2.9  2003/11/19 18:12:33  perev
  *  Fix Float Point Exception
  *
@@ -48,6 +51,7 @@
 #include "StRichRingPoint.h"
 
 #include <math.h>
+#include "StMessMgr.h"
 
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
@@ -63,7 +67,7 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   mParticle = 0;
 
   if (!track) {
-    cerr << "WARNING: StRichRingPoint passed NULL pointer!" << endl;
+    { LOG_WARN << "StRichRingPoint passed NULL pointer!" << endm; }
     abort();
   }
   
@@ -161,11 +165,7 @@ void StRichRingPoint::setParticleType(StParticleDefinition* particle) {
 
     
     if (mCher>M_PI/2.0 || mCher<0) {
-	cout << "StRichRingPoint::setParticleType()\n";
-	cout << "\tERROR\n";
-	cout << "\tProblem with the Chernekov angle!\n";
-	cout << "\tmCher= " << mCher;
-	cout << "\tabort!! "<< endl;
+      { LOG_ERROR << "StRichRingPoint::setParticleType() %n ERROR %n Problem with the Chernekov angle! %n mCher= " << mCher << "abort!! "<< endm; }
 	abort();
     } 
 
@@ -272,28 +272,7 @@ bool StRichRingPoint::getPoint(double psi, StThreeVectorF& point) {
       mDepthProx*mTanMAngle*sinPsiPrime;
   
   if (isnan(tempXVal) || isnan(tempYVal)) {
-      cout << "StRichRingPoint::getPoint()\n";
-      cout << "\tERROR:\n";
-      cout << "impactxy = " << mImpactPoint << endl;
-      cout << "psi = " << psi/degree << endl;
-      cout << "mtanCher = " << mTanCher << endl;
-      cout << " cosPsi  sinPsi = " << cosPsi << "   " << sinPsi << endl;
-      cout << "mLightRay = " << mLightRay << endl;
-      cout << "mRotatedLightRay = " << mRotatedLightRay << endl;
-      cout << "mTrackCosTheta     mTrackCosPhi        mTrackSinPhi        mTrackSinTheta   " 
-	   << mTrackCosTheta  << "  " <<    mTrackCosPhi    << "  " <<     mTrackSinPhi    
-	   << "  " <<     mTrackSinTheta << endl;
-
-      cout << "mPsiPrime = " << mPsiPrime << endl;
-      cout << "cosPsiPrime    sinPsiPrime  = " << cosPsiPrime << "   " <<    sinPsiPrime << endl;
-      cout << "mRingType = " << static_cast<int>(mRingType) << endl;
-    
-      cout << " mDepthQuar*mTanQAngle*cosPsiPrime  = " <<  mDepthQuar << "   " 
-	   << mTanQAngle << "   " << cosPsiPrime << endl;
-    
-      cout << " mPropagatedLightRay = " <<  mPropagatedLightRay << endl;
-      cout << "mDepthProx*mTanMAngle*sinPsiPrime = " << mDepthProx 
-	   << "   " << mTanMAngle << "   " << sinPsiPrime << endl;
+    { LOG_ERROR << "StRichRingPoint::getPoint() %n ERROR : %n impactxy = " << mImpactPoint << "psi = " << psi/degree << "mtanCher = " << mTanCher << " cosPsi  sinPsi = " << cosPsi << "   " << sinPsi << "mLightRay = " << mLightRay << "mRotatedLightRay = " << mRotatedLightRay << "mTrackCosTheta     mTrackCosPhi        mTrackSinPhi        mTrackSinTheta   " << mTrackCosTheta  << "  " <<    mTrackCosPhi    << "  " <<     mTrackSinPhi    << "  " <<     mTrackSinTheta << " %n mPsiPrime = " << mPsiPrime << "%n cosPsiPrime    sinPsiPrime  = " << cosPsiPrime << "   " <<    sinPsiPrime << "%n mRingType = " << static_cast<int>(mRingType) << "%n mDepthQuar*mTanQAngle*cosPsiPrime  = " <<  mDepthQuar << "   " << mTanQAngle << "   " << cosPsiPrime << "%n mPropagatedLightRay = " <<  mPropagatedLightRay << "%n mDepthProx*mTanMAngle*sinPsiPrime = " << mDepthProx << "   " << mTanMAngle << "   " << sinPsiPrime << endm; }
       abort();
   }
   

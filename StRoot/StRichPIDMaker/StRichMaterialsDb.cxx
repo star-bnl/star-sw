@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.cxx,v 2.6 2001/04/10 16:56:06 lasiuk Exp $
+ * $Id: StRichMaterialsDb.cxx,v 2.7 2007/04/27 12:03:27 hippolyt Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.cxx,v $
+ *  Revision 2.7  2007/04/27 12:03:27  hippolyt
+ *  Star logger recommendations
+ *
  *  Revision 2.6  2001/04/10 16:56:06  lasiuk
  *  Change parameters to bring into line with richgeo.g and CERN.
  *
@@ -32,9 +35,10 @@
   **********************************************************/
 
 #include "StRichMaterialsDb.h"
-
+#include "StMessMgr.h"
 #include "StGlobals.hh"
 #include "SystemOfUnits.h"
+
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -143,19 +147,15 @@ void StRichMaterialsDb::setWavelengthRange(double shortwave, double longwave) {
   mInnerWave = longwave;
   mOuterWave = shortwave;
 
-  cout << "StRichMaterialsDb::setWavelenghtRange() ---> using wavelengths " 
-       <<  mInnerWave/nanometer  << "  nm     and " 
-       << mOuterWave/nanometer << "nm " << endl; 
+  { LOG_INFO << "StRichMaterialsDb::setWavelenghtRange() ---> using wavelengths " <<  mInnerWave/nanometer  << "  nm     and " << mOuterWave/nanometer << "nm " << endm; }
 }
 
 bool StRichMaterialsDb::boundsCheck(double index) const {
   
     bool status = true;
     if ( (index>mEnergy.size()-1) || index<0) {
-	cerr << "StRichMaterialsDb::boundsCheck()\n";
-	cerr << "WARNING\n";
-	cerr << "\tindex = " << index << endl;
-	status = false;
+      { LOG_ERROR << "StRichMaterialsDb::boundsCheck() %n WARNING %n index = " << index << endm; }
+      status = false;
     }
     
     return status;
@@ -173,9 +173,7 @@ double StRichMaterialsDb::whichBin(double lambda) const {
     
 //     double bin = -1;
     if( (energy < mEnergy.front()) || (energy > mEnergy.back()) ) {
-	cout << "StRichMaterialsDb::whichBin()\n";
-	cout << "WARNING:\n";
-	cout << "\tEnergy Out of Range (" << (energy/eV) << " eV)" << endl;
+      { LOG_INFO << "StRichMaterialsDb::whichBin() %n WARNING : %n Energy Out of Range (" << (energy/eV) << " eV)" << endm; }
     }
     return ( (energy - mEnergy.front())/mBinSize);
 }
