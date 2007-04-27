@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.496 2006/04/10 18:58:24 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.496.6.1 2007/04/27 01:52:15 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -35,8 +35,8 @@
 #endif
 
 // NoChainOptions -> Number of chain options auto-calculated
-Int_t NoChainOptions = 0;
-St_Bfc *chainOpt = 0;
+//Int_t NoChainOptions = 0;
+//St_Bfc *chainOpt = 0;
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
@@ -382,6 +382,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("VFppLMV5") ){  VtxOpt |= (0x1 << 2);} //  4 0x04
       if ( GetOption("VFPPV") ){     VtxOpt |= (0x1 << 3);} //  8 0x08
       if ( GetOption("VFPPVnoCTB") ){VtxOpt |= (0x1 << 4);} // 16 0x10
+      if ( GetOption("VFFV") ){      VtxOpt |= (0x1 << 5);} // 32 0x20
+      if ( GetOption("VFMCE") ){     VtxOpt |= (0x1 << 6);} // 64 0x40
       mk->SetMode(VtxOpt);
 
       // All VertexFinders implement those (or not)

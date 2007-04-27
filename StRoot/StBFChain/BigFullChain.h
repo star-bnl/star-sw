@@ -378,6 +378,8 @@ Bfc_st BFC2[] = { // ITTF Chains
 #else
   {"VFPPV"      ,""  ,"","",""                                ,"","... Pile-up proof vertex finder",kFALSE},
   {"VFPPVnoCTB"      ,""  ,"","",""                    ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
+  {"VFFV"        ,""  ,"","",""                                     ,"","... Fixed dummy VF method",kFALSE},
+  {"VFMCE"       ,""  ,"","",""                                 ,"","... Fixed vertex from MCEvent",kFALSE},
 #endif /* __BFC2__ */
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
