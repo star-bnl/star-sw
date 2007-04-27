@@ -26,3 +26,4 @@ class created via the BFC.  There are two ways to get this:
 
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb               
 If you have any questions, contact David Hardtke (DHHardtke@lbl.gov)
+Added this line as a test for CVS commit (RAW 04/27/2007)
