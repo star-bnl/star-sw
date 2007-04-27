@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableTMip.cxx,v 2.3 2003/09/02 17:58:52 perev Exp $
+ * $Id: StRichDrawableTMip.cxx,v 2.4 2007/04/27 11:39:12 hippolyt Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTMip.cxx,v $
+ * Revision 2.4  2007/04/27 11:39:12  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.3  2003/09/02 17:58:52  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -25,8 +28,7 @@
  * Intitial
  *
  ***************************************************************/
-#include <Stiostream.h>
-#include "Stiostream.h"
+#include "StMessMgr.h"
 #ifdef __ROOT__
 
 #include "SystemOfUnits.h"
@@ -174,7 +176,7 @@ void StRichDrawableTMip::drawPionRing(){
     else if(mTrackPointer->getRing(StPionMinus::instance()))
 	mTrackPointer->getRing(StPionMinus::instance())->draw();
     else
-	cerr << " No Pion Ring -- Probably Not Above Threshold\n";
+      { LOG_ERROR << " No Pion Ring - Probably Not Above Threshold" << endm; }
 }
 void StRichDrawableTMip::drawKaonRing()
 {
@@ -183,7 +185,7 @@ void StRichDrawableTMip::drawKaonRing()
     else if(mTrackPointer->getRing(StKaonMinus::instance()))
 	mTrackPointer->getRing(StKaonMinus::instance())->draw();
     else
-	cerr << " No Kaon Ring -- Probably Not Above Threshold\n";
+      { LOG_ERROR << " No Kaon Ring - Probably Not Above Threshold" << endm; }
 }
 void StRichDrawableTMip::drawProtonRing(){
     if(mTrackPointer->getRing(StProton::instance()))
@@ -191,7 +193,7 @@ void StRichDrawableTMip::drawProtonRing(){
     else if(mTrackPointer->getRing(StAntiProton::instance()))
 	mTrackPointer->getRing(StAntiProton::instance())->draw();
     else
-	cerr << " No Proton Ring -- Probably Not Above Threshold\n";
+      { LOG_ERROR << " No Proton Ring - Probably Not Above Threshold" << endm; }
 }
     
 void StRichDrawableTMip::drawAllRings(){
@@ -213,7 +215,7 @@ void StRichDrawableTMip::findRealMip(){
 	mTMarkerMIPPointer->Draw();
     }
     else
-	cout << "No Geant Mip";
+      { LOG_INFO << "No Geant Mip" << endm; }
 }
 void StRichDrawableTMip::clearRealMip(){
     delete mTLineMIPPointer;
