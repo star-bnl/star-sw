@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: maker.cxx,v 2.1 2003/09/02 17:58:58 perev Exp $
+ * $Id: maker.cxx,v 2.2 2007/04/27 13:53:30 hippolyt Exp $
  * Description:
  *  Stand-alone test module
  *
  * $Log: maker.cxx,v $
+ * Revision 2.2  2007/04/27 13:53:30  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.1  2003/09/02 17:58:58  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -24,7 +27,7 @@
 #ifdef RICH_HISTOGRAM
 #include "StHbook.hh"
 #endif
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include <string>
 
 #ifndef ST_NO_NAMESPACES
@@ -58,7 +61,7 @@ using std::string;
 int main()
 {
 #ifdef RICH_HISTOGRAM
-    cout << "Histogram" << endl;
+    { LOG_INFO << "Histogram" << endm; }
     
     //
     //  Open histogram file and book tuple
@@ -125,7 +128,7 @@ int main()
 
 
     //*************************************************************//
-    cout << " -- Begin Processing --" << endl;
+    { LOG_INFO << " -- Begin Processing --" << endm; }
 #ifdef RICH_DIAGNOSTIC
     ofstream raw("data.txt");
 #endif
@@ -142,11 +145,11 @@ int main()
     int vid;
     //while( input(hit) == 0 )  {   // if OK
     for(int ii=0; ii<numberOfHits; ii++) {
-	cout << "************ " << ii << endl;
+	{ LOG_INFO << "************ " << ii << endm; }
 	int status = input(hit);
-	cout << hit << endl;
+	{ LOG_INFO << hit << endm; }
 	hit.full(cout);
-	cout << endl;
+	{ LOG_INFO << endm; }
 	
 	theRealHit.fill(hit.position().x(),
 			hit.position().y(),
@@ -160,8 +163,8 @@ int main()
 			hit.id(),
 			hit.volumeID());
 	theRealHit.full(cout);;
-	cout << endl;
-	cout << "vvvvvvvvvvvvvvvvvvvv" << endl;
+	{ LOG_INFO << endm; }
+	{ LOG_INFO << "vvvvvvvvvvvvvvvvvvvv" << endm; }
 
 #ifdef RICH_HISTOGRAM
 // 	tuple[0] = static_cast<float>(hit.x().x());
@@ -183,7 +186,7 @@ int main()
 	//myFilter(theRealHit);
 	PR(hit.volumeID());
 	if ( hit.volumeID() != "RCSI" ) {
-	    cout << "call myIonize()" << endl;
+	    { LOG_INFO << "call myIonize()" << endm; }
 	    myIonize( hit );		 
 	}
 	else {
@@ -191,7 +194,7 @@ int main()
 	    // check if it is photon
 	    PR(hit.dE());
 	    if ( hit.dE() > 0 )
-		cout << "call myInduceSignal()" << endl;
+		{ LOG_INFO << "call myInduceSignal()" << endm; }
 		myInduceSignal ( hit );
 	}
     
@@ -203,7 +206,7 @@ int main()
     }  // loop over hits
 
 
-    cout << "Try Write...Finish Looping over all hits." << endl;
+    { LOG_INFO << "Try Write...Finish Looping over all hits." << endm; }
     for ( int irow = 0; irow < myWriter->rows(); irow++ ) {
 	for ( int jpad = 0; jpad < myWriter->cols(); jpad++ ) {
 	    //mWriter->getSignal(i,j).signal +=  mNoiseSimulator();
@@ -213,8 +216,8 @@ int main()
 		    myADC( myWriter->getSignal(irow,jpad).signal );
 
 		if(myWriter->getSignal(irow,jpad).signal >0) {
-		    cout << "maker::getSignal (r,p): (" << irow << ", " << jpad << ")=> "
-			 << myWriter->getSignal(irow,jpad).signal << endl;
+		    { LOG_INFO << "maker::getSignal (r,p): (" << irow << ", " << jpad << ")=> "
+			 << myWriter->getSignal(irow,jpad).signal << endm; }
 
 	    }
 	}
@@ -224,13 +227,13 @@ int main()
     unsigned int theADCValue = 0;
     
     StRrsReader theReader(myPadPlane,version);
-    cout << "DECODER " << endl;
+    { LOG_INFO << "DECODER " << endm; }
     for(int iRow=0; iRow<(myGeometryDb->numberOfRowsInAColumn()); iRow++) {  // 96
 	for(int iCol=0; iCol<(myGeometryDb->numberOfPadsInARow()) ; iCol++) {
 	    
 	    theADCValue = theReader.GetADCFromCoord(iRow,iCol);
 	    if(theADCValue) {
-		//cout << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endl;
+		//{ LOG_INFO << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endm; }
 #ifdef RICH_DIAGNOSTIC
 		raw << "r/c/adc: "
 		    << iRow << ' '
@@ -261,7 +264,7 @@ int main()
     delete myPadPlane;
 
 #ifdef RICH_HISTOGRAM
-    cout << "Save and close " << endl;
+    { LOG_INFO << "Save and close " << endm; }
     hbookFile->saveAndClose();
 #endif
     

@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: db.cxx,v 2.1 2003/09/02 17:58:58 perev Exp $
+ * $Id: db.cxx,v 2.2 2007/04/27 13:53:30 hippolyt Exp $
  * Description:
  *  Stand-alone test module
  *
  * $Log: db.cxx,v $
+ * Revision 2.2  2007/04/27 13:53:30  hippolyt
+ * Star logger recommendations
+ *
  * Revision 2.1  2003/09/02 17:58:58  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -24,7 +27,7 @@
 #ifdef RICH_HISTOGRAM
 #include "StHbook.hh"
 #endif
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include <string>
 #include <vector>
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
@@ -45,12 +48,12 @@ int main()
     StRichGeometryDb* myGeometryDb = StRichGeometryDb::getDb();
 
     if ( !myGeometryDb ) {
-      cerr << "Geometry database could not be initialized. Aborting!!!\n";
+      { LOG_ERROR << "Geometry database could not be initialized. Aborting!!!" << endm; }
       return 1;
     }
 
     if ( !myPhysicsDb ) {
-      cerr << "Physics database could not be initialized. Aborting!!!\n";
+      { LOG_ERROR << "Physics database could not be initialized. Aborting!!!" << endm; }
       return 1;
     }
 
@@ -65,7 +68,7 @@ int main()
     StRichLocalCoordinate    localA;
     StGlobalCoordinate       global;
     
-    cout << "Raw --> Quadrant" << endl;
+    { LOG_INFO << "Raw --> Quadrant" << endm; }
     vector<StRichRawCoordinate> raw;
     raw.push_back(StRichRawCoordinate(0,0));
     raw.push_back(StRichRawCoordinate(79,0));
@@ -83,36 +86,33 @@ int main()
 
     int ii;
     for(ii=0; ii<raw.size(); ii++) {
-	cout << "ii= " << ii << endl;
-	(*transform)(raw[ii],quad);
-	cout << "raw --> quad:  " << raw[ii]   << " " << quad << endl;
-
+      { LOG_INFO << "ii= " << ii << endm; }
+      (*transform)(raw[ii],quad);
+      { LOG_INFO << "raw --> quad:  " << raw[ii]   << " " << quad << endm; }
 	(*transform)(raw[ii],localA);
-	cout << "raw --> local: " << raw[ii]   << " " << localA << endl;
-
+	{ LOG_INFO << "raw --> local: " << raw[ii]   << " " << localA << endm; }
 	(*transform)(raw[ii], global);
-	cout << "raw-->global:  " << raw[ii]   << " " << global << endl;
-
+	{ LOG_INFO << "raw-->global:  " << raw[ii]   << " " << global << endm; }
 	(*transform)(global,rawA);
-	cout << "global->rawA:  " << global  << " " << rawA
-	     << "(" << nearestInteger(rawA.pad()) << ", " << nearestInteger(rawA.row()) << ")" << endl;
+	{ LOG_INFO << "global->rawA:  " << global  << " " << rawA
+	     << "(" << nearestInteger(rawA.pad()) << ", " << nearestInteger(rawA.row()) << ")" << endm; }
     }
 
-    cout << "*****************************************\n" << endl;
+    { LOG_INFO << "*****************************************\n" << endm; }
     for(ii=0; ii<local.size(); ii++) {
-	cout << "ii= " << ii << endl;
-	cout << local[ii] << endl;
+	{ LOG_INFO << "ii= " << ii << endm; }
+	{ LOG_INFO << local[ii] << endm; }
 	(*transform)(local[ii],rawA);
-	cout << "local --> local: " << local[ii]   << " " << rawA << endl;
+	{ LOG_INFO << "local --> local: " << local[ii]   << " " << rawA << endm; }
 
 	(*transform)(local[ii],quad);
-	cout << "local --> quad:  " << local[ii]   << " " << quad << endl;
+	{ LOG_INFO << "local --> quad:  " << local[ii]   << " " << quad << endm; }
 
 	(*transform)(local[ii], global);
-	cout << "local-->global:  " << local[ii]   << " " << global << endl;
+	{ LOG_INFO << "local-->global:  " << local[ii]   << " " << global << endm; }
 
 	(*transform)(global,localA);
-	cout << "global->localA:  " << global  << " " << localA << endl;
+	{ LOG_INFO << "global->localA:  " << global  << " " << localA << endm; }
     }
 
 
