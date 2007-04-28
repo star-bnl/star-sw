@@ -1,8 +1,11 @@
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.cxx,v 1.10 2003/09/02 18:00:19 perev Exp $
+// $Id: StppTrigMaker.cxx,v 1.11 2007/04/28 17:56:43 perev Exp $
 // $Log: StppTrigMaker.cxx,v $
+// Revision 1.11  2007/04/28 17:56:43  perev
+// Redundant StChain.h removed
+//
 // Revision 1.10  2003/09/02 18:00:19  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -46,7 +49,6 @@
 #include <stdlib.h> 
 
 #include "StppTrigMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "TH1.h"

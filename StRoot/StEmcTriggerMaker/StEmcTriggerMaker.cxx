@@ -19,7 +19,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Stiostream.h>
-#include "StChain.h"
 #include "TFile.h"
 #include <math.h>
 
@@ -670,9 +669,12 @@ map<int,int> StEmcTriggerMaker::endcapJetPatchesAboveThreshold(int trigId) {
 	return jetPatches;
 }
 
-// $Id: StEmcTriggerMaker.cxx,v 1.17 2007/04/24 15:53:17 kocolosk Exp $
+// $Id: StEmcTriggerMaker.cxx,v 1.18 2007/04/28 17:56:07 perev Exp $
 //
 // $Log: StEmcTriggerMaker.cxx,v $
+// Revision 1.18  2007/04/28 17:56:07  perev
+// Redundant StChain.h removed
+//
 // Revision 1.17  2007/04/24 15:53:17  kocolosk
 // added new interface methods to get trigger thresholds and decisions based on trigId
 //

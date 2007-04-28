@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.10 2005/07/11 19:20:56 caines Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.11 2007/04/28 17:57:11 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
+ * Revision 1.11  2007/04/28 17:57:11  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.10  2005/07/11 19:20:56  caines
  * Add in shift due to pasa response that is accounted for in the real data t0 calc.
  *
@@ -40,7 +43,6 @@ using namespace std;
 #include "TH2.h"
 #include "TFile.h"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 #include "StSequence.hh"

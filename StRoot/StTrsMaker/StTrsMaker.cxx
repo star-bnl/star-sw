@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.79 2005/12/12 21:00:11 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.80 2007/04/28 17:57:27 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.80  2007/04/28 17:57:27  perev
+// Redundant StChain.h removed
+//
 // Revision 1.79  2005/12/12 21:00:11  perev
 // 3 random generators ==> 1
 //
@@ -290,7 +293,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "TObjectSet.h"
 
@@ -395,7 +397,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.79 2005/12/12 21:00:11 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.80 2007/04/28 17:57:27 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)

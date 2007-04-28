@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.18 2004/08/09 18:25:21 kollegge Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.19 2007/04/28 17:56:24 perev Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.19  2007/04/28 17:56:24  perev
+//  Redundant StChain.h removed
+//
 //  Revision 1.18  2004/08/09 18:25:21  kollegge
 //  Added tpc detector id when setting the number of points since StEvent can now store the number of points for different detectors.
 //
@@ -58,7 +61,6 @@
 //
 
 #include "Stl3RawReaderMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
 #include "StDAQMaker/StDAQReader.h"

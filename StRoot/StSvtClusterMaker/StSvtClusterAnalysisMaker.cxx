@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.30 2007/03/21 17:22:58 fisyak Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.31 2007/04/28 17:57:04 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.31  2007/04/28 17:57:04  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.30  2007/03/21 17:22:58  fisyak
  * Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
  *
@@ -98,7 +101,6 @@
 
 #include "Stiostream.h"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
 #include "TH1.h"

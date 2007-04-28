@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 2.6 2007/04/27 13:52:50 hippolyt Exp $
+ * $Id: StRrsMaker.cxx,v 2.7 2007/04/28 17:56:52 perev Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 2.7  2007/04/28 17:56:52  perev
+ * Redundant StChain.h removed
+ *
  * Revision 2.6  2007/04/27 13:52:50  hippolyt
  * Star logger recommendations
  *
@@ -101,7 +104,6 @@
 #include "StRichDisplayActivate.h"
 //#define RICH_WITH_PAD_MONITOR 1
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 

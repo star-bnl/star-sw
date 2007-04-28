@@ -1,7 +1,10 @@
 //*-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StEEmcTrigSimuMaker.cxx,v 1.6 2007/01/24 21:07:03 balewski Exp $
+// $Id: StEEmcTrigSimuMaker.cxx,v 1.7 2007/04/28 17:56:03 perev Exp $
 // $Log: StEEmcTrigSimuMaker.cxx,v $
+// Revision 1.7  2007/04/28 17:56:03  perev
+// Redundant StChain.h removed
+//
 // Revision 1.6  2007/01/24 21:07:03  balewski
 // 1) no cout or printf, only new Logger
 // 2) EndcapMixer:
@@ -27,7 +30,6 @@
 #include <StMessMgr.h>
 
 #include "StEEmcTrigSimuMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include <Stiostream.h>

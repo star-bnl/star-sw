@@ -6,7 +6,6 @@
 #include <StMessMgr.h>  
 #include <StEventTypes.h>
 #include <StEvent.h>
-#include <StChain.h>
 
 #include "StEEmcSimulatorMaker/StEEmcFastMaker.h"
 #include "StEEmcSimulatorMaker/StEEmcSlowMaker.h"
@@ -255,8 +254,11 @@ into the first StEmcCollection in event for all EEMC subdetectors
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.6 2007/03/23 03:26:23 balewski Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.7 2007/04/28 17:56:02 perev Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.7  2007/04/28 17:56:02  perev
+// Redundant StChain.h removed
+//
 // Revision 1.6  2007/03/23 03:26:23  balewski
 // Corretions from Victor
 //

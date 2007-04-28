@@ -8,7 +8,6 @@ Here are
 #include "TError.h"
 #include "StBbcSimulationMaker.h"
 #include "g2t/St_g2t_bbc_Module.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "TRandom.h"

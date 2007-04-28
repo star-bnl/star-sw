@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.20 2007/04/27 13:11:48 hippolyt Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.21 2007/04/28 17:56:51 perev Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.21  2007/04/28 17:56:51  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.20  2007/04/27 13:11:48  hippolyt
  * Star logger recommendations
  *
@@ -91,7 +94,6 @@
 #include <vector>
 #include <algorithm>
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StGlobals.hh"
@@ -787,7 +789,7 @@ Int_t StRichSpectraMaker::Make() {
 //-----------------------------------------------------------------
 void StRichSpectraMaker::PrintInfo() 
 {
-  { LOG_INFO << "************************************************************** %n * $Id: StRichSpectraMaker.cxx,v 1.20 2007/04/27 13:11:48 hippolyt Exp $ %n **************************************************************" << endm; }
+  { LOG_INFO << "************************************************************** %n * $Id: StRichSpectraMaker.cxx,v 1.21 2007/04/28 17:56:51 perev Exp $ %n **************************************************************" << endm; }
     if (Debug()) StMaker::PrintInfo();
 }
 

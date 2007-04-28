@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.13 2007/03/21 17:19:56 fisyak Exp $
+ * $Id: St_sls_Maker.cxx,v 1.14 2007/04/28 17:56:59 perev Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.14  2007/04/28 17:56:59  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.13  2007/03/21 17:19:56  fisyak
  * use new StSsdBarrel
  *
@@ -36,7 +39,6 @@
 #include <Stiostream.h>
 #include <stdlib.h>
 #include "St_sls_Maker.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "TFile.h"
 #include "StMessMgr.h"

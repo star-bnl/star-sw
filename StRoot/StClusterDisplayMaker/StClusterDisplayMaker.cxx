@@ -1,5 +1,5 @@
 // Author : Dominik Flierl 
-// $Id: StClusterDisplayMaker.cxx,v 1.9 2003/09/02 17:55:30 perev Exp $
+// $Id: StClusterDisplayMaker.cxx,v 1.10 2007/04/28 17:55:46 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                                                                      //
@@ -9,7 +9,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StClusterDisplayMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "TH2.h"

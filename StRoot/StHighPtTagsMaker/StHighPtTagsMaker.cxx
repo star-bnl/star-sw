@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHighPtTagsMaker.cxx,v 1.1 2004/07/30 23:02:05 calderon Exp $
+ * $Id: StHighPtTagsMaker.cxx,v 1.2 2007/04/28 17:56:17 perev Exp $
  *
  * Author: Thomas Henry, July 2004, base on Gene Van Beuren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHighPtTagsMaker.cxx,v $
+ * Revision 1.2  2007/04/28 17:56:17  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.1  2004/07/30 23:02:05  calderon
  * Revised entry after testing.  Commented out data members that are used
  * as local variables in fillTag().  Speeded up primary track loop.  Added
@@ -23,7 +26,6 @@
 #include "StEvent.h"
 #include "StEventTypes.h"
 #include "StTrack.h"
-#include "StChain.h"
 #include "TMath.h"
 #include "PhysicalConstants.h"
 #include "phys_constants.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.cxx,v 1.7 2004/09/09 22:45:56 fisyak Exp $
+ * $Id: StZdcVertexMaker.cxx,v 1.8 2007/04/28 17:57:28 perev Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.cxx,v $
+ * Revision 1.8  2007/04/28 17:57:28  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.7  2004/09/09 22:45:56  fisyak
  * Add protection for missing StTriggerData
  *
@@ -40,7 +43,6 @@
 
 #include "StEventTypes.h"
 #include "StMessMgr.h"
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "ZdcCalPars.h"
@@ -51,7 +53,7 @@
 
 //#include "StEventMaker/StEventMaker.h"
 
-static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.7 2004/09/09 22:45:56 fisyak Exp $";
+static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.8 2007/04/28 17:57:28 perev Exp $";
 
 ClassImp(StZdcVertexMaker)
 

@@ -2,10 +2,13 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.46 2005/06/15 01:22:58 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.47 2007/04/28 17:55:51 perev Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.47  2007/04/28 17:55:51  perev
+// Redundant StChain.h removed
+//
 // Revision 1.46  2005/06/15 01:22:58  caines
-// Setup stuff for flagging hits used in fit of traack
+//  Setup stuff for flagging hits used in fit of traack
 //
 // Revision 1.45  2004/05/18 18:10:31  fisyak
 // comment assert
@@ -152,7 +155,6 @@ using namespace units;
 #include "TMath.h"
 #include "StMatchMaker.h"
 
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 

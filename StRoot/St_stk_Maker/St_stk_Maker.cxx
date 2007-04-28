@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.25 2003/09/02 17:59:31 perev Exp $
+// $Id: St_stk_Maker.cxx,v 1.26 2007/04/28 17:57:01 perev Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.26  2007/04/28 17:57:01  perev
+// Redundant StChain.h removed
+//
 // Revision 1.25  2003/09/02 17:59:31  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -92,7 +95,6 @@
 #include <math.h>
 #include "math_constants.h"
 #include "St_stk_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "svt/St_stk_am_Module.h"
 #include "svt/St_ste_am_Module.h"

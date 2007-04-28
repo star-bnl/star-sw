@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.11 2007/03/21 17:19:56 fisyak Exp $
+ * $Id: St_spa_Maker.cxx,v 1.12 2007/04/28 17:57:00 perev Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.12  2007/04/28 17:57:00  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.11  2007/03/21 17:19:56  fisyak
  * use new StSsdBarrel
  *
@@ -34,7 +37,6 @@
 #include <Stiostream.h>
 #include <stdlib.h>
 #include "St_spa_Maker.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 //#include "svt/St_spa_am_Module.h"
 #include "TFile.h"

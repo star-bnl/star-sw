@@ -14,7 +14,6 @@
 #include "StTrsMaker/include/StTrsDetectorReader.hh"
 #include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
 #include "St_tpcdaq_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 #include "TH1.h"
@@ -893,6 +892,9 @@ char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.91  2007/04/28 17:57:18  perev
+// Redundant StChain.h removed
+//
 // Revision 1.90  2005/09/09 22:14:11  perev
 // IdTruth added
 //

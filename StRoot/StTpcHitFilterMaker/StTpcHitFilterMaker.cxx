@@ -1,5 +1,8 @@
-// $Id: StTpcHitFilterMaker.cxx,v 1.4 2003/09/02 17:59:13 perev Exp $
+// $Id: StTpcHitFilterMaker.cxx,v 1.5 2007/04/28 17:57:21 perev Exp $
 // $Log: StTpcHitFilterMaker.cxx,v $
+// Revision 1.5  2007/04/28 17:57:21  perev
+// Redundant StChain.h removed
+//
 // Revision 1.4  2003/09/02 17:59:13  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -21,7 +24,6 @@
 #include <Stiostream.h>
 #include <math.h>
 #include "StTpcHitFilterMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
 #include "tables/St_tcl_tphit_Table.h"

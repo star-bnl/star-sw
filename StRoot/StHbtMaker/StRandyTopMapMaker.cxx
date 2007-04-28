@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRandyTopMapMaker.cxx,v 1.5 2000/05/02 22:13:24 laue Exp $
+ * $Id: StRandyTopMapMaker.cxx,v 1.6 2007/04/28 17:56:15 perev Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRandyTopMapMaker.cxx,v $
+ * Revision 1.6  2007/04/28 17:56:15  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.5  2000/05/02 22:13:24  laue
  * Memory leak fixed
  *
@@ -34,14 +37,13 @@
  *
  **************************************************************************/
 #include "StRandyTopMapMaker.h"
-#include "StChain.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 #include "StEvent.h"
 #include "StTrackGeometry.h"
 #include "StTrackTopologyMap.h"
 
-static const char rcsid[] = "$Id: StRandyTopMapMaker.cxx,v 1.5 2000/05/02 22:13:24 laue Exp $";
+static const char rcsid[] = "$Id: StRandyTopMapMaker.cxx,v 1.6 2007/04/28 17:56:15 perev Exp $";
 
 ClassImp(StRandyTopMapMaker)
 

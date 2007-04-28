@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.87 2007/01/25 19:04:45 perev Exp $
+// $Id: St_dst_Maker.cxx,v 1.88 2007/04/28 17:55:49 perev Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.88  2007/04/28 17:55:49  perev
+// Redundant StChain.h removed
+//
 // Revision 1.87  2007/01/25 19:04:45  perev
 // GMT fix
 //
@@ -249,7 +252,6 @@
 #include "tables/St_particle_Table.h"
 #include "tables/St_hepe_gent_Table.h"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StMessMgr.h"
@@ -270,8 +272,12 @@
 
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
+enum EChainBits {  
+  kIsCalibrated = BIT(24)   // if the TObject has been created after calibration 
+};
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.87 2007/01/25 19:04:45 perev Exp $";
+
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.88 2007/04/28 17:55:49 perev Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________

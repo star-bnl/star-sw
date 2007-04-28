@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.36 2004/06/02 15:02:45 cmironov Exp $
+// $Id: StKinkMaker.cxx,v 1.37 2007/04/28 17:55:50 perev Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.37  2007/04/28 17:55:50  perev
+// Redundant StChain.h removed
+//
 // Revision 1.36  2004/06/02 15:02:45  cmironov
 // Naming clash solved by changing names
 //
@@ -101,7 +104,6 @@
 
 #include "StKinkMaker.h"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StMessMgr.h"

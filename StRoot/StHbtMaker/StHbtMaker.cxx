@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.13 2003/09/02 17:58:19 perev Exp $
+ * $Id: StHbtMaker.cxx,v 1.14 2007/04/28 17:56:14 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.14  2007/04/28 17:56:14  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.13  2003/09/02 17:58:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -63,7 +66,6 @@
 #include <stdlib.h>
 
 #ifdef __ROOT__
-#include "StChain.h"
 #endif
 
 #include "StHbtMaker.h"

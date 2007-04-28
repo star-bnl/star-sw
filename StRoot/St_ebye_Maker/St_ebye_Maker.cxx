@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.17 2003/09/13 00:42:33 perev Exp $
+// $Id: St_ebye_Maker.cxx,v 1.18 2007/04/28 17:55:58 perev Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.18  2007/04/28 17:55:58  perev
+// Redundant StChain.h removed
+//
 // Revision 1.17  2003/09/13 00:42:33  perev
 // XDF obsolete + small fixes
 //
@@ -72,7 +75,6 @@
 #include <assert.h>
 #include <Stiostream.h>
 #include "St_ebye_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 //VP#include "St_XDFFile.h"
 

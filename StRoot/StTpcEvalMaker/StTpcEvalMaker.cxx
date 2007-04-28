@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.11 2005/09/28 21:32:53 fisyak Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.12 2007/04/28 17:57:20 perev Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.12  2007/04/28 17:57:20  perev
+// * Redundant StChain.h removed
+// *
 // * Revision 1.11  2005/09/28 21:32:53  fisyak
 // * Persistent StMcEvent
 // *
@@ -54,7 +57,6 @@ using std::distance;
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "TFile.h"
@@ -82,7 +84,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.11 2005/09/28 21:32:53 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.12 2007/04/28 17:57:20 perev Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------

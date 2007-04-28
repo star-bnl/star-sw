@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.63 2006/11/22 21:18:24 fisyak Exp $
+ * $Id: StMcEventMaker.cxx,v 1.64 2007/04/28 17:56:26 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.64  2007/04/28 17:56:26  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.63  2006/11/22 21:18:24  fisyak
  * Add check that coming from g2t tables : iTrkId >= 0 && iTrkId < NTracks
  *
@@ -248,7 +251,6 @@ using std::find;
 
 #include "StThreeVectorF.hh"
 
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
@@ -282,7 +284,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.63 2006/11/22 21:18:24 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.64 2007/04/28 17:56:26 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\

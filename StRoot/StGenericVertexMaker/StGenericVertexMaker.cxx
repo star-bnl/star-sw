@@ -14,7 +14,6 @@
 #include <math.h>
 
 #include "StGenericVertexMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
 #include "TH2.h"

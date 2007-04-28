@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.16 2007/04/27 11:26:45 hippolyt Exp $
+ * $Id: StRchMaker.cxx,v 2.17 2007/04/28 17:56:48 perev Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -18,7 +18,6 @@
 #include "StMessMgr.h"
 
 #include "StRchMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StGlobals.hh"
@@ -981,7 +980,7 @@ void StRchMaker::fillStEvent()
 //-----------------------------------------------------------------
 void StRchMaker::PrintInfo() 
 {
-  { LOG_INFO <<"* $Id: StRchMaker.cxx,v 2.16 2007/04/27 11:26:45 hippolyt Exp $\n"<<endm; }
+  { LOG_INFO <<"* $Id: StRchMaker.cxx,v 2.17 2007/04/28 17:56:48 perev Exp $\n"<<endm; }
 }
 
 //-----------------------------------------------------------------
@@ -1022,6 +1021,9 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.17  2007/04/28 17:56:48  perev
+ * Redundant StChain.h removed
+ *
  * Revision 2.16  2007/04/27 11:26:45  hippolyt
  * Star logger recommendations
  *

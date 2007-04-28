@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.5 2007/01/22 13:08:15 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.6 2007/04/28 17:56:08 perev Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.6  2007/04/28 17:56:08  perev
+// Redundant StChain.h removed
+//
 // Revision 1.5  2007/01/22 13:08:15  jcs
 // replace cout with LOG
 //
@@ -32,7 +35,6 @@
 #include "StFtpcLaserCalib.hh"
 #include "StFtpcLaserTrafo.hh"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
 #include "StMessMgr.h"

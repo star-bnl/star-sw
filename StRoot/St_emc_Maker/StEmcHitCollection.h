@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.h,v 1.9 2003/01/23 03:50:04 jeromel Exp $
+// $Id: StEmcHitCollection.h,v 1.10 2007/04/28 17:56:04 perev Exp $
 // $Log: StEmcHitCollection.h,v $
+// Revision 1.10  2007/04/28 17:56:04  perev
+// Redundant StChain.h removed
+//
 // Revision 1.9  2003/01/23 03:50:04  jeromel
 // Include changed
 //
@@ -38,7 +41,6 @@
 #include "St_TableSorter.h"
 #include "StMaker.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StChain.h"
 #include "TArrayS.h"
 #include "TArrayF.h"
 #include "TArrayI.h"

@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.15 2003/04/30 20:39:14 perev Exp $
+// $Id: St_ctf_Maker.cxx,v 1.16 2007/04/28 17:55:47 perev Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.16  2007/04/28 17:55:47  perev
+// Redundant StChain.h removed
+//
 // Revision 1.15  2003/04/30 20:39:14  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -70,7 +73,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "St_ctf_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "ctf/St_ctg_Module.h"
 #include "ctf/St_ctg_Module.h"

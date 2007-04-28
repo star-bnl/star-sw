@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.28 2004/05/03 23:33:00 perev Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.29 2007/04/28 17:56:22 perev Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.29  2007/04/28 17:56:22  perev
+// Redundant StChain.h removed
+//
 // Revision 1.28  2004/05/03 23:33:00  perev
 // Possible non init WarnOff
 //
@@ -110,7 +113,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "St_l3Clufi_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
 #include "tables/St_raw_sec_m_Table.h"

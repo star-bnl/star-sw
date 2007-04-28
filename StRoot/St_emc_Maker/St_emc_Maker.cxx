@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.13 2003/09/02 17:59:29 perev Exp $
+// $Id: St_emc_Maker.cxx,v 1.14 2007/04/28 17:56:05 perev Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.14  2007/04/28 17:56:05  perev
+// Redundant StChain.h removed
+//
 // Revision 1.13  2003/09/02 17:59:29  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -44,7 +47,6 @@
 #include <Stiostream.h>
 #include <math.h>
 #include "St_emc_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 ClassImp(St_emc_Maker)
 

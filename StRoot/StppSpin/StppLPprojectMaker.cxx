@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.cxx,v 1.10 2003/01/02 22:19:45 balewski Exp $
+// $Id: StppLPprojectMaker.cxx,v 1.11 2007/04/28 17:56:42 perev Exp $
 // $Log: StppLPprojectMaker.cxx,v $
+// Revision 1.11  2007/04/28 17:56:42  perev
+// Redundant StChain.h removed
+//
 // Revision 1.10  2003/01/02 22:19:45  balewski
 // cleanup #1 of unused code, all makers are now empty
 //
@@ -38,7 +41,6 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
 

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.cxx,v 1.6 2007/04/26 04:05:37 perev Exp $
+ * $Id: StEbyeDSTMaker.cxx,v 1.7 2007/04/28 17:55:57 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.cxx,v $
+ * Revision 1.7  2007/04/28 17:55:57  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.6  2007/04/26 04:05:37  perev
  * Cleanup
  *
@@ -41,7 +44,6 @@
  *********************************************************************/
 
 #include "StEbyeDSTMaker.h"
-#include "StChain.h"
 //-tu #include "StRun.h"
 #include "StEventTypes.h"
 #include "StGlobalTrack.h"

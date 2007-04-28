@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.10 2003/09/02 17:57:56 perev Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.11 2007/04/28 17:55:56 perev Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
+ * Revision 1.11  2007/04/28 17:55:56  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.10  2003/09/02 17:57:56  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -41,7 +44,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include "StEbye2ptMaker.h"
-#include "StChain.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 #include "StParticleTypes.hh"
@@ -59,7 +61,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.10 2003/09/02 17:57:56 perev Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.11 2007/04/28 17:55:56 perev Exp $";
 
 ClassImp(StEbye2ptMaker)
 

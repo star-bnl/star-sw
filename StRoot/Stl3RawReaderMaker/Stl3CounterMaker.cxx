@@ -17,9 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.7 2003/09/02 18:00:16 perev Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.8 2007/04/28 17:56:23 perev Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.8  2007/04/28 17:56:23  perev
+//  Redundant StChain.h removed
+//
 //  Revision 1.7  2003/09/02 18:00:16  perev
 //  gcc 3.2 updates + WarnOff
 //
@@ -52,7 +55,6 @@
 #include <Stiostream.h>
 #include "Stiostream.h"
 #include "Stl3CounterMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
 #include "StIOMaker/StIOMaker.h"

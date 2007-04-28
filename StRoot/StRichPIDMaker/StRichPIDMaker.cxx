@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.55 2005/10/06 20:10:24 fisyak Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.56 2007/04/28 17:56:50 perev Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.56  2007/04/28 17:56:50  perev
+ * Redundant StChain.h removed
+ *
  * Revision 2.55  2005/10/06 20:10:24  fisyak
  * persistent StMcEvent
  *
@@ -250,7 +253,6 @@ using std::less;
 
 
 // StChain, etc...
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
@@ -340,7 +342,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.55 2005/10/06 20:10:24 fisyak Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.56 2007/04/28 17:56:50 perev Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;

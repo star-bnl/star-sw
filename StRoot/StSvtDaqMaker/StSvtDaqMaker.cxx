@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.18 2005/12/07 20:48:50 perev Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.19 2007/04/28 17:57:08 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.19  2007/04/28 17:57:08  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.18  2005/12/07 20:48:50  perev
  * EndCrashFix
  *
@@ -61,7 +64,6 @@
  *
  **************************************************************************/
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
 #include "StDAQMaker/StSVTReader.h"
@@ -388,7 +390,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.18 2005/12/07 20:48:50 perev Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.19 2007/04/28 17:57:08 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

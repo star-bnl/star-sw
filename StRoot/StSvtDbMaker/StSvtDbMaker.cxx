@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.19 2007/03/27 20:01:22 fisyak Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.20 2007/04/28 17:57:09 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.20  2007/04/28 17:57:09  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.19  2007/03/27 20:01:22  fisyak
  * remove senseless print outs
  *
@@ -69,7 +72,6 @@
 #include <assert.h>
 #include "StSvtDbMaker.h"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 #include "StMessMgr.h"

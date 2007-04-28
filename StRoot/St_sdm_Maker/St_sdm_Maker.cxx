@@ -7,7 +7,6 @@
 #include <Stiostream.h>
 #include <stdlib.h>
 #include "St_sdm_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "tables/St_sdm_condition_par_Table.h"
@@ -113,7 +112,7 @@ Int_t St_sdm_Maker::Make()
 void St_sdm_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sdm_Maker.cxx,v 1.2 2003/09/02 17:59:30 perev Exp $\n");
+  printf("* $Id: St_sdm_Maker.cxx,v 1.3 2007/04/28 17:56:53 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

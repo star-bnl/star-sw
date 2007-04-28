@@ -5,7 +5,6 @@
 //////////////////////////////////////////////////////////////////////////
 #include <Stiostream.h>
 #include "TError.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StTreeMaker.h"
 #include "tables/St_dst_bfc_status_Table.h"

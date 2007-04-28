@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.25 2007/04/27 18:41:29 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.26 2007/04/28 17:56:36 perev Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.26  2007/04/28 17:56:36  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.25  2007/04/27 18:41:29  wleight
  * Removed smearing of the coordinate not controlled by the strips in the 17cm layer
  *
@@ -79,7 +82,6 @@
 #include "StPixelFastSimMaker.h"
 #include "StHit.h"
 #include "StEventTypes.h"
-#include "StChain.h"
 #include "StEvent.h"
 #include "StRnDHit.h"
 #include "StMcEvent.hh"
@@ -108,7 +110,7 @@ using namespace std;
 #include "Sti/StiVMCToolKit.h"
 #include "StarClassLibrary/StRandom.hh"
 #include "tables/St_HitError_Table.h"
-#include <fstream.h>
+#include <fstream>
 
 ClassImp(StPixelFastSimMaker)
 

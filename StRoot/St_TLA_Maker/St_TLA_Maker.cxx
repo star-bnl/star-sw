@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_TLA_Maker.cxx,v 1.16 2006/12/19 21:59:16 fine Exp $
+// $Id: St_TLA_Maker.cxx,v 1.17 2007/04/28 17:57:13 perev Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.17  2007/04/28 17:57:13  perev
+// Redundant StChain.h removed
+//
 // Revision 1.16  2006/12/19 21:59:16  fine
 // replace the class StMessMgr forward declaration with the real declaration and adjust St_TLA_Maker to show how to use logger
 //
@@ -24,7 +27,6 @@
 
 
 #include "St_TLA_Maker.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 

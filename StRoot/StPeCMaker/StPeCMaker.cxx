@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.26 2004/02/07 01:40:46 meissner Exp $
+// $Id: StPeCMaker.cxx,v 1.27 2007/04/28 17:56:34 perev Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.27  2007/04/28 17:56:34  perev
+// Redundant StChain.h removed
+//
 // Revision 1.26  2004/02/07 01:40:46  meissner
 // bug in check of un-analylized MC events, all MC events are now filled
 //
@@ -92,7 +95,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StPeCMaker.h"
 #include "StEventTypes.h"
-#include "StChain.h"
 #include "Stypes.h"
 #include "StMessMgr.h"
 #include "TH1.h"
@@ -116,7 +118,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.26 2004/02/07 01:40:46 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.27 2007/04/28 17:56:34 perev Exp $";
 
 ClassImp(StPeCMaker)
 

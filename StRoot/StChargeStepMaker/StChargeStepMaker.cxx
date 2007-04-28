@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.14 2007/04/26 04:03:40 perev Exp $
+// $Id: StChargeStepMaker.cxx,v 1.15 2007/04/28 17:55:45 perev Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.15  2007/04/28 17:55:45  perev
+// Redundant StChain.h removed
+//
 // Revision 1.14  2007/04/26 04:03:40  perev
 // Remove redundant GetMaker()
 //
@@ -52,7 +55,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include "StChargeStepMaker.h"
-#include "StChain.h"
 #include "TDataSet.h"
 #include "TDataSetIter.h"
 //VP#include "St_XDFFile.h"
@@ -338,7 +340,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.14 2007/04/26 04:03:40 perev Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.15 2007/04/28 17:55:45 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.55 2005/07/23 03:37:34 perev Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.56 2007/04/28 17:57:10 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.56  2007/04/28 17:57:10  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.55  2005/07/23 03:37:34  perev
  * IdTruth + Cleanup
  *
@@ -173,7 +176,6 @@
  *
  **************************************************************************/
 
-#include "StChain.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"

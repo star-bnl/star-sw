@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.16 2007/04/04 01:20:33 bouchet Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.17 2007/04/28 17:56:57 perev Exp $
 //
 // $log$
 //
@@ -26,7 +26,6 @@
 //*--         : Jonathan Bouchet
             
 #include "StSsdDaqMaker.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
 #include "StDAQMaker/StDAQReader.h"

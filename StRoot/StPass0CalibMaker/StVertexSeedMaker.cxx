@@ -11,7 +11,6 @@
 
 #include "Stiostream.h"
 #include "StVertexSeedMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "St_db_Maker/St_db_Maker.h"
@@ -448,7 +447,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.33 2007/04/22 04:25:59 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.34 2007/04/28 17:56:31 perev Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -742,8 +741,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.33 2007/04/22 04:25:59 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.34 2007/04/28 17:56:31 perev Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.34  2007/04/28 17:56:31  perev
+// Redundant StChain.h removed
+//
 // Revision 1.33  2007/04/22 04:25:59  genevb
 // printf, gMessMgr ==> STAR Logger
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMixerMaker.cxx,v 1.3 2003/09/24 02:57:39 hippolyt Exp $
+ * $Id: StRichMixerMaker.cxx,v 1.4 2007/04/28 17:56:49 perev Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichMixerMaker.cxx,v $
+ * Revision 1.4  2007/04/28 17:56:49  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.3  2003/09/24 02:57:39  hippolyt
  * init pointers and arrays
  *
@@ -28,7 +31,6 @@
 #include "Stiostream.h"
 #include <algorithm>
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 
@@ -466,7 +468,7 @@ Int_t StRichMixerMaker::Make() {
 void StRichMixerMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichMixerMaker.cxx,v 1.3 2003/09/24 02:57:39 hippolyt Exp $\n");
+    printf("* $Id: StRichMixerMaker.cxx,v 1.4 2007/04/28 17:56:49 perev Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }

@@ -4,7 +4,6 @@
 //                                                                      //
 
 #include "StDAQfilterMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "tables/St_tcl_tphit_Table.h"

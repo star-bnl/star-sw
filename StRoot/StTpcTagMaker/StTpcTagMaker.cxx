@@ -1,7 +1,10 @@
 //*-- Author : Iwona Sakrejda
 //
-// $Id: StTpcTagMaker.cxx,v 1.7 2007/04/27 16:47:50 jeromel Exp $
+// $Id: StTpcTagMaker.cxx,v 1.8 2007/04/28 17:57:22 perev Exp $
 // $Log: StTpcTagMaker.cxx,v $
+// Revision 1.8  2007/04/28 17:57:22  perev
+// Redundant StChain.h removed
+//
 // Revision 1.7  2007/04/27 16:47:50  jeromel
 // No change - this is a test
 //
@@ -31,7 +34,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTpcTagMaker.h"
-#include "StChain.h"
 #include "St_TpcTag_Table.h"
 #include "tables/St_dst_mon_soft_tpc_Table.h"
 

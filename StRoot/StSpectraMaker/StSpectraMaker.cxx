@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.14 2003/09/02 17:58:59 perev Exp $
+// $Id: StSpectraMaker.cxx,v 1.15 2007/04/28 17:56:54 perev Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.15  2007/04/28 17:56:54  perev
+// Redundant StChain.h removed
+//
 // Revision 1.14  2003/09/02 17:58:59  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -48,7 +51,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StSpectraMaker.h"
-#include "StChain.h"
 //-tu #include "StRun.h"
 #include "StEventTypes.h"
 #include "StSpectraAnalysis.h"
@@ -73,7 +75,7 @@ string readString(ifstream& ifs) {
   return line;
 }
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.14 2003/09/02 17:58:59 perev Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.15 2007/04/28 17:56:54 perev Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
