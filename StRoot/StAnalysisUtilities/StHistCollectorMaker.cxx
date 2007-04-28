@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine (fine@bnl.gov)
 // 
-// $Id: StHistCollectorMaker.cxx,v 2.5 2000/12/02 01:03:10 fine Exp $
+// $Id: StHistCollectorMaker.cxx,v 2.6 2007/04/28 20:36:14 perev Exp $
 //
 ////////////////////////////////////////////////////////////////////////////
 //                                                                        //
@@ -26,7 +26,6 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "StHistCollectorMaker.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "TH1.h"
 
@@ -148,6 +147,9 @@ void  StHistCollectorMaker::UpdateHists(TObjectSet *oldSet,TObjectSet *newSet)
 }
 
 // $Log: StHistCollectorMaker.cxx,v $
+// Revision 2.6  2007/04/28 20:36:14  perev
+// Redundant StChain.h removed
+//
 // Revision 2.5  2000/12/02 01:03:10  fine
 // Recursive collection of histogram introduced
 //

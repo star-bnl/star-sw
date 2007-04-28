@@ -350,7 +350,8 @@ int StiTrackNodeHelper::join()
 
   int ierr = 0;
   double chi2;		
-  
+    
+  StiDebug::Break(mTargetNode->mId);
   int kase = mTargetNode->isValid();
   if (mState==StiTrackNode::kTNFitEnd) kase |=kNewFitd;
 static int oldJoinPrim = StiDebug::iFlag("StiOldJoinPrim");
@@ -865,9 +866,9 @@ int StiTrackNodeHelper::updateNode()
 static int nCall=0; nCall++;
   mState = StiTrackNode::kTNFitBeg;
   assert(mPredErrs._cXX<1e-8);
-  double r00,r01,r11;
+  double r00,r01,r11,hitPars[3];
+  StiDebug::Break(mTargetNode->mId);
   if (!mDetector)	{ //Primary vertex
-    double hitPars[3];
     hitPars[0] = mPredPars._x;
     hitPars[1] = mHit->y();
     hitPars[2] = mHit->z();
@@ -925,6 +926,7 @@ static int nCall=0; nCall++;
     mFitdPars._tanl  = tanl;
     mFitdPars._sinCA = sinCA;
     mFitdPars._cosCA = ::sqrt((1.-mFitdPars._sinCA)*(1.+mFitdPars._sinCA)); 
+assert(fabs(mFitdPars._y-hitPars[1])>1e-10 ||  fabs(hitPars[0])<4);
 //??    cutStep(&mFitdPars,&mPredPars);
 //??    cutStep(&mFitdPars,&mBestPars);
     if (mFitdPars.check()) return -11;
