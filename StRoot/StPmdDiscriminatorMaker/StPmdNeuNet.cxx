@@ -1,6 +1,7 @@
 
 
 #include "StPmdNeuNet.h"
+#include<StMessMgr.h>
 
 //  StPmdNeuNet 
 //  Feed-Forward Neural Network 
@@ -31,8 +32,8 @@ StPmdNeuNet::StPmdNeuNet(Text_t *name, Int_t nInput, Text_t *hidden, Int_t nOutp
 
   TDatime temps;
   fRandom.SetSeed(temps.Convert());
-  printf("StPmdNeuNet::StPmdNeuNet: First Random Seed = %i\n",fRandom.GetSeed());
-  printf("StPmdNeuNet::StPmdNeuNet: Neural Network is created : \n");
+  gMessMgr->Info()<<"StPmdNeuNet::StPmdNeuNet: First Random Seed = "<<fRandom.GetSeed();
+  gMessMgr->Info()<<"StPmdNeuNet::StPmdNeuNet: Neural Network is created";
 
 }
 
@@ -54,7 +55,7 @@ StPmdNeuNet::StPmdNeuNet()
 
   TDatime temps;
   fRandom.SetSeed(temps.Convert());
-  printf("StPmdNeuNet::StPmdNeuNet: First Random Seed = %i\n",fRandom.GetSeed());
+  gMessMgr->Info()<<"StPmdNeuNet::StPmdNeuNet: First Random Seed = "<<fRandom.GetSeed();
 }
 
 
@@ -63,7 +64,7 @@ StPmdNeuNet::StPmdNeuNet()
 StPmdNeuNet::~StPmdNeuNet() 
 {
   // destructor  
-  printf("StPmdNeuNet::~StPmdNeuNet : we are done\n");
+  gMessMgr->Info()<<"StPmdNeuNet::~StPmdNeuNet : we are done ";
   DeleteArray(); 
   FreeVW();
   if(fEventsList) delete [] fEventsList;
@@ -160,7 +161,7 @@ void StPmdNeuNet::AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput)
   Int_t i,l;
   
   if(fW){
-    printf("StPmdNeuNet::AllocateVW: free memory first !\n");
+    gMessMgr->Info()<<"StPmdNeuNet::AllocateVW: free memory first ";
     return;
   }
 
@@ -224,11 +225,12 @@ void StPmdNeuNet::SetLearnParam(Double_t learnParam,Double_t fse,Double_t mu)
   fFlatSE=fabs(fse);
   fMu=fabs(mu);
 
-  if (fLearnParam>1.0)  printf("StPmdNeuNet::SetLearnParam: Warning : %6.2f is not an usual value\n",fLearnParam);
-  if (fLearnParam==0.0) printf("StPmdNeuNet::SetLearnParam: Warning : 0 is a stupid value\n");
-  printf("StPmdNeuNet::SetLearnParam: Learning Parameter set to : %6.2f\n",fLearnParam);
-  printf("StPmdNeuNet::SetLearnParam: Flat Spot elimination value  set to : %6.2f\n",fFlatSE);
-  printf("StPmdNeuNet::SetLearnParam: Momentum set to : %6.2f\n",fMu);
+    gMessMgr->Info()<<"StPmdNeuNet::AllocateVW: free memory first ";
+  if (fLearnParam>1.0)  gMessMgr->Info()<<"StPmdNeuNet::SetLearnParam: Warning : is not an usual value "<<fLearnParam;
+  if (fLearnParam==0.0) gMessMgr->Info()<<"StPmdNeuNet::SetLearnParam: Warning : 0 is a stupid value";
+  gMessMgr->Info()<<"StPmdNeuNet::SetLearnParam: Learning Parameter set to : "<<fLearnParam;
+  gMessMgr->Info()<<"StPmdNeuNet::SetLearnParam: Flat Spot elimination value  set to :"<<fFlatSE;
+  gMessMgr->Info()<<"StPmdNeuNet::SetLearnParam: Momentum set to : "<<fMu;
 }
 
 
@@ -246,10 +248,10 @@ void StPmdNeuNet::SetInitParam(Float_t lowerInitWeight, Float_t upperInitWeight)
     fLowerInitWeight=temp;
   } 
   if (fLowerInitWeight==fUpperInitWeight)
-    printf("StPmdNeuNet::SetInitParam: Warning : the weights initialisation bounds are equal !\n");
-  printf("StPmdNeuNet::SetInitParam: Init Parameters set to :\n");
-  printf("StPmdNeuNet::SetInitParam: --> Lower bound = %6.2f\n",fLowerInitWeight);
-  printf("StPmdNeuNet::SetInitParam: --> Upper bound = %6.2f\n",fUpperInitWeight);
+    gMessMgr->Info()<<"StPmdNeuNet::SetInitParam: Warning : the weights initialisation bounds are equal ";
+  gMessMgr->Info()<<"StPmdNeuNet::SetInitParam: Init Parameters set to ";
+  gMessMgr->Info()<<"StPmdNeuNet::SetInitParam: --> Lower bound = "<<fLowerInitWeight;
+  gMessMgr->Info()<<"StPmdNeuNet::SetInitParam: --> Upper bound = "<<fUpperInitWeight;
 
 }
 
@@ -270,7 +272,7 @@ void StPmdNeuNet::Init()
 {  
   Int_t i,l,c;
   
-  if(!fW){printf("StPmdNeuNet::Init: allocate memory first !\n");return;}
+  if(!fW){gMessMgr->Info()<<"StPmdNeuNet::Init: allocate memory first";return;}
   
   // init of weights
   
@@ -290,7 +292,7 @@ void StPmdNeuNet::Init()
 
 
   fNTrainCycles=0;
-  printf("StPmdNeuNet::Init: Initialisation done\n");
+  gMessMgr->Info()<<"StPmdNeuNet::Init: Initialisation done";
 }
 
 
@@ -299,53 +301,50 @@ void StPmdNeuNet::PrintS()
 {
   Int_t i,l,c;
   
-  if(!fW){printf("StPmdNeuNet::PrintS: no unit !\n");return;} 
+  if(!fW){gMessMgr->Info()<<"StPmdNeuNet::PrintS: no unit ";return;} 
   
-  printf("StPmdNeuNet::PrintS: +++++++++ Neural Network %s ++++++++++++\n",GetName());
-  for(i=0;i<fNHiddL+2;i++)printf("StPmdNeuNet::PrintS: Layer %1i contains %2i units\n",i,fNUnits[i]);
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: +++++++++ Neural Network ++++++++++++"<<GetName();
+  for(i=0;i<fNHiddL+2;i++)gMessMgr->Info()<<"StPmdNeuNet::PrintS: Layer contains units"<<i<<" "<<fNUnits[i];
 
-  if(fUseBiases)printf("StPmdNeuNet::PrintS: >>>>>>> Biases USED\n");
-  else          printf("StPmdNeuNet::PrintS: >>>>>>>Biases DUMMY\n");
+  if(fUseBiases)gMessMgr->Info()<<"StPmdNeuNet::PrintS: >>>>>>> Biases USED";
+  else          gMessMgr->Info()<<"StPmdNeuNet::PrintS: >>>>>>>Biases DUMMY";
 
-  printf("StPmdNeuNet::PrintS: ----------   Biases   ---------- \n");
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: ----------   Biases   ---------- ";
   Int_t maxl=0;
   for(i=0;i<fNHiddL+2;i++)if(fNUnits[i]>=maxl)maxl=fNUnits[i];
-  for(i=0;i<fNHiddL+2;i++)printf("    %1i   | ",i);printf("\n");
-  for(i=0;i<fNHiddL+2;i++)printf("--------|-");printf("\n");
+  for(i=0;i<fNHiddL+2;i++)gMessMgr->Info()<<"      | "<<i;
+  for(i=0;i<fNHiddL+2;i++)gMessMgr->Info()<<"--------|-";
   for(l=0;l<maxl;l++)
   {
     for(i=0;i<fNHiddL+2;i++)
-      if(l<fNUnits[i])printf("StPmdNeuNet::PrintS: %6.2f  | ",fBiases[i][l]);
-      else printf("        | "); printf("\n");
+      if(l<fNUnits[i])gMessMgr->Info()<<"StPmdNeuNet::PrintS:  | "<<fBiases[i][l];
+      else gMessMgr->Info()<<"        | "; 
   }
 
 
-  printf("\nStPmdNeuNet::PrintS:    ----------   Weights ----------- \n");
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS:    ----------   Weights ----------- ";
   for(i=0;i<fNHiddL+1;i++)
   {
-    printf("StPmdNeuNet::PrintS:  From  %1i  to  %1i  : \n",i,i+1);
-    printf("StPmdNeuNet::PrintS: %2i |",i);for(l=0;l<fNUnits[i];l++)printf("  %3i |",l);printf("\n");
-    printf("StPmdNeuNet::PrintS: ===|");for(l=0;l<fNUnits[i];l++)printf("-------");printf("\n");
-    printf("StPmdNeuNet::PrintS: %2i |",i+1);for(l=0;l<fNUnits[i];l++)printf("-------");printf("\n");
+    gMessMgr->Info()<<"StPmdNeuNet::PrintS:  From  "<<i<<" to " <<i+1;
+   gMessMgr->Info()<<"StPmdNeuNet::PrintS: "<<i;for(l=0;l<fNUnits[i];l++)gMessMgr->Info()<<"  |"<<l;
+    gMessMgr->Info()<<"StPmdNeuNet::PrintS: ===|";for(l=0;l<fNUnits[i];l++)gMessMgr->Info()<<"-------";
+     gMessMgr->Info()<<"StPmdNeuNet::PrintS:  |"<<i+1; for(l=0;l<fNUnits[i];l++)gMessMgr->Info()<<"-------";
     for(c=0;c<fNUnits[i+1];c++)
     { 
-       printf("StPmdNeuNet::PrintS: %2i |",c);
-       for(l=0;l<fNUnits[i];l++)printf("%6.2f|",fW[i][l][c]);
-       printf("\n");
+       gMessMgr->Info()<<"StPmdNeuNet::PrintS: |"<<c;
+       for(l=0;l<fNUnits[i];l++)gMessMgr->Info()<<"|"<<fW[i][l][c];
     }     
-    printf("\n");
   }  
 
-  printf("\n");
-  printf("StPmdNeuNet::PrintS: Learning parameter = %6.2f\n",fLearnParam);
-  printf("StPmdNeuNet::PrintS: Flat Spot elimination value = %6.2f\n",fFlatSE);
-  printf("StPmdNeuNet::PrintS: Momentum = %6.2f\n",fMu);
-  printf("StPmdNeuNet::PrintS: Lower initialisation weight = %6.2f\n",fLowerInitWeight);
-  printf("StPmdNeuNet::PrintS: Upper initialisation weight = %6.2f\n",fUpperInitWeight);
-  printf("StPmdNeuNet::PrintS: Number of events for training   = %5i\n",fNTrainEvents);
-  printf("StPmdNeuNet::PrintS: Number of events for validation = %5i\n",fNValidEvents);
-  printf("StPmdNeuNet::PrintS: Number of cycles done = %3i\n",fNTrainCycles);
-  printf("StPmdNeuNet::PrintS: +++++++++++++++++++++++++++++++++++++++++++++++\n");
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: Learning parameter = "<<fLearnParam;
+ gMessMgr->Info()<<"StPmdNeuNet::PrintS: Flat Spot elimination value = "<<fFlatSE;
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: Momentum = "<<fMu;
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: Lower initialisation weight = "<<fLowerInitWeight;
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: Upper initialisation weight = "<<fUpperInitWeight;
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: Number of events for training   = "<<fNTrainEvents;
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: Number of events for validation = "<<fNValidEvents;
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: Number of cycles done = "<<fNTrainCycles;
+  gMessMgr->Info()<<"StPmdNeuNet::PrintS: +++++++++++++++++++++++++++++++++++++++++++++++";
 
 }
 
@@ -359,7 +358,7 @@ void StPmdNeuNet::Forward()
   Double_t sum;
   //  cout<<"Valid forward called "<<endl;
   if(!fW){ 
-    printf("StPmdNeuNet::Forward no unit !\n");
+    gMessMgr->Info()<<"StPmdNeuNet::Forward no unit !";
     return;
   }  
   
@@ -377,8 +376,8 @@ void StPmdNeuNet::Forward()
 /// gradient retropropagation (updates of biases and weights)  
 void StPmdNeuNet::LearnBackward()
 {
-  if(fNTrainEvents<1){printf("StPmdNeuNet::LearnBackward: No event to train !!!\n");return;}
-  if(!fW){printf("StPmdNeuNet::LearnBackward: no unit !\n");return;}
+  if(fNTrainEvents<1){gMessMgr->Info()<<"StPmdNeuNet::LearnBackward: No event to train !!!";return;}
+  if(!fW){gMessMgr->Info()<<"StPmdNeuNet::LearnBackward: no unit !";return;}
 
   Int_t i,l,c;
   Double_t delta;
@@ -416,7 +415,7 @@ Double_t StPmdNeuNet::Error()
 
   Int_t i,l,c;
   Double_t sum,error=0,errorOneUnit;
-  if(!fW){printf("StPmdNeuNet::Error: no unit !\n");return 0;}    
+  if(!fW){gMessMgr->Info()<<"StPmdNeuNet::Error: no unit !";return 0;}    
   
   //  Error on Output Units
 
@@ -458,7 +457,7 @@ Double_t StPmdNeuNet::ErrorO()
 //  cout<<"Error0 called "<<endl;
   Int_t l;
   Double_t error=0;
-  if(!fW){printf("StPmdNeuNet::ErrorO: no unit !\n");return 0;}    
+  if(!fW){gMessMgr->Info()<<"StPmdNeuNet::ErrorO: no unit !";return 0;}    
   for(l=0;l<fNUnits[fNHiddL+1];l++)
     error+=fabs((Double_t)(fTeach[l]-fValues[fNHiddL+1][l]));
   error=error/(Double_t)fNUnits[fNHiddL+1];  
@@ -477,8 +476,8 @@ Double_t StPmdNeuNet::ErrorO()
  */
 Double_t StPmdNeuNet::TrainOneCycle()
 {
-  if(fNTrainEvents<1){printf("StPmdNeuNet::TrainOneCycle: No event to train !!!\n");return 0.;}
-  if(!fW){printf("StPmdNeuNet::TrainOneCycle: no unit !\n");return 0.;}
+  if(fNTrainEvents<1){gMessMgr->Info()<<"StPmdNeuNet::TrainOneCycle: No event to train !!!";return 0.;}
+  if(!fW){gMessMgr->Info()<<"StPmdNeuNet::TrainOneCycle: no unit !";return 0.;}
 
 
   Int_t i;
@@ -504,7 +503,7 @@ Double_t StPmdNeuNet::TrainOneCycle()
  
   fNTrainCycles++;
   error=error/(Double_t)fNTrainEvents;
-  printf("StPmdNeuNet::TrainOneCycle: cycle %i : E_t = %6.4f ",fNTrainCycles,error);
+  gMessMgr->Info()<<"StPmdNeuNet::TrainOneCycle: cycle  : E_t =  "<<fNTrainCycles<<" "<<error;
 
   return error;
 }
@@ -540,16 +539,16 @@ Double_t StPmdNeuNet::Valid()
  */
 void StPmdNeuNet::TrainNCycles(Int_t nCycles)
 {
-  //sub  if(!conte){printf("no controller !\n");return;}
+  //sub  if(!conte){gMessMgr->Info()<<"no controller !";return;}
   Float_t errt,errv;
   for(Int_t i=0;i<nCycles;i++)
   {
     Mix();
     errt=(Float_t)TrainOneCycle();
     errv=(Float_t)Valid();
-    printf("StPmdNeuNet::TrainNCycles: cycle %3i > train : %7.3f",fNTrainCycles,errt);
-    if(fNValidEvents)printf("StPmdNeuNet::TrainNCycles: and valid : %7.3f \n",errv);
-    else printf("\n");
+    gMessMgr->Info()<<"StPmdNeuNet::TrainNCycles: cycle  > train : "<<fNTrainCycles<<" "<<errt;
+    if(fNValidEvents)gMessMgr->Info()<<"StPmdNeuNet::TrainNCycles: and valid : ";
+    else gMessMgr->Info()<<("  ");
 
   }
   
@@ -566,12 +565,12 @@ void StPmdNeuNet::Export(Text_t *fileName)
 {
   Int_t i,l,c;
   
-  if(!fW){printf("StPmdNeuNet::Export: no unit !\n");return;} 
+  if(!fW){gMessMgr->Info()<<"StPmdNeuNet::Export: no unit !";return;} 
   
   FILE  *file=0;
   file = fopen(fileName,"w");
   if ( ! file){
-    printf("StPmdNeuNet::Export: ERROR Cannot open %s for write\n",fileName);
+    gMessMgr->Info()<<"StPmdNeuNet::Export: ERROR Cannot open  for write  "<<fileName;
     return;
   }
 
@@ -579,7 +578,6 @@ void StPmdNeuNet::Export(Text_t *fileName)
   for(l=0;l<fNTrainEvents;l++)fprintf(file,"%8.4f %8.4f\n",Teach[l],Value[l]);
 
   //////////////////////
-  cout<<"StPmdNeuNet::Export: discMaker  "<<m_DiscMaker<<endl;
   m_DiscMaker->mNNoutput->Fill(Value[l]);
 
   fprintf(file,"%3i\n",fNHiddL);
@@ -613,7 +611,7 @@ void StPmdNeuNet::Import(Text_t *fileName)
   file = fopen(fileName,"r");
   
   if ( ! file){
-    printf("StPmdNeuNet::Import: ERROR Cannot open %s for read\n",fileName);
+    gMessMgr->Info()<<"StPmdNeuNet::Import: ERROR Cannot open  for read"<<fileName;
     return;
   }
 
@@ -625,13 +623,13 @@ void StPmdNeuNet::Import(Text_t *fileName)
   fscanf(file,"%s",piece);strcat(hidden,piece);
   fscanf(file,"%3i",&newO); 
   
-  printf("StPmdNeuNet::Import: New NN set to : %3i  %s  %3i \n",newI,hidden,newO);
+  gMessMgr->Info()<<"StPmdNeuNet::Import: New NN set to : "<<newI<<" "<<hidden<<" "<<newO;
   FreeVW();			  
 
-  printf("StPmdNeuNet::Import: Allocating\n");
+  gMessMgr->Info()<<"StPmdNeuNet::Import: Allocating";
   AllocateVW(newI,hidden,newO);
 
-  printf("StPmdNeuNet::Import: Filling fDB+fscanf()\n");
+  gMessMgr->Info()<<"StPmdNeuNet::Import: Filling fDB+fscanf()";
   Float_t tmpfl;
   for(i=0;i<fNHiddL+2;i++)
     for(l=0;l<fNUnits[i];l++){fDB[i][l]=0.;fscanf(file,"%f",&tmpfl);*(fBiases[i]+l)=(Double_t)tmpfl;}
@@ -647,7 +645,7 @@ void StPmdNeuNet::Import(Text_t *fileName)
   fscanf(file,"%5i",&fNTrainCycles);  
   fscanf(file,"%f",&tmpfl);fUseBiases=(Double_t)tmpfl;  
   fclose(file);   
-  printf("StPmdNeuNet::Import: Done\n");
+  gMessMgr->Info()<<"StPmdNeuNet::Import: Done";
 }
 
 
@@ -683,7 +681,6 @@ void StPmdNeuNet::SetArraySize(Int_t size)
   fArrayIn  = new Float_t*[fNTrainEvents];
   for (i=0;i<fNTrainEvents;i++) fArrayIn[i] = new Float_t[fNUnits[0]];
 
-  cout<<"StPmdNeuNet::SetArraySize: array size "<<fNUnits[0]<<endl;
 
   fArrayOut = new Float_t*[fNTrainEvents];  
   for (i=0;i<fNTrainEvents;i++) fArrayOut[i] = new Float_t[fNUnits[fNHiddL+1]];
@@ -773,8 +770,8 @@ void StPmdNeuNet::FillArray(Int_t iev,Int_t iunit,Float_t value)
  */
 Double_t StPmdNeuNet::ApplyWeights(Float_t *Teach,Float_t *Value)
 {
-  if(fNTrainEvents<1){printf("StPmdNeuNet::ApplyWeights: No event to train !!!\n");return 0.;}
-  if(!fW){printf("StPmdNeuNet::ApplyWeights: no unit !\n");return 0.;}
+  if(fNTrainEvents<1){gMessMgr->Info()<<"StPmdNeuNet::ApplyWeights: No event to train !!!";return 0.;}
+  if(!fW){gMessMgr->Info()<<"StPmdNeuNet::ApplyWeights: no unit !";return 0.;}
   FILE *file1;
   file1=fopen("testout","w");
 
