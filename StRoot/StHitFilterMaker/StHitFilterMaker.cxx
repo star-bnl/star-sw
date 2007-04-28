@@ -1,7 +1,10 @@
 //*-- Author : James Dunlop
 // 
-// $Id: StHitFilterMaker.cxx,v 1.5 2006/05/17 23:42:42 fisyak Exp $
+// $Id: StHitFilterMaker.cxx,v 1.6 2007/04/28 17:56:18 perev Exp $
 // $Log: StHitFilterMaker.cxx,v $
+// Revision 1.6  2007/04/28 17:56:18  perev
+// Redundant StChain.h removed
+//
 // Revision 1.5  2006/05/17 23:42:42  fisyak
 // Use option KeepTpcHit and KeepSvtHit for StHitFilterMaker to keep corresponing hits regardless of track selection
 //
@@ -22,7 +25,6 @@
 
 
 #include "StHitFilterMaker.h"
-#include "StChain.h"
 #include "StMessMgr.h"
 
 

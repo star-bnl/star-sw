@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.17 2007/04/26 04:14:27 perev Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.18 2007/04/28 17:56:37 perev Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.18  2007/04/28 17:56:37  perev
+ *Redundant StChain.h removed
+ *
  *Revision 1.17  2007/04/26 04:14:27  perev
  *Remove StBFChain dependency
  *
@@ -61,7 +64,6 @@
 #include <sstream>
 
 #include "StPmdReadMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StDbLib/StDbManager.hh"

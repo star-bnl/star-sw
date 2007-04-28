@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.19 2004/07/27 12:02:00 lbarnby Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.20 2007/04/28 17:57:02 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.20  2007/04/28 17:57:02  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.19  2004/07/27 12:02:00  lbarnby
  * Filling of NKink and MaxPtKink tags added.
  *
@@ -74,7 +77,6 @@
 #include "StXiVertex.h"
 #include "StEventTypes.h"
 #include "StTrack.h"
-#include "StChain.h"
 #include "TMath.h"
 #include "PhysicalConstants.h"
 #include "phys_constants.h"

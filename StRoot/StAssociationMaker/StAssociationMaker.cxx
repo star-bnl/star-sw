@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.49 2006/05/30 22:56:20 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.50 2007/04/28 17:55:43 perev Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.50  2007/04/28 17:55:43  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.49  2006/05/30 22:56:20  calderon
  * The check for null StEvent pointer had been moved down, move it back up
  * near the beginning of the Make() call, otherwise the pointer is used
@@ -233,7 +236,6 @@ using std::ostream;
 
 #include "StMessMgr.h"
 
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "TH2.h"

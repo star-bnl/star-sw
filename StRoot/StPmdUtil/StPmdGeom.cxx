@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.20 2007/04/28 07:46:02 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.21 2007/04/28 17:56:38 perev Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.21  2007/04/28 17:56:38  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.20  2007/04/28 07:46:02  rashmi
  * mapping after access on date 26/04/07
  *
@@ -68,6 +71,7 @@
  * Mapping of chain # and channel # to supmod,row,col
  **********************************************************/
  
+#include "Stypes.h"
 #include "StPmdGeom.h"
 #include <strings.h>
 #include <stdlib.h>
@@ -80,7 +84,6 @@
 #include<TCanvas.h>
 #include<TPolyLine.h>
 #include<TArrayF.h>
-#include "StChain.h"
 
 ClassImp(StPmdGeom)
 

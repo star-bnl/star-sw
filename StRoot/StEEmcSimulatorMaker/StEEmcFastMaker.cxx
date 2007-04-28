@@ -1,8 +1,7 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.19 2007/03/23 03:26:23 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.20 2007/04/28 17:56:01 perev Exp $
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
 
@@ -292,6 +291,9 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.20  2007/04/28 17:56:01  perev
+// Redundant StChain.h removed
+//
 // Revision 1.19  2007/03/23 03:26:23  balewski
 // Corretions from Victor
 //

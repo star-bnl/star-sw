@@ -1,7 +1,6 @@
 // StSpectraTagMaker class for Spectra Reconstruction Tags                  //
 
 #include "StSpectraTagMaker.h"
-#include "StChain.h"
 #include "tables/St_SpectraTag_Table.h"
 #include "StEventTypes.h"
 #include "Stypes.h"

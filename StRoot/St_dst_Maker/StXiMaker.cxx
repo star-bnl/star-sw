@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.21 2003/09/23 01:18:18 jeromel Exp $
+// $Id: StXiMaker.cxx,v 1.22 2007/04/28 17:55:55 perev Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.22  2007/04/28 17:55:55  perev
+// Redundant StChain.h removed
+//
 // Revision 1.21  2003/09/23 01:18:18  jeromel
 // READ_UNINIT_MEM(read) problem fixed (of course used in a if() statement)
 //
@@ -72,7 +75,6 @@
 
 #include "StVertexId.h"
 
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 

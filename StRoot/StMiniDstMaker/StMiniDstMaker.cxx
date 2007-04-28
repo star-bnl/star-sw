@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMiniDstMaker.cxx,v 1.2 2000/10/16 19:35:41 ullrich Exp $
+ * $Id: StMiniDstMaker.cxx,v 1.3 2007/04/28 17:56:27 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMiniDstMaker.cxx,v $
+ * Revision 1.3  2007/04/28 17:56:27  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.2  2000/10/16 19:35:41  ullrich
  * Updated to run on Sun/CC5.
  *
@@ -20,7 +23,6 @@
  **************************************************************************/
 #include <typeinfo>
 #include "StMiniDstMaker.h"
-#include "StChain.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 #include "SystemOfUnits.h"

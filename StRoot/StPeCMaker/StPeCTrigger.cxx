@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.8 2003/11/25 01:54:37 meissner Exp $
+// $Id: StPeCTrigger.cxx,v 1.9 2007/04/28 17:56:35 perev Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.9  2007/04/28 17:56:35  perev
+// Redundant StChain.h removed
+//
 // Revision 1.8  2003/11/25 01:54:37  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -29,7 +32,6 @@
 #include "StPeCTrigger.h"
 #include "StPeCMaker.h"
 #include "StEventTypes.h"
-#include "StChain.h"
 #include "Stypes.h"
 #include "StMessMgr.h"
 #include "StPeCCtbSlat.h"

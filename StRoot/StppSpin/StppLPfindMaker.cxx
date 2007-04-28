@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPfindMaker.cxx,v 1.10 2003/01/03 23:37:18 balewski Exp $
+// $Id: StppLPfindMaker.cxx,v 1.11 2007/04/28 17:56:41 perev Exp $
 // $Log: StppLPfindMaker.cxx,v $
+// Revision 1.11  2007/04/28 17:56:41  perev
+// Redundant StChain.h removed
+//
 // Revision 1.10  2003/01/03 23:37:18  balewski
 // cleanup
 //
@@ -14,7 +17,6 @@
 #include <strings.h>
 #include <math.h>
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
 #include "TH2.h"

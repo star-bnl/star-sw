@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.41 2007/04/17 05:09:25 perev Exp $
+// $Id: StSsdPointMaker.cxx,v 1.42 2007/04/28 17:56:58 perev Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.42  2007/04/28 17:56:58  perev
+// Redundant StChain.h removed
+//
 // Revision 1.41  2007/04/17 05:09:25  perev
 // GetTFile()==>StMaker. Jerome request
 //
@@ -124,7 +127,6 @@
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
 #include "TNtuple.h"

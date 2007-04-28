@@ -25,7 +25,6 @@
 #include "SystemOfUnits.h"
 #include "StVertexId.h"
 
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
@@ -448,8 +447,11 @@ void StVertexMaker::UnFixVertex(){
 
 
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.10 2004/12/16 00:29:56 jeromel Exp $
+// $Id: StVertexMaker.cxx,v 1.11 2007/04/28 17:55:54 perev Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.11  2007/04/28 17:55:54  perev
+// Redundant StChain.h removed
+//
 // Revision 1.10  2004/12/16 00:29:56  jeromel
 // Modifications (shall we say hack ?) to implement the ppLMV-5 cuts to
 // ppLMV4.

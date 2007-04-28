@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.11 2005/12/06 16:37:44 genevb Exp $
+// $Id: StTpcT0Maker.cxx,v 1.12 2007/04/28 17:56:30 perev Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.12  2007/04/28 17:56:30  perev
+// Redundant StChain.h removed
+//
 // Revision 1.11  2005/12/06 16:37:44  genevb
 // Remove compiler warnings
 //
@@ -81,7 +84,6 @@
 #include <Stiostream.h>
 #include "Stiostream.h"
 #include "StTpcT0Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StTpcDb/StTpcDb.h"
@@ -406,7 +408,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.11 2005/12/06 16:37:44 genevb Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.12 2007/04/28 17:56:30 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

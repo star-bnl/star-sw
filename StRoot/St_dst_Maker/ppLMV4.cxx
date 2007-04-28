@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.12 2004/12/16 00:29:56 jeromel Exp $
+// $Id: ppLMV4.cxx,v 1.13 2007/04/28 17:55:48 perev Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.13  2007/04/28 17:55:48  perev
+// Redundant StChain.h removed
+//
 // Revision 1.12  2004/12/16 00:29:56  jeromel
 // Modifications (shall we say hack ?) to implement the ppLMV-5 cuts to
 // ppLMV4.
@@ -26,7 +29,6 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
-#include "StChain.h"
 #include "MatchedTrk.h"
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_vertex_Table.h" // only for histo
@@ -59,7 +61,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.12 2004/12/16 00:29:56 jeromel Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.13 2007/04/28 17:55:48 perev Exp $";
 
 struct Jcyl {float eta,phi;};
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.11 2006/03/06 20:03:06 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.12 2007/04/28 17:56:20 perev Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -40,7 +40,6 @@
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 
 //St_base
-#include "StChain.h"
 
 //StEvent
 #include "StEvent.h"

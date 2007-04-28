@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSector.cxx,v 1.7 2003/09/02 17:59:11 perev Exp $
+// $Id: StTpcCalibSector.cxx,v 1.8 2007/04/28 17:57:15 perev Exp $
 // $Log: StTpcCalibSector.cxx,v $
+// Revision 1.8  2007/04/28 17:57:15  perev
+// Redundant StChain.h removed
+//
 // Revision 1.7  2003/09/02 17:59:11  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -21,7 +24,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // STAR
-#include "StChain.h" // Needed before StTpcDb.h ; should be added there
 //#include "St_DataSetIter.h"
 //#include "StTpcDb/StTpcDb.h"
 #include "StDAQMaker/StDAQReader.h"

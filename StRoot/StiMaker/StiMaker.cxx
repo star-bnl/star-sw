@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.177  2007/04/28 17:56:19  perev
+// Redundant StChain.h removed
+//
 // Revision 1.176  2007/04/26 04:23:54  perev
 // Remove StBFChain dependency
 //
@@ -310,7 +313,6 @@ More detailed: 				<br>
 #else
 #include "TCernLib.h"
 #endif
-#include "StChain.h"
 #include "TDataSet.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"

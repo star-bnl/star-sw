@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.38 2007/03/21 17:22:58 fisyak Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.39 2007/04/28 17:57:06 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.39  2007/04/28 17:57:06  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.38  2007/03/21 17:22:58  fisyak
  * Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
  *
@@ -130,7 +133,6 @@
 
 #include "StSvtHitMaker.h"
 
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "TObjectSet.h"
 #include "StMessMgr.h"

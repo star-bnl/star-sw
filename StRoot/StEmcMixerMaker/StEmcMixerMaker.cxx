@@ -1,7 +1,6 @@
 #include "StEmcMixerMaker.h"
 #include <Stiostream.h>
 #include <math.h>
-#include "StChain.h"
 #include "SystemOfUnits.h"
 #include <stdlib.h>
 #include <string.h>

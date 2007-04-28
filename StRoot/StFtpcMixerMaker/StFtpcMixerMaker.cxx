@@ -29,7 +29,6 @@
 #include "StMessMgr.h"
 
 // SCL
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 
@@ -410,9 +409,12 @@ Int_t StFtpcMixerMaker::Finish()
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.cxx,v 1.6 2007/01/15 15:02:12 jcs Exp $
+ * $Id: StFtpcMixerMaker.cxx,v 1.7 2007/04/28 17:56:11 perev Exp $
  *
  * $Log: StFtpcMixerMaker.cxx,v $
+ * Revision 1.7  2007/04/28 17:56:11  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.6  2007/01/15 15:02:12  jcs
  * replace printf, cout and gMesMgr with Logger
  *

@@ -1,6 +1,9 @@
 //*-- Author : Jan Balewski 
-// $Id: StSpinSortMaker.cxx,v 1.6 2003/01/02 22:19:44 balewski Exp $
+// $Id: StSpinSortMaker.cxx,v 1.7 2007/04/28 17:56:44 perev Exp $
 // $Log: StSpinSortMaker.cxx,v $
+// Revision 1.7  2007/04/28 17:56:44  perev
+// Redundant StChain.h removed
+//
 // Revision 1.6  2003/01/02 22:19:44  balewski
 // cleanup #1 of unused code, all makers are now empty
 //
@@ -36,7 +39,6 @@
 #include <strings.h>
 #include <stdio.h>
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StSpinSortMaker.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.25 2003/09/02 17:57:58 perev Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.26 2007/04/28 17:55:59 perev Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.26  2007/04/28 17:55:59  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.25  2003/09/02 17:57:58  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -87,7 +90,6 @@
  *
  **************************************************************************/
 #include "StEbyeScaTagsMaker.h"
-#include "StChain.h"
 //-tu #include "StRun.h"
 #include "StEventTypes.h"
 #include "StGlobalTrack.h"

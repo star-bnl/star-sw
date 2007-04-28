@@ -1,5 +1,8 @@
-// $Id: St_tptsts_Maker.cxx,v 1.6 2006/08/11 19:43:41 fisyak Exp $
+// $Id: St_tptsts_Maker.cxx,v 1.7 2007/04/28 17:57:24 perev Exp $
 // $Log: St_tptsts_Maker.cxx,v $
+// Revision 1.7  2007/04/28 17:57:24  perev
+// Redundant StChain.h removed
+//
 // Revision 1.6  2006/08/11 19:43:41  fisyak
 // Comment #include St_XDFFile.h
 //
@@ -27,7 +30,6 @@
 //////////////////////////////////////////////////////////////////////////
 #include <Stiostream.h>
 #include "St_tptsts_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 //#include "St_XDFFile.h"
 #include "tpc/St_tcl_Module.h"

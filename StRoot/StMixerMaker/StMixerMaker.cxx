@@ -29,7 +29,6 @@
 // SCL
 #include "StGlobals.hh"
 #include "Randomize.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "TObjectSet.h"
 

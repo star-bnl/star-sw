@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.36 2007/03/21 17:28:25 fisyak Exp $
+//$Id: St_srs_Maker.cxx,v 1.37 2007/04/28 17:56:56 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.37  2007/04/28 17:56:56  perev
+//Redundant StChain.h removed
+//
 //Revision 1.36  2007/03/21 17:28:25  fisyak
 //New coordinate transformation
 //
@@ -62,7 +65,6 @@
 
 #include "StMessMgr.h"
 #include "St_srs_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 #include "TString.h"

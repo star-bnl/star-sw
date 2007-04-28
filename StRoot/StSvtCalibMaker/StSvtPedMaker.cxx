@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.cxx,v 1.9 2007/04/20 17:26:31 caines Exp $
+ * $Id: StSvtPedMaker.cxx,v 1.10 2007/04/28 17:57:03 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.cxx,v $
+ * Revision 1.10  2007/04/28 17:57:03  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.9  2007/04/20 17:26:31  caines
  * Removing print statements
  *
@@ -44,7 +47,6 @@
 #include "TFile.h"
 #include "TKey.h"
 #include "StSvtPedMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
 #include "StMessMgr.h"

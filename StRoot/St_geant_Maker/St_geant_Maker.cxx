@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.116 2007/04/26 15:51:31 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.117 2007/04/28 17:56:12 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.117  2007/04/28 17:56:12  perev
+// Redundant StChain.h removed
+//
 // Revision 1.116  2007/04/26 15:51:31  fisyak
 // Move creation of TGiant3 in ctor (fix byg 942)
 //
@@ -371,7 +374,6 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include "St_geant_Maker.h"
-#include "StChain.h"
 #include "TDataSetIter.h"
 #include "TTable.h"
 #include "Stiostream.h"

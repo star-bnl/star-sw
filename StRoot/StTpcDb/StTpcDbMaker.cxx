@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.37 2007/03/21 17:27:02 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.38 2007/04/28 17:57:19 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.38  2007/04/28 17:57:19  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.37  2007/03/21 17:27:02  fisyak
  * use TGeoHMatrix, change mode for switching drift velocities
  *
@@ -115,7 +118,6 @@
 #define StTpc_STATIC_ARRAYS
 #include <assert.h>
 #include "StTpcDbMaker.h"
-#include "StChain.h"
 #include "StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "tables/St_tpg_pad_plane_Table.h"

@@ -17,7 +17,6 @@
 #include "StThreeVectorD.hh"
 #include "StHelixD.hh"
 
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
@@ -545,8 +544,11 @@ Int_t StPrimaryMaker::Make(){
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.84 2005/02/05 01:13:54 perev Exp $
+// $Id: StPrimaryMaker.cxx,v 1.85 2007/04/28 17:55:53 perev Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.85  2007/04/28 17:55:53  perev
+// Redundant StChain.h removed
+//
 // Revision 1.84  2005/02/05 01:13:54  perev
 // globtrk2 is filled wrongly but not used anywhere (VP). Remove
 //

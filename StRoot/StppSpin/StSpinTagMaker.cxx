@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StSpinTagMaker.cxx,v 1.4 2003/09/02 18:00:19 perev Exp $
+// $Id: StSpinTagMaker.cxx,v 1.5 2007/04/28 17:56:45 perev Exp $
 // $Log: StSpinTagMaker.cxx,v $
+// Revision 1.5  2007/04/28 17:56:45  perev
+// Redundant StChain.h removed
+//
 // Revision 1.4  2003/09/02 18:00:19  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -21,7 +24,6 @@
 #include <string.h>
 
 #include "StSpinTagMaker.h"
-#include "StChain.h"
 #include "tables/St_SpinTag_Table.h"
 #include "StEventTypes.h"
 #include "Stypes.h"

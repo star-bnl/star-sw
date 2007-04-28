@@ -1,5 +1,8 @@
-// $Id: StTpcBadChanMaker.cxx,v 1.8 2003/09/02 17:59:11 perev Exp $
+// $Id: StTpcBadChanMaker.cxx,v 1.9 2007/04/28 17:57:14 perev Exp $
 // $Log: StTpcBadChanMaker.cxx,v $
+// Revision 1.9  2007/04/28 17:57:14  perev
+// Redundant StChain.h removed
+//
 // Revision 1.8  2003/09/02 17:59:11  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -38,7 +41,6 @@
 #include "TH3.h"
 #include "TNtuple.h"
 // STAR
-#include "StChain.h"
 #include "St_DataSetIter.h"
 //#include "StTpcDb/StTpcDb.h"
 #include "StDAQMaker/StDAQReader.h"
@@ -122,7 +124,7 @@ Int_t StTpcBadChanMaker::Make(){
 //_____________________________________________________________________________
 void StTpcBadChanMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcBadChanMaker.cxx,v 1.8 2003/09/02 17:59:11 perev Exp $\n");
+  printf("* $Id: StTpcBadChanMaker.cxx,v 1.9 2007/04/28 17:57:14 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

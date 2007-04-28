@@ -1,4 +1,4 @@
-/* $Id: StHeavyTagMaker.cxx,v 1.3 2004/08/26 03:24:10 jeromel Exp $
+/* $Id: StHeavyTagMaker.cxx,v 1.4 2007/04/28 17:56:16 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, July 2004
  ***************************************************************************
@@ -22,6 +22,9 @@
  ***************************************************************************
  *
  * $Log: StHeavyTagMaker.cxx,v $
+ * Revision 1.4  2007/04/28 17:56:16  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.3  2004/08/26 03:24:10  jeromel
  * Fixed wrong indexing
  *
@@ -36,7 +39,6 @@
 #include "StHeavyTagMaker.h"
 #include "tables/St_HeavyTag_Table.h"
 
-#include "StChain.h"
 #include "StEvent.h"
 #include "StMessMgr.h"
 #include "StEventUtilities/StuRefMult.hh"

@@ -1,5 +1,8 @@
-//! $Id: StRawTpcQaMaker.cxx,v 1.8 2003/09/02 17:58:50 perev Exp $
+//! $Id: StRawTpcQaMaker.cxx,v 1.9 2007/04/28 17:56:47 perev Exp $
 //! $Log: StRawTpcQaMaker.cxx,v $
+//! Revision 1.9  2007/04/28 17:56:47  perev
+//! Redundant StChain.h removed
+//!
 //! Revision 1.8  2003/09/02 17:58:50  perev
 //! gcc 3.2 updates + WarnOff
 //!
@@ -33,7 +36,6 @@
 
 
 #include "StRawTpcQaMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "StDAQMaker/StDAQReader.h"
@@ -170,7 +172,7 @@ Int_t StRawTpcQaMaker::Make(){
 //_____________________________________________________________________________
 void StRawTpcQaMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StRawTpcQaMaker.cxx,v 1.8 2003/09/02 17:58:50 perev Exp $\n");
+  printf("* $Id: StRawTpcQaMaker.cxx,v 1.9 2007/04/28 17:56:47 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

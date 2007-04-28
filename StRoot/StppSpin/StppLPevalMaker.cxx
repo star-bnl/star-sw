@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPevalMaker.cxx,v 1.3 2003/01/02 22:19:45 balewski Exp $
+// $Id: StppLPevalMaker.cxx,v 1.4 2007/04/28 17:56:40 perev Exp $
 // $Log: StppLPevalMaker.cxx,v $
+// Revision 1.4  2007/04/28 17:56:40  perev
+// Redundant StChain.h removed
+//
 // Revision 1.3  2003/01/02 22:19:45  balewski
 // cleanup #1 of unused code, all makers are now empty
 //
@@ -26,7 +29,6 @@
 #include <stdio.h>
 
 #include "StppLPevalMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 

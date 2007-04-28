@@ -1,7 +1,6 @@
 // StPCollTagMaker class for PColl Reconstruction Tags                  //
 
 #include "StPCollTagMaker.h"
-#include "StChain.h"
 #include "tables/St_PCollTag_Table.h"
 #include "StEventTypes.h"
 #include "Stypes.h"

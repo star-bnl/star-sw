@@ -1,5 +1,8 @@
-// $Id: StPeCLumiMaker.cxx,v 1.6 2003/02/01 18:50:18 yepes Exp $
+// $Id: StPeCLumiMaker.cxx,v 1.7 2007/04/28 17:56:33 perev Exp $
 // $Log: StPeCLumiMaker.cxx,v $
+// Revision 1.7  2007/04/28 17:56:33  perev
+// Redundant StChain.h removed
+//
 // Revision 1.6  2003/02/01 18:50:18  yepes
 // New Lumi version for MuDst
 //
@@ -38,7 +41,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StPeCLumiMaker.h"
 #include "StEventTypes.h"
-#include "StChain.h"
 #include "Stypes.h"
 #include "StMessMgr.h"
 #include "TH1.h"
@@ -62,7 +64,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.6 2003/02/01 18:50:18 yepes Exp $";
+static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.7 2007/04/28 17:56:33 perev Exp $";
 
 ClassImp(StPeCLumiMaker)
 

@@ -7,7 +7,6 @@
 
 #include "Stiostream.h"
 #include "St_trg_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StTRGReader.h"
@@ -1070,8 +1069,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.54 2007/03/23 17:28:56 jeromel Exp $
+// $Id: St_trg_Maker.cxx,v 1.55 2007/04/28 17:57:26 perev Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.55  2007/04/28 17:57:26  perev
+// Redundant StChain.h removed
+//
 // Revision 1.54  2007/03/23 17:28:56  jeromel
 // One more small modif (print year)
 //

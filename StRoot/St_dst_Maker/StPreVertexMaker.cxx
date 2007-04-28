@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.13 2003/09/30 19:21:02 perev Exp $
+// $Id: StPreVertexMaker.cxx,v 1.14 2007/04/28 17:55:52 perev Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.14  2007/04/28 17:55:52  perev
+// Redundant StChain.h removed
+//
 // Revision 1.13  2003/09/30 19:21:02  perev
 // zeroing tpc_track before copy into it
 //
@@ -46,7 +49,6 @@
 #include "StPreVertexMaker.h"
 
 #include "StDetectorId.h"
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"

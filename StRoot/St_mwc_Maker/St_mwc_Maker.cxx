@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.28 2004/03/01 17:54:19 fisyak Exp $
+// $Id: St_mwc_Maker.cxx,v 1.29 2007/04/28 17:56:29 perev Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.29  2007/04/28 17:56:29  perev
+// Redundant StChain.h removed
+//
 // Revision 1.28  2004/03/01 17:54:19  fisyak
 // Add include of math.h for osf
 //
@@ -114,7 +117,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "St_mwc_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 //#include "StTpcDb/StTpcDb.h" - no call to DB until dust settles
 #include "mwc/St_mwg_Module.h"

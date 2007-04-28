@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.54 2007/03/11 01:25:47 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.55 2007/04/28 17:56:00 perev Exp $
  
 
 #include <time.h>
@@ -8,7 +8,6 @@
 
 #include <TDatime.h>
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 
 #include "St_db_Maker/St_db_Maker.h" // tmp to ovveride time stamp
@@ -1084,6 +1083,9 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.55  2007/04/28 17:56:00  perev
+// Redundant StChain.h removed
+//
 // Revision 1.54  2007/03/11 01:25:47  balewski
 // nicer printouts
 //

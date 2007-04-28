@@ -1,7 +1,6 @@
 
 #include "StSvtVertexFinderMaker.h"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 #include "StMessMgr.h"

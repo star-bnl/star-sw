@@ -18,7 +18,6 @@
 
 //St_base
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
-#include "StChain.h"
 
 //StEvent
 #include "StEvent.h"

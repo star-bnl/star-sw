@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.92  2007/04/28 17:56:09  perev
+// Redundant StChain.h removed
+//
 // Revision 1.91  2007/04/26 11:06:11  jcs
 // Use the bfc option "debug" to create and fill the FTPC cluster tuning histograms
 //
@@ -311,7 +314,6 @@
 #include "StFtpcTrackMaker/StFtpcConfMapPoint.hh"
 #include "StFtpcGeantPoint.hh"
 #include "StFtpcFastSimu.hh"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"

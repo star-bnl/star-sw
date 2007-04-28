@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.12 2007/03/21 17:22:58 fisyak Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.13 2007/04/28 17:57:05 perev Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.13  2007/04/28 17:57:05  perev
+// Redundant StChain.h removed
+//
 // Revision 1.12  2007/03/21 17:22:58  fisyak
 // Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
 //
@@ -42,7 +45,6 @@
 // StSvtClusterMaker class                                             //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include "StChain.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "St_DataSetIter.h"

@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.21 2006/08/02 13:57:57 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.22 2007/04/28 17:56:10 perev Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.22  2007/04/28 17:56:10  perev
+// Redundant StChain.h removed
+//
 // Revision 1.21  2006/08/02 13:57:57  jcs
 // add deltaAr argument to allow user to change gas compostion (default: deltaAr=0)
 //
@@ -78,7 +81,6 @@
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 
 #include "StMessMgr.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"

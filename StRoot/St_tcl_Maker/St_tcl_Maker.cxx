@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.76 2006/10/17 20:17:18 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.77 2007/04/28 17:57:12 perev Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.77  2007/04/28 17:57:12  perev
+// Redundant StChain.h removed
+//
 // Revision 1.76  2006/10/17 20:17:18  fisyak
 // remove direct filling of StEvent, StEvent is not ready yet
 //
@@ -72,7 +75,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include "St_tcl_Maker.h"
-#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 //#include "St_XDFFile.h"
@@ -490,7 +492,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.76 2006/10/17 20:17:18 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.77 2007/04/28 17:57:12 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
