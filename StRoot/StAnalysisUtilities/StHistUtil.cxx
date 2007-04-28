@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.36 2007/04/24 00:33:06 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.37 2007/04/28 20:36:15 perev Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.37  2007/04/28 20:36:15  perev
+// Redundant StChain.h removed
+//
 // Revision 2.36  2007/04/24 00:33:06  genevb
 // SSD hists; Logz for Dedx
 //
@@ -136,7 +139,6 @@
 #include "TLine.h"
 #include "StMessMgr.h"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StMaker.h"
 

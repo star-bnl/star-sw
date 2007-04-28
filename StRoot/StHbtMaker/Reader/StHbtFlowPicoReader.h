@@ -3,7 +3,7 @@
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 #include "StHbtMaker/Infrastructure/StHbtString.hh"
 #include "flow_pDST.h"
-#include <vector.h>
+#include <vector>
 #include <string.h>
 /* http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StHbtMaker/doc/#Reader
 outlines the requirements for this type of class.
