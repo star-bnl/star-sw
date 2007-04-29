@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMixerMaker.cxx,v 1.4 2007/04/28 17:56:49 perev Exp $
+ * $Id: StRichMixerMaker.cxx,v 1.5 2007/04/29 17:29:55 hippolyt Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichMixerMaker.cxx,v $
+ * Revision 1.5  2007/04/29 17:29:55  hippolyt
+ * Star logger recommendations pass 2
+ *
  * Revision 1.4  2007/04/28 17:56:49  perev
  * Redundant StChain.h removed
  *
@@ -27,8 +30,6 @@
  * Initial Revision
  *
  ***************************************************************************/
-#include <Stiostream.h>
-#include "Stiostream.h"
 #include <algorithm>
 
 #include "St_DataSetIter.h"
@@ -118,8 +119,6 @@ StRichMixerMaker::~StRichMixerMaker() {}
 
 Int_t StRichMixerMaker::Init() {
 
-//     cout << "StRichMixerMaker::init()" << endl;
-
     //
     // Read in parameters from the dataBase!
     //
@@ -148,8 +147,7 @@ Int_t StRichMixerMaker::Init() {
 	ifstream pedfile;
 	pedfile.open(mPedestalFile);
 	if (!pedfile) {
-	    cout << "StRichMixerMaker::Init()\n";
-	    cout << "\tCan not open ped file: " << mPedestalFile << endl;
+	  { LOG_WARN << "Can not open ped file: " << mPedestalFile << endm; }
 	}
 	else {
 	    for (unsigned int channelnum=0; channelnum<960; ++channelnum) {
@@ -159,13 +157,12 @@ Int_t StRichMixerMaker::Init() {
 		}
 	    }
 	    pedfile.close();
-	    cout << "StRichMixerMaker::Init() ";
-	    cout << " Read pedestals" << endl;
+	    { LOG_INFO << " Read pedestals" << endm; }
 	    
   	    for (unsigned int pad=0; pad < 160; ++pad) {
   		for (unsigned int row=0; row < 96; ++row) {
-		    cout << " pad " << pad << " row " << row
-			 << " ped " << mPedestal[pad][row] << " sig " << mSigma[pad][row] << endl;
+		  { LOG_DEBUG << " pad " << pad << " row " << row
+			      << " ped " << mPedestal[pad][row] << " sig " << mSigma[pad][row] << endm; }
   		}
   	    }
 	}
@@ -220,10 +217,7 @@ Int_t StRichMixerMaker::Make() {
 //     cout << "\tMake the StRichCollection" << endl;
     mTheRichCollection = new StRichCollection();
     if(!mTheRichCollection) {
-	cout << "ERROR:\n";
-	cout << "STRichMixerMaker::Make()\n";
-	cout << "\tCould not make a RichCollection\n";
-	cout << "\tAborting..." << endl;
+      { LOG_ERROR << "Could not make a RichCollection Aborting..." << endm; }
 	abort();
     }
 
@@ -237,29 +231,23 @@ Int_t StRichMixerMaker::Make() {
     //
     St_ObjectSet *rrsEvent = (St_ObjectSet*)GetDataSet("Rrs/.const/richPixels");
     if(!rrsEvent) {
-	cout << "StRichMixerMaker::Maker()\n";
-	cout << "\tDataSet: rrsEvent not there\n";
-	cout << "\tSkip this event\n" << endl;
-	return kStWarn;
+      { LOG_WARN << "DataSet: rrsEvent not there %n Skip this event" << endm; }
+      return kStWarn;
     }
 
     StRichPadPlane* theRichSimData = (StRichPadPlane*)(rrsEvent->GetObject());
     if(!theRichSimData) {
-	cout << "StRichMixerMaker::Maker()\n";
-	cout << "\tRichSimData: not there\n";
-	cout << "\tSkip this event\n" << endl;
-	return kStWarn;
+      { LOG_WARN << "RichSimData: not there %n Skip this event" << endm; }
+      return kStWarn;
     }
 
     mSimStreamReader = new StRrsReader(theRichSimData, -9);
     if(!mSimStreamReader) {
-	cout << "StRichMixerMaker::Make()\n";
-	cout << "\tERROR\n";
-	cout << "\tCannot get the Sim Stream Reader" << endl;
-	return kStWarn;
+      { LOG_WARN << "Cannot get the Sim Stream Reader" << endm; }
+      return kStWarn;
     }
     else {
-	cout << " Sim Stream Reader acquired" << endl;
+      { LOG_INFO << " Sim Stream Reader acquired" << endm; }
     }
     
     //
@@ -267,35 +255,27 @@ Int_t StRichMixerMaker::Make() {
     //
     mTheRichDaqData   = GetDataSet("StDAQReader");
     if(!mTheRichDaqData) {
-	cout << "StRichMixerMaker::Maker()\n";
-	cout << "\tDataSet: StDAQReader not there\n";
-	cout << "\tSkip this event\n" << endl;	    
-	return kStWarn;
+      { LOG_WARN << "DataSet: StDAQReader not there %n Skip this event" << endm; }
+      return kStWarn;
     }
     
     mTheDaqDataReader = (StDAQReader*)(mTheRichDaqData->GetObject());
     if(!mTheDaqDataReader) {
-	cout << "StRichMixerMaker::Maker()\n";
-	cout << "\tStDAQReader*: not there\n";
-	cout << "\tSkip this event\n" << endl;
-	return kStWarn;
+      { LOG_WARN << "DataSet: StDAQReader not there %n Skip this event" << endm; }
+      return kStWarn;
     }
     if (!(mTheDaqDataReader->RICHPresent())) {
-	cout << "StRichMixerMaker::Maker()\n";
-	cout << "\tRICH not in datastream\n";
-	cout << "\tSkip this event\n" << endl;
+      { LOG_WARN << "RICH not in datastream %n Skip this event" << endm; }
 	return kStWarn;
     }
     mDaqStreamReader = mTheDaqDataReader->getRICHReader();
 
     if(!mDaqStreamReader) {
-	cout << "StRichMixerMaker::Make()\n";
-	cout << "\tCould not get a Reader\n";
-	cout << "\tSkip Event" << endl;
+      { LOG_WARN << "Could not get a Reader %n Skip this event" << endm; }
 	return kStWarn;
     }
     else {
-	cout << " Daq Stream Reader acquired" << endl;
+      { LOG_WARN << "Daq Stream Reader acquired" << endm; }
     }
     
     //
@@ -390,10 +370,7 @@ Int_t StRichMixerMaker::Make() {
 	} // loop over rows (y)
     } // loop over pads (x)
     
-    cout << "StRichMixerMaker-->combined:\n";
-    cout << daqPixels << '/'
-	 << simPixels << " daq/sim pixels ("
-	 << (daqPixels+simPixels) << ")" << endl;
+    { LOG_DEBUG << "StRichMixerMaker-->combined : " << daqPixels << '/' << simPixels << " daq/sim pixels (" << (daqPixels+simPixels) << ")" << endm; }
 
 #ifdef RCH_HISTOGRAM
     const StSPtrVecRichPixel& pixelStore = mTheRichCollection->getRichPixels();
@@ -426,36 +403,35 @@ Int_t StRichMixerMaker::Make() {
     // This should be removed at a later date
     //
     if(!mTheRichCollection) {
-	cout << "StRichMixerMaker::mTheRichCollection doesn't exist!!!\n";
-	cout << "\tthis is fatal" << endl;
-	abort();
+      { LOG_ERROR << "StRichMixerMaker::mTheRichCollection doesn't exist!!! %n" << "\tthis is fatal" << endm; }
+      abort();
     }
-    cout << "StRichMixerMaker --> add the pixels to the dataset"  << endl;
+    { LOG_INFO << "StRichMixerMaker --> add the pixels to the dataset"  << endm; }
     AddData(new St_ObjectSet("richMixedEvent", mTheRichCollection));
     
 #ifdef RCH_DEBUG
     if(!mTheRichCollection->pixelsPresent()) {
-	cout << "StEvent RichPixelCollection DOES NOT Exist" << endl;
+      { LOG_WARN << "StEvent RichPixelCollection DOES NOT Exist" << endm; }
 	return kStWarn;
     }
     const StSPtrVecRichPixel& thePixels = mTheRichCollection->getRichPixels();
 
-    cout << "StRichMixerMaker:  There are " << thePixels.size() << " Rich Pixels" << endl;
+    { LOG_DEBUG << "StRichMixerMaker:  There are " << thePixels.size() << " Rich Pixels" << endm; }
     for(size_t ii=0; ii<thePixels.size(); ii++) {
-	cout << "StEvent: p/r/adc "
-	     << (thePixels[ii]->pad()) << '/'
-	     << (thePixels[ii]->row()) << '/'
-	     << (thePixels[ii]->adc()) << endl;
+      { LOG_DEBUG << "StEvent: p/r/adc "
+		  << (thePixels[ii]->pad()) << '/'
+		  << (thePixels[ii]->row()) << '/'
+		  << (thePixels[ii]->adc()) << endm; }
 	if(dynamic_cast<StRichMCPixel*>(thePixels[ii])) {
-	    cout << "MCInfo id/gid/track/q/pro" << endl;
+	  { LOG_DEBUG << "MCInfo id/gid/track/q/pro" << endm; }
 	    const StSPtrVecRichMCInfo& info = dynamic_cast<StRichMCPixel*>(thePixels[ii])->getMCInfo();
 	    PR(info.size());
 	    for(size_t i3=0; i3<info.size(); i3++) { 
-		cout << info[i3]->id() << '/'
-		     << info[i3]->gid() << '/'
-		     << info[i3]->trackp() << '/'
-		     << info[i3]->charge() << '/'
-		     << info[i3]->process() << endl;
+	      { LOG_DEBUG << info[i3]->id() << '/'
+			  << info[i3]->gid() << '/'
+			  << info[i3]->trackp() << '/'
+			  << info[i3]->charge() << '/'
+			  << info[i3]->process() << endm; }
 	    }
 	}
     }
@@ -467,9 +443,9 @@ Int_t StRichMixerMaker::Make() {
 //-----------------------------------------------------------------
 void StRichMixerMaker::PrintInfo() 
 {
-    printf("**************************************************************\n");
-    printf("* $Id: StRichMixerMaker.cxx,v 1.4 2007/04/28 17:56:49 perev Exp $\n");
-    printf("**************************************************************\n");
+  { LOG_INFO << "*****************************************************************" << endm; }
+  { LOG_INFO << "*  StRichMixerMaker.cxx,v 1.4 2007/04/28 17:56:49 perev Exp *" << endm; }
+  { LOG_INFO << "*****************************************************************" << endm; }
     if (Debug()) StMaker::PrintInfo();
 }
 
@@ -478,7 +454,7 @@ void StRichMixerMaker::PrintInfo()
 
 Int_t StRichMixerMaker::Finish() {
 
-    cout << "StRichMixerMaker::Finish()" << endl;
+  { LOG_INFO << "StRichMixerMaker::Finish()" << endm; }
 
 	
 #ifdef RCH_HISTOGRAM
