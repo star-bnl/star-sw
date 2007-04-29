@@ -9,6 +9,7 @@
  */
 
 #include "StEEmcStrip.h"
+#include <iostream> 
 
 ClassImp(StEEmcStrip);
 
@@ -23,7 +24,7 @@ StEEmcStrip::StEEmcStrip()
 // ----------------------------------------------------------------------------
 void StEEmcStrip::print()
 {
-
+   std::cout << name() << " "  << " " << energy()*1000. << " MeV"; 
 }
 
 // ----------------------------------------------------------------------------
