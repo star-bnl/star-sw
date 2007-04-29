@@ -1,10 +1,13 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 2.3 2007/04/27 13:52:50 hippolyt Exp $
+ * $Id: StRichWriter.cxx,v 2.4 2007/04/29 12:50:26 hippolyt Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
+ * Revision 2.4  2007/04/29 12:50:26  hippolyt
+ * Star logger recommendations pass 2
+ *
  * Revision 2.3  2007/04/27 13:52:50  hippolyt
  * Star logger recommendations
  *
@@ -89,7 +92,6 @@ StRichWriter::StRichWriter(StRichPadPlane* aPadPlane)
 
 StRichWriter* StRichWriter::getInstance()
 {
-    //cerr << "WARNING::StRichWriter::getInstance()" << endl;
     if(!p2Instance)
       { LOG_ERROR << "An Instance of StRichPadPlane must exist!" << endm; }
     return p2Instance;
