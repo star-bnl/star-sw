@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: tform.cxx,v 2.2 2007/04/27 13:53:30 hippolyt Exp $
+ * $Id: tform.cxx,v 2.3 2007/04/29 12:47:03 hippolyt Exp $
  * Description:
  *  Stand-alone test module
  *
  * $Log: tform.cxx,v $
+ * Revision 2.3  2007/04/29 12:47:03  hippolyt
+ * *** empty log message ***
+ *
  * Revision 2.2  2007/04/27 13:53:30  hippolyt
  * Star logger recommendations
  *
@@ -74,12 +77,12 @@ int main()
     StRichGeometryDb* myGeometryDb = StRichGeometryDb::getDb();
 
     if ( !myGeometryDb ) {
-      cerr << "Geometry database could not be initialized. Aborting!!!\n";
+      { LOG_ERROR << "Geometry database could not be initialized. Aborting!!!" << endm; }
       return 1;
     }
 
     if ( !myPhysicsDb ) {
-      cerr << "Physics database could not be initialized. Aborting!!!\n";
+      { LOG_ERROR << "Physics database could not be initialized. Aborting!!!" << endm; }
       return 1;
     }
 
