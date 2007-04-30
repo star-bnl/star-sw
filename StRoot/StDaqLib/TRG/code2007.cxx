@@ -178,7 +178,7 @@ int TRG_Reader::Swap2007_Raw(char *ptr) {
     pTRGD->swapHerb2bytes(&(p->rawTriggerDet[i].QQTdataBytes),1);
     pTRGD->swapHerb4bytes(&(p->rawTriggerDet[i].QQTfiller),1);
     pTRGD->swapHerb4bytes(&(p->rawTriggerDet[i].QQTdata[0]),1600);
-    int nqt = p->rawTriggerDet[i].QQTdataBytes;
+    int nqt = p->rawTriggerDet[i].QQTdataBytes/4;
     int ac10 = p->rawTriggerDet[i].QQTdata[nqt-1];
     printf("NQTdata = %d, AC10 = 0x%x\n",nqt,ac10);
     if(nqt>0 && ac10 != 0xAC10){
