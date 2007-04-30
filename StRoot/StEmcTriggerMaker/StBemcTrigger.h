@@ -1,5 +1,6 @@
+
 //
-// $Id: StBemcTrigger.h,v 1.12 2007/04/23 20:00:07 rfatemi Exp $
+// $Id: StBemcTrigger.h,v 1.13 2007/04/30 01:02:07 rfatemi Exp $
 //
 //
 
@@ -55,27 +56,27 @@ private:
     int get2006Trigger();
     void PatchMap();
 
-    int mIsTrig[16];//1==true,0==false
-    int mTowJetId[13];//JP_ID/HT_ID of trigger
-    int mDsmAdc[14];//DSM ADC of trigger
-    int mnumHT[7];//#towers in trigger
-    int mnumJP[7];//#patches in trigger
-    int mnumHTTP[1];//#HT+TP which fullf HTTP trigger
+    int mIsTrig[50];//1==true,0==false
+    int mTowJetId[50];//JP_ID/HT_ID of trigger
+    int mDsmAdc[50];//DSM ADC of trigger
+    int mnumHT[12];//#towers in trigger
+    int mnumJP[12];//#patches in trigger
+    int mnumHTTP[6];//#HT+TP which fullf HTTP trigger
     int mHT12005array[kNTowers];//array of towers which pass trigger
     int mJP12005array[kNJet];//array of JP's which pass trigger
     int mHT22005array[kNTowers];//array of towers which pass trigger
     int mJP22005array[kNJet];//array of JP's which pass trigger
     int mJPSI2005adc[kNJet];//array of adc of HT in each JP
     int mJPSI2005id[kNJet];//array of id of HT in each JP
-    int mJP12006array[kNJet];//array of JP's which pass trigger
-    int mHT22006array[kNTowers];//array of towers which pass trigger
-    int mJP22006array[kNJet];//array of JP's which pass trigger
-    int mJPSI2006adc[kNJet];//array of adc of HT in each JP
-    int mJPSI2006id[kNJet];//array of id of HT in each JP
-    int mHTTP2006arrayHT[kNPatches];
-    int mHTTP2006arrayHTADC[kNPatches];
-    int mHTTP2006arrayTP[kNPatches];
-    int mHTTP2006arrayTPADC[kNPatches];
+    int mHT22006array[6][kNTowers];//array of towers which pass trigger
+    int mJP02006array[6][kNJet];//array of JP's which pass trigger
+    int mJP12006array[6][kNJet];//array of JP's which pass trigger
+    int mJPSI2006adc[6][kNJet];//array of adc of HT in each JP
+    int mJPSI2006id[6][kNJet];//array of id of HT in each JP
+    int mHTTP2006arrayHT[6][kNPatches];
+    int mHTTP2006arrayHTADC[6][kNPatches];
+    int mHTTP2006arrayTP[6][kNPatches];
+    int mHTTP2006arrayTPADC[6][kNPatches];
     int mBL12006arrayADC[kNJet];
 
     int mIs2003HT1;
@@ -89,11 +90,11 @@ private:
     int mIs2005JP2;
     int mIs2005ADJ;
     int mIs2005JPSI;
-    int mIs2006JP1;
-    int mIs2006HT2;
-    int mIs2006JP2;
-    int mIs2006JPSI;
-    int mIs2006BHTTP;
+    int mIs2006HT2[6];
+    int mIs2006JP0[6];
+    int mIs2006JP1[6];
+    int mIs2006JPSI[6];
+    int mIs2006BHTTP[6];
 
     int HT1_ID_2003;
     int HT1_ID_2004;
@@ -105,9 +106,9 @@ private:
     int JP1_ID_2005;
     int JP2_ID_2005;
     int ADJ_ID_2005;
-    int HT2_ID_2006;
-    int JP1_ID_2006;
-    int JP2_ID_2006;
+    int HT2_ID_2006[6];
+    int JP0_ID_2006[6];
+    int JP1_ID_2006[6];
 
     int HT1_DSM_2003;
     int HT1_DSM_2004;
@@ -119,9 +120,9 @@ private:
     int JP1_DSM_2005;
     int JP2_DSM_2005;
     int ADJ_DSM_2005;
-    int HT2_DSM_2006;
-    int JP1_DSM_2006;
-    int JP2_DSM_2006;
+    int HT2_DSM_2006[6];
+    int JP0_DSM_2006[6];
+    int JP1_DSM_2006[6];
     int JP_TP[12][25];
     int BETOT_DSM_2006;
 
@@ -130,10 +131,10 @@ private:
     int numJP1_2005;
     int numJP2_2005;
     int numADJ_2005;
-    int numHT2_2006;
-    int numJP1_2006;
-    int numJP2_2006;
-    int numHTTP_2006;
+    int numHT2_2006[6];
+    int numJP0_2006[6];
+    int numJP1_2006[6];
+    int numHTTP_2006[6];
 
     int HT1_2005_array[kNTowers];
     int HT2_2005_array[kNTowers];
@@ -141,19 +142,20 @@ private:
     int JP2_2005_array[kNJet];
     int JPSI_2005_ADC[kNJet];
     int JPSI_2005_ID[kNJet];
-    int HT2_2006_array[kNTowers];
-    int JP1_2006_array[kNJet];
-    int JP2_2006_array[kNJet];
-    int JPSI_2006_ADC[kNJet];
-    int JPSI_2006_ID[kNJet];
-    int BHTTP_2006_HT[kNPatches];
-    int BHTTP_2006_HT_ADC[kNPatches];
-    int BHTTP_2006_TP[kNPatches];
-    int BHTTP_2006_TP_ADC[kNPatches];
+    int HT2_2006_array[6][kNTowers];
+    int JP0_2006_array[6][kNJet];
+    int JP1_2006_array[6][kNJet];
+    int JPSI_2006_ADC[6][kNJet];
+    int JPSI_2006_ID[6][kNJet];
+    int BHTTP_2006_HT[6][kNPatches];
+    int BHTTP_2006_HT_ADC[6][kNPatches];
+    int BHTTP_2006_TP[6][kNPatches];
+    int BHTTP_2006_TP_ADC[6][kNPatches];
     int BL1_ADC_2006[kNJet/2];
 
 public:
-        
+       
+
     StBemcTrigger();
     virtual        ~StBemcTrigger();
 
@@ -166,7 +168,7 @@ public:
                     }///< Obsolete function; users can control messages with logger config file.
     void    setDbMaker(St_db_Maker* dbMaker) { mDbMaker = dbMaker; }
     void    setTableMaker(StBemcTables *tab) { mTables =tab; }
-
+   
     //1==true, 0==false, -1==problems
     int*    isTrigEvent() { return mIsTrig; }
     //return JPID/towID -1==problems
@@ -175,23 +177,23 @@ public:
     int*    getTowPatchDSM() { return mDsmAdc; }
     int*    getNHT() { return mnumHT; }
     int*    getNJP() { return mnumJP; }
-    int*    getNHTTP() { return mnumHTTP; }
+    int*    getNHTTP() { return numHTTP_2006; }
     int*    getHT12005array() { return mHT12005array; }
     int*    getHT22005array() {	return mHT22005array; }
     int*    getJP12005array(){ return mJP12005array; }
     int*    getJP22005array() { return mJP22005array; }
     int*    getJPSI2005adc() { return mJPSI2005adc; }
     int*    getJPSI2005id() { return mJPSI2005id; }
-    int*    getHT22006array() { return mHT22006array; }
-    int*    getJP12006array() { return mJP12006array; }
-    int*    getJP22006array() { return mJP22006array; }
-    int*    getJPSI2006adc() { return mJPSI2006adc; }
-    int*    getJPSI2006id() { return mJPSI2006id; }
-    int*    getHTTP2006arrayHT() { return mHTTP2006arrayHT; }
-    int*    getHTTP2006arrayHTADC() { return mHTTP2006arrayHTADC; }
-    int*    getHTTP2006arrayTP() { return mHTTP2006arrayTP; }
-    int*    getHTTP2006arrayTPADC() { return mHTTP2006arrayTPADC; }
     int*    getBL12006arrayADC() { return mBL12006arrayADC; }
+    int    getHT22006array(int i,int j) { return mHT22006array[i][j]; }
+    int    getJP02006array(int i,int j) { return mJP02006array[i][j]; }
+    int    getJP12006array(int i,int j) { return mJP12006array[i][j]; }
+    int    getJPSI2006adc(int i,int j) { return mJPSI2006adc[i][j]; }
+    int    getJPSI2006id(int i,int j) { return mJPSI2006id[i][j]; }
+    int    getHTTP2006arrayHT(int i, int j) { return mHTTP2006arrayHT[i][j]; }
+    int    getHTTP2006arrayHTADC(int i, int j) { return mHTTP2006arrayHTADC[i][j]; }
+    int    getHTTP2006arrayTP(int i, int j) { return mHTTP2006arrayTP[i][j]; }
+    int    getHTTP2006arrayTPADC(int i, int j) { return mHTTP2006arrayTPADC[i][j]; }
 
     emcTrigger     getTrigger() { return mTrigger; }
 
