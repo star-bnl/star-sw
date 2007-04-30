@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.25 2007/04/23 19:59:07 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.26 2007/04/30 01:01:27 rfatemi Exp $
 //
 //
 
@@ -52,12 +52,14 @@ void StBemcTrigger::resetConf(){
     mIs2005JP2=-1;
     mIs2005ADJ=-1;
     mIs2005JPSI=-1;
-    mIs2006JP1=-1;
-    mIs2006HT2=-1;
-    mIs2006JP2=-1;
-    mIs2006JPSI=-1;
-    mIs2006BHTTP=-1;
-    for (int i=0;i<16;i++)
+    for ( int matrix=0;matrix<6;matrix++){
+      mIs2006JP0[matrix]=-1;
+      mIs2006HT2[matrix]=-1;
+      mIs2006JP1[matrix]=-1;
+      mIs2006JPSI[matrix]=-1;
+      mIs2006BHTTP[matrix]=-1;
+    }
+    for (int i=0;i<50;i++)
     {
         mIsTrig[i]=-1;
     }
@@ -72,14 +74,16 @@ void StBemcTrigger::resetConf(){
     JP1_ID_2005=-1;
     JP2_ID_2005=-1;
     ADJ_ID_2005=-1;
-    HT2_ID_2006=-1;
-    JP1_ID_2006=-1;
-    JP2_ID_2006=-1;
-    for (int i=0;i<13;i++)
-    {
-        mTowJetId[i] = -1;
+    for (int matrix=0;matrix<6;matrix++){
+      HT2_ID_2006[matrix]=-1;
+      JP0_ID_2006[matrix]=-1;
+      JP1_ID_2006[matrix]=-1;
     }
-
+    for (int i=0;i<50;i++)
+      {
+        mTowJetId[i] = -1;
+      }
+    
     HT1_DSM_2003=-1;
     HT1_DSM_2004=-1;
     HT2_DSM_2004=-1;
@@ -90,11 +94,13 @@ void StBemcTrigger::resetConf(){
     JP1_DSM_2005=-1;
     JP2_DSM_2005=-1;
     ADJ_DSM_2005=-1;
-    HT2_DSM_2006=-1;
-    JP1_DSM_2006=-1;
-    JP2_DSM_2006=-1;
+    for ( int matrix=0;matrix<6;matrix++){
+      HT2_DSM_2006[matrix]=-1;
+      JP0_DSM_2006[matrix]=-1;
+      JP1_DSM_2006[matrix]=-1;
+    }
     BETOT_DSM_2006=-1;
-    for (int i=0;i<14;i++)
+    for (int i=0;i<50;i++)
     {
         mDsmAdc[i] = -1;
     }
@@ -102,23 +108,23 @@ void StBemcTrigger::resetConf(){
     for(int i=0;i<kNTowers;i++){
       mHT12005array[i]=-1;
       mHT22005array[i]=-1;
-      mHT22006array[i]=-1;
+      for (int matrix=0;matrix<6;matrix++) mHT22006array[matrix][i]=-1;
     }
     for (int i=0;i<kNJet;i++){
       mJP12005array[i]=-1;
       mJP22005array[i]=-1;
-      mJP12006array[i]=-1;
-      mJP22006array[i]=-1;
+      for (int matrix=0;matrix<6;matrix++) mJP02006array[matrix][i]=-1;
+      for (int matrix=0;matrix<6;matrix++) mJP12006array[matrix][i]=-1;
     }
 
-    for (int i=0;i<kNJet/2;i++){
-      BL1_ADC_2006[i]=-1;
-    }
+    for (int i=0;i<kNJet/2;i++) BL1_ADC_2006[i]=-1;
 
-    for (int i=0;i<8;i++){
+    for (int i=0;i<12;i++){
       mnumHT[i]=0;
       mnumJP[i]=0;
+      if (i<6) mnumHTTP[i]=0;
     }
+
 }
 
 //----------------------------------------------------
@@ -142,6 +148,7 @@ void StBemcTrigger::zero()
 
 
 void StBemcTrigger::PatchMap()
+
   ///This is only used for trigger years before 2006 and is WRONG on the EAST BEMC for these years. 
   ///For year 2006 the TP->tower mapping is taken directly from EmcDecoder
 
@@ -225,7 +232,7 @@ void StBemcTrigger::PatchMap()
     **************************************************************************/
 
 
-   /*
+   /* mapping of renee's JP ids to StEmcDecoder's ids
     int renee[12];
     renee[0] = 5;
     renee[1] = 0;
@@ -246,7 +253,6 @@ void StBemcTrigger::PatchMap()
 
 int StBemcTrigger::makeTrigger()
 {
-
     get2003Trigger();
     get2004Trigger();
     get2005Trigger();
@@ -321,58 +327,74 @@ int StBemcTrigger::makeTrigger()
 
     //2005 JPSI
     mIsTrig[10] =mIs2005JPSI;
+    mTowJetId[10]=-1;
+    mDsmAdc[10]=-1;
     for (int i=0;i<kNJet;i++){
       mJPSI2005adc[i]=JPSI_2005_ADC[i];
       mJPSI2005id[i]=JPSI_2005_ID[i];
     }
+    
 
-    //2006 HT2 
-    mIsTrig[11]  =mIs2006HT2;
-    mTowJetId[11]=HT2_ID_2006;
-    mDsmAdc[11]  =HT2_DSM_2006;
-    mnumHT[5] =numHT2_2006;
-    for (int i=0;i<numHT2_2006;i++){
-      mHT22006array[i]=HT2_2006_array[i];
+
+    for (int matrix=0;matrix<6;matrix++){
+      
+      //2006 HT2 
+      mIsTrig[11+(matrix*5)]  =mIs2006HT2[matrix];
+      mTowJetId[11+(matrix*5)]=HT2_ID_2006[matrix];
+      mDsmAdc[11+(matrix*5)]  =HT2_DSM_2006[matrix];
+      mnumHT[5+matrix] =numHT2_2006[matrix];
+      for (int i=0;i<numHT2_2006[matrix];i++){
+	mHT22006array[matrix][i]=HT2_2006_array[matrix][i];
+      }
+      
+      //2006 JP1 
+      mIsTrig[12+(matrix*5)]  =mIs2006JP0[matrix];
+      mTowJetId[12+(matrix*5)]=JP0_ID_2006[matrix];
+      mDsmAdc[12+(matrix*5)]  =JP0_DSM_2006[matrix];
+      mnumJP[5+(matrix*2)]  =numJP0_2006[matrix];
+      for (int i=0;i<numJP0_2006[matrix];i++){
+	mJP02006array[matrix][i]=JP0_2006_array[matrix][i];
+      }
+      
+      //2006 JP2 
+      mIsTrig[13+(matrix*5)]  =mIs2006JP1[matrix];
+      mTowJetId[13+(matrix*5)]=JP1_ID_2006[matrix];
+      mDsmAdc[13+(matrix*5)]  =JP1_DSM_2006[matrix];
+      mnumJP[6+(matrix*2)]   =numJP1_2006[matrix];
+      for (int i=0;i<numJP1_2006[matrix];i++){
+	mJP12006array[matrix][i]=JP1_2006_array[matrix][i];
+      }
+      
+      //2006 JPSI
+      mIsTrig[14+(matrix*5)] =mIs2006JPSI[matrix];
+      mTowJetId[14+(matrix*5)]=-1;
+      mDsmAdc[14+(matrix*5)]=-1;
+      for (int i=0;i<kNJet;i++){
+	mJPSI2006adc[matrix][i]=JPSI_2006_ADC[matrix][i];
+	mJPSI2006id[matrix][i]=JPSI_2006_ID[matrix][i];
+      }
+      
+      //2006 BHTTP
+      mIsTrig[15+(matrix*5)]=mIs2006BHTTP[matrix];
+      mTowJetId[15+(matrix*5)]=-1;
+      mDsmAdc[15+(matrix*5)]=-1;
+      mnumHTTP[matrix]=0;
+      mnumHTTP[matrix]=numHTTP_2006[matrix];
+      for (int i=0; i<numHTTP_2006[matrix];i++){
+	mHTTP2006arrayHT[matrix][i]=BHTTP_2006_HT[matrix][i];
+	mHTTP2006arrayHTADC[matrix][i]=BHTTP_2006_HT_ADC[matrix][i];
+	mHTTP2006arrayTP[matrix][i]=BHTTP_2006_TP[matrix][i];
+	mHTTP2006arrayTPADC[matrix][i]=BHTTP_2006_TP_ADC[matrix][i];
+      }
     }
 
-    //2006 JP1 
-    mIsTrig[12]  =mIs2006JP1;
-    mTowJetId[12]=JP1_ID_2006;
-    mDsmAdc[12]  =JP1_DSM_2006;
-    mnumJP[5]  =numJP1_2006;
-    for (int i=0;i<numJP1_2006;i++){
-      mJP12006array[i]=JP1_2006_array[i];
-    }
-
-    //2006 JP2 
-    mIsTrig[13]  =mIs2006JP2;
-    mTowJetId[13]=JP2_ID_2006;
-    mDsmAdc[13]  =JP2_DSM_2006;
-    mnumJP[6]   =numJP2_2006;
-    for (int i=0;i<numJP2_2006;i++){
-      mJP22006array[i]=JP2_2006_array[i];
-    }
-
-    //2006 JPSI
-    mIsTrig[14] =mIs2006JPSI;
-    for (int i=0;i<kNJet;i++){
-      mJPSI2006adc[i]=JPSI_2006_ADC[i];
-      mJPSI2006id[i]=JPSI_2006_ID[i];
-    }
-
-    //2006 BHTTP
-    mIsTrig[15]=mIs2006BHTTP;
-    mnumHTTP[0]=numHTTP_2006;
-    for (int i=0; i<numHTTP_2006;i++){
-      mHTTP2006arrayHT[i]=BHTTP_2006_HT[i];
-      mHTTP2006arrayHTADC[i]=BHTTP_2006_HT_ADC[i];
-      mHTTP2006arrayTP[i]=BHTTP_2006_TP[i];
-      mHTTP2006arrayTPADC[i]=BHTTP_2006_TP_ADC[i];
-    }
-
-    //2005 BETOT
-    mDsmAdc[14]=BETOT_DSM_2006;
+    //2006 BETOT
+    mIsTrig[41]=-1;
+    mTowJetId[41]=-1;
+    mDsmAdc[41]=BETOT_DSM_2006;
     for (int i=0; i<(kNJet/2); i++){mBL12006arrayADC[i]=BL1_ADC_2006[i];}
+    
+
 
     return kStOK;
 }
@@ -1191,28 +1213,32 @@ int StBemcTrigger::get2005Trigger()
 }
 
 
-//----------------------------------------------------
+
 int StBemcTrigger::get2006Trigger()
 {
 
-    zero();
 
-    const int HT0_TH_2006 = 5;//bhtE0=5,bhtW0=11,bht1=12,bht2=24
-    const int HT1_TH_2006 = 12;
-    const int HT2_TH_2006 = 24;
-    const int HTTP0_TH_2006 = 1;//btp0=1,btp1=17,btp2=31
-    const int HTTP1_TH_2006 = 17;
-    const int HTTP2_TH_2006 = 31;
-    //const int JP0_TH_2005 = 42;//bjp0=42,bjp1=58,bjp2=110
-    const int JP1_TH_2006 = 58;
-    const int JP2_TH_2006 = 110;
-    //const int BEMC_ETOT_2006 =109;
-    const int JPSI_WEST_TH_2006 = 5; // same as bht0
-    const int JPSI_EAST_TH_2006 = 5; // same as bht0
-    const int pedestalTargetValue2006 = 24;
+  zero();
+
+  //trigger matrix for 6 different settings in time
+  const int HT0WEST_TH_2006[6]= {  5,  5,  5,  5,  5,  5};
+  const int HT0EAST_TH_2006[6]= {  5,  5,  5,  5,  5,  5};
+  const int HT1WEST_TH_2006[6]= { 12, 12, 16, 18, 16, 16};
+  const int HT1EAST_TH_2006[6]= { 12, 12, 16, 18, 16, 16};
+  const int HT2WEST_TH_2006[6]= { 22, 24, 24, 24, 24, 24};
+  const int HT2EAST_TH_2006[6]= { 24, 24, 24, 24, 24, 24};
+  const int HTTP0_TH_2006[6]  = {  1,  1,  1,  1,  1,  1};
+  const int HTTP1_TH_2006[6]  = { 17, 17, 20, 20, 19, 19};
+  const int HTTP2_TH_2006[6]  = { 31, 31, 31, 31, 31, 31};
+  const int JP0_TH_2006[6]    = { 42, 42, 48, 49, 49, 49};
+  const int JP1_TH_2006[6]    = { 58, 58, 58, 60, 60, 60};
+  //const int JP2_TH_2006[6]    = {110,110,110,110,110,110};
+  //const int BEMC_ETOT_2006[6] = {109,109,109,109,109,109};
+
+  const int pedestalTargetValue2006 = 24;
+
+ 
     
-
-
     if(!mEvent)
     {
         LOG_WARN << "StBemcTrigger::make2006Trigger() -- no StEvent!" << endm;
@@ -1238,41 +1264,44 @@ int StBemcTrigger::get2006Trigger()
         adc10[i] = 0;
         adc08[i] = 0;
         ped10[i] = 0;
-        HT2_2006_array[i] = -1;
-        mHT22006array[i] = -1;
-    
+	for ( int matrix=0; matrix<6; matrix++){
+	  HT2_2006_array[matrix][i] = -1;
+	  mHT22006array[matrix][i] = -1;
+	}
     }
 
-    mnumHT[5]=0;
-    mnumJP[5]=0;
-    mnumJP[6]=0;
-
-    
     for(int i = 0; i < kNJet; ++i)
-    {
-    
-        JP1_2006_array[i] = -1;
-        JP2_2006_array[i] = -1;
-        mJP12006array[i] = -1;
-        mJP22006array[i] = -1;
-        mJPSI2006adc[i] = -1;
-        mJPSI2006id[i] = -1;
-      
-    }
+      {
+	for (int matrix=0;matrix<6;matrix++)
+	  {
+	    JP0_2006_array[matrix][i] = -1;
+	    JP1_2006_array[matrix][i] = -1;
+	    mJP02006array[matrix][i] = -1;
+	    mJP12006array[matrix][i] = -1;
+	    mJPSI2006adc[matrix][i] = -1;
+	    mJPSI2006id[matrix][i] = -1;
+	  }
+      }
+
     
     for(int i = 0; i < kNPatches; ++i)
-    {
-        BHTTP_2006_HT[i]=-1;
-        BHTTP_2006_HT_ADC[i]=-1;
-        BHTTP_2006_TP[i]=-1;
-        BHTTP_2006_TP_ADC[i]=-1;
+      {
+	for (int matrix=0;matrix<6;matrix++)
+	  {
+	    BHTTP_2006_HT[matrix][i]=-1;
+	    BHTTP_2006_HT_ADC[matrix][i]=-1;
+	    BHTTP_2006_TP[matrix][i]=-1;
+	    BHTTP_2006_TP_ADC[matrix][i]=-1;
+	  }
+      }
+
+    for (int matrix=0;matrix<6;matrix++){
+      numHT2_2006[matrix]=0;
+      numJP0_2006[matrix]=0;
+      numJP1_2006[matrix]=0;
+      numHTTP_2006[matrix]=0;
     }
-
-    numHT2_2006=0;
-    numJP1_2006=0;
-    numJP2_2006=0;
-    numHTTP_2006=0;
-
+  
     int ped12bit, val12bit, operation; 
     // operation bit for pedestal subtraction
     // subtract: +1 (default)
@@ -1284,7 +1313,7 @@ int StBemcTrigger::get2006Trigger()
         
         for(Int_t m = 1; m <= 120; ++m)
         {
-        
+         
             StEmcModule* module = detector->module(m);
             if(module)
             {
@@ -1318,10 +1347,10 @@ int StBemcTrigger::get2006Trigger()
                             val12bit = ped12bit - pedestalTargetValue2006;
                             
                             if(val12bit < 0)
-                            {
+			      {
                                 val12bit = -val12bit;
-                                operation = 0;
-                            }
+				operation = 0;
+			      }
                             
                             int val10bit = val12bit/4;
                             if(val12bit - val10bit*4 > 2) val10bit+=1;
@@ -1450,65 +1479,108 @@ int StBemcTrigger::get2006Trigger()
                 HTmax=mTrigger.HT[i];
                 HTmaxID=HTID;
             }
-            
-            if(mTrigger.HT[i]>HT2_TH_2006)
-            {
-                HT2_2006_array[numHT2_2006]=HTID;
-                numHT2_2006++;
-            }
-        
+    
+	    for (int matrix=0; matrix<6; matrix++){
+
+	      if (HTID>2400) {//East
+		if(mTrigger.HT[i]>HT2EAST_TH_2006[matrix])
+		  {
+		    HT2_2006_array[matrix][numHT2_2006[matrix]]=HTID;
+		    numHT2_2006[matrix]++;
+		  }
+	      }
+	      
+	      if (HTID<=2400) {//West
+		if(mTrigger.HT[i]>HT2WEST_TH_2006[matrix])
+		  {
+		    HT2_2006_array[matrix][numHT2_2006[matrix]]=HTID;
+		    numHT2_2006[matrix]++;
+		  }
+	      }
+	    }
         }
-            
     }
             
     //making HT trigger
-    if(HTmax > HT2_TH_2006)
-    {
-        mIs2006HT2=1;
-        HT2_ID_2006=HTmaxID;
-        HT2_DSM_2006=HTmax;
-    }
-    else
-    {
-        mIs2006HT2=0;
-        HT2_ID_2006=HTmaxID;
-        HT2_DSM_2006=HTmax;
+    for (int matrix=0; matrix<6; matrix++){
+
+      if (HTmaxID>2400){//East
+	if (HTmax > HT2EAST_TH_2006[matrix])
+	  {
+	    mIs2006HT2[matrix]=1;
+	    HT2_ID_2006[matrix]=HTmaxID;
+	    HT2_DSM_2006[matrix]=HTmax;
+	  }
+	else
+	  {
+	    mIs2006HT2[matrix]=0;
+	    HT2_ID_2006[matrix]=HTmaxID;
+	    HT2_DSM_2006[matrix]=HTmax;
+	  }
+      }
+
+      if (HTmaxID<=2400){//West
+	if (HTmax > HT2WEST_TH_2006[matrix])
+	  {
+	    mIs2006HT2[matrix]=1;
+	    HT2_ID_2006[matrix]=HTmaxID;
+	    HT2_DSM_2006[matrix]=HTmax;
+	  }
+	else
+	  {
+	    mIs2006HT2[matrix]=0;
+	    HT2_ID_2006[matrix]=HTmaxID;
+	    HT2_DSM_2006[matrix]=HTmax;
+	  }
+      }
     }
     
     // making HTTP trigger
-    int BHTTPcounter=0;
-    mIs2006BHTTP=0;
-    for(int i = 0; i < kNPatches; ++i)
-    {
-    
-        int HTBIT = -1;
-        int TPBIT = -1;
+    int BHTTPcounter[6];
+    for ( int matrix=0; matrix<6; matrix++){
+
+      mIs2006BHTTP[matrix]=0;
+      BHTTPcounter[matrix]=0;
+      
+      for(int i = 0; i < kNPatches; ++i)
+	{
+	  
+	  int HTBIT = -1;
+	  int TPBIT = -1;
         
-        if (mTrigger.HT[i] < HT0_TH_2006) HTBIT = 0;
-        if (mTrigger.HT[i] > HT0_TH_2006) HTBIT = 1;
-        if (mTrigger.HT[i] > HT1_TH_2006) HTBIT = 2;
-        if (mTrigger.HT[i] > HT2_TH_2006) HTBIT = 3;
+	  if (kNPatches < 150){ //West
+	    if (mTrigger.HT[i] < HT0WEST_TH_2006[matrix]) HTBIT = 0;
+	    if (mTrigger.HT[i] > HT0WEST_TH_2006[matrix]) HTBIT = 1;
+	    if (mTrigger.HT[i] > HT1WEST_TH_2006[matrix]) HTBIT = 2;
+	    if (mTrigger.HT[i] > HT2WEST_TH_2006[matrix]) HTBIT = 3;
+	  }
+	  
+	  if (kNPatches >= 150){//East
+	    if (mTrigger.HT[i] < HT0EAST_TH_2006[matrix]) HTBIT = 0;
+	    if (mTrigger.HT[i] > HT0EAST_TH_2006[matrix]) HTBIT = 1;
+	    if (mTrigger.HT[i] > HT1EAST_TH_2006[matrix]) HTBIT = 2;
+	    if (mTrigger.HT[i] > HT2EAST_TH_2006[matrix]) HTBIT = 3;
+	  }
+	
+	  if (mTrigger.Patch[i] < HTTP0_TH_2006[matrix]) TPBIT = 0;
+	  if (mTrigger.Patch[i] > HTTP0_TH_2006[matrix]) TPBIT = 1;
+	  if (mTrigger.Patch[i] > HTTP1_TH_2006[matrix]) TPBIT = 2;
+	  if (mTrigger.Patch[i] > HTTP2_TH_2006[matrix]) TPBIT = 3;
         
-        if (mTrigger.Patch[i] < HTTP0_TH_2006) TPBIT = 0;
-        if (mTrigger.Patch[i] > HTTP0_TH_2006) TPBIT = 1;
-        if (mTrigger.Patch[i] > HTTP1_TH_2006) TPBIT = 2;
-        if (mTrigger.Patch[i] > HTTP2_TH_2006) TPBIT = 3;
-        
-        if( TPBIT >= 2 && HTBIT >= 2)
-        {
-            mIs2006BHTTP = 1;
-            BHTTP_2006_TP[BHTTPcounter] = i;
-            BHTTP_2006_TP_ADC[BHTTPcounter] = mTrigger.Patch[i];
-            BHTTP_2006_HT[BHTTPcounter] = mTrigger.HTID[i];
-            BHTTP_2006_HT_ADC[BHTTPcounter] = mTrigger.HT[i];
-            
-            BHTTPcounter++;
-        }
-        
+	  if( TPBIT >= 2 && HTBIT >= 2)
+	    {
+	      mIs2006BHTTP[matrix] = 1;
+	      BHTTP_2006_TP[matrix][BHTTPcounter[matrix]] = i;
+	      BHTTP_2006_TP_ADC[matrix][BHTTPcounter[matrix]] = mTrigger.Patch[i];
+	      BHTTP_2006_HT[matrix][BHTTPcounter[matrix]] = mTrigger.HTID[i];
+	      BHTTP_2006_HT_ADC[matrix][BHTTPcounter[matrix]] = mTrigger.HT[i];
+	      BHTTPcounter[matrix]++;
+	    }
+	}
+      numHTTP_2006[matrix]=BHTTPcounter[matrix];
     }
     
-    numHTTP_2006=BHTTPcounter;
-    
+
     // Clear jet patch variables
     int JPmax = 0;
     int JPid = 0;
@@ -1539,46 +1611,51 @@ int StBemcTrigger::get2006Trigger()
             JPid = i;
 	  }
 	
-        if(mTrigger.Jet[i] > JP1_TH_2006)
-	  {
-            JP1_2006_array[numJP1_2006] = i;
-            ++numJP1_2006;
-	  }
+	for (int matrix=0;matrix<6;matrix++){
 	
-        if(mTrigger.Jet[i] > JP2_TH_2006)
-	  {
-            JP2_2006_array[numJP2_2006] = i;
-            ++numJP2_2006;
-	  }
-        
+	  if(mTrigger.Jet[i] > JP0_TH_2006[matrix])
+	    {
+	      JP0_2006_array[matrix][numJP0_2006[matrix]] = i;
+	      ++numJP0_2006[matrix];
+	    }
+	  
+	  if(mTrigger.Jet[i] > JP1_TH_2006[matrix])
+	    {
+	      JP1_2006_array[matrix][numJP1_2006[matrix]] = i;
+	      ++numJP1_2006[matrix];
+	    }   
+	}
       }
+	
+
+    for (int matrix=0;matrix<6;matrix++){
+      
+      if(JPmax > JP0_TH_2006[matrix])
+	{
+	  mIs2006JP0[matrix]=1;
+	  JP0_ID_2006[matrix]=JPid;
+	  JP0_DSM_2006[matrix]=JPmax;
+	}
+      else
+	{
+	  mIs2006JP0[matrix]=0;
+	  JP0_ID_2006[matrix]=JPid;
+	  JP0_DSM_2006[matrix]=JPmax;
+	}
     
-    if(JPmax > JP1_TH_2006)
-      {
-        mIs2006JP1=1;
-        JP1_ID_2006=JPid;
-        JP1_DSM_2006=JPmax;
-      }
-    else
-      {
-        mIs2006JP1=0;
-        JP1_ID_2006=JPid;
-        JP1_DSM_2006=JPmax;
-      }
-    
-    
-    if(JPmax > JP2_TH_2006)
-      {
-        mIs2006JP2=1;
-        JP2_ID_2006=JPid;
-        JP2_DSM_2006=JPmax;
-      }
-    else
-      {
-        mIs2006JP2=0;
-        JP2_ID_2006=JPid;
-        JP2_DSM_2006=JPmax;
-      }
+      if(JPmax > JP1_TH_2006[matrix])
+	{
+	  mIs2006JP1[matrix]=1;
+	  JP1_ID_2006[matrix]=JPid;
+	  JP1_DSM_2006[matrix]=JPmax;
+	}
+      else
+	{
+	  mIs2006JP1[matrix]=0;
+	  JP1_ID_2006[matrix]=JPid;
+	  JP1_DSM_2006[matrix]=JPmax;
+	}
+    }
     
     //making ETOT trigger
     //combine 2 JP to form 13 bit adc
@@ -1605,73 +1682,82 @@ int StBemcTrigger::get2006Trigger()
 	BL1_ADC_2006[i] = EtotSum[i];
 	
       }
+    
     BETOT_DSM_2006=mTrigger.Et;
     
     //
     // Making Jpsi trigger
     // See http://www.star.bnl.gov/STAR/html/trg_l/TSL/Software/EMC.pdf
     //
-    int JpsiPatch[kNJet];
-    for(int i = 0; i < kNJet; ++i)
+    int JpsiPatch[6][kNJet];
+    for (int matrix=0;matrix<6;matrix++)
       {
+	for(int i = 0; i < kNJet; ++i)
+	  {
+	    
+	    int p0 = 0;
+	    int p1 = p0+25;
+	    
+	    
+	    JPSI_2006_ADC[matrix][i]=0;
+	    JPSI_2006_ID[matrix][i]=0;
+	    JpsiPatch[matrix][i]=0;
+	  
+	    
+	    for(int j = p0; j < p1; ++j)
+	      {
+		
+		int k=JP_TP[i][j];
+		if(mTrigger.HT[k] > JPSI_2006_ADC[matrix][i]) 
+		  {
+		    JPSI_2006_ADC[matrix][i]=mTrigger.HT[k];
+		    JPSI_2006_ID[matrix][i]=mTrigger.HTID[k];
+		  }
+		
+		LOG_DEBUG << "Jet id=" << i << " Patch id=" << j << " PatchHT=" << mTrigger.HT[k] << " PatchHTID="
+			  << mTrigger.HTID[k] << " JPSI_2006_ADC=" << JPSI_2006_ADC[matrix][i] << endm;
+		
+	      }
+	    
+	    if(i < 6) 
+	      {
+		// BEMC West
+		if(JPSI_2006_ADC[matrix][i] > HT0WEST_TH_2006[matrix]) JpsiPatch[matrix][i] = 1;
+	      }
+	    else 
+	      {
+		// BEMC East
+		if(JPSI_2006_ADC[matrix][i] > HT0EAST_TH_2006[matrix]) JpsiPatch[matrix][i] = 1;
+	      }
+	    
+	    LOG_DEBUG << "Final JetPatchHT for JP" << i << " is TowID=" << JPSI_2006_ID[matrix][i] << "  with ADC= "
+		      << JPSI_2006_ADC[matrix][i] << " and flag=" << JpsiPatch[matrix][i] << endm;
+	    
+	  }
+      
+
+	//
+	// The J/psi trigger fires if two opposite jet patches have high towers
+	// above selected thresholds.
+	// Follow convention in the DSM implementation where vector bits (0-5)
+	// correspond to positions 2,4,6,8,10,12 o'clock.
+	//
+	int ht_jpsi[6]={0,0,0,0,0,0};
 	
-        int p0 = 0;
-        int p1 = p0+25;
-        
-        JPSI_2006_ADC[i]=0;
-        JPSI_2006_ID[i]=0;
-        JpsiPatch[i]=0;
-        
-        for(int j = p0; j < p1; ++j)
-        {
-        
-            int k=JP_TP[i][j];
-            if(mTrigger.HT[k] > JPSI_2006_ADC[i]) 
-            {
-                JPSI_2006_ADC[i]=mTrigger.HT[k];
-                JPSI_2006_ID[i]=mTrigger.HTID[k];
-            }
-            
-            LOG_DEBUG << "Jet id=" << i << " Patch id=" << j << " PatchHT=" << mTrigger.HT[k] << " PatchHTID="
-                      << mTrigger.HTID[k] << " JPSI_2006_ADC=" << JPSI_2006_ADC[i] << endm;
-        
-        }
-        
-        if(i < 6) 
-        {
-            // BEMC West
-            if(JPSI_2006_ADC[i] > JPSI_WEST_TH_2006) JpsiPatch[i] = 1;
-        }
-        else 
-        {
-            // BEMC East
-            if(JPSI_2006_ADC[i] > JPSI_EAST_TH_2006) JpsiPatch[i] = 1;
-        }
-        
-        LOG_DEBUG << "Final JetPatchHT for JP" << i << " is TowID=" << JPSI_2006_ID[i] << "  with ADC= "
-                  << JPSI_2006_ADC[i] << " and flag=" << JpsiPatch[i] << endm;
-                  
-    }
-
-    //
-    // The J/psi trigger fires if two opposite jet patches have high towers
-    // above selected thresholds.
-    // Follow convention in the DSM implementation where vector bits (0-5)
-    // correspond to positions 2,4,6,8,10,12 o'clock.
-    //
-    int ht_jpsi[6];
-
-    ht_jpsi[0] = JpsiPatch[5] || JpsiPatch[7];
-    ht_jpsi[1] = JpsiPatch[4] || JpsiPatch[8];
-    ht_jpsi[2] = JpsiPatch[3] || JpsiPatch[9];
-    ht_jpsi[3] = JpsiPatch[2] || JpsiPatch[10];
-    ht_jpsi[4] = JpsiPatch[1] || JpsiPatch[11];
-    ht_jpsi[5] = JpsiPatch[0] || JpsiPatch[6];
-
-    mIs2006JPSI = ((ht_jpsi[0] && (ht_jpsi[2] || ht_jpsi[3] || ht_jpsi[4])) ||
-		          (ht_jpsi[1] && (ht_jpsi[3] || ht_jpsi[4] || ht_jpsi[5])) ||
-		          (ht_jpsi[2] && (ht_jpsi[4] || ht_jpsi[5])) || (ht_jpsi[3] &&  ht_jpsi[5]));
-
+	ht_jpsi[0] = JpsiPatch[matrix][5] || JpsiPatch[matrix][7];
+	ht_jpsi[1] = JpsiPatch[matrix][4] || JpsiPatch[matrix][8];
+	ht_jpsi[2] = JpsiPatch[matrix][3] || JpsiPatch[matrix][9];
+	ht_jpsi[3] = JpsiPatch[matrix][2] || JpsiPatch[matrix][10];
+	ht_jpsi[4] = JpsiPatch[matrix][1] || JpsiPatch[matrix][11];
+	ht_jpsi[5] = JpsiPatch[matrix][0] || JpsiPatch[matrix][6];
+	
+	mIs2006JPSI[matrix] = ((ht_jpsi[0] && (ht_jpsi[2] || ht_jpsi[3] || ht_jpsi[4])) ||
+			       (ht_jpsi[1] && (ht_jpsi[3] || ht_jpsi[4] || ht_jpsi[5])) ||
+			       (ht_jpsi[2] && (ht_jpsi[4] || ht_jpsi[5])) || (ht_jpsi[3] &&  ht_jpsi[5]));
+	
+	
+      }
+    
     delete mDecoder;
     return kStOK;
 }
