@@ -241,6 +241,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   void   reduce();
   Int_t  debug() const 				{return _debug;}
   void   setDebug(Int_t m) {_debug = m;}
+  static void   SetLaser(Int_t m) {_laser = m;}
   void   PrintpT(Char_t *opt="");
   int    getFlipFlop() const 			{return mFlipFlop;}
   static void   ResetComment(Char_t *m = "") 	{comment = m; commentdEdx = "";}
@@ -302,6 +303,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   static int   _debug;
   static TString comment;
   static TString commentdEdx;
+  static int   _laser;
 public:
   int mId;  //for debug only 
 };

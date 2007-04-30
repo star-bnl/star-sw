@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.105 2007/03/21 17:47:24 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.106 2007/04/30 19:53:16 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.106  2007/04/30 19:53:16  fisyak
+ * Correct time of flight calculation, add time of flight corrrection for Laser
+ *
  * Revision 2.105  2007/03/21 17:47:24  fisyak
  * Time of Flight
  *
@@ -331,6 +334,11 @@ using namespace std;
 #include "TCernLib.h"
 #endif
 #include "THelixTrack.h"
+// because I can't figure out how to use THelixTrack to get interception with cylinder 
+#include "StPhysicalHelix.hh"
+#include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
+
 #include "TRMatrix.h"
 #include "TRVector.h"
 #include "StarMagField.h"
@@ -395,6 +403,7 @@ if (kase!=myBreak) return;
    3   => 8 - test locate
  */
 int StiKalmanTrackNode::_debug = 0;
+int StiKalmanTrackNode::_laser = 0;
 
 //______________________________________________________________________________
 void StiKalmanTrackNode::reset()
@@ -2153,17 +2162,34 @@ void StiKalmanTrackNode::setUntouched()
 }
 //________________________________________________________________________________
 float StiKalmanTrackNode::getTime() {
-  double pt = getPt();
-  double p2=(1.+mFP._tanl*mFP._tanl)*pt*pt;
-  double m=pars->massHypothesis;
-  double m2=m*m;
-  double e2=p2+m2;
-  double beta2=p2/e2;
-  double beta = TMath::Sqrt(beta2);
-  TCircle tc(&mFP._x,&mFP._cosCA,mFP._curv);
-  double xy[2] = {0,0};
-  double s = tc.Path(xy); 
-  double time = TMath::Abs(s)/(TMath::Ccgs()*beta*1e-6); // mksec  
+  static const Double_t smax = 1e3; 
+  Float_t time = 0;
+  Double_t dir[3] = {mFP._cosCA,mFP._sinCA,mFP._tanl};
+  if (! _laser) {
+    Double_t pt = getPt();
+    Double_t p2=(1.+mFP._tanl*mFP._tanl)*pt*pt;
+    Double_t m=pars->massHypothesis;
+    Double_t m2=m*m;
+    Double_t e2=p2+m2;
+    Double_t beta2=p2/e2;
+    Double_t beta = TMath::Sqrt(beta2);
+    TCircle tc(&mFP._x,dir,mFP._curv);
+    Double_t xy[2] = {0,0};
+    Double_t s = tc.Path(xy); 
+    if (TMath::Abs(s) < smax) 
+      time = TMath::Abs(s)/(TMath::Ccgs()*beta*1e-6); // mksec  
+  } else {
+    if (TMath::Abs(mFP._z) > 20.0) {
+      static Double_t Radius = 197.;
+      static const Int_t nsurf = 6;
+      static const Double_t surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
+      THelixTrack tc(&mFP._x,dir,mFP._curv);
+      Double_t xyzG[3], dirG[3];
+      Double_t s = tc.Step(smax, surf, nsurf,xyzG,dirG,1);
+      if (TMath::Abs(s) < smax) 
+	time = TMath::Abs(s)/(TMath::Ccgs()*1e-6); // mksec
+    }
+  }
   return time;
 }
 
