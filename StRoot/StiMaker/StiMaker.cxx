@@ -1,8 +1,11 @@
-// $Id $
+// $Id: StiMaker.cxx,v 1.178 2007/04/30 19:53:47 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.178  2007/04/30 19:53:47  fisyak
+// add time of flight corrrection for Laser
+//
 // Revision 1.177  2007/04/28 17:56:19  perev
 // Redundant StChain.h removed
 //
@@ -361,6 +364,7 @@ More detailed: 				<br>
 #include "TGeometry.h"
 #include "Sti/StiTimer.h"
 #include "StiDetectorVolume.h"
+#include "StarMagField.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -500,7 +504,10 @@ Int_t StiMaker::InitDetectors()
       cout << "StiMaker::InitDetectors() -I- use hits in sectors[" 
 	   << hitLoader->minSector() << "," << hitLoader->maxSector() << "] and rows["
 	   << hitLoader->minRow() << "," <<  hitLoader->maxRow() << "]" << endl;
-      
+      if (IAttr("laserIT")) {
+	StiKalmanTrackNode::SetLaser(1);
+	cout << "StiMaker::InitDetectors() -I- set laser time of flight correction" << endl;
+      }
     }
   if (IAttr("useSvt"))
     {
@@ -593,7 +600,10 @@ Int_t StiMaker::Make()
   if (!event) return kStWarn;
 
   // Retrieve bfield in Tesla
-  double field = event->summary()->magneticField()/10.;
+  Double_t x[3] = {0,0,0};
+  Double_t h[3];
+  StarMagField::Instance()->BField(x,h);
+  double field = h[2]/10;
 
   if (runField==0) runField=field;
   if (field==0 && field != runField) field=runField;
