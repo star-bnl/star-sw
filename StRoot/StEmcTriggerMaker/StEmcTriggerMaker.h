@@ -15,9 +15,12 @@
 // StEemcTrigger classes which mock up the BEMC/EEMC FEE + L0 DSM trigger algorithms.
 // Interface to L2 should also take place in this class.
 //
-// $Id: StEmcTriggerMaker.h,v 1.15 2007/04/24 15:53:18 kocolosk Exp $
+// $Id: StEmcTriggerMaker.h,v 1.16 2007/04/30 01:00:25 rfatemi Exp $
 //
 // $Log: StEmcTriggerMaker.h,v $
+// Revision 1.16  2007/04/30 01:00:25  rfatemi
+// Update for new trigger interface
+//
 // Revision 1.15  2007/04/24 15:53:18  kocolosk
 // added new interface methods to get trigger thresholds and decisions based on trigId
 //
@@ -50,31 +53,21 @@ class StEmcTriggerMaker : public StMaker
 {
 private:
     StBemcTrigger*    mBemcTrigger;
-    bool              mSaveStEvent;
 
-    int               isTrig[16];
-    int               TowJetId[13];
-    int               DsmAdc[14];
-    int               numHT[7];//# of HT which pass HT trigger
-    int               numJP[7];//# of JP which pass JP trigger
-    int               numHTTP[7];//# of HT-TP which pass HTTP trigger
+    int               isTrig[50];
+    int               TowJetId[50];
+    int               DsmAdc[50];
+    int               numHT[12];//# of HT which pass HT trigger
+    int               numJP[12];//# of JP which pass JP trigger
+    int               numHTTP[6];//# of HT-TP which pass HTTP trigger
     int               HT12005array[kNTowers];//array of towers which pass trigger
     int               HT22005array[kNTowers];//array of towers which pass trigger
     int               JP12005array[kNJet];//array of JP's which pass trigger
     int               JP22005array[kNJet];//array of JP's which pass trigger
     int               JPSI2005adc[kNJet];//array of adc for highest tower in JP
     int               JPSI2005id[kNJet];//array of id for highest tower in JP
-    int               HT12006array[kNTowers];//array of towers which pass trigger
-    int               HT22006array[kNTowers];//array of towers which pass trigger
-    int               JP12006array[kNJet];//array of JP's which pass trigger
-    int               JP22006array[kNJet];//array of JP's which pass trigger
-    int               JPSI2006id[kNJet];//array of id for highest tower in JP
-    int               HTTP2006arrayHT[kNPatches];//array of HT which are part of a HTTP trigger
-    int               HTTP2006arrayTP[kNPatches];//array of TP which are part of a HTTP trigger
-    int               HTTP2006arrayHTADC[kNPatches];//array of HT ADC which are part of a HTTP trigger
-    int               HTTP2006arrayTPADC[kNPatches];//array of TP ADC which are part of a HTTP trigger
     int               BL12006arrayADC[kNJet/2];//array of level 1 DSM 5 bit ADC from 2x1 PATCH sum
-
+    
     int mIs2003HT1;
     int mIs2004HT1;
     int mIs2004JP1;
@@ -86,11 +79,11 @@ private:
     int mIs2005JP2;
     int mIs2005ADJ;
     int mIs2005JPSI;
-    int mIs2006JP1;
-    int mIs2006HT2;
-    int mIs2006JP2;
-    int mIs2006JPSI;
-    int mIs2006HTTP;
+    int mIs2006JP0[6];
+    int mIs2006HT2[6];
+    int mIs2006JP1[6];
+    int mIs2006JPSI[6];
+    int mIs2006HTTP[6];
 
     int HT1_ID_2003;
     int HT1_ID_2004;
@@ -102,9 +95,9 @@ private:
     int JP1_ID_2005;
     int JP2_ID_2005;
     int ADJ_ID_2005;
-    int HT2_ID_2006;
-    int JP1_ID_2006;
-    int JP2_ID_2006;
+    int HT2_ID_2006[6];
+    int JP0_ID_2006[6];
+    int JP1_ID_2006[6];
 
     int HT1_DSM_2003;
     int HT1_DSM_2004;
@@ -116,9 +109,9 @@ private:
     int JP1_DSM_2005;
     int JP2_DSM_2005;
     int ADJ_DSM_2005;
-    int HT2_DSM_2006;
-    int JP1_DSM_2006;
-    int JP2_DSM_2006;
+    int HT2_DSM_2006[6];
+    int JP0_DSM_2006[6];
+    int JP1_DSM_2006[6];
     int BETOT_DSM_2006;
 
     int numHT1_2005;
@@ -133,19 +126,19 @@ private:
     int ADJ_2005_array[kNJet];
     int JPSI_2005_ADC[kNJet];
     int JPSI_2005_ID[kNJet];
-    int numHT2_2006;
-    int numJP1_2006;
-    int numJP2_2006;
-    int HT2_2006_array[kNTowers];
-    int JP1_2006_array[kNJet];
-    int JP2_2006_array[kNJet];
-    int JPSI_2006_ADC[kNJet];
-    int JPSI_2006_ID[kNJet];
-    int numHTTP_2006;
-    int HTTP_2006_arrayTP[kNPatches];
-    int HTTP_2006_arrayHT[kNPatches];
-    int HTTP_2006_arrayTP_ADC[kNPatches];
-    int HTTP_2006_arrayHT_ADC[kNPatches];
+    int numHT2_2006[6];
+    int numJP0_2006[6];
+    int numJP1_2006[6];
+    int HT2_2006_array[6][kNTowers];
+    int JP0_2006_array[6][kNJet];
+    int JP1_2006_array[6][kNJet];
+    int JPSI_2006_ADC[6][kNJet];
+    int JPSI_2006_ID[6][kNJet];
+    int numHTTP_2006[6];
+    int HTTP_2006_arrayTP[6][kNPatches];
+    int HTTP_2006_arrayHT[6][kNPatches];
+    int HTTP_2006_arrayTP_ADC[6][kNPatches];
+    int HTTP_2006_arrayHT_ADC[6][kNPatches];
     int BL1_2006_arrayADC[kNJet/2];
 
 protected:
@@ -158,20 +151,20 @@ public:
     virtual Int_t     Finish();
 
     void              fillStEvent(StEvent*);
-    //void              fillHistograms(StEvent*);
     void              saveHistograms(char*);
-    void              setSaveStEvent(bool a) {mSaveStEvent = a;}
-    void              setPrint(bool a) { LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm; }///< Obsolete function; users can control messages with logger config file.
+    // void              setSaveStEvent(bool a) {mSaveStEvent = a;}
+    void              set2006Trigger(int);
 
     ///1==Yes,0==No,-1==Don't Know.  Same convention holds for other methods where appropriate.
     int             isTrigger(int trigId);
-
     ///Tower ADC > threshold required to fire trigger.
     int             barrelTowerThreshold(int trigId, int softId=1);
     ///Trigger Patch ADC > threshold required to fire trigger.
     int             barrelTriggerPatchThreshold(int trigId, int patchId=1);
     ///Jet Patch ADC > threshold required to fire trigger.
     int             barrelJetPatchThreshold(int trigId, int patchId=1);
+    ///Note: DO NOT use ordering of HT and TP to associate HT->TP for BHTTP trigger
+    ///Use StEmcDecoder to associate a tower with a TP
 
     ///map contains (key,value) = (softId,ADC) of all towers above DSM threshold.  map is empty if threshold = 0,-1.
     map<int,int>    barrelTowersAboveThreshold(int trigId);
@@ -205,11 +198,6 @@ public:
     int               is2005JP2() {return mIs2005JP2;}
     int               is2005ADJ() {return mIs2005ADJ;}
     int               is2005JPSI() {return mIs2005JPSI;}
-    int               is2006HT2() {return mIs2006HT2;}
-    int               is2006JP1() {return mIs2006JP1;}
-    int               is2006JP2() {return mIs2006JP2;}
-    int               is2006JPSI() {return mIs2006JPSI;}
-    int               is2006HTTP() {return mIs2006HTTP;}
 
     int               get2003HT1_ID() {return HT1_ID_2003;}//tower/JP id of trigger
     int               get2004HT1_ID() {return HT1_ID_2004;}
@@ -221,9 +209,6 @@ public:
     int               get2005JP1_ID() {return JP1_ID_2005;}
     int               get2005JP2_ID() {return JP2_ID_2005;}
     int               get2005ADJ_ID() {return ADJ_ID_2005;}
-    int               get2006HT2_ID() {return HT2_ID_2006;}
-    int               get2006JP1_ID() {return JP1_ID_2006;}
-    int               get2006JP2_ID() {return JP2_ID_2006;}
 
     int               get2003HT1_ADC() {return HT1_DSM_2003;}//6 bit DSM ADC
     int               get2004HT1_ADC() {return HT1_DSM_2004;}
@@ -235,57 +220,41 @@ public:
     int               get2005JP1_ADC() {return JP1_DSM_2005;}
     int               get2005JP2_ADC() {return JP2_DSM_2005;}
     int               get2005ADJ_ADC() {return ADJ_DSM_2005;}
-    int               get2006HT2_ADC() {return HT2_DSM_2006;}
-    int               get2006JP1_ADC() {return JP1_DSM_2006;}
-    int               get2006JP2_ADC() {return JP2_DSM_2006;}
-    int               get2006BETOT_ADC() {return BETOT_DSM_2006;}
 
     void              get2005HT1_TOWS(int, int*);//array of tow ids passing HT1_2005 trig
     void              get2005HT2_TOWS(int, int*);//array of tow ids passing HT2_2005 trig
     int               get2005HT1_NTOWS() {return numHT1_2005;}//# tows passing HT1_2005 trig
     int               get2005HT2_NTOWS() {return numHT2_2005;}//# tows passing HT2_2005 trig
-    void              get2006HT2_TOWS(int, int*);//array of tow ids passing HT2_2006 trig
-    int               get2006HT2_NTOWS() {return numHT2_2006;}//# tows passing HT2_2006 trig
 
     void              get2005JP1_PATCHES(int, int*);//array of patches passing JP1_2005
     void              get2005JP2_PATCHES(int, int*);//array of patches passing JP2_2005
     int               get2005JP1_NPATCHES() {return numJP1_2005;}//# patches passing JP1_2005
     int               get2005JP2_NPATCHES() {return numJP2_2005;}//# patches passing JP2_2005
-    void              get2006JP1_PATCHES(int, int*);//array of patches passing JP1_2006
-    void              get2006JP2_PATCHES(int, int*);//array of patches passing JP2_2006
-    int               get2006JP1_NPATCHES() {return numJP1_2006;}//# patches passing JP1_2006
-    int               get2006JP2_NPATCHES() {return numJP2_2006;}//# patches passing JP2_2006
 
     void              get2005JPSI_ADC(int, int*);//array of HT adc for each JP
     void              get2005JPSI_ID(int, int*);//array of HT id for each JP
-    void              get2006JPSI_ADC(int, int*);//array of HT adc for each JP
-    void              get2006JPSI_ID(int, int*);//array of HT id for each JP
-    void              get2006HTTP_HT(int, int*);//array of HT for each HTTP
-    void              get2006HTTP_TP(int, int*);//array of TP for each HTTP
-    void              get2006HTTP_HT_ADC(int, int*);//array of HT ADC for each HTTP
-    void              get2006HTTP_TP_ADC(int, int*);//array of TP ADC  for each HTTP
-    int               get2006HTTP_NTP() {return numHTTP_2006;}//# HTTP passing trigger
     void              get2006BL1_ADC(int, int*);//array of DSM_L1 ADC values
+
 
     StBemcTrigger*    getTrigger()
     {
-        return mBemcTrigger;
+      return mBemcTrigger;
     }
-
+    
     void              setDbMaker(St_db_Maker *dbMk)
-    {
+      {
         mBemcTrigger->setDbMaker(dbMk);
-    }
-
+      }
+    
     StBemcTables*     tables;
-
+    
     void              setTableMaker(StBemcTables *bemcTab)
-    {
+      {
         mBemcTrigger->setTableMaker(bemcTab);
-    }
+      }
 
     int               trigPatch[300];
-
+    
     ClassDef(StEmcTriggerMaker,0)
-};
+      };
 #endif
