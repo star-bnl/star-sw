@@ -26,7 +26,7 @@ export EMCONLINE_TRG_LOGS_DIR=${EMCONLINE_TRG_DIR}/logs.emconline_trg
 export EMCONLINE_TRG_TABLES_DIR=${EMCONLINE_TRG_DIR}/tables.emconline_trg/StarDb/Calibrations/emc/trigger
 # Directory for the config files currently being processed
 export EMCONLINE_TRG_CURRCONF_DIR=${EMCONLINE_TRG_DIR}/current_config.emconline_trg
-# Directory for hte last seen configuration, to be compared with the latest downloaded files
+# Directory for the last seen configuration, to be compared with the latest downloaded files
 export EMCONLINE_TRG_LASTCONF_DIR=${EMCONLINE_TRG_DIR}/last_config.emconline_trg
 
 # Mapping between DSM addresses and trigger patches
@@ -47,89 +47,6 @@ export EMCONLINE_TRG_SAVETABLES=true
 export EMCONLINE_TRG_UPDATEDESKTOPICON=true
 # Desktop icon file
 export EMCONLINE_TRG_DESKTOPICON_FILE=~/.gnome-desktop/emconline_trg.desktop
-
-# Crate configuration files
-export CRATE_CONFIG_FILES_MASK="config_crate0x??.dat"
-export CRATE_CONFIG_FILES="\
-config_crate0x01.dat \
-config_crate0x02.dat \
-config_crate0x03.dat \
-config_crate0x04.dat \
-config_crate0x05.dat \
-config_crate0x06.dat \
-config_crate0x07.dat \
-config_crate0x08.dat \
-config_crate0x09.dat \
-config_crate0x0a.dat \
-config_crate0x0b.dat \
-config_crate0x0c.dat \
-config_crate0x0d.dat \
-config_crate0x0e.dat \
-config_crate0x0f.dat \
-config_crate0x10.dat \
-config_crate0x11.dat \
-config_crate0x12.dat \
-config_crate0x13.dat \
-config_crate0x14.dat \
-config_crate0x15.dat \
-config_crate0x16.dat \
-config_crate0x17.dat \
-config_crate0x18.dat \
-config_crate0x19.dat \
-config_crate0x1a.dat \
-config_crate0x1b.dat \
-config_crate0x1c.dat \
-config_crate0x1d.dat \
-config_crate0x1e.dat \
-"
-
-# Crate pedestal files
-export CRATE_PEDESTAL_FILES_MASK="pedestal_crate0x??.dat"
-export CRATE_PEDESTAL_FILES="\
-pedestal_crate0x01.dat \
-pedestal_crate0x02.dat \
-pedestal_crate0x03.dat \
-pedestal_crate0x04.dat \
-pedestal_crate0x05.dat \
-pedestal_crate0x06.dat \
-pedestal_crate0x07.dat \
-pedestal_crate0x08.dat \
-pedestal_crate0x09.dat \
-pedestal_crate0x0a.dat \
-pedestal_crate0x0b.dat \
-pedestal_crate0x0c.dat \
-pedestal_crate0x0d.dat \
-pedestal_crate0x0e.dat \
-pedestal_crate0x0f.dat \
-pedestal_crate0x10.dat \
-pedestal_crate0x11.dat \
-pedestal_crate0x12.dat \
-pedestal_crate0x13.dat \
-pedestal_crate0x14.dat \
-pedestal_crate0x15.dat \
-pedestal_crate0x16.dat \
-pedestal_crate0x17.dat \
-pedestal_crate0x18.dat \
-pedestal_crate0x19.dat \
-pedestal_crate0x1a.dat \
-pedestal_crate0x1b.dat \
-pedestal_crate0x1c.dat \
-pedestal_crate0x1d.dat \
-pedestal_crate0x1e.dat \
-"
-
-# Main configuration file
-export CRATES_CONFIG_FILE_MASK="BemcConfig.dat"
-export CRATES_CONFIG_FILE="\
-BemcConfig.dat \
-"
-
-# DSM mask files
-export DSM_MASK_FILES_MASK="bc?.lut.bin"
-export DSM_MASK_FILES="\
-bce.lut.bin \
-bcw.lut.bin \
-"
 
 function update_desktop_icon_trg () {
     if [[ "${EMCONLINE_TRG_UPDATEDESKTOPICON}" == "true" ]]
@@ -201,14 +118,14 @@ if [[ "${SCP}" == "" ]] ; then export SCP='/home/emc/online/emc/scp' ; fi
 # Directory that contains pedestal files
 if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]]
 then
-    export EMCONLINE_SLOWCTRL_PED_DIR='~/emconline_slowctrl/pedestals'
+    export EMCONLINE_SLOWCTRL_PED_DIR='~/emconline_slowctrl/pedestal_crate.emconline_slowctrl.current'
     echo "EMC Slow Control pedestals directory not specified, assuming ${EMCONLINE_SLOWCTRL_PED_DIR}"
 fi
 
 # Directory that contains crate configuration files
 if [[ "${EMCONLINE_SLOWCTRL_CFG_DIR}" == "" ]]
 then
-    export EMCONLINE_SLOWCTRL_CFG_DIR='~/emconline_slowctrl/configuration'
+    export EMCONLINE_SLOWCTRL_CFG_DIR='~/emconline_slowctrl/config_crate.emconline_slowctrl'
     echo "EMC Slow Control crate configurations directory not specified, assuming ${EMCONLINE_SLOWCTRL_CFG_DIR}"
 fi
 
@@ -218,4 +135,87 @@ then
     export EMCONLINE_SLOWCTRL_DSMMASK_DIR='~/emconline_slowctrl/dsmmask'
     echo "EMC Slow Control DSM masks directory not specified, assuming ${EMCONLINE_SLOWCTRL_DSMMASK_DIR}"
 fi
+
+# Crate configuration files
+if [[ "${CRATE_CONFIG_FILES_MASK}" == "" ]] ; then export CRATE_CONFIG_FILES_MASK="config_crate0x??.dat" ; fi
+if [[ "${CRATE_CONFIG_FILES}" == "" ]] ; then export CRATE_CONFIG_FILES="\
+config_crate0x01.dat \
+config_crate0x02.dat \
+config_crate0x03.dat \
+config_crate0x04.dat \
+config_crate0x05.dat \
+config_crate0x06.dat \
+config_crate0x07.dat \
+config_crate0x08.dat \
+config_crate0x09.dat \
+config_crate0x0a.dat \
+config_crate0x0b.dat \
+config_crate0x0c.dat \
+config_crate0x0d.dat \
+config_crate0x0e.dat \
+config_crate0x0f.dat \
+config_crate0x10.dat \
+config_crate0x11.dat \
+config_crate0x12.dat \
+config_crate0x13.dat \
+config_crate0x14.dat \
+config_crate0x15.dat \
+config_crate0x16.dat \
+config_crate0x17.dat \
+config_crate0x18.dat \
+config_crate0x19.dat \
+config_crate0x1a.dat \
+config_crate0x1b.dat \
+config_crate0x1c.dat \
+config_crate0x1d.dat \
+config_crate0x1e.dat \
+" ; fi
+
+# Crate pedestal files
+if [[ "${CRATE_PEDESTAL_FILES_MASK}" == "" ]] ; then export CRATE_PEDESTAL_FILES_MASK="pedestal_crate0x??.dat" ; fi
+if [[ "${CRATE_PEDESTAL_FILES}" == "" ]] ; then export CRATE_PEDESTAL_FILES="\
+pedestal_crate0x01.dat \
+pedestal_crate0x02.dat \
+pedestal_crate0x03.dat \
+pedestal_crate0x04.dat \
+pedestal_crate0x05.dat \
+pedestal_crate0x06.dat \
+pedestal_crate0x07.dat \
+pedestal_crate0x08.dat \
+pedestal_crate0x09.dat \
+pedestal_crate0x0a.dat \
+pedestal_crate0x0b.dat \
+pedestal_crate0x0c.dat \
+pedestal_crate0x0d.dat \
+pedestal_crate0x0e.dat \
+pedestal_crate0x0f.dat \
+pedestal_crate0x10.dat \
+pedestal_crate0x11.dat \
+pedestal_crate0x12.dat \
+pedestal_crate0x13.dat \
+pedestal_crate0x14.dat \
+pedestal_crate0x15.dat \
+pedestal_crate0x16.dat \
+pedestal_crate0x17.dat \
+pedestal_crate0x18.dat \
+pedestal_crate0x19.dat \
+pedestal_crate0x1a.dat \
+pedestal_crate0x1b.dat \
+pedestal_crate0x1c.dat \
+pedestal_crate0x1d.dat \
+pedestal_crate0x1e.dat \
+" ; fi
+
+# Main configuration file
+if [[ "${CRATES_CONFIG_FILE_MASK}" == "" ]] ; then export CRATES_CONFIG_FILE_MASK="BemcConfig.dat" ; fi
+if [[ "${CRATES_CONFIG_FILE}" == "" ]] ; then export CRATES_CONFIG_FILE="\
+BemcConfig.dat \
+" ; fi
+
+# DSM mask files
+if [[ "${DSM_MASK_FILES_MASK}" == "" ]] ; then export DSM_MASK_FILES_MASK="bc?.lut.bin" ; fi
+if [[ "${DSM_MASK_FILES}" == "" ]] ; then export DSM_MASK_FILES="\
+bce.lut.bin \
+bcw.lut.bin \
+" ; fi
 ########################################################

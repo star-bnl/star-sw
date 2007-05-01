@@ -21,6 +21,10 @@ C. The STAR computing environment
 It must be set up for the user who will be running this monitoring job, it can
 be AFS-based or a completely local installation.
 
+D. Write access to the database
+Here we assume that the monitoring job has write access to the database, in Calibrations/emc.
+Please consult EMC or DB experts on how to set it up.
+
 If the requirements are met you can proceed to the installation.
 Create a new directory
 mkdir ./emconline_ped

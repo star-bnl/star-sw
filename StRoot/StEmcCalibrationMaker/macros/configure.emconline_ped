@@ -3,7 +3,7 @@
     export CONFIGURE_EMCONLINE_PED='yes'
     export SRC_PATH=''
     export DST_PATH=''
-    export SRC_PATH_DEFAULT='./StRoot/StEmcCalibrationMaker'
+    export SRC_PATH_DEFAULT=${0%/macros/*}
     export DST_PATH_DEFAULT='.'
         
     export OPTIONS=$@

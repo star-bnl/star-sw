@@ -4,8 +4,13 @@ EMC Online trigger monitoring
 INSTALLATION
 
 Requirements:
+A. STAR computing environment
 The STAR computing environment must be set up for the user who will
 run this monitoring job.
+
+D. Write access to the database
+Here we assume that the monitoring job has write access to the database, in Calibrations/emc.
+Please consult EMC or DB experts on how to set it up.
 
 Create a new directory
 mkdir ./emconline_trg
