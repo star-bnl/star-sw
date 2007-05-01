@@ -82,14 +82,11 @@ bool processFile(char* line, char* dir)
 
 void makeOnlinePed(char* list = "./runlist.txt"
 		, bool isList = true
-		, char* dir = "/evp"
-		, char *savePath = "./backup"
-		, char *tablesPath = "./tables"
-		, char *tempPath = "./tmp"
-		, char *EVP_READER_LIB = "libevpSO.2.0.so"
 		, Int_t nevents = 2000
 		, Bool_t saveDb = true
 		, Bool_t saveTables = true
+		, Bool_t compareLastTableDB = false
+		, Float_t minPedDiffDB = 1.0
 		) {
     TDatime startTime;
     TStopwatch timer;
@@ -97,6 +94,14 @@ void makeOnlinePed(char* list = "./runlist.txt"
     timer.Start();
     memory.PrintMem(0);
     	   
+    const Char_t *EVP_READER_LIB = gSystem->Getenv("EVP_READER_LIB");
+    TString dirStr = gSystem->Getenv("EVP_DIR");
+    TString savePathStr = gSystem->Getenv("EMCONLINE_PED_BACKUP_DIR");
+    TString tablesPathStr = gSystem->Getenv("EMCONLINE_PED_TABLES_DIR");
+    TString lastTablePathStr = gSystem->Getenv("EMCONLINE_PED_LASTTABLES_DIR");
+    TString tempPathStr = gSystem->Getenv("EMCONLINE_PED_TEMP_DIR");
+    TString pedCrateFilenameFormatStr = gSystem->Getenv("CRATE_PEDESTAL_FILES_FORMAT");
+
     // Load needed shared libs
     gSystem->Load(EVP_READER_LIB);
     gSystem->Load("St_base");
@@ -113,17 +118,18 @@ void makeOnlinePed(char* list = "./runlist.txt"
     gSystem->Load("StEmcCalibrationMaker");
  			
     memory.PrintMem(0);
-    TString savePathStr = savePath;
-    TString tablesPathStr = tablesPath;
-    TString tempPathStr = tempPath;
     NEVENTS = nevents;
     cout << "Backup directory: " << savePathStr << endl;
     cout << "Backup tables directory: " << tablesPathStr << endl;
+    cout << "Last tables directory: " << lastTablePathStr << endl;
     cout << "Temp directory: " << tempPathStr << endl;
-    cout << "Event pool: " << dir << endl;	    
+    cout << "Event pool: " << dirStr << endl;	    
     cout << "Number of events to process: " << NEVENTS << endl;
     cout << "Save tables to DB: " << saveDb << endl;
     cout << "Save tables locally: " << saveTables << endl;
+    cout << "Compare to the last saved table: " << compareLastTableDB << endl;
+    cout << "Min ped diff from the last table: " << minPedDiffDB << endl;
+    cout << "Ped crate filename format: " << pedCrateFilenameFormatStr << endl;
     
     // create chain ///////////////////////////////////////////////    
     chain = new StChain("StChain"); 
@@ -133,7 +139,7 @@ void makeOnlinePed(char* list = "./runlist.txt"
 		//emcIo->setPrintInfo(kTRUE);
         
     // create database   
-    dbMk = new St_db_Maker("StarDb","MySQL:StarDb");  
+    dbMk = new St_db_Maker("StarDb","$STAR/StarDb","MySQL:StarDb");
     
     // create calibraton maker     
 	calib = new StEmcCalibrationMaker();
@@ -153,7 +159,11 @@ void makeOnlinePed(char* list = "./runlist.txt"
 		//ped[i]->setCTBMax(3000);
 		ped[i]->setSavePath(savePathStr.Data());
 		ped[i]->setTablesPath(tablesPathStr.Data());
+		ped[i]->setLastTablePath(lastTablePathStr.Data());
 		ped[i]->setSaveTables(saveTables);
+		ped[i]->setCompareLastTableDB(compareLastTableDB);
+		ped[i]->setPedDiffSaveDB(minPedDiffDB);
+		ped[i]->setPedCrateFilenameFormat(pedCrateFilenameFormatStr.Data());
 	}
 
     memory.PrintMem(0);
@@ -168,11 +178,11 @@ void makeOnlinePed(char* list = "./runlist.txt"
 	  while(!INPUT.eof())
 	  {
 	    INPUT >> line;
-		bool isDone = processFile(line,dir);
+		bool isDone = processFile(line,dirStr.Data());
 		if(isDone) goto EXIT;
 	  }
 	}
-	else processFile(list,dir);
+	else processFile(list,dirStr.Data());
 		
     EXIT:
     cout <<"FINISHED\n";

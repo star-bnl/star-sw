@@ -1,5 +1,8 @@
 #include "StEmcPedestalMaker.h"
 
+#include <fstream>
+using namespace std;
+
 #include <TFile.h>
 #include <TROOT.h>
 #include <TF1.h>
@@ -12,6 +15,7 @@
 #include <StDbLib/StDbConfigNode.hh>
 #include <tables/St_emcPed_Table.h>
 #include <tables/St_smdPed_Table.h>
+#include <StDaqLib/EMC/StEmcDecoder.h>
 
 ClassImp(StEmcPedestalMaker)
 
@@ -25,6 +29,9 @@ StEmcPedestalMaker::StEmcPedestalMaker(const Char_t *name)
     mLastPedTime = 0;
     setNPedEvents(2000);
     setSaveTables(false);
+    setPedDiffSaveDB(1.0);
+    setCompareLastTableDB(false);
+    setPedCrateFilenameFormat("pedestal_crate0x%02x.dat");
 }
 //_____________________________________________________________________________
 StEmcPedestalMaker::~StEmcPedestalMaker()
@@ -107,29 +114,27 @@ void StEmcPedestalMaker::calcPedestals()
   float left = 3;
   float right= 2;
 
-  int ngood=0,nped=0,nrms=0,nchi=0,nbad=0;
+  int ngood=0,nped=0,nrms=0,nchi=0,nbad=0,nodata=0;
   
-  for(int id = 1;id<=getNChannel();id++)
-  {		
-		TH1D *h = getSpec(id);
+  for(int id = 1;id<=getNChannel();id++) {		
+    TH1D *h = getSpec(id);
     int ibin = h->GetMaximumBin();
     float avg = (float)h->GetBinCenter(ibin);
     float max = (float)h->GetMaximum();
     float rms = 1.5;
     if(getDetector()>2) rms = h->GetRMS();
-		float integral = (float)h->Integral();
-		if(max!=0 && integral > getNPedEvents()/2.)
-		{
-      TF1 func("ped","gaus(0)");
-			float rmsInit = rms;
+    float integral = (float)h->Integral();
+    if((max!=0) && (integral > (getNPedEvents() / 2.0))) {
+	TF1 func("ped","gaus(0)");
+	float rmsInit = rms;
     	func.SetParameter(0,max);
     	func.SetParameter(1,avg);
     	func.SetParameter(2,rms);
     	func.SetParLimits(2,0,100000);
     	float seed = avg;    
-			float fitleft = avg-left*rms;
-			if(fitleft<0) fitleft = 0;
-			float fitright = avg+right*rms;
+	float fitleft = avg-left*rms;
+	if(fitleft<0) fitleft = 0;
+	float fitright = avg+right*rms;
     	func.SetRange(fitleft,fitright);
     
     	int npt = (Int_t)((left+right+1.0)*rms);
@@ -155,19 +160,20 @@ void StEmcPedestalMaker::calcPedestals()
 			                                           <<"  peakY = "<<max
                                                  <<"  ped = "<<avg <<"  res = " <<res<<"  rms = "<<rms
                                                  <<"  chi = "<<chi<<"  status = "<<status<<endl;
-		}
-		else
-		{
+    } else {
     	mPedestal->Fill((float)id,0);
     	mRms->Fill((float)id,0);
     	mChi->Fill((float)id,0);
-    	mStatus->Fill((float)id,0);    
-		}
-		if(h) {delete h; h = 0;}
+    	mStatus->Fill((float)id,0);
+	nodata++;
+	nbad++;
+    	cout << "det = " << getDetector() << "  id = " << id << " peakY = "<< max
+                                                 << " ped = " << avg << " rms = " << rms
+                                                 << " int = " << integral << endl;
+    }
+    if(h) {delete h; h = 0;}
   }
-  cout <<"nGood = "<<ngood<<"  nBad = "<<nbad<<"  neg Ped = "<<nped<<"  bad rms = "<<nrms<<"  large res = "<<nchi<<endl;
-  return;
-   
+  cout <<"nGood = "<<ngood<<"; nBad = "<<nbad<<": neg Ped = "<<nped<<", bad rms = "<<nrms<<", large res = "<<nchi << ", no data " << nodata <<endl;
 }
 //_____________________________________________________________________________
 void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFilename) const {
@@ -176,6 +182,70 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
     cout << "TimeStamp = " << timeStamp << endl;
     
     TString n[] = {"bemcPed", "bprsPed", "bsmdePed", "bsmdpPed"};
+
+    Bool_t saveThisTable = true;
+    TString lastTableFilename = getLastTablePath();
+    lastTableFilename += "/";
+    lastTableFilename += n[getDetector() - 1];
+    lastTableFilename += ".last.root";
+
+    if (getCompareLastTableDB()) {
+    cout << "Comparing to the last table file " << lastTableFilename << endl;
+    TFile *lastTableFile = new TFile(lastTableFilename);
+    if (lastTableFile && lastTableFile->IsOpen()) {
+	cout << "Opened last table file " << lastTableFilename << endl;
+	saveThisTable = false;
+	const emcPed_st *ped_t_st = 0;
+	const smdPed_st *ped_s_st = 0;
+	if (getDetector() < 3) {
+	    const St_emcPed *pedT = (const St_emcPed *)lastTableFile->Get(n[getDetector() - 1]);
+	    ped_t_st = pedT ? pedT->GetTable() : 0;
+	} else {
+	    const St_smdPed *pedT = (const St_smdPed *)lastTableFile->Get(n[getDetector() - 1]);
+	    ped_s_st = pedT ? pedT->GetTable() : 0;
+	}
+	Float_t maxPedDiff = 0;
+	for (Int_t i = 0;(i < getNChannel())/* && (!saveThisTable)*/;i++) {
+	    Int_t id = i + 1;
+	    Float_t pedNew = getPedestal(id);
+	    Float_t rmsNew = getRms(id);
+	    Float_t chiNew = getChi(id);
+	    Int_t statusNew = (int)getStatus(id);
+	    Float_t pedLast = 0;
+	    Float_t rmsLast = 0;
+	    Float_t chiLast = 0;
+	    Int_t statusLast = 0;
+	    Bool_t saveThisPed = false;
+	    if (getDetector() < 3) {
+		if (ped_t_st) {
+		    pedLast = (short)ped_t_st->AdcPedestal[i] / 100.0;
+		    rmsLast = (short)ped_t_st->AdcPedestalRMS[i] / 100.0;
+		    chiLast = ped_t_st->ChiSquare[i];
+		    statusLast = ped_t_st->Status[i];
+		}
+	    } else {
+		if (ped_s_st) {
+		    pedLast = (short)ped_s_st->AdcPedestal[i][0] / 100.0;
+		    rmsLast = (short)ped_s_st->AdcPedestalRMS[i][0] / 100.0;
+		    statusLast = ped_s_st->Status[i];
+		}
+	    }
+	    Float_t pedDiff = pedNew - pedLast;
+	    if (maxPedDiff < TMath::Abs(pedDiff)) maxPedDiff = TMath::Abs(pedDiff);
+	    if ((statusLast == 1) || (statusNew == 1)) {
+		if (TMath::Abs(pedDiff) >= getPedDiffSaveDB()) {
+		    saveThisPed = true;
+		    cout << "det " << getDetector() << ", id " << id << ": ped diff " << pedDiff << ", last " << pedLast << " " << rmsLast << " " << (Int_t)statusLast << ", new " << pedNew << " " << rmsNew << " " << (Int_t)statusNew << endl;
+		}
+	    }
+	    saveThisTable |= saveThisPed;
+	}
+	cout << "max ped diff " << maxPedDiff << endl;
+	lastTableFile->Close();
+	if (!saveThisTable) cout << "This table does not need to be saved" << endl;
+    }
+    if (lastTableFile) delete lastTableFile; lastTableFile = 0;
+    }
     
     St_emcPed *pedT_t = new St_emcPed(n[getDetector() - 1].Data(), 1);
     emcPed_st *tnew = pedT_t ? pedT_t->GetTable() : 0;
@@ -210,7 +280,7 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 	    }
 	}
     }
-    if (isAutoSaveDB()) {
+    if (isAutoSaveDB() && (!getCompareLastTableDB() || saveThisTable)) {
 	StDbManager* mgr = StDbManager::Instance();
 	cout << "mgr = " << mgr << endl;
 	StDbConfigNode* node = mgr ? mgr->initConfig(dbCalibrations, dbEmc) : 0;
@@ -234,7 +304,7 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 	    cout << "Stored." << endl;
 	}
     }
-    if (getSaveTables() && tableFilename) {
+    if (getSaveTables() && (!getCompareLastTableDB() || saveThisTable) && tableFilename) {
 	cout << "Saving DB table into " << tableFilename << endl;
 	TFile *f = new TFile(tableFilename, "RECREATE");
 	if (f) {
@@ -247,6 +317,42 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 	    }
 	    f->Close();
 	    delete f; f = 0;
+	}
+    }
+    if (getCompareLastTableDB() && saveThisTable) {
+	cout << "Saving last DB table into " << lastTableFilename << endl;
+	TFile *f = new TFile(lastTableFilename, "RECREATE");
+	if (f) {
+	    if (getDetector() < 3) {
+		pedT_t->AddAt(tnew, 0);
+		pedT_t->Write();
+	    } else {
+		pedS_t->AddAt(snew, 0);
+		pedS_t->Write();
+	    }
+	    f->Close();
+	    delete f; f = 0;
+	}
+	if (getDetector() == 1) {
+	    StEmcDecoder *d = new StEmcDecoder();
+	    for (Int_t crate = 1;crate <= 30;crate++) {
+		TString pedCrateFilename = getLastTablePath();
+	        pedCrateFilename += "/";
+	        pedCrateFilename += Form(getPedCrateFilenameFormat(), crate);
+	        TString pedCrateTimestampFilename = pedCrateFilename + ".timestamp";
+	        cout << "Saving pedestals for crate " << crate << ": " << pedCrateFilename << endl;
+	        ofstream ofstr(pedCrateFilename);
+    	        for (Int_t ch = 0;ch < 160;ch++) {
+		    Int_t softId = -1;
+            	    if (d) d->GetTowerIdFromCrate(crate, ch, softId);
+            	    if ((softId >= 1) && (softId <= 4800)) {
+	    		ofstr << ch << " " << getPedestal(softId) << " " << getRms(softId) << endl;
+		    }
+		}
+	        ofstream ofstr_timestamp(pedCrateTimestampFilename);
+	        ofstr_timestamp << timeStamp << endl;
+	    }
+	    if (d) delete d; d = 0;
 	}
     }
 }

@@ -28,7 +28,11 @@ protected:
     Bool_t                      mStarted;
     TString                     mSavePath;
     TString                     mTablesPath;
+    TString                     mLastTablePath;
     Bool_t			mSaveTables;
+    Float_t			mPedDiffSaveDB;
+    Bool_t 			mCompareLastTableDB;
+    TString			mPedCrateFilenameFormat;
                             
 public:
      
@@ -56,8 +60,20 @@ public:
 	      const Char_t     *getTablesPath() const {return mTablesPath;}
 	      void              setTablesPath(const Char_t *path) {mTablesPath = path ? path : "";}
 	    
+	      const Char_t     *getLastTablePath() const {return mLastTablePath;}
+	      void              setLastTablePath(const Char_t *path) {mLastTablePath = path ? path : "";}
+	    
 	      Bool_t 		getSaveTables() const {return mSaveTables;}
 	      void 		setSaveTables(Bool_t save) {mSaveTables = save;}
+
+              Float_t           getPedDiffSaveDB() const {return mPedDiffSaveDB;}
+              void              setPedDiffSaveDB(Float_t diff) {mPedDiffSaveDB = diff;}
+
+	      Bool_t 		getCompareLastTableDB() const {return mCompareLastTableDB;}
+	      void 		setCompareLastTableDB(Bool_t cmp) {mCompareLastTableDB = cmp;}
+
+	      const Char_t     *getPedCrateFilenameFormat() const {return mPedCrateFilenameFormat;}
+	      void              setPedCrateFilenameFormat(const Char_t *fmt) {mPedCrateFilenameFormat = fmt ? fmt : "";}
 	    
               void              calcPedestals();
               void              saveToDb(const Char_t *timestamp, const Char_t *tableFilename = 0) const;

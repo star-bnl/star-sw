@@ -28,9 +28,10 @@ export EMCONLINE_PED_BACKUP_DIR=${EMCONLINE_PED_DIR}/backup.emconline_ped
 export EMCONLINE_PED_LOGS_DIR=${EMCONLINE_PED_DIR}/logs.emconline_ped
 # Temporary directory
 export EMCONLINE_PED_TEMP_DIR=${EMCONLINE_PED_DIR}/tmp.emconline_ped
-
 # Directory where the DB tables are saved
 export EMCONLINE_PED_TABLES_DIR=${EMCONLINE_PED_DIR}/tables.emconline_ped/StarDb/Calibrations/emc
+# Directory where the last DB tables are saved
+export EMCONLINE_PED_LASTTABLES_DIR=${EMCONLINE_PED_DIR}/tables.emconline_ped/last
 # ROOT script to make a DB tables from the backup histograms
 export EMCONLINE_PED_TABLES_SCRIPT=${EMCONLINE_PED_DIR}/transformBackupHistoToDBTable.C
 
@@ -43,11 +44,15 @@ export EMCONLINE_PED_SAVEDB=true
 # Save tables on disk?
 export EMCONLINE_PED_SAVETABLES=true
 # Produce one tables per run? (otherwise, one table per day)
-export EMCONLINE_PED_TABLEPERRUN=false
+export EMCONLINE_PED_TABLEPERRUN=true
 # Process the last day's runs only? (otherwise, all available runs in the event pool)
-export EMCONLINE_PED_LASTDAYONLY=true
+export EMCONLINE_PED_LASTDAYONLY=false
 # Exclude runs from the veto file?
-export EMCONLINE_PED_USEVETOFILE=false
+export EMCONLINE_PED_USEVETOFILE=true
+# Compare peds to the last saved DB table before saving?
+export EMCONLINE_PED_COMPARELASTTABLEDB=true
+# Min ped difference from the last saved table, for table to be saved, in ADC counts
+export EMCONLINE_PED_MINPEDDIFFDB=2.0
 
 # Update the desktop icon when the current status changes?
 export EMCONLINE_PED_UPDATEDESKTOPICON=true
@@ -100,6 +105,11 @@ if [[ "${EVP_READER_LIB}" == "" ]] ; then export EVP_READER_LIB='/home/emc/onlin
 
 # Event pool mounting point
 if [[ "${EVP_DIR}" == "" ]] ; then export EVP_DIR='/evp' ; fi
+
+# Directory to upload pedestal files into
+if [[ "${EMCONLINE_SLOWCTRL_PEDMON_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_PEDMON_DIR='sysuser@sc3.starp.bnl.gov:/export/home/users/sysuser/epics/R3.12.2-LBL.4/radstone/unix/emconline_slowctrl/pedestal_crate.emconline_ped' ; fi
+
+if [[ "${SCP}" == "" ]] ; then export SCP='/home/emc/online/emc/scp' ; fi
 ##################################################################
 
 ##################################################################
@@ -118,4 +128,46 @@ then
     export EVP_DIR='/evp'
     echo "Event pool directory is not specified, assuming ${EVP_DIR}"
 fi
+
+# Directory to upload crate pedestal files into
+if [[ "${EMCONLINE_SLOWCTRL_PEDMON_DIR}" == "" ]]
+then
+    export EMCONLINE_SLOWCTRL_PEDMON_DIR='~/emconline_slowctrl/pedestal_crate.emconline_ped'
+    echo "EMC Slow Control pedestals directory for uploading not specified, assuming ${EMCONLINE_SLOWCTRL_PEDMON_DIR}"
+fi
+
+if [[ "${CRATE_PEDESTAL_FILES_MASK}" == "" ]] ; then export CRATE_PEDESTAL_FILES_MASK="pedestal_crate0x??.dat" ; fi
+if [[ "${CRATE_PEDESTAL_FILES_FORMAT}" == "" ]] ; then export CRATE_PEDESTAL_FILES_FORMAT="pedestal_crate0x%02x.dat" ; fi
+if [[ "${CRATE_PEDESTAL_FILES}" == "" ]] ; then export CRATE_PEDESTAL_FILES="\
+pedestal_crate0x01.dat \
+pedestal_crate0x02.dat \
+pedestal_crate0x03.dat \
+pedestal_crate0x04.dat \
+pedestal_crate0x05.dat \
+pedestal_crate0x06.dat \
+pedestal_crate0x07.dat \
+pedestal_crate0x08.dat \
+pedestal_crate0x09.dat \
+pedestal_crate0x0a.dat \
+pedestal_crate0x0b.dat \
+pedestal_crate0x0c.dat \
+pedestal_crate0x0d.dat \
+pedestal_crate0x0e.dat \
+pedestal_crate0x0f.dat \
+pedestal_crate0x10.dat \
+pedestal_crate0x11.dat \
+pedestal_crate0x12.dat \
+pedestal_crate0x13.dat \
+pedestal_crate0x14.dat \
+pedestal_crate0x15.dat \
+pedestal_crate0x16.dat \
+pedestal_crate0x17.dat \
+pedestal_crate0x18.dat \
+pedestal_crate0x19.dat \
+pedestal_crate0x1a.dat \
+pedestal_crate0x1b.dat \
+pedestal_crate0x1c.dat \
+pedestal_crate0x1d.dat \
+pedestal_crate0x1e.dat \
+" ; fi
 ##################################################################

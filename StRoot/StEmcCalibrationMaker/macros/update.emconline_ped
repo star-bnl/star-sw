@@ -1,7 +1,6 @@
 #!/bin/bash
 
-export EMCONLINE_PED_DIR=${0}
-export EMCONLINE_PED_DIR=${EMCONLINE_PED_DIR%/*}
+export EMCONLINE_PED_DIR=${0%/*}
 if [[ -f ./.emconline_ped.cfg.sh ]]
 then
     source ./.emconline_ped.cfg.sh
@@ -24,11 +23,15 @@ then
     exit
 fi
 
+if [[ "${SCP}" == "" ]] ; then export SCP=scp ; fi
+
 export FILE=${1}
 export MODE=${2}
 export DAY=${3}
 export year=${4}
 export RUNID=${5}
+
+export DIFF_OPTIONS='-bBN'
 
 if [[ "${FILE}" == "" ]]
 then
@@ -125,7 +128,14 @@ mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bemc
 mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bprs
 mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bsmde
 mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bsmdp
+mkdir -p ${EMCONLINE_PED_LASTTABLES_DIR}
 mkdir -p ${EMCONLINE_PED_TEMP_DIR}
+
+if [[ "${EMCONLINE_PED_COMPARELASTTABLEDB}" == "true" ]]
+then
+    rm -f ${EMCONLINE_PED_TEMP_DIR}/${CRATE_PEDESTAL_FILES_MASK}.timestamp
+    cp ${EMCONLINE_PED_LASTTABLES_DIR}/${CRATE_PEDESTAL_FILES_MASK}.timestamp ${EMCONLINE_PED_TEMP_DIR}
+fi
 
 starver ${EMCONLINE_PED_STARVER}
 
@@ -137,7 +147,7 @@ then
 	    echo ${FILE} > ${FILELIST}.tmp
 	    echo "Running over ${FILE}" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
 	    update_desktop_icon_ped
-	    if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}.tmp\",${LIST},\"${EVP_DIR}\",\"${EMCONLINE_PED_BACKUP_DIR}\",\"${EMCONLINE_PED_TABLES_DIR}\",\"${EMCONLINE_PED_TEMP_DIR}\",\"${EVP_READER_LIB}\",${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES}\))
+	    if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}.tmp\",${LIST},${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES},${EMCONLINE_PED_COMPARELASTTABLEDB},${EMCONLINE_PED_MINPEDDIFFDB}\))
 	    then
 		if [[ "${EMCONLINE_PED_USEVETOFILE}" == "true" ]]
 		then
@@ -148,7 +158,7 @@ then
 	    rm -f ${FILELIST}.tmp
 	done
 else
-	if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}\",${LIST},\"${EVP_DIR}\",\"${EMCONLINE_PED_BACKUP_DIR}\",\"${EMCONLINE_PED_TABLES_DIR}\",\"${EMCONLINE_PED_TEMP_DIR}\",\"${EVP_READER_LIB}\",${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES}\))
+	if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}\",${LIST},${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES},${EMCONLINE_PED_COMPARELASTTABLEDB},${EMCONLINE_PED_MINPEDDIFFDB}\))
 	then
 	    if [[ "$LIST" == "true" ]]
 	    then
@@ -159,6 +169,37 @@ else
 		fi
 	    fi
 	fi
+fi
+
+if [[ "${EMCONLINE_PED_COMPARELASTTABLEDB}" == "true" ]]
+then
+    export SAVE_ANY_FILES=false
+    export SAVE_ALL_FILES=true
+    for file in ${CRATE_PEDESTAL_FILES}
+    do
+	export DIFF=`diff ${DIFF_OPTIONS} ${EMCONLINE_PED_LASTTABLES_DIR}/${file}.timestamp ${EMCONLINE_PED_TEMP_DIR}/${file}.timestamp`
+	export DIFF=`echo ${DIFF}`
+	if [[ "${DIFF}" == "" ]]
+	then
+	    export SAVE_ALL_FILES=false
+	else
+	    export SAVE_ANY_FILES=true
+	fi
+    done
+    
+    if [[ "${SAVE_ANY_FILES}" == "true" ]]
+    then
+	echo "Delivering new crate pedestal files"
+	echo "Delivering new crate pedestal files" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
+	update_desktop_icon_ped
+
+	${SCP} "${EMCONLINE_PED_LASTTABLES_DIR}/${CRATE_PEDESTAL_FILES_MASK}" ${EMCONLINE_SLOWCTRL_PEDMON_DIR}
+	${SCP} "${EMCONLINE_PED_LASTTABLES_DIR}/${CRATE_PEDESTAL_FILES_MASK}.timestamp" ${EMCONLINE_SLOWCTRL_PEDMON_DIR}
+    else
+	echo "No updated timestamps found"
+    fi
+
+    rm -f ${EMCONLINE_PED_TEMP_DIR}/${CRATE_PEDESTAL_FILES_MASK}.timestamp
 fi
 
 echo "" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
