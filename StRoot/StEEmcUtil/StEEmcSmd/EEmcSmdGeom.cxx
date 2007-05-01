@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.11 2007/02/17 01:29:05 balewski Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.12 2007/05/01 20:22:25 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -604,6 +604,13 @@ void EEmcSmdGeom::printSectorPhis(const Int_t iPlane, const Int_t iSec,
 //   strip ID's.
 TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId ) {
 
+  Int_t nU = getNStrips( sector, 0 );
+  Int_t nV = getNStrips( sector, 1 );
+  if ( uId >= nU || vId >= nV ) {
+    LOG_WARN<<"::getIntersection(...) passed invalid strip ID sector="<<sector<<" uId="<<uId<<" vId="<<vId<<std::endl;
+    return TVector3(1.,1.,-999.0);
+  }
+
   return getIntersection ( getStripPtr( uId, 0, sector ),
 			   getStripPtr( vId, 1, sector ) );
 
@@ -611,6 +618,13 @@ TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId ) {
 
 
 TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId, TVector3 vert ) {
+
+  Int_t nU = getNStrips( sector, 0 );
+  Int_t nV = getNStrips( sector, 1 );
+  if ( uId >= nU || vId >= nV ) {
+    LOG_WARN<<"::getIntersection(...) passed invalid strip ID sector="<<sector<<" uId="<<uId<<" vId="<<vId<<std::endl;
+    return TVector3(1.,1.,-999.0);
+  }
 
   return getIntersection ( getStripPtr( uId, 0, sector ),
 			   getStripPtr( vId, 1, sector ), vert );
@@ -626,15 +640,15 @@ TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
   // The strips are arranged sensibly, so that the ID's and the
   // widths of the strips basically tell us the position of the
   // crossing point.  However, we need to know a few things:
-                                                                                                                                                             
+                                                                             
   Int_t uSectorId = u -> stripStructId.sectorId;   // This would be easier if
   Int_t vSectorId = v -> stripStructId.sectorId;   // we were dealing with a
   //Int_t uPlaneId  = u -> stripStructId.planeId;  // class instead of a struct
   //Int_t vPlaneId  = v -> stripStructId.planeId;  //
-                                                                                                                                                             
+
   Int_t uId = u -> stripStructId.stripId;
   Int_t vId = v -> stripStructId.stripId;
-                                                                                                                                                             
+
   // Get vectors pointing to the start of the u and v strips in question,
   //   as well as the ends.  NOTE: We pass uId - 1 to getStripPtr, because
   //   that routine expects the c++ _index_... (the convention in this
@@ -672,7 +686,6 @@ TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
   Float_t scale_denomv = (Nv.X()*(v0.X()-vF.X()) + Nv.Y()*(v0.Y()-vF.Y()) + Nv.Z()*(v0.Z()-vF.Z()));
   Float_t scalev=scale_numerv/scale_denomv;
   if (scalev < 0 || scalev > 1) {
-
     TVector3 ErrorVector(1.,1.,-999.);
     LOG_WARN<<GetName()<<"::getIntersection( ) passed non-intersecting SMD strips " << *u << " " << *v << endm;
     return ErrorVector;
@@ -751,6 +764,9 @@ ostream& operator<<(ostream &os, const StructEEmcStrip strip)
 /////////////////////////////////////////////////////////////////////////////
 /*
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.12  2007/05/01 20:22:25  jwebb
+ * Added error handling to EEmcSmdGeom::getIntersection().
+ *
  * Revision 1.11  2007/02/17 01:29:05  balewski
  * less printout
  *
