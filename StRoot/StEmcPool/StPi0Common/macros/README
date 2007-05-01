@@ -123,3 +123,9 @@ the current directory.
 StPi0Common/macros/submit <component> <option=value>
 The shell script to submit the batch jobs for the component.
 Run 'submit' without parameters to get the complete list of options.
+
+StPi0Common/macros/resubmit
+The shell script that scans through the output files looking for the specific mark
+and prints the list of jobs where the mark is not found.
+Useful to find the crashed jobs that needs to be resubmitted.
+Run once without parameters to get a short help line about the usage.

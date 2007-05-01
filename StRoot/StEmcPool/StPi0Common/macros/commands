@@ -358,7 +358,6 @@ function get_file_size () {
     export STR=`ls -al $1 | grep -o -E '[^ ]{10}[[:space:]]+[[:digit:]]+[[:space:]]+[[:alnum:]]+[[:space:]]+[[:alnum:]]+[[:space:]]+[[:digit:]]+' | grep -o -E '[[:digit:]]+$'`
     #export STR=`du -b $1`
     #export STR1=${STR//	*/}
-    #echo ${STR1}
     echo ${STR}
 }
 
