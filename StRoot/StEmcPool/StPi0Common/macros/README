@@ -35,6 +35,7 @@ mkdir pi0_data
 cd pi0_data
 $STAR/StRoot/StEmcPool/StPi0Common/macros/copy data
 ./StRoot/StEmcPool/StPi0Common/macros/configure data
+cons
 Then use './submit' to submit the jobs.
 
 There are predefined scripts for 2003 d+Au and 2005 p+p datasets.
@@ -50,7 +51,7 @@ The following separate trees can be produced:
 8. Monte-Carlo photons
 9. Monte-Carlo pi0 mesons
 10. Monte-Carlo eta mesons
-See StPi0Datastructures.h for details.
+See StPi0DataStructures.h for details.
 
 =================================================================
 ANALYSIS
@@ -66,6 +67,7 @@ mkdir pi0_analysis
 cd pi0_analysis
 $STAR/StRoot/StEmcPool/StPi0Common/macros/copy analysis
 ./StRoot/StEmcPool/StPi0Common/macros/configure analysis
+cons or make
 Then use './submit' to submit the jobs.
 
 There are predefined scripts for 2003 d+Au and 2005 p+p datasets.
@@ -85,6 +87,7 @@ mkdir pi0_results
 cd pi0_results
 $STAR/StRoot/StEmcPool/StPi0Common/macros/copy results
 ./StRoot/StEmcPool/StPi0Common/macros/configure results
+cons or make
 Then run './show_analysis'
 
 =================================================================
