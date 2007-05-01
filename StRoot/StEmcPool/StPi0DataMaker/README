@@ -1,0 +1,42 @@
+StPi0DataMaker
+
+----------------------------------------------------------------------------
+This is a part of pi0 analysis code.
+See StPi0Common/README for details.
+----------------------------------------------------------------------------
+
+This maker produces data structures and stores it in the maker tree.
+Other maker downstream can get it via TMaker::GetData(name).
+The data structures of a given type are stored inside TObjectSet wrappers 
+under one TDataSet.
+
+----------------------------------------------------------------------------
+DATA STRUCTURES
+See StPi0Common/StPi0DataStructures.h for the structures and corresponding dataset names.
+The following datasets are created: events, BEMC hits, BEMC clusters, BEMC points, pairs of points
+(same event, mixed events and mixed sub-events), MC pi0 particles, MC eta particles, MC photons.
+
+----------------------------------------------------------------------------
+HOW TO USE THIS MAKER
+See macros/run_data.C
+
+----------------------------------------------------------------------------
+HOW TO SAVE DATA STRUCTURES INTO FILE
+Use StPi0DataSaveMaker as shown in macros/run_data.C, it is the maker that accesses data created by
+StPi0DataMaker and writes it into trees in two formats: plain data structures or packed into TClonesArray arrays.
+See StPi0Common/StPi0DataStructures.h for the names of trees and branches.
+
+----------------------------------------------------------------------------
+HOW TO USE DATA STRUCTURES IN OTHER MAKERS
+Here is an example of the code in another maker that accesses the data:
+TDataSet *dataset = this->GetData(datasetName);
+if (dataset) {
+    TListIter iter(dataset->GetList());
+    while (const TObjectSet *objSet = dynamic_cast<const TObjectSet *>(iter())) {
+	const TMyEventData *eventData = dynamic_cast<const TMyEventData*>(objSet->GetObject());
+	if (eventData) {
+	    // Here is TMyEventData
+	}
+    }
+}
+Another real example is StPi0DataSaveMaker.
