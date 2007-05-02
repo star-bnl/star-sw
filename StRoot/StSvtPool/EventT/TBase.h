@@ -12,7 +12,7 @@
 #include <TChain.h>
 #include <TFile.h>
 const Int_t kMaxfTracks  = 10000;
-const Int_t kMaxfHits =   200000;
+const Int_t kMaxfHits =   400000;
 
 class TBase {
 public :
