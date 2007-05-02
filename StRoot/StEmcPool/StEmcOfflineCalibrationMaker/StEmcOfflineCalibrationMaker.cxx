@@ -1,5 +1,7 @@
 //StEmcOfflineCalibrationMaker.cxx
 
+#include <map>
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TH2.h"
@@ -212,9 +214,10 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	LOG_DEBUG << "got ADCs" << endm;
 	
 	//trigger maker
-	myEvent->htTrigMaker[0] = emcTrigMaker->is2006HT2();
-	myEvent->htTrigMaker[1] = emcTrigMaker->get2006HT2_ID();
-	myEvent->htTrigMaker[2] = emcTrigMaker->get2006HT2_ADC();
+	myEvent->htTrigMaker[0] = emcTrigMaker->isTrigger(137213);
+    std::map<int,int>::const_iterator p = (emcTrigMaker->barrelTowersAboveThreshold(137213)).begin();
+    myEvent->htTrigMaker[1] = p->first;
+    myEvent->htTrigMaker[2] = p->second;
 	
 	
 	//now for the tracks
