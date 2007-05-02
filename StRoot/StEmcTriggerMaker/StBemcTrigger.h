@@ -1,6 +1,6 @@
 
 //
-// $Id: StBemcTrigger.h,v 1.13 2007/04/30 01:02:07 rfatemi Exp $
+// $Id: StBemcTrigger.h,v 1.14 2007/05/02 17:36:22 kocolosk Exp $
 //
 //
 
@@ -196,6 +196,7 @@ public:
     int    getHTTP2006arrayTPADC(int i, int j) { return mHTTP2006arrayTPADC[i][j]; }
 
     emcTrigger     getTrigger() { return mTrigger; }
+    const StEmcDecoder* decoder() const { return mDecoder; }
 
     int     trgPatch[300];//just for testing purposes!
 

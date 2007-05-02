@@ -15,9 +15,13 @@
 // StEemcTrigger classes which mock up the BEMC/EEMC FEE + L0 DSM trigger algorithms.
 // Interface to L2 should also take place in this class.
 //
-// $Id: StEmcTriggerMaker.h,v 1.16 2007/04/30 01:00:25 rfatemi Exp $
+// $Id: StEmcTriggerMaker.h,v 1.17 2007/05/02 17:36:22 kocolosk Exp $
 //
 // $Log: StEmcTriggerMaker.h,v $
+// Revision 1.17  2007/05/02 17:36:22  kocolosk
+// added decoder wrapper method that correlates tower and trigger patch.
+// Useful for HTTP in particular.
+//
 // Revision 1.16  2007/04/30 01:00:25  rfatemi
 // Update for new trigger interface
 //
@@ -164,7 +168,7 @@ public:
     ///Jet Patch ADC > threshold required to fire trigger.
     int             barrelJetPatchThreshold(int trigId, int patchId=1);
     ///Note: DO NOT use ordering of HT and TP to associate HT->TP for BHTTP trigger
-    ///Use StEmcDecoder to associate a tower with a TP
+    ///Use ::barrelTriggerPatchForTower to find TP associated with tower
 
     ///map contains (key,value) = (softId,ADC) of all towers above DSM threshold.  map is empty if threshold = 0,-1.
     map<int,int>    barrelTowersAboveThreshold(int trigId);
@@ -172,6 +176,8 @@ public:
     map<int,int>    barrelTriggerPatchesAboveThreshold(int trigId);
     ///map contains (key,value) = (patchId,ADC) of all JP above DSM threshold.  map is empty if threshold = 0,-1.
     map<int,int>    barrelJetPatchesAboveThreshold(int trigId);
+    
+    int             barrelTriggerPatchForTower(int softId);
 
     int             endcapTowerThreshold(int trigId);
     int             endcapTriggerPatchThreshold(int trigId);

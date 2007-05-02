@@ -116,9 +116,12 @@ void Run2006TriggerMaker(const char *dir ="",
 
     cout<<"           "<<endl;
     map<int,int>::iterator iter;
+    map<int,int> tower;
+    map<int,int> tpatch;
+    map<int,int> jpatch;
 
     cout<<" 127212 ht2 (matrix0)="<<emcTrig->isTrigger(127212)<<endl;
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(127212);
+    tower=emcTrig->barrelTowersAboveThreshold(127212);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
       cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -127,7 +130,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 127213 ht2 (matrix1)="<<emcTrig->isTrigger(127213)<<endl;
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(127213);
+    tower=emcTrig->barrelTowersAboveThreshold(127213);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
       cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -136,7 +139,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 137213 ht2 (matrix3) ="<<emcTrig->isTrigger(127213)<<endl;
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(127213);
+    tower=emcTrig->barrelTowersAboveThreshold(127213);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
       cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -145,7 +148,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 127501 jp0 (matrix1)="<<emcTrig->isTrigger(127501)<<endl;
-    map<int,int> jpatch=emcTrig->barrelJetPatchesAboveThreshold(127501);
+    jpatch=emcTrig->barrelJetPatchesAboveThreshold(127501);
     cout<<"Total #'s of jpatches="<<jpatch.size()<<endl;
     for ( iter=jpatch.begin();iter !=jpatch.end(); iter++){
       cout<<"jpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -154,7 +157,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 137501 jp0 (matrix3) ="<<emcTrig->isTrigger(137501)<<endl;
-    map<int,int> jpatch=emcTrig->barrelJetPatchesAboveThreshold(137501);
+    jpatch=emcTrig->barrelJetPatchesAboveThreshold(137501);
     cout<<"Total #'s of jpatches="<<jpatch.size()<<endl;
     for ( iter=jpatch.begin();iter !=jpatch.end(); iter++){
       cout<<"jpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -163,7 +166,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 127221 jp1 (matrix1)="<<emcTrig->isTrigger(127221)<<endl;
-    map<int,int> jpatch=emcTrig->barrelJetPatchesAboveThreshold(127221);
+    jpatch=emcTrig->barrelJetPatchesAboveThreshold(127221);
     cout<<"Total #'s of jpatches="<<jpatch.size()<<endl;
     for ( iter=jpatch.begin();iter !=jpatch.end(); iter++){
       cout<<"jpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -172,7 +175,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 137221 jp1 (matrix2)="<<emcTrig->isTrigger(137221)<<endl;
-    map<int,int> jpatch=emcTrig->barrelJetPatchesAboveThreshold(137221);
+    jpatch=emcTrig->barrelJetPatchesAboveThreshold(137221);
     cout<<"Total #'s of jpatches="<<jpatch.size()<<endl;
     for ( iter=jpatch.begin();iter !=jpatch.end(); iter++){
       cout<<"jpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -181,7 +184,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 137222 jp1 (matrix3)="<<emcTrig->isTrigger(137222)<<endl;
-    map<int,int> jpatch=emcTrig->barrelJetPatchesAboveThreshold(127501);
+    jpatch=emcTrig->barrelJetPatchesAboveThreshold(127501);
     cout<<"Total #'s of jpatches="<<jpatch.size()<<endl;
     for ( iter=jpatch.begin();iter !=jpatch.end(); iter++){
       cout<<"jpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -190,49 +193,52 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 127821 http (matrix1)="<<emcTrig->isTrigger(127821)<<endl;
-    map<int,int> tpatch=emcTrig->barrelTriggerPatchesAboveThreshold(127821);
+    tpatch=emcTrig->barrelTriggerPatchesAboveThreshold(127821);
     cout<<"Total #'s of tpatches="<<tpatch.size()<<endl;
     for ( iter=tpatch.begin();iter !=tpatch.end(); iter++){
       cout<<"tpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
     }
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(127821);
+    tower=emcTrig->barrelTowersAboveThreshold(127821);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
-      cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
+        int triggerPatch = emcTrig->barrelTriggerPatchForTower(iter->first);
+        cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<"  tp (id,adc)=("<< triggerPatch << "," << tpatch[triggerPatch] << ")" <<endl;
     }
 
     cout<<endl;
     cout<<endl;
     cout<<" 137821 http (matrix3) ="<<emcTrig->isTrigger(137821)<<endl;
-    map<int,int> tpatch=emcTrig->barrelTriggerPatchesAboveThreshold(137821);
+    tpatch=emcTrig->barrelTriggerPatchesAboveThreshold(137821);
     cout<<"Total #'s of tpatches="<<tpatch.size()<<endl;
     for ( iter=tpatch.begin();iter !=tpatch.end(); iter++){
       cout<<"tpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
     }
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(137821);
+    tower=emcTrig->barrelTowersAboveThreshold(137821);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
-      cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
+        int triggerPatch = emcTrig->barrelTriggerPatchForTower(iter->first);
+        cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<"  tp (id,adc)=("<< triggerPatch << "," << tpatch[triggerPatch] << ")" <<endl;
     }
 
     cout<<endl;
     cout<<endl;
     cout<<" 137822 http (matrix4)="<<emcTrig->isTrigger(137822)<<endl;
-    map<int,int> tpatch=emcTrig->barrelTriggerPatchesAboveThreshold(137822);
+    tpatch=emcTrig->barrelTriggerPatchesAboveThreshold(137822);
     cout<<"Total #'s of tpatches="<<tpatch.size()<<endl;
     for ( iter=tpatch.begin();iter !=tpatch.end(); iter++){
       cout<<"tpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
     }  
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(137822);
+    tower=emcTrig->barrelTowersAboveThreshold(137822);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
-      cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
+        int triggerPatch = emcTrig->barrelTriggerPatchForTower(iter->first);
+        cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<"  tp (id,adc)=("<< triggerPatch << "," << tpatch[triggerPatch] << ")" <<endl;
     }
 
     cout<<endl;
     cout<<endl;
     cout<<" 117705 jpsi (matrix1)="<<emcTrig->isTrigger(117705)<<endl;
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(117705);
+    tower=emcTrig->barrelTowersAboveThreshold(117705);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
       cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -241,7 +247,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 117602 upsilon (matrix1)="<<emcTrig->isTrigger(117602)<<endl;
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(117602);
+    tower=emcTrig->barrelTowersAboveThreshold(117602);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
       cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -250,7 +256,7 @@ void Run2006TriggerMaker(const char *dir ="",
     cout<<endl;
     cout<<endl;
     cout<<" 137602 upsilon (matrix3)="<<emcTrig->isTrigger(137602)<<endl;
-    map<int,int> tower=emcTrig->barrelTowersAboveThreshold(137602);
+    tower=emcTrig->barrelTowersAboveThreshold(137602);
     cout<<"Total #'s of towers="<<tower.size()<<endl;
     for ( iter=tower.begin();iter !=tower.end(); iter++){
       cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
@@ -285,6 +291,3 @@ void Run2006TriggerMaker(const char *dir ="",
   cout << "****************************************** " << endl;
  
 }
-
-
-

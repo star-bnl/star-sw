@@ -770,6 +770,22 @@ map<int,int> StEmcTriggerMaker::barrelJetPatchesAboveThreshold(int trigId) {
     return patches;
 }
 
+int StEmcTriggerMaker::barrelTriggerPatchForTower(int softId) {
+    const StEmcDecoder *decoder = mBemcTrigger->decoder();
+    if(decoder == NULL) {
+        LOG_WARN << "Pointer to decoder is NULL! Can't get trigger patch for " << softId << endm;
+        return -1;
+    }
+    int patchId;
+    if(decoder->GetTriggerPatchFromTowerId(softId,patchId) != 0) {
+        return patchId;
+    }
+    else {
+        LOG_WARN << "Decoder encountered a problem translating tower id = " << softId << " into a trigger patch" << endm;
+        return -1;
+    }
+}
+
 int StEmcTriggerMaker::totalEnergyThreshold(int trigId) {
     switch(trigId) 
       {
@@ -810,9 +826,13 @@ map<int,int> StEmcTriggerMaker::endcapJetPatchesAboveThreshold(int trigId) {
 	return jetPatches;
 }
 
-// $Id: StEmcTriggerMaker.cxx,v 1.20 2007/04/30 01:53:14 rfatemi Exp $
+// $Id: StEmcTriggerMaker.cxx,v 1.21 2007/05/02 17:36:22 kocolosk Exp $
 //
 // $Log: StEmcTriggerMaker.cxx,v $
+// Revision 1.21  2007/05/02 17:36:22  kocolosk
+// added decoder wrapper method that correlates tower and trigger patch.
+// Useful for HTTP in particular.
+//
 // Revision 1.20  2007/04/30 01:53:14  rfatemi
 // Remove cout statements
 //
