@@ -95,8 +95,13 @@ void WritesvtRDOstripped(svtRDOstripped_st *rows, Int_t date, Int_t time) {
   nCFW++;
 }
 //________________________________________________________________________________
-void MakesvtRDOstripped(Char_t *FileName="/star/data07/calib/fisyak/svtRDOs/SlowCotrolDump/svtRDOsMergedNew3Sorted.txt") {
+void MakesvtRDOstripped(Char_t *FileName="./svtRDOs.txt") {
+  /* file svtRDOs.txt is created by
+echo 'select beginTime,flavor,deactive,barNum,ladNum,rdo,northTemp,southTemp,hvBoardTemp,hvVolt,hvCurr,lvFault from Conditions_svt.svtRDOs where deactive=0 and beginTime > "2007-01-01"' |\
+mysql Conditions_svt -h onldb.starp.bnl.gov -P 3502 > svtRDOs.txt
+  */  
   ///afs/rhic.bnl.gov/star/users/fisyak/.dev/DB/svtRDOs.txtdb01"
+  Int_t Year = 2007;
   gSystem->Load("libStDb_Tables.so");
   FILE *fp = fopen(FileName,"r");
   if (! fp) return;
@@ -111,47 +116,53 @@ void MakesvtRDOstripped(Char_t *FileName="/star/data07/calib/fisyak/svtRDOs/Slow
     //    cout << i << "\tB" <<  rows[i].barNum << "\tL" << rows[i].ladNum << "\t" << rows[i].rdo << endl;
   }
   svtRDOstripped_st row;
-  //  Int_t year, month, day;
-  //  Int_t hour, mins, secs;
+  Int_t year, month, day;
+  Int_t hour, mins, secs;
   Int_t date, time, dateOld = 0, timeOld = 0;
   Double_t datimeOld = 0;
-  char ofl[3];
+  char flavor[3];
   Int_t deactive;
   char line[121];
   
   fgets(&line[0],120,fp); // skip the first line
   Int_t nRowsModified = 0;
-  TString separator = "[^ ;,]+\t";
   while (fgets(&line[0],120,fp)) {
 #ifdef DEBUG
     if (nCFW > 100) break;
 #endif
     memset (&row, 0, sizeof(svtRDOstripped_st));
     
-    //    sscanf(&line[0],"%4d-%2d-%2d  %02d:%02d:%02d %s %d %d %d %s %f %f %f %f %f %d", 
-    //	   &year,&month,&day, &hour,&mins,&secs,
-    sscanf(&line[0],"%8d.%06d %s %d %d %d %s %f %f %f %f %f %d", 
-	   &date,&time,
-	   ofl, &deactive,
+    //    sscanf(&line[0],"%8d.%06d %s %d %d %d %s %f %f %f %f %f %d", 
+    //	   &date,&time,
+    /*
+beginTime	flavor	deactive	barNum	ladNum	rdo	hvBoardTemp	hvVolt    	hvCurr  	lvFault
+2007-03-24 04:37:23	ofl	0	1	1	W1	0.00000000	0.10000000	-0.89999998	0
+     */
+    sscanf(&line[0],"%4d-%2d-%2d  %02d:%02d:%02d %s %d %d %d %s %f %f %f %f %f %d", 
+	   &year,&month,&day, &hour,&mins,&secs,
+	   flavor, &deactive,
 	   &row.barNum,&row.ladNum,row.rdo,&row.northTemp,
 	   &row.southTemp,&row.hvBoardTemp,&row.hvVolt,&row.hvCurr,&row.lvFault);
-    //     printf("%4i-%02i-%02i  %02i:%02i:%02i %s %i %i %i %s %f %f %f %f %f %i\n", 
-    // 	   year,month,day, hour,mins,secs,
-    // 	   ofl, deactive,
-    // 	   row.barNum,row.ladNum,row.rdo,row.northTemp,
-    // 	   row.southTemp,row.hvBoardTemp,row.hvVolt,row.hvCurr,row.lvFault);
-    //    date = day + 100*(month + 100*year);
-    //    time = secs + 100*(mins + 100*hour);
+#ifdef DEBUG
+    printf("%4i-%02i-%02i  %02i:%02i:%02i %s %i %i %i %s %f %f %f %f %f %i\n", 
+ 	   year,month,day, hour,mins,secs,
+ 	   flavor, deactive,
+ 	   row.barNum,row.ladNum,row.rdo,row.northTemp,
+ 	   row.southTemp,row.hvBoardTemp,row.hvVolt,row.hvCurr,row.lvFault);
+#endif
+    date = day + 100*(month + 100*year);
+    time = secs + 100*(mins + 100*hour);
 #ifdef DEBUG
     cout << line;
     printf("%8d.%06d %s %d %d %d %s %f %f %f %f %f %d", 
 	   date,time,
-	   ofl, deactive,
+	   flavor, deactive,
 	   row.barNum,row.ladNum,row.rdo,row.northTemp,
 	   row.southTemp,row.hvBoardTemp,row.hvVolt,row.hvCurr,row.lvFault);
 #endif
-    if (! strncmp(ofl,"ofl",3)) continue;
-    if (date/10000 !=  2005) {
+    TString Ofl(flavor);
+    if (Ofl != "ofl") continue;
+    if (year !=  Year) {
       cout << "Wrong date: " << line;
       continue;
     }
@@ -214,7 +225,7 @@ void MakesvtRDOstripped(Char_t *FileName="/star/data07/calib/fisyak/svtRDOs/Slow
       rows[i].hvVolt      = row.hvVolt;
       rows[i].hvCurr      = row.hvCurr;
       rows[i].lvFault     = row.lvFault;
-      strcpy(tags[i],ofl);
+      strcpy(tags[i],flavor);
       break;
     }
     if (irow < 0) {
