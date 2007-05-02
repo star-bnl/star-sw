@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.30 2007/04/12 20:39:48 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.31 2007/05/02 20:46:40 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.31  2007/05/02 20:46:40  genevb
+// Additional SVT plots
+//
 // Revision 2.30  2007/04/12 20:39:48  genevb
 // Cleanup (removal) of CalibVtx, Nfitpnt, Chisq1, Rich, histograms
 //
@@ -107,6 +110,7 @@
 
   "QaPointTpc",
   "QaPointSvt",
+  "QaPointXYSvt",
   "QaPointSvtLaser",
   "QaPointFtpc",
   "QaPointXYTpcE",
@@ -167,6 +171,7 @@
   "QaPtrkFlag",
   "QaPtrkGlob",
   "QaPtrkFitPntLTTS",
+  "QaPtrkSvtLoc",
   "QaNullPrimVtxMult",
   "QaVtxPrXY",
   "QaVtxPrZ",
