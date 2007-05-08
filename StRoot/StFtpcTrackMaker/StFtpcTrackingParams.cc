@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.32 2007/02/06 11:42:17 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.33 2007/05/08 10:47:33 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.33  2007/05/08 10:47:33  jcs
+// replace StMagUtilities with StarMagField as requested by Yuri
+//
 // Revision 1.32  2007/02/06 11:42:17  jcs
 // move unessential output messages from INFO to DEBUG
 //
@@ -127,8 +130,6 @@ using namespace units;
 extern "C" void gufld(float *, float *);
 #endif
 
-#include "tables/St_MagFactor_Table.h"
-
 #include "TMath.h"
 #include <Stiostream.h>
 
@@ -224,10 +225,6 @@ StMatrixD StFtpcTrackingParams::FtpcRotationYInverse(Int_t i)  { return *mFtpcRo
  Double_t StFtpcTrackingParams::ObservedVertexOffsetY(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetY[i] : 0.; }
  Double_t StFtpcTrackingParams::ObservedVertexOffsetX(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetX[i] : 0.; }
 
-// magnetic field table
-Double_t StFtpcTrackingParams::MagFieldFactor()  { return mMagFieldFactor; }
-StMagUtilities *StFtpcTrackingParams::MagField() { return mMagField;       }
-
 
 StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug,
 						     St_ftpcTrackingPars *trackPars,
@@ -250,29 +247,10 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordT
   mInstance->InitCoordTransformation(ftpcCoordTrans->GetTable()); // Has to be invoked here, because it could change from run to run.
   mInstance->InitSpaceTransformation(); // Has to be invoked here, since gStTpcDb isn't set before.
   
-  if (RunLog) {
-    mInstance->ResetMagField(RunLog); // Has to be invoked here, because it could change from run to run.
-  }
-  
   if (debug) {
     mInstance->PrintParams();
   }
   
-  return mInstance;
-}
-
-
-StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, Double_t magFieldFactor) {
-  // Initialization with hardcoded values (to be able to run stand alone).
-  
-  if (!mInstance || magFieldFactor != mInstance->MagFieldFactor()) {
-    delete mInstance;
-    mInstance = new StFtpcTrackingParams(magFieldFactor);
-  }
-  if (debug) {
-    mInstance->PrintParams();
-  }
-
   return mInstance;
 }
 
@@ -314,11 +292,10 @@ StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcTrackingPars *trackPars,
   InitDimensions(dimensions->GetTable());
   InitPadRows(zrow->GetTable());
   InitCoordTransformation();
-  ResetMagField();
 }
 
 
-StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
+StFtpcTrackingParams::StFtpcTrackingParams()
   : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1) 
 {
   // zero everythig what is possible
@@ -470,11 +447,6 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   mFracTrunc    = 0.8;
   mAip          = 2.6e-08;
   mALargeNumber = 1.0e+10;
-
-  // magnetic field
-  mMagFieldFactor = magFieldFactor;
-  LOG_INFO << "Initializing StMagUtilities for FTPC!" << endm;
-  mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
 
   // transformation due to rotated and displaced TPC
   mTpcPositionInGlobal.setX(-0.256 * centimeter);
@@ -661,7 +633,6 @@ StFtpcTrackingParams::~StFtpcTrackingParams() {
   }
 
   delete[] mPadRowPosZ;
-  delete mMagField;
   
   mInstance = 0;
 }
@@ -1042,61 +1013,16 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 
   return 1;
 }
-
-
-Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
-  // Resets magnetic field if field configuration has changed.
-  
-  if (RunLog) { // I think RunLog is not needed anymore. (?)
-                // It was used before to figure out if the field was set already 
-                // (it wasn't for the first call of ResetMagField).
-                // I'm not sure how gufld behaves so I'll keep it (RunLog) for now.
-
-    Float_t x[3] = {0., 0., 0.};
-    Float_t b[3];
-    gufld(x, b);
-    Double_t newFactor = b[2]/4.980;
-    if (TMath::Abs(newFactor) < 10e-3) newFactor = 0.; // set factor to zero if it is close (otherwise NoFieldTracking won't be switched on)
-
-    if (newFactor != mMagFieldFactor) { // field has changed
-      
-      if (mMagFieldFactor == -9999.) { // field will be set the first time
-	mMagFieldFactor = newFactor;
-	LOG_INFO << "Initializing StMagUtilities for FTPC!" << endm;
-        delete mMagField;
-	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);  
-	// I hope this is ok. Should be the same as the table in the database.
-      }
-      
-      else { // field has been set before
-	LOG_WARN << "Magnetic field has changed. Reset magnetic field table and the field factor from " 
-					  << mMagFieldFactor << " to " << newFactor << "." << endm;
-	mMagFieldFactor = newFactor;
-	delete mMagField;
-	LOG_DEBUG << "Initializing StMagUtilities for FTPC!" << endm;
-	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
-      }
-    }
-  }
-  
-  else { // fill dummy
-    mMagFieldFactor = -9999.; // just some dumb number, will be set by ResetMagField() as soon as *RunLog is there
-  }
-  
-  return 1;
-}
   
 
 void StFtpcTrackingParams::PrintParams() {
-  // prints params to sreen
+  // prints params to screen
 
   LOG_INFO << endm;
 
   LOG_INFO << "Used parameters for FTPC tracking" << endm;
   LOG_INFO << "---------------------------------" << endm;
   
-  LOG_INFO << endm;
-  LOG_INFO << "Magnetic field factor: " << mMagFieldFactor << endm;
   LOG_INFO << endm;
   LOG_INFO << "FTPC geometry" << endm;
   LOG_INFO << "Inner radius (cm)...........: " << mInnerRadius << endm; 
