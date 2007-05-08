@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.18 2005/07/06 19:40:07 fisyak Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.19 2007/05/08 10:47:33 jcs Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.19  2007/05/08 10:47:33  jcs
+// replace StMagUtilities with StarMagField as requested by Yuri
+//
 // Revision 1.18  2005/07/06 19:40:07  fisyak
 // use templated version of StThreeVectorF and StPhysicalHelixD
 //
@@ -92,6 +95,8 @@ using namespace units;
 #include "StDbUtilities/StMagUtilities.h"
 #include "StTpcDb/StTpcDb.h"
 
+#include "StarMagField.h"
+
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
 class St_ftpcdEdxPars;
@@ -179,10 +184,6 @@ private:
    Double_t  mObservedVertexOffsetY[2];
    Double_t  mObservedVertexOffsetX[2];
 
-  StMagUtilities *mMagField;       // pointer to magnetic field table
-
-   Double_t  mMagFieldFactor;
-
    char mEnd; //End of simple variables
 
   // transformation due to rotated and displaced TPC
@@ -196,7 +197,7 @@ protected:
 		       St_ftpcdEdxPars *dEdxPars = 0,
 		       St_ftpcDimensions *dimensions = 0,
 		       St_ftpcPadrowZ *padrow_z = 0);
-  StFtpcTrackingParams(Double_t magFieldFactor);
+  StFtpcTrackingParams();
   
   Int_t InitTrackingParams(ftpcTrackingPars_st *trackParsTable);
   Int_t InitdEdx(ftpcdEdxPars_st *dEdxParsTable);
@@ -205,7 +206,6 @@ protected:
   Int_t InitCoordTransformation();
   Int_t InitCoordTransformation(ftpcCoordTrans_st* ftpcCoordTrans);
   Int_t InitSpaceTransformation();
-  Int_t ResetMagField(TDataSet *RunLog = 0);
   
 public:
   
@@ -217,7 +217,6 @@ public:
   static StFtpcTrackingParams* Instance(Bool_t debug, 
 					St_ftpcCoordTrans *ftpcCoordTrans, 
 					TDataSet *RunLog);
-  static StFtpcTrackingParams* Instance(Bool_t debug, Double_t magFieldFactor);
   static StFtpcTrackingParams* Instance();
   
   virtual ~StFtpcTrackingParams();
@@ -330,9 +329,8 @@ public:
   //@}
 
 
-  /// magnetic field table
-  StMagUtilities *MagField();
-  Double_t  MagFieldFactor();
+  StarMagField *MagField() {return StarMagField::Instance();}
+  Double_t  MagFieldFactor(){ return StarMagField::Instance()->GetFactor();}
 
   ClassDef(StFtpcTrackingParams,0)  // Parameters for FTPC tracking
 };    
