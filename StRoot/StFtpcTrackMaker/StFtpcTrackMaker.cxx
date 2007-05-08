@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.82 2007/04/27 17:04:27 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.83 2007/05/08 09:02:35 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.83  2007/05/08 09:02:35  jcs
+// move database initialization from Init to InitRun as requested by Victor and Yuri
+// redefine m_nrec_track histogram and only fill if debug option on
+//
 // Revision 1.82  2007/04/27 17:04:27  jcs
 // forgot to check if bfc option debug is on before filling vertex by sector histograms
 //
@@ -379,31 +383,6 @@ StFtpcTrackMaker::~StFtpcTrackMaker()
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::InitRun(Int_t run) {
 
-  // get ftpc calibration db
-  TDataSet *ftpcCalibrationsDb = GetDataBase("Calibrations/ftpc");
-
-  if (!ftpcCalibrationsDb){
-    LOG_WARN << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
-    assert(ftpcCalibrationsDb);
-
-    return kStWarn;
-  }
-
-  TDataSetIter ftpcCalibrations(ftpcCalibrationsDb);
-
-  // get run dependend tracking parameters from database
-  StFtpcTrackingParams::Instance(kTRUE, 
-				 (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"),
-				 GetDataBase("RunLog"));
-
-  return kStOK;
-}
-
-//_____________________________________________________________________________
-Int_t StFtpcTrackMaker::Init()
-{
-  // Initialisation.
-
   // get ftpc parameters
   TDataSet *ftpcParsDb = GetInputDB("ftpc");
   assert(ftpcParsDb);
@@ -435,6 +414,31 @@ Int_t StFtpcTrackMaker::Init()
   				 (St_ftpcDimensions *)ftpcGeometry("ftpcDimensions"), 
   				 (St_ftpcPadrowZ *)ftpcGeometry("ftpcPadrowZ"));
 
+  // get ftpc calibration db
+  TDataSet *ftpcCalibrationsDb = GetDataBase("Calibrations/ftpc");
+
+  if (!ftpcCalibrationsDb){
+    LOG_WARN << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
+    assert(ftpcCalibrationsDb);
+
+    return kStWarn;
+  }
+
+  TDataSetIter ftpcCalibrations(ftpcCalibrationsDb);
+
+  // get run dependend tracking parameters from database
+  StFtpcTrackingParams::Instance(kTRUE, 
+				 (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"),
+				 GetDataBase("RunLog"));
+
+  return kStOK;
+}
+
+//_____________________________________________________________________________
+Int_t StFtpcTrackMaker::Init()
+{
+  // Initialisation.
+
   // Create Histograms
 
 if (m_Mode >= 2) {
@@ -456,9 +460,6 @@ if (m_Mode >= 2) {
 //			      100, -10., 10.);
 
   if (IAttr(".histos")) {
-     m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 
-			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
-			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
 
      m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 150, 0.5, 150.5);
      m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 150, 0.5, 150.5);
@@ -481,6 +482,7 @@ if (m_Mode >= 2) {
 				   100, -0.01, 0.01, 100, 6.5, 31.);
 
      if (Debug()) {
+        m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 10, 0.5, 10.5, 100, 0., 20.);
         m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", 
  	            		             "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 
 				             6, 0.5, 6.5,  80,  -2.,  2.);
@@ -777,7 +779,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
        StFtpcTrack *track = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
        TObjArray   *fhits = (TObjArray*) track->GetHits();
     
-       m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
+        if (Debug()) m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
     
        for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
       
@@ -901,7 +903,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.82 2007/04/27 17:04:27 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.83 2007/05/08 09:02:35 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
