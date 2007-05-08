@@ -5,9 +5,9 @@ int total=0;
 #include <map>
 
 void Run2006TriggerMaker(const char *dir ="",
-			const char* file="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.MuDst.root",
-			const char *fname="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.event.root",
-			const char *filter = "")
+			 const char* file="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.MuDst.root",
+			 const char *fname="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.event.root",
+			 const char *filter = "")
 {
   int nevents = 10;
   
