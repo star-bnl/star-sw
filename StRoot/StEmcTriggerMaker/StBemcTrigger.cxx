@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.26 2007/04/30 01:01:27 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.27 2007/05/08 14:47:09 kocolosk Exp $
 //
 //
 
@@ -21,7 +21,7 @@ StBemcTrigger::StBemcTrigger():TObject()
 {
     mGeo=StEmcGeom::getEmcGeom("bemc");
     mEvent = NULL;
-    mDecoder = NULL;
+    mDecoder = new StEmcDecoder();
     resetConf();
 }
 //----------------------------------------------------
@@ -470,7 +470,7 @@ int StBemcTrigger::get2003Trigger()
     TUnixTime unixTime(mEvent->time());
     Int_t dat=0,tim=0;
     unixTime.GetGTime(dat,tim);
-    mDecoder = new StEmcDecoder(dat,tim);
+    mDecoder->SetDateTime(dat,tim);
     mDecoder->SetFixTowerMapBug(true);
 
 
@@ -529,7 +529,6 @@ int StBemcTrigger::get2003Trigger()
         HT1_DSM_2003=HTmax;
     }
 
-    delete mDecoder;
     return kStOK;
 }
 
@@ -667,7 +666,7 @@ int StBemcTrigger::get2004Trigger()
     TUnixTime unixTime(mEvent->time());
     Int_t dat=0,tim=0;
     unixTime.GetGTime(dat,tim);
-    mDecoder = new StEmcDecoder(dat,tim);
+    mDecoder->SetDateTime(dat,tim);
     mDecoder->SetFixTowerMapBug(true);
 
     int HTmax=0;
@@ -817,7 +816,6 @@ int StBemcTrigger::get2004Trigger()
     }
 
 
-    delete mDecoder;
     return kStOK;
 }
 
@@ -997,7 +995,7 @@ int StBemcTrigger::get2005Trigger()
     TUnixTime unixTime(mEvent->time());
     Int_t dat=0,tim=0;
     unixTime.GetGTime(dat,tim);
-    mDecoder = new StEmcDecoder(dat,tim);
+    mDecoder->SetDateTime(dat,tim);
     mDecoder->SetFixTowerMapBug(false);
 
     float rped12bit;
@@ -1208,7 +1206,6 @@ int StBemcTrigger::get2005Trigger()
       }
     
 
-    delete mDecoder;
     return kStOK;
 }
 
@@ -1395,7 +1392,7 @@ int StBemcTrigger::get2006Trigger()
     TUnixTime unixTime(mEvent->time());
     Int_t dat=0,tim=0;
     unixTime.GetGTime(dat,tim);
-    mDecoder = new StEmcDecoder(dat,tim);
+    mDecoder->SetDateTime(dat,tim);
     mDecoder->SetFixTowerMapBug(false);
 
     float rped12bit;
@@ -1758,6 +1755,5 @@ int StBemcTrigger::get2006Trigger()
 	
       }
     
-    delete mDecoder;
     return kStOK;
 }
