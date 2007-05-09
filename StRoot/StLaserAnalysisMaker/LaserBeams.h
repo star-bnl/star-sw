@@ -1,13 +1,21 @@
 #ifndef LaserBeams_h
 #define LaserBeams_h
+#include "Stiostream.h"
+#include "TString.h"
 //	Table 2. Global coordinates and angles for laser beams.
 struct Raft_t {
   Int_t Sector, Raft, Bundle, Mirror;
   Double_t X, Y, Z; // [cm]
   Double_t Theta, Phi; // [rad]
-  Double_t psi, dpsi, tanl, dtanl, xl, dxL, yl, dyL, zl, dzl;
+  //  Double_t psi, dpsi, tanl, dtanl, xl, dxL, yl, dyL, zl, dzl;
   Char_t *Name;
+  void    Print() {
+	  cout << Form("Raft:%2i,%2i,%1i,%1i,%9.4f,%9.4f,%9.4f,%9.4f,%9.4f",
+		       Sector, Raft, Bundle, Mirror, X, Y, Z, Theta, Phi) 
+	       << endl;
+  }
 };
+#if 0
 //	Table 2. Global coordinates and angles for laser beams. // Bill Love   sec, mir, zbd,  n,     
 // S   R B M         X,        Y,        Z,    Theta,	   Phi,      psi,    +-,     tanl,   +-,        xl,   +- ,       yl,   +- ,      zl ,   +-   
 static const Raft_t LaserBeams[] = {
@@ -517,4 +525,5 @@ static const Raft_t LaserBeams[] = {
   {22,14,6,7, 169.9120, 100.6810, -32.2800,   0.0220,   0.0000,  70.3640, 0.013,   0.0223, 0.000, 169.7850, 0.045, 100.6910, 0.016, -32.2050, 0.067,"S22R14B6M7"}
 };
 static const Int_t NoBeams = sizeof(LaserBeams)/ sizeof (Raft_t);
+#endif
 #endif

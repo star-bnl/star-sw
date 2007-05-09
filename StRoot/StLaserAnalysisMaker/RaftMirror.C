@@ -9,7 +9,7 @@ TChain *GetChain() {
 }
 //________________________________________________________________________________
 Double_t RaftMirror(Double_t pXL, Double_t pYL, Double_t PhiT, Int_t Raft, Int_t Mirror) {
-  //RaftMirror(fTracks.Laser.DirG.mX2,fTracks.Laser.DirG.mX1,fTracks.fgeoOut.mPsi,fTracks.Laser.Raft,fTracks.Laser.Mirror):fTracks.Laser.Raft>>RaftPhiC","fTracks.Flag==1&&fTracks.Laser.Mirror==4","colz")
+  //RaftMirror(fTracks.Laser.DirG.mX2,fTracks.Laser.DirG.mX1,fTracks.fgeoOut.mPsi,fTracks.Laser.Raft,fTracks.Laser.Mirror):fTracks.Laser.Raft>>RaftPhiC","fTracks.Flag==2&&fTracks.Laser.Mirror==4","colz")
   struct RaftCorr_t {
     Int_t raft;
     Double_t phi;
@@ -27,7 +27,8 @@ Double_t RaftMirror(Double_t pXL, Double_t pYL, Double_t PhiT, Int_t Raft, Int_t
 }
 //________________________________________________________________________________
 Double_t SectorMirror(Double_t PhiL, Double_t PhiT, Int_t Sector, Int_t Mirror) {
-  //SectorMirror(fTracks.Laser.DirG.mX2,fTracks.Laser.DirG.mX1,fTracks.fgeoOut.mPsi,fTracks.Laser.Sector,fTracks.Laser.Mirror):fTracks.Laser.Sector>>SectorPhiC","fTracks.Flag==1&&fTracks.Laser.Mirror==4","colz")
+  //SectorMirror(fTracks.Laser.DirG.mX2,fTracks.Laser.DirG.mX1,fTracks.fgeoOut.mPsi,fTracks.Laser.Sector,fTracks.Laser.Mirror):fTracks.Laser.Sector>>SectorPhiC","fTracks.Flag==2&&fTracks.Laser.Mirror==4","colz")
+#if 0
   struct SectorCorr_t {
     Int_t sector2;
     Double_t phi;
@@ -148,6 +149,7 @@ Double_t SectorMirror(Double_t PhiL, Double_t PhiT, Int_t Sector, Int_t Mirror) 
       {24,    0,      0,      0,      0}
     }
   };
+#endif
   Double_t dPhi = -999;
   if (Sector   < 1 || Sector > 24 ||
       Mirror < 1 || Mirror > 7) return dPhi; 
@@ -157,7 +159,11 @@ Double_t SectorMirror(Double_t PhiL, Double_t PhiT, Int_t Sector, Int_t Mirror) 
   Int_t m = Mirror - 1;
   if (SectorCorr0[i].sigma <= 0) return dPhi;
   if (SectorMirror[m][i].sigma <= 0) return dPhi;
+#if 0
   Double_t dPhi = PhiL - PhiT - SectorCorr0[i].phi - SectorMirror[m][i].phi;
+#else
+  Double_t dPhi = PhiL - PhiT - SectorMirror[m][i].phi;
+#endif
   if (dPhi >=  TMath::Pi()) dPhi -= 2*TMath::Pi();
   if (dPhi <= -TMath::Pi()) dPhi += 2*TMath::Pi();
   return dPhi;
@@ -185,7 +191,7 @@ void FillRM(Int_t Mirror) {
   TString hName(Form("Sector%iPhi2",Mirror));
   Plot += hName;
   Plot += "(12,1,25,400,-.2,.2)";
-  TString Cut(Form("fTracks.Flag==1&&fTracks.Laser.Mirror==%i",Mirror));
+  TString Cut(Form("fTracks.Flag==2&&fTracks.Laser.Mirror==%i",Mirror));
   Cut += "&&abs(fTracks.XyzP.mX1-fTracks.Laser.XyzG.mX1)<0.1";
   Cut += "&&abs(fTracks.XyzP.mX2-fTracks.Laser.XyzG.mX2)<0.1";
   Cut += "&&fTracks.thePath > 5 && fTracks.thePath < 12";
@@ -207,7 +213,8 @@ void MembraneDip() {
   TCanvas *c1 = new TCanvas();
   c1->Divide(1,2);
   c1->cd(1)->SetLogz(1);
-  TString Cut("fTracks.Flag==2&&(abs(fTracks.Vertex.mX3+7.3)<2||abs(fTracks.Vertex.mX3-6.8)<2)&&abs(fTracks.fgeoIn.mDipAngle)<0.010");
+  //  TString Cut("fTracks.Flag==1&&(abs(fTracks.Vertex.mX3+7.3)<2||abs(fTracks.Vertex.mX3-6.8)<2)&&abs(fTracks.fgeoIn.mDipAngle)<0.010");
+  TString Cut("fTracks.Flag==1&&(abs(fTracks.Vertex.mX3+3.3)<2||abs(fTracks.Vertex.mX3-3.6)<2)&&abs(fTracks.fgeoIn.mDipAngle)<0.010");
   TString cut = Cut;
   cut += "&&fTracks.mSector<=12";
   laser->Draw("1.e3*fTracks.fgeoIn.mDipAngle:fTracks.fgeoIn.mPsi>>DipPsiWW",cut,"colz");

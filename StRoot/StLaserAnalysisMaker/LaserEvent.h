@@ -1,4 +1,4 @@
-//$Id: LaserEvent.h,v 1.2 2007/03/06 16:31:55 fisyak Exp $
+//$Id: LaserEvent.h,v 1.3 2007/05/09 13:36:44 fisyak Exp $
 
 #ifndef Laser_Event
 #define Laser_Event
@@ -18,9 +18,10 @@
 #include "TClonesArray.h"
 #include "TMath.h"
 #include "LaserBeams.h"
-#include <Stiostream.h>
+#include "Stiostream.h"
 #include "StThreeVectorF.hh"
 #include "StHelixModel.h"
+#include "TString.h"
 #ifdef __CINT__
 class StPrimaryVertex;
 class StTrack;
@@ -28,6 +29,25 @@ class StTrack;
 #include "StPrimaryVertex.h"
 #include "StTrack.h"
 #endif
+class LaserRaft : public TObject {
+ public: 
+  LaserRaft() {}
+  Int_t Sector, Raft, Bundle, Mirror;
+  StThreeVectorD XyzL;
+  StThreeVectorD XyzU;
+  StThreeVectorD dirL;
+  StThreeVectorD dirU;
+  Double_t Theta, Phi; // [rad]
+  //  Double_t psi, dpsi, tanl, dtanl, xl, dxL, yl, dyL, zl, dzl;
+  Char_t *Name;
+  virtual void Print(const Option_t* opt="") const {
+	  cout << Form("Raft:%2i,%2i,%1i,%1i,%9.4f,%9.4f",
+		       Sector, Raft, Bundle, Mirror, Theta, Phi) 
+	       << " XyzL: " << XyzL << " U: " << XyzU
+	       << endl;
+  }
+  ClassDef(LaserRaft,1)
+};
 class  FitDV : public TObject {
  public:
   FitDV() {Clear();}
@@ -45,24 +65,37 @@ class  FitDV : public TObject {
   Double32_t doffset;
   Double32_t dslope;
   Double32_t chisq;
+  virtual void Print(const Option_t* opt="") const {
+    cout << Form("FitDV:%5i,%2i,%9.4f,%9.4f,%9.4f,%9.4f,%9.4,%9.4f,%9.4f,%9.4f,%9.4f,%9.4",
+		 N, Sector, xM, yM, x2M, y2M, xyM, offset, slope, doffset, dslope, chisq) 
+	 << endl;
+    
+  }
   ClassDef(FitDV,1)    
 };
 class  LaserB {
  public:
-  LaserB(const Raft_t &laser);
-  LaserB() : IsValid(1), Sector(0), Raft(0), Bundle(0), Mirror(0),  XyzL(), Theta(0), Phi(0),  
-    DirL(1,0,0), XyzG(0,0,0), ThetaG(0), PhiG(0) {}
+  LaserB(const LaserRaft &laser);
+  LaserB() : IsValid(1), Sector(0), Raft(0), Bundle(0), Mirror(0),   
+    Theta(0), Phi(0), ThetaG(0), PhiG(0) {}
   virtual ~LaserB() {}
   Int_t IsValid;
   Int_t Sector, Raft, Bundle, Mirror;
-  StThreeVectorD XyzL; // [cm]  in TPC
-  Double_t Theta, dPhi; // [rad] in TPC
-  Double_t Phi;
-  StThreeVectorD DirL;
   StThreeVectorD XyzG; // [cm]  in GCS
-  StThreeVectorD DirG;
+  StThreeVectorD XyzL; // [cm]  in TPC
+  StThreeVectorD XyzU; // [cm]  in raft
+  StThreeVectorD dirG;
+  StThreeVectorD dirL;
+  StThreeVectorD dirU;
+  Double_t Theta,  Phi;
   Double_t ThetaG, PhiG; // in GCS
-  Double_t psi, dpsi, tanl, dtanl, xl, dxL, yl, dyL, zl, dzl;
+  virtual void Print(const Option_t* opt="") const {
+    cout << "LaserB:" << IsValid << " S/R/B/M = " << Sector << "/" << Raft << "/" << Bundle << "/" << Mirror
+	 << " xyz U: " << XyzU << " L: " << XyzL << " G: " << XyzG << endl;
+    cout << "\tdir U: " << dirU << " L: " << dirL << " G: " << dirG << endl;
+    cout << "\tTheta L: " << Theta << " G: " << ThetaG << " Phi L: " << Phi << " G: " << PhiG 
+	 << endl;
+  }
   ClassDef(LaserB,2)
 };
 
@@ -120,6 +153,10 @@ class Zees : public TObject {
   Double32_t dP; // drift distance for prediction; dP = |zE - zP|;
   Double32_t tD; // drift time for track at mirror tD = dP/v
   Double32_t tL; // light delay time tL = (zE - zL)/c;
+  virtual void Print(const Option_t* opt="") const {
+    cout << Form("Zees:%9.4f,%9.4f,%9.4f,%9.4f,%9.4f",zP, zL, dP, tD, tL)
+	 << endl;
+  }
   ClassDef(Zees,1)
 };
 
@@ -132,13 +169,14 @@ class Vertex : public TObject {
   StThreeVectorD Xyz;
   StThreeVectorD XyzL;
   UInt_t         numberOfDaughter;
-  ClassDef(Vertex,1)
+  virtual void Print(const Option_t* opt="") const {
+    cout << "Vertex: WE = " << WestEast << " XYZ L: " << XyzL << " G: " << Xyz << " Nd " << numberOfDaughter << endl;
+  }    
+  ClassDef(Vertex,1) 
 };
 
-
 class Track : public TObject {
-
-public:
+ public:
   Int_t          Flag;// 0 there no is match between track and laser; 1 if it is  matched, 2 primary track 
   // StVertex
   StVertexId     mType;
@@ -153,24 +191,40 @@ public:
   // StTrackFitTraits
   UShort_t       mNumberOfFitPointsTpc;
   UShort_t       mPrimaryVertexUsedInFit;
-  
+#if 1    
   Int_t          fNdEdx;      // Number of points used in dE/dx calc 
   Float_t        fdEdx;      
+#endif
   StHelixModel   fgeoIn;
   StHelixModel   fgeoOut;
   Double32_t     fTheta;
   Double32_t     fPhi;
-  LaserB         Laser;
   StThreeVectorD XyzP; // laser prediction on the mirror in GCS
   StThreeVectorD XyzPL;// laser prediction on the mirror in TPC CS
+  StThreeVectorD XyzPU;// laser in raft coordinate system 
+  StThreeVectorD dirP; // laser prediction on the mirror in GCS
+  StThreeVectorD dirPL;// laser prediction on the mirror in TPC CS
+  StThreeVectorD dirPU;// laser in raft coordinate system 
+  StThreeVectorD dU;
   Double32_t     thePath;
+  LaserB         Laser;
   Double32_t     dPhi;
-  Double32_t     dDip;
-public:
+  Double32_t     dTheta;
+ public:
   Track() {};
   Track(Int_t sector, StTrack *track, LaserB *laser = 0);
   virtual ~Track() { }
   Int_t Matched();
+  virtual void Print(const Option_t* opt="") const {
+    cout << "Track F: " << Flag << " Vtx: " << Vertex << " Sec/Key = " << mSector << "/" << mKey << endl;
+    cout << "\tgeoIn pxyz " << fgeoIn.momentum() << " geoIn xyz " << fgeoIn.origin() << endl;
+    cout << "\tgeoOut pxyz " << fgeoOut.momentum() << " geoOut xyz " << fgeoOut.origin() << endl;
+    cout << "\tTheta " << fTheta << " Phi " << fPhi << endl;
+    cout << "\tXyzP U: " << XyzPU  << " L: " << XyzPL << " G: " << XyzP << endl; 
+    cout << "\tdU : " << dU << endl;
+    Laser.Print();
+    cout << "\tdTheta " << dTheta << " dPhi " << dPhi << endl;
+  }
   ClassDef(Track,1)  //An expanded tpt_track rep of a laser track. 
 };
 class LaserEvent : public TObject {
