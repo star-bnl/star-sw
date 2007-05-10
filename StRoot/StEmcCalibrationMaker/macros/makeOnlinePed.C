@@ -80,14 +80,7 @@ bool processFile(char* line, char* dir)
 	return true;
 }
 
-void makeOnlinePed(char* list = "./runlist.txt"
-		, bool isList = true
-		, Int_t nevents = 2000
-		, Bool_t saveDb = true
-		, Bool_t saveTables = true
-		, Bool_t compareLastTableDB = false
-		, Float_t minPedDiffDB = 1.0
-		) {
+void makeOnlinePed(char* list = "./runlist.txt", bool isList = true) {
     TDatime startTime;
     TStopwatch timer;
     cout << "Started: " << startTime.AsSQLString() << endl;
@@ -101,6 +94,42 @@ void makeOnlinePed(char* list = "./runlist.txt"
     TString lastTablePathStr = gSystem->Getenv("EMCONLINE_PED_LASTTABLES_DIR");
     TString tempPathStr = gSystem->Getenv("EMCONLINE_PED_TEMP_DIR");
     TString pedCrateFilenameFormatStr = gSystem->Getenv("CRATE_PEDESTAL_FILES_FORMAT");
+    TString bemcStatusStr = gSystem->Getenv("EMCONLINE_PED_BEMCSTATUS_FILE");
+
+    TString neventsStr = gSystem->Getenv("EMCONLINE_PED_NEVENTS");
+    Int_t nevents = neventsStr.Atoi();
+    TString saveDbStr = gSystem->Getenv("EMCONLINE_PED_SAVEDB");
+    Bool_t saveDb = (saveDbStr == "true");
+    TString saveTablesStr = gSystem->Getenv("EMCONLINE_PED_SAVETABLES");
+    Bool_t saveTables = (saveTablesStr == "true");
+    TString compareLastTableDBStr = gSystem->Getenv("EMCONLINE_PED_COMPARELASTTABLEDB");
+    Bool_t compareLastTableDB = (compareLastTableDBStr == "true");
+    TString useBemcStatusStr = gSystem->Getenv("EMCONLINE_PED_USEBEMCSTATUS");
+    Bool_t useBemcStatus = (useBemcStatusStr == "true");
+
+    // BTOW
+    TString minPedDiffDBStr_BTOW = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFDB_BTOW");
+    Float_t minPedDiffDB_BTOW = minPedDiffDBStr_BTOW.Atof();
+    TString minPedDiffNumStr_BTOW = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFNUM_BTOW");
+    Int_t minPedDiffNum_BTOW = minPedDiffNumStr_BTOW.Atoi();
+    TString minPedDiffMinTimeStr_BTOW = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFMINTIME_BTOW");
+    Float_t minPedDiffMinTime_BTOW = minPedDiffMinTimeStr_BTOW.Atof();
+
+    // BPRS
+    TString minPedDiffDBStr_BPRS = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFDB_BPRS");
+    Float_t minPedDiffDB_BPRS = minPedDiffDBStr_BPRS.Atof();
+    TString minPedDiffNumStr_BPRS = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFNUM_BPRS");
+    Int_t minPedDiffNum_BPRS = minPedDiffNumStr_BPRS.Atoi();
+    TString minPedDiffMinTimeStr_BPRS = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFMINTIME_BPRS");
+    Float_t minPedDiffMinTime_BPRS = minPedDiffMinTimeStr_BPRS.Atof();
+
+    // BSMD
+    TString minPedDiffDBStr_BSMD = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFDB_BSMD");
+    Float_t minPedDiffDB_BSMD = minPedDiffDBStr_BSMD.Atof();
+    TString minPedDiffNumStr_BSMD = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFNUM_BSMD");
+    Int_t minPedDiffNum_BSMD = minPedDiffNumStr_BSMD.Atoi();
+    TString minPedDiffMinTimeStr_BSMD = gSystem->Getenv("EMCONLINE_PED_MINPEDDIFFMINTIME_BSMD");
+    Float_t minPedDiffMinTime_BSMD = minPedDiffMinTimeStr_BSMD.Atof();
 
     // Load needed shared libs
     gSystem->Load(EVP_READER_LIB);
@@ -119,17 +148,31 @@ void makeOnlinePed(char* list = "./runlist.txt"
  			
     memory.PrintMem(0);
     NEVENTS = nevents;
+
     cout << "Backup directory: " << savePathStr << endl;
     cout << "Backup tables directory: " << tablesPathStr << endl;
     cout << "Last tables directory: " << lastTablePathStr << endl;
     cout << "Temp directory: " << tempPathStr << endl;
     cout << "Event pool: " << dirStr << endl;	    
+    cout << "bemcStatus.txt: " << bemcStatusStr << endl;	    
     cout << "Number of events to process: " << NEVENTS << endl;
     cout << "Save tables to DB: " << saveDb << endl;
     cout << "Save tables locally: " << saveTables << endl;
     cout << "Compare to the last saved table: " << compareLastTableDB << endl;
-    cout << "Min ped diff from the last table: " << minPedDiffDB << endl;
+    cout << "Use bemcStatus.txt: " << useBemcStatus << endl;
     cout << "Ped crate filename format: " << pedCrateFilenameFormatStr << endl;
+    cout << "BTOW:" << endl;
+    cout << "Min ped diff from the last table: " << minPedDiffDB_BTOW << endl;
+    cout << "Min ped diff num from the last table: " << minPedDiffNum_BTOW << endl;
+    cout << "Min time from the last table: " << minPedDiffMinTime_BTOW << endl;
+    cout << "BPRS:" << endl;
+    cout << "Min ped diff from the last table: " << minPedDiffDB_BPRS << endl;
+    cout << "Min ped diff num from the last table: " << minPedDiffNum_BPRS << endl;
+    cout << "Min time from the last table: " << minPedDiffMinTime_BPRS << endl;
+    cout << "BSMD:" << endl;
+    cout << "Min ped diff from the last table: " << minPedDiffDB_BSMD << endl;
+    cout << "Min ped diff num from the last table: " << minPedDiffNum_BSMD << endl;
+    cout << "Min time from the last table: " << minPedDiffMinTime_BSMD << endl;
     
     // create chain ///////////////////////////////////////////////    
     chain = new StChain("StChain"); 
@@ -162,8 +205,22 @@ void makeOnlinePed(char* list = "./runlist.txt"
 		ped[i]->setLastTablePath(lastTablePathStr.Data());
 		ped[i]->setSaveTables(saveTables);
 		ped[i]->setCompareLastTableDB(compareLastTableDB);
-		ped[i]->setPedDiffSaveDB(minPedDiffDB);
 		ped[i]->setPedCrateFilenameFormat(pedCrateFilenameFormatStr.Data());
+		ped[i]->setBemcStatusFilename(bemcStatusStr.Data());
+		ped[i]->setUseBemcStatus(useBemcStatus);
+		if (i == 0) {
+		    ped[i]->setPedDiffSaveDB(minPedDiffDB_BTOW);
+		    ped[i]->setPedDiffSaveNum(minPedDiffNum_BTOW);
+		    ped[i]->setPedDiffSaveMinTime(minPedDiffMinTime_BTOW);
+		} else if (i == 1) {
+		    ped[i]->setPedDiffSaveDB(minPedDiffDB_BPRS);
+		    ped[i]->setPedDiffSaveNum(minPedDiffNum_BPRS);
+		    ped[i]->setPedDiffSaveMinTime(minPedDiffMinTime_BPRS);
+		} else if ((i == 2) || (i == 3)) {
+		    ped[i]->setPedDiffSaveDB(minPedDiffDB_BSMD);
+		    ped[i]->setPedDiffSaveNum(minPedDiffNum_BSMD);
+		    ped[i]->setPedDiffSaveMinTime(minPedDiffMinTime_BSMD);
+		}
 	}
 
     memory.PrintMem(0);

@@ -31,8 +31,12 @@ protected:
     TString                     mLastTablePath;
     Bool_t			mSaveTables;
     Float_t			mPedDiffSaveDB;
+    Int_t			mPedDiffSaveNum;
+    Float_t			mPedDiffSaveMinTime;
     Bool_t 			mCompareLastTableDB;
     TString			mPedCrateFilenameFormat;
+    TString                     mBemcStatusFilename;
+    Bool_t 			mUseBemcStatus;
                             
 public:
      
@@ -69,11 +73,23 @@ public:
               Float_t           getPedDiffSaveDB() const {return mPedDiffSaveDB;}
               void              setPedDiffSaveDB(Float_t diff) {mPedDiffSaveDB = diff;}
 
+    	      Int_t             getPedDiffSaveNum() const {return mPedDiffSaveNum;}
+              void              setPedDiffSaveNum(Int_t num) {mPedDiffSaveNum = num;}
+
+              Float_t           getPedDiffSaveMinTime() const {return mPedDiffSaveMinTime;}
+              void              setPedDiffSaveMinTime(Float_t diff) {mPedDiffSaveMinTime = diff;}
+
 	      Bool_t 		getCompareLastTableDB() const {return mCompareLastTableDB;}
 	      void 		setCompareLastTableDB(Bool_t cmp) {mCompareLastTableDB = cmp;}
 
 	      const Char_t     *getPedCrateFilenameFormat() const {return mPedCrateFilenameFormat;}
 	      void              setPedCrateFilenameFormat(const Char_t *fmt) {mPedCrateFilenameFormat = fmt ? fmt : "";}
+
+	      const Char_t     *getBemcStatusFilename() const {return mBemcStatusFilename;}
+	      void              setBemcStatusFilename(const Char_t *name) {mBemcStatusFilename = name ? name : "";}
+
+	      Bool_t 		getUseBemcStatus() const {return mUseBemcStatus;}
+	      void 		setUseBemcStatus(Bool_t use) {mUseBemcStatus = use;}
 	    
               void              calcPedestals();
               void              saveToDb(const Char_t *timestamp, const Char_t *tableFilename = 0) const;
