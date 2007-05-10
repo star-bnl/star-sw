@@ -1,6 +1,12 @@
-* $Id: g2t_get_event.F,v 1.9 2004/08/05 16:38:05 potekhin Exp $
+* $Id: g2t_get_event.F,v 1.10 2007/05/10 19:11:32 potekhin Exp $
 *
 * $Log: g2t_get_event.F,v $
+* Revision 1.10  2007/05/10 19:11:32  potekhin
+* a) Added MSTU72, MSTU73, MSTP111 as per Spin PWG request
+* b) Removed two print statements (St_geant_Maker is a better place to report diagnostics)
+* c) Improved formatting
+* d) Separate error codes for the generic and Pythia-specific header read
+*
 * Revision 1.9  2004/08/05 16:38:05  potekhin
 * New format for the common block due to Pythia work
 *
@@ -47,12 +53,19 @@
       Parameter           (NBytPW=4)
 
       INTEGER             NUMPRIM,NUMFINS
-      common /HDRNFO/     EVSTAT,SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+      COMMON /HDRNFO/     EVSTAT,SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
       INTEGER             EVSTAT,SUB_ID,NBIN_COLL,NWE,NWW,NJETS,NREJ
+
+      COMMON/PYTNFO/ PYSTAT,PYT_ID,
+     *               MANDS,MANDT,MANDU,HARDP,COSTH,
+     *               BJOR1,BJOR2,
+     *               MSTU72,MSTU73,MSTP111
+      INTEGER        PYSTAT,PYT_ID,MSTU72,MSTU73,MSTP111
+      REAL           MANDS,MANDT,MANDU,HARDP,COSTH,BJOR1,BJOR2
 
       common /g2tevtcnt/  NUMPRIM,NUMFINS 
 *
-*     make g2t_event:
+
       G2T_GET_EVENT   = 1
       g2t_event_h.nok = 1
       Len = g2t_event_h.rbytes/NBytPW
@@ -65,36 +78,33 @@
       g2t_event(1).ge_rndm(1)         = IHEAD(3)
       g2t_event(1).ge_rndm(2)         = IHEAD(4)
 
-* --max-- was EQ.10, which was also incorrect
+* --max-- originally, it was EQ.10, which was incorrect
       if (Istat .ge. 10) then
-        g2t_event(1).eg_label         = VERT(2)    ! run number
-        g2t_event(1).event_type       = VERT(1)    ! event number
-        i  =  AMASS                                ! Awest.Aeast
-        j  = (AMASS-i)*1000+0.5
-        in = (100*i)/197                           ! west
-        ip = i-in
-        g2t_event(1).n_part_neut_west = in
-        g2t_event(1).n_part_prot_west = ip
-        jn = 100*j/197                             ! east
-        jp = j-jn
-        g2t_event(1).n_part_neut_east = jn  
-        g2t_event(1).n_part_prot_east = jp
+         g2t_event(1).eg_label         = VERT(2) ! run number
+         g2t_event(1).event_type       = VERT(1) ! event number
+         i  =  AMASS                             ! Awest.Aeast
+         j  = (AMASS-i)*1000+0.5
+         in = (100*i)/197                        ! west
+         ip = i-in
+         g2t_event(1).n_part_neut_west = in
+         g2t_event(1).n_part_prot_west = ip
+         jn = 100*j/197                          ! east
+         jp = j-jn
+         g2t_event(1).n_part_neut_east = jn  
+         g2t_event(1).n_part_prot_east = jp
 
-        g2t_event(1).n_run            = MOTH(1)
-        g2t_event(1).b_impact         = PP(1)
-        g2t_event(1).phi_impact       = PP(2)
+         g2t_event(1).n_run            = MOTH(1)
+         g2t_event(1).b_impact         = PP(1)
+         g2t_event(1).phi_impact       = PP(2)
       endif
+
       g2t_event(1).n_track_eg_fs      = NUMPRIM
       g2t_event(1).n_track_prim       = NUMFINS
       g2t_event(1).prim_vertex_p      = 1
       g2t_event(1).time_offset        = 0
 
-* Adding the subprocess ID and other additional info, to the event struct:
-* Note that the following call fills out a few common blocks used as
-* a temporary container. Only one of those is used right here, others
-* can be accessed from a diferent location
-
-      call MHEADRD() ! Fetch data from Zebra and into the common blocks
+* event header and Pythia-specific (if it exists) data read from Zebra and put into the common blocks
+      call MHEADRD()
 
       if(evStat.ge.0) then
          g2t_event(1).subprocess_id = SUB_ID
@@ -103,7 +113,13 @@
          g2t_event(1).n_wounded_west= NWW
          g2t_event(1).njets         = NJETS
          g2t_event(1).n_rejected    = NREJ
-* now, we reserve the second decimal bit to signal the success of Pythia read:
+      endif
+
+* Useful debug diagnostic
+*     write(*,*) 'EVSTAT,PYSTAT:',EVSTAT,',',PYSTAT
+
+* Check the success of the Pythia header read procedure: (we reserve another decimal bit to signal the success)
+      if(PYSTAT.eq.0) then
          G2T_GET_EVENT=G2T_GET_EVENT+10
       endif
 
