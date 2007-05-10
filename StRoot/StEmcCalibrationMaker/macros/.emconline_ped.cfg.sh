@@ -21,6 +21,8 @@ export EMCONLINE_PED_FILELIST_FILE=${EMCONLINE_PED_DIR}/runlist.emconline_ped.tx
 export EMCONLINE_PED_FILELIST_VETO_FILE=${EMCONLINE_PED_DIR}/runlist_veto.emconline_ped.txt
 # Summary from the last run
 export EMCONLINE_PED_LASTRUN_FILE=${EMCONLINE_PED_DIR}/LAST_TIME_RUN.emconline_ped
+# Local copy of bemcStatus.txt
+export EMCONLINE_PED_BEMCSTATUS_FILE=${EMCONLINE_PED_DIR}/bemcStatus.txt
 
 # Directory for the backup histograms
 export EMCONLINE_PED_BACKUP_DIR=${EMCONLINE_PED_DIR}/backup.emconline_ped
@@ -51,8 +53,30 @@ export EMCONLINE_PED_LASTDAYONLY=false
 export EMCONLINE_PED_USEVETOFILE=true
 # Compare peds to the last saved DB table before saving?
 export EMCONLINE_PED_COMPARELASTTABLEDB=true
-# Min ped difference from the last saved table, for table to be saved, in ADC counts
-export EMCONLINE_PED_MINPEDDIFFDB=2.0
+# Ignore towers masked out in bemcStatus.txt?
+export EMCONLINE_PED_USEBEMCSTATUS=true
+# Deliver new pedestal files to EMCONLINE_SLOWCTRL_PEDMON_DIR?
+export EMCONLINE_PED_DELIVERPEDFILES=true
+
+# BTOW
+# Min ped difference from the last saved table, for table to be saved, in terms of RMS
+export EMCONLINE_PED_MINPEDDIFFDB_BTOW=2.0
+# Number of towers that must have ped difference above minimum to save the table
+export EMCONLINE_PED_MINPEDDIFFNUM_BTOW=3
+# Min time period after which the table must be saved
+export EMCONLINE_PED_MINPEDDIFFMINTIME_BTOW=86400
+
+# Same for BPRS
+# No matter how pedestals change, save once per day
+export EMCONLINE_PED_MINPEDDIFFDB_BPRS=100000
+export EMCONLINE_PED_MINPEDDIFFNUM_BPRS=100000
+export EMCONLINE_PED_MINPEDDIFFMINTIME_BPRS=86400
+
+# Same for BSMD
+# No matter how pedestals change, save once per day
+export EMCONLINE_PED_MINPEDDIFFDB_BSMD=100000
+export EMCONLINE_PED_MINPEDDIFFNUM_BSMD=100000
+export EMCONLINE_PED_MINPEDDIFFMINTIME_BSMD=86400
 
 # Update the desktop icon when the current status changes?
 export EMCONLINE_PED_UPDATEDESKTOPICON=true

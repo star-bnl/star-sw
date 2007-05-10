@@ -27,11 +27,16 @@ StEmcPedestalMaker::StEmcPedestalMaker(const Char_t *name)
     setMaxTracks(100);
     mLastPedDate = 2000;
     mLastPedTime = 0;
+
     setNPedEvents(2000);
     setSaveTables(false);
-    setPedDiffSaveDB(1.0);
+    setPedDiffSaveDB(2.0);
+    setPedDiffSaveNum(3);
+    setPedDiffSaveMinTime(60 * 60 * 24);
     setCompareLastTableDB(false);
     setPedCrateFilenameFormat("pedestal_crate0x%02x.dat");
+    setBemcStatusFilename("bemcStatus.txt");
+    setUseBemcStatus(true);
 }
 //_____________________________________________________________________________
 StEmcPedestalMaker::~StEmcPedestalMaker()
@@ -173,7 +178,7 @@ void StEmcPedestalMaker::calcPedestals()
     }
     if(h) {delete h; h = 0;}
   }
-  cout <<"nGood = "<<ngood<<"; nBad = "<<nbad<<": neg Ped = "<<nped<<", bad rms = "<<nrms<<", large res = "<<nchi << ", no data " << nodata <<endl;
+  cout <<"nGood = "<<ngood<<"; nBad = "<<nbad<<": neg Ped = "<<nped<<", bad rms = "<<nrms<<", large res = "<<nchi << ", no data = " << nodata <<endl;
 }
 //_____________________________________________________________________________
 void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFilename) const {
@@ -187,7 +192,9 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
     TString lastTableFilename = getLastTablePath();
     lastTableFilename += "/";
     lastTableFilename += n[getDetector() - 1];
-    lastTableFilename += ".last.root";
+    lastTableFilename += ".last";
+    TString lastTableTimestampFilename = lastTableFilename + ".timestamp";
+    lastTableFilename += ".root";
 
     if (getCompareLastTableDB()) {
     cout << "Comparing to the last table file " << lastTableFilename << endl;
@@ -195,6 +202,26 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
     if (lastTableFile && lastTableFile->IsOpen()) {
 	cout << "Opened last table file " << lastTableFilename << endl;
 	saveThisTable = false;
+	ifstream ifstr_timestamp(lastTableTimestampFilename);
+	if (ifstr_timestamp.good()) {
+	    Char_t lastTableTimestampStr[2048];
+	    ifstr_timestamp.getline(lastTableTimestampStr, 2048);
+	    ifstr_timestamp.close();
+	    TDatime tsLast(&lastTableTimestampStr[0]);
+	    TDatime tsCurrent(timeStamp);
+    	    UInt_t timeLast = tsLast.Convert();
+    	    UInt_t timeCurrent = tsCurrent.Convert();
+	    Double_t diffTime = difftime(timeCurrent, timeLast);
+	    cout << "Timestamps:  Last: " << lastTableTimestampStr << ", " << tsLast.AsSQLString() << endl;
+	    cout << "Timestamps:  Current: " << timeStamp << ", " << tsCurrent.AsSQLString() << "; Diff: " << diffTime << endl;
+	    if (diffTime > this->getPedDiffSaveMinTime()) {
+		saveThisTable = true;
+		cout << "Saving this table because min time passed" << endl;
+	    }
+	} else {
+	    saveThisTable = true;
+	    cout << "Saving this table because cannot open last timestamp file " << lastTableTimestampFilename << endl;
+	}
 	const emcPed_st *ped_t_st = 0;
 	const smdPed_st *ped_s_st = 0;
 	if (getDetector() < 3) {
@@ -205,7 +232,48 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 	    ped_s_st = pedT ? pedT->GetTable() : 0;
 	}
 	Float_t maxPedDiff = 0;
-	for (Int_t i = 0;(i < getNChannel())/* && (!saveThisTable)*/;i++) {
+	Float_t numPedDiff = 0;
+	Int_t *bemcStatus = 0;
+	if ((getDetector() == 1) && this->getUseBemcStatus() && this->getBemcStatusFilename()) {
+	    TString bemcStatusFilename = this->getBemcStatusFilename();
+	    ifstream ifstr(bemcStatusFilename);
+	    if (ifstr.good()) {
+    		cout << "Reading BEMC trigger status file " << bemcStatusFilename << endl;
+	    } else {
+    		cout << "Cannot open BEMC trigger status file! " << bemcStatusFilename << endl;
+	    }
+	    if (ifstr.good()) {
+		bemcStatus = new Int_t[4800];
+		if (bemcStatus) {
+		    for (Int_t i = 4800;i;bemcStatus[--i] = 1);
+		    while (ifstr.good()) {
+    			string token;
+    			do {
+			    if (token == "#") {
+				char dummy[4096];
+				ifstr.getline(dummy, sizeof(dummy));
+			    }
+			    ifstr >> token;
+			} while (ifstr.good() && (token != "SoftId"));
+    			if (ifstr.good()) {
+			    if (token == "SoftId") {
+				int softId, crate, crateSeq, unmaskTower, unmaskHT, unmaskPA;
+				float ped;
+				ifstr >> softId >> crate >> crateSeq >> unmaskTower >> unmaskHT >> unmaskPA >> ped;
+				if ((softId >= 1) && (softId <= 4800)) {
+				    bemcStatus[softId - 1] = (unmaskTower && (unmaskHT || unmaskPA)) ? 1 : 0;
+				    if (bemcStatus[softId - 1] != 1) {
+					//cout << "tower " << softId << " masked out: " << unmaskTower << " " << unmaskHT << " " << unmaskPA << endl;
+				    }
+	    			}
+			    }
+			}
+		    }
+    		}
+		ifstr.close();
+	    }
+	}
+	for (Int_t i = 0;i < getNChannel();i++) {
 	    Int_t id = i + 1;
 	    Float_t pedNew = getPedestal(id);
 	    Float_t rmsNew = getRms(id);
@@ -215,7 +283,6 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 	    Float_t rmsLast = 0;
 	    Float_t chiLast = 0;
 	    Int_t statusLast = 0;
-	    Bool_t saveThisPed = false;
 	    if (getDetector() < 3) {
 		if (ped_t_st) {
 		    pedLast = (short)ped_t_st->AdcPedestal[i] / 100.0;
@@ -232,15 +299,22 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 	    }
 	    Float_t pedDiff = pedNew - pedLast;
 	    if (maxPedDiff < TMath::Abs(pedDiff)) maxPedDiff = TMath::Abs(pedDiff);
-	    if ((statusLast == 1) || (statusNew == 1)) {
-		if (TMath::Abs(pedDiff) >= getPedDiffSaveDB()) {
-		    saveThisPed = true;
-		    cout << "det " << getDetector() << ", id " << id << ": ped diff " << pedDiff << ", last " << pedLast << " " << rmsLast << " " << (Int_t)statusLast << ", new " << pedNew << " " << rmsNew << " " << (Int_t)statusNew << endl;
+	    if (/*(statusLast == 1) || */(statusNew == 1)) {
+		if (TMath::Abs(pedDiff) >= TMath::Abs(getPedDiffSaveDB() * rmsNew)) {
+		    TString statusLabel = "";
+		    if (!bemcStatus || ((getDetector() == 1) && bemcStatus && (id >= 1) && (id <= 4800) && (bemcStatus[id-1] == 1))) {
+			numPedDiff++;
+		    } else {
+			statusLabel = " (bad in trigger)";
+		    }
+		    cout << "det " << getDetector() << ", id " << id << statusLabel << ": ped diff " << pedDiff << ", last " << pedLast << " " << rmsLast << " " << (Int_t)statusLast << ", new " << pedNew << " " << rmsNew << " " << (Int_t)statusNew << endl;
 		}
 	    }
-	    saveThisTable |= saveThisPed;
 	}
+	if (bemcStatus) delete [] bemcStatus; bemcStatus = 0;
 	cout << "max ped diff " << maxPedDiff << endl;
+	cout << "num ped diff " << numPedDiff << endl;
+	saveThisTable |= (numPedDiff >= this->getPedDiffSaveNum());
 	lastTableFile->Close();
 	if (!saveThisTable) cout << "This table does not need to be saved" << endl;
     }
@@ -332,6 +406,8 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 	    }
 	    f->Close();
 	    delete f; f = 0;
+	    ofstream ofstr_timestamp(lastTableTimestampFilename);
+	    ofstr_timestamp << timeStamp << endl;
 	}
 	if (getDetector() == 1) {
 	    StEmcDecoder *d = new StEmcDecoder();

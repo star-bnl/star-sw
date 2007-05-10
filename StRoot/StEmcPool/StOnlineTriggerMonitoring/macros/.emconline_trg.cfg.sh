@@ -101,11 +101,15 @@ if [[ "${EMCONLINE_SLOWCTRL_DSMMASK_DIR}" == "" ]] ; then export EMCONLINE_SLOWC
 # Directory that contains EMC Pplots installation
 if [[ "${EMCONLINE_PPLOTS_DIR}" == "" ]] ; then export EMCONLINE_PPLOTS_DIR='/home/emc/online/emc/pplots' ; fi
 
+# Directory that contains pedestal monitoring installation
+if [[ "${EMCONLINE_PED_DIR}" == "" ]] ; then export EMCONLINE_PED_DIR='/home/emc/online/emc/pedestal' ; fi
+
 if [[ "${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}" == "" ]] ; then export EMCONLINE_TRG_BEMCSTATUS_CONSUMERS="\
 staruser@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
 bemc@evp.starp.bnl.gov:/home_local/bemc \
 bemc@evp.starp.bnl.gov:/evp/a \
 ${EMCONLINE_PPLOTS_DIR} \
+${EMCONLINE_PED_DIR} \
 " ; fi
 
 if [[ "${SCP}" == "" ]] ; then export SCP='/home/emc/online/emc/scp' ; fi

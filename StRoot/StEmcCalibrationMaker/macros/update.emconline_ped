@@ -147,7 +147,7 @@ then
 	    echo ${FILE} > ${FILELIST}.tmp
 	    echo "Running over ${FILE}" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
 	    update_desktop_icon_ped
-	    if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}.tmp\",${LIST},${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES},${EMCONLINE_PED_COMPARELASTTABLEDB},${EMCONLINE_PED_MINPEDDIFFDB}\))
+	    if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}.tmp\",${LIST}\))
 	    then
 		if [[ "${EMCONLINE_PED_USEVETOFILE}" == "true" ]]
 		then
@@ -158,7 +158,7 @@ then
 	    rm -f ${FILELIST}.tmp
 	done
 else
-	if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}\",${LIST},${EMCONLINE_PED_NEVENTS},${EMCONLINE_PED_SAVEDB},${EMCONLINE_PED_SAVETABLES},${EMCONLINE_PED_COMPARELASTTABLEDB},${EMCONLINE_PED_MINPEDDIFFDB}\))
+	if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}\",${LIST}\))
 	then
 	    if [[ "$LIST" == "true" ]]
 	    then
@@ -187,7 +187,7 @@ then
 	fi
     done
     
-    if [[ "${SAVE_ANY_FILES}" == "true" ]]
+    if [[ ( "${SAVE_ANY_FILES}" == "true" ) && ( "${EMCONLINE_PED_DELIVERPEDFILES}" == "true" ) ]]
     then
 	echo "Delivering new crate pedestal files"
 	echo "Delivering new crate pedestal files" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
