@@ -1,5 +1,10 @@
-// $Id: St_geant_Maker.cxx,v 1.117 2007/04/28 17:56:12 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.118 2007/05/10 19:15:29 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.118  2007/05/10 19:15:29  potekhin
+// Improved handling of the Pythia event header translation,
+// replaced a print statement with a logger call, plus
+// a few cosmetic changes
+//
 // Revision 1.117  2007/04/28 17:56:12  perev
 // Redundant StChain.h removed
 //
@@ -903,18 +908,25 @@ Int_t St_geant_Maker::Make()
   St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
   m_DataSet->Add(g2t_track);
   
-  iRes = g2t_get_kine(g2t_vertex,g2t_track); if (Debug() > 1) {g2t_vertex->Print(0,10); g2t_track->Print(0,10);}
-  iRes = g2t_get_event(g2t_event);   if (Debug() > 1) g2t_event->Print(0,10);
+  iRes = g2t_get_kine (g2t_vertex,g2t_track);
+  if (Debug() > 1) {
+    g2t_vertex->Print(0,10);
+    g2t_track->Print(0,10);
+  }
 
-  if(iRes>1) { // means there was Pythia information detected in the input
+  iRes = g2t_get_event(g2t_event);
+  if (Debug() > 1) {
+    g2t_event->Print(0,10);
+  }
+
+  if(iRes>=10) { // means there was Pythia information detected in the input, see g2t_get_event code
     St_g2t_pythia *g2t_pythia = new St_g2t_pythia("g2t_pythia",1); // prepare an empty g2t_pythia
     m_DataSet->Add(g2t_pythia);
-    cout<<"---------------------------- pythia ready"<<endl;
+    gMessMgr->Info() << "Pythia event header captured" << endm;
     iRes = g2t_get_pythia(g2t_pythia);
   }
   
-  // --max--
-  // Filling the event header, addition due to the new coding
+  // --max-- Filling the event header, addition due to the new coding
   if(fEvtHddr) {
     fEvtHddr->SetAEast((*g2t_event)[0].n_wounded_east);
     fEvtHddr->SetAWest((*g2t_event)[0].n_wounded_west);
