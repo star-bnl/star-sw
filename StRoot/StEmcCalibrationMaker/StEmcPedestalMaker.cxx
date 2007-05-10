@@ -422,7 +422,8 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 		    Int_t softId = -1;
             	    if (d) d->GetTowerIdFromCrate(crate, ch, softId);
             	    if ((softId >= 1) && (softId <= 4800)) {
-	    		ofstr << ch << " " << getPedestal(softId) << " " << getRms(softId) << endl;
+	    		TString line = Form("%i %.2f %.2f", ch, getPedestal(softId), getRms(softId));
+			ofstr << line.Data() << endl;
 		    }
 		}
 	        ofstream ofstr_timestamp(pedCrateTimestampFilename);
