@@ -42,12 +42,17 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2004Y","","","db,detDb"  ,"","","Year4 full Barrel+TPC backplane+rad length+SVT copper cable",kFALSE},
   {"RY2004c","","","db,detDb"                                         ,"","","Year4 geometry fixed",kFALSE},
   {"RY2004d","","","db,detDb"                                  ,"","","Year4 geometry with ne wSVT",kFALSE},
+
   {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005x","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005b","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005c","","","db,detDb"                                      ,"","","the best Year5 geometry",kFALSE},
-  {"RY2005d","","","db,detDb"                                             ,"","","y2005c + new SVT",kFALSE},
+  {"RY2005d","","","db,detDb"                                             ,"","","y2005d + new SVT",kFALSE},
+  {"RY2005e","","","db,detDb"                                             ,"","","y2005e + new SVT",kFALSE},
+  {"RY2005f","","","db,detDb"                                             ,"","","y2005f + new SVT",kFALSE},
+
   {"RY2006","","","db,detDb"                                             ,"","","y2006 for p+p run",kFALSE},
+
   {"RY2007","","","db,detDb"                                            ,"","","y2007 for AuAu run",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
@@ -79,7 +84,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Y2005b" ,"","","db,detDb","","",        "Year5 geometry + corrections SVT, FTPC gas + SSD y4c", kFALSE},
   {"Y2005c" ,"","","db,detDb","","",   "Year5 geometry + more corrections SVT, FTPC gas + SSD y4c", kFALSE},
   {"Y2005d" ,"","","db,detDb","","",                                            "y2005c + new SVT", kFALSE},
+  {"Y2005e" ,"","","db,detDb","","",                                       "y2005d + new SSD code", kFALSE},
+  {"Y2005f" ,"","","db,detDb","","",                            "y2005d + SSD code with dead area", kFALSE},
+
   {"ForceGeometry","","","","","",  "Force geometry to overwrite the geometry caming from fz-file", kFALSE},
+
   // geometry timestamps are now dynamic. Please see StChain/StMaker    
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"Ist1"    ,"","","db,detDb"                                   ,"","","Development geometry STAR",kFALSE},
