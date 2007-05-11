@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.80 2007/04/28 20:36:16 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.81 2007/05/11 23:17:11 jeromel Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -425,6 +425,26 @@ StEventMaker::makeEvent()
 			    dbTriggerId->getThreashVersion(iTrg),
 			    dbTriggerId->getPsVersion(iTrg)
 			    );
+		    }
+		}
+		
+		// Add in additional trigger ids to all levels; hack to fix prescale problem in runs 3-6
+		for (unsigned int iTrg = 0; iTrg < dbTriggerId->getAdditionalTriggerIDNumRows() ; iTrg++){
+		    // Shift the mask by daqTrigId bits to examine that bit
+		    // Tweak for warnings; saved the run/event number as an unsigned int, but for some reason StEvent is int
+		    int checkRun = dbTriggerId->getAdditionalTriggerIDRunNumber(iTrg);
+		    int checkEvent = dbTriggerId->getAdditionalTriggerIDEventNumber(iTrg);
+
+		    if (mCurrentEvent->runId() == checkRun &&
+			mCurrentEvent->id() == checkEvent )
+		    {
+			    whichTrig->addTrigger(
+				dbTriggerId->getAdditionalTriggerIDOfflineTrgId(iTrg),
+				dbTriggerId->getAdditionalTriggerIDTrgVersion(iTrg),
+				dbTriggerId->getAdditionalTriggerIDTrgNameVersion(iTrg),
+				dbTriggerId->getAdditionalTriggerIDThreashVersion(iTrg),
+				dbTriggerId->getAdditionalTriggerIDPsVersion(iTrg)
+				);
 		    }
 		}
 	    }
@@ -1774,8 +1794,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.80 2007/04/28 20:36:16 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.81 2007/05/11 23:17:11 jeromel Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.81  2007/05/11 23:17:11  jeromel
+ * Addition by J.Dunlop of random trigger (from db)
+ *
  * Revision 2.80  2007/04/28 20:36:16  perev
  * Redundant StChain.h removed
  *
