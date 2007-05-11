@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.11 2007/04/26 04:31:43 perev Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.12 2007/05/11 03:04:57 mvl Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.12  2007/05/11 03:04:57  mvl
+ * Slightly tighter quality cuts on tracks: npoint>=20, radial dca < 1.
+ * Widened the cut on close vertices to be mDcaZMax (3 cm)
+ *
  * Revision 1.11  2007/04/26 04:31:43  perev
  * More precise Chi2 calculation
  *
@@ -144,10 +148,10 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
   mBeamHelix =0;
 
-  mMinNumberOfFitPointsOnTrack = 15; 
+  mMinNumberOfFitPointsOnTrack = 20; 
   mDcaZMax = 3;     // Note: best to use integer numbers
   mMinTrack = 5;
-  mRImpactMax = 2;
+  mRImpactMax = 1.5;
 
   mMinuit = new TMinuit(3);         
   mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
@@ -506,6 +510,10 @@ StMinuitVertexFinder::fit(StEvent* event)
 	  mHelixFlags.push_back(1);
 	  
 	  Double_t path=(TMath::ATan2(-helix.ycenter(),-helix.xcenter())-helix.phase())/2/TMath::Pi();
+          if ( path < -0.5 )
+            path += 1;
+          if ( path > 0.5 )
+            path -= 1;
 	  path *= helix.h()*helix.period();
 	  StThreeVectorD tmp_pos = helix.at(path);
 	  
@@ -717,9 +725,9 @@ StMinuitVertexFinder::fit(StEvent* event)
       if (!mExternalSeedPresent && fabs(seed_z-mSeedZ[iSeed]) > mDcaZMax)
 	LOG_WARN << "Vertex walks during fits: seed was " << mSeedZ[iSeed] << ", vertex at " << seed_z << endl;
 
-      if (fabs(seed_z - old_vtx_z) < 0.1) {
+      if (fabs(seed_z - old_vtx_z) < mDcaZMax) {
 	if (mDebugLevel) 
-	  cout << "Vertices too close (<0.1). Skipping" << endl;
+	  cout << "Vertices too close (<mDcaZMax). Skipping" << endl;
 	continue;
       }
 
