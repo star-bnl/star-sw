@@ -1,6 +1,9 @@
-// $Id: StDetectorDbTriggerID.cxx,v 1.12 2006/11/29 20:53:37 fisyak Exp $
+// $Id: StDetectorDbTriggerID.cxx,v 1.13 2007/05/11 05:30:29 dunlop Exp $
 //
 // $Log: StDetectorDbTriggerID.cxx,v $
+// Revision 1.13  2007/05/11 05:30:29  dunlop
+// Add in the additionalTriggerID table
+//
 // Revision 1.12  2006/11/29 20:53:37  fisyak
 // Fix for icc
 //
@@ -14,6 +17,7 @@
 #include "StMessMgr.h"
 #include "StDetectorDbTriggerID.h"
 #include "tables/St_triggerID_Table.h"
+#include "tables/St_additionalTriggerID_Table.h"
 #include "tables/St_trigPrescales_Table.h"
 #include "tables/St_L0TriggerInfo_Table.h"
 #include "tables/St_defaultTrgLvl_Table.h"
@@ -41,6 +45,8 @@ StDetectorDbTriggerID* StDetectorDbTriggerID::instance()
     // the array memeory changed althoug the TTable stays the same
     if(sInstance->mIDTable)
 	sInstance->mTriggerID = (triggerID_st*)(sInstance->mIDTable->GetArray());
+    if(sInstance->mAdditionalTriggerIDTable)
+	sInstance->mAdditionalTriggerID = (additionalTriggerID_st*)(sInstance->mAdditionalTriggerIDTable->GetArray());
     if(sInstance->mSTable)
 	sInstance->mTrigPrescales = (trigPrescales_st*)(sInstance->mSTable->GetArray());
     if(sInstance->mL0Table)
@@ -72,6 +78,14 @@ void StDetectorDbTriggerID::update(StMaker* maker){
 		mIDNumRows = mIDTable->GetNRows();
 		mTriggerID = (triggerID_st*)(mIDTable->GetArray());
 	    }
+	    // TTable of additionalTriggerID
+	    mAdditionalTriggerIDTable = dynamic_cast<TTable*>(dataSet->Find("additionalTriggerID"));
+	    
+	    if(mAdditionalTriggerIDTable){
+		mAdditionalTriggerIDNumRows = mAdditionalTriggerIDTable->GetNRows();
+		mAdditionalTriggerID = (additionalTriggerID_st*)(mAdditionalTriggerIDTable->GetArray());
+	    }
+
 	    // TTable of trigPrescales	
 	    mSTable = dynamic_cast<TTable*>(dataSet->Find("trigPrescales"));
 	    
@@ -130,6 +144,10 @@ StDetectorDbTriggerID::StDetectorDbTriggerID(){
     mIDNumRows = 0;
     mIDTable = 0;
 
+    mAdditionalTriggerID = 0;
+    mAdditionalTriggerIDNumRows = 0;
+    mAdditionalTriggerIDTable = 0;
+
     mTrigPrescales = 0;
     mSNumRows = 0;
     mSTable = 0;
@@ -150,6 +168,11 @@ StDetectorDbTriggerID::StDetectorDbTriggerID(){
     mDsmPrescalesNumRows = 0;
     
 };
+/// Default destructor
+StDetectorDbTriggerID::~StDetectorDbTriggerID(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 /// triggerID members
 /// Returns Number of Entries in database
@@ -165,11 +188,6 @@ unsigned int StDetectorDbTriggerID::getIDRunNumber(){
     return value;
 };
 
-/// Default destructor
-StDetectorDbTriggerID::~StDetectorDbTriggerID(){
-  delete sInstance;
-  sInstance = 0;
-};
 
 /// Returns idxTrg
 unsigned int StDetectorDbTriggerID::getIdxTrg(unsigned int entry){
@@ -224,6 +242,87 @@ unsigned int StDetectorDbTriggerID::getPsVersion(unsigned int entry){
     unsigned int value = 0;
     if(mTriggerID && entry < this->getIDNumRows() )
 	value = mTriggerID[entry].psVersion;
+    return value;
+};
+
+
+/// additionalTriggerID members
+/// Returns Number of Entries in database
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDNumRows(){
+    return mAdditionalTriggerIDNumRows;
+};
+
+/// Returns Run Number
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDRunNumber(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows())
+	value = mAdditionalTriggerID[entry].runNumber;
+    return value;
+};
+
+/// Returns Event Number
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDEventNumber(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows())
+	value = mAdditionalTriggerID[entry].eventNumber;
+    return value;
+};
+
+
+
+/// Returns idxTrg
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDIdxTrg(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows() )
+	value = mAdditionalTriggerID[entry].idxTrg;
+    return value;
+};
+
+/// Returns daqTrgId
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDDaqTrgId(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows() )
+	value = mAdditionalTriggerID[entry].daqTrgId;
+    return value;
+};
+
+/// Returns offlineTrgId
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDOfflineTrgId(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows() )
+	value = mAdditionalTriggerID[entry].offlineTrgId;
+    return value;
+};
+
+/// Returns trgNameVersion
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDTrgNameVersion(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows() )
+	value = mAdditionalTriggerID[entry].trgNameVersion;
+    return value;
+};
+
+/// Returns trgVersion
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDTrgVersion(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows() )
+	value = mAdditionalTriggerID[entry].trgVersion;
+    return value;
+};
+
+/// Returns threashVersion
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDThreashVersion(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows() )
+	value = mAdditionalTriggerID[entry].threashVersion;
+    return value;
+};
+
+/// Returns psVersion
+unsigned int StDetectorDbTriggerID::getAdditionalTriggerIDPsVersion(unsigned int entry){
+    unsigned int value = 0;
+    if(mAdditionalTriggerID && entry < this->getAdditionalTriggerIDNumRows() )
+	value = mAdditionalTriggerID[entry].psVersion;
     return value;
 };
 
@@ -568,6 +667,18 @@ ostream& operator<<(ostream& os, StDetectorDbTriggerID& v){
     for (unsigned int i=0; i<v.getDsmPrescalesNumRows(); ++i) {
 	os << "trgId: " << v.getDsmPrescalesTrgId(i) 
 	   << " dsmPrescale: " << v.getDsmPrescalesDsmPrescale(i) << endl;
+    }
+
+    os << endl << "Run shown in additionalTriggerID: " << v.getAdditionalTriggerIDRunNumber() << endl;
+    for(unsigned int i = 0; i < v.getAdditionalTriggerIDNumRows(); i++){
+	os << "eventNumber: " << v.getAdditionalTriggerIDEventNumber(i)
+	    << "idx_trg: " << v.getAdditionalTriggerIDIdxTrg(i) 
+	   << "  daqTrg: " << v.getAdditionalTriggerIDDaqTrgId(i)  
+	   << "  offlineTrgId: " << v.getAdditionalTriggerIDOfflineTrgId(i)  
+	   << "  trgNameVersion: " << v.getAdditionalTriggerIDTrgNameVersion(i) << endl
+	   << "  trgVersion: " << v.getAdditionalTriggerIDTrgVersion(i)  
+	   << "  threashVersion: " << v.getAdditionalTriggerIDThreashVersion(i)  
+	   << "  psVersion: " << v.getAdditionalTriggerIDPsVersion(i) << endl;
     }
     
     return os;
