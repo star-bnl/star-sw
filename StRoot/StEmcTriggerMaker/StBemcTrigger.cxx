@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.27 2007/05/08 14:47:09 kocolosk Exp $
+// $Id: StBemcTrigger.cxx,v 1.28 2007/05/12 12:45:53 rfatemi Exp $
 //
 //
 
@@ -258,10 +258,15 @@ int StBemcTrigger::makeTrigger()
     get2005Trigger();
     get2006Trigger();
 
-    //2003 HT == 1101
+    //2003 HT1 == 1101+2201
     mIsTrig[0]  =mIs2003HT1;
     mTowJetId[0]=HT1_ID_2003;
     mDsmAdc[0]  =HT1_DSM_2003;
+
+   //2003 HT2 == 2202
+    mIsTrig[42]  =mIs2003HT2;
+    mTowJetId[42]=HT2_ID_2003;
+    mDsmAdc[42]  =HT2_DSM_2003;
 
     //2004 HT1 == 45201
     mIsTrig[1]  =mIs2004HT1;
@@ -405,24 +410,13 @@ int StBemcTrigger::get2003Trigger()
     zero();
 
     const int HT1_TH_2003 = 8;
+    const int HT2_TH_2003 = 13;
 
     if(!mEvent)
         return kStWarn;
     StEmcCollection *emc = mEvent->emcCollection();
     if(!emc)
         return kStWarn;
-
-
-    TDataSet* db = 0;
-    if(mDbMaker != 0)
-        db = mDbMaker->GetDataBase("Calibrations/emc/y3bemc");
-    else
-    {
-		LOG_WARN << "You *MUST* provide a pointer to St_db_Maker!" << endm;
-        LOG_WARN << "In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);" << endm;
-        return kStWarn;
-    }
-
 
     int adc12[kNTowers];
     int adc10[kNTowers];
@@ -505,12 +499,13 @@ int StBemcTrigger::get2003Trigger()
             int HTL = HT & 0x1F;//strip off 5 LB
             int HTH = HT >> 5;//strip off top 2 HB
             int B5  = 0;
-            if(HTH>0)
-                B5 = 1; // IF top bits !=0 B5=1
+            if(HTH>0) B5 = 1; // IF top bits !=0 B5=1
             mTrigger.HT[i] = HTL+(B5<<5); // Or top bits
-			{ LOG_DEBUG <<"Patch number "<<i<<" Tower id = "<<HTID<<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]<<" HT = "<<mTrigger.HT[i]<<endm; }
+	    { LOG_DEBUG <<"Patch number "<<i<<" Tower id = "<<
+		HTID<<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<
+		adc10[HTID-1]<<" HT = "<<mTrigger.HT[i]<<endm; }
             if (mTrigger.HT[i]>HTmax)
-            {
+	      {
                 HTmax=mTrigger.HT[i];
                 HTmaxID=HTID;
             }
@@ -528,6 +523,20 @@ int StBemcTrigger::get2003Trigger()
         HT1_ID_2003=HTmaxID;
         HT1_DSM_2003=HTmax;
     }
+
+    if (HTmax>HT2_TH_2003)
+    {
+        mIs2003HT2=1;
+        HT2_ID_2003=HTmaxID;
+        HT2_DSM_2003=HTmax;
+    }
+    else
+    {
+        mIs2003HT2=0;
+        HT2_ID_2003=HTmaxID;
+        HT2_DSM_2003=HTmax;
+    }
+
 
     return kStOK;
 }
@@ -554,23 +563,7 @@ int StBemcTrigger::get2004Trigger()
     //This code accesses offline database to get peds. These are NOT == peds
     //which were used during running. So NO ONLINE INFO is used in this trigger
     //reconstruction because the online database was not filled for 2004!
-    TDataSet* db = 0;
-    if(mDbMaker != 0)
-        db = mDbMaker->GetDataBase("Calibrations/emc/y3bemc");
-    else
-    {
-        LOG_WARN << "You *MUST* provide a pointer to St_db_Maker!" << endm;
-        LOG_WARN << "In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);" << endm;
-        return kStWarn;
-    }
-
-    St_emcPed *emcPedestals = (St_emcPed*) db->Find("bemcPed");
-    if (!emcPedestals)
-        return kStWarn;
-    emcPed_st *pedestalTable = emcPedestals->GetTable();
-    if (!pedestalTable)
-        return kStWarn;
-
+ 
 
     int adc12[kNTowers];
     int adc10[kNTowers];
@@ -846,32 +839,6 @@ int StBemcTrigger::get2005Trigger()
     if(!emc)
     {
         LOG_WARN << "StBemcTrigger::make2005Trigger() -- no StEmcCollection!" << endm;
-        return kStWarn;
-    }
-
-
-    TDataSet* db = 0;
-    if(mDbMaker != 0)
-        db = mDbMaker->GetDataBase("Calibrations/emc/y3bemc");
-    else
-    {
-        LOG_WARN << "StBemcTrigger::make2005Trigger() -- You *MUST* provide a pointer to St_db_Maker!" << endm;
-        LOG_WARN << "    In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);" << endm;
-        return kStWarn;
-    }
-
-
-    St_emcPed *emcPedestals = (St_emcPed*) db->Find("bemcPed");
-    if(!emcPedestals)
-    {
-		LOG_WARN << "StBemcTrigger::make2005Trigger() -- can't find BEMC pedestal table!" << endm;
-        return kStWarn;
-    }
-
-    emcPed_st *pedestalTable = emcPedestals->GetTable();
-    if(!pedestalTable)
-    {
-        LOG_WARN << "StBemcTrigger::make2005Trigger() -- can't find BEMC pedestal table!" << endm;
         return kStWarn;
     }
 

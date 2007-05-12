@@ -40,6 +40,7 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
     mBemcTrigger = new StBemcTrigger();
 
     mIs2003HT1=-1;
+    mIs2003HT2=-1;
     mIs2004HT1=-1;
     mIs2004JP1=-1;
     mIs2004HT2=-1;
@@ -61,6 +62,7 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
       
     
     HT1_ID_2003=-1;
+    HT2_ID_2003=-1;
     HT1_ID_2004=-1;
     HT2_ID_2004=-1;
     JP1_ID_2004=-1;
@@ -80,6 +82,7 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
     for (int i=0;i<50;i++) TowJetId[i] = -1;
     
     HT1_DSM_2003=-1;
+    HT2_DSM_2003=-1;
     HT1_DSM_2004=-1;
     HT2_DSM_2004=-1;
     JP1_DSM_2004=-1;
@@ -164,10 +167,15 @@ Int_t StEmcTriggerMaker::Make()
     int* BL12006arrayADC=mBemcTrigger->getBL12006arrayADC();
   
 
-    //2003 HT1 ==  1101
+    //2003 HT1 == 1101/2201
     mIs2003HT1=isTrig[0];
     HT1_ID_2003=TowJetId[0];
     HT1_DSM_2003=DsmAdc[0];
+
+    //2003 HT2 == 2202
+    mIs2003HT2=isTrig[42];
+    HT2_ID_2003=TowJetId[42];
+    HT2_DSM_2003=DsmAdc[42];
 
     //2004 HT1 == 45201
     mIs2004HT1=isTrig[1];
@@ -398,12 +406,19 @@ int StEmcTriggerMaker::isTrigger(int trigId) {
       //bemc-http-mb-l2gamma 
     case(137611): return -1;
 
-      
+      //2003-2005 
     case(96201): return is2005HT1();
     case(96211): return is2005HT2();
     case(96221): return is2005JP1();
     case(96233): return is2005JP2();
-      
+    case(45201): return is2004HT1();
+    case(45202): return is2004HT2();
+    case(45206): return is2004JP1();
+    case(45207): return is2004JP2();
+    case(1101):  return is2003HT1();
+    case(2201):  return is2003HT1();
+    case(2202):  return is2003HT2();
+
     }
   
   //if we got here then we don't know how to interpret the trigger
@@ -431,10 +446,18 @@ int StEmcTriggerMaker::barrelTowerThreshold(int trigId, int softId)
       //jpsi E==11, W==5
     case(117705): return (softId > 2400) ? 11:5;
       
-      //run 5
+      //2003-2005
     case(96201): return 13;
     case(96211): return 17;
     case(96221): case(96233): return 0;
+    case(45201): return 10;
+    case(45202): return 20;
+    case(45206): case(45207): return 0;
+    case(1101):  return 8;
+    case(2201):  return 8;
+    case(2202):  return 13;
+
+
     }
   
   //if we got here then we don't know how to interpret the trigger
@@ -460,8 +483,11 @@ int StEmcTriggerMaker::barrelTriggerPatchThreshold(int trigId, int patchId)
       //jpsi
     case(117705): return 0;
       
-      //run 5
+      //run 2003-2005
     case(96201): case(96211): case(96221): case(96233): return 0;
+    case(45201): case(45202): case(45206): case(45207): return 0;
+    case(1101): case(2201): case(2202):  return 0;
+
     }
   
   //if we got here then we don't know how to interpret the trigger
@@ -487,10 +513,15 @@ int StEmcTriggerMaker::barrelJetPatchThreshold(int trigId, int patchId)
       //jpsi
     case(117705): return 0;        
       
-      //run 5
+      //run 2003+2004+2005
     case(96201): case(96211): return 0;
     case(96221): return 66;
     case(96233): return 84;
+    case(45201): case(45202): return 0;
+    case(45206): return 40;
+    case(45207): return 60;
+    case(1101): case(2201): case(2202): return 0;
+
       
     }
   
@@ -516,7 +547,7 @@ map<int,int> StEmcTriggerMaker::barrelTowersAboveThreshold(int trigId) {
 	  towers[softId] = adc;
 	}
         break;
-
+	
 	//matrix==1
 	//bemc-http-mb-fast 
       case(127821):
@@ -527,12 +558,12 @@ map<int,int> StEmcTriggerMaker::barrelTowersAboveThreshold(int trigId) {
 	  towers[softId] = adc;
 	}
         break;
-
+	
 	//bemc-http-mb-l2gamma 
 	//case(127611): return -1;
 	//bemc-jp0-etot-mb-L2jet
 	//case(127622): return -1;
-
+	
 	//bemc-ht2-mb-emul	
       case(127213):
 	counter = numHT2_2006[1];
@@ -636,6 +667,59 @@ map<int,int> StEmcTriggerMaker::barrelTowersAboveThreshold(int trigId) {
 	  towers[softId] = adc;
 	}
         break;
+	
+      case(1101):
+	if (is2003HT1()==0) counter=0;
+	if (is2003HT1()==1) counter=1;
+	for(int i=0; i<counter; i++) {
+	  softId=get2003HT1_ID();
+	  adc = get2003HT1_ADC();
+	  towers[softId] = adc;
+	}
+        break;
+	
+      case(2201):
+	if (is2003HT1()==0) counter=0;
+	if (is2003HT1()==1) counter=1;
+	for(int i=0; i<counter; i++) {
+	  softId=get2003HT1_ID();
+	  adc = get2003HT1_ADC();
+	  towers[softId] = adc;
+	}
+        break;
+	
+      case(2202):
+	if (is2003HT2()==0) counter=0;
+	if (is2003HT2()==1) counter=1;
+	for(int i=0; i<counter; i++) {
+	  softId=get2003HT2_ID();
+	  adc = get2003HT2_ADC();
+	  towers[softId] = adc;
+	}
+        break;
+
+      case(45201):
+	if (is2004HT1()==0) counter=0;
+	if (is2004HT1()==1) counter=1;
+	for(int i=0; i<counter; i++) {
+	  softId=get2004HT1_ID();
+	  adc = get2004HT1_ADC();
+	  towers[softId] = adc;
+	}
+        break;
+	
+     case(45202):
+	if (is2004HT2()==0) counter=0;
+	if (is2004HT2()==1) counter=1;
+	for(int i=0; i<counter; i++) {
+	  softId=get2004HT2_ID();
+	  adc = get2004HT2_ADC();
+	  towers[softId] = adc;
+	}
+        break;
+	
+
+
       }
     
     return towers;
@@ -765,6 +849,28 @@ map<int,int> StEmcTriggerMaker::barrelJetPatchesAboveThreshold(int trigId) {
 	  patches[softId] = adc;
 	}
 	break;
+
+	
+      case(45206):
+	if (is2004JP1()==0) counter=0;
+	if (is2004JP1()==1) counter=1;
+	for(int i=0; i<counter; i++) {
+	  softId=get2004JP1_ID();
+	  adc = get2004JP1_ADC();
+	  patches[softId] = adc;
+	}
+        break;
+	
+      case(45207):
+	if (is2004JP2()==0) counter=0;
+	if (is2004JP2()==1) counter=1;
+	for(int i=0; i<counter; i++) {
+	  softId=get2004JP2_ID();
+	  adc = get2004JP2_ADC();
+	  patches[softId] = adc;
+	}
+        break;
+   
       }
     
     return patches;
@@ -826,9 +932,12 @@ map<int,int> StEmcTriggerMaker::endcapJetPatchesAboveThreshold(int trigId) {
 	return jetPatches;
 }
 
-// $Id: StEmcTriggerMaker.cxx,v 1.21 2007/05/02 17:36:22 kocolosk Exp $
+// $Id: StEmcTriggerMaker.cxx,v 1.22 2007/05/12 12:45:53 rfatemi Exp $
 //
 // $Log: StEmcTriggerMaker.cxx,v $
+// Revision 1.22  2007/05/12 12:45:53  rfatemi
+// Added BHT2 for 2003, new access scheme extends back to 2003+2004, remove all access to StEmcPedestal tables
+//
 // Revision 1.21  2007/05/02 17:36:22  kocolosk
 // added decoder wrapper method that correlates tower and trigger patch.
 // Useful for HTTP in particular.

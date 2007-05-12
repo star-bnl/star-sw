@@ -77,7 +77,6 @@ void Run2006SimuTriggerMaker(const char *dir ="",
   
   //StEmcTrigger
   StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
-  emcTrig->setDbMaker(dbMk);
 
   chain->Init();
   chain->PrintInfo();
@@ -120,6 +119,78 @@ void Run2006SimuTriggerMaker(const char *dir ="",
     map<int,int> tpatch;
     map<int,int> jpatch;
 
+    cout<<endl;
+    cout<<endl;
+    cout<<" 1101 ht1 = "<<emcTrig->isTrigger(1101)<<" = "<<emcTrig->is2003HT1()<<endl;    
+    tower=emcTrig->barrelTowersAboveThreshold(1101);
+    cout<<"Total #'s of towers="<<tower.size()<<endl;
+    for ( iter=tower.begin();iter !=tower.end(); iter++){
+      cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
+      cout<<"old tower id="<<emcTrig->get2003HT1_ID()<<" adc="<<emcTrig->get2003HT1_ADC()<<endl;
+    }
+
+    cout<<endl;
+    cout<<endl;
+    cout<<" 2101 ht1 = "<<emcTrig->isTrigger(2201)<<" = "<<emcTrig->is2003HT1()<<endl;   
+    tower=emcTrig->barrelTowersAboveThreshold(2201);
+    cout<<"Total #'s of towers="<<tower.size()<<endl;
+    for ( iter=tower.begin();iter !=tower.end(); iter++){
+      cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
+      cout<<"old tower id="<<emcTrig->get2003HT1_ID()<<" adc="<<emcTrig->get2003HT1_ADC()<<endl;
+    }
+
+    cout<<endl;
+    cout<<endl;
+    cout<<" 2202 ht2 = "<<emcTrig->isTrigger(2202)<<" = "<<emcTrig->is2003HT2()<<endl;   
+    tower=emcTrig->barrelTowersAboveThreshold(2202);
+    cout<<"Total #'s of towers="<<tower.size()<<endl;
+    for ( iter=tower.begin();iter !=tower.end(); iter++){
+      cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
+      cout<<"old tower id="<<emcTrig->get2003HT2_ID()<<" adc="<<emcTrig->get2003HT2_ADC()<<endl;
+    }
+
+    cout<<endl;
+    cout<<endl;
+    cout<<" 45201 ht1 = "<<emcTrig->isTrigger(45201)<<" =  "<<emcTrig->is2004HT1()<<endl;   
+    tower=emcTrig->barrelTowersAboveThreshold(45201);
+    cout<<"Total #'s of towers="<<tower.size()<<endl;
+    for ( iter=tower.begin();iter !=tower.end(); iter++){
+      cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
+      cout<<"old tower id="<<emcTrig->get2004HT1_ID()<<" adc="<<emcTrig->get2004HT1_ADC()<<endl;
+    }
+
+    cout<<endl;
+    cout<<endl;
+    cout<<" 45202 ht1 = "<<emcTrig->isTrigger(45202)<<" =  "<<emcTrig->is2004HT2()<<endl;   
+    tower=emcTrig->barrelTowersAboveThreshold(45202);
+    cout<<"Total #'s of towers="<<tower.size()<<endl;
+    for ( iter=tower.begin();iter !=tower.end(); iter++){
+      cout<<"tower id="<<iter->first<<"  adc="<<iter->second<<endl;
+      cout<<"old tower id="<<emcTrig->get2004HT2_ID()<<" adc="<<emcTrig->get2004HT2_ADC()<<endl;
+    }
+
+    cout<<endl;
+    cout<<endl;
+    cout<<" 45206 jp1 = "<<emcTrig->isTrigger(45206)<<" =  "<<emcTrig->is2004JP1()<<endl;   
+    jpatch=emcTrig->barrelJetPatchesAboveThreshold(45206);
+    cout<<"Total #'s of jpatches="<<jpatch.size()<<endl;
+    for ( iter=jpatch.begin();iter !=jpatch.end(); iter++){
+      cout<<"jpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
+      cout<<"old patch id="<<emcTrig->get2004JP1_ID()<<" adc="<<emcTrig->get2004JP1_ADC()<<endl;
+    }
+
+    cout<<endl;
+    cout<<endl;
+    cout<<" 45207 jp2 = "<<emcTrig->isTrigger(45207)<<"  =  "<<emcTrig->is2004JP2()<<endl;   
+    jpatch=emcTrig->barrelJetPatchesAboveThreshold(45207);
+    cout<<"Total #'s of jpatches="<<jpatch.size()<<endl;
+    for ( iter=jpatch.begin();iter !=jpatch.end(); iter++){
+      cout<<"jpatch id="<<iter->first<<"  adc="<<iter->second<<endl;
+      cout<<"old patch id="<<emcTrig->get2004JP2_ID()<<" adc="<<emcTrig->get2004JP2_ADC()<<endl;
+    }
+
+    cout<<endl;
+    cout<<endl;
     cout<<" 127212 ht2 (matrix0)="<<emcTrig->isTrigger(127212)<<endl;
     tower=emcTrig->barrelTowersAboveThreshold(127212);
     cout<<"Total #'s of towers="<<tower.size()<<endl;

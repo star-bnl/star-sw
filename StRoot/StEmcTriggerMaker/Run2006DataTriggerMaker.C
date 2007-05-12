@@ -55,7 +55,6 @@ void Run2006DataTriggerMaker(const char *dir ="",
   
   //StEmcTrigger
   StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
-  emcTrig->setDbMaker(dbMk);
 
   chain->Init();
   chain->PrintInfo();  
