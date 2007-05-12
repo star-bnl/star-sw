@@ -1,6 +1,6 @@
 
 //
-// $Id: StBemcTrigger.h,v 1.14 2007/05/02 17:36:22 kocolosk Exp $
+// $Id: StBemcTrigger.h,v 1.15 2007/05/12 12:45:53 rfatemi Exp $
 //
 //
 
@@ -23,7 +23,6 @@
 class StEmcGeom;
 class StEmcDecoder;
 class StEvent;
-class St_db_Maker;
 class StBemcTables;
 
 struct emcTrigger
@@ -46,7 +45,6 @@ private:
     StEmcGeom*     mGeo;
     StEmcDecoder*  mDecoder;
     StEvent*       mEvent;
-    St_db_Maker*   mDbMaker;
     StBemcTables*  mTables;
     emcTrigger     mTrigger;
 
@@ -80,6 +78,7 @@ private:
     int mBL12006arrayADC[kNJet];
 
     int mIs2003HT1;
+    int mIs2003HT2;
     int mIs2004HT1;
     int mIs2004JP1;
     int mIs2004HT2;
@@ -97,6 +96,7 @@ private:
     int mIs2006BHTTP[6];
 
     int HT1_ID_2003;
+    int HT2_ID_2003;
     int HT1_ID_2004;
     int HT2_ID_2004;
     int JP1_ID_2004;
@@ -111,6 +111,7 @@ private:
     int JP1_ID_2006[6];
 
     int HT1_DSM_2003;
+    int HT2_DSM_2003;
     int HT1_DSM_2004;
     int HT2_DSM_2004;
     int JP1_DSM_2004;
@@ -166,7 +167,6 @@ public:
     void    setPrint(bool a) {
                 LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
                     }///< Obsolete function; users can control messages with logger config file.
-    void    setDbMaker(St_db_Maker* dbMaker) { mDbMaker = dbMaker; }
     void    setTableMaker(StBemcTables *tab) { mTables =tab; }
    
     //1==true, 0==false, -1==problems

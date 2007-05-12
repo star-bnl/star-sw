@@ -15,9 +15,12 @@
 // StEemcTrigger classes which mock up the BEMC/EEMC FEE + L0 DSM trigger algorithms.
 // Interface to L2 should also take place in this class.
 //
-// $Id: StEmcTriggerMaker.h,v 1.17 2007/05/02 17:36:22 kocolosk Exp $
+// $Id: StEmcTriggerMaker.h,v 1.18 2007/05/12 12:45:53 rfatemi Exp $
 //
 // $Log: StEmcTriggerMaker.h,v $
+// Revision 1.18  2007/05/12 12:45:53  rfatemi
+// Added BHT2 for 2003, new access scheme extends back to 2003+2004, remove all access to StEmcPedestal tables
+//
 // Revision 1.17  2007/05/02 17:36:22  kocolosk
 // added decoder wrapper method that correlates tower and trigger patch.
 // Useful for HTTP in particular.
@@ -52,6 +55,7 @@ using namespace std;
 #define k12bits 4096
 
 class StEvent;
+class St_db_Maker;
 
 class StEmcTriggerMaker : public StMaker
 {
@@ -73,6 +77,7 @@ private:
     int               BL12006arrayADC[kNJet/2];//array of level 1 DSM 5 bit ADC from 2x1 PATCH sum
     
     int mIs2003HT1;
+    int mIs2003HT2;
     int mIs2004HT1;
     int mIs2004JP1;
     int mIs2004HT2;
@@ -90,6 +95,7 @@ private:
     int mIs2006HTTP[6];
 
     int HT1_ID_2003;
+    int HT2_ID_2003;
     int HT1_ID_2004;
     int HT2_ID_2004;
     int JP1_ID_2004;
@@ -104,6 +110,7 @@ private:
     int JP1_ID_2006[6];
 
     int HT1_DSM_2003;
+    int HT2_DSM_2003;
     int HT1_DSM_2004;
     int HT2_DSM_2004;
     int JP1_DSM_2004;
@@ -194,6 +201,7 @@ public:
 
 
     int               is2003HT1() {return mIs2003HT1;}//1=true,0=false,-1=problem
+    int               is2003HT2() {return mIs2003HT2;}
     int               is2004HT1() {return mIs2004HT1;}
     int               is2004HT2() {return mIs2004HT2;}
     int               is2004JP1() {return mIs2004JP1;}
@@ -206,6 +214,7 @@ public:
     int               is2005JPSI() {return mIs2005JPSI;}
 
     int               get2003HT1_ID() {return HT1_ID_2003;}//tower/JP id of trigger
+    int               get2003HT2_ID() {return HT2_ID_2003;}
     int               get2004HT1_ID() {return HT1_ID_2004;}
     int               get2004HT2_ID() {return HT2_ID_2004;}
     int               get2004JP1_ID() {return JP1_ID_2004;}
@@ -217,6 +226,7 @@ public:
     int               get2005ADJ_ID() {return ADJ_ID_2005;}
 
     int               get2003HT1_ADC() {return HT1_DSM_2003;}//6 bit DSM ADC
+    int               get2003HT2_ADC() {return HT2_DSM_2003;}
     int               get2004HT1_ADC() {return HT1_DSM_2004;}
     int               get2004HT2_ADC() {return HT2_DSM_2004;}
     int               get2004JP1_ADC() {return JP1_DSM_2004;}
@@ -249,7 +259,9 @@ public:
     
     void              setDbMaker(St_db_Maker *dbMk)
       {
-        mBemcTrigger->setDbMaker(dbMk);
+        //mBemcTrigger->setDbMaker(dbMk);
+	//This has been disabled so as to use StBemcTables but 
+	//allow old code not to break
       }
     
     StBemcTables*     tables;
