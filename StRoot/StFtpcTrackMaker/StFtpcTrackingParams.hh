@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.19 2007/05/08 10:47:33 jcs Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.20 2007/05/14 19:44:16 jcs Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.20  2007/05/14 19:44:16  jcs
+// remove obsolete include statement
+//
 // Revision 1.19  2007/05/08 10:47:33  jcs
 // replace StMagUtilities with StarMagField as requested by Yuri
 //
@@ -92,7 +95,6 @@ using namespace units;
 #include "tables/St_ftpcdEdxPars_Table.h"
 #include "tables/St_ftpcCoordTrans_Table.h"
 
-#include "StDbUtilities/StMagUtilities.h"
 #include "StTpcDb/StTpcDb.h"
 
 #include "StarMagField.h"
