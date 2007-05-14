@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.28 2007/05/12 12:45:53 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.29 2007/05/14 16:23:43 rfatemi Exp $
 //
 //
 
@@ -1186,7 +1186,7 @@ int StBemcTrigger::get2006Trigger()
 
   //trigger matrix for 6 different settings in time
   const int HT0WEST_TH_2006[6]= {  5,  5,  5,  5,  5,  5};
-  const int HT0EAST_TH_2006[6]= {  5,  5,  5,  5,  5,  5};
+  const int HT0EAST_TH_2006[6]= { 11, 11,  5,  5,  5,  5};
   const int HT1WEST_TH_2006[6]= { 12, 12, 16, 18, 16, 16};
   const int HT1EAST_TH_2006[6]= { 12, 12, 16, 18, 16, 16};
   const int HT2WEST_TH_2006[6]= { 22, 24, 24, 24, 24, 24};
@@ -1645,8 +1645,7 @@ int StBemcTrigger::get2006Trigger()
 	mTrigger.Et += EtotSum[i];
 	BL1_ADC_2006[i] = EtotSum[i];
 	
-      }
-    
+      } 
     BETOT_DSM_2006=mTrigger.Et;
     
     //
@@ -1659,28 +1658,21 @@ int StBemcTrigger::get2006Trigger()
 	for(int i = 0; i < kNJet; ++i)
 	  {
 	    
-	    int p0 = 0;
-	    int p1 = p0+25;
-	    
-	    
 	    JPSI_2006_ADC[matrix][i]=0;
 	    JPSI_2006_ID[matrix][i]=0;
 	    JpsiPatch[matrix][i]=0;
 	  
-	    
-	    for(int j = p0; j < p1; ++j)
+	    for(int sequence = 0; sequence < kN_sequences; ++sequence)
 	      {
 		
-		int k=JP_TP[i][j];
+		int k = 0;
+		mDecoder->GetTriggerPatchFromJetPatch(i, sequence, k);	    
 		if(mTrigger.HT[k] > JPSI_2006_ADC[matrix][i]) 
+
 		  {
 		    JPSI_2006_ADC[matrix][i]=mTrigger.HT[k];
 		    JPSI_2006_ID[matrix][i]=mTrigger.HTID[k];
 		  }
-		
-		LOG_DEBUG << "Jet id=" << i << " Patch id=" << j << " PatchHT=" << mTrigger.HT[k] << " PatchHTID="
-			  << mTrigger.HTID[k] << " JPSI_2006_ADC=" << JPSI_2006_ADC[matrix][i] << endm;
-		
 	      }
 	    
 	    if(i < 6) 
@@ -1694,31 +1686,28 @@ int StBemcTrigger::get2006Trigger()
 		if(JPSI_2006_ADC[matrix][i] > HT0EAST_TH_2006[matrix]) JpsiPatch[matrix][i] = 1;
 	      }
 	    
-	    LOG_DEBUG << "Final JetPatchHT for JP" << i << " is TowID=" << JPSI_2006_ID[matrix][i] << "  with ADC= "
-		      << JPSI_2006_ADC[matrix][i] << " and flag=" << JpsiPatch[matrix][i] << endm;
-	    
 	  }
-      
-
-	//
+	
+	
+	
 	// The J/psi trigger fires if two opposite jet patches have high towers
 	// above selected thresholds.
 	// Follow convention in the DSM implementation where vector bits (0-5)
 	// correspond to positions 2,4,6,8,10,12 o'clock.
-	//
+	
+	
 	int ht_jpsi[6]={0,0,0,0,0,0};
 	
-	ht_jpsi[0] = JpsiPatch[matrix][5] || JpsiPatch[matrix][7];
-	ht_jpsi[1] = JpsiPatch[matrix][4] || JpsiPatch[matrix][8];
-	ht_jpsi[2] = JpsiPatch[matrix][3] || JpsiPatch[matrix][9];
-	ht_jpsi[3] = JpsiPatch[matrix][2] || JpsiPatch[matrix][10];
-	ht_jpsi[4] = JpsiPatch[matrix][1] || JpsiPatch[matrix][11];
-	ht_jpsi[5] = JpsiPatch[matrix][0] || JpsiPatch[matrix][6];
-	
+	ht_jpsi[4] = JpsiPatch[matrix][0] || JpsiPatch[matrix][6];
+	ht_jpsi[5] = JpsiPatch[matrix][1] || JpsiPatch[matrix][7];
+	ht_jpsi[0] = JpsiPatch[matrix][2] || JpsiPatch[matrix][8];
+	ht_jpsi[1] = JpsiPatch[matrix][3] || JpsiPatch[matrix][9];
+	ht_jpsi[2] = JpsiPatch[matrix][4] || JpsiPatch[matrix][10];
+	ht_jpsi[3] = JpsiPatch[matrix][5] || JpsiPatch[matrix][11];
+
 	mIs2006JPSI[matrix] = ((ht_jpsi[0] && (ht_jpsi[2] || ht_jpsi[3] || ht_jpsi[4])) ||
 			       (ht_jpsi[1] && (ht_jpsi[3] || ht_jpsi[4] || ht_jpsi[5])) ||
 			       (ht_jpsi[2] && (ht_jpsi[4] || ht_jpsi[5])) || (ht_jpsi[3] &&  ht_jpsi[5]));
-	
 	
       }
     
