@@ -926,7 +926,8 @@ static int nCall=0; nCall++;
     mFitdPars._tanl  = tanl;
     mFitdPars._sinCA = sinCA;
     mFitdPars._cosCA = ::sqrt((1.-mFitdPars._sinCA)*(1.+mFitdPars._sinCA)); 
-assert(fabs(mFitdPars._y-hitPars[1])>1e-10 ||  fabs(hitPars[0])<4);
+    if (!mDetector) 
+      assert(fabs(mFitdPars._y-hitPars[1])>1e-10 ||  fabs(hitPars[0])<4);
 //??    cutStep(&mFitdPars,&mPredPars);
 //??    cutStep(&mFitdPars,&mBestPars);
     if (mFitdPars.check()) return -11;
