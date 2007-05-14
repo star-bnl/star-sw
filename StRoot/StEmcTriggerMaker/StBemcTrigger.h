@@ -1,6 +1,5 @@
-
 //
-// $Id: StBemcTrigger.h,v 1.15 2007/05/12 12:45:53 rfatemi Exp $
+// $Id: StBemcTrigger.h,v 1.16 2007/05/14 16:23:44 rfatemi Exp $
 //
 //
 
