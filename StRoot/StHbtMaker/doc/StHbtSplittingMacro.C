@@ -49,7 +49,6 @@ void StHbtSplittingEstimate(const Int_t nevents=9999,
   gSystem->Load("StDbUtilities");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
-  gSystem->Load("StEventDstMaker"); 
   gSystem->Load("StEventUtilities");
   gSystem->Load("StEmcUtil");
   gSystem->Load("St_emc_Maker");

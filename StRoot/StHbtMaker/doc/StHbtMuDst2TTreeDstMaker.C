@@ -46,7 +46,6 @@ void StHbtMuDst2TTreeDstMaker(
   gSystem->Load("StDbUtilities");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
-  gSystem->Load("StEventDstMaker"); 
   gSystem->Load("StEventUtilities");
   gSystem->Load("StEmcUtil");
   gSystem->Load("St_emc_Maker");
