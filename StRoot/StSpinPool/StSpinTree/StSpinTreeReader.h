@@ -18,7 +18,7 @@
 #include "StJetMaker/StJetSkimEvent.h"
 #include "StJetMaker/StJet.h"
 #include "StSpinPool/StChargedPionAnalysisMaker/StChargedPionTrack.h"
-#include "TPi0Event.h"
+//#include "TPi0Event.h"
 #include "StEEmcPool/StEEmcPi0Mixer/StEEmcPair.h"
 
 class StSpinTreeReader {
@@ -64,9 +64,9 @@ public:
     TClonesArray* chargedPions() {return mChargedPions;}
     StChargedPionTrack* chargedPion(int i) {return (StChargedPionTrack*)mChargedPions->At(i);}
     
-    int nBemcNeutralPions() {return mBemcNeutralPions->GetEntries();}
-    TClonesArray* bemcNeutralPions() {return mBemcNeutralPions;}
-    TPi0Candidate* bemcNeutralPion(int i) {return (TPi0Candidate*)mBemcNeutralPions->At(i);}
+    //int nBemcNeutralPions() {return mBemcNeutralPions->GetEntries();}
+    //TClonesArray* bemcNeutralPions() {return mBemcNeutralPions;}
+    //TPi0Candidate* bemcNeutralPion(int i) {return (TPi0Candidate*)mBemcNeutralPions->At(i);}
     
     int nEemcNeutralPions() {return mEemcNeutralPions->GetEntries();}
     TClonesArray* eemcNeutralPions() {return mEemcNeutralPions;}
