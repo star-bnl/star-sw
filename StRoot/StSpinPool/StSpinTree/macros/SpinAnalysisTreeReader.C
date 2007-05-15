@@ -110,7 +110,7 @@ void SpinAnalysisTreeReader(const char *files = "StRoot/StSpinPool/StSpinTree/da
     gSystem->Load("StarSpinAnalyses");
 }*/
 
-void LoadSpinTreeLibraries() {
+void LoadSpinTreeLibs() {
     gSystem->Load("libPhysics");
     gSystem->Load("libTable");
     gSystem->Load("StarRoot");
