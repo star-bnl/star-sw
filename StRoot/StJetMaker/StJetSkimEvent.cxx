@@ -431,6 +431,10 @@ void StJetSkimEvent::setVert(const StJetSkimVert& t)
 
 StJetSkimTrigHeader* StJetSkimEvent::trigHeader(int trigId) {
     TClonesArray *tmp = this->trigHeaders();
+    if(!tmp) {
+        cout << "ERROR LOADING TRIGGER HEADERS!" << endl;
+        return NULL;
+    }
     for(int i=0; i<tmp->GetEntries(); i++) {
         StJetSkimTrigHeader* header = (StJetSkimTrigHeader*)tmp->At(i);
         if(header->trigId == trigId) return header;

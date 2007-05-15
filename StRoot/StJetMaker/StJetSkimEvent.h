@@ -13,6 +13,7 @@
 #include "TLorentzVector.h"
 
 #include <map>
+using std::map;
 
 class StJetSkimTrigHeader : public TObject
 {
@@ -65,9 +66,9 @@ public:
     int shouldFire() const;
     
     //detector:  0 == BEMC, 1 == EEMC
-    std::map<int,int>& towersAboveThreshold(int detector) const;
-    std::map<int,int>& triggerPatchesAboveThreshold(int detector) const;
-    std::map<int,int>& jetPatchesAboveThreshold(int detector) const;
+    map<int,int>& towersAboveThreshold(int detector) const;
+    map<int,int>& triggerPatchesAboveThreshold(int detector) const;
+    map<int,int>& jetPatchesAboveThreshold(int detector) const;
     
     int totalEnergy() const;
     
