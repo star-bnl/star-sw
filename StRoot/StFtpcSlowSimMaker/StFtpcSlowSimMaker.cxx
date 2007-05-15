@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.33 2007/01/15 15:02:20 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.34 2007/05/15 14:35:18 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.34  2007/05/15 14:35:18  jcs
+// update to be compatible with changes made to StFtpcTrackParams.cc
+// use default microsecondsPerTimebin value from database if no RHIC clock info available
+//
 // Revision 1.33  2007/01/15 15:02:20  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -283,22 +287,21 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
  
 
-  // instance tracking parameters for rotations
-  StFtpcTrackingParams::Instance(kTRUE, 
-				 (St_ftpcCoordTrans *)dblocal_calibrations("ftpcCoordTrans"),
-				 GetDataBase("RunLog"));
   // get ftpc parameters
-  St_DataSet *ftpcParsDb = GetInputDB("ftpc");
+  TDataSet *ftpcParsDb = GetInputDB("ftpc");
   assert(ftpcParsDb);
-  St_DataSetIter ftpcPars(ftpcParsDb);
-  
+  TDataSetIter ftpcPars(ftpcParsDb);
 
-  StFtpcTrackingParams::Instance(0,
+  // get tracking parameters from database
+  StFtpcTrackingParams::Instance(Debug(),
   				 (St_ftpcTrackingPars *)ftpcPars("ftpcTrackingPars"),
   				 (St_ftpcdEdxPars *)ftpcPars("ftpcdEdxPars"),
   				 (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions"), 
   				 (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ"));
-
+  // instance tracking parameters for rotations
+  StFtpcTrackingParams::Instance(kTRUE, 
+				 (St_ftpcCoordTrans *)dblocal_calibrations("ftpcCoordTrans"),
+				 GetDataBase("RunLog"));
 
   St_DataSet *ftpclocal = GetDataBase("ftpc");  // zum Verwenden der lokalen DB
   if ( !ftpclocal ){
@@ -382,10 +385,13 @@ Int_t StFtpcSlowSimMaker::Make(){
 //  LOG_INFO<<"paramReader->gasTemperatureEast() = "<<paramReader->gasTemperatureEast()<<endm;
 
     if ( paramReader->gasTemperatureWest() == 0 && paramReader->gasTemperatureEast() == 0) {
-       dbReader->setMicrosecondsPerTimebin(microsecondsPerTimebin);
        LOG_INFO << "Using the following values from database:" << endm;
-
-       LOG_INFO << "          microsecondsPerTimebin    = "<<dbReader->microsecondsPerTimebin()<<endm;
+       if (microsecondsPerTimebin > 0.0 ) {
+          dbReader->setMicrosecondsPerTimebin(microsecondsPerTimebin);
+          LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader->microsecondsPerTimebin()<<" (calculated from RHIC Clock Frequency)"<<endm;
+       } else {
+          LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader->microsecondsPerTimebin()<<" (default value from database)"<<endm;
+       }
        LOG_INFO <<"          EastIsInverted            = "<<dbReader->EastIsInverted()<<endm;
        LOG_INFO <<"          Asic2EastNotInverted      = "<<dbReader->Asic2EastNotInverted()<<endm;
        LOG_INFO <<"          tzero                     = "<<dbReader->tZero()<<endm;
