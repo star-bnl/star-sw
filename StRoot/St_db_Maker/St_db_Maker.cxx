@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.107 2007/04/26 04:17:45 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.108 2007/05/15 18:45:11 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.108  2007/05/15 18:45:11  perev
+// Add StMaker::Init() into Init
+//
 // Revision 1.107  2007/04/26 04:17:45  perev
 // Correct printout
 //
@@ -331,7 +334,7 @@ Int_t St_db_Maker::Init()
    SetFlavor(0,0);	// Apply all collected before flavors
    ResetBIT(kInitBeg); SetBIT(kInitEnd);
    fTimer[0].Stop ();
-   return 0;
+   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_db_Maker::Finish()
