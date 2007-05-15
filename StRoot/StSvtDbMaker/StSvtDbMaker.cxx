@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.21 2007/05/15 18:44:09 perev Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.22 2007/05/15 19:23:21 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
- * Revision 1.21  2007/05/15 18:44:09  perev
- * Init global pointers by 0
+ * Revision 1.22  2007/05/15 19:23:21  perev
+ * Init local pointers by 0
  *
  * Revision 1.20  2007/04/28 17:57:09  perev
  * Redundant StChain.h removed
@@ -508,10 +508,10 @@ StSvtHybridCollection* StSvtDbMaker::getDriftCurve()
   if(!mSvtDriftCurve)
     mSvtDriftCurve = new StSvtHybridCollection(mSvtConfig);
 
-  St_svtDriftCurve *driftVelocityCurve;
+  St_svtDriftCurve *driftVelocityCurve=0;
 
-  svtDriftCurve_st *driftCurve;
-  StSvtHybridDriftCurve* hybridDriftCurve;
+  svtDriftCurve_st *driftCurve=0;
+  StSvtHybridDriftCurve* hybridDriftCurve=0;
 
   char path[100];
   int index;
