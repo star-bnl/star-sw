@@ -39,7 +39,7 @@
 			<param name="LevelToMatch"  value="INFO"/>
 			<param name="AcceptOnMatch" value="true"/>
 		</filter>
-	</appender> -->
+	</appender>
 	
 	<logger name="StEmcADCtoEMaker">
 		<priority value = "WARN" />
@@ -47,6 +47,6 @@
   
 	<logger name="StEmcTriggerMaker">
 		<priority value = "WARN" />
-	</logger>
+	</logger> -->
 
 </configuration>
