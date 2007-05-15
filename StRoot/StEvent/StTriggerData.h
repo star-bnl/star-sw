@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.17 2007/04/03 20:10:49 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.18 2007/05/15 16:31:26 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.18  2007/05/15 16:31:26  ullrich
+ * Add virtual function mtdAtAddress().
+ *
  * Revision 2.17  2007/04/03 20:10:49  ullrich
  * Added access function for VPD data.
  *
@@ -171,12 +174,19 @@ public:
     // FPD  module #: north=0, south=1, top=2, bottom=3, north preshower=4, south preshower=5
     virtual unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
     virtual unsigned short fpdSum(StBeamDirection eastwest, int module) const;
+  
+    // FMS 
+    virtual unsigned short nQTdata(int prepost=0) const;
+    virtual unsigned int*  QTdata(int prepost=0) const;
 
     // VPD
     virtual unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short vpdTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short vpdEarliestTDC(StBeamDirection eastwest) const;
     virtual unsigned short vpdTimeDifference() const;
+
+    //MTD
+    virtual unsigned short mtdAtAddress(int address, int prepost=0) const;
 
     // auxiliary information
     float zdcVertexZ() const;
@@ -189,6 +199,11 @@ public:
     virtual unsigned short int * getDsm1_EEMC(int prepost=0) const =0;
     virtual unsigned short int * getDsm2_EMC()  const =0;
     virtual unsigned short int * getDsm3()      const =0;
+    virtual unsigned      char*  getDsm_FMS(int prepost=0) const;
+    virtual unsigned      char*  getDsm01_FMS(int prepost=0) const;
+    virtual unsigned      char*  getDsm02_FMS(int prepost=0) const;
+    virtual unsigned short int*  getDsm1_FMS(int prepost=0) const;
+    virtual unsigned short int*  getDsm2_FMS() const;
     virtual unsigned int         l2ResultLength() const = 0;  // Length of raw info
     virtual const unsigned int*  l2Result() const = 0;  // Pointer to raw info
 
@@ -270,10 +285,19 @@ inline unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, in
 inline unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
 inline unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
 inline unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
+inline unsigned short StTriggerData::nQTdata(int prepost) const {return 0;};
+inline unsigned int*  StTriggerData::QTdata(int prepost) const {return 0;};
 inline unsigned short StTriggerData::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest) const {return 0;}
 inline unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
+inline unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
+inline unsigned      char*  StTriggerData::getDsm_FMS(int prepost) const {return 0;}
+inline unsigned      char*  StTriggerData::getDsm01_FMS(int prepost) const {return 0;}
+inline unsigned      char*  StTriggerData::getDsm02_FMS(int prepost) const {return 0;}
+inline unsigned short int*  StTriggerData::getDsm1_FMS(int prepost) const {return 0;}
+inline unsigned short int*  StTriggerData::getDsm2_FMS() const {return 0;}
+
 inline int StTriggerData::L2ResultsOffset(StL2AlgorithmId id) const {return -1;}  
 inline bool StTriggerData::isL2Triggered(StL2TriggerResultType id) const {return false;}  
 
