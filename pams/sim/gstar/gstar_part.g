@@ -1,6 +1,14 @@
-* $Id: gstar_part.g,v 1.17 2007/04/02 18:09:27 potekhin Exp $
+* $Id: gstar_part.g,v 1.18 2007/05/15 21:20:42 potekhin Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.18  2007/05/15 21:20:42  potekhin
+* The introduction of the Dalitz particle
+* had unforeseen consequence in that all
+* pi0's in Pythia simulations were counted
+* as Dalitz, which we clearly don't want.
+* I disable this feature until a better
+* solution is found.
+*
 * Revision 1.17  2007/04/02 18:09:27  potekhin
 * For the pi0 "embedding" studies, we need to enrich the
 * pi0 sample with Dalitz decays to enhance statistics.
@@ -117,8 +125,8 @@
 
 ************************************************************************************ 
 * special pi0 decay: 50% normal, 50% dalitz
-  Particle Dalitz    code=149        TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
-                     pdg=111  bratio= { 0.5, 0.5}  mode= { 101, 10203}
+*  Particle Dalitz    code=149        TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
+*                     pdg=111  bratio= { 0.5, 0.5}  mode= { 101, 10203}
 ************************************************************************************ 
   Particle omega     code=150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
                      pdg=223  bratio  = { .888, .085, .021 },  
