@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimField.cc,v 1.15 2003/10/07 14:01:48 jcs Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.16 2007/05/15 14:35:18 jcs Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.16  2007/05/15 14:35:18  jcs
+// update to be compatible with changes made to StFtpcTrackParams.cc
+// use default microsecondsPerTimebin value from database if no RHIC clock info available
+//
 // Revision 1.15  2003/10/07 14:01:48  jcs
 // remove double Stiostream.h include
 //
@@ -66,6 +70,7 @@
 #include "StFtpcSlowSimField.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
+#include "TMath.h"
 
 StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
                                        StFtpcDbReader *dbReader)
