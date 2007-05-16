@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.40 2007/04/20 06:25:21 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.41 2007/05/16 18:50:49 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -163,9 +163,9 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
 
   static int warningPrinted = 0;
   if (!warningPrinted) {
-     cout << "WARNING: You are using " << __PRETTY_FUNCTION__ 
-          << " which does not work properly " 
-             " for productions with FTPC >= SL04d and <= SL05g" << endl;
+     LOG_WARN << "WARNING: You are using " << __PRETTY_FUNCTION__ 
+              << " which does not work properly " 
+                 " for productions with FTPC >= SL04d and <= SL05g" << endm;
      warningPrinted = 1;
   }
   int nGlobals = global->GetEntries();
@@ -442,6 +442,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.41  2007/05/16 18:50:49  mvl
+ * Cleanup of output. Replaced cout with LOG_INFO etc.
+ *
  * Revision 1.40  2007/04/20 06:25:21  mvl
  * Removed Q-vectors (will implement utility class).
  * Added Vpd info.

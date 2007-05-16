@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.27 2006/12/20 21:53:15 mvl Exp $
+ * $Id: StMuChainMaker.cxx,v 1.28 2007/05/16 18:50:49 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -213,9 +213,9 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
 	string node = file.substr(rootdTag.length(),pos-rootdTag.length());
 	//cout << node.c_str() << endl;
 	if ( node == machine ) {
-	    cout << " filename changed from " << file.c_str();  
+	    LOG_INFO << " filename changed from " << file.c_str();  
 	    file.erase(0,pos+1);
-	    cout << " to : " << file.c_str() << endl;
+	    LOG_INFO << " to : " << file.c_str() << endm;
 	}
     }
     
@@ -331,7 +331,7 @@ void StMuChainMaker::fromList(string list) {
   DEBUGMESSAGE2("");
   ifstream inputStream(list.c_str());
   if (!(inputStream.good())) {
-     cout << "ERROR: Cannot open list file " << list << endl;
+     LOG_ERROR << "ERROR: Cannot open list file " << list << endm;
   }
   char line[512];
   char name[500];
@@ -374,6 +374,9 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.28  2007/05/16 18:50:49  mvl
+  * Cleanup of output. Replaced cout with LOG_INFO etc.
+  *
   * Revision 1.27  2006/12/20 21:53:15  mvl
   * Added warning when file list not found (read mode)
   *

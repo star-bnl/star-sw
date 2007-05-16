@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.13 2005/08/19 19:46:05 mvl Exp $
+ * $Id: StMuIOMaker.cxx,v 1.14 2007/05/16 18:50:48 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -9,6 +9,7 @@
  **************************************************************************/
 #include "StarClassLibrary/StTimer.hh"
 //#include "StMuEmcUtil.h"
+#include "StMessMgr.h"
 #include "StMuDebug.h"
 #include "StMuIOMaker.h"
 #include "StMuDst.h"
@@ -151,7 +152,7 @@ int StMuIOMaker::Make(const StUKey& key){
 //-----------------------------------------------------------------------
 int StMuIOMaker::Finish() {
   DEBUGMESSAGE("");
-  cout << "###### StMuIOMaker read " << mEventCounter << " events"  << endl;
+  LOG_INFO << "###### StMuIOMaker read " << mEventCounter << " events"  << endm;
   if(mMuSave && !mBadInFile && !mCloseWrite) { 
     if (mOutTree) mOutTree->AutoSave(); 
     closeMuWrite();
@@ -218,7 +219,7 @@ int StMuIOMaker::openRead() {
   mNumberOfEvents = (int)mChain->GetEntries();
 
   if(mNumberOfEvents == 1234567890) {
-     cout << "#### " << fFile.Data() << " Corrupted!" << endl;
+     LOG_WARN << "#### " << fFile.Data() << " Corrupted!" << endm;
      mBadInFile = true;
      closeRead();
      return kStOK;
@@ -231,8 +232,8 @@ int StMuIOMaker::openRead() {
   setBranchAddresses(mChain);
   mChain->BuildIndex("MuEvent.mEventInfo.mRunId","MuEvent.mEventInfo.mId");
   timer.stop();
-  cout << " Index of " << mNumberOfEvents << " events buit in " 
-       << timer.elapsedTime() << " seconds " << endl;
+  LOG_INFO << " Index of " << mNumberOfEvents << " events buit in " 
+           << timer.elapsedTime() << " seconds " << endm;
 
 
   mCurrentIndex = -1;
@@ -268,14 +269,14 @@ void StMuIOMaker::openMuWrite() {
 //-----------------------------------------------------------------------
 void StMuIOMaker::closeMuWrite(){
   DEBUGMESSAGE("");
-  cout << __PRETTY_FUNCTION__ << endl;
+  LOG_INFO << __PRETTY_FUNCTION__ << endm;
   if (mOutTree && mOutFile) {
-      cout << " ##### " << __PRETTY_FUNCTION__ << " ";
-      cout << " ##### " << endl;
-      cout << " ##### File=" << mOutFile->GetName() << " "; 
-      cout << " ##### " << endl;
-      cout << " ##### NumberOfEvents= " << mOutTree->GetEntries() << " ";
-      cout << " ##### " << endl;
+      LOG_INFO << " ##### " << __PRETTY_FUNCTION__ << " "
+               << " ##### " << endm;
+      LOG_INFO << " ##### File=" << mOutFile->GetName() << " " 
+               << " ##### " << endm;
+      LOG_INFO << " ##### NumberOfEvents= " << mOutTree->GetEntries() << " "
+               << " ##### " << endm;
   }
   StTimer timer;
   timer.reset();
@@ -287,13 +288,16 @@ void StMuIOMaker::closeMuWrite(){
   mOutFile = 0;
 
   timer.stop();
-  cout << " Writing took " << timer.elapsedTime() << " seconds " << endl;
+  LOG_INFO << " Writing took " << timer.elapsedTime() << " seconds " << endm;
   mCloseWrite = true;
   DEBUGMESSAGE3("out");
 }
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.14  2007/05/16 18:50:48  mvl
+ * Cleanup of output. Replaced cout with LOG_INFO etc.
+ *
  * Revision 1.13  2005/08/19 19:46:05  mvl
  * Further updates for multiple vertices. The main changes are:
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks
