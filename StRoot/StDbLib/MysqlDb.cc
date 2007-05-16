@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.41 2007/03/08 22:08:41 deph Exp $
+ * $Id: MysqlDb.cc,v 1.42 2007/05/16 22:48:09 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.42  2007/05/16 22:48:09  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.41  2007/03/08 22:08:41  deph
  * Load Balancer adjustments for machinePower features
  *
@@ -179,6 +182,7 @@
 #include "stdb_streams.h"
 #include "StDbDefaults.hh"
 #include "StDbManagerImpl.hh"
+#include "StMessMgr.h"
 
 //#include "errmsg.h"
 
@@ -321,7 +325,7 @@ strcpy(mdbhost,aHost);
 	}
       else
 	{
-	  cerr << "MysqlDb::Connect: StDbServiceBroker error "<<mSBStatus<<"\n";
+	  LOG_ERROR << "MysqlDb::Connect: StDbServiceBroker error "<<mSBStatus<<endm;
 	}
     }
   finish = clock();
@@ -857,13 +861,13 @@ unsigned int mysqlError;
     if(mysqlError==CR_SERVER_GONE_ERROR || mysqlError==CR_SERVER_LOST){
        reConnect();  
        if(mysql_select_db(&mData,dbName)){
-         cerr<< "Error selecting database=" << dbName << endl;
+         LOG_ERROR<< "Error selecting database=" << dbName << endm;
          tOk=false;
        } else {
          tOk=true;
        }
     } else {
-       cerr<< "Error selecting database=" << dbName << endl;
+       LOG_ERROR<< "Error selecting database=" << dbName << endm;
        tOk=false;
     }
  } else {

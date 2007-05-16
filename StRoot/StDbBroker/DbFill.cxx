@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbFill.cxx,v 1.6 2003/09/02 17:55:34 perev Exp $
+ * $Id: DbFill.cxx,v 1.7 2007/05/16 22:47:54 deph Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: DbFill.cxx,v $
+ * Revision 1.7  2007/05/16 22:47:54  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.6  2003/09/02 17:55:34  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -44,7 +47,7 @@
 #include <string.h>
 #include <Stsstream.h>
 #include <Stiostream.h>
-
+#include "StMessMgr.h"
 #include "mysql.h"
 #include "mysql_com.h"
 extern "C" char *strmov(char *dst,const char *src);//from mysqlclient lib
@@ -137,8 +140,8 @@ mysql_init(&mysql);
 if (!mysql_real_connect(&mysql,"localhost","stardb","","params",0,NULL,0))
 //if (!mysql_real_connect(&mysql,"db1.star.bnl.gov","writer","","params",0,NULL,0))
    {
-     cerr << "Failed to connect to database: Error: "
- 	 <<  mysql_error(&mysql) << endl;
+     LOG_ERROR << "Failed to connect to database: Error: "
+ 	 <<  mysql_error(&mysql) << endm;
    }
 
 //check structure name/size first
@@ -157,7 +160,7 @@ Query << "SELECT ID,version FROM structures WHERE name=\""<<structName
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
   {
-    cerr << "Failed to query: Error: " <<  mysql_error(&mysql) << endl;
+    LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
      mysql_close(&mysql);
      return;
   }
@@ -167,7 +170,7 @@ else // query succeeded, get result
     if (result) 
       {
 	num_fields = mysql_num_fields(result);
-	if (num_fields!=2) cerr <<"ERROR: wrong size of struct query"<<endl;
+	if (num_fields!=2) LOG_ERROR <<"ERROR: wrong size of struct query"<<endm;
 
 	num_struct = mysql_num_rows(result);
 	if (num_struct==0)// this is the new struct name/size to insert
@@ -195,7 +198,7 @@ else // query succeeded, get result
       }
     else   // query OK but, no result?!
       {
-	cerr << "no result: Error: " <<  mysql_error(&mysql) << endl;
+	LOG_ERROR << "no result: Error: " <<  mysql_error(&mysql) << endm;
 	mysql_close(&mysql);
 	return;
       } 
@@ -216,7 +219,7 @@ for (i=0;i<num_struct;i++)
     //cout << "database query: " << Query.str() << endl;
     if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
       {
-	cerr << "Failed to query: Error: " <<  mysql_error(&mysql) << endl;
+	LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
 	mysql_close(&mysql);
 	return;
       }
@@ -226,7 +229,7 @@ for (i=0;i<num_struct;i++)
 	if (result)// query OK
 	  {
 	    num_fields = mysql_num_fields(result);
-	    if (num_fields!=5) cerr << "ERROR: wrong size of headers query"<<endl;
+	    if (num_fields!=5) LOG_ERROR << "ERROR: wrong size of headers query"<<endm;
 	    
 	    num_rows = mysql_num_rows(result);
 	    
@@ -290,7 +293,7 @@ for (i=0;i<num_struct;i++)
 	  }
 	else   // something wrong
 	  {
-	    cerr << "no result, Error: " <<  mysql_error(&mysql) << endl;
+	    LOG_ERROR << "no result, Error: " <<  mysql_error(&mysql) << endm;
 	    mysql_close(&mysql);
 	    return;
 	  }
@@ -311,8 +314,8 @@ if (same==0)//we have to insert this structure
     //cout << "database query: " << Query.str() << endl;
     if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
       {
-	cerr<<"ERROR: Failed to insert, " <<  mysql_error(&mysql) << endl;
-	cerr << "database query: " << Query.str() << endl;
+	LOG_ERROR<<"ERROR: Failed to insert, " <<  mysql_error(&mysql) << endm;
+	LOG_ERROR << "database query: " << Query.str() << endm;
 	mysql_close(&mysql);
 	return;
       }
@@ -342,9 +345,9 @@ end += mysql_escape_string(end,Comments[j],lenComment);
   //if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
 	if (mysql_real_query(&mysql,query,(end - query)))
 	  {
-	    cerr<<"ERROR: Failed to insert, " <<  mysql_error(&mysql) << endl;
+	    LOG_ERROR<<"ERROR: Failed to insert, " <<  mysql_error(&mysql) << endm;
 	    *end++ = '\0';
-	    cerr << "database query: " << query << endl;
+	    LOG_ERROR << "database query: " << query << endm;
 	    mysql_close(&mysql);
 	    return;
 	  }
@@ -369,8 +372,8 @@ Query << "INSERT INTO instances SET name=\""<<tableName
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
   {
-    cerr << "Failed to query: Error: " <<  mysql_error(&mysql) << endl;
-    cerr << "database query: " << Query.str() << endl;
+    LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
+    LOG_ERROR << "database query: " << Query.str() << endm;
     mysql_close(&mysql);
     return;
   }
@@ -395,8 +398,8 @@ end += mysql_escape_string(end,(const char*)pData,byteSize);
 
 if (mysql_real_query(&mysql,binQuery,(int) (end - binQuery)))
   {
-      cerr << "Failed to insert binQuery: Error: "<<mysql_error(&mysql)<<endl;
-      cerr << "start of query: " << Query.str() << endl;
+      LOG_ERROR << "Failed to insert binQuery: Error: "<<mysql_error(&mysql)<<endm;
+      LOG_ERROR << "start of query: " << Query.str() << endm;
       mysql_close(&mysql);
       return;
   }

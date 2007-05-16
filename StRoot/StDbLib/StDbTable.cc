@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.38 2005/09/07 22:03:04 deph Exp $
+ * $Id: StDbTable.cc,v 1.39 2007/05/16 22:48:10 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.39  2007/05/16 22:48:10  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.38  2005/09/07 22:03:04  deph
  * update to correct padding issue for pacted tables
  *
@@ -168,6 +171,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.39  2007/05/16 22:48:10  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.38  2005/09/07 22:03:04  deph
  * update to correct padding issue for pacted tables
  *
@@ -331,6 +337,7 @@
 #include "StDbBuffer.h"
 #include "typeAcceptor.hh"
 #include "StTableDescriptorI.h"
+#include "StMessMgr.h"
 #include "StDbDefaults.hh"
 #include "StDbManager.hh"
 #include <string.h>
@@ -857,7 +864,7 @@ char* ptr;
   if(isReading)mhasData=true;
 
  } else {
-   cerr << "dbStreamer:: more rows delivered than allocated " << endl;
+   LOG_ERROR << "dbStreamer:: more rows delivered than allocated " << endm;
  }
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
 }

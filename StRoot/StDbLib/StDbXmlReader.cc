@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.12 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbXmlReader.cc,v 1.13 2007/05/16 22:48:10 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.13  2007/05/16 22:48:10  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.12  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -65,6 +68,7 @@
 #include <string.h>
 
 #include "dbStruct.hh"
+#include "StMessMgr.h"
 
 template<class T>
 static void passAux(elem* e, T*& i,  int& len)
@@ -429,7 +433,7 @@ if(p1){
 
 void
 StDbXmlReader::pass(char* name, char*& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"String")==0){
    i=new char[strlen((e->val).data)+1];
    strcpy(i,(e->val).data);
@@ -440,7 +444,7 @@ StDbXmlReader::pass(char* name, char*& i,  int& len){
 
 void
 StDbXmlReader::pass(char* name, unsigned char& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"Char")==0)i=atoi((e->val).data);
 }
 
@@ -449,7 +453,7 @@ StDbXmlReader::pass(char* name, unsigned char& i,  int& len){
 void
 StDbXmlReader::pass(char* name, unsigned char*& i,  int& len)
 {
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"UChar")) return;
  passAux(e,i,len);
 }
@@ -462,7 +466,7 @@ StDbXmlReader::pass(char* name, unsigned char*& i,  int& len)
 
 void
 StDbXmlReader::pass(char* name, short& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"Short")==0)i=atoi((e->val).data);
 }
 
@@ -472,7 +476,7 @@ StDbXmlReader::pass(char* name, short& i,  int& len){
 void
 StDbXmlReader::pass(char* name, short*& i,  int& len){
 
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"Short"))return;
  passAux(e,i,len);
 }
@@ -482,7 +486,7 @@ StDbXmlReader::pass(char* name, short*& i,  int& len){
 
 void
 StDbXmlReader::pass(char* name, unsigned short& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"UShort")==0)i=atoi((e->val).data);
 }
 
@@ -492,7 +496,7 @@ StDbXmlReader::pass(char* name, unsigned short& i,  int& len){
 void
 StDbXmlReader::pass(char* name, unsigned short*& i,  int& len){
 
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"UShort"))return;
  passAux(e,i,len);
 }
@@ -501,7 +505,7 @@ void
 StDbXmlReader::pass(char* name, int& i,  int& len){
   //  cout << "In Int " << endl;
 
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"Int")==0)i=atoi((e->val).data);
 }
 
@@ -511,13 +515,13 @@ void
 StDbXmlReader::pass(char* name, int*& i,  int& len){
 
   //  cout << "In IntArray " << endl;
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"Int")) return; 
  passAux(e,i,len);
 }
 void
 StDbXmlReader::pass(char* name,unsigned int& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"UInt")==0)i=atoi((e->val).data);
 }
 
@@ -526,7 +530,7 @@ StDbXmlReader::pass(char* name,unsigned int& i,  int& len){
 void
 StDbXmlReader::pass(char* name,unsigned int*& i,  int& len){
 
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"UInt"))return;
  passAux(e,i,len);
 }
@@ -535,7 +539,7 @@ StDbXmlReader::pass(char* name,unsigned int*& i,  int& len){
 
 void
 StDbXmlReader::pass(char* name, long& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"Long")==0)i=atol((e->val).data);
 }
 
@@ -545,7 +549,7 @@ StDbXmlReader::pass(char* name, long& i,  int& len){
 void
 StDbXmlReader::pass(char* name, long*& i,  int& len){
 
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"Long")) return;
  passAux(e,i,len);
 }
@@ -554,7 +558,7 @@ StDbXmlReader::pass(char* name, long*& i,  int& len){
 
 void
 StDbXmlReader::pass(char* name, unsigned long& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"ULong")==0)i=atol((e->val).data);
 }
 
@@ -562,7 +566,7 @@ StDbXmlReader::pass(char* name, unsigned long& i,  int& len){
 
 void
 StDbXmlReader::pass(char* name, long long& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
 #ifndef __osf__
  if(strcmp(e->type,"LongLong")==0)i=atoll((e->val).data);
 #else
@@ -581,7 +585,7 @@ StDbXmlReader::pass(char* name, long long*& i,  int& len){
 void
 StDbXmlReader::pass(char* name, unsigned long*& i,  int& len){
 
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"ULong"))return;
  passAux(e,i,len);
 }
@@ -592,7 +596,7 @@ StDbXmlReader::pass(char* name, unsigned long*& i,  int& len){
 void
 StDbXmlReader::pass(char* name, float*& i,  int& len){
 
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"Float")) return; 
  passAux(e,i,len);
 }
@@ -601,7 +605,7 @@ StDbXmlReader::pass(char* name, float*& i,  int& len){
 void
 StDbXmlReader::pass(char* name, double*& i,  int& len){
 
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(!strstr(e->type,"Double"))return;
  passAux(e,i,len);
 }
@@ -609,7 +613,7 @@ StDbXmlReader::pass(char* name, double*& i,  int& len){
 
 void
 StDbXmlReader::pass(char* name, float& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"Float")==0)i=(float)atof((e->val).data);
 
 }
@@ -617,7 +621,7 @@ StDbXmlReader::pass(char* name, float& i,  int& len){
 
 void
 StDbXmlReader::pass(char* name, double& i,  int& len){
- elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ elem* e = findElement(name); if(!e){ LOG_ERROR<<name<<" not found"<<endm; return;}
  if(strcmp(e->type,"Double")==0)i=atof((e->val).data);
 
 }

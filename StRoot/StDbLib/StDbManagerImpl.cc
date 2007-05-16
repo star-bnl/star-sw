@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.25 2007/03/08 22:01:44 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.26 2007/05/16 22:48:10 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.26  2007/05/16 22:48:10  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.25  2007/03/08 22:01:44  deph
  * minor change (removed a break) to allow load balancer to be backward compatible with online migration code
  *
@@ -216,6 +219,7 @@
 #include "StDbTableIter.hh"
 #include "dbCollection.h"
 #include "StDbMessenger.hh"
+#include "StMessMgr.h"
 #include "stdb_streams.h"
 //#include "StDbDefs.hh"
 #include <string.h>
@@ -486,7 +490,7 @@ void StDbManagerImpl::lookUpServers(){
     {
       delete myServiceBroker;
       myServiceBroker = 0;
-      cerr << "StDbManagerImpl::lookUpServers() StDbServiceBroker error "<<SBStatus<<"\n";
+      LOG_ERROR << "StDbManagerImpl::lookUpServers() StDbServiceBroker error "<<SBStatus<<endm;
     }
 #endif
 

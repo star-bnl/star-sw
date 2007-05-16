@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.21 2004/01/15 00:02:24 fisyak Exp $
+ * $Id: StDbBuffer.cc,v 1.22 2007/05/16 22:48:10 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.22  2007/05/16 22:48:10  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.21  2004/01/15 00:02:24  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -111,6 +114,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stdb_streams.h"
+#include "StMessMgr.h"
 
 
 #ifdef HPUX
@@ -269,7 +273,7 @@ void StDbBuffer::MemSwapCpy(char* where,char* from,int len,int swaplen,BuffMode 
     memcpy(where,from,len);
   } else {
     if (len%swaplen!=0) {
-      cerr << "memswapcy: len not in agreement with swapping - binary  truncate " << endl;
+      LOG_ERROR << "memswapcy: len not in agreement with swapping - binary  truncate " << endm;
     };
     int tNbCpy=len/swaplen;
     int i;

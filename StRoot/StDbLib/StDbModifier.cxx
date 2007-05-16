@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.5 2005/09/07 22:04:02 deph Exp $
+ * $Id: StDbModifier.cxx,v 1.6 2007/05/16 22:48:10 deph Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.6  2007/05/16 22:48:10  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.5  2005/09/07 22:04:02  deph
  * update to correct padding issue for packed tables
  *
@@ -34,7 +37,7 @@
 
 #include "TROOT.h"
 #include "TInterpreter.h"
-
+#include "StMessMgr.h"
 #include "TTable.h"
 
 #include "StDbLib/StDbManager.hh"
@@ -196,7 +199,7 @@ Int_t StDbModifier::WriteDataToDB()
   command = ".L ";                  // by ReadDataFromDB()
   command += fInputFileName;
 
-  if ( fDebug == 1 ) printf("   LoadTable: %s\n",(const char*)command);
+  if ( fDebug == 1 ) LOG_INFO<<"   LoadTable: "<<(const char*)command<<endm;
 
   gInterpreter->ProcessLine(command);                                 // Load the file in CINT
   TTable* table = (TTable*) gInterpreter->Calc("CreateTable()");      // execute comand in the file

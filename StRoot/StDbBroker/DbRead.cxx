@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbRead.cxx,v 1.7 2001/01/22 18:40:24 porter Exp $
+ * $Id: DbRead.cxx,v 1.8 2007/05/16 22:47:54 deph Exp $
  *
  * Author: S. Vanyashin 
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: DbRead.cxx,v $
+ * Revision 1.8  2007/05/16 22:47:54  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.7  2001/01/22 18:40:24  porter
  * Added a wrapper for StMessage so one can use it in StDbLib
  *
@@ -37,6 +40,7 @@
 #include "StDbLib/StDbConfigNode.hh"
 #include "StDbLib/StDbTable.h"
 #include "StDbLib/StDbTableDescriptor.h"
+#include "StMessMgr.h"
 
 // modified for general access
 
@@ -100,7 +104,7 @@ if(!tableVersion)strcpy((char*)version,"default");
    char* atype;
    char* adomain;
    if(!mgr->getDataBaseInfo(database, atype, adomain)){
-     cerr << "StDbManager:: Database specified incorrectly" << endl;
+     LOG_ERROR << "StDbManager:: Database specified incorrectly" << endm;
      *nRows=0;
      return NULL;
    } 

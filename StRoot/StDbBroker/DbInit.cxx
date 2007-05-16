@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbInit.cxx,v 1.6 2003/09/02 17:55:35 perev Exp $
+ * $Id: DbInit.cxx,v 1.7 2007/05/16 22:47:54 deph Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: DbInit.cxx,v $
+ * Revision 1.7  2007/05/16 22:47:54  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.6  2003/09/02 17:55:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -22,6 +25,7 @@
 //this function check if it is possible to connect to database server
 #include <Stiostream.h>
 #include "mysql.h"
+#include "StMessMgr.h"
 
 extern "C" int DbInit(const char * dbName)
 {
@@ -50,8 +54,8 @@ const char *dbHost="db1.star.bnl.gov";
 
 if (!mysql_real_connect(&mysql,dbHost,"","",database,0,NULL,0))
    {
-     cerr << "Failed to connect to database: "<<database<< endl;
-     cerr << "MySQL ERROR: " <<  mysql_error(&mysql) << endl;
+     LOG_ERROR << "Failed to connect to database: "<<database<< endm;
+     LOG_ERROR << "MySQL ERROR: " <<  mysql_error(&mysql) << endm;
      return 1;
    }
 
