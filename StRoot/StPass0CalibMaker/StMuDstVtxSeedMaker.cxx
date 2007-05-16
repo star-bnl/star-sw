@@ -91,15 +91,18 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
 }
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StMuDstVtxSeedMaker.cxx,v 1.4 2006/09/01 22:27:16 genevb Exp $\n");
-  printf("**************************************************************\n");
+  LOG_INFO << "\n**************************************************************"
+           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.5 2007/05/16 02:59:25 genevb Exp $"
+           << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.4 2006/09/01 22:27:16 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.5 2007/05/16 02:59:25 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.5  2007/05/16 02:59:25  genevb
+// printf => LOG_INFO
+//
 // Revision 1.4  2006/09/01 22:27:16  genevb
 // More detailed info in ntuple
 //
