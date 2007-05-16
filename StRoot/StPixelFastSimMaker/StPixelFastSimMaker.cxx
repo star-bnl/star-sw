@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.26 2007/04/28 17:56:36 perev Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.27 2007/05/16 15:06:55 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.27  2007/05/16 15:06:55  andrewar
+ * Switched cout's to LOG_INFO.
+ *
  * Revision 1.26  2007/04/28 17:56:36  perev
  * Redundant StChain.h removed
  *
@@ -185,9 +188,9 @@ Int_t StPixelFastSimMaker::Make()
 
   // Get the input data structures from StEvent and StMcEvent
     StEvent* rcEvent =  (StEvent*) GetInputDS("StEvent");
-    if (! rcEvent) {cout << "No StEvent on input" << endl; return kStWarn;}
+    if (! rcEvent) {LOG_INFO << "No StEvent on input" << endl; return kStWarn;}
     StMcEvent* mcEvent = (StMcEvent *) GetInputDS("StMcEvent");
-    if (! mcEvent) {cout << "No StMcEvent on input" << endl; return kStWarn;}
+    if (! mcEvent) {LOG_INFO << "No StMcEvent on input" << endl; return kStWarn;}
     if (! gGeoManager) GetDataBase("VmcGeometry");
 
     
@@ -562,7 +565,7 @@ Int_t StPixelFastSimMaker::Make()
   }									 
   else
     {
-      cout <<"No Ist hits found."<<endl;
+      LOG_INFO <<"No Ist hits found."<<endl;
     }
 
     
@@ -602,7 +605,7 @@ Int_t StPixelFastSimMaker::Make()
 	  }							 
 	}									 
      
-     cout <<"StPixelFastSimMaker::Make() -I- Loaded Hpd  "
+     LOG_INFO <<"StPixelFastSimMaker::Make() -I- Loaded Hpd  "
 			 <<nhits<<" hpd hits. "<<endl;
     }
   else
