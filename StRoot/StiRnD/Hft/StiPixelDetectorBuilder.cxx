@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.19 2007/05/03 06:14:56 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.20 2007/05/16 15:02:57 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.20  2007/05/16 15:02:57  andrewar
+ * Removed couts in favor of LOG_INFO.
+ *
  * Revision 1.19  2007/05/03 06:14:56  andrewar
  * Geometry fix to conform to StiHit:setGlobal() test.
  *
@@ -69,7 +72,7 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
     if (inF)
       {
 	_trackingParameters.loadFS(inF);
-	cout << "StiPixelDetectorBuilder:: -I-  New tracking parameters from file" << endl;
+	LOG_INFO << "StiPixelDetectorBuilder:: -I-  New tracking parameters from file" << endl;
       }
     else
       {
@@ -176,7 +179,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	  //     << pDetector->getKey(1) << " "  << pDetector->getKey(2) << endl;
 	}
     }
-  cout << "StiPixelDetectorBuilder::buildDetectors() -I- Done" << endl;
+  LOG_INFO << " -I- Done" << endl;
 }
 
 void StiPixelDetectorBuilder::useVMCGeometry() {
