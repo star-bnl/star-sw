@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbUse.cxx,v 1.11 2005/12/06 21:33:03 deph Exp $
+ * $Id: DbUse.cxx,v 1.12 2007/05/16 22:47:54 deph Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: DbUse.cxx,v $
+ * Revision 1.12  2007/05/16 22:47:54  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.11  2005/12/06 21:33:03  deph
  * clean up to remove warnings
  *
@@ -61,7 +64,7 @@
 #include "mysql.h"
 #include "mysql_com.h"
 #include "DbEndian.h"
-
+#include "StMessMgr.h"
 #include "StDbBroker.h"
 
 extern "C" void * DbUse(uint *nRows,
@@ -142,8 +145,8 @@ char *dbHost=new char[strlen("db1.star.bnl.gov")+1];strcpy(dbHost,"db1.star.bnl.
 
 if (!mysql_real_connect(&mysql,dbHost,"","",dbName,0,NULL,0))
    {
-     cerr << "Failed to connect to database: Error: "
- 	 <<  mysql_error(&mysql) << endl;
+     LOG_ERROR << "Failed to connect to database: Error: "
+ 	 <<  mysql_error(&mysql) << endm;
      *nRows=0;
      return NULL;
    }
@@ -159,7 +162,7 @@ if(strlen(tableName)>0)
   }
 else
   {
-    cerr<<"ERROR: Zero length for Table Name is not allowed"<<endl;
+    LOG_ERROR<<"ERROR: Zero length for Table Name is not allowed"<<endm;
     return NULL;
   }
 
@@ -169,7 +172,7 @@ int latestDirTime;
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
   {
-    cerr << "Failed to query: Error: " <<  mysql_error(&mysql) << endl;
+    LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
     mysql_close(&mysql);
     return NULL;
   }
@@ -179,22 +182,22 @@ else // query succeeded, get result
     if (result) 
       {
 	num_fields = mysql_num_fields(result);
-	if (num_fields!=1) cerr << "ERROR: wrong size of LATEST query"<<endl;
+	if (num_fields!=1) LOG_ERROR << "ERROR: wrong size of LATEST query"<<endm;
 
 	num_latest = mysql_num_rows(result);
 
 	if (num_latest==0)// found nothing
 	  {
-  	    cerr << "INFO: db " << dbName << " on host "<< dbHost 
+  	    LOG_ERROR << "INFO: db " << dbName << " on host "<< dbHost 
 		 << " has no struct+table pair "<<structName<<"+"<< tableName 
- 		 << " valid for "<<currentDateTime <<endl;
+ 		 << " valid for "<<currentDateTime <<endm;
 	    mysql_close(&mysql);
 	    return NULL;
 	  }
 	else   // this structure name already exists
 	  {
-	if (num_latest>1) cerr << "ERROR: found more than one latest date"
-			       << tableName << endl;
+	if (num_latest>1) LOG_ERROR << "ERROR: found more than one latest date"
+			       << tableName << endm;
 
 // 	    cout<<"Found "<<num_latest<<" struct "<<structName<<" for table "<<tableName<<endl;
 		row = mysql_fetch_row(result);
@@ -225,7 +228,7 @@ else // query succeeded, get result
       }
     else   // query OK but, no result?!
       {
-	cerr << "no result: Error: " <<  mysql_error(&mysql) << endl;
+	LOG_ERROR << "no result: Error: " <<  mysql_error(&mysql) << endm;
      mysql_close(&mysql);
      return NULL;
       }
@@ -245,7 +248,7 @@ uint nDbVar=99999;
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
   {
-    cerr << "Failed to query: Error: " <<  mysql_error(&mysql) << endl;
+    LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
      mysql_close(&mysql);
      return NULL;
   }
@@ -255,14 +258,14 @@ else // query succeeded, get result
     if (result) 
       {
 	num_fields = mysql_num_fields(result);
-	if (num_fields!=5) cerr << "ERROR: wrong size of latest entries query"<<endl;
+	if (num_fields!=5) LOG_ERROR << "ERROR: wrong size of latest entries query"<<endm;
 
 	num_instances = mysql_num_rows(result);
 
 	if (num_instances==0)// found nothing
 	  {
-            cerr << "ERROR: db " << dbName << " has lost the struct+table pair "
-                 <<structName<<"+"<< tableName << endl;
+            LOG_ERROR << "ERROR: db " << dbName << " has lost the struct+table pair "
+                 <<structName<<"+"<< tableName << endm;
 	    mysql_close(&mysql);
 	    return NULL;
 	  }
@@ -270,11 +273,11 @@ else // query succeeded, get result
 	  {
 	    if (num_instances>1)// bad
 	      {
-		cerr << "INFO: db " << dbName << " has more then one struct+table pair "
+		LOG_ERROR << "INFO: db " << dbName << " has more then one struct+table pair "
 		     <<structName<<"+"<< tableName 
 		     << " valid for "<<currentDateTime
 		     <<", the LAST INSERTED is used"<<endl;
-		cerr << "database query: " << Query.str() << endl;
+		LOG_ERROR << "database query: " << Query.str() << endm;
 	      }
             for (uint id=0;id<num_instances;id++)
               {
@@ -290,7 +293,7 @@ else // query succeeded, get result
       }
     else   // query OK but, no result?!
       {
-	cerr << "no result: Error: " <<  mysql_error(&mysql) << endl;
+	LOG_ERROR << "no result: Error: " <<  mysql_error(&mysql) << endm;
 	mysql_close(&mysql);
 	return NULL;
       }
@@ -300,18 +303,18 @@ Query.seekp(0);
 
 if(sizeOfDbStruct!=sizeOfStruct)
   {
-    cerr<<"ERROR: DB struct byteSize is "<<sizeOfDbStruct<<endl;
-    cerr<<"     user struct byteSize is "<<sizeOfStruct<<endl;
-    cerr << "structure: "<<structName<<endl;
+    LOG_ERROR<<"ERROR: DB struct byteSize is "<<sizeOfDbStruct<<endm;
+    LOG_ERROR<<"     user struct byteSize is "<<sizeOfStruct<<endm;
+    LOG_ERROR << "structure: "<<structName<<endm;
     *nRows=0;
     return NULL;
   }
 
 if(nVar!=nDbVar)
   {
-    cerr << "ERROR: DB struct nVariables is "<<nDbVar<<endl;
-    cerr << "     user struct nVariables is "<<nVar<<endl; 
-    cerr << "structure: "<<structName<<endl;
+    LOG_ERROR << "ERROR: DB struct nVariables is "<<nDbVar<<endm;
+    LOG_ERROR << "     user struct nVariables is "<<nVar<<endm; 
+    LOG_ERROR << "structure: "<<structName<<endm;
    *nRows = 0;
     return NULL;
   }
@@ -331,7 +334,7 @@ Query<<"SELECT name, type, offset, nDims, firstDim FROM headers WHERE strID="
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
   {
-    cerr << "Failed to query: Error: " << mysql_error(&mysql) << endl;
+    LOG_ERROR << "Failed to query: Error: " << mysql_error(&mysql) << endm;
     mysql_close(&mysql);
     return NULL;
   }
@@ -341,7 +344,7 @@ else // query succeeded, get result
     if (result)// query OK
       {
 	num_fields = mysql_num_fields(result);
-	if (num_fields!=5) cerr<<"ERROR: wrong size of headers query"<<endl;
+	if (num_fields!=5) LOG_ERROR<<"ERROR: wrong size of headers query"<<endm;
 	
 	num_rows = mysql_num_rows(result);
 	//        cout<<"total variables: "<< num_rows <<endl;
@@ -408,25 +411,25 @@ for (j=0;j<nVar;j++)
 
 if (count!=nVar)
   {
-    cerr<<"structure " << structName
-	<<" is not compatible with database instance ID "<<latestDirID<<endl;
-    cerr <<"nVar "<<nVar<<", count "<<count<<endl;
+    LOG_ERROR<<"structure " << structName
+	<<" is not compatible with database instance ID "<<latestDirID<<endm;
+    LOG_ERROR <<"nVar "<<nVar<<", count "<<count<<endm;
 
     for (j=0;j<nVar;j++)
       {
-	cerr<<"names: \""<<d[j].fColumnName<<"\" \""<<names[j]<<"\""<<endl;
+	LOG_ERROR<<"names: \""<<d[j].fColumnName<<"\" \""<<names[j]<<"\""<<endm;
 	if (strcmp(d[j].fColumnName,names[j]))
 	  break;
 	
-	cerr<<"offset: "<<d[j].fOffset<<" "<<offset[j]<<endl;
+	LOG_ERROR<<"offset: "<<d[j].fOffset<<" "<<offset[j]<<endm;
 	if ( d[j].fOffset!=(unsigned int)offset[j] )
 	  break;
 	
-	cerr<<"nDims: "<<d[j].fDimensions<<" "<<nDims[j]<<endl;
+	LOG_ERROR<<"nDims: "<<d[j].fDimensions<<" "<<nDims[j]<<endm;
 	if ( d[j].fDimensions!=(unsigned int)nDims[j] )
 	  break;
 
-	cerr<<"firstDim: "<<d[j].fIndexArray[0]<<" "<<firstDim[j]<<endl;
+	LOG_ERROR<<"firstDim: "<<d[j].fIndexArray[0]<<" "<<firstDim[j]<<endm;
 	if ( d[j].fIndexArray[0]!=(unsigned int)firstDim[j] )
 	  break;
       }
@@ -443,9 +446,9 @@ if (count!=nVar)
 void* pDbData = calloc((size_t) *nRows, (size_t) sizeOfDbStruct);
 
 if (pDbData==NULL){
-  cerr<<"DbUse: failed to allocate memory nedeed for the array of "
+  LOG_ERROR<<"DbUse: failed to allocate memory nedeed for the array of "
       << *nRows <<" structs " <<structName <<" each of "
-      <<sizeOfStruct <<" bytes"<<endl;
+      <<sizeOfStruct <<" bytes"<<endm;
   *nRows=0;
   return NULL;
 }
@@ -462,8 +465,8 @@ Query << "SELECT bytes FROM bytes WHERE instanceID="<<latestDirID<< ends;
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
   {
-    cerr << "Failed to query: Error: " <<  mysql_error(&mysql) << endl;
-    cerr << "database query: " << Query.str() << endl;
+    LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
+    LOG_ERROR << "database query: " << Query.str() << endm;
      mysql_close(&mysql);
      return NULL;
   }
@@ -472,29 +475,29 @@ else // query succeeded, get result
     result = mysql_store_result(&mysql);
     if (!result)   // query OK but, no result?!
       {
-	cerr << "no result: Error: " <<  mysql_error(&mysql) << endl;
+	LOG_ERROR << "no result: Error: " <<  mysql_error(&mysql) << endm;
 	mysql_close(&mysql);
 	return NULL;
       }
     else 
       {
 	num_fields = mysql_num_fields(result);
-	if (num_fields!=1) cerr << "ERROR: wrong size of blob query"<<endl;
+	if (num_fields!=1) LOG_ERROR << "ERROR: wrong size of blob query"<<endm;
 
 	num_blobs = mysql_num_rows(result);
 
 	if (num_blobs==0)// found nothing
 	  {
-  	    cerr << "ERROR: db " << dbName << " has lost BLOB for struct+table pair "
+  	    LOG_ERROR << "ERROR: db " << dbName << " has lost BLOB for struct+table pair "
   		 <<structName<<"+"<< tableName 
- 		 << " valid for "<<currentDateTime <<endl;
+ 		 << " valid for "<<currentDateTime <<endm;
 	    mysql_close(&mysql);
 	    return NULL;
 	  }
 	else
 	  {
-	    if (num_blobs>1) cerr << "ERROR: found more than one BLOB for "
-				  <<tableName<<endl;
+	    if (num_blobs>1) LOG_ERROR << "ERROR: found more than one BLOB for "
+				  <<tableName<<endm;
 	    //this is the place where data are fethched
 	    row = mysql_fetch_row(result);
 
@@ -505,13 +508,13 @@ else // query succeeded, get result
 		//cout << "blob size "<<lengths[0]<<" for table "<<tableName<<endl;
 		if (lengths[0]!=(*nRows)*sizeOfDbStruct)
 		  {
-		    cerr << "ERROR: wrong blob size "
-			 <<tableName<<endl;
-		    cerr <<"lengths[0] "<<lengths[0]
+		    LOG_ERROR << "ERROR: wrong blob size "
+			 <<tableName<<endm;
+		    LOG_ERROR <<"lengths[0] "<<lengths[0]
 			 <<", nRows "<<(*nRows)
 			 <<", sizeOfDbStruct "<<sizeOfDbStruct
 			 <<", nRows*sizeOfDbStruct "<<(*nRows)*sizeOfDbStruct
-			 <<endl;
+			 <<endm;
 		    mysql_close(&mysql);
 		    *nRows=0;
 		    return NULL;
@@ -538,12 +541,12 @@ else // query succeeded, get result
 			    nTimes=d[j].fIndexArray[0];
 			    break;
 			  case 2:
-			    cerr<<"two-dims not handled yet"<<endl;
+			    LOG_ERROR<<"two-dims not handled yet"<<endm;
 			    nTimes=0;
 			    //nTimes=d[j].firstDimension*d[j].secondDimension;
 			    break;
 			  default:
-			    cerr << "ERROR: more that one dimension "<<endl;
+			    LOG_ERROR << "ERROR: more that one dimension "<<endm;
 			    nTimes=0;
 			    break;
 			  }
@@ -596,7 +599,7 @@ else // query succeeded, get result
 			      
 			    case kNAN:
 			    default:
-			      cerr << "ERROR: unknown type!"<<endl;
+			  LOG_ERROR << "ERROR: unknown type!"<<endm;
 			      break;
 			    }
 			}//end loop over array variable
@@ -622,7 +625,7 @@ int nextDirTime;
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
   {
-    cerr << "Failed to query: Error: " <<  mysql_error(&mysql) << endl;
+    LOG_ERROR << "Failed to query: Error: " <<  mysql_error(&mysql) << endm;
      mysql_close(&mysql);
      return NULL;
   }
@@ -632,7 +635,7 @@ else // query succeeded, get result
     if (result) 
       {
 	num_fields = mysql_num_fields(result);
-	if (num_fields!=1) cerr << "ERROR: wrong size of next date query"<<endl;
+	if (num_fields!=1) LOG_ERROR << "ERROR: wrong size of next date query"<<endm;
 
 	num_next = mysql_num_rows(result);
 
@@ -646,8 +649,8 @@ else // query succeeded, get result
 	  }
 	else   //validity limit exists
 	  {
-	    if (num_next>1) cerr << "ERROR: found more than one next date"
-				 <<tableName<<endl;
+	    if (num_next>1) LOG_ERROR << "ERROR: found more than one next date"
+				 <<tableName<<endm;
 //  	    cout<<"Found next "<<num_next<<" struct "<<structName<<" for table "<<tableName<<endl;
 
 		row = mysql_fetch_row(result);
@@ -679,7 +682,7 @@ else // query succeeded, get result
       }
     else   // query OK but, no result?!
       {
-	cerr << "no result: Error: " <<  mysql_error(&mysql) << endl;
+	LOG_ERROR << "no result: Error: " <<  mysql_error(&mysql) << endm;
 	mysql_close(&mysql);
 	return NULL;
       }

@@ -2,6 +2,7 @@
 #include <iostream>
 #include "StlXmlTree.h"
 #include "ChapiStringUtilities.h"
+#include "StMessMgr.h"
 
 using std::string;
 using std::vector;

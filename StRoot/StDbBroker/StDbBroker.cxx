@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.49 2006/01/13 21:09:41 deph Exp $
+ * $Id: StDbBroker.cxx,v 1.50 2007/05/16 22:47:54 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.50  2007/05/16 22:47:54  deph
+ * Replaced cerr with LOG_ERROR <<endm; for logger
+ *
  * Revision 1.49  2006/01/13 21:09:41  deph
  * Fixed minor memory leak
  *
@@ -172,6 +175,7 @@
 #include <stdlib.h> 
 
 #include "TString.h"
+#include "StMessMgr.h"
 
 // needed for GetComments
 #include "TROOT.h"
@@ -273,7 +277,7 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
     
     if(m_descriptor[i].fDimensions>1)
       {
-	cerr<<"dim>1, can't handle yet"<<endl;
+	LOG_ERROR<<"dim>1, can't handle yet"<<endm;
 	return;
       }
     
