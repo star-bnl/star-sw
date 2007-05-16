@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.18 2007/03/28 13:33:23 mmiller Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.19 2007/05/16 15:03:22 andrewar Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.19  2007/05/16 15:03:22  andrewar
+ * Removed cout's in favor of LOG_INFO.
+ *
  * Revision 1.18  2007/03/28 13:33:23  mmiller
  * Removed cout/printf's.
  *
@@ -56,18 +59,17 @@ void StiPixelHitLoader::loadHits(StEvent* source,
                                  Filter<StiHit> * hitFilter)
 {
 
-    cout << "StiPixelHitLoader::loadHits(StEvent*) -I- Started" << endl;
+    LOG_INFO << " -I- Started" << endl;
     if (!_detector)
 	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
     if(!_hitContainer)
 	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
-    cout << "StiPixelHitLoader::loadHits(StEvent*) -I- Done" << endl;
     
     StRnDHitCollection *col = source->rndHitCollection();
     if (!col) {
-	cout <<"StiPixelHitLoader::loadHits\tERROR:\tcol==0"<<endl;
-	cout <<"You must not have pixelFastSim in your chain"<<endl;
-	cout <<"will return with no action taken"<<endl;
+	LOG_ERROR <<"StiPixelHitLoader::loadHits\tERROR:\tcol==0"
+		  <<"You must not have pixelFastSim in your chain"
+		  <<"will return with no action taken"<<endm;
 	return;
     }
     StSPtrVecRnDHit& vec = col->hits();
@@ -135,7 +137,7 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 	nHit++;
       }
 
-    cout <<"StiPixelHitLoader:loadHits -I- Loaded "<<nHit<<" pixel hits."<<endl;
+    LOG_INFO <<"StiPixelHitLoader:loadHits -I- Loaded "<<nHit<<" pixel hits."<<endm;
 
 
 }
