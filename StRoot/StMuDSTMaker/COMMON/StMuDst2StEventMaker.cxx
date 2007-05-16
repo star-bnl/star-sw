@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.12 2004/10/21 02:59:01 mvl Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.13 2007/05/16 18:50:49 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -57,8 +57,8 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
     //}
 
   } else {
-    cout << "StMuDst2StEventMaker::Make() : WARNING Did not get pointer to MuDst. "    << endl;
-    cout <<  "                              StEvent will NOT be filled (nothing we can do)" << endl;
+    LOG_WARN << "StMuDst2StEventMaker::Make() : WARNING Did not get pointer to MuDst. "    << endm;
+    LOG_WARN <<  "                              StEvent will NOT be filled (nothing we can do)" << endm;
   }
   return 0;
 }
@@ -103,7 +103,7 @@ void StMuDst2StEventMaker::printTriggerIds(StEvent* ev) {
 }
 
 void StMuDst2StEventMaker::loopOverTracks(StEvent* ev) {
-    cout << "StMuDst2StEventMaker::loopOverTracks(...)" << endl;
+    LOG_DEBUG << "StMuDst2StEventMaker::loopOverTracks(...)" << endm;
     StDedxPidTraits dEdxPidTraits;
     StTpcDedxPidAlgorithm pidAlgorithm;
     // get the track nodes vector and loop over nodes
@@ -132,6 +132,9 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.13  2007/05/16 18:50:49  mvl
+ * Cleanup of output. Replaced cout with LOG_INFO etc.
+ *
  * Revision 1.12  2004/10/21 02:59:01  mvl
  * Now get MuDst from GetInputDS, instead of StMuDSTMaker
  *

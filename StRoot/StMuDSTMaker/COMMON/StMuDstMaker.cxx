@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.81 2007/04/27 17:07:01 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.82 2007/05/16 18:50:48 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -222,7 +222,7 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     char *sta=mStatusArrays+specIndex[i];
     int   num=specIndex[i+1]-specIndex[i];
     memset(sta,status,num);
-    printf("StMuDstMaker::SetStatus %d to %s\n",status,specNames[i]);
+    LOG_INFO << "StMuDstMaker::SetStatus " << status << " to " << specNames[i] << endm;
     if (mIoMode==ioRead)
       setBranchAddresses(mChain);
     return;
@@ -232,7 +232,7 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
   for (int i=0;i<__NALLARRAYS__;i++) {
     Ssiz_t len;
     if (re.Index(StMuArrays::arrayNames[i],&len) < 0)	continue;
-    printf("StMuDstMaker::SetStatus %d to %s\n",status,StMuArrays::arrayNames[i]);
+    LOG_INFO << "StMuDstMaker::SetStatus " << status << " to " << StMuArrays::arrayNames[i] << endm;
     mStatusArrays[i]=status;
   }
   if (mIoMode==ioRead)
@@ -487,8 +487,8 @@ int StMuDstMaker::Finish() {
   DEBUGMESSAGE2("");
   if (mFinish) {
     for ( int i=0; i<10; i++) {
-      cout << "why are you calling the Finish() again  ???????" << endl;
-      cout << "are you the stupid chain destructor ???????????" << endl;
+      LOG_INFO << "why are you calling the Finish() again  ???????" << endl;
+      LOG_INFO << "are you the stupid chain destructor ???????????" << endl;
     }
   }
   else {
@@ -686,10 +686,10 @@ void StMuDstMaker::openWrite(string fileName) {
 void StMuDstMaker::closeWrite(){
   DEBUGMESSAGE(__PRETTYF__);
   if (mTTree && mCurrentFile) {
-    cout << " ##### " << __PRETTYF__ << endl;
-    cout << " ##### File=" << mCurrentFile->GetName() << " ";
-    cout << " NumberOfEvents= " << mTTree->GetEntries() << " ";
-    cout << " ##### " << endl;
+    LOG_INFO << " ##### " << __PRETTYF__ << endm;
+    LOG_INFO << " ##### File=" << mCurrentFile->GetName() << " ";
+    LOG_INFO << " NumberOfEvents= " << mTTree->GetEntries() << " ";
+    LOG_INFO << " ##### " << endm;
   }
   //if (mTTree) mTTree->AutoSave();
   
@@ -1280,6 +1280,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.82  2007/05/16 18:50:48  mvl
+ * Cleanup of output. Replaced cout with LOG_INFO etc.
+ *
  * Revision 1.81  2007/04/27 17:07:01  mvl
  * Added protection against StEvent::triggerData() == 0 in EZTREE.
  *

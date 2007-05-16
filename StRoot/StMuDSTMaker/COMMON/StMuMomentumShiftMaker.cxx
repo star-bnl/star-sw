@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuMomentumShiftMaker.cxx,v 1.2 2005/05/07 01:56:25 jeromel Exp $
+ * $Id: StMuMomentumShiftMaker.cxx,v 1.3 2007/05/16 18:50:49 mvl Exp $
  * Author: Marco van Leeuwen, LBNL
  *
  * This class is used to correct the momenta of tracks on MicroDst after 
@@ -18,6 +18,7 @@
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 #include "StStrangeMuDstMaker/StXiMuDst.hh"
 #include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
+#include "StMessMgr.h"
 
 #include "TChain.h"
 #include "TFile.h"
@@ -70,7 +71,7 @@ int StMuMomentumShiftMaker::Make() {
 
   StMuDstMaker *mudstMaker = (StMuDstMaker*) GetMaker("MuDst");
   if (!mudstMaker) {
-    cout << "ERROR: cannot find MuDstMaker" << endl;
+    LOG_ERROR << "ERROR: cannot find MuDstMaker" << endm;
     return kStErr;
   }
   if (mWriteMuDst) {
@@ -88,7 +89,7 @@ int StMuMomentumShiftMaker::Make() {
       }
       mOutFile=new TFile(mOutDir+inBaseName,"RECREATE");
       if (!mOutFile->IsOpen()) {
-	cout << "ERROR in StMuMomentumShiftMaker::Make: cannot open output file: " << mOutDir+inBaseName << endl;
+	LOG_ERROR << "ERROR in StMuMomentumShiftMaker::Make: cannot open output file: " << mOutDir+inBaseName << endm;
       }
     }
   }
