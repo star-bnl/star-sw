@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.12 2007/05/11 03:04:57 mvl Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.13 2007/05/17 01:50:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.13  2007/05/17 01:50:34  fisyak
+ * Use PrimaryVertexCuts table
+ *
  * Revision 1.12  2007/05/11 03:04:57  mvl
  * Slightly tighter quality cuts on tracks: npoint>=20, radial dca < 1.
  * Widened the cut on close vertices to be mDcaZMax (3 cm)
@@ -104,6 +107,7 @@
  * Initial Version for development and integration
  *
  **************************************************************************/
+#include <assert.h>
 #include "StMinuitVertexFinder.h"
 #include "StEventTypes.h"
 #include "StEnumerations.h"
@@ -115,6 +119,8 @@
 #include <math.h>
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StDcaGeometry.h"
+#include "tables/St_VertexCuts_Table.h"
+#include "StMaker.h"
 vector<StDcaGeometry*>   StMinuitVertexFinder::mDCAs;
 vector<StPhysicalHelixD> StMinuitVertexFinder::mHelices;
 vector<unsigned short>   StMinuitVertexFinder::mHelixFlags;
@@ -147,12 +153,7 @@ StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 StMinuitVertexFinder::StMinuitVertexFinder() {
   LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
   mBeamHelix =0;
-
-  mMinNumberOfFitPointsOnTrack = 20; 
-  mDcaZMax = 3;     // Note: best to use integer numbers
-  mMinTrack = 5;
-  mRImpactMax = 1.5;
-
+  
   mMinuit = new TMinuit(3);         
   mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
   mMinuit->SetPrintLevel(-1);
@@ -178,6 +179,22 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
    mZImpact.clear();
    mSigma.clear();
  }
+//________________________________________________________________________________
+void StMinuitVertexFinder::InitRun(int runumber) {
+  St_VertexCuts *Cuts = (St_VertexCuts *) StMaker::GetChain()->GetDataBase("Calibrations/tracker/PrimaryVertexCuts");
+  assert(Cuts);
+  VertexCuts_st *cuts = Cuts->GetTable();
+  mMinNumberOfFitPointsOnTrack = cuts->MinNumberOfFitPointsOnTrack;
+  mDcaZMax                     = cuts->DcaZMax;     // Note: best to use integer numbers
+  mMinTrack                    = cuts->MinTrack;
+  mRImpactMax                  = cuts->RImpactMax;
+  LOG_INFO << "Set cuts: MinNumberOfFitPointsOnTrack = " << mMinNumberOfFitPointsOnTrack
+	   << " DcaZMax = " << mDcaZMax
+	   << " MinTrack = " << mMinTrack
+	   << " RImpactMax = " << mRImpactMax
+	   << endm;
+}
+//________________________________________________________________________________
 
 
 void
