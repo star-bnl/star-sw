@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.77 2007/04/28 17:57:12 perev Exp $
+// $Id: St_tcl_Maker.cxx,v 1.78 2007/05/17 14:13:02 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.78  2007/05/17 14:13:02  fisyak
+// replace printf and  cout by logger printouts
+//
 // Revision 1.77  2007/04/28 17:57:12  perev
 // Redundant StChain.h removed
 //
@@ -193,7 +196,7 @@ Int_t St_tcl_Maker::Make() {
 
   //  m_DataSet is global pointer from StMaker to data set
 
-  if (Debug()) printf("Start of TCL Maker");
+  if (Debug()) {gMessMgr->QAInfo() << Form("Start of TCL Maker") << endm;}
 
   // initialize pointers to tables
   tpseq = NULL;
@@ -226,25 +229,25 @@ Int_t St_tcl_Maker::Make() {
       if ((name = strstr(sector->GetName(),"Sector"))) {
 	// look for the sector number
 	name  = strchr(name,'_')+1; Int_t indx = atoi(name);
-	if (Debug()) printf(" Sector = %d \n", indx);
+	if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
 	St_DataSetIter sect(sector);
 	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
 	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
 	Int_t ipin = pixel_data_in->GetNRows();
 	Int_t ipout = pixel_data_out->GetNRows();
 	isumpix += ipin + ipout;
-	if (Debug()) cout << "Total number of pixels, " << isumpix << endl;
+	if (Debug()) {gMessMgr->QAInfo()  << "Total number of pixels, " << isumpix << endm;}
 	St_raw_seq  *raw_seq_in  = (St_raw_seq *) sect("raw_seq_in");
 	St_raw_seq  *raw_seq_out = (St_raw_seq *) sect("raw_seq_out");
 	Int_t nseqin = raw_seq_in->GetNRows();
 	Int_t nseqout = raw_seq_out->GetNRows();
 	isumseq += nseqin + nseqout;
-	if (Debug()) cout << "Total number of sequences, " << isumseq << endl;
+	if (Debug()) {gMessMgr->QAInfo()  << "Total number of sequences, " << isumseq << endm;}
       }
     }
     
     //calculate or estimate the size before creating the tables
-    if (Debug()) cout << "making tcl_tp table with " << isumseq << " entries" << endl;
+    if (Debug()) {gMessMgr->QAInfo()  << "making tcl_tp table with " << isumseq << " entries" << endm;}
     tpseq = new St_tcl_tp_seq("tpseq",isumseq);      
     m_DataSet->Add(tpseq);
 
@@ -289,7 +292,7 @@ Int_t St_tcl_Maker::Make() {
 	// look for the sector number
 	name  = strchr(name,'_') + 1; 
 	Int_t indx = atoi(name);
-	if (Debug()) printf(" Sector = %d \n", indx);
+	if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
 	tcl_sector_index_st *tcl_sector_index = m_tcl_sector_index->GetTable();
 	m_tcl_sector_index->SetNRows(1);
 	tcl_sector_index->CurrentSector = indx;
@@ -306,7 +309,7 @@ Int_t St_tcl_Maker::Make() {
 	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
 	
 	if (m_tclPixTransOn) {	  // call the pixel translation
-	  if(Debug()) printf("Starting %20s for sector %2d.\n","xyz_newtab",indx);
+	  if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","xyz_newtab",indx) << endm;}
 	  // Need to guard against zero size output tables
           if(adcxyz->GetTableSize()){	  
 	    Int_t res = xyz_newtab(m_tpg_detector,
@@ -320,7 +323,7 @@ Int_t St_tcl_Maker::Make() {
 	}
 	
 	//     	TCL
-        if(Debug()) printf("Starting %20s for sector %2d.\n","tcl",indx);
+        if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","tcl",indx) << endm;}
 	
 	// Need to guard against zero size output tables
 	if(tpcluster->GetTableSize()){	  
@@ -333,10 +336,10 @@ Int_t St_tcl_Maker::Make() {
 	}
 	// Create morphology table only if needed
 	if (m_tclMorphOn) {
-	  if(Debug()) printf("Starting %20s for sector %2d.\n","cluster_morphology",indx);
+	  if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","cluster_morphology",indx) << endm;}
 
 	  Int_t tcc_res = cluster_morphology( indx, pixel_data_in, pixel_data_out);
-	  if(tcc_res) { printf("ERROR %d, tcl maker\n",tcc_res); return kStErr; }
+	  if(tcc_res) {gMessMgr->Error() << Form("ERROR %d, tcl maker\n",tcc_res) << endm; return kStErr; }
 	}
       }
     }
@@ -352,7 +355,7 @@ Int_t St_tcl_Maker::Make() {
 	// look for the sector number
 	name  = strchr(name,'_') + 1; 
 	Int_t indx = atoi(name);
-	if (Debug()) printf(" Sector = %d \n", indx);
+	if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
 	tcl_sector_index_st *tcl_sector_index = m_tcl_sector_index->GetTable();
 	m_tcl_sector_index->SetNRows(1);
 	tcl_sector_index->CurrentSector = indx;
@@ -371,7 +374,7 @@ Int_t St_tcl_Maker::Make() {
 	Int_t k = indx;
 	if (sector_tot == 1) {k = -k;}
 	tcl_sector_index->CurrentSector = k;
-        if(Debug()) printf("Starting %20s for sector %2d.\n","tph",indx);
+        if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","tph",indx) << endm;}
 	// Need to guard against zero size output tables
 	if(tpcluster->GetTableSize()){	  
 	  Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
@@ -385,7 +388,7 @@ Int_t St_tcl_Maker::Make() {
     }
 
     if (sector_tot && m_tclEvalOn) { //slow simulation exist and evaluation switch set
-      if (Debug()) cout << "start run_tte_hit_match" << endl;
+      if (Debug()) {gMessMgr->QAInfo()  << "start run_tte_hit_match" << endm;}
       St_DataSet *geant = GetInputDS("geant");
       if (geant) {
 	St_DataSetIter geantI(geant);
@@ -404,7 +407,7 @@ Int_t St_tcl_Maker::Make() {
 	  if (Res_tte !=  kSTAFCV_OK) {
 	     gMessMgr->Info() << "Problem with tte_hit_match.." << endm;
 	  }
-	  if (Debug()) cout << "finish run_tte_hit_match" << endl;
+	  if (Debug()) {gMessMgr->QAInfo()  << "finish run_tte_hit_match" << endm;}
 	}
       }
     }
@@ -431,7 +434,7 @@ Int_t St_tcl_Maker::Make() {
 	  index = new St_tcl_tpc_index("index",2*max_hit); 
 	  m_DataSet->Add(index);
 	}
-	if (Debug()) cout << "start tfs_run" << endl;
+	if (Debug()) {gMessMgr->QAInfo()  << "start tfs_run" << endm;}
 
 	// make a tphit table with the size of the number of geant hits
 	tphit = new St_tcl_tphit("tphit",max_hit); 
@@ -457,7 +460,7 @@ Int_t St_tcl_Maker::Make() {
 	  }
 	  
 	}
-	if (Debug()) cout << "finish tfs_run" << endl;
+	if (Debug()) {gMessMgr->QAInfo()  << "finish tfs_run" << endm;}
       }
     }
   }
@@ -475,8 +478,8 @@ Int_t St_tcl_Maker::Make() {
 	    spc -> x = global.position().x();
 	    spc -> y = global.position().y();
 	    spc -> z = global.position().z();
-	    //            cout << "Local Coordinates: " << local << endl;
-	    //            cout << "Global Coordinates: " << global << endl;
+	    //            {gMessMgr->QAInfo()  << "Local Coordinates: " << local << endm;}
+	    //            {gMessMgr->QAInfo()  << "Global Coordinates: " << global << endm;}
 	  }
   }
   
@@ -491,9 +494,9 @@ Int_t St_tcl_Maker::Make() {
 //-----------------------------------------------------------------------
 
 void St_tcl_Maker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.77 2007/04/28 17:57:12 perev Exp $\n");
-  printf("**************************************************************\n");
+  {gMessMgr->QAInfo() << Form("**************************************************************\n") << endm;}
+  {gMessMgr->QAInfo() << Form("* $Id: St_tcl_Maker.cxx,v 1.78 2007/05/17 14:13:02 fisyak Exp $\n") << endm;}
+  {gMessMgr->QAInfo() << Form("**************************************************************\n") << endm;}
 
   if (Debug()) StMaker::PrintInfo();
 }
@@ -610,13 +613,13 @@ Int_t St_tcl_Maker::cluster_morphology(
   tcl_tpcluster_st *clusterTbl = (tcl_tpcluster_st*) tpcluster->GetTable();
   for(iClusterTbl=lastRowPrevTime+1;iClusterTbl<nCluster;iClusterTbl++) {
     if(iClusterTbl%473==0) {
-      printf("St_tcl_Maker::cluster_morphology Sector %2d, %3d percent done\n",
-             sectorNumber,(100*(iClusterTbl-lastRowPrevTime))/(nCluster-lastRowPrevTime));
+      {gMessMgr->QAInfo() << Form("St_tcl_Maker::cluster_morphology Sector %2d, %3d percent done\n",
+             sectorNumber,(100*(iClusterTbl-lastRowPrevTime))/(nCluster-lastRowPrevTime)) << endm;}
     }
     sector=clusterTbl[iClusterTbl].tpc_row/100;
-    if(sector!=sectorNumber) { printf("cluster table may be corrupted.\n"); return 1; }
+    if(sector!=sectorNumber) { {gMessMgr->QAInfo() << Form("cluster table may be corrupted.\n") << endm;} return 1; }
     padrow=clusterTbl[iClusterTbl].tpc_row%100;
-    if(padrow<1||padrow>45) { printf("padrow (%d) out of range.\n",padrow); return 2; }
+    if(padrow<1||padrow>45) { {gMessMgr->QAInfo() << Form("padrow (%d) out of range.\n",padrow) << endm;} return 2; }
     iSeqTbl=clusterTbl[iClusterTbl].jseq-1;
     nseq=clusterTbl[iClusterTbl].nseq;
     if(padrow<=13) pixTbl= pixel_data_in->GetTable();
