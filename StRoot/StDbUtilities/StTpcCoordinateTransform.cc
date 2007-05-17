@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.27 2007/03/21 16:39:04 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.28 2007/05/17 15:28:57 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.28  2007/05/17 15:28:57  fisyak
+ * Replace cout and cerr with Loggger
+ *
  * Revision 1.27  2007/03/21 16:39:04  fisyak
  * TpcCoordinate transformation via TGeoHMatrix
  *
@@ -186,6 +189,7 @@
 #include "StTpcCoordinateTransform.hh"
 #include "StMatrix.hh"
 #include <unistd.h>
+#include "StMessMgr.h"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
@@ -251,7 +255,7 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
         double theta = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisY();
         double psi = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisX();
 	// R = R_x(psi)*R_y(theta)*R_z(phi)
-	//        cout << cos(theta) << " " << cos(phi) << endl;
+	//        gMessMgr->QAInfo()  << cos(theta) << " " << cos(phi) << endm;
         mGlobalToTpcRotation(1,1) = cos(theta)*cos(phi);
 	mGlobalToTpcRotation(1,2) = cos(theta)*sin(phi);
         mGlobalToTpcRotation(1,3) = -sin(theta);
@@ -264,24 +268,24 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
         size_t ierr;
         mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
   	if (ierr!=0){ 
-            cerr << "StTpcCoordinateTransform::Cant invert rotation matrix" << endl;
-            cout << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endl;
-  	  cout << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endl;
+            gMessMgr->Error()  "StTpcCoordinateTransform::Cant invert rotation matrix" << endm;
+            gMessMgr->QAInfo()  << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
+  	  gMessMgr->QAInfo()  << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
         }
         mTpcPositionInGlobal.setX(gTpcDbPtr->GlobalPosition()->TpcCenterPositionX());
         mTpcPositionInGlobal.setY(gTpcDbPtr->GlobalPosition()->TpcCenterPositionY());
         mTpcPositionInGlobal.setZ(gTpcDbPtr->GlobalPosition()->TpcCenterPositionZ());
-	//        cout << "Global Position of TPC center" << mTpcPositionInGlobal << endl;
+	//        gMessMgr->QAInfo()  << "Global Position of TPC center" << mTpcPositionInGlobal << endm;
 	if (_debug) {
-	  cout << "mTpcToGlobalRotation" << endl;
-	  cout << mGlobalToTpcRotation << endl;
-	  cout << "mTpcPositionInGlobal" << mTpcPositionInGlobal << endl;
+	  gMessMgr->QAInfo()  << "mTpcToGlobalRotation" << endm;
+	  gMessMgr->QAInfo()  << mGlobalToTpcRotation << endm;
+	  gMessMgr->QAInfo()  << "mTpcPositionInGlobal" << mTpcPositionInGlobal << endm;
 	  gTpcDbPtr->Tpc2GlobalMatrix().Print();
 	}
 #endif
     }
     else {
-	cerr << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endl;
+	gMessMgr->Error() << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
 	assert(gTpcDbPtr->PadPlaneGeometry());
 	assert(gTpcDbPtr->Electronics());
 	assert(gTpcDbPtr->SlowControlSim()); 
@@ -628,9 +632,9 @@ int StTpcCoordinateTransform::padFromX(const double x, const int row) const
   probablePad += numberOfPads; 
   // CAUTION: pad cannot be <1
     if(probablePad<1) {
-// 	cerr << "ERROR in pad From Local.\n";
-// 	cerr << "Pad is calculated to be '" << probablePad << "'\n";
-// 	cerr << "Assigning Pad='1'"<< endl;
+// 	gMessMgr->Error() << "ERROR in pad From Local.\n";
+// 	gMessMgr->Error() << "Pad is calculated to be '" << probablePad << "'\n";
+// 	gMessMgr->Error() << "Assigning Pad='1'"<< endm;
       probablePad=1;
     }
     return (probablePad);
