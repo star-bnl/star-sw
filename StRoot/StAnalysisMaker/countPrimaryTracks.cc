@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: countPrimaryTracks.cc,v 2.0 1999/11/04 16:10:08 ullrich Exp $
+ * $Id: countPrimaryTracks.cc,v 2.1 2007/05/17 14:09:59 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,13 +14,16 @@
  ***************************************************************************
  *
  * $Log: countPrimaryTracks.cc,v $
+ * Revision 2.1  2007/05/17 14:09:59  fisyak
+ * replace cerr by LOG_ERROR
+ *
  * Revision 2.0  1999/11/04 16:10:08  ullrich
  * Revision for new StEvent
  *
  **************************************************************************/
 #include "StEventTypes.h"
-
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 2.0 1999/11/04 16:10:08 ullrich Exp $";
+#include "StMessMgr.h"
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 2.1 2007/05/17 14:09:59 fisyak Exp $";
 
 long countPrimaryTracks(StEvent& event)
 {
@@ -75,9 +78,9 @@ long countPrimaryTracks(StEvent& event)
     //  At last, a check if both are equal (they better be)
     //  and we are done.
     //
-    if (counter1 != counter2)
-	cerr << "countPrimaryTracks(): strange, different # of primary "
-	     << "tracks from different methods." << endl;
-
+    if (counter1 != counter2) {
+      LOG_ERROR << "countPrimaryTracks(): strange, different # of primary "
+		<< "tracks from different methods." << endm;
+    }
     return counter2;
 }
