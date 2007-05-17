@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.27 2007/05/16 15:06:55 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.28 2007/05/17 13:18:52 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.28  2007/05/17 13:18:52  andrewar
+ * Removed cout in shiftHit.
+ *
  * Revision 1.27  2007/05/16 15:06:55  andrewar
  * Switched cout's to LOG_INFO.
  *
@@ -882,8 +885,7 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
   gGeoManager->CdTop();
   gGeoManager->cd(Path);
   TGeoPhysicalNode* node= (TGeoPhysicalNode*)(gGeoManager->GetCurrentNode());
-  if (!node ) printf("Failed to get node for %i %i",
-		     sector(layer,ladder), secLadder(layer, ladder));
+  if (!node ) LOG_ERROR<< "Failed to get node for sector(layer,ladder), secLadder(layer, ladder)"<<endm;
  
   double pos[3]={position.x(),position.y(),position.z()};
   double localpos[3]={0,0,0};
@@ -896,13 +898,13 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
  
   if (! hmat )
     {
-      printf("Can't shift hit - no hmat.\n");
+      LOG_ERROR<< "Can't shift hit - no hmat."<<endm;
     }
   
   Double_t     *rot    = hmat->GetRotationMatrix();
   if (! rot )
     {
-      gMessMgr->Info()<<"Can't shift hit - no rotation matrix.\n";
+      LOG_ERROR <<"Can't shift hit - no rotation matrix."<<endm;
     }
  
   StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
