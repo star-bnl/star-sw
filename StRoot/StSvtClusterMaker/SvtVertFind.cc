@@ -91,7 +91,7 @@ float sft_main(  St_scs_spt  *scs_spt, St_dst_vertex *svt_vertex, float x0,float
    }
    
    spt_n = ispt;
-   cout << spt_n << endl;
+
    if( spt_n < 4) return -1;
 
    zsvt= sft_find_vertex ();
@@ -175,7 +175,7 @@ float sft_main2(  StSvtHitCollection* rSvtHitColl, StEvent* event, float x0,floa
      }
    }
    spt_n = ispt;
-   cout << spt_n << endl;
+ 
    if( spt_n < 4) return -1;
    
    zsvt =  sft_find_vertex ();
@@ -225,7 +225,7 @@ float sft_vf_ntrack(double z0)
 
          if (ix < 0 || ix > x_size - 1 || iz < 0 || iz > z_size - 1)
          {
-	     printf("\n out of domain %d  %d ",ix,iz); 
+	   gMessMgr->Info() << " out of domain " << ix << " " <<iz << endm; 
 	      continue;
 	 }
 
@@ -250,14 +250,15 @@ float sft_vf_ntrack(double z0)
                OccupiedPixels[iNumOccupiedPixels] = PixelOcc + ii;
                iNumOccupiedPixels++;
 	       if( iNumOccupiedPixels >= SPT_PTR_NMAX) {
-		printf("\n error: iNumOccupiedPixels =%d",iNumOccupiedPixels);
+		 gMessMgr->Info() << "error: iNumOccupiedPixels = " <<
+		   iNumOccupiedPixels << endm;
 		 ispt=spt_n;
 	       }
             }
          }
          else
          {
-             printf("\n error: out of bounds ii=%d",ii); 
+	   gMessMgr->Info() << " error: out of bounds ii= " << ii << endm; 
          }
       } /* for loop */
    }    /* if icall ==1 loop */
@@ -272,7 +273,8 @@ float sft_vf_ntrack(double z0)
          iz  = (int)((zc-z_min)*z_scale);
          if (iz < 0 || iz > z_size-1)
          {
-	   printf("\n out of domain2 %d  %d ",(int)spt[ispt].off,iz); 
+	   gMessMgr->Info()<< "out of domain2 " <<(int)spt[ispt].off << " " <<
+	     iz << endm;
 	   continue;
          }
 
@@ -289,14 +291,15 @@ float sft_vf_ntrack(double z0)
 	     OccupiedPixels[iNumOccupiedPixels] = PixelOcc + ii;
 	     iNumOccupiedPixels++;
 	     if( iNumOccupiedPixels >= SPT_PTR_NMAX) {
-	       printf("\n error: iNumOccupiedPixels =%d",iNumOccupiedPixels);
+	       gMessMgr->Info() << " error: iNumOccupiedPixels = " << 
+		 iNumOccupiedPixels << endm; 
 	       ispt=spt_n;
 	     }
 	   }
          }
          else
          {
-            printf("\n error: out of bounds ii=%d",ii);
+	   gMessMgr->Info() << " error: out of bounds ii= " << ii << endm;
          }
       }
    } /* if icall != 1 loop */
@@ -371,9 +374,9 @@ float sft_find_vertex ()
 
    step=.1;
    iNumPoints = bracket2 (sft_vf_ntrack, (float)d, step, &ax, &bx, &cx, &fa, &fb, &fc);
-   /* printf ("point a: z= % 12.5f with % 12.5f tracks \n", ax, fa);
-      printf ("point b: z= % 12.5f with % 12.5f tracks \n", bx, fb);
-      printf ("point c:   % 12.5f    % 12.5f\n", cx, fc);  */
+   /* print ("point a: z= % 12.5f with % 12.5f tracks \n", ax, fa);
+      print ("point b: z= % 12.5f with % 12.5f tracks \n", bx, fb);
+      print ("point c:   % 12.5f    % 12.5f\n", cx, fc);  */
 
    /* Not sure how this works!*/
    r = (double)((bx - cx) * (fb - fa));
@@ -446,7 +449,7 @@ int bracket2 ( float (*func)(double),
       
       fX += iStep * fStep;
       fVal = (*func)(fX);
-      // printf("%f %f \n",fX,-fVal);
+      
       //if (fStep==.1){
       if (mtemp)
 	mtemp->Fill(fX,-fVal);
@@ -482,7 +485,7 @@ int bracket2 ( float (*func)(double),
   for (iLeftPos=-500; iLeftPos<500; iLeftPos++){
     
     fX = (float) iLeftPos/10.;
-    fprintf(fout,"%f %f \n",fX,(*func)(fX));
+    print(fout,"%f %f \n",fX,(*func)(fX));
   }
   fclose(fout);
 #endif     
