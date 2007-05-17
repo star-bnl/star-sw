@@ -18,7 +18,7 @@ mCluCol = mCol;
  
 if ( MatrixAlloc(mRow, mCol) )
 	  {
-		 cerr<<"\n Memory allocation Error ! " ;
+		 
 		 exit(-1);
 	  }
 }
