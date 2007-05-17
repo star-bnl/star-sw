@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.10 2007/01/17 16:43:46 mmiller Exp $
+// $Id: StJets.cxx,v 1.11 2007/05/17 14:33:22 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.11  2007/05/17 14:33:22  mmiller
+// Added Murad's dca update.
+//
 // Revision 1.10  2007/01/17 16:43:46  mmiller
 // Added StMuTrack info on track charge, dedx, and hit information to StJets.h.  Updated exampleFastJetAna() accordingly.
 //
@@ -118,7 +121,7 @@ ClassImp(TrackToJetIndex)
 int* global_index;
 
 TrackToJetIndex::TrackToJetIndex(int ji, int ti, StDetectorId id) 
-: mJetIndex(ji), mTrackIndex(ti) , mDetId(id) , mCharge(0), mNhits(0), mNhitsPoss(0), mNhitsDedx(0), mNhitsFit(0), mNsigmaPion(0.)
+: mJetIndex(ji), mTrackIndex(ti) , mDetId(id) , mCharge(0), mNhits(0), mNhitsPoss(0), mNhitsDedx(0), mNhitsFit(0), mNsigmaPion(0.), mTdca(0.), mTdcaxy(0.)
 {
 }
 
@@ -153,72 +156,75 @@ void StJets::Clear(bool clearAll)
 
 void StJets::addProtoJet(StProtoJet& pj)
 {
-    //jetIndex == number of jets + 1, i.e., where to insert
-    int jetIndex = mJets->GetLast()+1;
-    
-    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
+  //jetIndex == number of jets + 1, i.e., where to insert
+  int jetIndex = mJets->GetLast()+1;
+  
+  StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
 	
-    //Make it here and update info as we go through tracks:
-    StJet tempJet( pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0 );
-    tempJet.jetEt = pj.eT();
-    tempJet.jetPt = tempJet.Pt();
-    tempJet.jetEta = tempJet.Eta();
-    tempJet.jetPhi = tempJet.Phi();
-	
-    
-    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
-		StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
-		if (!track) {
-			cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
-			return;
-		}
-		int muTrackIndex = track->getIndex();
-		if (muTrackIndex <0) {
-			cout <<"Error, muTrackIndex<0. abort()"<<endl;
-			abort();
-		}
-		else {
-			
-			//cout <<"here's the track:\t"<<*track<<endl;
-			
-			//add to trackToJetIndices
-			int addAt = mTrackToJetIndices->GetLast()+1;
-			TrackToJetIndex t2j( jetIndex, muTrackIndex, track->detectorId() );
-			t2j.SetPxPyPzE(track->px(), track->py(), track->pz(), track->e() );
-			
-			//and cache some properties if it really came from a StMuTrack:
-			StMuTrack* muTrack = track->particle();
-			if (muTrack) {  //this will fail for calorimeter towers ;)
-				t2j.setCharge( muTrack->charge() );
-				t2j.setNhits( muTrack->nHits() );
-				t2j.setNhitsPoss( muTrack->nHitsPoss() );
-				t2j.setNhitsDedx( muTrack->nHitsDedx() );
-				t2j.setNhitsFit( muTrack->nHitsFit() );
-				t2j.setNsigmaPion( muTrack->nSigmaPion() );
-			}
-
-			//cout <<"here's the t2j:\t"<<t2j<<endl;
-			
-			new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );
-			
-			//ok, get track/tower properties here:
-			StDetectorId mDetId = track->detectorId();
-			if (mDetId==kTpcId) {
-				tempJet.nTracks++;
-				tempJet.tpcEtSum += track->eT();
-			}
-			else if (mDetId==kBarrelEmcTowerId) {
-				tempJet.nBtowers++;
-				tempJet.btowEtSum += track->eT();
-			}
-			else if (mDetId==kEndcapEmcTowerId) {
-				tempJet.nEtowers++;
-				tempJet.etowEtSum += track->eT();
-			}
-		}
+  //Make it here and update info as we go through tracks:
+  StJet tempJet( pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0 );
+  tempJet.jetEt = pj.eT();
+  tempJet.jetPt = tempJet.Pt();
+  tempJet.jetEta = tempJet.Eta();
+  tempJet.jetPhi = tempJet.Phi();
+  
+  for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
+    StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
+    if (!track) {
+      cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
+      return;
     }
-    //add in the jet container
-    new((*mJets)[jetIndex]) StJet( tempJet );
+    int muTrackIndex = track->getIndex();
+    if (muTrackIndex <0) {
+      cout <<"Error, muTrackIndex<0. abort()"<<endl;
+      abort();
+    }
+    else {
+      
+      //cout <<"here's the track:\t"<<*track<<endl;
+      
+      //add to trackToJetIndices
+      int addAt = mTrackToJetIndices->GetLast()+1;
+      TrackToJetIndex t2j( jetIndex, muTrackIndex, track->detectorId() );
+      t2j.SetPxPyPzE(track->px(), track->py(), track->pz(), track->e() );
+      
+      //and cache some properties if it really came from a StMuTrack:
+      StMuTrack* muTrack = track->particle();
+      if (muTrack) {  //this will fail for calorimeter towers ;)
+	t2j.setCharge( muTrack->charge() );
+	t2j.setNhits( muTrack->nHits() );
+	t2j.setNhitsPoss( muTrack->nHitsPoss() );
+	t2j.setNhitsDedx( muTrack->nHitsDedx() );
+	t2j.setNhitsFit( muTrack->nHitsFit() );
+	t2j.setNsigmaPion( muTrack->nSigmaPion() );
+	t2j.setTdca ( muTrack->dcaGlobal().mag() ); //jan 27, 2007
+	t2j.setTdcaxyP ( muTrack->dcaGlobal().perp() ); //jan 27, 2007
+	t2j.setTdcaz ( muTrack->dcaZ() ); //jan 27, 2007
+	t2j.setTdcaxy ( muTrack->dcaD() ); //jan 27, 2007
+      }
+      
+      //cout <<"here's the t2j:\t"<<t2j<<endl;
+      
+      new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );
+      
+      //ok, get track/tower properties here:
+      StDetectorId mDetId = track->detectorId();
+      if (mDetId==kTpcId) {
+	tempJet.nTracks++;
+	tempJet.tpcEtSum += track->eT();
+      }
+      else if (mDetId==kBarrelEmcTowerId) {
+	tempJet.nBtowers++;
+	tempJet.btowEtSum += track->eT();
+      }
+      else if (mDetId==kEndcapEmcTowerId) {
+	tempJet.nEtowers++;
+	tempJet.etowEtSum += track->eT();
+      }
+    }
+  }
+  //add in the jet container
+  new((*mJets)[jetIndex]) StJet( tempJet );
 }
 
 vector<TrackToJetIndex*> StJets::particles(int jetIndex)
