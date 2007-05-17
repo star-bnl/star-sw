@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.78 2007/04/28 17:57:23 perev Exp $
+// $Id: St_tpt_Maker.cxx,v 1.79 2007/05/17 14:13:42 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.79  2007/05/17 14:13:42  fisyak
+// replace printf and  cout by logger printouts
+//
 // Revision 1.78  2007/04/28 17:57:23  perev
 // Redundant StChain.h removed
 //
@@ -257,6 +260,7 @@
 #include "StDbUtilities/StMagUtilities.h"
 #include "StDbUtilities/StSectorAligner.h"
 #include "StDbUtilities/StCoordinates.hh"
+#include "TString.h"
 
 // Corrections moved in StTpcHitMoverMaker. However, for
 // debugging purposes, you may set this to one and run with 
@@ -284,7 +288,7 @@ ClassImp(St_tpt_Maker)
   m_tteEvalOn=kFALSE;
   m_tptResOn=kFALSE;
   m_mkfinal=kFALSE;
-  printf("\n TPT CONSTRUCTOR name=\"%s\"\n",GetName());
+  {gMessMgr->QAInfo() << Form("\n TPT CONSTRUCTOR name=\"%s\"\n",GetName()) << endm;}
   SetInputHits("tpc_hits","tphit"); // initialize default input
 }
 //_____________________________________________________________________________
@@ -292,7 +296,7 @@ void St_tpt_Maker:: SetInputHits(  TString DataSet,  TString Hit)
 {
   m_InputDataSetName=DataSet;
   m_InputHitName=Hit;
-  printf("%s.SetInputHits to: DataSet=\"%s\", Hit=\"%s\"\n",GetName(),m_InputDataSetName.Data(), m_InputHitName.Data());
+  {gMessMgr->QAInfo() << Form("%s.SetInputHits to: DataSet=\"%s\", Hit=\"%s\"\n",GetName(),m_InputDataSetName.Data(), m_InputHitName.Data()) << endm;}
 }
 
 //_____________________________________________________________________________
@@ -352,7 +356,7 @@ Int_t St_tpt_Maker::InitRun(int runnumber){
   // xave and sigma are not filled anymore because they came from aux table (RAI)
 
   // if m_tteEvalOn=kTrue, then initialize the histograms of the efficiency and momentum resolution
-  //  cout<<"kFALSE="<<kFALSE<<endl;
+  //  gMessMgr->QAInfo() <<"kFALSE="<<kFALSE<<endm;;
 
   if(m_tteEvalOn){VertexEffResolutionInit();}
   return kStOK;
@@ -361,7 +365,7 @@ Int_t St_tpt_Maker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Make(){
 
-  printf("\n TPT=\"%s\" Input is: DataSet=\"%s\", Hit=\"%s\"\n",GetName(),m_InputDataSetName.Data(), m_InputHitName.Data());
+  {gMessMgr->QAInfo() << Form("\n TPT=\"%s\" Input is: DataSet=\"%s\", Hit=\"%s\"\n",GetName(),m_InputDataSetName.Data(), m_InputHitName.Data()) << endm;}
   
   St_DataSet *tpc_data =  GetInputDS(m_InputDataSetName);
   
@@ -369,11 +373,11 @@ Int_t St_tpt_Maker::Make(){
   
   // 		Clusters exist -> do tracking
   //tpc_data->ls(4);
-  //(void) printf("DEBUG2 :: [%s]\n",m_InputHitName.Data());
+  //gMessMgr->QAInfo() << Form("DEBUG2 :: [%s]\n",m_InputHitName.Data()) << endm;
   St_DataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime(m_InputHitName);
   if (! tphit) return kStWarn;
-  printf(" Input hit table size is %d\n\n",(int)tphit->GetNRows());
+  gMessMgr->QAInfo() << Form(" Input hit table size is %d\n\n",(int)tphit->GetNRows()) << endm;
 
 #if 0 // disable it. pp chain crashs somewhere sometime.
   // cluster vertex 
@@ -448,10 +452,10 @@ Int_t St_tpt_Maker::Make(){
     //
     //undo ExB distortions - only if ExB switch is set
     //
-    //printf("DEBUG :: %d 0x%X -> %d\n",m_Mode,m_Mode,m_Mode & 0x01);
+    //{gMessMgr->QAInfo() << Form("DEBUG :: %d 0x%X -> %d\n",m_Mode,m_Mode,m_Mode & 0x01) << endm;}
 
     if (m_AlignSector) {
-           cout << "############# ALIGNING HITS" << endl;
+           gMessMgr->QAInfo()  << "############# ALIGNING HITS" << endm;;
       StSectorAligner* aligner = new StSectorAligner(gStTpcDb);
       tcl_tphit_st* spc = tphit->GetTable();
       float x[3], xprime[3];
@@ -467,20 +471,27 @@ Int_t St_tpt_Maker::Make(){
 	 spc->x = xprime[0]; spc->y = xprime[1]; spc->z = xprime[2];
       }
       delete aligner;
-      cout << "############ done " << endl;
+      gMessMgr->QAInfo()  << "############ done " << endm;;
     }
+#if 1
+    m_ExB = gStTpcDb->ExB();
+    if (ExB)
+#else
     if(m_Mode & 0x01)
+#endif
       {
 	Float_t x[3], xprime[3] ;
+#if 0
 	Int_t   option = (m_Mode & 0x7FFFFFFE) >> 1;
 	// request from Jim Thomas to have 2 (or more)
 	// method in StMagUtilities. We then use the
 	// option as a mask. J.Lauret July 2001. 
-	(void) printf("St_tpt_Maker: ExB StMagUtilities(0x%X)\n\n",option);
+	gMessMgr->QAInfo() << Form("St_tpt_Maker: ExB StMagUtilities(0x%X)\n\n",option) << endm;
 	if ( m_ExB == 0 ) {
 	  TDataSet *RunLog = GetDataBase("RunLog");
 	  m_ExB = new StMagUtilities( gStTpcDb, RunLog, option ) ;
         }
+#endif	
 	tcl_tphit_st *spc = tphit -> GetTable() ;
 	for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
 	  {
@@ -518,12 +529,12 @@ Int_t St_tpt_Maker::Make(){
 
 
 
-    if (Debug()) cout << " start tpt_run " << endl;
+    if (Debug()) {gMessMgr->QAInfo()  << " start tpt_run " << endm;}
     Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
     //                      ==============================
     
-    if (Res_tpt != kSTAFCV_OK) {cout << "Problem with tpt.." << endl;}
-    if (Debug()) cout << " finish tpt_run " << endl;
+    if (Res_tpt != kSTAFCV_OK) {gMessMgr->QAInfo()  << "Problem with tpt.." << endm;}
+    if (Debug()) {gMessMgr->QAInfo()  << " finish tpt_run " << endm;}
     
   } 
   else 
@@ -535,10 +546,10 @@ Int_t St_tpt_Maker::Make(){
       St_g2t_track   *g2t_track    = (St_g2t_track  *) geantI("g2t_track");
       St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geantI("g2t_tpc_hit");
       if (g2t_tpc_hit && g2t_track) {
-	if (Debug()) cout << "start run_tte_track" << endl;
+	if (Debug()) gMessMgr->QAInfo()  << "start run_tte_track" << endm;
 	Int_t Res_tte_track =  tte_track(tptrack,tphit,g2t_tpc_hit,g2t_track,index,m_type);
-	if (Res_tte_track != kSTAFCV_OK) {cout << " Problem running tte_track " << endl;}
-	if (Debug()) cout << " finish run_tte_track " << endl; 
+	if (Res_tte_track != kSTAFCV_OK) {gMessMgr->QAInfo()  << " Problem running tte_track " << endm;}
+	if (Debug()) {gMessMgr->QAInfo()  << " finish run_tte_track " << endm;}
       }
     }
   }
@@ -549,11 +560,11 @@ Int_t St_tpt_Maker::Make(){
 //		Set up table for residuals
     St_tpt_res      *restpt= new St_tpt_res("restpt",10*maxNofTracks);
     m_DataSet->Add(restpt);
-    if (Debug()) cout << "start run_tpt_residuals" << endl;
+    if (Debug()) {gMessMgr->QAInfo()  << "start run_tpt_residuals" << endm;}
     Int_t Res_tpt_res = tpt_residuals(tphit,tptrack,restpt);
 //			===================================
-    if (Res_tpt_res != kSTAFCV_OK) {cout << "Problem with tpt_residuals...." << endl;}
-    else {if (Debug()) cout << "finish run_tpt_residuals" << endl;}
+    if (Res_tpt_res != kSTAFCV_OK) {gMessMgr->QAInfo()  << "Problem with tpt_residuals...." << endm;}
+    else {if (Debug()) {gMessMgr->QAInfo()  << "finish run_tpt_residuals" << endm;}}
   }
 
 //		End of residuals calculations
@@ -567,7 +578,7 @@ Int_t St_tpt_Maker::Make(){
     St_g2t_track   *g2t_track    = (St_g2t_track  *) geantI("g2t_track");
     St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geantI("g2t_tpc_hit");
     if (g2t_tpc_hit && g2t_track) {
-      if (Debug()) cout << " start run_tte " << endl;
+      if (Debug()) {gMessMgr->QAInfo()  << " start run_tte " << endm;}
       //		If tte on, create evaluation tables
       St_tte_mctrk  *mctrk   = new St_tte_mctrk("mctrk",maxNofTracks);
       m_DataSet->Add(mctrk);
@@ -579,8 +590,8 @@ Int_t St_tpt_Maker::Make(){
 			  index,m_type,evaltrk,mctrk,m_tte_control);
 //		    ==============================================
     
-      if (Res_tte != kSTAFCV_OK) {cout << " Problem with tte.. " << endl;}
-      else {if (Debug()) cout << " finish run_tte " << endl;}
+      if (Res_tte != kSTAFCV_OK) {gMessMgr->QAInfo()  << " Problem with tte.. " << endm;}
+      else {if (Debug()) gMessMgr->QAInfo()  << " finish run_tte " << endm;}
     }
   }
 // Calculate  efficiency and the momentum resolution
@@ -679,7 +690,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
 
-  cout<<"begin to run St_tpt_Maker::VertexEffResolutionMakeHistogram"<<endl; 
+  gMessMgr->QAInfo() <<"begin to run St_tpt_Maker::VertexEffResolutionMakeHistogram"<<endm; 
 
   // Create an iterator
   St_DataSetIter ap(m_DataSet);
@@ -690,20 +701,20 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
     if(af){
       wr=af->GetTable();
       if(!wr){
- 	cout<<"no information in mctrk, quit from VertexEffResolutionMakeHistogram"<<endl;
+ 	gMessMgr->QAInfo() <<"no information in mctrk, quit from VertexEffResolutionMakeHistogram"<<endm;
 	return;
       }
     }else {
-      cout<<"there is no mctrk, quit from VertexEffResolutionMakeHistogram"<<endl;
+      gMessMgr->QAInfo() <<"there is no mctrk, quit from VertexEffResolutionMakeHistogram"<<endm;
       return;
     }
   }else {
-    cout<<"wrong in get m_DataSet, quit from VertexEffResolutionMakeHistogram"<<endl;
+    gMessMgr->QAInfo() <<"wrong in get m_DataSet, quit from VertexEffResolutionMakeHistogram"<<endm;
     return;
   }
   
   mevent++;
-  cout<<"Event number is "<<mevent<<endl; 
+  gMessMgr->QAInfo() <<"Event number is "<<mevent<<endm; 
   
   //get tpc_tracks/evaltrk table
   St_tte_eval *aeval=(St_tte_eval  *) ap("evaltrk");
@@ -711,11 +722,11 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   if(aeval){
     weval=aeval->GetTable();
     if(!weval){
-      cout<<"no information in evaltrk,quit from VertexEffResolutionMakeHistogram"<<endl;
+      gMessMgr->QAInfo() <<"no information in evaltrk,quit from VertexEffResolutionMakeHistogram"<<endm;
       return;
     }
   }else {
-    cout<<"there is no evaltrk,quit from VertexEffResolutionMakeHistogram"<<endl;
+    gMessMgr->QAInfo() <<"there is no evaltrk,quit from VertexEffResolutionMakeHistogram"<<endm;
     return;
   }
   //get g2t_vertex table, and get the position of vertex, fill histograms
@@ -732,11 +743,11 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
     if(ayf){
       wyr=ayf->GetTable();
       if(!wyr){
-	cout<<"no information in g2t_vertex,quit from VertexEffResolutionMakeHistogram"<<endl;
+	gMessMgr->QAInfo() <<"no information in g2t_vertex,quit from VertexEffResolutionMakeHistogram"<<endm;
         return;
       }
     }else {
-      cout<<"there is no g2t_vertex,quit from VertexEffResolutionMakeHistogram"<<endl;
+      gMessMgr->QAInfo() <<"there is no g2t_vertex,quit from VertexEffResolutionMakeHistogram"<<endm;
       return;
     }
     //wr->eg_label=1 stand for the primary vertex
@@ -744,11 +755,11 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
     for(Int_t ji=0;ji<3;ji++)eg_vertex[ji]=wyr->eg_x[ji];
   }
   else {
-    cout<<"there is no geant dataset,quit from VertexEffResolutionMakeHistogram"<<endl; 
+    gMessMgr->QAInfo() <<"there is no geant dataset,quit from VertexEffResolutionMakeHistogram"<<endm; 
     return ;
   }
-  cout<<"event gen. vertex="<<eg_vertex[0]<<eg_vertex[1]<<eg_vertex[2]<<endl;
-  cout<<"geant vertex="<<vertex[0]<<vertex[1]<<vertex[2]<<endl;
+  gMessMgr->QAInfo() <<"event gen. vertex="<<eg_vertex[0]<<eg_vertex[1]<<eg_vertex[2]<<endm;
+  gMessMgr->QAInfo() <<"geant vertex="<<vertex[0]<<vertex[1]<<vertex[2]<<endm;
   
   m_vertex_x->Fill(vertex[0]);
   m_vertex_y->Fill(vertex[1]);
@@ -831,8 +842,8 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
     Float_t chisqz=weval->chisq[1];
     Int_t nfit=weval->nfit;
     
-    if(ji==0)cout<<"chisqxy="<<chisqxy<<endl;
-    if(ji==0)cout<<"chisqz="<<chisqz<<endl;
+    if(ji==0) {gMessMgr->QAInfo() <<"chisqxy="<<chisqxy<<endm;}
+    if(ji==0) {gMessMgr->QAInfo() <<"chisqz="<<chisqz<<endm;}
     if(nfit!=3)chisqxy/=(nfit-3.0);
     if(nfit!=2)chisqz/=(nfit-2.0);
     m_chisqxy->Fill(chisqxy);
@@ -846,7 +857,7 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   //get efficiency
   m_eff1->Divide(m_rapidity2,m_rapidity1,1.0,1.0); 
   Float_t effm=m_eff1->GetBinContent(10);
-  cout<<"GetBinContent eff="<<effm<<endl; 
+  gMessMgr->QAInfo() <<"GetBinContent eff="<<effm<<endm; 
   
   
   //fit efficiency per event
@@ -856,32 +867,32 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   pol_0.GetParameters(&par[0]);
   
   Float_t efficiency=par[0];
-  cout<<"For each event:Fit eff0="<<par[0]<<endl; 
+  gMessMgr->QAInfo() <<"For each event:Fit eff0="<<par[0]<<endm; 
   m_averge_eff->Fill(efficiency);
   
   //get average pt,rapidity,chisqxy,chisqz
-  cout<<"No. of tracks selected in mctrk="<<nmctrk<<endl;
-  cout<<"No. of tracks in evaltrk="<<nevaltrk<<endl;
+  gMessMgr->QAInfo() <<"No. of tracks selected in mctrk="<<nmctrk<<endm;
+  gMessMgr->QAInfo() <<"No. of tracks in evaltrk="<<nevaltrk<<endm;
   
   if(!nmctrk){
-    cout<<"No. of tracks selected in mctrk=0,quit from VertexEffResolutionMakeHistogram "<<endl;     
+    gMessMgr->QAInfo() <<"No. of tracks selected in mctrk=0,quit from VertexEffResolutionMakeHistogram "<<endm;     
     return;
   }
   Float_t average_ptr=total_ptr/nmctrk;
   Float_t average_ptg=total_ptg/nmctrk;
-  cout<<"total_ptr="<<total_ptr<<"average_ptr="<<average_ptr<<endl;
-  cout<<"total_ptg="<<total_ptg<<"average_ptg="<<average_ptg<<endl;
+  gMessMgr->QAInfo() <<"total_ptr="<<total_ptr<<"average_ptr="<<average_ptr<<endm;
+  gMessMgr->QAInfo() <<"total_ptg="<<total_ptg<<"average_ptg="<<average_ptg<<endm;
   Float_t average_rapidity=total_rapidity/nmctrk;
-  cout<<"total_rapidity="<<total_rapidity<<"  average_rapidity="<<average_rapidity<<endl;
+  gMessMgr->QAInfo() <<"total_rapidity="<<total_rapidity<<"  average_rapidity="<<average_rapidity<<endm;
 
   if(!nevaltrk){
-    cout<<"No. of tracks selected in evaltrk=0,quit from VertexEffResolutionMakeHistogram "<<endl;  
+    gMessMgr->QAInfo() <<"No. of tracks selected in evaltrk=0,quit from VertexEffResolutionMakeHistogram "<<endm;  
     return;
   }
   Float_t average_chisqxy=total_chisqxy/nevaltrk;
-  cout<<"total_chisqxy="<<total_chisqxy<<"  average_chisqxy="<<average_chisqxy<<endl;
+  gMessMgr->QAInfo() <<"total_chisqxy="<<total_chisqxy<<"  average_chisqxy="<<average_chisqxy<<endm;
   Float_t average_chisqz=total_chisqz/nevaltrk;
-  cout<<"total_chisqz="<<total_chisqz<<"  average_chisqz="<<average_chisqz<<endl;
+  gMessMgr->QAInfo() <<"total_chisqz="<<total_chisqz<<"  average_chisqz="<<average_chisqz<<endm;
   
   //fill histograms
   m_average_ptr->Fill(average_ptr);
@@ -909,7 +920,7 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   delete m_rapidity2;
   delete m_eff1;
   
-  cout<<"at the end of the VertexEffResolutionMakeHistogram"<<endl;
+  gMessMgr->QAInfo() <<"at the end of the VertexEffResolutionMakeHistogram"<<endm;
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
@@ -920,7 +931,7 @@ Int_t St_tpt_Maker::Finish(){
 }
 //_____________________________________________________________________________
 void St_tpt_Maker::VertexEffResolutionFinish(){
-  cout<<"begin to run StVertexEffMaker::Finish"<<endl; 
+  gMessMgr->QAInfo() <<"begin to run StVertexEffMaker::Finish"<<endm; 
   m_eff_total->Divide(m_rapidity_total2,m_rapidity_total1,1.0,1.0); 
   //fit efficiency for all events
   Double_t par[1];
@@ -929,7 +940,7 @@ void St_tpt_Maker::VertexEffResolutionFinish(){
   pol_0.GetParameters(&par[0]);
   
   Float_t efficiency=par[0];
-  cout<<"For all events:Fit eff="<<efficiency<<endl; 
+  gMessMgr->QAInfo() <<"For all events:Fit eff="<<efficiency<<endm; 
   
   //divide to get efficiency
   m_ptg_rapidity->Divide(m_ptg_rapidity_2,m_ptg_rapidity_1,1.0,1.0); 
@@ -949,7 +960,7 @@ void St_tpt_Maker::VertexEffResolutionFinish(){
 void St_tpt_Maker::VertexEffResolutionInit() {
   //create histograms and ntuple for VertexEffResolution
   
-  cout<<"begin to run St_tpt_Maker::VertexEffResolutionInit"<<endl;
+  gMessMgr->QAInfo() <<"begin to run St_tpt_Maker::VertexEffResolutionInit"<<endm;
 
   m_vertex_x=new TH1F("TptTteVertexX", "primary vertex X",50,-0.05, 0.05);
   //m_vertex_x->SetXTitle("primary vertex X");
