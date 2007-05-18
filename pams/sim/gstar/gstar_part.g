@@ -1,6 +1,12 @@
-* $Id: gstar_part.g,v 1.18 2007/05/15 21:20:42 potekhin Exp $
+* $Id: gstar_part.g,v 1.19 2007/05/18 16:37:39 potekhin Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.19  2007/05/18 16:37:39  potekhin
+* a) shifted the PDG code for the Dalitz particle by adding a large
+* integer, thus hoping to resolve the previous clash
+* b) Introduced 3 particles corresponding to 2 states of the Upsilon,
+* albeit with decays exclusively into th mu+/mu- channel
+*
 * Revision 1.18  2007/05/15 21:20:42  potekhin
 * The introduction of the Dalitz particle
 * had unforeseen consequence in that all
@@ -125,8 +131,8 @@
 
 ************************************************************************************ 
 * special pi0 decay: 50% normal, 50% dalitz
-*  Particle Dalitz    code=149        TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
-*                     pdg=111  bratio= { 0.5, 0.5}  mode= { 101, 10203}
+  Particle Dalitz    code=149        TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
+                     pdg=100111 bratio= { 0.5, 0.5}  mode= { 101, 10203}
 ************************************************************************************ 
   Particle omega     code=150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
                      pdg=223  bratio  = { .888, .085, .021 },  
@@ -152,15 +158,29 @@
   Particle anti_K0   code=156 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
                      pdg=-311  bratio= { .5, .5}    mode= { 16, 10 }
 ************************************************************************************ 
-* Heavy flavor embedding studies -- July 2003, M.Potekhin
-  Particle Jpsi      code=160 TrkTyp=4 mass=3.096  charge=0  tlife=7.48e-21,
-                     pdg=443  bratio= { 1, }       mode= { 203, }
-  Particle Upsilon   code=161 TrkTyp=4 mass=9.460   charge=0  tlife=1.254e-20,
-                     pdg=553  bratio= { 1, }       mode= { 203, }
-  Particle Ups2S     code=162 TrkTyp=4 mass=10.023  charge=0  tlife=1.545e-20,
-                     pdg=100553  bratio= { 1, }    mode= { 203, }
-  Particle Ups3S     code=163 TrkTyp=4 mass=10.355  charge=0  tlife=2.556e-20,
-                     pdg=200553  bratio= { 1, }    mode= { 203, }
+* Heavy flavor studies -- July 2003 - May 2007, M.Potekhin
+  Particle Jpsi       code=160 TrkTyp=4 mass=3.096  charge=0  tlife=7.48e-21,
+                      pdg=443  bratio= { 1, }       mode= { 203, }
+
+  Particle Upsilon    code=161 TrkTyp=4 mass=9.460  charge=0  tlife=1.254e-20,
+                      pdg=553  bratio= { 1, }       mode= { 203, }
+
+  Particle Ups2S      code=162 TrkTyp=4 mass=10.023 charge=0  tlife=1.545e-20,
+                      pdg=100553  bratio= { 1, }    mode= { 203, }
+
+  Particle Ups3S      code=163 TrkTyp=4 mass=10.355 charge=0  tlife=2.556e-20,
+                      pdg=200553  bratio= { 1, }    mode= { 203, }
+
+* have to use different PDG codes to avoid a clash
+
+  Particle Upsilon_mu code=164 TrkTyp=4 mass=9.460  charge=0  tlife=1.254e-20,
+                      pdg=300553  bratio= { 1, }    mode= { 506, }
+
+  Particle Ups2S_mu   code=165 TrkTyp=4 mass=10.023 charge=0  tlife=1.545e-20,
+                      pdg=400553  bratio= { 1, }    mode= { 506, }
+
+  Particle Ups3S_mu   code=166 TrkTyp=4 mass=10.355 charge=0  tlife=2.556e-20,
+                      pdg=500553  bratio= { 1, }    mode= { 506, }
 ************************************************************************************ 
 
   Particle LASERINO  code=170         TrkTyp=6 mass=0     charge=1 tlife=big
