@@ -227,13 +227,13 @@ Bfc_st BFC2[] = { // ITTF Chains
 #ifndef __CLEANUP__
   {"B2005a"      ,""  ,"","ry2005b,in,tpc_daq,tpc,Physics,Cdst,-SvtDedx,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2005 (tpc only)",kFALSE},
-  {"B2005b"      ,""  ,"","ry2005f,in,tpc_daq,tpc,Physics,Cdst,-SvtDedx,Kalman,tags,Tree,evout","",""
-                                                            ,"Base chain for 2005 Geo f (tpc only)",kFALSE},
+  {"B2005b"      ,""  ,"","ry2005f,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                        ,"Base chain for 2005 Geo f (tpc+svt only)",kFALSE},
 #else
   {"B2005a"      ,""  ,"","ry2005b,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2005 (tpc only)",kFALSE},
-  {"B2005b"      ,""  ,"","ry2005f,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
-                                                            ,"Base chain for 2005 Geo f (tpc only)",kFALSE},
+  {"B2005b"      ,""  ,"","ry2005f,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                        ,"Base chain for 2005 Geo f (tpc+svt only)",kFALSE},
 #endif
   {"P2005"       ,""     ,"","B2005,l3onl,fcf,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3","",""
                      ,"Production chain for winter 2004/2005 data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
@@ -271,13 +271,13 @@ Bfc_st BFC2[] = { // ITTF Chains
 #ifndef __CLEANUP__
   {"B2005a"      ,""       ,"","ry2005b,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2005 ITTF (tpc only)",kFALSE},
-  {"B2005b"      ,""       ,"","ry2005f,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
-                                                       ,"Base chain for 2005 ITTF Geo f (tpc only)",kFALSE},
+  {"B2005b"      ,""       ,"","ry2005f,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+                                                   ,"Base chain for 2005 ITTF Geo f (tpc+svt only)",kFALSE},
 #else
   {"B2005a"      ,""       ,"","ry2005b,in,tpc_daq,tpcI,Physics,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2005 ITTF (tpc only)",kFALSE},
-  {"B2005b"      ,""       ,"","ry2005f,in,tpc_daq,tpcI,Physics,Idst,l0,tags,Tree,evout","",""
-                                                       ,"Base chain for 2005 ITTF Geo f (tpc only)",kFALSE},
+  {"B2005b"      ,""       ,"","ry2005f,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+                                                   ,"Base chain for 2005 ITTF Geo f (tpc+svt only)",kFALSE},
 #endif
   {"P2005"       ,"" ,"",
      "B2005,IAna,fcf,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
