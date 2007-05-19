@@ -13,6 +13,7 @@
 #include "TRealData.h"
 #include "phys_constants.h"
 #include "math_constants.h"
+#include "StMessMgr.h"
 
 int GGetOffset(TClass* cl, TDataMember* that);
 
@@ -96,8 +97,8 @@ void DcaService::replaceDca(TObject* obj, float dca, int* offset, TClass* cl,
                             const char* memname) {
   if (!(*offset)) {
     *offset = GGetOffset(cl,cl->GetDataMember(memname));
-    if (!(*offset)) printf("OFFSET NOT FOUND: %s in %s\n",
-      memname,cl->GetName());
+    if (!(*offset)) LOG_WARN << Form("OFFSET NOT FOUND: %s in %s\n",
+      memname,cl->GetName()) << endm;
   }
   float* cf = (float*) obj;
   float* dcaptr = (float*) ((int) cf + (*offset));
@@ -217,8 +218,11 @@ int GGetOffset(TClass* cl, TDataMember* that) {
 }
 
 //_____________________________________________________________________________
-// $Id: DcaService.cxx,v 3.1 2002/08/13 19:18:54 genevb Exp $
+// $Id: DcaService.cxx,v 3.2 2007/05/19 00:35:55 genevb Exp $
 // $Log: DcaService.cxx,v $
+// Revision 3.2  2007/05/19 00:35:55  genevb
+// use STAR logger
+//
 // Revision 3.1  2002/08/13 19:18:54  genevb
 // Introduction of DcaService
 //
