@@ -931,7 +931,7 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       Int_t maxBin = 0;
       Float_t maxValue = -1;
       //      for (Int_t j = 1; j < proj->GetXaxis()->GetNbins(); j++) {
-      for (Int_t j = 2; j < proj->GetXaxis()->GetNbins(); j++) {  // Trying this out D.Staszak
+      for (Int_t j = 2; j < proj->GetXaxis()->GetNbins(); j++) {  // D.Staszak
         if (proj->GetBinContent(j) > maxValue) {
           maxBin = j;
           maxValue = proj->GetBinContent(j);
@@ -949,14 +949,14 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
 // D.Staszak - Need to be careful about the influence of 0 bin on mean fit measurement.
 // In 2006pp, many runs have multiple towers filled with a lot of 0 ADC counts. Other
 // than this, the data is fine...so we just need to worry how it is affecting pedMean
-      // --- Comment this out when not running files with '0's --- 
+      // --- Include the below line when running over files with '0's --- 
       //Float_t zero_chk = pedMean - 11;
 
       // fit a gaussian to the pedestal peak
       gaus->SetParameter(0,maxValue);
       gaus->SetParameter(1,pedMean);
       gaus->SetParameter(2,3.5);
-      // --- Comment this out when not running files with '0's --- 
+      // --- Include this when running over files with '0's --- 
       //if (zero_chk < 1)
       //	gaus->SetRange(pedMean-(10.0+zero_chk),pedMean+(10.0+zero_chk));
       //else       
@@ -973,18 +973,12 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
 
 //pedestal width test
 //SHOULD THIS BE DIFFERENT FOR THE EEMC???
-//      if (chanId==1010) cout << "Chan 1010: width: " << pedestalwidth[chanId] << "  mean: " << pedestalmean[chanId] 
-//			     << endl;
 
       if (pedestalwidth[chanId] <= 0.5 || pedestalwidth[chanId] > 2.8) {
 	//cout << "In wide ped, Id: " << chanId << "   width: " << pedestalwidth[chanId] << "   mean:   " << pedestalmean[chanId] << endl;
 	statusVector[chanId] |= 4+32;
       }
   
-//pedestal mean test again
-      //if (mDetectorFlavor=="bemc" && (pedestalmean[chanId] < 4 || pedestalmean[chanId] > 145)) {
-      //	cout << "After fit - Mean too low --- Id:  " << chanId << "  mean: " << pedestalmean[chanId] << "  width:  " << pedestalwidth[chanId] << endl;
-      //}
 
 //pedestal mean test
       if (mDetectorFlavor=="bemc" && (pedestalmean[chanId] < 4 || pedestalmean[chanId] > 145)) {
@@ -1108,10 +1102,10 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       }
 
 
-// D.Staszak --- I know it seems a bit ad-hoc, but a lot of entries in the zero
-// bin is an indication of one type of problem seen with crates, also this finds
-// towers with a lot counts below the pedestal peak -- calling towers flagged 
-// by this test a stuck bit
+// D.Staszak --- Use this test to identify larger problems, as a first check - 
+// a lot of entries in the zero bin is an indication of some problems 
+// seen with crates, also this finds towers with a lot counts below the
+// pedestal peak
     // --- Comment out for running with 0's present: ---
       /*
       if ( (proj->GetBinContent(1) > 10 && (proj->GetBinContent(2)<10 || proj->GetBinContent(3)<10 ) && (proj->Integral(2,proj->GetXaxis()->GetNbins()) > 0)) ||
@@ -1126,10 +1120,6 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       } 
       */
     //--- End comment ----
-
-
-      //Don't like doing this, but has to be done --- problem tower in 2006pp (stuck bit ~2500 ADC)
-      if (chanId==3407) statusVector[chanId] = 8+64;
 
 
       delete proj;
