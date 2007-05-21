@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.29 2007/05/14 16:23:43 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.30 2007/05/21 16:02:56 rfatemi Exp $
 //
 //
 
@@ -1634,14 +1634,9 @@ int StBemcTrigger::get2006Trigger()
 	BL1_ADC_2006[i] = 0;
 	Int_t j = 2*i;
 	Int_t TempSum = 0;
-	Int_t EtotHigh = 0;
 	TempSum = mTrigger.Jet[j] + mTrigger.Jet[j+1];
-	TempSum = TempSum >> 2;
-	EtotHigh = TempSum >> 5;
-	int B5  = 0;
-	if(EtotHigh > 0) B5 = 1;
-	EtotSum[i] = (TempSum & 0x1F);
-	EtotSum[i] += B5<<5;
+	EtotSum[i]=TempSum >> 2;
+	if (EtotSum[i]>31)  EtotSum[i]=31;
 	mTrigger.Et += EtotSum[i];
 	BL1_ADC_2006[i] = EtotSum[i];
 	
