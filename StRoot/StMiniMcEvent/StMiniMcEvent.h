@@ -181,7 +181,7 @@ private:
   TClonesArray* mMatGlobPairs;
   static Int_t mSFirst; //!
 
-  ClassDef(StMiniMcEvent,3)
+  ClassDef(StMiniMcEvent,4)
 };
 
 #endif
@@ -189,6 +189,9 @@ private:
   
 //
 // $Log: StMiniMcEvent.h,v $
+// Revision 1.7  2007/05/21 16:17:16  fisyak
+// Increament ClassDef, thanks to Adam Kocoloski
+//
 // Revision 1.6  2007/02/23 17:07:00  fisyak
 // Add Ssd and DCA
 //
