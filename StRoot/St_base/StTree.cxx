@@ -734,21 +734,22 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
 void StTree::SetBaseName(const char *baseName,const char *dirname)
 {
   const char *sla,*dot;
-  fBaseName = baseName;
-  sla = strrchr(fBaseName.Data(),'/');
-  if (sla) fBaseName.Remove(0,sla-fBaseName.Data()+1);
-  dot = strrchr(fBaseName.Data(),'.');
-  if (!dot) return;
-  fBaseName.Remove(dot-fBaseName.Data());
-  dot = strrchr(fBaseName.Data(),'.');
-  if (!dot) return;
-  fBaseName.Remove(dot-fBaseName.Data());
+  fBaseName = gSystem->BaseName(baseName);
   if (dirname && *dirname) {
     TString ts(dirname); 
     if (ts[ts.Length()-1]!='/') ts += "/";
     ts += fBaseName;
     fBaseName = ts;
   }
+  dot = strrchr(fBaseName.Data(),'.');
+  if (!dot) 				return;
+  int fz = (strstr(".fz .fzd .daq",dot)!=0);
+  fBaseName.Remove(dot-fBaseName.Data());
+  if (fz) 				return;
+  dot = strrchr(fBaseName.Data(),'.');
+  if (!dot) 				return;
+  if ('0' <=dot[1] && dot[1]<='9') 	return;
+  fBaseName.Remove(dot-fBaseName.Data());
 }
 
 //_____________________________________________________________________________
