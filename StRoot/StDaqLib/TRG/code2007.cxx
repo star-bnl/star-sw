@@ -80,14 +80,21 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
     if(swap) pTRGD->swapHerb2bytes(nbytes,1); //byte swap for # of bytes
     unsigned short n = *nbytes;
     printf("TRG_Reader::UnpackTrg2007: Nprepost=%d   RawDat Size=%d (byte)\n",i,n);
-    if(swap) pTRGD->swapHerb2bytes(nbytes,1); //swap back so that later whole things will swap correctly
+    if(swap){
+      printf("-> Swapping on %lx\n",pTRGD);
+      pTRGD->swapHerb2bytes(nbytes,1); //swap back so that later whole things will swap correctly
+    }
+
+    printf("-> Doing memcpy to %lx from %lx\n",p_unp,p_daq);
     memcpy(p_unp, p_daq, n);
+
     p_daq += *nbytes;
     p_unp += size_raw;
   }
     
   //Byte Swap (if needed) for all raw data section
   if(swap){
+    printf("-> Swap2007_Raw on %lx\n",trgd);
     res = Swap2007_Raw(trgd);
     if(res<0){
       printf("TRG_Reader::UnpackTrg2007: Swap RawData error %s %d.\n",__FILE__,__LINE__);
