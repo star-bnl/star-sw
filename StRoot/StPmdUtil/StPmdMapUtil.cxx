@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdMapUtil.cxx,v 1.5 2007/05/21 04:38:11 rashmi Exp $
+ * $Id: StPmdMapUtil.cxx,v 1.6 2007/05/23 18:49:55 rashmi Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdMapUtil.cxx,v $
+ * Revision 1.6  2007/05/23 18:49:55  rashmi
+ * bug fix for unphysical year  23/05/07
+ *
  * Revision 1.5  2007/05/21 04:38:11  rashmi
  * functions for SMChain Combination information 21/05/07
  *
@@ -63,8 +66,14 @@ void StPmdMapUtil::StoreMapInfo(Int_t runno1)
   rn=atoi(iRun);
   year=atoi(iyear);
   cout<<"runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
+  cout<<"PMD runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
+  if(year<4){
+    gMessMgr->Warning("Unphysical year");
+    return;
+  }
+
 //////////////////////////////////////////////
-  Int_t sm,row,col;
+  Int_t sm=0,row=0,col=0;
   //Initialize
   for(Int_t ism=0;ism<PMD_CRAMS_MAX*2;ism++){
     for(Int_t irow=0;irow<PMD_ROW_MAX;irow++){
@@ -86,7 +95,7 @@ void StPmdMapUtil::StoreMapInfo(Int_t runno1)
 	   mPmdGeom->readBoardDetail(runno1);
 	   mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp,year);
 	}
-	if(sm>0 && row>0 && col>0){
+	if(year>=4 && sm>0 && row>0 && col>0){
  //  if(sm>12)cout<<"chain,ch,sm,col,row,chtemp,year "<<Chain_No<<" "<<channel<<" "<<sm-1<<" "<<col-1<<" "<<row-1<<" "<<chtemp<<" "<<year<<endl;
 	 m_ChannelInBoard[sm-1][row-1][col-1]=channel;
 	 m_TempChannelInBoard[sm-1][row-1][col-1]=chtemp;
