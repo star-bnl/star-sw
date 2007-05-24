@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.18 2004/11/11 20:06:58 jeromel Exp $
+ * $Id: DetectorReader.cxx,v 1.19 2007/05/24 20:56:38 jeromel Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.19  2007/05/24 20:56:38  jeromel
+ * (Pointer to) method returns FALSE instead of NULL fixed (+ one debug statement to remove later)
+ *
  * Revision 1.18  2004/11/11 20:06:58  jeromel
  * Message format change only (explicit)
  *
@@ -100,7 +103,7 @@ DetectorReader *getDetectorReader(EventReader *er, string det)
     {
       Bank_TPCPV1P0  *pTPCP;
       pTPCP = (Bank_TPCPV1P0 *)er->findBank("TPCP");
-      if (!pTPCP) dr = FALSE;
+      if (!pTPCP) dr = NULL;
       else dr =  new TPCV1P0_Reader(er,pTPCP);
       
     }
@@ -108,28 +111,28 @@ DetectorReader *getDetectorReader(EventReader *er, string det)
     {
       Bank_TPCPV1P0  *pTPCP;
       pTPCP = (Bank_TPCPV1P0 *)er->findBank("TPCP");
-      if (!pTPCP) dr = FALSE;
+      if (!pTPCP) dr = NULL;
       else dr =  new TPCV1P0_Reader(er,pTPCP);
     }
    else if (det == "TPCV2P0")
      {
       Bank_TPCPV2P0  *pTPCP;
       pTPCP = (Bank_TPCPV2P0 *)er->findBank("TPCP");
-      if (!pTPCP) dr = FALSE;
+      if (!pTPCP) dr = NULL;
       else dr =  new TPCV2P0_Reader(er,pTPCP);
      }
   else if  (det == "SVT")
      {
       Bank_SVTPV1P0 *pSVTP;
       pSVTP = (Bank_SVTPV1P0 *)er->findBank("SVTP");
-      if (!pSVTP) dr = FALSE;
+      if (!pSVTP) dr = NULL;
       else dr =  new SVTV1P0_Reader(er,pSVTP);
      }
   else if  (det == "FTPC")
      {
       Bank_FTPPV1P0 *pFTPP;
       pFTPP = (Bank_FTPPV1P0 *)er->findBank("FTPP");
-      if (!pFTPP) dr = FALSE;
+      if (!pFTPP) dr = NULL;
       else dr =  new FTPV1P0_Reader(er,pFTPP);
      }
   else
@@ -174,13 +177,13 @@ EEMC_Reader *getEEMCReader(EventReader *er)
     pEEMCP->header.CRC = 0;
     return new EEMC_Reader(er,pEEMCP);
   }
-  return FALSE;
+  return NULL;
 }
 SSD_Reader *getSSDReader(EventReader *er)
 {
   printf("DetectorReader - getSSDReader: before instantiation of SSD_Reader.\n"); 
   return new SSD_Reader(er);
-  return FALSE;
+  return NULL;
 }
 EMC_Reader *getEMCReader(EventReader *er)
 {
@@ -194,7 +197,7 @@ EMC_Reader *getEMCReader(EventReader *er)
     pEMCP->header.CRC = 0;
     return new EMC_Reader(er,pEMCP);
   }
-  return FALSE;
+  return NULL;
 }
 PMD_Reader *getPMDReader(EventReader *er)
 {
@@ -208,25 +211,28 @@ PMD_Reader *getPMDReader(EventReader *er)
     pPMDP->header.CRC = 0;
     return new PMD_Reader(er,pPMDP);
   }
-  return FALSE;
+  return NULL;
 }
 TRG_Reader *getTRGReader(EventReader *er)
 {
   Bank_TRGP *pTRGP;
   pTRGP = (Bank_TRGP *)er->findBank("TRGP");
+  printf("DEBUG In getTRGReader - pointer to TRGP is %p = %s\n",
+	 (void *) pTRGP,
+	 pTRGP?"TRUE":"FALSE");
   if (pTRGP)  {
     if (!pTRGP->test_CRC())  {printf("DetectorReader - getTRGReader: CRC error in TRGP: %s %d\n",
-					__FILE__,__LINE__) ; return 0;}
+					__FILE__,__LINE__) ; return NULL;}
     if (pTRGP->swap() < 0)   {printf("DetectorReader - getTRGReader: swap error in TRGP: %s %d\n",
-					__FILE__,__LINE__) ; return 0;}
+					__FILE__,__LINE__) ; return NULL;}
     pTRGP->header.CRC = 0;
     TRG_Reader *r = new TRG_Reader(er,pTRGP);
     if (!r->GetErr()) return r;
     (void) printf("DetectorReader - getTRGReader: Error => deleting implementation (check will cause event to be skipped)\n");
     delete r;
-    return 0;
+    return NULL;
   }
-  return FALSE;
+  return NULL;
 }
 
 L3_Reader *getL3Reader(EventReader *er)
@@ -242,7 +248,7 @@ L3_Reader *getL3Reader(EventReader *er)
     pL3P->header.CRC = 0;
     return new L3_Reader(er,pL3P);
   }
-  return FALSE;
+  return NULL;
 }
 
 TOF_Reader *getTOFReader(EventReader *er)
@@ -257,7 +263,7 @@ TOF_Reader *getTOFReader(EventReader *er)
     pTOFP->header.CRC = 0;
     return new TOF_Reader(er,pTOFP);
   }
-  return FALSE;
+  return NULL;
 }
 
 FPD_Reader *getFPDReader(EventReader *er)
@@ -272,5 +278,5 @@ FPD_Reader *getFPDReader(EventReader *er)
     pFPDP->header.CRC = 0;
     return new FPD_Reader(er,pFPDP);
   }
-  return FALSE;
+  return NULL;
 }
