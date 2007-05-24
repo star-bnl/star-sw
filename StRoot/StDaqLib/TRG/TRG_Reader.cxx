@@ -71,12 +71,16 @@ int TRG_Reader::YearOfData(char *data) {
 }
 
 
-TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
-  mErr = 0;
-  pBankUnp=0;
-  sizeUnp=0;
+TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) :
+    mErr(0),pBankUnp(0),sizeUnp(0),pTRGD(0)
+{
+  if (!pTRGD) pTRGD = new Bank_TRGD();
+
   pBankTRGP=pTRGP; //copy into class data member for use by other methods
   ercpy=er;        // squirrel away pointer eventreader for our friends
+
+  if ( !pTRGP) return;
+
   if(!pBankTRGP->test_CRC()) { 
     (void) printf("TRG_Reader::TRG_Reader: CRC error: %s %d\n",__FILE__,__LINE__); 
   }
