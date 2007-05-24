@@ -8,6 +8,11 @@
 int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   int returnValue,npre,npost,swap,res;
   
+  if ( ! pTRGP){
+    printf("DEBUG TRG_Reader::UnpackTrg2007 - not pTRGP\n");
+    return -1;
+  }
+
   assert(pTRGP->header.ByteOrder==0x01020304 ||
 	 pTRGP->header.ByteOrder==0x04030201);
   if(pTRGP->header.ByteOrder==0x04030201) {
@@ -81,11 +86,11 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
     unsigned short n = *nbytes;
     printf("TRG_Reader::UnpackTrg2007: Nprepost=%d   RawDat Size=%d (byte)\n",i,n);
     if(swap){
-      printf("-> Swapping on %lx\n",pTRGD);
+      printf("-> Swapping on %p\n",pTRGD);
       pTRGD->swapHerb2bytes(nbytes,1); //swap back so that later whole things will swap correctly
     }
 
-    printf("-> Doing memcpy to %lx from %lx\n",p_unp,p_daq);
+    printf("-> Doing memcpy to %p from %p\n",p_unp,p_daq);
     memcpy(p_unp, p_daq, n);
 
     p_daq += *nbytes;
@@ -93,8 +98,9 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   }
     
   //Byte Swap (if needed) for all raw data section
+  printf("-> Checking if swap is necessary\n");
   if(swap){
-    printf("-> Swap2007_Raw on %lx\n",trgd);
+    printf("-> Swap2007_Raw on %p\n",trgd);
     res = Swap2007_Raw(trgd);
     if(res<0){
       printf("TRG_Reader::UnpackTrg2007: Swap RawData error %s %d.\n",__FILE__,__LINE__);
@@ -103,6 +109,7 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   }
   
   //Switch bank pointer to fully restored data
+  printf("-> pBankTRGP set to (Bank_TRGP *) %p\n",pBankUnp);
   pBankTRGP = (Bank_TRGP *)pBankUnp; 
   
   return 0;
