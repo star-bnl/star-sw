@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.49 2004/09/10 22:08:01 perev Exp $
+ * $Id: EventReader.cxx,v 1.50 2007/05/24 20:56:38 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.50  2007/05/24 20:56:38  jeromel
+ * (Pointer to) method returns FALSE instead of NULL fixed (+ one debug statement to remove later)
+ *
  * Revision 1.49  2004/09/10 22:08:01  perev
  * more defence agains corrupted DAQ data
  *
@@ -744,15 +747,15 @@ char * EventReader::findBank(char *bankid)
   Bank_DATAP *pBankDATAP = (Bank_DATAP *)getDATAP();
   if (!pBankDATAP) {
     printf("DATAP not found: %s %d\n",__FILE__,__LINE__) ;
-    return FALSE;
+    return NULL;
   }
   if (!pBankDATAP->test_CRC()) {
     printf("CRC error in DATAP: %s %d\n",__FILE__,__LINE__) ;
-    return FALSE;
+    return NULL;
   }
   if (pBankDATAP->swap() < 0){
     printf("swap error in DATAP: %s %d\n",__FILE__,__LINE__) ;
-    return FALSE;
+    return NULL;
   }
   pBankDATAP->header.CRC = 0;
   
@@ -765,10 +768,10 @@ char * EventReader::findBank(char *bankid)
   int len = 10;
   int ext_len=22; // For Extended Detector ( e.g PMD ) ; Added by Susanta on 6th Nov, 2002
 
-  Bank_Header *pBank;
   Pointer *ptr = &pBankDATAP->TPC;
   
-  Bank_DATAPX *pBankDATAPX; // Added by Susanta for PMD on 6th Nov, 2002
+  Bank_Header *pBank=0;
+  Bank_DATAPX *pBankDATAPX=0; // Added by Susanta for PMD on 6th Nov, 2002
 
   int i,j=0;
 
@@ -792,12 +795,13 @@ char * EventReader::findBank(char *bankid)
 	// ---ENDS
         if(!strncmp(bankid,pBank->BankType,4)) break;
   }
-  if (i==len)  return FALSE;
+  if (i==len)  return NULL;
+  if (!pBank)  return NULL;
+
   if(strncmp(pBank->BankType,bankid,4)) {
     printf("detector %s not found in DATAP\n",bankid);
-    return FALSE;
+    return NULL;
   }
-
   return (char *)pBank;
   
 }
