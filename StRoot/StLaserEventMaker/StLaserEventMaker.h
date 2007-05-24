@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.23 2004/03/11 20:57:37 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.24 2007/05/24 20:34:19 jeromel Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.24  2007/05/24 20:34:19  jeromel
+// m_clockNominal class Data memebr unused
+//
 // Revision 1.23  2004/03/11 20:57:37  pfachini
 // The minimum number of valid tracks (minValidTracks) for a good drift velocity
 // calculation was lowered to 450 if both east and west lasers are up and 225
@@ -113,7 +116,7 @@ private:
   Float_t m_tzero;        // record tzero etc. in the event header
   Float_t m_drivel;
   Float_t m_clock;
-  Float_t m_clockNominal;
+  //Float_t m_clockNominal;
   Float_t m_trigger;//additional time added to tZero for trigger delay
   Int_t m_rowmin ; Int_t m_rowmax ;  //Range for the pixel branch.
   Bool_t m_mklaser;   	          //control flag for laser tree production
@@ -181,7 +184,7 @@ public:
   double velocityWest;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.23 2004/03/11 20:57:37 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.24 2007/05/24 20:34:19 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker,0)   //StAF chain virtual base class for Makers
 };
