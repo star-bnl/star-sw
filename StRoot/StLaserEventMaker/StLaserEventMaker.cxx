@@ -1,5 +1,9 @@
-// $Id: StLaserEventMaker.cxx,v 1.35 2007/04/17 05:08:18 perev Exp $
+// $Id: StLaserEventMaker.cxx,v 1.36 2007/05/24 20:35:47 jeromel Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.36  2007/05/24 20:35:47  jeromel
+// Fixes: m_clock unu-initialized, Float_t m_clockNominal replaced class DM,
+// naming changed to l_clockNominal.
+//
 // Revision 1.35  2007/04/17 05:08:18  perev
 // GetTFile()==>StMaker. Jerome request
 //
@@ -131,6 +135,7 @@ ClassImp(StLaserEventMaker)
 //_____________________________________________________________________________
   StLaserEventMaker::StLaserEventMaker(const char *name):
     StMaker(name),
+    m_clock(0),
     m_tpg_pad_plane(0),
     m_type(0),
     m_tpt_pars(0),
@@ -294,8 +299,8 @@ void StLaserEventMaker::MakeHistograms()
     driftVelocityReco = m_drivel;
     driftVelocityRec->Fill(driftVelocityReco);
     Float_t m_tzero = gStTpcDb->Electronics()->tZero();
-    Float_t m_clockNominal = gStTpcDb->Electronics()->samplingFrequency();
-    clockNominal = m_clockNominal;
+    Float_t l_clockNominal = gStTpcDb->Electronics()->samplingFrequency();
+    clockNominal = l_clockNominal;
     //Float_t m_clock = 0;
     //TDataSet* rundb=GetDataBase("RunLog/onl");
     //if (rundb) {
@@ -306,7 +311,7 @@ void StLaserEventMaker::MakeHistograms()
     //}
     //}
     //if (m_clock == 0) {
-    //m_clock = m_clockNominal;
+    //m_clock = l_clockNominal;
     //cout << "No real clock! Clock is set to be ClockNominal then." << endl;
     //}
     StDetectorDbClock* dbclock = StDetectorDbClock::instance();
@@ -322,7 +327,7 @@ void StLaserEventMaker::MakeHistograms()
 		     m_tzero, m_drivel, m_clock, m_trigger);
     cout << "Event "<< evno << " Run " << m_runno << endl;
     cout << " tZero "<< m_tzero << " trigger " << m_trigger << endl;
-    cout << " clock "<< m_clock << " clockNominal " << m_clockNominal << endl;
+    cout << " clock "<< m_clock << " clockNominal " << l_clockNominal << endl;
     cout << " drivel " << m_drivel << endl;
     cout << " freq "<< freq << endl;
 
@@ -861,7 +866,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.35 2007/04/17 05:08:18 perev Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.36 2007/05/24 20:35:47 jeromel Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
