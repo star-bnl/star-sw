@@ -88,7 +88,10 @@ class TRG_Reader {
   friend class EventReader;
 public:
   TRG_Reader(EventReader *er, Bank_TRGP *pTRGP);
-  ~TRG_Reader(){ if(pBankUnp!=0) {delete[] pBankUnp;} }; 
+  ~TRG_Reader(){ 
+    if (pBankUnp) delete[] pBankUnp;
+    if (pTRGD)    delete   pTRGD;
+  }; 
   Bank_TRGD *pBankTRGD;     // Making this public saves 2 large layers of accessor functions.
   int YearOfData(char *);   //!
   int S_mode;               //!
