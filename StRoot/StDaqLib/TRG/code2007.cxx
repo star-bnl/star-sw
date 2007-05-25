@@ -9,7 +9,7 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
   int returnValue,npre,npost,swap,res;
   
   if ( ! pTRGP){
-    printf("DEBUG TRG_Reader::UnpackTrg2007 - not pTRGP\n");
+    printf("TRG_Reader::UnpackTrg2007 - not pTRGP\n");
     return -1;
   }
 
