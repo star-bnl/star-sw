@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.19 2007/05/24 20:56:38 jeromel Exp $
+ * $Id: DetectorReader.cxx,v 1.20 2007/05/25 13:37:46 jeromel Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.20  2007/05/25 13:37:46  jeromel
+ * /DEBUG//
+ *
  * Revision 1.19  2007/05/24 20:56:38  jeromel
  * (Pointer to) method returns FALSE instead of NULL fixed (+ one debug statement to remove later)
  *
@@ -217,9 +220,9 @@ TRG_Reader *getTRGReader(EventReader *er)
 {
   Bank_TRGP *pTRGP;
   pTRGP = (Bank_TRGP *)er->findBank("TRGP");
-  printf("DEBUG In getTRGReader - pointer to TRGP is %p = %s\n",
-	 (void *) pTRGP,
-	 pTRGP?"TRUE":"FALSE");
+  //printf("DEBUG In getTRGReader - pointer to TRGP is %p = %s\n",
+  //	 (void *) pTRGP,
+  //	 pTRGP?"TRUE":"FALSE");
   if (pTRGP)  {
     if (!pTRGP->test_CRC())  {printf("DetectorReader - getTRGReader: CRC error in TRGP: %s %d\n",
 					__FILE__,__LINE__) ; return NULL;}
