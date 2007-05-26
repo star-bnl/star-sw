@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdMapUtil.cxx,v 1.6 2007/05/23 18:49:55 rashmi Exp $
+ * $Id: StPmdMapUtil.cxx,v 1.7 2007/05/26 00:40:07 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdMapUtil.cxx,v $
+ * Revision 1.7  2007/05/26 00:40:07  perev
+ * Initialization added
+ *
  * Revision 1.6  2007/05/23 18:49:55  rashmi
  * bug fix for unphysical year  23/05/07
  *
@@ -42,6 +45,7 @@ ClassImp(StPmdMapUtil)
 
   StPmdMapUtil::StPmdMapUtil()         //! A constructor
 {
+  memset(beg,0,end-beg);
   mPmdGeom = new StPmdGeom();
   StoreMapInfo();
 }
@@ -50,21 +54,8 @@ StPmdMapUtil::~StPmdMapUtil(){/*none*/}  //! A destructor
 
 void StPmdMapUtil::StoreMapInfo(Int_t runno1)
 {
-  char runfile[20];
-  sprintf(runfile,"%d",runno1);
-// Fetch from the run # the day
-  char iRun[8];
-  char iyear[8];
-  for (Int_t ik=0; ik<3; ik++)
-    {
-      iRun[ik] = runfile[ik+1];
-    }
-  iyear[0] = runfile[0];
-
-  Int_t rn =0;
-  Int_t year =0;
-  rn=atoi(iRun);
-  year=atoi(iyear);
+  int year = runno1/1000000;
+  int rn   = (runno1/1000)%1000;
   cout<<"runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
   cout<<"PMD runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
   if(year<4){
@@ -75,15 +66,9 @@ void StPmdMapUtil::StoreMapInfo(Int_t runno1)
 //////////////////////////////////////////////
   Int_t sm=0,row=0,col=0;
   //Initialize
-  for(Int_t ism=0;ism<PMD_CRAMS_MAX*2;ism++){
-    for(Int_t irow=0;irow<PMD_ROW_MAX;irow++){
-      for(Int_t icol=0;icol<PMD_COL_MAX;icol++){
-	m_ChannelInBoard[ism][irow][icol]=0;
-	m_TempChannelInBoard[ism][irow][icol]=0;
-	m_Chain[ism][irow][icol]=0;
-      }
-    }
-  }
+  memset(m_ChannelInBoard    [0][0],0,sizeof(m_ChannelInBoard    ));
+  memset(m_TempChannelInBoard[0][0],0,sizeof(m_TempChannelInBoard));
+  memset(m_Chain             [0][0],0,sizeof(m_Chain             ));
   
   for(Int_t Chain_No=1;Chain_No<=PMD_CHAIN_MAX;Chain_No++){
     for(Int_t CHANNEL=0;CHANNEL<PMD_CHAIN_CHANNEL_MAX;CHANNEL++){
@@ -94,13 +79,11 @@ void StPmdMapUtil::StoreMapInfo(Int_t runno1)
 	if(year>4){
 	   mPmdGeom->readBoardDetail(runno1);
 	   mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp,year);
-	}
-	if(year>=4 && sm>0 && row>0 && col>0){
  //  if(sm>12)cout<<"chain,ch,sm,col,row,chtemp,year "<<Chain_No<<" "<<channel<<" "<<sm-1<<" "<<col-1<<" "<<row-1<<" "<<chtemp<<" "<<year<<endl;
-	 m_ChannelInBoard[sm-1][row-1][col-1]=channel;
-	 m_TempChannelInBoard[sm-1][row-1][col-1]=chtemp;
-	 m_Chain[sm-1][row-1][col-1]=Chain_No;
-	}
+	   m_ChannelInBoard[sm-1][row-1][col-1]=channel;
+	   m_TempChannelInBoard[sm-1][row-1][col-1]=chtemp;
+	   m_Chain[sm-1][row-1][col-1]=Chain_No;
+        }
     }
   }
 }
@@ -109,15 +92,9 @@ void StPmdMapUtil::StoreMapInfo()
 {
   Int_t sm,row,col;
   //Initialize
-  for(Int_t ism=0;ism<PMD_CRAMS_MAX*2;ism++){
-    for(Int_t irow=0;irow<PMD_ROW_MAX;irow++){
-      for(Int_t icol=0;icol<PMD_COL_MAX;icol++){
-	m_ChannelInBoard[ism][irow][icol]=0;
-	m_TempChannelInBoard[ism][irow][icol]=0;
-	m_Chain[ism][irow][icol]=0;
-      }
-    }
-  }
+  memset(m_ChannelInBoard    [0][0],0,sizeof(m_ChannelInBoard    ));
+  memset(m_TempChannelInBoard[0][0],0,sizeof(m_TempChannelInBoard));
+  memset(m_Chain             [0][0],0,sizeof(m_Chain             ));
   
   for(Int_t Chain_No=1;Chain_No<=PMD_CHAIN_MAX;Chain_No++){
     for(Int_t CHANNEL=0;CHANNEL<PMD_CHAIN_CHANNEL_MAX;CHANNEL++){
