@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdMapUtil.h,v 1.3 2007/05/21 04:38:05 rashmi Exp $
+ * $Id: StPmdMapUtil.h,v 1.4 2007/05/26 00:40:07 perev Exp $
  *
  * Author: Dipak Mishra
  *
@@ -15,6 +15,9 @@
  *************************************************************
  *
  * $Log: StPmdMapUtil.h,v $
+ * Revision 1.4  2007/05/26 00:40:07  perev
+ * Initialization added
+ *
  * Revision 1.3  2007/05/21 04:38:05  rashmi
  * functions for SMChain Combination information 21/05/07
  *
@@ -39,11 +42,12 @@ class StPmdGeom;
 
 class StPmdMapUtil {
  private:
+  char beg[1];
   StPmdGeom * mPmdGeom;
  protected:
   Int_t m_TempChannelInBoard[PMD_CRAMS_MAX*2][PMD_ROW_MAX][PMD_COL_MAX];
-  Int_t m_ChannelInBoard[PMD_CRAMS_MAX*2][PMD_ROW_MAX][PMD_COL_MAX];
-  Int_t m_Chain[PMD_CRAMS_MAX*2][PMD_ROW_MAX][PMD_COL_MAX];
+  Int_t m_ChannelInBoard    [PMD_CRAMS_MAX*2][PMD_ROW_MAX][PMD_COL_MAX];
+  Int_t m_Chain             [PMD_CRAMS_MAX*2][PMD_ROW_MAX][PMD_COL_MAX];
   Int_t SMChainExists[24][48];
   Int_t nBoardSMChain[24][48];
   Int_t FirstBoard[60];
@@ -51,6 +55,7 @@ class StPmdMapUtil {
   Int_t SM_Combo[60];
 
   Int_t nSMChain; 
+  char end[1];
  public: 
   StPmdMapUtil();                 //! A constructor
   virtual  ~StPmdMapUtil();       //! A destructor
