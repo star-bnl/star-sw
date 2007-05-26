@@ -2143,6 +2143,8 @@ void StEventQAMaker::MakeHistPMD() {
   
   // Code written by Subhasis, Nov. 2004
 
+  StPhmdCollection* phmdcl = (StPhmdCollection*) (event->phmdCollection());
+  if (!phmdcl) return;
   Int_t runNumber=event->runId();
   Int_t eventID=event->id();
   if (runNumber != mRunNumber) {
@@ -2154,71 +2156,71 @@ void StEventQAMaker::MakeHistPMD() {
     maputil->StoreMapInfo(mRunNumber);
   }
   //get PhmdCollection
-  StPhmdCollection* phmdcl = (StPhmdCollection*) (event->phmdCollection());
   //if phmdcollection exists then loop over two detectors (pmd and cpv)
-  if (phmdcl) {
-    for (Int_t d=0;d<2;d++) {
-      
-      Int_t TOTAL_HIT_DETECTOR=0;
-      Int_t TOTAL_ADC_DETECTOR=0;
+  for (Int_t d=0;d<2;d++) {
 
-      //kPhmdCpvId = enum for Cpv Id,(25) and kPhmdId enum for Pmd Id (26)
-      StDetectorId pdet = static_cast<StDetectorId>(kPhmdCpvId+d);
-      StPhmdDetector* detector = (StPhmdDetector*) (phmdcl->detector(StDetectorId(pdet)));
-      if (detector) {
-        for (UInt_t j=0;j<12;j++) {
-	  Float_t TotalAdc=0;
-	  Float_t TotalHit=0;
-	  StPhmdModule* module = detector->module(j);
-	  if (module) {
-	    StSPtrVecPhmdHit& rawHit=module->hits();
-	    if (rawHit.size()>0) {
-	      for (Int_t k=0;k<(Int_t)rawHit.size();k++) {
-		Int_t sm=rawHit[k]->superModule();
-		Int_t row=rawHit[k]->row();
-		Int_t col=rawHit[k]->column();
-		Int_t adc=rawHit[k]->adc();
-		TotalAdc+=adc;
-		TotalHit++;
-		Int_t chainR, channelOR, channelCR;
-		if (d==0) {
-		  maputil->ReverseChannelOriginal(sm+13,row+1,col+1,channelOR);
-		  maputil->ReverseChannelConverted(sm+13,row+1,col+1,channelCR);
-		  maputil->ChainNumber(sm+13,row+1,col+1,chainR);
-		} else {
-		  maputil->ReverseChannelOriginal(sm+1,row+1,col+1,channelOR);
-		  maputil->ReverseChannelConverted(sm+1,row+1,col+1,channelCR);
-		  maputil->ChainNumber(sm+1,row+1,col+1,chainR);
-		}
-		if (chainR>0 && channelCR>=0 && chainR<=49) {
-		  hists->m_pmd_chain_adc[chainR/2]->Fill(channelCR,chainR%2,adc);
-		  hists->m_pmd_chain_hit[chainR/2]->Fill(channelCR,chainR%2);
-		}
-                TOTAL_HIT_DETECTOR++;;
-                TOTAL_ADC_DETECTOR+=adc;
+    Int_t TOTAL_HIT_DETECTOR=0;
+    Int_t TOTAL_ADC_DETECTOR=0;
+
+    //kPhmdCpvId = enum for Cpv Id,(25) and kPhmdId enum for Pmd Id (26)
+    StDetectorId pdet = static_cast<StDetectorId>(kPhmdCpvId+d);
+    StPhmdDetector* detector = (StPhmdDetector*) (phmdcl->detector(StDetectorId(pdet)));
+    if (detector) {
+      for (UInt_t j=0;j<12;j++) {
+	Float_t TotalAdc=0;
+	Float_t TotalHit=0;
+	StPhmdModule* module = detector->module(j);
+	if (module) {
+	  StSPtrVecPhmdHit& rawHit=module->hits();
+	  if (rawHit.size()>0) {
+	    for (Int_t k=0;k<(Int_t)rawHit.size();k++) {
+	      Int_t sm=rawHit[k]->superModule();
+	      Int_t row=rawHit[k]->row();
+	      Int_t col=rawHit[k]->column();
+	      Int_t adc=rawHit[k]->adc();
+	      TotalAdc+=adc;
+	      TotalHit++;
+	      Int_t chainR, channelOR, channelCR;
+	      if (d==0) {
+		maputil->ReverseChannelOriginal(sm+13,row+1,col+1,channelOR);
+		maputil->ReverseChannelConverted(sm+13,row+1,col+1,channelCR);
+		maputil->ChainNumber(sm+13,row+1,col+1,chainR);
+	      } else {
+		maputil->ReverseChannelOriginal(sm+1,row+1,col+1,channelOR);
+		maputil->ReverseChannelConverted(sm+1,row+1,col+1,channelCR);
+		maputil->ChainNumber(sm+1,row+1,col+1,chainR);
 	      }
-	    } //rawHit.size()
-	  } //module
-	  Int_t smid=d*12+j;
-	  hists->m_pmd_sm_hit[smid/2]->Fill(TotalHit,smid%2);
-          if (TotalHit<=0) continue;
-	  hists->m_pmd_sm_adc[smid/2]->Fill(TotalAdc/TotalHit,smid%2);
-	}
+	      if (chainR>0 && channelCR>=0 && chainR<=49) {
+		hists->m_pmd_chain_adc[chainR/2]->Fill(channelCR,chainR%2,adc);
+		hists->m_pmd_chain_hit[chainR/2]->Fill(channelCR,chainR%2);
+	      }
+              TOTAL_HIT_DETECTOR++;;
+              TOTAL_ADC_DETECTOR+=adc;
+	    }
+	  } //rawHit.size()
+	} //module
+	Int_t smid=d*12+j;
+	hists->m_pmd_sm_hit[smid/2]->Fill(TotalHit,smid%2);
+        if (TotalHit<=0) continue;
+	hists->m_pmd_sm_adc[smid/2]->Fill(TotalAdc/TotalHit,smid%2);
       }
-      if (d==0) {
-	hists->m_pmd_total_hit->Fill(eventID,TMath::Log10(1e-30+TOTAL_HIT_DETECTOR));
-	hists->m_pmd_total_adc->Fill(eventID,TMath::Log10(1e-30+TOTAL_ADC_DETECTOR));	
-      } else {
-	hists->m_cpv_total_hit->Fill(eventID,TMath::Log10(1e-30+TOTAL_HIT_DETECTOR));
-	hists->m_cpv_total_adc->Fill(eventID,TMath::Log10(1e-30+TOTAL_ADC_DETECTOR));	
-      }
+    }
+    if (d==0) {
+      hists->m_pmd_total_hit->Fill(eventID,TMath::Log10(1e-30+TOTAL_HIT_DETECTOR));
+      hists->m_pmd_total_adc->Fill(eventID,TMath::Log10(1e-30+TOTAL_ADC_DETECTOR));	
+    } else {
+      hists->m_cpv_total_hit->Fill(eventID,TMath::Log10(1e-30+TOTAL_HIT_DETECTOR));
+      hists->m_cpv_total_adc->Fill(eventID,TMath::Log10(1e-30+TOTAL_ADC_DETECTOR));	
     }
   }
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.78 2007/04/25 18:35:56 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.79 2007/05/26 00:42:18 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.79  2007/05/26 00:42:18  perev
+// Do Pmd only if exists
+//
 // Revision 2.78  2007/04/25 18:35:56  genevb
 // Additional SSD hists
 //
