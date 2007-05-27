@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.7 2007/01/26 17:20:57 msd Exp $
+ * $Id: StEStructHAdd.cxx,v 1.8 2007/05/27 22:46:00 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -177,6 +177,34 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
     outFile->cd();
     tmp->Write();
 
+    inFile->cd();
+    TH1* tmp=(TH1*)inFile->Get("NPosSame");
+    if(tmp) {
+      outFile->cd();
+      tmp->Write();
+    }
+    
+    inFile->cd();
+    tmp=(TH1*)inFile->Get("NPosMixed");
+    if(tmp) {
+      outFile->cd();
+      tmp->Write();
+    }
+
+    inFile->cd();
+    TH1* tmp=(TH1*)inFile->Get("NNegSame");
+    if(tmp) {
+      outFile->cd();
+      tmp->Write();
+    }
+
+    inFile->cd();
+    tmp=(TH1*)inFile->Get("NNegMixed");
+    if(tmp) {
+      outFile->cd();
+      tmp->Write();
+    }
+
     outFile->Close();
 };
 
@@ -260,6 +288,10 @@ void StEStructHAdd::addCuts(const char* outfile, const char* infile,
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.8  2007/05/27 22:46:00  msd
+ * Added buildChargeTypes mode 3 which takes rho_ref from track counts.
+ * Added buildChargeTypeSumOfRatios.
+ *
  * Revision 1.7  2007/01/26 17:20:57  msd
  * Updated HAdd for new binning scheme.
  * Improved Support::buildChargeTypes.
