@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.10 2007/01/26 17:09:29 msd Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.11 2007/05/27 22:43:35 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -140,6 +140,10 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
     retVal->SetCentrality((double)nTracks);
     if(!mECuts->goodCentrality(retVal->Centrality())) useEvent=false;
 
+    retVal->SetRefMult( muEvent->refMult() );
+    retVal->SetctbMult( muEvent->ctbMultiplicity() );
+    retVal->SetNumPrim( muEvent->eventSummary().numberOfGoodPrimaryTracks() );    
+
     if(useEvent){
 
       retVal->SetEventID(muEvent->eventNumber());
@@ -222,6 +226,7 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
     useTrack = (mTCuts->goodEta(track->eta()) && useTrack);
     useTrack = (mTCuts->goodChi2(track->chi2()) && useTrack);
     useTrack = (mTCuts->goodPhi(track->phi()) && useTrack);
+    if(track->pt() < 0.15) useTrack = false;  // basic pt cut, ranges checked in isTrackGoodToUse
 
     //--> But add a quick electron removal... for selected p ranges
     //    Note I only want to do this if I am defining an electron dEdx cut.
@@ -330,6 +335,9 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.11  2007/05/27 22:43:35  msd
+ * Added new centrality plots to Empty analysis
+ *
  * Revision 1.10  2007/01/26 17:09:29  msd
  * Minor bug fix in AnalysisMaker, cleaned up EmptyAnalysis
  *

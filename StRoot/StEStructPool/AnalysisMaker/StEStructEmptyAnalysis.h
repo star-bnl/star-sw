@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.h,v 1.7 2007/01/26 17:09:28 msd Exp $
+ * $Id: StEStructEmptyAnalysis.h,v 1.8 2007/05/27 22:43:35 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -26,16 +26,23 @@ class StEStructEmptyAnalysis : public StEStructAnalysis {
 
   char* moutFileName;
   
-  //int mhm[14];        // Jeff had these in place for p-p analysis, probably don't need them anymore
-  //TH1F** etaMean[3];
-  //TH1F** phiMean[3];
-  //TH1F** ytMean[3];
-  //TH1F*  ptdist[15];
-  
   // Make some plots for determining centrality bins
   TH1F* hNEvent;  // dNevent/dNch using Centrality
   TH1F* hnt;      // dNevent/dNch using Ntrack
   TH1F* hvar;     //variable bins;  I'd like to use a TGraph instead of TH1F, but hadd doesn't support graphs...
+  TH1F* href;     // refMult
+  TH1F* hnumPrim; // from StEventSummary::numberOfGoodPrimaryTracks()
+  TH1D* hctb;     // ctb multiplicity
+
+  TH1F* hnev14;   // centrality^1/4
+  TH1F* hnt14;    // ntrack^1/4 
+  TH1F* href14;     // refMult^1/4            
+  TH1F* hnumPrim14; // numPrim^1/4
+  TH1D* hctb14;     // ctb^1/4
+
+  // Track Level plots
+  TH1F* hmeanpt;   // event <pt>
+  TH1F* hmeanpt14; // <pt>^1/4
 
  public:
 
@@ -64,6 +71,9 @@ inline void StEStructEmptyAnalysis::setCutFile(const char* cutFileName, StEStruc
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.h,v $
+ * Revision 1.8  2007/05/27 22:43:35  msd
+ * Added new centrality plots to Empty analysis
+ *
  * Revision 1.7  2007/01/26 17:09:28  msd
  * Minor bug fix in AnalysisMaker, cleaned up EmptyAnalysis
  *

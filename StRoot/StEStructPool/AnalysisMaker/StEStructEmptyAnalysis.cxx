@@ -1,15 +1,16 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.cxx,v 1.8 2007/01/26 17:09:27 msd Exp $
+ * $Id: StEStructEmptyAnalysis.cxx,v 1.9 2007/05/27 22:43:33 msd Exp $
  *
- * Author: Jeff Porter 
+ * Author: Jeff Porter and Michael Daugherity 
  *
  **********************************************************************
  *
  * Description:  Empty analysis code for testing
  *               Can replace StEStruct2ptCorrelations for an analysis that
  *               reads events, applies all event and track (NOT pair) cuts,
- *               and outputs a few histograms.  
+ *               and outputs a few histograms.
+ *               Makes Nch distributions for centrality analysis.  
  *
  **********************************************************************/
 #include "StEStructEmptyAnalysis.h"
@@ -25,54 +26,21 @@ ClassImp(StEStructEmptyAnalysis)
 
 StEStructEmptyAnalysis::StEStructEmptyAnalysis(): moutFileName(0) {
 
-  /*  isn't being used
-  const char* ctype[]={"Pos","Neg","All"};
-
-  mhm[0]=mhm[1]=0;
-  mhm[2]=mhm[3]=0;
-  mhm[4]=mhm[5]=1;
-  mhm[6]=mhm[7]=2;
-  mhm[8]=mhm[9]=3;
-  mhm[10]=mhm[11]=4;
-  mhm[12]=mhm[13]=4;
- 
-  for(int i=0;i<3;i++){
-
-    etaMean[i]=new TH1F*[6];
-    phiMean[i]=new TH1F*[6];
-    ytMean[i]=new TH1F*[6];
-
-    for(int j=0;j<6;j++){
-      TString ename("EtaMean");
-      ename+=ctype[i]; ename+=j;
-      etaMean[i][j]=new TH1F(ename.Data(),ename.Data(),120,-1.2,1.2);
- 
-      TString pname("PhiMean");
-      pname+=ctype[i]; pname+=j;
-      phiMean[i][j]=new TH1F(pname.Data(),pname.Data(),120,-3.16,3.16);
-
-      TString yname("YtMean");
-      yname+=ctype[i]; yname+=j;
-      ytMean[i][j]=new TH1F(yname.Data(),yname.Data(),120,1.0,5.0);    
-
-    }
-
-  }
-
-  float binx[35]={ .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.6, 2.8, 3.0, 3.35, 3.8, 4.4, 5.1, 6, 7, 8, 9, 10.}; 
-
-  for(int i=0;i<14;i++){
-    TString hn1("PtNch_"); hn1+=(i+1);
-    //    TString hn2("PtNch_trig_"); hn2+=(i+1);
-    ptdist[i]=new TH1F(hn1.Data(),hn1.Data(),34,binx);
-    //    ptdistTrg[i]=new TH1F(hn2.Data(),hn2.Data(),34,binx);
-  }
-  ptdist[14]=new TH1F("PtNch_all","PtNch_all",34,binx);
-  */
-
   hNEvent = new TH1F("hNEvent","dNevent/dNch - Centrality",1200,0,1200);
   hnt = new TH1F("hnt","dNevent/dNch - Ntrack",1200,0,1200);
+  href = new TH1F("href","refMult", 1000,0,1000);
+  hnumPrim = new TH1F("hnumPrim", "Number of Good Primary Tracks", 2000, 0, 2000);
+  hctb = new TH1D("hctb","CTB Multiplicity", 1500,0,15000);
 
+  hnev14 = new TH1F("hnev14","centrality ^ 1/4",100,0,7);  // I guess round numbers don't matter here... 
+  hnt14 = new TH1F("hnt14","Ntrack ^ 1/4",100,0,7); 
+  href14 = new TH1F("href14","refMult ^ 1/4", 100,0,7);
+  hnumPrim14 = new TH1F("hnumPrim14","Primaries ^ 1/4", 100,0,7);
+  hctb14 = new TH1D("hctb14","CTB ^ 1/4", 200,0,15);
+    
+  hmeanpt = new TH1F("hmeanpt","mean pt",100,0,2);
+  hmeanpt14 = new TH1F("hmeanpt14","mean pt ^ 1/4",1000,0,2);
+  
   float varxbins[1200];
   varxbins[0]=0;
   for(int i=1; i<1200; i++) varxbins[i]=pow(i,0.25)-0.00001;
@@ -84,77 +52,46 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
 
   if(!event) return false;
 
-  //int mult = event->Ntrack();
   int mult = (int)event->Centrality();
   //cout << " doing event " << event->EventID() << " with mult " << mult << endl; //***
+
   hNEvent->Fill(mult);
-  hvar->Fill(pow(mult,0.25));
   hnt->Fill(event->Ntrack());
-
-  /*  unused
-    int id=event->Ntrack();
-  if(id>=1){
-
-    if(id<=13){
-      id=mhm[id];
-    } else {
-      id=5;
-    }
-
-    float npart[2],etaSum[2],phiSum[2],ytSum[2];
-    StEStructTrackCollection* tcol;
-    int inch=0;
-
-    for(int i=0;i<2;i++){
+  href->Fill(event->RefMult());
+  hnumPrim->Fill(event->NumPrim());
+  hctb->Fill(event->ctbMult());
 
 
-      npart[i]=etaSum[i]=phiSum[i]=ytSum[i]=0.;
+  hnev14->Fill(pow(mult,0.25));
+  hvar->Fill(pow(mult,0.25));  
+  hnt14->Fill(pow(event->Ntrack(),0.25));
+  href14->Fill(pow(event->RefMult(),0.25));
+  hnumPrim14->Fill(pow(event->NumPrim(),0.25));
+  hctb14->Fill(pow(event->ctbMult(),0.25));
 
-      if(i==0)tcol=event->TrackCollectionP();
-      if(i==1)tcol=event->TrackCollectionM();
-      StEStructTrackIterator Iter;
-      for(Iter=tcol->begin(); Iter!=tcol->end();++Iter){
-	if(*Iter) {
- 	  npart[i]+=1.0;
-	  etaSum[i]+=(*Iter)->Eta();
-	  phiSum[i]+=(*Iter)->Phi();
-	  ytSum[i]+=(*Iter)->Yt();
-          if(fabs((*Iter)->Eta())<0.5)inch++;
-	}        
+
+  double ptsum = 0;
+  int count = 0;
+
+  StEStructTrackCollection* tcol;
+  for(int i=0;i<2;i++){
+
+    if(i==0)tcol=event->TrackCollectionP();
+    if(i==1)tcol=event->TrackCollectionM();
+    StEStructTrackIterator Iter;
+    for(Iter=tcol->begin(); Iter!=tcol->end();++Iter){
+      if(*Iter) {
+	count++;
+	ptsum+=(*Iter)->Pt();
       }
-      if(npart[i]>0.){
-	etaMean[i][id]->Fill(etaSum[i]/npart[i]);
-	phiMean[i][id]->Fill(phiSum[i]/npart[i]);
-	ytMean[i][id]->Fill(ytSum[i]/npart[i]);
-      }
-
     }
-
-    if(inch>0 && inch<15){
-      inch-=1;
-     for(int i=0;i<2;i++){
-       if(i==0)tcol=event->TrackCollectionP();
-       if(i==1)tcol=event->TrackCollectionM();
-       StEStructTrackIterator Iter;
-       for(Iter=tcol->begin(); Iter!=tcol->end();++Iter){
-	 if(*Iter) {
-           ptdist[inch]->Fill((*Iter)->Pt());
-           ptdist[14]->Fill((*Iter)->Pt());
-	 }
-       }
-     }
-    }
-
-    if( (npart[0]+npart[1])>0.){
- 	etaMean[2][id]->Fill((etaSum[0]+etaSum[1])/(npart[0]+npart[1]));
-	phiMean[2][id]->Fill((phiSum[0]+phiSum[1])/(npart[0]+npart[1]));
-	ytMean[2][id]->Fill((ytSum[0]+ytSum[1])/(npart[0]+npart[1]));
-    }
-
   }
-  */
+
+  hmeanpt->Fill( ptsum/count );
+  hmeanpt14->Fill( pow(ptsum/count,0.25) );    
 
   delete event;
+
   return true;
 }
 
@@ -169,25 +106,23 @@ void StEStructEmptyAnalysis::finish(){
   TFile * tf=new TFile(moutFileName,"RECREATE");
   tf->cd();
 
-  // Jeff's plots
-  /*
-  for(int i=0;i<3;i++){
-    for(int j=0;j<6;j++){
-      etaMean[i][j]->Write();
-      phiMean[i][j]->Write();
-      ytMean[i][j]->Write();
-    }
-  }
-  for(int i=0;i<15;i++)ptdist[i]->Write();
-  */
-
-  // Centrality plots
-  hNEvent->Write();
-  
   for(int i=1; i<=hvar->GetNbinsX(); i++)  hvar->SetBinContent(i, hvar->GetBinContent(i)*4*pow(hvar->GetBinLowEdge(i),3) );
-  hvar->Write();
 
+  hNEvent->Write();
   hnt->Write();
+  hvar->Write();
+  href->Write();
+  hnumPrim->Write();
+  hctb->Write();
+
+  hnev14->Write();
+  hnt14->Write();
+  href14->Write();
+  hnumPrim14->Write();
+  hctb14->Write();
+
+  hmeanpt->Write();
+  hmeanpt14->Write();
 
   tf->Close();
 
@@ -196,6 +131,9 @@ void StEStructEmptyAnalysis::finish(){
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.cxx,v $
+ * Revision 1.9  2007/05/27 22:43:33  msd
+ * Added new centrality plots to Empty analysis
+ *
  * Revision 1.8  2007/01/26 17:09:27  msd
  * Minor bug fix in AnalysisMaker, cleaned up EmptyAnalysis
  *
