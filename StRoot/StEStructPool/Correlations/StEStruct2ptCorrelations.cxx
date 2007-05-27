@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.20 2007/01/26 17:17:04 msd Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.21 2007/05/27 22:45:00 msd Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -149,7 +149,11 @@ void StEStruct2ptCorrelations::init(){
   /* Event count via Nch distribution */
   mHNEvents[0]=new TH1D("NEventsSame","NEventsSame",1000,0.,2000.);
   mHNEvents[1]=new TH1D("NEventsMixed","NEventsMixed",1000,0.,2000.);
-  
+  mHNEvents[2]=new TH1D("NPosSame","NPosSame",1000,0.,1000.);
+  mHNEvents[3]=new TH1D("NPosMixed","NPosMixed",1000,0.,1000.);
+  mHNEvents[4]=new TH1D("NNegSame","NNegSame",1000,0.,1000.);
+  mHNEvents[5]=new TH1D("NNegMixed","NNegMixed",1000,0.,1000.);
+
   StEStructCutBin* cb = StEStructCutBin::Instance();
   int ncutbins=cb->getNumBins();
   int nQAbins=cb->getNumQABins();
@@ -180,8 +184,11 @@ void StEStruct2ptCorrelations::init(){
 
   /* Event Mixing Parameters */
   mHmix = new TH2D("EventMixing","Event Mixing: delta-Z vs delta-N",50,0,10, 50,0,200);  // deltaZ vs deltaN
-  TH1::AddDirectory(kTRUE);
 
+  mHcb = new TH1D("hcb","Cutbin usage",ncutbins,-0.5,ncutbins - 0.5);  // local   
+
+  TH1::AddDirectory(kTRUE);
+		  
   mInit=true;
 }
 
@@ -227,8 +234,8 @@ void StEStruct2ptCorrelations::cleanUp(){
   deleteHistograms();
   deleteArrays(); 
 
-  delete mHNEvents[0];
-  delete mHNEvents[1];
+  for(int i=0; i<6; i++) delete mHNEvents[i];
+
   delete mHptAll;
   StEStructCutBin* cb = StEStructCutBin::Instance();
   if (cb) {
@@ -304,6 +311,8 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
   moveEvents();
   mCurrentEvent=event;
   mHNEvents[0]->Fill(event->Ntrack());
+  mHNEvents[2]->Fill(event->Npos());
+  mHNEvents[4]->Fill(event->Nneg());
 
   // inclusive pt distribution
   // Note that cuts are done in yt-yt space and bins are
@@ -330,7 +339,7 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
 
       int i=0;
       if (cb->getMode() == 5) i = cb->getdEdxPID((*iter));
-      if (cb->getMode() == 6) i = bufferIndex(); 
+      if (cb->getMode() == 6 || cb->getMode() == 7) i = bufferIndex(); 
       mQAHists->fillTrackHistograms(*iter,i);
 
     // Choose mass according to dEdx (in which case transverse and longitudinal
@@ -350,6 +359,8 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
          (*iter)->SetMassAssignment(0);
     }
   }
+
+  //if (cb->getMode() == 6) mHcb->Fill( bufferIndex() );  // now filled in makepairs
 
   // Set magnetic field for pair cuts
   mPairCuts->SetBField( mCurrentEvent->BField() );
@@ -412,6 +423,8 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
     if(!mMixingEvent) break;
     //cout << "\t  mixing " << mMixingEvent->EventID() << ": " << mMixingEvent->Ntrack()  << " tracks." << endl;
     mHNEvents[1]->Fill(mMixingEvent->Ntrack());
+    mHNEvents[3]->Fill(mMixingEvent->Npos());
+    mHNEvents[5]->Fill(mMixingEvent->Nneg());
     float deltaZ = abs(mCurrentEvent->VertexZ() - mMixingEvent->VertexZ());
     float deltaN = abs(mCurrentEvent->Ntrack() -  mMixingEvent->Ntrack());
     mHmix->Fill(deltaZ,deltaN);
@@ -662,12 +675,14 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
 
         if (!cb->ignorePair(&mPair)) {
 
-          int icb=cb->getCutBin(&mPair);
-	  if(cb->getMode()==6) icb = bufferIndex();  // Has to be done here as a hack since event-level info not available inside cb
+	  int icb=cb->getCutBin(&mPair, bufferIndex());
+          //if (cb->getMode() == 7) mHcb->Fill(icb);
+	  mHcb->Fill(icb);   // now filled for all cb modes
 	  if(icb>=ncutbins) {
 	    cout << "ERROR, got cutbin " << icb << " of " << ncutbins << " possible." << endl;
 	    return;
 	  }
+
           pt1   = mPair.Track1()->Pt();
           pt2   = mPair.Track2()->Pt();
           if (itpt[0][icb][it1] == 0) {
@@ -1104,8 +1119,9 @@ void StEStruct2ptCorrelations::fillHistograms(){
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::writeHistograms() {
 
-  for(int j=0;j<2;j++)mHNEvents[j]->Write(); 
+  for(int j=0;j<6;j++)mHNEvents[j]->Write(); 
   mHmix->Write();
+  mHcb->Write();
 
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
 
@@ -1763,6 +1779,11 @@ void StEStruct2ptCorrelations::createHist1D(TH1D*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.21  2007/05/27 22:45:00  msd
+ * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
+ * Fixed bug in merging cut.
+ * Added a few histograms to 2pt corr.
+ *
  * Revision 1.20  2007/01/26 17:17:04  msd
  * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
  *

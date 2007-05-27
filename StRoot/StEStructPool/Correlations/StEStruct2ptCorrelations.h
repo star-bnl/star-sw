@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.10 2006/04/27 22:40:36 porter Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.11 2007/05/27 22:45:01 msd Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -53,10 +53,11 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
  protected:
 
   // Event-level hists needed for normalization and pt-correlations
-  TH1D*  mHNEvents[2];
+  TH1D*  mHNEvents[6];
   TH1D*  mHptAll;
   TH1D** mHpt[2];
   TH2D*  mHmix;
+  TH1D*  mHcb;  // my local hist for cutbin usage
 
   // HBT parameters
   qBins * mQinv[8]; //!  1D
@@ -324,6 +325,11 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.11  2007/05/27 22:45:01  msd
+ * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
+ * Fixed bug in merging cut.
+ * Added a few histograms to 2pt corr.
+ *
  * Revision 1.10  2006/04/27 22:40:36  porter
  * 3 changes: 1) added npair hists for errors needed with eta_delta weighting
  * 2) commented out a few histograms to trim memory usage

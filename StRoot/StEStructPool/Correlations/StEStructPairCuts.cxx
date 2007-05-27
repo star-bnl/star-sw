@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.6 2007/01/26 17:17:10 msd Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.7 2007/05/27 22:45:03 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -510,9 +510,7 @@ StEStructPairCuts::NominalTpcAvgZSeparation() const {
   double x1=NominalTpcZEntranceSeparation();
   double x2=MidTpcZSeparation();
   double x3=NominalTpcZExitSeparation();
-  //if (mZoffset) cout << "  AvgZ shifted by " << (x1+x2+x3)/3. - NominalTpcAvgZSeparation() << endl; 
-  // *** trying to fix endcap problem
-  if (x3==-1) return -1;  // hopefully will underflow in hist, and not break pair merging cut
+  if (x3==-1) return (x1+x2)/2.;  // if particle exited the endcap, exlude from average
   else return (x1+x2+x3)/3.;
 }
 
@@ -543,6 +541,11 @@ StEStructPairCuts::MidTpcZSeparation() const {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.7  2007/05/27 22:45:03  msd
+ * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
+ * Fixed bug in merging cut.
+ * Added a few histograms to 2pt corr.
+ *
  * Revision 1.6  2007/01/26 17:17:10  msd
  * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
  *
