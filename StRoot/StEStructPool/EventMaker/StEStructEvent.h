@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.7 2006/04/26 18:49:56 dkettler Exp $
+ * $Id: StEStructEvent.h,v 1.8 2007/05/27 22:45:18 msd Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -40,6 +40,10 @@ class StEStructEvent : public TObject {
   Float_t mZDCe;                     // ZDC East
   Float_t mZDCw;                     // ZDC West
 
+  unsigned short mRefMult;            // not used for determining centrality, stored for comparison
+  double mctbMult;                    
+  int mNumPrim;                       // from StEventSummary::numberOfGoodPrimaryTracks()
+
   TClonesArray *fTracks; //->
 
   // non-persistent data to merge old event and 2ptevent classes
@@ -74,6 +78,10 @@ class StEStructEvent : public TObject {
   Float_t ZDCe() const { return mZDCe; }
   Float_t ZDCw() const { return mZDCw; }
   
+  unsigned short RefMult() const { return mRefMult; }
+  double ctbMult() const { return mctbMult; }
+  int NumPrim() const { return mNumPrim; }
+
   // Reaction-plane related functions
   TVector2 Q();			// Calculates Q and returns it
   void CalculatePsi();		// Calculates Psi and stores it in mPsi
@@ -97,7 +105,14 @@ class StEStructEvent : public TObject {
   void SetZDCe(const Float_t zdce) { mZDCe = zdce; }
   void SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
 
+  void SetRefMult(const unsigned short mult) { mRefMult = mult; }
+  void SetctbMult(const double mult) { mctbMult = mult; }
+  void SetNumPrim(const int mult) { mNumPrim = mult; }
+
   Int_t Ntrack() { return mNtrack; }
+  Int_t Npos() { return (Int_t)mTrackCollectionP->size(); }
+  Int_t Nneg() { return (Int_t)mTrackCollectionM->size(); }
+
   TClonesArray *Tracks() { return fTracks; }
 
   virtual StEStructTrackCollection * TrackCollectionM() const; 
@@ -117,7 +132,11 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.8  2007/05/27 22:45:18  msd
+ * Added Npos() and Nneg().
+ *
  * Revision 1.7  2006/04/26 18:49:56  dkettler
+ *
  * Added reaction plane determination for the analysis
  *
  * Added reaction plane angle calculation
