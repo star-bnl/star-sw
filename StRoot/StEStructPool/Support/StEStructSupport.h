@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.9 2007/01/26 17:20:59 msd Exp $
+ * $Id: StEStructSupport.h,v 1.10 2007/05/27 22:46:02 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -33,6 +33,7 @@ public:
   int   mbgMode;
   char* mtmpString;
   bool  mapplyDEtaFix;
+  bool  msilent;
 
   bool  goodName(const char* name); // test if name is one of ours
   char* getFrontName(int itype); 
@@ -52,6 +53,9 @@ public:
   void setApplyDEtaFix();
   void unsetApplyDEtaFix(); // default
   bool applyDEtaFix();
+  void setSilent();
+  void unsetSilent();
+  bool silent();
 
   TH1** getHists(const char* name);
   float* getNorms(TH1** histArray);
@@ -79,6 +83,7 @@ public:
   TH1** buildPtChargeTypes_Old(const char* name, int opt=0, int subtract=0);
   TH1** buildPtChargeTypes(const char* name, int opt=0, int subtract=0);
 
+  TH1** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf=0);
   
   void scaleBackGround(TH1* sib, TH1* mix, float sf=0);
   TH1* getSqrt(TH1* h);
@@ -96,13 +101,19 @@ inline void StEStructSupport::setBGMode(int mode){ mbgMode=mode; };
 inline void StEStructSupport::setApplyDEtaFix()  { mapplyDEtaFix=true; };
 inline void StEStructSupport::unsetApplyDEtaFix(){ mapplyDEtaFix=false; };
 inline bool StEStructSupport::applyDEtaFix()     { return mapplyDEtaFix; };
-
+inline void StEStructSupport::setSilent() { msilent=true; };
+inline void StEStructSupport::unsetSilent(){ msilent=false; };
+inline bool StEStructSupport::silent() { return msilent; };
 
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.10  2007/05/27 22:46:02  msd
+ * Added buildChargeTypes mode 3 which takes rho_ref from track counts.
+ * Added buildChargeTypeSumOfRatios.
+ *
  * Revision 1.9  2007/01/26 17:20:59  msd
  * Updated HAdd for new binning scheme.
  * Improved Support::buildChargeTypes.

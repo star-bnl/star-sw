@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.15 2007/01/26 17:20:58 msd Exp $
+ * $Id: StEStructSupport.cxx,v 1.16 2007/05/27 22:46:01 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -87,6 +87,7 @@ StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float* npairs, float n
   //
 
   mapplyDEtaFix=false; // must set explicitly now
+  msilent=false;
 
   if(npairs){
     mnpairs = new float[8];
@@ -183,8 +184,8 @@ void StEStructSupport::rescale(TH1** hists){
       double dy = (hists[i]->GetYaxis())->GetBinWidth(1);
       binFactor = dx*dy; 
       // divinding by ex*ey converts all input hists from counts to densities, so all operations and final result should also be density.
-      if(i==0) cout << "Scaling with Nevents " << nev << " and binFactor " << binFactor << endl;
-      hists[i]->Scale(1.0/(nev*binFactor));
+      if(i==0 && !msilent) cout << "Scaling with Nevents " << nev << " and binFactor " << binFactor << endl;
+      hists[i]->Scale(1.0/(nev*binFactor));  
     }
   }
   
@@ -205,7 +206,7 @@ TH1** StEStructSupport::getLocalClones(const char* name){
   TH1** hlocal=new TH1*[_pair_totalmax];
   for(int i=0;i<_pair_totalmax;i++) {
     hlocal[i]=(TH1*)hset[i]->Clone();
-//    hlocal[i]->Sumw2();  // trigger error propogation
+    //hlocal[i]->Sumw2();  // trigger error propogation
   }
   delete hset;
 
@@ -572,6 +573,115 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
   retVal[0]->Add(hlocal[0]);  // LS sib
   retVal[1]->Add(hlocal[1]);  // US sib
 
+  // opt: 0 = delta-rho/rho_mix;  1 = delta-rho;  2 = delta-rho/sqrt(rho_mix);  3 = delta-rho/sqrt(rho_mix) ALT
+  
+  // for opt = 3 get counts of number of + and - tracks from mixed pairs, doesn't really matter which hist we use
+  TH1** heta=getLocalClones("EtaEta");  
+  TH1F* hNEventsMix = (TH1F*)mtf->Get("NEventsMixed");
+  double nev = hNEventsMix->GetEntries();
+  double nump = pow( heta[4]->Integral() / nev / 2, 0.5);   // number of + tracks
+  double numm = pow( heta[7]->Integral() / nev / 2, 0.5);   // number of - tracks
+  if(opt==3 && !msilent) cout << "Found total of " << nump << " + and " << numm << " - tracks" << endl;
+  nump/=2;  numm/=2;  // I want dN/deta ~= nbar / 2 for this eta range
+  delete hNEventsMix;
+
+  for(int i=0;i<2;i++){  // loop over LS and US
+    retVal[i]->Add(hlocal[i+4],-1.0);  // delta-rho
+  }
+  retVal[2]->Add(retVal[0],retVal[1],1.,-1.);  // CD sib
+  retVal[3]->Add(retVal[0],retVal[1],1.,1.);   // CI sib
+
+  if(opt!=1) {  // retVal has LS, US, CD, CI sib; use hlocal to take ratios
+    hlocal[6]->Add(hlocal[4], hlocal[5]);
+    hlocal[7]->Add(hlocal[4], hlocal[5]);  // hlocal[4] starts mix for denominators
+
+    for(int i=0;i<4;i++) {  
+      retVal[i]->Divide(hlocal[i+4]);  // delta-rho/rho_mix
+      // NOTE: now CI = (LS_sib + US_sib) / (LS_mix + US_mix), not sum of ratios
+
+      if(opt==2){    // delta-rho/sqrt(rho_mix), taking rho_ref from mixed pairs
+        TH1 *href;   // should be corrected rho_ref, for now take rho_mix
+	hlocal[i+4]->Scale(2.0); // dividing by two factors of 1/sqrt(2) to get densities on eta,phi; not eta_Delta, phi_Delta
+        href = getSqrt(hlocal[i+4]);
+        retVal[i]->Multiply(href);
+	retVal[i]->Scale( 1.0 / TMath::Pi() / 2);
+        delete href;
+      }
+      else if(opt>=3) {   // delta-rho/sqrt(rho_mix), taking rho_ref as a constant using nbar
+	double rhoref = 0; 
+	switch(i) {
+	  case 0: rhoref = pow( nump*nump + numm*numm, 0.5) / 2 / TMath::Pi();  break;
+	  case 1: rhoref = pow( 2*nump*numm, 0.5) / 2 / TMath::Pi();  break;
+	  case 2: rhoref = (nump + numm) / 2 / TMath::Pi();  break;
+	  case 3: rhoref = (nump + numm) / 2 / TMath::Pi();  break;
+	}
+	cout << "\trho_ref = " << rhoref << endl;
+	retVal[i]->Scale(rhoref);
+      }
+    }
+  }
+
+  if(opt>=2 && !msilent) cout << "  dividing by 2pi" << endl;
+
+  // Free local histograms.
+  for(int i=0;i<_pair_totalmax;i++) {
+    delete hlocal[i];
+    delete heta[i];
+  }
+  delete hlocal;
+  delete heta;
+
+  return retVal;
+}
+
+//---------------------------------------------------------
+TH1** StEStructSupport::buildChargeTypesSumOfRatios(const char* name, int opt, float* sf){
+  // finds LS and US same as buildChargeTypes, but here CI and CD are sums of ratios
+
+  // build hist types = LS, US, CD, CI
+  // eight input histograms ++,+-,-+,-- for Sib and Mix
+  TH1** hlocal=getLocalClones(name);
+  if(!hlocal) return hlocal;
+
+  if(mnpairs){  // manual scaling
+    for(int i=0;i<8;i++) hlocal[i]->Scale(1.0/mnpairs[i]);
+  } else rescale(hlocal);  // automatic scaling, norm sib to pairs per event, norm mix to sib
+
+  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEta((TH2**)hlocal,8); // does nothing unless mapplyDEtaFix is set
+
+  // four returned hists
+  TH1** retVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
+  const char* nm[4]={"LS","US","CD","CI"};
+  const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
+
+  for(int i=0;i<4;i++){
+    retVal[i]=(TH1*)hlocal[0]->Clone();
+    retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
+    retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i]));
+    retVal[i]->Scale(0.); // zero the hists
+  }
+
+  hlocal[0]->Add(hlocal[3]);                // ++ + -- Sib
+  if(hlocal[2]) hlocal[1]->Add(hlocal[2]);  // +- + -+ Sib, backward compatible
+  hlocal[4]->Add(hlocal[7]);                // ++ + -- Mix
+  if(hlocal[6]) hlocal[5]->Add(hlocal[6]);  // +- + -+ Mix
+
+  float scf1=0.;
+  float scf2=0.;
+  if(sf){
+    scf1=sf[0];
+    scf2=sf[1];
+  }
+  // if requested, scale bg to require correlations>=0 where statistics are large
+  if(1==mbgMode){
+    scaleBackGround(hlocal[0],hlocal[4],scf1);
+    scaleBackGround(hlocal[1],hlocal[5],scf2);
+    if(opt==3)scaleBackGround(hlocal[3],hlocal[7]);
+  }
+
+  retVal[0]->Add(hlocal[0]);  // LS sib
+  retVal[1]->Add(hlocal[1]);  // US sib
+
   // opt: 0 = delta-rho/rho_mix;  1 = delta-rho;  2 = delta-rho/sqrt(rho_mix)
 
   for(int i=0;i<2;i++){  // loop over LS and US
@@ -584,7 +694,7 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
     hlocal[6]->Add(hlocal[4], hlocal[5]);
     hlocal[7]->Add(hlocal[4], hlocal[5]);  // hlocal[4] starts mix for denominators
 
-    for(int i=0;i<4;i++) {  //2
+    for(int i=0;i<4;i++) {  
       retVal[i]->Divide(hlocal[i+4]);  // delta-rho/rho_mix
       // NOTE: now CI = (LS_sib + US_sib) / (LS_mix + US_mix), not sum of ratios
 
@@ -592,10 +702,17 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
         TH1 *href;   // should be corrected rho_ref, for now take rho_mix
         href = getSqrt(hlocal[i+4]);
         retVal[i]->Multiply(href);
+	retVal[i]->Scale( 1.0 / TMath::Pi() / 2);
         delete href;
       }
     }
   }
+
+  // overwrite final answer 
+  retVal[2]->Add(retVal[0],retVal[1],1.,-1.);  // CD
+  retVal[3]->Add(retVal[0],retVal[1],1.,1.);   // CI
+
+  if(opt>=2 && !msilent) cout << "  dividing by 2pi" << endl;
 
   // Free local histograms.
   for(int i=0;i<_pair_totalmax;i++) {
@@ -1167,6 +1284,10 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.16  2007/05/27 22:46:01  msd
+ * Added buildChargeTypes mode 3 which takes rho_ref from track counts.
+ * Added buildChargeTypeSumOfRatios.
+ *
  * Revision 1.15  2007/01/26 17:20:58  msd
  * Updated HAdd for new binning scheme.
  * Improved Support::buildChargeTypes.
