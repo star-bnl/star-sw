@@ -76,6 +76,7 @@ Int_t StTimeRandomizerMaker::Init() {
 Int_t StTimeRandomizerMaker::Make() {
   {LOG_DEBUG << "Starting Make()" << endm;}
   Int_t result = this->inherited::Make();
+  this->mEventNum++;
   if ((this->mEventsTotal > 0) && (this->mDates.size() == this->mTimes.size()) && (this->mDates.size() == this->mEvents.size()) && (this->mDates.size() > 0)) {
     Float_t random = 0;
     if (this->getNormalizeEventsTotal() != 0) {
@@ -115,7 +116,6 @@ Int_t StTimeRandomizerMaker::Make() {
    	*runUsedIter = (*runUsedIter) + 1;
     } else {LOG_ERROR << "Internal error when selecting timestamp" << endm;}
   } else {LOG_DEBUG << "Nothing to do" << endm;}
-  this->mEventNum++;
   {LOG_DEBUG << "Finished Make()" << endm;}
   return result;
 }
