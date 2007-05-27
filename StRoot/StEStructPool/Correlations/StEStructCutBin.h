@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.7 2007/01/26 17:17:10 msd Exp $
+ * $Id: StEStructCutBin.h,v 1.8 2007/05/27 22:45:02 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -41,7 +41,8 @@ class StEStructCutBin : public TObject {
   int getCutBinMode3(StEStructPairCuts *pc);
   int getCutBinMode4(StEStructPairCuts *pc);
   int getCutBinMode5(StEStructPairCuts *pc);
-  int getCutBinMode6(StEStructPairCuts *pc);
+  int getCutBinMode6(StEStructPairCuts *pc, int zbin);
+  int getCutBinMode7(StEStructPairCuts *pc, int zbin);
   int ignorePair5(StEStructPairCuts *pc);
   int symmetrizeYt5(StEStructPairCuts *pc);
   int switchYt5(StEStructPairCuts *pc);
@@ -53,6 +54,7 @@ class StEStructCutBin : public TObject {
   void initPtBinMode4();
   void initPtBinMode5();
   void initPtBinMode6();
+  void initPtBinMode7();
 
  public:
 
@@ -65,7 +67,7 @@ class StEStructCutBin : public TObject {
   int  getMode();
   int  getNumBins();
   int  getNumQABins();
-  int  getCutBin(StEStructPairCuts *pc);
+  int  getCutBin(StEStructPairCuts *pc, int zbin=0);
   int  ignorePair(StEStructPairCuts *pc);
   int  symmetrizeYt(StEStructPairCuts *pc);
   int  switchYt(StEStructPairCuts *pc);
@@ -83,12 +85,14 @@ inline int StEStructCutBin::getNumBins(){ return mnumBins; }
 inline int StEStructCutBin::getNumQABins(){
     if (5 == mcutMode) {
         return 4;
+    } else if (mcutMode == 7) {
+      return 10;
     } else {
         return mnumBins;
     }
 }
 
-inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
+inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int zbin){
   int retVal=0;
 
  switch (mcutMode){
@@ -124,12 +128,16 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
       }
  case 6:
    {
-     retVal=getCutBinMode6(pc);
+     retVal=getCutBinMode6(pc, zbin);
+     break;
+   }
+ case 7:
+   {
+     retVal=getCutBinMode7(pc, zbin);
      break;
    }
   default:
       {
-    
 	break;
       }
  }
@@ -185,6 +193,11 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.8  2007/05/27 22:45:02  msd
+ * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
+ * Fixed bug in merging cut.
+ * Added a few histograms to 2pt corr.
+ *
  * Revision 1.7  2007/01/26 17:17:10  msd
  * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.8 2007/01/26 17:17:09 msd Exp $
+ * $Id: StEStructCutBin.cxx,v 1.9 2007/05/27 22:45:02 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -58,13 +58,9 @@ void StEStructCutBin::setMode(int mode){
     }
   case 2:
     {
-      mnumBins=4;
-      strcpy(mcutModeName,"Trig/Assoc. Pt, 4 bins");
-      initPtBinMode0();
-      //setMode(1); // mode 2 is now obsolete ... same as mode 1
-      //      mnumBins=56;
-      //      strcpy(mcutModeName," yt_sum vs yt_delta Cut Binning, 54 bins");
-      //      initPtBinMode2();
+      mnumBins=6;
+      strcpy(mcutModeName,"Simple soft/hard same-side/away-side, 6 bins");   // *** new change
+      initPtBinMode2();
       break;
     }
   case 3:
@@ -93,6 +89,13 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=10;
       strcpy(mcutModeName," event-wise z-vertex binning, 10 bins");
       initPtBinMode6();
+      break;
+    }
+  case 7:
+    {
+      mnumBins=60;
+      strcpy(mcutModeName," event-wise z-vertex binning & soft/hard SS/AS, 60 bins");
+      initPtBinMode7();
       break;
     }
   default:
@@ -169,77 +172,45 @@ void StEStructCutBin::initPtBinMode1(){
 
 //------------------------ Mode=2 -------------------------------------------
 
-// TAKEN OVER FOR TRIGGER STUDY
-//********* 
-//********* OBSOLETE!!! used to be 2x finer than mode1 but never used
-//*********
-//*********   so now default to  Mode1
-
-  // binning on yt_sum,yt_delta
-  // 13 sum-bins from 2.0-8.5 with <2. & >8.5 included in first & last bins
-  // 7 delta-bins from 0-3.5 with >3.5 included in last bin
-/*
-  static int __ytsum_ytdelta_bin[13][7]={0,13,25,36,46,46,53,
-                     1,13,25,36,46,46,53,
-                     2,14,25,36,46,46,53,
-                     3,15,26,36,46,46,53,
-                     4,16,27,37,46,46,53,
-                     5,17,28,38,47,47,53,
-                     6,18,29,39,48,48,53,
-                     7,19,30,40,49,49,53,
-                     8,20,31,41,50,50,54,
-                     9,21,32,42,51,51,54,
-		     10,22,33,43,52,52,54,
-                     11,23,34,44,52,52,54,
-                     12,24,35,45,52,52,54};
-
-*/
+// now trying simple soft/hard SS/AS binning
+//   using cut from pp ytxyt paper with soft == yt_sum < 3.3
+//   should also require yt > 2 for hard, but I don't want to make a third case right now
+//   0 = soft SS;  1 = hard SS;  2 = other SS;  3 = soft AS;  4 = hard AS;  5 = other AS;
 
 int StEStructCutBin::getCutBinMode2(StEStructPairCuts* pc){
 
-  // Now set to copy a trig/assoc study with pt 2.5<trig<3
-  //   .3<assoc<.8 = bin 1,  .8<assoc<1.3 = bin 2, 1.3<assoc<1.8 = bin 3
-  //   everything else = bin 0
-  
-  float min,max,temp;
   int retVal;
-
-  min=pc->Track1()->Pt();
-  max=pc->Track2()->Pt();
-  if( min > max ){
-    temp=min;
-    min=max;
-    max=temp;
-  }
-                                                                                                             
-  if (max>3.0 || max<2.5) retVal=0;
-  else if (min<0.3 || min>1.8) retVal=0;
-  else {
-    retVal=2;
-    if (min<0.8) retVal=1; 
-    if (min>1.3) retVal=3;
-  }
+  int iyt, idp;
   
+  float yt1=pc->Track1()->Yt();
+  float yt2=pc->Track2()->Yt();
+
+  iyt = 2;
+  if (yt1+yt2 <= 3.3) iyt = 0;
+  if (yt1>=2 && yt2>=2) iyt = 1;
+
+  if (pc->sameSide()) idp = 0;
+  else idp = 1;
+
+  retVal = iyt + 3*idp;
+
   return retVal;
 
 }
 
-/*
-  float s=pc->SigmaYt();
-  float d=fabs(pc->DeltaYt());
-  int is=(int) floor((s-2.0)/0.5);
-  int id=(int) floor(d/0.5);
-  
-  if(is<0)is=0;
-  if(is>12)is=12;
-  if(id<0) id=0;
-  if(id>6) id=6;
+void StEStructCutBin::initPtBinMode2(){ 
+  // check these in qa spectra
 
-  return __ytsum_ytdelta_bin[is][id];
-}
-*/
-void StEStructCutBin::initPtBinMode2(){ return initPtBinMode1(); }
+  mPtBinMin[0]=mPtBinMin[3]=0;  // soft: min = 0; max = 3.3
+  mPtBinMax[0]=mPtBinMax[3]=0.139*sinh(3.3);  
 
+  mPtBinMin[1]=mPtBinMin[4]=0.139*sinh(3.3);  // hard: min = 3.3; max = 999.
+  mPtBinMax[1]=mPtBinMax[4]=999.;
+
+  mPtBinMin[2]=mPtBinMin[5]=0;  // other:  min = 0; max = 999.
+  mPtBinMax[2]=mPtBinMax[5]=999.;
+
+} 
 
 
 //------------------------ Mode=3 -------------------------------------------
@@ -655,9 +626,8 @@ int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
 //  pc object doesn't have event level info, so cutbin number is set in
 //    2ptanalysis by looking at mixing event buffer index.
 
-int StEStructCutBin::getCutBinMode6(StEStructPairCuts*){
-  // This function should never be used, can't access z-vertex position from here...
-  return 0;
+int StEStructCutBin::getCutBinMode6(StEStructPairCuts* pc, int zbin) {
+  return zbin;
 }
 
 void StEStructCutBin::initPtBinMode6(){
@@ -667,10 +637,58 @@ void StEStructCutBin::initPtBinMode6(){
   }
 }
   
+//------------------------ Mode=7 -------------------------------------------     
+//  Combines modes 2 and 6:
+//  Event-wise z-vertex binning WITH soft/hard SS/AS binning
+
+int StEStructCutBin::getCutBinMode7(StEStructPairCuts* pc, int zbin){
+
+  if (zbin<0 || zbin>9) return 0;
+
+  int retVal;
+  int iyt, idp;
+
+  float yt1=pc->Track1()->Yt();
+  float yt2=pc->Track2()->Yt();
+
+  iyt = 2;
+  if (yt1+yt2 <= 3.3) iyt = 0;
+  if (yt1>=2 && yt2>=2) iyt = 1;
+
+  if (pc->sameSide()) idp = 0;
+  else idp = 1;
+
+  retVal = zbin*6 + iyt + 3*idp;
+
+  return retVal;
+
+}
+
+void StEStructCutBin::initPtBinMode7(){
+  // check these in qa spectra 
+
+  for(int i=0; i<10; i++) {
+    mPtBinMin[i*6 + 0]=mPtBinMin[i*6 + 3]=0;  // soft: min = 0; max = 3.3
+    mPtBinMax[i*6 + 0]=mPtBinMax[i*6 + 3]=0.139*sinh(3.3);
+    mPtBinMin[i*6 + 1]=mPtBinMin[i*6 + 4]=0.139*sinh(3.3);  // hard: min = 3.3; max = 999. 
+    mPtBinMax[i*6 + 1]=mPtBinMax[i*6 + 4]=999.;
+    mPtBinMin[i*6 + 2]=mPtBinMin[i*6 + 5]=0;  // other:  min = 0; max = 999.
+    mPtBinMax[i*6 + 2]=mPtBinMax[i*6 + 5]=999.;
+  }
+}
+
+
+
+
 
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.9  2007/05/27 22:45:02  msd
+ * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
+ * Fixed bug in merging cut.
+ * Added a few histograms to 2pt corr.
+ *
  * Revision 1.8  2007/01/26 17:17:09  msd
  * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
  *
