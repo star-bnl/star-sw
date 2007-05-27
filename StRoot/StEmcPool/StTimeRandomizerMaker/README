@@ -64,7 +64,8 @@ St_db_Maker *dbMaker = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
 TRandom3 is utilized with user defined seed (default is zero) in Init() for
 the Uniform() random numbers.
 
-Events are assigned a sequential IDs, starting from the user defined base ID.
+Events are assigned a sequential IDs, starting from the user defined base ID:
+baseID+1, baseID+2, baseID+3...
 Set it to a different (large) number for each job if you want all events to
 have globally unique IDs.
 
