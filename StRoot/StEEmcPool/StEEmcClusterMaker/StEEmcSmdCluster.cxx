@@ -5,8 +5,8 @@
  * This class is designed to represent clusters of smd strips in the endcap.
  *
  * \author Jason C. Webb
- * $Date: 2006/11/27 22:52:34 $
- * $Revision: 1.3 $
+ * $Date: 2007/05/28 14:49:51 $
+ * $Revision: 1.4 $
  *
  * \section steemcsmdcluster_conventions
  *
@@ -16,6 +16,7 @@
  */
 #include "StEEmcSmdCluster.h"
 #include <TMath.h>
+#include <TH1F.h>
 
 #include "StEvent/StEmcCluster.h"
 
@@ -24,30 +25,44 @@ ClassImp(StEEmcSmdCluster);
 // ----------------------------------------------------------------------------
 StEEmcSmdCluster::StEEmcSmdCluster() : StEEmcBaseCluster()
 {
-  mEnergy=0.;
-  mSumXW=0.;
+  mEnergy=0.; 
+  mSumXW=0.; 
   mSumX2W=0.;
   mEmcCluster = 0;
   mLeft=999;
   mRight=-999;
 }
 
-void StEEmcSmdCluster::print()
+void StEEmcSmdCluster::print(Option_t *opts)
 {
   const Char_t *names[]={"u","v"};
   std::cout << "smd cluster plane=" << names[plane()] << std::endl;
   std::cout << "key   = " << key() << std::endl;
   std::cout << "energy= " << energy() << std::endl;
   std::cout << "mean  = " << mean() << std::endl;
+  if ( TString(opts).Contains("all") ) {
+    for ( UInt_t ii=0;ii<mStrips.size();ii++ )
+    {
+      mStrips[ii].print();
+      std::cout <<" w=" << mWeights[ii] << std::endl;  
+    }
+  } 
 }
 
-void StEEmcSmdCluster::printLine()
+void StEEmcSmdCluster::printLine(Bool_t endline)
 {
   std::cout << strip(0).name() << " " 
 	    << energy() << " "
 	    << mStrips.size() << " "
 	    << mean() << " "
-	    << sigma() << std::endl;
+	    << sigma();
+  if ( endline ) std::cout << std::endl;
+}
+
+void StEEmcSmdCluster::copy( TH1F *h )
+{
+  for ( UInt_t ii=0;ii<mStrips.size();ii++ )
+    h->AddBinContent( mStrips[ii].index()+1, mStrips[ii].energy()*1000.*mWeights[ii] );
 }
 
 StEEmcSmdCluster::StEEmcSmdCluster( const StEEmcSmdCluster &c )
@@ -68,6 +83,11 @@ StEEmcSmdCluster::StEEmcSmdCluster( const StEEmcSmdCluster &c )
   mSector=c.mSector;
 }
 // ----------------------------------------------------------------------------
+void StEEmcSmdCluster::add( StEEmcStripVec_t &strips )
+{
+  for ( UInt_t ii=0;ii<strips.size();ii++ ) add( strips[ii] );
+}
+
 void StEEmcSmdCluster::add( StEEmcStrip strip, Float_t weight )
 {
 

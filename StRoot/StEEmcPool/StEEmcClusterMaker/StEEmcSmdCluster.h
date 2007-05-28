@@ -45,6 +45,8 @@
 
 #include "StEEmcBaseCluster.h"
 
+class TH1F;
+
 class StEmcCluster;
 
 class StEEmcSmdCluster : public StEEmcBaseCluster {
@@ -61,6 +63,8 @@ class StEEmcSmdCluster : public StEEmcBaseCluster {
   /// specified weight
   void add( StEEmcStrip strip, Float_t weight=1.0 );
 
+  void add( StEEmcStripVec_t &strips );
+
  
   /// Return the energy of this cluster
   Float_t energy();
@@ -70,6 +74,7 @@ class StEEmcSmdCluster : public StEEmcBaseCluster {
   Float_t mean();
    /// Return the mean strip number of this cluster
   Float_t mean()const;
+
   /// Return the sigma -- sqrt(variance) -- of the cluster
   Float_t sigma();
   /// Return the sigma -- sqrt(variance) -- of the cluster
@@ -108,10 +113,14 @@ class StEEmcSmdCluster : public StEEmcBaseCluster {
 
   /// Returns the number of SMD strips in the cluster
   Int_t numberOfStrips(){ return (Int_t)mStrips.size(); }
+  Int_t numberOfStrips()const{ return (Int_t)mStrips.size(); }
 
   /// Returns the specified smd strip w/in the cluster
   StEEmcStrip strip(Int_t s){ return mStrips[s]; }
   StEEmcStrip strip(Int_t s)const{ return mStrips[s]; }
+
+  Float_t weight(Int_t s){ return mWeights[s]; }
+  Float_t weight(Int_t s)const{ return mWeights[s]; } 
 
   /// Returns the seed strip (by convention, the first
   /// strip added to the cluster).
@@ -132,12 +141,14 @@ class StEEmcSmdCluster : public StEEmcBaseCluster {
   /// Set pointer to StEmcCluster
   void stemc( StEmcCluster *c ){ mEmcCluster = c; }
   /// print
-  void print();
-  void printLine();
+  void print(Option_t *opts="");
+  void printLine(Bool_t endline=false);
 
   /// return the index of the next strip in the specified direction.
   /// \param: direct, negative is left, positive is right
   Int_t next(Int_t direct){ if(direct>0) return mRight; else if(direct<0) return mLeft; else return -999; }
+
+  void copy( TH1F *h );
 
  private:
  protected:
