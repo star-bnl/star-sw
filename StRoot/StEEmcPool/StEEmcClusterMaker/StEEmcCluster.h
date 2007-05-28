@@ -76,6 +76,7 @@ class StEEmcCluster : public StEEmcBaseCluster {
 
   /// Get the number of towers in cluster
   Int_t numberOfTowers(); 
+  Int_t numberOfTowers()const;
 
   /// Get the specified tower within the cluster
   StEEmcTower tower(Int_t t); 
@@ -111,6 +112,9 @@ class StEEmcCluster : public StEEmcBaseCluster {
 
   /// Prints cluster data
   void print();
+
+  void printLine(Bool_t Endl=false);
+
 //<<<<<<< StEEmcCluster.h
 
   /// Returns true if tower is adjacent to any tower in the cluster
@@ -134,6 +138,9 @@ class StEEmcCluster : public StEEmcBaseCluster {
 
   Bool_t operator<( const StEEmcCluster &other ) const { return this->energy() < other.energy(); }
   Bool_t operator>( const StEEmcCluster &other ) const { return this->energy() > other.energy(); }
+
+  Int_t numberOfEtabins();
+  Int_t numberOfPhibins();
 
  private:
  protected:
@@ -173,6 +180,7 @@ inline TVector3 StEEmcCluster::position(){ return mPosition;}
 inline StEEmcTower StEEmcCluster::tower(Int_t t){ return mTowers[t]; } 
 inline StEEmcTower StEEmcCluster::tower(Int_t t)const{ return mTowers[t]; } 
 inline Int_t StEEmcCluster::numberOfTowers(){ return (Int_t)mTowers.size(); } 
+inline Int_t StEEmcCluster::numberOfTowers()const{ return (Int_t)mTowers.size(); } 
 inline StEEmcTowerVec_t StEEmcCluster::towers(){ return mTowers; } 
 inline Float_t StEEmcCluster::weight( Int_t t ) { return mWeights[t]; } 
 

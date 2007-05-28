@@ -8,8 +8,8 @@
  * elements.
  *
  * \author Jason C. Webb
- * $Date: 2007/02/01 22:00:20 $
- * $Revision: 1.6 $
+ * $Date: 2007/05/28 14:48:49 $
+ * $Revision: 1.7 $
  *
  * \section steemccluster_conventions Conventions
  *
@@ -163,11 +163,14 @@ void StEEmcCluster::print()
   
   std::cout << "cluster key: " << mKey << std::endl;
   std::cout << "seed tower:  " << mTowers[0].name() << std::endl;
-  std::cout << "ntowers:     " << mTowers.size() << std::endl;
-  std::cout << "feta:        " << fracEtabin() << std::endl;
+  //  std::cout << "ntowers:     " << mTowers.size() << std::endl;
+  //  std::cout << "feta:        " << fracEtabin() << std::endl;
   std::cout << "fphi:        " << fracPhibin() << std::endl;
   std::cout << "energy:      " << mEnergy << std::endl;
   std::cout << "pt:          " << mMomentum.Perp() << std::endl;
+  std::cout << "eta:         " << mMomentum.Eta() << std::endl;
+  std::cout << "phi:         " << mMomentum.Phi() << std::endl;
+
   for ( UInt_t i=0;i<mTowers.size();i++ )
     {
       mTowers[i].printLine(); std::cout << " W=" << mWeights[i] << std::endl;
@@ -175,6 +178,12 @@ void StEEmcCluster::print()
 
 }
 //<<<<<<< StEEmcCluster.cxx
+
+void StEEmcCluster::printLine(Bool_t Endl)
+{
+  std::cout << "key="<<mKey<<" seed="<<mTowers[0].name()<<" ntow="<<mTowers.size()<<" pt=" <<mMomentum.Perp()<<" eta="<<mMomentum.Eta()<<" phi="<<mMomentum.Phi();
+  if ( Endl ) std::cout << std::endl;
+}
 
 Bool_t StEEmcCluster::isNeighbor( StEEmcTower tower ) 
 {
@@ -216,6 +225,25 @@ Float_t StEEmcCluster::sigmaE()
   Float_t var=sumE2/sumw-mean*mean;
   return TMath::Sqrt(var);  
 }
+
+Int_t StEEmcCluster::numberOfEtabins()
+{
+  Int_t etabins[12];for ( Int_t ii=0;ii<12;ii++ ) etabins[ii]=0;
+  for ( UInt_t ii=0;ii<mTowers.size();ii++ ) etabins[ mTowers[ii].etabin() ]++;
+  Int_t count=0;
+  for ( Int_t ii=0;ii<12;ii++ ) if ( etabins[ii] ) count++;
+  return count;
+}
+
+Int_t StEEmcCluster::numberOfPhibins()
+{
+  Int_t phibins[60];for ( Int_t ii=0;ii<12;ii++ ) phibins[ii]=0;
+  for ( UInt_t ii=0;ii<mTowers.size();ii++ ) phibins[ mTowers[ii].phibin() ]++;
+  Int_t count=0;
+  for ( Int_t ii=0;ii<12;ii++ ) if ( phibins[ii] ) count++;
+  return count;
+}
+
 //=======
 
 
