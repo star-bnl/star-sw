@@ -178,6 +178,8 @@ class StEEmcGenericClusterMaker : public StMaker
     StEEmcClusterVec_t  post;
     StEEmcSmdClusterVec_t  smdu;
     StEEmcSmdClusterVec_t  smdv;
+    StEEmcStripVec_t ustrips;
+    StEEmcStripVec_t vstrips;
   };
 
   /// Returns the clusters which match (see ::match()) the specified 
