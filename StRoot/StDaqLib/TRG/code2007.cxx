@@ -93,7 +93,7 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
     printf("-> Doing memcpy to %p from %p\n",p_unp,p_daq);
     memcpy(p_unp, p_daq, n);
 
-    p_daq += *nbytes;
+    p_daq += n; 
     p_unp += size_raw;
   }
     
