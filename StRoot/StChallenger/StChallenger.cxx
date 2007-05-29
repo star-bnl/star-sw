@@ -12,6 +12,7 @@
 #include "TROOT.h"
 #include "TClass.h"
 #include "StChallenger.h"
+#include "StMessMgr.h" 
 
  ClassImp(StChallenger)
 //_____________________________________________________________________________
@@ -24,14 +25,13 @@ StChallenger* StChallenger::Challenge(){
 
   TClass *c = gROOT->GetClass("Challenger");
   if (!c) {
-    cerr<<"ERROR <StChallenger::Challenge> failed to GetClass"<<endl;      
+    LOG_ERROR <<"failed to GetClass"<<endm;      
     return 0;
   }
 
   serv = (StChallenger *) c->New();
   if(!serv)
-    cerr<<"ERROR <StChallenger::Challenge> failed to make new Challenger"
-	<<endl;
+    LOG_ERROR<<"failed to make new Challenger"<<endm;
 
   return serv;
  }
