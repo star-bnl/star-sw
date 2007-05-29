@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine (fine@bnl.gov)
 // 
-// $Id: StHistCollectorMaker.cxx,v 2.6 2007/04/28 20:36:14 perev Exp $
+// $Id: StHistCollectorMaker.cxx,v 2.7 2007/05/29 20:46:19 fine Exp $
 //
 ////////////////////////////////////////////////////////////////////////////
 //                                                                        //
@@ -68,7 +68,9 @@ TDataSet *StHistCollectorMaker::AddHists()
  //  Update dataset fMergedSet with "histBranch"  staff
   TDataSet *rec = fMergedSet;
   TDataSet *histBranch = GetDataSet("hist");
-  if (!histBranch) { printf("No hist\n");  return 0;} 
+  if (!histBranch) { 
+     LOG_INFO << "No hist" << endm;
+     return 0;} 
   TDataSetIter nextDonor(histBranch);
   TDataSet *donor = 0;
   while((donor = nextDonor())) {
@@ -147,6 +149,9 @@ void  StHistCollectorMaker::UpdateHists(TObjectSet *oldSet,TObjectSet *newSet)
 }
 
 // $Log: StHistCollectorMaker.cxx,v $
+// Revision 2.7  2007/05/29 20:46:19  fine
+// Introduce logger-based output
+//
 // Revision 2.6  2007/04/28 20:36:14  perev
 // Redundant StChain.h removed
 //
