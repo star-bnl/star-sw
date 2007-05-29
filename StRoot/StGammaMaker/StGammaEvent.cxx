@@ -106,3 +106,33 @@ StGammaCandidate *StGammaEvent::newCandidate()
 }
 
 // ----------------------------------------------------------------------------
+
+Float_t StGammaEvent::sumPt( Float_t min, Float_t max )
+{
+  return sumTrackPt(min,max) + sumTowerPt(min,max);
+}
+Float_t StGammaEvent::sumTrackPt(Float_t min, Float_t max)
+{  
+  Float_t sum = 0.;
+  for ( Int_t i=0;i<numberOfTracks();i++ )
+    {
+      StGammaTrack *t=track(i);
+      if ( t->eta() < min || t->eta() > max ) continue;
+      sum += t->pt();
+    }
+  return sum;
+}
+
+Float_t StGammaEvent::sumTowerPt(Float_t min, Float_t max)
+{  
+  Float_t sum = 0.;
+  for ( Int_t i=0;i<numberOfTowers();i++ )
+    {
+      StGammaTower *t=tower(i);
+      if ( t->fail ) continue;      
+      if ( t->eta < min || t->eta > max ) continue;
+      sum += t->pt();
+    }
+  return sum;
+}
+
