@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.47 2007/04/24 17:10:57 akio Exp $
+ * $Id: StDAQReader.cxx,v 1.48 2007/05/29 22:12:18 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.48  2007/05/29 22:12:18  fine
+ * Introduce logger-based output
+ *
  * Revision 1.47  2007/04/24 17:10:57  akio
  * correct byte swapping issue
  *
@@ -171,6 +174,8 @@
 #include "StFTPCReader.h"
 #include "StTRGReader.h"
 #include "StSVTReader.h"
+#include "StMessMgr.h" 
+#include "TString.h" 
 //
 
 
@@ -216,7 +221,7 @@ int StDAQReader::open(const char *file)
 
   fFd = ::open(fFile,O_RDONLY);
    if (fFd==-1) { 
-     printf("<StDAQReader::open>  %s %s ",fFile, strerror( errno ) );
+     LOG_INFO << fFile << "  " << strerror( errno ) << endm;
      return kStErr;
   }
   fOffset =0;   
@@ -252,8 +257,7 @@ int StDAQReader::close()
 StDAQReader::~StDAQReader()
 {
   if (m_ZeroTokens > 1){
-    (void) printf("<Warning: StDAQReader::~StDAQReader()> %d events with token==0\n",
-		  m_ZeroTokens);
+    LOG_WARN << m_ZeroTokens << " events with token==0" << endm;
   }
   close();
 }
@@ -276,8 +280,9 @@ int StDAQReader::readEvent()
   if(fEventReader->errorNo()) return kStErr;  
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0){
-    (void) printf("StDAQReader::readEvent: found event with token==0\n");
-    m_ZeroTokens++;
+     LOG_INFO << 
+         Form("StDAQReader::readEvent: found event with token==0") << endm;
+     m_ZeroTokens++;
     // return kStErr;  // Herb, July 5 2000
   }
 
@@ -286,8 +291,9 @@ int StDAQReader::readEvent()
   if (fTRGReader  && TRGPresent() ){     
                                         fTRGReader ->Update();
 					if ( ! fTRGReader->thereIsTriggerData() ){
-					  (void) printf("StDAQReader::readEvent: No or bad TRG data - Skipping event\n");
-					  return kStErr;
+                  LOG_INFO <<
+					   Form("StDAQReader::readEvent: No or bad TRG data - Skipping event")<< endm;
+					   return kStErr;
 					}
   }
   if (fSVTReader  && SVTPresent() ) 	fSVTReader ->Update();
@@ -314,14 +320,14 @@ int StDAQReader::skipEvent(int nskip)
   {
     delete fEventReader;
     if (fOffset == -1) {
-      printf("<Warning: StDAQReader::skipEvent> EOF after record %d\n",isk);
+      LOG_WARN << Form("EOF after record %d\n",isk)<< endm;
       break;}  
       
     fEventReader = new EventReader();
     //    fEventReader->InitEventReader(fFd, fOffset, 0);
     fEventReader->InitEventReader(fFd, fOffset);
     if(fEventReader->errorNo()) {
-      printf("<Warning: StDAQReader::skipEvent> ReadError on record %d\n",isk);
+      LOG_WARN << Form("<Warning: StDAQReader::skipEvent> ReadError on record %d",isk)<<endm;
       fOffset = -1; break;}  
     fOffset = fEventReader->NextEventOffset();
   }

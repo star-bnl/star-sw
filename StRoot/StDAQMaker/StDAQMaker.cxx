@@ -44,7 +44,7 @@ Int_t StDAQMaker::Init()
 Int_t StDAQMaker::Open(const char*)
 {
   if (fDAQReader && fDAQReader->isOpened()) return 0;
-  printf("*** StDAQMaker::Open:  Open Input file %s ***\n",GetFile());
+  LOG_INFO << "Open Input file" << GetFile() << endm;
   if(!fDAQReader) fDAQReader = new StDAQReader();
   fDAQReader->setVerbose(GetDebug());
   fDAQReader->open(GetFile());
@@ -94,7 +94,7 @@ Int_t StDAQMaker::Make(){
       int npad = myTPCReader->getPadList(sector,padRow,padList);
       if (npad <0) break;
       if (npad==0) continue;
-      printf(" Sector=%2d PadRow=%2d nPads=%3d\n",sector,padRow,npad);
+      LOG_INFO << Form("Sector=%2d PadRow=%2d nPads=%3d\n",sector,padRow,npad) << endm;
     }
   }
   return 0;

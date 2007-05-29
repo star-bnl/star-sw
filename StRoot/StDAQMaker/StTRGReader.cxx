@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.cxx,v 1.7 2007/02/22 22:18:41 akio Exp $
+ * $Id: StTRGReader.cxx,v 1.8 2007/05/29 22:12:19 fine Exp $
  *
  * Author: Herbert Ward, Dec 28 1999, 13:10 EST.
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.cxx,v $
+ * Revision 1.8  2007/05/29 22:12:19  fine
+ * Introduce logger-based output
+ *
  * Revision 1.7  2007/02/22 22:18:41  akio
  * Update for 2007
  *
@@ -46,7 +49,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#define PP printf(
+#define PP LOG_INFO << 
 
 //_____________________________________________________________________________
 StTRGReader::StTRGReader(StDAQReader *daqr) {
