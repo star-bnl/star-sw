@@ -595,9 +595,37 @@ StGammaTower *StGammaRawMaker::tower( Int_t id, Int_t layer )
     {
       return mEEtowers[id][layer];
     }
-  else 
+  else if (layer == kBEmcTower)
     {
-      
+      StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMaker("gemaker");
+      if (!gemaker) return 0;
+      StGammaEvent* gevent = gemaker->event();
+      if (!gevent) return 0;
+      for (int i = 0; i < gevent->numberOfTowers(); ++i)
+	{
+	  StGammaTower* tower = gevent->tower(i);
+	  if ((int)tower->id == id && (int)tower->layer == layer)
+	    {
+	      return tower;
+	    }
+	}
+      return 0;
+    }
+  else if (layer == kBEmcPres)
+    {
+      StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMaker("gemaker");
+      if (!gemaker) return 0;
+      StGammaEvent* gevent = gemaker->event();
+      if (!gevent) return 0;
+      for (int i = 0; i < gevent->numberOfPreshower1(); ++i)
+	{
+	  StGammaTower* tower = gevent->preshower1(i);
+	  if ((int)tower->id == id && (int)tower->layer == layer)
+	    {
+	      return tower;
+	    }
+	}
+      return 0;
     }
   return 0;
 };
@@ -608,8 +636,13 @@ StGammaStrip *StGammaRawMaker::strip( Int_t sec, Int_t plane, Int_t index )
     {
       return mEEstrips[sec][plane][index];
     }
-  else
+  else if (plane == kBEmcSmdEta)
     {
+      return 0;
+    }
+  else if (plane == kBEmcSmdPhi)
+    {
+      return 0;
     }
   return 0;
 };
