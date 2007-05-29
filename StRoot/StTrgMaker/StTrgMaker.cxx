@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.10 2004/05/03 23:30:28 perev Exp $
+ * $Id: StTrgMaker.cxx,v 1.11 2007/05/29 23:11:44 fine Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.11  2007/05/29 23:11:44  fine
+ * Introduce logger-based output
+ *
  * Revision 1.10  2004/05/03 23:30:28  perev
  * Possible non init WarnOff
  *
@@ -100,8 +103,8 @@ Int_t StTrgMaker::Make() {
   }
   StThreeVectorD vertexPos(0,0,0);
   vertexPos=event->primaryVertex()->position();
-  printf("Event %3d: the position of the primary vertex is (%g %g %g)\n",
-     mEventCounter,vertexPos.x(), vertexPos.y(), vertexPos.z());
+  LOG_INFO << Form("Event %3d: the position of the primary vertex is (%g %g %g)",
+     mEventCounter,vertexPos.x(), vertexPos.y(), vertexPos.z()) << endm;
   if(vertexPos.z()>50.0||vertexPos.z()<-50.0) {
     fprintf(out,"# Event %3d: the primary vertex is out of z-range: %6.1f.\n",mEventCounter,vertexPos.z());
     fclose(out);
