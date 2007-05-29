@@ -28,7 +28,6 @@ Int_t StGammaEventMaker::Make()
       return kStFatal;
     }
 
-
   StMuPrimaryVertex *pv = StMuDst::primaryVertex();
   if ( pv )
     {
@@ -40,6 +39,9 @@ Int_t StGammaEventMaker::Make()
       mGammaEvent->SetVertex(TVector3(0.,0.,0.));
       mGammaEvent->mFlags |= !(TPC_VERTEX);
     }
+
+  mGammaEvent -> SetRunNumber ( StMuDst::event()->runNumber() );
+  mGammaEvent -> SetEventNumber( StMuDst::event()->eventNumber() );
 
   return kStOK;
 }

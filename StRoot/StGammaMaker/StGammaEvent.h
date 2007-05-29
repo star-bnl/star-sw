@@ -27,30 +27,35 @@ class StGammaEvent : public TObject {
 
   void Clear(Option_t *opts="");
   UShort_t mFlags;  /// Event flags (see above)
+  UShort_t flags(){ return mFlags; }
 
-  StGammaTrack *newTrack( StMuTrack *mutr=0 );
-  StGammaTower *newTower();
-  StGammaTower *newPreshower1();
-  StGammaTower *newPreshower2();
-  StGammaTower *newPostshower();
-  StGammaStrip *newStrip();
-  StGammaCandidate *newCandidate();
+  StGammaTrack *newTrack( StMuTrack *mutr=0 );/// Add a new track
+  StGammaTower *newTower();/// Add a new tower
+  StGammaTower *newPreshower1();/// Add a new preshower1 (bprs) element
+  StGammaTower *newPreshower2();/// Add a new preshower2 element
+  StGammaTower *newPostshower();/// Add a new postshower element
+  StGammaStrip *newStrip();/// Add a new SMD strip
+  StGammaCandidate *newCandidate();/// Add a new gamma candidate
 
-  Int_t numberOfTracks(){ return nTracks; }
-  Int_t numberOfTowers(){ return nTowers; }
-  Int_t numberOfPreshower1(){ return nPreshower1; }
-  Int_t numberOfPreshower2(){ return nPreshower2; }
-  Int_t numberOfPostshower(){ return nPostshower; }
-  Int_t numberOfStrips(){ return nStrips; }
-  Int_t numberOfCandidates(){ return nCandidates; }
+  Int_t numberOfTracks(){ return nTracks; }/// Return number of tracks
+  Int_t numberOfTowers(){ return nTowers; }/// Return number of towers
+  Int_t numberOfPreshower1(){ return nPreshower1; }/// Return number of pre1
+  Int_t numberOfPreshower2(){ return nPreshower2; }/// Return number of pre2
+  Int_t numberOfPostshower(){ return nPostshower; }/// Return number of post
+  Int_t numberOfStrips(){ return nStrips; }/// Return number of strips
+  Int_t numberOfCandidates(){ return nCandidates; }/// Return number of candidates
 
-  StGammaTrack *track( Int_t i ){ return (StGammaTrack*)mTracks->At(i); }
-  StGammaTower *tower( Int_t i ){ return (StGammaTower*)mTowers->At(i); }
-  StGammaTower *preshower1( Int_t i ){ return (StGammaTower*)mPreshower1->At(i); }
-  StGammaTower *preshower2( Int_t i ){ return (StGammaTower*)mPreshower2->At(i); }
-  StGammaTower *postshower( Int_t i ){ return (StGammaTower*)mPostshower->At(i); }
-  StGammaStrip *strip( Int_t i ){ return (StGammaStrip*)mStrips->At(i); }
-  StGammaCandidate *candidate( Int_t i ){ return (StGammaCandidate*)mCandidates->At(i); }
+  Float_t sumPt( Float_t eta_min = -2.5, Float_t eta_max = +2.5 );/// Returns track+tower pT in eta range
+  Float_t sumTrackPt(Float_t eta_min = -2.5, Float_t eta_max = +2.5 );/// Returns track pT in eta range
+  Float_t sumTowerPt(Float_t eta_min = -2.5, Float_t eta_max = +2.5 );/// Returns tower pT in eta range
+
+  StGammaTrack *track( Int_t i ){ return (StGammaTrack*)mTracks->At(i); }/// Return ith track
+  StGammaTower *tower( Int_t i ){ return (StGammaTower*)mTowers->At(i); }/// Return ith tower
+  StGammaTower *preshower1( Int_t i ){ return (StGammaTower*)mPreshower1->At(i); }/// Return ith pre1
+  StGammaTower *preshower2( Int_t i ){ return (StGammaTower*)mPreshower2->At(i); }/// Return ith pre2
+  StGammaTower *postshower( Int_t i ){ return (StGammaTower*)mPostshower->At(i); }/// Return ith post
+  StGammaStrip *strip( Int_t i ){ return (StGammaStrip*)mStrips->At(i); }/// Return ith strip
+  StGammaCandidate *candidate( Int_t i ){ return (StGammaCandidate*)mCandidates->At(i); }/// Return ith candidate
   
   //                                                     Run, event and vertex
  protected:
@@ -59,14 +64,15 @@ class StGammaEvent : public TObject {
   TVector3 mVertex; /// Event vertex (TPC)
 
 
+
  public:
   void SetRunNumber( Int_t run ){ mRunNumber=run; }
   void SetEventNumber( Int_t event ){ mEventNumber=event; }
   void SetVertex( TVector3 vertex ){ mVertex=vertex; }
 
-  Int_t runNumber(){ return mRunNumber; }
-  Int_t eventNumber(){ return mEventNumber; }
-  TVector3 vertex(){ return mVertex; }
+  Int_t runNumber(){ return mRunNumber; }/// Returns run number
+  Int_t eventNumber(){ return mEventNumber; }/// Returns event number
+  TVector3 vertex(){ return mVertex; }/// Returns the vertex
 
   
  private:
@@ -81,13 +87,13 @@ class StGammaEvent : public TObject {
   Int_t nStrips;
   Int_t nCandidates;
 
-  TClonesArray *mTracks;    //[nTracks]
-  TClonesArray *mTowers;    //[nTowers]
-  TClonesArray *mPreshower1;//[nPreshower1]
-  TClonesArray *mPreshower2;//[nPreshower2]
-  TClonesArray *mPostshower;//[nPostshower]
-  TClonesArray *mStrips;    //[nStrips]
-  TClonesArray *mCandidates;//[nCandidates]
+  TClonesArray *mTracks;    //-> array of all tracks
+  TClonesArray *mTowers;    //-> array of all towers
+  TClonesArray *mPreshower1;//-> array of all preshower1
+  TClonesArray *mPreshower2;//-> array of all preshower2
+  TClonesArray *mPostshower;//-> array of all postshower
+  TClonesArray *mStrips;    //-> array of all strips
+  TClonesArray *mCandidates;//-> array of all candidates
  
   ClassDef(StGammaEvent,1);
 

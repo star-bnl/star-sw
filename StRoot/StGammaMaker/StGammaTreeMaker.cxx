@@ -29,7 +29,7 @@ Int_t StGammaTreeMaker::Init()
   if ( !mGammaFile )
     mGammaFile=new TFile("gamma_tree.root","RECREATE");
   if ( !mGammaTree ) {
-    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.1 2007/05/25 23:01:34 jwebb Exp $ built "__DATE__" "__TIME__);
+    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.2 2007/05/29 01:37:05 jwebb Exp $ built "__DATE__" "__TIME__);    
     mGammaTree->SetDirectory(mGammaFile);
   }
 
@@ -43,6 +43,7 @@ Int_t StGammaTreeMaker::Init()
 
   mGammaEvent = gemaker->event();
   mGammaTree->Branch("GammaEvent",&mGammaEvent,32000,99);
+  mGammaTree->BranchRef(); // to ensure reference table is saved
 
   assert(mGammaFile);
   assert(mGammaTree);

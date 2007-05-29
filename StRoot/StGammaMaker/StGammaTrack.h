@@ -36,7 +36,7 @@ private:
   Float_t  mPhi;
   Float_t  mdEdx;
 
-  TRefArray mCandidates; // referencing candidates
+  //  TRefArray mCandidates; // referencing candidates
 
   ClassDef(StGammaTrack,1);
 };

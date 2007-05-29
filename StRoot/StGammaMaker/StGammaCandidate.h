@@ -29,6 +29,23 @@ class StGammaCandidate : public TObject
   ~StGammaCandidate();
 
 
+  //
+  // Functions to access raw data and return (simple) isolation sums
+  //
+  Float_t sumPt( Float_t radius );
+  Float_t sumTrackPt( Float_t radius );
+  Float_t sumTowerPt( Float_t radius );
+  Float_t sumPreshower1( Float_t radius );
+  Float_t sumPreshower2( Float_t radius );
+  Float_t sumPostshower( Float_t radius );
+
+  Int_t numberOfTracks( Float_t radius, Float_t minpt = 0. );
+  Int_t numberOfTowers( Float_t radius, Float_t minpt = 0. );
+  Int_t numberOfPreshower1( Float_t radius, Float_t threshold = 0. );
+  Int_t numberOfPreshower2( Float_t radius, Float_t threshold = 0. );
+  Int_t numberOfPostshower( Float_t radius, Float_t threshold = 0. );
+  
+  
   //                                   Association of candidate with clusters
   //                                     Author EEMC:
   //                                     Author BEMC:
@@ -53,6 +70,7 @@ class StGammaCandidate : public TObject
   enum CalorimeterId { kEEmc=0, kBEmc, kUnknown }; 
 
   Int_t detectorId(){ return mDetector; }
+  Int_t id(){ return mGammaId; }
 
 
 
@@ -150,6 +168,13 @@ class StGammaCandidate : public TObject
   StGammaTower *mypreshower2( Int_t i ){ return (StGammaTower*)mMyPreshower2.At(i); }
   StGammaTower *mypostshower( Int_t i ){ return (StGammaTower*)mMyPostshower.At(i); }
 
+  Int_t numberOfMyTracks(){ return mMyTracks.GetLast()+1; }
+  Int_t numberOfMyTowers(){ return mMyTowers.GetLast()+1; }
+  Int_t numberOfMyPreshower1(){ return mMyPreshower1.GetLast()+1; }
+  Int_t numberOfMyPreshower2(){ return mMyPreshower2.GetLast()+1; }
+  Int_t numberOfMyPostshower(){ return mMyPostshower.GetLast()+1; }
+
+
   // to add a new tower, do the following:
 
   // StGammaTower tower = candidate.AddTower();
@@ -159,10 +184,6 @@ class StGammaCandidate : public TObject
   // tower.phi    = <tower phi>;
   // tower.status = <tower status>;
   // tower.fail   = <tower fail>;
-
-
-
-
 
   ClassDef(StGammaCandidate,1);
 
