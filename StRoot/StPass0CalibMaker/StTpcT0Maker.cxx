@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.12 2007/04/28 17:56:30 perev Exp $
+// $Id: StTpcT0Maker.cxx,v 1.13 2007/05/29 22:27:35 fine Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.13  2007/05/29 22:27:35  fine
+// Introduce logger-based output
+//
 // Revision 1.12  2007/04/28 17:56:30  perev
 // Redundant StChain.h removed
 //
@@ -407,9 +410,9 @@ Int_t StTpcT0Maker::Finish() {
 }
 
 void StTpcT0Maker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.12 2007/04/28 17:56:30 perev Exp $\n");
-  printf("**************************************************************\n");
+  LOG_INFO << "**************************************************************"<< endm;
+  LOG_INFO << "* $Id: StTpcT0Maker.cxx,v 1.13 2007/05/29 22:27:35 fine Exp $"<< endm;
+  LOG_INFO << "**************************************************************"<< endm;
 
   if (Debug()) StMaker::PrintInfo();
 }
