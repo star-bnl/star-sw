@@ -1,5 +1,4 @@
 class  StChain *chain;
-class  StGammaPythiamaker *weight;
 int total=0;
 #include <string>
 
@@ -12,14 +11,10 @@ void RunGammaPythiaMaker(
 {
   int nevents =10;
   
-  if (gClassTable->GetID("TTable") < 0) {
-    gSystem->Load("libStar");
-    gSystem->Load("libPhysics");
-  }
-  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
-  loadSharedLibraries();
-  gSystem->Load("StGammaMaker/StGammaPythiaMaker");
-  
+ 
+  gROOT->LoadMacro("StRoot/StGammaMaker/macros/loadGammaLibs.C");
+  loadGammaLibs();
+
   chain= new StChain("StChain"); 
   chain->SetDebug(1);
   gMessMgr->SwitchOff("D");
@@ -33,7 +28,8 @@ void RunGammaPythiaMaker(
     
   StMuDebug::setLevel(1); 
   StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,file,filter,1e6,"MuDst"); 
-  weight = new StGammaPythiaMaker("GammaPythia");
+
+  StGammaPythiaMaker *weight = new StGammaPythiaMaker("GammaPythia");
   
   TChain* fileChain = muDstMaker->chain();
   int ntotal = fileChain->GetEntries();
