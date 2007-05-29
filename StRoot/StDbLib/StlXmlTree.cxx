@@ -56,26 +56,26 @@ StlXmlTree::StlXmlTree(const string xmlfilename, StlXmlTree* filter) :
       xmlFreeTextReader(reader);
       if (ret != 0) 
 	{
-	  printf("StlXmlTree::StlXmlTree: failed to parse %s\n", xmlfilename.c_str());
+	  LOG_ERROR<<"StlXmlTree::StlXmlTree: failed to parse "<< xmlfilename<<endm;
 	  MyStatus = BAD_XML;
 	}
     } 
   else 
     {
-    printf("StlXmlTree::StlXmlTree: unable to open %s\n", xmlfilename.c_str());
+    LOG_ERROR<<"StlXmlTree::StlXmlTree: unable to open "<< xmlfilename<< endm;
     MyStatus = NO_XML_BASE;
     }
 }
 ////////////////////////////////////////////////////////
 void StlXmlTree::ShowTree()
 {
-  cout << "-----------------------------------------\n";
-  cout << "XmlTree contains:\n";
+  LOG_INFO << "-----------------------------------------"<<endm;
+  LOG_INFO << "XmlTree contains:\n";
   for (MMCI I=XmlTree.begin(); I!=XmlTree.end(); ++I)
     {
-      cout << (*I).first <<" -- "<<(*I).second <<"\n";
+      LOG_INFO << (*I).first <<" -- "<<(*I).second <<endm;
     }
-  cout << "-----------------------------------------\n";
+  LOG_INFO << "-----------------------------------------"<<endm;
 }
 ////////////////////////////////////////////////////////
 string StlXmlTree::MakeKey(string FullyQualifiedParent, string Child)
@@ -112,7 +112,7 @@ vector<string> StlXmlTree::LookUpValueByKey
   string qp = QualifyParent(Parent,ParentAttributes);
   string key = MakeKey(qp,Child);
 #ifdef DEBUG
-  cout << "StlXmlTree::LookUpValueByKey key is " << key <<"\n";
+  LOG_INFO << "StlXmlTree::LookUpValueByKey key is " << key <<endm;
 #endif
   vector<string> rtrn = LookUpValueByKey(key);
   Parent = key; // return key to the calling module -- enable recursion
@@ -151,22 +151,23 @@ EndEntity = 16
     //    value = xmlTextReaderConstValue(reader);
     value = xmlTextReaderValue(reader);
 
-    printf("%d %d %s %d %d", 
-	    xmlTextReaderDepth(reader),
-	    xmlTextReaderNodeType(reader),
-	    name,
-	    xmlTextReaderIsEmptyElement(reader),
-	    xmlTextReaderHasValue(reader));
-    if (value == NULL)
-	printf("\n");
-    else 
-      {
-        if (xmlStrlen(value) > 40)
-	  printf(" %.40s...\n", value);
-        else
-	  printf(" %s\n", value);
-      }
-    
+    LOG_INFO << xmlTextReaderDepth(reader) <<" "<<xmlTextReaderNodeType(reader)<<" "<<name<<" "<<xmlTextReaderIsEmptyElement(reader)<<" "<<  xmlTextReaderHasValue(reader)<<endm;
+	if (value == NULL)
+	{
+		LOG_INFO <<endm;
+	}
+	else
+	{
+		if (xmlStrlen(value) > 40)
+		{
+		LOG_INFO<<value<<".40s..."<endm;
+		}
+		else
+		{
+		LOG_INFO<<" "<<value<<endm;
+		}
+	}
+
   short HasAttributes = xmlTextReaderHasAttributes(reader);
       if (HasAttributes)
 	{
@@ -292,7 +293,7 @@ bool StlXmlTree::SkipBasedOnValue(const string key, const string value)
   map<string,string> m = ParseAttributeString(value);
 
 #ifdef DEBUG
-  cout << "StlXmlTree::SkipBasedOnValue key = "<<key<<" value =  "<<value<<"\n ";
+  LOG_INFO << "StlXmlTree::SkipBasedOnValue key = "<<key<<" value =  "<<value<<endm;
 #endif
   MMCI b = Filter->XmlTree.lower_bound(key);
   MMCI e = Filter->XmlTree.upper_bound(key);
@@ -316,7 +317,6 @@ single match, take it.  If there is no key, take it !*/
 	    {
 	      string search_key = (*ii).first;
 
-	    //  cout << " search_key " << search_key <<"\n";
 	      MCI mykey = m.find(search_key);
 	      
 	      if (mykey!=m.end())
@@ -338,7 +338,7 @@ single match, take it.  If there is no key, take it !*/
 			      while (f_v_i != f_v.end() && rtrn)
 				{
 #ifdef DEBUG
-				  cout <<" compare " <<*m_v_i <<" and "<<*f_v_i <<"\n";
+				  LOG_INFO <<" compare " <<*m_v_i <<" and "<<*f_v_i <<endm;
 #endif
 				  if (*m_v_i == *f_v_i) 
 				    {
@@ -353,7 +353,7 @@ single match, take it.  If there is no key, take it !*/
 			  if (rtrn) 
 			    {
 #ifdef DEBUG
-			      cout << "StlXmlTree::SkipBasedOnValue "<< rtrn <<"\n";
+			      LOG_INFO << "StlXmlTree::SkipBasedOnValue "<< rtrn <<endm;
 #endif
 			      return rtrn;
 			    }
@@ -368,7 +368,7 @@ single match, take it.  If there is no key, take it !*/
     }
 
 #ifdef DEBUG
-			      cout << "StlXmlTree::SkipBasedOnValue "<< rtrn <<"\n";
+			      LOG_INFO << "StlXmlTree::SkipBasedOnValue "<< rtrn <<endm;
 #endif
   return rtrn;
 }
