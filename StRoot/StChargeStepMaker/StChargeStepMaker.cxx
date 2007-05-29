@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.15 2007/04/28 17:55:45 perev Exp $
+// $Id: StChargeStepMaker.cxx,v 1.16 2007/05/29 21:11:37 fine Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.16  2007/05/29 21:11:37  fine
+// Introduce logger-based output
+//
 // Revision 1.15  2007/04/28 17:55:45  perev
 // Redundant StChain.h removed
 //
@@ -109,10 +112,12 @@ Int_t StChargeStepMaker::Init() {
 Int_t StChargeStepMaker::Make() {
 
 
-  if (Debug()) printf("Start of StChargeStepMaker");
+  if (Debug()) {
+   LOG_DEBUG << "Start of StChargeStepMaker" << endm;
+  }
 
-  if (date==0) {date = GetDate();cout << "date = " << date << endl;}
-  if (time==0) {time = GetTime();cout << "time = " << time << endl;}
+  if (date==0) {date = GetDate();LOG_INFO << "date = " << date << endm;}
+  if (time==0) {time = GetTime();LOG_INFO << "time = " << time << endm;}
 
   // prepare tree
   typedef struct
@@ -135,7 +140,7 @@ Int_t StChargeStepMaker::Make() {
 
   if (!raw_data_tpc)
     {
-      cout << "No raw data found." << endl ;
+      LOG_INFO  << "No raw data found." << endm ;
       return kStOK;
     }
   else
@@ -302,10 +307,10 @@ Int_t StChargeStepMaker::Make() {
                     }
                   else
                     {
-                      cout << "something wrong with adc value :" << adc_value <<endl;
-                      cout << "in   pad : " << pad_id << "\t" ;
-                      cout << "       time : " << bucket_id << "\t" ;
-                      cout << "       adc : " << adc_value << endl;
+                      LOG_INFO  << "something wrong with adc value :" << adc_value <<endm;
+                      LOG_INFO << "in   pad : " << pad_id << "\t" ;
+                      LOG_INFO  << "       time : " << bucket_id << "\t" ;
+                      LOG_INFO  << "       adc : " << adc_value << endm;
                     }
                 } // Loop over pixel in this sequenz
             } // Loop over sequnezes
@@ -326,12 +331,12 @@ Int_t StChargeStepMaker::Make() {
     result[i]->Fill(answer);
     AddToAverage(i,answer);
     float current_average = GetAverage(i);
-    cout << "StChargeStepMaker: weighted mean "  << eRegions_names[i] << " = " << answer << endl;
-    cout << "StChargeStepMaker: average "  << eRegions_names[i] << " = " << current_average << endl;
+    LOG_INFO  << "weighted mean "  << eRegions_names[i] << " = " << answer << endm;
+    LOG_INFO  << "average "  << eRegions_names[i] << " = " << current_average << endm;
     }
   }
 
-  cout << "Got through StChargeStepMaker OK." << endl;
+  LOG_INFO << "Got through StChargeStepMaker OK." << endm;
 
   return kStOK;
 }
@@ -339,9 +344,9 @@ Int_t StChargeStepMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StChargeStepMaker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.15 2007/04/28 17:55:45 perev Exp $\n");
-  printf("**************************************************************\n");
+  LOG_INFO << "**************************************************************" << endm;
+  LOG_INFO << "* $Id: StChargeStepMaker.cxx,v 1.16 2007/05/29 21:11:37 fine Exp $"<< endm;
+  LOG_INFO << "**************************************************************"<< endm;
 
   if (Debug()) StMaker::PrintInfo();
 }
@@ -362,9 +367,9 @@ void StChargeStepMaker::Clear(const char *opt) {
 Int_t StChargeStepMaker::Finish() {
   if (nresults[1]>10&&nresults[3]>10){  // need some stats for decent result
     WriteTableToFile();
-    cout << "StChargeStepMaker -- Create tpcDriftVelocityTable" << endl;
+    LOG_INFO << "Create tpcDriftVelocityTable" << endm;
   }
-  else {cout << "StChargeStepMaker -- Insufficient Statistics for Drift Velocity" << endl;
+  else { LOG_INFO << "Insufficient Statistics for Drift Velocity" << endm;
   }
   return StMaker::Finish();
 }
@@ -375,12 +380,12 @@ void StChargeStepMaker::InitHistograms() {
 theDb = gStTpcDb;
 assert(theDb);
 //Figure out approximately where the zero point is:
- cout << "TPC length = " << theDb->Dimensions()->outerEffectiveDriftDistance() << endl;
- cout << "Drift Velocity = " << theDb->DriftVelocity() << endl;
- cout << "sampling Frequency = " << theDb->Electronics()->samplingFrequency() << endl;
- cout << "trigger offset" << theDb->triggerTimeOffset() << endl;
+ LOG_INFO << "TPC length = " << theDb->Dimensions()->outerEffectiveDriftDistance() << endm;
+ LOG_INFO << "Drift Velocity = " << theDb->DriftVelocity() << endm;
+ LOG_INFO << "sampling Frequency = " << theDb->Electronics()->samplingFrequency() << endm;
+ LOG_INFO << "trigger offset" << theDb->triggerTimeOffset() << endl;
 theGuess = (int)((theDb->Dimensions()->outerEffectiveDriftDistance()/(theDb->DriftVelocity())-theDb->triggerTimeOffset())*theDb->Electronics()->samplingFrequency()*1e6);
- cout << "central membrane around tb = " << theGuess << endl;
+ LOG_INFO << "central membrane around tb = " << theGuess << endm;
  for(int i = 0;i<4;i++){
   char histname[50];
   sprintf(histname,"Step %s",eRegions_names[i]);
@@ -412,8 +417,8 @@ float StChargeStepMaker::GetWeightedMean(TH1S* hist){
 int peak = hist->GetMaximumBin();
  double location = hist->GetBinCenter(peak);
  if (location<theGuess-10||location>theGuess+10) {
-   cout << "StChargeStepMaker:: False peak found at tb = " << location << endl;
-   cout << "StChargeStepMaker:: Database may be way off" << endl;
+   LOG_INFO  << "False peak found at tb = " << location << endm;
+   LOG_INFO  << "Database may be way off" << endm;
    return -1.0;
  }
 float mom1=0.0;
@@ -463,7 +468,7 @@ St_tpcDriftVelocity* StChargeStepMaker::driftTable(){
   float reference_step_east = mytable->chargeStepOuterEast;;
   float Lwest = reference_velocity*((reference_step_west/reference_clock)+reference_t0);
   float Least = reference_velocity*((reference_step_east/reference_clock)+reference_t0);
-  cout << "Least, trig offset = " << Least << " " << reference_t0 << endl;
+  LOG_INFO << "Least, trig offset = " << Least << " " << reference_t0 << endm;
   float velocityEast = Least/((GetAverage(3)/theDb->Electronics()->samplingFrequency()) + theDb->triggerTimeOffset()*1e6);
   float velocityWest = Lwest/((GetAverage(1)/theDb->Electronics()->samplingFrequency()) + theDb->triggerTimeOffset()*1e6);
   St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
@@ -482,7 +487,7 @@ void StChargeStepMaker::WriteTableToFile(){
   TString dirname = gSystem->DirName(filename);
   if (!gSystem->OpenDirectory(dirname.Data())) {
     if (gSystem->mkdir(dirname.Data())) {
-      cout << "Directoty " << dirname << " creation failed" << endl;
+      LOG_INFO << "Directoty " << dirname << " creation failed" << endm;
     }
   }
   ofstream *out = new ofstream(filename);
