@@ -9,7 +9,7 @@ const Float_t rootS = 200.0;
 
 void readGammaTree( const Char_t *fname = "gamma_tree.root" )
 {
-  gROOT->LoadMacro("loadGammaLibs.C");
+  gROOT->LoadMacro("StRoot/StGammaMaker/macros/loadGammaLibs.C");
   loadGammaLibs();
 
   file = new TFile(fname);
