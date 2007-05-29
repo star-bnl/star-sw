@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.36 2007/05/24 20:35:47 jeromel Exp $
+// $Id: StLaserEventMaker.cxx,v 1.37 2007/05/29 22:22:24 fine Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.37  2007/05/29 22:22:24  fine
+// Introduce logger-based output
+//
 // Revision 1.36  2007/05/24 20:35:47  jeromel
 // Fixes: m_clock unu-initialized, Float_t m_clockNominal replaced class DM,
 // naming changed to l_clockNominal.
@@ -185,7 +188,7 @@ Int_t StLaserEventMaker::InitRun(int RunId){
   assert(m_tpt_pars);
 
   //  Create a root tree. (let controlling Macro make the file?)
-  cout << "Making the laser TTree" << endl;
+  LOG_INFO << "Making the laser TTree" << endm;
   event = new StLaserEvent();
   GetTFile()->cd();
   m_laser = new TTree("laser","Tpc laser track tree");
@@ -194,7 +197,7 @@ Int_t StLaserEventMaker::InitRun(int RunId){
   m_laser->Branch("event", "StLaserEvent",&event, bufsize, 1);
 
   //  Create histograms
-  cout << "Making Histograms" << endl;
+  LOG_INFO << "Making Histograms" << endm;
   fzLaser = new TH1F("fzLaser","fzLaser",100,-200,200);
   fzlWestHigh = new TH1F("fzlWestHigh","fzlWestHigh",100,165,190);
   fzlWestLow = new TH1F("fzlWestLow","fzlWestLow",100,15,40);
@@ -220,8 +223,8 @@ Int_t StLaserEventMaker::InitRun(int RunId){
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Make(){
 
-  if (date==0) {date = GetDate();cout << "date = " << date << endl;}
-  if (time==0) {time = GetTime();cout << "time = " << time << endl;}
+  if (date==0) {date = GetDate();LOG_INFO << "date = " << date << endm;}
+  if (time==0) {time = GetTime();LOG_INFO << "time = " << time << endm;}
 
   TDataSet *tpc_data =  GetInputDS("tpc_hits");
   if (!tpc_data) return kStWarn;
@@ -234,7 +237,7 @@ Int_t StLaserEventMaker::Make(){
   // Move the hits according to the ExB corrections. We have a flag.
 
      if(tphit && m_undoExB){
-       cout << " correct the hits for ExB effects" << endl;
+       LOG_INFO << " correct the hits for ExB effects" << endm;
        tcl_tphit_st *h = tphit->GetTable();
        for (int i = 0;i<tphit->GetNRows();i++,h++){
 	 UndoExB(&h->x,&h->y,&h->z);
@@ -267,16 +270,16 @@ Int_t StLaserEventMaker::Make(){
 
 
   //			call TPT tracker
-  if (Debug()) cout << " start tpt run " << endl;
+  if (Debug()) LOG_INFO << " start tpt run " << endm;
 
   Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
 
 
   if (Res_tpt != kSTAFCV_OK) {
-    cout << "Problem with tpt... returns " <<Res_tpt<< endl;
+    LOG_INFO << "Problem with tpt... returns " <<Res_tpt<< endm;
     return kStErr;}
 
-  if (Debug()) cout << " finish tpt run " << endl;
+  if (Debug()) LOG_INFO << " finish tpt run " << endm;
 
   MakeHistograms(); // tracking histograms
   return kStOK;
@@ -312,7 +315,7 @@ void StLaserEventMaker::MakeHistograms()
     //}
     //if (m_clock == 0) {
     //m_clock = l_clockNominal;
-    //cout << "No real clock! Clock is set to be ClockNominal then." << endl;
+    //cout << "No real clock! Clock is set to be ClockNominal then." << endm;
     //}
     StDetectorDbClock* dbclock = StDetectorDbClock::instance();
     double freq = dbclock->getCurrentFrequency()/1000000.0;
@@ -325,11 +328,11 @@ void StLaserEventMaker::MakeHistograms()
     // Fill the event header.
     event->SetHeader(evno, m_runno, m_date, m_time,
 		     m_tzero, m_drivel, m_clock, m_trigger);
-    cout << "Event "<< evno << " Run " << m_runno << endl;
-    cout << " tZero "<< m_tzero << " trigger " << m_trigger << endl;
-    cout << " clock "<< m_clock << " clockNominal " << l_clockNominal << endl;
-    cout << " drivel " << m_drivel << endl;
-    cout << " freq "<< freq << endl;
+    LOG_INFO << "Event "<< evno << " Run " << m_runno << endm;
+    LOG_INFO << " tZero "<< m_tzero << " trigger " << m_trigger << endm;
+    LOG_INFO << " clock "<< m_clock << " clockNominal " << l_clockNominal << endm;
+    LOG_INFO << " drivel " << m_drivel << endm;
+    LOG_INFO << " freq "<< freq << endm;
 
     //  Make the "laser"  TTree  Should be controllable.
     // Create an iterator for the track dataset
@@ -400,7 +403,7 @@ void StLaserEventMaker::MakeHistograms()
 	  event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
 			0,0,0,0,0,0,0,h->alpha,h->lambda,h->prf,h->zrf,exbdx,exbdy);
       }
-      cout << n_hit->GetNRows() << " hits, " ;
+      LOG_INFO << n_hit->GetNRows() << " hits, " ;
     }
     tpt_track_st *t = n_track->GetTable();
     Int_t ngtk=0;
@@ -425,7 +428,7 @@ void StLaserEventMaker::MakeHistograms()
     } //end of itrk for loop
     numberTracks->Fill(ngtk);
     numberEvents->Fill(1);
-    cout <<  ntks << " total tracks " << ngtk << " good tracks" << endl;
+    LOG_INFO <<  ntks << " total tracks " << ngtk << " good tracks" << endm;
     delete [] sector;
     delete [] xl;
     delete [] yl;
@@ -441,7 +444,7 @@ void StLaserEventMaker::MakeHistograms()
     if(n_adc){
 
       tfc_adcxyz_st *p = n_adc->GetTable();
-      cout << n_adc->GetNRows() << " pixels in adcxyz table, " ;
+      LOG_INFO << n_adc->GetNRows() << " pixels in adcxyz table, " ;
       for(int iadc=0;iadc<n_adc->GetNRows();iadc++,p++){
 	if(p->row >=m_rowmin && p->row<=m_rowmax){
 	  event->AddPixel(100*p->sector+p->row,p->pad,p->bucket,
@@ -450,7 +453,7 @@ void StLaserEventMaker::MakeHistograms()
 	}
       }
     }
-    cout << npixwrit <<" pixels written to event " << evno << endl;
+    LOG_INFO << npixwrit <<" pixels written to event " << evno << endm;
 
     m_laser->Fill(); //Fill the Tree
   }  //end of if(m_mklaser)
@@ -865,9 +868,9 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.36 2007/05/24 20:35:47 jeromel Exp $\n");
-  printf("**************************************************************\n");
+  LOG_INFO << "**************************************************************" << endm;
+  LOG_INFO << "* $Id: StLaserEventMaker.cxx,v 1.37 2007/05/29 22:22:24 fine Exp $" << endm;;
+  LOG_INFO << "**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
 }
@@ -880,8 +883,8 @@ void StLaserEventMaker::WriteTableToFile(){
   TString dirname = gSystem->DirName(filename);
   if (gSystem->OpenDirectory(dirname.Data())==0) {
     if (gSystem->mkdir(dirname.Data())) {
-      cout << "Directory " << dirname << " creation failed" << endl;
-      cout << "Putting tpcDriftVelocity.C in current directory" << endl;
+      LOG_INFO << "Directory " << dirname << " creation failed" << endm;
+      LOG_INFO << "Putting tpcDriftVelocity.C in current directory" << endm;
       for (int i=0;i<80;i++){filename[i]=0;}
       sprintf(filename,"tpcDriftVelocity.%08d.%06d.C",date,time);
     }
