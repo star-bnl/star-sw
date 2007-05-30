@@ -71,7 +71,7 @@ class StVertexMaker : public StMaker {
   void UnSetBeam4ppLMV(){beam4ppLMV.isOn=0;};
   void SetBeam4ppLMV(){
     beam4ppLMV.isOn=1; 
-    printf("SetBeam4ppLMV() from DB is activated\n");
+    LOG_INFO<<"SetBeam4ppLMV() from DB is activated"<<endm;
   };
   void SetBeam4ppLMV(int ntr, double x, double y, double ux, double uy){
     beam4ppLMV.equivNtr=ntr;
@@ -83,7 +83,7 @@ class StVertexMaker : public StMaker {
     unsigned int GetCTBMode(){ return mCTBMode;};
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StVertexMaker.h,v 1.3 2003/09/02 17:59:26 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVertexMaker.h,v 1.4 2007/05/30 02:38:57 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StVertexMaker, 0)   //StAF chain virtual base class for Makers
     
@@ -97,8 +97,11 @@ inline Int_t StVertexMaker::FixVertexFileMatch(char* fname)
   { embedVerts=kFALSE; return FixVertexFileRead(fname, kTRUE ); }
 #endif
 
-// $Id: StVertexMaker.h,v 1.3 2003/09/02 17:59:26 perev Exp $
+// $Id: StVertexMaker.h,v 1.4 2007/05/30 02:38:57 balewski Exp $
 // $Log: StVertexMaker.h,v $
+// Revision 1.4  2007/05/30 02:38:57  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.3  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //

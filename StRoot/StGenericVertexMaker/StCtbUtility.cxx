@@ -4,7 +4,6 @@
 
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include <StMessMgr.h>
-//#include <StGlobals.hh>
 
 
 #include <StTriggerData.h>
@@ -98,7 +97,7 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
   int i;
   for (i = 0; i < g2t_ctb_hit->GetNRows(); i++,ctb_hit++){
     float de_mev=ctb_hit->de*1000.;
-    if(de_mev>0.01)  printf("CTB Hit i=%d  de/MeV=%f parent=%d\n",i,de_mev ,ctb_hit->track_p);
+    if(de_mev>0.01)  LOG_INFO<<Form("CTB Hit i=%d  de/MeV=%f parent=%d\n",i,de_mev ,ctb_hit->track_p)<<endm;
     if(de_mev <mCtbThres_mev)  continue; // ignore low energy CTB slat
     
     long iPhi,iEta;
@@ -163,7 +162,7 @@ void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
       ctbHit curHit;
       curHit.adc = ctbDet->mips(tray,slat,0);
       if(curHit.adc<mCtbThres_ch) continue;
-      printf("A sl=%3d tr=%3d  %4f\n",slat,tray, curHit.adc );
+      LOG_INFO<<Form("A sl=%3d tr=%3d  %4f\n",slat,tray, curHit.adc )<<endm;
     }
   
 #endif
@@ -174,12 +173,12 @@ void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
 //==========================================================
 //==========================================================
 void  StCtbUtility::printCtb() {
- printf("StCtbUtility::print(),nSlat=%d\n",mCtbHits.size());
+  LOG_INFO<<Form("StCtbUtility::print(),nSlat=%d\n",mCtbHits.size())<<endm;
 
   uint ih;
   for(ih=0;ih<mCtbHits.size();ih++) {// loop over CTB hits
-    printf("ih=%d eta=%.3f phi/deg=%.1f adc=%.1f\n",ih
-           ,mCtbHits[ih].eta,mCtbHits[ih].phi/3.1416*180,mCtbHits[ih].adc);
+    LOG_INFO<<Form("ih=%d eta=%.3f phi/deg=%.1f adc=%.1f\n",ih
+           ,mCtbHits[ih].eta,mCtbHits[ih].phi/3.1416*180,mCtbHits[ih].adc)<<endm;
   }
 }
      

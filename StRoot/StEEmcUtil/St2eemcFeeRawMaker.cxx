@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.13 2004/04/12 16:20:14 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.14 2007/05/30 02:38:43 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -74,8 +74,8 @@ Int_t St2eemcFeeRawMaker::InitRun  (int runNumber){
 
   StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
   assert(mEvent); // fix your chain or open the right event file
-  printf("\n%s  accessing StEvent ID=%d\n",GetName(),mEvent->id());
-  printf("StEvent time=%d, ID=%d, runID=%d\n",(int)mEvent->time(),(int)mEvent->id(),(int)mEvent->runId());
+  LOG_INFO<<Form("\n%s  accessing StEvent ID=%d\n",GetName(),mEvent->id())<<endm;
+   LOG_INFO<<Form("StEvent time=%d, ID=%d, runID=%d\n",(int)mEvent->time(),(int)mEvent->id(),(int)mEvent->runId())<<endm;
 
   mrunTT->setTimeStamp(meeDb->getTimeStampUnix());
   mrunTT->setProcessingTime(time(0));
@@ -84,7 +84,7 @@ Int_t St2eemcFeeRawMaker::InitRun  (int runNumber){
   mrunTT->setComment(text);
   mrunTT->print();  
  
- printf("\n%s::InitRun(%d) list  DB content \n",GetName(),runNumber);
+ LOG_INFO<<Form("\n%s::InitRun(%d) list  DB content \n",GetName(),runNumber)<<endm;
  //meeDb->print();
   return kStOK;
 }
@@ -97,7 +97,7 @@ Int_t St2eemcFeeRawMaker::Make(){
 
   StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
   assert(mEvent);// fix your chain or open the right event file
-  printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
+   LOG_INFO<<Form("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id())<<endm;
 
   StEmcCollection* emcCollection = mEvent->emcCollection();
   //  StEmcDetector* twB = emcCollection->detector(kBarrelEmcTowerId);
@@ -105,7 +105,7 @@ Int_t St2eemcFeeRawMaker::Make(){
 
   StEmcDetector* twE = emcCollection->detector(kEndcapEmcTowerId);
   if(!twE) { 
-    printf("No EEMC twE hits, skip event\n");  
+    LOG_WARN<<"No EEMC twE hits, skip event"<<endm;  
     return kStOK;
   }
 
@@ -134,13 +134,13 @@ Int_t St2eemcFeeRawMaker::Make(){
   // ....... Copy data to Local EEfeeDataBlock's .................
 
   int i;
-  printf("%s:: E_EMC Tower HITS ... %d\n",GetName(),twE->numberOfModules());
+  LOG_INFO<<Form("%s:: E_EMC Tower HITS ... %d\n",GetName(),twE->numberOfModules())<<endm;
   for ( i = 0; i < (int)twE->numberOfModules(); i++) { // The E-EMC modules
     // printf("AAA %d\n",i);
     StEmcModule* stmod =   twE->module(i);
     if(stmod==0)	continue;
     StSPtrVecEmcRawHit& emcTowerHits = stmod->hits();
-    printf("bbb i=%d %d\n",i,emcTowerHits.size());
+    LOG_INFO<<Form("bbb i=%d %d\n",i,emcTowerHits.size())<<endm;
  
     uint j;
     for ( j = 0; j < emcTowerHits.size(); j++) { 
@@ -158,7 +158,7 @@ Int_t St2eemcFeeRawMaker::Make(){
       //      adc=adc+(int)dbItem->ped; // add pedestal for each channel
       // tmp
 
-      printf("j=%d, sec=%d, sub=%c, eta=%d rawAdc=%d energy =%g -->crate/chan=%d/%d\n",j,sec,sub,eta,adc,energy,slot,chan);
+       LOG_INFO<<Form("j=%d, sec=%d, sub=%c, eta=%d rawAdc=%d energy =%g -->crate/chan=%d/%d\n",j,sec,sub,eta,adc,energy,slot,chan)<<endm;
 
 
       // record this entry
@@ -178,7 +178,7 @@ Int_t St2eemcFeeRawMaker::Make(){
   for(icr=0;icr<mNFeeCrate;icr++) {
     if(mcrateData[icr].getNData(0)<=0) continue; // empty data block
 
-    printf("SS crateID=%d, Npositive=%d\n",icr+1,mcrateData[icr].getNData(0));
+    LOG_INFO<<Form("SS crateID=%d, Npositive=%d\n",icr+1,mcrateData[icr].getNData(0))<<endm;
     // crateData[icr].print(0);
     meveTT->addFeeDataBlock(mcrateData+icr);
     n1++;
@@ -189,7 +189,7 @@ Int_t St2eemcFeeRawMaker::Make(){
   moutTTree->Fill();
  
  //  eveTT->print(1);
-  printf("%s:: stored TTree with %d=%d data blocks, ID=%d \n",GetName(),n1,meveTT->block->GetEntries(),meveTT->getID());
+  LOG_INFO<<Form("%s:: stored TTree with %d=%d data blocks, ID=%d \n",GetName(),n1,meveTT->block->GetEntries(),meveTT->getID())<<endm;
 
 
   return kStOK;
@@ -199,6 +199,9 @@ Int_t St2eemcFeeRawMaker::Make(){
 
 
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.14  2007/05/30 02:38:43  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.13  2004/04/12 16:20:14  balewski
 // DB cleanup & update
 //

@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.15 2007/01/26 20:45:58 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.16 2007/05/30 02:38:34 balewski Exp $
  
 #include <stdio.h>
 #include <string.h>
@@ -34,16 +34,16 @@ bool EEmcDbItem::isTower() const{
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbItem::print() const{
-  printf("EEmcDbItem:");
+  LOG_INFO<<"EEmcDbItem::print() "<<endm;
 
   if(name[0]==0) {
-    printf(" item not defined ???\n");
+    LOG_WARN<<" item not defined ???"<<endm;
     return;
   }
   if( isSMD() )
-    printf(" %s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,sigPed,thr,stat,fail,tube,key);
+    LOG_INFO<<Form("EEmcDbItem::SMD %s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,sigPed,thr,stat,fail,tube,key)<<endm;
   else
-    printf(" %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,sigPed,thr,stat,fail,tube,key);
+    LOG_INFO<<Form("EEmcDbItem::Tail %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,sigPed,thr,stat,fail,tube,key)<<endm;
 }
 
 //----                                          ----
@@ -198,7 +198,7 @@ void EEmcDbItem::setTube(char *text) {
       return;
     }
   }
-  printf("Error in  EEmcDbItem::setTube(%s), no terminating '%c'\n",text,EEMCDbStringDelim);
+  LOG_WARN<<Form("Error in  EEmcDbItem::setTube(%s), no terminating '%c'\n",text,EEMCDbStringDelim)<<endm;
   assert(1==2);
 }
 
@@ -223,11 +223,14 @@ void EEmcDbItem::setName(char *text) {
       return;
     }
   }
-  printf("Error in  EEmcDbItem::setName(%s), no terminating '%c'\n",text,EEMCDbStringDelim);
+  LOG_WARN<<Form("Error in  EEmcDbItem::setName(%s), no terminating '%c'\n",text,EEMCDbStringDelim)<<endm;
   assert(1==2);
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.16  2007/05/30 02:38:34  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.15  2007/01/26 20:45:58  balewski
 // now we have pure new Logger, thanks Jason, Jan
 //

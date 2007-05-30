@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.13 2007/04/28 17:55:48 perev Exp $
+// $Id: ppLMV4.cxx,v 1.14 2007/05/30 02:38:57 balewski Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.14  2007/05/30 02:38:57  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.13  2007/04/28 17:55:48  perev
 // Redundant StChain.h removed
 //
@@ -61,7 +64,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.13 2007/04/28 17:55:48 perev Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.14 2007/05/30 02:38:57 balewski Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -76,14 +79,14 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
   //int bXing=maTrk.getTrigBXing();
   //int bXing=maTrk.getPileupBXing();
   int bXing=trigBXing;// temp
-  printf(" THIS IS ppLMV -START, use only tracks matched to CTB in bXing=%d\n",bXing+firstBXing);
+  LOG_INFO<< Form(" THIS IS ppLMV -START, use only tracks matched to CTB in bXing=%d\n",bXing+firstBXing)<<endm;
 
   if(bXing<0) 
-    {printf("No tracks matched to selected bXing=%d\n",bXing); return kStOk;}
+    {LOG_INFO<< Form("No tracks matched to selected bXing=%d",bXing)<<endm; return kStOk;}
 
   vector <Jtrk> *tracks=&(maTrk.tracks[bXing]);
 
-  printf("passed tracks match to CTB  nTracks=%d, BeamLine=%d\n",(*tracks).size(), beam4ppLMV.isOn);
+  LOG_INFO<< Form("passed tracks match to CTB  nTracks=%d, BeamLine=%d\n",(*tracks).size(), beam4ppLMV.isOn)<<endm;
 
   // Get BField from gufld(,) 
   //  cout<<"Trying to Get the BField the old way..."<<endl;
@@ -121,7 +124,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
 
     trk1.sigma=sigMin/::sqrt(beam4ppLMV.equivNtr); //<== assigne weight
     (*tracks).push_back(trk1);
-    printf("WARN ppLMV: nominal beam line added with sigma=%f, now nTrack=%d beamLineX=%f, Y=%f Weight=%d\n", trk1.sigma,(*tracks).size(),beam4ppLMV.x0,beam4ppLMV.y0,beam4ppLMV.equivNtr);
+    LOG_WARN<< Form("WARN ppLMV: nominal beam line added with sigma=%f, now nTrack=%d beamLineX=%f, Y=%f Weight=%d\n", trk1.sigma,(*tracks).size(),beam4ppLMV.x0,beam4ppLMV.y0,beam4ppLMV.equivNtr)<<endm;
     
   }//
 
@@ -359,7 +362,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
       hPiFi[10]->Fill(GVER->ge_x[2]-rZver);
       hPiFi[11]->Fill(GVER->ge_x[0]-rXver);
       hPiFi[12]->Fill(GVER->ge_x[1]-rYver);
-      printf("Z Geant-found=%.2f, dx=%.2f, dy=%.2f\n",GVER->ge_x[2]-rZver,GVER->ge_x[0]-rXver,GVER->ge_x[1]-rYver);
+      LOG_INFO<< Form("Z Geant-found=%.2f, dx=%.2f, dy=%.2f\n",GVER->ge_x[2]-rZver,GVER->ge_x[0]-rXver,GVER->ge_x[1]-rYver)<<endm;
     }
 
   }  // end of histos
@@ -376,18 +379,18 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
 void StVertexMaker::ppLMVuse(int *parI, float *parF) {
 const  char *nameI[]={"CtbThres/ch","MinTrkPonits","beamEequivNtr","MinMatchTr","i4","i5","i6","i7","i8","i9"};
 const  char *nameF[]={"CtbThres/MeV","MaxTrkDcaRxy","MinTrkPt/GeV","CtbEtaErr","CtbPhiErr/deg","MaxTrkDcaZ","f6","f7","f8","f9"};
-  printf("\nppLMV use new set of params\n    INT:  "); 
+ LOG_INFO<<"\nppLMV use new set of params\n    INT:  "<<endm; 
   int i;
   for( i=0;i<10;i++) { 
     ppLMVparI[i]=parI[i];
-    printf("%s=%d   ", nameI[i],ppLMVparI[i]);
+     LOG_INFO<<Form("%s=%d   ", nameI[i],ppLMVparI[i])<<endm;
   }
-  printf("\n   FLOAT:  "); 
+  LOG_INFO<<Form("\n   FLOAT:  ")<<endm; 
   for( i=0;i<10;i++) { 
     ppLMVparF[i]=parF[i];
-    printf("%s=%f  ", nameF[i],ppLMVparF[i]);
+     LOG_INFO<<Form("%s=%f  ", nameF[i],ppLMVparF[i])<<endm;
   }
-  printf("\n\n");
+
   zCutppLMV=ppLMVparF[5];
 }
 

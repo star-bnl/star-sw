@@ -1,4 +1,4 @@
-// $Id: EEmcDbCrate.cxx,v 1.6 2007/01/26 20:45:58 balewski Exp $
+// $Id: EEmcDbCrate.cxx,v 1.7 2007/05/30 02:38:34 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -24,14 +24,14 @@ int EEmcDbCrate::isEmpty() const{
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbCrate::print() const{
-  printf("DbCrate:");
+  LOG_INFO<<"EEmcDbCrate::print():"<<endm;
 
   if(name[0]==0) {
-    printf(" item not defined ???\n");
+    LOG_WARN<<" item not defined ???"<<endm;
     return;
   }
 
-  printf("%s crID=%3d crIDswitch=%3d fiber=%d nCh=%d nHead=%d type=%c useIt=%d\n",name, crID, crIDswitch,fiber,nCh,nHead,type,useIt);
+   LOG_INFO<<Form("EEmcDbCrate:: crID=%3d crIDswitch=%3d fiber=%d nCh=%d nHead=%d type=%c useIt=%d\n",name, crID, crIDswitch,fiber,nCh,nHead,type,useIt)<<endm;
 }
 
 ostream &
@@ -133,6 +133,9 @@ int EEmcDbCrate::importAscii(FILE *fd){
 
 
 // $Log: EEmcDbCrate.cxx,v $
+// Revision 1.7  2007/05/30 02:38:34  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.6  2007/01/26 20:45:58  balewski
 // now we have pure new Logger, thanks Jason, Jan
 //
