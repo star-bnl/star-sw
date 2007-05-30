@@ -150,7 +150,7 @@ Int_t StGenericVertexMaker::Init()
 
 //_____________________________________________________________________________
 void StGenericVertexMaker::Clear(const char* opt){
-  printf(" StGenericVertexMaker::Clear()\n"); 
+  LOG_INFO <<" StGenericVertexMaker::Clear()"<<endm; 
   theFinder->Clear();
 }
 
@@ -298,14 +298,14 @@ void StGenericVertexMaker::MakeEvalNtuple(){ // only for Minuit vertex finder
   int stat= ((StMinuitVertexFinder*)theFinder)->statusMin();
   
   if(!primV) {
-    printf("primaryVertex()=NULL\n");
+    LOG_INFO <<"primaryVertex()=NULL"<<endm;
     // why would one access x,y,z of the vertex if it is not found, Jan ???
     float x=999,y=999,z=999;
     mEvalNtuple->Fill(x,y,z,stat,mEvent->summary()->numberOfGoodTracks(),-999.,-999.,-999.,-999.,-999.,nCtb,gx,gy,gz);
     }
   else {
-    printf("primaryVertex()= %f, %f %f, nTracks=%d\n",primV->position().x(),primV->position().y(),primV->position().z(),primV->numberOfDaughters());
-  mEvalNtuple->Fill(primV->position().x(),primV->position().y(),primV->position().z(),stat               ,mEvent->summary()->numberOfGoodTracks(),primV->position().x(),primV->position().y(),primV->position().z(),primV->flag(),primV->numberOfDaughters(), nCtb,gx,gy,gz);
+     LOG_INFO << Form("primaryVertex()= %f, %f %f, nTracks=%d\n",primV->position().x(),primV->position().y(),primV->position().z(),primV->numberOfDaughters())<<endm;
+     mEvalNtuple->Fill(primV->position().x(),primV->position().y(),primV->position().z(),stat               ,mEvent->summary()->numberOfGoodTracks(),primV->position().x(),primV->position().y(),primV->position().z(),primV->flag(),primV->numberOfDaughters(), nCtb,gx,gy,gz);
   }
 }
 

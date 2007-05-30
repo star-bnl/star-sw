@@ -30,7 +30,7 @@ extern void cts_get_ctb_indexes(long, long &, long &);
 
 CtbResponse::CtbResponse(StVertexMaker *head, int *ipar, float *fpar,unsigned int mode) {
     
-  printf(" THIS IS CtbResponse -START\n");
+  LOG_INFO <<" THIS IS CtbResponse -START"<<endm;
   int i;
 
   this->SetCTBMode(mode);
@@ -64,7 +64,7 @@ CtbResponse::CtbResponse(StVertexMaker *head, int *ipar, float *fpar,unsigned in
   }
   
   if( this->GetCTBMode() == 0){ //extract Ctb Hist from trigger Maker
-    printf("use DAQ  CTB slats fired for the trigger bXing\n");
+    LOG_INFO <<"use DAQ  CTB slats fired for the trigger bXing"<<endm;
     
     int bXing=trigBXing; // ignore other bXings
     St_dst_TrgDet *trgDet=(St_dst_TrgDet*) trg->Find(".data/TrgDet");
@@ -107,8 +107,7 @@ CtbResponse::CtbResponse(StVertexMaker *head, int *ipar, float *fpar,unsigned in
 
   // *************  M-C events *****************************
   if( this->GetCTBMode() == 1 || this->GetCTBMode() == 2 ) {
-    printf("use M-C for CTB hits\n");
-    printf("I will write CTB ADC's into DAQ Table with 2 MeV=> 5 ADC!!!\n");
+    LOG_INFO <<"use M-C for CTB hits\nI will write CTB ADC's into DAQ Table with 2 MeV=> 5 ADC!!!"<<endm;
     St_DataSet *gds=head->GetDataSet("geant"); 
     head->ls();
     assert(gds);
@@ -117,8 +116,7 @@ CtbResponse::CtbResponse(StVertexMaker *head, int *ipar, float *fpar,unsigned in
     //access the CTB data  from GEANT
     St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) gds->Find("g2t_ctb_hit");
     if(g2t_ctb_hit == 0){
-      cout << "No CTB Hits in MC File" << endl;
-      cout << "g2t_ctb_hit = " << g2t_ctb_hit << endl;
+      LOG_WARN << Form("No CTB Hits in MC File\ng2t_ctb_hit = %d",g2t_ctb_hit)<<endm;
       return;
     }
     //    assert(g2t_ctb_hit);
@@ -130,10 +128,10 @@ CtbResponse::CtbResponse(StVertexMaker *head, int *ipar, float *fpar,unsigned in
     St_g2t_vertex  *g2t_ver=( St_g2t_vertex *)gds->Find("g2t_vertex");
     g2t_vertex_st *gver=g2t_ver->GetTable();
     
-    printf("All GEANT CTB hits=%d\n",(int)g2t_ctb_hit->GetNRows());
+    LOG_INFO << Form("All GEANT CTB hits=%d\n",(int)g2t_ctb_hit->GetNRows())<<endm;
     
     if (g2t_ctb_hit->GetNRows() == 0)
-      { printf("Empty geant/ctb data set \n");  return;}
+      { LOG_INFO <<"Empty geant/ctb data set "<<endm;  return;}
     
     ctb_hit = g2t_ctb_hit->GetTable();  
     assert(ctb_hit);

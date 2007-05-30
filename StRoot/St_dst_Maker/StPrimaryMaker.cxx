@@ -525,7 +525,7 @@ Int_t StPrimaryMaker::Make(){
   }
   nrows = n2rows;
   primtrk->SetNRows(nrows);  
-  printf("%s end, nPrimTR=%d\n",GetName(),nrows);
+  //  printf("%s end, nPrimTR=%d\n",GetName(),nrows);
   
   
    if( EstPrimary){
@@ -544,8 +544,11 @@ Int_t StPrimaryMaker::Make(){
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.85 2007/04/28 17:55:53 perev Exp $
+// $Id: StPrimaryMaker.cxx,v 1.86 2007/05/30 02:38:57 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.86  2007/05/30 02:38:57  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.85  2007/04/28 17:55:53  perev
 // Redundant StChain.h removed
 //

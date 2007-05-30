@@ -1,7 +1,8 @@
-// $Id: EEeventDst.cxx,v 1.8 2004/04/08 21:34:17 perev Exp $
+// $Id: EEeventDst.cxx,v 1.9 2007/05/30 02:38:48 balewski Exp $
 
 #include <cassert>
 #include <TClonesArray.h>
+#include <StMessMgr.h>
 
 #include "EEsectorDst.h"
 #include "EEeventDst.h"
@@ -13,7 +14,7 @@ ClassImp(EEeventDst)
 EEeventDst::EEeventDst(){
   // printf("EEeventDst() constructed\n");
   Sec= new TClonesArray("EEsectorDst",1000);
-  clear();
+  clear(); 
 }
 
 //--------------------------------------------------
@@ -50,7 +51,7 @@ void EEeventDst::Clear(const char*){ clear();}
 //-------------------------------------------------
 //-------------------------------------------------
 void EEeventDst::print(int k){
-  printf("Event ID=%d, type=%d  token=%d nSect=%d time stamp= %d\n",ID,type,token,Sec->GetEntries(),timeStamp);
+  LOG_INFO<<Form("Event ID=%d, type=%d  token=%d nSect=%d time stamp= %d\n",ID,type,token,Sec->GetEntries(),timeStamp)<<endm;
   int is;
   for(is=0;is<Sec->GetEntriesFast();is++) {
     EEsectorDst *sec=(EEsectorDst*)Sec->At(is);
@@ -123,6 +124,9 @@ void EEeventDst:: sumRawMC(EEeventDst* eveOut,float minE) {
 
 
 // $Log: EEeventDst.cxx,v $
+// Revision 1.9  2007/05/30 02:38:48  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.8  2004/04/08 21:34:17  perev
 // Leak off
 //

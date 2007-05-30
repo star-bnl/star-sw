@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.11 2006/10/24 20:19:37 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.12 2007/05/30 02:38:54 balewski Exp $
  
 
 #include <time.h>
@@ -240,7 +240,7 @@ StSpinDbMaker::getTable(TDataSet *mydb,  TString tabName,   T_st** outTab ){
   *outTab=(T_st *) ds->GetArray();
 
   if(*outTab==0) {
-    printf(" GetArray() failed\n");
+    LOG_WARN<<" GetArray() failed"<<endm;
     return  ;
   }
 
@@ -431,22 +431,22 @@ StSpinDbMaker::BXyellowUsingBX7(int bx7){
 //--------------------------------------------------
 void StSpinDbMaker::print(int level) {
 
-  printf("SpinDb::print(level=%d) ...isValid=%d \n",level,isValid());
+  LOG_INFO << Form("SpinDb::print(level=%d) ...isValid=%d \n",level,isValid())<<endm;
   if(!isValid()) {
-    printf("       SpinDb not loaded or some tables not found, nFound=%d \n spinDB will not work if InitRun() was executed !!!\n\n",mNFound);
+    LOG_WARN << Form("       SpinDb not loaded or some tables not found, nFound=%d \n spinDB will not work if InitRun() was executed !!!\n\n",mNFound)<<endm;
     return;
   }
 
-  printf("Dump spinDB: valid=%d polTrans=%d polLong=%d BX7off=%d BX48off=%d\n", isValid(), isPolDirTrans(), isPolDirLong(), BX7offset(), BX48offset());
+  LOG_INFO << Form("Dump spinDB: valid=%d polTrans=%d polLong=%d BX7off=%d BX48off=%d\n", isValid(), isPolDirTrans(), isPolDirLong(), BX7offset(), BX48offset())<<endm;
 
-  printf("     spinDB: timeBucket offset: Blue=%d Yell=%d\n",getBucketOffsets()[blueRing],getBucketOffsets()[yellRing]);
-  printf("     spinDB: bXing offset: off7=%d off48=%d\n",mTabSpinStar->bXoff7,mTabSpinStar->bXoff48);
+  LOG_INFO << Form("     spinDB: timeBucket offset: Blue=%d Yell=%d\n",getBucketOffsets()[blueRing],getBucketOffsets()[yellRing])<<endm;
+ LOG_INFO << Form("     spinDB: bXing offset: off7=%d off48=%d\n",mTabSpinStar->bXoff7,mTabSpinStar->bXoff48)<<endm;
 
-  printf("DB records labels:\n V124: %s \n BXoffset: %s\n BXmask: %s\n\n",mTabSpinV124->comment,mTabSpinStar->comment,mTabSpinBXmask->comment); 
-  printf("dump of spin bits  @ STAR IP, for 120 bXings, range [0,119]\n");
+  LOG_INFO << Form("DB records labels:\n V124: %s \n BXoffset: %s\n BXmask: %s\n\n",mTabSpinV124->comment,mTabSpinStar->comment,mTabSpinBXmask->comment)<<endm; 
+  LOG_INFO << Form("dump of spin bits  @ STAR IP, for 120 bXings, range [0,119]\n")<<endm;
   int bx;
 
-  printf("bXstar  spin8  spin4(dec) filled?  masked?  bx48   blueBx yellBx\n");
+  LOG_INFO << Form("bXstar  spin8  spin4(dec) filled?  masked?  bx48   blueBx yellBx\n")<<endm;
 
   for(bx=SPINDbMaxBXings-BX48offset();bx<2*SPINDbMaxBXings-BX48offset();bx++) {
     int bx48=bx%SPINDbMaxBXings;// this is dangerous, but works right
@@ -459,20 +459,20 @@ void StSpinDbMaker::print(int level) {
     if (isBXfilledUsingBX48(bx48))ftt="filled";
     char *mtt="use "; 
     if(isMaskedUsingBX48(bx48))mtt="*mask*";
-    printf("  %3d    0x%02x       %2d    %6s   %6s   %3d     %3d    %3d\n",bXstar,spin8,spin4,ftt,mtt,bx48,blueBx,yellBx);
+     LOG_INFO << Form("  %3d    0x%02x       %2d    %6s   %6s   %3d     %3d    %3d\n",bXstar,spin8,spin4,ftt,mtt,bx48,blueBx,yellBx)<<endm;
     //  printf("bx48=%d mU=%d bxStar=%d mR=%d\n", bx48,isMaskedUsingBX48(bx48),bXstar,mTabSpinBXmask->bXmask[bXstar]);
     //  printf(" \n");    assert(1==2);
   }
   
   if(level<=0) return;
   int j;
-  printf("dump raw V124 spin bits:\n time bucket, spin8(hex)\n");
+  LOG_INFO << Form("dump raw V124 spin bits:\n time bucket, spin8(hex)\n")<<endm;
   for(j=0;j<SPINDbMaxBuckets;j++) 
-    printf("timeBucket=%3d rawV124=0x%x\n",j,getRawV124bits()[j]);
+   LOG_INFO << Form("timeBucket=%3d rawV124=0x%x\n",j,getRawV124bits()[j])<<endm;
 
-  printf("dump raw bXing mask \n STAR bXing mask (0=use, none-0=drop)\n");
+  LOG_INFO << Form("dump raw bXing mask \n STAR bXing mask (0=use, none-0=drop)\n")<<endm;
   for(j=0;j<SPINDbMaxBXings;j++) 
-    printf("%3d  %d\n",j,mTabSpinBXmask->bXmask[j]);
+   LOG_INFO << Form("%3d  %d\n",j,mTabSpinBXmask->bXmask[j])<<endm;
 }
 
 //--------------------------------------------------
@@ -542,6 +542,9 @@ StSpinDbMaker::auxilairyVariables(){
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.12  2007/05/30 02:38:54  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.11  2006/10/24 20:19:37  balewski
 // cleanup: - spin4 for abort gaps, drop STARbXing
 //

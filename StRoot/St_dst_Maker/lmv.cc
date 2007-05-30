@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.17 2003/09/02 17:59:26 perev Exp $
+// $Id: lmv.cc,v 1.18 2007/05/30 02:38:57 balewski Exp $
 // $Log: lmv.cc,v $
+// Revision 1.18  2007/05/30 02:38:57  balewski
+// replace printf -->LOG_XXX
+//
 // Revision 1.17  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -111,7 +114,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.17 2003/09/02 17:59:26 perev Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.18 2007/05/30 02:38:57 balewski Exp $";
 
 static double  MinTrackLen= 1.;
 
@@ -238,7 +241,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     }
 
 
-  printf(", used %d %d %d\n",n1,n2,n3);
+  //  printf(", used %d %d %d\n",n1,n2,n3);
 
   // Do the Multiple Scattering
   for(unsigned int jj=0; jj < helices.size(); jj++){

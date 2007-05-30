@@ -12,7 +12,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
   float aa=gStTpcDb->DriftVelocity();
   long Ntrk = 0;
   if( track) Ntrk = track->GetNRows();
-  printf("Do matching of %d dstTracks to CTB hist, drift vel=%f\n",(int)Ntrk,aa);
+  LOG_INFO <<Form("Do matching of %d dstTracks to CTB hist, drift vel=%f\n",(int)Ntrk,aa)<<endm;
  
   const double Rctb=213.6; // (cm) radius of the CTB 
   const float CtbEtaSeg=0.5, CtbPhiSeg=C_PI/30;
@@ -122,9 +122,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
     if(d2.first>=0 || d2.second<=0) {
       n5++;
       head->hmtr[0]->Fill(5);
-      printf("WARN MatchTrk , unexpected solution for track crossing CTB\n");
-      printf(" tack=%d, d2.firts=%f, second=%f, track ignored\n",
-	     l,d2.first, d2.second);
+      LOG_WARN<< Form("MatchTrk , unexpected solution for track crossing CTB\n tack=%d, d2.firts=%f, second=%f, track ignored",  l,d2.first, d2.second)<<endm;
     }
     
     StThreeVectorD posCTB = TrkHlx.at(d2.second);
@@ -198,7 +196,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
     
   } // end of loop over tracks
   
-  printf(", used n1=%d n2=%d n3=%d n4=%d  n6=%d\n",n1,n2,n3,n4,n6);
+  LOG_INFO<< Form(", used n1=%d n2=%d n3=%d n4=%d  n6=%d\n",n1,n2,n3,n4,n6)<<endm;
 
   // copy Geant vertex info
   for(int tSl=0;tSl<MxTimeSlot;tSl++) 
@@ -206,19 +204,19 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
 
   head->hPiFi[5]->Fill(tracks[trigBXing].size());
 
-  printf("total match to CTB \nbXing\tnTracks    GVER  \n");
+  LOG_INFO<< Form("total match to CTB \nbXing\tnTracks    GVER  ")<<endm;
   for(int i=0;i<MxTimeSlot;i++) {
     if(!tracks[i].size()) continue; 
-    printf("%d    \t%d  ",i+firstBXing,tracks[i].size());
+     LOG_INFO<< Form("%d    \t%d  ",i+firstBXing,tracks[i].size())<<endm;
     g2t_vertex_st *v=(g2t_vertex_st *)GVER[i];
     if(v)
-      printf("  x=%6.2f y=%6.2f z=%6.2f \n",v->ge_x[0],v->ge_x[1],v->ge_x[2]);
+       LOG_INFO<< Form("  x=%6.2f y=%6.2f z=%6.2f \n",v->ge_x[0],v->ge_x[1],v->ge_x[2])<<endm;
     else
-      printf("    no vertex\n");
+       LOG_INFO<< Form("    no vertex\n")<<endm;
   }
 
-  printf("total primCandidates=%d\n",primCan.size());
-  printf("CHeck :getPileupBXing()=%d (-26 == NONE)\n",getPileupBXing()+firstBXing);
+   LOG_INFO<< Form("total primCandidates=%d",primCan.size())<<endm;
+   LOG_INFO<< Form("CHeck :getPileupBXing()=%d (-26 == NONE)\n",getPileupBXing()+firstBXing)<<endm;
 
 }
 

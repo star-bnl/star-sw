@@ -1,4 +1,6 @@
+#include <StMessMgr.h>
 #include <cassert>
+
 
 #include "EEsmdHitDst.h"
 
@@ -35,7 +37,7 @@ void EEsmdHitDst::set(int strip,  Float_t ener) {
 //---------------------------------
 //---------------------------------
 void EEsmdHitDst::print(){
-  printf("strip=%d  Energy=%f \n",mStrip,mEnergy);
+  // LOG_INFO << Form("EEsmdHitDst::print(): strip=%d  Energy=%f ",mStrip,mEnergy)<<endm;
 }
 
 
