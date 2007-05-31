@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4.C,v 1.4 2007/05/31 18:25:08 andrewar Exp $
+// $Id: bfcMixer_v4.C,v 1.5 2007/05/31 18:32:37 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -61,7 +61,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   //  chain1->SetFlags("in NoDefault");
   //  chain1->SetFlags("in alltrigger NoDefault");
   //  chain1->SetFlags("in Physics DbV20020226 NoDefault");
-  chain1->SetFlags("in Physics DbV20040415 NoDefault");
+  chain1->SetFlags("in Physics DbV20040804 NoDefault");
   chain1->Set_IO_Files(file1);
   chain1->Load();
   chain1->Instantiate();
@@ -72,7 +72,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
   //  chain2->SetFlags("fzin DbV20020226 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
-  chain2->SetFlags("fzin DbV20040415 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
+  chain2->SetFlags("fzin DbV20040804 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
@@ -128,7 +128,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   // Create chain3 object
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  chain3->SetFlags("Simu NoDefault DbV20040415 NoInput db tpc_daq tpc ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat onlraw -onlcl Xi2 Kink2 eventQA"); 
+  chain3->SetFlags("Simu NoDefault DbV20040804 NoInput db tpc_daq tpc -tcl fcf ITTF ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf -Prevtx -nohits CMuDST ZDCvtx tofDat onlraw -onlcl Xi2 xiSvt Kink2"); 
 
   //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
   //  fcfMk->SetMode("0x1");
