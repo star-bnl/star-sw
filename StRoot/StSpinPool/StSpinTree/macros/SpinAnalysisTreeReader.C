@@ -1,37 +1,40 @@
-void SpinAnalysisTreeReader(const char *files = "StRoot/StSpinPool/StSpinTree/datasets/run5_pdsf.dataset", 
-                            const char *runlist = "StRoot/StSpinPool/StSpinTree/filters/run5_chargedPions.runlist",
-                            const long nevents = 20) {
+void SpinAnalysisTreeReader(const long nevents = 20) {
     LoadSpinTreeLibs();
     
     //create a new reader
     StSpinTreeReader *reader = new StSpinTreeReader();
     
+    //add some files to analyze, one at a time or in a text file
+    reader->selectDataset("StRoot/StSpinPool/StSpinTree/datasets/run6_mit.dataset");
+    //reader->selectFile("./spinAnalyses_6119039.tree.root");
+    
     //configure the branches you're interested in (default = true)
     reader->connectJets             = true;
     reader->connectNeutralJets      = false;
     reader->connectChargedPions     = true;
-    reader->connectBemcNeutralPions = false;
-    reader->connectEemcNeutralPions = false;
+    reader->connectBemcPions        = true;
+    reader->connectEemcPions        = false;
     reader->connectBemcElectrons    = false;
     
     //optionally filter events by run and trigger
-    //reader->selectRunList(runlist);
-    reader->selectRun(6119038);
-    reader->selectRun(6119063);
-    reader->selectRun(6119064);
+    //reader->selectRunList("StRoot/StSpinPool/StSpinTree/filters/run6_chargedPions.runlist");
+    reader->selectRun(7132001);
     
     //select events that passed hardware OR software trigger for any trigger in list
-    reader->selectTrigger(96011);
-    reader->selectTrigger(96201);
-    reader->selectTrigger(96211);
-    reader->selectTrigger(96221);
-    reader->selectTrigger(96233);
+    reader->selectTrigger(137221);
+    reader->selectTrigger(137222);
+    reader->selectTrigger(137611);
+    reader->selectTrigger(137622);
+    reader->selectTrigger(5);
     
-    //add some files to analyze, one at a time or in a text file
-    //reader->addFileList(files);
-    reader->addFile("./spinAnalyses_6119039.tree.root");
-    reader->addFile("./spinAnalyses_6119063.tree.root");    
-    reader->addFile("./spinAnalyses_6119064.tree.root");    
+    //we can change the OR to AND by doing
+    reader->requireDidFire      = true;
+    reader->requireShouldFire   = true;
+    
+    StJetSkimEvent *ev = reader->event();
+    TClonesArray *jets = reader->jets();
+    TClonesArray *chargedPions = reader->chargedPions();
+    TClonesArray *bemcPions = reader->bemcPions();
     
     long entries = reader->GetEntries();
     if(entries > nevents) entries = nevents;
@@ -39,21 +42,21 @@ void SpinAnalysisTreeReader(const char *files = "StRoot/StSpinPool/StSpinTree/da
         reader->GetEntry(i);
 
         //the basics:  run, event, etc.
-        int runId   = reader->event()->runId();
-        int eventId = reader->event()->eventId();
+        int runId   = ev->runId();
+        int eventId = ev->eventId();
         
         printf("----------------Reading Event %d of %d----------------\n",i,entries);
         printf("basics:  Run = %d, Event = %d\n",runId,eventId);
 
         //triggers -- note prescale/threshold access
-        TClonesArray *trigs = reader->event()->triggers();
+        TClonesArray *trigs = ev->triggers();
         for(int j=0; j<trigs->GetEntries(); j++) {
             StJetSkimTrig* aTrig = (StJetSkimTrig*)trigs->At(j);
             int trigId      = aTrig->trigId();
             bool didFire    = aTrig->didFire();
             int shouldFire  = aTrig->shouldFire();
             
-            StJetSkimTrigHeader *header = reader->event()->trigHeader(trigId);
+            StJetSkimTrigHeader *header = ev->trigHeader(trigId);
             if(!header) { 
                 printf("ERROR LOADING TRIGGER HEADER FOR %d\n",trigId); 
                 break;
@@ -64,8 +67,8 @@ void SpinAnalysisTreeReader(const char *files = "StRoot/StSpinPool/StSpinTree/da
         }
         
         //vertices -- bestVert() will return NULL if none were found
-        int nVertices = reader->event()->vertices()->GetEntries();
-        StJetSkimVert *bestVert = reader->event()->bestVert();
+        int nVertices = ev->vertices()->GetEntries();
+        StJetSkimVert *bestVert = ev->bestVert();
         if(bestVert) {
             printf("nVertices =     %d   position of best = %f\n",nVertices,bestVert->position()[2]);
         }
@@ -78,12 +81,12 @@ void SpinAnalysisTreeReader(const char *files = "StRoot/StSpinPool/StSpinTree/da
         
         //for more details on event-level quantities see StJetMaker skim event documentation and examples
         
-        //jets
+        //jets -- could also access using jets pointer from above
         printf("nJets =         %d\n",reader->nJets());
         for(int j=0; j<reader->nJets(); j++) {
             StJet* aJet = reader->jet(j);
-            double R = aJet->btowEtSum/(aJet->tpcEtSum + aJet->btowEtSum + aJet->etowEtSum);
-            printf("jet pt=%7.4f  jet eta=% 1.4f  E_neu/E_tot=%1.4f\n",aJet->jetPt,aJet->jetEta,R);
+            double R = aJet->btowEtSum/aJet->Et();
+            printf("jet pt=%7.4f  jet eta=% 1.4f  det eta=% 1.4f  E_neu/E_tot=%1.4f\n",aJet->jetPt,aJet->jetEta,aJet->detEta(bestVert->position()[2]),R);
         }
         
         //charged pions
@@ -94,11 +97,11 @@ void SpinAnalysisTreeReader(const char *files = "StRoot/StSpinPool/StSpinTree/da
         }
         
         //neutral pions
-        /*printf("nNeutralPions = %d\n",reader->nBemcNeutralPions());
-        for(int j=0; j<reader->nBemcNeutralPions(); j++) {
-            TPi0Candidate* aPi0 = reader->bemcNeutralPion(j);
-            printf("neutral pion mass=%f  pt=%f  eta=%f\n",aPi0->Mass(),aPi0->Pt(),aPi0->Eta());
-        }*/
+        printf("nNeutralPions = %d\n",reader->nBemcPions());
+        for(int j=0; j<reader->nBemcPions(); j++) {
+            TPi0Candidate* aPi0 = reader->bemcPion(j);
+            //printf("neutral pion mass=%f  pt=%f  eta=%f\n",aPi0->Mass(),aPi0->Pt(),aPi0->Eta());
+        }
         
         cout << "-----------------------------------------------------" << endl;
     }
@@ -106,11 +109,11 @@ void SpinAnalysisTreeReader(const char *files = "StRoot/StSpinPool/StSpinTree/da
     delete reader;
 }
 
-/*void LoadSpinTreeLibs() {
-    gSystem->Load("StarSpinAnalyses");
-}*/
-
 void LoadSpinTreeLibs() {
+    gSystem->Load("StarSpinAnalyses");
+}
+
+/*void LoadSpinTreeLibs() {
     gSystem->Load("libPhysics");
     gSystem->Load("libTable");
     gSystem->Load("StarRoot");
@@ -129,4 +132,4 @@ void LoadSpinTreeLibs() {
     gSystem->Load("StMcEvent");
     gSystem->Load("StChargedPionAnalysisMaker");
     gSystem->Load("StSpinTree");
-}
+}*/
