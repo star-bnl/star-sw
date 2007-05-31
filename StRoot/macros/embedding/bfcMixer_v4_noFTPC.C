@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4_noFTPC.C,v 1.2 2007/05/31 18:39:23 andrewar Exp $
+// $Id: bfcMixer_v4_noFTPC.C,v 1.3 2007/05/31 18:40:39 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ void Load(){
   //Extra things to load for the acceptance filter
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StAnalysisUtilities");
-  gSystem->Load("StV0AccMaker.so");
+  //gSystem->Load("StV0AccMaker.so");
 
   if (chain) delete chain;
 }
@@ -61,7 +61,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   //  chain1->SetFlags("in NoDefault");
   //  chain1->SetFlags("in alltrigger NoDefault");
   //  chain1->SetFlags("in Physics DbV20020226 NoDefault");
-  chain1->SetFlags("in Physics DbV20050215 NoDefault");
+  chain1->SetFlags("in Physics DbV20050816 NoDefault -ittf");
   chain1->Set_IO_Files(file1);
   chain1->Load();
   chain1->Instantiate();
@@ -72,7 +72,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
   //  chain2->SetFlags("fzin DbV20020226 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
-  chain2->SetFlags("fzin DbV20050215 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
+  chain2->SetFlags("fzin DbV20050816 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
@@ -81,7 +81,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   
   if (chain2->GetOption("TRS")){
     StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Trs");
-    trsMk->setNormalFactor(1.22);
+    trsMk->setNormalFactor(1.15);
   }
 
   // Add the acceptance filter maker before TRS  
@@ -130,14 +130,21 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   saveMk = chain3->cd();
 
   // use Simu NoDefault NoInput onlraw -onlcl and standard chain options
-  // then take apart e.g. P2004/B2004 and remove corrections as well as 
-  // in, physics, analyis and Event QA from Cdst, tags, SCEbyE
-  // also don't use hitfilt
+//  standard P05if pp options:
+//  chain3->SetFlags("DbV20050816 pp2005a ITTF OSpaceZ2 OGridLeak3D hitfilt");
+//  expand pp2005a, get rid of corrections and ftpc
+//  chain3->SetFlags("DbV20050816 B2005a fcf ppOpt VFPPV beamline CtbMatchVtx l3onl emcDY2 fpd trgd ZDCvtx ITTF hitfilt");
+//  add Simu NoDefault NoInput onlraw -onlcl
+//  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050816 B2005a fcf ppOpt VFPPV beamline CtbMatchVtx l3onl emcDY2 fpd trgd ZDCvtx ITTF hitfilt"); 
+//  expand B2005a, get rid of in, tpc_daq, Physics, CtbMatchVtx
+//  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050816 ry2005b tpc -tpt tpc_daq Cdst svt_daq SvtD -SvtDedx  Tree evout fcf ctf emcDY2 eemcD MuDst ppOpt VFPPV beamline trgd ZDCvtx ITTF hitfilt -analysis GeantOut miniMcMk");
+  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050816 ry2005b tpc -tpt tpc_daq Cdst svt_daq SvtD -SvtDedx  Tree evout fcf ctf emcDY2 eemcD MuDst ppOpt vfmce beamline trgd ZDCvtx ITTF hitfilt -analysis GeantOut McEvent miniMcMk");
 
-  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050215 ry2004 tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw"); 
 
-  //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
-  //  fcfMk->SetMode("0x1");
+  //  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,svt_daq,SvtD,Physics,l0,tags,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat MuDST -trg GeantOut");
+
+  //StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
+  //fcfMk->SetMode("0x1");
 
 
   TString OutputFileName(gSystem->BaseName(file1));
