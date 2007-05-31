@@ -4,14 +4,13 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4_noFTPC.C,v 1.3 2007/05/31 18:40:39 andrewar Exp $
+// $Id: bfcMixer_v4_noFTPC.C,v 1.4 2007/05/31 18:41:44 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
 //TBrowser *b = 0;
-class StChain;
 class StBFChain;
-StChain  *chain=0;
+StBFChain  *chain=0;
 class StMaker;
 StMaker    *treeMk=0;
 StBFChain *chain1, *chain2, *chain3;
@@ -31,17 +30,21 @@ void Load(){
   gSystem->Load("StUtilities");
   gSystem->Load("StBFChain");
   //Extra things to load for the acceptance filter
-  gSystem->Load("StarClassLibrary");
+  //  gSystem->Load("StarClassLibrary");
   gSystem->Load("StAnalysisUtilities");
-  //gSystem->Load("StV0AccMaker.so");
+  //  gSystem->Load("StV0AccMaker.so");
 
   if (chain) delete chain;
 }
 //_____________________________________________________________________
 void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
-             const Char_t *file1="/auto/pdsfdv08/starprod/daq/2004/production62GeV/ReversedFullField/st_physics_adc_5090009_raw_2060002.daq",
-	     const Char_t *file2="/home/starofl/embedding/GSTAR/gtest.fz",
-             const Char_t *file3="/home/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
+			//             const Char_t *file1="/auto/pdsfdv08/starprod/daq/2004/production62GeV/ReversedFullField/st_physics_adc_5090009_raw_2060002.daq",
+			const Char_t *file1="/star/data03/daq/2004/090/st_physics_adc_5090009_raw_2060002.daq",
+			//	     const Char_t *file2="/home/starofl/embedding/GSTAR/gtest.fz",
+			const Char_t *file2="./gtest.fz",
+			//             const Char_t *file3="/home/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
+			//             const Char_t *file3="/home/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
+			const Char_t *file3="./st_physics_adc_5090009_raw_2060002.vertices.dat",
              const Float_t zvertex_low=-175.0,
              const Float_t zvertex_high=175.0,
 	     const Char_t *mode="strange",
@@ -51,17 +54,18 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   if (gClassTable->GetID("StBFChain") < 0) Load();
 
   // Create the main chain object
-  chain = new StChain("Embedding");
-
+  chain = new StBFChain("Embedding");
+  
   StMaker *saveMk = 0;
-
+  chain->SetFlags("-ittf,NoDefault");
   // Create chain1 object
   chain1 = new StBFChain("One");
+  
   saveMk = chain1->cd();
   //  chain1->SetFlags("in NoDefault");
   //  chain1->SetFlags("in alltrigger NoDefault");
   //  chain1->SetFlags("in Physics DbV20020226 NoDefault");
-  chain1->SetFlags("in Physics DbV20050816 NoDefault -ittf");
+  chain1->SetFlags("in Physics DbV20060421 NoDefault -ittf");
   chain1->Set_IO_Files(file1);
   chain1->Load();
   chain1->Instantiate();
@@ -72,7 +76,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
   //  chain2->SetFlags("fzin DbV20020226 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
-  chain2->SetFlags("fzin DbV20050816 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
+  chain2->SetFlags("fzin DbV20060421 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq -ittf");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
@@ -81,7 +85,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   
   if (chain2->GetOption("TRS")){
     StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Trs");
-    trsMk->setNormalFactor(1.15);
+    trsMk->setNormalFactor(1.25);
   }
 
   // Add the acceptance filter maker before TRS  
@@ -129,39 +133,46 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
 
-  // use Simu NoDefault NoInput onlraw -onlcl and standard chain options
-//  standard P05if pp options:
-//  chain3->SetFlags("DbV20050816 pp2005a ITTF OSpaceZ2 OGridLeak3D hitfilt");
-//  expand pp2005a, get rid of corrections and ftpc
-//  chain3->SetFlags("DbV20050816 B2005a fcf ppOpt VFPPV beamline CtbMatchVtx l3onl emcDY2 fpd trgd ZDCvtx ITTF hitfilt");
-//  add Simu NoDefault NoInput onlraw -onlcl
-//  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050816 B2005a fcf ppOpt VFPPV beamline CtbMatchVtx l3onl emcDY2 fpd trgd ZDCvtx ITTF hitfilt"); 
-//  expand B2005a, get rid of in, tpc_daq, Physics, CtbMatchVtx
-//  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050816 ry2005b tpc -tpt tpc_daq Cdst svt_daq SvtD -SvtDedx  Tree evout fcf ctf emcDY2 eemcD MuDst ppOpt VFPPV beamline trgd ZDCvtx ITTF hitfilt -analysis GeantOut miniMcMk");
-  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050816 ry2005b tpc -tpt tpc_daq Cdst svt_daq SvtD -SvtDedx  Tree evout fcf ctf emcDY2 eemcD MuDst ppOpt vfmce beamline trgd ZDCvtx ITTF hitfilt -analysis GeantOut McEvent miniMcMk");
+  //  Base CuCu chain, fails. ELH: standard P06ib cucu options:
+  //chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl P2005 DbV20060421 useCDV ITTF tofDat -SvtIT SCEbyE OGridLeak OShortR OSpaceZ2");
+
+// use Simu NoDefault NoInput onlraw -onlcl and standard chain options
+//  expand P2005, get rid of corrections and ftpc:
+chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw"); 
+//chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl B2005 l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT SCEbyE");
+
+//chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,tpc_T, globT tls db tpcDB,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT MuDST -trg VFMinuit GeantOut");
+  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT MuDST -trg  VFMinuit GeantOut ");
 
 
-  //  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,svt_daq,SvtD,Physics,l0,tags,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat MuDST -trg GeantOut");
 
-  //StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
-  //fcfMk->SetMode("0x1");
+  //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
+  //  fcfMk->SetMode("0x1");
 
 
   TString OutputFileName(gSystem->BaseName(file1));
   OutputFileName.ReplaceAll("*","");
   OutputFileName.ReplaceAll(".daq","");
   OutputFileName.Append(".root");
+  cout <<"AAR - Setting file output to: " <<OutputFileName.Data()<<endl;
+  
   chain3->Set_IO_Files(0,OutputFileName.Data());
   chain3->Load();
   chain3->Instantiate();
   St_geant_Maker *geantMk = (St_geant_Maker *) chain->GetMaker("geant");
   geantMk->SetActive(kTRUE);
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
+  if(!tpcdaqMk )
+    {
+      cout <<" Error: no tpc daq maker. End. "<<endl;
+      return;
+    }
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
 
   //  StMaker *ftpccluMk = chain3->GetMaker("ftpc_hits");
   //  ftpccluMk->SetInput("ftpc_raw","FtpcMixer");
+  cout <<"AAR - going to file"<<endl;
 
   saveMk->cd();
   {
@@ -174,13 +185,18 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   printf ("QAInfo: with %s\n", chain->GetCVS());
 
   // Init the chain and all its makers
+  cout <<"AAR - initializing the chain"<<endl;
+
+  chain->SetDEBUG(0);
   if (Nevents >= 0) {
     Int_t iInit = chain->Init();
   }
+
   // chain->SetDEBUG();
   treeMk = chain->GetMaker("tree");
   TBenchmark evnt;
   Int_t iMake = 0, i = 1, iBad = 0;
+
 
   StIOMaker *inpMk = (StIOMaker *)chain1->GetMaker("inputStream");
   FILE *fp = fopen(file3,"r");
@@ -190,6 +206,8 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
 
   // vtxMk = (StVertexMaker*) chain3->GetMaker("vertex");
 
+
+  cout <<"AAR - Entering Event Loop"<<endl;
 EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
    evnt.Reset();
    evnt.Start("QAInfo:");
