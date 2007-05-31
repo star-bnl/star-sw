@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4.C,v 1.6 2007/05/31 18:33:27 andrewar Exp $
+// $Id: bfcMixer_v4.C,v 1.7 2007/05/31 18:34:15 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -61,7 +61,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   //  chain1->SetFlags("in NoDefault");
   //  chain1->SetFlags("in alltrigger NoDefault");
   //  chain1->SetFlags("in Physics DbV20020226 NoDefault");
-  chain1->SetFlags("in Physics DbV20040804 NoDefault");
+  chain1->SetFlags("in Physics DbV20041213 NoDefault");
   chain1->Set_IO_Files(file1);
   chain1->Load();
   chain1->Instantiate();
@@ -72,7 +72,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
   //  chain2->SetFlags("fzin DbV20020226 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
-  chain2->SetFlags("fzin DbV20040804 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
+  chain2->SetFlags("fzin DbV20041213 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
@@ -122,13 +122,22 @@ void bfcMixer_v4(const Int_t Nevents=10,
   chain2->SetInput("Input2","Event");
   mixer->writeFile("mixer.trs",Nevents);
 
-  gSystem->Load("StFtpcMixerMaker");
-  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
+  //  gSystem->Load("StFtpcMixerMaker");
+  //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
 
   // Create chain3 object
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  chain3->SetFlags("Simu NoDefault DbV20040804 NoInput db tpc_daq tpc -tcl fcf ITTF ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf -Prevtx -nohits CMuDST ZDCvtx tofDat onlraw -onlcl Xi2 xiSvt Kink2"); 
+
+  // works but missing flags:
+  //  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20041213 ry2004 tpc_daq tpc ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2"); 
+
+
+  // use Simu NoDefault NoInput onlraw -onlcl and standard chain options
+  // then take apart e.g. P2004/B2004 and remove corrections as well as 
+  // in, physics, analyis and Event QA from Cdst, tags, SCEbyE
+
+  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20041213 ry2004 tpc_daq tpc ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw"); 
 
   //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
   //  fcfMk->SetMode("0x1");
@@ -180,7 +189,9 @@ void bfcMixer_v4(const Int_t Nevents=10,
 EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
    evnt.Reset();
    evnt.Start("QAInfo:");
+  printf ("ELH3\n");
    chain->Clear();
+  printf ("ELH4\n");
    
    ncols = fscanf(fp,"%d %d %d %f %f %f",&eventnumber,&skip,&mult,&x,&y,&z);
    if(ncols<0) break;
