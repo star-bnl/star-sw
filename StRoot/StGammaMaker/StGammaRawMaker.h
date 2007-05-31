@@ -74,6 +74,12 @@ class StGammaRawMaker : public StMaker {
 
   StGammaTower *mEEtowers[ kEEmcNumSectors * kEEmcNumSubSectors * kEEmcNumEtas ][ 4 ];
   StGammaStrip *mEEstrips[ kEEmcNumSectors ][ kEEmcNumSmdUVs     ][ kEEmcNumStrips ];
+
+  StGammaTower* mBarrelEmcTower[4801];
+  StGammaTower* mBarrelEmcPreshower[4801];
+
+  map<int, StGammaStrip*> mBarrelSmdEtaStrip;
+  map<int, StGammaStrip*> mBarrelSmdPhiStrip;
   
  public:
 
