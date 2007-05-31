@@ -1,0 +1,19 @@
+/*    pmdSMChain_GNF.idl
+*
+*  Table: pmdSMChain_GNF
+*
+*       description: *    gain normalization factor parameters for each
+*                         SM-chain combination
+*/ 
+
+
+struct pmdSMChain_GNF { 
+
+   long sm;           /* super module */
+   long chain;        /* chain */
+   float mean;        /* mean */
+   float errmean;     /* error on mean */
+   float mpv;         /* most probable value */
+   float errmpv;      /* error on mpv */
+
+ };  
