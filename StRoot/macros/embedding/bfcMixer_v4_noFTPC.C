@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4.C,v 1.8 2007/05/31 18:35:48 andrewar Exp $
+// $Id: bfcMixer_v4_noFTPC.C,v 1.1 2007/05/31 18:36:53 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -22,7 +22,7 @@ class StIOMaker;
 class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
 class StEventMaker; StEventMaker *evMk = 0;
 class StMixerMaker;
-class StFtpcMixerMaker;
+//class StFtpcMixerMaker;
 class StEvtHddr;
 //_____________________________________________________________________
 void Load(){
@@ -38,7 +38,7 @@ void Load(){
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer_v4(const Int_t Nevents=10,
+void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
              const Char_t *file1="/auto/pdsfdv08/starprod/daq/2004/production62GeV/ReversedFullField/st_physics_adc_5090009_raw_2060002.daq",
 	     const Char_t *file2="/home/starofl/embedding/GSTAR/gtest.fz",
              const Char_t *file3="/home/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
@@ -72,7 +72,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
   //  chain2->SetFlags("fzin DbV20020226 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
-  chain2->SetFlags("fzin DbV20050215 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
+  chain2->SetFlags("fzin DbV20050215 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
@@ -122,8 +122,8 @@ void bfcMixer_v4(const Int_t Nevents=10,
   chain2->SetInput("Input2","Event");
   mixer->writeFile("mixer.trs",Nevents);
 
-  gSystem->Load("StFtpcMixerMaker");
-  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
+  //  gSystem->Load("StFtpcMixerMaker");
+  //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
 
   // Create chain3 object
   chain3 = new StBFChain("Three");
@@ -134,7 +134,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   // in, physics, analyis and Event QA from Cdst, tags, SCEbyE
   // also don't use hitfilt
 
-  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050215 ry2004 tpc_daq tpc ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw"); 
+  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050215 ry2004 tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw MiniMcMk"); 
 
   //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
   //  fcfMk->SetMode("0x1");
@@ -153,8 +153,8 @@ void bfcMixer_v4(const Int_t Nevents=10,
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
 
-  StMaker *ftpccluMk = chain3->GetMaker("ftpc_hits");
-  ftpccluMk->SetInput("ftpc_raw","FtpcMixer");
+  //  StMaker *ftpccluMk = chain3->GetMaker("ftpc_hits");
+  //  ftpccluMk->SetInput("ftpc_raw","FtpcMixer");
 
   saveMk->cd();
   {
