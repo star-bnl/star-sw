@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4_noFTPC.C,v 1.2 2007/05/31 18:39:23 andrewar Exp $
+// $Id: bfcMixer_v4_svt.C,v 1.1 2007/05/31 18:39:05 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ void Load(){
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
+void bfcMixer_v4(const Int_t Nevents=10,
              const Char_t *file1="/auto/pdsfdv08/starprod/daq/2004/production62GeV/ReversedFullField/st_physics_adc_5090009_raw_2060002.daq",
 	     const Char_t *file2="/home/starofl/embedding/GSTAR/gtest.fz",
              const Char_t *file3="/home/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
@@ -61,7 +61,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   //  chain1->SetFlags("in NoDefault");
   //  chain1->SetFlags("in alltrigger NoDefault");
   //  chain1->SetFlags("in Physics DbV20020226 NoDefault");
-  chain1->SetFlags("in Physics DbV20050215 NoDefault");
+  chain1->SetFlags("in Physics DbV20050515 NoDefault svt_daq");
   chain1->Set_IO_Files(file1);
   chain1->Load();
   chain1->Instantiate();
@@ -72,7 +72,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
   //  chain2->SetFlags("fzin DbV20020226 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
-  chain2->SetFlags("fzin DbV20050215 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
+  chain2->SetFlags("fzin DbV20050515 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
@@ -133,8 +133,11 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   // then take apart e.g. P2004/B2004 and remove corrections as well as 
   // in, physics, analyis and Event QA from Cdst, tags, SCEbyE
   // also don't use hitfilt
+  //  took out svtdEdx, emcDY2 too
 
-  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050215 ry2004 tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw"); 
+  //  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc svt_daq SvtD event Kalman Tree evout useCDV SCEbyE tofdat EST xiSvt pmdRaw Xi2 V02 Kink2 CMuDst");
+
+  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svtEmbed SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw"); 
 
   //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
   //  fcfMk->SetMode("0x1");
