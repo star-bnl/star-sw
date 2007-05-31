@@ -7,8 +7,9 @@
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
 #include "StEEmcPool/StEEmcClusterMaker/StEEmcGenericClusterMaker.h"
 
-#include "StEventTypes.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StBarrelEmcCluster.h"
+#include "StBarrelEmcClusterMaker.h"
 
 ClassImp(StGammaCandidate);
 
@@ -309,144 +310,121 @@ Int_t StGammaCandidateMaker::MakeBarrel()
   // Get gamma event maker
   StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMaker("gemaker");
   if (!gemaker) {
-    LOG_WARN << "MakeBarrel - No StGammaEventMaker" << endm;
+    LOG_WARN << "MakeBarrel - No gamma event maker" << endm;
     return kStWarn;
   }
 
   // Get gamma event
   StGammaEvent* gevent = gemaker->event();
   if (!gevent) {
-    LOG_WARN << "MakeBarrel - No StGammaEvent" << endm;
+    LOG_WARN << "MakeBarrel - No gamma event" << endm;
     return kStWarn;
   }
 
   // Get gamma raw maker
   StGammaRawMaker* grawmaker = (StGammaRawMaker*)GetMaker("grawmaker");
   if (!grawmaker) {
-    LOG_WARN << "MakeBarrel - No StGammaRawMaker" << endm;
+    LOG_WARN << "MakeBarrel - No gamma raw maker" << endm;
     return kStWarn;
   }
 
-  // Get StEvent
-  StEvent* event = (StEvent*)GetDataSet("StEvent");
-  if (!event) {
-    LOG_WARN << "MakeBarrel - No StEvent" << endm;
+  // Get BEMC cluster maker
+  StBarrelEmcClusterMaker* ecl = (StBarrelEmcClusterMaker*)GetMaker("bemc_cluster");
+  if (!ecl) {
+    LOG_WARN << "MakeBarrel - No BEMC clusters" << endm;
     return kStWarn;
   }
 
-  // Get EMC collection
-  StEmcCollection* emc = event->emcCollection();
-  if (!emc) {
-    LOG_WARN << "MakeBarrel - No EMC collection" << endm;
-    return kStWarn;
-  }
+  // Loop over BEMC clusters
+  for (int i = 0; i < ecl->numberOfClusters(); ++i) {
+    StBarrelEmcCluster* cluster = ecl->cluster(i);
 
-  // Create BEMC gamma candidates associated with BTOW clusters
-  if (StEmcDetector* det = emc->detector(kBarrelEmcTowerId)) {
-    // Get BTOW geometry
-    StEmcGeom* geo = StEmcGeom::instance("bemc");
+    // Cut on transverse energy of the cluster
+    if (cluster->et() < mMinimumET) continue;
 
-    if (det->cluster()) {
-      StSPtrVecEmcCluster& clusters = det->cluster()->clusters();
+    // Create gamma candidate
+    StGammaCandidate* candidate = gevent->newCandidate();
+    candidate->SetId(nextId());
+    candidate->SetDetectorId(StGammaCandidate::kBEmc);
+    candidate->SetEnergy(cluster->energy());
+    candidate->SetPosition(cluster->position());
+    candidate->SetMomentum(cluster->momentum());
 
-      // Loop over BTOW clusters
-      for (unsigned int i = 0; i < clusters.size(); ++i) {
-	StEmcCluster* cluster = clusters[i];
+    // Set seed energy
+    StGammaTower* seed = cluster->seed();
+    candidate->SetSeedEnergy(seed->energy);
+    candidate->SetTowerId(seed->id);
 
-	// Cut on transverse energy of the cluster
-	float et = cluster->energy() / cosh(cluster->eta());
-	if (et < mMinimumET) continue;
-
-	// Create gamma candidate
-	StGammaCandidate* candidate = gevent->newCandidate();
-	candidate->SetId(nextId());
-	candidate->SetDetectorId(StGammaCandidate::kBEmc);
-	candidate->SetEnergy(cluster->energy());
-
-	// Set candidate momentum
-	TVector3 momentum;
-	momentum.SetPtEtaPhi(et, cluster->eta(), cluster->phi());
-	candidate->SetMomentum(momentum);
-
-	// Set seed energy
-	StEmcRawHit* seed = cluster->hit().front();
-	candidate->SetSeedEnergy(seed->energy());
-	candidate->SetTowerId(seed->softId(BTOW));
-
-	// Compute candidate position as energy-weighted centroid of hits
-	float x = 0;
-	float y = 0;
-	float z = 0;
-	float preShowerEnergy =0;
-	StPtrVecEmcRawHit& hits = cluster->hit();
-
-	for (unsigned int k = 0; k < hits.size(); ++k) {
-	  StEmcRawHit* hit = hits[k];
-	  int id = hit->softId(BTOW);
-	  float xx;
-	  float yy;
-	  float zz;
-	  geo->getXYZ(id, xx, yy, zz);
-	  x += xx * hit->energy();
-	  y += yy * hit->energy();
-	  z += zz * hit->energy();
-
+    float energy = 0;
+    for (int deta = -1; deta <= 1; ++deta) {
+      for (int dphi = -1; dphi <= 1; ++dphi) {
+	if (StGammaTower* tower = cluster->tower(deta, dphi)) {
 	  // Add BTOW hit to candidate list of "my" towers
-	  if (StGammaTower* gtower = grawmaker->tower(id, kBEmcTower))
-	    candidate->addMyTower(gtower);
+	  if (deta || dphi) candidate->addMyTower(tower);
 
 	  // Add BPRS hit to candidate list of "my" towers
-	  if (StGammaTower* gtower = grawmaker->tower(id, kBEmcPres)) {
-	    candidate->addMyTower(gtower);
-	    preShowerEnergy += gtower->energy;
+	  if (StGammaTower* preshower = grawmaker->tower(tower->id, kBEmcPres)) {
+	    candidate->addMyPreshower1(preshower);
+	    energy += preshower->energy;
 	  }
 	}
+      }
+    }
 
-	x /= cluster->energy();
-	y /= cluster->energy();
-	z /= cluster->energy();
+    // Set candidate preshower energy sum
+    candidate->SetBPrsEnergy(energy);
 
-	// Set candidate position
-	TVector3 position(x, y, z);
-	candidate->SetPosition(position);
+    // Add tracks that fall within mRadius of candidate
+    for (int k = 0; k < gevent->numberOfTracks(); ++k) {
+      if (StGammaTrack* track = gevent->track(k)) {
+	float deta = cluster->eta() - track->eta();
+	float dphi = cluster->phi() - track->phi();
+	dphi = acos(cos(dphi));
+	float r = hypot(deta, dphi);
+	if (r <= mRadius) candidate->addTrack(track);
+      }
+    }
 
-	// Set candidate preshower energy sum
-	candidate->SetBPrsEnergy(preShowerEnergy);
+    // Add BTOW hits that fall within mRadius of candidate
+    for (int k = 0; k < gevent->numberOfTowers(); ++k) {
+      StGammaTower* tower = gevent->tower(k);
+      if (tower && tower->layer == kBEmcTower) {
+	float deta = cluster->eta() - tower->eta;
+	float dphi = cluster->phi() - tower->phi;
+	dphi = acos(cos(dphi));
+	float r = hypot(deta, dphi);
+	if (r <= mRadius) candidate->addTower(tower);
+      }
+    }
 
-	// Add tracks that fall within mRadius of candidate
-	for (int k = 0; k < gevent->numberOfTracks(); ++k) {
-	  if (StGammaTrack* track = gevent->track(k)) {
-	    float deta = cluster->eta() - track->eta();
-	    float dphi = cluster->phi() - track->phi();
-	    dphi = acos(cos(dphi));
-	    float r = hypot(deta, dphi);
-	    if (r <= mRadius) candidate->addTrack(track);
-	  }
-	}
+    // Add BPRS hits that fall within mRadius of candidate
+    for (int k = 0; k < gevent->numberOfTowers(); ++k) {
+      StGammaTower* preshower = gevent->preshower1(k);
+      if (preshower && preshower->layer == kBEmcPres) {
+	float deta = cluster->eta() - preshower->eta;
+	float dphi = cluster->phi() - preshower->phi;
+	dphi = acos(cos(dphi));
+	float r = hypot(deta, dphi);
+	if (r <= mRadius) candidate->addPreshower1(preshower);
+      }
+    }
 
-	// Add BTOW hits that fall within mRadius of candidate
-	for (int k = 0; k < gevent->numberOfTowers(); ++k) {
-	  if (StGammaTower* tower = gevent->tower(k)) {
-	    float deta = cluster->eta() - tower->eta;
-	    float dphi = cluster->phi() - tower->phi;
-	    dphi = acos(cos(dphi));
-	    float r = hypot(deta, dphi);
-	    if (r <= mRadius) candidate->addTower(tower);
-	  }
-	}
-
-	// Add BPRS hits that fall within mRadius of candidate
-	for (int k = 0; k < gevent->numberOfTowers(); ++k) {
-	  if (StGammaTower* tower = gevent->preshower1(k)) {
-	    float deta = cluster->eta() - tower->eta;
-	    float dphi = cluster->phi() - tower->phi;
-	    dphi = acos(cos(dphi));
-	    float r = hypot(deta, dphi);
-	    if (r <= mRadius) candidate->addTower(tower);
-	  }
-	}
-
-	// TODO: Add BSMD eta and phi strips that fall within mRadius of candidate
+    // Add BSMDE and BSMDP strips that fall within mRadius of candidate
+    for (int id = 1; id <= 18000; ++id) {
+      int sector = 0;		// Not used
+      if (StGammaStrip* strip = grawmaker->strip(sector, kBEmcSmdEta, id)) {
+	float x, y, z;
+	StEmcGeom::instance("bsmde")->getXYZ(id, x, y, z);
+	TVector3 d(x, y, z);
+	d -= cluster->position();
+	if (d.Mag() <= mSmdRange) candidate->addSmdu(strip); // BSMDE
+      }
+      if (StGammaStrip* strip = grawmaker->strip(sector, kBEmcSmdPhi, id)) {
+	float x, y, z;
+	StEmcGeom::instance("bsmdp")->getXYZ(id, x, y, z);
+	TVector3 d(x, y, z);
+	d -= cluster->position();
+	if (d.Mag() <= mSmdRange) candidate->addSmdv(strip); // BSMDP
       }
     }
   }

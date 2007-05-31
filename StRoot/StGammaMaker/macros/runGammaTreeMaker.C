@@ -62,8 +62,8 @@ void runGammaTreeMaker( Int_t nevents = -1,
   mMuDstMaker->SetStatus("PrimaryTracks",1);
 #endif 
 
-  StMuDbReader *db = StMuDbReader::instance();
-  StDetectorDbMaker *detdb = new StDetectorDbMaker();  
+  //StMuDbReader *db = StMuDbReader::instance();
+  //StDetectorDbMaker *detdb = new StDetectorDbMaker();  
   mStarDatabase = new St_db_Maker("StarDb", "MySQL:StarDb");
   
 #ifdef MONTE_CARLO  
@@ -116,35 +116,15 @@ void runGammaTreeMaker( Int_t nevents = -1,
   StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
 #endif
 
-  // This maker does clustering in the detectors
-  StPreEclMaker *ecl=new StPreEclMaker();
-
   StGammaEventMaker *gemaker = new StGammaEventMaker();
 
   StGammaRawMaker       *raw    = new StGammaRawMaker(); 
+  StBarrelEmcClusterMaker* ecl  = new StBarrelEmcClusterMaker;
   StGammaCandidateMaker *gcm    = new StGammaCandidateMaker();
   StGammaTreeMaker      *gtm    = new StGammaTreeMaker();
 
   mChain->Init();
   mChain->ls(3);
-
-  /////////////////////////////////////////////////////////////
-  // the EMC cluster finder parameters should be set after Init() method
-  // is called
-  // the syntax for SetClusterConditions is
-  // SetClusterConditions("det Name", sizeMax, energySeed, energyAdd, energyThresholdAll, kCheckClustersOk)
-  //   sizeMax is the maximum size the cluster can have 
-  //   energySeed is the energy threshold to start looking for a cluster in that detector region
-  //   energyAdd is the minimum energy a hit can have to be included as part of a cluster
-  //   energyThresholdAll is the minimum energy a cluster can have in order to be saved
-  //   kCheckClustersOk is a flag to do a refit of the cluster based on the shower profile. NOT TESTED !!!
-  //
-  // These are the default conditions
-  /////////////////////////////////////////////////////////////
-  ecl->SetClusterConditions("bemc",  4, 0.7, 0.001, 0.1, kFALSE);
-  ecl->SetClusterConditions("bprs",  1, 0.1, 0.001, 0.1, kFALSE); 
-  ecl->SetClusterConditions("bsmde", 5, 0.4, 0.001, 0.1, kFALSE);
-  ecl->SetClusterConditions("bsmdp", 5, 0.4, 0.001, 0.1, kFALSE);
 
   //-----------------------------------------------------------------
   //--

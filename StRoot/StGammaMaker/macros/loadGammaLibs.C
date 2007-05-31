@@ -8,7 +8,7 @@ void loadGammaLibs()
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StDetectorDbMaker");
+  //gSystem->Load("StDetectorDbMaker");
 
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
