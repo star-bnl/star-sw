@@ -101,6 +101,13 @@ void StGammaRawMaker::Clear(Option_t *opts)
       for ( Int_t strip=0;strip<kEEmcNumStrips;strip++ )
 	mEEstrips[sec][plane][strip]=0;
 
+  // clear BTOW and BPRS arrays of pointers
+  memset(mBarrelEmcTower, 0, sizeof(mBarrelEmcTower));
+  memset(mBarrelEmcPreshower, 0, sizeof(mBarrelEmcPreshower));
+
+  // clear BSMDE and BSMDP maps
+  mBarrelSmdEtaStrip.clear();
+  mBarrelSmdPhiStrip.clear();
 }
 
 
@@ -235,9 +242,11 @@ void StGammaRawMaker::GetBarrel(){
 	btower->eta    = bEta;
 	btower->phi    = bPhi;
 
-	
 	LOG_DEBUG <<" tower id="<<id<<" status = "<<status<<" energy="<<energy<<" eta="<<bEta<<" phi="<<bPhi<<" ADC="<<ADC<<endm;
-	
+
+	mTowers.push_back(*btower);
+	mBarrelEmcTower[btower->id] = btower;
+
       }
     }
 
@@ -279,11 +288,11 @@ void StGammaRawMaker::GetBarrel(){
 	pshower->eta    = bEta;
 	pshower->phi    = bPhi;
 
-	
 	LOG_DEBUG<<" bprs id="<<id<<" status = "<<bprs_status<<" energy="<<energy<<" eta="<<bEta<<" phi="<<bPhi<<" ADC="<<ADC<<endm;
-	
+
 	mPreshower1.push_back(*pshower);
-	
+	mBarrelEmcPreshower[pshower->id] = pshower;
+
       }
     }  
   }// loop over modules
@@ -314,6 +323,7 @@ void StGammaRawMaker::GetBarrel(){
 	  LOG_DEBUG<<" estrip id="<<smde_id<<" status = "<<smde_status<<" energy="<<(*hit)->energy()<<" module="<<(*hit)->module()<<endm;
 	  	  
 	  mStrips.push_back(*bstrip);
+	  mBarrelSmdEtaStrip[bstrip->index] = bstrip;
 	}
       }
     }
@@ -342,8 +352,9 @@ void StGammaRawMaker::GetBarrel(){
 	  bstrip->energy = (*hit)->energy(); 
 
 	  LOG_DEBUG<<" pstrip id="<<smdp_id<<" status = "<<smdp_status<<" energy="<<(*hit)->energy()<<" module="<<(*hit)->module()<<endm;
-	  mStrips.push_back(*bstrip);
 
+	  mStrips.push_back(*bstrip);
+	  mBarrelSmdPhiStrip[bstrip->index] = bstrip;
  	}
       }
     }
@@ -597,35 +608,11 @@ StGammaTower *StGammaRawMaker::tower( Int_t id, Int_t layer )
     }
   else if (layer == kBEmcTower)
     {
-      StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMaker("gemaker");
-      if (!gemaker) return 0;
-      StGammaEvent* gevent = gemaker->event();
-      if (!gevent) return 0;
-      for (int i = 0; i < gevent->numberOfTowers(); ++i)
-	{
-	  StGammaTower* tower = gevent->tower(i);
-	  if ((int)tower->id == id && (int)tower->layer == layer)
-	    {
-	      return tower;
-	    }
-	}
-      return 0;
+      return mBarrelEmcTower[id];
     }
   else if (layer == kBEmcPres)
     {
-      StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMaker("gemaker");
-      if (!gemaker) return 0;
-      StGammaEvent* gevent = gemaker->event();
-      if (!gevent) return 0;
-      for (int i = 0; i < gevent->numberOfPreshower1(); ++i)
-	{
-	  StGammaTower* tower = gevent->preshower1(i);
-	  if ((int)tower->id == id && (int)tower->layer == layer)
-	    {
-	      return tower;
-	    }
-	}
-      return 0;
+      return mBarrelEmcPreshower[id];
     }
   return 0;
 };
@@ -638,11 +625,11 @@ StGammaStrip *StGammaRawMaker::strip( Int_t sec, Int_t plane, Int_t index )
     }
   else if (plane == kBEmcSmdEta)
     {
-      return 0;
+      return mBarrelSmdEtaStrip[index];
     }
   else if (plane == kBEmcSmdPhi)
     {
-      return 0;
+      return mBarrelSmdPhiStrip[index];
     }
   return 0;
 };
