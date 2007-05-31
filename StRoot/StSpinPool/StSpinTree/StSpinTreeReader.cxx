@@ -3,7 +3,6 @@
  *  StarSpinLibraries
  *
  *  Created by Adam Kocoloski on 5/7/07.
- *  Copyright 2007 __MyCompanyName__. All rights reserved.
  *
  */
 
@@ -14,17 +13,35 @@ ClassImp(StSpinTreeReader)
 #include <fstream>
 
 StSpinTreeReader::StSpinTreeReader(const char *treeName) : connectJets(true), 
-    connectNeutralJets(true), connectChargedPions(true), connectBemcNeutralPions(true),
-    connectEemcNeutralPions(true), connectBemcElectrons(true), mIsConnected(false), mEvent(NULL), 
-    mConeJets(NULL), mConeJetsEMC(NULL), mChargedPions(NULL), mBemcNeutralPions(NULL), 
-    mEemcNeutralPions(NULL), mEventList(NULL)
+    connectNeutralJets(true), connectChargedPions(true), connectBemcPions(true),
+    connectEemcPions(true), connectBemcElectrons(true), mEemcPions(NULL),
+    mEventList(NULL), mIsConnected(false), requireDidFire(false), requireShouldFire(false)
 {
-    mChain = new TChain(treeName);
+    mChain              = new TChain(treeName);
+    mChainConeJets      = new TChain("ConeJets");
+    mChainConeJetsEMC   = new TChain("ConeJetsEMC");
+    mChainChargedPions  = new TChain("chargedPions");
+    mChainBemcPions     = new TChain("bemcPions");
+    
+    mEvent = new StJetSkimEvent();
+    mConeJets = new TClonesArray("StJet",100);
+    mConeJetsEMC = new TClonesArray("StJet",100);
+    mChargedPions = new TClonesArray("StChargedPionTrack",100);
+    mBemcPions = new TClonesArray("TPi0Candidate",100);
 }
 
 StSpinTreeReader::~StSpinTreeReader() { 
     std::cout << "StSpinTreeReader::~StSpinTreeReader()" << std::endl;
+    delete mChainConeJets;
+    delete mChainConeJetsEMC;
+    delete mChainChargedPions;
+    delete mChainBemcPions;
     delete mChain;
+    
+    delete mConeJets;
+    delete mConeJetsEMC;
+    delete mChargedPions;
+    delete mBemcPions;
 }
 
 StSpinTreeReader::StSpinTreeReader(const StSpinTreeReader & t) {
@@ -35,7 +52,7 @@ StSpinTreeReader& StSpinTreeReader::operator=(const StSpinTreeReader &rhs) {
     return *this;
 }
 
-int StSpinTreeReader::addFile(const char *path) {
+/*int StSpinTreeReader::addFile(const char *path) {
     return mChain->AddFile(path);
 }
 
@@ -50,94 +67,123 @@ int StSpinTreeReader::addFileList(const char *path) {
         if(ret < addFile(currentFile.c_str())) ret++;
     }
     return ret;
+}*/
+
+void StSpinTreeReader::selectDataset(const char *path) {
+    std::ifstream filelist(path);
+    std::string currentFile;
+    while(!filelist.eof()) {
+        getline(filelist,currentFile);
+        if(currentFile.size() == 0) continue;
+        //std::cout << "adding current file = " << currentFile << std::endl;
+        selectFile(currentFile);
+    }
+}
+
+void StSpinTreeReader::selectFile(const char *path) {
+    std::string theFile(path);
+    selectFile(theFile);
+}
+
+void StSpinTreeReader::selectFile(std::string & path) {
+    int run = atoi(path.substr(path.length()-17,7).c_str());
+    mFileList[run] = path;
 }
 
 long StSpinTreeReader::GetEntries() {
+    connect();
+    if(mEventList) return mEventList->GetN();
     return mChain->GetEntries();
 }
 
 void StSpinTreeReader::GetEntry(long i) {
     connect();
-    long n = mEventList->GetEntry(i);
-    std::cout<<"next entry number in chain is " << n << endl;
-    mChain->GetEntry(n);
+    if(mEventList) {
+        long n = mEventList->GetEntry(i);
+        mChain->GetEntry(n);
+    }
+    else mChain->GetEntry(i);
 }
 
 void StSpinTreeReader::connect() {
     if(!mIsConnected) {
+        //only use files in the filelist if the run is selected or runlist.empty()
+        for(map<int,std::string>::iterator it=mFileList.begin(); it!=mFileList.end(); it++) {
+            if(mRunList.empty() || mRunList.count(it->first)) { 
+                cout << "adding " << it->second << endl;
+                mChain->AddFile(it->second.c_str());
+                if(connectJets)         mChainConeJets->AddFile(it->second.c_str());
+                if(connectNeutralJets)  mChainConeJetsEMC->AddFile(it->second.c_str());
+                if(connectChargedPions) mChainChargedPions->AddFile(it->second.c_str());
+                if(connectBemcPions)    mChainBemcPions->AddFile(it->second.c_str());
+            }
+        }
+                
         mChain->SetBranchAddress("skimEventBranch",&mEvent);
         
         if(connectJets) { 
-            mConeJets = new TClonesArray("StJet",100);
-            if(mChain->GetBranch("ConeJets12") != NULL) { //Run 6
-                mChain->SetBranchAddress("ConeJets12",&mConeJets);
-            }
-            else { //Run 5
-                mChain->SetBranchAddress("ConeJets", &mConeJets);
-            }
+            mChain->AddFriend("ConeJets");
+            mChain->SetBranchAddress("ConeJets", &mConeJets);
         }
         
         if(connectNeutralJets) {
-            mConeJetsEMC = new TClonesArray("StJet",100);
+            mChain->AddFriend("ConeJetsEMC");
             mChain->SetBranchAddress("ConeJetsEMC",&mConeJetsEMC);
         }
         
         if(connectChargedPions) {
-            mChargedPions = new TClonesArray("StChargedPionTrack",100);
+            mChain->AddFriend("chargedPions");
             mChain->SetBranchAddress("chargedPions",&mChargedPions);
         }
         
-        if(connectBemcNeutralPions) {
-            mBemcNeutralPions = new TClonesArray("TPi0Candidate",100);
-            mChain->SetBranchAddress("bemcNeutralPions",&mBemcNeutralPions);
+        if(connectBemcPions) {
+            mChain->AddFriend("bemcPions");
+            mChain->SetBranchAddress("bemcPions",&mBemcPions);
         }
         
-        if(connectEemcNeutralPions) {
-            mEemcNeutralPions = new TClonesArray("StEEmcPair",100);
-            mChain->SetBranchAddress("eemcNeutralPions",&mEemcNeutralPions);
+        if(connectEemcPions) {
+            //mEemcPions = new TClonesArray("StEEmcPair",100);
+            //mChain->SetBranchAddress("eemcNeutralPions",&mEemcPions);
         }
         
-        //now do the event list selection by building a TString from the sets of runs/triggers
-        TString s = "( ";
-        bool atStart = true;
-        std::cout << s << std::endl;
-        for(std::set<int>::const_iterator it = mRunList.begin(); it != mRunList.end(); it++) {
-            if(!atStart) s += " || ";
-            s += "mRunId==";
-            s += *it;
-            atStart = false;
-        }
-        s += " )";
-        atStart = true;
-        for(std::set<int>::const_iterator it = mTriggerList.begin(); it != mTriggerList.end(); it++) {
-            if(atStart) {
-                s += " && ( mTriggers.mTrigId==";
-                atStart = false;
+        //now do the event list selection by building a TString from the sets of triggers
+        if(mEventList == NULL) {
+            TString s = "";
+            bool atStart = true;
+            for(std::set<int>::const_iterator it = mTriggerList.begin(); it != mTriggerList.end(); it++) {
+                if(atStart) {
+                    s += "( mTriggers.mTrigId==";
+                    atStart = false;
+                }
+                else { s += " || mTriggers.mTrigId=="; }
+                s += *it;
             }
-            else { s += " || mTriggers.mTrigId=="; }
-            s += *it;
-        }
-        if(mTriggerList.size()) s += " )";
-        
-        if(s.Length()) {
-            std::cout << "Processing the chain using a TEntryList that looks like \n" << s << std::endl;
-            mChain->Draw(">>elist",s.Data(),"entrylist");
-            mEventList = (TEventList*)gDirectory->Get("elist");
-            mChain->SetEventList(mEventList);
-            //mEventList->Print("all");
+            if(mTriggerList.size()) s += " )";
+            if(requireDidFire || requireShouldFire) {
+                s += " && ( ";
+                if(requireDidFire && requireShouldFire) s += "mTriggers.mDidFire==1 && mTriggers.mShouldFire==1 )";
+                else if(requireDidFire) s += "mTriggers.mDidFire==1 )";
+                else s+= "mTriggers.mShouldFire==1";
+            }
+            if(s.Length()) {
+                std::cout << "Processing the chain using a TEventList that looks like \n" << s << std::endl;
+                mChain->Draw(">>elist",s.Data(),"entrylist");
+                mEventList = (TEventList*)gDirectory->Get("elist");
+                mChain->SetEventList(mEventList);
+            }
         }
         
         mIsConnected = true;
     }
 }
 
-void StSpinTreeReader::selectRunList(const char *path) {
+void StSpinTreeReader::selectRunlist(const char *path) {
     std::ifstream list(path);
     int currentRun;
     while(!list.eof()) {
         list >> currentRun;
         if(currentRun == 0) continue;
-        std::cout << "adding current run = " << currentRun << std::endl;
+        //std::cout << "adding current run = " << currentRun << std::endl;
         mRunList.insert(currentRun);
     }
 }
