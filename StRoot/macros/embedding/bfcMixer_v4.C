@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4.C,v 1.3 2007/04/20 00:13:39 andrewar Exp $
+// $Id: bfcMixer_v4.C,v 1.4 2007/05/31 18:25:08 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +39,7 @@ void Load(){
 }
 //_____________________________________________________________________
 void bfcMixer_v4(const Int_t Nevents=10,
-             const Char_t *file1="/auto/pdsfdv09/starprod/daq/2001/minbias/st_physics_2270008_raw_0030.daq",
+             const Char_t *file1="/auto/pdsfdv08/starprod/daq/2004/production62GeV/ReversedFullField/st_physics_adc_5090009_raw_2060002.daq",
 	     const Char_t *file2="/home/starofl/embedding/GSTAR/gtest.fz",
              const Char_t *file3="/home/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
              const Float_t zvertex_low=-175.0,
@@ -61,7 +61,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   //  chain1->SetFlags("in NoDefault");
   //  chain1->SetFlags("in alltrigger NoDefault");
   //  chain1->SetFlags("in Physics DbV20020226 NoDefault");
-  chain1->SetFlags("in Physics DbV20031114 NoDefault");
+  chain1->SetFlags("in Physics DbV20040415 NoDefault");
   chain1->Set_IO_Files(file1);
   chain1->Load();
   chain1->Instantiate();
@@ -72,7 +72,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
   //  chain2->SetFlags("fzin DbV20020226 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
-  chain2->SetFlags("fzin DbV20031114 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
+  chain2->SetFlags("fzin DbV20040415 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
@@ -81,7 +81,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
   
   if (chain2->GetOption("TRS")){
     StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Trs");
-    trsMk->setNormalFactor(1.23);
+    trsMk->setNormalFactor(1.15);
   }
 
   // Add the acceptance filter maker before TRS  
@@ -128,9 +128,11 @@ void bfcMixer_v4(const Int_t Nevents=10,
   // Create chain3 object
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  //  chain3->SetFlags("Simu DbV20031114 NoDefault NoInput db tpc_daq tpc global dst Kalman event evout CMuDst QA Tree GeantOut tofDat -nohits"); 
-  //  chain3->SetFlags("Simu DbV20031114 NoDefault NoInput db tpc_daq tpc ftpc global dst Kalman event QA Tree GeantOut evout"); 
-  chain3->SetFlags("Simu ppOpt beamline NoDefault DbV20031114 NoInput db tpc_daq tpc ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf -Prevtx -nohits CMuDST"); 
+  chain3->SetFlags("Simu NoDefault DbV20040415 NoInput db tpc_daq tpc ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat onlraw -onlcl Xi2 Kink2 eventQA"); 
+
+  //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
+  //  fcfMk->SetMode("0x1");
+
 
   TString OutputFileName(gSystem->BaseName(file1));
   OutputFileName.ReplaceAll("*","");
@@ -197,8 +199,9 @@ EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
    if (inpMk && skip>0) {
      if(i == 1) {skip++;}
      skiptest = inpMk->Skip(skip-oldskip-1);
+     printf("bfcMixer: skiptest1 = %i\n",skiptest);
      skiptest = inpMk->Skip();
-     printf("bfcMixer: skiptest = %i\n",skiptest);
+     printf("bfcMixer: skiptest2 = %i\n",skiptest);
      if(i == 1) {skip--;}
    }
    oldskip = skip;
@@ -217,14 +220,6 @@ EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
    printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time%d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n", i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
 	  iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:"));
 
-
-   // This doesn't work...  elh
-   // TString *fnam = OutputFileName.Data();
-   // TFile *fileptr = TFILE::Open(fnam);
-   // TTree *tree = (TTree*)fileptr->Get("Tag");
-   // tree->GetEvent(i);
-   // Float_t zvert = tree->GetLeaf("primaryVertexX")->GetValue();
-   // printf("zvert = %f\n",zvert);
 
    // Be sure to get the same event from daq and fz files...  elh
    if(eventnumber == chain->GetEventNumber()){
