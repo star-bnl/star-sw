@@ -4,7 +4,6 @@
 // 30 May 2007
 //
 
-#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StGammaRawMaker.h"
 #include "StBarrelEmcCluster.h"
@@ -56,21 +55,18 @@ int StBarrelEmcClusterMaker::Make()
 StBarrelEmcCluster* StBarrelEmcClusterMaker::makeCluster(StGammaTower* tower) const
 {
   //
-  // A cluster is 3x3 patch of towers around the high tower.
+  // A cluster is a 3x3 patch of towers around the high tower.
   // The cluster energy is the sum of the energies of the towers.
   // The cluster position is the energy-weighted centroid of all
   // towers in the cluster.
   //
-  StEmcGeom* geo = StEmcGeom::instance("bemc");
   StEmcPosition emcPosition;
   StBarrelEmcCluster* cluster = new StBarrelEmcCluster;
   cluster->setSeed(tower);
   int id = tower->id;
-  float x, y, z;
-  geo->getXYZ(id, x, y, z);
-  x *= tower->energy;
-  y *= tower->energy;
-  z *= tower->energy;
+  TVector3 position;
+  getTowerPosition(id, position);
+  position *= tower->energy;
   float energy = tower->energy;
 
   for (int deta = -1; deta <= 1; ++deta) {
@@ -80,11 +76,9 @@ StBarrelEmcCluster* StBarrelEmcClusterMaker::makeCluster(StGammaTower* tower) co
 	if (StGammaTower* tower2 = mGammaRawMaker->tower(id2, kBEmcTower)) {
 	  if (tower->energy > tower2->energy) {
 	    cluster->setTower(deta, dphi, tower2);
-	    float x2, y2, z2;
-	    geo->getXYZ(id2, x2, y2, z2);
-	    x += x2 * tower2->energy;
-	    y += y2 * tower2->energy;
-	    z += z2 * tower2->energy;
+	    TVector3 position2;
+	    getTowerPosition(id2, position2);
+	    position += position2 * tower2->energy;
 	    energy += tower2->energy;
 	  }
 	  else {
@@ -100,11 +94,9 @@ StBarrelEmcCluster* StBarrelEmcClusterMaker::makeCluster(StGammaTower* tower) co
     }
   }
 
-  x /= energy;
-  y /= energy;
-  z /= energy;
+  position *= 1 / energy;
 
-  cluster->setPosition(x, y, z);
+  cluster->setPosition(position);
   cluster->setEnergy(energy);
 
   return cluster;
