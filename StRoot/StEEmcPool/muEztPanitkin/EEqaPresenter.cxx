@@ -12,6 +12,7 @@
 
 #ifdef IN_PANITKIN 
   #include <TMapFile.h>
+  #include <Infrastructure/GenericFile.h>
 #else
   #include <TFile.h>
 #endif
@@ -23,7 +24,7 @@ static  TList *hCleanUp=new TList;
 
 
 #include "EEqaPresenter.h"
-TStyle *defStyle=0;
+TStyle *defStyle=0; 
 TStyle *ee1Style=0;
 
 
