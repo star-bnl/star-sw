@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <Stiostream.h>
 #include <stdio.h>
+#ifdef IN_PANITKIN
+#include <TFile.h>
+#endif
 #include "StMessMgr.h"
 
 //--------------------------------------------------------
@@ -1167,9 +1170,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.46 2007/04/09 23:35:13 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.47 2007/06/01 17:47:41 jml Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.47  2007/06/01 17:47:41  jml
+// Attempt to fix panitkin plot compile
+//
 // Revision 2.46  2007/04/09 23:35:13  kocolosk
 // 2.45 didn't get it quite right ... thanks to Oleksandr who identified the correct fix for east side JP mapping
 //
