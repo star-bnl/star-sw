@@ -1,4 +1,4 @@
-// $Id: EEqaSorterC.cxx,v 1.1 2005/04/28 20:54:46 balewski Exp $
+// $Id: EEqaSorterC.cxx,v 1.2 2007/06/01 17:47:05 jml Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -22,7 +22,7 @@
 // tmp end
 
 #ifdef IN_PANITKIN
-  #include "../../../EEmcDb/EEmcDb.h"
+#include "Infrastructure/EEmcDb/EEmcDb.h"
 #else
   #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #endif
@@ -225,6 +225,9 @@ void  EEqaSorterC::initRun() {
 
 
 // $Log: EEqaSorterC.cxx,v $
+// Revision 1.2  2007/06/01 17:47:05  jml
+// attempt to fix panitkin plot compile
+//
 // Revision 1.1  2005/04/28 20:54:46  balewski
 // start
 //

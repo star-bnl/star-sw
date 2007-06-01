@@ -4,8 +4,8 @@
  
 class TPad ;
 #ifdef IN_PANITKIN 
-  class TMapFile;
-  typedef TMapFile  FileType;
+  class GenericFile;
+  typedef GenericFile  FileType;
 #else
   class TFile;
  typedef TFile  FileType;
