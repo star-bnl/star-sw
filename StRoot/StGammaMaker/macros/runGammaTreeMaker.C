@@ -1,5 +1,5 @@
 //-- switch should be commented out when analysing real data
-//#define MONTE_CARLO
+#define MONTE_CARLO
 
 class StChain;
 class St_db_Maker;
@@ -24,8 +24,8 @@ Int_t prescale = 1;
 void runGammaTreeMaker( Int_t nevents = -1, 
 			 //			 Char_t *name = "6149020.lis", 
 			 //			 Char_t *ofile= "6149020.root",
-			 Char_t *name="7146009.list",
-			 Char_t *ofile="test.root",
+			 Char_t *name="/star/data04/sim/rfatemi/photon/gamma5.MuDst.root",
+			 Char_t *ofile="gamma5.root",
 			 Char_t *path = "", 
 			 Int_t nfiles = 100
 			 )
@@ -42,6 +42,13 @@ void runGammaTreeMaker( Int_t nevents = -1,
   mChain = new StChain("chain");
 
 #ifdef MONTE_CARLO
+  TString gname=name;
+  if ( !gname.Contains("MuDst.root") )
+    {
+      std::cout << "We need to be running over a single MuDst for MC" << std::endl;
+      return;
+    }
+  gname.ReplaceAll("MuDst.root","geant.root");
   StIOMaker* ioMaker = new StIOMaker();
   ioMaker->SetFile(gname);
   ioMaker->SetIOMode("r");
@@ -51,10 +58,12 @@ void runGammaTreeMaker( Int_t nevents = -1,
   class StMcEventMaker *mcEventMaker = new StMcEventMaker();
   mcEventMaker->doPrintEventInfo = false;
   mcEventMaker->doPrintMemoryInfo = false;
-#endif MONTE_CARLO
+#endif
+
 
 
   mMuDstMaker = new StMuDstMaker(0,0,path,name,"MuDst",nfiles);
+
 #if 0
   mMuDstMaker->SetStatus("*",0);
   mMuDstMaker->SetStatus("MuEvent",1);
@@ -64,8 +73,9 @@ void runGammaTreeMaker( Int_t nevents = -1,
 
   //StMuDbReader *db = StMuDbReader::instance();
   //StDetectorDbMaker *detdb = new StDetectorDbMaker();  
-  mStarDatabase = new St_db_Maker("StarDb", "MySQL:StarDb");
-  
+  //  mStarDatabase = new St_db_Maker("StarDb", "MySQL:StarDb");
+  mStarDatabase = new St_db_Maker("StarDb", "MySQL:StarDb", "$STAR/StarDb");
+
 #ifdef MONTE_CARLO  
   // Setup ideal gains for processing MC data
   mStarDatabase->SetFlavor("sim","eemcPMTcal");
@@ -74,11 +84,13 @@ void runGammaTreeMaker( Int_t nevents = -1,
   mStarDatabase->SetFlavor("sim","eemcPMTstat");
   mStarDatabase->SetFlavor("sim","eemcPMTname");
   mStarDatabase->SetFlavor("sim","eemcADCconf");
-  mStarDatabase->SetDateTime(20050101,0);
+  //  mStarDatabase->SetDateTime(20050101,0);
+  mStarDatabase->SetDateTime(20060616, 173801);
 #endif
 
   // Initialize EEMC database
   mEEmcDatabase = new StEEmcDbMaker("eemcDb");
+
 
 
 #ifdef MONTE_CARLO
@@ -109,22 +121,49 @@ void runGammaTreeMaker( Int_t nevents = -1,
 
 
   //get BEMC calibration 
+#ifndef MONTE_CARLO
   StEmcADCtoEMaker *bemcAdc2E = new StEmcADCtoEMaker(); // this will just convert what's in MuDst to ADC, use for data only!
   bemcAdc2E->setPrint(true);
+#endif
 #ifdef MONTE_CARLO
   StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
   StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
 #endif
 
-  StGammaEventMaker *gemaker = new StGammaEventMaker();
 
+
+
+  StGammaEventMaker *gemaker = new StGammaEventMaker();
   StGammaRawMaker       *raw    = new StGammaRawMaker(); 
   StBarrelEmcClusterMaker* ecl  = new StBarrelEmcClusterMaker;
   StGammaCandidateMaker *gcm    = new StGammaCandidateMaker();
   StGammaTreeMaker      *gtm    = new StGammaTreeMaker();
 
-  mChain->Init();
   mChain->ls(3);
+
+  mChain->Init();
+
+
+#ifdef MONTE_CARLO
+  // Note: ------------ Must do this stuff after Init()
+  const int controlVal = 2;
+  controlEmcSimulatorMaker_st* simControl = emcSim->getControlSimulator()->GetTable();
+  simControl->calibSpread[0] = 0.15;
+  simControl->keyDB[0] = controlVal;
+  simControl->keyDB[1] = 0;
+  simControl->keyDB[2] = controlVal;
+  simControl->keyDB[3] = controlVal;
+  //keyDB[det] = 0 -> NO database (default value)
+  //           = 1 - only gains are applied
+  //           = 2 - gains and pedestals are applied
+  // In other words, for pure MC should be 2, and
+  // for embedding should be 1.
+
+#endif
+
+
+
+
 
   //-----------------------------------------------------------------
   //--
@@ -160,7 +199,7 @@ void LoadLibs()
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StDetectorDbMaker");
+  //gSystem->Load("StDetectorDbMaker");
 
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
