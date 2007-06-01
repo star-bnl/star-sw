@@ -14,6 +14,7 @@ class StGammaRawMaker;
 class StGammaTower;
 
 #include "StMaker.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 
 class StBarrelEmcClusterMaker : public StMaker {
 public:
@@ -35,11 +36,19 @@ private:
   vector<StBarrelEmcCluster*> mClusters;
 
   StBarrelEmcCluster* makeCluster(StGammaTower* tower) const;
+  void getTowerPosition(int id, TVector3& position) const;
 
   ClassDef(StBarrelEmcClusterMaker, 1)
 };
 
 inline int StBarrelEmcClusterMaker::numberOfClusters() const { return mClusters.size(); }
 inline StBarrelEmcCluster* StBarrelEmcClusterMaker::cluster(int i) const { return mClusters[i]; }
+
+inline void StBarrelEmcClusterMaker::getTowerPosition(int id, TVector3& position) const
+{
+  float x, y, z;
+  StEmcGeom::instance("bemc")->getXYZ(id, x, y, z);
+  position.SetXYZ(x, y, z);
+}
 
 #endif

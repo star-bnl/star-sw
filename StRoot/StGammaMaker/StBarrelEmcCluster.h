@@ -35,7 +35,6 @@ public:
   void setSeed(StGammaTower* tower);
   void setTower(int deta, int dphi, StGammaTower* tower);
   void setPosition(const TVector3& position);
-  void setPosition(float x, float y, float z);
   void setEnergy(float energy);
 
 private:
@@ -59,7 +58,6 @@ inline StGammaTower* StBarrelEmcCluster::seed() const { return tower(0,0); }
 inline void StBarrelEmcCluster::setSeed(StGammaTower* tower) { setTower(0, 0, tower); }
 inline void StBarrelEmcCluster::setTower(int deta, int dphi, StGammaTower* tower) { mTowers[deta+1][dphi+1] = tower; }
 inline void StBarrelEmcCluster::setPosition(const TVector3& position) { mPosition = position; }
-inline void StBarrelEmcCluster::setPosition(float x, float y, float z) { mPosition.SetXYZ(x, y, z); }
 inline void StBarrelEmcCluster::setEnergy(float energy) { mEnergy = energy; }
 
 inline TVector3 StBarrelEmcCluster::momentum(const TVector3& vertex) const

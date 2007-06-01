@@ -17,8 +17,7 @@ ostream& operator<<(ostream& out, const StBarrelEmcCluster& cluster)
   out << "Transverse energy [GeV]:\t" << cluster.et() << '\n';
   out << "Eta:\t" << cluster.eta() << '\n';
   out << "Phi [radians]:\t" << cluster.phi() << '\n';
-  out << "Position [cm]: [ x = " << cluster.position().x() << ", y = " << cluster.position().y() << ", z = "
-      << cluster.position().z() << " ]\n";
+  out << "Position [cm]: [ x = " << cluster.position().x() << ", y = " << cluster.position().y() << ", z = " << cluster.position().z() << " ]\n";
 
   out << "Tower id:\n";
   for (int dphi = 1; dphi >= -1; --dphi) {
