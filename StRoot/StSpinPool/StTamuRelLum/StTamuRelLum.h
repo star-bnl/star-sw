@@ -6,6 +6,9 @@
 
 #ifndef StTamuRelLum_HH
 #define StTamuRelLum_HH
+#ifdef __ROOT__
+#include "Rtypes.h"
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -54,9 +57,7 @@ public:
 	typedef map<TamuRelLum, TamuRelLum, TamuRelLumLessThan> RelLumMap;
 
 	//here's access to the one global instance
-	//NOTE: the input file is assumed to be in the directory where the process is running.
-	//To change that, edit StTamuRelLum.cxx and re-compile
-	static StTamuRelLum* instance();
+	static StTamuRelLum* instance(const string infile = "StRoot/StSpinPool/StTamuRelLum/inputs/run6.txt");
 
 	//Print the contents of the map to screen
 	void print();
@@ -76,15 +77,17 @@ private:
 	~StTamuRelLum();
 
 private:
-	//StTamuRelLum(	const string infile = "/Volumes/star1.lns.mit.edu/kocolosk/analysis/lum.dat.txt" ); //We make the constructor private for singleton access
-	StTamuRelLum(	const string infile = "/Volumes/star1.lns.mit.edu/kocolosk/analysis/finalLum.list" ); //We make the constructor private for singleton access
-
+	StTamuRelLum( const string infile ); //We make the constructor private for singleton access
+	
+	#ifdef __ROOT__
+    ClassDef(StTamuRelLum,1)
+    #endif
 };
 
 
-inline StTamuRelLum* StTamuRelLum::instance()
+inline StTamuRelLum* StTamuRelLum::instance(const string infile)
 {
-	return (sInstance) ? sInstance : new StTamuRelLum();
+	return (sInstance) ? sInstance : new StTamuRelLum(infile);
 }
 
 

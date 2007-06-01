@@ -3,6 +3,10 @@
 #include "StTamuRelLum.h"
 #include <assert.h>
 
+#ifdef __ROOT__
+ClassImp(StTamuRelLum)
+#endif
+
 //have to initialize the static instance to zero
 StTamuRelLum* StTamuRelLum::sInstance = 0;
 
@@ -14,7 +18,6 @@ StTamuRelLum::StTamuRelLum(const string infile)
 	sInstance = this;
 
 	cout <<"\n------------------------------- open file:\t"<<infile<<"\tfor reading"<<endl;
-	cout <<"if you want to change this file, edit line 79 of StTamuRelLum.h"<<endl;
 	
 
 	ifstream myin(infile.c_str());
