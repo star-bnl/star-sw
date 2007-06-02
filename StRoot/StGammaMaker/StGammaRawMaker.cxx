@@ -26,7 +26,7 @@
 #include "StGammaEventMaker.h"
 
 #define __GLOBAL_TRACKS__
-#define __HACK_VERTEX__
+//#define __HACK_VERTEX__
 
 ClassImp(StGammaRawMaker);
 
