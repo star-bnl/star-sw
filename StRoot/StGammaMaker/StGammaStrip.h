@@ -19,6 +19,7 @@ class StGammaStrip : public TObject
   UChar_t stat;  // status bits (non fatal HW problems)
   UChar_t fail;    // fail bits (fatal HW problems)
   TRefArray candidates; // referencing candidates
+  void print();
 
   ClassDef(StGammaStrip,1);
 };
