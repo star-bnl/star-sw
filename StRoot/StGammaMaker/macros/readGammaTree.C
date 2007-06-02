@@ -79,6 +79,10 @@ void readGammaTree( const Char_t *fname = "gamma_tree.root" )
 	  std::cout << " ntr4="<<ntracks4<<" ntr5="<<ntracks5<<" ntr7="<<ntracks7<<std::endl;
 	  std::cout << " ntw4="<<ntowers4<<" ntw5="<<ntowers5<<" ntw7="<<ntowers7<<std::endl;
 
+	  Int_t nu = candidate->numberOfSmdu();
+	  Int_t nv = candidate->numberOfSmdv(); 
+	  std::cout << "nu="<<nu<<" nv="<<nv<<std::endl; 
+
 	  
 
 	}
