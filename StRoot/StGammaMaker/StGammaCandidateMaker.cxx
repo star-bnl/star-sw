@@ -293,12 +293,65 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	   * to choose the center of the range first.
 	   */
 
+	  Float_t umin[kEEmcNumSectors], vmin[kEEmcNumSectors];
+	  Float_t umax[kEEmcNumSectors], vmax[kEEmcNumSectors];
+	  Float_t umid[kEEmcNumSectors], vmid[kEEmcNumSectors];
+	  Int_t ntow[kEEmcNumSectors];
+
+	  // 1) find geometric center of tower cluster in each sector
+	  for ( Int_t ii=0;ii<12;ii++ )
+	    { umin[ii]=0.; vmin[ii]=0.; umax[ii]=0.; vmax[ii]=0.; umid[ii]=-1.; vmid[ii]=-1.; ntow[ii]=0; }
+
+	  EEmcSmdMap *eemap = EEmcSmdMap::instance();
+	  for ( Int_t itow = 0; itow < cluster.numberOfTowers(); itow++ )
+	    {
+	      StEEmcTower tower = cluster.tower(itow);
+	      Int_t U, V;
+	      eemap->getMiddleU( tower.sector(), tower.subsector(), tower.etabin(), U );
+	      eemap->getMiddleV( tower.sector(), tower.subsector(), tower.etabin(), V );
+	      ntow[ tower.sector() ]++;
+	      umid[ tower.sector() ]+=0.5+(Float_t)U;// from middle of strip
+	      vmid[ tower.sector() ]+=0.5+(Float_t)V;
+	    }
+
+
+	  for ( Int_t isec=0;isec<12;isec++ )
+	    {
+	      if ( ntow[isec] ) { 
+		umid[isec]/=ntow[isec]; 
+		vmid[isec]/=ntow[isec]; 
+		umin[isec]=TMath::Max(umid[isec] - mSmdRange * 2.0, 0. );
+		vmin[isec]=TMath::Max(vmid[isec] - mSmdRange * 2.0, 0. );
+		umax[isec]=TMath::Min(umid[isec] + mSmdRange * 2.0, 287. );
+		vmax[isec]=TMath::Min(vmid[isec] + mSmdRange * 2.0, 287. );
+	      }
+	    }
+
+	  // now associate SMD strips with the candidate
+	  for ( Int_t isec=0;isec<12;isec++ )
+	    {
+	      if ( !ntow[isec] ) continue;
+	      for ( Int_t i=(Int_t)umin[isec];i<(Int_t)umax[isec];i++ )
+		{
+		  StGammaStrip *strip = grawmaker->strip(isec,0,i);
+		  if ( strip ) {
+		    can->addSmdu(strip);
+		  }
+		}
+	      for ( Int_t i=(Int_t)vmin[isec];i<(Int_t)vmax[isec];i++ )
+		{
+		  StGammaStrip *strip = grawmaker->strip(isec,1,i);
+		  if ( strip ) {
+		    can->addSmdv(strip);
+		  }
+		}
+	    }
 
 
 
-	}
+	}// loop over clusters
 
-    }
+    }// loop over sectors
 
 
   return kStOK;
@@ -431,3 +484,5 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 
   return kStOK;
 }
+
+

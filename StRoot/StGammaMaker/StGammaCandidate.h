@@ -66,6 +66,10 @@ class StGammaCandidate : public TObject
   void SetSmduClusterId( Int_t id ){ mSmduClusterId=id; }
   void SetSmdvClusterId( Int_t id ){ mSmdvClusterId=id; }
 
+  void SetSmdEtaClusterId( Int_t id ){ mSmduClusterId=id; }
+  void SetSmdPhiClusterId( Int_t id ){ mSmdvClusterId=id; }
+
+
   void SetDetectorId( Int_t id ){ mDetector=id; }
   enum CalorimeterId { kEEmc=0, kBEmc, kUnknown }; 
 
@@ -139,6 +143,8 @@ class StGammaCandidate : public TObject
   void addPostshower( StGammaTower *post ){ mPostshower.Add( post ); }
   void addSmdu( StGammaStrip *strip ){ mSmdu.Add(strip); }
   void addSmdv( StGammaStrip *strip ){ mSmdv.Add(strip); }
+  void addSmdEta( StGammaStrip *strip ){ mSmdu.Add(strip); }
+  void addSmdPhi( StGammaStrip *strip ){ mSmdv.Add(strip); }
 
   Int_t numberOfTracks(){ return mTracks.GetLast()+1; }
   Int_t numberOfTowers(){ return mTowers.GetLast()+1; }
@@ -147,6 +153,9 @@ class StGammaCandidate : public TObject
   Int_t numberOfPostshower(){ return mPostshower.GetLast()+1; }
   Int_t numberOfSmdu(){ return mSmdu.GetLast()+1; }
   Int_t numberOfSmdv(){ return mSmdv.GetLast()+1; }
+  Int_t numberOfSmdEta(){ return mSmdu.GetLast()+1; }
+  Int_t numberOfSmdPhi(){ return mSmdv.GetLast()+1; }
+
 
   StGammaTrack *track( Int_t i ){ return (StGammaTrack*)mTracks.At(i); }
   StGammaTower *tower( Int_t i ){ return (StGammaTower*)mTowers.At(i); }
@@ -155,6 +164,8 @@ class StGammaCandidate : public TObject
   StGammaTower *postshower( Int_t i ){ return (StGammaTower*)mPostshower.At(i); }
   StGammaStrip *smdu( Int_t i ){ return (StGammaStrip *)mSmdu.At(i); }
   StGammaStrip *smdv( Int_t i ){ return (StGammaStrip *)mSmdv.At(i); }
+  StGammaStrip *smdEta( Int_t i ){ return (StGammaStrip *)mSmdu.At(i); }
+  StGammaStrip *smdPhi( Int_t i ){ return (StGammaStrip *)mSmdv.At(i); }
   
   void addMyTrack ( StGammaTrack *track ){ mMyTracks.Add( track ); }
   void addMyTower ( StGammaTower *tower ){ mMyTowers.Add( tower ); }

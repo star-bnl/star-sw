@@ -26,6 +26,7 @@
 #include "StGammaEventMaker.h"
 
 #define __GLOBAL_TRACKS__
+#define __HACK_VERTEX__
 
 ClassImp(StGammaRawMaker);
 
@@ -66,11 +67,13 @@ Int_t StGammaRawMaker::Make()
       return kStWarn;
     }
 
+#ifndef __HACK_VERTEX__
   StMuPrimaryVertex *pv=mumk->muDst()->primaryVertex();
   if ( !pv ) 
     {
       return kStOK;
     }
+#endif
 
   GetTracks();
 
@@ -407,12 +410,17 @@ void StGammaRawMaker::GetEndcap()
       return;
     }
 
+#ifndef __HACK_VERTEX__
   StMuPrimaryVertex *pv=mumk->muDst()->primaryVertex();
   if ( !pv ) 
     {
       return; // we're going to need tracking, therefore vertex
     }
   Float_t zvertex = pv->position().z();
+#endif
+#ifdef __HACK_VERTEX__
+  Float_t zvertex = 0.0;
+#endif
 
   StEEmcA2EMaker *adc2e=(StEEmcA2EMaker*)GetMaker("mEEanalysis");
   if ( !adc2e )
@@ -543,6 +551,8 @@ void StGammaRawMaker::GetEndcap()
 	    gstrip->stat   = strip.stat();
 	    gstrip->fail   = strip.fail();
 	    gstrip->energy = strip.energy(); /// <<<< How do we make this consistent with the barrel?  this is energy deposit in MeV, barrel is ~EM-energy of photon...
+
+	    mEEstrips[ gstrip->sector ][ gstrip->plane ][ gstrip->index ]=gstrip;
 
 	    if ( Accept(*gstrip) )
 	      {
