@@ -462,7 +462,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
       }
     }
 
-    // Add BSMDE and BSMDP strips that fall within mRadius of candidate
+    // Add BSMDE and BSMDP strips that fall within mSmdRange of candidate
     for (int id = 1; id <= 18000; ++id) {
       int sector = 0;		// Not used
       if (StGammaStrip* strip = grawmaker->strip(sector, kBEmcSmdEta, id)) {
@@ -470,14 +470,14 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	StEmcGeom::instance("bsmde")->getXYZ(id, x, y, z);
 	TVector3 d(x, y, z);
 	d -= cluster->position();
-	if (d.Mag() <= mSmdRange) candidate->addSmdu(strip); // BSMDE
+	if (d.Mag() <= mSmdRange) candidate->addSmdEta(strip); // BSMDE
       }
       if (StGammaStrip* strip = grawmaker->strip(sector, kBEmcSmdPhi, id)) {
 	float x, y, z;
 	StEmcGeom::instance("bsmdp")->getXYZ(id, x, y, z);
 	TVector3 d(x, y, z);
 	d -= cluster->position();
-	if (d.Mag() <= mSmdRange) candidate->addSmdv(strip); // BSMDP
+	if (d.Mag() <= mSmdRange) candidate->addSmdPhi(strip); // BSMDP
       }
     }
   }
