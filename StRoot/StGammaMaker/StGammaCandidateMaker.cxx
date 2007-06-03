@@ -397,6 +397,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 
     // Create gamma candidate
     StGammaCandidate* candidate = gevent->newCandidate();
+    candidate->SetTowerClusterId(i);
     candidate->SetId(nextId());
     candidate->SetDetectorId(StGammaCandidate::kBEmc);
     candidate->SetEnergy(cluster->energy());
@@ -463,6 +464,9 @@ Int_t StGammaCandidateMaker::MakeBarrel()
     }
 
     // Add BSMDE and BSMDP strips that fall within mSmdRange of candidate
+    float smdEtaEnergy = 0;
+    float smdPhiEnergy = 0;
+
     for (int id = 1; id <= 18000; ++id) {
       int sector = 0;		// Not used
       if (StGammaStrip* strip = grawmaker->strip(sector, kBEmcSmdEta, id)) {
@@ -470,16 +474,25 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	StEmcGeom::instance("bsmde")->getXYZ(id, x, y, z);
 	TVector3 d(x, y, z);
 	d -= cluster->position();
-	if (d.Mag() <= mSmdRange) candidate->addSmdEta(strip); // BSMDE
+	if (d.Mag() <= mSmdRange) {
+	  candidate->addSmdEta(strip);
+	  smdEtaEnergy += strip->energy;
+	}
       }
       if (StGammaStrip* strip = grawmaker->strip(sector, kBEmcSmdPhi, id)) {
 	float x, y, z;
 	StEmcGeom::instance("bsmdp")->getXYZ(id, x, y, z);
 	TVector3 d(x, y, z);
 	d -= cluster->position();
-	if (d.Mag() <= mSmdRange) candidate->addSmdPhi(strip); // BSMDP
+	if (d.Mag() <= mSmdRange) {
+	  candidate->addSmdPhi(strip);
+	  smdPhiEnergy += strip->energy;
+	}
       }
     }
+
+    candidate->SetSmdEtaEnergy(smdEtaEnergy);
+    candidate->SetSmdPhiEnergy(smdPhiEnergy);
   }
 
   return kStOK;
