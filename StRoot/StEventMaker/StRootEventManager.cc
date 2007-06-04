@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.13 2004/08/28 18:52:03 fisyak Exp $
+ * $Id: StRootEventManager.cc,v 2.14 2007/06/04 21:53:46 fine Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.14  2007/06/04 21:53:46  fine
+ * replace cerr with LOG_INFO
+ *
  * Revision 2.13  2004/08/28 18:52:03  fisyak
  * Replace StEvent Hit containers if there are entries in the corrensponding tables
  *
@@ -106,8 +109,9 @@ _NAME2_(TABLE_TYPE,_st)* StRootEventManager::_NAME2_(returnTable_,TABLE_TYPE)(lo
     nentries = tableWrap->GetNRows();\
   } \
   else {\
-  if ((n13--)>0) {    cerr << "StRootEventManager: Table type  " << nt << \
-  " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;}\
+  if ((n13--)>0) {\
+   LOG_INFO << "StRootEventManager: Table type  " << nt << \
+  " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;}\
     nentries = 0;\
   }\
   return table;\
@@ -154,8 +158,8 @@ StRootEventManager::returnTable_dst_globtrk(long& nentries) const
 	nentries = tableWrap->GetNRows();
     }
     else {
-	cerr << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
+	   LOG_INFO <<  "StRootEventManager: Table type  " << nt << 
+	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
     }
     return table;
@@ -177,8 +181,8 @@ StRootEventManager::returnTable_dst_primtrk(long& nentries) const
 	nentries = tableWrap->GetNRows();
     }
     else {
-	cerr << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
+	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
+	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
     }
     return table;
@@ -199,8 +203,8 @@ StRootEventManager::returnTable_CpyTrk(long& nentries) const
 	nentries = tableWrap->GetNRows();
     }
     else {
-	cerr << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
+	   LOG_INFO  << "StRootEventManager: Table type  " << nt << 
+	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
     }
     return table;
@@ -222,8 +226,8 @@ StRootEventManager::returnTable_EstGlobal(long& nentries) const
 	nentries = tableWrap->GetNRows();
     }
     else {
-	cerr << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
+	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
+	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
     }
     return table;
@@ -245,8 +249,8 @@ StRootEventManager::returnTable_EstPrimary(long& nentries) const
 	nentries = tableWrap->GetNRows();
     }
     else {
-	cerr << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
+	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
+	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
     }
     return table;
