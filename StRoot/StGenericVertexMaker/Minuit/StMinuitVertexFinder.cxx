@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.13 2007/05/17 01:50:34 fisyak Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.14 2007/06/04 22:10:23 fine Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.14  2007/06/04 22:10:23  fine
+ * replace cout with LOG_INFO
+ *
  * Revision 1.13  2007/05/17 01:50:34  fisyak
  * Use PrimaryVertexCuts table
  *
@@ -244,7 +247,7 @@ int StMinuitVertexFinder::findSeeds() {
 	  }
 	  if (nTrkZ > mMinTrack) {
 	    if (mDebugLevel) 
-	      cout << "Seed " << mNSeed << ", z " << seed_z << " nTrk " << nTrkZ << " meanZ/nTrkZ " << meanZ/nTrkZ << endl;
+	      LOG_INFO << "Seed " << mNSeed << ", z " << seed_z << " nTrk " << nTrkZ << " meanZ/nTrkZ " << meanZ/nTrkZ << endm;
 	    seed_z = meanZ/nTrkZ;
 	    mSeedZ[mNSeed] = seed_z;
 	    mNSeed ++;
@@ -257,7 +260,7 @@ int StMinuitVertexFinder::findSeeds() {
       slope = -1;
     }
     if (mDebugLevel > 1) 
-      cout << "iBin " << iBin << " nTrkBin " << nTrkBin << " nOldBin " << nOldBin << ", slope " << slope << " mNSeed " << mNSeed << endl; 
+      LOG_INFO << "iBin " << iBin << " nTrkBin " << nTrkBin << " nOldBin " << nOldBin << ", slope " << slope << " mNSeed " << mNSeed << endm; 
     nOldBin = nTrkBin;
   }
 
@@ -293,7 +296,7 @@ void StMinuitVertexFinder::fillBemcHits(StEvent *event){
     }
   }
   if (mDebugLevel) 
-    cout << "Found " << n_emc_hit << " emc hits" << endl;
+    LOG_INFO << "Found " << n_emc_hit << " emc hits" << endm;
 }
 
 int  
@@ -301,11 +304,11 @@ StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
   static const double rBemc = 242; // middle of tower
   static StEmcGeom *bemcGeom = StEmcGeom::getEmcGeom("bemc");
   //static double rBemc = bemcGeom->Radius(); // front face??
-  //cout << "rBemc: " << rBemc << endl;
+  //LOG_INFO << "rBemc: " << rBemc << endm;
 
   if (track->outerGeometry()==0) {
     if (mDebugLevel) // Happens only rarely
-      cout << "No outer track geom" << endl;
+      LOG_INFO << "No outer track geom" << endm;
     return 0;
   }
 
@@ -313,7 +316,7 @@ StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
 
   if (!helix.valid()) {
     if (mDebugLevel) // Happens only rarely
-      cout << "Invalid helix" << endl;
+      LOG_INFO << "Invalid helix" << endm;
     return 0;
   }
      
@@ -403,7 +406,7 @@ void StMinuitVertexFinder::calculateRanks() {
     float n_cross_expected = fabs(primV->position().z())*0.0020*primV->numTracksUsedInFinder(); // old coeff 0.0016 with dca 3 and 10 points on track
 
     if (mDebugLevel)
-      cout << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endl;
+      LOG_INFO << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endm;
     float rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
     if (rank_avg_dip < -5)
       rank_avg_dip = -5;
@@ -434,7 +437,7 @@ void StMinuitVertexFinder::calculateRanks() {
       rank_cross = 1;
     
     if (mDebugLevel)
-      cout << "rankings: " << rank_avg_dip << " " << rank_bemc << " " << rank_cross << endl;
+      LOG_INFO << "rankings: " << rank_avg_dip << " " << rank_bemc << " " << rank_cross << endm;
     primV->setRanking(rank_cross+rank_bemc+rank_avg_dip);
     if (primV->ranking() > mBestRank) {
       mBestRank = primV->ranking();
@@ -580,7 +583,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       }
     }
     if (mDebugLevel)
-      cout << "Found " << n_ctb_match_tot << " ctb matches, " << n_bemc_match_tot << " bemc matches, " << n_cross_tot << " tracks crossing central membrane" << endl; 
+      LOG_INFO << "Found " << n_ctb_match_tot << " ctb matches, " << n_bemc_match_tot << " bemc matches, " << n_cross_tot << " tracks crossing central membrane" << endm; 
     //
     //  In case there are no tracks left we better quit
     //
@@ -678,10 +681,10 @@ StMinuitVertexFinder::fit(StEvent* event)
 	}
       	
 	if (mDebugLevel) 
-	  cout << n_trk_vtx << " tracks within dcaZ cut (iter " << iter <<" )" << endl;
+	  LOG_INFO << n_trk_vtx << " tracks within dcaZ cut (iter " << iter <<" )" << endm;
 	if (n_trk_vtx < mMinTrack) {
 	  if (mDebugLevel) 
-	    cout << "Less than mMinTrack (=" << mMinTrack << ") tracks, skipping vtx" << endl;
+	    LOG_INFO << "Less than mMinTrack (=" << mMinTrack << ") tracks, skipping vtx" << endm;
 	  continue;
 	}
 	mMinuit->mnexcm("MINImize", 0, 0, mStatusMin);
@@ -702,7 +705,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mMinuit->mnstat(chisquare, fedm, errdef, npari, nparx, mStatusMin);
 
 	if (mStatusMin != 3) {
-	  cout << "Warning: Minuit Status: " << mStatusMin << ", func val " << chisquare<< endl;
+	  LOG_INFO << "Warning: Minuit Status: " << mStatusMin << ", func val " << chisquare<< endm;
 	  done = 0;  // refit
 	}
 	mMinuit->mnhess();
@@ -740,11 +743,11 @@ StMinuitVertexFinder::fit(StEvent* event)
       }
 
       if (!mExternalSeedPresent && fabs(seed_z-mSeedZ[iSeed]) > mDcaZMax)
-	LOG_WARN << "Vertex walks during fits: seed was " << mSeedZ[iSeed] << ", vertex at " << seed_z << endl;
+	LOG_WARN << "Vertex walks during fits: seed was " << mSeedZ[iSeed] << ", vertex at " << seed_z << endm;
 
       if (fabs(seed_z - old_vtx_z) < mDcaZMax) {
 	if (mDebugLevel) 
-	  cout << "Vertices too close (<mDcaZMax). Skipping" << endl;
+	  LOG_INFO << "Vertices too close (<mDcaZMax). Skipping" << endm;
 	continue;
       }
 
@@ -834,8 +837,8 @@ StMinuitVertexFinder::fit(StEvent* event)
       mean_dip /= n_trk_vtx;
 
       if (mDebugLevel) {
-	cout << "check n_trk_vtx " << n_trk_vtx << ", found " << n_ctb_match << " ctb matches, " << n_bemc_match << " bemc matches, " << n_cross << " tracks crossing central membrane" << endl; 
-	cout << "mean dip " << mean_dip << endl;
+	LOG_INFO << "check n_trk_vtx " << n_trk_vtx << ", found " << n_ctb_match << " ctb matches, " << n_bemc_match << " bemc matches, " << n_cross << " tracks crossing central membrane" << endm; 
+	LOG_INFO << "mean dip " << mean_dip << endm;
       }
       primV.setNumMatchesWithCTB(n_ctb_match);      
       primV.setNumMatchesWithBEMC(n_bemc_match);
