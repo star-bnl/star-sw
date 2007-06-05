@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.6 2007/05/03 19:40:19 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.7 2007/06/05 19:32:19 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.7  2007/06/05 19:32:19  kocolosk
+* meaning of primary first point changed btw runs -- best to get vertex from event
+*
 * Revision 1.6  2007/05/03 19:40:19  kocolosk
 * Rewrite of StChargedPionTrack to remove redundant / useless info.
 * Single particles takes up 75% less space now.
@@ -173,6 +176,7 @@ Int_t StChargedPionMaker::Make()
             
             StChargedPionTrack cpTrack(this->chargedPionTrack(track));
             cpTrack.setB(event->eventSummary().magneticField()*kilogauss);
+            cpTrack.setVertex(muDst.primaryVertex().position());
             new ( (*mPrimaries)[mPrimaries->GetLast()+1] ) StChargedPionTrack(cpTrack);
             mNTracks++;
             
@@ -213,7 +217,11 @@ StChargedPionTrack & StChargedPionMaker::chargedPionTrack(StMuTrack *muTrack)
     cpTrack->setFlag(muTrack->flag());
     
     cpTrack->setVertexIndex(muTrack->vertexIndex());
-    cpTrack->setVertex(muTrack->firstPoint());
+    
+    //be VERY careful here -- better to get current primary vertex from MuDst
+    //Run 5 -- primary first point == global first point
+    //Run 6 -- primary first point == vertex
+    //cpTrack->setVertex(muTrack->firstPoint());
     
     cpTrack->setNHits(muTrack->nHits());
     cpTrack->setNHitsPoss(muTrack->nHitsPoss());
