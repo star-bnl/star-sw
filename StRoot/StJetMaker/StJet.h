@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.2 2005/01/27 18:39:03 mmiller Exp $
+// $Id: StJet.h,v 1.3 2007/06/05 21:56:11 kocolosk Exp $
 // $Log: StJet.h,v $
+// Revision 1.3  2007/06/05 21:56:11  kocolosk
+// added data members for zVertex and geometric trigger associations, plus methods for detEta (barrel only)
+//
 // Revision 1.2  2005/01/27 18:39:03  mmiller
 // Added some extra accessors to StJet object to keep track of Et from TPC, BTOW, ETOW, etc.
 //
@@ -58,6 +61,7 @@
 #include "TObject.h"
 #include "TLorentzVector.h"
 #include <cmath>
+#include <vector>
 
 /*!
   \class StJet
@@ -73,6 +77,7 @@ public:
     {
 	nTracks = nBtowers = nEtowers = 0;
 	tpcEtSum = btowEtSum = etowEtSum = 0.;
+    zVertex = -999;
     }
 
     StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
@@ -80,6 +85,7 @@ public:
     {
 	nTracks = nBtowers = nEtowers = 0;
 	tpcEtSum = btowEtSum = etowEtSum = 0.;
+    zVertex = -999;
     }
     
     virtual ~StJet();
@@ -120,10 +126,25 @@ public:
     ///Phi (stored for convenience when drawing TTree)
     float jetPhi;
     
+    ///position of vertex used to reconstruct jet
+    float zVertex;
     
     Float_t      et() const {return E()*sqrt(1.0-tanh(Eta())*tanh(Eta()));}
     Float_t      ez() const {return E()*fabs(tanh(Eta()));}
-    ClassDef(StJet,4)
+    
+    //default radius is in between BSMD radii
+    Float_t      detEta(float vz, float r=231.72) const;
+    Float_t      detEta() const;
+    
+    //methods to record jet pointing at trigger tower/patch
+    void addGeomTrigger(int trigId);
+    bool geomTrigger(int trigId) const;
+    std::vector<int>& geomTriggers() { return mGeomTriggers; }
+    
+private:
+    std::vector<int> mGeomTriggers;
+    
+    ClassDef(StJet,7)
 };
 
 #endif
