@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.cxx,v 1.1 2004/07/08 15:41:03 mmiller Exp $
+// $Id: StJet.cxx,v 1.2 2007/06/05 21:56:13 kocolosk Exp $
 // $Log: StJet.cxx,v $
+// Revision 1.2  2007/06/05 21:56:13  kocolosk
+// added data members for zVertex and geometric trigger associations, plus methods for detEta (barrel only)
+//
 // Revision 1.1  2004/07/08 15:41:03  mmiller
 // First release of StJetMaker.  Mike's commit of full clean of StJetFinder, StJetMaker, and StSpinMaker.  builds and runs in dev.
 //
@@ -46,4 +49,37 @@ StJet::~StJet()
 {
 }
 
+Float_t StJet::detEta() const {
+    if (zVertex > -998) return detEta(zVertex);
+    return -999;
+}
 
+Float_t StJet::detEta(float vz, float r) const {
+    float hold(0.),denom(0.);
+    if (Theta()==TMath::PiOver2()) { // if Jet Theta = 90 then tan is undefined
+        if (vz==0) {hold = TMath::PiOver2();}
+        else {hold = atan2(r,vz);}
+    }
+    else
+    {
+        denom = (r/tan(Theta()))+vz;
+        if (denom==0.) {hold = TMath::PiOver2();}
+        if (denom!=0.) {hold = atan2(r,denom);}
+    }
+    return -TMath::Log(TMath::Tan(hold/2));
+}
+
+void StJet::addGeomTrigger(int trigId) {
+    //check if the trigId is already in the vector -- not really necessary
+    for(int i=0; i<mGeomTriggers.size(); i++) {
+        if (mGeomTriggers[i] == trigId) return;
+    }
+    mGeomTriggers.push_back(trigId);
+}
+
+bool StJet::geomTrigger(int trigId) const {
+    for(int i=0; i<mGeomTriggers.size(); i++) {
+        if (mGeomTriggers[i] == trigId) return true;
+    }
+    return false;
+}
