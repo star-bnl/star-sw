@@ -295,13 +295,45 @@ StJetSkimEvent::StJetSkimEvent()
 
 StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
 {
-    (*mTriggers) = *(other.triggers());
-    (*mVertices) = *(other.vertices());
-    cout << "are we calling the copy constructor?" << endl;
+    this->mFill         = other.fill();
+    this->mRunId        = other.runId();
+    this->mEventId      = other.eventId();
+    this->mMudstFileName= other.mudstFileName();
+    
+    mTriggers = new TClonesArray("StJetSkimTrig",100);
+    for(int i=0; i<other.triggers()->GetEntries(); i++) {
+        this->setTrig(*(StJetSkimTrig*)other.triggers()->At(i));
+    }
+    
+    mVertices = new TClonesArray("StJetSkimTrig",100);
+    for(int i=0; i<other.vertices()->GetEntries(); i++) {
+        this->setVert(*(StJetSkimVert*)other.vertices()->At(i));
+    }
+    
+    mBestVert = other.bestVert();
+    if(mBestVert) this->setBestVert(*mBestVert);
+    mBestVert = NULL;
+    
+    this->mbx7          = other.bx7();
+    this->mbx48         = other.bx48();
+    this->mSpinBits     = other.spinBits();
+    this->mEbbc         = other.eBbc();
+    this->mWbbc         = other.wBbc();
+    this->mBbcTimeBin   = other.bbcTimeBin();
+    
+    this->mIsValid      = other.isValid();
+    this->mIsPolLong    = other.isPolLong();
+    this->mIsPolTrans   = other.isPolTrans();
+    this->mIsMaskedUsingBx48 = other.isMaskedUsingBx48();
+    this->mOffsetBx48minusBX7 = other.offsetBx48minusBX7();
+    this->mSpin4usingBx48 = other.spin4usingBx48();
+    this->mL2Result     = other.l2Result();
 }
 
 StJetSkimEvent::~StJetSkimEvent()
 {
+    if(mTriggers) mTriggers->Delete();
+    if(mVertices) mVertices->Delete();
 }
 
 StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs) 
