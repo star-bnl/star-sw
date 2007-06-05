@@ -280,7 +280,7 @@ StJetSkimMcEvent::StJetSkimMcEvent(const StJetSkimMcEvent &t) { /* no-op */ }
 StJetSkimMcEvent& StJetSkimMcEvent::operator=(const StJetSkimMcEvent &rhs) { return *this; }
 
 StJetSkimEvent::StJetSkimEvent() 
-: TObject(), mTriggers(new TClonesArray("StJetSkimTrig",100)), mVertices(new TClonesArray("StJetSkimVert",100)), mMcEvent(NULL), mBestVert(NULL)
+: TObject(), mTriggers(new TClonesArray("StJetSkimTrig",100)), mMcEvent(NULL), mVertices(new TClonesArray("StJetSkimVert",100)), mBestVert(NULL)
 {
     mMudstFileName = "Undefined";
     mBestVertRef = NULL;
