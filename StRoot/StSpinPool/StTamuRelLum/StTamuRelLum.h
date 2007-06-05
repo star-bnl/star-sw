@@ -74,7 +74,7 @@ private:
 	//This is the static instance
 	static StTamuRelLum* sInstance;
 
-	~StTamuRelLum();
+	virtual ~StTamuRelLum();
 
 private:
 	StTamuRelLum( const string infile ); //We make the constructor private for singleton access
