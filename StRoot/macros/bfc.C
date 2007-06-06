@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.167 2007/03/21 17:56:51 fisyak Exp $
+// $Id: bfc.C,v 1.168 2007/06/06 04:05:55 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -166,9 +166,7 @@ void bfc(Int_t First, Int_t Last,
   StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
   if (hd) hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
     // skip if any
-  chain->Skip(First-1);
-  StMaker *treeMk = chain->GetMaker("outputStream");
-  chain->EventLoop(First,Last,treeMk);
+  chain->EventLoop(First,Last,0);
   gMessMgr->QAInfo() << "Run completed " << endm;
   gSystem->Exec("date");
   {
