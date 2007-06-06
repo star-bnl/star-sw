@@ -163,13 +163,14 @@ void StSpinTreeReader::connect() {
                 s += " && ( ";
                 if(requireDidFire && requireShouldFire) s += "mTriggers.mDidFire==1 && mTriggers.mShouldFire==1 )";
                 else if(requireDidFire) s += "mTriggers.mDidFire==1 )";
-                else s+= "mTriggers.mShouldFire==1";
+                else s+= "mTriggers.mShouldFire==1 )";
             }
             if(s.Length()) {
                 std::cout << "Processing the chain using a TEventList that looks like \n" << s << std::endl;
                 mChain->Draw(">>elist",s.Data(),"entrylist");
                 mEventList = (TEventList*)gDirectory->Get("elist");
                 mChain->SetEventList(mEventList);
+                std::cout << "Eventlist stored" << std::endl;
             }
         }
         
