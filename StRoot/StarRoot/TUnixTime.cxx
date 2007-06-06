@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TUnixTime.cxx,v 1.2 2007/01/25 19:05:54 perev Exp $
+ * $Id: TUnixTime.cxx,v 1.3 2007/06/06 04:01:12 perev Exp $
  *
  ***************************************************************************
  *
@@ -74,6 +74,7 @@ static void DateTime2tm(struct tm *gt,Int_t idate, Int_t itime)
 {
   time_t ul = time(0);
   *gt = *localtime(&ul);
+  gt->tm_isdst =-1;
   if (idate < 19000000) idate +=19000000;
   if (idate < 19500000) idate += 1000000;
   gt->tm_year= ((idate/10000)-1900);        
