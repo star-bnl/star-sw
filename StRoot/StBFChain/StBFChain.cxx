@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.513 2007/04/26 03:55:50 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.514 2007/06/06 03:59:00 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1565,4 +1565,11 @@ Long_t  StBFChain::ProcessLine(const char *line) {
     gSystem->Exit(1);
   }
   return res;
+}
+//________________________________________________________________________________
+Int_t StBFChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk) 
+{
+  if (jBeg>1) Skip(jBeg-1);
+  if (!outMk) outMk = GetMaker("outputStream");
+  return StChain::EventLoop(jBeg,jEnd,outMk);
 }
