@@ -158,7 +158,7 @@ public:
   char  &getNullCount()        		{return nullCount;}
   char  &getContigHitCount ()  		{return contiguousHitCount ;}
   char  &getContigNullCount()  		{return contiguousNullCount;}
-  float  getTime();
+  double getTime();
 
   void   setHitCand(int nhits)		{mHitCand = nhits;}
   void   setIHitCand(int ihit)		{mIHitCand = ihit;}
