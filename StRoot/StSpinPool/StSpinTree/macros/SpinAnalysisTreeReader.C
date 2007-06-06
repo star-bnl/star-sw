@@ -5,19 +5,19 @@ void SpinAnalysisTreeReader(const long nevents = 20) {
     StSpinTreeReader *reader = new StSpinTreeReader();
     
     //add some files to analyze, one at a time or in a text file
-    reader->selectDataset("StRoot/StSpinPool/StSpinTree/datasets/run6_rcf.dataset");
+    reader->selectDataset("$STAR/StRoot/StSpinPool/StSpinTree/datasets/run6_rcf.dataset");
     //reader->selectFile("./spinAnalyses_6119039.tree.root");
     
     //configure the branches you're interested in (default = true)
     reader->connectJets             = true;
-    reader->connectNeutralJets      = false;
+    reader->connectNeutralJets      = false; //only for Run6
     reader->connectChargedPions     = true;
     reader->connectBemcPions        = true;
     reader->connectEemcPions        = false; //not added yet
     reader->connectBemcElectrons    = false; //not added yet
     
     //optionally filter events by run and trigger
-    //reader->selectRunList("StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
+    //reader->selectRunList("$STAR/StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
     reader->selectRun(7143025);
     
     //select events that passed hardware OR software trigger for any trigger in list
@@ -108,10 +108,7 @@ void SpinAnalysisTreeReader(const long nevents = 20) {
 
 void LoadSpinTreeLibs() {
     gSystem->Load("libPhysics");
-    gSystem->Load("libTable");
-    gSystem->Load("StarRoot");
     gSystem->Load("St_base");
-    gSystem->Load("StarClassLibrary");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StEvent");

@@ -17,7 +17,7 @@ void SpinAnalysisTreeReaderPDSF(const long nevents = 20) {
     reader->connectBemcElectrons    = false; //not added yet
     
     //optionally filter events by run and trigger
-    //reader->selectRunList("StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
+    //reader->selectRunList("$STAR/StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
     reader->selectRun(7143025);
     
     //select events that passed hardware OR software trigger for any trigger in list
