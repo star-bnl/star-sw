@@ -18,7 +18,7 @@ void SpinAnalysisTreeReaderPDSF(const long nevents = 20) {
     
     //optionally filter events by run and trigger
     //reader->selectRunList("StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
-    reader->selectRun(7132001);
+    reader->selectRun(7143025);
     
     //select events that passed hardware OR software trigger for any trigger in list
     reader->selectTrigger(137221);
@@ -42,7 +42,7 @@ void SpinAnalysisTreeReaderPDSF(const long nevents = 20) {
         int runId   = ev->runId();
         int eventId = ev->eventId();
         
-        printf("----------------Reading Event %d of %d----------------\n",i,entries);
+        printf("----------------Reading Event %d of %d----------------\n",i+1,entries);
         printf("basics:  Run = %d, Event = %d\n",runId,eventId);
 
         //triggers -- note prescale/threshold access
@@ -108,10 +108,7 @@ void SpinAnalysisTreeReaderPDSF(const long nevents = 20) {
 
 void LoadSpinTreeLibs() {
     gSystem->Load("libPhysics");
-    gSystem->Load("libTable");
-    gSystem->Load("StarRoot");
     gSystem->Load("St_base");
-    gSystem->Load("StarClassLibrary");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StEvent");
