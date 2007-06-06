@@ -43,7 +43,7 @@ MarilynMonroe2000 *gs2000;
 
 ClassImp(St_trg_Maker)
 #define SANITYCheck(name,value) \
- if (name != value) {cout << "Value of "#name" = |" << name << "| instead of expected "#value << endl; return  kStErr;}
+ if (name != value) {LOG_INFO << "Value of "#name" = |" << name << "| instead of expected "#value << endm; return  kStErr;}
 
 
 //_____________________________________________________________________________
@@ -198,13 +198,13 @@ Int_t St_trg_Maker::Make(){
     //
     int yy=YearOfData(DAQdset);
     if (yy >= 2007 ){
-      (void) printf("St_trg_Maker:: Make() : trg is obsolete for years %d >= 2007\n",yy);
+      LOG_INFO << "trg is obsolete for years " << yy << ">= 2007" << endm;
       return kStOk;
     }
 
     switch(yy) {
       case 2000:
-        (void) printf("St_trg_Maker:: Make()  : analyzing year 2000 trigger data.\n");
+        LOG_INFO << "analyzing year 2000 trigger data." << endm;
         if(!initializationDone) { 
 	  InitCtbArrays(); initializationDone=7; 
 	}
@@ -212,7 +212,7 @@ Int_t St_trg_Maker::Make(){
         break;
 
       case 2001:
-        (void) printf("St_trg_Maker:: Make()  : analyzing year 2001 trigger data.\n");
+        LOG_INFO << "analyzing year 2001 trigger data" << endm;
         if(!initializationDone) { 
 	  InitCtbArrays2001(); 
 	  initializationDone=7; 
@@ -221,7 +221,7 @@ Int_t St_trg_Maker::Make(){
         break;
 
       case 2003:
-        (void) printf("St_trg_Maker:: Make()  : analyzing year 2003 trigger data.\n");
+        LOG_INFO << "analyzing year 2003 trigger data"<< endm;
         if(!initializationDone) { 
 	  InitCtbArrays2001(); /* use 2001 for 2003 */ 
 	  initializationDone=7; 
@@ -232,7 +232,7 @@ Int_t St_trg_Maker::Make(){
 
       case 2004:
       case 2005:
-        (void) printf("St_trg_Maker:: Make()  : analyzing year 2004/2005 trigger data (using 2003)\n");
+        LOG_INFO <<  "analyzing year 2004/2005 trigger data (using 2003)" << endm;
         if(!initializationDone) { 
 	  InitCtbArrays2001();                        /* use 2001 for 2004-2005  */ 
 	  initializationDone=7; 
@@ -259,19 +259,19 @@ Int_t St_trg_Maker::Make(){
 
 void St_trg_Maker::TakeCareOfL1andL2Sim(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
   // Like the rest of the sim stuff, this needs to be filled in.
-  printf ( "we are in TakeCareOfL1andL2Sim\n" ) ;
+  LOG_INFO << "we are in TakeCareOfL1andL2Sim" << endm ;
 }
 
 
 int St_trg_Maker::HandleCtu(St_ctu_raw *ctu_raw,St_dst_TrgDet *dst1) {
   if ( !dst1 ) {
-     printf ( "St_trg_Maker::HandleCtu: dst1 not found \n" ) ;
+     LOG_INFO << "dst1 not found" << endm ;
      return 0 ;
   }  
   dst_TrgDet_st *tt = 0 ;
   tt = dst1->GetTable();
   if ( !tt ) {
-     printf ( "St_trg_Maker::HandleCtu: dst1 table not found \n" ) ;
+     LOG_INFO << "dst1 table not found" << endm ;
      return 0 ;
   }
   //
@@ -281,13 +281,13 @@ int St_trg_Maker::HandleCtu(St_ctu_raw *ctu_raw,St_dst_TrgDet *dst1) {
   tt->npost= 0;
 
   if ( !ctu_raw ) {
-     printf ( "St_trg_Maker::HandleCtu: ctu_raw table not found \n" ) ;
+     LOG_INFO << "ctu_raw table not found" << endm ;
      return 0 ;
   }
   ctu_raw_st* ctbRaw = 0 ;
   ctbRaw = ctu_raw->GetTable();
   if ( !ctbRaw ) {
-     printf ( "St_trg_Maker::HandleCtu: ctbRaw table not found \n" ) ;
+     LOG_INFO <<  "ctbRaw table not found" << endm ;
      return 0 ;
   }
   
@@ -352,7 +352,7 @@ void St_trg_Maker::Vladimir2Herbert(int input,int *sector,int *subsector) {
 }
 int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
   int prePost,sector,subsector,index,irow;
-  if(!mwc_raw) { (void) printf("Did not find the mwc_raw table mwc.\n"); return 7; }
+  if(!mwc_raw) { LOG_INFO << "Did not find the mwc_raw table mwc."<< endm; return 7; }
   mwc_raw_st    *vladimir = mwc_raw->GetTable(); assert(vladimir);
   dst_TrgDet_st *herbert  = dst1->GetTable();    assert(herbert);
   herbert->npre=5; herbert->npost=5;
@@ -1069,8 +1069,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.55 2007/04/28 17:57:26 perev Exp $
+// $Id: St_trg_Maker.cxx,v 1.56 2007/06/06 12:26:53 fine Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.56  2007/06/06 12:26:53  fine
+// Switch to STAR Logger
+//
 // Revision 1.55  2007/04/28 17:57:26  perev
 // Redundant StChain.h removed
 //
