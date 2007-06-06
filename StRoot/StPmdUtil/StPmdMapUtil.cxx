@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdMapUtil.cxx,v 1.7 2007/05/26 00:40:07 perev Exp $
+ * $Id: StPmdMapUtil.cxx,v 1.8 2007/06/06 04:00:00 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdMapUtil.cxx,v $
+ * Revision 1.8  2007/06/06 04:00:00  perev
+ * CleanUp
+ *
  * Revision 1.7  2007/05/26 00:40:07  perev
  * Initialization added
  *
@@ -75,15 +78,21 @@ void StPmdMapUtil::StoreMapInfo(Int_t runno1)
       Int_t channel=CHANNEL;
       Int_t chtemp;
 
-	if(year==4)mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp);
-	if(year>4){
-	   mPmdGeom->readBoardDetail(runno1);
-	   mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp,year);
- //  if(sm>12)cout<<"chain,ch,sm,col,row,chtemp,year "<<Chain_No<<" "<<channel<<" "<<sm-1<<" "<<col-1<<" "<<row-1<<" "<<chtemp<<" "<<year<<endl;
-	   m_ChannelInBoard[sm-1][row-1][col-1]=channel;
-	   m_TempChannelInBoard[sm-1][row-1][col-1]=chtemp;
-	   m_Chain[sm-1][row-1][col-1]=Chain_No;
-        }
+      int fail = 0;
+      if(year==4) {
+	 fail = mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp);
+      }  else if(year>4){
+	 mPmdGeom->readBoardDetail(runno1);
+	 fail = mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp,year);
+      }
+      if (sm <=0) fail +=10;
+      if (col<=0) fail +=20;
+      if (row<=0) fail +=40;
+      if (fail) continue;
+//  if(sm>12)cout<<"chain,ch,sm,col,row,chtemp,year "<<Chain_No<<" "<<channel<<" "<<sm-1<<" "<<col-1<<" "<<row-1<<" "<<chtemp<<" "<<year<<endl;
+      m_ChannelInBoard[sm-1][row-1][col-1]=channel;
+      m_TempChannelInBoard[sm-1][row-1][col-1]=chtemp;
+      m_Chain[sm-1][row-1][col-1]=Chain_No;
     }
   }
 }
