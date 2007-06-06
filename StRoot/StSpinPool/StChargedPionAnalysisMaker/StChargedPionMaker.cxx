@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.7 2007/06/05 19:32:19 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.8 2007/06/06 13:01:31 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.8  2007/06/06 13:01:31  kocolosk
+* muDst is a pointer ... oops
+*
 * Revision 1.7  2007/06/05 19:32:19  kocolosk
 * meaning of primary first point changed btw runs -- best to get vertex from event
 *
@@ -176,7 +179,7 @@ Int_t StChargedPionMaker::Make()
             
             StChargedPionTrack cpTrack(this->chargedPionTrack(track));
             cpTrack.setB(event->eventSummary().magneticField()*kilogauss);
-            cpTrack.setVertex(muDst.primaryVertex().position());
+            cpTrack.setVertex(muDst->primaryVertex()->position());
             new ( (*mPrimaries)[mPrimaries->GetLast()+1] ) StChargedPionTrack(cpTrack);
             mNTracks++;
             
