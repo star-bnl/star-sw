@@ -197,9 +197,9 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   // }
 
   // printf("St_trg_Maker:: Daq2003 : passed L1/L2 summary sanity check.\n"); 
-  printf("St_trg_Maker:: Daq2003 : ActionWrdCommand is 0x%0x TriggerWord 0x%0x\n",
+  LOG_INFO << Form("Daq2003 : ActionWrdCommand is 0x%0x TriggerWord 0x%0x",
 	 mS2003->EvtDesc.actionWdTrgCommand,
-	 mS2003->EvtDesc.TriggerWord);
+	 mS2003->EvtDesc.TriggerWord) << endm;
 
 
   if(  (((mActionWord)&0xf000)==0x9000 ) &&
@@ -222,11 +222,11 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   if(isLaser)   oo="Laser"; 
   if(isPulser)  oo="Pulser";
 
-  printf("St_trg_Maker:: Daq2003 : %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning %s. m_Mode=%d.\n",
+  LOG_INFO <<Form("Daq2003 : %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning %s. m_Mode=%d.\n",
 	 oo,mActionWord,
 	 mS2003->EvtDesc.TriggerWord,
 	 thisEventOk?"kStOK":"kStErr",
-	 m_Mode);
+	 m_Mode) << endm;
 
   if (!thisEventOk) return kStErr; // Skip this event.
 
