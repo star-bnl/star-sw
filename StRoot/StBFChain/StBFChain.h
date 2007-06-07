@@ -23,7 +23,7 @@
 #include "TTable.h"
 #include "Ttypes.h"
 
-/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.41 2007/06/06 03:59:12 perev Exp $ */
+/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.42 2007/06/07 20:12:12 perev Exp $ */
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
@@ -73,6 +73,7 @@ class StBFChain : public StChain {
    virtual Int_t       Make(){return StChain::Make();};
            Int_t       Skip(int nskip);      //Skip events
            Int_t       EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk=0); 
+           Int_t       EventLoop(Int_t jEnd=1000000, StMaker *outMk=0) 	{return StChain::EventLoop(jEnd,outMk);}
    virtual Int_t       Load();             
    virtual Int_t       Instantiate();      
    virtual Int_t       Init();      
@@ -111,7 +112,7 @@ class StBFChain : public StChain {
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.41 2007/06/06 03:59:12 perev Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.42 2007/06/07 20:12:12 perev Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
