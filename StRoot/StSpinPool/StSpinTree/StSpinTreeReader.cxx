@@ -70,7 +70,9 @@ int StSpinTreeReader::addFileList(const char *path) {
 }*/
 
 void StSpinTreeReader::selectDataset(const char *path) {
-    std::ifstream filelist(path);
+    TString fullPath = path;
+    fullPath.ReplaceAll("$STAR",getenv("STAR"));
+    std::ifstream filelist(fullPath.Data());
     std::string currentFile;
     while(!filelist.eof()) {
         getline(filelist,currentFile);
@@ -179,7 +181,9 @@ void StSpinTreeReader::connect() {
 }
 
 void StSpinTreeReader::selectRunlist(const char *path) {
-    std::ifstream list(path);
+    TString fullPath = path;
+    fullPath.ReplaceAll("$STAR",getenv("STAR"));
+    std::ifstream list(fullPath.Data());
     int currentRun;
     while(!list.eof()) {
         list >> currentRun;
