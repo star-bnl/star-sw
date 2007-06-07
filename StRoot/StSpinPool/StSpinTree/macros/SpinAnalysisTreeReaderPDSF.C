@@ -5,7 +5,7 @@ void SpinAnalysisTreeReaderPDSF(const long nevents = 20) {
     StSpinTreeReader *reader = new StSpinTreeReader();
     
     //add some files to analyze, one at a time or in a text file
-    reader->selectDataset("StRoot/StSpinPool/StSpinTree/datasets/run6_pdsf.dataset");
+    reader->selectDataset("$STAR/StRoot/StSpinPool/StSpinTree/datasets/run6_pdsf.dataset");
     //reader->selectFile("./spinAnalyses_6119039.tree.root");
     
     //configure the branches you're interested in (default = true)
