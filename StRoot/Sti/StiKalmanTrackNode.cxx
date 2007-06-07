@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.107 2007/06/06 04:03:03 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.108 2007/06/07 20:13:42 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.108  2007/06/07 20:13:42  perev
+ * BugFix in getPt()
+ *
  * Revision 2.107  2007/06/06 04:03:03  perev
  * getTime() cleanup
  *
@@ -494,8 +497,7 @@ void StiKalmanTrackNode::get(double& alpha,
 //______________________________________________________________________________
 double StiKalmanTrackNode::getPt() const
 {
-  double tmp = fabs(mFP._ptin);
-  return (tmp<1e6) ? 1e6: 1./tmp;
+  return (fabs(mFP._ptin)<1e-6) ? 1e6: 1./mFP._ptin;
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
