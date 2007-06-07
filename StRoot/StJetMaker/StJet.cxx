@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.cxx,v 1.2 2007/06/05 21:56:13 kocolosk Exp $
+// $Id: StJet.cxx,v 1.3 2007/06/07 01:36:06 kocolosk Exp $
 // $Log: StJet.cxx,v $
+// Revision 1.3  2007/06/07 01:36:06  kocolosk
+// fix minor AutoBuild warnings
+//
 // Revision 1.2  2007/06/05 21:56:13  kocolosk
 // added data members for zVertex and geometric trigger associations, plus methods for detEta (barrel only)
 //
@@ -71,14 +74,14 @@ Float_t StJet::detEta(float vz, float r) const {
 
 void StJet::addGeomTrigger(int trigId) {
     //check if the trigId is already in the vector -- not really necessary
-    for(int i=0; i<mGeomTriggers.size(); i++) {
+    for(unsigned int i=0; i<mGeomTriggers.size(); i++) {
         if (mGeomTriggers[i] == trigId) return;
     }
     mGeomTriggers.push_back(trigId);
 }
 
 bool StJet::geomTrigger(int trigId) const {
-    for(int i=0; i<mGeomTriggers.size(); i++) {
+    for(unsigned int i=0; i<mGeomTriggers.size(); i++) {
         if (mGeomTriggers[i] == trigId) return true;
     }
     return false;
