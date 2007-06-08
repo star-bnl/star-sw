@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <cmath>
 using namespace std;
 
 //St_base
@@ -275,7 +276,7 @@ Int_t StJetHistMaker::Make()
 		 && track->topologyMap().trackFtpcWest()==false
 		 && track->pt()>0.2
 		 && track->nHitsFit()>30
-		 && abs(track->eta())<0.5
+		 && fabs(track->eta())<0.5
 		 ) {
 		
 		
