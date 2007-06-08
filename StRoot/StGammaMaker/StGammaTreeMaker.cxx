@@ -29,7 +29,7 @@ Int_t StGammaTreeMaker::Init()
   if ( !mGammaFile )
     mGammaFile=new TFile(mFilename,"RECREATE");
   if ( !mGammaTree ) {
-    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.3 2007/06/08 16:15:40 jwebb Exp $ built "__DATE__" "__TIME__);    
+    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.4 2007/06/08 23:17:55 jwebb Exp $ built "__DATE__" "__TIME__);    
     mGammaTree->SetDirectory(mGammaFile);
   }
 
@@ -78,59 +78,6 @@ Int_t StGammaTreeMaker::Make()
   if ( !rawmk ) 
     {
       LOG_WARN<<"StGammaRawMaker not in chain"<<endm;
-    }
-  else 
-    {
-
-      // copy tracks
-      StGammaTrackVec_t tracks = rawmk->tracks();
-      for ( UInt_t i=0;i<tracks.size();i++ )
-	{
-	  StGammaTrack *track = mGammaEvent->newTrack();
-	  *track = tracks[i];
-	}
-
-      // copy towers
-      StGammaTowerVec_t towers = rawmk->towers();
-      for ( UInt_t i=0;i<towers.size();i++ )
-	{
-	  StGammaTower *tower = mGammaEvent->newTower();
-	  *tower = towers[i];
-	}
-
-      // preshower1 
-      StGammaTowerVec_t preshower1 = rawmk->preshower1();
-      for ( UInt_t i=0;i<preshower1.size();i++ )
-	{
-	  StGammaTower *pre1 = mGammaEvent->newPreshower1();
-	  *pre1 = preshower1[i];
-	}
-
-      // preshower2
-      StGammaTowerVec_t preshower2 = rawmk->preshower2();
-      for ( UInt_t i=0;i<preshower2.size();i++ )
-	{
-	  StGammaTower *pre2 = mGammaEvent->newPreshower2();
-	  *pre2 = preshower2[i];
-	}
-
-      // postshower
-      StGammaTowerVec_t postshower = rawmk->postshower();
-      for ( UInt_t i=0;i<postshower.size();i++ )
-	{
-	  StGammaTower *pre1 = mGammaEvent->newPostshower();
-	  *pre1 = postshower[i];
-	}
-
-      // smd strips
-      StGammaStripVec_t strips = rawmk->strips();
-      for ( UInt_t i=0;i<strips.size();i++ )
-	{
-	  StGammaStrip *strip = mGammaEvent->newStrip();
-	  *strip = strips[i];
-	}
-
-
     }
 
 
