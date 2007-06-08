@@ -20,16 +20,16 @@ ClassImp(StGammaTreeMaker);
 // ---------------------------------------------------------------------
 StGammaTreeMaker::StGammaTreeMaker(const Char_t *name):StMaker(name)
 {
-
+  mFilename="gamma_tree.root";
 }
 
 // ---------------------------------------------------------------------
 Int_t StGammaTreeMaker::Init()
 {
   if ( !mGammaFile )
-    mGammaFile=new TFile("gamma_tree.root","RECREATE");
+    mGammaFile=new TFile(mFilename,"RECREATE");
   if ( !mGammaTree ) {
-    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.2 2007/05/29 01:37:05 jwebb Exp $ built "__DATE__" "__TIME__);    
+    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.3 2007/06/08 16:15:40 jwebb Exp $ built "__DATE__" "__TIME__);    
     mGammaTree->SetDirectory(mGammaFile);
   }
 
