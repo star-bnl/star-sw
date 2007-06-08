@@ -2,6 +2,7 @@
 #define __StGammaTreeMaker_h__
 
 #include "StMaker.h"
+#include "TString.h"
 
 class TTree;
 class TFile;
@@ -23,6 +24,8 @@ class StGammaTreeMaker : public StMaker
   void SetFile( TFile *file ){ mGammaFile = file; }
   /// Sets a pointer to an existing TTree.  Default creates at Init().
   void SetTree( TTree *tree ){ mGammaTree = tree; }
+  /// Sets the filename (unless a file has been passeed above)
+  void SetFilename( const Char_t *fname ){ mFilename=fname; }
 
   TFile *file(){ return mGammaFile; }
   TTree *tree(){ return mGammaTree; }
@@ -37,6 +40,7 @@ class StGammaTreeMaker : public StMaker
   TFile *mGammaFile;
 
   StGammaEvent *mGammaEvent;
+  TString mFilename;
 
   ClassDef(StGammaTreeMaker,1);
 

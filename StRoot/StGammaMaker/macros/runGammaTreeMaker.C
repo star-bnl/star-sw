@@ -24,8 +24,8 @@ Int_t prescale = 1;
 void runGammaTreeMaker( Int_t nevents = -1, 
 			 //			 Char_t *name = "6149020.lis", 
 			 //			 Char_t *ofile= "6149020.root",
-			 Char_t *name="/star/data04/sim/rfatemi/photon/gamma5.MuDst.root",
-			 Char_t *ofile="gamma5.root",
+			 Char_t *name="/star/institutions/mit/betan/Simulation/photon_5_7.MuDst.root",
+			 Char_t *ofile="photon_5_7.gtree.root",
 			 Char_t *path = "", 
 			 Int_t nfiles = 100
 			 )
@@ -138,6 +138,7 @@ void runGammaTreeMaker( Int_t nevents = -1,
   StBarrelEmcClusterMaker* ecl  = new StBarrelEmcClusterMaker;
   StGammaCandidateMaker *gcm    = new StGammaCandidateMaker();
   StGammaTreeMaker      *gtm    = new StGammaTreeMaker();
+  gtm->SetFilename(ofile);
 
   mChain->ls(3);
 
