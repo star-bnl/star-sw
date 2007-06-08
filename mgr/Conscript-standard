@@ -257,6 +257,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $pkg =~ m/^StTofPool$/          ||
 	    $pkg =~ m/^StRichPool$/         ||
 	    $pkg =~ m/^StGeneri/            ||
+	    $pkg =~ m/^St.*Utilities/       ||
 	    $pkg =~ m/^Sti/           ) {
     $CPPPATH = "#" . $Dir;
     
