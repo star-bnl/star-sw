@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.18 2007/04/18 20:06:02 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.19 2007/06/14 23:40:04 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -748,6 +748,8 @@ TVirtualViewer3D *GeomBrowser::viewCoin3D()
                viewerImp->MakeCurrent();
                connect(&viewerImp->Signals(),SIGNAL( ObjectSelected(TObject *, const QPoint&))
                  , this, SLOT(ObjectSelected(TObject *, const QPoint &)));
+               connect(&viewerImp->Signals(),SIGNAL( destroyed())
+                 , this, SLOT(ViewerDestroyed()));
            }
        }
     } else {
@@ -1107,4 +1109,11 @@ void GeomBrowser::TurnGeomSrcEditor(bool on)
    // Turn on/off the source file seacth and look up
    if (on) 
       QWhatsThis::display("Select the 3D image of the detector volume to popu the text editor");
+}
+
+//_____________________________________________________________________________
+void GeomBrowser::ViewerDestroyed()
+{
+   // disconnect the current viewer 
+   fCurrentViewer = 0;
 }

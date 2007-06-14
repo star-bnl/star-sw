@@ -1116,6 +1116,7 @@
     <slot>fileOpenInventor( const QString &amp; fileName )</slot>
     <slot>RemakeGeom ( const QString &amp; fileName )</slot>
     <slot>TurnGeomSrcEditor (bool)</slot>
+    <slot>ViewerDestroyed()</slot>
 </slots>
 <functions>
     <function access="protected">SetVisibility( TQtObjectListItem * item, TVolume::ENodeSEEN vis )</function>
