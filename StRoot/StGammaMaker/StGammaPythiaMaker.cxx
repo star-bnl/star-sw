@@ -4,13 +4,17 @@
 #include "StChain.h"
 #include "TLorentzVector.h"
 
+#include "StLorentzVectorF.hh"
+
 #include "StMaker.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
 
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StMcEventTypes.hh"
-#include "StMcEvent.hh"
+#include "StMcEvent/StMcEvent.hh"
+#include "StMcEvent/StMcTrack.hh"
+#include "StMcEvent/StMcVertex.hh"
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -56,9 +60,11 @@ void StGammaPythiaMaker::Zero(){
 
   Prompt4Mom.clear();
   Decay4Mom.clear();
+  Pion04Mom.clear();
   prompt.SetPxPyPzE(0.0,0.0,0.0,0.0);
   decay.SetPxPyPzE(0.0,0.0,0.0,0.0);
- 
+  pion0.SetPxPyPzE(0.0,0.0,0.0,0.0);
+
   df1_LO=0;
   df2_LO=0;
   f1_LO=0;
@@ -91,13 +97,16 @@ Int_t StGammaPythiaMaker::Make(){
   //CLEAR vectors and zero other variables
   Zero();
 
+  //Get StMcEvent to look at GEANT record
+  mcEvent=(StMcEvent*)StMaker::GetChain()->GetDataSet("StMcEvent");
+
   //GET EVTID FROM MuDST
   muDstMaker = (StMuDstMaker*)GetMaker("MuDst"); assert(muDstMaker);
   StMuDst* dst = muDstMaker->muDst(); assert(dst);
   muEvent = dst->event();  assert(muEvent);
   StEventInfo &info=muEvent->eventInfo();
   evtid=info.id();
-  
+
   //GET GEANT EVENT
   TDataSet *Event = GetDataSet("geant"); //  Event->ls(3);
 
@@ -116,6 +125,56 @@ Int_t StGammaPythiaMaker::Make(){
   //TEST that geantID==eventID to ensure .geant and .MuDst file are synchronized
   assert(evtid==geantID);
 
+  if ( mcEvent ) {
+    
+    StMcVertex *primary=mcEvent->primaryVertex();
+    
+    for ( UInt_t id=0;id<primary->numberOfDaughters();id++ )
+      {
+     
+	StMcTrack *track = primary->daughter(id);
+	if ( !track ) continue;
+	const StLorentzVectorF& trackV=track->fourMomentum();
+
+	//Store all pion Four Momentum
+	pion0.SetPxPyPzE(0.0,0.0,0.0,0.0);  
+	if (track->geantId() == 7)
+	  {
+	    pion0.SetPxPyPzE(trackV.px(),trackV.py(),trackV.pz(),trackV.e());
+	    Pion04Mom.push_back(pion0);
+	  }
+	
+	
+	if ((pid==14)||(pid==18)||(pid==29)||(pid==114)||(pid==115))  //1-2 prompt gammas and the rest are decay
+	  {
+	    
+	    prompt.SetPxPyPzE(0.0,0.0,0.0,0.0);
+	    decay.SetPxPyPzE(0.0,0.0,0.0,0.0);
+	    if (track->geantId() == 1 && (track->parent()->eventGenLabel() <= 8 ||track->parent()->geantId() == 1)){
+	      prompt.SetPxPyPzE(trackV.px(),trackV.py(),trackV.pz(),trackV.e());	      
+	      LOG_DEBUG<<" GEANT prompt px="<<prompt.Px()<<" py="<<prompt.Py()<<" pz="<<prompt.Pz()<<endm;
+	      Prompt4Mom.push_back(prompt);
+	    }
+	    else {
+	      if (track->geantId() == 1)
+		{
+		  decay.SetPxPyPzE(trackV.px(),trackV.py(),trackV.pz(),trackV.e());
+		  Decay4Mom.push_back(decay);
+		}
+	    }
+	  }
+
+	if ((pid==11)||(pid==12)||(pid==13)||(pid==28)||(pid==53)||(pid==68)||(pid==96))  //2-2 QCD -> all gammas are decay
+
+	  {
+	    decay.SetPxPyPzE(0.0,0.0,0.0,0.0);
+	    decay.SetPxPyPzE(trackV.px(),trackV.py(),trackV.pz(),trackV.e());
+	    Decay4Mom.push_back(decay);
+	  }
+      }
+  }
+  
+ 
   //GET PARTONIC KINEMATICS from struct Pg2t_pythia
   Pg2t_pythia=(St_g2t_pythia *) geantDstI("g2t_pythia");// Pg2t_pythia->Print();
   g2t_pythia_st *g2t_pythia1=Pg2t_pythia->GetTable();
@@ -126,7 +185,6 @@ Int_t StGammaPythiaMaker::Make(){
   cos_th= g2t_pythia1->cos_th;
   x1= g2t_pythia1->bjor_1;
   x2= g2t_pythia1->bjor_2;
- 
 
   //GET FLAVOR AFTER INTIAL RADIATION BEFORE and AFTER SCATTERING
   flavor1=particleTable[4].idhep;
@@ -134,80 +192,25 @@ Int_t StGammaPythiaMaker::Make(){
   flavor3=particleTable[6].idhep;
   flavor4=particleTable[7].idhep;
 
-  //GET SCATTERED PARTON RECORD
-  parton1[0]=particleTable[6].idhep;// particle id
-  parton1[1]=particleTable[6].phep[0];//px
-  parton1[2]=particleTable[6].phep[1];//py
-  parton1[3]=particleTable[6].phep[2];//pz
-  parton1[4]=particleTable[6].phep[3];//E
-  parton1[5]=particleTable[6].phep[4];//m
-  parton1[6]=particleTable[6].isthep;//status
-  parton1[7]=particleTable[6].jmohep[0];//moth1
-  parton1[8]=particleTable[6].jmohep[1];//moth2
-  parton1[9]=particleTable[6].jdahep[0];//daughter1
-  parton1[10]=particleTable[6].jdahep[1];//daughter2
-  parton2[0]=particleTable[7].idhep;// particle id
-  parton2[1]=particleTable[7].phep[0];//px
-  parton2[2]=particleTable[7].phep[1];//py
-  parton2[3]=particleTable[7].phep[2];//pz
-  parton2[4]=particleTable[7].phep[3];//E
-  parton2[5]=particleTable[7].phep[4];//m
-  parton2[6]=particleTable[7].isthep;//status
-  parton2[7]=particleTable[7].jmohep[0];//moth1
-  parton2[8]=particleTable[7].jmohep[1];//moth2
-  parton2[9]=particleTable[7].jdahep[0];//daughter1
-  parton2[10]=particleTable[7].jdahep[1];//daughter2
+  //Print OUT PYTHIA RECORD
+  LOG_DEBUG<<"PID/evtid from McEvent ="<<pid<<"/"<<evtid<<"  PID/evtid from Table ="<<geantPID<<"/"<<geantID<<endm;
+  LOG_DEBUG<<"row |   id   |   px   |   py   |   pz   |   E   |   m   | status | moth1 | moth2 | daught1 | daught2"<<endm;
+  for (int i=0; i<particleTabPtr->GetNRows();++i) {	
+    LOG_DEBUG<<i<<"  "<<particleTable[i].idhep<<"  "<<particleTable[i].phep[0]<<"  "<<particleTable[i].phep[1]<<"  "<<
+      particleTable[i].phep[2]<<"  "<<particleTable[i].phep[3]<<"  "<<particleTable[i].phep[4]<<"  "<<
+      particleTable[i].isthep<<"  "<<particleTable[i].jmohep[0]<<"  "<<particleTable[i].jmohep[1]<<"  "<<
+      particleTable[i].jdahep[0]<<"  "<<particleTable[i].jdahep[1]<<endm;
+  }
 
-  LOG_DEBUG<<cout<<"PID/evtid from McEvent ="<<pid<<"/"<<evtid<<"  PID/evtid from Table ="<<geantPID<<"/"<<geantID<<endm;
-  LOG_DEBUG<<cout<<"row |   id   |   px   |   py   |   pz   |   E   |   m   | status | moth1 | moth2 | daught1 | daught2"<<endm;
-  
-  if ((pid==11)||(pid==12)||(pid==13)||(pid==28)||(pid==53)||(pid==68)||(pid==96))  //2-2 QCD -> all gammas are decay
-    {
-
-      decay.SetPxPyPzE(0.0,0.0,0.0,0.0);
-      for (int i=0; i<particleTabPtr->GetNRows();++i) 
-	{
-	  if ((particleTable[i].isthep==1)&&(particleTable[i].idhep==22)) 
-	    {
-	      decay.SetPxPyPzE(particleTable[i].phep[0],particleTable[i].phep[1],particleTable[i].phep[2],particleTable[i].phep[3]);
-	      Decay4Mom.push_back(decay);
-	    }
-	  
-	  
-	  LOG_DEBUG<<i<<"  "<<particleTable[i].idhep<<"  "<<particleTable[i].phep[0]<<"  "<<particleTable[i].phep[1]<<"  "<<
-	    particleTable[i].phep[2]<<"  "<<particleTable[i].phep[3]<<"  "<<particleTable[i].phep[4]<<"  "<<
-	    particleTable[i].isthep<<"  "<<particleTable[i].jmohep[0]<<"  "<<particleTable[i].jmohep[1]<<"  "<<
-	    particleTable[i].jdahep[0]<<"  "<<particleTable[i].jdahep[1]<<endm;
-	  
-	}      
-    }
-  
-  
   if ((pid==14)||(pid==18)||(pid==29)||(pid==114)||(pid==115))  //1-2 prompt gammas and the rest are decay
     {
-
-      prompt.SetPxPyPzE(0.0,0.0,0.0,0.0);
-      decay.SetPxPyPzE(0.0,0.0,0.0,0.0);
-      for (int i=0; i<particleTabPtr->GetNRows();++i) {
+      for (int i=0; i<9;++i) {
 	
 	//need to check if 8 is the correct row in MuDst and also for 114 and 115 events
 	if ((particleTable[i].isthep==1)&&(particleTable[i].idhep==22)&&(particleTable[i].jmohep[0]<=8)&&(particleTable[i].jmohep[1]<=8))
 	  {
-	    prompt.SetPxPyPzE(particleTable[i].phep[0],particleTable[i].phep[1],particleTable[i].phep[2],particleTable[i].phep[3]);
-	    Prompt4Mom.push_back(prompt);
-	  }
-	
-	if ((particleTable[i].isthep==1)&&(particleTable[i].idhep==22)&&(particleTable[i].jmohep[0]>8)&&(particleTable[i].jmohep[1]>8))
-	  {
-	    decay.SetPxPyPzE(particleTable[i].phep[0],particleTable[i].phep[1],particleTable[i].phep[2],particleTable[i].phep[3]);
-	    Decay4Mom.push_back(decay);
-	  }	
-	
-	LOG_DEBUG<<i<<"  "<<particleTable[i].idhep<<"  "<<particleTable[i].phep[0]<<"  "<<particleTable[i].phep[1]<<"  "<<
-	  particleTable[i].phep[2]<<"  "<<particleTable[i].phep[3]<<"  "<<particleTable[i].phep[4]<<"  "<<
-	  particleTable[i].isthep<<"  "<<particleTable[i].jmohep[0]<<"  "<<particleTable[i].jmohep[1]<<"  "<<
-	  particleTable[i].jdahep[0]<<"  "<<particleTable[i].jdahep[1]<<endm;
-
+	    LOG_DEBUG<<" PYTHIA prompt px="<<particleTable[i].phep[0]<<" py="<<particleTable[i].phep[1]<<" pz="<<particleTable[i].phep[2]<<endm;
+	  }	     	  
       }
     }
   
@@ -257,9 +260,7 @@ Int_t StGammaPythiaMaker::Make(){
     printf("NLO_gmin:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmin,df2_NLO_gmin,f1_NLO,f2_NLO,weight_NLO_gmin);
     printf("NLO_g0:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_g0,df2_NLO_g0,f1_NLO,f2_NLO,weight_NLO_g0);
     printf("NLO_gmax:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmax,df2_NLO_gmax,f1_NLO,f2_NLO,weight_NLO_gmax);
-  }
-
- 
+  } 
 
   return kStOK;   
 }
@@ -272,10 +273,10 @@ Double_t StGammaPythiaMaker::get_polPDF_LO(int flavor, double x, double Q2){
   double pdf=1000;
   int polset_LO=101;
   int polid=0;
-  LOG_DEBUG<<cout<<"get_polPDF_LO: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endm;
+  LOG_DEBUG<<"get_polPDF_LO: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endm;
 
   if (Q2>=0.8)  polar_(&polset_LO, &x, &Q2, parpol, &polid);
-  LOG_DEBUG<<cout<<"getpolPDF_LO:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endm;
+  LOG_DEBUG<<"getpolPDF_LO:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endm;
 
   if (flavor==1) pdf=parpol[1];      //dv + dsea quark
   if (flavor==2) pdf=parpol[0];      //uv + usea quark
@@ -296,10 +297,10 @@ Double_t StGammaPythiaMaker::get_polPDF_NLO(int flavor, double x, double Q2){
   double pdf=1000;
   int polset_NLO=102;
   int polid=0;
-  LOG_DEBUG<<cout<<"get_polPDF_NLO: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endm;
+  LOG_DEBUG<<"get_polPDF_NLO: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endm;
 
   if (Q2>=0.8) polar_(&polset_NLO, &x, &Q2, parpol, &polid);
-  LOG_DEBUG<<cout <<"getpolPDF_NLO:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endm;
+  LOG_DEBUG<<"getpolPDF_NLO:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endm;
 
   if (flavor==1) pdf=parpol[1];      //dv + dsea quark
   if (flavor==2) pdf=parpol[0];      //uv + usea quark
@@ -319,10 +320,10 @@ Double_t StGammaPythiaMaker::get_polPDF_NLO_g0(int flavor, double x, double Q2){
   double pdf=1000;
   int polset_NLO_g0=103;
   int polid=0;
-  LOG_DEBUG<<cout<<"get_polPDF_NLO_g0: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endm;
+  LOG_DEBUG<<"get_polPDF_NLO_g0: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endm;
 
   if (Q2>=0.8) polar_(&polset_NLO_g0, &x, &Q2, parpol, &polid);
-  LOG_DEBUG<<cout <<"getpolPDF_NLO_g0:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endm;
+  LOG_DEBUG<<"getpolPDF_NLO_g0:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endm;
 
   if (flavor==1) pdf=parpol[1];      //dv + dsea quark
   if (flavor==2) pdf=parpol[0];      //uv + usea quark
@@ -452,20 +453,19 @@ Double_t StGammaPythiaMaker::getPartonicALL(double s, double t, double u, int su
 
   num_(&s,&t,&u,&N1,&N2,&N3,&N4,&N5,&N6,&N7,&N8);
   denom_(&s,&t,&u,&D1,&D2,&D3,&D4,&D5,&D6,&D7,&D8);
-  LOG_DEBUG<<
-    cout<<"s="<<s<<" t="<<t<<" u="<<u<<" sub="<<sub<<" inA="<<inA<<" inB="<<inB<<" outA="<<outA<<" outB="<<outB<<endl;
-    cout<<" 1="<<N1<<" "<<D1<<endl;
-    cout<<" 2="<<N2<<" "<<D2<<endl;
-    cout<<" 3="<<N3<<" "<<D3<<endl;
-    cout<<" 4="<<N4<<" "<<D4<<endl;
-    cout<<" 5="<<N5<<" "<<D5<<endl;
-    cout<<" 6="<<N6<<" "<<D6<<endl;
-    cout<<" 7="<<N7<<" "<<D7<<endl;
-    cout<<" 8="<<N8<<" "<<D8<<endm;
   
-
+ 
+  LOG_DEBUG<< cout<<"s="<<s<<" t="<<t<<" u="<<u<<" sub="<<sub<<" inA="<<inA<<" inB="<<inB<<" outA="<<outA<<" outB="<<outB<<endm;
+  LOG_DEBUG<<cout<<" 1="<<N1<<" "<<D1<<endm;
+  LOG_DEBUG<<cout<<" 2="<<N2<<" "<<D2<<endm;
+  LOG_DEBUG<<cout<<" 3="<<N3<<" "<<D3<<endm;
+  LOG_DEBUG<<cout<<" 4="<<N4<<" "<<D4<<endm;
+  LOG_DEBUG<<cout<<" 5="<<N5<<" "<<D5<<endm;
+  LOG_DEBUG<<cout<<" 6="<<N6<<" "<<D6<<endm;
+  LOG_DEBUG<<cout<<" 7="<<N7<<" "<<D7<<endm;
+  LOG_DEBUG<<cout<<" 8="<<N8<<" "<<D8<<endm;
   
-  if ((sub==11)&&(abs(inA)!=abs(inB))) all=N1/D1;
+  
   if ((sub==11)&&(abs(inA)==abs(inB))) all=N2/D2;
   if ((sub==12)&&(abs(inA)!=abs(outA))) all=N3/D3;
   if ((sub==12)&&(abs(inA)==abs(outA))) all=N4/D4;
@@ -477,3 +477,29 @@ Double_t StGammaPythiaMaker::getPartonicALL(double s, double t, double u, int su
   return all;
 }
 
+vector< StMcTrack * >  StGammaPythiaMaker::filterMcTracks( StMcVertex *vertex, Int_t geantId )
+{
+  vector<StMcTrack *> listOfTracks;
+  if ( !vertex ) 
+    return listOfTracks;
+  
+  UInt_t ndaughters = vertex->numberOfDaughters();
+  for ( UInt_t id=0;id<ndaughters;id++ )
+    {
+      StMcTrack *track = vertex->daughter( id );
+      if ( !track ) continue;
+
+      StMcTrack *parent=track->parent();
+      const StLorentzVectorF& trackV=track->fourMomentum();
+      const StLorentzVectorF& parentV=parent->fourMomentum();
+
+      LOG_DEBUG<<" track genLabel="<<track->eventGenLabel()<<" geantID="<<track->geantId()<<" Px="<<trackV.px()
+	<<"  Py="<<trackV.py()<<"  Pz="<<trackV.pz()<<" key="<<track->key()<<endl;
+      LOG_DEBUG<<" parent genLabel="<<parent->eventGenLabel()<<" geantID="<<parent->geantId()
+	<<" Px="<<parentV.px()<<"  Py="<<parentV.py()<<"  Pz="<<parentV.pz()<<" key="<<parent->key()<<endl;
+   
+      if ( track->geantId() == geantId ) listOfTracks.push_back(track);
+    }
+
+  return listOfTracks;
+}
