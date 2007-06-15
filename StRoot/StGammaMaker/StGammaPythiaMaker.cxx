@@ -513,5 +513,8 @@ void StGammaPythiaMaker::collectDecayPhotons(StMcVertex* vertex)
       const StLorentzVectorF& p = track->fourMomentum();
       Decay4Mom.push_back(TLorentzVector(p.px(), p.py(), p.pz(), p.e()));
     }
+    if (StMcVertex* stopVertex = track->stopVertex()) {
+      collectDecayPhotons(stopVertex);
+    }
   }
 }
