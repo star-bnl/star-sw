@@ -38,24 +38,20 @@ extern "C" void denom_(double*,double*,double*,double*,double*,double*,double*,d
 
 class StGammaPythiaMaker : public StMaker
 {
-
- private:
-  
-  TLorentzVector prompt;
-  TLorentzVector pion0;
-  TLorentzVector decay;
+private:
 
   vector<StMcTrack *> filterMcTracks ( StMcVertex *v, Int_t geantId );
+  void collectDecayPhotons();
+  void collectDecayPhotons(StMcVertex* vertex);
   
- protected:
-  
- public: 
+public: 
 
   StGammaPythiaMaker(const char *name="GammaPythia");
-  virtual  ~StGammaPythiaMaker();
-  virtual Int_t Init();
-  virtual Int_t  Make();
-  void Zero();
+  ~StGammaPythiaMaker();
+
+  void  Clear(Option_t* option = "");
+  Int_t Init();
+  Int_t Make();
   
   //pointers to makers
   StMuDstMaker *muDstMaker;
@@ -94,15 +90,29 @@ class StGammaPythiaMaker : public StMaker
   Double_t get_unpolPDF_NLO(int x1, double d1, double d2);
   
   Double_t getPartonicALL(double a, double b, double c, int d, int e, int f, int g, int h);
+
+  int numberOfPion0() const;
+  int numberOfPrompt() const;
+  int numberOfDecay() const;
+
+  TLorentzVector& pion0(int i);
+  TLorentzVector& prompt(int i);
+  TLorentzVector& decay(int i);
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaMaker.h,v 1.2 2007/06/15 03:26:44 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaMaker.h,v 1.3 2007/06/15 21:37:25 pibero Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }  
   
   ClassDef(StGammaPythiaMaker,0)   //StAF chain virtual base class for Makers
 };
 
+inline int StGammaPythiaMaker::numberOfPion0() const { return Pion04Mom.size(); }
+inline int StGammaPythiaMaker::numberOfPrompt() const { return Prompt4Mom.size(); }
+inline int StGammaPythiaMaker::numberOfDecay() const { return Decay4Mom.size(); }
+
+inline TLorentzVector& StGammaPythiaMaker::pion0(int i) { return Pion04Mom[i]; }
+inline TLorentzVector& StGammaPythiaMaker::prompt(int i) { return Prompt4Mom[i]; }
+inline TLorentzVector& StGammaPythiaMaker::decay(int i) { return Decay4Mom[i]; }
+
 #endif
-
-
