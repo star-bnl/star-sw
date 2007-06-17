@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.22 2007/05/16 22:48:10 deph Exp $
+ * $Id: StDbBuffer.cc,v 1.23 2007/06/17 16:05:34 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.23  2007/06/17 16:05:34  deph
+ * Bug fix for unsigned datatypes: max int was being returned  changed atoi to strtol.
+ *
  * Revision 1.22  2007/05/16 22:48:10  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -297,9 +300,9 @@ void StDbBuffer::StrConv(char* aVal,unsigned char &s){s=(unsigned char)atoi(aVal
 void StDbBuffer::StrConv(char* aVal,short &s){s=(short)atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,unsigned short &s){s=(unsigned short) atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,int &s){s=atoi(aVal);};
-void StDbBuffer::StrConv(char* aVal,unsigned int &s){s=atol(aVal);};
+void StDbBuffer::StrConv(char* aVal,unsigned int &s){s=strtoul(aVal,0,10);};
 void StDbBuffer::StrConv(char* aVal,long &s){s=atoi(aVal);};
-void StDbBuffer::StrConv(char* aVal,unsigned long &s){s=atol(aVal);};
+void StDbBuffer::StrConv(char* aVal,unsigned long &s){s=strtoul(aVal,0,10);};
 #ifndef __osf__
 void StDbBuffer::StrConv(char* aVal,long long &s){s=atoll(aVal);};
 #else
