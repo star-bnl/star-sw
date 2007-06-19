@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.25 2007/03/27 23:15:09 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.26 2007/06/19 01:19:15 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.26  2007/06/19 01:19:15  bouchet
+// cosmetic changes
+//
 // Revision 1.25  2007/03/27 23:15:09  bouchet
 // Add a switch to use the gain calibration
 //
@@ -215,31 +218,12 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto;    //! (1p-1n) packages control matching.
   TH1S  *orthoproj;    //! orthonormal projection and perfect matching deviation.
   TH1S  *kind;         //! kind of hits -->see StSsdWafer for definition
-  TH2S  *matchisto_1;  //! (1p-1n) packages control matching  
-  TH2S  *matchisto_2;  //! (1p-1n) packages control matching.
-  TH2S  *matchisto_3;  //! (1p-1n) packages control matching  
-  TH2S  *matchisto_4;  //! (1p-1n) packages control matching
-  TH2S  *matchisto_5;  //! (1p-1n) packages control matching  
-  TH2S  *matchisto_6;  //! (1p-1n) packages control matching.
-  TH2S  *matchisto_7;  //! (1p-1n) packages control matching  
-  TH2S  *matchisto_8;  //! (1p-1n) packages control matching
-  TH2S  *matchisto_9;  //! (1p-1n) packages control matching
-  TH2S  *matchisto_10; //! (1p-1n) packages control matching
-  TH2S  *matchisto_11; //! (1p-1n) packages control matching  
-  TH2S  *matchisto_12; //! (1p-1n) packages control matching.
-  TH2S  *matchisto_13; //! (1p-1n) packages control matching  
-  TH2S  *matchisto_14; //! (1p-1n) packages control matching
-  TH2S  *matchisto_15; //! (1p-1n) packages control matching  
-  TH2S  *matchisto_16; //! (1p-1n) packages control matching.
-  TH2S  *matchisto_17; //! (1p-1n) packages control matching  
-  TH2S  *matchisto_18; //! (1p-1n) packages control matching
-  TH2S  *matchisto_19; //! (1p-1n) packages control matching  
-  TH2S  *matchisto_20; //! (1p-1n) packages control matching.
+  TH2S *matchisto_[20];
   Int_t Zero;
   Int_t UseCalibration ;
   Float_t CalibArray[320];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.25 2007/03/27 23:15:09 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.26 2007/06/19 01:19:15 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };

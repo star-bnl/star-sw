@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.42 2007/04/28 17:56:58 perev Exp $
+// $Id: StSsdPointMaker.cxx,v 1.43 2007/06/19 01:19:15 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.43  2007/06/19 01:19:15  bouchet
+// cosmetic changes
+//
 // Revision 1.42  2007/04/28 17:56:58  perev
 // Redundant StChain.h removed
 //
@@ -209,106 +212,19 @@ ClassImp(StSsdPointMaker)
     kind->SetYTitle("entries");
     kind->SetTitleOffset(2,"X");
     kind->SetTitleOffset(2,"Y");
-    
-    matchisto_1 = new TH2S("matchingHisto_1","Matching Adc (1p-1n) for ladder 1",50,0,1000,50,0,1000);
-    matchisto_1->SetXTitle("PSide ADC count");
-    matchisto_1->SetYTitle("NSide ADC count");
-    matchisto_1->SetZTitle("(1p-1n) hits");
 
-    matchisto_2 = new TH2S("matchingHisto_2","Matching Adc (1p-1n) for ladder 2",50,0,1000,50,0,1000);
-    matchisto_2->SetXTitle("PSide ADC count");
-    matchisto_2->SetYTitle("NSide ADC count");
-    matchisto_2->SetZTitle("(1p-1n) hits");
-
-    matchisto_3 = new TH2S("matchingHisto_3","Matching Adc (1p-1n) for ladder 3",50,0,1000,50,0,1000);
-    matchisto_3->SetXTitle("PSide ADC count");
-    matchisto_3->SetYTitle("NSide ADC count");
-    matchisto_3->SetZTitle("(1p-1n) hits");
-
-    matchisto_4 = new TH2S("matchingHisto_4","Matching Adc (1p-1n) for ladder 4",50,0,1000,50,0,1000);
-    matchisto_4->SetXTitle("PSide ADC count");
-    matchisto_4->SetYTitle("NSide ADC count");
-    matchisto_4->SetZTitle("(1p-1n) hits");
-    
-    matchisto_5 = new TH2S("matchingHisto_5","Matching Adc (1p-1n) for ladder 5",50,0,1000,50,0,1000);
-    matchisto_5->SetXTitle("PSide ADC count");
-    matchisto_5->SetYTitle("NSide ADC count");
-    matchisto_5->SetZTitle("(1p-1n) hits");
-
-    matchisto_6 = new TH2S("matchingHisto_6","Matching Adc (1p-1n) for ladder 6",50,0,1000,50,0,1000);
-    matchisto_6->SetXTitle("PSide ADC count");
-    matchisto_6->SetYTitle("NSide ADC count");
-    matchisto_6->SetZTitle("(1p-1n) hits");
-
-    matchisto_7 = new TH2S("matchingHisto_7","Matching Adc (1p-1n) for ladder 7",50,0,1000,50,0,1000);
-    matchisto_7->SetXTitle("PSide ADC count");
-    matchisto_7->SetYTitle("NSide ADC count");
-    matchisto_7->SetZTitle("(1p-1n) hits");
-
-    matchisto_8 = new TH2S("matchingHisto_8","Matching Adc (1p-1n) for ladder 8",50,0,1000,50,0,1000);
-    matchisto_8->SetXTitle("PSide ADC count");
-    matchisto_8->SetYTitle("NSide ADC count");
-    matchisto_8->SetZTitle("(1p-1n) hits");
-    
-    matchisto_9 = new TH2S("matchingHisto_9","Matching Adc (1p-1n) for ladder 9",50,0,1000,50,0,1000);
-    matchisto_9->SetXTitle("PSide ADC count");
-    matchisto_9->SetYTitle("NSide ADC count");
-    matchisto_9->SetZTitle("(1p-1n) hits");
-    
-    matchisto_10 = new TH2S("matchingHisto_10","Matching Adc (1p-1n) for ladder 10",50,0,1000,50,0,1000);
-    matchisto_10->SetXTitle("PSide ADC count");
-    matchisto_10->SetYTitle("NSide ADC count");
-    matchisto_10->SetZTitle("(1p-1n) hits");
-    
-    matchisto_11 = new TH2S("matchingHisto_11","Matching Adc (1p-1n) for ladder 11",50,0,1000,50,0,1000);
-    matchisto_11->SetXTitle("PSide ADC count");
-    matchisto_11->SetYTitle("NSide ADC count");
-    matchisto_11->SetZTitle("(1p-1n) hits");
-
-    matchisto_12 = new TH2S("matchingHisto_12","Matching Adc (1p-1n) for ladder 12",50,0,1000,50,0,1000);
-    matchisto_12->SetXTitle("PSide ADC count");
-    matchisto_12->SetYTitle("NSide ADC count");
-    matchisto_12->SetZTitle("(1p-1n) hits");
-
-    matchisto_13 = new TH2S("matchingHisto_13","Matching Adc (1p-1n) for ladder 13",50,0,1000,50,0,1000);
-    matchisto_13->SetXTitle("PSide ADC count");
-    matchisto_13->SetYTitle("NSide ADC count");
-    matchisto_13->SetZTitle("(1p-1n) hits");
-
-    matchisto_14 = new TH2S("matchingHisto_14","Matching Adc (1p-1n) for ladder 14",50,0,1000,50,0,1000);
-    matchisto_14->SetXTitle("PSide ADC count");
-    matchisto_14->SetYTitle("NSide ADC count");
-    matchisto_14->SetZTitle("(1p-1n) hits");
-    
-    matchisto_15 = new TH2S("matchingHisto_15","Matching Adc (1p-1n) for ladder 15",50,0,1000,50,0,1000);
-    matchisto_15->SetXTitle("PSide ADC count");
-    matchisto_15->SetYTitle("NSide ADC count");
-    matchisto_15->SetZTitle("(1p-1n) hits");
-
-    matchisto_16 = new TH2S("matchingHisto_16","Matching Adc (1p-1n) for ladder 16",50,0,1000,50,0,1000);
-    matchisto_16->SetXTitle("PSide ADC count");
-    matchisto_16->SetYTitle("NSide ADC count");
-    matchisto_16->SetZTitle("(1p-1n) hits");
-
-    matchisto_17 = new TH2S("matchingHisto_17","Matching Adc (1p-1n) for ladder 17",50,0,1000,50,0,1000);
-    matchisto_17->SetXTitle("PSide ADC count");
-    matchisto_17->SetYTitle("NSide ADC count");
-    matchisto_17->SetZTitle("(1p-1n) hits");
-
-    matchisto_18 = new TH2S("matchingHisto_18","Matching Adc (1p-1n) for ladder 18",50,0,1000,50,0,1000);
-    matchisto_18->SetXTitle("PSide ADC count");
-    matchisto_18->SetYTitle("NSide ADC count");
-    matchisto_18->SetZTitle("(1p-1n) hits");
-    
-    matchisto_19 = new TH2S("matchingHisto_19","Matching Adc (1p-1n) for ladder 19",50,0,1000,50,0,1000);
-    matchisto_19->SetXTitle("PSide ADC count");
-    matchisto_19->SetYTitle("NSide ADC count");
-    matchisto_19->SetZTitle("(1p-1n) hits");
-
-    matchisto_20 = new TH2S("matchingHisto_20","Matching Adc (1p-1n) for ladder 20",50,0,1000,50,0,1000);
-    matchisto_20->SetXTitle("PSide ADC count");
-    matchisto_20->SetYTitle("NSide ADC count");
-    matchisto_20->SetZTitle("(1p-1n) hits");
+    TString Title;
+    Char_t *Name = new Char_t[20];
+    Title ="Matching Adc (1p-1n) for ladder";
+    for(Int_t ii=0;ii<20;ii++)
+      {
+	Title = Form("Matching Adc (1p-1n) for ladder = %i",ii+1);
+	sprintf(Name,"%s%d","matchingHisto_",ii);
+	matchisto_[ii] =  new TH2S(Name,Title,500,0,1000, 500, 0, 1000);
+	matchisto_[ii]->SetXTitle("PSide ADC count");
+	matchisto_[ii]->SetYTitle("NSide ADC count");
+	matchisto_[ii]->SetZTitle("(1p-1n) hits");
+      }
     if (Debug() > 1) DeclareNtuple();
   }
   return StMaker::Init();
@@ -607,109 +523,8 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
 		b = convMeVToAdc*(pSpt->getDe(0)-pSpt->getDe(1));
 		matchisto->Fill(a,b);
 		orthoproj->Fill((b-a)/TMath::Sqrt(2.));
-		switch(i+1)
-		  {
-		  case 1:
-		    {
-		      matchisto_1->Fill(a,b);
-		      break;
-		    } 
-		  case 2:
-		    {
-		      matchisto_2->Fill(a,b);
-		      break;
-		    } 
-		  case 3:
-		    {
-		      matchisto_3->Fill(a,b);
-		      break;
-		    } 
-		  case 4:
-		    {
-		      matchisto_4->Fill(a,b);
-		      break;
-		    } 
-		  case 5:
-		    {
-		      matchisto_5->Fill(a,b);
-		      break;
-		    } 
-		  case 6:
-		    {
-		      matchisto_6->Fill(a,b);
-		      break;
-		    } 
-		  case 7:
-		    {
-		      matchisto_7->Fill(a,b);
-		      break;
-		    } 
-		  case 8:
-		    {
-		      matchisto_8->Fill(a,b);
-		      break;
-		    } 
-		  case 9:
-		    {
-		      matchisto_9->Fill(a,b);
-		      break;
-		    } 
-		  case 10:
-		    {
-		      matchisto_10->Fill(a,b);
-		      break;
-		    } 
-		  case 11:
-		    {
-		      matchisto_11->Fill(a,b);
-		      break;
-		    } 
-		  case 12:
-		    {
-		      matchisto_12->Fill(a,b);
-		      break;
-		    } 
-		  case 13:
-		    {
-		      matchisto_13->Fill(a,b);
-		      break;
-		    } 
-		  case 14:
-		    {
-		      matchisto_14->Fill(a,b);
-		      break;
-		    } 
-		  case 15:
-		    {
-		      matchisto_15->Fill(a,b);
-		      break;
-		    } 
-		  case 16:
-		    {
-		      matchisto_16->Fill(a,b);
-		      break;
-		    } 
-		  case 17:
-		    {
-		      matchisto_17->Fill(a,b);
-		      break;
-		    } 
-		  case 18:
-		    {
-		      matchisto_18->Fill(a,b);
-		      break;
-		    } 
-		  case 19:
-		    {
-		      matchisto_19->Fill(a,b);
-		      break;
-		    } 
-		  case 20:
-		    {
-		      matchisto_20->Fill(a,b);
-		      break;
-		    } 
-		  }
+		printf("ladder = %d\n",i);
+		matchisto_[i]->Fill(a,b);
 	      }
 	    
 	    for(Int_t k=0;k<=11;k++)
@@ -1509,7 +1324,7 @@ void StSsdPointMaker::FillCalibTable(){
     for(Int_t i=0; i<320;i++){
       CalibArray[i] = 1;
       //LOG_INFO << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm; 
-    
+      
     }
   }
 }
