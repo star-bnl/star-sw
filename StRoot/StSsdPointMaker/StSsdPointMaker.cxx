@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.43 2007/06/19 01:19:15 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.44 2007/06/19 18:30:24 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.44  2007/06/19 18:30:24  bouchet
+// Add a method to evaluate the reconstruction efficiency (defined as the ratio of the number of matched clusters with all reconstructed clusters) ; some clean-up
+//
 // Revision 1.43  2007/06/19 01:19:15  bouchet
 // cosmetic changes
 //
@@ -165,7 +168,7 @@
 #include "TMath.h"
 ClassImp(StSsdPointMaker)
 
-//_____________________________________________________________________________
+  //_____________________________________________________________________________
   Int_t StSsdPointMaker::Init(){
   LOG_INFO << "Init() : Defining the histograms" << endm;
   
@@ -187,6 +190,12 @@ ClassImp(StSsdPointMaker)
     ClustMapN = new TH2S("ClustMapN","Number of clusters on the n-side per wafer and ladder",20,0,20,16,0,16);
     ClustMapN->SetXTitle("Ladder id");
     ClustMapN->SetYTitle("Wafer id");
+    MatchedClusterP = new TH2F("MatchedClusterP","#frac{# clusters matched}{# clusters reconstructed} , wafers on p-side",20,1,21,16,1,17);
+    MatchedClusterP->SetXTitle("Ladder id");
+    MatchedClusterP->SetYTitle("Wafer id");
+    MatchedClusterN = new TH2F("MatchedClusterN","#frac{# clusters matched}{# clusters reconstructed} , wafers on n-side",20,1,21,16,1,17);
+    MatchedClusterN->SetXTitle("Ladder id");
+    MatchedClusterN->SetYTitle("Wafer id");
     // 		Create SCM histograms
     matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",500,0,1000,500,0,1000);
     matchisto->SetXTitle("PSide ADC count");
@@ -212,7 +221,7 @@ ClassImp(StSsdPointMaker)
     kind->SetYTitle("entries");
     kind->SetTitleOffset(2,"X");
     kind->SetTitleOffset(2,"Y");
-
+    
     TString Title;
     Char_t *Name = new Char_t[20];
     Title ="Matching Adc (1p-1n) for ladder";
@@ -225,7 +234,7 @@ ClassImp(StSsdPointMaker)
 	matchisto_[ii]->SetYTitle("NSide ADC count");
 	matchisto_[ii]->SetZTitle("(1p-1n) hits");
       }
-    if (Debug() > 1) DeclareNtuple();
+    if (Debug() >1) DeclareNtuple();
   }
   return StMaker::Init();
 }
@@ -235,7 +244,7 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   //    mDbMgr->setVerbose(false);
   
   //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
-
+  
   UseCalibration = 1;
   printf("UseCalibration=%d\n",UseCalibration);
   St_slsCtrl* slsCtrlTable = (St_slsCtrl*) GetDataBase("Geometry/ssd/slsCtrl");
@@ -288,20 +297,20 @@ void StSsdPointMaker::DeclareNtuple(){
   if (f) {
     f->cd();
     string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag:idClusP:idClusN:position_0:position_1:xl:yl";
-    mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
+    mHitNtuple      = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
     string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc:FirstAdc:LastAdc:TotNoise";
-    nHitNtuple     = new TNtuple("ClusTuple","All Clusters stored",varlist3.c_str()); 
-    string varlist4     = "side:ladder:wafer:nstrip:pedestal:signal:noise:snratio";
-    qHitNtuple          = new TNtuple("Strips","All Strips stored",varlist4.c_str());
-    pHitNtuple     = new TNtuple("ClustupleIn","Clusters in hits",varlist3.c_str()); 
-    rHitNtuple          = new TNtuple("StripsIn","Strips in hits",varlist4.c_str()); 
+    nHitNtuple      = new TNtuple("ClusTuple","All Clusters stored",varlist3.c_str()); 
+    string varlist4 = "side:ladder:wafer:nstrip:pedestal:signal:noise:snratio";
+    qHitNtuple      = new TNtuple("Strips","All Strips stored",varlist4.c_str());
+    pHitNtuple      = new TNtuple("ClustupleIn","Clusters in hits",varlist3.c_str()); 
+    rHitNtuple      = new TNtuple("StripsIn","Strips in hits",varlist4.c_str()); 
   }
 }
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Make()
 {
   LOG_DEBUG << Form("Make : begin")<< endm;
-    // 		Create output tables
+  // 		Create output tables
   Int_t res = 0; 
   char* myLabel  = new char[100];
   char* myTime = new char[100]; 
@@ -404,7 +413,7 @@ Int_t StSsdPointMaker::Make()
 	{
 	for(Int_t j=1;j<=16;j++)
 	{
-	PrintStripDetails(mySsd,7000+(100*j)+i);
+	//PrintStripDetails(mySsd,7000+(100*j)+i);
 	//PrintClusterDetails(mySsd,7000+(100*j)+i);
 	//PrintPointDetails(mySsd,7000+(100*j)+i);
 	//PrintPackageDetails(mySsd,7000+(100*j)+i);
@@ -417,6 +426,7 @@ Int_t StSsdPointMaker::Make()
       if(mSsdHitColl) {
 	LOG_INFO<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;
 	makeScmCtrlHistograms(mySsd);
+	EvaluateEfficiency(mySsd);
       }
       else {
 	LOG_INFO<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endm;
@@ -424,7 +434,7 @@ Int_t StSsdPointMaker::Make()
 	LOG_INFO<<"####        END OF SSD NEW POINT MAKER       ####"<<endm;
 	LOG_INFO<<"#################################################"<<endm;
       }
-      if(Debug() > 1){ 
+      if(Debug() >1){
 	if (qHitNtuple) WriteStripTuple(mySsd);
 	if (nHitNtuple) WriteScfTuple(mySsd);
 	if (mHitNtuple) WriteScmTuple(mySsd);
@@ -451,7 +461,6 @@ Int_t StSsdPointMaker::Make()
 //_____________________________________________________________________________
 void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 {
-  
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
   Int_t found;
   Float_t convAdcToE = (mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip())/(pow(2.0,mDynamicControl->getnbitEncoding()));
@@ -475,25 +484,25 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 	pSize = 0;
 	nSize = 0;
 	StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
-	  while (pClusterP)
-	    {  
-	      stpClusP->Fill(pClusterP->getClusterSize());
-	      totChrgP->Fill(convAdcToE*pClusterP->getTotAdc());
-	      if (pClusterP->getClusterSize()>0) 
-	        noisDisP->Fill(pClusterP->getTotNoise()/pClusterP->getClusterSize());
-	      if (pClusterP->getTotNoise()>0) 
-	        snRatioP->Fill((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
-	      pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);	
-	    }
-	    StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
-	    while (pClusterN)
-	      {
-		stpClusN->Fill(pClusterN->getClusterSize());
-		totChrgN->Fill(convAdcToE*pClusterN->getTotAdc());
-		noisDisN->Fill(pClusterN->getTotNoise()/(3e-33+pClusterN->getClusterSize()));
-		snRatioN->Fill((pClusterN->getTotAdc()*pClusterN->getClusterSize())/(3e-33+pClusterN->getTotNoise()));	
-		pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
-	      }	  
+	while (pClusterP)
+	  {  
+	    stpClusP->Fill(pClusterP->getClusterSize());
+	    totChrgP->Fill(convAdcToE*pClusterP->getTotAdc());
+	    if (pClusterP->getClusterSize()>0) 
+	      noisDisP->Fill(pClusterP->getTotNoise()/pClusterP->getClusterSize());
+	    if (pClusterP->getTotNoise()>0) 
+	      snRatioP->Fill((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
+	    pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);	
+	  }
+	StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
+	while (pClusterN)
+	  {
+	    stpClusN->Fill(pClusterN->getClusterSize());
+	    totChrgN->Fill(convAdcToE*pClusterN->getTotAdc());
+	    noisDisN->Fill(pClusterN->getTotNoise()/(3e-33+pClusterN->getClusterSize()));
+	    snRatioN->Fill((pClusterN->getTotAdc()*pClusterN->getClusterSize())/(3e-33+pClusterN->getTotNoise()));	
+	    pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
+	  }	  
       }
     }
   LOG_DEBUG <<"totclusters P="<<ClustersP_tot<<" totclusters N="<<ClustersN_tot<<endm;
@@ -523,7 +532,6 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
 		b = convMeVToAdc*(pSpt->getDe(0)-pSpt->getDe(1));
 		matchisto->Fill(a,b);
 		orthoproj->Fill((b-a)/TMath::Sqrt(2.));
-		printf("ladder = %d\n",i);
 		matchisto_[i]->Fill(a,b);
 	      }
 	    
@@ -534,14 +542,13 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
 		    kind->Fill(k);
 		  }
 	      }
-	    
 	    pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
 	  } 
 	}
       }
     }
 }
- //_____________________________________________________________________________
+//_____________________________________________________________________________
 
 void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
 {
@@ -708,50 +715,49 @@ void StSsdPointMaker::WriteStripTuple(StSsdBarrel *mySsd)
 //_____________________________________________________________________________
 void StSsdPointMaker::WriteScfTuple(StSsdBarrel *mySsd)
 {
-
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
   Int_t found;
   found=0;
-    for (Int_t i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
 	while (pClusterP)
 	  {   
-		ClusterNtuple[0] = 0;
-		ClusterNtuple[1] = i+1;
-		ClusterNtuple[2] = j+1;
-		ClusterNtuple[3] = pClusterP->getClusterSize();
-		ClusterNtuple[4] = ((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
-		ClusterNtuple[5] = pClusterP->getTotNoise()/pClusterP->getClusterSize();
-		ClusterNtuple[6] = pClusterP->getFirstStrip();
-		ClusterNtuple[7] = pClusterP->getTotAdc();
-		ClusterNtuple[8] = pClusterP->getFirstAdc();
-		ClusterNtuple[9] = pClusterP->getLastAdc();
-		ClusterNtuple[10]= pClusterP->getTotNoise();
-		pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);
-		nHitNtuple->Fill(ClusterNtuple);	
-	      }
-	    StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
-	    while (pClusterN)
-	      {	
-		ClusterNtuple[0] = 1;
-		ClusterNtuple[1] = i+1;
-		ClusterNtuple[2] = j+1;
-		ClusterNtuple[3] = pClusterN->getClusterSize();
-		ClusterNtuple[4] = ((pClusterN->getTotAdc()*pClusterN->getClusterSize())/pClusterN->getTotNoise());
-		ClusterNtuple[5] = pClusterN->getTotNoise()/pClusterN->getClusterSize();
-		ClusterNtuple[6] = pClusterN->getFirstStrip();
-		ClusterNtuple[7] = pClusterN->getTotAdc();
-		ClusterNtuple[8] = pClusterN->getFirstAdc();
-		ClusterNtuple[9] = pClusterN->getLastAdc();
-		ClusterNtuple[10]= pClusterN->getTotNoise();	
-		pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
-		nHitNtuple->Fill(ClusterNtuple);
-	      }	  
+	    ClusterNtuple[0] = 0;
+	    ClusterNtuple[1] = i+1;
+	    ClusterNtuple[2] = j+1;
+	    ClusterNtuple[3] = pClusterP->getClusterSize();
+	    ClusterNtuple[4] = ((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
+	    ClusterNtuple[5] = pClusterP->getTotNoise()/pClusterP->getClusterSize();
+	    ClusterNtuple[6] = pClusterP->getFirstStrip();
+	    ClusterNtuple[7] = pClusterP->getTotAdc();
+	    ClusterNtuple[8] = pClusterP->getFirstAdc();
+	    ClusterNtuple[9] = pClusterP->getLastAdc();
+	    ClusterNtuple[10]= pClusterP->getTotNoise();
+	    pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);
+	    nHitNtuple->Fill(ClusterNtuple);	
 	  }
+	StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
+	while (pClusterN)
+	  {	
+	    ClusterNtuple[0] = 1;
+	    ClusterNtuple[1] = i+1;
+	    ClusterNtuple[2] = j+1;
+	    ClusterNtuple[3] = pClusterN->getClusterSize();
+	    ClusterNtuple[4] = ((pClusterN->getTotAdc()*pClusterN->getClusterSize())/pClusterN->getTotNoise());
+	    ClusterNtuple[5] = pClusterN->getTotNoise()/pClusterN->getClusterSize();
+	    ClusterNtuple[6] = pClusterN->getFirstStrip();
+	    ClusterNtuple[7] = pClusterN->getTotAdc();
+	    ClusterNtuple[8] = pClusterN->getFirstAdc();
+	    ClusterNtuple[9] = pClusterN->getLastAdc();
+	    ClusterNtuple[10]= pClusterN->getTotNoise();	
+	    pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
+	    nHitNtuple->Fill(ClusterNtuple);
+	  }	  
       }
     }
+}
 //_____________________________________________________________________________
 void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 {
@@ -763,64 +769,64 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
-	  if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
-	  }
-	  else {
-	    StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
-	    while (pSpt){
-	      Float_t a = 0, b = 0;
-	      a = convMeVToAdc*(pSpt->getDe(0)+pSpt->getDe(1));
-	      b = convMeVToAdc*(pSpt->getDe(0)-pSpt->getDe(1));
-	      hitNtuple[0] = a;
-	      hitNtuple[1] = b;
-	      hitNtuple[2] = i+1;
-	      hitNtuple[3] = j+1;
-	      for(Int_t k=0;k<=11;k++)
-		{
-		  if(pSpt->getNMatched()==conversion[k])
-		    {
-		      hitNtuple[4]=k; 
-		    }
-		    }
-	      hitNtuple[5] = pSpt->getXg(0);
-	      hitNtuple[6] = pSpt->getXg(1);
-	      hitNtuple[7] = pSpt->getXg(2);
-	      hitNtuple[8] = pSpt->getFlag();
-
-	      Int_t IdP = pSpt->getIdClusterP();
-	      Int_t IdN = pSpt->getIdClusterN();
-
-	      StSsdClusterList *currentListP_j = mySsd->mLadders[i]->mWafers[j]->getClusterP();
-	      StSsdCluster     *cluster_P_j   = currentListP_j->first();
-	      while(cluster_P_j)
-		{
-		  if(cluster_P_j->getNCluster()==IdP) 
-		    break;
-		  cluster_P_j = currentListP_j->next(cluster_P_j);
-		}
- 
-	      StSsdClusterList *currentListN_j = mySsd->mLadders[i]->mWafers[j]->getClusterN();
-	      StSsdCluster *cluster_N_j       = currentListN_j->first();
-	      while(cluster_N_j)
-		{
-		  if(cluster_N_j->getNCluster()==IdN) 
-		    break;
-		  cluster_N_j = currentListN_j->next(cluster_N_j);
-		}
-	      
-	      hitNtuple[9] = cluster_P_j->getStripMean();
-	      hitNtuple[10]= cluster_N_j->getStripMean();
-	      hitNtuple[11] = pSpt->getPositionU(0);
-	      hitNtuple[12] = pSpt->getPositionU(1);
-	      hitNtuple[13] = pSpt->getXl(0);
-	      hitNtuple[14] = pSpt->getXl(1);
-	      mHitNtuple->Fill(hitNtuple);		 
-	      pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
-		} 
-	    }
-	  }
+	if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
+	}
+	else {
+	  StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+	  while (pSpt){
+	    Float_t a = 0, b = 0;
+	    a = convMeVToAdc*(pSpt->getDe(0)+pSpt->getDe(1));
+	    b = convMeVToAdc*(pSpt->getDe(0)-pSpt->getDe(1));
+	    hitNtuple[0] = a;
+	    hitNtuple[1] = b;
+	    hitNtuple[2] = i+1;
+	    hitNtuple[3] = j+1;
+	    for(Int_t k=0;k<=11;k++)
+	      {
+		if(pSpt->getNMatched()==conversion[k])
+		  {
+		    hitNtuple[4]=k; 
+		  }
+	      }
+	    hitNtuple[5] = pSpt->getXg(0);
+	    hitNtuple[6] = pSpt->getXg(1);
+	    hitNtuple[7] = pSpt->getXg(2);
+	    hitNtuple[8] = pSpt->getFlag();
+	    
+	    Int_t IdP = pSpt->getIdClusterP();
+	    Int_t IdN = pSpt->getIdClusterN();
+	    
+	    StSsdClusterList *currentListP_j = mySsd->mLadders[i]->mWafers[j]->getClusterP();
+	    StSsdCluster     *cluster_P_j   = currentListP_j->first();
+	    while(cluster_P_j)
+	      {
+		if(cluster_P_j->getNCluster()==IdP) 
+		  break;
+		cluster_P_j = currentListP_j->next(cluster_P_j);
+	      }
+	    
+	    StSsdClusterList *currentListN_j = mySsd->mLadders[i]->mWafers[j]->getClusterN();
+	    StSsdCluster *cluster_N_j       = currentListN_j->first();
+	    while(cluster_N_j)
+	      {
+		if(cluster_N_j->getNCluster()==IdN) 
+		  break;
+		cluster_N_j = currentListN_j->next(cluster_N_j);
+	      }
+	    
+	    hitNtuple[9] = cluster_P_j->getStripMean();
+	    hitNtuple[10]= cluster_N_j->getStripMean();
+	    hitNtuple[11] = pSpt->getPositionU(0);
+	    hitNtuple[12] = pSpt->getPositionU(1);
+	    hitNtuple[13] = pSpt->getXl(0);
+	    hitNtuple[14] = pSpt->getXl(1);
+	    mHitNtuple->Fill(hitNtuple);		 
+	    pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
+	  } 
+	}
       }
     }
+}
 //_____________________________________________________________________________
 void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
@@ -838,16 +844,16 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
           }
           else {
             LOG_DEBUG<<"PrintStripDetails() - "
-                            <<mySsd->mLadders[i]->mWafers[j]->getStripP()->getSize()<<" strip(s) on the P-side of this wafer "<< endm;  
+		     <<mySsd->mLadders[i]->mWafers[j]->getStripP()->getSize()<<" strip(s) on the P-side of this wafer "<< endm;  
             LOG_DEBUG<<"PrintStripDetails() - Strip/Adc/Ped/Noise"<< endm;  
             StSsdStrip *pStripP = mySsd->mLadders[i]->mWafers[j]->getStripP()->first();
             while (pStripP){
               LOG_DEBUG<<"PrintStripDetails() - "
-                              <<pStripP->getNStrip()<<" "
-                              <<pStripP->getDigitSig()<<" "
-                              <<pStripP->getPedestal()<<" "
-                              <<pStripP->getSigma()<<" "
-                              <<endm;  
+		       <<pStripP->getNStrip()<<" "
+		       <<pStripP->getDigitSig()<<" "
+		       <<pStripP->getPedestal()<<" "
+		       <<pStripP->getSigma()<<" "
+		       <<endm;  
               pStripP    = mySsd->mLadders[i]->mWafers[j]->getStripP()->next(pStripP);
             }
 	  }
@@ -857,26 +863,24 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
           }
           else {
             LOG_DEBUG<<"PrintStripDetails() - "
-                            <<mySsd->mLadders[i]->mWafers[j]->getStripN()->getSize()<<" strip(s) on the N-side of this wafer "<< endm;  
+		     <<mySsd->mLadders[i]->mWafers[j]->getStripN()->getSize()<<" strip(s) on the N-side of this wafer "<< endm;  
             LOG_DEBUG <<"StSsdPointMaker::PrintStripDetails() - Strip/Adc/Ped/Noise"<< endm;  
             StSsdStrip *pStripN = mySsd->mLadders[i]->mWafers[j]->getStripN()->first();
             while (pStripN){
               LOG_DEBUG<<"PrintStripDetails() - "
-                              <<pStripN->getNStrip()<<" "
-                              <<pStripN->getDigitSig()<<" "
-                              <<pStripN->getPedestal()<<" "
-                              <<pStripN->getSigma()<<" "
-                              <<endm;  
+		       <<pStripN->getNStrip()<<" "
+		       <<pStripN->getDigitSig()<<" "
+		       <<pStripN->getPedestal()<<" "
+		       <<pStripN->getSigma()<<" "
+		       <<endm;  
               pStripN    = mySsd->mLadders[i]->mWafers[j]->getStripN()->next(pStripN);
             }     
           }
         }
       }
-    }
-
+    } 
   if (found==0) {LOG_DEBUG <<"PrintStripDetails() - Wafer not found !!!"<<endm;}
 }
-
 //_____________________________________________________________________________
 void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
@@ -894,21 +898,21 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
           }
           else {
             LOG_INFO<<"PrintClusterDetails() - "
-                            <<mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()<<" cluster(s) on the P-side of this wafer "<< endm;  
+		    <<mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()<<" cluster(s) on the P-side of this wafer "<< endm;  
             LOG_INFO<<"PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
             StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
             while (pClusterP){
               LOG_INFO<<"PrintClusterDetails() - "
-                              <<pClusterP->getNCluster()<<" "
-                              <<pClusterP->getFlag()<<" "
-                              <<pClusterP->getClusterSize()<<" "
-                              <<pClusterP->getFirstStrip()<<" "
-                              <<pClusterP->getStripMean()<<" "
-                              <<pClusterP->getTotAdc()<<" "
-                              <<pClusterP->getFirstAdc()<<" "
-                              <<pClusterP->getLastAdc()<<" "
-			      <<pClusterP->getTotNoise()<<" "
-                              <<endm;  
+		      <<pClusterP->getNCluster()<<" "
+		      <<pClusterP->getFlag()<<" "
+		      <<pClusterP->getClusterSize()<<" "
+		      <<pClusterP->getFirstStrip()<<" "
+		      <<pClusterP->getStripMean()<<" "
+		      <<pClusterP->getTotAdc()<<" "
+		      <<pClusterP->getFirstAdc()<<" "
+		      <<pClusterP->getLastAdc()<<" "
+		      <<pClusterP->getTotNoise()<<" "
+		      <<endm;  
               pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);
             }
 	  }
@@ -918,28 +922,27 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
           }
           else {
             LOG_INFO<<"PrintClusterDetails() - "
-                            <<mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()<<" cluster(s) on the N-side of this wafer "<< endm;  
+		    <<mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()<<" cluster(s) on the N-side of this wafer "<< endm;  
             LOG_INFO<<"PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
             StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
             while (pClusterN){
               LOG_INFO<<"PrintClusterDetails() - "
-                              <<pClusterN->getNCluster()<<" "
-                              <<pClusterN->getFlag()<<" "
-                              <<pClusterN->getClusterSize()<<" "
-                              <<pClusterN->getFirstStrip()<<" "
-                              <<pClusterN->getStripMean()<<" "
-                              <<pClusterN->getTotAdc()<<" "
-                              <<pClusterN->getFirstAdc()<<" "
-                              <<pClusterN->getLastAdc()<<" "
-			      <<pClusterN->getTotNoise()<<" "
-                              <<endm;  
+		      <<pClusterN->getNCluster()<<" "
+		      <<pClusterN->getFlag()<<" "
+		      <<pClusterN->getClusterSize()<<" "
+		      <<pClusterN->getFirstStrip()<<" "
+		      <<pClusterN->getStripMean()<<" "
+		      <<pClusterN->getTotAdc()<<" "
+		      <<pClusterN->getFirstAdc()<<" "
+		      <<pClusterN->getLastAdc()<<" "
+		      <<pClusterN->getTotNoise()<<" "
+		      <<endm;  
               pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
             }     
           }
         }
       }
     }
-
   if (found==0){ LOG_INFO <<"PrintClusterDetails() - Wafer not found !!!"<<endm; }
 }
 
@@ -948,7 +951,6 @@ void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
   Int_t found;
-
   found=0;
   LOG_INFO <<"PrintPackageDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
@@ -965,8 +967,8 @@ void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer)
             StSsdPackage *pPack = mySsd->mLadders[i]->mWafers[j]->getPackage()->first();
             while (pPack){
               LOG_INFO<<"PrintPackageDetails() - "<<pPack->getNPackage()<<" "
-                              <<pPack->getKind()<<" "
-                              <<pPack->getSize()<<" "<<endm;
+		      <<pPack->getKind()<<" "
+		      <<pPack->getSize()<<" "<<endm;
               for (Int_t k=0;k<pPack->getSize();k++) {
                 LOG_INFO<<"PrintPackageDetails() - "<<k<<" "<<pPack->getMatched(k)<<" "<<pPack->getMatched(k)->getNCluster()<<endm;
               }
@@ -976,7 +978,6 @@ void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer)
         }
       }
     }
-
   if (found==0){ LOG_INFO <<"PrintPackageDetails() - Wafer not found !!!"<<endm;}
 }
 
@@ -985,7 +986,6 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
   Int_t found;
-
   found=0;
   LOG_INFO <<"PrintPointDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
@@ -1003,30 +1003,29 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer)
             StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
             while (pSpt){
               LOG_INFO<<"PrintPointDetails() - "
-                              <<pSpt->getNPoint()<<" "
-                              <<pSpt->getFlag()<<" "
-                              <<pSpt->getNMatched()<<" "
-                              <<pSpt->getIdClusterP()<<" "
-                              <<pSpt->getIdClusterN()<<" "
-			      <<pSpt->getNMchit(0)<<" "
-			      <<pSpt->getNMchit(1)<<" "
-			      <<pSpt->getNMchit(2)<<" "
-			      <<pSpt->getNMchit(3)<<" "
-			      <<pSpt->getNMchit(4)<<" "
-			      <<pSpt->getXg(0)    <<" "
-			      <<pSpt->getXg(1)    <<" "
-			      <<pSpt->getXg(2)    <<" "
-			      <<pSpt->getXl(0)    <<" "
-			      <<pSpt->getXl(1)    <<" "
-			      <<pSpt->getXl(2)    <<" "
-                              <<endm;  
+		      <<pSpt->getNPoint()<<" "
+		      <<pSpt->getFlag()<<" "
+		      <<pSpt->getNMatched()<<" "
+		      <<pSpt->getIdClusterP()<<" "
+		      <<pSpt->getIdClusterN()<<" "
+		      <<pSpt->getNMchit(0)<<" "
+		      <<pSpt->getNMchit(1)<<" "
+		      <<pSpt->getNMchit(2)<<" "
+		      <<pSpt->getNMchit(3)<<" "
+		      <<pSpt->getNMchit(4)<<" "
+		      <<pSpt->getXg(0)    <<" "
+		      <<pSpt->getXg(1)    <<" "
+		      <<pSpt->getXg(2)    <<" "
+		      <<pSpt->getXl(0)    <<" "
+		      <<pSpt->getXl(1)    <<" "
+		      <<pSpt->getXl(2)    <<" "
+		      <<endm;  
               pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
             }     
           }
         }
       }
     }
-
   if (found==0) {LOG_INFO <<"PrintPointDetails() - Wafer not found !!!"<<endm; }
 }
 
@@ -1038,19 +1037,18 @@ void StSsdPointMaker::PrintInfo()
 //_____________________________________________________________________________
 void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero)
 {
-    ssdStripCalib_st *noise = strip_calib->GetTable();
-
+  ssdStripCalib_st *noise = strip_calib->GetTable();
   Int_t  mSsdLayer = 7;
-
+  
   Int_t idWaf  = 0;
   Int_t iWaf   = 0;
   Int_t iLad   = 0;
   Int_t nStrip = 0;
   Int_t iSide  = 0;
-  Int_t iOver = 0;
-  Int_t iZero = 0;
+  Int_t iOver  = 0;
+  Int_t iZero  = 0;
   Int_t iUnder = 0;
-  Int_t iGood = 0;
+  Int_t iGood  = 0;
   for (Int_t i = 0 ; i < strip_calib->GetNRows(); i++)
     {
       if (noise[i].id>0 && noise[i].id<=76818620) {
@@ -1061,12 +1059,12 @@ void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero)
 	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
 	if (iLad==11 && iWaf==8 && nStrip <10) {
 	  LOG_INFO<<"ReadStrip: iLad,idWaf,nStrip,iSide,pedestal,rms = "<<iLad
-			  <<" "<<idWaf
-			  <<" "<<nStrip
-			  <<" "<<iSide
-			  <<" "<<(float)(noise[i].pedestals)
-			  <<" "<<(float)(noise[i].rms)<<endm;
-	iGood++;
+		  <<" "<<idWaf
+		  <<" "<<nStrip
+		  <<" "<<iSide
+		  <<" "<<(float)(noise[i].pedestals)
+		  <<" "<<(float)(noise[i].rms)<<endm;
+	  iGood++;
 	}
       }
       else {
@@ -1090,221 +1088,288 @@ void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero)
 //_____________________________________________________________________________
 void StSsdPointMaker::WriteMatchedStrips(StSsdBarrel *mySsd)
 {
-Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
   Int_t found;
   found=0;
-    for (Int_t i=0;i<20;i++) 
-      if (LadderIsActive[i]>0) {
-	for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
-	  LOG_DEBUG << " in ladder= "<<i << " wafer = "<<j<<endm;
-
-	  if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
-          }
-          else{
-	    LOG_DEBUG << " Size of the cluster P list = " << mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()<<endm;
-	    StSsdCluster *pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
-	    while (pclusterP)
-	      {  	
-		Int_t IdP = pclusterP->getNCluster();
-		//LOG_DEBUG << " we are looking for clusterId= " << pclusterP->getNCluster()<< endm;
-		if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
-		  if (pclusterP!=mySsd->mLadders[i]->mWafers[j]->getClusterP()->last())
-		    pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);
-		}
-		else {
-		  StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
-		  Int_t stop = 0;
-		  while ((pSpt)&&(stop==0)){
-		    if(IdP==pSpt->getIdClusterP()) 
-		      {
-			StSsdStrip *pStripP     = mySsd->mLadders[i]->mWafers[j]->getStripP()->first();
-			StSsdStrip *pStripLastP = mySsd->mLadders[i]->mWafers[j]->getStripP()->last();
-			while ((pStripP->getNStrip()!=pStripLastP->getNStrip())&&(pStripP->getNStrip()!=pclusterP->getFirstStrip())){
-			  pStripP    = mySsd->mLadders[i]->mWafers[j]->getStripP()->next(pStripP);
-			}
-			Int_t stripInCluster = pclusterP->getClusterSize();
-			Int_t k = 0;
-			while(k<stripInCluster){
-			  LOG_DEBUG<<"PrintStripDetails() - "
-				  << k << " "
-				  <<pStripP->getNStrip()<<" "
-				  <<pStripP->getDigitSig()<<" "
-				  <<pStripP->getPedestal()<<" "
-				  <<pStripP->getSigma()<<" "
-				  <<endm;
-			  StripsIn[0] = 0;
-			  StripsIn[1] = i+1;
-			  StripsIn[2] = j+1;
-			  StripsIn[3] = pStripP->getNStrip();
-			  StripsIn[4] = pStripP->getPedestal();
-			  StripsIn[5] = pStripP->getDigitSig();
-			  StripsIn[6] = pStripP->getSigma();
-			  StripsIn[7] = (float)(pStripP->getDigitSig()/pStripP->getSigma());
-			  rHitNtuple->Fill(StripsIn);  
-			  k++;
-			  stop=1;// 1 cluster matched to 1 hit
-			  pStripP    = mySsd->mLadders[i]->mWafers[j]->getStripP()->next(pStripP);
-			}
-		      }
-		    pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
-		  }
-		}
-		pclusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);
+  for (Int_t i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	LOG_DEBUG << " in ladder= "<<i << " wafer = "<<j<<endm;
+	
+	if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
+	}
+	else{
+	  LOG_DEBUG << " Size of the cluster P list = " << mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()<<endm;
+	  StSsdCluster *pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
+	  while (pclusterP)
+	    {  	
+	      Int_t IdP = pclusterP->getNCluster();
+	      //LOG_DEBUG << " we are looking for clusterId= " << pclusterP->getNCluster()<< endm;
+	      if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
+		if (pclusterP!=mySsd->mLadders[i]->mWafers[j]->getClusterP()->last())
+		  pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);
 	      }
-	  }
-	  if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
-          }
-          else{
-	    LOG_DEBUG << " Size of the cluster N list = " << mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()<<endm;
-	    StSsdCluster *pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
-	    while (pclusterN)
-	      {  	
-		Int_t IdN = pclusterN->getNCluster();
-		if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
-		  if (pclusterN!=mySsd->mLadders[i]->mWafers[j]->getClusterN()->last())
-		    pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);
-		}
-		else {
-		  StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
-		  Int_t stop = 0;
-		  while ((pSpt)&&(stop==0)){
-		    if(IdN==pSpt->getIdClusterN()) 
-		      {
-			StSsdStrip *pStripN     = mySsd->mLadders[i]->mWafers[j]->getStripN()->first();
-			StSsdStrip *pStripLastN = mySsd->mLadders[i]->mWafers[j]->getStripN()->last();
-			while ((pStripN->getNStrip()!=pStripLastN->getNStrip())&&(pStripN->getNStrip()!=pclusterN->getFirstStrip())){
-			  pStripN    = mySsd->mLadders[i]->mWafers[j]->getStripN()->next(pStripN);
-			}
-			Int_t stripInClusterN = pclusterN->getClusterSize();
-			Int_t kk = 0;
-			while(kk<stripInClusterN){
-			  LOG_DEBUG<<"PrintStripDetails() - "
-				  << kk << " "
-				  <<pStripN->getNStrip()<<" "
-				  <<pStripN->getDigitSig()<<" "
-				  <<pStripN->getPedestal()<<" "
-				  <<pStripN->getSigma()<<" "
-				  <<endm;
-			  StripsIn[0] = 1;
-			  StripsIn[1] = i+1;
-			  StripsIn[2] = j+1;
-			  StripsIn[3] = pStripN->getNStrip();
-			  StripsIn[4] = pStripN->getPedestal();
-			  StripsIn[5] = pStripN->getDigitSig();
-			  StripsIn[6] = pStripN->getSigma();
-			  StripsIn[7] = (float)(pStripN->getDigitSig()/pStripN->getSigma());
-			  rHitNtuple->Fill(StripsIn);  
-			  kk++;
-			  stop=1;// 1 cluster matched to 1 hit
-			  pStripN    = mySsd->mLadders[i]->mWafers[j]->getStripN()->next(pStripN);
-			}
+	      else {
+		StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+		Int_t stop = 0;
+		while ((pSpt)&&(stop==0)){
+		  if(IdP==pSpt->getIdClusterP()) 
+		    {
+		      StSsdStrip *pStripP     = mySsd->mLadders[i]->mWafers[j]->getStripP()->first();
+		      StSsdStrip *pStripLastP = mySsd->mLadders[i]->mWafers[j]->getStripP()->last();
+		      while ((pStripP->getNStrip()!=pStripLastP->getNStrip())&&(pStripP->getNStrip()!=pclusterP->getFirstStrip())){
+			pStripP    = mySsd->mLadders[i]->mWafers[j]->getStripP()->next(pStripP);
 		      }
-		    pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
-		  }
+		      Int_t stripInCluster = pclusterP->getClusterSize();
+		      Int_t k = 0;
+		      while(k<stripInCluster){
+			LOG_DEBUG<<"PrintStripDetails() - "
+				 << k << " "
+				 <<pStripP->getNStrip()<<" "
+				 <<pStripP->getDigitSig()<<" "
+				 <<pStripP->getPedestal()<<" "
+				 <<pStripP->getSigma()<<" "
+				 <<endm;
+			StripsIn[0] = 0;
+			StripsIn[1] = i+1;
+			StripsIn[2] = j+1;
+			StripsIn[3] = pStripP->getNStrip();
+			StripsIn[4] = pStripP->getPedestal();
+			StripsIn[5] = pStripP->getDigitSig();
+			StripsIn[6] = pStripP->getSigma();
+			StripsIn[7] = (float)(pStripP->getDigitSig()/pStripP->getSigma());
+			rHitNtuple->Fill(StripsIn);  
+			k++;
+			stop=1;// 1 cluster matched to 1 hit
+			pStripP    = mySsd->mLadders[i]->mWafers[j]->getStripP()->next(pStripP);
+		      }
+		    }
+		  pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
 		}
-		pclusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);
 	      }
-	  }
+	      pclusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);
+	    }
+	}
+	if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
+	}
+	else{
+	  LOG_DEBUG << " Size of the cluster N list = " << mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()<<endm;
+	  StSsdCluster *pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
+	  while (pclusterN)
+	    {  	
+	      Int_t IdN = pclusterN->getNCluster();
+	      if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
+		if (pclusterN!=mySsd->mLadders[i]->mWafers[j]->getClusterN()->last())
+		  pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);
+	      }
+	      else {
+		StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+		Int_t stop = 0;
+		while ((pSpt)&&(stop==0)){
+		  if(IdN==pSpt->getIdClusterN()) 
+		    {
+		      StSsdStrip *pStripN     = mySsd->mLadders[i]->mWafers[j]->getStripN()->first();
+		      StSsdStrip *pStripLastN = mySsd->mLadders[i]->mWafers[j]->getStripN()->last();
+		      while ((pStripN->getNStrip()!=pStripLastN->getNStrip())&&(pStripN->getNStrip()!=pclusterN->getFirstStrip())){
+			pStripN    = mySsd->mLadders[i]->mWafers[j]->getStripN()->next(pStripN);
+		      }
+		      Int_t stripInClusterN = pclusterN->getClusterSize();
+		      Int_t kk = 0;
+		      while(kk<stripInClusterN){
+			LOG_DEBUG<<"PrintStripDetails() - "
+				 << kk << " "
+				 <<pStripN->getNStrip()<<" "
+				 <<pStripN->getDigitSig()<<" "
+				 <<pStripN->getPedestal()<<" "
+				 <<pStripN->getSigma()<<" "
+				 <<endm;
+			StripsIn[0] = 1;
+			StripsIn[1] = i+1;
+			StripsIn[2] = j+1;
+			StripsIn[3] = pStripN->getNStrip();
+			StripsIn[4] = pStripN->getPedestal();
+			StripsIn[5] = pStripN->getDigitSig();
+			StripsIn[6] = pStripN->getSigma();
+			StripsIn[7] = (float)(pStripN->getDigitSig()/pStripN->getSigma());
+			rHitNtuple->Fill(StripsIn);  
+			kk++;
+			stop=1;// 1 cluster matched to 1 hit
+			pStripN    = mySsd->mLadders[i]->mWafers[j]->getStripN()->next(pStripN);
+		      }
+		    }
+		  pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
+		}
+	      }
+	      pclusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);
+	    }
 	}
       }
+    }
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::WriteMatchedClusters(StSsdBarrel *mySsd)
 {
-Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
   Int_t found;
   found=0;
   Int_t clusP = 0;
   Int_t clusN = 0;
-    for (Int_t i=0;i<20;i++) 
-      if (LadderIsActive[i]>0) {
-	for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
-	  LOG_DEBUG << " in ladder= "<<i << " wafer = "<<j<<endm;
-
-	  if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
-	  }
-          else{
-	    //LOG_DEBUG << " Size of the cluster P list = " << mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()<<endm;
-	    StSsdCluster *pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
-	    while (pclusterP)
-	      {  	
-		//LOG_DEBUG << " clusterId= " << pclusterP->getNCluster()<< endm;
-		Int_t IdP = pclusterP->getNCluster();
-		//LOG_DEBUG << " we are looking for clusterId= " << pclusterP->getNCluster()<< endm;
-		if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
-		  pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);  
-		}
-		else {
-		  StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
-		  while (pSpt){
-		    if(IdP==pSpt->getIdClusterP())
-		      {
-			clusP++;
-			LOG_DEBUG << "ok found the corresponding hit to this cluster id = "<<pSpt->getIdClusterP()<<endm; 
-			ClustupleIn[0] = 0;
-			ClustupleIn[1] = i+1;
-			ClustupleIn[2] = j+1;
-			ClustupleIn[3] = pclusterP->getClusterSize();
-			ClustupleIn[4] = ((pclusterP->getTotAdc()*pclusterP->getClusterSize())/pclusterP->getTotNoise());
-			ClustupleIn[5] = pclusterP->getTotNoise()/pclusterP->getClusterSize();
-			ClustupleIn[6] = pclusterP->getFirstStrip();
-			ClustupleIn[7] = pclusterP->getTotAdc();
-			ClustupleIn[8] = pclusterP->getFirstAdc();
-			ClustupleIn[9] = pclusterP->getLastAdc();
-			ClustupleIn[10]= pclusterP->getTotNoise();
-			pHitNtuple->Fill(ClustupleIn);
-			//break;
-		      }
-		    pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
-		  }
-		  pclusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);
-		}
+  for (Int_t i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	LOG_DEBUG << " in ladder= "<<i << " wafer = "<<j<<endm;
+	if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
+	}
+	else{
+	  LOG_DEBUG << " Size of the cluster P list = " << mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()<<endm;
+	  StSsdCluster *pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
+	  while (pclusterP)
+	    {  	
+	      LOG_DEBUG << " clusterId= " << pclusterP->getNCluster()<< endm;
+	      Int_t IdP = pclusterP->getNCluster();
+	      LOG_DEBUG << " we are looking for clusterId= " << pclusterP->getNCluster()<< endm;
+	      if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
+		pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);  
 	      }
-	  }
-	  if (mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()==0) {
-	  }
-          else{
-	    LOG_DEBUG << " Size of the cluster N list = " << mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()<<endm;
-	    StSsdCluster *pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
-	    while (pclusterN)
-	      {  	
-		//LOG_DEBUG << " clusterId= " << pclusterN->getNCluster()<< endm;
-		Int_t IdN = pclusterN->getNCluster();
-		//LOG_DEBUG << " we are looking for clusterId= " << pclusterN->getNCluster()<< endm;
-		if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
-		  pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);  
+	      else {
+		StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+		while (pSpt){
+		  if(IdP==pSpt->getIdClusterP())
+		    {
+		      clusP++;
+		      LOG_DEBUG << "ok found the corresponding hit to this cluster id = "<<pSpt->getIdClusterP()<<endm; 
+		      ClustupleIn[0] = 0;
+		      ClustupleIn[1] = i+1;
+		      ClustupleIn[2] = j+1;
+		      ClustupleIn[3] = pclusterP->getClusterSize();
+		      ClustupleIn[4] = ((pclusterP->getTotAdc()*pclusterP->getClusterSize())/pclusterP->getTotNoise());
+		      ClustupleIn[5] = pclusterP->getTotNoise()/pclusterP->getClusterSize();
+		      ClustupleIn[6] = pclusterP->getFirstStrip();
+		      ClustupleIn[7] = pclusterP->getTotAdc();
+		      ClustupleIn[8] = pclusterP->getFirstAdc();
+		      ClustupleIn[9] = pclusterP->getLastAdc();
+		      ClustupleIn[10]= pclusterP->getTotNoise();
+		      pHitNtuple->Fill(ClustupleIn);
+		      //break;
+		    }
+		  pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
 		}
-		else {
-		  StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
-		  while (pSpt){
-		    if(IdN==pSpt->getIdClusterN())
-		      {
-			clusN++;
-			LOG_DEBUG << "ok found the corresponding hit to this cluster id = "<<pSpt->getIdClusterN()<<endm; 
-			ClustupleIn[0] = 1;
-			ClustupleIn[1] = i+1;
-			ClustupleIn[2] = j+1;
-			ClustupleIn[3] = pclusterN->getClusterSize();
-			ClustupleIn[4] = ((pclusterN->getTotAdc()*pclusterN->getClusterSize())/pclusterN->getTotNoise());
-			ClustupleIn[5] = pclusterN->getTotNoise()/pclusterN->getClusterSize();
-			ClustupleIn[6] = pclusterN->getFirstStrip();
-			ClustupleIn[7] = pclusterN->getTotAdc();
-			ClustupleIn[8] = pclusterN->getFirstAdc();
-			ClustupleIn[9] = pclusterN->getLastAdc();
-			ClustupleIn[10]= pclusterN->getTotNoise();
-			pHitNtuple->Fill(ClustupleIn);
-			//break;
-		      }
-		    pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
-		  }
-		  pclusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);
-		}
+		pclusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);
 	      }
-	  }
+	    }
+	  clusP = 0;
+	}
+	if (mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()==0) {
+	}
+	else{
+	  LOG_DEBUG << " Size of the cluster N list = " << mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()<<endm;
+	  StSsdCluster *pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
+	  while (pclusterN)
+	    {  	
+	      //LOG_DEBUG << " clusterId= " << pclusterN->getNCluster()<< endm;
+	      Int_t IdN = pclusterN->getNCluster();
+	      //LOG_DEBUG << " we are looking for clusterId= " << pclusterN->getNCluster()<< endm;
+	      if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
+		pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);  
+	      }
+	      else {
+		StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+		while (pSpt){
+		  if(IdN==pSpt->getIdClusterN())
+		    {
+		      clusN++;
+		      LOG_DEBUG << "ok found the corresponding hit to this cluster id = "<<pSpt->getIdClusterN()<<endm; 
+		      ClustupleIn[0] = 1;
+		      ClustupleIn[1] = i+1;
+		      ClustupleIn[2] = j+1;
+		      ClustupleIn[3] = pclusterN->getClusterSize();
+		      ClustupleIn[4] = ((pclusterN->getTotAdc()*pclusterN->getClusterSize())/pclusterN->getTotNoise());
+		      ClustupleIn[5] = pclusterN->getTotNoise()/pclusterN->getClusterSize();
+		      ClustupleIn[6] = pclusterN->getFirstStrip();
+		      ClustupleIn[7] = pclusterN->getTotAdc();
+		      ClustupleIn[8] = pclusterN->getFirstAdc();
+		      ClustupleIn[9] = pclusterN->getLastAdc();
+		      ClustupleIn[10]= pclusterN->getTotNoise();
+		      pHitNtuple->Fill(ClustupleIn);
+		      //break;
+		    }
+		  pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
+		}
+		pclusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);
+	      }
+	    }
+	  clusN = 0;
 	}
       }
-    LOG_DEBUG << "Number of p-side clusters in hits = " << clusP << endm ;
-    LOG_DEBUG << "Number of n-side clusters in hits = " << clusN << endm ;
+    }
+  LOG_DEBUG << "Number of p-side clusters in hits = " << clusP << endm ;
+  LOG_DEBUG << "Number of n-side clusters in hits = " << clusN << endm ;
+}
+//_____________________________________________________________________________
+void StSsdPointMaker::EvaluateEfficiency(StSsdBarrel *mySsd)
+{
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  Int_t found;
+  found=0;
+  Int_t clusP = 0;
+  Int_t clusN = 0;
+  for (Int_t i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
+	}
+	else{
+	  StSsdCluster *pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
+	  while (pclusterP)
+	    {  	
+	      Int_t IdP = pclusterP->getNCluster();
+	      if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
+		pclusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);  
+	      }
+	      else {
+		StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+		while (pSpt){
+		  if(IdP==pSpt->getIdClusterP())
+		    {
+		      clusP++;
+		      //break;
+		    }
+		  pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
+		}
+		pclusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);
+	      }
+	    }
+	  MatchedClusterP->Fill(i+1,j+1,(float)clusP/mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize());
+	  clusP = 0;
+	}
+	if (mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()==0) {
+	}
+	else{
+	  StSsdCluster *pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
+	  while (pclusterN)
+	    {  	
+	      Int_t IdN = pclusterN->getNCluster();
+	      if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) { 
+		pclusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);  
+	      }
+	      else {
+		StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+		while (pSpt){
+		  if(IdN==pSpt->getIdClusterN())
+		    {
+		      clusN++;
+		      //break;
+		    }
+		  pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
+		}
+		pclusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);
+	      }
+	    }
+	  MatchedClusterN->Fill(i+1,j+1,(float)clusN/mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize());
+	  clusN = 0;
+	}
+      }
+    }
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::FillCalibTable(){
@@ -1323,8 +1388,7 @@ void StSsdPointMaker::FillCalibTable(){
     LOG_WARN << "We will use the default table" <<endm;
     for(Int_t i=0; i<320;i++){
       CalibArray[i] = 1;
-      //LOG_INFO << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm; 
-      
+      //LOG_INFO << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm;
     }
   }
 }

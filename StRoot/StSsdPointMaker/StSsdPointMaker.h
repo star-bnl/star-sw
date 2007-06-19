@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.26 2007/06/19 01:19:15 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.27 2007/06/19 18:30:24 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.27  2007/06/19 18:30:24  bouchet
+// Add a method to evaluate the reconstruction efficiency (defined as the ratio of the number of matched clusters with all reconstructed clusters) ; some clean-up
+//
 // Revision 1.26  2007/06/19 01:19:15  bouchet
 // cosmetic changes
 //
@@ -109,6 +112,7 @@ class TFile;
 class TH1F;
 class TH1S;
 class TH2S;
+class TH2F;
 class TNtuple;
 
 class St_ssdDimensions;
@@ -191,6 +195,7 @@ class StSsdPointMaker : public StMaker {
   void Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero);
   void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
   void WriteMatchedStrips(StSsdBarrel *mySsd);//! 
+  void EvaluateEfficiency(StSsdBarrel *mySsd);//!
   void FillCalibTable();
   void FillDefaultCalibTable();
  protected:
@@ -218,12 +223,14 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto;    //! (1p-1n) packages control matching.
   TH1S  *orthoproj;    //! orthonormal projection and perfect matching deviation.
   TH1S  *kind;         //! kind of hits -->see StSsdWafer for definition
-  TH2S *matchisto_[20];
+  TH2S  *matchisto_[20];
+  TH2F  *MatchedClusterP;//!
+  TH2F  *MatchedClusterN;//!
   Int_t Zero;
   Int_t UseCalibration ;
   Float_t CalibArray[320];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.26 2007/06/19 01:19:15 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.27 2007/06/19 18:30:24 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
