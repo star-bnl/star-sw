@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.44 2007/06/19 18:30:24 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.45 2007/06/23 04:53:50 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.45  2007/06/23 04:53:50  bouchet
+// add 0's to Timestamp which size is less than 6 digits
+//
 // Revision 1.44  2007/06/19 18:30:24  bouchet
 // Add a method to evaluate the reconstruction efficiency (defined as the ratio of the number of matched clusters with all reconstructed clusters) ; some clean-up
 //
@@ -315,11 +318,16 @@ Int_t StSsdPointMaker::Make()
   char* myLabel  = new char[100];
   char* myTime = new char[100]; 
   char* myDate = new char[100];
-  
-  if (GetTime()>99999)
-    sprintf(myTime,"%d",GetTime());
+  if (GetTime()<999)
+    sprintf(myTime,"000%d",GetTime());
   else
-    sprintf(myTime,"0%d",GetTime());
+    if ((GetTime()<9999)&&(GetTime()>999))
+      sprintf(myTime,"00%d",GetTime());
+    else
+      if ((GetTime()<99999)&&(GetTime()>9999))
+	sprintf(myTime,"0%d",GetTime());
+      else 
+	sprintf(myTime,"%d",GetTime());
   sprintf(myDate,"%d%s",GetDate(),".");
   sprintf(myLabel,"%s%s",myDate,myTime);
   // two different tables can exist (physics data or pedestal data)
