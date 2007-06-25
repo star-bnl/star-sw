@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.108 2007/06/07 20:13:42 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.109 2007/06/25 19:31:52 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.109  2007/06/25 19:31:52  perev
+ * Init of _sinCA and _cosCA non zeros now
+ *
  * Revision 2.108  2007/06/07 20:13:42  perev
  * BugFix in getPt()
  *
@@ -340,8 +343,6 @@ using namespace std;
 #include "TCernLib.h"
 #endif
 #include "THelixTrack.h"
-// because I can't figure out how to use THelixTrack to get interception with cylinder 
-#include "StPhysicalHelix.hh"
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
 
@@ -1774,36 +1775,6 @@ int StiKalmanTrackNode::locate()
   }
   return position;
  }
-#if 0//obsolete
-//______________________________________________________________________________
-void StiKalmanTrackNode::initialize(StiHit *h,double alpha, double XcRho, double curvature, double tanl)
-{
-  //cout << "StiKalmanTrackNode::initialize(...) -I- Started"<<endl;
-  reset();
-  setHit(h);
-  mFP._x       = h->x();
-  _alpha   = alpha;
-  mFP._y      = h->y();
-  mFP._z      = h->z();
-  mFP._eta      = XcRho-mFP._x*curvature;
-  mFP._curv      = curvature;
-  mFP._tanl      = tanl;
-  mFP._sinCA = 999.;
-  if (fabs(mFP._eta)>1.)   
-      throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
-  mFP._sinCA   = -mFP._eta;
-  mFP._cosCA   = ::sqrt((1.-mFP._sinCA)*(1+mFP._sinCA));
-//		Changing eta -sinCA ==>> arcsin(sinCA)
-   mFP._eta = asin(mFP._sinCA);
-  //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
-  resetError();
-  mPP() = mFP;
-  setDetector(h->detector());
-  setHitErrors();
-  _state = kTNInit;
-  setChi2(0.1);
-}
-#endif
 //______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)
 {
@@ -1811,6 +1782,8 @@ void StiKalmanTrackNode::initialize(StiHit *h)
   setHit(h);
   _detector = h->detector();
   _alpha   = _detector->getPlacement()->getNormalRefAngle(); 
+  mFP._sinCA = 0.6;
+  mFP._cosCA = 0.8;
   mFP._x = h->x();
   mFP._y = h->y();
   mFP._z = h->z();
