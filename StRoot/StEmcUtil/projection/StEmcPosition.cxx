@@ -143,9 +143,9 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
   *atFinal=Zero;
   *momentumAtFinal=Zero;
 
-  const StThreeVectorF& origin = track->geometry()->origin();
-  const StThreeVectorF& momentum = track->geometry()->momentum();
-  Double_t charge = track->geometry()->charge();
+  const StThreeVectorF& origin = track->outerGeometry()->origin();
+  const StThreeVectorF& momentum = track->outerGeometry()->momentum();
+  Double_t charge = track->outerGeometry()->charge();
   StPhysicalHelixD helix(momentum, origin, magField*tesla, charge);
   pairD pathLength = helix.pathLength(radius);
 
@@ -272,9 +272,9 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
 {  
   // There's no check for primary or secondary tracks
   
-  if (!track->geometry()) return kFALSE;  
+  if (!track->outerGeometry()) return kFALSE;  
 
-  const StThreeVectorD& origin = track->geometry()->origin();
+  const StThreeVectorD& origin = track->outerGeometry()->origin();
   Float_t xO = origin.x();
   Float_t yO = origin.y();
   Float_t distToOrigin = ::sqrt( ::pow(xO, 2) + ::pow(yO, 2) );    
