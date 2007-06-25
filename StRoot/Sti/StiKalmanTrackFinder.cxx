@@ -222,7 +222,7 @@ static int nCall=0;nCall++;
       int iBreak=1;
       do { //technical do
         track->setFlag(-1);
-        status = track->approx(); 
+        status = track->approx(0); 
         if (status ) 	{nTSeed++; break;}
         status = track->fit(kOutsideIn);
         if (status ) 	{nTSeed++; break;}
@@ -340,7 +340,7 @@ StiDebug::Break(nCall);
     }
   trackExtended |=trackExtendedOut;
   if (trackExtended) {
-    status = track->approx();
+    status = track->approx(1);
     if (status) return -1;
     status = track->refit();
     if (status) return -1;
