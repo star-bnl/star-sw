@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.91 2007/03/21 17:49:16 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.91 2007/03/21 17:49:16 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.92 2007/06/25 19:28:50 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.92 2007/06/25 19:28:50 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.92  2007/06/25 19:28:50  perev
+ * New better THelix fit in approx
+ *
  * Revision 2.91  2007/03/21 17:49:16  fisyak
  * add includes for ROOT 5.14
  *
@@ -425,7 +428,7 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
     add(n,kOutsideIn);
   }
 
-  int ierr = approx();
+  int ierr = approx(0);
   if (!ierr) return 0;
   BFactory::Free(this);
   return 1;  
@@ -1086,14 +1089,14 @@ StiDebug::Break(nCall);
       if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
       double radSvt= 25.;
       if (trackFinder->find(this,kOutsideIn,radSvt)) {
-          status = approx(); if(status) return false;
-          status = refit() ; if(status) return false;
+          status = approx(1); if(status) return false;
+          status = refit()  ; if(status) return false;
 	  trackExtended = getNNodes(3)>5;
       }	
 
       if (trackFinder->find(this,kOutsideIn,0.)) {
-          status = approx(); if(status) return false;
-          status = refit() ; if(status) return false;
+          status = approx(1); if(status) return false;
+          status = refit()  ; if(status) return false;
 	  trackExtended = trackExtended || getNNodes(3)>5;
       }	
     }
@@ -1115,8 +1118,8 @@ StiDebug::Break(nCall);
 	  if (debug()) cout << "StiKalmanTrack::find swap " << *((StiTrack *) this);
 	  trackExtendedOut= trackFinder->find(this,kInsideOut);
           if (trackExtendedOut) { 
-             status = approx(); if(status) return false;
-             status = refit() ; if(status) return false;
+             status = approx(1); if(status) return false;
+             status = refit()  ; if(status) return false;
 	     trackExtendedOut = getNNodes(3)>5;
           }
 	  if (debug()) cout << "StiKalmanTrack::find find(this,kInsideOut)" << *((StiTrack *) this);
@@ -1443,19 +1446,43 @@ void StiKalmanTrack::print(const char *opt) const
     node->print(opt);
   }
 }
+#define APPROX_DEBUG
+#ifdef APPROX_DEBUG
+#include "TCanvas.h"
+#include "TH1F.h"
+#include "TProfile.h"
+#endif // APPROX_DEBUG
 //_____________________________________________________________________________
-int StiKalmanTrack::approx()
+int StiKalmanTrack::approx(int mode)
 {
-  enum {BAD_RESIDUAL=5};
 static int nCall=0; nCall++;
-  double xyz[100][3],err[100][4],res;
+StiDebug::Break(nCall);
+#ifdef APPROX_DEBUG
+static TCanvas *myCanvas=0;
+static TH1  *H[4];
+
+if(!myCanvas) {
+   myCanvas=new TCanvas("Approx","",600,800);
+   H[0] = new TH1F("Approx0l","Approx0l", 100,0,5);
+   H[1] = new TH1F("Approx1l","Approx1l", 100,0,5);
+   H[2] = new TProfile("Approx0 ","Approx0",  100,0,0.1);
+   H[3] = new TProfile("Approx1 ","Approx1 ", 100,0,0.1);
+   myCanvas->Divide(1,4);
+   for (int i=0;i<4;i++) {myCanvas->cd(i+1); H[i]->Draw();}
+}
+#endif // APPROX_DEBUG
+const double BAD_XI2[2]={77,6},XI2_FACT=1.5;
+int nNode,nNodeIn;
+double Xi2=0;
   StiHitErrs hr;
 //		Loop over nodes and collect global xyz
 
   StiKTNBidirectionalIterator source;
   StiKalmanTrackNode *targetNode;
-  int nNode=0;
+  nNode=0;
   double hz=0; 
+  THelixFitter circ;
+  THelixTrack  cirl;
   for (source=rbegin();source!=rend();source++) {
     targetNode = &(*source);
     if (!hz) hz = targetNode->getHz();
@@ -1463,43 +1490,45 @@ static int nCall=0; nCall++;
     StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
     if (targetNode->getChi2()>1000)	continue;
-    xyz[nNode][0] = hit->x_g();
-    xyz[nNode][1] = hit->y_g();
-    xyz[nNode][2] = hit->z_g();
+    circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
-    TCL::ucopy(hr.A,err[nNode],3);
-    err[nNode][3] = hr.hZZ;
-
-
+    circ.AddErr(hr.A,hr.hZZ);
     nNode++;
   }  
   if (!nNode) 				return 1; 
-  int nNodeIn = nNode;
+  nNodeIn = nNode;
   int nPnts = nNode;
   if (nPnts==2) {
     nPnts=3;
-    memset(xyz[2],0,sizeof(double)*3);
+    circ.Add(0.,0.,0.);
+    double vErr[3]={1.,0.,1};
+    circ.AddErr(vErr,100*100.);
   }
   
   
-  TCircle circ,cirl;
-  if (fabs(hz)<1e-5) circ.SetStrait();
-  res=circ.Approx(nPnts,xyz[0],3);
-  if (res>BAD_RESIDUAL*5) 		return 2;
-  res=circ.Fit(nPnts,xyz[0],3,err[0],4);
-  if (res>BAD_RESIDUAL) 		return 3;
-  double Z0TanL[5];
-  res=circ.FitZ(Z0TanL,nNode,xyz[0],3,xyz[0]+2,3,err[0]+3,4);
-  if (res>BAD_RESIDUAL) 		return 4;
-
-  double s=0,xy[2]; 
-  double curv = circ.Rho();
+  Xi2 =circ.Fit();
+#ifdef APPROX_DEBUG
+  H[mode+0]->Fill(log(Xi2)/log(10.));
+  H[mode+2]->Fill(fabs(circ.GetRho()),Xi2);
+#endif // APPROX_DEBUG
+  circ.MakeErrs();
+  
+  double s=0,xyz[3]; 
+  double curv = circ.GetRho();
   for (source=rbegin();source!=rend();source++) {
     targetNode = &(*source);
     if (!targetNode->isValid()) 	continue;
-    xy[0] = targetNode->x_g();
-    xy[1] = targetNode->y_g();
-    double ds = circ.Path(xy);
+    StiHit * hit = targetNode->getHit();
+    if (hit) {
+      xyz[0] = hit->x_g();
+      xyz[1] = hit->y_g();
+      xyz[2] = hit->z_g();
+    } else {
+      xyz[0] = targetNode->x_g();
+      xyz[1] = targetNode->y_g();
+      xyz[2] = targetNode->z_g();
+    }
+    double ds = circ.Path(xyz);
     circ.Move(ds);
     s+=ds;
     cirl = circ;
@@ -1508,17 +1537,32 @@ static int nCall=0; nCall++;
     StiNodePars P = targetNode->fitPars();
     P._x  =  cirl.Pos()[0];
     P._y  =  cirl.Pos()[1];
-    P._z  = Z0TanL[0]+Z0TanL[1]*s;
+    P._z  =  cirl.Pos()[2];
     P._eta  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P._curv = curv;
-    double ptin = (fabs(P._hz)>1e-5)? curv/P._hz:1e-6;
-    P._ptin= ptin;
-    P._tanl = Z0TanL[1];
-    P._cosCA = cirl.Dir()[0];
-    P._sinCA = cirl.Dir()[1];
+    double hh = P._hz;
+    hh = (fabs(hh)<1e-10)? 0:1./hh;
+    P._ptin = (hh)? curv*hh:1e-6;
+    P._tanl = cirl.GetSin()/cirl.GetCos();
+    P._cosCA = cirl.Dir()[0]/cirl.GetCos();
+    P._sinCA = cirl.Dir()[1]/cirl.GetCos();
     targetNode->fitPars() = P;
-    if(targetNode->nudge()) {nNode--; targetNode->setInvalid();}
+    int ians = targetNode->nudge();
+    if(ians) {nNode--; targetNode->setInvalid();continue;}
+    P = targetNode->fitPars();
+#if 0
+    if (mode==0) {
+      StiNodeErrs &E = targetNode->fitErrs();
+      cirl.StiEmx(E.A);
+      TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
+      E._cPP*=hh; E._cTP*=hh;
+      if (Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
+      E.check("In aprox");
+    }
+#endif //
   }   
+//  printf ("UUUUUUUUUU %d %d %d\n",nCall,nNode,nNodeIn);
+  if (Xi2>BAD_XI2[mode])return 2;
   if (nNode==nNodeIn) 	return 0;
   if (nNode<2)		return 3;
   return 0;
