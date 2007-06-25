@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.92 2007/06/25 19:28:50 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.92 2007/06/25 19:28:50 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.93 2007/06/25 19:35:10 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.93 2007/06/25 19:35:10 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.93  2007/06/25 19:35:10  perev
+ * DEbug off
+ *
  * Revision 2.92  2007/06/25 19:28:50  perev
  * New better THelix fit in approx
  *
@@ -1446,7 +1449,7 @@ void StiKalmanTrack::print(const char *opt) const
     node->print(opt);
   }
 }
-#define APPROX_DEBUG
+//#define APPROX_DEBUG
 #ifdef APPROX_DEBUG
 #include "TCanvas.h"
 #include "TH1F.h"
