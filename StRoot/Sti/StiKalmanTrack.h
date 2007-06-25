@@ -284,7 +284,7 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
-  int approx();
+  int approx(int mode=0);
   
   void reduce();
 
