@@ -476,8 +476,8 @@ static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv"
 void StiHitErrs::rotate(double angle)
 {
   double t[2][2];
-  t[0][0] = cos(angle); t[0][1] = sin(angle);
-  t[1][0] = -t[0][1];   t[1][1] = t[0][0];
+  t[0][0] = cos(angle); t[0][1] = -sin(angle);
+  t[1][0] = -t[0][1]  ; t[1][1] = t[0][0];
   double r[3];
   TCL::trasat(t[0],&hXX,r,2,2);
   TCL::ucopy(r,&hXX,3);
