@@ -6,44 +6,37 @@ StChain *chain;
 int total=0;
 
 void RunJetReader(int nevents=10,
-		  const char* file,
-		  const char* jetInFile,
-		  const char* dir = "",
-		  const char *filter = "")
+          const char* file,
+          const char* jetInFile,
+          const char* dir = "",
+          const char *filter = "")
 {
     cout <<"MuDst chain file:\t"<<file<<endl;
     cout <<"Jet tree file:\t"<<jetInFile<<endl;
     //abort();
     
-	if (gClassTable->GetID("TTable") < 0) {
-		gSystem->Load("libStar");
-		gSystem->Load("libPhysics");
-	}
-	gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
-	loadSharedLibraries();
-	gSystem->Load("StTpcDb");
-	gSystem->Load("StDbUtilities");
-	gSystem->Load("StMcEvent");
-	gSystem->Load("StMcEventMaker");
-	gSystem->Load("StDaqLib");
-	gSystem->Load("StEmcRawMaker");
-	gSystem->Load("StEmcADCtoEMaker");
-	gSystem->Load("StPreEclMaker");
-	gSystem->Load("StEpcMaker");
-	gSystem->Load("StEmcSimulatorMaker");
-	gSystem->Load("StEmcUtil");
-	gSystem->Load("StDbLib");
-	gSystem->Load("StDbBroker");
-	gSystem->Load("StDetectorDbMaker");
-	gSystem->Load("St_db_Maker");
-	gSystem->Load("StEEmcDbMaker");
-	gSystem->Load("StSpinDbMaker");
-	gSystem->Load("StEEmcUtil");
-	gSystem->Load("StJetFinder");
-	gSystem->Load("StJetMaker");
-	
+    gROOT->Macro("loadMuDst.C");
+    gSystem->Load("StTpcDb");
+    gSystem->Load("StDbUtilities");
+    gSystem->Load("StMcEvent");
+    gSystem->Load("StMcEventMaker");
+    gSystem->Load("StDaqLib");
+    gSystem->Load("StEmcRawMaker");
+    gSystem->Load("StEmcADCtoEMaker");
+    gSystem->Load("StEpcMaker");
+    gSystem->Load("StEmcSimulatorMaker");
+    gSystem->Load("StDbBroker");
+    gSystem->Load("StDetectorDbMaker");
+    gSystem->Load("St_db_Maker");
+    gSystem->Load("StEEmcDbMaker");
+    gSystem->Load("StSpinDbMaker");
+    gSystem->Load("StEEmcUtil");
+    gSystem->Load("StEmcTriggerMaker");
+    gSystem->Load("StJetFinder");
+    gSystem->Load("StJetMaker");
+    
     cout << " loading done " << endl;
-	
+    
     double pi = atan(1.0)*4.0;
     cout << " loading done " << endl;
    
@@ -79,36 +72,36 @@ void RunJetReader(int nevents=10,
 
     //Victor, this line works if turned on...
     if (1) {
-	jetReader->InitFile(jetInFile);
+    jetReader->InitFile(jetInFile);
     }
 
     //Victor, these lines don't work if turned on...
     else {
-	cout <<"\nGet Chain --------"<<endl;
-	TChain* c = muDstMaker->chain();
-	
-	cout <<"\nAdd Friend from file:\t"<<jetInFile<<endl;
-	c->AddFriend("jet",jetInFile);
-	
-	cout <<"\nInitTree()"<<endl;
-	jetReader->InitTree(c);
+    cout <<"\nGet Chain --------"<<endl;
+    TChain* c = muDstMaker->chain();
+    
+    cout <<"\nAdd Friend from file:\t"<<jetInFile<<endl;
+    c->AddFriend("jet",jetInFile);
+    
+    cout <<"\nInitTree()"<<endl;
+    jetReader->InitTree(c);
     }
     
     chain->PrintInfo();
     
     for (Int_t iev=0;iev<nevents; iev++) {
-	cout << "****************************************** " << endl;
-	cout << "Working on eventNumber " << iev << endl;
-	cout << "*************************1***************** " << endl;
-	chain->Clear();
-	int iret = chain->Make(iev); 
-	total++;
-	if (iret) {
-	    cout << "Bad return code!" << endl;
-	    break;
-	}
-	//Here's where you can do your analysis, for an example look in this method
-	jetReader->exampleEventAna();
+    cout << "****************************************** " << endl;
+    cout << "Working on eventNumber " << iev << endl;
+    cout << "*************************1***************** " << endl;
+    chain->Clear();
+    int iret = chain->Make(iev); 
+    total++;
+    if (iret) {
+        cout << "Bad return code!" << endl;
+        break;
+    }
+    //Here's where you can do your analysis, for an example look in this method
+    jetReader->exampleEventAna();
     } 
     chain->Finish(); 
     cout << "****************************************** " << endl;
