@@ -329,18 +329,25 @@ enum {kXX
      ,kZX,kZY,kZZ                 
      ,kEX,kEY,kEZ,kEE           
      ,kPX,kPY,kPZ,kPE,kPP     
-     ,kTX,kTY,kTZ,kTE,kTP,kTT};
-   memset(err,0,sizeof(err[0])*21);
+     ,kTX,kTY,kTZ,kTE,kTP,kTT
+     ,kLN
+     ,kHHth=0
+     ,kAHth,kAAth
+     ,kCHth,kCAth,kCCth
+     ,kZZth=0
+     ,kTZth,kTTth
+     };
+   memset(err,0,sizeof(err[0])*kLN);
    double cosCA = fP[0]/fCosL;
-   err[kYY] = fEmxXY[0]/(cosCA*cosCA);
-   err[kZZ] = fEmxSZ[0];
-   err[kEY] = fEmxXY[1]/cosCA;
-   err[kEE] = fEmxXY[2];
-   err[kPY] = fEmxXY[3]/cosCA;
-   err[kPE] = fEmxXY[4];
-   err[kPP] = fEmxXY[5];
-   err[kTZ] = fEmxSZ[1];
-   err[kTT] = fEmxSZ[2];
+   err[kYY] = fEmxXY[kHHth]/(cosCA*cosCA);
+   err[kZZ] = fEmxSZ[kZZth];
+   err[kEY] = fEmxXY[kAHth]/cosCA;
+   err[kEE] = fEmxXY[kAAth];
+   err[kPY] = fEmxXY[kCHth]/cosCA;
+   err[kPE] = fEmxXY[kCAth];
+   err[kPP] = fEmxXY[kCCth];
+   err[kTZ] = fEmxSZ[kTZth];
+   err[kTT] = fEmxSZ[kTTth];
 }
 //_____________________________________________________________________________
 void THelixTrack::Set(double rho,double drho)
@@ -2692,17 +2699,21 @@ void THelixFitter::Show() const
 static TCanvas *myCanvas = 0;
 static TGraph  *ptGraph[2]  = {0,0};
 static TGraph  *ciGraph[2]  = {0,0};
-  double x[100],y[100],z[100],l[100];
+  double  x[100],y[100],z[100],l[100]
+        , X[100],Y[100],Z[100];
   int nPts = Size();
   if (nPts>100) nPts=100;
   TCircleFitterAux* aux=GetAux(0);
+  THelixTrack tc(*this);
+  double s = tc.Path(aux[0].x,aux[0].y); tc.Move(s);
+  s = tc.Path(aux[nPts-1].x,aux[nPts-1].y);
+  if (s<0) { tc.Backward();}
   l[0]=0;
+  double ds=0;
   for (int i=0;i<nPts;i++) {
-    x[i]=aux[i].x;  y[i]=aux[i].y; z[i]=aux[i].z;
-    if(!i) continue; 
-    double dl = sqrt(pow(x[i]-x[i-1],2)+pow(y[i]-y[i-1],2));
-    if (fabs(fRho)>1e-6) dl = fabs(2./fRho*asin(0.5*dl*fRho));
-    l[i]=l[i-1]+dl;
+    if (i) {ds = tc.Path(aux[i].x,aux[i].y);tc.Move(ds);l[i]=l[i-1]+ds;}
+    x[i]=aux[i].x;   y[i]=aux[i].y;   z[i]=aux[i].z;
+    X[i]=tc.Pos()[0];Y[i]=tc.Pos()[1];Z[i]=tc.Pos()[2];
   }
 
 
@@ -2718,28 +2729,10 @@ static TGraph  *ciGraph[2]  = {0,0};
   ptGraph[1]  = new TGraph(nPts  , l, z);
   ptGraph[1]->SetMarkerColor(kRed);
   myCanvas->cd(2); ptGraph[1]->Draw("A*");
-
-  THelixTrack tc(*this);
-  double xyz[3];
-  xyz[0] = x[0];xyz[1] = y[0];xyz[2] = z[0];
-  double s = tc.Path(xyz);
-  tc.Move(s);
-  xyz[0] = x[nPts-1];xyz[1] = y[nPts-1];xyz[2] = z[nPts-1];
-  s = tc.Path(xyz);
-  if (s<0) { tc.Backward(); s = tc.Path(xyz);}
-  double ds = s/99;
-  s = 0;
-  for (int i=0;i<100;i++) {
-    x[i]=tc.Pos()[0];
-    y[i]=tc.Pos()[1];
-    z[i]=tc.Pos()[2];
-    l[i]=s*fCosL;
-    s+=ds;tc.Move(ds);
-  }
   
-  ciGraph[0]  = new TGraph(100  , x, y);
+  ciGraph[0]  = new TGraph(nPts  , X, Y);
   myCanvas->cd(1); ciGraph[0]->Draw("Same CP");
-  ciGraph[1]  = new TGraph(100  , l, z);
+  ciGraph[1]  = new TGraph(nPts  , l, Z);
   myCanvas->cd(2); ciGraph[1]->Draw("Same CP");
 
   myCanvas->Modified();
@@ -2750,7 +2743,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.28 2007/04/26 04:20:18 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.29 2007/06/25 19:26:40 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2766,6 +2759,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.29  2007/06/25 19:26:40  perev
+ * Cleanup
+ *
  * Revision 1.28  2007/04/26 04:20:18  perev
  * Some improvements
  *
