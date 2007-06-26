@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.93 2007/06/25 19:35:10 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.93 2007/06/25 19:35:10 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.94 2007/06/26 19:17:25 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.94 2007/06/26 19:17:25 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.94  2007/06/26 19:17:25  perev
+ * Path to hit in 2dim space only
+ *
  * Revision 2.93  2007/06/25 19:35:10  perev
  * DEbug off
  *
@@ -1468,13 +1471,13 @@ if(!myCanvas) {
    myCanvas=new TCanvas("Approx","",600,800);
    H[0] = new TH1F("Approx0l","Approx0l", 100,0,5);
    H[1] = new TH1F("Approx1l","Approx1l", 100,0,5);
-   H[2] = new TProfile("Approx0 ","Approx0",  100,0,0.1);
-   H[3] = new TProfile("Approx1 ","Approx1 ", 100,0,0.1);
+   H[2] = new TProfile("Approx0 ","Approx0",  30,0,30);
+   H[3] = new TProfile("Approx1 ","Approx1 ", 30,0,30);
    myCanvas->Divide(1,4);
    for (int i=0;i<4;i++) {myCanvas->cd(i+1); H[i]->Draw();}
 }
 #endif // APPROX_DEBUG
-const double BAD_XI2[2]={77,6},XI2_FACT=1.5;
+const double BAD_XI2[2]={77,6},XI2_FACT=1.0;
 int nNode,nNodeIn;
 double Xi2=0;
   StiHitErrs hr;
@@ -1512,7 +1515,7 @@ double Xi2=0;
   Xi2 =circ.Fit();
 #ifdef APPROX_DEBUG
   H[mode+0]->Fill(log(Xi2)/log(10.));
-  H[mode+2]->Fill(fabs(circ.GetRho()),Xi2);
+  H[mode+2]->Fill(nNode,Xi2);
 #endif // APPROX_DEBUG
   circ.MakeErrs();
   
@@ -1531,7 +1534,7 @@ double Xi2=0;
       xyz[1] = targetNode->y_g();
       xyz[2] = targetNode->z_g();
     }
-    double ds = circ.Path(xyz);
+    double ds = circ.Path(xyz[0],xyz[1]);
     circ.Move(ds);
     s+=ds;
     cirl = circ;
