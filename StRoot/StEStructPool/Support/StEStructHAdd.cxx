@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.8 2007/05/27 22:46:00 msd Exp $
+ * $Id: StEStructHAdd.cxx,v 1.9 2007/06/26 20:22:17 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -178,7 +178,7 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
     tmp->Write();
 
     inFile->cd();
-    TH1* tmp=(TH1*)inFile->Get("NPosSame");
+    tmp=(TH1*)inFile->Get("NPosSame");
     if(tmp) {
       outFile->cd();
       tmp->Write();
@@ -192,7 +192,7 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
     }
 
     inFile->cd();
-    TH1* tmp=(TH1*)inFile->Get("NNegSame");
+    tmp=(TH1*)inFile->Get("NNegSame");
     if(tmp) {
       outFile->cd();
       tmp->Write();
@@ -288,6 +288,9 @@ void StEStructHAdd::addCuts(const char* outfile, const char* infile,
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.9  2007/06/26 20:22:17  msd
+ * Very minor bug fix
+ *
  * Revision 1.8  2007/05/27 22:46:00  msd
  * Added buildChargeTypes mode 3 which takes rho_ref from track counts.
  * Added buildChargeTypeSumOfRatios.
