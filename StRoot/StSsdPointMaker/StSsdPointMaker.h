@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.27 2007/06/19 18:30:24 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.28 2007/07/01 16:18:41 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.28  2007/07/01 16:18:41  bouchet
+// add a normalization for the reconstruction efficiency histograms
+//
 // Revision 1.27  2007/06/19 18:30:24  bouchet
 // Add a method to evaluate the reconstruction efficiency (defined as the ratio of the number of matched clusters with all reconstructed clusters) ; some clean-up
 //
@@ -196,6 +199,7 @@ class StSsdPointMaker : public StMaker {
   void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
   void WriteMatchedStrips(StSsdBarrel *mySsd);//! 
   void EvaluateEfficiency(StSsdBarrel *mySsd);//!
+  void NormalizeEfficiency();
   void FillCalibTable();
   void FillDefaultCalibTable();
  protected:
@@ -228,9 +232,10 @@ class StSsdPointMaker : public StMaker {
   TH2F  *MatchedClusterN;//!
   Int_t Zero;
   Int_t UseCalibration ;
+  Int_t NEvent;
   Float_t CalibArray[320];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.27 2007/06/19 18:30:24 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.28 2007/07/01 16:18:41 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
