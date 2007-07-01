@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.45 2007/06/23 04:53:50 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.46 2007/07/01 16:18:41 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.46  2007/07/01 16:18:41  bouchet
+// add a normalization for the reconstruction efficiency histograms
+//
 // Revision 1.45  2007/06/23 04:53:50  bouchet
 // add 0's to Timestamp which size is less than 6 digits
 //
@@ -247,7 +250,7 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   //    mDbMgr->setVerbose(false);
   
   //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
-  
+  NEvent         = 0;  
   UseCalibration = 1;
   printf("UseCalibration=%d\n",UseCalibration);
   St_slsCtrl* slsCtrlTable = (St_slsCtrl*) GetDataBase("Geometry/ssd/slsCtrl");
@@ -432,6 +435,7 @@ Int_t StSsdPointMaker::Make()
       LOG_INFO<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endm;
       
       if(mSsdHitColl) {
+	NEvent++;
 	LOG_INFO<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;
 	makeScmCtrlHistograms(mySsd);
 	EvaluateEfficiency(mySsd);
@@ -1380,6 +1384,21 @@ void StSsdPointMaker::EvaluateEfficiency(StSsdBarrel *mySsd)
     }
 }
 //_____________________________________________________________________________
+void StSsdPointMaker::NormalizeEfficiency(){
+  for(Int_t ii=1 ;ii< 21 ;ii++)
+    {
+      for(Int_t jj=1 ;jj<17;jj++)
+	{
+	  Double_t NClusP = MatchedClusterP->GetBinContent(ii,jj);
+	  if(NEvent!=0){
+	    MatchedClusterP->Fill(ii,jj,NClusP/NEvent);}
+	  Double_t NClusN = MatchedClusterN->GetBinContent(ii,jj);
+	  if(NEvent!=0){
+	    MatchedClusterN->Fill(ii,jj,NClusN/NEvent);}
+	}
+    }
+}
+//_____________________________________________________________________________
 void StSsdPointMaker::FillCalibTable(){
   mGain          = (St_ssdGainCalibWafer*)GetDataBase("Calibrations/ssd/ssdGainCalibWafer"); 
   if(mGain){ 
@@ -1410,6 +1429,8 @@ void StSsdPointMaker::FillDefaultCalibTable(){
 }
 //____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {
+  LOG_INFO <<Form("Normalize histos") << endm;
+  NormalizeEfficiency();
   LOG_INFO << Form("Finish() ...") << endm;
   return kStOK;
 }
