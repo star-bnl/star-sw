@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.3 2007/03/27 23:11:49 bouchet Exp $
+// $Id: StSsdWafer.hh,v 1.4 2007/07/01 15:47:38 bouchet Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.4  2007/07/01 15:47:38  bouchet
+// add method to remove strips which signal < 3*rms
+//
 // Revision 1.3  2007/03/27 23:11:49  bouchet
 // Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
 //
@@ -166,6 +169,7 @@ class StSsdWafer: public TGeoHMatrix {
   void              updateStripList();
   void              zeroSubstraction();
   void              UndoLorentzShift(StSsdPoint *ptr, Int_t iSide,Float_t mShift_hole,Float_t mShift_elec,Float_t pitch);
+  void              doCleanListStrip(StSsdStripList *myListStrip);
   void  SetDebug(Int_t k = 0) {mDebug = k;}
   Int_t Debug() {return mDebug;}
   
@@ -187,5 +191,8 @@ class StSsdWafer: public TGeoHMatrix {
   StSsdPointList    *mPoint;
   Int_t    mDebug;
   Char_t             last[1];
+  StSsdStripList    *cleanListStrip;
+  StSsdStripList    *myStripList;
+
 };
 #endif

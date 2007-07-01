@@ -1,7 +1,11 @@
 
-// $Id: StSsdWafer.cc,v 1.4 2007/03/27 23:11:48 bouchet Exp $
+
+// $Id: StSsdWafer.cc,v 1.5 2007/07/01 15:47:37 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.5  2007/07/01 15:47:37  bouchet
+// add method to remove strips which signal < 3*rms
+//
 // Revision 1.4  2007/03/27 23:11:48  bouchet
 // Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
 //
@@ -241,6 +245,26 @@ void StSsdWafer::doClusterisation(Int_t *NClusterPerSide, StSsdClusterControl *c
   doFindCluster(clusterControl, iSide); 
   NClusterPerSide[1] = doClusterSplitting(clusterControl, iSide);
 }
+//______________________________________________________________
+void  StSsdWafer::doCleanListStrip(StSsdStripList *myStripList)
+{
+  Int_t lowCut = 3;
+  
+  StSsdStripList *cleanListStrip;
+  //  cleanListStrip = new StSsdStripList();
+  cleanListStrip = myStripList; 
+  StSsdStrip *myStrip   = 0; 
+  StSsdStrip *copyStrip = cleanListStrip->first(); 
+  int        size       = cleanListStrip->getSize();   
+  for(Int_t i=0;i<size;i++){  
+    //printf("%d over %d strips signal=%d id=%d noise=%f\n",i,cleanListStrip->getSize(),copyStrip->getDigitSig(),copyStrip->getNStrip(),copyStrip->getSigma()); 
+    myStrip = copyStrip; 
+    if((copyStrip->getSigma()==0)||(copyStrip->getDigitSig()<lowCut*copyStrip->getSigma())){
+      cleanListStrip->removeStrip(myStrip);  
+    }
+    copyStrip = myStripList->next(copyStrip); 
+  }
+}
 //________________________________________________________________________________
 /*!
 Does the cluster finding on the iSide. 
@@ -267,11 +291,13 @@ Int_t StSsdWafer::doFindCluster(StSsdClusterControl *clusterControl, Int_t iSide
      CurrentClusterList =  mClusterN;
      break;
     }
-  
   if(!CurrentStripList->getSize()) return 0;
   
   Int_t nCluster = 0;
   Int_t atTheEnd = 0;
+
+  doCleanListStrip(CurrentStripList);
+
   StSsdStrip *CurrentStrip = CurrentStripList->first();
   StSsdStrip *ScanStrip  = 0;
   StSsdStrip *LastScanStrip = 0;
