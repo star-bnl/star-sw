@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.27 2007/03/09 20:01:03 perev Exp $
+// $Id: St_db_Maker.h,v 1.28 2007/07/02 19:36:40 fisyak Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.28  2007/07/02 19:36:40  fisyak
+// Add parameter currenTime (== requested time) in FindLeft
+//
 // Revision 1.27  2007/03/09 20:01:03  perev
 // Request by user defined time now allowed
 //
@@ -92,7 +95,7 @@ private:
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
   TStopwatch  fTimer[4];        //!Timer object 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.27 2007/03/09 20:01:03 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.28 2007/07/02 19:36:40 fisyak Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -122,7 +125,7 @@ private:
    virtual TDataSet* UpdateDB (TDataSet* ds);
    virtual int UpdateTable(UInt_t parId, TTable* dat, const TDatime &req, TDatime val[2]);
    virtual TDataSet *LoadTable(TDataSet* left);
-   virtual TDataSet *FindLeft(StValiSet *val, TDatime vals[2]);
+   virtual TDataSet *FindLeft(StValiSet *val, TDatime vals[2], const TDatime &currenTime);
    virtual TDataSet *OpenMySQL(const char* dbname);
            int       Snapshot (int flag);
 
@@ -134,7 +137,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.27 2007/03/09 20:01:03 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.28 2007/07/02 19:36:40 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   
 };
