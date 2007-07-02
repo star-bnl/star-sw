@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.46 2007/07/01 16:18:41 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.47 2007/07/02 20:01:03 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.47  2007/07/02 20:01:03  bouchet
+// bug fixed for the normalization of reconstruction efficiency histos
+//
 // Revision 1.46  2007/07/01 16:18:41  bouchet
 // add a normalization for the reconstruction efficiency histograms
 //
@@ -293,7 +296,17 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
     Read_Strip(m_noise2,&Zero); 
   }
   (UseCalibration==1)?FillCalibTable():FillDefaultCalibTable();
- 
+  /*
+    Init arrays for the reconstruction efficiency
+  */
+  for(Int_t ii=0 ;ii<20;ii++)
+    {
+      for(Int_t jj=0;jj<16;jj++)
+	{
+	  ratioP[ii][jj] = 0;
+	  ratioN[ii][jj] = 0;
+	}
+    }
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -439,6 +452,7 @@ Int_t StSsdPointMaker::Make()
 	LOG_INFO<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;
 	makeScmCtrlHistograms(mySsd);
 	EvaluateEfficiency(mySsd);
+	NormalizeEfficiency();
       }
       else {
 	LOG_INFO<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endm;
@@ -1351,7 +1365,7 @@ void StSsdPointMaker::EvaluateEfficiency(StSsdBarrel *mySsd)
 		pclusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pclusterP);
 	      }
 	    }
-	  MatchedClusterP->Fill(i+1,j+1,(float)clusP/mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize());
+	  ratioP[i][j]+=(float)clusP/mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize();
 	  clusP = 0;
 	}
 	if (mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()==0) {
@@ -1377,7 +1391,7 @@ void StSsdPointMaker::EvaluateEfficiency(StSsdBarrel *mySsd)
 		pclusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pclusterN);
 	      }
 	    }
-	  MatchedClusterN->Fill(i+1,j+1,(float)clusN/mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize());
+	  ratioN[i][j]+=(float)clusN/mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize();
 	  clusN = 0;
 	}
       }
@@ -1385,16 +1399,22 @@ void StSsdPointMaker::EvaluateEfficiency(StSsdBarrel *mySsd)
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::NormalizeEfficiency(){
-  for(Int_t ii=1 ;ii< 21 ;ii++)
+  Double_t NClusP = 0;
+  Double_t NClusN = 0;
+  for(Int_t ii=0 ;ii< 20 ;ii++)
     {
-      for(Int_t jj=1 ;jj<17;jj++)
+      for(Int_t jj=0 ;jj<16;jj++)
 	{
-	  Double_t NClusP = MatchedClusterP->GetBinContent(ii,jj);
+	  NClusP = ratioP[ii][jj];
+	  //LOG_INFO<<Form("NEvent=%d side P ladder=%d wafer=%d bin content=%f\n",NEvent,ii,jj,NClusP)<<endm;
 	  if(NEvent!=0){
-	    MatchedClusterP->Fill(ii,jj,NClusP/NEvent);}
-	  Double_t NClusN = MatchedClusterN->GetBinContent(ii,jj);
+	    NClusP = NClusP/NEvent;
+	    MatchedClusterP->SetBinContent(ii+1,jj+1,NClusP);}
+	  NClusN = ratioN[ii][jj];
 	  if(NEvent!=0){
-	    MatchedClusterN->Fill(ii,jj,NClusN/NEvent);}
+	    //LOG_INFO<<Form("NEvent=%d side N ladder=%d wafer=%d bin content=%f\n",NEvent,ii,jj,NClusN)<<endm;
+	  NClusN = NClusN/NEvent;
+	  MatchedClusterN->SetBinContent(ii+1,jj+1,NClusN);}
 	}
     }
 }
@@ -1429,8 +1449,6 @@ void StSsdPointMaker::FillDefaultCalibTable(){
 }
 //____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {
-  LOG_INFO <<Form("Normalize histos") << endm;
-  NormalizeEfficiency();
   LOG_INFO << Form("Finish() ...") << endm;
   return kStOK;
 }
