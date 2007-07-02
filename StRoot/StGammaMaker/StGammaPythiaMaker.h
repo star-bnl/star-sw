@@ -44,6 +44,9 @@ private:
   void collectDecayPhotons();
   void collectDecayPhotons(StMcVertex* vertex);
   
+  bool display_flag;
+  int n_prompt;
+  
 public: 
 
   StGammaPythiaMaker(const char *name="GammaPythia");
@@ -73,7 +76,10 @@ public:
   vector<TLorentzVector> Pion04Mom;    //4 momentum of pions in pythia record which may or may not decay in geant record
   vector<TLorentzVector> Prompt4Mom;   //4 momentum of prompt photons in pythia record
   vector<TLorentzVector> Decay4Mom;    //4 momentum of decay photon from pythia and geant record
-  
+  vector<TLorentzVector> Frag4Mom;     // Four momentum of fragmentation photons
+  vector<TLorentzVector> Initial4Mom;  // Four momentum of initial state radiation
+  vector<TLorentzVector> Final4Mom;    // Four momentum of final state radiation  
+
   double df1_LO,df2_LO,f1_LO,f2_LO,weight_LO;         //Leading Order polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
   double df1_NLO,df2_NLO,f1_NLO,f2_NLO,weight_NLO;    //NLO STD polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
   double df1_NLO_g0,df2_NLO_g0,weight_NLO_g0;         //NLO G0  polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
@@ -94,13 +100,19 @@ public:
   int numberOfPion0() const;
   int numberOfPrompt() const;
   int numberOfDecay() const;
+  int numberOfFrag() const;
+  int numberOfInitial() const;
+  int numberOfFinal() const;
 
   TLorentzVector& pion0(int i);
   TLorentzVector& prompt(int i);
   TLorentzVector& decay(int i);
+  TLorentzVector& frag(int i);
+  TLorentzVector& initial_rad(int i);
+  TLorentzVector& final_rad(int i);
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaMaker.h,v 1.3 2007/06/15 21:37:25 pibero Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaMaker.h,v 1.4 2007/07/02 14:13:05 betan Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }  
   
@@ -110,9 +122,15 @@ public:
 inline int StGammaPythiaMaker::numberOfPion0() const { return Pion04Mom.size(); }
 inline int StGammaPythiaMaker::numberOfPrompt() const { return Prompt4Mom.size(); }
 inline int StGammaPythiaMaker::numberOfDecay() const { return Decay4Mom.size(); }
+inline int StGammaPythiaMaker::numberOfFrag() const { return Frag4Mom.size(); }
+inline int StGammaPythiaMaker::numberOfInitial() const { return Initial4Mom.size(); }
+inline int StGammaPythiaMaker::numberOfFinal() const { return Final4Mom.size(); }
 
 inline TLorentzVector& StGammaPythiaMaker::pion0(int i) { return Pion04Mom[i]; }
 inline TLorentzVector& StGammaPythiaMaker::prompt(int i) { return Prompt4Mom[i]; }
 inline TLorentzVector& StGammaPythiaMaker::decay(int i) { return Decay4Mom[i]; }
+inline TLorentzVector& StGammaPythiaMaker::frag(int i) { return Frag4Mom[i]; }
+inline TLorentzVector& StGammaPythiaMaker::initial_rad(int i) { return Initial4Mom[i]; }
+inline TLorentzVector& StGammaPythiaMaker::final_rad(int i) { return Final4Mom[i]; }
 
 #endif
