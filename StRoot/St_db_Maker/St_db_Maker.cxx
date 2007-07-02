@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.108 2007/05/15 18:45:11 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.109 2007/07/02 19:36:39 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.109  2007/07/02 19:36:39  fisyak
+// Add parameter currenTime (== requested time) in FindLeft
+//
 // Revision 1.108  2007/05/15 18:45:11  perev
 // Add StMaker::Init() into Init
 //
@@ -605,7 +608,7 @@ static int nCall=0; nCall++;
     if (!ierr) kase = 1;
   }
   
-  left = FindLeft(val,valsCINT);
+  left = FindLeft(val,valsCINT,currenTime);
   if (left) kase+=2;
   TDataSet *newGuy=0;
 SWITCH:  switch (kase) {
@@ -662,12 +665,12 @@ SWITCH:  switch (kase) {
 }
 
 //_____________________________________________________________________________
-TDataSet *St_db_Maker::FindLeft(StValiSet *val, TDatime vals[2])
+TDataSet *St_db_Maker::FindLeft(StValiSet *val, TDatime vals[2], const TDatime &currenTime)
 {
 
 //      Search left object among ONLY CINT_DB objects. MySQL objects ignored here
 //	Start loop
-  UInt_t uevent = GetDateTime().Get();
+  UInt_t uevent = currenTime.Get();
   
   vals[0].Set(kMinTime,0);
   vals[1].Set(kMaxTime,0);
