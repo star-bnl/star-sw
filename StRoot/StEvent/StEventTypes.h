@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.29 2006/01/19 21:52:57 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.30 2007/07/02 20:45:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.30  2007/07/02 20:45:04  ullrich
+ * Added FMS and MTD trigger detector classes.
+ *
  * Revision 2.29  2006/01/19 21:52:57  ullrich
  * Added RnD hits and collection.
  *
@@ -126,6 +129,7 @@
 #include "StEventSummary.h"
 #include "StEstGlobalTrack.h"
 #include "StEstPrimaryTrack.h"
+#include "StFmsTriggerDetector.h"
 #include "StFpdCollection.h"
 #include "StFpdTriggerDetector.h"
 #include "StFtpcHit.h"
@@ -146,6 +150,7 @@
 #include "StL3AlgorithmInfo.h"
 #include "StL3SoftwareMonitor.h"
 #include "StMeasuredPoint.h"
+#include "StMtdTriggerDetector.h"
 #include "StMwcTriggerDetector.h"
 #include "StPhmdCollection.h"
 #include "StPhmdDetector.h"
