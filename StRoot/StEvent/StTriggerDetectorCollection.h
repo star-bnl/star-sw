@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 2.8 2006/09/14 00:02:16 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.9 2007/07/02 20:23:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *`
  * $Log: StTriggerDetectorCollection.h,v $
+ * Revision 2.9  2007/07/02 20:23:09  ullrich
+ * Added FMS and MTD.
+ *
  * Revision 2.8  2006/09/14 00:02:16  ullrich
  * Removed argument (run) in constructor. Not needed anymore.
  *
@@ -53,6 +56,8 @@
 #include "StZdcTriggerDetector.h"
 #include "StEmcTriggerDetector.h"
 #include "StFpdTriggerDetector.h"
+#include "StFmsTriggerDetector.h"
+#include "StMtdTriggerDetector.h"
 
 class dst_TrgDet_st;
 class StTriggerData;
@@ -80,6 +85,10 @@ public:
     const StEmcTriggerDetector& emc() const;
     StFpdTriggerDetector&       fpd();
     const StFpdTriggerDetector& fpd() const;
+    StFmsTriggerDetector&       fms();
+    const StFmsTriggerDetector& fms() const;
+    StMtdTriggerDetector&       mtd();
+    const StMtdTriggerDetector& mtd() const;
 
     void setCtbTriggerDetector(const StCtbTriggerDetector&);
     void setMwcTriggerDetector(const StMwcTriggerDetector&);
@@ -88,6 +97,8 @@ public:
     void setBbcTriggerDetector(const StBbcTriggerDetector&);
     void setEmcTriggerDetector(const StEmcTriggerDetector&);
     void setFpdTriggerDetector(const StFpdTriggerDetector&);
+    void setFmsTriggerDetector(const StFmsTriggerDetector&);
+    void setMtdTriggerDetector(const StMtdTriggerDetector&);
     
 protected:
     StCtbTriggerDetector mCtb;
@@ -97,8 +108,10 @@ protected:
     StBbcTriggerDetector mBbc;
     StEmcTriggerDetector mEmc;
     StFpdTriggerDetector mFpd;
+    StFmsTriggerDetector mFms;
+    StMtdTriggerDetector mMtd;
     
-    ClassDef(StTriggerDetectorCollection,4)
+    ClassDef(StTriggerDetectorCollection,6)
 };
 
 inline void StTriggerDetectorCollection::setCtbTriggerDetector(const StCtbTriggerDetector& val) {mCtb = val;}
@@ -108,5 +121,7 @@ inline void StTriggerDetectorCollection::setZdcTriggerDetector(const StZdcTrigge
 inline void StTriggerDetectorCollection::setBbcTriggerDetector(const StBbcTriggerDetector& val) {mBbc = val;}
 inline void StTriggerDetectorCollection::setEmcTriggerDetector(const StEmcTriggerDetector& val) {mEmc = val;}
 inline void StTriggerDetectorCollection::setFpdTriggerDetector(const StFpdTriggerDetector& val) {mFpd = val;}
+inline void StTriggerDetectorCollection::setFmsTriggerDetector(const StFmsTriggerDetector& val) {mFms = val;}
+inline void StTriggerDetectorCollection::setMtdTriggerDetector(const StMtdTriggerDetector& val) {mMtd = val;}
 
 #endif

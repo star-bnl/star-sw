@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.10 2007/04/04 16:40:18 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 2.11 2007/07/02 20:23:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
+ * Revision 2.11  2007/07/02 20:23:08  ullrich
+ * Added FMS and MTD.
+ *
  * Revision 2.10  2007/04/04 16:40:18  ullrich
  * Add setup of VPD data to constructor.
  *
@@ -48,7 +51,7 @@
 #include "StTriggerData.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.10 2007/04/04 16:40:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.11 2007/07/02 20:23:08 ullrich Exp $";
 
 ClassImp(StTriggerDetectorCollection)
 
@@ -58,7 +61,7 @@ StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t)
     mCtb(t), mMwc(t), mVpd(t), mZdc(t), mBbc(t), mEmc(t), mFpd(t) {/* noop */}
 
 StTriggerDetectorCollection::StTriggerDetectorCollection(const StTriggerData& t) :
-    mCtb(t), mVpd(t), mZdc(t), mBbc(t), mEmc(t), mFpd(t) {/* noop */}
+    mCtb(t), mVpd(t), mZdc(t), mBbc(t), mEmc(t), mFpd(t), mFms(t), mMtd(t) {/* noop */}
 
 StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
 
@@ -104,3 +107,14 @@ StTriggerDetectorCollection::fpd() { return mFpd; }
 const StFpdTriggerDetector&
 StTriggerDetectorCollection::fpd() const { return mFpd; }
 
+StFmsTriggerDetector&
+StTriggerDetectorCollection::fms() { return mFms; }
+
+const StFmsTriggerDetector&
+StTriggerDetectorCollection::fms() const { return mFms; }
+
+StMtdTriggerDetector&
+StTriggerDetectorCollection::mtd() { return mMtd; }
+
+const StMtdTriggerDetector&
+StTriggerDetectorCollection::mtd() const { return mMtd; }
