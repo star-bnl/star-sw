@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.cxx,v 2.5 2007/04/24 14:51:59 ullrich Exp $
+ * $Id: StTriggerData2007.cxx,v 2.6 2007/07/02 17:04:32 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.cxx,v $
+ * Revision 2.6  2007/07/02 17:04:32  ullrich
+ * Add two new members mtdAdc() and mtdTdc() (Akio).
+ *
  * Revision 2.5  2007/04/24 14:51:59  ullrich
  * Fixed bug in VPD unpacking (Akio).
  *
@@ -57,6 +60,7 @@ StTriggerData2007::StTriggerData2007(const TrgDataType2007* data, int run)
         + sizeof(RawTrgDet2007)*(npre+npost+1);    
     memcpy(mData,data,size); 
     memset((char*)mData+size,0,sizeof(TrgDataType2007)-size);
+    dump();
 }
 
 unsigned int StTriggerData2007::version() const
@@ -748,6 +752,11 @@ void StTriggerData2007::dump() const
     printf(" ZDC Sum(A) West  : ");printf("%d ",zdcAttenuated(west));        printf("\n");
     printf(" ZDC Sum(UA) East : ");printf("%d ",zdcUnAttenuated(east));      printf("\n");
     printf(" ZDC Sum(UA) West : ");printf("%d ",zdcUnAttenuated(west));      printf("\n");
+    printf(" VPD E Earliest TAC : %d\n", vpdEarliestTDC(east));
+    printf(" VPD W Earliest TAC : %d\n", vpdEarliestTDC(west));
+    printf(" VPD TimeDifference : %d\n", vpdTimeDifference());
+    printf(" L2 result : \n"); 
+    for (int j=0; j<4 ;j++) { for (int k=0; k<16; k++) {printf("%u ",*(l2Result()+j*16+k)); } printf("\n");}
     printf("\n");
     printf("***** StTriggerData Dump *****\n");
 }
@@ -915,5 +924,25 @@ unsigned short int* StTriggerData2007::getDsm2_FMS() const {return mData->TrgSum
 unsigned short StTriggerData2007::mtdAtAddress(int address, int prepost) const
 {
   if (address>=0 && address<32){ return mData->rawTriggerDet[prepostAddress(prepost)].MTD[address]; }
+  return 0;
+}
+
+unsigned short StTriggerData2007::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const
+{
+  static const int map[2][8] = {
+    { 6, 5, 11, 12, 13, 10,  9,  8},
+    { 7, 4,  3,  2,  1,  0, 15, 14}
+  };
+  if(pmt>=0 && pmt<8) { return mData->rawTriggerDet[prepostAddress(prepost)].MTD[map[eastwest][pmt]]; }
+  return 0;
+}
+
+unsigned short StTriggerData2007::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const
+{
+  static const int map[2][8] = {
+    {22,21,27,28,29,26,25,24},
+    {23,20,19,18,17,16,31,30}
+  };
+  if(pmt>=0 && pmt<8) { return mData->rawTriggerDet[prepostAddress(prepost)].MTD[map[eastwest][pmt]]; }
   return 0;
 }

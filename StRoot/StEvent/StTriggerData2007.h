@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.h,v 2.3 2007/04/24 14:51:59 ullrich Exp $
+ * $Id: StTriggerData2007.h,v 2.4 2007/07/02 17:04:32 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.h,v $
+ * Revision 2.4  2007/07/02 17:04:32  ullrich
+ * Add two new members mtdAdc() and mtdTdc() (Akio).
+ *
  * Revision 2.3  2007/04/24 14:51:59  ullrich
  * Fixed bug in VPD unpacking (Akio).
  *
@@ -131,6 +134,8 @@ public:
 
     //MTD
     unsigned short mtdAtAddress(int address, int prepost=0) const;
+    unsigned short mtdAdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
 
     // experts only
     char*                getTriggerStructure();
