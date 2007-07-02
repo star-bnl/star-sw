@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.28 2007/07/01 16:18:41 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.29 2007/07/02 20:01:03 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.29  2007/07/02 20:01:03  bouchet
+// bug fixed for the normalization of reconstruction efficiency histos
+//
 // Revision 1.28  2007/07/01 16:18:41  bouchet
 // add a normalization for the reconstruction efficiency histograms
 //
@@ -234,8 +237,10 @@ class StSsdPointMaker : public StMaker {
   Int_t UseCalibration ;
   Int_t NEvent;
   Float_t CalibArray[320];
+  Float_t ratioP[20][16];
+  Float_t ratioN[20][16];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.28 2007/07/01 16:18:41 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.29 2007/07/02 20:01:03 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
