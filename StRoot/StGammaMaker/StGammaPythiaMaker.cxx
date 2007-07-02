@@ -563,6 +563,7 @@ Double_t StGammaPythiaMaker::getPartonicALL(double s, double t, double u, int su
     //prompt photon subprocesses
     if (sub==29) all=N7/D7;//q_i + g -> q_i + gamma
     if (sub==14) all=N6/D6;//q_i+qbar_i -> g + gamma
+    if (sub==18) all=N6/D6;//q_i+qbar_i -> gamma + gamma
        
     return all;
 
