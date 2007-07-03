@@ -1,8 +1,11 @@
 
 
-// $Id: StSsdWafer.cc,v 1.5 2007/07/01 15:47:37 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.6 2007/07/03 16:28:38 fisyak Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.6  2007/07/03 16:28:38  fisyak
+// Add protection against division 0/0
+//
 // Revision 1.5  2007/07/01 15:47:37  bouchet
 // add method to remove strips which signal < 3*rms
 //
@@ -1571,8 +1574,9 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
           setE[1] = matchDistr(clusterControl, setE[0]);
           setF[0] = (Adc[6] - Adc[5])/sqrt(2.0);
           setF[1] = matchDistr(clusterControl, setF[0]);
-	  probACF = (setC[1]*setF[1])/(setC[1]*setF[1]+setD[1]*setE[1]);
-	  probADE = (setD[1]*setE[1])/(setC[1]*setF[1]+setD[1]*setE[1]);
+	  Double_t tmp = 3e-33+ setC[1]*setF[1]+setD[1]*setE[1];
+	  probACF = (setC[1]*setF[1])/tmp;
+	  probADE = (setD[1]*setE[1])/tmp;
 	  if(probACF>probADE)
 	    {
 	      mPoint->addNewPoint(newPointA);
@@ -1632,8 +1636,9 @@ Int_t StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterContr
           setE[1] = matchDistr(clusterControl, setE[0]);
           setF[0] = (Adc[6] - Adc[5])/sqrt(2.0);
           setF[1] = matchDistr(clusterControl, setF[0]);
-	  probACF = (setC[1]*setF[1])/(setC[1]*setF[1]+setD[1]*setE[1]);
-	  probADE = (setD[1]*setE[1])/(setC[1]*setF[1]+setD[1]*setE[1]);
+	  Double_t tmp = 3e-33+ setC[1]*setF[1]+setD[1]*setE[1];
+	  probACF = (setC[1]*setF[1])/tmp;
+	  probADE = (setD[1]*setE[1])/tmp;
 	  if(probACF>probADE)
 	    {
 	      mPoint->addNewPoint(newPointA);
