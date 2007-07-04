@@ -96,11 +96,12 @@ void StGammaPythiaMaker::Clear(Option_t* option)
 /// Make - Called each event
 Int_t StGammaPythiaMaker::Make()
 {
-
-    cout << "StGammaPythiaMaker;:Make()" << endl;
-
     //Get StMcEvent to look at GEANT record
-    mcEvent=(StMcEvent*)GetDataSet("StMcEvent"); assert(mcEvent);
+    mcEvent = (StMcEvent*)GetDataSet("StMcEvent");
+    if (!mcEvent) {
+      LOG_WARN << "No StMcEvent" << endm;
+      return kStWarn;
+    }
     
     //GET EVTID FROM MuDST
     muDstMaker = (StMuDstMaker*)GetMaker("MuDst"); assert(muDstMaker);
