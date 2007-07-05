@@ -1,7 +1,10 @@
 //*-- Author :Y.Fisyak 01/26/07
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.12 2007/05/09 13:36:44 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.13 2007/07/05 14:37:04 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.13  2007/07/05 14:37:04  fisyak
+// Freeze version for run VII
+//
 // Revision 1.12  2007/05/09 13:36:44  fisyak
 // Freeze before intruducing Bundle coordinate system
 //
@@ -15,11 +18,15 @@
 #include "TFile.h"
 #include "StEventTypes.h"
 #include "StLaserAnalysisMaker.h"
-#include "LASERINO.h"
+#include "laserino.h"
 #include "LaserEvent.h"
 #include "StTpcDb/StTpcDb.h"
-#include "StDetectorDbMaker/StDetectorDbClock.h"
 #include "TGeoMatrix.h"
+#include "TRVector.h"
+#include "TRMatrix.h"
+#include "TRSymMatrix.h"
+#include "StDetectorDbMaker/StDetectorDbClock.h"
+
 ClassImp(StLaserAnalysisMaker);
 static  LaserEvent             *event = 0;  //! Laser Event object
 static  const Int_t NS = 12;
@@ -32,6 +39,9 @@ static LaserRaft *LaserBeams[NS*NB*NM];
 #endif
 static TGeoHMatrix *Traft[14];
 static TGeoHMatrix *Raft2Tpc[14];
+static TGeoHMatrix *Bundles2Tpc[14][6];
+static TGeoHMatrix *Mirrors2Tpc[14][6][7];
+//________________________________________________________________________________
 Int_t StLaserAnalysisMaker::Init(){
   event = new LaserEvent();
   TFile *f = GetTFile();
@@ -71,6 +81,8 @@ Int_t StLaserAnalysisMaker::Init(){
   NoBeams = 0;
   memset(Traft, 0, 14*sizeof(TGeoHMatrix *));
   memset(Raft2Tpc, 0, 14*sizeof(TGeoHMatrix *));
+  memset(Bundles2Tpc, 0,  14*6*sizeof(TGeoHMatrix *));
+  memset(Mirrors2Tpc, 0,  14*6*7*sizeof(TGeoHMatrix *));
   for (Int_t i = 0; i < NoRaftPositions; i++) {
     if (! RaftPositions[i].Sector) continue;
     Int_t raft = RaftPositions[i].Raft;
@@ -85,34 +97,45 @@ Int_t StLaserAnalysisMaker::Init(){
     }
   }
   for (Int_t r = 0; r < 14; r++) {
-    Int_t sector = Locals[r][0][0].Sector;
+    Int_t sector = Bundles[r][0].Sector;
     if (! sector) continue;
-    Int_t raft = Locals[r][0][0].Raft;
+    Int_t raft = Bundles[r][0].Raft;
     Int_t half = 0;
     if (sector > 12) half = 1;
-    Int_t s = (sector-1)/2;
     Raft2Tpc[raft-1] = new TGeoHMatrix(Form("Raft%iToTpc",raft));
     *Raft2Tpc[raft-1] = RotSec[sector-1] * TpcHalf[half] * (*Traft[raft-1]);
     for (Int_t b = 0; b < 6; b++) {
-      Double_t phi0 = 0;
-      for (Int_t m = 0; m < 3; m++) phi0 += Locals[r][b][m].DeltaPhi;
-      Double_t phiM = -phi0;
+      Int_t bundle = Bundles[r][b].Bundle;
+      TGeoHMatrix rotB;
+      rotB.SetTranslation(&Bundles[r][b].X);
+      Bundles2Tpc[raft-1][bundle-1] = new TGeoHMatrix(Form("BundleR%iB%i",raft,bundle));
+      *Bundles2Tpc[raft-1][bundle-1] = *Raft2Tpc[raft-1] * rotB;
       for (Int_t m = 0; m < 7; m++) {
-	LASERINO_t *local = &Locals[r][b][m];
+	if (Mirrors[r][b][m].Sector < 2) continue;
+	LASERINO_t *local = &Mirrors[r][b][m];
 	if (! local) continue;
+	Int_t mirror = Mirrors[r][b][m].Mirror;
 	LaserBeams[NoBeams] = new LaserRaft();
 	LaserBeams[NoBeams]->Sector = local->Sector;
 	LaserBeams[NoBeams]->Raft   = local->Raft;
 	LaserBeams[NoBeams]->Bundle = local->Bundle;
 	LaserBeams[NoBeams]->Mirror = local->Mirror;
-	LaserBeams[NoBeams]->XyzU = StThreeVectorD(0.1*local->X+local->dX,0.1*local->Y+local->dY,0.1*local->Z);
-	Raft2Tpc[raft-1]->LocalToMaster(LaserBeams[NoBeams]->XyzU.xyz(),LaserBeams[NoBeams]->XyzL.xyz());
-	Double_t theta = local->ThetaZ;
-	Double_t phi   = phiM - 1.e-3*(dPhiC[s].Angle+dPhiC2[s].Angle);
-	phiM += local->DeltaPhi;
-	LaserBeams[NoBeams]->dirU = StThreeVectorD(-TMath::Cos(phi)*TMath::Cos(theta), 
+	LaserBeams[NoBeams]->XyzB = StThreeVectorD(Mirrors[r][b][m].X+Mirrors[r][b][m].dX,
+						   Mirrors[r][b][m].Y+Mirrors[r][b][m].dY,
+						   Mirrors[r][b][m].Z+Mirrors[r][b][m].dZ);
+	Double_t theta = Bundles[r][b].ThetaZ + Mirrors[r][b][m].ThetaZ;
+	Double_t phi   = Bundles[r][b].Phi    + Mirrors[r][b][m].Phi;
+	TGeoHMatrix rotM;
+	rotM.SetTranslation(LaserBeams[NoBeams]->XyzB.xyz());
+	Mirrors2Tpc[raft-1][bundle-1][mirror-1] = new TGeoHMatrix(Form("MirrorR%iB%iM%i",raft,bundle,mirror));
+	*Mirrors2Tpc[raft-1][bundle-1][mirror-1] = *Bundles2Tpc[raft-1][bundle-1] * rotM;
+	
+	LaserBeams[NoBeams]->dirB = StThreeVectorD(-TMath::Cos(phi)*TMath::Cos(theta), 
 						   -TMath::Sin(phi)*TMath::Cos(theta), 
 						   -TMath::Sin(theta));
+	rotB.LocalToMaster(LaserBeams[NoBeams]->XyzB.xyz(), LaserBeams[NoBeams]->XyzU.xyz());
+	rotB.LocalToMasterVect(LaserBeams[NoBeams]->dirB.xyz(), LaserBeams[NoBeams]->dirU.xyz());
+	Raft2Tpc[raft-1]->LocalToMaster(LaserBeams[NoBeams]->XyzU.xyz(),LaserBeams[NoBeams]->XyzL.xyz());
 	Raft2Tpc[raft-1]->LocalToMasterVect(LaserBeams[NoBeams]->dirU.xyz(),LaserBeams[NoBeams]->dirL.xyz());
 	LaserBeams[NoBeams]->Theta = LaserBeams[NoBeams]->dirL.theta();
 	LaserBeams[NoBeams]->Phi   = LaserBeams[NoBeams]->dirL.phi();
@@ -218,8 +241,6 @@ Int_t StLaserAnalysisMaker::Make(){
     StPtrVecHit hvec = gTrack->detectorInfo()->hits();
     Double_t rMax = 0;
     Int_t jmax = -1;
-    LaserB *theLaser = 0;
-    StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
     //    StThreeVectorD *pred = 0;
     StTpcHit *tpcHit;
     Int_t sector, s = -1;
@@ -233,11 +254,16 @@ Int_t StLaserAnalysisMaker::Make(){
     for (unsigned int j=0; j<hvec.size(); j++) {// hit loop
       if (hvec[j]->detector() != kTpcId) continue;
       tpcHit = static_cast<StTpcHit *> (hvec[j]);
+#if 0
+      event->AddHit(tpcHit);
+#endif
       if (tpcHit->position().perp() > rMax) {
 	rMax = tpcHit->position().perp();
 	jmax = j;
       }
     }
+    LaserB *theLaser = 0;
+    StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
     if (jmax < 0 || rMax < 120) goto ADDTRACK;
     tpcHit = static_cast<StTpcHit *> (hvec[jmax]);
     // sector
@@ -271,40 +297,82 @@ Int_t StLaserAnalysisMaker::Make(){
     t = event->AddTrack(sector,gTrack,theLaser);
     if (theLaser) {
       Int_t raft = theLaser->Raft;
-      if (raft > 0 && raft <= 14 && Raft2Tpc[raft-1]) 
-	Raft2Tpc[raft-1]->MasterToLocal(t->XyzPL.xyz(),t->XyzPU.xyz());
-	Raft2Tpc[raft-1]->MasterToLocalVect(t->dirPL.xyz(),t->dirPU.xyz());
-	t->dU = t->XyzPU - t->Laser.XyzU;
-	t->Flag += t->Matched();
+      Int_t bundle = theLaser->Bundle;
+      Int_t mirror = theLaser->Mirror;
+      if (raft > 0 && raft <= 14 &&
+	  bundle > 0 && bundle <= 6 &&
+	  mirror > 0 && mirror <= 7) {
+	t->SetPredictions(Raft2Tpc[raft-1], Bundles2Tpc[raft-1][bundle-1], Mirrors2Tpc[raft-1][bundle-1][mirror-1]);
+	if (t->Flag == 2 || theLaser->IsValid)  event->AddTrackFit(t);
+      }
     }
     if (Debug()) {
       t->Print();
     }
   }  
+  static const Double_t sigma = 0.0385; // run 8090018 Full Field.
   for (Int_t k = 0; k < 11; k++) {
     FitDV *fit = (FitDV *) (*event->Fit())[k];
     Int_t N = fit->N;
-    if (N >= 2) {
-      Double_t *x = &fit->xM;
-      for (Int_t i = 0; i < 5; i++) x[i] /= fit->N;
-      Double_t xM = fit->xM;
-      Double_t yM = fit->yM;
-      Double_t x2M = fit->x2M;
-      Double_t y2M = fit->y2M;
-      Double_t xyM = fit->xyM;
-      Double32_t det = x2M - xM*xM;
-      if (det > 0) {
-	Double_t d = 1./det;
-	Double_t slope   = (xyM - xM*yM)*d;
-	Double_t offset  = (x2M*yM - xM*xyM)*d;
-	Double_t chisq   = slope*slope*x2M + 2*slope*offset*xM + offset*offset - 2*slope*xyM -2 *offset*yM + y2M; 
-	Double_t dslope  = TMath::Sqrt(d);
-	Double_t doffset = TMath::Sqrt(x2M*d);
-        fit->slope   = slope;
-	fit->offset  = offset;
-	fit->chisq   = chisq;
-	fit->dslope  = dslope;
-	fit->doffset = doffset;
+    if (N > 2) {
+      for (;;) {
+	TRVector Y;
+	TRMatrix A(0,2);
+	for (Int_t i = 0; i < N; i++) {
+	  if (! fit->Flag[i]) {
+	    Double_t dev = fit->Y[i]/sigma;
+	    Y.AddRow(&dev);
+	    Double_t a[2] = {1./sigma, fit->X[i]/sigma};
+	    A.AddRow(a);
+	  }
+	}
+	Int_t ndf = A.GetNrows() - 2;
+	if (ndf < 1) break;
+	TRSymMatrix S(A,TRArray::kATxA);        if (Debug()) cout << "S: " << S << endl;
+	TRVector    B(A,TRArray::kATxB,Y);      if (Debug()) cout << "B: " << B << endl;
+	TRSymMatrix SInv(S,TRArray::kInverted); if (Debug()) cout << "SInv: " << SInv << endl;
+	TRVector    X(SInv,TRArray::kSxA,B);    if (Debug()) cout << "X: " << X << endl;
+	TRVector    R(Y);               
+	R -= TRVector(A,TRArray::kAxB,X);       if (Debug()) cout << "R: " << R << endl;
+	Double_t chisq = R*R;
+	Double_t prob = TMath::Prob(chisq,ndf);
+	if (prob > 0.01) {
+	  fit->offset  = X[0];
+	  fit->slope   = X[1];
+	  fit->chisq   = chisq;
+	  fit->dslope  = SInv[2];
+	  fit->doffset = SInv[0];
+	  fit->Prob = prob;
+	  fit->ndf = ndf;
+	  if (Debug()) fit->Print();
+#if 0
+	  TClonesArray &tracks = *event->Tracks();
+	  Int_t Ntrack = event->GetNtrack();
+	  for (Int_t i = 0; i < Ntrack; i++) {
+	    Track *t = (Track *) tracks[i];
+	    if (t->Flag == 2 && t->Laser.Sector == 2*(k+1)) {
+	      t->fit = *fit;
+	    }
+	  }
+#endif
+	  break;
+	} else {
+	  Int_t j = -1;
+	  Int_t imax = -1;
+	  Double_t Rmax = 0;
+	  for (Int_t i = 0; i < N; i++) {
+	    if (! fit->Flag[i]) {
+	      j++;
+	      Double_t RR = TMath::Abs(R[j]);
+	      if (RR > Rmax) {
+		imax = i;
+		Rmax = RR;
+	      }
+	    }
+	  }
+	  if (imax < 0) break;
+	  fit->Flag[imax] = 1;
+	}
       }
     }
   }
