@@ -21,15 +21,15 @@ ClassImp(EventHeader);
 ClassImp(LaserEvent);
 ClassImp(Vertex);
 ClassImp(Track);
-ClassImp(Zees);
+ClassImp(Hit);
 TClonesArray *LaserEvent::fgVertices = 0;
 TClonesArray *LaserEvent::fgTracks = 0;
-TClonesArray *LaserEvent::fgzEast = 0;
-TClonesArray *LaserEvent::fgzWest = 0;
+TClonesArray *LaserEvent::fgHits = 0;
 TClonesArray *LaserEvent::fgFit = 0;
 //______________________________________________________________________________
 LaserB::LaserB(const LaserRaft &laser) : Sector(laser.Sector), Raft(laser.Raft), Bundle(laser.Bundle), Mirror(laser.Mirror),
-					 XyzL(laser.XyzL), XyzU(laser.XyzU), dirL(laser.dirL), dirU(laser.dirU),
+					 XyzL(laser.XyzL), XyzU(laser.XyzU), XyzB(laser.XyzB), 
+					 dirL(laser.dirL), dirU(laser.dirU),dirB(laser.dirB),
 					 Theta(laser.Theta), Phi(laser.Phi){
 }
 //______________________________________________________________________________
@@ -46,16 +46,13 @@ LaserEvent::LaserEvent()
    fTracks = fgTracks;
    fNtrack = 0;
 
-   if (!fgzEast) fgzEast = new TClonesArray("Zees", 1000);
-   fzEast = fgzEast;
-   fNzEast = 0;
-   if (!fgzWest) fgzWest = new TClonesArray("Zees", 1000);
-   fzWest = fgzWest;
-   fNzWest = 0;
+   if (!fgHits) fgHits = new TClonesArray("Hit", 1000);
+   fHits = fgHits;
+   fNhit = 0;
+
    if (!fgFit) fgFit = new TClonesArray("FitDV", 1000);
    fgFit->ExpandCreate(12);
    fFit = fgFit;
-   fNFit = 0;
 }
 
 //______________________________________________________________________________
@@ -71,19 +68,6 @@ Vertex *LaserEvent::AddVertex(StPrimaryVertex *vertex) {
   Vertex *vx = new(vertices[fNvertex++]) Vertex(vertex);
   const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
   Tpc2Global.MasterToLocal(vx->Xyz.xyz(),vx->XyzL.xyz());
-  if (vx->WestEast) {
-    Zees *z = 0;
-    if (vx->WestEast == 1) z = new((*fgzWest)[fNzWest++]) Zees();
-    else                   z = new((*fgzEast)[fNzEast++]) Zees();
-    z->zP = vx->XyzL.z();
-    z->zL = 0;
-    Double_t dv = fEvtHdr.DriftVel();
-    Double_t ZE = fEvtHdr.DriftDistance();
-    z->dP = ZE - TMath::Abs(z->zP);
-    z->tD = z->dP/dv;
-    static const  Double_t R = 320; // Radius of middle of supersector 
-    z->tL = (2*ZE + TMath::Sqrt(ZE*ZE + R*R))/TMath::Ccgs();
-  }
   return vx;
 }
 //______________________________________________________________________________
@@ -91,62 +75,52 @@ Track *LaserEvent::AddTrack(Int_t sector, StTrack *track, LaserB *laser) {
   if (! track) return 0;
   TClonesArray &tracks = *fTracks;
   Track *t = new(tracks[fNtrack++]) Track(sector, track, laser);
-  const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
-  Tpc2Global.MasterToLocal(t->XyzP.xyz(),t->XyzPL.xyz());
-  StThreeVectorD g3 = track->outerGeometry()->momentum();
-  t->dirP = g3.unit();
-  Tpc2Global.MasterToLocalVect(t->dirP.xyz(),t->dirPL.xyz());
-  if (t->Flag == 2 && laser->IsValid) {
-    Int_t s2 = (t->mSector-1)/2;
-    if (s2 >= 0 && s2 < 12) {
-      TClonesArray &fits = *fFit;
-      FitDV *fit = (FitDV *) fits[s2]; 
-      fit->Sector = t->mSector;
-      Int_t N = fit->N + 1;
-      Double32_t x = t->Laser.XyzL.z();
-      Double32_t y = t->XyzPL.z() - x;
-      Double_t xM  = fit->xM  + x;
-      Double_t yM  = fit->yM  + y;
-      Double_t x2M = fit->x2M + x*x;
-      Double_t y2M = fit->y2M + y*y;
-      Double_t xyM = fit->xyM + x*y;
-      fit->N   = N;
-      fit->xM  = xM;
-      fit->yM  = yM; 
-      fit->x2M = x2M;
-      fit->y2M = y2M;
-      fit->xyM = xyM;
-    }
-    Zees *z = 0;
-    if (t->mSector <= 12) z = new((*fgzWest)[fNzWest++]) Zees();
-    else                  z = new((*fgzEast)[fNzEast++]) Zees();
-    z->zP = t->XyzPL.z();
-    z->zL = t->Laser.XyzL.z();
-    Double_t dv = fEvtHdr.DriftVel();
-    Double_t ZE = fEvtHdr.DriftDistance();
-    z->dP = ZE - TMath::Abs(z->zP);
-    z->tD = z->dP/dv;
-    z->tL = (ZE - TMath::Abs(z->zL))/TMath::Ccgs();
-  }
   return t;
+}
+//______________________________________________________________________________
+Hit *LaserEvent::AddHit(StTpcHit *hit) {
+  if (! hit) return 0;
+  TClonesArray &hits = *fHits;
+  Hit *t = new(hits[fNhit++]) Hit(hit);
+  return t;
+}
+//________________________________________________________________________________
+void LaserEvent::AddTrackFit(Track *t) {
+  if (! t) return;
+  Int_t sector = t->Laser.Sector;
+  Int_t bundle =  t->Laser.Bundle;
+  Int_t mirror =  t->Laser.Mirror;
+  Int_t s2 = (sector-1)/2;
+  if (s2 >= 0 && s2 < 12) {
+    TClonesArray &fits = *fFit;
+    FitDV *fit = (FitDV *) fits[s2]; 
+    fit->Sector = sector;
+    Int_t N = fit->N;
+    Double32_t x = t->Laser.XyzL.z();
+    Double32_t y = t->XyzPL.z() - x;
+    if (N < 42) {
+      fit->X[N] = x;
+      fit->Y[N] = y;
+      fit->Bundle[N] =  bundle;
+      fit->Mirror[N] =  mirror;
+      fit->N   = N+1;
+    }
+  }
 }
 //______________________________________________________________________________
 void LaserEvent::Clear(Option_t *option) {
    fTracks->Clear(option);
+   fHits->Clear(option);
    fVertices->Clear(option);
-   fgzEast->Clear(option);
-   fgzWest->Clear(option);
    fgFit->Clear(option);
 }
 //______________________________________________________________________________
 void LaserEvent::Reset() {
-// Static function to reset all static objects for this event
-//   fgTracks->Delete(option);
-   delete fgTracks; fgTracks = 0;
-   delete fgVertices; fgVertices = 0;
-   SafeDelete(fgzEast);
-   SafeDelete(fgzWest);
-   SafeDelete(fgFit);
+  // Static function to reset all static objects for this event
+  SafeDelete(fgTracks);
+  SafeDelete(fgHits);
+  SafeDelete(fgVertices);
+  SafeDelete(fgFit);
 }
 
 //______________________________________________________________________________
@@ -154,45 +128,35 @@ void LaserEvent::SetHeader(Int_t i, Int_t run, Int_t date, Int_t time)
 {
    fNvertex = 0;
    fNtrack = 0;
-   fNzEast = fNzWest = fNFit =0;
+   fNhit = 0;
    fEvtHdr.Set(i, run, date, time);
 }
 //______________________________________________________________________________
 void LaserEvent::SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
      Float_t tzero, Float_t drivel, Float_t clock)
 {
-   fNvertex = 0;
-   fNtrack = 0;
-   fNzEast = fNzWest = fNFit = 0;
-   fEvtHdr.Set(i, run, date, time);
+   SetHeader(i, run, date, time);
    fEvtHdr.SetE(tzero, drivel, clock);
 }
 //______________________________________________________________________________
 void LaserEvent::SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
      Float_t tzero, Float_t drivel, Float_t clock, Float_t trigger)
 {
-   fNvertex = 0;
-   fNtrack = 0;
-   fNzEast = fNzWest = fNFit = 0;
-   fEvtHdr.Set(i, run, date, time);
+   SetHeader(i, run, date, time);
    fEvtHdr.SetE(tzero, drivel, clock, trigger);
 }
 //______________________________________________________________________________
 Track::Track(Int_t sector, StTrack *track, LaserB *theLaser) : Flag(0),mType(kUndefinedVtxId),  mSector(sector), 
-							       XyzP(), thePath(0), dPhi(-999), dTheta(-999) {
+							       fpTInv(-999), thePath(0), dPhi(-999), dTheta(-999) {
   StTrackNode*   node = track->node();
   StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
   fgeoIn = *((StHelixModel *) gTrack->geometry());
   fgeoOut = *((StHelixModel *) gTrack->outerGeometry());
-  StPhysicalHelixD helixO = fgeoOut.helix();
+  StThreeVectorD g3 = fgeoOut.momentum();
+  fpTInv = fgeoOut.charge()/g3.perp();
   fTheta = fgeoOut.momentum().theta();
   fPhi   = fgeoOut.momentum().phi();
-  if (theLaser) {
-    thePath = helixO.pathLength(theLaser->XyzG.x(),theLaser->XyzG.y());
-    XyzP   = helixO.at(thePath);
-    Flag   = 2;
-    Laser  = *theLaser; 
-  }
+  if (theLaser) Laser = *theLaser;
   if (gTrack) {
     StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
     if (pTrack) {
@@ -202,7 +166,7 @@ Track::Track(Int_t sector, StTrack *track, LaserB *theLaser) : Flag(0),mType(kUn
 	Vertex = vertex->position();
 	Flag = 1;
       }
-    }
+    } 
     mKey = gTrack->key();
     mFlag = gTrack->flag();
     mNumberOfPossiblePointsTpc = gTrack->numberOfPossiblePoints(kTpcId);
@@ -228,6 +192,35 @@ Track::Track(Int_t sector, StTrack *track, LaserB *theLaser) : Flag(0),mType(kUn
     }
 #endif
   }
+}
+//______________________________________________________________________________
+void Track::SetPredictions(TGeoHMatrix *Raft2Tpc, TGeoHMatrix *Bundle2Tpc, TGeoHMatrix *Mirror2Tpc) {
+  if ( Flag ) return;
+  if ( Laser.Sector < 1 || Laser.Sector > 24) return;
+  Flag   = 2;
+  const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
+  StPhysicalHelixD helixO = fgeoOut.helix();
+  thePath = helixO.pathLength(Laser.XyzG.x(),Laser.XyzG.y());
+  XyzP   = helixO.at(thePath);
+  Tpc2Global.MasterToLocal(XyzP.xyz(),XyzPL.xyz());
+  StThreeVectorD g3 = fgeoOut.momentum();
+  dirP = g3.unit();
+  Tpc2Global.MasterToLocalVect(dirP.xyz(),dirPL.xyz());
+  dU = StThreeVectorD(999.,999.,999.);
+  if (Raft2Tpc) {
+    Raft2Tpc->MasterToLocal(XyzPL.xyz(),XyzPU.xyz());
+    Raft2Tpc->MasterToLocalVect(dirPL.xyz(),dirPU.xyz());
+    dU = XyzPU - Laser.XyzU;
+  }
+  if (Bundle2Tpc) {
+    Bundle2Tpc->MasterToLocal(XyzPL.xyz(),XyzPB.xyz());
+    Bundle2Tpc->MasterToLocalVect(dirPL.xyz(),dirPB.xyz());
+  }
+  if (Mirror2Tpc) {
+    Mirror2Tpc->MasterToLocal(XyzPL.xyz(),XyzPM.xyz());
+    Mirror2Tpc->MasterToLocalVect(dirPL.xyz(),dirPM.xyz());
+  }
+  Flag += Matched();
 }
 //______________________________________________________________________________
 Vertex::Vertex(StPrimaryVertex *vertex) : mType(kUndefinedVtxId), WestEast(0), 
@@ -275,15 +268,29 @@ Int_t Track::Matched() {
   if (thePath < 5 || thePath > 25)    status |= 1 << 5;
   if (mNumberOfFitPointsTpc  < 25)    status |= 1 << 6;
   dTheta = Laser.ThetaG-fgeoOut.dipAngle()-TMath::Pi()/2;
-#if 0
+#if 1
   if (TMath::Abs(dTheta) > 0.030)                  status |= 1 << 7;;
 #endif
   dPhi = Laser.PhiG - fgeoOut.psi();
   if (dPhi >=  TMath::Pi()) dPhi -= 2*TMath::Pi();
   if (dPhi <= -TMath::Pi()) dPhi += 2*TMath::Pi();
   //  if (SectorMirror[m][i].sigma > 0 && TMath::Abs(dPhi) > 5*SectorMirror[m][i].sigma) status |= 1 << 8;
-#if 0
+#if 1
   if ( TMath::Abs(dPhi) > 0.020)  status |= 1 << 9;
 #endif
+  static const Double_t pTInv0 = 4.78815e-03;
+  static const Double_t DpTInv0 = 9.75313e-03;
+  if (TMath::Abs(fpTInv - pTInv0) > 3.0*DpTInv0) status |= 1 << 10;
   return iok + 10*status;
+}
+//________________________________________________________________________________
+Hit::Hit(StTpcHit *tpcHit)  : sector(0),row(0),charge(0),flag(0),usedInFit(0) {
+  if (tpcHit) {
+    sector = tpcHit->sector();
+    row = tpcHit->padrow();;
+    charge = tpcHit->charge();
+    flag = tpcHit->flag();
+    usedInFit = tpcHit->usedInFit();
+    xyz = tpcHit->position();
+  }
 }
