@@ -109,12 +109,12 @@ class StGammaCandidate : public TObject
   void SetSmdEtaEnergy( Float_t e ){ mSmduEnergy=e; }
   void SetSmdPhiEnergy( Float_t e ){ mSmdvEnergy=e; }
 
-  TVector3 momentum(){ return mMomentum; }
-  TVector3 position(){ return mPosition; }
+  TVector3 momentum() const { return mMomentum; }
+  TVector3 position() const { return mPosition; }
+  Float_t  energy() const { return mEnergy; }
 
 
 
-  
   // Tower and track information w/in given radius
  
  private:
