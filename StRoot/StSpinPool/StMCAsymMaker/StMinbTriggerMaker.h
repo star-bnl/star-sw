@@ -1,4 +1,3 @@
-
 #ifndef STAR_StMinbTriggerMaker
 #define STAR_StMinbTriggerMaker
 
@@ -32,7 +31,7 @@ class StMinbTriggerMaker : public StMaker {
  protected:
 
  public: 
-  StMinbTriggerMaker(const char *name="BbcTrig");
+  StMinbTriggerMaker(const char *name="MinbTrig");
   virtual       ~StMinbTriggerMaker();
   virtual Int_t Init();
   virtual Int_t  Make();
@@ -42,7 +41,7 @@ class StMinbTriggerMaker : public StMaker {
   int BBCadc[48];
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMinbTriggerMaker.h,v 1.1 2007/07/10 15:19:57 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMinbTriggerMaker.h,v 1.2 2007/07/10 15:47:56 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
