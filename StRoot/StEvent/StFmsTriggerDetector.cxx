@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.cxx,v 2.1 2007/07/02 20:21:54 ullrich Exp $
+ * $Id: StFmsTriggerDetector.cxx,v 2.2 2007/07/10 17:04:48 perev Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.cxx,v $
+ * Revision 2.2  2007/07/10 17:04:48  perev
+ * Check for zero pointer added
+ *
  * Revision 2.1  2007/07/02 20:21:54  ullrich
  * Initial Revision.
  *
@@ -19,7 +22,7 @@
 #include "Stiostream.h"
 #include <stdio.h>
 
-static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.1 2007/07/02 20:21:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.2 2007/07/10 17:04:48 perev Exp $";
 
 ClassImp(StFmsTriggerDetector)
     
@@ -27,25 +30,33 @@ StFmsTriggerDetector::StFmsTriggerDetector()
 {
     mNumHeader=-1;
     mNumQTdata=0;
-    memset(mQTdata, 0, mMaxLine *sizeof(int));
-    memset(mDSM   , 0, mMaxDSM  *sizeof(char));
-    memset(mDSM01 , 0, mMaxDSM01*sizeof(char));
-    memset(mDSM02 , 0, mMaxDSM02*sizeof(char));
-    memset(mDSM1  , 0, mMaxDSM1 *sizeof(short));
-    memset(mDSM2  , 0, mMaxDSM2 *sizeof(short));
+    memset(mQTdata, 0, sizeof(mQTdata));
+    memset(mDSM   , 0, sizeof(mDSM));
+    memset(mDSM01 , 0, sizeof(mDSM01));
+    memset(mDSM02 , 0, sizeof(mDSM02));
+    memset(mDSM1  , 0, sizeof(mDSM1));
+    memset(mDSM2  , 0, sizeof(mDSM2));
 }
 
 StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
 {
+const unsigned char  *c=0;
+const unsigned short *s=0;
+const unsigned int   *i=0;
     mNumHeader=-1;
     mNumQTdata = (int)t.nQTdata();
-    memcpy(mQTdata, t.QTdata(),     mNumQTdata*sizeof(int));  
-    memset(mQTdata+mNumQTdata, 0, (mMaxLine-mNumQTdata)*sizeof(int));
-    memcpy(mDSM   ,t.getDsm_FMS(),   mMaxDSM  *sizeof(char));
-    memcpy(mDSM01 ,t.getDsm01_FMS(), mMaxDSM01*sizeof(char));
-    memcpy(mDSM02 ,t.getDsm02_FMS(), mMaxDSM02*sizeof(char));
-    memcpy(mDSM1  ,t.getDsm1_FMS(),  mMaxDSM1 *sizeof(short));
-    memcpy(mDSM2  ,t.getDsm2_FMS(),  mMaxDSM2 *sizeof(short));
+    memset(mQTdata, 0, sizeof(mQTdata));
+    memset(mDSM   , 0, sizeof(mDSM));
+    memset(mDSM01 , 0, sizeof(mDSM01));
+    memset(mDSM02 , 0, sizeof(mDSM02));
+    memset(mDSM1  , 0, sizeof(mDSM1));
+    memset(mDSM2  , 0, sizeof(mDSM2));
+    i = t.QTdata();       if (i) memcpy(mQTdata,i, mNumQTdata*sizeof(int ));  
+    c = t.getDsm_FMS()  ; if (c) memcpy(mDSM   ,c, sizeof(mDSM  ));
+    c = t.getDsm02_FMS(); if (c) memcpy(mDSM01 ,c, sizeof(mDSM01));
+    c = t.getDsm02_FMS(); if (c) memcpy(mDSM02 ,c, sizeof(mDSM02));
+    s = t.getDsm1_FMS() ; if (s) memcpy(mDSM1  ,s, sizeof(mDSM1 ));
+    s = t.getDsm2_FMS() ; if (s) memcpy(mDSM2  ,s, sizeof(mDSM2 ));
     decode();
 }
 
