@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcTriggerDetector.cxx,v 2.5 2001/04/05 04:00:51 ullrich Exp $
+ * $Id: StMwcTriggerDetector.cxx,v 2.6 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMwcTriggerDetector.cxx,v $
+ * Revision 2.6  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.5  2001/04/05 04:00:51  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -29,28 +32,18 @@
 #include "StMwcTriggerDetector.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.5 2001/04/05 04:00:51 ullrich Exp $";
+static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.6 2007/07/11 23:06:45 perev Exp $";
 
 ClassImp(StMwcTriggerDetector)
 
 StMwcTriggerDetector::StMwcTriggerDetector()
 {
-    int i, j, k;
-    for(i=0; i<mMaxSectors; i++)
-        for(j=0; j<mMaxSubSectors; j++)
-            for(k=0; k<mMaxEventSamples; k++)
-                mMips[i][j][k] = 0;
-
-    for(i=0; i<mMaxAux; i++)
-        for(j=0; j<mMaxEventSamples; j++)
-            mAux[i][j] = 0;
-    
-    mNumberOfPreSamples = 0;
-    mNumberOfPostSamples = 0;
+    memset(mBeg,0,mEnd-mBeg);
 }
 
 StMwcTriggerDetector::StMwcTriggerDetector(const dst_TrgDet_st& t)
 {
+    memset(mBeg,0,mEnd-mBeg);
     int i, j, k;
     for(i=0; i<mMaxSectors; i++)
         for(j=0; j<mMaxSubSectors; j++)

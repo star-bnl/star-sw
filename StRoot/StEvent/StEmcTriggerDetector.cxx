@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTriggerDetector.cxx,v 2.3 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StEmcTriggerDetector.cxx,v 2.4 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Alex Suaide, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcTriggerDetector.cxx,v $
+ * Revision 2.4  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.3  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -25,48 +28,27 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StEmcTriggerDetector.cxx,v 2.3 2004/08/03 17:22:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcTriggerDetector.cxx,v 2.4 2007/07/11 23:06:45 perev Exp $";
 
 ClassImp(StEmcTriggerDetector)
 
 StEmcTriggerDetector::StEmcTriggerDetector()
 {
-    for(int i=0; i<mNPatch; i++) {
-	mHighTower[i]=0;
-	mPatch[i]=0;
-    }
-    for(int i=0; i<mENPatch; i++) {
-	mEHighTower[i]=0;
-	mEPatch[i]=0;
-    }
-    for(int i=0; i<mNBemcLayer1; i++) 
-      mBemcLayer1[i]=0;
-    for(int i=0; i<mNEemcLayer1; i++) 
-      mEemcLayer1[i]=0;
-    for(int i=0; i<mNEmcLayer2; i++) 
-      mEmcLayer2[i]=0;
+    memset(mBeg,0,mEnd-mBeg);
 }
 
 StEmcTriggerDetector::StEmcTriggerDetector(const dst_TrgDet_st& t)
 {
+    memset(mBeg,0,mEnd-mBeg);
     for(int i=0; i<mNPatch; i++) {
 	mHighTower[i]=static_cast<char>(t.emcHiTower[i]);
 	mPatch[i]=static_cast<char>(t.emcTrigPatch[i]);
     }
-    for(int i=0; i<mENPatch; i++) {
-	mEHighTower[i]=0;
-	mEPatch[i]=0;
-    }
-    for(int i=0; i<mNBemcLayer1; i++) 
-      mBemcLayer1[i]=0;
-    for(int i=0; i<mNEemcLayer1; i++) 
-      mEemcLayer1[i]=0;
-    for(int i=0; i<mNEmcLayer2; i++) 
-      mEmcLayer2[i]=0;
 }
 
 StEmcTriggerDetector::StEmcTriggerDetector(const StTriggerData &trg_dat)
 {
+    memset(mBeg,0,mEnd-mBeg);
     for(int i=0; i<mNPatch; i++) {
 	mHighTower[i]=trg_dat.bemcHighTower(i);
 	mPatch[i]=trg_dat.bemcJetPatch(i);

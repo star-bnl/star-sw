@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StCtbTriggerDetector.h,v 2.6 2004/02/11 01:42:09 ullrich Exp $
+ * $Id: StCtbTriggerDetector.h,v 2.7 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StCtbTriggerDetector.h,v $
+ * Revision 2.7  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.6  2004/02/11 01:42:09  ullrich
  * Added new constructor to load data from StTriggerData.
  *
@@ -72,12 +75,14 @@ protected:
           mMaxSlats = 2,
           mMaxEventSamples = 11,
           mMaxAux = 16};
+    char mBeg[1];//!
     Float_t  mMips[mMaxTrays][mMaxSlats][mMaxEventSamples];
     Char_t   mTime[mMaxTrays][mMaxSlats][mMaxEventSamples];
     Float_t  mAux[mMaxAux][mMaxEventSamples];
     Int_t    mNumberOfPreSamples;
     Int_t    mNumberOfPostSamples;
+    char mEnd[1];//!
     
-    ClassDef(StCtbTriggerDetector,1)
+    ClassDef(StCtbTriggerDetector,2)
 };
 #endif

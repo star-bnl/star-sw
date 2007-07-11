@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcTriggerDetector.h,v 2.4 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StEmcTriggerDetector.h,v 2.5 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Alex Suaide, Feb 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcTriggerDetector.h,v $
+ * Revision 2.5  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.4  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -66,6 +69,7 @@ protected:
 
 private:    
     // Layer0 DSM input (from detector)
+    char mBeg[1];//!
     Char_t  mHighTower[mNPatch];  // High tower info from trigger patches
     Char_t  mPatch[mNPatch];      // Trigger patch sums
     
@@ -76,7 +80,8 @@ private:
     unsigned short mBemcLayer1[mNBemcLayer1];  // Barrel layer 1 input 
     unsigned short mEemcLayer1[mNEemcLayer1];  // Endcap layer 1 input
     unsigned short mEmcLayer2[mNEmcLayer2];    // Combined EMC layer 2 input
+    char mEnd[1];//!;
     
-    ClassDef(StEmcTriggerDetector,2)
+    ClassDef(StEmcTriggerDetector,3)
 };
 #endif

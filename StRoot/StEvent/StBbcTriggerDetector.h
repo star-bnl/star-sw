@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.h,v 2.8 2007/04/24 14:52:23 ullrich Exp $
+ * $Id: StBbcTriggerDetector.h,v 2.9 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.h,v $
+ * Revision 2.9  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.8  2007/04/24 14:52:23  ullrich
  * Fixed bug in BBC unpacking (Akio).
  *
@@ -120,6 +123,7 @@ protected:
         mMaxPedData = 128,
         mMaxScalars = 32
     };
+    char mBeg[1];//!
     UShort_t mAdc[mMaxPMTs];
     UShort_t mTdc[mMaxPMTs];
     UShort_t mReg[mMaxRegisters];
@@ -127,7 +131,8 @@ protected:
     UShort_t mScl[mMaxScalars];
     UInt_t   mYear;
     UInt_t   mDSMVTX;
-    ClassDef(StBbcTriggerDetector,4)
+    char mEnd[1];//!
+    ClassDef(StBbcTriggerDetector,5)
 };
 
 inline unsigned int

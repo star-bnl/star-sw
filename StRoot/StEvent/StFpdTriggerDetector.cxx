@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdTriggerDetector.cxx,v 2.5 2004/11/30 19:18:14 ullrich Exp $
+ * $Id: StFpdTriggerDetector.cxx,v 2.6 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Akio Ogawa, Jul 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdTriggerDetector.cxx,v $
+ * Revision 2.6  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.5  2004/11/30 19:18:14  ullrich
  * Fixed 2 bugs causing out of range errors reported in insure++ (Akio).
  *
@@ -32,7 +35,7 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.5 2004/11/30 19:18:14 ullrich Exp $";
+static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.6 2007/07/11 23:06:45 perev Exp $";
 
 ClassImp(StFpdTriggerDetector)
 
@@ -50,15 +53,21 @@ StFpdTriggerDetector::StFpdTriggerDetector(const dst_TrgDet_st& t)
 
 StFpdTriggerDetector::StFpdTriggerDetector(const StTriggerData& t)
 {  
+    clear();
     init();
     for(int ew=0; ew<2; ew++) {
 	for(unsigned int nstbps=0; nstbps<mMaxModule; nstbps++) {
-	    for(unsigned int tower=0; tower<mMaxTower[nstbps]; tower++) 
+	    int tst=(char*)&mAdc[ew][nstbps]-(char*)&mAdc[0][0];
+	    assert(tst>=0 && tst<(int)sizeof(mAdc));
+	    for(unsigned int tower=0; tower<mMaxTower[nstbps]; tower++){ 
 		mAdc[ew][nstbps][tower]=t.fpd((StBeamDirection)ew,nstbps,tower+1);
-	}
+	}  }
 	for(unsigned int nstbps=0; nstbps<mMaxBoard; nstbps++) {
-	    for(int bd=0; bd<mMaxBoard; bd++) 
+	    for(int bd=0; bd<mMaxBoard; bd++) {
+		int tst=(char*)&mLayer1[ew][nstbps][bd]-(char*)&mLayer1[0][0][0];
+	        assert(tst>=0 && tst<(int)sizeof(mLayer1));
 		mLayer1[ew][nstbps][bd]=t.fpdLayer1DSM((StBeamDirection)ew,nstbps,bd);
+	    }
 	    mLayer2[ew][nstbps]=t.fpdLayer2DSM((StBeamDirection)ew,nstbps);
 	}
     }
@@ -120,32 +129,16 @@ StFpdTriggerDetector::init()
     mMaxTower[0]=mMaxNS; mMaxTower[1]=mMaxNS; 
     mMaxTower[2]=mMaxTB; mMaxTower[3]=mMaxTB; 
     mMaxTower[4]=mMaxPS; mMaxTower[5]=mMaxPS; 
-    mAdc[0][0]=mEN;mAdc[0][1]=mES;mAdc[0][2]=mET;mAdc[0][3]=mEB;
+    mAdc[0][0]=mEN ;mAdc[0][1]=mES ;mAdc[0][2]=mET;mAdc[0][3]=mEB;
     mAdc[0][4]=mEPN;mAdc[0][5]=mEPS;
-    mAdc[1][0]=mWN;mAdc[1][1]=mWS;mAdc[1][2]=mWT;mAdc[1][3]=mWB;
+    mAdc[1][0]=mWN ;mAdc[1][1]=mWS ;mAdc[1][2]=mWT;mAdc[1][3]=mWB;
     mAdc[1][4]=mWPN;mAdc[1][5]=mWPS;
 }
 
 void 
 StFpdTriggerDetector::clear()
 {
-    fill_n(mEN, static_cast<size_t>(mMaxNS), 0);
-    fill_n(mES, static_cast<size_t>(mMaxNS), 0);
-    fill_n(mET, static_cast<size_t>(mMaxTB), 0);
-    fill_n(mEB, static_cast<size_t>(mMaxTB), 0);
-    fill_n(mEPN,static_cast<size_t>(mMaxPS), 0);
-    fill_n(mEPS,static_cast<size_t>(mMaxPS), 0);
-    fill_n(mWN, static_cast<size_t>(mMaxNS), 0);
-    fill_n(mWS, static_cast<size_t>(mMaxNS), 0);
-    fill_n(mWT, static_cast<size_t>(mMaxTB), 0);
-    fill_n(mWB, static_cast<size_t>(mMaxTB), 0);
-    fill_n(mWPN, static_cast<size_t>(mMaxPS), 0);
-    fill_n(mWPS, static_cast<size_t>(mMaxPS), 0);
-    for (int i=0; i<2; i++)
-	for (int j=0; j<mMaxModule; j++) {
-	    for (int k=0; k<mMaxBoard; k++) mLayer1[i][j][k] = 0;
-	    mLayer2[i][j]=0;
-	}
+    memset(mBeg,0,mEnd-mBeg);
 }
 
 unsigned int

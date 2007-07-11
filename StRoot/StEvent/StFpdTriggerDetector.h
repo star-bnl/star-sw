@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFpdTriggerDetector.h,v 2.1 2004/08/03 17:20:33 ullrich Exp $
+ * $Id: StFpdTriggerDetector.h,v 2.2 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Akio Ogawa, Jul 2004
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFpdTriggerDetector.h,v $
+ * Revision 2.2  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.1  2004/08/03 17:20:33  ullrich
  * Initial Revision.
  *
@@ -56,6 +59,7 @@ private:
     void init();
 
 private:    
+    char mBeg[1];//!
     unsigned int mMaxTower[mMaxModule];//!
     UChar_t*     mAdc[2][mMaxModule];  //!
 
@@ -73,7 +77,8 @@ private:
     UChar_t  mWPS[mMaxPS];
     UShort_t mLayer1[2][mMaxModule][mMaxBoard];   
     UShort_t mLayer2[2][mMaxModule];   
+    char mEnd[1];//!
 
-    ClassDef(StFpdTriggerDetector,1)
+    ClassDef(StFpdTriggerDetector,2)
 };
 #endif
