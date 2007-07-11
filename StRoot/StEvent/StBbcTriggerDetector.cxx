@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.9 2007/04/24 14:52:23 ullrich Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.10 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.10  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.9  2007/04/24 14:52:23  ullrich
  * Fixed bug in BBC unpacking (Akio).
  *
@@ -43,18 +46,15 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.9 2007/04/24 14:52:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.10 2007/07/11 23:06:45 perev Exp $";
 
 ClassImp(StBbcTriggerDetector)
     
 StBbcTriggerDetector::StBbcTriggerDetector()
 {
+    memset(mBeg,0,mEnd-mBeg);
     int i;
     mYear=2002;
-    for (i=0; i<mMaxPMTs; i++){mAdc[i] = 0; mTdc[i] = 0;}
-    for (i=0; i<mMaxRegisters; i++){mReg[i] = 0;}
-    for (i=0; i<mMaxPedData; i++){mPed[i] = 0;}
-    for (i=0; i<mMaxScalars; i++){mScl[i] = 0;}
     mDSMVTX=0;
 }
 
@@ -71,6 +71,7 @@ StBbcTriggerDetector::StBbcTriggerDetector(const dst_TrgDet_st& t)
     int west_t_map[16] = { 32 , 29 , 28 , 64 , 61 , 60 , 31 , 30 ,
 		       27 , 26 , 25 , 63 , 62 , 59 , 58 , 57 };
 
+    memset(mBeg,0,mEnd-mBeg);
     int i;
     mYear=2003;
     for (i=0; i<24; i++){ 
@@ -81,20 +82,7 @@ StBbcTriggerDetector::StBbcTriggerDetector(const dst_TrgDet_st& t)
 	mTdc[i   ] = (unsigned short) t.BBC[east_t_map[i]-1]; 
 	mTdc[i+24] = (unsigned short) t.BBC[west_t_map[i]-1]; 
     }
-    for (i=16;i<24; i++)            {mTdc[i] = 0;}
-    for (i=40;i<48; i++)            {mTdc[i] = 0;}
-    for (i=0; i<mMaxRegisters; i++) {mReg[i] = 0;}
-    for (i=0; i<mMaxPedData; i++)   {mPed[i] = 0;}
-    for (i=0; i<mMaxScalars; i++)   {mScl[i] = 0;}
     mDSMVTX = 0;
-//     for (i=0; i<5; i++){
-// 	for (int j=0; j<16; j++){
-// 	    if (j==8) cout << " : ";
-// 	    cout << (unsigned short)(t.BBC[i*16+j]) << "  ";
-// 	}
-// 	cout << endl;
-//     }
-//     dump();
 }
 
 StBbcTriggerDetector::StBbcTriggerDetector(const StTriggerData& t)
@@ -107,6 +95,7 @@ StBbcTriggerDetector::StBbcTriggerDetector(const StTriggerData& t)
     //  in StTriggerData.
     //  tu 2/10/2004
     //
+    memset(mBeg,0,mEnd-mBeg);
     int i,maxt;
     mYear = t.year();
     if (mYear<2005)
@@ -122,14 +111,6 @@ StBbcTriggerDetector::StBbcTriggerDetector(const StTriggerData& t)
 	mTdc[i   ] = (unsigned short) t.bbcTDC(east, i+1); 
 	mTdc[i+24] = (unsigned short) t.bbcTDC(west, i+1); 
     }
-    for (i=maxt; i<24; i++){ 
-        mTdc[i   ] = 0;
-        mTdc[i+24] = 0;
-    }
-    
-    for (i=0; i<mMaxRegisters; i++) mReg[i] = 0;
-    for (i=0; i<mMaxPedData; i++)   mPed[i] = 0;
-    for (i=0; i<mMaxScalars; i++)   mScl[i] = 0;
     mDSMVTX=t.bbcTimeDifference();
 }
 

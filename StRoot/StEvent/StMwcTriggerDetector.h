@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMwcTriggerDetector.h,v 2.4 2002/02/22 22:56:49 jeromel Exp $
+ * $Id: StMwcTriggerDetector.h,v 2.5 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StMwcTriggerDetector.h,v $
+ * Revision 2.5  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.4  2002/02/22 22:56:49  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -61,11 +64,13 @@ protected:
           mMaxSubSectors = 4,
           mMaxEventSamples = 11,
           mMaxAux = 32};
+    char mBeg[1];//!
     Float_t  mMips[mMaxSectors][mMaxSubSectors][mMaxEventSamples];
     Float_t  mAux[mMaxAux][mMaxEventSamples];
     Int_t    mNumberOfPreSamples;
     Int_t    mNumberOfPostSamples;
+    char mEnd[1];//!
     
-    ClassDef(StMwcTriggerDetector,1)
+    ClassDef(StMwcTriggerDetector,2)
 };
 #endif

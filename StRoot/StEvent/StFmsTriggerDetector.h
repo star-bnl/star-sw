@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.h,v 2.1 2007/07/02 20:21:55 ullrich Exp $
+ * $Id: StFmsTriggerDetector.h,v 2.2 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.h,v $
+ * Revision 2.2  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.1  2007/07/02 20:21:55  ullrich
  * Initial Revision.
  *
@@ -65,6 +68,7 @@ protected:
       mOffsetAddr  = 15
     }; //!
     
+    char mBeg[1];//!
     UInt_t   mNumQTdata;
     UInt_t   mQTdata[mMaxLine];
     Char_t   mDSM[mMaxDSM];
@@ -76,8 +80,9 @@ protected:
     int  mNumHeader; //!
     unsigned short mADC[mMaxCrate][mMaxAddr][mMaxDCard][mMaxChan]; //!
     unsigned short mTDC[mMaxCrate][mMaxAddr][mMaxDCard][mMaxChan]; //!
+    char mEnd[1];//!
 
-    ClassDef(StFmsTriggerDetector,1)      
+    ClassDef(StFmsTriggerDetector,2)      
 };
 
 inline unsigned int   StFmsTriggerDetector::nHit() const {return mNumQTdata;} 

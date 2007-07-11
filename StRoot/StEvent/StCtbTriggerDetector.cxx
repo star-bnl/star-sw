@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StCtbTriggerDetector.cxx,v 2.9 2004/07/20 18:02:26 jeromel Exp $
+ * $Id: StCtbTriggerDetector.cxx,v 2.10 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StCtbTriggerDetector.cxx,v $
+ * Revision 2.10  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.9  2004/07/20 18:02:26  jeromel
  * Updates from Akio to fix CTB issues.
  *
@@ -42,30 +45,18 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StCtbTriggerDetector.cxx,v 2.9 2004/07/20 18:02:26 jeromel Exp $";
+static const char rcsid[] = "$Id: StCtbTriggerDetector.cxx,v 2.10 2007/07/11 23:06:45 perev Exp $";
 
 ClassImp(StCtbTriggerDetector)
 
 StCtbTriggerDetector::StCtbTriggerDetector()
 {
-    int i, j, k;
-    for(i=0; i<mMaxTrays; i++)
-        for(j=0; j<mMaxSlats; j++)
-            for(k=0; k<mMaxEventSamples; k++) {
-                mMips[i][j][k] = 0;
-                mTime[i][j][k] = 0;
-            }
-
-    for(i=0; i<mMaxAux; i++)
-        for(j=0; j<mMaxEventSamples; j++)
-            mAux[i][j] = 0;
-    
-    mNumberOfPreSamples = 0;
-    mNumberOfPostSamples = 0;
+    memset(mBeg,0,mEnd-mBeg);
 }
 
 StCtbTriggerDetector::StCtbTriggerDetector(const dst_TrgDet_st& t)
 {
+    memset(mBeg,0,mEnd-mBeg);
     int i, j, k;
     for(i=0; i<mMaxTrays; i++)
         for(j=0; j<mMaxSlats; j++)
@@ -84,6 +75,7 @@ StCtbTriggerDetector::StCtbTriggerDetector(const dst_TrgDet_st& t)
 
 StCtbTriggerDetector::StCtbTriggerDetector(const StTriggerData& t)
 {
+    memset(mBeg,0,mEnd-mBeg);
     int evtmap[mMaxEventSamples] = {0, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5};
     int i, j, k, evt;
     
@@ -92,7 +84,6 @@ StCtbTriggerDetector::StCtbTriggerDetector(const StTriggerData& t)
             for(k=0; k<mMaxEventSamples; k++) {
 		evt = evtmap[k];
 		mMips[i][j][k] = t.ctbTraySlat(i,j,evt);
-                mTime[i][j][k] = 0;              // N/A
 		
 		//if(t.ctbTraySlat(i,j, evt)>0) {
 		//  printf("AKIO! tray=%d slat=%d prepost=%d adc=%f\n",i,j,evt,mMips[i][j][k]);
@@ -100,9 +91,6 @@ StCtbTriggerDetector::StCtbTriggerDetector(const StTriggerData& t)
 
             }
     
-    for(i=0; i<mMaxAux; i++)
-        for(j=0; j<mMaxEventSamples; j++)
-            mAux[i][j] = 0;                      // N/A
     
     mNumberOfPreSamples = 5;
     mNumberOfPostSamples = 5;

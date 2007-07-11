@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.cxx,v 2.2 2007/07/10 17:04:48 perev Exp $
+ * $Id: StFmsTriggerDetector.cxx,v 2.3 2007/07/11 23:06:45 perev Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.cxx,v $
+ * Revision 2.3  2007/07/11 23:06:45  perev
+ * Cleanup+fix StXXXTriggerDetector
+ *
  * Revision 2.2  2007/07/10 17:04:48  perev
  * Check for zero pointer added
  *
@@ -22,35 +25,26 @@
 #include "Stiostream.h"
 #include <stdio.h>
 
-static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.2 2007/07/10 17:04:48 perev Exp $";
+static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.3 2007/07/11 23:06:45 perev Exp $";
 
 ClassImp(StFmsTriggerDetector)
     
 StFmsTriggerDetector::StFmsTriggerDetector()
 {
+    memset(mBeg,0,mEnd-mBeg);
     mNumHeader=-1;
     mNumQTdata=0;
-    memset(mQTdata, 0, sizeof(mQTdata));
-    memset(mDSM   , 0, sizeof(mDSM));
-    memset(mDSM01 , 0, sizeof(mDSM01));
-    memset(mDSM02 , 0, sizeof(mDSM02));
-    memset(mDSM1  , 0, sizeof(mDSM1));
-    memset(mDSM2  , 0, sizeof(mDSM2));
 }
 
 StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
 {
+    memset(mBeg,0,mEnd-mBeg);
 const unsigned char  *c=0;
 const unsigned short *s=0;
 const unsigned int   *i=0;
     mNumHeader=-1;
     mNumQTdata = (int)t.nQTdata();
-    memset(mQTdata, 0, sizeof(mQTdata));
-    memset(mDSM   , 0, sizeof(mDSM));
-    memset(mDSM01 , 0, sizeof(mDSM01));
-    memset(mDSM02 , 0, sizeof(mDSM02));
-    memset(mDSM1  , 0, sizeof(mDSM1));
-    memset(mDSM2  , 0, sizeof(mDSM2));
+    assert(mMaxLine>=mNumQTdata);
     i = t.QTdata();       if (i) memcpy(mQTdata,i, mNumQTdata*sizeof(int ));  
     c = t.getDsm_FMS()  ; if (c) memcpy(mDSM   ,c, sizeof(mDSM  ));
     c = t.getDsm02_FMS(); if (c) memcpy(mDSM01 ,c, sizeof(mDSM01));
@@ -67,9 +61,8 @@ StFmsTriggerDetector::decode()
 {
     mNumHeader=0;
     if(mNumQTdata==0) return;
-    int l=mMaxCrate*mMaxAddr*mMaxDCard*mMaxChan;
-    memset(mADC,0,l*sizeof(int));
-    memset(mTDC,0,l*sizeof(int));
+    memset(mADC,0,sizeof(mADC));
+    memset(mTDC,0,sizeof(mTDC));
     int header=1, nline=0;
     int crate=0, addr=0;
     for (int i=0; i<static_cast<int>(mNumQTdata-1); i++){    
@@ -84,6 +77,9 @@ StFmsTriggerDetector::decode()
         else {
             unsigned short dcard = getQT8(d);
             unsigned short dch   = getCHA(d);
+            int tst=(char*)&mADC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]
+                   -(char*)&mADC[0][0][0][0];
+            assert(tst>=0 && tst<(int)sizeof(mADC));
             mADC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]=getADC(d);
             mTDC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]=getTDC(d);
             nline++;
