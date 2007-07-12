@@ -1,3 +1,0 @@
-struct type_begrun_str {
-        char descrip[256];
-};

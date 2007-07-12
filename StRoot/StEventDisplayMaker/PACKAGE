@@ -1,5 +1,0 @@
-# $Id $
-# package StEventDisplayMaker
-# author: 
-Library:libStEventDisplayMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -l_StEvent  -l_StEventUtilities  -lStTableUtilities  -ltpc_Tables  -lQtGui
-#Library:libStEventDisplayMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStEvent  -lStEventUtilities  -lStTableUtilities  -ltpc_Tables  -lQtGui

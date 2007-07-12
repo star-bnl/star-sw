@@ -1,7 +1,0 @@
-#!/bin/bash
-
-export DATA_NAME='Real data dAu2003 dAuCombined dataset'
-export DATA_TAG='dAu2003Combined'
-export DATA_QUERY='catalog:'$CATALOG'?collision=dau200,production=P04if,trgsetupname=dAuCombined,'$MYQUERY_general
-export DATA_CONFIG='config_dAu2003.C'
-export DATA_DIR=$DATA_PATH'/data_dAu2003'

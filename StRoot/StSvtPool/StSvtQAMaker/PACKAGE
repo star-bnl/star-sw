@@ -1,5 +1,0 @@
-# $Id $
-# package StSvtQAMaker
-# author: 
-Library:libStSvtQAMaker.so:LIBS +=   -lglobal_Tables  -lsim_Tables  -lStChain  -l_StEventMaker  -l_StEvent  -lStIOMaker  -lStSvtCalibMaker  -lStSvtClassLibrary  -l_StSvtClusterMaker  -lStSvtDaqMaker  -lStSvtSeqAdjMaker  -lGui
-#Library:libStSvtQAMaker.so:LIBS +=   -lglobal_Tables  -lsim_Tables  -lStChain  -lStEventMaker  -lStEvent  -lStIOMaker  -lStSvtCalibMaker  -lStSvtClassLibrary  -lStSvtClusterMaker  -lStSvtDaqMaker  -lStSvtSeqAdjMaker  -lGui
