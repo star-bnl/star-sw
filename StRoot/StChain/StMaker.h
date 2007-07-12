@@ -12,14 +12,16 @@
 #include "TDataSet.h"
 #include "TDataSetIter.h"
 #include "TObjectSet.h"
-#include <TString.h>
-#include <TDatime.h>
-#include <TH1.h>
+#include "TClass.h"
+#include "TMath.h"
+#include "TString.h"
+#include "TDatime.h"
+#include "TH1.h"
 #include "StEvtHddr.h"
 #ifndef ROOT_TClonesArray
-#include <TClonesArray.h>
+#include "TClonesArray.h"
 #endif
-#include <TStopwatch.h>
+#include "TStopwatch.h"
 #include "StMessMgr.h" 
 
 #ifndef __CINT__
@@ -70,6 +72,7 @@ protected:
    TDataSet     *m_Ouputs;              //!list of logOuput:ActualOuput
    TDataSet     *m_Runco;               //!Run Control parameters
    TList          *m_Histograms;        //!list of Histograms
+   static StMaker *fgTopChain;          //!pointer to top StChain
    static StMaker *fgStChain;           //!current pointer to StChain
    static StMaker *fgFailedMaker;       //!current pointer to failed maker
    static StTestMaker *fgTestMaker;     //pointer to test maker called before each one
@@ -149,6 +152,7 @@ public:
    /// STAR methods
    virtual Int_t        GetNumber() const ;
    virtual void         SetNumber(Int_t number) ;
+   static  StMaker     *GetTopChain(){return fgTopChain;}
    static  StMaker     *GetChain(){return fgStChain;}
    static  StMaker     *GetFailedMaker(){return fgFailedMaker;}
    virtual StMaker     *GetParentChain() const;
@@ -188,6 +192,7 @@ public:
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
    virtual StMaker     *GetMaker (const char *mkname);
+   virtual StMaker     *GetMakerInheritsFrom (const char *mktype);
    virtual Bool_t       IsActive() {return TestBIT(kActive);}
    virtual StMaker     *Maker (const char *mkname){return GetMaker (mkname);};
 
@@ -240,7 +245,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.83 2007/04/26 03:59:20 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.84 2007/07/12 19:17:20 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -303,8 +308,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.83 2007/04/26 03:59:20 perev Exp $
+// $Id: StMaker.h,v 1.84 2007/07/12 19:17:20 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.84  2007/07/12 19:17:20  fisyak
+// Add fTopChain - a pointer to TopChain (for embedding), add method GetMakerInheritsFrom
+//
 // Revision 1.83  2007/04/26 03:59:20  perev
 // new WhiteBoard methods
 //
