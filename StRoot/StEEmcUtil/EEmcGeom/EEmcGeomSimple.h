@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.24 2005/07/15 20:53:09 balewski Exp $
+ * $Id: EEmcGeomSimple.h,v 1.25 2007/07/12 19:30:14 fisyak Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -15,7 +15,8 @@
 
 #include "TObject.h"
 #include "TVector3.h"
-
+#include "TMath.h"
+#include <math.h>
 
 class EEmcGeomException : public TObject  {
 public:
@@ -201,6 +202,9 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.25  2007/07/12 19:30:14  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.24  2005/07/15 20:53:09  balewski
  * more get methods
  *

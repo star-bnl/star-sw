@@ -57,7 +57,7 @@ eemcfeerootopen_(long& run, long& runtime, char *chfile, int &nAuto, int len)
     char *idt  = strchr(basefile,'.');  *idt = 0x00; // locate first dot
   }
   sprintf(filename,"%s/%s.ez.root",rootdir,basefile); 
-  sprintf(comment,"run:%05ld, time:%s ",run,ctime(&runtime));
+  sprintf(comment,"run:%05ld, time:%s ",run,ctime((time_t *)&runtime));
 
   file  = new TFile(filename,"RECREATE");
   tree  = new TTree("ezstar","A tree with FEE events");

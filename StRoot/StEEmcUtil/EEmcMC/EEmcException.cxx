@@ -1,5 +1,8 @@
-// $Id: EEmcException.cxx,v 1.4 2003/09/11 19:41:08 zolnie Exp $
+// $Id: EEmcException.cxx,v 1.5 2007/07/12 19:30:14 fisyak Exp $
 // $Log: EEmcException.cxx,v $
+// Revision 1.5  2007/07/12 19:30:14  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.4  2003/09/11 19:41:08  zolnie
 // updates for gcc3.2
 //
@@ -25,7 +28,7 @@
 //
 
 #include <cstdio>
-#include <iostream>
+#include "Stiostream.h"
 using namespace std;
 
 #include "EEmcException.h"
@@ -46,5 +49,5 @@ EEmcException1::EEmcException1(const EEmcErrno_t e, const char *msg, const int v
   if(msg!=NULL) cerr << msg ;
   cerr << " (errno=" << mErrno << ")" ;
   cerr << " value=" << value << endl;
-};
+}
 

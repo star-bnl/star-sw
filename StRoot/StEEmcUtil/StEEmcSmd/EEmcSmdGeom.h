@@ -4,7 +4,7 @@
  * 
  *****************************************************************************
  *
- * $Id: EEmcSmdGeom.h,v 1.8 2007/02/01 13:47:39 balewski Exp $
+ * $Id: EEmcSmdGeom.h,v 1.9 2007/07/12 19:30:15 fisyak Exp $
  *
  * 
  *
@@ -215,7 +215,7 @@ class EEmcSmdGeom : public TObject {
 
 };
 
-inline bool EEmcSmdGeom::IsSectorIn(Int_t iSec)
+inline bool EEmcSmdGeom::IsSectorIn(const Int_t iSec)
        const {return mIsSectorIn[iSec];}
 inline StructEEmcSmdParam EEmcSmdGeom::getEEmcSmdParam()
        const {return mEEmcSmdParam;}
@@ -232,6 +232,9 @@ inline StructEEmcSmdSector EEmcSmdGeom::getEEmcSector(const Int_t iUV,
  *
  *
  * $Log: EEmcSmdGeom.h,v $
+ * Revision 1.9  2007/07/12 19:30:15  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.8  2007/02/01 13:47:39  balewski
  * bug fix in getDca2Strip(), more methodhs are public
  *

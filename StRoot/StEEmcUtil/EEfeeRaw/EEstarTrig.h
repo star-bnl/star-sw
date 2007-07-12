@@ -1,12 +1,13 @@
 #ifndef EEstarTrig_h
 #define EEstarTrig_h
 /*********************************************************************
- * $Id: EEstarTrig.h,v 1.9 2004/09/07 20:32:01 balewski Exp $
+ * $Id: EEstarTrig.h,v 1.10 2007/07/12 19:30:13 fisyak Exp $
  *********************************************************************
  * container for STAR trigger data
  */
 
 #include <TObject.h>
+#include <string.h>
 #define u_int unsigned int
 #define u_char unsigned char
 #define u_short unsigned short
@@ -50,6 +51,9 @@ class EEstarTrig : public TObject {
 
 /*************************************************************
  * $Log: EEstarTrig.h,v $
+ * Revision 1.10  2007/07/12 19:30:13  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.9  2004/09/07 20:32:01  balewski
  * more methods, remove questionable spin bits interpetation
  *

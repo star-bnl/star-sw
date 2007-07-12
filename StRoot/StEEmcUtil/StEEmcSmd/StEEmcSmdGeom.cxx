@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.11 2007/01/25 22:33:21 balewski Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.12 2007/07/12 19:30:15 fisyak Exp $
  *
  * Author: Wei-Ming Zhang
  *
@@ -17,6 +17,7 @@
  *
  *****************************************************************/
 
+#include "Stiostream.h"
 #include "StEEmcSmdGeom.h"
 #include "PhysicalConstants.h"
 
@@ -207,14 +208,14 @@ void StEEmcSmdGeom::printSectorPhis(const Int_t iPlane, const Int_t iSec,
   int iUV;
   iUV = kEEmcSmdMapUV[iPlane][iSec];
 
-  os << "------EEmcSmdGeom::printPhis()------" << std::endl;
-  os << " planeId = " << iPlane + 1 << " sectorId = " << iSec + 1 << std::endl;
+  os << "------EEmcSmdGeom::printPhis()------" << endl;
+  os << " planeId = " << iPlane + 1 << " sectorId = " << iSec + 1 << endl;
   if(iUV >= 0) 
-    os << " " <<  kEEmcSmdUVChar[iUV] << " Sector" << std::endl; 
+    os << " " <<  kEEmcSmdUVChar[iUV] << " Sector" << endl; 
   else  
-    os << " Empty" << std::endl; 
+    os << " Empty" << endl; 
   os << " delPhi = " << getEEmcSmdDelPhi(iPlane, iSec)/degree <<
     " " << "centerPhi = " << getEEmcSmdCenterPhi(iPlane, iSec)/degree 
-     << std::endl;
+     << endl;
   
 }

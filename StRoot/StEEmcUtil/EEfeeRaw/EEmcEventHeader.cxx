@@ -1,7 +1,8 @@
-// $Id: EEmcEventHeader.cxx,v 1.10 2004/07/09 02:38:05 balewski Exp $ 
+// $Id: EEmcEventHeader.cxx,v 1.11 2007/07/12 19:30:13 fisyak Exp $ 
 
 #include "EEmcEventHeader.h"
- 
+#include <string.h>
+
 //#include <Stiostream.h>
 
 ClassImp(EEmcEventHeader)
@@ -69,6 +70,9 @@ void EEmcEventHeader :: print(FILE *fd) const{
 
 
 // $Log: EEmcEventHeader.cxx,v $
+// Revision 1.11  2007/07/12 19:30:13  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.10  2004/07/09 02:38:05  balewski
 // BTOW data are not masked out any more but headres are checked as for EEMC
 //

@@ -1,5 +1,5 @@
 #include <cassert>
-
+#include <string.h>
 #include "EEdims.h"
 
 #include "EEfeeDataBlock.h"
@@ -187,6 +187,9 @@ UChar_t  EEfeeDataBlock
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.16  2007/07/12 19:30:13  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.15  2004/06/21 19:50:21  balewski
  * mre detailed monitoring of data corruption
  *

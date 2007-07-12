@@ -1,6 +1,9 @@
-// $Id: StFtpcLaser.cc,v 1.5 2007/01/22 13:08:15 jcs Exp $
+// $Id: StFtpcLaser.cc,v 1.6 2007/07/12 19:36:11 fisyak Exp $
 //
 // $Log: StFtpcLaser.cc,v $
+// Revision 1.6  2007/07/12 19:36:11  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.5  2007/01/22 13:08:15  jcs
 // replace cout with LOG
 //
@@ -15,6 +18,7 @@
 //
 
 #include "StFtpcLaser.hh"
+#include "TMath.h"
 #include "StMessMgr.h"
 
 //---------------------------------------------------------------
