@@ -17,6 +17,7 @@
 
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
+#include "TClonesArray.h"
 //---------------------------------------------
 ClassImp(HitEntry)
 HitEntry::HitEntry() {};
@@ -35,7 +36,7 @@ HitEntry::HitEntry(Float_t ix, Float_t iy, Float_t id, Float_t isig, Float_t ian
   nhits = isize;
 }
 
-HitEntry::~HitEntry() {};
+HitEntry::~HitEntry() {}
 
 
 //--------------------------------------------- 

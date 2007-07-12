@@ -1,11 +1,13 @@
 #ifndef EztEventHeader_h
 #define EztEventHeader_h
 /*********************************************************************
- * $Id: EztEventHeader.h,v 1.1 2004/10/28 00:10:19 mvl Exp $
+ * $Id: EztEventHeader.h,v 1.2 2007/07/12 19:46:20 fisyak Exp $
  *********************************************************************/
 
 #include <cstdio>
 #include <ctime>
+#include <string.h>
+
 #include "TObject.h"
 
 
@@ -51,6 +53,9 @@ class EztEventHeader : public TObject {
 
 /*
  * $Log: EztEventHeader.h,v $
+ * Revision 1.2  2007/07/12 19:46:20  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.1  2004/10/28 00:10:19  mvl
  * Initial revision of ezTree classes (for EEmc raw data)
  *

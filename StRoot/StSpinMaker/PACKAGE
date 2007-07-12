@@ -1,0 +1,5 @@
+# $Id $
+# package StSpinMaker
+# author: 
+Library:libStSpinMaker.so:LIBS +=   -lsim_Tables
+#Library:libStSpinMaker.so:LIBS +=   -lgeant3  -lsim_Tables

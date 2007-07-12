@@ -13,6 +13,7 @@
 #include "TRealData.h"
 #include "phys_constants.h"
 #include "math_constants.h"
+#include "TClass.h"
 #include "StMessMgr.h"
 
 int GGetOffset(TClass* cl, TDataMember* that);
@@ -218,8 +219,11 @@ int GGetOffset(TClass* cl, TDataMember* that) {
 }
 
 //_____________________________________________________________________________
-// $Id: DcaService.cxx,v 3.2 2007/05/19 00:35:55 genevb Exp $
+// $Id: DcaService.cxx,v 3.3 2007/07/12 20:01:47 fisyak Exp $
 // $Log: DcaService.cxx,v $
+// Revision 3.3  2007/07/12 20:01:47  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 3.2  2007/05/19 00:35:55  genevb
 // use STAR logger
 //

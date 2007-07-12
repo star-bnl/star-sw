@@ -1,0 +1,5 @@
+# $Id $
+# package StPidAmpMaker
+# author: 
+Library:libStPidAmpMaker.so:LIBS +=   -lStChain  -l_StFlowMaker
+#Library:libStPidAmpMaker.so:LIBS +=   -lStChain  -lStFlowMaker

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppGeant.cxx,v 1.4 2006/11/06 20:39:18 perev Exp $
+// $Id: StppGeant.cxx,v 1.5 2007/07/12 19:59:43 fisyak Exp $
 // $Log: StppGeant.cxx,v $
+// Revision 1.5  2007/07/12 19:59:43  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.4  2006/11/06 20:39:18  perev
 // using std added
 //
@@ -18,7 +21,7 @@
 // Revision 1.0  2001/06/14 Akio Ogawa
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream>
+#include "Stiostream.h"
 using namespace std;
 #include <math.h>
 #include "StppGeant.h"
