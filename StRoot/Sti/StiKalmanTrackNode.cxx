@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.109 2007/06/25 19:31:52 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.110 2007/07/12 00:21:00 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.110  2007/07/12 00:21:00  perev
+ * Normal radius instead of layer one
+ *
  * Revision 2.109  2007/06/25 19:31:52  perev
  * Init of _sinCA and _cosCA non zeros now
  *
@@ -989,8 +992,8 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   if (!hit) hit = getHit();
   double deltaX = 0;
   if (hit) { deltaX = hit->x()-mFP._x;}
-  else     { if (_detector) deltaX = _detector->getPlacement()->getLayerRadius()-mFP._x;}
-  if(fabs(deltaX)>3)		return -1;
+  else     { if (_detector) deltaX = _detector->getPlacement()->getNormalRadius()-mFP._x;}
+  if(fabs(deltaX)>5)		return -1;
   if (fabs(deltaX) <1.e-3) 	return  0;
   double deltaS = mFP._curv*(deltaX);
   double sCA2 = mFP._sinCA + deltaS;
@@ -2139,7 +2142,6 @@ void StiKalmanTrackNode::setUntouched()
 double StiKalmanTrackNode::getTime() {
   static const double smax = 1e3; 
   double time = 0;
-  double dir[3] = {mFP._cosCA,mFP._sinCA,mFP._tanl};
   if (! _laser) {
     double d = sqrt(mFP._x*mFP._x+mFP._y*mFP._y);
     double sn = fabs(mFP._cosCA*mFP._y - mFP._sinCA*mFP._x)/d;
