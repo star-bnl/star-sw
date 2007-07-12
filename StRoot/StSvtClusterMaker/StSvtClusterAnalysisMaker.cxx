@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.31 2007/04/28 17:57:04 perev Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.32 2007/07/12 20:06:49 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.32  2007/07/12 20:06:49  fisyak
+ * Move initialization to IntRun from Init, empty GetSvtDriftCurve, clean up
+ *
  * Revision 1.31  2007/04/28 17:57:04  perev
  * Redundant StChain.h removed
  *
@@ -184,7 +187,7 @@ StSvtClusterAnalysisMaker::~StSvtClusterAnalysisMaker()
   delete [] m_sumADC;
 }
 //_____________________________________________________________________________________________
-Int_t StSvtClusterAnalysisMaker::Init()
+Int_t StSvtClusterAnalysisMaker::InitRun(int runumber)
 {
   if( Debug()) gMessMgr->Debug() <<"In StSvtClusterAnalysisMaker::Init()"
 				 << GetName() <<endm;
@@ -213,7 +216,7 @@ Int_t StSvtClusterAnalysisMaker::Init()
 
   mSvtAnalysis->LoadAnodeGains();
 
-  return  StMaker::Init();
+  return  StMaker::InitRun(runumber);
 
 }
 
