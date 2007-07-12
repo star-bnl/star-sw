@@ -3,7 +3,12 @@
 #include <assert.h>
 #include "TROOT.h"
 #include "TClass.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
+#include "TMath.h"
 #include "TBaseClass.h"
 #include "TDataMember.h"
 #include "TMethod.h"
