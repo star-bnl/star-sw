@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.30  2007/07/12 20:25:05  fisyak
+ * Use StarLogger, use time of flight, fix cluster shape
+ *
  * Revision 1.29  2005/09/09 22:12:49  perev
  * Bug fix + IdTruth added
  *
@@ -124,7 +127,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
     // Make a digital Pad!
       digitalTimeBins  digPadData;
     // Remember mSector is the "normal" analog sector! 
-      cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
+      //      cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
       for(int irow=1; irow<=mSector->numberOfRows(); irow++) { 
 	for(unsigned int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
            
@@ -141,7 +144,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 	  for (int icur=0;icur<currentSize;icur++) {
             float amp = currentPad[icur].amplitude();
             if (!amp) 				continue;
-            if (mSimpleConversion>0) amp = amp/mSimpleConversion+0.5;
+            if (mSimpleConversion>0) amp = amp/mSimpleConversion;//+0.5;
 	    int temporary_digitalAmplitude = int(amp);
             if (!temporary_digitalAmplitude)	continue;
 

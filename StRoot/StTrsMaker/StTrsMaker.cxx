@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.80 2007/04/28 17:57:27 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.81 2007/07/12 20:25:04 fisyak Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.81  2007/07/12 20:25:04  fisyak
+// Use StarLogger, use time of flight, fix cluster shape
+//
 // Revision 1.80  2007/04/28 17:57:27  perev
 // Redundant StChain.h removed
 //
@@ -392,12 +395,14 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h" 
+#include "StMessMgr.h"
+#include "TString.h"
 #define PILEUP_ON  (m_Mode )
 
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.80 2007/04/28 17:57:27 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.81 2007/07/12 20:25:04 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -432,14 +437,14 @@ Int_t StTrsMaker::Init()
 
 Int_t StTrsMaker::InitRun(int runnumber)
 {
-  if (mAllTheData) {cout << "StTrsMaker::InitRun Already called" << endl; return kStOK;}
+  if (mAllTheData) {gMessMgr->QAInfo()  << "StTrsMaker::InitRun Already called" << endm; return kStOK;}
 #ifdef TPC_DATABASE_PARAMETERS
     // The global pointer to the Db is gStTpcDb and it should be created in the macro.
     
     if (!gStTpcDb) {
-	cout << "DATABASE MISSING!" << endl;
+	gMessMgr->QAInfo()  << "DATABASE MISSING!" << endm;
 	PR(gStTpcDb);
-	cout << "Can't initialize TRS" << endl;
+	gMessMgr->QAInfo()  << "Can't initialize TRS" << endm;
 	return kStFatal;
     }
     mGeometryDb =
@@ -514,32 +519,32 @@ Int_t StTrsMaker::InitRun(int runnumber)
     //
     // Check File access
     //
-    cout << "StTrsMaker::Init()" << endl;
+    gMessMgr->QAInfo()  << "StTrsMaker::Init()" << endm;
     string geoFile = "StRoot/StTrsMaker/run/TPCgeo.conf";
     if (access(geoFile.c_str(),R_OK)) {
-	cerr << "ERROR:\n" << geoFile.c_str() << " cannot be opened" << endl;
-	cerr << "Exitting..." << endl;
+	gMessMgr->Error()  "ERROR:\n" << geoFile.c_str() << " cannot be opened" << endm;
+	gMessMgr->Error()  "Exitting..." << endm;
 	exit(1);
     }
 
     string scFile = "StRoot/StTrsMaker/run/sc.conf";
     if (access(scFile.c_str(),R_OK)) {
-     cerr << "ERROR:\n" << scFile.c_str() << " cannot be opened" << endl;
-     cerr << "Exitting..." << endl;
+     gMessMgr->Error()  "ERROR:\n" << scFile.c_str() << " cannot be opened" << endm;
+     gMessMgr->Error()  "Exitting..." << endm;
      exit(1);
     }
 
     string electronicsFile = "StRoot/StTrsMaker/run/electronics.conf";
     if (access(electronicsFile.c_str(),R_OK)) {
-	cerr << "ERROR:\n" << electronicsFile.c_str() << " cannot be opened" << endl;
-	cerr << "Exitting..." << endl;
+	gMessMgr->Error()  "ERROR:\n" << electronicsFile.c_str() << " cannot be opened" << endm;
+	gMessMgr->Error()  "Exitting..." << endm;
 	exit(1);
     }
 
     string magFile = "StRoot/StTrsMaker/run/example.conf";         // contains B field
     if (access(magFile.c_str(),R_OK)) {
-	cerr << "ERROR:\n" << magFile.c_str() << " cannot be opened" << endl;
-	cerr << "Exitting..." << endl;
+	gMessMgr->Error()  "ERROR:\n" << magFile.c_str() << " cannot be opened" << endm;
+	gMessMgr->Error()  "Exitting..." << endm;
 	exit(1);
     }
 
@@ -682,7 +687,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
 //
 void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 
-    //cout << "StTrsMaker::whichSector()" << endl;
+    //gMessMgr->QAInfo()  << "StTrsMaker::whichSector()" << endm;
     *isDet  = (volId/100000);
 
     volId  -= (*isDet)*100000;
@@ -700,26 +705,25 @@ Int_t StTrsMaker::Make(){
     //Do not use this unless you really know what you are
     // doing...This is a histogram diagnostic to compare
     // the GEANT hits to those produced by TRS!
-
-    cout << "\n -- Begin TRS Processing -- \n";
     time_t trsMakeBegin = time(0);
-    cout << "Started at: " << ctime(&trsMakeBegin);    
-    cout << "========= TRS driftVelocity used = " << mSlowControlDb->driftVelocity() << endl;
-    
+    gMessMgr->QAInfo()  << "\n -- Begin TRS Processing -- " << endm; 
+    gMessMgr->QAInfo()  << "Started at: " << ctime(&trsMakeBegin);    
+    gMessMgr->QAInfo()  << "========= TRS driftVelocity used = " << mSlowControlDb->driftVelocity() << endm;
     int seed = IAttr("trsMakeSeed");
     if (seed) StTrsRandom::inst().SetSeed(seed);
-    cout << "========= TRS Seed  used = " <<  StTrsRandom::inst().GetSeed()<< endl;
+    gMessMgr->QAInfo()  << "========= TRS Seed  used = " <<  StTrsRandom::inst().GetSeed()<< endm;
 
 
     int currentSectorProcessed = mFirstSectorToProcess;
-
-    cout << "Processing sectors "
-	 << mFirstSectorToProcess
-	 << "--"
-	 << mLastSectorToProcess << endl;
-
-    //
-    cout << "make sure pointer are clean" << endl;
+    if (Debug()) {
+      gMessMgr->QAInfo()  << "Processing sectors "
+	   << mFirstSectorToProcess
+	   << "--"
+	   << mLastSectorToProcess << endm;
+      
+      //
+      gMessMgr->QAInfo()  << "make sure pointer are clean" << endm;
+    } 
     mAllTheData->clear();
     //
     //
@@ -728,7 +732,7 @@ Int_t StTrsMaker::Make(){
    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
     
     // Normal processing of TRS through GEANT   
-    //cout << "Make ofstream" << endl;
+    //gMessMgr->QAInfo()  << "Make ofstream" << endm;
     //ofstream ofs("/star/u2b/lasiuk/geantdebug.txt", ios::out);
     //ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
     //
@@ -760,11 +764,12 @@ Int_t StTrsMaker::Make(){
     
     g2t_vertex_st *gver=g2t_ver->GetTable();
     assert(gver); 
-     if(PILEUP_ON)
-       printf("\n  TRS(): Pileup is ON (m_Mode=%d)\n\n",m_Mode); 
-     else
-       printf("\n  TRS(): Pileup is OFF (m_Mode=%d)\n\n",m_Mode); 
-
+    if(PILEUP_ON) {
+       gMessMgr->QAInfo() << Form("\n  TRS(): Pileup is ON (m_Mode=%d)\n",m_Mode) << endm; 
+    }
+    else {
+       gMessMgr->QAInfo() << Form("\n  TRS(): Pileup is OFF (m_Mode=%d)\n",m_Mode) << endm; 
+    }
     //int geantPID = tpc_track->ge_pid;
     //PR(geantPID);
 
@@ -777,11 +782,11 @@ Int_t StTrsMaker::Make(){
     if(no_tpc_hits<1)return kStOK;
     g2t_tpc_hit_st *tpc_hit = tpcHit;
     for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
-       int id2=tpc_hit->track_p;
-         int id3=tpc_track[id2-1].start_vertex_p; //  "-1" is (Fortran-->C++)
-        float BunchZoffset=gver[id3-1].ge_tof* mSlowControlDb->driftVelocity();
-          float absHitZ=fabs(tpc_hit->x[2]);
-	
+      int id2=tpc_hit->track_p;
+      int id3=tpc_track[id2-1].start_vertex_p; //  "-1" is (Fortran-->C++)
+      float BunchZoffset=(gver[id3-1].ge_tof+tpc_hit->tof)* mSlowControlDb->driftVelocity();
+      float absHitZ=fabs(tpc_hit->x[2]);
+      
 	      if(PILEUP_ON)
             {
 	    if(absHitZ - tpc_hit->ds + BunchZoffset<0) continue;//crossed central membrane
@@ -789,7 +794,7 @@ Int_t StTrsMaker::Make(){
 	   continue;//out of TPC
 	     }    //  for piled up events
 
-// 		cout << "--> tpc_hit:  " << i << endl;
+// 		gMessMgr->QAInfo()  << "--> tpc_hit:  " << i << endm;
 // 		raw << tpc_hit->volume_id   << ' '
 // 		    << tpc_hit->de          << ' '
 // 		    << tpc_hit->ds          << ' '
@@ -798,11 +803,11 @@ Int_t StTrsMaker::Make(){
 // 		    << tpc_hit->x[2]        << ' '
 // 		    << tpc_hit->p[0]        << ' '
 // 		    << tpc_hit->p[1]        << ' '
-// 		    << tpc_hit->p[2]        << ' '  << endl;
+// 		    << tpc_hit->p[2]        << ' '  << endm;
         
 	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
 // 	PR(bsectorOfHit);
-// 	cout<< mFirstSectorToProcess<<" "<< mLastSectorToProcess<<endl;
+// 	gMessMgr->QAInfo() << mFirstSectorToProcess<<" "<< mLastSectorToProcess<<endm;
 	if(bsectorOfHit >= mFirstSectorToProcess &&
 	   bsectorOfHit <= mLastSectorToProcess)
 	    inRange = true;
@@ -811,7 +816,7 @@ Int_t StTrsMaker::Make(){
 
 	// Save time initially  - by not processing pseudo padrows
 	if(bisdet && !mProcessPseudoPadRows) {
-	  //   cout << "Segment in a pseudo-padRow. Skipping..." << endl;
+	  //   gMessMgr->QAInfo()  << "Segment in a pseudo-padRow. Skipping..." << endm;
 	    //  tpc_hit++;
 	     if(i != no_tpc_hits) continue;
              inRange=false;
@@ -821,7 +826,7 @@ Int_t StTrsMaker::Make(){
 	//
 	// If not in range AND there are no points processed, skip to next point
 	if(!inRange && !numberOfProcessedPointsInCurrentSector) {
-	    //cout << "out of range and no points" << endl;
+	    //gMessMgr->QAInfo()  << "out of range and no points" << endm;
 	    //  tpc_hit++;
 	    continue;
 	}
@@ -876,6 +881,7 @@ Int_t StTrsMaker::Make(){
 	    //   double yp = hitPosition.x()*sb + hitPosition.y()*cb;
                  double xp = tpc_hit->x[0]*cb -tpc_hit->x[1]*sb;
 	         double yp = tpc_hit->x[0]*sb +tpc_hit->x[1]*cb;
+		 
 	    StThreeVector<double>
 		sector12Coordinate(xp,yp,(tpc_hit->x[2]));
 
@@ -1045,18 +1051,19 @@ Int_t StTrsMaker::Make(){
 	mWireNtuple->Write();
 	}
 	}
-	PR(currentSectorProcessed);
+	if (Debug()) PR(currentSectorProcessed);
      
 	//
 	// Generate the ANALOG Signals on pads
 	//
 	time_t inducedChargeBegin = time(0);
-	cout << "--->inducedChargeOnPad()..." << endl;
+	if (Debug()) {gMessMgr->QAInfo()  << "--->inducedChargeOnPad()..." << endm;}
 	mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
+	if (Debug()) {
 	time_t inducedChargeEnd= time(0);
 	double inducedChargeTime = difftime(inducedChargeEnd,inducedChargeBegin);
-	cout << "Time to process induced Charge: " << inducedChargeTime << " sec\n\n";
-
+	gMessMgr->QAInfo()  << "Time to process induced Charge: " << inducedChargeTime << " sec\n" << endm;
+	}
 	if (mContinuousAnalogNtuple) {
 	tpcTimeBins continuousAnalogTimeSequence;
 	timeBinIterator timeSeqIter;
@@ -1082,12 +1089,13 @@ Int_t StTrsMaker::Make(){
 	}
 
 	time_t sampleAnalogSignalBegin = time(0);
-	cout << "--->sampleAnalogSignal()..." << endl;
+	if (Debug()) {
+	gMessMgr->QAInfo()  << "--->sampleAnalogSignal()..." << endm;
 	//	mAnalogSignalGenerator->sampleAnalogSignal();
 	time_t sampleAnalogSignalEnd= time(0);
 	double sampleAnalogSignalTime = difftime(sampleAnalogSignalEnd,sampleAnalogSignalBegin);
-	cout << "Time to sample Analog Signal: " << sampleAnalogSignalTime << " sec\n\n";
-
+	gMessMgr->QAInfo()  << "Time to sample Analog Signal: " << sampleAnalogSignalTime << " sec\n" << endm;
+	}
 	if (mDiscreteAnalogNtuple) {
 	tpcTimeBins discreteAnalogTimeSequence;
 	timeBinIterator timeBinIter;
@@ -1126,13 +1134,14 @@ Int_t StTrsMaker::Make(){
 	//
 	// ...and digitize it
 	time_t digitizeSignalBegin = time(0);
-	cout << "--->digitizeSignal()..." << endl;
+	if (Debug()) {gMessMgr->QAInfo()  << "--->digitizeSignal()..." << endm;}
       	mDigitalSignalGenerator->digitizeSignal();
-	cout<<"--->digitizeSignal() Finished..." << endl;
+	if (Debug()) {
+	gMessMgr->QAInfo() <<"--->digitizeSignal() Finished..." << endm;
 	time_t digitizeSignalEnd= time(0);
 	double digitizeSignalTime = difftime(digitizeSignalEnd,digitizeSignalBegin);
-	cout << "Time to digitize Signal: " << digitizeSignalTime << " sec\n\n";
-
+	gMessMgr->QAInfo()  << "Time to digitize Signal: " << digitizeSignalTime << " sec\n" << endm;
+	}
 	//
 	// Fill it into the event structure...
 	// and you better check the sector number!
@@ -1141,7 +1150,7 @@ Int_t StTrsMaker::Make(){
 	// Clear and reset for next sector:
 	mWireHistogram->clear();
 	mSector->clear();
-	cout << endl;
+	if (Debug()) gMessMgr->QAInfo()  << endm;
 
 	//
 	// Go to the next sector --> should be identical to a simple increment
@@ -1193,12 +1202,12 @@ Int_t StTrsMaker::Make(){
 	      for(int kk=0; kk<nseq; kk++) {
 		  for(int zz=0; zz<listOfSequences[kk].length; zz++) {
 		    if (Debug()%10 > 2 && kk < Debug()) {
-		    cout << "sector\t" << isector << "\trow\t" << irow 
+		    gMessMgr->QAInfo()  << "sector\t" << isector << "\trow\t" << irow 
 		     << "\tpad\t" << ipad  << "\tseq\t" << kk 
 		     << "\tz\t" << zz + (int)(listOfSequences[kk].startTimeBin)
 		     << "\tADC\t" << (int)(*(listOfSequences[kk].firstAdc)) 
 		     << "\tid\t" << (int)(*(listOfIds[kk])) 
-		     << endl;
+		     << endm;
 		    }
 		    digitalValues[0] = (int)(*(listOfSequences[kk].firstAdc)) ;
 		    digitalValues[1] = zz + (int)(listOfSequences[kk].startTimeBin);
@@ -1223,16 +1232,18 @@ Int_t StTrsMaker::Make(){
   } // Loop over sectors
     }
     
-    //cout << "Got to the end of the maker" << endl;
+    //gMessMgr->QAInfo()  << "Got to the end of the maker" << endm;
     // CAUTION: ROOT is resposible for the memory at this point
     // ROOT deletes m_DataSet in the chain after every event.
+    if (Debug()) {
     time_t trsMakeEnd = time(0);
-    cout << "\nFinished at: " << ctime(&trsMakeEnd);
+    gMessMgr->QAInfo()  << "\nFinished at: " << ctime(&trsMakeEnd);
     double trsMakeTotal = difftime(trsMakeEnd,trsMakeBegin);
-    cout << "Total StTrsMaker::Make() Processing Time: " << trsMakeTotal << " sec\n\n"; 
-    
+    gMessMgr->QAInfo()  << "Total StTrsMaker::Make() Processing Time: " << trsMakeTotal << " sec" << endm; 
+    }
+#if 0
     CheckTruth(no_tpc_hits, tpcHit);
-
+#endif
     return kStOK;
 }
 

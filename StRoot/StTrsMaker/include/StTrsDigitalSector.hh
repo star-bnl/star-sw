@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.11 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.12 2007/07/12 20:25:05 fisyak Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,6 +24,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
+ * Revision 1.12  2007/07/12 20:25:05  fisyak
+ * Use StarLogger, use time of flight, fix cluster shape
+ *
  * Revision 1.11  2005/09/09 22:12:48  perev
  * Bug fix + IdTruth added
  *
@@ -87,18 +90,19 @@ typedef std::vector<unsigned char, allocator<unsigned char > >  vectorADC;
 typedef std::vector<          int, allocator<           int> >  vectorIDT;
 
 class digitalPair {
-int mTime;
-vectorADC mAdc;
-vectorIDT mIdt; 
-public:
-  digitalPair(int time)       {mTime=time;}
-void add(int adc,int idt=0)   {mAdc.push_back((unsigned char )adc);
-                               mIdt.push_back((unsigned short)idt);}
+ private:
+  int mTime;
+  vectorADC mAdc;
+  vectorIDT mIdt; 
+ public:
+  digitalPair(int time)         {mTime=time;}
+  void add(int adc,int idt=0)   {mAdc.push_back((unsigned char )adc);
+                                 mIdt.push_back((unsigned short)idt);}
 
   unsigned char* adc() const  {return (unsigned char*)&mAdc[0];}			
-            int* idt() const  {return (          int*)&mIdt[0];}			
-  int size() const            {return mAdc.size();}
-  int time() const            {return mTime;}
+  int*           idt() const  {return (          int*)&mIdt[0];}			
+  int           size() const  {return mAdc.size();}
+  int           time() const  {return mTime;}
 
 };
 typedef vector<unsigned char, allocator<unsigned char> >     digitalPadData;

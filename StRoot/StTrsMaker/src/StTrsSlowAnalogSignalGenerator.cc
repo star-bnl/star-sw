@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.26 2003/09/02 17:59:19 perev Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.27 2007/07/12 20:25:05 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.27  2007/07/12 20:25:05  fisyak
+ * Use StarLogger, use time of flight, fix cluster shape
+ *
  * Revision 1.26  2003/09/02 17:59:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -347,8 +350,10 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
     // coordinate transform is now a data member
     // 
     //StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
+#if 0
     PR(wireHistogram->minWire());
     PR(wireHistogram->maxWire());
+#endif
     if(wireHistogram->minWire()<0) {
 	cerr << "Wire Plane is empty" << endl;
 	return;

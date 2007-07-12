@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.9 2005/10/06 19:59:10 fisyak Exp $
+ * $Id: StTrsSector.cc,v 1.10 2007/07/12 20:25:05 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
+ * Revision 1.10  2007/07/12 20:25:05  fisyak
+ * Use StarLogger, use time of flight, fix cluster shape
+ *
  * Revision 1.9  2005/10/06 19:59:10  fisyak
  * adjust for ICC
  *
@@ -58,7 +61,6 @@
  **************************************************************************/
 #include "StTrsSector.hh"
 #include "StMCTruth.h"
-
 //______________________________________________________________________________
 StTrsSector::StTrsSector(StTpcGeometry* geoDb)
 {
@@ -141,10 +143,10 @@ int StTrsSector::sort()
       tpcTimeBins &tb = mSector[irow][ipad];
       int ntb = tb.size();
       if (ntb<2) continue;
-#ifndef __ICC
-      std::sort(tb.begin(), tb.end(),StTrsAnalogSignalComparator());
-#else
+#if defined( __ICC ) &&  __ICC < 910
       sort(tb.begin(), tb.end(),StTrsAnalogSignalComparator());
+#else
+      std::sort(tb.begin(), tb.end(),StTrsAnalogSignalComparator());
 #endif
       int jl=0,jr=1;
       for (;1;jr++) {
