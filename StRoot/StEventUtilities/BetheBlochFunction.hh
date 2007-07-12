@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBlochFunction.hh,v 1.4 2005/11/01 18:38:37 aihong Exp $
+ * $Id: BetheBlochFunction.hh,v 1.5 2007/07/12 19:35:07 fisyak Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BetheBlochFunction.hh,v $
+ * Revision 1.5  2007/07/12 19:35:07  fisyak
+ * Change includes for ROOT 5.16
+ *
  * Revision 1.4  2005/11/01 18:38:37  aihong
  * switch to functions from TMath
  *
@@ -41,7 +44,7 @@
 
 #ifndef BetheBlochFunction_hh
 #define BetheBlochFunction_hh
-
+#include "TMath.h"
 double BetheBlochFunction(double *rig,double *par) {
 
 
