@@ -1,59 +1,34 @@
 #ifndef StDetectorDbIntegratedTriggerID_h
 #define StDetectorDbIntegratedTriggerID_h
-
-#include "StMaker.h"
-
-struct triggerInfo_st;
-struct defaultTrgLvl_st;
-
+#include "St_triggerInfoC.h"
+#include "St_defaultTrgLvlC.h"
 
 class StDetectorDbIntegratedTriggerID{
 public:
-    static StDetectorDbIntegratedTriggerID*  instance();
-    int                        getIDRunNumber();
-    unsigned int               getIDNumRows();
-    int                        getIdxTrg(unsigned int entry = 0);
-    int                        getDaqTrgId(unsigned int entry = 0);
-    int                        getOfflineTrgId(unsigned int entry = 0);
-    int                        getTrgNameVersion(unsigned int entry = 0);
-    int                        getTrgVersion(unsigned int entry = 0);
-    int                        getThreashVersion(unsigned int entry = 0);
-    int                        getPsVersion(unsigned int entry = 0);
-    int                        getPsL0(unsigned int entry = 0);
-    char*                      getName(unsigned int entry = 0);
-    unsigned int               getDetectorLiveOnBits(unsigned int entry = 0);
-    unsigned int               getDetectorLiveOffBits(unsigned int entry = 0);
-    unsigned int               getDetectorRequest(unsigned int entry = 0);
-    int                        getIdxLevel(unsigned int entry = 0);
-    int                        getAlgorithmId(unsigned int entry = 0);
-    float                      getPs(unsigned int entry = 0);
-
-
-
-    unsigned int              getDefaultTriggerLevel();
-    
-    friend ostream& operator<<(ostream& os, StDetectorDbIntegratedTriggerID& v);
-
-    // These fuction will be public
-    // but should be used only for debugging
-    void update(StMaker*);
-    friend class nobody; // for virtual ~
-    
+  static StDetectorDbIntegratedTriggerID*  instance() {if (! fgInstance) fgInstance = new StDetectorDbIntegratedTriggerID(); return fgInstance;}
+    virtual ~StDetectorDbIntegratedTriggerID() {SafeDelete(fgInstance);}
+    UInt_t    getIDNumRows()                           {return St_triggerInfoC::instance()->getNumRows();}
+    Int_t     getIDRunNumber()                         {return St_triggerInfoC::instance()->runNumber();}
+    Int_t     getIdxTrg(UInt_t entry = 0)              {return St_triggerInfoC::instance()->idxTrg();}
+    Int_t     getDaqTrgId(UInt_t entry = 0)            {return St_triggerInfoC::instance()->daqTrgId();}
+    Int_t     getOfflineTrgId(UInt_t entry = 0)        {return St_triggerInfoC::instance()->offlineTrgId();}
+    Int_t     getTrgNameVersion(UInt_t entry = 0)      {return St_triggerInfoC::instance()->trgNameVersion();}
+    Int_t     getTrgVersion(UInt_t entry = 0)          {return St_triggerInfoC::instance()->trgVersion();}
+    Int_t     getThreashVersion(UInt_t entry = 0)      {return St_triggerInfoC::instance()->threashVersion();}
+    Int_t     getPsVersion(UInt_t entry = 0)           {return St_triggerInfoC::instance()->psVersion();}
+    Int_t     getPsL0(UInt_t entry = 0)                {return St_triggerInfoC::instance()->psL0();}
+    Char_t*   getName(UInt_t entry = 0)                {return St_triggerInfoC::instance()->name();}
+    UInt_t    getDetectorLiveOnBits(UInt_t entry = 0)  {return St_triggerInfoC::instance()->detectorLiveOnBits();}
+    UInt_t    getDetectorLiveOffBits(UInt_t entry = 0) {return St_triggerInfoC::instance()->detectorLiveOffBits();}
+    UInt_t    getDetectorRequest(UInt_t entry = 0)     {return St_triggerInfoC::instance()->detectorRequest();}
+    Int_t     getIdxLevel(UInt_t entry = 0)            {return St_triggerInfoC::instance()->idxLevel();}
+    Int_t     getAlgorithmId(UInt_t entry = 0)         {return St_triggerInfoC::instance()->algorithmId();}
+    Float_t   getPs(UInt_t entry = 0)                  {return St_triggerInfoC::instance()->ps();}
+    UInt_t    getDefaultTriggerLevel()                 {return St_defaultTrgLvlC::instance()->level();}
 protected:
-// members of triggerInfo 
-    virtual ~StDetectorDbIntegratedTriggerID();
     StDetectorDbIntegratedTriggerID();
-    triggerInfo_st* mTriggerInfo; // points to triggerID struct
-    TTable* mIDTable; // points to table, need to re-intilize mTriggerID every event
-    unsigned int mIDNumRows;
-
-// members of defaultTrgLvl 
-    defaultTrgLvl_st* mDefaultTriggerLevel; // points to prescales struct
-    TTable* mDefTrgLvlTable; // points to table, need to re-intilize mDefaultTriggerLevel every event
-    
-    StMaker* mMaker; // Holds pointer to maker
 private:
-    static StDetectorDbIntegratedTriggerID* sInstance;
+    static StDetectorDbIntegratedTriggerID* fgInstance;
 };
 
 #endif
