@@ -83,5 +83,5 @@ void makeTPlots(const Char_t *tag = ""){//"dEdx") {
   Out += ".root";
   cout << " ===> " << Out << endl;
   t.SetOutFileName(Out);
-  t.Loop();
+  t.Loop(0);
 }

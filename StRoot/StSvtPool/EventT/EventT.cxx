@@ -254,7 +254,7 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
       const StThreeVectorD middle(tra);
       StPhysicalHelixD helixI = pTrackT->geometry()->helix();
       Double_t sh = helixI.pathLength(middle, normal); if (_debug) cout << "StHelix sh " << sh << endl;
-      if (TMath::Abs(sh) > 1e3) continue;
+      if (sh <= 0 || sh > 1e3) continue;
       StThreeVectorD xyzG = helixI.at(sh); if (_debug) cout << "StHelix xyzG\t" << xyzG << endl;
       Double_t xyzGPred[3] = {xyzG.x(),xyzG.y(),xyzG.z()};
       Double_t uvPred[3];
@@ -269,7 +269,7 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
       
       StPhysicalHelixD helixG = gTrackT->geometry()->helix();
       sh = helixG.pathLength(middle, normal); if (_debug) cout << "StHelix sh " << sh << endl;
-      if (TMath::Abs(sh) > 1e3) continue;
+      if (sh < 0 || sh > 1e3) continue;
       xyzG = helixG.at(sh); if (_debug) cout << "StHelix xyzG\t" << xyzG << endl;
       Double_t xyzGPredGl[3] = {xyzG.x(),xyzG.y(),xyzG.z()};
       Double_t uvPredGl[3];
