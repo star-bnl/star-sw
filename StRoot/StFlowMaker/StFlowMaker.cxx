@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.112 2007/03/26 20:36:04 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.113 2007/07/12 19:35:49 fisyak Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -53,6 +53,7 @@
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "TClass.h"
 #include "TDatime.h"
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
@@ -261,7 +262,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.112 2007/03/26 20:36:04 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.113 2007/07/12 19:35:49 fisyak Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -2358,6 +2359,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.113  2007/07/12 19:35:49  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.112  2007/03/26 20:36:04  aihong
 // west ZDCSMD H7 (readout as 26 in the trigger array) was swapped with LED (readout as 24 in trigger array), to avoid abnormal pedestal in the electronic channel associated with 26 in the trigger array. The swap happened on 03/25/07
 //

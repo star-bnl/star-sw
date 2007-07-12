@@ -3,12 +3,15 @@
 #ifndef EEmcGeom_EEmcDefs_h
 #define EEmcGeom_EEmcDefs_h
 /*********************************************************************
- * $Id: EEmcGeomDefs.h,v 1.6 2007/01/25 22:33:11 balewski Exp $
+ * $Id: EEmcGeomDefs.h,v 1.7 2007/07/12 19:30:14 fisyak Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Definitions (temp file)
  *********************************************************************
  * $Log: EEmcGeomDefs.h,v $
+ * Revision 1.7  2007/07/12 19:30:14  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.6  2007/01/25 22:33:11  balewski
  * add:
  * - better writeup
@@ -57,6 +60,7 @@ const float kEEmcSmdROffset[kEEmcNumSmdPlanes]={1.850,0.925,0.0};
 
 // The value of the map matrix(3x12) indicates if a EEMC SMD layer in a plane 
 // is  U=0, V=1, or void=-1  
+#ifndef __CINT__
 
 const int   kEEmcSmdMapUV[kEEmcNumSmdPlanes][kEEmcNumSectors] = 
                                      {{1,0,-1,1,0,-1,1,0,-1,1,0,-1},
@@ -69,12 +73,15 @@ const int   kEEmcSmdMapEdge[kEEmcNumSmdPlanes][kEEmcNumSectors] =
                                      {{0,0,0,1,0,0,0,0,0,1,0,0},
                                       {0,0,1,0,0,0,0,0,1,0,0,0},
                                       {0,0,0,0,0,0,0,0,0,0,0,0}};
+#else
+const int   **kEEmcSmdMapUV;
+const int   **kEEmcSmdMapEdge;
+#endif
 
 const char kEEmcSmdUVChar[kEEmcNumSmdUVs] = {'U','V'};
 
 const int kEEmcSmdSectorIdPhiCrossPi = 9;
 
-#endif
 /* ------------------------------------------
    MEGA 1    270.19        -   preshower 1
    MEGA 2    271.695       -   preshower 2
@@ -106,3 +113,4 @@ const int kEEmcSmdSectorIdPhiCrossPi = 9;
    MEGA 23   304.8430
    MEGA 24   306.1580          - postshower 
    ------------------------------------------*/
+#endif

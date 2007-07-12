@@ -1,0 +1,5 @@
+# $Id $
+# package StJetAnalysis
+# author: 
+Library:libStJetAnalysis.so:LIBS +=   -l_StEvent  -l_StMuDSTMaker
+#Library:libStJetAnalysis.so:LIBS +=   -lStEvent  -lStMuDSTMaker

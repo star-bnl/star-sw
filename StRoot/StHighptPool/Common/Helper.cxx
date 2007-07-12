@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: Helper.cxx,v 1.2 2003/09/02 17:58:35 perev Exp $                                      
+ * $Id: Helper.cxx,v 1.3 2007/07/12 19:40:59 fisyak Exp $                                      
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: Helper.cxx,v $
+ * Revision 1.3  2007/07/12 19:40:59  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.2  2003/09/02 17:58:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -31,7 +34,7 @@
  **************************************************************************/
 #include "Helper.h"
 #include <math.h>
-
+#include "TMath.h"
 
 #include "StPhysicalHelixD.hh"
 #include "TRandom.h"

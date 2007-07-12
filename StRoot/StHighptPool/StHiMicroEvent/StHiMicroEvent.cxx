@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroEvent.cxx,v 1.3 2003/09/02 17:58:36 perev Exp $
+ * $Id: StHiMicroEvent.cxx,v 1.4 2007/07/12 19:41:00 fisyak Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroEvent.cxx,v $
+ * Revision 1.4  2007/07/12 19:41:00  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.3  2003/09/02 17:58:36  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -24,7 +27,7 @@
  **************************************************************************/
 #include "StHiMicroEvent.h"
 #include "Stiostream.h"
-
+#include <math.h>
 #define DEBUG 1
 // set the static pointers to zero.
 TClonesArray* StHiMicroEvent::mSTracks = 0;

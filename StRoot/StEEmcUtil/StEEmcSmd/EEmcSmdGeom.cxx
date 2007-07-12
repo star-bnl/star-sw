@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.12 2007/05/01 20:22:25 jwebb Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.13 2007/07/12 19:30:15 fisyak Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -32,6 +32,7 @@
     \author Wei-Ming Zhang
 
 */
+#include "Stiostream.h"
 #include "EEmcSmdGeom.h"
 #include "EEmcStripGeom.h"
 
@@ -58,7 +59,7 @@ EEmcSmdGeom::EEmcSmdGeom(){
 EEmcSmdGeom::~EEmcSmdGeom(){ 
   delete sInstance;
   sInstance = 0;
-};
+}
 
 /// Initialize geometry class 
 void EEmcSmdGeom::init(){ 
@@ -428,6 +429,7 @@ const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
       StructEEmcStrip *stripPtr = new StructEEmcStrip;
       (*stripPtr) = initStrip();
       //    std::cout << "NO dca strip found in plane (sector empty or not in)" << std::endl;  //silentium
+
       return stripPtr;
     }
 }
@@ -488,18 +490,18 @@ TVector3  EEmcSmdGeom::getstripEnd(const StructEEmcStrip strip,
 // methods of printout
 /// printout global geometry parameters
 void EEmcSmdGeom::printGeom(ostream& os) const {
-  os << "------EEmcSmdGeom::printGeom()------" << std::endl;
+  os << "------EEmcSmdGeom::printGeom()------" << endl;
   os << " " << "z[3]          = " 
      << " " << getEEmcSmdParam().zPlane[0] 
      << " " << getEEmcSmdParam().zPlane[1] 
-     << " " << getEEmcSmdParam().zPlane[2] << std::endl;
+     << " " << getEEmcSmdParam().zPlane[2] << endl;
   os << " " << "rOffset[3]    = "
      << " " << getEEmcSmdParam().rOffset[0]
      << " " << getEEmcSmdParam().rOffset[1]
-     << " " << getEEmcSmdParam().rOffset[2] << std::endl;
+     << " " << getEEmcSmdParam().rOffset[2] << endl;
   os << " " << "stripWidth    = "
-     << " " << getEEmcSmdParam().stripWidth << std::endl;
-  os << "---------------------------------------" << std::endl;
+     << " " << getEEmcSmdParam().stripWidth << endl;
+  os << "---------------------------------------" << endl;
 }
 
 /// printout sector-specific geometry parameters
@@ -510,20 +512,20 @@ void EEmcSmdGeom::printSector(const StructEEmcSmdSector sector, ostream& os) con
   if(sector.sectorId == kEEmcSmdSectorIdPhiCrossPi) 
 	                     delPhi = 2*pi/degree + delPhi;
   
-  os << "------EEmcSmdGeom::printSector()------" << std::endl;
+  os << "------EEmcSmdGeom::printSector()------" << endl;
   os << kEEmcSmdUVChar[iUV] << " Sector:  sectorId, planeId, nStrips      = " 
      << " " << sector.sectorId 
      << " " << sector.planeId 
-     << " " << sector.stripPtrVec.size() << std::endl;
+     << " " << sector.stripPtrVec.size() << endl;
   os << "           phiMin, phiMax, delPhi  = " 
      << " " << sector.phiMin/degree 
      << " " << sector.phiMax/degree
-     << " " << delPhi << std::endl;
+     << " " << delPhi << endl;
   os << "           rMin, rMax delR         = "  
      << " " << sector.rMin 
      << " " << sector.rMax 
-     << " " << sector.rMax - sector.rMin << std::endl;
-  os << "------------------------------------" << std::endl;
+     << " " << sector.rMax - sector.rMin << endl;
+  os << "------------------------------------" << endl;
 }
 
 /// printout strip-specific geometry parameters
@@ -533,24 +535,24 @@ void EEmcSmdGeom::printStrip(const StructEEmcStrip strip, ostream& os) const {
   else
     UVChar = kEEmcSmdUVChar[strip.stripStructId.UVId - 1];
 
-  os << "------EEmcSmdGeom::printStrip()------" << std::endl;
+  os << "------EEmcSmdGeom::printStrip()------" << endl;
 
     os << "Strip:  sectorId, planeUV, stripId, planeId    = "
        << " " << strip.stripStructId.sectorId
        << " " << UVChar 
        << " " << strip.stripStructId.stripId
-       << " " << strip.stripStructId.planeId << std::endl;
+       << " " << strip.stripStructId.planeId << endl;
     os << "        x1, y1, x2, y2, z     = "
        << " " << strip.end1.x() 
        << " " << strip.end1.y() 
        << " " << strip.end2.x() 
        << " " << strip.end2.y() 
-       << " " << strip.end2.z() << std::endl; 
+       << " " << strip.end2.z() << endl; 
     os << "        phi1, phi2, length    = "
        << " " << strip.end1.Phi()/degree
        << " " << strip.end2.Phi()/degree
-       << " " << strip.length << std::endl;
-    os << "------------------------------------" << std::endl;
+       << " " << strip.length << endl;
+    os << "------------------------------------" << endl;
 }
 
 /// printout stripStructId
@@ -560,13 +562,13 @@ void EEmcSmdGeom::printStripId(const StructEEmcStripId stripStructId, ostream& o
   else
     UVChar = kEEmcSmdUVChar[stripStructId.UVId - 1];
 
-  os << "------EEmcSmdGeom::printStripId()------" << std::endl;
+  os << "------EEmcSmdGeom::printStripId()------" << endl;
     os << "Strip:  sectorId, stripId, planeId    = "
        << " " << stripStructId.sectorId
               << UVChar 
        << " " << stripStructId.stripId
-       << " " << stripStructId.planeId << std::endl;
-    os << "------------------------------------" << std::endl;
+       << " " << stripStructId.planeId << endl;
+    os << "------------------------------------" << endl;
 }
 
 
@@ -579,15 +581,15 @@ void EEmcSmdGeom::printSectorPhis(const Int_t iPlane, const Int_t iSec,
   int iUV;
   iUV = kEEmcSmdMapUV[iPlane][iSec];
 
-  os << "------EEmcSmdGeom::printPhis()------" << std::endl;
-  os << " planeId = " << iPlane + 1 << " sectorId = " << iSec + 1 << std::endl;
+  os << "------EEmcSmdGeom::printPhis()------" << endl;
+  os << " planeId = " << iPlane + 1 << " sectorId = " << iSec + 1 << endl;
   if(iUV >= 0) 
-    os << " " <<  kEEmcSmdUVChar[iUV] << " Sector" << std::endl; 
+    os << " " <<  kEEmcSmdUVChar[iUV] << " Sector" << endl; 
   else  
-    os << " Empty" << std::endl; 
+    os << " Empty" << endl; 
   os << " delPhi = " << getEEmcSmdDelPhi(iPlane, iSec)/degree <<
     " " << "centerPhi = " << getEEmcSmdCenterPhi(iPlane, iSec)/degree 
-     << std::endl;
+     << endl;
   
 }
 #endif
@@ -764,6 +766,9 @@ ostream& operator<<(ostream &os, const StructEEmcStrip strip)
 /////////////////////////////////////////////////////////////////////////////
 /*
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.13  2007/07/12 19:30:15  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.12  2007/05/01 20:22:25  jwebb
  * Added error handling to EEmcSmdGeom::getIntersection().
  *

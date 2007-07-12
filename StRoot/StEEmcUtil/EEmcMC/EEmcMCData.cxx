@@ -1,4 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.13 2006/08/10 03:20:00 perev Exp $
+// $Id: EEmcMCData.cxx,v 1.14 2007/07/12 19:30:14 fisyak Exp $
 
 #include "StEventTypes.h"
 
@@ -19,7 +19,7 @@
 #include "StEEmcUtil/EEevent/EEeventDst.h"
 #include "StEEmcUtil/EEevent/EEsectorDst.h"
 
-#include <iostream>
+#include "Stiostream.h"
 using namespace std;
 
 
@@ -422,6 +422,9 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 }
 
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.14  2007/07/12 19:30:14  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.13  2006/08/10 03:20:00  perev
 // Assert==>assert
 //

@@ -1,9 +1,9 @@
 #ifndef EEmcEventHeader_h
 #define EEmcEventHeader_h
 /*********************************************************************
- * $Id: EEmcEventHeader.h,v 1.8 2003/12/02 17:22:08 balewski Exp $
+ * $Id: EEmcEventHeader.h,v 1.9 2007/07/12 19:30:13 fisyak Exp $
  *********************************************************************/
-
+#include <string.h>
 #include <cstdio>
 #include <ctime>
 #include "TObject.h"
@@ -51,6 +51,9 @@ class EEmcEventHeader : public TObject {
 
 /*
  * $Log: EEmcEventHeader.h,v $
+ * Revision 1.9  2007/07/12 19:30:13  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.8  2003/12/02 17:22:08  balewski
  * fix after version mixup
  *

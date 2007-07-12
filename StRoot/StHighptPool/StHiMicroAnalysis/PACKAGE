@@ -1,0 +1,5 @@
+# $Id $
+# package StHiMicroAnalysis
+# author: 
+Library:libStHiMicroAnalysis.so:LIBS +=   -lStHighptPoolCommon  -lStHiMicroEvent
+#Library:libStHiMicroAnalysis.so:LIBS +=   -lStHighptPoolCommon  -lStHiMicroEvent

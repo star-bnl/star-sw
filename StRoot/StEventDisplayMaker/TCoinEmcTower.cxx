@@ -1,4 +1,4 @@
-// @(#)root/g3d:$Name:  $:$Id: TCoinEmcTower.cxx,v 1.1 2007/03/19 00:40:36 fine Exp $
+// @(#)root/g3d:$Name:  $:$Id: TCoinEmcTower.cxx,v 1.2 2007/07/12 19:34:21 fisyak Exp $
 // Author: Valeri Fine    22/12/04
 
 
@@ -6,7 +6,7 @@
 #include "TDataProvider.h"
 #include "TColor.h"
 #include "TROOT.h"
-
+#include "TMath.h"
 #ifdef STAR_COIN
 #include <Inventor/nodes/SoIndexedFaceSet.h>
 #include <Inventor/nodes/SoCoordinate3.h>
