@@ -10,7 +10,7 @@
 #include "StDbUtilities/StCoordinates.hh"
 
 #include "StEventTypes.h"
-
+#include "TMath.h"
 StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name), 
 						   mAlignSector(kFALSE),
 						   mSectorAligner(NULL),
@@ -37,10 +37,10 @@ Int_t StTpcHitMover::Init() {
     mAlignSector   << endm;
 
   gMessMgr->Info() << "StTpcHitMover::Init() - ExB corrections:  " <<
-    (m_Mode & 0x01)<< endm;
+    (TMath::Abs(m_Mode) & 0x01)<< endm;
 
   gMessMgr->Info() << "StTpcHitMover::Init() - mag utils options " <<
-    ((m_Mode & 0x3FFE) >> 1) << endm;
+    ((TMath::Abs(m_Mode) & 0x3FFE) >> 1) << endm;
 
   return StMaker::Init();
 }
@@ -59,9 +59,9 @@ void StTpcHitMover::FlushDB() {
 
 
 Int_t StTpcHitMover::Make() {
-  if (m_Mode & 0x01) {
+  if (TMath::Abs(m_Mode) & 0x01) {
     // option handling needs some clean up, but right now we stay compatible
-    Int_t option = (m_Mode & 0x7FFFFFFE) >> 1;
+    Int_t option = (TMath::Abs(m_Mode) & 0x7FFFFFFE) >> 1;
     if (! mExB ) {
       TDataSet *RunLog = GetDataBase("RunLog");
       mExB = new StMagUtilities(gStTpcDb, RunLog, option);
@@ -95,6 +95,7 @@ Int_t StTpcHitMover::Make() {
 	      if (NoHits) {
 		for (UInt_t k = 0; k < NoHits; k++) {
 		  StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+		  if (m_Mode < 0 && tpcHit->idTruth() && tpcHit->qaTruth() > 95) continue; // don't move embedded hits
 		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
 		  transform(coorL,coorLS);   // to sector 12
 		  transform(coorLS,coorLSA); // alignment 
@@ -179,21 +180,21 @@ Int_t StTpcHitMover::Make() {
   Float_t x[3];
   Float_t xprime[3];
   for (Int_t i = 0; i < tphit->GetNRows(); i++, spc++) {
+    if (m_Mode < 0 && spc->id_simtrk && spc->id_quality > 95) continue; // don't move embedded hits
     short sector = short(spc->row/100.);
     short row = spc->row-sector*100;
     x[0] = spc->x;
     x[1] = spc->y;
     x[2] = spc->z;
-
+    
     moveTpcHit(x,xprime,sector,row);
-
+    
     if (mOutputMode == 0) {
       spc->x = xprime[0];
       spc->y = xprime[1];
       spc->z = xprime[2];
     }
   }
-
   return kStOk;
 }
 
