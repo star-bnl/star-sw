@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TH1Helper.cxx,v 1.1 2003/10/23 04:04:02 perev Exp $
+ * $Id: TH1Helper.cxx,v 1.2 2007/07/12 20:38:41 fisyak Exp $
  *
  ***************************************************************************
  *
@@ -14,7 +14,7 @@
 #include <assert.h>
 
 #include "TH1Helper.h"
-
+#include "TMath.h"
 
 //ClassImp(TH1Helper)
 //______________________________________________________________________________
@@ -100,7 +100,7 @@ void TH1Helper::Aver()
   ovl[0][1] = (upp-low);        			//partial width
   part = ovl[0][1]/h;
   ovl[0][2] = content*part; 				//partial content
-  ovl[0][3] = error*sqrt(part);                         //partial error
+  ovl[0][3] = error*TMath::Sqrt(part);                         //partial error
   ovl[0][4] = low;                                    	//low edge
   ovl[0][5] = upp;                  			//upp edge
 
@@ -116,7 +116,7 @@ void TH1Helper::Aver()
   ovl[1][0] = 0.5*(low+upp); 				//partial Center
   ovl[1][1] = (upp-low);      				//partial width
   ovl[1][2] = content*part; 				//partial content
-  ovl[1][3] = error*sqrt(part);                         //partial error
+  ovl[1][3] = error*TMath::Sqrt(part);                         //partial error
   ovl[1][4] = low;                 //low edge
   ovl[1][5] = upp;                 			//upp edge
   double wtot=0,wt,fun;
@@ -152,13 +152,13 @@ void TH1Helper::Aver()
 	continue;
       }
       if ( iter==1 ) {
-	fun  = h*h/12 + pow(center-fMom[1],2);
+	fun  = h*h/12 + TMath::Power(center-fMom[1],2);
 	fMom[2] += fun*content;
 	continue;
       } 
       if ( iter==2 ) {
 	fun = 0;
-	for (int i=0;i<3;i++){fun += pow(pow(low-fMom[1]+i*h/2,2)-fMom[2],2);}
+	for (int i=0;i<3;i++){fun += TMath::Power(TMath::Power(low-fMom[1]+i*h/2,2)-fMom[2],2);}
 	fun /=3;
 	fMom[4] += fun*content;
 	continue;
@@ -171,9 +171,9 @@ void TH1Helper::Aver()
 
 }
 double TH1Helper::GetMean    () {Aver();return fMom[1];              }
-double TH1Helper::GetMeanErr () {Aver();return sqrt(fMom[2]/fMom[0]);}
-double TH1Helper::GetRMS     () {Aver();return sqrt(fMom[2]);        }
-double TH1Helper::GetRMSErr  () {Aver();return sqrt(fMom[4]/fMom[0]);}
+double TH1Helper::GetMeanErr () {Aver();return TMath::Sqrt(fMom[2]/fMom[0]);}
+double TH1Helper::GetRMS     () {Aver();return TMath::Sqrt(fMom[2]);        }
+double TH1Helper::GetRMSErr  () {Aver();return TMath::Sqrt(fMom[4]/fMom[0]);}
 int    TH1Helper::GetNonZeros() const { return fNonZeros;            }
 double TH1Helper::GetIntegral() {Aver();return fMom[0];              }
-double TH1Helper::GetIntegErr() {Aver();return sqrt(fMom[0]);        }
+double TH1Helper::GetIntegErr() {Aver();return TMath::Sqrt(fMom[0]);        }

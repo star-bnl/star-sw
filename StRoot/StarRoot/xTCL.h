@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: xTCL.h,v 1.1 2007/04/26 04:22:36 perev Exp $
+ * $Id: xTCL.h,v 1.2 2007/07/12 20:38:41 fisyak Exp $
  *
  * Author: Victor Perev, Feb 2007
  ***************************************************************************
@@ -17,7 +17,12 @@
  **************************************************************************/
 #ifndef xTCL_h
 #define xTCL_h
+#include "TMath.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "TMatrixD.h"
 #include "TVectorD.h"
 

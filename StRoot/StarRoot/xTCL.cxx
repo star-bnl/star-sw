@@ -8,7 +8,7 @@
 double xTCL::vmaxa(const double *a,int na)
 { 
   double r=0;
-  for (int i=0;i<na;i++){if (r < fabs(a[i])) r = fabs(a[i]);}
+  for (int i=0;i<na;i++){if (r < TMath::Abs(a[i])) r = TMath::Abs(a[i]);}
   return r;
 }
 //______________________________________________________________________________
@@ -21,15 +21,15 @@ int xTCL::lvmaxa(const double *a,int na)
 { 
   double r=0;
   int l=0;
-  for (int i=0;i<na;i++){if (r < fabs(a[i])) {r = fabs(a[i]);l=i;}}
+  for (int i=0;i<na;i++){if (r < TMath::Abs(a[i])) {r = TMath::Abs(a[i]);l=i;}}
   return l;
 }
 //______________________________________________________________________________
 int xTCL::lvmina(const double *a,int na)
 { 
-  double r=fabs(a[0]);
+  double r=TMath::Abs(a[0]);
   int l=0;
-  for (int i=1;i<na;i++){if (r > fabs(a[i])) {r = fabs(a[i]);l=i;}}
+  for (int i=1;i<na;i++){if (r > TMath::Abs(a[i])) {r = TMath::Abs(a[i]);l=i;}}
   return l;
 }
 //______________________________________________________________________________
@@ -45,26 +45,29 @@ void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
   double det  = err[0]*err[2]-err[1]*err[1];
   double dis  = spur*spur-4*det;
   if (dis<0) dis = 0;
-  dis = sqrt(dis);
+  dis = TMath::Sqrt(dis);
   lam[0] = 0.5*(spur+dis);
   lam[1] = 0.5*(spur-dis);
   eig[0][0] = 1; eig[0][1]=0;
   if (dis>1e-6*spur) {// eigenvalues are different
-    if (fabs(err[0]-lam[0])>fabs(err[2]-lam[0])) {
+    if (TMath::Abs(err[0]-lam[0])>TMath::Abs(err[2]-lam[0])) {
      eig[0][1] = 1; eig[0][0]= -err[1]/(err[0]-lam[0]);
     } else {
      eig[0][0] = 1; eig[0][1]= -err[1]/(err[2]-lam[0]);
     }
-    double tmp = sqrt(eig[0][0]*eig[0][0]+eig[0][1]*eig[0][1]);
+    double tmp = TMath::Sqrt(eig[0][0]*eig[0][0]+eig[0][1]*eig[0][1]);
     eig[0][0]/=tmp; eig[0][1]/=tmp;
   }
   eig[1][0]=-eig[0][1];  eig[1][1]= eig[0][0];
 }
 //______________________________________________________________________________
 /*
-* $Id: xTCL.cxx,v 1.1 2007/04/26 04:22:31 perev Exp $
+* $Id: xTCL.cxx,v 1.2 2007/07/12 20:38:41 fisyak Exp $
 *
 * $Log: xTCL.cxx,v $
+* Revision 1.2  2007/07/12 20:38:41  fisyak
+* Add includes for ROOT 5.16
+*
 * Revision 1.1  2007/04/26 04:22:31  perev
 * eXtended TCL class xTCL
 *
@@ -147,7 +150,7 @@ TMatrixD xTCL::T(const TMatrixD &mx)
 double xTCL::vasum(const double *a, int na)
 {
   double sum = 0;
-  for (int i=0;i<na;i++) { sum += fabs(a[i]);}
+  for (int i=0;i<na;i++) { sum += TMath::Abs(a[i]);}
   return sum;
 }
 //______________________________________________________________________________
@@ -215,7 +218,7 @@ static int nCall=0; nCall++;
     if (iAkt==1 ) {
       double bb    = (B*B);
       double bSb   = (B*(S*B));
-      double tau = -bb/(fabs(bSb)+3e-33);
+      double tau = -bb/(TMath::Abs(bSb)+3e-33);
       add = tau*B;
 
     }

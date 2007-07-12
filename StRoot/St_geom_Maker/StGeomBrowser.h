@@ -1,5 +1,6 @@
 #ifndef STAR_StGeomBrowser
 #define STAR_StGeomBrowser
+#include "TString.h"
 class GeomBrowser;
 class StGeomBrowser { 
    private:

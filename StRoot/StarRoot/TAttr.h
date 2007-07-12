@@ -29,9 +29,10 @@ UInt_t      UAttr(const char *key) const;
 double      DAttr(const char *key) const;
 const char *SAttr(const char *key) const;
 void        PrintAttr() const;
+ static void SetDebug(Int_t k = 0) {_debug = k;}
 //		Data members
 private:
-
+ static Int_t _debug; 
 ClassDef(TAttr,1)
 
 };

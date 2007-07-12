@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.48 2007/04/28 17:56:25 perev Exp $
+// $Id: St_l3t_Maker.cxx,v 1.49 2007/07/12 20:37:11 fisyak Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -94,7 +94,7 @@
 #include "TH1.h"
 #include "tables/St_hitarray_Table.h"
 #include "StEventTypes.h"
-
+#include "TMath.h"
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
 
@@ -724,7 +724,7 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
     for(Int_t pointindex = 0 ; pointindex < pointS->GetNRows() ; pointindex++)
        {
 	 ////
-	 // Convert to StTpcHit
+	 // Convert(kTRUE) to StTpcHit
 	 ////
 	 // position
 	 StThreeVectorF pos(tcl_points[pointindex].x,

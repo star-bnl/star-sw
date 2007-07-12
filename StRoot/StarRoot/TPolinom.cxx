@@ -2,7 +2,11 @@
 #include <math.h>
 #include "TError.h"
 #include "TArrayD.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "TPolinom.h"
 ClassImp(TPolinom)
 //_____________________________________________________________________________
