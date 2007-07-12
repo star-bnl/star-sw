@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.27 2007/03/21 17:27:01 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.28 2007/07/12 20:21:09 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.28  2007/07/12 20:21:09  fisyak
+ * Drift velocity depends on TPC half, use online RHIC clock
+ *
  * Revision 1.27  2007/03/21 17:27:01  fisyak
  * use TGeoHMatrix, change mode for switching drift velocities
  *
@@ -174,7 +177,7 @@ class StTpcDb {
    St_tpcPadResponseC *PadResponse();
    TTable          *FindTable(const Char_t *name, Int_t dbIndex=kCalibration);
    //small pieces of data:
-   float DriftVelocity();
+   float DriftVelocity(Int_t sector=24);
    float triggerTimeOffset();
    int dvelcounter;
    StMagUtilities* ExB() {return mExB;}

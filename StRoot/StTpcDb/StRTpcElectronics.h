@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcElectronics.h,v 1.7 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StRTpcElectronics.h,v 1.8 2007/07/12 20:21:09 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcElectronics.h,v $
+ * Revision 1.8  2007/07/12 20:21:09  fisyak
+ * Drift velocity depends on TPC half, use online RHIC clock
+ *
  * Revision 1.7  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -51,10 +54,6 @@ inline int StRTpcElectronics::numberOfTimeBins() const {
 
 inline double StRTpcElectronics::nominalGain() const {
    return (*mElec)[0].nominalGain;
-}
-
-inline double StRTpcElectronics::samplingFrequency() const {
-   return (*mElec)[0].samplingFrequency;
 }
 
 inline double StRTpcElectronics::tZero() const {

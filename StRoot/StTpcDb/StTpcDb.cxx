@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.43 2007/04/16 22:51:03 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.44 2007/07/12 20:21:09 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.44  2007/07/12 20:21:09  fisyak
+ * Drift velocity depends on TPC half, use online RHIC clock
+ *
  * Revision 1.43  2007/04/16 22:51:03  fisyak
  * Add protection from infinit endTime
  *
@@ -479,7 +482,7 @@ St_Table *StTpcDb::getTpcTable(int i){
 }
 
 //-----------------------------------------------------------------------------
-float StTpcDb::DriftVelocity(){
+float StTpcDb::DriftVelocity(Int_t sector){
   static UInt_t u = 0;  // current time (secs)
   static UInt_t u0 = 0; // beginTime of current Table
   static UInt_t u1 = 0; // beginTime for next Table
@@ -502,10 +505,11 @@ float StTpcDb::DriftVelocity(){
     u0 = TUnixTime(t[0],1).GetUTime();
     u1 = TUnixTime(t[1],1).GetUTime();
     SafeDelete(dvel1);
-    if (u1 < umax) 
+    if (u1 < umax && u1 - u0 < 7*24*3600) {// next drift velocity should within a week from current
       dvel1 = (St_tpcDriftVelocity *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
-    if (! dvel1) {
-      gMessMgr->Message("StTpcDb::Error Finding next Tpc DriftVelocity","W");
+      if (! dvel1) {
+	gMessMgr->Message("StTpcDb::Error Finding next Tpc DriftVelocity","W");
+      }
     }
   }
   if (! u || u != uc) {
@@ -531,18 +535,20 @@ float StTpcDb::DriftVelocity(){
       tpcDriftVelocity_st *d0 = dvel0->GetTable();
       if (dvel1) {
 	tpcDriftVelocity_st *d1 = dvel1->GetTable();
-	driftvel = 1e6*(d0->laserDriftVelocityEast + 
-			(d1->laserDriftVelocityEast - d0->laserDriftVelocityEast)*(u - u0)/(u1 - u0));
-	if (driftvel<=0.0) 
-	driftvel = 1e6*(d0->cathodeDriftVelocityEast + 
-			(d1->cathodeDriftVelocityEast - d0->cathodeDriftVelocityEast)*(u - u0)/(u1 - u0));
+	driftvel = sector > 12 ? 
+	  (d0->laserDriftVelocityEast + (d1->laserDriftVelocityEast - d0->laserDriftVelocityEast)*(u - u0)/(u1 - u0)):
+	  (d0->laserDriftVelocityWest + (d1->laserDriftVelocityWest - d0->laserDriftVelocityWest)*(u - u0)/(u1 - u0));
+	if (driftvel<= 0.0)  driftvel = sector > 12 ? 
+	  (d0->cathodeDriftVelocityEast + (d1->cathodeDriftVelocityEast - d0->cathodeDriftVelocityEast)*(u - u0)/(u1 - u0)) :
+	  (d0->cathodeDriftVelocityWest + (d1->cathodeDriftVelocityWest - d0->cathodeDriftVelocityWest)*(u - u0)/(u1 - u0));
       } else {
-	driftvel = 1e6*d0->laserDriftVelocityEast;
-	if (driftvel<=0.0) driftvel = 1e6*d0->cathodeDriftVelocityEast;
+	driftvel = sector > 12 ? d0->laserDriftVelocityEast : d0->laserDriftVelocityWest;
+	if (driftvel<=0.0) 
+	  driftvel = sector > 12 ? d0->cathodeDriftVelocityEast : d0->cathodeDriftVelocityWest;
       }
     }
   }
-  return driftvel;
+  return 1e6*driftvel;
 }
 
 //-----------------------------------------------------------------------------
