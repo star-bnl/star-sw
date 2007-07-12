@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.40 2007/04/26 15:51:31 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.41 2007/07/12 20:35:30 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.41  2007/07/12 20:35:30  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.40  2007/04/26 15:51:31  fisyak
 // Move creation of TGiant3 in ctor (fix byg 942)
 //
@@ -69,7 +72,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
-//#define DetectorIndex
+#define DetectorIndex
 #ifdef DetectorIndex
 #include "TArrayI.h"
 #endif
@@ -193,7 +196,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.40 2007/04/26 15:51:31 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.41 2007/07/12 20:35:30 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
