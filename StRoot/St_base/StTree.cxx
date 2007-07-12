@@ -852,7 +852,7 @@ Int_t StFile::AddFile(const char *file,const char *opt)
     return kStWarn;}
 
   const char* cc = strrchr(tfile,'.');
-  if (!cc || !strstr(".xdf .root .daq",cc)){// No extention
+  if (!cc || !strstr(".root .daq",cc)){// No extention
     Warning("AddFile","*** IGNORED *** File %s has wrong extention \n",
     (const char *)tfile);
     return kStWarn;}
@@ -951,12 +951,6 @@ void StFile::SetInfo(TDataSet *ds)
 
   tit.Replace(0,0," branch=NONE ");
 
-//              .XDF
-  if (strcmp(".xdf",ext)==0) {
-    tit.Replace(0,0," format=xdf ");
-    known = 3;
-    goto RETN;
-  }
 //              DAQ
   if (strcmp(".daq",ext)==0) {
     tit.Replace(0,0," format=daq ");
