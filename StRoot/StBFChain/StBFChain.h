@@ -23,12 +23,12 @@
 #include "TTable.h"
 #include "Ttypes.h"
 
-/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.42 2007/06/07 20:12:12 perev Exp $ */
+/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.43 2007/07/12 19:14:07 fisyak Exp $ */
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
   Char_t       Chain[63];    /* its chain */
-  Char_t       Opts[127];    /* required options */
+  Char_t       Opts[257];    /* required options */
   Char_t       Maker[63];    /* required Makers */
   Char_t       Libs[127];    /* libraries to be loaded */
   Char_t       Comment[257];  
@@ -94,12 +94,13 @@ class StBFChain : public StChain {
    TFile              *GetTFile() const			        {return fTFile;}
    virtual Int_t       kOpt(const TString *Tag, Bool_t Check = kTRUE) const;
    virtual Int_t       kOpt(const Char_t  *Tag, Bool_t Check = kTRUE) const;
-   virtual void        SetDbOptions();
-   virtual void        SetGeantOptions();
+   virtual void        SetDbOptions(StMaker *db=0);
+   virtual void        SetGeantOptions(StMaker *geant=0);
    virtual void        SetTreeOptions();
    virtual void        SetOption(const Int_t k, const Char_t *chain="Chain");
    virtual void        SetOption(const Char_t*  Opt, const Char_t *chain="Chain") {SetOption(kOpt(Opt), chain);}
    virtual void        SetOption(const TString* Opt, const Char_t *chain="Chain") {SetOption(kOpt(Opt),chain);}
+   virtual void        SetOptions(const Char_t*  Opt, const Char_t *chain="Chain");
    virtual void        SetOptionOff(const Char_t*  Opt, const Char_t *chain="Chain") {SetOption(-kOpt(Opt),chain);}
    virtual void        SetOptionOff(const TString* Opt, const Char_t *chain="Chain") {SetOption(-kOpt(Opt),chain);}
    virtual Int_t       Finish();
@@ -112,7 +113,7 @@ class StBFChain : public StChain {
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.42 2007/06/07 20:12:12 perev Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.43 2007/07/12 19:14:07 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
