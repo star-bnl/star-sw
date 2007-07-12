@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.32 2007/03/21 17:25:51 fisyak Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.33 2007/07/12 20:18:18 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.33  2007/07/12 20:18:18  fisyak
+ * read Db by deman
+ *
  * Revision 1.32  2007/03/21 17:25:51  fisyak
  * Ivan Kotov's drift velocities, TGeoHMatrix
  *
@@ -175,6 +178,8 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
   mDriftSpeedColl=NULL;
   
   mCoordTransform = NULL;
+  mElectronCloud = 0;
+  mSvtSimulation = 0;
 
   counter = NULL;
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor...END"<<endm;
@@ -185,10 +190,10 @@ StSvtSimulationMaker::~StSvtSimulationMaker()
 {
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor"<<endm;
  
-  if (mSvtAngles) delete mSvtAngles;
-  if (mSvtSimulation) delete mSvtSimulation;
-  if (mElectronCloud) delete mElectronCloud;
-  if (mCoordTransform) delete mCoordTransform;
+  SafeDelete(mSvtAngles);
+  SafeDelete(mSvtSimulation);
+  SafeDelete(mElectronCloud);
+  SafeDelete(mCoordTransform);
 
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor...END"<<endm; 
 }
@@ -239,20 +244,7 @@ Int_t StSvtSimulationMaker::Init()
       
   if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() ..."<<endm;
     
-  // init objects that do parts of simulation
-  mSvtAngles =  new StSvtAngles();
- 
-  mElectronCloud = new StSvtElectronCloud();
-  mElectronCloud->setElectronLifeTime(mLifeTime);
-  mElectronCloud->setDiffusionConst(mDiffusionConst);
-  mElectronCloud->setTrappingConst(mTrapConst);
 
-  mSvtSimulation = new StSvtSimulation();
-  mSvtSimulation->setOptions(mSigOption);
-  mSvtSimulation->setElCloud(mElectronCloud);
- 
-  mCoordTransform=new StSvtCoordinateTransform();  
-   
   if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() -End"<<endm;
 
   return  StMaker::Init();
@@ -268,12 +260,16 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   Int_t res;
   getConfig();
   if ((res=getSvtGeometry())!=kStOk) return res;
+#if 0
   if ((res=getSvtDriftSpeeds())!=kStOk) return res;
+#endif
   if ((res=getSvtT0())!=kStOk) return res;
   if ((res=getPedestalOffset())!=kStOk) return res; 
 
   setSvtPixelData();
   //Set up coordinate transformation 
+  if (! mCoordTransform) mCoordTransform=new StSvtCoordinateTransform();  
+   
   mCoordTransform->setParamPointers(mSvtGeom, mConfig,mDriftSpeedColl,mT0);
   
   //mTimeBinSize = 1.E6/mSvtSrsPar->fsca;  // Micro Secs
@@ -282,15 +278,17 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   mTimeBinSize = cTimeBinSize;  // Micro Secs - Petr: this is quite accurate according to Dave
   mAnodeSize = mSvtGeom->getAnodePitch()*10;  // mm
   mDefaultDriftVelocity = cDefaultDriftVelocity;  // used only if there is no database
-  
   //set default drift speeds - if drift speed data exist it will be overriden later
+  if (! mElectronCloud) mElectronCloud = new StSvtElectronCloud();
+  mElectronCloud->setDriftVelocity(mDefaultDriftVelocity);
+  mElectronCloud->setElectronLifeTime(mLifeTime);
+  mElectronCloud->setDiffusionConst(mDiffusionConst);
+  mElectronCloud->setTrappingConst(mTrapConst);
+  if (! mSvtSimulation) mSvtSimulation = new StSvtSimulation();
+  mSvtSimulation->setOptions(mSigOption);
   mSvtSimulation->setAnodeTimeBinSizes(mTimeBinSize , mAnodeSize);
   mSvtSimulation->setDriftVelocity(mDefaultDriftVelocity);
- 
-  //set size of hits-otherwise default is false,8
-  //mSvtSimulation->setPasaSigAttributes(kFALSE,8)
-
-
+  mSvtSimulation->setElCloud(mElectronCloud);
   cout<<"StSvtSimulationMaker::InitRun info:"<<endl;
   cout<<"  Anode size="<<mAnodeSize<<" ,time bin size="<<mTimeBinSize<<endl;
   cout<<"  default drift velocity="<<mDefaultDriftVelocity<<endl;
@@ -324,7 +322,7 @@ void  StSvtSimulationMaker::resetPixelData(){
  
    StSvtHybridPixelsD* tmpPixels;
    StSvtHybridPixelsC* tmp8bitPixels;
-
+   if (mSvtSimPixelColl) {
    for(int Barrel = 1;Barrel <= mSvtSimPixelColl->getNumberOfBarrels();Barrel++) {
      for (int Ladder = 1;Ladder <= mSvtSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
        for (int Wafer = 1;Wafer <= mSvtSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {
@@ -351,6 +349,7 @@ void  StSvtSimulationMaker::resetPixelData(){
          }
        }
      }
+   }
    }
 }
 
@@ -451,7 +450,7 @@ Int_t  StSvtSimulationMaker::getPedestalOffset()
 
   return kStOk;
 }
-
+#if 0
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::getSvtDriftSpeeds()
 {
@@ -468,7 +467,7 @@ Int_t StSvtSimulationMaker::getSvtDriftSpeeds()
     
   return kStOk;
 }
-
+#endif
 
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::getSvtT0()
@@ -631,7 +630,7 @@ static const int barrels[]={3,1,1,2,2};
       int index = mSvtSimPixelColl->getHybridIndex(barrel,ladder,wafer,hybrid);
       if( index < 0) continue; 
       svtSimDataPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);
-	     
+      if (! mSvtAngles) mSvtAngles =  new StSvtAngles();
       mSvtAngles->calcAngles(mSvtGeom,px,py,pz,layer,ladder,wafer);
       double theta = mSvtAngles->getTheta();
       double phi = mSvtAngles->getPhi();
