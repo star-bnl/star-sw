@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.28 2007/05/17 15:28:57 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.29 2007/07/12 19:22:00 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.29  2007/07/12 19:22:00  fisyak
+ * Tpc Drift Velocity depends on West/East half
+ *
  * Revision 1.28  2007/05/17 15:28:57  fisyak
  * Replace cout and cerr with Loggger
  *
@@ -351,14 +354,14 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     double t0zoffset;
     if (sector>=1&&sector<=24){
      t0zoffset = 
-       gTpcDbPtr->DriftVelocity()*1e-6*   //cm/s -> cm/us
+       gTpcDbPtr->DriftVelocity(sector)*1e-6*   //cm/s -> cm/us
        (gTpcDbPtr->T0(sector)->getT0(row,probablePad) *mTimeBinWidth);  
        //t0 offset -- DH  27-Mar-00
     }
     else{
      t0zoffset = 0;
     }
-    int tb = tBFromZ(a.position().z()+zoffset-t0zoffset);  
+    int tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector);  
     b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b)
@@ -371,10 +374,10 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
 	:mInnerSectorzOffset;
 
     double t0zoffset = 
-      gTpcDbPtr->DriftVelocity()*1e-6*    //cm/s -> cm/us
+      gTpcDbPtr->DriftVelocity(a.sector())*1e-6*    //cm/s -> cm/us
       (gTpcDbPtr->T0(a.sector())->getT0(a.row(),a.pad()) *mTimeBinWidth);  
       //t0 offset -- DH  27-Mar-00
-    Double_t z = zFromTB(a.timeBucket())-zoffset+t0zoffset;
+    Double_t z = zFromTB(a.timeBucket(),a.sector())-zoffset+t0zoffset;
 #if 0
     if (z <= 0) z = 1.e-5;
 #endif
@@ -675,14 +678,14 @@ double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
     return(dist2move);
 }
 
-double StTpcCoordinateTransform::zFromTB(const int tb) const
+double StTpcCoordinateTransform::zFromTB(const int tb, Int_t sector) const
 {
     double timeBin = tb; // to avoid using const_cast<int> & static_cast<double>
     //    double z = 
     //      gTpcDbPtr->DriftVelocity()*1e-6*         //cm/s->cm/us
       //        (-gTpcDbPtr->Electronics()->tZero() + (timeBin+.5)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
        double z = 
-         gTpcDbPtr->DriftVelocity()*1e-6*         //cm/s->cm/us
+         gTpcDbPtr->DriftVelocity(sector)*1e-6*         //cm/s->cm/us
 	 (gTpcDbPtr->triggerTimeOffset()*1e6   // units are s
 	+ gTpcDbPtr->Electronics()->tZero()    // units are us 
         +    (timeBin)*mTimeBinWidth );  // 
@@ -690,7 +693,7 @@ double StTpcCoordinateTransform::zFromTB(const int tb) const
     return(z);
 }
 
-int StTpcCoordinateTransform::tBFromZ(const double z) const
+int StTpcCoordinateTransform::tBFromZ(const double z, Int_t sector) const
 {
     //PR(gTpcDbPtr->PadPlaneGeometry->driftDistance()); // Not available yet.
     //PR(z);
@@ -700,7 +703,7 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
     double time = (
 	 -1*(gTpcDbPtr->triggerTimeOffset()*1e6  // units are s
 	   + gTpcDbPtr->Electronics()->tZero())   // units are us 
-	 + ( z / (gTpcDbPtr->DriftVelocity()*1e-6))
+	 + ( z / (gTpcDbPtr->DriftVelocity(sector)*1e-6))
 		   ); // tZero + (z/v_drift); the z already has the proper offset
     
     return((int)(time/(mTimeBinWidth) + 1e-5));//time bin starts at 0,HL,9/1/99

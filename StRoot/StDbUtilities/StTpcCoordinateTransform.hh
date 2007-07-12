@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.11 2007/03/21 16:39:05 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.12 2007/07/12 19:22:01 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.12  2007/07/12 19:22:01  fisyak
+ * Tpc Drift Velocity depends on West/East half
+ *
  * Revision 1.11  2007/03/21 16:39:05  fisyak
  * TpcCoordinate transformation via TGeoHMatrix
  *
@@ -180,8 +183,8 @@ public:
 
     StThreeVector<double> sector12Coordinate(StThreeVector<double>&, int*);
     StThreeVector<double> padCentroid(StTpcLocalSectorCoordinate&, int*, int*)  ;
-    int      tBFromZ(const double)                                   const;
-    double   zFromTB(const int)                   const;
+  int      tBFromZ(const double, Int_t sector=24) const;
+  double   zFromTB(const    int, Int_t sector=24) const;
     
     // Transformation Routines!!
     // Raw Data From tpc local Coordinates
