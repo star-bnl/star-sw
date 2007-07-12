@@ -1,4 +1,4 @@
-// $Id: CorrAna.cxx,v 1.2 2004/07/26 22:54:25 rfatemi Exp $
+// $Id: CorrAna.cxx,v 1.3 2007/07/12 19:24:31 fisyak Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 #include <TH1.h> 
 #include <TH2.h> 
 #include <TFile.h> 
-
+#include "TMath.h"
 #include "CorrAna.h"
 
 
@@ -185,7 +185,7 @@ void CorrAna::taskEbad(){
   }
 
   for (j=0;j<5;j++){
-    UChar_t test=(int)pow(2,j); // probably 1<<j would work as well, JB
+    UChar_t test=(int)TMath::Power(2,j); // probably 1<<j would work as well, JB
     if (test&Esanity) hEdiag[1]->Fill(j);
   }
 }
@@ -224,7 +224,7 @@ void CorrAna::taskESbad(){
   }
 
   for (j=0;j<5;j++){
-    UChar_t test=(int)pow(2,j);
+    UChar_t test=(int)TMath::Power(2,j);
     if (test&ESsanity) hESdiag[1]->Fill(j);
   }
 
@@ -252,7 +252,7 @@ void CorrAna::taskBbad(){
   }
 
   for (j=0;j<5;j++){
-    UChar_t test=(int)pow(2,j);
+    UChar_t test=(int)TMath::Power(2,j);
     // printf("Test=%d,BSanity=%d,And=%d\n",test,Bsanity,(test&Bsanity));
     if ((test&Bsanity)==test) {
       hBdiag[1]->Fill(j);
@@ -292,6 +292,9 @@ void CorrAna:: saveHisto(TString fname){
 
 /*****************************************************************
  * $Log: CorrAna.cxx,v $
+ * Revision 1.3  2007/07/12 19:24:31  fisyak
+ * Add includes for TString and TMath for ROOT 5.16
+ *
  * Revision 1.2  2004/07/26 22:54:25  rfatemi
  * Corruption Update
  *

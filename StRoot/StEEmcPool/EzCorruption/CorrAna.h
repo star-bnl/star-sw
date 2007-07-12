@@ -3,7 +3,7 @@
 #ifndef CorrAna_h
 #define CorrAna_h
 /*********************************************************************
- * $Id: CorrAna.h,v 1.2 2004/07/26 22:54:26 rfatemi Exp $
+ * $Id: CorrAna.h,v 1.3 2007/07/12 19:24:31 fisyak Exp $
  * modified by rfatemi 2004/06/22
  *********************************************************************/
 
@@ -18,7 +18,7 @@ class TH2F;
 
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 #include "StEEmcPool/EzCorruption/BEdims.h"
-
+#include "TString.h"
 
 class CorrAna {
 
@@ -94,6 +94,9 @@ class CorrAna {
 
 /*****************************************************************
  * $Log: CorrAna.h,v $
+ * Revision 1.3  2007/07/12 19:24:31  fisyak
+ * Add includes for TString and TMath for ROOT 5.16
+ *
  * Revision 1.2  2004/07/26 22:54:26  rfatemi
  * Corruption Update
  *
