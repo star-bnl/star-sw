@@ -4,7 +4,7 @@
 #ifndef SmdGains_h
 #define SmdGains_h
 /*******************************************************
- * $Id: SmdGains.h,v 1.5 2005/08/09 18:46:31 balewski Exp $
+ * $Id: SmdGains.h,v 1.6 2007/07/12 19:27:20 fisyak Exp $
  *******************************************************
  This code should run only on histogram files,
  not on events, JB
@@ -12,7 +12,7 @@
  *******************************************************/
 
 #include "TObject.h"
-
+#include "TFile.h"
 class TObjArray  ;
 class TH1F;
 class TF1;
@@ -88,6 +88,9 @@ class SmdGains :public TObject{
 
 /*****************************************************************
  * $Log: SmdGains.h,v $
+ * Revision 1.6  2007/07/12 19:27:20  fisyak
+ * Add includes for TMath for ROOT 5.16
+ *
  * Revision 1.5  2005/08/09 18:46:31  balewski
  * after smd calib in 2005
  *

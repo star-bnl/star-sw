@@ -1,4 +1,4 @@
-// $Id: StiForwardTrackMaker.h,v 1.7 2005/09/26 14:03:55 kocolosk Exp $
+// $Id: StiForwardTrackMaker.h,v 1.8 2007/07/12 19:27:21 fisyak Exp $
 
 #ifndef STAR_StiForwardTrackMaker
 #define STAR_StiForwardTrackMaker
@@ -14,6 +14,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include <vector>
 class StiToolkit;
 class StiKalmanTrack;
 class StPrimaryVertex; //tmp
@@ -86,7 +87,7 @@ class StiForwardTrackMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.7 2005/09/26 14:03:55 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.8 2007/07/12 19:27:21 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -97,6 +98,9 @@ class StiForwardTrackMaker : public StMaker {
 
 
 // $Log: StiForwardTrackMaker.h,v $
+// Revision 1.8  2007/07/12 19:27:21  fisyak
+// Add includes for TMath for ROOT 5.16
+//
 // Revision 1.7  2005/09/26 14:03:55  kocolosk
 // added Kalman propagation for forward track seeds
 //

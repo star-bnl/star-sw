@@ -1,0 +1,5 @@
+# $Id $
+# package muEztPanitkin
+# author: 
+Library:libStEEmcPoolmuEztPanitkin.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcPoolHanksTriggerDataReader  -l_StEEmcUtil  -l_StEvent  -l_StMuDSTMaker
+#Library:libStEEmcPoolmuEztPanitkin.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcPoolHanksTriggerDataReader  -lStEEmcUtil  -lStEvent  -lStMuDSTMaker

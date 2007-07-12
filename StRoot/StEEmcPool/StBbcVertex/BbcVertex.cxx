@@ -1,4 +1,4 @@
-// $Id: BbcVertex.cxx,v 1.2 2004/12/04 05:07:38 balewski Exp $
+// $Id: BbcVertex.cxx,v 1.3 2007/07/12 19:25:36 fisyak Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 
 #include "BbcVertex.h"
 #include "BbcHex.h"
-
+#include "TMath.h"
 ClassImp(BbcVertex)
 
 //--------------------------------------------------
@@ -62,7 +62,7 @@ void BbcVertex::clear(){
 //-------------------------------------------------
 void BbcVertex::initRun(int runID){
   printf(" BbcVertex::initRun(%d),  cm2tdcCh=%f\n",runID, cm2tdcCh);
-  assert(fabs(cm2tdcCh)<20);
+  assert(TMath::Abs(cm2tdcCh)<20);
 
 }
 
@@ -225,7 +225,7 @@ void BbcVertex:: doVertex(){
 
 #if 0 
   float diff=onlTdiff -oflTdiff;
-  if(fabs(diff)>0.01)
+  if(TMath::Abs(diff)>0.01)
     printf("DIFIDIF: Z=%f  onlTd=%f oflTd=%f  difT=%f\n",zTpc,onlTdiff,oflTdiff,diff);
 #endif
   
@@ -345,6 +345,9 @@ void BbcVertex::readCalib(char *fname) {
 
 /*******************************************************
  * $Log: BbcVertex.cxx,v $
+ * Revision 1.3  2007/07/12 19:25:36  fisyak
+ * Add includes for TMath for ROOT 5.16
+ *
  * Revision 1.2  2004/12/04 05:07:38  balewski
  * export to NN
  *

@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.28 2005/08/24 14:17:12 jwebb Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.29 2007/07/12 19:27:23 fisyak Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -10,8 +10,8 @@
  * of towers with associated tracks (list of EEmcTTMatch objects)
  *
  * \author Piotr A. Zolnierczuk
- * $Date: 2005/08/24 14:17:12 $
- * $Revision: 1.28 $
+ * $Date: 2007/07/12 19:27:23 $
+ * $Revision: 1.29 $
  *
  * \section ttmakerremarks Remarks
  *
@@ -471,12 +471,15 @@ EEmcTTMMaker::Summary(ostream &out ) const
 // ================================================================================================
 ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  { 
   return ttm.Summary(out); 
-};
+}
 
 
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.29  2007/07/12 19:27:23  fisyak
+// Add includes for TMath for ROOT 5.16
+//
 // Revision 1.28  2005/08/24 14:17:12  jwebb
 // Primary tracks now in a TObjArray.  Code has been updated, and should
 // "just work".

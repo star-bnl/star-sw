@@ -1,7 +1,6 @@
 // -- Author : Victor Perevoztchikov
 // 
-// $Id: StiForwardTrackMaker.cxx,v 1.9 2006/10/17 18:47:49 fisyak Exp $
-
+// $Id: StiForwardTrackMaker.cxx,v 1.10 2007/07/12 19:27:21 fisyak Exp $
 #include "TFile.h"
 #include "StMessMgr.h"
 
@@ -411,6 +410,9 @@ StiForwardTrackMaker::addVertex(float z, float ez){
 }
 
 // $Log: StiForwardTrackMaker.cxx,v $
+// Revision 1.10  2007/07/12 19:27:21  fisyak
+// Add includes for TMath for ROOT 5.16
+//
 // Revision 1.9  2006/10/17 18:47:49  fisyak
 // Remove reference to dead classes
 //

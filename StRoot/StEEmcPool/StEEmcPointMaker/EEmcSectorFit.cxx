@@ -7,8 +7,8 @@
  * planes.
  *
  * \author Jason C. Webb
- * $Date: 2006/11/28 18:14:09 $
- * $Revision: 1.2 $
+ * $Date: 2007/07/12 19:27:18 $
+ * $Revision: 1.3 $
  *
  */
 
@@ -21,7 +21,7 @@
 #include <iostream>
 #include <algorithm>
 #include "TLine.h"
-
+#include "TList.h"
 ClassImp(EEmcSectorFit);
 
 // ----------------------------------------------------------------------------

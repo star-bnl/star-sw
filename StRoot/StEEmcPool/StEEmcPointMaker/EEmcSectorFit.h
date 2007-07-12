@@ -4,7 +4,6 @@
 #include "TMinuit.h"
 #include <vector>
 class TH1F;
-
 class EEmcSectorFit : public TMinuit
 {
 

@@ -2,7 +2,6 @@
 Author Wei-Ming Zhang              KSU    4/27/2005
 An example maker to read maps from StEEmcAssociationMaker for efficiency study
 */
-#if 0
 #include <Stiostream.h>
 #include "StEventTypes.h"
 #include "StMcEventTypes.hh"
@@ -27,6 +26,7 @@ Int_t StEEmcMatchMaker::Init()
 //_____________________________________________________________________________
 Int_t StEEmcMatchMaker::Make()
 {
+#if 0
  const TString detname[] = {"etow", "eprs", "esmdu", "esmdv"};
  const TString part[] =    {"none", "gamma", "e+",   "e-",  "nu", 
                                     "mu+",   "mu-",  "pi0", "pi+", 
@@ -236,7 +236,7 @@ Int_t StEEmcMatchMaker::Make()
       } 
     } 
   }
-
+#endif
   return kStOk;
 }
 
@@ -248,8 +248,11 @@ Int_t StEEmcMatchMaker::Finish()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMatchMaker.cxx,v 1.2 2005/06/04 23:40:36 balewski Exp $
+// $Id: StEEmcMatchMaker.cxx,v 1.3 2007/07/12 19:27:17 fisyak Exp $
 // $Log: StEEmcMatchMaker.cxx,v $
+// Revision 1.3  2007/07/12 19:27:17  fisyak
+// Add includes for TMath for ROOT 5.16
+//
 // Revision 1.2  2005/06/04 23:40:36  balewski
 // temporary disabled - it is Saturde evening - Jan
 //
@@ -258,4 +261,3 @@ Int_t StEEmcMatchMaker::Finish()
 //
 //
 ///////////////////////////////////////////////////////////////////////////
-#endif

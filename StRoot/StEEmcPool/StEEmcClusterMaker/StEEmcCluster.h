@@ -43,7 +43,7 @@
 #include <TVector3.h>
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcTower.h"
 #include "StEEmcBaseCluster.h"
-
+#include "TMath.h"
 class StEmcCluster;
 
 class StEEmcCluster : public StEEmcBaseCluster {

@@ -1,0 +1,5 @@
+# $Id $
+# package muEztStaleData
+# author: 
+Library:libStEEmcPoolmuEztStaleData.so:LIBS +=   -lStChain  -l_StMuDSTMaker
+#Library:libStEEmcPoolmuEztStaleData.so:LIBS +=   -lStChain  -lStMuDSTMaker

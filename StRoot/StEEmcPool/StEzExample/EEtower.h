@@ -3,7 +3,7 @@
 #ifndef EEtower_h
 #define EEtower_h
 /*********************************************************************
- * $Id: EEtower.h,v 1.1 2004/06/06 04:54:10 balewski Exp $
+ * $Id: EEtower.h,v 1.2 2007/07/12 19:27:19 fisyak Exp $
  *********************************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
@@ -16,7 +16,7 @@ class EEmcDbItem;
 
 /// the ultimate source of dimensions is in this header
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
-
+#include "TString.h"
 
 /// the trick to switch between two DB readers
 #ifdef StRootFREE
@@ -73,6 +73,9 @@ class EEtower {
 
 /*****************************************************************
  * $Log: EEtower.h,v $
+ * Revision 1.2  2007/07/12 19:27:19  fisyak
+ * Add includes for TMath for ROOT 5.16
+ *
  * Revision 1.1  2004/06/06 04:54:10  balewski
  * dual analyzis
  *
