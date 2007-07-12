@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.29 2007/07/02 20:01:03 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.30 2007/07/12 17:07:18 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.30  2007/07/12 17:07:18  bouchet
+// add switch to read old ssdStripCalib Table and new ssdNoise Table
+//
 // Revision 1.29  2007/07/02 20:01:03  bouchet
 // bug fixed for the normalization of reconstruction efficiency histos
 //
@@ -126,6 +129,7 @@ class St_ssdConfiguration;
 class St_ssdWafersPosition;
 class St_ssdStripCalib;
 class St_ssdGainCalibWafer;
+class St_ssdNoise;
 
 class StEvent;
 class StSsdHitCollection;
@@ -165,6 +169,7 @@ class StSsdPointMaker : public StMaker {
  private:
   TDataSet* DbConnector;
   St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
+  St_ssdNoise           *m_noise3;        //!< Pointer to the ssdNoise table (noise values)
   St_ssdGainCalibWafer  *mGain;           //!< Pointer to the ssdGainCalib table (calibration gain)) 
 #ifdef config_position_dimensions
   St_ssdWafersPosition  *position;
@@ -199,12 +204,14 @@ class StSsdPointMaker : public StMaker {
   void PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero);
+  void Read_Strip(St_ssdNoise *strip);
   void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
   void WriteMatchedStrips(StSsdBarrel *mySsd);//! 
   void EvaluateEfficiency(StSsdBarrel *mySsd);//!
   void NormalizeEfficiency();
   void FillCalibTable();
   void FillDefaultCalibTable();
+  Int_t ReadNoiseTable(StSsdBarrel *mySsd,Int_t year);
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -236,11 +243,13 @@ class StSsdPointMaker : public StMaker {
   Int_t Zero;
   Int_t UseCalibration ;
   Int_t NEvent;
+  Int_t year;
+  Int_t noiseTableSize;
   Float_t CalibArray[320];
   Float_t ratioP[20][16];
   Float_t ratioN[20][16];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.29 2007/07/02 20:01:03 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.30 2007/07/12 17:07:18 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
