@@ -1,6 +1,7 @@
 #include "TChair.h"
 #include "StDetectorId.h"
 #include "tables/St_dst_track_Table.h"
+#include "TMath.h"
 
 class St_dst_trackC : public TChair
 {
@@ -22,5 +23,5 @@ inline StDetectorId St_dst_trackC::detector(Int_t i) const { return (StDetectorI
 //_____________________________________________________________________________
 inline Double_t St_dst_trackC::AbsMoment(Int_t i){
    momentum(i); 
-   return  ::sqrt(mMomentum[0]*mMomentum[0]+mMomentum[1]*mMomentum[1]+mMomentum[2]*mMomentum[2]);
+   return  TMath::Sqrt(mMomentum[0]*mMomentum[0]+mMomentum[1]*mMomentum[1]+mMomentum[2]*mMomentum[2]);
 }
