@@ -98,7 +98,8 @@ Int_t StMixerMaker::InitRun(int RunId) {
   
   // Construct constant data sets.  This is what is passed downstream
   mAllTheDataMixer = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
-  AddConst(new TObjectSet("MixerEvent"  , mAllTheDataMixer));
+  TObjectSet *set = new TObjectSet("MixerEvent"  , mAllTheDataMixer, kFALSE);
+  AddConst(set);
   return kStOk;
 }
 
