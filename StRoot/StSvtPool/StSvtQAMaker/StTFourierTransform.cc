@@ -3,7 +3,7 @@
 #include "w.h"
 #include "malloc.h"
 //#include "free.h"
-
+#include "TMath.h"
 COMPLEX *W_factors = 0;		/* array of W-factors */
 unsigned Nfactors = 0;		/* number of entries in W-factors */
 static unsigned radix(unsigned n);
@@ -51,8 +51,8 @@ void StTFourierTransform::Fft(TH1 * in, TH1 * amplitude, TH1 * phase,
 
     for (i = 1; i < nbins / 2; i++)
     {
-      amplitude->SetBinContent(i + 1, sqrt(pow(outArray[2 * i - 1], 2) +
-	  pow(outArray[2 * i], 2)));
+      amplitude->SetBinContent(i + 1, TMath::Sqrt(TMath::Power(outArray[2 * i - 1], 2) +
+	  TMath::Power(outArray[2 * i], 2)));
     }
   }
 
@@ -63,7 +63,7 @@ void StTFourierTransform::Fft(TH1 * in, TH1 * amplitude, TH1 * phase,
 
     for (i = 1; i < nbins / 2; i++)
     {
-      phase->SetBinContent(i + 1, atan2(outArray[2 * i], outArray[2 * i - 1]));
+      phase->SetBinContent(i + 1, TMath::ATan2(outArray[2 * i], outArray[2 * i - 1]));
     }
   }
 
@@ -92,13 +92,13 @@ void realfft(double *in, unsigned n, double *out)
 
   fft(c_in, n, c_out);
 
-  out[0] = c_re(c_out[0]);	/* cos van dc */
+  out[0] = c_re(c_out[0]);	/* TMath::Cos van dc */
   for (i = 1; i < (n + 1) / 2; i++)
-  {				/* cos/sin i-de harmonische */
+  {				/* TMath::Cos/TMath::Sin i-de harmonische */
     out[2 * i - 1] = c_re(c_out[i]) * 2;
     out[2 * i] = c_im(c_out[i]) * -2;
   }
-  if (n % 2 == 0)		/* cos van Nyquist */
+  if (n % 2 == 0)		/* TMath::Cos van Nyquist */
     out[n - 1] = c_re(c_out[n / 2]);
 
   free((char *) c_in);
@@ -231,8 +231,8 @@ int W_init(unsigned n)
 
   for (k = 0; k < n; k++)
   {
-    c_re(W_factors[k]) = cos(2 * pi * k / n);
-    c_im(W_factors[k]) = sin(2 * pi * k / n);
+    c_re(W_factors[k]) = TMath::Cos(2 * pi * k / n);
+    c_im(W_factors[k]) = TMath::Sin(2 * pi * k / n);
   }
 
   return 0;
