@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.168 2007/06/06 04:05:55 perev Exp $
+// $Id: bfc.C,v 1.169 2007/07/12 20:41:56 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -64,8 +64,7 @@ void Load(const Char_t *options){
       }
     }
   }
-  if (gClassTable->GetID("TTable")  < 0) gSystem->Load("libTable");
-  if (gClassTable->GetID("TRArray") < 0) gSystem->Load("StarRoot");//  TMemStat::PrintMem("load StarRoot");
+  //  if (gClassTable->GetID("TMatrix") < 0) gSystem->Load("StarRoot");// moved to rootlogon.C  TMemStat::PrintMem("load StarRoot");
 #ifdef UseLogger
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
@@ -99,9 +98,12 @@ void bfc(Int_t First, Int_t Last,
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load(Chain);
   chain = new StBFChain(); cout << "Create chain " << chain->GetName() << endl;
+  TString tChain(Chain);
+  chain->cd();
   chain->SetDebug(1);
   if (Last < -3) return;
   chain->SetFlags(Chain);
+  if (tChain == "" || ! tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
   chain->Set_IO_Files(infile,outfile);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
   gMessMgr->QAInfo() << Form("Process [First=%6i/Last=%6i/Total=%6i] Events",First,Last,Last-First+1) << endm;
@@ -115,6 +117,7 @@ void bfc(Int_t First, Int_t Last,
     gMessMgr->Error() << "Problems with instantiation of Maker(s)" << endm;
     gSystem->Exit(1);
   }
+  if (Last < 0) return;
   StMaker *dbMk = chain->GetMaker("db");
   if (dbMk) dbMk->SetDebug(1);
 #if 0
@@ -154,12 +157,10 @@ void bfc(Int_t First, Int_t Last,
   gMessMgr->QAInfo() << Form("Run on %s in %s",gSystem->HostName(),gSystem->WorkingDirectory()) << endm;
   gMessMgr->QAInfo() << Form("with %s", chain->GetCVS()) << endm;
   // Init the chain and all its makers
-  Int_t iTotal = 0, iBad = 0;
-
+  TAttr::SetDebug(0);
   chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
   chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
-  if (Last < 0) return;
   Int_t iInit = chain->Init();
   if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return;}
   if (Last == 0) return;
@@ -169,11 +170,6 @@ void bfc(Int_t First, Int_t Last,
   chain->EventLoop(First,Last,0);
   gMessMgr->QAInfo() << "Run completed " << endm;
   gSystem->Exec("date");
-  {
-    TDatime t;
-    gMessMgr->QAInfo() << Form("Run is finished at Date/Time %i/%i; Total events processed :%i and not completed: %i",
-			       t.GetDate(),t.GetTime(),iTotal,iBad) << endm;
-  }
 }
 //_____________________________________________________________________
 void bfc(Int_t Last, 
@@ -186,15 +182,6 @@ void bfc(Int_t Last,
 }
 //____________________________________________________________
 void Usage() {
-  Char_t *path  = "./StRoot/StBFChain:$STAR/StRoot/StBFChain";
-  Char_t *rootf = "BigFullChain.h";
-  Char_t *file = gSystem->Which(path,rootf,kReadPermission);
-  if (file) {
-    printf ("============= \tBigFullChain options  =============\n");
-    TString cmd("cat ");
-    cmd += file;
-    gSystem->Exec(cmd);
-  }
   printf ("============= \t U S A G E =============\n");
   printf ("bfc(Int_t First,Int_t Last,const Char_t *Chain,const Char_t *infile,const Char_t *outfile,const Char_t *TreeFile)\n");
   printf ("bfc(Int_t Last,const Char_t *Chain,const Char_t *infile,const Char_t *outfile,const Char_t *TreeFile)\n");
@@ -208,9 +195,9 @@ void Usage() {
   printf (" outfile   \t- Name of Output file   \t(Default = 0, i.e. define Output file name from Input one)\n");
   printf (" outfile   \t- Name of Tree File     \t(Default = 0, i.e. define Output file name from Input one (tags TNtuple))\n");
   printf (" ChainShort\t- Short cut for chain   \t(Default = \"\" -> print out of this message)\n");
+  gSystem->Exit(1);
 }
 //_____________________________________________________________________
-void bfc() {
-  Usage(); 
-  gSystem->Exit(1);
+void bfc(const Char_t *Chain="ittf") {
+  bfc(-2,Chain);
 }
