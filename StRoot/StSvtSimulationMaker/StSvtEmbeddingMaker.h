@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.h,v 1.8 2004/07/09 00:17:45 caines Exp $
+ * $Id: StSvtEmbeddingMaker.h,v 1.9 2007/07/12 20:18:18 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.h,v $
+ * Revision 1.9  2007/07/12 20:18:18  fisyak
+ * read Db by deman
+ *
  * Revision 1.8  2004/07/09 00:17:45  caines
  * Code no longer kill code is things go wrong, also  by default dont do anthing if SVT not there
  *
@@ -84,9 +87,7 @@ public:
   void setPlainSimEvenIfNoSVT(Bool_t doIt);                    							  //and create simple background -just a plain simulation; default is TRUE
   
 private:
-  void ReadPedRMSfromDb();
   Int_t GetSvtData();
-  void GetPedRMS();
   void ClearMask();
   void AddRawData();
   void CreateBackground();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.11 2007/04/28 17:57:11 perev Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.12 2007/07/12 20:18:18 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
+ * Revision 1.12  2007/07/12 20:18:18  fisyak
+ * read Db by deman
+ *
  * Revision 1.11  2007/04/28 17:57:11  perev
  * Redundant StChain.h removed
  *
@@ -48,8 +51,6 @@ using namespace std;
 #include "StSequence.hh"
 #include "StSvtEmbeddingMaker.h"
 #include "StMessMgr.h"
-
-#include "StSvtDbMaker/StSvtDbMaker.h"
 
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
@@ -101,9 +102,21 @@ Int_t StSvtEmbeddingMaker::Init()
 ///All database dependent data are read here. 
 Int_t StSvtEmbeddingMaker::InitRun(int runumber)
 {
-  
-  ReadPedRMSfromDb();
-  GetPedRMS();
+  if (mUsePixelRMS){
+    gMessMgr->Warning()<<"StSvtEmbeddingMaker - reading individual pixel RMS values from database "<<endm;
+    mPedRMSColl= (StSvtHybridCollection*) ((TObjectSet *) GetData("StSvtRMSPedestal"))->GetObject();
+    if (mPedRMSColl) {gMessMgr->Warning()<<"StSvtEmbeddingMaker: Found RMS values for individual pixels."<<endm;}
+    else {gMessMgr->Warning()<<"StSvtEmbeddingMaker: NO RMS values for individual pixels."<<endm;}
+  }
+
+  if (mUseHybridRMS){
+    gMessMgr->Warning()<<"StSvtEmbeddingMaker - reading individual hybrid RMS values from database "<<endm;
+    mPedColl= (StSvtHybridCollection*) ((TObjectSet *) GetData("StSvtRMSPedestal"))->GetObject();
+    if (mPedColl) {gMessMgr->Warning()<<"StSvtEmbeddingMaker: Found RMS values for individual hybrids."<<endm;}
+    else {gMessMgr->Warning()<<"StSvtEmbeddingMaker: NO RMS values for individual hybrids."<<endm;}
+  }
+  if ((!mPedRMSColl)&&(!mPedColl))
+    {gMessMgr->Warning()<<"Warning: no SVT RMS information available from Chain - using default backgroung:"<<mBackGSigma<<endm;}
 
   return StMaker::InitRun(runumber);
 }
@@ -152,7 +165,7 @@ Int_t StSvtEmbeddingMaker::Make()
           mCurrentPixelData  = (StSvtHybridPixelsD*)mSimPixelColl->at(mCurrentIndex);
           
           if(!mCurrentPixelData) { //no data from simulation Maker
-            gMessMgr->Info()<<"Error  in StSvtEmbeddingMaker::Make(): Something is wrong, no data from simulator for hybrid index:"<<mCurrentIndex<<endm;
+            gMessMgr->Error()<<"Error  in StSvtEmbeddingMaker::Make(): Something is wrong, no data from simulator for hybrid index:"<<mCurrentIndex<<endm;
             mCurrentPixelData = new StSvtHybridPixelsD(Barrel, Ladder, Wafer, Hybrid);
             mSimPixelColl->put_at(mCurrentPixelData,mCurrentIndex);
           }
@@ -171,55 +184,6 @@ Int_t StSvtEmbeddingMaker::Make()
   
   return kStOK;
 }
-
-//____________________________________________________________________________
-///Reads information about background from the database.
-///First it tries to find RMS values for individual anodes.
-///If that's not avilable then it tries to find values for individual hybrids.
-///If not even this is available then one default value for RMS is used.
-void StSvtEmbeddingMaker::ReadPedRMSfromDb()
-{
-  StSvtDbMaker *svtDb =(StSvtDbMaker*)GetMaker("svtDb");
-  if (svtDb ==NULL) {
-    gMessMgr->Error()<<"StSvtEmbeddingMaker::ReadPedRMSfromDb() - NO SvtDbMaker in chain !"<<endm;
-    return;
-  }
-
-  if (mUsePixelRMS){
-    gMessMgr->Error()<<"StSvtEmbeddingMaker - reading individual pixel RMS values from database "<<endm;
-    if ( !GetData("StSvtRMSPedestal") ) svtDb->setSvtRms();
-    svtDb->readSvtRms();
-  }
-
-if (mUseHybridRMS){
-    gMessMgr->Error()<<"StSvtEmbeddingMaker - reading individual hybrid RMS values from database "<<endm;
-    if ( !GetData("StSvtPedestal") ) svtDb->setSvtPedestals();
-    svtDb->readSvtPedestals();
-  }
-}
-
-//____________________________________________________________________________
-void  StSvtEmbeddingMaker::GetPedRMS()
-{
-  mPedRMSColl=NULL;
-  mPedColl=NULL;
-
-  St_DataSet* dataSet=NULL;
-  dataSet = GetDataSet("StSvtRMSPedestal");
-  if (dataSet)  mPedRMSColl= (StSvtHybridCollection*)dataSet->GetObject();
-  if (mPedRMSColl) cout<<"StSvtEmbeddingMaker: Found RMS values for individual pixels."<<endl;
-    else cout<<"StSvtEmbeddingMaker: NO RMS values for individual pixels."<<endl;
-      
-  dataSet=NULL;
-  dataSet = GetDataSet("StSvtPedestal");
-  if (dataSet) mPedColl= (StSvtHybridCollection*)dataSet->GetObject();
-  if (mPedColl) cout<<"StSvtEmbeddingMaker: Found RMS values for individual hybrids."<<endl;
-    else cout<<"StSvtEmbeddingMaker: NO RMS values for individual hybrids."<<endl;
-
-  if ((!mPedRMSColl)&&(!mPedColl))
-    cout<<"Warning: no SVT RMS information available from Chain - using default backgroung:"<<mBackGSigma<<endl;
-}
-
 
 //____________________________________________________________________________
 Int_t StSvtEmbeddingMaker::GetSvtData()
@@ -336,7 +300,7 @@ void StSvtEmbeddingMaker::CreateBackground()
   if (mPedRMSColl)
     { 
       pedRms = (StSvtHybridPixels*)mPedRMSColl->at(mCurrentIndex);
-      if (pedRms == NULL) cout<<"Warning: Individual pixel RMS info is empty for hybrid "<<mCurrentIndex<<" =>have to use other method "<<endl;
+      if (pedRms == NULL) {gMessMgr->Warning()<<"Warning: Individual pixel RMS info is empty for hybrid "<<mCurrentIndex<<" =>have to use other method "<<endm;}
     }
   
   if(pedRms)
@@ -353,14 +317,14 @@ void StSvtEmbeddingMaker::CreateBackground()
     StSvtHybridPed *ped=NULL;
     if (mPedColl){ 
       ped=(StSvtHybridPed *)mPedColl->at(mCurrentIndex);
-      if (ped == NULL) cout<<"Warning: hybrid  RMS info is empty for hybrid "<<mCurrentIndex<<" =>using default value "<<mBackGSigma<<endl;
+      if (ped == NULL) {gMessMgr->Warning()<<"Warning: hybrid  RMS info is empty for hybrid "<<mCurrentIndex<<" =>using default value "<<mBackGSigma<<endm;}
 	}
     if (ped) backgsigma=ped->getRMS(); else  backgsigma=mBackGSigma; //the default value
     if ((backgsigma<=0.)||(backgsigma>=6.)){ //check for obviously bad values 
-      cout<<"Warnig for index "<<mCurrentIndex<<" pedestal RMS is:"<<backgsigma<<" => seting to default "<<mBackGSigma<<endl;
+      {gMessMgr->Warning()<<"Warnig for index "<<mCurrentIndex<<" pedestal RMS is:"<<backgsigma<<" => seting to default "<<mBackGSigma<<endm;}
       backgsigma=mBackGSigma;
     }
-    if (Debug()) cout<<"for index "<<mCurrentIndex<<" pedestal RMS is:"<< backgsigma<<endl;
+      if (Debug()) {gMessMgr->Debug()<<"for index "<<mCurrentIndex<<" pedestal RMS is:"<< backgsigma<<endm;}
     
     for(int an = 0; an < 240; an++){
       for(int tim = 0; tim < 128; tim++){
