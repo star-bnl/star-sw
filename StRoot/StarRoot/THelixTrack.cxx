@@ -1619,7 +1619,9 @@ static int nCall=0; nCall++;
       fRr = fXx+fYy;
 
       if (fNuse <= 3) fKase=1;
-      if (!fKase) fKase =(fYy < fXx *(0.5)*(0.5)/210)? 1:2;
+    if (!fKase) fKase =(fYy < fXx *(0.5)*(0.5)/210)? 1:2;
+//      if (!fKase) fKase =(fYy < fXx *(0.5)*(0.5)/10)? 1:2;
+SWIT:
       switch(fKase) {
         case 1:	{	//Try 1st method
 
@@ -1672,7 +1674,10 @@ static int nCall=0; nCall++;
 	  }
 	  fG1 = xroot*g0;
 	  xnom = (g-fG1)*(f-fG1)-h*h;
-	  assert(xnom>3e-33);
+
+//	  assert(xnom>3e-33);
+          if (xnom<1e-20) { fCase=1; goto SWIT;}
+
 	  fXd = ( p*(g-fG1)-q*h      )/xnom;
 	  fYd = (-p*h      +q*(f-fG1))/xnom;
         }//end case 2
@@ -2743,7 +2748,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.29 2007/06/25 19:26:40 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.30 2007/07/12 00:22:29 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2759,6 +2764,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.30  2007/07/12 00:22:29  perev
+ * TCircleFitter::Fit case 1 if case 2 failed
+ *
  * Revision 1.29  2007/06/25 19:26:40  perev
  * Cleanup
  *
