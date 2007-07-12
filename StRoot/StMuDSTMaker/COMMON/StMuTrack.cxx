@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.30 2007/04/20 06:23:46 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.31 2007/07/12 19:46:20 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -20,7 +20,7 @@
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "THelixTrack.h"
-
+#include "TMath.h"
 StuProbabilityPidAlgorithm* StMuTrack::mProbabilityPidAlgorithm=0;
 double StMuTrack::mProbabilityPidCentrality=0;
  
@@ -399,6 +399,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.31  2007/07/12 19:46:20  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.30  2007/04/20 06:23:46  mvl
  * Removed Q-vector flag (will implement utility class)
  *

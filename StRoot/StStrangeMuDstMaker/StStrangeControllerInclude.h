@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerInclude.h,v 3.2 2003/05/23 20:10:43 genevb Exp $
+// $Id: StStrangeControllerInclude.h,v 3.3 2007/07/12 20:01:47 fisyak Exp $
 // $Log: StStrangeControllerInclude.h,v $
+// Revision 3.3  2007/07/12 20:01:47  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 3.2  2003/05/23 20:10:43  genevb
 // No message accounting for PrintNumCand()
 //
@@ -29,7 +32,7 @@
 #include "StStrangeControllerBase.h"
 #include "StStrangeMuDstMaker.h"
 #include "StMessMgr.h"
-
+#include "TClass.h"
 
 //_____________________________________________________________________________
 inline void StStrangeControllerBase::PrintNumCand(const char* text, Int_t num) {

@@ -31,7 +31,7 @@
 #include "TNtuple.h"
 #include "TArrayF.h"
 #include "StTree.h"
-
+#include "TMath.h"
 //_____________________________________________________________________________
 // C variables and functions for fit/minimization
 //_____________________________________________________________________________
@@ -60,8 +60,8 @@ void fnch(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
     //                              =>  Error2^2 = 0.0016 cm^2
     // The total error should be ::sqrt(Error1^2 + Error2^2)
     error_sq = 0.0016 + (2.45 / multA[i]); 
-    delta_sq = ::pow(xVert[i]-funcX(zVert[i],par),2) +
-               ::pow(yVert[i]-funcY(zVert[i],par),2);
+    delta_sq = TMath::Power(xVert[i]-funcX(zVert[i],par),2) +
+               TMath::Power(yVert[i]-funcY(zVert[i],par),2);
     chisq += (delta_sq/error_sq);
   }
   f = chisq;
@@ -447,7 +447,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.34 2007/04/28 17:56:31 perev Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.35 2007/07/12 19:46:56 fisyak Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -741,8 +741,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.34 2007/04/28 17:56:31 perev Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.35 2007/07/12 19:46:56 fisyak Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.35  2007/07/12 19:46:56  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.34  2007/04/28 17:56:31  perev
 // Redundant StChain.h removed
 //

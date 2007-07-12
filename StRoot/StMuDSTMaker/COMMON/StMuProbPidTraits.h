@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuProbPidTraits.h,v 1.5 2004/05/02 04:10:14 perev Exp $
+ * $Id: StMuProbPidTraits.h,v 1.6 2007/07/12 19:46:19 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -21,7 +21,7 @@
 
 #ifndef StMuProbPidTraits_h
 #define StMuProbPidTraits_h
-
+#include <string.h>
 #include "TObject.h"
 
 #define __NPARTICLES__ 9
@@ -84,6 +84,9 @@ inline void   StMuProbPidTraits::setNdf(unsigned int i) { mNDF = i; }
 /***************************************************************************
  *
  * $Log: StMuProbPidTraits.h,v $
+ * Revision 1.6  2007/07/12 19:46:19  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.5  2004/05/02 04:10:14  perev
  * private => protected
  *

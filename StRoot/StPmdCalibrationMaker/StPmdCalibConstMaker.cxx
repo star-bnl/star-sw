@@ -26,7 +26,7 @@ Landau function and then generates the calibration constants. these calibration
 constants are then stored in calibration database
 */
 
-#include<sstream>
+#include"Stsstream.h"
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"

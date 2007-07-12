@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.21 2007/04/28 17:56:38 perev Exp $
+ * $Id: StPmdGeom.cxx,v 1.22 2007/07/12 19:52:31 fisyak Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.22  2007/07/12 19:52:31  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.21  2007/04/28 17:56:38  perev
  * Redundant StChain.h removed
  *
@@ -84,7 +87,7 @@
 #include<TCanvas.h>
 #include<TPolyLine.h>
 #include<TArrayF.h>
-
+#include "TMath.h"
 ClassImp(StPmdGeom)
 
   /*! mxcon[17],mycon[17] are the x and y position of the corner cell 

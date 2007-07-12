@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.18 2007/04/28 17:56:37 perev Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.19 2007/07/12 19:52:05 fisyak Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.19  2007/07/12 19:52:05  fisyak
+ *Add includes for ROOT 5.16
+ *
  *Revision 1.18  2007/04/28 17:56:37  perev
  *Redundant StChain.h removed
  *
@@ -61,7 +64,7 @@
  */
 
 //#include <Stiostream.h>
-#include <sstream>
+#include "Stsstream.h"
 
 #include "StPmdReadMaker.h"
 #include "St_DataSetIter.h"

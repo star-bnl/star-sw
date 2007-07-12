@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdDBUtil.h,v 1.5 2004/04/10 00:48:39 subhasis Exp $
+ * $Id: StPmdDBUtil.h,v 1.6 2007/07/12 19:52:31 fisyak Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -16,6 +16,9 @@
  *************************************************************
  *
  * $Log: StPmdDBUtil.h,v $
+ * Revision 1.6  2007/07/12 19:52:31  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.5  2004/04/10 00:48:39  subhasis
  * 2016 changed to 1728 in DbUtil
  *
@@ -30,7 +33,7 @@
 #define STAR_StPmdDBUtil
 #include <stdlib.h>
 #include <TMatrix.h>
-#include <sstream>
+#include "Stsstream.h"
 #include <math.h>
 #include "StPmdGeom.h"
 
