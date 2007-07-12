@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TAttr.cxx,v 1.2 2007/03/21 17:40:44 fisyak Exp $
+ * $Id: TAttr.cxx,v 1.3 2007/07/12 20:38:41 fisyak Exp $
  *
  ***************************************************************************
  *
@@ -15,7 +15,7 @@
 #include <assert.h>
 #include "TAttr.h"
 #include "TClass.h"
-
+Int_t TAttr::_debug = 0;
 ClassImp(TAttr)
 //______________________________________________________________________________
 TAttr::TAttr(const char *name)
@@ -48,7 +48,8 @@ void TAttr::SetAttr(const char *key, const char *val)
        if(t){Remove(t); delete t;}}
    else {
        AddFirst(new TNamed(tk.Data(),tv.Data()));}
-   Info("SetAttr","(\"%s\",\"%s\",\")",tk.Data(),tv.Data());
+   if (_debug)
+     Info("SetAttr","(\"%s\",\"%s\",\")",tk.Data(),tv.Data());
 
 }
 //_____________________________________________________________________________
