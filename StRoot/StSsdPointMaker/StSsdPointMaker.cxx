@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.47 2007/07/02 20:01:03 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.48 2007/07/12 17:07:18 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.48  2007/07/12 17:07:18  bouchet
+// add switch to read old ssdStripCalib Table and new ssdNoise Table
+//
 // Revision 1.47  2007/07/02 20:01:03  bouchet
 // bug fixed for the normalization of reconstruction efficiency histos
 //
@@ -171,13 +174,14 @@
 #include "tables/St_ssdBarrelPosition_Table.h"
 #include "tables/St_ssdStripCalib_Table.h"
 #include "tables/St_ssdGainCalibWafer_Table.h"
+#include "tables/St_ssdNoise_Table.h"
 #include "StEvent.h"
 #include "StSsdHitCollection.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
 #include "TMath.h"
 ClassImp(StSsdPointMaker)
-
-  //_____________________________________________________________________________
+  
+//_____________________________________________________________________________
   Int_t StSsdPointMaker::Init(){
   LOG_INFO << "Init() : Defining the histograms" << endm;
   
@@ -289,11 +293,21 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
     mClusterControl -> setMatchSigma(clusterCtrl->matchSigma);
     mClusterControl -> printParameters();
   }    
-  m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
-  if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
+  year = (GetDate()/10000)-2000;
+  LOG_DEBUG <<Form("TimeStamp is %d Year is =%d\n",GetDate(),year)<<endm;
+  if(year<7){
+    m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
+    if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
+    else {
+      LOG_INFO<<"InitRun : printing few pedestal/noise values"<<endm;
+      Zero = 0;
+      Read_Strip(m_noise2,&Zero); 
+    }
+  }
   else {
-    LOG_INFO<<"InitRun : printing few pedestal/noise values"<<endm;
-    Read_Strip(m_noise2,&Zero); 
+    m_noise3 = (St_ssdNoise*)GetDataBase("Calibrations/ssd/ssdNoise");
+    if (m_noise3)  {LOG_INFO << "InitRun : access to ssdNoise - will use this table" << endm;}
+    if (!m_noise3) {LOG_ERROR << "InitRun : No access to ssdNoise - will use the default noise and pedestal values" << endm;}
   }
   (UseCalibration==1)?FillCalibTable():FillDefaultCalibTable();
   /*
@@ -311,7 +325,7 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::DeclareNtuple(){
-
+  
   TFile *f = GetTFile();
   if (f) {
     f->cd();
@@ -401,16 +415,8 @@ Int_t StSsdPointMaker::Make()
       LOG_INFO<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endm;
       mySsd->sortListStrip();
       PrintStripSummary(mySsd);
-      Int_t noiseTableSize = 0; 
-      printf("iZero=%d\n",Zero);     
-      if ((!m_noise2)||(Zero==491520) )
-	{
-	  LOG_WARN << "Make : No pedestal and noise values (ssdStripCalib table missing), will use default values" <<endm;
-	}
-      else
-	{
-	  noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
-	}
+      noiseTableSize = 0; 
+      noiseTableSize = ReadNoiseTable(mySsd,year);
       LOG_INFO<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endm;
       Int_t nClusterPerSide[2];
       nClusterPerSide[0] = 0;
@@ -474,7 +480,11 @@ Int_t StSsdPointMaker::Make()
       if((spa_strip->GetNRows()==0)&&(spa_ped_strip && spa_ped_strip->GetNRows()!=0))
 	{ 
 	  LOG_INFO <<"###### WRITING SSD PEDESTAL HISTOGRAMS##########"<<endm;
-	  mySsd->writeNoiseToFile(spa_ped_strip,myLabel);
+	  if(year<7){
+	    mySsd->writeNoiseToFile(spa_ped_strip,myLabel);}
+	  else{mySsd->writeNewNoiseToFile3(spa_ped_strip,myLabel);//new method
+	    printf("done\n");
+	  }
 	}
     }
   mySsd->Reset();
@@ -1112,6 +1122,34 @@ void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero)
  }
 
 //_____________________________________________________________________________
+void StSsdPointMaker::Read_Strip(St_ssdNoise *strip)
+{
+    ssdNoise_st *noise = strip->GetTable();
+
+  Int_t  mNWaferPerLadder = 16;
+  Int_t iWaf              = 0;
+  Int_t iLad              = 0;
+  for (Int_t i = 0 ; i < strip->GetNRows(); i++)
+    {
+      iWaf = noise[i].id-(noise[i].id/mNWaferPerLadder)*mNWaferPerLadder;
+      iLad = noise[i].id/16;
+      Int_t idWaf = noise[i].id;
+      if (idWaf==1)
+	{
+	  for(Int_t nStrip=0;nStrip<10;nStrip++)
+	    {
+	      LOG_INFO<<"ReadStrip: iLad,idWaf,nStrip,rmsP,rmsN = "<<iLad+1
+		      <<" "<<idWaf+1
+		      <<" "<<nStrip
+		      <<" "<<(int)(noise[i].rmsp[nStrip])
+		      <<" "<<(int)(noise[i].rmsn[nStrip])<<endm;
+	    }
+	}
+    }  
+  LOG_INFO<<"ReadStrip: Number of rows in the table : "<<strip->GetNRows()<<endm;
+ }
+//_____________________________________________________________________________
+
 void StSsdPointMaker::WriteMatchedStrips(StSsdBarrel *mySsd)
 {
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
@@ -1446,6 +1484,32 @@ void StSsdPointMaker::FillDefaultCalibTable(){
     CalibArray[i] = 1;
     //LOG_INFO << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm; 
   }
+}
+//--------------------------------------------------------------------------------
+Int_t StSsdPointMaker::ReadNoiseTable(StSsdBarrel *mySsd,Int_t year){
+  if(year<7)
+    {
+      Int_t noiseTableSize = 0; 
+      printf("iZero=%d\n",Zero);     
+      if ((!m_noise2)||(Zero==491520))
+	{
+	  LOG_WARN << "Make : No pedestal and noise values (ssdStripCalib table missing), will use default values" <<endm;
+	}
+      else
+	{
+	  LOG_INFO << " Pedestal file will use new Table"<<endm;
+	  noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
+	}
+    }
+  else if (year>=7){
+    if(m_noise3)
+      {
+	Read_Strip(m_noise3);
+	LOG_INFO << " Pedestal file will use new Table "<< endm;
+	noiseTableSize = mySsd->readNoiseFromTable(m_noise3,mDynamicControl);
+      }
+  }
+  return noiseTableSize;  
 }
 //____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {
