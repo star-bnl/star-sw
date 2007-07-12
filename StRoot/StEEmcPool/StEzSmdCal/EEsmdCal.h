@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*******************************************************
- * $Id: EEsmdCal.h,v 1.12 2005/05/04 17:00:32 balewski Exp $
+ * $Id: EEsmdCal.h,v 1.13 2007/07/12 19:27:19 fisyak Exp $
  *******************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -19,7 +19,7 @@ class EEmcSmdMap;
 
 /// the ultimate source of dimensions is in this header
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
-
+#include "TString.h"
 /// the trick to switch between two DB readers
 #ifdef StRootFREE
   class EEmcDb;
@@ -139,6 +139,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.13  2007/07/12 19:27:19  fisyak
+ * Add includes for TMath for ROOT 5.16
+ *
  * Revision 1.12  2005/05/04 17:00:32  balewski
  * tuned for MIP detection in CuCu200
  *

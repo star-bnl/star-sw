@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTower.cxx,v 1.6 2004/05/10 21:10:19 zolnie Exp $
+// $Id: EEmcTower.cxx,v 1.7 2007/07/12 19:27:23 fisyak Exp $
 
 /**
  * \class  EEmcTower
@@ -11,8 +11,8 @@
  *
  * \author Piotr A. Zolnierczuk
  *
- * $Date: 2004/05/10 21:10:19 $ 
- * $Revision: 1.6 $
+ * $Date: 2007/07/12 19:27:23 $ 
+ * $Revision: 1.7 $
  *
  * \section towerremarks Remarks
  * \bug  implicitly assumed that labels are no longer than 16 characters
@@ -47,7 +47,7 @@ EEmcTower::EEmcTower(const char *label , float adc, float ene)
  if( ! ParseLabel(label) ) return;
  mADC  = adc;
  mEdep = ene;
-};
+}
 //                                
 
 //=============================================================================

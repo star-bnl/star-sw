@@ -1,0 +1,5 @@
+# $Id $
+# package StRFEmcTrigger
+# author: 
+Library:libStRFEmcTrigger.so:LIBS +=   -lStChain    -l_StEvent  -l_StMuDSTMaker
+#Library:libStRFEmcTrigger.so:LIBS +=   -lStChain  -lStEmcUtil  -lStEvent  -lStMuDSTMaker

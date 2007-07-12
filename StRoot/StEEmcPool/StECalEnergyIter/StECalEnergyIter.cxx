@@ -6,7 +6,7 @@
 #include "StMuDSTMaker/COMMON/StMuEmcHit.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #include "StEEmcDbMaker/EEmcDbItem.h"
-
+#include "TMath.h"
 
 bool StECalEnergyIter::mIsSimu = false;
 
@@ -79,7 +79,7 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
       float acorr = adc - dbitem->ped;
       e = acorr/dbitem->gain;
       if ( mIsSimu && mdetector == eemc ) e *= 1.25;
-      adclessped = (int) floor(acorr + 0.5);
+      adclessped = (int) TMath::Floor(acorr + 0.5);
     }
 
   return true;

@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StGeant2LcpTreeMaker.cxx,v 1.3 2004/02/24 21:33:23 balewski Exp $
+// $Id: StGeant2LcpTreeMaker.cxx,v 1.4 2007/07/12 19:24:55 fisyak Exp $
 
 #include <math.h>
 #include <TFile.h>
@@ -21,7 +21,7 @@
 #include "tables/St_particle_Table.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
-
+#include "TMath.h"
 ClassImp(StGeant2LcpTreeMaker)
 
 
@@ -265,6 +265,9 @@ particle_st* StGeant2LcpTreeMaker::findGeantLcp( St_particle    *tab) {
 
 
 // $Log: StGeant2LcpTreeMaker.cxx,v $
+// Revision 1.4  2007/07/12 19:24:55  fisyak
+// Add includes for TMath for ROOT 5.16
+//
 // Revision 1.3  2004/02/24 21:33:23  balewski
 // *** empty log message ***
 //

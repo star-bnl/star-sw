@@ -16,7 +16,7 @@
 
 class TH1F;
 class TH2F;
-
+#include "TDirectory.h"
 #include "StEEmcPair.h"
 
 class SpinHistos : public TDirectory 

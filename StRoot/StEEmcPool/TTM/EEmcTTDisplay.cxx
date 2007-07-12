@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.11 2005/02/05 00:53:01 perev Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.12 2007/07/12 19:27:22 fisyak Exp $
 // doxygen info here
 /**
  * \class   EEmcTTDisplay
@@ -12,8 +12,8 @@
  *
  * \author  Piotr A. Zolnierczuk
  * 
- * $Date: 2005/02/05 00:53:01 $ 
- * $Revision: 1.11 $
+ * $Date: 2007/07/12 19:27:22 $ 
+ * $Revision: 1.12 $
  * 
  * \section displayexample  Short example how to use EEmcTTDisplay
  * for details consult  StRoot/StEEmcPool/macros/TTM/show.C
@@ -32,6 +32,7 @@
 #include <Stsstream.h>
 
 #include "TList.h"
+#include "TMath.h"
 #include "TGeoVolume.h"
 #include "TGeoCone.h"
 #include "TGeoManager.h"
@@ -86,7 +87,7 @@ EEmcTTDisplay::~EEmcTTDisplay()
   if(mEEmc)      delete mEEmc;
   if(mTrackHits) delete mTrackHits;
   if(mTowerHits) delete mTowerHits;
-};
+}
 
 
 void
@@ -109,7 +110,7 @@ EEmcTTDisplay::initGeometry(const char *topName)
 
   int numSSec  = mNumSec*mNumSSec;
   
-  TGeoMedium   *medVac = new TGeoMedium  ("Vacuum",1, new TGeoMaterial("Vacuum",0,0,0) );
+  TGeoMedium   *medVac = new TGeoMedium  ("Vacuum",1, new TGeoMaterial("Vacuum") );
   TGeoCone     *econe  = new TGeoCone(dz,rmin1,rmax1,rmin2,rmax2);
   mEEmc                = new TGeoVolume(topName,econe,medVac);
   mEEmc->SetLineColor(kWhite);
@@ -330,10 +331,13 @@ char *
 EEmcTTDisplay::volumeName(const EEmcTower& tower)
 {  
   return volumeName(tower.Sec(),tower.SubSec(),tower.Eta()); 
-}; 
+}
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.12  2007/07/12 19:27:22  fisyak
+// Add includes for TMath for ROOT 5.16
+//
 // Revision 1.11  2005/02/05 00:53:01  perev
 // Bacward compatibility to redhead7
 //

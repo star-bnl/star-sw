@@ -9,7 +9,7 @@
 #include <TStyle.h> // for gPad
 #include <TROOT.h> // for gROOT
 #include <TSystem.h>
-
+#include "TMath.h"
 #ifdef IN_PANITKIN 
   #include <TMapFile.h>
   #include <Infrastructure/GenericFile.h>
@@ -854,7 +854,7 @@ void eeJpQaMinMax(TH1 *hh) {
     if(yMin<=0) yMin=1;
     if(yMax<=0) yMax=1;    
     r=yMin/yMax;
-    er=r*sqrt(1/yMax + 1/yMin);
+    er=r*TMath::Sqrt(1/yMax + 1/yMin);
     printf("JP min/max=%.2f +/- %.2f  (min=%.0f max=%.0f) \"%s\"\n",r,er,yMin, yMax,hh->GetTitle());
     printf("#JP %.2f %.2f %.0f %.0f :%s\n",r,er,yMin, yMax,hh->GetTitle());
 }

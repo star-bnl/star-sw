@@ -3,7 +3,7 @@
 #include <TH1.h>
 
 #include "SpyJPfreq.h"
-
+#include "TMath.h"
 //------------------------------
 //------------------------------
 SpyJPfreq:: SpyJPfreq(){ //none
@@ -26,7 +26,7 @@ SpyJPfreq::sense(FILE *fd) {
   if(yMax<=0) yMax=1;
   
   r=yMin/yMax;
-  er=r*sqrt(1/yMax + 1/yMin);
+  er=r*TMath::Sqrt(1/yMax + 1/yMin);
   
   bool isBad=( r+er <maxR ) && ( yMax+yMin >150);
   

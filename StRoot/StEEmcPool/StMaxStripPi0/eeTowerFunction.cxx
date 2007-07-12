@@ -1,6 +1,6 @@
 #include "eeTowerFunction.h"
 #include "TSpline.h"
- 
+#include "TMath.h" 
 Double_t eeTowerFunction( Double_t *x, Double_t *p ) {
 
   /// note-- need to make cyclical in phi
@@ -87,4 +87,4 @@ Double_t eeTower2Function( Double_t *x, Double_t *p ) {
 
   return eeTowerFunction(x,p1) + eeTowerFunction(x,p2);
 
-};
+}

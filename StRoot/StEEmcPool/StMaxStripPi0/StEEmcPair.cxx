@@ -1,4 +1,5 @@
 #include "StEEmcPair.h"
+#include "TMath.h"
 ClassImp(StEEmcPair);
 
 // ----------------------------------------------------------------------------

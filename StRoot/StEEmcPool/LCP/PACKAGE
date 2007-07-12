@@ -1,0 +1,5 @@
+# $Id $
+# package LCP
+# author: 
+Library:libStEEmcPoolLCP.so:LIBS +=   -lgen_Tables  -lsim_Tables  -lStChain  -l_StEvent  -l_StMuDSTMaker
+#Library:libStEEmcPoolLCP.so:LIBS +=   -lgen_Tables  -lsim_Tables  -lStChain  -lStEvent  -lStMuDSTMaker
