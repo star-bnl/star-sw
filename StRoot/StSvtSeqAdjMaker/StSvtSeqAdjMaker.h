@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.25 2005/07/23 03:37:34 perev Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.26 2007/07/12 20:10:35 fisyak Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.26  2007/07/12 20:10:35  fisyak
+// Add forward declaration for ROOT 5.16
+//
 // Revision 1.25  2005/07/23 03:37:34  perev
 // IdTruth + Cleanup
 //
@@ -95,7 +98,7 @@
 
 class TH1D;
 class TH2F;
- 
+class TFile; 
 class StSequence;
 class StSvtData;
 class StSvtHybridData;
@@ -141,7 +144,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.25 2005/07/23 03:37:34 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.26 2007/07/12 20:10:35 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     
