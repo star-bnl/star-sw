@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.32 2007/01/04 02:51:45 jeromel Exp $
+ * $Id: FCFMaker.cxx,v 1.33 2007/07/12 20:31:42 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.33  2007/07/12 20:31:42  fisyak
+ * Use Drift velocity depending on sector
+ *
  * Revision 1.32  2007/01/04 02:51:45  jeromel
  * Lots of printf and gMessMgr transformed ino LOGger format
  *
@@ -564,10 +567,6 @@ Int_t StRTSClientFCFMaker::Make()
     mCTransform = new StTpcCoordinateTransform(gStTpcDb);
   }
 
-  mDriftVelocity = gStTpcDb->DriftVelocity();
-  // LOG_INFO << "The drift velocity used = " << mDriftVelocity << endm;
-
-
   // Get StEvent / tphit table
 
   mStEvent = NULL;
@@ -1056,7 +1055,7 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   double lx = lxFromPad(r+1,(((double)(cl_x))/64.0));
   double ly = lyFromRow(r+1);
   double lz = lzFromTB((((double)(cl_t))/64.0), sector, r+1, (cl_x+32)/64);
-  lz -= 3.0 * tsspar->tau * mDriftVelocity * 1.0e-6;   // correct for convolution lagtime
+  lz -= 3.0 * tsspar->tau * gStTpcDb->DriftVelocity(sector) * 1.0e-6;   // correct for convolution lagtime
 
 
   StTpcLocalSectorCoordinate local(lx,ly,lz,sector);

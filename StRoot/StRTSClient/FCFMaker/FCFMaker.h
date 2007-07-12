@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.13 2005/04/11 14:08:20 jml Exp $
+ * $Id: FCFMaker.h,v 1.14 2007/07/12 20:31:42 fisyak Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.14  2007/07/12 20:31:42  fisyak
+ * Use Drift velocity depending on sector
+ *
  * Revision 1.13  2005/04/11 14:08:20  jml
  * flags to switch of EAST &/or WEST TPC
  *
@@ -206,8 +209,6 @@ class StRTSClientFCFMaker:public StMaker
 
   int clustercount;
   int hasSim;
-
-  double mDriftVelocity;
 
   St_tcl_tphit *mT_tphit;
   StEvent *mStEvent;
