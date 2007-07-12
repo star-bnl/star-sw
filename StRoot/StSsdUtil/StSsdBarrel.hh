@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.3 2007/03/27 23:11:48 bouchet Exp $
+// $Id: StSsdBarrel.hh,v 1.4 2007/07/12 17:08:08 bouchet Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.4  2007/07/12 17:08:08  bouchet
+// add method to decode new ssdNoise Table
+//
 // Revision 1.3  2007/03/27 23:11:48  bouchet
 // Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
 //
@@ -49,6 +52,7 @@ class StSsdClusterControl;
 class StSsdDynamicControl;
 class StSsdHitCollection;
 class St_ssdGainCalibWafer;
+class St_ssdNoise;
 
 class StSsdBarrel
 {
@@ -67,6 +71,7 @@ class StSsdBarrel
   Int_t readNoiseFromTable(St_sdm_calib_db  *spa_noise, StSsdDynamicControl *dynamicControl);
   Int_t readNoiseFromTable(St_ssdStripCalib *strip_noise, StSsdDynamicControl *dynamicControl);
   Int_t readNoiseFromTable(St_ssdStripCalib *noise); //
+  Int_t readNoiseFromTable(St_ssdNoise *strip_noise, StSsdDynamicControl *dynamicControl); 
   Int_t readConditionDbFromTable(St_sdm_condition_db *condition);//
   Int_t writeNoiseToFile(St_spa_strip *spa_strip);
   Int_t writeNoiseToFile(St_ssdPedStrip *pedStrip, char myLabel[]);
@@ -77,6 +82,7 @@ class StSsdBarrel
   Int_t writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster);    
   Int_t writeStripToTable(St_spa_strip * spa_strip); //
   Int_t writeStripToTable(St_spa_strip * spa_strip,St_sls_strip *sls_strip); //
+  Int_t writeNewNoiseToFile3(St_ssdPedStrip *pedStrip, char myLabel[]);
   void  doSideClusterisation(Int_t *numberOfCluster);   
   Int_t doClusterMatching(Float_t CalibArray[320]);
   void  doDaqSimulation(slsCtrl_st* ctrl); //
