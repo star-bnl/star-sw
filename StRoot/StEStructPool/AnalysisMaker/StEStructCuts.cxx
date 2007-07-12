@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.5 2006/04/04 22:05:03 porter Exp $
+ * $Id: StEStructCuts.cxx,v 1.6 2007/07/12 19:31:37 fisyak Exp $
  *
  * Author: Jeff Porter 
  *
@@ -12,7 +12,7 @@
  *
  ***********************************************************************/
 #include "StEStructCuts.h"
-#include <sstream>
+#include "StString.h"
 #include "Stiostream.h"
 #include "Stsstream.h"
 #include "TFile.h"
@@ -305,10 +305,10 @@ int StEStructCuts::createCutHists(const char* name, float* range, int nvals){
   float Max=range[1]+delta;
   float Min=range[0]-delta;
 
-  ostringstream hc; hc<<name<<"Cut";
+  StString hc; hc<<name<<"Cut";
   mvarHistsCut[mnumVars]=new TH1F((hc.str()).c_str(),(hc.str()).c_str(),200,Min,Max);
 
-  ostringstream hnc; hnc<<name<<"NoCut";
+  StString hnc; hnc<<name<<"NoCut";
   mvarHistsNoCut[mnumVars]=new TH1F((hnc.str()).c_str(),(hnc.str()).c_str(),200,Min,Max);
 
   int retVal=mnumVars;
@@ -409,6 +409,9 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.6  2007/07/12 19:31:37  fisyak
+ * use StString instead of sstream
+ *
  * Revision 1.5  2006/04/04 22:05:03  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
