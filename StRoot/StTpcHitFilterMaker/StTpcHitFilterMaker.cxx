@@ -1,5 +1,8 @@
-// $Id: StTpcHitFilterMaker.cxx,v 1.5 2007/04/28 17:57:21 perev Exp $
+// $Id: StTpcHitFilterMaker.cxx,v 1.6 2007/07/12 20:21:43 fisyak Exp $
 // $Log: StTpcHitFilterMaker.cxx,v $
+// Revision 1.6  2007/07/12 20:21:43  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.5  2007/04/28 17:57:21  perev
 // Redundant StChain.h removed
 //
@@ -26,6 +29,7 @@
 #include "StTpcHitFilterMaker.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
+#include "TString.h"
 #include "tables/St_tcl_tphit_Table.h"
 #include "tpc/St_tfs_filt_Module.h"
 
@@ -68,7 +72,7 @@ Int_t StTpcHitFilterMaker::Make(){
   St_DataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime("tphit");
   if (! tphit) return kStWarn;
-  printf(" Input hit table size is %d\n\n",(int)tphit->GetNRows());
+  gMessMgr->QAInfo() << Form(" Input hit table size is %d\n\n",(int)tphit->GetNRows()) << endm;
 
   float xhit;
   float yhit;
@@ -121,7 +125,7 @@ Int_t StTpcHitFilterMaker::Make(){
 	 gMessMgr->Info() << " Problem running tfs_filt..." << endm;
       }
     }
-  printf(" Output hit table size is %d\n\n",(int)tphit->GetNRows());
+    gMessMgr->QAInfo() << Form(" Output hit table size is %d\n\n",(int)tphit->GetNRows()) << endm;
 
 
   return kStOK;

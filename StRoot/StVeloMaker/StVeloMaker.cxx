@@ -13,9 +13,13 @@
 #include "TH1.h"
 #include "TH1K.h"
 #include "TH2.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "TTableSorter.h"
 #include "TCanvas.h"
-#include "TCL.h"
 #include "TMath.h"
 #include "TRandom.h"
 #include "StDstPointChair.h"

@@ -1,5 +1,9 @@
 #include "St_dst_trackC.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 
 ClassImp(St_dst_trackC);
 

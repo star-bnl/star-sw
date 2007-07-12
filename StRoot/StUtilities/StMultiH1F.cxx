@@ -15,7 +15,7 @@
 #include "TLegend.h"
 #include "TPad.h"
 #include "TDirectory.h"
-
+#include "TMath.h"
 ClassImp(StMultiH1F)
 
 StMultiH1F::StMultiH1F() : fMOffset(0.) {}
@@ -62,7 +62,7 @@ void StMultiH1F::Draw(Option_t *option) {
   Int_t minbin = -1;
   Float_t offset = fMOffset;
   if (fMOffset && gPad->GetLogy()) {
-    Float_t max_offset = ::pow(
+    Float_t max_offset = TMath::Power(
       1.0e10*GetNonZeroMinimum()/GetNonZeroMaximum(),
       1.0/(ybins-1.0));
     if (offset > max_offset) offset = max_offset;
@@ -86,7 +86,7 @@ void StMultiH1F::Draw(Option_t *option) {
     if (fMOffset && ybin) {
       temp[ybin]->SetLineColor(slice);
       if (gPad->GetLogy()) {
-        temp[ybin]->Scale(::pow(offset,ybin));
+        temp[ybin]->Scale(TMath::Power(offset,ybin));
       } else {
         for (Int_t xbin=0; xbin<GetNbinsX(); xbin++)
           temp[ybin]->AddBinContent(xbin,offset*ybin);
@@ -205,8 +205,11 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
   return maximum;
 }
 
-// $Id: StMultiH1F.cxx,v 1.11 2007/04/24 17:45:32 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.12 2007/07/12 20:26:03 fisyak Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.12  2007/07/12 20:26:03  fisyak
+// Add includes for ROOT 5.16
+//
 // Revision 1.11  2007/04/24 17:45:32  genevb
 // Patched for problems with limited axis ranges
 //
