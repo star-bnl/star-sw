@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.154 2007/04/13 17:54:58 potekhin Exp $
+* $Id: geometry.g,v 1.155 2007/07/12 20:16:47 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.155  2007/07/12 20:16:47  potekhin
+* Added the following geometry tags:
+* a) Y2008   -- first cut, will be improved
+* b) UPGR14  -- UPGR13 sans IST
+* c) DEV2007 -- sandbox for what-if studies, non-production grade
+*
 * Revision 1.154  2007/04/13 17:54:58  potekhin
 * Based on a comment by Akio, remove the PHMD (photon
 * multiplicity detector) from the Y2006 configuration, to
@@ -2449,6 +2455,77 @@ If LL>1
                      CaveConfig = 4;
                 }
 ****************************************************************************************
+  on Y2008    { Year 2008 baseline: no SVT, material stripped from cones
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=5 " call btofgeo5 ";
+* NEW CONFIG!
+                     BtofConfig=10;
+
+* Full barrel in 2007
+                  "calb" 
+                     ems=on ;
+* important:
+                     CalbConfig = 2
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 3 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=7;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 9; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "Muon Trigger System"
+                     mutd = on;
+                     MutdConfig = 1;
+                  "We need an even bigger Cave"
+                     CaveConfig = 4;
+                }
+****************************************************************************************
   on DUMM01   { R and D geometry: TPC+DUMM
 
                      svtt=off; "no SVT  at all in this configuration"
@@ -3219,6 +3296,57 @@ If LL>1
                    itsp=off; "prototype of the Inner Tracker SuPport structure"
                 }
 ****************************************************************************************
+  on UPGR14   { TUP sans IST: HFT+TPC+SSD-SVT
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Multiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 65;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=5;   " newest version, thicker active Si"
+
+                   istb=off;       "no IST barrel"
+                   IstbConfig=0;   "ditto"
+
+                   fstd=off;  "no pixel based forward tracker in this tag"
+                   FstdConfig=0;
+
+* Forward STAR tracker disk
+                   fgtd=on;  "GEM forward tracker"
+                   FgtdConfig=2;
+* On Gerrit's request, we disable the cone:
+                   itsp=off; "prototype of the Inner Tracker SuPport structure"
+                }
+****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -3285,6 +3413,78 @@ If LL>1
 
                   "New version of the TPC backplane "
                      TpceConfig = 2;
+                }
+
+****************************************************************************************
+  on DEV2007    { THIS TAG IS RESERVED FOR THE 2007 DEVELOPMENT ONLY
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=5 " call btofgeo5 ";
+* NEW CONFIG!
+                     BtofConfig=10;
+
+* Full barrel in 2007
+                  "calb" 
+                     ems=on ;
+* important:
+                     CalbConfig = 2
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 3 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=7;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "Muon Trigger System"
+                     mutd = on;
+                     MutdConfig = 1;
+                  "We need an even bigger Cave"
+                     CaveConfig = 4;
                 }
 
 ****************************************************************************************
@@ -3465,6 +3665,7 @@ If LL>1
     if(SvttConfig==5) call svttgeo5
     if(SvttConfig==6) call svttgeo6
     if(SvttConfig==7) call svttgeo7
+    if(SvttConfig==9) call svttgeo9
 
   endif
 
