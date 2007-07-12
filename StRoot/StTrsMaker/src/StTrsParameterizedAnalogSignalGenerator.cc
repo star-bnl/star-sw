@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.35 2005/12/12 21:00:12 perev Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.36 2007/07/12 20:25:05 fisyak Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.36  2007/07/12 20:25:05  fisyak
+ * Use StarLogger, use time of flight, fix cluster shape
+ *
  * Revision 1.35  2005/12/12 21:00:12  perev
  * 3 random generators ==> 1
  *
@@ -260,7 +263,7 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
    landauConstant=0.2703;
    landauMean=2.256; 
    landauSigma=1.197;
-   expConstant=1.56538;
+   expConstant=1.56538/10.;
    expSlope=-0.589033;
    landauCut=3.6;
 
@@ -408,8 +411,10 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
     //
     // This should probably be made a data member at some point!
 //     StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
+#if 0
     PR(wireHistogram->minWire());
     PR(wireHistogram->maxWire());
+#endif
     if(wireHistogram->minWire()<0) {
 	cerr << "Wire Plane is empty" << endl;
 	return;
