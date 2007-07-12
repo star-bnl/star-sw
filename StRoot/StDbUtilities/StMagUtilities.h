@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.36 2006/12/16 23:46:25 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.37 2007/07/12 19:20:42 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.37  2007/07/12 19:20:42  fisyak
+ * Account that StDetectorDbSpaceChargeR2 is not inherit from StDetectorDbSpaceCharge anymore
+ *
  * Revision 1.36  2006/12/16 23:46:25  jhthomas
  * Add ManualShortedRing() for Gene, and protect against B=0 ... set to a minimum of 0.25 gauss instead
  *
@@ -151,10 +154,10 @@ enum   DistortSelect
 
 class StTpcDb ;
 class TDataSet ;
-class StDetectorDbSpaceCharge ;
-class StDetectorDbTpcVoltages ;
-class StDetectorDbTpcOmegaTau ;
-class StDetectorDbGridLeak    ;
+#include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
+#include "StDetectorDbMaker/StDetectorDbTpcVoltages.h"
+#include "StDetectorDbMaker/StDetectorDbTpcOmegaTau.h"
+#include "StDetectorDbMaker/StDetectorDbGridLeak.h"
 
 //class TMatrix ;
 
@@ -165,11 +168,11 @@ class StMagUtilities {
   
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
-  StDetectorDbSpaceCharge* fSpaceCharge   ;
-  StDetectorDbSpaceCharge* fSpaceChargeR2 ;  
-  StDetectorDbTpcVoltages* fTpcVolts      ;
-  StDetectorDbTpcOmegaTau* fOmegaTau      ;
-  StDetectorDbGridLeak*    fGridLeak      ;
+  StDetectorDbSpaceCharge*   fSpaceCharge   ;
+  StDetectorDbSpaceChargeR2* fSpaceChargeR2 ;  
+  StDetectorDbTpcVoltages*   fTpcVolts      ;
+  StDetectorDbTpcOmegaTau*   fOmegaTau      ;
+  StDetectorDbGridLeak*      fGridLeak      ;
 
   virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
   virtual void    GetMagFactor ()     ;

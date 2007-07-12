@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.70 2007/03/21 16:36:09 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.71 2007/07/12 19:20:41 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.71  2007/07/12 19:20:41  fisyak
+ * Account that StDetectorDbSpaceChargeR2 is not inherit from StDetectorDbSpaceCharge anymore
+ *
  * Revision 1.70  2007/03/21 16:36:09  fisyak
  * zero field mean 1G
  *
@@ -299,12 +302,8 @@ To do:  <br>
 #include "TH2.h"
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_MagFactor_Table.h"
-#include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
-#include "StDetectorDbMaker/StDetectorDbMagnet.h"
-#include "StDetectorDbMaker/StDetectorDbTpcVoltages.h"
 #include "tables/St_tpcFieldCageShort_Table.h"
-#include "StDetectorDbMaker/StDetectorDbTpcOmegaTau.h"
-#include "StDetectorDbMaker/StDetectorDbGridLeak.h"
+  //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
@@ -3052,7 +3051,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    // Extra index is to accomodate the vertex in the fit for primaries
 
    // Temporarily overide settings for space charge data (only)
-   StDetectorDbSpaceCharge* tempfSpaceChargeR2 = fSpaceChargeR2 ;
+   StDetectorDbSpaceChargeR2* tempfSpaceChargeR2 = fSpaceChargeR2 ;
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
    ManualSpaceChargeR2(sc); // Set a custom value of the spacecharge parameter
    
@@ -3263,7 +3262,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Double_t U[ROWS+1], V[ROWS+1], eU[ROWS+1], eV[ROWS+1] ;  
 
    // Temporarily overide settings for space charge data (only)
-   StDetectorDbSpaceCharge* tempfSpaceChargeR2 = fSpaceChargeR2 ;
+   StDetectorDbSpaceChargeR2* tempfSpaceChargeR2 = fSpaceChargeR2 ;
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
    ManualSpaceChargeR2(0.01);// Set "medium to large" value of the spacecharge parameter for tests, not critical.
      
@@ -3478,7 +3477,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Double_t Xprime[BITS+1], Yprime[BITS+1], Zprime[BITS+1], dX[BITS+1], dY[BITS+1] ;  
 
    // Temporarily overide settings for space charge data (only)
-   StDetectorDbSpaceCharge* tempfSpaceChargeR2 = fSpaceChargeR2 ;
+   StDetectorDbSpaceChargeR2* tempfSpaceChargeR2 = fSpaceChargeR2 ;
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
    ManualSpaceChargeR2(0.01);    // Set "medium to large" value of the spacecharge parameter for tests, not critical.
      
