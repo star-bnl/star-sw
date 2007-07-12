@@ -97,8 +97,8 @@ void WritesvtRDOstripped(svtRDOstripped_st *rows, Int_t date, Int_t time) {
 //________________________________________________________________________________
 void MakesvtRDOstripped(Char_t *FileName="./svtRDOs.txt") {
   /* file svtRDOs.txt is created by
-echo 'select beginTime,flavor,deactive,barNum,ladNum,rdo,northTemp,southTemp,hvBoardTemp,hvVolt,hvCurr,lvFault from Conditions_svt.svtRDOs where deactive=0 and beginTime > "2007-01-01"' |\
-mysql Conditions_svt -h onldb.starp.bnl.gov -P 3502 > svtRDOs.txt
+ mysql Conditions_svt -h onldb.starp.bnl.gov -P 3502 \
+ -e 'select beginTime,flavor,deactive,barNum,ladNum,rdo,northTemp,southTemp,hvBoardTemp,hvVolt,hvCurr,lvFault from Conditions_svt.svtRDOs where deactive=0 and beginTime > "2007-01-01"' > svtRDOs.txt
   */  
   ///afs/rhic.bnl.gov/star/users/fisyak/.dev/DB/svtRDOs.txtdb01"
   Int_t Year = 2007;
