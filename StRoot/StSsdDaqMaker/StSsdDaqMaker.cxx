@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.17 2007/04/28 17:56:57 perev Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.18 2007/07/12 20:00:51 fisyak Exp $
 //
 // $log$
 //
@@ -146,13 +146,7 @@ Int_t StSsdDaqMaker::InitRun(int runumber)
   LOG_INFO <<"InitRun(int runumber) - Read now Databases"<<endm;
   Int_t run = (runumber/1000000)-1;
   
-  TDataSet *DbConnector = GetDataBase("Geometry/ssd");
-  if (!DbConnector){
-    LOG_ERROR << "InitRun(int runumber) - ERROR - DbConnector==0" << endm;
-    return 0;
-  }
-  
-  St_ssdConfiguration *configuration = (St_ssdConfiguration*)DbConnector->Find("ssdConfiguration");
+  St_ssdConfiguration *configuration = (St_ssdConfiguration*) GetDataBase("Geometry/ssd/ssdConfiguration");
   if (!configuration){
     LOG_ERROR << "InitRun("<<runumber<<") - ERROR - ssdConfiguration==0"<<endm;
     return 0;

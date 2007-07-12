@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.cxx,v 1.11 2007/03/21 17:17:16 fisyak Exp $
+// $Id: StSsdDbMaker.cxx,v 1.12 2007/07/12 20:01:15 fisyak Exp $
 //
 // $Log: StSsdDbMaker.cxx,v $
+// Revision 1.12  2007/07/12 20:01:15  fisyak
+// Don't read whole database but only the table requested
+//
 // Revision 1.11  2007/03/21 17:17:16  fisyak
 // use TGeoHMatrix for coordinate transformation, eliminate ssdWafersPostion
 //
@@ -60,32 +63,18 @@ Int_t StSsdDbMaker::Init()
 }
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::InitRun(Int_t runNumber) {
-  TDataSet *ssdparams = GetInputDB("Geometry/ssd");
-  if (! ssdparams) {
-    gMessMgr->Error() << "No  access to Geometry/ssd parameters" << endm;
-    return kStFatal;
-  }
-  TDataSetIter    local(ssdparams);
-  m_ctrl          = ((St_slsCtrl           *)local("slsCtrl"))->GetTable();
-  m_dimensions    = (St_ssdDimensions     *)local("ssdDimensions"); 
-#if 0
-  if( m_Mode == 1) {// simulation
-    m_positions        = (St_ssdWafersPosition *)local("ssdWafersPosition");
-  } else {
-    m_positions = CalculateWafersPosition();  
-  }
-#else
-  m_positions = CalculateWafersPosition();  
-#endif
+  m_ctrl          = ((St_slsCtrl           *) GetInputDB("Geometry/ssd/slsCtrl"))->GetTable();
   if (!m_ctrl) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
     return kStFatal;
   }   
+  m_dimensions    =  (St_ssdDimensions     *) GetInputDB("Geometry/ssd/ssdDimensions"); 
+  m_positions = CalculateWafersPosition();  
   if ((!m_dimensions)||(!m_positions)) {
     gMessMgr->Error() << "No  access to geometry parameters" << endm;
     return kStFatal;
   }  
-  St_ssdConfiguration* configTable = (St_ssdConfiguration*) local("ssdConfiguration");
+  St_ssdConfiguration* configTable = (St_ssdConfiguration*) GetInputDB("Geometry/ssd/ssdConfiguration");
   if (!configTable) {
     gMessMgr->Error() << "InitRun : No access to ssdConfiguration database" << endm;
     return kStFatal;
