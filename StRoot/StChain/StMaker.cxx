@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.196 2007/04/26 20:36:49 perev Exp $
+// $Id: StMaker.cxx,v 1.197 2007/07/12 19:17:20 fisyak Exp $
 //
 //
 /*!
@@ -48,6 +48,7 @@
 #include "StMkDeb.h"
 #include "StMessMgr.h"
 
+StMaker     *StMaker::fgTopChain    = 0;
 StMaker     *StMaker::fgStChain     = 0;
 StMaker     *StMaker::fgFailedMaker = 0;
 StTestMaker *StMaker::fgTestMaker   = 0;
@@ -209,7 +210,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),
    m_Attr=0;
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
-     fgStChain = this;
+     fgTopChain = fgStChain = this;
      AddData(0,".make");
    } else         {	// add this maker to chain  
      fgStChain->AddData(this,".make");
@@ -239,6 +240,7 @@ void StMaker::AddMaker(StMaker *mk)
 //_____________________________________________________________________________
 StMaker::~StMaker()
 {
+  if (fgTopChain == this) fgTopChain = 0;
   if (fgStChain == this) fgStChain = 0;
   delete fMemStatMake;	fMemStatMake  = 0;
   delete fMemStatClear;	fMemStatClear = 0;
@@ -596,26 +598,27 @@ FOUND: if (uppMk || dowMk) 	return dataset;
 TDataSet *StMaker::GetDataBase(const char* logInput,const TDatime *td)
 {
   TURN_LOGGER(this);
-  TDataSet *ds;
-  StMaker  *mk;
+  TDataSet *ds = 0;
+  StMaker  *mk = GetMakerInheritsFrom("St_db_Maker");
+  if (mk) ds = mk->GetDataBase(logInput,td);
+  return ds;
+}
+//______________________________________________________________________________
+StMaker *StMaker::GetMakerInheritsFrom (const char *mktype)
+{
+  TURN_LOGGER(this);
+  StMaker  *mk = 0;
   StMakerIter mkiter(this);
   while ((mk = mkiter.NextMaker())) {//loop over makers
-    if (!mk->InheritsFrom("St_db_Maker")) 	continue;
-    ds = mk->GetDataBase(logInput,td);
-    if (ds) 					return ds;
+    if (mk->InheritsFrom(mktype))   break;
   }
-  return 0;
+  return mk;
 }
 //______________________________________________________________________________
 void StMaker::SetFlavor(const char *flav,const char *tabname)
 {
-  StMaker *mk;
-  StMakerIter mkiter(this);
-  while ((mk = mkiter.NextMaker())) {//loop over makers
-    if (!mk->InheritsFrom("St_db_Maker")) 	continue;
-    mk->SetFlavor(flav,tabname);
-    return;
-  }
+  StMaker *mk = GetMakerInheritsFrom("St_db_Maker");
+  if (mk) mk->SetFlavor(flav,tabname);
 }
 //______________________________________________________________________________
 Int_t   StMaker::GetValidity(const TTable *tb, TDatime *val) const
@@ -1528,11 +1531,14 @@ int StMaker::SetAttr(const char *key, const char *val, const char *to)
      else {
        if (!m_Attr) m_Attr = new TAttr(GetName());
        m_Attr->SetAttr(tk.Data(), tv.Data());
-       Info("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data());}
+       if (Debug() > 1) {
+	 LOG_DEBUG << Form("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data()) << endm;
+       }
+     }
    }
    if (!(act&4)) return count;
-
-//   Loop on all makers
+     
+   //   Loop on all makers
    TList *tl = GetMakeList();
    if (!tl) return count;
    
@@ -1796,6 +1802,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.197  2007/07/12 19:17:20  fisyak
+// Add fTopChain - a pointer to TopChain (for embedding), add method GetMakerInheritsFrom
+//
 // Revision 1.196  2007/04/26 20:36:49  perev
 // Some ChainOpt fixes
 //
