@@ -53,7 +53,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       break;
     }
     //    for (unsigned int row=0; row<45; row++)
-    Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(); // cm/mkmsec
+    Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
     for (unsigned int row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
