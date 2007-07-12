@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.39 2007/04/28 17:57:06 perev Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.40 2007/07/12 20:06:50 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.40  2007/07/12 20:06:50  fisyak
+ * Move initialization to IntRun from Init, empty GetSvtDriftCurve, clean up
+ *
  * Revision 1.39  2007/04/28 17:57:06  perev
  * Redundant StChain.h removed
  *
@@ -378,21 +381,6 @@ Int_t StSvtHitMaker::GetSvtDriftVelocity()
 Int_t StSvtHitMaker::GetSvtDriftCurve()
 {
   m_driftCurve = 0;
-  St_DataSet* dataSet;
-  dataSet = GetDataSet("StSvtDriftCurve");
-  // gMessMgr->Info() << "dataset: " << dataSet << endm;
-  if(!dataSet) {
-    gMessMgr->Error("Failure to get SVT drift curve  - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
-    
-    return kStOK;
-  }
-
-  m_driftCurve = (StSvtHybridCollection*)dataSet->GetObject();
-  
-  //gMessMgr->Info() << "GETSVTDRIFTCURVE: m_driftCurve is: " << m_driftCurve << endm;
-
-  if(!m_driftCurve) gMessMgr->Error("NULL pointer  - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
-
   return kStOK;
 
 }
@@ -462,13 +450,6 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   //SvtGeomTrans.setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
   //   if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_t0);
   St_svtCorrectionC *driftVelocityCor = 0;
-  TDataSet *svt_calib  = StMaker::GetChain()->GetDataBase("Calibrations/svt");
-#if 0
-  if (svt_calib) {
-    St_svtCorrection *corr = ( St_svtCorrection*) svt_calib->Find("svtDriftCorrection");
-    if (corr) driftVelocityCor = new St_svtCorrectionC(corr);
-  }
-#endif
   if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_driftCurve, m_t0,driftVelocityCor );
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
@@ -477,12 +458,6 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   StEvent *pEvent = (StEvent*) GetInputDS("StEvent");
 
   //here is applied laser correction for temperature variations;
-#if 0
-  dst_mon_soft_svt_st* drift_vel =  svt_drift_mon->GetTable();
-  drift_vel->res_drf_svt = LaserTemperatureCorrection();
-  svt_drift_mon->SetNRows(1);
-  SvtGeomTrans.setVelocityScale(drift_vel->res_drf_svt);
-#endif
   St_svtHybridDriftVelocityC *driftVel = St_svtHybridDriftVelocityC::instance();
   assert(driftVel);
   Int_t index2 = -1;
