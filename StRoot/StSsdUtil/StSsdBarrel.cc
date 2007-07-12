@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.3 2007/03/27 23:11:48 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.4 2007/07/12 17:08:08 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.4  2007/07/12 17:08:08  bouchet
+// add method to decode new ssdNoise Table
+//
 // Revision 1.3  2007/03/27 23:11:48  bouchet
 // Add a method to use the gain calibration for the Charge Matching between pulse of p and n sides
 //
@@ -95,7 +98,7 @@
 #include "StMessMgr.h"
 
 #include "tables/St_ssdGainCalibWafer_Table.h"
-
+#include "tables/St_ssdNoise_Table.h"
 StSsdBarrel* StSsdBarrel::fSsdBarrel = 0;
 //________________________________________________________________________________
 /*!
@@ -223,8 +226,48 @@ Int_t  StSsdBarrel::writeNoiseToFile(St_spa_strip *spa_strip){
   f1.Close();
   return spa_strip->GetNRows();
 }
+//-----------------------------------------------------------------------------------------
+Int_t  StSsdBarrel::writeNewNoiseToFile3(St_ssdPedStrip  *spa_ped_strip, char myLabel[]){
+  char *name =new char[100] ;
+  ssdPedStrip_st *strip = spa_ped_strip->GetTable();
+  //print("size is %ld\n",spa_ped_strip->GetNRows());
+  St_ssdNoise *StripCal = new St_ssdNoise("ssdNoise",spa_ped_strip->GetNRows());
+  ssdNoise_st  temp[320];
+  memset(temp, 0, 320*sizeof(ssdNoise_st));
+  Int_t idWaf  = 0;
+  Int_t iWaf   = 0;
+  Int_t iLad   = 0;
+  Int_t nStrip = 0;
+  Int_t iSide  = 0;
+  Int_t wafer  = 0;
+  Int_t N = spa_ped_strip->GetNRows();
+  for (Int_t i=0; i< N;i++) {
+      if (strip[i].id_strip>0 && strip[i].id_strip<=76818620) {
+	//cout << "id = "<<strip[i].id_strip << endl;
+	nStrip  = (int)(strip[i].id_strip/100000.);
+	idWaf   = strip[i].id_strip-10000*((int)(strip[i].id_strip/10000.));
+	iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+	iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+	iSide   = (strip[i].id_strip - nStrip*100000 - idWaf)/10000;
+	wafer = iLad*mNWaferPerLadder +iWaf;
+	//if((idWaf==8009)&&(iSide==0)) cout << "ladder= " << iLad <<" wafer =" << iWaf << " Strip= " << nStrip <<" id =" << strip[i].id_strip  << " noise = " << strip[i].noise << endl; 
+	if (iSide == 0) temp[wafer].rmsp[nStrip-1] = (unsigned char)strip[i].noise;
+	if (iSide == 1) temp[wafer].rmsn[nStrip-1] = (unsigned char)strip[i].noise;
+      }
+  }
+  for(Int_t i=0;i<320;i++) {
+    temp[i].id = i;
+    StripCal->AddAt(&temp[i]);
+  }
+  //printf("Number of entries seen p=%d and n=%d \n",NumberofStripsp,NumberofStripsn);
+  sprintf(name,"%s%s%s","ssdNoise.",myLabel,".root");
+  TFile f1(name,"RECREATE","SSD ped and noise file",9);
+  StripCal->Write();
+  f1.Close();
+  return spa_ped_strip->GetNRows();
+}
 //________________________________________________________________________________
-/*!
+/*
  Method to read pedestal data and save them into a root file
 */
 Int_t  StSsdBarrel::writeNoiseToFile(St_ssdPedStrip *spa_ped_strip, char myLabel[]){ 
@@ -295,6 +338,38 @@ Int_t  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynam
 	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
 	//if(idWaf==7101)printf("id=%d stripId=%d  side=%d  waferId=%d  pedestal=%d  noise=%d\n",noise[i].id,nStrip,iSide,idWaf,noise[i].pedestals,noise[i].rms);
 	mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
+	NumberOfNoise++;
+      }
+    }
+  return NumberOfNoise;
+}
+
+//________________________________________________________________________________
+/*!
+first method reading from the ssdNoise table
+ */
+Int_t  StSsdBarrel::readNoiseFromTable(St_ssdNoise *strip_noise, StSsdDynamicControl *dynamicControl){
+  ssdNoise_st *noise = strip_noise->GetTable();
+  
+  Int_t NumberOfNoise = 0;
+  Int_t iWaf          = 0;
+  Int_t iLad          = 0;
+  Int_t nStrip        = 0;
+  Int_t iSide         = 0;
+  Int_t pedestal      = 150;//constant, not used later
+  printf("size of m_noise3 table = %d\n",(int)strip_noise->GetNRows());
+  for (Int_t i = 0 ; i < strip_noise->GetNRows(); i++)
+    {
+      iWaf      = noise[i].id-(noise[i].id/mNWaferPerLadder)*mNWaferPerLadder;
+      iLad      = noise[i].id/16;
+      for(nStrip=0;nStrip<mNStripPerSide;nStrip++){
+	iSide=0;
+	mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip+1, iSide, pedestal, noise[i].rmsp[nStrip], dynamicControl);
+	//printf("iSide=%d i=%d wafer=%d ladder=%d nStrip=%d\n",iSide,i,iWaf,iLad,nStrip);
+	NumberOfNoise++;
+	iSide=1;
+	mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip+1, iSide, pedestal, noise[i].rmsn[nStrip], dynamicControl);
+	//printf("iSide=%d i=%d wafer=%d ladder=%d nStrip=%d\n",iSide,i,iWaf,iLad,nStrip);
 	NumberOfNoise++;
       }
     }
