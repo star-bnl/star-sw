@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.25 2007/07/12 19:57:10 fisyak Exp $
+ * $Id: StRichTrack.cxx,v 2.26 2007/07/12 22:03:31 fisyak Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.26  2007/07/12 22:03:31  fisyak
+ *  Adjust for roto 5.12
+ *
  *  Revision 2.25  2007/07/12 19:57:10  fisyak
  *  Add includes for ROOT 5.16
  *
@@ -488,7 +491,7 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
     //
     StGlobalCoordinate    globalImpactPointAtAnodeWirePlane(-999,-999,-999);
     StRichLocalCoordinate localImpactPointAtAnodeWirePlane(-999,-999,-999);  
-#if 0    
+#if 1    
     globalImpactPointAtAnodeWirePlane.position().setX(mHelix.x(mPathLengthAtPadPlane));
     globalImpactPointAtAnodeWirePlane.position().setY(mHelix.y(mPathLengthAtPadPlane));
     globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));
