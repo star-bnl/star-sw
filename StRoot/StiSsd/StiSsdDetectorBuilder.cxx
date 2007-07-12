@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.27 2007/03/21 17:53:38 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.28 2007/07/12 20:39:13 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.28  2007/07/12 20:39:13  fisyak
+// Remove default errors for SSD
+//
 // Revision 1.27  2007/03/21 17:53:38  fisyak
 // make use for new StSsdBarrel
 //
@@ -63,7 +66,6 @@ StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active, const string & inputFi
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
     _trackingParameters.setName("ssdTrackingParameters");
     _hitCalculator.setName("ssdHitError");
-    _hitCalculator.set(0.002, 0., 0., 0.002, 0., 0.);
 }
 
 StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
