@@ -48,19 +48,23 @@ ClassImp(StGenericVertexMaker)
 //___________________________________________________________
 StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
 {
+  use_ITTF=kTRUE;
   usebeamline = kFALSE;
   useCTB = kFALSE;
   eval = kFALSE;
   nEvTotal=nEvGood=0;
   externalFindUse=kTRUE; ///Default means that no finding actually done
-  use_ITTF=kTRUE;
   m_Mode2=0;
+  mEvalNtuple = 0;
+  mEvent = 0;
+  primV = 0;
+  theFinder = 0;
 }
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
 {
 
-  if(theFinder) delete theFinder;
+  SafeDelete(theFinder);
 
 }
 
