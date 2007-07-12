@@ -5,6 +5,6 @@
 #pragma link off all functions;
  
 #pragma link C++ class  St_Bfc-;
-#pragma link C++ class  Bfc_st-;
+#pragma link C++ class  Bfc_st+;
 #endif
 
