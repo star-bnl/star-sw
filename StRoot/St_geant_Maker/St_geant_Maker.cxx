@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.118 2007/05/10 19:15:29 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.119 2007/07/12 20:34:02 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.119  2007/07/12 20:34:02  fisyak
+// use StarLogger
+//
 // Revision 1.118  2007/05/10 19:15:29  potekhin
 // Improved handling of the Pythia event header translation,
 // replaced a print statement with a logger call, plus
@@ -1095,7 +1098,7 @@ Int_t St_geant_Maker::Make()
   geant3->Gfnhit("RICH","RCSI", nhit2);
   geant3->Gfnhit("RICH","FREO", nhit3);
   geant3->Gfnhit("RICH","QUAR", nhit4);
-  //  cout << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endl;
+  //  gMessMgr->QAInfo()  << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endm;
   nhits=nhit1+nhit2+nhit3+nhit4;
   if (nhits>0) {
     St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
@@ -1560,12 +1563,12 @@ void St_geant_Maker::Mark(TVolume *topvol) {
       Int_t NWHI=z_iq[JD+7];
       Int_t NWDI=z_iq[JD+8];
       memcpy (Udet, &z_iq[JS+IDET], 4);
-      cout << "  Set " << Uset << " Detector " << Udet
-	   << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endl;
+      gMessMgr->QAInfo()  << "  Set " << Uset << " Detector " << Udet
+	   << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endm;
       Int_t JDU = z_lq[JD-3];
       if (JDU > 0) {
 	Int_t i1 = (int)z_q[JDU+3], i2 = (int)z_q[JDU+5];
-	cout << " Volume/Bits :" << i1 << "/" << i2 <<  endl;
+	gMessMgr->QAInfo()  << " Volume/Bits :" << i1 << "/" << i2 <<  endm;
 	for (Int_t i=i1;i<i2;i += 3) {
 	  Int_t j   = JDU+i;
 	  Int_t iv  = (int)z_q[j+1];
@@ -1573,17 +1576,17 @@ void St_geant_Maker::Mark(TVolume *topvol) {
 	  Int_t Nam = (int)z_iq[clink->jvolum+iv];
 	  Int_t Nb  = (int)z_q[j+3];
 	  memcpy (Uvol, &Nam, 4);
-	  cout << "\t" << Uvol << "\t" << Nmx << "\t" << Nb << endl;
+	  gMessMgr->QAInfo()  << "\t" << Uvol << "\t" << Nmx << "\t" << Nb << endm;
 	}
       }
       else {
 	if (NV > 0) {
-	  cout << " Volume/Bits ";
+	  gMessMgr->QAInfo()  << " Volume/Bits ";
 	  for (Int_t I=1; I<=NV; I++) {
 	    memcpy (Uvol, &z_iq[JD+2*I+9], 4);
-	    cout << "\t" << Uvol << "/\t" << z_iq[JD+2*I+10];
+	    gMessMgr->QAInfo()  << "\t" << Uvol << "/\t" << z_iq[JD+2*I+10];
 	  }
-	  cout << endl;
+	  gMessMgr->QAInfo()  << endm;
 	}
       }
     }
@@ -1591,18 +1594,18 @@ void St_geant_Maker::Mark(TVolume *topvol) {
 #if 0
   geant3->Gfinds();
   if (csets->iset && csets->idet) {
-    cout << "Set/Det \t" << csets->iset << "/" << csets->idet 
+    gMessMgr->QAInfo()  << "Set/Det \t" << csets->iset << "/" << csets->idet 
 	 << "\tidtype = \t" << csets->idtype
-	 << "\tnvname = \t" << csets->nvname << endl; 
+	 << "\tnvname = \t" << csets->nvname << endm; 
     Int_t nLev, lNam[15], lNum[15];
     Char_t Name[4];
     geant3->Gfpath(csets->iset,csets->idet,csets->numbv, nLev, lNam, lNum);
     Int_t four = 4;
     for (Int_t i=0; i< nLev; i++) {
       uhtoc(lNam[i],four,PASSCHARD(Name),four PASSCHARL(Name));
-      cout << "\t" << Name << "\t" << lNum[i];
+      gMessMgr->QAInfo()  << "\t" << Name << "\t" << lNum[i];
     }
-    cout << endl;
+    gMessMgr->QAInfo()  << endm;
   }
 #endif
 }
@@ -1805,7 +1808,7 @@ void St_geant_Maker::BookHist(){
 //_____________________________________________________________________________
 
 void St_geant_Maker::FillHist(){
-  //  cout << " St_geant_Maker::FillHist - Will now fill histograms! " << endl;
+  //  gMessMgr->QAInfo()  << " St_geant_Maker::FillHist - Will now fill histograms! " << endm;
   
   
   // get geant event vertex
@@ -1855,11 +1858,11 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
   Int_t      noMarked = 0;
   Int_t node = 0;
 
-  cout << "Total no. of volumes = "      << cnum->nvolum 
+  gMessMgr->QAInfo()  << "Total no. of volumes = "      << cnum->nvolum 
        << "\t no. of rot. matrices = "   << cnum->nrotm 
        << "\t no. of materials = "       << cnum->nmate 
        << "\t no. of tracking medias = " << cnum->ntmed
-       << endl;
+       << endm;
   Int_t   nmat;
   Int_t   isvol;  
   Int_t   ifield; 
@@ -1872,7 +1875,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
   Float_t epsil; 
   Float_t stmin; 
 
-  cout << "----------- Make List of Materials and Mixtures--------------" << endl;
+  gMessMgr->QAInfo()  << "----------- Make List of Materials and Mixtures--------------" << endm;
 
   TGeoMaterial *mat = 0;
   TGeoMixture  *mix = 0;
@@ -1933,7 +1936,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
 		     (Double_t) z_q[jtm+13], // EPSIL
 		     (Double_t) z_q[jtm+14]);// STMIN
     if (Debug()) 
-      cout << "medium: " << med->GetId() << "\t" << med->GetName() << "\t" << med->GetTitle()
+      gMessMgr->QAInfo()  << "medium: " << med->GetId() << "\t" << med->GetName() << "\t" << med->GetTitle()
 	   << "\tisvol  " << med->GetParam(0)
 	   << "\tifield " << med->GetParam(1)
 	   << "\tfieldm " << med->GetParam(2)
@@ -1942,7 +1945,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
 	   << "\tdeemax " << med->GetParam(5)
 	   << "\tepsil  " << med->GetParam(6)
 	   << "\tstmin  " << med->GetParam(7)
-	   << endl;
+	   << endm;
     TGeoMaterial  *mater = med->GetMaterial(); mater->Print("");
   }
   Int_t NLevel = 0;
@@ -1952,7 +1955,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
     TString Name(nick,4);
     TString Nick(name,4);
     if (npar < 3) {
-      cout << Name.Data() << "/" << Nick.Data() << " has npar = " << npar << endl;
+      gMessMgr->QAInfo()  << Name.Data() << "/" << Nick.Data() << " has npar = " << npar << endm;
     }
     ntot++;
     node = ntot;
@@ -1978,14 +1981,14 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
     Int_t    np      = (Int_t)  volu[4];
     Double_t dp[250];
     if (Debug())
-      cout<<"** nick: " <<Nick.Data() <<"    name: "<<Name.Data()<<endl;
+      gMessMgr->QAInfo() <<"** nick: " <<Nick.Data() <<"    name: "<<Name.Data()<<endm;
 
-    if (Debug()) cout<<"******** number of params " << npar <<endl;
+    if (Debug()) gMessMgr->QAInfo() <<"******** number of params " << npar <<endm;
     for (int i = 0; i < npar; i++) {
       dp[i] = params[i];
-      if (Debug()) cout<< "\tparams[" << i << "] =" << params[i];
+      if (Debug()) gMessMgr->QAInfo() << "\tparams[" << i << "] =" << params[i];
     }
-    if (Debug()) cout <<endl;
+    if (Debug()) gMessMgr->QAInfo()  <<endm;
     Float_t *att     = volu+6+np;
     Int_t    nin     = 0;
 
@@ -1993,7 +1996,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
     Int_t konly = (int) position[7];
     Bool_t kmany = konly != 1 && ntot > 0 && nin > 0;
     if (kmany) {
-      cout << "Many Volume" << endl;
+      gMessMgr->QAInfo()  << "Many Volume" << endm;
     }
 
     H = (GtHash*) VolumeH.GetPointer((void *)Name.Data(),1);
@@ -2123,16 +2126,16 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
 
   gGeoManager->CloseGeometry();
 
-  cout << " found " 
+  gMessMgr->QAInfo()  << " found " 
        << ntot     << " objects (" 
        << nshape   << " different) " 
        << noMarked << " are marked"
-       << endl;
+       << endm;
 
   m_Timer.Stop();
-  cout << "Conversion:  Real Time = " 
+  gMessMgr->QAInfo()  << "Conversion:  Real Time = " 
        << m_Timer.RealTime() << "  seconds Cpu Time = " 
-       << m_Timer.CpuTime() << " seconds" << endl;
+       << m_Timer.CpuTime() << " seconds" << endm;
   fTopGeoVolume = volume;
   return GetTopGeoVolume();
 }
@@ -2164,7 +2167,7 @@ void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
 	    if (index > begin) {
 	      TString line(C(begin,index-begin));
 	      line.ToLower();
-	      if (Debug()) cout << line << endl;
+	      if (Debug()) gMessMgr->QAInfo()  << line << endm;
 	      if (line.Contains("detp")) {
 		Int_t indx = line.Index("year");
 		if (indx) {
@@ -2225,9 +2228,9 @@ Char_t *acfromr(Float_t r) {// 'TYPE'
   Int_t k = (int) r;
   for (int i = 3; i >= 0; i--) {
     int j = 077 & k; k = k >> 6; charm[i] = S[j];
-    //    cout << "i\t" << i << "\tj\t" << j << "\tk\t" << k << "\t" << charm[i] << endl;
+    //    gMessMgr->QAInfo()  << "i\t" << i << "\tj\t" << j << "\tk\t" << k << "\t" << charm[i] << endm;
   }
-  //  cout << charm << endl;
+  //  gMessMgr->QAInfo()  << charm << endm;
   return charm;
 }
 #endif
@@ -2257,8 +2260,8 @@ Int_t St_geant_Maker::AgstHits() {
       Int_t NWDI=z_iq[JD+8];
       memcpy (Udet, &z_iq[JS+IDET], 4);
       if (Debug()) {
-	cout << "  Set " << Uset << " Detector " << Udet
-	     << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endl;
+	gMessMgr->QAInfo()  << "  Set " << Uset << " Detector " << Udet
+	     << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endm;
       }
       Int_t JDU = z_lq[JD-3];
       Int_t ivd = 0;
@@ -2280,16 +2283,16 @@ Int_t St_geant_Maker::AgstHits() {
 	rowU.Iprin   = (int) z_q[JDU+10];
 	detu->AddAt(&rowU);
 	if (Debug()) {
-	  cout << " displacement for hit description part    = 10                " << rowU.i0 << endl;     
-	  cout << " Number of all hit descriptors (both in non- and cum. parts)  " << rowU.N  << endl;     
-	  cout << " displacement for volume description part=10+10*Nh            " << rowU.i1 << endl;     
-	  cout << " Number of all volume descriptors (branching or not)          " << rowU.Nva << endl;    
-	  cout << " displacement for the free space   = 10+10*Nh+3*Nv            " << rowU.i2 << endl;     
-	  cout << " number of real volume branchings for NUMBV                   " << rowU.Nvb << endl;    
-	  cout << " Hit option: 1 - single step, 4 - Calorimetry                 " << rowU.Goption << endl;
-	  cout << " Valid serial number for this subset                          " << rowU.Serial << endl; 
-	  cout << " USER detector number                                         " << rowU.IdType << endl; 
-	  cout << " current print flag both for HITS and DIGI                    " << rowU.Iprin << endl;  
+	  gMessMgr->QAInfo()  << " displacement for hit description part    = 10                " << rowU.i0 << endm;     
+	  gMessMgr->QAInfo()  << " Number of all hit descriptors (both in non- and cum. parts)  " << rowU.N  << endm;     
+	  gMessMgr->QAInfo()  << " displacement for volume description part=10+10*Nh            " << rowU.i1 << endm;     
+	  gMessMgr->QAInfo()  << " Number of all volume descriptors (branching or not)          " << rowU.Nva << endm;    
+	  gMessMgr->QAInfo()  << " displacement for the free space   = 10+10*Nh+3*Nv            " << rowU.i2 << endm;     
+	  gMessMgr->QAInfo()  << " number of real volume branchings for NUMBV                   " << rowU.Nvb << endm;    
+	  gMessMgr->QAInfo()  << " Hit option: 1 - single step, 4 - Calorimetry                 " << rowU.Goption << endm;
+	  gMessMgr->QAInfo()  << " Valid serial number for this subset                          " << rowU.Serial << endm; 
+	  gMessMgr->QAInfo()  << " USER detector number                                         " << rowU.IdType << endm; 
+	  gMessMgr->QAInfo()  << " current print flag both for HITS and DIGI                    " << rowU.Iprin << endm;  
 	}
 	St_det_path *detuV = new St_det_path("Path",rowU.Nva);
 	St_det_hit  *detuH = new St_det_hit("Hit",rowU.N);
@@ -2327,8 +2330,8 @@ Int_t St_geant_Maker::AgstHits() {
 //                XX YY ZZ  PX   PY   PZ   SLEN PTOT LPTO rese )
 	  if (Debug()) {
 	    if (! i) 
-	    cout << "\thit \toption \tNb \tFmin \tFmax \tOrigin \tFactor \tNbit \tIext \tIfun" << endl;
-	    cout << "\t"  << setw(4) << rowH.hit 
+	    gMessMgr->QAInfo()  << "\thit \toption \tNb \tFmin \tFmax \tOrigin \tFactor \tNbit \tIext \tIfun" << endm;
+	    gMessMgr->QAInfo()  << "\t"  << setw(4) << rowH.hit 
 		 << "\t"  << rowH.option
 		 << "\t"  << rowH.Nb    
 		 << "\t"  << rowH.Fmin  //<< "/" << alim[i]
@@ -2338,7 +2341,7 @@ Int_t St_geant_Maker::AgstHits() {
 		 << "\t"  << rowH.Nbit  
 		 << "\t"  << rowH.Iext  
 		 << "\t"  << rowH.Ifun  
-		 << endl;
+		 << endm;
 	  }
 	  detuH->AddAt(&rowH);
 	}
@@ -2357,8 +2360,8 @@ Int_t St_geant_Maker::AgstHits() {
 	    memcpy (Udvol, &Namd, 4);
 	  }
 	  if (Debug()) {
-	    cout << "\t" << setw(4) << rowV.VName <<  "/" << Udvol 
-		 << "\t" << rowV.Ncopy << "\t" << rowV.Nb << endl;
+	    gMessMgr->QAInfo()  << "\t" << setw(4) << rowV.VName <<  "/" << Udvol 
+		 << "\t" << rowV.Ncopy << "\t" << rowV.Nb << endm;
 	  }
 	  detuV->AddAt(&rowV);
 	}
@@ -2367,7 +2370,7 @@ Int_t St_geant_Maker::AgstHits() {
 	    Int_t Namd = (int) z_iq[JD+2*ivd+11]; ivd++;
 	    Char_t Udvol[] = "     ";
 	    memcpy (Udvol, &Namd, 4);
-	    cout << "\t" << "    " <<  "/" << Udvol << endl;
+	    gMessMgr->QAInfo()  << "\t" << "    " <<  "/" << Udvol << endm;
 	  }
 	  Int_t n = detuV->GetNRows();
 	  detuV->Print(0,n);
@@ -2382,7 +2385,7 @@ Int_t St_geant_Maker::AgstHits() {
 void St_geant_Maker::DetSetIndex() {
   TString vers = mInitialization;
   vers.ReplaceAll("detp geometry ","");
-  cout << "St_geant_Maker::DetSetIndex for geometry version " << vers << endl;
+  gMessMgr->QAInfo()  << "St_geant_Maker::DetSetIndex for geometry version " << vers << endm;
   Int_t JSET = clink->jset;
   if (JSET <= 0) return;
   Int_t  NSET=z_iq[JSET-1];
@@ -2408,7 +2411,7 @@ void St_geant_Maker::DetSetIndex() {
 	Int_t i2      = (int) z_q[JDU+5];
 	Int_t Nva     = (int) z_q[JDU+4]; 
 	Int_t Nvb     = (int) z_q[JDU+6]; 
-	cout << "  Set " << Uset << " Detector " << Udet << "\tNva = " << Nva << "\tNvb = " << Nvb << endl;
+	gMessMgr->QAInfo()  << "  Set " << Uset << " Detector " << Udet << "\tNva = " << Nva << "\tNvb = " << Nvb << endm;
 	TArrayI NVmax(Nvb);
 	Int_t ivv = 0;
 	TString fmt("");
@@ -2419,7 +2422,7 @@ void St_geant_Maker::DetSetIndex() {
 	  Int_t Nam   = (int) z_iq[clink->jvolum+iv];
 	  Int_t Nb    = (int) z_q[j+3];
 	  memcpy (&Uvol[0], &Nam, 4);
-	  //	  cout <<  Uvol << " copy " << Ncopy << " bits " << Nb << endl;  
+	  //	  gMessMgr->QAInfo()  <<  Uvol << " copy " << Ncopy << " bits " << Nb << endm;  
 	  fmt += "/";
 	  fmt += Uvol;
 	  if (Nb <= 0) fmt += "_1";
@@ -2438,10 +2441,10 @@ void St_geant_Maker::DetSetIndex() {
 	  continue;
 	}
         Int_t Nelem = 1;
-	cout << "format: " << fmt << endl;
-	cout << "NVmax";
-	for (Int_t i = 0; i < Nvb; i++) {Nelem *= NVmax[i]; cout << "[" << NVmax[i] << "]";}
-	cout << endl;
+	gMessMgr->QAInfo()  << "format: " << fmt << endm;
+	gMessMgr->QAInfo()  << "NVmax";
+	for (Int_t i = 0; i < Nvb; i++) {Nelem *= NVmax[i]; gMessMgr->QAInfo()  << "[" << NVmax[i] << "]";}
+	gMessMgr->QAInfo()  << endm;
 	Int_t numbv[15];
 	memset (numbv, 0, 15*sizeof(Int_t));
 	TArrayI Ids(Nelem);
@@ -2470,7 +2473,7 @@ void St_geant_Maker::DumpIndex(const Char_t *name, const Char_t *vers, const Cha
   fOut += vers;
   fOut += ".C";
   ofstream out;
-  cout << "Create " << fOut << endl;
+  gMessMgr->QAInfo()  << "Create " << fOut << endm;
   out.open(fOut.Data());
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"StarVMCDetector\")) return 0;" << endl;
