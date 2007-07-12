@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.22 2007/05/15 19:23:21 perev Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.23 2007/07/12 20:07:49 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.23  2007/07/12 20:07:49  fisyak
+ * Move to access on demand of Db tables
+ *
  * Revision 1.22  2007/05/15 19:23:21  perev
  * Init local pointers by 0
  *
@@ -122,19 +125,7 @@
 
 svtElectronics_st *electronic = NULL;
 THashList *StSvtDbMaker::fRotList = 0;
-
-StSvtDbMaker* gStSvtDbMaker=NULL; 
-St_ObjectSet *svtSetConfig=0;
-St_ObjectSet *svtSetDrift=0;
-St_ObjectSet *svtSetDriftCurve=0;
-St_ObjectSet *svtSetAnodeDriftCorr=0;
-St_ObjectSet *svtSetPed=0;
-St_ObjectSet *svtSetRms=0;
-St_ObjectSet *svtSetGeom=0;
-St_ObjectSet *svtSetBad=0;
-St_ObjectSet *svtSetT0=0;
-St_ObjectSet *svtSetDaq=0;
-
+StSvtDbMaker* gStSvtDbMaker = 0;
 //C and fortran routines
 
 //_______________________________________________________________________
@@ -191,29 +182,9 @@ int type_of_call SvtLtoG_(float *xp, float *x, int* index){
 
 ClassImp(StSvtDbMaker)
 //_____________________________________________________________________________
-StSvtDbMaker::StSvtDbMaker(const char *name):StMaker(name) {
-  memset(&beg, 0, &end - &beg);
-  mTimeStamp = "1999-12-01 00:00:01";
-  
-  gStSvtDbMaker = this;
-}
-
+StSvtDbMaker::StSvtDbMaker(const char *name):StMaker(name) {  gStSvtDbMaker = this;}
 //_____________________________________________________________________________
-StSvtDbMaker::~StSvtDbMaker() {
-
- gStSvtDbMaker = NULL;
-#if 0 
- SafeDelete( mSvtDriftVeloc );
- SafeDelete( mSvtConfig );
- SafeDelete( mSvtPed ); 
- SafeDelete( mSvtRms ); 
- SafeDelete( mSvtGeom );        
- SafeDelete( mSvtBadAnodes ); 
- SafeDelete( mSvtT0 );                
- SafeDelete( mSvtDaq );
-#endif
-}
-
+StSvtDbMaker::~StSvtDbMaker() { gStSvtDbMaker = NULL;}
 //_____________________________________________________________________________
 Int_t StSvtDbMaker::Init()
 {
@@ -226,17 +197,6 @@ Int_t StSvtDbMaker::Init()
       SetFlavor("simu",tabNames[i]);   
     }
   }
-  setSvtConfig();
-  readSvtConfig();
-  setSvtGeometry();
-  setSvtDriftVelocity();
-  setSvtDriftCurve();
-  setSvtAnodeDriftCorr();
-  setSvtBadAnodes();
-  setSvtT0();
-  setSvtDaqParameters();
-
-
   return StMaker::Init();
 }
 
@@ -244,14 +204,6 @@ Int_t StSvtDbMaker::Init()
 Int_t StSvtDbMaker::InitRun(int runumber)
 {
   gMessMgr->Info() << "StSvtDbMaker::InitRun" << endm;
-
-  readSvtGeometry();
-  readSvtDriftVelocity();
-  readSvtDriftCurve();
-  readSvtAnodeDriftCorr();
-  readSvtBadAnodes();
-  readSvtT0();
-  readSvtDaqParameters();
   
   St_svtRDOstrippedC *svtRDOstrippedC = St_svtRDOstrippedC::instance();
   if (! svtRDOstrippedC) {
@@ -268,145 +220,6 @@ Int_t StSvtDbMaker::InitRun(int runumber)
   }
   assert(St_svtHybridDriftVelocityC::instance());
   return kStOk;
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtConfig()
-{    
-  svtSetConfig = new St_ObjectSet("StSvtConfig");
-  AddConst(svtSetConfig);  
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtConfig()
-{ 
-  TObject* o=(TObject*) getConfiguration();
-  if (o!=svtSetConfig->GetObject())svtSetConfig->SetObject(o);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtDriftVelocity()
-{
-  svtSetDrift = new St_ObjectSet("StSvtDriftVelocity");
-  AddConst(svtSetDrift);  
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtDriftVelocity()
-{ 
-  TObject* o=(TObject*) getDriftVelocity();  
-  if (o!=svtSetDrift->GetObject()) svtSetDrift->SetObject(o);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtDriftCurve()
-{
-  svtSetDriftCurve = new St_ObjectSet("StSvtDriftCurve");
-  AddConst(svtSetDriftCurve);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtDriftCurve()
-{
-  TObject* o=(TObject*) getDriftCurve();
-  if (o!=svtSetDriftCurve->GetObject()) svtSetDriftCurve->SetObject(o);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtAnodeDriftCorr()
-{
-  svtSetAnodeDriftCorr = new St_ObjectSet("StSvtAnodeDriftCorr");
-  AddConst(svtSetAnodeDriftCorr);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtAnodeDriftCorr()
-{
-  TObject* o=(TObject*) getAnodeDriftCorr();
-  if (o!=svtSetAnodeDriftCorr->GetObject()) svtSetAnodeDriftCorr->SetObject(o);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtPedestals()
-{
-  svtSetPed = new St_ObjectSet("StSvtPedestal");
-  AddConst(svtSetPed);  
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtPedestals()
-{ 
-  TObject* o=(TObject*) getPedestals();
-  if (o!=svtSetPed->GetObject()) svtSetPed->SetObject(o);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtRms()
-{
-  svtSetRms = new St_ObjectSet("StSvtRmsPedestal");
-  AddConst(svtSetRms);  
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtRms()
-{
-  TObject* o=(TObject*) getRms();
-  if (o!=svtSetRms->GetObject()) svtSetRms->SetObject(o);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtGeometry()
-{
-  svtSetGeom = new St_ObjectSet("StSvtGeometry");
-  AddConst(svtSetGeom);  
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtGeometry()
-{
-  TObject* o=(TObject*) getGeometry();
-  if (o!=svtSetGeom->GetObject()) svtSetGeom->SetObject(o);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtBadAnodes()
-{
-  svtSetBad = new St_ObjectSet("StSvtBadAnodes");
-  AddConst(svtSetBad);  
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtBadAnodes()
-{
-  TObject* o=(TObject*) getBadAnodes();
-  if (o!=svtSetBad->GetObject()) svtSetBad->SetObject(o);
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtT0()
-{    
-  svtSetT0 = new St_ObjectSet("StSvtT0");
-  AddConst(svtSetT0);  
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtT0()
-{    
-  TObject* o=(TObject*) getT0();
-  if (o!=svtSetT0->GetObject()) svtSetT0->SetObject(o);
-}
-//_____________________________________________________________________________
-void StSvtDbMaker::setSvtDaqParameters()
-{    
-  svtSetDaq = new St_ObjectSet("StSvtDaq");
-  AddConst(svtSetDaq);  
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::readSvtDaqParameters()
-{ 
-  TObject* o=(TObject*) getDaqParameters();
-  if (o!=svtSetDaq->GetObject()) svtSetDaq->SetObject(o);
 }
 
 //_____________________________________________________________________________
@@ -463,8 +276,7 @@ StSvtConfig* StSvtDbMaker::getConfiguration()
   gMessMgr->Info() << "numberOfWafersPerLadder[2] = "  << config->numberOfWafersPerLadder[2] << endm;
   gMessMgr->Info() << "numberOfHybridsPerWafer = "  << config->numberOfHybridsPerWafer << endm;
 
-  if (!mSvtConfig) 
-    mSvtConfig = new StSvtConfig();
+  StSvtConfig *mSvtConfig = new StSvtConfig();
   mSvtConfig->setNumberOfBarrels(config->numberOfBarrels);
 
   for (int i=0; i<config->numberOfBarrels; i++) {
@@ -483,30 +295,13 @@ StSvtConfig* StSvtDbMaker::getConfiguration()
   return mSvtConfig;
 }
 
-//_____________________________________________________________________________
-StSvtHybridCollection* StSvtDbMaker::getDriftVelocity()
-{
-  //  gMessMgr->Info() << "StSvtDbMaker::getDriftVelocity" << endm;
-
-  if(!mSvtDriftVeloc)
-    mSvtDriftVeloc = new StSvtHybridCollection(mSvtConfig);
-
-  getDriftVelocityAverage(mSvtDriftVeloc);
-
-  return mSvtDriftVeloc;
-}
-
-//_____________________________________________________________________________
-void StSvtDbMaker::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVeloc) {
-}
 
 //_____________________________________________________________________________
 StSvtHybridCollection* StSvtDbMaker::getDriftCurve()
 {
   gMessMgr->Info() << "StSvtDbMaker::getDriftVelocityCurve" << endm;
-
-  if(!mSvtDriftCurve)
-    mSvtDriftCurve = new StSvtHybridCollection(mSvtConfig);
+  StSvtConfig *mSvtConfig = (StSvtConfig *) (((TObjectSet *) GetDataSet("StSvtConfig"))->GetObject());
+  StSvtHybridCollection *mSvtDriftCurve = (StSvtHybridCollection *) new StSvtHybridCollection(mSvtConfig);
 
   St_svtDriftCurve *driftVelocityCurve=0;
 
@@ -585,8 +380,8 @@ StSvtHybridCollection* StSvtDbMaker::getAnodeDriftCorr()
   svtAnodeDriftCorr_st *driftCorr;
 
   // Create all pedestal objects
-  if (!mSvtAnodeDriftCorr)
-    mSvtAnodeDriftCorr = new StSvtHybridCollection(mSvtConfig);
+  StSvtConfig *mSvtConfig = (StSvtConfig *) (((TObjectSet *) GetDataSet("StSvtConfig"))->GetObject());
+  StSvtHybridCollection *mSvtAnodeDriftCorr = new StSvtHybridCollection(mSvtConfig);
   StSvtHybridAnodeDriftCorr* hybridAnodeDriftCorr;
 
   char path[100];
@@ -664,8 +459,8 @@ StSvtHybridCollection* StSvtDbMaker::getPedestals()
   svtPedestals_st *pedestal = pedestals->GetTable();
 
   // Create all pedestal objects
-  if (!mSvtPed)
-    mSvtPed = new StSvtHybridCollection(mSvtConfig);
+  StSvtConfig *mSvtConfig = (StSvtConfig *) (((TObjectSet *) GetDataSet("StSvtConfig"))->GetObject());
+  StSvtHybridCollection *mSvtPed = new StSvtHybridCollection(mSvtConfig);
   StSvtHybridPed* hybridPed;
   int index;
 
@@ -715,8 +510,8 @@ StSvtHybridCollection* StSvtDbMaker::getRms()
   svtRms_st *rms = st_rms->GetTable();
 
   // Create all pedestal objects
-  if (!mSvtRms)
-    mSvtRms = new StSvtHybridCollection(mSvtConfig);
+  StSvtConfig *mSvtConfig = (StSvtConfig *) (((TObjectSet *) GetDataSet("StSvtConfig"))->GetObject());
+  StSvtHybridCollection  *mSvtRms = new StSvtHybridCollection(mSvtConfig);
   StSvtHybridPixels* hybridRms;
   int index;
 
@@ -766,14 +561,8 @@ StSvtGeometry* StSvtDbMaker::getGeometry()
   svtDimensions_st *dimension = dimensions->GetTable();
 
   // Create all pedestal objects
-  if (!mSvtGeom) {
-    TDataSet *svtSetGeom = GetDataSet("StSvtGeometry");
-    if ( svtSetGeom ) delete svtSetGeom;
-    svtSetGeom = new St_ObjectSet("StSvtGeometry");
-    mSvtGeom = new StSvtGeometry(mSvtConfig);
-    svtSetGeom->SetObject(mSvtGeom);
-    AddConst(svtSetGeom);  
-  };
+  StSvtConfig *mSvtConfig = (StSvtConfig *) (((TObjectSet *) GetDataSet("StSvtConfig"))->GetObject());
+  StSvtGeometry *mSvtGeom = new StSvtGeometry(mSvtConfig);
   mSvtGeom->setBarrelRadius(dimension->barrelRadius);
   mSvtGeom->setWaferLength(dimension->waferLength);
   mSvtGeom->setWaferThickness(dimension->waferThickness);
@@ -933,10 +722,9 @@ StSvtHybridCollection* StSvtDbMaker::getBadAnodes()
   // get svt dimensions table
   St_svtBadAnodes *badAnodes;
   svtBadAnodes_st *badAnode;
-
+  StSvtConfig *mSvtConfig = (StSvtConfig *) (((TObjectSet *) GetDataSet("StSvtConfig"))->GetObject());
   // Create all pedestal objects
-  if (!mSvtBadAnodes)
-    mSvtBadAnodes = new StSvtHybridCollection(mSvtConfig);
+  StSvtHybridCollection *mSvtBadAnodes = new StSvtHybridCollection(mSvtConfig);
   StSvtHybridBadAnodes* hybridBadAnodes;
 
   char path[100];
@@ -1019,8 +807,7 @@ int StSvtDbMaker::getElectronics()
 //_____________________________________________________________________________
 StSvtT0* StSvtDbMaker::getT0()
 {
-  if (!mSvtT0)
-    mSvtT0 = new StSvtT0();
+  StSvtT0 *mSvtT0 = new StSvtT0();
 
   if (getElectronics()) {
     for (int i=0;i<24;i++)
@@ -1057,8 +844,7 @@ StSvtDaq* StSvtDbMaker::getDaqParameters()
   gMessMgr->Info() << "threshLo = " << daqParam->threshLo << endm;
   gMessMgr->Info() << "threshHi = " << daqParam->threshHi << endm;
 
-  if(!mSvtDaq)
-    mSvtDaq = new StSvtDaq();
+  StSvtDaq *mSvtDaq = new StSvtDaq();
 
   mSvtDaq->setClearedTimeBins(daqParam->clearedTimeBins);
   mSvtDaq->setSavedBlackAnodes(daqParam->savedBlackAnodes[0],0);
@@ -1076,3 +862,38 @@ StSvtDaq* StSvtDbMaker::getDaqParameters()
   return mSvtDaq;
 }
 
+//_____________________________________________________________________________
+TDataSet  *StSvtDbMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
+                                        const StMaker *dowMk) const 
+{
+  TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
+  if (ds) return ds;
+  static const Char_t *SetNames[] = {"StSvtConfig",  "StSvtDriftVelocity", "StSvtDriftCurve", 
+				     "StSvtAnodeDriftCorr", "StSvtPedestal", "StSvtRmsPedestal", 
+				     "StSvtGeometry", "StSvtBadAnodes", "StSvtT0", "StSvtDaq", 
+				     "StSvtGeometry", 0};
+  TString Input(logInput);
+  if (! Input.Contains("StSvt")) return ds;
+  St_ObjectSet *objs = 0;
+  StSvtDbMaker *This = (StSvtDbMaker *) this;
+  for (Int_t i = 0; SetNames[i]; i++) {
+    if (Input.CompareTo(SetNames[i])) continue;
+    objs = new St_ObjectSet(SetNames[i]);
+    This->AddConst(objs);
+    TObject *o = 0;
+    if      (! Input.CompareTo("StSvtConfig"))        o = This->getConfiguration();
+    else if (! Input.CompareTo("StSvtDriftVelocity")) o = 0;
+    else if (! Input.CompareTo("StSvtDriftCurve"))    o = This->getDriftCurve(); 
+    else if (! Input.CompareTo("StSvtAnodeDriftCorr"))o = This->getAnodeDriftCorr(); 
+    else if (! Input.CompareTo("StSvtPedestal"))      o = This->getPedestals(); 
+    else if (! Input.CompareTo("StSvtRmsPedestal"))   o = This->getRms(); 
+    else if (! Input.CompareTo("StSvtGeometry"))      o = This->getGeometry(); 
+    else if (! Input.CompareTo("StSvtBadAnodes"))     o = This->getBadAnodes(); 
+    else if (! Input.CompareTo("StSvtT0"))            o = This->getT0(); 
+    else if (! Input.CompareTo("StSvtDaq"))           o = This->getDaqParameters(); 
+    else if (! Input.CompareTo("StSvtGeometry"))      o = This->getGeometry();  
+    if (o) objs->SetObject(o);
+    break;
+  }
+  return (TDataSet *) objs;  
+}
