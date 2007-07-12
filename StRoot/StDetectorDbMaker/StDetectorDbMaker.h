@@ -6,21 +6,15 @@
 #endif
 
 class StDetectorDbMaker : public StMaker {
- private:
-// static Char_t  m_VersionCVS = "$Id: StDetectorDbMaker.h,v 1.2 2003/09/10 19:47:07 perev Exp $";
- 
- protected:
  public: 
-                   StDetectorDbMaker(const char *name="DetectorDb");
-    virtual       ~StDetectorDbMaker();
-    virtual Int_t Init();
-    virtual Int_t  Make();
-    virtual Int_t InitRun(int);
-    
-   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StDetectorDbMaker.h,v 1.2 2003/09/10 19:47:07 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-   ClassDef(StDetectorDbMaker,0)   //StAF chain virtual base class for Makers
+  StDetectorDbMaker(const char *name="DetectorDb") : StMaker(name) {}
+  virtual       ~StDetectorDbMaker() {}
+  virtual Int_t  Make();
+  
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StDetectorDbMaker.h,v 1.3 2007/07/12 19:23:13 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  
+  ClassDef(StDetectorDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
