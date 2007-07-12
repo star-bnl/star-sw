@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridHistAnalog.cc,v 1.2 2004/05/12 17:47:57 perev Exp $
+ * $Id: StSvtHybridHistAnalog.cc,v 1.3 2007/07/12 20:09:44 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridHistAnalog.cc,v $
+ * Revision 1.3  2007/07/12 20:09:44  fisyak
+ * Add includes for ROOT 5.16
+ *
  * Revision 1.2  2004/05/12 17:47:57  perev
  * WarnOff
  *
@@ -22,7 +25,7 @@
 #include "TH1.h"
 #include "TStyle.h"
 #include "TPaveText.h"
-
+#include "TMath.h"
 ClassImp(StSvtHybridHistAnalog)
 
 StSvtHybridHistAnalog::StSvtHybridHistAnalog() : StSvtHybridObject()
@@ -136,11 +139,11 @@ void StSvtHybridHistAnalog::Draw(const char* option)
       }
     }
     mean_a = (float)total_a/counter_a;
-    rms_a = sqrt((float)total_sq_a/counter_a-mean_a*mean_a);
+    rms_a = TMath::Sqrt((float)total_sq_a/counter_a-mean_a*mean_a);
     mean_b = (float)total_b/counter_b;
-    rms_b = sqrt((float)total_sq_b/counter_b-mean_b*mean_b);
+    rms_b = TMath::Sqrt((float)total_sq_b/counter_b-mean_b*mean_b);
     mean_c = (float)total_c/counter_c;
-    rms_c = sqrt((float)total_sq_c/counter_c-mean_c*mean_c);
+    rms_c = TMath::Sqrt((float)total_sq_c/counter_c-mean_c*mean_c);
 
     binMax = histA->GetMaximumBin();
     max = histA->GetBinContent(binMax);
