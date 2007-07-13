@@ -238,7 +238,6 @@ protected:
 	double fRho;
 	double fDRho;
 	double fCosL;
-   	double fMax;
         double fEmxXY[6];
         double fEmxSZ[3];
    	mutable double fDCA[2];
