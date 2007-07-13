@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.48 2007/07/12 17:07:18 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.49 2007/07/13 06:19:43 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.49  2007/07/13 06:19:43  bouchet
+// display of number of reconstructed hits corrected
+//
 // Revision 1.48  2007/07/12 17:07:18  bouchet
 // add switch to read old ssdStripCalib Table and new ssdNoise Table
 //
@@ -452,20 +455,21 @@ Int_t StSsdPointMaker::Make()
       */
       Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
       LOG_INFO<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endm;
-      
-      if(mSsdHitColl) {
-	NEvent++;
-	LOG_INFO<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;
-	makeScmCtrlHistograms(mySsd);
-	EvaluateEfficiency(mySsd);
-	NormalizeEfficiency();
+      if(mSsdHitColl){
+	if (mSsdHitColl->numberOfHits()>0) {
+	  NEvent++;
+	  LOG_INFO<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;
+	  makeScmCtrlHistograms(mySsd);
+	  EvaluateEfficiency(mySsd);
+	  NormalizeEfficiency();
+	  scm_spt->Purge();
+	}
+	else {
+	  LOG_INFO<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endm;
+	}
       }
-      else {
-	LOG_INFO<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endm;
-	scm_spt->Purge();
-	LOG_INFO<<"####        END OF SSD NEW POINT MAKER       ####"<<endm;
-	LOG_INFO<<"#################################################"<<endm;
-      }
+      LOG_INFO<<"####        END OF SSD NEW POINT MAKER       ####"<<endm;
+      LOG_INFO<<"#################################################"<<endm;
       if(Debug() >1){
 	if (qHitNtuple) WriteStripTuple(mySsd);
 	if (nHitNtuple) WriteScfTuple(mySsd);
