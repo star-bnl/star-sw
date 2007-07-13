@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.97 2007/02/06 19:00:39 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.98 2007/07/13 22:18:29 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1179,7 +1179,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.97 2007/02/06 19:00:39 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.98 2007/07/13 22:18:29 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1925,18 +1925,21 @@ static Double_t resEventPlaneK4(double chi) {
 
 //-----------------------------------------------------------------------
 
-static Double_t chi(double res) {
+Double_t chi(double res) {
   // Calculates chi from the event plane resolution
 
-  double chi   = 2.0;
+  double chi = 2.0;
   double delta = 1.0;
 
-  for (int i = 0; i < 15; i++) {
-    chi   = (resEventPlane(chi) < res) ? chi + delta : chi - delta;
-    delta = delta / 2.;
+  for (int i = 0; i < 20; i++) {
+      while(resEventPlane(chi) < res) {chi += delta;}
+      delta = delta / 2.;
+      while(resEventPlane(chi) > res) {chi -= delta;}
+      delta = delta / 2.;
   }
 
   return chi;
+
 }
 
 //-----------------------------------------------------------------------
@@ -2315,6 +2318,11 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.98  2007/07/13 22:18:29  posk
+// Method chi() revised by Wang Gang: "With this modification,
+// it will give good results not only for realistic resolutions, but also
+// for res=1 and res=0."
+//
 // Revision 1.97  2007/02/06 19:00:39  posk
 // In Lee Yang Zeros method, introduced recentering of Q vector.
 // Reactivated eta symmetry cut.
