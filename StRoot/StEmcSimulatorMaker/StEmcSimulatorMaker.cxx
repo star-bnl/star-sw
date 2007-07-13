@@ -99,13 +99,12 @@ void StEmcSimulatorMaker::Clear(const char *)
 {
     //if(mEmcCollection)
     //    delete mEmcCollection;
-    mEmcCollection=0;
-    StMaker::Clear();
+  if (mEmbed) SafeDelete(mEmcCollection);
+  StMaker::Clear();
 }
 StEmcSimulatorMaker::~StEmcSimulatorMaker()
 {
-    if(mEmcCollection)
-        delete mEmcCollection; // 25-jan-2001
+  if (mEmbed) SafeDelete(mEmcCollection);
     for (int det=0;det<MAXDET;det++)
         if(mSimulator[det])
             delete mSimulator[det];  //!
@@ -1231,8 +1230,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.42 2007/04/05 19:04:33 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.43 2007/07/13 13:44:20 fisyak Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.43  2007/07/13 13:44:20  fisyak
+// Delete mEmcCollection if set mEmbed
+//
 // Revision 1.42  2007/04/05 19:04:33  kocolosk
 // fix AutoBuild warning
 //
