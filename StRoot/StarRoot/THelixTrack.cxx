@@ -352,7 +352,7 @@ enum {kXX
 //_____________________________________________________________________________
 void THelixTrack::Set(double rho,double drho)
 {
-   fRho = rho; fDRho=drho; fMax = 1./(fabs(fRho*fCosL)+1.e-10);
+   fRho = rho; fDRho=drho; 
 }
 //_____________________________________________________________________________
 void THelixTrack::Backward()
@@ -405,8 +405,6 @@ void THelixTrack::Build()
     tmp = ::sqrt(tmp); fP[0] /=tmp; fP[1] /=tmp; fP[2] /=tmp; }
     
   fCosL = ::sqrt(fP[0]*fP[0]+fP[1]*fP[1]);
-
-  fMax = 1./(fabs(fRho*fCosL)+1.e-10);
 }
 
 //_____________________________________________________________________________
@@ -458,6 +456,7 @@ double THelixTrack::Step(double stmin,double stmax, const double *s, int nsurf,
   const double *sp[4][4] = {{s+0,s+1,s+2,s+3}, {s+1,s+4,s+7,s+9}, 
                             {s+2,s+7,s+5,s+8}, {s+3,s+9,s+8,s+6}}; 
 
+  double myMax = 1./(fabs(fRho*fCosL)+1.e-10);
   THelixTrack th(fX,fP,fRho);
   cos1t = 0.5*fRho*fCosL;
   double totStep=0;
@@ -495,11 +494,11 @@ double THelixTrack::Step(double stmin,double stmax, const double *s, int nsurf,
     if (step < stmin && nsol > 1) step = sol[1];
     if (step < stmin || step > stmax) 	{
       nsol = 0; 
-      if (step>0) {step = stmax; stmin+=fMax/2;}
-      else        {step = stmin; stmax-=fMax/2;}}
+      if (step>0) {step = stmax; stmin+=myMax/2;}
+      else        {step = stmin; stmax-=myMax/2;}}
 
-    if (!nsol && fabs(step) < 0.1*fMax) return 1.e+12;
-    if (fabs(step)>fMax) {step = (step<0)? -fMax:fMax; nsol=0;}
+    if (!nsol && fabs(step) < 0.1*myMax) return 1.e+12;
+    if (fabs(step)>myMax) {step = (step<0)? -myMax:myMax; nsol=0;}
 
     double x[3],d[3];
     th.Step(step,x,d);
@@ -2748,7 +2747,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.30 2007/07/12 00:22:29 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.31 2007/07/13 18:17:10 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2764,6 +2763,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.31  2007/07/13 18:17:10  perev
+ * remove member fMax from THelixTrack
+ *
  * Revision 1.30  2007/07/12 00:22:29  perev
  * TCircleFitter::Fit case 1 if case 2 failed
  *
