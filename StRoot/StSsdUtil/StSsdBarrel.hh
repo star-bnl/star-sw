@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.4 2007/07/12 17:08:08 bouchet Exp $
+// $Id: StSsdBarrel.hh,v 1.5 2007/07/14 13:53:45 bouchet Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.5  2007/07/14 13:53:45  bouchet
+// add default pedestal/noise ; noise value is 60/16 = 3.75 adc
+//
 // Revision 1.4  2007/07/12 17:08:08  bouchet
 // add method to decode new ssdNoise Table
 //
@@ -72,6 +75,7 @@ class StSsdBarrel
   Int_t readNoiseFromTable(St_ssdStripCalib *strip_noise, StSsdDynamicControl *dynamicControl);
   Int_t readNoiseFromTable(St_ssdStripCalib *noise); //
   Int_t readNoiseFromTable(St_ssdNoise *strip_noise, StSsdDynamicControl *dynamicControl); 
+  Int_t readNoiseDefault(StSsdDynamicControl *dynamicControl);
   Int_t readConditionDbFromTable(St_sdm_condition_db *condition);//
   Int_t writeNoiseToFile(St_spa_strip *spa_strip);
   Int_t writeNoiseToFile(St_ssdPedStrip *pedStrip, char myLabel[]);
