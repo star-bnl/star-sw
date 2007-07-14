@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.4 2007/07/12 17:08:08 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.5 2007/07/14 13:53:45 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.5  2007/07/14 13:53:45  bouchet
+// add default pedestal/noise ; noise value is 60/16 = 3.75 adc
+//
 // Revision 1.4  2007/07/12 17:08:08  bouchet
 // add method to decode new ssdNoise Table
 //
@@ -343,7 +346,28 @@ Int_t  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynam
     }
   return NumberOfNoise;
 }
-
+//---------------------------------------------------------------------------------------------
+Int_t StSsdBarrel::readNoiseDefault(StSsdDynamicControl *dynamicControl){
+  Int_t rms           = 60  ; 
+  // the noise is coded as 16*rms then for each strip, noise = 60/16 = 3.75 adc
+  Int_t ped           = 140 ;
+  Int_t NumberOfNoise = 0;
+  for(Int_t i=0;i<mNLadder;i++)
+    {
+      for(Int_t j=0;j<mNWaferPerLadder;j++)
+	{
+	  for(Int_t k=0;k<mNStripPerSide;k++)
+	    {
+	      for(Int_t iSide=0;iSide<2;iSide++)
+		{
+		  mLadders[i]->mWafers[j]->setPedestalSigmaStrip(k+1,iSide,ped,rms,dynamicControl);
+		  NumberOfNoise++;
+		}
+	    }
+	}
+    }
+  return NumberOfNoise;
+}
 //________________________________________________________________________________
 /*!
 first method reading from the ssdNoise table
@@ -376,6 +400,7 @@ Int_t  StSsdBarrel::readNoiseFromTable(St_ssdNoise *strip_noise, StSsdDynamicCon
   return NumberOfNoise;
 }
 //________________________________________________________________________________
+
 Int_t StSsdBarrel::readClusterFromTable(St_scf_cluster *scf_cluster){
   scf_cluster_st *cluster = scf_cluster->GetTable();
 
