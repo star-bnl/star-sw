@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.50 2007/07/14 13:52:16 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.51 2007/07/14 14:29:44 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.51  2007/07/14 14:29:44  bouchet
+// forget the Debug condition for the declaration of the tuples
+//
 // Revision 1.50  2007/07/14 13:52:16  bouchet
 // add method to fill with default pedestal/noise values if no table is found
 //
@@ -253,7 +256,7 @@ ClassImp(StSsdPointMaker)
 	matchisto_[ii]->SetYTitle("NSide ADC count");
 	matchisto_[ii]->SetZTitle("(1p-1n) hits");
       }
-    DeclareNtuple();
+    if (Debug()>1) DeclareNtuple();
   }
   return StMaker::Init();
 }
