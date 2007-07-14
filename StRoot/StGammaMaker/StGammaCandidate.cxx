@@ -22,16 +22,12 @@ StGammaCandidate::StGammaCandidate()
   SetPostEnergy(0.);
   SetSmduEnergy(0.);
   SetSmdvEnergy(0.);
-
 }
 
 // -------------------------------------------------------- class destructor --
 StGammaCandidate::~StGammaCandidate()
 {
-
-  
 }
-
 
 // --------------------------------------------------------------- isolation --
 Float_t StGammaCandidate::sumPt( Float_t radius )

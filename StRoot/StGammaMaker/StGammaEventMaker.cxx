@@ -1,4 +1,6 @@
 
+#include "StGammaPythiaMaker.h"
+#include "StPythiaEvent.h"
 #include "StGammaEventMaker.h"
 #include "StGammaEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -18,6 +20,7 @@ Int_t StGammaEventMaker::Init()
   AddObj(mGammaEvent,".data"); // ok, but what can I do with this?
   return StMaker::Init();
 }
+
 // -------------------------------------------------------------------
 Int_t StGammaEventMaker::Make()
 {
@@ -31,7 +34,7 @@ Int_t StGammaEventMaker::Make()
   StMuPrimaryVertex *pv = StMuDst::primaryVertex();
   if ( pv )
     {
-      mGammaEvent->SetVertex(TVector3(pv->position().x(),pv->position().y(),pv->position().z()));
+      mGammaEvent->SetVertex(TVector3(pv->position().xyz()));
       mGammaEvent->mFlags |= TPC_VERTEX;
     }
   else
@@ -40,11 +43,24 @@ Int_t StGammaEventMaker::Make()
       mGammaEvent->mFlags |= !(TPC_VERTEX);
     }
 
-  mGammaEvent -> SetRunNumber ( StMuDst::event()->runNumber() );
+  mGammaEvent -> SetRunNumber( StMuDst::event()->runNumber() );
   mGammaEvent -> SetEventNumber( StMuDst::event()->eventNumber() );
+  mGammaEvent -> SetMagneticField( StMuDst::event()->magneticField() );
+
+  // Get Pythia event if Monte Carlo
+  StGammaPythiaMaker* pythiaMaker = (StGammaPythiaMaker*)GetMaker("GammaPythia");
+  if (pythiaMaker) {
+    StPythiaEvent* pythia = mGammaEvent->pythia();
+    if (!pythia) {
+      pythia = new StPythiaEvent;
+      mGammaEvent->SetPythia(pythia);
+    }
+    pythiaMaker->fillPythiaEvent(pythia);
+  }
 
   return kStOK;
 }
+
 // -------------------------------------------------------------------
 void StGammaEventMaker::Clear(Option_t *opts)
 {

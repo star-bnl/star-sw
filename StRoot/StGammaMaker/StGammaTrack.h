@@ -5,16 +5,15 @@
 
 class StMuTrack;
 
-#include <TObject.h>
 #include <vector>
-
 #include "TRefArray.h"
+#include "StPhysicalHelix.hh"
 
 class StGammaTrack : public TObject {
 public:
 
   StGammaTrack();
-  StGammaTrack(const StMuTrack* track);
+  StGammaTrack(StMuTrack* track);
   ~StGammaTrack() {}
 
   Short_t  id() const;    /// id of the track
@@ -25,6 +24,8 @@ public:
   Float_t  eta() const;  /// eta at vertex
   Float_t  phi() const;  /// phi angle at vertex
   Float_t  dEdx() const; /// energy loss in keV
+  StPhysicalHelix& helix(); /// Returns inner helix (first measured point)
+  StPhysicalHelix& outerHelix(); /// Returns outer helix (last measured point)
 
 private:
   Short_t  mId;
@@ -35,6 +36,8 @@ private:
   Float_t  mEta;
   Float_t  mPhi;
   Float_t  mdEdx;
+  StPhysicalHelix mHelix;
+  StPhysicalHelix mOuterHelix;
 
   //  TRefArray mCandidates; // referencing candidates
 
@@ -49,7 +52,10 @@ inline Float_t StGammaTrack::eta() const { return mEta; }
 inline Float_t StGammaTrack::phi() const { return mPhi; }
 inline Float_t StGammaTrack::dEdx() const { return mdEdx; }
 inline Short_t StGammaTrack::type() const { return mType; }
+inline StPhysicalHelix& StGammaTrack::helix() { return mHelix; }
+inline StPhysicalHelix& StGammaTrack::outerHelix() { return mOuterHelix; }
 
 typedef std::vector<StGammaTrack> StGammaTrackVec_t;
 typedef std::vector<StGammaTrack*> StGammaTrackPtrVec_t;
+
 #endif

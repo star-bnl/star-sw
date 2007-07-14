@@ -16,6 +16,7 @@
 #include "TClonesArray.h"
 
 class StMuTrack;
+class StPythiaEvent;
 
 #define TPC_VERTEX 0x0001
 
@@ -62,18 +63,22 @@ class StGammaEvent : public TObject {
   Int_t mRunNumber;   /// Run number
   Int_t mEventNumber; /// Event number  
   TVector3 mVertex; /// Event vertex (TPC)
-
+  Float_t mMagneticField; /// Magnetic field (kG)
+  StPythiaEvent* mPythia;
 
 
  public:
   void SetRunNumber( Int_t run ){ mRunNumber=run; }
   void SetEventNumber( Int_t event ){ mEventNumber=event; }
   void SetVertex( TVector3 vertex ){ mVertex=vertex; }
+  void SetMagneticField( Float_t magneticField) { mMagneticField = magneticField; }
+  void SetPythia(StPythiaEvent* pythia) { mPythia = pythia; }
 
   Int_t runNumber(){ return mRunNumber; }/// Returns run number
   Int_t eventNumber(){ return mEventNumber; }/// Returns event number
   TVector3 vertex(){ return mVertex; }/// Returns the vertex
-
+  Float_t magneticField() const { return mMagneticField; } /// Magnetic field (kG)
+  StPythiaEvent* pythia() { return mPythia; } /// Pythia event
   
  private:
   //                                                 Towers, tracks and strips

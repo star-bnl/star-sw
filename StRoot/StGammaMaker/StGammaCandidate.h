@@ -14,11 +14,11 @@
 #include "StGammaTower.h"
 #include "StGammaStrip.h"
 #include "StGammaTrack.h"
+#include "StGammaFitterResult.h"
 
 class StEEmcCluster;
 class StEEmcSmdCluster;
 class StEmcCluster;
-
 
 
 class StGammaCandidate : public TObject
@@ -184,6 +184,21 @@ class StGammaCandidate : public TObject
   Int_t numberOfMyPreshower1(){ return mMyPreshower1.GetLast()+1; }
   Int_t numberOfMyPreshower2(){ return mMyPreshower2.GetLast()+1; }
   Int_t numberOfMyPostshower(){ return mMyPostshower.GetLast()+1; }
+
+
+  //
+  // Results of gamma fitter
+  //
+public:
+  StGammaFitterResult& smduFit() { return mSmduFit; }
+  StGammaFitterResult& smdvFit() { return mSmdvFit; }
+
+  void SetSmduFit(const StGammaFitterResult& u) { mSmduFit = u; }
+  void SetSmdvFit(const StGammaFitterResult& v) { mSmdvFit = v; }
+
+protected:
+  StGammaFitterResult mSmduFit;
+  StGammaFitterResult mSmdvFit;
 
 
   // to add a new tower, do the following:

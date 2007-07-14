@@ -17,7 +17,7 @@
 
 class StGammaFitterResult : public TObject {
 public:
-  StGammaFitterResult() {}
+  StGammaFitterResult();
   ~StGammaFitterResult() {}
 
   float yield() const;

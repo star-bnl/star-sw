@@ -7,3 +7,13 @@
 #include "StGammaFitterResult.h"
 
 ClassImp(StGammaFitterResult);
+
+StGammaFitterResult::StGammaFitterResult()
+{
+  setYield(0);
+  setMean(0);
+  setResidual(0);
+  setChi2(0);
+  setNdf(0);
+  setSigma(0);
+}

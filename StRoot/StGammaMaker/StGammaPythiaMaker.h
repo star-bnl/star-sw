@@ -8,6 +8,8 @@
 
 #ifndef STAR_StGammaPythiaMaker
 #define STAR_StGammaPythiaMaker
+
+class StPythiaEvent;
                                                                   
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -110,9 +112,11 @@ public:
   TLorentzVector& frag(int i);
   TLorentzVector& initial_rad(int i);
   TLorentzVector& final_rad(int i);
+
+  void fillPythiaEvent(StPythiaEvent* pythia);
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaMaker.h,v 1.4 2007/07/02 14:13:05 betan Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaMaker.h,v 1.5 2007/07/14 01:47:22 pibero Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }  
   

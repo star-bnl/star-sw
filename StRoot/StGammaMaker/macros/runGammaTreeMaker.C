@@ -24,8 +24,8 @@ Int_t prescale = 1;
 void runGammaTreeMaker( Int_t nevents = -1, 
 			 //			 Char_t *name = "6149020.lis", 
 			 //			 Char_t *ofile= "6149020.root",
-			 Char_t *name="/star/institutions/mit/betan/Simulation/photon_5_7.MuDst.root",
-			 Char_t *ofile="photon_5_7.gtree.root",
+			 Char_t *name="/star/institutions/mit/betan/Simulation/photon_9_11_1.MuDst.root",
+			 Char_t *ofile="photon_9_11_1.gtree.root",
 			 Char_t *path = "", 
 			 Int_t nfiles = 100
 			 )
@@ -132,6 +132,9 @@ void runGammaTreeMaker( Int_t nevents = -1,
 
 
 
+#ifdef MONTE_CARLO
+  StGammaPythiaMaker* pythia = new StGammaPythiaMaker;
+#endif
 
   StGammaEventMaker *gemaker = new StGammaEventMaker();
   StGammaRawMaker       *raw    = new StGammaRawMaker(); 
