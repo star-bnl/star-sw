@@ -10,6 +10,7 @@
 #define ST_BARREL_EMC_CLUSTER_MAKER_H
 
 class StBarrelEmcCluster;
+class StGammaEventMaker;
 class StGammaRawMaker;
 class StGammaTower;
 
@@ -25,14 +26,15 @@ public:
   int  Init();
   int  Make();
 
-  int numberOfClusters() const;
-  StBarrelEmcCluster* cluster(int i) const;
+  vector<StBarrelEmcCluster*>& clusters();
 
 private:
   static const float mHighTowerThreshold;
   static const float mClusterThreshold;
 
+  StGammaEventMaker* mGammaEventMaker;
   StGammaRawMaker* mGammaRawMaker;
+  TVector3 mVertex;
   vector<StBarrelEmcCluster*> mClusters;
 
   StBarrelEmcCluster* makeCluster(StGammaTower* tower) const;
@@ -41,8 +43,7 @@ private:
   ClassDef(StBarrelEmcClusterMaker, 1)
 };
 
-inline int StBarrelEmcClusterMaker::numberOfClusters() const { return mClusters.size(); }
-inline StBarrelEmcCluster* StBarrelEmcClusterMaker::cluster(int i) const { return mClusters[i]; }
+inline vector<StBarrelEmcCluster*>& StBarrelEmcClusterMaker::clusters()  { return mClusters; }
 
 inline void StBarrelEmcClusterMaker::getTowerPosition(int id, TVector3& position) const
 {

@@ -408,11 +408,11 @@ Int_t StGammaCandidateMaker::MakeBarrel()
   }
 
   // Loop over BEMC clusters
-  for (int i = 0; i < ecl->numberOfClusters(); ++i) {
-    StBarrelEmcCluster* cluster = ecl->cluster(i);
+  for (unsigned i = 0; i < ecl->clusters().size(); ++i) {
+    StBarrelEmcCluster* cluster = ecl->clusters()[i];
 
     // Cut on transverse energy of the cluster
-    if (cluster->et() < mMinimumET) continue;
+    if (cluster->momentum().Pt() < mMinimumET) continue;
 
     // Create gamma candidate
     StGammaCandidate* candidate = gevent->newCandidate();
@@ -464,8 +464,8 @@ Int_t StGammaCandidateMaker::MakeBarrel()
     // Add tracks that fall within mRadius of candidate
     for (int k = 0; k < gevent->numberOfTracks(); ++k) {
       if (StGammaTrack* track = gevent->track(k)) {
-	float deta = cluster->eta() - track->eta();
-	float dphi = cluster->phi() - track->phi();
+	float deta = cluster->momentum().Eta() - track->eta();
+	float dphi = cluster->momentum().Phi() - track->phi();
 	dphi = acos(cos(dphi));
 	float r = hypot(deta, dphi);
 	if (r <= mRadius) candidate->addTrack(track);
@@ -476,8 +476,8 @@ Int_t StGammaCandidateMaker::MakeBarrel()
     for (int k = 0; k < gevent->numberOfTowers(); ++k) {
       StGammaTower* tower = gevent->tower(k);
       if (tower && tower->layer == kBEmcTower) {
-	float deta = cluster->eta() - tower->eta;
-	float dphi = cluster->phi() - tower->phi;
+	float deta = cluster->momentum().Eta() - tower->eta;
+	float dphi = cluster->momentum().Phi() - tower->phi;
 	dphi = acos(cos(dphi));
 	float r = hypot(deta, dphi);
 	if (r <= mRadius) candidate->addTower(tower);
@@ -488,8 +488,8 @@ Int_t StGammaCandidateMaker::MakeBarrel()
     for (int k = 0; k < gevent->numberOfTowers(); ++k) {
       StGammaTower* preshower = gevent->preshower1(k);
       if (preshower && preshower->layer == kBEmcPres) {
-	float deta = cluster->eta() - preshower->eta;
-	float dphi = cluster->phi() - preshower->phi;
+	float deta = cluster->momentum().Eta() - preshower->eta;
+	float dphi = cluster->momentum().Phi() - preshower->phi;
 	dphi = acos(cos(dphi));
 	float r = hypot(deta, dphi);
 	if (r <= mRadius) candidate->addPreshower1(preshower);
