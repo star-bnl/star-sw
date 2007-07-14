@@ -7,12 +7,15 @@
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
 #include "StEEmcPool/StEEmcClusterMaker/StEEmcGenericClusterMaker.h"
 
+#include "SystemOfUnits.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StBarrelEmcCluster.h"
 #include "StBarrelEmcClusterMaker.h"
+#include "StGammaFitter.h"
 
 ClassImp(StGammaCandidate);
 
+// ----------------------------------------------------------------------------
 StGammaCandidateMaker::StGammaCandidateMaker( const Char_t *name ):StMaker(name)
 {
   Clear();
@@ -26,6 +29,7 @@ Int_t StGammaCandidateMaker::Init()
 {
   return StMaker::Init();
 }
+
 // ----------------------------------------------------------------------------
 Int_t StGammaCandidateMaker::Make()
 { 
@@ -33,13 +37,14 @@ Int_t StGammaCandidateMaker::Make()
   MakeBarrel();
   return kStOK;
 }
+
 // ----------------------------------------------------------------------------
 void StGammaCandidateMaker::Clear( Option_t *opts )
 {
   mId=0;
 }
-// ----------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------------
 TVector3 momentum( StEEmcCluster cluster, TVector3 vertex )
 {
   TVector3 d=cluster.momentum().Unit();
@@ -50,6 +55,7 @@ TVector3 momentum( StEEmcCluster cluster, TVector3 vertex )
   return d;
 };
 
+// ----------------------------------------------------------------------------
 Int_t StGammaCandidateMaker::MakeEndcap()
 {
 
@@ -353,6 +359,19 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 
     }// loop over sectors
 
+  //
+  // Run gamma fitter on Endcap candidates
+  //
+  for (int i = 0; i < gevent->numberOfCandidates(); ++i) {
+    StGammaCandidate* candidate = gevent->candidate(i);
+    if (candidate->detectorId() == StGammaCandidate::kEEmc) {
+      StGammaFitterResult u, v;
+      if (StGammaFitter::instance()->fitSector(candidate, &u, &v)) {
+	candidate->SetSmduFit(u);
+	candidate->SetSmdvFit(v);
+      }
+    }
+  }
 
   return kStOK;
 }
@@ -420,6 +439,20 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	  if (StGammaTower* preshower = grawmaker->tower(tower->id, kBEmcPres)) {
 	    candidate->addMyPreshower1(preshower);
 	    energy += preshower->energy;
+	  }
+
+	  // Add tracks to candidate list of "my" towers
+	  for (int k = 0; k < gevent->numberOfTracks(); ++k) {
+	    StGammaTrack* track = gevent->track(k);
+	    if (!track) continue;
+	    TVector3 position;
+	    TVector3 momentum;
+	    double magneticField = gevent->magneticField() * kilogauss;
+	    if (!getPositionMomentumAtBarrel(track, magneticField, position, momentum)) continue;
+	    int id;
+	    if (StEmcGeom::instance("bemc")->getId(position.Phi(), position.Eta(), id) != 0) continue;
+	    if (id != static_cast<int>(tower->id)) continue;
+	    candidate->addMyTrack(track);
 	  }
 	}
       }
@@ -498,4 +531,32 @@ Int_t StGammaCandidateMaker::MakeBarrel()
   return kStOK;
 }
 
+//
+// See $STAR/StRoot/StEmcUtil/projection/StEmcPosition.h
+//
+bool StGammaCandidateMaker::getPositionMomentumAtBarrel(StGammaTrack* track, double magneticField, TVector3& position, TVector3& momentum)
+{
+  const double radius = StEmcGeom::instance("bemc")->Radius();
+  const pair<double, double> VALUE(999999999., 999999999.); // No solution
+  const StPhysicalHelix& helix = track->outerHelix();
 
+  if (helix.origin().perp() > radius) return false;
+  pair<double, double> ss = helix.pathLength(radius);
+  if (!finite(ss.first) || !finite(ss.second)) return false;
+  if (ss == VALUE) return false;
+
+  double s = 0;
+  if (ss.first > 0 && ss.second > 0)
+    s = ss.first;
+  else if (ss.first >= 0 && ss.second < 0)
+    s = ss.first;
+  else if (ss.first < 0 && ss.second >= 0)
+    s = ss.second;
+  else
+    return false;
+
+  position = TVector3(helix.at(s).xyz());
+  momentum = TVector3(helix.momentumAt(s, magneticField).xyz());
+
+  return true;
+}

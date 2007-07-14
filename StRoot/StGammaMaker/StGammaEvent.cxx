@@ -35,7 +35,7 @@ void StGammaEvent::Clear(Option_t *opts)
   nPostshower=0;
   nStrips=0;
   nCandidates=0;
-  
+  mPythia = 0;
 }
 
 // ------------------------------------------------------------ init tclones --

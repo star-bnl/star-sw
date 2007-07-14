@@ -4,11 +4,11 @@ void loadGammaLibs()
   gROOT -> LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  //gSystem->Load("StDetectorDbMaker");
 
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");

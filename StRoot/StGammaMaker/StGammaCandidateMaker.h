@@ -1,6 +1,9 @@
 #ifndef __StGammaCandidateMaker_h__
 #define __StGammaCandidateMaker_h__
 
+class TVector3;
+class StGammaTrack;
+
 #include "StMaker.h"
 
 #include "StGammaCandidate.h"
@@ -28,6 +31,8 @@ class StGammaCandidateMaker : public StMaker
 
   Int_t MakeEndcap();
   Int_t MakeBarrel();
+
+  bool getPositionMomentumAtBarrel(StGammaTrack* track, double magneticField, TVector3& position, TVector3& momentum);
   
   Float_t mMinimumET; // in GeV
   Float_t mRadius;    // in sqrt( deta**2 + dphi**2 )

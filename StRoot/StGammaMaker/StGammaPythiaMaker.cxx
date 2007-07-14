@@ -28,6 +28,7 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
+#include "StPythiaEvent.h"
 #include "StGammaPythiaMaker.h"
 
 
@@ -654,4 +655,36 @@ void StGammaPythiaMaker::collectDecayPhotons(StMcVertex* vertex)
             collectDecayPhotons(stopVertex);
         }
     }
+}
+
+void StGammaPythiaMaker::fillPythiaEvent(StPythiaEvent* pythia)
+{
+  g2t_event_st* eventTable = Pg2t_event->GetTable();
+
+  pythia->setRunId(eventTable->n_run);
+  pythia->setEventId(eventTable->n_event);
+
+  if (mcEvent && mcEvent->primaryVertex())
+    pythia->setVertex(mcEvent->primaryVertex()->position().xyz());
+
+  g2t_pythia_st* pythiaTable = Pg2t_pythia->GetTable();
+
+  pythia->setProcessId(pythiaTable->subprocess_id);
+  pythia->setS(pythiaTable->mand_s);
+  pythia->setT(pythiaTable->mand_t);
+  pythia->setU(pythiaTable->mand_u);
+  pythia->setPt(pythiaTable->hard_p);
+  pythia->setCosTheta(pythiaTable->cos_th);
+  pythia->setX1(pythiaTable->bjor_1);
+  pythia->setX2(pythiaTable->bjor_2);
+  pythia->setALL(partonic_all);
+  pythia->setALL_LO(weight_LO);
+  pythia->setALL_NLO(weight_NLO);
+  pythia->setALL_NLO_g0(weight_NLO_g0);
+  pythia->setALL_NLO_gmax(weight_NLO_gmax);
+  pythia->setALL_NLO_gmin(weight_NLO_gmin);
+
+  particle_st* particleTable = particleTabPtr->GetTable();
+
+  for (int i = 4; i < 8; ++i) pythia->addParton(particleTable[i]);
 }
