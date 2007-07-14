@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.49 2007/07/13 06:19:43 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.50 2007/07/14 13:52:16 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.50  2007/07/14 13:52:16  bouchet
+// add method to fill with default pedestal/noise values if no table is found
+//
 // Revision 1.49  2007/07/13 06:19:43  bouchet
 // display of number of reconstructed hits corrected
 //
@@ -250,7 +253,7 @@ ClassImp(StSsdPointMaker)
 	matchisto_[ii]->SetYTitle("NSide ADC count");
 	matchisto_[ii]->SetZTitle("(1p-1n) hits");
       }
-    if (Debug() >1) DeclareNtuple();
+    DeclareNtuple();
   }
   return StMaker::Init();
 }
@@ -302,15 +305,14 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
     m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
     if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
     else {
-      LOG_INFO<<"InitRun : printing few pedestal/noise values"<<endm;
-      Zero = 0;
-      Read_Strip(m_noise2,&Zero); 
+      LOG_INFO<<"InitRun : old Table(ssdStripCalib) is used"<<endm;
     }
   }
   else {
     m_noise3 = (St_ssdNoise*)GetDataBase("Calibrations/ssd/ssdNoise");
-    if (m_noise3)  {LOG_INFO << "InitRun : access to ssdNoise - will use this table" << endm;}
     if (!m_noise3) {LOG_ERROR << "InitRun : No access to ssdNoise - will use the default noise and pedestal values" << endm;}
+    else{
+      LOG_INFO << "InitRun : new Table(ssdNoise) is used" << endm;}
   }
   (UseCalibration==1)?FillCalibTable():FillDefaultCalibTable();
   /*
@@ -330,7 +332,7 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
 void StSsdPointMaker::DeclareNtuple(){
   
   TFile *f = GetTFile();
-  if (f) {
+  if (f){
     f->cd();
     string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag:idClusP:idClusN:position_0:position_1:xl:yl";
     mHitNtuple      = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
@@ -1075,18 +1077,18 @@ void StSsdPointMaker::PrintInfo()
   if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero)
+void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib)
 {
   ssdStripCalib_st *noise = strip_calib->GetTable();
   Int_t  mSsdLayer = 7;
-  
+  LOG_INFO << "Read_Strip : printing few pedestal/noise values " << endm;
   Int_t idWaf  = 0;
   Int_t iWaf   = 0;
   Int_t iLad   = 0;
+  Int_t iZero  = 0;
   Int_t nStrip = 0;
   Int_t iSide  = 0;
   Int_t iOver  = 0;
-  Int_t iZero  = 0;
   Int_t iUnder = 0;
   Int_t iGood  = 0;
   for (Int_t i = 0 ; i < strip_calib->GetNRows(); i++)
@@ -1122,14 +1124,13 @@ void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero)
     LOG_WARN <<"ReadStrip: Number of underf  : "<<iUnder<<endm;}
   if (iOver>0){
     LOG_WARN <<"ReadStrip: Number of overf   : "<<iOver<<endm;}
-  *Zero = iZero;
  }
 
 //_____________________________________________________________________________
 void StSsdPointMaker::Read_Strip(St_ssdNoise *strip)
 {
-    ssdNoise_st *noise = strip->GetTable();
-
+  ssdNoise_st *noise = strip->GetTable();
+  LOG_INFO << " ReadStrip : printing few pedestal/noise values "<< endm;
   Int_t  mNWaferPerLadder = 16;
   Int_t iWaf              = 0;
   Int_t iLad              = 0;
@@ -1494,24 +1495,29 @@ Int_t StSsdPointMaker::ReadNoiseTable(StSsdBarrel *mySsd,Int_t year){
   if(year<7)
     {
       Int_t noiseTableSize = 0; 
-      printf("iZero=%d\n",Zero);     
-      if ((!m_noise2)||(Zero==491520))
+      if (!m_noise2)
 	{
 	  LOG_WARN << "Make : No pedestal and noise values (ssdStripCalib table missing), will use default values" <<endm;
+	  noiseTableSize = mySsd->readNoiseDefault(mDynamicControl);
 	}
       else
 	{
-	  LOG_INFO << " Pedestal file will use new Table"<<endm;
+	  Read_Strip(m_noise2);
 	  noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
 	}
     }
   else if (year>=7){
-    if(m_noise3)
+    if(!m_noise3)
       {
-	Read_Strip(m_noise3);
-	LOG_INFO << " Pedestal file will use new Table "<< endm;
-	noiseTableSize = mySsd->readNoiseFromTable(m_noise3,mDynamicControl);
+	LOG_WARN << "Make : No pedestal and noise values (ssdNoise table missing), will use default values" << endm;
+	noiseTableSize = mySsd->readNoiseDefault(mDynamicControl);
       }
+    else
+      if(m_noise3)
+	{
+	  Read_Strip(m_noise3);
+	  noiseTableSize = mySsd->readNoiseFromTable(m_noise3,mDynamicControl);
+	}
   }
   return noiseTableSize;  
 }
