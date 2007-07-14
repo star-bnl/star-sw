@@ -14,9 +14,9 @@ ClassImp(StBarrelEmcCluster);
 ostream& operator<<(ostream& out, const StBarrelEmcCluster& cluster)
 {
   out << "Energy [GeV]:\t" << cluster.energy() << '\n';
-  out << "Transverse energy [GeV]:\t" << cluster.et() << '\n';
-  out << "Eta:\t" << cluster.eta() << '\n';
-  out << "Phi [radians]:\t" << cluster.phi() << '\n';
+  out << "Transverse energy [GeV]:\t" << cluster.momentum().Pt() << '\n';
+  out << "Eta:\t" << cluster.momentum().Eta() << '\n';
+  out << "Phi [radians]:\t" << cluster.momentum().Phi() << '\n';
   out << "Position [cm]: [ x = " << cluster.position().x() << ", y = " << cluster.position().y() << ", z = " << cluster.position().z() << " ]\n";
 
   out << "Tower id:\n";

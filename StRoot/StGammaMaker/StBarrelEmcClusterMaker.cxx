@@ -5,6 +5,8 @@
 //
 
 #include "StEmcUtil/projection/StEmcPosition.h"
+#include "StGammaEventMaker.h"
+#include "StGammaEvent.h"
 #include "StGammaRawMaker.h"
 #include "StBarrelEmcCluster.h"
 #include "StBarrelEmcClusterMaker.h"
@@ -16,6 +18,10 @@ ClassImp(StBarrelEmcClusterMaker);
 
 int StBarrelEmcClusterMaker::Init()
 {
+  // Get gamma event maker
+  mGammaEventMaker = (StGammaEventMaker*)GetMaker("gemaker");
+  assert(mGammaEventMaker);
+
   // Get gamma raw maker
   mGammaRawMaker = (StGammaRawMaker*)GetMaker("grawmaker");
   assert(mGammaRawMaker);
@@ -24,13 +30,20 @@ int StBarrelEmcClusterMaker::Init()
 
 void StBarrelEmcClusterMaker::Clear(Option_t* option)
 {
-  for (unsigned int i = 0; i < mClusters.size(); ++i) delete mClusters[i];
+  mVertex.SetXYZ(0,0,0);
+  for (unsigned i = 0; i < mClusters.size(); ++i) {
+    delete mClusters[i];
+    mClusters[i] = 0;
+  }
   mClusters.clear();
   StMaker::Clear(option);
 }
 
 int StBarrelEmcClusterMaker::Make()
 {
+  // Get vertex
+  if (mGammaEventMaker->event()) mVertex = mGammaEventMaker->event()->vertex();
+
   // Loop over towers
   for (int id = 1; id <= 4800; ++id) {
     if (StGammaTower* tower = mGammaRawMaker->tower(id, kBEmcTower)) {
@@ -96,8 +109,12 @@ StBarrelEmcCluster* StBarrelEmcClusterMaker::makeCluster(StGammaTower* tower) co
 
   position *= 1 / energy;
 
-  cluster->setPosition(position);
   cluster->setEnergy(energy);
+  cluster->setPosition(position);
+
+  TVector3 momentum = position - mVertex;
+  momentum.SetMag(energy);
+  cluster->setMomentum(momentum);
 
   return cluster;
 }
