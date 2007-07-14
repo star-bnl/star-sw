@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.30 2007/07/12 17:07:18 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.31 2007/07/14 13:52:17 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.31  2007/07/14 13:52:17  bouchet
+// add method to fill with default pedestal/noise values if no table is found
+//
 // Revision 1.30  2007/07/12 17:07:18  bouchet
 // add switch to read old ssdStripCalib Table and new ssdNoise Table
 //
@@ -203,7 +206,7 @@ class StSsdPointMaker : public StMaker {
   void PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
-  void Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero);
+  void Read_Strip(St_ssdStripCalib *strip_calib);
   void Read_Strip(St_ssdNoise *strip);
   void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
   void WriteMatchedStrips(StSsdBarrel *mySsd);//! 
@@ -240,7 +243,6 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto_[20];
   TH2F  *MatchedClusterP;//!
   TH2F  *MatchedClusterN;//!
-  Int_t Zero;
   Int_t UseCalibration ;
   Int_t NEvent;
   Int_t year;
@@ -249,7 +251,7 @@ class StSsdPointMaker : public StMaker {
   Float_t ratioP[20][16];
   Float_t ratioN[20][16];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.30 2007/07/12 17:07:18 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.31 2007/07/14 13:52:17 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
