@@ -20,6 +20,9 @@ class StGammaEvent;
 class StGammaTower;
 class StGammaStrip;
 
+class StPythiaEvent;
+class StGammaPythiaMaker;
+
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 class StGammaEventMaker : public StMaker
@@ -39,6 +42,9 @@ class StGammaEventMaker : public StMaker
  protected:
 
   StGammaEvent *mGammaEvent;
+  StPythiaEvent* mPythia;
+  StGammaPythiaMaker* mPythiaMaker;
+
   ClassDef(StGammaEventMaker,1);
 };
 
