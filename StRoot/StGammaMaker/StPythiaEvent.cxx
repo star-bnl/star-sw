@@ -27,14 +27,14 @@ StPythiaEvent::StPythiaEvent()
   mALL_NLO_g0 = 0;
   mALL_NLO_gmax = 0;
   mALL_NLO_gmin = 0;
-  mPartons = new TClonesArray("TParticle");
+  mParticles = new TClonesArray("TParticle");
 }
 
 StPythiaEvent::~StPythiaEvent()
 {
   Clear();
-  if (mPartons) {
-    delete mPartons;
-    mPartons = 0;
+  if (mParticles) {
+    delete mParticles;
+    mParticles = 0;
   }
 }

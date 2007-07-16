@@ -686,5 +686,12 @@ void StGammaPythiaMaker::fillPythiaEvent(StPythiaEvent* pythia)
 
   particle_st* particleTable = particleTabPtr->GetTable();
 
-  for (int i = 4; i < 8; ++i) pythia->addParton(particleTable[i]);
+  for (int i = 4; i < 8; ++i) pythia->addParticle(particleTable[i]);
+
+  copy(Pion04Mom.begin(), Pion04Mom.end(), back_inserter(pythia->pion04Mom()));
+  copy(Prompt4Mom.begin(), Prompt4Mom.end(), back_inserter(pythia->prompt4Mom()));
+  copy(Decay4Mom.begin(), Decay4Mom.end(), back_inserter(pythia->decay4Mom()));
+  copy(Frag4Mom.begin(), Frag4Mom.end(), back_inserter(pythia->frag4Mom()));
+  copy(Initial4Mom.begin(), Initial4Mom.end(), back_inserter(pythia->frag4Mom()));
+  copy(Final4Mom.begin(), Final4Mom.end(), back_inserter(pythia->final4Mom()));
 }
