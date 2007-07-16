@@ -55,6 +55,9 @@ Int_t StGammaEventMaker::Make()
       pythia = new StPythiaEvent;
       mGammaEvent->SetPythia(pythia);
     }
+    else {
+      pythia->Clear();
+    }
     pythiaMaker->fillPythiaEvent(pythia);
   }
 

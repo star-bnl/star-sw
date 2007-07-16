@@ -186,7 +186,7 @@ void StGammaRawMaker::GetBarrel(){
   //And now we can implement Alex's new StEmcAdc2EMaker test
   StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
   if (!adc2e) {
-    cout <<"adc2e in chain"<<endl;
+    LOG_DEBUG << "adc2e in chain" << endm;
   }
   else {
     mCorrupt = adc2e->isCorrupted();
