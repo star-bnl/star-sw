@@ -688,10 +688,21 @@ void StGammaPythiaMaker::fillPythiaEvent(StPythiaEvent* pythia)
 
   for (int i = 4; i < 8; ++i) pythia->addParticle(particleTable[i]);
 
-  copy(Pion04Mom.begin(), Pion04Mom.end(), back_inserter(pythia->pion04Mom()));
-  copy(Prompt4Mom.begin(), Prompt4Mom.end(), back_inserter(pythia->prompt4Mom()));
-  copy(Decay4Mom.begin(), Decay4Mom.end(), back_inserter(pythia->decay4Mom()));
-  copy(Frag4Mom.begin(), Frag4Mom.end(), back_inserter(pythia->frag4Mom()));
-  copy(Initial4Mom.begin(), Initial4Mom.end(), back_inserter(pythia->frag4Mom()));
-  copy(Final4Mom.begin(), Final4Mom.end(), back_inserter(pythia->final4Mom()));
+  for (unsigned i = 0; i < Pion04Mom.size(); ++i)
+    pythia->addLorentzVector(Pion04Mom[i], pythia->pion04Mom());
+
+  for (unsigned i = 0; i < Prompt4Mom.size(); ++i)
+    pythia->addLorentzVector(Prompt4Mom[i], pythia->prompt4Mom());
+
+  for (unsigned i = 0; i < Decay4Mom.size(); ++i)
+    pythia->addLorentzVector(Decay4Mom[i], pythia->decay4Mom());
+
+  for (unsigned i = 0; i < Frag4Mom.size(); ++i)
+    pythia->addLorentzVector(Frag4Mom[i], pythia->frag4Mom());
+
+  for (unsigned i = 0; i < Initial4Mom.size(); ++i)
+    pythia->addLorentzVector(Initial4Mom[i], pythia->initial4Mom());
+
+  for (unsigned i = 0; i < Final4Mom.size(); ++i)
+    pythia->addLorentzVector(Final4Mom[i], pythia->final4Mom());
 }

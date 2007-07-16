@@ -41,15 +41,30 @@ public:
   float ALL_NLO_g0() const;
   float ALL_NLO_gmax() const;
   float ALL_NLO_gmin() const;
+
   TClonesArray* particles();
-  TParticle* particle(int i);
+  TClonesArray* pion04Mom();
+  TClonesArray* prompt4Mom();
+  TClonesArray* decay4Mom();
+  TClonesArray* frag4Mom();
+  TClonesArray* initial4Mom();
+  TClonesArray* final4Mom();
+
   int numberOfParticles() const;
-  vector<TLorentzVector>& pion04Mom();
-  vector<TLorentzVector>& prompt4Mom();
-  vector<TLorentzVector>& decay4Mom();
-  vector<TLorentzVector>& frag4Mom();
-  vector<TLorentzVector>& initial4Mom();
-  vector<TLorentzVector>& final4Mom();
+  int numberOfPion0() const;
+  int numberOfPrompt() const;
+  int numberOfDecay() const;
+  int numberOfFrag() const;
+  int numberOfInitial() const;
+  int numberOfFinal() const;
+
+  TParticle* particle(int i);
+  TLorentzVector& pion0(int i);
+  TLorentzVector& prompt(int i);
+  TLorentzVector& decay(int i);
+  TLorentzVector& frag(int i);
+  TLorentzVector& initial(int i);
+  TLorentzVector& final(int i);
 
   void Clear(Option_t* option = "");
   void setRunId(int id);
@@ -70,6 +85,7 @@ public:
   void setALL_NLO_gmax(float a);
   void setALL_NLO_gmin(float a);
   void addParticle(const particle_st& particle);
+  void addLorentzVector(const TLorentzVector& v, TClonesArray* a);
 
 private:
   int mRunId;
@@ -89,14 +105,14 @@ private:
   float mALL_NLO_g0;
   float mALL_NLO_gmax;
   float mALL_NLO_gmin;
-  TClonesArray* mParticles;
 
-  vector<TLorentzVector> mPion04Mom;    // Four-momentum of pions in pythia record which may or may not decay in geant record
-  vector<TLorentzVector> mPrompt4Mom;   // Four-momentum of prompt photons in pythia record
-  vector<TLorentzVector> mDecay4Mom;    // Four-momentum of decay photon from pythia and geant record
-  vector<TLorentzVector> mFrag4Mom;     // Four-momentum of fragmentation photons
-  vector<TLorentzVector> mInitial4Mom;  // Four-momentum of initial state radiation
-  vector<TLorentzVector> mFinal4Mom;    // Four-momentum of final state radiation  
+  TClonesArray* mParticles;
+  TClonesArray* mPion04Mom;    // Four-momentum of pions in pythia record which may or may not decay in geant record
+  TClonesArray* mPrompt4Mom;   // Four-momentum of prompt photons in pythia record
+  TClonesArray* mDecay4Mom;    // Four-momentum of decay photon from pythia and geant record
+  TClonesArray* mFrag4Mom;     // Four-momentum of fragmentation photons
+  TClonesArray* mInitial4Mom;  // Four-momentum of initial state radiation
+  TClonesArray* mFinal4Mom;    // Four-momentum of final state radiation  
 
   ClassDef(StPythiaEvent, 1);
 };
@@ -120,15 +136,30 @@ inline float StPythiaEvent::ALL_NLO() const { return mALL_NLO; }
 inline float StPythiaEvent::ALL_NLO_g0() const { return mALL_NLO_g0; }
 inline float StPythiaEvent::ALL_NLO_gmax() const { return mALL_NLO_gmax; }
 inline float StPythiaEvent::ALL_NLO_gmin() const { return mALL_NLO_gmin; }
+
 inline TClonesArray* StPythiaEvent::particles() { return mParticles; }
-inline TParticle* StPythiaEvent::particle(int i) { return (TParticle*)mParticles->At(i); }
+inline TClonesArray* StPythiaEvent::pion04Mom() { return mPion04Mom; }
+inline TClonesArray* StPythiaEvent::prompt4Mom() { return mPrompt4Mom; }
+inline TClonesArray* StPythiaEvent::decay4Mom() { return mDecay4Mom; }
+inline TClonesArray* StPythiaEvent::frag4Mom() { return mFrag4Mom; }
+inline TClonesArray* StPythiaEvent::initial4Mom() { return mInitial4Mom; }
+inline TClonesArray* StPythiaEvent::final4Mom() { return mFinal4Mom; }
+
 inline int StPythiaEvent::numberOfParticles() const { return mParticles->GetEntriesFast(); }
-inline vector<TLorentzVector>& StPythiaEvent::pion04Mom() { return mPion04Mom; }
-inline vector<TLorentzVector>& StPythiaEvent::prompt4Mom() { return mPrompt4Mom; }
-inline vector<TLorentzVector>& StPythiaEvent::decay4Mom() { return mDecay4Mom; }
-inline vector<TLorentzVector>& StPythiaEvent::frag4Mom() { return mFrag4Mom; }
-inline vector<TLorentzVector>& StPythiaEvent::initial4Mom() { return mInitial4Mom; }
-inline vector<TLorentzVector>& StPythiaEvent::final4Mom() { return mFinal4Mom; }
+inline int StPythiaEvent::numberOfPion0() const { return mPion04Mom->GetEntriesFast(); }
+inline int StPythiaEvent::numberOfPrompt() const { return mPrompt4Mom->GetEntriesFast(); }
+inline int StPythiaEvent::numberOfDecay() const { return mDecay4Mom->GetEntriesFast(); }
+inline int StPythiaEvent::numberOfFrag() const { return mFrag4Mom->GetEntriesFast(); }
+inline int StPythiaEvent::numberOfInitial() const { return mInitial4Mom->GetEntriesFast(); }
+inline int StPythiaEvent::numberOfFinal() const { return mFinal4Mom->GetEntriesFast(); }
+
+inline TParticle* StPythiaEvent::particle(int i) { return (TParticle*)mParticles->At(i); }
+inline TLorentzVector& StPythiaEvent::pion0(int i) { return *(TLorentzVector*)mPion04Mom->At(i); }
+inline TLorentzVector& StPythiaEvent::prompt(int i) { return *(TLorentzVector*)mPrompt4Mom->At(i); }
+inline TLorentzVector& StPythiaEvent::decay(int i) { return *(TLorentzVector*)mDecay4Mom->At(i); }
+inline TLorentzVector& StPythiaEvent::frag(int i) { return *(TLorentzVector*)mFrag4Mom->At(i); }
+inline TLorentzVector& StPythiaEvent::initial(int i) { return *(TLorentzVector*)mInitial4Mom->At(i); }
+inline TLorentzVector& StPythiaEvent::final(int i) { return *(TLorentzVector*)mFinal4Mom->At(i); }
 
 inline void StPythiaEvent::addParticle(const particle_st& particle)
 {
@@ -143,7 +174,40 @@ inline void StPythiaEvent::addParticle(const particle_st& particle)
               TLorentzVector(particle.vhep));
 }
 
-inline void StPythiaEvent::Clear(Option_t* option) { mParticles->Clear(option); }
+inline void StPythiaEvent::addLorentzVector(const TLorentzVector& v, TClonesArray* a)
+{
+  new ((*a)[a->GetEntriesFast()]) TLorentzVector(v);
+}
+
+inline void StPythiaEvent::Clear(Option_t* option)
+{
+  mRunId = 0;
+  mEventId = 0;
+  mProcessId = 0;
+  mVertex.SetXYZ(0, 0, 0);
+  mS = 0;
+  mT = 0;
+  mU = 0;
+  mPt = 0;
+  mCosTheta = 0;
+  mX1 = 0;
+  mX2 = 0;
+  mALL = 0;
+  mALL_LO = 0;
+  mALL_NLO = 0;
+  mALL_NLO_g0 = 0;
+  mALL_NLO_gmax = 0;
+  mALL_NLO_gmin = 0;
+
+  mParticles->Clear(option);
+  mPion04Mom->Clear(option);
+  mPrompt4Mom->Clear(option);
+  mDecay4Mom->Clear(option);
+  mFrag4Mom->Clear(option);
+  mInitial4Mom->Clear(option);
+  mFinal4Mom->Clear(option);
+}
+
 inline void StPythiaEvent::setRunId(int id) { mRunId = id; }
 inline void StPythiaEvent::setEventId(int id) { mEventId = id; }
 inline void StPythiaEvent::setProcessId(int id) { mProcessId = id; }
