@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.4 2007/04/04 17:32:11 kocolosk Exp $
+ * $Id: StEmcGeom.h,v 1.5 2007/07/16 21:24:59 kocolosk Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.5  2007/07/16 21:24:59  kocolosk
+ * added projection against sub == -1 case in getId(phi,eta,softId).  Thanks Pibero
+ *
  * Revision 1.4  2007/04/04 17:32:11  kocolosk
  * Added softId-based versions of getEta, getTheta, and getPhi.  Also added getId(phi,eta,&softId).  Implemented const-correctness and used meaningful argument names in method declarations to improve readability
  *
@@ -356,7 +359,7 @@ inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, I
 inline Int_t StEmcGeom::getId(const Float_t phi, const Float_t eta, Int_t &softId) const
 {
 	Int_t m,e,s;
-	if(getBin(phi,eta,m,e,s) == 0) {
+	if(getBin(phi,eta,m,e,s) == 0 && s != -1) {
 		return getId(m,e,s,softId);
 	}
 	return 1;
