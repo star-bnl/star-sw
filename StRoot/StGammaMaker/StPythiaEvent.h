@@ -9,6 +9,9 @@
 #ifndef ST_PYTHIA_EVENT
 #define ST_PYTHIA_EVENT
 
+#include <vector>
+using std::vector;
+
 #include "TParticle.h"
 #include "TClonesArray.h"
 
@@ -38,11 +41,17 @@ public:
   float ALL_NLO_g0() const;
   float ALL_NLO_gmax() const;
   float ALL_NLO_gmin() const;
-  TClonesArray* partons();
-  TParticle* parton(int i);
-  int numberOfPartons() const;
-  void Clear(Option_t* option = "");
+  TClonesArray* particles();
+  TParticle* particle(int i);
+  int numberOfParticles() const;
+  vector<TLorentzVector>& pion04Mom();
+  vector<TLorentzVector>& prompt4Mom();
+  vector<TLorentzVector>& decay4Mom();
+  vector<TLorentzVector>& frag4Mom();
+  vector<TLorentzVector>& initial4Mom();
+  vector<TLorentzVector>& final4Mom();
 
+  void Clear(Option_t* option = "");
   void setRunId(int id);
   void setEventId(int id);
   void setProcessId(int id);
@@ -60,7 +69,7 @@ public:
   void setALL_NLO_g0(float a);
   void setALL_NLO_gmax(float a);
   void setALL_NLO_gmin(float a);
-  void addParton(const particle_st& parton);
+  void addParticle(const particle_st& particle);
 
 private:
   int mRunId;
@@ -80,7 +89,14 @@ private:
   float mALL_NLO_g0;
   float mALL_NLO_gmax;
   float mALL_NLO_gmin;
-  TClonesArray* mPartons;
+  TClonesArray* mParticles;
+
+  vector<TLorentzVector> mPion04Mom;    // Four-momentum of pions in pythia record which may or may not decay in geant record
+  vector<TLorentzVector> mPrompt4Mom;   // Four-momentum of prompt photons in pythia record
+  vector<TLorentzVector> mDecay4Mom;    // Four-momentum of decay photon from pythia and geant record
+  vector<TLorentzVector> mFrag4Mom;     // Four-momentum of fragmentation photons
+  vector<TLorentzVector> mInitial4Mom;  // Four-momentum of initial state radiation
+  vector<TLorentzVector> mFinal4Mom;    // Four-momentum of final state radiation  
 
   ClassDef(StPythiaEvent, 1);
 };
@@ -104,25 +120,30 @@ inline float StPythiaEvent::ALL_NLO() const { return mALL_NLO; }
 inline float StPythiaEvent::ALL_NLO_g0() const { return mALL_NLO_g0; }
 inline float StPythiaEvent::ALL_NLO_gmax() const { return mALL_NLO_gmax; }
 inline float StPythiaEvent::ALL_NLO_gmin() const { return mALL_NLO_gmin; }
-inline TClonesArray* StPythiaEvent::partons() { return mPartons; }
-inline TParticle* StPythiaEvent::parton(int i) { return (TParticle*)mPartons->At(i); }
-inline int StPythiaEvent::numberOfPartons() const { return mPartons->GetEntriesFast(); }
+inline TClonesArray* StPythiaEvent::particles() { return mParticles; }
+inline TParticle* StPythiaEvent::particle(int i) { return (TParticle*)mParticles->At(i); }
+inline int StPythiaEvent::numberOfParticles() const { return mParticles->GetEntriesFast(); }
+inline vector<TLorentzVector>& StPythiaEvent::pion04Mom() { return mPion04Mom; }
+inline vector<TLorentzVector>& StPythiaEvent::prompt4Mom() { return mPrompt4Mom; }
+inline vector<TLorentzVector>& StPythiaEvent::decay4Mom() { return mDecay4Mom; }
+inline vector<TLorentzVector>& StPythiaEvent::frag4Mom() { return mFrag4Mom; }
+inline vector<TLorentzVector>& StPythiaEvent::initial4Mom() { return mInitial4Mom; }
+inline vector<TLorentzVector>& StPythiaEvent::final4Mom() { return mFinal4Mom; }
 
-inline void StPythiaEvent::addParton(const particle_st& parton)
+inline void StPythiaEvent::addParticle(const particle_st& particle)
 {
-  new ((*mPartons)[mPartons->GetEntriesFast()])
-    TParticle(parton.idhep,
-	      parton.isthep,
-              parton.jmohep[0],
-	      parton.jmohep[1],
-              parton.jdahep[0],
-              parton.jdahep[1],
-              TLorentzVector(parton.phep),
-              TLorentzVector(parton.vhep));
+  new ((*mParticles)[mParticles->GetEntriesFast()])
+    TParticle(particle.idhep,
+	      particle.isthep,
+              particle.jmohep[0],
+	      particle.jmohep[1],
+              particle.jdahep[0],
+              particle.jdahep[1],
+              TLorentzVector(particle.phep),
+              TLorentzVector(particle.vhep));
 }
 
-inline void StPythiaEvent::Clear(Option_t* option) { mPartons->Clear(option); }
-
+inline void StPythiaEvent::Clear(Option_t* option) { mParticles->Clear(option); }
 inline void StPythiaEvent::setRunId(int id) { mRunId = id; }
 inline void StPythiaEvent::setEventId(int id) { mEventId = id; }
 inline void StPythiaEvent::setProcessId(int id) { mProcessId = id; }
