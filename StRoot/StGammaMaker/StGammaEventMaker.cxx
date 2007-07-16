@@ -17,6 +17,12 @@ StGammaEventMaker::StGammaEventMaker(const Char_t *name):StMaker(name) { /* nada
 Int_t StGammaEventMaker::Init()
 {
   mGammaEvent=new StGammaEvent();
+  mPythia = 0;
+  mPythiaMaker = (StGammaPythiaMaker*)GetMaker("GammaPythia");
+  if (mPythiaMaker) {
+    mPythia = new StPythiaEvent;
+    mGammaEvent->SetPythia(mPythia);
+  }
   AddObj(mGammaEvent,".data"); // ok, but what can I do with this?
   return StMaker::Init();
 }
@@ -47,19 +53,8 @@ Int_t StGammaEventMaker::Make()
   mGammaEvent -> SetEventNumber( StMuDst::event()->eventNumber() );
   mGammaEvent -> SetMagneticField( StMuDst::event()->magneticField() );
 
-  // Get Pythia event if Monte Carlo
-  StGammaPythiaMaker* pythiaMaker = (StGammaPythiaMaker*)GetMaker("GammaPythia");
-  if (pythiaMaker) {
-    StPythiaEvent* pythia = mGammaEvent->pythia();
-    if (!pythia) {
-      pythia = new StPythiaEvent;
-      mGammaEvent->SetPythia(pythia);
-    }
-    else {
-      pythia->Clear();
-    }
-    pythiaMaker->fillPythiaEvent(pythia);
-  }
+  // Get Pythia record if Monte Carlo
+  if (mPythiaMaker) mPythiaMaker->fillPythiaEvent(mPythia);
 
   return kStOK;
 }
@@ -68,5 +63,7 @@ Int_t StGammaEventMaker::Make()
 void StGammaEventMaker::Clear(Option_t *opts)
 {
   mGammaEvent->Clear();
+  mPythia->Clear();
+  StMaker::Clear(opts);
 }
 
