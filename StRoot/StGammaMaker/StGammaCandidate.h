@@ -113,6 +113,11 @@ class StGammaCandidate : public TObject
   TVector3 position() const { return mPosition; }
   Float_t  energy() const { return mEnergy; }
   Float_t  seedEnergy() const { return mSeedEnergy; }
+  Float_t  pre1Energy() const { return mPre1Energy; }
+  Float_t  pre2Energy() const { return mPre2Energy; }
+  Float_t  postEnergy() const { return mPostEnergy; }
+  Float_t  smduEnergy() const { return mSmduEnergy; }
+  Float_t  smdvEnergy() const { return mSmdvEnergy; }
 
 
 
