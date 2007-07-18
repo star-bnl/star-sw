@@ -63,7 +63,7 @@ Int_t StGammaEventMaker::Make()
 void StGammaEventMaker::Clear(Option_t *opts)
 {
   mGammaEvent->Clear(opts);
-  mPythia->Clear(opts);
+  if (mPythia) mPythia->Clear(opts);
   StMaker::Clear(opts);
 }
 
