@@ -13,8 +13,8 @@ void SpinAnalysisTreeReaderPDSF(const long nevents = 20) {
     reader->connectNeutralJets      = false;
     reader->connectChargedPions     = true;
     reader->connectBemcPions        = true;
+    reader->connectBemcElectrons    = true;
     reader->connectEemcPions        = false; //not added yet
-    reader->connectBemcElectrons    = false; //not added yet
     
     //optionally filter events by run and trigger
     //reader->selectRunlist("$STAR/StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
