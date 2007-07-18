@@ -17,7 +17,7 @@ void SpinAnalysisTreeReaderPDSF(const long nevents = 20) {
     reader->connectBemcElectrons    = false; //not added yet
     
     //optionally filter events by run and trigger
-    //reader->selectRunList("$STAR/StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
+    //reader->selectRunlist("$STAR/StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
     reader->selectRun(7143025);
     
     //select events that passed hardware OR software trigger for any trigger in list
@@ -83,7 +83,8 @@ void SpinAnalysisTreeReaderPDSF(const long nevents = 20) {
         for(int j=0; j<reader->nJets(); j++) {
             StJet* aJet = reader->jet(j);
             double R = aJet->btowEtSum/aJet->Et();
-            printf("jet pt=%7.4f  jet eta=% 1.4f  det eta=% 1.4f  E_neu/E_tot=%1.4f\n",aJet->jetPt,aJet->jetEta,aJet->detEta(bestVert->position()[2]),R);
+            if(bestVert) printf("jet pt=%7.4f  jet eta=% 1.4f  det eta=% 1.4f  E_neu/E_tot=%1.4f\n",aJet->jetPt,aJet->jetEta,aJet->detEta(bestVert->position()[2]),R);
+            else printf("jet pt=%7.4f  jet eta=% 1.4f  no vertex  E_neu/E_tot=%1.4f\n",aJet->jetPt,aJet->jetEta,R);
         }
         
         //charged pions

@@ -8,6 +8,10 @@
 
 #include "StSpinTreeReader.h"
 
+#include "TDirectory.h"
+#include "TFile.h"
+#include "TStopwatch.h"
+
 ClassImp(StSpinTreeReader)
 
 #include <fstream>
@@ -22,12 +26,15 @@ StSpinTreeReader::StSpinTreeReader(const char *treeName) : connectJets(true),
     mChainConeJetsEMC   = new TChain("ConeJetsEMC");
     mChainChargedPions  = new TChain("chargedPions");
     mChainBemcPions     = new TChain("bemcPions");
+    mChainBemcElectrons = new TChain("bemcElectrons");
     
     mEvent = new StJetSkimEvent();
     mConeJets = new TClonesArray("StJet",100);
     mConeJetsEMC = new TClonesArray("StJet",100);
     mChargedPions = new TClonesArray("StChargedPionTrack",100);
     mBemcPions = new TClonesArray("TPi0Candidate",100);
+    mBemcElectrons = new TClonesArray("StPrimaryElectron",100);
+    mBemcGlobalElectrons = new TClonesArray("StGlobalElectron",500);
 }
 
 StSpinTreeReader::~StSpinTreeReader() { 
@@ -36,12 +43,20 @@ StSpinTreeReader::~StSpinTreeReader() {
     delete mChainConeJetsEMC;
     delete mChainChargedPions;
     delete mChainBemcPions;
+    delete mChainBemcElectrons;
     delete mChain;
     
     delete mConeJets;
     delete mConeJetsEMC;
     delete mChargedPions;
     delete mBemcPions;
+    delete mBemcElectrons;
+    delete mBemcGlobalElectrons;
+    
+    if(mEventList){
+        delete mEventList;
+        mEventList = NULL;
+    }
 }
 
 StSpinTreeReader::StSpinTreeReader(const StSpinTreeReader & t) {
@@ -52,29 +67,12 @@ StSpinTreeReader& StSpinTreeReader::operator=(const StSpinTreeReader &rhs) {
     return *this;
 }
 
-/*int StSpinTreeReader::addFile(const char *path) {
-    return mChain->AddFile(path);
-}
-
-int StSpinTreeReader::addFileList(const char *path) {
-    int ret = 0;
-    std::ifstream filelist(path);
-    std::string currentFile;
-    while(!filelist.eof()) {
-        getline(filelist,currentFile);
-        if(currentFile.size() == 0) continue;
-        std::cout << "adding current file = " << currentFile << std::endl;
-        if(ret < addFile(currentFile.c_str())) ret++;
-    }
-    return ret;
-}*/
-
 void StSpinTreeReader::selectDataset(const char *path) {
     TString fullPath = path;
     fullPath.ReplaceAll("$STAR",getenv("STAR"));
     std::ifstream filelist(fullPath.Data());
     std::string currentFile;
-    while(!filelist.eof()) {
+    while(filelist.good()) {
         getline(filelist,currentFile);
         if(currentFile.size() == 0) continue;
         //std::cout << "adding current file = " << currentFile << std::endl;
@@ -105,19 +103,26 @@ void StSpinTreeReader::GetEntry(long i) {
         mChain->GetEntry(n);
     }
     else mChain->GetEntry(i);
+    
+    if(mCurrentFileName != mChain->GetFile()->GetName()) { 
+        mCurrentFileName = mChain->GetFile()->GetName();
+        std::cout << "now analyzing " << mCurrentFileName << std::endl;
+    }
 }
 
 void StSpinTreeReader::connect() {
     if(!mIsConnected) {
         //only use files in the filelist if the run is selected or runlist.empty()
+        if(mFileList.empty()) std::cout << "no files to analyze!  check your macro" << std::endl;
         for(map<int,std::string>::iterator it=mFileList.begin(); it!=mFileList.end(); it++) {
             if(mRunList.empty() || mRunList.count(it->first)) { 
-                cout << "adding " << it->second << endl;
+                std::cout << "adding " << it->second << std::endl;
                 mChain->AddFile(it->second.c_str());
                 if(connectJets)         mChainConeJets->AddFile(it->second.c_str());
                 if(connectNeutralJets)  mChainConeJetsEMC->AddFile(it->second.c_str());
                 if(connectChargedPions) mChainChargedPions->AddFile(it->second.c_str());
                 if(connectBemcPions)    mChainBemcPions->AddFile(it->second.c_str());
+                if(connectBemcElectrons)mChainBemcElectrons->AddFile(it->second.c_str());
             }
         }
                 
@@ -142,7 +147,11 @@ void StSpinTreeReader::connect() {
             mChain->AddFriend("bemcPions");
             mChain->SetBranchAddress("bemcPions",&mBemcPions);
         }
-        
+        if(connectBemcElectrons) {
+            mChain->AddFriend("bemcElectrons");
+            mChain->SetBranchAddress("PrimaryElectrons",&mBemcElectrons);
+            mChain->SetBranchAddress("GlobalElectrons",&mBemcGlobalElectrons);
+        }
         if(connectEemcPions) {
             //mEemcPions = new TClonesArray("StEEmcPair",100);
             //mChain->SetBranchAddress("eemcNeutralPions",&mEemcPions);
@@ -168,11 +177,13 @@ void StSpinTreeReader::connect() {
                 else s+= "mTriggers.mShouldFire==1 )";
             }
             if(s.Length()) {
-                std::cout << "Processing the chain using a TEventList that looks like \n" << s << std::endl;
-                mChain->Draw(">>elist",s.Data(),"entrylist");
-                mEventList = (TEventList*)gDirectory->Get("elist");
+                std::cout << "begin generation of TEventList with contents \n" << s << std::endl;
+                TStopwatch timer;
+                mChain->Draw(">>elist_spinTreeReader",s.Data(),"entrylist");
+                mEventList = (TEventList*)gDirectory->Get("elist_spinTreeReader");
                 mChain->SetEventList(mEventList);
-                std::cout << "Eventlist stored" << std::endl;
+                std::cout << "TEventList generated and stored in " << timer.CpuTime() 
+                    << " CPU / " << timer.RealTime() << " real seconds" << std::endl;
             }
         }
         
