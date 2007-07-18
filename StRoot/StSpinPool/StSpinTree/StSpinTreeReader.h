@@ -3,6 +3,7 @@
  *  StarSpinLibraries
  *
  *  Created by Adam Kocoloski on 5/7/07.
+ *  Last updated 7/4/07.
  *
  */
 
@@ -18,6 +19,8 @@
 #include "StJetMaker/StJet.h"
 #include "StSpinPool/StChargedPionAnalysisMaker/StChargedPionTrack.h"
 #include "TPi0Event.h"
+#include "StPrimaryElectron.h"
+#include "StGlobalElectron.h"
 //#include "StEEmcPool/StEEmcPi0Mixer/StEEmcPair.h"
 
 class StSpinTreeReader {
@@ -39,8 +42,8 @@ public:
     bool connectNeutralJets;
     bool connectChargedPions;
     bool connectBemcPions;
-    bool connectEemcPions;
     bool connectBemcElectrons;
+    bool connectEemcPions;
     
     //setters
     void selectRunlist(const char *path);
@@ -55,30 +58,37 @@ public:
     void setEventList(TEventList *elist) {mEventList = elist;}
     
     //accessors
-    StJetSkimEvent* event() {return mEvent;}
+    const TChain* chain() const {return mChain;}
+    
+    const StJetSkimEvent* event() const {return mEvent;}
     
     int nJets() {return mConeJets->GetEntries();}
-    TClonesArray* jets() {return mConeJets;}
-    StJet* jet(int i) {return (StJet*)mConeJets->At(i);}
+    const TClonesArray* jets() const {return mConeJets;}
+    const StJet* jet(int i) const {return (StJet*)mConeJets->At(i);}
     
     int nNeutralJets() {return mConeJetsEMC->GetEntries();}
-    TClonesArray* neutralJets() {return mConeJetsEMC;}
-    StJet* neutralJet(int i) {return (StJet*)mConeJetsEMC->At(i);}
+    const TClonesArray* neutralJets() const {return mConeJetsEMC;}
+    const StJet* neutralJet(int i) const {return (StJet*)mConeJetsEMC->At(i);}
     
     int nChargedPions() {return mChargedPions->GetEntries();}
-    TClonesArray* chargedPions() {return mChargedPions;}
-    StChargedPionTrack* chargedPion(int i) {return (StChargedPionTrack*)mChargedPions->At(i);}
+    const TClonesArray* chargedPions() const {return mChargedPions;}
+    const StChargedPionTrack* chargedPion(int i) const {return (StChargedPionTrack*)mChargedPions->At(i);}
     
     int nBemcPions() {return mBemcPions->GetEntries();}
-    TClonesArray* bemcPions() {return mBemcPions;}
-    TPi0Candidate* bemcPion(int i) {return (TPi0Candidate*)mBemcPions->At(i);}
+    const TClonesArray* bemcPions() const {return mBemcPions;}
+    const TPi0Candidate* bemcPion(int i) const {return (TPi0Candidate*)mBemcPions->At(i);}
+    
+    int nBemcElectrons() {return mBemcElectrons->GetEntries();}
+    const TClonesArray* bemcElectrons() const {return mBemcElectrons;}
+    const StPrimaryElectron* bemcElectron(int i) const {return (StPrimaryElectron*)mBemcElectrons->At(i);}
+    
+    int nBemcGlobalElectrons() {return mBemcGlobalElectrons->GetEntries();}
+    const TClonesArray* bemcGlobalElectrons() const {return mBemcGlobalElectrons;}
+    const StGlobalElectron* bemcGlobalElectron(int i) const {return (StGlobalElectron*)mBemcGlobalElectrons->At(i);}
     
     //int nEemcPions() {return mEemcNeutralPions->GetEntries();}
     //TClonesArray* eemcPions() {return mEemcNeutralPions;}
     //StEEmcPair* eemcPion(int i) {return (StEEmcPair*)mEemcNeutralPions->At(i);}
-    
-    int nBemcElectrons() {return 0;}
-    TClonesArray* bemcElectrons() {return NULL;}
     
 private:
     StJetSkimEvent *mEvent;             //!
@@ -86,6 +96,8 @@ private:
     TClonesArray *mConeJetsEMC;         //!
     TClonesArray *mChargedPions;        //!
     TClonesArray *mBemcPions;           //!
+    TClonesArray *mBemcElectrons;       //!
+    TClonesArray *mBemcGlobalElectrons; //!
     TClonesArray *mEemcPions;           //!
         
     std::map<int,std::string> mFileList;//!
@@ -100,7 +112,10 @@ private:
     TChain *mChainConeJetsEMC;          //!
     TChain *mChainChargedPions;         //!
     TChain *mChainBemcPions;            //!
+    TChain *mChainBemcElectrons;        //!
     TChain *mChainEemcPions;            //!
+    
+    std::string mCurrentFileName;       //!
     
     void connect();
     bool mIsConnected;                  //!

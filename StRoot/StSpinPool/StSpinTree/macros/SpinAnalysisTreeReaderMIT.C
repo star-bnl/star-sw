@@ -1,11 +1,11 @@
-void SpinAnalysisTreeReader(const long nevents = 20) {
+void SpinAnalysisTreeReaderMIT(const long nevents = 20) {
     LoadSpinTreeLibs();
     
     //create a new reader
     StSpinTreeReader *reader = new StSpinTreeReader();
     
     //add some files to analyze, one at a time or in a text file
-    reader->selectDataset("$STAR/StRoot/StSpinPool/StSpinTree/datasets/run6_rcf.dataset");
+    reader->selectDataset("StSpinTree/datasets/run6_mit.dataset");
     //reader->selectFile("./spinAnalyses_6119039.tree.root");
     
     //configure the branches you're interested in (default = true)
@@ -17,7 +17,8 @@ void SpinAnalysisTreeReader(const long nevents = 20) {
     reader->connectBemcElectrons    = false; //not added yet
     
     //optionally filter events by run and trigger
-    reader->selectRunlist("$STAR/StRoot/StSpinPool/StSpinTree/filters/run6_jets.runlist");
+    //reader->selectRunlist("StSpinTree/filters/run6_jets.runlist");
+    reader->selectRun(7132001);
     //reader->removeRun(7143025);
     
     //select events that passed hardware OR software trigger for any trigger in list
@@ -108,19 +109,5 @@ void SpinAnalysisTreeReader(const long nevents = 20) {
 }
 
 void LoadSpinTreeLibs() {
-    gSystem->Load("libPhysics");
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
-    gSystem->Load("StEvent");
-    gSystem->Load("StEmcUtil");
-    gSystem->Load("StStrangeMuDstMaker");
-    gSystem->Load("StMuDSTMaker");
-    gSystem->Load("StSpinDbMaker");
-    gSystem->Load("StEmcTriggerMaker");
-    gSystem->Load("StJetFinder");
-    gSystem->Load("StJetMaker");
-    gSystem->Load("StMcEvent");
-    gSystem->Load("StChargedPionAnalysisMaker");
-    gSystem->Load("StSpinTree");
+    gSystem->Load("StarSpinAnalyses");
 }
