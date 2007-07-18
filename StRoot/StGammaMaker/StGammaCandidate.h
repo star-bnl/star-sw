@@ -118,6 +118,8 @@ class StGammaCandidate : public TObject
   Float_t  postEnergy() const { return mPostEnergy; }
   Float_t  smduEnergy() const { return mSmduEnergy; }
   Float_t  smdvEnergy() const { return mSmdvEnergy; }
+  Float_t  smdEtaEnergy() const { return mSmduEnergy; }
+  Float_t  smdPhiEnergy() const { return mSmdvEnergy; }
 
 
 
