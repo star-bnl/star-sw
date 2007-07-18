@@ -113,6 +113,7 @@ void LoadSpinTreeLibs() {
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StEvent");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StEmcUtil");
     gSystem->Load("StStrangeMuDstMaker");
     gSystem->Load("StMuDSTMaker");
