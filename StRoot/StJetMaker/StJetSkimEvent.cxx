@@ -10,11 +10,11 @@ using namespace std;
 //local
 #include "StJetSkimEvent.h"
 
+#include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"
+
 ClassImp(StJetSkimTrigHeader)
 ClassImp(StJetSkimTrig)
 ClassImp(StJetSkimVert)
-ClassImp(StJetSkimParton)
-ClassImp(StJetSkimMcEvent)
 ClassImp(StJetSkimEvent)
 
 StJetSkimTrigHeader::StJetSkimTrigHeader() {
@@ -268,19 +268,7 @@ bool StJetSkimVert::operator==(const StJetSkimVert &rhs) const {
     return true;
 }
 
-//stubs for the Monte Carlo classes
-StJetSkimParton::StJetSkimParton() { /* no-op */ }
-StJetSkimParton::~StJetSkimParton() { /* no-op */ }
-StJetSkimParton::StJetSkimParton(const StJetSkimParton &t) { /* no-op */ }
-StJetSkimParton& StJetSkimParton::operator=(const StJetSkimParton &rhs) { return *this; }
-
-StJetSkimMcEvent::StJetSkimMcEvent() { /* no-op */ }
-StJetSkimMcEvent::~StJetSkimMcEvent() { /* no-op */ }
-StJetSkimMcEvent::StJetSkimMcEvent(const StJetSkimMcEvent &t) { /* no-op */ }
-StJetSkimMcEvent& StJetSkimMcEvent::operator=(const StJetSkimMcEvent &rhs) { return *this; }
-
-StJetSkimEvent::StJetSkimEvent() 
-: TObject(), mMcEvent(NULL), mTriggers(new TClonesArray("StJetSkimTrig",100)), mVertices(new TClonesArray("StJetSkimVert",100)), mBestVert(NULL)
+StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetSkimTrig",100)), mVertices(new TClonesArray("StJetSkimVert",100)), mBestVert(NULL), mMcEvent(NULL)
 {
     mMudstFileName = "Undefined";
     mBestVertRef = NULL;
@@ -402,13 +390,6 @@ void StJetSkimEvent::clear()
 void StJetSkimEvent::Clear(const char *option) {
     this->clear();
     TObject::Clear(option);
-}
-
-StJetSkimMcEvent* StJetSkimEvent::mcEvent() {
-    if(mMcEvent) return mMcEvent;
-    
-    mMcEvent = new StJetSkimMcEvent();
-    return mMcEvent;
 }
 
 StJetSkimVert* StJetSkimEvent::bestVert() const {

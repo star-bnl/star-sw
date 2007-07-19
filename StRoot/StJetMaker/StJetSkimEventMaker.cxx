@@ -35,12 +35,16 @@
 #include "StJetMaker/StJetSkimEvent.h"
 #include "StJetMaker/StJetSkimEventMaker.h"
 
+//StMCAsymMaker
+#include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"
+#include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
+
 void copyVertex(StMuPrimaryVertex& v, StJetSkimVert& sv);
 
 ClassImp(StJetSkimEventMaker)
 
 StJetSkimEventMaker::StJetSkimEventMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
-: StMaker(name), muDstMaker(uDstMaker), outName(outputName), mOutfile(0), mTree(0), mEvent(0)
+: StMaker(name), muDstMaker(uDstMaker), outName(outputName), mOutfile(0), mTree(0), mEvent(0), isRealData(true)
 {
     
 }
@@ -61,12 +65,20 @@ Int_t StJetSkimEventMaker::Init()
     
     //skipping TObject data members if possible can save significant space
     StJetSkimTrig::Class()->IgnoreTObjectStreamer();
+    StPythiaEvent::Class()->IgnoreTObjectStreamer();
     
     //now we build the tree
     mTree = new TTree("jetSkimTree","StJetSkimEvent Tree",99);
     
     //and add a branch for our event objects
     mTree->Branch ("skimEventBranch", "StJetSkimEvent", &mEvent, 64000, 99);
+    
+    //if this is a simulation we'll pick up all the info we need right here
+    mcAsymMaker  = dynamic_cast<StMCAsymMaker*>(GetMaker("MCAsym"));
+    if(mcAsymMaker != NULL) {
+        mEvent->setMcEvent(mcAsymMaker->pythiaEvent());
+        isRealData = false;
+    }
     
     return kStOk;
 }
@@ -93,14 +105,25 @@ Int_t StJetSkimEventMaker::InitRun(int runnumber) {
         TClonesArray *trigHeaderArray = new TClonesArray("StJetSkimTrigHeader",50);
         StJetSkimTrigHeader *header = new StJetSkimTrigHeader();
         
-        StDetectorDbTriggerID *v = StDetectorDbTriggerID::instance();
-        map<int,float> prescaleMap = v->getTotalPrescales();
-        for(map<int,float>::const_iterator it=prescaleMap.begin(); it!=prescaleMap.end(); it++) {
-            header->runId = runnumber;
-            header->trigId = it->first;
-            header->prescale = it->second;
-            fillThresholds(*header);
-            new( (*trigHeaderArray)[trigHeaderArray->GetLast()+1] ) StJetSkimTrigHeader(*header);
+        if(isRealData) {
+            StDetectorDbTriggerID *v = StDetectorDbTriggerID::instance();
+            map<int,float> prescaleMap = v->getTotalPrescales();
+            for(map<int,float>::const_iterator it=prescaleMap.begin(); it!=prescaleMap.end(); it++) {
+                header->runId = runnumber;
+                header->trigId = it->first;
+                header->prescale = it->second;
+                fillThresholds(*header);
+                new( (*trigHeaderArray)[trigHeaderArray->GetLast()+1] ) StJetSkimTrigHeader(*header);
+            }
+        }
+        else {
+            for(unsigned i=0; i<mSimuTrigIds.size(); i++) {
+                header->runId = runnumber;
+                header->trigId = mSimuTrigIds[i];
+                header->prescale = 1.0;
+                fillThresholds(*header);
+                new( (*trigHeaderArray)[trigHeaderArray->GetLast()+1] ) StJetSkimTrigHeader(*header);
+            }
         }
         
         headerList->Add(trigHeaderArray);
@@ -121,9 +144,7 @@ Int_t StJetSkimEventMaker::Make()
     assert(muDst);
     StMuEvent* muEvent = muDst->event();
     assert(muEvent);
-    StSpinDbMaker* spDbMaker = dynamic_cast<StSpinDbMaker*>(GetMaker("spinDb"));
-    assert(spDbMaker);
-
+    
     StBbcTriggerDetector* bbc = &(muEvent->bbcTriggerDetector());
     assert(bbc);
     StRunInfo* runInfo = &(muEvent->runInfo()); assert(runInfo);
@@ -133,33 +154,34 @@ Int_t StJetSkimEventMaker::Make()
 
     //first cycle through triggers:
     mEvent->setTrigHeaderArray(mCurrentHeaderRef);
-    map<int,float> prescaleMap = v->getTotalPrescales();
-    StJetSkimTrig skimTrig;
-    for (map<int,float>::iterator it=prescaleMap.begin(); it!=prescaleMap.end(); ++it) {
-        skimTrig.setTrigId((*it).first);
-        //skimTrig.setPrescale(v->getTotalPrescaleByTrgId(skimTrig.trigId()));
-        if (muEvent->triggerIdCollection().nominal().isTrigger(skimTrig.trigId())) {
-            skimTrig.setDidFire(true);
+    if(isRealData) {
+        map<int,float> prescaleMap = v->getTotalPrescales();
+        StJetSkimTrig skimTrig;
+        for (map<int,float>::iterator it=prescaleMap.begin(); it!=prescaleMap.end(); ++it) {
+            skimTrig.setTrigId((*it).first);
+            if (muEvent->triggerIdCollection().nominal().isTrigger(skimTrig.trigId())) {
+                skimTrig.setDidFire(true);
+            }
+            else {
+                skimTrig.setDidFire(false);
+            }
+            fillTriggerSimulationInfo(skimTrig);
+            if(skimTrig.didFire() || (skimTrig.shouldFire() > 0)) mEvent->setTrig(skimTrig);
+            skimTrig.clear();
         }
-        else {
+        TArrayI& l2Array = muEvent->L2Result();
+        mEvent->setL2Result(l2Array);
+    }
+    else {
+        StJetSkimTrig skimTrig;
+        for(unsigned i=0; i<mSimuTrigIds.size(); i++) {
             skimTrig.setDidFire(false);
+            fillTriggerSimulationInfo(skimTrig);
+            if(skimTrig.shouldFire() > 0) mEvent->setTrig(skimTrig);
+            skimTrig.clear();
         }
-        fillTriggerSimulationInfo(skimTrig);
-        if(skimTrig.didFire() || (skimTrig.shouldFire() > 0)) mEvent->setTrig(skimTrig);
-        skimTrig.clear();
-        //cout <<"filled with:\t"<<skimTrig.trigId<<"\t"<<skimTrig.prescale<<"\t"<<skimTrig.isSatisfied<<endl;
     }
     
-    //then get L2Results:
-    TArrayI& l2Array = muEvent->L2Result();
-    //cout <<"l2Size:\t"<<l2Array.GetSize()<<endl;
-    /*
-    assert(l2Array.GetSize()==32);
-    mEvent->setL2Result(l2Array.GetArray());
-     */
-    mEvent->setL2Result(l2Array);
-
-        
     //basic event/run info
     mEvent->setFill( runInfo->beamFillNumber(blue));
     mEvent->setRunId( muEvent->runId() );
@@ -178,7 +200,7 @@ Int_t StJetSkimEventMaker::Make()
             if(pmt>23 && pmt<40) mEvent->setWbbc(1);
         }
     }
-    
+
     //spin specific info from Mudst:
     int bx7 = muEvent->l0Trigger().bunchCrossingId7bit(muEvent->runId());
     int bx48 =  muEvent->l0Trigger().bunchCrossingId();
@@ -187,14 +209,17 @@ Int_t StJetSkimEventMaker::Make()
     mEvent->setSpinBits( muEvent->l0Trigger().spinBits( muEvent->runId() ) );
     
     //get spin info (Yellow,Blue): Up,Up = 5; Down,Up = 6; Up,Down = 9; Down,Down = 10;
-    mEvent->setIsValid( spDbMaker->isValid() );
-    mEvent->setIsPolLong( spDbMaker->isPolDirLong() );
-    mEvent->setIsPolTrans( spDbMaker->isPolDirTrans() );
-    int isMasked = (spDbMaker->isMaskedUsingBX48(bx48)) ? 1 : 0;
-    mEvent->setIsMaskedUsingBx48( isMasked );   
-    mEvent->setOffsetBx48minusBX7( spDbMaker->offsetBX48minusBX7(bx48, bx7) );  
-    mEvent->setSpin4UsingBx48( spDbMaker->spin4usingBX48(bx48) );
-    
+    if(isRealData) {
+        StSpinDbMaker* spDbMaker = dynamic_cast<StSpinDbMaker*>(GetMaker("spinDb"));
+        assert(spDbMaker);
+        mEvent->setIsValid( spDbMaker->isValid() );
+        mEvent->setIsPolLong( spDbMaker->isPolDirLong() );
+        mEvent->setIsPolTrans( spDbMaker->isPolDirTrans() );
+        int isMasked = (spDbMaker->isMaskedUsingBX48(bx48)) ? 1 : 0;
+        mEvent->setIsMaskedUsingBx48( isMasked );   
+        mEvent->setOffsetBx48minusBX7( spDbMaker->offsetBX48minusBX7(bx48, bx7) );  
+        mEvent->setSpin4UsingBx48( spDbMaker->spin4usingBX48(bx48) );
+    }
     //cout <<"sdb:\t"<<mEvent->isValid()<<"\t"<<mEvent->isPolLong()<<"\t"<<mEvent->isPolTrans()<<"\t"<<mEvent->isMaskedUsingBx48()<<"\t"<<mEvent->offsetBx48minusBX7()<<endl;
     
     //vertex information:
@@ -203,12 +228,6 @@ Int_t StJetSkimEventMaker::Make()
         assert(muDst->primaryVertex(i));
         StMuPrimaryVertex* muVert = muDst->primaryVertex(i);
         assert(muVert);
-        
-    //  if (i==0) {//best vertex:
-    //      StJetSkimVert* bestVert = mEvent->bestVert();
-    //      assert(bestVert);
-    //      copyVertex(*muVert, *bestVert);
-    //  }
         
         StJetSkimVert skimVert;
         copyVertex(*muVert, skimVert);
