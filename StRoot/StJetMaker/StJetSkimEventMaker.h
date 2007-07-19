@@ -11,6 +11,7 @@ using namespace std;
 
 class TFile;
 class StMuDstMaker;
+class StMCAsymMaker;
 class TTree;
 class StJetSkimEvent;
 
@@ -28,16 +29,21 @@ public:
 	virtual void Clear(const Option_t*);
     
     TTree* tree();
+    
+    void addSimuTrigger(int trigId) {mSimuTrigIds.push_back(trigId);}
     	
 protected:
-		StMuDstMaker*   muDstMaker;   //!
-	
+	StMuDstMaker*   muDstMaker;         //!
+    StMCAsymMaker*  mcAsymMaker;        //!
+    	
 private:
-	const char*     outName;      //!
-    TFile           *mOutfile;   //!
-    TTree           *mTree;      //!
-	StJetSkimEvent* mEvent; //!
-    TRef            mCurrentHeaderRef; //!
+	const char*     outName;            //!
+    TFile*          mOutfile;           //!
+    TTree*          mTree;              //!
+	StJetSkimEvent* mEvent;             //!
+    TRef            mCurrentHeaderRef;  //!
+    vector<int>     mSimuTrigIds;       //!
+    bool            isRealData;         //!
 	
 	void fillTriggerSimulationInfo(StJetSkimTrig &trig);
     void fillThresholds(StJetSkimTrigHeader &header);

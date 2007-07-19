@@ -12,6 +12,8 @@
 #include "TRef.h"
 #include "TLorentzVector.h"
 
+class StPythiaEvent;
+
 #include <map>
 using std::map;
 
@@ -188,57 +190,6 @@ private:
     ClassDef(StJetSkimVert,1);
 };
 
-class StJetSkimParton : public TLorentzVector {
-public:
-    StJetSkimParton();
-    StJetSkimParton(const StJetSkimParton &other);
-    virtual ~StJetSkimParton();
-    StJetSkimParton& operator=(const StJetSkimParton &rhs);
-    
-private:
-    UInt_t mFlavor;
-    Float_t mStatus;
-    Float_t mMother1;
-    Float_t mMother2;
-    Float_t mDaughter1;
-    Float_t mDaughter2;
-    
-    ClassDef(StJetSkimParton,1);
-};
-
-class StJetSkimMcEvent : public TObject {
-public:
-    StJetSkimMcEvent();
-    StJetSkimMcEvent(const StJetSkimMcEvent &other);
-    virtual ~StJetSkimMcEvent();
-    StJetSkimMcEvent& operator=(const StJetSkimMcEvent &rhs);
-    
-//    void Clear(const char *option="");
-    
-private:
-    UShort_t mSubProcessID;
-    Float_t mS;
-    Float_t mT;
-    Float_t mU;
-    Float_t mX1;
-    Float_t mX2;
-    Float_t mPartonicPt;
-    Float_t mCosTheta;
-    
-    Double_t mPartonicAsymmetry;
-    Double_t mPolarizedPDF1[5];
-    Double_t mPolarizedPDF2[5];
-    Double_t mUnpolarizedPDF1[2];
-    Double_t mUnpolarizedPDF2[2];
-
-    StJetSkimParton mParton1;
-    StJetSkimParton mParton2;
-    StJetSkimParton mParton3;
-    StJetSkimParton mParton4;
-    
-    ClassDef(StJetSkimMcEvent,1);
-};
-
 class StJetSkimEvent : public TObject
 {
 public:
@@ -286,6 +237,8 @@ public:
     //!void setL2Result(int* vals);
     void setL2Result(const TArrayI& rhs) {mL2Result=rhs;}
     
+    void setMcEvent(const StPythiaEvent *ptr) {mMcEvent = ptr;}
+    
     //gets
     float fill() const {return mFill;}
     int runId() const {return mRunId;}
@@ -319,7 +272,7 @@ public:
 
     const TArrayI& l2Result() const {return mL2Result;}
     
-    StJetSkimMcEvent* mcEvent();
+    const StPythiaEvent* mcEvent() const {return mMcEvent;}
     
 private:
     
@@ -328,14 +281,14 @@ private:
     int mEventId;
     TObjString mMudstFileName;
     
-    StJetSkimMcEvent* mMcEvent;
-    
     TClonesArray* mTriggers;
     TRef mTrigHeaderArrayRef;
     
     TClonesArray* mVertices;
     StJetSkimVert* mBestVert;
     TRef mBestVertRef;
+
+    const StPythiaEvent* mMcEvent;
     
     //bunch x-ing info from MuDSt
     int mbx7;
@@ -360,7 +313,7 @@ private:
     //!int mL2Result[32]; 
     TArrayI mL2Result;
     
-    ClassDef(StJetSkimEvent,3);
+    ClassDef(StJetSkimEvent,4);
 };
 
 #endif
