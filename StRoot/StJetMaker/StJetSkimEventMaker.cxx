@@ -175,6 +175,7 @@ Int_t StJetSkimEventMaker::Make()
     else {
         StJetSkimTrig skimTrig;
         for(unsigned i=0; i<mSimuTrigIds.size(); i++) {
+            skimTrig.setTrigId(mSimuTrigIds[0]);
             skimTrig.setDidFire(false);
             fillTriggerSimulationInfo(skimTrig);
             if(skimTrig.shouldFire() > 0) mEvent->setTrig(skimTrig);
