@@ -29,6 +29,6 @@ void loadGammaLibs()
   gSystem->Load("StEEmcClusterMaker");
   gSystem->Load("StEEmcPointMaker");
   gSystem->Load("StEEmcPi0Mixer");
+  gSystem->Load("StMCAsymMaker");
   gSystem->Load("StGammaMaker");
-
 }
