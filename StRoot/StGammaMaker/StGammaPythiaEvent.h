@@ -18,7 +18,7 @@ using std::vector;
 class StGammaPythiaEvent : public StPythiaEvent {
 public:
   StGammaPythiaEvent() {}
-  StGammaPythiaEvent(StPythiaEvent* pythia) : StPythiaEvent(*pythia) {}
+  StGammaPythiaEvent(const StPythiaEvent* pythia) : StPythiaEvent(*pythia) {}
   ~StGammaPythiaEvent() {}
 
   void Clear(Option_t* option = "");
