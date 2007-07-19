@@ -39,7 +39,7 @@ int StGammaPythiaEventMaker::Make()
     return kStWarn;
   }
 
-  new (mPythia) StGammaPythiaEvent(mPythia);
+  new (mPythia) StGammaPythiaEvent(asym->pythiaEvent());
 
   // Collect photons from primary vertex
   StMcVertex *primary=mcEvent->primaryVertex();
