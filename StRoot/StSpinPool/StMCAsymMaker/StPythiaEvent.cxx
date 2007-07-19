@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.2  2007/07/19 02:05:38  kocolosk
+// fix two small bugs I missed in the last commit.
+//
 // Revision 1.1  2007/07/19 01:40:41  kocolosk
 // use Pibero's StPythiaEvent class to supply mcAsymMaker results to user
 //
@@ -57,35 +60,35 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
     }
 }
 
-StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& t) 
+StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs) 
 {
     if(this == &rhs) return *this;
     
-    mRunId      = t.mRunId;
-    mEventId    = t.mEventId;
-    mProcessId  = t.mProcessId;
-    mVertex     = t.mVertex;
-    mS          = t.mS;
-    mT          = t.mT;
-    mU          = t.mU;
-    mPt         = t.mPt;
-    mCosTheta   = t.mCosTheta;
-    mX1         = t.mX1;
-    mX2         = t.mX2;
-    mPartonALL  = t.mPartonALL;
+    mRunId      = rhs.mRunId;
+    mEventId    = rhs.mEventId;
+    mProcessId  = rhs.mProcessId;
+    mVertex     = rhs.mVertex;
+    mS          = rhs.mS;
+    mT          = rhs.mT;
+    mU          = rhs.mU;
+    mPt         = rhs.mPt;
+    mCosTheta   = rhs.mCosTheta;
+    mX1         = rhs.mX1;
+    mX2         = rhs.mX2;
+    mPartonALL  = rhs.mPartonALL;
     
     for(int i=0; i<5; i++) {
-        mDF1[i] = t.mDF1[i];
-        mDF2[i] = t.mDF2[i];
+        mDF1[i] = rhs.mDF1[i];
+        mDF2[i] = rhs.mDF2[i];
     }
     
     for(int i=0; i<2; i++) {
-        mF1[i]  = t.mF1[i];
-        mF2[i]  = t.mF2[i];
+        mF1[i]  = rhs.mF1[i];
+        mF2[i]  = rhs.mF2[i];
     }
     
-    for(int i=0; i<t.mParticles->GetEntries(); i++) {
-        TParticle *p = (TParticle*)(t.mParticles->At(i));
+    for(int i=0; i<rhs.mParticles->GetEntries(); i++) {
+        TParticle *p = (TParticle*)(rhs.mParticles->At(i));
         new ((*mParticles)[mParticles->GetEntriesFast()]) TParticle(*p);
     }
     

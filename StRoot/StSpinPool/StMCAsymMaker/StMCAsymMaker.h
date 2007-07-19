@@ -86,10 +86,9 @@ public:
     const StPythiaEvent* pythiaEvent() const { return mEvent; }
     
     const St_particle* particleTable() const { return particleTabPtr; }
-    const StMcEvent* mcEvent() const { return mcEvent; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.2 2007/07/19 01:40:40 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.3 2007/07/19 02:05:38 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 
