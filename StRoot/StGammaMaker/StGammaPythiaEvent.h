@@ -9,7 +9,11 @@
 #ifndef ST_GAMMA_PYTHIA_EVENT_H
 #define ST_GAMMA_PYTHIA_EVENT_H
 
-#include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
+#include <vector>
+using std::vector;
+
+#include "TLorentzVector.h"
+#include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"
 
 class StGammaPythiaEvent : public StPythiaEvent {
 public:
@@ -68,6 +72,13 @@ inline int StGammaPythiaEvent::numberOfDecay() const { return mDecay.size(); }
 inline int StGammaPythiaEvent::numberOfFrag() const { return mFrag.size(); }
 inline int StGammaPythiaEvent::numberOfInitial() const { return mInitial.size(); }
 inline int StGammaPythiaEvent::numberOfFinal() const { return mFinal.size(); }
+
+inline TLorentzVector& StGammaPythiaEvent::pion0(int i) { return mPion0[i]; }
+inline TLorentzVector& StGammaPythiaEvent::prompt(int i) { return mPrompt[i]; }
+inline TLorentzVector& StGammaPythiaEvent::decay(int i) { return mDecay[i]; }
+inline TLorentzVector& StGammaPythiaEvent::frag(int i) { return mFrag[i]; }
+inline TLorentzVector& StGammaPythiaEvent::initial(int i) { return mInitial[i]; }
+inline TLorentzVector& StGammaPythiaEvent::final(int i) { return mFinal[i]; }
 
 inline vector<TLorentzVector>& StGammaPythiaEvent::pion0() { return mPion0; }
 inline vector<TLorentzVector>& StGammaPythiaEvent::prompt() { return mPrompt; }
