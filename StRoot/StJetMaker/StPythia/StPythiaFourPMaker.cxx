@@ -1,4 +1,3 @@
-
 //std
 #include <iostream>
 using namespace std;
@@ -32,15 +31,17 @@ using namespace std;
 #include "tables/St_particle_Table.h"
 #include "tables/St_g2t_pythia_Table.h"
 
+//Get Pythia record 
+#include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
+
 //StJetMaker
-#include "StJetMaker/StJetSimuUtil/StJetSimuWeightMaker.h"
 #include "StJetMaker/StMuTrackFourVec.h"
 #include "StJetMaker/StPythia/StPythiaFourPMaker.h"
 #include "StJetMaker/StPythia/StPythiaMuTrackFourVec.h"
 
 ClassImp(StPythiaFourPMaker)
     
-    StPythiaFourPMaker::StPythiaFourPMaker(const char* name, StJetSimuWeightMaker* sim,  StMcEventMaker* mc) 
+    StPythiaFourPMaker::StPythiaFourPMaker(const char* name, StMCAsymMaker* sim,  StMcEventMaker* mc) 
 	: StFourPMaker(name, 0), mSimuMaker(sim), mMcEventMaker(mc)
 {
     cout <<"StPythiaFourPMaker::StPythiaFourPMaker()"<<endl;
@@ -80,14 +81,14 @@ Int_t StPythiaFourPMaker::Make()
     
 
     //access the ptyhia particle table.  Should access via StMcEvent, but that's not yet updated for Maxim's newest additions
-    St_particle* particleTabPtr = mSimuMaker->particleTabPtr;
+    const St_particle* particleTabPtr = mSimuMaker->particleTable();
     assert(particleTabPtr);
-    particle_st* particleTable = particleTabPtr->GetTable();
+    const particle_st* particleTable = particleTabPtr->GetTable();
     assert(particleTable);
 
     //look at outgoing parton:
-    StThreeVectorF out1(mSimuMaker->parton1[1], mSimuMaker->parton1[2], mSimuMaker->parton1[3]);
-    StThreeVectorF out2(mSimuMaker->parton2[1], mSimuMaker->parton2[2], mSimuMaker->parton2[3]);
+    //StThreeVectorF out1(mSimuMaker->parton1[1], mSimuMaker->parton1[2], mSimuMaker->parton1[3]);
+    //StThreeVectorF out2(mSimuMaker->parton2[1], mSimuMaker->parton2[2], mSimuMaker->parton2[3]);
 
     //Wow, how did this survive, big potential bias! Removed 8/31, MLM (sorry!!!!!!!)
     //if (out1.perp()<3. || out2.perp()<3.) {
@@ -130,8 +131,8 @@ Int_t StPythiaFourPMaker::Make()
     }
     cout <<StMaker::GetName()<<"::Make()\tAdded:\t"<<tracks.size()<<"\tparticles to track container"<<endl;
 	
-    cout <<"out1:\t"<<out1.perp()<<"\t"<<out1.phi()<<"\t"<<out1.pseudoRapidity()<<endl;
-    cout <<"out2:\t"<<out2.perp()<<"\t"<<out2.phi()<<"\t"<<out2.pseudoRapidity()<<endl;
+    //cout <<"out1:\t"<<out1.perp()<<"\t"<<out1.phi()<<"\t"<<out1.pseudoRapidity()<<endl;
+    //cout <<"out2:\t"<<out2.perp()<<"\t"<<out2.phi()<<"\t"<<out2.pseudoRapidity()<<endl;
     
     return StMaker::Make();
 }

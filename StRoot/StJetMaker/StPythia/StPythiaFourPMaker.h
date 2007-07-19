@@ -21,8 +21,8 @@ class StPythiaFourPMaker : public StFourPMaker
 {
 public:
     
-    ///Must pass a valid instance of Renee's StJetSimuWeightMaker in constructor
-    StPythiaFourPMaker(const char *name, StJetSimuWeightMaker*, StMcEventMaker*);
+    ///Must pass a valid instance of Renee's StMCAsymMaker in constructor
+    StPythiaFourPMaker(const char *name, StMCAsymMaker*, StMcEventMaker*);
     ///Default destructor
     virtual ~StPythiaFourPMaker() {};
     
@@ -37,7 +37,7 @@ protected:
     typedef vector<StMuTrackFourVec*> Pythia4Vec;
     Pythia4Vec mVec;
     
-    StJetSimuWeightMaker* mSimuMaker;
+    StMCAsymMaker* mSimuMaker;
     StMcEventMaker* mMcEventMaker;
     
     ClassDef(StPythiaFourPMaker,1)
