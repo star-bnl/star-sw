@@ -433,7 +433,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
       for (int dphi = -1; dphi <= 1; ++dphi) {
 	if (StGammaTower* tower = cluster->tower(deta, dphi)) {
 	  // Add BTOW hit to candidate list of "my" towers
-	  if (deta || dphi) candidate->addMyTower(tower);
+	  candidate->addMyTower(tower);
 
 	  // Add BPRS hit to candidate list of "my" towers
 	  if (StGammaTower* preshower = grawmaker->tower(tower->id, kBEmcPres)) {
