@@ -1,12 +1,14 @@
-#include "StGammaEvent.h"
-
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StGammaPythiaEvent.h"
+
+#include "StGammaEvent.h"
 
 ClassImp(StGammaEvent);
 
 // ------------------------------------------------------- class constructor --
 StGammaEvent::StGammaEvent()
 {
+  mPythia = 0;
   InitArrays(); // initialize tclones arrays
   Clear();
 }
@@ -35,7 +37,7 @@ void StGammaEvent::Clear(Option_t *opts)
   nPostshower=0;
   nStrips=0;
   nCandidates=0;
-  mPythia = 0;
+  if (mPythia) mPythia->Clear(opts);
 }
 
 // ------------------------------------------------------------ init tclones --

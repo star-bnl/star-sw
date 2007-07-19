@@ -22,8 +22,8 @@ Int_t               stat          = 0;
 Int_t prescale = 1; 
 
 void runGammaTreeMaker( Int_t nevents = -1, 
-			 //			 Char_t *name = "6149020.lis", 
-			 //			 Char_t *ofile= "6149020.root",
+			 //Char_t *name = "7146009.list", 
+			 //Char_t *ofile= "7146009.root",
 			 Char_t *name="/star/institutions/mit/betan/Simulation/photon_9_11_1.MuDst.root",
 			 Char_t *ofile="photon_9_11_1.gtree.root",
 			 Char_t *path = "", 
@@ -133,7 +133,8 @@ void runGammaTreeMaker( Int_t nevents = -1,
 
 
 #ifdef MONTE_CARLO
-  StGammaPythiaMaker* pythia = new StGammaPythiaMaker;
+  StMCAsymMaker* asym = new StMCAsymMaker;
+  StGammaPythiaEventMaker* pythia = new StGammaPythiaEventMaker;
 #endif
 
   StGammaEventMaker *gemaker = new StGammaEventMaker();
@@ -192,39 +193,3 @@ void runGammaTreeMaker( Int_t nevents = -1,
   return;
     
 }
-
-void LoadLibs()
-{
-  //-- Load muDst shared libraries --
-  gROOT -> LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
-  loadSharedLibraries();
-  
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("StDbLib");
-  gSystem->Load("StDbBroker");
-  gSystem->Load("St_db_Maker");
-  //gSystem->Load("StDetectorDbMaker");
-
-  gSystem->Load("StMcEvent");
-  gSystem->Load("StMcEventMaker");
-  gSystem->Load("libgeometry_Tables");
-  gSystem->Load("StDaqLib");
-  gSystem->Load("StEmcRawMaker");
-  gSystem->Load("StEmcADCtoEMaker");
-  gSystem->Load("StPreEclMaker");
-  gSystem->Load("StEpcMaker");
-  gSystem->Load("StEmcSimulatorMaker");
-  gSystem->Load("StEmcUtil");
-
-  gSystem->Load("StEEmcDbMaker");
-  gSystem->Load("StEEmcUtil");
-  gSystem->Load("StEEmcSimulatorMaker");
-  
-  gSystem->Load("StEEmcA2EMaker");
-  gSystem->Load("StEEmcClusterMaker");
-  gSystem->Load("StEEmcPointMaker");
-  gSystem->Load("StEEmcPi0Mixer");
-  gSystem->Load("StGammaMaker");
-
-}
-
