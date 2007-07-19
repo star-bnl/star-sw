@@ -1852,7 +1852,7 @@ void StEventQAMaker::MakeHistPoint() {
 	  hists->m_pnt_xyS->Fill(x,y);
           hists->m_pnt_sizeSSD->Fill(ssdhit->clusterSizePSide(),0);
           hists->m_pnt_sizeSSD->Fill(ssdhit->clusterSizeNSide(),1);
-          hists->m_pnt_eSSD->Fill(TMath::Log10(ssdhit->charge()));
+          hists->m_pnt_eSSD->Fill(TMath::Log10(fabs(ssdhit->charge())+1e-33));
         }
       }
     }
@@ -2216,8 +2216,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.79 2007/05/26 00:42:18 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.80 2007/07/19 22:20:41 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.80  2007/07/19 22:20:41  perev
+// FPEfix
+//
 // Revision 2.79  2007/05/26 00:42:18  perev
 // Do Pmd only if exists
 //

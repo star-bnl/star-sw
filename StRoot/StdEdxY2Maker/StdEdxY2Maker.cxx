@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.58 2007/04/17 05:11:21 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.59 2007/07/19 22:21:10 perev Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -2510,7 +2510,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	}
 	if (pid->method() == kLikelihoodFitId) {
 	  pidF = pid;
-	  fitZ = TMath::Log(pidF->mean()); NF = pidF->numberOfPoints(); 
+	  fitZ = TMath::Log(pidF->mean()+3e-33); NF = pidF->numberOfPoints(); 
 	  TrackLength = pidF->length(); fitdZ = pidF->errorOnMean(); 
 	}
       }
