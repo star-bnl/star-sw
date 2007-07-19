@@ -1,6 +1,5 @@
-
-#include "StGammaPythiaMaker.h"
-#include "StPythiaEvent.h"
+#include "StGammaPythiaEvent.h"
+#include "StGammaPythiaEventMaker.h"
 #include "StGammaEventMaker.h"
 #include "StGammaEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -18,8 +17,12 @@ Int_t StGammaEventMaker::Init()
 {
   mGammaEvent=new StGammaEvent();
   mPythia = 0;
-  mPythiaMaker = (StGammaPythiaMaker*)GetMaker("GammaPythia");
-  if (mPythiaMaker) mPythia = new StPythiaEvent;
+  mPythiaMaker = (StGammaPythiaEventMaker*)GetMaker("GammaPythia");
+  if (mPythiaMaker) {
+    mPythia = new StGammaPythiaEvent;
+    mPythiaMaker->SetPythia(mPythia);
+    mGammaEvent->SetPythia(mPythia);
+  }
   AddObj(mGammaEvent,".data"); // ok, but what can I do with this?
   return StMaker::Init();
 }
@@ -50,12 +53,6 @@ Int_t StGammaEventMaker::Make()
   mGammaEvent -> SetEventNumber( StMuDst::event()->eventNumber() );
   mGammaEvent -> SetMagneticField( StMuDst::event()->magneticField() );
 
-  // Get Pythia record if Monte Carlo
-  if (mPythiaMaker) {
-    mPythiaMaker->fillPythiaEvent(mPythia);
-    mGammaEvent->SetPythia(mPythia);
-  }
-
   return kStOK;
 }
 
@@ -63,7 +60,5 @@ Int_t StGammaEventMaker::Make()
 void StGammaEventMaker::Clear(Option_t *opts)
 {
   mGammaEvent->Clear(opts);
-  if (mPythia) mPythia->Clear(opts);
   StMaker::Clear(opts);
 }
-
