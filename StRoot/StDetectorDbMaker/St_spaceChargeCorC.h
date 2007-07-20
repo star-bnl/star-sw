@@ -20,7 +20,6 @@ class St_spaceChargeCorC : public TChair {
   Float_t 	offset(Int_t i = 0) 	        {return Struct(i)->offset;}
   Double_t      getSpaceChargeCorrection(Double_t scaleFactor){
     Double_t value = 0;
-    if (! instance()) return value;
     if(scaleFactor < -.75 && scaleFactor > -1.25) value = fullFieldB();
     else if(scaleFactor < -0.25)	          value = halfFieldB();
     else if(scaleFactor < .25)	                  value = zeroField();
