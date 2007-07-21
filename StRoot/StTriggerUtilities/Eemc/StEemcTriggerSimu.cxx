@@ -125,8 +125,8 @@ StEemcTriggerSimu::addTriggerList( void * adr){
 //==================================================
 //==================================================
 void  
-StEemcTriggerSimu::initRun(int rn){
-  runNo=rn;
+StEemcTriggerSimu::initRun(){
+
   
   memset(feePed,0,sizeof(feePed));
   memset(feeMask,0xff,sizeof(feeMask)); // mask everything as bad
@@ -138,20 +138,25 @@ StEemcTriggerSimu::initRun(int rn){
   int yyyymmdd=mydb->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
   int hhmmss=mydb->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
 
-  LOG_INFO<<Form("StEemcTriggerSimu::InitRun() run=%d yyyymmdd=%d  hhmmss=%06d\n",runNo, yyyymmdd, hhmmss )<<endm;
+  LOG_INFO<<Form("StEemcTriggerSimu::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
 
   EemcTrigUtil::getFeePed4("setup/EemcFeePed/", yyyymmdd, hhmmss, mxChan, feePed);
 
-  int HTthr[3], TPthr[3];
-  int JPthr[3];
+  const int nThr=3;
+  int HTthr[nThr], TPthr[nThr];
+  int JPthr[nThr];
   int TPthrSelc, HTTPthrSelc;
   int BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr;
 
   EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, HTthr, TPthr, JPthr, TPthrSelc, HTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr); // home-made DB
 
-  //printf("======! TPthrSelc=%d\n", TPthrSelc);
-  //printf("======! HTTPthrSelc=%d\n", HTTPthrSelc);
+
+  LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",HTthr[0],HTthr[1],HTthr[2])<<endm;
+  LOG_INFO<<Form("Eemc::DSM setup TPthr: %d, %d, %d",TPthr[0],TPthr[1],TPthr[2])<<endm;
+  LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",JPthr[0],JPthr[1],JPthr[2])<<endm;
+  LOG_INFO<<Form("Eemc::DSM setup  BEsumthr=%d, EEsumthr=%d, EtotThr=%d", BEsumthr, EEsumthr, EtotThr);
+  LOG_INFO<<Form("Eemc::DSM setup TPthrSelc=%d, HTTPthrSelc=%d, JPSIthrSelc=%d, BarreSide=%d", TPthrSelc, HTTPthrSelc, JPSIthrSelc, BarreSide)<<endm;
 
 
   dsm0TreeADC->setYear(mYear,HTthr,TPthr); 
@@ -159,9 +164,6 @@ StEemcTriggerSimu::initRun(int rn){
 
   dsm1TreeADC->setYear(mYear, JPthr, TPthrSelc, HTTPthrSelc);
   dsm1TreeTRG->setYear(mYear, JPthr, TPthrSelc, HTTPthrSelc);
-
-  //printf("======!! TPthrSelc=%d\n", TPthrSelc);
-  //printf("======!! HTTPthrSelc=%d\n", HTTPthrSelc);
 
   dsm2TreeTRG->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
   dsm2TreeADC->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
