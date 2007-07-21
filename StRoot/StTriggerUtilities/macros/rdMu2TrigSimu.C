@@ -2,10 +2,11 @@ class StMuDstMaker;
 class  StChain *chain;
 int total=0;
 #include <string>
-#include <map>
+#include <map>  
 
 void rdMu2TrigSimu(const char *dirIn ="runList/",
-			     const char *file="R7101015.lis",
+		   const char *file="R7101015.lis",
+		   int flagMC=0
 			     )
 {
   int nevents = 5;
