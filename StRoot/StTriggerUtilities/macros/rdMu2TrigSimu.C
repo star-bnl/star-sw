@@ -1,15 +1,14 @@
 class StMuDstMaker;
 class  StChain *chain;
 int total=0;
-#include <string>
-#include <map>  
 
-void rdMu2TrigSimu(const char *dirIn ="runList/",
-		   const char *file="R7101015.lis",
-		   int flagMC=0
+void rdMu2TrigSimu( char *dirIn ="runList/",
+		    //char *file="photon_9_11.lis",//MC event file
+		    char *file="R7101015.lis", // real data file
+		    int flagMC=0 // set it to 0 for real data
 			     )
 {
-  int nevents = 5;
+  int nevents = 100;
   int nfiles = 3; // make this big if you want to read all events from a run
  
   TString outDir="./out2/"; 
@@ -42,7 +41,10 @@ void rdMu2TrigSimu(const char *dirIn ="runList/",
  
   //Database -- get a real calibration from the database
   St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  
+  if(flagMC) {
+    dbMk->SetDateTime(20070101,1 ); // for simulation for Pibero
+    // if Endcap fast simu is used tower gains in DB do not matter,JB
+  }
   //Endcap DB
   StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
   
@@ -53,8 +55,22 @@ void rdMu2TrigSimu(const char *dirIn ="runList/",
   simuTrig->setDbMaker(dbMk);
   simuTrig->setHList(HList);
   simuTrig->useEemc();
-  
+  if(flagMC){
+    simuTrig->setMC(flagMC); // pass one argument to M-C as generic switch
 
+    // Endcap specific params
+    int eemcDsmSetup[20]; // see StEemcTriggerSimu::initRun() for definition
+    memset(eemcDsmSetup, 0,sizeof(eemcDsmSetup));// clear all, may be a bad default
+    eemcDsmSetup[0]=3;  // HTthr0
+    eemcDsmSetup[1]=12; // HTthr1
+    eemcDsmSetup[2]=22; // HTthr2
+    eemcDsmSetup[3]=1;  // TPthr0
+    eemcDsmSetup[4]=17; // TPthr1
+    eemcDsmSetup[5]=31; // TPthr2
+    eemcDsmSetup[10]=2; //HTTPthrSelc, 2=use_thres_#1
+    simuTrig->eemc->setDsmSetup(eemcDsmSetup);
+    
+  }
   chain->ls(3);
   chain->Init();
   chain->PrintInfo();  
@@ -84,7 +100,7 @@ void rdMu2TrigSimu(const char *dirIn ="runList/",
       break;
     }
     
-    cout<<Form(" Simu trgSize=%d, firedID:", simuTrig->mTriggerList.size());
+    cout<<Form(" Simu trgSize=%d, firedID:", simuTrig->mTriggerList.size())<<endl;
     int j;
     for(j=0; j<simuTrig->mTriggerList.size();j++) 
       cout<<Form("s%d, ", simuTrig->mTriggerList[j]);

@@ -22,14 +22,15 @@ class St_db_Maker;
 class StTriggerSimuMaker : public StMaker {
 private:
   int mYear;
+  int mMCflag; // set yo 0 for real data
   St_db_Maker *mDbMk;
   void addTriggerList();
 
 public:
     StTriggerSimuMaker(const char *name="EMCtrigger");
     virtual           ~StTriggerSimuMaker();
-    void     useEemc();
-
+    void    useEemc();
+    void    setMC(int x) {mMCflag=x;}
     //hang all activated trigger detectors below
     StEemcTriggerSimu *eemc;
 
@@ -51,9 +52,12 @@ public:
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.1 2007/07/20 21:01:41 balewski Exp $
+// $Id: StTriggerSimuMaker.h,v 1.2 2007/07/21 23:35:24 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.2  2007/07/21 23:35:24  balewski
+// works for M-C
+//
 // Revision 1.1  2007/07/20 21:01:41  balewski
 // start
 //
