@@ -47,7 +47,8 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   mHList=0;
   mDbE=0;
   mBemcEsum5bit=0;
-
+  mExternDsmSetup=0;
+  
   feeTPTreeADC=new EEfeeTPTree("ADC",mxChan);
   dsm0TreeADC =new EEdsm0Tree("ADC");
   dsm1TreeADC =new EEdsm1Tree("ADC");
@@ -59,7 +60,7 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   dsm2TreeTRG =new EMCdsm2Tree("TRG");
   dsm3TRG     =new EEdsm3();
 
-  LOG_INFO <<"StEemcTriggerSimu::constructor"<<endm;
+  LOG_INFO <<"Eemc::constructor"<<endm;
 }
 
 
@@ -97,7 +98,7 @@ StEemcTriggerSimu::Init(){
   mDbE= (StEEmcDbMaker*) StMaker::GetChain()->GetMaker("eemcDb");
   assert(mDbE);
   //  assert( mBemcEsum5bit);
-  LOG_INFO <<"StEemcTriggerSimu::Init()"<<endm;
+  LOG_INFO <<Form("Eemc::Init() MC_flag=%d",mMCflag)<<endm;
 }
   
 //==================================================
@@ -105,7 +106,6 @@ StEemcTriggerSimu::Init(){
 void  
 StEemcTriggerSimu::addTriggerList( void * adr){
   vector <int> *trgList=( vector <int> *)adr;
-
 
   if(mYear==2006) {
     //fix it if(   yymmdd<20060408  || yymmdd>20060414) return; 
@@ -138,7 +138,7 @@ StEemcTriggerSimu::initRun(){
   int yyyymmdd=mydb->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
   int hhmmss=mydb->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
 
-  LOG_INFO<<Form("StEemcTriggerSimu::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
+  LOG_INFO<<Form("Eemc::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
 
   EemcTrigUtil::getFeePed4("setup/EemcFeePed/", yyyymmdd, hhmmss, mxChan, feePed);
@@ -146,16 +146,30 @@ StEemcTriggerSimu::initRun(){
   const int nThr=3;
   int HTthr[nThr], TPthr[nThr];
   int JPthr[nThr];
-  int TPthrSelc, HTTPthrSelc;
-  int BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr;
+  int TPthrSelc, HTTPthrSelc, JPSIthrSelc, BarreSide;
+  int BEsumthr, EEsumthr, EtotThr;
 
-  EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, HTthr, TPthr, JPthr, TPthrSelc, HTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr); // home-made DB
-
+  if(!mExternDsmSetup) {
+    EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, HTthr, TPthr, JPthr, TPthrSelc, HTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr); // home-made DB
+  }  else {
+    LOG_INFO<<Form("Eemc::InitRun() use externalDSM setup")<<endm;
+    int i;
+    for(i=0;i<nThr;i++) HTthr[i]=mExternDsmSetup[0+i];
+    for(i=0;i<nThr;i++) TPthr[i]=mExternDsmSetup[3+i];
+    for(i=0;i<nThr;i++) JPthr[i]=mExternDsmSetup[6+i];
+    TPthrSelc=mExternDsmSetup[9];
+    HTTPthrSelc=mExternDsmSetup[10];
+    JPSIthrSelc=mExternDsmSetup[11];
+    BarreSide=mExternDsmSetup[12];
+    BEsumthr=mExternDsmSetup[13];
+    EEsumthr=mExternDsmSetup[14];
+    EtotThr=mExternDsmSetup[15];
+  }
 
   LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",HTthr[0],HTthr[1],HTthr[2])<<endm;
   LOG_INFO<<Form("Eemc::DSM setup TPthr: %d, %d, %d",TPthr[0],TPthr[1],TPthr[2])<<endm;
   LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",JPthr[0],JPthr[1],JPthr[2])<<endm;
-  LOG_INFO<<Form("Eemc::DSM setup  BEsumthr=%d, EEsumthr=%d, EtotThr=%d", BEsumthr, EEsumthr, EtotThr);
+  LOG_INFO<<Form("Eemc::DSM setup  BEsumthr=%d, EEsumthr=%d, EtotThr=%d", BEsumthr, EEsumthr, EtotThr)<<endm;
   LOG_INFO<<Form("Eemc::DSM setup TPthrSelc=%d, HTTPthrSelc=%d, JPSIthrSelc=%d, BarreSide=%d", TPthrSelc, HTTPthrSelc, JPSIthrSelc, BarreSide)<<endm;
 
 
@@ -164,7 +178,7 @@ StEemcTriggerSimu::initRun(){
 
   dsm1TreeADC->setYear(mYear, JPthr, TPthrSelc, HTTPthrSelc);
   dsm1TreeTRG->setYear(mYear, JPthr, TPthrSelc, HTTPthrSelc);
-
+ 
   dsm2TreeTRG->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
   dsm2TreeADC->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
   
@@ -180,7 +194,7 @@ void
 StEemcTriggerSimu::Make(){
   nInpEve++;  
   mDumpEve=eveId%1==0;
-
+#if 0
   StMuDstMaker* muMk = (StMuDstMaker*) StMaker::GetChain()->Maker("MuDst");
   assert(muMk);
   
@@ -198,12 +212,15 @@ StEemcTriggerSimu::Make(){
     TString cID=Form("%d",trgL[ii]);
     hA[1]->Fill(cID.Data(),1.);
   }
-
+#endif
 
   // ************** Emulation of trigger based on ADC ************ 
   getEemcAdc();   //  processed raw ADC
-  feeTPTreeADC->compute(rawAdc,feePed,feeMask);
+  feeTPTreeADC->compute(rawAdc,feePed,feeMask); 
+
   int i;
+  //  for(i=0;i<90;i++) feeTPTreeADC->TP(i)->print(3); // prints FEE output for 720 towers
+
   // printf("...... populate inputs of dsm0TreeADC...\n");
   for(i=0;i<EEfeeTPTree::mxTP;i++) {
     dsm0TreeADC->setInp12bit(i,feeTPTreeADC->TP(i)->getOut12bit());
@@ -241,12 +258,13 @@ StEemcTriggerSimu::Make(){
     
   // *********** END of Emulation of trigger based on ADC ************ 
 
-
-  //........... QA of online trigger data ...............
-  getDsm0123inputs(); // this tree contains trigger data
-  dsm0TreeTRG->compute();
-  dsm1TreeTRG->compute(); 
-  dsm2TreeTRG->compute(); 
+  if(mMCflag==0){ 
+    // acquire true DSM values  only for real events
+    //........... QA of online trigger data ...............
+    getDsm0123inputs(); // this tree contains trigger data
+    dsm0TreeTRG->compute();
+    dsm1TreeTRG->compute(); 
+    dsm2TreeTRG->compute(); 
 
   //if(mDumpEve)   dsm0TreeTRG->print();
   //if(mDumpEve)   dsm1TreeTRG->print();
@@ -266,8 +284,10 @@ StEemcTriggerSimu::Make(){
   compareTRG2_TRG3();
   
   DSM2EsumSpectra();
+  }
 
-
+  dsm2TreeADC->print(0); 
+  
   //if(mDumpEve) printf("\nzzzzz===================================================\n\n");
   
 }

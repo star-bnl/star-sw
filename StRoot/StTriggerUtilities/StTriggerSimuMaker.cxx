@@ -18,7 +18,8 @@
 
 //#include "StEEmcPool/StL2Emulator/StL2EmulatorMaker.h"
 #include "St_db_Maker/St_db_Maker.h" // just for time stamp
-//#include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"// to access Etot
+#include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"// to access Etot
+
 
 
 #include "Eemc/StEemcTriggerSimu.h"
@@ -31,6 +32,7 @@ ClassImp(StTriggerSimuMaker)
 StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
   mDbMk=0;
   mYear=-1;
+  mMCflag=0;
   eemc=0;
 }
 
@@ -50,9 +52,10 @@ StTriggerSimuMaker::Init() {
   if(eemc) {
     eemc->setHList(mHList);
     eemc->Init();
+    eemc->setMC(mMCflag);
   }
 
-  LOG_INFO <<"StTriggerSimuMaker::Init()"<<endm;
+  LOG_INFO <<Form("StTriggerSimuMaker::Init(), MCflag=%d",mMCflag)<<endm;
  return StMaker::Init();
 }
 
@@ -73,8 +76,8 @@ Int_t
 StTriggerSimuMaker::InitRun  (int runNumber){
   LOG_INFO<<"::InitRun()="<<runNumber<<endm;
 
-  if(eemc) eemc->initRun(runNumber);
-
+  if(eemc) eemc->initRun();
+  
   assert(mDbMk);
   mYear=mDbMk->GetDateTime().GetYear();
   int yyyymmdd=mDbMk->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
@@ -101,6 +104,8 @@ StTriggerSimuMaker::Make(){
     if(eemc) eemc->addTriggerList(&mTriggerList);
     addTriggerList(); //  final decisions, involve L2 
 
+
+    cout<<Form(" 4Pibero HTTP bit=%d",eemc->dsm2TreeADC->getOutEndcapHTTP1bit())<<endl;
     return kStOK;
 }
 
@@ -148,9 +153,12 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.1 2007/07/20 21:03:18 balewski Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.2 2007/07/21 23:35:24 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.2  2007/07/21 23:35:24  balewski
+// works for M-C
+//
 // Revision 1.1  2007/07/20 21:03:18  balewski
 // start
 //

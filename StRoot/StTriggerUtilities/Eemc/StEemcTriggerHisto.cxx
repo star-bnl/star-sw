@@ -10,7 +10,7 @@ StEemcTriggerSimu::initHisto() {
   memset(hA,0,sizeof(hA));
 
   hA[0]=0;
-  hA[1]=new TH1F("trgID", "trigger ID for input, trigger ID", 10,0,5);
+  hA[1]=new TH1F("trgID", "trigger ID for input; trigger ID", 10,0,5);
 
 
   //................. DSM0 inputs  .........................  
