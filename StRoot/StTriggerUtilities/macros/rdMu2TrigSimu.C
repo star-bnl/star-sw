@@ -6,7 +6,7 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
 		    //char *file="photon_9_11.lis",//MC event file
 		    char *file="R7101015.lis", // real data file
 		    int flagMC=0 // set it to 0 for real data
-			     )
+		    )
 {
   int nevents = 100;
   int nfiles = 3; // make this big if you want to read all events from a run
@@ -15,21 +15,31 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
-
   assert( !gSystem->Load("StDbBroker"));
   assert( !gSystem->Load("St_db_Maker"));
   assert( !gSystem->Load("StEEmcDbMaker"));
   assert( !gSystem->Load("StEEmcUtil")); // needed by eemcDb
   assert( !gSystem->Load("StDaqLib")); // needed by bemcDb
   assert( !gSystem->Load("StEmcRawMaker"));
-  assert( !gSystem->Load("StEmcADCtoEMaker"));
+  if (flagMC==1) {
+    assert( !gSystem->Load("StSimulatorMaker"));
+    assert( !gSystem->Load("StEmcPreEclMaker"));
+  }
+  if (flagMC==0) assert( !gSystem->Load("StEmcADCtoEMaker"));
   assert( !gSystem->Load("StTriggerUtilities"));
   gROOT->Macro("LoadLogger.C");
-
-
   cout << " loading done " << endl;
   
   chain= new StChain("StChain"); 
+  
+  if (flagMC==1){
+    StIOMaker* ioMaker = new StIOMaker();
+    ioMaker->SetFile(fname);
+    ioMaker->SetIOMode("r");
+    ioMaker->SetBranch("*",0,"0");             //deactivate all branches
+    ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
+  }
+
   TObjArray* HList=new TObjArray; // to collect all output histograms for Jan
 
   const char *filter = "";
@@ -47,14 +57,20 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
   }
   //Endcap DB
   StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
-  
-  //BEMC adc->Et  
-  StEmcADCtoEMaker *adc = new StEmcADCtoEMaker(); // this will just convert what's in MuDst to ADC, use for data only!
+ 
+  if (flagMC==1) {
+    StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
+    StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
+  }
+  if (flagMC==0){
+    StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
+  }
   
   StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
   simuTrig->setDbMaker(dbMk);
   simuTrig->setHList(HList);
   simuTrig->useEemc();
+  simuTrig->useBbc();
   if(flagMC){
     simuTrig->setMC(flagMC); // pass one argument to M-C as generic switch
 
