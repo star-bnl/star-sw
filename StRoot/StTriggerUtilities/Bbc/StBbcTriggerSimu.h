@@ -28,7 +28,7 @@ class StBbcTriggerSimu {
  StMuDst *muDst;
  StMuEvent *muEvent;
  int BBCadcNum;
- 
+ static const int AdcTrigThresh=5;
  protected:
 
  public: 
