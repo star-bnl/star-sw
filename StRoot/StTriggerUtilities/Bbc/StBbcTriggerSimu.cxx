@@ -59,7 +59,7 @@ void StBbcTriggerSimu::Make()
     
     int bbcadc=bbc->adc(pmt);
     
-    if (bbcadc>5) {
+    if (bbcadc>AdcTrigThresh) {
       if (pmt<16) Ebbc=1;      
       if (23<pmt && pmt<40)  Wbbc=1;
     }
