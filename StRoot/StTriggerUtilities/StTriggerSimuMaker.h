@@ -30,9 +30,11 @@ public:
     StTriggerSimuMaker(const char *name="EMCtrigger");
     virtual           ~StTriggerSimuMaker();
     void    useEemc();
+    void    useBbc();
     void    setMC(int x) {mMCflag=x;}
     //hang all activated trigger detectors below
     StEemcTriggerSimu *eemc;
+    StBbcTriggerSimu *bbc;
 
     TObjArray  *mHList; // output histo access point
     void setHList(TObjArray * x){mHList=x;}
@@ -52,9 +54,12 @@ public:
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.2 2007/07/21 23:35:24 balewski Exp $
+// $Id: StTriggerSimuMaker.h,v 1.3 2007/07/22 23:09:51 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.3  2007/07/22 23:09:51  rfatemi
+// added access to Bbc
+//
 // Revision 1.2  2007/07/21 23:35:24  balewski
 // works for M-C
 //
