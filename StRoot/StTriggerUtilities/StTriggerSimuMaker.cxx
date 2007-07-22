@@ -23,7 +23,7 @@
 //get  EEMC
 #include "Eemc/StEemcTriggerSimu.h"
 //get BBC
-#include "TrgEmulatorBBC/StBbcTriggerSimu.h"
+#include "Bbc/StBbcTriggerSimu.h"
 //get HEAD Maker
 #include "StTriggerSimuMaker.h"
 
@@ -40,10 +40,17 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
 //____________________________________________________________________________
 StTriggerSimuMaker::~StTriggerSimuMaker(){
 }
+
 //________________________________________________
 void 
 StTriggerSimuMaker::useEemc(){
   eemc=new StEemcTriggerSimu;
+}
+
+//________________________________________________
+void 
+StTriggerSimuMaker::useBbc(){
+  bbc=new StBbcTriggerSimu;
 }
 
 //_____________________________________________________________________________
@@ -95,7 +102,10 @@ StTriggerSimuMaker::Make(){
 
     LOG_DEBUG<<"::Make()"<<endm;
 
-    if(eemc) eemc->Make(); 
+    if(bbc) bbc->Make();
+    cout<<"BBC Trigger = "<<bbc->bbcTrig<<endl;
+    if(eemc) eemc->Make();
+ 
     // add L2 triggers
     //.....
 
@@ -154,11 +164,11 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.3 2007/07/22 21:30:53 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.4 2007/07/22 23:09:34 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
-// Revision 1.3  2007/07/22 21:30:53  rfatemi
-// Removed TrgEmulBbc and replaced with Bbc
+// Revision 1.4  2007/07/22 23:09:34  rfatemi
+// Add Bbc access
 //
 // Revision 1.2  2007/07/21 23:35:24  balewski
 // works for M-C
