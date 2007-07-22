@@ -20,10 +20,11 @@
 #include "St_db_Maker/St_db_Maker.h" // just for time stamp
 #include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"// to access Etot
 
-
-
+//get  EEMC
 #include "Eemc/StEemcTriggerSimu.h"
-
+//get BBC
+#include "TrgEmulatorBBC/StBbcTriggerSimu.h"
+//get HEAD Maker
 #include "StTriggerSimuMaker.h"
 
 
@@ -153,9 +154,12 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.2 2007/07/21 23:35:24 balewski Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.3 2007/07/22 21:30:53 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.3  2007/07/22 21:30:53  rfatemi
+// Removed TrgEmulBbc and replaced with Bbc
+//
 // Revision 1.2  2007/07/21 23:35:24  balewski
 // works for M-C
 //
