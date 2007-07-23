@@ -72,10 +72,10 @@ class StEemcTriggerSimu {
   StEemcTriggerSimu();
   virtual     ~StEemcTriggerSimu();
   void Init();
-  void initRun();
+  void InitRun();
   void setMC(int x) {mMCflag=x;}
   void setDsmSetup(int *x){ mExternDsmSetup=x;}
-  void clear();
+  void Clear();
   void Make();
   void getEemcFeeMask();
   void setHList(TObjArray * x){mHList=x;}
@@ -88,3 +88,8 @@ class StEemcTriggerSimu {
 
 #endif
 
+//
+// $Log: StEemcTriggerSimu.h,v $
+// Revision 1.2  2007/07/23 03:00:00  balewski
+// cleanup, bbc for M-C still not working
+//

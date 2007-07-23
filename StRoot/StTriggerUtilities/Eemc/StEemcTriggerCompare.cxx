@@ -79,7 +79,7 @@ StEemcTriggerSimu::compareTRG0_TRG1(){
       hA[152]->Fill(ch, emuTrgTPsum-inpTrgTPsum); 
       hA[157]->Fill(ch, emuTrgTPsum-inpTrgTPsum);
       hA[153]->Fill(ch);
-      printf("BaD TPsum(ch=%d)  out0=%d  inp1=%d   del=%d\n", ch, emuTrgTPsum, inpTrgTPsum, emuTrgTPsum-inpTrgTPsum );
+      if(!mMCflag) printf("BaD TPsum(ch=%d)  out0=%d  inp1=%d   del=%d\n", ch, emuTrgTPsum, inpTrgTPsum, emuTrgTPsum-inpTrgTPsum );
       isGood=false;
     }
   
@@ -93,7 +93,7 @@ StEemcTriggerSimu::compareTRG0_TRG1(){
       hA[162]->Fill(ch, emuTrgHT-inpTrgHT);
       hA[163]->Fill(ch);
       isGood=false;
-      printf("BaD HT2bit(ch=%d)  out0=%d  inp1=%d   del=%d\n",ch, emuTrgHT, inpTrgHT, emuTrgHT-inpTrgHT );
+      if(!mMCflag) printf("BaD HT2bit(ch=%d)  out0=%d  inp1=%d   del=%d\n",ch, emuTrgHT, inpTrgHT, emuTrgHT-inpTrgHT );
     }
     
     int inpTrgHTTP=dsm1TreeTRG->getInpHTTP2bit(ch);
@@ -106,7 +106,7 @@ StEemcTriggerSimu::compareTRG0_TRG1(){
       hA[172]->Fill(ch, emuTrgHTTP-inpTrgHTTP);
       hA[173]->Fill(ch);
       isGood=false;
-      printf("BaD HTTP2bit(ch=%d)  out0=%d  inp1=%d   del=%d\n", ch, emuTrgHTTP, inpTrgHTTP, emuTrgHTTP-inpTrgHTTP );
+      if(!mMCflag) printf("BaD HTTP2bit(ch=%d)  out0=%d  inp1=%d   del=%d\n", ch, emuTrgHTTP, inpTrgHTTP, emuTrgHTTP-inpTrgHTTP );
     }
 
     
@@ -120,7 +120,7 @@ StEemcTriggerSimu::compareTRG0_TRG1(){
       hA[182]->Fill(ch, emuTrgTP-inpTrgTP);
       hA[183]->Fill(ch);
       isGood=false;
-      printf("BaD TP2bit(ch=%d)  out0=%d  inp1=%d   del=%d\n", ch, emuTrgTP, inpTrgTP, emuTrgTP-inpTrgTP );
+      if(!mMCflag) printf("BaD TP2bit(ch=%d)  out0=%d  inp1=%d   del=%d\n", ch, emuTrgTP, inpTrgTP, emuTrgTP-inpTrgTP );
     }
 
     int inpTrg16bit=dsm1TreeTRG->getInp16bit(ch);
@@ -133,7 +133,7 @@ StEemcTriggerSimu::compareTRG0_TRG1(){
       hA[192]->Fill(ch, emuTrg16bit-inpTrg16bit);
       hA[193]->Fill(ch);
       isGood=false;
-      printf("BaD TP2bit(ch=%d)  out0=%d  inp1=%d   del=%d\n", ch, emuTrgTP, inpTrgTP, emuTrgTP-inpTrgTP );
+      if(!mMCflag) printf("BaD TP2bit(ch=%d)  out0=%d  inp1=%d   del=%d\n", ch, emuTrgTP, inpTrgTP, emuTrgTP-inpTrgTP );
     }
     
   }
@@ -177,7 +177,7 @@ StEemcTriggerSimu::compareTRG1_TRG2(){
       hA[502]->Fill(ch, outE-inpE);
       hA[503]->Fill(ch);
 
-      printf("BaD 3JP Esum5bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outE,inpE,outE-inpE);
+     if(!mMCflag)  printf("BaD 3JP Esum5bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outE,inpE,outE-inpE);
       // assert(400==i);
     }
 
@@ -200,7 +200,7 @@ StEemcTriggerSimu::compareTRG1_TRG2(){
       hA[512]->Fill(ch, outJP-inpJP);
       hA[513]->Fill(ch);
 
-      printf("BaD 3JP JP2bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outJP,inpJP,outJP-inpJP);
+      if(!mMCflag) printf("BaD 3JP JP2bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outJP,inpJP,outJP-inpJP);
       // assert(500==i);
     } 
     
@@ -221,7 +221,7 @@ StEemcTriggerSimu::compareTRG1_TRG2(){
       hA[512]->Fill(ch+3, outHT-inpHT);
       hA[513]->Fill(ch+3);
 
-      printf("BaD 3JP HT2bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outHT,inpHT,outHT-inpHT);
+      if(!mMCflag)  printf("BaD 3JP HT2bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outHT,inpHT,outHT-inpHT);
       // assert(100==i);
     }  
 
@@ -243,7 +243,7 @@ StEemcTriggerSimu::compareTRG1_TRG2(){
       hA[512]->Fill(ch+6, outHTTP-inpHTTP);
       hA[513]->Fill(ch+6);
 
-      printf("BaD 3JP HTTP1bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outHTTP,inpHTTP,outHTTP-inpHTTP);
+     if(!mMCflag)  printf("BaD 3JP HTTP1bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outHTTP,inpHTTP,outHTTP-inpHTTP);
       // assert(300==i);
     } 
     
@@ -265,7 +265,7 @@ StEemcTriggerSimu::compareTRG1_TRG2(){
       hA[512]->Fill(ch+9, outTP-inpTP);
       hA[513]->Fill(ch+9);
 
-      printf("BaD 3JP TP1bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outTP,inpTP,outTP-inpTP);
+      if(!mMCflag)  printf("BaD 3JP TP1bit(ch=%d)  out1=%d  inp2=%d   diff=%d\n",ch, outTP,inpTP,outTP-inpTP);
       //assert(200==i);
     } 
 
@@ -470,7 +470,7 @@ StEemcTriggerSimu::compareADC0_TRG1(){
       hA[158]->Fill(ch, emuTrgTPsum-inpTrgTPsum); 
       hA[156]->Fill(ch);
 
-      printf("BaD TPsum(ch=%d)  emu-out0=%d  inp1=%d   del=%d\n", ch, emuTrgTPsum, inpTrgTPsum, emuTrgTPsum-inpTrgTPsum );
+     if(!mMCflag)  printf("BaD TPsum(ch=%d)  emu-out0=%d  inp1=%d   del=%d\n", ch, emuTrgTPsum, inpTrgTPsum, emuTrgTPsum-inpTrgTPsum );
       isGood=false;
     }
 
@@ -485,7 +485,7 @@ StEemcTriggerSimu::compareADC0_TRG1(){
       hA[166]->Fill(ch);
 
       isGood=false;
-      printf("BaD HT2bit(ch=%d)  emu-out0=%d  inp1=%d   del=%d\n",ch, emuTrgHT, inpTrgHT, emuTrgHT-inpTrgHT );  
+     if(!mMCflag)  printf("BaD HT2bit(ch=%d)  emu-out0=%d  inp1=%d   del=%d\n",ch, emuTrgHT, inpTrgHT, emuTrgHT-inpTrgHT );  
     }
 
     int inpTrgHTTP=dsm1TreeTRG->getInpHTTP2bit(ch);
@@ -499,7 +499,7 @@ StEemcTriggerSimu::compareADC0_TRG1(){
       hA[176]->Fill(ch);
 
       isGood=false;
-      printf("BaD HTTP2bit(ch=%d)  emu-out0=%d  inp1=%d   del=%d\n", ch, emuTrgHTTP, inpTrgHTTP, emuTrgHTTP-inpTrgHTTP );
+     if(!mMCflag)  printf("BaD HTTP2bit(ch=%d)  emu-out0=%d  inp1=%d   del=%d\n", ch, emuTrgHTTP, inpTrgHTTP, emuTrgHTTP-inpTrgHTTP );
     }
 
     int inpTrgTP=dsm1TreeTRG->getInpTP2bit(ch);
@@ -513,7 +513,7 @@ StEemcTriggerSimu::compareADC0_TRG1(){
       hA[186]->Fill(ch);
       
       isGood=false;
-      printf("BaD TP2bit(ch=%d)  emu-out0=%d  inp1=%d   del=%d\n", ch, emuTrgTP, inpTrgTP, emuTrgTP-inpTrgTP );
+      if(!mMCflag) printf("BaD TP2bit(ch=%d)  emu-out0=%d  inp1=%d   del=%d\n", ch, emuTrgTP, inpTrgTP, emuTrgTP-inpTrgTP );
     }
 
   }
@@ -553,12 +553,12 @@ StEemcTriggerSimu::compareADC1_TRG2(){
     if(outJP!=inpJP) {
       
       //dsm1TreeADC->print();//tmp
-      printf("###\n");
+      //  printf("###\n");
       
       hA[515]->Fill(ch, outJP-inpJP);
       hA[516]->Fill(ch);
       
-      printf("BaD 3JP JP2bit(ch=%d)  emu-out1=%d  inp2=%d   diff=%d\n",ch, outJP,inpJP,outJP-inpJP);
+      if(!mMCflag)  printf("BaD 3JP JP2bit(ch=%d)  emu-out1=%d  inp2=%d   diff=%d\n",ch, outJP,inpJP,outJP-inpJP);
       // assert(500==i);
     } 
     
@@ -575,12 +575,12 @@ StEemcTriggerSimu::compareADC1_TRG2(){
     
     if(outHT!=inpHT) {
       //dsm1TreeADC->print();//tmp
-      printf("###\n");
+      // printf("###\n");
       
       hA[515]->Fill(ch+3, outHT-inpHT);
       hA[516]->Fill(ch+3);
       
-      printf("BaD 3JP HT2bit(ch=%d)  emu-out1=%d  inp2=%d   diff=%d\n",ch, outHT,inpHT,outHT-inpHT);
+      if(!mMCflag)  printf("BaD 3JP HT2bit(ch=%d)  emu-out1=%d  inp2=%d   diff=%d\n",ch, outHT,inpHT,outHT-inpHT);
       // assert(100==i);
     }  
     
@@ -598,12 +598,12 @@ StEemcTriggerSimu::compareADC1_TRG2(){
     if(outHTTP!=inpHTTP) {
       
       //dsm1TreeADC->print();//tmp
-      printf("###\n");
+      // printf("###\n");
       
       hA[515]->Fill(ch+6, outHTTP-inpHTTP);
       hA[516]->Fill(ch+6);
       
-      printf("BaD 3JP HTTP1bit(ch=%d)  emu-out1=%d  inp2=%d   diff=%d\n",ch, outHTTP,inpHTTP,outHTTP-inpHTTP);
+      if(!mMCflag)  printf("BaD 3JP HTTP1bit(ch=%d)  emu-out1=%d  inp2=%d   diff=%d\n",ch, outHTTP,inpHTTP,outHTTP-inpHTTP);
       // assert(300==i);
     } 
     
@@ -621,12 +621,12 @@ StEemcTriggerSimu::compareADC1_TRG2(){
     if(outTP!=inpTP) {
       
       //dsm1TreeADC->print();//tmp
-      printf("###\n");
+      // printf("###\n");
       
       hA[515]->Fill(ch+9, outTP-inpTP);
       hA[516]->Fill(ch+9);
       
-      printf("BaD 3JP TP1bit(ch=%d)  emu-out1=%d  inp2=%d   diff=%d\n",ch, outTP,inpTP,outTP-inpTP);
+      if(!mMCflag) printf("BaD 3JP TP1bit(ch=%d)  emu-out1=%d  inp2=%d   diff=%d\n",ch, outTP,inpTP,outTP-inpTP);
       //assert(200==i);
     } 
     
@@ -646,7 +646,7 @@ StEemcTriggerSimu::compareADC1_TRG2(){
       if(outE!=inpE) {
 	hA[505]->Fill(jch, outE-inpE);
 	hA[506]->Fill(jch);
-	printf("BaD  Esum5bit(ibr=%d,ch=%d)  adcOut1=%d  trgInp2=%d   diff=%d\n",ibr,ch, outE,inpE,outE-inpE);
+	if(!mMCflag) printf("BaD  Esum5bit(ibr=%d,ch=%d)  adcOut1=%d  trgInp2=%d   diff=%d\n",ibr,ch, outE,inpE,outE-inpE);
       } 
     }
   }
@@ -670,7 +670,7 @@ StEemcTriggerSimu::compareADC2_TRG3(){
     hA[625]->Fill(ch, outEtot-inpEtot);
     hA[626]->Fill(ch);
 
-    printf("BaD Etot 1bit emu-out2=%d inp3=%d, diff=%d\n", outEtot, inpEtot, outEtot-inpEtot);
+     if(!mMCflag) printf("BaD Etot 1bit emu-out2=%d inp3=%d, diff=%d\n", outEtot, inpEtot, outEtot-inpEtot);
   }
 }
 
@@ -720,3 +720,9 @@ StEemcTriggerSimu::DSM2EsumSpectra(){
   }
   
 }
+
+//
+// $Log: StEemcTriggerCompare.cxx,v $
+// Revision 1.2  2007/07/23 02:59:59  balewski
+// cleanup, bbc for M-C still not working
+//

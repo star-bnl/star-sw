@@ -170,3 +170,9 @@ StEemcTriggerSimu::initHisto() {
 
 }
 
+//
+// $Log: StEemcTriggerHisto.cxx,v $
+// Revision 1.3  2007/07/23 02:59:59  balewski
+// cleanup, bbc for M-C still not working
+//
+

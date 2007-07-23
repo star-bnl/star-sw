@@ -20,14 +20,28 @@
 #include "StTriggerUtilities/Bbc/StBbcTriggerSimu.h"
 
 ClassImp(StBbcTriggerSimu)
+//==================================================
+//==================================================
 
 StBbcTriggerSimu::StBbcTriggerSimu(){
     BBCadcNum=48;
 }
+//==================================================
+//==================================================
 
 StBbcTriggerSimu::~StBbcTriggerSimu(){
+} 
+//==================================================
+//==================================================
+void  
+StBbcTriggerSimu::Init(){
+
+  LOG_INFO <<Form("Bbc::Init() MC_flag=%d, adcThres=%d",mMCflag,AdcTrigThresh)<<endm;
+  if(mMCflag) LOG_WARN <<"Bbc:: TDC thresholds not implemented"<<endm;
 }
 
+//==================================================
+//==================================================
 void StBbcTriggerSimu::Clear(){
 
     bbcTrig=0;
@@ -38,11 +52,11 @@ void StBbcTriggerSimu::Clear(){
     }
 
 }
+//==================================================
+//==================================================
 
 void StBbcTriggerSimu::Make()
 {
-
-  Clear();
   
   muDstMaker = (StMuDstMaker*)StMaker::GetChain()->GetMaker("MuDst");  assert(muDstMaker);
   
@@ -74,6 +88,13 @@ void StBbcTriggerSimu::Make()
   }
   
 }
+
+
+//
+// $Log: StBbcTriggerSimu.cxx,v $
+// Revision 1.3  2007/07/23 02:59:56  balewski
+// cleanup, bbc for M-C still not working
+//
 
 
 

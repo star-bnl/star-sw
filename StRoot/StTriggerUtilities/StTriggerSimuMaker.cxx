@@ -35,6 +35,7 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
   mYear=-1;
   mMCflag=0;
   eemc=0;
+  bbc=0;
 }
 
 //____________________________________________________________________________
@@ -56,14 +57,19 @@ StTriggerSimuMaker::useBbc(){
 //_____________________________________________________________________________
 Int_t 
 StTriggerSimuMaker::Init() {
+  LOG_INFO <<Form("StTriggerSimuMaker::Init(), MCflag=%d",mMCflag)<<endm;
   
   if(eemc) {
     eemc->setHList(mHList);
-    eemc->Init();
     eemc->setMC(mMCflag);
+    eemc->Init();
   }
 
-  LOG_INFO <<Form("StTriggerSimuMaker::Init(), MCflag=%d",mMCflag)<<endm;
+  if(bbc) {
+    bbc->setMC(mMCflag);
+    bbc->Init();
+  }
+
  return StMaker::Init();
 }
 
@@ -72,7 +78,8 @@ void
 StTriggerSimuMaker::Clear(const Option_t*){
   
   mTriggerList.clear();
-  if(eemc) eemc->clear();
+  if(eemc) eemc->Clear();
+  if(bbc)  bbc ->Clear();
   
   LOG_DEBUG<<"::Clear()"<<endm;
 }
@@ -84,7 +91,7 @@ Int_t
 StTriggerSimuMaker::InitRun  (int runNumber){
   LOG_INFO<<"::InitRun()="<<runNumber<<endm;
 
-  if(eemc) eemc->initRun();
+  if(eemc) eemc->InitRun();
   
   assert(mDbMk);
   mYear=mDbMk->GetDateTime().GetYear();
@@ -116,7 +123,7 @@ StTriggerSimuMaker::Make(){
     addTriggerList(); //  final decisions, involve L2 
 
 
-    cout<<Form(" 4Pibero HTTP bit=%d",eemc->dsm2TreeADC->getOutEndcapHTTP1bit())<<endl;
+    cout<<Form(" 4Pibero HTTP bit=%d  bbc=%d",eemc->dsm2TreeADC->getOutEndcapHTTP1bit(), bbc->getEandW())<<endl;
     return kStOK;
 }
 
@@ -164,9 +171,12 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.4 2007/07/22 23:09:34 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.5 2007/07/23 02:59:48 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.5  2007/07/23 02:59:48  balewski
+// cleanup, bbc for M-C still not working
+//
 // Revision 1.4  2007/07/22 23:09:34  rfatemi
 // Add Bbc access
 //
