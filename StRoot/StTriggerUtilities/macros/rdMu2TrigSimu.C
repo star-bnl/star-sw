@@ -1,63 +1,52 @@
+class StMuDstMaker;
+class  StChain *chain;
+int total=0;
 
-void rdMu2TrigSimu( char *dirIn ="runList/",
-		    char *file="R7101015", // real data file
-		    //char *file="photon_9_11_1", //MC event file
-
-		    int flagMC=0 // set it to 0 for real data
-		    )
+void rdMu2TrigSimu( char *dirIn="",
+		    //char *dirIn ="runList/",
+		    //char *file="photon_9_11.lis",//MC event file
+		    //char *file="R7101015.lis", // real data file
+		    const char *file="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.MuDst.root",
+		    const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root",
+		    int flagMC=1)
 {
-  int nevents = 100;
-  int nFiles = 3; // make this big if you want to read all events from a run
-
-  TString fileMu=file; fileMu+=".lis";
-  printf("MC flag=%d, file=%s\n", flagMC,file);
-
-  if(flagMC) {
-    dirIn ="/star/institutions/mit/common/simu/";
-    fileMu=file;fileMu+=".MuDst.root";
-
-    TString fileG=file;fileG+=".event.root";
-    fileG= dirIn+fileG;
-
-  }
-
-  //cout<<fileMu<<endl; cout<<fileG<<endl;
-
-  
+  int nevents = 10;
+  int nfiles = 3; // make this big if you want to read all events from a run
+ 
   TString outDir="./out2/"; 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
-
+  assert( !gSystem->Load("StDetectorDbMaker"));
+  assert( !gSystem->Load("StDbUtilities"));
   assert( !gSystem->Load("StDbBroker"));
   assert( !gSystem->Load("St_db_Maker"));
   assert( !gSystem->Load("StEEmcDbMaker"));
   assert( !gSystem->Load("StEEmcUtil")); // needed by eemcDb
   assert( !gSystem->Load("StDaqLib")); // needed by bemcDb
   assert( !gSystem->Load("StEmcRawMaker"));
-  if (flagMC) {
-    assert( !gSystem->Load("StEmcSimulatorMaker"));
-    assert( !gSystem->Load("StMcEvent"));
-    assert( !gSystem->Load("StBbcSimulationMaker"));
-  }
-  if (flagMC==0) assert( !gSystem->Load("StEmcADCtoEMaker"));
+  assert( !gSystem->Load("StEmcADCtoEMaker"));
+  if (flagMC) assert( !gSystem->Load("StEpcMaker"));
+  if (flagMC) assert( !gSystem->Load("StEmcSimulatorMaker"));
+  if (flagMC) assert( !gSystem->Load("StMcEvent"));
+  if (flagMC) assert( !gSystem->Load("StMcEventMaker"));
   assert( !gSystem->Load("StTriggerUtilities"));
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
-  TObjArray* HList=new TObjArray; // to collect all output histograms for Jan
   
   chain= new StChain("StChain"); 
-  if(flagMC) {
-    StIOMaker* ioMaker = new StIOMaker("IO","r",fileG,"bfcTree");
+  
+  if (flagMC){
+    StIOMaker* ioMaker = new StIOMaker();
+    ioMaker->SetFile(fname);
     ioMaker->SetIOMode("r");
-    ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
-    ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
-    ioMaker->SetBranch("eventBranch",0,"r"); //activate runco Branch
+    ioMaker->SetBranch("*",0,"0");             //deactivate all branches
+    ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
   }
 
+  TObjArray* HList=new TObjArray; // to collect all output histograms for Jan
 
-
-  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dirIn,fileMu,"MuDst.root",nFiles);
-
+  const char *filter = "";
+  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dirIn,file,filter,nfiles,"MuDst");
   TChain* tree=muDstMaker->chain(); assert(tree);
   int nEntries=(int) tree->GetEntries();
   printf("total eve in muDst chain =%d\n",nEntries);  // return ;
@@ -73,11 +62,10 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
   StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
  
   if (flagMC) {
-    new StBbcSimulationMaker();
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
     StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
   }
-  if (flagMC==0){
+  if (!flagMC){
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
   }
   
@@ -86,7 +74,6 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
   simuTrig->setHList(HList);
   simuTrig->useEemc();
   simuTrig->useBbc();
-
   if(flagMC){
     simuTrig->setMC(flagMC); // pass one argument to M-C as generic switch
 
@@ -103,7 +90,6 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
     simuTrig->eemc->setDsmSetup(eemcDsmSetup);
     
   }
-
   chain->ls(3);
   chain->Init();
   chain->PrintInfo();  
@@ -117,7 +103,8 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
   memset(nS,0, sizeof(nR));
   memset(nRS,0, sizeof(nR));
 
-  int total=0;
+  int BL1_ADC[6];
+  int hold=-1;
   int t1=time(0);
 
   for (Int_t iev=0;iev<nevents; iev++) {
@@ -158,16 +145,16 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
       if(realT) nR[j]++;
       if(realT && simT) nRS[j]++;
       if(simT) nS[j]++;
-      //  cout <<Form("C:j=%d  trg=%d  R=%d S=%d  RS=%d",j, myTrgList[j],realT,simT,realT && simT )<<endl;
-    }
+        cout <<Form("C:j=%d  trg=%d  R=%d S=%d  RS=%d",j, myTrgList[j],realT,simT,realT && simT )<<endl;
+     }
 
   }
   int t2=time(0);
   if(t2==t1) t2=t1+1;
   float tMnt=(t2-t1)/60.;
   float rate=1.*total/(t2-t1);
-
-
+  
+    
 
   chain->Finish();
   cout << "****************************************** " << endl;
@@ -195,9 +182,4 @@ void rdMu2TrigSimu( char *dirIn ="runList/",
  
 }
 
-//
-// $Log: rdMu2TrigSimu.C,v $
-// Revision 1.5  2007/07/23 03:00:03  balewski
-// cleanup, bbc for M-C still not working
-//
 
