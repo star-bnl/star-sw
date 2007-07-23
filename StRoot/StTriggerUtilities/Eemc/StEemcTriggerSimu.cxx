@@ -3,12 +3,7 @@
 //
 /*
 changes to be done in bbc-code, Jan
--  bbc=0 in maker constr
-- Clear() from maker
-- add Init() with warning for M-C
 - add TDC limits for real data
-- add MC/data switch
-- add getEandW() method instead of bbcTrig
 - add histos for all PMTs
 */
 
@@ -83,7 +78,7 @@ StEemcTriggerSimu::~StEemcTriggerSimu(){ /* nop */}
 //==================================================
 //==================================================
 void  
-StEemcTriggerSimu::clear(){
+StEemcTriggerSimu::Clear(){
   
   // printf("This is StEemcTriggerSimu::Clear\n");
   memset(rawAdc,0,sizeof(rawAdc));
@@ -136,7 +131,7 @@ StEemcTriggerSimu::addTriggerList( void * adr){
 //==================================================
 //==================================================
 void  
-StEemcTriggerSimu::initRun(){
+StEemcTriggerSimu::InitRun(){
 
   
   memset(feePed,0,sizeof(feePed));
@@ -276,6 +271,7 @@ StEemcTriggerSimu::Make(){
     dsm0TreeTRG->compute();
     dsm1TreeTRG->compute(); 
     dsm2TreeTRG->compute(); 
+  }
 
   //if(mDumpEve)   dsm0TreeTRG->print();
   //if(mDumpEve)   dsm1TreeTRG->print();
@@ -295,7 +291,7 @@ StEemcTriggerSimu::Make(){
   compareTRG2_TRG3();
   
   DSM2EsumSpectra();
-  }
+
 
   dsm2TreeADC->print(0); 
   
@@ -458,4 +454,10 @@ StEemcTriggerSimu::getEemcFeeMask(){
     } // end of chan loop
   }// end of crate loop
 }
+
+//
+// $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.5  2007/07/23 03:00:00  balewski
+// cleanup, bbc for M-C still not working
+//
 
