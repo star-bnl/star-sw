@@ -1,6 +1,17 @@
 //
 //  StEemcTriggerSimu.cxx,v 0.01
 //
+/*
+changes to be done in bbc-code, Jan
+-  bbc=0 in maker constr
+- Clear() from maker
+- add Init() with warning for M-C
+- add TDC limits for real data
+- add MC/data switch
+- add getEandW() method instead of bbcTrig
+- add histos for all PMTs
+*/
+
 
 
 #include <TH2.h>
