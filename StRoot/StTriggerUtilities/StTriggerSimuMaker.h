@@ -17,6 +17,7 @@
 #include "StMaker.h"
 #endif
 class StEemcTriggerSimu;
+class StBecTriggerSimu;
 class St_db_Maker;
 
 class StTriggerSimuMaker : public StMaker {
@@ -54,9 +55,12 @@ public:
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.3 2007/07/22 23:09:51 rfatemi Exp $
+// $Id: StTriggerSimuMaker.h,v 1.4 2007/07/23 03:03:39 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.4  2007/07/23 03:03:39  balewski
+// fix
+//
 // Revision 1.3  2007/07/22 23:09:51  rfatemi
 // added access to Bbc
 //
