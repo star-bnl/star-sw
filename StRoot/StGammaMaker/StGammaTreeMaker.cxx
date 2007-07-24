@@ -29,15 +29,10 @@ Int_t StGammaTreeMaker::Init()
   if ( !mGammaFile )
     mGammaFile=new TFile(mFilename,"RECREATE");
   if ( !mGammaTree ) {
-    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.4 2007/06/08 23:17:55 jwebb Exp $ built "__DATE__" "__TIME__);    
+    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.5 2007/07/24 22:18:38 pibero Exp $ built "__DATE__" "__TIME__);    
     mGammaTree->SetDirectory(mGammaFile);
   }
 
-  /***
-  mGammaEvent=new StGammaEvent();
-
-  ***/
-  
   StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMaker("gemaker");
   assert(gemaker);
 
@@ -78,25 +73,7 @@ Int_t StGammaTreeMaker::Make()
   if ( !rawmk ) 
     {
       LOG_WARN<<"StGammaRawMaker not in chain"<<endm;
-    }
-
-
-  // copy primary vertex
-
-  StMuPrimaryVertex *pv = StMuDst::primaryVertex();
-  if ( pv )
-    {
-      mGammaEvent->SetVertex(TVector3(pv->position().x(),pv->position().y(),pv->position().z()));
-      mGammaEvent->mFlags |= TPC_VERTEX;
-    }
-  else
-    {
-      mGammaEvent->SetVertex(TVector3(0.,0.,0.));
-      mGammaEvent->mFlags |= !(TPC_VERTEX);
-    }
-  
-
-  
+    }  
     
     
   // write out the tree
@@ -107,7 +84,7 @@ Int_t StGammaTreeMaker::Make()
 
 
   // write out the tree
-  if ( mGammaTree ) mGammaTree->Fill();
+  if ( mGammaEvent->numberOfCandidates() > 0 ) mGammaTree->Fill();
 
   return kStOK;
 
