@@ -22,6 +22,10 @@
 
 //get  EEMC
 #include "Eemc/StEemcTriggerSimu.h"
+#include "Eemc/EemcHttpInfo.h"
+#include "StEEmcUtil/EEdsm/EEfeeTPTree.h" // for printouts only
+#include "StEEmcUtil/EEdsm/EEfeeTP.h"  // for printouts only
+
 //get BBC
 #include "Bbc/StBbcTriggerSimu.h"
 //get HEAD Maker
@@ -123,7 +127,22 @@ StTriggerSimuMaker::Make(){
     addTriggerList(); //  final decisions, involve L2 
 
 
+    // all code below is for Pibero for testing
+
+    int tpId;
+    EemcHttpInfo httpInfo;
+    for (tpId=0;tpId<90;tpId++){
+      bool found=eemc->getHttpInfo(tpId,httpInfo);
+      printf("http(%d) ok=%d ",tpId,found);
+      if(!found) { printf("\n"); continue;}
+       httpInfo.print();
+       // details of this TP
+      eemc->feeTPTreeADC->TP(tpId)->print(3);
+      // do your job
+      // break;// ???
+    } 
     cout<<Form(" 4Pibero HTTP bit=%d  bbc=%d",eemc->dsm2TreeADC->getOutEndcapHTTP1bit(), bbc->getEandW())<<endl;
+
     return kStOK;
 }
 
@@ -171,9 +190,12 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.5 2007/07/23 02:59:48 balewski Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.6 2007/07/24 01:32:43 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.6  2007/07/24 01:32:43  balewski
+// *** empty log message ***
+//
 // Revision 1.5  2007/07/23 02:59:48  balewski
 // cleanup, bbc for M-C still not working
 //
