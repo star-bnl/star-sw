@@ -29,7 +29,7 @@ Int_t StGammaTreeMaker::Init()
   if ( !mGammaFile )
     mGammaFile=new TFile(mFilename,"RECREATE");
   if ( !mGammaTree ) {
-    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.5 2007/07/24 22:18:38 pibero Exp $ built "__DATE__" "__TIME__);    
+    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.6 2007/07/24 22:22:54 pibero Exp $ built "__DATE__" "__TIME__);    
     mGammaTree->SetDirectory(mGammaFile);
   }
 
@@ -74,13 +74,6 @@ Int_t StGammaTreeMaker::Make()
     {
       LOG_WARN<<"StGammaRawMaker not in chain"<<endm;
     }  
-    
-    
-  // write out the tree
-  if ( mGammaTree ) mGammaTree->Fill();
-  
-  return kStOK;
-
 
 
   // write out the tree
