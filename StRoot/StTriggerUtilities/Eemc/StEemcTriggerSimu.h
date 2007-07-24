@@ -13,14 +13,18 @@ class EEdsm0Tree;
 class EEdsm1Tree;
 class EMCdsm2Tree;
 class EEdsm3;
-
+class EemcHttpInfo;
 class TH1;
+
 class StEemcTriggerSimu {
  private:
   StEEmcDbMaker    *mDbE;
   int mMCflag; // set yo 0 for real data
   int * mBemcEsum5bit; // output from Bemc emulation
   int * mExternDsmSetup;
+
+  enum {nThr=3};
+  int mHTthr[nThr], mTPthr[nThr],mHTTPthrSelc;
 
   int  eveId; 
   int mYear;
@@ -81,7 +85,7 @@ class StEemcTriggerSimu {
   void setHList(TObjArray * x){mHList=x;}
   void addTriggerList( void * );
   void connectBemcL0(int  *x) { mBemcEsum5bit=x;};
-
+  bool getHttpInfo(int tpId, EemcHttpInfo &httpInfo);
   ClassDef(StEemcTriggerSimu, 1)
  };
 
@@ -90,6 +94,9 @@ class StEemcTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.3  2007/07/24 01:32:59  balewski
+// added HTTP id for the endcap
+//
 // Revision 1.2  2007/07/23 03:00:00  balewski
 // cleanup, bbc for M-C still not working
 //

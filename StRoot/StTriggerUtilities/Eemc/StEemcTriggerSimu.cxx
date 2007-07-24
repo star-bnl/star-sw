@@ -13,6 +13,8 @@ changes to be done in bbc-code, Jan
 #include <StMessMgr.h>
 
 #include "StEemcTriggerSimu.h"
+#include "EemcHttpInfo.h"
+
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
 #include "StEvent/StEmcTriggerDetector.h"
@@ -32,6 +34,7 @@ changes to be done in bbc-code, Jan
 #include <StEEmcDbMaker/EEmcDbCrate.h>
 #include <StEEmcDbMaker/EEmcDbItem.h>
 #include <StEEmcDbMaker/cstructs/eemcConstDB.hh>
+
 
 
 #include "StEEmcUtil/EEdsm/EEfeeTPTree.h" 
@@ -149,41 +152,40 @@ StEemcTriggerSimu::InitRun(){
 
   EemcTrigUtil::getFeePed4("setup/EemcFeePed/", yyyymmdd, hhmmss, mxChan, feePed);
 
-  const int nThr=3;
-  int HTthr[nThr], TPthr[nThr];
+ 
   int JPthr[nThr];
-  int TPthrSelc, HTTPthrSelc, JPSIthrSelc, BarreSide;
+  int TPthrSelc, JPSIthrSelc, BarreSide;
   int BEsumthr, EEsumthr, EtotThr;
 
   if(!mExternDsmSetup) {
-    EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, HTthr, TPthr, JPthr, TPthrSelc, HTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr); // home-made DB
+    EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, mHTthr, mTPthr, JPthr, TPthrSelc, mHTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr); // home-made DB
   }  else {
     LOG_INFO<<Form("Eemc::InitRun() use externalDSM setup")<<endm;
     int i;
-    for(i=0;i<nThr;i++) HTthr[i]=mExternDsmSetup[0+i];
-    for(i=0;i<nThr;i++) TPthr[i]=mExternDsmSetup[3+i];
-    for(i=0;i<nThr;i++) JPthr[i]=mExternDsmSetup[6+i];
-    TPthrSelc=mExternDsmSetup[9];
-    HTTPthrSelc=mExternDsmSetup[10];
-    JPSIthrSelc=mExternDsmSetup[11];
-    BarreSide=mExternDsmSetup[12];
-    BEsumthr=mExternDsmSetup[13];
-    EEsumthr=mExternDsmSetup[14];
-    EtotThr=mExternDsmSetup[15];
+    for(i=0;i<nThr;i++) mHTthr[i]=mExternDsmSetup[0+i];
+    for(i=0;i<nThr;i++) mTPthr[i]=mExternDsmSetup[3+i];
+    for(i=0;i<nThr;i++) JPthr[i] =mExternDsmSetup[6+i];
+    TPthrSelc   =mExternDsmSetup[9];
+    mHTTPthrSelc=mExternDsmSetup[10];
+    JPSIthrSelc =mExternDsmSetup[11];
+    BarreSide   =mExternDsmSetup[12];
+    BEsumthr    =mExternDsmSetup[13];
+    EEsumthr    =mExternDsmSetup[14];
+    EtotThr     =mExternDsmSetup[15];
   }
 
-  LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",HTthr[0],HTthr[1],HTthr[2])<<endm;
-  LOG_INFO<<Form("Eemc::DSM setup TPthr: %d, %d, %d",TPthr[0],TPthr[1],TPthr[2])<<endm;
+  LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",mHTthr[0],mHTthr[1],mHTthr[2])<<endm;
+  LOG_INFO<<Form("Eemc::DSM setup TPthr: %d, %d, %d",mTPthr[0],mTPthr[1],mTPthr[2])<<endm;
   LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",JPthr[0],JPthr[1],JPthr[2])<<endm;
   LOG_INFO<<Form("Eemc::DSM setup  BEsumthr=%d, EEsumthr=%d, EtotThr=%d", BEsumthr, EEsumthr, EtotThr)<<endm;
-  LOG_INFO<<Form("Eemc::DSM setup TPthrSelc=%d, HTTPthrSelc=%d, JPSIthrSelc=%d, BarreSide=%d", TPthrSelc, HTTPthrSelc, JPSIthrSelc, BarreSide)<<endm;
+  LOG_INFO<<Form("Eemc::DSM setup TPthrSelc=%d, HTTPthrSelc=%d, JPSIthrSelc=%d, BarreSide=%d", TPthrSelc, mHTTPthrSelc, JPSIthrSelc, BarreSide)<<endm;
 
 
-  dsm0TreeADC->setYear(mYear,HTthr,TPthr); 
-  dsm0TreeTRG->setYear(mYear,HTthr,TPthr); 
+  dsm0TreeADC->setYear(mYear,mHTthr,mTPthr); 
+  dsm0TreeTRG->setYear(mYear,mHTthr,mTPthr); 
 
-  dsm1TreeADC->setYear(mYear, JPthr, TPthrSelc, HTTPthrSelc);
-  dsm1TreeTRG->setYear(mYear, JPthr, TPthrSelc, HTTPthrSelc);
+  dsm1TreeADC->setYear(mYear, JPthr, TPthrSelc, mHTTPthrSelc);
+  dsm1TreeTRG->setYear(mYear, JPthr, TPthrSelc, mHTTPthrSelc);
  
   dsm2TreeTRG->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
   dsm2TreeADC->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
@@ -303,10 +305,33 @@ StEemcTriggerSimu::Make(){
 //==================================================
 //==================================================
 //==================================================
+bool 
+StEemcTriggerSimu::getHttpInfo(int tpId, EemcHttpInfo &httpInfo){
+  httpInfo.clear();
+  int ith=mHTTPthrSelc-1;
+  assert(ith>=0 && ith<nThr);
+  if(tpId<0 or tpId>=EEfeeTPTree::mxTP) return false;
+  EEfeeTP *TP=feeTPTreeADC->TP(tpId); assert(TP);
+  int TPsum6b=TP->getOutTPsum();
+  if(TPsum6b<mTPthr[ith]) return false;
+  int HT6bit=TP->getOutHT();
+  if(HT6bit<mHTthr[ith]) return false;
+  httpInfo.tpId=tpId;
+  httpInfo.tpSumDsmAdc=TPsum6b;
+  httpInfo.htwCh=TP->getTranHTchId();
+  httpInfo.htwCr=TP->getCrateID();
+  httpInfo.htwDsmAdc=HT6bit; 
+  return true;
+ 
+}
+
+//==================================================
+//==================================================
+//==================================================
 void 
 StEemcTriggerSimu::getEemcAdc(){
   
-  // printf("This StEemcTriggerSimu::getting Endcap ADC values\n");
+   // printf("This StEemcTriggerSimu::getting Endcap ADC values\n");
 
   StMuDstMaker* muMk = (StMuDstMaker*) StMaker::GetChain()->Maker("MuDst");
   assert(muMk);
@@ -457,6 +482,9 @@ StEemcTriggerSimu::getEemcFeeMask(){
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.6  2007/07/24 01:32:59  balewski
+// added HTTP id for the endcap
+//
 // Revision 1.5  2007/07/23 03:00:00  balewski
 // cleanup, bbc for M-C still not working
 //
