@@ -2,6 +2,10 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.27  2007/07/24 15:41:44  kocolosk
+// bugFix from Oleksandr:
+// http://www.star.bnl.gov/HyperNews-star/get/emc2/2444.html
+//
 // Revision 1.26  2007/01/22 19:13:50  kocolosk
 // use STAR logger for all output
 //
@@ -504,7 +508,7 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
             if((k[i1]-1)>=0)
             {
                 StEmcCluster *cl1;
-                cl1 = (StEmcCluster*)evec[i1];
+                cl1 = (StEmcCluster*)mvec[i1];
                 Float_t avg_en = cl1->energy();
                 totAvg += avg_en;
             }
