@@ -568,6 +568,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	  my @words = split /(=)/, $line;
 	  chomp(@words[2]);
 	  my $h = $words[2];
+     # remove the quotation surrounding the file name if any
+     $h =~ s/^\"// ; $h =~ s/\"$// ; 
 	  if (! -r $Dir . "/" . $h) {
 	    $h = "#StRoot/" . $h;
 	  }
