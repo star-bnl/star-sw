@@ -341,6 +341,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 		{
 		  StGammaStrip *strip = grawmaker->strip(isec,0,i);
 		  if ( strip ) {
+                    strip->position = i;
 		    can->addSmdu(strip);
 		  }
 		}
@@ -348,6 +349,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 		{
 		  StGammaStrip *strip = grawmaker->strip(isec,1,i);
 		  if ( strip ) {
+                    strip->position = i;
 		    can->addSmdv(strip);
 		  }
 		}
