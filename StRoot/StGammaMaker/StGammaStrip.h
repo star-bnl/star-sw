@@ -16,6 +16,11 @@ class StGammaStrip : public TObject
   UChar_t sector;  // or bemc module
   UChar_t plane;   // 0=esmd-u 1=esmdv 10=bsmd-eta 11=bsmd-phi
   Float_t energy;  // energy deposited
+  Float_t position; // Reference position for the calculation of moments
+                    // bsmd-eta -> theta
+                    // bsmd-phi -> phi
+                    // esmd-u -> u index
+                    // esmd-v -> v index
   UChar_t stat;  // status bits (non fatal HW problems)
   UChar_t fail;    // fail bits (fatal HW problems)
   TRefArray candidates; // referencing candidates
