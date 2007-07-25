@@ -1,3 +1,5 @@
+#include "TChain.h"
+
 #include "StGammaPythiaEvent.h"
 #include "StGammaPythiaEventMaker.h"
 #include "StGammaEventMaker.h"
@@ -24,6 +26,10 @@ Int_t StGammaEventMaker::Init()
     mGammaEvent->SetPythia(mPythia);
   }
   AddObj(mGammaEvent,".data"); // ok, but what can I do with this?
+ 
+  // Instantiate mDustMaker
+  muDstMaker  = dynamic_cast<StMuDstMaker*>(GetMaker("MuDst")); assert(muDstMaker);
+
   return StMaker::Init();
 }
 
@@ -51,6 +57,7 @@ Int_t StGammaEventMaker::Make()
 
   mGammaEvent -> SetRunNumber( StMuDst::event()->runNumber() );
   mGammaEvent -> SetEventNumber( StMuDst::event()->eventNumber() );
+  mGammaEvent -> SetMudstFileName( muDstMaker->chain()->GetFile()->GetName() );
   mGammaEvent -> SetMagneticField( StMuDst::event()->magneticField() );
 
   return kStOK;
