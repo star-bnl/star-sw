@@ -322,6 +322,7 @@ void StGammaRawMaker::GetBarrel(){
 	  bstrip->stat   = smde_status;
 	  bstrip->fail   = !(smde_status);
 	  bstrip->energy = (*hit)->energy();
+          bstrip->position = 2 * exp( - (double)(*hit)->eta() );
 	  
 	  LOG_DEBUG<<" estrip id="<<smde_id<<" status = "<<smde_status<<" energy="<<(*hit)->energy()<<" module="<<(*hit)->module()<<endm;
 	  	  
@@ -341,9 +342,11 @@ void StGammaRawMaker::GetBarrel(){
 	for (StEmcRawHitIterator hit = hits.begin(); hit!=hits.end(); ++hit) {
 	  Int_t smdp_id = 0;
 	  Int_t smdp_status=0;
+          Float_t phi = -2;
 	  StEmcGeom* geom = StEmcGeom::instance("bsmdp");
 	  geom->getId((*hit)->module(),(*hit)->eta(),TMath::Abs((*hit)->sub()),smdp_id);
-	  tables->getStatus(BSMDP,smdp_id, smdp_status);
+	  geom->getPhi(smdp_id, phi);
+          tables->getStatus(BSMDP,smdp_id, smdp_status);
 	  
 	  StGammaStrip *bstrip = gevent->newStrip();
 
@@ -353,6 +356,7 @@ void StGammaRawMaker::GetBarrel(){
 	  bstrip->stat   = smdp_status;
 	  bstrip->fail   = !(smdp_status);
 	  bstrip->energy = (*hit)->energy(); 
+          bstrip->position = phi;
 
 	  LOG_DEBUG<<" pstrip id="<<smdp_id<<" status = "<<smdp_status<<" energy="<<(*hit)->energy()<<" module="<<(*hit)->module()<<endm;
 
