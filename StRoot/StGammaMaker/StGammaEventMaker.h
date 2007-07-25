@@ -23,6 +23,8 @@ class StGammaStrip;
 class StGammaPythiaEvent;
 class StGammaPythiaEventMaker;
 
+class StMuDstMaker;
+
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 class StGammaEventMaker : public StMaker
@@ -44,6 +46,7 @@ class StGammaEventMaker : public StMaker
   StGammaEvent *mGammaEvent;
   StGammaPythiaEvent* mPythia;
   StGammaPythiaEventMaker* mPythiaMaker;
+  StMuDstMaker *muDstMaker;
 
   ClassDef(StGammaEventMaker,1);
 };
