@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.28  2007/07/25 16:53:20  kocolosk
+// bugfix for the bugfix in 1.27
+//
 // Revision 1.27  2007/07/24 15:41:44  kocolosk
 // bugFix from Oleksandr:
 // http://www.star.bnl.gov/HyperNews-star/get/emc2/2444.html
@@ -422,8 +425,8 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
     if(evec.size()>0 && pvec.size()==0)
     {
         Category=1;
-        na=evec.size();
-        ma=mvec.size();
+        na=mvec.size();
+        ma=evec.size();
     }
     if(evec.size()==0 && pvec.size()>0)
     {
@@ -464,8 +467,8 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
                 cl2 = (StEmcCluster*)mvec[ip];
                 break;
             case 1:
-                cl1 = (StEmcCluster*)evec[ie];
-                cl2 = (StEmcCluster*)mvec[ip];
+                cl1 = (StEmcCluster*)mvec[ie];
+                cl2 = (StEmcCluster*)evec[ip];
                 break;
             case 2:
                 cl1 = (StEmcCluster*)mvec[ie];
@@ -567,8 +570,8 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
         case 1:
             if((k[i1]-1)>=0)
             {
-                btow  = (StEmcCluster*)mvec[k[i1]-1];
-                bsmde = (StEmcCluster*)evec[i1];
+                btow  = (StEmcCluster*)mvec[i1];
+                bsmde = (StEmcCluster*)evec[k[i1]-1];
                 eta = bsmde->eta();
                 phi = btow->phi();
                 fraction = EmcTot/totAvg;
