@@ -14,6 +14,7 @@
 #include "StGammaStrip.h"
 
 #include "TClonesArray.h"
+#include "TObjString.h"
 
 class StMuTrack;
 class StGammaPythiaEvent;
@@ -62,6 +63,7 @@ class StGammaEvent : public TObject {
  protected:
   Int_t mRunNumber;   /// Run number
   Int_t mEventNumber; /// Event number  
+  TObjString mMudstFileName; /// File which originated StGammaEvent
   TVector3 mVertex; /// Event vertex (TPC)
   Float_t mMagneticField; /// Magnetic field (kG)
   StGammaPythiaEvent* mPythia;
@@ -70,12 +72,14 @@ class StGammaEvent : public TObject {
  public:
   void SetRunNumber( Int_t run ){ mRunNumber=run; }
   void SetEventNumber( Int_t event ){ mEventNumber=event; }
+  void SetMudstFileName(const TObjString &i) { mMudstFileName = i; }
   void SetVertex(const TVector3& vertex ){ mVertex=vertex; }
   void SetMagneticField( Float_t magneticField) { mMagneticField = magneticField; }
   void SetPythia(StGammaPythiaEvent* pythia) { mPythia = pythia; }
 
   Int_t runNumber(){ return mRunNumber; }/// Returns run number
   Int_t eventNumber(){ return mEventNumber; }/// Returns event number
+  TObjString muDstFileName() const { return mMudstFileName; } /// Returns muDst file from which event originated
   TVector3& vertex(){ return mVertex; }/// Returns the vertex
   Float_t magneticField() const { return mMagneticField; } /// Magnetic field (kG)
   StGammaPythiaEvent* pythia() { return mPythia; } /// Pythia event
