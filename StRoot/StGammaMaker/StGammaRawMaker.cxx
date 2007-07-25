@@ -322,7 +322,7 @@ void StGammaRawMaker::GetBarrel(){
 	  bstrip->stat   = smde_status;
 	  bstrip->fail   = !(smde_status);
 	  bstrip->energy = (*hit)->energy();
-          bstrip->position = 2 * exp( - (double)(*hit)->eta() );
+          bstrip->position = 2 * atan( exp( - (double)(*hit)->eta() ) );
 	  
 	  LOG_DEBUG<<" estrip id="<<smde_id<<" status = "<<smde_status<<" energy="<<(*hit)->energy()<<" module="<<(*hit)->module()<<endm;
 	  	  
