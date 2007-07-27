@@ -17,6 +17,7 @@ void RunJetReader(int nevents=10,
     
     gROOT->Macro("loadMuDst.C");
     gSystem->Load("StTpcDb");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
@@ -26,12 +27,12 @@ void RunJetReader(int nevents=10,
     gSystem->Load("StEpcMaker");
     gSystem->Load("StEmcSimulatorMaker");
     gSystem->Load("StDbBroker");
-    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("St_db_Maker");
     gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StSpinDbMaker");
     gSystem->Load("StEEmcUtil");
     gSystem->Load("StEmcTriggerMaker");
+    gSystem->Load("StMCAsymMaker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
     
