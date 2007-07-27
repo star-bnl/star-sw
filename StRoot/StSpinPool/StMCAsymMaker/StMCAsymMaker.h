@@ -63,7 +63,7 @@ private:
     double df1_NLO_gmax,df2_NLO_gmax,weight_NLO_gmax;   //NLO GMAX polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
     double df1_NLO_gmin,df2_NLO_gmin,weight_NLO_gmin;   //NLO GMIN polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
 
-
+public: 
     Double_t get_polPDF_LO(int x1, double d1, double d2);
     Double_t get_polPDF_NLO(int x1, double d1, double d2);
     Double_t get_polPDF_NLO_g0(int x1, double d1, double d2);
@@ -75,7 +75,6 @@ private:
 
     Double_t getPartonicALL(double a, double b, double c, int d, int e, int f, int g, int h);
 
-public: 
     StMCAsymMaker(const char *name="MCAsym");
     virtual  ~StMCAsymMaker();
     virtual Int_t Init();
@@ -88,7 +87,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.3 2007/07/19 02:05:38 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.4 2007/07/27 16:53:39 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 
