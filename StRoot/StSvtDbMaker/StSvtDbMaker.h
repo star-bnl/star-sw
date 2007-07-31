@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.13 2007/07/12 20:07:49 fisyak Exp $
+ * $Id: StSvtDbMaker.h,v 1.14 2007/07/31 16:38:11 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.14  2007/07/31 16:38:11  fisyak
+ * Make request for SvtGeometry from GetRotations
+ *
  * Revision 1.13  2007/07/12 20:07:49  fisyak
  * Move to access on demand of Db tables
  *
@@ -93,7 +96,7 @@ class StSvtDbMaker : public StMaker {
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   Clear(const char *opt);
-  virtual THashList *GetRotations() {return fRotList;}
+  virtual THashList *GetRotations();
   StSvtHybridDriftVelocity* getDriftVelocity(int barrel, int ladder, int wafer, int hybrid);
   StSvtConfig*           getConfiguration();
   StSvtHybridCollection* getDriftVelocity();
@@ -114,7 +117,7 @@ class StSvtDbMaker : public StMaker {
 				  const StMaker *dowMk=0) const ;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.13 2007/07/12 20:07:49 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.14 2007/07/31 16:38:11 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSvtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
