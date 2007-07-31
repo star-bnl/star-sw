@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.23 2007/07/12 20:07:49 fisyak Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.24 2007/07/31 16:38:11 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.24  2007/07/31 16:38:11  fisyak
+ * Make request for SvtGeometry from GetRotations
+ *
  * Revision 1.23  2007/07/12 20:07:49  fisyak
  * Move to access on demand of Db tables
  *
@@ -896,4 +899,9 @@ TDataSet  *StSvtDbMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
     break;
   }
   return (TDataSet *) objs;  
+}
+//________________________________________________________________________________
+THashList *StSvtDbMaker::GetRotations() {
+  FindDataSet("StSvtGeometry");
+  return fRotList;
 }
