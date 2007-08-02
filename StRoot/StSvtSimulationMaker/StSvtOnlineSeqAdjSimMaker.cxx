@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.9 2005/07/23 03:37:34 perev Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.10 2007/08/02 01:10:02 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -64,6 +64,8 @@ Int_t StSvtOnlineSeqAdjSimMaker::GetConfig()
     gMessMgr->Warning() << "SvtConfig data set is empty- seting default full configuration" << endm;
     mConfig=new StSvtConfig();
     mConfig->setConfiguration("FULL");
+    mConfig->setNumberOfAnodes(240);
+    mConfig->setNumberOfTimeBins(128);
     dataSet->SetObject(mConfig);
     }
   
