@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.28 2007/05/16 18:50:49 mvl Exp $
+ * $Id: StMuChainMaker.cxx,v 1.29 2007/08/02 18:57:49 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -223,10 +223,12 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
 	int tmp_entries = mDbReader->entries(file.c_str());
         if (tmp_entries != 0)
            entries = tmp_entries;
+        else 
+           entries = TChain::kBigNumber;  // If still not known, set to kBigNumber to avoid opening of file 
     }
     // If entries==0, TChain will open the file and get the number of entries
     // If entries==TChain::kBigNumber, TChain will start reading 
-    //    and figure aout the numbers of events while going along
+    //    and figure out the numbers of events while going along
     mChain->Add( file.c_str(), entries );
     mFileCounter++;
 }
@@ -374,6 +376,9 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.29  2007/08/02 18:57:49  mvl
+  * One more change to avoid reading all input files on initialisation: If the number of events is '0' for a given file, set it to TChain::kBigNumber.
+  *
   * Revision 1.28  2007/05/16 18:50:49  mvl
   * Cleanup of output. Replaced cout with LOG_INFO etc.
   *
