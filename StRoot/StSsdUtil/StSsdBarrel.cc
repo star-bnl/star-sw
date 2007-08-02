@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.5 2007/07/14 13:53:45 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.6 2007/08/02 19:34:13 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.6  2007/08/02 19:34:13  bouchet
+// bug fixed for trackReferenceCount
+//
 // Revision 1.5  2007/07/14 13:53:45  bouchet
 // add default pedestal/noise ; noise value is 60/16 = 3.75 adc
 //
@@ -594,6 +597,7 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
   Int_t i = 0, inContainer = 0, inTable = 0;
   StThreeVectorF gPos; StThreeVectorF gPosError; 
   Int_t hw; Float_t q ; unsigned char c; 
+  c =0;
 
   for (Int_t iLad = 0; iLad < mNLadder; iLad++)
     for (Int_t iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
@@ -610,7 +614,6 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 	    }
 	    hw = idCurrentWaf;
 	    q =  pSpt->getDe(0);
-	     
 	    currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
 	    currentSsdHit->setIdTruth(pSpt->getNMchit(0));// need to check first = most probable!
 
@@ -696,14 +699,13 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster){
   scm_spt_st spt;
   StSsdHit *currentSsdHit;
-  
   //scf_cluster_st *on_cluster = scf_cluster->GetTable(); 
   scf_cluster_st *on_cluster = scf_cluster->GetTable(); 
   // table size is 148 bytes
   Int_t i = 0, inContainer = 0, inTable = 0 ;
   StThreeVectorF gPos; StThreeVectorF gPosError; 
   Int_t hw; Float_t q ; unsigned char c; 
-
+  c =0;
   for (Int_t iLad = 0; iLad < mNLadder; iLad++)
     for (Int_t iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       {
