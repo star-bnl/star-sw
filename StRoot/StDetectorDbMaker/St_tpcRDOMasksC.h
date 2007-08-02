@@ -7,13 +7,13 @@
 class St_tpcRDOMasksC : public TChair {
  public:
   static St_tpcRDOMasksC* 	instance();
-  tpcRDOMasks_st 	*Struct(Int_t i = 0) 	{return ((St_tpcRDOMasks*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
-  UInt_t 	runNumber(Int_t i = 0) 	{return Struct(i)->runNumber;}
-  UInt_t 	sector(Int_t i = 0) 	{return Struct(i)->sector;}
-  UInt_t 	mask(Int_t i = 0) 	{return Struct(i)->mask;}
+  tpcRDOMasks_st 	*Struct(Int_t i = 0) 	{return ((St_tpcRDOMasks*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	{return GetNRows();}
+  UInt_t 	runNumber(Int_t i = 0) 	        {return Struct(i)->runNumber;}
+  UInt_t 	sector(Int_t i = 0) 	        {return Struct(i)->sector;}
+  UInt_t 	mask(Int_t i = 0) 	        {return Struct(i)->mask;}
   UInt_t        getSectorMask(UInt_t sector);
-  Bool_t        isOn(UInt_t sector,UInt_t rdo) {    
+  Bool_t        isOn(UInt_t sector,UInt_t rdo)  {    
     if(sector < 1 || sector > 24 || rdo < 1 || rdo > 6)	return 0;
     UInt_t MASK = getSectorMask(sector);
     MASK = MASK >> (rdo - 1);

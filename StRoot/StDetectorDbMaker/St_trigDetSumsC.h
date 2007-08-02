@@ -9,8 +9,8 @@ class St_trigDetSumsC : public TChair {
   St_trigDetSumsC(St_trigDetSums *table) : TChair(table) {SafeDelete(fgInstance); fgInstance = this;}
   virtual ~St_trigDetSumsC() {SafeDelete(fgInstance);}
   static St_trigDetSumsC* 	instance()      {return fgInstance;}
-  trigDetSums_st 	*Struct(Int_t i = 0) 	{return ((St_trigDetSums*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
+  trigDetSums_st 	*Struct(Int_t i = 0) 	{return ((St_trigDetSums*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	{return GetNRows();}
   UInt_t 	runNumber(Int_t i = 0) 	        {return Struct(i)->runNumber;}
   UInt_t 	timeOffset(Int_t i = 0) 	{return Struct(i)->timeOffset;}
   Double_t 	ctbWest(Int_t i = 0) 	        {return Struct(i)->ctbWest;}

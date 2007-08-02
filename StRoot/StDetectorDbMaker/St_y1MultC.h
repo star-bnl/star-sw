@@ -7,8 +7,8 @@
 class St_y1MultC : public TChair {
  public:
   static St_y1MultC* 	instance();
-  y1Mult_st 	*Struct(Int_t i = 0) 	{return ((St_y1Mult*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
+  y1Mult_st 	*Struct(Int_t i = 0) 	{return ((St_y1Mult*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()            {return GetNRows();}
   Double_t 	mult(Int_t i = 0) 	{return Struct(i)->mult;}
  protected:
   St_y1MultC(St_y1Mult *table=0) : TChair(table) {}

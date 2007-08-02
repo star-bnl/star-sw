@@ -7,8 +7,8 @@
 class St_defaultTrgLvlC : public TChair {
  public:
   static St_defaultTrgLvlC* 	instance();
-  defaultTrgLvl_st 	*Struct(Int_t i = 0) 	{return ((St_defaultTrgLvl*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
+  defaultTrgLvl_st *Struct(Int_t i = 0) {return ((St_defaultTrgLvl*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()            {return GetNRows();}
   UInt_t 	level(Int_t i = 0) 	{return Struct(i)->level;}
  protected:
   St_defaultTrgLvlC(St_defaultTrgLvl *table=0) : TChair(table) {}

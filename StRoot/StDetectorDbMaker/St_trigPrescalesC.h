@@ -7,16 +7,16 @@
 class St_trigPrescalesC : public TChair {
  public:
   static St_trigPrescalesC* 	instance();
-  trigPrescales_st 	*Struct(Int_t i = 0) 	{return ((St_trigPrescales*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
+  trigPrescales_st *Struct(Int_t i = 0) {return ((St_trigPrescales*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()            {return GetNRows();}
   Int_t 	runNumber(Int_t i = 0) 	{return Struct(i)->runNumber;}
-  Int_t 	idxTrigger(Int_t i = 0) 	{return Struct(i)->idxTrigger;}
+  Int_t 	idxTrigger(Int_t i = 0) {return Struct(i)->idxTrigger;}
   Int_t 	idxLevel(Int_t i = 0) 	{return Struct(i)->idxLevel;}
   Int_t 	id(Int_t i = 0) 	{return Struct(i)->id;}
   Float_t 	ps(Int_t i = 0) 	{return Struct(i)->ps;}
  protected:
   St_trigPrescalesC(St_trigPrescales *table=0) : TChair(table) {}
-  virtual ~St_trigPrescalesC() {SafeDelete(fgInstance);}
+  virtual ~St_trigPrescalesC() {if (Table()->IsMarked()) delete GetThisTable(); SafeDelete(fgInstance);}
  private:
   static St_trigPrescalesC* fgInstance;
   ClassDefChair(St_trigPrescales, trigPrescales_st )
