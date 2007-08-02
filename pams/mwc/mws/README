@@ -1,4 +1,0 @@
-mws     pams/mws/mws       # vlmrz    Jan 31, 01 - slow simulator for MWC, includes electronic noise
-mwf     pams/mws/mwf       # vlmrz    Jan 31, 01 - fast simulator, same as old mws.F by P. Yepes
-
-see http://sseos.lbl.gov/~vlmrz/mwc for more information 

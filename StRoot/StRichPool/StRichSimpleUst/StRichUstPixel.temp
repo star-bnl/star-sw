@@ -1,5 +1,0 @@
-    Int_t charge;
-    Int_t rawX;
-    Int_t rawY;
-    Float_t localX;
-    Float_t localY;

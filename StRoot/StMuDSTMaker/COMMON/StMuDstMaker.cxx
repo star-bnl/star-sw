@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.74 2006/07/28 18:25:11 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.83 2007/08/02 20:46:47 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -71,6 +71,7 @@
 #include "TChain.h"
 #include "TStreamerInfo.h"
 #include "TClonesArray.h"
+#include "TEventList.h"
 
 #include "THack.h"
 ClassImp(StMuDstMaker)
@@ -95,7 +96,7 @@ ClassImp(StMuDstMaker)
 StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
   mIOMaker(0), mTreeMaker(0),
-  mIoMode(1), mIoNameMode((int)ioTreeMaker),
+  mIoMode(1), mIoNameMode((int)ioTreeMaker), mEventList(0),
   mTrackType(256), mReadTracks(1),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mTrackFilter(0), mL3TrackFilter(0),
@@ -221,7 +222,7 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     char *sta=mStatusArrays+specIndex[i];
     int   num=specIndex[i+1]-specIndex[i];
     memset(sta,status,num);
-    printf("StMuDstMaker::SetStatus %d to %s\n",status,specNames[i]);
+    LOG_INFO << "StMuDstMaker::SetStatus " << status << " to " << specNames[i] << endm;
     if (mIoMode==ioRead)
       setBranchAddresses(mChain);
     return;
@@ -231,7 +232,7 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
   for (int i=0;i<__NALLARRAYS__;i++) {
     Ssiz_t len;
     if (re.Index(StMuArrays::arrayNames[i],&len) < 0)	continue;
-    printf("StMuDstMaker::SetStatus %d to %s\n",status,StMuArrays::arrayNames[i]);
+    LOG_INFO << "StMuDstMaker::SetStatus " << status << " to " << StMuArrays::arrayNames[i] << endm;
     mStatusArrays[i]=status;
   }
   if (mIoMode==ioRead)
@@ -243,8 +244,9 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
 StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StIOInterFace(name),
   mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
   mIOMaker(0), mTreeMaker(0),
-  mIoMode(mode), mIoNameMode(nameMode),
-  mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
+  mIoMode(mode), mIoNameMode(nameMode), 
+  mDirName(dirName), mFileName(fileName), mFilter(filter), 
+  mMaxFiles(maxFiles), mEventList(0),
   mTrackType(256), mReadTracks(1),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
@@ -485,8 +487,8 @@ int StMuDstMaker::Finish() {
   DEBUGMESSAGE2("");
   if (mFinish) {
     for ( int i=0; i<10; i++) {
-      cout << "why are you calling the Finish() again  ???????" << endl;
-      cout << "are you the stupid chain destructor ???????????" << endl;
+      LOG_INFO << "why are you calling the Finish() again  ???????" << endl;
+      LOG_INFO << "are you the stupid chain destructor ???????????" << endl;
     }
   }
   else {
@@ -538,18 +540,32 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     }
     ts = bname; ts +="*";
     chain->SetBranchStatus (ts,1);
+    if (strstr("MuEvent",bname) && mChain->GetBranch("MuEvent.mQA.fX")) {
+       // Need to manually switch off Q-vector branches to avoid root warnings
+       // Note: the Q-vectors are only present in SL07b
+       mChain->SetBranchStatus("MuEvent.mQA*",0);
+       mChain->SetBranchStatus("MuEvent.mQB*",0);
+       mChain->SetBranchStatus("MuEvent.mQNegEastA*",0);
+       mChain->SetBranchStatus("MuEvent.mQNegEastB*",0);
+       mChain->SetBranchStatus("MuEvent.mQPosEastA*",0);
+       mChain->SetBranchStatus("MuEvent.mQPosEastB*",0);
+       mChain->SetBranchStatus("MuEvent.mQNegWestA*",0);
+       mChain->SetBranchStatus("MuEvent.mQNegWestB*",0);
+       mChain->SetBranchStatus("MuEvent.mQPosWestA*",0);
+       mChain->SetBranchStatus("MuEvent.mQPosWestB*",0);
+    }
     chain->SetBranchAddress(bname,mAArrays+i);
     assert(tb->GetAddress() == (char*)(mAArrays+i));
   }
   if (emc_oldformat) {
     TBranch *branch=chain->GetBranch("EmcCollection");
     if (branch) {
-      chain->SetBranchStatus("EmcCollection*",1);
-      chain->SetBranchAddress("EmcCollection",&mEmcCollectionArray);
       Warning("setBranchAddresses","Using backward compatibility mode for EMC");
       if (!mEmcCollectionArray) {
          mEmcCollectionArray=new TClonesArray("StMuEmcCollection",1);
       }
+      chain->SetBranchStatus("EmcCollection*",1);
+      chain->SetBranchAddress("EmcCollection",&mEmcCollectionArray);
       StMuEmcHit::Class()->IgnoreTObjectStreamer(0);
       mStMuDst->set(this);
     }
@@ -606,6 +622,7 @@ int StMuDstMaker::openRead() {
 void StMuDstMaker::read(){
   if (!mChain){
     DEBUGMESSAGE2("ATTENTION: No StMuChain ... results won't be exciting (nothing to do)");
+    throw StMuExceptionNullPointer("No input files",__PRETTYF__);
     return;
   }
 
@@ -613,12 +630,24 @@ void StMuDstMaker::read(){
   if (mChain->GetCurrentFile()) {
     DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
   }
-  int bytes = mChain->GetEntry(mEventCounter++);
-  while (bytes==0 ) {
-    DEBUGVALUE3(mEventCounter);
-    if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
-    bytes = mChain->GetEntry(mEventCounter++);
-    DEBUGVALUE3(bytes);
+
+  if ( !mEventList ) {
+    int bytes = mChain->GetEntry(mEventCounter++);
+    while (bytes==0 ) {
+      DEBUGVALUE3(mEventCounter);
+      if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
+      bytes = mChain->GetEntry(mEventCounter++);
+      DEBUGVALUE3(bytes);
+    }
+  }
+  else {
+    int bytes = mChain->GetEntry( mEventList->GetEntry( mEventCounter++ ) );
+    while ( bytes==0 ) {
+      DEBUGVALUE3(mEventCounter);
+      if ( mEventCounter >= mEventList->GetN() ) throw StMuExceptionEOF("end of event list",__PRETTYF__);
+      bytes = mChain->GetEntry( mEventList->GetEntry( mEventCounter++ ) );
+      DEBUGVALUE3(bytes);
+    }
   }
   if (GetDebug()>1) printArrays();
   mStMuDst->set(this);
@@ -671,10 +700,10 @@ void StMuDstMaker::openWrite(string fileName) {
 void StMuDstMaker::closeWrite(){
   DEBUGMESSAGE(__PRETTYF__);
   if (mTTree && mCurrentFile) {
-    cout << " ##### " << __PRETTYF__ << endl;
-    cout << " ##### File=" << mCurrentFile->GetName() << " ";
-    cout << " NumberOfEvents= " << mTTree->GetEntries() << " ";
-    cout << " ##### " << endl;
+    LOG_INFO << " ##### " << __PRETTYF__ << endm;
+    LOG_INFO << " ##### File=" << mCurrentFile->GetName() << " ";
+    LOG_INFO << " NumberOfEvents= " << mTTree->GetEntries() << " ";
+    LOG_INFO << " ##### " << endm;
   }
   //if (mTTree) mTTree->AutoSave();
   
@@ -851,7 +880,8 @@ void StMuDstMaker::fillEzt(StEvent* ev) {
 
   if(eztArrayStatus[muEztTrig]) {
     EztTrigBlob* trig = mEzTree->copyTrig(ev);
-    addType(mEztArrays[muEztTrig], *trig);
+    if (trig)
+      addType(mEztArrays[muEztTrig], *trig);
   }
 
   if(eztArrayStatus[muEztFpd]) {
@@ -1264,6 +1294,31 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.83  2007/08/02 20:46:47  mvl
+ * Switch off Q-vector branhces in StMuDstMaker and increase version number in StMuEvent.
+ * This is to avoid wranings when reading P07ib data which has Q-vector information stored with more recent libraries.
+ *
+ * Revision 1.82  2007/05/16 18:50:48  mvl
+ * Cleanup of output. Replaced cout with LOG_INFO etc.
+ *
+ * Revision 1.81  2007/04/27 17:07:01  mvl
+ * Added protection against StEvent::triggerData() == 0 in EZTREE.
+ *
+ * Revision 1.80  2007/04/20 06:26:00  mvl
+ * Removed Q-vector calculation. Will implement utility class instead.
+ *
+ * Revision 1.78  2007/02/07 07:53:09  mvl
+ * Added SetEventList function to read only pre-selected events (by J. Webb)
+ *
+ * Revision 1.77  2006/12/20 21:53:15  mvl
+ * Added warning when file list not found (read mode)
+ *
+ * Revision 1.76  2006/09/10 00:58:43  mvl
+ * Roll-back of previous changes for ROOT 5.12. Problem has been resolved inside ROOT.
+ *
+ * Revision 1.75  2006/08/18 20:09:51  fine
+ * ROOT 5.12 bug workaround See: STAR Bug 741
+ *
  * Revision 1.74  2006/07/28 18:25:11  mvl
  * Added call to StMuDst::setVertexIndex(0) to StMuDstMaker::read() to reset the current vertex index to 0 for every event
  *

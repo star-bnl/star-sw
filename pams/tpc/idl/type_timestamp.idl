@@ -1,9 +1,0 @@
-struct type_timestamp {
-        unsigned long year;
-	unsigned long month;
-	unsigned long day;
-	unsigned long hour;
-	unsigned long minute;
-	unsigned long second;
-	unsigned long systime;
-};
