@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.82 2007/05/16 18:50:48 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.83 2007/08/02 20:46:47 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -540,6 +540,20 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     }
     ts = bname; ts +="*";
     chain->SetBranchStatus (ts,1);
+    if (strstr("MuEvent",bname) && mChain->GetBranch("MuEvent.mQA.fX")) {
+       // Need to manually switch off Q-vector branches to avoid root warnings
+       // Note: the Q-vectors are only present in SL07b
+       mChain->SetBranchStatus("MuEvent.mQA*",0);
+       mChain->SetBranchStatus("MuEvent.mQB*",0);
+       mChain->SetBranchStatus("MuEvent.mQNegEastA*",0);
+       mChain->SetBranchStatus("MuEvent.mQNegEastB*",0);
+       mChain->SetBranchStatus("MuEvent.mQPosEastA*",0);
+       mChain->SetBranchStatus("MuEvent.mQPosEastB*",0);
+       mChain->SetBranchStatus("MuEvent.mQNegWestA*",0);
+       mChain->SetBranchStatus("MuEvent.mQNegWestB*",0);
+       mChain->SetBranchStatus("MuEvent.mQPosWestA*",0);
+       mChain->SetBranchStatus("MuEvent.mQPosWestB*",0);
+    }
     chain->SetBranchAddress(bname,mAArrays+i);
     assert(tb->GetAddress() == (char*)(mAArrays+i));
   }
@@ -1280,6 +1294,10 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.83  2007/08/02 20:46:47  mvl
+ * Switch off Q-vector branhces in StMuDstMaker and increase version number in StMuEvent.
+ * This is to avoid wranings when reading P07ib data which has Q-vector information stored with more recent libraries.
+ *
  * Revision 1.82  2007/05/16 18:50:48  mvl
  * Cleanup of output. Replaced cout with LOG_INFO etc.
  *
