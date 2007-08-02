@@ -7,8 +7,8 @@
 class St_triggerIDC : public TChair {
  public:
   static St_triggerIDC* 	instance();
-  triggerID_st 	*Struct(Int_t i = 0)     	{return ((St_triggerID*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
+  triggerID_st 	*Struct(Int_t i = 0)     	{return ((St_triggerID*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	{return GetNRows();}
   UInt_t 	runNumber(Int_t i = 0) 	        {return Struct(i)->runNumber;}
   UInt_t 	idxTrg(Int_t i = 0) 	        {return Struct(i)->idxTrg;}
   UInt_t 	daqTrgId(Int_t i = 0) 	        {return Struct(i)->daqTrgId;}

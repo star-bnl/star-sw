@@ -7,8 +7,8 @@
 class St_beamInfoC : public TChair {
  public:
   static St_beamInfoC* 	instance();
-  beamInfo_st 	*Struct(Int_t i = 0) 	          {return ((St_beamInfo*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	  {return instance()->GetNRows();}
+  beamInfo_st 	*Struct(Int_t i = 0) 	          {return ((St_beamInfo*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	  {return GetNRows();}
   UInt_t 	runNumber(Int_t i = 0) 	          {return Struct(i)->runNumber;}
   Int_t 	entryTag(Int_t i = 0) 	          {return Struct(i)->entryTag;}
   Char_t* 	blueSpecies(Int_t i = 0) 	  {return Struct(i)->blueSpecies;}

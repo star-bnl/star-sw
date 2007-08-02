@@ -7,11 +7,11 @@
 class St_ftpcGasOutC : public TChair {
  public:
   static St_ftpcGasOutC* 	instance();
-  ftpcGasOut_st 	*Struct(Int_t i = 0) 	{return ((St_ftpcGasOut*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
+  ftpcGasOut_st *Struct(Int_t i = 0) 	{return ((St_ftpcGasOut*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()            {return GetNRows();}
   UInt_t 	runNumber(Int_t i = 0) 	{return Struct(i)->runNumber;}
-  Double_t 	gasOutEast(Int_t i = 0) 	{return Struct(i)->gasOutEast;}
-  Double_t 	gasOutWest(Int_t i = 0) 	{return Struct(i)->gasOutWest;}
+  Double_t 	gasOutEast(Int_t i = 0) {return Struct(i)->gasOutEast;}
+  Double_t 	gasOutWest(Int_t i = 0) {return Struct(i)->gasOutWest;}
   Double_t 	body1East(Int_t i = 0) 	{return Struct(i)->body1East;}
   Double_t 	body1West(Int_t i = 0) 	{return Struct(i)->body1West;}
   Double_t 	body2East(Int_t i = 0) 	{return Struct(i)->body2East;}

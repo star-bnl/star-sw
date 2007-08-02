@@ -7,8 +7,8 @@
 class St_ftpcVoltageStatusC : public TChair {
  public:
   static St_ftpcVoltageStatusC* 	instance();
-  ftpcVoltageStatus_st 	*Struct(Int_t i = 0) 	{return ((St_ftpcVoltageStatus*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
+  ftpcVoltageStatus_st 	*Struct(Int_t i = 0) 	{return ((St_ftpcVoltageStatus*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	{return GetNRows();}
   UInt_t 	runNumber(Int_t i = 0) 	        {return Struct(i)->runNumber;}
   UInt_t 	startStatusTime(Int_t i = 0) 	{return Struct(i)->startStatusTime;}
   UInt_t 	endStatusTime(Int_t i = 0) 	{return Struct(i)->endStatusTime;}

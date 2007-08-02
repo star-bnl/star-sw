@@ -12,8 +12,8 @@ enum StGLpos {
 class St_tpcGridLeakC : public TChair {
  public:
   static St_tpcGridLeakC* 	instance();
-  tpcGridLeak_st 	*Struct(Int_t i = 0) 	{return ((St_tpcGridLeak*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
+  tpcGridLeak_st 	*Struct(Int_t i = 0) 	{return ((St_tpcGridLeak*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	{return GetNRows();}
   Double_t 	InnerGLRadius(Int_t i = 0) 	{return Struct(i)->InnerGLRadius;}
   Double_t 	MiddlGLRadius(Int_t i = 0) 	{return Struct(i)->MiddlGLRadius;}
   Double_t 	OuterGLRadius(Int_t i = 0) 	{return Struct(i)->OuterGLRadius;}

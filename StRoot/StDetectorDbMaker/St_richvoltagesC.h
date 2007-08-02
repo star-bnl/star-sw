@@ -7,12 +7,12 @@
 class St_richvoltagesC : public TChair {
  public:
   static St_richvoltagesC* 	instance();
-  richvoltages_st 	*Struct(Int_t i = 0) 	{return ((St_richvoltages*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
-  UInt_t 	runNumber(Int_t i = 0) 	{return Struct(i)->runNumber;}
+  richvoltages_st 	*Struct(Int_t i = 0) 	{return ((St_richvoltages*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	{return GetNRows();}
+  UInt_t 	runNumber(Int_t i = 0) 	        {return Struct(i)->runNumber;}
   UInt_t 	startStatusTime(Int_t i = 0) 	{return Struct(i)->startStatusTime;}
   UInt_t 	endStatusTime(Int_t i = 0) 	{return Struct(i)->endStatusTime;}
-  UInt_t 	status(Int_t i = 0) 	{return Struct(i)->status;}
+  UInt_t 	status(Int_t i = 0) 	        {return Struct(i)->status;}
  protected:
   St_richvoltagesC(St_richvoltages *table=0) : TChair(table) {}
   virtual ~St_richvoltagesC() {SafeDelete(fgInstance);}

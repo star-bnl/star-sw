@@ -7,7 +7,7 @@
 class St_starClockOnlC : public TChair {
  public:
   static St_starClockOnlC*   instance();
-  UInt_t     getNumRows()                     {return instance()->GetNRows();}
+  UInt_t     getNumRows()                     {return GetNRows();}
   starClockOnl_st *Struct(Int_t i = -1);
   UInt_t    RunNumber(Int_t i = -1)           {return Struct(i)->runNumber;}
   Double_t  CurrentFrequency(Int_t i = -1)    {return Struct(i)->frequency;} 

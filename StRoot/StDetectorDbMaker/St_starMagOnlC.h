@@ -11,8 +11,8 @@ enum StMagnetPolarity {eUnknownMField, eFullMFieldPolB, eHalfMFieldPolB,
 class St_starMagOnlC : public TChair {
  public:
   static St_starMagOnlC* 	instance();
-  starMagOnl_st*Struct(Int_t i = 0) 	{return ((St_starMagOnl*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()            {return instance()->GetNRows();}
+  starMagOnl_st*Struct(Int_t i = 0) 	{return ((St_starMagOnl*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()            {return GetNRows();}
   UInt_t 	runNumber(Int_t i = 0) 	{return Struct(i)->runNumber;}
   UInt_t 	time(Int_t i = 0) 	{return Struct(i)->time;}
   Double_t 	current(Int_t i = 0) 	{return Struct(i)->current;}

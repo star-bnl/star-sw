@@ -7,12 +7,12 @@
 class St_tpcHighVoltagesC : public TChair {
  public:
   static St_tpcHighVoltagesC* 	instance();
-  tpcHighVoltages_st 	*Struct(Int_t i = 0) 	{return ((St_tpcHighVoltages*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
-  Float_t 	cathode(Int_t i = 0) 	{return Struct(i)->cathode;}
-  Float_t 	gatedGridRef(Int_t i = 0) 	{return Struct(i)->gatedGridRef;}
-  Double_t      getCathodeVoltage() {return cathode();}
-  Double_t      getGGVoltage() {return gatedGridRef();}
+  tpcHighVoltages_st 	*Struct(Int_t i = 0)  {return ((St_tpcHighVoltages*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                  {return GetNRows();}
+  Float_t 	cathode(Int_t i = 0)          {return Struct(i)->cathode;}
+  Float_t 	gatedGridRef(Int_t i = 0)     {return Struct(i)->gatedGridRef;}
+  Double_t      getCathodeVoltage()           {return cathode();}
+  Double_t      getGGVoltage()                {return gatedGridRef();}
   
  protected:
   St_tpcHighVoltagesC(St_tpcHighVoltages *table=0) : TChair(table) {}

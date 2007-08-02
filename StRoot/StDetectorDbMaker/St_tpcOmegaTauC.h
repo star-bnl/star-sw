@@ -7,12 +7,12 @@
 class St_tpcOmegaTauC : public TChair {
  public:
   static St_tpcOmegaTauC* 	instance();
-  tpcOmegaTau_st 	*Struct(Int_t i = 0) 	{return ((St_tpcOmegaTau*) instance()->Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	{return instance()->GetNRows();}
-  Float_t 	tensorV1(Int_t i = 0) 	{return Struct(i)->tensorV1;}
-  Float_t 	tensorV2(Int_t i = 0) 	{return Struct(i)->tensorV2;}
-  Float_t 	getOmegaTauTensorV1()   {return tensorV1();}
-  Float_t 	getOmegaTauTensorV2()   {return tensorV2();}
+  tpcOmegaTau_st 	*Struct(Int_t i = 0) {return ((St_tpcOmegaTau*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                 {return GetNRows();}
+  Float_t 	tensorV1(Int_t i = 0) 	     {return Struct(i)->tensorV1;}
+  Float_t 	tensorV2(Int_t i = 0) 	     {return Struct(i)->tensorV2;}
+  Float_t 	getOmegaTauTensorV1()        {return tensorV1();}
+  Float_t 	getOmegaTauTensorV2()        {return tensorV2();}
  protected:
   St_tpcOmegaTauC(St_tpcOmegaTau *table=0) : TChair(table) {}
   virtual ~St_tpcOmegaTauC() {SafeDelete(fgInstance);}
