@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.42 2007/05/16 22:48:09 deph Exp $
+ * $Id: MysqlDb.cc,v 1.43 2007/08/03 18:46:30 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.43  2007/08/03 18:46:30  deph
+ * Increased the number of allowed elements in a comma delimeted text field from 100 to 1024 to allow for the 768 ssd strips
+ *
  * Revision 1.42  2007/05/16 22:48:09  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -757,7 +760,8 @@ char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
 
   char* tPnt=strinput; 
   aLen=0;
-  while (tPnt&&aLen<100) { // 100 is a limit on # comma separated values
+  //MPD: bumped this limit up from 100 for the 768 ssd strips - with fingers crossed
+  while (tPnt&&aLen<1024) { // 1024 is a limit on # comma separated values
     tPnt=strpbrk( tPnt,"\\,");
     if (tPnt!=0){
       if (*tPnt==',') {
