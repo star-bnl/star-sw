@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcDimensions.h,v 1.9 2000/11/14 22:00:06 genevb Exp $
+ * $Id: StRTpcDimensions.h,v 1.10 2007/08/04 00:38:03 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRTpcDimensions.h,v $
+ * Revision 1.10  2007/08/04 00:38:03  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
  * Revision 1.9  2000/11/14 22:00:06  genevb
  * Switched several functions from float to double
  *
@@ -84,68 +88,7 @@ public:
 
 };
 
-#ifndef __CINT__
-inline  void StRTpcDimensions::AddData( St_tpcDimensions* TpcIn){ mTpc = TpcIn;}
 
-inline  void StRTpcDimensions::AddData( St_tpcEffectiveGeom* GeoIn){ mEffGeo = GeoIn;}
-
-inline int StRTpcDimensions::numberOfSectors() const {
-return (*mTpc)[0].numberOfSectors;
-}
-
-inline double StRTpcDimensions::ifcRadius() const {
-return (*mTpc)[0].tpcInnerRadius;
-}
-    
-inline double StRTpcDimensions::ofcRadius() const {
-return (*mTpc)[0].tpcOuterRadius;
-}
-    
-inline double StRTpcDimensions::tpcTotalLength() const {
-return (*mTpc)[0].tpcTotalLength;
-}
-
-inline double StRTpcDimensions::wheelInnerRadius() const {
-return (*mTpc)[0].wheelInnerRadius;
-}
-
-inline double StRTpcDimensions::wheelOuterRadius() const {
-return (*mTpc)[0].wheelOuterRadius;
-}
-
-inline double StRTpcDimensions::wheelThickness() const {
-return (*mTpc)[0].wheelThickness;
-}
-
-inline double StRTpcDimensions::senseGasOuterRadius() const {
-return (*mTpc)[0].senseGasOuterRadius;
-}
-    
-inline double StRTpcDimensions::tpeaThickness() const {
-return (*mTpc)[0].tpeaThickness; 
-}
-
-inline double StRTpcDimensions::cathodeInnerRadius() const {
-return (*mTpc)[0].cathodeInnerRadius;
-}
-    
-inline double StRTpcDimensions::cathodeOuterRadius() const {
-return (*mTpc)[0].cathodeOuterRadius;
-}
-    
-inline double StRTpcDimensions::cathodeThickness() const {
-return (*mTpc)[0].cathodeThickness;
-} 
-
-inline double StRTpcDimensions::zInnerOffset() const {
-  return (*mEffGeo)[0].z_inner_offset;
-}
-
-inline double StRTpcDimensions::zOuterOffset() const {
-  return (*mEffGeo)[0].z_outer_offset;
-}
-
-#endif
 #endif
 
 

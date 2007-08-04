@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.39 2007/07/12 20:21:09 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.40 2007/08/04 00:38:04 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.40  2007/08/04 00:38:04  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
  * Revision 1.39  2007/07/12 20:21:09  fisyak
  * Drift velocity depends on TPC half, use online RHIC clock
  *
@@ -617,5 +621,6 @@ void StTpcDbMaker::SetTpc2Global() {
 }
 
 
+StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcElectronics.cxx,v 1.6 2007/07/12 20:21:09 fisyak Exp $
+ * $Id: StRTpcElectronics.cxx,v 1.7 2007/08/04 00:38:03 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRTpcElectronics.cxx,v $
+ * Revision 1.7  2007/08/04 00:38:03  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
  * Revision 1.6  2007/07/12 20:21:09  fisyak
  * Drift velocity depends on TPC half, use online RHIC clock
  *
@@ -27,3 +31,34 @@ double StRTpcElectronics::samplingFrequency() const {
   return StDetectorDbClock::instance()->getCurrentFrequency()/1000000.0;
 }
 
+int StRTpcElectronics::numberOfTimeBins() const {
+   return (*mElec)[0].numberOfTimeBins;
+}
+
+double StRTpcElectronics::nominalGain() const {
+   return (*mElec)[0].nominalGain;
+}
+
+double StRTpcElectronics::tZero() const {
+   return (*mElec)[0].tZero;
+}
+
+double StRTpcElectronics::adcCharge() const {
+   return (*mElec)[0].adcCharge;
+}
+
+double StRTpcElectronics::adcConversion() const {
+   return (*mElec)[0].adcConversion;
+}
+
+double StRTpcElectronics::averagePedestal() const {
+   return (*mElec)[0].averagePedestal;
+}
+
+double StRTpcElectronics::shapingTime() const {
+   return (*mElec)[0].shapingTime;
+}
+
+double StRTpcElectronics::tau() const {
+   return (*mElec)[0].tau;
+}
