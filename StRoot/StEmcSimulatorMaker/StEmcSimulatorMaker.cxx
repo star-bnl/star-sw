@@ -832,13 +832,13 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                                     if(statusALL!=1)
                                         continue;               // bad common status - skip this hit
 
-                                    if(i<BPRS)
-                                        calCoef  = calibRec[0].AdcToE[cellInd][1]; // AdcToE[0] - discard now
+                                    if(i<BPRS) {
+                                        calCoef = calibRec[0].AdcToE[cellInd][1]; // AdcToE[0] - discard now
+                                    	LOG_DEBUG << Form("det %i cellID %4i m %3i eta %3i sub %2i AdcToE[0][0] %f AdcToE[1][0] %f", i+1, cellID, mf, eta, sub, calibRec->AdcToE[0][0], calibRec->AdcToE[1][0]) << endm; //VP
+				    }
                                     else
                                         calCoef = calibSmdRec[0].AdcToE[cellInd][1];
 
-                                    LOG_DEBUG << Form("det %i cellID %4i m %3i eta %3i sub %2i AdcToE[0][0] %f AdcToE[1][0] %f",
-                                                   i+1, cellID, mf, eta, sub, calibRec->AdcToE[0][0], calibRec->AdcToE[1][0]) << endm; //VP
                                     if(calCoef < 1.e-7) {
                                         LOG_DEBUG << Form("det %i cellID %4i m %3i eta %3i sub %2i c %f", i+1,cellID,mf,eta,sub,calCoef) << endm;
 									}
@@ -1230,8 +1230,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.43 2007/07/13 13:44:20 fisyak Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.44 2007/08/06 22:55:56 kocolosk Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.44  2007/08/06 22:55:56  kocolosk
+// fixed a logic error in logging that was causing segfaults (RT #1012)
+//
 // Revision 1.43  2007/07/13 13:44:20  fisyak
 // Delete mEmcCollection if set mEmbed
 //
