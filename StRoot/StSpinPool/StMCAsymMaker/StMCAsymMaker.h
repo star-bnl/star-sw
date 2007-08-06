@@ -64,16 +64,16 @@ private:
     double df1_NLO_gmin,df2_NLO_gmin,weight_NLO_gmin;   //NLO GMIN polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
 
 public: 
-    Double_t get_polPDF_LO(int x1, double d1, double d2);
-    Double_t get_polPDF_NLO(int x1, double d1, double d2);
-    Double_t get_polPDF_NLO_g0(int x1, double d1, double d2);
-    Double_t get_polPDF_NLO_gmax(int x1, double d1, double d2);
-    Double_t get_polPDF_NLO_gmin(int x1, double d1, double d2);
+    static Double_t get_polPDF_LO(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_g0(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_gmax(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_gmin(int flavor, double x1, double Q2);
 
-    Double_t get_unpolPDF_LO(int x1, double d1, double d2); 
-    Double_t get_unpolPDF_NLO(int x1, double d1, double d2);
+    static Double_t get_unpolPDF_LO(int flavor, double x1, double Q2); 
+    static Double_t get_unpolPDF_NLO(int flavor, double x1, double Q2);
 
-    Double_t getPartonicALL(double a, double b, double c, int d, int e, int f, int g, int h);
+    static Double_t getPartonicALL(double s, double t, double u, int pid, int flavor1, int flavor2, int flavor3, int flavor4);
 
     StMCAsymMaker(const char *name="MCAsym");
     virtual  ~StMCAsymMaker();
@@ -87,7 +87,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.4 2007/07/27 16:53:39 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.5 2007/08/06 17:05:44 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 
