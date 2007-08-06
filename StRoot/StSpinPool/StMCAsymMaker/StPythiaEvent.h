@@ -6,6 +6,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.2  2007/08/06 17:06:05  rfatemi
+// set default GRSV to standard
+//
 // Revision 1.1  2007/07/19 01:40:41  kocolosk
 // use Pibero's StPythiaEvent class to supply mcAsymMaker results to user
 //
@@ -41,11 +44,11 @@ public:
     float x2() const;
     float Q2() const;
     float partonALL() const;
-    float dF1(GRSV scenario) const;
-    float dF2(GRSV scenario) const;
-    float f1(GRSV scenario) const;
-    float f2(GRSV scenario) const;
-    float ALL(GRSV scenario) const;
+    float dF1(GRSV scenario = STD) const;
+    float dF2(GRSV scenario = STD) const;
+    float f1(GRSV scenario = STD) const;
+    float f2(GRSV scenario = STD) const;
+    float ALL(GRSV scenario = STD) const;
 
     TClonesArray* particles();
     int numberOfParticles() const;
