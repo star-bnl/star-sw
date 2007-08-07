@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.20 2007/05/25 13:37:46 jeromel Exp $
+ * $Id: DetectorReader.cxx,v 1.21 2007/08/07 19:44:09 perev Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.21  2007/08/07 19:44:09  perev
+ * Gene scalers added
+ *
  * Revision 1.20  2007/05/25 13:37:46  jeromel
  * /DEBUG//
  *
@@ -97,6 +100,7 @@
 #include "L3/L3_Reader.hh"
 #include "TOF/TOF_Reader.hh"
 #include "FPD/FPD_Reader.hh"
+#include "SC/SC_Reader.hh"
 
 DetectorReader *getDetectorReader(EventReader *er, string det)
 {
@@ -283,3 +287,10 @@ FPD_Reader *getFPDReader(EventReader *er)
   }
   return NULL;
 }
+
+SC_Reader *getSCReader(EventReader *er)
+{
+  return new SC_Reader(er);
+  return FALSE;
+}
+

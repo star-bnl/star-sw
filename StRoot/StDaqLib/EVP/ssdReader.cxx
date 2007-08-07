@@ -18,7 +18,7 @@ struct ssd ssd ;
 static int unpackRaw(int rb, int mz, int what, char *mem) ;
 
 
-/* UNUSED */
+/* UNUSED 
 static struct ssdMap {
 	u_char start_ladder ;
 	u_char side ;
@@ -28,7 +28,7 @@ static struct ssdMap {
 	{ {0,1}, {5,1} },
 	{ {10,1}, {15,1} }
 } ;
-
+*/
 int ssdReader(char *m)
 {
 	int sec ;

@@ -82,6 +82,8 @@ Int_t StDAQMaker::Make(){
     fEvtHddr->Print();
   }  
 
+  AddData(fDAQReader->getSCTable());
+
   if (GetDebug()<=1) return 0;
 
 
