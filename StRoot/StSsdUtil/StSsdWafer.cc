@@ -1,8 +1,11 @@
 
 
-// $Id: StSsdWafer.cc,v 1.6 2007/07/03 16:28:38 fisyak Exp $
+// $Id: StSsdWafer.cc,v 1.7 2007/08/07 19:58:10 fine Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.7  2007/08/07 19:58:10  fine
+// Protect against of died object
+//
 // Revision 1.6  2007/07/03 16:28:38  fisyak
 // Add protection against division 0/0
 //
@@ -262,10 +265,10 @@ void  StSsdWafer::doCleanListStrip(StSsdStripList *myStripList)
   for(Int_t i=0;i<size;i++){  
     //printf("%d over %d strips signal=%d id=%d noise=%f\n",i,cleanListStrip->getSize(),copyStrip->getDigitSig(),copyStrip->getNStrip(),copyStrip->getSigma()); 
     myStrip = copyStrip; 
-    if((copyStrip->getSigma()==0)||(copyStrip->getDigitSig()<lowCut*copyStrip->getSigma())){
+    copyStrip = myStripList->next(copyStrip); 
+    if((myStrip->getSigma()==0)||(myStrip->getDigitSig()<lowCut*myStrip->getSigma())){
       cleanListStrip->removeStrip(myStrip);  
     }
-    copyStrip = myStripList->next(copyStrip); 
   }
 }
 //________________________________________________________________________________
