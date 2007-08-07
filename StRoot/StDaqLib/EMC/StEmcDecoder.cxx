@@ -161,7 +161,7 @@ FIXBUG:
     // these tables are for SMD decoding //////////////////////////////////
 
     // which module is connected to each RDO and crate board
-SMD:
+/*SMD:*/
     if(date <= 20011201)  // SMD modules connection before this date
     {
         int SmdModules_tmp[8][15]={
@@ -1170,9 +1170,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.47 2007/06/01 17:47:41 jml Exp $
+// $Id: StEmcDecoder.cxx,v 2.48 2007/08/07 19:44:07 perev Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.48  2007/08/07 19:44:07  perev
+// Gene scalers added
+//
 // Revision 2.47  2007/06/01 17:47:41  jml
 // Attempt to fix panitkin plot compile
 //

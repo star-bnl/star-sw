@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.29 2004/08/07 02:39:00 perev Exp $
+ * $Id: StDAQReader.h,v 1.30 2007/08/07 19:44:11 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.30  2007/08/07 19:44:11  perev
+ * Gene scalers added
+ *
  * Revision 1.29  2004/08/07 02:39:00  perev
  * Traditional Clear added
  *
@@ -107,11 +110,13 @@ class EventReader ;
 class StTPCReader ;  
 class StSSDReader ;
 class StEMCReader ;  
-class StEEMCReader ;  
+class StEEMCReader;  
 class StPMDReader ;  
 class StFTPCReader;  
 class StTRGReader ;
 class StSVTReader ;
+class StSCReader  ;
+class TDataSet    ;
 #ifndef __CINT__
 
 #include "StDaqLib/RICH/RICH_Reader.hh"
@@ -172,6 +177,7 @@ public:
   virtual int RICHPresent() const;
   virtual int TRGPresent () const;
   virtual int L3Present  () const;
+  virtual int SCPresent  () const;
 
   virtual void setTPCVersion(const char* vers = "TPCV2P0"); 
   virtual void setFTPCVersion(const char* vers = "FTPV1P0"); 
@@ -180,7 +186,7 @@ public:
   StTPCReader  *getTPCReader (char mergeSequences=1); 
   StSSDReader  *getSSDReader ();
   StEMCReader  *getEMCReader (); 
-  StEEMCReader  *getEEMCReader (); 
+  StEEMCReader *getEEMCReader(); 
   StPMDReader  *getPMDReader (); 
   StRICHReader *getRICHReader(); 
   StFTPCReader *getFTPCReader(); 
@@ -189,6 +195,8 @@ public:
   StL3Reader   *getL3Reader  ();
   StTOFReader  *getTOFReader ();
   StFPDReader  *getFPDReader ();
+  StSCReader   *getSCReader  ();
+  TDataSet     *getSCTable   ();
   StTrigSummary *getTrigSummary () const {return fTrigSummary;}
   virtual void printEventInfo();
   virtual int  getEventSize() const;
@@ -211,6 +219,7 @@ protected:
   StL3Reader   *fL3Reader;
   StTOFReader  *fTOFReader;
   StFPDReader  *fFPDReader;
+  StSCReader   *fSCReader;
   long fOffset;
   DAQEventInfo *fEventInfo;
   char *fFile;

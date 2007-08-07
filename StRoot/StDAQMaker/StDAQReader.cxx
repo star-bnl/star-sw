@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.48 2007/05/29 22:12:18 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.49 2007/08/07 19:44:10 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.49  2007/08/07 19:44:10  perev
+ * Gene scalers added
+ *
  * Revision 1.48  2007/05/29 22:12:18  fine
  * Introduce logger-based output
  *
@@ -174,6 +177,8 @@
 #include "StFTPCReader.h"
 #include "StTRGReader.h"
 #include "StSVTReader.h"
+#include "StSCReader.h"
+#include "tables/St_trigDetSums_Table.h"
 #include "StMessMgr.h" 
 #include "TString.h" 
 //
@@ -198,6 +203,7 @@ StDAQReader::StDAQReader(const char *file)
   fL3Reader 	= 0;
   fTOFReader    = 0;
   fFPDReader    = 0;
+  fSCReader     = 0;
   m_ZeroTokens  = 0;
   fOffset = 0;
   fFile = 0;
@@ -243,7 +249,7 @@ int StDAQReader::close()
   if(fTPCReader) 	fTPCReader ->close();  
   if(fSSDReader)        fSSDReader ->close();
   if(fEMCReader) 	fEMCReader ->close();  
-  if(fEEMCReader) 	fEEMCReader ->close();  
+  if(fEEMCReader) 	fEEMCReader->close();  
   if(fPMDReader) 	fPMDReader ->close();  
   if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
@@ -301,6 +307,10 @@ int StDAQReader::readEvent()
   if (fEMCReader  && EMCPresent() ) 	fEMCReader ->Update();
   if (fEEMCReader && EMCPresent() ) 	fEEMCReader->Update();
   if (fPMDReader  && PMDPresent() ) 	fPMDReader ->Update();
+
+  // Must skip SCPresent check to handle missing SCPresent value in 2005-2006
+  // (SCPresent value indicates not present, but it may in fact be present)
+  if (fSCReader                   )	fSCReader  ->Update();
 
 //	Trigger Summary, code provided by Herb
   Bank_DATAP *datap = (Bank_DATAP*)(fEventReader->getDATAP());
@@ -373,9 +383,11 @@ void StDAQReader::setFTPCVersion(const char* vers)
 //_____________________________________________________________________________
    int StDAQReader::RICHPresent() const {return  fEventInfo->RICHPresent;}
 //_____________________________________________________________________________
-   int StDAQReader::TRGPresent()  const{return   fEventInfo->TRGPresent;}
+   int StDAQReader::TRGPresent()  const {return  fEventInfo->TRGPresent;}
 //_____________________________________________________________________________
    int StDAQReader::L3Present()   const {return  fEventInfo->L3Present;}
+//_____________________________________________________________________________
+   int StDAQReader::SCPresent()   const {return  fEventInfo->SCPresent;}
 //_____________________________________________________________________________
    int StDAQReader::getEventSize()const {return  fEventInfo->EventLength;}
 //_____________________________________________________________________________
@@ -496,6 +508,25 @@ StSVTReader *StDAQReader::getSVTReader()
     fSVTReader->Update();
   }
   return fSVTReader;
+}
+//-----------------------------------------------------------------------------
+StSCReader *StDAQReader::getSCReader()
+{
+  // Must change order to handle missing SCPresent value in 2005-2006.
+  // Only good check is to create a reader and see if there is data.
+  if (!fSCReader) {
+    fSCReader = new StSCReader(this);
+  }
+  if (!(SCPresent() || fSCReader->thereIsSCData())) return 0;
+  return fSCReader;
+}
+//-----------------------------------------------------------------------------
+TDataSet *StDAQReader::getSCTable()
+{
+  if (getSCReader()) {
+    return fSCReader->getSCTable((unsigned long) (fEventReader->runno()));
+  }
+  return 0;
 }
 //_____________________________________________________________________________
 void StDAQReader::printEventInfo()

@@ -190,7 +190,7 @@ typedef unsigned char UINT8 ;
 #define CHAR_SSDRMSR	"SSDRMSR "
 #define CHAR_SSDGAINR	"SSDGAINR"
 #define CHAR_SSDBADR	"SSDBADR "
-
+#define CHAR_SCD        "SCD     "
 
 // real RICH names
 #define CHAR_RICP	"RICP    "
@@ -930,6 +930,14 @@ struct PP2PPR {	// void data dump...
 	char data[0] ;	// unknown at compile time...
 } ;
 #endif
+
+#define SCD_FORMAT_VERSION        0x000500001    // Run FY05, version 1
+struct SCD {
+  struct bankHeader bh ;
+  unsigned int time ;    //unix time
+  int mag_field ;
+  unsigned int rich_scalers[17] ;
+} ;
 
 
 

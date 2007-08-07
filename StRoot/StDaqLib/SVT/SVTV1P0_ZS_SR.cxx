@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ZS_SR.cxx,v 1.6 2007/01/04 21:27:51 jml Exp $
+ * $Id: SVTV1P0_ZS_SR.cxx,v 1.7 2007/08/07 19:44:10 perev Exp $
  *      
  * Author: J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0_ZS_SR.cxx,v $
+ * Revision 1.7  2007/08/07 19:44:10  perev
+ * Gene scalers added
+ *
  * Revision 1.6  2007/01/04 21:27:51  jml
  * zero suppressed reader no longer uses adcx, only seqd.  Fixes bug from early 2005
  *
@@ -307,7 +310,7 @@ int SVTV1P0_ZS_SR::initialize()
       else { // sequence descriptor
 	unsigned short work = seqd_p->sequence[i];
 	int tb = (work>>6) & 0xff;
-	int len = work & 0x1f;
+//	int len = work & 0x1f;
 	int last = work & 0x20;
 
 	if(oldtb > tb) {
