@@ -26,8 +26,12 @@
 #include "StEEmcUtil/EEdsm/EEfeeTPTree.h" // for printouts only
 #include "StEEmcUtil/EEdsm/EEfeeTP.h"  // for printouts only
 
+//get BEMC
+#include "Bemc/StBemcTriggerSimu.h"
+
 //get BBC
 #include "Bbc/StBbcTriggerSimu.h"
+
 //get HEAD Maker
 #include "StTriggerSimuMaker.h"
 
@@ -40,6 +44,7 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
   mMCflag=0;
   eemc=0;
   bbc=0;
+  bemc=0;
 }
 
 //____________________________________________________________________________
@@ -58,6 +63,12 @@ StTriggerSimuMaker::useBbc(){
   bbc=new StBbcTriggerSimu;
 }
 
+//________________________________________________
+void
+StTriggerSimuMaker::useBemc(){
+  bemc=new StBemcTriggerSimu;
+}
+
 //_____________________________________________________________________________
 Int_t 
 StTriggerSimuMaker::Init() {
@@ -74,6 +85,11 @@ StTriggerSimuMaker::Init() {
     bbc->Init();
   }
 
+  if(bemc) {
+    bemc->setMC(mMCflag);
+    bemc->Init();
+  }
+
  return StMaker::Init();
 }
 
@@ -84,7 +100,8 @@ StTriggerSimuMaker::Clear(const Option_t*){
   mTriggerList.clear();
   if(eemc) eemc->Clear();
   if(bbc)  bbc ->Clear();
-  
+  if(bemc) bemc->Clear();
+
   LOG_DEBUG<<"::Clear()"<<endm;
 }
 
@@ -116,13 +133,14 @@ StTriggerSimuMaker::Make(){
     if(bbc) bbc->Make();
     cout<<"BBC Trigger = "<<bbc->bbcTrig<<endl;
     if(eemc) eemc->Make();
+    if(bemc) bemc->Make();
  
     // add L2 triggers
     //.....
 
     // now both E+B EMC response has been processed by the trigger logic, below only get-methods are called.
     
-    // StBemcTrigger::addTriggerList(&mTriggerList);
+    if(bemc) bemc->addTriggerList(&mTriggerList);
     if(eemc) eemc->addTriggerList(&mTriggerList);
     addTriggerList(); //  final decisions, involve L2 
 
@@ -190,9 +208,12 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.6 2007/07/24 01:32:43 balewski Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.7 2007/08/07 15:48:20 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.7  2007/08/07 15:48:20  rfatemi
+// Added BEMC access
+//
 // Revision 1.6  2007/07/24 01:32:43  balewski
 // *** empty log message ***
 //
