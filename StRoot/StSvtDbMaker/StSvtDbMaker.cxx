@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.19 2007/03/27 20:01:22 fisyak Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.22 2007/05/15 19:23:21 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.22  2007/05/15 19:23:21  perev
+ * Init local pointers by 0
+ *
+ * Revision 1.20  2007/04/28 17:57:09  perev
+ * Redundant StChain.h removed
+ *
  * Revision 1.19  2007/03/27 20:01:22  fisyak
  * remove senseless print outs
  *
@@ -69,7 +75,6 @@
 #include <assert.h>
 #include "StSvtDbMaker.h"
 
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 #include "StMessMgr.h"
@@ -119,16 +124,16 @@ svtElectronics_st *electronic = NULL;
 THashList *StSvtDbMaker::fRotList = 0;
 
 StSvtDbMaker* gStSvtDbMaker=NULL; 
-St_ObjectSet *svtSetConfig;
-St_ObjectSet *svtSetDrift;
-St_ObjectSet *svtSetDriftCurve;
-St_ObjectSet *svtSetAnodeDriftCorr;
-St_ObjectSet *svtSetPed;
-St_ObjectSet *svtSetRms;
-St_ObjectSet *svtSetGeom;
-St_ObjectSet *svtSetBad;
-St_ObjectSet *svtSetT0;
-St_ObjectSet *svtSetDaq;
+St_ObjectSet *svtSetConfig=0;
+St_ObjectSet *svtSetDrift=0;
+St_ObjectSet *svtSetDriftCurve=0;
+St_ObjectSet *svtSetAnodeDriftCorr=0;
+St_ObjectSet *svtSetPed=0;
+St_ObjectSet *svtSetRms=0;
+St_ObjectSet *svtSetGeom=0;
+St_ObjectSet *svtSetBad=0;
+St_ObjectSet *svtSetT0=0;
+St_ObjectSet *svtSetDaq=0;
 
 //C and fortran routines
 
@@ -503,10 +508,10 @@ StSvtHybridCollection* StSvtDbMaker::getDriftCurve()
   if(!mSvtDriftCurve)
     mSvtDriftCurve = new StSvtHybridCollection(mSvtConfig);
 
-  St_svtDriftCurve *driftVelocityCurve;
+  St_svtDriftCurve *driftVelocityCurve=0;
 
-  svtDriftCurve_st *driftCurve;
-  StSvtHybridDriftCurve* hybridDriftCurve;
+  svtDriftCurve_st *driftCurve=0;
+  StSvtHybridDriftCurve* hybridDriftCurve=0;
 
   char path[100];
   int index;

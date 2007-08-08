@@ -42,12 +42,17 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2004Y","","","db,detDb"  ,"","","Year4 full Barrel+TPC backplane+rad length+SVT copper cable",kFALSE},
   {"RY2004c","","","db,detDb"                                         ,"","","Year4 geometry fixed",kFALSE},
   {"RY2004d","","","db,detDb"                                  ,"","","Year4 geometry with ne wSVT",kFALSE},
+
   {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005x","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005b","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005c","","","db,detDb"                                      ,"","","the best Year5 geometry",kFALSE},
-  {"RY2005d","","","db,detDb"                                             ,"","","y2005c + new SVT",kFALSE},
+  {"RY2005d","","","db,detDb"                                             ,"","","y2005d + new SVT",kFALSE},
+  {"RY2005e","","","db,detDb"                                             ,"","","y2005e + new SVT",kFALSE},
+  {"RY2005f","","","db,detDb"                                             ,"","","y2005f + new SVT",kFALSE},
+
   {"RY2006","","","db,detDb"                                             ,"","","y2006 for p+p run",kFALSE},
+
   {"RY2007","","","db,detDb"                                            ,"","","y2007 for AuAu run",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
@@ -79,7 +84,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Y2005b" ,"","","db,detDb","","",        "Year5 geometry + corrections SVT, FTPC gas + SSD y4c", kFALSE},
   {"Y2005c" ,"","","db,detDb","","",   "Year5 geometry + more corrections SVT, FTPC gas + SSD y4c", kFALSE},
   {"Y2005d" ,"","","db,detDb","","",                                            "y2005c + new SVT", kFALSE},
+  {"Y2005e" ,"","","db,detDb","","",                                       "y2005d + new SSD code", kFALSE},
+  {"Y2005f" ,"","","db,detDb","","",                            "y2005d + SSD code with dead area", kFALSE},
+
   {"ForceGeometry","","","","","",  "Force geometry to overwrite the geometry caming from fz-file", kFALSE},
+
   // geometry timestamps are now dynamic. Please see StChain/StMaker    
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"Ist1"    ,"","","db,detDb"                                   ,"","","Development geometry STAR",kFALSE},
@@ -218,18 +227,30 @@ Bfc_st BFC2[] = { // ITTF Chains
 #ifndef __CLEANUP__
   {"B2005a"      ,""  ,"","ry2005b,in,tpc_daq,tpc,Physics,Cdst,-SvtDedx,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2005 (tpc only)",kFALSE},
+  {"B2005b"      ,""  ,"","ry2005f,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                        ,"Base chain for 2005 Geo f (tpc+svt only)",kFALSE},
 #else
   {"B2005a"      ,""  ,"","ry2005b,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2005 (tpc only)",kFALSE},
+  {"B2005b"      ,""  ,"","ry2005f,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                        ,"Base chain for 2005 Geo f (tpc+svt only)",kFALSE},
 #endif
   {"P2005"       ,""     ,"","B2005,l3onl,fcf,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3","",""
                      ,"Production chain for winter 2004/2005 data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  // no "a" which is fine and less confusing
+  {"P2005b"      ,""     ,"","B2005b,l3onl,fcf,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3","",""
+                     ,"Production chain for winter 2004/2005 data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+
   {"pp2005"     ,""   ,"",
      "B2005,fcf,ppOpt,VFppLMV5,-PreVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3",
                          "","","Production chain for 2005 pp data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   {"pp2005a"      ,"" ,"",
    "B2005a,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},  
+  {"pp2005b"      ,"" ,"",
+   "B2005b,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
+                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},  
+
 #else /* __BFC2__ */
   {"B2004"       ,""        ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                               ,"Base chain for 2004 ITTF (tpc+svt)",kFALSE},
@@ -243,25 +264,38 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"pp2004"      ,"" ,"",
      "B2004,IAna,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
               "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
   // Year 5 Chains
   {"B2005"       ,""       ,"","ry2005b,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                               ,"Base chain for 2005 ITTF (tpc+svt)",kFALSE},
 #ifndef __CLEANUP__
   {"B2005a"      ,""       ,"","ry2005b,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2005 ITTF (tpc only)",kFALSE},
+  {"B2005b"      ,""       ,"","ry2005f,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+                                                   ,"Base chain for 2005 ITTF Geo f (tpc+svt only)",kFALSE},
 #else
   {"B2005a"      ,""       ,"","ry2005b,in,tpc_daq,tpcI,Physics,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2005 ITTF (tpc only)",kFALSE},
+  {"B2005b"      ,""       ,"","ry2005f,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+                                                   ,"Base chain for 2005 ITTF Geo f (tpc+svt only)",kFALSE},
 #endif
   {"P2005"       ,"" ,"",
      "B2005,IAna,fcf,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
               "","","Production chain for 2004/2005 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+  {"P2005b"      ,"" ,"",
+     "B2005b,IAna,fcf,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
+              "","","Production chain for 2004/2005 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
   {"pp2005"      ,"" ,"",
      "B2005,IAna,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2005a"      ,"" ,"",
    "B2005a,IAna,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+  {"pp2005b"      ,"" ,"",
+   "B2005b,IAna,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
+                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
 
   // Year 6 chains - Geometry 2006 not yet ready, starting with y2005d
   {"B2006"       ,""       ,"","ry2005d,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
@@ -319,7 +353,7 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   // New-- DBV20050515,useCDV Old-- Corr3,OSpaceZ2,OShortR,SCEbyE
   {"SpcChgCalG","","","MuDST,fcf,Corr4,OSpaceZ2,OGridLeak3D,SCEbyE,-Tree,-tags,-EvOut,-EventQA",
-                                                  "","","Pass0 SpaceCharge evaluator with GridLeak",kFALSE},
+                    "","","Pass0 SpaceCharge evaluator with GridLeak, no geo or tracker dependence",kFALSE},
 
   {"VtxSeedCalG","","","MuDST,fcf,Corr4,FindEvtVtxSeed,-Tree,-tags,-EvOut,-EventQA",       
                                                                      "","","Pass0 Vertex evaluator",kFALSE},

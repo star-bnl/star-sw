@@ -9,10 +9,10 @@ HitError_st row;
 St_HitError *tableSet = new St_HitError("someHitError",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.coeff[0]	 = 1.349342e-05; // *;
+    row.coeff[0]	 = 1.843223e-05; // *;
     row.coeff[1]	 =          0;
     row.coeff[2]	 =          0;
-    row.coeff[3]	 = 4.836174e-06;
+    row.coeff[3]	 = 1.652874e-05;
     row.coeff[4]	 =          0;
     row.coeff[5]	 =          0;
 tableSet->AddAt(&row);

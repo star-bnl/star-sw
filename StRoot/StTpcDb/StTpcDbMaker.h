@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.18 2007/03/21 17:27:02 fisyak Exp $
+ * $Id: StTpcDbMaker.h,v 1.19 2007/08/04 00:38:04 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.19  2007/08/04 00:38:04  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
  * Revision 1.18  2007/03/21 17:27:02  fisyak
  * use TGeoHMatrix, change mode for switching drift velocities
  *
@@ -188,12 +192,11 @@ class StTpcDbMaker : public StMaker {
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    virtual void SetTpc2Global();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.18 2007/03/21 17:27:02 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.19 2007/08/04 00:38:04 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
-inline StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
 
 #endif
 

@@ -68,13 +68,13 @@
 #include "TError.h"
 #include "TDirIter.h"
 
-enum ETTI { kUnknown=0
-     ,kChar   =  1,  kShort   =  2,  kInt     =  3,  kLong    =  4,  kFloat = 5, kDouble  =  8,kDouble32 = 9
-     ,kUChar  = 11,  kUShort  = 12,  kUInt    = 13,  kULong   = 14};
+enum ETTI { kUnknown=0,
+      kChar   =  1,  kShort   =  2,  kInt     =  3,  kLong    =  4,  kFloat = 5, kDouble  =  8,
+      kUChar  = 11,  kUShort  = 12,  kUInt    = 13,  kULong   = 14};
 
 const char* NTTI[] = {"Unknown"
 ,"Char_t"	 ,"Short_t"	   ,"Int_t"	   ,"Long_t"	    ,"Float_t"
-,"_______"	 ,"_______" 	   ,"Double_t"	   ,"Double32_t"    ,"_______"
+,"_______"	 ,"_______" 	   ,"Double_t"	   ,"_______"	    ,"_______"
 ,"UChar_t"	 ,"UShort_t"	   ,"UInt_t"       ,"ULong_t"	    ,"_______" 
 ,"_______"       ,"_______"        ,"_______"      ,"_______"       ,"_______"      
 ,"Char_t*"	 ,"Short_t*"	   ,"Int_t*"	   ,"Long_*t"	    ,"Float_t*"
@@ -102,13 +102,8 @@ const char* NTTI[] = {"Unknown"
 
 
 //______________________________________________________________________________
-void TTreeIterCast::Set(void* v,Int_t t,const char* name)
-{
-if (t==kDouble32   ) t = kDouble;
-if (t==kDouble32+20) t = kDouble+20;
-fV=v;fT=t;fN=name;
-}
-//______________________________________________________________________________
+
+
 void *TTreeIterCast::Addr(Int_t outType)
 {
   void *v = fV;
@@ -607,7 +602,6 @@ Int_t TTreeIter::TypeSize(Int_t ity)
      case kInt:   		return sizeof(Int_t);
      case kFloat: 		return sizeof(Float_t);
      case kDouble: 		return sizeof(Double_t);
-     case kDouble32: 		return sizeof(Double_t);
      default: 			return 0;
   }
 }

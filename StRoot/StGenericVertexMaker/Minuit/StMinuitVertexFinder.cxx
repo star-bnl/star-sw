@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.10 2007/01/05 19:55:20 jeromel Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.13 2007/05/17 01:50:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,16 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.13  2007/05/17 01:50:34  fisyak
+ * Use PrimaryVertexCuts table
+ *
+ * Revision 1.12  2007/05/11 03:04:57  mvl
+ * Slightly tighter quality cuts on tracks: npoint>=20, radial dca < 1.
+ * Widened the cut on close vertices to be mDcaZMax (3 cm)
+ *
+ * Revision 1.11  2007/04/26 04:31:43  perev
+ * More precise Chi2 calculation
+ *
  * Revision 1.10  2007/01/05 19:55:20  jeromel
  * abs() is wrong, should have been fabs()
  *
@@ -97,6 +107,7 @@
  * Initial Version for development and integration
  *
  **************************************************************************/
+#include <assert.h>
 #include "StMinuitVertexFinder.h"
 #include "StEventTypes.h"
 #include "StEnumerations.h"
@@ -108,6 +119,8 @@
 #include <math.h>
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StDcaGeometry.h"
+#include "tables/St_VertexCuts_Table.h"
+#include "StMaker.h"
 vector<StDcaGeometry*>   StMinuitVertexFinder::mDCAs;
 vector<StPhysicalHelixD> StMinuitVertexFinder::mHelices;
 vector<unsigned short>   StMinuitVertexFinder::mHelixFlags;
@@ -140,12 +153,7 @@ StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 StMinuitVertexFinder::StMinuitVertexFinder() {
   LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
   mBeamHelix =0;
-
-  mMinNumberOfFitPointsOnTrack = 15; 
-  mDcaZMax = 3;     // Note: best to use integer numbers
-  mMinTrack = 5;
-  mRImpactMax = 2;
-
+  
   mMinuit = new TMinuit(3);         
   mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
   mMinuit->SetPrintLevel(-1);
@@ -171,6 +179,22 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
    mZImpact.clear();
    mSigma.clear();
  }
+//________________________________________________________________________________
+void StMinuitVertexFinder::InitRun(int runumber) {
+  St_VertexCuts *Cuts = (St_VertexCuts *) StMaker::GetChain()->GetDataBase("Calibrations/tracker/PrimaryVertexCuts");
+  assert(Cuts);
+  VertexCuts_st *cuts = Cuts->GetTable();
+  mMinNumberOfFitPointsOnTrack = cuts->MinNumberOfFitPointsOnTrack;
+  mDcaZMax                     = cuts->DcaZMax;     // Note: best to use integer numbers
+  mMinTrack                    = cuts->MinTrack;
+  mRImpactMax                  = cuts->RImpactMax;
+  LOG_INFO << "Set cuts: MinNumberOfFitPointsOnTrack = " << mMinNumberOfFitPointsOnTrack
+	   << " DcaZMax = " << mDcaZMax
+	   << " MinTrack = " << mMinTrack
+	   << " RImpactMax = " << mRImpactMax
+	   << endm;
+}
+//________________________________________________________________________________
 
 
 void
@@ -503,6 +527,10 @@ StMinuitVertexFinder::fit(StEvent* event)
 	  mHelixFlags.push_back(1);
 	  
 	  Double_t path=(TMath::ATan2(-helix.ycenter(),-helix.xcenter())-helix.phase())/2/TMath::Pi();
+          if ( path < -0.5 )
+            path += 1;
+          if ( path > 0.5 )
+            path -= 1;
 	  path *= helix.h()*helix.period();
 	  StThreeVectorD tmp_pos = helix.at(path);
 	  
@@ -714,9 +742,9 @@ StMinuitVertexFinder::fit(StEvent* event)
       if (!mExternalSeedPresent && fabs(seed_z-mSeedZ[iSeed]) > mDcaZMax)
 	LOG_WARN << "Vertex walks during fits: seed was " << mSeedZ[iSeed] << ", vertex at " << seed_z << endl;
 
-      if (fabs(seed_z - old_vtx_z) < 0.1) {
+      if (fabs(seed_z - old_vtx_z) < mDcaZMax) {
 	if (mDebugLevel) 
-	  cout << "Vertices too close (<0.1). Skipping" << endl;
+	  cout << "Vertices too close (<mDcaZMax). Skipping" << endl;
 	continue;
       }
 
@@ -833,9 +861,13 @@ StMinuitVertexFinder::fit(StEvent* event)
 } 
 //________________________________________________________________________________
 Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
+static int nCall=0; nCall++;
   Double_t f = 0;
   Double_t e, s;
   nCTBHits = 0;
+  if (fabs(vtx.x())> 10) return 1e6;
+  if (fabs(vtx.y())> 10) return 1e6;
+  if (fabs(vtx.z())>300) return 1e6;
   if (! mUseDCA) {
     for (unsigned int i=0; i<mHelices.size(); i++) {
       if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
@@ -872,14 +904,21 @@ Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
 	if (sgn < 0) Imp = - Imp;
 	Double_t Z  = dcaP.z();
 #endif
-	const Float_t *errMatrix = gDCA->errMatrix();
 #if 0
+	const Float_t *errMatrix = gDCA->errMatrix();
 	Double_t d = errMatrix[0]*errMatrix[2] - errMatrix[1]*errMatrix[1];
 	if (TMath::Abs(d) < 1e-7) continue;
 	Double_t a[3] = {errMatrix[2]/d, -errMatrix[1]/d, errMatrix[0]/d};
 // 	Double_t chi2     = a[0]*Imp*Imp + 2*a[1]*Imp*Z + a[2]*Z*Z; 
 #endif
-	Double_t chi2     = e*e/(errMatrix[0] + errMatrix[2]);
+//VP version
+//VP	Double_t chi2     = e*e/(errMatrix[0] + errMatrix[2]);
+static int nCall=0;
+nCall++;
+        double err2;
+        double chi2 = gDCA->thelix().Dca(&(vtx.x()),&err2);
+        chi2*=chi2/err2;
+//EndVP
 	Double_t scale = 1./(mWidthScale*mWidthScale);
 	f += scale*(1. - TMath::Exp(-chi2/scale)); // robust potential
 	//	f -= scale*TMath::Exp(-chi2/scale); // robust potential

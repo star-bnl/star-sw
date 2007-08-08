@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.6 2006/05/31 04:09:52 fisyak Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.7 2007/05/17 01:50:35 fisyak Exp $
  *
  */
 
@@ -111,6 +111,7 @@ public:
     int             fit(StEvent*);       
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
+    virtual void           InitRun  (int runumber);
     void           Clear();
 
 
@@ -190,6 +191,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.7  2007/05/17 01:50:35  fisyak
+ * Use PrimaryVertexCuts table
+ *
  * Revision 1.6  2006/05/31 04:09:52  fisyak
  * Use dca track parameters for primary vertex fit
  *
