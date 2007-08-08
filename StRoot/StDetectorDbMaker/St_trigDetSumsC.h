@@ -7,7 +7,7 @@
 class St_trigDetSumsC : public TChair {
  public:
   St_trigDetSumsC(St_trigDetSums *table) : TChair(table) {SafeDelete(fgInstance); fgInstance = this;}
-  virtual ~St_trigDetSumsC() {SafeDelete(fgInstance);}
+  virtual ~St_trigDetSumsC() {fgInstance = 0;}
   static St_trigDetSumsC* 	instance()      {return fgInstance;}
   trigDetSums_st 	*Struct(Int_t i = 0) 	{return ((St_trigDetSums*) Table())->GetTable()+i;}
   UInt_t     	getNumRows()                	{return GetNRows();}
