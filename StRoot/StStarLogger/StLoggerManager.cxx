@@ -125,7 +125,7 @@ std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
     // There was a StMessage terminator
     *this << ends;
      StMessMgr::CurrentMessager()->Print();
-     seekp(0);
+     seekp(0);*this << ends;seekp(0);
   } else {
     // fprintf(stderr,"StLoggerManager::OperatorShift os  %p StMessMgr = %Lp, stm = %Lp endm = %Lp\n",
     //       &os, (std::ostream*) StMessMgr::Instance(), stm, endm);
@@ -308,21 +308,13 @@ StMessMgr& StLoggerManager::Message(const char* mess, const char* type,
   size_t messSize = (mess && mess[0]) ? strlen(mess) : 0;
   *fCurType = typeChar;
   strcpy(fCurOpt,opt);
-  if (messSize && lineNumber == -1 && (!sourceFileName)) {
-     seekp(0);
-     BuildMessage(mess, type, opt,sourceFileName, lineNumber);     // comes back with fCurType=0
-  } else {
-//    building = 1;
-     if (messSize>0) {
-        // Add the message to the logger context
-        assert(0);
-        NDC::push(_T("mess"));
-        mess = 0;
-     }
-    if (sourceFileName && sourceFileName[0] ) fSourceFileNames[LevelIndex(*fCurType)] = sourceFileName;
-    else fSourceFileNames[LevelIndex(*fCurType)].clear();
-    fLineNumbers[LevelIndex(*fCurType)]     = lineNumber;
-  }
+  if (tellp() > 0 ) *this << endm;  // print out the previous line if any
+  
+  if (sourceFileName && sourceFileName[0] ) fSourceFileNames[LevelIndex(*fCurType)] = sourceFileName;
+  else fSourceFileNames[LevelIndex(*fCurType)].clear();
+  fLineNumbers[LevelIndex(*fCurType)]     = lineNumber;
+ 
+  if (messSize > 0) *this << mess << endm; // print out the previous this message if present
   return *((StMessMgr*) this);
 }
 //_____________________________________________________________________________
@@ -466,7 +458,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.27 2007/08/03 21:34:51 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.28 2007/08/08 20:50:22 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -850,8 +842,11 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.27 2007/08/03 21:34:51 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.28 2007/08/08 20:50:22 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.28  2007/08/08 20:50:22  fine
+// Fix bug: some messages submitted via the old interface were lost
+//
 // Revision 1.27  2007/08/03 21:34:51  fine
 // fix StStarLogger for Sl 4.4
 //
