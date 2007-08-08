@@ -1,5 +1,0 @@
-# $Id $
-# package StRichPIDMaker
-# author: 
-Library:libStRichPIDMaker.so:LIBS +=   -lsim_Tables  -lStChain  -lStDbUtilities  -l_StEventMaker  -l_StEvent  -lStMcEvent  -lStRrsMaker
-#Library:libStRichPIDMaker.so:LIBS +=   -lsim_Tables  -lStChain  -lStDbUtilities  -lStEventMaker  -lStEvent  -lStMcEvent  -lStRrsMaker

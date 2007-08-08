@@ -1,8 +1,0 @@
-# $Id $
-# package svt
-# author: 
-Library:libsvt.so:LIBS +=   -l_StSvtDbMaker  -ltls
-Library:libSt_svt.so:LIBS +=   -l_StSvtDbMaker  -ltls
-#Library:libsvt_Tables.so:LIBS += 
-#Library:libsvt.so:LIBS +=   -lminicern  -lStSvtDbMaker  -ltls
-#Library:libSt_svt.so:LIBS +=   -lminicern  -lStSvtDbMaker  -ltls

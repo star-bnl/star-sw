@@ -1,8 +1,0 @@
-#!/bin/bash
-
-export DATA_NAME='Pure MC eta simulation using pp2005 geometry and BFC chain and dAu2003 HighTower-2 timestamps'
-export DATA_TAG='dAu2003FromPP2005Simulation'
-export DATA_SUBTAG=$DATA_TAG'_eta_HT2'
-export DATA_QUERY="file:$DATA_PATH/starsim_eta_pp2005/*.event.root"
-export DATA_CONFIG='config_simulation_dAu2003_HT2.C'
-export DATA_DIR=$DATA_PATH'/simu_dAu2003_eta_HT2'
