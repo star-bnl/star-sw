@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.17 2006/11/30 20:42:46 andrewar Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.18 2007/03/28 13:33:23 mmiller Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.18  2007/03/28 13:33:23  mmiller
+ * Removed cout/printf's.
+ *
  * Revision 1.17  2006/11/30 20:42:46  andrewar
  * Fixed sign error in pixel smearing.
  *
@@ -88,12 +91,12 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 
 	//detector= _detector->getDetector(hftH->layer()-1, hftH->ladder()-1);
 	int ittfLadder;
-	printf("hit layer: %i ladder: %i\n",hftH->layer(), hftH->ladder());
+	//MLM printf("hit layer: %i ladder: %i\n",hftH->layer(), hftH->ladder());
 	if(hftH->layer()==1)
 	  ittfLadder= ( 2* int( (hftH->ladder()-1.) /3. ) +1)*3 - hftH->ladder();
 	else
 	  ittfLadder=( 2* int( (hftH->ladder()-1.) /8. ) +1)*8 - hftH->ladder();
-	printf("ittfLadder: %i\n",ittfLadder);
+	//MLM printf("ittfLadder: %i\n",ittfLadder);
 	detector= _detector->getDetector(hftH->layer()-1, ittfLadder);
 
 

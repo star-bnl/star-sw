@@ -68,34 +68,34 @@ void StiIstHitLoader::loadHits(StEvent* source,
 	assert(hit);
 
 	if (hit->detector()!=kIstId) continue;
-	if(hit->extraByte0()==1){
-	  //                             ladder    module           side    
-	  //        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
-	  cout <<"retrieve detector"<<endl;
-	  /*int ladder=hit->volumeId()/1000000;
+	//if(hit->extraByte0()==1){
+	//                             ladder    module           side    
+	//        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+	//MLM cout <<"retrieve detector"<<endl;
+	/*int ladder=hit->volumeId()/1000000;
 	  int layer = 1;
 	  if (ladder > 11) layer = 2;
 	  if (ladder > 30) layer = 3;*/
-	  int layer=hit->layer();
-	  int ladder=hit->ladder();
-	  int wafer=hit->wafer();
-	  int side=hit->extraByte0();
-	  cout<<"hit vol id: "<<hit->volumeId()<<endl;
-	  cout<<"hit layer/ladder/wafer/side: "<< layer << "/" << ladder<<"/"<<wafer<<"/"<<side<<endl;
-	  cout<<"passed: "<<2*(layer-1)+side-1<<" and "<<ladder<<endl;
-	  StiDetector* detector=0;
-	  if(((StBFChain *)StMaker::GetChain())->GetOption("UPGR09",kFALSE)) detector=_detector->getDetector(side-1,ladder);
-	  else detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
-	  if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
-	  assert(detector);
-	  cout <<"add hit to detector:\t"<<detector->getName()<<endl;
+	int layer=hit->layer();
+	int ladder=hit->ladder();
+	int wafer=hit->wafer();
+	int side=hit->extraByte0();
+	//MLM cout<<"hit vol id: "<<hit->volumeId()<<endl;
+	//MLM cout<<"hit layer/ladder/wafer/side: "<< layer << "/" << ladder<<"/"<<wafer<<"/"<<side<<endl;
+	//MLM cout<<"passed: "<<2*(layer-1)+side-1<<" and "<<ladder<<endl;
+	StiDetector* detector=0;
+	if(((StBFChain *)StMaker::GetChain())->GetOption("UPGR09",kFALSE)) detector=_detector->getDetector(side-1,ladder);
+	else detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
+	if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
+	assert(detector);
+	//MLM cout <<"add hit to detector:\t"<<detector->getName()<<endl;
 	
-	  StiHit * stiHit = _hitFactory->getInstance();
-	  if(!stiHit) throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- stiHit==0");
-	  stiHit->reset();
-	  stiHit->setGlobal(detector, hit, hit->position().x(),hit->position().y(),hit->position().z(),hit->charge());
-	  _hitContainer->add( stiHit );
-	  }
+	StiHit * stiHit = _hitFactory->getInstance();
+	if(!stiHit) throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- stiHit==0");
+	stiHit->reset();
+	stiHit->setGlobal(detector, hit, hit->position().x(),hit->position().y(),hit->position().z(),hit->charge());
+	_hitContainer->add( stiHit );
+	//}
     }
     
     cout << "StiIstHitLoader::loadHits(StEvent*) -I- Done" << endl;

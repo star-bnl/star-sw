@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.56 2006/12/18 02:39:18 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.57 2007/03/27 23:29:56 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.57  2007/03/27 23:29:56  potekhin
+* Commented out an annoying left over print statement
+*
 * Revision 1.56  2006/12/18 02:39:18  potekhin
 * Need to instroduce versioning for the multiple
 * IST configurations
@@ -163,7 +166,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if (ieem>=0) print *,'              : ECAL version=',emcg_version, 
                                ' onoff   =',emcg_onoff,emcg_FillMode
           if (istb>=0) then
-             print *,'              : ISTB version of code=', ismg_code
+*             print *,'              : ISTB version of code=', ismg_code
              istVersion=ismg_code
           endif
       endif
@@ -607,17 +610,17 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='ist') then
         if(istVersion.ne.3.and.istVersion.ne.4) then
             istLayer=numbv(1)+1
-            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(2),' ',numbv(3),' ',numbv(4)
+*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(2),' ',numbv(3),' ',numbv(4)
             volume_id = istLayer*1000000 + numbv(2)*10000 + 100*numbv(3)  + numbv(4)
         endif
         if(istVersion.eq.3) then
             istLayer=3
-            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
+*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
             volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
         endif
         if(istVersion.eq.4) then
             istLayer=2
-            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
+*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
             volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
         endif
 *19*                                 Kai Schweda
