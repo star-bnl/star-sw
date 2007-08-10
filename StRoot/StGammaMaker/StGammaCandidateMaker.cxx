@@ -1,17 +1,18 @@
-#include "StGammaCandidateMaker.h"
-
-#include "StGammaEventMaker.h"
-#include "StGammaEvent.h"
-#include "StGammaRawMaker.h"
+#include "TVector2.h"
 
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
 #include "StEEmcPool/StEEmcClusterMaker/StEEmcGenericClusterMaker.h"
 
 #include "SystemOfUnits.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
+
 #include "StBarrelEmcCluster.h"
 #include "StBarrelEmcClusterMaker.h"
 #include "StGammaFitter.h"
+#include "StGammaEvent.h"
+#include "StGammaEventMaker.h"
+#include "StGammaRawMaker.h"
+#include "StGammaCandidateMaker.h"
 
 ClassImp(StGammaCandidate);
 
@@ -201,6 +202,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addTrack( track );
+		  track -> candidates.Add( can );
 		}
 	      
 	    }
@@ -224,6 +226,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addTower( tower );
+		  tower -> candidates.Add( can );
 		}
 	      
 	    }
@@ -246,6 +249,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addPreshower1( tower );
+		  tower -> candidates.Add( can );
 		}
 	      
 	    }
@@ -269,6 +273,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addPreshower2( tower );
+		  tower -> candidates.Add( can );
 		}
 	      
 	    }
@@ -291,6 +296,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addPostshower( tower );
+		  tower -> candidates.Add( can );
 		}
 	      
 	    }
@@ -471,9 +477,12 @@ Int_t StGammaCandidateMaker::MakeBarrel()
       if (StGammaTrack* track = gevent->track(k)) {
 	float deta = cluster->momentum().Eta() - track->eta();
 	float dphi = cluster->momentum().Phi() - track->phi();
-	dphi = acos(cos(dphi));
+	dphi = TVector2::Phi_mpi_pi(dphi);
 	float r = hypot(deta, dphi);
-	if (r <= mRadius) candidate->addTrack(track);
+	if (r <= mRadius) {
+	  candidate->addTrack(track);
+	  track->candidates.Add(candidate);
+	}
       }
     }
 
@@ -483,9 +492,12 @@ Int_t StGammaCandidateMaker::MakeBarrel()
       if (tower && tower->layer == kBEmcTower) {
 	float deta = cluster->momentum().Eta() - tower->eta;
 	float dphi = cluster->momentum().Phi() - tower->phi;
-	dphi = acos(cos(dphi));
+	dphi = TVector2::Phi_mpi_pi(dphi);
 	float r = hypot(deta, dphi);
-	if (r <= mRadius) candidate->addTower(tower);
+	if (r <= mRadius) {
+	  candidate->addTower(tower);
+	  tower->candidates.Add(candidate);
+	}
       }
     }
 
@@ -495,9 +507,12 @@ Int_t StGammaCandidateMaker::MakeBarrel()
       if (preshower && preshower->layer == kBEmcPres) {
 	float deta = cluster->momentum().Eta() - preshower->eta;
 	float dphi = cluster->momentum().Phi() - preshower->phi;
-	dphi = acos(cos(dphi));
+	dphi = TVector2::Phi_mpi_pi(dphi);
 	float r = hypot(deta, dphi);
-	if (r <= mRadius) candidate->addPreshower1(preshower);
+	if (r <= mRadius) {
+	  candidate->addPreshower1(preshower);
+	  preshower->candidates.Add(candidate);
+	}
       }
     }
 
@@ -584,14 +599,21 @@ Int_t StGammaCandidateMaker::Compress()
     return kStWarn;
   }
 
-  TClonesArray* strips = gevent->mStrips;
-  TIter next(strips);
-
-  while (StGammaStrip* strip = (StGammaStrip*)next())
-    if (strip->candidates.IsEmpty())
-      strips->Remove(strip);
-
-  strips->Compress();
+  // Drop strips, tracks, towers without candidates
+  Compress<StGammaStrip>(gevent->mStrips);
+  Compress<StGammaTrack>(gevent->mTracks);
+  Compress<StGammaTower>(gevent->mTowers);
+  Compress<StGammaTower>(gevent->mPreshower1);
+  Compress<StGammaTower>(gevent->mPreshower2);
+  Compress<StGammaTower>(gevent->mPostshower);
 
   return kStOk;
+}
+
+template<class T>
+void StGammaCandidateMaker::Compress(TClonesArray* clones)
+{
+  TIter next(clones);
+  while (T* x = (T*)next()) if (x->candidates.IsEmpty()) clones->Remove(x);
+  clones->Compress();
 }

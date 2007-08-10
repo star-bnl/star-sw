@@ -4,6 +4,7 @@
 #define __StGammaTrack_h__
 
 class StMuTrack;
+class StGammaCandidate;
 
 #include <vector>
 #include "TRefArray.h"
@@ -11,7 +12,6 @@ class StMuTrack;
 
 class StGammaTrack : public TObject {
 public:
-
   StGammaTrack();
   StGammaTrack(StMuTrack* track);
   ~StGammaTrack() {}
@@ -26,6 +26,7 @@ public:
   Float_t  dEdx() const; /// energy loss in keV
   StPhysicalHelix& helix(); /// Returns inner helix (first measured point)
   StPhysicalHelix& outerHelix(); /// Returns outer helix (last measured point)
+  TRefArray candidates; // Referencing candidates
 
 private:
   Short_t  mId;
@@ -38,8 +39,6 @@ private:
   Float_t  mdEdx;
   StPhysicalHelix mHelix;
   StPhysicalHelix mOuterHelix;
-
-  //  TRefArray mCandidates; // referencing candidates
 
   ClassDef(StGammaTrack,1);
 };
