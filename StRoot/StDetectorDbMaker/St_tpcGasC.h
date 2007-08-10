@@ -27,7 +27,7 @@ class St_tpcGasC : public TChair {
   Float_t 	flowRateRecirculation(Int_t i=0){return Struct(i)->flowRateRecirculation;}
  protected:
   St_tpcGasC(St_tpcGas *table=0) : TChair(table) {}
-  virtual ~St_tpcGasC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcGasC() {fgInstance = 0;}
  private:
   static St_tpcGasC* fgInstance;
   ClassDefChair(St_tpcGas, tpcGas_st )

@@ -15,7 +15,7 @@ class St_richvoltagesC : public TChair {
   UInt_t 	status(Int_t i = 0) 	        {return Struct(i)->status;}
  protected:
   St_richvoltagesC(St_richvoltages *table=0) : TChair(table) {}
-  virtual ~St_richvoltagesC() {SafeDelete(fgInstance);}
+  virtual ~St_richvoltagesC() {fgInstance = 0;}
  private:
   static St_richvoltagesC* fgInstance;
   ClassDefChair(St_richvoltages, richvoltages_st )

@@ -12,7 +12,7 @@ class St_MagFactorC : public TChair {
   Float_t 	ScaleFactor(Int_t i = 0) {return Struct(i)->ScaleFactor;}
  protected:
   St_MagFactorC(St_MagFactor *table=0) : TChair(table) {}
-  virtual ~St_MagFactorC() {SafeDelete(fgInstance);}
+  virtual ~St_MagFactorC() {fgInstance = 0;}
  private:
   static St_MagFactorC* fgInstance;
   ClassDefChair(St_MagFactor, MagFactor_st )

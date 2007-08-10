@@ -18,7 +18,7 @@ class St_ftpcVoltageStatusC : public TChair {
   UInt_t        getStatusFTPCWest()             {return statusWest();}
  protected:
   St_ftpcVoltageStatusC(St_ftpcVoltageStatus *table=0) : TChair(table) {}
-  virtual ~St_ftpcVoltageStatusC() {SafeDelete(fgInstance);}
+  virtual ~St_ftpcVoltageStatusC() {fgInstance = 0;}
  private:
   static St_ftpcVoltageStatusC* fgInstance;
   ClassDefChair(St_ftpcVoltageStatus, ftpcVoltageStatus_st )

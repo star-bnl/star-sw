@@ -43,7 +43,7 @@ class St_beamInfoC : public TChair {
   Float_t       getYellowFillNumber(Int_t i=0)    {return yellowFillNumber(i);}
  protected:
   St_beamInfoC(St_beamInfo *table=0) : TChair(table) {}
-  virtual ~St_beamInfoC() {SafeDelete(fgInstance);}
+  virtual ~St_beamInfoC() {fgInstance = 0;}
  private:
   static St_beamInfoC* fgInstance;
   ClassDefChair(St_beamInfo, beamInfo_st )

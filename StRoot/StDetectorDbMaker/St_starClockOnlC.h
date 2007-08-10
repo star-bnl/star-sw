@@ -7,8 +7,8 @@
 class St_starClockOnlC : public TChair {
  public:
   static St_starClockOnlC*   instance();
-  UInt_t     getNumRows()                     {return GetNRows();}
-  starClockOnl_st *Struct(Int_t i = -1);
+  starClockOnl_st 	*Struct(Int_t i = -1);
+  UInt_t    getNumRows()                      {return GetNRows();}
   UInt_t    RunNumber(Int_t i = -1)           {return Struct(i)->runNumber;}
   Double_t  CurrentFrequency(Int_t i = -1)    {return Struct(i)->frequency;} 
   UInt_t    Time(Int_t i = -1)                {return Struct(i)->time;}   
@@ -20,7 +20,7 @@ class St_starClockOnlC : public TChair {
   Double_t  getFrequency(Int_t i = -1)        {return Frequency(i);}       
  protected:
   St_starClockOnlC(St_starClockOnl *table=0) : TChair(table) {}
-  virtual ~St_starClockOnlC() {SafeDelete(fgInstance);}
+  virtual ~St_starClockOnlC() {fgInstance = 0;}
  private:
   static St_starClockOnlC* fgInstance;
   ClassDefChair(St_starClockOnl, starClockOnl_st )

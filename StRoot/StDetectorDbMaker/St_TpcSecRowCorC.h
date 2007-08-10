@@ -13,7 +13,7 @@ class St_TpcSecRowCorC : public TChair {
   Float_t* 	GainRms(Int_t i = 0) 	        {return Struct(i)->GainRms;}
  protected:
   St_TpcSecRowCorC(St_TpcSecRowCor *table=0) : TChair(table) {}
-  virtual ~St_TpcSecRowCorC() {SafeDelete(fgInstance);}
+  virtual ~St_TpcSecRowCorC() {fgInstance = 0;}
  private:
   static St_TpcSecRowCorC* fgInstance;
   ClassDefChair(St_TpcSecRowCor, TpcSecRowCor_st )

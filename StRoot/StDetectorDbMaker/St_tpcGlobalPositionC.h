@@ -26,7 +26,7 @@ class St_tpcGlobalPositionC : public TChair {
   Float_t 	ZZ_geom(Int_t i = 0) 	 	{return Struct(i)->ZZ_geom;}
  protected:
   St_tpcGlobalPositionC(St_tpcGlobalPosition *table=0) : TChair(table) {}
-  virtual ~St_tpcGlobalPositionC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcGlobalPositionC() {fgInstance = 0;}
  private:
   static St_tpcGlobalPositionC* fgInstance;
   ClassDefChair(St_tpcGlobalPosition, tpcGlobalPosition_st )

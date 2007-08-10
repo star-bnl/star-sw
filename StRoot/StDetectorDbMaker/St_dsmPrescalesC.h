@@ -14,7 +14,7 @@ class St_dsmPrescalesC : public TChair {
   Int_t 	dsmPrescale(Int_t i = 0) 	{return Struct(i)->dsmPrescale;}
  protected:
   St_dsmPrescalesC(St_dsmPrescales *table=0) : TChair(table) {}
-  virtual ~St_dsmPrescalesC() {if (Table()->IsMarked()) delete GetThisTable(); SafeDelete(fgInstance);}
+  virtual ~St_dsmPrescalesC() {if (Table()->IsMarked()) delete GetThisTable(); fgInstance = 0;}
  private:
   static St_dsmPrescalesC* fgInstance;
   ClassDefChair(St_dsmPrescales, dsmPrescales_st )

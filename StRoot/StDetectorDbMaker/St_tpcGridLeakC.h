@@ -49,7 +49,7 @@ class St_tpcGridLeakC : public TChair {
   }
  protected:
   St_tpcGridLeakC(St_tpcGridLeak *table=0) : TChair(table) {}
-  virtual ~St_tpcGridLeakC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcGridLeakC() {fgInstance = 0;}
  private:
   static St_tpcGridLeakC* fgInstance;
   ClassDefChair(St_tpcGridLeak, tpcGridLeak_st )

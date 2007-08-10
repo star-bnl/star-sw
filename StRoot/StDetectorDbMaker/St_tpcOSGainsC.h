@@ -12,7 +12,7 @@ class St_tpcOSGainsC : public TChair {
   Float_t* 	gain(Int_t i = 0) 	     {return Struct(i)->gain;}
  protected:
   St_tpcOSGainsC(St_tpcOSGains *table=0) : TChair(table) {}
-  virtual ~St_tpcOSGainsC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcOSGainsC() {fgInstance = 0;}
  private:
   static St_tpcOSGainsC* fgInstance;
   ClassDefChair(St_tpcOSGains, tpcOSGains_st )

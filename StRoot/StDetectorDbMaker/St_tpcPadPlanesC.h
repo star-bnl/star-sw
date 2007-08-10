@@ -42,7 +42,7 @@ class St_tpcPadPlanesC : public TChair {
   Double_t* 	outerRowRadii(Int_t i = 0) 	 {return Struct(i)->outerRowRadii;}
  protected:
   St_tpcPadPlanesC(St_tpcPadPlanes *table=0) : TChair(table) {}
-  virtual ~St_tpcPadPlanesC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcPadPlanesC() {fgInstance = 0;}
  private:
   static St_tpcPadPlanesC* fgInstance;
   ClassDefChair(St_tpcPadPlanes, tpcPadPlanes_st )

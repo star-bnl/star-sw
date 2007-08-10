@@ -12,7 +12,7 @@ class St_y1MultC : public TChair {
   Double_t 	mult(Int_t i = 0) 	{return Struct(i)->mult;}
  protected:
   St_y1MultC(St_y1Mult *table=0) : TChair(table) {}
-  virtual ~St_y1MultC() {SafeDelete(fgInstance);}
+  virtual ~St_y1MultC() {fgInstance = 0;}
  private:
   static St_y1MultC* fgInstance;
   ClassDefChair(St_y1Mult, y1Mult_st )

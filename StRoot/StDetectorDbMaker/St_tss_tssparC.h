@@ -52,7 +52,7 @@ class St_tss_tssparC : public TChair {
   Float_t 	z_laser(Int_t i = 0) 	{return Struct(i)->z_laser;}
  protected:
   St_tss_tssparC(St_tss_tsspar *table=0) : TChair(table) {}
-  virtual ~St_tss_tssparC() {SafeDelete(fgInstance);}
+  virtual ~St_tss_tssparC() {fgInstance = 0;}
  private:
   static St_tss_tssparC* fgInstance;
   ClassDefChair(St_tss_tsspar, tss_tsspar_st )

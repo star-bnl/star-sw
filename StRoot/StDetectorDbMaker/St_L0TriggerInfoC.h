@@ -19,7 +19,7 @@ class St_L0TriggerInfoC : public TChair {
   UInt_t 	detectorRequest(Int_t i = 0) 	{return Struct(i)->detectorRequest;}
  protected:
   St_L0TriggerInfoC(St_L0TriggerInfo *table=0) : TChair(table) {}
-  virtual ~St_L0TriggerInfoC() {SafeDelete(fgInstance);}
+  virtual ~St_L0TriggerInfoC() {fgInstance = 0;}
  private:
   static St_L0TriggerInfoC* fgInstance;
   ClassDefChair(St_L0TriggerInfo, L0TriggerInfo_st )

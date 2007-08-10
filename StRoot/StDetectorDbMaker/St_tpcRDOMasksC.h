@@ -22,7 +22,7 @@ class St_tpcRDOMasksC : public TChair {
   }
  protected:
   St_tpcRDOMasksC(St_tpcRDOMasks *table=0) : TChair(table) {}
-  virtual ~St_tpcRDOMasksC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcRDOMasksC() {fgInstance = 0;}
  private:
   static St_tpcRDOMasksC* fgInstance;
   ClassDefChair(St_tpcRDOMasks, tpcRDOMasks_st )

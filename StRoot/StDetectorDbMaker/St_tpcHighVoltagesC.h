@@ -16,7 +16,7 @@ class St_tpcHighVoltagesC : public TChair {
   
  protected:
   St_tpcHighVoltagesC(St_tpcHighVoltages *table=0) : TChair(table) {}
-  virtual ~St_tpcHighVoltagesC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcHighVoltagesC() {fgInstance = 0;}
  private:
   static St_tpcHighVoltagesC* fgInstance;
   ClassDefChair(St_tpcHighVoltages, tpcHighVoltages_st )

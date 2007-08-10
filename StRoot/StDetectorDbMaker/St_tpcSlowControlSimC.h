@@ -25,7 +25,7 @@ class St_tpcSlowControlSimC : public TChair {
   Double_t 	hallTemperature(Int_t i = 0) 	        {return Struct(i)->hallTemperature;}
  protected:
   St_tpcSlowControlSimC(St_tpcSlowControlSim *table=0) : TChair(table) {}
-  virtual ~St_tpcSlowControlSimC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcSlowControlSimC() {fgInstance = 0;}
  private:
   static St_tpcSlowControlSimC* fgInstance;
   ClassDefChair(St_tpcSlowControlSim, tpcSlowControlSim_st )

@@ -85,7 +85,7 @@ class St_tpcDimensionsC : public TChair {
 
  protected:
   St_tpcDimensionsC(St_tpcDimensions *table=0) : TChair(table) {}
-  virtual ~St_tpcDimensionsC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcDimensionsC() {fgInstance = 0;}
  private:
   static St_tpcDimensionsC* fgInstance;
   ClassDefChair(St_tpcDimensions, tpcDimensions_st )

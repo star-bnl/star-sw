@@ -40,7 +40,7 @@ class St_ftpcVoltageC : public TChair {
   Double_t      getAnodeV6West()            	{return anodeV6West();}
  protected:
   St_ftpcVoltageC(St_ftpcVoltage *table=0) : TChair(table) {}
-  virtual ~St_ftpcVoltageC() {SafeDelete(fgInstance);}
+  virtual ~St_ftpcVoltageC() {fgInstance = 0;}
  private:
   static St_ftpcVoltageC* fgInstance;
   ClassDefChair(St_ftpcVoltage, ftpcVoltage_st )

@@ -27,7 +27,7 @@ class St_triggerInfoC : public TChair {
   Float_t 	ps(Int_t i = 0) 	        {return Struct(i)->ps;}
  protected:
   St_triggerInfoC(St_triggerInfo *table=0) : TChair(table) {}
-  virtual ~St_triggerInfoC() {SafeDelete(fgInstance);}
+  virtual ~St_triggerInfoC() {fgInstance = 0;}
  private:
   static St_triggerInfoC* fgInstance;
   ClassDefChair(St_triggerInfo, triggerInfo_st )

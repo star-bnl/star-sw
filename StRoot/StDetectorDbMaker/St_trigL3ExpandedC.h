@@ -18,7 +18,7 @@ class St_trigL3ExpandedC : public TChair {
   Float_t 	l2Ps(Int_t i = 0) 	         {return Struct(i)->l2Ps;}
  protected:
   St_trigL3ExpandedC(St_trigL3Expanded *table=0) : TChair(table) {}
-  virtual ~St_trigL3ExpandedC() {if (Table()->IsMarked()) delete GetThisTable(); SafeDelete(fgInstance);}
+  virtual ~St_trigL3ExpandedC() {if (Table()->IsMarked()) delete GetThisTable(); fgInstance = 0;}
  private:
   static St_trigL3ExpandedC* fgInstance;
   ClassDefChair(St_trigL3Expanded, trigL3Expanded_st )

@@ -1,6 +1,9 @@
-// $Id: StDetectorDbTriggerID.h,v 1.13 2007/07/12 19:23:15 fisyak Exp $
+// $Id: StDetectorDbTriggerID.h,v 1.14 2007/08/10 15:57:45 fisyak Exp $
 //
 // $Log: StDetectorDbTriggerID.h,v $
+// Revision 1.14  2007/08/10 15:57:45  fisyak
+// Fix bug in chairs destractors, clean up, add debug print outs
+//
 // Revision 1.13  2007/07/12 19:23:15  fisyak
 // Provide access to Db tables by demand only
 //
@@ -44,7 +47,7 @@ enum { kDbTriggerBadID = 999 };
 class StDetectorDbTriggerID{
  public:
   static StDetectorDbTriggerID*  instance() {if (! fgInstance) fgInstance = new StDetectorDbTriggerID(); return fgInstance;};
-  virtual ~StDetectorDbTriggerID() {SafeDelete(fgInstance);}
+  virtual ~StDetectorDbTriggerID() {fgInstance = 0;}
   /*!
     Table RunLog/onl triggerID 
   */
