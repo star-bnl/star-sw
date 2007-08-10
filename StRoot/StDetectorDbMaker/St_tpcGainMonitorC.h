@@ -14,7 +14,7 @@ class St_tpcGainMonitorC : public TChair {
   Float_t 	width(Int_t i = 0) 	     {return Struct(i)->width;}
  protected:
   St_tpcGainMonitorC(St_tpcGainMonitor *table=0) : TChair(table) {}
-  virtual ~St_tpcGainMonitorC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcGainMonitorC() {fgInstance = 0;}
  private:
   static St_tpcGainMonitorC* fgInstance;
   ClassDefChair(St_tpcGainMonitor, tpcGainMonitor_st )

@@ -15,7 +15,7 @@ class St_tpcDriftVelocityC : public TChair {
   Float_t 	cathodeDriftVelocityWest(Int_t i = 0) 	{return Struct(i)->cathodeDriftVelocityWest;}
  protected:
   St_tpcDriftVelocityC(St_tpcDriftVelocity *table=0) : TChair(table) {}
-  virtual ~St_tpcDriftVelocityC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcDriftVelocityC() {fgInstance = 0;}
  private:
   static St_tpcDriftVelocityC* fgInstance;
   ClassDefChair(St_tpcDriftVelocity, tpcDriftVelocity_st )

@@ -19,7 +19,7 @@ class St_tpcSectorPositionC : public TChair {
   Float_t 	outerSectorCovMatrix(Int_t i = 0) 	{return Struct(i)->outerSectorCovMatrix;}
  protected:
   St_tpcSectorPositionC(St_tpcSectorPosition *table=0) : TChair(table) {}
-  virtual ~St_tpcSectorPositionC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcSectorPositionC() {fgInstance = 0;}
  private:
   static St_tpcSectorPositionC* fgInstance;
   ClassDefChair(St_tpcSectorPosition, tpcSectorPosition_st )

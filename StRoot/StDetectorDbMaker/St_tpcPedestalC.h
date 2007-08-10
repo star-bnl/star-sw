@@ -15,7 +15,7 @@ class St_tpcPedestalC : public TChair {
   {return Struct(sector-1)->Rms[row-1][pad-1];}
  protected:
   St_tpcPedestalC(St_tpcPedestal *table=0) : TChair(table) {}
-  virtual ~St_tpcPedestalC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcPedestalC() {fgInstance = 0;}
  private:
   static St_tpcPedestalC* fgInstance;
   ClassDefChair(St_tpcPedestal, tpcPedestal_st )

@@ -23,7 +23,7 @@ class St_tpcHitErrorsC : public TChair {
   Float_t 	sig2_tan_inner_z(Int_t i = 0) 	    {return Struct(i)->sig2_tan_inner_z;}
  protected:
   St_tpcHitErrorsC(St_tpcHitErrors *table=0) : TChair(table) {}
-  virtual ~St_tpcHitErrorsC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcHitErrorsC() {fgInstance = 0;}
  private:
   static St_tpcHitErrorsC* fgInstance;
   ClassDefChair(St_tpcHitErrors, tpcHitErrors_st )

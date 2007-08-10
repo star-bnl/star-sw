@@ -12,7 +12,7 @@ class St_defaultTrgLvlC : public TChair {
   UInt_t 	level(Int_t i = 0) 	{return Struct(i)->level;}
  protected:
   St_defaultTrgLvlC(St_defaultTrgLvl *table=0) : TChair(table) {}
-  virtual ~St_defaultTrgLvlC() {SafeDelete(fgInstance);}
+  virtual ~St_defaultTrgLvlC() {fgInstance = 0;}
  private:
   static St_defaultTrgLvlC* fgInstance;
   ClassDefChair(St_defaultTrgLvl, defaultTrgLvl_st )

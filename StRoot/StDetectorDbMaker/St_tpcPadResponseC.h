@@ -27,7 +27,7 @@ class St_tpcPadResponseC : public TChair {
   Float_t 	InnerOuterFactor(Int_t i = 0) 	        {return Struct(i)->InnerOuterFactor;}
  protected:
   St_tpcPadResponseC(St_tpcPadResponse *table=0) : TChair(table) {}
-  virtual ~St_tpcPadResponseC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcPadResponseC() {fgInstance = 0;}
  private:
   static St_tpcPadResponseC* fgInstance;
   ClassDefChair(St_tpcPadResponse, tpcPadResponse_st )

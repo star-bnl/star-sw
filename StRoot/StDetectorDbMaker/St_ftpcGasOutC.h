@@ -26,7 +26,7 @@ class St_ftpcGasOutC : public TChair {
   Double_t 	body6West(Int_t i = 0) 	{return Struct(i)->body6West;}
  protected:
   St_ftpcGasOutC(St_ftpcGasOut *table=0) : TChair(table) {}
-  virtual ~St_ftpcGasOutC() {SafeDelete(fgInstance);}
+  virtual ~St_ftpcGasOutC() {fgInstance = 0;}
  private:
   static St_ftpcGasOutC* fgInstance;
   ClassDefChair(St_ftpcGasOut, ftpcGasOut_st )

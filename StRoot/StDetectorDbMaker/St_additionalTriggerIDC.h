@@ -20,7 +20,7 @@ class St_additionalTriggerIDC : public TChair {
   UInt_t 	psVersion(Int_t i = 0) 	        {return Struct(i)->psVersion;}
  protected:
   St_additionalTriggerIDC(St_additionalTriggerID *table=0) : TChair(table) {}
-  virtual ~St_additionalTriggerIDC() {if (Table()->IsMarked()) delete GetThisTable(); SafeDelete(fgInstance);}
+  virtual ~St_additionalTriggerIDC() {if (Table()->IsMarked()) delete GetThisTable(); fgInstance = 0;}
  private:
   static St_additionalTriggerIDC* fgInstance;
   ClassDefChair(St_additionalTriggerID, additionalTriggerID_st )

@@ -14,7 +14,7 @@ class St_tpcFieldCageC : public TChair {
   Float_t 	westClockError(Int_t i = 0) 	{return Struct(i)->westClockError;}
  protected:
   St_tpcFieldCageC(St_tpcFieldCage *table=0) : TChair(table) {}
-  virtual ~St_tpcFieldCageC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcFieldCageC() {fgInstance = 0;}
  private:
   static St_tpcFieldCageC* fgInstance;
   ClassDefChair(St_tpcFieldCage, tpcFieldCage_st )

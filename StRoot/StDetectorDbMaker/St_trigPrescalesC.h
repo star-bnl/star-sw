@@ -16,7 +16,7 @@ class St_trigPrescalesC : public TChair {
   Float_t 	ps(Int_t i = 0) 	{return Struct(i)->ps;}
  protected:
   St_trigPrescalesC(St_trigPrescales *table=0) : TChair(table) {}
-  virtual ~St_trigPrescalesC() {if (Table()->IsMarked()) delete GetThisTable(); SafeDelete(fgInstance);}
+  virtual ~St_trigPrescalesC() {if (Table()->IsMarked()) delete GetThisTable(); fgInstance = 0;}
  private:
   static St_trigPrescalesC* fgInstance;
   ClassDefChair(St_trigPrescales, trigPrescales_st )

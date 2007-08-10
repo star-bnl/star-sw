@@ -12,7 +12,7 @@ class St_tpcOSTimeOffsetsC : public TChair {
   Float_t* 	offset(Int_t i = 0) 	     {return Struct(i)->offset;}
  protected:
   St_tpcOSTimeOffsetsC(St_tpcOSTimeOffsets *table=0) : TChair(table) {}
-  virtual ~St_tpcOSTimeOffsetsC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcOSTimeOffsetsC() {fgInstance = 0;}
  private:
   static St_tpcOSTimeOffsetsC* fgInstance;
   ClassDefChair(St_tpcOSTimeOffsets, tpcOSTimeOffsets_st )

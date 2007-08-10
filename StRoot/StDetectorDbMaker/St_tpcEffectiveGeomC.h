@@ -14,7 +14,7 @@ class St_tpcEffectiveGeomC : public TChair {
   Double_t 	z_outer_offset(Int_t i = 0) 	  {return Struct(i)->z_outer_offset;}
  protected:
   St_tpcEffectiveGeomC(St_tpcEffectiveGeom *table=0) : TChair(table) {}
-  virtual ~St_tpcEffectiveGeomC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcEffectiveGeomC() {fgInstance = 0;}
  private:
   static St_tpcEffectiveGeomC* fgInstance;
   ClassDefChair(St_tpcEffectiveGeom, tpcEffectiveGeom_st )

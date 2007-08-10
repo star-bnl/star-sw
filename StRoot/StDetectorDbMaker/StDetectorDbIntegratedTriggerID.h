@@ -6,7 +6,7 @@
 class StDetectorDbIntegratedTriggerID{
 public:
   static StDetectorDbIntegratedTriggerID*  instance() {if (! fgInstance) fgInstance = new StDetectorDbIntegratedTriggerID(); return fgInstance;}
-    virtual ~StDetectorDbIntegratedTriggerID() {SafeDelete(fgInstance);}
+    virtual ~StDetectorDbIntegratedTriggerID() {fgInstance = 0;}
     UInt_t    getIDNumRows()                           {return St_triggerInfoC::instance()->getNumRows();}
     Int_t     getIDRunNumber()                         {return St_triggerInfoC::instance()->runNumber();}
     Int_t     getIdxTrg(UInt_t entry = 0)              {return St_triggerInfoC::instance()->idxTrg();}

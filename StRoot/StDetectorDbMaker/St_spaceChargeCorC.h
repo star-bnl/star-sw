@@ -66,7 +66,7 @@ class St_spaceChargeCorR1C : public St_spaceChargeCorC {
   static St_spaceChargeCorR1C* 	instance();
  protected:
   St_spaceChargeCorR1C(St_spaceChargeCor *table=0) : St_spaceChargeCorC(table) {}
-  virtual ~St_spaceChargeCorR1C() {SafeDelete(fgInstance);}
+  virtual ~St_spaceChargeCorR1C() {fgInstance = 0;}
  private:
   static St_spaceChargeCorR1C* fgInstance;
   ClassDef(St_spaceChargeCorR1C,1) //C++ TChair for spaceChargeCor table class
@@ -76,7 +76,7 @@ class St_spaceChargeCorR2C : public St_spaceChargeCorC {
   static St_spaceChargeCorR2C* 	instance();
  protected:
   St_spaceChargeCorR2C(St_spaceChargeCor *table=0) : St_spaceChargeCorC(table) {}
-  virtual ~St_spaceChargeCorR2C() {SafeDelete(fgInstance);}
+  virtual ~St_spaceChargeCorR2C() {fgInstance = 0;}
  private:
   static St_spaceChargeCorR2C* fgInstance;
   ClassDef(St_spaceChargeCorR2C,1) //C++ TChair for spaceChargeCor table class

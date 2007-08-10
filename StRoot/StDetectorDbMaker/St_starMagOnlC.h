@@ -53,7 +53,7 @@ class St_starMagOnlC : public TChair {
   }
  protected:
   St_starMagOnlC(St_starMagOnl *table=0) : TChair(table) {}
-  virtual ~St_starMagOnlC() {SafeDelete(fgInstance);}
+  virtual ~St_starMagOnlC() {fgInstance = 0;}
  private:
   static St_starMagOnlC* fgInstance;
   ClassDefChair(St_starMagOnl, starMagOnl_st )

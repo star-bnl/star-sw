@@ -15,7 +15,7 @@ class St_tpcOmegaTauC : public TChair {
   Float_t 	getOmegaTauTensorV2()        {return tensorV2();}
  protected:
   St_tpcOmegaTauC(St_tpcOmegaTau *table=0) : TChair(table) {}
-  virtual ~St_tpcOmegaTauC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcOmegaTauC() {fgInstance = 0;}
  private:
   static St_tpcOmegaTauC* fgInstance;
   ClassDefChair(St_tpcOmegaTau, tpcOmegaTau_st )

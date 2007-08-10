@@ -23,7 +23,7 @@ class St_ftpcGasSystemC : public TChair {
   Double_t 	flowCO2(Int_t i = 0) 	     {return Struct(i)->flowCO2;}
  protected:
   St_ftpcGasSystemC(St_ftpcGasSystem *table=0) : TChair(table) {}
-  virtual ~St_ftpcGasSystemC() {SafeDelete(fgInstance);}
+  virtual ~St_ftpcGasSystemC() {fgInstance = 0;}
  private:
   static St_ftpcGasSystemC* fgInstance;
   ClassDefChair(St_ftpcGasSystem, ftpcGasSystem_st )

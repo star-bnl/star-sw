@@ -20,7 +20,7 @@ class St_tpcElectronicsC : public TChair {
   Double_t 	tau(Int_t i = 0) 	        {return Struct(i)->tau;}
  protected:
   St_tpcElectronicsC(St_tpcElectronics *table=0) : TChair(table) {}
-  virtual ~St_tpcElectronicsC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcElectronicsC() {fgInstance = 0;}
  private:
   static St_tpcElectronicsC* fgInstance;
   ClassDefChair(St_tpcElectronics, tpcElectronics_st )

@@ -56,7 +56,7 @@ class St_tpcWirePlanesC : public TChair {
 
  protected:
   St_tpcWirePlanesC(St_tpcWirePlanes *table=0) : TChair(table) {}
-  virtual ~St_tpcWirePlanesC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcWirePlanesC() {fgInstance = 0;}
  private:
   static St_tpcWirePlanesC* fgInstance;
   ClassDefChair(St_tpcWirePlanes, tpcWirePlanes_st )

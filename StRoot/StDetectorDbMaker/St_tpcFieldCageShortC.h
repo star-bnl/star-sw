@@ -16,7 +16,7 @@ class St_tpcFieldCageShortC : public TChair {
   Float_t 	MissingResistance(Int_t i = 0) 	{return Struct(i)->MissingResistance;}
  protected:
   St_tpcFieldCageShortC(St_tpcFieldCageShort *table=0) : TChair(table) {}
-  virtual ~St_tpcFieldCageShortC() {SafeDelete(fgInstance);}
+  virtual ~St_tpcFieldCageShortC() {fgInstance = 0;}
  private:
   static St_tpcFieldCageShortC* fgInstance;
   ClassDefChair(St_tpcFieldCageShort, tpcFieldCageShort_st )

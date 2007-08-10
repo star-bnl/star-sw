@@ -13,7 +13,7 @@ class St_trgTimeOffsetC : public TChair {
   Float_t 	laserOffset(Int_t i = 0) 	{return Struct(i)->laserOffset;}
  protected:
   St_trgTimeOffsetC(St_trgTimeOffset *table=0) : TChair(table) {}
-  virtual ~St_trgTimeOffsetC() {SafeDelete(fgInstance);}
+  virtual ~St_trgTimeOffsetC() {fgInstance = 0;}
  private:
   static St_trgTimeOffsetC* fgInstance;
   ClassDefChair(St_trgTimeOffset, trgTimeOffset_st )
