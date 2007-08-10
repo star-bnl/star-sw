@@ -1,6 +1,7 @@
 #ifndef __StGammaCandidateMaker_h__
 #define __StGammaCandidateMaker_h__
 
+class TClonesArray;
 class TVector3;
 class StGammaTrack;
 
@@ -32,6 +33,7 @@ class StGammaCandidateMaker : public StMaker
   Int_t MakeEndcap();
   Int_t MakeBarrel();
   Int_t Compress();
+  template<class T> void Compress(TClonesArray* clones);
 
   bool getPositionMomentumAtBarrel(StGammaTrack* track, double magneticField, TVector3& position, TVector3& momentum);
   
