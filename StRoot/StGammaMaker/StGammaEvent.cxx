@@ -17,9 +17,8 @@ void StGammaEvent::Clear(Option_t *opts)
 {
   mRunNumber=0;
   mEventNumber=0;
-
+  mTriggerIds.clear();
   mVertex=TVector3(0.,0.,0.);
-
   mTracks->Clear();
   mTowers->Clear();
   mPreshower1->Clear();
