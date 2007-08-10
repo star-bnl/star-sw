@@ -1,5 +1,9 @@
+// -*- mode: C++ -*-
+
 #ifndef __StGammaEvent_h__
 #define __StGammaEvent_h__
+
+#include <set>
 
 #include "TObject.h"
 #include "TVector3.h"
@@ -64,6 +68,7 @@ class StGammaEvent : public TObject {
  protected:
   Int_t mRunNumber;   /// Run number
   Int_t mEventNumber; /// Event number  
+  set<int> mTriggerIds; /// Trigger ID's
   TObjString mMudstFileName; /// File which originated StGammaEvent
   TVector3 mVertex; /// Event vertex (TPC)
   Float_t mMagneticField; /// Magnetic field (kG)
@@ -73,13 +78,16 @@ class StGammaEvent : public TObject {
  public:
   void SetRunNumber( Int_t run ){ mRunNumber=run; }
   void SetEventNumber( Int_t event ){ mEventNumber=event; }
+  void SetTriggerIds(const vector<unsigned int>& triggerIds);
   void SetMudstFileName(const TObjString &i) { mMudstFileName = i; }
   void SetVertex(const TVector3& vertex ){ mVertex=vertex; }
   void SetMagneticField( Float_t magneticField) { mMagneticField = magneticField; }
   void SetPythia(StGammaPythiaEvent* pythia) { mPythia = pythia; }
 
   Int_t runNumber(){ return mRunNumber; }/// Returns run number
-  Int_t eventNumber(){ return mEventNumber; }/// Returns event number
+  Int_t eventNumber(){ return mEventNumber; } /// Returns event number
+  set<int>& triggerIds() { return mTriggerIds; }
+  bool isTrigger(int id) const { return mTriggerIds.find(id) != mTriggerIds.end(); }
   TObjString muDstFileName() const { return mMudstFileName; } /// Returns muDst file from which event originated
   TVector3& vertex(){ return mVertex; }/// Returns the vertex
   Float_t magneticField() const { return mMagneticField; } /// Magnetic field (kG)
@@ -110,5 +118,10 @@ class StGammaEvent : public TObject {
   ClassDef(StGammaEvent,1);
 
 };
+
+inline void StGammaEvent::SetTriggerIds(const vector<unsigned int>& triggerIds)
+{
+  copy(triggerIds.begin(), triggerIds.end(), inserter(mTriggerIds, mTriggerIds.begin()));
+}
 
 #endif

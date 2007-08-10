@@ -59,6 +59,7 @@ Int_t StGammaEventMaker::Make()
   mGammaEvent -> SetEventNumber( StMuDst::event()->eventNumber() );
   mGammaEvent -> SetMudstFileName( muDstMaker->chain()->GetFile()->GetName() );
   mGammaEvent -> SetMagneticField( StMuDst::event()->magneticField() );
+  mGammaEvent -> SetTriggerIds( StMuDst::event()->triggerIdCollection().nominal().triggerIds() );
 
   return kStOK;
 }
