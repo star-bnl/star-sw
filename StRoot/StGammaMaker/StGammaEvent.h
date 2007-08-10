@@ -5,6 +5,7 @@
 #include "TVector3.h"
 
 #include "StGammaCandidate.h"
+#include "StGammaCandidateMaker.h"
 //#include "StGammaIsolation.h"
 //#include "StGammaDistribution.h"
 //#include "StGammaFit.h"
@@ -103,6 +104,8 @@ class StGammaEvent : public TObject {
   TClonesArray *mPostshower;//-> array of all postshower
   TClonesArray *mStrips;    //-> array of all strips
   TClonesArray *mCandidates;//-> array of all candidates
+
+  friend Int_t StGammaCandidateMaker::Compress();
  
   ClassDef(StGammaEvent,1);
 

@@ -31,6 +31,7 @@ class StGammaCandidateMaker : public StMaker
 
   Int_t MakeEndcap();
   Int_t MakeBarrel();
+  Int_t Compress();
 
   bool getPositionMomentumAtBarrel(StGammaTrack* track, double magneticField, TVector3& position, TVector3& momentum);
   

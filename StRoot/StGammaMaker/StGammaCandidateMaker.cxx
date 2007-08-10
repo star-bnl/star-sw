@@ -35,6 +35,7 @@ Int_t StGammaCandidateMaker::Make()
 { 
   MakeEndcap();
   MakeBarrel();
+  Compress();
   return kStOK;
 }
 
@@ -343,6 +344,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 		  if ( strip ) {
                     strip->position = i;
 		    can->addSmdu(strip);
+		    strip->candidates.Add(can);
 		  }
 		}
 	      for ( Int_t i=(Int_t)vmin[isec];i<(Int_t)vmax[isec];i++ )
@@ -351,6 +353,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 		  if ( strip ) {
                     strip->position = i;
 		    can->addSmdv(strip);
+		    strip->candidates.Add(can);
 		  }
 		}
 	    }
@@ -511,6 +514,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	d -= cluster->position();
 	if (d.Mag() <= mSmdRange) {
 	  candidate->addSmdEta(strip);
+	  strip->candidates.Add(candidate);
 	  smdEtaEnergy += strip->energy;
 	}
       }
@@ -521,6 +525,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	d -= cluster->position();
 	if (d.Mag() <= mSmdRange) {
 	  candidate->addSmdPhi(strip);
+	  strip->candidates.Add(candidate);
 	  smdPhiEnergy += strip->energy;
 	}
       }
@@ -561,4 +566,32 @@ bool StGammaCandidateMaker::getPositionMomentumAtBarrel(StGammaTrack* track, dou
   momentum = TVector3(helix.momentumAt(s, magneticField).xyz());
 
   return true;
+}
+
+Int_t StGammaCandidateMaker::Compress()
+{
+  // Get gamma event maker
+  StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMaker("gemaker");
+  if (!gemaker) {
+    LOG_WARN << "MakeBarrel - No gamma event maker" << endm;
+    return kStWarn;
+  }
+
+  // Get gamma event
+  StGammaEvent* gevent = gemaker->event();
+  if (!gevent) {
+    LOG_WARN << "MakeBarrel - No gamma event" << endm;
+    return kStWarn;
+  }
+
+  TClonesArray* strips = gevent->mStrips;
+  TIter next(strips);
+
+  while (StGammaStrip* strip = (StGammaStrip*)next())
+    if (strip->candidates.IsEmpty())
+      strips->Remove(strip);
+
+  strips->Compress();
+
+  return kStOk;
 }
