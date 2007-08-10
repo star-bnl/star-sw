@@ -95,17 +95,17 @@ if (gErrorIgnoreLevel == kUnset) {
    
 
    if (level >= kFatal) {
-        LOG_FATAL << msg << endm;
+        LOG_FATAL << location <<msg << endm;
      } else if (level >= kSysError) {
-        LOG_FATAL << msg << endm;  
+        LOG_FATAL << location << " : " << msg << endm;  
      } else if (level >= kBreak) {
-        LOG_FATAL << msg << endm;  
+        LOG_FATAL << location << " : " << msg << endm;  
      } else if (level >= kError) { 
-        LOG_ERROR << msg << endm;
+        LOG_ERROR << location << " : " << msg << endm;
 //   else if (level >= kWarning)
-//        LOG_WARN << msg << endm;
+//        LOG_WARN << location << " : " << msg << endm;
      } else if (level >= kInfo) {
-        LOG_INFO << msg << endm;
+        LOG_INFO << location << " : " << msg << endm;
      }
 
    if (abort) {
@@ -124,7 +124,8 @@ std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
   if (((&os) == (std::ostream*) StMessMgr::CurrentMessager()) && (stm == endm)) {
     // There was a StMessage terminator
     *this << ends;
-    StMessMgr::CurrentMessager()->Print();
+     StMessMgr::CurrentMessager()->Print();
+     seekp(0);*this << ends;seekp(0);
   } else {
     // fprintf(stderr,"StLoggerManager::OperatorShift os  %p StMessMgr = %Lp, stm = %Lp endm = %Lp\n",
     //       &os, (std::ostream*) StMessMgr::Instance(), stm, endm);
@@ -182,7 +183,7 @@ StLoggerManager::StLoggerManager(const char *loggerName)
      fLineNumbers[i] = -1;
   }
   fLogger   = Logger::getLogger(_T(loggerName));
-  
+  fDefaultLevel = fLogger->getLevel();
   fCurType     = new char[ 2];  fCurType[0] = 0; fCurType[1] = 0;
   fCurOpt      = new char[32];  fCurOpt [0] = 0; 
   SwitchOff("D");
@@ -245,9 +246,12 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        filter = new StarOptionFilter();
        appender->addFilter(filter);
        root->addAppender(appender);
+       //Set the default threashold to be 
+       root->setLevel(Level::INFO);
     }
     Logger::getRootLogger();
     fgQALogger = Logger::getLogger("QA");
+    //Almost all QA messages are on the info level
     NDC::push(_T(":"));
 
     mInstance = StarLoggerInit("BFC");
@@ -302,23 +306,15 @@ StMessMgr& StLoggerManager::Message(const char* mess, const char* type,
   if (type && type[0]) typeChar = type[0];
   if (!opt) opt = "";
   size_t messSize = (mess && mess[0]) ? strlen(mess) : 0;
-  seekp(0);
   *fCurType = typeChar;
   strcpy(fCurOpt,opt);
-  if (messSize && lineNumber == -1 && (!sourceFileName)) {
-     BuildMessage(mess, type, opt,sourceFileName, lineNumber);     // comes back with fCurType=0
-  } else {
-//    building = 1;
-     if (messSize>0) {
-        // Add the message to the logger context
-        assert(0);
-        NDC::push(_T("mess"));
-        mess = 0;
-     }
-    if (sourceFileName && sourceFileName[0] ) fSourceFileNames[LevelIndex(*fCurType)] = sourceFileName;
-    else fSourceFileNames[LevelIndex(*fCurType)].clear();
-    fLineNumbers[LevelIndex(*fCurType)]     = lineNumber;
-  }
+  if (tellp() > 0 ) *this << endm;  // print out the previous line if any
+  
+  if (sourceFileName && sourceFileName[0] ) fSourceFileNames[LevelIndex(*fCurType)] = sourceFileName;
+  else fSourceFileNames[LevelIndex(*fCurType)].clear();
+  fLineNumbers[LevelIndex(*fCurType)]     = lineNumber;
+ 
+  if (messSize > 0) *this << mess << endm; // print out the previous this message if present
   return *((StMessMgr*) this);
 }
 //_____________________________________________________________________________
@@ -395,7 +391,7 @@ void StLoggerManager::Print() {
 // Empty the buffer into the current message and print it.
 // If not currenty building a message, print the last one created.
 //
-  std::string message = std::ostringstream::str();
+  string message = ostringstream::str();
   BuildMessage(message.c_str(),fCurType,fCurOpt);
 }
 //_____________________________________________________________________________
@@ -462,7 +458,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.21 2006/07/01 01:19:17 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.21.4.1 2007/08/10 20:55:30 didenko Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -784,6 +780,35 @@ int StLoggerManager::ListTypes()
 _NO_IMPLEMENTATION_;   return 5;
 //   return messTypeList->ListTypes();                           
 }
+
+//_____________________________________________________________________________
+void StLoggerManager::SetLevel(Int_t level) 
+{
+   // Map STAR level to the logger level and set the logger level
+   switch (level) {
+      case kFatal:
+         fLogger->setLevel(Level::FATAL);
+         break;
+      case kError:
+         fLogger->setLevel(Level::ERROR);
+         break;
+      case kWarning:
+         fLogger->setLevel(Level::WARN);
+         break;
+      case kInfo:
+         fLogger->setLevel(Level::INFO);
+         break;
+      default:
+         fLogger->setLevel(Level::DEBUG);
+         break;            
+   };   
+}
+//_____________________________________________________________________________
+Int_t StLoggerManager::GetLevel(Int_t) const 
+{
+   // Map the current logger level to the STAR one
+   return 1;
+}
 #if 0
 //_____________________________________________________________________________
 const char *GetName() 
@@ -800,8 +825,12 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.21 2006/07/01 01:19:17 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.21.4.1 2007/08/10 20:55:30 didenko Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.21.4.1  2007/08/10 20:55:30  didenko
+// patches for branch SL06g_2 for SL4.4
+//
+//
 // Revision 1.21  2006/07/01 01:19:17  fine
 // Add new jiob tracking option code
 //
