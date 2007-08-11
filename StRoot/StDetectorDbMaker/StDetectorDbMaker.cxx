@@ -27,6 +27,7 @@ StDetectorDbMaker::~StDetectorDbMaker(){
 //_____________________________________________________________________________
 Int_t StDetectorDbMaker::Init(){
     
+    StDetectorDbClock::instance()->update(this);
     return StMaker::Init();
 }
 Int_t StDetectorDbMaker::InitRun(int runNumber){
