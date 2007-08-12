@@ -74,6 +74,7 @@ void rdMu2TrigSimu( char *dirIn="",
   simuTrig->setHList(HList);
   simuTrig->useEemc();
   simuTrig->useBbc();
+  simuTrig->useBemc();
   if(flagMC){
     simuTrig->setMC(flagMC); // pass one argument to M-C as generic switch
 

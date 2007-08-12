@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////
 //
 //
 // StTriggerSimuMaker R.Fatemi, Adam Kocoloski , Jan Balewski  (Fall, 2007)
@@ -20,6 +20,9 @@
 #include "St_db_Maker/St_db_Maker.h" // just for time stamp
 #include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"// to access Etot
 
+//StEvent
+#include "StEvent/StEvent.h"
+
 //get  EEMC
 #include "Eemc/StEemcTriggerSimu.h"
 #include "Eemc/EemcHttpInfo.h"
@@ -28,6 +31,7 @@
 
 //get BEMC
 #include "Bemc/StBemcTriggerSimu.h"
+#include "StEmcRawMaker/StBemcTables.h"
 
 //get BBC
 #include "Bbc/StBbcTriggerSimu.h"
@@ -86,7 +90,10 @@ StTriggerSimuMaker::Init() {
   }
 
   if(bemc) {
+    mTables=new StBemcTables();
+    event=new StEvent();
     bemc->setMC(mMCflag);
+    bemc->setBemcConfig(config);
     bemc->Init();
   }
 
@@ -106,6 +113,7 @@ StTriggerSimuMaker::Clear(const Option_t*){
 }
 
 
+
 //________________________________________________
 
 Int_t
@@ -113,7 +121,9 @@ StTriggerSimuMaker::InitRun  (int runNumber){
   LOG_INFO<<"::InitRun()="<<runNumber<<endm;
 
   if(eemc) eemc->InitRun();
-  
+  if(bemc) bemc->setBemcDbMaker(mDbMk);
+  if(bemc) bemc->InitRun();
+
   assert(mDbMk);
   mYear=mDbMk->GetDateTime().GetYear();
   int yyyymmdd=mDbMk->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
@@ -131,10 +141,19 @@ StTriggerSimuMaker::Make(){
     LOG_DEBUG<<"::Make()"<<endm;
 
     if(bbc) bbc->Make();
-    cout<<"BBC Trigger = "<<bbc->bbcTrig<<endl;
     if(eemc) eemc->Make();
-    if(bemc) bemc->Make();
- 
+    if(bemc) 
+      {
+	mTables->loadTables(this);
+	setTableMaker(mTables);
+	
+	event=(StEvent*)GetInputDS("StEvent");
+	if(!event) return kStOk;
+	bemc->setEvent(event);
+
+	bemc->Make();
+      }
+
     // add L2 triggers
     //.....
 
@@ -208,9 +227,12 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.7 2007/08/07 15:48:20 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.8 2007/08/12 01:03:22 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.8  2007/08/12 01:03:22  rfatemi
+// Added flag for offline/online/expert settings
+//
 // Revision 1.7  2007/08/07 15:48:20  rfatemi
 // Added BEMC access
 //
