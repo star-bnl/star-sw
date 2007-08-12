@@ -353,9 +353,11 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
 	if (hitsvt) hit = (*hitsvt)[l];
 	if (hitssd) hit = (*hitssd)[l];
 	if (hit) {
-	  if (hit->flag()>=4) continue;
-	  if (hit->flag()< 0) continue;
+	  //if (hit->flag()>=4) continue;
+	  //if (hit->flag()< 0) continue;
+	  //	  cout << "hitFlag=" << hit->flag() << endl;
 	  HitT *h = AddHitT();
+	  h->SetHitFlag(UInt_t(hit->flag()));
 	  h->SetUVPred (uvPred[0],uvPred[1]);
 	  h->SettUVPred(tuvPred[0],tuvPred[1]);
 	  h->SetXyzG(xyzGPred);

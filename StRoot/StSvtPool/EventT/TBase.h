@@ -48,6 +48,7 @@ public :
    Double32_t      fTracks_fRhoGl[kMaxfTracks];   //[fTracks_]
 #endif
    UInt_t          fTracks_fNpoint[kMaxfTracks];   //[fTracks_]
+   UInt_t          fTracks_fNPpoint[kMaxfTracks];   //[fTracks_]
    Short_t         fTracks_fValid[kMaxfTracks];   //[fTracks_]
    UInt_t          fTracks_fNsp[kMaxfTracks];   //[fTracks_]
    UInt_t          fTracks_fIdHitT[kMaxfTracks][1000];   //[fTracks_]
@@ -122,7 +123,13 @@ public :
    Double32_t      fHits_uD[kMaxfHits];   //[fHits_]
    Double32_t      fHits_vD[kMaxfHits];   //[fHits_]
    Double32_t      fHits_uHat[kMaxfHits];   //[fHits_]
-   //   Double32_t      fHits_vHat[kMaxfHits];   //[fHits_]
+   Double32_t      fHits_vHat[kMaxfHits];   //[fHits_]
+   Int_t           fHits_NofHits[kMaxfHits];   //[fHits_]
+   Int_t           fHits_NofFHits[kMaxfHits];   //[fHits_]
+   Int_t           fHits_isFitted[kMaxfHits];   //[fHits_]
+   Int_t           fHits_isTrack[kMaxfHits];   //[fHits_]
+   Int_t           fHits_isUsedInFit[kMaxfHits];   //[fHits_]
+   UInt_t          fHits_hitFlag[kMaxfHits];   //[fHits_]
    Bool_t          fIsValid;
 
    // List of branches
@@ -153,6 +160,7 @@ public :
    TBranch        *b_fTracks_fRhoGl;   //!
 #endif
    TBranch        *b_fTracks_fNpoint;   //!
+   TBranch        *b_fTracks_fNPpoint;   //!
    TBranch        *b_fTracks_fValid;   //!
    TBranch        *b_fTracks_fNsp;   //!
    TBranch        *b_fTracks_fIdHitT;   //!
@@ -224,10 +232,14 @@ public :
    TBranch        *b_fHits_uD;   //!
    TBranch        *b_fHits_vD;   //!
    TBranch        *b_fHits_uHat;   //!
-   //   TBranch        *b_fHits_vHat;   //!
+   TBranch        *b_fHits_vHat;   //!
+   TBranch        *b_fHits_NofHits;   //!
+   TBranch        *b_fHits_NofFHits;   //!
+   TBranch        *b_fHits_isFitted;   //!
+   TBranch        *b_fHits_isTrack;   //!
+   TBranch        *b_fHits_isUsedInFit;   //!
+   TBranch        *b_fHits_hitFlag;   //!
    TBranch        *b_fHits_end;   //!
-   //   TBranch        *b_EventT_fLastTrackT;   //!
-   //   TBranch        *b_EventT_fLastHitT;   //!
    TBranch        *b_EventT_fIsValid;   //!
 
    TBase(TTree *tree=0);

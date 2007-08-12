@@ -44,6 +44,7 @@ class HitT : public TObject {
   Int_t      isFitted;
   Int_t      isTrack; 
   Int_t      isUsedInFit;
+  UInt_t     hitFlag;
   Char_t end;
  public:
   HitT(Int_t B = 0, Int_t L = 0, Int_t l = 0, Int_t W = 0, Int_t H = 0,
@@ -59,6 +60,7 @@ class HitT : public TObject {
     xG = X; yG = Y; zG = Z; 
     uM = XL; vM = YL; w = ZL;
   }
+  void SetHitFlag(const UInt_t flag) {hitFlag = flag;}
   void SetL(Double32_t X, Double32_t Y, Double32_t Z) {xL = X; yL = Y; zL = Z;}
   void SetGC(Double32_t X, Double32_t Y, Double32_t Z) {xGC = X; yGC = Y; zGC = Z;}
   void SetLM(Double32_t X, Double32_t Z) {u = X; v = Z;}
@@ -99,6 +101,7 @@ class HitT : public TObject {
   void SetisFitted(Int_t k=1) {isFitted = k;}
   void SetisTrack(Int_t k=1) {isTrack = k;}
   void SetUsedInFit(Int_t k=0) {isUsedInFit = k;}
+  UInt_t      GetHitFlag()     const {return hitFlag;}
   Double32_t  GetU()           const {return u;}
   Double32_t  GetV()           const {return v;}
   Double32_t  GetuD()          const {return uD;}

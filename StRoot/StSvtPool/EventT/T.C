@@ -491,7 +491,8 @@ or
 	 Int_t hybrid = fHits_hybrid[k];
 	 Double32_t anode = fHits_anode[k];
 	 Int_t sector = -1;
-	 if (layer < 7 && IsNotValidHybrid(barrel,ladder,wafer,hybrid,run,anode)) continue;
+	 if (layer < 7 && fHits_hitFlag[k] > 3) continue;
+	 //Run V	 if (layer < 7 && IsNotValidHybrid(barrel,ladder,wafer,hybrid,run,anode)) continue;
 	 if (layer < 7) {
 	   sector = 0;
 	   if (ladder > SvtSsdConfig[layer-1].NoLadders/2) sector = 1;
@@ -843,6 +844,7 @@ void TT::MakeNt() {
 	 //	for (UInt_t k = 0;  k < fNhit; k++) {
 	 Int_t barrel = fHits_barrel[k];
 	 Int_t layer  = fHits_layer[k];
+	 if (layer < 7 && fHits_hitFlag[k] > 3) continue;
 	 Int_t ladder = fHits_ladder[k];
 	 Int_t wafer  = fHits_wafer[k];
 	 Int_t hybrid = fHits_hybrid[k];
