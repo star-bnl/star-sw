@@ -16,16 +16,24 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+class StEvent;
+class StBemcTables;
 class StEemcTriggerSimu;
-class StBecTriggerSimu;
+class StBemcTriggerSimu;
 class St_db_Maker;
 
 class StTriggerSimuMaker : public StMaker {
+
 private:
-  int mYear;
-  int mMCflag; // set yo 0 for real data
+
+  TString *config;
+  int mYear,mMCflag; // set yo 0 for real data
+  StEvent *event;
   St_db_Maker *mDbMk;
+  StBemcTables *mTables;
   void addTriggerList();
+  void fillStEvent(StEvent*);
+  void setTableMaker(StBemcTables *bemcTab) { bemc->setTableMaker(bemcTab);}
 
 public:
 
@@ -42,17 +50,18 @@ public:
     StBbcTriggerSimu *bbc;
     StBemcTriggerSimu *bemc;
 
-    TObjArray  *mHList; // output histo access point
-    void setHList(TObjArray * x){mHList=x;}
-    vector <int> mTriggerList;
     virtual Int_t     Init();
     virtual Int_t     Make();
     virtual Int_t     Finish();
     virtual void      Clear(const Option_t* = "");
     virtual Int_t InitRun  (int runumber);
-    bool    isTrigger(int trigId);   
-    void    setDbMaker(St_db_Maker *dbMk) { mDbMk=dbMk;}
- 
+
+    TObjArray  *mHList; // output histo access point
+    void setHList(TObjArray * x){mHList=x;}
+    vector <int> mTriggerList;
+    bool isTrigger(int trigId);   
+    void setDbMaker(St_db_Maker *dbMk) { mDbMk=dbMk;}
+    void setConfig(TString *CONFIG) {config=CONFIG;}
     ClassDef(StTriggerSimuMaker,0)
 };
    
@@ -60,9 +69,12 @@ public:
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.5 2007/08/07 15:48:38 rfatemi Exp $
+// $Id: StTriggerSimuMaker.h,v 1.6 2007/08/12 01:03:22 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.6  2007/08/12 01:03:22  rfatemi
+// Added flag for offline/online/expert settings
+//
 // Revision 1.5  2007/08/07 15:48:38  rfatemi
 // Added BEMC access methods
 //
