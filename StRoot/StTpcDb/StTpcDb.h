@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.28 2007/07/12 20:21:09 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.29 2007/08/12 15:06:30 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.29  2007/08/12 15:06:30  fisyak
+ * Use separated East/West drift velocities only >= 2007, for back compartibility
+ *
  * Revision 1.28  2007/07/12 20:21:09  fisyak
  * Drift velocity depends on TPC half, use online RHIC clock
  *
@@ -114,7 +117,7 @@
 #include "StRTpcSectorPosition.h"
 #include "StRTpcFieldCage.h"
 #include "StRTpcHitErrors.h"
-#include "St_DataSet.h"
+#include "TTable.h"
 #include "St_tpcPedestalC.h"
 #include "St_tpcGainC.h"
 #include "St_tpcPadResponseC.h"
@@ -141,7 +144,7 @@ class StTpcDb {
  StTpcGlobalPositionI* GlobPos; //!
  StTpcFieldCageI*      FC;
  StTpcHitErrorsI*      hitErrors;
- St_DataSet*           tpctrg[3];     //!
+ TDataSet*           tpctrg[3];     //!
  St_tpcDriftVelocity*  dvel;          //!
  St_trgTimeOffset*     toff;          //!
  St_dst_L0_Trigger*    trigtype;      //!
@@ -156,7 +159,7 @@ class StTpcDb {
    StTpcDb() {}
    void GetDataBase(StMaker* maker);
  public:
-   StTpcDb(St_DataSet* input);
+   StTpcDb(TDataSet* input);
    StTpcDb(StMaker* makerDb);
    virtual ~StTpcDb();
    void Clear();
@@ -171,7 +174,7 @@ class StTpcDb {
    StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
    StTpcSectorPositionI* SectorPosition(int sector);
-   St_Table *getTpcTable(int i);
+   TTable *getTpcTable(int i);
    St_tpcPedestalC *Pedestal();
    St_tpcGainC     *tpcGain();
    St_tpcPadResponseC *PadResponse();
