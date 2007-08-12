@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcElectronics.h,v 1.7 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StRTpcElectronics.h,v 1.7.4.1 2007/08/12 23:27:41 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,16 @@
  ***************************************************************************
  *
  * $Log: StRTpcElectronics.h,v $
+ * Revision 1.7.4.1  2007/08/12 23:27:41  jeromel
+ * Further fixes for SL06g built for SL44
+ *
+ * Revision 1.9  2007/08/04 00:38:03  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
+ * Revision 1.8  2007/07/12 20:21:09  fisyak
+ * Drift velocity depends on TPC half, use online RHIC clock
+ *
  * Revision 1.7  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -45,41 +55,6 @@ ClassDef(StRTpcElectronics,0)
 
 };
 
-inline int StRTpcElectronics::numberOfTimeBins() const {
-   return (*mElec)[0].numberOfTimeBins;
-}
-
-inline double StRTpcElectronics::nominalGain() const {
-   return (*mElec)[0].nominalGain;
-}
-
-inline double StRTpcElectronics::samplingFrequency() const {
-   return (*mElec)[0].samplingFrequency;
-}
-
-inline double StRTpcElectronics::tZero() const {
-   return (*mElec)[0].tZero;
-}
-
-inline double StRTpcElectronics::adcCharge() const {
-   return (*mElec)[0].adcCharge;
-}
-
-inline double StRTpcElectronics::adcConversion() const {
-   return (*mElec)[0].adcConversion;
-}
-
-inline double StRTpcElectronics::averagePedestal() const {
-   return (*mElec)[0].averagePedestal;
-}
-
-inline double StRTpcElectronics::shapingTime() const {
-   return (*mElec)[0].shapingTime;
-}
-
-inline double StRTpcElectronics::tau() const {
-   return (*mElec)[0].tau;
-}
 
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.17 2004/01/14 22:54:31 fisyak Exp $
+ * $Id: StTpcDbMaker.h,v 1.17.4.1 2007/08/12 23:27:44 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.17.4.1  2007/08/12 23:27:44  jeromel
+ * Further fixes for SL06g built for SL44
+ *
  * Revision 1.17  2004/01/14 22:54:31  fisyak
  * Add hooks for Pedestal and tpcGain
  *
@@ -185,15 +188,11 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.17 2004/01/14 22:54:31 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.17.4.1 2007/08/12 23:27:44 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
-inline StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
-inline void StTpcDbMaker::UseOnlyLaserDriftVelocity() {m_dvtype=2;}
-inline void StTpcDbMaker::UseOnlyCathodeDriftVelocity() {m_dvtype=1;}
-inline void StTpcDbMaker::UseAnyDriftVelocity() {m_dvtype=0;}
 
 #endif
 
