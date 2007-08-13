@@ -101,7 +101,6 @@ StBemcTriggerSimu::Clear(){
     adc08[did-1]=0;
     adc10[did-1]=0;
     adc12[did-1]=0;
-    ped08[did-1]=0;
     ped10[did-1]=0;
     ped12[did-1]=0;
   }
@@ -208,6 +207,9 @@ StBemcTriggerSimu::setDSM_HTStatus(){
   
 void StBemcTriggerSimu::getPed(){
 
+  Float_t ped,rms;   
+  
+  //offline 12 bit peds
   if (config->Contains("offline")){
     for (did=1; did<=kNTowers; did++){
       mTables->getPedestal(BTOW,did,0,ped,rms);
@@ -216,7 +218,7 @@ void StBemcTriggerSimu::getPed(){
   }
 
 
- //online tower/TP peds + Bit Conversion 
+ //online 12 bit peds
   dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
   St_emcTriggerPed *PEDonline=(St_emcTriggerPed*) dbOnline->Find("bemcTriggerPed");
   emcTriggerPed_st *PEDtab=PEDonline->GetTable();
@@ -229,13 +231,63 @@ void StBemcTriggerSimu::getPed(){
     }
   }
 
+  //Set ped to your favorite values
   if (config->Contains("expert")){
     for ( did=1; did<=kNTowers; did++){
-      //set your favorite ped value here
       ped12[did-1]=16;
     }
   }
+
+  
+  for (did=1; did<=kNTowers; did++){
+    mTables->getPedestal(BTOW,did,0,ped,rms);
+    cout<<" tower id="<<did<<" Online ped="<<ped12[did-1]/100<<" Offline ped="<<ped<<endl;
+  }
+  
+
+  pedTargetValue=PEDtab->PedShift/100;
+  // copied directly from Oleksandr's BEMC_DSM_decoder.cxx
+  for (did=1; did<kNTowers; did++){
+    
+    ped12[did-1]/=100;
+
+    char buffer[10];
+    int scale10bits = 4;
+    int operationBit = 1;
+    double ped1 = ped12[did-1] - pedTargetValue;
+    if (ped1 < 0) {
+      ped1 = -ped1;
+      operationBit = 0;
+    }
+    double value2 = ped1 / scale10bits;
+    sprintf(buffer, "%3.0f", value2);
+    int value1 = atoi(buffer);
+    value2 = ped1 - value1 * scale10bits;
+    if (value2 > 2) {
+      value2 = value1 + 1;
+      sprintf(buffer, "%3.0f", value2);
+      value1 = atoi(buffer);
+    }
+    if (value1 > 15) {
+      sprintf(buffer, "%3.0f", double(value1 - 11) / scale10bits);
+      int value3 = atoi(buffer);
+      value3 *= scale10bits;
+      value2 = value1 - value3;
+      sprintf(buffer, "%3.0f", value2);
+      value1 = atoi(buffer);
+    }
+    int value = 0;
+    if (operationBit == 1) {
+      value = (value1 & 0x0F) | 0x10;
+    }
+    if (operationBit == 0) {
+      value = (value1 & 0x0F);
+    }
+    ped10[did-1]=value;
+    cout << "Calculating FEE pedestal: pedAdc = " << ped12[did-1] << ", shift = " << pedTargetValue << "; PED = " << value << endl;
+  }
 }
+
 
 void StBemcTriggerSimu::setLUT(){
 
@@ -255,7 +307,7 @@ void StBemcTriggerSimu::Make(){
   
   // Clear all of ADC values
   Clear();
-  
+
   if(!mEvent)
     {
       LOG_WARN << "StBemcTriggerSimu -- no StEvent!" << endm;
@@ -287,22 +339,25 @@ void StBemcTriggerSimu::Make(){
 		  if(rawHit[k])
                     {
 
-		      Int_t mod=rawHit[k]->module();
+		      Int_t m=rawHit[k]->module();
 		      Int_t e=rawHit[k]->eta();
 		      Int_t s=abs(rawHit[k]->sub());
-		      mGeo->getId(mod,e,s,did);
-		      
+		      Int_t adc=rawHit[k]->adc();
+
+		      mGeo->getId(m,e,s,did);
 		      if (TowerStatus[did-1]==1){
-			adc12[did-1]=(Int_t)adc;
+			adc12[did-1]=adc;
 			adc10[did-1]=adc12[did-1] >> 2;
-			adc08[did-1]=adc10[did-1] >> 2;
+			//insert ped adjust here before shifting again
+ 			adc08[did-1]=adc10[did-1] >> 2;
 		      }
+		      
 		    }
 		}
 	    }
 	}
     }
-
+  
 
   //Loop through Trigger Patches and find 6 bit HT and 6 bit TP FEE ADC 
   for(int tpid = 0; tpid < kNPatches; ++tpid) 
