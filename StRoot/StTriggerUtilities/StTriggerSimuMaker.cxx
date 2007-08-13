@@ -121,8 +121,12 @@ StTriggerSimuMaker::InitRun  (int runNumber){
   LOG_INFO<<"::InitRun()="<<runNumber<<endm;
 
   if(eemc) eemc->InitRun();
-  if(bemc) bemc->setBemcDbMaker(mDbMk);
-  if(bemc) bemc->InitRun();
+  if(bemc) {
+    bemc->setBemcDbMaker(mDbMk);
+    mTables->loadTables(this);
+    bemc->setTableMaker(mTables);
+    bemc->InitRun();
+  }
 
   assert(mDbMk);
   mYear=mDbMk->GetDateTime().GetYear();
@@ -145,7 +149,7 @@ StTriggerSimuMaker::Make(){
     if(bemc) 
       {
 	mTables->loadTables(this);
-	setTableMaker(mTables);
+	bemc->setTableMaker(mTables);
 	
 	event=(StEvent*)GetInputDS("StEvent");
 	if(!event) return kStOk;
@@ -227,9 +231,12 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.8 2007/08/12 01:03:22 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.9 2007/08/13 02:51:29 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.9  2007/08/13 02:51:29  rfatemi
+// update before rcf goes offline
+//
 // Revision 1.8  2007/08/12 01:03:22  rfatemi
 // Added flag for offline/online/expert settings
 //

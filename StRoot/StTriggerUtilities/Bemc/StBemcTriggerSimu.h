@@ -41,8 +41,6 @@ class StBemcTriggerSimu {
   TString *config;                         //"online" or "offline" or "expert"   
   Int_t did;                               //always used as BEMC tower id
   Int_t mMCflag;                           //0= false and 1 =true
-  Float_t adc;                             //12 bit BEMC adc from StEvent
-  Float_t ped,rms;                           //12 bit BEMC ped and rms from offline database 
   unsigned long pedTargetValue;            //value FEE shifts pedestal to (10 or 12 bit?)
   unsigned long bitConvValue[kNCrates][10];//gives window used to determine HT6Bit
   Int_t HT_FEE_Offset;                     //same as bitConvValue but set by support class
@@ -50,8 +48,9 @@ class StBemcTriggerSimu {
   Int_t DSM_HTStatus[kNPatches];           //DSM_HTStatus only set online
   Int_t DSM_TPStatus[kNPatches];           //DSM_TPStatus only set online
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
-  Int_t adc12[kNTowers],adc10[kNTowers],adc08[kNTowers];
-  Int_t ped12[kNTowers],ped10[kNTowers],ped08[kNTowers];
+  Int_t adc12[kNTowers];                   //12 bit adc from StEvent -> NOT pedestal adjusted!
+  Int_t adc10[kNTowers],adc08[kNTowers];   //ped adjusted 10 and 8 bit adc
+  Int_t ped12[kNTowers],ped10[kNTowers];   //12 and 10 bit pedestal
 
 
   void setTowerStatus();
