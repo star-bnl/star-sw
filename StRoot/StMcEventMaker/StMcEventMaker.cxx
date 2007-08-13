@@ -9,8 +9,15 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.64 2007/04/28 17:56:26 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.65 2007/08/13 22:04:51 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.65  2007/08/13 22:04:51  calderon
+ * Fix off-by-one bug in assigning parents to event-generator particles found by
+ * Pibero.  Should be done obtaining the index to the mother particle in the
+ * particle table and subtracting one from this index when accessing the
+ * ttempParticle array.
+ * Added debugging to check this.
+ *
  * Revision 1.64  2007/04/28 17:56:26  perev
  * Redundant StChain.h removed
  *
@@ -250,6 +257,7 @@ using std::find;
 #include "StTimer.hh"
 
 #include "StThreeVectorF.hh"
+#include "StParticleDefinition.hh"
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -284,7 +292,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.64 2007/04/28 17:56:26 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.65 2007/08/13 22:04:51 calderon Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -944,15 +952,22 @@ Int_t StMcEventMaker::Make()
 			    << " to track with index " << gtrk << endm;
 		    }
 		}
-		else ttempParticle[gtrk]->setParent(ttempParticle[motherIndex]);
+		else ttempParticle[gtrk]->setParent(ttempParticle[motherIndex-1]);
 		if (Debug()>=2) {
-		    if (motherIndex && !(ttempParticle[gtrk]->parent())) {
-			cout << "Error in assigning parent to particle table!\n There should be a parent and there isn't one!\n";
-			PR(gtrk);
-			PR(motherIndex);
-			PR(particleTable[gtrk].jmohep[0]);
-			PR(ttempParticle[gtrk]->parent());
-		    }
+		  cout << "Particle table (generator) track " << gtrk << ", key " << ttempParticle[gtrk]->key() << endl;
+		  cout << "Mother Index-1 (off-by-1)        " << motherIndex-1 << endl;
+		  cout << "PDG ID of generator track        " << particleTable[gtrk].idhep << endl;
+		  cout << "PDG ID of mother track           " << particleTable[motherIndex-1].idhep << endl;
+		  if (ttempParticle[gtrk]->particleDefinition())
+		    cout << "particle                         " << ttempParticle[gtrk]->particleDefinition()->name() << endl;
+		  if (ttempParticle[gtrk]->parent() && ttempParticle[gtrk]->parent()->particleDefinition())
+		    cout << "parent                           " <<  ttempParticle[gtrk]->parent()->particleDefinition()->name() << endl;
+		  
+		  if (motherIndex && !(ttempParticle[gtrk]->parent())) {
+		      cout << "Error in assigning parent to particle table!\n There should be a parent and there isn't one!\n";
+		      PR(particleTable[gtrk].jmohep[0]);
+		      PR(ttempParticle[gtrk]->parent());
+		  }
 		}
 	    }
 	}}
@@ -962,12 +977,15 @@ Int_t StMcEventMaker::Make()
 	if (Debug()>=2) {
 	    // Check the whole ttempParticle for entries with problems
 	    for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++)
-		if (ttempParticle[gtrk]->parent() && ttempParticle[gtrk]->parent() != ttempParticle[particleTable[gtrk].jmohep[0]]) {
+		if (ttempParticle[gtrk]->parent() && ttempParticle[gtrk]->parent() != ttempParticle[particleTable[gtrk].jmohep[0]-1]) {
 		    cout << "The indexing got screwed up!" << endl;
 		    PR(ttempParticle[gtrk]->eventGenLabel());
 		    PR(ttempParticle[gtrk]->key());
 		    PR(ttempParticle[gtrk]->parent());
-		    PR(ttempParticle[particleTable[gtrk].jmohep[0]]);
+		    PR(ttempParticle[particleTable[gtrk].jmohep[0]-1]);
+		    if (ttempParticle[gtrk]->particleDefinition()) cout << "particle " << ttempParticle[gtrk]->particleDefinition()->name() << endl;
+		    if (ttempParticle[gtrk]->parent() && ttempParticle[gtrk]->parent()->particleDefinition()) cout << "parent   " <<  ttempParticle[gtrk]->parent()->particleDefinition()->name() << endl;
+
 		}
 	    cout << "Used   tracks from g2t_track table: " << usedTracksG2t << endl;
 	    cout << "Avail. tracks from g2t_track table: " << NTracks       << endl;
