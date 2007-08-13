@@ -66,108 +66,12 @@ public:
  ClassDef(StRTpcPadPlane,0)
 
 };
-inline int   StRTpcPadPlane::numberOfRows() const { return mPadPlane.padRows;}
-
-inline int   StRTpcPadPlane::numberOfInnerRows() const {
-return mPadPlane.innerPadRows;
-}
-
-inline int   StRTpcPadPlane::numberOfInnerRows48() const {
-return mPadPlane.innerPadRows48;
-}
-
-inline int   StRTpcPadPlane::numberOfInnerRows52() const {
-return mPadPlane.innerPadRows52;
-}
- 
-inline int   StRTpcPadPlane::numberOfOuterRows() const {
-return mPadPlane.outerPadRows;
-}
-
-inline double StRTpcPadPlane::innerSectorPadWidth() const {
-return mPadPlane.innerSectorPadWidth;
-}
-
-inline double StRTpcPadPlane::innerSectorPadLength() const {
-return mPadPlane.innerSectorPadLength;
-}
-
-inline double StRTpcPadPlane::innerSectorPadPitch() const {
-return mPadPlane.innerSectorPadPitch;
-}
-
-inline double StRTpcPadPlane::innerSectorRowPitch1() const {
-return mPadPlane.innerSectorRowPitch1;
-}
-inline double StRTpcPadPlane::innerSectorRowPitch2() const {
-return mPadPlane.innerSectorRowPitch2;
-}
-
-inline double StRTpcPadPlane::firstPadRow() const {
-return mPadPlane.firstPadRow;
-}
-
-inline double StRTpcPadPlane::firstOuterSectorPadRow() const {
-return mPadPlane.firstOuterSectorPadRow;
-}
-
-inline double StRTpcPadPlane::lastOuterSectorPadRow() const {
-return mPadPlane.lastOuterSectorPadRow;
-}
-
-inline double StRTpcPadPlane::firstRowWidth() const {
-return mPadPlane.firstRowWidth;
-}
- 
-inline double StRTpcPadPlane::lastRowWidth() const {
-return mPadPlane.lastRowWidth;
-}
-
-inline double StRTpcPadPlane::outerSectorPadWidth() const {
-return mPadPlane.outerSectorPadWidth;
-}
-
-inline double StRTpcPadPlane::outerSectorPadLength() const {
-return mPadPlane.outerSectorPadLength;
-}
-
-inline double StRTpcPadPlane::outerSectorPadPitch() const {
-return mPadPlane.outerSectorPadPitch;
-}
-
-inline double StRTpcPadPlane::outerSectorRowPitch() const {
-return mPadPlane.outerSectorRowPitch;
-}
-
-inline double StRTpcPadPlane::outerSectorLength() const {
-return mPadPlane.outerSectorLength;
-}
-
-inline double StRTpcPadPlane::ioSectorSeparation() const {
-return mPadPlane.ioSectorSeparation;
-}
-
-inline double StRTpcPadPlane::innerSectorEdge() const {
-return mPadPlane.innerSectorEdge;
-}
-
-inline double StRTpcPadPlane::outerSectorEdge() const {
-return mPadPlane.outerSectorEdge;
-}
-
-inline double StRTpcPadPlane::innerSectorPadPlaneZ() const {
-return mPadPlane.innerSectorPadPlaneZ;
-}
-
-inline double StRTpcPadPlane::outerSectorPadPlaneZ() const {
-return mPadPlane.outerSectorPadPlaneZ;
-}
 
 #endif
 
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.h,v 1.14 2004/08/26 20:34:17 genevb Exp $
+ * $Id: StRTpcPadPlane.h,v 1.14.6.1 2007/08/13 01:04:42 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -177,6 +81,16 @@ return mPadPlane.outerSectorPadPlaneZ;
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.h,v $
+ * Revision 1.14.6.1  2007/08/13 01:04:42  jeromel
+ * Patches for SL07a, SL44
+ *
+ * Revision 1.14.4.1  2007/08/12 23:27:42  jeromel
+ * Further fixes for SL06g built for SL44
+ *
+ * Revision 1.15  2007/08/04 00:38:04  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
  * Revision 1.14  2004/08/26 20:34:17  genevb
  * Improve speed by keeping own copy of table row
  *
