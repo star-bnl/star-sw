@@ -22,10 +22,11 @@ class StEmcGeom;
 class StBemcTables;
 class St_db_Maker;
 class StBemcTriggerDbThresholds;
+class TDataSet;
 class StBemcTriggerSimu {
+
  private:
-
-
+  
   TObjArray *mHList;
   StMuDstMaker *mMuDstMaker;
   StMuDst *muDst;
@@ -35,16 +36,30 @@ class StBemcTriggerSimu {
   StEmcGeom *mGeo;
   StBemcTables *mTables;
   StBemcTriggerDbThresholds *mDbThres;
+  TDataSet *dbOnline;
 
-  Int_t mMCflag; // 0 for real data  
-  Int_t did;
-  Float_t adc,ped,rms;
-  Int_t HT6bit,TP6bit,HT_FEE_Offset;
+  TString *config;                         //"online" or "offline" or "expert"   
+  Int_t did;                               //always used as BEMC tower id
+  Int_t mMCflag;                           //0= false and 1 =true
+  Float_t adc;                             //12 bit BEMC adc from StEvent
+  Float_t ped,rms;                           //12 bit BEMC ped and rms from offline database 
+  unsigned long pedTargetValue;            //value FEE shifts pedestal to (10 or 12 bit?)
+  unsigned long bitConvValue[kNCrates][10];//gives window used to determine HT6Bit
+  Int_t HT_FEE_Offset;                     //same as bitConvValue but set by support class
+  Int_t HT6bit,TP6bit;                     //6 bit HT and TP word which is passed out of FEE and into DSM L0
+  Int_t DSM_HTStatus[kNPatches];           //DSM_HTStatus only set online
+  Int_t DSM_TPStatus[kNPatches];           //DSM_TPStatus only set online
+  Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
   Int_t adc12[kNTowers],adc10[kNTowers],adc08[kNTowers];
   Int_t ped12[kNTowers],ped10[kNTowers],ped08[kNTowers];
-  Int_t PatchStatus[kNPatches];
-  TString *config;
 
+
+  void setTowerStatus();
+  void setDSM_TPStatus();
+  void setDSM_HTStatus();
+  void setLUT();
+  void getPed();
+  
  public:
 
   StBemcTriggerSimu();
@@ -58,9 +73,6 @@ class StBemcTriggerSimu {
   void setMC(int x) {mMCflag=x;}
   void setHList(TObjArray * x){mHList=x;}
   void addTriggerList( void * );
-
-  Int_t simulateHT_FEEaction(int,int,int);
-  Int_t simulateTP_FEEaction(int,int);
 
   void setTableMaker(StBemcTables *tab) { mTables=tab; }
   void setBemcDbMaker(St_db_Maker *dbMk) { starDb=dbMk; }

@@ -63,6 +63,7 @@ StBemcTriggerSimu::~StBemcTriggerSimu(){
 void StBemcTriggerSimu::Init(){
  
   LOG_INFO <<"StBemcTriggerSimu::Init()"<<endm;
+
 }
 
 
@@ -74,11 +75,17 @@ void StBemcTriggerSimu::InitRun(){
   LOG_INFO<<"StBemcTriggerSimu::InitRun()"<<endm;
 
   assert(starDb);
+  int yyyy=starDb->GetDateTime().GetYear();  
 
-  int yyyy=starDb->GetDateTime().GetYear();   
-
+  //Get FEE window for HT from support class
+  //Replace this with Db soon
   HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(yyyy);
 
+  setTowerStatus();
+  setDSM_TPStatus();
+  setDSM_HTStatus();
+  setLUT();
+  getPed();
 }
 
 
@@ -90,39 +97,17 @@ StBemcTriggerSimu::Clear(){
   LOG_INFO <<"StBemcTriggerSimu::Clear()"<<endm;
 
   //set all adcs and pedestals to 0
-  for (int i=0;i<kNTowers;i++){
-    adc08[i]=0;
-    adc10[i]=0;
-    adc12[i]=0;
-    ped08[i]=0;
-    ped10[i]=0;
-    ped12[i]=0;
+  for (did=1; did<=kNTowers; did++){
+    adc08[did-1]=0;
+    adc10[did-1]=0;
+    adc12[did-1]=0;
+    ped08[did-1]=0;
+    ped10[did-1]=0;
+    ped12[did-1]=0;
   }
-
-  //for offline config all TP status is good by definition. 
-  //Only individual towers are masked out
-  if (config=="offline") {
-    for (int i=0;i<kNPatches;i++){
-      PatchStatus[i]=1;
-    }
-  }
-
-  //for online config it is possible to mask TP from DSM side
-  if (config=="online"){
-    for (int i=0;i<kNPatches;i++){
-      PatchStatus[i]=1;
-    }
-  }
-
-  if (config=="expert"){
-    //you set here exactly your patch status - default to all good
-    for (int i=0;i<kNPatches;i++){
-      PatchStatus[i]=1;
-    }
-  }
-
 
 }
+
   
 //==================================================
 //==================================================
@@ -131,14 +116,144 @@ StBemcTriggerSimu::addTriggerList( void * adr){
 
 }
 
+//==================================================
+//==================================================
+void 
+StBemcTriggerSimu::setTowerStatus(){
+  
+  
+  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
+  St_emcTriggerStatus *STATUSonline=(St_emcTriggerStatus*) dbOnline->Find("bemcTriggerStatus");
+  emcTriggerStatus_st *STATUStab=STATUSonline->GetTable();
+  if (config->Contains("online")) {
+    for (int cr=0; cr < kNCrates; cr++){
+      for (int ch=0; ch < kNChannels; ch++){
+	mDecoder->GetTowerIdFromCrate(cr,ch,did);
+	TowerStatus[did-1]=STATUStab->TowerStatus[cr][ch];
+      }
+    }
+  }
 
-     
+  if (config->Contains("offline")){
+    for (did=1; did<=kNTowers; did++){
+      mTables->getStatus(BTOW, did, TowerStatus[did-1]);
+    }
+  }
+  
+  if (config->Contains("expert")){
+    for (int did=1; did<=kNTowers; did++){
+      TowerStatus[did-1]=1;
+    }
+  }
+}
+
+//==================================================
+//==================================================
+void 
+StBemcTriggerSimu::setDSM_TPStatus(){
+
+  //for offline config all TP status is good by definition. 
+  if (config->Contains("offline")) {
+    for (int i=0;i<kNPatches;i++){
+      DSM_TPStatus[i]=1;
+    }
+  }
+
+  
+  //for online config TP status is set by DB
+  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
+  St_emcTriggerStatus *STATUSonline=(St_emcTriggerStatus*) dbOnline->Find("bemcTriggerStatus");
+  emcTriggerStatus_st *STATUStab=STATUSonline->GetTable();
+  if (config->Contains("online")){
+    for (int i=0;i<kNPatches;i++){
+      DSM_TPStatus[i]=STATUStab->PatchStatus[i];
+    }
+  }
+  
+  if (config->Contains("expert")){
+    for (int i=0;i<kNPatches;i++){
+      DSM_TPStatus[i]=1;
+    }
+  }
+}
+
+//==================================================
+//==================================================
+void 
+StBemcTriggerSimu::setDSM_HTStatus(){
+  
+  //Offline all DSM HT status are good
+  if (config->Contains("offline")){
+    for (int i=0; i<kNPatches; i++){
+      DSM_HTStatus[i]=1;
+    }
+  }
+
+  //Online get DSM HT status from db
+  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
+  St_emcTriggerStatus *STATUSonline=(St_emcTriggerStatus*) dbOnline->Find("bemcTriggerStatus");
+  emcTriggerStatus_st *STATUStab=STATUSonline->GetTable();
+  if (config->Contains("online")){
+    for (int i=0;i<kNPatches;i++){
+      DSM_HTStatus[i]=STATUStab->HighTowerStatus[i];
+    }
+  }
+   
+  if (config->Contains("expert")){
+    for (int i=0;i<kNPatches;i++){
+      DSM_HTStatus[i]=STATUStab->HighTowerStatus[i];
+    }
+  } 
+}
+  
+void StBemcTriggerSimu::getPed(){
+
+  if (config->Contains("offline")){
+    for (did=1; did<=kNTowers; did++){
+      mTables->getPedestal(BTOW,did,0,ped,rms);
+      ped12[did-1]=(Int_t)ped;
+    }
+  }
+
+
+ //online tower/TP peds + Bit Conversion 
+  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
+  St_emcTriggerPed *PEDonline=(St_emcTriggerPed*) dbOnline->Find("bemcTriggerPed");
+  emcTriggerPed_st *PEDtab=PEDonline->GetTable();
+  if (config->Contains("online")){
+    for (int cr=0; cr < kNCrates; cr++){
+      for (int ch=0; ch < kNChannels; ch++){
+	mDecoder->GetTowerIdFromCrate(cr,ch,did);
+	ped12[did-1]=(Int_t)PEDtab->Ped[cr][ch];
+      }
+    }
+  }
+
+  if (config->Contains("expert")){
+    for ( did=1; did<=kNTowers; did++){
+      //set your favorite ped value here
+      ped12[did-1]=16;
+    }
+  }
+}
+
+void StBemcTriggerSimu::setLUT(){
+
+
+  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
+  St_emcTriggerLUT *LUTonline=(St_emcTriggerLUT*) dbOnline->Find("bemcTriggerLUT");
+  emcTriggerLUT_st *LUTtab=LUTonline->GetTable();
+
+}
+
+
 //==================================================
 //==================================================
 void StBemcTriggerSimu::Make(){
-
+  
   LOG_INFO<<"StBemcTriggerSimu::Maker()"<<endl;
-
+  
+  // Clear all of ADC values
   Clear();
   
   if(!mEvent)
@@ -157,7 +272,7 @@ void StBemcTriggerSimu::Make(){
     {
       LOG_WARN << "StBemcTriggerSimu -- no StEmcDetector!" << endm;
     }
-
+  
  //loop through BEMC hits and store 8,10,12 bit pedestal adjusted adcs for all hits
   if(detector)
     {
@@ -176,19 +291,12 @@ void StBemcTriggerSimu::Make(){
 		      Int_t e=rawHit[k]->eta();
 		      Int_t s=abs(rawHit[k]->sub());
 		      mGeo->getId(mod,e,s,did);
-
-		      if (config == "offline") mTables->getPedestal(BTOW,did,0,ped,rms);
-		      if (config == "online") mTables->getPedestal(BTOW,did,0,ped,rms);
-		      adc=rawHit[k]->adc();
-
-		      adc12[did-1]=(Int_t)adc;
-		      adc10[did-1]=adc12[did-1] >> 2;
-		      adc08[did-1]=adc10[did-1] >> 2;
-
-		      ped12[did-1]=(Int_t)ped;
-		      ped10[did-1]=ped12[did-1] >> 2;
-		      ped08[did-1]=ped10[did-1] >> 2;
-
+		      
+		      if (TowerStatus[did-1]==1){
+			adc12[did-1]=(Int_t)adc;
+			adc10[did-1]=adc12[did-1] >> 2;
+			adc08[did-1]=adc10[did-1] >> 2;
+		      }
 		    }
 		}
 	    }
@@ -199,16 +307,14 @@ void StBemcTriggerSimu::Make(){
   //Loop through Trigger Patches and find 6 bit HT and 6 bit TP FEE ADC 
   for(int tpid = 0; tpid < kNPatches; ++tpid) 
     {      
-      if(PatchStatus[tpid]==1) 
-        {
+      {
         
-            int crate = 0;
-            int seq  = 0;
-            //int HT = 0;
-            //int PA = 0;
-            //int HTID = -1;
-            int id;
-            //int patchPed = 0;
+	int crate = 0;
+	int seq  = 0;
+	//int HT = 0;
+	//int PA = 0;
+	//int HTID = -1;
+	//int patchPed = 0;
 
             mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,crate,seq);
             
@@ -216,7 +322,8 @@ void StBemcTriggerSimu::Make(){
             for(int j = seq; j < seq + 16; ++j)
             {
             
-                int stat = mDecoder->GetTowerIdFromCrate(crate,j,id);
+	      int stat = mDecoder->GetTowerIdFromCrate(crate,j,did);
+
                 if(stat == 1)
                 {
             
