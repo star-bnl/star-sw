@@ -1,6 +1,7 @@
 #include "StiTimer.h"
 #include "TList.h"
 #include "TNamed.h"
+#include "StMessMgr.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -45,7 +46,7 @@ void StiTimer::Clear(const char *)
 void StiTimer::Print(const char *option)
 {
 
- printf("/n**** StiTimer::Print ****\n");
+ LOG_DEBUG << Form("**** StiTimer::Print ****")<<endm;
  TListIter next(fgList);
  MyHolder *mh=0;
  int n = 0;
@@ -57,8 +58,8 @@ void StiTimer::Print(const char *option)
    double cpu = mh->fSW->CpuTime()/tally;
    double rte = mh->fSW->RealTime()/tally;
 
-   printf("StiTimer for <%s> Evts =%d CPU/Evts = %g Time/Evts = %g\n"
-         ,mh->GetName(),tally,cpu,rte);
+   LOG_DEBUG << Form("StiTimer for <%s> Evts =%d CPU/Evts = %g Time/Evts = %g"
+         ,mh->GetName(),tally,cpu,rte) << endm;
    mh->fSW->Print("u");
 
  }

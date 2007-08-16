@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.94 2007/06/26 19:17:25 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.94 2007/06/26 19:17:25 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.95 2007/08/16 20:21:23 fine Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.95 2007/08/16 20:21:23 fine Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.95  2007/08/16 20:21:23  fine
+ * replace printf with logger
+ *
  * Revision 2.94  2007/06/26 19:17:25  perev
  * Path to hit in 2dim space only
  *
@@ -693,7 +696,9 @@ double StiKalmanTrack::getTrackLength() const
       double curv = fabs(0.5*(x[0][3]+x[1][3]));
       double dsin = (0.5*dlen*curv);
       if (dsin>0.9) {
-        printf("StiKalmanTrack::getTrackLength ***ERROR*** dsin %g >.9\n",dsin);
+         LOG_DEBUG <<
+           Form("StiKalmanTrack::getTrackLength ***ERROR*** dsin %g >.9",dsin)
+         << endm;
         dsin = 0.9;
       }
       dlen = (dsin<0.1)? dlen*(1.+dsin*dsin/6) : 2*asin(dsin)/curv; 
@@ -1067,7 +1072,9 @@ if (debug()) cout << "extendToVertex:: " << StiKalmanTrackNode::Comment() << end
           trackNodeFactory->free(tNode);             
 	}
       else if (d < 4) {
-        printf("Primary(%d) not accepted BUT d = %g chi2 = %g\n",nCall,d,chi2);
+        LOG_DEBUG <<
+          Form("Primary(%d) not accepted BUT d = %g chi2 = %g",nCall,d,chi2)
+        << endm;
       }
     }
   //else
@@ -1366,10 +1373,15 @@ if (oldRefit) {
   }
 static int VPDEBUG=0;
 if (VPDEBUG) {
-  if (fail>0) 
-    printf("StiKalmanTrack::refit(%d)=%d ***FAILED***   %d>%d \n",fail,nCall,nNBeg,nNEnd);
-  else 
-    printf("StiKalmanTrack::refit(%d)=%d ***EndIters*** %d>%d \n",fail,nCall,nNBeg,nNEnd);
+  if (fail>0) {
+   LOG_DEBUG <<
+    Form("StiKalmanTrack::refit(%d)=%d ***FAILED***   %d>%d",fail,nCall,nNBeg,nNEnd)
+   << endm;
+ } else {
+   LOG_DEBUG <<    
+    Form("StiKalmanTrack::refit(%d)=%d ***EndIters*** %d>%d",fail,nCall,nNBeg,nNEnd)
+   << endm;
+ }
 } //endif VPDEBUG
 
   if (fail) setFlag(-1);
@@ -1438,7 +1450,8 @@ void StiKalmanTrack::unset()
 //_____________________________________________________________________________
 void StiKalmanTrack::print(const char *opt) const
 {
-  printf("\n Track %p\n",(void*)this);
+  LOG_DEBUG <<
+    Form("Track %p",(void*)this) << endm;
 
   StiKTNBidirectionalIterator it;
   int n=0;
@@ -1448,7 +1461,7 @@ void StiKalmanTrack::print(const char *opt) const
     if (!hit && strchr(opt,'h')) continue;
     if (!hit && strchr(opt,'H')) continue;
     n++;
-    printf("%3d - ",n);
+    LOG_DEBUG << Form("%3d - ",n);
     node->print(opt);
   }
 }

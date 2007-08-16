@@ -399,13 +399,13 @@ if (!oldJoinPrim) {
 	  assert(mHrr.hYY > mJoinErrs._cYY);
 	  assert(mHrr.hZZ > mJoinErrs._cZZ);
           if (mHrr.hYY <= mJoinErrs._cYY) {
-            printf("StiTrackNodeHelper::updateNode() WRONG hYY(%g) < nYY(%g)\n"
-                   ,mHrr.hYY,mFitdErrs._cYY);
+            LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hYY(%g) < nYY(%g)"
+                   ,mHrr.hYY,mFitdErrs._cYY)<< endm;
             return -13;
 	  }
           if (mHrr.hZZ <= mJoinErrs._cZZ) {
-            printf("StiTrackNodeHelper::updateNode() WRONG hZZ(%g) < nZZ(%g)\n"
-                  ,mHrr.hZZ,mFitdErrs._cZZ);
+            LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hZZ(%g) < nZZ(%g)"
+                  ,mHrr.hZZ,mFitdErrs._cZZ) << endm;
             return -14;
 	  }
         } //End  Check errors improvements
@@ -767,7 +767,7 @@ double StiTrackNodeHelper::evalChi2()
     r11=mPredErrs._cZZ+mHrr.hZZ;
     mDetm = r00*r11 - r01*r01;
     if (mDetm<r00*r11*1.e-5) {
-      printf("StiTrackNodeHelper::evalChi2 *** zero determinant %g\n",mDetm);
+      LOG_DEBUG << Form("StiTrackNodeHelper::evalChi2 *** zero determinant %g",mDetm)<< endm;
       return 1e60;
     }
     double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
@@ -953,13 +953,13 @@ if(ERRTEST) errTest(mPredPars,mPredErrs,mHit,mHrr,mFitdPars,mFitdErrs,mChi2);
 //prod  assert(mHrr.hZZ > mFitdErrs._cZZ);
   if (mDetector) { //Not a primary
     if (mHrr.hYY <= mFitdErrs._cYY) {
-      printf("StiTrackNodeHelper::updateNode() WRONG hYY(%g) < nYY(%g)\n"
-            ,mHrr.hYY,mFitdErrs._cYY);
+      LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hYY(%g) < nYY(%g)"
+            ,mHrr.hYY,mFitdErrs._cYY)<< endm;
       return -13;
     }  
     if (mHrr.hZZ <= mFitdErrs._cZZ) {
-      printf("StiTrackNodeHelper::updateNode() WRONG hZZ(%g) < nZZ(%g)\n"
-            ,mHrr.hZZ,mFitdErrs._cZZ);
+      LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hZZ(%g) < nZZ(%g)"
+            ,mHrr.hZZ,mFitdErrs._cZZ)<< endm;
       return -14;
     }  
   } //EndIf Not a primary	  
@@ -1080,7 +1080,7 @@ int errTest(StiNodePars &predP,StiNodeErrs &predE,
     diff/=0.5*(fabs(mineP.P[i])+fabs(fitdP.P[i]));
     if (diff < 1e-5 ) continue;
     ndif++;
-    printf("errTest(P): %g(%d) - %g(%d) = %g\n",mineE.A[i],i,fitdE.A[i],i,diff);
+    LOG_DEBUG << Form("errTest(P): %g(%d) - %g(%d) = %g",mineE.A[i],i,fitdE.A[i],i,diff)<< endm;
   }
   if (ndif){ mineP.print();fitdP.print();}
 
@@ -1090,14 +1090,14 @@ int errTest(StiNodePars &predP,StiNodeErrs &predE,
     diff/=0.5*(fabs(mineE.A[i])+fabs(fitdE.A[i]));
     if (diff < 1e-5 ) continue;
     ndif+=100;
-    printf("errTest(E): %g(%d) - %g(%d) = %g\n",mineE.A[i],i,fitdE.A[i],i,diff);
+    LOG_DEBUG << Form("errTest(E): %g(%d) - %g(%d) = %g",mineE.A[i],i,fitdE.A[i],i,diff)<< endm;
   }
   if (ndif>=100){ mineE.print();fitdE.print();}
   
   double diff = fabs((chi2-myChi2)/(chi2+myChi2));
   if (diff > 1e-5 ) {
     ndif+=1000;
-    printf("errTest(C): %g() - %g() = %g\n",myChi2,chi2,diff);
+    LOG_DEBUG << Form("errTest(C): %g() - %g() = %g",myChi2,chi2,diff)<< endm;
   }
 
   return ndif;

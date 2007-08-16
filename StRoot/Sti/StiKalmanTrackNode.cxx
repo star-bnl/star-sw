@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.110 2007/07/12 00:21:00 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.111 2007/08/16 20:21:24 fine Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.111  2007/08/16 20:21:24  fine
+ * replace printf with logger
+ *
  * Revision 2.110  2007/07/12 00:21:00  perev
  * Normal radius instead of layer one
  *
@@ -404,7 +407,7 @@ void StiKalmanTrackNode::Break(int kase)
 {
 static int myBreak=-2005;
 if (kase!=myBreak) return;
-  printf("*** Break(%d) ***\n",kase);
+  LOG_DEBUG << Form("*** Break(%d) ***",kase)<< endm;
 }		
 /* bit mask for debug printout  
    0   => 1 - covariance and propagate matrices 
@@ -1032,7 +1035,8 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
 
 //  assert(fabs(mFP._sinCA) <  1.);
   if (fabs(mFP._sinCA)>=1) {
-    printf("StiKalmanTrackNode::nudge WRONG WRONG WRONG sinCA=%g\n",mFP._sinCA);
+    LOG_DEBUG << Form("StiKalmanTrackNode::nudge WRONG WRONG WRONG sinCA=%g",mFP._sinCA)
+    << endm;          
     mFP.print();
     return -13;
   }
@@ -1108,8 +1112,8 @@ void StiKalmanTrackNode::propagateError()
   errPropag6(mFE.A,mMtx().A,kNPars);
   int smallErr = !(mFE._cYY>1e-20 && mFE._cZZ>1e-20 && mFE._cEE>1e-20&& mFE._cPP>1.e-30&& mFE._cTT>1.e-20);
   if (smallErr) {
-    printf("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g\n"
-          ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cPP,mFE._cTT);
+    LOG_DEBUG << Form("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g"
+          ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cPP,mFE._cTT) << endm;
     assert(mFE._cYY>0 && mFE._cZZ>0 && mFE._cEE>0 && mFE._cPP>0 && mFE._cTT>0);
   }
   assert(fabs(mFE._cXX)<1.e-6);
@@ -1219,7 +1223,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
 #endif
   _det=r00*r11 - r01*r01;
   if (_det<r00*r11*1.e-5) {
-    printf("StiKalmanTrackNode::evalChi2 *** zero determinant %g\n",_det);
+    LOG_DEBUG << Form("StiKalmanTrackNode::evalChi2 *** zero determinant %g",_det)<< endm;
     return 1e60;
   }
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
@@ -1431,7 +1435,8 @@ static int nCall=0; nCall++;
 #endif
   _det=r00*r11 - r01*r01;
   if (!finite(_det) || _det<(r00*r11)*1.e-5) {
-    printf("StiKalmanTrackNode::updateNode *** zero determinant %g\n",_det);
+    LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** zero determinant %g",_det)
+    << endm;
     return -11;
   }
   // inverse matrix
@@ -1531,8 +1536,8 @@ static int nCall=0; nCall++;
   mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTP-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
 
   if (mFE._cYY >= mHrr.hYY || mFE._cZZ >= mHrr.hZZ) {
-    printf("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g \n"
-          ,mFE._cYY,mHrr.hYY,mFE._cZZ,mHrr.hZZ);
+    LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g"
+          ,mFE._cYY,mHrr.hYY,mFE._cZZ,mHrr.hZZ)<< endm;
     return -14;
   }
   if (mFE.check()) return -14;
@@ -1845,11 +1850,13 @@ int StiKalmanTrackNode::testError(double *emx, int begend)
   for (j1=0; j1<5;j1++){
     jj = idx55[j1][j1];
     if (!(emx[jj]>0)) {;
-      printf("<StiKalmanTrackNode::testError> Negative diag %g[%d][%d]\n",emx[jj],j1,j1);
-      				continue;}
+      LOG_DEBUG << Form("<StiKalmanTrackNode::testError> Negative diag %g[%d][%d]",emx[jj],j1,j1)
+      << endm;
+ 	continue;}
     if (emx[jj]<=10*dia[j1] )	continue;
     assert(finite(emx[jj]));
-    printf("<StiKalmanTrackNode::testError> Huge diag %g[%d][%d]\n",emx[jj],j1,j1);
+    LOG_DEBUG << Form("<StiKalmanTrackNode::testError> Huge diag %g[%d][%d]",emx[jj],j1,j1)
+    << endm;
     				continue;
 //    ians++; emx[jj]=dia[j1];
 //    for (j2=0; j2<5;j2++){if (j1!=j2) emx[idx55[j1][j2]]=0;}
@@ -1935,7 +1942,8 @@ int StiKalmanTrackNode::testDeriv(double *der)
      if (fabs(dif) <= 1.e-5) 				continue;
      if (fabs(dif) <= 0.2*0.5*fabs(num[i]+der[i]))	continue;
      nerr++;
-     printf ("***Wrong deriv [%d][%d] = %g %g %g\n",ipar,jpar,num[i],der[i],dif);
+     LOG_DEBUG << Form("***Wrong deriv [%d][%d] = %g %g %g",ipar,jpar,num[i],der[i],dif)
+     << endm;
   }
   fDerivTestOn=0;
   return nerr;
@@ -2010,8 +2018,8 @@ static const char *HHH = "xyzXYZ";
   TString ts;
   if (!isValid()) ts+="*";
   if (hit) {ts+=(getChi2()>1e3)? "h":"H";}
-  printf("%p(%s)",(void*)this,ts.Data());
-  if (strchr(opt,'2')) printf("\t%s=%g","ch2",getChi2());
+  LOG_DEBUG << Form("%p(%s)",(void*)this,ts.Data());
+  if (strchr(opt,'2')) LOG_DEBUG << Form("\t%s=%g","ch2",getChi2());
 
   for (int i=0;txt[i];i++) {
     if (!strchr(opt,txt[i])) continue;
@@ -2029,8 +2037,8 @@ static const char *HHH = "xyzXYZ";
         case 2: val = z_g(); 	break;
         case 3: val = getPsi();	break;
     } }
-    printf("\t%c=%g",txt[i],val);
-    if (err) printf("(%6.1g)",err);
+    LOG_DEBUG << Form("\t%c=%g",txt[i],val);
+    if (err) LOG_DEBUG << Form("(%6.1g)",err);
   }//end for i
 
   for (int i=0;hit && hhh[i];i++) {
@@ -2044,10 +2052,10 @@ static const char *HHH = "xyzXYZ";
       case 4:val = hit->y_g(); 	break;
       case 5:val = hit->z_g();	err = ::sqrt(getEzz());break;
     }
-    printf("\th%c=%g",HHH[i],val);
-    if (err) printf("(%6.1g)",err);
+    LOG_DEBUG << Form("\th%c=%g",HHH[i],val);
+    if (err) LOG_DEBUG << Form("(%6.1g)",err);
   }
-  printf("\n");
+  LOG_DEBUG << endm;
   return 1;
 }    
 //________________________________________________________________________________

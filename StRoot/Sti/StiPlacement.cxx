@@ -46,8 +46,8 @@ void StiPlacement::setCenterRep(float refAngle_, float radius_,
   trig[3] = sin(centerRefAngle);
   double dif = fabs(trig[0]-trig[2])+fabs(trig[1]-trig[3]);
   if (dif >1e-3) {
-    printf("**** centerRefAngle=%g normalAngle=%g diff=%g ****\n"
-          ,centerRefAngle,normalRefAngle,dif);
+    LOG_DEBUG << Form("**** centerRefAngle=%g normalAngle=%g diff=%g ****"
+          ,centerRefAngle,normalRefAngle,dif)<< endm;
   }
 #endif
 }// setCenterRep()
@@ -77,8 +77,8 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_,
   trig[3] = sin(centerRefAngle);
   double dif = fabs(trig[0]-trig[2])+fabs(trig[1]-trig[3]);
   if (dif >1e-3) {
-    printf("**** centerRefAngle=%g normalAngle=%g diff=%g ****\n"
-          ,centerRefAngle,normalRefAngle,dif);
+    LOG_DEBUG << Form("**** centerRefAngle=%g normalAngle=%g diff=%g ****"
+          ,centerRefAngle,normalRefAngle,dif)<< endm;
   }
 #endif  
   
