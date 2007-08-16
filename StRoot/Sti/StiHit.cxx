@@ -9,10 +9,10 @@
 #include "TSystem.h"
 #include "TRandom.h"
 #ifdef Sti_DEBUG
-#include "TRMatrix.h"
-#include "TRVector.h"
-#define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
-#define PrPP(A,B) cout << "=== StiHit::" << (#A); PrP((B)); cout << endl;
+#  include "TRMatrix.h"
+#  include "TRVector.h"
+#  define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
+#  define PrPP(A,B) cout << "=== StiHit::" << (#A); PrP((B)); cout << endl;
 #endif
 
 
@@ -149,17 +149,21 @@ void StiHit::setGlobal(const StiDetector * detector,
       if (dif > 180) dif-=360;
       if (dif <-180) dif+=360;
       if (fabs(dif) > 1.1*22) {
-printf("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****\n"
-      ,detector->getName().c_str(),myAngle,centerAngle,dif);
-assert( fabs(dif) <33 );     // 30 for sixangle
+         LOG_DEBUG <<
+           Form("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****"
+           ,detector->getName().c_str(),myAngle,centerAngle,dif)
+         << endm;
+          assert( fabs(dif) <33 );     // 30 for sixangle
       }
       double normalAngle = placement->getNormalRefAngle()*togra;
       dif = myAngle-normalAngle;
       if (dif > 180) dif-=360;
       if (dif <-180) dif+=360;
       if (fabs(dif) > 1.1*30) {
-printf("**** StiHit.%s wrong angle: hitAng=%f norAng=%g dif=%g ****\n"
-      ,detector->getName().c_str(),myAngle,normalAngle,dif);
+         LOG_DEBUG <<
+         Form("**** StiHit.%s wrong angle: hitAng=%f norAng=%g dif=%g ****"
+         ,detector->getName().c_str(),myAngle,normalAngle,dif)
+               << endm;
       }
 
       mx =  detector->_cos*gx + detector->_sin*gy;
@@ -190,8 +194,10 @@ printf("**** StiHit.%s wrong angle: hitAng=%f norAng=%g dif=%g ****\n"
   double pos = detector->getPlacement()->getNormalRadius();
   double dif = mx-pos;
   if (fabs(dif)<0.01*pos) return;
-  printf("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
-        ,detector->getName().c_str(),mx,pos,dif);
+  LOG_DEBUG <<
+     Form("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
+          ,detector->getName().c_str(),mx,pos,dif)
+  << endm;
   assert(fabs(dif)<0.30*pos);
 }
 
@@ -240,8 +246,11 @@ printf("**** StiHit.%s wrong angle: hitAng=%f norAng=%g dif=%g ****\n"
   double pos = detector->getPlacement()->getNormalRadius();
   double dif = mx-pos;
   if (fabs(dif)<1.) return;
-  printf("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
-        ,detector->getName().c_str(),mx,pos,dif);
+  LOG_DEBUG <<
+
+  Form("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
+        ,detector->getName().c_str(),mx,pos,dif)
+        << endm;
 }
 
 //_____________________________________________________________________________

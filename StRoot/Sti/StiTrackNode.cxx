@@ -4,6 +4,7 @@
 #include "TMath.h"
 #include "TRMatrix.h"
 #include "TRVector.h"
+#include "StMessMgr.h"
 int StiTrackNode::mgFlag=0;
   static const int idx66[6][6] =
   {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}
@@ -98,10 +99,10 @@ void StiHitContino::print(const char* tit) const
 {
   if (!tit || !*tit) tit ="print()";
   int n=getNHits();	
-  printf(" ****	StiHitContino::%s nHits=%d\n",tit,n);
+  LOG_DEBUG << Form(" ****	StiHitContino::%s nHits=%d",tit,n)<< endm;
   for (int i=0;i<n;i++) {
-    printf("%3d - hit=%p chi2 = %g\n",i,(void*)mHits[i],mChi2[i]);}
-  printf("\n");
+    LOG_DEBUG << Form("%3d - hit=%p chi2 = %g",i,(void*)mHits[i],mChi2[i]);}
+    LOG_DEBUG << endm;
 }
 //______________________________________________________________________________
 int StiHitContino::getNHits() const
@@ -285,14 +286,14 @@ static int PRINT_IT=0;
     int ld = idx66[i][i];
     if (A[ld]<minDia) {
 if(PRINT_IT){
-      printf("StiNodeErrs::cut. Negative diagonal %g(%d)\n",A[ld],i);
+      LOG_DEBUG << Form("StiNodeErrs::cut. Negative diagonal %g(%d)",A[ld],i)<<endm;
       print();
 }
        A[ld] = minDia;
     }
     if (A[ld]>maxDia) {
 if(PRINT_IT) {
-      printf("StiNodeErrs::cut. Too big  diagonal %g(%d)\n",A[ld],i);
+      LOG_DEBUG << Form("StiNodeErrs::cut. Too big  diagonal %g(%d)",A[ld],i)<<endm;
       print();
 }
        for (int j=0;j<kNPars;j++){ A[idx66[i][j]]=0;}
@@ -306,8 +307,8 @@ if(PRINT_IT) {
       double &aij = A[idx66[i][j]];
       if (aij*aij <= aii*ajj*recvCORRMAX) continue;
       if (aij*aij > aii*ajj){
-        printf("StiNodeErrs::recov : Correlation too big %g[%d][%d]>%g\n"
-              ,aij,i,j,sqrt(aii*ajj));}	  
+        LOG_DEBUG << Form("StiNodeErrs::recov : Correlation too big %g[%d][%d]>%g"
+              ,aij,i,j,sqrt(aii*ajj))<< endm;}	  
       double ab = sqrt(aii*ajj);
       double t2 = (fabs(aij)/ab-recvCORRMAX)/(1+recvCORRMAX);
       aii += aii*t2; ajj += ajj*t2;
@@ -322,8 +323,8 @@ void StiNodeErrs::print() const
 {
    const double *d = A;
    for (int n=1;n<=6;n++) {
-     printf("%d - ",n);
-     for (int i=0;i<n;i++){printf("%g\t",*(d++));}; printf("\n");
+     LOG_DEBUG << Form("%d - ",n);
+     for (int i=0;i<n;i++){LOG_DEBUG << Form("%g\t",*(d++));}; LOG_DEBUG << endm;
    }  
 }     
 
@@ -356,12 +357,12 @@ RETN:
   if (!pri ) 	return kase;
   switch(kase) {
   
-    case 1: printf("StiNodeErrs::check(%s) FAILED: Negative diagonal %g[%d][%d]\n",pri,aii,i,i);  
+    case 1: LOG_DEBUG << Form("StiNodeErrs::check(%s) FAILED: Negative diagonal %g[%d][%d]",pri,aii,i,i)<< endm;  
           break;
-    case 2: printf("StiNodeErrs::check(%s) FAILED: Correlation too big %g[%d][%d]>%g\n"
-                ,pri,aij,i,j,sqrt(aii*ajj)); 	  
+    case 2: LOG_DEBUG << Form("StiNodeErrs::check(%s) FAILED: Correlation too big %g[%d][%d]>%g"
+                ,pri,aij,i,j,sqrt(aii*ajj))<<endm; 	  
           break;
-    case 3: printf("StiNodeErrs::check(%s) FAILED: Non Positive matrix\n",pri);  
+    case 3: LOG_DEBUG << Form("StiNodeErrs::check(%s) FAILED: Non Positive matrix",pri)<<endm;  
   }    
   return kase;
 }  
@@ -453,7 +454,7 @@ int StiNodePars::check(const char *pri) const
 FAILED: 
   if (!ierr) return ierr;
   if (!pri ) return ierr;
-  printf("StiNodePars::check(%s) == FAILED(%d)\n",pri,ierr);
+  LOG_DEBUG << Form("StiNodePars::check(%s) == FAILED(%d)",pri,ierr)<<endm;
   print();
   return ierr;
 } 
@@ -469,8 +470,8 @@ StiNodePars &StiNodePars::merge(double wt,StiNodePars &other)
 void StiNodePars::print() const
 {
 static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv",0};
-  for (int i=-2;i<kNPars+1;i++) {printf("%s = %g, ",tit[i+2],P[i]);}
-  printf("\n");
+  for (int i=-2;i<kNPars+1;i++) {LOG_DEBUG << Form("%s = %g, ",tit[i+2],P[i]);}
+  LOG_DEBUG << endm;
 }   
 //______________________________________________________________________________
 void StiHitErrs::rotate(double angle)

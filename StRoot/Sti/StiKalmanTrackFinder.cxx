@@ -183,7 +183,8 @@ void StiKalmanTrackFinder::findTracks()
   double s = gTAssign->Assign();
   int nKeys = gTAssMtx->GetNKeys();
 
-  printf ("findTracks:: nTracks=%d aver Chi2=%g\n",nKeys,s/nKeys);
+  LOG_DEBUG << Form("findTracks:: nTracks=%d aver Chi2=%g",nKeys,s/nKeys)
+        << endm;
   vpAssign = 2;
   long token = 0,lKey=0,lVal=0;
   while ( gTAssign->Iter(token,lKey,lVal)) {
@@ -252,10 +253,11 @@ static int nCall=0;nCall++;
       if (!iBreak) continue;
       BFactory::Free(track);
     }
-   printf("***extendSeeds***:nTTot=%d nbSeed=%d nTFail=%d nTFilt=%d nTAdd=%d\n", 
-     nTTot,nTSeed,nTFail,nTFilt,nTAdd);
-   printf("***extendSeeds***:nTpcHits=%d nSvtHits=%d  nSsdHits=%d nHftHits=%d nIstHits=%d nHpdHits=%d\n",
-	nTpcHits,nSvtHits,nSsdHits,nHftHits,nIstHits,nHpdHits);
+   LOG_DEBUG << Form("***extendSeeds***:nTTot=%d nbSeed=%d nTFail=%d nTFilt=%d nTAdd=%d", 
+     nTTot,nTSeed,nTFail,nTFilt,nTAdd) << endm;
+   LOG_DEBUG << Form("***extendSeeds***:nTpcHits=%d nSvtHits=%d  nSsdHits=%d nHftHits=%d nIstHits=%d nHpdHits=%d",
+	nTpcHits,nSvtHits,nSsdHits,nHftHits,nIstHits,nHpdHits)
+   << endm;
 }
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracks(double rMin)
@@ -298,9 +300,9 @@ static int nCall=0;nCall++;
     nIstHits+=track->getFitPointCount(kIstId);
     track->reserveHits();
   }// end track loop
-   printf("***extendTracks***: nTKeep=%d \n", nTKeep);
-   printf("***extendTracks***: nTpcHits=%d nSvtHits=%d nSsdHits=%d nHftHits=%d nIstHits=%d nHpdHits=%d\n",
-	nTpcHits,nSvtHits,nSsdHits,nHftHits,nIstHits,nHpdHits);
+   LOG_DEBUG << Form("***extendTracks***: nTKeep=%d", nTKeep) << endm;
+   LOG_DEBUG << Form("***extendTracks***: nTpcHits=%d nSvtHits=%d nSsdHits=%d nHftHits=%d nIstHits=%d nHpdHits=%d",
+	nTpcHits,nSvtHits,nSsdHits,nHftHits,nIstHits,nHpdHits) << endm;
 }
 //______________________________________________________________________________
 int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
@@ -596,9 +598,9 @@ static  const double ref1a  = 110.*degToRad;
        if (radius < qa.rmin) {gLevelOfFind--;return;}
        double diff = radius-leadRadius;if (!direction) diff = -diff;
        if (diff<-1e-6 && debug()>3) {
-          printf("TrackFinder: Wrong order: (%s).(%g) and (%s).(%g)\n"
+          LOG_DEBUG << Form("TrackFinder: Wrong order: (%s).(%g) and (%s).(%g)"
 	  ,leadDet->getName().c_str(),leadRadius 
-	  ,detector->getName().c_str(),radius);
+	  ,detector->getName().c_str(),radius) << endm;
        }
        
        
