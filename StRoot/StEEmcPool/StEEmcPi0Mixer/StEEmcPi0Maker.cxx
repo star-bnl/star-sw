@@ -133,10 +133,10 @@ Int_t StEEmcPi0Maker::Make()
 	  Int_t phibin1 = p1.tower(0).phibin();
 	  Int_t phibin2 = p2.tower(0).phibin();
 
-	  Int_t etabin1 = p1.tower(0).etabin();
-	  Int_t etabin2 = p2.tower(0).etabin();
+	  //Int_t etabin1 = p1.tower(0).etabin();
+	  //Int_t etabin2 = p2.tower(0).etabin();
 
-	  Int_t deta = TMath::Abs(etabin1-etabin2);
+	  //Int_t deta = TMath::Abs(etabin1-etabin2);
 	  Int_t dphi = phibin1-phibin2;
 	  if ( dphi < 0 ) dphi+=60;
 	  if ( dphi > 30 ) dphi=60-dphi;
@@ -156,8 +156,8 @@ Int_t StEEmcPi0Maker::Make()
 	  mPairs.push_back( pair );
 	  mPi0Event->addPair( pair );
 
-	  Int_t index1 = p1.tower(0).index();
-	  Int_t index2 = p2.tower(0).index();
+	  //Int_t index1 = p1.tower(0).index();
+	  //Int_t index2 = p2.tower(0).index();
 	  
 	  StEEmcClusterVec_t tower_clusters; // tower clusters associated w/ pair (should be 1 or 2)
 	  StEEmcCluster c1 = p1.clusters(0)[0];
