@@ -1,38 +1,62 @@
 #ifndef EEdsm1_h
 #define EEdsm1_h
 /**************************************************************
- * $Id: EEdsm1.h,v 1.3 2006/04/05 18:34:10 balewski Exp $
+ * $Id: EEdsm1.h,v 1.4 2007/08/17 01:15:36 balewski Exp $
  **************************************************************/
 #include <stdlib.h>
 
 class EEdsm1  {
-  static const int nc=6;
+  enum{ nc=6, nJP=3, mxTh=3};
   ushort data[nc];
   int type;
   int mYear;// unpacking changed in 2006
+  int JPthr[mxTh];
+  int TPthrSelect, HTTPthrSelect; 
+  int intJP11bit[nJP]; // internal
+  int intJPsum13bit;
+  int outJPsum5bit; 
+  int outHTTP1bit;
+  int outTP1bit;
+  int outJP2bit;
+  int outHT2bit;
+  int out16bit;
 
- private:
  public:
   
   EEdsm1();
   virtual ~EEdsm1();
   void  print(int k=0);
   void  clear();
-  void setWord(int ch, ushort val);
-  void setYear(int y) { mYear=y;}
-  int getNc(){return nc;}
-  ushort getTPsum(int ch);
-  ushort getHTthr(int ch);
-  ushort getHTTPthr(int ch);// year2006+
-  ushort getTPthr(int ch);  // year2006+
-  void setType(int t) {type=t;}
-  
+  void  compute();  
+  void  setWord(int ch, ushort val);
+  void  setYear(int y, int *JPth, int TPthrSelc, int HTTPthrSelc);
+  void  setType(int t) {type=t;}
+
+  int   getNc(){return nc;}
+
+  //.... input.....
+  int getInpTPsum(int ch);
+  int getInpHT2bit(int ch);
+  int getInpHTTP2bit(int ch);// year2006+
+  int getInpTP2bit(int ch);  // year2006+ 
+  int getInp16bit(int ch);
+
+  //..... output
+  int getOutEsum5bit(){ return outJPsum5bit;}
+  int getOutHTTP1bit(){ return outHTTP1bit;}
+  int getOutTP1bit(){ return outTP1bit;}
+  int getOutJP2bit(){ return outJP2bit;}
+  int getOutHT2bit(){ return outHT2bit;}  
+  int getOut16bit(){ return out16bit;}
 };
 #endif
 
 
 /* container for STAR trigger data
  * $Log: EEdsm1.h,v $
+ * Revision 1.4  2007/08/17 01:15:36  balewski
+ * full blown Endcap trigger simu, by Xin
+ *
  * Revision 1.3  2006/04/05 18:34:10  balewski
  * new DSM bit assignment in 2006,
  * possibly lost backward compatibility

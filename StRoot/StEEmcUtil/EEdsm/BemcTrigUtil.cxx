@@ -45,6 +45,6 @@ void BemcTrigUtil::encodeBemcTP12bitToRaw8bit(int dsm, int channel, int HT_ADC, 
     int k = channel / 2 * 3;	// position of low byte
     //assert(0 <= k && k < 16);
     crate_p[dsmmap[k]]   =  triggerWord & 0x0ff;
-    crate_p[dsmmap[k+1]] = (triggerWord & 0xf00) >> 8 | crate_p[dsmmap[k+1]] & 0x0f;
+    crate_p[dsmmap[k+1]] = (triggerWord & 0xf00) >> 8 | crate_p[dsmmap[k+1]] & 0xf0;
   }
 }
