@@ -1,7 +1,7 @@
 #ifndef EEdsm0_h
 #define EEdsm0_h
 /**************************************************************
- * $Id: EEdsm0.h,v 1.2 2005/02/01 22:13:37 perev Exp $
+ * $Id: EEdsm0.h,v 1.3 2007/08/17 01:15:35 balewski Exp $
  **************************************************************/
 #include <stdlib.h> 
 #include <stdio.h> 
@@ -10,30 +10,51 @@
 typedef unsigned char uchar;
 
 class EEdsm0  {
-  static const int nw=16;
-  static const int nc=10;
+  enum {nw=16,nc=10,mxTh=3,mxOu=2};
   uchar data[nw];
-  
- private:
+  short value[nc]; // unpacked 12bit input values
+  int type;
+  int mYear;// HTTP algo added in 2006
+  int HTthr[mxTh], TPthr[mxTh];
+  int outHTTP2bit[mxOu];
+  int outHT2bit[mxOu];
+  int outTP2bit[mxOu];
+  int outTPsum[mxOu]; // 10 or 9 bits
+  int out16bit[mxOu];
+
  public:
   
   EEdsm0();
-  virtual ~EEdsm0();
+  virtual ~EEdsm0();  
+  void  setYear(int y, int*HTth, int*TPth);
+  void  setType(int t) {type=t;}
   void  print(int k=0);
   void  clear();
-  void setBite(int b, uchar val);
-  uint getChan(int ch); // only lower 12 bits are used, upper=0
-  uint getHT(int ch){ return getChan(ch) & 0x3f;} 
-  uint getTP(int ch){ return getChan(ch)>>6; }
-  int maxHT(); // returns ch
-  int maxTP(); // returns ch
-  int getNc(){return nc;}
-  
+  void  compute(); // for 2006+
+  void  unpack(); // 16 inputs --> 10 values
+
+  //.... input
+  void  setBite(int b, uchar val); // from trigger data block
+  void  setInp12bit(int ch, short val); // HT+TPsum from one FEE TP  
+  int   getInp12bit(int ch); // HT+TPsum from one FEE TP  
+  int   getInpHT6bit(int ch){ return  getInp12bit(ch) & 0x3f;} 
+  int   getInpTP6bit(int ch){ return getInp12bit(ch)>>6; }
+  int   getNc(){return nc;} 
+
+  //....... output
+  int  getOutTPsum(int k=0){ return outTPsum[k];} // default type 1
+  int  getOutHT2bit(int k=0){ return outHT2bit[k];} // default type 1
+  int  getOutTP2bit(int k=0){ return outTP2bit[k];} // default type 1 
+  int  getOutHTTP2bit(int k=0){ return outHTTP2bit[k];} // default type 1
+  int  getOut16bit(int k=0) { return out16bit[k];} // default type 1
 };
 #endif
 
 /*
  * $Log: EEdsm0.h,v $
+ * Revision 1.3  2007/08/17 01:15:35  balewski
+ * full blown Endcap trigger simu, by Xin
+ *
  * Revision 1.2  2005/02/01 22:13:37  perev
  * Compatibility to redhat
  *

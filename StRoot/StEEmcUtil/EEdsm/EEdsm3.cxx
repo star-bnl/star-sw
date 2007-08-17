@@ -38,9 +38,18 @@ EEdsm3::setWord(int ch, ushort val){
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm3::getJPthr() {
+EEdsm3::getBarreJPthr2bit() {
   int ch=0;
-  ushort val=data[ch]>>7;
+  ushort val=data[ch] & 3;
+  return val;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort 
+EEdsm3::getBarreHTthr2bit() {
+  int ch=0;
+  ushort val=data[ch] >> 2;
   val=val & 3;
   return val;
 }
@@ -48,9 +57,49 @@ EEdsm3::getJPthr() {
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm3::getHTthr() {
+EEdsm3::getBarreEsumThr1bit() {
   int ch=0;
-  ushort val=data[ch]>>9;
+  ushort val=data[ch] >> 4;
+  val=val & 1;
+  return val;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort 
+EEdsm3::getJpsi1bit() {
+  int ch=0;
+  ushort val=data[ch] >> 5;
+  val=val & 1;
+  return val;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort 
+EEdsm3::getBarreHTTPthr1bit() {
+  int ch=0;
+  ushort val=data[ch] >> 6;
+  val=val & 1;
+  return val;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort 
+EEdsm3::getBarreTPthr1bit() {
+  int ch=0;
+  ushort val=data[ch] >> 13;
+  val=val & 1;
+  return val;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort 
+EEdsm3::getEndcapJPthr2bit() {
+  int ch=0;
+  ushort val=data[ch] >> 7;
   val=val & 3;
   return val;
 }
@@ -58,10 +107,31 @@ EEdsm3::getHTthr() {
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm3::getTPbit() {
+EEdsm3::getEndcapHTthr2bit() {
+  int ch=0;
+  ushort val=data[ch] >> 9;
+  val=val & 3;
+  return val;
+}
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort 
+EEdsm3::getEndcapEsumthr1bit() {
+  int ch=0;
+  ushort val=data[ch] >> 11;
+  val=val & 1;
+  return val;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort 
+EEdsm3::getEndcapHTTPthr1bit() {
   assert(mYear>=2006);
   int ch=0;
-  ushort val=data[ch]>>12;
+  ushort val=data[ch] >> 12;
   val=val & 1;
   return val;
 }
@@ -69,10 +139,10 @@ EEdsm3::getTPbit() {
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm3::getHTTPbit() {
+EEdsm3::getEndcapTPthr1bit() {
   assert(mYear>=2006);
   int ch=0;
-  ushort val=data[ch]>>14;
+  ushort val=data[ch] >> 14;
   val=val & 1;
   return val;
 }
@@ -80,29 +150,9 @@ EEdsm3::getHTTPbit() {
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm3::getEtbitE() {
+EEdsm3::getEtotThr1bit() {
   int ch=0;
-  ushort val=data[ch]>>11;
-  val=val & 1;
-  return val;
-}
-
-//--------------------------------------------------
-//--------------------------------------------------
-ushort 
-EEdsm3::getEtbitB() {
-  int ch=0;
-  ushort val=data[ch]>>4;
-  val=val & 1;
-  return val;
-}
-
-//--------------------------------------------------
-//--------------------------------------------------
-ushort 
-EEdsm3::getEtbitBE() {
-  int ch=0;
-  ushort val=data[ch]>>15;
+  ushort val=data[ch] >> 15;
   val=val & 1;
   return val;
 }
@@ -112,10 +162,12 @@ EEdsm3::getEtbitBE() {
 void 
 EEdsm3::print( int k) {
   printf("EEdsm3==TCU  INPUTS,  year=%d  \n",mYear); 
-  printf("\n word=0x%04x   JPthr=%d   Tthr=%d   EtbitE=%d   EtbitB=%d  EtbitBE=%d  TPbit=%d  HTTPbit=%d\n\n",data[0],getJPthr(), getHTthr(), getEtbitE(), getEtbitB(), getEtbitBE(),getTPbit(),getHTTPbit());
 }
  
 // $Log: EEdsm3.cxx,v $
+// Revision 1.4  2007/08/17 01:15:36  balewski
+// full blown Endcap trigger simu, by Xin
+//
 // Revision 1.3  2006/04/05 18:34:10  balewski
 // new DSM bit assignment in 2006,
 // possibly lost backward compatibility
