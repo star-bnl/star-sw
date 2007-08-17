@@ -294,7 +294,8 @@ void StBemcTriggerSimu::setLUT(){
 
   dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
   St_emcTriggerLUT *LUTonline=(St_emcTriggerLUT*) dbOnline->Find("bemcTriggerLUT");
-  emcTriggerLUT_st *LUTtab=LUTonline->GetTable();
+  //emcTriggerLUT_st *LUTtab=  // not needed, Jan
+  LUTonline->GetTable();
 
 }
 
