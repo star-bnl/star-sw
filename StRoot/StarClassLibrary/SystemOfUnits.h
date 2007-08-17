@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SystemOfUnits.h,v 1.5 2003/09/02 17:59:35 perev Exp $
+ * $Id: SystemOfUnits.h,v 1.6 2007/08/17 16:04:46 fine Exp $
  *
  * Author: blasiuk adapted from CLHEP
  ***************************************************************************
@@ -35,6 +35,9 @@
  ***************************************************************************
  *
  * $Log: SystemOfUnits.h,v $
+ * Revision 1.6  2007/08/17 16:04:46  fine
+ * Eliminate the redundant semicolon - causes the compilation error with the pedantic compilation flag
+ *
  * Revision 1.5  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -292,6 +295,6 @@ namespace units {
 
 #endif
 
-};
+}
 using namespace units;
 #endif /* HEP_SYSTEM_OF_UNITS_H */
