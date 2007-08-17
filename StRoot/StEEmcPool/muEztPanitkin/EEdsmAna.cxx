@@ -5,6 +5,8 @@
 #include <TH2.h>
 #include <TFile.h>
 
+#if 0 // disable whole code, needs re-work to match with new EEdsm.so after Xin added  detailed Endcap triger simu code 
+
 #ifdef IN_PANITKIN
   #include "daqFormats.h"
   #include "trgReader.h"
@@ -865,3 +867,4 @@ void EEdsmAna ::usePed( TString fName){
   } 
 }
  
+#endif
