@@ -1,5 +1,7 @@
 #ifndef NoXmlTreeReader
+#ifndef __CINT__
 #include <libxml/xmlreader.h>
+#endif
 /*! \class StlXmlTree
 * 
 * Name: StlXmlTree
@@ -225,6 +227,9 @@
 
 #ifndef StlXmlTree_h
 #define StlXmlTree_h
+#ifdef __ROOT__
+#include "Rtypes.h"
+#endif
 #include <vector>
 #include <map>
 #include <string>
@@ -244,7 +249,9 @@ class StlXmlTree
 {
  private:
   StlXmlTree* Filter;
+#ifndef __CINT__
   xmlTextReaderPtr reader;
+#endif
   std::multimap<std::string,std::string> XmlTree;
   char* xmlfilename;
   std::multimap<std::string,std::string>::const_iterator OnTheTree;
@@ -268,6 +275,7 @@ class StlXmlTree
 public:
   StlXmlTree();
   StlXmlTree(const std::string xmlfilename, StlXmlTree* filter=0);
+  virtual ~StlXmlTree(){;}
   void ShowTree();
   static std::map<std::string,std::string> ParseAttributeString(const std::string);
   static std::string MakeKey(const std::string FullyQualifiedParent, const std::string Child);
@@ -277,7 +285,11 @@ public:
     (std::string& Parent, const std::string ParentAttributes, const std::string Child);
 //--------------^ enables recursion, returns the look-up key good for the next step
   void InsertKeyValuePair(std::string key, std::string value);
+  static bool AttributesContain(std::string attributeString, std::string attributeName, std::string attributeValue);
   inline short GetStatus() {return MyStatus;};
+#ifdef __ROOT__
+  ClassDef(StlXmlTree,0);
+#endif
 };
 #endif
 #endif

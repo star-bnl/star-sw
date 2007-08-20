@@ -3,13 +3,27 @@
 #include "ChapiStringUtilities.h"
 #include "mysql.h"
 #include "math.h"
-
+#include <libxml/nanohttp.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#ifndef __STDB_STANDALONE__
+#include "StMessMgr.h"
+#else
+#define LOG_DEBUG cout
+#define LOG_INFO cout
+#define LOG_WARN cout
+#define LOG_ERROR cerr
+#define LOG_FATAL cerr
+#define LOG_QA cout
+#define endm "\n"
+#endif
 using namespace std;
 using namespace chapi_string_utilities;
 
 typedef vector<string>::const_iterator VCI;
 
 using st_db_service_broker::MyScatalogVersion; 
+using st_db_service_broker::NO_ERROR;
 using st_db_service_broker::NO_USER;
 using st_db_service_broker::NO_DOMAIN;
 using st_db_service_broker::NO_HOSTS;
@@ -44,25 +58,11 @@ string WHEN_ACTIVE = "whenActive";
 string ACCESS_MODE = "accessMode";
 string WRITER = "writer";
 string POWER = "machinePower";
+string CAP = "cap"; // max # connections to a server
 
 static MYSQL *conn;
 
 char* Socket = 0;
-
-
-static std::map<std::string, std::string> DomainRules;  
-static bool InitDomainRules()
-{
-  // rules to select a recognized XML attribute value based on $DOMAINNAME env. variable.
-
-  DomainRules["nersc.gov"] = "LBL";
-  DomainRules["rhic.bnl.gov"] = "BNL";
-
-  // any other sites here ?
-
-  return true;
-}
-static bool rules_init_dummy = InitDomainRules();
 
 
 //////////////////////////////////////////////////////
@@ -77,20 +77,6 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
       MyStatus = NO_USER;
       return;  
     }
-  char* whereami = getenv("DOMAINNAME");
-
-  if (!whereami)
-    {
-      MyStatus = NO_DOMAIN;
-      return;
-    }
-
-  string site = DomainRules[whereami];
-  if (site=="")
-    {
-      MyStatus = NO_DOMAIN;
-      return;
-    }
 
   char* access_mode = getenv("DB_ACCESS_MODE");
   if (!access_mode)  
@@ -103,11 +89,7 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
   f->InsertKeyValuePair(ScatalogKey, MyScatalogVersion);
 
   string QualifiedScatalog = sep + StlXmlTree::QualifyParent(nn[SCATALOG],MyScatalogVersion);
-  string SiteKey = QualifiedScatalog + sep + nn[SITE];
-  f->InsertKeyValuePair(SiteKey, NAME+"="+site+";");
-
-  string QualifiedSite = StlXmlTree::QualifyParent(SiteKey, NAME+"="+site+";");
-  string ServerKey = QualifiedSite + sep + nn[SERVER];
+  string ServerKey = QualifiedScatalog + sep + nn[SERVER];
 
   struct tm *tp;  
   time_t timeNow;
@@ -136,6 +118,7 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
   f->InsertKeyValuePair(ServerKey, ServerAttr);
 
 #ifdef DEBUG
+  LOG_INFO << " Filter XML "<<endm;
   f->ShowTree();
 #endif
 
@@ -143,10 +126,11 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
   if (ParsedXml.GetStatus()==stl_xml_tree::NO_XML_BASE)
     {
       MyStatus = st_db_service_broker::NO_XML_BASE;
-      cerr <<"StDbServiceBroker::StDbServiceBroker: no XML description of services found \n";
+      LOG_ERROR <<"StDbServiceBroker::StDbServiceBroker: no XML description of services found "<<endm;
     }
 
 #ifdef DEBUG
+  LOG_INFO << " Parsed XML "<<endm;
   ParsedXml.ShowTree();
 #endif
 
@@ -173,7 +157,7 @@ void StDbServiceBroker::DoLoadBalancing()
 {
   if (MyStatus!=st_db_service_broker::NO_ERROR)
     {
-      cout << " StDbServiceBroker::DoLoadBalancing() errors" <<MyStatus<<"\n";
+      LOG_ERROR << " StDbServiceBroker::DoLoadBalancing() errors" <<MyStatus<<endm;
     }
 #ifdef DEBUG
   PrintHostList();
@@ -201,11 +185,7 @@ We expect:
 
   string my_version = versions[0];
 
-  vector<string> sites = ParsedXml.LookUpValueByKey(key,my_version,nn[SITE]);
-  
-  for (VCI i = sites.begin(); i!=sites.end(); ++i)
-    {
-      vector<string> services = ParsedXml.LookUpValueByKey(key,*i,nn[SERVER]);
+      vector<string> services = ParsedXml.LookUpValueByKey(key,my_version,nn[SERVER]);
       
       for (VCI ii = services.begin(); ii!=services.end(); ++ii)
 	{
@@ -223,31 +203,42 @@ We expect:
 	      }
 
 	      double power;
+	      short cap;
 
 	      if (!from_string<double>(power,host_data[POWER],std::dec))
 	      {
 		// error: non-numeric port string
 #ifdef DEBUG
-		cout << "StDbServiceBroker::FormHostList(): using default power for host "<<*iii<<"\n";
+		LOG_ERROR << "StDbServiceBroker::FormHostList():  non-numeric port, using default power for host "<<*iii<<endm;
 #endif
 		power = DefaultPower;
 	      }
 
-	      ChapiDbHost host_entry = ChapiDbHost(host_data[NAME],port,power);
+
+	      if (!from_string<short>(cap,host_data[CAP],std::dec))
+	      {
+		// error: non-numeric cap string
+#ifdef DEBUG
+		LOG_ERROR << "StDbServiceBroker::FormHostList(): non-numeric cap, using default cap for host "<<*iii<<endm;
+#endif
+		cap = DefaultCap;
+	      }
+
+	      ChapiDbHost host_entry = ChapiDbHost(host_data[NAME],port,power,cap);
 	      MyHostList.push_back(host_entry);
 	    }
 	  cut_string_after_sub(key,">");
 	  cut_string_after_sub(key,"(");
 	}
-	  cut_string_after_sub(key,">");
-	  cut_string_after_sub(key,"(");
-    }
 
+#ifdef DEBUG
+  PrintHostList();
+#endif
 
   if (MyHostList.size()==0)
     {
       MyStatus = NO_HOSTS;
-      cerr<<" StDbServiceBroker::RecommendHost() has no hosts to choose from !\n";
+      LOG_DEBUG<<" StDbServiceBroker::RecommendHost() will have no hosts to choose from !"<<endm;
       return;
     }
 
@@ -255,10 +246,10 @@ We expect:
 //////////////////////////////////////////////////////
 void StDbServiceBroker::PrintHostList()
 {
-  cout << " MyHostList contains:\n";
+  LOG_DEBUG << " MyHostList contains:"<<endm;
   for (vector<ChapiDbHost>::const_iterator i = MyHostList.begin(); i!=MyHostList.end(); ++i)
     {
-      cout << (*i).HostName << "\n";
+      LOG_DEBUG << (*i).HostName << endm;
     }
 }
 //////////////////////////////////////////////////////
@@ -277,22 +268,22 @@ void StDbServiceBroker::RecommendHost()
 
       if (conn==0)
         {
-          cerr << "StDbServiceBroker::RecommendHost() mysql_init(0) failed \n";
+          LOG_ERROR << "StDbServiceBroker::RecommendHost() mysql_init(0) failed "<<endm;
           continue;
         }
 
       if (mysql_real_connect
 	  (conn,((*I).HostName).c_str(), "loadbalancer","lbdb","test",(*I).Port,Socket,0)==NULL)
         {
-          cerr << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
-	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" failed\n";
+          LOG_ERROR << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
+	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" failed"<<endm;
           mysql_close(conn);
           continue;
         }
 
       if (mysql_query(conn, "show processlist") != 0 )
         {
-          cerr <<"StDbServiceBroker::RecommendHost() show processlist failed\n";
+          LOG_ERROR <<"StDbServiceBroker::RecommendHost() show processlist failed"<<endm;
           continue;
         }
 
@@ -300,11 +291,11 @@ void StDbServiceBroker::RecommendHost()
       unsigned int nproc = mysql_num_rows(res_set);
       double dproc = nproc/(*I).Power;
 #ifdef DEBUG
-      cout <<" Server "<<((*I).HostName).c_str()<< " actual "<< nproc << " effective "<< dproc <<" processes \n";
+      LOG_DEBUG <<" Server "<<((*I).HostName).c_str()<< " actual "<< nproc << " effective "<< dproc <<" processes "<<endm;
 #endif
       mysql_close(conn);
 
-      if (dproc<dproc_min)
+      if (dproc<dproc_min && nproc<(*I).Cap)
         {
           dproc_min = dproc;
 	  MyBestHost = I;
@@ -322,4 +313,196 @@ short StDbServiceBroker::GiveHostPort()
   return (*MyBestHost).Port;
 }
 ////////////////////////////////////////////////////////////////
+
+int StDbServiceBroker::updateLocalLbPolicy()
+{
+// MLK: this method will be most likely run as a static method through a root 
+// call by a specially created user once a day.
+
+  string writableDir;
+  string dbLoadBalancerConfig;
+
+  const char* loConfig = getenv("DB_SERVER_LOCAL_CONFIG");
+  dbLoadBalancerConfig = loConfig ? loConfig : "";
+  
+  if (!loConfig)
+    {
+      LOG_ERROR << "StDbManagerImpl::updateLocalLbPolicy(): DB_SERVER_LOCAL_CONFIG is undefined! "<<endm;
+      return lb_error::NO_LPD_ENV_VAR;
+    }
+  else
+    {
+      string::size_type last_slash = dbLoadBalancerConfig.find_last_of("/");
+      writableDir = dbLoadBalancerConfig.substr(0,last_slash+1);
+
+
+      struct stat dir_status;
+      if (stat(writableDir.c_str(),&dir_status)==0)
+	{
+	  if (dir_status.st_mode & S_IWUSR)
+	    {
+	      // OK
+	    }
+	  else
+	    {
+	      LOG_ERROR << "StDbManagerImpl::lookUpServers() "<<writableDir<<" is not writable"<<endm;
+	      return lb_error::NO_WRITE_PERMISSION;
+	    }
+	}
+      else
+	{
+	  LOG_ERROR << "StDbManagerImpl::lookUpServers() invalid dir "<<writableDir <<endm;
+	  return lb_error::NO_LPD_DIR;
+	}
+
+    }
+
+  //////////////////////////////////////////////////////////	  
+// do we need to fetch XML from the Web ?
+
+  struct stat file_status;
+  bool fetchWorldConfig = true;
+  
+  if (stat(dbLoadBalancerConfig.c_str(), &file_status) == 0) 
+    {
+	  /* A STAR site has an option to state that they do not want to use global XML. They do that by
+	     1) creating in a specific, group-writeable directory's WorldConfig file an element <Site>
+	     2) making sure a <Site> element with name "World" does NOT exist in that file
+	     3) the file has to be error-free XML
+	     These conditions can be fullfilled by e.g. having <Site name="MyLittleWorld" /> as the only 
+	     Site element in that file. In that case, global XML from the Web will not be downloaded to that
+	     group-writeable directory.
+	  */
+      
+      StlXmlTree myLittleWorldCheck = StlXmlTree(dbLoadBalancerConfig.c_str());
+#ifdef DEBUG
+      LOG_INFO << "myLittleWorldCheck is:"<<endm;
+      myLittleWorldCheck.ShowTree();
+#endif
+      if (myLittleWorldCheck.GetStatus()==stl_xml_tree::NO_ERROR)
+	{
+	  string key = StlXmlTree::MakeKey("","Scatalog");
+	  
+	  vector<string> versions = myLittleWorldCheck.LookUpValueByKey(key);
+	  
+	  string my_version = versions[0];
+	  
+	  vector<string> sites = myLittleWorldCheck.LookUpValueByKey(key,my_version,"Site");
+	  
+	  vector<string>::const_iterator I = sites.begin();
+	  bool WorldNotFound = true;
+	  if (sites.size()==0)
+	    {
+	      // protection is invalid, no Site element
+	      WorldNotFound = false;
+	    }
+	  while( I!=sites.end() && WorldNotFound)
+	    {
+	      if (StlXmlTree::AttributesContain(*I,"name","World"))
+		    {
+		      WorldNotFound = false;
+		    }
+	      ++I;
+	    }
+	  
+	  if (WorldNotFound)
+	    {
+#ifdef DEBUG
+	      LOG_INFO <<"StDbManagerImpl::updateLocalLbPolicy()  protection against WWW XML is activated"<<endm;
+#endif
+	      fetchWorldConfig = false; 
+	    }
+	  else
+	    {
+#ifdef DEBUG
+	      LOG_INFO<<"StDbManagerImpl::updateLocalLbPolicy()  we found World, the user wants to read from the Web"<<endm;
+#endif
+	    }
+	  
+	  if (fetchWorldConfig)
+	    {
+	      time_t glbModTime = file_status.st_mtime;
+	      time_t nowTime = time(0);
+	      if (nowTime-glbModTime<60) 
+		{
+		  fetchWorldConfig = false;
+		}
+	    }
+	}
+      else
+	{
+	  LOG_ERROR << "StDbManagerImpl::updateLocalLbPolicy() invalid XML file "<<dbLoadBalancerConfig <<endm;
+	}
+    }
+  else
+    {
+      LOG_ERROR << "StDbManagerImpl::lookUpServers(): config file " << dbLoadBalancerConfig << " is invalid "<< endm;
+    }
+  
+  if (fetchWorldConfig)
+    {
+      // try AFS first
+      const char* glConfig = getenv("DB_SERVER_GLOBAL_CONFIG");
+      const string dbLoadBalancerWorldAFS = glConfig ? glConfig : "";
+      
+      if (!glConfig)
+	{
+	  LOG_ERROR << "StDbManagerImpl::updateLocalLbPolicy(): DB_SERVER_GLOBAL_CONFIG is undefined! "<<endm;
+	}
+      else
+	{
+	  
+	  struct stat file_status;
+	  if (stat(dbLoadBalancerWorldAFS.c_str(), &file_status) == 0) 
+	    {
+	      system(("cp "+dbLoadBalancerConfig+" "+dbLoadBalancerConfig+".old").c_str());
+	      system(("cp "+dbLoadBalancerWorldAFS+" "+dbLoadBalancerConfig).c_str());
+	      system(("chmod u+w "+dbLoadBalancerConfig).c_str());
+	      return lb_error::NO_ERROR;
+	    }
+	  else
+	    {
+	      LOG_ERROR << "StDbManagerImpl::updateLocalLbPolicy(): DB_SERVER_GLOBAL_CONFIG points to invalid file! "<<endm;
+	    }
+
+	}
+
+      // try WWW
+      const char* wwwConfig = getenv("DB_SERVER_GLOBAL_CONFIG_URL");
+      const string dbLoadBalancerWorldURL = wwwConfig ? wwwConfig : "";
+
+      if (!wwwConfig)
+	{
+	  LOG_ERROR << "StDbManagerImpl::updateLocalLbPolicy(): DB_SERVER_GLOBAL_CONFIG_URL is undefined! "<<endm;
+	  return lb_error::NO_GPD_ENV_VAR;
+	}
+
+#ifdef DEBUG
+      LOG_INFO <<"StDbManagerImpl::updateLocalLbPolicy() fetching world config "<<endm;
+#endif
+      system(("cp "+dbLoadBalancerConfig+" "+dbLoadBalancerConfig+".old").c_str());
+      const char* proxy = getenv("http_proxy");
+      if (proxy)
+	{
+	  xmlNanoHTTPScanProxy(proxy);
+	}
+      
+      int ret = xmlNanoHTTPFetch(dbLoadBalancerWorldURL.c_str(), dbLoadBalancerConfig.c_str(), 0);
+
+      if (ret!=0)
+	{
+	  LOG_ERROR << "StDbManagerImpl::updateLocalLbPolicy() xmlNanoHTTPFetch error "<<ret<<endm;
+	  return lb_error::WWW_ERROR;
+	}
+      else
+	{
+	  system(("chmod u+w "+dbLoadBalancerConfig).c_str());
+	  return lb_error::NO_ERROR;
+	}
+    }
+return lb_error::NO_ERROR;
+
+}  
+
+
 #endif

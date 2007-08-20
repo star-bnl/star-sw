@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.30 2007/04/21 03:20:33 deph Exp $
+ * $Id: StDbSql.cc,v 1.31 2007/08/20 18:21:30 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.31  2007/08/20 18:21:30  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.30  2007/04/21 03:20:33  deph
  * removed extra check for endTime replacement
  *
@@ -434,6 +437,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
 	 }
 
   Db.Release();  
+
   //MPD - removed this to remove extra table scans updating end time
   // if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
 

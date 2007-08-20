@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.43 2007/08/03 18:46:30 deph Exp $
+ * $Id: MysqlDb.cc,v 1.44 2007/08/20 18:21:28 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.44  2007/08/20 18:21:28  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.43  2007/08/03 18:46:30  deph
  * Increased the number of allowed elements in a comma delimeted text field from 100 to 1024 to allow for the 768 ssd strips
  *
@@ -185,7 +188,18 @@
 #include "stdb_streams.h"
 #include "StDbDefaults.hh"
 #include "StDbManagerImpl.hh"
+
+#ifndef __STDB_STANDALONE__
 #include "StMessMgr.h"
+#else
+#define LOG_DEBUG cout
+#define LOG_INFO cout
+#define LOG_WARN cout
+#define LOG_ERROR cerr
+#define LOG_FATAL cerr
+#define LOG_QA cout
+#define endm "\n"
+#endif
 
 //#include "errmsg.h"
 

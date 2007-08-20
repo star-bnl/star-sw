@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.6 2007/05/16 22:48:10 deph Exp $
+ * $Id: StDbModifier.cxx,v 1.7 2007/08/20 18:21:29 deph Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.7  2007/08/20 18:21:29  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.6  2007/05/16 22:48:10  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -30,21 +33,35 @@
  * + made code more robust against requesting data from non-existent databases
  *
  **************************************************************************/
-
+#ifdef __ROOT__
 #include <stdio.h>
 #include <stdlib.h>
-#include <Stiostream.h>
+
 
 #include "TROOT.h"
 #include "TInterpreter.h"
+
+#ifndef __STDB_STANDALONE__
+#include "Stiostream.h"
 #include "StMessMgr.h"
+#else
+#define LOG_DEBUG cout
+#define LOG_INFO cout
+#define LOG_WARN cout
+#define LOG_ERROR cerr
+#define LOG_FATAL cerr
+#define LOG_QA cout
+#define endm "\n"
+#endif
+
+
 #include "TTable.h"
 
-#include "StDbLib/StDbManager.hh"
-#include "StDbLib/StDbConfigNode.hh"
-#include "StDbLib/StDbTable.h"
-#include "StDbLib/StDbDefs.hh"
-#include "StDbLib/StDbTableDescriptor.h"
+#include "StDbManager.hh"
+#include "StDbConfigNode.hh"
+#include "StDbTable.h"
+#include "StDbDefs.hh"
+#include "StDbTableDescriptor.h"
 
 #include "StDbModifier.h"
 
@@ -335,3 +352,4 @@ void StDbModifier::SetFlavor(const char* flavorname)
   cout << "       Flavor is set " << fFlavorName << endl;
 }
 
+#endif

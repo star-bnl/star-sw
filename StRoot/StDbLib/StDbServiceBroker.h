@@ -21,7 +21,9 @@
 
 #include "StlXmlTree.h"
 #include "ChapiDbHost.h"
-
+#ifdef __ROOT__
+#include "Rtypes.h"
+#endif
 namespace st_db_service_broker
 {
   const std::string MyScatalogVersion = "version=1.0.1;"; 
@@ -32,13 +34,28 @@ namespace st_db_service_broker
   
   enum 
     {
-      NO_ERROR,
-      NO_XML_BASE,
-      NO_USER,
-      NO_DOMAIN,
-      NO_HOSTS
+      NO_ERROR,   // 0
+      NO_XML_BASE,// 1
+      NO_USER,    // 2
+      NO_DOMAIN,  // 3
+      NO_HOSTS    // 4
     };
 }
+
+namespace lb_error
+{
+enum
+  {
+    NO_ERROR,           // 0
+    NO_LPD_ENV_VAR,     // 1
+    NO_GPD_ENV_VAR,     // 2
+    NO_WRITE_PERMISSION,// 3
+    NO_LPD_DIR,         // 4 
+    AFS_ERROR,          // 5
+    WWW_ERROR           // 6
+  };
+}
+
 
 class StDbServiceBroker
 {
@@ -57,6 +74,7 @@ class StDbServiceBroker
   StDbServiceBroker(): MyStatus(st_db_service_broker::NO_XML_BASE){};
   StDbServiceBroker(const std::string xmlbase);
   StDbServiceBroker(const std::string xmlbase, const std::string xmlfilter);
+  virtual ~StDbServiceBroker(){};
   void DoLoadBalancing();
 
   std::string GiveHostName();
@@ -64,6 +82,10 @@ class StDbServiceBroker
   std::string GiveUserName();
   std::string GiveUserPassword();
   inline short GetStatus(){return MyStatus;};
+  static int updateLocalLbPolicy(); // returns an lb_error:: error
+#ifdef __ROOT__
+  ClassDef(StDbServiceBroker,0)
+#endif
 };
 #endif
 #endif

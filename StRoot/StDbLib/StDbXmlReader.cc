@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.13 2007/05/16 22:48:10 deph Exp $
+ * $Id: StDbXmlReader.cc,v 1.14 2007/08/20 18:21:31 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.14  2007/08/20 18:21:31  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.13  2007/05/16 22:48:10  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -68,7 +71,18 @@
 #include <string.h>
 
 #include "dbStruct.hh"
+
+#ifndef __STDB_STANDALONE__
 #include "StMessMgr.h"
+#else
+#define LOG_DEBUG cout
+#define LOG_INFO cout
+#define LOG_WARN cout
+#define LOG_ERROR cerr
+#define LOG_FATAL cerr
+#define LOG_QA cout
+#define endm "\n"
+#endif
 
 template<class T>
 static void passAux(elem* e, T*& i,  int& len)

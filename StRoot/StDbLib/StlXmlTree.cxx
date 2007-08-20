@@ -2,7 +2,6 @@
 #include <iostream>
 #include "StlXmlTree.h"
 #include "ChapiStringUtilities.h"
-#include "StMessMgr.h"
 
 using std::string;
 using std::vector;
@@ -13,6 +12,20 @@ using stl_xml_tree::sep; // separation symbol
 using stl_xml_tree::NO_ERROR;
 using stl_xml_tree::NO_XML_BASE;
 using stl_xml_tree::BAD_XML;
+using std::cout;
+using std::cerr;
+#ifndef __STDB_STANDALONE__
+#include "StMessMgr.h"
+#else
+#define LOG_DEBUG cout
+#define LOG_INFO cout
+#define LOG_WARN cout
+#define LOG_ERROR cerr
+#define LOG_FATAL cerr
+#define LOG_QA cout
+#define endm "\n"
+#endif
+
 
 
 typedef vector<string>::const_iterator VCI;
@@ -70,7 +83,7 @@ StlXmlTree::StlXmlTree(const string xmlfilename, StlXmlTree* filter) :
 void StlXmlTree::ShowTree()
 {
   LOG_INFO << "-----------------------------------------"<<endm;
-  LOG_INFO << "XmlTree contains:\n";
+  LOG_INFO << "XmlTree contains"<<endm;
   for (MMCI I=XmlTree.begin(); I!=XmlTree.end(); ++I)
     {
       LOG_INFO << (*I).first <<" -- "<<(*I).second <<endm;
@@ -122,6 +135,32 @@ vector<string> StlXmlTree::LookUpValueByKey
 void StlXmlTree::InsertKeyValuePair(string Key, string Value)
 {
  OnTheTree = XmlTree.insert(make_pair(Key,Value));
+}
+////////////////////////////////////////////////////////
+bool StlXmlTree::AttributesContain(string A, string N, string V)
+{
+  // as input, expect any of the strings returned by LookUpValueByKey
+  if ((N=="" && V=="") || N=="") 
+    {
+      return false;
+    }
+  map<string,string> nv = ParseAttributeString(A);
+  map<string,string>::iterator I = nv.find(N);
+  if (I==nv.end())
+    {
+      return false;
+    }
+  else
+    {
+      if ((*I).second==V)
+	{
+	  return true;
+	}
+      else
+	{
+	  return false;
+	}
+    }
 }
 ////////////////////////////////////////////////////////
 #ifdef DEBUG

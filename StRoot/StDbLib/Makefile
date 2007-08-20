@@ -18,10 +18,20 @@ all:: $(TARGETS)
 
 include rules.make
 
-SRCFILES += $(wildcard *.cc)
+SRCFILES1 := $(wildcard *.cc)
+SRCFILES2 := $(wildcard *.cxx)
+
+SRCFILES := $(SRCFILES1)
+SRCFILES += $(SRCFILES2)
+
 HEADERS  += $(wildcard *.h)
 HHEADERS += $(wildcard *.hh)
-LINK_OBJS := $(subst .cc,.o, $(SRCFILES))
+LINK_OBJS1 := $(subst .cc,.o, $(SRCFILES1))
+LINK_OBJS2 := $(subst .cxx,.o, $(SRCFILES2))
+LINK_OBJS := $(LINK_OBJS1)
+LINK_OBJS += $(LINK_OBJS2)
+
+
 
 $(STDBLIBSO): $(LINK_OBJS) 
 	rm -f $@
@@ -36,8 +46,7 @@ $(LINK_OBJS): $(HEADERS) $(HHEADERS)
 
 clean::
 	rm -f $(TARGETS)
-	rm -f $(LINK_OBJS)
-
+	rm -f *.o
 
 #include .depend
 # DO NOT DELETE THIS LINE -- make depend depends on it.

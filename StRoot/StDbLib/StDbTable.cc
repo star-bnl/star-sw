@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.39 2007/05/16 22:48:10 deph Exp $
+ * $Id: StDbTable.cc,v 1.40 2007/08/20 18:21:30 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.40  2007/08/20 18:21:30  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.39  2007/05/16 22:48:10  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -171,6 +174,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.40  2007/08/20 18:21:30  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.39  2007/05/16 22:48:10  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -337,7 +343,19 @@
 #include "StDbBuffer.h"
 #include "typeAcceptor.hh"
 #include "StTableDescriptorI.h"
+
+#ifndef __STDB_STANDALONE__
 #include "StMessMgr.h"
+#else
+#define LOG_DEBUG cout
+#define LOG_INFO cout
+#define LOG_WARN cout
+#define LOG_ERROR cerr
+#define LOG_FATAL cerr
+#define LOG_QA cout
+#define endm "\n"
+#endif
+
 #include "StDbDefaults.hh"
 #include "StDbManager.hh"
 #include <string.h>
