@@ -162,9 +162,6 @@ int StGammaFitter::fitSector(StGammaCandidate* candidate, StGammaFitterResult* f
   fit->setNdf(npar);
   fit->setLikelihood(likelihood);
 
-  fit->print();
-  cout << endl;
-
   return status;
 }
 
