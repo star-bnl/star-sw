@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelix.cc,v 1.7 2005/07/06 18:49:56 fisyak Exp $
+ * $Id: StPhysicalHelix.cc,v 1.8 2007/08/20 23:24:54 perev Exp $
  *
  * Author: Brian Lasiuk, Sep 1997
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelix.cc,v $
+ * Revision 1.8  2007/08/20 23:24:54  perev
+ * BugFix #1027
+ *
  * Revision 1.7  2005/07/06 18:49:56  fisyak
  * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
  *
@@ -99,11 +102,9 @@ StThreeVector<double> StPhysicalHelix::momentum(double B) const
 StThreeVector<double> StPhysicalHelix::momentumAt(double S, double B) const
 {
     // Obtain phase-shifted momentum from phase-shift of origin
-    double xc = this->xcenter();
-    double yc = this->ycenter();
-    double rx = (y(S)-yc)/(mOrigin.y()-yc);
-    double ry = (x(S)-xc)/(mOrigin.x()-xc);
-    return (this->momentum(B)).pseudoProduct(rx,ry,1.0);
+    StPhysicalHelix tmp(*this);
+    tmp.moveOrigin(S);
+    return tmp.momentum(B);
 }
 
 int StPhysicalHelix::charge(double B) const
