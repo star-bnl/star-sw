@@ -23,6 +23,7 @@ class StGammaCandidateMaker : public StMaker
   void SetMinimumET( Float_t et ){ mMinimumET = et; }
   void SetRadius( Float_t r ) { mRadius = r; }
   void SetSmdRange( Float_t r ){ mSmdRange = r; }
+  Int_t Compress();
 
  private:
  protected:
@@ -32,7 +33,6 @@ class StGammaCandidateMaker : public StMaker
 
   Int_t MakeEndcap();
   Int_t MakeBarrel();
-  Int_t Compress();
   template<class T> void Compress(TClonesArray* clones);
 
   bool getPositionMomentumAtBarrel(StGammaTrack* track, double magneticField, TVector3& position, TVector3& momentum);
