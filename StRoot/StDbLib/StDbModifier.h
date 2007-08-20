@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.h,v 1.1 2000/08/15 22:51:52 porter Exp $
+ * $Id: StDbModifier.h,v 1.2 2007/08/20 18:21:29 deph Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,20 +10,23 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.h,v $
+ * Revision 1.2  2007/08/20 18:21:29  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.1  2000/08/15 22:51:52  porter
  * Added Root2DB class from Masashi Kaneta
  * + made code more robust against requesting data from non-existent databases
  *
  **************************************************************************/
 
-
+#ifdef __ROOT__
 #ifndef STAR_StDbModifier
 #define STAR_StDbModifier
 
-#include "StDbLib/StDbManager.hh"
-#include "StDbLib/StDbConfigNode.hh"
-#include "StDbLib/StDbTable.h"
-#include "StDbLib/StDbDefs.hh"
+#include "StDbManager.hh"
+#include "StDbConfigNode.hh"
+#include "StDbTable.h"
+#include "StDbDefs.hh"
 
 class StDbModifier
 {
@@ -65,5 +68,5 @@ class StDbModifier
 };
 
 #endif
-
+#endif
 

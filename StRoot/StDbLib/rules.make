@@ -22,6 +22,8 @@ ifndef OPTSTAR
 OPTSTAR := /opt/star
 endif
 
+
+
 ifndef NODEBUG
  DBG = -g 
 else
@@ -85,6 +87,7 @@ else
 endif
 endif
 
+
 ifeq (Linux,$(SYSTYPE))
 # CXX = insure
 
@@ -94,7 +97,7 @@ AR       := /usr/bin/ar -rvu
 #  OSDEFS     := GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES LINUX
   LD       := $(CXX)
   SO       := $(CXX)
-  CXXFLAGS := $(DBG) -fPIC -Wall -I/usr/include/g++
+  CXXFLAGS := $(DBG) -fPIC -Wall -I/usr/include/g++ 
   CFLAGS   := $(DBG) -fPIC -Wall
 #  LDFLAGS  := $(DBG) -Wl,-Bstatic
   SOFLAGS  := $(DBG) -shared  
@@ -114,8 +117,16 @@ SO  := $(CXX)
 ###############################################################
 
 LIBS += $(EXTRA_LIBS)
+
+CXXFLAGS += $(shell xml2-config --cflags)
+#CXXFLAGS += $(shell root-config --cflags)
+
 LOCAL_INCS = -I. -I$(OPTSTAR)/include -I/usr/include/mysql
+
 SHARED_LIBS = -L$(OPTSTAR)/lib/ -L$(OPTSTAR)/lib/mysql -L/usr/lib/mysql/ -lmysqlclient $(LIBS)
+SHARED_LIBS += $(shell xml2-config --libs)
+#SHARED_LIBS += $(shell root-config --libs)
+
 STATIC_LIBS = $(OPTSTAR)/lib/libmysqlclient.a $(LIBS)
 
 ########################################

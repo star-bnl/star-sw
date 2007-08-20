@@ -6,8 +6,8 @@
 
 #ifndef ChapiStringUtilities_h
 #define ChapiStringUtilities_h
-#include <vector.h>
-#include <map.h>
+#include <vector>
+#include <map>
 #include <sstream>
 #include <iostream>
 

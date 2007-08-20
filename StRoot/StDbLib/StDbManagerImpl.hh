@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManagerImpl.hh,v 1.6 2007/01/09 16:27:40 deph Exp $
+ * $Id: StDbManagerImpl.hh,v 1.7 2007/08/20 18:21:29 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.hh,v $
+ * Revision 1.7  2007/08/20 18:21:29  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.6  2007/01/09 16:27:40  deph
  * Updates for load balancing "added 1)write privilege 2)xml comments 3)camelCase notation
  *
@@ -104,6 +107,8 @@ typedef list<dbType*> dbTypes;
 typedef list<dbDomain*> dbDomains;
 typedef list<StDbServer*> ServerList;
 #endif
+
+
 
 class StDbManagerImpl : public StDbManager {
 
@@ -225,6 +230,7 @@ public:
   // MLK added for load balacing:
 #ifndef NoXmlTreeReader
   StDbServiceBroker* myServiceBroker;
+  
 #endif
 
 protected:
@@ -251,6 +257,8 @@ protected:
   // ensure both unix & date timestamp are in-sinc.
   void          updateDateTime(StDbTime& t);
   void          updateUnixTime(StDbTime& t);
+
+
 };
 
 #endif

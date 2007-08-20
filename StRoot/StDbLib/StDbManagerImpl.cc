@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.26 2007/05/16 22:48:10 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.27 2007/08/20 18:21:29 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.27  2007/08/20 18:21:29  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.26  2007/05/16 22:48:10  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -219,9 +222,30 @@
 #include "StDbTableIter.hh"
 #include "dbCollection.h"
 #include "StDbMessenger.hh"
+
+#ifndef __STDB_STANDALONE__
 #include "StMessMgr.h"
+#else
+#define LOG_DEBUG cout
+#define LOG_INFO cout
+#define LOG_WARN cout
+#define LOG_ERROR cerr
+#define LOG_FATAL cerr
+#define LOG_QA cout
+#define endm "\n"
+#endif
+
 #include "stdb_streams.h"
 //#include "StDbDefs.hh"
+
+
+#ifndef NoXmlTreeReader
+//#include <libxml/nanohttp.h>
+//#include <sys/stat.h>
+//#include <sys/types.h>
+//#include <fstream>
+#endif
+
 #include <string.h>
 
 #ifdef HPUX
@@ -459,6 +483,7 @@ StDbManagerImpl::deleteTypes(){
 
 }
 
+
 ////////////////////////////////////////////////////////////////
 void StDbManagerImpl::lookUpServers(){
 #define __METHOD__ "lookUpServer()"
@@ -469,17 +494,89 @@ void StDbManagerImpl::lookUpServers(){
   */
   
 #ifndef NoXmlTreeReader
-#ifdef DEBUG
-  string dbLoadBalancerConfig = 
-    (string)getenv("HOME")+"/dbLoadBalancerConfig.xml";
-#else
-  string dbLoadBalancerConfig = 
-    //    "/star/u/deph/servers/dbLoadBalancerConfig.xml";  Switch back to this name next release
-    "/star/u/deph/servers/dbLoadBalancerConfig.new"; 
-#endif 
 
-  //cout <<"****************HERE A ****************"<<endl;
- 
+  string dbLoadBalancerLocalConfig = "dbLoadBalancerLocalConfig.xml";
+  string dbLoadBalancerGlobalConfig = "dbLoadBalancerGlobalConfig.xml";
+
+  vector<string> configFileNames;
+      const char* fLocalConfig = getenv("DB_SERVER_LOCAL_CONFIG");
+     
+
+	if (!fLocalConfig)
+	  {
+	    LOG_ERROR << "StDbManagerImpl::lookUpServers(): DB_SERVER_LOCAL_CONFIG is undefined! "<<endm;
+	  }
+	else
+	  {
+	    configFileNames.push_back(fLocalConfig);
+	  }
+/******Removing option to allow LB in $HOME***********************
+	const char* HOME = getenv("HOME");
+
+	if (!HOME)
+	  {
+	    LOG_ERROR << "StDbManagerImpl::lookUpServers(): HOME is undefined! "<<endm;
+	  }
+	else
+	  {
+	    configFileNames.push_back((string)HOME+"/"+dbLoadBalancerLocalConfig);
+	  }
+
+******************************/
+
+	const char* STAR = getenv("STAR");
+
+	if (!STAR)
+	  {
+	     LOG_ERROR << "StDbManagerImpl::lookUpServers(): STAR is undefined! "<<endm;
+	  }
+//	else
+//	  {
+//	    configFileNames.push_back((string)STAR+"/StDb/servers/"+dbLoadBalancerLocalConfig);
+//	  }
+
+	const char* fGlobalConfig = getenv("DB_SERVER_GLOBAL_CONFIG");
+
+	if (!fGlobalConfig)
+	  {
+	    LOG_ERROR << "StDbManagerImpl::lookUpServers(): DB_SERVER_GLOBAL_CONFIG is undefined! "<<endm;
+	  }
+	else
+	  {
+	    configFileNames.push_back(fGlobalConfig);
+	  }
+
+	if (STAR)
+	  {
+	     configFileNames.push_back((string)STAR+"/StDb/servers/"+dbLoadBalancerGlobalConfig);
+	  }
+
+	// try opening the files until the first one that opens is found
+
+      string dbLoadBalancerConfig = "";
+
+      vector<string>::iterator I= configFileNames.begin(); 
+      while (I!=configFileNames.end())
+	{
+	  fstream dbLbIn;
+	  dbLbIn.open((*I).c_str(),ios::in);
+	  if(dbLbIn.is_open())
+	    {
+	      dbLoadBalancerConfig = (*I);
+	      dbLbIn.close();
+	      break;
+	    }
+	  else
+	    {
+	      LOG_ERROR << "StDbManagerImpl::lookUpServers(): could not open "<<(*I)<<endm;
+	    }
+	  ++I;
+	}
+      
+      LOG_INFO << "StDbManagerImpl::lookUpServers(): config file name is "<<dbLoadBalancerConfig<<endm;
+
+    /// we have determined the name of the configuration file dbLoadBalancerConfig
+
   myServiceBroker = new StDbServiceBroker(dbLoadBalancerConfig);
   short SBStatus = myServiceBroker->GetStatus();
   if (SBStatus == st_db_service_broker::NO_ERROR)
@@ -490,16 +587,19 @@ void StDbManagerImpl::lookUpServers(){
     {
       delete myServiceBroker;
       myServiceBroker = 0;
-      LOG_ERROR << "StDbManagerImpl::lookUpServers() StDbServiceBroker error "<<SBStatus<<endm;
+      LOG_ERROR << "StDbManagerImpl::lookUpServers() StDbServiceBroker error "<<SBStatus<<" disable XML loadbalancing "<<endm;
     }
+  
+  ///////////////////////////////////////////////////////////////
+  
 #endif
 
  char* xmlFile[3]={NULL,NULL,NULL};
  // dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
  dbFindServerMode mode[3]={serverEnvVar,userHome,starDefault};
 
- StString cos;
- cos<<stendl<<"******** Order of Files searched for dbServers ********* "<<stendl;
+ StString costr;
+ costr<<stendl<<"******** Order of Files searched for dbServers ********* "<<stendl;
  
  for(int i=0;i<3; i++){
    xmlFile[i]=StDbDefaults::Instance()->getServerFileName(mode[i]);
@@ -508,7 +608,7 @@ void StDbManagerImpl::lookUpServers(){
      if(is){
 
        cout << " looking at "<<i << " " << xmlFile[i]<< endl;
-        cos<<"  "<<i+1<<". "<< xmlFile[i] <<stendl;
+        costr<<"  "<<i+1<<". "<< xmlFile[i] <<stendl;
          findServersXml(is);
 	 is.close();
 
@@ -521,8 +621,8 @@ void StDbManagerImpl::lookUpServers(){
      xmlFile[i]=NULL;
    }
  }
- cos <<"********************************************************" << stendl;
- printInfo((cos.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
+ costr <<"********************************************************" << stendl;
+ printInfo((costr.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
 
  // cout <<"****************HERE B ****************"<<endl;
 mhasServerList = true;

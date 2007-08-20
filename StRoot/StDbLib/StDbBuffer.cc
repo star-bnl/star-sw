@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.23 2007/06/17 16:05:34 deph Exp $
+ * $Id: StDbBuffer.cc,v 1.24 2007/08/20 18:21:28 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.24  2007/08/20 18:21:28  deph
+ * New Version of Load Balancer
+ *
  * Revision 1.23  2007/06/17 16:05:34  deph
  * Bug fix for unsigned datatypes: max int was being returned  changed atoi to strtol.
  *
@@ -117,8 +120,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stdb_streams.h"
-#include "StMessMgr.h"
 
+#ifndef __STDB_STANDALONE__
+#include "StMessMgr.h"
+#else
+#define LOG_DEBUG cout
+#define LOG_INFO cout
+#define LOG_WARN cout
+#define LOG_ERROR cerr
+#define LOG_FATAL cerr
+#define LOG_QA cout
+#define endm "\n"
+#endif
 
 #ifdef HPUX
 #define freeze(i) str()
