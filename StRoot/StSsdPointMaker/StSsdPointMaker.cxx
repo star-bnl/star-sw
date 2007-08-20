@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.51 2007/07/14 14:29:44 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.52 2007/08/20 06:47:37 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.52  2007/08/20 06:47:37  bouchet
+// ssdStripCalib table taken for simulation
+//
 // Revision 1.51  2007/07/14 14:29:44  bouchet
 // forget the Debug condition for the declaration of the tuples
 //
@@ -304,7 +307,7 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   }    
   year = (GetDate()/10000)-2000;
   LOG_DEBUG <<Form("TimeStamp is %d Year is =%d\n",GetDate(),year)<<endm;
-  if(year<7){
+  if((year<7)||(year>30)){
     m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
     if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
     else {
