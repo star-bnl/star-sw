@@ -7,10 +7,6 @@
 
 #include <vector>
 
-//#include "StGammaIsolation.h"
-//#include "StGammaDistribution.h"
-//#include "StGammaFit.h"
-
 #include "StGammaTower.h"
 #include "StGammaStrip.h"
 #include "StGammaTrack.h"
@@ -198,15 +194,12 @@ class StGammaCandidate : public TObject
   // Results of gamma fitter
   //
 public:
-  StGammaFitterResult& smduFit() { return mSmduFit; }
-  StGammaFitterResult& smdvFit() { return mSmdvFit; }
+  StGammaFitterResult& smdFit() { return mSmdFit; }
 
-  void SetSmduFit(const StGammaFitterResult& u) { mSmduFit = u; }
-  void SetSmdvFit(const StGammaFitterResult& v) { mSmdvFit = v; }
+  void SetSmdFit(const StGammaFitterResult& fit) { mSmdFit = fit; }
 
 protected:
-  StGammaFitterResult mSmduFit;
-  StGammaFitterResult mSmdvFit;
+  StGammaFitterResult mSmdFit;
 
 
   // to add a new tower, do the following:

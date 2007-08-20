@@ -376,11 +376,9 @@ Int_t StGammaCandidateMaker::MakeEndcap()
   for (int i = 0; i < gevent->numberOfCandidates(); ++i) {
     StGammaCandidate* candidate = gevent->candidate(i);
     if (candidate->detectorId() == StGammaCandidate::kEEmc) {
-      StGammaFitterResult u, v;
-      if (StGammaFitter::instance()->fitSector(candidate, &u, &v)) {
-	candidate->SetSmduFit(u);
-	candidate->SetSmdvFit(v);
-      }
+      StGammaFitterResult fit;
+      int status = StGammaFitter::instance()->fitSector(candidate, &fit);
+      if (status == 0) candidate->SetSmdFit(fit);
     }
   }
 
