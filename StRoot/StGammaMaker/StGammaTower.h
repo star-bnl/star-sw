@@ -21,6 +21,14 @@ class StGammaTower : public TObject
   UChar_t fail;    // fail bits (fatal HW problems)
   UChar_t layer;   // see below
   Float_t pt(){ return energy / TMath::CosH(eta); }
+
+  Int_t sector();    // returns eemc sector [0,11]
+  Int_t subsector(); // returns eemc subsector [0,4]
+  Int_t etabin();    // returns eemc etabin [0,11] 
+  Int_t phibin();
+  //Int_t module();
+  //Int_t submodule();
+
   TRefArray candidates; // referencing candidates
   ClassDef(StGammaTower,1);
 };
