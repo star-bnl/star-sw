@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.26 2005/10/13 23:15:13 genevb Exp $
+ * $Id: StHelix.cc,v 1.27 2007/08/20 23:25:39 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.27  2007/08/20 23:25:39  perev
+ * BugFix #1016
+ *
  * Revision 1.26  2005/10/13 23:15:13  genevb
  * Save a few calculations
  *
@@ -479,13 +482,7 @@ double StHelix::pathLength(const StThreeVector<double>& r,
                if (fp<0.) sgn = -sgn;
                if (f <0.) sgn = -sgn;
 	       shift = sgn*deltas;
-	       if (shift == -shiftOld) { // don't get stuck shifting +/-deltas
-	         deltas *= dampingFactor; // dampen magnitude of shift
-		 shift = sgn*deltas;
-		 // allow iterations to run out
-	       } else {
-	         i--; // don't count against iterations
-	       }
+               if (shift<0) shift*=0.9;  // don't get stuck shifting +/-deltas
             } else {
                shift = f/fp;
             }
