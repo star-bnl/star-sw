@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.8 2007/07/12 19:27:20 fisyak Exp $
+// $Id: SmdGains.cxx,v 1.9 2007/08/21 13:10:04 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@
 #include <TH1.h> 
 #include <TH2.h> 
 #include <TFile.h> 
-#include "TMath.h"
+
 #include "SmdGains.h"
 
 
@@ -34,9 +34,11 @@ SmdGains::SmdGains(){
 
   idealMipEne=1.3; // (MeV) in 7mm of plastic
   // limits for expo fit
-  adcMin=40;  adcMax=100; // SMD
+  // sww 1/17/07 - change adcMax from 100 -> 140
+  adcMin=40;  adcMax=140; // SMD
    minSum=50;
-  maxRelEr=0.4; // maximal relative error at any stage of calculations
+  // sww 1/17/07 - change maxRelEr from 0.4 -> 0.5
+  maxRelEr=0.5; // maximal relative error at any stage of calculations
   minMipEne=0.4;// (MeV) lower/upper thres for Landau Ene fit
   maxMipEne=4;
 }
@@ -287,7 +289,8 @@ void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
     gPad->SetGridx(0);      gPad->SetGridy(0);
     float ymax=6000-str1*10;    h->SetMaximum(ymax);
     float ymin=100.9-str1/2.7;   
-    if(i<=30) ymin=0.9;
+   // sww 1/17/07 change test from 30 ->300
+    if(i<=300) ymin=0.9;
     h->SetMinimum(ymin);    
 
     Lx=h->GetListOfFunctions();    assert(Lx);
@@ -311,7 +314,7 @@ void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
 
     s->sl=par[1];
     s->esl=epar[1];
-    if(epar[1]>maxRelEr *TMath::Abs(par[1])) {
+    if(epar[1]>maxRelEr *fabs(par[1])) {
       s->flag+=2;
     } 
   }
@@ -401,12 +404,12 @@ void SmdGains:: doSlopesOnly(float fac){
   printf("working on gains from slopes only, fac=%f\n",fac);
 
   int i;
-  // ...... realtive gains
+  // ...... relative gains
   for(i=0;i<mxS;i++) {
     StripG *s=str+i;
     if(s->sl<0){ // calculate is possible
       s->gc=-fac/s->sl;
-      s->egc=s->esl*s->gc/TMath::Abs(s->sl);
+      s->egc=s->esl*s->gc/fabs(s->sl);
     }
     if(s->egc>maxRelEr *s->gc) {
       s->flag+=4;
@@ -496,8 +499,11 @@ void StripG::print(){
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
- * Revision 1.8  2007/07/12 19:27:20  fisyak
- * Add includes for TMath for ROOT 5.16
+ * Revision 1.9  2007/08/21 13:10:04  balewski
+ * final, used in 2006 offline calibration by soScott
+ *
+ *
+ * VS: ----------------------------------------------------------------------
  *
  * Revision 1.7  2005/09/29 13:57:57  balewski
  * after SMD gains were rescaled

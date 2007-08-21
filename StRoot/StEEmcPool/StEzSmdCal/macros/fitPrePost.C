@@ -10,23 +10,19 @@ fitPrePost() {
   gStyle->SetStatW(0.22);
   gStyle->SetStatH(0.22);
   
-  //  f=new TFile("june18.hist.root");
-  // f=new TFile("/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2-out/sum-sect5.hist.root");
+  //  f=new TFile("iter4-pp/sect05/sum-sect5.hist.root");
 
   TH1F *h1=new TH1F("mpv","MPV  MIP gated; MPV of ADC-ped",35,-5,65); 
   TH1F *h2=new TH1F("mpvE","relative error of MPV , MIP gated; err(MPV)/MPV ",50,0,0.5); 
-
   TH1F *h3=new TH1F("mpvS","relative width of L-peak,  MIP gated; sigma/MPV",25,0.,1.); 
-
-  
  TH2F *h4=new TH2F("mpv2","MPV from ; gated w/ MIP ; inclusive spectrum;",25,0,50,25,0,25); 
- 
-  char cT='P';
+
+//===sww===Set layer to analyze in next line
+  char cT='R';
   openAll(cT);
   
   const float feta[]=
     {1.95,1.855,1.765,1.675,1.59,1.51,1.435,1.365,1.3,1.235,1.17,1.115};
-  
   
   int sec=5;
   char core[100];
@@ -34,6 +30,7 @@ fitPrePost() {
   int eta;
   char sub='C';
   
+//===sww===Set eta range and sector range in next two "for" statements
   for(eta=1;eta<=12;eta++) {
     int nErr=0, nOK=0;
     float mpvL=999, mpvH=0; 
@@ -41,7 +38,7 @@ fitPrePost() {
     fprintf(wfd," <tr> <th> %d <td> \n",eta); 
     gStyle->SetOptStat(1001111);
 
-    for(sec=1; sec<=3;sec++) {
+    for(sec=1; sec<=12;sec++) {
       TFile *f=fdA[sec-1];
       for(sub='A';sub<='E';sub++)     {
 	sprintf(core,"%02d%c%c%02d",sec,cT,sub,eta);
@@ -95,7 +92,7 @@ fitPrePost() {
     sprintf(txt,"cat *%02d.ps | ps2pdf - %s",eta,pdfN);
     printf("%s\n",txt);
     system(txt);
-    sprintf(txt,"mv %s /star/u/balewski/WWW/tmp/",pdfN);
+    sprintf(txt,"mv %s /star/u/wissink/cal2006/tmp/",pdfN);
     printf("%s\n",txt);
     system(txt);
     fprintf(wfd,"     <td> <a href=\"%s\"> PDF </a>\n",pdfN);    
@@ -115,7 +112,7 @@ fitPrePost() {
     sprintf(txt,"ps2pdf %s.ps %s.pdf",sumN,sumN);
     printf("%s\n",txt);
     system(txt);
-    sprintf(txt,"mv %s.pdf /star/u/balewski/WWW/tmp/",sumN);
+    sprintf(txt,"mv %s.pdf /star/u/wissink/cal2006/tmp/",sumN);
     printf("%s\n",txt);
     system(txt);
     fprintf(wfd,"     <td> <a href=\"%s.pdf\"> PDF </a>\n",sumN);
@@ -239,7 +236,8 @@ TString QaOne(TH1F *ha, TH1F *hd,char cT ) {
   //  printf("ped xAdc=%f\n",xb);
   if(fabs(xb)>1.) return "ped";
   if(ha->GetEntries() <=0) return "empty";
-  if(ha->Integral()/ha->GetEntries()>0.999) return "mask";
+  // change limit to 0.9999 for R analysis - sww
+  if(ha->Integral()/ha->GetEntries()>0.9999) return "mask";
 
 
   //.............Landau 
@@ -272,18 +270,20 @@ void openAll(char cT) {
   for(i=0;i<12;i++) {
     //  sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/sum-sect%d.hist.root",i+1);
     // sprintf(txt,"./iter12-mc/sum-sect%d.hist.root",i+1);
-    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter8-mc/sum-sect%d.hist.root",i+1);
+    // sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter8-mc/sum-sect%d.hist.root",i+1);
+    if(i<9) sprintf(txt,"iter4-pp/sect0%d/sum-sect%d.hist.root",i+1,i+1);
+    if(i>8) sprintf(txt,"iter4-pp/sect%d/sum-sect%d.hist.root",i+1,i+1);
     fdA[i]=new TFile(txt);
     assert(fdA[i]->IsOpen());
   }
-  sprintf(txt,"/star/u/balewski/WWW/tmp/gains%c-allSect.dat",cT); 
+  sprintf(txt,"/star/u/wissink/cal2006/iter4-pp/gains%c-allSect.dat",cT); 
   gfd=fopen(txt,"w");
   assert(gfd);
   fprintf(gfd,"# final %c-gains from MIP using UxV\n",cT);
   fprintf(gfd,"# format: gain (ch/GeV), errGain, LandauFit: MPV(ADC) sigMPV\n");
 
   
-  sprintf(txt,"/star/u/balewski/WWW/tmp/gains%c.html",cT);
+  sprintf(txt,"/star/u/wissink/cal2006/iter4-pp/gains%c.html",cT);
   
   wfd=fopen(txt,"w");
   assert(wfd);

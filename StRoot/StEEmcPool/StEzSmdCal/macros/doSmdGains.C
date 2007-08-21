@@ -3,28 +3,21 @@ SmdGains *task=0;
 TObjArray  *HList;
 TFile *fd;
 
-doSmdGains( int sectID=3 , int iU=1){
+// doSmdGains( int sectID=6 , int iU=0){
+doSmdGains( int sectID , int iU) {
   
-  TString iPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter1e/";
-  iPath="/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter5-pp/";
-  //iPath="/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter8-mc/";
-  iPath="iter14-pp/";
+  TString iPath="iter5-pp/sect";
+  if (sectID<10) iPath+="0"; 
+  iPath+=sectID; iPath+="/";  
 
-  //  iPath="/auto/pdsfdv34/starspin/balewski/calib2004/outE2/";//LBL
-  
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  loadSharedLibraries();
 
-  char *libL[]={
-   "StRoot/StEEmcUtil/EEmcGeom/libEEmcGeom.so", // some hidden dependence
-   "StRoot/StEEmcPool/StEzSmdCal/libEzSmdCal.so",
- };
- 
  gStyle->SetPalette(1,0);
- int i;
- for(i=0;i<sizeof(libL)/sizeof(char*);i++) {
-   printf("   load '%s' ...\n",libL[i]);
-   assert( !gSystem->Load(libL[i]));
- }
- printf("loaded %d libraries\n",i);
+
+ gSystem->Load("StEEmcUtil");
+ gSystem->Load("StEzSmdCal");
+ printf("loaded  libraries\n");
  
   HList=new TObjArray;
   task=new SmdGains;
@@ -40,18 +33,19 @@ doSmdGains( int sectID=3 , int iU=1){
   task->set(HList,sectID,'U'+iU);
   task->init();
  
-  int str1=267,str2=270;
-
+   int str1=267,str2=270;
 
 #if 0
   //=== iteration 0 =====> SMD gains from slopes
   // just plot all SMD slopes for given sector for one plain
   for(str1=1;str1<288;str1+=30) {
-    str2=str1+30;
+    str2=str1+29;
     if(str2>288) str2=288;
-    task->fitSlopesSmd(str1,str2,0); 
-    task-> doSlopesOnly(760./1.4); // for CuCu200-minB
-    // break;
+    task->fitSlopesSmd(str1,str2,1); 
+    // sww 1/26/2007 change conv fact from 760. -> 850.
+    //task-> doSlopesOnly(760./1.4); // for CuCu200-minB
+    task-> doSlopesOnly(850./1.4); // for 2006 pp minbias
+    //  break;
   }
 #endif
 
@@ -98,4 +92,3 @@ void  plotAllTiles() {
     task->fitSlopesTile(7,6,cT[iT],3);  
   }
 }
-

@@ -21,28 +21,12 @@ plTwCal(int keta=0 ){
   TLine *lnV=new TLine(1,0,1,20); lnV->SetLineColor(kMagenta);lnV->SetLineWidth(1);
 
   //  readG(gIdeal,"../iterIdeal/");
-  // readG(gAu200,"../iterSlopeAuAu200/"); // ~online
-  // readG(gAu62,"../iterPiotr/"); // best MIP w/ TPC
-  //  readG(gFinal,"/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter4-inp/"); // best MIP w/ SMD
-  //  readG(gFinal,"0xcucu/"); // best MIP w/ SMD
-
-
-  // readG(gSlpp,"../../WWW-E/calibration/run4/smd+PQRT-calib-w-MIP/iter4/"); // best slopes
-   
-  //plAllGains(gSlpp);
-
-  //readG(gFinal,"/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter6-mc-sec1to3/",'T');
   // readG(gFinal,"/star/u/balewski/WWW/tmp-iter12-mc/",'T');
-  // plAllGains(gFinal);
-  // return;
-
-
   //..... patch for per/post gains
   // readG(gFinal,"/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter6-mc-sec1to3/",'R');
-  readG(gFinal,"/star/u/balewski/WWW/tmp/",'P');
-                                    plGainsRaw(gFinal,'P');
-
-
+  readG(gFinal,"/star/u/wissink/WWW/cal2006/tablesTowers/",'T');
+  // plGainsRaw(gFinal,'T');
+  plAllGains(gFinal);
 
   return;  
   
@@ -56,7 +40,6 @@ plTwCal(int keta=0 ){
     c2=new TCanvas("bb","bb",300,300);  c2->Divide(1,1);
   }
 
-
   int ieta=1;
   for(ieta=0;ieta<12;ieta++) {
     if(!keta) c->cd(ieta+1);
@@ -64,11 +47,7 @@ plTwCal(int keta=0 ){
       if(keta!=ieta+1) continue;
       c->cd(1);
     }
-    //doCorr1(gSlpp,gAu62,ieta);
-    doCorr1(gAu200,gSlpp,ieta);
     //doCorr1(gSlpp,gFinal,ieta);
-    //doCorr1(gAu200,gFinal,ieta);
-    //doCorr1(gAu62,gFinal,ieta);
     ln1->Draw();
     drawIdeal(ieta);
     gPad->SetGrid(1,1); 
@@ -145,18 +124,22 @@ int readG( int iv, char *path, char cT='T') {
 //========================
 int  plAllGains(int v1) {
   TGraphErrors *gr=new TGraphErrors;
-  gr->SetMarkerStyle(8);
+  gr->SetMarkerStyle(21);
   gr->SetMarkerColor(kRed);
   gr->SetMarkerSize(0.5);
   char tit[200];
   int ieta=4;
 
-  //  sprintf(tit,"2005 EEMC tower gains from MIPs w/ UxV, day49, absolute scale=pp; eta bin; gain (ch/GeV)");
-  sprintf(tit,"Reco EEMC tower gains from M-C, SF=5%; eta bin; gain (ch/GeV)");
+  sprintf(tit,"2006 EEMC tower gains from MIPs w/ UxV, day89; eta bin; gain (ch/GeV)");
+  //sprintf(tit,"Reco EEMC tower gains from M-C, SF=5%; eta bin; gain (ch/GeV)");
   
   gr->SetTitle(tit);
-  h=new TH2F("cc",tit,10,0.91,13.1,10,0,50);
+  // line below added - sww 3/8/07
+  TString tt="T"; tt+="-shower";
+  h=new TH2F(tt,tit,10,0.91,13.1,10,0,60);
 
+  // line below added - sww 3/8/07
+  c=new TCanvas(tt,tt,900,600);
   int iphi;
 
   for(ieta=0; ieta<mxEta;ieta++)
@@ -179,6 +162,8 @@ int  plAllGains(int v1) {
   for(ieta=0; ieta<mxEta;ieta++) drawIdeal(ieta,1.1, 1);
   gPad->SetGridy(0);
   gPad->SetGridx(0);
+  // line below added - sww 3/8/07
+  c->Print(tt+".gif");
 }
 
 
@@ -231,9 +216,6 @@ int  plGainsRaw(int v1, char cT='X') {
   gPad->SetGridx(0);
   c->Print(tt+".gif");
 }
-
-
-
 
 //========================
 //========================

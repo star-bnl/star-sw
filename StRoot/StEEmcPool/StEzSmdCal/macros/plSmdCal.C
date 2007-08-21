@@ -7,11 +7,9 @@ TCanvas *cc;
 TString  inPath;
 
 //=========================
-plSmdCal(TString  hFile="R61710371"){
-  inPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter5-cucu/";
-  inPath="/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter5-pp/";
-  // inPath="/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter8-mc/";  
-  inPath="iter14-pp/";
+plSmdCal(TString  hFile="R7089008"){
+  inPath="/star/u/wissink/cal2006/iter4-pp/";
+  // inPath="/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter5-pp/";
   f=new TFile(inPath+hFile+".hist.root");
   
   gStyle->SetPalette(1,0);
@@ -22,7 +20,7 @@ plSmdCal(TString  hFile="R61710371"){
 //====================
 plOne(int sec=1, float zMax=10., int sepSect=1) {
   if(sepSect) {// read each sector from different input file
-    TString fname="sum-sect"; fname+=sec;
+    TString fname="sect01/sum-sect"; fname+=sec;
     f=new TFile(inPath+fname+".hist.root");
   }
   
@@ -128,8 +126,9 @@ pl2Dall(float zMax=10., int bestMip=0, int sepSect=1) {
   for(int sec=1;sec<=12;sec++) {
     char txt[100];
     if(sepSect) {//
-      TString fname=inPath+"sum-sect"; fname+=sec; fname+=".hist.root";
-      // printf("read each sector from different input file=%s\n",fname.Data());
+      if(sec<10) {TString fname=inPath+"sect0"; fname+=sec; fname+="/sum-sect"; fname+=sec; fname+=".hist.root";}
+      if(sec>9)  {TString fname=inPath+"sect"; fname+=sec; fname+="/sum-sect"; fname+=sec; fname+=".hist.root";}
+      printf("read each sector from different input file=%s\n",fname.Data());
      f=new TFile(fname);
     }
     TString opt="colz";
