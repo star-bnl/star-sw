@@ -99,14 +99,6 @@ private:
   /// \return Maximaml sided fit residual from h1 fitted with f1
   float residual(TH1* h1, TF1* f1);
 
-  /// \brief Convert tower id to sector, subsector, etabin, and phibin.
-  /// \param id of tower
-  /// \param sector [0-12[
-  /// \param subsector [0-5[
-  /// \param etabin [0-12[
-  /// \param phibin [0-60[
-  void getSectorSubEtaPhiFromTowerId(int id, int& sector, int& subsector, int& etabin, int& phibin);
-
   /// \brief chi square function for fitter
   static void fcn(int& npar, double* gin, double& f, double* par, int iflag);
 
