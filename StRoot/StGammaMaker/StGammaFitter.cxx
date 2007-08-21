@@ -81,15 +81,17 @@ int StGammaFitter::fitSector(StGammaCandidate* candidate, StGammaFitterResult* f
     hV->Fill(strip->index, 1000 * strip->energy); // MeV
   }  
 
-#if 0
   // Get seed tower
+  int sector, subsector, etabin;
   StGammaTower* tower = candidate->mytower(0);
-  // Conversion tower id -> sector, subsector, etabin
-  int sector, subsector, etabin, phibin;
-  getSectorSubEtaPhiFromTowerId(tower->id, sector, subsector, etabin, phibin);
-
-  // Get tower at cluster position
-  EEmcGeomSimple::Instance().getTower(candidate->position(), sector, subsector, etabin);
+  if (tower) {
+    sector    = tower->sector();
+    subsector = tower->subsector();
+    etabin    = tower->etabin();
+  }
+  else {
+    EEmcGeomSimple::Instance().getTower(candidate->position(), sector, subsector, etabin);
+  }
 
   // Get range of SMD strips under the seed tower
   int uMin, uMax, vMin, vMax;
@@ -98,7 +100,6 @@ int StGammaFitter::fitSector(StGammaCandidate* candidate, StGammaFitterResult* f
 
   hU->SetAxisRange(uMin, uMax);
   hV->SetAxisRange(vMin, vMax);
-#endif
 
   float uyield = 0;
   float vyield = 0;
@@ -201,14 +202,6 @@ float StGammaFitter::residual(TH1* h1, TF1* f1)
   }
 
   return max(leftResidual, rightResidual);
-}
-
-void StGammaFitter::getSectorSubEtaPhiFromTowerId(int id, int& sector, int& subsector, int& etabin, int& phibin)
-{
-  phibin = id / 12;
-  etabin = id % 12;
-  sector = phibin / 5;
-  subsector = phibin % 5;
 }
 
 void StGammaFitter::fcn(int& npar, double* gin, double& f, double* par, int iflag)
