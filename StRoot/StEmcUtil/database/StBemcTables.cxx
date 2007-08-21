@@ -1,11 +1,11 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.5 2007/08/21 18:14:39 kocolosk Exp $
+ * $Id: StBemcTables.cxx,v 1.6 2007/08/21 18:39:22 kocolosk Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
  ***************************************************************************/
- 
+
 #include "StBemcTables.h"
 #include "Stiostream.h"
 #include "StEmcUtil/others/emcDetectorName.h"
@@ -236,13 +236,37 @@ void StBemcTables::updateValidity(StMaker* maker, TTable* table) {
     
     map<string, pair<string, string> >::iterator iter = mValidRanges.find(tableName);
     if(iter == mValidRanges.end()) {
-        mValidRanges[tableName] = make_pair(datime[0].AsSQLString(), datime[1].AsSQLString());
+        mValidRanges[tableName] = make_pair(beginTime, endTime);
         LOG_INFO << Form("loaded a new %20s table with beginTime %s and endTime %s", tableName.c_str(), beginTime.c_str(), endTime.c_str()) << endm; 
     }
     else if( beginTime != (iter->second).first ) {
         (iter->second).first    = beginTime;
         (iter->second).second   = endTime;
         LOG_INFO << Form("loaded a new %20s table with beginTime %s and endTime %s", tableName.c_str(), beginTime.c_str(), endTime.c_str()) << endm; 
+    }
+}
+
+const char* StBemcTables::beginTime(const char * tableName) const {
+    string t = tableName;
+    map<string, pair<string, string> >::const_iterator iter = mValidRanges.find(t);
+    if(iter == mValidRanges.end()) {
+        LOG_WARN << "Couldn't find a table named " << tableName << endm;
+        return NULL;
+    }
+    else {
+        return (iter->second).first.c_str();
+    }
+}
+
+const char* StBemcTables::endTime(const char * tableName) const {
+    string t = tableName;
+    map<string, pair<string, string> >::const_iterator iter = mValidRanges.find(t);
+    if(iter == mValidRanges.end()) {
+        LOG_WARN << "Couldn't find a table named " << tableName << endm;
+        return NULL;
+    }
+    else {
+        return (iter->second).second.c_str();
     }
 }
 
@@ -557,11 +581,8 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
- * Revision 1.5  2007/08/21 18:14:39  kocolosk
- * Several updates:
- * 1) trigger DB tables accessible by softId
- * 2) validity range of each new DB table is logged
- * 3) wrapper methods using return values instead of pass-by-reference
+ * Revision 1.6  2007/08/21 18:39:22  kocolosk
+ * added methods to get beginTime / endTime of a given DB table
  *
  *
  **************************************************************************/

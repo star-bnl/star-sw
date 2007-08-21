@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.h,v 1.4 2007/08/21 18:14:40 kocolosk Exp $
+ * $Id: StBemcTables.h,v 1.5 2007/08/21 18:39:23 kocolosk Exp $
  * Author:      Alexandre A. P. Suaide
  * Maintainer:  Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -77,6 +77,9 @@ public:
     
     void    loadTables(StMaker* anyMaker); ///< load tables.
     
+    const char* beginTime(const char * tableName) const;
+    const char* endTime(const char * tableName) const;
+    
     //the following methods are simple wrappers around the original "get" methods for those who 
     //prefer a return value instead of passing a parameter
     //detector numbering uses StEmcRawMaker/defines
@@ -131,11 +134,8 @@ public:
 /***************************************************************************
  *
  * $Log: StBemcTables.h,v $
- * Revision 1.4  2007/08/21 18:14:40  kocolosk
- * Several updates:
- * 1) trigger DB tables accessible by softId
- * 2) validity range of each new DB table is logged
- * 3) wrapper methods using return values instead of pass-by-reference
+ * Revision 1.5  2007/08/21 18:39:23  kocolosk
+ * added methods to get beginTime / endTime of a given DB table
  *
  *
  **************************************************************************/
