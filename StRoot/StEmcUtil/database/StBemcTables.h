@@ -1,31 +1,24 @@
-// $Id: StBemcTables.h,v 1.3 2007/04/02 13:29:17 kocolosk Exp $
-// $Log: StBemcTables.h,v $
-// Revision 1.3  2007/04/02 13:29:17  kocolosk
-// added methods from Pibero to access trigger database information
-//
-// Revision 1.2  2006/01/24 16:32:20  suaide
-// added method to correct database for bug in tower map
-//
-// Revision 1.1  2004/12/21 12:54:30  suaide
-// moved StBemcTables to StEmcUtil/database
-// added interface to trigger tables in offline DB
-//
-// Revision 1.1  2004/10/18 18:20:07  suaide
-// New Maker. Will replace StEmcADCtoEMaker in production.
-// It reads only DAQ structures. Output is StEvent.
-//
-//
-/*!\class StBemcTables
-\author Alexandre A. P. Suaide
-
-This class handles all the BEMC database requests
-*/
+/***************************************************************************
+ *
+ * $Id: StBemcTables.h,v 1.4 2007/08/21 18:14:40 kocolosk Exp $
+ * Author:      Alexandre A. P. Suaide
+ * Maintainer:  Adam Kocoloski, MIT, kocolosk@mit.edu
+ *
+ ***************************************************************************/
 
 #ifndef STAR_StBemcTables
 #define STAR_StBemcTables
 
+#include <string>
+using std::string;
+
+#include <map>
+using std::map;
+
+#include <utility>
+using std::pair;
+
 #include "TObject.h"
-#include "TDataSet.h"
 
 #include "tables/St_emcPed_Table.h"
 #include "tables/St_smdPed_Table.h"
@@ -39,66 +32,110 @@ This class handles all the BEMC database requests
 #include "tables/St_emcTriggerPed_Table.h"
 #include "tables/St_emcTriggerLUT_Table.h"
 
-#include "StMaker.h"
-#include "StEmcRawMaker/defines.h"
-#include "StDaqLib/EMC/StEmcDecoder.h"
+class StMaker;
+class StEmcDecoder;
 
+/*!\class StBemcTables
+\author Alexandre A. P. Suaide
+
+This class handles all the BEMC database requests
+*/
 
 class StBemcTables : public TObject 
 {
- private: 
- 
-   emcPed_st*              mBtowP;
-   emcPed_st*              mBprsP;
-   smdPed_st*              mSmdeP;
-   smdPed_st*              mSmdpP;
-   emcStatus_st*           mBtowS;
-   emcStatus_st*           mBprsS;
-   smdStatus_st*           mSmdeS;
-   smdStatus_st*           mSmdpS;
-   emcCalib_st*            mBtowC;
-   emcCalib_st*            mBprsC;
-   smdCalib_st*            mSmdeC;
-   smdCalib_st*            mSmdpC;
-   emcGain_st*             mBtowG;
-   emcGain_st*             mBprsG;
-   smdGain_st*             mSmdeG;
-   smdGain_st*             mSmdpG;
-   emcTriggerStatus_st*    mTrigS;
-   emcTriggerPed_st*       mTrigP;
-   emcTriggerLUT_st*       mTrigL;
+protected: 
+    emcPed_st*              mBtowP;
+    emcPed_st*              mBprsP;
+    smdPed_st*              mSmdeP;
+    smdPed_st*              mSmdpP;
+    emcStatus_st*           mBtowS;
+    emcStatus_st*           mBprsS;
+    smdStatus_st*           mSmdeS;
+    smdStatus_st*           mSmdpS;
+    emcCalib_st*            mBtowC;
+    emcCalib_st*            mBprsC;
+    smdCalib_st*            mSmdeC;
+    smdCalib_st*            mSmdpC;
+    emcGain_st*             mBtowG;
+    emcGain_st*             mBprsG;
+    smdGain_st*             mSmdeG;
+    smdGain_st*             mSmdpG;
+    emcTriggerStatus_st*    mTrigS;
+    emcTriggerPed_st*       mTrigP;
+    emcTriggerLUT_st*       mTrigL;
+    
+    StEmcDecoder*           mDecoder;
+    Bool_t                  mBtowMapFix;  
+    Int_t                   getOldId(Int_t) const;
+    
+    map<string, pair<string, string> > mValidRanges;
+    void updateValidity(StMaker* dbMaker, TTable* table);
    
-   StEmcDecoder*           mDecoder;
-   Bool_t                  mBtowMapFix;  
-   Int_t                   getOldId(Int_t);                  
-   
-   
-   void                    loadTables(Int_t,TDataSet*);
-          
- public: 
-                 
-                            StBemcTables(Bool_t btowMapFix = kFALSE); ///< StBemcTables constructor
-  virtual                   ~StBemcTables(); ///< StBemcTables destructor
-
-   void                    loadTables(StMaker*); ///< load tables.
-   
-   // These are methods to get offline database values, like pedestals, gains, status
-   
-   void                    getPedestal(Int_t,Int_t,Int_t,Float_t&,Float_t&); ///<Return pedestal mean and rms
-   void                    getStatus(Int_t,Int_t,Int_t&); ///<Return status
-   void                    getGain(Int_t,Int_t,Float_t&); ///<Return gain correction factor
-   void                    getCalib(Int_t,Int_t,Int_t,Float_t&); ///<Return calibration constant
-   
-   // Thease are methods to get trigger information, like masks, trigger pedestals and bit conversion mode
-   void                    getTriggerPatchStatus(Int_t,Int_t&); ///< Return trigger patch status
-   void                    getTriggerHighTowerStatus(Int_t,Int_t&); ///< Return trigger highTower status
-   void                    getTriggerTowerStatus(Int_t,Int_t,Int_t&); ///< Return trigger single tower status
-   void                    getTriggerPedestal(Int_t,Int_t,Float_t&); ///< Return tower pedestal loaded in trigger
-   void                    getTriggerBitConv(Int_t,Int_t,Int_t&); ///< Return 6 bits conversion mode
-   void                    getTriggerPedestalShift(Int_t& pedestalShift); ///< Return target pedestal shift
-   void                    getTriggerFormulaTag(Int_t crate, Int_t index, Int_t& formula); ///< Return LUT formula
-   void                    getTriggerFormulaParameters(Int_t crate, Int_t index, Int_t* parameters); ///< Return LUT formula parameters
-  ClassDef(StBemcTables, 1)  
+public:
+    StBemcTables(Bool_t btowMapFix = kFALSE); ///< StBemcTables constructor
+    virtual  ~StBemcTables(); ///< StBemcTables destructor
+    
+    void    loadTables(StMaker* anyMaker); ///< load tables.
+    
+    //the following methods are simple wrappers around the original "get" methods for those who 
+    //prefer a return value instead of passing a parameter
+    //detector numbering uses StEmcRawMaker/defines
+    //BTOW == 1, BPRS == 2, BSMDE == 3, BSMDP == 4
+    float   calib(int det, int softId, int power=1) const;
+    float   pedestal(int det, int softId, int cap=0) const;
+    float   pedestalRMS(int det, int softId, int cap=0) const;
+    float   gain(int det, int softId) const;
+    int     status(int det, int softId) const;
+    
+    int     triggerPatchStatus(int triggerPatch) const;
+    int     triggerHighTowerStatus(int triggerPatch) const;
+    int     triggerTowerStatus(int crate, int sequence) const;
+    float   triggerPedestal(int crate, int sequence) const;
+    int     triggerPedestalShift() const;
+    int     triggerBitConversion(int crate, int patchSequence) const;
+    int     triggerFormulaTag(int crate, int patchSequence) const;
+    int*    triggerFormulaParameters(int crate, int patchSequence) const;
+    
+    //these methods allow the user to access the same trigger info via softId.
+    int     triggerPatchStatusByID(int softId) const;
+    int     triggerHighTowerStatusByID(int softId) const;
+    int     triggerTowerStatusByID(int softId) const;
+    float   triggerPedestalByID(int softId) const;
+    int     triggerBitConversionByID(int softId) const;
+    int     triggerFormulaTagByID(int softId) const;
+    int*    triggerFormulaParametersByID(int softId) const;
+    
+    //-----------------------------------------------------------------------------
+    
+    // These are methods to get offline database values, like pedestals, gains, status
+    void    getPedestal(Int_t det, Int_t softId, Int_t cap, Float_t& ped, Float_t& rms) const; ///<Return pedestal mean and rms
+    void    getStatus(Int_t det, Int_t softId, Int_t& status) const; ///<Return status
+    void    getGain(Int_t det, Int_t softId, Float_t& gain) const; ///<Return gain correction factor
+    void    getCalib(Int_t det, Int_t softId, Int_t power, Float_t& calib) const; ///<Return calibration constant
+             
+    // These get trigger information, like masks, trigger pedestals and bit conversion mode
+    void    getTriggerPatchStatus(Int_t patch, Int_t& status) const; ///< Return trigger patch status
+    void    getTriggerHighTowerStatus(Int_t hightower, Int_t& status) const; ///< Return trigger highTower status
+    void    getTriggerTowerStatus(Int_t crate, Int_t index, Int_t& status) const; ///< Return trigger single tower status
+    void    getTriggerPedestal(Int_t crate, Int_t index, Float_t& pedestal) const; ///< Return tower pedestal loaded in trigger
+    void    getTriggerBitConv(Int_t crate, Int_t patch, Int_t& bit) const; ///< Return 6 bits conversion mode
+    void    getTriggerPedestalShift(Int_t& pedestalShift) const; ///< Return target pedestal shift
+    void    getTriggerFormulaTag(Int_t crate, Int_t index, Int_t& formula) const; ///< Return LUT formula
+    void    getTriggerFormulaParameters(Int_t crate, Int_t index, Int_t* parameters) const; ///< Return LUT formula parameters
+    
+    ClassDef(StBemcTables, 1)  
 };
 
 #endif
+
+/***************************************************************************
+ *
+ * $Log: StBemcTables.h,v $
+ * Revision 1.4  2007/08/21 18:14:40  kocolosk
+ * Several updates:
+ * 1) trigger DB tables accessible by softId
+ * 2) validity range of each new DB table is logged
+ * 3) wrapper methods using return values instead of pass-by-reference
+ *
+ *
+ **************************************************************************/
