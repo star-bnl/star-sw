@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: MuEzSmdCalMaker.cxx,v 1.5 2006/09/15 01:45:34 balewski Exp $
+// $Id: MuEzSmdCalMaker.cxx,v 1.6 2007/08/21 13:10:04 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -124,9 +124,9 @@ Int_t
 MuEzSmdCalMaker::Make(){
   clear();
   nInpEve++;
-  gMessMgr->Message("","D") <<GetName()<<"::Make() is called , useEZtree="<<useEZtree<<endm;
-  
-  if(useEZtree)  return MakeEZtree();
+//  gMessMgr->Message("","D") <<GetName()<<"::Make() is called , 
+//  useEZtree="<<useEZtree<<endm;
+    if(useEZtree)  return MakeEZtree();
   
   return MakeRegular();
 }
@@ -151,7 +151,7 @@ MuEzSmdCalMaker::MakeEZtree(){
   eETow=mMuDstMaker->muDst()->eztETow();
   eESmd=mMuDstMaker->muDst()->eztESmd();
   eTrig=mMuDstMaker->muDst()->eztTrig(); 
-  // printf("pp %p %p %p\n",eETow, eESmd, eTrig);
+  //  printf("pp %p %p %p\n",eETow, eESmd, eTrig);
   if(!eETow || !eESmd || !eTrig)  return kStOK;
 
   //  trgAkio=new StTriggerDataMother(eTrig);
@@ -523,6 +523,12 @@ MuEzSmdCalMaker::killTail( const  EEmcDbItem  *x, int iT) {
 
 //---------------------------------------------------
 // $Log: MuEzSmdCalMaker.cxx,v $
+// Revision 1.6  2007/08/21 13:10:04  balewski
+// final, used in 2006 offline calibration by soScott
+//
+//
+// VS: ----------------------------------------------------------------------
+//
 // Revision 1.5  2006/09/15 01:45:34  balewski
 // add run# to trg-data unpaker
 //

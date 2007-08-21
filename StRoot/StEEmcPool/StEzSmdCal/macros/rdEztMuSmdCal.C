@@ -1,23 +1,23 @@
 TObjArray  *HList;
-//cucu200_minB=66007, cucu62_minB=76007
-//pp200_minB=96011
+//for 2006 pp200, minB_trigID =117001
 
-int rdEztMuSmdCal( int run=61710371,
-		   int trigID=96011,
-		   int nEve=800000   ,
+int rdEztMuSmdCal( int run,
+		   int trigID=117001,
+		   int nEve=1000000,
 		   Int_t nFiles  = 1000
 		   ){ 
-  TString fileS="lis/R";
+  TString fileS="R";
   fileS+=run;  fileS+=".lis";
-  char* inDir   = "./";
-  // inDir   ="/star/data05/scratch/eemcdb/muDst/2005/171/037b/"; fileS="st_physics_6171037_raw_2020001.MuDst.root";
-  // fileS="lis/R61730x.lis";
-  // inDir="/star/data04/sim/balewski/myfzdSamples/";  fileS="mc_mu-eta1_24.MuDst.root";
-
-  TString outF="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2xx";
-  outF="iter14-pp/";
-  
+  //char* inDir   ="/star/data05/scratch/wissink/MBRunsDay89/7089008/"; 
+  //fileS="st_physics_7089008_raw_1010001.MuDst.root";
+  char* inDir = "./";
   char*  file=fileS.Data();
+
+  int sectID=6;
+  // TString outF="iter1-pp/sect";
+  // outF+=sectID; outF+="/";
+
+  TString outF="iter5-pp/";
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();  
@@ -35,8 +35,7 @@ int rdEztMuSmdCal( int run=61710371,
   chain = new StChain("StChain"); 
 
   printf("adding muDst from '%s' ....\n",file);
-  int sectID=66;
-
+  
   // Now we add Makers to the chain...   
   muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
   TChain* tree=muMk->chain(); assert(tree); 
@@ -48,7 +47,10 @@ int rdEztMuSmdCal( int run=61710371,
   StEEmcDbMaker *myDb = new StEEmcDbMaker("eemcDb");
 
   // stDb->SetFlavor("onlPed","eemcPMTped");
-  //#define IS_MC  // M-C events
+  stDb->SetFlavor("slope2006","eemcPIXcal"); //get 1st pass gains for strips from db
+  stDb->SetFlavor("sim","eemcPMTcal"); //use to get ideal gains for towers
+
+//#define IS_MC  // M-C events
 #ifdef IS_MC 
   //stDb->SetFlavor("sim","eemcPMTped"); // better use real if pedSmear is ON
   stDb->SetFlavor("sim","eemcPMTcal");
@@ -65,20 +67,24 @@ int rdEztMuSmdCal( int run=61710371,
 #endif
 #endif 
 
-  myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter5-out/auxilMask.dat");
-  myDb->changeMask( "./maskCrash.dat");
-  //myDb->setSectors(5,5);
+  // Two lines below added 1/9/07 to mask / set gains for smd
+  myDb->changeMask("iter4-pp/smdAllMaskDay89v1.dat");
+  // myDb->changeGains("iter1-pp/smdAllSect-slopes.dat");
+  // myDb->setSectors(sectID,sectID);
 
   // MIP cut .........
   float thrMipSmdE=0.4/1000.; // was 0.5 MeV for data
-  int emptyStripCount=7; 
+  // line below added 3/12/2007 - sww
+  int emptyStripCount=11;
+  // int emptyStripCount=7; 
   float offCenter=0.7; // fiducial area of tower =offCenter^2, was 0.8,CuCuwas0.7
   float twMipRelEneLow=0.5, twMipRelEneHigh=2.;  // was 0.5,1.5
   int thrMipPresAdc=12; // thres over pedestal for pre/post (was 12 if no energy cut)
 
   HList=new  TObjArray;
+
   int id;
-  for(id=1;id<=12;id++) { 
+  for(id=1;id<=12;id++)   { 
     sectID=id;
     myMk3=new MuEzSmdCalMaker("mySmdCal","MuDst");
     // myMk3->setEZtree(false); // switch input: EzTree or regular muDst collection
@@ -153,7 +159,6 @@ int rdEztMuSmdCal( int run=61710371,
   
   chain->Finish();
 }
-
 
 #if 0
 AUXILIARY code

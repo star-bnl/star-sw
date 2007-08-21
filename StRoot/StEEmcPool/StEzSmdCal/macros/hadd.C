@@ -11,21 +11,17 @@ TFile *Target;
 
 void MergeRootfile( TDirectory *target, TList *sourcelist );
 
-void hadd(int sectID=5) {
-  TString iPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter4-out/";
-  iPath="iter14-pp/";
-  TString out=iPath;
+void hadd(int sectID) {
+  TString iPath="iter5-pp/";
+  // TString out=iPath;
+  TString out="iter5-pp/sect";
+  if(sectID<10) out+="0";
+  out+=sectID; out+="/sum-sect"; out+=sectID;
 
-  out+="sum-sect";  out+=sectID;
   Target = TFile::Open( out+".hist.root", "RECREATE" );
 
-  //... CuCu minB events ....
-  char *runL="R60490911 R60490912  R60490921 R60490922 R6049126 R60491291 R60491292  R6049130  R6049131 R60500161 R60500162  R60500171  R60500172 R6050018 R6050019 R60500201   R60500202";
-
   //... pp minB events ....
-  char *runL=" R61710371  R61710372  R61710373  R61720911 R61720912 R61720913 R61730681 R61730682 R61730683 R61730771 R61730772 R61730773 ";
-//... M-C events
-//char *runL=" R123101  R123102  R123103 R123104 R123105 R123106 R123107 R123108 R123109 R123110  R123111 R123112";  
+  char *runL=" R7089008 R7089013 R7089014 R7089015 R7089021 R7089022 R7089024 R7089025 R7089091 R7090008 ";
 
   FileList = new TList();
 

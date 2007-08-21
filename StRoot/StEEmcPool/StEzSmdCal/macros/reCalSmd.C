@@ -2,15 +2,14 @@
 reCalSmd() {
   float goalMipEne=1.3; // MeV
 
-  // const int nSec=8;  char *secL[nSec]={"01V","02U","04V","05U","07V","08U","10V","11U"};    TString tit="smd-Layer-1";  char *fncN="pol5";
-   const int nSec=8;  char *secL[nSec]={"02V","03U","05V","06U","08V","09U","11V","12U"};    TString tit="smd-Layer-2";  char *fncN="pol5";
-  // const int nSec=8;  char *secL[nSec]={"03V","04U","06V","07U","09V","10U","12V","01U"};    TString tit="smd-Layer-3";  char *fncN="pol4";
+  // const int nSec=8;  char *secL[nSec]={"01V","02U","04V","05U","07V","08U","10V","11U"};    TString tit="smd-Layer-1";  char *fncN="pol4";
+  // const int nSec=8;  char *secL[nSec]={"02V","03U","05V","06U","08V","09U","11V","12U"};    TString tit="smd-Layer-2";  char *fncN="pol4";
+  const int nSec=8;  char *secL[nSec]={"03V","04U","06V","07U","09V","10U","12V","01U"};    TString tit="smd-Layer-3";  char *fncN="pol4";
 
-  //   const int nSec=2;  char *secL[nSec]={"01U","01V"}; TString tit="sectXX";  char *fncN="pol5";
+  //  const int nSec=2;  char *secL[nSec]={"01U","01V"}; TString tit="sectXX";  char *fncN="pol3"; //test case
    
    TFile *fdA[nSec];
-   TString iPath="/star/data05/scratch/balewski/outD1/"; //BNL
-   iPath="./iter2-out/";
+   TString iPath="/star/u/wissink/cal2006/"; //location of .hist.root files
  
   //.......... open files  
   int j;
@@ -21,7 +20,7 @@ reCalSmd() {
   }
 
   //  fdG=new TFile("R5112018.hist.root");
-  fdG=new TFile("/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter1e/R6049126.hist.root");
+  fdG=new TFile("/star/u/wissink/cal2006/iter5-pp/R7089008.hist.root");
   assert(fdG->IsOpen());
 
   // ...... draw .........
@@ -125,12 +124,11 @@ reCalSmd() {
 avr2() {
 
   // const int nSec=3;  char *secL[nSec]={"05U","07V","08U"}; int symA[nSec]={24,28,29}; TString tit="SMD-L1";
-  //   const int nSec=3;  char *secL[nSec]={"06U","05V","08V"}; int symA[nSec]={26,24,29}; TString tit="SMD-L2";
-           const int nSec=2;  char *secL[nSec]={"06V","07U"}; int symA[nSec]={26,28}; TString tit="SMD-L3";
+  // const int nSec=3;  char *secL[nSec]={"06U","05V","08V"}; int symA[nSec]={26,24,29}; TString tit="SMD-L2";
+     const int nSec=2;  char *secL[nSec]={"01U","01V"}; int symA[nSec]={26,28}; TString tit="SMD-L3";
 
   TFile *fdA[nSec];
-  TString iPath="/star/data05/scratch/balewski/outD1/"; //BNL
-  iPath="outE2/";
+  TString iPath="/star/u/wissink/cal2006/"; // location for output files
 
   //.......... open files  
   int j;
@@ -165,6 +163,7 @@ avr2() {
     gr->SetLineColor(col);
     gr->SetMarkerColor(col);
 
+   // change pol4 -> pol2 3/30/2007 - sww
     char *fncN="pol4";
     gr->Fit(fncN);
     TF1* f=gr->GetFunction(fncN); assert(f);

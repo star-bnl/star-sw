@@ -10,22 +10,19 @@ FILE *gfd;
 void openAll(char cT) {
   int i;
   char txt[200];
-  for(i=0;i<3;i++) {
-    //    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/sum-sect%d.hist.root",i+1);
-    //sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/sum-sect%d.hist.root",i+1);
-    sprintf(txt,"./iter12-mc/sum-sect%d.hist.root",i+1);
-    //sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter11-mc/sum-sect%d.hist.root",i+1);
+  for(i=0;i<12;i++) {
+    sprintf(txt,"iter5-pp/sect%02d/sum-sect%d.hist.root",i+1,i+1);
     fdA[i]=new TFile(txt);
     assert(fdA[i]->IsOpen());
   }
-  sprintf(txt,"/star/u/balewski/WWW/tmp/gains%c-allSect.dat",cT); 
+  sprintf(txt,"/star/u/wissink/cal2006/iter5-pp/gains%c-allSect.dat",cT); 
   gfd=fopen(txt,"w");
   assert(gfd);
   fprintf(gfd,"# final %c-gains from MIP using UxV\n",cT);
   fprintf(gfd,"# format: gain (ch/GeV) & errGain, GausLandauFit: MPV(ADC) & errMPV, pedFit: means(ADC) & err \n");
 
   
-  sprintf(txt,"/star/u/balewski/WWW/tmp/gains%c.html",cT);
+  sprintf(txt,"/star/u/wissink/cal2006/iter5-pp/gains%c.html",cT);
   
   wfd=fopen(txt,"w");
   assert(wfd);
@@ -43,7 +40,6 @@ fitTower() {
   gStyle->SetStatW(0.22);
   gStyle->SetStatH(0.22);
   
-  //  f=new TFile("june18.hist.root");
   // f=new TFile("/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2-out/sum-sect5.hist.root");
 
   TH1F *h1=new TH1F("mpv","MPV gated w/ MIP ; MPV of ADC-ped",40,-5,35); 
@@ -71,7 +67,7 @@ fitTower() {
     fprintf(wfd," <tr> <th> %d <td> \n",eta); 
     gStyle->SetOptStat(1001111);
 
-    for(sec=1; sec<=3;sec++) {
+    for(sec=1; sec<=12;sec++) {
       TFile *f=fdA[sec-1];
       for(sub='A';sub<='E';sub++)     {
 	sprintf(core,"%02d%c%c%02d",sec,cT,sub,eta);
@@ -79,8 +75,8 @@ fitTower() {
 	ha=(TH1F*)f->Get("a"+coreT);
 	hd=(TH1F*)f->Get("d"+coreT);
 
-	// specical case of stuck low bits
-	if(eta==7 && sub=='B' && (sec==4 || sec==6 || sec==8) ){
+	// special case of stuck low bits - sww - modified to include 06TA07
+	if( (eta==7 && sub=='B' && (sec==4 || sec==8)) || (eta==7 && sub=='A' && sec==6)) {
 	  ha->Rebin(4);
 	  hd->Rebin(4);
 	  printf("tower=%s rebinned\n",core);
@@ -120,7 +116,7 @@ fitTower() {
     sprintf(txt,"cat *%02d.ps | ps2pdf - %s",eta,pdfN);
     printf("%s\n",txt);
     system(txt);
-    sprintf(txt,"mv %s /star/u/balewski/WWW/tmp/",pdfN);
+    sprintf(txt,"mv %s /star/u/wissink/cal2006/tmp/",pdfN);
     printf("%s\n",txt);
     system(txt);
     fprintf(wfd,"     <td> <a href=\"%s\"> PDF </a>\n",pdfN);    
@@ -138,7 +134,7 @@ fitTower() {
     sprintf(txt,"ps2pdf %s.ps %s.pdf",sumN,sumN);
     printf("%s\n",txt);
     system(txt);
-    sprintf(txt,"mv %s.pdf /star/u/balewski/WWW/tmp/",sumN);
+    sprintf(txt,"mv %s.pdf /star/u/wissink/cal2006/tmp/",sumN);
     printf("%s\n",txt);
     system(txt);
     fprintf(wfd,"     <td> <a href=\"%s.pdf\"> PDF </a>\n",sumN);
