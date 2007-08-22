@@ -28,6 +28,7 @@
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
 #include "StEmcUtil/database/StBemcTables.h"
+#include "StDaqLib/EMC/StEmcDecoder.h"
 
 #include "StEmcTriggerMaker.h"
 
@@ -932,9 +933,13 @@ map<int,int> StEmcTriggerMaker::endcapJetPatchesAboveThreshold(int trigId) {
 	return jetPatches;
 }
 
-// $Id: StEmcTriggerMaker.cxx,v 1.22 2007/05/12 12:45:53 rfatemi Exp $
+// $Id: StEmcTriggerMaker.cxx,v 1.23 2007/08/22 15:06:53 kocolosk Exp $
 //
 // $Log: StEmcTriggerMaker.cxx,v $
+// Revision 1.23  2007/08/22 15:06:53  kocolosk
+// added #include statements that should have always been there.  We didn't catch the problem
+// because StBemcTables provided them in the past.
+//
 // Revision 1.22  2007/05/12 12:45:53  rfatemi
 // Added BHT2 for 2003, new access scheme extends back to 2003+2004, remove all access to StEmcPedestal tables
 //

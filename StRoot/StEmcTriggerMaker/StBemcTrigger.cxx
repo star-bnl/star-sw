@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.30 2007/05/21 16:02:56 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.31 2007/08/22 15:06:52 kocolosk Exp $
 //
 //
 
@@ -13,6 +13,7 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_emcPed_Table.h"
 #include "StEmcUtil/database/StBemcTables.h"
+#include "StEmcRawMaker/defines.h"
 
 ClassImp(StBemcTrigger);
 
