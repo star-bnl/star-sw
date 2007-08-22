@@ -161,8 +161,32 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      
 	      if ( gpost && !post.fail() && post.energy() > 0. )
 		can -> addMyPostshower( gpost );
-	      
-	      
+
+	      // add tracks to the list of "my" tracks, i.e. tracks which 
+	      // extrapolate to the gamma candidate tower
+
+	      if ( gtower ) {
+		for (int k = 0; k < gevent->numberOfTracks(); ++k) {
+		  StGammaTrack* track = gevent->track(k);
+		  if (!track) continue;
+		  try
+		    {
+		      EEmcGeomSimple& geom = EEmcGeomSimple::Instance();
+		      TVector3 position = track->positionAtZ(geom.getZ1());
+		      int sector, subsector, etabin;
+		      if (geom.getTower(position, sector, subsector, etabin))
+			{
+			  if (gtower->sector   () == sector    &&
+			      gtower->subsector() == subsector &&
+			      gtower->etabin   () == etabin)
+			    {
+			      can -> addMyTrack( track );
+			    }
+			}
+		    }
+		  catch (StGammaTrack::Exception& e) {}
+		}
+	      }
 	    }
 
 
@@ -364,7 +388,23 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 		}
 	    }
 
+	  // Sum SMDU energy
+	  float smduEnergy = 0;
+	  for (int i = 0; i < can->numberOfSmdu(); ++i)
+	    {
+	      StGammaStrip* strip = can->smdu(i);
+	      smduEnergy += strip->energy;
+	    }
+	  can->SetSmduEnergy(smduEnergy);
 
+	  // Sum SMDV energy
+	  float smdvEnergy = 0;
+	  for (int i = 0; i < can->numberOfSmdv(); ++i)
+	    {
+	      StGammaStrip* strip = can->smdv(i);
+	      smdvEnergy += strip->energy;
+	    }
+	  can->SetSmdvEnergy(smdvEnergy);
 
 	}// loop over clusters
 
@@ -454,14 +494,16 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	  for (int k = 0; k < gevent->numberOfTracks(); ++k) {
 	    StGammaTrack* track = gevent->track(k);
 	    if (!track) continue;
-	    TVector3 position;
-	    TVector3 momentum;
-	    double magneticField = gevent->magneticField() * kilogauss;
-	    if (!getPositionMomentumAtBarrel(track, magneticField, position, momentum)) continue;
-	    int id;
-	    if (StEmcGeom::instance("bemc")->getId(position.Phi(), position.Eta(), id) != 0) continue;
-	    if (id != static_cast<int>(tower->id)) continue;
-	    candidate->addMyTrack(track);
+	    try {
+	      StEmcGeom* geom = StEmcGeom::instance("bemc");
+	      TVector3 position = track->positionAtRadius(geom->Radius());
+	      int id;
+	      if (geom->getId(position.Phi(), position.Eta(), id) == 0 &&
+		  id == static_cast<int>(tower->id)) {
+		candidate->addMyTrack(track);
+	      }
+	    }
+	    catch (StGammaTrack::Exception& e) {}
 	  }
 	}
       }
