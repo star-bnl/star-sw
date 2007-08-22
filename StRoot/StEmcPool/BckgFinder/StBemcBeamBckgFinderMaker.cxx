@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.10 2006/06/27 16:54:47 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.11 2007/08/22 14:03:50 kocolosk Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -19,6 +19,9 @@
 #include <StMessMgr.h>
 #include <StEmcUtil/geometry/StEmcGeom.h>
 #include <StEmcUtil/database/StBemcTables.h>
+
+#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcRawMaker/defines.h"
 
 //MuDst
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -559,6 +562,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.11  2007/08/22 14:03:50  kocolosk
+  #included some additional headers that used to be included implicitly from StBemcTables
+
   Revision 1.10  2006/06/27 16:54:47  qattan
   *** empty log message ***
 
