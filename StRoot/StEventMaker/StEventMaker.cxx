@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.82 2007/08/24 15:07:43 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.83 2007/08/24 17:26:29 fine Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -208,8 +208,8 @@ StEventMaker::Make()
     }
     if (doPrintCpuInfo) {
         timer.stop();
-        cout << "CPU time for StEventMaker::Make(): "
-             << timer.elapsedTime() << " sec\n" << endl;
+        LOG_DEBUG  << "CPU time for StEventMaker::Make(): "
+             << timer.elapsedTime() << " sec\n" << endm;
     }
     
     return status;
@@ -1381,292 +1381,292 @@ StEventMaker::makeEvent()
 void
 StEventMaker::printEventInfo()
 {
-    cout << "*********************************************************" << endl;
-    cout << "*                  StEvent Information                  *" << endl;
-    cout << "*********************************************************" << endl;
+    LOG_INFO << "*********************************************************" << endm;
+    LOG_INFO << "*                  StEvent Information                  *" << endm;
+    LOG_INFO << "*********************************************************" << endm;
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StEvent at " << (void*) mCurrentEvent                      << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StEvent at " << (void*) mCurrentEvent                      << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent)
 	 mCurrentEvent->Dump();
     else
         return;
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StRunInfo at " << (void*) mCurrentEvent->runInfo()         << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StRunInfo at " << (void*) mCurrentEvent->runInfo()         << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->runInfo())
 	 mCurrentEvent->runInfo()->Dump();
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StEventInfo at " << (void*) mCurrentEvent->info()          << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StEventInfo at " << (void*) mCurrentEvent->info()          << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->info())
 	 mCurrentEvent->info()->Dump();
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StEventSummary at " << (void*) (mCurrentEvent->summary())  << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StEventSummary at " << (void*) (mCurrentEvent->summary())  << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->summary()) mCurrentEvent->summary()->Dump();
     if (mCurrentEvent->summary()) {
         unsigned int k;
  StEventSummary *evtsum = mCurrentEvent->summary();
-        cout << "--> StEventSummary quasi-histograms" << endl;
-        cout << "--> StEventSummary quasi-histogram -> # of tracks vs. eta" << endl;
+    LOG_INFO << "--> StEventSummary quasi-histograms" << endm;
+    LOG_INFO << "--> StEventSummary quasi-histogram -> # of tracks vs. eta" << endm;
         for (k=0; k<evtsum->numberOfBins(); k++) {
-            cout << k << "\t[" << evtsum->lowerEdgeEtaBin(k)
+           LOG_INFO << k << "\t[" << evtsum->lowerEdgeEtaBin(k)
                  << " - "      << evtsum->upperEdgeEtaBin(k)
-                 << "] : \t"  <<  evtsum->tracksInEtaBin(k) << endl;
+                 << "] : \t"  <<  evtsum->tracksInEtaBin(k) << endm;
         }
-        cout << "--> StEventSummary quasi-histogram -> # of tracks vs. phi" << endl;
+        LOG_INFO << "--> StEventSummary quasi-histogram -> # of tracks vs. phi" << endm;
         for (k=0; k<evtsum->numberOfBins(); k++) {
-            cout << k << "\t[" << evtsum->lowerEdgePhiBin(k)
+           LOG_INFO << k << "\t[" << evtsum->lowerEdgePhiBin(k)
                  << " - "      << evtsum->upperEdgePhiBin(k)
-                 << "] : \t"   << evtsum->tracksInPhiBin(k) << endl;
+                 << "] : \t"   << evtsum->tracksInPhiBin(k) << endm;
         }
-        cout << "--> StEventSummary quasi-histogram -> # of tracks vs. pt" << endl;
+        LOG_INFO << "--> StEventSummary quasi-histogram -> # of tracks vs. pt" << endm;
         for (k=0; k<evtsum->numberOfBins(); k++) {
-            cout << k << "\t[" << evtsum->lowerEdgePtBin(k)
+           LOG_INFO << k << "\t[" << evtsum->lowerEdgePtBin(k)
                  << " - "      << evtsum->upperEdgePtBin(k)
-                 << "] : \t"   << evtsum->tracksInPtBin(k) << endl;
+                 << "] : \t"   << evtsum->tracksInPtBin(k) << endm;
         }
-        cout << "--> StEventSummary quasi-histogram -> energy vs. eta" << endl;
+        LOG_INFO << "--> StEventSummary quasi-histogram -> energy vs. eta" << endm;
         for (k=0; k<evtsum->numberOfBins(); k++) {
-            cout << k << "\t[" << evtsum->lowerEdgeEtaBin(k)
+            LOG_INFO << k << "\t[" << evtsum->lowerEdgeEtaBin(k)
                  << " - "      << evtsum->upperEdgeEtaBin(k)
-                 << "] : \t"   << evtsum->energyInEtaBin(k) << endl;
+                 << "] : \t"   << evtsum->energyInEtaBin(k) << endm;
         }
-        cout << "--> StEventSummary quasi-histogram -> energy vs. phi" << endl;
+        LOG_INFO << "--> StEventSummary quasi-histogram -> energy vs. phi" << endm;
         for (k=0; k<evtsum->numberOfBins(); k++) {
-            cout << k << "\t[" << evtsum->lowerEdgePhiBin(k)
+        LOG_INFO << k << "\t[" << evtsum->lowerEdgePhiBin(k)
                  << " - "      << evtsum->upperEdgePhiBin(k)
-                 << "] : \t"   << evtsum->energyInPhiBin(k) << endl;
+                 << "] : \t"   << evtsum->energyInPhiBin(k) << endm;
         }
     }
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSoftwareMonitor at "
-         << (void*) (mCurrentEvent->softwareMonitor())                  << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSoftwareMonitor at "
+         << (void*) (mCurrentEvent->softwareMonitor())                  << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->softwareMonitor()) mCurrentEvent->softwareMonitor()->Dump();
     
     if (mCurrentEvent->softwareMonitor()) {
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StTpcSoftwareMonitor at "
-             << (void*) (mCurrentEvent->softwareMonitor()->tpc())           << endl;
-        cout << "---------------------------------------------------------" << endl;
+      LOG_INFO << "---------------------------------------------------------" << endm;
+      LOG_INFO << "StTpcSoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->tpc())           << endm;
+      LOG_INFO << "---------------------------------------------------------" << endm;
         if (mCurrentEvent->softwareMonitor()->tpc())
             mCurrentEvent->softwareMonitor()->tpc()->Dump();
         
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StSvtSoftwareMonitor at "
-             << (void*) (mCurrentEvent->softwareMonitor()->svt())           << endl;
-        cout << "---------------------------------------------------------" << endl;
+      LOG_INFO << "---------------------------------------------------------" << endm;
+      LOG_INFO << "StSvtSoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->svt())           << endm;
+      LOG_INFO << "---------------------------------------------------------" << endm;
         if (mCurrentEvent->softwareMonitor()->svt())
             mCurrentEvent->softwareMonitor()->svt()->Dump();
         
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StFtpcSoftwareMonitor at "
-             << (void*) (mCurrentEvent->softwareMonitor()->ftpc())          << endl;
-        cout << "---------------------------------------------------------" << endl;
+     LOG_INFO<< "---------------------------------------------------------" << endm;
+       LOG_INFO << "StFtpcSoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->ftpc())          << endm;
+       LOG_INFO << "---------------------------------------------------------" << endm;
         if (mCurrentEvent->softwareMonitor()->ftpc())
             mCurrentEvent->softwareMonitor()->ftpc()->Dump();
 	
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StEmcSoftwareMonitor at "
-             << (void*) (mCurrentEvent->softwareMonitor()->emc())           << endl;
-        cout << "---------------------------------------------------------" << endl;
+      LOG_INFO << "---------------------------------------------------------" << endm;
+      LOG_INFO << "StEmcSoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->emc())           << endm;
+      LOG_INFO << "---------------------------------------------------------" << endm;
         if (mCurrentEvent->softwareMonitor()->emc())
             mCurrentEvent->softwareMonitor()->emc()->Dump();
         
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StRichSoftwareMonitor at "
-             << (void*) (mCurrentEvent->softwareMonitor()->rich())          << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StRichSoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->rich())          << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         if (mCurrentEvent->softwareMonitor()->rich())
             mCurrentEvent->softwareMonitor()->rich()->Dump();
         
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StCtbSoftwareMonitor at "
-             << (void*) (mCurrentEvent->softwareMonitor()->ctb())           << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StCtbSoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->ctb())           << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         if (mCurrentEvent->softwareMonitor()->ctb())
             mCurrentEvent->softwareMonitor()->ctb()->Dump();
         
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StL3SoftwareMonitor at "
-             << (void*) (mCurrentEvent->softwareMonitor()->l3())            << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StL3SoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->l3())            << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         if (mCurrentEvent->softwareMonitor()->l3())
             mCurrentEvent->softwareMonitor()->l3()->Dump();
         
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StGlobalSoftwareMonitor at "
-             << (void*) (mCurrentEvent->softwareMonitor()->global())        << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StGlobalSoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->global())        << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         if (mCurrentEvent->softwareMonitor()->global())
             mCurrentEvent->softwareMonitor()->global()->Dump();
     }
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StL0Trigger at "
-         << (void*) (mCurrentEvent->l0Trigger())                        << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StL0Trigger at "
+         << (void*) (mCurrentEvent->l0Trigger())                        << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->l0Trigger()) mCurrentEvent->l0Trigger()->Dump();
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StTriggerDetectorCollection at "
-         << (void*) (mCurrentEvent->triggerDetectorCollection())        << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StTriggerDetectorCollection at "
+         << (void*) (mCurrentEvent->triggerDetectorCollection())        << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->triggerDetectorCollection())
         mCurrentEvent->triggerDetectorCollection()->Dump();
 
     if (mCurrentEvent->triggerDetectorCollection()) {
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StCtbTriggerDetector"                                      << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StCtbTriggerDetector"                                      << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->triggerDetectorCollection()->ctb().Dump();
 	
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StMwcTriggerDetector"                                      << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StMwcTriggerDetector"                                      << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->triggerDetectorCollection()->mwc().Dump();
 	
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StVpdTriggerDetector"                                      << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StVpdTriggerDetector"                                      << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->triggerDetectorCollection()->vpd().Dump();
 	
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StZdcTriggerDetector"                                      << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StZdcTriggerDetector"                                      << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->triggerDetectorCollection()->zdc().Dump();
     }
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecTrackDetectorInfo"                                << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "collection size = "
-         << mCurrentEvent->trackDetectorInfo().size() << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSPtrVecTrackDetectorInfo"                                << endm;
+    LOG_INFO << "Dumping first element in collection only (if available). " << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "collection size = "
+         << mCurrentEvent->trackDetectorInfo().size() << endm;
     
     if (mCurrentEvent->trackDetectorInfo().size()) {
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StTrackDetectorInfo at "
-             << (void*) mCurrentEvent->trackDetectorInfo()[0]               << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StTrackDetectorInfo at "
+             << (void*) mCurrentEvent->trackDetectorInfo()[0]               << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->trackDetectorInfo()[0]->Dump();
     }
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecTrackNode"                                        << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "All tracks in the first node are printed separately  "     << endl;
-    cout << "after the node info.                                     " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "collection size = "
-         << mCurrentEvent->trackNodes().size() << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSPtrVecTrackNode"                                        << endm;
+    LOG_INFO << "Dumping first element in collection only (if available). " << endm;
+    LOG_INFO << "All tracks in the first node are printed separately  "     << endm;
+    LOG_INFO << "after the node info.                                     " << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "collection size = "
+         << mCurrentEvent->trackNodes().size() << endm;
     
     unsigned int i;
     if (mCurrentEvent->trackNodes().size()) {
-        cout << "# tracks in first element = "
-             << mCurrentEvent->trackNodes()[0]->entries() << endl;
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StTrackNode at "
-             << (void*) mCurrentEvent->trackNodes()[0]                      << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "# tracks in first element = "
+             << mCurrentEvent->trackNodes()[0]->entries() << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StTrackNode at "
+             << (void*) mCurrentEvent->trackNodes()[0]                      << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->trackNodes()[0]->Dump();
         for (i=0; i<mCurrentEvent->trackNodes()[0]->entries(); i++)
             printTrackInfo(mCurrentEvent->trackNodes()[0]->track(i));
     }
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecPrimaryVertex"                                    << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "The first daughter track (primary track) in the first    " << endl;
-    cout << "vertex is printed separately after the vertex info.      " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "collection size = "
-         << mCurrentEvent->numberOfPrimaryVertices() << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSPtrVecPrimaryVertex"                                    << endm;
+    LOG_INFO << "Dumping first element in collection only (if available). " << endm;
+    LOG_INFO << "The first daughter track (primary track) in the first    " << endm;
+    LOG_INFO << "vertex is printed separately after the vertex info.      " << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "collection size = "
+         << mCurrentEvent->numberOfPrimaryVertices() << endm;
     
     if (mCurrentEvent->numberOfPrimaryVertices()) {
-        cout << "# primary tracks in first element = "
-             << mCurrentEvent->primaryVertex()->numberOfDaughters() << endl;
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StPrimaryVertex at "
-             << (void*) mCurrentEvent->primaryVertex()                      << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "# primary tracks in first element = "
+             << mCurrentEvent->primaryVertex()->numberOfDaughters() << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StPrimaryVertex at "
+             << (void*) mCurrentEvent->primaryVertex()                      << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->primaryVertex()->Dump();
         if (mCurrentEvent->primaryVertex()->numberOfDaughters())
             printTrackInfo(mCurrentEvent->primaryVertex()->daughter(0));
     }
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecCalibrationVertex"                                << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "collection size = "
-         << mCurrentEvent->numberOfCalibrationVertices() << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSPtrVecCalibrationVertex"                                << endm;
+    LOG_INFO << "Dumping first element in collection only (if available). " << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "collection size = "
+         << mCurrentEvent->numberOfCalibrationVertices() << endm;
     
     if (mCurrentEvent->numberOfCalibrationVertices())
         mCurrentEvent->calibrationVertex(0)->Dump();
 
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecV0Vertex"                                         << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "collection size = "
-         << mCurrentEvent->v0Vertices().size() << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSPtrVecV0Vertex"                                         << endm;
+    LOG_INFO << "Dumping first element in collection only (if available). " << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "collection size = "
+         << mCurrentEvent->v0Vertices().size() << endm;
     
     if (mCurrentEvent->v0Vertices().size()) {
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StV0Vertex at "
-             << (void*) mCurrentEvent->v0Vertices()[0]                      << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StV0Vertex at "
+             << (void*) mCurrentEvent->v0Vertices()[0]                      << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->v0Vertices()[0]->Dump();
     }
 
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecXiVertex"                                         << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "collection size = "
-         << mCurrentEvent->xiVertices().size() << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSPtrVecXiVertex"                                         << endm;
+    LOG_INFO << "Dumping first element in collection only (if available). " << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "collection size = "
+         << mCurrentEvent->xiVertices().size() << endm;
     
     if (mCurrentEvent->xiVertices().size()) {
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StXiVertex at "
-             << (void*) mCurrentEvent->xiVertices()[0]                      << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StXiVertex at "
+             << (void*) mCurrentEvent->xiVertices()[0]                      << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->xiVertices()[0]->Dump();
     }
     
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecKinkVertex"                                       << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "collection size = "
-         << mCurrentEvent->kinkVertices().size() << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSPtrVecKinkVertex"                                       << endm;
+    LOG_INFO << "Dumping first element in collection only (if available). " << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "collection size = "
+         << mCurrentEvent->kinkVertices().size() << endm;
     
     if (mCurrentEvent->kinkVertices().size()) {
-        cout << "---------------------------------------------------------" << endl;
-        cout << "StKinkVertex at "
-             << (void*) mCurrentEvent->kinkVertices()[0]                    << endl;
-        cout << "---------------------------------------------------------" << endl;
+        LOG_INFO << "---------------------------------------------------------" << endm;
+        LOG_INFO << "StKinkVertex at "
+             << (void*) mCurrentEvent->kinkVertices()[0]                    << endm;
+        LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->kinkVertices()[0]->Dump();
     }
     
     unsigned int       j, k, nhits;
     Bool_t             gotOneHit;
     StTpcHitCollection *tpcColl = mCurrentEvent->tpcHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StTpcHitCollection at " << (void*) tpcColl                 << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StTpcHitCollection at " << (void*) tpcColl                 << endm;
+    LOG_INFO << "Dumping collection size and one hit only."                 << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (tpcColl) {
         nhits = tpcColl->numberOfHits();
-        cout << "# of hits in collection = " << nhits << endl;
+        LOG_INFO << "# of hits in collection = " << nhits << endm;
         gotOneHit = kFALSE;
         for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
             for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++)
@@ -1677,13 +1677,13 @@ StEventMaker::printEventInfo()
     }
     
     StFtpcHitCollection *ftpcColl = mCurrentEvent->ftpcHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StFtpcHitCollection at " << (void*) ftpcColl               << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StFtpcHitCollection at " << (void*) ftpcColl               << endm;
+    LOG_INFO << "Dumping collection size and one hit only."                 << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (ftpcColl) {
         nhits = ftpcColl->numberOfHits();
-        cout << "# of hits in collection = " << nhits << endl;
+        LOG_INFO << "# of hits in collection = " << nhits << endm;
         gotOneHit = kFALSE;
         for (k=0; !gotOneHit && k<ftpcColl->numberOfPlanes(); k++)
             for (j=0; !gotOneHit && j<ftpcColl->plane(k)->numberOfSectors(); j++)
@@ -1694,13 +1694,13 @@ StEventMaker::printEventInfo()
     }
     
     StSvtHitCollection *svtColl = mCurrentEvent->svtHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSvtHitCollection at " << (void*) svtColl                 << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSvtHitCollection at " << (void*) svtColl                 << endm;
+    LOG_INFO << "Dumping collection size and one hit only."                 << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (svtColl) {
         nhits = svtColl->numberOfHits();
-        cout << "# of hits in collection = " << nhits << endl;
+        LOG_INFO << "# of hits in collection = " << nhits << endm;
         gotOneHit = kFALSE;
         for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
             for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
@@ -1712,13 +1712,13 @@ StEventMaker::printEventInfo()
     }
     
     StSsdHitCollection *ssdColl = mCurrentEvent->ssdHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSsdHitCollection at " << (void*) ssdColl                 << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StSsdHitCollection at " << (void*) ssdColl                 << endm;
+    LOG_INFO << "Dumping collection size and one hit only."                 << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (ssdColl) {
         nhits = ssdColl->numberOfHits();
-        cout << "# of hits in collection = " << nhits << endl;
+        LOG_INFO << "# of hits in collection = " << nhits << endm;
         gotOneHit = kFALSE;
         for (k=0; !gotOneHit && k<ssdColl->numberOfLadders(); k++)
 	    for (i=0; !gotOneHit && i<ssdColl->ladder(j)->numberOfWafers(); i++)
@@ -1728,74 +1728,77 @@ StEventMaker::printEventInfo()
 		}
     }
 
-    cout << endl;
+    LOG_INFO << endm;
 
     //
     //   Info from some tables for comparisons.
     //   Only tables with varying # of rows are listed.
     //
-    cout << "*********************************************************" << endl;
-    cout << "*                   Table Information                   *" << endl;
-    cout << "*********************************************************" << endl;
+    LOG_INFO << "*********************************************************" << endm;
+    LOG_INFO << "*                   Table Information                   *" << endm;
+    LOG_INFO << "*********************************************************" << endm;
     long nrows;
-    cout << "globtrk:    ";
-    if (mEventManager->returnTable_dst_globtrk(nrows))    cout << nrows << endl; else cout << "n/a" << endl;
-    cout << "primtrk:    ";
-    if (mEventManager->returnTable_dst_primtrk(nrows))    cout << nrows << endl; else cout << "n/a" << endl;
-    cout << "tpt:        ";
-    if (mEventManager->returnTable_CpyTrk(nrows))         cout << nrows << endl; else cout << "n/a" << endl;
-    cout << "dedx:       ";
-    if (mEventManager->returnTable_dst_dedx(nrows))       cout << nrows << endl; else cout << "n/a" << endl;
-    cout << "vertex:     ";
-    if (mEventManager->returnTable_dst_vertex(nrows))     cout << nrows << endl; else cout << "n/a" << endl;
-    cout << "v0_vertex:  ";
-    if (mEventManager->returnTable_dst_v0_vertex(nrows))  cout << nrows << endl; else cout << "n/a" << endl;
-    cout << "xi_vertex:  ";
-    if (mEventManager->returnTable_dst_xi_vertex(nrows))  cout << nrows << endl; else cout << "n/a" << endl;
-    cout << "tkf_vertex: ";
-    if (mEventManager->returnTable_dst_tkf_vertex(nrows)) cout << nrows << endl; else cout << "n/a" << endl;
-    cout << "point:      ";
-    if (mEventManager->returnTable_dst_point(nrows))      cout << nrows << endl; else cout << "n/a" << endl;
-    cout << endl;
+    LOG_INFO << "globtrk:    ";
+    if (mEventManager->returnTable_dst_globtrk(nrows))    { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << "primtrk:    ";
+    if (mEventManager->returnTable_dst_primtrk(nrows))    { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << "tpt:        ";
+    if (mEventManager->returnTable_CpyTrk(nrows))         { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << "dedx:       ";
+    if (mEventManager->returnTable_dst_dedx(nrows))       { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << "vertex:     ";
+    if (mEventManager->returnTable_dst_vertex(nrows))     { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << "v0_vertex:  ";
+    if (mEventManager->returnTable_dst_v0_vertex(nrows))  { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << "xi_vertex:  ";
+    if (mEventManager->returnTable_dst_xi_vertex(nrows))  { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << "tkf_vertex: ";
+    if (mEventManager->returnTable_dst_tkf_vertex(nrows)) { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << "point:      ";
+    if (mEventManager->returnTable_dst_point(nrows))      { LOG_INFO << nrows << endm; } else {LOG_INFO << "n/a" << endm;}
+    LOG_INFO << endm;
 }
 
 void
 StEventMaker::printTrackInfo(StTrack* track)
 {
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StTrack (" << (track ? track->GetName() : "n/a")
-         << ") at " << (void*) track                                    << endl;
-    cout << "---------------------------------------------------------" << endl;
+    LOG_INFO << "---------------------------------------------------------" << endm;
+    LOG_INFO << "StTrack (" << (track ? track->GetName() : "n/a")
+         << ") at " << (void*) track                                    << endm;
+    LOG_INFO << "---------------------------------------------------------" << endm;
     if (track) {
         track->Dump();
-        cout << "covariantMatrix():" << track->fitTraits().covariantMatrix() << endl;
+        LOG_INFO << "covariantMatrix():" << track->fitTraits().covariantMatrix() << endm;
 	
-        cout << "---> StTrack -> StGeometry ("<< track->geometry()->GetName()
-             << ") at " << (void*) (track->geometry()) << endl;
+        LOG_INFO << "---> StTrack -> StGeometry ("<< track->geometry()->GetName()
+             << ") at " << (void*) (track->geometry()) << endm;
         if (track->geometry()) track->geometry()->Dump();
 
-        cout << "---> StTrack -> StGeometry (outer) ("<< track->outerGeometry()->GetName()
-             << ") at " << (void*) (track->outerGeometry()) << endl;
+        LOG_INFO << "---> StTrack -> StGeometry (outer) ("<< track->outerGeometry()->GetName()
+             << ") at " << (void*) (track->outerGeometry()) << endm;
         if (track->outerGeometry()) track->outerGeometry()->Dump();
 	
-        cout << "---> StTrack -> StDetectorInfo at "
-             << (void*) (track->detectorInfo()) << endl;
+        LOG_INFO << "---> StTrack -> StDetectorInfo at "
+             << (void*) (track->detectorInfo()) << endm;
         if (track->detectorInfo()) track->detectorInfo()->Dump();
 	
-        cout << "---> StTrack -> StTrackNode at "
-             << (void*) (track->node()) << endl;
+        LOG_INFO << "---> StTrack -> StTrackNode at "
+             << (void*) (track->node()) << endm;
         if (track->node()) track->node()->Dump();
 	
-        cout << "---> StTrack -> StPidTraits ("
+        LOG_INFO << "---> StTrack -> StPidTraits ("
              << (track->pidTraits().size() ? 1 : 0 ) << " of "
-             <<  track->pidTraits().size() << " entries shown)" << endl;
+             <<  track->pidTraits().size() << " entries shown)" << endm;
         if (track->pidTraits().size()) track->pidTraits()[0]->Dump();
     }
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.82 2007/08/24 15:07:43 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.83 2007/08/24 17:26:29 fine Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.83  2007/08/24 17:26:29  fine
+ * replace cout with LOG_INFO
+ *
  * Revision 2.82  2007/08/24 15:07:43  perev
  * No print mem info by default
  *
