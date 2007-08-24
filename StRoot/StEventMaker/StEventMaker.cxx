@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.81 2007/05/11 23:17:11 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.82 2007/08/24 15:07:43 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -118,8 +118,8 @@ ClassImp(StEventMaker)
     doLoadTptTracks   = kFALSE;
     doLoadEstTracks   = kTRUE;
     doPrintEventInfo  = kFALSE;
-    doPrintMemoryInfo = kTRUE;
-    doPrintCpuInfo    = kTRUE;
+    doPrintMemoryInfo = kFALSE;
+    doPrintCpuInfo    = kFALSE;
     mCreateEmptyInstance = kFALSE;
 }
 
@@ -1794,8 +1794,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.81 2007/05/11 23:17:11 jeromel Exp $
+ * $Id: StEventMaker.cxx,v 2.82 2007/08/24 15:07:43 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.82  2007/08/24 15:07:43  perev
+ * No print mem info by default
+ *
  * Revision 2.81  2007/05/11 23:17:11  jeromel
  * Addition by J.Dunlop of random trigger (from db)
  *
