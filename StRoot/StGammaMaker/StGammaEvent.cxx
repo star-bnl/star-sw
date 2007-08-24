@@ -29,13 +29,6 @@ void StGammaEvent::Clear(Option_t *opts)
 
   mFlags=0x0000;
 
-  nTracks=0;
-  nTowers=0;
-  nPreshower1=0;
-  nPreshower2=0;
-  nPostshower=0;
-  nStrips=0;
-  nCandidates=0;
   if (mPythia) mPythia->Clear(opts);
 }
 
@@ -58,51 +51,51 @@ StGammaTrack *StGammaEvent::newTrack( StMuTrack *mutr )
   TClonesArray &tracks = *mTracks;
   StGammaTrack *track = 0;
   if ( mutr )
-    track = new( tracks[nTracks++] ) StGammaTrack(mutr);
+    track = new( tracks[tracks.GetEntriesFast()] ) StGammaTrack(mutr);
   else
-    track = new( tracks[nTracks++] ) StGammaTrack();
+    track = new( tracks[tracks.GetEntriesFast()] ) StGammaTrack;
   return track;
 }
 
 StGammaTower *StGammaEvent::newTower()
 {
   TClonesArray &towers = *mTowers;
-  StGammaTower *tower = new( towers[nTowers++] ) StGammaTower();
+  StGammaTower *tower = new( towers[towers.GetEntriesFast()] ) StGammaTower();
   return tower;
 }
 
 StGammaTower *StGammaEvent::newPreshower1()
 {
   TClonesArray &preshower1 = *mPreshower1;
-  StGammaTower *tower = new( preshower1[nPreshower1++] ) StGammaTower();
+  StGammaTower *tower = new( preshower1[preshower1.GetEntriesFast()] ) StGammaTower();
   return tower;
 }
 
 StGammaTower *StGammaEvent::newPreshower2()
 {
   TClonesArray &preshower2 = *mPreshower2;
-  StGammaTower *tower = new( preshower2[nPreshower2++] ) StGammaTower();
+  StGammaTower *tower = new( preshower2[preshower2.GetEntriesFast()] ) StGammaTower();
   return tower;
 }
 
 StGammaTower *StGammaEvent::newPostshower()
 {
   TClonesArray &postshower = *mPostshower;
-  StGammaTower *tower = new( postshower[nPostshower++] ) StGammaTower();
+  StGammaTower *tower = new( postshower[postshower.GetEntriesFast()] ) StGammaTower();
   return tower;
 }
 
 StGammaStrip *StGammaEvent::newStrip()
 {
   TClonesArray &strips = *mStrips;
-  StGammaStrip *strip = new( strips[nStrips++] ) StGammaStrip();
+  StGammaStrip *strip = new( strips[strips.GetEntriesFast()] ) StGammaStrip();
   return strip;
 }
 
 StGammaCandidate *StGammaEvent::newCandidate()
 {
   TClonesArray &candidates = *mCandidates;
-  StGammaCandidate *candidate = new( candidates[nCandidates++] ) StGammaCandidate();
+  StGammaCandidate *candidate = new( candidates[candidates.GetEntriesFast()] ) StGammaCandidate();
   return candidate;
 }
 
@@ -136,4 +129,3 @@ Float_t StGammaEvent::sumTowerPt(Float_t min, Float_t max)
     }
   return sum;
 }
-

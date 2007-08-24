@@ -30,7 +30,7 @@ class StGammaEvent : public TObject {
   
  public:
   StGammaEvent();
-  ~StGammaEvent(){ /* nada */ };
+  ~StGammaEvent(){ /* nada */ }
 
   void Clear(Option_t *opts="");
   UShort_t mFlags;  /// Event flags (see above)
@@ -44,13 +44,13 @@ class StGammaEvent : public TObject {
   StGammaStrip *newStrip();/// Add a new SMD strip
   StGammaCandidate *newCandidate();/// Add a new gamma candidate
 
-  Int_t numberOfTracks(){ return nTracks; }/// Return number of tracks
-  Int_t numberOfTowers(){ return nTowers; }/// Return number of towers
-  Int_t numberOfPreshower1(){ return nPreshower1; }/// Return number of pre1
-  Int_t numberOfPreshower2(){ return nPreshower2; }/// Return number of pre2
-  Int_t numberOfPostshower(){ return nPostshower; }/// Return number of post
-  Int_t numberOfStrips(){ return nStrips; }/// Return number of strips
-  Int_t numberOfCandidates(){ return nCandidates; }/// Return number of candidates
+  Int_t numberOfTracks() { return mTracks ? mTracks->GetEntriesFast() : 0; } /// Return number of tracks
+  Int_t numberOfTowers() { return mTowers ? mTowers->GetEntriesFast() : 0; } /// Return number of towers
+  Int_t numberOfPreshower1() { return mPreshower1 ? mPreshower1->GetEntriesFast() : 0; } /// Return number of pre1
+  Int_t numberOfPreshower2() { return mPreshower2 ? mPreshower2->GetEntriesFast() : 0; } /// Return number of pre2
+  Int_t numberOfPostshower() { return mPostshower ? mPostshower->GetEntriesFast() : 0; } /// Return number of post
+  Int_t numberOfStrips() { return mStrips ? mStrips->GetEntriesFast() : 0; } /// Return number of strips
+  Int_t numberOfCandidates() { return mCandidates ? mCandidates->GetEntriesFast() : 0; } /// Return number of candidates
 
   Float_t sumPt( Float_t eta_min = -2.5, Float_t eta_max = +2.5 );/// Returns track+tower pT in eta range
   Float_t sumTrackPt(Float_t eta_min = -2.5, Float_t eta_max = +2.5 );/// Returns track pT in eta range
@@ -78,7 +78,7 @@ class StGammaEvent : public TObject {
  public:
   void SetRunNumber( Int_t run ){ mRunNumber=run; }
   void SetEventNumber( Int_t event ){ mEventNumber=event; }
-  void SetTriggerIds(const vector<unsigned int>& triggerIds);
+  void SetTriggerIds(const vector<unsigned int>& triggerIds) { copy(triggerIds.begin(), triggerIds.end(), inserter(mTriggerIds, mTriggerIds.begin())); }
   void SetMudstFileName(const TObjString &i) { mMudstFileName = i; }
   void SetVertex(const TVector3& vertex ){ mVertex=vertex; }
   void SetMagneticField( Float_t magneticField) { mMagneticField = magneticField; }
@@ -97,14 +97,6 @@ class StGammaEvent : public TObject {
   //                                                 Towers, tracks and strips
   Int_t InitArrays();
 
-  Int_t nTracks;
-  Int_t nTowers;
-  Int_t nPreshower1;
-  Int_t nPreshower2;
-  Int_t nPostshower;
-  Int_t nStrips;
-  Int_t nCandidates;
-
   TClonesArray *mTracks;    //-> array of all tracks
   TClonesArray *mTowers;    //-> array of all towers
   TClonesArray *mPreshower1;//-> array of all preshower1
@@ -118,10 +110,5 @@ class StGammaEvent : public TObject {
   ClassDef(StGammaEvent,1);
 
 };
-
-inline void StGammaEvent::SetTriggerIds(const vector<unsigned int>& triggerIds)
-{
-  copy(triggerIds.begin(), triggerIds.end(), inserter(mTriggerIds, mTriggerIds.begin()));
-}
 
 #endif
