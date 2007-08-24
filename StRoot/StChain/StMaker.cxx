@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.197 2007/07/12 19:17:20 fisyak Exp $
+// $Id: StMaker.cxx,v 1.198 2007/08/24 23:57:24 perev Exp $
 //
 //
 /*!
@@ -358,7 +358,7 @@ TDataSet *StMaker::AddData(TDataSet *ds, const char* dir)
   if (!tl || !tl->FindObject(ds->GetName())) {
     set->Add(ds);
   } else {
-    Error("AddData","Data %s is not added. ***Name clash***",ds->GetName());
+    Error("AddData","Data %s/%s is not added. ***Name clash***",dir,ds->GetName());
     return 0;
   }
   return set;
@@ -1802,6 +1802,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.198  2007/08/24 23:57:24  perev
+// More informative err message
+//
 // Revision 1.197  2007/07/12 19:17:20  fisyak
 // Add fTopChain - a pointer to TopChain (for embedding), add method GetMakerInheritsFrom
 //
