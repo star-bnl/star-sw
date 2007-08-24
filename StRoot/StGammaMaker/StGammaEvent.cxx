@@ -60,71 +60,72 @@ StGammaTrack *StGammaEvent::newTrack( StMuTrack *mutr )
 StGammaTower *StGammaEvent::newTower()
 {
   TClonesArray &towers = *mTowers;
-  StGammaTower *tower = new( towers[towers.GetEntriesFast()] ) StGammaTower();
+  StGammaTower *tower = new( towers[towers.GetEntriesFast()] ) StGammaTower;
   return tower;
 }
 
 StGammaTower *StGammaEvent::newPreshower1()
 {
   TClonesArray &preshower1 = *mPreshower1;
-  StGammaTower *tower = new( preshower1[preshower1.GetEntriesFast()] ) StGammaTower();
+  StGammaTower *tower = new( preshower1[preshower1.GetEntriesFast()] ) StGammaTower;
   return tower;
 }
 
 StGammaTower *StGammaEvent::newPreshower2()
 {
   TClonesArray &preshower2 = *mPreshower2;
-  StGammaTower *tower = new( preshower2[preshower2.GetEntriesFast()] ) StGammaTower();
+  StGammaTower *tower = new( preshower2[preshower2.GetEntriesFast()] ) StGammaTower;
   return tower;
 }
 
 StGammaTower *StGammaEvent::newPostshower()
 {
   TClonesArray &postshower = *mPostshower;
-  StGammaTower *tower = new( postshower[postshower.GetEntriesFast()] ) StGammaTower();
+  StGammaTower *tower = new( postshower[postshower.GetEntriesFast()] ) StGammaTower;
   return tower;
 }
 
 StGammaStrip *StGammaEvent::newStrip()
 {
   TClonesArray &strips = *mStrips;
-  StGammaStrip *strip = new( strips[strips.GetEntriesFast()] ) StGammaStrip();
+  StGammaStrip *strip = new( strips[strips.GetEntriesFast()] ) StGammaStrip;
   return strip;
 }
 
 StGammaCandidate *StGammaEvent::newCandidate()
 {
   TClonesArray &candidates = *mCandidates;
-  StGammaCandidate *candidate = new( candidates[candidates.GetEntriesFast()] ) StGammaCandidate();
+  StGammaCandidate *candidate = new( candidates[candidates.GetEntriesFast()] ) StGammaCandidate;
   return candidate;
 }
 
 // ----------------------------------------------------------------------------
 
-Float_t StGammaEvent::sumPt( Float_t min, Float_t max )
+Float_t StGammaEvent::sumPt( Float_t eta_min, Float_t eta_max ) const
 {
-  return sumTrackPt(min,max) + sumTowerPt(min,max);
+  return sumTrackPt(eta_min,eta_max) + sumTowerPt(eta_min,eta_max);
 }
-Float_t StGammaEvent::sumTrackPt(Float_t min, Float_t max)
+
+Float_t StGammaEvent::sumTrackPt(Float_t eta_min, Float_t eta_max) const
 {  
   Float_t sum = 0.;
   for ( Int_t i=0;i<numberOfTracks();i++ )
     {
       StGammaTrack *t=track(i);
-      if ( t->eta() < min || t->eta() > max ) continue;
+      if ( t->eta() < eta_min || t->eta() > eta_max ) continue;
       sum += t->pt();
     }
   return sum;
 }
 
-Float_t StGammaEvent::sumTowerPt(Float_t min, Float_t max)
+Float_t StGammaEvent::sumTowerPt(Float_t eta_min, Float_t eta_max) const
 {  
   Float_t sum = 0.;
   for ( Int_t i=0;i<numberOfTowers();i++ )
     {
       StGammaTower *t=tower(i);
       if ( t->fail ) continue;      
-      if ( t->eta < min || t->eta > max ) continue;
+      if ( t->eta < eta_min || t->eta > eta_max ) continue;
       sum += t->pt();
     }
   return sum;
