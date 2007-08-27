@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.198 2007/08/24 23:57:24 perev Exp $
+// $Id: StMaker.cxx,v 1.199 2007/08/27 19:54:41 fisyak Exp $
 //
 //
 /*!
@@ -1764,7 +1764,20 @@ const StChainOpt *StMaker::GetChainOpt()    const
 //_____________________________________________________________________________
 TFile *StMaker::GetTFile() const 			
 {
-  const StChainOpt *opt = GetChainOpt();
+  const static Char_t *mktype = "StBFChain";
+  StMaker  *mk = 0;
+  if (this->InheritsFrom(mktype)) {mk = (StMaker *) this;}
+  else {
+    StMakerIter mkiter(GetChain());
+    while ((mk = mkiter.NextMaker())) {//loop over makers
+      if (mk->InheritsFrom(mktype))   {// take first TFile in any BFC
+	const StChainOpt *opt = mk->GetChainOpt();
+	if (!opt) continue;
+	if (opt->GetTFile()) break;
+      }
+    }
+  }
+  const StChainOpt *opt = mk->GetChainOpt();
   if (!opt) return 0;
   return opt->GetTFile();
 }
@@ -1802,6 +1815,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.199  2007/08/27 19:54:41  fisyak
+// Just account that only StBFChain has TFile
+//
 // Revision 1.198  2007/08/24 23:57:24  perev
 // More informative err message
 //
