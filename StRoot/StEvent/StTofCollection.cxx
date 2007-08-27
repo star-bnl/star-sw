@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCollection.cxx,v 2.8 2007/04/03 18:16:48 ullrich Exp $
+ * $Id: StTofCollection.cxx,v 2.9 2007/08/27 22:57:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.cxx,v $
+ * Revision 2.9  2007/08/27 22:57:49  ullrich
+ * Fixed problem in numberOfVpdEast() and numberOfVpdWest() - X. Dong
+ *
  * Revision 2.8  2007/04/03 18:16:48  ullrich
  * Add new data members and methods in preperation for new ToF.
  *
@@ -43,7 +46,7 @@
  **************************************************************************/
 #include "StTofCollection.h"
 
-static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.8 2007/04/03 18:16:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.9 2007/08/27 22:57:49 ullrich Exp $";
 
 ClassImp(StTofCollection)
     
@@ -177,7 +180,7 @@ StTofCollection::numberOfVpdEast() const
 {
     unsigned int num = 0;
     for(int i=0;i<32;i++) {
-	num += mVpdEast & (1<<i);
+       num += mVpdEast>>i & 1;
     }
     return num;
 }
@@ -187,7 +190,7 @@ StTofCollection::numberOfVpdWest() const
 {
     unsigned int num = 0;
     for(int i=0;i<32;i++) {
-	num += mVpdWest & (1<<i);
+       num += mVpdWest>>i & 1;
     }
     return num;
 }
