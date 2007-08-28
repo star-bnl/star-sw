@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.105 2006/08/15 21:42:43 jeromel Exp $
+// $Id: doEvents.C,v 1.106 2007/08/28 14:30:55 fine Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -205,7 +205,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   // Maker to read events from file or database into StEvent
   if (!mainBranch.Contains("mudstBranch") &&
       mainBranch.Contains("dstBranch")) {
-    gSystem->Load("StEventMaker");
+      gSystem->Load("StTpcDb");
+      gSystem->Load("StEventMaker");
     StEventMaker *readerMaker =  new StEventMaker("events","title");
   }
     //  Sample analysis maker
@@ -468,6 +469,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.106  2007/08/28 14:30:55  fine
+// Add StTpcDb to load StEventMaker
+//
 // Revision 1.105  2006/08/15 21:42:43  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
