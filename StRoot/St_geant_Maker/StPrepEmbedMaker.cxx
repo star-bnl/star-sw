@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.1 2007/07/12 20:34:35 fisyak Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.2 2007/08/29 22:59:33 andrewar Exp $
  *
  */
 
@@ -35,14 +35,20 @@ struct embedSettings{
   Double_t etahigh;
   Double_t philow;
   Double_t phihigh;
+  Int_t rnd1;
+  Int_t rnd2;
 };
+
 static embedSettings  *mSettings = 0;
 //________________________________________________________________________________
 StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name) {
   mEventCounter = 0;
   mGeant3=0;
-  mSettings = new embedSettings();
-  mSettings->mult=0.;
+
+  if( !mSettings ){
+    mSettings = new embedSettings();
+    mSettings->mult=0.;
+  }
   mFile = 0;
   mTree = 0;
 }
@@ -75,9 +81,27 @@ Int_t StPrepEmbedMaker::Init() {
       LOG_ERROR << "In TagFile : " << mTagFile << " cannot find TTree \"Tag\"" << endm;
       return kStErr;
     }
-    //    Do("detp  hadr_on");
+  
+
+
+    Do("detp  hadr_on");
+    TString cmd("rndm ");
+    cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
+    Do(cmd.Data());
+
+    Do("user/output o temp.fz");
+
     return StMaker::Init();
 }
+
+//----
+Int_t StPrepEmbedMaker::InitRun(int runnum)
+{
+  //Field can change from event to event (malformed event headers?) - set once per run
+  Do("field = 5.");
+}
+
+
 //________________________________________________________________________________
 Int_t StPrepEmbedMaker::Make() {
   mEventCounter++;  // increase counter
@@ -96,27 +120,61 @@ Int_t StPrepEmbedMaker::Make() {
   }
   Int_t numberOfPrimaryTracks = (Int_t) mTree->GetV1()[0];
   // Extract info for mult for this event
-  Int_t npart=int(mSettings->mult * numberOfPrimaryTracks);
-  if (! npart) {
-    LOG_ERROR << "StPrepEmbedMaker::Make EvtHddr skip event" << EvtHddr->GetEventNumber() 
-	      << " because numberOfPrimaryTracks " << numberOfPrimaryTracks << " is too low" << endm; 
-    return kStErr;
-  }
+  Int_t npart;
+  if(mSettings->mult < 1.) 
+    {
+      npart=int(mSettings->mult * numberOfPrimaryTracks);
+      if (! npart)
+      {
+	LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber() 
+	      << " has too small numberOfPrimaryTracks " << numberOfPrimaryTracks << " for the mult fraction requested. Forcing npart to 1." << endm; 
+	npart=1;
+      }
+  
+    }
+  else
+    {
+      npart = int (mSettings->mult);
+    }
+
+
   nFound = (Int_t) mTree->Draw("primaryVertexX:primaryVertexY:primaryVertexZ",
-			       Form("mRunNumber==%i&&mEventNumber==%i",EvtHddr->GetRunNumber(),EvtHddr->GetEventNumber()),
+			       Form("mRunNumber==%i&&mEventNumber==%i",
+				    EvtHddr->GetRunNumber(),
+				    EvtHddr->GetEventNumber()),
 			       "goff");
   Double_t xyz[3] = {mTree->GetV1()[0],mTree->GetV2()[0],mTree->GetV3()[0]};
-  // gkine              PTLOW,   PTHIGH,   YLOW,   YHIGH,   PHILOW,   PHIHIGH,   ZLOW,   ZHIGH
+
+  //Done set up for event.
+
+  //Setup embedded particle
+  // gkine      npart ID        PTLOW,   PTHIGH,   YLOW,   YHIGH,   PHILOW,   PHIHIGH,   ZLOW,   ZHIGH
+  //make sure zlow!=zhigh in particle definition - not sure of result. 
+  //Z vertex will be forced in vxyz statement.
+  double zlow=xyz[2]-.01;
+  double zhigh=xyz[2]+.01;
+
   TString cmd(Form("gkine %i %i %f %f %f %f %f %f %f %f;",
 		   npart, mSettings->pid,
 		   mSettings->ptlow, mSettings->pthigh,
 		   mSettings->etalow, mSettings->etahigh,
-		   mSettings->philow, mSettings->phihigh, xyz[2], xyz[2]));
+		   mSettings->philow, mSettings->phihigh, zlow,zhigh));
   Do(cmd.Data());
   Do(Form("vxyz %f %f %f",xyz[0],xyz[1],xyz[2]));
   Do("vsig 0 0;");
+
+  Do("trig 1");
+
   return kStOK;
 }
+
+Int_t StPrepEmbedMaker::Finish()
+{
+  TString cmd("user/output c temp.fz");
+  Do(cmd.Data());
+}
+
+
 //_____________________________________________________________________________
 void StPrepEmbedMaker::Do(const Char_t *job)
 {  
@@ -127,7 +185,8 @@ void StPrepEmbedMaker::Do(const Char_t *job)
   }
 }
 //________________________________________________________________________________
-void StPrepEmbedMaker::SetPartOpt(Int_t pid, Double_t mult)  { 
+void StPrepEmbedMaker::SetPartOpt(Int_t pid, Double_t mult)  
+{ 
   mSettings->mult=mult; mSettings->pid=pid; 
   LOG_INFO << "StPrepEmbedMaker::SetPartOpt mult = " << mSettings->mult
 	   << " pid = " << mSettings->pid << endm;
@@ -145,6 +204,9 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.2  2007/08/29 22:59:33  andrewar
+ * Added some calls for GEANT simulation of embedded particles.
+ *
  * Revision 1.1  2007/07/12 20:34:35  fisyak
  * Add StPrepEmbedMaker
  *
