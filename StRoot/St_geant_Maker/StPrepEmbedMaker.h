@@ -5,11 +5,14 @@
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.1 2007/07/12 20:34:35 fisyak Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.2 2007/08/29 23:00:14 andrewar Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.2  2007/08/29 23:00:14  andrewar
+ * Added calls for embedding particle parameters, Maker methods
+ *
  * Revision 1.1  2007/07/12 20:34:35  fisyak
  * Add StPrepEmbedMaker
  *
@@ -38,9 +41,11 @@ class StPrepEmbedMaker : public StMaker {
   
   Int_t  Init();                      // called once at the beginning of your job
   Int_t  Make();                      // invoked for every event
+  Int_t   Finish();
+  Int_t  InitRun(int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.1 2007/07/12 20:34:35 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.2 2007/08/29 23:00:14 andrewar Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
