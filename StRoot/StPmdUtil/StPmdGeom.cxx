@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.22 2007/07/12 19:52:31 fisyak Exp $
+ * $Id: StPmdGeom.cxx,v 1.23 2007/08/31 10:56:27 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.23  2007/08/31 10:56:27  rashmi
+ * removed a warning on chtemp ondate 31/08/07; removed some print statements
+ *
  * Revision 1.22  2007/07/12 19:52:31  fisyak
  * Add includes for ROOT 5.16
  *
@@ -1294,8 +1297,8 @@ void StPmdGeom::readBoardDetail()
 
 void StPmdGeom::readBoardDetail(Int_t runno1)
 {
-  char runfile[20];
-  sprintf(runfile,"%d",runno1);
+  //  char runfile[20];
+  //  sprintf(runfile,"%d",runno1);
   
   //Initialise status array as 1 (good board)
   Int_t alive_stat[48];
@@ -1312,6 +1315,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
     alive_stat[i]=0;
   }
   // Fetch from the run # the day
+  /*
   char iRun[8];
   char iyear[8];
   for (Int_t ik=0; ik<3; ik++)
@@ -1324,7 +1328,11 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
   Int_t year =0;
   rn=atoi(iRun);
   year=atoi(iyear);
-  
+  */
+  Int_t rn =0;
+  Int_t year =0;
+  GetRunYear(runno1,rn,year);
+
   //  cout<<"runid="<<runno1<<" run#="<<rn<<" year="<<year<<endl;
   
   if(year==5){  // 2004 run
@@ -1915,6 +1923,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
 Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t&chmod,Int_t year)
 {
   //initialized to zero rr 27.1.2005
+  //  cout<<"In chain mapping"<<endl;
   supmod =0;
   col =0; 
   row = 0;
@@ -1924,6 +1933,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
   Int_t brd=Int_t((ch)/64)+1;
   Int_t missing=0;
   Int_t brdCount=0;
+  //  cout<<" Going to get missing"<<endl;
   //  for(Int_t ibrd=0;ibrd<27;ibrd++)
   for(Int_t ibrd=0;ibrd<36;ibrd++){
     if(brdCount<brd){
@@ -1934,14 +1944,17 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
   chtemp=ch+missing*64;
   chmod=chtemp;
   //  cout<<"year,ch,chtemp,missing="<<year<<","<<ch<<","<<chtemp<<","<<missing<<endl;
-  
+
   if(year==8){
     if(chain==1 || chain==7 || chain==19 || chain==20 || chain==23 || chain==24) {
       //      if(chtemp>=2304) cout<<"ch,chtemp="<<ch<<","<<chtemp<<endl;
       if( chtemp>=2304){return kStWarn;}
     }else{
       //      if(chtemp>=1728) cout<<"ch,chtemp="<<ch<<","<<chtemp<<endl;
-      if(chtemp >=1728){return kStWarn;}
+      if(chtemp >=1728){
+	//	cout<<"returning kStWarn"<<endl;
+	return kStWarn;
+      }
     }
     //    Non existent chains
     if(chain==6 || chain==17 || chain == 21 ){return kStWarn;}
@@ -1950,6 +1963,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     if(chtemp>=1728){ return kStWarn;}
   }
   
+
   switch(chain){
     
   case 1:
@@ -5830,12 +5844,12 @@ void StPmdGeom::chain48(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
 }
 
 void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
-  cout<<" I am drawing the PMD"<<endl;
+  ///  cout<<" I am drawing the PMD"<<endl;
   readBoardDetail(runno);
  
   Int_t rn=0,year=0;
   GetRunYear(runno,rn,year);
-  cout<<"runnumber = "<<rn<<" year="<<year<<endl;
+  //  cout<<"runnumber = "<<rn<<" year="<<year<<endl;
   
   char histname[20];
   if (firstchain<25){
@@ -5863,7 +5877,7 @@ void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
     }
   }
   for (Int_t chain=firstchain;chain<=lastchain;chain++){
-    cout<<"Drawing chain="<<chain<<" with "<<bmax[chain]<<" mapped boards"<<endl;
+    //    cout<<"Drawing chain="<<chain<<" with "<<bmax[chain]<<" mapped boards"<<endl;
     Int_t workingboard = 0;
     Float_t xboard[27],yboard[27];
     Int_t workingchannel = 0;
@@ -5876,7 +5890,7 @@ void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
 	mapcheck = ChainMapping(chain,chan,sm,col,row,chmod,year);
       }
       
-      //           cout<<"chain,chan,sm,chmod,mapcheck="<<chain<<","<<chan<<","<<sm<<","<<chmod<<","<<mapcheck<<endl;
+      //  cout<<"chain,chan,sm,chmod,mapcheck="<<chain<<","<<chan<<","<<sm<<","<<chmod<<","<<mapcheck<<endl;
       if(mapcheck==kStOk && sm > 0){
 	//	cout<<chain<<","<<chan<<","<<sm<<","<<row<<","<<col<<","<<icorner<<endl;
 	DrawRhombus(chain,chan,sm,row,col,icorner,xcon,ycon);
@@ -5886,11 +5900,11 @@ void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
 	  for(Int_t i=0;i<4;i++){
 	    xboard[workingboard]=xboard[workingboard]+xcon[i];
 	    yboard[workingboard]=yboard[workingboard]+ycon[i];
-	    if(chain==24) cout<<"chain24,xycon="<<xcon[i]<<","<<ycon[i]<<endl;	
+	    //	    if(chain==24) cout<<"chain24,xycon="<<xcon[i]<<","<<ycon[i]<<endl;	
 	  }
 	  xboard[workingboard]=xboard[workingboard]/4;
 	  yboard[workingboard]=yboard[workingboard]/4;
-	  cout<<"board# = "<<workingboard<<" x,y="<<xboard[workingboard]<<","<<yboard[workingboard]<<endl;
+	  //	  cout<<"board# = "<<workingboard<<" x,y="<<xboard[workingboard]<<","<<yboard[workingboard]<<endl;
 	  workingboard++;
 	  icorner = 0;
 	}
@@ -5999,7 +6013,7 @@ void StPmdGeom::GetRunYear(Int_t runno,Int_t&rn,Int_t&year){
   Int_t rest = runno-year*1000000;
   rn = Int_t(rest/1000);
 
-  cout<<"rn="<<rn<<" year="<<year<<endl;
+  //  cout<<"rn="<<rn<<" year="<<year<<endl;
 }
 
 Int_t StPmdGeom::GetNBoardsChain(Int_t chain){
