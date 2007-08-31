@@ -121,18 +121,17 @@ void StGammaRawMaker::GetBarrel(){
 
   tables->loadTables(this);
 
-  // get MuDst maker
-  StMuDstMaker *mMuDstMaker=(StMuDstMaker*)GetMaker("MuDst");
-  if ( !mMuDstMaker ) { 
+  // get MuDst
+  if (!GetDataSet("MuDst")) {
+    LOG_WARN << "No MuDst" << endm;
     return;
   }
-
 
   // get gamma event
   StGammaEvent *gevent = 0;
   if ( !GetMaker("gemaker") ) 
     {
-      LOG_DEBUG<<" StGammaEventMaker not in chain, no tree for you"<<endm;
+      LOG_DEBUG << " StGammaEventMaker not in chain, no tree for you" << endm;
     }
   else 
     {
@@ -140,28 +139,15 @@ void StGammaRawMaker::GetBarrel(){
       gevent = gemaker -> event();
     }
 
-
-  
-  StMuDst* uDst = mMuDstMaker->muDst();
-  assert(uDst);
-  
-  StEmcGeom* geom = StEmcGeom::instance("bemc"); 
-  assert(geom);
-  
   StEmcCollection* emc = 0;
   StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-  if (event) {
-    emc = event->emcCollection();
-  }
-  else {
-    emc = uDst->emcCollection();
-  }
-  assert(emc);
+  emc = event ? event->emcCollection() : StMuDst::emcCollection();
+  if (!emc) return;
 
-  StEmcDetector* btow = emc->detector(kBarrelEmcTowerId);  //TOWERs
-  StEmcDetector* bprs = emc->detector(StDetectorId(kBarrelEmcTowerId+1));  //BPRS
-  StEmcDetector* smde = emc->detector(StDetectorId(kBarrelEmcTowerId+2));  //SMDe
-  StEmcDetector* smdp = emc->detector(StDetectorId(kBarrelEmcTowerId+3));   //SMDp
+  StEmcDetector* btow = emc->detector(kBarrelEmcTowerId); // BTOW
+  StEmcDetector* bprs = emc->detector(kBarrelEmcPreShowerId); // BPRS
+  StEmcDetector* smde = emc->detector(kBarrelSmdEtaStripId); // SMDE
+  StEmcDetector* smdp = emc->detector(kBarrelSmdPhiStripId); // SMDP
   
   //corruption checking
   mCorrupt = false;
@@ -196,8 +182,6 @@ void StGammaRawMaker::GetBarrel(){
   }
         
  
-  //  StGammaTower btower, pshower;  
-  //  StGammaStrip bstrip_p, bstrip_e;
   float pedestal, rms, bEta, bPhi;
   int CAP=0; //this arument matters only for SMD
 
@@ -206,9 +190,8 @@ void StGammaRawMaker::GetBarrel(){
   for(int m = 1; m<=120;m++) { 
     
     if (btow){
-
+      StEmcGeom* geom = StEmcGeom::instance("bemc"); 
       StEmcModule* module = btow->module(m);
-      assert(module);
       
       StSPtrVecEmcRawHit& rawHits = module->hits();
       
@@ -216,15 +199,16 @@ void StGammaRawMaker::GetBarrel(){
 	
 	StEmcRawHit* tempRawHit = rawHits[k];
 	
-	//int m = tempRawHit->module();
-	//int e = tempRawHit->eta();
-	//int s = abs(tempRawHit->sub());
 	int id, status;
 	int ADC = tempRawHit->adc(); //not pedestal subtracted!
 	double energy = tempRawHit->energy();
 	id = tempRawHit->softId(BTOW);
-	//geom->getId(m,e,s,id); 
-	geom->getEtaPhi(id,bEta,bPhi);
+	float x, y, z;
+	geom->getXYZ(id,x,y,z);
+	TVector3 position(x, y, z);
+	position -= TVector3(StMuDst::event()->primaryVertexPosition().xyz());
+	bEta = position.Eta();
+	bPhi = position.Phi();
 	tables->getStatus(BTOW, id, status);
 	tables->getPedestal(BTOW, id, CAP, pedestal, rms);
 
@@ -256,25 +240,23 @@ void StGammaRawMaker::GetBarrel(){
 
     
     if (bprs){
-      
-      StEmcModule*  module = bprs->module(m);
-      assert(module);
+      StEmcGeom* geom = StEmcGeom::instance("bprs"); 
+      StEmcModule* module = bprs->module(m);
       StSPtrVecEmcRawHit& rawHits=module->hits();
       //loop over our preshower
       for(UInt_t k=0;k<rawHits.size();k++) { //loop on hits in modules
 	
 	StEmcRawHit* tempRawHit = rawHits[k];
-	assert(tempRawHit);
-	
-	//int m = tempRawHit->module();
-	//int e = tempRawHit->eta();
-	//int s = abs(tempRawHit->sub());
 	int id, bprs_status;
 	int ADC = tempRawHit->adc(); //not pedestal subtracted!
 	double energy = tempRawHit->energy();
 	id = tempRawHit->softId(BPRS);
-	// geom->getId(m,e,s,id);
-	geom->getEtaPhi(id,bEta,bPhi);
+	float x, y, z;
+	geom->getXYZ(id,x,y,z);
+	TVector3 position(x, y, z);
+	position -= TVector3(StMuDst::event()->primaryVertexPosition().xyz());
+	bEta = position.Eta();
+	bPhi = position.Phi();
 	tables->getStatus(BPRS, id, bprs_status);
 	tables->getPedestal(BPRS, id, CAP, pedestal, rms);
 
@@ -302,30 +284,31 @@ void StGammaRawMaker::GetBarrel(){
   
 
   if (smde) {// loop over SMDe
-    
+    StEmcGeom* geom = StEmcGeom::instance("bsmde");
     for (UInt_t i = 1; i <= smde->numberOfModules(); i++) {
       StEmcModule* module = smde->module(i);
       if (module) {
 	StSPtrVecEmcRawHit& hits = module->hits();
-	for (StEmcRawHitIterator hit = hits.begin(); hit!=hits.end(); ++hit) {
-	  Int_t smde_id = 0;
-	  Int_t smde_status=0;
-	  StEmcGeom* geom = StEmcGeom::instance("bsmde");
-	  geom->getId((*hit)->module(),(*hit)->eta(),TMath::Abs((*hit)->sub()),smde_id); 
-	  tables->getStatus(BSMDE,smde_id, smde_status);
-	
+	for (size_t k = 0; k < hits.size(); ++k) {
+	  StEmcRawHit* hit = hits[k];
+	  Int_t smde_id = hit->softId(BSMDE);
+	  Int_t smde_status = 0;
+	  Float_t eta = -999;
+	  tables->getStatus(BSMDE,smde_id,smde_status);
+	  geom->getEta(smde_id,eta);
+
 	  StGammaStrip *bstrip = gevent->newStrip();
   
 	  bstrip->index = smde_id;
-	  bstrip->sector = (*hit)->module();
+	  bstrip->sector = hit->module();
 	  bstrip->plane  = kBEmcSmdEta;
 	  bstrip->stat   = smde_status;
-	  bstrip->fail   = !(smde_status);
-	  bstrip->energy = (*hit)->energy();
-          bstrip->position = 2 * atan( exp( - (double)(*hit)->eta() ) );
-	  
-	  LOG_DEBUG<<" estrip id="<<smde_id<<" status = "<<smde_status<<" energy="<<(*hit)->energy()<<" module="<<(*hit)->module()<<endm;
-	  	  
+	  bstrip->fail   = !smde_status;
+	  bstrip->energy = hit->energy();
+          bstrip->position = 2 * atan( exp( - eta ) );
+
+	  LOG_DEBUG<<" estrip id="<<smde_id<<" status = "<<smde_status<<" energy="<<hit->energy()<<" module="<<hit->module()<<endm;
+
 	  mStrips.push_back(*bstrip);
 	  mBarrelSmdEtaStrip[bstrip->index] = bstrip;
 	}
@@ -334,31 +317,30 @@ void StGammaRawMaker::GetBarrel(){
   }
 
   if (smdp) {// loop over SMDp
-    
+    StEmcGeom* geom = StEmcGeom::instance("bsmdp");
     for (UInt_t i = 1; i <= smdp->numberOfModules(); i++) {
       StEmcModule* module = smdp->module(i);
       if (module) {
 	StSPtrVecEmcRawHit& hits = module->hits();
-	for (StEmcRawHitIterator hit = hits.begin(); hit!=hits.end(); ++hit) {
-	  Int_t smdp_id = 0;
-	  Int_t smdp_status=0;
-          Float_t phi = -2;
-	  StEmcGeom* geom = StEmcGeom::instance("bsmdp");
-	  geom->getId((*hit)->module(),(*hit)->eta(),TMath::Abs((*hit)->sub()),smdp_id);
-	  geom->getPhi(smdp_id, phi);
-          tables->getStatus(BSMDP,smdp_id, smdp_status);
-	  
+	for (size_t k = 0; k < hits.size(); ++k) {
+	  StEmcRawHit* hit = hits[k];
+	  Int_t smdp_id = hit->softId(BSMDP);
+	  Int_t smdp_status = 0;
+          Float_t phi = -999;
+          tables->getStatus(BSMDP,smdp_id,smdp_status);
+	  geom->getPhi(smdp_id,phi);
+
 	  StGammaStrip *bstrip = gevent->newStrip();
 
 	  bstrip->index = smdp_id;
-	  bstrip->sector = (*hit)->module();
+	  bstrip->sector = hit->module();
 	  bstrip->plane  = kBEmcSmdPhi;
 	  bstrip->stat   = smdp_status;
-	  bstrip->fail   = !(smdp_status);
-	  bstrip->energy = (*hit)->energy(); 
+	  bstrip->fail   = !smdp_status;
+	  bstrip->energy = hit->energy(); 
           bstrip->position = phi;
 
-	  LOG_DEBUG<<" pstrip id="<<smdp_id<<" status = "<<smdp_status<<" energy="<<(*hit)->energy()<<" module="<<(*hit)->module()<<endm;
+	  LOG_DEBUG<<" pstrip id="<<smdp_id<<" status = "<<smdp_status<<" energy="<<hit->energy()<<" module="<<hit->module()<<endm;
 
 	  mStrips.push_back(*bstrip);
 	  mBarrelSmdPhiStrip[bstrip->index] = bstrip;
@@ -373,6 +355,7 @@ void StGammaRawMaker::GetBarrel(){
 void StGammaRawMaker::GetTracks(){ 
 
   if (!GetDataSet("MuDst")) {
+    LOG_WARN << "No MuDst" << endm;
     return;
   }
 
