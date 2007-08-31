@@ -35,8 +35,6 @@ class StGammaCandidateMaker : public StMaker
   Int_t MakeBarrel();
   template<class T> void Compress(TClonesArray* clones);
 
-  bool getPositionMomentumAtBarrel(StGammaTrack* track, double magneticField, TVector3& position, TVector3& momentum);
-  
   Float_t mMinimumET; // in GeV
   Float_t mRadius;    // in sqrt( deta**2 + dphi**2 )
   Float_t mSmdRange;  // in cm

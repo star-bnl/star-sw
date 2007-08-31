@@ -150,17 +150,25 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      // add towers to the list of "my" towers, i.e. towers which 
 	      // belong to the gamma candidate cluster
 
-	      if ( gtower )
+	      if ( gtower ) {
 		can -> addMyTower(gtower);
+		gtower -> candidates.Add( can );
+	      }
 
-	      if ( gpre1 && !pre1.fail() && pre1.energy() > 0. )
+	      if ( gpre1 && !pre1.fail() && pre1.energy() > 0. ) {
 		can -> addMyPreshower1( gpre1 );
+		gpre1 -> candidates.Add( can );
+	      }
 
-	      if ( gpre2 && !pre2.fail() && pre2.energy() > 0. )
+	      if ( gpre2 && !pre2.fail() && pre2.energy() > 0. ) {
 		can -> addMyPreshower2( gpre2 );
+		gpre2 -> candidates.Add( can );
+	      }
 	      
-	      if ( gpost && !post.fail() && post.energy() > 0. )
+	      if ( gpost && !post.fail() && post.energy() > 0. ) {
 		can -> addMyPostshower( gpost );
+		gpost -> candidates.Add( can );
+	      }
 
 	      // add tracks to the list of "my" tracks, i.e. tracks which 
 	      // extrapolate to the gamma candidate tower
@@ -168,7 +176,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( gtower ) {
 		for (int k = 0; k < gevent->numberOfTracks(); ++k) {
 		  StGammaTrack* track = gevent->track(k);
-		  if (!track) continue;
+		  if (!track || track->pz() < 0) continue;
 		  try
 		    {
 		      EEmcGeomSimple& geom = EEmcGeomSimple::Instance();
@@ -181,6 +189,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 			      gtower->etabin   () == etabin)
 			    {
 			      can -> addMyTrack( track );
+			      track -> candidates.Add( can );
 			    }
 			}
 		    }
@@ -223,7 +232,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addTrack( track );
-		  track -> candidates.Add( can );
+		  if (!track -> candidates.FindObject( can )) track -> candidates.Add( can );
 		}
 	      
 	    }
@@ -244,7 +253,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addTower( tower );
-		  tower -> candidates.Add( can );
+		  if (!tower -> candidates.FindObject( can )) tower -> candidates.Add( can );
 		}
 	      
 	    }
@@ -264,7 +273,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addPreshower1( tower );
-		  tower -> candidates.Add( can );
+		  if (!tower -> candidates.FindObject( can )) tower -> candidates.Add( can );
 		}
 	      
 	    }
@@ -285,7 +294,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addPreshower2( tower );
-		  tower -> candidates.Add( can );
+		  if (!tower -> candidates.FindObject( can )) tower -> candidates.Add( can );
 		}
 	      
 	    }
@@ -305,7 +314,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      if ( r <= mRadius ) 
 		{
 		  can -> addPostshower( tower );
-		  tower -> candidates.Add( can );
+		  if (!tower -> candidates.FindObject( can )) tower -> candidates.Add( can );
 		}
 	      
 	    }
@@ -468,10 +477,12 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	if (StGammaTower* tower = cluster->tower(deta, dphi)) {
 	  // Add BTOW hit to candidate list of "my" towers
 	  candidate->addMyTower(tower);
+	  tower->candidates.Add(candidate);
 
 	  // Add BPRS hit to candidate list of "my" towers
 	  if (StGammaTower* preshower = grawmaker->tower(tower->id, kBEmcPres)) {
 	    candidate->addMyPreshower1(preshower);
+	    preshower->candidates.Add(candidate);
 	    energy += preshower->energy;
 	  }
 
@@ -486,6 +497,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	      if (geom->getId(position.Phi(), position.Eta(), id) == 0 &&
 		  id == static_cast<int>(tower->id)) {
 		candidate->addMyTrack(track);
+		track->candidates.Add(candidate);
 	      }
 	    }
 	    catch (StGammaTrack::Exception& e) {}
@@ -506,7 +518,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	float r = hypot(deta, dphi);
 	if (r <= mRadius) {
 	  candidate->addTrack(track);
-	  track->candidates.Add(candidate);
+	  if (!track->candidates.FindObject(candidate)) track->candidates.Add(candidate);
 	}
       }
     }
@@ -521,7 +533,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	float r = hypot(deta, dphi);
 	if (r <= mRadius) {
 	  candidate->addTower(tower);
-	  tower->candidates.Add(candidate);
+	  if (!tower->candidates.FindObject(candidate)) tower->candidates.Add(candidate);
 	}
       }
     }
@@ -536,7 +548,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	float r = hypot(deta, dphi);
 	if (r <= mRadius) {
 	  candidate->addPreshower1(preshower);
-	  preshower->candidates.Add(candidate);
+	  if (!preshower->candidates.FindObject(candidate)) preshower->candidates.Add(candidate);
 	}
       }
     }
@@ -576,36 +588,6 @@ Int_t StGammaCandidateMaker::MakeBarrel()
   }
 
   return kStOK;
-}
-
-//
-// See $STAR/StRoot/StEmcUtil/projection/StEmcPosition.h
-//
-bool StGammaCandidateMaker::getPositionMomentumAtBarrel(StGammaTrack* track, double magneticField, TVector3& position, TVector3& momentum)
-{
-  const double radius = StEmcGeom::instance("bemc")->Radius();
-  const pair<double, double> VALUE(999999999., 999999999.); // No solution
-  const StPhysicalHelix& helix = track->outerHelix();
-
-  if (helix.origin().perp() > radius) return false;
-  pair<double, double> ss = helix.pathLength(radius);
-  if (!finite(ss.first) || !finite(ss.second)) return false;
-  if (ss == VALUE) return false;
-
-  double s = 0;
-  if (ss.first > 0 && ss.second > 0)
-    s = ss.first;
-  else if (ss.first >= 0 && ss.second < 0)
-    s = ss.first;
-  else if (ss.first < 0 && ss.second >= 0)
-    s = ss.second;
-  else
-    return false;
-
-  position = TVector3(helix.at(s).xyz());
-  momentum = TVector3(helix.momentumAt(s, magneticField).xyz());
-
-  return true;
 }
 
 Int_t StGammaCandidateMaker::Compress()
