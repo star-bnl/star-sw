@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdMapUtil.cxx,v 1.8 2007/06/06 04:00:00 perev Exp $
+ * $Id: StPmdMapUtil.cxx,v 1.9 2007/08/31 10:55:47 rashmi Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdMapUtil.cxx,v $
+ * Revision 1.9  2007/08/31 10:55:47  rashmi
+ * Changed initialization of channelOR,CR,chainR to -1
+ *
  * Revision 1.8  2007/06/06 04:00:00  perev
  * CleanUp
  *
@@ -57,8 +60,13 @@ StPmdMapUtil::~StPmdMapUtil(){/*none*/}  //! A destructor
 
 void StPmdMapUtil::StoreMapInfo(Int_t runno1)
 {
+  /*
   int year = runno1/1000000;
   int rn   = (runno1/1000)%1000;
+  */
+  Int_t year=0;
+  Int_t rn = 0;
+  mPmdGeom->GetRunYear(runno1,rn,year);
   cout<<"runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
   cout<<"PMD runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
   if(year<4){
@@ -69,27 +77,40 @@ void StPmdMapUtil::StoreMapInfo(Int_t runno1)
 //////////////////////////////////////////////
   Int_t sm=0,row=0,col=0;
   //Initialize
-  memset(m_ChannelInBoard    [0][0],0,sizeof(m_ChannelInBoard    ));
-  memset(m_TempChannelInBoard[0][0],0,sizeof(m_TempChannelInBoard));
-  memset(m_Chain             [0][0],0,sizeof(m_Chain             ));
+  //memset(m_ChannelInBoard    [0][0],0,sizeof(m_ChannelInBoard    ));
+  //   memset(m_TempChannelInBoard[0][0],0,sizeof(m_TempChannelInBoard));
+  //   memset(m_Chain             [0][0],0,sizeof(m_Chain             ));
+  
+  //Initializing channels to -1; channel=0 is a physical channel; RR 2007-08-30
+  for(Int_t ism=0;ism<PMD_CRAMS_MAX*2;ism++){
+    for(Int_t irow=0;irow<PMD_ROW_MAX;irow++){
+      for(Int_t icol=0;icol<PMD_COL_MAX;icol++){
+	m_ChannelInBoard[ism][irow][icol]=-1;
+	m_TempChannelInBoard[ism][irow][icol]=-1;
+	m_Chain[ism][irow][icol]=-1;
+      }
+    }
+  }  
   
   for(Int_t Chain_No=1;Chain_No<=PMD_CHAIN_MAX;Chain_No++){
+    //    Int_t AliveBoards = mPmdGeom->GetNBoardsChain(Chain_No);
     for(Int_t CHANNEL=0;CHANNEL<PMD_CHAIN_CHANNEL_MAX;CHANNEL++){
       Int_t channel=CHANNEL;
       Int_t chtemp;
-
+      
       int fail = 0;
-      if(year==4) {
-	 fail = mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp);
-      }  else if(year>4){
-	 mPmdGeom->readBoardDetail(runno1);
-	 fail = mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp,year);
+      if(year==5) {
+	fail = mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp);
+      }  else if(year>5){
+	mPmdGeom->readBoardDetail(runno1);
+	fail = mPmdGeom->ChainMapping(Chain_No,channel,sm,col,row,chtemp,year);
       }
       if (sm <=0) fail +=10;
       if (col<=0) fail +=20;
       if (row<=0) fail +=40;
       if (fail) continue;
-//  if(sm>12)cout<<"chain,ch,sm,col,row,chtemp,year "<<Chain_No<<" "<<channel<<" "<<sm-1<<" "<<col-1<<" "<<row-1<<" "<<chtemp<<" "<<year<<endl;
+      if(chtemp==-1)continue;
+      //  if(sm>12)cout<<"chain,ch,sm,col,row,chtemp,year "<<Chain_No<<" "<<channel<<" "<<sm-1<<" "<<col-1<<" "<<row-1<<" "<<chtemp<<" "<<year<<endl;
       m_ChannelInBoard[sm-1][row-1][col-1]=channel;
       m_TempChannelInBoard[sm-1][row-1][col-1]=chtemp;
       m_Chain[sm-1][row-1][col-1]=Chain_No;
