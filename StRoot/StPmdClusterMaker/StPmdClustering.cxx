@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.24 2007/04/26 04:11:11 perev Exp $
+ * $Id: StPmdClustering.cxx,v 1.25 2007/08/31 10:52:30 rashmi Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.25  2007/08/31 10:52:30  rashmi
+ * Setting cutoff from SetAdcCutOff(); default cutoff=7
+ *
  * Revision 1.24  2007/04/26 04:11:11  perev
  * Remove StBFChain dependency
  *
@@ -123,6 +126,7 @@ StPmdGeom *geom=new StPmdGeom(); //! utility class
   StPmdClustering::StPmdClustering(StPmdDetector *pmd_det, StPmdDetector *cpv_det):StPmdAbsClustering(pmd_det,cpv_det){
  m_pmd_det=pmd_det;
  m_cpv_det=cpv_det;
+ SetAdcCutOff(7.0);
 }
 
 
@@ -134,6 +138,7 @@ StPmdClustering::~StPmdClustering()
 //! finding Pmd and Cpv clusters
 void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 {
+  //  cout<<"cutoff="<<cutoff<<endl;
   if(mdet)
     {
       StPmdClusterCollection * pmdclus = new StPmdClusterCollection();
@@ -141,7 +146,7 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
       
       Int_t i, i1, i2, j,xpad, ypad,nmx1, incr,idet;
       Int_t gsuper;  
-      Double_t  edep, cutoff, ave;
+      Double_t  edep, ave;
 
       for(i=0; i<96; i++){
 	for(j=0;j<72;j++){
@@ -163,7 +168,7 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 	    {
 	      
 	      Int_t nmh=mdet->module_hit(id);  //! total no.of hits in the supermodule in PMD plane
-
+	      //	      cout<<" number of hits in module "<<id<<" is ="<<nmh<<endl;
 	      TIter next(pmd_mod->Hits());
 	      StPmdHit *spmcl;   //! pointer for hits
 	      for(Int_t im=0; im<nmh; im++)
@@ -210,7 +215,10 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 	      
 	//!compare cutoff with the average energy deposited. Has no use in calc.
 	      
-	      cutoff=0.4; //! cutoff(in KeV) is the threshold above which value the data is analysed.
+	      //	      This is now set in Init() or
+	      //explicitly by hand from StPmdClusterMaker
+	      //AFTER instantiating.
+	      //	      cutoff=0.4; //! cutoff(in KeV) is the threshold above which value the data is analysed.
 	      
 	      /* crude clusters. superclusters are formed. These are separated from each other by cells having edep smaller than cutoff. */
 	      incr=crclust(ave, cutoff, nmx1, idet);
