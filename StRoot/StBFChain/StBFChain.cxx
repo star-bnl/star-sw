@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.515 2007/07/12 19:14:06 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.516 2007/08/31 18:47:49 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1472,7 +1472,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
 		       << " Maker set time = "
 		       << db->GetDateTime().GetDate() << "."
 		       << db->GetDateTime().GetTime() << endm;
-    if (GetOption("VMC") && m_EvtHddr) {
+    if (GetOption("SIMU") && m_EvtHddr) {
       gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
       m_EvtHddr->SetDateTime(db->GetDateTime());
     }

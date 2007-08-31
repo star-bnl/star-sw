@@ -332,15 +332,15 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"B2007","","","ry2007,MakeEvent,in,tpc_daq,tpcI,fcf,svt_daq,SvtD,ssddat,spt,Physics,Idst,l0,tags,Tree,evout",
                                                         "","","Base chain for 2007 ITTF (tpc+svt+ssd)",kFALSE},
   {"P2007"       ,"" ,"",
-   "B2007,IAna,KeepSvtHit,hitfilt,skip1row,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr5",
+   "B2007,IAna,KeepSvtHit,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr5",
                       "","","Production chain for 2007 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
   // startup for calib
   {"P2007a"      ,"" ,"",
-   "B2007,IAna,KeepSvtHit,hitfilt,skip1row,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr3",
+   "B2007,IAna,KeepSvtHit,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr3",
                  "","","Production chain for 2007 data Corr3 (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"P2007b"      ,"" ,"",
-   "B2007,IAna,KeepSvtHit,hitfilt,skip1row,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr4",
+   "B2007,IAna,KeepSvtHit,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr4",
                  "","","Production chain for 2007 data Corr4 (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
   //  {"testing"      ,"" ,"",   // just a damned test
@@ -754,7 +754,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                            "New simulator for BEMC",kFALSE},
   {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
                                      "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
-  {"StiLibs","","","StarMagField,StiTpcLib,StiSvtLib,StiSsdlib,StiRnDLib","",
+  {"StiLibs","","","StarMagField,StiTpcLib,StiSvtLib,StiSsdlib,StiRnDLib,StiUtil","",
                                                                        "","ITTF:load Sti libraries",kFALSE},
   {"StiTpcLib","","","tpcDB","",                          "Sti,StiTpc","Sti Tpc related libratries",kFALSE},
   {"StiSvtLib","","","svtDB","",        "Sti,StSvtClassLibrary,StiSvt","Sti Svt related libratries",kFALSE},
@@ -946,7 +946,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE},
 
   {"Calibration chains","------------","-----------","-----------------------------------","","","",kFALSE},
-  {"LanaDV"      ,"","","MakeEvent,in,tpc_daq,tpcI,fcf,LaserIT,VFMinuit,Lana,Analysis,Corr4",
+  {"LanaDV"      ,"","","MakeEvent,trgd,in,tpc_daq,tpcI,fcf,LaserIT,VFMinuit,Lana,Analysis,Corr4",
    "",""                                                                                 ,"get LDV",kFALSE},
   {"LaserDV.Chain","","","in,LaserCal,fcf,TpcHitMover,OGridLeak3D,OShortR,OSpaceZ2","","","get LDV",kFALSE},
 
