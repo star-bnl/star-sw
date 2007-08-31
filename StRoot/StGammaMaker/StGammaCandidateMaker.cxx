@@ -216,11 +216,8 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      Float_t eta_track = track -> eta();
 	      Float_t phi_track = track -> phi();
 	      Float_t deta = eta_track - eta_candidate;
-	      
-	      Float_t phi1 = TMath::Max(phi_track, phi_candidate);
-	      Float_t phi2 = TMath::Min(phi_track, phi_candidate);
+	      Float_t dphi = TVector2::Phi_mpi_pi(phi_track - phi_candidate);
 
-	      Float_t dphi = TMath::Min( phi1 - phi2, phi1 - phi2 + (Float_t)TMath::TwoPi() );
 	      Float_t r = TMath::Sqrt( dphi*dphi + deta*deta );
 
 	      if ( r <= mRadius ) 
@@ -240,11 +237,8 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      Float_t eta_tower = tower -> eta;
 	      Float_t phi_tower = tower -> phi;
 	      Float_t deta = eta_tower - eta_candidate;
-	      
-	      Float_t phi1 = TMath::Max(phi_tower, phi_candidate);
-	      Float_t phi2 = TMath::Min(phi_tower, phi_candidate);
+	      Float_t dphi = TVector2::Phi_mpi_pi(phi_tower - phi_candidate);
 
-	      Float_t dphi = TMath::Min( phi1 - phi2, phi1 - phi2 + (Float_t)TMath::TwoPi() );
 	      Float_t r = TMath::Sqrt( dphi*dphi + deta*deta );
 
 	      if ( r <= mRadius ) 
@@ -263,11 +257,8 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      Float_t eta_tower = tower -> eta;
 	      Float_t phi_tower = tower -> phi;
 	      Float_t deta = eta_tower - eta_candidate;
-	      
-	      Float_t phi1 = TMath::Max(phi_tower, phi_candidate);
-	      Float_t phi2 = TMath::Min(phi_tower, phi_candidate);
+	      Float_t dphi = TVector2::Phi_mpi_pi(phi_tower - phi_candidate);
 
-	      Float_t dphi = TMath::Min( phi1 - phi2, phi1 - phi2 + (Float_t)TMath::TwoPi() );
 	      Float_t r = TMath::Sqrt( dphi*dphi + deta*deta );
 
 	      if ( r <= mRadius ) 
@@ -287,11 +278,8 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      Float_t eta_tower = tower -> eta;
 	      Float_t phi_tower = tower -> phi;
 	      Float_t deta = eta_tower - eta_candidate;
-	      
-	      Float_t phi1 = TMath::Max(phi_tower, phi_candidate);
-	      Float_t phi2 = TMath::Min(phi_tower, phi_candidate);
+	      Float_t dphi = TVector2::Phi_mpi_pi(phi_tower - phi_candidate);
 
-	      Float_t dphi = TMath::Min( phi1 - phi2, phi1 - phi2 + (Float_t)TMath::TwoPi() );
 	      Float_t r = TMath::Sqrt( dphi*dphi + deta*deta );
 
 	      if ( r <= mRadius ) 
@@ -310,11 +298,8 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	      Float_t eta_tower = tower -> eta;
 	      Float_t phi_tower = tower -> phi;
 	      Float_t deta = eta_tower - eta_candidate;
-	      
-	      Float_t phi1 = TMath::Max(phi_tower, phi_candidate);
-	      Float_t phi2 = TMath::Min(phi_tower, phi_candidate);
+	      Float_t dphi = TVector2::Phi_mpi_pi(phi_tower - phi_candidate);
 
-	      Float_t dphi = TMath::Min( phi1 - phi2, phi1 - phi2 + (Float_t)TMath::TwoPi() );
 	      Float_t r = TMath::Sqrt( dphi*dphi + deta*deta );
 
 	      if ( r <= mRadius ) 
