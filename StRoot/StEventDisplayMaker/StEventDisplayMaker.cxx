@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.126 2007/03/19 14:35:45 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.127 2007/09/01 01:42:22 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -200,6 +200,8 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   fEmcTowers         = 0;
   fColorProvider     = 0; 
   fSizeProvider      = 0;
+  
+  fEventIdToRender   = 0; // render all events
   
   fEventNeedRescan   = kFALSE;
   fNeedsClear3DView  = kFALSE;
@@ -667,7 +669,12 @@ Int_t StEventDisplayMaker::Make()
 // AGAIN:
    fgEventLoop = -1;
 
-
+   // Skip all events but one if needed
+   if (     EventIdToRender() 
+         && (EventIdToRender() != GetEventNumber())) 
+   {
+      return kStOk;
+   }
 //  const Int_t maxTrackCounter = 9;
   if (!m_EventsNode) return kStErr;
   if (m_Mode == 1)   return  kStOK;
@@ -1490,6 +1497,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.127  2007/09/01 01:42:22  fine
+// Quick fix to allow selection one event by event id
+//
 // Revision 1.126  2007/03/19 14:35:45  fine
 // Remove  the obsolete refs to TEmcTower class
 //
