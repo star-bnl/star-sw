@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.106 2007/08/28 14:30:55 fine Exp $
+// $Id: doEvents.C,v 1.107 2007/09/01 02:26:12 fine Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -115,11 +115,23 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
 
   if (!qaflag) qaflag = "";
   int nEvents = nEventsQQ;
+  int eventNumber2Display = 0;
   TString tflag = qaflag; tflag.ToLower();
   int eventDisplay = tflag.Contains("disp");
-  if (eventDisplay && gROOT->IsBatch() ){
-     cout <<  endl << endl <<" ** Warning  ** You have started the EventDisplay version in a batch mode" << endl;
-   return; 
+  if (eventDisplay) {
+     if (gROOT->IsBatch() )
+     {
+        cout <<  endl << endl <<" ** Warning  ** You have started the EventDisplay version in a batch mode" << endl;
+        return;
+     }
+     TObjArray *tokens = tflag.Tokenize(":");
+     if ( tokens->GetEntries() >= 2 ) {
+        // May be event id
+        TString eventid = (tokens->At(tokens->GetEntries()-1))->GetName();
+        if ( eventid.IsDigit() ) 
+           eventNumber2Display = eventid.Atoi();
+     } 
+     delete tokens;
   }
   cout <<  endl << endl <<" doEvents -  input # events = " << nEvents << endl;
   Int_t ilist=0;
@@ -239,7 +251,9 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   if (eventDisplay) {
     
     StEventDisplayMaker *displayMk = new StEventDisplayMaker();
-    
+    displayMk->SetEventIdToRender(eventNumber2Display);
+    if (eventNumber2Display) 
+       printf("\n\n\n Display the Event %d only\n", eventNumber2Display);
     // Set the default to display all StEvent tracks
     displayMk->AddName("StEvent(Primary Tracks)");
     // displayMk->AddName("StEvent(Kink Tracks)");
@@ -469,6 +483,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.107  2007/09/01 02:26:12  fine
+// introduce Event selection to fix isseu #1051
+//
 // Revision 1.106  2007/08/28 14:30:55  fine
 // Add StTpcDb to load StEventMaker
 //
