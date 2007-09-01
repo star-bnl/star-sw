@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.127 2007/09/01 01:42:22 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.128 2007/09/01 02:25:57 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -823,7 +823,11 @@ Int_t StEventDisplayMaker::Make()
    fgEventLoop = 0;
    if (f3DViewer) {  f3DViewer->EndScene(); f3DViewer->SetUpdatesEnabled(); /*f3DViewer->Update();*/ }
    gSystem->DispatchOneEvent(1);
-   return kStOK;
+   if (  EventIdToRender() ) {
+      return kStEOF;
+   } else {
+      return kStOK;
+   }
 }
 //_____________________________________________________________________________
 void  StEventDisplayMaker::MakeEmcTowers()
@@ -1497,6 +1501,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.128  2007/09/01 02:25:57  fine
+// introduce Event selection to fix isseu #1051
+//
 // Revision 1.127  2007/09/01 01:42:22  fine
 // Quick fix to allow selection one event by event id
 //
