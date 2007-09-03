@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.9 2005/09/07 22:04:02 deph Exp $
+ * $Id: StDbTableDescriptor.h,v 1.10 2007/09/03 05:39:03 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.10  2007/09/03 05:39:03  fisyak
+ * Anti Cint corrections
+ *
  * Revision 1.9  2005/09/07 22:04:02  deph
  * update to correct padding issue for packed tables
  *
@@ -62,8 +65,11 @@
 
 #include <string.h>
 #include "StTableDescriptorI.h"
+#ifndef __CINT__
 #include "StDbBuffer.h"
-
+#else
+class StDbBuffer;
+#endif
 struct tableDescriptor {
   StTypeE type;      // enumerated basic type
   char name[60];     //  element name
@@ -134,9 +140,8 @@ public:
   int getTrowSize() ;  
   void endRowPadding();
   void storeRowSize(int rowSize);
-
 };
-
+#ifndef __CINT__
 inline unsigned int
 StDbTableDescriptor::getNumElements() const {return mnumElements;}
 
@@ -207,7 +212,7 @@ inline bool StDbTableDescriptor::IsValid() const { return misValid; }
 inline int  StDbTableDescriptor::getCurrentInternalSize() { return mMax; };
 inline void StDbTableDescriptor::storeRowSize(int rowSize) { rowSizeTT = rowSize; }
 inline int  StDbTableDescriptor::getTrowSize() { return rowSizeTT; };
-
+#endif
 
 #endif
 
