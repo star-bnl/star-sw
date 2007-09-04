@@ -117,12 +117,18 @@ CREATE TABLE IF NOT EXISTS Jobs (
 
 DROP TABLE IF EXISTS Messages;
 CREATE TABLE IF NOT EXISTS Messages (
-  messageID        int(11)      NOT NULL COMMENT 'ID of message',
+  messageID        int(11)      NOT NULL AUTO_INCREMENT COMMENT 'ID of message',
   jobID            int(11)      NOT NULL COMMENT 'Job that this message is associated with',
   facilityID       int(11)      NOT NULL COMMENT 'The ID of the facility or bulk category of messages',
   severityID       int(11)      NOT NULL COMMENT 'The ID of the severity (warning, debug, error, etc.) of the message',
   content          varchar(512) NOT NULL COMMENT 'The textual content of the message',
   eventTime        timestamp    NOT NULL default CURRENT_TIMESTAMP COMMENT 'Time that event happened which corresponds to the message',
+  SequenceValue   INT                                      COMMENT 'The current event # processed. for example '   ,
+  MessageContext  CHAR(20)                                 COMMENT 'could represent StFtpcMaker, StMake'           ,  #STAR maker name
+  StepEventID     ENUM('Start','Finish','EventFinish','Run','JobStart','JobFinish') NOT NULL  COMMENT 'Event ID'   ,
+  MessageType     CHAR(10)                                COMMENT 'Event context'                                  ,  #Field name
+  MessageClass    ENUM('=')              NULL              COMMENT 'Extra message flag'                            ,
+  Message         VARCHAR(120)                             COMMENT 'Body core of the message'                      ,
   PRIMARY KEY  (messageID)
 );
 
