@@ -223,8 +223,13 @@ void MySQLAppender::flushBuffer()
 ///--- Task description         
            expandCommand =         
 //         expandCommand ="INSERT         IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
+#ifdef  OLDTABLE
            "INSERT DELAYED IGNORE  TaskDescription (TaskDescriptionID, TaskRequestID_MD5, TaskSize, TaskRemainSize, EntryTime, UpdateTime, TaskUser,TaskDescription,TaskCredential,BrokerID)"
            " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"$SUMS_AUTHENTICATED_USER\",\"SUMS\");";
+#else
+           "INSERT DELAYED IGNORE  Tasks (taskID, brokerTaskID, taskSize, taskRemainSize, submitTime, updateTime, requesterName,taskDescription)"
+           " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\");";
+#endif                      
 // Edit meta symbols
 //-----------------------
 //  $hostid        = $HOSTNAME            
@@ -247,6 +252,8 @@ void MySQLAppender::flushBuffer()
 //--- Job description         
 
 //         expandCommand ="INSERT         IGNORE INTO JobDescription SET ";
+          
+#ifdef  OLDTABLE
            expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
 
            expandCommand +=  "TaskDescriptionID = (SELECT TaskDescriptionID FROM TaskDescription WHERE  TaskRequestID_MD5=\"$REQUESTID\")";
@@ -259,6 +266,20 @@ void MySQLAppender::flushBuffer()
                              expandCommand += ", ";
            expandCommand +=  "JobUser=\"$USER\"";
                              expandCommand += "; ";
+#else
+           expandCommand ="INSERT DELAYED IGNORE INTO Jobs SET ";
+
+           expandCommand +=  "taskID = (SELECT taskID FROM Tasks WHERE  brokerTaskID=\"$REQUESTID\")";
+                             expandCommand += ", ";                  
+           expandCommand += "brokerTaskID=\"$REQUESTID\"";
+                             expandCommand += ", ";
+           expandCommand += "brokerJobID=\"$PROCESSID\"";
+                             expandCommand += ", ";
+           expandCommand +=  "nodeLocation=\"$HOSTNAME\"";
+                             expandCommand += ", ";
+           expandCommand +=  "executionUserName=\"$USER\"";
+                             expandCommand += "; ";
+#endif                                                          
 // Edit meta symbols
 //-----------------------
 //  $hostid        = $HOSTNAME            

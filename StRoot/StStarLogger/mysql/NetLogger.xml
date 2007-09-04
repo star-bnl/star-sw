@@ -14,7 +14,12 @@
     <layout class="org.apache.log4j.PatternLayout">
 <!--     <param name="ConversionPattern" value="INSERT         INTO JobTracking SET stepId=NULL, StepName =&quot;%-3c{2}&quot;,jobId = (SELECT jobId FROM JobDescription WHERE  jobID_MD5=&quot;$REQUESTID&quot; AND processID=&quot;$PROCESSID&quot;), %m; " /> -->
 <!--     <param name="ConversionPattern" value="INSERT DELAYED INTO JobTracking SET stepId=NULL, StepName =&quot;%-3c{2}&quot;,jobId = (SELECT jobId FROM JobDescription WHERE  jobID_MD5=&quot;$REQUESTID&quot; AND processID=&quot;$PROCESSID&quot;), %m; " />   -->
+<!--- OLD TABLE 
      <param name="ConversionPattern" value="INSERT DELAYED INTO JobTracking SET JobTrackingID=NULL, MessageContext=&quot;%-3c{2}&quot;,MessageSeverity=&quot;%p&quot;,JobDescriptionID = (SELECT JobDescriptionID FROM JobDescription WHERE  TaskRequestID_MD5=&quot;$REQUESTID&quot; AND BrokerProcessID=&quot;$PROCESSID&quot;), %m; " /> 
+  -->
+  
+     <param name="ConversionPattern" value="INSERT DELAYED INTO Messages SET content=&quot;%-3c{2}&quot;,severityID=&quot;%p&quot;,jobID = (SELECT jobID FROM Jobs WHERE  brokerTaskID=&quot;$REQUESTID&quot; AND brokerJobID=&quot;$PROCESSID&quot;), %m; " /> 
+     
 <!--      <param name="ConversionPattern" value=" REPLACE INSERT IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, &quot;$REQUESTID&quot;, &quot;$PROCESSID&quot;,&quot;$HOSTNAME&quot;,&quot;$USER&quot; ); INSERT INTO JobTracking ( id, StepName, jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;, &quot;1&quot; ); " />  -->
     </layout>	    
      <!--  Define the pattern  -->
