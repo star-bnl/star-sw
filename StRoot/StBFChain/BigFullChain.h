@@ -799,7 +799,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"flaser"    ,"","","fpt"                              ,"","","StFtpcTrackMaker in LASERTRACKING",kFALSE},
 
 
-  {"pmdRaw"    ,"pmdRaw","","PmdUtil,pmdRead,pmdClust"         ,"StMaker","StChain","PMD Raw chain",kFALSE},
+  {"pmdReco"   ,"pmdReco","","PmdUtil,pmdRead,pmdClust"       ,"StMaker","StChain","PMD Reco chain",kFALSE},
+  {"pmdRaw"    ,"pmdRaw","","pmdReco"                        "","","PMD Reco chain giving raw data",kFALSE},
   {"pmd"       ,"pmd","","pmdSim,pmdClust,pmdDis","StMaker"      ,"StChain", "PMD Simulation chain",kFALSE},
   {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
   {"pmdSim"    ,"","","PmdUtil","StPmdSimulatorMaker","StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
