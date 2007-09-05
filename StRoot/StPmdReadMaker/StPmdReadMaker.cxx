@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.20 2007/08/31 10:50:12 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.21 2007/09/05 03:19:45 genevb Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.21  2007/09/05 03:19:45  genevb
+ *Use attribute pmdRaw
+ *
  *Revision 1.20  2007/08/31 10:50:12  rashmi
  *Added routines to read badchains,HotCells,Cell_GNF,SMChain_GNF,Modified VMEcondition&ApplyMapping(subhasis)
  *
@@ -122,7 +125,8 @@ StPmdReadMaker::StPmdReadMaker(const char *name)
   mPmdDBUtil = new StPmdDBUtil();
   mChainTh=0;
   //  mCalibFlag=kFALSE;
-  mCalibFlag=kTRUE;
+  //  mCalibFlag=kTRUE;
+  mCalibFlag = !(IAttr("pmdRaw"));
   mPmdPrint=kFALSE;
   mHotCells=NULL;                                                          
 }
