@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.21 2007/09/05 03:19:45 genevb Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.22 2007/09/05 03:41:42 genevb Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.22  2007/09/05 03:41:42  genevb
+ *Attribute check was in the wrong place
+ *
  *Revision 1.21  2007/09/05 03:19:45  genevb
  *Use attribute pmdRaw
  *
@@ -125,8 +128,7 @@ StPmdReadMaker::StPmdReadMaker(const char *name)
   mPmdDBUtil = new StPmdDBUtil();
   mChainTh=0;
   //  mCalibFlag=kFALSE;
-  //  mCalibFlag=kTRUE;
-  mCalibFlag = !(IAttr("pmdRaw"));
+  mCalibFlag=kTRUE;
   mPmdPrint=kFALSE;
   mHotCells=NULL;                                                          
 }
@@ -151,6 +153,7 @@ StPmdReadMaker::~StPmdReadMaker() {
 
 Int_t StPmdReadMaker::Init() {
   if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Init()");
+  mCalibFlag = !(IAttr("pmdRaw"));
   bookHist();
 
   return StMaker::Init();
