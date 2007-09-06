@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.23 2007/09/06 05:30:52 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.24 2007/09/06 06:35:30 genevb Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.24  2007/09/06 06:35:30  genevb
+ *Small refinements to the BadChain fix
+ *
  *Revision 1.23  2007/09/06 05:30:52  subhasis
  *Subhasis: BadChain fix to avoid cucu crash
  *
@@ -107,6 +110,7 @@
 
 //added for cleanup 
 #include "StPmdCleanConstants.h"
+Int_t BadChainZero[25];
 Int_t * BadChain;
 Float_t SM_chain_factor[24][48];
 //ofstream fout("calib_out.dat");
@@ -181,9 +185,7 @@ Int_t StPmdReadMaker::InitRun(Int_t runnr) {
   
   if(mPmdPrint) cout<<"Run Number, VME Condition : "<<mRunNumber<<" "<<mVmeCond<<endl;
 // subhasis // to fix crash in BadChain
-    for(Int_t i=0;i<25;i++){
-      BadChain[i]=0;
-    }
+    for(Int_t i=0;i<25;i++) BadChainZero[i]=0;
   
   ReadBadChains(runnr);
   ReadCalibrationsConst();
@@ -233,6 +235,8 @@ void StPmdReadMaker::ReadBadChains(Int_t runNo){
     }else{
       BadChain = PmdClean::BadChain_y8d0;
     }
+  } else {
+    BadChain = BadChainZero;
   }
 
   if (BadChain[0]>0 && Debug()){
