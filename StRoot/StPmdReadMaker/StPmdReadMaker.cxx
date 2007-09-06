@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.22 2007/09/05 03:41:42 genevb Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.23 2007/09/06 05:30:52 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.23  2007/09/06 05:30:52  subhasis
+ *Subhasis: BadChain fix to avoid cucu crash
+ *
  *Revision 1.22  2007/09/05 03:41:42  genevb
  *Attribute check was in the wrong place
  *
@@ -104,7 +107,7 @@
 
 //added for cleanup 
 #include "StPmdCleanConstants.h"
-Int_t * BadChain={0};
+Int_t * BadChain;
 Float_t SM_chain_factor[24][48];
 //ofstream fout("calib_out.dat");
 
@@ -177,6 +180,10 @@ Int_t StPmdReadMaker::InitRun(Int_t runnr) {
   // subhasis (25th aug 2007:) These conditions need to be checked very carefully
   
   if(mPmdPrint) cout<<"Run Number, VME Condition : "<<mRunNumber<<" "<<mVmeCond<<endl;
+// subhasis // to fix crash in BadChain
+    for(Int_t i=0;i<25;i++){
+      BadChain[i]=0;
+    }
   
   ReadBadChains(runnr);
   ReadCalibrationsConst();
