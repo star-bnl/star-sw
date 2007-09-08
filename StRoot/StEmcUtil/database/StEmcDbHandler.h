@@ -16,53 +16,46 @@ using namespace std;
 
 
 //#include <strstream>
-#include <Stsstream.h>
+//#include <Stsstream.h>
 
 #include "TObject.h"
-#include "TString.h"
 
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
 #include "StDbLib/StDbTable.h"
 #include "StDbLib/StDataBaseI.hh"
 
+#include <string>
+#include <vector>
 
 class StEmcDbHandler : public TObject 
 {
-  public:
+public:
+    StEmcDbHandler();  ///< Class ctor
+    virtual ~StEmcDbHandler();  ///< Class dtor
+    
+    StDbTable* getDbTable();
+    std::vector<std::string> getTimeStampList(const char * beginTime, const char * endTime);
 
-                   StEmcDbHandler();  ///< Class ctor
-        virtual    ~StEmcDbHandler();  ///< Class dtor
-     StDbTable*    getDbTable();
-        TString    getTimeStamp() { return mTimeStamp; }
-       TString*    getTimeStampList();
-   unsigned int    getListSize() { return mListSize; }
-	         void    setTableName(char* name) { mTableName = name; }
-	         void    setTableName(char*, char* );
-	         void    setTableNode(char* node = "Calibrations_emc") { mTableNode = node; }
-	         void    setTimeStamp(char* stamp = "2030-01-01 00:00:00") { mTimeStamp = stamp; }
-	         void    setMaxEntryTime(char* stamp = "2030-01-01 00:00:00") { mMaxTime = stamp; }
-	         void    setTimeStampLimits(char* stamp1 = "2000-01-01 00:00:00", char* stamp2 = "2030-01-01 00:00:00");
-	         void    setFlavor(char* flavor = "ofl") { mFlavor = flavor; }
+	void   setTableNode(const char* node = "Calibrations_emc") { mTableNode = node; }
+	void   setTableName(const char* name) { mTableName = name; }
+	void   setTimeStamp(const char* stamp = "2030-01-01 00:00:00") { mTimeStamp = stamp; }
+	void   setMaxEntryTime(const char* stamp = "2030-01-01 00:00:00") { mMaxTime = stamp; }
+	void   setFlavor(const char* flavor = "ofl") { mFlavor = flavor; }
+    
+    void   writeToDb(char* data);
+    
+    static std::string& timeToSqlTime(const char* apiTime);
 
-  protected:
-
-    unsigned int    mDet;
-    unsigned int    mParam;
-      StDbTable*    mTable;                  ///< EMC database table
-         TString    mFlavor;                 ///< flavor for BEMC tables
-         TString    mTableNode;              ///< Database node for EMC tables
-         TString    mTableName;              ///< EMC database table name, according to input
-         TString    mTimeStamp;              ///< EMC database table time stamp
-         TString    mMaxTime;                ///< EMC database max entry time
-         TString    mFstTimeStamp;           ///< First time stamp of list
-         TString    mLstTimeStamp;           ///< Last time stamp of list
-    unsigned int    mListSize;
-         TString    mTimeStampList[1000];    ///< Time stamp list of specified EMC database table
-      
-         TString    timeToSqlTime(const char*);
-
-  ClassDef(StEmcDbHandler,1)
-  
+protected:
+    StDbTable*      mTable;                 ///< EMC database table
+    std::string     mFlavor;                ///< flavor for BEMC tables
+    std::string     mTableNode;             ///< Database node for EMC tables
+    std::string     mTableName;             ///< EMC database table name, according to input
+    std::string     mTimeStamp;             ///< EMC database table time stamp
+    std::string     mMaxTime;               ///< EMC database max entry time
+    std::vector<std::string> mTimeStampList;///< Time stamp list of specified EMC database table
+    
+    ClassDef(StEmcDbHandler,1)
 };
 #endif
