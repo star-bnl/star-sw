@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.28 2007/05/17 13:18:52 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.29 2007/09/08 00:33:05 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.29  2007/09/08 00:33:05  andrewar
+ * Modifications for pileup hit read in.
+ *
  * Revision 1.28  2007/05/17 13:18:52  andrewar
  * Removed cout in shiftHit.
  *
@@ -249,6 +252,26 @@ Int_t StPixelFastSimMaker::Make()
     }//end if pileup output
   else
     { //try file input
+      if(pixHitCol){
+	vector<pair<double,double>*>::iterator iD=pileupDet.begin();
+        for(vector<StThreeVectorD*>::iterator iH=pileupHits.begin();
+	  iH<pileupHits.end();
+	  iH++, iD++)
+	{
+	  int id = col->numberOfHits();
+	   			
+	    StThreeVectorD mRndHitError(0.,0.,0.);
+	    StThreeVectorD p((*iH)->x(),(*iH)->y(),(*iH)->z());
+	    StRnDHit* tempHit = new StRnDHit(p,mRndHitError, 1, 1., 0, 
+						   1, 1, id++, kHftId);
+	    tempHit->setDetectorId(kHftId);
+	    tempHit->setVolumeId(999);
+	    tempHit->setKey(999);
+	    tempHit->setLayer((*iD)->first);
+	    tempHit->setLadder((*iD)->second);
+	    col->addHit(tempHit);
+	}
+      }//end if pixelhitcol
     }
 
   if (pixHitCol)							
@@ -256,7 +279,7 @@ Int_t StPixelFastSimMaker::Make()
       Int_t nhits = pixHitCol->numberOfHits();				
       if (nhits)								
 	{									
-	  Int_t id = 0;							
+	  Int_t id = col->numberOfHits();							
 	  for (UInt_t k=0; k<pixHitCol->numberOfLayers(); k++)		       
 	    if (pixHitCol->layer(k))						
 	      {								
