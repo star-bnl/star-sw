@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.29 2007/09/08 00:33:05 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.30 2007/09/09 17:00:32 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.30  2007/09/09 17:00:32  fisyak
+ * Fix bug 1056
+ *
  * Revision 1.29  2007/09/08 00:33:05  andrewar
  * Modifications for pileup hit read in.
  *
@@ -99,6 +102,7 @@
 
 #include "StMcPixelHit.hh"
 #include "StMcEventTypes.hh"
+#ifdef bug1056
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
@@ -107,16 +111,22 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiDetectorBuilder.h"
+#endif
 #include <stdio.h>
 #include <map>
 #include <exception>
 using namespace std;
 #include <stdexcept>
+#ifdef bug1056
 #include "Sti/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
 #include "Sti/StiVMCToolKit.h"
+#else
+#include "TGeoManager.h"
+#include "TGeoMatrix.h"
+#endif
 #include "StarClassLibrary/StRandom.hh"
 #include "tables/St_HitError_Table.h"
 #include <fstream>
@@ -758,7 +768,7 @@ double StPixelFastSimMaker::distortHit(double x, double res, double detLength){
   double test;
   if(mSmear){
     test = x + myRandom->gauss(0,res);
-    while( fabs(x) > detLength){
+    while( fabs(test) > detLength){
       test = x + myRandom->gauss(0,res);
     }
     //cout << " x was " <<x<< " and is now " << test<< endl;

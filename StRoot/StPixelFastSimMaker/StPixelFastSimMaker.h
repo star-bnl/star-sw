@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.8 2007/04/23 18:11:48 andrewar Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.9 2007/09/09 17:00:33 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.9  2007/09/09 17:00:33  fisyak
+ * Fix bug 1056
+ *
  * Revision 1.8  2007/04/23 18:11:48  andrewar
  * Removed references to Hpd (includes were obsolete)
  *
@@ -60,7 +63,7 @@
 #endif
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
-
+#include <vector>
 class StEvent;
 class StMcEvent;
 class StRandom;
@@ -118,7 +121,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.8 2007/04/23 18:11:48 andrewar Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.9 2007/09/09 17:00:33 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
