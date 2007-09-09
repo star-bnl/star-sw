@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniEmbed.C,v 1.9 2006/09/29 01:32:12 calderon Exp $
+// $Id: StMiniEmbed.C,v 1.10 2007/09/09 17:30:17 fisyak Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from emedding data, produces minimc.root file 
@@ -10,6 +10,9 @@
 //       so if one needs to run elsewhere, and the output directory doesn't have the same
 //       lower level directory structure, no output files will be done.
 // $Log: StMiniEmbed.C,v $
+// Revision 1.10  2007/09/09 17:30:17  fisyak
+// use bfc.C for loading shared libraries
+//
 // Revision 1.9  2006/09/29 01:32:12  calderon
 // use event branch instead of dst branch.
 //
@@ -67,11 +70,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-class StChain;
-StChain *chain=0;
-
 // const char* ffile="/auto/pdsfdv09/starprod/embedding/P01hj/HighpT_piminus_101/1243006_0003.26283/st_physics_1243006_raw_0003.dst.root";
-const char* ffile="/beta/starprod/embedding/P02gd/Rev/Piminus_801_minbias/2254002_0021.21333/st_physics_2254002_raw_0021.geant.root";
+//const char* ffile="/beta/starprod/embedding/P02gd/Rev/Piminus_801_minbias/2254002_0021.21333/st_physics_2254002_raw_0021.geant.root";
+const char* ffile="/star/data16/reco/pp200/pythia6_205/0_2gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1273_99_4000evts.geant.root";
 void StMiniEmbed(Int_t nevents=2,
 		 const char* MainFile=ffile,
 		 const char* outDir = "./",
@@ -79,81 +80,14 @@ void StMiniEmbed(Int_t nevents=2,
 {
 
   cout << "Using  : " << MainFile << endl;
-
-  // Dynamically link needed shared libs
-  //gSystem->Load("StarRoot");
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-
-  gSystem->Load("St_Tables");
-  gSystem->Load("StUtilities");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StarClassLibrary");
-    
-  gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("StTpcDb");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventMaker"); 
-  gSystem->Load("StEmcUtil"); 
-  gSystem->Load("StEEmcUtil");
-
-  gSystem->Load("StMcEvent");
-  gSystem->Load("StMcEventMaker");
-  gSystem->Load("StAssociationMaker");
-  gSystem->Load("StMcAnalysisMaker");
-
-
-  gSystem->Load("StMiniMcEvent");
-  gSystem->Load("StMiniMcMaker");
-//   gSystem->Load("Common");
-
-  chain = new StChain("StChain"); 
-  chain->SetDebug();
-  
-  // Now we add Makers to the chain...
-  
-  StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
-  ioMaker->SetDebug();
-  ioMaker->SetIOMode("r");
-  ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
-  ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
-//   ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
-//   ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
-  ioMaker->SetBranch("eventBranch",0,"r"); //activate runco Branch
-  
-  //     const char *mainDB = "MySQL:Geometry_tpc";
-  //     St_db_Maker *dbMk = new St_db_Maker("Geometry",mainDB);
-  //     dbMk->SetDebug();
-  
-  //     const char *calibDB = "MySQL:Calibrations_tpc";
-  //     St_db_Maker *calibMk = new St_db_Maker("Calibrations",calibDB);
-  //     calibMk->SetDebug();
-  
-  //     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
-  
-  // Note, the title "events" is used in the Association Maker, so don't change it.
-  StEventMaker*       eventReader   = new StEventMaker("events","title");
-  eventReader->doPrintMemoryInfo = kFALSE;
-  StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
-  //     mcEventReader->doPrintMemoryInfo = kFALSE;
-  //     mcEventReader->doUseTpc = kTRUE;
-  //     mcEventReader->doUseSvt = kTRUE;
-  //     mcEventReader->doUseFtpc = kTRUE;
-  //     mcEventReader->doUseRich = kTRUE;
-  StAssociationMaker* associator    = new StAssociationMaker;
-  //associator->doPrintMemoryInfo = kTRUE;
-
-  StMiniMcMaker *krap = new StMiniMcMaker;
-  krap->SetDebug();
-  TString outDirName = outDir;
-  TString filename   = MainFile;
-  TString embedrun   = MainFile;
-
   //
   // the string manipulations below are for use in PDSF, from
   // the /beta/starprod/embedding/ input directory
   // to the /auto/pdsfdv41/starprod/QA/McMiniDst/  output directory
   //
+  TString outDirName = outDir;
+  TString filename   = MainFile;
+  TString embedrun   = MainFile;
   if (filename.Contains("Rev"))
       outDirName.Append("RevFullField/");
   else
@@ -171,7 +105,6 @@ void StMiniEmbed(Int_t nevents=2,
       outDirName.Append("Pbar/");
   if (filename.Contains("Proton"))
       outDirName.Append("Proton/");
-  krap->setOutDir(outDirName.Data());
   int embedRunIndex = embedrun.Index("_",0);
   embedrun.Remove(0,embedRunIndex+1);
   embedRunIndex = embedrun.Index("_",0);
@@ -180,11 +113,12 @@ void StMiniEmbed(Int_t nevents=2,
   filename.Remove(0,fileBeginIndex);
   filename.Prepend(embedrun);
   filename.Prepend("emb");
-  krap->setFileName(filename);
-  krap->setFilePrefix("st_physics");
   cout << "outdir : " << outDirName << endl;
   cout << "Output : " << filename << endl;
 
+  gROOT->LoadMacro("bfc.C");
+  TString Chain("in,StEvent,gen_T,sim_T,readall,nodefault,minimcmk");
+  bfc(-1,Chain.Data(),MainFile,0,filename);
   // Define the cuts for the Associations
   
   StMcParameterDB* parameterDB = StMcParameterDB::instance();  
