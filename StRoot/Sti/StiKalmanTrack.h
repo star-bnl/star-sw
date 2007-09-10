@@ -109,6 +109,7 @@ class StiKalmanTrack : public StiTrack
   static void setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>*);
   static void setParameters(StiKalmanTrackFinderParameters* p);
   static void setFitParameters(StiKalmanTrackFitterParameters* p);
+  static void setMaxRefiter(int maxRefiter);
 
   void reset();
   void unset();
@@ -300,6 +301,7 @@ protected:
     
   static StiKalmanTrackFinderParameters * pars;
   static StiKalmanTrackFitterParameters * fitpars;
+  static int mgMaxRefiter;		//max number of refit iteratins allowed
   static Factory<StiKalmanTrackNode> * trackNodeFactory;
   
   StiKalmanTrackNode * firstNode;

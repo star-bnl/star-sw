@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.95 2007/08/16 20:21:23 fine Exp $
- * $Id: StiKalmanTrack.cxx,v 2.95 2007/08/16 20:21:23 fine Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.96 2007/09/10 00:34:28 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.96 2007/09/10 00:34:28 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.96  2007/09/10 00:34:28  perev
+ * member mgMaxRefiter added
+ *
  * Revision 2.95  2007/08/16 20:21:23  fine
  * replace printf with logger
  *
@@ -334,6 +337,7 @@ ostream& operator<<(ostream&, const StiHit&);
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 StiKalmanTrackFinderParameters* StiKalmanTrack::pars = 0;
 StiKalmanTrackFitterParameters* StiKalmanTrack::fitpars = 0;
+int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
 int debugCount=0;
 
@@ -1292,7 +1296,8 @@ StiDebug::Break(nCall);
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
 static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
-  if (nNBeg<=3) return 1;
+  if (nNBeg<=3) 	return 1;
+  if (!mgMaxRefiter) 	return 0;
   StiKalmanTrackNode *inn= getInnerMostNode(3);
   int fail,status;
 
@@ -1301,7 +1306,7 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   int iter=0,igor=0;
   double qA;
   double errConfidence = defConfidence;
-  for (int ITER=0;ITER<100;ITER++) {
+  for (int ITER=0;ITER<mgMaxRefiter;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
       sTNH.set(fitpars->getMaxChi2()*10,fitpars->getMaxChi2Vtx()*100,errConfidence,iter);
@@ -1490,7 +1495,7 @@ if(!myCanvas) {
    for (int i=0;i<4;i++) {myCanvas->cd(i+1); H[i]->Draw();}
 }
 #endif // APPROX_DEBUG
-const double BAD_XI2[2]={77,6},XI2_FACT=1.0;
+const double BAD_XI2[2]={77,6}/*,XI2_FACT=1.0*/;
 int nNode,nNodeIn;
 double Xi2=0;
   StiHitErrs hr;
@@ -1630,4 +1635,9 @@ StThreeVector<double> StiKalmanTrack::getPoint(int firstLast) const
   return StThreeVector<double>(node->x_g(),node->y_g(),node->z_g());
 }
 
+//_____________________________________________________________________________
+void StiKalmanTrack::setMaxRefiter(int maxRefiter) 
+{
+  mgMaxRefiter = maxRefiter;
+}
 
