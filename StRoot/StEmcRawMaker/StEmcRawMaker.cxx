@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.14 2007/04/11 03:29:11 balewski Exp $
+// $Id: StEmcRawMaker.cxx,v 1.15 2007/09/10 22:21:42 kocolosk Exp $
 
 #include <math.h>
 
@@ -39,6 +39,7 @@ StEmcRawMaker::StEmcRawMaker(const char *name):StMaker(name)
     // does not correct for tower map bug at production level by default
     // this assures consistency between the muDst/StEvent files and database
     mBemcRaw->towerMapBug(kFALSE);
+    mBemcRaw->psdMapBug2(kFALSE);
 
     mEemcRaw = new StEemcRaw();
     eeStDb=0;
@@ -292,6 +293,10 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.15  2007/09/10 22:21:42  kocolosk
+// Support for new BPRS swap fixes (off by default for 06/07 production, on for analysis).
+// StBemcTables now matches map fixes in case end users want to use this copy.
+//
 // Revision 1.14  2007/04/11 03:29:11  balewski
 // undo hacks,
 // Endcap code is now in default configuration

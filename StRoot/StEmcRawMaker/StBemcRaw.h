@@ -1,5 +1,9 @@
-// $Id: StBemcRaw.h,v 1.9 2006/01/16 11:12:00 suaide Exp $
+// $Id: StBemcRaw.h,v 1.10 2007/09/10 22:21:41 kocolosk Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.10  2007/09/10 22:21:41  kocolosk
+// Support for new BPRS swap fixes (off by default for 06/07 production, on for analysis).
+// StBemcTables now matches map fixes in case end users want to use this copy.
+//
 // Revision 1.9  2006/01/16 11:12:00  suaide
 // tower map bug fixed and astyle run
 //
@@ -76,6 +80,7 @@ protected:
 
     Bool_t                   mSaveAllStEvent;
     Bool_t                   mPsdMapBug;
+    Bool_t                   mPsdMapBug2;
     Bool_t                   mTowerMapBug;
 
     Int_t                    mDate;
@@ -137,9 +142,17 @@ public:
     {
         mPsdMapBug = a;
     } ///< Set to ktrue to correct PSD map inthe P04* productions
+    void                      psdMapBug2(Bool_t a)
+    { 
+        mPsdMapBug2 = a;
+        delete mTables;
+        mTables = new StBemcTables(mTowerMapBug, mPsdMapBug2);
+    } ///< Set to ktrue to correct PSD swaps in 2006 and 2007 data
     void                      towerMapBug(Bool_t a)
     {
         mTowerMapBug = a;
+        delete mTables;
+        mTables = new StBemcTables(mTowerMapBug, mPsdMapBug2);
     } ///< Set to ktrue to correct for the tower map bug (only runs before 2006)
 
     StBemcTables*             getTables()
