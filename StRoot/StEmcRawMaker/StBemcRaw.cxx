@@ -1,6 +1,10 @@
 //
-// $Id: StBemcRaw.cxx,v 1.20 2007/01/22 19:13:37 kocolosk Exp $
+// $Id: StBemcRaw.cxx,v 1.21 2007/09/10 22:21:41 kocolosk Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.21  2007/09/10 22:21:41  kocolosk
+// Support for new BPRS swap fixes (off by default for 06/07 production, on for analysis).
+// StBemcTables now matches map fixes in case end users want to use this copy.
+//
 // Revision 1.20  2007/01/22 19:13:37  kocolosk
 // use STAR logger for all output
 //
@@ -90,6 +94,7 @@ StBemcRaw::StBemcRaw():TObject()
 {
     mSaveAllStEvent = kFALSE;
     mPsdMapBug = kFALSE;
+    mPsdMapBug2 = kFALSE;
     mTowerMapBug = kFALSE;
     mDecoder = 0;
     mDate = 0;
@@ -598,6 +603,19 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
 Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, Int_t CRATE, Int_t CAP,Float_t& E)
 {
     E=0;
+    
+    if(det==BTOW && mTowerMapBug && mDate<20060101) // after this date the bug should be fixed
+    {
+        Int_t shift = 0;
+        mDecoder->GetTowerBugCorrectionShift(id,shift);
+        id+=shift;
+    }
+    if(det==BPRS && mPsdMapBug2 && mDate<20080101)
+    {
+        Int_t shift = 0;
+        mDecoder->GetPreshowerBugCorrectionShift(id,shift);
+        id+=shift;
+    }
 
     if(CRATE>0 && CRATE<=MAXCRATES && mControlADCtoE->CheckCrate[det-1]==1)
         if((mCrateStatus[det-1][CRATE-1]!=crateOK &&
@@ -683,12 +701,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         id+=PsdOffset_ok[wire-1];
         //cout <<"PSD old id = "<<oldId<<"  new id = "<<id<<"  wire = "<<wire<<endl;
     }
-    if(det==BTOW && mTowerMapBug && mDate<20060101) // after this date the bug should be fixed
-    {
-        Int_t shift = 0;
-        mDecoder->GetTowerBugCorrectionShift(id,shift);
-        id+=shift;
-    }
+    
     Int_t m,e,s;
     geo->getBin(id,m,e,s);
     StEmcRawHit* hit=new StEmcRawHit(did,m,e,s,(UInt_t)ADC);
