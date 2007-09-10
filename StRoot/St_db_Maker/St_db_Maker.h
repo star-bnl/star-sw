@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.28 2007/07/02 19:36:40 fisyak Exp $
+// $Id: St_db_Maker.h,v 1.29 2007/09/10 02:20:10 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.29  2007/09/10 02:20:10  perev
+// StDbBroker::Release used
+//
 // Revision 1.28  2007/07/02 19:36:40  fisyak
 // Add parameter currenTime (== requested time) in FindLeft
 //
@@ -95,7 +98,7 @@ private:
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
   TStopwatch  fTimer[4];        //!Timer object 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.28 2007/07/02 19:36:40 fisyak Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.29 2007/09/10 02:20:10 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -118,7 +121,7 @@ private:
    virtual void    SetOn (const Char_t *path);
    virtual void    SetFlavor(const char *flav,const char *tabname=".all");
    virtual void    OnOff();
-   virtual void    Clear(Option_t *opt=""){if(opt){/*unused*/}};
+   virtual void    Clear(Option_t *opt="");
    virtual Int_t   Finish();
            void    SetMaxEntryTime(Int_t idate,Int_t itime);
 private:
@@ -137,7 +140,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.28 2007/07/02 19:36:40 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.29 2007/09/10 02:20:10 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   
 };
