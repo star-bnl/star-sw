@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.50 2007/05/16 22:47:54 deph Exp $
+ * $Id: StDbBroker.cxx,v 1.51 2007/09/10 02:36:08 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.51  2007/09/10 02:36:08  perev
+ * StDbBroker::Release added
+ *
  * Revision 1.50  2007/05/16 22:47:54  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -263,7 +266,19 @@ void StDbBroker::printStatistics(){
 
 void StDbBroker::CloseAllConnections(){
   if(mgr)mgr->closeAllConnections();
+   cout<<"MPD:GOT HERE connection to db closed"<<endl;
 };
+
+//_____________________________________________________________________________
+
+void StDbBroker::Release(){
+//a general close (cut loose function) for use by
+//st_db_maker (Victor did not want to call CloseAllConnections to 
+//mainain abstraction) Also could add other utilities here later on.
+   StDbBroker::CloseAllConnections();
+   StDbBroker::printStatistics();
+   cout<<"MPD:connection to db closed"<<endl;
+}
 
 //_____________________________________________________________________________
 void StDbBroker::Fill(void * pArray, const char **Comments)
