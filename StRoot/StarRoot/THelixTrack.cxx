@@ -1675,7 +1675,7 @@ SWIT:
 	  xnom = (g-fG1)*(f-fG1)-h*h;
 
 //	  assert(xnom>3e-33);
-          if (xnom<1e-20) { fCase=1; goto SWIT;}
+          if (xnom<1e-20) { fKase=1; goto SWIT;}
 
 	  fXd = ( p*(g-fG1)-q*h      )/xnom;
 	  fYd = (-p*h      +q*(f-fG1))/xnom;
@@ -2747,7 +2747,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.31 2007/07/13 18:17:10 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.32 2007/09/10 02:05:37 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2763,6 +2763,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.32  2007/09/10 02:05:37  perev
+ * Misstype fixed
+ *
  * Revision 1.31  2007/07/13 18:17:10  perev
  * remove member fMax from THelixTrack
  *
