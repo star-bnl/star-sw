@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.28 2005/08/29 21:43:15 fisyak Exp $
+ * $Id: StDbBroker.h,v 1.29 2007/09/10 02:36:08 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.29  2007/09/10 02:36:08  perev
+ * StDbBroker::Release added
+ *
  * Revision 1.28  2005/08/29 21:43:15  fisyak
  * replace UInt_t to Int_t for m_runNumber to avoid problem with undefined run no.
  *
@@ -285,6 +288,7 @@ const char *GetFlavor();
     void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 
     void   printStatistics();
     void   CloseAllConnections();
+    void   Release();
 
   //-> here's all the real stuff now
     dbConfig_st* InitConfig(const char* configName, int& numRows, char* versionName=0);
