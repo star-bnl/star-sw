@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.178 2007/04/30 19:53:47 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.179 2007/09/10 00:32:30 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.179  2007/09/10 00:32:30  perev
+// Attribute useTreeSearch added
+//
 // Revision 1.178  2007/04/30 19:53:47  fisyak
 // add time of flight corrrection for Laser
 //
@@ -459,6 +462,7 @@ Int_t StiMaker::Init()
 	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
   
   _loaderHitFilter = 0; // not using this yet.
+  if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
 
   if (IAttr("useSvtSelf")) {
     SetAttr("useTpc"		,0);
@@ -466,7 +470,7 @@ Int_t StiMaker::Init()
     SetAttr("useSvt"		,kTRUE); 
     SetAttr("activeSvt"		,kTRUE);
 //    SetAttr("useSsd"		,kTRUE); 
-//    SetAttr("activeSsd"		,kTRUE);
+//    SetAttr("activeSsd"	,kTRUE);
     SetAttr("useEventFiller"    ,0);
     SetAttr("useTracker"        ,0);
     SetAttr("useVertexFinder"   ,0);
@@ -565,7 +569,7 @@ Int_t StiMaker::InitRun(int run)
         _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
 	_tracker->load("trackFinderPars.dat",*this);
 	_fitter->load("trackFitterPars.dat",*this);
-        if (IAttr("noTreeSearch")) _tracker->setComb(0);
+        if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
 
       }
       _eventFiller=0;
