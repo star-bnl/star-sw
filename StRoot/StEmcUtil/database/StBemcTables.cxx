@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.6 2007/08/21 18:39:22 kocolosk Exp $
+ * $Id: StBemcTables.cxx,v 1.7 2007/09/10 21:23:22 kocolosk Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -15,7 +15,7 @@
 
 ClassImp(StBemcTables)
 
-StBemcTables::StBemcTables(Bool_t btowMapFix):TObject() {
+StBemcTables::StBemcTables(Bool_t btowMapFix, Bool_t bprsMapFix):TObject() {
   mBtowP = NULL;
   mBprsP = NULL;
   mSmdeP = NULL;
@@ -37,6 +37,7 @@ StBemcTables::StBemcTables(Bool_t btowMapFix):TObject() {
   mTrigL = NULL;
   
   mBtowMapFix = btowMapFix;
+  mBprsMapFix = bprsMapFix;
   mDecoder = new StEmcDecoder();
 }
 
@@ -94,6 +95,9 @@ void StBemcTables::loadTables(StMaker* maker) {
     // the BTOW map fix should be used *ONLY* for runs before 2006
     // For runs after 2006-01-01 the database is supposed to be fixed
     if(date >= 20060101) mBtowMapFix = kFALSE;
+    
+    // same comment for BPRS in Run 8
+    if(date >= 20080101) mBprsMapFix = kFALSE;
     
     TDataSet * DB = NULL;
     
@@ -272,9 +276,14 @@ const char* StBemcTables::endTime(const char * tableName) const {
 
 //-----------------------------------------------------------------------------
 
-Int_t StBemcTables::getOldId(Int_t newId) const {
+Int_t StBemcTables::getOldId(int det, Int_t newId) const {
     Int_t  shift = 0;
-    mDecoder->GetTowerBugCorrectionShift(newId, shift);
+    if(det == BTOW) { 
+        mDecoder->GetTowerBugCorrectionShift(newId, shift);
+    }
+    if(det == BPRS) {
+        mDecoder->GetPreshowerBugCorrectionShift(newId, shift);
+    }
     return newId + shift;
 }
 
@@ -286,15 +295,17 @@ void StBemcTables::getPedestal(Int_t det, Int_t id, Int_t CAP,Float_t& P, Float_
   if(det==BTOW && mBtowP) 
   {
     Int_t id1 = id;
-    if(mBtowMapFix) id1 = getOldId(id);
+    if(mBtowMapFix) id1 = getOldId(BTOW, id);
     P = ((Float_t)mBtowP[0].AdcPedestal[id1-1])/100;
     R = ((Float_t)mBtowP[0].AdcPedestalRMS[id1-1])/100;
     return;
   }
   if(det==BPRS && mBprsP) 
   {
-    P = ((Float_t)mBprsP[0].AdcPedestal[id-1])/100;
-    R = ((Float_t)mBprsP[0].AdcPedestalRMS[id-1])/100;
+    Int_t id1 = id;
+    if(mBprsMapFix) id1 = getOldId(BPRS, id);
+    P = ((Float_t)mBprsP[0].AdcPedestal[id1-1])/100;
+    R = ((Float_t)mBprsP[0].AdcPedestalRMS[id1-1])/100;
     return;
   }
   if(det==BSMDE && mSmdeP) 
@@ -322,12 +333,16 @@ void StBemcTables::getStatus(Int_t det, Int_t id, Int_t& S) const {
   S = STATUS_OK;
   if(det==BTOW && mBtowS) 
   {    
-    Int_t id1 = id;
-    if(mBtowMapFix) id1 = getOldId(id);
-    S = (Int_t)mBtowS[0].Status[id1-1];
-    return;
+      Int_t id1 = id;
+        if(mBtowMapFix) id1 = getOldId(BTOW, id);
+        S = (Int_t)mBtowS[0].Status[id1-1];
+        return;
   }
-  if(det==BPRS && mBprsS) { S = (Int_t)mBprsS[0].Status[id-1];return;}
+  if(det==BPRS && mBprsS) {
+      Int_t id1 = id;
+      if(mBprsMapFix) id1 = getOldId(BPRS, id);
+      S = (Int_t)mBprsS[0].Status[id1-1];return;
+  }
   if(det==BSMDE && mSmdeS) { S = (Int_t)mSmdeS[0].Status[id-1];return;}
   if(det==BSMDP && mSmdpS) { S = (Int_t)mSmdpS[0].Status[id-1];return;}
   return;  
@@ -338,11 +353,15 @@ void StBemcTables::getGain(Int_t det, Int_t id, Float_t& G) const {
   if(det==BTOW && mBtowG) 
   { 
     Int_t id1 = id;
-    if(mBtowMapFix) id1 = getOldId(id);
+    if(mBtowMapFix) id1 = getOldId(BTOW, id);
     G = (Float_t)mBtowG[0].Gain[id1-1];
     return;
   }
-  if(det==BPRS && mBprsG) { G = (Float_t)mBprsG[0].Gain[id-1];return;}
+  if(det==BPRS && mBprsG) { 
+      Int_t id1 = id;
+      if(mBprsMapFix) id1 = getOldId(BPRS, id);
+      G = (Float_t)mBprsG[0].Gain[id1-1];return;
+  }
   if(det==BSMDE && mSmdeG) { G = (Float_t)mSmdeG[0].Gain[id-1];return;}
   if(det==BSMDP && mSmdpG) { G = (Float_t)mSmdpG[0].Gain[id-1];return;}
   return;  
@@ -353,11 +372,15 @@ void StBemcTables::getCalib(Int_t det, Int_t id, Int_t power, Float_t& C) const 
   if(det==BTOW && mBtowC) 
   { 
     Int_t id1 = id;
-    if(mBtowMapFix) id1 = getOldId(id);
+    if(mBtowMapFix) id1 = getOldId(BTOW, id);
     C = (Float_t)mBtowC[0].AdcToE[id1-1][power];
     return;
   }
-  if(det==BPRS && mBprsC) { C = (Float_t)mBprsC[0].AdcToE[id-1][power];return;}
+  if(det==BPRS && mBprsC) { 
+      Int_t id1 = id;
+      if(mBprsMapFix) id1 = getOldId(BPRS, id);
+      C = (Float_t)mBprsC[0].AdcToE[id1-1][power];return;
+  }
   if(det==BSMDE && mSmdeC) { C = (Float_t)mSmdeC[0].AdcToE[id-1][power];return;}
   if(det==BSMDP && mSmdpC) { C = (Float_t)mSmdpC[0].AdcToE[id-1][power];return;}
   return;  
@@ -581,6 +604,9 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
+ * Revision 1.7  2007/09/10 21:23:22  kocolosk
+ * specify kTRUE as 2nd ctor argument to implement swapping corrections for 06/07 BPRS DB
+ *
  * Revision 1.6  2007/08/21 18:39:22  kocolosk
  * added methods to get beginTime / endTime of a given DB table
  *

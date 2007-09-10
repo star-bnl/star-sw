@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.h,v 1.5 2007/08/21 18:39:23 kocolosk Exp $
+ * $Id: StBemcTables.h,v 1.6 2007/09/10 21:23:23 kocolosk Exp $
  * Author:      Alexandre A. P. Suaide
  * Maintainer:  Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -65,14 +65,15 @@ protected:
     emcTriggerLUT_st*       mTrigL;
     
     StEmcDecoder*           mDecoder;
-    Bool_t                  mBtowMapFix;  
-    Int_t                   getOldId(Int_t) const;
+    Bool_t                  mBtowMapFix;
+    Bool_t                  mBprsMapFix;
+    Int_t                   getOldId(int det, Int_t newId) const;
     
     map<string, pair<string, string> > mValidRanges;
     void updateValidity(StMaker* dbMaker, TTable* table);
    
 public:
-    StBemcTables(Bool_t btowMapFix = kFALSE); ///< StBemcTables constructor
+    StBemcTables(Bool_t btowMapFix = kFALSE, Bool_t bprsMapFix = kFALSE); ///< StBemcTables constructor
     virtual  ~StBemcTables(); ///< StBemcTables destructor
     
     void    loadTables(StMaker* anyMaker); ///< load tables.
@@ -134,6 +135,9 @@ public:
 /***************************************************************************
  *
  * $Log: StBemcTables.h,v $
+ * Revision 1.6  2007/09/10 21:23:23  kocolosk
+ * specify kTRUE as 2nd ctor argument to implement swapping corrections for 06/07 BPRS DB
+ *
  * Revision 1.5  2007/08/21 18:39:23  kocolosk
  * added methods to get beginTime / endTime of a given DB table
  *
