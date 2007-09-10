@@ -676,12 +676,17 @@ static  const double ref1a  = 110.*degToRad;
       }//if(active)
 
       int nHits = hitCont.getNHits();
+      assert(nHits<100);
       testNode.setHitCand(nHits);
-      if (direction || useComb()==0) {
+      if (direction) {
         nHits=1;
       } else {
-        if (testNode.getX()< kRMinTpc || !nHits) nHits++; //No hits considered out of tpc
+        int flg = (testNode.getX()< kRMinTpc)? useComb()&3:useComb()>>2;
+        if ((flg&2) || !nHits) 	nHits++;
+        if ((flg&1)==0) 	nHits=1;
+        
       }
+
 #ifdef ASSIGNVP
       do {
         if (!active) 		break;

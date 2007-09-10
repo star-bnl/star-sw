@@ -11,7 +11,7 @@ template<class Filtered>class Filter;
 class StiTrackFinder 
 {
 public:
-   StiTrackFinder(){mComb=1;}
+   StiTrackFinder(){mComb=7;}
   /// Initialize the finder
   virtual void initialize()=0;
   /// Find all tracks of the currently loaded event
@@ -36,12 +36,15 @@ public:
   virtual void setVertexFinder(StiVertexFinder *)=0;
   virtual EditableParameters & getParameters()=0;
   
-  void setComb(int comb=1)		{mComb = comb;}
+  void setComb(int comb=7)		{mComb = comb;}
   int  useComb() const			{return mComb;}
   
 
 protected:
-  int mComb; //0=no combinatoric , no tree search
+  int mComb; //=silicon+4*tpc
+             // silicon/tpc 0=no combinatoric , no tree search
+             //             1=combinatoric , only hits count
+             //             2=combinatoric , no hits also counts
 
 
 };
