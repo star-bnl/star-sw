@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.109 2007/07/02 19:36:39 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.110 2007/09/10 02:19:25 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.110  2007/09/10 02:19:25  perev
+// StDbBroker::Release used
+//
 // Revision 1.109  2007/07/02 19:36:39  fisyak
 // Add parameter currenTime (== requested time) in FindLeft
 //
@@ -368,7 +371,12 @@ Int_t St_db_Maker::Make()
   fTimer[1].Stop();
   return kStOK;
 }
-
+//_____________________________________________________________________________
+void St_db_Maker::Clear(const char *)
+{
+  if (!fDBBroker) return;
+  fDBBroker->Release();
+}
 //_____________________________________________________________________________
 TDatime St_db_Maker::Time(const char *filename)
 {
