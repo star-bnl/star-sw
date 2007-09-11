@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimulatorMaker
 #define STAR_StEmcSimulatorMaker
 
-// $Id: StEmcSimulatorMaker.h,v 1.17 2007/09/11 21:49:14 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.18 2007/09/11 22:40:48 kocolosk Exp $
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -47,7 +47,7 @@ private:
     float                   mCalibSpread[MAXDETBARREL];
     
     /// The simulators should not add pedestal noise if we're doing embedding.  This flag
-    /// is set automatically by looking for StEmcRawMaker in the chain.
+    /// is set automatically by looking for StEmcMixerMaker in the chain.
     bool                    mEmbeddingMode;
     
     /// convert StMcCalorimeterHits to StEmcRawHits here
@@ -107,7 +107,7 @@ public:
     StEmcCollection*        getEmcCollection() { return mEmcCollection; }
 
     virtual const char*     GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.17 2007/09/11 21:49:14 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.18 2007/09/11 22:40:48 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -118,6 +118,9 @@ public:
 
 /*****************************************************************************
  * $Log: StEmcSimulatorMaker.h,v $
+ * Revision 1.18  2007/09/11 22:40:48  kocolosk
+ * small correction to documentation
+ *
  * Revision 1.17  2007/09/11 21:49:14  kocolosk
  * complete overhaul of the BEMC simulator
  * http://www.star.bnl.gov/HyperNews-star/get/emc2/2486.html
