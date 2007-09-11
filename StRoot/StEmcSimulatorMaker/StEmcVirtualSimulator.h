@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcVirtualSimulator
 #define STAR_StEmcVirtualSimulator
 
-// $Id: StEmcVirtualSimulator.h,v 1.5 2007/09/11 21:49:14 kocolosk Exp $
+// $Id: StEmcVirtualSimulator.h,v 1.6 2007/09/11 21:58:10 kocolosk Exp $
 
 #ifndef ROOT_Rtypes
 #include "Rtypes.h"
@@ -25,15 +25,6 @@ public:
     StEmcVirtualSimulator();
     virtual ~StEmcVirtualSimulator();
 
-    /*virtual void     init() = 0;
-    virtual void     setPedestal(const UInt_t type, const Float_t pedMean, const Float_t pedRMS) = 0;
-    virtual void     setParameters(const Float_t calibCoeff,const UInt_t type, const Float_t pedMean, const Float_t pedRMS, const Float_t gainUnc)=0;
-    virtual Double_t getPedestal(const Int_t type, const Double_t pedMean, const Double_t pedRMS) = 0;
-    virtual Double_t deductPedestal(const Int_t type, const Int_t adc, const Double_t pedMean) = 0;
-    virtual Int_t    getAdc(const Double_t de, const Double_t eta) = 0;
-    virtual Float_t  getEnergy() = 0;
-    virtual void     print() = 0;*/
-    
     virtual void setTables(const StBemcTables *tables)                  = 0;
     virtual void setCalibScale(float scale)                             = 0;
     virtual void setCalibSpread(float spread)                           = 0;
@@ -41,6 +32,8 @@ public:
     
     virtual StEmcRawHit* makeRawHit(const StMcCalorimeterHit *mcHit)    = 0;
     
+    /// possible modes of operation for simulators.  Currently StEmcSimpleSimulator
+    /// only implements the first two, while StEmcPmtSimulator implements all 5.
     enum StEmcSimulatorMode {   kTestMode, 
                                 kSimpleMode, 
                                 kPrimaryOnlyMode, 
@@ -54,6 +47,9 @@ public:
 
 /*****************************************************************************
  *  $Log: StEmcVirtualSimulator.h,v $
+ *  Revision 1.6  2007/09/11 21:58:10  kocolosk
+ *  small cleanup and extra documentation
+ *
  *  Revision 1.5  2007/09/11 21:49:14  kocolosk
  *  complete overhaul of the BEMC simulator
  *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2486.html
