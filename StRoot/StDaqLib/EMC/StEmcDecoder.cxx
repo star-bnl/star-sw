@@ -8,6 +8,8 @@
 #endif
 #include "StMessMgr.h"
 
+ClassImp(StEmcDecoder)
+
 //--------------------------------------------------------
 /*!
 Date and time should be in GMT
@@ -40,6 +42,21 @@ void StEmcDecoder::fixTowerBugIndexes()
     }
     //for(int i=0;i<4800;i++) if(TowerBugFixIndex[i]!=i+1)
     //  cout <<"****** TOWER BUG - id_original = "<<i+1<<"   id_new = "<<TowerBugFixIndex[i]<<endl;
+}
+//--------------------------------------------------------
+/*!
+fixes the software indexes for the preshower based on 2006/2007 mapping indexes
+many changes correspond to the tower mapping bugs
+*/
+void StEmcDecoder::fixPreshowerBugIndexes()
+{
+    for(int i=0; i<4800; i++) {
+        int id = i+1;
+        if(PreshowerBugFixIndex[i] != id) {
+            int newId = PreshowerBugFixIndex[i];
+            PreshowerBugFixIndex[newId-1] = id;
+        }
+    }
 }
 //--------------------------------------------------------
 void StEmcDecoder::SetDateTime(unsigned int date, unsigned int time)
@@ -290,6 +307,17 @@ PSDTables:
     for(int i=0;i<60;i++)
         PsdStart[i] = PsdStart_tmp[i];
 
+    //fix preshower softIds based on 2006/7 mapping studies
+    for(int i=0; i<4800; i++) {
+        PreshowerBugFixIndex[i] = i+1;
+    }
+    if(date >= 20060101) //use mapping determined from Run 7 for Run 6 data as well
+    {
+        #include "PreshowerBug2007.txt"
+        if(date >= 20080101) fixPreshowerMap = true;
+    }
+    fixPreshowerBugIndexes();
+    
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     // these tables are for TRIGGER decoding //////////////////////////////
@@ -415,6 +443,19 @@ the tower index (software) in the original map
 int StEmcDecoder::GetTowerBugCorrectionShift(int id_original,int& id_shift) const
 {
     int id_new = TowerBugFixIndex[id_original - 1];
+    id_shift = id_new-id_original;
+    return 1;
+}
+//--------------------------------------------------------
+/*!
+GetPreshowerBugCorrectionShift method - returns the id shift with respect to
+the preshower index (software) in the original map
+\param id_original is the soft_id in the original map
+\param id_shift is the shift that should be applied to the id. In this case, id_corrected = Id_original+id_shift
+*/
+int StEmcDecoder::GetPreshowerBugCorrectionShift(int id_original,int& id_shift) const
+{
+    int id_new = PreshowerBugFixIndex[id_original - 1];
     id_shift = id_new-id_original;
     return 1;
 }
@@ -1015,7 +1056,9 @@ int StEmcDecoder::GetPsdId(int RDO,int index, int& id, int& PMTBox, int& wire, i
         id-=2400;
     if(PMTBox==32 && id>4800)
         id-=2400;
-
+        
+    if(fixPreshowerMap) id = PreshowerBugFixIndex[id-1];
+    
     if(print)
         sprintf(line,"%s  PMTB=%2d  start=%4d  offset=%2d  half=%2d  SoftId=%4d",line,PMTBox,start,offset,half,id);
     if(print)
@@ -1035,6 +1078,9 @@ int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index) const
     index=0;
     if(id<1 || id>4800)
         return 0;
+        
+    if(fixPreshowerMap) id = PreshowerBugFixIndex[id-1];
+    
     RDO = PsdRDO[id-1];
     index = PsdIndex[id-1];
     return 1;
@@ -1170,9 +1216,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.48 2007/08/07 19:44:07 perev Exp $
+// $Id: StEmcDecoder.cxx,v 2.49 2007/09/11 02:41:37 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.49  2007/09/11 02:41:37  kocolosk
+// added code to fix preshower swaps in 2006 and beyond
+//
 // Revision 2.48  2007/08/07 19:44:07  perev
 // Gene scalers added
 //
