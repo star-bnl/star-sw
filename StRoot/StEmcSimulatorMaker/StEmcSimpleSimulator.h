@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimpleSimulator
 #define STAR_StEmcSimpleSimulator
 
-// $Id: StEmcSimpleSimulator.h,v 1.6 2007/09/11 21:49:14 kocolosk Exp $
+// $Id: StEmcSimpleSimulator.h,v 1.7 2007/09/11 21:56:07 kocolosk Exp $
 
 #include "TRandom3.h"
 
@@ -34,9 +34,6 @@ protected:
     
     double  mSF[3];
     int     mMaxADC;
-    double  mMaxEnergy;
-    double  mDefaultPedestalMean;
-    double  mDefaultPedestalRMS;
     
     bool    mEmbeddingMode;
     double  mCalibScale;
@@ -71,6 +68,9 @@ public:
 
 /*****************************************************************************
  *  $Log: StEmcSimpleSimulator.h,v $
+ *  Revision 1.7  2007/09/11 21:56:07  kocolosk
+ *  remove a couple of unused variables
+ *
  *  Revision 1.6  2007/09/11 21:49:14  kocolosk
  *  complete overhaul of the BEMC simulator
  *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2486.html
