@@ -8,8 +8,6 @@
 #endif
 #include "StMessMgr.h"
 
-ClassImp(StEmcDecoder)
-
 //--------------------------------------------------------
 /*!
 Date and time should be in GMT
@@ -1216,9 +1214,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.49 2007/09/11 02:41:37 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.50 2007/09/11 13:30:13 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.50  2007/09/11 13:30:13  kocolosk
+// removed ClassImp that was left in by accident
+//
 // Revision 2.49  2007/09/11 02:41:37  kocolosk
 // added code to fix preshower swaps in 2006 and beyond
 //
