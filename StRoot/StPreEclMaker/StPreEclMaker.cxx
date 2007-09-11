@@ -84,7 +84,7 @@ StEvent* StPreEclMaker::getEvent()
     if(sim)
     {
         emc = (StEmcCollection*)sim->getEmcCollection();
-        sim->clearStEventStaf();
+        //sim->clearStEventStaf();
         if(emc)
         {
             ev->setEmcCollection(emc);
