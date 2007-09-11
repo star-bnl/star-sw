@@ -39,7 +39,9 @@ protected:
     int       TriggerPatch[30];
     int       TriggerSequence[10];
     int       TowerBugFixIndex[4800];
+    int       PreshowerBugFixIndex[4800];
     bool      fixTowerMap;
+    bool      fixPreshowerMap;
 
     int       JetPatchFromTriggerPatch[300];
     int       JetPatchSeqFromTriggerPatch[300];
@@ -65,6 +67,7 @@ protected:
     int       getSmdPin(int,int,int,int&) const;///<Get SMD pin number
     int       getSmdpStrip(int,int&,int&) const;///<Get SMDP strip
     void      fixTowerBugIndexes();///<fixes the array in order to correct the tower bug
+    void      fixPreshowerBugIndexes();///<fixes the array in order to correct the preshower mapping
 
     void      Init(unsigned int,unsigned int);///< Init method
 
@@ -77,6 +80,7 @@ public:
     void      SetFixTowerMapBug(bool fix);///< Sets the tower map bug fix
 
     int       GetTowerBugCorrectionShift(int id_original, int &shift) const;///<Returns the index shift for the tower in original map
+    int       GetPreshowerBugCorrectionShift(int id_original, int &shift) const;///<Returns the index shift for the preshower in original map
 
 	//methods to get another basis from softId
     int       GetTowerBin(int softId,int &m,int &e,int &s) const;///<Convert from softId to m,e,s for towers only
@@ -120,9 +124,12 @@ public:
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 2.15 2007/04/04 17:35:12 kocolosk Exp $
+// $Id: StEmcDecoder.h,v 2.16 2007/09/11 02:41:37 kocolosk Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 2.16  2007/09/11 02:41:37  kocolosk
+// added code to fix preshower swaps in 2006 and beyond
+//
 // Revision 2.15  2007/04/04 17:35:12  kocolosk
 // Added methods GetCrateFromTowerId, GetTDCFromTowerId, GetTDCFromTowerId, GetTriggerPatchFromTowerId, GetJetPatchFromTowerId, and GetTowerIdFromBin.  Also implemented const-correctness and used meaningful argument names in method declarations to improve readability.
 //
