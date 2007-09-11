@@ -229,7 +229,6 @@ Bool_t StEmcMixerMaker::getEvents()
   if(sim)
   {
     StEmcCollection *ecol = sim->getEmcCollection();
-    sim->clearStEventStaf();
     if(ecol)
     {
       mEvent2 = new StEvent();
