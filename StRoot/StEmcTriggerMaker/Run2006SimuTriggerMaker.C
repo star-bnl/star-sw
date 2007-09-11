@@ -14,6 +14,7 @@ void Run2006SimuTriggerMaker(const char *dir ="",
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   gSystem->Load("StTpcDb");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
@@ -25,7 +26,6 @@ void Run2006SimuTriggerMaker(const char *dir ="",
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StDbBroker");
-  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("St_db_Maker");
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
