@@ -31,6 +31,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mEmbed = kFALSE;
     mBemcData = new StBemcData();
     mBemcData->towerMapBug(kTRUE); // corrects for tower map bug at analysis level by default
+    mBemcData->psdMapBug2(kTRUE);
 }
 //_____________________________________________________________________________
 /*!

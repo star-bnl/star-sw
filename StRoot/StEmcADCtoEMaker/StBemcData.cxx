@@ -31,6 +31,13 @@ StBemcData::StBemcData():StBemcRaw()
         mControlADCtoE->CheckStatus[i]=status[i];
         mControlADCtoE->CheckCrate[i]=crate[i];
     }
+    
+    mPsdMapBug2 = kTRUE;
+    mTowerMapBug = kTRUE;
+    
+    // correct DB tables for swapping
+    delete mTables;
+    mTables = new StBemcTables(kTRUE, kTRUE);
 
 }
 //_____________________________________________________________________________
