@@ -13,6 +13,7 @@ void Run2006DataTriggerMaker(const char *dir ="",
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   gSystem->Load("StTpcDb");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
@@ -23,7 +24,6 @@ void Run2006DataTriggerMaker(const char *dir ="",
   gSystem->Load("StEpcMaker");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StDbBroker");
-  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("St_db_Maker");
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
