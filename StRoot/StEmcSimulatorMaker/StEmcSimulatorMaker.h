@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimulatorMaker
 #define STAR_StEmcSimulatorMaker
 
-// $Id: StEmcSimulatorMaker.h,v 1.21 2007/09/12 02:58:53 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.22 2007/09/12 03:06:13 kocolosk Exp $
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -47,7 +47,7 @@ private:
     float                   mCalibSpread[MAXDETBARREL];
     
     /// The simulators should not add pedestal noise if we're doing embedding.  This flag
-    /// is set automatically by looking for StEmcRawMaker in the chain.
+    /// is set automatically by looking for StEmcRawMaker or StEmcADCtoEMaker in the chain.
     bool                    mEmbeddingMode;
     
     /// convert StMcCalorimeterHits to StEmcRawHits here
@@ -110,7 +110,7 @@ public:
     StBemcTables*           getTables() { return mTables; }
 
     virtual const char*     GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.21 2007/09/12 02:58:53 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.22 2007/09/12 03:06:13 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -121,6 +121,9 @@ public:
 
 /*****************************************************************************
  * $Log: StEmcSimulatorMaker.h,v $
+ * Revision 1.22  2007/09/12 03:06:13  kocolosk
+ * embedding mode also set if StEmcADCtoEMaker is in chain (non-bfc embedding)
+ *
  * Revision 1.21  2007/09/12 02:58:53  kocolosk
  * look for emcRaw, not emcEmbed, to determine if it's an embedding chain
  *

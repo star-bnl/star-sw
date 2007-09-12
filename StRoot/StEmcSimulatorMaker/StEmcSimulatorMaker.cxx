@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.47 2007/09/12 02:58:53 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.48 2007/09/12 03:06:11 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -24,8 +24,8 @@
 ClassImp(StEmcSimulatorMaker)
 
 StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name) {
-    // checking if this is embedding mode by looking for StEmcRawMaker in this chain
-    mEmbeddingMode = GetMaker("emcRaw") ? true:false;
+    // checking if this is embedding mode by looking for StEmcRawMaker or StEmcADCtoEMaker in this chain
+    mEmbeddingMode = (GetMaker("emcRaw") || GetMaker("Eread"));
     LOG_INFO <<"StEmcSimulatorMaker EMBEDDING mode = "<< (Int_t)mEmbeddingMode <<endm;
     
     // initialize control table
@@ -236,6 +236,9 @@ void StEmcSimulatorMaker::makeRawHits() {
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.48  2007/09/12 03:06:11  kocolosk
+ *  embedding mode also set if StEmcADCtoEMaker is in chain (non-bfc embedding)
+ *
  *  Revision 1.47  2007/09/12 02:58:53  kocolosk
  *  look for emcRaw, not emcEmbed, to determine if it's an embedding chain
  *
