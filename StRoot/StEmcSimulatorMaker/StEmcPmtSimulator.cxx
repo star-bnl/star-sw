@@ -1,4 +1,4 @@
-// $Id: StEmcPmtSimulator.cxx,v 1.10 2007/09/11 21:49:13 kocolosk Exp $
+// $Id: StEmcPmtSimulator.cxx,v 1.11 2007/09/12 13:31:45 kocolosk Exp $
 
 #include "StEmcPmtSimulator.h"
 
@@ -70,7 +70,7 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
         pedRMS  = mTables->pedestalRMS(mDetectorId-8, softId);
     }
     
-    double ADC;
+    double ADC(0.0);
     switch(mMode) {
         case kTestMode: case kSimpleMode: {
             delete rawHit;
@@ -114,6 +114,9 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
 
 /*****************************************************************************
  *  $Log: StEmcPmtSimulator.cxx,v $
+ *  Revision 1.11  2007/09/12 13:31:45  kocolosk
+ *  two small changes to suppress compiler warnings
+ *
  *  Revision 1.10  2007/09/11 21:49:13  kocolosk
  *  complete overhaul of the BEMC simulator
  *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2486.html
