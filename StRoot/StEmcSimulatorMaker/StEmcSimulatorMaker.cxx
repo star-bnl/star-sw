@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.46 2007/09/12 02:55:15 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.47 2007/09/12 02:58:53 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -25,7 +25,7 @@ ClassImp(StEmcSimulatorMaker)
 
 StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name) {
     // checking if this is embedding mode by looking for StEmcRawMaker in this chain
-    mEmbeddingMode = GetMaker("emcEmbed") ? true:false;
+    mEmbeddingMode = GetMaker("emcRaw") ? true:false;
     LOG_INFO <<"StEmcSimulatorMaker EMBEDDING mode = "<< (Int_t)mEmbeddingMode <<endm;
     
     // initialize control table
@@ -236,6 +236,9 @@ void StEmcSimulatorMaker::makeRawHits() {
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.47  2007/09/12 02:58:53  kocolosk
+ *  look for emcRaw, not emcEmbed, to determine if it's an embedding chain
+ *
  *  Revision 1.46  2007/09/12 02:55:15  kocolosk
  *  don't do zero suppression on embedding hits (they have no pedestal)
  *
