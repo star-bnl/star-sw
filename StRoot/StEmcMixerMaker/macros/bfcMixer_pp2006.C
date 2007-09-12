@@ -9,7 +9,7 @@
 //  \author Jan Balewski, IUCF
 //  \author Adam Kocoloski, MIT
 //
-// $Id: bfcMixer_pp2006.C,v 1.2 2007/04/13 14:28:48 kocolosk Exp $
+// $Id: bfcMixer_pp2006.C,v 1.3 2007/09/12 21:47:47 kocolosk Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -22,16 +22,16 @@ class StEvent;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
 void bfcMixer_pp2006( Int_t Nevents=10,
-			  Char_t *file1="st_physics_adc_7118049_raw_1080001.daq", // probably ppLong 2006 run, NOT for real embedding - just for testing
+			  Char_t *file1="star/data03/daq/2006/120/7120049/st_physics_adc_7120049_raw_1050001.daq", // probably ppLong 2006 run, NOT for real embedding - just for testing
 			  //Char_t *file1="st_zerobias_7118049_raw_1110001.daq",// contains 127 events, good foor real embedding
 			  // Char_t *file2="eleB.fzd", // one-particle events from Naresh
-			  Char_t *file2="rcf1206_109_300evts.fzd",
+			  Char_t *file2="mcpi0_hipt_run140_gid7_1000evts.fzd",
 			  Int_t useEndcapSlowSim=1
 			  // note, Barrel slow sim is always ON, said Adam 
 			  ){
-  TString path1="/star/data05/scratch/balewski/2006-daq/7118049/";
+  TString path1="/";
   //TString path2="/star/data04/sim/subbanly/electron2006/oneTrack2Keve/fzd/";
-    TString path2="/star/u/wzhang/links/gc2002/EEmc/embedData/";
+    TString path2="/star/u/wzhang/links/gc2002/EEmc/embedData/fzd/";
 
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
@@ -96,10 +96,12 @@ void bfcMixer_pp2006( Int_t Nevents=10,
   //............. begin of EMC embedding makers................
 
   //.............. Add BEmc stuff here ....................
+  StMcEventMaker* mcEventMaker = new StMcEventMaker();
   StEmcSimulatorMaker *bemcSim   = new StEmcSimulatorMaker();
   StEmcMixerMaker     *bemcMixer = new StEmcMixerMaker();
   chain3->AddAfter("emcRaw",bemcMixer); 
   chain3->AddAfter("emcRaw",bemcSim); 
+  chain3->AddAfter("emcRaw",mcEventMaker);
   bemcMixer->SetDebug(0); // set it to 1 for more printouts
  // note, Barrel slow sim is always ON, said Adam 
 
@@ -204,6 +206,7 @@ void Load(){
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcSimulatorMaker");
   gSystem->Load("StMcEvent");
+  gSystem->Load("StMcEventMaker");
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StEmcMixerMaker");
 
