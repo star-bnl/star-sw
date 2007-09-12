@@ -2,25 +2,17 @@ TH1 *btow_adc, *bprs_adc, *smde_adc, *smdp_adc;
 TH1 *btow_energy, *bprs_energy, *smde_energy, *smdp_energy;
 TCanvas *c;
 
-void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/u/kocolosk/tmp01/photon_5_7_09.geant.root") {
+void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/institutions/mit/common/simu/photon_5_7_09.geant.root") {
     gROOT->Macro("LoadLogger.C");
     gROOT->Macro("loadMuDst.C");
-    gSystem->Load("StTpcDb");
     gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StEEmcUtil");
     gSystem->Load("StMcEvent"); 
     gSystem->Load("StMcEventMaker"); 
-    gSystem->Load("StAssociationMaker");
-    gSystem->Load("StMcAnalysisMaker");
     gSystem->Load("StDbBroker");
     gSystem->Load("St_db_Maker");
-    gSystem->Load("libgeometry_Tables");
     gSystem->Load("StDaqLib");
-    gSystem->Load("StEmcRawMaker");
-    gSystem->Load("StEmcADCtoEMaker");
-    gSystem->Load("StPreEclMaker");
-    gSystem->Load("StEpcMaker");
     gSystem->Load("StEmcSimulatorMaker");
     
     StChain *chain = new StChain("StChain");
@@ -40,7 +32,7 @@ void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/u/kocol
     
     //if you want to use ideal DB values for some detector
     dbMaker->SetFlavor("sim","bprsCalib");
-    
+
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker();
         
     //emcSim->setCheckStatus(kBarrelEmcTowerId, false);
@@ -59,24 +51,10 @@ void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/u/kocol
     
     chain->Init();
     
-    /*controlEmcSimulatorMaker_st* simControl = emcSim->getControlSimulator()->GetTable();
-    simControl->keyDB[0] = 2;
-    simControl->keyDB[1] = 2;
-    simControl->keyDB[2] = 2;
-    simControl->keyDB[3] = 2;
-    simControl->makeFullDet[0] = 0;
-    simControl->makeFullDet[1] = 0;
-    simControl->makeFullDet[2] = 0;
-    simControl->makeFullDet[3] = 0;
-    simControl->pedCutOff[2] = 1.5;
-    simControl->pedCutOff[3] = 1.5;*/
-    
-    int i=0;
-    
     btow_adc = new TH1F("btow_adc","",200,0.,400.);
     btow_energy = new TH1F("btow_energy","",200,0.,4.);
     
-    bprs_adc = new TH1F("bprs_adc","",200,0.,200.);
+    bprs_adc = new TH1F("bprs_adc","",200,0.,400.);
     bprs_energy = new TH1F("bprs_energy","",200,0.,4.);
     
     smde_adc = new TH1F("smde_adc","",200,0.,200.);
@@ -85,6 +63,7 @@ void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/u/kocol
     smdp_adc = new TH1F("smdp_adc","",200,0.,200.);
     smdp_energy = new TH1F("smdp_energy","",200,0.,4.);
     
+    int i=0;
     while(i<nEvents && chain->Make() == kStOk) {
         StEmcCollection *coll = emcSim->getEmcCollection();
         
@@ -93,11 +72,11 @@ void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/u/kocol
         StEmcDetector *smde = coll->detector(kBarrelSmdEtaStripId);
         StEmcDetector *smdp = coll->detector(kBarrelSmdPhiStripId);
         
-        for(int i=1; i<=120; i++) {
-            StSPtrVecEmcRawHit btow_hits = btow->module(i)->hits();
-            StSPtrVecEmcRawHit bprs_hits = bprs->module(i)->hits();
-            StSPtrVecEmcRawHit smde_hits = smde->module(i)->hits();
-            StSPtrVecEmcRawHit smdp_hits = smdp->module(i)->hits();
+        for(int m=1; m<=120; m++) {
+            StSPtrVecEmcRawHit btow_hits = btow->module(m)->hits();
+            StSPtrVecEmcRawHit bprs_hits = bprs->module(m)->hits();
+            StSPtrVecEmcRawHit smde_hits = smde->module(m)->hits();
+            StSPtrVecEmcRawHit smdp_hits = smdp->module(m)->hits();
             
             for(int j=0; j<btow_hits.size(); j++) {
                 btow_adc->Fill( (btow_hits[j])->adc() );
