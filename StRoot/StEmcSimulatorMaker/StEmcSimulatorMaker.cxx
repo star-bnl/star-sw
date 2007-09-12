@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.48 2007/09/12 03:06:11 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.49 2007/09/12 13:31:45 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -188,7 +188,7 @@ void StEmcSimulatorMaker::makeRawHits() {
     }
     
     for(int det=BTOW; det<=BSMDP; det++) {
-        StDetectorId detectorId;
+        StDetectorId detectorId = kUnknownId;
         switch(det) {
             case BTOW:  detectorId = kBarrelEmcTowerId; break;
             case BPRS:  detectorId = kBarrelEmcPreShowerId; break;
@@ -236,6 +236,9 @@ void StEmcSimulatorMaker::makeRawHits() {
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.49  2007/09/12 13:31:45  kocolosk
+ *  two small changes to suppress compiler warnings
+ *
  *  Revision 1.48  2007/09/12 03:06:11  kocolosk
  *  embedding mode also set if StEmcADCtoEMaker is in chain (non-bfc embedding)
  *
