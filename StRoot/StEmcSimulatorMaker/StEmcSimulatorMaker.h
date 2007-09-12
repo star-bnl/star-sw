@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimulatorMaker
 #define STAR_StEmcSimulatorMaker
 
-// $Id: StEmcSimulatorMaker.h,v 1.19 2007/09/12 01:29:32 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.20 2007/09/12 02:55:15 kocolosk Exp $
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -80,7 +80,7 @@ public:
     /// false for embedding.
     void setMakeFullDetector(StDetectorId det, bool flag) { mMakeFullDetector[det-kBarrelEmcTowerId] = flag; }
     
-    /// only save hits which pass pedestal cut.  Default is true.
+    /// only save hits which pass pedestal cut.  Default is true for simulations, false for embedding.
     void setDoZeroSuppression(StDetectorId det, bool flag) { mDoZeroSuppression[det-kBarrelEmcTowerId] = flag; }
     
     /// pedestal cut requires (ADC-pedMean) > n*pedRMS.
@@ -110,7 +110,7 @@ public:
     StBemcTables*           getTables() { return mTables; }
 
     virtual const char*     GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.19 2007/09/12 01:29:32 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.20 2007/09/12 02:55:15 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -121,6 +121,9 @@ public:
 
 /*****************************************************************************
  * $Log: StEmcSimulatorMaker.h,v $
+ * Revision 1.20  2007/09/12 02:55:15  kocolosk
+ * don't do zero suppression on embedding hits (they have no pedestal)
+ *
  * Revision 1.19  2007/09/12 01:29:32  kocolosk
  * added method to access StBemcTables
  *

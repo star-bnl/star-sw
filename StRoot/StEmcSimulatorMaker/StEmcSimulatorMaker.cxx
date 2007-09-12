@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.45 2007/09/11 21:49:14 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.46 2007/09/12 02:55:15 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -32,8 +32,7 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name) {
     for(int i=0; i<MAXDETBARREL; i++) { 
         mMakeFullDetector[i]    = (mEmbeddingMode) ? false:true;
         mCheckStatus[i]         = true;
-        mMakeFullDetector[i]    = true;
-        mDoZeroSuppression[i]   = true;
+        mDoZeroSuppression[i]   = (mEmbeddingMode) ? false:true;
         mPedestalCut[i]         = 1.5;
         mCalibOffset[i]         = 0.0;
         mCalibSpread[i]         = 0.0;
@@ -237,6 +236,9 @@ void StEmcSimulatorMaker::makeRawHits() {
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.46  2007/09/12 02:55:15  kocolosk
+ *  don't do zero suppression on embedding hits (they have no pedestal)
+ *
  *  Revision 1.45  2007/09/11 21:49:14  kocolosk
  *  complete overhaul of the BEMC simulator
  *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2486.html
