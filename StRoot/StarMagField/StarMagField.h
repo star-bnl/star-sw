@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.2 2005/07/28 19:46:01 fisyak Exp $
+ * $Id: StarMagField.h,v 1.3 2007/09/13 00:00:27 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
+ * Revision 1.3  2007/09/13 00:00:27  fisyak
+ * add mag.field in steel, from Lijuan Ruan
+ *
  * Revision 1.2  2005/07/28 19:46:01  fisyak
  * Add:
  * -  frindge magnetic field from P.Nevski extrapolation,
@@ -48,6 +51,9 @@
 #define  nZ               57            // Standard STAR B field Map. Number of Z points in table
 #define  nR               28            // Number of R points in table
 #define  nPhi             37            // Number of Phi points in table
+#define  nZSteel          16
+#define  nRSteel         115
+#define  nPhiSteel        25
 #if 0
 #define  neZ              69            // Standard STAR E field Map. Number of Z points in table
 #define  neR              33            // Number of R points in table
@@ -67,8 +73,16 @@ class StarMagField {
 					Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    Interpolate2ExtDBfield ( const Float_t r, const Float_t z, 
 					Float_t &Br_value, Float_t &Bz_value ) ;
-  virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
-					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
+   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi,
+  				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
+
+  //added by Lijuan
+  
+  virtual void    Interpolate3DBSteelfield ( const Float_t r, const Float_t z, const Float_t phi,
+					     Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value );
+  //end added by Lijuan
+
+
 #if 0
   virtual void    Interpolate2DEdistortion ( const Float_t r, const Float_t z, 
 					     const Float_t Er[neZ][neR], Float_t &Er_value ) ;
@@ -91,6 +105,14 @@ class StarMagField {
   Float_t  Radius[nR], ZList[nZ] ;         
   Float_t  Bz3D[nPhi][nZ][nR], Br3D[nPhi][nZ][nR], Bphi3D[nPhi][nZ][nR] ;         
   Float_t  R3D[nR], Z3D[nZ], Phi3D[nPhi] ;         
+  Float_t  R3DSteel[nRSteel], Z3DSteel[nZSteel], Phi3DSteel[nPhiSteel] ;         
+  Float_t  Bz3DSteel[nPhiSteel][nZSteel][nRSteel];
+  Float_t  Bx3DSteel[nPhiSteel][nZSteel][nRSteel], By3DSteel[nPhiSteel][nZSteel][nRSteel] ;        
+
+  //added by Lijuan
+  Float_t  Br3DSteel[nPhiSteel][nZSteel][nRSteel], Bphi3DSteel[nPhiSteel][nZSteel][nRSteel] ;        
+  //end added by Lijuan
+ 
 #if 0
   Float_t  cmEr[neZ][nePhi][neR],    cmEphi[neZ][nePhi][neR] ;
   Float_t  endEr[neZ][nePhi][neR],   endEphi[neZ][nePhi][neR] ;
@@ -108,12 +130,13 @@ class StarMagField {
   static StarMagField *Instance() {return fgInstance;}
   virtual ~StarMagField () { fgInstance = 0; }
 
+
   virtual void    BField   ( const Float_t x[], Float_t B[] ) ;
   virtual void    BField   ( const Double_t x[], Double_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    B3DField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBz3DField ( const Float_t r, const Float_t z, const Float_t phi,
-				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
+  				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
   virtual void    SetFactor (Float_t factor = 1);
   virtual void    SetRescale(Float_t factor = 1);
   virtual void    SetBDipole(Float_t m = -42.67);
