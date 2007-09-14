@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_P07ib.C,v 1.1 2007/07/12 20:43:17 fisyak Exp $
+// $Id: bfcMixer_P07ib.C,v 1.2 2007/09/14 20:56:22 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -21,13 +21,13 @@ void bfcMixer_P07ib(const Int_t Nevents=1,
 	      const Char_t *mode="strange",
 	      const Char_t *acc_mode="off" ) {
   // production chain for P07ib
-  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 KeepSvtHit hitfilt skip1row");
+  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2");// KeepSvtHit hitfilt skip1row");
   TString geomP07ib("ry2005f");
   TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput");
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geomP07ib;
   TString chain3Opt = prodP07ib;
-  chain3Opt += " Embedding GeantOut MiniMcMk -in NoInput"; 
+  chain3Opt += " Embedding onlraw GeantOut MiniMcMk -in NoInput,useInTracker"; 
   chain3Opt += " "; chain3Opt += geomP07ib;
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -55,8 +55,9 @@ void bfcMixer_P07ib(const Int_t Nevents=1,
   //________________________________________________________________________________
   gSystem->Load("StMixerMaker");
   StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
-  chain1->SetInput("Input1","StDAQReader");
-  chain2->SetInput("Input2","Event");
+  //  StMixerMaker  *mixer = new StMixerMaker("Mixer","","trs");
+  mixer->SetInput("Input1","StDAQReader");
+  mixer->SetInput("Input2","Event");
   //________________________________________________________________________________
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
@@ -67,7 +68,7 @@ void bfcMixer_P07ib(const Int_t Nevents=1,
   OutputFileName.Append("_emb.root");
   bfc(-1,chain3Opt,0,OutputFileName);
   chain3 = chain;
-  chain2->SetName("Three"); 
+  chain3->SetName("Three"); 
   Chain->cd();
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw"); 
   if(!tpcdaqMk )  {
