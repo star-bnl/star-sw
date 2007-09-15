@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.49 2007/09/12 13:31:45 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.50 2007/09/15 18:36:35 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -30,7 +30,7 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name) {
     
     // initialize control table
     for(int i=0; i<MAXDETBARREL; i++) { 
-        mMakeFullDetector[i]    = (mEmbeddingMode) ? false:true;
+        mMakeFullDetector[i]    = false;
         mCheckStatus[i]         = true;
         mDoZeroSuppression[i]   = (mEmbeddingMode) ? false:true;
         mPedestalCut[i]         = 1.5;
@@ -38,6 +38,9 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name) {
         mCalibSpread[i]         = 0.0;
     }
     
+    // adc2e doesn't suppress BTOW hits, so we won't either
+    mDoZeroSuppression[0] = false;
+
     mMcEvent = NULL;
     mEmcCollection = NULL;
     
@@ -236,6 +239,9 @@ void StEmcSimulatorMaker::makeRawHits() {
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.50  2007/09/15 18:36:35  kocolosk
+ *  changed defaults so makeFullDetector is false and so zero suppression is turned off for BTOW
+ *
  *  Revision 1.49  2007/09/12 13:31:45  kocolosk
  *  two small changes to suppress compiler warnings
  *
