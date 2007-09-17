@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.517 2007/09/05 03:48:48 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.518 2007/09/17 15:47:46 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -304,8 +304,11 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
 	if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
 	if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
-	if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed")) mk->SetActive(kTRUE);
-	else                                                              mk->SetActive(kFALSE);
+	if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed")) {
+	  mk->SetActive(kTRUE);
+	  if (GetOption("Embedding")) mk->SetMode(10*(mk->GetMode()/10)+1);
+	}
+	else   mk->SetActive(kFALSE);
 	if (! mk) goto Error;
 	SetGeantOptions(mk);
       }
