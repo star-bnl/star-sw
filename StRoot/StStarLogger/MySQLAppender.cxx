@@ -194,7 +194,7 @@ void ReplaceVariable(TString &string, const char *var)
       if (spec == "REQUESTID") {
           spec.Form("%d",gSystem->GetPid());
           varValue= spec.Data();
-      } else if (spec == "PROCESSID") {
+      } else if (spec == "JOBINDEX") {
           spec.Form("%d",0);
           varValue= spec.Data();
       }
@@ -235,7 +235,7 @@ void MySQLAppender::flushBuffer()
 //  $hostid        = $HOSTNAME            
 //  $JobUser       = $USER
 //  $SUMSJobId     = $REQUESTID 
-//  $SUMSProcessID = $PROCESSID
+//  $SUMSProcessID = $JOBINDEX (was $PROCESSID)
 
              ReplaceVariable(expandCommand, "REQUESTID");
              ReplaceVariable(expandCommand, "SUMS_nProcesses");
@@ -260,7 +260,7 @@ void MySQLAppender::flushBuffer()
                              expandCommand += ", ";                  
            expandCommand += "TaskRequestID_MD5=\"$REQUESTID\"";
                              expandCommand += ", ";
-           expandCommand += "BrokerProcessID=\"$PROCESSID\"";
+           expandCommand += "BrokerProcessID=\"$JOBINDEX\"";
                              expandCommand += ", ";
            expandCommand +=  "JobLocationURL=\"$HOSTNAME\"";
                              expandCommand += ", ";
@@ -273,7 +273,7 @@ void MySQLAppender::flushBuffer()
                              expandCommand += ", ";                  
            expandCommand += "brokerTaskID=\"$REQUESTID\"";
                              expandCommand += ", ";
-           expandCommand += "brokerJobID=\"$PROCESSID\"";
+           expandCommand += "brokerJobID=\"$JOBINDEX\"";
                              expandCommand += ", ";
            expandCommand +=  "nodeLocation=\"$HOSTNAME\"";
                              expandCommand += ", ";
@@ -285,12 +285,12 @@ void MySQLAppender::flushBuffer()
 //  $hostid        = $HOSTNAME            
 //  $JobUser       = $USER
 //  $SUMSJobId     = $REQUESTID 
-//  $SUMSProcessID = $PROCESSID
+//  $SUMSProcessID = $JOBINDEX (was $PROCESSID)
 
              ReplaceVariable(expandCommand, "USER");
              ReplaceVariable(expandCommand, "HOSTNAME");
              ReplaceVariable(expandCommand, "REQUESTID");
-             ReplaceVariable(expandCommand, "PROCESSID");
+             ReplaceVariable(expandCommand, "JOBINDEX");
              sql = expandCommand.Data();
              if (!execute(sql) ) {
  		  
@@ -301,7 +301,7 @@ void MySQLAppender::flushBuffer()
                 expandCommand = sql.c_str();
          
                 ReplaceVariable(expandCommand, "REQUESTID");
-                ReplaceVariable(expandCommand, "PROCESSID");
+                ReplaceVariable(expandCommand, "JOBINDEX");
          
                 sql = expandCommand.Data();
 			       if (execute(sql)) {
