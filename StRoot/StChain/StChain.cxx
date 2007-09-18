@@ -235,13 +235,13 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 
   LOG_QA << "SequenceValue="       << mNTotal
          << ",StepEventId=" << "'Finish'"
-         << ",essageType=" << "'MemUsed',"  << "MessageClass='='"
+         << ",MessageType=" << "'MemUsed',"  << "MessageClass='='"
          << ",Message='" << int(TMemStat::Used())
          << "'" << endm;
 
   LOG_QA << "SequenceValue="       << mNFailed
          << ",StepEventId=" << "'Finish'"
-         << ",essageType=" << "'ProgSize',"  << "MessageClass='='"
+         << ",MessageType=" << "'ProgSize',"  << "MessageClass='='"
          << ",Message='" << int(TMemStat::ProgSize())
          << "'" << endm;
 #endif         
@@ -253,8 +253,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.64 2007/04/26 20:36:49 perev Exp $
+// $Id: StChain.cxx,v 1.65 2007/09/18 20:42:35 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.65  2007/09/18 20:42:35  fine
+// Fix the message typo
+//
 // Revision 1.64  2007/04/26 20:36:49  perev
 // Some ChainOpt fixes
 //
