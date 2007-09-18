@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_P07ib.C,v 1.2 2007/09/14 20:56:22 fisyak Exp $
+// $Id: bfcMixer_P07ib.C,v 1.3 2007/09/18 22:01:13 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -95,6 +95,7 @@ void bfcMixer_P07ib(const Int_t Nevents=1,
   embMk->SetPartOpt(  8,0.05);
   TAttr::SetDebug(0);
   Chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
+  Chain->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
   Chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
   Chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
   Chain->SetAttr(".Privilege",1,"StPrepEmbedMaker::*"); //It is also IO maker
