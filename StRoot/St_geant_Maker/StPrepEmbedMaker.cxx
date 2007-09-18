@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.2 2007/08/29 22:59:33 andrewar Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.3 2007/09/18 21:53:45 fisyak Exp $
  *
  */
 
@@ -98,7 +98,7 @@ Int_t StPrepEmbedMaker::Init() {
 Int_t StPrepEmbedMaker::InitRun(int runnum)
 {
   //Field can change from event to event (malformed event headers?) - set once per run
-  Do("field = 5.");
+  //  Do("field = 5.");
 }
 
 
@@ -204,6 +204,9 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.3  2007/09/18 21:53:45  fisyak
+ * Don't use field set from GEANT
+ *
  * Revision 1.2  2007/08/29 22:59:33  andrewar
  * Added some calls for GEANT simulation of embedded particles.
  *
