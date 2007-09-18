@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.h,v 1.6 2007/09/10 21:23:23 kocolosk Exp $
+ * $Id: StBemcTables.h,v 1.7 2007/09/18 19:41:47 kocolosk Exp $
  * Author:      Alexandre A. P. Suaide
  * Maintainer:  Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -89,7 +89,10 @@ public:
     float   pedestal(int det, int softId, int cap=0) const;
     float   pedestalRMS(int det, int softId, int cap=0) const;
     float   gain(int det, int softId) const;
-    int     status(int det, int softId) const;
+    
+    /// option can be one of pedestal/calib/gain to get the detailed status for that table,
+    /// otherwise it returns the general status code for the channel
+    int     status(int det, int softId, const char *option = "") const;
     
     int     triggerPatchStatus(int triggerPatch) const;
     int     triggerHighTowerStatus(int triggerPatch) const;
@@ -113,7 +116,7 @@ public:
     
     // These are methods to get offline database values, like pedestals, gains, status
     void    getPedestal(Int_t det, Int_t softId, Int_t cap, Float_t& ped, Float_t& rms) const; ///<Return pedestal mean and rms
-    void    getStatus(Int_t det, Int_t softId, Int_t& status) const; ///<Return status
+    void    getStatus(Int_t det, Int_t softId, Int_t& status, const char *option = "") const; ///<Return status
     void    getGain(Int_t det, Int_t softId, Float_t& gain) const; ///<Return gain correction factor
     void    getCalib(Int_t det, Int_t softId, Int_t power, Float_t& calib) const; ///<Return calibration constant
              
@@ -135,6 +138,9 @@ public:
 /***************************************************************************
  *
  * $Log: StBemcTables.h,v $
+ * Revision 1.7  2007/09/18 19:41:47  kocolosk
+ * added an optional argument to status methods to get status for calib, pedestal, and gain tables
+ *
  * Revision 1.6  2007/09/10 21:23:23  kocolosk
  * specify kTRUE as 2nd ctor argument to implement swapping corrections for 06/07 BPRS DB
  *

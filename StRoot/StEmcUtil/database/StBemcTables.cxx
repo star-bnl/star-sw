@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.7 2007/09/10 21:23:22 kocolosk Exp $
+ * $Id: StBemcTables.cxx,v 1.8 2007/09/18 19:41:46 kocolosk Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -329,22 +329,38 @@ void StBemcTables::getPedestal(Int_t det, Int_t id, Int_t CAP,Float_t& P, Float_
   return;  
 }
 
-void StBemcTables::getStatus(Int_t det, Int_t id, Int_t& S) const {
+void StBemcTables::getStatus(Int_t det, Int_t id, Int_t& S, const char *option) const {
   S = STATUS_OK;
   if(det==BTOW && mBtowS) 
   {    
       Int_t id1 = id;
         if(mBtowMapFix) id1 = getOldId(BTOW, id);
+        if(!strcmp(option, "calib"))    { S = (Int_t)mBtowC[0].Status[id1-1]; return; }
+        if(!strcmp(option, "pedestal")) { S = (Int_t)mBtowP[0].Status[id1-1]; return; }
+        if(!strcmp(option, "gain"))     { S = (Int_t)mBtowG[0].Status[id1-1]; return; }        
         S = (Int_t)mBtowS[0].Status[id1-1];
         return;
   }
   if(det==BPRS && mBprsS) {
       Int_t id1 = id;
       if(mBprsMapFix) id1 = getOldId(BPRS, id);
+      if(!strcmp(option, "calib"))    { S = (Int_t)mBprsC[0].Status[id1-1]; return; }
+      if(!strcmp(option, "pedestal")) { S = (Int_t)mBprsP[0].Status[id1-1]; return; }
+      if(!strcmp(option, "gain"))     { S = (Int_t)mBprsG[0].Status[id1-1]; return; }
       S = (Int_t)mBprsS[0].Status[id1-1];return;
   }
-  if(det==BSMDE && mSmdeS) { S = (Int_t)mSmdeS[0].Status[id-1];return;}
-  if(det==BSMDP && mSmdpS) { S = (Int_t)mSmdpS[0].Status[id-1];return;}
+  if(det==BSMDE && mSmdeS) { 
+      if(!strcmp(option, "calib"))    { S = (Int_t)mSmdeC[0].Status[id-1]; return; }
+      if(!strcmp(option, "pedestal")) { S = (Int_t)mSmdeP[0].Status[id-1]; return; }
+      if(!strcmp(option, "gain"))     { S = (Int_t)mSmdeG[0].Status[id-1]; return; }
+      S = (Int_t)mSmdeS[0].Status[id-1];return;
+  }
+  if(det==BSMDP && mSmdpS) { 
+      if(!strcmp(option, "calib"))    { S = (Int_t)mSmdpC[0].Status[id-1]; return; }
+      if(!strcmp(option, "pedestal")) { S = (Int_t)mSmdpP[0].Status[id-1]; return; }
+      if(!strcmp(option, "gain"))     { S = (Int_t)mSmdpG[0].Status[id-1]; return; }
+      S = (Int_t)mSmdpS[0].Status[id-1];return;
+  }
   return;  
 }
 
@@ -471,9 +487,9 @@ float StBemcTables::gain(int det, int softId) const {
     return val;
 }
 
-int StBemcTables::status(int det, int softId) const {
+int StBemcTables::status(int det, int softId, const char *option) const {
     int val;
-    getStatus(det, softId, val);
+    getStatus(det, softId, val, option);
     return val;
 }
 
@@ -604,6 +620,9 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
+ * Revision 1.8  2007/09/18 19:41:46  kocolosk
+ * added an optional argument to status methods to get status for calib, pedestal, and gain tables
+ *
  * Revision 1.7  2007/09/10 21:23:22  kocolosk
  * specify kTRUE as 2nd ctor argument to implement swapping corrections for 06/07 BPRS DB
  *
