@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.31 2007/07/12 19:46:20 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.32 2007/09/18 02:29:58 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -393,12 +393,58 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   
 }
 
+void StMuTrack::Print(Option_t *option) const {
+  //
+  // Print out some of the essential track info. 
+  // Note: more is stored in the track; may expand printout
+  // or specify options some time
+  //
+
+
+  if (mType == global)
+    cout << "Global ";
+  else if (mType == primary)
+    cout << "Primary ";
+  else    
+    cout << "Other type ";
+  cout << "track, id " << mId << ", flag " << mFlag << " (>0 is OK)" << endl;
+
+  if (mVertexIndex != 0) 
+    cout << "Not assigned to primary vertex ( vertex Index " << mVertexIndex << " )" << endl;
+
+  cout << "momentum " << mP << endl;
+  cout << "eta  " << mEta << ", phi " << mPhi << ", pt " << mPt << endl;
+  cout << "DCA  " << mDCA << endl;
+  cout << "\t radial " << dcaD() << " +- " << mSigmaDcaD << ", z " << dcaZ() << " +- " << mSigmaDcaZ << endl;
+  cout << "global DCA " << mDCAGlobal << endl;
+  cout << "Total hits: " << nHits() << ", fitted " << nHitsFit()
+       << "\t ( TPC "
+       << nHitsFit(kTpcId) << ", FTPC "
+       << nHitsFit(kFtpcEastId) + nHitsFit(kFtpcWestId) << ", SVT "  
+       << nHitsFit(kSvtId) << ", SSD "
+       << nHitsFit(kSsdId) << " ) " << endl;
+
+  cout << "Possible points: " << nHitsPoss() << " \t( TPC "
+       << nHitsPoss(kTpcId) << ", FTPC "
+       << nHitsPoss(kFtpcEastId) + nHitsPoss(kFtpcWestId) << ", SVT "
+       << nHitsPoss(kSvtId) << ", SSD "
+       << nHitsPoss(kSsdId) << " ) " << endl;
+
+  cout << "\t first point " << mFirstPoint << endl;
+  cout << "\t last point  " << mLastPoint << endl;
+  //cout << "\t inner helix origin " << pr_track->helix().origin() << endl; 
+
+}
+
 ClassImp(StMuTrack)
 
 
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.32  2007/09/18 02:29:58  mvl
+ * Added basic printing functionality. For convenience and to assist data consistency checks
+ *
  * Revision 1.31  2007/07/12 19:46:20  fisyak
  * Add includes for ROOT 5.16
  *

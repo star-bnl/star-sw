@@ -4,7 +4,7 @@
  * Simple class to store primary vertices. Data members are a mainly a copy of 
  * StPrimaryVertex
  *
- * $Id: StMuPrimaryVertex.h,v 1.3 2006/04/25 08:27:43 mvl Exp $ 
+ * $Id: StMuPrimaryVertex.h,v 1.4 2007/09/18 02:29:58 mvl Exp $ 
  */
 
 #include "TObject.h"
@@ -42,6 +42,7 @@ class StMuPrimaryVertex : public TObject {
    void setPosition(const StThreeVectorF &pos)     { mPosition = pos; }
    void setPosError(const StThreeVectorF &pos_err) { mPosError = pos_err; }
 
+   virtual void     Print(Option_t *option="") const; ///< Print essential vertex info
 
   ClassDef(StMuPrimaryVertex,3)
     
@@ -68,6 +69,9 @@ class StMuPrimaryVertex : public TObject {
 #endif
 /*
  * $Log: StMuPrimaryVertex.h,v $
+ * Revision 1.4  2007/09/18 02:29:58  mvl
+ * Added basic printing functionality. For convenience and to assist data consistency checks
+ *
  * Revision 1.3  2006/04/25 08:27:43  mvl
  * Added members and getters for mean-dip and chisquared value
  *

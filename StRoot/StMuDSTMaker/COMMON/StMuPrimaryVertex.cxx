@@ -3,7 +3,7 @@
  * A simple class to store porimary vertex information
  * All functions are inline
  *
- * $Id: StMuPrimaryVertex.cxx,v 1.3 2006/04/25 08:27:44 mvl Exp $ 
+ * $Id: StMuPrimaryVertex.cxx,v 1.4 2007/09/18 02:29:58 mvl Exp $ 
  */
 
 #include "StMuPrimaryVertex.h"
@@ -31,4 +31,15 @@ StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex*& vertex) {
   mRefMultNeg = uncorrectedNumberOfNegativePrimaries(vertex); 
   mRefMultFtpcEast = uncorrectedNumberOfFtpcEastPrimaries(vertex);
   mRefMultFtpcWest = uncorrectedNumberOfFtpcWestPrimaries(vertex); 
+}
+
+void StMuPrimaryVertex::Print(Option_t *option) const {
+  cout << "Vertex position " << mPosition << endl;
+  cout << "       errors   " << mPosError << endl;
+  cout << "Rank        " << mRanking << endl;
+  cout << "Chisquared  " << mChiSquared << endl;
+  cout << "RefMult     " << refMult() << " ( pos " << mRefMultPos << ", neg " 
+       << mRefMultNeg << " )" << endl;
+  cout << "Tracks used " << mNTracksUsed << endl;
+  cout << "Mean dip    " << mMeanDip << endl;
 }

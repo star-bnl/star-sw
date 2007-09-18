@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.30 2005/08/22 17:29:12 mvl Exp $
+ * $Id: StMuDst.h,v 1.31 2007/09/18 02:29:58 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -309,6 +309,11 @@ public:
   // run 5 - dongx
   static unsigned int GetNTofRawData()         { return numberOfTofRawData(); }
 
+  virtual void Print(Option_t *option = "") const; ///< Print basic event info
+  void printPrimaryTracks() const;
+  void printGlobalTracks() const;
+  void printVertices() const;
+
   friend class StMuDstMaker;
   friend class StMuIOMaker;
   ClassDef(StMuDst,0)
@@ -319,6 +324,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.31  2007/09/18 02:29:58  mvl
+ * Added basic printing functionality. For convenience and to assist data consistency checks
+ *
  * Revision 1.30  2005/08/22 17:29:12  mvl
  * Made setVertexId static, changed globalTracks() to return
  * TObjArray* (for similarity to primaryTracks.h)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.23 2007/04/20 06:23:46 mvl Exp $
+ * $Id: StMuTrack.h,v 1.24 2007/09/18 02:29:58 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -100,6 +100,7 @@ class StMuTrack : public TObject {
     StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
+    virtual void Print(Option_t* option = "") const;  ///< Print track info
 protected:
   Short_t mId;
   Short_t mType;
@@ -217,6 +218,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.24  2007/09/18 02:29:58  mvl
+ * Added basic printing functionality. For convenience and to assist data consistency checks
+ *
  * Revision 1.23  2007/04/20 06:23:46  mvl
  * Removed Q-vector flag (will implement utility class)
  *
