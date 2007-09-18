@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.41 2007/05/16 18:50:49 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.42 2007/09/18 02:29:57 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -14,8 +14,9 @@
 
 #include "StarClassLibrary/StTimer.hh"
 #include "StMuDstMaker.h"
-#include "StMuTrack.h"
 #include "StMuEvent.h"
+#include "StMuPrimaryVertex.h"
+#include "StMuTrack.h"
 #include "StMuDebug.h"
 #include "StMuEmcUtil.h"
 #include "StMuPmdUtil.h"
@@ -436,12 +437,93 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
   return t;
 }
 
+void StMuDst::Print(Option_t *option) const {
+  StMuEvent *event = 0;
+  if ((event = StMuDst::event())) {
+    cout << "++++++++++++++ MuDst run " << event->runId() << " event " << event->eventId() << " ++++++++++++++" << endl;
+    cout << endl << "primary vertex pos " << event->primaryVertexPosition() << endl;
+  }
+  else 
+    cout << "No event structure (StMuEvent) found!" << endl;
+
+
+  cout << numberOfPrimaryVertices() << " vertices reconstructed" << endl;
+  cout << numberOfPrimaryTracks() << " primary tracks, ";
+  if (mCurrVertexId != 0)
+    cout << "( note vtx_id " << mCurrVertexId << " ) " ; 
+  cout << numberOfGlobalTracks() << " global " << endl;
+
+  cout << numberOfV0s() << " V0s, " << numberOfXis() << " Xis " 
+       << numberOfKinks() << " kinks" << endl;
+
+  cout << endl;
+  if (muEmcCollection())
+    cout << "EMC data present" << endl;
+  else
+    cout << "No EMC data present" << endl;
+
+  if (pmdCollection())
+    cout << "PMD data present" << endl;
+  else
+    cout << "No PMD data present" << endl;
+
+  if (numberOfTofHit())
+    cout << "TOF data present" << endl;
+  else
+    cout << "No TOF data present" << endl;
+  cout << endl;
+}
+
+void StMuDst::printVertices() const {
+  if (numberOfPrimaryVertices() == 0) {
+    cout << "No vertices stored (for older data, check StMuEvent)" << endl;
+    return;
+  }
+  cout << endl;
+  cout << "+++++++++ vertex list ( " << numberOfPrimaryVertices() << " entries )" << endl << endl;
+  for (UInt_t i_vtx = 0; i_vtx < numberOfPrimaryVertices(); i_vtx++) {
+    cout << "+++ Vertex " << i_vtx << endl;
+    primaryVertex(i_vtx)->Print();
+    cout << endl;
+  }
+}
+
+void StMuDst::printPrimaryTracks() const {
+  if (numberOfPrimaryTracks() == 0) {
+    cout << "No primary tracks found!" << endl;
+    return;
+  }
+  cout << endl;
+  cout << "+++++++++ PRIMARY track list ( " << numberOfPrimaryTracks() << " entries )" << endl << endl;
+  for (UInt_t i_trk = 0; i_trk < numberOfPrimaryTracks(); i_trk++) {
+    cout << "+++ Primary track " << i_trk << endl;
+    primaryTracks(i_trk)->Print();
+    cout << endl;
+  }
+}
+
+void StMuDst::printGlobalTracks() const {
+  if (numberOfGlobalTracks() == 0) {
+    cout << "No global tracks found!" << endl;
+    return;
+  }
+  cout << endl;
+  cout << "+++++++++ GLOBAL track list ( " << numberOfGlobalTracks() << " entries )" << endl << endl;
+  for (UInt_t i_trk = 0; i_trk < numberOfGlobalTracks(); i_trk++) {
+    cout << "+++ Global track " << i_trk << endl;
+    globalTracks(i_trk)->Print();
+    cout << endl;
+  }
+}
 
 ClassImp(StMuDst)
 
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.42  2007/09/18 02:29:57  mvl
+ * Added basic printing functionality. For convenience and to assist data consistency checks
+ *
  * Revision 1.41  2007/05/16 18:50:49  mvl
  * Cleanup of output. Replaced cout with LOG_INFO etc.
  *
