@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS FacilityDictionary (
 
 DROP TABLE IF EXISTS Jobs;
 CREATE TABLE IF NOT EXISTS Jobs (
-  jobID             int(11)      NOT NULL AUTO_INCREMENT COMMENT 'ID of job when entry is created, unique within table',
+  jobID             int(11)      NOT NULL AUTO_INCREMENT KEY COMMENT 'ID of job when entry is created, unique within table',
   taskID            int(11)      NOT NULL      COMMENT 'Foreign key reference to Tasks table',
   brokerJobID       int(11)      NOT NULL      COMMENT 'ID of job as assigned by Broker',
   gridJobID         varchar(64)  default NULL  COMMENT 'ID for job as assigned by Grid Resource Allocation Manager (GRAM)',
@@ -100,8 +100,7 @@ CREATE TABLE IF NOT EXISTS Jobs (
   executionUserID   int(11)      default NULL  COMMENT 'A login ID on the local resource site & worker node that actually executes',
   executionUserName varchar(32)  NOT NULL      COMMENT 'A login ID on the local resource site & worker node that actually executes',
   stateID           int(11)      NOT NULL default '1' COMMENT 'Foreign key reference to StateDictionary table',
-  brokerTaskID      int(11)      NOT NULL      COMMENT 'ID of task as assigned by Broker',
-  PRIMARY KEY  (jobID)
+  CONSTRAINT UNIQUE INDEX JobID (taskID, brokerJobID )
 );
 
 -- 
@@ -227,7 +226,7 @@ INSERT INTO StateDictionary (`stateID`, `stateName`, `stateDescription`, `stateA
 
 DROP TABLE IF EXISTS Tasks;
 CREATE TABLE IF NOT EXISTS Tasks (
-  taskID           int(11)     NOT NULL AUTO_INCREMENT COMMENT 'ID of task when entry is created, unique in table',
+  taskID           int(11)     NOT NULL AUTO_INCREMENT  KEY COMMENT 'ID of task when entry is created, unique in table',
   brokerID         int(11)     NOT NULL default '2' COMMENT 'The ID of the broker that created task',
   requesterName    varchar(32) NOT NULL             COMMENT 'An requester (user) name from the TaskRequesters table',
   taskName         varchar(32) default NULL         COMMENT 'Short name of task as assigned by user through broker',
@@ -237,8 +236,8 @@ CREATE TABLE IF NOT EXISTS Tasks (
   submitTime       datetime    default NULL         COMMENT 'Wall time that task was submitted to broker',
   updateTime       timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'Wall time that task row was last updated',
   endTime          datetime    default  NULL        COMMENT 'Wall time that task completed execution',
-  brokerTaskID     char(32)    NOT NULL             COMMENT 'ID of task as assigned by Broker',
-  PRIMARY KEY  (taskID)
+  brokerTaskID     char(40)    NOT NULL             COMMENT 'ID of task as assigned by Broker',
+  CONSTRAINT UNIQUE  INDEX taskID (brokerTaskID)
 );
 
 -- 

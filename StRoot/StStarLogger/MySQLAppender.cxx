@@ -41,7 +41,7 @@ IMPLEMENT_LOG4CXX_OBJECT(MySQLAppender)
 
 //_________________________________________________________________________
 MySQLAppender::MySQLAppender()
-: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(10),fLastId(0),fIsConnectionOpen(false)
+: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(3),fLastId(0),fIsConnectionOpen(false)
 { 
   // fprintf(stderr,"MySQLAppender::MySQLAppender() \n");
 }
@@ -271,8 +271,6 @@ void MySQLAppender::flushBuffer()
 
            expandCommand +=  "taskID = (SELECT taskID FROM Tasks WHERE  brokerTaskID=\"$REQUESTID\")";
                              expandCommand += ", ";                  
-           expandCommand += "brokerTaskID=\"$REQUESTID\"";
-                             expandCommand += ", ";
            expandCommand += "brokerJobID=\"$JOBINDEX\"";
                              expandCommand += ", ";
            expandCommand +=  "nodeLocation=\"$HOSTNAME\"";
