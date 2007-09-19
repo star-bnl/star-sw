@@ -17,7 +17,7 @@
 
 */
 
-struct ssd {
+struct ssd_t {
 	int channels ;
 	int mode ;	// 0 normal, 1 pedestals/RMSs
 	int max_channels ;
@@ -41,7 +41,7 @@ struct ssd {
 
 } ;
 
-extern struct ssd ssd ;
+extern struct ssd_t ssd ;
 
 extern int ssdReader(char *mem) ;
 

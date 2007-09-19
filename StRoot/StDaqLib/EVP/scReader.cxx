@@ -12,7 +12,7 @@
 #include "evpSupport.h"
 #include "scReader.h"
 
-struct sc sc;
+struct sc_t sc;
 
 // reads the Triggers event descriptor from DATAP directly...
 int scReader(char *m) 

@@ -13,7 +13,7 @@
 #include "evpSupport.h"
 #include "ssdReader.h"
 
-struct ssd ssd ;
+struct ssd_t ssd ;
 
 static int unpackRaw(int rb, int mz, int what, char *mem) ;
 
