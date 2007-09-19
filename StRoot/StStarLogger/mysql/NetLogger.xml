@@ -18,7 +18,7 @@
      <param name="ConversionPattern" value="INSERT DELAYED INTO JobTracking SET JobTrackingID=NULL, MessageContext=&quot;%-3c{2}&quot;,MessageSeverity=&quot;%p&quot;,JobDescriptionID = (SELECT JobDescriptionID FROM JobDescription WHERE  TaskRequestID_MD5=&quot;$REQUESTID&quot; AND BrokerProcessID=&quot;$PROCESSID&quot;), %m; " /> 
 -->
   
-     <param name="ConversionPattern" value="INSERT DELAYED INTO Messages SET content=&quot;%-3c{2}&quot;,severityID=&quot;%p&quot;,jobID = (SELECT jobID FROM Jobs WHERE  brokerTaskID=&quot;$REQUESTID&quot; AND brokerJobID=&quot;$JOBINDEX&quot;), %m; " /> 
+     <param name="ConversionPattern" value="INSERT DELAYED INTO Messages SET content=&quot;%-3c{2}&quot;,severityID=&quot;%p&quot;,jobID = (SELECT jobID FROM Jobs WHERE  taskID=(SELECT taskID FROM Tasks WHERE brokerTaskID=&quot;$REQUESTID&quot;) AND brokerJobID=&quot;$JOBINDEX&quot;), %m; " /> 
      
 <!--      <param name="ConversionPattern" value=" REPLACE INSERT IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, &quot;$REQUESTID&quot;, &quot;$PROCESSID&quot;,&quot;$HOSTNAME&quot;,&quot;$USER&quot; ); INSERT INTO JobTracking ( id, StepName, jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;, &quot;1&quot; ); " />  
 -->
