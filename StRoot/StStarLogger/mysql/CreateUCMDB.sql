@@ -236,8 +236,8 @@ CREATE TABLE IF NOT EXISTS Tasks (
   taskRemainSize   int(11)     NOT NULL default '1' COMMENT 'Number of jobs no completed',
   submitTime       datetime    default NULL         COMMENT 'Wall time that task was submitted to broker',
   updateTime       timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'Wall time that task row was last updated',
-  endTime          datetime    default  NULL    COMMENT 'Wall time that task completed execution',
-  brokerTaskID     int(11)     NOT NULL COMMENT 'ID of task as assigned by Broker',
+  endTime          datetime    default  NULL        COMMENT 'Wall time that task completed execution',
+  brokerTaskID     char(32)    NOT NULL             COMMENT 'ID of task as assigned by Broker',
   PRIMARY KEY  (taskID)
 );
 
