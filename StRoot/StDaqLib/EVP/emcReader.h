@@ -12,7 +12,7 @@
 #define ESMD_PRESIZE     4
 #define ESMD_DATSIZE   192
 
-struct emc {
+struct emc_t {
 	u_char btow_in ;
 	u_short btow_max_ch ;
 	u_short btow_ch ;
@@ -47,7 +47,7 @@ struct emc {
 
 } ;
 
-extern struct emc emc ;
+extern struct emc_t emc ;
 
 extern int emcReader(char *mem) ;
 

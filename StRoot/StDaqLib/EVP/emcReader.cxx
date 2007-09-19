@@ -12,7 +12,7 @@
 #include "evpSupport.h"
 #include "emcReader.h"
 
-struct emc emc ;
+struct emc_t emc ;
 
 int emcReader(char *m) {
   struct DATAP *datap = (struct DATAP *)m ;
