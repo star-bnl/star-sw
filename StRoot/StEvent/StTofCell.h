@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCell.h,v 2.6 2004/06/14 23:54:38 jeromel Exp $
+ * $Id: StTofCell.h,v 2.7 2007/09/19 17:32:18 ullrich Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCell.h,v $
+ * Revision 2.7  2007/09/19 17:32:18  ullrich
+ * New member (mLeadingEdgeTime,  mTrailingEdgeTime) and related functions and updates added.
+ *
  * Revision 2.6  2004/06/14 23:54:38  jeromel
  * Corrected typo
  *
@@ -46,7 +49,9 @@ class StTofCell : public StObject {
 public:
     StTofCell();
     StTofCell(int, int, int, int, int, int, StTrack*,
-	      float, int, const StThreeVectorD&);
+	    float, int, const StThreeVectorD&);
+    StTofCell(int, int, int, int, StTrack*,
+	    float, int, const StThreeVectorD&);
     ~StTofCell();
     
     int operator==(const StTofCell&) const;
@@ -58,6 +63,9 @@ public:
     int                   daqIndex() const;
     int                   adc() const;
     int                   tdc() const;
+    float                 leadingEdgeTime() const;
+    float                 trailingEdgeTime() const;
+    float                 tot() const;
     StTrack*              associatedTrack();
     const StTrack*        associatedTrack() const;
     float                 zHit() const;
@@ -70,6 +78,8 @@ public:
     void      setDaqIndex(int);
     void      setAdc(int);
     void      setTdc(int);
+    void      setLeadingEdgeTime(float);
+    void      setTrailingEdgeTime(float);
     void      setAssociatedTrack(StTrack*);
     void      setZHit(float);
     void      setMatchFlag(int);
@@ -82,6 +92,8 @@ protected:
     Int_t    mDaqIndex;
     Int_t    mAdc;
     Int_t    mTdc;
+    Float_t  mLeadingEdgeTime;
+    Float_t  mTrailingEdgeTime;
     //    StTrack* mAssociatedTrack;   //$LINK
 #ifdef __CINT__
     StObjLink        mAssociatedTrack;		
@@ -133,6 +145,18 @@ StTofCell::setTdc(int rawTdc)
 }
 
 inline void
+StTofCell::setLeadingEdgeTime(float leTime)
+{
+    mLeadingEdgeTime = leTime;
+}
+
+inline void
+StTofCell::setTrailingEdgeTime(float teTime)
+{
+    mTrailingEdgeTime = teTime;
+}
+
+inline void
 StTofCell::setZHit(float zhit) {mZhit = zhit;}
 
 inline void
@@ -175,6 +199,24 @@ inline int
 StTofCell::tdc()  const
 {
     return mTdc;
+}
+
+inline float
+StTofCell::leadingEdgeTime()  const
+{
+    return mLeadingEdgeTime;
+}
+
+inline float
+StTofCell::trailingEdgeTime()  const
+{
+    return mTrailingEdgeTime;
+}
+
+inline float
+StTofCell::tot()  const
+{
+    return mTrailingEdgeTime - mLeadingEdgeTime;
 }
 
 inline int
