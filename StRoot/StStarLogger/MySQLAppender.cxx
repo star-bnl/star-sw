@@ -275,6 +275,8 @@ void MySQLAppender::flushBuffer()
                              expandCommand += ", ";
            expandCommand +=  "nodeLocation=\"$HOSTNAME\"";
                              expandCommand += ", ";
+           expandCommand +=  "stateID=\"4\"";  // (4, 'Active', 'Scheduler running job', 'ucmAdmin', '2007-07-12 10:25:35')
+                             expandCommand += ", ";
            expandCommand +=  "executionUserName=\"$USER\"";
                              expandCommand += "; ";
 #endif                                                          
