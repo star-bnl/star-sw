@@ -135,9 +135,12 @@ int emcReader(char *m) {
       
       if(checkBank(emcsecp->bh.bank_type,secp) < 0) continue;
 
-      cou = (b2h32(emcsecp->bh.length) - 10) / 2 ;	// contributions!
-      if(cou<0||cou>999) cou = (l2h32(emcsecp->bh.length) - 10) / 2 ;
+      cou = b2h32(emcsecp->bh.length)*4 ;	// contributions!
+      if(cou<0||cou>999) cou = l2h32(emcsecp->bh.length)*4;
       assert(cou>=0&&cou<999);
+      if (cou>(int)sizeof(EMCSECP)) cou=sizeof(EMCSECP);
+      cou = (cou-sizeof(bankHeader))/sizeof(offlen);
+
                
       for(j=0;j<cou;j++) {
 	len = b2h32(emcsecp->fiber[j].len) ;
@@ -151,9 +154,11 @@ int emcReader(char *m) {
 	
 	if(checkBank(emcrbp->bh.bank_type,rbp) < 0) continue;
 	
-	cou2 = (b2h32(emcrbp->bh.length) - 10) /2 ;
-	if(cou2<0||cou2>999) cou2 = (l2h32(emcrbp->bh.length) - 10) /2 ;
+	cou2 = (b2h32(emcrbp->bh.length))*4 ;
+	if(cou2<0||cou2>999) cou2 = l2h32(emcrbp->bh.length)*4 ;
 	assert(cou2>0&&cou2<999);
+        if (cou2>(int)sizeof(EMCRBP)) cou=sizeof(EMCRBP);
+        cou2 = (cou2-sizeof(bankHeader))/sizeof(offlen);
 		
 	emcadcr = emcadcd = NULL ;
 	

@@ -2,6 +2,7 @@
 #define _EMC_READER_H_
 
 #include <sys/types.h>
+#include "daqFormats.h"
 
 
 // ENDCAP constants; 
@@ -22,8 +23,8 @@ struct emc_t {
 	u_char bsmd_in ;
 	u_short bsmd_max_ch ;
 	u_short bsmd_ch ;
-	u_short bsmd[8][4800] ;
-	u_char  bsmd_cap[8] ;	// capacitor value...
+	u_short bsmd[EMC_FIBER_NUM][4800] ;
+	u_char  bsmd_cap[EMC_FIBER_NUM] ;	// capacitor value...
 
 	u_char bpre_in ;
 	u_short bpre_max_ch ;
