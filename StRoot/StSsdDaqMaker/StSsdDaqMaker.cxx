@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.18 2007/07/12 20:00:51 fisyak Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.19 2007/09/20 03:04:44 perev Exp $
 //
 // $log$
 //
@@ -262,17 +262,11 @@ Int_t StSsdDaqMaker::Make(){
   ssdPedStrip_st out_ped_strip;
   count=1;
   // looping on the sides ...      
+static const char EW[4]={'E','W','p','n'};
   for (id_side=0;id_side<2;id_side++)
     {
-      if (id_side == 0) {EastWest='E';} // side = 0 = East = P-side
-      if (id_side == 1) {EastWest='W';} // side = 1 = West = N-side
-      if(id_side==0){
-	LOG_DEBUG <<" process p-side ladders "<< endm;
-      }
-      else 
-	if(id_side==1){
-	  LOG_DEBUG <<" process n-side ladders "<< endm;
-	}
+      EastWest=EW[id_side];
+      LOG_DEBUG <<" process "<<EW[id_side+2]<<"-side ladders "<< endm;
       for (ladder=0;ladder<mConfig->getTotalNumberOfLadders();ladder++) 
 	{
 	  if (mConfig->getLadderIsActive(ladder+1)>0)
@@ -299,7 +293,7 @@ Int_t StSsdDaqMaker::Make(){
 		      //id_side=0 for p side, 1 for n side
 		      if (data>0) {
 			if (id_side==1) my_channel=maxChannel-1-channel;
-			else my_channel=channel;                  
+			else            my_channel=channel;                  
 			// the ssd mapping tables are inverted at the moment so we have to scan 
 			// them to get the correct channel.
 			if (id_side==1) {
@@ -327,7 +321,7 @@ Int_t StSsdDaqMaker::Make(){
 			out_strip.id_mchit[4]   = 0;
 			spa_strip->AddAt(&out_strip);
 			if (id_side ==0) ladderCountP[ladder]++;
-			else ladderCountN[ladder]++;
+			else             ladderCountN[ladder]++;
 			count++;
 		      } // end else for if data > 0
 		    }
@@ -441,25 +435,25 @@ Int_t StSsdDaqMaker::Make(){
     
   LOG_DEBUG <<"Make()/Number of raw data in the SSD ";
   LOG_DEBUG << "Make()/Active Ladders: ";
-  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
+  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++){ 
     if (mConfig->getLadderIsActive(i+1)>0) {
       gMessMgr->width(5);
       *gMessMgr <<i+1<<" ";
-    }
+  } }
   *gMessMgr<<endm;
   LOG_DEBUG << "Make()/Counts (p-side): ";
-  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
+  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++){ 
     if (mConfig->getLadderIsActive(i+1)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCountP[i]<<" ";
-    }
+  } }
   *gMessMgr<<endm;
   LOG_DEBUG << "Make()/Counts (n-side): "; 
-  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
+  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++){
     if (mConfig->getLadderIsActive(i+1)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCountN[i]<<" ";
-    }
+  } }
   *gMessMgr<<endm;
   if((spa_strip->GetNRows()==0)&&(ssdPedStrip && ssdPedStrip->GetNRows()!=0)){
     LOG_INFO << "Make()/ Read Pedestal & Noise"<< endm; 
