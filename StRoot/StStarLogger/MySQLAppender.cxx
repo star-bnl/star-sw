@@ -41,7 +41,7 @@ IMPLEMENT_LOG4CXX_OBJECT(MySQLAppender)
 
 //_________________________________________________________________________
 MySQLAppender::MySQLAppender()
-: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(3),fLastId(0),fIsConnectionOpen(false)
+: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(5),fLastId(0),fIsConnectionOpen(false)
 { 
   // fprintf(stderr,"MySQLAppender::MySQLAppender() \n");
 }
@@ -227,8 +227,8 @@ void MySQLAppender::flushBuffer()
            "INSERT DELAYED IGNORE  TaskDescription (TaskDescriptionID, TaskRequestID_MD5, TaskSize, TaskRemainSize, EntryTime, UpdateTime, TaskUser,TaskDescription,TaskCredential,BrokerID)"
            " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"$SUMS_AUTHENTICATED_USER\",\"SUMS\");";
 #else
-           "INSERT DELAYED IGNORE  Tasks (taskID, brokerTaskID, taskSize, taskRemainSize, submitTime, updateTime, requesterName,taskDescription)"
-           " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\");";
+           "INSERT DELAYED IGNORE  Tasks (taskID, brokerTaskID, taskName, taskSize, taskRemainSize, submitTime, updateTime, requesterName,taskDescription)"
+           " VALUES  ( DEFAULT, \"$REQUESTID\", \"Short name of task\", \"$SUMS_nProcesses\",\"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\");";
 #endif                      
 // Edit meta symbols
 //-----------------------
@@ -273,6 +273,8 @@ void MySQLAppender::flushBuffer()
                              expandCommand += ", ";                  
            expandCommand += "brokerJobID=\"$JOBINDEX\"";
                              expandCommand += ", ";
+           expandCommand += "startTime=NOW()";
+                             expandCommand += ", ";
            expandCommand +=  "nodeLocation=\"$HOSTNAME\"";
                              expandCommand += ", ";
            expandCommand +=  "stateID=\"4\"";  // (4, 'Active', 'Scheduler running job', 'ucmAdmin', '2007-07-12 10:25:35')
@@ -304,7 +306,16 @@ void MySQLAppender::flushBuffer()
                 ReplaceVariable(expandCommand, "JOBINDEX");
          
                 sql = expandCommand.Data();
-			       if (execute(sql)) {
+			       if (!execute(sql)) {
+#ifdef  NEWTABLE_EXPANSION
+                  expandCommand = "UPDATE IGNORE Jobs SET updateTime=NOW() WHERE brokerJobID=\"$JOBINDEX\"" AND taskID=(SELECT taskID FROM Tasks WHERE brokerTaskID=\"$REQUESTID\");";
+                  ReplaceVariable(expandCommand, "REQUESTID");
+                  ReplaceVariable(expandCommand, "JOBINDEX");
+			         if (execute(sql)) {
+                     fprintf(stderr," MYSQL ----> can not update the Jobs record%s \n", expandCommand.c_str());
+                  }
+#endif                  
+                } else {
                    // clear the buffer of reported events
      	             fprintf(stderr," MYSQL ----> skip and lose event \n");
                 } 
