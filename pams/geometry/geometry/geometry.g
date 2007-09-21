@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.156 2007/08/15 18:06:22 potekhin Exp $
+* $Id: geometry.g,v 1.157 2007/09/21 20:30:08 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.157  2007/09/21 20:30:08  perev
+* Add U2007 geometry
+*
 * Revision 1.156  2007/08/15 18:06:22  potekhin
 * Seec omment at
 * http://drupal.star.bnl.gov/STAR/comp/simu/geometry0/changes-beampipe-support
@@ -2534,6 +2537,77 @@ If LL>1
                      CaveConfig = 4;
                 }
 ****************************************************************************************
+  on U2007    { Year 2006 baseline which is Y2006+FMS
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=5 " call btofgeo5 ";
+* NEW CONFIG!
+                     BtofConfig=10;
+
+* Full barrel in 2007
+                  "calb" 
+                     ems=on ;
+* important:
+                     CalbConfig = 2
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 3 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=7;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "Muon Trigger System"
+                     mutd = on;
+                     MutdConfig = 2;
+                  "We need an even bigger Cave"
+                     CaveConfig = 4;
+                }
+****************************************************************************************
   on Y2008    { Year 2008 baseline: no SVT, material stripped from cones
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -3919,6 +3993,7 @@ If LL>1
    if (magp)                   Call magpgeo
 
    if (mutd.and.MutdConfig==1) Call mutdgeo
+   if (mutd.and.MutdConfig==2) Call mutdgeo2
 
    if (pixl.and.PixlConfig==1) Call pixlgeo
    if (pixl.and.PixlConfig==2) Call pixlgeo1
