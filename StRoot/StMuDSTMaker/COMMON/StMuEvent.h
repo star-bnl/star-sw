@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.18 2007/09/05 23:21:21 mvl Exp $
+ * $Id: StMuEvent.h,v 1.19 2007/09/21 02:27:12 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -33,6 +33,7 @@
 
 class StEvent;
 class StMuCut;
+class StTofCollection; // calibrated vpd for TOF
 
 /**
    @class StMuEvent
@@ -94,6 +95,12 @@ class StMuEvent : public TObject {
   StThreeVectorF primaryVertexErrors();
   TArrayI& L2Result(); // Raw L2Result[] array
 
+  // Calibrated VPD info from StTofCollection in StEvent
+  unsigned int numberOfVpdEastHits();  
+  unsigned int numberOfVpdWestHits();
+  float vpdTstart();
+  float vpdTdiff(); 
+
  protected:
   void clear();
   void fill(const StEvent*);
@@ -120,11 +127,17 @@ class StMuEvent : public TObject {
   UShort_t mRefMultFtpcEast;
   UShort_t mRefMultFtpcWest;
   Float_t mReactionPlane[2];              
-  Float_t mReactionPlanePtWgt[2];              
+  Float_t mReactionPlanePtWgt[2];
 
   StThreeVectorF mPrimaryVertexError;
 
   TArrayI mL2Result; // Raw L2 info
+
+  UInt_t  mVpdEast;    // VPD East Hit pattern 
+  UInt_t  mVpdWest;    // VPD West Hit pattern
+  Float_t mVpdTstart;  // VPD start time (calibrated)
+  Float_t mVpdTdiff;   // VPD time difference (calibrated)
+
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
@@ -170,11 +183,29 @@ inline double StMuEvent::ctbMultiplicity() {
 inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.primaryVertexPosition();}
 inline StThreeVectorF StMuEvent::primaryVertexErrors() { return mPrimaryVertexError;}
 inline TArrayI &StMuEvent::L2Result() { return mL2Result; }
-
+inline unsigned int StMuEvent::numberOfVpdEastHits() {  
+  unsigned int num = 0;
+  for(int i=0;i<32;i++) {
+    num += mVpdEast>>i & 1;
+  }
+  return num;
+}
+inline unsigned int StMuEvent::numberOfVpdWestHits() {
+  unsigned int num = 0;
+  for(int i=0;i<32;i++) {
+    num += mVpdWest>>i & 1;
+  }
+  return num;
+}
+inline float StMuEvent::vpdTstart() { return mVpdTstart; }
+inline float StMuEvent::vpdTdiff() { return mVpdTdiff; }
 #endif
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.19  2007/09/21 02:27:12  mvl
+ * Added calibrated VPD info from StTofCollection (run-8 prep)
+ *
  * Revision 1.18  2007/09/05 23:21:21  mvl
  * Added StMtdTriggerDetector
  *

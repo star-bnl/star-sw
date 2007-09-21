@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.15 2007/09/05 23:21:21 mvl Exp $
+ * $Id: StMuEvent.cxx,v 1.16 2007/09/21 02:27:12 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -118,6 +118,17 @@ void StMuEvent::fill(const StEvent* event){
 
   if (event->triggerData()) // MC has no triggerData
     mL2Result.Set(event->triggerData()->l2ResultLength(),(const Int_t*) event->triggerData()->l2Result());
+
+  // calibrated vpd for TOF - X.Dong
+  mVpdEast = mVpdWest = 0;
+  mVpdTstart = mVpdTdiff = 0.;
+  if (event->tofCollection()) {
+    mVpdEast = event->tofCollection()->vpdEast();
+    mVpdWest = event->tofCollection()->vpdWest();
+    mVpdTstart = event->tofCollection()->tstart();
+    mVpdTdiff = event->tofCollection()->tdiff();
+  }
+  //
 } 
 
 unsigned short StMuEvent::refMultPos(int vtx_id) {
@@ -170,6 +181,9 @@ unsigned short StMuEvent::refMultFtpc(int vtx_id) {return refMultFtpcEast(vtx_id
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.16  2007/09/21 02:27:12  mvl
+ * Added calibrated VPD info from StTofCollection (run-8 prep)
+ *
  * Revision 1.15  2007/09/05 23:21:21  mvl
  * Added StMtdTriggerDetector
  *
