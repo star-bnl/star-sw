@@ -68,6 +68,7 @@ void RunJetSimuSkimFinder(const int nevents = 100,
   
   //get BEMC calibration
   StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
+  emcSim->setCalibSpread(kBarrelEmcTowerId, 0.15);
   StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
   
   //get trigger
@@ -141,21 +142,7 @@ void RunJetSimuSkimFinder(const int nevents = 100,
  
   chain->Init();
   chain->PrintInfo();
-  
-  //Note: ------------ Must do this after Init()
-  int controlVal = 2;
-  controlEmcSimulatorMaker_st* simControl = emcSim->getControlSimulator()->GetTable();
-  simControl->calibSpread[0]=0.15;
-  simControl->keyDB[0] = controlVal;
-  simControl->keyDB[1] = 0;
-  simControl->keyDB[2] = controlVal;
-  simControl->keyDB[3] = controlVal;
-  //keyDB[det] = 0 -> NO database (default value)
-  //           = 1 - only gains are applied
-  //           = 2 - gains and pedestals are applied
-  // In other words, for pure MC should be 2, and
-  // for embedding should be 1.
-  
+    
   chain->ls(3);
   
   TChain* fileChain = muDstMaker->chain();
