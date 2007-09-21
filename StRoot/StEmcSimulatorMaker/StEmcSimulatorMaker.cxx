@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.50 2007/09/15 18:36:35 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.51 2007/09/21 13:16:20 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -93,15 +93,38 @@ void StEmcSimulatorMaker::Clear(const char*) {
 
 Int_t StEmcSimulatorMaker::Make() {
     mMcEvent = dynamic_cast<StMcEvent*>(GetDataSet("StMcEvent"));
-    if(mMcEvent) {
-        mEmcMcHits[0] = mMcEvent->bemcHitCollection();
-        mEmcMcHits[1] = mMcEvent->bprsHitCollection();
-        mEmcMcHits[2] = mMcEvent->bsmdeHitCollection();
-        mEmcMcHits[3] = mMcEvent->bsmdpHitCollection();
-    }
-    else {
+    if(!mMcEvent) {
         LOG_ERROR << "couldn't find StMcEvent for this event" << endm;
         return kStErr;
+    }
+    
+    //create new "consolidated" MC hit collections so at most one hit per mod/eta/sub is found
+    mEmcMcHits[0] = new StMcEmcHitCollection("bemcMcHits");
+    mEmcMcHits[1] = new StMcEmcHitCollection("bprsMcHits");
+    mEmcMcHits[2] = new StMcEmcHitCollection("bsmdeMcHits");
+    mEmcMcHits[3] = new StMcEmcHitCollection("bsmdpMcHits");
+    
+    for(int det=BTOW; det<=BSMDP; det++) {
+        const StMcEmcHitCollection *oldHits = NULL;
+        switch(det) {
+            case BTOW:  oldHits = mMcEvent->bemcHitCollection();  break;
+            case BPRS:  oldHits = mMcEvent->bprsHitCollection();  break;
+            case BSMDE: oldHits = mMcEvent->bsmdeHitCollection(); break;
+            case BSMDP: oldHits = mMcEvent->bsmdpHitCollection(); break;
+        }
+        
+        m_DataSet->Add(mEmcMcHits[det-1]); //takes care of memory management
+        
+        //key point here is that we don't pass a pointer to the parent track
+        //as a result, all hits from the same tower or strip will be summed together
+        for(unsigned mod=1; mod<=oldHits->numberOfModules(); mod++) {
+            const StMcEmcModuleHitCollection *module = oldHits->module(mod);
+            const vector<StMcCalorimeterHit*> hits = module->hits();
+            for(unsigned i=0; i<hits.size(); i++) {
+                StMcCalorimeterHit *myHit = new StMcCalorimeterHit(hits[i]->module(), hits[i]->eta(), hits[i]->sub(), hits[i]->dE());
+                if(mEmcMcHits[det-1]->addHit(myHit) != StMcEmcHitCollection::kNew) delete myHit;
+            }
+        }
     }
     
     //simulate pedestals where no hit was found if makeFullDetector is specified
@@ -158,9 +181,19 @@ Int_t StEmcSimulatorMaker::Make() {
         
         delete mcHit;
         hasHit.clear();
-        
-        //lots of LOG_DEBUG statements
-        mEmcMcHits[det-1]->print();
+    }
+    
+    //lots of LOG_DEBUG statements
+    for(int det=BTOW; det<=BSMDP; det++) {
+        LOG_DEBUG << *(mEmcMcHits[det-1]) << endm;
+        for(unsigned int mod=1; mod<=mEmcMcHits[det-1]->numberOfModules(); mod++) {
+            const StMcEmcModuleHitCollection *module = mEmcMcHits[det-1]->module(mod);
+            const vector<StMcCalorimeterHit*> hits = module->hits();
+            for(unsigned long i=0; i<hits.size(); i++) {
+                int softId; mGeom[det-1]->getId(hits[i]->module(), hits[i]->eta(), hits[i]->sub(), softId);
+                LOG_DEBUG << "softId:" << softId << " mod:" << hits[i]->module() << " eta:" << hits[i]->eta() << " sub:" << hits[i]->sub() << " dE:" << hits[i]->dE() << endm;
+            }
+        }
     }
     
     //now convert the energy depositions to ADC values
@@ -239,6 +272,11 @@ void StEmcSimulatorMaker::makeRawHits() {
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.51  2007/09/21 13:16:20  kocolosk
+ *  bugfix with Martijn's help.  There is currently an important difference
+ *  between the way StMcEvent fills its collections and the way the old simulator
+ *  filled them.  This fix ensures at most one MC hit per detector element (tower/strip)
+ *
  *  Revision 1.50  2007/09/15 18:36:35  kocolosk
  *  changed defaults so makeFullDetector is false and so zero suppression is turned off for BTOW
  *
