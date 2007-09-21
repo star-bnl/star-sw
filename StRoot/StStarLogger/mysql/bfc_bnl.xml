@@ -1,17 +1,17 @@
-<job name="BFC test jobtracking jobs - 25" nProcesses="25" simulateSubmission ="false">
+<job name="BFC test jobtracking jobs - 5/3 events" nProcesses="5" simulateSubmission ="false">
 <SandBox>
   <Package >
     <File>file:log4j.xml</File>
-    <!-- <File>file:.sl305_gcc323</File>  -->
+<!--    <File>file:.sl44_gcc346</File>  -->
   </Package>
 </SandBox>
  <command>       
    <![CDATA[
     time
     stardev
-    root4star -b -l -q 'bfc.C(5)'
-
-  ]]>
+    root4star -b -l -q 'bfc.C(3)'
+   $STAR/StRoot/StStarLogger/mysql/StarJobs.csh $REQUESTID $JOBINDEX $?
+   ]]>
  </command>  
    <stdout URL="file:./$JOBID.out" />
    <stderr URL="file:./$JOBID.err" />
