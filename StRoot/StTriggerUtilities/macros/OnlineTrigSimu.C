@@ -1,20 +1,23 @@
 //This macro is set up to allow the user to emulate the trigger for the online condition set
 //by the date in the dbMaker. This macro runs on real data (flagMC=0) and MC files (flagMC=1)
 
-class StMuDstMaker;
-class  StChain *chain;
+
 int total=0;
 
-void OnlineTrigSimu( char *dirIn="",
-		    //char *dirIn ="runList/",
-		    //char *file="photon_9_11.lis",//MC event file
-		    //char *file="R7101015.lis", // real data file
-		    const char *file="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.MuDst.root",
-		    const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root",
-		    int flagMC=1)
-{
-  int nevents = 10;
+void OnlineTrigSimu( int nevents = 10,
+		     int flagMC=0)
 
+{
+  const char *dirIn="";
+  const char *filter="";
+  if (flagMC==1){
+    const char *file="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.MuDst.root";
+    const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
+  }
+  if (flagMC==0){
+    const char *file="/star/institutions/iucf/balewski/prodOfficial06_muDst/7098001/st_physics_*.MuDst.root";
+  }
+  
  
   TString outDir="./out2/"; 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -28,63 +31,76 @@ void OnlineTrigSimu( char *dirIn="",
   assert( !gSystem->Load("StDaqLib")); // needed by bemcDb
   assert( !gSystem->Load("StEmcRawMaker"));
   assert( !gSystem->Load("StEmcADCtoEMaker"));
-  if (flagMC) assert( !gSystem->Load("StEpcMaker"));
-  if (flagMC) assert( !gSystem->Load("StEmcSimulatorMaker"));
   if (flagMC) assert( !gSystem->Load("StMcEvent"));
   if (flagMC) assert( !gSystem->Load("StMcEventMaker"));
+  if (flagMC) assert( !gSystem->Load("StEmcSimulatorMaker"));
+  if (flagMC) assert( !gSystem->Load("StEpcMaker"));
+  assert( !gSystem->Load("StBemcTesterMaker"));
   assert( !gSystem->Load("StTriggerUtilities"));
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
   
-  chain= new StChain("StChain"); 
-  
-  //Need ioMaker in order to access geant branch in MC
+  StChain *chain= new StChain("StChain"); 
+  gMessMgr->SwitchOff("D");
+  gMessMgr->SwitchOff("I");
+  gMessMgr->SwitchOff("W");
+
   if (flagMC){
+    
+    //Need ioMaker in order to access geant branch in MC
     StIOMaker* ioMaker = new StIOMaker();
     ioMaker->SetFile(fname);
     ioMaker->SetIOMode("r");
     ioMaker->SetBranch("*",0,"0");             //deactivate all branches
     ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
+    
+    //Need StMCEventMaker to get g2t tables
+    StMcEventMaker *evtMaker = new StMcEventMaker();
   }
 
-  //Collect all output histograms 
-  TObjArray* HList=new TObjArray; 
-
-  //Need MuDstMaker
+  //Need MuDstMaker to get data
   StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dirIn,file,"",100,"MuDst");
   TChain* tree=muDstMaker->chain(); assert(tree); int nEntries=(int) tree->GetEntries();
-
+  
   //Database -- get a real calibration from the database
   St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
+  
   //If MC then must set database time and date
+  // if Endcap fast simu is used tower gains in DB do not matter,JB
   if(flagMC) {
-    dbMk->SetDateTime(20070101,1 ); // for simulation for Pibero
-    // if Endcap fast simu is used tower gains in DB do not matter,JB
+    dbMk->SetDateTime(20070101,1 );
   }
+
   //Endcap DB
-  StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
+  //StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
  
   //Get BEMC adc values
   if (flagMC) {
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
     StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
-    emcSim->getControlTable()->CheckStatus[0]=0; //this sets offline tower status to 0
+    emcSim->setCheckStatus(kBarrelEmcTowerId,false); //this sets offline tower status to 0 default is 1
+    emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);//spread gains by 15%
   }
-  if (!flagMC){
+  if (flagMC==0){
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();//for real data this sets calibration and status
-    adc->getControlTable()->CheckStatus[0]=0;//this sets offline tower status to 0 
+    adc->getControlTable()->CheckStatus[0]=1;//this sets offline tower status to 0 
   }
-  
+
+ //Collect all output histograms 
+  TObjArray* HList=new TObjArray; 
+  TObjArray *BHList=new TObjArray;
+ 
   //Get TriggerMaker
   StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
-  TString *config=new TString("online");  //Chose online configuration
+  TString *config=new TString("online");  //Chose online/offline/expert configuration
   simuTrig->setConfig(config);
-  simuTrig->setDbMaker(dbMk);//Pass dB to TriggerMaker
-  simuTrig->setHList(HList);//Pass Histograms to TriggerMaker
-  simuTrig->useEemc();
+  simuTrig->setDbMaker(dbMk);
+  simuTrig->setHList(HList);
+  //simuTrig->useEemc();
   simuTrig->useBbc();
   simuTrig->useBemc();
   if(flagMC){
+
     simuTrig->setMC(flagMC); // pass one argument to M-C as generic switch
 
     // Endcap specific params -- ok Jan you need to change this to a default "online" setup
@@ -100,30 +116,25 @@ void OnlineTrigSimu( char *dirIn="",
     simuTrig->eemc->setDsmSetup(eemcDsmSetup);
     
   }
+
+  //Include in chain if want to test the output of the TriggerMaker
+  if (flagMC==0) {
+    StBemcTesterMaker *bTest=new StBemcTesterMaker("BemcTesterMaker",muDstMaker);
+    bTest->SetHList(BHList);
+    bTest->Histo();
+  }
+    
   chain->ls(3);
   chain->Init();
-  chain->PrintInfo();  
-
-  if (flagMC==1){
-    //Note: ------------ Must do this stuff after Init()
-    int controlVal = 2;
-    controlEmcSimulatorMaker_st* simControl = emcSim->getControlSimulator()->GetTable();
-    simControl->calibSpread[0]=0.15;
-    simControl->keyDB[0] = controlVal;
-    simControl->keyDB[1] = 0;
-    simControl->keyDB[2] = controlVal;
-    simControl->keyDB[3] = controlVal;
-    //keyDB[det] = 0 -> NO database (default value)
-    //           = 1 - only gains are applied
-    //           = 2 - gains and pedestals are applied
-    // In other words, for pure MC should be 2, and
-    // for embedding should be 1.
-  }
+ 
 
   const int mxTr=13;
-  int myTrgList[mxTr]    ={127580,     127551,        127271,           127571,      127821,            127831, 127575, 127622,127221,127611, 117705, 127501, 127652	};
+  int myTrgList[mxTr]    ={127580,127551,127271,127571,127821,127831,127575,127622,127221,127611,117705,127501,127652};
   // prescale as for run 7101015
-  char* myTrgListN[mxTr]={"eemc-http*116","eemc-jp0-mb*221", "eemc-jp1-mb*1", "bemc-jp1*433", "bemc-http-mb-fast*1", "eemc-http-mb-fast*1", "bemc-jp0-etot*979" , "bemc-jp0-etot-mb-L2jet*2", "bemc-jp1-mb*1", "bemc-http-mb-l2gamma*1", "jpsi-mb*20", "bemc-jp0-mb*909","eemc-jp0-etot-mb-L2jet*2"};
+  char* myTrgListN[mxTr]={"eemc-http*116","eemc-jp0-mb*221", "eemc-jp1-mb*1", "bemc-jp1*433", 
+			  "bemc-http-mb-fast*1", "eemc-http-mb-fast*1", "bemc-jp0-etot*979" , 
+			  "bemc-jp0-etot-mb-L2jet*2", "bemc-jp1-mb*1", "bemc-http-mb-l2gamma*1",
+			  "jpsi-mb*20", "bemc-jp0-mb*909","eemc-jp0-etot-mb-L2jet*2"};
   int nR[mxTr],nS[mxTr],nRS[mxTr];
   memset(nR,0, sizeof(nR));
   memset(nS,0, sizeof(nR));
@@ -187,7 +198,9 @@ void OnlineTrigSimu( char *dirIn="",
   cout << "total number of events  " << total << endl;
   cout << "****************************************** " << endl;
 
- 
+  TString outB="BEMC_7098001_test.hist.root";
+  bhf=new TFile(outB,"recreate");
+  BHList->Write();
 
   TString fileMu=file;
   printf("=%s=\n",fileMu.Data());
@@ -195,7 +208,7 @@ void OnlineTrigSimu( char *dirIn="",
   outF+=".hist.root";
   printf("=%s=\n",outF.Data());
   hf=new TFile(outF,"recreate");
-  // HList->ls();
+  //HList->ls();
   HList->Write();
   printf("\n Histo saved -->%s<\n",outF.Data());
   
