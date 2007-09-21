@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.8 2007/09/13 00:00:27 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.9 2007/09/21 17:30:33 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.9  2007/09/21 17:30:33  perev
+ * Root dependecies removed
+ *
  * Revision 1.8  2007/09/13 00:00:27  fisyak
  * add mag.field in steel, from Lijuan Ruan
  *
@@ -93,10 +96,12 @@ To do:  <br>
 #include <string.h>
 #include <assert.h>
 #include "StarMagField.h"
-#include "TMath.h"
 #include "StarCallf77.h"
-#include "TString.h"
-#include "TSystem.h"
+#include <string>
+
+#define myMax(A,B)  (((A)>(B))? (A):(B))
+#define myMin(A,B)  (((A)<(B))? (A):(B))
+#define mySign(A,B) (((B)>=0)? fabs(A):-fabs(A))
 
 StarMagField *StarMagField::fgInstance = 0;
 //________________________________________
@@ -358,15 +363,15 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
   Br_value =  Bz_value = 0;
   B[0] = B[1] = B[2] = 0;
   z  = x[2] ;
-  r  = TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi = TMath::ATan2( x[1], x[0] ) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+  r  = sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  phi = atan2( x[1], x[0] ) ;
+  if ( phi < 0 ) phi += 2*M_PI ;             // Table uses phi from 0 to 2*Pi
 
 
-  Float_t za = TMath::Abs(z);
+  Float_t za = fabs(z);
   if (za > fZminDip && za < fZmaxDip && r < fRmaxDip) {//     beam Dipole   
-    B[1] = TMath::Sign(fBDipole, z);
-    B[2] = TMath::Abs(B[1]/1000.);
+    B[1] = mySign(fBDipole, z);
+    B[2] = fabs(B[1]/1000.);
     return;
   }
   if (z >= ZList[0] && z <= ZList[nZ-1] && r <= Radius[nR-1]) { // within Map
@@ -382,9 +387,9 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
 //   //added by Lijuan within the steel
 
 
-  if (za <=342.20  && r>=303.29 && r <= 363.29) { // within Map
+  if (za <=342.20  && r>=303.29 && r <= 364.25) { // within Map
   
-    phi1=phi*180/TMath::Pi();
+    phi1=phi*180/M_PI;
     if(phi1>12) phi1=phi1-int(phi1/12)*12;
     
     Interpolate3DBSteelfield( r, za, phi1, Br_value, Bz_value, Bphi_value ) ;
@@ -413,9 +418,9 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
     static const Float_t one = 1;
     Float_t wz = (za - ZList[nZ-1] )/(BFLD.zmaxx - ZList[nZ-1]);
     Float_t wr = (r  - Radius[nR-1])/(BFLD.rmaxx - Radius[nR-1]);
-    Float_t w  = TMath::Min(TMath::Max(zero,TMath::Max(wz,wr)),one);
-    Float_t rm = TMath::Min(r,Radius[nR-1]);    
-    Float_t zm = TMath::Sign(TMath::Min(za,ZList[nZ-1]),z);    
+    Float_t w  = myMin(myMax(zero,myMax(wz,wr)),one);
+    Float_t rm = myMin(r,Radius[nR-1]);    
+    Float_t zm = mySign(myMin(za,ZList[nZ-1]),z);    
     Float_t BrI, BzI;
     Interpolate2DBfield( rm, zm, BrI, BzI ) ;
     Br_value = (1-w)*BrI + w*Br_value;
@@ -460,15 +465,15 @@ void StarMagField::B3DField( const Float_t x[], Float_t B[] )
   
   
   
-  r  = TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  r  = sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   
   if ( r != 0.0 )
     {
-      phi = TMath::ATan2( x[1], x[0] ) ;
-      if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+      phi = atan2( x[1], x[0] ) ;
+      if ( phi < 0 ) phi += 2*M_PI ;             // Table uses phi from 0 to 2*Pi
 
       //added by Lijuan
-      phi1=phi*180/TMath::Pi();
+      phi1=phi*180/M_PI;
       //added by Lijuan
 
       Interpolate3DBfield( r, z, phi1, Br_value, Bz_value, Bphi_value ) ;
@@ -523,10 +528,10 @@ void StarMagField::BrBz3DField( const Float_t r, const Float_t z, const Float_t 
   Float_t phiprime ;
 
   phiprime = phi ;
-  if ( phiprime < 0 ) phiprime += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+  if ( phiprime < 0 ) phiprime += 2*M_PI ;             // Table uses phi from 0 to 2*Pi
 
   //added by Lijuan
-  phiprime=phiprime*180/TMath::Pi();
+  phiprime=phiprime*180/M_PI;
   //added by Lijuan
 
 
@@ -549,13 +554,14 @@ void StarMagField::ReadField( )
 {
 
   FILE    *magfile, *b3Dfile ;
-  TString comment, filename, filename3D ;
-  TString MapLocation ;
-  TString BaseLocation = "$STAR/StarDb/StMagF/" ;     // Base Directory for Maps
+  std::string comment, filename, filename3D ;
+  std::string MapLocation ;
+  std::string BaseLocation = getenv("STAR") ; 	// Base Directory for Maps
+  BaseLocation += "/StarDb/StMagF/" ;     	// Base Directory for Maps
 
-  if ( fMap == kMapped )                    // Mapped field values
+  if ( fMap == kMapped )                    	// Mapped field values
     {
-      if ( TMath::Abs(fFactor) > 0.8 )      // Scale from full field data 
+      if ( fabs(fFactor) > 0.8 )      		// Scale from full field data 
 	{
 	  if ( fFactor > 0 )
 	    {
@@ -592,13 +598,12 @@ void StarMagField::ReadField( )
       exit(1) ;
     }
       
-  printf("StarMagField::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.Data(),fFactor);
-  printf("StarMagField::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),fFactor*fRescale);
+  printf("StarMagField::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.c_str(),fFactor);
+  printf("StarMagField::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.c_str(),fFactor*fRescale);
   
   MapLocation = BaseLocation + filename ;
-  gSystem->ExpandPathName(MapLocation) ;
-  magfile = fopen(MapLocation.Data(),"r") ;
-  printf("StarMagField::ReadField  Reading  2D Magnetic Field file: %s \n",filename.Data());
+  magfile = fopen(MapLocation.c_str(),"r") ;
+  printf("StarMagField::ReadField  Reading  2D Magnetic Field file: %s \n",filename.c_str());
 
   if (magfile) 
 
@@ -623,16 +628,15 @@ void StarMagField::ReadField( )
   else 
 
     { 
-      fprintf(stderr,"StarMagField::ReadField  File %s not found !\n",MapLocation.Data());
+      fprintf(stderr,"StarMagField::ReadField  File %s not found !\n",MapLocation.c_str());
       exit(1);
     }
 
   fclose(magfile) ;
       
   MapLocation = BaseLocation + filename3D ;
-  gSystem->ExpandPathName(MapLocation) ;
-  b3Dfile = fopen(MapLocation.Data(),"r") ;
-  printf("StarMagField::ReadField  Reading 3D Magnetic Field file: %s \n",filename3D.Data());
+  b3Dfile = fopen(MapLocation.c_str(),"r") ;
+  printf("StarMagField::ReadField  Reading 3D Magnetic Field file: %s \n",filename3D.c_str());
 
   if (b3Dfile) 
 
@@ -654,7 +658,7 @@ void StarMagField::ReadField( )
 		  fgets  ( cname, sizeof(cname) , b3Dfile ) ; 
 		  sscanf ( cname, " %f %f %f %f %f %f ",
 			   &R3D[k], &Z3D[j], &Phi3D[i], &Br3D[i][j][k], &Bz3D[i][j][k], &Bphi3D[i][j][k] ) ;
-		  Phi3D[i] *= TMath::Pi() / 180. ;   // Convert to Radians  phi = 0 to 2*Pi
+		  Phi3D[i] *= M_PI / 180. ;   // Convert to Radians  phi = 0 to 2*Pi
 		}
 	    }
 	}
@@ -680,7 +684,7 @@ void StarMagField::ReadField( )
   else
 
     { 
-      fprintf(stderr,"StarMagField::ReadField  File %s not found !\n",MapLocation.Data());
+      fprintf(stderr,"StarMagField::ReadField  File %s not found !\n",MapLocation.c_str());
       exit(1);
     }
 
@@ -694,10 +698,9 @@ void StarMagField::ReadField( )
 //   memset(By3DSteel, 0, nPhiSteel*nZSteel*nRSteel*sizeof(Float_t));
 //   memset(Bz3DSteel, 0, nPhiSteel*nZSteel*nRSteel*sizeof(Float_t));
   MapLocation = BaseLocation + "steel_magfieldmap.dat";
-  gSystem->ExpandPathName(MapLocation) ;
-  magfile = fopen(MapLocation.Data(),"r") ;
+  magfile = fopen(MapLocation.c_str(),"r") ;
   if (magfile) {
-    printf("StarMagField::ReadField  Reading  3D Magnetic Field file: %s \n",filename.Data());
+    printf("StarMagField::ReadField  Reading  3D Magnetic Field file: %s \n",filename.c_str());
     Char_t cname[128] ;
     for (;;) {
       fgets  ( cname, sizeof(cname) , magfile ) ;    // Read comment lines at begining of file
@@ -718,9 +721,9 @@ void StarMagField::ReadField( )
 		   &R3DSteel[k], &Z3DSteel[j], &Phi3DSteel[i], &Bx3DSteel[i][j][k], &Bz3DSteel[i][j][k], &By3DSteel[i][j][k] ) ;
 
 	  //added by Lijuan
-	  Br3DSteel[i][j][k]=cos(Phi3DSteel[i]*TMath::Pi()/180)*Bx3DSteel[i][j][k]+sin(Phi3DSteel[i]*TMath::Pi()/180)*By3DSteel[i][j][k];
+	  Br3DSteel[i][j][k]=cos(Phi3DSteel[i]*M_PI/180)*Bx3DSteel[i][j][k]+sin(Phi3DSteel[i]*M_PI/180)*By3DSteel[i][j][k];
 
-	  Bphi3DSteel[i][j][k]=0-sin(Phi3DSteel[i]*TMath::Pi()/180)*Bx3DSteel[i][j][k]+cos(Phi3DSteel[i]*TMath::Pi()/180)*By3DSteel[i][j][k];
+	  Bphi3DSteel[i][j][k]=0-sin(Phi3DSteel[i]*M_PI/180)*Bx3DSteel[i][j][k]+cos(Phi3DSteel[i]*M_PI/180)*By3DSteel[i][j][k];
 
 
 	  //cout<<R3DSteel[k]<<" "<<Z3DSteel[j]<<" "<<Phi3DSteel[i]<<" "<<Bx3DSteel[i][j][k]<<" "<<Bz3DSteel[i][j][k]<<" "<<By3DSteel[i][j][k]<<endl;
@@ -782,7 +785,7 @@ void StarMagField::Interpolate2ExtDBfield( const Float_t r, const Float_t z, Flo
     for (Int_t j = 0; j < nZext; j++) ZExtList[j] = BDAT[j].Zi;
     first = kFALSE;
   }
-  Float_t za = TMath::Abs(z);
+  Float_t za = fabs(z);
   if (za > BFLD.zz2 || r > BFLD.rrm) return;
   if (za < ZList[nZ-1] && r < Radius[nR-1]) return;
 
