@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.40 2007/07/12 20:06:50 fisyak Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.41 2007/09/21 00:08:17 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.41  2007/09/21 00:08:17  caines
+ * Save out number of pixels and hits into StEvent hits
+ *
  * Revision 1.40  2007/07/12 20:06:50  fisyak
  * Move initialization to IntRun from Init, empty GetSvtDriftCurve, clean up
  *
@@ -518,6 +521,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    //cout << "global x = " << globalCoord.position().x() <<  ", global y = " << globalCoord.position().y() <<  ", global z = " << globalCoord.position().z() << endl; 
 
 	    if (pEvent) {
+	     
 	      Int_t hw_position, svtx, svty;
 	      Float_t covx, covy, covz;
 	      StSvtHit *svtHit = 0;
@@ -551,14 +555,17 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	      svtHit->setPosition(mSvtBigHit->svtHit()[clu].position());
 	      
 	      covx = covy = covz = 999.;
-	      if (dat->numOfAnodesInClu > 0) covx = 1./(100*(float)dat->numOfAnodesInClu);
-	      if (dat->numOfPixelsInClu > 0) 	covy = 1./(100*(float)dat->numOfPixelsInClu);
+	      // if (dat->numOfAnodesInClu > 0) covx = 1./(100*(float)dat->numOfAnodesInClu);
+	      //if (dat->numOfPixelsInClu > 0) 	covy = 1./(100*(float)dat->numOfPixelsInClu...allowing the particles to collid);
 	      covz =  hit->positionError().z()*hit->positionError().z();
 	      svtHit->setPositionError(StThreeVectorF(covx,covy,covz));
 	      svtHit->setId(dat->id);
 	      svtHit->setLocalPosition(dat->uv[0],dat->uv[1]);
 	      svtHit->setAnode(dat->anode);
 	      svtHit->setTimebucket(dat->timeb);
+	      svtHit->setNumberOfAnodes(dat->numOfAnodesInClu);
+	      svtHit->setNumberOfPixels(dat->numOfPixelsInClu);
+	      
 	      svtHitColl->addHit(svtHit);
 	    }
 	    
