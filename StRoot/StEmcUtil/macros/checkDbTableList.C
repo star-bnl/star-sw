@@ -32,12 +32,10 @@ checkDbTableList(char* listFile="table.list", char* outName="out.txt",
 {
   
   // Loading basic libraries
-  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
-  loadSharedLibraries();
+  gROOT->Macro("loadMuDst.C");
   
   // loading functions macros
   gROOT->LoadMacro("$STAR/StRoot/StEmcUtil/macros/checkDbTable.C");
-  //gROOT->LoadMacro("checkDbTable.C");
 
   // Getting file list to be checked
   ifstream inputFile(listFile); 

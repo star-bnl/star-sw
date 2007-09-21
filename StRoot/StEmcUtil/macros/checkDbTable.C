@@ -20,7 +20,7 @@
 | author: Marcia Maria de Moura 2005-03-22
 |
 |-----------------------------------------------------------------------------*/
-TString DBTIME;
+std::string DBTIME;
 bool checkDbTable(char* fileSource, char* MAXENTRY = "2030-01-01 00:00:00",char* flavor = "ofl")
 {  
   bool equal=true;  
@@ -51,7 +51,7 @@ bool checkDbTable(char* fileSource, char* MAXENTRY = "2030-01-01 00:00:00",char*
   dbHandler->setFlavor(flavor);    
 
   StDbTable *table =  dbHandler->getDbTable();  
-  DBTIME = dbHandler->getTimeStamp();
+  DBTIME = dbHandler->timeToSqlTime(table->getBeginDateTime());
   if (tableName=="bemcCalib" || tableName=="bprsCalib" )
   {
     emcCalib_st* tableInFile = (emcCalib_st*) ((St_emcCalib*)tableFile->Get(tableName.Data()))->GetTable();
