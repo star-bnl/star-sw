@@ -633,10 +633,6 @@ if ( $#idlL > -1 ) {
       $SO_PKGT = $SO_PKG;
       $SO_MAPT = $SO_MAP;
       $LIBPKGT = $LIBPKG;
-    } else {
-      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir,
-	      $PKGT )
-	unless ($param::quiet);
     }
     #        Install $env $INCLUDE, @idlT;  # print "Install $env $INCLUDE, @idlT\n";
     
@@ -742,7 +738,6 @@ if ( $#sourcesT > -1 ) {
     Install $env3 $LIB, $SO_MAPT;
   }
 }
-
 if ( $#src > -1 ) {
   printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $PKG )
     unless ($param::quiet);
@@ -792,15 +787,6 @@ if ( $#src > -1 ) {
 	InstallAs $env2 $lib, $SO_PKG_PLAIN;
       }
     } else { # orinal package
-      if ($LIBPKG) {
-	Library $env2 $LIBPKG, @src;
-	Install $env2 $LIB,    $LIBPKG;
-	print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
-	if ($SO_PKG) {
-	  my $libpkg = $LIB . "/" . File::Basename::basename($LIBPKG);
-	  Depends $env2 $SO_PKG, $libpkg;
-	}
-      }
       my $lib = $LIB . "/" . $SO_PKG;
       if ($SO_PKG ne $SO_PKG_lib) {
 	$lib = $LIB . "/" . $SO_PKG_lib;
@@ -816,6 +802,15 @@ if ( $#src > -1 ) {
 	my $lib = $LIB . "/lib" . $SO_PKG_PLAIN;
 	InstallAs $env2 $lib, $SO_PKG_PLAIN;
       }
+    }
+  }
+  if ($LIBPKG) {
+    Library $env2 $LIBPKG, @src;
+    Install $env2 $LIB,    $LIBPKG;
+    print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
+    if ($SO_PKG) {
+      my $libpkg = $LIB . "/" . File::Basename::basename($LIBPKG);
+      Depends $env2 $SO_PKG, $libpkg;
     }
   }
   if ($SO_PKG) {
