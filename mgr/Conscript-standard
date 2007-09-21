@@ -818,10 +818,12 @@ if ( $#src > -1 ) {
       }
     }
   }
-  Install $env2 $LIB,         $SO_PKG;
-  if ($SO_PKG !~ /^lib/) {
-    my $lib = $LIB . "/lib" . $SO_PKG;
-    InstallAs $env2 $lib, $SO_PKG;
+  if ($SO_PKG) {
+    Install $env2 $LIB,         $SO_PKG;
+    if ($SO_PKG !~ /^lib/) {
+      my $lib = $LIB . "/lib" . $SO_PKG;
+      InstallAs $env2 $lib, $SO_PKG;
+    }
   }
 #  if ($env2->{Packages}->{ROOT}->{RLIBMAP}) {
 #    my $libt = $SO_PKG_lib;
