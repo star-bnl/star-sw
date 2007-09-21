@@ -16,16 +16,25 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
+#define kNPatches 300
+#define kNJet 12
+#define kNTowers 4800
+#define k12bits 4096
+#define kNCrates 30
+#define kNChannels 160
+
 class StEvent;
 class StBemcTables;
+class StBbcTriggerSimu;
 class StEemcTriggerSimu;
 class StBemcTriggerSimu;
 class St_db_Maker;
 
 class StTriggerSimuMaker : public StMaker {
 
-private:
-
+ private:
+  
   TString *config;
   int mYear,mMCflag; // set yo 0 for real data
   StEvent *event;
@@ -33,45 +42,52 @@ private:
   StBemcTables *mTables;
   void addTriggerList();
   void fillStEvent(StEvent*);
-  void setTableMaker(StBemcTables *bemcTab) { bemc->setTableMaker(bemcTab);}
-
-public:
-
-    StTriggerSimuMaker(const char *name="StarTrigSimu");
-    virtual           ~StTriggerSimuMaker();
-
-    void    useEemc();
-    void    useBbc();
-    void    useBemc();
-    void    setMC(int x) {mMCflag=x;}
-
-    //hang all activated trigger detectors below
-    StEemcTriggerSimu *eemc;
-    StBbcTriggerSimu *bbc;
-    StBemcTriggerSimu *bemc;
-
-    virtual Int_t     Init();
-    virtual Int_t     Make();
-    virtual Int_t     Finish();
-    virtual void      Clear(const Option_t* = "");
-    virtual Int_t InitRun  (int runumber);
-
-    TObjArray  *mHList; // output histo access point
-    void setHList(TObjArray * x){mHList=x;}
-    vector <int> mTriggerList;
-    bool isTrigger(int trigId);   
-    void setDbMaker(St_db_Maker *dbMk) { mDbMk=dbMk;}
-    void setConfig(TString *CONFIG) {config=CONFIG;}
-    ClassDef(StTriggerSimuMaker,0)
+  void setTableMaker(StBemcTables *bemcTab); 
+  
+ public:
+  
+  StTriggerSimuMaker(const char *name="StarTrigSimu");
+  virtual           ~StTriggerSimuMaker();
+  
+  void    useEemc();
+  void    useBbc();
+  void    useBemc();
+  void    setMC(int x) {mMCflag=x;}
+  
+  virtual Int_t     Init();
+  virtual Int_t     Make();
+  virtual Int_t     Finish();
+  virtual void      Clear(const Option_t* = "");
+  virtual Int_t     InitRun  (int runumber);
+  
+  TObjArray  *mHList; // output histo access point
+  void setHList(TObjArray * x){mHList=x;}
+  bool isTrigger(int trigId);   
+  vector <int> mTriggerList;
+  void setDbMaker(St_db_Maker *dbMk) { mDbMk=dbMk;}
+  void setConfig(TString *CONFIG) {config=CONFIG;}
+  
+  //hang all activated trigger detectors below
+  StEemcTriggerSimu *eemc;
+  StBbcTriggerSimu *bbc;
+  StBemcTriggerSimu *bemc;
+  
+  Int_t BEMC_L0_HT_ADC[kNPatches],*BEMC_L0_TP_ADC[kNPatches];
+  
+  ClassDef(StTriggerSimuMaker,0)
+    
 };
    
 #endif
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.6 2007/08/12 01:03:22 rfatemi Exp $
+// $Id: StTriggerSimuMaker.h,v 1.7 2007/09/21 18:45:51 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.7  2007/09/21 18:45:51  rfatemi
+// End of week update
+//
 // Revision 1.6  2007/08/12 01:03:22  rfatemi
 // Added flag for offline/online/expert settings
 //
