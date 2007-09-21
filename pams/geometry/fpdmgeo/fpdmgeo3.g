@@ -1,11 +1,9 @@
 ******************************************************************************
-* $Id: fpdmgeo3.g,v 1.5 2007/02/16 23:24:53 potekhin Exp $
+* $Id: fpdmgeo3.g,v 1.6 2007/09/21 23:00:08 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo3.g,v $
-* Revision 1.5  2007/02/16 23:24:53  potekhin
-* Another round of code improvments by Ermes, aimed at
-* eliminating the hardcoded values and better code
-* structure.
+* Revision 1.6  2007/09/21 23:00:08  perev
+* corrects E.Braidot@phys.uu.nl
 *
 * Revision 1.4  2007/02/07 23:38:37  potekhin
 * Further evolution of the code, with many improvements
@@ -39,8 +37,10 @@ Author    Akio Ogawa
       Real       ztotsmd,wtotsmd,zsmd,zsmd2,wsmd
       Real       xsmdh,ysmdh,zsmdh,xsmdv,ysmdv,zsmdv
       Real       xlcOffSet, BZOffSet
-      Real       basewidth,distancer,xoffFECC,xoffFEDC
+      Real       basewidth,distancer,xoffFECC,xoffFEDC,xshift
       Real       xoffFENC,yoffFENC,zoffFENC,zoffFECC
+
+      REAL       tmp(7)  ! temporary test variable
 
       Integer    N
       Parameter (N=12)
@@ -146,7 +146,7 @@ Fill FBXD                           ! FPD Box Geometry
       NY=24                         ! number of pbg in y
       NXL=17                        ! Number of large pbg in x
       NYL=34                        ! number of large pbg in y
-      XOffset=-(6*3.81+0.5*5.8)-(127.0-17*5.8)/2.0 +0.3     ! tower x offset from box edge to PbG edge
+      XOffset=(6*3.822+0.5*5.812)+(127.0-17*5.812)/2.0     ! tower x offset from box edge to PbG edge
       ZOffset=10.4                  ! tower z offset from box edge to PbG edge
       PSOffset=0                    ! PreShower z offset from box edge to PbG edge
       SmdOff=0.0                    ! SMD z offset from box edge
@@ -239,13 +239,13 @@ EndFill
 
         if(FBXD_Type.eq.1) then
            USE FLGG Type=1
-           wid  =  FLGG_Width + FLGG_DGap + FLGG_AlThick*2
+           wid  =  FLGG_Width + FLGG_DGap + FLGG_AlThick*2.0
            ztot = (FLGG_Depth + FLGG_AlThick + FLGG_MuMetDz)/2.0
            rtot = FBXD_NX*wid/2.0        
            bwid = rtot+FBXD_XOffset
         else
            USE FLGG Type=2
-           wid  =  FLGG_Width + FLGG_DGap + FLGG_AlThick*2
+           wid  =  FLGG_Width + FLGG_DGap + FLGG_AlThick*2.0
            ztot = (FLGG_Depth + FLGG_AlThick + FLGG_MuMetDz)/2.0
            rtot = FBXD_NXL*wid/2.0        
            bwid = rtot
@@ -254,7 +254,7 @@ EndFill
         if(m.ge.3) then
            bwid=FBXD_Width/2.0 
            if(FPOS_X.gt.0.0) then
-             xx=FPOS_X+bwid
+             xx=FPOS_X+bwid 
             elseif(FPOS_X.eq.0.0) then
              xx=0.0
             else 
@@ -286,6 +286,7 @@ EndFill
         endif
 
         serN=0
+
         if(m.eq.4)  then
           serN=1
         endif
@@ -301,39 +302,40 @@ Block FBOX is one Pb-Glass fpd detector
       Medium    standard
       Attribute FBOX seen=1 colo=2 serial=serN
       if(FBXD_Type.eq.2) then
-       shape box dx=FBXD_Width/2 dy=FBXD_Height/2 dz=FBXD_Depth/2
+       shape box dx=FBXD_Width/2.0 dy=FBXD_Height/2.0 dz=FBXD_Depth/2.0
       else
-       shape box dx=bwid dy=FBXD_Height/2 dz=FBXD_Depth/2
+       shape box dx=bwid dy=FBXD_Height/2.0 dz=FBXD_Depth/2.0
       endif
 
 *Towers
       USE FLGG Type=2
-      widL = FLGG_Width + FLGG_DGap + FLGG_AlThick*2              !large cell width
+      widL = FLGG_Width + FLGG_DGap + FLGG_AlThick*2.0              !large cell width
       USE FLGG Type=1
       USE FLGM Type=1
-      wid  =  FLGG_Width + FLGG_DGap + FLGG_AlThick*2             !small cell width
+      wid  =  FLGG_Width + FLGG_DGap + FLGG_AlThick*2.0             !small cell width
       ztot = (FLGG_Depth + FLGG_AlThick + FLGG_MuMetDz)/2.0       
       rtot = FBXD_NX*wid/2.0
-      bwid = rtot+FBXD_XOffset
+      bwid = rtot-FBXD_XOffset
 
       Create FTOW
       Create PBPT
       Create FSHM
+
       if(FBXD_Type.eq.2 .and. FPOS_iMod.eq.4) then                 
-        x0 = - rtot + FBXD_XOffset + wid/2                        ! x0 start from north9near beam) for 
+        x0 = - rtot - FBXD_XOffset + wid/2.0                        ! x0 start from north (near beam) for 
         widx = wid                                                ! WS (FMS-south) module
       else 
-        x0 =  rtot - FBXD_XOffset - wid/2                         ! x0 start from south for north/top/bottom module
-        widx = -wid                                               ! since fpd is symmetric, true for ES module too
+        x0 =  rtot + FBXD_XOffset - wid/2.0                         ! x0 start from south for north/top/bottom module
+      widx = -wid                                               ! since fpd is symmetric, true for ES module too
       endif
       if(FBXD_Type.eq.2) then                                     !this is to set the vertical gap between small cells
-        y1 =  FBXD_NY*wid/2.0 - wid/2 + (16*widL-FBXD_NY*wid)/2   !in order to correct the differences between  
-        widy = wid+(16*widL-FBXD_NY*wid)/23                       !3 small cells and 2 large ones (see again in 17 lines)  
+        y1 =  FBXD_NY*wid/2.0 - wid/2.0 + (16*widL-FBXD_NY*wid)/2.0   !in order to correct the differences between  
+        widy = wid+(16.0*widL-FBXD_NY*wid)/23.0                       !3 small cells and 2 large ones (see again in 17 lines)  
       else                                                        
-        y1 =  FBXD_NY*wid/2.0 - wid/2                          
+        y1 =  FBXD_NY*wid/2.0 - wid/2.0                          
         widy = wid
       endif 
-      z1 = -FBXD_Depth/2 + FBXD_ZOffset + ztot
+      z1 = -FBXD_Depth/2.0 + FBXD_ZOffset + ztot
       do i=1, FBXD_NY
         x1=x0
         do j=1, FBXD_NX
@@ -353,18 +355,18 @@ Block FBOX is one Pb-Glass fpd detector
 *PreShowers
          x1=x0
          y1= -rtot + ztot
-         z1=-FBXD_Depth/2  + FBXD_PSOffset + wid/2
+         z1=-FBXD_Depth/2.0  + FBXD_PSOffset + wid/2.0
          do j=1,FBXD_NX
            Create and Position FTOW x=x1 y=y1 z=z1 alphaX=90
            x1=x1-wid
          enddo
 *Pb Plate
          if(fmcg_PbPlate==1) then
-           Create and Position PBPT x=0 y=0 z=PBPD_Thick/2.0-FBXD_Depth/2
+           Create and Position PBPT x=0 y=0 z=PBPD_Thick/2.0-FBXD_Depth/2.0
          endif
 *SMD
          ztotsmd=FMXG_G10Thick+FMXG_Sapex
-         Create and Position FSHM x=0 y=0 z=FBXD_SmdOff+ztotsmd-FBXD_Depth/2
+         Create and Position FSHM x=0 y=0 z=FBXD_SmdOff+ztotsmd-FBXD_Depth/2.0
          
       endif     
 
@@ -372,21 +374,21 @@ Block FBOX is one Pb-Glass fpd detector
       if(FBXD_Type.ge.2) then
          USE FLGG Type=2
          USE FLGM Type=2
-         wid  = FLGG_Width + FLGG_DGap +  FLGG_AlThick*2
+         wid  = FLGG_Width + FLGG_DGap +  FLGG_AlThick*2.0
          ztot = FLGG_Depth/2.0
          rtot = FBXD_NXL*wid/2.0
          bwid = rtot
          xlcOffSet = (FBXD_Width-FBXD_NXL*wid)/2.0          ! Large Cells OffSet in X
  
          if(FPOS_iMod.eq.4) then                            ! defining x0 for North and South
-           x0 =  -bwid + wid/2 - xlcOffSet + FPOS_X         
+           x0 =  -bwid + wid/2.0 - xlcOffSet
            widx = wid
          elseif(FPOS_iMod.eq.3) then           
-           x0 =  +bwid - wid/2 + xlcOffSet + FPOS_X 
-           widx = -wid
+           x0 =  +bwid - wid/2.0 + xlcOffSet 
+            widx = -wid
          endif
-         y1 =  FBXD_NYL*wid/2.0 - wid/2
-         z1 = -FBXD_Depth/2 + FBXD_ZOffset + ztot
+         y1 =  FBXD_NYL*wid/2.0 - wid/2.0
+         z1 = -FBXD_Depth/2.0 + FBXD_ZOffset + ztot
          do i=1,FBXD_NYL
             x1=x0            
             do j=1,FBXD_NXL
@@ -415,7 +417,7 @@ Block FBOX is one Pb-Glass fpd detector
          USE FLGM Type=2
          BZOffSet=0.0
          wid  = FLGG_Width + FLGG_DGap 
-         Create and Position FBAS x=FPOS_X  y=-(FBXD_NXL*wid+basewidth/2.0) z=-FBXD_Depth/2+BZOffSet+INSE_Depth/2.0
+         Create and Position FBAS x=FPOS_X  y=-(FBXD_NXL*wid+basewidth/2.0) z=-FBXD_Depth/2.0 +BZOffSet+INSE_Depth/2.0
         endif
 
 * Steel Insert   
@@ -426,64 +428,65 @@ Block FBOX is one Pb-Glass fpd detector
         Create FEEC
         distancer=INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt)
         xoffFECC=(INSE_SheetDpt-FBXD_Width)/2.0
-        zoffFECC=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap
+        zoffFECC=-FBXD_Depth/2.0+BZOffSet+INSE_Depth-INSE_GateGap
         xoffFEDC=INSE_Width - INSE_SheetDpt
         xoffFENC=(INSE_Width-FBXD_Width)/2.0
         yoffFENC=(INSE_Height-INSE_SheetDpt)/2.0
-        zoffFENC=-FBXD_Depth/2.0 + BZOffSet + INSE_Depth/2.0 
+        zoffFENC=-FBXD_Depth/2.0 + BZOffSet + INSE_Depth/2.0
+        xshift=8*5.812-12*3.822+5*3.822-INSE_Width    !this is to move insert to small cell edge
         if(FBXD_Type.eq.2) then
          if(FPOS_iMod.eq.4) then    
-          Position FENC x=FPOS_X+xoffFENC  
+          Position FENC x=xoffFENC+xshift
      +        y=-yoffFENC z=zoffFENC
-          Position FENC x=FPOS_X+xoffFENC   
+          Position FENC x=xoffFENC+xshift
      +        y=yoffFENC z=zoffFENC 
-          Position FEAC x=FPOS_X+INSE_Width-(FBXD_Width+INSE_SheetDpt)/2.0  
-     +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth/2.0
-          Position FECC x=FPOS_X+xoffFECC 
+          Position FEAC x=INSE_Width+xshift-(FBXD_Width+INSE_SheetDpt)/2.0
+     +        y=0 z=-FBXD_Depth/2.0+BZOffSet+INSE_Depth/2.0
+          Position FECC x=xoffFECC+xshift
      +        y=distancer/2.0 
      +        z=zoffFECC-INSE_GateDepth-INSE_GapDepth/2.0  
-          Position FECC x=FPOS_X+xoffFECC  
+          Position FECC x=xoffFECC+xshift
      +        y=distancer/2.0 
      +        z=zoffFECC-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
-          Position FECC x=FPOS_X+xoffFECC  
+          Position FECC x=xoffFECC+xshift
      +        y=-distancer/2.0 
      +        z=zoffFECC-INSE_GateDepth-INSE_GapDepth/2.0  
-          Position FECC x=FPOS_X+xoffFECC  
+          Position FECC x=xoffFECC+xshift
      +        y=-distancer/2.0 
      +        z=zoffFECC-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
-          Position FEDC x=FPOS_X+(xoffFEDC-FBXD_Width)/2.0 
-     +        y=0 z=zoffFECC-INSE_GateDepth/2.0  
-          Position FEDC x=FPOS_X+(xoffFEDC-FBXD_Width)/2.0 
+          Position FEDC x=xshift+(xoffFEDC-FBXD_Width)/2.0
+     +        y=0 z=zoffFECC-INSE_GateDepth/2.0 
+          Position FEDC x=xshift+(xoffFEDC-FBXD_Width)/2.0
      +        y=0 z=zoffFECC-INSE_GateDepth-INSE_GapDepth-INSE_GateDepth/2.0  
-          Position FEDC x=FPOS_X+(xoffFEDC-FBXD_Width)/2.0 
-     +        y=0 z=zoffFECC-2*(INSE_GateDepth+INSE_GapDepth)-INSE_GateDepth/2.0  
+          Position FEDC x=xshift+(xoffFEDC-FBXD_Width)/2.0
+     +        y=0 z=zoffFECC-2.0*(INSE_GateDepth+INSE_GapDepth)-INSE_GateDepth/2.0  
 
       
          elseif(FPOS_iMod.eq.3) then           
-          Position FENC x=FPOS_X-xoffFENC   
+          Position FENC x=-xoffFENC-xshift   
      +        y=-yoffFENC z=zoffFENC
-          Position FENC x=FPOS_X-xoffFENC   
+          Position FENC x=-xoffFENC-xshift      
      +        y=yoffFENC z=zoffFENC     
-          Position FEAC x=FPOS_X-INSE_Width+(FBXD_Width+INSE_SheetDpt)/2.0   
-     +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth/2.0  
-          Position FECC x=FPOS_X-xoffFECC  
+          Position FEAC x=-xshift-INSE_Width+(FBXD_Width+INSE_SheetDpt)/2.0   
+     +        y=0 z=-FBXD_Depth/2.0+BZOffSet+INSE_Depth/2.0  
+          Position FECC x=-xoffFECC-xshift     
      +        y=distancer/2.0 
      +        z=zoffFECC-INSE_GateDepth-INSE_GapDepth/2.0  
-          Position FECC x=FPOS_X-xoffFECC  
+          Position FECC x=-xoffFECC-xshift     
      +        y=distancer/2.0
      +        z=zoffFECC-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
-          Position FECC x=FPOS_X-xoffFECC  
+          Position FECC x=-xoffFECC-xshift     
      +        y=-distancer/2.0 
      +        z=zoffFECC-INSE_GateDepth-INSE_GapDepth/2.0  
-          Position FECC x=FPOS_X-xoffFECC 
+          Position FECC x=-xoffFECC-xshift    
      +        y=-distancer/2.0 
      +        z=zoffFECC-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
-          Position FEEC x=FPOS_X-(xoffFEDC-FBXD_Width)/2.0 
+          Position FEEC x=-xshift-(xoffFEDC-FBXD_Width)/2.0 
      +        y=0 z=zoffFECC-INSE_GateDepth/2.0  
-          Position FEEC x=FPOS_X-(xoffFEDC-FBXD_Width)/2.0 
+          Position FEEC x=-xshift-(xoffFEDC-FBXD_Width)/2.0 
      +        y=0 z=zoffFECC-INSE_GateDepth-INSE_GapDepth-INSE_GateDepth/2.0  
-          Position FEEC x=FPOS_X-(xoffFEDC-FBXD_Width)/2.0 
-     +        y=0 z=zoffFECC-2*(INSE_GateDepth+INSE_GapDepth)-INSE_GateDepth/2.0 
+          Position FEEC x=-xshift-(xoffFEDC-FBXD_Width)/2.0 
+     +        y=0 z=zoffFECC-2.0*(INSE_GateDepth+INSE_GapDepth)-INSE_GateDepth/2.0 
          
          endif
         endif
@@ -492,7 +495,7 @@ EndBlock
 Block FTOW is one PbG Tower
       material Air
       Attribute FTOW seen=1 colo=2
-      Shape box	dx=wid/2 dy=wid/2 dz=ztot
+      Shape box	dx=wid/2.0 dy=wid/2.0 dz=ztot
 *      Shape box	dx=0 dy=0 dz=0
 
       Create and Position FWAL z=-ztot+(FLGG_AlThick+FLGG_depth)/2.0
@@ -520,7 +523,7 @@ Block FLGR is Lead Glass detector
       Mixture   PbG   Dens=FLGM_Density Radl=FLGM_RadLen
       Medium leadglass ISVOL=1
       Attribute FLGR  seen=1    colo=4    ! red
-      Shape box dz=FLGG_depth/2 dx=FLGG_Width/2 dy=FLGG_Width/2
+      Shape box dz=FLGG_depth/2.0 dx=FLGG_Width/2.0 dy=FLGG_Width/2.0
 
 *      Call GSTPAR (ag_imed,'CUTELE', flgm_CritEne)
       HITS FLGR ELOS:0:(0,50)
@@ -539,15 +542,15 @@ Block FLXF is Lead Glass detector
       Mixture   F2   Dens=FLGM_Density Radl=FLGM_RadLen
       Medium leadglass ISVOL=1
       Attribute FLXF  seen=1    colo=4    ! red
-      Shape     box dz=FLGG_depth/2 dx=FLGG_Width/2 dy=FLGG_Width/2
-      Call GSTPAR (ag_imed,'CUTELE', flgm_CritEne)
+      Shape     box dz=FLGG_depth/2.0 dx=FLGG_Width/2.0 dy=FLGG_Width/2.0
+*      Call GSTPAR (ag_imed,'CUTELE', flgm_CritEne)
       HITS FLXF ELOS:0:(0,50)
 Endblock
 * ----------------------------------------------------------------------------
 Block FALU is Aluminium Base Cell
       material Aluminium
       Attribute FALU  seen=1    colo=1    ! black
-      Shape     box dz=FLGG_depth/2 dx=FLGG_Width/2 dy=FLGG_Width/2
+      Shape     box dz=FLGG_depth/2.0 dx=FLGG_Width/2.0 dy=FLGG_Width/2.0
     
 Endblock
 * ----------------------------------------------------------------------------
@@ -676,18 +679,18 @@ Endblock
 Block FSHM  is the SHower Max  section
       Material  Air 
       Attribute FSHM  seen=1   colo=4                 
-      Shape     box dx=FMXG_G10Width/2 dy=FMXG_G10hgt/2 dz=ztotsmd
+      Shape     box dx=FMXG_G10Width/2.0 dy=FMXG_G10hgt/2.0 dz=ztotsmd
       
-      wsmd=FMXG_Sbase/2+FMXG_Sgap
+      wsmd=FMXG_Sbase/2.0+FMXG_Sgap
       wtotsmd=(FMXG_Nstrip+1)*wsmd
 *G10 
-      zsmd=-ztotsmd+FMXG_G10Thick/2
+      zsmd=-ztotsmd+FMXG_G10Thick/2.0
       Create and Position FXGT x=0 y=0 z=zsmd
 
 *SMD V-Plane
-      xsmdv=-wtotsmd/2-FMXG_Sgap/2+wsmd
+      xsmdv=-wtotsmd/2.0-FMXG_Sgap/2.0+wsmd
       ysmdv=0.0
-      zsmdv=zsmd+FMXG_G10Thick/2+FMXG_Sapex/2
+      zsmdv=zsmd+FMXG_G10Thick/2.0+FMXG_Sapex/2.0
       do i=1,FMXG_Nstrip
          if(mod(i,2)!= 0) then 
            Create and Position FHMS x=xsmdv y=ysmdv z=zsmdv
@@ -698,13 +701,13 @@ Block FSHM  is the SHower Max  section
       enddo
 
 *G10 
-      zsmd2=zsmdv+FMXG_G10Thick/2++FMXG_Sapex/2
+      zsmd2=zsmdv+FMXG_G10Thick/2.0++FMXG_Sapex/2.0
       Create and Position FXGT x=0 y=0 z=zsmd2
       
 *SMD H-Plane
       xsmdh=0.0
-      ysmdh=-wtotsmd/2-FMXG_Sgap/2+wsmd
-      zsmdh=zsmd2+FMXG_G10Thick/2+FMXG_Sapex/2
+      ysmdh=-wtotsmd/2.0-FMXG_Sgap/2.0+wsmd
+      zsmdh=zsmd2+FMXG_G10Thick/2.0+FMXG_Sapex/2.0
       Create FHMS
       do i=1,FMXG_Nstrip
          if(mod(i,2)!= 0) then
@@ -735,8 +738,8 @@ Block FHMS is sHower Max Strip
       Material  POLYSTYREN
       Material  Cpolystyren Isvol=1
       Attribute FHMS seen=1    colo=2     ! red
-      Shape     TRD1 dx1=0 dx2=fmxg_Sbase/2 dy=FMXG_G10hgt/2,
-                dz=fmxg_Sapex/2
+      Shape     TRD1 dx1=0 dx2=fmxg_Sbase/2.0 dy=FMXG_G10hgt/2.0,
+                dz=fmxg_Sapex/2.0
       Call GSTPAR (ag_imed,'CUTGAM',0.00008)
       Call GSTPAR (ag_imed,'CUTELE',0.001)
       Call GSTPAR (ag_imed,'BCUTE', 0.0001)
