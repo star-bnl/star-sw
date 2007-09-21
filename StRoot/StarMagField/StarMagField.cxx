@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.9 2007/09/21 17:30:33 perev Exp $
+ * $Id: StarMagField.cxx,v 1.10 2007/09/21 21:07:08 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.10  2007/09/21 21:07:08  fisyak
+ * Remove ClassDef and ClassImp
+ *
  * Revision 1.9  2007/09/21 17:30:33  perev
  * Root dependecies removed
  *
@@ -138,7 +141,7 @@ R__EXTERN  "C" {
 #endif
   }
 }
-ClassImp(StarMagField);
+//ClassImp(StarMagField);
 struct BFLD_t { 
   Int_t version; 
   Char_t *code; 

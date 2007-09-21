@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.3 2007/09/13 00:00:27 fisyak Exp $
+ * $Id: StarMagField.h,v 1.4 2007/09/21 21:07:08 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
+ * Revision 1.4  2007/09/21 21:07:08  fisyak
+ * Remove ClassDef and ClassImp
+ *
  * Revision 1.3  2007/09/13 00:00:27  fisyak
  * add mag.field in steel, from Lijuan Ruan
  *
@@ -149,7 +152,7 @@ class StarMagField {
   virtual Float_t GetRescale() {return fRescale;}
   virtual Bool_t  IsLocked()   {return fLock;}
   virtual void    Print();
-  ClassDef(StarMagField,1)    // Base class for all STAR MagField
+  //  ClassDef(StarMagField,1)    // Base class for all STAR MagField
 
 };
 
