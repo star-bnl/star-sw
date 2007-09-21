@@ -53,7 +53,7 @@ StDbTable* StEmcDbHandler::getDbTable()
 
   dbMngr->fetchDbTable(table);
 
-  mTimeStamp = "";//getSqlTime(table->getBeginDateTime()); 
+  mTimeStamp = timeToSqlTime(table->getBeginDateTime()); 
   mTable = table;
   
   return mTable;  
@@ -88,7 +88,7 @@ std::vector<std::string> StEmcDbHandler::getTimeStampList(const char * beginTime
     for (int i = 0; i < nRows ; i++)
     {
       dbMngr->setRequestTime(timeStampList[i]); //let db translate to Human Readable
-      mTimeStampList.push_back(""/*getSqlTime(dbMngr->getDateRequestTime())*/);
+      mTimeStampList.push_back( timeToSqlTime(dbMngr->getDateRequestTime()) );
     }
     
     delete [] timeStampList;
