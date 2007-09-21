@@ -1,4 +1,4 @@
-  //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 //
 //
 // StTriggerSimuMaker R.Fatemi, Adam Kocoloski , Jan Balewski  (Fall, 2007)
@@ -30,7 +30,7 @@
 #include "StEEmcUtil/EEdsm/EEfeeTP.h"  // for printouts only
 
 //get BEMC
-#include "Bemc/StBemcTriggerSimu.h"
+#include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
 #include "StEmcRawMaker/StBemcTables.h"
 
 //get BBC
@@ -103,15 +103,21 @@ StTriggerSimuMaker::Init() {
 //________________________________________________
 void 
 StTriggerSimuMaker::Clear(const Option_t*){
+
+  LOG_INFO<<"StTriggerSimuMaker::Clear()"<<endm;
   
   mTriggerList.clear();
   if(eemc) eemc->Clear();
   if(bbc)  bbc ->Clear();
   if(bemc) bemc->Clear();
 
-  LOG_DEBUG<<"::Clear()"<<endm;
-}
+  for (int tpid=0;tpid<kNPatches;tpid++) {
+    BEMC_L0_HT_ADC[tpid]=0;
+    BEMC_L0_TP_ADC[tpid]=0;
+  }
+  
 
+}
 
 
 //________________________________________________
@@ -142,7 +148,7 @@ StTriggerSimuMaker::InitRun  (int runNumber){
 Int_t 
 StTriggerSimuMaker::Make(){
 
-    LOG_DEBUG<<"::Make()"<<endm;
+    LOG_INFO<<"::Make()"<<endm;
 
     if(bbc) bbc->Make();
     if(eemc) eemc->Make();
@@ -156,13 +162,19 @@ StTriggerSimuMaker::Make(){
 	bemc->setEvent(event);
 
 	bemc->Make();
+
+        int *BEMC_HT_Holder=bemc->getBEMC_L0_HT_ADC();
+	for (int tpid=0;tpid<kNPatches;tpid++)  {
+	  BEMC_L0_HT_ADC[tpid]=BEMC_HT_Holder[tpid];
+	  LOG_INFO<<"TP#"<<tpid<<"  BEMC_L0="<<BEMC_L0_HT_ADC[tpid]<<endm;
+	}
       }
 
     // add L2 triggers
     //.....
 
     // now both E+B EMC response has been processed by the trigger logic, below only get-methods are called.
-    
+    /*
     if(bemc) bemc->addTriggerList(&mTriggerList);
     if(eemc) eemc->addTriggerList(&mTriggerList);
     addTriggerList(); //  final decisions, involve L2 
@@ -183,7 +195,7 @@ StTriggerSimuMaker::Make(){
       // break;// ???
     } 
     cout<<Form(" 4Pibero HTTP bit=%d  bbc=%d",eemc->dsm2TreeADC->getOutEndcapHTTP1bit(), bbc->getEandW())<<endl;
-
+    */
     return kStOK;
 }
 
@@ -231,9 +243,18 @@ StTriggerSimuMaker::Finish() {
     return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.9 2007/08/13 02:51:29 rfatemi Exp $
+
+void StTriggerSimuMaker::setTableMaker(StBemcTables *bemcTab){
+
+  bemc->setTableMaker(bemcTab);
+
+}
+// $Id: StTriggerSimuMaker.cxx,v 1.10 2007/09/21 18:45:40 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.10  2007/09/21 18:45:40  rfatemi
+// End of week update
+//
 // Revision 1.9  2007/08/13 02:51:29  rfatemi
 // update before rcf goes offline
 //
