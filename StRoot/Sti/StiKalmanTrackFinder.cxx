@@ -13,6 +13,8 @@
 #include <stdexcept>
 #include <math.h>
 #include "TMath.h"
+#include "TError.h"
+#include "TStopwatch.h"
 #include "StEnumerations.h"
 using namespace std;
 #include "Sti/Base/Parameter.h"
@@ -51,6 +53,8 @@ static const StiDetector *vpDetector=0;
 static StiHit *vpHit = 0;
 
 #endif //ASSIGNVP
+
+enum {kSeedTimg,kTrakTimg,kPrimTimg};
 
 static const double kRMinTpc =55;
 int StiKalmanTrackFinder::_debug = 0;
@@ -104,6 +108,7 @@ _eventFiller(0),
 _event(0)
 {
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Started"<<endl;
+memset(mTimg,0,sizeof(mTimg));
 StiKalmanTrack::setParameters(&_pars);
 StiKalmanTrackNode::setParameters(&_pars);
   _pars.setName("KalmanTrackFinderParameters");
@@ -217,10 +222,16 @@ static int nCall=0;nCall++;
 
   while (true ){
 // 		obtain track seed from seed finder
+    
+    if (mTimg[kSeedTimg]) mTimg[kSeedTimg]->Start(0);
+
     track = (StiKalmanTrack*)_trackSeedFinder->findTrack(rMin);
+
+    if (mTimg[kSeedTimg]) mTimg[kSeedTimg]->Stop();
     if (!track) break; // no more seeds
       nTTot++;
       int iBreak=1;
+      if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
       do { //technical do
         track->setFlag(-1);
         status = track->approx(0); 
@@ -250,6 +261,7 @@ static int nCall=0;nCall++;
         nHftHits+=track->getFitPointCount(kHftId);
 	//cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
       }while((iBreak=0));
+      if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
       if (!iBreak) continue;
       BFactory::Free(track);
     }
@@ -428,8 +440,10 @@ StiDebug::tally("Tracks");
 //VP  if (fabs(vertex->z_g()-nearBeam.z()) > ZMAX2d) 	continue;
       if (fabs(track->getDca(vertex)) > DMAX3d)    	continue;
 StiDebug::tally("PrimCandidates");
+      if (mTimg[kPrimTimg]) mTimg[kPrimTimg]->Start(0);
 
       extended = (StiKalmanTrackNode*)track->extendToVertex(vertex);
+      if (mTimg[kPrimTimg]) mTimg[kPrimTimg]->Stop();
 
       if (!extended) 					continue;
 StiDebug::tally("PrimExtended");
@@ -908,7 +922,23 @@ void StiKalmanTrackFinder::setDefaults()
   _pars.setDefaults();
   cout << "StiKalmanTrackFinder::setDefaults() -I- Done" << endl;
 }
-
+//______________________________________________________________________________
+void StiKalmanTrackFinder::setTiming()
+{
+  for (int it=0;it<(int)(sizeof(mTimg)/sizeof(mTimg[0]));it++){
+    mTimg[it]= new TStopwatch(); mTimg[it]->Stop();    } 
+}
+//______________________________________________________________________________
+void StiKalmanTrackFinder::finish() const
+{
+static const char *timg[] = {"SeedFnd","TrakFnd","PrimFnd",0};
+  if (mTimg[0]) {
+    for (int i=0;timg[i];i++) {
+      Info("TrackFinder::Timing","%s(%d) \tCpuTime = %6.2f seconds,\tPerTrak = %g seconds"
+      ,timg[i],mTimg[i]->Counter(),mTimg[i]->CpuTime()
+      ,mTimg[i]->CpuTime()/mTimg[i]->Counter());    
+  } }
+}
 //______________________________________________________________________________
 CloserAngle::CloserAngle(double refAngle)
   : _refAngle(refAngle)

@@ -8,6 +8,7 @@
 #include "Sti/Base/Described.h"
 #include "Sti/Base/Loadable.h"
 
+class TStopwatch;
 class StiDetector;
 class StiDetectorBuilder;
 class StiDetectorContainer;
@@ -36,10 +37,12 @@ template<class Event,class Detector>class StiHitLoader;
 class StiKalmanTrackFinder : public Loadable, public StiTrackFinder, public Named, public Described
 {
 public:
-  StiKalmanTrackFinder(StiToolkit*toolkit);
+  StiKalmanTrackFinder(StiToolkit *toolkit);
   virtual ~StiKalmanTrackFinder();
   /// Initialize the finder
   virtual void initialize();
+  /// Set timing of tracking
+          void setTiming();
   /// Set default tracking parameter values
   virtual void setDefaults();
   /// Find all tracks of the currently loaded event
@@ -62,6 +65,8 @@ public:
 
   /// Clear the tracker
   virtual void clear();
+  /// Finish the tracker
+  virtual void finish() const;
   /// Get the track filter currently used by the tracker
   virtual Filter<StiTrack> * getTrackFilter();
   /// Get the vertex finder used by this track finder
@@ -133,6 +138,7 @@ private:
     bool scanningDone;
     bool hasHit;
     bool hasDet;
+    TStopwatch *mTimg[3]; //seeds,traks,prims
     static int   _debug;
 };
 
