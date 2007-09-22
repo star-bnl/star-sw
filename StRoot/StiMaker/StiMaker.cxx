@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.179 2007/09/10 00:32:30 perev Exp $
+// $Id: StiMaker.cxx,v 1.180 2007/09/22 03:29:16 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.180  2007/09/22 03:29:16  perev
+// Timer + Pulls without vertex
+//
 // Revision 1.179  2007/09/10 00:32:30  perev
 // Attribute useTreeSearch added
 //
@@ -373,7 +376,7 @@ More detailed: 				<br>
 /// But zero errors could to unpredicted problems
 /// Now minimal possible error is 1 micron
 static const float MIN_VTX_ERR2 = 1e-4*1e-4;
-
+enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
 ClassImp(StiMaker)
   
 //_____________________________________________________________________________
@@ -393,6 +396,7 @@ StiMaker::StiMaker(const Char_t *name) :
     _loaderHitFilter(0)
 
 {
+  memset(mTimg,0,sizeof(mTimg));
   cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
   mPullFile=0; mPullEvent=0;mPullTTree=0;
   memset(mPullHits,0,sizeof(mPullHits));
@@ -446,8 +450,14 @@ Int_t StiMaker::Finish()
   StiTimer::Print();
   StiTimer::Clear();
 
-
-
+static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
+  if (mTimg[0]) {
+    for (int i=0;timg[i];i++) {
+      Info("Timing","%s(%d) \tCpuTime = %6.2f seconds,\tPerEvent = %g seconds"
+      ,timg[i],mTimg[i]->Counter(),mTimg[i]->CpuTime()
+      ,mTimg[i]->CpuTime()/mTimg[i]->Counter());    
+  } }
+  if (_tracker) _tracker->finish();
 
   return StMaker::Finish();
 }
@@ -463,6 +473,10 @@ Int_t StiMaker::Init()
   
   _loaderHitFilter = 0; // not using this yet.
   if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
+  if (IAttr("useTiming")) {
+    for (int it=0;it<(int)(sizeof(mTimg)/sizeof(mTimg[0]));it++){
+      mTimg[it]= new TStopwatch(); mTimg[it]->Stop();
+  } }
 
   if (IAttr("useSvtSelf")) {
     SetAttr("useTpc"		,0);
@@ -570,6 +584,7 @@ Int_t StiMaker::InitRun(int run)
 	_tracker->load("trackFinderPars.dat",*this);
 	_fitter->load("trackFitterPars.dat",*this);
         if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
+        if (IAttr("useTiming")) _tracker->setTiming();
 
       }
       _eventFiller=0;
@@ -618,7 +633,9 @@ Int_t StiMaker::Make()
   _tracker->clear();
   }
   try {
+     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Start(0);
     _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
+     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
   }
   catch (runtime_error &rte)
   {
@@ -629,12 +646,20 @@ Int_t StiMaker::Make()
 
   _seedFinder->reset();
   if (_tracker) {
+      if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
+
       _tracker->findTracks();
+
+      if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
       const std::vector<StiHit*> *vertexes=0;
       try
 	{
+          if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
+
 	  if (_eventFiller)
 	    _eventFiller->fillEvent(event, _trackContainer);
+
+          if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
 	}
       catch (runtime_error & rte)
 	{
@@ -643,8 +668,12 @@ Int_t StiMaker::Make()
       if (_vertexFinder)
 	{
 	  //cout << "StiMaker::Maker() -I- Will Find Vertex"<<endl;
+          if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Start(0);
+
 	  _vertexFinder->fit(event);
 	  vertexes = _vertexFinder->result();
+
+          if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Stop();
 
 
 	  if (vertexes && vertexes->size())
@@ -665,9 +694,16 @@ Int_t StiMaker::Make()
                 vtx->setError(vtxErr);
               }
 	      //cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
+              if (mTimg[kPriTimg]) mTimg[kPriTimg]->Start(0);
+
 	      _tracker->extendTracksToVertices(*vertexes);
+
+              if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
+
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
-		  if (_eventFiller) _eventFiller->fillEventPrimaries();
+              if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
+	      if (_eventFiller) _eventFiller->fillEventPrimaries();
+              if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
 	    }
 	}
     }
@@ -726,13 +762,16 @@ Int_t StiMaker::FillPulls()
   mPullEvent->mEvt  = hddr->GetEventNumber();
   mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
   StiHit *vertex   = _vertexFinder->getVertex(0);
-  if (!vertex) return 0;
   mPullEvent->mChi2 = 0;	
   
-  mPullEvent->mVtx[0] = vertex->x_g();
-  mPullEvent->mVtx[1] = vertex->y_g();
-  mPullEvent->mVtx[2] = vertex->z_g();
-  TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
+  memset(mPullEvent->mVtx,0,sizeof(mPullEvent->mVtx));
+  memset(mPullEvent->mEtx,0,sizeof(mPullEvent->mEtx));
+  if (vertex) {
+    mPullEvent->mVtx[0] = vertex->x_g();
+    mPullEvent->mVtx[1] = vertex->y_g();
+    mPullEvent->mVtx[2] = vertex->z_g();
+    TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
+  }
   mPullTTree->Fill();
   for (int i=0; i<3; i++) {mPullHits[i]+=mPullEvent->mNHits[i];}
   if (! IAttr(".Privilege")) return kStOK;
