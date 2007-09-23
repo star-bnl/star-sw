@@ -4,7 +4,7 @@
 
 int total=0;
 
-void OnlineTrigSimu( int nevents = 10,
+void OnlineTrigSimu( int nevents = 1000,
 		     int flagMC=0)
 
 {
@@ -198,7 +198,7 @@ void OnlineTrigSimu( int nevents = 10,
   cout << "total number of events  " << total << endl;
   cout << "****************************************** " << endl;
 
-  TString outB="BEMC_7098001_test.hist.root";
+  TString outB="BEMC_7098001_Online.hist.root";
   bhf=new TFile(outB,"recreate");
   BHList->Write();
 
