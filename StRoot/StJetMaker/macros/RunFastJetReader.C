@@ -14,16 +14,17 @@ void RunFastJetReader(
     
     gROOT->Macro("loadMuDst.C");
     gSystem->Load("StTpcDb");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
+    gSystem->Load("StMCAsymMaker");
     gSystem->Load("StDaqLib");
     gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
     gSystem->Load("StEpcMaker");
     gSystem->Load("StEmcSimulatorMaker");
     gSystem->Load("StDbBroker");
-    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("St_db_Maker");
     gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StSpinDbMaker");
@@ -35,7 +36,8 @@ void RunFastJetReader(
     cout << " loading done " << endl;
     
     chain= new StChain("StChain"); 
-    chain->SetDebug(1);
+    //    chain->SetDebug(1);
+    chain->SetDebug(5);
     
     //Instantiate the JetReader
     StJetReader* jetReader = new StJetReader("JetReader",0);
