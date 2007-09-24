@@ -70,7 +70,7 @@ void StBemcTriggerSimu::Init(){
  
 //==================================================
 //==================================================
-void StBemcTriggerSimu::InitRun(){
+void StBemcTriggerSimu::InitRun(int runnumber){
  
   LOG_INFO<<"StBemcTriggerSimu::InitRun()"<<endm;
 
@@ -117,6 +117,12 @@ StBemcTriggerSimu::addTriggerList( void * adr){
 
 }
 
+//==================================================
+//==================================================
+short
+StBemcTriggerSimu::isTrigger(int trigId) {
+    return -1;
+}
 //==================================================
 //==================================================
 void 

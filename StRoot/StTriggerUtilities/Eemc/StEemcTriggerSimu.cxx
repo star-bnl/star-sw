@@ -130,11 +130,22 @@ StEemcTriggerSimu::addTriggerList( void * adr){
 
 }
 
+//==================================================
+//==================================================
+short
+StEemcTriggerSimu::isTrigger(int trigId) {
+    vector<int> tmpTrigList;
+    addTriggerList(&tmpTrigList);
+    for(unsigned i=0; i<tmpTrigList.size(); i++) {
+        if(trigId == tmpTrigList[i]) return 1;
+    }
+    return -1;
+}
  
 //==================================================
 //==================================================
 void  
-StEemcTriggerSimu::InitRun(){
+StEemcTriggerSimu::InitRun(int runnumber){
 
   
   memset(feePed,0,sizeof(feePed));
@@ -482,6 +493,9 @@ StEemcTriggerSimu::getEemcFeeMask(){
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.7  2007/09/24 18:08:42  kocolosk
+// added inheritance from ABC clss StTriggerSimu
+//
 // Revision 1.6  2007/07/24 01:32:59  balewski
 // added HTTP id for the endcap
 //
