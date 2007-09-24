@@ -26,9 +26,9 @@ void rdMu2TrigSimu( char *dirIn="",
   assert( !gSystem->Load("StEmcRawMaker"));
   assert( !gSystem->Load("StEmcADCtoEMaker"));
   if (flagMC) assert( !gSystem->Load("StEpcMaker"));
-  if (flagMC) assert( !gSystem->Load("StEmcSimulatorMaker"));
   if (flagMC) assert( !gSystem->Load("StMcEvent"));
   if (flagMC) assert( !gSystem->Load("StMcEventMaker"));
+  if (flagMC) assert( !gSystem->Load("StEmcSimulatorMaker"));
   assert( !gSystem->Load("StTriggerUtilities"));
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
@@ -62,6 +62,7 @@ void rdMu2TrigSimu( char *dirIn="",
   StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
  
   if (flagMC) {
+    StMcEventMaker* mcEvent = new StMcEventMaker();
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
     StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
   }
