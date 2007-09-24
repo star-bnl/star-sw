@@ -7,6 +7,8 @@
 #include <TObject.h> 
 #include <vector>
 
+#include "StTriggerSimu.h"
+
 #define kNPatches 300
 #define kNJet 12
 #define kNTowers 4800
@@ -24,7 +26,8 @@ class StBemcTables;
 class St_db_Maker;
 class StBemcTriggerDbThresholds;
 class TDataSet;
-class StBemcTriggerSimu {
+
+class StBemcTriggerSimu : public StTriggerSimu {
 
  private:
   
@@ -41,7 +44,7 @@ class StBemcTriggerSimu {
 
   TString *config;                         //"online" or "offline" or "expert"   
   Int_t did;                               //always used as BEMC tower id
-  Int_t mMCflag;                           //0= false and 1 =true
+  //Int_t mMCflag;                           //0= false and 1 =true
   unsigned long pedTargetValue;            //value FEE shifts pedestal to (10 or 12 bit?)
   unsigned long bitConvValue[kNCrates][kNSeq];//gives window used to determine HT6Bit
   Int_t HT_FEE_Offset;                     //same as bitConvValue but set by support class
@@ -68,11 +71,13 @@ class StBemcTriggerSimu {
   virtual     ~StBemcTriggerSimu();
 
   void Init();
-  void InitRun();
+  void InitRun(int runnumber);
   void Clear();
   void Make();
+  
+  short isTrigger(int trigId);
 
-  void setMC(int x) {mMCflag=x;}
+  //void setMC(int x) {mMCflag=x;}
   void setHList(TObjArray * x){mHList=x;}
   void addTriggerList( void * );
 

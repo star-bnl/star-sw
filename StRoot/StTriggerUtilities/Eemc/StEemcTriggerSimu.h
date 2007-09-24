@@ -7,6 +7,8 @@
 #include <TObject.h> 
 #include <vector>
 
+#include "StTriggerSimu.h"
+
 class StEEmcDbMaker;
 class EEfeeTPTree;
 class EEdsm0Tree;
@@ -16,10 +18,10 @@ class EEdsm3;
 class EemcHttpInfo;
 class TH1;
 
-class StEemcTriggerSimu {
+class StEemcTriggerSimu : public StTriggerSimu {
  private:
   StEEmcDbMaker    *mDbE;
-  int mMCflag; // set yo 0 for real data
+  //int mMCflag; // set yo 0 for real data
   int * mBemcEsum5bit; // output from Bemc emulation
   int * mExternDsmSetup;
 
@@ -76,14 +78,15 @@ class StEemcTriggerSimu {
   StEemcTriggerSimu();
   virtual     ~StEemcTriggerSimu();
   void Init();
-  void InitRun();
-  void setMC(int x) {mMCflag=x;}
+  void InitRun(int runnumber);
+  //void setMC(int x) {mMCflag=x;}
   void setDsmSetup(int *x){ mExternDsmSetup=x;}
   void Clear();
   void Make();
   void getEemcFeeMask();
   void setHList(TObjArray * x){mHList=x;}
   void addTriggerList( void * );
+  short isTrigger(int trigId);
   void connectBemcL0(int  *x) { mBemcEsum5bit=x;};
   bool getHttpInfo(int tpId, EemcHttpInfo &httpInfo);
   ClassDef(StEemcTriggerSimu, 1)
@@ -94,6 +97,9 @@ class StEemcTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.4  2007/09/24 18:08:43  kocolosk
+// added inheritance from ABC clss StTriggerSimu
+//
 // Revision 1.3  2007/07/24 01:32:59  balewski
 // added HTTP id for the endcap
 //
