@@ -49,6 +49,7 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
   eemc=0;
   bbc=0;
   bemc=0;
+  config = new TString("offline");
 }
 
 //____________________________________________________________________________
@@ -59,18 +60,21 @@ StTriggerSimuMaker::~StTriggerSimuMaker(){
 void 
 StTriggerSimuMaker::useEemc(){
   eemc=new StEemcTriggerSimu;
+  mSimulators.push_back(eemc);
 }
 
 //________________________________________________
 void 
 StTriggerSimuMaker::useBbc(){
   bbc=new StBbcTriggerSimu;
+  mSimulators.push_back(bbc);
 }
 
 //________________________________________________
 void
 StTriggerSimuMaker::useBemc(){
   bemc=new StBemcTriggerSimu;
+  mSimulators.push_back(bemc);
 }
 
 //_____________________________________________________________________________
@@ -80,21 +84,17 @@ StTriggerSimuMaker::Init() {
   
   if(eemc) {
     eemc->setHList(mHList);
-    eemc->setMC(mMCflag);
-    eemc->Init();
-  }
-
-  if(bbc) {
-    bbc->setMC(mMCflag);
-    bbc->Init();
   }
 
   if(bemc) {
     mTables=new StBemcTables();
-    event=new StEvent();
-    bemc->setMC(mMCflag);
+    event = NULL;
     bemc->setBemcConfig(config);
-    bemc->Init();
+  }
+  
+  for(unsigned i=0; i<mSimulators.size(); i++) {
+    mSimulators[i]->setMC(mMCflag);
+    mSimulators[i]->Init();
   }
 
  return StMaker::Init();
@@ -107,15 +107,15 @@ StTriggerSimuMaker::Clear(const Option_t*){
   LOG_INFO<<"StTriggerSimuMaker::Clear()"<<endm;
   
   mTriggerList.clear();
-  if(eemc) eemc->Clear();
-  if(bbc)  bbc ->Clear();
-  if(bemc) bemc->Clear();
+  
+  for(unsigned i=0; i<mSimulators.size(); i++) {
+    mSimulators[i]->Clear();
+  }
 
   for (int tpid=0;tpid<kNPatches;tpid++) {
     BEMC_L0_HT_ADC[tpid]=0;
     BEMC_L0_TP_ADC[tpid]=0;
   }
-  
 
 }
 
@@ -126,12 +126,16 @@ Int_t
 StTriggerSimuMaker::InitRun  (int runNumber){
   LOG_INFO<<"::InitRun()="<<runNumber<<endm;
 
-  if(eemc) eemc->InitRun();
+  //if(eemc) eemc->InitRun();
   if(bemc) {
     bemc->setBemcDbMaker(mDbMk);
     mTables->loadTables(this);
     bemc->setTableMaker(mTables);
-    bemc->InitRun();
+    //bemc->InitRun();
+  }
+  
+  for(unsigned i=0; i<mSimulators.size(); i++) {
+    mSimulators[i]->InitRun(runNumber);
   }
 
   assert(mDbMk);
@@ -147,56 +151,57 @@ StTriggerSimuMaker::InitRun  (int runNumber){
 //_____________________________________________________________________________
 Int_t 
 StTriggerSimuMaker::Make(){
+  LOG_INFO<<"::Make()"<<endm;
 
-    LOG_INFO<<"::Make()"<<endm;
+  if(bemc) 
+  {
+    mTables->loadTables(this);
+    bemc->setTableMaker(mTables);
 
-    if(bbc) bbc->Make();
-    if(eemc) eemc->Make();
-    if(bemc) 
-      {
-	mTables->loadTables(this);
-	bemc->setTableMaker(mTables);
-	
-	event=(StEvent*)GetInputDS("StEvent");
-	if(!event) return kStOk;
-	bemc->setEvent(event);
+    event=(StEvent*)GetInputDS("StEvent");
+    if(!event) return kStOk;
+    bemc->setEvent(event);
+  }
 
-	bemc->Make();
+  for(unsigned i=0; i<mSimulators.size(); i++) {
+    mSimulators[i]->Make();
+  }
 
-        int *BEMC_HT_Holder=bemc->getBEMC_L0_HT_ADC();
-	for (int tpid=0;tpid<kNPatches;tpid++)  {
-	  BEMC_L0_HT_ADC[tpid]=BEMC_HT_Holder[tpid];
-	  LOG_INFO<<"TP#"<<tpid<<"  BEMC_L0="<<BEMC_L0_HT_ADC[tpid]<<endm;
-	}
-      }
+  if(bemc) {
+    int *BEMC_HT_Holder=bemc->getBEMC_L0_HT_ADC();
+    for (int tpid=0;tpid<kNPatches;tpid++)  {
+      BEMC_L0_HT_ADC[tpid]=BEMC_HT_Holder[tpid];
+      LOG_INFO<<"TP#"<<tpid<<"  BEMC_L0="<<BEMC_L0_HT_ADC[tpid]<<endm;
+    }
+  }
 
-    // add L2 triggers
-    //.....
+  // add L2 triggers
+  //.....
 
-    // now both E+B EMC response has been processed by the trigger logic, below only get-methods are called.
-    /*
-    if(bemc) bemc->addTriggerList(&mTriggerList);
-    if(eemc) eemc->addTriggerList(&mTriggerList);
-    addTriggerList(); //  final decisions, involve L2 
+  // now both E+B EMC response has been processed by the trigger logic, below only get-methods are called.
+  /*
+  if(bemc) bemc->addTriggerList(&mTriggerList);
+  if(eemc) eemc->addTriggerList(&mTriggerList);
+  addTriggerList(); //  final decisions, involve L2 
 
 
-    // all code below is for Pibero for testing
+  // all code below is for Pibero for testing
 
-    int tpId;
-    EemcHttpInfo httpInfo;
-    for (tpId=0;tpId<90;tpId++){
-      bool found=eemc->getHttpInfo(tpId,httpInfo);
-      printf("http(%d) ok=%d ",tpId,found);
-      if(!found) { printf("\n"); continue;}
-       httpInfo.print();
+  int tpId;
+  EemcHttpInfo httpInfo;
+  for (tpId=0;tpId<90;tpId++){
+    bool found=eemc->getHttpInfo(tpId,httpInfo);
+    printf("http(%d) ok=%d ",tpId,found);
+    if(!found) { printf("\n"); continue;}
+    httpInfo.print();
        // details of this TP
-      eemc->feeTPTreeADC->TP(tpId)->print(3);
+    eemc->feeTPTreeADC->TP(tpId)->print(3);
       // do your job
       // break;// ???
-    } 
-    cout<<Form(" 4Pibero HTTP bit=%d  bbc=%d",eemc->dsm2TreeADC->getOutEndcapHTTP1bit(), bbc->getEandW())<<endl;
-    */
-    return kStOK;
+  } 
+  cout<<Form(" 4Pibero HTTP bit=%d  bbc=%d",eemc->dsm2TreeADC->getOutEndcapHTTP1bit(), bbc->getEandW())<<endl;
+  */
+  return kStOK;
 }
 
 
@@ -227,31 +232,36 @@ StTriggerSimuMaker::addTriggerList() { // not working yet
 //========================================
     
 bool StTriggerSimuMaker::isTrigger(int trigId) {
-  uint j;
-  for(j=0; j<mTriggerList.size();j++) {
-    //  printf("aa j=%d,  %d %d  ret=%d\n",j, trigId, mTriggerList[j],trigId==mTriggerList[j]);
-    if(trigId==mTriggerList[j]) return true;
+//  uint j;
+//  for(j=0; j<mTriggerList.size();j++) {
+//    //  printf("aa j=%d,  %d %d  ret=%d\n",j, trigId, mTriggerList[j],trigId==mTriggerList[j]);
+//    if(trigId==mTriggerList[j]) return true;
+//  }
+//  return false;
+
+  for(unsigned i=0; i<mSimulators.size(); i++) {
+    if(mSimulators[i]->isTrigger(trigId) == 0) return false;
   }
-  return false;
+  return true;
 }
-    
-    
+
 //========================================
 
 Int_t 
 StTriggerSimuMaker::Finish() {
-    return StMaker::Finish();
+  return StMaker::Finish();
 }
-
 
 void StTriggerSimuMaker::setTableMaker(StBemcTables *bemcTab){
-
   bemc->setTableMaker(bemcTab);
-
 }
-// $Id: StTriggerSimuMaker.cxx,v 1.10 2007/09/21 18:45:40 rfatemi Exp $
+
+// $Id: StTriggerSimuMaker.cxx,v 1.11 2007/09/24 18:08:11 kocolosk Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.11  2007/09/24 18:08:11  kocolosk
+// some code restructuring
+//
 // Revision 1.10  2007/09/21 18:45:40  rfatemi
 // End of week update
 //

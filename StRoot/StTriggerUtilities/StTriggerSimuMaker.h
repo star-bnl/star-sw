@@ -13,6 +13,8 @@
 #ifndef STAR_StTriggerSimuMaker
 #define STAR_StTriggerSimuMaker
 
+#include <vector>
+
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
@@ -43,6 +45,8 @@ class StTriggerSimuMaker : public StMaker {
   void addTriggerList();
   void fillStEvent(StEvent*);
   void setTableMaker(StBemcTables *bemcTab); 
+  
+  std::vector<StTriggerSimu*> mSimulators;
   
  public:
   
@@ -82,9 +86,12 @@ class StTriggerSimuMaker : public StMaker {
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.7 2007/09/21 18:45:51 rfatemi Exp $
+// $Id: StTriggerSimuMaker.h,v 1.8 2007/09/24 18:08:11 kocolosk Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.8  2007/09/24 18:08:11  kocolosk
+// some code restructuring
+//
 // Revision 1.7  2007/09/21 18:45:51  rfatemi
 // End of week update
 //
