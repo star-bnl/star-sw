@@ -44,9 +44,9 @@ class StBemcTriggerSimu : public StTriggerSimu {
 
   TString *config;                         //"online" or "offline" or "expert"   
   Int_t did;                               //always used as BEMC tower id
-  //Int_t mMCflag;                           //0= false and 1 =true
-  unsigned long pedTargetValue;            //value FEE shifts pedestal to (10 or 12 bit?)
-  unsigned long bitConvValue[kNCrates][kNSeq];//gives window used to determine HT6Bit
+  Int_t tpid;                              //always used as BEMC trigger Patch id
+  Int_t cr;                                //always used as BEMC crate id
+  Int_t seq;                               //always used as BEMC sequence in crate
   Int_t HT_FEE_Offset;                     //same as bitConvValue but set by support class
   Int_t HT6bit,TP6bit;                     //6 bit HT and TP word which is passed out of FEE and into DSM L0
   Int_t DSM_HTStatus[kNPatches];           //DSM_HTStatus only set online
@@ -54,10 +54,15 @@ class StBemcTriggerSimu : public StTriggerSimu {
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
   Int_t adc12[kNTowers];                   //12 bit adc from StEvent -> NOT pedestal adjusted!
   Int_t adc10[kNTowers],adc08[kNTowers];   //ped adjusted 10 and 8 bit adc
-  Int_t ped12[kNTowers],ped10[kNTowers];   //12 and 10 bit pedestal
-  Int_t HTadc06[kNTowers];
+  Int_t ped12[kNTowers];                   //12 and 10 bit pedestal
+  Int_t HTadc06[kNTowers];                 //6bit HT ADC for each tower
+  unsigned long pedTargetValue;            //value FEE shifts pedestal to (12 bit)
+  unsigned long bitConvValue[kNCrates][kNSeq];//gives window used to determine HT6Bit from adc10
+  unsigned long LUTbit0[kNCrates][kNSeq],LUTbit1[kNCrates][kNSeq],LUTbit2[kNCrates][kNSeq];
+  unsigned long LUTbit3[kNCrates][kNSeq],LUTbit4[kNCrates][kNSeq],LUTbit5[kNCrates][kNSeq];
+  unsigned long LUTtag[kNCrates][kNSeq];
   Float_t ped12Diff,ped10Diff;
-  Int_t L0_HT_ADC[kNPatches], L0_TP_ADC[kNPatches];
+  Int_t L0_HT_ADC[kNPatches], L0_TP_ADC[kNPatches], L0_TP_PED[kNPatches];
 
   void getTowerStatus();
   void getDSM_TPStatus();

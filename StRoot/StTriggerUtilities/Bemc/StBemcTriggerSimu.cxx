@@ -102,8 +102,10 @@ StBemcTriggerSimu::Clear(){
     adc12[did-1]=0;
   }
   
-  for (int tpid=0;tpid<kNPatches; tpid++){
+  for (tpid=0;tpid<kNPatches; tpid++){
     L0_HT_ADC[tpid]=0;
+    L0_TP_ADC[tpid]=0;
+    L0_TP_PED[tpid]=0;
     HTadc06[tpid]=0;
   }
 
@@ -130,7 +132,7 @@ StBemcTriggerSimu::getTowerStatus(){
   
   LOG_INFO<<" StBemcTriggerSimu::getTowerStatus()"<<endm;
   
-  for (int i=1;i<kNTowers;i++) TowerStatus[i-1]=1;
+  for (int i=0;i<kNTowers;i++) TowerStatus[i]=1;
 
   dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
   St_emcTriggerStatus *STATUSonline=(St_emcTriggerStatus*) dbOnline->Find("bemcTriggerStatus");
@@ -329,7 +331,19 @@ void StBemcTriggerSimu::getLUT(){
 
   dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
   St_emcTriggerLUT *LUTonline=(St_emcTriggerLUT*) dbOnline->Find("bemcTriggerLUT");
-  LUTonline->GetTable();
+  emcTriggerLUT_st *LUTtab=LUTonline->GetTable();
+  for (int cr=0;cr<kNCrates;cr++){
+    for (int seq=0; seq<kNSeq; seq++){
+      LUTtag[cr][seq]=LUTtab->FormulaTag[cr][seq];
+      LUTbit0[cr][seq]=LUTtab->FormulaParameter0[cr][seq];
+      LUTbit1[cr][seq]=LUTtab->FormulaParameter1[cr][seq];
+      LUTbit2[cr][seq]=LUTtab->FormulaParameter2[cr][seq];
+      LUTbit3[cr][seq]=LUTtab->FormulaParameter3[cr][seq];
+      LUTbit4[cr][seq]=LUTtab->FormulaParameter4[cr][seq];
+      LUTbit5[cr][seq]=LUTtab->FormulaParameter5[cr][seq];
+    }
+  }
+  
 
 }
 
@@ -358,12 +372,7 @@ void StBemcTriggerSimu::Make(){
     {
       LOG_WARN << "StBemcTriggerSimu -- no StEmcDetector!" << endm;
     }
-  
-  /*  TUnixTime unixTime(mEvent->time());
-  Int_t dat=0,tim=0;
-  unixTime.GetGTime(dat,tim);
-  mDecoder->SetDateTime(dat,tim);
-  */
+ 
 
   //loop through BEMC hits 
   //Store 8,10,12 bit pedestal adjusted ADC for hits
@@ -389,19 +398,23 @@ void StBemcTriggerSimu::Make(){
 		      Int_t s=abs(rawHit[k]->sub());
 		      Int_t adc=rawHit[k]->adc();
 
+		      //Get software tower id, trigger patch id, crate and seq
 		      mGeo->getId(m,e,s,did);
-
+		      mDecoder->GetTriggerPatchFromTowerId(did,tpid);
+		      mDecoder->GetCrateFromTowerId(did,cr,seq);
+		      
+		      //apply tower masks
 		      if (TowerStatus[did-1]==1){
 			
 			//12 bit ADC enters FEE and drop 2 bits immediately
 			adc12[did-1]=adc;
 			adc10[did-1]=adc12[did-1] >> 2;
-			ped10[did-1]=ped12[did-1] >> 2;
 			
 			//need to shift ADC and ped to pedTargetValue 
 			//goal is to ultimately place DSM channel at 1
 			ped12Diff=(Double_t)ped12[did-1]-pedTargetValue;
 
+			//determine if pedestal is > or < pedTargetValue
 			int operation=1;
 			if(ped12Diff < 0)
 			  {
@@ -419,47 +432,41 @@ void StBemcTriggerSimu::Make(){
 			if(ped10Diff > 15) ped10Diff = ped10Diff - 4*((ped10Diff-11)/4);
 			
 			//adjust pedestal of tower adc to 24(6) in 12(10) bit
-			if(operation==1)
-			  {
-			    adc10[did-1] -= ped10Diff;
-			    ped10[did-1] -= ped10Diff;
-			  }
-			if(operation==0)
-			  {
-			    adc10[did-1] += ped10Diff;
-			    ped10[did-1] += ped10Diff;
-			  }
-			
-			//now ped12 == 24 and ped10==6 If not scream!
-			if (ped10[did-1]!=6) {LOG_WARN <<" PED10 !=6 PROBLEM!"<<endm;}
-			
+			if(operation==1) adc10[did-1] -= ped10Diff;
+			if(operation==0) adc10[did-1] += ped10Diff;
+		       			
 			//now adc10 and adc08 are the 10 and 8 bit pedestal shift adcs
  			adc08[did-1]=adc10[did-1] >> 2;
-
+			
 			//subject all towers to HT algorithm and transform adc10 into adc06
-			Int_t cr,seq;
-			mDecoder->GetCrateFromTowerId(did,cr,seq);
-			int HTholder = adc10[did-1] >> bitConvValue[cr][seq];//drop lowest bits
+			int HTholder=-1;
+			if (config->Contains("online")) HTholder = adc10[did-1] >> bitConvValue[cr][seq];//drop lowest bits
+			if (config->Contains("offline")) HTholder = adc10[did-1] >> HT_FEE_Offset;//drop lowest bits
 			int HTL = HTholder & 0x1F;//reserve 5 LSB
 			int HTH = HTholder >> 5;//take 6 LSB
 			int B5  = 0;
 			if(HTH>0) B5 = 1;
 			HTadc06[did-1] = HTL+(B5<<5);
 
-			//Fill DSM L0 with 6bit HT in each TP
-			int tpid=-1;
-			mDecoder->GetTriggerPatchFromTowerId(did,tpid);
+			//Fill DSM L0 with 6bit HT/TP in each TP
+			if (DSM_HTStatus[tpid]==1){
+			  if (HTadc06[did-1]>L0_HT_ADC[tpid]) L0_HT_ADC[tpid]=HTadc06[did-1];
+			}
+			if (DSM_TPStatus[tpid]==1) {
+			  L0_TP_ADC[tpid]+=adc08[did-1];
+			  L0_TP_PED[tpid]++;
+			}
 
-			cout<<"Tower/TP#"<<did<<"/"<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]<<" HTadc06="<<HTadc06[did-1]
-			    <<" ped12="<<ped12[did-1]<<" ped10="<<ped10[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="<<ped10Diff<<endl;
+			//Mask out 6 bit adc if that DSM HT/TP bit was masked out
+			if (DSM_HTStatus[tpid]==0) L0_HT_ADC[tpid]=0;
+			if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
 
-			//if (DSM_HTStatus[tpid]==1){
-			if (HTadc06[did-1]>L0_HT_ADC[tpid]) L0_HT_ADC[tpid]=HTadc06[did-1];
-			//}
-			
-			//Mask out 6 bit adc if that DSM HT bit was masked out
-			//if (DSM_HTStatus[tpid]==0)  HTadc06[did-1]=0;
-			
+			  
+			//LOG_INFO<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
+			//<<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped10="<<ped10[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
+			//<<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[cr][seq]
+			//<<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" L0_TP_PED"<<endm;
+
 		      }
 		    }
 		}
@@ -467,5 +474,15 @@ void StBemcTriggerSimu::Make(){
 	}
     }
 
+  for (tpid=0;tpid<kNPatches;tpid++){ 
+    mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq);
+    if (config->Contains("offline")) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+    cout<<"TPid="<<tpid<<" cr="<<cr<<" L0_TP_ADC="<<L0_TP_PED[tpid]-1<<endl;
+    for (int s=seq;s<seq+16;s++){
+      cout<<"    seq="<<s<<" LUT="<<LUTbit5[cr][s]<<LUTbit4[cr][s]<<LUTbit3[cr][s]<<LUTbit2[cr][s]<<LUTbit1[cr][s]<<LUTbit0[cr][s]<<" tag="<<LUTtag[cr][s]<<endl;
+    }
+    //if (config->Contains("online")) L0_TP_ADC[tpid]-=(
+  }
 }
+
   

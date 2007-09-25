@@ -76,7 +76,7 @@ class StTriggerSimuMaker : public StMaker {
   StBbcTriggerSimu *bbc;
   StBemcTriggerSimu *bemc;
   
-  Int_t BEMC_L0_HT_ADC[kNPatches],*BEMC_L0_TP_ADC[kNPatches];
+  Int_t BEMC_L0_HT_ADC[kNPatches],BEMC_L0_TP_ADC[kNPatches];
   
   ClassDef(StTriggerSimuMaker,0)
     
@@ -86,9 +86,12 @@ class StTriggerSimuMaker : public StMaker {
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.8 2007/09/24 18:08:11 kocolosk Exp $
+// $Id: StTriggerSimuMaker.h,v 1.9 2007/09/25 18:19:35 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.9  2007/09/25 18:19:35  rfatemi
+// Update for TP work
+//
 // Revision 1.8  2007/09/24 18:08:11  kocolosk
 // some code restructuring
 //
