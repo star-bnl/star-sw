@@ -1,3 +1,4 @@
+#if 0
 Module    MFLDMAP  is the realistic field data map
 author    Pavel Nevski
 created   may 20, 2001
@@ -59,4 +60,4 @@ close (li)
 return
 :e: STOP '< error in MFLMDAT: field map not found or bad >'
 end
-
+#endif
