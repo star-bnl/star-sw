@@ -169,9 +169,10 @@ StTriggerSimuMaker::Make(){
 
   if(bemc) {
     int *BEMC_HT_Holder=bemc->getBEMC_L0_HT_ADC();
+    int *BEMC_TP_Holder=bemc->getBEMC_L0_TP_ADC();
     for (int tpid=0;tpid<kNPatches;tpid++)  {
       BEMC_L0_HT_ADC[tpid]=BEMC_HT_Holder[tpid];
-      LOG_INFO<<"TP#"<<tpid<<"  BEMC_L0="<<BEMC_L0_HT_ADC[tpid]<<endm;
+      BEMC_L0_TP_ADC[tpid]=BEMC_TP_Holder[tpid];
     }
   }
 
@@ -256,9 +257,12 @@ void StTriggerSimuMaker::setTableMaker(StBemcTables *bemcTab){
   bemc->setTableMaker(bemcTab);
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.11 2007/09/24 18:08:11 kocolosk Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.12 2007/09/25 18:19:35 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.12  2007/09/25 18:19:35  rfatemi
+// Update for TP work
+//
 // Revision 1.11  2007/09/24 18:08:11  kocolosk
 // some code restructuring
 //
