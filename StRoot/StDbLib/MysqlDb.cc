@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.45 2007/08/29 21:08:13 deph Exp $
+ * $Id: MysqlDb.cc,v 1.46 2007/09/25 15:59:53 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.46  2007/09/25 15:59:53  deph
+ * Fixed fallback from LoadBalancer (PDSF problem with missing Config File)
+ *
  * Revision 1.45  2007/08/29 21:08:13  deph
  * Separated out string copy for load  lbalancer (host name too long for legacy code) deafual
  *
@@ -330,6 +333,7 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
   clock_t start,finish;
  double lbtime;
   start = clock();
+  bool ok = false;
   if (my_manager->myServiceBroker)
     {
       my_manager->myServiceBroker->DoLoadBalancing();
@@ -341,13 +345,19 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
 	  if(mdbhost) delete [] mdbhost;
 	  mdbhost = new char[strlen(lbHostName)+1];
           strcpy(mdbhost,lbHostName);
-
+	  ok = true;
           mdbPort = my_manager->myServiceBroker->GiveHostPort();
 	}
       else
 	{
 	  LOG_ERROR << "MysqlDb::Connect: StDbServiceBroker error "<<mSBStatus<<endm;
 	}
+    }
+  if (!ok)
+    {
+	  if(mdbhost) delete [] mdbhost;
+	  mdbhost  = new char[strlen(aHost)+1];   
+	  strcpy(mdbhost,aHost);
     }
   finish = clock();
   lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
