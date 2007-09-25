@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.31 2007/07/14 13:52:17 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.32 2007/09/25 13:40:46 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.32  2007/09/25 13:40:46  bouchet
+// Use m_Mode to switch between pedestals used in real data/simulation ; move some message to DEBUG
+//
 // Revision 1.31  2007/07/14 13:52:17  bouchet
 // add method to fill with default pedestal/noise values if no table is found
 //
@@ -154,6 +157,7 @@ class ssdConfiguration_st;
 class StRunInfo;
 class StEventInfo;
 
+class St_db_Maker;
 
 class StSsdPointMaker : public StMaker {
  public:
@@ -246,12 +250,13 @@ class StSsdPointMaker : public StMaker {
   Int_t UseCalibration ;
   Int_t NEvent;
   Int_t year;
+  Int_t mode;
   Int_t noiseTableSize;
   Float_t CalibArray[320];
   Float_t ratioP[20][16];
   Float_t ratioN[20][16];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.31 2007/07/14 13:52:17 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.32 2007/09/25 13:40:46 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
