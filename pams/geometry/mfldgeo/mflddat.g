@@ -1,3 +1,4 @@
+#if 0
 Module    MFLDDAT  is the realistic field data
 author    Pavel Nevski
 created   december 1, 1998
@@ -245,7 +246,7 @@ Fill  BDAT ! calculated STAR field
   Bri= {  0.0,   5.2,   9.8,  13.3,  15.2,  15.4,  14.1,  11.4,   7.9 } ! Radial
 
 end
-
+#endif
 
 
 

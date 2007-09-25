@@ -1,3 +1,4 @@
+#if 0
 ******************************************************************************
 Module     MFLDGEO  is the actual GUFLD routine for GSTAR
   author   Pavel Nevski
@@ -395,3 +396,4 @@ end
       x   = {0.,r,z};  dummy = agufld(x,B);  BZZ = B(3)
       return
       end
+#endif
