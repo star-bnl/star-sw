@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.h,v 1.7 2007/03/21 17:17:16 fisyak Exp $
+// $Id: StSsdDbMaker.h,v 1.8 2007/09/25 13:36:55 bouchet Exp $
 //
 // $Log: StSsdDbMaker.h,v $
+// Revision 1.8  2007/09/25 13:36:55  bouchet
+// add m_Mode to constructor
+//
 // Revision 1.7  2007/03/21 17:17:16  fisyak
 // use TGeoHMatrix for coordinate transformation, eliminate ssdWafersPostion
 //
@@ -37,6 +40,7 @@ class StSsdDbMaker : public StMaker {
   St_ssdWafersPosition  *m_positions;//!
   ssdConfiguration_st   *m_config;//!
   slsCtrl_st            *m_ctrl;//!
+  Int_t                   mode;//!
   static THashList *fRotList;
  public: 
   StSsdDbMaker(const char *name="SsdDb");
@@ -50,8 +54,9 @@ class StSsdDbMaker : public StMaker {
   virtual St_ssdWafersPosition *CalculateWafersPosition();
   virtual StSsdBarrel  *GetSsd() {return mySsd;}
   virtual slsCtrl_st   *GetSlsCtrl() {return m_ctrl;}
+  virtual Int_t        GetMode(){return mode;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.7 2007/03/21 17:17:16 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.8 2007/09/25 13:36:55 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSsdDbMaker,0)   //StAF chain virtual base class for Makers
 };
 // Global pointers:
