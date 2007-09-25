@@ -423,6 +423,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		       'LIBPATH'  => $libpath,
 		       'ObjDir'   => $obj_dir
 		      );
+  $envPlain = $env2;
   #    bless $env2, "cons"; #?
   #    if ($CC eq 'icc') {$EXTRA_CPPFLAGS .= " " . "-DR__NO_CLASS_TEMPLATE_SPECIALIZATION";}
   my $Cint_CPPPATH = $CPPPATH . $main::PATH_SEPARATOR . "#";
@@ -758,6 +759,32 @@ if ( $#src > -1 ) {
 #  print "SO_PKG = $SO_PKG\n";
   if ($SO_PKG) {
     script::Keep $SO_PKG;
+    if ($pkg =~ m/StarMagField/) {
+      my @o = Objects $env2 (@src);
+      my @PlainObj = ();
+      foreach my $s (@o) {
+	if ($s !~ /Cint/) {push @PlainObj, $s;}
+      }
+      $SO_PKG_PLAIN = $pkg . "NoDict";
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+    }
+    if ($pkg =~ m/^geometry/) {
+      $SO_PKG_PLAIN = $pkg . "NoField";
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+      my @ss = ();
+      foreach my $s (@src) {
+	if ($s !~ /mfldgeo/ ) {push @ss, $s}
+      }
+      @src = @ss;
+      @PlainObj = Objects $env2 (@src);
+      @src = @PlainObj;
+      #      print "PlainObj = @PlainObj\n";
+      my $libs = "-lStarMagFieldNoDict";
+      $envg = $env2->clone('LIBPATH'  => $LIB, 'LIBS'     => $libs);
+      $env2 = $envPlain;
+      $env2 = $envg;
+    }
     LinkedModule $env2 $SO_PKG, @src;
     Install $env2 $LIB,         $SO_PKG;
     my $lib = $LIB . "/" . $SO_PKG;
@@ -768,50 +795,11 @@ if ( $#src > -1 ) {
     #      print "SO_PKG = $SO_PKG SO_PKG_PLAIN = $SO_PKG_PLAIN $#PlainObj PlainObj = @PlainObj\n";
     if ($SO_PKG ne $SO_PKG_PLAIN and $#PlainObj > -1) {#print "============================\n";
       script::Keep $SO_PKG_PLAIN;
-      LinkedModule $env2 $SO_PKG_PLAIN, @PlainObj;
-      Install $env2 $LIB,         $SO_PKG_PLAIN;
+      LinkedModule $envPlain $SO_PKG_PLAIN, @PlainObj;
+      Install $envPlain $LIB,         $SO_PKG_PLAIN;
       if ($SO_PKG_PLAIN !~ /^lib/) {
 	my $lib = $LIB . "/lib" . $SO_PKG_PLAIN;
-	InstallAs $env2 $lib, $SO_PKG_PLAIN;
-      }
-    }
-    if ($pkg =~ m/StarMagField/) {
-      my @objfiles = Objects $env2 (@src);
-      my @objNoCint = ();
-      foreach my $s (@src) {
-	if ($s !~ /Cint/) {push @objNoCint, $s;}
-      }
-      $SO_PKG_PLAIN = $pkg . "NoDict";
-      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
-      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
-      script::Keep $SO_PKG_PLAIN;
-      LinkedModule $env2 $SO_PKG_PLAIN, @objNoCint;
-      Install $env2 $LIB,         $SO_PKG_PLAIN;
-      if ($SO_PKG_PLAIN !~ /^lib/) {
-	my $lib = $LIB . "/lib" . $SO_PKG_PLAIN;
-	InstallAs $env2 $lib, $SO_PKG_PLAIN;
-      }
-    }
-    if ($pkg =~ m/^geometry/) {
-      $SO_PKG_PLAIN = $pkg . "NoField";
-      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
-      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
-      my @o = Objects $env2 @src;    
-      @PlainObj = ();
-      foreach my $o (@o) {#print "o = $o\n";
-	if ($o !~ /mfldgeo/ ) {push @PlainObj, $o}
-      }
-      #      print "PlainObj = @PlainObj\n";
-      my $libs = "-lStarMagFieldNoDict";
-      $envg = $env2->clone('LIBPATH'  => $LIB, 'LIBS'     => $libs);
-      $libs =~ s/-l/lib/;
-      $libs = $LIB . "/" . $libs;
-      script::Keep $SO_PKG_PLAIN;
-      LinkedModule $envg $SO_PKG_PLAIN, @PlainObj;
-      Install $envg $LIB,         $SO_PKG_PLAIN;
-      if ($SO_PKG_PLAIN !~ /^lib/) {
-	my $lib = $LIB . "/lib" . $SO_PKG_PLAIN;
-	InstallAs $envg $lib, $SO_PKG_PLAIN;
+	InstallAs $envPlain $lib, $SO_PKG_PLAIN;
       }
     }
   }
