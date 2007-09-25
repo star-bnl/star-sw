@@ -423,7 +423,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		       'LIBPATH'  => $libpath,
 		       'ObjDir'   => $obj_dir
 		      );
-  $envPlain = $env2;
   #    bless $env2, "cons"; #?
   #    if ($CC eq 'icc') {$EXTRA_CPPFLAGS .= " " . "-DR__NO_CLASS_TEMPLATE_SPECIALIZATION";}
   my $Cint_CPPPATH = $CPPPATH . $main::PATH_SEPARATOR . "#";
@@ -745,6 +744,7 @@ if ( $#sourcesT > -1 ) {
 }
 
 if ( $#src > -1 ) {
+  my  $envPlain = $env2;
   printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $PKG )
     unless ($param::quiet);
   if ($LIBPKG) {
@@ -782,7 +782,6 @@ if ( $#src > -1 ) {
       #      print "PlainObj = @PlainObj\n";
       my $libs = "-lStarMagFieldNoDict";
       $envg = $env2->clone('LIBPATH'  => $LIB, 'LIBS'     => $libs);
-      $env2 = $envPlain;
       $env2 = $envg;
     }
     LinkedModule $env2 $SO_PKG, @src;
