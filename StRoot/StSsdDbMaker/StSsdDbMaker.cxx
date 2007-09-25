@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.cxx,v 1.12 2007/07/12 20:01:15 fisyak Exp $
+// $Id: StSsdDbMaker.cxx,v 1.13 2007/09/25 13:36:51 bouchet Exp $
 //
 // $Log: StSsdDbMaker.cxx,v $
+// Revision 1.13  2007/09/25 13:36:51  bouchet
+// add m_Mode to constructor
+//
 // Revision 1.12  2007/07/12 20:01:15  fisyak
 // Don't read whole database but only the table requested
 //
@@ -45,8 +48,8 @@ THashList *StSsdDbMaker::fRotList = 0;
 ClassImp(StSsdDbMaker)
 //_____________________________________________________________________________
 StSsdDbMaker::StSsdDbMaker(const char *name) : 
-  StMaker(name), mySsd(0),m_dimensions(0),m_positions(0),m_config(0),m_ctrl(0) {
-    gStSsdDbMaker = this;
+  StMaker(name), mySsd(0),m_dimensions(0),m_positions(0),m_config(0),m_ctrl(0){
+  gStSsdDbMaker = this;mode=0;
 }
 //_____________________________________________________________________________
 StSsdDbMaker::~StSsdDbMaker() {SafeDelete(mySsd); gStSsdDbMaker = 0;}
@@ -63,6 +66,7 @@ Int_t StSsdDbMaker::Init()
 }
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::InitRun(Int_t runNumber) {
+  mode = m_Mode;
   m_ctrl          = ((St_slsCtrl           *) GetInputDB("Geometry/ssd/slsCtrl"))->GetTable();
   if (!m_ctrl) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
