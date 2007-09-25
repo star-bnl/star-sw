@@ -4,7 +4,7 @@
 
 int total=0;
 
-void OnlineTrigSimu( int nevents = 1000,
+void OfflineTrigSimu( int nevents = 1000,
 		     int flagMC=0)
 
 {
@@ -64,6 +64,7 @@ void OnlineTrigSimu( int nevents = 1000,
   
   //Database -- get a real calibration from the database
   St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
+  //St_db_Maker* dbMk = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
   
   //If MC then must set database time and date
   // if Endcap fast simu is used tower gains in DB do not matter,JB
@@ -83,7 +84,6 @@ void OnlineTrigSimu( int nevents = 1000,
   }
   if (flagMC==0){
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();//for real data this sets calibration and status
-    adc->getControlTable()->CheckStatus[0]=1;//this sets offline tower status to 0 
   }
 
  //Collect all output histograms 
