@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.52 2007/08/20 06:47:37 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.53 2007/09/25 13:40:46 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.53  2007/09/25 13:40:46  bouchet
+// Use m_Mode to switch between pedestals used in real data/simulation ; move some message to DEBUG
+//
 // Revision 1.52  2007/08/20 06:47:37  bouchet
 // ssdStripCalib table taken for simulation
 //
@@ -196,7 +199,6 @@ ClassImp(StSsdPointMaker)
 //_____________________________________________________________________________
   Int_t StSsdPointMaker::Init(){
   LOG_INFO << "Init() : Defining the histograms" << endm;
-  
   if (IAttr(".histos")) {
     noisDisP  = new TH1F("Noise_p","Noise Distribution",250,0,25);
     snRatioP  = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
@@ -269,6 +271,8 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   //    mDbMgr->setVerbose(false);
   
   //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
+  mode= gStSsdDbMaker->GetMode();
+  LOG_DEBUG <<" m_Mode = " << mode << endm;
   NEvent         = 0;  
   UseCalibration = 1;
   printf("UseCalibration=%d\n",UseCalibration);
@@ -307,19 +311,34 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   }    
   year = (GetDate()/10000)-2000;
   LOG_DEBUG <<Form("TimeStamp is %d Year is =%d\n",GetDate(),year)<<endm;
-  if((year<7)||(year>30)){
-    m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
-    if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
-    else {
-      LOG_INFO<<"InitRun : old Table(ssdStripCalib) is used"<<endm;
+  switch(mode)
+    {
+    case 1: {
+      m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
+      if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;} 
+      else { 
+	LOG_INFO<<"InitRun for simu : old Table (ssdStripCalib) is used"<<endm; 
+      } 
+      break;
     }
-  }
-  else {
-    m_noise3 = (St_ssdNoise*)GetDataBase("Calibrations/ssd/ssdNoise");
-    if (!m_noise3) {LOG_ERROR << "InitRun : No access to ssdNoise - will use the default noise and pedestal values" << endm;}
-    else{
-      LOG_INFO << "InitRun : new Table(ssdNoise) is used" << endm;}
-  }
+    case 0 :{
+      if(year<7){
+	m_noise2 = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
+	if (!m_noise2) {LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
+	else {
+	  LOG_INFO<<"InitRun for real data : old Table(ssdStripCalib) is used"<<endm;
+	}
+      }
+      else {
+	m_noise3 = (St_ssdNoise*)GetDataBase("Calibrations/ssd/ssdNoise");
+	if (!m_noise3) {LOG_ERROR << "InitRun : No access to ssdNoise - will use the default noise and pedestal values" << endm;}
+	else{
+	  LOG_INFO << "InitRun for real data : new Table(ssdNoise) is used" << endm;}
+      }
+      break;
+    }
+    default : {printf("no real data nor simu");}
+    }
   (UseCalibration==1)?FillCalibTable():FillDefaultCalibTable();
   /*
     Init arrays for the reconstruction efficiency
@@ -1106,7 +1125,7 @@ void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib)
 	iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
 	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
 	if (iLad==11 && iWaf==8 && nStrip <10) {
-	  LOG_INFO<<"ReadStrip: iLad,idWaf,nStrip,iSide,pedestal,rms = "<<iLad
+	  LOG_DEBUG<<"ReadStrip: iLad,idWaf,nStrip,iSide,pedestal,rms = "<<iLad
 		  <<" "<<idWaf
 		  <<" "<<nStrip
 		  <<" "<<iSide
@@ -1149,7 +1168,7 @@ void StSsdPointMaker::Read_Strip(St_ssdNoise *strip)
 	{
 	  for(Int_t nStrip=0;nStrip<10;nStrip++)
 	    {
-	      LOG_INFO<<"ReadStrip: iLad,idWaf,nStrip,rmsP,rmsN = "<<iLad+1
+	      LOG_DEBUG<<"ReadStrip: iLad,idWaf,nStrip,rmsP,rmsN = "<<iLad+1
 		      <<" "<<idWaf+1
 		      <<" "<<nStrip
 		      <<" "<<(int)(noise[i].rmsp[nStrip])
@@ -1498,7 +1517,8 @@ void StSsdPointMaker::FillDefaultCalibTable(){
 }
 //--------------------------------------------------------------------------------
 Int_t StSsdPointMaker::ReadNoiseTable(StSsdBarrel *mySsd,Int_t year){
-  if(year<7)
+  //ssdStripCalib is used for year <2007 and for the simulation
+    if((year<7)||(mode==1))
     {
       Int_t noiseTableSize = 0; 
       if (!m_noise2)
