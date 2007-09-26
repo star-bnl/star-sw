@@ -119,7 +119,7 @@ StTpcdEdxCorrection::~StTpcdEdxCorrection() {
   for (Int_t k = 0; k < kTpcAllCorrections; k++) SafeDelete(m_Corrections[k].Chair);
 }
 //________________________________________________________________________________
-Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx) { 
+Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) { 
   //  static const Double_t Degree2Rad = TMath::Pi()/180.;
   Double_t dEU = CdEdx.dE;
   Double_t dE  = dEU;
@@ -143,6 +143,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx) {
   Double_t VarX = 0;
   Double_t iCut = 0;
   for (Int_t k = 0; k <= kTpcLast; k++) {
+    if (CdEdx.lSimulated && ! doIT) goto ENDL;
     if (! TESTBIT(m_Mask, k)) goto ENDL;
     l = kTpcOutIn;
     iCut = 0;

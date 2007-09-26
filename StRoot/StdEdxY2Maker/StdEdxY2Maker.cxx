@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.59 2007/07/19 22:21:10 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.60 2007/09/26 21:47:18 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -118,9 +118,10 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Init(){
   Int_t mode = m_Mode;
-  if (m_Mode == -10 || m_Mode == 0) { // default
+  if (m_Mode == -10 || m_Mode == -11 || m_Mode == 0) { // default
     //    SETBIT(m_Mode,kOldClusterFinder); 
     m_Mode = 0;
+    if (mode == -11) {SETBIT(m_Mode,kEmbedding);}
     SETBIT(m_Mode,kPadSelection); 
     if (mode == -10) {m_Mask = 0; SETBIT(m_Mask,StTpcdEdxCorrection::kTpcLast);}
   }
@@ -133,6 +134,8 @@ Int_t StdEdxY2Maker::Init(){
       gMessMgr->Warning() << "StdEdxY2Maker::Init Pad Selection is ON" << endm;
     if (TESTBIT(m_Mode, kDoNotCorrectdEdx))     
       gMessMgr->Warning() << "StdEdxY2Maker::Init Don't Correct dEdx" << endm;
+    if (TESTBIT(m_Mode, kEmbedding))     
+      gMessMgr->Warning() << "StdEdxY2Maker::Init This is embedding run" << endm;
   }
   if (! m_Bichsel) m_Bichsel = new Bichsel();
   
@@ -713,6 +716,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].Npads  = tpcHit->padsInHit();
 	CdEdx[NdEdx].Ntbins = tpcHit->pixelsInHit();
 	CdEdx[NdEdx].dE     = tpcHit->charge();
+	if (tpcHit->idTruth() && tpcHit->qaTruth() > 95) CdEdx[NdEdx].lSimulated = tpcHit->idTruth();
 	CdEdx[NdEdx].dx     = dx;
 #ifdef __THELIX__
 	CdEdx[NdEdx].dxH    = dxH;
@@ -738,7 +742,9 @@ Int_t StdEdxY2Maker::Make(){
 	if (dCharge < 0.2) dCharge = 0.2;
 	CdEdx[NdEdx].dCharge = TMath::Log10(dCharge);
 #endif
-	Int_t iok = m_TpcdEdxCorrection->dEdxCorrection(CdEdx[NdEdx]);
+	Bool_t doIT = kTRUE;
+	if (TESTBIT(m_Mode,kEmbedding)) doIT = kFALSE;
+	Int_t iok = m_TpcdEdxCorrection->dEdxCorrection(CdEdx[NdEdx],doIT);
 	if (iok) {BadHit(4+iok, tpcHit->position()); continue;} 
 	TrackLength         += CdEdx[NdEdx].dx;
 	//	if ((TESTBIT(m_Mode, kSpaceChargeStudy))) SpaceCharge(2,pEvent,&global,&CdEdx[NdEdx]);

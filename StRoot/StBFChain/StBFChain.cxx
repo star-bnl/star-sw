@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.519 2007/09/18 00:14:43 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.520 2007/09/26 21:47:14 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -687,8 +687,10 @@ Int_t StBFChain::Instantiate()
       if (mode) mk->SetMode(mode);
     }
 #endif
-    if ((maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) &&
-	GetOption("Simu"))  mk->SetMode(-10);
+    if (maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) {
+      if (GetOption("Simu"))  mk->SetMode(-10);
+      if (GetOption("Embedding")) mk->SetMode(-11);
+    }
     if (maker == "StTpcDbMaker"){
       mk->SetMode(0);
       // this change may be temporary i.e. if Simulation includes
