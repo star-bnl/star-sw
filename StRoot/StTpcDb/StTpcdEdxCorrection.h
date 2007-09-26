@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.12 2005/07/06 22:26:53 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.13 2007/09/26 21:47:17 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -60,6 +60,7 @@ class dEdxY2_t : public TObject {
   Double_t zP;      // the most probable value from Bichsel
   Double_t sigmaP;  // sigma from Bichsel
   Double_t dCharge; //
+  Int_t    lSimulated;
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
   ClassDef(dEdxY2_t,1)
@@ -103,7 +104,7 @@ class StTpcdEdxCorrection : public TObject {
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
-  Int_t dEdxCorrection(dEdxY2_t &dEdx); 
+  Int_t dEdxCorrection(dEdxY2_t &dEdx, Bool_t doIT=kTRUE); 
   Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx);
   void SettpcGas               (St_tpcGas          *m = 0);
   //  void SettrigDetSums          (St_trigDetSums     *m = 0);

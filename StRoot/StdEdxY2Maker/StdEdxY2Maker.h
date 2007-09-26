@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.18 2005/07/06 18:55:08 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.19 2007/09/26 21:47:18 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -39,6 +39,7 @@ class StdEdxY2Maker : public StMaker {
 	       kCORRELATION            ,
 	       kAlignment              , 
 	       kZBGX                   ,
+	       kEmbedding              ,
 	       kNoUsedHits
   };
   StdEdxY2Maker(const char *name="dEdxY2");
@@ -65,7 +66,7 @@ class StdEdxY2Maker : public StMaker {
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.18 2005/07/06 18:55:08 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.19 2007/09/26 21:47:18 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
