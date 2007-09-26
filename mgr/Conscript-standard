@@ -787,7 +787,7 @@ if ( $#src > -1 ) {
       $libs =~ s/-l/lib/;
       $libs = $LIB . "/" . $libs;
       $libs .= "." . $env2->{SUFSOLIB};
-      Depends $envg, [($SO_PKG)], ($libs); print "libs = $libs\n";
+      Depends $envg, [($SO_PKG)], ($libs); #print "libs = $libs\n";
       $env2 = $envg;
     }
     LinkedModule $env2 $SO_PKG, @src;
