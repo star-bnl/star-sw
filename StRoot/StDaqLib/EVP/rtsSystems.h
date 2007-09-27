@@ -1,6 +1,7 @@
 #ifndef _RTS_SYSTEMS_H_
 #define _RTS_SYSTEMS_H_
 
+#include <stdio.h>
 #include <sys/types.h>
 //#include <rtsLog.h>
 
@@ -66,19 +67,23 @@
 #define TCD_TOF         11      //
 #define TCD_SVT         12      //
 #define TCD_SVT_CD      13      // SVT's cable driver slot
-#define TCD_MWC         14
+#define TCD_MIX         14
 #define TCD_BSMD        15      //
 #define TCD_CTB         16
 #define TCD_BTOW        17      //
 #define TCD_FTPC        18      //
 #define TCD_PMD         19      //
 #define TCD_TPC         20      //
-#define TCD_TPC_CD      21      // TPC's cable driver slot
+#define TCD_VPD		21      // Tonko,March07,instead of: TPC's cable driver slot
+
+#define TCD_HFT         TCD_TPC  // for now HFT uses TPC TCD???
+#define TCD_TPX		TCD_TPC		// 2007: TPX uses TCP
 
 // Trigger Detector groupings...
 #define TPC_GRP		0
 #define FPD_GRP		1
 #define TOF_GRP		2
+#define SSD_GRP         7
 #define BTOW_GRP	3
 #define BSMD_GRP	4
 #define ETOW_GRP	5
@@ -94,9 +99,23 @@ myrinet libraries.
 To make life sane these 16 bits are partitioned into 4 subfields according
 to the bits:
 
+SYSTEM <= 10 or SYSTEM=15 (regular)
+
 15 14 13 12   11 10  9  8     7  6  5  4   3  2  1  0
 
 SYSTEM--->    ROUTE  SUBSYS   INSTANCE-------------->
+
+10 < SYSTEM < 20  (EXT)
+
+15 14 13 12   11 10  9  8     7  6  5  4   3  2  1  0
+
+EXT------->    x  x  System------------>   INSTANCE->  
+
+20 <= SYSTEM < 32  (EXT2)
+
+15 14 13 12   11 10  9  8     7  6  5  4   3  2  1  0
+
+EXT2------>   SYSTEM---------->  INSTANCE----------->
 
 
 SYSTEM is 4 bits, ROUTE is 2 bits, SUBSYSTEM is 2 bits and the particular
@@ -203,7 +222,13 @@ so we keep it here for source compatibility
 #define ESMD_SYSTEM	19
 #define ESMD_ID		ESMD_SYSTEM
 
-#define RTS_NUM_SYSTEMS	20	/* current maximum. Can not be greater than 32! */
+#define TPX_SYSTEM      20
+#define TPX_ID          TPX_SYSTEM    /* DAQ1000 detector */
+
+#define HFT_SYSTEM      21
+#define HFT_ID          HFT_SYSTEM     /* Heavy Flavor Tracker */
+
+#define RTS_NUM_SYSTEMS	22	/* current maximum. Can not be greater than 32! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -244,7 +269,9 @@ so we keep it here for source compatibility
 //#define TM_INSTANCE     GB_INSTANCE
 #define EVB_INSTANCE    BB_INSTANCE
 #define EVB02_INSTANCE	BB2_INSTANCE
+#define RC_CLIENT_INSTANCE 14
 #define CLIENT_INSTANCE 15
+
 
 #ifdef RTS_PROJECT_PP
 #define DAQMAN_INSTANCE BB_INSTANCE
@@ -258,16 +285,20 @@ so we keep it here for source compatibility
 #define TRG_RCC_INSTANCE     5
 #define TRG_CTB_INSTANCE     6
 // #define TRG_EEC_INSTANCE     7    jml Aug 21,03
-#define TRG_MWC_INSTANCE     8
+#define TRG_SCALER48_INSTANCE 7
+#define TRG_MIX_INSTANCE     8
 #define TRG_BC1_INSTANCE     9
 #define TRG_BCE_INSTANCE    10  
 #define TRG_BCW_INSTANCE    11
 #define TRG_SCALER_INSTANCE 12
 #define TRG_BBC_INSTANCE    13
 #define TRG_FPE_INSTANCE    14  
-#define TRG_FPW_INSTANCE    15  
+#define TRG_FMS_INSTANCE    15  
 #define TRG_L0_INSTANCE		16 // Tonko. Feb25,03
-#define TRG_TDI_INSTANCE    18
+#define  TRG_QT1_INSTANCE  17
+#define  TRG_QT2_INSTANCE  18
+#define  TRG_QT3_INSTANCE  19
+#define  TRG_QT4_INSTANCE  20 
 
 #define L3EVP_INSTANCE      1
 #define L3DISP_INSTANCE     2
@@ -310,6 +341,7 @@ so we keep it here for source compatibility
 #define MON_NODE        DAQMAN_NODE
 
 
+#define RC_CLIENT_NODE ((DAQ_SYSTEM<<12) | RC_CLIENT_INSTANCE)
 #define CLIENT_NODE     ((DAQ_SYSTEM<<12) | CLIENT_INSTANCE)
 
 // Tonko: changed this, Nov 4, 2003
@@ -336,6 +368,9 @@ so we keep it here for source compatibility
 #define FPD01_NODE	((FPD_SYSTEM<<12) | 1)
 #define FPD02_NODE	((FPD_SYSTEM<<12) | 2)
 #define FPD_NODE	FPD01_NODE
+/* added IP steering */
+#define FPD_DEST_HOST	"gb.daq.bnl.local"
+#define FPD_PORT	5211
 
 /* multi-node detectors */
 #define TPC_NODES(x)	((TPC_SYSTEM<<12) | (x)) 
@@ -348,7 +383,10 @@ so we keep it here for source compatibility
 /* Barrel */
 
 #define BTOW_NODE	((BTOW_SYSTEM<<12) | 1)
+
 #define BSMD_NODE	((EXT_SYSTEM<<12)|(BSMD_SYSTEM<<4)|1)
+#define BSMD_NODES(x)	((EXT_SYSTEM<<12)|(BSMD_SYSTEM<<4) | (x)) /* Tonko, split into 3 crates */
+
 #define BPRE_NODE	((BTOW_SYSTEM<<12) | 2)	/* NOT really known yet! */
 
 /* Extended (post April 2002) Detectors */
@@ -358,6 +396,10 @@ so we keep it here for source compatibility
 #define PMD_NODES(x)	((EXT_SYSTEM<<12)|(PMD_SYSTEM<<4) | (x)) 
 /* the main node is PMD03 */
 #define PMD_NODE	PMD03_NODE
+/* Added TCP/IP steering */
+#define PMD_DEST_HOST	"gb.daq.bnl.local"
+#define PMD_PORT_1	5201
+#define PMD_PORT_2	5202	// becomes 5202 soon!
 
 #define SSD01_NODE	((EXT_SYSTEM<<12)|(SSD_SYSTEM<<4) | 1)
 #define SSD_NODE	SSD01_NODE
@@ -390,15 +432,21 @@ so we keep it here for source compatibility
 #define TRG_CTB_NODE        ((TRG_SYSTEM<<12) | TRG_CTB_INSTANCE)
 #define TRG_L1_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L1_SUBSYS<<8) | (x))
 #define TRG_L2_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L2_SUBSYS<<8) | (x))
-#define TRG_MWC_NODE	((TRG_SYSTEM<<12) | TRG_MWC_INSTANCE)
+#define TRG_MIX_NODE	((TRG_SYSTEM<<12) | TRG_MIX_INSTANCE)
 #define TRG_BC1_NODE        ((TRG_SYSTEM<<12) | TRG_BC1_INSTANCE)
 #define TRG_BCE_NODE        ((TRG_SYSTEM<<12) | TRG_BCE_INSTANCE)
 #define TRG_BCW_NODE        ((TRG_SYSTEM<<12) | TRG_BCW_INSTANCE)
 #define TRG_SCALER_NODE ((TRG_SYSTEM<<12) | TRG_SCALER_INSTANCE)
 #define TRG_BBC_NODE        ((TRG_SYSTEM<<12) | TRG_BBC_INSTANCE)
 #define TRG_FPE_NODE        ((TRG_SYSTEM<<12) | TRG_FPE_INSTANCE)
-#define TRG_FPW_NODE        ((TRG_SYSTEM<<12) | TRG_FPW_INSTANCE)
+#define TRG_FMS_NODE        ((TRG_SYSTEM<<12) | TRG_FMS_INSTANCE)
 #define TRG_L0_NODE		((TRG_SYSTEM<<12) | TRG_L0_INSTANCE)	// Tonko, Feb25,03
+#define  TRG_QT1_NODE   ((TRG_SYSTEM<<12) | TRG_QT1_INSTANCE)
+#define  TRG_QT2_NODE   ((TRG_SYSTEM<<12) | TRG_QT2_INSTANCE)
+#define  TRG_QT3_NODE   ((TRG_SYSTEM<<12) | TRG_QT3_INSTANCE)
+#define  TRG_QT4_NODE   ((TRG_SYSTEM<<12) | TRG_QT4_INSTANCE)
+
+#define TRG_SCALER48_NODE  ((TRG_SYSTEM<<12) | TRG_SCALER48_INSTANCE)
 
 /* Temporary... for zoran...*/
 #define TDI_NODE ((TRG_SYSTEM<<12) | TRG_TDI_INSTANCE)
@@ -408,7 +456,7 @@ so we keep it here for source compatibility
 /* Slow Controls */
 #define SC_NODE         ((SC_SYSTEM<<12) | 1)
 
-/* PP2PP */
+/* PP2PP */ /* IGNORED for STAR 2007+ runs! */
 #define PP_SEQE_NODE  ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | PP_SEQE_INSTANCE)
 
 /* this is known as Sector1 aka ppdaq2 aka Yellow */
@@ -421,6 +469,11 @@ so we keep it here for source compatibility
 #define PP_TRG_NODE  ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | PP_TRG_INSTANCE)
 #define PP_TEST_NODE  ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | PP_TEST_INSTANCE)
 
+/* Tonko, Aug 2007, ready for 2007 */
+#define PP_NODES(x) ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | (x))
+
+#define TPX_NODES(x)     ((EXT2_SYSTEM<<12) | ((TPX_SYSTEM)<<7) | (x))
+#define HFT_NODES(x)     ((EXT2_SYSTEM<<12) | ((HFT_SYSTEM)<<7) | (x))
 
 
 extern inline char *rts2name(int rts_id)
@@ -458,14 +511,44 @@ extern inline char *rts2name(int rts_id)
 		return "L3" ;
 	case SC_SYSTEM :
 		return "SC" ;
+	case TPX_SYSTEM :
+	        return "TPX" ;
+	case HFT_SYSTEM :
+	        return "HFT" ;
+	case PP_SYSTEM :
+	        return "PP2PP" ;
 	default :
 		return NULL ;	// unknown!
 	}
 } ;
 
+extern inline int rts2det(int ix)
+{
+	switch(ix) {
+	case TPC_ID :
+	case SVT_ID :
+	case TOF_ID :
+	case BTOW_ID :
+	case FPD_ID :
+	case FTP_ID :
+	case PMD_ID :
+	case SSD_ID :
+	case ETOW_ID :
+	case BSMD_ID :
+	case ESMD_ID :
+	case TPX_ID :
+	case HFT_ID :
+	case PP_ID :
+		return ix ;
+	default :
+		return -1 ;
+	}
+
+}
+
 extern inline int rts2tcd(int rts)
 {
-	static int map[32] = {
+	static const int map[32] = {
 		TCD_TPC,
 		TCD_SVT,
 		TCD_TOF,
@@ -486,8 +569,8 @@ extern inline int rts2tcd(int rts)
 		-1,
 		TCD_BSMD,
 		TCD_ESMD,
-		-1,
-		-1,
+		TCD_TPX,       /* TPX */
+		TCD_HFT,       
 		-1,
 		-1,
 		-1,
@@ -548,10 +631,10 @@ extern inline u_int grp2rts_mask(int grp)
 	ret = 0 ;
 
 	if(grp & (1<<TPC_GRP)) {
-		ret  = (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1<<SSD_SYSTEM) ;
+		ret  = (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1<<TOF_SYSTEM) | (1<<TPX_SYSTEM) | (1<<HFT_SYSTEM) | (1<<PP_SYSTEM);
 	}
-	if(grp & (1<<TOF_GRP)) {
-		ret |= (1<<TOF_SYSTEM) ;
+	if(grp & (1<<SSD_GRP)) {
+		ret |= (1<<SSD_SYSTEM) ;
 	}
 	if(grp & (1<<PMD_GRP)) {
 		ret |= (1<<PMD_SYSTEM) ;
@@ -584,9 +667,10 @@ extern inline int rts2grp(int rts)
     case TPC_ID: 
     case SVT_ID: 
     case FTP_ID:
-    case SSD_ID:
+    case TOF_ID:
+    case PP_ID :
 	return TPC_GRP ;
-    case TOF_ID: return TOF_GRP;
+    case SSD_ID: return SSD_GRP;
     case FPD_ID: return FPD_GRP;
     case FP2_ID: return FPD_GRP;
     case BTOW_ID: return BTOW_GRP;
@@ -594,6 +678,8 @@ extern inline int rts2grp(int rts)
     case ETOW_ID: return ETOW_GRP;
     case ESMD_ID: return ESMD_GRP;
     case PMD_ID: return PMD_GRP;
+    case TPX_ID: return TPC_GRP;
+    case HFT_ID: return TPC_GRP;
     default:
 	return 15 ;	// this is an ERROR!
     }
@@ -608,60 +694,48 @@ extern inline int rts2grp(int rts)
 
 extern inline int GET_NODE(int sys, int subsys, int inst)
 {
-	int node ;
+  int node ;
 
-	if((sys <= 10) || (sys==15)) {	// pre-Apr2002
-		node = ((sys<<12) | (subsys<<8) | (inst)) ;
-	}
-	else {
-	  //	node = 0x6000 | (inst);    
-	  node = 0x6000 | (sys<<4) | (inst);   // need sys -- 18APR02, jml
-	}
+  if((sys <= 10) || (sys==15)) {
+    node = (sys<<12) | (subsys<<8) | (inst);
+  }
+  else if (sys < 20) {
+    node = (EXT_SYSTEM << 12) | (sys<<4) | (inst);   
+  }
+  else {
+    node = (EXT2_SYSTEM << 12) | (sys<<7) | (inst);
+  }
 
-	return node ;
+  return node ;
 } ;
 
 extern inline int GET_SYSTEM(unsigned short node)
 {
-	int ret ;
-
-	if((node & 0xF000) != (EXT_SYSTEM<<12)) {
-		ret = ((node)>>12) & 0xF ;
-	}
-	else {
-		ret = ((node)&0x03F0) >> 4 ;
-	}
-
-	return ret ;
+  int id;
+  id = (node & 0xf000) >> 12;
+  
+  if(id == EXT_SYSTEM) return (node & 0x03f0) >> 4;
+  if(id == EXT2_SYSTEM) return (node & 0x0f80) >> 7;
+  return id;
 }
 
 extern inline int GET_INSTANCE(unsigned short node)
 {
-	int ret ;
+  int id;
 
-	if((node & 0xF000) != (EXT_SYSTEM << 12)) {
-		ret = (node) & 0xFF ;
-	}
-	else {
-		ret = (node) &  0xF ;
-	}
-
-	return ret ;
+  id = (node & 0xf000) >> 12;
+  if(id == EXT_SYSTEM) return node & 0xf;
+  if(id == EXT2_SYSTEM) return node & 0x7f;
+  return node & 0xff;
 }
 
 extern inline int GET_SUBSYSTEM(unsigned short node)
 {
-	int ret ;
-
-	if((node & 0xF000) != (EXT_SYSTEM<<12)) {
-		ret = (((node) >> 8) & 0x3) ;
-	}
-	else {
-		ret = 0 ;
-	}
-
-	return ret ;
-
+  int id = (node & 0xf000) >> 12;
+  
+  if(id == EXT_SYSTEM) return 0;
+  if(id == EXT2_SYSTEM) return 0;
+  return (node & 0x0300) >> 8;
 }
 	
 #define GET_NODE_PRE_APR2002(sys,subsys,inst)  ((sys<<12) | (subsys<<8) | (inst))

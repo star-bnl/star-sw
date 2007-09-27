@@ -6,8 +6,7 @@
 #include <arpa/inet.h>
 
 #include "daqFormats.h"
-#include "rtsSystemsEVP.h"
-#include "rtsLog.h"
+#include "rtsSystems.h"
 
 
 #include "evpSupport.h"
