@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.158 2007/09/25 19:56:14 perev Exp $
+* $Id: geometry.g,v 1.159 2007/09/28 18:54:08 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.159  2007/09/28 18:54:08  perev
+* dongx/TOFr/y8update
+*
 * Revision 1.158  2007/09/25 19:56:14  perev
 * U2007A added
 *
@@ -2555,7 +2558,7 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=5 " call btofgeo5 ";
 * NEW CONFIG!
-                     BtofConfig=10;
+                     BtofConfig=11;
 
 * Full barrel in 2007
                   "calb" 
