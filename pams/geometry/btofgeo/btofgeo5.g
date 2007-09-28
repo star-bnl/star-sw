@@ -1,7 +1,10 @@
-* $Id: btofgeo5.g,v 1.2 2007/02/16 22:56:01 potekhin Exp $
+* $Id: btofgeo5.g,v 1.3 2007/09/28 18:53:37 perev Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo5.g,v $
+* Revision 1.3  2007/09/28 18:53:37  perev
+* dongx/TOFr/y8update
+*
 * Revision 1.2  2007/02/16 22:56:01  potekhin
 * Code improvements by Xin, aimed at better readability,
 * better code structure and elimination of hardcoded values.
@@ -101,7 +104,7 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
 *
 *   Data Base interface staff:
       Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1(2), 
-                       posit2, posit3}
+                       posit2, posit3, posit4(5)}
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -177,13 +180,14 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
-         choice    = 10        ! 1=CTB, 2=Full-TOFp, 3=25% TOFp, 4=1 tray-TOFp, 
+         choice    = 11        ! 1=CTB, 2=Full-TOFp, 3=25% TOFp, 4=1 tray-TOFp, 
 *                               ! 5=1 tray-TOFr, 6=Full-TOFr, 7=TOFp+TOFrp Run-IV
 *                               ! 8= Run-V 1 tray-TOFr, 9= Run-VI, 10= Run-VII
          posit1    = {32,33}   ! TOFp tray position (0) choice 4 or 5 -> run-2,3 posn
 *                               !                    (1) choice 7 -> run-4 posn
          posit2    = 23        ! TOFr tray position for choice 5 -> run-4 posn
 		 posit3    = 33        ! TOFr tray position for choice 8,9,10 -> run-5,6,7 posn
+         posit4    = {17,18,19,37,39} ! TOFr8 tray positions for choice 11,12 -> run 8 east and west trays
 *
       Fill TRAY ! general tray stats        
          Height    =  8.89      ! tray height(8.89)
@@ -526,10 +530,12 @@ Block BTOF is the whole CTF system envelope
 	  if (btog_choice == 8) print *,' TOF: btog_choice=8: This is the Run-V geometry...'
 	  if (btog_choice == 9) print *,' TOF: btog_choice=9: This is the Run-VI geometry...'
 	  if (btog_choice == 10) print *,' TOF: btog_choice=10: This is the Run-VII geometry...'
+	  if (btog_choice == 11) print *,' TOF: btog_choice=11: This is the Run-VIII geometry...'
 
       choice = 1                                     ! ctb
       if (btog_choice == 2) choice=btog_choice       ! full tofp
       if (btog_choice == 6) choice=btog_choice       ! full tofr
+      if (btog_choice == 11) choice=btog_choice+1    ! Run VIII, 2 trays in west
 !      print *,' Positioning West Barrel, choice=',choice
       Create and Position BTOH  z=+btog_dz/2    alphay=180   ! West barrel
       choice=btog_choice                   
@@ -561,6 +567,12 @@ Block BTOH is a half of trigger system (west-east)
 		 if (choice==8 & is==btog_posit3)    tof=4  !-> Run-5 (one TOFr5 tray)
 		 if (choice==9 & is==btog_posit3)    tof=5  !-> Run-6 (one TOFr6 tray)
 		 if (choice==10 & is==btog_posit3)   tof=6  !-> Run-7 (one TOFr7 tray)
+
+         if (choice==11 & is==btog_posit4(1)) tof=7 !-> Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(2)) tof=7 !-> Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(3)) tof=7 !-> Run-8 (5 TOFr8 trays)
+         if (choice==12 & is==btog_posit4(4)) tof=7 !-> Run-8 (5 TOFr8 trays)
+         if (choice==12 & is==btog_posit4(5)) tof=7 !-> Run-8 (5 TOFr8 trays)
 
 !         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
          Create and Position BSEC  alphaz = 102+6*is
@@ -784,7 +796,18 @@ Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run
 *                        Z=z0-mod6_mrpcZ(i) ,
 *                        alphay=mod6_mrpcA(i)
 *      enddo
+* Run-7
     elseif (tof==6) then
+      z0 = tray_Length/2 - mod7_TrayEdgeZ
+      x0 = -tray_Height/2 + tray_WallThk
+      do i=1,32
+         Position BRMD  X=x0+mod7_mrpcX(i) ,
+                        Z=z0-mod7_mrpcZ(i) ,
+                        alphay=mod7_mrpcA(i)
+      enddo
+
+* Run-8, module positions are the same as Run-7
+    elseif (tof==7) then
       z0 = tray_Length/2 - mod7_TrayEdgeZ
       x0 = -tray_Height/2 + tray_WallThk
       do i=1,32
