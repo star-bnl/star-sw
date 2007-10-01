@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTablesWriter.cxx,v 1.1 2007/09/08 01:22:37 kocolosk Exp $
+ * $Id: StBemcTablesWriter.cxx,v 1.2 2007/10/01 16:57:29 kocolosk Exp $
  * Author:      Adam Kocoloski, MIT, kocolosk@mit.edu
  *
  ***************************************************************************/
@@ -361,6 +361,12 @@ void StBemcTablesWriter::writeToDb(const char * tableName, const char * timeStam
     if(!strcmp(tableName, "bsmdeStatus")) { mDbHandler->writeToDb(reinterpret_cast<char*>(mSmdeS)); return; }
     if(!strcmp(tableName, "bsmdpStatus")) { mDbHandler->writeToDb(reinterpret_cast<char*>(mSmdpS)); return; }
     
+    if(!strcmp(tableName, "bemcTriggerPed"))    { mDbHandler->writeToDb(reinterpret_cast<char*>(mTrigP)); return; }
+    if(!strcmp(tableName, "bemcTriggerStatus")) { mDbHandler->writeToDb(reinterpret_cast<char*>(mTrigS)); return; }
+    if(!strcmp(tableName, "bemcTriggerLUT"))    { mDbHandler->writeToDb(reinterpret_cast<char*>(mTrigL)); return; }
+    
+    
+    
     LOG_ERROR << "Can't upload a table with name = " << tableName << endm;
 }
 
@@ -540,6 +546,9 @@ void StBemcTablesWriter::loadTableFromFile(TFile *f) {
 /***************************************************************************
  *
  * $Log: StBemcTablesWriter.cxx,v $
+ * Revision 1.2  2007/10/01 16:57:29  kocolosk
+ * allow to uploaded bemcTrigger* tables too
+ *
  * Revision 1.1  2007/09/08 01:22:37  kocolosk
  * StBemcTablesWriter provides common interface for inserting DB tables
  *
