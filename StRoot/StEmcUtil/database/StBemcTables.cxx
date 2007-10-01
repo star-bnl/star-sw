@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.8 2007/09/18 19:41:46 kocolosk Exp $
+ * $Id: StBemcTables.cxx,v 1.9 2007/10/01 15:03:35 kocolosk Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -547,7 +547,7 @@ int* StBemcTables::triggerFormulaParameters(int crate, int patchSequence) const 
 
 int StBemcTables::triggerPatchStatusByID(int softId) const {
     int patchId;
-    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId) == 0) {
+    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId)) {
         return this->triggerPatchStatus(patchId);
     }
     LOG_ERROR << "Problem with StEmcDecoder::GetTriggerPatchFromTowerId for softId " << softId << endm;
@@ -556,7 +556,7 @@ int StBemcTables::triggerPatchStatusByID(int softId) const {
 
 int StBemcTables::triggerHighTowerStatusByID(int softId) const {
     int patchId;
-    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId) == 0) {
+    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId)) {
         return this->triggerHighTowerStatus(patchId);
     }
     LOG_ERROR << "Problem with StEmcDecoder::GetTriggerPatchFromTowerId for softId " << softId << endm;
@@ -565,7 +565,7 @@ int StBemcTables::triggerHighTowerStatusByID(int softId) const {
 
 int StBemcTables::triggerTowerStatusByID(int softId) const {
     int crate, sequence;
-    if(mDecoder->GetCrateFromTowerId(softId, crate, sequence) == 0) {
+    if(mDecoder->GetCrateFromTowerId(softId, crate, sequence)) {
         return this->triggerTowerStatus(crate, sequence);
     }
     LOG_ERROR << "Problem with StEmcDecoder::GetCrateFromTowerId for softId " << softId << endm;
@@ -574,7 +574,7 @@ int StBemcTables::triggerTowerStatusByID(int softId) const {
 
 float StBemcTables::triggerPedestalByID(int softId) const {
     int crate, sequence;
-    if(mDecoder->GetCrateFromTowerId(softId, crate, sequence) == 0) {
+    if(mDecoder->GetCrateFromTowerId(softId, crate, sequence)) {
         return this->triggerPedestal(crate, sequence);
     }
     LOG_ERROR << "Problem with StEmcDecoder::GetCrateFromTowerId for softId " << softId << endm;
@@ -583,43 +583,46 @@ float StBemcTables::triggerPedestalByID(int softId) const {
 
 int StBemcTables::triggerBitConversionByID(int softId) const {
     int patchId, crate, patchSequence;
-    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId) == 0) {
-        if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence) == 0) {
+    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId)) {
+        if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence)) {
             return this->triggerBitConversion(crate, patchSequence);
         }
-        LOG_ERROR << "Problem with StEmcDecoder::GetTriggerPatchFromTowerId for softId " << softId << endm;
+        LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
     }
-    LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
+    LOG_ERROR << "Problem with StEmcDecoder::GetTriggerPatchFromTowerId for softId " << softId << endm;
     return -999;
 }
 
 int StBemcTables::triggerFormulaTagByID(int softId) const {
     int patchId, crate, patchSequence;
-    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId) == 0) {
-        if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence) == 0) {
+    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId)) {
+        if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence)) {
             return this->triggerFormulaTag(crate, patchSequence);
         }
-        LOG_ERROR << "Problem with StEmcDecoder::GetTriggerPatchFromTowerId for softId " << softId << endm;
+        LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
     }
-    LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
+    LOG_ERROR << "Problem with StEmcDecoder::GetTriggerPatchFromTowerId for softId " << softId << endm;
     return -999;
 }
 
 int* StBemcTables::triggerFormulaParametersByID(int softId) const {
     int patchId, crate, patchSequence;
-    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId) == 0) {
-        if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence) == 0) {
+    if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId)) {
+        if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence)) {
             return this->triggerFormulaParameters(crate, patchSequence);
         }
-        LOG_ERROR << "Problem with StEmcDecoder::GetTriggerPatchFromTowerId for softId " << softId << endm;
+        LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
     }
-    LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
+    LOG_ERROR << "Problem with StEmcDecoder::GetTriggerPatchFromTowerId for softId " << softId << endm;
     return NULL;
 }
 
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
+ * Revision 1.9  2007/10/01 15:03:35  kocolosk
+ * bugfix in trigger DB methods that used StEmcDecoder, thanks to R. Fatemi
+ *
  * Revision 1.8  2007/09/18 19:41:46  kocolosk
  * added an optional argument to status methods to get status for calib, pedestal, and gain tables
  *
