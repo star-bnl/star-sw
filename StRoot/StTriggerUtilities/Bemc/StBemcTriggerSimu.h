@@ -16,6 +16,8 @@
 #define kNCrates 30
 #define kNChannels 160
 #define kNSeq 10
+#define kL0DsmModule 30
+#define kL0DsmInputs 10
 
 class StMuDstMaker;
 class StMuDst;
@@ -43,12 +45,12 @@ class StBemcTriggerSimu : public StTriggerSimu {
   TDataSet *dbOnline;
 
   TString *config;                         //"online" or "offline" or "expert"   
-  Int_t did;                               //always used as BEMC tower id
-  Int_t tpid;                              //always used as BEMC trigger Patch id
-  Int_t cr;                                //always used as BEMC crate id
-  Int_t seq;                               //always used as BEMC sequence in crate
+  Int_t did;                               //BEMC tower id  (1-4800)
+  Int_t tpid;                              //BEMC trigger Patch id (0-300)
+  Int_t cr;                                //BEMC crate id (1-30)
+  Int_t ch;                                //BEMC crate ch (0-159)
+  Int_t seq;                               //BEMC start point for TP in crate (0-10)
   Int_t HT_FEE_Offset;                     //same as bitConvValue but set by support class
-  Int_t HT6bit,TP6bit;                     //6 bit HT and TP word which is passed out of FEE and into DSM L0
   Int_t DSM_HTStatus[kNPatches];           //DSM_HTStatus only set online
   Int_t DSM_TPStatus[kNPatches];           //DSM_TPStatus only set online
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
@@ -62,6 +64,7 @@ class StBemcTriggerSimu : public StTriggerSimu {
   unsigned long LUTbit3[kNCrates][kNSeq],LUTbit4[kNCrates][kNSeq],LUTbit5[kNCrates][kNSeq];
   unsigned long LUTtag[kNCrates][kNSeq];
   Float_t ped12Diff,ped10Diff;
+
   Int_t L0_HT_ADC[kNPatches], L0_TP_ADC[kNPatches], L0_TP_PED[kNPatches];
 
   void getTowerStatus();
@@ -69,6 +72,10 @@ class StBemcTriggerSimu : public StTriggerSimu {
   void getDSM_HTStatus();
   void getLUT();
   void getPed();
+  void FEEout();
+  void DSMLayer0();
+  void DSMLayer1();
+  void DSMLayer2();
   
  public:
 
@@ -76,7 +83,7 @@ class StBemcTriggerSimu : public StTriggerSimu {
   virtual     ~StBemcTriggerSimu();
 
   void Init();
-  void InitRun(int runnumber);
+  void InitRun(int runnumber);                                              
   void Clear();
   void Make();
   

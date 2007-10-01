@@ -134,26 +134,23 @@ StBemcTriggerSimu::getTowerStatus(){
   
   for (int i=0;i<kNTowers;i++) TowerStatus[i]=1;
 
-  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
-  St_emcTriggerStatus *STATUSonline=(St_emcTriggerStatus*) dbOnline->Find("bemcTriggerStatus");
-  emcTriggerStatus_st *STATUStab=STATUSonline->GetTable();
   if (config->Contains("online")) {
-    for (int cr=0; cr < kNCrates; cr++){
-      for (int ch=0; ch < kNSeq; ch++){
+    for (cr=1; cr <= kNCrates; cr++){
+      for (ch=0; ch < kNChannels; ch++){
 	mDecoder->GetTowerIdFromCrate(cr,ch,did);
-	TowerStatus[did-1]=STATUStab->TowerStatus[cr][ch];
+	TowerStatus[did-1]=mTables->triggerTowerStatus(cr,ch);
       }
     }
   }
 
   if (config->Contains("offline")){
-    for (int did=1; did<=kNTowers; did++){
+    for (did=1; did<=kNTowers; did++){
       mTables->getStatus(BTOW, did, TowerStatus[did-1]);
     }
   }
   
   if (config->Contains("expert")){
-    for (int did=1; did<=kNTowers; did++){
+    for (did=1; did<=kNTowers; did++){
       TowerStatus[did-1]=1;
     }
   }
@@ -166,29 +163,26 @@ StBemcTriggerSimu::getDSM_TPStatus(){
 
   LOG_INFO<<" StBemcTriggerSimu::getDSM_TPStatus()"<<endm;
 
-  for (int i=0;i<kNPatches;i++) DSM_TPStatus[i]=1;
+  for (tpid=0;tpid<kNPatches;tpid++) DSM_TPStatus[tpid]=1;
    
   //for online config TP status is set by DB
-  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
-  St_emcTriggerStatus *STATUSonline=(St_emcTriggerStatus*) dbOnline->Find("bemcTriggerStatus");
-  emcTriggerStatus_st *STATUStab=STATUSonline->GetTable();
   if (config->Contains("online")){
-    for (int i=0;i<kNPatches;i++){
-      DSM_TPStatus[i]=STATUStab->PatchStatus[i];
+    for (int tpid=0;tpid<kNPatches;tpid++){
+      DSM_TPStatus[tpid]=mTables->triggerPatchStatus(tpid);
     }
   }
  
  //for offline config all TP status is good by definition. 
   if (config->Contains("offline")) {
-    for (int i=0;i<kNPatches;i++){
-      DSM_TPStatus[i]=1;
+    for (int tpid=0;tpid<kNPatches;tpid++){
+      DSM_TPStatus[tpid]=1;
     }
   }
  
   //experts do as you will but set good by definition
   if (config->Contains("expert")){
-    for (int i=0;i<kNPatches;i++){
-      DSM_TPStatus[i]=1;
+    for (tpid=0;tpid<kNPatches;tpid++){
+      DSM_TPStatus[tpid]=1;
     }
   }
 
@@ -201,28 +195,25 @@ StBemcTriggerSimu::getDSM_HTStatus(){
   
   LOG_INFO<<" StBemcTriggerSimu::getDSM_HTStatus()"<<endm;
 
-  for (int i=0;i<kNPatches;i++) DSM_HTStatus[i]=1;
+  for (tpid=0;tpid<kNPatches;tpid++) DSM_HTStatus[tpid]=1;
 
   //Online get DSM HT status from db
-  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
-  St_emcTriggerStatus *STATUSonline=(St_emcTriggerStatus*) dbOnline->Find("bemcTriggerStatus");
-  emcTriggerStatus_st *STATUStab=STATUSonline->GetTable();
   if (config->Contains("online")){
-    for (int i=0;i<kNPatches;i++){
-      DSM_HTStatus[i]=STATUStab->HighTowerStatus[i];
+    for (int tpid=0;tpid<kNPatches;tpid++){
+      DSM_HTStatus[tpid]=mTables->triggerHighTowerStatus(tpid);
     }
   }
   
  //Offline all DSM HT status are good
   if (config->Contains("offline")){
-    for (int i=0; i<kNPatches; i++){
-      DSM_HTStatus[i]=1;
+    for (tpid=0; tpid<kNPatches; tpid++){
+      DSM_HTStatus[tpid]=1;
     }
   }
  
   if (config->Contains("expert")){
-    for (int i=0;i<kNPatches;i++){
-      DSM_HTStatus[i]=STATUStab->HighTowerStatus[i];
+    for (tpid=0;tpid<kNPatches;tpid++){
+      DSM_HTStatus[tpid]=1;
     }
   } 
 }
@@ -233,32 +224,28 @@ void StBemcTriggerSimu::getPed(){
   LOG_INFO<<"StBemcTriggerSimu::getPed()"<<endm;
 
   for (int i=1;i<=kNTowers;i++) {ped12[i-1]=0;}
-
-  //online 12 bit peds - NOTE online peds are stored as Int_t
-  dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
-  St_emcTriggerPed *PEDonline=(St_emcTriggerPed*) dbOnline->Find("bemcTriggerPed");
-  emcTriggerPed_st *PEDtab=PEDonline->GetTable();
   
   //Get Pedestal shift for HT which depends on calibration
-  for (int cr=0;cr<kNCrates;cr++){
-    for (int seq=0; seq<10; seq++){
-      bitConvValue[cr][seq]=PEDtab->BitConversionMode[cr][seq];
+  for (cr=1;cr<=kNCrates;cr++){
+    for (seq=0;seq<kNSeq;seq++){
+      bitConvValue[cr][seq]=mTables->triggerBitConversion(cr,seq);
     }
   }
-  
-  //get Target Pedestal value from DB
-  pedTargetValue=PEDtab->PedShift/100;
-  
 
+  //get Target Pedestal value from DB
+  pedTargetValue=mTables->triggerPedestalShift();
+  
+  //online 12 bit peds - NOTE online peds are stored as Int_t
   if (config->Contains("online")){
-    for (int cr=0; cr < kNCrates; cr++){
+    for (int cr=1; cr <= kNCrates; cr++){
       for (int ch=0; ch < kNChannels; ch++){
 	mDecoder->GetTowerIdFromCrate(cr,ch,did);
-	ped12[did-1]=(Int_t)PEDtab->Ped[cr][ch]/100;
+	Float_t pedholder = mTables->triggerPedestal(cr,ch);
+	ped12[did-1]=(Int_t)pedholder;
       }
     }
   }
-
+  
  //offline 12 bit peds which are stored as Float_t
   if (config->Contains("offline")){
     for (did=1; did<=kNTowers; did++){
@@ -269,7 +256,7 @@ void StBemcTriggerSimu::getPed(){
 
   //Experts set ped to your favorite values
   if (config->Contains("expert")){
-    for ( did=1; did<=kNTowers; did++){
+    for (did=1; did<=kNTowers; did++){
       ped12[did-1]=24;
     }
   }
@@ -332,8 +319,8 @@ void StBemcTriggerSimu::getLUT(){
   dbOnline = starDb->GetDataBase("Calibrations/emc/trigger"); 
   St_emcTriggerLUT *LUTonline=(St_emcTriggerLUT*) dbOnline->Find("bemcTriggerLUT");
   emcTriggerLUT_st *LUTtab=LUTonline->GetTable();
-  for (int cr=0;cr<kNCrates;cr++){
-    for (int seq=0; seq<kNSeq; seq++){
+  for (int cr=1;cr<=kNCrates;cr++){
+    for (seq=0; seq<kNSeq; seq++){
       LUTtag[cr][seq]=LUTtab->FormulaTag[cr][seq];
       LUTbit0[cr][seq]=LUTtab->FormulaParameter0[cr][seq];
       LUTbit1[cr][seq]=LUTtab->FormulaParameter1[cr][seq];
@@ -351,29 +338,29 @@ void StBemcTriggerSimu::getLUT(){
 //==================================================
 //==================================================
 void StBemcTriggerSimu::Make(){
-  
-  LOG_INFO<<"StBemcTriggerSimu::Make()"<<endl;
-  
-  Clear();
 
-  if(!mEvent)
-    {
-      LOG_WARN << "StBemcTriggerSimu -- no StEvent!" << endm;
-    }
+  LOG_INFO<<"StBemcTriggerSimu::Make()"<<endl;
+
+  Clear();
+  FEEout();
+  //DSMLayer0();
+  //DSMLayer1();
+  //DSMLayer2();
+
+}
+
+void StBemcTriggerSimu::FEEout(){
+
+  LOG_INFO<<"StBemcTriggerSimu::Fee()"<<endl;
+  
+  if(!mEvent) {LOG_WARN << "StBemcTriggerSimu -- no StEvent!" << endm;}
   
   StEmcCollection *emc = mEvent->emcCollection();
-  if(!emc)
-    {
-      LOG_WARN << "StBemcTriggerSimu -- no StEmcCollection!" << endm;
-    }
+  if(!emc)    {LOG_WARN << "StBemcTriggerSimu -- no StEmcCollection!" << endm;}
   
   StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
-  if(!detector)
-    {
-      LOG_WARN << "StBemcTriggerSimu -- no StEmcDetector!" << endm;
-    }
+  if(!detector) {LOG_WARN << "StBemcTriggerSimu -- no StEmcDetector!" << endm;}
  
-
   //loop through BEMC hits 
   //Store 8,10,12 bit pedestal adjusted ADC for hits
   //for online case online tower masks are applied
@@ -401,8 +388,9 @@ void StBemcTriggerSimu::Make(){
 		      //Get software tower id, trigger patch id, crate and seq
 		      mGeo->getId(m,e,s,did);
 		      mDecoder->GetTriggerPatchFromTowerId(did,tpid);
-		      mDecoder->GetCrateFromTowerId(did,cr,seq);
-		      
+		      //mDecoder->GetCrateFromTowerId(did,cr,ch);
+		      mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq);
+		     
 		      //apply tower masks
 		      if (TowerStatus[did-1]==1){
 			
@@ -440,8 +428,11 @@ void StBemcTriggerSimu::Make(){
 			
 			//subject all towers to HT algorithm and transform adc10 into adc06
 			int HTholder=-1;
-			if (config->Contains("online")) HTholder = adc10[did-1] >> bitConvValue[cr][seq];//drop lowest bits
+
+			if (bitConvValue[cr][seq]!=2) cout<<"cr"<<cr<<"_seq"<<seq<<" BitConvValue2="<<bitConvValue[cr][seq]<<endl;
+			if (config->Contains("online")) HTholder = adc10[did-1] >> bitConvValue[cr][0];//drop lowest bits		
 			if (config->Contains("offline")) HTholder = adc10[did-1] >> HT_FEE_Offset;//drop lowest bits
+
 			int HTL = HTholder & 0x1F;//reserve 5 LSB
 			int HTH = HTholder >> 5;//take 6 LSB
 			int B5  = 0;
@@ -462,10 +453,10 @@ void StBemcTriggerSimu::Make(){
 			if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
 
 			  
-			//LOG_INFO<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
-			//<<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped10="<<ped10[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
-			//<<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[cr][seq]
-			//<<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" L0_TP_PED"<<endm;
+			/*LOG_INFO<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
+				<<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
+				<<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[cr][seq]
+				<<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" PedTargetValue="<<pedTargetValue<<endm;*/
 
 		      }
 		    }
@@ -475,14 +466,34 @@ void StBemcTriggerSimu::Make(){
     }
 
   for (tpid=0;tpid<kNPatches;tpid++){ 
-    mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq);
-    if (config->Contains("offline")) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
-    cout<<"TPid="<<tpid<<" cr="<<cr<<" L0_TP_ADC="<<L0_TP_PED[tpid]-1<<endl;
-    for (int s=seq;s<seq+16;s++){
-      cout<<"    seq="<<s<<" LUT="<<LUTbit5[cr][s]<<LUTbit4[cr][s]<<LUTbit3[cr][s]<<LUTbit2[cr][s]<<LUTbit1[cr][s]<<LUTbit0[cr][s]<<" tag="<<LUTtag[cr][s]<<endl;
-    }
-    //if (config->Contains("online")) L0_TP_ADC[tpid]-=(
+     if (config->Contains("offline")) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+     if (config->Contains("online")) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
   }
 }
 
   
+void DSMLayer0(){
+
+  //output 16 bits
+  //0-9 ADC sum Trigger Patches
+  //10-11 HT threshold bits
+  //12-13 TP threshold bits
+  //14-15 HT&&TP threshold bits
+  //for (int i=0;i<kL0DsmModule;i++){
+
+    // HT_L0_DSM_threshold[i]=mDbThres->GetHT_L0_DSM_threshold(i,yyyy);
+    //TP_L0_DSM_threshold[i]=mDbThres->GetTP_L0_DSM_threshold(i,yyyy);
+    
+    //for (int j=0;j<kL0DsmInputs;j++){
+      
+    // }
+  //}
+}
+
+void DSMLayer1(){
+
+}
+
+void DSMLayer2(){
+
+}
