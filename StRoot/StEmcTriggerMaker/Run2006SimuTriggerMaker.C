@@ -5,9 +5,9 @@ int total=0;
 #include <map>
 
 void Run2006SimuTriggerMaker(const char *dir ="",
-			 const char* file="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.MuDst.root",
-			 const char *fname="/star/data40/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/trs_p05ie/rcf1230_10_4000evts.event.root",
-			 const char *filter = "")
+			     const char* file="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_10_4000evts.MuDst.root",
+			     const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_10_4000evts.event.root",
+			     const char *filter = "")
 {
   int nevents = 10;
   
@@ -73,6 +73,7 @@ void Run2006SimuTriggerMaker(const char *dir ="",
   
   //StEmcADCtoEMaker *adc = new StEmcADCtoEMaker(); // this will just convert what's in MuDst to ADC, use for data only!
   StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
+  emcSim->setCalibSpread(kBarrelEmcTowerId, 0.15);
   StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
   
   //StEmcTrigger
@@ -80,20 +81,6 @@ void Run2006SimuTriggerMaker(const char *dir ="",
 
   chain->Init();
   chain->PrintInfo();
-  
-  //Note: ------------ Must do this stuff after Init()
-  int controlVal = 2;
-  controlEmcSimulatorMaker_st* simControl = emcSim->getControlSimulator()->GetTable();
-  simControl->calibSpread[0]=0.15;
-  simControl->keyDB[0] = controlVal;
-  simControl->keyDB[1] = 0;
-  simControl->keyDB[2] = controlVal;
-  simControl->keyDB[3] = controlVal;
-  //keyDB[det] = 0 -> NO database (default value)
-  //           = 1 - only gains are applied
-  //           = 2 - gains and pedestals are applied
-  // In other words, for pure MC should be 2, and
-  // for embedding should be 1.
   
   chain->ls(3);
   TChain* fileChain = muDstMaker->chain(); 
