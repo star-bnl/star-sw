@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.37 2006/08/15 21:43:01 jeromel Exp $
+// $Id: StAssociator.C,v 1.38 2007/10/01 13:54:03 jeromel Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.38  2007/10/01 13:54:03  jeromel
+// Old issue for Ming Shao
+//
 // Revision 1.37  2006/08/15 21:43:01  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -149,6 +152,7 @@ const char *MainFile="/afs/rhic.bnl.gov/star/data/samples/*.geant.root")
   // Dynamically link needed shared libs
   gSystem->Load("St_base");
   gSystem->Load("StChain");
+  gSystem->Load("StBFChain");
 
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
