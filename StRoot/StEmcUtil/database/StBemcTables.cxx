@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.9 2007/10/01 15:03:35 kocolosk Exp $
+ * $Id: StBemcTables.cxx,v 1.10 2007/10/01 19:53:43 kocolosk Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -585,7 +585,10 @@ int StBemcTables::triggerBitConversionByID(int softId) const {
     int patchId, crate, patchSequence;
     if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId)) {
         if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence)) {
-            return this->triggerBitConversion(crate, patchSequence);
+            if( (patchSequence%16 != 0) || (patchId%10 != patchSequence/16) ) {
+                LOG_ERROR << "Please ask Adam what the heck is going on" << endm;
+            }
+            return this->triggerBitConversion(crate, patchSequence/16);
         }
         LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
     }
@@ -597,7 +600,10 @@ int StBemcTables::triggerFormulaTagByID(int softId) const {
     int patchId, crate, patchSequence;
     if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId)) {
         if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence)) {
-            return this->triggerFormulaTag(crate, patchSequence);
+            if( (patchSequence%16 != 0) || (patchId%10 != patchSequence/16) ) {
+                LOG_ERROR << "Please ask Adam what the heck is going on" << endm;
+            }
+            return this->triggerFormulaTag(crate, patchSequence/16);
         }
         LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
     }
@@ -609,7 +615,10 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
     int patchId, crate, patchSequence;
     if(mDecoder->GetTriggerPatchFromTowerId(softId, patchId)) {
         if(mDecoder->GetCrateAndSequenceFromTriggerPatch(patchId, crate, patchSequence)) {
-            return this->triggerFormulaParameters(crate, patchSequence);
+            if( (patchSequence%16 != 0) || (patchId%10 != patchSequence/16) ) {
+                LOG_ERROR << "Please ask Adam what the heck is going on" << endm;
+            }
+            return this->triggerFormulaParameters(crate, patchSequence/16);
         }
         LOG_ERROR << "Problem with StEmcDecoder::GetCrateAndSequenceFromTriggerPatch for patchId " << patchId << endm;
     }
@@ -620,6 +629,9 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
+ * Revision 1.10  2007/10/01 19:53:43  kocolosk
+ * another bugfix from Renee:  patchSequence is 0-9, not 0-159
+ *
  * Revision 1.9  2007/10/01 15:03:35  kocolosk
  * bugfix in trigger DB methods that used StEmcDecoder, thanks to R. Fatemi
  *
