@@ -491,6 +491,7 @@ or
 	 Int_t hybrid = fHits_hybrid[k];
 	 Double32_t anode = fHits_anode[k];
 	 Int_t sector = -1;
+	 if (fHits_isTrack[k]) continue; // prediction only
 	 if (layer < 7 && fHits_hitFlag[k] > 3) continue;
 	 //Run V	 if (layer < 7 && IsNotValidHybrid(barrel,ladder,wafer,hybrid,run,anode)) continue;
 	 if (layer < 7) {
