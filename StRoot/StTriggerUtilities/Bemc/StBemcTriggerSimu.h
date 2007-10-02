@@ -59,7 +59,7 @@ class StBemcTriggerSimu : public StTriggerSimu {
   Int_t ped12[kNTowers];                   //12 and 10 bit pedestal
   Int_t HTadc06[kNTowers];                 //6bit HT ADC for each tower
   unsigned long pedTargetValue;            //value FEE shifts pedestal to (12 bit)
-  unsigned long bitConvValue[kNCrates][kNSeq];//gives window used to determine HT6Bit from adc10
+  unsigned long bitConvValue[kNTowers];//gives window used to determine HT6Bit from adc10
   unsigned long LUTbit0[kNCrates][kNSeq],LUTbit1[kNCrates][kNSeq],LUTbit2[kNCrates][kNSeq];
   unsigned long LUTbit3[kNCrates][kNSeq],LUTbit4[kNCrates][kNSeq],LUTbit5[kNCrates][kNSeq];
   unsigned long LUTtag[kNCrates][kNSeq];
