@@ -26,7 +26,7 @@ struct emc_t {
 	u_char btow_in ;
 	u_short btow_max_ch ;
 	u_short btow_ch ;
-	u_short btow[4800] ;
+	u_short btow[4800] ; int fenceB;
 	u_short *btow_raw ;
 	// added later
 	u_short btow_new[BTOW_MAXFEE][BTOW_DATSIZE] ;
@@ -35,8 +35,8 @@ struct emc_t {
 	u_char bsmd_in ;
 	u_short bsmd_max_ch ;
 	u_short bsmd_ch ;
-	u_short bsmd[EMC_FIBER_NUM][4800] ;
-	u_char  bsmd_cap[EMC_FIBER_NUM] ;	// capacitor value...
+	u_short bsmd[EMC_FIBER_NUM][4800] ;int fenceC;
+	u_char  bsmd_cap[EMC_FIBER_NUM]   ;int fenceD;	// capacitor value...
 
 #if 0
 	// the bpre is currently unused - the data is in the last 4ish fibers of BSMD...
@@ -51,8 +51,8 @@ struct emc_t {
 	u_short etow_max_ch ;	// constant ETOW_MAXFEE * ETOW_DATSIZE
 
 	u_short etow_ch ;	// channels above zero
-	u_short etow[ETOW_MAXFEE][ETOW_DATSIZE] ;	// ADC data...
-	u_short etow_pre[ETOW_MAXFEE][ETOW_PRESIZE]; // ETOW preamble
+	u_short etow[ETOW_MAXFEE][ETOW_DATSIZE]    ; int fenceE;// ADC data...
+	u_short etow_pre[ETOW_MAXFEE][ETOW_PRESIZE]; int fenceF;// ETOW preamble
 	u_short *etow_raw ;	// pointer to the beginning of rawdata; raw data is little endian
 
 
@@ -62,8 +62,8 @@ struct emc_t {
 	u_short esmd_max_ch ;	// 48 * 192
 	u_short esmd_ch ;	// channels above 0
 	u_short esmd_max_fee ;	// ESMD_MAXFEE changed between FY04 and FY05...
-	u_short esmd[ESMD_MAXFEE][ESMD_DATSIZE] ;	// ADC data
-	u_short esmd_pre[ESMD_MAXFEE][ESMD_PRESIZE]; // ESMD preamble
+	u_short esmd    [ESMD_MAXFEE][ESMD_DATSIZE]; int fenceG;	/// ADC data
+	u_short esmd_pre[ESMD_MAXFEE][ESMD_PRESIZE]; int fenceH;	/// ESMD preamble
 	u_short *esmd_raw ;	// pointer to the beginning of raw data; raw data is little endian
         int fenceZ;
 
