@@ -12,12 +12,12 @@
 #include "emcReader.h"
 
 struct emc_t emc ;
-#define qswap32(test,x) ((test)?swap32(x):(x))
+#define SWAP32(bk,x) ((bk->bh.byte_order==0x4030201)?(bk->x):swap32(bk->x))
 //________________________________________________________________________________
 emc_t::emc_t()
 {
   memset(this,0,sizeof(emc_t));
-  fenceA=1946;
+  fenceA=fenceB=fenceC=fenceD=fenceE=fenceF=fenceG=fenceH=1946;
   fenceZ=1946;
   btow_max_ch = 4800  ;
   bsmd_max_ch = EMC_FIBER_NUM*4800 ;	// extended with BPRE
@@ -48,6 +48,13 @@ void emc_t::reset()
 int emc_t::check()
 {
  assert(fenceA==1946);
+ assert(fenceB==1946);
+ assert(fenceC==1946);
+ assert(fenceD==1946);
+ assert(fenceE==1946);
+ assert(fenceF==1946);
+ assert(fenceG==1946);
+ assert(fenceH==1946);
  assert(fenceZ==1946);
  return 0;
 }
@@ -97,13 +104,9 @@ int emcReader(char *m)
 
 	int bytes ;
 
-	int swapdatap = 0;
-	int swapdatapx = 0;
-	int swapemcp = 0;
 
         emc.check();
         emc.reset();
-	if(datap->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapdatap = 1;
 
 	if(datap == NULL) return 0 ;
 
@@ -120,10 +123,10 @@ int emcReader(char *m)
 			adcd = "EMCADCD" ;
 
 
-			len = qswap32(swapdatap, datap->det[id].len) * 4 ;
+			len = SWAP32(datap,det[id].len) * 4 ;
 			if(len == 0) continue ;
 
-			off = qswap32(swapdatap, datap->det[id].off) ;
+			off = SWAP32(datap,det[id].off) ;
 			if(off == 0) continue ;
 
 		}
@@ -136,10 +139,10 @@ int emcReader(char *m)
 			adcd = "EECADCD" ;
 
 			// EEC is in DATAPX...
-			len = qswap32(swapdatap, datap->det[EXT_ID].len) ;
+			len = SWAP32(datap,det[EXT_ID].len) ;
 			if(len == 0) continue ;	// not even a xtended det
 
-			off = qswap32(swapdatap, datap->det[EXT_ID].off) ;
+			off = SWAP32(datap,det[EXT_ID].off) ;
 			if(off == 0) continue ;
 
 			datapx = (struct DATAPX *)(m + off*4) ;
@@ -149,12 +152,11 @@ int emcReader(char *m)
 				continue ;
 			}
 
-			if(datapx->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapdatapx = 1;
 
-			len = qswap32(swapdatapx, datapx->det[id-10].len) * 4 ;
+			len = SWAP32(datapx,det[id-10].len) * 4 ;
 			if(len == 0) continue ;
 
-			off = qswap32(swapdatapx, datapx->det[id-10].off) ;
+			off = SWAP32(datapx,det[id-10].off) ;
 			if(off == 0) continue ;
 
 
@@ -174,19 +176,17 @@ int emcReader(char *m)
 			return -1 ;
 		}
 
-		if(emcp->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapemcp = 1;
-
-		token = qswap32(swapemcp, emcp->bh.token) ;
+		token = SWAP32(emcp,bh.token) ;
 
 		// let's see how many contributions (subdetectors) does this event have
 
 		for(i=0;i<3;i++) {	// go through subdets
-			len = qswap32(swapemcp, emcp->sec[i].len) ;
+			len = SWAP32(emcp,sec[i].len) ;
 			if(len == 0) continue ;
 
 			instance = i + 1 ;	// EMC subinstances star from 1...
 
-			off = qswap32(swapemcp, emcp->sec[i].off) ;
+			off = SWAP32(emcp,sec[i].off) ;
 
 			emcsecp = (struct EMCSECP *)((u_int *)emcp + off) ;
 
@@ -194,17 +194,17 @@ int emcReader(char *m)
 				continue ;
 			}
 
-			cou = (b2h32(emcsecp->bh.length) - 10) / 2 ;	// contributions!
+			cou = (SWAP32(emcsecp,bh.length) - 10) / 2 ;	// contributions!
 
 
 			//LOG(DBG,"EMC %s: instance %s: %d fibers possible",id2char(id),inst2char(instance),cou,0,0) ;
 
 			for(j=0;j<cou;j++) {
-				len = b2h32(emcsecp->fiber[j].len) ;
+				len = SWAP32(emcsecp,fiber[j].len) ;
 
 				if(len == 0) continue ;
 
-				off = b2h32(emcsecp->fiber[j].off) ;
+				off = SWAP32(emcsecp,fiber[j].off) ;
 
 				emcrbp = (struct EMCRBP *)((u_int *)emcsecp + off) ;
 
@@ -215,18 +215,18 @@ int emcReader(char *m)
 				}
 
 
-				cou2 = (b2h32(emcrbp->bh.length) - 10) /2 ;
+				cou2 = (SWAP32(emcrbp,bh.length) - 10) /2 ;
 
 				//LOG(DBG,"EMC %s: instance %s: fiber %d: %d banks used",id2char(id),inst2char(instance),j+1,cou2,0) ;
 
 				emcadcr = emcadcd = NULL ;
 
 				for(k=0;k<cou2;k++) {
-					len = b2h32(emcrbp->banks[k].len) ;
+					len = SWAP32(emcrbp,banks[k].len) ;
 
 					if(len == 0) continue ;
 
-					off = b2h32(emcrbp->banks[k].off) ;
+					off = SWAP32(emcrbp,banks[k].off) ;
 
 					emcadcr = NULL ;
 
