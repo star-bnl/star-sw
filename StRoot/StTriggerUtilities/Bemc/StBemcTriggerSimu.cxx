@@ -226,10 +226,14 @@ void StBemcTriggerSimu::getPed(){
   for (int i=1;i<=kNTowers;i++) {ped12[i-1]=0;}
   
   //Get Pedestal shift for HT which depends on calibration
-  for (cr=1;cr<=kNCrates;cr++){
-    for (seq=0;seq<kNSeq;seq++){
-      bitConvValue[cr][seq]=mTables->triggerBitConversion(cr,seq);
-    }
+  //for (cr=1;cr<=kNCrates;cr++){
+  //  for (seq=0;seq<kNSeq;seq++){
+  //    bitConvValue[cr][seq]=mTables->triggerBitConversion(cr,seq);
+  // }
+  //}
+
+  for (did=1;did<=kNTowers;did++){
+    bitConvValue[did-1]=mTables->triggerBitConversionByID(did);
   }
 
   //get Target Pedestal value from DB
@@ -429,8 +433,7 @@ void StBemcTriggerSimu::FEEout(){
 			//subject all towers to HT algorithm and transform adc10 into adc06
 			int HTholder=-1;
 
-			if (bitConvValue[cr][seq]!=2) cout<<"cr"<<cr<<"_seq"<<seq<<" BitConvValue2="<<bitConvValue[cr][seq]<<endl;
-			if (config->Contains("online")) HTholder = adc10[did-1] >> bitConvValue[cr][0];//drop lowest bits		
+			if (config->Contains("online")) HTholder = adc10[did-1] >> bitConvValue[did-1];//drop lowest bits		
 			if (config->Contains("offline")) HTholder = adc10[did-1] >> HT_FEE_Offset;//drop lowest bits
 
 			int HTL = HTholder & 0x1F;//reserve 5 LSB
