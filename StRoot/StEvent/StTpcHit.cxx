@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.12 2004/08/06 15:37:09 fisyak Exp $
+ * $Id: StTpcHit.cxx,v 2.13 2007/10/03 21:47:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.13  2007/10/03 21:47:35  ullrich
+ * Added several new member to hold hit length info.
+ *
  * Revision 2.12  2004/08/06 15:37:09  fisyak
  * Add clster id
  *
@@ -55,20 +58,37 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.12 2004/08/06 15:37:09 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.13 2007/10/03 21:47:35 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
 ClassImp(StTpcHit)
-
-StTpcHit::StTpcHit() { /* noop */ }
+    
+StTpcHit::StTpcHit()
+{
+    mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0;
+    mMcl_x = mMcl_t = 0;
+    mChargeModified = 0;
+}
 
 StTpcHit::StTpcHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
                    unsigned int hw, float q, unsigned char c,
-		   UShort_t idTruth, UShort_t quality, UShort_t id)
-    : StHit(p, e, hw, q, c, idTruth, quality, id)
-{ /* noop */ }
+	         unsigned short idTruth, unsigned short quality, unsigned short id,
+	         short mnpad, short mxpad, short mntmbk,
+	         short mxtmbk, float cl_x, float cl_t)
+    : StHit(p, e, hw, q, c, idTruth, quality)
+{
+    mMcl_x = static_cast<short>(cl_x*64);
+    mMcl_t = static_cast<short>(cl_t*64);
+    Short_t pad  = mMcl_x/64;
+    Short_t time = mMcl_t/64;
+    mMinpad = pad - mnpad;
+    mMaxpad = mxpad - pad;
+    mMintmbk = time - mntmbk;
+    mMaxtmbk = mxtmbk - time;
+    mChargeModified = 0;
+}
 
 StTpcHit::StTpcHit(const dst_point_st& pt)
 {
@@ -113,18 +133,9 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
     mIdTruth          = pt.id_simtrk;
     mQuality          = pt.id_quality;
     mId               = pt.cluster;
+    mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0;
+    mMcl_x = mMcl_t = 0;
+    mChargeModified = 0;
 }
 
 StTpcHit::~StTpcHit() {/* noop */}
-
-unsigned int
-StTpcHit::padsInHit() const
-{
-    return bits(15, 7);   // bits 15-21
-}
-
-unsigned int
-StTpcHit::pixelsInHit() const
-{
-    return bits(22, 10);   // bits 22-31
-}
