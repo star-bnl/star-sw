@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.33 2007/07/12 20:31:42 fisyak Exp $
+ * $Id: FCFMaker.cxx,v 1.34 2007/10/03 21:58:21 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
- * Revision 1.33  2007/07/12 20:31:42  fisyak
- * Use Drift velocity depending on sector
+ * Revision 1.34  2007/10/03 21:58:21  fisyak
+ * Fill size of cluster and local coordinate in StTpcHit
  *
  * Revision 1.32  2007/01/04 02:51:45  jeromel
  * Lots of printf and gMessMgr transformed ino LOGger format
@@ -293,6 +293,7 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 #endif
   doT0Corrections = 1;  // do the t0 corrections
   doGainCorrections = 1; // done by St_tpcdaq_Maker - shouldn't be!!! Tonko
+  //  doZeroTruncation = 0; // do it, but leave 5 cm... 
   doZeroTruncation = 1; // do it, but leave 5 cm... 
   fillDeconFlag = 1;
 
@@ -396,18 +397,6 @@ Int_t StRTSClientFCFMaker::Init()
   // Tonko: added startFlags
   memset(startFlags,0,sizeof(startFlags)) ;
   fcf->startFlags = startFlags ;
-
-  // Get TPC Parameters
-  St_DataSet *tpc = GetDataBase("tpc");
-  assert(tpc);
-  St_DataSet *tsspars = tpc->Find("tsspars");
-  assert(tsspars);
-  m_tsspar = (St_tss_tsspar *)tsspars->Find("tsspar");
-  assert(m_tsspar);
-  
-  tss_tsspar_st *tsspar = m_tsspar->GetTable();
-  tsspar->threshold = 1;
-
   fcf_after.setVerbose(false);
   return StMaker::Init();
 }
@@ -417,6 +406,14 @@ Int_t StRTSClientFCFMaker::Init()
 
 Int_t StRTSClientFCFMaker::InitRun(int run)
 {
+
+  // Get TPC Parameters
+  m_tsspar = (St_tss_tsspar *) GetDataBase("tpc/tsspars/tsspar");
+  assert(m_tsspar);
+  
+  tss_tsspar_st *tsspar = m_tsspar->GetTable();
+  tsspar->threshold = 1;
+
   int t1,t2;
   t1 = time(NULL);
 
@@ -1142,7 +1139,8 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   // Factors adjusted to match tcl
   hit.prf = hit.npads * ((r>=13) ? .1316 : .0636);
   hit.zrf = hit.ntmbk * .1059;
-
+  hit.cl_x = ((double)(cl_x))/64.0;
+  hit.cl_t = ((double)(cl_t))/64.0;
   hit.id_simtrk = id_simtrk;
   hit.id_quality = id_quality;
 
@@ -1242,11 +1240,9 @@ void StRTSClientFCFMaker::fillStEvent(tcl_tphit_st *hit)
   hw += (hit->npads   << 15);  // npads
   hw += (hit->ntmbk   << 22);  // ntmbks...
 
-  StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q);
-  tpcHit->setIdTruth(hit->id_simtrk,hit->id_quality);
-
-  // With simulation info, not currently there!
-  // StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q,0,hit->id_simtrk,hit->id_quality);  
+  StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q, 0,
+				  hit->id_simtrk,hit->id_quality, hit->id, 
+				  hit->minpad, hit->maxpad, hit->mintmbk, hit->maxtmbk,hit->cl_x,hit->cl_t);
 
   if(!mTpcHitColl->addHit(tpcHit)) {
     assert(false);
