@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.199 2007/08/27 19:54:41 fisyak Exp $
+// $Id: StMaker.cxx,v 1.200 2007/10/04 02:50:01 perev Exp $
 //
 //
 /*!
@@ -188,6 +188,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr13",      20190101,    16, "upgr13",   ""},
   // Future development:
   {"simpletpc",   20200102,    16, "simpletpc",""},
+  {"u2007",       20200102,    17, "u2007",    "y2007 +  one TOF"}, // advertized simu 20061101
+  {"u2007a",      20200102,    18, "u2007a",   "y2007 + full TOF"}, // advertized simu 20061101
   {0,                    0,     0,        0,    0}
 };
 
@@ -1815,6 +1817,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.200  2007/10/04 02:50:01  perev
+// Geometries u2007 & u2007a added
+//
 // Revision 1.199  2007/08/27 19:54:41  fisyak
 // Just account that only StBFChain has TFile
 //
