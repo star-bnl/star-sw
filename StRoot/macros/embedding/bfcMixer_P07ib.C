@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_P07ib.C,v 1.3 2007/09/18 22:01:13 fisyak Exp $
+// $Id: bfcMixer_P07ib.C,v 1.4 2007/10/04 21:02:39 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -50,7 +50,7 @@ void bfcMixer_P07ib(const Int_t Nevents=1,
       cout << "Cannot find Trs in chain2" << endl;
       return;
     }
-    trsMk->setNormalFactor(1.25);
+    trsMk->setNormalFactor(2.67);
   }
   //________________________________________________________________________________
   gSystem->Load("StMixerMaker");
