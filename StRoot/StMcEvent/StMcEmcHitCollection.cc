@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.11  2007/10/05 00:01:20  calderon
+ * Changes to include a EMC hit collection that does not care about
+ * parent tracks, so that now there are two collections.  This
+ * new collection will be useful to compare all the deposited energy in a hit tower
+ * in a given event. The information about the track parentage is still
+ * kept in the original collection unchanged.
+ *
  * Revision 2.10  2007/03/29 15:34:11  fisyak
  * comment out print out
  *
@@ -48,6 +55,7 @@
 #include "StMcCalorimeterHit.hh"
 #include "StMcTrack.hh"
 #include "StParticleDefinition.hh"
+#include "StMessMgr.h"
 #include "TObjectSet.h"
 #include "TDataSetIter.h"
 static const char rcsid[] = "$Id ";
@@ -75,29 +83,45 @@ StMcEmcHitCollection::~StMcEmcHitCollection()
 StMcEmcHitCollection::EAddHit 
 StMcEmcHitCollection::addHit(StMcCalorimeterHit* hit)
 {
-  unsigned int m ,i; // i - array index, m - module nuumber;
-    if (hit && (m = hit->module())<=mNumberOfModules && m>=1) {
-      i = m - 1;
-      if(thisModule(i).numberOfHits() == 0) {
-
-        thisModule(i)(m); // Set name
-        thisModule(i).hits().push_back(hit); // New hit(first)
-        return kNew;
-      }
-      else {
-        for(unsigned int ih=0; ih<thisModule(i).numberOfHits(); ih++){
-          if((*thisModule(i).hits()[ih]) == (*hit)) { // Hits from the same particle
-            (*thisModule(i).hits()[ih])  += (*hit);
-            return kAdd;
-          }
+    if(!hit) { LOG_ERROR << "tried to add a NULL hit to StMcEmcHitCollection" << endm; }
+    
+    unsigned int m = hit->module();
+    unsigned int i = m-1;
+    
+    if(m<=mNumberOfModules && m>=1) {
+        StMcCalorimeterHit *detectorHit = new StMcCalorimeterHit(hit->module(), hit->eta(), hit->sub(), hit->dE());
+        for(unsigned int ih=0; ih<thisModule(i).numberOfDetectorHits(); ih++) {
+            if((*thisModule(i).detectorHits()[ih]) == (*detectorHit)) {
+                (*thisModule(i).detectorHits()[ih]) += (*detectorHit);
+                delete detectorHit; detectorHit = NULL;
+                break;
+            }
         }
-        thisModule(i).hits().push_back(hit); // New hit
-        return kNew;
-      }
+        if(detectorHit) { // hit on a new element
+            thisModule(i).detectorHits().push_back(detectorHit);
+        }
+    }
+    
+    if (m<=mNumberOfModules && m>=1) {
+        if(thisModule(i).numberOfHits() == 0) {
+            thisModule(i)(m); // Set name
+            thisModule(i).hits().push_back(hit); // New hit(first)
+            return kNew;
+        }
+        else {
+            for(unsigned int ih=0; ih<thisModule(i).numberOfHits(); ih++){
+                if((*thisModule(i).hits()[ih]) == (*hit)) { // Hits from the same particle
+                    (*thisModule(i).hits()[ih])  += (*hit);
+                    return kAdd;
+                }
+            }
+            thisModule(i).hits().push_back(hit); // New hit
+            return kNew;
+        }
     }
     else {
-      Warning("addHit","Wrong hit: module=%d but mNumberOfModules=%d",m,mNumberOfModules);
-      return kErr; // Bad number of module
+        Warning("addHit","Wrong hit: module=%d but mNumberOfModules=%d",m,mNumberOfModules);
+        return kErr; // Bad number of module
     }
 }
 
