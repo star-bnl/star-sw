@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEmcModuleHitCollection.hh,v 2.4 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcEmcModuleHitCollection.hh,v 2.5 2007/10/05 00:01:21 calderon Exp $
  *
  * Author: Aleksei Pavlinov, May 2000
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.hh,v $
+ * Revision 2.5  2007/10/05 00:01:21  calderon
+ * Changes to include a EMC hit collection that does not care about
+ * parent tracks, so that now there are two collections.  This
+ * new collection will be useful to compare all the deposited energy in a hit tower
+ * in a given event. The information about the track parentage is still
+ * kept in the original collection unchanged.
+ *
  * Revision 2.4  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -39,10 +46,19 @@ public:
     void init(const unsigned int m);
     
     unsigned long numberOfHits() const;
+    unsigned long numberOfDetectorHits() const;
     float sum() const;
 
     StSPtrVecMcCalorimeterHit&       hits();
     const StSPtrVecMcCalorimeterHit& hits() const;
+    
+    // detector hits are like hits, but there is at most one detector hit per
+    // element (tower, preshower, or strip).  If multiple hits occur in a single
+    // element their energy depositions are summed, regardless of the parent track.
+    // Also, detector hits do not preserve information about the parent track of 
+    // the hit, since there may be more than one.  APK - 09/07
+    StSPtrVecMcCalorimeterHit&       detectorHits();
+    const StSPtrVecMcCalorimeterHit& detectorHits() const;
 
 //VP    virtual Bool_t IsFolder() const {return kFALSE;}
     virtual void   Browse(TBrowser *b);
@@ -51,6 +67,7 @@ public:
 
 private:
     StSPtrVecMcCalorimeterHit mHits;
+    StSPtrVecMcCalorimeterHit mDetectorHits;
     ClassDef(StMcEmcModuleHitCollection,1)
 };
 #endif

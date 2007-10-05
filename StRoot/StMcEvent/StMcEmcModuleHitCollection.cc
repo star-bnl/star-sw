@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.cc,v $
+ * Revision 2.6  2007/10/05 00:01:21  calderon
+ * Changes to include a EMC hit collection that does not care about
+ * parent tracks, so that now there are two collections.  This
+ * new collection will be useful to compare all the deposited energy in a hit tower
+ * in a given event. The information about the track parentage is still
+ * kept in the original collection unchanged.
+ *
  * Revision 2.5  2005/08/09 03:31:01  perev
  * Cleanup
  *
@@ -31,7 +38,7 @@
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcCalorimeterHit.hh"
 
-static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.5 2005/08/09 03:31:01 perev Exp $";
+static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.6 2007/10/05 00:01:21 calderon Exp $";
 
 ClassImp(StMcEmcModuleHitCollection)
 
@@ -64,6 +71,12 @@ StMcEmcModuleHitCollection::numberOfHits() const
     return mHits.size();
 }
 
+unsigned long
+StMcEmcModuleHitCollection::numberOfDetectorHits() const
+{
+    return mDetectorHits.size();
+}
+
 float 
 StMcEmcModuleHitCollection::sum() const
 {
@@ -79,6 +92,12 @@ StMcEmcModuleHitCollection::hits() const { return mHits; }
 
 StSPtrVecMcCalorimeterHit&
 StMcEmcModuleHitCollection::hits() { return mHits; }
+
+const StSPtrVecMcCalorimeterHit&
+StMcEmcModuleHitCollection::detectorHits() const { return mDetectorHits; }
+
+StSPtrVecMcCalorimeterHit&
+StMcEmcModuleHitCollection::detectorHits() { return mDetectorHits; }
 
 void StMcEmcModuleHitCollection::Browse(TBrowser *b)
 {
