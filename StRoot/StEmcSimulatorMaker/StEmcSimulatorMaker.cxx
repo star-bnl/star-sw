@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.51 2007/09/21 13:16:20 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.52 2007/10/08 15:28:38 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -36,7 +36,13 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name) {
         mPedestalCut[i]         = 1.5;
         mCalibOffset[i]         = 0.0;
         mCalibSpread[i]         = 0.0;
+        mMaxAdcSpread[i]        = 0.0;
     }
+    
+    mMaxAdc[0]  = 4095;
+    mMaxAdc[1]  = 1023;
+    mMaxAdc[2]  = 1023;
+    mMaxAdc[3]  = 1023;
     
     // adc2e doesn't suppress BTOW hits, so we won't either
     mDoZeroSuppression[0] = false;
@@ -82,6 +88,8 @@ Int_t StEmcSimulatorMaker::Init() {
         mSimulator[det-1]->setTables(mTables);
         mSimulator[det-1]->setCalibScale(1.0 + mCalibOffset[det-1]);
         mSimulator[det-1]->setCalibSpread(mCalibSpread[det-1]);
+        mSimulator[det-1]->setMaximumAdc(mMaxAdc[det-1]);
+        mSimulator[det-1]->setMaximumAdcSpread(mMaxAdcSpread[det-1]);
     }
     
     return kStOk;
@@ -98,34 +106,10 @@ Int_t StEmcSimulatorMaker::Make() {
         return kStErr;
     }
     
-    //create new "consolidated" MC hit collections so at most one hit per mod/eta/sub is found
-    mEmcMcHits[0] = new StMcEmcHitCollection("bemcMcHits");
-    mEmcMcHits[1] = new StMcEmcHitCollection("bprsMcHits");
-    mEmcMcHits[2] = new StMcEmcHitCollection("bsmdeMcHits");
-    mEmcMcHits[3] = new StMcEmcHitCollection("bsmdpMcHits");
-    
-    for(int det=BTOW; det<=BSMDP; det++) {
-        const StMcEmcHitCollection *oldHits = NULL;
-        switch(det) {
-            case BTOW:  oldHits = mMcEvent->bemcHitCollection();  break;
-            case BPRS:  oldHits = mMcEvent->bprsHitCollection();  break;
-            case BSMDE: oldHits = mMcEvent->bsmdeHitCollection(); break;
-            case BSMDP: oldHits = mMcEvent->bsmdpHitCollection(); break;
-        }
-        
-        m_DataSet->Add(mEmcMcHits[det-1]); //takes care of memory management
-        
-        //key point here is that we don't pass a pointer to the parent track
-        //as a result, all hits from the same tower or strip will be summed together
-        for(unsigned mod=1; mod<=oldHits->numberOfModules(); mod++) {
-            const StMcEmcModuleHitCollection *module = oldHits->module(mod);
-            const vector<StMcCalorimeterHit*> hits = module->hits();
-            for(unsigned i=0; i<hits.size(); i++) {
-                StMcCalorimeterHit *myHit = new StMcCalorimeterHit(hits[i]->module(), hits[i]->eta(), hits[i]->sub(), hits[i]->dE());
-                if(mEmcMcHits[det-1]->addHit(myHit) != StMcEmcHitCollection::kNew) delete myHit;
-            }
-        }
-    }
+    mEmcMcHits[0] = mMcEvent->bemcHitCollection();
+    mEmcMcHits[1] = mMcEvent->bprsHitCollection();
+    mEmcMcHits[2] = mMcEvent->bsmdeHitCollection();
+    mEmcMcHits[3] = mMcEvent->bsmdpHitCollection();
     
     //simulate pedestals where no hit was found if makeFullDetector is specified
     int maxChannels[4] = {4800, 4800, 18000, 18000};
@@ -139,8 +123,8 @@ Int_t StEmcSimulatorMaker::Make() {
         //identify the channels that already have real hits        
         for(unsigned int mod=1; mod<=mEmcMcHits[det-1]->numberOfModules(); mod++) {
             const StMcEmcModuleHitCollection* module = mEmcMcHits[det-1]->module(mod);
-            const vector<StMcCalorimeterHit*> hits   = module->hits();
-            for(unsigned long i=0; i<module->numberOfHits(); i++) {
+            const vector<StMcCalorimeterHit*> hits   = module->detectorHits();
+            for(unsigned long i=0; i<hits.size(); i++) {
                 mGeom[det-1]->getId(hits[i]->module(), hits[i]->eta(), hits[i]->sub(), softId);
                 hasHit.push_back(softId);
             }
@@ -188,7 +172,7 @@ Int_t StEmcSimulatorMaker::Make() {
         LOG_DEBUG << *(mEmcMcHits[det-1]) << endm;
         for(unsigned int mod=1; mod<=mEmcMcHits[det-1]->numberOfModules(); mod++) {
             const StMcEmcModuleHitCollection *module = mEmcMcHits[det-1]->module(mod);
-            const vector<StMcCalorimeterHit*> hits = module->hits();
+            const vector<StMcCalorimeterHit*> hits = module->detectorHits();
             for(unsigned long i=0; i<hits.size(); i++) {
                 int softId; mGeom[det-1]->getId(hits[i]->module(), hits[i]->eta(), hits[i]->sub(), softId);
                 LOG_DEBUG << "softId:" << softId << " mod:" << hits[i]->module() << " eta:" << hits[i]->eta() << " sub:" << hits[i]->sub() << " dE:" << hits[i]->dE() << endm;
@@ -236,8 +220,8 @@ void StEmcSimulatorMaker::makeRawHits() {
         
         for(unsigned int mod=1; mod<=mEmcMcHits[det-1]->numberOfModules(); mod++) {
             const StMcEmcModuleHitCollection* module = mEmcMcHits[det-1]->module(mod);
-            const vector<StMcCalorimeterHit*> hits   = module->hits();
-            for(unsigned long i=0; i<module->numberOfHits(); i++) {
+            const vector<StMcCalorimeterHit*> hits   = module->detectorHits();
+            for(unsigned long i=0; i<hits.size(); i++) {
                 int softId; mGeom[det-1]->getId(hits[i]->module(), hits[i]->eta(), hits[i]->sub(), softId);
                 
                 LOG_DEBUG << "-----------------------------------------------------------------------------------------------" << endm;
@@ -272,6 +256,10 @@ void StEmcSimulatorMaker::makeRawHits() {
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.52  2007/10/08 15:28:38  kocolosk
+ *  setMaximumAdc(Spread) methods allow for better simulation of BSMD ADC response
+ *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2507.html
+ *
  *  Revision 1.51  2007/09/21 13:16:20  kocolosk
  *  bugfix with Martijn's help.  There is currently an important difference
  *  between the way StMcEvent fills its collections and the way the old simulator

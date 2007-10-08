@@ -37,31 +37,30 @@ void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/institu
         
     //emcSim->setCheckStatus(kBarrelEmcTowerId, false);
     
-    //emcSim->setDoZeroSuppression(kBarrelEmcTowerId, false);
-    
     //emcSim->setSimulatorMode(kBarrelEmcTowerId, StEmcVirtualSimulator::kTestMode);
     //emcSim->setSimulatorMode(kBarrelEmcPreShowerId, StEmcVirtualSimulator::kTestMode);
     //emcSim->setSimulatorMode(kBarrelSmdEtaStripId, StEmcVirtualSimulator::kTestMode);
     //emcSim->setSimulatorMode(kBarrelSmdPhiStripId, StEmcVirtualSimulator::kTestMode);
     
-    emcSim->setMakeFullDetector(kBarrelEmcTowerId, false);
-    emcSim->setMakeFullDetector(kBarrelEmcPreShowerId, false);
-    emcSim->setMakeFullDetector(kBarrelSmdEtaStripId, false);
-    emcSim->setMakeFullDetector(kBarrelSmdPhiStripId, false);
+    emcSim->setMaximumAdc(kBarrelSmdEtaStripId, 850.0);
+    emcSim->setMaximumAdcSpread(kBarrelSmdEtaStripId, 15.0);
+    
+    emcSim->setMaximumAdc(kBarrelSmdPhiStripId, 850.0);
+    emcSim->setMaximumAdcSpread(kBarrelSmdPhiStripId, 15.0);
     
     chain->Init();
     
-    btow_adc = new TH1F("btow_adc","",200,0.,400.);
-    btow_energy = new TH1F("btow_energy","",200,0.,4.);
+    btow_adc = new TH1F("btow_adc","",200,0.,2000.);
+    btow_energy = new TH1F("btow_energy","",200,0.,60.);
     
-    bprs_adc = new TH1F("bprs_adc","",200,0.,400.);
-    bprs_energy = new TH1F("bprs_energy","",200,0.,4.);
+    bprs_adc = new TH1F("bprs_adc","",200,0.,1200.);
+    bprs_energy = new TH1F("bprs_energy","",200,0.,30.);
     
-    smde_adc = new TH1F("smde_adc","",200,0.,200.);
-    smde_energy = new TH1F("smde_energy","",200,0.,4.);
+    smde_adc = new TH1F("smde_adc","",200,0.,1200.);
+    smde_energy = new TH1F("smde_energy","",200,0.,30.);
     
-    smdp_adc = new TH1F("smdp_adc","",200,0.,200.);
-    smdp_energy = new TH1F("smdp_energy","",200,0.,4.);
+    smdp_adc = new TH1F("smdp_adc","",200,0.,1200.);
+    smdp_energy = new TH1F("smdp_energy","",200,0.,30.);
     
     int i=0;
     while(i<nEvents && chain->Make() == kStOk) {
@@ -109,13 +108,15 @@ void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/institu
     c->Divide(2,4);
     
     TVirtualPad *pad = c->cd(1);
+    pad->SetLogy();
     btow_adc->Draw();
     
     pad = c->cd(2);
     pad->SetLogy();
     btow_energy->Draw();
     
-    c->cd(3);
+    pad = c->cd(3);
+    pad->SetLogy();
     bprs_adc->Draw();
     
     pad = c->cd(4);
@@ -123,13 +124,15 @@ void testSimulatorMaker(int nEvents=1000, const char *geantFile = "/star/institu
     bprs_energy->Draw();
     
     pad = c->cd(5);
+    pad->SetLogy();
     smde_adc->Draw();
     
     pad = c->cd(6);
     pad->SetLogy();
     smde_energy->Draw();
     
-    c->cd(7);
+    pad = c->cd(7);
+    pad->SetLogy();
     smdp_adc->Draw();
     
     pad = c->cd(8);
