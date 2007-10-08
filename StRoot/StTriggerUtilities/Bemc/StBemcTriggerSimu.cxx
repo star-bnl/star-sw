@@ -239,22 +239,21 @@ void StBemcTriggerSimu::getPed(){
   //get Target Pedestal value from DB
   pedTargetValue=mTables->triggerPedestalShift();
   
-  //online 12 bit peds - NOTE online peds are stored as Int_t
+  //online 12 bit peds stored as Float_t
   if (config->Contains("online")){
     for (int cr=1; cr <= kNCrates; cr++){
       for (int ch=0; ch < kNChannels; ch++){
 	mDecoder->GetTowerIdFromCrate(cr,ch,did);
-	Float_t pedholder = mTables->triggerPedestal(cr,ch);
-	ped12[did-1]=(Int_t)pedholder;
+	ped12[did-1] = mTables->triggerPedestal(cr,ch);
       }
     }
   }
   
- //offline 12 bit peds which are stored as Float_t
+ //offline 12 bit peds stored as Float_t
   if (config->Contains("offline")){
     for (did=1; did<=kNTowers; did++){
       mTables->getPedestal(BTOW,did,0,ped,rms);
-      ped12[did-1]=(Int_t)ped;
+      ped12[did-1]=ped;
     }
   }
 
@@ -263,55 +262,7 @@ void StBemcTriggerSimu::getPed(){
     for (did=1; did<=kNTowers; did++){
       ped12[did-1]=24;
     }
-  }
-  
-  //copied directly from Oleksandr's BEMC_DSM_decoder.cxx
-  /*  for (did=1; did<kNTowers; did++){
-      
-    char buffer[10];
-    int scale10bits = 4;
-    int operationBit = 1;
-
-    double ped1 = ped12[did-1] - pedTargetValue;
-    if (ped1 < 0) {
-      ped1 = -ped1;
-      operationBit = 0;
-    }
-
-    double value2 = ped1 / scale10bits;
-    sprintf(buffer, "%3.0f", value2);
-    int value1 = atoi(buffer);
-    value2 = ped1 - value1 * scale10bits;
-    if (value2 > 2) {
-      value2 = value1 + 1;
-      sprintf(buffer, "%3.0f", value2);
-      value1 = atoi(buffer);
-    }
-
-    if (value1 > 15) {
-      sprintf(buffer, "%3.0f", double(value1 - 11) / scale10bits);
-      int value3 = atoi(buffer);
-      value3 *= scale10bits;
-      value2 = value1 - value3;
-      sprintf(buffer, "%3.0f", value2);
-      value1 = atoi(buffer);
-    }
-
-    int value = 0;
-    if (operationBit == 1) {
-      value = (value1 & 0x0F) | 0x10;
-    }
-    if (operationBit == 0) {
-      value = (value1 & 0x0F);
-    }
-    ped10[did-1]=value;
- 
-    mTables->getPedestal(BTOW,did,0,ped,rms);
-    cout << "Tower id="<< did<<" Online pedAdc = " << ped12[did-1] << ", shift = "<< 
-            pedTargetValue <<" Oleg PED10 = " << value <<" offline PED="<<ped<<  endl;
-    }
-  */
-  
+  } 
 }
 
 
@@ -355,6 +306,10 @@ void StBemcTriggerSimu::Make(){
 
 void StBemcTriggerSimu::FEEout(){
 
+  //many parts copied directly from Oleksandr's BEMC_DSM_decoder.cxx
+  //which is a C++ translation of the FEE code
+  //ped1 == ped12Diff value2 == ped10Diff value1 == ped10DiffI
+   
   LOG_INFO<<"StBemcTriggerSimu::Fee()"<<endl;
   
   if(!mEvent) {LOG_WARN << "StBemcTriggerSimu -- no StEvent!" << endm;}
@@ -392,9 +347,8 @@ void StBemcTriggerSimu::FEEout(){
 		      //Get software tower id, trigger patch id, crate and seq
 		      mGeo->getId(m,e,s,did);
 		      mDecoder->GetTriggerPatchFromTowerId(did,tpid);
-		      //mDecoder->GetCrateFromTowerId(did,cr,ch);
 		      mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq);
-		     
+		      
 		      //apply tower masks
 		      if (TowerStatus[did-1]==1){
 			
@@ -404,7 +358,7 @@ void StBemcTriggerSimu::FEEout(){
 			
 			//need to shift ADC and ped to pedTargetValue 
 			//goal is to ultimately place DSM channel at 1
-			ped12Diff=(Double_t)ped12[did-1]-pedTargetValue;
+			ped12Diff=ped12[did-1]-pedTargetValue;
 
 			//determine if pedestal is > or < pedTargetValue
 			int operation=1;
@@ -413,20 +367,34 @@ void StBemcTriggerSimu::FEEout(){
 			    ped12Diff = -ped12Diff;
 			    operation = 0;
 			  }
-			Int_t ped10Diff =(Int_t) ped12Diff/4;
-			
-		
+			ped10Diff = ped12Diff/4;
+
+			//Rounds ped10Diff up/down to an Int_t
+			sprintf(buffer,"%3.0f",ped10Diff);
+			ped10DiffI=atoi(buffer);
+					
 			//effective rounding up for binary numbers with 1xx,10xx,11xx,100xx,101xx,110xx,111xx etc
 			//so that carrying out ADC12 - PED12 + 24 in 12 bit land is the same exercise as in 10 bit land
-			if (ped12Diff - ped10Diff*4 > 2)  ped10Diff+=1;
+			if (ped12Diff - ped10DiffI*4 > 2)  
+			  {
+			    ped10Diff+=1;
+			    sprintf(buffer,"%3.0f",ped10Diff);
+			    ped10DiffI=atoi(buffer);
+			  }
 
 			// can't subtract/add more than 15 on 10-bit level
-			if(ped10Diff > 15) ped10Diff = ped10Diff - 4*((ped10Diff-11)/4);
-			
+			if(ped10DiffI > 15) {
+			  sprintf(buffer,"%3.0f",double(ped10DiffI - 11)/4);
+			  int holder = atoi(buffer);
+			  ped10Diff = ped10DiffI - 4*holder;
+			  sprintf(buffer,"%3.0f",ped10Diff);
+			  ped10DiffI = atoi(buffer);
+			}
+
 			//adjust pedestal of tower adc to 24(6) in 12(10) bit
-			if(operation==1) adc10[did-1] -= ped10Diff;
-			if(operation==0) adc10[did-1] += ped10Diff;
-		       			
+			if(operation==1) adc10[did-1] -= ped10DiffI;
+			if(operation==0) adc10[did-1] += ped10DiffI;
+	
 			//now adc10 and adc08 are the 10 and 8 bit pedestal shift adcs
  			adc08[did-1]=adc10[did-1] >> 2;
 			
@@ -436,8 +404,8 @@ void StBemcTriggerSimu::FEEout(){
 			if (config->Contains("online")) HTholder = adc10[did-1] >> bitConvValue[did-1];//drop lowest bits		
 			if (config->Contains("offline")) HTholder = adc10[did-1] >> HT_FEE_Offset;//drop lowest bits
 
-			int HTL = HTholder & 0x1F;//reserve 5 LSB
-			int HTH = HTholder >> 5;//take 6 LSB
+			int HTL = HTholder & 0x1F;// AND HTholder with 00011111 to grab 5 lowest bits
+			int HTH = HTholder >> 5;//Remove lowest 5 bits
 			int B5  = 0;
 			if(HTH>0) B5 = 1;
 			HTadc06[did-1] = HTL+(B5<<5);
@@ -454,23 +422,22 @@ void StBemcTriggerSimu::FEEout(){
 			//Mask out 6 bit adc if that DSM HT/TP bit was masked out
 			if (DSM_HTStatus[tpid]==0) L0_HT_ADC[tpid]=0;
 			if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
-
-			  
-			/*LOG_INFO<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
-				<<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
-				<<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[cr][seq]
-				<<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" PedTargetValue="<<pedTargetValue<<endm;*/
-
+			
+			/* LOG_INFO<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
+				  <<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
+				  <<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[did-1]
+				  <<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" PedTargetValue="<<pedTargetValue<<endm;
+			*/
 		      }
 		    }
 		}
 	    }
 	}
     }
-
+  
   for (tpid=0;tpid<kNPatches;tpid++){ 
-     if (config->Contains("offline")) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
-     if (config->Contains("online")) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+    if (config->Contains("offline")) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+    if (config->Contains("online")) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
   }
 }
 
