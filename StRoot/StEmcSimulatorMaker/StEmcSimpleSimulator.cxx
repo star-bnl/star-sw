@@ -1,4 +1,4 @@
-// $Id: StEmcSimpleSimulator.cxx,v 1.12 2007/09/11 21:49:13 kocolosk Exp $
+// $Id: StEmcSimpleSimulator.cxx,v 1.13 2007/10/08 15:28:36 kocolosk Exp $
 
 #include "StEmcSimpleSimulator.h"
 
@@ -20,28 +20,28 @@ StEmcSimpleSimulator::StEmcSimpleSimulator(StDetectorId det, StEmcSimulatorMode 
     // set some default values depending on the type of detector being simulated
     switch(mDetectorId) {
         case kBarrelEmcTowerId:
-            mMaxADC = 4095;     
+            mMaxADC = 4095.0;     
             mSF[0]  = 14.69;
             mSF[1]  = -0.1022;
             mSF[2]  = 0.7484;
             break;
         
         case kBarrelEmcPreShowerId:
-            mMaxADC = 1023;
+            mMaxADC = 1023.0;
             mSF[0]  = 559.7;
             mSF[1]  = -109.9;
             mSF[2]  = -97.81;
             break;
             
         case kBarrelSmdEtaStripId:
-            mMaxADC = 1023;
+            mMaxADC = 1023.9;
             mSF[0]  = 118500.0;
             mSF[1]  = -32920.0;
             mSF[2]  = 31130.0;
             break;
         
         case kBarrelSmdPhiStripId:
-            mMaxADC = 1023;
+            mMaxADC = 1023.0;
             mSF[0]  = 126000.0;
             mSF[1]  = -13950.0;
             mSF[2]  = 19710.0;
@@ -59,6 +59,8 @@ StEmcSimpleSimulator::StEmcSimpleSimulator(StDetectorId det, StEmcSimulatorMode 
     
     mCalibScale = 1.0;
     mCalibSpread = 0.0;
+    
+    mMaxADCSpread = 0.0;
 }
 
 StEmcRawHit* StEmcSimpleSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
@@ -101,9 +103,11 @@ StEmcRawHit* StEmcSimpleSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
             // finally smear with any specified calibration jitter
             ADC *= mRandom.Gaus(mCalibScale, mCalibSpread);
             
+            
             // check for a valid ADC range
+            double maxADC = mRandom.Gaus(mMaxADC, mMaxADCSpread);
             if(ADC < 0)         ADC = 0.0;
-            if(ADC > mMaxADC)   ADC = mMaxADC;
+            if(ADC > maxADC)    ADC = maxADC;
             
             rawHit->setAdc(static_cast<unsigned int>(ADC));
             
@@ -132,6 +136,10 @@ double StEmcSimpleSimulator::samplingFraction(double eta) {
 
 /*****************************************************************************
  *  $Log: StEmcSimpleSimulator.cxx,v $
+ *  Revision 1.13  2007/10/08 15:28:36  kocolosk
+ *  setMaximumAdc(Spread) methods allow for better simulation of BSMD ADC response
+ *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2507.html
+ *
  *  Revision 1.12  2007/09/11 21:49:13  kocolosk
  *  complete overhaul of the BEMC simulator
  *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2486.html

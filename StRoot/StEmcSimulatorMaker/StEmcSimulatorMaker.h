@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimulatorMaker
 #define STAR_StEmcSimulatorMaker
 
-// $Id: StEmcSimulatorMaker.h,v 1.23 2007/09/15 18:36:35 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.24 2007/10/08 15:28:38 kocolosk Exp $
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -45,6 +45,8 @@ private:
     float                   mPedestalCut[MAXDETBARREL];
     float                   mCalibOffset[MAXDETBARREL];
     float                   mCalibSpread[MAXDETBARREL];
+    float                   mMaxAdc[MAXDETBARREL];
+    float                   mMaxAdcSpread[MAXDETBARREL];
     
     /// The simulators should not add pedestal noise if we're doing embedding.  This flag
     /// is set automatically by looking for StEmcRawMaker or StEmcADCtoEMaker in the chain.
@@ -94,7 +96,13 @@ public:
     
     /// choose the simulator mode for each detector.  Defaults are kPrimarySecondaryFullMode (BTOW, BPRS) and kSimpleMode (SMDs)
     void setSimulatorMode(StDetectorId det, StEmcVirtualSimulator::StEmcSimulatorMode mode) { mSimulatorMode[det-kBarrelEmcTowerId] = mode; }
-
+    
+    /// maximum possible ADC for a channel.  Defaults are 4095 (TOW), 1023 (PRS), 1023 (SMDs)
+    void setMaximumAdc(StDetectorId det, float adc) { mMaxAdc[det-kBarrelEmcTowerId] = adc; }
+    
+    /// maximum possible ADC will be calculated by sampling Gaussian with this spread.  Default is 0 for all detectors.
+    void setMaximumAdcSpread(StDetectorId det, float spread) { mMaxAdcSpread[det-kBarrelEmcTowerId] = spread; }
+    
     StMcEmcHitCollection*   getEmcMcHits(Int_t det) { return mEmcMcHits[det-1]; }
     StMcEmcHitCollection*   getBemcMcHits()  { return getEmcMcHits(BTOW);  }
     StMcEmcHitCollection*   getBprsMcHits()  { return getEmcMcHits(BPRS);  }
@@ -110,7 +118,7 @@ public:
     StBemcTables*           getTables() { return mTables; }
 
     virtual const char*     GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.23 2007/09/15 18:36:35 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.24 2007/10/08 15:28:38 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -121,6 +129,10 @@ public:
 
 /*****************************************************************************
  * $Log: StEmcSimulatorMaker.h,v $
+ * Revision 1.24  2007/10/08 15:28:38  kocolosk
+ * setMaximumAdc(Spread) methods allow for better simulation of BSMD ADC response
+ * http://www.star.bnl.gov/HyperNews-star/get/emc2/2507.html
+ *
  * Revision 1.23  2007/09/15 18:36:35  kocolosk
  * changed defaults so makeFullDetector is false and so zero suppression is turned off for BTOW
  *

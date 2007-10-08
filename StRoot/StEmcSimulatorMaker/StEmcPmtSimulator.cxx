@@ -1,4 +1,4 @@
-// $Id: StEmcPmtSimulator.cxx,v 1.11 2007/09/12 13:31:45 kocolosk Exp $
+// $Id: StEmcPmtSimulator.cxx,v 1.12 2007/10/08 15:28:35 kocolosk Exp $
 
 #include "StEmcPmtSimulator.h"
 
@@ -97,8 +97,9 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
     ADC *= mRandom.Gaus(mCalibScale, mCalibSpread);
     
     // check for a valid ADC range
+    double maxADC = mRandom.Gaus(mMaxADC, mMaxADCSpread);
     if(ADC < 0)         ADC = 0.0;
-    if(ADC > mMaxADC)   ADC = mMaxADC;
+    if(ADC > maxADC)    ADC = maxADC;
     
     rawHit->setAdc(static_cast<unsigned int>(ADC));
     
@@ -114,6 +115,10 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
 
 /*****************************************************************************
  *  $Log: StEmcPmtSimulator.cxx,v $
+ *  Revision 1.12  2007/10/08 15:28:35  kocolosk
+ *  setMaximumAdc(Spread) methods allow for better simulation of BSMD ADC response
+ *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2507.html
+ *
  *  Revision 1.11  2007/09/12 13:31:45  kocolosk
  *  two small changes to suppress compiler warnings
  *

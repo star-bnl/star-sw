@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimpleSimulator
 #define STAR_StEmcSimpleSimulator
 
-// $Id: StEmcSimpleSimulator.h,v 1.7 2007/09/11 21:56:07 kocolosk Exp $
+// $Id: StEmcSimpleSimulator.h,v 1.8 2007/10/08 15:28:37 kocolosk Exp $
 
 #include "TRandom3.h"
 
@@ -33,7 +33,8 @@ protected:
     const StEmcGeom* mGeom;
     
     double  mSF[3];
-    int     mMaxADC;
+    double  mMaxADC;
+    double  mMaxADCSpread;
     
     bool    mEmbeddingMode;
     double  mCalibScale;
@@ -59,6 +60,12 @@ public:
     /// if true, don't add pedestal noise to the hit
     void setEmbeddingMode(bool flag) { mEmbeddingMode = flag; }
     
+    /// mean value for maximum possible ADC
+    void setMaximumAdc(double adc) { mMaxADC = adc; }
+    
+    /// max ADC will be calculated by sampling a Gaussian with this width
+    void setMaximumAdcSpread(double spread) { mMaxADCSpread = spread; }
+    
     /// workhorse function
     virtual StEmcRawHit* makeRawHit(const StMcCalorimeterHit *mcHit);
     
@@ -68,6 +75,10 @@ public:
 
 /*****************************************************************************
  *  $Log: StEmcSimpleSimulator.h,v $
+ *  Revision 1.8  2007/10/08 15:28:37  kocolosk
+ *  setMaximumAdc(Spread) methods allow for better simulation of BSMD ADC response
+ *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2507.html
+ *
  *  Revision 1.7  2007/09/11 21:56:07  kocolosk
  *  remove a couple of unused variables
  *

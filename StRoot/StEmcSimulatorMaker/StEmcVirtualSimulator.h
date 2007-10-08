@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcVirtualSimulator
 #define STAR_StEmcVirtualSimulator
 
-// $Id: StEmcVirtualSimulator.h,v 1.6 2007/09/11 21:58:10 kocolosk Exp $
+// $Id: StEmcVirtualSimulator.h,v 1.7 2007/10/08 15:28:39 kocolosk Exp $
 
 #ifndef ROOT_Rtypes
 #include "Rtypes.h"
@@ -29,6 +29,8 @@ public:
     virtual void setCalibScale(float scale)                             = 0;
     virtual void setCalibSpread(float spread)                           = 0;
     virtual void setEmbeddingMode(bool flag)                            = 0;
+    virtual void setMaximumAdc(double adc)                              = 0;
+    virtual void setMaximumAdcSpread(double spread)                     = 0;
     
     virtual StEmcRawHit* makeRawHit(const StMcCalorimeterHit *mcHit)    = 0;
     
@@ -47,6 +49,10 @@ public:
 
 /*****************************************************************************
  *  $Log: StEmcVirtualSimulator.h,v $
+ *  Revision 1.7  2007/10/08 15:28:39  kocolosk
+ *  setMaximumAdc(Spread) methods allow for better simulation of BSMD ADC response
+ *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2507.html
+ *
  *  Revision 1.6  2007/09/11 21:58:10  kocolosk
  *  small cleanup and extra documentation
  *
