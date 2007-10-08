@@ -56,16 +56,17 @@ class StBemcTriggerSimu : public StTriggerSimu {
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
   Int_t adc12[kNTowers];                   //12 bit adc from StEvent -> NOT pedestal adjusted!
   Int_t adc10[kNTowers],adc08[kNTowers];   //ped adjusted 10 and 8 bit adc
-  Int_t ped12[kNTowers];                   //12 and 10 bit pedestal
+  Float_t ped12[kNTowers];                   //12 and 10 bit pedestal
   Int_t HTadc06[kNTowers];                 //6bit HT ADC for each tower
   unsigned long pedTargetValue;            //value FEE shifts pedestal to (12 bit)
   unsigned long bitConvValue[kNTowers];//gives window used to determine HT6Bit from adc10
   unsigned long LUTbit0[kNCrates][kNSeq],LUTbit1[kNCrates][kNSeq],LUTbit2[kNCrates][kNSeq];
   unsigned long LUTbit3[kNCrates][kNSeq],LUTbit4[kNCrates][kNSeq],LUTbit5[kNCrates][kNSeq];
   unsigned long LUTtag[kNCrates][kNSeq];
-  Float_t ped12Diff,ped10Diff;
-
+  Float_t ped12Diff, ped10Diff;
+  Int_t ped10DiffI;
   Int_t L0_HT_ADC[kNPatches], L0_TP_ADC[kNPatches], L0_TP_PED[kNPatches];
+  char buffer[10];
 
   void getTowerStatus();
   void getDSM_TPStatus();
