@@ -107,6 +107,12 @@ public:
     int       GetCrateAndSequenceFromTriggerPatch(int patchId, int &crate, int &sequence) const; ///< returns the crate number and start point for a given trigger patch
     int       GetTriggerPatchFromJetPatch(int jetPatch, int sequence, int &patchId) const; ///< returns the trigger patch from big jet patch and the sequence in it
     int       GetJetPatchAndSequenceFromTriggerPatch(int patchId, int &jetPatch, int &sequence) const; ///< return the big jet patch and sequence number within it from the
+    
+    /// dsmModule is set to the DSM module containing this trigger patch (0-299)
+    int       GetDSMFromTriggerPatch(int patchId, int &dsmModule) const;
+    
+    /// triggerPatches is an int[10]; contents will be set to the TPs of the supplied DSM #
+    int       GetTriggerPatchesFromDSM(int dsmModule, int *triggerPatches) const;
 
 	//smd methods
     int       GetSmdCoord(int RDO, int posInFiber, int &det, int &m, int &e, int &s, bool print=false) const;///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
@@ -124,9 +130,12 @@ public:
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 2.16 2007/09/11 02:41:37 kocolosk Exp $
+// $Id: StEmcDecoder.h,v 2.17 2007/10/09 18:02:24 kocolosk Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 2.17  2007/10/09 18:02:24  kocolosk
+// two extra support functions for TP <=> DSM module mapping
+//
 // Revision 2.16  2007/09/11 02:41:37  kocolosk
 // added code to fix preshower swaps in 2006 and beyond
 //
