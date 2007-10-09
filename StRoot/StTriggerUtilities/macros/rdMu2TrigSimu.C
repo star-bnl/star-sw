@@ -61,8 +61,8 @@ void rdMu2TrigSimu( int nevents = 1000,
   TChain* tree=muDstMaker->chain(); assert(tree); int nEntries=(int) tree->GetEntries();
   
   //Database -- get a real calibration from the database
-  St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  //St_db_Maker* dbMk = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
+  //St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
+  St_db_Maker* dbMk = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
   
   //If MC then must set database time and date
   // if Endcap fast simu is used tower gains in DB do not matter,JB
@@ -113,13 +113,6 @@ void rdMu2TrigSimu( int nevents = 1000,
     eemcDsmSetup[10]=2; //HTTPthrSelc, 2=use_thres_#1
     simuTrig->eemc->setDsmSetup(eemcDsmSetup);
     
-  }
-
-  //Include in chain if want to test the output of the TriggerMaker
-  if (flagMC==0) {
-    StBemcTesterMaker *bTest=new StBemcTesterMaker("BemcTesterMaker",muDstMaker);
-    bTest->SetHList(BHList);
-    bTest->Histo();
   }
     
   chain->ls(3);
