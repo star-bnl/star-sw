@@ -36,7 +36,6 @@ void rdMu2TrigSimu( int nevents = 1000,
   if (flagMC) assert( !gSystem->Load("StMcEventMaker"));
   if (flagMC) assert( !gSystem->Load("StEmcSimulatorMaker"));
   if (flagMC) assert( !gSystem->Load("StEpcMaker"));
-  assert( !gSystem->Load("StBemcTesterMaker"));
   assert( !gSystem->Load("StTriggerUtilities"));
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
