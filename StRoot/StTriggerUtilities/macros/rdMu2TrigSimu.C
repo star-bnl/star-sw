@@ -60,8 +60,8 @@ void rdMu2TrigSimu( int nevents = 1000,
   TChain* tree=muDstMaker->chain(); assert(tree); int nEntries=(int) tree->GetEntries();
   
   //Database -- get a real calibration from the database
-  //St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  St_db_Maker* dbMk = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
+  St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
+  //St_db_Maker* dbMk = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
   
   //If MC then must set database time and date
   // if Endcap fast simu is used tower gains in DB do not matter,JB
