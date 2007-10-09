@@ -4,19 +4,23 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 1000,
-		      int flagMC=0,
-		      char charfig[100]="online")
-  
+void rdMu2TrigSimu( int nevents = 10,
+		    int flagMC=0,
+		    int useEemc=1, // 0== off
+		    int useBemc=0, // 0== off
+		    char *simConfig="online")  
 {
-  const char *dirIn="";
+  const char *dirIn="runList/";
+  int nFiles = 1; // make this big if you want to read all events from a run
+  
   const char *filter="";
   if (flagMC==1){
     const char *file="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.MuDst.root";
     const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
   }
   if (flagMC==0){
-    const char *file="/star/institutions/iucf/balewski/prodOfficial06_muDst/7098001/st_physics_*.MuDst.root";
+    // const char *file="/star/institutions/iucf/balewski/prodOfficial06_muDst/7098001/st_physics_*.MuDst.root";
+    const char *file="R710052.lis";
   }
   
  
@@ -32,10 +36,12 @@ void rdMu2TrigSimu( int nevents = 1000,
   assert( !gSystem->Load("StDaqLib")); // needed by bemcDb
   assert( !gSystem->Load("StEmcRawMaker"));
   assert( !gSystem->Load("StEmcADCtoEMaker"));
-  if (flagMC) assert( !gSystem->Load("StMcEvent"));
-  if (flagMC) assert( !gSystem->Load("StMcEventMaker"));
-  if (flagMC) assert( !gSystem->Load("StEmcSimulatorMaker"));
-  if (flagMC) assert( !gSystem->Load("StEpcMaker"));
+  if (flagMC) {
+    assert( !gSystem->Load("StMcEvent"));
+    assert( !gSystem->Load("StMcEventMaker"));
+    assert( !gSystem->Load("StEmcSimulatorMaker"));
+    assert( !gSystem->Load("StEpcMaker"));
+  }
   assert( !gSystem->Load("StTriggerUtilities"));
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
@@ -56,12 +62,15 @@ void rdMu2TrigSimu( int nevents = 1000,
   }
 
   //Need MuDstMaker to get data
-  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dirIn,file,"",100,"MuDst");
+  printf(" dirIn=%s=  file=%s=\n",dirIn,file);  
+  StMuDstMaker* muDstMaker =new StMuDstMaker(0,0,dirIn,file,"MuDst.root",nFiles);
+
   TChain* tree=muDstMaker->chain(); assert(tree); int nEntries=(int) tree->GetEntries();
+  cout << "Avaliable number of events  " << nEntries << endl;  
   
   //Database -- get a real calibration from the database
   St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  //St_db_Maker* dbMk = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
+  
   
   //If MC then must set database time and date
   // if Endcap fast simu is used tower gains in DB do not matter,JB
@@ -70,36 +79,35 @@ void rdMu2TrigSimu( int nevents = 1000,
   }
 
   //Endcap DB
-  //StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
+  if(useEemc) new StEEmcDbMaker("eemcDb");
  
   //Get BEMC adc values
-  if (flagMC) {
+  if (flagMC && useBemc) {
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
     StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
     emcSim->setCheckStatus(kBarrelEmcTowerId,false); //this sets offline tower status to 0 default is 1
     emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);//spread gains by 15%
   }
-  if (flagMC==0){
+  if (flagMC==0 && useBemc){
     StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();//for real data this sets calibration and status
   }
 
  //Collect all output histograms 
   TObjArray* HList=new TObjArray; 
-  TObjArray *BHList=new TObjArray;
  
   //Get TriggerMaker
   StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
-  TString *config=new TString(charfig);  //Chose online/offline/expert configuration
+  TString *config=new TString(simConfig);  //Chose online/offline/expert configuration
   simuTrig->setConfig(config);
   simuTrig->setDbMaker(dbMk);
   simuTrig->setHList(HList);
-  //simuTrig->useEemc();
   simuTrig->useBbc();
-  simuTrig->useBemc();
-  if(flagMC){
+  if(useEemc) simuTrig->useEemc();
+  if(useBemc) simuTrig->useBemc();
+  simuTrig->setMC(flagMC);
 
-    simuTrig->setMC(flagMC); // pass one argument to M-C as generic switch
-    
+  if(flagMC && use Eemc){
+    // pass one argument to M-C as generic switch    
     // Endcap specific params -- ok Jan you need to change this to a default "online" setup
     int eemcDsmSetup[20]; // see StEemcTriggerSimu::initRun() for definition
     memset(eemcDsmSetup, 0,sizeof(eemcDsmSetup));// clear all, may be a bad default
@@ -110,27 +118,12 @@ void rdMu2TrigSimu( int nevents = 1000,
     eemcDsmSetup[4]=17; // TPthr1
     eemcDsmSetup[5]=31; // TPthr2
     eemcDsmSetup[10]=2; //HTTPthrSelc, 2=use_thres_#1
-    simuTrig->eemc->setDsmSetup(eemcDsmSetup);
-    
+    simuTrig->eemc->setDsmSetup(eemcDsmSetup);    
   }
     
   chain->ls(3);
   chain->Init();
  
-
-  const int mxTr=13;
-  int myTrgList[mxTr]    ={127580,127551,127271,127571,127821,127831,127575,127622,127221,127611,117705,127501,127652};
-  // prescale as for run 7101015
-  char* myTrgListN[mxTr]={"eemc-http*116","eemc-jp0-mb*221", "eemc-jp1-mb*1", "bemc-jp1*433", 
-			  "bemc-http-mb-fast*1", "eemc-http-mb-fast*1", "bemc-jp0-etot*979" , 
-			  "bemc-jp0-etot-mb-L2jet*2", "bemc-jp1-mb*1", "bemc-http-mb-l2gamma*1",
-			  "jpsi-mb*20", "bemc-jp0-mb*909","eemc-jp0-etot-mb-L2jet*2"};
-  int nR[mxTr],nS[mxTr],nRS[mxTr];
-  memset(nR,0, sizeof(nR));
-  memset(nS,0, sizeof(nR));
-  memset(nRS,0, sizeof(nR));
-
-  int BL1_ADC[6];
   int hold=-1;
   int t1=time(0);
 
@@ -146,6 +139,53 @@ void rdMu2TrigSimu( int nevents = 1000,
       break;
     }
     
+
+  }
+  int t2=time(0);
+  if(t2==t1) t2=t1+1;
+  float tMnt=(t2-t1)/60.;
+  float rate=1.*total/(t2-t1);
+  
+    
+
+  chain->Finish();
+  cout << "****************************************** " << endl;
+  cout << "total number of events  " << total << endl;
+  cout << "****************************************** " << endl;
+
+
+  TString fileMu=file;
+  printf("=%s=\n",fileMu.Data());
+  TString outF=outDir+fileMu.ReplaceAll(".lis",".trgSim");
+  outF+=".hist.root";
+  printf("=%s=\n",outF.Data());
+  hf=new TFile(outF,"recreate");
+  //HList->ls();
+  HList->Write();
+  printf("\n Histo saved -->%s<\n",outF.Data());
+  
+  cout <<Form("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",total,nEntries,rate,tMnt)<<endl;
+
+
+}
+
+
+//========================================
+//========================================
+#if 0
+  const int mxTr=13;
+  int myTrgList[mxTr]    ={127580,127551,127271,127571,127821,127831,127575,127622,127221,127611,117705,127501,127652};
+  // prescale as for run 7101015
+  char* myTrgListN[mxTr]={"eemc-http*116","eemc-jp0-mb*221", "eemc-jp1-mb*1", "bemc-jp1*433", 
+			  "bemc-http-mb-fast*1", "eemc-http-mb-fast*1", "bemc-jp0-etot*979" , 
+			  "bemc-jp0-etot-mb-L2jet*2", "bemc-jp1-mb*1", "bemc-http-mb-l2gamma*1",
+			  "jpsi-mb*20", "bemc-jp0-mb*909","eemc-jp0-etot-mb-L2jet*2"};
+  int nR[mxTr],nS[mxTr],nRS[mxTr];
+  memset(nR,0, sizeof(nR));
+  memset(nS,0, sizeof(nR));
+  memset(nRS,0, sizeof(nR));
+
+  int BL1_ADC[6];
     cout<<Form(" Simu trgSize=%d, firedID:", simuTrig->mTriggerList.size())<<endl;
     int j;
     for(j=0; j<simuTrig->mTriggerList.size();j++) 
@@ -175,40 +215,9 @@ void rdMu2TrigSimu( int nevents = 1000,
         cout <<Form("C:j=%d  trg=%d  R=%d S=%d  RS=%d",j, myTrgList[j],realT,simT,realT && simT )<<endl;
      }
 
-  }
-  int t2=time(0);
-  if(t2==t1) t2=t1+1;
-  float tMnt=(t2-t1)/60.;
-  float rate=1.*total/(t2-t1);
-  
-    
-
-  chain->Finish();
-  cout << "****************************************** " << endl;
-  cout << "total number of events  " << total << endl;
-  cout << "****************************************** " << endl;
-
-  TString outB="BEMC_7098001_Offline.hist.root";
-  bhf=new TFile(outB,"recreate");
-  BHList->Write();
-
-  TString fileMu=file;
-  printf("=%s=\n",fileMu.Data());
-  TString outF=outDir+fileMu.ReplaceAll(".lis",".trgSim");
-  outF+=".hist.root";
-  printf("=%s=\n",outF.Data());
-  hf=new TFile(outF,"recreate");
-  //HList->ls();
-  HList->Write();
-  printf("\n Histo saved -->%s<\n",outF.Data());
-  
-  cout <<Form("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",total,nEntries,rate,tMnt)<<endl;
-
-
    for(j=0;j<mxTr;j++) {
      cout <<Form("SUM  trg=%d  nR=%d nS=%d  nRS=%d  %s", myTrgList[j], nR[j],nS[j],nRS[j],myTrgListN[j])<<endl;
    }
  
-}
 
-
+#endif
