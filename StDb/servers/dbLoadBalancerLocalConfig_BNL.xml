@@ -33,13 +33,12 @@
                         <Host name="db07.star.bnl.gov"  port="3316"/>
                         <Host name="db06.star.bnl.gov"  port="3316"/>
                         <Host name="db08.star.bnl.gov"  port="3316"/>
-                        <Host name="db01.star.bnl.gov" port="3316"/>
                 </Server>
-<!--
-                <Server scope="Analysis" whenActive="day" accessMode="read">
+
+                <Server scope="Analysis" whenActive="night" accessMode="read">
                         <Host name="db01.star.bnl.gov" port="3316"/>
                 </Server> 
--->		
+		
                <Server scope="Analysis" user="fisyak,perev,balewski,bouchet,genevb" accessMode="read">
                         <Host name="db01.star.bnl.gov" port="3316"/>
                 </Server>
