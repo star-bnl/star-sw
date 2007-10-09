@@ -703,6 +703,23 @@ int StEmcDecoder::GetJetPatchAndSequenceFromTriggerPatch(int triggerPatch, int &
     return 1;
 }
 
+int StEmcDecoder::GetDSMFromTriggerPatch(int patchId, int &dsmModule) const {
+    if(patchId < 0 || patchId >= 300) return 0;
+    
+    dsmModule = patchId/10;
+    return 1;
+}
+
+int StEmcDecoder::GetTriggerPatchesFromDSM(int dsmModule, int *triggerPatches) const {
+    if(dsmModule < 0 || dsmModule >= 30) return 0;
+    
+    for(int i=0; i<10; i++) {
+        triggerPatches[i] = dsmModule*10 + i;
+    }
+    
+    return 1;
+}
+
 //--------------------------------------------------------
 /*!
 \param detector is detector number (3 = SMDE, 4 = SMDP)
@@ -1214,9 +1231,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.50 2007/09/11 13:30:13 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.51 2007/10/09 18:02:24 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.51  2007/10/09 18:02:24  kocolosk
+// two extra support functions for TP <=> DSM module mapping
+//
 // Revision 2.50  2007/09/11 13:30:13  kocolosk
 // removed ClassImp that was left in by accident
 //
