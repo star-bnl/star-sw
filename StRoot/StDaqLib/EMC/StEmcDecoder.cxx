@@ -231,7 +231,7 @@ FIXBUG:
         goto FEE;
     }
     
-    if(date >= 20071001)
+    if(date >= 20070101)
     {
         int SmdModules_tmp[8][15]={
                                       {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 0
@@ -1250,9 +1250,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.52 2007/10/10 18:52:13 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.53 2007/10/10 22:12:35 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.53  2007/10/10 22:12:35  kocolosk
+// SMD module date correction: 20070101, not 20071001
+//
 // Revision 2.52  2007/10/10 18:52:13  kocolosk
 // SMD crate mapping fix for Run 7 and beyond from Oleg
 //
