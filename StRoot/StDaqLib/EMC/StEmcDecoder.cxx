@@ -213,7 +213,7 @@ FIXBUG:
         goto FEE;
     }
 
-    if(date >= 20021001) // year 2002/2003 pp and dAu runs
+    if(date >= 20021001 && date < 20070101)
     {
         int SmdModules_tmp[8][15]={
                                       {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 0
@@ -230,6 +230,25 @@ FIXBUG:
                 SmdModules[i][j]=SmdModules_tmp[i][j];
         goto FEE;
     }
+    
+    if(date >= 20071001)
+    {
+        int SmdModules_tmp[8][15]={
+                                      {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 0
+                                      {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},                         //RDO 1
+                                      {31,32,33,34,35,36,37,38,39,40,41,42,43,44,45},                //RDO 2
+                                      {30,29,28,27,26,25,24,23,22,21,20,19,18,17,16},                //RDO 3
+                                      {61,62,63,64,65,66,67,68,69,70,71,72,73,74,75},                //RDO 4
+                                      {76,77,78,79,80,81,82,83,84,85,86,87,88,89,90},                //RDO 5
+                                      {105,104,103,102,101,100,99,98,97,96,95,94,93,92,91},          //RDO 6
+                                      {106,107,108,109,110,111,112,113,114,115,116,117,118,119,120}  //RDO 7
+                                  };
+        for(int i=0;i<8;i++)
+            for(int j=0;j<15;j++)
+                SmdModules[i][j]=SmdModules_tmp[i][j];
+        goto FEE;
+    }
+    
 
 FEE:
     int FEE1_tmp[4]={1,4,3,2};
@@ -1231,9 +1250,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.51 2007/10/09 18:02:24 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.52 2007/10/10 18:52:13 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.52  2007/10/10 18:52:13  kocolosk
+// SMD crate mapping fix for Run 7 and beyond from Oleg
+//
 // Revision 2.51  2007/10/09 18:02:24  kocolosk
 // two extra support functions for TP <=> DSM module mapping
 //
