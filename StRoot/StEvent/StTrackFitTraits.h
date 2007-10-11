@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.12 2004/12/02 23:35:13 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.13 2007/10/11 21:52:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.13  2007/10/11 21:52:32  ullrich
+ * Added member to handle number of fit points for PXL and IST.
+ *
  * Revision 2.12  2004/12/02 23:35:13  ullrich
  * Added misisng setXXX functions.
  *
@@ -106,7 +109,6 @@ public:
     void                   setChi2(float, unsigned int = 0);
     void                   setCovariantMatrix(float[15]);
     
-    
 protected:
     UShort_t mPidHypothesis;       // GeantId
     UShort_t mNumberOfFitPoints;   // obsolete since ITTF
@@ -115,10 +117,12 @@ protected:
     UChar_t  mNumberOfFitPointsFtpcEast;
     UChar_t  mNumberOfFitPointsSvt;
     UChar_t  mNumberOfFitPointsSsd;
+    UChar_t  mNumberOfFitPointsPxl;
+    UChar_t  mNumberOfFitPointsIst;
     Bool_t   mPrimaryVertexUsedInFit;
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,6) 
+    ClassDef(StTrackFitTraits,7) 
 };
 #endif
