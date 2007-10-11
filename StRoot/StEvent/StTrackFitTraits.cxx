@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.15 2004/12/02 23:35:13 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.16 2007/10/11 21:52:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.16  2007/10/11 21:52:32  ullrich
+ * Added member to handle number of fit points for PXL and IST.
+ *
  * Revision 2.15  2004/12/02 23:35:13  ullrich
  * Added misisng setXXX functions.
  *
@@ -74,7 +77,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.15 2004/12/02 23:35:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.16 2007/10/11 21:52:32 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -85,6 +88,8 @@ StTrackFitTraits::StTrackFitTraits()
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsPxl = 0;
+    mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
     fill_n(mChi2, 2, 0);
 }
@@ -100,6 +105,8 @@ StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsPxl = 0;
+    mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
 }
 
@@ -115,6 +122,8 @@ StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsPxl = 0;
+    mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
 }
 
@@ -124,17 +133,25 @@ unsigned short
 StTrackFitTraits::numberOfFitPoints() const
 {
     unsigned short result;
+    //
+    // Old and obsolete
+    //
     if (mNumberOfFitPoints) {
-	result = numberOfFitPoints(kTpcId) +
-	    numberOfFitPoints(kSvtId) +
-	    numberOfFitPoints(kSsdId);
+        result = numberOfFitPoints(kTpcId) +
+	  numberOfFitPoints(kSvtId) +
+	  numberOfFitPoints(kSsdId);
     }
+    //
+    // New version
+    //
     else {
-	result = numberOfFitPoints(kTpcId) +
-	    numberOfFitPoints(kFtpcWestId) +
-	    numberOfFitPoints(kFtpcEastId) +
-	    numberOfFitPoints(kSvtId) +
-	    numberOfFitPoints(kSsdId);	
+        result = numberOfFitPoints(kTpcId) +
+	  numberOfFitPoints(kFtpcWestId) +
+	  numberOfFitPoints(kFtpcEastId) +
+	  numberOfFitPoints(kSvtId) +
+	  numberOfFitPoints(kSsdId) +	
+	  numberOfFitPoints(kPxlId) +
+	  numberOfFitPoints(kIstId);	
     }
     return mPrimaryVertexUsedInFit ? result+1 : result;
 }
@@ -142,6 +159,9 @@ StTrackFitTraits::numberOfFitPoints() const
 unsigned short
 StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 {
+    //
+    // Old and obsolete
+    //
     if (mNumberOfFitPoints) {    
 	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
 	switch (det) {
@@ -160,6 +180,9 @@ StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 	    return 0;
 	}
     }
+    //
+    // New version
+    //
     else {
 	switch (det) {
 	case kFtpcWestId:
@@ -176,6 +199,12 @@ StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 	    break;
 	case kSsdId:
 	    return mNumberOfFitPointsSsd;
+	    break;
+	case kPxlId:
+	    return mNumberOfFitPointsPxl;
+	    break;
+	case kIstId:
+	    return mNumberOfFitPointsIst;
 	    break;
 	default:
 	    return 0;
@@ -251,6 +280,12 @@ StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
     case kSsdId:
 	mNumberOfFitPointsSsd = val;
 	break;
+    case kPxlId:
+	mNumberOfFitPointsPxl = val;
+	break;
+    case kIstId:
+	mNumberOfFitPointsIst = val;
+	break;
     default:
 	break;
     }
@@ -275,7 +310,6 @@ void StTrackFitTraits::setCovariantMatrix(float val[15])
     mCovariantMatrix.Set(15, val);
 }
 
-//______________________________________________________________________________
 void StTrackFitTraits::Streamer(TBuffer &R__b)
 {
 //        Stream an object of class StTrackFitTraits.
