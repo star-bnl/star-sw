@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.10 2007/07/11 23:06:45 perev Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.11 2007/10/11 21:39:56 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.11  2007/10/11 21:39:56  ullrich
+ * Removed unused variable i.
+ *
  * Revision 2.10  2007/07/11 23:06:45  perev
  * Cleanup+fix StXXXTriggerDetector
  *
@@ -46,14 +49,13 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.10 2007/07/11 23:06:45 perev Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.11 2007/10/11 21:39:56 ullrich Exp $";
 
 ClassImp(StBbcTriggerDetector)
     
 StBbcTriggerDetector::StBbcTriggerDetector()
 {
     memset(mBeg,0,mEnd-mBeg);
-    int i;
     mYear=2002;
     mDSMVTX=0;
 }
