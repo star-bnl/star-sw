@@ -21,3 +21,8 @@ For M-C you use for now the same setup, just clone it.
  L2out-20060410
 to store all output L2-histos in _customary_ format. One file per L2-algo.
 Run   binH2rootH program to convert them to regular histograms.
+
+
+5) StL2TriggerSimu provides light interface between L2Maker and L0maker, it has just 2 methods:
+StL2TriggerSimu::Init() connects to L2-maker
+StL2TriggerSimu::isTrigger(int trigId) querries L2maker for given triggerID

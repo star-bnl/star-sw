@@ -1,4 +1,4 @@
-// $Id: StL2EmulatorMaker.h,v 1.1 2007/10/11 00:33:09 balewski Exp $
+// $Id: StL2EmulatorMaker.h,v 1.2 2007/10/11 21:22:57 balewski Exp $
 
 /* \class  StL2EmulatorMaker
 \author Jan Balewski
@@ -60,7 +60,7 @@ class StL2EmulatorMaker : public StMaker {
   void  addTriggerList();
   
  public: 
-  StL2EmulatorMaker(const char *name="L2TrigEmul");
+  StL2EmulatorMaker(const char *name="StarL2Emul");
   virtual       ~StL2EmulatorMaker();
   void printBEtowers();///<  hits in StEvent
   void printBEblocks();///<  regenerated banks
@@ -76,7 +76,7 @@ class StL2EmulatorMaker : public StMaker {
   vector <int> mTriggerList;
   bool    isTrigger(int trigId);   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StL2EmulatorMaker.h,v 1.1 2007/10/11 00:33:09 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StL2EmulatorMaker.h,v 1.2 2007/10/11 21:22:57 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -86,6 +86,9 @@ class StL2EmulatorMaker : public StMaker {
 #endif
 
 // $Log: StL2EmulatorMaker.h,v $
+// Revision 1.2  2007/10/11 21:22:57  balewski
+// added L2-->L0 interface class
+//
 // Revision 1.1  2007/10/11 00:33:09  balewski
 // L2algo added
 //
