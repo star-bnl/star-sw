@@ -94,7 +94,7 @@ void StBemcTriggerSimu::InitRun(int runnumber){
 void  
 StBemcTriggerSimu::Clear(){
   
-  LOG_INFO <<"StBemcTriggerSimu::Clear()"<<endm;
+  LOG_DEBUG <<"StBemcTriggerSimu::Clear()"<<endm;
 
   for (did=1; did<=kNTowers; did++){
     adc08[did-1]=0;
@@ -294,7 +294,7 @@ void StBemcTriggerSimu::getLUT(){
 //==================================================
 void StBemcTriggerSimu::Make(){
 
-  LOG_INFO<<"StBemcTriggerSimu::Make()"<<endl;
+  LOG_INFO<<"StBemcTriggerSimu::Make()"<<endm;
 
   Clear();
   FEEout();

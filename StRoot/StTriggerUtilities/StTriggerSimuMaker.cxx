@@ -6,7 +6,8 @@
 // Goal: generate trigger response based on ADC
 // implemented BEMC,EEMC,....
 // >StTriggerSimu/*SUB*/St*SUB*TriggerSimu.h
-// >where *SUB* are the subsystems: Eemc, Bemc, Bbc, L2,.... 
+// >where *SUB* are the subsystems: Eemc, Bemc, Bbc,.... 
+// > L2 is served by a separate maker
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -58,8 +59,9 @@ StTriggerSimuMaker::~StTriggerSimuMaker(){
 
 //________________________________________________
 void 
-StTriggerSimuMaker::useEemc(){
-  eemc=new StEemcTriggerSimu;
+StTriggerSimuMaker::useEemc(int flag){
+  eemc=new StEemcTriggerSimu();
+  eemc->setConfig(flag);
   mSimulators.push_back(eemc);
 }
 
@@ -257,9 +259,12 @@ void StTriggerSimuMaker::setTableMaker(StBemcTables *bemcTab){
   bemc->setTableMaker(bemcTab);
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.12 2007/09/25 18:19:35 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.13 2007/10/11 00:32:56 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.13  2007/10/11 00:32:56  balewski
+// L2algo added
+//
 // Revision 1.12  2007/09/25 18:19:35  rfatemi
 // Update for TP work
 //

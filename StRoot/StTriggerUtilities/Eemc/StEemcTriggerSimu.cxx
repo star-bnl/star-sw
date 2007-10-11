@@ -36,7 +36,6 @@ changes to be done in bbc-code, Jan
 #include <StEEmcDbMaker/cstructs/eemcConstDB.hh>
 
 
-
 #include "StEEmcUtil/EEdsm/EEfeeTPTree.h" 
 #include "StEEmcUtil/EEdsm/EEfeeTP.h" 
 #include "StEEmcUtil/EEdsm/EEdsm0Tree.h"
@@ -90,6 +89,7 @@ StEemcTriggerSimu::Clear(){
   dsm1TreeADC->clear();
   dsm2TreeADC->clear();
 
+  // always clear, despite of setup
   dsm0TreeTRG->clear();
   dsm1TreeTRG->clear();
   dsm2TreeTRG->clear();
@@ -107,7 +107,9 @@ StEemcTriggerSimu::Init(){
   mDbE= (StEEmcDbMaker*) StMaker::GetChain()->GetMaker("eemcDb");
   assert(mDbE);
   //  assert( mBemcEsum5bit);
-  LOG_INFO <<Form("Eemc::Init() MC_flag=%d",mMCflag)<<endm;
+  LOG_INFO <<Form("Eemc::Init() MC_flag=%d, conf_flag=%d",mMCflag, mConfig)<<endm;
+  assert(mConfig>=kOnlyAdc);
+  assert(mConfig<=kAdcCompareTrig);
 }
   
 //==================================================
@@ -161,7 +163,7 @@ StEemcTriggerSimu::InitRun(int runnumber){
   LOG_INFO<<Form("Eemc::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
 
-  EemcTrigUtil::getFeePed4("setup/EemcFeePed/", yyyymmdd, hhmmss, mxChan, feePed);
+  EemcTrigUtil::getFeePed4("L0setup/EemcFeePed/", yyyymmdd, hhmmss, mxChan, feePed);
 
  
   int JPthr[nThr];
@@ -213,20 +215,18 @@ void
 StEemcTriggerSimu::Make(){
   nInpEve++;  
   mDumpEve=eveId%1==0;
+
 #if 0
+  assert(mMCflag==0); // not sure what will it do for MC
   StMuDstMaker* muMk = (StMuDstMaker*) StMaker::GetChain()->Maker("MuDst");
-  assert(muMk);
-  
+  assert(muMk);  
   StEventInfo &info=muMk->muDst()->event()->eventInfo();
   //  mEleT->info.zVertex=ver.z();
   eveId=info.id();
-   StMuTriggerIdCollection *tic=&(muMk->muDst()->event()->triggerIdCollection());
-
-
+  StMuTriggerIdCollection *tic=&(muMk->muDst()->event()->triggerIdCollection());
   std::vector<unsigned int> trgL=(tic->nominal()).triggerIds();
   //  printf("   trigL len=%d \n",trgL.size());
   uint ii;
-  
   for(ii=0;ii<trgL.size();ii++){ // collect all trigger ID's
     TString cID=Form("%d",trgL[ii]);
     hA[1]->Fill(cID.Data(),1.);
@@ -239,7 +239,7 @@ StEemcTriggerSimu::Make(){
 
   int i;
   //  for(i=0;i<90;i++) feeTPTreeADC->TP(i)->print(3); // prints FEE output for 720 towers
-
+  
   // printf("...... populate inputs of dsm0TreeADC...\n");
   for(i=0;i<EEfeeTPTree::mxTP;i++) {
     dsm0TreeADC->setInp12bit(i,feeTPTreeADC->TP(i)->getOut12bit());
@@ -277,36 +277,38 @@ StEemcTriggerSimu::Make(){
     
   // *********** END of Emulation of trigger based on ADC ************ 
 
-  if(mMCflag==0){ 
+  if(mMCflag==0 && mConfig>=kAdcAndTrig){ 
     // acquire true DSM values  only for real events
     //........... QA of online trigger data ...............
     getDsm0123inputs(); // this tree contains trigger data
     dsm0TreeTRG->compute();
     dsm1TreeTRG->compute(); 
     dsm2TreeTRG->compute(); 
+
+
+    //if(mDumpEve)   dsm0TreeTRG->print();
+    //if(mDumpEve)   dsm1TreeTRG->print();
+    //if(mDumpEve)   dsm2TreeTRG->print();  
+    //if(mDumpEve)   dsm3TRG->print();  
+    
+    //dsm2TreeADC->print(); 
+    //dsm2TreeTRG->print(); 
+    if(mConfig>=  kAdcCompareTrig) {
+      compareADCfee_TRG0(); 
+      compareADC0_TRG1();
+      compareADC1_TRG2();
+      compareADC2_TRG3();
+      
+      compareTRG0_TRG1(); 
+      compareTRG1_TRG2(); 
+      compareTRG2_TRG3();
+    }  
   }
 
-  //if(mDumpEve)   dsm0TreeTRG->print();
-  //if(mDumpEve)   dsm1TreeTRG->print();
-  //if(mDumpEve)   dsm2TreeTRG->print();  
-  //if(mDumpEve)   dsm3TRG->print();  
-  
-  //dsm2TreeADC->print(); 
-  //dsm2TreeTRG->print(); 
-
-  compareADCfee_TRG0(); 
-  compareADC0_TRG1();
-  compareADC1_TRG2();
-  compareADC2_TRG3();
-
-  compareTRG0_TRG1(); 
-  compareTRG1_TRG2(); 
-  compareTRG2_TRG3();
-  
   DSM2EsumSpectra();
 
 
-  dsm2TreeADC->print(0); 
+  // dsm2TreeADC->print(0); 
   
   //if(mDumpEve) printf("\nzzzzz===================================================\n\n");
   
@@ -493,6 +495,9 @@ StEemcTriggerSimu::getEemcFeeMask(){
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.8  2007/10/11 00:33:03  balewski
+// L2algo added
+//
 // Revision 1.7  2007/09/24 18:08:42  kocolosk
 // added inheritance from ABC clss StTriggerSimu
 //
