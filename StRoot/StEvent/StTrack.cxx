@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.30 2006/08/28 17:04:46 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.31 2007/10/11 21:51:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.31  2007/10/11 21:51:40  ullrich
+ * Added member to handle number of possible points fpr PXL and IST.
+ *
  * Revision 2.30  2006/08/28 17:04:46  fisyak
  * Don't check StPhysicalHelixD quality for Beam Background tracks (flag() == 901)
  *
@@ -119,7 +122,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.30 2006/08/28 17:04:46 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.31 2007/10/11 21:51:40 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -134,6 +137,8 @@ StTrack::StTrack()
     mNumberOfPossiblePointsFtpcEast = 0;
     mNumberOfPossiblePointsSvt = 0;
     mNumberOfPossiblePointsSsd = 0;
+    mNumberOfPossiblePointsPxl = 0;
+    mNumberOfPossiblePointsIst = 0;
     mGeometry = 0;
     mOuterGeometry = 0;
     mDetectorInfo = 0;
@@ -158,6 +163,8 @@ StTrack::StTrack(const dst_track_st& track) :
     mNumberOfPossiblePointsFtpcEast = 0;
     mNumberOfPossiblePointsSvt = 0;
     mNumberOfPossiblePointsSsd = 0;
+    mNumberOfPossiblePointsPxl = 0;
+    mNumberOfPossiblePointsIst = 0;
 }
 
 StTrack::StTrack(const StTrack& track)
@@ -173,6 +180,8 @@ StTrack::StTrack(const StTrack& track)
     mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
     mNumberOfPossiblePointsSvt = track.mNumberOfPossiblePointsSvt;
     mNumberOfPossiblePointsSsd = track.mNumberOfPossiblePointsSsd;
+    mNumberOfPossiblePointsPxl = track.mNumberOfPossiblePointsPxl;
+    mNumberOfPossiblePointsIst = track.mNumberOfPossiblePointsIst;
     mTopologyMap = track.mTopologyMap;
     mFitTraits = track.mFitTraits;
     if (track.mGeometry)
@@ -198,11 +207,13 @@ StTrack::operator=(const StTrack& track)
         mImpactParameter = track.mImpactParameter;
         mLength = track.mLength;
         mNumberOfPossiblePoints = track.mNumberOfPossiblePoints;
-	mNumberOfPossiblePointsTpc = track.mNumberOfPossiblePointsTpc;
-	mNumberOfPossiblePointsFtpcWest = track.mNumberOfPossiblePointsFtpcWest;
-	mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
-	mNumberOfPossiblePointsSvt = track.mNumberOfPossiblePointsSvt;
-	mNumberOfPossiblePointsSsd = track.mNumberOfPossiblePointsSsd;
+        mNumberOfPossiblePointsTpc = track.mNumberOfPossiblePointsTpc;
+        mNumberOfPossiblePointsFtpcWest = track.mNumberOfPossiblePointsFtpcWest;
+        mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
+        mNumberOfPossiblePointsSvt = track.mNumberOfPossiblePointsSvt;
+        mNumberOfPossiblePointsSsd = track.mNumberOfPossiblePointsSsd;
+        mNumberOfPossiblePointsPxl = track.mNumberOfPossiblePointsPxl;
+        mNumberOfPossiblePointsIst = track.mNumberOfPossiblePointsIst;
         mTopologyMap = track.mTopologyMap;
         mFitTraits = track.mFitTraits;
         if (mGeometry) delete mGeometry;
@@ -286,17 +297,25 @@ unsigned short
 StTrack::numberOfPossiblePoints() const
 {
     unsigned short result;
+    //
+    //  Old (obsolete)
+    //
     if (mNumberOfPossiblePoints) {
-	result = numberOfPossiblePoints(kTpcId) +
-	    numberOfPossiblePoints(kSvtId) +
-	    numberOfPossiblePoints(kSsdId);
+        result = numberOfPossiblePoints(kTpcId) +
+	       numberOfPossiblePoints(kSvtId) +
+	       numberOfPossiblePoints(kSsdId);
     }
+    //
+    //  New, indicated by mNumberOfPossiblePoints=0
+    //
     else {
-	result = numberOfPossiblePoints(kTpcId) +
-	    numberOfPossiblePoints(kFtpcWestId) +
-	    numberOfPossiblePoints(kFtpcEastId) +
-	    numberOfPossiblePoints(kSvtId) +
-	    numberOfPossiblePoints(kSsdId);	
+        result = numberOfPossiblePoints(kTpcId) +
+	       numberOfPossiblePoints(kFtpcWestId) +
+	       numberOfPossiblePoints(kFtpcEastId) +
+	       numberOfPossiblePoints(kSvtId) +
+	       numberOfPossiblePoints(kSsdId) +	
+	       numberOfPossiblePoints(kPxlId) +
+	       numberOfPossiblePoints(kIstId);	
     }
     if (type() == primary || type() == estPrimary) result++;
     return result;
@@ -305,6 +324,9 @@ StTrack::numberOfPossiblePoints() const
 unsigned short
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
+    //
+    //  Old (obsolete)
+    //
     if (mNumberOfPossiblePoints) {    
 	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
 	switch (det) {
@@ -323,6 +345,9 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
 	    return 0;
 	}
     }
+    //
+    //  New, indicated by mNumberOfPossiblePoints=0
+    //
     else {
 	switch (det) {
 	case kFtpcWestId:
@@ -339,6 +364,12 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
 	    break;
 	case kSsdId:
 	    return mNumberOfPossiblePointsSsd;
+	    break;
+	case kPxlId:
+	    return mNumberOfPossiblePointsPxl;
+	    break;
+	case kIstId:
+	    return mNumberOfPossiblePointsIst;
 	    break;
 	default:
 	    return 0;
@@ -443,7 +474,15 @@ void
 StTrack::setDetectorInfo(StTrackDetectorInfo* val) { mDetectorInfo = val; }
 
 void         
-StTrack::setNumberOfPossiblePoints(unsigned short val) {mNumberOfPossiblePoints = val;}
+StTrack::setNumberOfPossiblePoints(unsigned short val)
+{
+    //
+    // This should not be used anymore. This number is not encoded
+    // in a single word given the large number of detectors we have now.
+    // Use the version below.
+    //
+    mNumberOfPossiblePoints = val;
+}
 
 void
 StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
@@ -464,6 +503,12 @@ StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
 	break;
     case kSsdId:
 	mNumberOfPossiblePointsSsd = val;
+	break;
+    case kPxlId:
+	mNumberOfPossiblePointsPxl = val;
+	break;
+    case kIstId:
+	mNumberOfPossiblePointsIst = val;
 	break;
     default:
 	break;
