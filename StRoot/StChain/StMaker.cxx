@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.200 2007/10/04 02:50:01 perev Exp $
+// $Id: StMaker.cxx,v 1.201 2007/10/11 21:37:20 perev Exp $
 //
 //
 /*!
@@ -186,6 +186,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr11",      20190101,    14, "upgr11",   ""},
   {"upgr12",      20190101,    15, "upgr12",   ""},
   {"upgr13",      20190101,    16, "upgr13",   ""},
+  {"upgr14",      20190101,    17, "upgr14",   ""},
   // Future development:
   {"simpletpc",   20200102,    16, "simpletpc",""},
   {"u2007",       20200102,    17, "u2007",    "y2007 +  one TOF"}, // advertized simu 20061101
@@ -1817,6 +1818,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.201  2007/10/11 21:37:20  perev
+// Add upgr14
+//
 // Revision 1.200  2007/10/04 02:50:01  perev
 // Geometries u2007 & u2007a added
 //
