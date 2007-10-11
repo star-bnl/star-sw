@@ -19,12 +19,15 @@ class EemcHttpInfo;
 class TH1;
 
 class StEemcTriggerSimu : public StTriggerSimu {
+ public:
+  enum {kOnlyAdc=0,kAdcAndTrig, kAdcCompareTrig};
+  void setConfig(int x) {mConfig=x;}
  private:
   StEEmcDbMaker    *mDbE;
   //int mMCflag; // set yo 0 for real data
   int * mBemcEsum5bit; // output from Bemc emulation
   int * mExternDsmSetup;
-
+  int mConfig; // see enum
   enum {nThr=3};
   int mHTthr[nThr], mTPthr[nThr],mHTTPthrSelc;
 
@@ -52,6 +55,7 @@ class StEemcTriggerSimu : public StTriggerSimu {
   EEfeeTPTree *feeTPTreeADC;
   EEdsm0Tree  * dsm0TreeADC;
   EEdsm1Tree  * dsm1TreeADC; 
+ public:
   EMCdsm2Tree * dsm2TreeADC;
 
  private:
@@ -60,6 +64,7 @@ class StEemcTriggerSimu : public StTriggerSimu {
   EEdsm1Tree  *dsm1TreeTRG;
   EMCdsm2Tree *dsm2TreeTRG;
   EEdsm3      *dsm3TRG;
+ private:
 
   // various QA methods validating inputs to DSMs
   void compareTRG0_TRG1();
@@ -97,6 +102,9 @@ class StEemcTriggerSimu : public StTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.5  2007/10/11 00:33:03  balewski
+// L2algo added
+//
 // Revision 1.4  2007/09/24 18:08:43  kocolosk
 // added inheritance from ABC clss StTriggerSimu
 //

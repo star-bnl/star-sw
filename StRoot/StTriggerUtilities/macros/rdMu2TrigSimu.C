@@ -5,13 +5,14 @@
 int total=0;
 
 void rdMu2TrigSimu( int nevents = 10,
-		    int flagMC=0,
+		    int flagMC=0, // 0== off
 		    int useEemc=1, // 0== off
-		    int useBemc=0, // 0== off
+		    int useBemc=1, // 0== off
+		    int useL2=1, // 0== off
 		    char *simConfig="online")  
 {
   const char *dirIn="runList/";
-  int nFiles = 1; // make this big if you want to read all events from a run
+  int nFiles = 2; // make this big if you want to read all events from a run
   
   const char *filter="";
   if (flagMC==1){
@@ -78,9 +79,23 @@ void rdMu2TrigSimu( int nevents = 10,
     dbMk->SetDateTime(20070101,1 );
   }
 
+ //Collect all output histograms 
+  TObjArray* HList=new TObjArray; 
+
   //Endcap DB
   if(useEemc) new StEEmcDbMaker("eemcDb");
  
+#if 0 // I'll clean it up next time, Jan
+  /*  Activate it only once to _produce_ L2 input gain files from off-line DB
+      will write to directory: L2setup-yyyymmdd/
+      yyyymmdd depends on the DB time stamp 
+   */
+  StEmcAsciiDbMaker * asciiDb=new StEmcAsciiDbMaker();
+  // asciiDb->setGain60Et(); //force  gains for B+ETOW , ignore oflDB
+  asciiDb->SetHList(HList);
+#endif
+
+
   //Get BEMC adc values
   if (flagMC && useBemc) {
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
@@ -92,8 +107,6 @@ void rdMu2TrigSimu( int nevents = 10,
     StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();//for real data this sets calibration and status
   }
 
- //Collect all output histograms 
-  TObjArray* HList=new TObjArray; 
  
   //Get TriggerMaker
   StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
@@ -101,12 +114,13 @@ void rdMu2TrigSimu( int nevents = 10,
   simuTrig->setConfig(config);
   simuTrig->setDbMaker(dbMk);
   simuTrig->setHList(HList);
+  simuTrig->setMC(flagMC); // must be before individual detectors, to be passed
   simuTrig->useBbc();
-  if(useEemc) simuTrig->useEemc();
+  if(useEemc) simuTrig->useEemc(0);  //default=0:just process ADC, 1,2:compare w/ trigData, see .h
   if(useBemc) simuTrig->useBemc();
-  simuTrig->setMC(flagMC);
 
-  if(flagMC && use Eemc){
+
+     if(flagMC && useEemc){
     // pass one argument to M-C as generic switch    
     // Endcap specific params -- ok Jan you need to change this to a default "online" setup
     int eemcDsmSetup[20]; // see StEemcTriggerSimu::initRun() for definition
@@ -120,11 +134,23 @@ void rdMu2TrigSimu( int nevents = 10,
     eemcDsmSetup[10]=2; //HTTPthrSelc, 2=use_thres_#1
     simuTrig->eemc->setDsmSetup(eemcDsmSetup);    
   }
+
+
+  if(useL2) {
+    /* 
+       reads all input/setup files from  L2setup-yyyymmdd/
+       writes all output files to L2out-yyyymmdd 
+       depending on the DB time stamp 
+       both dierectiorie MUST exist, setup must be reasonable
+    */
+    StL2EmulatorMaker* simL2Mk= new StL2EmulatorMaker;
+    //simL2Mk->useStEvent(); // default : use muDst
+  }
+
     
   chain->ls(3);
   chain->Init();
  
-  int hold=-1;
   int t1=time(0);
 
   for (Int_t iev=0;iev<nevents; iev++) {
@@ -173,6 +199,9 @@ void rdMu2TrigSimu( int nevents = 10,
 //========================================
 //========================================
 #if 0
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+clean it up, Jan
+
   const int mxTr=13;
   int myTrgList[mxTr]    ={127580,127551,127271,127571,127821,127831,127575,127622,127221,127611,117705,127501,127652};
   // prescale as for run 7101015

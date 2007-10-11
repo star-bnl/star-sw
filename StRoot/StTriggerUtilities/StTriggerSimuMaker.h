@@ -32,13 +32,14 @@ class StBbcTriggerSimu;
 class StEemcTriggerSimu;
 class StBemcTriggerSimu;
 class St_db_Maker;
+class StTriggerSimu;
 
 class StTriggerSimuMaker : public StMaker {
 
  private:
   
   TString *config;
-  int mYear,mMCflag; // set yo 0 for real data
+  int mYear,mMCflag; // set mcFlag=0 for real data
   StEvent *event;
   St_db_Maker *mDbMk;
   StBemcTables *mTables;
@@ -53,7 +54,7 @@ class StTriggerSimuMaker : public StMaker {
   StTriggerSimuMaker(const char *name="StarTrigSimu");
   virtual           ~StTriggerSimuMaker();
   
-  void    useEemc();
+  void    useEemc(int flag=0);  //0:just process ADC, 1:compare w/ trigData, see enum in Eemc class
   void    useBbc();
   void    useBemc();
   void    setMC(int x) {mMCflag=x;}
@@ -86,9 +87,12 @@ class StTriggerSimuMaker : public StMaker {
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.9 2007/09/25 18:19:35 rfatemi Exp $
+// $Id: StTriggerSimuMaker.h,v 1.10 2007/10/11 00:32:56 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.10  2007/10/11 00:32:56  balewski
+// L2algo added
+//
 // Revision 1.9  2007/09/25 18:19:35  rfatemi
 // Update for TP work
 //
