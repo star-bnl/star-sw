@@ -60,23 +60,38 @@
 #define kPhmdCpvIdentifier            25
 #define kPhmdIdentifier               26
 
+
+/*
+**  The following are for the inner and forward
+**  tracking upgrades. tu (Oct 11, 2007)
+*/
+#define kPxlIdentifier                27
+#define kIstIdentifier                28
+#define kFgtIdentifier                29
+
+ 
 /*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
 **  happen or not. tu
 */
-
+/*
 #define kHftIdentifier                27
 #define kIstIdentifier                28
 #define kIgtIdentifier                29
 #define kFstIdentifier                30
 #define kFgtIdentifier                31
 #define kHpdIdentifier                32
+*/
+
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.5 2006/08/15 14:34:02 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.6 2007/10/11 21:50:19 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.6  2007/10/11 21:50:19  ullrich
+** Added new enums for PXL and IST detectors.
+**
 ** Revision 2.5  2006/08/15 14:34:02  ullrich
 ** Added kHpdIdentifier.
 **

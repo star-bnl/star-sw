@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.33 2007/02/22 20:44:13 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.34 2007/10/11 21:50:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.34  2007/10/11 21:50:19  ullrich
+ * Added new enums for PXL and IST detectors.
+ *
  * Revision 2.33  2007/02/22 20:44:13  ullrich
  * Added l2DisplacedVertex to StL2AlgorithmId.
  *
@@ -174,12 +177,9 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kSsdSvtId    = kSsdSvtIdentifier,
                    kPhmdCpvId   = kPhmdCpvIdentifier,
                    kPhmdId      = kPhmdIdentifier,
-	         kHftId = kHftIdentifier,
-	         kIstId = kIstIdentifier,
-	         kIgtId = kIgtIdentifier,
-	         kFstId = kFstIdentifier,
-	         kFgtId = kFgtIdentifier,
-	         kHpdId = kHpdIdentifier,
+	         kPxlId       = kPxlIdentifier,
+	         kIstId       = kIstIdentifier,
+	         kFgtId       = kFgtIdentifier,
 	         kMaxDetectorId};
 
 /*!
