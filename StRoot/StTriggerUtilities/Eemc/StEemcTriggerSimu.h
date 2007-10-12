@@ -7,7 +7,7 @@
 #include <TObject.h> 
 #include <vector>
 
-#include "StTriggerSimu.h"
+#include "StTriggerUtilities/StVirtualTriggerSimu.h"
 
 class StEEmcDbMaker;
 class EEfeeTPTree;
@@ -18,7 +18,7 @@ class EEdsm3;
 class EemcHttpInfo;
 class TH1;
 
-class StEemcTriggerSimu : public StTriggerSimu {
+class StEemcTriggerSimu : public StVirtualTriggerSimu {
  public:
   enum {kOnlyAdc=0,kAdcAndTrig, kAdcCompareTrig};
   void setConfig(int x) {mConfig=x;}
@@ -100,6 +100,10 @@ class StEemcTriggerSimu : public StTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.7  2007/10/12 17:12:43  kocolosk
+// rename ABC class for subdetector trigger simulators
+// StTriggerSimu => StVirtualTriggerSimu
+//
 // Revision 1.6  2007/10/12 16:41:04  balewski
 // *** empty log message ***
 //

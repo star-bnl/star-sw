@@ -15,7 +15,7 @@
 #include "StMaker.h"
 #endif
 
-#include "StTriggerSimu.h"
+#include "StTriggerUtilities/StVirtualTriggerSimu.h"
 
 class StChain;
 class StMuDst;
@@ -24,7 +24,7 @@ class StEvent;
 class StMuEvent;
 class StBbcTriggerDetector;
 
-class StBbcTriggerSimu : public StTriggerSimu {
+class StBbcTriggerSimu : public StVirtualTriggerSimu {
 
  private:
  StMuDstMaker *muDstMaker;
@@ -56,6 +56,10 @@ class StBbcTriggerSimu : public StTriggerSimu {
 
 //
 // $Log: StBbcTriggerSimu.h,v $
+// Revision 1.5  2007/10/12 17:12:38  kocolosk
+// rename ABC class for subdetector trigger simulators
+// StTriggerSimu => StVirtualTriggerSimu
+//
 // Revision 1.4  2007/09/24 18:08:30  kocolosk
 // added inheritance from ABC clss StTriggerSimu
 //
