@@ -4,7 +4,7 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 10,
+void rdMu2TrigSimu( int nevents = 7,
 		    int flagMC=0, // 0== off
 		    int useEemc=1, // 0== off
 		    int useBemc=1, // 0== off
@@ -118,9 +118,9 @@ void rdMu2TrigSimu( int nevents = 10,
   simuTrig->useBbc();
   if(useEemc) simuTrig->useEemc(0);  //default=0:just process ADC, 1,2:compare w/ trigData, see .h
   if(useBemc) simuTrig->useBemc();
+  if(useL2)   simuTrig->useL2();
 
-
-     if(flagMC && useEemc){
+  if(flagMC && useEemc){
     // pass one argument to M-C as generic switch    
     // Endcap specific params -- ok Jan you need to change this to a default "online" setup
     int eemcDsmSetup[20]; // see StEemcTriggerSimu::initRun() for definition
@@ -135,7 +135,6 @@ void rdMu2TrigSimu( int nevents = 10,
     simuTrig->eemc->setDsmSetup(eemcDsmSetup);    
   }
 
-
   if(useL2) {
     /* 
        reads all input/setup files from  L2setup-yyyymmdd/
@@ -146,8 +145,8 @@ void rdMu2TrigSimu( int nevents = 10,
     StL2EmulatorMaker* simL2Mk= new StL2EmulatorMaker;
     //simL2Mk->useStEvent(); // default : use muDst
   }
+     
 
-    
   chain->ls(3);
   chain->Init();
  

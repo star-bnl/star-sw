@@ -62,7 +62,7 @@ StBemcTriggerSimu::~StBemcTriggerSimu(){
 //==================================================
 void StBemcTriggerSimu::Init(){
  
-  LOG_INFO <<"StBemcTriggerSimu::Init()"<<endm;
+  LOG_INFO <<"Bemc::Init()"<<endm;
 
 }
 
