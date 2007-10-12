@@ -19,39 +19,28 @@
 #include "StMaker.h"
 #endif
 
-#define kNPatches 300
-#define kNJet 12
-#define kNTowers 4800
-#define k12bits 4096
-#define kNCrates 30
-#define kNChannels 160
-
 class StEvent;
 class StBemcTables;
-class StBbcTriggerSimu;
-class StEemcTriggerSimu;
-class StBemcTriggerSimu;
-class StL2TriggerSimu;
 class St_db_Maker;
-class StTriggerSimu;
+
+class StVirtualTriggerSimu;
+class StBbcTriggerSimu;
+class StBemcTriggerSimu;
+class StEemcTriggerSimu;
+class StL2TriggerSimu;
 
 class StTriggerSimuMaker : public StMaker {
-
- private:
-  
-  TString *config;
+private:
+  TString mConfig;
   int mYear,mMCflag; // set mcFlag=0 for real data
-  StEvent *event;
+  
+  /// useful pointers
   St_db_Maker *mDbMk;
-  StBemcTables *mTables;
-  void addTriggerList();
-  void fillStEvent(StEvent*);
-  void setTableMaker(StBemcTables *bemcTab); 
+    
+  /// collection of subdetector trigger simulators, individual pointers also available publicly below
+  std::vector<StVirtualTriggerSimu*> mSimulators;
   
-  std::vector<StTriggerSimu*> mSimulators;
-  
- public:
-  
+public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
   virtual           ~StTriggerSimuMaker();
   
@@ -69,30 +58,28 @@ class StTriggerSimuMaker : public StMaker {
   
   TObjArray  *mHList; // output histo access point
   void setHList(TObjArray * x){mHList=x;}
-  bool isTrigger(int trigId);   
+  bool isTrigger(int trigId);
   vector <int> mTriggerList;
-  void setDbMaker(St_db_Maker *dbMk) { mDbMk=dbMk;}
-  void setConfig(TString *CONFIG) {config=CONFIG;}
+  void setConfig(const char *config) {mConfig=config;}
   
   //hang all activated trigger detectors below
-  StEemcTriggerSimu *eemc;
   StBbcTriggerSimu  *bbc;
   StBemcTriggerSimu *bemc;
+  StEemcTriggerSimu *eemc;
   StL2TriggerSimu   *lTwo;
   
-  Int_t BEMC_L0_HT_ADC[kNPatches],BEMC_L0_TP_ADC[kNPatches];
-  
   ClassDef(StTriggerSimuMaker,0)
-    
 };
-   
+
 #endif
 
-
-
-// $Id: StTriggerSimuMaker.h,v 1.11 2007/10/12 14:36:01 balewski Exp $
+// $Id: StTriggerSimuMaker.h,v 1.12 2007/10/12 17:19:17 kocolosk Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.12  2007/10/12 17:19:17  kocolosk
+// move BEMC-specific code to StBemcTriggerSimu
+// replace some config methods like setDbMaker with code that finds the Maker automatically
+//
 // Revision 1.11  2007/10/12 14:36:01  balewski
 // added L2 interface
 //
