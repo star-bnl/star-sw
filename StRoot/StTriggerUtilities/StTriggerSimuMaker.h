@@ -31,7 +31,7 @@ class StL2TriggerSimu;
 
 class StTriggerSimuMaker : public StMaker {
 private:
-  TString mConfig;
+
   int mYear,mMCflag; // set mcFlag=0 for real data
   
   /// useful pointers
@@ -60,7 +60,6 @@ public:
   void setHList(TObjArray * x){mHList=x;}
   bool isTrigger(int trigId);
   vector <int> mTriggerList;
-  void setConfig(const char *config) {mConfig=config;}
   
   //hang all activated trigger detectors below
   StBbcTriggerSimu  *bbc;
@@ -73,9 +72,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.12 2007/10/12 17:19:17 kocolosk Exp $
+// $Id: StTriggerSimuMaker.h,v 1.13 2007/10/12 20:10:23 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.13  2007/10/12 20:10:23  balewski
+// cleanup
+//
 // Revision 1.12  2007/10/12 17:19:17  kocolosk
 // move BEMC-specific code to StBemcTriggerSimu
 // replace some config methods like setDbMaker with code that finds the Maker automatically

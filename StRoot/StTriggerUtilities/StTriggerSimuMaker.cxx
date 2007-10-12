@@ -54,7 +54,6 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
   mDbMk = dynamic_cast<St_db_Maker*> ( this->GetMakerInheritsFrom("St_db_Maker") );
   mYear=-1;
   mMCflag=0;
-  mConfig = "offline";
   eemc=0;
   bbc=0;
   bemc=0;
@@ -105,7 +104,6 @@ StTriggerSimuMaker::Init() {
   }
 
   if(bemc) {
-    bemc->setConfig(mConfig.Data());
     bemc->setHList(mHList);
   }
   
@@ -172,9 +170,12 @@ StTriggerSimuMaker::Finish() {
   return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.15 2007/10/12 17:19:16 kocolosk Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.16 2007/10/12 20:10:23 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.16  2007/10/12 20:10:23  balewski
+// cleanup
+//
 // Revision 1.15  2007/10/12 17:19:16  kocolosk
 // move BEMC-specific code to StBemcTriggerSimu
 // replace some config methods like setDbMaker with code that finds the Maker automatically

@@ -1,7 +1,7 @@
 #ifndef STAR_StVirtualTriggerSimu
 #define STAR_StVirtualTriggerSimu
 
-// $Id: StVirtualTriggerSimu.h,v 1.1 2007/10/12 17:12:30 kocolosk Exp $
+// $Id: StVirtualTriggerSimu.h,v 1.2 2007/10/12 20:10:24 balewski Exp $
 
 /*****************************************************************************
  * @class StVirtualTriggerSimu
@@ -20,7 +20,7 @@ public:
     virtual void Make()                                     = 0;
     virtual void Clear();
     
-    /// 0 == real data, 1 == Monte Carlo
+    /// 0 == real data, 1 or more == Monte Carlo
     virtual void setMC(int flag) { mMCflag = flag; }
     
 protected:
@@ -30,6 +30,9 @@ protected:
 
 /*****************************************************************************
  * $Log: StVirtualTriggerSimu.h,v $
+ * Revision 1.2  2007/10/12 20:10:24  balewski
+ * cleanup
+ *
  * Revision 1.1  2007/10/12 17:12:30  kocolosk
  * rename ABC class for subdetector trigger simulators
  * StTriggerSimu => StVirtualTriggerSimu
