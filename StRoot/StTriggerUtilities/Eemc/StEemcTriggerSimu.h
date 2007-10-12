@@ -24,7 +24,6 @@ class StEemcTriggerSimu : public StTriggerSimu {
   void setConfig(int x) {mConfig=x;}
  private:
   StEEmcDbMaker    *mDbE;
-  //int mMCflag; // set yo 0 for real data
   int * mBemcEsum5bit; // output from Bemc emulation
   int * mExternDsmSetup;
   int mConfig; // see enum
@@ -84,7 +83,6 @@ class StEemcTriggerSimu : public StTriggerSimu {
   virtual     ~StEemcTriggerSimu();
   void Init();
   void InitRun(int runnumber);
-  //void setMC(int x) {mMCflag=x;}
   void setDsmSetup(int *x){ mExternDsmSetup=x;}
   void Clear();
   void Make();
@@ -102,6 +100,9 @@ class StEemcTriggerSimu : public StTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.6  2007/10/12 16:41:04  balewski
+// *** empty log message ***
+//
 // Revision 1.5  2007/10/11 00:33:03  balewski
 // L2algo added
 //
