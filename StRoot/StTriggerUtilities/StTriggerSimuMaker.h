@@ -31,6 +31,7 @@ class StBemcTables;
 class StBbcTriggerSimu;
 class StEemcTriggerSimu;
 class StBemcTriggerSimu;
+class StL2TriggerSimu;
 class St_db_Maker;
 class StTriggerSimu;
 
@@ -57,6 +58,7 @@ class StTriggerSimuMaker : public StMaker {
   void    useEemc(int flag=0);  //0:just process ADC, 1:compare w/ trigData, see enum in Eemc class
   void    useBbc();
   void    useBemc();
+  void    useL2();
   void    setMC(int x) {mMCflag=x;}
   
   virtual Int_t     Init();
@@ -74,8 +76,9 @@ class StTriggerSimuMaker : public StMaker {
   
   //hang all activated trigger detectors below
   StEemcTriggerSimu *eemc;
-  StBbcTriggerSimu *bbc;
+  StBbcTriggerSimu  *bbc;
   StBemcTriggerSimu *bemc;
+  StL2TriggerSimu   *lTwo;
   
   Int_t BEMC_L0_HT_ADC[kNPatches],BEMC_L0_TP_ADC[kNPatches];
   
@@ -87,9 +90,12 @@ class StTriggerSimuMaker : public StMaker {
 
 
 
-// $Id: StTriggerSimuMaker.h,v 1.10 2007/10/11 00:32:56 balewski Exp $
+// $Id: StTriggerSimuMaker.h,v 1.11 2007/10/12 14:36:01 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.11  2007/10/12 14:36:01  balewski
+// added L2 interface
+//
 // Revision 1.10  2007/10/11 00:32:56  balewski
 // L2algo added
 //

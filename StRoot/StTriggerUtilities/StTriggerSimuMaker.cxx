@@ -37,6 +37,9 @@
 //get BBC
 #include "Bbc/StBbcTriggerSimu.h"
 
+//get L2
+#include "L2Emulator/StL2TriggerSimu.h"
+
 //get HEAD Maker
 #include "StTriggerSimuMaker.h"
 
@@ -50,6 +53,7 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
   eemc=0;
   bbc=0;
   bemc=0;
+  lTwo=0;
   config = new TString("offline");
 }
 
@@ -77,6 +81,13 @@ void
 StTriggerSimuMaker::useBemc(){
   bemc=new StBemcTriggerSimu;
   mSimulators.push_back(bemc);
+}
+
+//________________________________________________
+void
+StTriggerSimuMaker::useL2(){
+  lTwo=new StL2TriggerSimu;
+  mSimulators.push_back(lTwo);
 }
 
 //_____________________________________________________________________________
@@ -259,9 +270,12 @@ void StTriggerSimuMaker::setTableMaker(StBemcTables *bemcTab){
   bemc->setTableMaker(bemcTab);
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.13 2007/10/11 00:32:56 balewski Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.14 2007/10/12 14:36:00 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.14  2007/10/12 14:36:00  balewski
+// added L2 interface
+//
 // Revision 1.13  2007/10/11 00:32:56  balewski
 // L2algo added
 //
