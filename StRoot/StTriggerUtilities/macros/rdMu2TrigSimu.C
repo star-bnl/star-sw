@@ -99,8 +99,7 @@ void rdMu2TrigSimu( int nevents = 7,
   //Get BEMC adc values
   if (flagMC && useBemc) {
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
-    StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
-    emcSim->setCheckStatus(kBarrelEmcTowerId,false); //this sets offline tower status to 0 default is 1
+    emcSim->setCheckStatus(kBarrelEmcTowerId,false); //this returns hits regardless of offline tower status
     emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);//spread gains by 15%
   }
   if (flagMC==0 && useBemc){
