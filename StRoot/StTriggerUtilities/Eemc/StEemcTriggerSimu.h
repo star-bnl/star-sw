@@ -24,8 +24,10 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   void setConfig(int x) {mConfig=x;}
  private:
   StEEmcDbMaker    *mDbE;
-  int * mBemcEsum5bit; // output from Bemc emulation
+  int * mBemcEsum5bit; // output from Bemc emulation, not working
   int * mExternDsmSetup;
+  TString  mSetupPath;
+
   int mConfig; // see enum
   enum {nThr=3};
   int mHTthr[nThr], mTPthr[nThr],mHTTPthrSelc;
@@ -83,7 +85,8 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   virtual     ~StEemcTriggerSimu();
   void Init();
   void InitRun(int runnumber);
-  void setDsmSetup(int *x){ mExternDsmSetup=x;}
+  void setDsmSetup(int *x){ mExternDsmSetup=x;} // discard
+  void setSetupPath(char *x) { mSetupPath=x;}
   void Clear();
   void Make();
   void getEemcFeeMask();
@@ -100,6 +103,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.8  2007/10/12 20:11:33  balewski
+// cleanup of setup path, now at inst/iucf
+//
 // Revision 1.7  2007/10/12 17:12:43  kocolosk
 // rename ABC class for subdetector trigger simulators
 // StTriggerSimu => StVirtualTriggerSimu
