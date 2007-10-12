@@ -7,8 +7,6 @@ changes to be done in bbc-code, Jan
 - add histos for all PMTs
 */
 
-
-
 #include <TH2.h>
 #include <StMessMgr.h>
 
@@ -56,7 +54,8 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   mDbE=0;
   mBemcEsum5bit=0;
   mExternDsmSetup=0;
-  
+  mSetupPath="wrong1";
+
   feeTPTreeADC=new EEfeeTPTree("ADC",mxChan);
   dsm0TreeADC =new EEdsm0Tree("ADC");
   dsm1TreeADC =new EEdsm1Tree("ADC");
@@ -107,7 +106,7 @@ StEemcTriggerSimu::Init(){
   mDbE= (StEEmcDbMaker*) StMaker::GetChain()->GetMaker("eemcDb");
   assert(mDbE);
   //  assert( mBemcEsum5bit);
-  LOG_INFO <<Form("Eemc::Init() MC_flag=%d, conf_flag=%d",mMCflag, mConfig)<<endm;
+  LOG_INFO <<Form("Eemc::Init() MC_flag=%d, config: flag=%d, path=%s=",mMCflag, mConfig,mSetupPath.Data())<<endm;
   assert(mConfig>=kOnlyAdc);
   assert(mConfig<=kAdcCompareTrig);
 }
@@ -162,8 +161,9 @@ StEemcTriggerSimu::InitRun(int runnumber){
 
   LOG_INFO<<Form("Eemc::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
-
-  EemcTrigUtil::getFeePed4("L0setup/EemcFeePed/", yyyymmdd, hhmmss, mxChan, feePed);
+  char text[1000];
+  sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
+  EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
 
  
   int JPthr[nThr];
@@ -495,6 +495,9 @@ StEemcTriggerSimu::getEemcFeeMask(){
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.9  2007/10/12 20:11:33  balewski
+// cleanup of setup path, now at inst/iucf
+//
 // Revision 1.8  2007/10/11 00:33:03  balewski
 // L2algo added
 //
