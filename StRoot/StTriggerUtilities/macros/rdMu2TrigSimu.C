@@ -9,12 +9,16 @@ void rdMu2TrigSimu( int nevents = 7,
 		    int useEemc=1, // 0== off
 		    int useBemc=1, // 0== off
 		    int useL2=1, // 0== off
-		    char *simConfig="online")  
+		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
+		    int playConfig=100 // jan:100_199
+		    )  
 {
   const char *dirIn="runList/";
   int nFiles = 2; // make this big if you want to read all events from a run
   
-  const char *filter="";
+  char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
+  TString outDir="./out2/"; 
+  
   if (flagMC==1){
     const char *file="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.MuDst.root";
     const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
@@ -25,7 +29,6 @@ void rdMu2TrigSimu( int nevents = 7,
   }
   
  
-  TString outDir="./out2/"; 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   assert( !gSystem->Load("StDetectorDbMaker"));
@@ -109,12 +112,17 @@ void rdMu2TrigSimu( int nevents = 7,
  
   //Get TriggerMaker
   StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
-  simuTrig->setConfig(simConfig);
   simuTrig->setHList(HList);
   simuTrig->setMC(flagMC); // must be before individual detectors, to be passed
   simuTrig->useBbc();
-  if(useEemc) simuTrig->useEemc(0);  //default=0:just process ADC, 1,2:compare w/ trigData, see .h
-  if(useBemc) simuTrig->useBemc();
+  if(useEemc) {
+    simuTrig->useEemc(0);//default=0:just process ADC, 1,2:comp w/trgData,see .
+    simuTrig->eemc->setSetupPath(eemcSetupPath);
+  } 
+  if(useBemc){
+    simuTrig->useBemc();
+    simuTrig->bemc->setConfig(bemcConfig);
+  }
   if(useL2)   simuTrig->useL2();
 
   if(flagMC && useEemc){
@@ -140,9 +148,15 @@ void rdMu2TrigSimu( int nevents = 7,
        both dierectiorie MUST exist, setup must be reasonable
     */
     StL2EmulatorMaker* simL2Mk= new StL2EmulatorMaker;
+    simL2Mk->setSetupPath(eemcSetupPath);
+    simL2Mk->setOutPath(outDir.Data());
     //simL2Mk->useStEvent(); // default : use muDst
   }
-     
+  
+  StTriggerSimuPlayMaker *playMk= new StTriggerSimuPlayMaker; // to develope user  analysis of trigQA 
+  playMk->setConfig(playConfig);
+  playMk->setHList(HList);
+
 
   chain->ls(3);
   chain->Init();
