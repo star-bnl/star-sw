@@ -110,9 +110,7 @@ void rdMu2TrigSimu( int nevents = 7,
  
   //Get TriggerMaker
   StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
-  TString *config=new TString(simConfig);  //Chose online/offline/expert configuration
-  simuTrig->setConfig(config);
-  simuTrig->setDbMaker(dbMk);
+  simuTrig->setConfig(simConfig);
   simuTrig->setHList(HList);
   simuTrig->setMC(flagMC); // must be before individual detectors, to be passed
   simuTrig->useBbc();
