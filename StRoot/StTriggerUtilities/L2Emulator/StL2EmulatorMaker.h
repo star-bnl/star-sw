@@ -1,4 +1,4 @@
-// $Id: StL2EmulatorMaker.h,v 1.2 2007/10/11 21:22:57 balewski Exp $
+// $Id: StL2EmulatorMaker.h,v 1.3 2007/10/12 20:11:50 balewski Exp $
 
 /* \class  StL2EmulatorMaker
 \author Jan Balewski
@@ -32,6 +32,8 @@ class StL2EmulatorMaker : public StMaker {
   bool mUseMuDst;
   int  mYear;
   int  mMCflag; // set mcFlag=0 for real data
+  TString  mSetupPath;
+  TString  mOutPath;
 
   void doBanksFromStRawData();
   void doBanksFromMuDst();
@@ -52,7 +54,7 @@ class StL2EmulatorMaker : public StMaker {
   // holds all instantiated L2algos
   L2VirtualAlgo **mL2algo; // actual algos
   int mL2algoN;  //# of existing algos (time-stamp dependent)
-  L2EmcDb* mL2EmcDb;
+  L2EmcDb   *mL2EmcDb;
   L2pedAlgo *mL2pedAlgo;
   L2jetAlgo *mL2jetAlgo;
 
@@ -72,11 +74,13 @@ class StL2EmulatorMaker : public StMaker {
   virtual void Clear(const Option_t* = "");
   void    useStEvent() {mUseMuDst=false;}
   void    setMC(int x) {mMCflag=x;}
+  void setSetupPath(char *x) { mSetupPath=x;}
+  void setOutPath(char *x)   { mOutPath=x;}
 
   vector <int> mTriggerList;
   bool    isTrigger(int trigId);   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StL2EmulatorMaker.h,v 1.2 2007/10/11 21:22:57 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StL2EmulatorMaker.h,v 1.3 2007/10/12 20:11:50 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -86,6 +90,9 @@ class StL2EmulatorMaker : public StMaker {
 #endif
 
 // $Log: StL2EmulatorMaker.h,v $
+// Revision 1.3  2007/10/12 20:11:50  balewski
+// cleanu setup , output path
+//
 // Revision 1.2  2007/10/11 21:22:57  balewski
 // added L2-->L0 interface class
 //

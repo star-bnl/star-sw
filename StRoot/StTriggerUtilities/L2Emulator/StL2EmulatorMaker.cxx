@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StL2EmulatorMaker.cxx,v 1.1 2007/10/11 00:33:09 balewski Exp $
+// $Id: StL2EmulatorMaker.cxx,v 1.2 2007/10/12 20:11:50 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -71,6 +71,8 @@ StL2EmulatorMaker::StL2EmulatorMaker(const char *name):StMaker(name){
 
   mL2pedAlgo=0;
   mL2jetAlgo=0;
+  mSetupPath="wrong2";
+  mOutPath="wrong3";
 }
 
 //________________________________________________________
@@ -235,10 +237,19 @@ StL2EmulatorMaker::InitRun(int runNo){
   mYear=mydb->GetDateTime().GetYear();
   int yyyymmdd=mydb->GetDateTime().GetDate();
 
+
+  assert(yyyymmdd>=20060410);
+  int refRun=710052;
+  // add other reference runs for later time stamps as appropriate
+  assert(yyyymmdd<20060700);
+
+
   //define path for L2 setup files & output
-  TString setPath="L2setup-"; setPath+=yyyymmdd;
-  TString outPath="L2out-"; outPath+=yyyymmdd;
-  LOG_INFO << GetName()<<"::InitRun()  run=" <<runNo<<" setPath="<<setPath<<" outPath="<<outPath<<endm;
+
+  char setPath[1000];
+  sprintf(setPath,"%sL2/%d/R%d/",mSetupPath.Data(),mYear,refRun);
+
+  LOG_INFO << GetName()<<"::InitRun()  run=" <<runNo<<" setPath="<<setPath<<" outPath="<<mOutPath<<endm;
  
   StBemcTables *myTable=new StBemcTables;
   
@@ -250,8 +261,7 @@ StL2EmulatorMaker::InitRun(int runNo){
 
   // create new L2Db instance for each run
   if(mL2EmcDb) delete mL2EmcDb;
-  mL2EmcDb=new L2EmcDb((char*)setPath.Data(),(char*)outPath.Data());
-  
+  mL2EmcDb=new L2EmcDb(setPath,(char*)mOutPath.Data());
   
   LOG_INFO << Form(" %s::setupL2Algos(), dbDate=%d",GetName(),yyyymmdd)<<endm;
   //WARN: do NOT use run# to controll setup of L2-algos
@@ -259,9 +269,9 @@ StL2EmulatorMaker::InitRun(int runNo){
   /* at this moment only 2006 L2 algos are implemented
      add new setupL@AlgosYYYY for 2008, use if/else clause to pick the right one
    */
+  
   assert(yyyymmdd>20060000); 
   assert(yyyymmdd<20060700);
-  
   setupL2Algos2006(yyyymmdd,runNo); 
 
   LOG_INFO  << "StL2JetEmulMaker::InitRun() done, run=" <<runNo<<endm;
@@ -609,6 +619,9 @@ StL2EmulatorMaker::printBEblocks(){
 
 
 // $Log: StL2EmulatorMaker.cxx,v $
+// Revision 1.2  2007/10/12 20:11:50  balewski
+// cleanu setup , output path
+//
 // Revision 1.1  2007/10/11 00:33:09  balewski
 // L2algo added
 //
