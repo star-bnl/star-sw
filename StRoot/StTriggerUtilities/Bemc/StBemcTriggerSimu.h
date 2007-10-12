@@ -2,12 +2,11 @@
 #define STAR_StBemcTriggerSimu
 
 #include "TObject.h"
-#include "StMessMgr.h"
 #include "TString.h"
-#include <TObject.h> 
 #include <vector>
+#include <set>
 
-#include "StTriggerSimu.h"
+#include "StTriggerUtilities/StVirtualTriggerSimu.h"
 
 #define kNPatches 300
 #define kNJet 12
@@ -19,47 +18,57 @@
 #define kL0DsmModule 30
 #define kL0DsmInputs 10
 
-class StMuDstMaker;
-class StMuDst;
 class StEvent;
 class StEmcDecoder;
 class StEmcGeom;
 class StBemcTables;
 class St_db_Maker;
 class StBemcTriggerDbThresholds;
+class StTriggerSimuMaker;
 class TDataSet;
 
-class StBemcTriggerSimu : public StTriggerSimu {
-
- private:
+class StBemcTriggerSimu : public StVirtualTriggerSimu {
+private:
+  std::vector<int>  mFiredTriggers;
+  std::set<int>     mAllTriggers;
   
   TObjArray *mHList;
-  StMuDstMaker *mMuDstMaker;
-  StMuDst *muDst;
-  StEvent *mEvent;
+  TString mConfig;                         //"online" or "offline" or "expert"   
+  
+  // pointers to useful objects we own
   StEmcDecoder *mDecoder;
-  St_db_Maker *starDb;
+  StBemcTriggerDbThresholds *mDbThres;
+  
+  // pointers to useful objects -- but we don't own them
+  StEvent *mEvent;
   StEmcGeom *mGeo;
   StBemcTables *mTables;
-  StBemcTriggerDbThresholds *mDbThres;
-  TDataSet *dbOnline;
-
-  TString *config;                         //"online" or "offline" or "expert"   
-  Int_t did;                               //BEMC tower id  (1-4800)
-  Int_t tpid;                              //BEMC trigger Patch id (0-300)
-  Int_t cr;                                //BEMC crate id (1-30)
-  Int_t ch;                                //BEMC crate ch (0-159)
-  Int_t seq;                               //BEMC start point for TP in crate (0-10)
+  St_db_Maker *starDb;
+  StTriggerSimuMaker *mHeadMaker;
+    
+  
+  // simple iterators -- C++ style manual would say declare in local scope
+  //Int_t did;                               //BEMC tower id  (1-4800)
+  //Int_t tpid;                              //BEMC trigger Patch id (0-300)
+  //Int_t cr;                                //BEMC crate id (1-30)
+  //Int_t ch;                                //BEMC crate ch (0-159)
+  //Int_t seq;                               //BEMC start point for TP in crate (0-10)
+  
+  
+  // DB information
   Int_t HT_FEE_Offset;                     //same as bitConvValue but set by support class
   Int_t DSM_HTStatus[kNPatches];           //DSM_HTStatus only set online
   Int_t DSM_TPStatus[kNPatches];           //DSM_TPStatus only set online
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
+  unsigned long bitConvValue[kNTowers];    //gives window used to determine HT6Bit from adc10
+  
+  
   Int_t adc12[kNTowers];                   //12 bit adc from StEvent -> NOT pedestal adjusted!
   Int_t adc10[kNTowers],adc08[kNTowers];   //ped adjusted 10 and 8 bit adc
-  Float_t ped12[kNTowers];                   //12 and 10 bit pedestal
+  Float_t ped12[kNTowers];                 //12 and 10 bit pedestal
   Int_t HTadc06[kNTowers];                 //6bit HT ADC for each tower
+  
   unsigned long pedTargetValue;            //value FEE shifts pedestal to (12 bit)
-  unsigned long bitConvValue[kNTowers];//gives window used to determine HT6Bit from adc10
   unsigned long LUTbit0[kNCrates][kNSeq],LUTbit1[kNCrates][kNSeq],LUTbit2[kNCrates][kNSeq];
   unsigned long LUTbit3[kNCrates][kNSeq],LUTbit4[kNCrates][kNSeq],LUTbit5[kNCrates][kNSeq];
   unsigned long LUTtag[kNCrates][kNSeq];
@@ -78,8 +87,7 @@ class StBemcTriggerSimu : public StTriggerSimu {
   void DSMLayer1();
   void DSMLayer2();
   
- public:
-
+public:
   StBemcTriggerSimu();
   virtual     ~StBemcTriggerSimu();
 
@@ -90,20 +98,19 @@ class StBemcTriggerSimu : public StTriggerSimu {
   
   short isTrigger(int trigId);
 
-  //void setMC(int x) {mMCflag=x;}
+  void setHeadMaker(StTriggerSimuMaker *maker) { mHeadMaker = maker; }
+  
   void setHList(TObjArray * x){mHList=x;}
-  void addTriggerList( void * );
-
-  void setTableMaker(StBemcTables *tab) { mTables=tab; }
-  void setBemcDbMaker(St_db_Maker *dbMk) { starDb=dbMk; }
-  void setBemcConfig(TString *CONFIG) { config=CONFIG; }
-  void setEvent(StEvent* e) { mEvent = e; }
+  
+  /// must be "offline", "online", or "expert"
+  void setConfig(const char *config) { mConfig = config; }
+  
+  /// default tables come from emcSim or adc2e, but you can supply your own if you prefer
+  void setTables(StBemcTables *tab) { mTables = tab; }
   
   Int_t* getBEMC_L0_HT_ADC() {return L0_HT_ADC;}
   Int_t* getBEMC_L0_TP_ADC() {return L0_TP_ADC;}
 
   ClassDef(StBemcTriggerSimu, 1);
- };
-
-
+};
 #endif
