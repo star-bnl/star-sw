@@ -33,8 +33,7 @@ private:
   std::set<int>     mAllTriggers;
   
   TObjArray *mHList;
-  TString mConfig;                         //"online" or "offline" or "expert"   
-  
+ 
   // pointers to useful objects we own
   StEmcDecoder *mDecoder;
   StBemcTriggerDbThresholds *mDbThres;
@@ -45,7 +44,7 @@ private:
   StBemcTables *mTables;
   St_db_Maker *starDb;
   StTriggerSimuMaker *mHeadMaker;
-    
+  int mConfig; // see enum  
   
   // simple iterators -- C++ style manual would say declare in local scope
   //Int_t did;                               //BEMC tower id  (1-4800)
@@ -102,8 +101,9 @@ public:
   
   void setHList(TObjArray * x){mHList=x;}
   
-  /// must be "offline", "online", or "expert"
-  void setConfig(const char *config) { mConfig = config; }
+  public:
+  enum {kOnline=1, kOffline, kExpert};
+  void setConfig(int x) {mConfig=x;}
   
   /// default tables come from emcSim or adc2e, but you can supply your own if you prefer
   void setTables(StBemcTables *tab) { mTables = tab; }
