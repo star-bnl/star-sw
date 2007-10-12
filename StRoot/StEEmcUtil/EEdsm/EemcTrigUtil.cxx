@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <StMessMgr.h>
 
 #include "EemcTrigUtil.h"
 
@@ -104,6 +105,7 @@ EemcTrigUtil::readPed4(char *path, char *dataSet, int mxChan, int *feePed4){
     for ( board=1; board<=4; board++){
       sprintf(fname,"%s%scrate%dboard%d.ped4", path, dataSet, crate, board);
       FILE *fd=fopen(fname,"r");
+      if(fd==0)  LOG_FATAL <<"EemcTrigUtil::failed open"<<fname<<endm;
       assert(fd);
       for (int i=0; i<32; i++){
 	int ival;
