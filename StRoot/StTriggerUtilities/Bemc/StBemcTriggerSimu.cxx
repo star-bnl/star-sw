@@ -34,7 +34,7 @@ StBemcTriggerSimu::StBemcTriggerSimu() {
   starDb    = NULL;
   mTables   = NULL;
   mHList    = NULL;
-  
+  mConfig =0;
 }
 //==================================================
 //==================================================
@@ -47,7 +47,11 @@ StBemcTriggerSimu::~StBemcTriggerSimu(){
 //==================================================
 void StBemcTriggerSimu::Init(){
   LOG_DEBUG <<"StBemcTriggerSimu::Init()"<<endm;
-  
+  LOG_INFO <<Form("Bemc::Init() MC_flag=%d, config: flag=%d",mMCflag, mConfig)<<endm;
+  assert(mConfig>=kOnline);
+  assert(mConfig<=kExpert);
+
+
   starDb = static_cast<St_db_Maker*> ( mHeadMaker->GetMakerInheritsFrom("St_db_Maker") );
   if(!starDb) {
     LOG_WARN << "StBemcTriggerSimu couldn't get a pointer to St_db_maker -- this means trouble" << endm;
@@ -147,7 +151,7 @@ void StBemcTriggerSimu::getTowerStatus(){
   
   for (int i=0;i<kNTowers;i++) TowerStatus[i]=1;
   
-  if (mConfig.Contains("online")) {
+  if (mConfig==kOnline) {
     for (int cr=1; cr <= kNCrates; cr++){
       for (int ch=0; ch < kNChannels; ch++){
         int did;
@@ -157,13 +161,13 @@ void StBemcTriggerSimu::getTowerStatus(){
     }
   }
 
-  if (mConfig.Contains("offline")){
+  if (mConfig==kOffline){
     for (int did=1; did<=kNTowers; did++){
       mTables->getStatus(BTOW, did, TowerStatus[did-1]);
     }
   }
   
-  if (mConfig.Contains("expert")){
+  if (mConfig==kExpert){
     for (int did=1; did<=kNTowers; did++){
       TowerStatus[did-1]=1;
     }
@@ -178,21 +182,21 @@ void StBemcTriggerSimu::getDSM_TPStatus(){
   for (int tpid=0;tpid<kNPatches;tpid++) DSM_TPStatus[tpid]=1;
    
   //for online config TP status is set by DB
-  if (mConfig.Contains("online")){
+  if (mConfig==kOnline){
     for (int tpid=0;tpid<kNPatches;tpid++){
       DSM_TPStatus[tpid]=mTables->triggerPatchStatus(tpid);
     }
   }
  
  //for offline config all TP status is good by definition. 
-  if (mConfig.Contains("offline")) {
+  if (mConfig==kOffline) {
     for (int tpid=0;tpid<kNPatches;tpid++){
       DSM_TPStatus[tpid]=1;
     }
   }
  
   //experts do as you will but set good by definition
-  if (mConfig.Contains("expert")){
+  if (mConfig==kExpert){
     for (int tpid=0;tpid<kNPatches;tpid++){
       DSM_TPStatus[tpid]=1;
     }
@@ -208,20 +212,20 @@ void StBemcTriggerSimu::getDSM_HTStatus(){
   for (int tpid=0;tpid<kNPatches;tpid++) DSM_HTStatus[tpid]=1;
 
   //Online get DSM HT status from db
-  if (mConfig.Contains("online")){
+  if (mConfig==kOnline){
     for (int tpid=0;tpid<kNPatches;tpid++){
       DSM_HTStatus[tpid]=mTables->triggerHighTowerStatus(tpid);
     }
   }
   
  //Offline all DSM HT status are good
-  if (mConfig.Contains("offline")){
+  if (mConfig==kOffline){
     for (int tpid=0; tpid<kNPatches; tpid++){
       DSM_HTStatus[tpid]=1;
     }
   }
  
-  if (mConfig.Contains("expert")){
+  if (mConfig==kExpert){
     for (int tpid=0;tpid<kNPatches;tpid++){
       DSM_HTStatus[tpid]=1;
     }
@@ -249,7 +253,7 @@ void StBemcTriggerSimu::getPed() {
   pedTargetValue=mTables->triggerPedestalShift();
   
   //online 12 bit peds stored as Float_t
-  if (mConfig.Contains("online")){
+  if (mConfig==kOnline){
     for (int cr=1; cr <= kNCrates; cr++){
       for (int ch=0; ch < kNChannels; ch++){
         int did;
@@ -260,14 +264,14 @@ void StBemcTriggerSimu::getPed() {
   }
   
  //offline 12 bit peds stored as Float_t
-  if (mConfig.Contains("offline")){
+  if (mConfig==kOffline){
     for (int did=1; did<=kNTowers; did++){
       ped12[did-1]=mTables->pedestal(BTOW,did);
     }
   }
 
   //Experts set ped to your favorite values
-  if (mConfig.Contains("expert")){
+  if (mConfig==kExpert){
     for (int did=1; did<=kNTowers; did++){
       ped12[did-1]=24;
     }
@@ -400,8 +404,8 @@ void StBemcTriggerSimu::FEEout() {
               //subject all towers to HT algorithm and transform adc10 into adc06
               int HTholder=-1;
 
-              if (mConfig.Contains("online")) HTholder = adc10[did-1] >> bitConvValue[did-1];//drop lowest bits   
-              if (mConfig.Contains("offline")) HTholder = adc10[did-1] >> HT_FEE_Offset;//drop lowest bits
+              if (mConfig==kOnline) HTholder = adc10[did-1] >> bitConvValue[did-1];//drop lowest bits   
+              if (mConfig==kOffline) HTholder = adc10[did-1] >> HT_FEE_Offset;//drop lowest bits
 
               int HTL = HTholder & 0x1F;// AND HTholder with 00011111 to grab 5 lowest bits
               int HTH = HTholder >> 5;//Remove lowest 5 bits
@@ -435,8 +439,8 @@ void StBemcTriggerSimu::FEEout() {
   }
   
   for (int tpid=0;tpid<kNPatches;tpid++){ 
-    if (mConfig.Contains("offline"))  L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
-    if (mConfig.Contains("online"))   L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+    if (mConfig==kOffline)  L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+    if (mConfig==kOnline)   L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
   }
 }
 //==================================================
