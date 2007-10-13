@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.159 2007/09/28 18:54:08 perev Exp $
+* $Id: geometry.g,v 1.160 2007/10/13 01:27:27 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.160  2007/10/13 01:27:27  perev
+* u2007 ==> upgr20
+*
 * Revision 1.159  2007/09/28 18:54:08  perev
 * dongx/TOFr/y8update
 *
@@ -3577,7 +3580,7 @@ If LL>1
 
 ****************************************************************************************
 ****************************************************************************************
-  on U2007A    { Year 2007 baseline with full tof;
+  on UPGR21    { Year UPGR20 + full tof;
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
@@ -3647,7 +3650,7 @@ If LL>1
                      CaveConfig = 4;
                 }
 ****************************************************************************************
-  on U2007    { Year 2006 baseline which is Y2006+FMS
+  on UPGR20    { Year 2007 + one TOF
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
