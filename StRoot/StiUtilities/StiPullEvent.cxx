@@ -108,6 +108,8 @@ void StiPullEvent::Add(StiPullHit &hit,int gloPrim)
   if (hit.mDetector==kTpcId) i=1;
   if (hit.mDetector==kSvtId) i=2;
   if (hit.mDetector==kSsdId) i=3;
+  if (hit.mDetector==kPxlId) i=4;
+  if (hit.mDetector==kIstId) i=5;
   if (!i || i>3)return;
   ++mNHits[i-1];
 }

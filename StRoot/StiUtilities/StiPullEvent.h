@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.3 2006/12/19 19:44:41 perev Exp $
+ * $Id: StiPullEvent.h,v 1.4 2007/10/16 20:56:00 fisyak Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.4  2007/10/16 20:56:00  fisyak
+ * Add pull entries for Pxl and Ist
+ *
  * Revision 1.3  2006/12/19 19:44:41  perev
  * tracks added
  *
@@ -49,6 +52,8 @@ unsigned char nAllHits; 	//number of all hits in track
 unsigned char nTpcHits; 	//number of tpc hits in track
 unsigned char nSvtHits; 	//number of svt hits in track
 unsigned char nSsdHits; 	//number of ssd hits in track
+unsigned char nPxlHits; 	//number of pxl hits in track
+unsigned char nIstHits; 	//number of ist hits in track
 unsigned char mL; 		//Length of track
 
 float mChi2;
@@ -60,7 +65,7 @@ float mRxy;			//Rxy of track begining
 float mPhi;			//Phi angle of track begining
 float mZ;
 char mEnd[1];
-  ClassDef(StiPullTrk,1);
+  ClassDef(StiPullTrk,2);
 };
 
 class StiPullHit : public TObject {
@@ -77,6 +82,8 @@ unsigned char nAllHits; 	//number of all hits in track
 unsigned char nTpcHits; 	//number of tpc hits in track
 unsigned char nSvtHits; 	//number of svt hits in track
 unsigned char nSsdHits; 	//number of ssd hits in track
+unsigned char nPxlHits; 	//number of pxl hits in track
+unsigned char nIstHits; 	//number of ist hits in track
 unsigned char mDetector;	//see StHit.h
 unsigned char nHitCand;	        //number of Hit Candidates
 unsigned char iHitCand;	        //number of selected  Hit Candidate.
@@ -139,7 +146,7 @@ float gPulEmx[3];			//  hit error mtx:PhiRPhiR,PhiRZ,ZZ
 float gPsi;			//  track Psi in global  Sti frame
 float gDip;			//  track Dip in global  Sti frame
 char mEnd[1];
-  ClassDef(StiPullHit,1);
+  ClassDef(StiPullHit,2);
 };
 
 class StiPullEvent : public TObject {
@@ -159,14 +166,14 @@ public:
    float mEtx[6];	//errors xx,yx,yy,zx,zy,zz
    float mChi2;         //Chi square of vertex fit
    int   mNTrks[2];     //N glob,N Prim tracks 
-   int   mNHits[4];     //nTpc,nSvt,nSsd,nRnd hits
+   int   mNHits[6];     //nTpc,nSvt,nSsd,nPxl,nIst,nRnd hits
 
 TClonesArray mTrksG;	//global  tracks
 TClonesArray mTrksP;	//primary  tracks
 TClonesArray mHitsG;	//StiPullHits for global  tracks
 TClonesArray mHitsP;	//StiPullHits for primary tracks
 TClonesArray mHitsR;	//StiPullHits for Rnd detectors
-  ClassDef(StiPullEvent,4);
+  ClassDef(StiPullEvent,5);
 };
 
   
