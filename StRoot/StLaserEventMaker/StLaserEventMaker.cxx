@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.37 2007/05/29 22:22:24 fine Exp $
+// $Id: StLaserEventMaker.cxx,v 1.38 2007/10/16 15:28:42 fisyak Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.38  2007/10/16 15:28:42  fisyak
+// Make laser tree splitted
+//
 // Revision 1.37  2007/05/29 22:22:24  fine
 // Introduce logger-based output
 //
@@ -194,7 +197,9 @@ Int_t StLaserEventMaker::InitRun(int RunId){
   m_laser = new TTree("laser","Tpc laser track tree");
   m_laser->SetAutoSave(100000000); //Save every 100 MB
   Int_t bufsize= 64000;
-  m_laser->Branch("event", "StLaserEvent",&event, bufsize, 1);
+  Int_t split = 99;
+  if (split)  bufsize /= 4;
+  m_laser->Branch("event", "StLaserEvent",&event, bufsize, split);
 
   //  Create histograms
   LOG_INFO << "Making Histograms" << endm;
@@ -233,7 +238,7 @@ Int_t StLaserEventMaker::Make(){
   TDataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime("tphit");
   if (!tphit) return kStWarn;
-
+#if 0
   // Move the hits according to the ExB corrections. We have a flag.
 
      if(tphit && m_undoExB){
@@ -260,7 +265,7 @@ Int_t StLaserEventMaker::Make(){
     }
     }
 
-
+#endif
   St_tpt_track  *tptrack = new St_tpt_track("tptrack",maxNofTracks);
   m_DataSet->Add(tptrack);
 
@@ -387,10 +392,10 @@ void StLaserEventMaker::MakeHistograms()
 	      Float_t psic = (te->psi + te->q*90)*C_RAD_PER_DEG;
 	      Float_t xc = x1-radius*cos(psic);
 	      Float_t yc = y1-radius*sin(psic);
-	      Float_t resy = (::sqrt((h->x-xc)*(h->x-xc)+(h->y-yc)*(h->y-yc))
+	      Float_t resy = (TMath::Sqrt((h->x-xc)*(h->x-xc)+(h->y-yc)*(h->y-yc))
 			      -radius)/cos(h->alpha*C_RAD_PER_DEG);
 	      Float_t resz = h->z-z1-te->tanl*
-		::sqrt((h->x-x1)*(h->x-x1) + (h->y-y1)*(h->y-y1));
+		TMath::Sqrt((h->x-x1)*(h->x-x1) + (h->y-y1)*(h->y-y1));
 	      Float_t phi = te->psi;
 
 	      event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
@@ -528,7 +533,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
 	  Float_t xp = xpt[iz][i]; Float_t yp= ypt[iz][i];
 	  Double_t d = xc - xp; Double_t a = yc - yp;
 	  Double_t c = d/a;
-	  Double_t dy = 1./::sqrt(1. + c*c)/curvature;
+	  Double_t dy = 1./TMath::Sqrt(1. + c*c)/curvature;
 	  Double_t dx = c*dy;
 	  if(a<0) { x = xc + dx;  y = yc + dy;}
 	  else    { x = xc - dx;  y = yc - dy;}
@@ -538,7 +543,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
 	    if(iz>5) *sector-=12;
     	    Float_t sign =1.0; // account for direction to origin
             if((*xl*px+*yl*py)<0) sign=-1.0;
-            disxy = ::sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
+            disxy = TMath::Sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
             *zl = z0 + sign*tanl*disxy;}
 	}
       }
@@ -555,7 +560,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
 	  y = (ay + ax*ax*yp - ax*ay*xp)/d;
    	  Float_t sign =1.0; // account for direction to origin
           if((x*px+y*py)<0) sign=-1.0;
-          disxy = ::sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
+          disxy = TMath::Sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
           z = z0 + sign*tanl*disxy;
           if(TMath::Abs(z-zpt[iz])<15.0){
 	    Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
@@ -592,14 +597,14 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
 	Float_t yc = y0 - q*px/curvature;
         Float_t d = xc - xp; Float_t a = yc - yp;
         Float_t c = d/a;
-        Float_t dy = 1./::sqrt(1. + c*c)/curvature;
+        Float_t dy = 1./TMath::Sqrt(1. + c*c)/curvature;
         Float_t dx = c*dy;
         if(a<0) { x = xc + dx;  y = yc + dy;}
 	else    { x = xc - dx;  y = yc - dy;}
 	Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
 	if (disq<test) {
             *xl=x; *yl=y;
-            disxy = ::sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
+            disxy = TMath::Sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
             *zl = z0 - tanl*disxy;
 	    // calculate phi angle at the POCA to the vertex.
 	    *phil = 57.29578*atan(a/d) +90.0;
@@ -616,7 +621,7 @@ void StLaserEventMaker::DOCA(Float_t r0,Float_t phi0,Float_t z0,
       x = (ax + ay*ay*xp - ax*ay*yp)/d;
       y = (ay + ax*ax*yp - ax*ay*xp)/d;
       //extrapolate back to x,y
-      disxy = ::sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
+      disxy = TMath::Sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));
       z = z0 + -tanl*disxy;
       Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
 	 if (disq<test) {
@@ -707,7 +712,7 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
   xp = *x;
   yp = *y;
   zp = *z;
-  r    = ::sqrt( xp*xp + yp*yp ) ;
+  r    = TMath::Sqrt( xp*xp + yp*yp ) ;
   xv[1] = ( r - ROFF ) / RSCALE ;
   phi  = atan2( yp, xp ) ;
   if ( phi < 0 ) phi = phi + 2*PI ;
@@ -869,7 +874,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   LOG_INFO << "**************************************************************" << endm;
-  LOG_INFO << "* $Id: StLaserEventMaker.cxx,v 1.37 2007/05/29 22:22:24 fine Exp $" << endm;;
+  LOG_INFO << "* $Id: StLaserEventMaker.cxx,v 1.38 2007/10/16 15:28:42 fisyak Exp $" << endm;;
   LOG_INFO << "**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();

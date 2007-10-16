@@ -1,0 +1,5 @@
+# $Id $
+# package StLaserEventMaker
+# author: 
+Library:libStLaserEventMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStDb_Tables  -lStDbUtilities  -lStDetectorDbMaker  -lStLaserEvent  -l_StTpcDb  -l_St_tpc  -ltpc_Tables
+#Library:libStLaserEventMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStDb_Tables  -lStDbUtilities  -lStDetectorDbMaker  -lStLaserEvent  -lStTpcDb  -lSt_tpc  -ltpc_Tables
