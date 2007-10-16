@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.30 2007/09/09 17:00:32 fisyak Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.31 2007/10/16 19:50:46 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.31  2007/10/16 19:50:46  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 1.30  2007/09/09 17:00:32  fisyak
  * Fix bug 1056
  *
@@ -273,8 +276,8 @@ Int_t StPixelFastSimMaker::Make()
 	    StThreeVectorD mRndHitError(0.,0.,0.);
 	    StThreeVectorD p((*iH)->x(),(*iH)->y(),(*iH)->z());
 	    StRnDHit* tempHit = new StRnDHit(p,mRndHitError, 1, 1., 0, 
-						   1, 1, id++, kHftId);
-	    tempHit->setDetectorId(kHftId);
+						   1, 1, id++, kPxlId);
+	    tempHit->setDetectorId(kPxlId);
 	    tempHit->setVolumeId(999);
 	    tempHit->setKey(999);
 	    tempHit->setLayer((*iD)->first);
@@ -310,10 +313,10 @@ Int_t StPixelFastSimMaker::Make()
 
 		  StRnDHit* tempHit = new StRnDHit(mcP->position(), 
 						   mRndHitError, 1, 1., 0, 
-						   1, 1, id++, kHftId);
+						   1, 1, id++, kPxlId);
 		  //cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
 		  //     <<*tempHit<<endl;
-		  tempHit->setDetectorId(kHftId);
+		  tempHit->setDetectorId(kPxlId);
 		  tempHit->setVolumeId(mcP->volumeId());                   
 		  tempHit->setKey(mcP->key());                             
 		  //StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);     

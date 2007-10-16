@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.65 2007/08/13 22:04:51 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.66 2007/10/16 19:49:46 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.66  2007/10/16 19:49:46  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 1.65  2007/08/13 22:04:51  calderon
  * Fix off-by-one bug in assigning parents to event-generator particles found by
  * Pibero.  Should be done obtaining the index to the mother particle in the
@@ -272,9 +275,6 @@ using std::find;
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "tables/St_g2t_pix_hit_Table.h"
 #include "tables/St_g2t_ist_hit_Table.h"
-#include "tables/St_g2t_hpd_hit_Table.h"
-#include "tables/St_g2t_igt_hit_Table.h"
-#include "tables/St_g2t_fst_hit_Table.h"
 #include "tables/St_g2t_fgt_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
@@ -292,7 +292,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.65 2007/08/13 22:04:51 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.66 2007/10/16 19:49:46 fisyak Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -334,9 +334,6 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseEemc        (kTRUE),
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
-    doUseHpd         (kTRUE),
-    doUseIgt         (kTRUE),
-    doUseFst         (kTRUE),
     doUseFgt         (kTRUE),
     ttemp(),
     ttempParticle(),
@@ -468,9 +465,6 @@ Int_t StMcEventMaker::Make()
     St_g2t_emc_hit *g2t_esm_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_esm_hit");
     St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_g2t_ist_hit *g2t_ist_hitTablePointer =  (St_g2t_ist_hit *) geantDstI("g2t_ist_hit");
-    St_g2t_hpd_hit *g2t_hpd_hitTablePointer =  (St_g2t_hpd_hit *) geantDstI("g2t_hpd_hit");
-    St_g2t_igt_hit *g2t_igt_hitTablePointer =  (St_g2t_igt_hit *) geantDstI("g2t_igt_hit");
-    St_g2t_fst_hit *g2t_fst_hitTablePointer =  (St_g2t_fst_hit *) geantDstI("g2t_fst_hit");
     St_g2t_fgt_hit *g2t_fgt_hitTablePointer =  (St_g2t_fgt_hit *) geantDstI("g2t_fgt_hit");
     St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
 
@@ -629,31 +623,6 @@ Int_t StMcEventMaker::Make()
 	    istHitTable = g2t_ist_hitTablePointer->GetTable();
 	else 
 	    if (Debug()) cerr << "Table g2t_ist_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
-	// Hpd Hit Table
-	//
-	g2t_hpd_hit_st *hpdHitTable=0;
-	if (g2t_hpd_hitTablePointer)
-	    hpdHitTable = g2t_hpd_hitTablePointer->GetTable();
-	else 
-	    if (Debug()) cerr << "Table g2t_hpd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
-	//	
-	// Igt Hit Table
-	//
-	g2t_igt_hit_st *igtHitTable=0;
-	if (g2t_igt_hitTablePointer)
-	    igtHitTable = g2t_igt_hitTablePointer->GetTable();
-	else 
-	    if (Debug()) cerr << "Table g2t_igt_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
-
-	//	
-	// Fst Hit Table
-	//
-	g2t_fst_hit_st *fstHitTable=0;
-	if (g2t_fst_hitTablePointer)
-	    fstHitTable = g2t_fst_hitTablePointer->GetTable();
-	else 
-	    if (Debug()) cerr << "Table g2t_fst_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
-
 	//	
 	// Fgt Hit Table
 	//
@@ -1218,9 +1187,6 @@ Int_t StMcEventMaker::Make()
 	AddHits(tfr,tof,Tof);
 	AddHits(pix,pixel,Pixel);
 	AddHits(ist,ist,Ist);
-	AddHits(hpd,hpd,Hpd);
-	AddHits(igt,igt,Igt);
-	AddHits(fst,fst,Fst);
 	AddHits(fgt,fgt,Fgt);
 
 	// BEMC and BPRS Hits

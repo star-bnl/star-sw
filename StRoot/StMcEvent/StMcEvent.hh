@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.22 2006/09/25 14:20:43 fisyak Exp $
+ * $Id: StMcEvent.hh,v 2.23 2007/10/16 19:49:13 fisyak Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.23  2007/10/16 19:49:13  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 2.22  2006/09/25 14:20:43  fisyak
  * Add Hpd Hits
  *
@@ -118,9 +121,6 @@ class StMcSsdHitCollection;
 class StMcTofHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
-class StMcHpdHitCollection;
-class StMcIgtHitCollection;
-class StMcFstHitCollection;
 class StMcFgtHitCollection;
 class StMcVertex;
 class g2t_event_st;
@@ -212,12 +212,6 @@ class StMcEvent : public TDataSet {
   const StMcPixelHitCollection*pixelHitCollection() const {return mPixelHits;}		
   StMcIstHitCollection*          istHitCollection()       {return mIstHits;}				
   const StMcIstHitCollection*    istHitCollection() const {return mIstHits;}	  
-  StMcHpdHitCollection*          hpdHitCollection()       {return mHpdHits;}				
-  const StMcHpdHitCollection*    hpdHitCollection() const {return mHpdHits;}		
-  StMcIgtHitCollection*          igtHitCollection()       {return mIgtHits;}				
-  const StMcIgtHitCollection*    igtHitCollection() const {return mIgtHits;}			
-  StMcFstHitCollection*          fstHitCollection()       {return mFstHits;}
-  const StMcFstHitCollection*    fstHitCollection() const {return mFstHits;}	         
   StMcFgtHitCollection*          fgtHitCollection()       {return mFgtHits;}		         
   const StMcFgtHitCollection*    fgtHitCollection() const {return mFgtHits;}
   
@@ -262,9 +256,6 @@ class StMcEvent : public TDataSet {
 #endif
   void setPixelHitCollection(StMcPixelHitCollection*);       
   void setIstHitCollection(StMcIstHitCollection*); 
-  void setHpdHitCollection(StMcHpdHitCollection*);
-  void setIgtHitCollection(StMcIgtHitCollection*);       
-  void setFstHitCollection(StMcFstHitCollection*);       
   void setFgtHitCollection(StMcFgtHitCollection*);       
   virtual void Print(Option_t *option="") const; // *MENU* 
   virtual void Browse(TBrowser *b) {TDataSet::Browse(b); Print("");}
@@ -311,9 +302,6 @@ class StMcEvent : public TDataSet {
 #endif
   StMcPixelHitCollection*        mPixelHits;
   StMcIstHitCollection*          mIstHits;
-  StMcHpdHitCollection*          mHpdHits;
-  StMcIgtHitCollection*          mIgtHits;
-  StMcFstHitCollection*          mFstHits;
   StMcFgtHitCollection*          mFgtHits;
 #if 0
   mutable StSPtrVecObject        mContent;

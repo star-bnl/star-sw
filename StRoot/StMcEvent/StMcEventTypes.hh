@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.11 2006/09/25 14:20:43 fisyak Exp $
+ * $Id: StMcEventTypes.hh,v 2.12 2007/10/16 19:49:14 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.12  2007/10/16 19:49:14  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 2.11  2006/09/25 14:20:43  fisyak
  * Add Hpd Hits
  *
@@ -89,15 +92,6 @@
 #include "StMcIstHit.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcIstLayerHitCollection.hh"
-#include "StMcHpdHit.hh"
-#include "StMcHpdHitCollection.hh"
-#include "StMcHpdLayerHitCollection.hh"
-#include "StMcIgtHit.hh"
-#include "StMcIgtHitCollection.hh"
-#include "StMcIgtLayerHitCollection.hh"
-#include "StMcFstHit.hh"
-#include "StMcFstHitCollection.hh"
-#include "StMcFstLayerHitCollection.hh"
 #include "StMcFgtHit.hh"
 #include "StMcFgtHitCollection.hh"
 #include "StMcFgtLayerHitCollection.hh"
