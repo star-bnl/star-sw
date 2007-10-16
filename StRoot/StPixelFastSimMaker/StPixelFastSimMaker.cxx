@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.31 2007/10/16 19:50:46 fisyak Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.32 2007/10/16 19:53:08 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.32  2007/10/16 19:53:08  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 1.31  2007/10/16 19:50:46  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -607,121 +610,6 @@ Int_t StPixelFastSimMaker::Make()
       LOG_INFO <<"No Ist hits found."<<endl;
     }
 
-    
-  /*const StMcHpdHitCollection* hpdHitCol = mcEvent->hpdHitCollection();	       			
-    if (hpdHitCol)							
-    {									
-      Int_t nhits = hpdHitCol->numberOfHits();
-      if (nhits)								
-	{									
-	  Int_t id = 0;							
-	 
-	  for (UInt_t k=0; k<hpdHitCol->numberOfLayers(); k++){	
-	    if (hpdHitCol->layer(k))						
-	      {								
-		UInt_t nh = hpdHitCol->layer(k)->hits().size();	
-		for (UInt_t i = 0; i < nh; i++) { 
-		  StMcHit *mcH = hpdHitCol->layer(k)->hits()[i];                          
-		  StMcHpdHit *mcI = dynamic_cast<StMcHpdHit*>(mcH); 
-		  if(mcI){
-
-		    StThreeVectorF local = global2LocalHpd(mcI->position(), mcI->ladder()-1);
-		    local.setX(distortHit(local.x(), resXHpd, ladderWidthHpd));
-		    local.setZ(distortHit(local.z(), resZHpd, 2*waferLengthHpd));
-		    StThreeVectorF global = local2GlobalHpd(local, mcI->ladder()-1);
-    
-		    StRnDHit* tempHit = new StRnDHit(global, mHitError, 1, 1., 0, 1, 1, id++, kHpdId);  
-		    tempHit->setDetectorId(kHpdId); 
-		    tempHit->setVolumeId(mcH->volumeId());                   
-		    tempHit->setKey(mcH->key());     
-		    tempHit->setLayer(mcI->layer());           
-		    tempHit->setLadder(mcI->ladder());             
-                                                       
-		    col->addHit(tempHit); 
-		  }                                
-		}                                                           
-	      }	
-	  }							 
-	}									 
-     
-     LOG_INFO <<"StPixelFastSimMaker::Make() -I- Loaded Hpd  "
-			 <<nhits<<" hpd hits. "<<endl;
-    }
-  else
-    {
-      cout <<"No hpd hits found."<<endl;
-    }
-  */
-    
-   const StMcIgtHitCollection* igtHitCol= mcEvent->igtHitCollection();					
-    
-      if (igtHitCol)							
-    {									
-      Int_t nhits = igtHitCol->numberOfHits();				
-      if (nhits)								
-	{									
-	  Int_t id = 0;							
-	  //StSPtrVecHit *cont = new StSPtrVecHit();				
-	  //rcEvent->addHitCollection(cont, # Name );				
-	  for (UInt_t k=0; k<igtHitCol->numberOfLayers(); k++)		       
-	    if (igtHitCol->layer(k))						
-	      {								
-		UInt_t nh = igtHitCol->layer(k)->hits().size();		
-		for (UInt_t i = 0; i < nh; i++) {
-		  StMcHit *mcH = igtHitCol->layer(k)->hits()[i];          
-		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++);  
-		  tempHit->setVolumeId(mcH->volumeId());                   
-		  tempHit->setKey(mcH->key());                             
-		  StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);     
-		  if(mcP){                                                
-		    tempHit->setLayer(mcP->layer());           
-		    tempHit->setLadder(mcP->ladder());           
-		  }                                                  
-		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
-		  if(mcI){                                                
-		    tempHit->setLayer(mcI->layer());           
-		    tempHit->setLadder(mcI->ladder());           
-		    tempHit->setWafer(mcI->wafer());           
-		    tempHit->setExtraByte0(mcI->side());         
-		  }                                                         
-		  col->addHit(tempHit);                                 
-		}                                                           
-	      }								 
-	}									 
-    }
-
-     const StMcFstHitCollection* fstHitCol= mcEvent->fstHitCollection();				
- 
-        if (fstHitCol)							
-    {									
-      Int_t nhits = fstHitCol->numberOfHits();				
-      if (nhits)								
-	{									
-	  Int_t id = 0;							
-	  //StSPtrVecHit *cont = new StSPtrVecHit();				
-	  //rcEvent->addHitCollection(cont, # Name );				
-	  for (UInt_t k=0; k<fstHitCol->numberOfLayers(); k++)		       
-	    if (fstHitCol->layer(k))						
-	      {								
-		UInt_t nh = fstHitCol->layer(k)->hits().size();		
-		for (UInt_t i = 0; i < nh; i++) {
-		  StMcHit *mcH = fstHitCol->layer(k)->hits()[i];          
-		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++);  
-		  tempHit->setVolumeId(mcH->volumeId());                   
-		  tempHit->setKey(mcH->key());                             
-		                                                 
-		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
-		  if(mcI){                                                
-		    tempHit->setLayer(mcI->layer());           
-		    tempHit->setLadder(mcI->ladder());           
-		    tempHit->setWafer(mcI->wafer());           
-		    tempHit->setExtraByte0(mcI->side());         
-		  }                                                         
-		  col->addHit(tempHit);                                 
-		}                                                           
-	      }								 
-	}									 
-    }
 
     const StMcFgtHitCollection* fgtHitCol = mcEvent->fgtHitCollection();					
 	  if (fgtHitCol)							

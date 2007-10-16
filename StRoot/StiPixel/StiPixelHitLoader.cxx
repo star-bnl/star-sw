@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.14 2006/02/17 21:37:53 andrewar Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.15 2007/10/16 19:57:45 fisyak Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.15  2007/10/16 19:57:45  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 1.14  2006/02/17 21:37:53  andrewar
  * Removed streaming of all read pixel hits, added version comments log
  *
@@ -63,13 +66,13 @@ void StiPixelHitLoader::loadHits(StEvent* source,
     StiDetector *detector=0;
     int nHit=0;
     for(unsigned int j=0; j<vec.size(); j++)	{
-	StRnDHit *hftH = vec[j];
-	if(!hftH)
+	StRnDHit *pxlH = vec[j];
+	if(!pxlH)
 	  throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL hit in container");
 
-	if (hftH->detector()!=kHftId) continue;
+	if (pxlH->detector()!=kPxlId) continue;
 	
-	detector= _detector->getDetector(hftH->layer()-1, hftH->ladder()-1);
+	detector= _detector->getDetector(pxlH->layer()-1, pxlH->ladder()-1);
 	if(!detector)
 	  throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
 	
@@ -77,9 +80,9 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 	if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
 	stiHit->reset();
 
-	stiHit->setGlobal(detector, hftH,
-                          hftH->position().x(), hftH->position().y(), hftH->position().z(),
-                          hftH->charge());
+	stiHit->setGlobal(detector, pxlH,
+                          pxlH->position().x(), pxlH->position().y(), pxlH->position().z(),
+                          pxlH->charge());
 	_hitContainer->add(stiHit);
 
 	//done loop over hits
