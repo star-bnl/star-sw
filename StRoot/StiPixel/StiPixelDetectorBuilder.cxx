@@ -1,12 +1,15 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.13 2006/04/19 19:49:47 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.14 2007/10/16 19:57:45 fisyak Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.14  2007/10/16 19:57:45  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 1.13  2006/04/19 19:49:47  andrewar
  * Added call to setLayerAngle, needed for detector container sort.
  *
  * Revision 1.12  2006/02/23 00:22:54  andrewar
- * Set Detector Id to kHftId, corrected Ist*pars -> Pixel*pars
+ * Set Detector Id to kPxlId, corrected Ist*pars -> Pixel*pars
  *
  * Revision 1.11  2006/02/17 21:39:32  andrewar
  * Added calls to StiDetector::setKey(key,val)
@@ -126,7 +129,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
 	  pDetector->setIsDiscreteScatterer(false);
 	  pDetector->setMaterial(material);
 	  pDetector->setGas(_gas);
-	  pDetector->setGroupId(kHftId);
+	  pDetector->setGroupId(kPxlId);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
 	  pDetector->setHitErrorCalculator(&_calculator);
