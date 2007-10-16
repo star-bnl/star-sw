@@ -1,6 +1,9 @@
-//$Id: StLaserEvent.h,v 1.11 2003/09/02 17:58:40 perev Exp $
+//$Id: StLaserEvent.h,v 1.12 2007/10/16 15:27:39 fisyak Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
+//Revision 1.12  2007/10/16 15:27:39  fisyak
+//Add default AddTrack
+//
 //Revision 1.11  2003/09/02 17:58:40  perev
 //gcc 3.2 updates + WarnOff
 //
@@ -117,12 +120,12 @@ public:
                  Float_t tzero, Float_t drivel, Float_t clock); 
    void          SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
               Float_t tzero, Float_t drivel, Float_t clock, Float_t trigger);
-   void          AddTrack(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
-         Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
-         Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
-         Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
-         Float_t phi0, Float_t r0, Float_t z0, Int_t sector, 
-         Float_t xl, Float_t yl, Float_t zl, Float_t phi);
+   void          AddTrack(Int_t flag = 0,Int_t hitid = 0,Int_t tid = 0,Int_t id_globtrk = 0,
+         Int_t ndedx = 0, Int_t nfit = 0, Int_t nrec = 0, Int_t npos = 0,
+         Int_t q = 0, Float_t Chixy = 0, Float_t Chiyz = 0, Float_t dedx = 0,
+         Float_t invp = 0, Float_t curvature = 0, Float_t psi = 0, Float_t tanl = 0,
+         Float_t phi0 = 0, Float_t r0 = 0, Float_t z0 = 0, Int_t sector = 0, 
+         Float_t xl = 0, Float_t yl = 0, Float_t zl = 0, Float_t phi = 0);
 
    void          AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
                         Int_t row, Int_t track, Int_t flag);
