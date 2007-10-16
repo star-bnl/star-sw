@@ -136,7 +136,12 @@ void CheckMirrors(const Char_t *files = "./laser_8102110.root") {
   for (Int_t i = 0; i < 3; i++) 
     for (Int_t j = 0; j < 3; j++) Fit[i][j] = (TH1D*) gDirectory->Get(Form("%s_%s",xyz[i],res[j]));
   ofstream out;
-  TString fOut = "LaserCorrection.data";
+  TString fOut(files);
+  fOut,ReplaceAll("*","");
+  fOut.ReplaceAll(".root","");
+  fOut,ReplaceAll(".","");
+  fOut.ReplaceAll("/","");
+  fOut += ".data";
   cout << "Create " << fOut << endl;
   out.open(fOut.Data());
   for (Int_t s = 0; s < 12; s++) {

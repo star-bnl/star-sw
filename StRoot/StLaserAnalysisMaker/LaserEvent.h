@@ -1,4 +1,4 @@
-//$Id: LaserEvent.h,v 1.4 2007/07/05 14:37:04 fisyak Exp $
+//$Id: LaserEvent.h,v 1.5 2007/10/16 15:26:02 fisyak Exp $
 #ifndef Laser_Event
 #define Laser_Event
 //////////////////////////////////////////////////////////////////////////
@@ -109,13 +109,17 @@ class  LaserB {
 
 class EventHeader {
 
-private:
+ private:
    Int_t   fEvtNum;
    Int_t   fRun;
    Int_t   fDate;
    Int_t   fTime;
    Float_t ftZero;
    Float_t fDriVel;
+ public:
+   Float_t fDriVelWest;
+   Float_t fDriVelEast;
+ private:
    Float_t fClock;
    Float_t fTrigger;
    Float_t fDriftDistance;  
@@ -274,6 +278,8 @@ private:
                  Float_t tzero, Float_t drivel, Float_t clock); 
    void          SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
 			   Float_t tzero, Float_t drivel, Float_t clock, Float_t trigger);
+   void          SetDVWest(Float_t dv) {fEvtHdr.fDriVelWest = dv;}
+   void          SetDVEast(Float_t dv) {fEvtHdr.fDriVelEast = dv;}
    Vertex       *AddVertex(StPrimaryVertex *vertex = 0);
    Track        *AddTrack(Int_t sector = 0, StTrack *track = 0, LaserB *laser = 0);
    Hit          *AddHit(StTpcHit *tpcHit = 0);

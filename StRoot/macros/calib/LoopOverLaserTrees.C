@@ -1,4 +1,6 @@
-//#define ADJUSTABL_EBINNING
+#define ADJUSTABLE_BINNING
+#define INTEGRATE_OVER_HOURS
+#define SeparateWestandEast
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //#include <ostream>
 #include "Riostream.h"
@@ -40,13 +42,24 @@ struct Run_t {
 const Char_t *vRun = "run:date:time:events:day:dvAll:ddvAll:dvWest:ddvWest:dvEast:ddvEast:slAll:dslAll:slWest:dslWest:slEast:dslEast";
 Run_t Run;
 //________________________________________________________________________________
+Double_t ScaleE2W(Double_t day) {// scale East to West drift velocity
+  //  RunNT->Draw("1e3*(dvEast/dvWest-1):day>>diffE(30,90,180)","(ddvWest>0&&ddvWest<4e-5&&ddvEast>0&&ddvEast<4e-5)/((ddvWest/dvWest)**2+(ddvEast/dvEast)**2)","profw")
+  static Double_t par[2] = {1.57361e-01,-4.59752e-03};
+  return par[0] + par[1]*day;
+}
+//________________________________________________________________________________
 void MakeTable() {
-#if 0
-  TDatime t(date,Time);
-  UInt_t  ut = t.Convert() - 1;
-  t.Set(ut);
-  date = t.GetDate();
-  Time = t.GetTime();
+#ifndef SeparateWestandEast
+  if (! (DVAll[0][0] > 5.5 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 1e-4)) {
+    cout << "Run " << run << " fails =============================" << endl;
+    return;
+  }
+#else
+  if (! (DVAll[0][1] > 5.5 && DVAll[0][1] < 5.9 && dDVAll[0][1] > 0 && dDVAll[0][1]< 4e-5 ||
+	 DVAll[0][2] > 5.5 && DVAll[0][2] < 5.9 && dDVAll[0][2] > 0 && dDVAll[0][2]< 4e-5)) {
+    cout << "Run " << run << " fails =============================" << endl;
+    return;
+  }
 #endif
   TString fOut =  Form("tpcDriftVelocity.%8i.%06i.C",date,Time);
   ofstream out;
@@ -56,6 +69,28 @@ void MakeTable() {
   out << "  if (!gROOT->GetClass(\"St_tpcDriftVelocity\")) return 0;" << endl;
   out << "  St_tpcDriftVelocity *tableSet = new St_tpcDriftVelocity(\"tpcDriftVelocity\",1);" << endl;
   out << "  tpcDriftVelocity_st row;// Laser Run " << run << endl;
+  Double_t dvEast  =  DVAll[0][2]; 
+  Double_t ddvEast = dDVAll[0][2]; 
+  Double_t dvWest  =  DVAll[0][1];
+  Double_t ddvWest = dDVAll[0][1];
+#ifdef SeparateWestandEast
+  if (! (dvWest > 5.5 && dvWest < 5.9 && ddvWest > 0 && ddvWest< 4e-5) ) {// West From East
+    ddvWest = -1;
+    dvWest = dvEast/(1 + 1e-3*ScaleE2W(Run.day));
+  } 
+  if (! (dvEast > 5.5 && dvEast < 5.9 && ddvEast > 0 && ddvEast< 4e-5) ) {// East from West
+    ddvEast = -1;
+    dvEast = dvWest*(1 + 1e-3*ScaleE2W(Run.day));
+  } 
+  out << "  row.laserDriftVelocityEast	 =   " << dvEast << "; // +/- " << ddvEast 
+      << " cm/us East: Slope = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << " DV = " << DVAll[0][2] << " +/- " << dDVAll[0][2]<< endl;
+  out << "  row.laserDriftVelocityWest	 =   " << dvWest << "; // +/- " << ddvWest 
+      << " cm/us West: Slope = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << " DV = " << DVAll[0][1] << " +/- " << dDVAll[0][1]<< endl;
+  out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
+  out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
+  out << "  tableSet->AddAt(&row); " << endl;
+  out << "  return (TDataSet *)tableSet;" << endl;
+#else
   out << "  row.laserDriftVelocityEast	 =   " << DVAll[0][0] << "; // +/- " << dDVAll[0][0] 
       << " cm/us All: East = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << endl;
   out << "  row.laserDriftVelocityWest	 =   " << DVAll[0][0] << "; // +/- " << dDVAll[0][0] 
@@ -66,6 +101,7 @@ void MakeTable() {
   out << "  return (TDataSet *)tableSet;//" 
       << " West = " << DVAll[0][1] << " +/- " << dDVAll[0][1]
       << " East = " << DVAll[0][2] << " +/- " << dDVAll[0][2] << endl;
+#endif
   out << "};" << endl;
 }
 //________________________________________________________________________________
@@ -85,7 +121,7 @@ void Fit() {
   TH2D *hist[2] = {dv, slope};
   Float_t *par = &Run.dvAll;
   for (Int_t l = 0; l < 2; l++) {
-#ifdef ADJUSTABL_EBINNING
+#ifdef ADJUSTABLE_BINNING
     hist[l]->BufferEmpty();
 #endif
     hist[l]->Write();
@@ -119,9 +155,7 @@ void Fit() {
     fit->Write();
   }
   runNT->Fill(&Run.run);
-  if (DVAll[0][0] > 5.5 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 1e-4) MakeTable();
-  else 	cout << "Run " << run << " fails =============================" << endl;
-  
+  MakeTable();
 }
 //________________________________________________________________________________
 void LoopOverLaserTrees(const Char_t *files="./2007B/st_laser_*.tags.root") {
@@ -190,14 +224,14 @@ big Laser Runs
 +-----------+----------------+
 
   */
-  static const Double_t EastWRTWestDiff = 3.55700e-01; // +/- 1.77572e-01   3.38530e-01; // +/- 1.39566e-01 permill
+  static const Double_t EastWRTWestDiff = 0;//3.55700e-01; // +/- 1.77572e-01   3.38530e-01; // +/- 1.39566e-01 permill
   static const Int_t NBad = 12;
   static const Int_t BadRuns[NBad] = {
     8094011,   8094013,   8124070,   8130015,   8137035,   8138043,
     8144002,   8157053,   8163044,   8163045,   8166085,   8172017  
   };
-  static const Int_t NZFR = 6;
-  static const Int_t ZFieldRuns[NZFR] = {8086022,8086061,8087063,8101057,8101058,8157053};
+  //  static const Int_t NZFR = 6;
+  //  static const Int_t ZFieldRuns[NZFR] = {8086022,8086061,8087063,8101057,8101058,8157053};
 
   Double_t OnlFreq = 0;
   Int_t oldRun = -1;
@@ -217,14 +251,16 @@ big Laser Runs
       TDatime t(fEvtHdr_fDate,fEvtHdr_fTime);
       UInt_t ut = t.Convert();
       Double_t Date = 1. + (ut - ut0)/(24.*60.*60.);
-      //      if (Date - oldDate > 0.03) {
+#ifdef INTEGRATE_OVER_HOURS
+      if (Date - oldDate > 0.125) { // 3/24 = 1/8 
+#endif
 	if (oldRun != -1) Fit();
 	cout << "New run " << fEvtHdr_fRun << " Date Old/New " << oldDate << "/" << Date << endl;
 	Run.run  = fEvtHdr_fRun%1000000;
 	Run.date = fEvtHdr_fDate%100000;
 	Run.time = fEvtHdr_fTime;
 	Run.events = 0;
-#ifdef ADJUSTABL_EBINNING
+#ifdef ADJUSTABLE_BINNING
 	dv = new TH2D(Form("DV%i",fEvtHdr_fRun%1000000),Form("Drift Velocity for run %i",fEvtHdr_fRun%1000000),12,1,25,400,1,-1);
 	dv->SetBuffer(100000);
 #else
@@ -232,7 +268,7 @@ big Laser Runs
 #endif
 	dv->SetXTitle("Sector");
 	dv->SetYTitle("Drift Velocity ");
-#ifdef ADJUSTABL_EBINNING
+#ifdef ADJUSTABLE_BINNING
 	slope = new TH2D(Form("SL%i",fEvtHdr_fRun%1000000),Form("Slope for run %i",fEvtHdr_fRun%1000000),12,1,25,400,1,-1);
 	slope->SetBuffer(100000);
 #else
@@ -242,7 +278,9 @@ big Laser Runs
 	slope->SetYTitle("Difference wrt reference Drift Velocity in pemill");
 	oldRun = (Int_t) fEvtHdr_fRun;
 	oldDate = Date;
-	//      }
+#ifdef INTEGRATE_OVER_HOURS
+      }
+#endif
     }
     Double_t dt =  fEvtHdr_fDate%100000 + ((Double_t) fEvtHdr_fTime)*1e-6;
     Double_t DT =  Run.date + Run.time*1e-6;

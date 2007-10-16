@@ -1,7 +1,9 @@
-//*-- Author :Y.Fisyak 01/26/07
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.13 2007/07/05 14:37:04 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.14 2007/10/16 15:26:03 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.14  2007/10/16 15:26:03  fisyak
+// Freeze version for Run VII
+//
 // Revision 1.13  2007/07/05 14:37:04  fisyak
 // Freeze version for run VII
 //
@@ -14,6 +16,8 @@
 // Revision 1.10  2007/03/06 16:31:55  fisyak
 // Before Selection of good runs
 //
+#define CORRECT_LASER_POSITIONS
+#define ADDPRIMTRACKHITS
 #include <assert.h>
 #include "TFile.h"
 #include "StEventTypes.h"
@@ -120,9 +124,15 @@ Int_t StLaserAnalysisMaker::Init(){
 	LaserBeams[NoBeams]->Raft   = local->Raft;
 	LaserBeams[NoBeams]->Bundle = local->Bundle;
 	LaserBeams[NoBeams]->Mirror = local->Mirror;
-	LaserBeams[NoBeams]->XyzB = StThreeVectorD(Mirrors[r][b][m].X+Mirrors[r][b][m].dX,
-						   Mirrors[r][b][m].Y+Mirrors[r][b][m].dY,
-						   Mirrors[r][b][m].Z+Mirrors[r][b][m].dZ);
+#ifdef CORRECT_LASER_POSITIONS
+       LaserBeams[NoBeams]->XyzB = StThreeVectorD(Mirrors[r][b][m].X+Mirrors[r][b][m].dX,
+						  Mirrors[r][b][m].Y+Mirrors[r][b][m].dY,
+						  Mirrors[r][b][m].Z+Mirrors[r][b][m].dZ);
+#else
+       LaserBeams[NoBeams]->XyzB = StThreeVectorD(Mirrors[r][b][m].X,
+						  Mirrors[r][b][m].Y,
+						  Mirrors[r][b][m].Z);
+#endif
 	Double_t theta = Bundles[r][b].ThetaZ + Mirrors[r][b][m].ThetaZ;
 	Double_t phi   = Bundles[r][b].Phi    + Mirrors[r][b][m].Phi;
 	TGeoHMatrix rotM;
@@ -210,6 +220,8 @@ Int_t StLaserAnalysisMaker::Make(){
   event->SetHeader(EvtHddr->GetEventNumber(), EvtHddr->GetRunNumber(), EvtHddr->GetDate(), EvtHddr->GetTime(),
 		   gStTpcDb->Electronics()->tZero(), gStTpcDb->DriftVelocity(), gStTpcDb->Electronics()->samplingFrequency(), 
 		   EvtHddr->GetInputTriggerMask());
+  event->SetDVWest(gStTpcDb->DriftVelocity(1));
+  event->SetDVEast(gStTpcDb->DriftVelocity(13));
   event->GetHeader()->SetDriftDistance(gStTpcDb->Dimensions()->gatingGridZ());
   event->GetHeader()->SetInnerSectorzOffset(gStTpcDb->Dimensions()->zInnerOffset());
   event->GetHeader()->SetOuterSectorzOffset(gStTpcDb->Dimensions()->zOuterOffset());
@@ -231,6 +243,7 @@ Int_t StLaserAnalysisMaker::Make(){
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     if (! gTrack) continue;
     if (gTrack->numberOfPossiblePoints(kTpcId) < 25) continue;
+    StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
     StTrackFitTraits&  fitTraits =  gTrack->fitTraits();
     if (fitTraits.numberOfFitPoints(kTpcId) < 25) continue;
     StThreeVectorD g3 = gTrack->outerGeometry()->momentum();
@@ -254,8 +267,9 @@ Int_t StLaserAnalysisMaker::Make(){
     for (unsigned int j=0; j<hvec.size(); j++) {// hit loop
       if (hvec[j]->detector() != kTpcId) continue;
       tpcHit = static_cast<StTpcHit *> (hvec[j]);
-#if 0
-      event->AddHit(tpcHit);
+#ifdef ADDPRIMTRACKHITS
+      if (pTrack) 
+	event->AddHit(tpcHit);
 #endif
       if (tpcHit->position().perp() > rMax) {
 	rMax = tpcHit->position().perp();
@@ -263,7 +277,6 @@ Int_t StLaserAnalysisMaker::Make(){
       }
     }
     LaserB *theLaser = 0;
-    StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
     if (jmax < 0 || rMax < 120) goto ADDTRACK;
     tpcHit = static_cast<StTpcHit *> (hvec[jmax]);
     // sector
