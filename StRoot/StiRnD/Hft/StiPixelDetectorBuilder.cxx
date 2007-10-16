@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.20 2007/05/16 15:02:57 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.21 2007/10/16 19:50:24 fisyak Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.21  2007/10/16 19:50:24  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 1.20  2007/05/16 15:02:57  andrewar
  * Removed couts in favor of LOG_INFO.
  *
@@ -23,13 +26,13 @@
  * Added call to get tracking parameters from DBase.
  *
  * Revision 1.14  2006/11/17 15:39:03  wleight
- * Changes to make HFT hits work with UPGR05 geometry
+ * Changes to make PXL hits work with UPGR05 geometry
  *
  * Revision 1.13  2006/04/19 19:49:47  andrewar
  * Added call to setLayerAngle, needed for detector container sort.
  *
  * Revision 1.12  2006/02/23 00:22:54  andrewar
- * Set Detector Id to kHftId, corrected Ist*pars -> Pixel*pars
+ * Set Detector Id to kPxlId, corrected Ist*pars -> Pixel*pars
  *
  * Revision 1.11  2006/02/17 21:39:32  andrewar
  * Added calls to StiDetector::setKey(key,val)
@@ -157,7 +160,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	  pDetector->setIsDiscreteScatterer(false);
 	  pDetector->setMaterial(material);
 	  pDetector->setGas(_gasMat);
-	  pDetector->setGroupId(kHftId);
+	  pDetector->setGroupId(kPxlId);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
 	  pDetector->setHitErrorCalculator(&_calculator);
@@ -218,9 +221,9 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
 
   // Set volume name tree. Inactive volumes only here. Active volumes are declared in ::AverageVolume, called
   // through loop over StiDetectorBuilder::AverageVolume
-  const VolumeMap_t HftVolumes[] = 
+  const VolumeMap_t PxlVolumes[] = 
     { 
-      // HFT - only active volumes for now.
+      // PXL - only active volumes for now.
  
       //{"PXMO","the structure mother volume","HALL_1/CAVE_1/PXMO_1","",""}
       //{"PSEC","Ladder group mother","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/*","",""}
@@ -229,7 +232,7 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
       //{"PLPS","Passive ladder volume","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/PLMO_1-11/PLPS_1/*","",""}
     };
 
-  Int_t NoHftVols = sizeof(HftVolumes)/sizeof(VolumeMap_t);
+  Int_t NoPxlVols = sizeof(PxlVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1/PXMO_1");
   gGeoManager->RestoreMasterVolume(); 
   gGeoManager->CdTop();
@@ -237,7 +240,7 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
     pathT = "HALL_1/CAVE_1/PXMO_1";
   }
   TString path("");
-  for (Int_t i = 0; i < NoHftVols; i++) {
+  for (Int_t i = 0; i < NoPxlVols; i++) {
     gGeoManager->RestoreMasterVolume(); 
     gGeoManager->CdTop();
     if (gGeoManager->cd(pathT)) 
@@ -245,7 +248,7 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
 	path = pathT;
 	TGeoNode *nodeT = gGeoManager->GetCurrentNode();
 	if (! nodeT) continue;;
-	StiVMCToolKit::LoopOverNodes(nodeT, path, HftVolumes[i].name, MakeAverageVolume);
+	StiVMCToolKit::LoopOverNodes(nodeT, path, PxlVolumes[i].name, MakeAverageVolume);
       } 
     else LOG_INFO << "StiPixelDetectorBuilder::useVMCGeometry skip node " 
 			  << pathT.Data() << endl;
@@ -269,7 +272,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
   // Note:
   // Volumes are currently all planes. I am coding this routine appropriately. Other
   // GEANT shapes (cylinder/sphere) are handled differently, and would require adding cases
-  // if such are added to the HFT geometry.
+  // if such are added to the PXL geometry.
   // AAR - Oct 31, 2006 
 
     TString nameP(nodeP->GetName());

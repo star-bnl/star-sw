@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.19 2007/05/16 15:03:22 andrewar Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.20 2007/10/16 19:50:25 fisyak Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.20  2007/10/16 19:50:25  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 1.19  2007/05/16 15:03:22  andrewar
  * Removed cout's in favor of LOG_INFO.
  *
@@ -15,7 +18,7 @@
  * Added smearing to hit loader.
  *
  * Revision 1.15  2006/11/17 15:39:03  wleight
- * Changes to make HFT hits work with UPGR05 geometry
+ * Changes to make PXL hits work with UPGR05 geometry
  *
  * Revision 1.14  2006/02/17 21:37:53  andrewar
  * Removed streaming of all read pixel hits, added version comments log
@@ -77,11 +80,11 @@ void StiPixelHitLoader::loadHits(StEvent* source,
     StiDetector *detector=0;
     int nHit=0;
     for(unsigned int j=0; j<vec.size(); j++)	{
-	StRnDHit *hftH = vec[j];
-	if(!hftH)
+	StRnDHit *pxlH = vec[j];
+	if(!pxlH)
 	  throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL hit in container");
 
-	if (hftH->detector()!=kHftId) continue;
+	if (pxlH->detector()!=kPxlId) continue;
 	
 	// Because of a screw up with the layout in the pixlgeo3.g file, the detectors are not 
 	// sequential in phi. List (geant,ittf): (1,2),(2,1),(3,0),(4,5),(5,4),(6,3),(7,8),(8,7),(9,6)
@@ -91,15 +94,15 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 	//    k= int[( geantL -1 )/3]
 	//Resolve the layer and ladder ids.
 
-	//detector= _detector->getDetector(hftH->layer()-1, hftH->ladder()-1);
+	//detector= _detector->getDetector(pxlH->layer()-1, pxlH->ladder()-1);
 	int ittfLadder;
-	//MLM printf("hit layer: %i ladder: %i\n",hftH->layer(), hftH->ladder());
-	if(hftH->layer()==1)
-	  ittfLadder= ( 2* int( (hftH->ladder()-1.) /3. ) +1)*3 - hftH->ladder();
+	//MLM printf("hit layer: %i ladder: %i\n",pxlH->layer(), pxlH->ladder());
+	if(pxlH->layer()==1)
+	  ittfLadder= ( 2* int( (pxlH->ladder()-1.) /3. ) +1)*3 - pxlH->ladder();
 	else
-	  ittfLadder=( 2* int( (hftH->ladder()-1.) /8. ) +1)*8 - hftH->ladder();
+	  ittfLadder=( 2* int( (pxlH->ladder()-1.) /8. ) +1)*8 - pxlH->ladder();
 	//MLM printf("ittfLadder: %i\n",ittfLadder);
-	detector= _detector->getDetector(hftH->layer()-1, ittfLadder);
+	detector= _detector->getDetector(pxlH->layer()-1, ittfLadder);
 
 
 
@@ -113,23 +116,23 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 
 	double dCos = cos(detector->getPlacement()->getNormalRefAngle());
 	double dSin = sin(detector->getPlacement()->getNormalRefAngle());
-        double x = hftH->position().x() * dCos + hftH->position().y() * dSin;
-        double y = hftH->position().x() * -1.*dSin + hftH->position().y() * dCos;
-	double z = hftH->position().z();
+        double x = pxlH->position().x() * dCos + pxlH->position().y() * dSin;
+        double y = pxlH->position().x() * -1.*dSin + pxlH->position().y() * dCos;
+	double z = pxlH->position().z();
 
-	y = y + hftH->positionError().y();
+	y = y + pxlH->positionError().y();
 
 	double xg = dCos * x - dSin * y;
 	double yg = dSin * x + dCos * y;
-	double zg = z + hftH->positionError().z();
+	double zg = z + pxlH->positionError().z();
 
 	const StThreeVectorF newPos(xg,yg,zg);
-	hftH->setPosition(newPos);
+	pxlH->setPosition(newPos);
 
 	
-	stiHit->setGlobal(detector, hftH,
-                          hftH->position().x(), hftH->position().y(),
-			  hftH->position().z(), hftH->charge());
+	stiHit->setGlobal(detector, pxlH,
+                          pxlH->position().x(), pxlH->position().y(),
+			  pxlH->position().z(), pxlH->charge());
 		
 	_hitContainer->add(stiHit);
 

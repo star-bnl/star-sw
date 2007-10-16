@@ -6,12 +6,9 @@
 #pragma link C++ function operator<<(ostream&, const StMcCtbHit&);
 #pragma link C++ function operator<<(ostream&, const StMcEvent&);
 #pragma link C++ function operator<<(ostream&, const StMcFgtHit&);
-#pragma link C++ function operator<<(ostream&, const StMcFstHit&);
 #pragma link C++ function operator<<(ostream&, const StMcFtpcHit&);
 #pragma link C++ function operator<<(ostream&, const StMcHit&);
-#pragma link C++ function operator<<(ostream&, const StMcIgtHit&);
 #pragma link C++ function operator<<(ostream&, const StMcIstHit&);
-#pragma link C++ function operator<<(ostream&, const StMcHpdHit&);
 #pragma link C++ function operator<<(ostream&, const StMcPixelHit&);
 #pragma link C++ function operator<<(ostream&, const StMcRichHit&);
 #pragma link C++ function operator<<(ostream&, const StMcSsdHit&);
@@ -32,9 +29,6 @@
 #pragma link C++ typedef StSPtrVecMcCtbHit; 
 #pragma link C++ typedef StSPtrVecMcPixelHit; 
 #pragma link C++ typedef StSPtrVecMcIstHit; 
-#pragma link C++ typedef StSPtrVecMcHpdHit; 
-#pragma link C++ typedef StSPtrVecMcIgtHit; 
-#pragma link C++ typedef StSPtrVecMcFstHit; 
 #pragma link C++ typedef StSPtrVecMcFgtHit; 
 #pragma link C++ typedef StSPtrVecMcTofHit; 
 #pragma link C++ typedef StSPtrVecMcTrack;  
@@ -50,9 +44,6 @@
 #pragma link C++ typedef StPtrVecMcCtbHit; 
 #pragma link C++ typedef StPtrVecMcPixelHit; 
 #pragma link C++ typedef StPtrVecMcIstHit;
-#pragma link C++ typedef StPtrVecMcHpdHit;
-#pragma link C++ typedef StPtrVecMcIgtHit; 
-#pragma link C++ typedef StPtrVecMcFstHit; 
 #pragma link C++ typedef StPtrVecMcFgtHit; 
 #pragma link C++ typedef StPtrVecMcTofHit; 
 #pragma link C++ typedef StPtrVecMcTrack; 
@@ -68,9 +59,6 @@
 #pragma link C++ typedef StMcCtbHitIterator; 
 #pragma link C++ typedef StMcPixelHitIterator; 
 #pragma link C++ typedef StMcIstHitIterator; 
-#pragma link C++ typedef StMcHpdHitIterator;
-#pragma link C++ typedef StMcIgtHitIterator; 
-#pragma link C++ typedef StMcFstHitIterator; 
 #pragma link C++ typedef StMcFgtHitIterator; 
 #pragma link C++ typedef StMcTofHitIterator; 
 #pragma link C++ typedef StMcTrackIterator; 
@@ -86,9 +74,6 @@
 #pragma link C++ typedef StMcCtbHitConstIterator; 
 #pragma link C++ typedef StMcPixelHitConstIterator; 
 #pragma link C++ typedef StMcIstHitConstIterator;
-#pragma link C++ typedef StMcHpdHitConstIterator;
-#pragma link C++ typedef StMcIgtHitConstIterator; 
-#pragma link C++ typedef StMcFstHitConstIterator; 
 #pragma link C++ typedef StMcFgtHitConstIterator; 
 #pragma link C++ typedef StMcTofHitConstIterator; 
 #pragma link C++ typedef StMcTrackConstIterator; 
@@ -104,9 +89,6 @@
 #pragma link C++ class vector<StMcCtbHit*>+;
 #pragma link C++ class vector<StMcPixelHit*>+;
 #pragma link C++ class vector<StMcIstHit*>+;
-#pragma link C++ class vector<StMcHpdHit*>+;
-#pragma link C++ class vector<StMcIgtHit*>+;
-#pragma link C++ class vector<StMcFstHit*>+;
 #pragma link C++ class vector<StMcFgtHit*>+;
 #pragma link C++ class vector<StMcTofHit*>+;
 #pragma link C++ class vector<StMcTrack*>+;
@@ -122,9 +104,6 @@
 #pragma link C++ class vector<StMcCtbHit*>+;
 #pragma link C++ class vector<StMcPixelHit*>+;
 #pragma link C++ class vector<StMcIstHit*>+;
-#pragma link C++ class vector<StMcHpdHit*>+;
-#pragma link C++ class vector<StMcIgtHit*>+;
-#pragma link C++ class vector<StMcFstHit*>+;
 #pragma link C++ class vector<StMcFgtHit*>+;
 #pragma link C++ class vector<StMcTofHit*>+;
 #pragma link C++ class vector<StMcTrack*>+;

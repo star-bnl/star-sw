@@ -6,11 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.23 2006/09/25 14:20:43 fisyak Exp $
+ * $Id: StMcTrack.hh,v 2.24 2007/10/16 19:49:20 fisyak Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.hh,v $
+ * Revision 2.24  2007/10/16 19:49:20  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
  * Revision 2.23  2006/09/25 14:20:43  fisyak
  * Add Hpd Hits
  *
@@ -183,12 +186,6 @@ public:
   const StPtrVecMcPixelHit& pixelHits() const { return mPixelHits; }
   StPtrVecMcIstHit& istHits() { return mIstHits; }
   const StPtrVecMcIstHit& istHits() const { return mIstHits; }
-  StPtrVecMcHpdHit& hpdHits() { return mHpdHits; }
-  const StPtrVecMcHpdHit& hpdHits() const { return mHpdHits; }
-  StPtrVecMcIgtHit& igtHits() { return mIgtHits; }
-  const StPtrVecMcIgtHit& igtHits() const { return mIgtHits; }
-  StPtrVecMcFstHit& fstHits() { return mFstHits; }
-  const StPtrVecMcFstHit& fstHits() const { return mFstHits; }
   StPtrVecMcFgtHit& fgtHits() { return mFgtHits; }
   const StPtrVecMcFgtHit& fgtHits() const { return mFgtHits; }
   StParticleDefinition* particleDefinition();
@@ -223,9 +220,6 @@ public:
     void setEsmdvHits(StPtrVecMcCalorimeterHit&); 
     void setPixelHits(StPtrVecMcPixelHit&); 
     void setIstHits(StPtrVecMcIstHit&); 
-    void setHpdHits(StPtrVecMcHpdHit&); 
-    void setIgtHits(StPtrVecMcIgtHit&); 
-    void setFstHits(StPtrVecMcFstHit&); 
     void setFgtHits(StPtrVecMcFgtHit&); 
 
     void setShower(char); 
@@ -253,9 +247,6 @@ public:
     void addEsmdvHit(StMcCalorimeterHit*); 
     void addPixelHit(StMcPixelHit*); 
     void addIstHit(StMcIstHit*);
-    void addHpdHit(StMcHpdHit*);
-    void addIgtHit(StMcIgtHit*); 
-    void addFstHit(StMcFstHit*); 
     void addFgtHit(StMcFgtHit*); 
     void removeTpcHit(StMcTpcHit*); 
     void removeSvtHit(StMcSvtHit*); 
@@ -275,9 +266,6 @@ public:
     void removeEsmdvHit(StMcCalorimeterHit*); 
     void removePixelHit(StMcPixelHit*); 
     void removeIstHit(StMcIstHit*); 
-    void removeHpdHit(StMcHpdHit*); 
-    void removeIgtHit(StMcIgtHit*); 
-    void removeFstHit(StMcFstHit*); 
     void removeFgtHit(StMcFgtHit*); 
   void Print(Option_t *option="") const;
   Bool_t IsPrimary() const {return mIsPrimary;}
@@ -305,9 +293,6 @@ protected:
     StPtrVecMcCalorimeterHit mEsmdvHits; 
     StPtrVecMcPixelHit       mPixelHits; 
     StPtrVecMcIstHit         mIstHits;
-    StPtrVecMcHpdHit         mHpdHits;
-    StPtrVecMcIgtHit         mIgtHits; 
-    StPtrVecMcFstHit         mFstHits; 
     StPtrVecMcFgtHit         mFgtHits; 
   StParticleDefinition*    mParticleDefinition; //!
     StMcTrack*               mParent;
