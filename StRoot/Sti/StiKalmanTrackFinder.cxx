@@ -218,7 +218,7 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
 static int nCall=0;nCall++;
   StiKalmanTrack *track;
   int nTTot=0,nTSeed=0,nTAdd=0,nTFail=0,nTFilt=0,extend=0,status;
-  int nTpcHits=0,nSvtHits=0,nSsdHits=0,nIstHits=0,nHftHits=0,nHpdHits=0;
+  int nTpcHits=0,nSvtHits=0,nSsdHits=0,nIstHits=0,nPxlHits=0;
 
   while (true ){
 // 		obtain track seed from seed finder
@@ -257,8 +257,7 @@ static int nCall=0;nCall++;
         nSvtHits+=track->getFitPointCount(kSvtId);
         nSsdHits+=track->getFitPointCount(kSsdId);
         nIstHits+=track->getFitPointCount(kIstId);
-        nHpdHits+=track->getFitPointCount(kHpdId);
-        nHftHits+=track->getFitPointCount(kHftId);
+        nPxlHits+=track->getFitPointCount(kPxlId);
 	//cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
       }while((iBreak=0));
       if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
@@ -267,8 +266,8 @@ static int nCall=0;nCall++;
     }
    LOG_DEBUG << Form("***extendSeeds***:nTTot=%d nbSeed=%d nTFail=%d nTFilt=%d nTAdd=%d", 
      nTTot,nTSeed,nTFail,nTFilt,nTAdd) << endm;
-   LOG_DEBUG << Form("***extendSeeds***:nTpcHits=%d nSvtHits=%d  nSsdHits=%d nHftHits=%d nIstHits=%d nHpdHits=%d",
-	nTpcHits,nSvtHits,nSsdHits,nHftHits,nIstHits,nHpdHits)
+   LOG_DEBUG << Form("***extendSeeds***:nTpcHits=%d nSvtHits=%d  nSsdHits=%d nPxlHits=%d nIstHits=%d",
+	nTpcHits,nSvtHits,nSsdHits,nPxlHits,nIstHits)
    << endm;
 }
 //______________________________________________________________________________
@@ -278,7 +277,7 @@ static int nCall=0;nCall++;
 
   int nTKeep=0;
   int ntr = _trackContainer->size();
-  int nTpcHits=0,nSvtHits=0,nSsdHits=0,nHftHits=0,nIstHits=0,nHpdHits=0, extended=0;
+  int nTpcHits=0,nSvtHits=0,nSsdHits=0,nPxlHits=0,nIstHits=0, extended=0;
   
   for ( int itr=0;itr < ntr;itr++) {	//Track loop
     StiKalmanTrack *track = (StiKalmanTrack*)(*_trackContainer)[itr];
@@ -307,14 +306,13 @@ static int nCall=0;nCall++;
     nTpcHits+=track->getFitPointCount(kTpcId);
     nSvtHits+=track->getFitPointCount(kSvtId);
     nSsdHits+=track->getFitPointCount(kSsdId);
-    nHftHits+=track->getFitPointCount(kHftId);
-    nHpdHits+=track->getFitPointCount(kHpdId);
+    nPxlHits+=track->getFitPointCount(kPxlId);
     nIstHits+=track->getFitPointCount(kIstId);
     track->reserveHits();
   }// end track loop
    LOG_DEBUG << Form("***extendTracks***: nTKeep=%d", nTKeep) << endm;
-   LOG_DEBUG << Form("***extendTracks***: nTpcHits=%d nSvtHits=%d nSsdHits=%d nHftHits=%d nIstHits=%d nHpdHits=%d",
-	nTpcHits,nSvtHits,nSsdHits,nHftHits,nIstHits,nHpdHits) << endm;
+   LOG_DEBUG << Form("***extendTracks***: nTpcHits=%d nSvtHits=%d nSsdHits=%d nPxlHits=%d nIstHits=%d",
+	nTpcHits,nSvtHits,nSsdHits,nPxlHits,nIstHits) << endm;
 }
 //______________________________________________________________________________
 int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
