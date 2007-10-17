@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.180 2007/09/22 03:29:16 perev Exp $
+// $Id: StiMaker.cxx,v 1.181 2007/10/17 15:32:34 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.181  2007/10/17 15:32:34  fisyak
+// rename Hft => Pxl
+//
 // Revision 1.180  2007/09/22 03:29:16  perev
 // Timer + Pulls without vertex
 //
@@ -341,7 +344,7 @@ More detailed: 				<br>
 #include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiSsd/StiSsdDetectorGroup.h"
-#include "StiPixel/StiPixelDetectorGroup.h"
+#include "StiRnD/Hft/StiPixelDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiHitLoader.h"
@@ -358,8 +361,7 @@ More detailed: 				<br>
 #include "StiTpc/StiTpcDetectorBuilder.h"
 #include "StiSvt/StiSvtDetectorBuilder.h"
 #include "Sti/StiHitErrorCalculator.h"
-#include "StiPixel/StiIstDetectorGroup.h"
-#include "StiPixel/StiHpdDetectorGroup.h"  //added for the Y-Pixel detector
+#include "StiRnD/Ist/StiIstDetectorGroup.h"
 #include "StiUtilities/StiDebug.h"
 #include "StiUtilities/StiPullEvent.h"
 #include "TDataSet.h"
@@ -543,7 +545,7 @@ Int_t StiMaker::InitDetectors()
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
       _toolkit->add(group = new StiPixelDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
-      group->setGroupId(kHftId);
+      group->setGroupId(kPxlId);
     }
  if (IAttr("useIst"))
     {
@@ -551,12 +553,6 @@ Int_t StiMaker::InitDetectors()
       _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst"),SAttr("istInputFile")));
       group->setGroupId(kIstId);  
     }
-  if (IAttr("useHpd"))
-    {
-      cout<<"StiMaker::Init() -I- Adding detector group:Hpd"<<endl;
-      _toolkit->add(group = new StiHpdDetectorGroup(IAttr("activeHpd"),SAttr("hpdInputFile")));
-      group->setGroupId(kHpdId);
-    }  //Added but removed later to make the IST hits the tracking...
   return kStOk;
 }
 
