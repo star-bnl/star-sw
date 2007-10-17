@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.81 2007/04/16 22:47:18 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.82 2007/10/17 15:32:35 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.82  2007/10/17 15:32:35  fisyak
+ * rename Hft => Pxl
+ *
  * Revision 2.81  2007/04/16 22:47:18  perev
  * aux.mPt is +ve
  *
@@ -970,6 +973,9 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   StTrackFitTraits& fitTrait = gTrack->fitTraits();
   //int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
   int svtFitPoints = fitTrait.numberOfFitPoints(kSvtId);
+  int ssdFitPoints = fitTrait.numberOfFitPoints(kSsdId);
+  int pxlFitPoints = fitTrait.numberOfFitPoints(kPxlId);
+  int istFitPoints = fitTrait.numberOfFitPoints(kIstId);
   //  int totFitPoints = fitTrait.numberOfFitPoints();
   /// In the flagging scheme, I will put in the cases for
   /// TPC only, and TPC+SVT (plus their respective cases with vertex)
@@ -980,7 +986,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   // if the track has svt points, it will be an svt+tpc track
   // (we assume that the ittf tracks start from tpc, so we don't
   // use the "svt only" case.)
-  if (svtFitPoints>0) {
+  if (svtFitPoints+ssdFitPoints+pxlFitPoints+istFitPoints>0) {
       if (gTrack->type()==global) {
 	  gTrack->setFlag(501); //svt+tpc
       }
@@ -1208,6 +1214,8 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   aux.nTpcHits = dets[kTpcId][2];
   aux.nSvtHits = dets[kSvtId][2];
   aux.nSsdHits = dets[kSsdId][2];
+  aux.nPxlHits = dets[kPxlId][2];
+  aux.nIstHits = dets[kIstId][2];
   aux.mL       = (unsigned char)track->getTrackLength();
   aux.mChi2    = track->getChi2();
   aux.mCurv    = track->getCurvature();
@@ -1370,6 +1378,8 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   aux.nTpcHits  = dets[kTpcId][2];
   aux.nSvtHits  = dets[kSvtId][2];
   aux.nSsdHits  = dets[kSsdId][2];
+  aux.nPxlHits  = dets[kPxlId][2];
+  aux.nIstHits  = dets[kIstId][2];
   const StiDetector *stiDet = stiHit->detector();
   if (stiDet) 		{
     aux.mHardwarePosition=stHit->hardwarePosition();
