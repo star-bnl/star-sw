@@ -107,7 +107,7 @@ unsigned int  MySQLAppender::execute(const String& sql)
 {
 	SQLRETURN ret=1;
    if (getConnection()) {
-//       fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
+//      fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
 //          String query = "INSERT INTO StarLogger VALUES (\"";
 //          query += sql;
 //          query += "\");";
@@ -227,7 +227,7 @@ void MySQLAppender::flushBuffer()
            "INSERT DELAYED IGNORE  TaskDescription (TaskDescriptionID, TaskRequestID_MD5, TaskSize, TaskRemainSize, EntryTime, UpdateTime, TaskUser,TaskDescription,TaskCredential,BrokerID)"
            " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"$SUMS_AUTHENTICATED_USER\",\"SUMS\");";
 #else
-           "INSERT DELAYED IGNORE  Tasks (taskID, brokerTaskID, taskName, taskSize, taskRemainSize, submitTime, updateTime, requesterName,taskDescription)"
+           "INSERT DELAYED IGNORE  Tasks (taskID, brokerTaskID, taskName, taskSize, taskRemainSize, submitTime, updateTime, requesterID,taskDescription)"
            " VALUES  ( DEFAULT, \"$REQUESTID\", \"Short name of task\", \"$SUMS_nProcesses\",\"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\");";
 #endif                      
 // Edit meta symbols
@@ -301,7 +301,7 @@ void MySQLAppender::flushBuffer()
 			       const LoggingEventPtr& logEvent = *i;
 			       String sql = getLogStatement(logEvent);
                 expandCommand = sql.c_str();
-         
+                fprintf(stderr," MYSQL QUERY: <%s>\n", sql.c_str());         
                 ReplaceVariable(expandCommand, "REQUESTID");
                 ReplaceVariable(expandCommand, "JOBINDEX");
          
