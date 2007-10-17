@@ -1,8 +1,8 @@
-<job name="BFC test jobtracking jobs - 5/3 events" nProcesses="5" simulateSubmission ="false">
+<job name="BFC test jobtracking jobs - 2/3 events" nProcesses="2" simulateSubmission ="false">
 <SandBox>
   <Package >
     <File>file:log4j.xml</File>
-<!--    <File>file:.sl44_gcc346</File>  -->
+    <File>file:.sl44_gcc346</File>
   </Package>
 </SandBox>
  <command>       

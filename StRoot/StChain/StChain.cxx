@@ -142,16 +142,18 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << "'" << endm;
 #else
 // Add a record to MySQL tracking Db     
-  LOG_QA << "SequenceValue="<< mNTotal
-         << ",StepEventId=" << "'Start'"
-         << ",MessageType=" << "'MemUsed',"  << "MessageClass='='"
-         << ",Message='" << int(TMemStat::Used())
+//  LOG_QA << "SequenceValue="<< mNTotal
+  LOG_QA 
+         << ",StageID=" << "'1'"
+         << ",MessageKey=" << "'MemUsed'," 
+         << ",MessageValue='" << int(TMemStat::Used())
          << "'" << endm;
          
-  LOG_QA << "SequenceValue="<<mNTotal 
-         << ",StepEventId=" << "'Start'"
-         << ",MessageType=" << "'ProgSize',"  << "MessageClass='='"
-         << ",Message='" << int(TMemStat::ProgSize())
+//  LOG_QA << "SequenceValue="<<mNTotal 
+  LOG_QA 
+         << ",StageID=" << "'1'"
+         << ",MessageKey=" << "'ProgSize',"
+         << ",MessageValue='" << int(TMemStat::ProgSize())
          << "'" << endm;
 #endif         
 #endif                
@@ -189,16 +191,18 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << "'" << endm;
 #else
 // Add a record to MySQL tracking Db     
-  LOG_QA << "SequenceValue="       << mNTotal
-         << ",StepEventId=" << "'EventFinish'"
-         << ",MessageType=" << "'Cpu',"  << "MessageClass='='"
-         << ",Message='" << evnt.GetCpuTime("QAInfo:")
+//  LOG_QA << "SequenceValue="       << mNTotal
+  LOG_QA
+         << ",StageID=" << "'3'"
+         << ",MessageKey=" << "'Cpu',"
+         << ",MessageValue='" << evnt.GetCpuTime("QAInfo:")
          << "'" << endm;
 
-  LOG_QA << "SequenceValue="       << mNFailed
-         << ",StepEventId=" << "'EventFinish'"
-         << ",MessageType=" << "'RealTime',"  << "MessageClass='='"
-         << ",Message='" << evnt.GetRealTime("QAInfo:")
+//  LOG_QA << "SequenceValue="       << mNFailed
+  LOG_QA 
+         << ",StageID=" << "'3'"
+         << ",MessageKey=" << "'RealTime'," 
+         << ",MessageValue='" << evnt.GetRealTime("QAInfo:")
          << "'" << endm;
 #endif
 #endif                
@@ -233,16 +237,18 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 #else
 // Add a record to MySQL tracking Db     
 
-  LOG_QA << "SequenceValue="       << mNTotal
-         << ",StepEventId=" << "'Finish'"
-         << ",MessageType=" << "'MemUsed',"  << "MessageClass='='"
-         << ",Message='" << int(TMemStat::Used())
+//   LOG_QA << "SequenceValue="       << mNTotal
+  LOG_QA 
+         << ",StageID=" << "'3'"
+         << ",MessageKey=" << "'MemUsed',"  
+         << ",MessageValue='" << int(TMemStat::Used())
          << "'" << endm;
 
-  LOG_QA << "SequenceValue="       << mNFailed
-         << ",StepEventId=" << "'Finish'"
-         << ",MessageType=" << "'ProgSize',"  << "MessageClass='='"
-         << ",Message='" << int(TMemStat::ProgSize())
+//   LOG_QA << "SequenceValue="       << mNFailed
+  LOG_QA 
+         << ",StageID=" << "'3'"
+         << ",MessageKey=" << "'ProgSize',"
+         << ",MessageValue='" << int(TMemStat::ProgSize())
          << "'" << endm;
 #endif         
    if (GetLogger()) GetLogger()->Close();
@@ -253,8 +259,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.65 2007/09/18 20:42:35 fine Exp $
+// $Id: StChain.cxx,v 1.66 2007/10/17 18:54:04 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.66  2007/10/17 18:54:04  fine
+// new Db tracking schema from TxCorp
+//
 // Revision 1.65  2007/09/18 20:42:35  fine
 // Fix the message typo
 //

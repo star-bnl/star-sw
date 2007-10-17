@@ -1,4 +1,4 @@
-use logger;
+use ucmdb;
 --
 -- Creation SQL script for Database: `ucmdb` for the UCM project
 --
@@ -33,47 +33,28 @@ use logger;
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `BrokerDictionary`
+-- Table structure for table `Tasks`
 -- 
 
-DROP TABLE IF EXISTS BrokerDictionary;
-CREATE TABLE IF NOT EXISTS BrokerDictionary (
-  brokerID          int(11)     NOT NULL COMMENT 'The ID of the broker as assigned by the UCM system',
-  brokerName        varchar(16) NOT NULL COMMENT 'A short name for the broker assigned by the UCM system',
-  brokerDescription varchar(64) NOT NULL default 'No Description' COMMENT 'A string description of the broker including the location',
-  brokerAuthor      varchar(8)  NOT NULL default 'ucmAdmin' COMMENT 'The author that last updated this information',
-  brokerUpdateTime  timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'The time that the information was last updated',
-  PRIMARY KEY  (brokerID)
+DROP TABLE IF EXISTS Tasks;
+CREATE TABLE IF NOT EXISTS Tasks (
+  taskID           int(11)     NOT NULL AUTO_INCREMENT  KEY COMMENT 'ID of task when entry is created, unique in table',
+  brokerTaskID     char(40)    NOT NULL             COMMENT 'ID of task as assigned by Broker',
+  brokerID         int(11)     NOT NULL default '2' COMMENT 'The ID of the broker that created task',
+  requesterID      varchar(32) NOT NULL             COMMENT 'An requester ID from the RequesterDictionary table',
+  taskName         varchar(32) default NULL         COMMENT 'Short name of task as assigned by user through broker',
+  taskDescription  varchar(64) NOT NULL             COMMENT 'Text description of task as assigned by user through broker',
+  taskSize         int(11)     NOT NULL default '1' COMMENT 'Number of jobs in the task',
+  taskRemainSize   int(11)     NOT NULL default '1' COMMENT 'Number of jobs no completed',
+  submitTime       datetime    default NULL         COMMENT 'Wall time that task was submitted to broker',
+  updateTime       timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'Wall time that task row was last updated',
+  CONSTRAINT UNIQUE  INDEX taskID (brokerTaskID)
 );
 
--- 
--- Dumping data for table `BrokerDictionary`
--- 
-
-INSERT INTO BrokerDictionary (`brokerID`, `brokerName`, `brokerDescription`, `brokerAuthor`, `brokerUpdateTime`) VALUES 
-(1, 'SUMS', 'STAR Unified MetaScheduler at Brookhaven National Lab', 'ucmAdmin', '2007-07-12 10:25:35'),
-(2, 'LSF-BNL', 'LSF Scheduler located at Brookhaven National Lab', 'ucmAdmin', '2007-07-12 10:25:35');
-
--- --------------------------------------------------------
-
--- 
--- Table structure for table `FacilityDictionary`
--- 
-
-DROP TABLE IF EXISTS FacilityDictionary;
-CREATE TABLE IF NOT EXISTS FacilityDictionary (
-  facilityID          int(11)     NOT NULL COMMENT 'ID of the facility for possible messages',
-  facilityName        varchar(32) NOT NULL COMMENT 'Short name of the facility',
-  facilityDescription varchar(64) NOT NULL default 'No Description' COMMENT 'A string description of the facility',
-  facilityAuthor      varchar(8)  NOT NULL default 'ucmAdmin' COMMENT 'The author that last updated this information',
-  facilityUpdateTime  timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'The time that the information was last updated',
-  PRIMARY KEY  (facilityID)
-);
-
--- 
--- Dumping data for table `FacilityDictionary`
--- 
-
+INSERT INTO `Tasks` (`taskID`, `brokerTaskID`, `requesterID`, `taskName`, `taskDescription`, `taskSize`, `taskRemainSize`, `submitTime`, `updateTime`) VALUES 
+(1, 'brokerB1taskFromJoe', 1, 'taskJ1', 'Joe Task B1', 2, 1, '2007-09-20 09:49:41', '2007-09-24 09:54:40'),
+(2, 'brokerB1taskFromMary', 2, 'taskM1', 'Mary Task B1', 2, 0, '2007-09-20 09:49:41', '2007-09-24 09:54:40'),
+(3, 'brokerB2taskFromJoe', 1, 'taskJ2', 'Joe Task B2', 2, 2, '2007-09-20 09:51:33', '2007-09-21 09:51:42');
 
 -- --------------------------------------------------------
 
@@ -84,8 +65,8 @@ CREATE TABLE IF NOT EXISTS FacilityDictionary (
 DROP TABLE IF EXISTS Jobs;
 CREATE TABLE IF NOT EXISTS Jobs (
   jobID             int(11)      NOT NULL AUTO_INCREMENT KEY COMMENT 'ID of job when entry is created, unique within table',
-  taskID            int(11)      NOT NULL      COMMENT 'Foreign key reference to Tasks table',
   brokerJobID       int(11)      NOT NULL      COMMENT 'ID of job as assigned by Broker',
+  taskID            int(11)      NOT NULL      COMMENT 'Foreign key reference to Tasks table',
   gridJobID         varchar(64)  default NULL  COMMENT 'ID for job as assigned by Grid Resource Allocation Manager (GRAM)',
   localJobID        int(11)      default NULL  COMMENT 'ID for job as assigned by local resource manager or scheduler',
   gridSubmitTime    datetime     default NULL  COMMENT 'Time that job was submitted to the GRAM',
@@ -96,50 +77,42 @@ CREATE TABLE IF NOT EXISTS Jobs (
   nodeLocation      varchar(64)  NOT NULL      COMMENT 'Name of worker node that job lands on',
   startTime         datetime     default  NULL COMMENT 'Time that job started execution',
   updateTime        timestamp    NOT NULL default CURRENT_TIMESTAMP COMMENT 'Time that job execution state was last updated',
-  endTime           datetime     default NULL  COMMENT 'Time that job completed execution',
-  executionUserID   int(11)      default NULL  COMMENT 'A login ID on the local resource site & worker node that actually executes',
   executionUserName varchar(32)  NOT NULL      COMMENT 'A login ID on the local resource site & worker node that actually executes',
   stateID           int(11)      NOT NULL default '1' COMMENT 'Foreign key reference to StateDictionary table',
-  CONSTRAINT UNIQUE INDEX JobID (taskID, brokerJobID )
+  CONSTRAINT UNIQUE INDEX jobID (brokerJobID, taskID)
 );
 
--- 
--- Dumping data for table `Jobs`
--- 
-
+INSERT INTO `Jobs` (`jobID`, `brokerJobID`, `taskID`, `gridJobID`, `localJobID`, `gridSubmitTime`, `localSubmitTime`, `siteLocation`, `queue`, `queuePosition`, `nodeLocation`, `startTime`, `updateTime`, `executionUserName`, `stateID`) VALUES 
+(1, 101, 1, 'uuid:5d85bb28-c67c-11db-ac3b-00163e010001', 301, '2007-09-20 09:49:41', '2007-09-20 10:00:00', 'grid.txcorp.com', 'schedulerQueue', 17, 'node1.txcorp.com', '2007-09-20 10:01:50', '2007-09-21 10:03:05', 'userx', 8),
+(2, 102, 1, 'uuid:5d85bb28-c67c-11db-ac3b-00163e010002', 302, '2007-09-21 10:07:05', '2007-09-21 10:10:10', 'grid.txcorp.com', 'schedulerQueue', 18, 'node2.txcorp.com', '2007-09-21 10:50:00', '2007-09-24 10:09:40', 'usery', 4),
+(3, 103, 2, 'uuid:5d85bb28-c67c-11db-ac3b-00163e010003', 303, '2007-09-20 09:49:41', '2007-09-20 12:00:00', 'grid.txcorp.com', 'schedulerQueue', 19, 'node3.bnl.gov', '0000-00-00 00:00:00', '2007-09-24 10:18:56', 'userbx', 3),
+(4, 104, 2, 'uuid:5d85bb28-c67c-11db-ac3b-00163e010004', 304, '2007-09-20 09:49:41', '2007-09-20 09:51:47', 'grid.txcorp.com', 'schedulerQueue', 20, 'node4.bnl.gov', '2007-09-20 13:00:40', '2007-09-20 13:10:15', 'userby', 9),
+(5, 105, 3, 'uuid:5d85bb28-c67c-11db-ac3b-00163e010005', 404, '2007-09-20 09:49:41', '2007-09-20 13:10:15', 'grid.txcorp.com', 'schedulerQueue', 21, 'node5.txcorp.com', '2007-09-21 13:10:15', '2007-09-22 13:10:15', 'userx', 8),
+(6, 106, 3, 'uuid:5d85bb28-c67c-11db-ac3b-00163e010006', 406, '2007-09-20 09:49:41', '2007-09-20 13:10:15', 'grid.txcorp.com', 'schedulerQueue', 22, 'node6.txcorp.com', '2007-09-21 13:10:15', '2007-09-22 13:10:15', 'userz', 8);
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `Messages`
+-- Table structure for table `Events`
 -- 
 
-DROP TABLE IF EXISTS Messages;
-CREATE TABLE IF NOT EXISTS Messages (
-  messageID        int(11)      NOT NULL AUTO_INCREMENT COMMENT 'ID of message',
+DROP TABLE IF EXISTS JobEvents;
+CREATE TABLE IF NOT EXISTS JobEvents (
+  eventID        int(11)      NOT NULL AUTO_INCREMENT KEY COMMENT 'ID of event when entry is created, unique within table',
   jobID            int(11)      NOT NULL COMMENT 'Job that this message is associated with',
-  facilityID       int(11)      NOT NULL COMMENT 'The ID of the facility or bulk category of messages',
-  severityID       int(11)      NOT NULL COMMENT 'The ID of the severity (warning, debug, error, etc.) of the message',
-  content          varchar(512) NOT NULL COMMENT 'The textual content of the message',
-  eventTime        timestamp    NOT NULL default CURRENT_TIMESTAMP COMMENT 'Time that event happened which corresponds to the message',
-  SequenceValue   INT                                      COMMENT 'The current event # processed. for example '   ,
-  MessageContext  CHAR(20)                                 COMMENT 'could represent StFtpcMaker, StMake'           ,  #STAR maker name
-  StepEventID     ENUM('Start','Finish','EventFinish','Run','JobStart','JobFinish') NOT NULL  COMMENT 'Event ID'   ,
-  MessageType     CHAR(10)                                COMMENT 'Event context'                                  ,  #Field name
-  MessageClass    ENUM('=')              NULL              COMMENT 'Extra message flag'                            ,
-  Message         VARCHAR(120)                             COMMENT 'Body core of the message'                      ,
-  PRIMARY KEY  (messageID)
+  levelID       int(11)      NOT NULL COMMENT 'The ID of the log level of the event (WARNING, DEBUG, ERROR, etc.)',
+  context          CHAR(20) NOT NULL COMMENT 'The bulk category of the log event or the facilty or code where the event happens',
+  time       CHAR(28)   NOT NULL COMMENT 'Time that event was recorded by the Tracking Library',
+  stageID     int(11)      NOT NULL COMMENT 'The ID of the logging stage of the event (i.e., START, STATUS, or END)',
+  MessageKey CHAR(20)      COMMENT 'A user defined property key or SYSTEM for system event',
+  MessageValue VARCHAR(120)    COMMENT 'A user defined property value or textual content of a log message for a system event', 
+  CONSTRAINT UNIQUE INDEX eventID (jobID)
 );
-
--- 
--- Dumping data for table `Messages`
--- 
-
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `RequesterDictionary`
+-- Table structure for table `RequesterDictionary` and initial data
 -- 
 
 DROP TABLE IF EXISTS RequesterDictionary;
@@ -152,45 +125,41 @@ CREATE TABLE IF NOT EXISTS RequesterDictionary (
   PRIMARY KEY  (requesterID)
 );
 
--- 
--- Dumping data for table `RequesterDictionary`
--- 
-
 INSERT INTO RequesterDictionary (`requesterID`, `requesterName`, `requesterDescription`, `requesterAuthor`, `requesterUpdateTime`) VALUES 
-(1, 'alexanda', 'Subject: DC=org, DC=doegrids, OU=People, CN=David A. Alexander 7', 'ucmAdmin', '2007-07-12 10:25:35');
+(1, 'joeScientist', 'Subject: DC=org, DC=doegrids, OU=People, CN=Joe Smith 12345', 'ucmAdmin', '2007-07-12 10:25:00'); 
+(2, 'maryScientist', 'Subject: DC=org, DC=doegrids, OU=People, CN=Mary Baker 67890', 'ucmAdmin', '2007-07-12 10:26:00');
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `SeverityDictionary`
+-- Table structure for table `LevelDictionary` and initial data
 -- 
 
-DROP TABLE IF EXISTS SeverityDictionary;
-CREATE TABLE IF NOT EXISTS SeverityDictionary (
-  severityID          int(11)     NOT NULL COMMENT 'ID of the severity for possible messages',
-  severityName        varchar(32) NOT NULL COMMENT 'Short name of the severity',
-  severityDescription varchar(64) NOT NULL default 'No Description' COMMENT 'A string description of the severity',
-  severityAuthor      varchar(8)  NOT NULL default 'ucmAdmin' COMMENT 'The author that last updated this information',
-  severityUpdateTime  timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'The time that the information was last updated',
-  PRIMARY KEY  (severityID)
+DROP TABLE IF EXISTS LevelDictionary;
+CREATE TABLE IF NOT EXISTS LevelDictionary (
+  levelID          int(11)     NOT NULL COMMENT 'ID of the level for possible events',
+  levelName        varchar(32) NOT NULL COMMENT 'Short name of the level',
+  levelDescription varchar(64) NOT NULL default 'No Description' COMMENT 'A string description of the level',
+  levelAuthor      varchar(8)  NOT NULL default 'ucmAdmin' COMMENT 'The author that last updated this information',
+  levelUpdateTime  timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'The time that the information was last updated',
+  PRIMARY KEY  (levelID)
 );
 
--- 
--- Dumping data for table `SeverityDictionary`
--- 
-
-INSERT INTO SeverityDictionary (`severityID`, `severityName`, `severityDescription`, `severityAuthor`, `severityUpdateTime`) VALUES 
-(1, 'TRACE', 'The TRACE Level designates finer-grained informational events th', 'ucmAdmin', '2007-07-12 10:25:35'),
-(2, 'DEBUG', 'The DEBUG Level designates fine-grained informational events tha', 'ucmAdmin', '2007-07-12 10:25:35'),
-(3, 'INFO', 'The INFO level designates informational messages that highlight ', 'ucmAdmin', '2007-07-12 10:25:35'),
-(4, 'WARN', 'The WARN level designates potentially harmful situations', 'ucmAdmin', '2007-07-12 10:25:35'),
-(5, 'ERROR', 'The ERROR level designates error events that might still allow t', 'ucmAdmin', '2007-07-12 10:25:35'),
-(6, 'FATAL', 'The FATAL level designates very severe error events that will pr', 'ucmAdmin', '2007-07-12 10:25:35');
+INSERT INTO LevelDictionary (`levelID`, `levelName`, `levelDescription`, `levelAuthor`, `levelUpdateTime`) VALUES
+(1, 'TRACE', 'The TRACE level is the finest granularity, similar to stepping through the component or system.', 'ucmAdmin', '2007-10-04 10:25:35'),
+(2, 'DEBUG', 'The DEBUG level is lower level information concerning program logic decisions, internal state, etc.', 'ucmAdmin', '2007-10-04 10:25:35'),
+(3, 'INFO', 'The INFO level designates informational messages that would be useful to a deployer or administrator ', 'ucmAdmin', '2007-10-04 10:25:35'),
+(4, 'NOTICE', 'The NOTICE level designates normal but significant condition', 'ucmAdmin', '2007-10-04 10:25:35'),
+(5, 'WARNING', 'The WARNING level designates roblems that are recovered from, usually.', 'ucmAdmin', '2007-10-04 10:25:35'),
+(6, 'ERROR', 'The ERROR level designates errors in the component; not errors from elsewhere.', 'ucmAdmin', '2007-10-04 10:25:35'),
+(7, 'CRITICAL', 'The CRITICAL level designates critical conditions on the system.', 'ucmAdmin', '2007-10-04 10:25:35'),
+(8, 'ALERT', 'The ALERT level designates that cction must be taken immediately.', 'ucmAdmin', '2007-10-04 10:25:35'),
+(9, 'FATAL', 'The FATAL level designates that a component cannot continue or system is unusable.', 'ucmAdmin', '2007-10-04 10:25:35');
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `StateDictionary`
+-- Table structure for table `StateDictionary` and initial data
 -- 
 
 DROP TABLE IF EXISTS StateDictionary;
@@ -202,10 +171,6 @@ CREATE TABLE IF NOT EXISTS StateDictionary (
   stateUpdateTime   timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'The time that the information was last updated',
   PRIMARY KEY  (stateID)
 );
-
--- 
--- Dumping data for table `StateDictionary`
--- 
 
 INSERT INTO StateDictionary (`stateID`, `stateName`, `stateDescription`, `stateAuthor`, `stateUpdateTime`) VALUES 
 (1, 'Unsubmitted', 'Job received by GRAM, but not submitted to scheduler', 'ucmAdmin', '2007-07-12 10:25:35'),
@@ -221,36 +186,54 @@ INSERT INTO StateDictionary (`stateID`, `stateName`, `stateDescription`, `stateA
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `Tasks`
+-- Table structure for table `BrokerDictionary` and initial data
 -- 
 
-DROP TABLE IF EXISTS Tasks;
-CREATE TABLE IF NOT EXISTS Tasks (
-  taskID           int(11)     NOT NULL AUTO_INCREMENT  KEY COMMENT 'ID of task when entry is created, unique in table',
-  brokerID         int(11)     NOT NULL default '2' COMMENT 'The ID of the broker that created task',
-  requesterName    varchar(32) NOT NULL             COMMENT 'An requester (user) name from the TaskRequesters table',
-  taskName         varchar(32) default NULL         COMMENT 'Short name of task as assigned by user through broker',
-  taskDescription  varchar(64) NOT NULL             COMMENT 'Text description of task as assigned by user through broker',
-  taskSize         int(11)     NOT NULL default '1' COMMENT 'Number of jobs in the task',
-  taskRemainSize   int(11)     NOT NULL default '1' COMMENT 'Number of jobs no completed',
-  submitTime       datetime    default NULL         COMMENT 'Wall time that task was submitted to broker',
-  updateTime       timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'Wall time that task row was last updated',
-  endTime          datetime    default  NULL        COMMENT 'Wall time that task completed execution',
-  brokerTaskID     char(40)    NOT NULL             COMMENT 'ID of task as assigned by Broker',
-  CONSTRAINT UNIQUE  INDEX taskID (brokerTaskID)
+DROP TABLE IF EXISTS BrokerDictionary;
+CREATE TABLE IF NOT EXISTS BrokerDictionary (
+  brokerID          int(11)     NOT NULL COMMENT 'The ID of the broker as assigned by the UCM system',
+  brokerName        varchar(16) NOT NULL COMMENT 'A short name for the broker assigned by the UCM system',
+  brokerDescription varchar(64) NOT NULL default 'No Description' COMMENT 'A string description of the broker including the location',
+  brokerAuthor      varchar(8)  NOT NULL default 'ucmAdmin' COMMENT 'The author that last updated this information',
+  brokerUpdateTime  timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'The time that the information was last updated',
+  PRIMARY KEY  (brokerID)
 );
 
+INSERT INTO BrokerDictionary (`brokerID`, `brokerName`, `brokerDescription`, `brokerAuthor`, `brokerUpdateTime`) VALUES 
+(1, 'SUMS', 'STAR Unified MetaScheduler at Brookhaven National Lab', 'ucmAdmin', '2007-07-12 10:25:35'),
+(2, 'LSF-BNL', 'LSF Scheduler located at Brookhaven National Lab', 'ucmAdmin', '2007-07-12 10:25:35');
+
+-- --------------------------------------------------------
+
 -- 
--- Dumping data for table `Tasks`
+-- Table structure for table `StageDictionary` and inital data
 -- 
+
+DROP TABLE IF EXISTS StageDictionary;
+CREATE TABLE IF NOT EXISTS StageDictionary (
+  stageID          int(11)     NOT NULL COMMENT 'ID of the stage for the event message',
+  stageName        varchar(32) NOT NULL COMMENT 'Short name of the stage',
+  stageDescription varchar(64) NOT NULL default 'No Description' COMMENT 'A string description of the stage',
+  lstageuthor      varchar(8)  NOT NULL default 'ucmAdmin' COMMENT 'The author that last updated this information',
+  stageUpdateTime  timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'The time that the information was last updated',
+  PRIMARY KEY  (stageID)
+);
+
+INSERT INTO StageDictionary (`stageID`, `stageName`, `stageDescription`, `stageAuthor`, `stageUpdateTime`) VALUES
+(1, 'START', 'The START stage is for events that start some process.', 'ucmAdmin', '2007-10-04 10:25:35'),
+(2, 'STATUS', 'The STATUS stage is for events that are updates or singleton events.', 'ucmAdmin', '2007-10-04 10:25:35'),
+(3, 'END', 'The END stage is for events that end some process pairing up with a START stage.', 'ucmAdmin', '2007-10-04 10:25:35');
+
+-- --------------------------------------------------------
+
 
 SHOW tables;
 
-DESCRIBE   BrokerDictionary;
-DESCRIBE   FacilityDictionary;
-DESCRIBE   Jobs;
-DESCRIBE   Messages;
-DESCRIBE   RequesterDictionary;
-DESCRIBE   SeverityDictionary;
-DESCRIBE   StateDictionary;
 DESCRIBE   Tasks;
+DESCRIBE   Jobs;
+DESCRIBE   JobEvents;
+DESCRIBE   RequesterDictionary;
+DESCRIBE   LevelDictionary;
+DESCRIBE   StateDictionary;
+DESCRIBE   BrokerDictionary;
+DESCRIBE   StageDictionary;
