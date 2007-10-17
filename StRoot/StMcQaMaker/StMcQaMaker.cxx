@@ -1,10 +1,13 @@
 /*************************************************
  *
- * $Id: StMcQaMaker.cxx,v 1.1 2007/03/21 16:48:49 fisyak Exp $
+ * $Id: StMcQaMaker.cxx,v 1.2 2007/10/17 19:32:06 fisyak Exp $
  * Author: Manuel Calderon de la Barca
  * Make standard Histograms for
  * StMcEvent 
  * $Log: StMcQaMaker.cxx,v $
+ * Revision 1.2  2007/10/17 19:32:06  fisyak
+ * The pixel story, remove Igt and Fst
+ *
  * Revision 1.1  2007/03/21 16:48:49  fisyak
  * maker for side by side comparision of GEANT and VMC simulations
  *
@@ -94,10 +97,8 @@ void StMcQaMaker::QAPlots(StMcEvent *mEvent) {
     {kMwpcEastId  	   ,"Mwpc",	10, {0, 0}, 250, 250., {0, 0}, 250, 250, 250., 250., {0, 0}, {0, 0}},	 
     {kPhmdCpvId   	   ,"PhmdCpv",	10, {0, 0}, 250, 250., {0, 0}, 250, 250, 250., 250., {0, 0}, {0, 0}},	  
     {kPhmdId      	   ,"Phmd",	10, {0, 0}, 250, 250., {0, 0}, 250, 250, 250., 250., {0, 0}, {0, 0}},	     
-    {kHftId     	   ,"Hft",	10, {0, 0},  60,  60., {0, 0}, 100, 100,  20.,  20., {0, 0}, {0, 0}},	    
+    {kPxlId     	   ,"Pxl",	10, {0, 0},  60,  60., {0, 0}, 100, 100,  20.,  20., {0, 0}, {0, 0}},	    
     {kIstId       	   ,"Ist",	10, {0, 0},  60,  60., {0, 0}, 100, 100,  20.,  20., {0, 0}, {0, 0}},		     
-    {kIgtId       	   ,"Igt",	10, {0, 0},  60,  60., {0, 0}, 100, 100,  20.,  20., {0, 0}, {0, 0}},		     
-    {kFstId   	           ,"Fst",	10, {0, 0}, 250, 250., {0, 0}, 250, 250, 250., 250., {0, 0}, {0, 0}},	  
     {kFgtId   	           ,"Fgt",	10, {0, 0}, 250, 250., {0, 0}, 250, 250, 250., 250., {0, 0}, {0, 0}}
   };
   static const Int_t NTdetectors = sizeof(TrackDetectors)/sizeof(TrackDetector_t);
