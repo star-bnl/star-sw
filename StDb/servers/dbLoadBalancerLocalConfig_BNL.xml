@@ -37,7 +37,7 @@
 
                 <Server scope="Analysis" whenActive="night" accessMode="read">
                         <Host name="db01.star.bnl.gov" port="3316"/>
-                        <Host name="db10.star.bnl.gov" port="3316"/>
+                        <Host name="db10.star.bnl.gov" port="3316" machinePower= ".7" />
                 </Server> 
 		
                <Server scope="Analysis" user="fisyak,perev,balewski,bouchet,genevb" accessMode="read">
