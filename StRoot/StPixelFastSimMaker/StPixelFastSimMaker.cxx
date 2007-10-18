@@ -1,16 +1,13 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.32 2007/10/16 19:53:08 fisyak Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.33 2007/10/18 14:25:13 didenko Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
- * Revision 1.32  2007/10/16 19:53:08  fisyak
- * rename Hft => Pxl, remove Hpd, Igt and Fst
- *
- * Revision 1.31  2007/10/16 19:50:46  fisyak
- * rename Hft => Pxl, remove Hpd, Igt and Fst
+ * Revision 1.33  2007/10/18 14:25:13  didenko
+ * updates for pile-up events
  *
  * Revision 1.30  2007/09/09 17:00:32  fisyak
  * Fix bug 1056
@@ -136,6 +133,8 @@ using namespace std;
 #include "StarClassLibrary/StRandom.hh"
 #include "tables/St_HitError_Table.h"
 #include <fstream>
+#include "TFile.h"
+#include "TTree.h"
 
 ClassImp(StPixelFastSimMaker)
 
@@ -170,34 +169,96 @@ int StPixelFastSimMaker::InitRun(int RunNo)
   resZIst2 = sqrt(ist2HitError->coeff[3]);
 
 
-     bool pileUpOut=false;
-     fstream file_op("pileup.dat",ios::in);
-     StThreeVectorD * pH=0;
-     if(!pileUpOut)
-       {
-        if(file_op && ! file_op.eof())
-	 {
-	  double x,y,z,layer,ladder;
-	  file_op>>x>>y>>z>>layer>>ladder;
-	  if(x!=-999)
-	    {
-	      pH=new StThreeVectorD(x,y,z);
-	      pileupHits.push_back(pH);
-	      pair<double, double>* pD = new pair<double,double>(layer,ladder);
-	      pileupDet.push_back(pD);
-	      
-	    }
-       	
-	 }//end if file op
-       }//end if pileup output
-    else
-      { //try file input
-      }
-
-
-
+  LoadPixPileUpHits(); //.. load the pile up hits for PIXEL
 
   return kStOk;
+}
+
+//___________________________
+void StPixelFastSimMaker::LoadPixPileUpHits()
+{
+  cout<<"+++ loading the PIXEL pileup files +++"<<endl;
+
+  pileup_on = true;
+
+  TFile f_pileup("pileup.root");
+  if (f_pileup.IsZombie()) {
+
+       pileup_on = false;
+
+       cout << "no PIXEL pileup file found. Will run with regular setup" << endl;
+       return;
+  }
+
+  cout<<"+++ Loaded pileup.root for PIXEL pileup simulation +++"<<endl;
+
+  TTree* pileup_tree = (TTree*)f_pileup.Get("pileup_tree");
+
+  const int maxhit = 200000;
+  float x[maxhit], y[maxhit], z[maxhit], px[maxhit], py[maxhit], pz[maxhit], de[maxhit], ds[maxhit];
+  long key[maxhit], vid[maxhit];
+  int layer[maxhit], nhits;
+
+  TBranch *b_x = pileup_tree->GetBranch("x");
+  TBranch *b_y = pileup_tree->GetBranch("y");
+  TBranch *b_z = pileup_tree->GetBranch("z");
+  TBranch *b_px = pileup_tree->GetBranch("px");
+  TBranch *b_py = pileup_tree->GetBranch("py");
+  TBranch *b_pz = pileup_tree->GetBranch("pz");
+  TBranch *b_de = pileup_tree->GetBranch("de");
+  TBranch *b_ds = pileup_tree->GetBranch("ds");
+  TBranch *b_key = pileup_tree->GetBranch("key");
+  TBranch *b_vid = pileup_tree->GetBranch("vid");
+  TBranch *b_layer = pileup_tree->GetBranch("layer");
+  TBranch *b_nhits = pileup_tree->GetBranch("nhits");
+  b_x->SetAddress(x);
+  b_y->SetAddress(y);
+  b_z->SetAddress(z);
+  b_px->SetAddress(px);
+  b_py->SetAddress(py);
+  b_pz->SetAddress(pz);
+  b_de->SetAddress(de);
+  b_ds->SetAddress(de);
+  b_key->SetAddress(key);
+  b_vid->SetAddress(vid);
+  b_layer->SetAddress(layer);
+  b_nhits->SetAddress(&nhits);
+
+  pileup_tree->GetEntry(0); //.. just one events
+
+  for(int ihit = 0; ihit<nhits; ihit++) {
+    pileup_x.push_back(x[ihit]);
+    pileup_y.push_back(y[ihit]);
+    pileup_z.push_back(z[ihit]);
+
+    pileup_px.push_back(px[ihit]);
+    pileup_py.push_back(py[ihit]);
+    pileup_pz.push_back(pz[ihit]);
+
+    pileup_key.push_back(key[ihit]);
+    pileup_vid.push_back(vid[ihit]);
+
+    pileup_de.push_back(de[ihit]);
+    pileup_ds.push_back(ds[ihit]);
+  }
+}
+//____________________________________________________________
+void StPixelFastSimMaker::AddPixPileUpHit(StMcPixelHitCollection* pixHitCol)
+{
+   for(unsigned int i = 0; i<pileup_x.size(); i++) {
+
+        StThreeVectorD pos(pileup_x[i], pileup_y[i], pileup_z[i]);
+        StThreeVectorF mom(pileup_px[i], pileup_py[i], pileup_pz[i]);
+
+	float de = pileup_de[i]; 
+	float ds = pileup_ds[i];
+
+	int key = pileup_key[i];
+	int vid = pileup_vid[i];
+
+        StMcPixelHit* pixhit = new StMcPixelHit(pos, mom, de, ds, key, vid, 0);
+        pixHitCol->addHit(pixhit);
+    }
 }
 //____________________________________________________________
 
@@ -229,69 +290,13 @@ Int_t StPixelFastSimMaker::Make()
     StThreeVectorF mHitError(0.,0.,0.);
 
     //Get MC Pixel hit collection. This contains all pixel hits.
-  const StMcPixelHitCollection* pixHitCol = mcEvent->pixelHitCollection();			     
-
-  bool pileupOut=false;
-  if(pileupOut)
-    {
-      fstream file_op("pileup.dat",ios::app);
-      
-      if(file_op)
-	{
-	    Int_t nhits = pixHitCol->numberOfHits();				
-	    if (nhits)								
-	      {									
-		Int_t id = 0;							
-		for (UInt_t k=0; k<pixHitCol->numberOfLayers(); k++)		       
-		  if (pixHitCol->layer(k))						
-		    {								
-		      UInt_t nh = pixHitCol->layer(k)->hits().size();		
-		      for (UInt_t i = 0; i < nh; i++) {
-		  
-			StMcHit *mcH = pixHitCol->layer(k)->hits()[i];
-			if (!mcH) continue;
-
-			StThreeVectorD mRndHitError(0.,0.,0.);
-			smearGaus(mRndHitError, 8.6, 8.6);
-			//8.6 is the design resolution of the detector
-			StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);
-			file_op<< mcH->position().x() + mRndHitError.x()<<" "
-			       <<mcH->position().y() + mRndHitError.y()<<" "
-			       <<mcH->position().z() + mRndHitError.z()<<" "
-			       <<mcP->layer()<<" "<<mcP->ladder()<<endl;
-       		      }                                                           
-		    }								 
-	      }//end if nhits
-	    file_op<<"-999 -999 -999 0. 0."<<endl; //send end of event flag
-	    file_op.close();
-	}//end if file op
-    }//end if pileup output
-  else
-    { //try file input
-      if(pixHitCol){
-	vector<pair<double,double>*>::iterator iD=pileupDet.begin();
-        for(vector<StThreeVectorD*>::iterator iH=pileupHits.begin();
-	  iH<pileupHits.end();
-	  iH++, iD++)
-	{
-	  int id = col->numberOfHits();
-	   			
-	    StThreeVectorD mRndHitError(0.,0.,0.);
-	    StThreeVectorD p((*iH)->x(),(*iH)->y(),(*iH)->z());
-	    StRnDHit* tempHit = new StRnDHit(p,mRndHitError, 1, 1., 0, 
-						   1, 1, id++, kPxlId);
-	    tempHit->setDetectorId(kPxlId);
-	    tempHit->setVolumeId(999);
-	    tempHit->setKey(999);
-	    tempHit->setLayer((*iD)->first);
-	    tempHit->setLadder((*iD)->second);
-	    col->addHit(tempHit);
-	}
-      }//end if pixelhitcol
-    }
-
+  StMcPixelHitCollection* pixHitCol = mcEvent->pixelHitCollection();			     
   if (pixHitCol)							
     {									
+      if(pileup_on)
+	AddPixPileUpHit(pixHitCol); //.. add the pileup hits into the collection
+
+
       Int_t nhits = pixHitCol->numberOfHits();				
       if (nhits)								
 	{									
@@ -316,10 +321,14 @@ Int_t StPixelFastSimMaker::Make()
 
 		  StRnDHit* tempHit = new StRnDHit(mcP->position(), 
 						   mRndHitError, 1, 1., 0, 
-						   1, 1, id++, kPxlId);
+						   1, 1, id++, kHftId);
+		  //StRnDHit* tempHit = new StRnDHit(mcP->position(), 
+		//				   mRndHitError, 1, 1., 0, 
+		//				   1, 1, id++, kPxlId);
 		  //cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
 		  //     <<*tempHit<<endl;
-		  tempHit->setDetectorId(kPxlId);
+		  tempHit->setDetectorId(kHftId);
+		  //tempHit->setDetectorId(kPxlId);
 		  tempHit->setVolumeId(mcP->volumeId());                   
 		  tempHit->setKey(mcP->key());                             
 		  //StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);     
@@ -610,6 +619,121 @@ Int_t StPixelFastSimMaker::Make()
       LOG_INFO <<"No Ist hits found."<<endl;
     }
 
+    
+  /*const StMcHpdHitCollection* hpdHitCol = mcEvent->hpdHitCollection();	       			
+    if (hpdHitCol)							
+    {									
+      Int_t nhits = hpdHitCol->numberOfHits();
+      if (nhits)								
+	{									
+	  Int_t id = 0;							
+	 
+	  for (UInt_t k=0; k<hpdHitCol->numberOfLayers(); k++){	
+	    if (hpdHitCol->layer(k))						
+	      {								
+		UInt_t nh = hpdHitCol->layer(k)->hits().size();	
+		for (UInt_t i = 0; i < nh; i++) { 
+		  StMcHit *mcH = hpdHitCol->layer(k)->hits()[i];                          
+		  StMcHpdHit *mcI = dynamic_cast<StMcHpdHit*>(mcH); 
+		  if(mcI){
+
+		    StThreeVectorF local = global2LocalHpd(mcI->position(), mcI->ladder()-1);
+		    local.setX(distortHit(local.x(), resXHpd, ladderWidthHpd));
+		    local.setZ(distortHit(local.z(), resZHpd, 2*waferLengthHpd));
+		    StThreeVectorF global = local2GlobalHpd(local, mcI->ladder()-1);
+    
+		    StRnDHit* tempHit = new StRnDHit(global, mHitError, 1, 1., 0, 1, 1, id++, kHpdId);  
+		    tempHit->setDetectorId(kHpdId); 
+		    tempHit->setVolumeId(mcH->volumeId());                   
+		    tempHit->setKey(mcH->key());     
+		    tempHit->setLayer(mcI->layer());           
+		    tempHit->setLadder(mcI->ladder());             
+                                                       
+		    col->addHit(tempHit); 
+		  }                                
+		}                                                           
+	      }	
+	  }							 
+	}									 
+     
+     LOG_INFO <<"StPixelFastSimMaker::Make() -I- Loaded Hpd  "
+			 <<nhits<<" hpd hits. "<<endl;
+    }
+  else
+    {
+      cout <<"No hpd hits found."<<endl;
+    }
+  */
+    
+   const StMcIgtHitCollection* igtHitCol= mcEvent->igtHitCollection();					
+    
+      if (igtHitCol)							
+    {									
+      Int_t nhits = igtHitCol->numberOfHits();				
+      if (nhits)								
+	{									
+	  Int_t id = 0;							
+	  //StSPtrVecHit *cont = new StSPtrVecHit();				
+	  //rcEvent->addHitCollection(cont, # Name );				
+	  for (UInt_t k=0; k<igtHitCol->numberOfLayers(); k++)		       
+	    if (igtHitCol->layer(k))						
+	      {								
+		UInt_t nh = igtHitCol->layer(k)->hits().size();		
+		for (UInt_t i = 0; i < nh; i++) {
+		  StMcHit *mcH = igtHitCol->layer(k)->hits()[i];          
+		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++);  
+		  tempHit->setVolumeId(mcH->volumeId());                   
+		  tempHit->setKey(mcH->key());                             
+		  StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);     
+		  if(mcP){                                                
+		    tempHit->setLayer(mcP->layer());           
+		    tempHit->setLadder(mcP->ladder());           
+		  }                                                  
+		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
+		  if(mcI){                                                
+		    tempHit->setLayer(mcI->layer());           
+		    tempHit->setLadder(mcI->ladder());           
+		    tempHit->setWafer(mcI->wafer());           
+		    tempHit->setExtraByte0(mcI->side());         
+		  }                                                         
+		  col->addHit(tempHit);                                 
+		}                                                           
+	      }								 
+	}									 
+    }
+
+     const StMcFstHitCollection* fstHitCol= mcEvent->fstHitCollection();				
+ 
+        if (fstHitCol)							
+    {									
+      Int_t nhits = fstHitCol->numberOfHits();				
+      if (nhits)								
+	{									
+	  Int_t id = 0;							
+	  //StSPtrVecHit *cont = new StSPtrVecHit();				
+	  //rcEvent->addHitCollection(cont, # Name );				
+	  for (UInt_t k=0; k<fstHitCol->numberOfLayers(); k++)		       
+	    if (fstHitCol->layer(k))						
+	      {								
+		UInt_t nh = fstHitCol->layer(k)->hits().size();		
+		for (UInt_t i = 0; i < nh; i++) {
+		  StMcHit *mcH = fstHitCol->layer(k)->hits()[i];          
+		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++);  
+		  tempHit->setVolumeId(mcH->volumeId());                   
+		  tempHit->setKey(mcH->key());                             
+		                                                 
+		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
+		  if(mcI){                                                
+		    tempHit->setLayer(mcI->layer());           
+		    tempHit->setLadder(mcI->ladder());           
+		    tempHit->setWafer(mcI->wafer());           
+		    tempHit->setExtraByte0(mcI->side());         
+		  }                                                         
+		  col->addHit(tempHit);                                 
+		}                                                           
+	      }								 
+	}									 
+    }
 
     const StMcFgtHitCollection* fgtHitCol = mcEvent->fgtHitCollection();					
 	  if (fgtHitCol)							
