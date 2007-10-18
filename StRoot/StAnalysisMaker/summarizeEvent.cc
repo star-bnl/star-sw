@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: summarizeEvent.cc,v 2.21 2007/10/18 00:33:05 fine Exp $
+* $Id: summarizeEvent.cc,v 2.22 2007/10/18 14:54:29 fine Exp $
 *
 * Author: Torre Wenaus, BNL,
 *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
 ***************************************************************************
 *
 * $Log: summarizeEvent.cc,v $
+* Revision 2.22  2007/10/18 14:54:29  fine
+* remove the extra coma
+*
 * Revision 2.21  2007/10/18 00:33:05  fine
 * Adjust job tracking messages fro the new tracking schema from TxCorp
 *
@@ -86,7 +89,7 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.21 2007/10/18 00:33:05 fine Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.22 2007/10/18 14:54:29 fine Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -150,7 +153,7 @@ summarizeEvent(StEvent& event, const int &nevents)
 //        LOG_QA << "SequenceValue=" << nevents 
         LOG_QA 
         << ",StageID='3'"
-        << ",MessageKey=" << "'nodes all'," 
+        << ",MessageKey=" << "'nodes all'" 
         << ",MessageValue='" <<  nTracks 
         << "'" << endm;
     }
@@ -159,7 +162,7 @@ summarizeEvent(StEvent& event, const int &nevents)
 //        LOG_QA << "SequenceValue=" << nevents 
         LOG_QA 
         << ",StageID='3'"
-        << ",MessageKey=" << "'nodes good'," 
+        << ",MessageKey=" << "'nodes good'" 
         << ",MessageValue='" << nGoodTracks 
         << "'" << endm;
     }
@@ -203,7 +206,7 @@ summarizeEvent(StEvent& event, const int &nevents)
 //            LOG_QA << "SequenceValue=" << nevents
             LOG_QA 
             << ",StageID='3'"
-            << ",MessageKey=" << "'primary all',"  
+            << ",MessageKey=" << "'primary all'"  
             << ",MessageValue='" <<  nDaughters
             << "'" << endm;
         }
@@ -211,7 +214,7 @@ summarizeEvent(StEvent& event, const int &nevents)
 //            LOG_QA << "SequenceValue=" << nevents
             LOG_QA 
             << ",StageID='3'"
-            << ",MessageKey=" << "'primary good'," 
+            << ",MessageKey=" << "'primary good'" 
             << ",MessageValue='" << nGoodTracks
             << "'" << endm;
         }
