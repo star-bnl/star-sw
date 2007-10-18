@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.24 2007/09/18 02:29:58 mvl Exp $
+ * $Id: StMuTrack.h,v 1.25 2007/10/18 03:44:24 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -112,8 +112,8 @@ protected:
   UChar_t mNHitsPoss;       // Total possible points (was (F)tpc only)
   UChar_t mNHitsDedx;       
   UChar_t mNHitsFit;        // Total fitted points (was (F)tpc only)
-  UChar_t mNHitsPossInner;  // Svt (3 bit) and Ssd (2 bit) possible hits
-  UChar_t mNHitsFitInner;   // Svt (3 bit) and Ssd (2 bit) fitted hits
+  UChar_t mNHitsPossInner;  // Svt/Ist (3 bit) and Ssd (2 bit) possible hits, Pixel (3 bits)
+  UChar_t mNHitsFitInner;   // Svt/Ist (3 bit) and Ssd (2 bit) fitted hits, Pixel (3 bits)
   UChar_t mNHitsPossTpc;    // Possible (F)tpc hits (Ftpc flagged with first 2 bits)
   UChar_t mNHitsFitTpc;     // Fitted (F)tpc hits (Ftpc flagged with first 2 bits)
   UShort_t mPidProbElectron;
@@ -218,6 +218,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.25  2007/10/18 03:44:24  mvl
+ * Added Ist and Pixel hits to mNPossInner and mNFitInner
+ *
  * Revision 1.24  2007/09/18 02:29:58  mvl
  * Added basic printing functionality. For convenience and to assist data consistency checks
  *
