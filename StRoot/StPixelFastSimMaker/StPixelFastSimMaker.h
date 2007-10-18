@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.9 2007/09/09 17:00:33 fisyak Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.10 2007/10/18 14:25:13 didenko Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.10  2007/10/18 14:25:13  didenko
+ * updates for pile-up events
+ *
  * Revision 1.9  2007/09/09 17:00:33  fisyak
  * Fix bug 1056
  *
@@ -67,6 +70,7 @@
 class StEvent;
 class StMcEvent;
 class StRandom;
+class StMcPixelHitCollection;
 
 class StPixelFastSimMaker : public StMaker {
  public:
@@ -109,6 +113,11 @@ class StPixelFastSimMaker : public StMaker {
   /* \brief Accept method for monte carlo event. */
   virtual Bool_t accept(StMcEvent* event);
 
+  //.. load pileup hits ....
+  void LoadPixPileUpHits();
+
+  //..add PIXEL pileup into the collection
+  void AddPixPileUpHit(StMcPixelHitCollection* pixHitCol);
 
   //Routine to smear hit by resolution with gaussian, mean zero and width res
   double distortHit(double x, double res, double detLength);
@@ -121,7 +130,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.9 2007/09/09 17:00:33 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.10 2007/10/18 14:25:13 didenko Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -138,15 +147,29 @@ class StPixelFastSimMaker : public StMaker {
   double resZIst1;
   double resXIst2;
   double resZIst2;
-
-
-
-
   int mSmear; //to turn smearing on and off
 
-  vector<StThreeVectorD*> pileupHits;
-  vector<pair<double,double>*> pileupDet;
+ protected:
+  vector<double> pileup_x; 
+  vector<double> pileup_y; 
+  vector<double> pileup_z; 
+			
+  vector<float> pileup_px;
+  vector<float> pileup_py;
+  vector<float> pileup_pz;
+
+  vector<int> pileup_key;
+  vector<int> pileup_vid;
+
+  vector<float> pileup_de;
+  vector<float> pileup_ds;
   
+  bool pileup_on;  //.. true: there's a pile file on the disk and will do
+		   //.. pileup simulation. 
+		   //.. false: there's no pile up file on the disk and will 
+		   //.. do regular production
+
+
   ClassDef(StPixelFastSimMaker,1)   //StAF chain virtual base class for Makers
 };
 
