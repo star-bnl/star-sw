@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.32 2007/09/18 02:29:58 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.33 2007/10/18 03:44:23 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -96,8 +96,10 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   }
 
   mNHitsPossInner=track->numberOfPossiblePoints(kSvtId) & 0x7;
+  if (! mNHitsPossInner) mNHitsPossInner=track->numberOfPossiblePoints(kIstId) & 0x7;
   mNHitsPossInner|=(track->numberOfPossiblePoints(kSsdId) & 0x3) << 3;
-
+  mNHitsPossInner|=(track->numberOfPossiblePoints(kPxlId) & 0x7) << 5;
+  
   mNHitsFit = track->fitTraits().numberOfFitPoints();
   mNHitsFitTpc=0;
   if (track->numberOfPossiblePoints(kTpcId)==track->numberOfPossiblePoints(kFtpcEastId)) {
@@ -118,7 +120,9 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
       mNHitsFitTpc=(2 << 6) + tpc_hits;
   }
   mNHitsFitInner=track->fitTraits().numberOfFitPoints(kSvtId) & 0x7;
+  if (! mNHitsFitInner) mNHitsFitInner=track->fitTraits().numberOfFitPoints(kIstId) & 0x7;
   mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kSsdId) & 0x3) << 3;
+  mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kPxlId) & 0x7) << 5;
 
   mChiSqXY = track->fitTraits().chi2(0);
   mChiSqZ = track->fitTraits().chi2(1);
@@ -225,10 +229,14 @@ unsigned short StMuTrack::nHitsPoss(StDetectorId det) const {
     return ((mNHitsPossTpc & 0xC0)==0x80)*(mNHitsPossTpc & 0x3F);
     break;
   case kSvtId:
+  case kIstId:
     return (mNHitsPossInner & 0x7);
     break;
   case kSsdId:
-    return ((mNHitsPossInner & 0x18) >> 3);
+    return ((mNHitsPossInner >> 3) & 0x3);
+    break;
+  case kPxlId:
+    return ((mNHitsPossInner >> 5) & 0x7);
     break;
   default:
     return 0;
@@ -257,10 +265,14 @@ unsigned short StMuTrack::nHitsFit(StDetectorId det) const {
     return ((mNHitsFitTpc & 0xC0)==0x80)*(mNHitsFitTpc & 0x3F);
     break;
   case kSvtId:
+  case kIstId:
     return (mNHitsFitInner & 0x7);
     break;
   case kSsdId:
-    return ((mNHitsFitInner & 0x18) >> 3);
+    return ((mNHitsFitInner >> 3) & 0x3);
+    break;
+  case kPxlId:
+    return ((mNHitsFitInner >> 5) & 0x7);
     break;
   default:
     return 0;
@@ -442,6 +454,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.33  2007/10/18 03:44:23  mvl
+ * Added Ist and Pixel hits to mNPossInner and mNFitInner
+ *
  * Revision 1.32  2007/09/18 02:29:58  mvl
  * Added basic printing functionality. For convenience and to assist data consistency checks
  *
