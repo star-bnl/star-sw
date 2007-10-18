@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: summarizeEvent.cc,v 2.20 2007/10/12 15:48:52 ullrich Exp $
+* $Id: summarizeEvent.cc,v 2.21 2007/10/18 00:33:05 fine Exp $
 *
 * Author: Torre Wenaus, BNL,
 *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
 ***************************************************************************
 *
 * $Log: summarizeEvent.cc,v $
+* Revision 2.21  2007/10/18 00:33:05  fine
+* Adjust job tracking messages fro the new tracking schema from TxCorp
+*
 * Revision 2.20  2007/10/12 15:48:52  ullrich
 * Removed use of obsolete detector enums.
 *
@@ -83,7 +86,7 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.20 2007/10/12 15:48:52 ullrich Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.21 2007/10/18 00:33:05 fine Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -144,18 +147,20 @@ summarizeEvent(StEvent& event, const int &nevents)
     }
 #else
     if (nTracks) {
-        LOG_QA << "SequenceValue=" << nevents 
-        << ",StepEventId='EventFinish'"
-        << ",MessageType=" << "'nodes all',"  << "MessageClass='='"
-        << ",Message='" <<  nTracks 
+//        LOG_QA << "SequenceValue=" << nevents 
+        LOG_QA 
+        << ",StageID='3'"
+        << ",MessageKey=" << "'nodes all'," 
+        << ",MessageValue='" <<  nTracks 
         << "'" << endm;
     }
     
     if (nGoodTracks) { 
-        LOG_QA << "SequenceValue=" << nevents 
-        << ",StepEventId='EventFinish'"
-        << ",MessageType=" << "'nodes good',"  << "MessageClass='='"
-        << ",Message='" << nGoodTracks 
+//        LOG_QA << "SequenceValue=" << nevents 
+        LOG_QA 
+        << ",StageID='3'"
+        << ",MessageKey=" << "'nodes good'," 
+        << ",MessageValue='" << nGoodTracks 
         << "'" << endm;
     }
 #endif    
@@ -195,17 +200,19 @@ summarizeEvent(StEvent& event, const int &nevents)
         }
 #else
         if (nDaughters) {
-            LOG_QA << "SequenceValue=" << nevents
-            << ",StepEventId='EventFinish'"
-            << ",MessageType=" << "'primary all',"  << "MessageClass='='"
-            << ",Message='" <<  nDaughters
+//            LOG_QA << "SequenceValue=" << nevents
+            LOG_QA 
+            << ",StageID='3'"
+            << ",MessageKey=" << "'primary all',"  
+            << ",MessageValue='" <<  nDaughters
             << "'" << endm;
         }
         if (nGoodTracks) {
-            LOG_QA << "SequenceValue=" << nevents
-            << ",StepEventId='EventFinish'"
-            << ",MessageType=" << "'primary good',"  << "MessageClass='='"
-            << ",Message='" << nGoodTracks
+//            LOG_QA << "SequenceValue=" << nevents
+            LOG_QA 
+            << ",StageID='3'"
+            << ",MessageKey=" << "'primary good'," 
+            << ",MessageValue='" << nGoodTracks
             << "'" << endm;
         }
 #endif     
@@ -244,20 +251,23 @@ summarizeEvent(StEvent& event, const int &nevents)
 #else
     // Report for jobTracking Db   (non-zero entry only)      
     if (event.v0Vertices()  .size()) {
-        LOG_QA << "SequenceValue=" << nevents 
-        << ",StepEventId='EventFinish'"
-        << ",MessageType=" << "'V0Vertices', " << "MessageClass='='," << "Message=" << event.v0Vertices()  .size() << endm;
+//        LOG_QA << "SequenceValue=" << nevents 
+        LOG_QA 
+        << ",StageID='3'"
+        << ",MessageKey=" << "'V0Vertices', " << "MessageValue=" << event.v0Vertices()  .size() << endm;
     }
     if (event.xiVertices()  .size()) {
-        LOG_QA << "SequenceValue=" << nevents 
-        << ",StepEventId='EventFinish'"
-        << ",MessageType=" << "'XiVertices', " << "MessageClass='='," << "Message="<< event.xiVertices()  .size()  << endm;
+//        LOG_QA << "SequenceValue=" << nevents 
+        LOG_QA 
+        << ",StageID='3'"
+        << ",MessageKey=" << "'XiVertices', " << "MessageValue="<< event.xiVertices()  .size()  << endm;
     }
     
     if (event.kinkVertices().size()) {
-        LOG_QA << "SequenceValue=" << nevents 
-        << ",StepEventId='EventFinish'"
-        << ",MessageType=" << "'KinkVertices'," << "MessageClass='='," << "Message="<< event.kinkVertices().size() << endm;
+//        LOG_QA << "SequenceValue=" << nevents 
+        LOG_QA 
+        << ",StageID='3'"
+        << ",MessageKey=" << "'KinkVertices'," << "MessageValue="<< event.kinkVertices().size() << endm;
     }
 #endif    
     
