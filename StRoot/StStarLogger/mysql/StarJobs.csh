@@ -20,7 +20,7 @@ mysql -B -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
 #--  UPDATE TaskDescription  SET TaskRemainSize=TaskRemainSize-1 WHERE TaskRequestID_MD5="$1";
 # -- 19/09/2007 temp remove  INSERT DELAYED INTO JobDescriptionFinish  SET SequenceValue="$3", JobDescriptionID = (SELECT JobDescriptionID  FROM JobDescription WHERE  TaskRequestID_MD5="$1" AND BrokerProcessID="$2");
   UPDATE Jobs   SET stateID='9',endTime=NOW() WHERE brokerJobID="$2" AND taskID=(SELECT taskID FROM Tasks WHERE brokerTaskID="$1");
-  UPDATE Tasks  SET taskRemainSize=taskRemainSize-1, endTime=NOW() WHERE brokerTaskID="$1";
+  UPDATE Tasks  SET taskRemainSize=taskRemainSize-1 WHERE brokerTaskID="$1";
 MYSQLCODE
 endif  
 
