@@ -1,5 +1,0 @@
-# $Id $
-# package StEEsoloPi0
-# author: 
-Library:libStEEsoloPi0.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -l_StEEmcUtil  -l_StEvent  -l_StMuDSTMaker  -lPhysics
-#Library:libStEEsoloPi0.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcUtil  -lStEvent  -lStMuDSTMaker  -lPhysics
