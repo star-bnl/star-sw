@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.9 2005/03/01 20:02:15 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.10 2007/10/19 23:18:40 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -154,7 +154,7 @@ void EEsoloPi0::init(){
   }
   
 
-  printf("\ncuts: scaleFactor=%f ch/GeV, seedEnergy=%f GeV ,shapeLimit=%f,  mLo=%.2f GeV, mHi=%.2f GeV\n\n",scaleFactor, seedEnergy,shapeLimit,mLo, mHi);
+  printf("\nEEsoloPi0::init(), cuts: scaleFactor=%f ch/GeV, seedEnergy=%f GeV ,shapeLimit=%f,  mLo=%.2f GeV, mHi=%.2f GeV\n\n",scaleFactor, seedEnergy,shapeLimit,mLo, mHi);
 
   //  HList->ls();
 
@@ -538,6 +538,9 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
 
 /*****************************************************************
  * $Log: EEsoloPi0.cxx,v $
+ * Revision 1.10  2007/10/19 23:18:40  balewski
+ * 2008 cleanup, now works only w/ regular muDst
+ *
  * Revision 1.9  2005/03/01 20:02:15  balewski
  * hack to access 2005 trigger data
  *

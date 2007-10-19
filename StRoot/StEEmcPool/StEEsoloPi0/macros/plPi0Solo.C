@@ -6,17 +6,13 @@ TPad *pad=0;
 //==========================
 //==========================
 
-void plPi0Solo( int page=1,TString fName="soloPi0" ) {
-  int pr=0;
+void plPi0Solo( int page=1,TString fName="R7098001" ) {
+  fName="sumP";
+ int pr=0;
 
-  
-  //  fName="mc12";
-  
-  TString outDir="./"; 
-  //  outDir="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0"; 
+  TString outDir="./out1/"; 
  
   gROOT->Reset();
-
   gStyle->SetPalette(1,0);
   
   // Connect the input file and get the  histogram
@@ -30,15 +26,15 @@ void plPi0Solo( int page=1,TString fName="soloPi0" ) {
   assert(fd->IsOpen());
   //  fd->ls();
   
-  float xLo=.02, xHi=.22;
+  float xLo=.05, xHi=.22;
   //    float xLo=.4, xHi=.7;
 
   
   TString ctit="pi0-"; ctit+=page;
   if(page==3 || page==6) 
-    c=new TCanvas(ctit,ctit,600,650);
+    c=new TCanvas(ctit,ctit,900,950);
   else
-    c=new TCanvas(ctit,ctit,600,350);
+    c=new TCanvas(ctit,ctit,900,650);
   
   c->Range(0,0,1,1);
   TPad *pad0 = new TPad("pad0", "apd0",0.0,0.95,1.,1.);
@@ -128,6 +124,7 @@ void plPi0Solo( int page=1,TString fName="soloPi0" ) {
   //..........................................
   //..........................................
   case 6: {
+    gStyle->SetOptStat(1);
     TGraphErrors*  gr1=new TGraphErrors;
     gr1->SetMarkerStyle(21);
     gr1->SetName(ctit+"eM"); // 
@@ -143,7 +140,7 @@ void plPi0Solo( int page=1,TString fName="soloPi0" ) {
     gr3->SetName(ctit+"eN"); // 
     gr3->SetTitle("Pi0 Yield vs. Eta; eta bin; yield, err=nBckg/10;");
 
-    pad->Divide(4,3);
+    pad->Divide(3,4);
     int i;
     for(i=0;i<12;i++) {
       char t1[100];

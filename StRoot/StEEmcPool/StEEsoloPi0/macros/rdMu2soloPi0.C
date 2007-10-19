@@ -1,4 +1,3 @@
-
 class StChain;
 class StMuEmcCollection;
 
@@ -11,13 +10,12 @@ StMuDstMaker* muMk;
 StChain *chain=0;
 
 int rdMu2soloPi0( 
- TString fullName="mc12",
- int nEve=40000,
- Int_t nFiles  = 5000,
- char* file="inpMC/10.lis", 
- char* inDir   = "./",
- char* outDir   = "outPi0/"
-){ 
+		 char* file="R7114062.lis", 
+		 int nEve=1e3,
+		 Int_t nFiles  = 999,
+		 char* outDir   = "out2/"
+		 ){ 
+  char* inDir   = "./runList/";
   
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
@@ -28,6 +26,8 @@ int rdMu2soloPi0(
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");  
   gSystem->Load("StEEsoloPi0");  
+
+  gROOT->Macro("LoadLogger.C");
 
   // create chain    
   chain = new StChain("StChain"); 
@@ -48,7 +48,7 @@ int rdMu2soloPi0(
   TObjArray  HList;
   myMk3->SetHList(&HList);
 
-#if 1  // flags for M-C events
+#if 0  // flags for M-C events
   stDb->SetDateTime(20031120,0);
   stDb->SetFlavor("sim","eemcPMTcal");
   stDb->SetFlavor("sim","eemcPIXcal");
@@ -59,8 +59,6 @@ int rdMu2soloPi0(
   myMk3->SetMCflag();
 #endif
   
-  gMessMgr->SwitchOff("D");
-  gMessMgr->SwitchOn("I");
  
   chain->Init();
   chain->ls(3);
@@ -75,9 +73,9 @@ int rdMu2soloPi0(
     chain->Clear();
     stat = chain->Make();
 
-    if(eventCounter%3000!=0)continue;
+    if(eventCounter%300!=0)continue;
 
-    printf("\n\n ====================%d  processing  ==============\n", eventCounter);
+    printf("\n====================%d  processing  ==============\n", eventCounter);
 
   }
   printf("sorting done, nEve=%d of %d\n",nEve, nEntries);
@@ -88,7 +86,7 @@ int rdMu2soloPi0(
 
    chain->Finish();
    //   HList.ls();
-   fullName+=".hist.root";
+   TString fullName=file;  fullName.ReplaceAll(".lis",".hist.root");
    fullName=outDir+fullName;
    TFile f( fullName,"recreate");
    assert(f.IsOpen());

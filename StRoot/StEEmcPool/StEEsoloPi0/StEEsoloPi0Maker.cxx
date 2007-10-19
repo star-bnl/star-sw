@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.11 2004/10/27 18:07:50 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.12 2007/10/19 23:18:42 balewski Exp $
 
 #include <TFile.h>
 
@@ -61,8 +61,8 @@ Int_t StEEsoloPi0Maker::InitRun(int runNo){
 Int_t StEEsoloPi0Maker::Init(){
   eeDb=(EEDB*)GetMaker("eemcDb");
   EEsoloPi0::init();
-  gMessMgr->Info() << GetName() << "has MCflag="<< MCflag<<endm;
-   return StMaker::Init();
+  LOG_INFO << "has MCflag="<< MCflag<<endm;
+  return StMaker::Init();
 }
 
 //________________________________________________
@@ -80,7 +80,7 @@ Int_t StEEsoloPi0Maker::Finish(){
 Int_t StEEsoloPi0Maker::Make(){
   clear();  
   static int n0=0,n1=0,n2=0,n3=0;
-  //  printf("%s::Make() is called ..........n0,1,2,3= %d %d %d %d \n",StMaker::GetName(),n0,n1,n2,n3);
+  // printf("%s::Make() is called ..........n0,1,2,3= %d %d %d %d \n",StMaker::GetName(),n0,n1,n2,n3);
   n0++;
   //............. trigger sort
   if( !MCflag&& !unpackMuTrig()) return kStOK;
@@ -105,7 +105,7 @@ Int_t StEEsoloPi0Maker::Make(){
 
 //________________________________________________
 //________________________________________________
-bool StEEsoloPi0Maker::unpackMuTrig(){
+bool StEEsoloPi0Maker::unpackMuTrig(){ // trigger filter, has wrongID
   
   //  printf("%s::unpackMuTrig() is called ..........\n",StMaker::GetName());
  
@@ -117,7 +117,7 @@ bool StEEsoloPi0Maker::unpackMuTrig(){
   const StTriggerId& oflTrgId=trgIdColl.nominal();
   vector<unsigned int> trgId=oflTrgId.triggerIds();
 
-#if 1
+#if 0
   StEventInfo &info=muEve->eventInfo();
   int nPrim = mMuDstMaker->muDst()->primaryTracks()->GetEntries(); 
   printf("\n\n ==================== processing eventID %d nPrim=%d nTrig=%d==============\n", info.id(),nPrim, trgId.size());
@@ -127,10 +127,16 @@ bool StEEsoloPi0Maker::unpackMuTrig(){
   uint i;
   for(i = 0; i < trgId.size() ; i++){
     //    printf("i=%d trgId=%d\n",i,trgId[i]);
+#if 0
     //.......... minB trig in pp200 in 2004
     if(trgId[i]==10) isGood=true;
     if(trgId[i]==45010) isGood=true;
     if(trgId[i]==45020) isGood=true;
+#endif 
+    //.......... some trigs in ppTrans in 2006 
+    if(trgId[i]==127641) isGood=true; //e-http-l2gam
+    // if(trgId[i]==127652) isGood=true; //e-jp0-l2jet
+    // if(trgId[i]==127551) isGood=true; //e-jp0
   }
   
 #if 0 // TPC vertex, not used (yet)
@@ -241,6 +247,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.12  2007/10/19 23:18:42  balewski
+// 2008 cleanup, now works only w/ regular muDst
+//
 // Revision 1.11  2004/10/27 18:07:50  balewski
 // practical use of 'sim' flavor for M-C
 //
