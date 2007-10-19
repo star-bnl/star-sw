@@ -144,15 +144,15 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 // Add a record to MySQL tracking Db     
 //  LOG_QA << "SequenceValue="<< mNTotal
   LOG_QA 
-         << ",StageID=" << "'1'"
-         << ",MessageKey=" << "'MemUsed'," 
+         << "StageID=" << "'1'"
+         << ",MessageKey=" << "'MemUsed'" 
          << ",MessageValue='" << int(TMemStat::Used())
          << "'" << endm;
          
 //  LOG_QA << "SequenceValue="<<mNTotal 
   LOG_QA 
-         << ",StageID=" << "'1'"
-         << ",MessageKey=" << "'ProgSize',"
+         << "StageID=" << "'1'"
+         << ",MessageKey=" << "'ProgSize'"
          << ",MessageValue='" << int(TMemStat::ProgSize())
          << "'" << endm;
 #endif         
@@ -193,15 +193,15 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 // Add a record to MySQL tracking Db     
 //  LOG_QA << "SequenceValue="       << mNTotal
   LOG_QA
-         << ",StageID=" << "'3'"
-         << ",MessageKey=" << "'Cpu',"
+         << "StageID=" << "'3'"
+         << ",MessageKey=" << "'Cpu'"
          << ",MessageValue='" << evnt.GetCpuTime("QAInfo:")
          << "'" << endm;
 
 //  LOG_QA << "SequenceValue="       << mNFailed
   LOG_QA 
-         << ",StageID=" << "'3'"
-         << ",MessageKey=" << "'RealTime'," 
+         << "StageID=" << "'3'"
+         << ",MessageKey=" << "'RealTime'" 
          << ",MessageValue='" << evnt.GetRealTime("QAInfo:")
          << "'" << endm;
 #endif
@@ -239,15 +239,15 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 
 //   LOG_QA << "SequenceValue="       << mNTotal
   LOG_QA 
-         << ",StageID=" << "'3'"
-         << ",MessageKey=" << "'MemUsed',"  
+         << "StageID=" << "'3'"
+         << ",MessageKey=" << "'MemUsed'"  
          << ",MessageValue='" << int(TMemStat::Used())
          << "'" << endm;
 
 //   LOG_QA << "SequenceValue="       << mNFailed
   LOG_QA 
-         << ",StageID=" << "'3'"
-         << ",MessageKey=" << "'ProgSize',"
+         << "StageID=" << "'3'"
+         << ",MessageKey=" << "'ProgSize'"
          << ",MessageValue='" << int(TMemStat::ProgSize())
          << "'" << endm;
 #endif         
@@ -259,8 +259,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.66 2007/10/17 18:54:04 fine Exp $
+// $Id: StChain.cxx,v 1.67 2007/10/19 16:18:32 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.67  2007/10/19 16:18:32  fine
+// new Db schema from TxCorp
+//
 // Revision 1.66  2007/10/17 18:54:04  fine
 // new Db tracking schema from TxCorp
 //

@@ -9,7 +9,7 @@
    <![CDATA[
     time
     stardev
-    root4star -b -l -q 'bfc.C(3)'
+    root4star -b -l -q 'bfc.C(5)'
    $STAR/StRoot/StStarLogger/mysql/StarJobs.csh $REQUESTID $JOBINDEX $?
    ]]>
  </command>  
