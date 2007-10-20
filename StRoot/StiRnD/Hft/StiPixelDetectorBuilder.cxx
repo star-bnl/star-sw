@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.21 2007/10/16 19:50:24 fisyak Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.22 2007/10/20 00:16:27 fisyak Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.22  2007/10/20 00:16:27  fisyak
+ * Active hit errors from DB
+ *
  * Revision 1.21  2007/10/16 19:50:24  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -68,24 +71,7 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
         //returns average error once you actually want to do tracking, the results
         //depend strongly on the numbers below. 
     _trackingParameters.setName("PixelTrackingParameters");
-    _calculator.setName("PixelHitErrors");
-    _calculator.set(6e-5, 0., 0., 6e-5, 0., 0.);
-
-    ifstream inF("PixelBuilder_pars.txt");
-    if (inF)
-      {
-	_trackingParameters.loadFS(inF);
-	LOG_INFO << "StiPixelDetectorBuilder:: -I-  New tracking parameters from file" << endl;
-      }
-    else
-      {
-
-	//StiTrackingParameters * trackingPars = getTrackingParameters();
-	_trackingParameters.setMaxChi2ForSelection(100.);
-	_trackingParameters.setMinSearchWindow(0.01);
-	_trackingParameters.setMaxSearchWindow(.5);
-	_trackingParameters.setSearchWindowScaling(10.);
-      }
+    _hitCalculator.setName("PixelHitError");
 }
 
 StiPixelDetectorBuilder::~StiPixelDetectorBuilder()
@@ -99,8 +85,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
   LOG_INFO << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endl;
 
   //Now pulling values from the DBase for the tracking parameters
-  //loadM(source);
-
+  load(_inputFile, source);
 
   unsigned int nRows=1;
 
@@ -163,7 +148,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	  pDetector->setGroupId(kPxlId);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
-	  pDetector->setHitErrorCalculator(&_calculator);
+	  pDetector->setHitErrorCalculator(&_hitCalculator);
 	  pDetector->setElossCalculator(siElossCalculator);
 	  if (sector<18)
 	    {
@@ -379,7 +364,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     if(!p->getGas()) LOG_INFO <<"gas not there!"<<endl;
     p->setMaterial(matS);
     p->setElossCalculator(ElossCalculator);
-    p->setHitErrorCalculator(&_calculator);
+    p->setHitErrorCalculator(&_hitCalculator);
 
     int startMoth   = nameP.Index("PSEC_",5) + 5;
     int startLadder = nameP.Index("PLMO_",5) + 5;
@@ -430,5 +415,5 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
 
 void StiPixelDetectorBuilder::loadDS(TDataSet &ds)
 {
-  _calculator.loadDS(ds);
+  _hitCalculator.loadDS(ds);
 }
