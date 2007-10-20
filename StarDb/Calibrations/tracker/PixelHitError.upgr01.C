@@ -6,7 +6,7 @@ TDataSet *CreateTable() {
 // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_HitError")) return 0;
 HitError_st row;
-St_HitError *tableSet = new St_HitError("hftHitError",1);
+St_HitError *tableSet = new St_HitError("PixelHitError",1);
 //
  Double_t sigma_x = 0.00086; //  8.6 mkm
  Double_t sigma_z = 0.00086; // 8.6 mkm
