@@ -6,7 +6,7 @@ TDataSet *CreateTable() {
 // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_TrackingParameters")) return 0;
 TrackingParameters_st row;
-St_TrackingParameters *tableSet = new St_TrackingParameters("hftTrackingParameters",1);
+St_TrackingParameters *tableSet = new St_TrackingParameters("PixelTrackingParameters",1);
 //
 memset(&row,0,tableSet->GetRowSize());
 //                                        hit errors are squared !
