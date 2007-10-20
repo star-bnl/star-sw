@@ -24,7 +24,7 @@ public:
     
  protected:
     StiMaterial * _fcMaterial;
-    StiDefaultHitErrorCalculator _calculator;
+    StiDefaultHitErrorCalculator _hitCalculator;
 };
 
 inline double StiPixelDetectorBuilder::phiForSector(unsigned int sector) const
