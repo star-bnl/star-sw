@@ -485,6 +485,8 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   {"VFppLMV"        ,""  ,"","genvtx",""                 ,"","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"       ,""  ,"","genvtx",""         ,"","...VertexMaker will use ppLMV method (tuned)",kFALSE},
+
+  {"VFmin1trk"      ,""  ,"","",""                  ,"","...only 1 track needed for vertex finding",kFALSE},
 #endif /* __BFC2__ */
 
 
