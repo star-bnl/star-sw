@@ -301,7 +301,7 @@ void MySQLAppender::flushBuffer()
 			       const LoggingEventPtr& logEvent = *i;
 			       String sql = getLogStatement(logEvent);
                 expandCommand = sql.c_str();
-                fprintf(stderr," MYSQL QUERY: <%s>\n", sql.c_str());         
+                // fprintf(stderr," MYSQL QUERY: <%s>\n", sql.c_str());         
                 ReplaceVariable(expandCommand, "REQUESTID");
                 ReplaceVariable(expandCommand, "JOBINDEX");
          
