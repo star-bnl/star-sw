@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.14 2007/06/04 22:10:23 fine Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.15 2007/10/22 20:43:02 genevb Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.15  2007/10/22 20:43:02  genevb
+ * Allow 1 track vertex-finding
+ *
  * Revision 1.14  2007/06/04 22:10:23  fine
  * replace cout with LOG_INFO
  *
@@ -189,7 +192,7 @@ void StMinuitVertexFinder::InitRun(int runumber) {
   VertexCuts_st *cuts = Cuts->GetTable();
   mMinNumberOfFitPointsOnTrack = cuts->MinNumberOfFitPointsOnTrack;
   mDcaZMax                     = cuts->DcaZMax;     // Note: best to use integer numbers
-  mMinTrack                    = cuts->MinTrack;
+  mMinTrack                    = ( (GetMode() == 1) ? 1 : cuts->MinTrack );
   mRImpactMax                  = cuts->RImpactMax;
   LOG_INFO << "Set cuts: MinNumberOfFitPointsOnTrack = " << mMinNumberOfFitPointsOnTrack
 	   << " DcaZMax = " << mDcaZMax
@@ -245,7 +248,7 @@ int StMinuitVertexFinder::findSeeds() {
 	      nTrkZ++;
 	    }
 	  }
-	  if (nTrkZ > mMinTrack) {
+	  if (nTrkZ >= mMinTrack) {
 	    if (mDebugLevel) 
 	      LOG_INFO << "Seed " << mNSeed << ", z " << seed_z << " nTrk " << nTrkZ << " meanZ/nTrkZ " << meanZ/nTrkZ << endm;
 	    seed_z = meanZ/nTrkZ;
