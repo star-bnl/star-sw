@@ -31,7 +31,7 @@
      <!--  Define the pattern  -->
      
      <filter class="StringMatchFilter">
-       <param name="StringToMatch" value=",StageID=" /> 
+       <param name="StringToMatch" value="StageID=" /> 
        <param name="AcceptOnMatch" value="true" /> 
      </filter>
      
