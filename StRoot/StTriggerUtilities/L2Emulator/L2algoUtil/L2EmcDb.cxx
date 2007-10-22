@@ -4,7 +4,7 @@
 #include <assert.h>
 
 /*********************************************************************
- * $Id: L2EmcDb.cxx,v 1.1 2007/10/11 00:33:13 balewski Exp $
+ * $Id: L2EmcDb.cxx,v 1.2 2007/10/22 23:10:03 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -19,9 +19,9 @@
 //=====================================
 //=====================================
 L2EmcDb::L2EmcDb(char *inpP, char *logP) {
-  printf("constr: ver17 L2EmcDb, inpPath='%s', logPath='%s'\n",inpP,logP);
-  inpPath=inpP;
-  logPath=logP;
+  printf("L2EmcDb::constr: ver20, inpPath='%s', logPath='%s'\n",inpP,logP);
+  strncpy(inpPath,inpP,mxTxt);
+  strncpy(logPath,logP,mxTxt);
   clearTables();
 }
  
@@ -35,6 +35,7 @@ L2EmcDb::initRun(int runNo){
   run_number=runNo;
   char fname[1000];
   
+  printf("L2EmcDb::initRun, inpPath='%s', logPath='%s'\n",inpPath,logPath);
   int err=0;
   sprintf(fname,"%s/btowDb.current",inpPath);           err+=readAsciiDb(fname,db_labels[0]);
   sprintf(fname,"%s/etowDb.current",inpPath);           err+=readAsciiDb(fname,db_labels[1]);
@@ -563,6 +564,9 @@ L2EmcDb::changeMaskByName(const char *fname, char *lbl) {
 /*
 *********************************************************************
   $Log: L2EmcDb.cxx,v $
+  Revision 1.2  2007/10/22 23:10:03  balewski
+  split L2 to generic and year specific, not finished
+
   Revision 1.1  2007/10/11 00:33:13  balewski
   L2algo added
 

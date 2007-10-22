@@ -17,7 +17,7 @@ class StL2TriggerSimu : public StVirtualTriggerSimu {
   public:
   StL2TriggerSimu(){mL2maker=0;};
   void Init();
-  //void InitRun(int runnumber){};
+  void InitRun(int runnumber);
   // void Clear(){};
   void Make(){};
   short isTrigger(int trigId);
@@ -31,6 +31,9 @@ class StL2TriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StL2TriggerSimu.h,v $
+// Revision 1.3  2007/10/22 23:09:59  balewski
+// split L2 to generic and year specific, not finished
+//
 // Revision 1.2  2007/10/12 17:12:48  kocolosk
 // rename ABC class for subdetector trigger simulators
 // StTriggerSimu => StVirtualTriggerSimu

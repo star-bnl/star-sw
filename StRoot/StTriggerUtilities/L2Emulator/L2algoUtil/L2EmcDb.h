@@ -2,7 +2,7 @@
 #define L2EMCDB_H
 
 /*********************************************************************
- * $Id: L2EmcDb.h,v 1.1 2007/10/11 00:33:14 balewski Exp $
+ * $Id: L2EmcDb.h,v 1.2 2007/10/22 23:10:03 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -53,7 +53,10 @@ class L2EmcDb {
 
   int   initRun(int runNo);
   void  finishRun();
-  char *logPath;
+
+  enum {mxTxt=1000};
+  char logPath[mxTxt];
+  char inpPath[mxTxt];
 
  private:
   EmcCDbItem dbByIndex[EmcDbIndexMax]; // the data container
@@ -71,8 +74,7 @@ class L2EmcDb {
   int   changeMaskByName(const char *fname, char *lbl); 
 
   int   run_number;
-  char *inpPath;
-
+ 
   enum {txMxLbl=6, txMxSize=100};
   char db_labels[txMxLbl][txMxSize];
 
@@ -144,6 +146,9 @@ class L2EmcDb {
 /*
 *********************************************************************
   $Log: L2EmcDb.h,v $
+  Revision 1.2  2007/10/22 23:10:03  balewski
+  split L2 to generic and year specific, not finished
+
   Revision 1.1  2007/10/11 00:33:14  balewski
   L2algo added
 
