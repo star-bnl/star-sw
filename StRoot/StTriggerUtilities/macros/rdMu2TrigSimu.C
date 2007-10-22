@@ -4,7 +4,7 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 7,
+void rdMu2TrigSimu( int nevents = 70e6,
 		    int flagMC=0, // 0== off
 		    int useEemc=1, // 0== off
 		    int useBemc=1, // 0== off
@@ -14,7 +14,7 @@ void rdMu2TrigSimu( int nevents = 7,
 		    )  
 {
   const char *dirIn="runList/";
-  int nFiles = 2; // make this big if you want to read all events from a run
+  int nFiles = 20; // make this big if you want to read all events from a run
   
   char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
   TString outDir="./out2/"; 
@@ -86,7 +86,7 @@ void rdMu2TrigSimu( int nevents = 7,
   TObjArray* HList=new TObjArray; 
 
   //Endcap DB
-  if(useEemc) new StEEmcDbMaker("eemcDb");
+  if(useEemc || useL2) new StEEmcDbMaker("eemcDb");
  
 #if 0 // I'll clean it up next time, Jan
   /*  Activate it only once to _produce_ L2 input gain files from off-line DB
@@ -147,9 +147,9 @@ void rdMu2TrigSimu( int nevents = 7,
        depending on the DB time stamp 
        both dierectiorie MUST exist, setup must be reasonable
     */
-    StL2EmulatorMaker* simL2Mk= new StL2EmulatorMaker;
-    simL2Mk->setSetupPath(eemcSetupPath);
-    simL2Mk->setOutPath(outDir.Data());
+    StL2_2006EmulatorMaker* simL2Mk= new StL2_2006EmulatorMaker;
+    ((StGenericL2Emulator*) simL2Mk)->setSetupPath(eemcSetupPath);
+    ((StGenericL2Emulator*) simL2Mk)->setOutPath(outDir.Data());
     //simL2Mk->useStEvent(); // default : use muDst
   }
   

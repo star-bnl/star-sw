@@ -33,7 +33,6 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   int mHTthr[nThr], mTPthr[nThr],mHTTPthrSelc;
 
   int  eveId; 
-  int mYear;
   int nInpEve;    
   bool mDumpEve;
   void getEemcAdc();
@@ -103,6 +102,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.9  2007/10/22 23:09:54  balewski
+// split L2 to generic and year specific, not finished
+//
 // Revision 1.8  2007/10/12 20:11:33  balewski
 // cleanup of setup path, now at inst/iucf
 //

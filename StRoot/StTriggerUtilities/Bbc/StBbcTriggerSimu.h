@@ -40,6 +40,7 @@ class StBbcTriggerSimu : public StVirtualTriggerSimu {
   StBbcTriggerSimu();
   virtual ~StBbcTriggerSimu();
   void Init();
+  void InitRun(int runnumber){};
   void Clear();
   void Make();
   
@@ -56,6 +57,9 @@ class StBbcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StBbcTriggerSimu.h,v $
+// Revision 1.6  2007/10/22 23:09:51  balewski
+// split L2 to generic and year specific, not finished
+//
 // Revision 1.5  2007/10/12 17:12:38  kocolosk
 // rename ABC class for subdetector trigger simulators
 // StTriggerSimu => StVirtualTriggerSimu
