@@ -50,69 +50,53 @@ StL2_2006EmulatorMaker::~StL2_2006EmulatorMaker(){
 Int_t  
 StL2_2006EmulatorMaker::InitRun(int runNo){
   //WARN: do NOT use  runNo for any setup - it woul dberak for M-C
+  //WARN: do NOT use run# to controll setup of L2-algos
   
   initRun();
-
-
+  
   LOG_INFO << Form("::setupL2Algos2006(), dbDate=%d  ", mYearMonthDay)<<endm;
-
-  mL2algoN=2; // total # of L2 algos
+  
+  assert(mYearMonthDay>20060000); 
+  assert(mYearMonthDay<20060700);
+  
+  mL2algoN=2; // total # of L2 algos (ped, jet)
   mL2algo =new L2VirtualAlgo *[mL2algoN]; // not cleared memeory leak
   memset(mL2algo,0,mL2algoN*sizeof(void*));
-
   //setup evry algo one by one, params may be time dependent
-  enum {mxPar=10};
-  int ints[mxPar]; // params passed from run control gui
-  float floats[mxPar]; // 
-  int L2ResOff=0;
 
-  /* Temporary solutions, needs fixing later 
-     - ints[] and floats[] should not be hardcoded but passed from some sort of DB or input file
-
-     Jan
-  */
-
+  char fname[1000];
 
   // ----------- L2 ped algo ----------------
-  L2ResOff=L2RESULTS_OFFSET_EMC_PED;
-  memset(ints,0,sizeof(ints));
-  memset(floats,0,sizeof(floats));
-  ints[0]=1;   // subtract ped on/off  
-  ints[1]=1;   // speed factor, use 16 for 180kTics=100muSec
-  ints[2]=0;   //  saveBinary on/off
-  ints[3]=0;   // debug verbose on/off 
-
+  int  L2ResOff=L2RESULTS_OFFSET_EMC_PED;
+  sprintf(fname,"%sL2/%d/algos/algoPed.setup",mSetupPath.Data(),mYear);
+  assert( L2VirtualAlgo::readParams(fname,mxPar,intsPar,floatsPar)==4);
   mL2pedAlgo=new L2pedAlgo(mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
-  assert(mL2pedAlgo->initRun("aaa", runNo,ints,floats)==0); // zero tolerance for missing input files
+  assert(mL2pedAlgo->initRun("aaa", runNo,intsPar,floatsPar)==0); // zero tolerance for missing input files
   mL2algo[0]=mL2pedAlgo;
 
   // ----------- L2 jet algo ----------------
-  memset(ints,0,sizeof(ints));
-  memset(floats,0,sizeof(floats));
   L2ResOff=L2RESULTS_OFFSET_DIJET;
-  ints[0] = 22;  /* cutTag, whatever value, not used for anything  */
-  ints[1] =  3; /* useBtow 1=East, 2=West, 3=E+W*/
-  ints[2] =  1; /* useEndcap   */
-  ints[3] =  8; /* threshold for ADC-ped */
-  ints[4] =  5; /* min phi dist J1-J2 in L2phiBins */
-  
-  floats[4] = 0 ;   // debug level
   //time dependent L2jet cuts are below 
   assert( mYearMonthDay>20060316); // before L2jet was not used
   assert( mYearMonthDay<20060620); // after L2jet was not used
+
   if( mYearMonthDay<20060406) { // ppLong-1 period not implementd
     assert(1==2);
   } else if (  mYearMonthDay<200605011) { // ppTrans
-  floats[0] = 8.0;  /* oneJetThr , slideing  */
-  floats[1] = 3.6;  /* diJet1thr , higher */
-  floats[2] = 3.3;  /* diJet2thr , lower */
-  floats[3] = 0.01; // rndAccProb
+  sprintf(fname,"%sL2/%d/algos/algoJet.setup1",mSetupPath.Data(),mYear);
   } else   { // ppLong-2, 62 geV  periods not implementd
     assert(1==2);
   }
+  assert( L2VirtualAlgo::readParams(fname,mxPar,intsPar,floatsPar)==10);
   mL2jetAlgo=new L2jetAlgo(mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
-  assert(mL2jetAlgo->initRun("jetA",runNo,ints,floats)==0); // zero tolerance for missing input files
+  assert(mL2jetAlgo->initRun("jetA",runNo,intsPar,floatsPar)==0); // zero tolerance for missing input files
   mL2algo[1]=mL2jetAlgo;
+
+  // ----------- L2 gamma algo ----------------
+  // add here
+
+  // ----------- L2 J/Psi algo ----------------
+  // add here
 
   LOG_INFO  << "StL2JetEmulMaker::InitRun() done, run=" <<runNo<<endm;
   
@@ -148,7 +132,7 @@ StL2_2006EmulatorMaker::Make(){
 
   addTriggerList(); // based on emulated L2Result[..]
 
-  //  if(mConfig==100) janTest100();
+
   //---------------- debugging is below ------------
   int l2jetOff=-1;
   if(mYear==2006) l2jetOff=L2RESULTS_OFFSET_DIJET;
@@ -170,17 +154,6 @@ Int_t
 StL2_2006EmulatorMaker::Finish(){
   finish();
   return kStOK;
-}
-
-
-//========================================
-//========================================
-//========================================
-void
-StL2_2006EmulatorMaker::janTest100(){
-
-  printf("in play:JanTest 100\n");
-  // hA[1]->Fill(2);
 }
 
 
@@ -301,7 +274,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.1 2007/10/22 23:09:59 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.2 2007/10/23 02:47:11 balewski Exp $
 //
 
 

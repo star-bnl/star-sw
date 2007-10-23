@@ -3,7 +3,7 @@
 //
 // StL2_2006EmulatorMaker Jan Balewski  (Fall, 2007)
 //
-// Goal: 
+// Goal: execute all L2-algos used in 2006 
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,8 @@
 #include "StGenericL2Emulator.h"
 
 //class  StTriggerSimuMaker;
-// used in 2006 ...
+
+// algos used in 2006 ...
 class  L2pedAlgo;
 class  L2jetAlgo;
 
@@ -26,9 +27,8 @@ class StL2_2006EmulatorMaker : public StMaker, StGenericL2Emulator{
 private:
   //  enum {mxAH=16};
   // TH1* hA[mxAH];  
-
-  void janTest100();
   //  void initHistoA(TString core);
+
   L2pedAlgo *mL2pedAlgo;
   L2jetAlgo *mL2jetAlgo;
   void  addTriggerList();
@@ -51,5 +51,5 @@ public:
 
 #endif
 
-// $Id: StL2_2006EmulatorMaker.h,v 1.1 2007/10/22 23:09:59 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.h,v 1.2 2007/10/23 02:47:11 balewski Exp $
 //
