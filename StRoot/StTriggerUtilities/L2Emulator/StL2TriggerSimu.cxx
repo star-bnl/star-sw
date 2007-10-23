@@ -9,7 +9,7 @@
 #include <St_db_Maker/St_db_Maker.h>
 
 #include "StL2TriggerSimu.h"
-#include "StL2EmulatorMaker.h"
+#include "StL2_2006EmulatorMaker.h" // tmp
 
 ClassImp(StL2TriggerSimu)
 
@@ -24,9 +24,9 @@ StL2TriggerSimu::InitRun(int runnumber){
 
   LOG_INFO <<Form("L2TriggerSimu::InitRun() year=%d",mYear )<<endm;
   if(mYear==2006)
-    mL2maker= (StL2EmulatorMaker*) StMaker::GetChain()->GetMaker("L2Emul2006");
+    mL2maker= (StL2_2006EmulatorMaker*) StMaker::GetChain()->GetMaker("L2Emul2006");
   else if(mYear==2008)
-    mL2maker= (StL2EmulatorMaker*) StMaker::GetChain()->GetMaker("L2Emul2008");
+    mL2maker= (StL2_2006EmulatorMaker*) StMaker::GetChain()->GetMaker("L2Emul2008");
   else
     assert(1==2); // wrong year, not implemented
 
@@ -48,12 +48,16 @@ StL2TriggerSimu::Init(){
  
 short   
 StL2TriggerSimu::isTrigger(int trigId){
-  return mL2maker->isTrigger(trigId);
+  // return mL2maker->isTrigger(trigId);// tmp
+  return 0;
 }
 
 
 //
 // $Log: StL2TriggerSimu.cxx,v $
+// Revision 1.3  2007/10/23 03:43:06  balewski
+// clenup
+//
 // Revision 1.2  2007/10/22 23:09:59  balewski
 // split L2 to generic and year specific, not finished
 //
