@@ -9,19 +9,18 @@
 #include <vector>
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
-class StL2_2006EmulatorMaker;//tmp
+class StGenericL2Emulator;
 
 class StL2TriggerSimu : public StVirtualTriggerSimu {
  private:
-  StL2_2006EmulatorMaker *mL2maker;
+  StGenericL2Emulator *mL2maker;
   public:
   StL2TriggerSimu(){mL2maker=0;};
   void Init();
   void InitRun(int runnumber);
-  // void Clear(){};
+  void Clear(){};
   void Make(){};
   short isTrigger(int trigId);
-
 
   ClassDef(StL2TriggerSimu, 1)
  };
@@ -31,6 +30,9 @@ class StL2TriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StL2TriggerSimu.h,v $
+// Revision 1.5  2007/10/23 13:26:40  balewski
+// more cleanup
+//
 // Revision 1.4  2007/10/23 03:43:06  balewski
 // clenup
 //

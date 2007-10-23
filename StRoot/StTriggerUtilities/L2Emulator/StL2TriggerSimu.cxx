@@ -24,9 +24,9 @@ StL2TriggerSimu::InitRun(int runnumber){
 
   LOG_INFO <<Form("L2TriggerSimu::InitRun() year=%d",mYear )<<endm;
   if(mYear==2006)
-    mL2maker= (StL2_2006EmulatorMaker*) StMaker::GetChain()->GetMaker("L2Emul2006");
+    mL2maker= (StGenericL2Emulator*) StMaker::GetChain()->GetMaker("L2Emul2006");
   else if(mYear==2008)
-    mL2maker= (StL2_2006EmulatorMaker*) StMaker::GetChain()->GetMaker("L2Emul2008");
+    mL2maker= (StGenericL2Emulator*) StMaker::GetChain()->GetMaker("L2Emul2008");
   else
     assert(1==2); // wrong year, not implemented
 
@@ -55,6 +55,9 @@ StL2TriggerSimu::isTrigger(int trigId){
 
 //
 // $Log: StL2TriggerSimu.cxx,v $
+// Revision 1.4  2007/10/23 13:26:40  balewski
+// more cleanup
+//
 // Revision 1.3  2007/10/23 03:43:06  balewski
 // clenup
 //
