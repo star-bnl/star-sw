@@ -59,6 +59,7 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
   mEvent = 0;
   primV = 0;
   theFinder = 0;
+  minTracks = -1;
 }
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
@@ -84,10 +85,6 @@ StGenericVertexMaker::~StGenericVertexMaker()
   m_Mode = 0x10    PPV without CTB matching
   m_Mode = 0x20    Fixed vertex finder
   m_Mode = 0x40    Fixed vertex finder, read from MC event
-
-  m_Mode = 0x40000000    ...with a minimum of 1 track
-                      (e.g. 0x40000001 = Minuit with 1 track minimum)
-                      (not all finders have this mode)
  
   Default          Minuit  (to preserver backward compatibility)
 
@@ -106,7 +103,7 @@ Int_t StGenericVertexMaker::Init()
 
   if ( m_Mode & 0x1){
     theFinder= new StMinuitVertexFinder();
-    if ( m_Mode & 0x40000000) theFinder->SetMode(1);
+    if (minTracks >= 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
     isMinuit=true;
 
   } else if ( m_Mode & 0x2){

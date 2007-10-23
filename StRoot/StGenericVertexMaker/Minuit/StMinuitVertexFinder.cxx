@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.15 2007/10/22 20:43:02 genevb Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.16 2007/10/23 05:29:44 genevb Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.16  2007/10/23 05:29:44  genevb
+ * Replace minimum 1 track vertex code with minimum N tracks
+ *
  * Revision 1.15  2007/10/22 20:43:02  genevb
  * Allow 1 track vertex-finding
  *
@@ -171,6 +174,7 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   mUseITTF   = false;
   mUseDCA    = false;
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
+  mMinTrack  = -1;
 }
  
 
@@ -192,7 +196,7 @@ void StMinuitVertexFinder::InitRun(int runumber) {
   VertexCuts_st *cuts = Cuts->GetTable();
   mMinNumberOfFitPointsOnTrack = cuts->MinNumberOfFitPointsOnTrack;
   mDcaZMax                     = cuts->DcaZMax;     // Note: best to use integer numbers
-  mMinTrack                    = ( (GetMode() == 1) ? 1 : cuts->MinTrack );
+  mMinTrack                    = (mMinTrack<0 ? cuts->MinTrack : mMinTrack);
   mRImpactMax                  = cuts->RImpactMax;
   LOG_INFO << "Set cuts: MinNumberOfFitPointsOnTrack = " << mMinNumberOfFitPointsOnTrack
 	   << " DcaZMax = " << mDcaZMax
