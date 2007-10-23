@@ -64,11 +64,9 @@ void makeTPlots(const Char_t *tag = ""){//"dEdx") {
       else                                              t.SetEastWest(2);
     }
   }
-#if 0
   if (Tag.Contains("global",TString::kIgnoreCase)) {
     t.UseGlobal();
   }
-#endif
   if (Tag.Contains("local",TString::kIgnoreCase)) {
     t.UseLocal();
   }  
