@@ -465,6 +465,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
+  {"min2trkVtx"     ,""  ,"","",""                    ,"","...only 2 tracks needed for vertex finding",kFALSE},
 
 #ifndef __BFC2__
   // This option does nothing in TPT mode
@@ -485,8 +486,6 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   {"VFppLMV"        ,""  ,"","genvtx",""                 ,"","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"       ,""  ,"","genvtx",""         ,"","...VertexMaker will use ppLMV method (tuned)",kFALSE},
-
-  {"VFmin1trk"      ,""  ,"","",""                  ,"","...only 1 track needed for vertex finding",kFALSE},
 #endif /* __BFC2__ */
 
 

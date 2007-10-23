@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.521 2007/10/22 20:42:59 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.522 2007/10/23 05:31:07 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -375,14 +375,14 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("VFPPVnoCTB") ){VtxOpt |= (0x1 << 4);} // 16 0x10
       if ( GetOption("VFFV") ){      VtxOpt |= (0x1 << 5);} // 32 0x20
       if ( GetOption("VFMCE") ){     VtxOpt |= (0x1 << 6);} // 64 0x40
-      if ( GetOption("VFmin1trk") ){ VtxOpt |= (0x1 <<30);} // 0x40000000
       mk->SetMode(VtxOpt);
       
       // All VertexFinders implement those (or not)
-      if (GetOption("beamLine") || GetOption("CtbMatchVtx")) {
+      if (GetOption("beamLine") || GetOption("CtbMatchVtx") || GetOption("min2trkVtx")) {
 	TString  cmd(Form("StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) %p;",mk));
 	if (GetOption("beamLine"))    {cmd += "gvtxMk->UseBeamLine();";}
 	if (GetOption("CtbMatchVtx")) {cmd += "gvtxMk->UseCTB();";}
+	if (GetOption("min2trkVtx"))  {cmd += "gvtxMk->SetMinimumTrack(2);";}
 	ProcessLine(cmd);
       }
     }
