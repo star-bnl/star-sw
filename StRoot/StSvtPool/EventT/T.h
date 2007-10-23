@@ -29,9 +29,7 @@ class TT : public TBase {
   Bool_t          UseSsd;
   Bool_t          UseSvt;
   Int_t           EastWest; // 1 => East, 2 => West; 0 => Both
-#ifdef __USE_GLOBAL__
   Bool_t          fGlobal;
-#endif
   Bool_t          fLocal;
   Double_t        dEdxCut;
   Double_t        TpcLengthCut;
@@ -93,10 +91,8 @@ class TT : public TBase {
   virtual void     SetSvt(Bool_t k = kTRUE) {UseSvt = k;}
   virtual void     SetEastWest(Int_t k = 0) {EastWest = k;}
   virtual void     SetdEdxCut(Double_t dEdx=4e-6, Double_t length=40) {dEdxCut = dEdx; TpcLengthCut = length;}
-#ifdef __USE_GLOBAL__
-  virtual void     UseGlobal() {fGlobal = kTRUE;}
-#endif
-  virtual void     UseLocal() {fLocal = kTRUE;}
+  virtual void     UseGlobal() {fGlobal = kTRUE; fLocal = kFALSE;}
+  virtual void     UseLocal() {fLocal = kTRUE; fGlobal = kFALSE;}
   Double_t         GetRCut() {return rCut;}
   virtual void     Init(TTree *tree) {
     uMin = uMax = vMin = vMax = DipCut = VertexZCut = 0; rCut = 0.5;
@@ -108,10 +104,8 @@ class TT : public TBase {
     EastWest = 0;
     dEdxCut = 0;
     TpcLengthCut = 0;
-#ifdef __USE_GLOBAL__
-    fGlobal  = kFALSE;
-#endif
-    fLocal  = kFALSE;
+    fGlobal  = kTRUE;
+    fLocal  = kTRUE;
     TBase::Init(tree);
   }
   //  ClassDef(TT,1)
