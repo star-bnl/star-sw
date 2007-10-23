@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.1 2007/10/22 23:09:58 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.2 2007/10/23 02:47:11 balewski Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -22,8 +22,6 @@ class  L2EmcDb;
 class StGenericL2Emulator  {
  private:
   int  mTotInpEve;
-
-   TString  mSetupPath;
   TString  mOutPath;
 
   void doBanksFromStRawData();
@@ -32,7 +30,7 @@ class StGenericL2Emulator  {
   //replicas of oryginal daq data containers
   unsigned short *mBTOW_BANK;
   unsigned short *mETOW_BANK;
-   int  mBTOW_in, mETOW_in;
+  int  mBTOW_in, mETOW_in;
 
 
   // needed to regenerate raw data banks
@@ -41,17 +39,21 @@ class StGenericL2Emulator  {
   StEmcDecoder  *mMappB; 
 
  protected:
-  int  mMCflag; // set mcFlag=0 for real data
-  int  mYear;
-  void           *mTrigData; // I do not want to deal with this content here
-  bool mUseMuDst;
+  int   mMCflag; // set mcFlag=0 for real data
+  int   mYear;
+  void *mTrigData; // I do not want to deal with this content here
+  bool  mUseMuDst;
   
   // holds all instantiated L2algos
   L2VirtualAlgo **mL2algo; // actual algos
   int mL2algoN;  //# of existing algos (time-stamp dependent)
   L2EmcDb   *mL2EmcDb;
-  // void setupL2Algos2006(int yyyymmdd, int runNo); // year dependent setup
   int  mYearMonthDay;
+  TString  mSetupPath;
+
+  enum {mxPar=10}; // for any algo, separate ints & floats
+  int intsPar[mxPar]; // params passed from run control gui
+  float floatsPar[mxPar]; 
 
  public: 
   StGenericL2Emulator();
@@ -77,6 +79,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.2  2007/10/23 02:47:11  balewski
+// cleanup
+//
 // Revision 1.1  2007/10/22 23:09:58  balewski
 // split L2 to generic and year specific, not finished
 //

@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.1 2007/10/22 23:09:58 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.2 2007/10/23 02:47:10 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -100,7 +100,6 @@ void StGenericL2Emulator::init(){
   mL2EmcDb=0; // will be instantiated in InitRun
   mYear=-1;
  
-  // initAuxHisto();
   LOG_INFO << Form("generic:init() , use: MuDst=1 (StEvent=0)=%d isMC=%d",mUseMuDst,mMCflag) <<endm;
  
 }
@@ -169,32 +168,21 @@ StGenericL2Emulator::initRun(){
   //define path for L2 setup files & output
 
   char setPath[1000];
-  sprintf(setPath,"%sL2/%d/R%d/",mSetupPath.Data(),mYear,refRun);
-
-  LOG_INFO <<"InitRun()  "<<" setPath="<<setPath<<" outPath="<<mOutPath<<" L2Db="<<mL2EmcDb<<endm;
+  sprintf(setPath,"%sL2/%d/db/R%d/",mSetupPath.Data(),mYear,refRun);
+  LOG_INFO <<"InitRun()  "<<"DB setPath="<<setPath<<" outPath="<<mOutPath<<endm;
  
-  StBemcTables *myTable=new StBemcTables;
-  
-  StMaker* maker= StMaker::GetChain()->GetMaker("StarDb");
-  myTable->loadTables(maker );
-
-  // this is how BTOW mapping is accesible
-  mMappB = new StEmcDecoder(mydb->GetDateTime().GetDate(),mydb->GetDateTime().GetTime());
 
   // create new L2Db instance for each run
   if(mL2EmcDb) delete mL2EmcDb;
   mL2EmcDb=new L2EmcDb(setPath,(char*)mOutPath.Data());
-  
-  LOG_INFO << Form("setupL2Algos(), dbDate=%d",mYearMonthDay)<<endm;
-  //WARN: do NOT use run# to controll setup of L2-algos
 
-  /* at this moment only 2006 L2 algos are implemented
-     add new setupL@AlgosYYYY for 2008, use if/else clause to pick the right one
-   */
-  
-  assert(mYearMonthDay>20060000); 
-  assert(mYearMonthDay<20060700);
-  //  setupL2Algos2006(mYearMonthDay,runNo); 
+
+  // access BTOW DB only re-map ADC back to rdo indexing
+  StBemcTables *myTable=new StBemcTables;  
+  StMaker* maker= StMaker::GetChain()->GetMaker("StarDb");
+  myTable->loadTables(maker );
+  // this is how BTOW mapping is accesible
+  mMappB = new StEmcDecoder(mydb->GetDateTime().GetDate(),mydb->GetDateTime().GetTime());
 
   LOG_INFO  << "StGenericL2Emulator::InitRun() done"<<endm;
 
@@ -426,6 +414,9 @@ StGenericL2Emulator::printBEblocks(){
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.2  2007/10/23 02:47:10  balewski
+// cleanup
+//
 // Revision 1.1  2007/10/22 23:09:58  balewski
 // split L2 to generic and year specific, not finished
 //

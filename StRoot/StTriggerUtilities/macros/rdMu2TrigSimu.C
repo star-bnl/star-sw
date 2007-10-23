@@ -4,7 +4,7 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 70e6,
+void rdMu2TrigSimu( int nevents = 7,
 		    int flagMC=0, // 0== off
 		    int useEemc=1, // 0== off
 		    int useBemc=1, // 0== off
