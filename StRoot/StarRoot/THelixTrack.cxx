@@ -715,6 +715,17 @@ double THelixTrack::Dca(const double *point,double *dcaErr) const
    return dca;
 }
 //_____________________________________________________________________________
+double THelixTrack::Dca(double x,double y,double *dcaErr) const
+{
+  double dir[3]={fP[0],fP[1],0};
+  THelixTrack hlx(fX,dir,fRho);
+  if (fEmxXY[0]>0) hlx.SetEmx(fEmxXY,fEmxSZ);
+  double vtx[3]={x,y,fX[2]};
+  return hlx.Dca(vtx,dcaErr);
+}
+
+
+//_____________________________________________________________________________
 double THelixTrack::Dca(const double point[3]
                        ,double &dcaXY,double &dcaZ,double dcaEmx[3]) const
 /// Full 3d dca evaluation
@@ -2747,7 +2758,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.32 2007/09/10 02:05:37 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.33 2007/10/24 22:43:24 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2763,6 +2774,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.33  2007/10/24 22:43:24  perev
+ * Implementation was forgotten. Thanx Adam
+ *
  * Revision 1.32  2007/09/10 02:05:37  perev
  * Misstype fixed
  *
