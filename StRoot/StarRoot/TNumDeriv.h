@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TNumDeriv.h,v 1.1 2006/08/10 04:23:58 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TNumDeriv.h,v 1.2 2007/10/24 22:45:01 perev Exp $
 // Author: Victor Perev   05/07/03
 
 #ifndef ROOT_TNumDeriv
@@ -37,7 +37,7 @@ ClassDef(TNumDeriv,0)
 
 class TNumDeriv1Test : public TNumDeriv {
 public:
-           TNumDeriv1Test(double x) :TNumDeriv("DerivTest") {fX=x;}
+           TNumDeriv1Test(double x) :TNumDeriv("DerivTest") {fX=x;SetStep(1e-3);}
   virtual ~TNumDeriv1Test(){};
 //  virtual Double_t   Fcn(Double_t  arg){return sin((fX+arg));}  	//Fcn 
     virtual Double_t   Fcn(Double_t  arg){return pow(fX+arg,3);}  	//Fcn 
