@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TNumDeriv.cxx,v 1.1 2006/08/10 04:23:55 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TNumDeriv.cxx,v 1.2 2007/10/24 22:44:46 perev Exp $
 // Author: Victor Perev   05/08/03
 
 
@@ -56,13 +56,14 @@ double TNumDeriv::numericalDerivative(  double x, double &delta, double &error )
 
   // This value of gives 8-digit accuracy for 1250 > curvature scale < 1/1250.
 
-  const int nItersMax = 6;
+static const int nItersMax = 6;
   int nIters;
   double bestError = 1.0E30;
   double bestAns = 0;
   double bestDelta = 0;
 
 static const double valFactor  = pow(2.0, -16);
+static const double zero  = 1e-10;
 
 static const double w   = 5.0/8;
 static const double wi2 = 64.0/25.0;
@@ -94,8 +95,9 @@ static const double adjustmentFactor[nItersMax] = {
     if (!finite(Fr) || fOutLim) continue;
     Fl = Fcn(x-h);
     if (!finite(Fl) || fOutLim) continue;
+    
     double A1 = (Fr - Fl)/(2.0*h);
-    if (!finite(A1)) continue;
+    if (!finite(A1) || fabs(A1) < zero) continue;
 //    size = max(fabs(A1), size);
     if (fabs(A1) > size) size = fabs(A1);
 
@@ -105,7 +107,7 @@ static const double adjustmentFactor[nItersMax] = {
     Fl = Fcn(x-hh);
     if (!finite(Fl) || fOutLim) continue;
     double A2 = (Fr-Fl)/(2.0*hh);
-    if (!finite(A2)) continue;
+    if (!finite(A2) || fabs(A2) < zero) continue;
 //    size = max(fabs(A2), size);
     if (fabs(A2) > size) size = fabs(A2);
 
@@ -116,7 +118,7 @@ static const double adjustmentFactor[nItersMax] = {
     if (!finite(Fl) || fOutLim) continue;
     double A3 = (Fr-Fl)/(2.0*hh);
 //    size = max(fabs(A3), size);
-    if (!finite(A3)) continue;
+    if (!finite(A3)|| fabs(A3) < zero) continue;
     if (fabs(A3) > size) size = fabs(A3);
 
     if ( (fabs(A1-A2)/size > maxErrorA) || (fabs(A1-A3)/size > maxErrorA) ) { 
