@@ -2,7 +2,7 @@
 #define L2PEDALGO_H
 
 /*********************************************************************
- * $Id: L2pedAlgo.h,v 1.1 2007/10/11 00:33:25 balewski Exp $
+ * $Id: L2pedAlgo.h,v 1.2 2007/10/25 02:07:07 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -15,7 +15,7 @@ class L2Histo;
 #ifdef __ROOT__ //in root4star environment
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
 #else
-  #include "L2VirtualAlgo.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
 #endif
 
 class L2pedAlgo : public  L2VirtualAlgo {
@@ -54,7 +54,7 @@ class L2pedAlgo : public  L2VirtualAlgo {
 
  public:
   L2pedAlgo(L2EmcDb* db, char *logP, int resOff); 
-  ~L2pedAlgo(){}; // memory leak
+  // ~L2pedAlgo(){}; // memory leak
   int  initRun(char* myName, int runNo,  int *rc_ints, float *rc_floats);
   
   bool  doEvent(int L0trg, int inpEveId, TrgDataType* trgData,  // for every event
@@ -69,6 +69,9 @@ class L2pedAlgo : public  L2VirtualAlgo {
 
 /**********************************************************************
   $Log: L2pedAlgo.h,v $
+  Revision 1.2  2007/10/25 02:07:07  balewski
+  added L2upsilon & binary event dump
+
   Revision 1.1  2007/10/11 00:33:25  balewski
   L2algo added
 

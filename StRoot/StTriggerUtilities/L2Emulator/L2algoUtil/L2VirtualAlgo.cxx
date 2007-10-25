@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include "L2VirtualAlgo.h"
-
+L2VirtualAlgo::~L2VirtualAlgo(){};
 int 
 L2VirtualAlgo::readParams(char *fileN, int mxPar, int *iPar, float *fPar) {
   /* return:

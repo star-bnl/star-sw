@@ -23,7 +23,7 @@ class  L2pedAlgo;
 class  L2jetAlgo;
 
 
-class StL2_2006EmulatorMaker : public StMaker, StGenericL2Emulator{
+class StL2_2006EmulatorMaker : public StMaker, public StGenericL2Emulator{
 private:
   //  enum {mxAH=16};
   // TH1* hA[mxAH];  
@@ -42,7 +42,7 @@ public:
   virtual Int_t     Make();
   virtual Int_t     Finish();
   virtual void      Clear(const Option_t* = "");
-   
+
   //  TObjArray  *mHList; // output histo access point
   // void setHList(TObjArray * x){mHList=x;}
   
@@ -51,5 +51,5 @@ public:
 
 #endif
 
-// $Id: StL2_2006EmulatorMaker.h,v 1.2 2007/10/23 02:47:11 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.h,v 1.3 2007/10/25 02:06:54 balewski Exp $
 //

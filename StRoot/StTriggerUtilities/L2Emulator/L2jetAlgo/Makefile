@@ -16,11 +16,12 @@ ifndef STAR
   INCL =-I  /home/startrg/trg/trg_soft_dev/include/	
 else
   DEFINES=
-  INCL =-I ../Tonko/
+  INCL = -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
 endif
 
 
-INSTALPATH=../main
+INSTALPATH=../../../../onlineL2
+
 
 INCL +=   -I ../L2janUtil 
 
@@ -60,6 +61,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.2  2007/10/25 02:07:03  balewski
+# added L2upsilon & binary event dump
+#
 # Revision 1.1  2007/10/11 00:33:20  balewski
 # L2algo added
 #

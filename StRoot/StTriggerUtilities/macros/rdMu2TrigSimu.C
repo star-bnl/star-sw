@@ -4,13 +4,14 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 7,
+void rdMu2TrigSimu( int nevents = 6e1,
 		    int flagMC=0, // 0== off
 		    int useEemc=1, // 0== off
 		    int useBemc=1, // 0== off
 		    int useL2=1, // 0== off
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
-		    int playConfig=100 // jan:100_199
+		    int playConfig=100, // jan:100_199
+		    int emcEveDump=0 // extrating raw EMC data in a custom format
 		    )  
 {
   const char *dirIn="runList/";
@@ -25,7 +26,7 @@ void rdMu2TrigSimu( int nevents = 7,
   }
   if (flagMC==0){
     // const char *file="/star/institutions/iucf/balewski/prodOfficial06_muDst/7098001/st_physics_*.MuDst.root";
-    const char *file="R710052.lis";
+    const char *file="R7100052.lis";
   }
   
  
@@ -47,6 +48,8 @@ void rdMu2TrigSimu( int nevents = 7,
     assert( !gSystem->Load("StEpcMaker"));
   }
   assert( !gSystem->Load("StTriggerUtilities"));
+  //  if(emcEveDump) assert( !gSystem->Load("EmcBinEvent"));
+
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
   
@@ -140,6 +143,7 @@ void rdMu2TrigSimu( int nevents = 7,
     simuTrig->eemc->setDsmSetup(eemcDsmSetup);    
   }
 
+
   if(useL2) {
     /* 
        reads all input/setup files from  L2setup-yyyymmdd/
@@ -152,6 +156,8 @@ void rdMu2TrigSimu( int nevents = 7,
     ((StGenericL2Emulator*) simL2Mk)->setOutPath(outDir.Data());
     //simL2Mk->useStEvent(); // default : use muDst
   }
+
+  if(emcEveDump) new StJanEventMaker;
   
   StTriggerSimuPlayMaker *playMk= new StTriggerSimuPlayMaker; // to develope user  analysis of trigQA 
   playMk->setConfig(playConfig);

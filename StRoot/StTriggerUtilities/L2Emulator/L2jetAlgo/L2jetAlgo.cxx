@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2jetAlgo.cxx,v 1.1 2007/10/11 00:33:19 balewski Exp $
+ * $Id: L2jetAlgo.cxx,v 1.2 2007/10/25 02:07:02 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -24,9 +24,9 @@
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #else
-  #include "trgStructures.h"
-  #include "L2EmcDb.h"
-  #include "L2Histo.h"
+  #include "StDaqLib/TRG/trgStructures.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
 
 #include "L2jetAlgo.h"
@@ -977,6 +977,9 @@ L2jetAlgo::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo.cxx,v $
+  Revision 1.2  2007/10/25 02:07:02  balewski
+  added L2upsilon & binary event dump
+
   Revision 1.1  2007/10/11 00:33:19  balewski
   L2algo added
 

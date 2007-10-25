@@ -2,13 +2,13 @@
 ifndef STAR
   INSTALPATH=../main/
 else
-  INSTALPATH=../../../../onlineL2
+  INSTALPATH=../../../onlineL2
 endif
 
 
-LIBNAME  = L2algoUtil
-HDRS     = L2Histo.h L2BinEvent.h L2EmcDb.h L2VirtualAlgo.h 
-SRCS     = L2Histo.cxx L2BinEvent.cxx L2EmcDb.cxx L2VirtualAlgo.cxx 
+LIBNAME  = L2binEve
+HDRS     =JanEventReader.h JanEvent.h
+SRCS     =JanEventReader.cxx JanEvent.cxx
 
 
 CXX    = g++
@@ -55,7 +55,7 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
-# Revision 1.2  2007/10/25 02:06:59  balewski
+# Revision 1.1  2007/10/25 02:07:17  balewski
 # added L2upsilon & binary event dump
 #
 # Revision 1.1  2007/10/11 00:33:15  balewski
