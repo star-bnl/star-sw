@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEventSummary.h,v 2.7 2003/09/02 17:58:05 perev Exp $
+ * $Id: StEventSummary.h,v 2.8 2007/10/25 19:12:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.h,v $
+ * Revision 2.8  2007/10/25 19:12:58  ullrich
+ * Removed obsolete method setNumberOfNegativeTracks().
+ *
  * Revision 2.7  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -93,7 +96,6 @@ public:
     void setNumberOfGoodTracks(int);
     void setNumberOfGoodTracks(StChargeSign, int);
     void setNumberOfGoodPrimaryTracks(int);
-    void setNumberOfNegativeTracks(int);
     void setNumberOfExoticTracks(int);
     void setNumberOfVertices(int);
     
