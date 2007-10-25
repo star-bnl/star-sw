@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.2 2007/10/23 02:47:10 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.3 2007/10/25 02:06:54 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -111,7 +111,7 @@ void
 StGenericL2Emulator::make(){
   int L0trgSwitch=1; // flag passed to L2-algos, derived from L0 decision
 
-#if 1 // filter some events base on L0-trigger decision, if you want  
+#if 0 // filter some events base on L0-trigger decision, if you want  
   StTriggerSimuMaker *L0trgSim=(StTriggerSimuMaker *)StMaker::GetChain()->GetMaker("StarTrigSimu");
   assert(L0trgSim);
   //  L0trgSim->eemc->dsm3TRG->print();
@@ -141,7 +141,7 @@ StGenericL2Emulator::make(){
     if(mL2algo[ia]) mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
   
 
-  
+  printf("gen i   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
   
  return;
 }
@@ -160,7 +160,7 @@ StGenericL2Emulator::initRun(){
 
 
   assert(mYearMonthDay>=20060410);
-  int refRun=710052;
+  int refRun=7100052;
   // add other reference runs for later time stamps as appropriate
   assert(mYearMonthDay<20060700);
 
@@ -414,6 +414,9 @@ StGenericL2Emulator::printBEblocks(){
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.3  2007/10/25 02:06:54  balewski
+// added L2upsilon & binary event dump
+//
 // Revision 1.2  2007/10/23 02:47:10  balewski
 // cleanup
 //

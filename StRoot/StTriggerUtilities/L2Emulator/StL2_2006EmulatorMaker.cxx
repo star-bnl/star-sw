@@ -21,7 +21,7 @@
 #include "StDaqLib/TRG/L2jetResults2006.h"
 #include "StDaqLib/TRG/trgStructures2005.h"
 #include "StDaqLib/TRG/trgStructures.h"
-
+ 
 //L2 stuff
 #include "L2algoUtil/L2EmcDb.h"
 #include "L2jetAlgo/L2jetAlgo.h"
@@ -274,7 +274,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.2 2007/10/23 02:47:11 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.3 2007/10/25 02:06:54 balewski Exp $
 //
 
 

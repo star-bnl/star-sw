@@ -1,7 +1,7 @@
 #ifndef L2JETALGO_H
 #define L2JETALGO_H
 /*********************************************************************
- * $Id: L2jetAlgo.h,v 1.1 2007/10/11 00:33:20 balewski Exp $
+ * $Id: L2jetAlgo.h,v 1.2 2007/10/25 02:07:03 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -14,7 +14,7 @@ class L2Histo;
 #ifdef __ROOT__ //in root4star environment
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
 #else
-  #include "L2VirtualAlgo.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
 #endif
 
 class L2jetAlgo : public  L2VirtualAlgo {
@@ -137,6 +137,9 @@ class L2jetAlgo : public  L2VirtualAlgo {
 
 /**********************************************************************
   $Log: L2jetAlgo.h,v $
+  Revision 1.2  2007/10/25 02:07:03  balewski
+  added L2upsilon & binary event dump
+
   Revision 1.1  2007/10/11 00:33:20  balewski
   L2algo added
 

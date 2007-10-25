@@ -4,13 +4,13 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.1 2007/10/11 00:33:24 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.2 2007/10/25 02:07:06 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
  * pedestal algo in L2 , for BTOW & ETOW
  *********************************************************************
- */
+ */  
 
 //#include "/usr/src/linux-2.4/include/asm/msr.h" /* for rdtscl */
 #include "/usr/src/kernels/2.6.9-42.0.10.EL-smp-i686/include/asm-i386/msr.h" /* for rdtscl */
@@ -20,9 +20,9 @@
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
  #else
-  #include "trgStructures.h"
-  #include "L2EmcDb.h"
-  #include "L2Histo.h"
+  #include "StDaqLib/TRG/trgStructures.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
 #include "L2pedAlgo.h"
 #include "L2pedResults2006.h"
@@ -242,7 +242,7 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
   printf("L2ped  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",iMax, iFWHM,nInp);
   if(par_saveBinary)  fprintf(fd,"#L2ped  will save full spectra for all towers\n");
 
-  int topAdc=60;
+  int par_topAdc=100;
   int maxPedDeviation=5;
 //int iadcHigh=maxPedDeviation-minAdc;
 // int iadcLow =maxPedDeviation+minAdc;
@@ -256,7 +256,7 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
   if(par_pedSubtr) sprintf(xAxis,"ADC - ped + %d",-minAdc);
   
   
-  fprintf(fd,"# L2ped-Adc spectra, run=%d, Z-scale is ln(yield), only first digit shown;  maxPedDev=%d  table format:\n# name, ped, sigPed, crate, chan, softID-m-s-e, RDO_ID;\n#                                   ADC spectrum: [%d ...  <=-10 ... *=0  ...  >=+10 ... :=+20 ... %d],  Xaxis=%s\n",run_number,maxPedDeviation,minAdc,topAdc,xAxis);
+  fprintf(fd,"# L2ped-Adc spectra, run=%d, Z-scale is ln(yield), only first digit shown;  maxPedDev=%d  table format:\n# name, ped, sigPed, crate, chan, softID-m-s-e, RDO_ID;\n#                                   ADC spectrum: [%d ...  <=-10 ... *=0  ...  >=+10 ... :=+20 ... %d],  Xaxis=%s\n",run_number,maxPedDeviation,minAdc,par_topAdc,xAxis);
   
   int i;
   int nB=0;
@@ -323,7 +323,7 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
       char okC=' ';
       if(x->fail) okC='#';
       fprintf(fd,"%c%s %3d %4.1f 0x%02x 0x%02x %15s %4d ",okC,x->name,iMax+minAdc,iFWHM/2.3,x->crate, x->chan,x->tube, x->rdo);
-      h->printPed(fd,minAdc,topAdc,' ');
+      h->printPed(fd,minAdc,par_topAdc,' ');
       fprintf(fd,"qa=%c\n",pedQA);
       // exit(1); 
     } /* end of BTOW & ETOW */
@@ -386,6 +386,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.2  2007/10/25 02:07:06  balewski
+  added L2upsilon & binary event dump
+
   Revision 1.1  2007/10/11 00:33:24  balewski
   L2algo added
 

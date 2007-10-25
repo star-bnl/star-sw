@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.2 2007/10/23 02:47:11 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.3 2007/10/25 02:06:54 balewski Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -27,23 +27,20 @@ class StGenericL2Emulator  {
   void doBanksFromStRawData();
   void doBanksFromMuDst();
 
-  //replicas of oryginal daq data containers
-  unsigned short *mBTOW_BANK;
-  unsigned short *mETOW_BANK;
-  int  mBTOW_in, mETOW_in;
-
-
   // needed to regenerate raw data banks
   StEEmcDbMaker *mDbE;
   StEmcGeom     *mGeomB;
   StEmcDecoder  *mMappB; 
 
+  
+
  protected:
   int   mMCflag; // set mcFlag=0 for real data
   int   mYear;
-  void *mTrigData; // I do not want to deal with this content here
   bool  mUseMuDst;
   
+
+
   // holds all instantiated L2algos
   L2VirtualAlgo **mL2algo; // actual algos
   int mL2algoN;  //# of existing algos (time-stamp dependent)
@@ -55,21 +52,32 @@ class StGenericL2Emulator  {
   int intsPar[mxPar]; // params passed from run control gui
   float floatsPar[mxPar]; 
 
+  //replicas of oryginal daq data containers, tmp open for export
+  unsigned short *mBTOW_BANK;
+  unsigned short *mETOW_BANK;
+  int  mBTOW_in, mETOW_in;
+  void *mTrigData; // I do not want to deal with this content here
+
  public: 
   StGenericL2Emulator();
   virtual       ~StGenericL2Emulator();
   void printBEtowers();///<  hits in StEvent
   void printBEblocks();///<  regenerated banks
 
-  void init();
-  void make();
-  void initRun();
+  unsigned short *getBtowBank(){return mBTOW_BANK;}
+  unsigned short *getEtowBank(){return mETOW_BANK;}
+  int getBtowIn(){return mBTOW_in;}
+  int getEtowIn(){return mETOW_in;}
+
+  void  init();
+  void  make();
+  void  initRun();
   void  finish();
   void  clear();
-  void    useStEvent() {mUseMuDst=false;}
-  void    setMC(int x) {mMCflag=x;}
-  void setSetupPath(char *x) { mSetupPath=x;}
-  void setOutPath(char *x)   { mOutPath=x;}
+  void  useStEvent() {mUseMuDst=false;}
+  void  setMC(int x) {mMCflag=x;}
+  void  setSetupPath(char *x) { mSetupPath=x;}
+  void  setOutPath(char *x)   { mOutPath=x;}
 
   vector <int> mTriggerList;
   bool    isTrigger(int trigId);   
@@ -79,6 +87,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.3  2007/10/25 02:06:54  balewski
+// added L2upsilon & binary event dump
+//
 // Revision 1.2  2007/10/23 02:47:11  balewski
 // cleanup
 //
