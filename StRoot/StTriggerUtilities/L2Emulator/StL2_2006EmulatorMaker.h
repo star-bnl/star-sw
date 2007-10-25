@@ -16,11 +16,11 @@
 #endif
 #include "StGenericL2Emulator.h"
 
-//class  StTriggerSimuMaker;
 
 // algos used in 2006 ...
 class  L2pedAlgo;
 class  L2jetAlgo;
+class  L2gammaAlgo;
 
 
 class StL2_2006EmulatorMaker : public StMaker, public StGenericL2Emulator{
@@ -29,8 +29,13 @@ private:
   // TH1* hA[mxAH];  
   //  void initHistoA(TString core);
 
-  L2pedAlgo *mL2pedAlgo;
-  L2jetAlgo *mL2jetAlgo;
+  L2pedAlgo   *mL2pedAlgo;
+  L2jetAlgo   *mL2jetAlgo;
+  L2gammaAlgo *mL2gammaEEmc;
+  L2gammaAlgo *mL2gammaBEmc;
+
+  void  addL2GammaAlgos2006(int runNo);
+
   void  addTriggerList();
   bool getTriggerData();
 
@@ -51,5 +56,5 @@ public:
 
 #endif
 
-// $Id: StL2_2006EmulatorMaker.h,v 1.3 2007/10/25 02:06:54 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.h,v 1.4 2007/10/25 15:30:43 balewski Exp $
 //

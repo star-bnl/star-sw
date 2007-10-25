@@ -4,7 +4,7 @@
 #include "L2VirtualAlgo.h"
 L2VirtualAlgo::~L2VirtualAlgo(){};
 int 
-L2VirtualAlgo::readParams(char *fileN, int mxPar, int *iPar, float *fPar) {
+L2VirtualAlgo::readParams(const char *fileN, int mxPar, int *iPar, float *fPar) {
   /* return:
     <0 : error in input
     >=0 : # of valid params : int+float
