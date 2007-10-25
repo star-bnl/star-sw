@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.14 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StRichPidTraits.h,v 2.15 2007/10/25 19:20:00 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.15  2007/10/25 19:20:00  ullrich
+ * Removed obsolete == operator
+ *
  * Revision 2.14  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -78,8 +81,6 @@ public:
     
     StRichPidTraits(const StRichPidTraits&);
     StRichPidTraits& operator=(const StRichPidTraits&);
-    
-    int  operator==(const StRichPidTraits&) const;
     
     void                    addPid(StRichPid* );
   
