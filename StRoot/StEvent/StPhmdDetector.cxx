@@ -1,6 +1,6 @@
 /********************************************************************
  *
- * $Id: StPhmdDetector.cxx,v 2.3 2007/10/25 19:24:14 ullrich Exp $
+ * $Id: StPhmdDetector.cxx,v 2.4 2007/10/25 19:38:47 ullrich Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -10,6 +10,9 @@
  ********************************************************************
  *
  * $Log: StPhmdDetector.cxx,v $
+ * Revision 2.4  2007/10/25 19:38:47  ullrich
+ * Added missing const version of method cluster().
+ *
  * Revision 2.3  2007/10/25 19:24:14  ullrich
  * Added missing const version of method module().
  *
@@ -117,6 +120,9 @@ StPhmdDetector::setModule(StPhmdModule* val, unsigned int IdMod)
 
 StPhmdClusterCollection*
 StPhmdDetector::cluster() {return mClusters;}
+
+const StPhmdClusterCollection*
+StPhmdDetector::cluster() const {return mClusters;}
 
 void
 StPhmdDetector::setCluster(StPhmdClusterCollection* val)
