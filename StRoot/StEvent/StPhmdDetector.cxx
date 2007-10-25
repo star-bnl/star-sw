@@ -1,6 +1,6 @@
 /********************************************************************
  *
- * $Id: StPhmdDetector.cxx,v 2.2 2003/11/07 18:33:03 perev Exp $
+ * $Id: StPhmdDetector.cxx,v 2.3 2007/10/25 19:24:14 ullrich Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -10,6 +10,9 @@
  ********************************************************************
  *
  * $Log: StPhmdDetector.cxx,v $
+ * Revision 2.3  2007/10/25 19:24:14  ullrich
+ * Added missing const version of method module().
+ *
  * Revision 2.2  2003/11/07 18:33:03  perev
  * Zeroing in constructor added
  *
@@ -85,6 +88,15 @@ StPhmdDetector::numberOfHits() const
 
 StPhmdModule*
 StPhmdDetector::module(unsigned int i)
+{
+    if (i < mMaxModules)
+	return (mModules[i]);
+    else
+	return 0;
+}
+
+const StPhmdModule*
+StPhmdDetector::module(unsigned int i) const
 {
     if (i < mMaxModules)
 	return (mModules[i]);
