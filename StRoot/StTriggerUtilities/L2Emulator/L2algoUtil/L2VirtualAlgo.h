@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo.h,v 1.2 2007/10/23 02:47:15 balewski Exp $
+ * $Id: L2VirtualAlgo.h,v 1.3 2007/10/25 15:30:46 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -25,7 +25,7 @@ class L2VirtualAlgo {
                         int  bemcIn, unsigned short *bemcData,
                         int  eemcIn, unsigned short *eemcData)=0;
   virtual void  finishRun()=0;// at the end of each run
-  static int  readParams(char *fileN, int mxPar, int *iPar, float *fPar);
+  static int  readParams(const char *fileN, int mxPar, int *iPar, float *fPar);
 };
 
 
