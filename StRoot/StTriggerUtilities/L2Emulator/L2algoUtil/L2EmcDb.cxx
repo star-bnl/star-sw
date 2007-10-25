@@ -4,7 +4,7 @@
 #include <assert.h>
 
 /*********************************************************************
- * $Id: L2EmcDb.cxx,v 1.2 2007/10/22 23:10:03 balewski Exp $
+ * $Id: L2EmcDb.cxx,v 1.3 2007/10/25 22:59:07 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -259,7 +259,7 @@ L2EmcDb::isEmpty(const EmcCDbItem *x){
 //=====================================
 bool  
 L2EmcDb::isBTOW(const EmcCDbItem *x){
-  if(x==0) return true;
+  if(x==0) return false;
   if (isEmpty( x)) return false;
   if (x->name[2]!='t') return false;
   if (x->crate<1 || x->crate> BTOW_MAXFEE) return false;
@@ -564,6 +564,9 @@ L2EmcDb::changeMaskByName(const char *fname, char *lbl) {
 /*
 *********************************************************************
   $Log: L2EmcDb.cxx,v $
+  Revision 1.3  2007/10/25 22:59:07  balewski
+  *** empty log message ***
+
   Revision 1.2  2007/10/22 23:10:03  balewski
   split L2 to generic and year specific, not finished
 
