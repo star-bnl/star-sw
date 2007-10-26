@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.24 2007/09/06 06:35:30 genevb Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.25 2007/10/26 18:13:17 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.25  2007/10/26 18:13:17  rashmi
+ *fixed some warnings
+ *
  *Revision 1.24  2007/09/06 06:35:30  genevb
  *Small refinements to the BadChain fix
  *
@@ -356,7 +359,7 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
   StPmdDetector* det0 = mPmdCollection->detector(0); //! Collection for CPV
   StPmdDetector* det1 = mPmdCollection->detector(1); //! Collection for PMD
   
-  Int_t Chain_No,supmod,row,col,SubDet,chtemp;
+  Int_t Chain_No,supmod,row,col,SubDet=0,chtemp;
   int AddCh_Count=0;
   Int_t orig_nhits = 0;
   Int_t nhits=0;
@@ -758,7 +761,7 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst()
       //      if (*bitMask!=0)cout<<chain<<" "<<offset<<"  "<<*bitMask<<endl;
       for (Int_t bit=31; bit>=0; bit--) {
         if ( ((*bitMask) & (((unsigned int) 1) << bit)) != 0 ) {
-	  Int_t channel = offset*32 + (31-bit);
+	  //	  Int_t channel = offset*32 + (31-bit);
           //            printf("%2d %4d",chain,channel);
 	  //	  fout<<bit<<"  "<<chain<<" "<<channel<<endl;
           nhot++;

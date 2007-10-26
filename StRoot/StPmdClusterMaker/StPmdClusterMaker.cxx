@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.18 2007/08/31 10:53:30 rashmi Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.19 2007/10/26 18:14:18 rashmi Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.19  2007/10/26 18:14:18  rashmi
+ * fixed some warnings
+ *
  * Revision 1.18  2007/08/31 10:53:30  rashmi
  * Included ReadCalibration to read PMD_MIP value from DB;Setting cutoff in StPmdClusteringas 15%PMD_MIP
  *
@@ -319,7 +322,7 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 {
   cout<<"Filling StEvent in ClusterMaker"<<endl;
   // Get StEvent
-  StPhmdCollection * PmdCollection; 
+  StPhmdCollection * PmdCollection=NULL; 
   StEvent *currevent = (StEvent*)GetInputDS("StEvent");
   if(!currevent){
     cout<<"ClusterMaker **, No StEvent Pointer "<<endl;
