@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_TLA_Maker.cxx,v 1.17 2007/04/28 17:57:13 perev Exp $
+// $Id: St_TLA_Maker.cxx,v 1.18 2007/10/27 17:42:59 fine Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.18  2007/10/27 17:42:59  fine
+// replace the obsolete class name
+//
 // Revision 1.17  2007/04/28 17:57:13  perev
 // Redundant StChain.h removed
 //
@@ -80,7 +83,7 @@ Int_t St_TLA_Maker::Make(){
   //
   int nArray; unsigned char *Array;
 
- St_ObjectSet *os = (St_ObjectSet*)GetDataSet("StDAQReader");
+ TObjectSet *os = (TObjectSet*)GetDataSet("StDAQReader");
  assert(os);
  StDAQReader *dr = (StDAQReader*)os->GetObject();
  StTPCReader *tr = dr->getTPCReader();
@@ -101,13 +104,3 @@ Int_t St_TLA_Maker::Make(){
 
  return kStOK;
 }
-
-
-
-
-
-
-
-
-
-
