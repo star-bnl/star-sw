@@ -764,6 +764,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"laserIT" ,"","","","",                               "TpcIT","use Sti for laser reconstruction",kFALSE},
   {"TpcIT"       ,""  ,"","TpcDb,StiLibs",""                       ,"","ITTF: track using TPC geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
+  {"NoSsdIT"     ,""  ,"","-SsdIT",""                    ,"","ITTF: track with switch off SSD geom",kFALSE},
   {"SvtIT"       ,""  ,"","svtDb,StiLibs",""                       ,"","ITTF: track using SVT geom",kFALSE},
   {"SsdIT"       ,""  ,"","ssdDb,StiLibs",""                       ,"","ITTF: track using SSD geom",kFALSE},
   {"HpdIT"       ,""  ,"","StiLibs",""                             ,"","ITTF: track using Hpd geom",kFALSE},

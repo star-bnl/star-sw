@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.522 2007/10/23 05:31:07 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.523 2007/10/29 20:41:58 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -339,10 +339,12 @@ Int_t StBFChain::Instantiate()
 	  mk->SetAttr("useSvt"	,kTRUE);
 	  mk->SetAttr("activeSvt"	,kTRUE);
 	}
-      if (GetOption("SsdIT")){
-	mk->SetAttr("useSsd"	,kTRUE);
-	mk->SetAttr("activeSsd"	,kTRUE);
-      }
+      if (GetOption("NoSsdIT")) mk->SetAttr("useSsd"	,kFALSE);
+      else 
+	if (GetOption("SsdIT")){
+	  mk->SetAttr("useSsd"	,kTRUE);
+	  mk->SetAttr("activeSsd"	,kTRUE);
+	}
       if (GetOption("PixelIT")){
 	mk->SetAttr("usePixel"	,kTRUE);
 	mk->SetAttr("activePixel",kTRUE);
