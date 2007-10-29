@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.26 2007/01/09 16:27:39 deph Exp $
+ * $Id: MysqlDb.h,v 1.27 2007/10/29 22:50:56 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.27  2007/10/29 22:50:56  deph
+ * Abstracted load balancer call from connect to own function called from reconnect
+ * removed extraneuos methods from header
+ *
  * Revision 1.26  2007/01/09 16:27:39  deph
  * Updates for load balancing "added 1)write privilege 2)xml comments 3)camelCase notation
  *
@@ -217,6 +221,7 @@ private:
   bool  isBlob[200];
   bool  isBinary[200];
   bool  isSpecialType[200];
+  bool loadBalance();
 
 public:
 

@@ -79,8 +79,8 @@ class StDbServiceBroker
 
   std::string GiveHostName();
   short GiveHostPort();
-  std::string GiveUserName();
-  std::string GiveUserPassword();
+//  std::string GiveUserName();
+//  std::string GiveUserPassword();
   inline short GetStatus(){return MyStatus;};
   static int updateLocalLbPolicy(); // returns an lb_error:: error
 #ifdef __ROOT__

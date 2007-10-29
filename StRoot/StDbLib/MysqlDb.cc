@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.46 2007/09/25 15:59:53 deph Exp $
+ * $Id: MysqlDb.cc,v 1.47 2007/10/29 22:50:55 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.47  2007/10/29 22:50:55  deph
+ * Abstracted load balancer call from connect to own function called from reconnect
+ * removed extraneuos methods from header
+ *
  * Revision 1.46  2007/09/25 15:59:53  deph
  * Fixed fallback from LoadBalancer (PDSF problem with missing Config File)
  *
@@ -279,6 +283,9 @@ bool MysqlDb::reConnect(){
   unsigned int timeOutConnect=mtimeout;
   while(!connected && timeOutConnect<600){ 
     mysql_options(&mData,MYSQL_OPT_CONNECT_TIMEOUT,(const char*)&timeOutConnect);
+
+    loadBalance(); // does nothing in the fall-back scenario
+
     if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0))
     connected=true;
     if(!connected){
@@ -328,46 +335,15 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
   //  cout << "aHost = "<<mdbhost<<endl; 
   //cout << " Calling load balancer\n";
 
-
 #ifndef NoXmlTreeReader
-  clock_t start,finish;
- double lbtime;
-  start = clock();
-  bool ok = false;
-  if (my_manager->myServiceBroker)
-    {
-      my_manager->myServiceBroker->DoLoadBalancing();
-      short mSBStatus = my_manager->myServiceBroker->GetStatus();
-      if (mSBStatus==st_db_service_broker::NO_ERROR)
-	{
-          
-	  const char* lbHostName = (my_manager->myServiceBroker->GiveHostName()).c_str();
-	  if(mdbhost) delete [] mdbhost;
-	  mdbhost = new char[strlen(lbHostName)+1];
-          strcpy(mdbhost,lbHostName);
-	  ok = true;
-          mdbPort = my_manager->myServiceBroker->GiveHostPort();
-	}
-      else
-	{
-	  LOG_ERROR << "MysqlDb::Connect: StDbServiceBroker error "<<mSBStatus<<endm;
-	}
-    }
-  if (!ok)
-    {
-	  if(mdbhost) delete [] mdbhost;
-	  mdbhost  = new char[strlen(aHost)+1];   
-	  strcpy(mdbhost,aHost);
-    }
-  finish = clock();
-  lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
-  cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
-#else
-  if(mdbhost) delete [] mdbhost;
-  mdbhost  = new char[strlen(aHost)+1];   
-strcpy(mdbhost,aHost);
-
+  if (!my_manager->myServiceBroker)
 #endif
+    {
+      // a fall-back scenario (NoXmlTreeReader) or lack of myServiceBroker (broken env.)
+      if(mdbhost) delete [] mdbhost;
+      mdbhost  = new char[strlen(aHost)+1];   
+      strcpy(mdbhost,aHost);
+    }
 
 
   if(mdbName) {
@@ -410,6 +386,45 @@ strcpy(mdbhost,aHost);
 #undef __METHOD__
 }
 
+////////////////////////////////////////////////////////////////////////
+
+bool MysqlDb::loadBalance()
+{
+  bool ok = false;
+
+#ifndef NoXmlTreeReader
+  clock_t start,finish;
+ double lbtime;
+  start = clock();
+
+  if (my_manager->myServiceBroker)
+    {
+      my_manager->myServiceBroker->DoLoadBalancing();
+      short mSBStatus = my_manager->myServiceBroker->GetStatus();
+      if (mSBStatus==st_db_service_broker::NO_ERROR)
+	{
+          
+	  const char* lbHostName = (my_manager->myServiceBroker->GiveHostName()).c_str();
+	  if(mdbhost) delete [] mdbhost;
+	  mdbhost = new char[strlen(lbHostName)+1];
+          strcpy(mdbhost,lbHostName);
+	  ok = true;
+          mdbPort = my_manager->myServiceBroker->GiveHostPort();
+	}
+      else
+	{
+	  LOG_ERROR << "MysqlDb::Connect: StDbServiceBroker error "<<mSBStatus<<endm;
+	}
+    }
+
+  finish = clock();
+  lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
+  cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
+
+#endif
+
+  return ok;
+}
 ////////////////////////////////////////////////////////////////////////
 
 
