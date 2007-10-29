@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.34 2007/10/18 16:31:44 fisyak Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.35 2007/10/29 18:16:14 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.35  2007/10/29 18:16:14  wleight
+ * Fixed bug in assigning keys to StRndHits in IST
+ *
  * Revision 1.34  2007/10/18 16:31:44  fisyak
  * Add pile-up from weixie
  *
@@ -512,10 +515,19 @@ Int_t StPixelFastSimMaker::Make()
 		    StRnDHit* tempHit = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		    tempHit->setDetectorId(kIstId); 
 		    tempHit->setVolumeId(0);
+		    /*
 		    multimap<int,int>::iterator iter=stripToKey.find(oo+1);
 		    if(iter!=stripToKey.end()){
 		      tempHit->setKey((*iter).second);
 		      stripToKey.erase(iter);
+		    }
+		    */
+		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair1=stripToKey.equal_range(oo+1);
+		    if(itpair1.first!=itpair1.second){
+		      for(multimap<int,int>::iterator iiit1=itpair1.first;iiit1!=itpair1.second;iiit1++){
+			tempHit->setKey((*iiit1).second);
+			stripToKey.erase(iiit1);
+		      }
 		    }
 		    else tempHit->setKey(99999);
 		    tempHit->setLayer(i+1);           
@@ -553,10 +565,19 @@ Int_t StPixelFastSimMaker::Make()
 		    StRnDHit* tempHit = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		    tempHit->setDetectorId(kIstId); 
 		    tempHit->setVolumeId(0);
+		    /*
 		    multimap<int,int>::iterator iter=strip1ToKey.find(o+1);
 		    if(iter!=strip1ToKey.end()){
 		      tempHit->setKey((*iter).second);
 		      strip1ToKey.erase(iter);
+		    }
+		    */
+		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair2=strip1ToKey.equal_range(o+1);
+		    if(itpair2.first!=itpair2.second){
+		      for(multimap<int,int>::iterator iiit2=itpair2.first;iiit2!=itpair2.second;iiit2++){
+			tempHit->setKey((*iiit2).second);
+			stripToKey.erase(iiit2);
+		      }
 		    }
 		    else tempHit->setKey(99999);
 		    tempHit->setLayer(i+1);           
@@ -590,10 +611,19 @@ Int_t StPixelFastSimMaker::Make()
 		    StRnDHit* tempHit2 = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		    tempHit2->setDetectorId(kIstId); 
 		    tempHit2->setVolumeId(0);
+		    /*
 		    multimap<int,int>::iterator iter=strip2ToKey.find(o+1);
 		    if(iter!=strip2ToKey.end()){
 		      tempHit2->setKey((*iter).second);
 		      strip2ToKey.erase(iter);
+		    }
+		    */
+		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair3=strip2ToKey.equal_range(o+1);
+		    if(itpair3.first!=itpair3.second){
+		      for(multimap<int,int>::iterator iiit3=itpair3.first;iiit3!=itpair3.second;iiit3++){
+			tempHit2->setKey((*iiit3).second);
+			stripToKey.erase(iiit3);
+		      }
 		    }
 		    else tempHit2->setKey(99999);
 		    tempHit2->setLayer(i+1);           
