@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.46 2007/08/12 15:06:30 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.47 2007/10/29 21:37:27 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.47  2007/10/29 21:37:27  fisyak
+ * add protection from laserDriftVelocity and cathodeDriftVelocity mixing
+ *
  * Revision 1.46  2007/08/12 15:06:30  fisyak
  * Use separated East/West drift velocities only >= 2007, for back compartibility
  *
@@ -503,53 +506,69 @@ float StTpcDb::DriftVelocity(Int_t sector)
   static UInt_t umax = TUnixTime(20250101,0,1).GetUTime(); // maximum time allowed for next table
   // for back compartiblity switch to separated West and East drift velocities after 2007
   static UInt_t u2007 = TUnixTime(20070101,0,1).GetUTime(); // 
+  static UInt_t ucOld = 0;
   static St_tpcDriftVelocity *dvel0 = 0;
   static St_tpcDriftVelocity *dvel1 = 0;
   static StMaker *mk = StMaker::GetChain();
-  Float_t driftvel = 0;
+  static TDatime t[2];
+  static Float_t driftvel[2] = {0,0};
   UInt_t uc = TUnixTime(mk->GetDateTime(),1).GetUTime();
   if (uc < u2007) sector = 24;
-  if (! dvel0 ) {//First time only
-    dvel0 = (St_tpcDriftVelocity *) mk->GetDataBase("Calibrations/tpc/tpcDriftVelocity");
-    if (! dvel0) {
-      gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
-      return 0;
-    }
-  }//End First time only
-
-  if (!(u0<=uc && uc<u1)) {//current time out of validity
-    TDatime t[2];
-    if (mk->GetValidity(dvel0,t) < 0) {
-      gMessMgr->Message("StTpcDb::Error Wrong Validity Tpc DriftVelocity","E");
-      return 0;
-    }
-
-    u0 = TUnixTime(t[0],1).GetUTime();
-    u1 = TUnixTime(t[1],1).GetUTime();
-    SafeDelete(dvel1);
-    if (u1 < umax && u1 - u0 < 7*24*3600) {// next drift velocity should within a week from current
-      dvel1 = (St_tpcDriftVelocity *) mk->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
-      if (! dvel1) {
-	gMessMgr->Message("StTpcDb::Error Finding next Tpc DriftVelocity","W");
+  UInt_t kase = 1;
+  if (sector <= 12) kase = 0;
+  if (uc != ucOld) {
+    if (! dvel0 || uc < umax && (uc < u0 || uc > u1)) {//First time only
+      dvel0 = (St_tpcDriftVelocity *) mk->GetDataBase("Calibrations/tpc/tpcDriftVelocity");
+      if (! dvel0) {
+	gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
+	return 0;
+      }
+      if (mk->GetValidity(dvel0,t) < 0) {
+	gMessMgr->Message("StTpcDb::Error Wrong Validity Tpc DriftVelocity","E");
+	return 0;
+      }
+      u0 = TUnixTime(t[0],1).GetUTime();
+      u1 = TUnixTime(t[1],1).GetUTime();
+      SafeDelete(dvel1);
+      if (u1 < umax) 
+	dvel1 = (St_tpcDriftVelocity *) mk->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
+    }//End First time only
+    
+    if (!(u0<=uc && uc<u1)) {//current time out of validity
+      
+      SafeDelete(dvel1);
+      if (u1 < umax && u1 - u0 < 7*24*3600 && uc - u0 < 7*24*3600) {// next drift velocity should within a week from current
+	dvel1 = (St_tpcDriftVelocity *) mk->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
+	if (! dvel1) {
+	  gMessMgr->Message("StTpcDb::Error Finding next Tpc DriftVelocity","W");
+	}
       }
     }
+    
+    driftvel[0] = driftvel[1] = 0;
+    tpcDriftVelocity_st *d0 = dvel0->GetTable();
+    if (dvel1) {
+      tpcDriftVelocity_st *d1 = dvel1->GetTable();
+      if (d0->laserDriftVelocityWest > 0 && d1->laserDriftVelocityWest > 0)
+	driftvel[0] = (d0->laserDriftVelocityWest  *(uc-u0) + d1->laserDriftVelocityWest  *(u1-uc))/(u1 - u0);
+      if (d0->laserDriftVelocityEast > 0 && d1->laserDriftVelocityEast > 0) 
+	driftvel[1] = (d0->laserDriftVelocityEast  *(uc-u0) + d1->laserDriftVelocityEast  *(u1-uc))/(u1 - u0);
+      if (driftvel[0] <= 0.0 || driftvel[1] <= 0.0) {
+	if (d0->cathodeDriftVelocityWest > 0 && d1->cathodeDriftVelocityWest > 0) 
+	  driftvel[0] = (d0->cathodeDriftVelocityWest*(uc-u0) + d1->cathodeDriftVelocityWest*(u1-uc))/(u1 - u0);
+	if (d0->cathodeDriftVelocityEast > 0 && d1->cathodeDriftVelocityEast > 0) 
+	  driftvel[1] = (d0->cathodeDriftVelocityEast*(uc-u0) + d1->cathodeDriftVelocityEast*(u1-uc))/(u1 - u0);
+      }
+    }
+    if (driftvel[0] <= 0.0 || driftvel[1] <= 0.0) {
+      driftvel[0] = d0->laserDriftVelocityWest;
+      driftvel[1] = d0->laserDriftVelocityEast;
+      if (driftvel[0] <= 0.0) driftvel[0] = d0->cathodeDriftVelocityWest;
+      if (driftvel[1] <= 0.0) driftvel[1] = d0->cathodeDriftVelocityEast;
+    }
+    ucOld = uc;
   }
-
-  tpcDriftVelocity_st *d0 = dvel0->GetTable();
-  if (dvel1) {
-    tpcDriftVelocity_st *d1 = dvel1->GetTable();
-    driftvel = sector > 12 ? 
-      (d0->laserDriftVelocityEast  *(uc-u0) + d1->laserDriftVelocityEast  *(u1-uc))/(u1 - u0):
-      (d0->laserDriftVelocityWest  *(uc-u0) + d1->laserDriftVelocityWest  *(u1-uc))/(u1 - u0);
-    if (driftvel<= 0.0)  driftvel = sector > 12 ? 
-      (d0->cathodeDriftVelocityEast*(uc-u0) + d1->cathodeDriftVelocityEast*(u1-uc))/(u1 - u0):
-      (d0->cathodeDriftVelocityWest*(uc-u0) + d1->cathodeDriftVelocityWest*(u1-uc))/(u1 - u0);
-  } else {
-    driftvel = sector > 12 ? d0->laserDriftVelocityEast   : d0->laserDriftVelocityWest;
-    if (driftvel<=0.0) 
-    driftvel = sector > 12 ? d0->cathodeDriftVelocityEast : d0->cathodeDriftVelocityWest;
-  }
-  return 1e6*driftvel;
+  return 1e6*driftvel[kase];
 }
 
 
