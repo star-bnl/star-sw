@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.523 2007/10/29 20:41:58 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.524 2007/10/31 15:18:29 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -384,7 +384,7 @@ Int_t StBFChain::Instantiate()
 	TString  cmd(Form("StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) %p;",mk));
 	if (GetOption("beamLine"))    {cmd += "gvtxMk->UseBeamLine();";}
 	if (GetOption("CtbMatchVtx")) {cmd += "gvtxMk->UseCTB();";}
-	if (GetOption("min2trkVtx"))  {cmd += "gvtxMk->SetMinimumTrack(2);";}
+	if (GetOption("min2trkVtx"))  {cmd += "gvtxMk->SetMinimumTracks(2);";}
 	ProcessLine(cmd);
       }
     }
