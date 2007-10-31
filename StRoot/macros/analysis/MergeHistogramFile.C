@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.6 2007/10/31 22:27:30 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.7 2007/10/31 23:25:32 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -113,18 +113,23 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
     TStopwatch time;
     Int_t fileCounter = 0;
     Int_t histogramCounter = 0;
-    Int_t currentDirDepth = 0;
      // Create the output file
      TFile *outFile = TFile::Open(TargetName,"RECREATE");
      TDirectory *outDir = outFile;
      TDirIter listOfFiles(inputFilesPattern);
      const char *fileName = 0;
      while ( (fileName =  listOfFiles.NextFile() ) ) {
+        Int_t currentDirDepth = 0;
         printf(".");
         fileCounter++;
         StFileIter file(fileName);
         TObject *obj = 0;
         while ( (obj = *file) ) {
+           Int_t depth = file.GetDepth();
+           while (depth < currentDirDepth) {
+                outDir = ourDir->GetMotherDir();
+                currentDirDepth--;
+           }
            if ( obj->IsA()->InheritsFrom(TH1::Class()) ) {
               // descendant of TH1 -> merge it
               // printf("Merging histogram: %s\n",obj->GetName() ); 
@@ -144,9 +149,7 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
                 histogramCounter++;
               }
            } else if ( obj->IsA()->InheritsFrom(TDirectory::Class()) ) {
-               Int_t depth = file.GetDepth();
                printf("The input sub-TDirectory object: %s\n",obj->GetName(), depth); 
-               if (depth = currentDirDepth) outDir = outDir->GetMotherDir();
                TDirectory *d =  (TDirectory *)outDir->FindObject(obj->GetName());
                if (!d) d = outDir->mkdir(obj->GetName());
                if (d) {

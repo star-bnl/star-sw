@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.1 2007/10/31 21:55:49 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.2 2007/10/31 23:25:31 fine Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -64,12 +64,12 @@ private:
 
    TFile      *fFileBackUp;       //! temporary data-members
    TDirectory *fDirectoryBackUp;  //! to save/restore TFile/TDirectory global scope
-   StFileIter  *fNestedIterator;   //! The inner TFidrectory interator;
+   StFileIter *fNestedIterator;   //! The inner TFidrectory interator;
 
    virtual TIterator &operator=(const TIterator &) { return *this; }
 
 protected:
-   TDirectory   *fRootFile;            // Tfile to be iterated over
+   TDirectory   *fRootFile;       // TDirectory/TFile to be iterated over
    TString  fEventName;           // current key name
    UInt_t   fRunNumber;           // current "run number"
    UInt_t   fEventNumber;         // current "event number"
@@ -169,7 +169,7 @@ inline TObject *StFileIter::Next()
 {
    // Make 1 step over the file objects and returns its pointer
    // or 0, if there is no object left in the container
-   return fNestedIterator ? fNestedIterator->Next(1) : Next(1);
+   return Next(1);
 }
 
 //__________________________________________________________________________
