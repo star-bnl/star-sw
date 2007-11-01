@@ -93,6 +93,101 @@
          ISET=2
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
+      ELSEIF (SPECIAL_f2.eq.106) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= m015
+*        
+         ISET=5
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+*
+      ELSEIF (SPECIAL_f2.eq.107) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= m030
+*        
+         ISET=6
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+*
+      ELSEIF (SPECIAL_f2.eq.108) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= m045
+*        
+         ISET=7
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+*
+      ELSEIF (SPECIAL_f2.eq.109) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= m060
+*        
+         ISET=8
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+*
+      ELSEIF (SPECIAL_f2.eq.110) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= m075
+*        
+         ISET=9
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+*
+      ELSEIF (SPECIAL_f2.eq.111) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= m090
+*        
+         ISET=10
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+*
+      ELSEIF (SPECIAL_f2.eq.112) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= m105
+*        
+         ISET=11
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+      ELSEIF (SPECIAL_f2.eq.113) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= p030
+*        
+         ISET=12
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+      ELSEIF (SPECIAL_f2.eq.114) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= p045
+*        
+         ISET=13
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+      ELSEIF (SPECIAL_f2.eq.115) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= p060
+*        
+         ISET=14
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+      ELSEIF (SPECIAL_f2.eq.116) THEN 
+*   
+*   
+*  
+* GRSV STANDARD NLO deltag= p070
+*        
+         ISET=15
+         call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
+*
       ENDIF
 *
 
