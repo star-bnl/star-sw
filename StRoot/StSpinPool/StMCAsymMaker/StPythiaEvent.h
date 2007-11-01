@@ -6,6 +6,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.3  2007/11/01 02:48:38  rfatemi
+// Dave Staszak update with additional GRSV grids
+//
 // Revision 1.2  2007/08/06 17:06:05  rfatemi
 // set default GRSV to standard
 //
@@ -28,7 +31,7 @@ public:
     StPythiaEvent(const StPythiaEvent& other);
     StPythiaEvent& operator=(const StPythiaEvent& rhs); 
 
-    enum GRSV { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4 };
+    enum GRSV { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15};
 
     int runId() const;
     int eventId() const;
@@ -87,8 +90,8 @@ private:
     float mX1;
     float mX2;
     float mPartonALL;
-    float mDF1[5];  //[LO][NLO][ZERO][MAX][MIN]
-    float mDF2[5];  //[LO][NLO][ZERO][MAX][MIN]
+    float mDF1[16];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070]
+    float mDF2[16];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070]
     float mF1[2];   //[LO][NLO]
     float mF2[2];   //[LO][NLO]
 
@@ -134,6 +137,17 @@ inline float StPythiaEvent::ALL(GRSV scenario) const
         case(ZERO): return (mDF1[2]*mDF2[2]*mPartonALL) / (mF1[1]*mF2[1]);
         case(MAX):  return (mDF1[3]*mDF2[3]*mPartonALL) / (mF1[1]*mF2[1]);
         case(MIN):  return (mDF1[4]*mDF2[4]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(M015):  return (mDF1[5]*mDF2[5]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(M030):  return (mDF1[6]*mDF2[6]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(M045):  return (mDF1[7]*mDF2[7]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(M060):  return (mDF1[8]*mDF2[8]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(M075):  return (mDF1[9]*mDF2[9]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(M090):  return (mDF1[10]*mDF2[10]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(M105):  return (mDF1[11]*mDF2[11]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(P030):  return (mDF1[12]*mDF2[12]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(P045):  return (mDF1[13]*mDF2[13]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(P060):  return (mDF1[14]*mDF2[14]*mPartonALL) / (mF1[1]*mF2[1]);
+        case(P070):  return (mDF1[15]*mDF2[15]*mPartonALL) / (mF1[1]*mF2[1]);
         default:    return -999;
     }
 }
@@ -169,8 +183,10 @@ inline void StPythiaEvent::Clear(Option_t* option)
     mX1 = 0;
     mX2 = 0;
     mPartonALL = 0;
-    mDF1[0] = 0; mDF1[1] = 0; mDF1[2] = 0; mDF1[3] = 0; mDF1[4] = 0;
-    mDF2[0] = 0; mDF2[1] = 0; mDF2[2] = 0; mDF2[3] = 0; mDF2[4] = 0;
+    for (int ii=0; ii<16; ii++) {
+      mDF1[ii] = 0;
+      mDF2[ii] = 0;
+    }
     mF1[0] = 0; mF1[1] = 0;
     mF2[0] = 0; mF2[1] = 0;
 
@@ -189,7 +205,10 @@ inline void StPythiaEvent::setCosTheta(float cosTheta) { mCosTheta = cosTheta; }
 inline void StPythiaEvent::setX1(float x1) { mX1 = x1; }
 inline void StPythiaEvent::setX2(float x2) { mX2 = x2; }
 inline void StPythiaEvent::setPartonALL(float a) { mPartonALL = a; }
-inline void StPythiaEvent::setDF1(GRSV scenario, float val) { mDF1[scenario] = val; }
+inline void StPythiaEvent::setDF1(GRSV scenario, float val) { 
+  printf("StPythiaEvent::setDF1 - setting %d  to %f ",scenario, val); 
+  mDF1[scenario] = val; 
+}
 inline void StPythiaEvent::setDF2(GRSV scenario, float val) { mDF2[scenario] = val; }
 
 inline void StPythiaEvent::setF1(GRSV scenario, float val) 
