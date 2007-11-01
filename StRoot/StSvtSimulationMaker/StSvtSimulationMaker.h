@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.16 2005/07/23 03:37:34 perev Exp $
+// $Id: StSvtSimulationMaker.h,v 1.17 2007/11/01 19:56:16 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.17  2007/11/01 19:56:16  caines
+// Added routines to move SVT hits from GEANT geometry to real geometry
+//
 // Revision 1.16  2005/07/23 03:37:34  perev
 // IdTruth + Cleanup
 //
@@ -124,6 +127,7 @@ class StSvtSimulationMaker : public StMaker
   Int_t getSvtDriftSpeeds();
   Int_t getSvtT0();
   Int_t getPedestalOffset();
+ 
 
 //+++++++++++++++++++++++
   Int_t GetNumOfHybrids(){return mNumOfHybrids;}
@@ -133,6 +137,8 @@ class StSvtSimulationMaker : public StMaker
   
   ClassDef(StSvtSimulationMaker,4)       //!
  
+    void ideal2RealTranslation(StThreeVector<double> *pos, StThreeVector<double> *mtm, double charge, int *wafId);
+
   // initial options
   double mLifeTime;        //!
   double mTrapConst;       //!
@@ -145,6 +151,7 @@ class StSvtSimulationMaker : public StMaker
    
   Int_t  mNumOfHybrids;         //!could be used to override number of simulated hybrids
   double mDefaultDriftVelocity; //! obsolete? - used if no database, error might be better
+  double mBField; // z component of BField;
 
   ///data for whole simulation
   StSvtConfig                  *mConfig;              //! created in constructor (desctructor kills)
@@ -171,11 +178,12 @@ class StSvtSimulationMaker : public StMaker
   int                          *counter;                //!
   TFile                        *mNtFile;                //! 
   TNtuple                      *mNTuple;                //! 
+  
 
     
     
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.16 2005/07/23 03:37:34 perev Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.17 2007/11/01 19:56:16 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 
   

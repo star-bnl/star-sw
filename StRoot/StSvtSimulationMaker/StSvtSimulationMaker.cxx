@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.33 2007/07/12 20:18:18 fisyak Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.34 2007/11/01 19:56:12 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.34  2007/11/01 19:56:12  caines
+ * Added routines to move SVT hits from GEANT geometry to real geometry
+ *
  * Revision 1.33  2007/07/12 20:18:18  fisyak
  * read Db by deman
  *
@@ -26,7 +29,7 @@
  *
  * Revision 1.31  2005/10/21 02:46:07  caines
  * Improve PASA shift to 220 microns to place hit residuals in MC closer to zero
- *
+
  * Revision 1.30  2005/10/19 21:22:30  caines
  * Make PASA shift 200 microns
  *
@@ -133,12 +136,20 @@ using namespace std;
 #include "StSvtSimulation.hh"
 #include "StSvtGeantHits.hh"
 
+#include "StThreeVectorD.hh"
+#include "StPhysicalHelixD.hh"
+#include "SystemOfUnits.h"
+
 #include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
 //#include "StSvtConversionTable.h"
 
 #include "StSvtSimulationMaker.h"
 #include "StDbUtilities/St_svtCorrectionC.h"
 #include "StDbUtilities/St_svtHybridDriftVelocityC.h"
+
+#define gufld   gufld_
+extern "C" {void gufld(Float_t *, Float_t *);}
 
 ClassImp(StSvtSimulationMaker)
 
@@ -295,6 +306,11 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   cout<<"  pedestal offset(from database)="<<mPedOffset<<endl;
   cout<<"  T0(from database)= "<<mT0->getT0(1)<<endl;
   
+  // Get BField;
+  Float_t x[3] = {0,0,0};
+  Float_t b[3];
+  gufld(x,b);
+  mBField = b[2]*tesla;
 
   if(Debug()) gMessMgr->Info()<<"StSvtSimulationMaker::InitRun()-END"<<endm;
  
@@ -513,17 +529,130 @@ Int_t StSvtSimulationMaker::getConfig()
   return kStOk;
 }
 
+//____________________________________________________________________________
+void StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  StThreeVector<double> *mtm, double charge, int *wafId){
 
+  StGlobalCoordinate globalCor(0,0,0);
+  StThreeVector<double> x;
+  // Find wafer geometry of wafer track passed through in Ideal Geom
+  int index = mSvtGeom->getWaferIndex(*wafId);
+  //cout << "pos going in : " << *pos << endl;
+
+  // Get normal and center position of the REAL wafer geom
+    StSvtWaferGeometry* waferGeom = (StSvtWaferGeometry*)mSvtGeom->at(index);
+    StThreeVectorD wafCent(waferGeom->x(0),waferGeom->x(1),waferGeom->x(2));
+    StThreeVectorD norm(waferGeom->n(0),waferGeom->n(1),waferGeom->n(2));
+    
+    // Move helix of track from IDEAL geom to find where it hit REAL wafer geom
+    
+    StPhysicalHelixD tHelix( *mtm, *pos, mBField, charge);
+    double s = tHelix.pathLength(wafCent, norm);
+    x = tHelix.at(s); 
+    pos->setX(x.x());
+    pos->setY(x.y());
+    pos->setZ(x.z());
+    globalCor.setPosition(*pos);  
+    
+    
+    if( mCoordTransform->IsOnWaferZ(*pos,*wafId) && mCoordTransform->IsOnWaferR(*pos,*wafId)){
+      //cout << " Coming out " << *pos << endl;
+      x = tHelix.momentumAt(s,mBField);
+      mtm->setX(x.x());
+      mtm->setY(x.y());
+      mtm->setZ(x.z());
+      return ;
+    }
+    
+
+    // If the hit is now on a different wafer look for it by looping
+    // over one ladder before and one after
+
+    int ladder = *wafId%100;
+    int layer = *wafId/1000;
+    int barrel = (layer-1)/2 +1;
+    int iladder;
+    for( iladder = ladder-1; iladder <= ladder+1; iladder++){
+      if( iladder==0) continue;
+      for( int iwaf = 1;  iwaf <= mConfig->getNumberOfWafers(barrel); iwaf++){
+	//wafId = 1000*layer+ 100*iwaf + iladder;
+	index = mSvtGeom->getWaferIndex(barrel, iladder, iwaf);
+      
+	// Get normal and center position of the REAL wafer geom
+	waferGeom = (StSvtWaferGeometry*)mSvtGeom->at(index);
+	wafCent.setX(waferGeom->x(0));
+	wafCent.setY(waferGeom->x(1));
+	wafCent.setZ(waferGeom->x(2));
+	norm.setX(waferGeom->n(0));
+	norm.setY(waferGeom->n(1));
+	norm.setZ(waferGeom->n(2));
+	
+	// Move helix of track from IDEAL geom to find where it hit REAL wafer geom
+	s = tHelix.pathLength(wafCent, norm);
+	x = tHelix.at(s); 
+	pos->setX(x.x());
+	pos->setY(x.y());
+	pos->setZ(x.z());
+	globalCor.setPosition(*pos);  
+	*wafId = 1000*mConfig->getLayer(index) + 100*iladder + iwaf;
+	if( mCoordTransform->IsOnWaferZ(*pos,*wafId) && mCoordTransform->IsOnWaferR(*pos,*wafId)){
+	  //cout << " Coming out " << *pos << endl;
+	  x = tHelix.momentumAt(s,mBField);
+	  mtm->setX(x.x());
+	  mtm->setY(x.y());
+	  mtm->setZ(x.z());
+	  return;
+	}
+      }
+    }
+
+    if( ladder ==1){
+      iladder = mConfig->getNumberOfLadders(barrel);
+      for( int iwaf = 1;  iwaf <= mConfig->getNumberOfWafers(barrel); iwaf++){
+	//wafId = 1000*layer+ 100*iwaf + iladder;
+	index = mSvtGeom->getWaferIndex(barrel, iladder, iwaf);
+      
+	// Get normal and center position of the REAL wafer geom
+	waferGeom = (StSvtWaferGeometry*)mSvtGeom->at(index);
+	wafCent.setX(waferGeom->x(0));
+	wafCent.setY(waferGeom->x(1));
+	wafCent.setZ(waferGeom->x(2));
+	norm.setX(waferGeom->n(0));
+	norm.setY(waferGeom->n(1));
+	norm.setZ(waferGeom->n(2));	
+
+	// Move helix of track from IDEAL geom to find where it hit REAL wafer geom
+	s = tHelix.pathLength(wafCent, norm);
+	x = tHelix.at(s); 
+	pos->setX(x.x());
+	pos->setY(x.y());
+	pos->setZ(x.z());
+	globalCor.setPosition(*pos);  
+	*wafId = 1000*mConfig->getLayer(index) + 100*iladder + iwaf;
+	if( mCoordTransform->IsOnWaferZ(*pos,*wafId) && 
+	    mCoordTransform->IsOnWaferR(*pos,*wafId)){
+	  //cout << " Coming out " << *pos << endl;
+	  x = tHelix.momentumAt(s,mBField);
+	  mtm->setX(x.x());
+	  mtm->setY(x.y());
+	  mtm->setZ(x.z());
+	  return;
+	}
+      }   
+    }
+    //cout << " Coming out " << *pos << endl;
+    return;
+}
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::Make()
 {
   if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Make()" << endm;
    
   int volId ,barrel, layer, ladder, wafer, hybrid;
-  double px,py,pz;
   Int_t NumOfHitsPerHyb=0;
   StThreeVector<double> VecG(0,0,0);
   StThreeVector<double> VecL(0,0,0);
+  StThreeVector<double> mtm(0,0,0);
+
 
   StSvtHybridPixelsD *svtSimDataPixels;
  
@@ -546,6 +675,7 @@ Int_t StSvtSimulationMaker::Make()
   St_DataSetIter g2t_svt_hit_it(g2t_svt_hit);
   St_g2t_svt_hit *g2t_SvtHit = (St_g2t_svt_hit *) g2t_svt_hit_it.Find("g2t_svt_hit");
 
+
   g2t_svt_hit_st *trk_st=0;
   if( !g2t_SvtHit) {
     gMessMgr->Warning() << "No SVT hits" << endm;
@@ -555,6 +685,12 @@ Int_t StSvtSimulationMaker::Make()
   trk_st = g2t_SvtHit->GetTable();    
   NumOfHitsPerHyb = g2t_SvtHit->GetNRows();
   }
+  // Get g2t tracks
+  St_DataSet *g2t_tracks =  GetDataSet("g2t_track");
+  St_DataSetIter g2t_track_it(g2t_tracks);
+  St_g2t_track *g2t_track = (St_g2t_track *) g2t_track_it.Find("g2t_track");
+  g2t_track_st *g2tTrack = 0;
+  g2tTrack = g2t_track->GetTable(); 
 
   //
   //################  Loop over geant hits ##########################
@@ -579,8 +715,16 @@ Int_t StSvtSimulationMaker::Make()
       */
 
    
-      VecG.setX( trk_st[j].x[0]);VecG.setY( trk_st[j].x[1]);VecG.setZ( trk_st[j].x[2]);
-      px = trk_st[j].p[0];  py = trk_st[j].p[1];  pz = trk_st[j].p[2];
+      VecG.setX( trk_st[j].x[0]);
+      VecG.setY( trk_st[j].x[1]);
+      VecG.setZ( trk_st[j].x[2]);
+      mtm.setX(trk_st[j].p[0]);
+      mtm.setY(trk_st[j].p[1]);
+      mtm.setZ(trk_st[j].p[2]);
+
+      // Translate hit position from IDEAL geom coords to REAL geom coords in
+      // global coordinates
+      ideal2RealTranslation(&VecG, &mtm, (double)g2tTrack[trackId-1].charge, &volId);
       //double energy = 96000.; 
       double  energy = trk_st[j].de*1e9; 
       globalCor.setPosition(VecG);
@@ -631,7 +775,7 @@ static const int barrels[]={3,1,1,2,2};
       if( index < 0) continue; 
       svtSimDataPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);
       if (! mSvtAngles) mSvtAngles =  new StSvtAngles();
-      mSvtAngles->calcAngles(mSvtGeom,px,py,pz,layer,ladder,wafer);
+      mSvtAngles->calcAngles(mSvtGeom,mtm.x(),mtm.y(),mtm.z(),layer,ladder,wafer);
       double theta = mSvtAngles->getTheta();
       double phi = mSvtAngles->getPhi();
       //seting drift speed for simulation
