@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.7 2007/10/31 23:25:32 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.8 2007/11/01 19:09:18 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -38,10 +38,9 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
      printf("                    indirect_file_list can be create by the shell command:\n\n");
      printf("                         ls -1 *.root>indirect_file_list \n\n");
      printf("                    The last parameter defines whether one wants to merge the \"simple\" ROOT files\n");
-     printf("                    The \"simple\" ROOT files are those with no sub-TDirectrory objects inside\n");
+     printf("                    The \"simple\" ROOT files are those with no sub-TDirectrory objects inside and with no TTree/TNtuples\n");
      printf("                    This is the default option and it can be omitted\n");
-     printf("                    To merge the ROOT files with sub-TDirectory pass the kFALSE as the 3d macro parameter\n\n");
-     printf("Attention: Macro doesn\'t merge any TTree yet.\n\n");
+     printf("                    To merge the ROOT files with sub-TDirectory or / ans TTree pass the kFALSE as the 3d macro parameter\n\n");
   }
 }
    
@@ -112,6 +111,8 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
     printf(" An experimental version of macro.\n");
     TStopwatch time;
     Int_t fileCounter = 0;
+    Int_t dirCounter = 0;
+    Int_t treeCounter = 0;
     Int_t histogramCounter = 0;
      // Create the output file
      TFile *outFile = TFile::Open(TargetName,"RECREATE");
@@ -141,36 +142,70 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
                  // Accumulate  the  histogram
                   dstHistogram->Add(h1);
                   delete h1;  // Optional, to reduce the memory consumption
-                  printf("+");
+                  printf("h");
               } else {
                 // First time - move the histogram
                 h1->SetDirectory(outDir);
                 printf(" The new Histogram found: %s \n", h1->GetName() );
                 histogramCounter++;
               }
+           } else  if ( obj->IsA()->InheritsFrom(TTree::Class()) ) {
+              // descendant of TH1 -> merge it
+              // printf("Merging histogram: %s\n",obj->GetName() ); 
+//              std::cout << "Merging histogram " << obj->GetName() << std::endl;
+              TTree *tree = (TTree*)obj;
+              TTree *dstTree = 0;
+              // Check whether we found the new histogram
+              if ( (dstTree = (TTree *)outDir->FindObject(tree->GetName()))) {
+                  // Merge  the  tree
+                  TList nextTree; nextTree.Add(tree);
+                  dstTree->Merge(&nextTree);
+                  delete tree;  // Optional, to reduce the memory consumption
+                  printf("t");
+              } else {
+                // First time - move the histogram
+                TDirectory *saveDir = 0;
+                if (outDir != gDirectory) {
+                   saveDir = gDirectory;
+                   outDir->cd();
+                }
+                TList nextTree; nextTree.Add(tree);               
+                dstTree = TTree::MergeTrees(&nextTree);
+                if (saveDir) saveDir->cd();
+                printf(" The new TTree found: %s \n", tree->GetName() );
+                delete tree;  // Optional, to reduce the memory consumption
+                treeCounter++;
+              }
            } else if ( obj->IsA()->InheritsFrom(TDirectory::Class()) ) {
                printf("The input sub-TDirectory object: %s\n",obj->GetName(), depth); 
                TDirectory *d =  (TDirectory *)outDir->FindObject(obj->GetName());
-               if (!d) d = outDir->mkdir(obj->GetName());
+               if (!d) {
+                  d = outDir->mkdir(obj->GetName());
+                  dirCounter++;
+                  printf("The new TDirectory object: %s\n",d->GetPathStatic(), depth); 
+               }
                if (d) {
                   outDir = d;                  
                   printf("The output sub-TDirectory object: %s\n",outDir->GetPathStatic(), depth); 
 
                }
            } else {
-              printf("Skipping object: %s\n",obj->GetName() ); 
+              printf("I have no idea how to merge the %s objects of the %s class. Skipping .... \n",obj->GetName(), obj->ClassName() ); 
            }
            ++file;
         }
               
      }
      printf("\n Finishing  . . . \n");
-     outFile->ls();
-     outFile->Write();
+     outFile->Write();  // this creates a second copy of the TTree ???
      outFile->Close();     
      delete outFile;
-     printf(" Total files merged: %d \n", fileCounter);
-     printf(" Total histogram merged: %d \n", histogramCounter);
+     if (fileCounter)      printf(" Total files merged: %d \n", fileCounter);
+     if (dirCounter)       printf(" Total Tdirectory object merged: %d \n", dirCounter);
+     if (histogramCounter) printf(" Total histogram merged: %d \n", histogramCounter);
+     if (treeCounter)      printf(" Total TTree\'s merged: %d \n",treeCounter);
+     if (dirCounter || treeCounter) printf(" You have used the experimental version of the program. Please check the outoput file\n");
+        
      time.Print("Merge");
   } else {
      printf("\nUsage: root MergeHistogramFile.C(\"DestinationFileName\",\"InputFilesPattern\")\n");     
