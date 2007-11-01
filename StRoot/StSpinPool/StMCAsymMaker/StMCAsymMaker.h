@@ -63,12 +63,39 @@ private:
     double df1_NLO_gmax,df2_NLO_gmax,weight_NLO_gmax;   //NLO GMAX polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
     double df1_NLO_gmin,df2_NLO_gmin,weight_NLO_gmin;   //NLO GMIN polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
 
+    double df1_NLO_m015,df2_NLO_m015,weight_NLO_m015;   //NLO M015 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_m030,df2_NLO_m030,weight_NLO_m030;   //NLO M030 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_m045,df2_NLO_m045,weight_NLO_m045;   //NLO M045 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_m060,df2_NLO_m060,weight_NLO_m060;   //NLO M060 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_m075,df2_NLO_m075,weight_NLO_m075;   //NLO M075 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_m090,df2_NLO_m090,weight_NLO_m090;   //NLO M090 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_m105,df2_NLO_m105,weight_NLO_m105;   //NLO M105 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+
+    double df1_NLO_p030,df2_NLO_p030,weight_NLO_p030;   //NLO P030 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_p045,df2_NLO_p045,weight_NLO_p045;   //NLO P045 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_p060,df2_NLO_p060,weight_NLO_p060;   //NLO P060 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+    double df1_NLO_p070,df2_NLO_p070,weight_NLO_p070;   //NLO P070 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
+
+
 public: 
     static Double_t get_polPDF_LO(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_g0(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_gmax(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_gmin(int flavor, double x1, double Q2);
+
+    static Double_t get_polPDF_NLO_m015(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_m030(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_m045(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_m060(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_m075(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_m090(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_m105(int flavor, double x1, double Q2);
+
+    static Double_t get_polPDF_NLO_p030(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_p045(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_p060(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_p070(int flavor, double x1, double Q2);
 
     static Double_t get_unpolPDF_LO(int flavor, double x1, double Q2); 
     static Double_t get_unpolPDF_NLO(int flavor, double x1, double Q2);
@@ -87,7 +114,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.5 2007/08/06 17:05:44 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.6 2007/11/01 02:47:38 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 
