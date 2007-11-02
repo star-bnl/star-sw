@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.4 2007/11/02 17:43:11 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.5 2007/11/02 20:44:54 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -224,13 +224,13 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
   int nBtowLow=0, nBtowHigh=0 ,nEtowLow=0, nEtowHigh=0 ;
 
   char fname[1000];
-  // sprintf(fname,"/home/developer/balewski/L2output_2/run%d.l2ped.log",runNumber);
   sprintf(fname,"%s/run%d.l2ped.out",mOutDir,run_number); // actual L2 output destination 
   printf("L2ped_finish('%s') , finding pedestals...\n",fname);
   
   FILE *fd=fopen(fname,"w");
   if(fd==0) {printf("failed to open output %s file,skip ped_finish()\n",fname); return;}  
   fprintf(fd,"#L2-ped algorithm finishRun(%d), compiled: %s , %s\n",run_number,__DATE__,__TIME__);
+  fprintf(fd,"#params: pedSubtr=%d speedFact=%d saveBin=%d debug=%d\n",par_pedSubtr,par_speedFact,par_saveBinary,par_dbg);
   hA[10]->printCSV(fd); // event accumulated
   int iMax=-3, iFWHM=-4;
   hA[11]->findMax( &iMax, &iFWHM);
@@ -382,6 +382,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.5  2007/11/02 20:44:54  balewski
+  cleanup
+
   Revision 1.4  2007/11/02 17:43:11  balewski
   cleanup & it started to work w/ L2upsilon
 
