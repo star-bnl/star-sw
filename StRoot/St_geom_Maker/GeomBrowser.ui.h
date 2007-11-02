@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.21 2007/11/02 22:48:20 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.22 2007/11/02 23:57:49 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -250,7 +250,7 @@ void GeomBrowser::listView1_selectionChanged()
 void GeomBrowser::listView1_selectionChanged( QListViewItem *item )
 {
     if (item) {
-      // fprintf(stderr,"listView1_selectionChanged %s\n", (const char *) item->text(0));
+       // fprintf(stderr,"listView1_selectionChanged %s\n", (const char *) item->text(0));
        drawItem(item, 1, tQtWidget2);
 #if o      
       TQtObjectListItem* itemRoot =(TQtObjectListItem* )item;
@@ -273,10 +273,44 @@ void GeomBrowser::listView1_selectionChanged( QListViewItem *item )
 void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPoint &pos, int col )
 {
    if (item && col >= 0) {
-      if (!fContextMenu) fContextMenu = new TContextMenu("BrowserContextMenu");
-      TQtObjectListItem* that =(TQtObjectListItem* )item;
-      if (that->Object())
-         fContextMenu->Popup(pos.x(),pos.y(), that->Object(),(TBrowser *)0);
+     // Count the number of the selected items
+      QPtrList<QListViewItem> lst;
+      int nSelected = 0;
+      QListViewItemIterator it(listView1, QListViewItemIterator::Selected );
+      while ( it.current() ) {
+          lst.append( it.current() );
+          ++it;++nSelected;
+      }
+      if (nSelected == 1) {
+         if (!fContextMenu) fContextMenu = new TContextMenu("BrowserContextMenu");
+         TQtObjectListItem* that =(TQtObjectListItem* )item;
+         if (that->Object())
+            fContextMenu->Popup(pos.x(),pos.y(), that->Object(),(TBrowser *)0);
+      } else {
+         int response = QMessageBox::question(listView1,"Change the volume visibility","Visible","Both","Child","none");
+         if (response >= 0 ) {
+            TUpdateList listLock(listView1);
+            QListViewItem  *i;
+            for ( i = lst.first(); i; i = lst.next() ) {     
+               TQtObjectListItem* itemRoot =(TQtObjectListItem* )i;
+               TObject *obj = itemRoot->Object();
+               TVolume *volume = dynamic_cast<TVolume *>(obj);
+
+               // check visibility
+               if (volume) {
+                  TVolume::ENodeSEEN s;
+                  switch ( response) {
+                     case 0: itemRoot->setState(QCheckListItem::On);       s = TVolume::kBothVisible;   break;
+                     case 1: itemRoot->setState(QCheckListItem::NoChange); s = TVolume::kThisUnvisible; break;
+                     case 2: itemRoot->setState(QCheckListItem::Off)     ; s = TVolume::kNoneVisible;   break;
+                     default: itemRoot->setState(QCheckListItem::On)     ; s = TVolume::kBothVisible;   break;
+                  };
+                  // set visibility
+                  if (volume->GetVisibility() != s) volume->SetVisibility(s);
+               }
+            }
+         }
+      }
    }
 }
 
