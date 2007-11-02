@@ -54,8 +54,8 @@
                     </property>
                     <property name="minimumSize">
                         <size>
-                            <width>204</width>
-                            <height>96</height>
+                            <width>242</width>
+                            <height>115</height>
                         </size>
                     </property>
                     <property name="frameShape">
@@ -999,6 +999,12 @@
         <receiver>GeomBrowser</receiver>
         <slot>STAR_geometry_activated(const QString&amp;)</slot>
     </connection>
+    <connection>
+        <sender>listView1</sender>
+        <signal>selectionChanged()</signal>
+        <receiver>GeomBrowser</receiver>
+        <slot>listView1_selectionChanged()</slot>
+    </connection>
 </connections>
 <includes>
     <include location="local" impldecl="in declaration">TVolume.h</include>
@@ -1117,6 +1123,7 @@
     <slot>RemakeGeom ( const QString &amp; fileName )</slot>
     <slot>TurnGeomSrcEditor (bool)</slot>
     <slot>ViewerDestroyed()</slot>
+    <slot>listView1_selectionChanged()</slot>
 </slots>
 <functions>
     <function access="protected">SetVisibility( TQtObjectListItem * item, TVolume::ENodeSEEN vis )</function>

@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.20 2007/10/12 16:49:01 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.21 2007/11/02 22:48:20 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -238,10 +238,19 @@ void GeomBrowser::helpAbout()
 }
 
 //_____________________________________________________________________________
+void GeomBrowser::listView1_selectionChanged()
+{
+   QListViewItem *i =listView1->currentItem();
+   if (i) {
+      if ( i->isSelected() ) listView1_selectionChanged(i);
+   }
+}
+
+//_____________________________________________________________________________
 void GeomBrowser::listView1_selectionChanged( QListViewItem *item )
 {
     if (item) {
-       // fprintf(stderr,"listView1_selectionChanged %s\n", (const char *) item->text(0));
+      // fprintf(stderr,"listView1_selectionChanged %s\n", (const char *) item->text(0));
        drawItem(item, 1, tQtWidget2);
 #if o      
       TQtObjectListItem* itemRoot =(TQtObjectListItem* )item;
@@ -385,6 +394,9 @@ void GeomBrowser::init()
    fTextEdit = new TextEdit(this);
    fTextEdit->setCaption( "GEANT3 geometry editor" );
    fTextEdit->resize( 640, 800 );
+   // Set the selection mode
+   listView1->setSelectionMode(QListView::Extended);
+   
    // populate the standard geometry type   
    // create the STAR search path
    QString file("pams/geometry/geometry/geometry.g");
@@ -1101,15 +1113,15 @@ void GeomBrowser::fileOpenInventor( const QString &fileName )
 }
 
 //_____________________________________________________________________________
-void GeomBrowser::RemakeGeom( const QString &) 
+void GeomBrowser::RemakeGeom( const QString &)
 {
-   Geant().SetRemake(kTRUE); 
+   Geant().SetRemake(kTRUE);
 }
 //_____________________________________________________________________________
 void GeomBrowser::TurnGeomSrcEditor(bool on)
 {
    // Turn on/off the source file seacth and look up
-   if (on) 
+   if (on)
       QWhatsThis::display("Select the 3D image of the detector volume to popu the text editor");
 }
 
