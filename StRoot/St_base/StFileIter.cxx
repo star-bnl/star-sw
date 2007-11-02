@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.2 2007/11/02 18:42:44 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.3 2007/11/02 18:48:25 fine Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -253,8 +253,8 @@ TObject *StFileIter::GetObject() const
   // ATTENTION:  memory leak danger !!!
   // ---------
   // This method does create a new object and it is the end-user
-  // code responsibility to take care about the object returned
-  // to avoid memeory leak.
+  // code responsibility to take care about this object
+  // to avoid memory leak.
   //
    return ReadObj(GetCurrentKey());
 }
@@ -437,7 +437,6 @@ TObject *StFileIter::ReadObj(const TKey *key)  const
       if (obj && obj->InheritsFrom(TDirectory::Class()) ) 
       {
          // create the next iteration level.
-         // We can do that only for the forward iteration
          assert(!fNestedIterator);
          ((StFileIter*)this)->fNestedIterator = new StFileIter((TDirectory *)obj);
          // FIXME:  needs to set  fDirection if needed 02/11/2007 vf
@@ -466,9 +465,7 @@ Int_t  StFileIter::NextEventPut(TObject *obj, UInt_t eventNum,  UInt_t runNumber
       }
       wBytes = obj->Write(thisKey.GetKey());
       if (fRootFile->InheritsFrom(TFile::Class())) ((TFile*)fRootFile)->Flush();
-      if (fRootFile != gDirectory) {
-         RestoreFileScope();
-      }
+      if (fRootFile != gDirectory)     RestoreFileScope();
    }
    return wBytes;
 }
