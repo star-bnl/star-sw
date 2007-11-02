@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2jetAlgo.cxx,v 1.2 2007/10/25 02:07:02 balewski Exp $
+ * $Id: L2jetAlgo.cxx,v 1.3 2007/11/02 03:03:47 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -14,9 +14,6 @@
   depends on L2-DB class 
  *********************************************************************
  */
-
-//#include "/usr/src/linux-2.4/include/asm/msr.h" /* for rdtscl */
-#include "/usr/src/kernels/2.6.9-42.0.10.EL-smp-i686/include/asm-i386/msr.h" /* for rdtscl */
 
 
 #ifdef __ROOT__ //in root4star environment
@@ -35,18 +32,18 @@
 
 //=================================================
 //=================================================
-L2jetAlgo::L2jetAlgo(L2EmcDb* db, char *logP, int resOff) { 
-  par_L2ResOff=resOff;
-  strncpy( par_logPath,logP,sizeof(par_logPath));
+L2jetAlgo::L2jetAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff) 
+  :  L2VirtualAlgo( name,  db,  outDir, resOff) { 
+  /* called one per days
+     all memory allocation must be done here
+  */
   par_maxADC=4095;
   par_maxEt=60;
   par_adcMask= (unsigned short) (-0x10); // to clear 4 LSF bits
   par_pedOff=0x10/2; //WARN, must match 'par_adcMask'
   createHisto();
   run_number=-1;
-  myDb=db;
-  printf("L2jetAlgo instantiated, logPath='%s'\n",logP);
-  assert(myDb);
+  printf("L2jetAlgo instantiated, logPath='%s'\n",mOutDir);
   eve_Jet[0]=new L2Jet;
   eve_Jet[1]=new L2Jet;
 }
@@ -72,15 +69,15 @@ L2jetAlgo::paramsChanged( int *rc_ints, float *rc_floats) {
 /*========================================
   ======================================== */
 int 
-L2jetAlgo::initRun(char* myName, int runNo, int *rc_ints, float *rc_floats) {
+L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
 
   // update DB if run # has changed
-  if(myDb->initRun(runNo)) return -7; 
+  if(mDb->initRun(runNo)) return -7; 
   // DB must be initialized prior to lookup tables
 
   if(run_number==runNo) {  
-    if (logFile) fprintf(logFile,"L2jet::initRun-%s(%d)=ghost already initilized, only check params\n",myName, runNo);
-    printf("L2jet::initRun-%s(%d)=ghost already initilized, only checking params\n",myName, runNo);
+    if (logFile) fprintf(logFile,"L2jet::initRun-%s(%d)=ghost already initilized, only check params\n",mName, runNo);
+    printf("L2jet::initRun-%s(%d)=ghost already initilized, only checking params\n",mName, runNo);
     int ret= paramsChanged(rc_ints, rc_floats);
     // 0=ok, 1=fatal problem
     if(ret){
@@ -127,8 +124,8 @@ L2jetAlgo::initRun(char* myName, int runNo, int *rc_ints, float *rc_floats) {
   run_nEventIn=run_nEventOneJet=run_nEventDiJet= run_nEventRnd=0;
 
   char Fname[1000];
-  sprintf(Fname,"%s/run%d.l2jet.out",par_logPath,run_number);
-  printf("L2jet::initRun-%s('%s') ...\n",myName,Fname);
+  sprintf(Fname,"%s/run%d.l2jet.out",mOutDir,run_number);
+  printf("L2jet::initRun-%s('%s') ...\n",mName,Fname);
 
   logFile = fopen(Fname,"w");
   if( logFile==0) printf(" L2jetAlgo() UNABLE to open run summary log file, continue anyhow\n");
@@ -162,9 +159,9 @@ L2jetAlgo::initRun(char* myName, int runNo, int *rc_ints, float *rc_floats) {
     par_rndAccThr=RAND_MAX;
     par_rndAccProb=1.0;
   }
-  if (logFile) {
+  if (logFile) { 
     fprintf(logFile,"L2jet algorithm initRun(%d), compiled: %s , %s\n params:\n",run_number,__DATE__,__TIME__);
-    fprintf(logFile," - use BTOW: East=%d West=%d, Endcap=%d  L2ResOffset=%d\n", par_useBtowEast, par_useBtowWest,par_useEndcap , par_L2ResOff);
+    fprintf(logFile," - use BTOW: East=%d West=%d, Endcap=%d  L2ResOffset=%d\n", par_useBtowEast, par_useBtowWest,par_useEndcap ,mResultOffset);
     fprintf(logFile," - threshold: ADC-ped> %d \n", par_adcThr);
     fprintf(logFile," - min phi opening angle Jet1<->Jet2: %d in L2phiBins\n",par_minPhiBinDiff);   
     fprintf(logFile," - diJet  Et thrHigh= %.2f (GeV)   thrLow= %.2f  (GeV)\n", par_diJetThrHigh, par_diJetThrLow); 
@@ -245,15 +242,15 @@ L2jetAlgo::initRun(char* myName, int runNo, int *rc_ints, float *rc_floats) {
   int nBg=0, nEg=0; /* counts # of reasonable calibrated towers */ 
 
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=myDb->getByIndex(i);
-    if(myDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
+    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
     if(x->fail) continue; /* dropped masked channels */
     if(x->gain<=0) continue; /* dropped uncalibrated towers , tmp */
     /* if(x->sec!=1) continue;   tmp, to test patch mapping */
 
     /* WARN, calculate index to match RDO order in the ADC data banks */
     int ietaP, iphiP;
-    if (myDb->isBTOW(x) ) {
+    if (mDb->isBTOW(x) ) {
       /*....... B A R R E L  .................*/
       nB++;   
       if(x->eta<0 || x->eta>mxEtaBinsB) goto crashIt_1;
@@ -280,7 +277,7 @@ L2jetAlgo::initRun(char* myName, int runNo, int *rc_ints, float *rc_floats) {
       db_btowThr[x->rdo]=(int) (x->ped+par_adcThr);
       db_btowPedS[x->rdo]=(unsigned short) (par_pedOff-x->ped);
       nBg++;
-    } else if(myDb->isETOW(x) &&  par_useEndcap) {
+    } else if(mDb->isETOW(x) &&  par_useEndcap) {
       /*....... E N D C A P ........................*/
       nE++;   
       int iphiTw= (x->sec-1)*5 + x->sub-'A';
@@ -512,7 +509,7 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   rdtscl(timeStop);
   unsigned long timeDiff=timeStop-eve_timeStart;
   int  kTick=timeDiff/1000;
-  // printf("kk=%f \n",timeDiff/1000.);
+  //printf("kk=%f \n",timeDiff/1000.);
   hA[11]->fill(kTick);
   
   out.int0.kTick=  kTick>255 ? 255 : kTick;
@@ -522,7 +519,7 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   // unsigned char  cSum=L2jetResults2006_doCheckSum(&out); printf("cSum2=%d\n",cSum);
 
   //===== step 7: write L2Result
-  uint *outPlace=eve_TrigData->TrgSum.L2Result+par_L2ResOff;
+  uint *outPlace=eve_TrigData->TrgSum.L2Result+mResultOffset;
   memcpy(outPlace,&out,sizeof( L2jetResults2006));
 
 
@@ -578,7 +575,7 @@ L2jetAlgo::finishRun() {  /* called once at the end of the run */
   
   // save run summary histos
   char Fname[1000];
-  sprintf(Fname,"%s/run%d.l2jet.hist.bin",par_logPath,run_number);
+  sprintf(Fname,"%s/run%d.l2jet.hist.bin",mOutDir,run_number);
   printf("L2jet::finishRun('%s') , save histo ...\n",Fname);
 
   FILE *hFile = fopen(Fname,"w");
@@ -934,16 +931,16 @@ L2jetAlgo::finishRunHisto(){
   int bHotSum=1,bHotId=-1;
   int eHotSum=1;
 
-  const L2EmcDb::EmcCDbItem *xE=myDb->getByIndex(402), *xB=myDb->getByIndex(402);
+  const L2EmcDb::EmcCDbItem *xE=mDb->getByIndex(402), *xB=mDb->getByIndex(402);
   int i;
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=myDb->getByIndex(i);
-    if(myDb->isEmpty(x)) continue; 
-    if (myDb->isBTOW(x) ) {
+    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    if(mDb->isEmpty(x)) continue; 
+    if (mDb->isBTOW(x) ) {
       int softId=atoi(x->tube+2);
       int ieta= (x->eta-1);
       int iphi= (x->sec-1)*10 + x->sub-'a' ;
-      //myDb->printItem(x); printf("softID=%d\n",softId);
+      //mDb->printItem(x); printf("softID=%d\n",softId);
       hA[21]->fillW(softId,data20[x->rdo]);
       hA[22]->fillW(ieta, iphi,data20[x->rdo]);
       if(bHotSum<data20[x->rdo]) {
@@ -952,7 +949,7 @@ L2jetAlgo::finishRunHisto(){
 	xB=x;
       }
    }// end of BTOW
-    else  if (myDb->isETOW(x) ) {
+    else  if (mDb->isETOW(x) ) {
       int ihard=x->chan+(x->crate-1)*128;
       int ieta= 12-x->eta;
       int iphi= (x->sec-1)*5 + x->sub-'A' ;
@@ -977,6 +974,9 @@ L2jetAlgo::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo.cxx,v $
+  Revision 1.3  2007/11/02 03:03:47  balewski
+  modified L2VirtualAlgo
+
   Revision 1.2  2007/10/25 02:07:02  balewski
   added L2upsilon & binary event dump
 

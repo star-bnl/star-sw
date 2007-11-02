@@ -1,9 +1,7 @@
 
-
-LIBNAME  =  L2jetAlgo
-HDRS     =  L2jetAlgo.h L2jetResults2006.h Map_DeltaPhiJets.h
-SRCS     =  L2jetAlgo.cxx
-
+LIBNAME  =  L2UpsilonAlgo
+HDRS     =  L2upsilon.hh 
+SRCS     =  L2upsilon.cc
 
 CXX    = g++
 AR     = ar rul
@@ -16,17 +14,16 @@ ifndef STAR
   INCL =-I  /home/startrg/trg/trg_soft_dev/include/	
 else
   DEFINES=
-  INCL = -I ../L2janUtil -I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
+  INCL =  -I ../L2algoUtil -I ../../../ -I ../L2algoUtil -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot
 endif
-
 
 INSTALPATH=../../../../onlineL2
 
+#
+#INCL =  -I ../L2algoUtil  
 
 
-
-
-OBJS = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
+OBJS = $(notdir $(patsubst %.cc,%.o,$(SRCS)))
 
 #
 CFLAGS   = -Wall $(DEBUG) $(DEFINES) $(INCL)
@@ -34,25 +31,24 @@ LDFLAGS  = -shared
 
 all:	$(LIBNAME) 
 
-$(LIBNAME): $(HOSTN) $(OBJS)
+$(LIBNAME): $(OBJS)
 	$(AR)  lib$(LIBNAME).a $^
 	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
 	@echo install path=$(INSTALPATH)
 
 install:
 	cp -p lib$(LIBNAME).a  $(INSTALPATH)/alg_lib
-	cp -p  L2jetAlgo.h   $(INSTALPATH)/alg_include
-
+	cp -p   $(HDRS)   $(INSTALPATH)/alg_include
 
 clean:
-	-rm -f *.o $(LINK)  lib*$(LIBNAME).*  .depend
+	-rm -f *.o $(LINK)  lib$(LIBNAME).*  .depend
 
 
 depend .depend : $(SRCS) 
 	$(CXX) -M $(CFLAGS) $^ > ./.depend
+ 
 
-
-%.o: %.cxx
+%.o: %.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 #
@@ -61,19 +57,7 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
-# Revision 1.3  2007/11/02 03:03:48  balewski
+# Revision 1.1  2007/11/02 03:03:54  balewski
 # modified L2VirtualAlgo
-#
-# Revision 1.2  2007/10/25 02:07:03  balewski
-# added L2upsilon & binary event dump
-#
-# Revision 1.1  2007/10/11 00:33:20  balewski
-# L2algo added
-#
-# Revision 1.4  2006/03/28 19:46:49  balewski
-# ver16b, in l2new
-#
-# Revision 1.3  2006/03/11 17:08:34  balewski
-# now CVS comments should work
 #
 #

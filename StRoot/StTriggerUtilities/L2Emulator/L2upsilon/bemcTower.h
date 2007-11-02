@@ -18,7 +18,8 @@ struct BemcTower {
   float eta;
   float phi;
   float pedestal;
-  int   kill;
+  int   stat;
+  int   fail;
   int   numberOfNeighbors;
   int   neighbor[8];
 };

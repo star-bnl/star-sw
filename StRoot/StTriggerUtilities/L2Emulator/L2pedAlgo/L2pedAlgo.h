@@ -2,7 +2,7 @@
 #define L2PEDALGO_H
 
 /*********************************************************************
- * $Id: L2pedAlgo.h,v 1.2 2007/10/25 02:07:07 balewski Exp $
+ * $Id: L2pedAlgo.h,v 1.3 2007/11/02 03:03:50 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -28,13 +28,9 @@ class L2pedAlgo : public  L2VirtualAlgo {
   bool par_saveBinary;
   int  par_speedFact;
   int  par_dbg;
-  int  par_L2ResOff;
 
   // speed-variables
   short s_stepE, s_stepB, s_lastE, s_lastB;
-
-  char par_logPath[1000];
-  L2EmcDb* myDb;
 
   //.............run-long variables
   enum { mxHA=64};
@@ -53,9 +49,9 @@ class L2pedAlgo : public  L2VirtualAlgo {
   TrgDataType* myTrigData;
 
  public:
-  L2pedAlgo(L2EmcDb* db, char *logP, int resOff); 
+  L2pedAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff);
   // ~L2pedAlgo(){}; // memory leak
-  int  initRun(char* myName, int runNo,  int *rc_ints, float *rc_floats);
+  int  initRun(int runNo,  int *rc_ints, float *rc_floats);
   
   bool  doEvent(int L0trg, int inpEveId, TrgDataType* trgData,  // for every event
 	      int bemcIn, ushort *bemcData,
@@ -69,6 +65,9 @@ class L2pedAlgo : public  L2VirtualAlgo {
 
 /**********************************************************************
   $Log: L2pedAlgo.h,v $
+  Revision 1.3  2007/11/02 03:03:50  balewski
+  modified L2VirtualAlgo
+
   Revision 1.2  2007/10/25 02:07:07  balewski
   added L2upsilon & binary event dump
 

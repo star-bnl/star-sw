@@ -1,8 +1,7 @@
 #ifndef L2HISTO_h
 #define L2HISTO_h
-
 /*********************************************************************
- * $Id: L2Histo.h,v 1.1 2007/10/11 00:33:15 balewski Exp $
+ * $Id: L2Histo.h,v 1.2 2007/11/02 03:03:41 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -65,6 +64,9 @@ class L2Histo {
 /*
 *********************************************************************
   $Log: L2Histo.h,v $
+  Revision 1.2  2007/11/02 03:03:41  balewski
+  modified L2VirtualAlgo
+
   Revision 1.1  2007/10/11 00:33:15  balewski
   L2algo added
 

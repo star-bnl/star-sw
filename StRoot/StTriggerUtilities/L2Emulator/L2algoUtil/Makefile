@@ -7,8 +7,8 @@ endif
 
 
 LIBNAME  = L2algoUtil
-HDRS     = L2Histo.h L2BinEvent.h L2EmcDb.h L2VirtualAlgo.h 
-SRCS     = L2Histo.cxx L2BinEvent.cxx L2EmcDb.cxx L2VirtualAlgo.cxx 
+HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h 
+SRCS     = L2Histo.cxx  L2EmcDb.cxx L2VirtualAlgo.cxx 
 
 
 CXX    = g++
@@ -55,6 +55,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.3  2007/11/02 03:03:41  balewski
+# modified L2VirtualAlgo
+#
 # Revision 1.2  2007/10/25 02:06:59  balewski
 # added L2upsilon & binary event dump
 #

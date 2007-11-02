@@ -4,7 +4,7 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 6e1,
+void rdMu2TrigSimu( int nevents = 6e0,
 		    int flagMC=0, // 0== off
 		    int useEemc=1, // 0== off
 		    int useBemc=1, // 0== off
@@ -48,7 +48,6 @@ void rdMu2TrigSimu( int nevents = 6e1,
     assert( !gSystem->Load("StEpcMaker"));
   }
   assert( !gSystem->Load("StTriggerUtilities"));
-  //  if(emcEveDump) assert( !gSystem->Load("EmcBinEvent"));
 
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;

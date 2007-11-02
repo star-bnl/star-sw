@@ -1,12 +1,5 @@
 #include <stdio.h>
 
-//#include "trgStructures.h"
-
-// on L2 machine??
-//#include "/usr/src/linux-2.4/include/asm/msr.h" /* for rdtscl */
-
-// at RCF??
-#include "/usr/src/kernels/2.6.9-42.0.10.EL-smp-i686/include/asm/msr.h"
 
 #include <stdio.h>
 #include "L2gammaAlgo.h"
@@ -19,7 +12,8 @@
 //#define DEBUG
 //#define DEBUG_PATCH_THRESHOLDS
 // ----------------------------------------------------------------------------
-L2gammaAlgo::L2gammaAlgo(char *name , L2EmcDb *db, char *dataPath, int L2gammaResult_offset )
+L2gammaAlgo::L2gammaAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff) 
+  :  L2VirtualAlgo( name,  db,  outDir, resOff)
 {
 
   int geom,  thresh; // temporary fix,JB
@@ -38,15 +32,8 @@ L2gammaAlgo::L2gammaAlgo(char *name , L2EmcDb *db, char *dataPath, int L2gammaRe
  }
 #endif
 
-
-  par_logPath=dataPath;
-  par_myName=name; 
-
- 
-  /// set databse
-  mDbase=db; 
   
-  printf("L2gammaEmCall2006 instantiated geom=%d thresh=%d logpath=%s\n",geom,thresh,par_logPath.c_str());
+  printf("L2gammaEmCall2006 instantiated geom=%d thresh=%d logpath=%s\n",geom,thresh,mOutDir);
   int I_par[]={
     1, // 0=bemc, 1=eemc
     0, // prescale
@@ -65,8 +52,6 @@ L2gammaAlgo::L2gammaAlgo(char *name , L2EmcDb *db, char *dataPath, int L2gammaRe
   init(geom,I_par,F_par);
   mL2input=0;
   mPrescale=0;
-
-  mL2gammaResult_offset= L2gammaResult_offset;
 
 }
 
@@ -194,9 +179,9 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 {
 
 
-  printf("%s ::initRun() for run=%d\n",par_myName.c_str(),run);
-
-  if ( mDbase->initRun(run) ) return -7; // this must be in, if your algos are the only one in the game, _you_ must initialize DB for the new run,JB
+  printf("%s ::initRun() for run=%d\n",mName,run);
+  
+  if ( mDb->initRun(run) ) return -7; // this must be in, if your algos are the only one in the game, _you_ must initialize DB for the new run,JB
 
   fflush(stdout);
   mRunNumber = run;
@@ -249,7 +234,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
   //const char *names[]={"bemc","eemc"};
 
   char clog[128];
-  sprintf(clog,"%s/run%d.l2%s.out",par_logPath.c_str(),run,par_myName.c_str());
+  sprintf(clog,"%s/run%d.l2%s.out",mOutDir,run,mName);
   //printf("%s=\n",clog);
   //setHistFile(chis);
   //  setLogFile(clog);
@@ -258,7 +243,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 
   fprintf(mLogFile,"\n\n====================================================================================================================================\n");
   fprintf(mLogFile,"L2gammaAlgo start of run %d  summary, compiled: %s , %s\n",run,__DATE__,__TIME__);
-  fprintf(mLogFile,"calorimeter:              %s\n",par_myName.c_str());
+  fprintf(mLogFile,"calorimeter:              %s\n",mName);
   fprintf(mLogFile,"run:                      %d\n",run);
   fprintf(mLogFile,"use offline gains   I[0]: %d\n",mUseOfflineGains);
   fprintf(mLogFile,"prescaled accept    I[1]: %d\n",mPrescale);
@@ -268,7 +253,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
   fprintf(mLogFile,"patch size:               %s\n","3x3"); /* may change in later revisions */
   fprintf(mLogFile,"logfile:                  %s\n",clog);
   //  fprintf(mLogFile,"histograms:               %s\n",chis);
-  fprintf(mLogFile,"database at:              %p\n",mDbase);
+  fprintf(mLogFile,"database at:              %p\n",mDb);
   fprintf(mLogFile,"l2 input at:              %p\n",mL2input);
 
   fprintf(mLogFile,"\nDetector Geometry\n");
@@ -285,7 +270,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 
   fprintf(mLogFile,"\n");
 
-  if ( !mDbase ) return 100;
+  if ( !mDb ) return 100;
 
    
 
@@ -343,14 +328,14 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 
       // get the item from the database
       //$$$struct EmcCDbItem *x = &gEmcCDbByIndex[index];
-      const L2EmcDb::EmcCDbItem *x = mDbase->getByIndex(index);
+      const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
       if ( x==0 ) continue;
 
 #if 1
       // make sure db item matches the calorimeter we're using
-      if ( mBEmc && !mDbase->isBTOW(x) )
+      if ( mBEmc && !mDb->isBTOW(x) )
 	continue;
-      if ( mEEmc && !mDbase->isETOW(x) )
+      if ( mEEmc && !mDb->isETOW(x) )
 	continue;
 #endif
 
@@ -436,13 +421,13 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 
       // get the item from the database
       //$$$   struct EmcCDbItem *x = &gEmcCDbByIndex[index];
-      const L2EmcDb::EmcCDbItem *x = mDbase->getByIndex(index);
+      const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
       if ( x==0 ) continue;
 
       // make sure db item matches the calorimeter we're using
-      if ( mBEmc && !mDbase->isBTOW(x) )
+      if ( mBEmc && !mDb->isBTOW(x) )
 	continue;
-      if ( mEEmc && !mDbase->isETOW(x) )
+      if ( mEEmc && !mDb->isETOW(x) )
 	continue;
      
       // local numbering scheme counts from 0
@@ -518,14 +503,14 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 
       // get the item from the database
       //.      struct EmcCDbItem *x = &gEmcCDbByIndex[index];
-      const L2EmcDb::EmcCDbItem *x = mDbase->getByIndex(index);
+      const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
       if ( x==0 ) continue;
 
 #if 1
       // make sure db item matches the calorimeter we're using
-      if ( mBEmc && !mDbase->isBTOW(x) )
+      if ( mBEmc && !mDb->isBTOW(x) )
 	continue;
-      if ( mEEmc && !mDbase->isETOW(x) )
+      if ( mEEmc && !mDb->isETOW(x) )
 	continue;
 #endif
  
@@ -863,7 +848,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
    **/
   unsigned int *pResult 
 //  = &trgData->TrgSum.L2Result[L2RESULTS_OFFSET_PIG +2*mEEmc+mThresholdLevel];
-    = &trgData->TrgSum.L2Result[mL2gammaResult_offset+2*mEEmc+mThresholdLevel];
+    = &trgData->TrgSum.L2Result[mResultOffset+2*mEEmc+mThresholdLevel];
 
   /**
    ** And write to L2result
@@ -926,8 +911,8 @@ void L2gammaAlgo::finishRun()
 
  
   char chis[128];
-  printf("%s/run%d.l2%s.hist.bin\n",par_logPath.c_str(),run,par_myName.c_str());
-  sprintf(chis,"%s/run%d.l2%s.hist.bin",par_logPath.c_str(),run,par_myName.c_str());
+  printf("%s/run%d.l2%s.hist.bin\n",mOutDir,run,mName);
+  sprintf(chis,"%s/run%d.l2%s.hist.bin",mOutDir,run,mName);
   printf("L2pig:saving '%s'\n",chis);
   //  mLogFile=fopen(clog,"a");
   //  mLogFile=stdout;
