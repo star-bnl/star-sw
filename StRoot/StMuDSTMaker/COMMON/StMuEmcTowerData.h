@@ -21,7 +21,6 @@ class StMuEmcTowerData: public TObject
                       StMuEmcTowerData();
                       StMuEmcTowerData(StMuEmcTowerData&);
     virtual           ~StMuEmcTowerData();
-    void              DeleteThis();
     int               towerADC(int id, int detector = bemc);    
     StEmcCrateStatus  crateStatus(int crate, int detector = bemc);
     void              clearBemc();
