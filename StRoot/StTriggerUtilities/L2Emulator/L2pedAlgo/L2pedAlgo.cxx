@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.2 2007/10/25 02:07:06 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.3 2007/11/02 03:03:50 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -12,8 +12,6 @@
  *********************************************************************
  */  
 
-//#include "/usr/src/linux-2.4/include/asm/msr.h" /* for rdtscl */
-#include "/usr/src/kernels/2.6.9-42.0.10.EL-smp-i686/include/asm-i386/msr.h" /* for rdtscl */
 
 #ifdef __ROOT__ //in root4star environment
   #include "StDaqLib/TRG/trgStructures.h"
@@ -24,19 +22,17 @@
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
+
 #include "L2pedAlgo.h"
 #include "L2pedResults2006.h"
 
 //=================================================
 //=================================================
-L2pedAlgo::L2pedAlgo(L2EmcDb* db, char *logP, int resOff) { 
+L2pedAlgo::L2pedAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff) 
+  :  L2VirtualAlgo( name,  db,  outDir, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
-  par_L2ResOff=resOff;
-  strncpy( par_logPath,logP,sizeof(par_logPath));
-  myDb=db;
-  assert(myDb);
 
   par_pedSubtr=false;
   par_saveBinary=false;
@@ -69,17 +65,17 @@ L2pedAlgo::L2pedAlgo(L2EmcDb* db, char *logP, int resOff) {
   hA[31]=new   L2Histo(31,"ETOW pedRes Z=ADC-DBped, saturated @ |3|; x: 12 - Endcap etaBin ,[+1,+2];  y: phi bin ~sector",12,60);
  
 
-  printf("L2pedAlgo instantiated, logPath='%s'\n",logP);
+  printf("L2pedAlgo instantiated, logPath='%s'\n",mOutDir);
 
 }
 
 /*========================================
   ======================================== */
 int
-L2pedAlgo::initRun(char* myName, int runNo, int *rc_ints, float *rc_floats) {
+L2pedAlgo::initRun(int runNo, int *rc_ints, float *rc_floats) {
   //myName is not used.
   // update DB if run # has changed
-  if(myDb->initRun(runNo)) return -27; 
+  if(mDb->initRun(runNo)) return -27; 
   // DB must be initialized prior to lookup tables
 
   // unpack input params
@@ -116,12 +112,12 @@ L2pedAlgo::initRun(char* myName, int runNo, int *rc_ints, float *rc_floats) {
   int i;  
   int nBtowOk=0, nEtowOk=0;
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=myDb->getByIndex(i);
-    if(myDb->isEmpty(x)) continue; // dropped not mapped channels
-    if (myDb->isBTOW(x) ) {
+    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    if(mDb->isEmpty(x)) continue; // dropped not mapped channels
+    if (mDb->isBTOW(x) ) {
 	  db_btowPed[x->rdo]=(int) (x->ped);
 	  nBtowOk++;
-    } else if (myDb->isETOW(x) ) {
+    } else if (mDb->isETOW(x) ) {
       db_etowPed[x->rdo]=(int) (x->ped);
       nEtowOk++;
     }
@@ -208,11 +204,11 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   int kTick=timeDiff/1000;
   hA[11]->fill(kTick/20);
   
-  //  printf("kTick=%d\n",kTick);
+  //  printf("jkTick=%d\n",kTick);
   const ushort maxKT=30000;
   out.int0.kTick=  kTick>maxKT ? maxKT : (int)kTick;
   
-  unsigned int *outPlace=myTrigData->TrgSum.L2Result+ par_L2ResOff;
+  unsigned int *outPlace=myTrigData->TrgSum.L2Result+ mResultOffset;
   memcpy(outPlace,&out,sizeof( L2pedResults2006));
   
   if(par_dbg) L2pedResults2006_print(&out);
@@ -229,7 +225,7 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
   char fname[1000];
   // sprintf(fname,"/home/developer/balewski/L2output_2/run%d.l2ped.log",runNumber);
-  sprintf(fname,"%s/run%d.l2ped.out",par_logPath,run_number); // actual L2 output destination 
+  sprintf(fname,"%s/run%d.l2ped.out",mOutDir,run_number); // actual L2 output destination 
   printf("L2ped_finish('%s') , finding pedestals...\n",fname);
   
   FILE *fd=fopen(fname,"w");
@@ -261,17 +257,17 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
   int i;
   int nB=0;
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=myDb->getByIndex(i);
-    if(myDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
-    if (myDb->isBTOW(x) ||myDb->isETOW(x) ) { //
-      // myDb->printItem(x);
+    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
+    if (mDb->isBTOW(x) ||mDb->isETOW(x) ) { //
+      // mDb->printItem(x);
       nB++;
       /* if(nB>30) return; */
       int iMax=-3, iFWHM=-4; 
       char pedQA='?';
       L2Histo *h=0;
-      if(myDb->isBTOW(x)) h= btowAdc[x->rdo];
-      else if(myDb->isETOW(x)) h= etowAdc[x->rdo];
+      if(mDb->isBTOW(x)) h= btowAdc[x->rdo];
+      else if(mDb->isETOW(x)) h= etowAdc[x->rdo];
       else continue;
 
 
@@ -285,7 +281,7 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 	if(!par_pedSubtr) pedRes=int(pedRes - x->ped); // this looks funny but is right
       }
 
-      if(myDb->isBTOW(x)) { //BTOW ...............
+      if(mDb->isBTOW(x)) { //BTOW ...............
 	if(pedQA=='-' )  nBtowLow++;
 	else if(pedQA=='+')  nBtowHigh++;
  	//........ residual monito histos ....
@@ -337,7 +333,7 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
   fclose(fd);
 
 
-  sprintf(fname,"%s/run%d.l2ped.hist.bin",par_logPath,run_number); // full spectra in binary form
+  sprintf(fname,"%s/run%d.l2ped.hist.bin",mOutDir,run_number); // full spectra in binary form
   
   fd=fopen(fname,"w");
   if(fd==0) {
@@ -356,16 +352,16 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
     // .................. SAVE FULL SPECTRA BINARY ...........
     for(i=0;i<mxHA;i++) if(hA[i]) hA[i]->write(fd);
     for(i=0; i<EmcDbIndexMax; i++) {
-      const L2EmcDb::EmcCDbItem *x=myDb->getByIndex(i);
-      if(myDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
+      const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+      if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
       L2Histo *h=0;
       char tit[200];
-      if(myDb->isBTOW(x) ){
+      if(mDb->isBTOW(x) ){
 	h= btowAdc[x->rdo];
 	//L2EmcDb::printItem(x);
 	sprintf(tit,"BTOW=%s cr/ch=%03d/%03d stat/0x=%04x+%04x soft=%s; %s",x->name, x->crate, x->chan, x->stat, x->fail,x->tube,xAxis);
 	//printf("tit=%s=\n",tit);	
-      } else if(myDb->isETOW(x) ) {
+      } else if(mDb->isETOW(x) ) {
 	h= etowAdc[x->rdo];
 	//L2EmcDb::printItem(x);
 	sprintf(tit,"ETOW=%s cr/ch=%03d/%03d stat/0x=%04x+%04x pname=%s; %s",x->name, x->crate, x->chan, x->stat, x->fail,x->tube,xAxis);
@@ -386,6 +382,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.3  2007/11/02 03:03:50  balewski
+  modified L2VirtualAlgo
+
   Revision 1.2  2007/10/25 02:07:06  balewski
   added L2upsilon & binary event dump
 

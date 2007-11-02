@@ -15,14 +15,14 @@ ifndef STAR
   DEFINES = -DIS_REAL_L2
   INCL =-I  /home/startrg/trg/trg_soft_dev/include/
 else
-  INCL =-I ../Tonko/
+  INCL =-I ../L2janUtil -I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
   DEFINES=
 endif
 
- INSTALPATH=../main
+ INSTALPATH=../../../../onlineL2
 
 #
-INCL +=   -I ../L2janUtil 
+
 
 
 OBJS = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))

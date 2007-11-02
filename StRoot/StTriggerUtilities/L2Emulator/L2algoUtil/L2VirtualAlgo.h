@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo.h,v 1.3 2007/10/25 15:30:46 balewski Exp $
+ * $Id: L2VirtualAlgo.h,v 1.4 2007/11/02 03:03:41 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -11,21 +11,33 @@
  *********************************************************************
  */
 
+//#include "/usr/src/kernels/2.6.9-42.0.10.EL-smp-i686/include/asm-i386/msr.h" /* for rdtscl */
+// Great suggestion from Pibero, to use ASM macro directly
+#define rdtscl(low) \
+     __asm__ __volatile__("rdtsc" : "=a" (low) : : "edx")
+
 
 class L2EmcDb;
 class TrgDataType;
 
 class L2VirtualAlgo {
- protected:
+  enum {mxTxt=1000};
+ protected:  
+  char mName[mxTxt];    
+  char mOutDir[mxTxt];
+  L2EmcDb* mDb;
+  int mResultOffset;
   
  public:
+  L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff);
   virtual ~L2VirtualAlgo()=0; // memory leak NOT taken care off
-  virtual int   initRun(char* myName, int runNo, int *rc_ints, float *rc_floats)=0;
+  virtual int   initRun(int runNo, int *rc_ints, float *rc_floats)=0;
   virtual bool  doEvent(int  L0trg, int inpEveId, TrgDataType* trgData, 
                         int  bemcIn, unsigned short *bemcData,
                         int  eemcIn, unsigned short *eemcData)=0;
   virtual void  finishRun()=0;// at the end of each run
   static int  readParams(const char *fileN, int mxPar, int *iPar, float *fPar);
+  const char* name() const { return mName; }
 };
 
 

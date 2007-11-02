@@ -2,7 +2,15 @@
 #include <stdio.h>
 
 #include "L2VirtualAlgo.h"
+//=============================================
+L2VirtualAlgo::L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff) :
+    mDb(db), mResultOffset(resOff) {
+    strncpy(mName, name,sizeof(mName));  strncpy(mOutDir,outDir,sizeof(mOutDir));}
+//=============================================
+
 L2VirtualAlgo::~L2VirtualAlgo(){};
+
+//=============================================
 int 
 L2VirtualAlgo::readParams(const char *fileN, int mxPar, int *iPar, float *fPar) {
   /* return:

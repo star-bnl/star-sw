@@ -14,13 +14,11 @@ ifndef STAR
   INCL =-I  /home/startrg/trg/trg_soft_dev/include/	
 else
   DEFINES=
-  INCL =-I/afs/rhic.bnl.gov/star/packages/DEV/StRoot
+  INCL =-I ../L2janUtil -I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
 endif
 
 INSTALPATH=../../../../onlineL2
 
-#
-INCL +=  -I ../L2janUtil 
 
 
 OBJS = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
@@ -57,6 +55,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.3  2007/11/02 03:03:50  balewski
+# modified L2VirtualAlgo
+#
 # Revision 1.2  2007/10/25 02:07:07  balewski
 # added L2upsilon & binary event dump
 #

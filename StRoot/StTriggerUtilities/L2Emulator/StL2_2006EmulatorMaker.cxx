@@ -70,8 +70,8 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
   int  L2ResOff=L2RESULTS_OFFSET_EMC_PED;
   sprintf(fname,"%sL2/%d/algos/algoPed.setup",mSetupPath.Data(),mYear);
   assert( L2VirtualAlgo::readParams(fname,mxPar,intsPar,floatsPar)==4);
-  mL2pedAlgo=new L2pedAlgo(mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
-  assert(mL2pedAlgo->initRun("aaa", runNo,intsPar,floatsPar)==0); // zero tolerance for missing input files
+  mL2pedAlgo=new L2pedAlgo("ped-algo",mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
+  assert(mL2pedAlgo->initRun( runNo,intsPar,floatsPar)==0); // zero tolerance for missing input files
   mL2algo[0]=mL2pedAlgo;
 
   // ----------- L2 jet algo ---------------- slot 1
@@ -88,8 +88,8 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
     assert(1==2);
   }
   assert( L2VirtualAlgo::readParams(fname,mxPar,intsPar,floatsPar)==10);
-  mL2jetAlgo=new L2jetAlgo(mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
-  assert(mL2jetAlgo->initRun("jetA",runNo,intsPar,floatsPar)==0); // zero tolerance for missing input files
+  mL2jetAlgo=new L2jetAlgo("jet-algo",mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
+  assert(mL2jetAlgo->initRun(runNo,intsPar,floatsPar)==0); // zero tolerance for missing input files
   mL2algo[1]=mL2jetAlgo;
 
   // ----------- L2 gamma algo ----------------uses  slots 2 & 3
@@ -339,7 +339,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.4 2007/10/25 15:30:43 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.5 2007/11/02 03:03:36 balewski Exp $
 //
 
 

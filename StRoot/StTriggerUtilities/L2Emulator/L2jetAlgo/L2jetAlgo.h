@@ -1,7 +1,7 @@
 #ifndef L2JETALGO_H
 #define L2JETALGO_H
 /*********************************************************************
- * $Id: L2jetAlgo.h,v 1.2 2007/10/25 02:07:03 balewski Exp $
+ * $Id: L2jetAlgo.h,v 1.3 2007/11/02 03:03:47 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -36,9 +36,7 @@ class L2jetAlgo : public  L2VirtualAlgo {
   float  par_maxEt;
   unsigned short par_adcMask,par_pedOff; 
   int    par_hotTwEtThr; // only monitoring
-  char  par_logPath[1000];
   FILE  *logFile;
-  L2EmcDb* myDb;
 
   //..................... params set in initRun
   int   par_useBtowEast;
@@ -55,7 +53,6 @@ class L2jetAlgo : public  L2VirtualAlgo {
   int   par_dbg;
   int   *raw_ints; 
   float *raw_floats;
-  int  par_L2ResOff;
 
   //.............run-long variables
   enum { mxHA=128, mxJ=2};
@@ -124,9 +121,9 @@ class L2jetAlgo : public  L2VirtualAlgo {
   bool paramsChanged( int *rc_ints, float *rc_floats);
 
  public:
-  L2jetAlgo(L2EmcDb* db,char *outDir, int resOff); // once pary day, all memory allocated here
-  ~L2jetAlgo(){}; // memory leak NOT taken care of
-  int   initRun(char* myName, int runNo, int *rc_ints, float *rc_floats);
+  L2jetAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff);
+  // ~L2jetAlgo(){}; // memory leak NOT taken care of
+  int   initRun( int runNo, int *rc_ints, float *rc_floats);
   bool  doEvent(int L0trg, int inpEveId, TrgDataType* trgData,  // for every event
 	      int bemcIn, ushort *bemcData,
 	      int eemcIn, ushort *eemcData);
@@ -137,6 +134,9 @@ class L2jetAlgo : public  L2VirtualAlgo {
 
 /**********************************************************************
   $Log: L2jetAlgo.h,v $
+  Revision 1.3  2007/11/02 03:03:47  balewski
+  modified L2VirtualAlgo
+
   Revision 1.2  2007/10/25 02:07:03  balewski
   added L2upsilon & binary event dump
 

@@ -10,10 +10,10 @@
 
 #else
 
-  #include "L2VirtualAlgo.h"
-  #include "trgStructures.h"
-  #include "L2EmcDb.h"
-  #include "L2Histo.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
+  #include "StDaqLib/TRG/trgStructures.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 
 #endif
 
@@ -54,7 +54,7 @@ typedef unsigned short ushort;
  * An optional "prescaled accept" will accept some prescaled rate of input
  * events.
  *
- * $Id: L2gammaAlgo.h,v 1.1 2007/10/25 15:30:50 balewski Exp $
+ * $Id: L2gammaAlgo.h,v 1.2 2007/11/02 03:03:44 balewski Exp $
  *
  */
 
@@ -91,10 +91,6 @@ class L2gammaAlgo : public L2VirtualAlgo
   int     mHistogramBase;
   ushort  mHistogramPres;
   ushort  mIdThreshold; // 0=low threshold, 1=high threshold
-  //  char  *par_logPath;
-  //  char  *par_myName;
-  std::string par_logPath;
-  std::string par_myName;
 
  public:
 
@@ -134,7 +130,7 @@ class L2gammaAlgo : public L2VirtualAlgo
   
   
   /// class constructor
-  L2gammaAlgo( char *name , L2EmcDb *db , char *dataPath, int L2gammaResult_offset );
+  L2gammaAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff);
   /// class destructor
   ~L2gammaAlgo(){ /* nada */ };
 
@@ -208,8 +204,6 @@ class L2gammaAlgo : public L2VirtualAlgo
  private:
  protected:  
 
-  /// pointer to database
-  L2EmcDb *mDbase;
 
   /// pointer to algorithm evaluating a lower threshold
   /// which we simply want to evaluate a higher threshold
@@ -308,7 +302,7 @@ class L2gammaAlgo : public L2VirtualAlgo
   ushort phibin( ushort sec, ushort sub ) { return mNumSubs * sec + sub; }
   ushort tower( ushort phi, ushort eta ) { return mNumEtas * phi + eta; }
 
-  int mL2gammaResult_offset;
+
 
 };
 
@@ -326,6 +320,9 @@ inline void L2gammaAlgo::setUseOfflineGains()
 }
 
 // $Log: L2gammaAlgo.h,v $
+// Revision 1.2  2007/11/02 03:03:44  balewski
+// modified L2VirtualAlgo
+//
 // Revision 1.1  2007/10/25 15:30:50  balewski
 // added L2gamma, full
 //
