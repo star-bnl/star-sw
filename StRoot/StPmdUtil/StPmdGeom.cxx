@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.23 2007/08/31 10:56:27 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.24 2007/11/02 11:04:39 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.24  2007/11/02 11:04:39  rashmi
+ * removed some print statements
+ *
  * Revision 1.23  2007/08/31 10:56:27  rashmi
  * removed a warning on chtemp ondate 31/08/07; removed some print statements
  *
@@ -199,6 +202,7 @@ void StPmdGeom::Cell_xy(Int_t nmod,Int_t row, Int_t col,Float_t& xreal, Float_t&
       yreal = mycon[nmod-1] + (row - col ) * mconst1;
     }
   Cell_eta_phi(xreal,yreal,eta,phi);   
+  //  cout<<"eta,phi="<<eta<<","<<phi<<endl;
 }
 
 //! function for converting supermodule,row,col to x,y,eta,phi after conversionfrom 17 to 12 supermodule used in clustering
