@@ -9,8 +9,6 @@
 #include <algorithm>
 #include <functional>
 
-#include "/usr/src/kernels/2.6.9-42.0.10.EL-smp-i686/include/asm-i386/msr.h"
-
 #include "L2Result.h"
 #include "L2upsilon.hh"
 #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
@@ -159,7 +157,7 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
   //
   unsigned int timeStart;
   unsigned int timeStop;
-  rdtscl(timeStart);
+  rdtscl_macro(timeStart);
 
   hL0rate->fill(timer.time());
 
@@ -205,7 +203,7 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
         result.eventsAccepted = ++mEventsAccepted;
         result.energyOfL0Cluster = bemcCluster[id1].E;
         result.energyOfL2Cluster = bemcCluster[id2].E;
-        rdtscl(timeStop);
+        rdtscl_macro(timeStop);
         result.processingTime = (timeStop > timeStart) ? timeStop - timeStart : 0;
 
 	//
@@ -238,7 +236,7 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
   result.eventsAccepted = mEventsAccepted;
   result.energyOfL0Cluster = 0;
   result.energyOfL2Cluster = 0;
-  rdtscl(timeStop);
+  rdtscl_macro(timeStop);
   result.processingTime = (timeStop > timeStart) ? timeStop - timeStart : 0;
   memcpy(&trgData->TrgSum.L2Result[mResultOffset], &result, sizeof(result));
   print();
@@ -390,7 +388,7 @@ void L2upsilon::writeHistograms()
   }
   for (list<L2Histo*>::iterator i = mHistograms.begin(); i != mHistograms.end(); ++i) {
     (*i)->write(fp);
-   }
+  }
   fclose(fp);
 }
 
