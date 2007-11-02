@@ -5,7 +5,6 @@
 #include "StMuEmcCollection.h"
 #include "SystemOfUnits.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StEmcUtil/others/emcDetectorName.h"
 #include "StMuEmcTowerData.h"
 
 ClassImp(StMuEmcUtil)
@@ -15,7 +14,7 @@ ClassImp(StMuEmcUtil)
 
 StMuEmcUtil::StMuEmcUtil()
 {
-  for(Int_t i =0;i<4;i++) mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
+  for(Int_t i =0;i<4;i++) mGeo[i]=StEmcGeom::getEmcGeom(i+1);
 }
 StMuEmcUtil::~StMuEmcUtil()
 {
