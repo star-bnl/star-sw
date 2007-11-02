@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.1 2007/10/31 21:55:49 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.2 2007/11/02 18:42:44 fine Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -294,7 +294,11 @@ TObject *StFileIter::Next(Int_t  nSkip)
 void StFileIter::Reset()
 {
    // Reset the status of the iterator
-   if (fNestedIterator) fNestedIterator->Reset();
+   if (fNestedIterator) { 
+      StFileIter *it = fNestedIterator; 
+      fNestedIterator=0;
+      delete it;
+   }
    TListIter::Reset();
    if (!fRootFile->IsWritable()) {
       TList *listOfKeys = fRootFile->GetListOfKeys();
@@ -430,12 +434,13 @@ TObject *StFileIter::ReadObj(const TKey *key)  const
    if (fNestedIterator) obj = fNestedIterator->ReadObj(key);
    else if (key)  {
       obj = ((TKey *)key)->ReadObj();
-      if (obj && obj->InheritsFrom(TDirectory::Class()) && (fDirection==kIterForward) ) 
+      if (obj && obj->InheritsFrom(TDirectory::Class()) ) 
       {
          // create the next iteration level.
          // We can do that only for the forward iteration
          assert(!fNestedIterator);
          ((StFileIter*)this)->fNestedIterator = new StFileIter((TDirectory *)obj);
+         // FIXME:  needs to set  fDirection if needed 02/11/2007 vf
       }
    }
    return obj;
