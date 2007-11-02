@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.8 2007/08/31 10:52:00 rashmi Exp $
+ * $Id: StPmdClustering.h,v 1.9 2007/11/02 11:00:14 rashmi Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,6 +13,9 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
+ * Revision 1.9  2007/11/02 11:00:14  rashmi
+ * Applying hitcalibration; eta,phi wrt primary vertex
+ *
  * Revision 1.8  2007/08/31 10:52:00  rashmi
  * Defined cutoff, setting it using inline SetAdcCutOff()
  *
@@ -36,6 +39,7 @@
 #include <TArrayF.h>
 #include <TArrayI.h>
 #include "StPmdAbsClustering.h"
+#include "StThreeVectorF.hh"
 class StPmdHit;
 class StPmdCluster;
 class StPmdDetector;
@@ -46,7 +50,8 @@ class StPmdClustering:public StPmdAbsClustering
   private:
  
   Double_t cutoff;
-  
+  StThreeVectorF mVertexPos;
+
  protected:
   
   
@@ -79,6 +84,8 @@ class StPmdClustering:public StPmdAbsClustering
   //! for Calculating cluster properties, those clusters having more then two cells
   Int_t CentroidCal(Int_t,Int_t,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&);
   void SetAdcCutOff(Double_t adccutoff);
+  void SetVertexPos(const StThreeVectorF&);
+  void Cluster_Eta_Phi(Float_t, Float_t, Float_t,Float_t&, Float_t&);
   
   //! for getting hits of each cluster
   //  StPmdHit* GetHit(StPmdDetector*, Int_t, Int_t, Int_t);
@@ -90,6 +97,12 @@ class StPmdClustering:public StPmdAbsClustering
     inline void StPmdClustering::SetAdcCutOff(Double_t adccutoff){
       cutoff = adccutoff;
     }
+
+inline void StPmdClustering::SetVertexPos(const StThreeVectorF& vertexPos){
+  mVertexPos = vertexPos;
+}
+
+
 
 
 #endif

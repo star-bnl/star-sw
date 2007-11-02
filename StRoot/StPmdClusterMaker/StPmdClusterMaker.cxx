@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.19 2007/10/26 18:14:18 rashmi Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.20 2007/11/02 10:59:30 rashmi Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.20  2007/11/02 10:59:30  rashmi
+ * Applying hitcalibration; eta,phi wrt primary vertex
+ *
  * Revision 1.19  2007/10/26 18:14:18  rashmi
  * fixed some warnings
  *
@@ -85,11 +88,18 @@
 //ofstream clout("cluster_out.dat");
 
 #include "StEventTypes.h"
+#include "StThreeVectorD.hh"
+#include "StHelixD.hh"
+#include "StPhysicalHelixD.hh"
+#include "StThreeVector.hh"
+#include "StHelix.hh"
+#include "SystemOfUnits.h"
 
 ClassImp(StPmdClusterMaker)
   
   TDataSet *clusterIn;
 StPmdCollection *cluster_hit;
+Float_t xv,yv,zv;
 //-------------------- 
 StPmdClusterMaker::StPmdClusterMaker(const char *name):StMaker(name)
 {
@@ -192,6 +202,19 @@ Int_t StPmdClusterMaker::Make()
           clust1->SetAdcCutOff(7.0);
         }
 	
+  	// Getting the vertex info to set it in StPmdClustering routine.
+	StEvent *currevent = (StEvent*)GetInputDS("StEvent");
+	if(!currevent){
+	  cout<<"ClusterMaker **, No StEvent Pointer "<<endl;
+	}
+  	StPrimaryVertex* Vertex=currevent->primaryVertex();
+	//  	if(!Vertex) return kStError;
+  	if(Vertex){
+	  StThreeVectorF v = Vertex->position();
+	  //	  cout<<"In StPmdClusterMaker: vertex="<<v.x()<<","<<v.y()<<","<<v.z()<<endl;
+	  clust1->SetVertexPos(v);
+	}
+	
 	if(clust1)
 	  {
 	    for(Int_t d=0;d<2;d++)  // Loop over detectors
@@ -208,11 +231,11 @@ Int_t StPmdClusterMaker::Make()
 	FillStEvent(pmd_det,cpv_det);
 	if(Debug())cout<<" NUmber of pmd clusters="<<((StPmdClusterCollection*)pmd_det->cluster())->Nclusters()<<endl;
 	if(Debug())cout<<" NUmber of cpv clusters="<<((StPmdClusterCollection*)cpv_det->cluster())->Nclusters()<<endl;
-
+	
 	//      cout<<"stevent filled , to go hist "<<endl;
-      if(mOptHist)FillHistograms(pmd_det,cpv_det);
-      //      cout<<"hist filled  "<<endl;
-	  }
+	if(mOptHist)FillHistograms(pmd_det,cpv_det);
+	//      cout<<"hist filled  "<<endl;
+      }
       } // if loop 'choice'
     }
   //   clock.Stop();
@@ -417,6 +440,7 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      Int_t SigInt=tempL*10000+tempS;
 	      Int_t mod=spmcl2->Module();
 	      Float_t ncell=spmcl2->NumofMems();
+	      
 	      // Filling PmdCluster for StEvent
 	      StPhmdCluster *pcls = new StPhmdCluster();
 	      // supmod filled as 0-11, earlier it was 1-12 (earlier version it was a mistake, it was changed for pmd not for cpv)
@@ -432,12 +456,12 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	    }       
 	}
     }
-    cout<<"Filled PMD StEvent in ClusterMaker"<<endl;
+  cout<<"Filled PMD StEvent in ClusterMaker"<<endl;
 }
 
 
 //---------------------------------------------------------------------
-                                                                         
+
 Bool_t StPmdClusterMaker::ReadCalibrationsConst()
 {
   if(Debug())cout<<" I AM IN READCALIB "<<endl;
@@ -475,6 +499,4 @@ Bool_t StPmdClusterMaker::ReadCalibrationsConst()
   return kTRUE;
                                                                          
 }
-
-
 
