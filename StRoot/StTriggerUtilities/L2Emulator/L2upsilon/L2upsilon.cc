@@ -388,8 +388,9 @@ void L2upsilon::writeHistograms()
     fprintf(mLogFile, "Can't open %s\n", filename);
     return;
   }
-  // jan, off temporary
-  //  for_each(mHistograms.begin(), mHistograms.end(), bind2nd(mem_fun(&L2Histo::write), fp));
+  for (list<L2Histo*>::iterator i = mHistograms.begin(); i != mHistograms.end(); ++i) {
+    (*i)->write(fp);
+   }
   fclose(fp);
 }
 
