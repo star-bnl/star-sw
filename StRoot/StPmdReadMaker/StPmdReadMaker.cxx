@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.25 2007/10/26 18:13:17 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.26 2007/11/02 11:03:00 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.26  2007/11/02 11:03:00  rashmi
+ *Storing gains with hits, not applying gain calibration
+ *
  *Revision 1.25  2007/10/26 18:13:17  rashmi
  *fixed some warnings
  *
@@ -138,6 +141,7 @@ StPmdReadMaker::StPmdReadMaker(const char *name)
   mPmdDBUtil = new StPmdDBUtil();
   mChainTh=0;
   //  mCalibFlag=kFALSE;
+
   mCalibFlag=kTRUE;
   mPmdPrint=kFALSE;
   mHotCells=NULL;                                                          
@@ -163,7 +167,8 @@ StPmdReadMaker::~StPmdReadMaker() {
 
 Int_t StPmdReadMaker::Init() {
   if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Init()");
-  mCalibFlag = !(IAttr("pmdRaw"));
+//  mCalibFlag = !(IAttr("pmdRaw"));
+  mCalibFlag = (IAttr("pmdRaw"));
   bookHist();
 
   return StMaker::Init();
@@ -448,8 +453,12 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 
 	  // Apply uniformity calibration here
 	  //
+	      Float_t cellgain = 1;
+	      Float_t smchaingain = 1;
+	      Float_t cellstatus = 1;
+//fout<<" "<<mRunNumber<<" "<<supmod<<" "<<row<<" "<<col<<" "<<DaqADC<<endl;
 	    if(mCalibFlag){
-	      Float_t calib = 0;
+	      Float_t calib = 1;
 	      Float_t final_factor = 0;
 
 	      if(supmod<=(2*PMD_CRAMS_MAX) && row <=PMD_ROW_MAX && col <=PMD_COL_MAX){
@@ -458,22 +467,32 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 		if(stCalib != kStOK)gMessMgr->Info("Problem in getting Calibration Constant");
 
                 if(mRunNumber < 8000000){
-                  final_factor=calib;
+//                  final_factor=calib;
+                  final_factor=1.;
                 }
                 if(mRunNumber >= 8000000){
+//storing gain factors for StPmdHit to be used in ClusterMaker
+	          cellgain=calib;
+	          smchaingain=SM_chain_factor[supmod-1][Chain_No-1];
+// application of finalfactor
                   final_factor=calib*SM_chain_factor[supmod-1][Chain_No-1];
-                  //fout<<"ADC, chain, channel, calib, sm_chain "<<DaqADC<<" "<<Chain_No<<" "<<channel<<" calib "<<calib<<" "<<SM_chain_factor[supmod][Chain_No-1]<<endl;
-                  if(!Accept(Chain_No,channel))final_factor=0.0;
+		  //		  fout<<"ADC, chain, row, col, calib, sm_chain "<<DaqADC<<" "<<Chain_No<<" "<<row<<" "<<col<<" "<<calib<<" "<<SM_chain_factor[supmod-1][Chain_No-1]<<" final_factor="<<final_factor<<endl;
+                  if(!Accept(Chain_No,channel)){
+			final_factor=0.0;
+			cellstatus=0;
+		    }
+//	      if(SubDet==1) fout<<supmod-1<<" "<<col-1<<" "<<row-1<<" "<<calib<<" "<<smchaingain<<" "<<cellstatus<<endl;
                 }
 		//if(calib!=0)DaqADC=(Int_t)(DaqADC*calib);
 
 		//		fout<<supmod<<","<<row<<","<<col<<","<<Chain_No<<","<<calib<<","<<SM_chain_factor[supmod-1][Chain_No-1]<<","<<final_factor<<","<<DaqADC;
                 if(final_factor>0){
-                  DaqADC=(Int_t)(1.0*DaqADC/final_factor);
+//subhasi: stop applying gain factor here, apply in clusterMaker
+//                  DaqADC=(Int_t)(1.0*DaqADC/final_factor);
                 }else{
-                  DaqADC=0;
+//                  DaqADC=0;
                 }
-		//		fout<<","<<DaqADC<<endl;
+
                                                              
   	      } //Check on overflow of supmod, row col
 	    } // Calibration flag     
@@ -494,6 +513,10 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	      pmdhit->setColumn(Int_t(col));         //! filling col
 	      pmdhit->setAdc(Int_t(DaqADC));         //! filling ADC   
 	      pmdhit->setEdep(Float_t(edep));        //! filling energy   
+	      // gain related
+	      pmdhit->setGainCell(Float_t(cellgain));        //! filling cellgain   
+	      pmdhit->setGainSmChain(Float_t(smchaingain));        //! smchaingain   
+	      pmdhit->setCellStatus(Float_t(cellstatus));        //! filling cellstatus   
 	      
 	    if(SubDet==2)det0->addHit(pmdhit);
 	    if(SubDet==1)det1->addHit(pmdhit);
