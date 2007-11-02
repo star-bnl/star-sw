@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.25 2007/08/31 10:52:30 rashmi Exp $
+ * $Id: StPmdClustering.cxx,v 1.26 2007/11/02 11:00:06 rashmi Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.26  2007/11/02 11:00:06  rashmi
+ * Applying hitcalibration; eta,phi wrt primary vertex
+ *
  * Revision 1.25  2007/08/31 10:52:30  rashmi
  * Setting cutoff from SetAdcCutOff(); default cutoff=7
  *
@@ -105,6 +108,15 @@
 #include "StPmdUtil/StPmdModule.h"
 #include "StPmdUtil/StPmdDetector.h"
 
+#include "StThreeVectorD.hh"
+#include "StHelixD.hh"
+#include "StPhysicalHelixD.hh"
+#include "StThreeVector.hh"
+#include "StHelix.hh"
+#include "SystemOfUnits.h"
+#include "StEventTypes.h"
+#include "StEvent.h"
+
 
 
 ClassImp(StPmdClustering)
@@ -117,6 +129,7 @@ Int_t iord[2][6912], infocl[2][96][72], inford[3][6912], clno;
 const Double_t pi=3.141592653, sqrth=sqrt(3.)/2.;
 const Int_t nmx    = 6912;
 Float_t cell_frac[200][2000];
+//ofstream fout1("cluster.dat");
 
 
 StPmdGeom *geom=new StPmdGeom(); //! utility class
@@ -127,6 +140,8 @@ StPmdGeom *geom=new StPmdGeom(); //! utility class
  m_pmd_det=pmd_det;
  m_cpv_det=cpv_det;
  SetAdcCutOff(7.0);
+ mVertexPos = StThreeVectorF(0.,0.,0.);
+
 }
 
 
@@ -186,7 +201,19 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 		      
 		      xpad = xpad -1; // for using as array parameter make xpad = 0
 		      ypad = ypad -1; // for using as array parameter make ypad = 0
-		      
+	// 11th Oct'07 : application of gain factors in ClusterMaker
+
+			Float_t cellgain=spmcl->GainCell();       //! CellGain
+			Float_t smchaingain=spmcl->GainSmChain(); //! SmChain Gain      
+			Float_t cellstatus=spmcl->CellStatus();    //! cellstatus
+	                Float_t finalfactor = cellgain*smchaingain*cellstatus;
+			if(finalfactor>0)edep/=finalfactor;
+			if(finalfactor<=0)edep=0;
+//if(idet==1)fout1<<gsuper-1<<" "<<xpad<<" "<<ypad<<" "<<cellgain<<" "<<smchaingain<<" "<<cellstatus<<endl;
+
+//			fout1<<"gain factors "<<gsuper<<" "<<ypad+1<<" "<<xpad+1<<" "<<edep<<" "<<cellgain<<" "<<smchaingain<<" "<<cellstatus<<" "<<finalfactor<<endl;
+	// end of application of gain factors
+
 		      d1[xpad][ypad]=d1[xpad][ypad]+edep;  //! edep added for each cell
 		    }
 		}
@@ -248,9 +275,31 @@ void StPmdClustering::printclust(Int_t i,Int_t m, StPmdCluster* pclust)
   
   Float_t cluedep=zc; y0 = yc/sqrth; x0 = xc - y0/2.;
   Float_t clueta,cluphi;
-  geom->DetCell_xy(i,y0+1,x0+1,x,y,clueta,cluphi);
-  //! following are the cluster info 
   
+  // modified by RR on 1 Nov 2007 to get eta & phi wrt to vertex
+  //  cout<<" StPmdClustering: vertex="<<mVertexPos.x()<<","<<mVertexPos.y()<<","<<mVertexPos.z()<<endl;
+  if(mVertexPos.x()==0 && mVertexPos.y()==0 && mVertexPos.z()==0) {
+    // This loop is for backcompatibility
+    geom->DetCell_xy(i,y0+1,x0+1,x,y,clueta,cluphi);
+    //    cout<<"clueta,phi="<<clueta<<","<<cluphi<<endl;
+  }else{
+    // Gives x,y of cluster in STAR Coordinates using x0,y0 wrt SM corner
+    geom->DetCell_xy(i,y0+1,x0+1,x,y,clueta,cluphi);
+    Float_t xwrtv = x-mVertexPos.x();
+    Float_t ywrtv = y-mVertexPos.y();
+    // StPmdGeom returns PMDZ as a positive number
+    // But in STAR coordinated the PMDZ in negative
+    Float_t zreal = -geom->GetPmdZ();
+    Float_t zwrtv = zreal-mVertexPos.z();
+
+    //    cout<<"x,y,z real="<<x<<","<<y<<","<<zreal<<endl;
+    //    cout<<"x,y,z wrtvertex="<<xwrtv<<","<<ywrtv<<","<<zwrtv<<endl;
+    Cluster_Eta_Phi(xwrtv,ywrtv,zwrtv,clueta,cluphi);
+    //    cout<<"clueta,phi="<<clueta<<","<<cluphi<<endl;
+  }
+
+/////////////////////////////
+ 
   pclust->setCluX(x);            //! filling 'X' position of Cluster
   pclust->setCluY(y);            //! filling 'Y' position of Cluster
   pclust->setModule(i);          //! filling cluster SM #
@@ -973,11 +1022,19 @@ StPmdClustering::GetHit(StPmdDetector* pdet,Int_t id,Double_t xc, Double_t yc)
     }
   return NULL;
 }
+//--------------------------------------------------------
+// This routine was copied from StPmdGeom with the difference that it uses
+// zreal ( PMDZ wrt vertex) instead of mzreal ( PMDZ wrt 0,0,0)                                                                         
+void StPmdClustering::Cluster_Eta_Phi(Float_t xreal,Float_t yreal,Float_t zreal,Float_t& eta,Float_t& phi){
+  Float_t rdist = (TMath::Sqrt(xreal*xreal + yreal*yreal))/TMath::Abs(zreal);
+  Float_t theta = TMath::ATan(rdist);
+  //Bedanga & pawan - added theta !=0.
+  // The negative sign is avoided to take care of -ve PMDZ
+  if(theta !=0.){ eta = TMath::Log(TMath::Tan(0.5*theta));}
+  if( xreal==0) {
+    if(yreal>0) {phi = 1.571428;}
+    if(yreal<0) {phi = -1.571428;}
+  }
+  if(xreal != 0) {phi = atan2(yreal,xreal);}
 
-
-
-
-
-
-
-
+}
