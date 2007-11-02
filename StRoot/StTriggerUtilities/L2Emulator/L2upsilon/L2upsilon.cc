@@ -119,22 +119,31 @@ int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
     }
   }
 
-  // Get towers x, y, z
-  FILE* fp = fopen("geom.txt", "r");
+
+  resetHistograms();
+  timer.start();
+  return 0;
+}
+
+void L2upsilon::readGeomXYZ(const char *fname){
+  printf(" Get BTOW towers x, y, z from=%s=\n",fname);
+
+  FILE* fp = fopen(fname, "r");
+  assert(fp);
   int id;
   float x, y, z;
-  while (fscanf(fp, "%d %f %f %f", &id, &x, &y, &z) != EOF) {
+  while (1) {
+    int ret=fscanf(fp, "%d %f %f %f", &id, &x, &y, &z);
+    if ( ret==EOF) break;
+    assert(ret==4);
     int rdo = mSoftIdToRdo[id];
     bemcTower[rdo].x = x;
     bemcTower[rdo].y = y;
     bemcTower[rdo].z = z;
   }
   fclose(fp);
-
-  resetHistograms();
-  timer.start();
-  return 0;
 }
+
 
 bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
 			int bemcIn, unsigned short* bemcData,

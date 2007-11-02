@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.3 2007/11/02 03:03:50 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.4 2007/11/02 17:43:11 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -145,7 +145,7 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
 
   /* STRICT TIME BUDGET  START ...., well a bit relaxed for this algo*/
   long timeStart=0;
-  rdtscl(timeStart);
+  rdtscl_macro(timeStart);
   nInp++;
   hA[10]->fill(0);
   myTrigData=trgData;
@@ -198,7 +198,7 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
     (  par_pedSubtr <<6 ) ;
  
   long timeStop=0;
-  rdtscl(timeStop);
+  rdtscl_macro(timeStop);
 
   long timeDiff=timeStop-timeStart;
   int kTick=timeDiff/1000;
@@ -382,6 +382,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.4  2007/11/02 17:43:11  balewski
+  cleanup & it started to work w/ L2upsilon
+
   Revision 1.3  2007/11/02 03:03:50  balewski
   modified L2VirtualAlgo
 

@@ -633,7 +633,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
   // track execution time of the algorithm (in cpu ticks)
   unsigned long eval_time_start;
   unsigned long eval_time_stop;
-  rdtscl(eval_time_start);
+  rdtscl_macro(eval_time_start);
 
   bool eht  = false;
   bool trig = false;
@@ -772,12 +772,12 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
     mPatchFrequency[mRdo2tower[tprdo]]++;
     mHistos[0].fill(2);
   }
-  rdtscl(eval_time_stop);
+  rdtscl_macro(eval_time_stop);
 
   /* algorithm selects fraction of events to do QA on */
   unsigned long qa_time_start;
   unsigned long qa_time_stop;
-  rdtscl(qa_time_start);
+  rdtscl_macro(qa_time_start);
      
   // ------------------------------------------------------------------------- save trigger decision --
   
@@ -837,7 +837,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
   if ( trig || prescaleAccept )
     mResult.trigger |= 0x8;
    
-  rdtscl(qa_time_stop);
+  rdtscl_macro(qa_time_stop);
   int dt=(int)(qa_time_stop-eval_time_start)/1000;
 
   mEvalTime += dt; 

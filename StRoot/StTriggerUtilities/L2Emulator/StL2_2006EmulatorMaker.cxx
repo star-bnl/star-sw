@@ -27,6 +27,7 @@
 #include "L2jetAlgo/L2jetAlgo.h"
 #include "L2pedAlgo/L2pedAlgo.h"
 #include "L2gammaAlgo/L2gammaAlgo.h"
+#include "L2upsilon/L2upsilon.hh"
 
 #include "StL2_2006EmulatorMaker.h"
 
@@ -35,9 +36,8 @@ ClassImp(StL2_2006EmulatorMaker)
 StL2_2006EmulatorMaker::StL2_2006EmulatorMaker(const char *name):StMaker(name) {
   mL2pedAlgo=0;
   mL2jetAlgo=0;
-
-  //  mHList=0;
-
+  mL2gammaEEmc=mL2gammaBEmc=0;
+  mL2upsilon=0;
 }
 
 //========================================
@@ -59,12 +59,15 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
   assert(mYearMonthDay>20060000); 
   assert(mYearMonthDay<20060700);
   
-  mL2algoN=4; // total # of L2 algos (ped, jet)
+  mL2algoN=5; // total # of L2 algos (ped, jet)
   mL2algo =new L2VirtualAlgo *[mL2algoN]; // not cleared memeory leak
   memset(mL2algo,0,mL2algoN*sizeof(void*));
   //setup evry algo one by one, params may be time dependent
 
   char fname[1000];
+  enum {mxPar=10}; // for any algo, separate ints & floats
+  int intsPar[mxPar]; // params passed from run control gui
+  float floatsPar[mxPar]; 
 
   // ----------- L2 ped algo ----------------  slot 0
   int  L2ResOff=L2RESULTS_OFFSET_EMC_PED;
@@ -93,9 +96,14 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
   mL2algo[1]=mL2jetAlgo;
 
   // ----------- L2 gamma algo ----------------uses  slots 2 & 3
-  mL2gammaEEmc=mL2gammaBEmc=0;
   addL2GammaAlgos2006(runNo); 
+  mL2algo[2]=mL2gammaEEmc; // add to list of algos to execute
+  mL2algo[3]=mL2gammaBEmc;
 
+  // ----------- L2 Upsilon algo ----------------  slot 4
+  addL2UpsilonAlgo2006(runNo);
+  mL2algo[4]=mL2upsilon; // add to list of algos to execute
+  
   // ----------- L2 J/Psi algo ----------------  slot 5
   // add here
 
@@ -103,6 +111,29 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
   
   return kStOK; 
 } 
+
+//_____________________________________________________________________________
+void
+StL2_2006EmulatorMaker::addL2UpsilonAlgo2006(int runNo){
+  enum {mxPar=10}; // for any algo, separate ints & floats
+  int intsPar[mxPar]; // params passed from run control gui
+  float floatsPar[mxPar]; 
+  
+  int L2ResOff = L2RESULTS_OFFSET_UPS;
+  assert( mYearMonthDay >= 20060406 ); // before ppTrans
+  assert( mYearMonthDay <= 20060607 ); // after ppLong2
+  
+  TString fullPath=Form("%sL2/%d/algos/algoUpsilon.setup1", mSetupPath.Data(), mYear);
+  
+  
+  assert(L2VirtualAlgo::readParams(fullPath, mxPar, intsPar, floatsPar) == 10);
+  mL2upsilon = new L2upsilon("L2upsilon", mL2EmcDb, mL2EmcDb->logPath,L2ResOff);
+  fullPath=Form("%sL2/%d/algos/btowXYZ.dat", mSetupPath.Data(), mYear);
+  mL2upsilon->readGeomXYZ(fullPath.Data());
+
+  assert(mL2upsilon->initRun(runNo, intsPar, floatsPar) == 0);
+}
+
 
 //_____________________________________________________________________________
 void
@@ -159,14 +190,14 @@ StL2_2006EmulatorMaker::addL2GammaAlgos2006(int runNo){
   
   if ( etest ) {
     LOG_ERROR << Form("Problem initializing runtime parameters for eemc run=%i",runNo) << endm;
+    assert(1==2);
   }
   if ( btest ) {
     LOG_ERROR << Form("Problem initializing runtime parameters for bemc run=%i",runNo) << endm;
+    assert(1==3);
   }
   
-  // add to list of algos to execute
-  mL2algo[2]=mL2gammaEEmc;
-  mL2algo[3]=mL2gammaBEmc;
+ 
 }
 
 
@@ -339,7 +370,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.5 2007/11/02 03:03:36 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.6 2007/11/02 17:42:57 balewski Exp $
 //
 
 

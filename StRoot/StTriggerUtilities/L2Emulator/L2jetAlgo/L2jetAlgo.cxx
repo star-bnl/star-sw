@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2jetAlgo.cxx,v 1.3 2007/11/02 03:03:47 balewski Exp $
+ * $Id: L2jetAlgo.cxx,v 1.4 2007/11/02 17:43:08 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -334,7 +334,7 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   
   if(eve_ID==inpEveId) return eve_decision; // this event has been processed
   /* STRICT TIME BUDGET  START ....*/
-  rdtscl(eve_timeStart);
+  rdtscl_macro(eve_timeStart);
  
   /*
     Chris doesn't want us to write something out 
@@ -506,7 +506,7 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   out.jet2.iEne=(unsigned short)(eve_Jet[1]->eneGeV*100.); // now 1=10 MeV
 
   unsigned long timeStop=0;
-  rdtscl(timeStop);
+  rdtscl_macro(timeStop);
   unsigned long timeDiff=timeStop-eve_timeStart;
   int  kTick=timeDiff/1000;
   //printf("kk=%f \n",timeDiff/1000.);
@@ -974,6 +974,9 @@ L2jetAlgo::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo.cxx,v $
+  Revision 1.4  2007/11/02 17:43:08  balewski
+  cleanup & it started to work w/ L2upsilon
+
   Revision 1.3  2007/11/02 03:03:47  balewski
   modified L2VirtualAlgo
 
