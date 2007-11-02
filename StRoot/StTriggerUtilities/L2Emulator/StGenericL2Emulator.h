@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.3 2007/10/25 02:06:54 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.4 2007/11/02 17:42:56 balewski Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -15,8 +15,8 @@ Interfaces L2 algos to the STAR ofl software
 class  StEEmcDbMaker;
 class  StEmcGeom;
 class  StEmcDecoder;
-class  L2VirtualAlgo;
 class  L2EmcDb;
+class  L2VirtualAlgo;
 
 
 class StGenericL2Emulator  {
@@ -33,24 +33,19 @@ class StGenericL2Emulator  {
   StEmcDecoder  *mMappB; 
 
   
-
  protected:
   int   mMCflag; // set mcFlag=0 for real data
   int   mYear;
   bool  mUseMuDst;
   
 
-
   // holds all instantiated L2algos
   L2VirtualAlgo **mL2algo; // actual algos
   int mL2algoN;  //# of existing algos (time-stamp dependent)
+
   L2EmcDb   *mL2EmcDb;
   int  mYearMonthDay;
   TString  mSetupPath;
-
-  enum {mxPar=10}; // for any algo, separate ints & floats
-  int intsPar[mxPar]; // params passed from run control gui
-  float floatsPar[mxPar]; 
 
   //replicas of oryginal daq data containers, tmp open for export
   unsigned short *mBTOW_BANK;
@@ -87,6 +82,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.4  2007/11/02 17:42:56  balewski
+// cleanup & it started to work w/ L2upsilon
+//
 // Revision 1.3  2007/10/25 02:06:54  balewski
 // added L2upsilon & binary event dump
 //

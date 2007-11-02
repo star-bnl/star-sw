@@ -54,6 +54,7 @@ public:
 	       int eemcIn, unsigned short* eemcData);
   void finishRun();
   void print();
+  void  readGeomXYZ(const char *fname);
 
 private:
   void  findSeedTowers(vector<int>& L0Seeds, vector<int>& L2Seeds);

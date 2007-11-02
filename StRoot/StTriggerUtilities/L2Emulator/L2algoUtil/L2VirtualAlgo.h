@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo.h,v 1.4 2007/11/02 03:03:41 balewski Exp $
+ * $Id: L2VirtualAlgo.h,v 1.5 2007/11/02 17:43:02 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -13,7 +13,7 @@
 
 //#include "/usr/src/kernels/2.6.9-42.0.10.EL-smp-i686/include/asm-i386/msr.h" /* for rdtscl */
 // Great suggestion from Pibero, to use ASM macro directly
-#define rdtscl(low) \
+#define rdtscl_macro(low) \
      __asm__ __volatile__("rdtsc" : "=a" (low) : : "edx")
 
 
