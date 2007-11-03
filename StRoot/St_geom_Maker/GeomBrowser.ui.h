@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.23 2007/11/03 23:01:59 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.24 2007/11/03 23:37:35 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -308,14 +308,14 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
             contextMenu->insertItem("Visibility:");
             contextMenu->insertSeparator(); 
 
-            itemPosition = contextMenu->insertItem("Both");
+            itemPosition = contextMenu->insertItem("&Both");
             int j =0;
             menus[j++] = itemPosition;
             contextMenu->setWhatsThis(itemPosition,"Make the selected volumes and its children visible");
-            contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("Child")
-               ,"Make the selected the children of the selected volumes visible but ithe volume itself none");
+            contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("&Children")
+               ,"Make the selected the children of the selected volumes visible but the volume itself none");
             menus[j++] = itemPosition;
-            contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("none")
+            contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("&None")
                ,"Make the selected the volumes invisible");
             menus[j++] = itemPosition;
          }
