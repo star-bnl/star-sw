@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.22 2007/11/02 23:57:49 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.23 2007/11/03 23:01:59 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -57,6 +57,17 @@ public:
    }
 };
 
+//_____________________________________________________________________________
+static void RefreshCanvas(TQtWidget *w) 
+{
+   // Select the proper gPad to force 3D refersh in synch
+   if (w) {
+      TVirtualPad *savePad = (gPad == w->GetCanvas() ) ? 0 : gPad; 
+      if (savePad) w->cd(); 
+      w->Refresh(); 
+      if (savePad) savePad->cd(); 
+   }
+}
 //_____________________________________________________________________________
 void GeomBrowser::fileNew()
 {
@@ -287,8 +298,29 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
          if (that->Object())
             fContextMenu->Popup(pos.x(),pos.y(), that->Object(),(TBrowser *)0);
       } else {
-         int response = QMessageBox::question(listView1,"Change the volume visibility","Visible","Both","Child","none");
-         if (response >= 0 ) {
+         int response = -1; //QMessageBox::question(listView1,"Change the volume visibility","Visible","Both","Child","none");
+         static QPopupMenu *contextMenu = 0;
+         static int menus[3];
+         if (!contextMenu) {
+            contextMenu = new QPopupMenu(listView1);
+            int itemPosition = -1;
+            // menu title :
+            contextMenu->insertItem("Visibility:");
+            contextMenu->insertSeparator(); 
+
+            itemPosition = contextMenu->insertItem("Both");
+            int j =0;
+            menus[j++] = itemPosition;
+            contextMenu->setWhatsThis(itemPosition,"Make the selected volumes and its children visible");
+            contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("Child")
+               ,"Make the selected the children of the selected volumes visible but ithe volume itself none");
+            menus[j++] = itemPosition;
+            contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("none")
+               ,"Make the selected the volumes invisible");
+            menus[j++] = itemPosition;
+         }
+         response = contextMenu->exec(QCursor::pos());
+         if (response != -1 ) {
             TUpdateList listLock(listView1);
             QListViewItem  *i;
             for ( i = lst.first(); i; i = lst.next() ) {     
@@ -298,18 +330,20 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
 
                // check visibility
                if (volume) {
-                  TVolume::ENodeSEEN s;
-                  switch ( response) {
-                     case 0: itemRoot->setState(QCheckListItem::On);       s = TVolume::kBothVisible;   break;
-                     case 1: itemRoot->setState(QCheckListItem::NoChange); s = TVolume::kThisUnvisible; break;
-                     case 2: itemRoot->setState(QCheckListItem::Off)     ; s = TVolume::kNoneVisible;   break;
-                     default: itemRoot->setState(QCheckListItem::On)     ; s = TVolume::kBothVisible;   break;
-                  };
+                  TVolume::ENodeSEEN s = volume->GetVisibility();
+                  if  ( response == menus[0] ) {
+                     itemRoot->setState(QCheckListItem::On);       s = TVolume::kBothVisible; 
+                  } else if (response == menus[1]) { 
+                     itemRoot->setState(QCheckListItem::NoChange); s = TVolume::kThisUnvisible;
+                  } else if (response == menus[2]) { 
+                     itemRoot->setState(QCheckListItem::Off)     ; s = TVolume::kNoneVisible;
+                  } else { response = -1; }
                   // set visibility
                   if (volume->GetVisibility() != s) volume->SetVisibility(s);
                }
             }
          }
+         if (response != -1) RefreshCanvas(tQtWidget1);
       }
    }
 }
@@ -570,8 +604,8 @@ void GeomBrowser::rootCommandExecute()
 {
    // TQtTabValidator::Clear();
    gROOT->ProcessLine(comboBox1->lineEdit()->text());
-   tQtWidget1->Refresh();
-   gROOT->ProcessLine("gPad->Update();");
+   RefreshCanvas(tQtWidget1);
+   //gROOT->ProcessLine("gPad->Update();");
 }
 //_____________________________________________________________________________
 void GeomBrowser::listView1_clicked( QListViewItem *item )
@@ -583,7 +617,7 @@ void GeomBrowser::listView1_clicked( QListViewItem *item )
 
       // check visibility
       if (volume) {
-         TVolume::ENodeSEEN s;
+         TVolume::ENodeSEEN s = volume->GetVisibility();
 #if (QT_VERSION > 0x030100)
          switch ( itemRoot->state() ){
             case QCheckListItem::On      : s = TVolume::kBothVisible;   break;
@@ -611,25 +645,7 @@ void GeomBrowser::listView1_clicked( QListViewItem *item )
                drawItem(item, 1, tQtWidget2);
 
             // adjust multi-level  view
-            if (fCurrentDrawn) {
-               if ( item == fCurrentDrawn) {
-                  drawItem(fCurrentDrawn, spinBox1->value(), tQtWidget1 ); 
-
-               } else if ( item->depth() > fCurrentDrawn->depth() ) {
-                  TObject *rootObject = ((TQtObjectListItem* )fCurrentDrawn)->Object() ;
-                  QListViewItemIterator it(fCurrentDrawn);
-                  while ( it.current() ) {
-                     if (rootObject == (((TQtObjectListItem*)it.current())->Object()) ){
-                          TVirtualPad *savePad = (gPad == tQtWidget1->GetCanvas() ) ? 0 : gPad;
-                          if (savePad) tQtWidget1->cd();
-                          tQtWidget1->Refresh();
-                          if (savePad) savePad->cd();
-                        // drawItem(fCurrentDrawn, spinBox1->value(), tQtWidget1 );
-                        break;
-                     }
-                  }
-               }
-            }
+            if (fCurrentDrawn) RefreshCanvas(tQtWidget1);
          }
       }
    }
@@ -732,7 +748,7 @@ void GeomBrowser::drawItem( QListViewItem *item, int depth, TQtWidget *view )
              volume->Draw((const char *)QString().setNum(depth));
           } else
              view->GetCanvas()->Clear();
-          view->Refresh();
+          RefreshCanvas(view);
           
           frame3->setEnabled(true);
           
