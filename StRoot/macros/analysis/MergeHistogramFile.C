@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.9 2007/11/05 19:10:01 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.10 2007/11/05 19:25:51 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -15,7 +15,6 @@
 #  include "TDirIter.h"
 #  include "StFileIter.h"
 #  include "TFileIter.h"
-#  include "TSystem.h"
 #  include "TFile.h"
 #  include "TTree.h"
 #  include "TH1.h"
@@ -204,7 +203,9 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
          // Use the deprecated version
          MergeSimpleHistogramFile(TargetName, inputFilesPattern);
       } else {
+#ifdef __CINT__         
          gSystem->Load("St_base");
+#endif         
          MergeComplexHistogramFile(TargetName, inputFilesPattern);
       }
   } else {
@@ -217,5 +218,7 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
      printf("                    The \"simple\" ROOT files are those with no sub-TDirectrory objects inside and with no TTree/TNtuples\n");
      printf("                    This is the default option and it can be omitted\n");
      printf("                    To merge the ROOT files with sub-TDirectory or / ans TTree pass the kFALSE as the 3d macro parameter\n\n");
+     printf("------------- To use with ACliC - load the \"St_base.so\" shared library first\n");
+     
   }
 }
