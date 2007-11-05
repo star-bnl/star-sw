@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.8 2007/11/01 19:09:18 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.9 2007/11/05 19:10:01 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -15,34 +15,12 @@
 #  include "TDirIter.h"
 #  include "StFileIter.h"
 #  include "TFileIter.h"
+#  include "TSystem.h"
 #  include "TFile.h"
+#  include "TTree.h"
 #  include "TH1.h"
 #  include "TStopwatch.h"
 #endif
-
-//________________________________________________________________________________
-void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPattern=0, Bool_t simple=kTRUE) 
-{  
-   if (TargetName && TargetName[0] && inputFilesPattern && inputFilesPattern[0] ) {
-      if (simple) {
-         // Use the deprecated version
-         MergeSimpleHistogramFile(TargetName, inputFilesPattern);
-      } else {
-         gSystem->Load("St_base");
-         MergeComplexHistogramFile(TargetName, inputFilesPattern);
-      }
-  } else {
-     printf("\nUsage: root MergeHistogramFile.C(\"DestinationFileName\",\"InputFilesPattern\",kTRUE)\n");     
-     printf("------        where InputFilesPattern  ::= <regexp_pattern_for_the_input_files>|@indirect_file_list\n");
-     printf("                    indirect_file_list ::= a text file with the list of the files\n");
-     printf("                    indirect_file_list can be create by the shell command:\n\n");
-     printf("                         ls -1 *.root>indirect_file_list \n\n");
-     printf("                    The last parameter defines whether one wants to merge the \"simple\" ROOT files\n");
-     printf("                    The \"simple\" ROOT files are those with no sub-TDirectrory objects inside and with no TTree/TNtuples\n");
-     printf("                    This is the default option and it can be omitted\n");
-     printf("                    To merge the ROOT files with sub-TDirectory or / ans TTree pass the kFALSE as the 3d macro parameter\n\n");
-  }
-}
    
 //________________________________________________________________________________
 void MergeSimpleHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPattern=0) 
@@ -128,7 +106,7 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
         while ( (obj = *file) ) {
            Int_t depth = file.GetDepth();
            while (depth < currentDirDepth) {
-                outDir = ourDir->GetMotherDir();
+                outDir = outDir->GetMotherDir();
                 currentDirDepth--;
            }
            if ( obj->IsA()->InheritsFrom(TH1::Class()) ) {
@@ -177,16 +155,16 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
                 treeCounter++;
               }
            } else if ( obj->IsA()->InheritsFrom(TDirectory::Class()) ) {
-               printf("The input sub-TDirectory object: %s\n",obj->GetName(), depth); 
+               printf("The input sub-TDirectory object: %s depth=%d\n",obj->GetName(), depth); 
                TDirectory *d =  (TDirectory *)outDir->FindObject(obj->GetName());
                if (!d) {
                   d = outDir->mkdir(obj->GetName());
                   dirCounter++;
-                  printf("The new TDirectory object: %s\n",d->GetPathStatic(), depth); 
+                  printf("The new TDirectory object: %s depth=%d\n",d->GetPathStatic(), depth); 
                }
                if (d) {
                   outDir = d;                  
-                  printf("The output sub-TDirectory object: %s\n",outDir->GetPathStatic(), depth); 
+                  printf("The output sub-TDirectory object: %s depth=%d\n",outDir->GetPathStatic(), depth); 
 
                }
            } else {
@@ -213,5 +191,31 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
      printf("                    indirect_file_list ::= a text file with the list of the files\n");
      printf("                    indirect_file_list can be create by the shell command:\n");
      printf("                         ls -1 *.root>indirect_file_list \n\n");
+  }
+}
+
+
+
+//________________________________________________________________________________
+void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPattern=0, Bool_t simple=kTRUE) 
+{  
+   if (TargetName && TargetName[0] && inputFilesPattern && inputFilesPattern[0] ) {
+      if (simple) {
+         // Use the deprecated version
+         MergeSimpleHistogramFile(TargetName, inputFilesPattern);
+      } else {
+         gSystem->Load("St_base");
+         MergeComplexHistogramFile(TargetName, inputFilesPattern);
+      }
+  } else {
+     printf("\nUsage: root MergeHistogramFile.C(\"DestinationFileName\",\"InputFilesPattern\",kTRUE)\n");     
+     printf("------        where InputFilesPattern  ::= <regexp_pattern_for_the_input_files>|@indirect_file_list\n");
+     printf("                    indirect_file_list ::= a text file with the list of the files\n");
+     printf("                    indirect_file_list can be create by the shell command:\n\n");
+     printf("                         ls -1 *.root>indirect_file_list \n\n");
+     printf("                    The last parameter defines whether one wants to merge the \"simple\" ROOT files\n");
+     printf("                    The \"simple\" ROOT files are those with no sub-TDirectrory objects inside and with no TTree/TNtuples\n");
+     printf("                    This is the default option and it can be omitted\n");
+     printf("                    To merge the ROOT files with sub-TDirectory or / ans TTree pass the kFALSE as the 3d macro parameter\n\n");
   }
 }
