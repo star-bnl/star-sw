@@ -1,13 +1,13 @@
-/*
- * $Id: StPixelFastSimMaker.cxx,v 1.35 2007/10/29 18:16:14 wleight Exp $
+ /*
+ * $Id: StPixelFastSimMaker.cxx,v 1.36 2007/11/06 16:20:06 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
- * Revision 1.35  2007/10/29 18:16:14  wleight
- * Fixed bug in assigning keys to StRndHits in IST
+ * Revision 1.36  2007/11/06 16:20:06  wleight
+ * Digitized Pixel, removed all hit smearing, and implemented idTruth
  *
  * Revision 1.34  2007/10/18 16:31:44  fisyak
  * Add pile-up from weixie
@@ -132,6 +132,9 @@
 #include <exception>
 using namespace std;
 #include <stdexcept>
+#include "tables/St_g2t_ist_hit_Table.h"
+#include "tables/St_g2t_pix_hit_Table.h"
+#include "tables/St_HitError_Table.h"
 #ifdef bug1056
 #include "Sti/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
@@ -155,6 +158,7 @@ StPixelFastSimMaker::~StPixelFastSimMaker(){ /*noop*/ }
 
 int StPixelFastSimMaker::Init()
 {
+  LOG_INFO<<"StPixelFastSimMaker::Init()"<<endm;
   int seed=time(NULL);
   myRandom=new StRandom();
   myRandom->setSeed(seed);
@@ -167,21 +171,29 @@ int StPixelFastSimMaker::Init()
 //____________________________________________________________
 int StPixelFastSimMaker::InitRun(int RunNo)
 {
-
-  // Define various HPD hit errors from database
+  LOG_INFO<<"StPixelFastSimMaker::InitRun"<<endm;
 
   TDataSet *set = GetDataBase("Calibrations/tracker");
   St_HitError *ist1TableSet = (St_HitError *)set->Find("ist1HitError");
   St_HitError *ist2TableSet = (St_HitError *)set->Find("ist2HitError");
+  St_HitError *ist3TableSet = (St_HitError *)set->Find("ist3HitError");
+  //St_HitError *pixelTableSet = (St_HitError *)set->Find("PixelHitError");
+  //cout<<"found St_HitErrors"<<endl;
   HitError_st* ist1HitError = ist1TableSet->GetTable();
   resXIst1 = sqrt(ist1HitError->coeff[0]);
   resZIst1 = sqrt(ist1HitError->coeff[3]);
   HitError_st* ist2HitError = ist2TableSet->GetTable();
   resXIst2 = sqrt(ist2HitError->coeff[0]);
   resZIst2 = sqrt(ist2HitError->coeff[3]);
-
+  HitError_st* ist3HitError = ist3TableSet->GetTable();
+  resXIst3 = sqrt(ist3HitError->coeff[0]);
+  resZIst3 = sqrt(ist3HitError->coeff[3]);
+  //HitError_st* pixelHitError = pixelTableSet->GetTable();
+  //resXPix = sqrt(pixelHitError->coeff[0]);
+  //resZPix = sqrt(pixelHitError->coeff[3]);
 
   LoadPixPileUpHits(); //.. load the pile up hits for PIXEL
+  //cout<<"done with StPixelFastSimMaker::InitRun"<<endl;
 
   return kStOk;
 }
@@ -189,7 +201,7 @@ int StPixelFastSimMaker::InitRun(int RunNo)
 //___________________________
 void StPixelFastSimMaker::LoadPixPileUpHits()
 {
-  cout<<"+++ loading the PIXEL pileup files +++"<<endl;
+  LOG_INFO<<"+++ loading the PIXEL pileup files +++"<<endm;
 
   pileup_on = true;
 
@@ -198,11 +210,11 @@ void StPixelFastSimMaker::LoadPixPileUpHits()
 
        pileup_on = false;
 
-       cout << "no PIXEL pileup file found. Will run with regular setup" << endl;
+       LOG_INFO << "no PIXEL pileup file found. Will run with regular setup" << endm;
        return;
   }
 
-  cout<<"+++ Loaded pileup.root for PIXEL pileup simulation +++"<<endl;
+  LOG_INFO<<"+++ Loaded pileup.root for PIXEL pileup simulation +++"<<endm;
 
   TTree* pileup_tree = (TTree*)f_pileup.Get("pileup_tree");
 
@@ -280,18 +292,23 @@ int StPixelFastSimMaker::Finish(){return kStOk;}
 //____________________________________________________________
 Int_t StPixelFastSimMaker::Make()
 {
+  LOG_INFO<<"StPixelFastSimMaker::Make()"<<endm;
 
   // Get the input data structures from StEvent and StMcEvent
     StEvent* rcEvent =  (StEvent*) GetInputDS("StEvent");
     if (! rcEvent) {LOG_INFO << "No StEvent on input" << endl; return kStWarn;}
     StMcEvent* mcEvent = (StMcEvent *) GetInputDS("StMcEvent");
     if (! mcEvent) {LOG_INFO << "No StMcEvent on input" << endl; return kStWarn;}
+    TDataSetIter geant(GetInputDS("geant"));
     if (! gGeoManager) GetDataBase("VmcGeometry");
+    St_g2t_ist_hit *g2t_ist_hit=(St_g2t_ist_hit *)geant("g2t_ist_hit");
+    St_g2t_pix_hit *g2t_pix_hit=(St_g2t_pix_hit *)geant("g2t_pix_hit");
+    g2t_ist_hit_st* g2tIst=g2t_ist_hit->GetTable();
+    g2t_pix_hit_st* g2tPix=g2t_pix_hit->GetTable();
 
-    
     // Store hits into RnD Hit Collection until we have our own
     StRnDHitCollection *col = new StRnDHitCollection;
-    if (!col ) 
+    if (!col )
       {
         gMessMgr->Info()<<"StPixelFastSimMaker -E- no RnDHitCollection!\n";
         abort();
@@ -302,69 +319,157 @@ Int_t StPixelFastSimMaker::Make()
     StThreeVectorF mHitError(0.,0.,0.);
 
     //Get MC Pixel hit collection. This contains all pixel hits.
-  StMcPixelHitCollection* pixHitCol = mcEvent->pixelHitCollection();			     
-  if (pixHitCol)							
-    {									
-      if(pileup_on)
-	AddPixPileUpHit(pixHitCol); //.. add the pileup hits into the collection
-
-
-      Int_t nhits = pixHitCol->numberOfHits();				
-      if (nhits)								
-	{									
-	  Int_t id = col->numberOfHits();							
-	  for (UInt_t k=0; k<pixHitCol->numberOfLayers(); k++)		       
-	    if (pixHitCol->layer(k))						
-	      {								
-		UInt_t nh = pixHitCol->layer(k)->hits().size();		
-		for (UInt_t i = 0; i < nh; i++) {
-		  
-		  StMcHit *mcH = pixHitCol->layer(k)->hits()[i];
-		  if (!mcH) continue;
-
-		  StThreeVectorD mRndHitError(0.,0.,0.);
-		  smearGaus(mRndHitError, 8.6, 8.6);
-
-		  StThreeVectorF pos(mcH->position());
-		  StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);
-		  StThreeVectorF mom(mcH->localMomentum());
-		  shiftHit(pos, mom ,mcP->layer(), mcP->ladder());
-		  //8.6 is the design resolution of the detector
-
-		  //StRnDHit* tempHit = new StRnDHit(mcP->position(), 
-		//				   mRndHitError, 1, 1., 0, 
-		//				   1, 1, id++, kHftId);
-		  StRnDHit* tempHit = new StRnDHit(mcP->position(), 
-						   mRndHitError, 1, 1., 0, 
-						   1, 1, id++, kPxlId);
-		  //cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
-		  //     <<*tempHit<<endl;
-		  //tempHit->setDetectorId(kHftId);
-		  tempHit->setDetectorId(kPxlId);
-		  tempHit->setVolumeId(mcP->volumeId());                   
-		  tempHit->setKey(mcP->key());                             
-		  //StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);     
-		  if(mcP){                                                
-		    tempHit->setLayer(mcP->layer());           
-		    tempHit->setLadder(mcP->ladder());           
-		  }                                                          
-		  col->addHit(tempHit);                                 
-		}                                                           
-	      }								 
-	}									 
-      gMessMgr->Info() <<"StPixelFastSimMaker::Make() -I- Loaded "
-	   <<nhits<<"pixel hits. \n";
+  StMcPixelHitCollection* pixHitCol = mcEvent->pixelHitCollection();
+  int nPixelPerWaferX=640;
+  int nPixelPerWaferZ=640;
+  int nWaferPerLadder=10;
+  double pixelWidth=.003;
+  unsigned int nPixLadders[2]={9,24};
+  //int pixels[6400][640];
+  vector<int> pixels;
+  vector<StMcPixelHit*> pixLadderHits;
+  multimap<int,int> pixelToKey;
+  int vid;
+  /*
+  for(int temp1=0;temp1<nPixelPerWaferX*nWaferPerLadder;temp1++){
+    for(int temp2=0;temp2<nPixelPerWaferZ;temp2++){
+      pixels[temp1][temp2]=0;
     }
-  else
-    {
-      gMessMgr->Info() <<"No pixel hits found.\n";
-    }
+  }
+  */
+  if (pixHitCol){
+    if(pileup_on) AddPixPileUpHit(pixHitCol); //.. add the pileup hits into the collection
 
-    const StMcIstHitCollection* istHitCol = mcEvent->istHitCollection();					
+    Int_t nhits = pixHitCol->numberOfHits();
+    LOG_DEBUG<<"There are "<<nhits<<" pixel hits"<<endm;
+    if (nhits){
+      Int_t id = col->numberOfHits();
+      for (UInt_t k=0; k<pixHitCol->numberOfLayers(); k++){
+	if (pixHitCol->layer(k)){
+	  LOG_DEBUG<<"Layer "<<k+1<<endm;
+	  for(unsigned int q=0;q<nPixLadders[k];q++){
+	    UInt_t nh = pixHitCol->layer(k)->hits().size();
+	    for (UInt_t i = 0; i < nh; i++){
+	      StMcHit *mcH = pixHitCol->layer(k)->hits()[i];
+	      StMcPixelHit* mcPix=dynamic_cast<StMcPixelHit*>(mcH);
+	      if(mcPix->ladder()==q+1){
+		pixLadderHits.push_back(mcPix);
+		LOG_DEBUG<<"hit found in ladder "<<q+1<<endm;
+	      }
+	    }
+	    TString Path("");
+	    Path = Form("/HALL_1/CAVE_1/PXMO_1/PSEC_%i/PLMO_%i/PLAC_1",sector(k+1,q+1),secLadder(k+1,q+1));
+	    LOG_DEBUG<<"Path: "<<Path<<endm;
+	    gGeoManager->RestoreMasterVolume();
+	    gGeoManager->CdTop();
+	    gGeoManager->cd(Path);
+	    for(unsigned int hh=0;hh<pixLadderHits.size();hh++){
+	      StMcPixelHit* mcPixel=pixLadderHits[hh];
+	      if (!mcPixel) continue;
+	      if(hh==0) vid=mcPixel->volumeId();
+	      LOG_DEBUG<<"pixel hit volume id: "<<mcPixel->volumeId()<<endm;
+	      double pos[3]={mcPixel->position().x(),mcPixel->position().y(),mcPixel->position().z()};
+	      LOG_DEBUG<<"original hit position: ("<<pos[0]<<","<<pos[1]<<","<<pos[2]<<")"<<endm;
+	      double localpos[3]={0,0,0};
+	      gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
+	      LOG_DEBUG<<"transformed local x: "<<localpos[0]<<"; local z: "<<localpos[2]<<"; local y: "<<localpos[1]<<endm;
+	      if(fabs(localpos[0])>.96){
+		LOG_INFO<<"bad hit position: local x="<<mcPixel->position().x()<<endm;
+		continue;
+	      }
+	      int xindex=static_cast<int>(localpos[0]/pixelWidth);
+	      LOG_DEBUG<<"localpos[0]: "<<localpos[0]<<"; pixelWidth: "<<pixelWidth<<"; xindex: "<<xindex<<endm;
+	      int zindex=static_cast<int>(localpos[2]/pixelWidth);
+	      LOG_DEBUG<<"localpos[2]: "<<localpos[2]<<"; pixelWidth: "<<pixelWidth<<"; zindex: "<<zindex<<endm;
+	      zindex=zindex+nWaferPerLadder*nPixelPerWaferZ/2;
+	      xindex=xindex+nPixelPerWaferX/2;
+	      int pixdex=nWaferPerLadder*nPixelPerWaferX*(xindex-1)+zindex;
+	      //pixels[xindex][zindex]=1;
+	      pixels.push_back(pixdex);
+	      pixelToKey.insert(std::pair<int,int>(pixdex,mcPixel->key()));
+	      LOG_DEBUG<<"x, z and total index for pixel containing this hit (offset by 1) are x: "<<xindex<<"; z: "<<zindex<<"; total: "<<pixdex<<endm;
+	      //StThreeVectorF pos(mcPixel->position());
+	      //StThreeVectorF mom(mcH->localMomentum());
+	      //shiftHit(pos, mom ,mcP->layer(), mcP->ladder());
+	    }
+	    StThreeVectorD mRndHitError(0.,0.,0.);
+	    //smearGaus(mRndHitError, resXPix, resZPix);
+	    /*
+	      for(int t1=0;t1<nPixelPerWaferX*nWaferPerLadder;t1++){
+	      for(int t2=0;t2<nPixelPerWaferZ;t2++){
+	      if(pixels[t1][t2]){
+	    */
+	    for(unsigned int temp=0;temp<pixels.size();temp++){
+	      //cout<<"pixel "<<t1<<","<<t2<<" is lit up"<<endl;
+	      LOG_DEBUG<<"pixel "<<pixels[temp]<<" is lit up"<<endm;
+	      int pixz=pixels[temp]%(nWaferPerLadder*nPixelPerWaferX);
+	      int pixx=(pixels[temp]-pixz)/(nWaferPerLadder*nPixelPerWaferX)+1;
+	      LOG_DEBUG<<"this corresponds to pixel x "<<pixx<<" and pixel z "<<pixz<<endm;
+	      double flocalpos[3]={(pixx-nPixelPerWaferX/2+1/2)*pixelWidth,.0008,(pixz-nWaferPerLadder*nPixelPerWaferZ/2+1/2)*pixelWidth};
+	      LOG_DEBUG<<"final local x: "<<flocalpos[0]<<"; local y: "<<flocalpos[1]<<"; local z: "<<flocalpos[2]<<endm;
+	      double fpos[3]={0,0,0};
+	      gGeoManager->GetCurrentMatrix()->LocalToMaster(flocalpos,fpos);
+	      LOG_DEBUG<<"reconstructed hit position: ("<<fpos[0]<<","<<fpos[1]<<","<<fpos[2]<<")"<<endm;
+	      StThreeVectorF fposv(fpos);
+	      StRnDHit* tempHit = new StRnDHit(fposv, mRndHitError, 1, 1., 0, 1, 1, id++, kPxlId);
+	      //cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
+	      //     <<*tempHit<<endl;
+	      tempHit->setDetectorId(kPxlId);
+	      tempHit->setVolumeId(vid);
+	      tempHit->setLayer(k+1);
+	      tempHit->setLadder(q+1);
+	      //multimap<int,int>::iterator piter=pixelToKey.find(pixels[temp]);
+	      std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair=pixelToKey.equal_range(pixels[temp]);
+	      /*
+	      if(piter!=pixelToKey.end()){
+		tempHit->setKey((*piter).second);
+		pixelToKey.erase(piter);
+	      }
+	      */
+	      double topdE=0,sumdE=0;
+	      int topHit=-999;
+	      for(multimap<int,int>::iterator iiit=itpair.first;iiit!=itpair.second;iiit++){
+		for(int ab=0;ab<g2t_pix_hit->GetNRows();ab++){
+		  if(g2tPix[ab].id==(*iiit).second){
+		    if(g2tPix[ab].de>topdE){
+		      topdE=g2tPix[ab].de;
+		      topHit=ab;
+		    }
+		    sumdE=sumdE+g2tPix[ab].de;
+		  }
+		}
+		pixelToKey.erase(iiit);
+	      }
+	      if(topHit!=-999){
+		int idTQual=static_cast<int>(topdE*100/sumdE);
+		tempHit->setIdTruth(g2tPix[topHit].track_p,idTQual);
+		tempHit->setKey(g2tPix[topHit].id);
+	      }
+	      else tempHit->setKey(99999);
+	      col->addHit(tempHit);
+	      //pixels[t1][t2]=0;
+	      //}
+	      //}
+	    }
+	    pixels.clear();
+	    pixLadderHits.clear();
+	  }
+	}
+      }
+    }
+    gMessMgr->Info() <<"StPixelFastSimMaker::Make() -I- Loaded "<<nhits<<"pixel hits. \n";
+  }
+  else{
+    gMessMgr->Info() <<"No pixel hits found.\n";
+  }
+
+  const StMcIstHitCollection* istHitCol = mcEvent->istHitCollection();					
   int nLadders[2]={19,27};
   int nWafers[2]={10,13};
-  double pitch=.006; //note, all lengths in centimeters unless explicitly noted
-  int nStrips=640;
+  double pitch=.006; 
+  //note, all lengths in centimeters unless explicitly noted
+  unsigned int nStrips=640;
+  int nStripsComp=nStrips+1;
   unsigned int ladderCount;
   unsigned int waferCount;
   double icept;
@@ -373,12 +478,14 @@ Int_t StPixelFastSimMaker::Make()
   double localpos[3];
   double gpos[3];
   int id=0;
+  double istWaferLow=-1.92;
 	
   TString PathIn("");
   TString PathOut("");
   if(istHitCol){
     LOG_INFO<<"ist hit collection found"<<endm;
-    int nhits=istHitCol->numberOfHits();
+    int nIsthits=istHitCol->numberOfHits();
+    LOG_DEBUG<<"there are "<<nIsthits<<" ist hits"<<endm;
     vector<StMcIstHit*> ladderHits;
     multimap<int, int> stripToKey;
     multimap<int, int> strip2ToKey;
@@ -386,7 +493,7 @@ Int_t StPixelFastSimMaker::Make()
     istStrip strips1[640];
     istStrip strips2[640];
     istStrip sStrips[1280];
-    if(nhits){
+    if(nIsthits){
       for(unsigned int i=0;i<2;i++){
 	if(istHitCol->layer(i)){
 	  ladderCount=1;
@@ -428,7 +535,7 @@ Int_t StPixelFastSimMaker::Make()
 		  double x=localpos[0];
 		  double z=localpos[2];
 		  //note that in these local coordinates the strips give good resolution in the x coordinate in layer 1 and layer 2 side 1 and z in layer 2 side 2
-		  if(fabs(z)<1.92 && fabs(x)<1.92){
+		  if(fabs(z)<fabs(istWaferLow) && fabs(x)<fabs(istWaferLow)){
 		    if(i==0){
 		      LOG_DEBUG<<"layer 1: local x: "<<localpos[0]<<"; local y: "<<localpos[1]<<"; local z: "<<localpos[2]<<endm;
 		      stripHit sh;
@@ -437,12 +544,12 @@ Int_t StPixelFastSimMaker::Make()
 		      int sindex;
 		      sindex=static_cast<int>(x/pitch);
 		      sindex=sindex+nStrips/2+1;
-		      if(0<sindex && sindex<641){
+		      if(0<sindex && sindex<nStripsComp){
 			if(z<0){
 			  sStrips[sindex-1].stripHits.push_back(sh);
 			}
 			else{
-			  sindex=sindex+640;
+			  sindex=sindex+nStrips;
 			  sStrips[sindex-1].stripHits.push_back(sh);
 			}
 			stripToKey.insert(std::pair<int,int>(sindex,mcIw->key()));
@@ -460,7 +567,7 @@ Int_t StPixelFastSimMaker::Make()
 			int sindex; 
 			sindex=static_cast<int>(z/pitch);
 			sindex=sindex+nStrips/2+1;
-			if(0<sindex && sindex<641){
+			if(0<sindex && sindex<nStripsComp){
 			  strips2[sindex-1].stripHits.push_back(sh);
 			  strip2ToKey.insert(std::pair<int,int>(sindex,mcIw->key()));
 			}
@@ -474,7 +581,7 @@ Int_t StPixelFastSimMaker::Make()
 			int sindex;
 			sindex=static_cast<int>(x/pitch);
 			sindex=sindex+nStrips/2+1;
-			if(0<sindex && sindex<641){
+			if(0<sindex && sindex<nStripsComp){
 			  strips1[sindex-1].stripHits.push_back(sh);
 			  strip1ToKey.insert(std::pair<int,int>(sindex,mcIw->key()));
 			}
@@ -486,23 +593,26 @@ Int_t StPixelFastSimMaker::Make()
 		}
 	      }
 	      if(i==0){
-		for(unsigned int oo=0;oo<1280;oo++){
+		for(unsigned int oo=0;oo<nStrips*2;oo++){
 		  icept=0;
 		  sTotE=0;
 		  if(sStrips[oo].stripHits.size()){
+		    /*
 		    for(unsigned int pp=0;pp<sStrips[oo].stripHits.size();pp++){
 		      icept=icept+sStrips[oo].stripHits[pp].localX*sStrips[oo].stripHits[pp].e;
 		      sTotE=sTotE+sStrips[oo].stripHits[pp].e;
-		    }
-		    sStrips[oo].intercept=icept/sTotE;
-		    double smearedX;
-		    smearedX=distortHit(sStrips[oo].intercept,pitch/sqrt(12.),100);
+		    }*/
+		    //sStrips[oo].intercept=icept/sTotE;
+		    sStrips[oo].intercept=istWaferLow+(oo+1/2)*pitch;
+		    //double smearedX;
+		    //smearedX=distortHit(sStrips[oo].intercept,0,100); //resXIst1,100);
 		    gGeoManager->RestoreMasterVolume();
 		    gGeoManager->cd(PathIn);
 		    //TGeoNode* node=gGeoManager->GetCurrentNode();
-		    localpos[0]=smearedX;
-		    if(oo>639) localpos[2]=distortHit(.96,1.92/sqrt(12.),100);
-		    else localpos[2]=distortHit(-.96,.96/sqrt(12.),100);
+		    //localpos[0]=smearedX;
+		    localpos[0]=sStrips[oo].intercept;
+		    if(oo>nStrips-1) localpos[2]=.96; //distortHit(.96,0,100); //resZIst1,100);
+		    else localpos[2]=-.96; //distortHit(-.96,0,100); //resZIst1,100);
 		    localpos[1]=-.0005;
 		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
 		    LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
@@ -515,19 +625,31 @@ Int_t StPixelFastSimMaker::Make()
 		    StRnDHit* tempHit = new StRnDHit(gposv, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		    tempHit->setDetectorId(kIstId); 
 		    tempHit->setVolumeId(0);
-		    /*
-		    multimap<int,int>::iterator iter=stripToKey.find(oo+1);
+		    /*multimap<int,int>::iterator iter=stripToKey.find(oo+1);
 		    if(iter!=stripToKey.end()){
 		      tempHit->setKey((*iter).second);
 		      stripToKey.erase(iter);
 		    }
 		    */
 		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair1=stripToKey.equal_range(oo+1);
-		    if(itpair1.first!=itpair1.second){
-		      for(multimap<int,int>::iterator iiit1=itpair1.first;iiit1!=itpair1.second;iiit1++){
-			tempHit->setKey((*iiit1).second);
-			stripToKey.erase(iiit1);
+		    double topdE1=0,sumdE1=0;
+		    int topHit1=-999;
+		    for(multimap<int,int>::iterator iiit1=itpair1.first;iiit1!=itpair1.second;iiit1++){
+		      for(int aa=0;aa<g2t_ist_hit->GetNRows();aa++){
+			if(g2tIst[aa].id==(*iiit1).second){
+			  if(g2tIst[aa].de>topdE1){
+			    topdE1=g2tIst[aa].de;
+			    topHit1=aa;
+			  }
+			  sumdE1=sumdE1+g2tIst[aa].de;
+			}
 		      }
+		      stripToKey.erase(iiit1);
+		    }
+		    if(topHit1!=-999){
+		      int idTQual=static_cast<int>(topdE1*100/sumdE1);
+		      tempHit->setIdTruth(g2tIst[topHit1].track_p,idTQual);
+		      tempHit->setKey(g2tIst[topHit1].id);
 		    }
 		    else tempHit->setKey(99999);
 		    tempHit->setLayer(i+1);           
@@ -539,20 +661,25 @@ Int_t StPixelFastSimMaker::Make()
 		}
 	      }
 	      if(i==1){
-		for(unsigned int o=0;o<640;o++){
+		for(unsigned int o=0;o<nStrips;o++){
 		  icept=0;
 		  sTotE=0;
 		  if(strips1[o].stripHits.size()){
+		    /*
 		    for(unsigned int p=0;p<strips1[o].stripHits.size();p++){
 		      icept=icept+strips1[o].stripHits[p].localX*strips1[o].stripHits[p].e;
 		      sTotE=sTotE+strips1[o].stripHits[p].e;
 		    }
-		    strips1[o].intercept=icept/sTotE;
+		    */
+		    //strips1[o].intercept=icept/sTotE;
+		    strips1[o].intercept=istWaferLow+(o+1/2)*pitch;
 		    gGeoManager->RestoreMasterVolume();
 		    gGeoManager->cd(PathIn);
 		    //TGeoNode* node=gGeoManager->GetCurrentNode();
-		    localpos[0]=distortHit(strips1[o].intercept,pitch/sqrt(12.),100);
-		    localpos[2]=0.;
+		    //localpos[0]=distortHit(strips1[o].intercept,0,100); //resXIst2,100);
+		    localpos[0]=strips1[o].intercept;
+		    //localpos[2]=distortHit(0,0,100); //resZIst2,100);
+		    localpos[2]=0;
 		    localpos[1]=.0005;
 		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
 		    LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
@@ -573,11 +700,24 @@ Int_t StPixelFastSimMaker::Make()
 		    }
 		    */
 		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair2=strip1ToKey.equal_range(o+1);
-		    if(itpair2.first!=itpair2.second){
-		      for(multimap<int,int>::iterator iiit2=itpair2.first;iiit2!=itpair2.second;iiit2++){
-			tempHit->setKey((*iiit2).second);
-			stripToKey.erase(iiit2);
+		    double topdE2=0,sumdE2=0;
+		    int topHit2=-999;
+		    for(multimap<int,int>::iterator iiit2=itpair2.first;iiit2!=itpair2.second;iiit2++){
+		      for(int bb=0;bb<g2t_ist_hit->GetNRows();bb++){
+			if(g2tIst[bb].id==(*iiit2).second){
+			  if(g2tIst[bb].de>topdE2){
+			    topdE2=g2tIst[bb].de;
+			    topHit2=bb;
+			  }
+			  sumdE2=sumdE2+g2tIst[bb].de;
+			}
 		      }
+		      strip1ToKey.erase(iiit2);
+		    }
+		    if(topHit2!=-999){
+		      int idTQual=static_cast<int>(topdE2*100/sumdE2);
+		      tempHit->setIdTruth(g2tIst[topHit2].track_p,idTQual);
+		      tempHit->setKey(g2tIst[topHit2].id);
 		    }
 		    else tempHit->setKey(99999);
 		    tempHit->setLayer(i+1);           
@@ -589,16 +729,21 @@ Int_t StPixelFastSimMaker::Make()
 		  icept=0;
 		  sTotE=0;
 		  if(strips2[o].stripHits.size()){
+		    /*
 		    for(unsigned int s=0;s<strips2[o].stripHits.size();s++){
 		      icept=icept+strips2[o].stripHits[s].localX*strips2[o].stripHits[s].e;
 		      sTotE=sTotE+strips2[o].stripHits[s].e;
 		    }
-		    strips2[o].intercept=icept/sTotE;
+		    */
+		    //strips2[o].intercept=icept/sTotE;
+		    strips2[o].intercept=istWaferLow+(o+1/2)*pitch;
 		    gGeoManager->RestoreMasterVolume();
 		    gGeoManager->cd(PathOut);
 		    //TGeoNode* node=gGeoManager->GetCurrentNode();
-		    localpos[0]=0.;
-		    localpos[2]=distortHit(strips2[o].intercept,pitch/sqrt(12.),100);
+		    //localpos[0]=distortHit(0,0,100); //resXIst3,100);
+		    localpos[0]=0;
+		    //localpos[2]=distortHit(strips2[o].intercept,0,100); //resZIst3,100);
+		    localpos[2]=strips2[o].intercept;
 		    localpos[1]=-.0005;
 		    LOG_DEBUG<<"final local x: "<<localpos[0]<<"; final local y: "<<localpos[1]<<" final local z: "<<localpos[2]<<endm;
 		    LOG_DEBUG<<"layer ladder wafer: "<<i+1<<" "<<ladderCount<<" "<<waferCount<<endm;
@@ -619,11 +764,24 @@ Int_t StPixelFastSimMaker::Make()
 		    }
 		    */
 		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair3=strip2ToKey.equal_range(o+1);
-		    if(itpair3.first!=itpair3.second){
-		      for(multimap<int,int>::iterator iiit3=itpair3.first;iiit3!=itpair3.second;iiit3++){
-			tempHit2->setKey((*iiit3).second);
-			stripToKey.erase(iiit3);
+		    double topdE3=0,sumdE3=0;
+		    int topHit3=-999;
+		    for(multimap<int,int>::iterator iiit3=itpair3.first;iiit3!=itpair3.second;iiit3++){
+		      for(int ba=0;ba<g2t_ist_hit->GetNRows();ba++){
+			if(g2tIst[ba].id==(*iiit3).second){
+			  if(g2tIst[ba].de>topdE3){
+			    topdE3=g2tIst[ba].de;
+			    topHit3=ba;
+			  }
+			  sumdE3=sumdE3+g2tIst[ba].de;
+			}
 		      }
+		      strip2ToKey.erase(iiit3);
+		    }
+		    if(topHit3!=-999){
+		      int idTQual=static_cast<int>(topdE3*100/sumdE3);
+		      tempHit2->setIdTruth(g2tIst[topHit3].track_p,idTQual);
+		      tempHit2->setKey(g2tIst[topHit3].id);
 		    }
 		    else tempHit2->setKey(99999);
 		    tempHit2->setLayer(i+1);           
@@ -635,8 +793,8 @@ Int_t StPixelFastSimMaker::Make()
 		}
 	      }
 	      waferCount++;
-	      for(unsigned int kl=0;kl<1280;kl++){
-		if(kl<640){
+	      for(unsigned int kl=0;kl<nStrips*2;kl++){
+		if(kl<nStrips){
 		  strips1[kl].stripHits.clear();
 		  strips2[kl].stripHits.clear();
 		}
@@ -653,43 +811,43 @@ Int_t StPixelFastSimMaker::Make()
       }
     }
   }									 
-  else
-    {
-      LOG_INFO <<"No Ist hits found."<<endl;
-    }
+  else{
+    LOG_INFO <<"No Ist hits found."<<endm;
+  }
 
     
-    const StMcFgtHitCollection* fgtHitCol = mcEvent->fgtHitCollection();					
-	  if (fgtHitCol)							
-    {									
-      Int_t nhits = fgtHitCol->numberOfHits();				
-      if (nhits)								
-	{									
-	  Int_t id = 0;							
-	  //StSPtrVecHit *cont = new StSPtrVecHit();				
-	  //rcEvent->addHitCollection(cont, # Name );				
-	  for (UInt_t k=0; k<fgtHitCol->numberOfLayers(); k++)		       
-	    if (fgtHitCol->layer(k))						
-	      {								
-		UInt_t nh = fgtHitCol->layer(k)->hits().size();		
+  const StMcFgtHitCollection* fgtHitCol = mcEvent->fgtHitCollection();
+  if (fgtHitCol)
+    {
+      Int_t nhits = fgtHitCol->numberOfHits();
+      if (nhits)
+	{
+	  Int_t id = 0;
+	  //StSPtrVecHit *cont = new StSPtrVecHit();
+	  //rcEvent->addHitCollection(cont, # Name );
+	  for (UInt_t k=0; k<fgtHitCol->numberOfLayers(); k++){
+	    if (fgtHitCol->layer(k))
+	      {
+		UInt_t nh = fgtHitCol->layer(k)->hits().size();
 		for (UInt_t i = 0; i < nh; i++) {
-		  StMcHit *mcH = fgtHitCol->layer(k)->hits()[i];          
-		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++);  
-		  tempHit->setVolumeId(mcH->volumeId());                   
-		  tempHit->setKey(mcH->key());                             
-		                                                
-		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
-		  if(mcI){                                                
-		    tempHit->setLayer(mcI->layer());           
-		    tempHit->setLadder(mcI->ladder());           
-		    tempHit->setWafer(mcI->wafer());           
-		    tempHit->setExtraByte0(mcI->side());         
-		  }                                                         
-		  col->addHit(tempHit);                                 
-		}                                                           
-	      }								 
-	}									 
-    }		
+		  StMcHit *mcH = fgtHitCol->layer(k)->hits()[i];
+		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++);
+		  tempHit->setVolumeId(mcH->volumeId());
+		  tempHit->setKey(mcH->key());
+
+		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH);
+		  if(mcI){
+		    tempHit->setLayer(mcI->layer());
+		    tempHit->setLadder(mcI->ladder());
+		    tempHit->setWafer(mcI->wafer());
+		    tempHit->setExtraByte0(mcI->side());
+		  }
+		  col->addHit(tempHit);
+		}
+	      }
+	  }
+	}
+    }
   
   rcEvent->setRnDHitCollection(col);
   return kStOK;
@@ -764,7 +922,7 @@ int StPixelFastSimMaker::sector(int layer, int ladder)
   else
     {
       if ( ladder < 9 ) return 1;
-      if ( ladder < 18 ) return 2;
+      if ( ladder < 17 ) return 2;
       return 3;
     }
 
@@ -773,10 +931,10 @@ int StPixelFastSimMaker::sector(int layer, int ladder)
 
 int StPixelFastSimMaker::secLadder(int layer, int ladder)
 {
-  if (layer ==1 )
-      return ladder - 3*(sector(layer, ladder)-1);
+  if (layer==1)
+    return ladder - 3*(sector(layer,ladder)-1);
   else
-    return ladder - 8*(sector(layer,ladder)-1);
+    return ladder - 8*(sector(layer,ladder)-1)+3;
 }
 
 
@@ -785,7 +943,7 @@ double StPixelFastSimMaker::phiForLadder(int layer, int ladder)
 {
   int sec = sector(layer,ladder);
   int secLad = secLadder(layer,ladder);
-  double phi=0.;
+  //double phi=0.;
   double secPhi=0.;
   double ladPhi=0.;
   switch (sec)
@@ -847,6 +1005,7 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
 
   //printf("Entering hit shift code. %i %i\n",
   // sector(layer,ladder), secLadder(layer,ladder));
+  LOG_DEBUG<<"Pixel Hit in layer "<<layer<<" and ladder "<<ladder<<" or sector "<<sector(layer,ladder)<<" and sector ladder "<<secLadder(layer,ladder)<<endm;
 
   TString Path("");
   Path = Form("/HALL_1/CAVE_1/PXMO_1/PSEC_%i/PLMO_%i/PLAC_1",
@@ -880,7 +1039,7 @@ void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom,
     }
  
   StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
-  double momentum = mom.magnitude();
+  //double momentum = mom.magnitude();
   StThreeVectorF momUnit(mom);
   momUnit/=momUnit.magnitude();
  
