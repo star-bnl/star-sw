@@ -4,7 +4,7 @@
 #include <assert.h>
 
 /*********************************************************************
- * $Id: L2EmcDb.cxx,v 1.4 2007/10/25 23:00:30 balewski Exp $
+ * $Id: L2EmcDb.cxx,v 1.5 2007/11/06 22:07:24 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -23,7 +23,12 @@ L2EmcDb::L2EmcDb(char *inpP, char *logP) {
   strncpy(inpPath,inpP,mxTxt);
   strncpy(logPath,logP,mxTxt);
   clearTables();
+  setPedFile("pedestal.current");// default ped file
+  setMaskFile("towerMask.current");// default mask file
 }
+
+void L2EmcDb::setPedFile(const char *c){ strncpy(pedFile,c,mxTxt); }
+void L2EmcDb::setMaskFile(const char *c){ strncpy(maskFile,c,mxTxt); }
  
 //==============================
 //==============================
@@ -43,9 +48,8 @@ L2EmcDb::initRun(int runNo){
   sprintf(fname,"%s/btowCrateMask.current",inpPath); err+=changeMaskFullCrate(fname,'B',db_labels[2]);
   sprintf(fname,"%s/etowCrateMask.current",inpPath); err+=changeMaskFullCrate(fname,'E',db_labels[3]);
 
-  sprintf(fname,"%s/towerMask.current",inpPath);     err+=changeMaskByName(fname,db_labels[4]);
- 
-  sprintf(fname,"%s/pedestal.current",inpPath);            err+=changePedsByName(fname,db_labels[5]);
+  sprintf(fname,"%s/%s",inpPath,maskFile);     err+=changeMaskByName(fname,db_labels[4]);
+  sprintf(fname,"%s/%s",inpPath,pedFile);            err+=changePedsByName(fname,db_labels[5]);
 
   if(err) {
     printf("\n\n total CRASH of L2EmcDb::initRun(%d), reason=some error in ASCII DB\n\n",runNo);
@@ -563,6 +567,9 @@ L2EmcDb::changeMaskByName(const char *fname, char *lbl) {
 /*
 *********************************************************************
   $Log: L2EmcDb.cxx,v $
+  Revision 1.5  2007/11/06 22:07:24  balewski
+  added timeStamp controlled L2 setup from Jason
+
   Revision 1.4  2007/10/25 23:00:30  balewski
   logic bug fix
 

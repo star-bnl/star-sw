@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.3 2007/10/25 02:06:54 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.4 2007/11/06 22:07:20 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -46,6 +46,8 @@
 //L2 stuff
 #include "L2algoUtil/L2EmcDb.h"
 #include "L2algoUtil/L2VirtualAlgo.h"
+#include "L2algoUtil/L2DbConfig.h"  // time-dep config
+#include "L2algoUtil/L2DbTime.h"  // time-dep config
 
 //trg-data from ezTree, to read on-line decision, tmp
 #include "StMuDSTMaker/EZTREE/EztTrigBlob.h" // to access DB time stamp
@@ -73,6 +75,7 @@ StGenericL2Emulator::StGenericL2Emulator(){
   mOutPath="wrong3";
   mYear=-1;
   mYearMonthDay=-2;
+  mHourMinSec=-3;
 }
 
 //________________________________________________________
@@ -98,7 +101,6 @@ void StGenericL2Emulator::init(){
   mGeomB = StEmcGeom::instance("bemc");
   //....
   mL2EmcDb=0; // will be instantiated in InitRun
-  mYear=-1;
  
   LOG_INFO << Form("generic:init() , use: MuDst=1 (StEvent=0)=%d isMC=%d",mUseMuDst,mMCflag) <<endm;
  
@@ -157,10 +159,9 @@ StGenericL2Emulator::initRun(){
   assert(mydb);
   mYear=mydb->GetDateTime().GetYear();
   mYearMonthDay=mydb->GetDateTime().GetDate();
-
+  mHourMinSec=mydb->GetDateTime().GetTime();
 
   assert(mYearMonthDay>=20060410);
-  int refRun=7100052;
   // add other reference runs for later time stamps as appropriate
   assert(mYearMonthDay<20060700);
 
@@ -168,13 +169,22 @@ StGenericL2Emulator::initRun(){
   //define path for L2 setup files & output
 
   char setPath[1000];
-  sprintf(setPath,"%sL2/%d/db/R%d/",mSetupPath.Data(),mYear,refRun);
+  sprintf(setPath,"%sL2/%d/db/",mSetupPath.Data(),mYear);
   LOG_INFO <<"InitRun()  "<<"DB setPath="<<setPath<<" outPath="<<mOutPath<<endm;
  
+  // read in time-dependent configuration
+  L2DbConfig config(setPath);
+  L2DbTime * myconfig = config.getConfiguration( mYearMonthDay, mHourMinSec );
+  assert( myconfig ); // trigger code has not been setup properly
 
-  // create new L2Db instance for each run
+
+  // create new L2Db instance , new per run
   if(mL2EmcDb) delete mL2EmcDb;
   mL2EmcDb=new L2EmcDb(setPath,(char*)mOutPath.Data());
+  // override default ped and mask files
+  mL2EmcDb->setPedFile( myconfig->getPedFile() );
+  mL2EmcDb->setMaskFile( myconfig->getMaskFile() );
+
 
 
   // access BTOW DB only re-map ADC back to rdo indexing
@@ -414,6 +424,9 @@ StGenericL2Emulator::printBEblocks(){
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.4  2007/11/06 22:07:20  balewski
+// added timeStamp controlled L2 setup from Jason
+//
 // Revision 1.3  2007/10/25 02:06:54  balewski
 // added L2upsilon & binary event dump
 //
