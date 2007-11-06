@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.10 2007/11/05 19:25:51 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.11 2007/11/06 23:20:10 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -77,7 +77,7 @@ void MergeSimpleHistogramFile( const Char_t *TargetName=0, const Char_t *inputFi
      printf("------        where InputFilesPattern  ::= <regexp_pattern_for_the_input_files>|@indirect_file_list\n");
      printf("                    indirect_file_list ::= a text file with the list of the files\n");
      printf("                    indirect_file_list can be create by the shell command:\n");
-     printf("                         ls -1 *.root>indirect_file_list \n\n");
+     printf("                         ls -1 --color=never *.root>indirect_file_list \n\n");
   }
 }
 
@@ -213,7 +213,7 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
      printf("------        where InputFilesPattern  ::= <regexp_pattern_for_the_input_files>|@indirect_file_list\n");
      printf("                    indirect_file_list ::= a text file with the list of the files\n");
      printf("                    indirect_file_list can be create by the shell command:\n\n");
-     printf("                         ls -1 *.root>indirect_file_list \n\n");
+     printf("                         ls -1 --color=never *.root>indirect_file_list \n\n");
      printf("                    The last parameter defines whether one wants to merge the \"simple\" ROOT files\n");
      printf("                    The \"simple\" ROOT files are those with no sub-TDirectrory objects inside and with no TTree/TNtuples\n");
      printf("                    This is the default option and it can be omitted\n");
