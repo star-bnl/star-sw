@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.10 2007/10/18 14:25:13 didenko Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.11 2007/11/06 16:20:07 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.11  2007/11/06 16:20:07  wleight
+ * Digitized Pixel, removed all hit smearing, and implemented idTruth
+ *
  * Revision 1.10  2007/10/18 14:25:13  didenko
  * updates for pile-up events
  *
@@ -71,6 +74,8 @@ class StEvent;
 class StMcEvent;
 class StRandom;
 class StMcPixelHitCollection;
+class St_g2t_ist_hit;
+class St_g2t_pix_hit;
 
 class StPixelFastSimMaker : public StMaker {
  public:
@@ -130,7 +135,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.10 2007/10/18 14:25:13 didenko Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.11 2007/11/06 16:20:07 wleight Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -147,6 +152,10 @@ class StPixelFastSimMaker : public StMaker {
   double resZIst1;
   double resXIst2;
   double resZIst2;
+  double resXIst3;
+  double resZIst3;
+  double resZPix;
+  double resXPix;
   int mSmear; //to turn smearing on and off
 
  protected:
