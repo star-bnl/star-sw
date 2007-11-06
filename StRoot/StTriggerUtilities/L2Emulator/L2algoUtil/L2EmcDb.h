@@ -2,7 +2,7 @@
 #define L2EMCDB_H
 
 /*********************************************************************
- * $Id: L2EmcDb.h,v 1.2 2007/10/22 23:10:03 balewski Exp $
+ * $Id: L2EmcDb.h,v 1.3 2007/11/06 22:07:24 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -57,6 +57,12 @@ class L2EmcDb {
   enum {mxTxt=1000};
   char logPath[mxTxt];
   char inpPath[mxTxt];
+  char pedFile[mxTxt];
+  char maskFile[mxTxt];
+
+
+  void setPedFile( const char *c ); /**< sets the name of the pedestal file, defaults to pedestal.current */
+  void setMaskFile( const char *c ); /**< sets the name of the mask file, defaults to ... */
 
  private:
   EmcCDbItem dbByIndex[EmcDbIndexMax]; // the data container
@@ -146,6 +152,9 @@ class L2EmcDb {
 /*
 *********************************************************************
   $Log: L2EmcDb.h,v $
+  Revision 1.3  2007/11/06 22:07:24  balewski
+  added timeStamp controlled L2 setup from Jason
+
   Revision 1.2  2007/10/22 23:10:03  balewski
   split L2 to generic and year specific, not finished
 

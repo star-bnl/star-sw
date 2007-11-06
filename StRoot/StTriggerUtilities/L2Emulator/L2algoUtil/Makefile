@@ -7,8 +7,8 @@ endif
 
 
 LIBNAME  = L2algoUtil
-HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h 
-SRCS     = L2Histo.cxx  L2EmcDb.cxx L2VirtualAlgo.cxx 
+HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h L2DbTime.hL2DbConfig.h
+SRCS     = L2Histo.cxx  L2EmcDb.cxx L2VirtualAlgo.cxx L2DbTime.cxx L2DbConfig.cxx
 
 
 CXX    = g++
@@ -55,6 +55,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.4  2007/11/06 22:07:24  balewski
+# added timeStamp controlled L2 setup from Jason
+#
 # Revision 1.3  2007/11/02 03:03:41  balewski
 # modified L2VirtualAlgo
 #

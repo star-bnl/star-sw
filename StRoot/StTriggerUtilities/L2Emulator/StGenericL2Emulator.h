@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.4 2007/11/02 17:42:56 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.5 2007/11/06 22:07:20 balewski Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -44,7 +44,7 @@ class StGenericL2Emulator  {
   int mL2algoN;  //# of existing algos (time-stamp dependent)
 
   L2EmcDb   *mL2EmcDb;
-  int  mYearMonthDay;
+  int  mYearMonthDay,mHourMinSec;
   TString  mSetupPath;
 
   //replicas of oryginal daq data containers, tmp open for export
@@ -82,6 +82,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.5  2007/11/06 22:07:20  balewski
+// added timeStamp controlled L2 setup from Jason
+//
 // Revision 1.4  2007/11/02 17:42:56  balewski
 // cleanup & it started to work w/ L2upsilon
 //
