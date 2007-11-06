@@ -65,7 +65,8 @@ struct EEmcStripMapItem {
 };
 
 //-- Maps towers to individual strips --
-struct EEmcTowerMapItem {
+struct EEmcTowerMapItem  {
+ EEmcTowerMapItem() : nTower(0) {}
   Int_t                nTower;    // Number of towers which match strip
   std::vector<TString> towers;    // [nTower] array of tower names, eg 01TA01
   std::vector<Int_t>   sector;    // [nTower] array of sectors
