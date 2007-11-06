@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.160 2007/10/13 01:27:27 perev Exp $
+* $Id: geometry.g,v 1.161 2007/11/06 01:19:35 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.161  2007/11/06 01:19:35  perev
+* y2008 geo
+*
 * Revision 1.160  2007/10/13 01:27:27  perev
 * u2007 ==> upgr20
 *
@@ -199,7 +202,7 @@
 *
 * Revision 1.120  2006/03/21 23:51:41  potekhin
 * Fairly significant additions:
-* (a) add steering for the muon trigger system, "mutd"
+* (a) add steering for the muon trigger system, "MUTD"
 * (b) specify a complete barrel calorimeter for Y2006
 * (c) add steering for the corrected SSD (sisdgeo3)
 * (d) add steering for a small modifications in the SVT shield in Y2006
@@ -604,11 +607,11 @@
 * 1) Fixed typos in comments
 *
 * 2) Created a few options that allow the user to selectively include
-* certain detectors such as svtt, ecal, calb into the minimal geometry,
+* certain detectors such as svtt, ECAL, CALB into the minimal geometry,
 * thus facilitating the creation of custom geometries on the fly --
 * useful for debugging and detector exploration
 *
-* 3) Improved the phmd logic
+* 3) Improved the PHMD logic
 *
 * 4) last but not least -- the shift variable for CALB was changed from
 * {75,75} (incorrect) to {75,105} in geometry y2003x (full).
@@ -674,7 +677,7 @@
 * Important: the hadronic interactions are now indeed actuated in GCALOR
 *
 * Revision 1.53  2002/12/05 23:28:41  potekhin
-* Streamlined the btof config logic
+* Streamlined the BTOF config logic
 *
 * Revision 1.52  2002/11/27 21:53:14  potekhin
 * code improvement for readability etc -- moved bbcmgeo call
@@ -707,13 +710,13 @@
 * switch on/off cooling water
 *
 * Revision 1.42  2001/03/15 01:24:47  nevski
-* default btof forced to no TOF tray
+* default BTOF forced to no TOF tray
 *
 * Revision 1.41  2001/03/15 01:14:20  nevski
 * first approach to forward pion detector
 *
 * Revision 1.40  2001/03/13 20:56:31  nevski
-* variable rich position taken from DB
+* variable RICH position taken from DB
 *
 * Revision 1.39  2001/03/12 01:01:30  nevski
 * mwc x-hits corrected
@@ -734,9 +737,9 @@
 *                                                                         *
 *  Update history:                                                        *
 *  08/19/98, PN: tof is not part of year_2a                               *
-*  12/04/98, PN: rich  + upstream part + zero degree calo                 *
+*  12/04/98, PN: RICH  + upstream part + zero degree calo                 *
 *  09/26/99, E.Cains: 1H geometry added - one svt ladder at layer 3       *
-*  01/27/99, PN: rich in 1H geometry is simulated with hits is quartz & fr*
+*  01/27/99, PN: RICH in 1H geometry is simulated with hits is quartz & fr*
 *  05/22/01, PN: starting with tag y2000 field is version 3 (direct map)  *
 *  09/30/03, MP: see the many new CVS comments about recent check-ins     *
 *  09/30/03, MP: converted the sub into a MODULE to allow for ZEBRA access*
@@ -745,11 +748,12 @@
    Structure  GDAT {real mfscale, char gtag(2)}
 
 * list of system on/off switches:
-   Logical    cave,pipe,svtt,sisd,tpce,ftpc,
-              btof,vpdd,magp,calb,ecal,upst,
-              rich,zcal,mfld,bbcm,fpdm,phmd,
-              pixl,istb,gemb,fstd,ftro,fgtd,
-              shld,quad,mutd,igtd,hpdt,itsp,dumm
+   Logical    CAVE,PIPE,SVTT,SISD,TPCE,FTPC,
+              BTOF,VPDD,MAGP,CALB,ECAL,UPST,
+              RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,
+              PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
+              SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
+	      DUMM,SCON
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -874,12 +878,12 @@ replace[;ON#{#;] with [
    field=5               " default"
 
 * "Canonical" detectors are all ON by default,
-   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
+   {CAVE,PIPE,SVTT,TPCE,FTPC,BTOF,VPDD,CALB,ECAL,MAGP,MFLD,UPST,ZCAL} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd,hpdt,itsp,dumm} = off;
+   {BBCM,FPDM,PHMD,PIXL,ISTB,GEMB,FSTD,SISD,FTRO,FGTD,SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,DUMM,SCON} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
-   {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
+   {ems,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
    NsiMin=1;             " the innermost layer of SVT                     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
@@ -887,7 +891,7 @@ replace[;ON#{#;] with [
    Itof=2                " use btofgeo2 - default starting from Y2000     "
    Rv=2                  " add non-sensitive hits to RICH system          "
    Rp=2                  " real RICH position and spectra inst.of nominal "
-   nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
+   nonf={1,2,2}          " ECAL on right side, FPD parts on left side     "
    ecal_config=0         " Ecal: east, west or both                       "
    ecal_fill=3           " full wheel by default                          "
    mf=2                  " default field - symmetrical, as fitted by Bill "
@@ -937,10 +941,10 @@ If LL>1
 
   on YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
                   BtofConfig=4;
-                  {rich,ems}=on;  nmod={24,0}; shift={21,0};  
+                  {RICH,ems}=on;  nmod={24,0}; shift={21,0};  
                   nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
 
-  on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  bbcm=on;            }
+  on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  BBCM=on;            }
 
 *************************************************************************************************************
 * as complete as Y2003X below but with all corrections AND pixel detector
@@ -956,16 +960,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=3   "both wheels"
                      ecal_fill=3     "all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -976,20 +980,20 @@ If LL>1
                      SvttConfig = 4;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=off;
+                     SISD=off;
                      SisdConfig = 1;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;    " put the pixel detector in"
+                   PIXL=on;    " put the pixel detector in"
                    PixlConfig=1;
                 }
 ****************************************************************************************
 * corrected: MWC readout, RICH reconstructed position, no TOF 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
-                  {vpdd,ecal,ftpc,svtw}=off; {rich,ems}=on; Field=2.5; 
+                  {VPDD,ECAL,FTPC,svtw}=off; {RICH,ems}=on; Field=2.5; 
                   nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  Nsi=-3;}
 
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
@@ -1003,14 +1007,14 @@ If LL>1
                      SupoConfig = 1; "FTPC Support"
 
                   BtofConfig=4;
-                  {rich,ems}=on;
+                  {RICH,ems}=on;
 
-* a newer way to steer ecal:
-                  ecal_config=1   " one ecal patch, west "
+* a newer way to steer ECAL:
+                  ecal_config=1   " one ECAL patch, west "
 
 * this was put here in recent versions (as of 1.50) and I believe this is wrong as
 * it destroys compatibility with earlier code: --max--
-*    ecal=off;  
+*    ECAL=off;  
                   nmod={24,0}; shift={21,0}; Itof=2; Rv=2; Mf=3;       Nsi=6; }  
                 
 ****************************************************************************************
@@ -1022,24 +1026,24 @@ If LL>1
                   "tpc: standard, i.e.  "
                      mwc=on       " Wultiwire chambers are read-out ";
                      pse=on       " inner sector has pseudo padrows ";
-                  "rich"
-                     rich=on      " have rich ";
+                  "RICH"
+                     RICH=on      " have RICH ";
                      Rv=2;        " save additional (fake) hits "; 
                   "ctb: central trigger barrer ";
                      Itof=2       " call btofgeo2 ";
                      BtofConfig=4;
-                  "calb: barrel calorimeter "
+                  "CALB: barrel calorimeter "
                      ems=on       " sector version "
                      nmod={24,0}  " 24 sectors ";
                      shift={21,0} " starting from 21         "; 
-                  "ecal "
-                     ecal=off
+                  "ECAL "
+                     ECAL=off
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=2;
                   "field version "
                      Mf=4;      " tabulated field, with correction ";
@@ -1056,18 +1060,18 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 "  btofgeo2  ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on   "endcap "
                      nmod={60,0}; shift={0,0}; " 60 sectors "
-                  "ecal" 
-                     ecal_config=1   "one ecal patch, west "
+                  "ECAL" 
+                     ecal_config=1   "one ECAL patch, west "
                      ecal_fill=1     " sectors 2-5 filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
@@ -1092,18 +1096,18 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,0}; shift={75,0}; " 60 sectors " 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=1     " sectors 2-5 filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
@@ -1130,18 +1134,18 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,0}; shift={75,0}; " 60 sectors " 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=1     " sectors 2-5 filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
@@ -1161,18 +1165,18 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,0}; shift={75,0}; " 60 sectors " 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=1     " sectors 2-5 filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
@@ -1182,7 +1186,7 @@ If LL>1
                 }
 
 ****************************************************************************************
-  on Y2003X    { same as y2003b but with full calorimeters and phmd
+  on Y2003X    { same as y2003b but with full calorimeters and PHMD
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -1193,18 +1197,18 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-                  "ecal" 
+                  "ECAL" 
                      ecal_config=3   "both wheels"
                      ecal_fill=3     "all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
@@ -1213,7 +1217,7 @@ If LL>1
                      SvttConfig = 2; "SVTT version"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                 }
 
@@ -1239,23 +1243,23 @@ If LL>1
                      BtofConfig=7;
 
 * note the full barrel same as in y2003x:
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1267,11 +1271,11 @@ If LL>1
                      DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 2;
                 }
 
@@ -1294,23 +1298,23 @@ If LL>1
                      BtofConfig=7;
 
 * note the full barrel same as in y2003x:
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1319,19 +1323,19 @@ If LL>1
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 4; "SVTT version"
                      DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
+                     FtpcConfig = 1; "FTPC configuration"
 * Above:  Ar+C02 in ftpc
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 22;
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -1355,7 +1359,7 @@ If LL>1
 * note the upgrade with respect to previous years:
                      BtofConfig=7;
 
-                  "calb" 
+                  "CALB" 
                      ems=on
                      CalbConfig = 1
 * remember that with this config, the following parameters have
@@ -1364,19 +1368,19 @@ If LL>1
 * control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1388,11 +1392,11 @@ If LL>1
                      DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 2;
                 }
 
@@ -1413,23 +1417,23 @@ If LL>1
 * note the upgrade with respect to previous years:
                      BtofConfig=7;
 
-                  "calb" 
+                  "CALB" 
                      CalbConfig = 1  " Please see note in Y2004A"
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1441,11 +1445,11 @@ If LL>1
                      DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 12;
 
                 }
@@ -1468,23 +1472,23 @@ If LL>1
 * note the upgrade with respect to previous years:
                      BtofConfig=7;
 
-                  "calb" 
+                  "CALB" 
                      CalbConfig = 1  " Please see note in Y2004A"
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1499,16 +1503,16 @@ If LL>1
 
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
 * second file version, 10 ladders
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 22;
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -1533,23 +1537,23 @@ If LL>1
 * note the upgrade with respect to previous years:
                      BtofConfig=7;
 
-                  "calb" 
+                  "CALB" 
                      CalbConfig = 1  " Please see note in Y2004A"
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1564,16 +1568,16 @@ If LL>1
 
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
 * second file version, 10 ladders
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 22;
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -1606,7 +1610,7 @@ If LL>1
 * note the upgrade with respect to previous years:
                      BtofConfig=7;
 
-                  "calb" 
+                  "CALB" 
                      ems=on
                      CalbConfig = 1
 * remember that with this config, the following parameters have
@@ -1616,19 +1620,19 @@ If LL>1
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1640,11 +1644,11 @@ If LL>1
                      DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 2;
                 }
 
@@ -1667,23 +1671,23 @@ If LL>1
                      BtofConfig=7;
 
 * note the full barrel same as in y2003x:
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1695,16 +1699,16 @@ If LL>1
                      DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 23; "second version, full barrel"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                 }
@@ -1727,7 +1731,7 @@ If LL>1
 * note the upgrade with respect to previous years:
                      BtofConfig=7;
 
-                  "calb" 
+                  "CALB" 
                      ems=on
                      CalbConfig = 1
 * remember that with this config, the following parameters have
@@ -1736,19 +1740,19 @@ If LL>1
 * control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1762,16 +1766,16 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 24; "second version, full barrel with corrected radii"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -1797,7 +1801,7 @@ If LL>1
 * NEW CONFIG!
                      BtofConfig=8;
 
-                  "calb" 
+                  "CALB" 
                      ems=on
                      CalbConfig = 1
 * remember that with this config, the following parameters have
@@ -1806,19 +1810,19 @@ If LL>1
 * control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1832,16 +1836,16 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 24; "second version, full barrel with corrected radii"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -1867,7 +1871,7 @@ If LL>1
 * NEW CONFIG!
                      BtofConfig=8;
 
-                  "calb" 
+                  "CALB" 
                      ems=on
                      CalbConfig = 1
 * remember that with this config, the following parameters have
@@ -1876,19 +1880,19 @@ If LL>1
 * control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1902,16 +1906,16 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 24; "second version, full barrel with corrected radii"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -1938,23 +1942,23 @@ If LL>1
                      BtofConfig=8;
 
 * note the full barrel same as in y2003x:
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -1969,16 +1973,16 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 35; "second version, full barrel with corrected radii"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -2005,24 +2009,24 @@ If LL>1
                      BtofConfig=8;
 
 * note the full barrel same as in y2003x:
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -2037,16 +2041,16 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, full barrel with corrected radii and dead area"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -2072,7 +2076,7 @@ If LL>1
 * note the upgrade with respect to previous years:
                      BtofConfig=7;
 
-                  "calb" 
+                  "CALB" 
                      ems=on
                      CalbConfig = 1
 * remember that with this config, the following parameters have
@@ -2081,19 +2085,19 @@ If LL>1
 * control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -2105,16 +2109,16 @@ If LL>1
                      DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 23; "second version, full barrel"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                 }
@@ -2136,25 +2140,25 @@ If LL>1
                      Itof=4 " call btofgeo4 ";
                      BtofConfig=8;
 * Full barrel in 2006
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 2 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -2169,22 +2173,22 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=off;
+                     PHMD=off;
                      PhmdConfig = 0;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, full barrel newly corrected radii and dead area"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 1;
                   "We need a bigger Cave"
                      CaveConfig = 3;
@@ -2208,25 +2212,25 @@ If LL>1
                      BtofConfig=8;
 
 * Full barrel in 2006
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 2 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -2241,22 +2245,22 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, full barrel newly corrected radii and dead area"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 1;
                   "We need a bigger Cave"
                      CaveConfig = 3;
@@ -2280,24 +2284,24 @@ If LL>1
                      BtofConfig=8;
 
 * Full barrel in 2006
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 2 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -2312,22 +2316,22 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 35; "third version, full barrel newly corrected radii"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 1;
                   "We need a bigger Cave"
                      CaveConfig = 3;
@@ -2351,24 +2355,24 @@ If LL>1
                      BtofConfig=8;
 
 * Full barrel in 2006
-                  "calb" 
+                  "CALB" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -2383,22 +2387,22 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 35; "third version, full barrel newly corrected radii"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 1;
                   "We need a bigger Cave"
                      CaveConfig = 3;
@@ -2422,24 +2426,24 @@ If LL>1
                      BtofConfig=10;
 
 * Full barrel in 2007
-                  "calb" 
+                  "CALB" 
                      ems=on ;
 * important:
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 3 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=7;
 
                   "field version "
@@ -2454,22 +2458,22 @@ If LL>1
                      FtpcConfig = 1;  "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 1;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
@@ -2493,24 +2497,24 @@ If LL>1
                      BtofConfig=10;
 
 * Full barrel in 2007
-                  "calb" 
+                  "CALB" 
                      ems=on ;
 * important:
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 3 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=7;
 
                   "field version "
@@ -2525,33 +2529,32 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 1;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
                 }
 ****************************************************************************************
-  on Y2008    { Year 2008 baseline: no SVT, material stripped from cones
-                  "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+  on Y2008    { Year 2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now
+                  
 
+                     SVTT = off;
+		     SCON = on;
                      ConeConfig=2 " new cable weight estimate ";
 
                   "tpc: standard, i.e.  "
@@ -2564,24 +2567,24 @@ If LL>1
                      BtofConfig=11;
 
 * Full barrel in 2007
-                  "calb" 
+                  "CALB" 
                      ems=on ;
 * important:
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 3 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=7;
 
                   "field version "
@@ -2596,30 +2599,30 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
-                     MutdConfig = 1;
+                     MUTD = on;
+                     MutdConfig = 3;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
                 }
 ****************************************************************************************
   on DUMM01   { R and D geometry: TPC+DUMM
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -2627,16 +2630,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -2646,19 +2649,19 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=off;
+                     PHMD=off;
                      PhmdConfig = 0;
                   "Silicon Strip Detector Version "
-                     sisd=off;
+                     SISD=off;
                      SisdConfig = 0;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   dumm=on;        " put the dummy in"
+                   DUMM=on;        " put the dummy in"
                 }
 ****************************************************************************************
   on UPGR01   { R and D geometry: TPC+SSD+HFT-SVT
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -2666,16 +2669,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -2685,26 +2688,26 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 * HPD, IST off
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=2;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * Forward GEM disks in this tag
-                   igtd=on;
+                   IGTD=on;
 * prototype of the Inner Tracker SuPport structure
-                   itsp=on;
+                   ITSP=on;
                 }
 ****************************************************************************************
   on UPGR02    { R and D geometry: TPC+IST+HFT-SVT
@@ -2724,7 +2727,7 @@ If LL>1
 * NEW CONFIG!
                      BtofConfig=8;
 
-                  "calb" 
+                  "CALB" 
                      ems=on
                      CalbConfig = 1
 * remember that with this config, the following parameters have
@@ -2733,19 +2736,19 @@ If LL>1
 * control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -2759,25 +2762,25 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=off;
+                     SISD=off;
                      SisdConfig = 0; "no ssd here"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
+                   ISTB=on;  "new pixel based inner tracker"
                    IstbConfig=1;
 
 * careful! Achtung!
                    pipeConfig=5;   " thinner pipe "
-                   pixl=on;        " activate "
+                   PIXL=on;        " activate "
                    PixlConfig=3;   " source version "
 
                   "New version of the TPC backplane "
@@ -2787,7 +2790,7 @@ If LL>1
 *************************************************************************************************************
   on UPGR03   { New Tracking: IST+IGT+HFT-SVT
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -2795,16 +2798,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 *                    -- Obsoleted: CorrNum = 4;
@@ -2814,34 +2817,34 @@ If LL>1
                      SvttConfig = 4;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 23;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=2;   " newer version decoupled from SVT"
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
+                   ISTB=on;  "new pixel based inner tracker"
                    IstbConfig=1;
 * Inner STAR GEM barrel
-                   gemb=off;  
+                   GEMB=off;  
                    GembConfig=0;
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=1;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * the forward GEM disks
-                   igtd=on;
+                   IGTD=on;
                 }
 *************************************************************************************************************
   on UPGR04   { New Tracking: HPD
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
 
                   "tpc: standard, i.e.  "
@@ -2850,16 +2853,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 *                    -- Obsoleted: CorrNum = 4;
@@ -2869,20 +2872,20 @@ If LL>1
                      SvttConfig = 4;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=off;
+                     PHMD=off;
                      PhmdConfig = 0;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 35;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   hpdt=on;        " put the detector in"
+                   HPDT=on;        " put the detector in"
                    HpdtConfig=1;   " base version"
                 }
 ****************************************************************************************
   on UPGR05   { New Tracking: HFT+HPD+IST+TPC-SVT
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -2890,16 +2893,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -2909,39 +2912,39 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
-                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HPDT=on;        " put the Hybrid Pixel detector in"
                    HpdtConfig=1;   " base version"
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
+                   ISTB=on;  "new pixel based inner tracker"
                    IstbConfig=3;
 * Inner STAR GEM barrel
-                   gemb=off;  
+                   GEMB=off;  
                    GembConfig=0;
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=2;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * Forward GEM disks in this tag
-                   igtd=on;
+                   IGTD=on;
 * prototype of the Inner Tracker SuPport structure
-                   itsp=on;
+                   ITSP=on;
                 }
 ****************************************************************************************
   on UPGR06   { New Tracking: HFT+HPD+SSD
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -2949,16 +2952,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -2968,33 +2971,33 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
-                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HPDT=on;        " put the Hybrid Pixel detector in"
                    HpdtConfig=1;   " base version"
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=2;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * Forward GEM disks in this tag
-                   igtd=on;
+                   IGTD=on;
 * prototype of the Inner Tracker SuPport structure
-                   itsp=on;
+                   ITSP=on;
                 }
 ****************************************************************************************
   on UPGR07   { New Tracking: HFT+IST+TPC+SSD-SVT
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -3002,16 +3005,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -3021,29 +3024,29 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
-                   istb=on;  "IST barrel"
+                   ISTB=on;  "IST barrel"
                    IstbConfig=3;
 
-                   fstd=on;  "new pixel based forward tracker disk"
+                   FSTD=on;  "new pixel based forward tracker disk"
                    FstdConfig=2;
 
-                   igtd=on; "Forward GEM disks in this tag"
-                   itsp=on; "prototype of the Inner Tracker SuPport structure"
+                   IGTD=on; "Forward GEM disks in this tag"
+                   ITSP=on; "prototype of the Inner Tracker SuPport structure"
                 }
 ****************************************************************************************
   on UPGR08   { New Tracking: HFT+HPD+IST+TPC-SVT-SSD
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -3051,16 +3054,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -3070,39 +3073,39 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=off;
+                     SISD=off;
                      SisdConfig = 0;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
-                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HPDT=on;        " put the Hybrid Pixel detector in"
                    HpdtConfig=1;   " base version"
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
+                   ISTB=on;  "new pixel based inner tracker"
                    IstbConfig=3;
 * Inner STAR GEM barrel
-                   gemb=off;  
+                   GEMB=off;  
                    GembConfig=0;
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=2;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * Forward GEM disks in this tag
-                   igtd=on;
+                   IGTD=on;
 * prototype of the Inner Tracker SuPport structure
-                   itsp=on;
+                   ITSP=on;
                 }
 ****************************************************************************************
   on UPGR09   { New Tracking: HFT+HPD+IST*outer+TPC-SVT-SSD
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -3110,16 +3113,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -3129,39 +3132,39 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=off;
+                     SISD=off;
                      SisdConfig = 0;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
-                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HPDT=on;        " put the Hybrid Pixel detector in"
                    HpdtConfig=1;   " base version"
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
+                   ISTB=on;  "new pixel based inner tracker"
                    IstbConfig=4;
 * Inner STAR GEM barrel
-                   gemb=off;  
+                   GEMB=off;  
                    GembConfig=0;
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=2;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * Forward GEM disks in this tag
-                   igtd=on;
+                   IGTD=on;
 * prototype of the Inner Tracker SuPport structure
-                   itsp=on;
+                   ITSP=on;
                 }
 ****************************************************************************************
   on UPGR10   { New Tracking: HFT+innerLayerIST+TPC-SVT+SSD
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -3169,16 +3172,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -3188,40 +3191,40 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=off;
+                     SISD=off;
                      SisdConfig = 0;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
                   "Silicon Strip Detector Version "
-                   sisd=on;
+                   SISD=on;
                    SisdConfig = 45;
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
+                   ISTB=on;  "new pixel based inner tracker"
                    IstbConfig=5;
 * Inner STAR GEM barrel
-                   gemb=off;  
+                   GEMB=off;  
                    GembConfig=0;
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=2;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * Forward GEM disks in this tag
-                   igtd=on;
+                   IGTD=on;
 * prototype of the Inner Tracker SuPport structure
-                   itsp=on;
+                   ITSP=on;
                 }
 ****************************************************************************************
   on UPGR11   { New Tracking: HFT+2LayerIST+TPC-SVT+SSD
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -3229,16 +3232,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -3248,37 +3251,37 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
                   "Silicon Strip Detector Version "
-                   sisd=on;
+                   SISD=on;
                    SisdConfig = 45;
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
+                   ISTB=on;  "new pixel based inner tracker"
                    IstbConfig=6;
 * Inner STAR GEM barrel
-                   gemb=off;  
+                   GEMB=off;  
                    GembConfig=0;
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=2;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * Forward GEM disks in this tag
-                   igtd=on;
+                   IGTD=on;
 * prototype of the Inner Tracker SuPport structure
-                   itsp=on;
+                   ITSP=on;
                 }
 ****************************************************************************************
   on UPGR12   { New Tracking: HFT+HPD+IST+TPC+IGT*newRadii
 
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -3286,16 +3289,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -3305,39 +3308,39 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
-                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HPDT=on;        " put the Hybrid Pixel detector in"
                    HpdtConfig=1;   " base version"
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
+                   ISTB=on;  "new pixel based inner tracker"
                    IstbConfig=3;
 * Inner STAR GEM barrel
-                   gemb=off;  
+                   GEMB=off;  
                    GembConfig=0;
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
+                   FSTD=on;  "new pixel based forward tracker"
                    FstdConfig=2;
 * Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
+                   FGTD=off;  "GEM forward tracker"
                    FgtdConfig=0;
 * Forward GEM disks in this tag
-                   igtd=on;
+                   IGTD=on;
                    IgtdConfig=2;
 * prototype of the Inner Tracker SuPport structure
-                   itsp=on;
+                   ITSP=on;
                 }
 ****************************************************************************************
   on UPGR13   { New Tracking: HFT+IST+TPC+SSD-SVT
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Multiwire chambers are read-out ";
@@ -3345,16 +3348,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -3364,31 +3367,31 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 65;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=5;   " newest version, thicker active Si"
 
-                   istb=on;  "IST barrel"
+                   ISTB=on;  "IST barrel"
                    IstbConfig=7;
 
-                   fstd=off;  "no pixel based forward tracker in this tag"
+                   FSTD=off;  "no pixel based forward tracker in this tag"
                    FstdConfig=0;
 
 * Forward STAR tracker disk
-                   fgtd=on;  "GEM forward tracker"
+                   FGTD=on;  "GEM forward tracker"
                    FgtdConfig=2;
 * On Gerrit's request, we disable the cone:
-                   itsp=off; "prototype of the Inner Tracker SuPport structure"
+                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
                 }
 ****************************************************************************************
   on UPGR14   { TUP sans IST: HFT+TPC+SSD-SVT
-                     svtt=off; "no SVT  at all in this configuration"
+                     SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Multiwire chambers are read-out ";
@@ -3396,16 +3399,16 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
-                  "calb" 
+                  "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
+                  "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
@@ -3415,27 +3418,27 @@ If LL>1
                      SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 65;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
+                   PIXL=on;        " put the pixel detector in"
                    PixlConfig=5;   " newest version, thicker active Si"
 
-                   istb=off;       "no IST barrel"
+                   ISTB=off;       "no IST barrel"
                    IstbConfig=0;   "ditto"
 
-                   fstd=off;  "no pixel based forward tracker in this tag"
+                   FSTD=off;  "no pixel based forward tracker in this tag"
                    FstdConfig=0;
 
 * Forward STAR tracker disk
-                   fgtd=on;  "GEM forward tracker"
+                   FGTD=on;  "GEM forward tracker"
                    FgtdConfig=2;
 * On Gerrit's request, we disable the cone:
-                   itsp=off; "prototype of the Inner Tracker SuPport structure"
+                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
                 }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
@@ -3455,7 +3458,7 @@ If LL>1
 * NEW CONFIG!
                      BtofConfig=8;
 
-                  "calb" 
+                  "CALB" 
                      ems=on
                      CalbConfig = 1
 * remember that with this config, the following parameters have
@@ -3464,19 +3467,19 @@ If LL>1
 * control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 1 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=4;
 
                   "field version "
@@ -3490,16 +3493,16 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 24; "second version, full barrel with corrected radii"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
@@ -3525,24 +3528,24 @@ If LL>1
                      BtofConfig=10;
 
 * Full barrel in 2007
-                  "calb" 
+                  "CALB" 
                      ems=on ;
 * important:
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 3 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=7;
 
                   "field version "
@@ -3557,22 +3560,22 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 1;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
@@ -3597,24 +3600,24 @@ If LL>1
                      BtofConfig=6;
 
 * Full barrel in 2007
-                  "calb" 
+                  "CALB" 
                      ems=on ;
 * important:
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 3 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=7;
 
                   "field version "
@@ -3629,22 +3632,22 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 2;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
@@ -3668,24 +3671,24 @@ If LL>1
                      BtofConfig=10;
 
 * Full barrel in 2007
-                  "calb" 
+                  "CALB" 
                      ems=on ;
 * important:
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                  "ECAL"
+                     ecal_config=1   " one ECAL patch, west "
                      ecal_fill=3     " all sectors filled "
 
                   "beam-beam counter "
-                     bbcm=on
+                     BBCM=on
 
                   "forward pion detector "
-                     fpdm=on
+                     FPDM=on
                      FpdmConfig  = 3 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
-                     vpdd=on;
+                     VPDD=on;
                      VpddConfig=7;
 
                   "field version "
@@ -3700,22 +3703,22 @@ If LL>1
                      FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
+                     PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     SISD=on;
                      SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
 
 
                   "FTPC Readout barrel "
-                     ftro=on;
+                     FTRO=on;
                      FtroConfig = 1;
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
                   "Muon Trigger System"
-                     mutd = on;
+                     MUTD = on;
                      MutdConfig = 2;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
@@ -3744,40 +3747,40 @@ If LL>1
                 }
 
   on TPC_ONLY   { Minimal geometry - only TPC;
-                  {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm,sisd,ftro}=off; }
+                  {PIPE,SVTT,ftpc,BTOF,VPDD,CALB,ECAL,MAGP,UPST,ZCAL,PHMD,FPDM,BBCM,SISD,FTRO}=off; }
   on TPC_AND_SVTT  { Only TPC and SVT;
-                  {pipe,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm,ftro}=off; }
+                  {PIPE,ftpc,BTOF,VPDD,CALB,ECAL,MAGP,UPST,ZCAL,PHMD,FPDM,BBCM,FTRO}=off; }
   on SVTT_ON    { Optional SVTT added on top of the minimal geo;
-                     svtt=on; }
+                     SVTT=on; }
   on SVTT_OFF   { Optionally remove the SVTT;
-                     svtt=off; }
+                     SVTT=off; }
   on SISD_OFF   { Optionally remove the SISD ssd;
-                     sisd=off; }
+                     SISD=off; }
   on ONLY_SVTT   { Only SVTT;
-                  {pipe,tpce,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm,ftro}=off; }
+                  {PIPE,TPCE,ftpc,BTOF,VPDD,CALB,ECAL,MAGP,UPST,ZCAL,PHMD,FPDM,BBCM,FTRO}=off; }
 *
-  on PIPE_ON    { Optional pipe added on top of the minimal geo;
-                     pipe=on; }
+  on PIPE_ON    { Optional PIPE added on top of the minimal geo;
+                     PIPE=on; }
   on PIPE_OFF   { Pipe optionally removed;
-                     pipe=off; }
+                     PIPE=off; }
 *
   on FTPC_ON    { Optional FTPC added on top of the minimal geo;
                      ftpc=on; }
   on BTOF_ON    { Optional BTOF added on top of the minimal geo;
-                     btof=on; }
+                     BTOF=on; }
   on ECAL_ON    { Optional ECAL added on top of the minimal geo;
-                     ecal=on; }
+                     ECAL=on; }
   on CALB_ON    { Optional CALB added on top of the minimal geo;
-                     calb=on; }
+                     CALB=on; }
 
   on SHIELD_OFF { Can switch the shield off in the DEV geom;
-                     shld=off; }
+                     SHLD=off; }
 
   on PIXL_ON    { Optional PIXL added on top of the minimal geo;
-                     pixl=on; }
+                     PIXL=on; }
 
   on FIELD_ONLY { No geometry - only magnetic field;              NtrSubEv=0;
-      {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,rich,upst,zcal}=off; }
+      {CAVE,PIPE,SVTT,TPCE,ftpc,BTOF,VPDD,MAGP,CALB,ECAL,RICH,UPST,ZCAL}=off; }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
   on FIELD_ON   { Standard (5 KGs) field on;        field=5;                  }
 
@@ -3838,9 +3841,9 @@ If LL>1
    write(*,*) '***** FOR EXPERTS ONLY: LOOK UP GEOMETRY.G FOR DETAIL *******'
 
 
-   if (rich) ItCKOV = 1
+   if (RICH) ItCKOV = 1
 
-   if (cave) then
+   if (CAVE) then
       call AgDETP new ('CAVE')
       call AgDETP add ('CVCF.config=',CaveConfig,1)
       call cavegeo
@@ -3848,20 +3851,20 @@ If LL>1
 
 * Pipe:
    If (LL>1)        call AgDETP new ('PIPE')
-   call AgDETP add ('pipv.pipeConfig=',pipeConfig,2);
-   if (pipe)        Call pipegeo
+   call AgDETP add ('pipv.pipeConfig=',pipeConfig,1);
+   if (PIPE)        Call pipegeo
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
-   if (upst)        Call upstgeo
-   if (shld)        Call shldgeo
-   if (quad)        Call quadgeo
+   if (UPST)        Call upstgeo
+   if (SHLD)        Call shldgeo
+   if (QUAD)        Call quadgeo
 
 * --- 
    Call AGSFLAG('SIMU',2)
 
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
 
-   If (LL>1 & svtt) then
+   If (LL>1 & SVTT) then
      call AgDETP new ('SVTT')
      if (Nsi < 7)           call AgDETP add ('svtg.nlayer=',   Nsi,1)
      if (NsiMin > 1)        call AgDETP add ('svtg.nmin=',   NsiMin,1)
@@ -3874,7 +3877,7 @@ If LL>1
 
 ******************************************************************
 * Take care of the correction level and call the appropriate constructor:
-  if(svtt) then
+  if(SVTT .or. SCON) then
 
 *   This applies to the newer versions of the svt code:
 *   we can now switch to a better description of the cone
@@ -3888,18 +3891,25 @@ If LL>1
 * Or, pick a shield that is slighly bigger outside according to Lilian's observation
     if(SvshConfig==2) call AgDETP add ('svtg.SupportVer=',3 ,1)
 
+    if (SVTT) then
 * Ugly, but I don't want to hash function pointers in Fortran:
 
-    if(SvttConfig==0)  call svttgeo
-    if(SvttConfig==1)  call svttgeo1
-    if(SvttConfig==2)  call svttgeo2
-    if(SvttConfig==3)  call svttgeo3
-    if(SvttConfig==4)  call svttgeo4
-    if(SvttConfig==5)  call svttgeo5
-    if(SvttConfig==6)  call svttgeo6
-    if(SvttConfig==7)  call svttgeo7
-    if(SvttConfig==9)  call svttgeo9
-    if(SvttConfig==10) call svttgeo10
+      if(SvttConfig==0)  call svttgeo
+      if(SvttConfig==1)  call svttgeo1
+      if(SvttConfig==2)  call svttgeo2
+      if(SvttConfig==3)  call svttgeo3
+      if(SvttConfig==4)  call svttgeo4
+      if(SvttConfig==5)  call svttgeo5
+      if(SvttConfig==6)  call svttgeo6
+      if(SvttConfig==7)  call svttgeo7
+      if(SvttConfig==9)  call svttgeo9
+      if(SvttConfig==10) call svttgeo10
+
+  endif
+
+    if (SCON) then
+      call scongeo
+    endif
 
   endif
 
@@ -3907,12 +3917,12 @@ If LL>1
 * See note on top about using MOD(10) to encode the geometry
 * cut, as opposed to configuration of the detector:
 
-  if(sisd) then
+  if(SISD) then
        sisd_level=0
        call AgDETP new ('SISD')
 
 * if SVT is present, position the SSD in it, otherwise need to position in CAVE (default)
-       if(svtt) { call AgDETP add ('ssdp.Placement=',1 ,1) };
+       if(SVTT) { call AgDETP add ('ssdp.Placement=',1 ,1) };
 
 * In the following, level means the version of the ssd geo code to be loaded
 * It is the most important decimal place of the SisdConfig, and we just check
@@ -3955,7 +3965,7 @@ If LL>1
 *   CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
 * - for year_1 X in mwc hits was limited, keep this (mwx=1)
 
-   If (LL>1 & tpce) then
+   If (LL>1 & TPCE) then
      call AgDETP new ('TPCE')
 * Attention -- this line below was effectively moved into individual year 1 declarations:
 *     If (Geom(1:2)='_1') mwx=1
@@ -3972,9 +3982,9 @@ If LL>1
    if(DensConfig>0) call AgDETP add ('tpcg.gasCorr=',2 ,1)
 
    write(*,*) 'TPC'
-   if (tpce.and.TpceConfig==1) Call tpcegeo
-   if (tpce.and.TpceConfig==2) Call tpcegeo1
-   if (tpce.and.TpceConfig==3) Call tpcegeo2
+   if (TPCE.and.TpceConfig==1) Call tpcegeo
+   if (TPCE.and.TpceConfig==2) Call tpcegeo1
+   if (TPCE.and.TpceConfig==3) Call tpcegeo2
 
    write(*,*) 'FTPC'
    if (ftpc) then
@@ -3986,16 +3996,16 @@ If LL>1
    endif
 
 * FTPC readout electronics barrel
-   if (ftro) Call ftrogeo
+   if (FTRO) Call ftrogeo
 
    write(*,*) 'BTOF'
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
-   If (LL>1 & btof) then
+   If (LL>1 & BTOF) then
      call AgDETP new ('BTOF')
      call AgDETP add ('btog.choice=',BtofConfig,1)
    endif
 
-   if(btof) then
+   if(BTOF) then
       if(Itof.eq.1) write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
       if(Itof.eq.2) call btofgeo2
       if(Itof.eq.4) call btofgeo4
@@ -4006,7 +4016,7 @@ If LL>1
 
 
 ********************* Vertex Position Detector *******************
-   If (LL>1 & vpdd) then
+   If (LL>1 & VPDD) then
      call AgDETP new ('VPDD')
      call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
      if(VpddConfig<7) call vpddgeo
@@ -4015,14 +4025,14 @@ If LL>1
 
 ********************** BARREL CALORIMETER ************************
 *  - Set up the parameters for the barrel calorimeter
-   If (LL>1 & calb) then
+   If (LL>1 & CALB) then
      call AgDETP new ('CALB')
      if (ems)  call AgDETP add ('calg.nmodule=',Nmod, 2)
      if (ems)  call AgDETP add ('calg.shift=',  shift,2)
    endif
 
 
-   if (calb) then ! Pick the version:
+   if (CALB) then ! Pick the version:
 
        if(CalbConfig==0) then
            write(*,*) '************** Creating the 1996-2003 version of the Barrel Calorimeter'
@@ -4042,17 +4052,17 @@ If LL>1
   endif
 ******************************************************************
 *  - Set up the parameters for the RICH counter
-   if (LL>1 & rich) then
+   if (LL>1 & RICH) then
       call AgDETP new ('Rich')
       if (Rv>0) call AgDETP add ('Rich.Version=', Rv,1) 
       if (Rp>0) call AgDETP add ('Rich.Position=',Rp,1)
       if (Rp>0) call AgDETP add ('Rich.Cversion=',Rp,1)
    endif
-   if (rich) Call richgeo
+   if (RICH) Call richgeo
 
 ******************************************************************
 *  - Set up the parameters for the endcap calorimeter
-   If (LL>1 & ecal) then
+   If (LL>1 & ECAL) then
       call AgDETP new ('ECAL')
       call AgDETP add ('emcg.OnOff='   ,ecal_config,1)
       call AgDETP add ('emcg.FillMode=',ecal_fill,1)
@@ -4061,42 +4071,43 @@ If LL>1
 ******************************************************************
 * The rest of steering:
 
-   if (ecal)                   Call ecalgeo
-   if (bbcm)                   Call bbcmgeo
+   if (ECAL)                   Call ecalgeo
+   if (BBCM)                   Call bbcmgeo
 
-   if (fpdm.and.FpdmConfig==0) Call fpdmgeo
-   if (fpdm.and.FpdmConfig==1) Call fpdmgeo1
-   if (fpdm.and.FpdmConfig==2) Call fpdmgeo2
-   if (fpdm.and.FpdmConfig==3) Call fpdmgeo3
+   if (FPDM.and.FpdmConfig==0) Call fpdmgeo
+   if (FPDM.and.FpdmConfig==1) Call fpdmgeo1
+   if (FPDM.and.FpdmConfig==2) Call fpdmgeo2
+   if (FPDM.and.FpdmConfig==3) Call fpdmgeo3
 
-   if (zcal)                   Call zcalgeo
-   if (magp)                   Call magpgeo
+   if (ZCAL)                   Call zcalgeo
+   if (MAGP)                   Call magpgeo
 
-   if (mutd.and.MutdConfig==1) Call mutdgeo
-   if (mutd.and.MutdConfig==2) Call mutdgeo2
+   if (MUTD.and.MutdConfig==1) Call mutdgeo
+   if (MUTD.and.MutdConfig==2) Call mutdgeo2
+   if (MUTD.and.MutdConfig==3) Call mutdgeo3
 
-   if (pixl.and.PixlConfig==1) Call pixlgeo
-   if (pixl.and.PixlConfig==2) Call pixlgeo1
-   if (pixl.and.PixlConfig==3) Call pixlgeo2
-   if (pixl.and.PixlConfig==4) Call pixlgeo3
-   if (pixl.and.PixlConfig==5) then
+   if (PIXL.and.PixlConfig==1) Call pixlgeo
+   if (PIXL.and.PixlConfig==2) Call pixlgeo1
+   if (PIXL.and.PixlConfig==3) Call pixlgeo2
+   if (PIXL.and.PixlConfig==4) Call pixlgeo3
+   if (PIXL.and.PixlConfig==5) then
          call AgDETP new ('PIXL')
          call AgDETP add ('PXLV.LadVer=',2.0,1)
          call pixlgeo3
    endif
 
-   if (istb.and.IstbConfig==1) Call istbgeo
-   if (istb.and.IstbConfig==2) Call istbgeo1
-   if (istb.and.IstbConfig==3) Call istbgeo2
-   if (istb.and.IstbConfig==4) Call istbgeo3
-   if (istb.and.IstbConfig==5) Call istbgeo4
-   if (istb.and.IstbConfig==6) Call istbgeo5
-   if (istb.and.IstbConfig==7) Call istbgeo6
+   if (ISTB.and.IstbConfig==1) Call istbgeo
+   if (ISTB.and.IstbConfig==2) Call istbgeo1
+   if (ISTB.and.IstbConfig==3) Call istbgeo2
+   if (ISTB.and.IstbConfig==4) Call istbgeo3
+   if (ISTB.and.IstbConfig==5) Call istbgeo4
+   if (ISTB.and.IstbConfig==6) Call istbgeo5
+   if (ISTB.and.IstbConfig==7) Call istbgeo6
 
 
-   if (gemb.and.GembConfig>0)  Call gembgeo
+   if (GEMB.and.GembConfig>0)  Call gembgeo
 
-   if (fstd.and.FstdConfig>0)  then
+   if (FSTD.and.FstdConfig>0)  then
       if(FstdConfig==2) then
          call AgDETP new ('FSTD')
          call AgDETP add ('fstg.Rmax=',22.3,1)
@@ -4104,14 +4115,14 @@ If LL>1
         Call fstdgeo
    endif
 
-   if (fgtd.and.FgtdConfig==1)    then
+   if (FGTD.and.FgtdConfig==1)    then
       Call fgtdgeo  ! old, decomissioned
-   elseif(fgtd.and.FgtdConfig==2) then
+   elseif(FGTD.and.FgtdConfig==2) then
       write(*,*) '****** constructing the new 6-disk Forward Gem Tracker geometry ***********'
       Call fgtdgeo1
    endif
 
-   if (igtd) then
+   if (IGTD) then
        if(IgtdConfig==2) then
            call AgDETP new ('IGTD')
            call AgDETP add ('igtv.Config=',IgtdConfig ,1)
@@ -4119,15 +4130,15 @@ If LL>1
        Call igtdgeo
    endif
 
-   if (hpdt.and.HpdtConfig>0)  Call hpdtgeo
+   if (HPDT.and.HpdtConfig>0)  Call hpdtgeo
 
-   if (itsp)                   Call itspgeo
+   if (ITSP)                   Call itspgeo
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
 * is defined, pass the version number to its constructor
 * and create it:
 
-   if  (phmd.and.PhmdConfig>0) then
+   if  (PHMD.and.PhmdConfig>0) then
       call AgDETP new ('PHMD')
       call AgDETP add ('PMVR.Config=', PhmdConfig,1)
       call phmdgeo
@@ -4135,7 +4146,7 @@ If LL>1
 
 
 ********************************************************************
-   if(dumm) then
+   if(DUMM) then
       call dummgeo
    endif
 ****************  Magnetic Field  ********************************
@@ -4143,13 +4154,13 @@ If LL>1
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
    If (LL>1) then
       call AgDETP new ('MFLD')
-      if (mfld & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
-      if (mfld & mf!=0)    call AgDETP add ('MFLG(1).version=',mf,1)
-*     if (mfld & mf>=4)    call AgDETP add ('MFLG(1).nrp=',200,1)
-*     if (mfld & mf>=4)    call AgDETP add ('MFLG(1).nzp=',800,1)
+      if (MFLD & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
+      if (MFLD & mf!=0)    call AgDETP add ('MFLG(1).version=',mf,1)
+*     if (MFLD & mf>=4)    call AgDETP add ('MFLG(1).nrp=',200,1)
+*     if (MFLD & mf>=4)    call AgDETP add ('MFLG(1).nzp=',800,1)
 
    endif
-   if (mfld) Call mfldgeo
+   if (MFLD) Call mfldgeo
 *
    if JVOLUM>0 
    { Call ggclos
