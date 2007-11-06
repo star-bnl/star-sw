@@ -1,3 +1,4 @@
+#include "Riostream.h"
 class St_db_Maker;
 class TTable;
 St_db_Maker *dbMk = 0;
@@ -8,28 +9,16 @@ struct data_t {
   Double_t v0, v1, v2, v3;
   Char_t Comment[10];
 };
-#ifdef Drift
+
 Int_t Drift = 1;
-#ifdef Pass126G
-#include "SvtDriftVelocities.Pass126.021G.h"
-#include "SvtDriftVelocities.Pass126.Cu62G.h"
-#include "SvtDriftVelocities.Pass126.049G.h"
-Int_t time =       25; 
-#endif
-#ifdef Pass126L
-#include "SvtDriftVelocities.Pass126.Cu62L.h"
-#include "SvtDriftVelocities.Pass126.021L.h"
-#include "SvtDriftVelocities.Pass126.049L.h"
-Int_t time =       26; 
-#endif
-#endif
-#ifndef Drift
-Int_t Drift = 0;
-//#include "SvtDriftVelocities.Pass126.021MAnodes.h"
-//#include "SvtDriftVelocities.Pass126.049MAnodes.h"
-#include "SvtDriftVelocities.Pass126.Cu62MAnodes.h"
-Int_t time =       27; 
-#endif
+#include "Results.DriftBarrel_Pass214_RFB_all.h"
+//#include "Results.DriftBarrel_2Pass214_TpcSsd_RFBPlotsNFP25rCut0.5cm.h"
+//#include "Results.DriftBarrel_3Pass214_TpcSsd_RFBPlotsNFP25rCut0.5cm.h"
+Int_t time =       102; 
+Int_t date =  20070524;
+const Char_t *Pass = "Pass214 RFB"; 
+
+
 static const Int_t N = sizeof(Data)/sizeof(data_t);
 
 
@@ -103,10 +92,11 @@ void MakeSvtDriftVelocities(){
     }
   }
   // Merge Drift velocities
-  TString fOut =  Form("%s.%8i.%06i.C",svtHybridDriftVelocity->GetName(),date,time);
+  Char_t Out[132];
+  sprintf(Out,"%s.%8i.%06i.C",svtHybridDriftVelocity->GetName(),date,time);
   ofstream out;
-  cout << "Create " << fOut << endl;
-  out.open(fOut.Data());
+  out.open(Out);
+  cout << "Create " << Out << endl;
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"St_svtHybridDriftVelocity\")) return 0;" << endl;
   out << "  svtHybridDriftVelocity_st row[" << NN << "] = {//" << Pass << endl; 
