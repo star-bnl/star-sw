@@ -4,17 +4,19 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 7e0,
-		    int flagMC=0, // 0== off
-		    int useEemc=1, // 0== off
+void rdMu2TrigSimu( int nevents = 6e1,
+		    int flagMC=1, // 0== off
+		    int useEemc=0, // 0== off
 		    int useBemc=1, // 0== off
-		    int useL2=1, // 0== off
+		    int useL2=0, // 0== off
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
 		    int playConfig=100, // jan:100_199
 		    int emcEveDump=0 // extrating raw EMC data in a custom format
 		    )  
 {
-  const char *dirIn="runList/";
+
+  if (flagMC==0)  const char *dirIn="runList/";
+  if (flagMC==1) const char *dirIn="";
   int nFiles = 20; // make this big if you want to read all events from a run
   
   char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
@@ -48,6 +50,7 @@ void rdMu2TrigSimu( int nevents = 7e0,
     assert( !gSystem->Load("StEpcMaker"));
   }
   assert( !gSystem->Load("StTriggerUtilities"));
+  //  if(emcEveDump) assert( !gSystem->Load("EmcBinEvent"));
 
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
@@ -75,13 +78,14 @@ void rdMu2TrigSimu( int nevents = 7e0,
   cout << "Avaliable number of events  " << nEntries << endl;  
   
   //Database -- get a real calibration from the database
-  St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  
+  //St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
+  St_db_Maker* dbMk = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
+   
   
   //If MC then must set database time and date
   // if Endcap fast simu is used tower gains in DB do not matter,JB
   if(flagMC) {
-    dbMk->SetDateTime(20070101,1 );
+    dbMk->SetDateTime(20060522, 112810);//Alans timestamp 7142018
   }
 
  //Collect all output histograms 
@@ -195,15 +199,15 @@ void rdMu2TrigSimu( int nevents = 7e0,
   cout << "****************************************** " << endl;
 
 
-  TString fileMu=file;
-  printf("=%s=\n",fileMu.Data());
-  TString outF=outDir+fileMu.ReplaceAll(".lis",".trgSim");
-  outF+=".hist.root";
-  printf("=%s=\n",outF.Data());
-  hf=new TFile(outF,"recreate");
+  // TString fileMu=file;
+  //printf("=%s=\n",fileMu.Data());
+  //TString outF=outDir+fileMu.ReplaceAll(".lis",".trgSim");
+  //outF+=".hist.root";
+  //printf("=%s=\n",outF.Data());
+  //hf=new TFile(outF,"recreate");
   //HList->ls();
-  HList->Write();
-  printf("\n Histo saved -->%s<\n",outF.Data());
+  //HList->Write();
+  //printf("\n Histo saved -->%s<\n",outF.Data());
   
   cout <<Form("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",total,nEntries,rate,tMnt)<<endl;
 
