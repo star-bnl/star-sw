@@ -362,8 +362,17 @@ void StEventQAMaker::MakeHistGlob() {
     gMessMgr->Info(" *** in StEventQAMaker - filling global track histograms ");
   
   StSPtrVecTrackNode &theNodes = event->trackNodes();
+
   StThreeVectorF pvert;
-  if (event->primaryVertex()) pvert = event->primaryVertex()->position();
+  Float_t highestRank = -999;
+  for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
+    Float_t currentRank = event->primaryVertex(v)->ranking();
+    if (currentRank > highestRank) {
+      highestRank = currentRank;
+      pvert = event->primaryVertex(v)->position();
+    }
+  }
+  
   Int_t cnttrk=0;
   Int_t cnttrkT=0;
   Int_t cnttrkTS=0;
@@ -2211,8 +2220,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.82 2007/11/07 22:39:07 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.83 2007/11/07 22:43:00 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.83  2007/11/07 22:43:00  genevb
+// Use highest rank primary vertex (one more)
+//
 // Revision 2.82  2007/11/07 22:39:07  genevb
 // Use highest rank primary vertex (missed a spot on last commit)
 //
