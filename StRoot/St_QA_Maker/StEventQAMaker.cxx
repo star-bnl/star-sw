@@ -951,22 +951,19 @@ void StEventQAMaker::MakeHistPrim() {
   Float_t mean_etaFE=0;
   Float_t mean_etaFW=0;
   
-  StPrimaryVertex *primVtx = event->primaryVertex();
-  UInt_t daughters=0;
-  UInt_t currentNumber=0;
-  StThreeVectorF pvert;
-  if (primVtx) {
-    pvert = primVtx->position();
-    for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
-      currentNumber = event->primaryVertex(v)->numberOfDaughters();
-      if (currentNumber > daughters) {
-	daughters = currentNumber;
-	primVtx = event->primaryVertex(v);
-      }
+  // Select primary vertex to use based on highest ranking
+  StPrimaryVertex *primVtx = 0;
+  Float_t highestRank = -999;
+  for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
+    Float_t currentRank = event->primaryVertex(v)->ranking();
+    if (currentRank > highestRank) {
+      highestRank = currentRank;
+      primVtx = event->primaryVertex(v);
     }
   }
   
   if (primVtx) {
+    StThreeVectorF pvert = primVtx->position();
     cnttrk = primVtx->numberOfDaughters();
     hists->m_primtrk_tot->Fill(cnttrk);
     hists->m_primtrk_tot_sm->Fill(cnttrk);
@@ -2216,8 +2213,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.80 2007/07/19 22:20:41 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.81 2007/11/07 20:49:13 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.81  2007/11/07 20:49:13  genevb
+// Use highest rank primary vertex
+//
 // Revision 2.80  2007/07/19 22:20:41  perev
 // FPEfix
 //
