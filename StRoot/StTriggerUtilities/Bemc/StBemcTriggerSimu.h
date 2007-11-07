@@ -5,6 +5,7 @@
 #include "TString.h"
 #include <vector>
 #include <set>
+#include "TDatime.h"
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 
@@ -26,6 +27,7 @@ class St_db_Maker;
 class StBemcTriggerDbThresholds;
 class StTriggerSimuMaker;
 class TDataSet;
+class St_db_Maker;
 
 class StBemcTriggerSimu : public StVirtualTriggerSimu {
 private:
@@ -60,21 +62,25 @@ private:
   Int_t DSM_TPStatus[kNPatches];           //DSM_TPStatus only set online
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
   unsigned long bitConvValue[kNTowers];    //gives window used to determine HT6Bit from adc10
-  
-  
+  Int_t year,timestamp;
+
   Int_t adc12[kNTowers];                   //12 bit adc from StEvent -> NOT pedestal adjusted!
   Int_t adc10[kNTowers],adc08[kNTowers];   //ped adjusted 10 and 8 bit adc
   Float_t ped12[kNTowers];                 //12 and 10 bit pedestal
   Int_t HTadc06[kNTowers];                 //6bit HT ADC for each tower
   
   unsigned long pedTargetValue;            //value FEE shifts pedestal to (12 bit)
-  unsigned long LUTbit0[kNCrates][kNSeq],LUTbit1[kNCrates][kNSeq],LUTbit2[kNCrates][kNSeq];
-  unsigned long LUTbit3[kNCrates][kNSeq],LUTbit4[kNCrates][kNSeq],LUTbit5[kNCrates][kNSeq];
-  unsigned long LUTtag[kNCrates][kNSeq];
   Float_t ped12Diff, ped10Diff;
   Int_t ped10DiffI;
-  Int_t L0_HT_ADC[kNPatches], L0_TP_ADC[kNPatches], L0_TP_PED[kNPatches];
+  Int_t *LUTbit[kNCrates][kNSeq], LUTtag[kNCrates][kNSeq];
   char buffer[10];
+
+  Int_t L0_HT_ADC[kNPatches], L0_TP_ADC[kNPatches], L0_TP_PED[kNPatches];
+  Int_t DSM0_TP_ADC[kL0DsmModule],DSM0_HT_ADC[kL0DsmModule];
+  Int_t DSM_L0_Bits[16];
+
+  //Thresholds set by database
+  Int_t HT_DSM0_threshold[kL0DsmModule], TP_DSM0_threshold[kL0DsmModule],HTTP_DSM0_threshold[kL0DsmModule];
 
   void getTowerStatus();
   void getDSM_TPStatus();
