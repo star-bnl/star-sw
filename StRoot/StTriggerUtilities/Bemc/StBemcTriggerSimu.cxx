@@ -101,10 +101,12 @@ void StBemcTriggerSimu::InitRun(int runnumber){
   getLUT();
   getPed();
 
-  //Get FEE window for HT from support class for offline operation
+  timestamp=starDb->GetDateTime().Get();
+  year=starDb->GetDateTime().GetYear(); 
+
+ //Get FEE window for HT from support class for offline operation
   //online replaced this with Db call in getPed()
-  int yyyy=starDb->GetDateTime().GetYear();  
-  HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(yyyy);
+  HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
 
 }
 //==================================================
@@ -234,6 +236,7 @@ void StBemcTriggerSimu::getDSM_HTStatus(){
 //==================================================
 //==================================================
 void StBemcTriggerSimu::getPed() {
+
   LOG_DEBUG<<"StBemcTriggerSimu::getPed()"<<endm;
 
   for (int i=1;i<=kNTowers;i++) {ped12[i-1]=0;}
@@ -282,18 +285,10 @@ void StBemcTriggerSimu::getPed() {
 void StBemcTriggerSimu::getLUT(){
   LOG_DEBUG<<"StBemcTriggerSimu::getLUT()"<<endm;
 
-  TDataSet *dbOnline = mHeadMaker->GetDataBase("Calibrations/emc/trigger"); 
-  St_emcTriggerLUT *LUTonline=(St_emcTriggerLUT*) dbOnline->Find("bemcTriggerLUT");
-  emcTriggerLUT_st *LUTtab=LUTonline->GetTable();
   for (int cr=1;cr<=kNCrates;cr++){
     for (int seq=0; seq<kNSeq; seq++){
-      LUTtag[cr][seq]=LUTtab->FormulaTag[cr][seq];
-      LUTbit0[cr][seq]=LUTtab->FormulaParameter0[cr][seq];
-      LUTbit1[cr][seq]=LUTtab->FormulaParameter1[cr][seq];
-      LUTbit2[cr][seq]=LUTtab->FormulaParameter2[cr][seq];
-      LUTbit3[cr][seq]=LUTtab->FormulaParameter3[cr][seq];
-      LUTbit4[cr][seq]=LUTtab->FormulaParameter4[cr][seq];
-      LUTbit5[cr][seq]=LUTtab->FormulaParameter5[cr][seq];
+      mTables->getTriggerFormulaTag(cr,seq,LUTtag[cr][seq]);
+      // mTables->getTriggerFormulaParameters(cr,seq,LUTbit[cr][seq]);
     }
   }
 }
@@ -307,9 +302,9 @@ void StBemcTriggerSimu::Make(){
   mEvent = static_cast<StEvent*> ( mHeadMaker->GetDataSet("StEvent") );
 
   FEEout();
-  //DSMLayer0();
-  //DSMLayer1();
-  //DSMLayer2();
+  DSMLayer0();
+  DSMLayer1();
+  DSMLayer2();
   
   // fill list of fired triggers for this event
 }
@@ -419,6 +414,7 @@ void StBemcTriggerSimu::FEEout() {
               }
               if (DSM_TPStatus[tpid]==1) {
                 L0_TP_ADC[tpid]+=adc08[did-1];
+		// This line needs to be replaced with LUT from the database in the case of online. For offline this is fine
                 L0_TP_PED[tpid]++;
               }
 
@@ -447,19 +443,31 @@ void StBemcTriggerSimu::FEEout() {
 //==================================================
 void StBemcTriggerSimu::DSMLayer0() {
   //output 16 bits
+  //need to get the thresholds + the bit locations for each year
   //0-9 ADC sum Trigger Patches
   //10-11 HT threshold bits
   //12-13 TP threshold bits
   //14-15 HT&&TP threshold bits
-  //for (int i=0;i<kL0DsmModule;i++){
 
-    // HT_L0_DSM_threshold[i]=mDbThres->GetHT_L0_DSM_threshold(i,yyyy);
-    //TP_L0_DSM_threshold[i]=mDbThres->GetTP_L0_DSM_threshold(i,yyyy);
+  int DSM_TP[kL0DsmInputs];
+  for (int i=0;i<kL0DsmModule;i++){
     
-    //for (int j=0;j<kL0DsmInputs;j++){
-      
-    // }
-  //}
+    //for (int l=0; l<3; l++){
+    //  HT_DSM0_threshold[i]=mDbThres->GetHT_DSM0_threshold(i,timestamp,l);
+    //  JP_DSM0_threshold[i]=mDbThres->GetTP_DSM0_threshold(i,timestamp,l);
+    //  HTTP_DSM0_threshold[i]=mDbThres->GetHTTP_DSM0_threshold(i,timestamp,l);    
+    //}
+    
+    mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP);
+    for (int j=0;j<kL0DsmInputs;j++){
+      int tpid=DSM_TP[j];
+      if (L0_HT_ADC[tpid]>DSM0_HT_ADC[i]) DSM0_HT_ADC[i]=L0_HT_ADC[tpid];
+      DSM0_TP_ADC[i]+=L0_TP_ADC[tpid];
+    }
+    //OK fine have HT 6bit and TP 10x6bit sum for each DSM
+
+
+  }
 }
 //==================================================
 //==================================================
