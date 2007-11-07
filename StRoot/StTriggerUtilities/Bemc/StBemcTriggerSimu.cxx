@@ -73,6 +73,8 @@ void StBemcTriggerSimu::Init(){
     }
     mTables = adc2e->getBemcData()->getTables();
   }
+
+  mDbThres->LoadTimeStamps();
   
   // 2005 pp
   mAllTriggers.insert(96201);
@@ -81,9 +83,7 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(96233);
   
   // 2006 pp
-  mAllTriggers.insert(137611);
-  // and so on, this set should contain all trigIds BEMC cares about
-  // is there a way to get this information from a DB query?
+  mAllTriggers.insert(137822);//HTTP05
   
   Clear();
 }
@@ -306,7 +306,7 @@ void StBemcTriggerSimu::Make(){
   DSMLayer1();
   DSMLayer2();
   
-  // fill list of fired triggers for this event
+
 }
 //==================================================
 //==================================================
@@ -442,31 +442,40 @@ void StBemcTriggerSimu::FEEout() {
 //==================================================
 //==================================================
 void StBemcTriggerSimu::DSMLayer0() {
-  //output 16 bits
+  //2006 output 16 bits
   //need to get the thresholds + the bit locations for each year
   //0-9 ADC sum Trigger Patches
   //10-11 HT threshold bits
   //12-13 TP threshold bits
   //14-15 HT&&TP threshold bits
 
+  
+  //Loop over modules
   int DSM_TP[kL0DsmInputs];
   for (int i=0;i<kL0DsmModule;i++){
-    
-    //for (int l=0; l<3; l++){
-    //  HT_DSM0_threshold[i]=mDbThres->GetHT_DSM0_threshold(i,timestamp,l);
-    //  JP_DSM0_threshold[i]=mDbThres->GetTP_DSM0_threshold(i,timestamp,l);
-    //  HTTP_DSM0_threshold[i]=mDbThres->GetHTTP_DSM0_threshold(i,timestamp,l);    
-    //}
+  
+    DSM0_HT_ADC[i]=0;
+    DSM0_TP_ADC[i]=0;
+    DSM0_TP_SUM[i]=0;
     
     mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP);
+
     for (int j=0;j<kL0DsmInputs;j++){
       int tpid=DSM_TP[j];
       if (L0_HT_ADC[tpid]>DSM0_HT_ADC[i]) DSM0_HT_ADC[i]=L0_HT_ADC[tpid];
-      DSM0_TP_ADC[i]+=L0_TP_ADC[tpid];
+      if (L0_TP_ADC[tpid]>DSM0_TP_ADC[i]) DSM0_TP_ADC[i]=L0_TP_ADC[tpid];
+      DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];
+      //this is temporary to get it out for Alan
+      if ((L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))&&(L0_TP_ADC[tpid]>mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1))){
+	mFiredTriggers.push_back(137822);
+      }
     }
-    //OK fine have HT 6bit and TP 10x6bit sum for each DSM
 
-
+    // if (DSM0_HT_ADC[i] < GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_Bit=0;
+    //if ((DSM0_HT_ADC[i] < GetHT_DSM0_threshold(i,timestamp,1)) && (DSM0_HT_ADC[i] > GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_Bit=1;
+    //if ((DSM0_HT_ADC[i] < GetHT_DSM0_threshold(i,timestamp,2)) && (DSM0_HT_ADC[i] > GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_Bit=2;
+    //if (DSM0_HT_ADC[i] > GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_Bit=3;
+    
   }
 }
 //==================================================
