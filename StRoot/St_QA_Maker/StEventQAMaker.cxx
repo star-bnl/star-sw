@@ -1501,22 +1501,20 @@ void StEventQAMaker::MakeHistVertex() {
   Float_t m_lamass2 = (lambda_mass_c2*lambda_mass_c2);
   
   // primary vertex
-  StPrimaryVertex *primVtx = event->primaryVertex();
-  UInt_t daughters=0;
-  UInt_t currentNumber=0;
+  StPrimaryVertex *primVtx = 0;
   StThreeVectorF pvert;
+  Float_t highestRank = -999;
+  for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
+    Float_t currentRank = event->primaryVertex(v)->ranking();
+    if (currentRank > highestRank) {
+      highestRank = currentRank;
+      primVtx = event->primaryVertex(v);
+    }
+  }
   
   if (primVtx) {
     
     pvert = primVtx->position();
-    // Decide true primary vertex by most daughters
-    for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
-      currentNumber = event->primaryVertex(v)->numberOfDaughters();
-      if (currentNumber > daughters) {
-	daughters = currentNumber;
-	primVtx = event->primaryVertex(v);
-      }
-    }
     
     for (UInt_t j=0; j<event->numberOfPrimaryVertices(); j++) {
       StPrimaryVertex *aPrimVtx = event->primaryVertex(j);
@@ -2213,8 +2211,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.81 2007/11/07 20:49:13 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.82 2007/11/07 22:39:07 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.82  2007/11/07 22:39:07  genevb
+// Use highest rank primary vertex (missed a spot on last commit)
+//
 // Revision 2.81  2007/11/07 20:49:13  genevb
 // Use highest rank primary vertex
 //
