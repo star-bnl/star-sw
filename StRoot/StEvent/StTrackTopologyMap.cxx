@@ -1,15 +1,94 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.16 2005/06/23 19:04:24 ullrich Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.17 2007/11/07 00:54:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
  *
  * Description:
  *
+ * The topo map is stored in two 32 bit words.
+ * Cases: Depending on the context the bits have slightly
+ *        different meaning. For FTPC tracks bit 1-20 describe
+ *        the FTPC. There's no confusion with the TPC since
+ *        there are only tracks in either one. Starting 2007
+ *        the 6 layers of the SVT are re-used for the HFT.
+ *      
+ * 
+ * bit             Case 1               Case 2            Case 3
+ *--------------------------------------------------------------------
+ *  0            primary-vertex-used
+ *  1            SVT layer=1      FTPC-West row=1     PXL layer=1
+ *  2            SVT layer=2      FTPC-West row=2     PXL layer=2
+ *  3            SVT layer=3      FTPC-West row=3     IST layer=1
+ *  4            SVT layer=4      FTPC-West row=4     IST layer=2
+ *  5            SVT layer=5      FTPC-West row=5     IST layer=3 (?)
+ *  6            SVT layer=6      FTPC-West row=6
+ *  7            SSD              FTPC-West row=7
+ *  8            TPC row=1        FTPC-West row=8
+ *  9            TPC row=2        FTPC-West row=9
+ *  10           TPC row=3        FTPC-West row=10
+ *  11           TPC row=4        FTPC-East row=1
+ *  12           TPC row=5        FTPC-East row=2
+ *  13           TPC row=6        FTPC-East row=3
+ *  14           TPC row=7        FTPC-East row=4
+ *  15           TPC row=8        FTPC-East row=5
+ *  16           TPC row=9        FTPC-East row=6
+ *  17           TPC row=10       FTPC-East row=7
+ *  18           TPC row=11       FTPC-East row=8
+ *  19           TPC row=12       FTPC-East row=9
+ *  20           TPC row=13       FTPC-East row=10
+ *  21           TPC row=14
+ *  22           TPC row=15
+ *  23           TPC row=16
+ *  24           TPC row=17
+ *  25           TPC row=18
+ *  26           TPC row=19
+ *  27           TPC row=20
+ *  28           TPC row=21
+ *  29           TPC row=22
+ *  30           TPC row=23
+ *  31           TPC row=24
+ *  -------------------------- word boundary
+ *  32     0     TPC row=25
+ *  33     1     TPC row=26
+ *  34     2     TPC row=27
+ *  35     3     TPC row=28
+ *  36     4     TPC row=29
+ *  37     5     TPC row=30
+ *  38     6     TPC row=31
+ *  39     7     TPC row=32
+ *  40     8     TPC row=33
+ *  41     9     TPC row=34
+ *  42     10    TPC row=35
+ *  43     11    TPC row=36
+ *  44     12    TPC row=37
+ *  45     13    TPC row=38
+ *  46     14    TPC row=39
+ *  47     15    TPC row=40
+ *  48     16    TPC row=41
+ *  49     17    TPC row=42
+ *  50     18    TPC row=43
+ *  51     19    TPC row=44
+ *  52     20    TPC row=45
+ *  53     21    Mwpc
+ *  54     22    CTB
+ *  55     23    ToF
+ *  56     24    RICH
+ *  57     25    Barrel EMC/SMD
+ *  58     26    Endcap EMC/SMD
+ *  59     27
+ *  60     28
+ *  61     29
+ *  62     30    turn around flag  (flags that track spirals back)
+ *  63     31    FTPC Format (flags TOC or FTPC)
+ *
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.17  2007/11/07 00:54:54  ullrich
+ * Added PXL and IST.
+ *
  * Revision 2.16  2005/06/23 19:04:24  ullrich
  * Added overloaded version of hasHitInDetector() taking up to 6 args.
  *
@@ -69,7 +148,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.16 2005/06/23 19:04:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.17 2007/11/07 00:54:54 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -119,27 +198,45 @@ StTrackTopologyMap::hasHitInDetector(StDetectorId id) const
 
 bool
 StTrackTopologyMap::hasHitInDetector(StDetectorId d1, StDetectorId d2,
-			       StDetectorId d3, StDetectorId d4,
-			       StDetectorId d5, StDetectorId d6) const
+                               StDetectorId d3, StDetectorId d4,
+                               StDetectorId d5, StDetectorId d6) const
 {
     //
     //  Note d3 - d6 are optional, if not given they will have
     //  the value kUnknownId and shouldn't be used.
     //
     return (hasHitInDetector(d1) && hasHitInDetector(d2) &&
-	  (d3 == kUnknownId ? true : hasHitInDetector(d3)) &&
-	  (d4 == kUnknownId ? true : hasHitInDetector(d4)) &&
-	  (d5 == kUnknownId ? true : hasHitInDetector(d5)) &&
-	  (d6 == kUnknownId ? true : hasHitInDetector(d6)));
+          (d3 == kUnknownId ? true : hasHitInDetector(d3)) &&
+          (d4 == kUnknownId ? true : hasHitInDetector(d4)) &&
+          (d5 == kUnknownId ? true : hasHitInDetector(d5)) &&
+          (d6 == kUnknownId ? true : hasHitInDetector(d6)));
 }
 
 bool
 StTrackTopologyMap::hasHitInSvtLayer(unsigned int layer) const
 {
     if (ftpcFormat())
-        return kFALSE;
+        return false;
     else
         return bit(layer);
+}
+
+bool
+StTrackTopologyMap::hasHitInPxlLayer(unsigned int layer) const
+{
+    if(ftpcFormat())
+        return false;
+    else
+        return bit(layer);
+}
+
+bool
+StTrackTopologyMap::hasHitInIstLayer(unsigned int layer) const
+{
+    if(ftpcFormat())
+        return false;
+    else
+        return bit(layer+2);
 }
 
 bool
@@ -156,7 +253,7 @@ StTrackTopologyMap::hasHitInRow(StDetectorId id, unsigned int row) const
         return ftpcFormat() && bit(row+10);
         break;
     default:
-        return kFALSE;
+        return false;
         break;
     }
 }
@@ -178,6 +275,14 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
         break;
     case kSsdId:
         if (bit(7)) n++;
+        break;
+    case kPxlId:
+        for(i=1;i<3;i++)
+	  if(hasHitInPxlLayer(i)) n++;
+        break;
+    case kIstId:
+        for(i=1;i<4;i++)
+	  if(hasHitInIstLayer(i)) n++;
         break;
     case kFtpcWestId:
     case kFtpcEastId:
@@ -270,6 +375,10 @@ StTrackTopologyMap::largestGap(StDetectorId id) const
     case kSvtId:
         for (i=1; i<7; i++)
             if (hasHitInSvtLayer(i)) rows.push_back(i);
+        break;
+    case kIstId:
+        for (i=1; i<4; i++)
+            if (hasHitInIstLayer(i)) rows.push_back(i);
         break;
     case kFtpcWestId:
     case kFtpcEastId:

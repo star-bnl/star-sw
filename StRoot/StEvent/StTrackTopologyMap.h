@@ -1,10 +1,10 @@
 /*!
- * \class StTrackTopologyMap 
+ * \class StTrackTopologyMap
  * \author Thomas Ullrich, AUg 1999
  */
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.10 2005/06/23 19:04:24 ullrich Exp $
+ * $Id: StTrackTopologyMap.h,v 2.11 2007/11/07 00:54:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
+ * Revision 2.11  2007/11/07 00:54:54  ullrich
+ * Added PXL and IST.
+ *
  * Revision 2.10  2005/06/23 19:04:24  ullrich
  * Added overloaded version of hasHitInDetector() taking up to 6 args.
  *
@@ -67,10 +70,12 @@ public:
     unsigned int   numberOfHits(StDetectorId) const;
     bool           hasHitInDetector(StDetectorId) const;
     bool           hasHitInDetector(StDetectorId, StDetectorId,
-			      StDetectorId = kUnknownId, StDetectorId = kUnknownId,
-			      StDetectorId = kUnknownId, StDetectorId = kUnknownId) const;
+                              StDetectorId = kUnknownId, StDetectorId = kUnknownId,
+                              StDetectorId = kUnknownId, StDetectorId = kUnknownId) const;
     bool           hasHitInRow(StDetectorId, unsigned int) const; // first row = 1
     bool           hasHitInSvtLayer(unsigned int) const;          // first layer = 1
+    bool           hasHitInPxlLayer(unsigned int) const;          // first layer = 1
+    bool           hasHitInIstLayer(unsigned int) const;          // first layer = 1
 
     bool           trackTpcOnly() const;
     bool           trackSvtOnly() const;
