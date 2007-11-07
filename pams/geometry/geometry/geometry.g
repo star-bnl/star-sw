@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.161 2007/11/06 01:19:35 perev Exp $
+* $Id: geometry.g,v 1.162 2007/11/07 21:25:41 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.162  2007/11/07 21:25:41  perev
+* btofgeo6 added by X.Dong
+*
 * Revision 1.161  2007/11/06 01:19:35  perev
 * y2008 geo
 *
@@ -765,6 +768,8 @@
 *  Codes:
 *  1 - full ctb,         2 - full TOFp based tof,   3 - partial TOFp based tof,
 *  4 - single TOFp tray, 5 - one TOFp and one TOFr, 6 - full TOFr based tof.
+* X.Dong - global parameters for TOF trays
+   real       tofX0, tofZ0
 
    real       Par(1000),field,dcay(5),shift(2),wdm
 
@@ -2553,8 +2558,6 @@ If LL>1
   on Y2008    { Year 2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now
                   
 
-                     SVTT = off;
-		     SCON = on;
                      ConeConfig=2 " new cable weight estimate ";
 
                   "tpc: standard, i.e.  "
@@ -2562,8 +2565,11 @@ If LL>1
                      pse=on " inner sector has pseudo padrows ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=5 " call btofgeo5 ";
+* X.Dong
+                     Itof=6 " call btofgeo6 ";
 * NEW CONFIG!
+                     tofX0=-3.90;
+                     tofZ0=2.54;
                      BtofConfig=11;
 
 * Full barrel in 2007
@@ -4003,6 +4009,13 @@ If LL>1
    If (LL>1 & BTOF) then
      call AgDETP new ('BTOF')
      call AgDETP add ('btog.choice=',BtofConfig,1)
+* X.Dong
+     if(Itof>5) then
+         call AgDETP add ('btog.X0=',tofX0,1)
+         call AgDETP add ('btog.Z0=',tofZ0,1)
+     endif
+* X.Dong.end
+
    endif
 
    if(BTOF) then
@@ -4010,6 +4023,7 @@ If LL>1
       if(Itof.eq.2) call btofgeo2
       if(Itof.eq.4) call btofgeo4
       if(Itof.eq.5) call btofgeo5
+      if(Itof.eq.6) call btofgeo6  	!X.Dong
    endif
      
    Call AGSFLAG('SIMU',1)
