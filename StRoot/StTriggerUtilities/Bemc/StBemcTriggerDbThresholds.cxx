@@ -15,7 +15,20 @@ StBemcTriggerDbThresholds::StBemcTriggerDbThresholds() {
   
   LOG_INFO<<"StBemcTriggerDbThresholds::constructor"<<endm; 
 
- //settings for year 2006
+}
+
+//==================================================
+StBemcTriggerDbThresholds::~StBemcTriggerDbThresholds(){ 
+
+  LOG_INFO<<"StBemcTriggerDbThresholds::deconstructor"<<endl;
+
+}
+
+//==================================================
+//==================================================
+void StBemcTriggerDbThresholds::LoadTimeStamps(){
+
+  //settings for year 2006
   //#0   Runs#7097009 - 7101054   2006-04-07 04:43:31 to 2006-04-11 17:21:09
   start_2006[0].Set(2006,04,07,04,43,31);
   end_2006[0].Set(2006,04,11,17,21,9);
@@ -36,14 +49,6 @@ StBemcTriggerDbThresholds::StBemcTriggerDbThresholds() {
   end_2006[5].Set(2006,6,5,15,49,17);
   
 }
-
-//==================================================
-StBemcTriggerDbThresholds::~StBemcTriggerDbThresholds(){ 
-
-  LOG_INFO<<"StBemcTriggerDbThresholds::deconstructor"<<endl;
-
-}
-
 
 //==================================================
 //==================================================
@@ -69,6 +74,7 @@ Int_t  StBemcTriggerDbThresholds::GetHTTP_DSM0_threshold(Int_t DSMmodule, UInt_t
 
   Int_t threshold=-1;
 
+  //2006 HTTP thresholds
   const Int_t HTTP0_TH_2006[6]  = {  1,  1,  1,  1,  1,  1};
   const Int_t HTTP1_TH_2006[6]  = { 17, 17, 20, 20, 19, 19};
   const Int_t HTTP2_TH_2006[6]  = { 31, 31, 31, 31, 31, 31};
@@ -107,10 +113,10 @@ Int_t  StBemcTriggerDbThresholds::GetJP_DSM0_threshold(Int_t DSMmodule,UInt_t ti
   
   Int_t threshold=-1;
 
+  //2006 JP thresholds
   const Int_t JP0_TH_2006[6]    = { 42, 42, 48, 49, 49, 49};
   const Int_t JP1_TH_2006[6]    = { 58, 58, 58, 60, 60, 60};
   const Int_t JP2_TH_2006[6]    = {110,110,110,110,110,110};
-
   for (int i=0;i<6;i++)
     {
       if (DSMmodule<15)
@@ -147,7 +153,7 @@ Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t t
 
   int threshold=-1;
 
-  //2006
+  //2006 HT East and West Thresholds
   const Int_t HTW0_TH_2006[6]   = {  5,  5,  5,  5,  5,  5};
   const Int_t HTW1_TH_2006[6]   = { 12, 12, 16, 18, 16, 16};
   const Int_t HTW2_TH_2006[6]   = { 22, 24, 24, 24, 24, 24};

@@ -75,11 +75,13 @@ private:
   Int_t *LUTbit[kNCrates][kNSeq], LUTtag[kNCrates][kNSeq];
   char buffer[10];
 
+  //HT/TP 6bit ADC out of FEE and into DSM Layer0
   Int_t L0_HT_ADC[kNPatches], L0_TP_ADC[kNPatches], L0_TP_PED[kNPatches];
-  Int_t DSM0_TP_ADC[kL0DsmModule],DSM0_HT_ADC[kL0DsmModule];
-  Int_t DSM_L0_Bits[16];
 
-  //Thresholds set by database
+  //MAX TP ADC, MAX HT ADC and SUM TPC ADC for each DSM Module
+  Int_t DSM0_TP_ADC[kL0DsmModule],DSM0_HT_ADC[kL0DsmModule],DSM0_TP_SUM[kL0DsmModule];
+
+  //Thresholds set by database in DSM Layer0
   Int_t HT_DSM0_threshold[kL0DsmModule], TP_DSM0_threshold[kL0DsmModule],HTTP_DSM0_threshold[kL0DsmModule];
 
   void getTowerStatus();
