@@ -133,14 +133,14 @@ StEemcTriggerSimu::addTriggerList( void * adr){
 
 //==================================================
 //==================================================
-short
-StEemcTriggerSimu::isTrigger(int trigId) {
+StTriggerSimuDecision
+StEemcTriggerSimu::triggerDecision(int trigId) {
     vector<int> tmpTrigList;
     addTriggerList(&tmpTrigList);
     for(unsigned i=0; i<tmpTrigList.size(); i++) {
-        if(trigId == tmpTrigList[i]) return 1;
+        if(trigId == tmpTrigList[i]) return kYes;
     }
-    return -1;
+    return kDoNotCare;
 }
  
 //==================================================
@@ -495,6 +495,10 @@ StEemcTriggerSimu::getEemcFeeMask(){
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.10  2007/11/08 20:59:52  kocolosk
+// subdet isTrigger returns a bool
+// triggerDecision returns enumerator including kDoNotCare
+//
 // Revision 1.9  2007/10/12 20:11:33  balewski
 // cleanup of setup path, now at inst/iucf
 //

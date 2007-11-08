@@ -46,15 +46,19 @@ StL2TriggerSimu::Init(){
 //==================================================
 //==================================================
  
-short   
-StL2TriggerSimu::isTrigger(int trigId){
+StTriggerSimuDecision   
+StL2TriggerSimu::triggerDecision(int trigId){
   // return mL2maker->isTrigger(trigId);// tmp
-  return 0;
+  return kDoNotCare;
 }
 
 
 //
 // $Log: StL2TriggerSimu.cxx,v $
+// Revision 1.5  2007/11/08 20:59:58  kocolosk
+// subdet isTrigger returns a bool
+// triggerDecision returns enumerator including kDoNotCare
+//
 // Revision 1.4  2007/10/23 13:26:40  balewski
 // more cleanup
 //

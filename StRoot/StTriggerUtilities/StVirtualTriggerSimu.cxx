@@ -1,8 +1,13 @@
-// $Id: StVirtualTriggerSimu.cxx,v 1.2 2007/10/22 23:09:48 balewski Exp $
+// $Id: StVirtualTriggerSimu.cxx,v 1.3 2007/11/08 20:59:34 kocolosk Exp $
 //STAR
 #include <StMessMgr.h>
 
 #include "StVirtualTriggerSimu.h"
+
+bool StVirtualTriggerSimu::isTrigger(int trigId) {
+    if (this->triggerDecision(trigId) == kYes) return true;
+    return false;
+}
 
 void StVirtualTriggerSimu::Init() { /* no-op */ }
 
@@ -12,6 +17,10 @@ void StVirtualTriggerSimu::Clear() { /* no-op */ }
 
 /*****************************************************************************
  * $Log: StVirtualTriggerSimu.cxx,v $
+ * Revision 1.3  2007/11/08 20:59:34  kocolosk
+ * subdet isTrigger returns a bool
+ * triggerDecision returns enumerator including kDoNotCare
+ *
  * Revision 1.2  2007/10/22 23:09:48  balewski
  * split L2 to generic and year specific, not finished
  *

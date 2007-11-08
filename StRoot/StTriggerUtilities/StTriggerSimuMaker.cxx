@@ -159,7 +159,7 @@ StTriggerSimuMaker::Make(){
 //========================================
 bool StTriggerSimuMaker::isTrigger(int trigId) {
   for(unsigned i=0; i<mSimulators.size(); i++) {
-    if(mSimulators[i]->isTrigger(trigId) == 0) return false;
+    if(mSimulators[i]->triggerDecision(trigId) == kNo) return false;
   }
   return true;
 }
@@ -170,9 +170,13 @@ StTriggerSimuMaker::Finish() {
   return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.16 2007/10/12 20:10:23 balewski Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.17 2007/11/08 20:59:33 kocolosk Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.17  2007/11/08 20:59:33  kocolosk
+// subdet isTrigger returns a bool
+// triggerDecision returns enumerator including kDoNotCare
+//
 // Revision 1.16  2007/10/12 20:10:23  balewski
 // cleanup
 //
