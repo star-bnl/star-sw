@@ -1,6 +1,12 @@
 #include <string.h>
 #include <stdio.h>
 
+#ifdef  IS_REAL_L2  //in l2-ana  environment
+  #include "trgStructures.h"
+ #else
+  #include "StDaqLib/TRG/trgStructures.h"
+#endif
+
 #include "L2VirtualAlgo.h"
 //=============================================
 L2VirtualAlgo::L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff) :

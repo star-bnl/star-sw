@@ -1,5 +1,5 @@
 
-LIBNAME  =  L2UpsilonAlgo
+LIBNAME  =  L2upsilonAlgo
 HDRS     =  L2upsilon.hh 
 SRCS     =  L2upsilon.cc
 
@@ -8,19 +8,19 @@ AR     = ar rul
 
 DEBUG  =-g -O 
 
+INCL =-I ../L2algoUtil
+
 # some details may differ for the real L2-machine
 ifndef STAR
   DEFINES = -DIS_REAL_L2
-  INCL =-I  /home/startrg/trg/trg_soft_dev/include/	
+  INCL +=-I  /home/startrg/trg/trg_soft_dev/include/	
 else
   DEFINES=
-  INCL =  -I ../L2algoUtil -I ../../../ -I ../L2algoUtil -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot
+  INCL += -I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
 endif
 
 INSTALPATH=../../../../onlineL2
 
-#
-#INCL =  -I ../L2algoUtil  
 
 
 OBJS = $(notdir $(patsubst %.cc,%.o,$(SRCS)))
@@ -38,7 +38,7 @@ $(LIBNAME): $(OBJS)
 
 install:
 	cp -p lib$(LIBNAME).a  $(INSTALPATH)/alg_lib
-	cp -p   $(HDRS)   $(INSTALPATH)/alg_include
+	cp -p L2upsilon.hh  bemcTower.h   $(INSTALPATH)/alg_include
 
 clean:
 	-rm -f *.o $(LINK)  lib$(LIBNAME).*  .depend
@@ -57,6 +57,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.2  2007/11/08 04:02:36  balewski
+# run on l2ana as well
+#
 # Revision 1.1  2007/11/02 03:03:54  balewski
 # modified L2VirtualAlgo
 #

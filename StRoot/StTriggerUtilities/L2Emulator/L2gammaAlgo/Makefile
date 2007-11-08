@@ -10,13 +10,15 @@ AR     = ar rul
 
 DEBUG  =-g -O 
 
+INCL =-I ../L2algoUtil
+
 # some details may differ for the real L2-machine
 ifndef STAR
   DEFINES = -DIS_REAL_L2
-  INCL =-I  /home/startrg/trg/trg_soft_dev/include/
+  INCL +=-I  /home/startrg/trg/trg_soft_dev/include/	
 else
-  INCL =-I ../L2janUtil -I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
   DEFINES=
+  INCL += -I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
 endif
 
  INSTALPATH=../../../../onlineL2

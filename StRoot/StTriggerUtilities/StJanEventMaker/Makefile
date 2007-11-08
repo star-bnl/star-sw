@@ -1,6 +1,6 @@
 # some details may differ for  the real  L2-machine
 ifndef STAR
-  INSTALPATH=../main/
+  INSTALPATH=../../../onlineL2
 else
   INSTALPATH=../../../onlineL2
 endif
@@ -55,6 +55,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.2  2007/11/08 04:02:37  balewski
+# run on l2ana as well
+#
 # Revision 1.1  2007/10/25 02:07:17  balewski
 # added L2upsilon & binary event dump
 #

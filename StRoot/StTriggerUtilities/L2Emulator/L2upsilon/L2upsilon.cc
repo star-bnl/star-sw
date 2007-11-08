@@ -11,8 +11,15 @@
 
 #include "L2Result.h"
 #include "L2upsilon.hh"
-#include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
-#include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
+#ifdef  IS_REAL_L2  //in l2-ana  environment
+  #include "trgStructures.h"
+  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2Histo.h"
+#else
+  #include "StDaqLib/TRG/trgStructures.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
+#endif
 
 #define L0_HT_TRIGGER_BIT_SHIFT 4
 #define CPU_MHZ 1603.680
@@ -55,7 +62,7 @@ int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
   }
   char filename[FILENAME_MAX];
   sprintf(filename, "%s.log", mBaseFileName);
-  mLogFile = fopen(filename, "w");
+  mLogFile = fopen(filename, "w"); 
   fprintf(mLogFile, "Run Number: %d\n", runNumber);
   fprintf(mLogFile, "Start Time: %s", timeString());
   fprintf(mLogFile, "L0 seed threshold: %d\n", mL0SeedThreshold);

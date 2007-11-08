@@ -1,17 +1,13 @@
 #ifndef __L2gammaAlgo_h__
 #define __L2gammaAlgo_h__
 
-#ifdef __ROOT__ // root4star environment
-
-  #include "../L2algoUtil/L2VirtualAlgo.h"
-  #include "StDaqLib/TRG/trgStructures.h"
-  #include "../L2algoUtil/L2Histo.h"
-  #include "../L2algoUtil/L2EmcDb.h"
+#ifdef IS_REAL_L2  //in l2-ana  environment
+  #include "L2VirtualAlgo.h"
+  #include "L2Histo.h"
+  #include "L2EmcDb.h"
 
 #else
-
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
-  #include "StDaqLib/TRG/trgStructures.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 
@@ -54,7 +50,7 @@ typedef unsigned short ushort;
  * An optional "prescaled accept" will accept some prescaled rate of input
  * events.
  *
- * $Id: L2gammaAlgo.h,v 1.2 2007/11/02 03:03:44 balewski Exp $
+ * $Id: L2gammaAlgo.h,v 1.3 2007/11/08 04:02:29 balewski Exp $
  *
  */
 
@@ -320,6 +316,9 @@ inline void L2gammaAlgo::setUseOfflineGains()
 }
 
 // $Log: L2gammaAlgo.h,v $
+// Revision 1.3  2007/11/08 04:02:29  balewski
+// run on l2ana as well
+//
 // Revision 1.2  2007/11/02 03:03:44  balewski
 // modified L2VirtualAlgo
 //
