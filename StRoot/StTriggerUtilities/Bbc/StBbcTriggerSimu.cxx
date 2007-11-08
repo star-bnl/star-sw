@@ -44,7 +44,7 @@ StBbcTriggerSimu::Init(){
 //==================================================
 void StBbcTriggerSimu::Clear(){
 
-    bbcTrig=0;
+    bbcTrig=kNo;
     Wbbc=0;
     Ebbc=0;
     for (int i=0;i<BBCadcNum;i++) {
@@ -80,7 +80,7 @@ void StBbcTriggerSimu::Make()
 
   }
   
-  if ((Ebbc==1)&&(Wbbc==1)) bbcTrig=1;
+  if ((Ebbc==1)&&(Wbbc==1)) bbcTrig=kYes;
 
   LOG_DEBUG<<" Wbbc ="<<Wbbc<<" Ebbc="<<Ebbc<<" bbcTrig="<<bbcTrig<<endm;
   for (int i=0;i<BBCadcNum;i++) {
@@ -92,6 +92,10 @@ void StBbcTriggerSimu::Make()
 
 //
 // $Log: StBbcTriggerSimu.cxx,v $
+// Revision 1.4  2007/11/08 20:59:43  kocolosk
+// subdet isTrigger returns a bool
+// triggerDecision returns enumerator including kDoNotCare
+//
 // Revision 1.3  2007/07/23 02:59:56  balewski
 // cleanup, bbc for M-C still not working
 //

@@ -103,7 +103,7 @@ public:
   void Clear();
   void Make();
   
-  short isTrigger(int trigId);
+  StTriggerSimuDecision triggerDecision(int trigId);
 
   void setHeadMaker(StTriggerSimuMaker *maker) { mHeadMaker = maker; }
   

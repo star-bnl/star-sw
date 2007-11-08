@@ -20,7 +20,7 @@ class StL2TriggerSimu : public StVirtualTriggerSimu {
   void InitRun(int runnumber);
   void Clear(){};
   void Make(){};
-  short isTrigger(int trigId);
+  StTriggerSimuDecision triggerDecision(int trigId);
 
   ClassDef(StL2TriggerSimu, 1)
  };
@@ -30,6 +30,10 @@ class StL2TriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StL2TriggerSimu.h,v $
+// Revision 1.6  2007/11/08 20:59:58  kocolosk
+// subdet isTrigger returns a bool
+// triggerDecision returns enumerator including kDoNotCare
+//
 // Revision 1.5  2007/10/23 13:26:40  balewski
 // more cleanup
 //

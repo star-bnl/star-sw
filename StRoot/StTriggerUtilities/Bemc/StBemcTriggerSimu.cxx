@@ -132,18 +132,18 @@ void StBemcTriggerSimu::Clear(){
 }
 //==================================================
 //==================================================
-short StBemcTriggerSimu::isTrigger(int trigId) {
+StTriggerSimuDecision StBemcTriggerSimu::triggerDecision(int trigId) {
   //first check if it fired
   for(unsigned i=0; i<mFiredTriggers.size(); i++) {
-    if(trigId == mFiredTriggers[i]) return 1;
+    if(trigId == mFiredTriggers[i]) return kYes;
   }
   
   //now check if we care
   if(mAllTriggers.find(trigId) == mAllTriggers.end()) {
-    return -1;
+    return kDoNotCare;
   }
   else {
-    return 0;
+    return kNo;
   }
 }
 //==================================================

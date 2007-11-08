@@ -91,7 +91,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   void getEemcFeeMask();
   void setHList(TObjArray * x){mHList=x;}
   void addTriggerList( void * );
-  short isTrigger(int trigId);
+  StTriggerSimuDecision triggerDecision(int trigId);
   void connectBemcL0(int  *x) { mBemcEsum5bit=x;};
   bool getHttpInfo(int tpId, EemcHttpInfo &httpInfo);
   ClassDef(StEemcTriggerSimu, 1)
@@ -102,6 +102,10 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.10  2007/11/08 20:59:53  kocolosk
+// subdet isTrigger returns a bool
+// triggerDecision returns enumerator including kDoNotCare
+//
 // Revision 1.9  2007/10/22 23:09:54  balewski
 // split L2 to generic and year specific, not finished
 //

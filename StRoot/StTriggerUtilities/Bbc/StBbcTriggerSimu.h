@@ -44,10 +44,11 @@ class StBbcTriggerSimu : public StVirtualTriggerSimu {
   void Clear();
   void Make();
   
-  short isTrigger(int trigId) { return bbcTrig; }
+  StTriggerSimuDecision triggerDecision(int trigId) { return bbcTrig; }
 
-  int Wbbc, Ebbc, bbcTrig, BBCadc[48];
-  bool getEandW() {return bbcTrig;} // bbc trigger decision
+  int Wbbc, Ebbc, BBCadc[48];
+  StTriggerSimuDecision bbcTrig;
+  bool getEandW() {return (Wbbc && Ebbc);} // bbc trigger decision
   //void setMC(int x) {mMCflag=x;}
 
   ClassDef(StBbcTriggerSimu, 1)
@@ -57,6 +58,10 @@ class StBbcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StBbcTriggerSimu.h,v $
+// Revision 1.7  2007/11/08 20:59:43  kocolosk
+// subdet isTrigger returns a bool
+// triggerDecision returns enumerator including kDoNotCare
+//
 // Revision 1.6  2007/10/22 23:09:51  balewski
 // split L2 to generic and year specific, not finished
 //
