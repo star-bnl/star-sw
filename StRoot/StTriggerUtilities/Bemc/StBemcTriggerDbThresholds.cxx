@@ -149,7 +149,7 @@ Int_t  StBemcTriggerDbThresholds::GetJP_DSM0_threshold(Int_t DSMmodule,UInt_t ti
 //==================================================
 Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t timestamp, Int_t layer){
 
-  LOG_INFO <<"StBemcTriggerDbThresholds::GetHT_DSM0_threshold()"<<endm;
+  LOG_DEBUG <<"StBemcTriggerDbThresholds::GetHT_DSM0_threshold()"<<endm;
 
   int threshold=-1;
 
