@@ -5,10 +5,10 @@
 int total=0;
 
 void rdMu2TrigSimu( int nevents = 7e0,
-		    int flagMC=1, // 0== off
+		    int flagMC=1,  // 0== off
 		    int useEemc=1, // 0== off
 		    int useBemc=0, // 0== off
-		    int useL2=1, // 0== off
+		    int useL2=1,   // 0== off
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
 		    int playConfig=100, // jan:100_199
 		    int emcEveDump=0 // extrating raw EMC data in a custom format
@@ -75,9 +75,12 @@ void rdMu2TrigSimu( int nevents = 7e0,
   cout << "Avaliable number of events  " << nEntries << endl;  
   
   //Database -- get a real calibration from the database
-  St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  
-  
+  St_db_Maker* dbMk =0;
+  if(useEemc || useL2) // full DB access
+    dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
+  else // only Barrel is uploaded, is faster 
+    dbMk  = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
+    
   //If MC then must set database time and date
   // if Endcap fast simu is used tower gains in DB do not matter,JB
   if(flagMC) {
@@ -154,6 +157,7 @@ void rdMu2TrigSimu( int nevents = 7e0,
     StL2_2006EmulatorMaker* simL2Mk= new StL2_2006EmulatorMaker;
     ((StGenericL2Emulator*) simL2Mk)->setSetupPath(eemcSetupPath);
     ((StGenericL2Emulator*) simL2Mk)->setOutPath(outDir.Data());
+    if (flagMC) simL2Mk->setMC();
     //simL2Mk->useStEvent(); // default : use muDst
   }
 
