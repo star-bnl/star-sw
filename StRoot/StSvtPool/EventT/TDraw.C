@@ -55,6 +55,7 @@ class TSystem;
 class Bichsel;
 #endif
 Int_t npeaks = 1;
+static const Double_t nSigMax = 10;
 TCanvas *c1, *c2;
 TPad *selold = 0;
 static const Double_t WaferLength = 2.9928;
@@ -87,7 +88,7 @@ struct Rot_t {
   Double_t alpha, beta, gamma;
   Char_t  *Comment;
 };
-static const Int_t NPOL = 3;
+static const Int_t NPOL = 7;
 //________________________________________________________________________________
 Double_t PolN(Double_t *x,Double_t *par) {
   Double_t sum = par[NPOL-1];
@@ -111,7 +112,8 @@ Double_t Fit(TH1 *hist, Double_t xmin=-99, Double_t xmax=99, const Char_t *opt =
   f->GetRange(xmin,xmax);
   prob = f->GetProb();
   Int_t NfitP = f->GetNumberFitPoints();
-  if (prob > 1e-3 || NfitP < 10) return prob;
+  //  if (prob > 1e-3 || NfitP < 10) return prob;
+  if (prob > 0 || NfitP < 10) return prob;
   for (Int_t k = 2; k <= NPOL; k++) {
     f->ReleaseParameter(k);
     hist->Fit("PolN",opt,"",xmin,xmax);
@@ -580,7 +582,7 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
 	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
 	    Double_t dev = mu - LSFit[m];
 	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
-	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < 3) {
+	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
 	      Double_t dMu2 = dMu*dMu;
 	      FitR[m]  += -Mu/dMu2;
 	      dFitR[m] +=  1./dMu2;
@@ -598,7 +600,7 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
 	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
 	    Double_t dev = mu - LSFit[m];
 	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
-	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < 3) {
+	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
 	      Double_t dslope2 = dslope*dslope;
 	      FitR[m]  += slope/dslope2;
 	      dFitR[m] +=  1./dslope2;
@@ -623,7 +625,7 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
 	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
 	    Double_t dev = mu - LSFit[m];
 	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
-	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < 3) {
+	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
 	      Double_t dslope2 = dslope*dslope;
 	      FitR[m]  += slope/dslope2;
 	      dFitR[m] +=  1./dslope2;
@@ -954,7 +956,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
 	    lTitle += Form("%s = %7.2f +- %5.2f (mkm)", duv[m], -mu,dmu);
 	    Double_t dev = mu - LSFit[m];
 	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
-	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < 3) {
+	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
 	      Double_t dMu2 = dMu*dMu;
 	      FitR[m]  += -Mu/dMu2;
 	      dFitR[m] +=  1./dMu2;
@@ -1027,7 +1029,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
           if (! Name.Contains("duOvertuP") && dslope > 0) {
 	    Double_t dev = mu - LSFit[m];
 	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
-	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < 3) {
+	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
 	      dslope2 = dslope*dslope;
 	      FitR[m]  += slope/dslope2;
 	      dFitR[m] +=  1./dslope2;
@@ -1092,7 +1094,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
 }
 //________________________________________________________________________________
 //void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift velocity 
-void TDrawD(const Char_t *tag="duuP", Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift velocity 
+void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t wafer = 0) {// fit drift velocity 
   static const Int_t NlPerBarrel[3] = {8, 12, 16};
   static const Int_t NwPerBarrel[3] = {4,  6,  7};
   if (barrel < 1 || barrel > 3) {cout << "Wrong barrel no. " << barrel << endl; return;}
@@ -1116,8 +1118,7 @@ void TDrawD(const Char_t *tag="duuP", Int_t barrel = 1, Int_t ladder = 0, Int_t 
   TH1D *fitPN[2];
   c1 = new TCanvas(Form("Drift_Barrel_%i",barrel),Form("Barrel %i, Ladder %i, Wafer %i",barrel,ladder,wafer) ,10,10,10+scaleX*nx,10+scaleY*ny);
   cout << "nx/ny = " << nx << "/" << ny << endl;
-
-  c1->Divide(nx,ny);
+  if (nx > 1 || ny > 1)   c1->Divide(nx,ny);
   ofstream out;
   ofstream outC;
   TString Out("Results.");
@@ -1132,7 +1133,7 @@ void TDrawD(const Char_t *tag="duuP", Int_t barrel = 1, Int_t ladder = 0, Int_t 
   else                              outC.open(Out, ios::app);
   TH2 *h = 0;
   Int_t head = 0;
-  const Int_t NPol1 = 5;
+  const Int_t NPol1 = NPOL;// first parameter reserved for degree of polynomial
   const Int_t NPMax = NPol1;
   Double_t params[NPol1];
   Double_t dparams[NPol1];
@@ -1144,7 +1145,7 @@ void TDrawD(const Char_t *tag="duuP", Int_t barrel = 1, Int_t ladder = 0, Int_t 
       outC << "struct data_t {" << endl;
       outC << "\tInt_t type, idx, nrows, barrel, layer, ladder, wafer, hybrid, Npar;" << endl;
       outC << "\tDouble_t "; 
-      for (Int_t i = 0; i <  NPol1 - 1; i++) {
+      for (Int_t i = 0; i <  NPol1-1; i++) {
 	outC << "v" << i; 
 	if (i < NPol1 - 2) {outC << ", ";} 
 	else               {outC << ";";} 
@@ -1258,6 +1259,8 @@ void TDrawD(const Char_t *tag="duuP", Int_t barrel = 1, Int_t ladder = 0, Int_t 
 	  }
 	  f[k]->FixParameter(0,np);
 	  fitPN[k]->Fit(f[k],"erq");
+	  c1->Update();
+	  
 	  if (f[k]->GetNumberFitPoints() >= 10) {
 	    Int_t NPar = (Int_t) f[k]->GetParameter(0);
 	    memset (params, 0, NPol1*sizeof(Double_t));
@@ -1298,7 +1301,8 @@ void TDrawD(const Char_t *tag="duuP", Int_t barrel = 1, Int_t ladder = 0, Int_t 
       h->Draw("colz");
       if (prof) prof->Draw("same");
       if (fit) {
-	for (Int_t k = 0; k < 2; k++) {fitPN[k]->Draw("same"); f[k]->Draw("same");}
+	for (Int_t k = 0; k < 2; k++) {fitPN[k]->Draw("same");}
+	// f[k]->Draw("same");}
       }
 #endif
       if (leg) leg->Draw();
