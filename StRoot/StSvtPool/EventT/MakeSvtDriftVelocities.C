@@ -1,3 +1,4 @@
+//#define DEBUG
 #include "Riostream.h"
 class St_db_Maker;
 class TTable;
@@ -11,13 +12,19 @@ struct data_t {
 };
 
 Int_t Drift = 1;
-#include "Results.DriftBarrel_Pass214_RFB_all.h"
+#if 0
+//#include "Results.DriftBarrel_Pass214_RFB_all.h"
 //#include "Results.DriftBarrel_2Pass214_TpcSsd_RFBPlotsNFP25rCut0.5cm.h"
 //#include "Results.DriftBarrel_3Pass214_TpcSsd_RFBPlotsNFP25rCut0.5cm.h"
-Int_t time =       102; 
+Int_t time =       103; 
 Int_t date =  20070524;
 const Char_t *Pass = "Pass214 RFB"; 
-
+#else
+#include "Results.DriftBarrel_Pass214FFD_all.h"
+Int_t time =       104; 
+Int_t date =  20070321;
+const Char_t *Pass = "Pass214 FFD"; 
+#endif
 
 static const Int_t N = sizeof(Data)/sizeof(data_t);
 
@@ -38,6 +45,9 @@ void MakeSvtDriftVelocities(){
   St_svtHybridDriftVelocity *svtHybridDriftVelocity = (St_svtHybridDriftVelocity *) dbMk->GetDataBase("Calibrations/svt/svtHybridDriftVelocity"); 
   if (! (svtHybridDriftVelocity)) return;
   Int_t NN = svtHybridDriftVelocity->GetNRows();
+#ifdef DEBUG
+  cout << "NN row from svtHybridDriftVelocity " << NN << " N corrections " << N << endl;
+#endif
   svtHybridDriftVelocity_st *row = svtHybridDriftVelocity->GetTable();
   Double_t drift[10];
   Double_t anode[10];
@@ -47,6 +57,15 @@ void MakeSvtDriftVelocities(){
 	  Data[j].ladder == row[i].ladder &&
 	  Data[j].wafer  == row[i].wafer  &&
 	  Data[j].hybrid == row[i].hybrid) {
+#ifdef DEBUG
+	cout << "Found Match" << endl;
+	svtHybridDriftVelocity->Print(i,1);
+	cout << Data[j].type    << ",\t" << Data[j].idx   << ",\t" << Data[j].nrows<< ",\t" 
+	     << Data[j].barrel  << ",\t" << Data[j].layer << ",\t" << Data[j].ladder<< ",\t" 
+	     << Data[j].wafer   << ",\t" << Data[j].hybrid<< ",\t" 
+	     << Data[j].Npar    << ",\t" << Data[j].v0    << ",\t" << Data[j].v1<< ",\t" << Data[j].v2<< ",\t" << Data[j].v3 << ",\t"
+	     << Data[j].Comment << endl;
+#endif 
 	if (row[i].type == 0 && row[i].npar == 0) {
 	  row[i].type = 2; row[i].v0 = 0;
 	}
@@ -86,8 +105,9 @@ void MakeSvtDriftVelocities(){
 	    else        par[k] = anode[k-nu];
 	  }
 	}
-// 	svtHybridDriftVelocity->Print(i,1);
-	break;
+#ifdef DEBUG
+ 	svtHybridDriftVelocity->Print(i,1);
+#endif
       }
     }
   }
