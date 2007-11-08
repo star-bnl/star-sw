@@ -51,7 +51,7 @@ public:
 	       int eemcIn, unsigned short* eemcData);
   void finishRun();
   void print();
-  void  readGeomXYZ(const char *fname);
+  void readGeomXYZ(const char *fname);
 
 private:
   void  findSeedTowers(vector<int>& L0Seeds, vector<int>& L2Seeds);
@@ -71,9 +71,10 @@ private:
   TrgDataType* trgData;
   unsigned short* bemcData;
 
-  char mBaseFileName[FILENAME_MAX];
   FILE* mLogFile;
 
+  int mRunNumber;
+  bool mUnfinished;
   int mEventsSeen;
   int mEventsAccepted;
 
@@ -115,24 +116,6 @@ private:
 
 inline void Timer::start() { startTime = std::time(0); }
 inline time_t Timer::time() const { return std::time(0) - startTime; }
-
-inline L2upsilon::L2upsilon(const char* name, L2EmcDb* db, char* outDir, int resOff) :
-  L2VirtualAlgo(name, db, outDir, resOff)
-{
-  mLogFile = 0;
-  createHistograms();
-}
-
-inline L2upsilon::~L2upsilon()
-{
-  if (mLogFile) {
-    finishRun();
-    fclose(mLogFile);
-    mLogFile = 0;
-  }
-
-  deleteHistograms();
-}
 
 inline const char* L2upsilon::timeString() const
 {

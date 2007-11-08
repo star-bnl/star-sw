@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.5 2007/11/06 22:07:20 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.6 2007/11/08 21:29:10 balewski Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -70,7 +70,7 @@ class StGenericL2Emulator  {
   void  finish();
   void  clear();
   void  useStEvent() {mUseMuDst=false;}
-  void  setMC(int x) {mMCflag=x;}
+  void  setMC(int x=true) {mMCflag=x;}
   void  setSetupPath(char *x) { mSetupPath=x;}
   void  setOutPath(char *x)   { mOutPath=x;}
 
@@ -82,6 +82,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.6  2007/11/08 21:29:10  balewski
+// now L2emu runs on M-C
+//
 // Revision 1.5  2007/11/06 22:07:20  balewski
 // added timeStamp controlled L2 setup from Jason
 //

@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.4 2007/11/06 22:07:20 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.5 2007/11/08 21:29:09 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -69,7 +69,7 @@ StGenericL2Emulator::StGenericL2Emulator(){
   mETOW_BANK =new  unsigned short [MaxEtowRdo];
   mTrigData = new  TrgDataType; //note it is _local_ container to store L2Results - it has nothing in common with the same type container filled during data taking - do not mix them up -JB
   mUseMuDst=true;
-  mMCflag=false;
+  setMC(false);
 
   mSetupPath="wrong2";
   mOutPath="wrong3";
@@ -424,6 +424,9 @@ StGenericL2Emulator::printBEblocks(){
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.5  2007/11/08 21:29:09  balewski
+// now L2emu runs on M-C
+//
 // Revision 1.4  2007/11/06 22:07:20  balewski
 // added timeStamp controlled L2 setup from Jason
 //
