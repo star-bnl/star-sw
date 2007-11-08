@@ -60,7 +60,8 @@ ClassImp(StBET4pMaker)
 //: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mAdc2E(adc2e), mTables(new StBemcTables()
     
     StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
-	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mTables(new StBemcTables(doTowerSwapFix)), mUse2003Cuts(false)
+	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mTables(new StBemcTables(doTowerSwapFix)), 
+	  mUse2003Cuts(false), mUse2005Cuts(false)
 {
     cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
     mCorrupt = false;
@@ -412,6 +413,7 @@ Int_t StBET4pMaker::Make()
 
 void StBET4pMaker::fillBarrelHits()
 {
+
     StMuDst* uDst = mMuDstMaker->muDst();
     assert(uDst);
     
@@ -534,6 +536,11 @@ void StBET4pMaker::fillBarrelHits()
 		    mSumEmcEt += energy;
 		}
 
+	    }
+	    //modified (DDS 9/05/2007) to reject east barrel towers for 2005 analysis:
+	    else if ( mUse2005Cuts==true
+		      && id>2400 ) { //ignore
+	      mBTowHits[id] = 0;
 	    }
 	    //if the status is good, add it to the array, otherwise add a null pointer
 	    else if ( ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) { //it's good
