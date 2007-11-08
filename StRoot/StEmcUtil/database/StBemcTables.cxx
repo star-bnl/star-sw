@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.10 2007/10/01 19:53:43 kocolosk Exp $
+ * $Id: StBemcTables.cxx,v 1.11 2007/11/08 11:12:39 kocolosk Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -432,13 +432,6 @@ void StBemcTables::getTriggerBitConv(Int_t crate,Int_t patch, Int_t& BIT) const 
     BIT = 0;
     if(mTrigP && crate>0 && crate<=MAXCRATES && patch>=0 && patch<NPATCHESPERCRATE) {
         BIT = (Int_t)mTrigP[0].BitConversionMode[crate-1][patch];
-        if(BIT == 0) cout << "bit is still zero" << endl;
-    }
-    else if(!mTrigP) {
-        cout << "no TrigP" << endl;
-    }
-    else {
-        cout << crate << '\t' << MAXCRATES << '\t' << patch << '\t' << NPATCHESPERCRATE << endl;
     }
 }
 
@@ -629,6 +622,9 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
+ * Revision 1.11  2007/11/08 11:12:39  kocolosk
+ * remove debugging statements
+ *
  * Revision 1.10  2007/10/01 19:53:43  kocolosk
  * another bugfix from Renee:  patchSequence is 0-9, not 0-159
  *
