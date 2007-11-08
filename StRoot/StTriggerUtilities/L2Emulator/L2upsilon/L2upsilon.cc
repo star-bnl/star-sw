@@ -24,12 +24,39 @@
 #define L0_HT_TRIGGER_BIT_SHIFT 4
 #define CPU_MHZ 1603.680
 
+L2upsilon::L2upsilon(const char* name, L2EmcDb* db, char* outDir, int resOff) :
+  L2VirtualAlgo(name, db, outDir, resOff), mLogFile(stdout), mRunNumber(0), mUnfinished(false)
+{
+  createHistograms();
+}
+
+L2upsilon::~L2upsilon()
+{
+  deleteHistograms();
+}
+
 int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
 {
-  // Debug
-  printf("L2upsilon::initRun(char* name=\"%s\", int runNumber=%d, int* userInt=%p, float* userFloat=%p)\n", mName, runNumber, userInt, userFloat);
+  //
+  // Open log file and write out algorithm parameters
+  //
+  if (mUnfinished) {
+    fprintf(mLogFile, "L2upsilon: WARNING - finishRun() was not called for last run\n");
+    finishRun();
+  }
 
-  sprintf(mBaseFileName, "out2/run%d.l2ups", runNumber);
+  mRunNumber = runNumber;
+  mUnfinished = true;
+
+  char filename[FILENAME_MAX];
+  sprintf(filename, "%s/run%d.l2ups.log", mOutDir, runNumber);
+
+  if (FILE* fp = fopen(filename, "w"))
+    mLogFile = fp;
+  else
+    printf("L2upsilon: WARNING - Can't open log file %s\n", filename);
+
+  fprintf(mLogFile, "L2upsilon::initRun(char* name=\"%s\", int runNumber=%d, int* userInt=%p, float* userFloat=%p)\n", mName, runNumber, userInt, userFloat);
 
   //
   // Set float and int run control parameters
@@ -46,23 +73,6 @@ int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
   mUseVertexZ               = userInt[3];
   mNumberOfTowersPerCluster = userInt[4];
 
-  //
-  // Reset event counters
-  //
-  mEventsSeen = 0;
-  mEventsAccepted = 0;
-
-  //
-  // Open log file and write out algorithm parameters
-  //
-  if (mLogFile) {
-    finishRun();
-    fclose(mLogFile);
-    mLogFile = 0;
-  }
-  char filename[FILENAME_MAX];
-  sprintf(filename, "%s.log", mBaseFileName);
-  mLogFile = fopen(filename, "w"); 
   fprintf(mLogFile, "Run Number: %d\n", runNumber);
   fprintf(mLogFile, "Start Time: %s", timeString());
   fprintf(mLogFile, "L0 seed threshold: %d\n", mL0SeedThreshold);
@@ -75,6 +85,12 @@ int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
   fprintf(mLogFile, "Minimum invariant mass [GeV]: %f\n", mMinInvMass);
   fprintf(mLogFile, "Maximum invariant mass [GeV]: %f\n", mMaxInvMass);
   fprintf(mLogFile, "Maximum cos(theta): %f\n", mMaxCosTheta);
+
+  //
+  // Reset event counters
+  //
+  mEventsSeen = 0;
+  mEventsAccepted = 0;
 
   mL0SeedThreshold <<= L0_HT_TRIGGER_BIT_SHIFT;
 
@@ -124,9 +140,9 @@ int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
     }
   }
 
-
   resetHistograms();
   timer.start();
+
   return 0;
 }
 
@@ -137,9 +153,8 @@ void L2upsilon::readGeomXYZ(const char *fname){
   assert(fp);
   int id;
   float x, y, z;
-  while (1) {
-    int ret=fscanf(fp, "%d %f %f %f", &id, &x, &y, &z);
-    if ( ret==EOF) break;
+  int ret;
+  while ((ret = fscanf(fp, "%d %f %f %f", &id, &x, &y, &z)) != EOF) {
     assert(ret==4);
     int rdo = mSoftIdToRdo[id];
     bemcTower[rdo].x = x;
@@ -154,32 +169,32 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
 			int bemcIn, unsigned short* bemcData,
 			int eemcIn, unsigned short* eemcData)
 {
-  // Debug
+#ifndef IS_REAL_L2
   printf("L2upsilon::doEvent(int L0trg=%d, int eventNumber=%d, TrgDataType* trgData=%p, int bemcIn=%d, unsigned short* bemcData=%p, int eemcIn=%d, unsigned short* eemcData=%p)\n", L0trg, eventNumber, trgData, bemcIn, bemcData, eemcIn, eemcData);
+#endif
 
-  if (!(trgData &&bemcData)) return false;
+  if (!(trgData && bemcData)) return false;
 
   //
   // We have a valid event
   //
   unsigned int timeStart;
   unsigned int timeStop;
+
   rdtscl_macro(timeStart);
-
   hL0rate->fill(timer.time());
-
   ++mEventsSeen;
+  this->trgData = trgData;
+  this->bemcData = bemcData;
 
   //
   // Save the trigger data and BEMC data pointers for use in member functions
   //
-  this->trgData = trgData;
-  this->bemcData = bemcData;
-
   vector<int> L0Seeds;
   vector<int> L2Seeds;
-  L0Seeds.reserve(10);
-  L2Seeds.reserve(10);
+
+  L0Seeds.reserve(100);
+  L2Seeds.reserve(100);
   findSeedTowers(L0Seeds, L2Seeds);
 
   L2Result result;
@@ -227,7 +242,11 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
         hCosTheta->fill(int((cosTheta+1)*50));
 
         memcpy(&trgData->TrgSum.L2Result[mResultOffset], &result, sizeof(result));
+
+#ifndef IS_REAL_L2
 	print();
+#endif
+
         return true;
       }
     }
@@ -246,14 +265,18 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
   rdtscl_macro(timeStop);
   result.processingTime = (timeStop > timeStart) ? timeStop - timeStart : 0;
   memcpy(&trgData->TrgSum.L2Result[mResultOffset], &result, sizeof(result));
+
+#ifndef IS_REAL_L2
   print();
+#endif
+
   return false;
 }
 
 void L2upsilon::finishRun()
 {
-  // Debug
-  printf("L2upsilon::finishRun()\n");
+  mUnfinished = false;
+  fprintf(mLogFile, "L2upsilon::finishRun()\n");
 
   //
   // Write out events summary and close log file
@@ -261,9 +284,10 @@ void L2upsilon::finishRun()
   fprintf(mLogFile, "Stop Time: %s", timeString());
   fprintf(mLogFile, "Events seen: %d\n", mEventsSeen);
   fprintf(mLogFile, "Events accepted: %d\n", mEventsAccepted);
-  fclose(mLogFile);
-  mLogFile = 0;
+
   writeHistograms();
+
+  if (mLogFile != stdout) fclose(mLogFile);
 }
 
 void L2upsilon::findSeedTowers(vector<int>& L0Seeds, vector<int>& L2Seeds)
@@ -387,15 +411,14 @@ void L2upsilon::createHistograms()
 void L2upsilon::writeHistograms()
 {
   char filename[FILENAME_MAX];
-  sprintf(filename, "%s.histo.bin", mBaseFileName);
+  sprintf(filename, "%s/run%d.l2ups.histo.bin", mOutDir, mRunNumber);
   FILE* fp = fopen(filename, "w");
   if (!fp) {
-    fprintf(mLogFile, "Can't open %s\n", filename);
+    fprintf(mLogFile, "L2upsilon: WARNING - Can't open histogram file %s\n", filename);
     return;
   }
-  for (list<L2Histo*>::iterator i = mHistograms.begin(); i != mHistograms.end(); ++i) {
+  for (list<L2Histo*>::iterator i = mHistograms.begin(); i != mHistograms.end(); ++i)
     (*i)->write(fp);
-  }
   fclose(fp);
 }
 

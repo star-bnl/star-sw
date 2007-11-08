@@ -107,10 +107,10 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
   // ----------- L2 J/Psi algo ----------------  slot 5
   // add here
 
-  LOG_INFO  << "StL2JetEmulMaker::InitRun() done, run=" <<runNo<<endm;
+  LOG_INFO  << "StL2JetEmulMaker::InitRun() done, run=" <<runNo<<" isMC="<<mMCflag<<endm;
   
   return kStOK; 
-} 
+}  
 
 //_____________________________________________________________________________
 void
@@ -309,13 +309,13 @@ StL2_2006EmulatorMaker::getTriggerData(){
     l2jetOff=trgAkio5.L2ResultsOffset(idJ); 
     l2res=trgDB->TrgSum.L2Result;
 #endif
-  
-    
-#if 1 // read regular muDst 
-    TArrayI& l2Array = muMk->muDst()->event()->L2Result();
-    printf("AccessL2Decision() from regular muDst: L2Ar-size=%d\n",l2Array.GetSize());    
-    l2res=(unsigned int *)l2Array.GetArray();
-#endif
+
+    // read regular muDst   
+    if(mMCflag==0) {
+      TArrayI& l2Array = muMk->muDst()->event()->L2Result();
+      printf("AccessL2Decision() from regular muDst: L2Ar-size=%d\n",l2Array.GetSize());    
+      l2res=(unsigned int *)l2Array.GetArray();
+    }
 
  } else { // try StEvent  
     StEvent *mEvent = (StEvent *)StMaker::GetChain()->  GetInputDS("StEvent");
@@ -336,14 +336,16 @@ StL2_2006EmulatorMaker::getTriggerData(){
   }
 #endif
 
-  printf(" L2-jet online results below:\n");
-  // int k;  for (k=0;k<32;k++) printf("k=%2d  val=0x%04x\n",k,l2res[k]);
-  L2jetResults2006 *out1= ( L2jetResults2006 *) &l2res[l2jetOff];
-  // printf("pp=%p %d %d \n",out1,sizeof(L2jetResults2006), sizeof(L2jetOutInt0));
-  
-  L2jetResults2006_print(out1);
-  unsigned char cSum=L2jetResults2006_doCheckSum(out1);
-  assert(cSum==0);
+  if(mMCflag==0) {
+    printf(" L2-jet online results below:\n");
+    // int k;  for (k=0;k<32;k++) printf("k=%2d  val=0x%04x\n",k,l2res[k]);
+    L2jetResults2006 *out1= ( L2jetResults2006 *) &l2res[l2jetOff];
+    // printf("pp=%p %d %d \n",out1,sizeof(L2jetResults2006), sizeof(L2jetOutInt0));    
+    L2jetResults2006_print(out1);
+    unsigned char cSum=L2jetResults2006_doCheckSum(out1);
+    assert(cSum==0);
+  } // only for real data
+
     
 #if 0
   vector<unsigned int> trgL=L1->triggerIds();
@@ -370,7 +372,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.6 2007/11/02 17:42:57 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.7 2007/11/08 21:29:10 balewski Exp $
 //
 
 

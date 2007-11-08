@@ -8,6 +8,8 @@ else
 endif
 
 INSTALPATH=../../../../onlineL2
+ROOT_LIB  = `root-config --libs`
+ROOT_INC  = -I `root-config --incdir`
 
 
 LIBNAME  = L2algoUtil
@@ -41,6 +43,14 @@ install:
 	cp -p $(HDRS)  $(INSTALPATH)/alg_include
 
 
+binH2rootH.o: binH2rootH.cxx
+	$(CXX) $(CFLAGS) $(ROOT_INC) -c $< -o $@
+
+binH2rootH: binH2rootH.o
+	$(LD) -o  $@ $^ $(LIBS) $(ROOT_LIB)
+
+
+
 clean:
 	-rm -f *.o $(LINK)  lib*$(LIBNAME).*  .depend
 
@@ -59,6 +69,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.6  2007/11/08 21:29:13  balewski
+# now L2emu runs on M-C
+#
 # Revision 1.5  2007/11/08 04:02:27  balewski
 # run on l2ana as well
 #
