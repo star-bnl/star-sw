@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuFixTopoMap.cxx,v 1.1 2000/06/15 03:55:29 calderon Exp $
+ * $Id: StuFixTopoMap.cxx,v 1.2 2007/11/08 00:37:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 2000
  ***************************************************************************
@@ -87,7 +87,7 @@ bool StuFixTopoMap(StTrack* track)
     //
     // Different coding for FTPC and TPC/SVT/SSD tracks
     //
-    unsigned int i, k;
+    unsigned int i, k, s;
     if (info->numberOfReferencedPoints(kFtpcWestId) ||
 	info->numberOfReferencedPoints(kFtpcEastId)) {
 
@@ -115,9 +115,28 @@ bool StuFixTopoMap(StTrack* track)
 		if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
 		word1 |= 1U<<k;
 	    }
+	    if (hits[i]->detector() == kPxlId) {
+		k = dynamic_cast<const StRnDHit*>(hits[i])->layer();
+		LOG_DEBUG<<"track has hit in pixel detector, layer "<<k<<endm;
+		if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
+		word1 |= 1U<<k;
+		LOG_DEBUG<<"word1: "<<word1<<endm;
+	    }
+	    if (hits[i]->detector() == kIstId) {
+		k = dynamic_cast<const StRnDHit*>(hits[i])->layer();
+		s = dynamic_cast<const StRnDHit*>(hits[i])->extraByte0();
+		LOG_DEBUG<<"track has hit in ist, layer "<<k<<", side "<<s<<endm;
+		if(k==2) k=k+s-1;
+		LOG_DEBUG<<"set bit for layer "<<k<<" to 1"<<endm;
+		if (word1 & 1U<<(k+2)) word2 |= 1U<<30; // turnaround flag    
+		word1 |= 1U<<(k+2);
+		LOG_DEBUG<<"word1: "<<word1<<endm;
+	    }
 	    else if (hits[i]->detector() == kSsdId) {
 		if (word1 & 1U<<7) word2 |= 1U<<30; // turnaround flag    
+		LOG_DEBUG<<"track has hit in ssd"<<endm;
 		word1 |= 1U<<7;
+		LOG_DEBUG<<"word1: "<<endm;
 	    }
 	    else if (hits[i]->detector() == kTpcId) {
 		k = dynamic_cast<const StTpcHit*>(hits[i])->padrow();
