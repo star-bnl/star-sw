@@ -4,27 +4,26 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 6e1,
+void rdMu2TrigSimu( int nevents = 7e0,
 		    int flagMC=1, // 0== off
-		    int useEemc=0, // 0== off
-		    int useBemc=1, // 0== off
-		    int useL2=0, // 0== off
+		    int useEemc=1, // 0== off
+		    int useBemc=0, // 0== off
+		    int useL2=1, // 0== off
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
 		    int playConfig=100, // jan:100_199
 		    int emcEveDump=0 // extrating raw EMC data in a custom format
 		    )  
 {
-
-  if (flagMC==0)  const char *dirIn="runList/";
-  if (flagMC==1) const char *dirIn="";
+  const char *dirIn="runList/";
   int nFiles = 20; // make this big if you want to read all events from a run
   
   char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
   TString outDir="./out2/"; 
   
   if (flagMC==1){
-    const char *file="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.MuDst.root";
-    const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
+      //const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
+    const char *file="/star/u/ahoffman/ForJan/rcf1308_203_2000evts.MuDst.root";
+    dirIn="";
   }
   if (flagMC==0){
     // const char *file="/star/institutions/iucf/balewski/prodOfficial06_muDst/7098001/st_physics_*.MuDst.root";
@@ -50,7 +49,6 @@ void rdMu2TrigSimu( int nevents = 6e1,
     assert( !gSystem->Load("StEpcMaker"));
   }
   assert( !gSystem->Load("StTriggerUtilities"));
-  //  if(emcEveDump) assert( !gSystem->Load("EmcBinEvent"));
 
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
@@ -58,10 +56,9 @@ void rdMu2TrigSimu( int nevents = 6e1,
   StChain *chain= new StChain("StChain"); 
 
   if (flagMC){
-    
     //Need ioMaker in order to access geant branch in MC
     StIOMaker* ioMaker = new StIOMaker();
-    ioMaker->SetFile(fname);
+    ioMaker->SetFile(file);
     ioMaker->SetIOMode("r");
     ioMaker->SetBranch("*",0,"0");             //deactivate all branches
     ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
@@ -78,15 +75,15 @@ void rdMu2TrigSimu( int nevents = 6e1,
   cout << "Avaliable number of events  " << nEntries << endl;  
   
   //Database -- get a real calibration from the database
-  //St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  St_db_Maker* dbMk = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
-   
+  St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
+  
   
   //If MC then must set database time and date
   // if Endcap fast simu is used tower gains in DB do not matter,JB
   if(flagMC) {
-    dbMk->SetDateTime(20060522, 112810);//Alans timestamp 7142018
-  }
+    // dbMk->SetDateTime(20070101,1 ); // for Pibero
+    dbMk->SetDateTime(20060522, 55000);//Alans timestamp R7142018
+ }
 
  //Collect all output histograms 
   TObjArray* HList=new TObjArray; 
@@ -199,15 +196,17 @@ void rdMu2TrigSimu( int nevents = 6e1,
   cout << "****************************************** " << endl;
 
 
-  // TString fileMu=file;
-  //printf("=%s=\n",fileMu.Data());
-  //TString outF=outDir+fileMu.ReplaceAll(".lis",".trgSim");
-  //outF+=".hist.root";
-  //printf("=%s=\n",outF.Data());
-  //hf=new TFile(outF,"recreate");
+  TString fileMu=file;
+  printf("=%s=\n",fileMu.Data());
+  if(fileMu.Contains(".lis")) fileMu.ReplaceAll(".lis",".trgSim");
+  if(fileMu.Contains(".MuDst.root")) fileMu.ReplaceAll(".MuDst.root",".trgSim");
+  TString outF=outDir+fileMu;
+  outF+=".hist.root";
+  printf("=%s=\n",outF.Data());
+  hf=new TFile(outF,"recreate");
   //HList->ls();
-  //HList->Write();
-  //printf("\n Histo saved -->%s<\n",outF.Data());
+  HList->Write();
+  printf("\n Histo saved -->%s<\n",outF.Data());
   
   cout <<Form("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",total,nEntries,rate,tMnt)<<endl;
 

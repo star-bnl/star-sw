@@ -14,13 +14,10 @@
 
 using namespace std;
 class L2Histo;
-#ifdef __ROOT__ // RCF environment
-#include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
-#include "StDaqLib/TRG/trgStructures.h"
+#ifdef  IS_REAL_L2  //in l2-ana  environmen
+  #include "L2VirtualAlgo.h"
 #else
-
-#include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
-#include "StDaqLib/TRG/trgStructures.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
 #endif
 
 #include "bemcTower.h"

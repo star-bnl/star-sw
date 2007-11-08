@@ -8,13 +8,15 @@ AR     = ar rul
 
 DEBUG  =-g -O 
 
+INCL =-I ../L2algoUtil
+
 # some details may differ for the real L2-machine
 ifndef STAR
   DEFINES = -DIS_REAL_L2
-  INCL =-I  /home/startrg/trg/trg_soft_dev/include/	
+  INCL +=-I  /home/startrg/trg/trg_soft_dev/include/	
 else
   DEFINES=
-  INCL =-I ../L2janUtil -I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
+  INCL += -I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
 endif
 
 INSTALPATH=../../../../onlineL2
@@ -55,6 +57,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.4  2007/11/08 04:02:34  balewski
+# run on l2ana as well
+#
 # Revision 1.3  2007/11/02 03:03:50  balewski
 # modified L2VirtualAlgo
 #

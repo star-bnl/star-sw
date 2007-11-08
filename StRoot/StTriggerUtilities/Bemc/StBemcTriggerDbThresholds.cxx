@@ -70,7 +70,7 @@ Int_t  StBemcTriggerDbThresholds::GetHtFEEbitOffset(int year){
 //==================================================
 Int_t  StBemcTriggerDbThresholds::GetHTTP_DSM0_threshold(Int_t DSMmodule, UInt_t timestamp, Int_t layer){
 
-  LOG_INFO <<"StBemcTriggerDbThresholds::GetHTTP_DSM0_threshold()"<<endm;
+  LOG_DEBUG <<"StBemcTriggerDbThresholds::GetHTTP_DSM0_threshold()"<<endm;
 
   Int_t threshold=-1;
 

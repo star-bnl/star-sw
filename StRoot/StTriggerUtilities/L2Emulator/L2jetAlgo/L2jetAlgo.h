@@ -1,7 +1,7 @@
 #ifndef L2JETALGO_H
 #define L2JETALGO_H
 /*********************************************************************
- * $Id: L2jetAlgo.h,v 1.3 2007/11/02 03:03:47 balewski Exp $
+ * $Id: L2jetAlgo.h,v 1.4 2007/11/08 04:02:31 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -11,8 +11,8 @@
 
 
 class L2Histo;
-#ifdef __ROOT__ //in root4star environment
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
+#ifdef  IS_REAL_L2  //in l2-ana  environmen
+  #include "L2VirtualAlgo.h"
 #else
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
 #endif
@@ -134,6 +134,9 @@ class L2jetAlgo : public  L2VirtualAlgo {
 
 /**********************************************************************
   $Log: L2jetAlgo.h,v $
+  Revision 1.4  2007/11/08 04:02:31  balewski
+  run on l2ana as well
+
   Revision 1.3  2007/11/02 03:03:47  balewski
   modified L2VirtualAlgo
 

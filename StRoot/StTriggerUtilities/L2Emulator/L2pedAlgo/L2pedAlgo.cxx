@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.5 2007/11/02 20:44:54 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.6 2007/11/08 04:02:33 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -13,12 +13,10 @@
  */  
 
 
-#ifdef __ROOT__ //in root4star environment
-  #include "StDaqLib/TRG/trgStructures.h"
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
- #else
-  #include "StDaqLib/TRG/trgStructures.h"
+#ifdef  IS_REAL_L2  //in l2-ana  environment
+  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2Histo.h"
+#else
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
@@ -382,6 +380,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.6  2007/11/08 04:02:33  balewski
+  run on l2ana as well
+
   Revision 1.5  2007/11/02 20:44:54  balewski
   cleanup
 

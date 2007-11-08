@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo.h,v 1.5 2007/11/02 17:43:02 balewski Exp $
+ * $Id: L2VirtualAlgo.h,v 1.6 2007/11/08 04:02:27 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -16,9 +16,13 @@
 #define rdtscl_macro(low) \
      __asm__ __volatile__("rdtsc" : "=a" (low) : : "edx")
 
+#ifdef  IS_REAL_L2  //in l2-ana  environmen
+  #include "trgStructures.h"
+#else
+  #include "StDaqLib/TRG/trgStructures.h"
+#endif
 
 class L2EmcDb;
-class TrgDataType;
 
 class L2VirtualAlgo {
   enum {mxTxt=1000};

@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2jetAlgo.cxx,v 1.4 2007/11/02 17:43:08 balewski Exp $
+ * $Id: L2jetAlgo.cxx,v 1.5 2007/11/08 04:02:31 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -16,12 +16,11 @@
  */
 
 
-#ifdef __ROOT__ //in root4star environment
-  #include "StDaqLib/TRG/trgStructures.h"
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
+
+#ifdef  IS_REAL_L2  //in l2-ana  environment
+  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2Histo.h"
 #else
-  #include "StDaqLib/TRG/trgStructures.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
@@ -974,6 +973,9 @@ L2jetAlgo::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo.cxx,v $
+  Revision 1.5  2007/11/08 04:02:31  balewski
+  run on l2ana as well
+
   Revision 1.4  2007/11/02 17:43:08  balewski
   cleanup & it started to work w/ L2upsilon
 

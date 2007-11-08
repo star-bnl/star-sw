@@ -1,28 +1,32 @@
 # some details may differ for  the real  L2-machine
 ifndef STAR
-  INSTALPATH=../main/
+  DEFINES = -DIS_REAL_L2
+  INCL =-I  /home/startrg/trg/trg_soft_dev/include/
 else
-  INSTALPATH=../../../../onlineL2
+  DEFINES=-I../../../ -I/afs/rhic.bnl.gov/star/packages/DEV/StRoot 
+  INCL =
 endif
+
+INSTALPATH=../../../../onlineL2
 
 
 LIBNAME  = L2algoUtil
-HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h L2DbTime.hL2DbConfig.h
-SRCS     = L2Histo.cxx  L2EmcDb.cxx L2VirtualAlgo.cxx L2DbTime.cxx L2DbConfig.cxx
-
+HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h 
+SRCS     = L2Histo.cxx  L2EmcDb.cxx L2VirtualAlgo.cxx 
+# tmp out: L2DbTime.hL2DbConfig.h L2DbTime.cxx L2DbConfig.cxx
 
 CXX    = g++
 AR     = ar rul
 
 DEBUG  =-g -O 
-DEFINES=
+
 #
 
 OBJS   = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
 
 
 #
-CFLAGS   = -Wall $(DEBUG) $(DEFINES) 
+CFLAGS   = -Wall $(DEBUG) $(DEFINES) $(INCL)
 LDFLAGS  = -shared 
 
 all:	$(LIBNAME) 
@@ -55,6 +59,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.5  2007/11/08 04:02:27  balewski
+# run on l2ana as well
+#
 # Revision 1.4  2007/11/06 22:07:24  balewski
 # added timeStamp controlled L2 setup from Jason
 #
