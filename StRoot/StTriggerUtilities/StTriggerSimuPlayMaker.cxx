@@ -9,11 +9,13 @@
 
 
 //get L2
-#include "L2Emulator/StL2TriggerSimu.h"
+#include "StTriggerSimuMaker.h"
 
 //get HEAD Maker
 #include "StTriggerSimuMaker.h"
-
+#include "StBbcTriggerSimu.h"
+#include "StBemcTriggerSimu.h"
+#include "StL2TriggerSimu.h"
 #include "StTriggerSimuPlayMaker.h"
 
 ClassImp(StTriggerSimuPlayMaker)
@@ -89,10 +91,18 @@ StTriggerSimuPlayMaker::Finish(){
 void
 StTriggerSimuPlayMaker::janTest100(){
 
+  int trigID=137611;
   printf("in play:JanTest 100\n");
   hA[1]->Fill(2);
+  StTriggerSimuMaker *trgSimMk= (StTriggerSimuMaker*) StMaker::GetChain()->GetMaker("StarTrigSimu");
+  assert(trgSimMk);
+  printf("trigID=%d decision=%d ,",trigID,trgSimMk->isTrigger(trigID));
+  if(trgSimMk->bbc) printf("L0-BBC=%d ,",trgSimMk->bbc->isTrigger(trigID));
+  if(trgSimMk->bemc) printf("L0-BEMC=%d ,",trgSimMk->bemc->isTrigger(trigID));
+  if(trgSimMk->lTwo) printf("L2=%d ",trgSimMk->lTwo->isTrigger(trigID));
+  printf("\n");
 }
 
 
-// $Id: StTriggerSimuPlayMaker.cxx,v 1.1 2007/10/12 20:10:23 balewski Exp $
+// $Id: StTriggerSimuPlayMaker.cxx,v 1.2 2007/11/08 04:53:52 balewski Exp $
 //
