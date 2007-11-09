@@ -2,7 +2,8 @@
  *
  * Tables: tofTDIGOnTray
  *
- * description: // positioning of TDIG boards on trays */
+ * description: // positioning of TDIG boards on trays 
+*/
 
 struct tofTDIGOnTray {
   short trayId;      /* tray Id */   

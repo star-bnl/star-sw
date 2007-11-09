@@ -2,7 +2,8 @@
  *
  * Tables: tofDaqMap
  *
- * description: // Map btw TDIG chan to MRPC/PMT channel */
+ * description: // Map btw TDIG chan to MRPC/PMT channel
+ */
 
 struct tofDaqMap {
    short MRPC2TDIGChanMap[192]; /* global TDIG channel number for MRPC     */
