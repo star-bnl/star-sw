@@ -22,8 +22,8 @@ void rdMu2TrigSimu( int nevents = 7e0,
   
   if (flagMC==1){
       //const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
-    const char *file="/star/u/ahoffman/ForJan/rcf1308_203_2000evts.MuDst.root";
-    dirIn="";
+    const char *file="rcf1308_203_2000evts.MuDst.root";
+    dirIn="/star/u/ahoffman/ForJan/";
   }
   if (flagMC==0){
     // const char *file="/star/institutions/iucf/balewski/prodOfficial06_muDst/7098001/st_physics_*.MuDst.root";
