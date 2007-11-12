@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.24 2007/11/03 23:37:35 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.25 2007/11/12 22:59:41 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -200,8 +200,11 @@ void GeomBrowser::editPaste()
 //_____________________________________________________________________________
 void GeomBrowser::editFind()
 {
-#if  ROOT_VERSION_CODE >= ROOT_VERSION(4,01,01)   
-   TVirtualViewer3D *viewer = TVirtualViewer3D::Viewer3D(gPad,"ogl");
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(4,01,01)
+   // Draw the 3d image fomr the secoind pad only 
+   TVirtualPad *pad3d = tQtWidget1->GetCanvas() ? tQtWidget1->GetCanvas() : gPad;
+//   TVirtualViewer3D *viewer = TVirtualViewer3D::Viewer3D(gPad,"ogl");
+   TVirtualViewer3D *viewer = TVirtualViewer3D::Viewer3D(pad3d,"ogl");
    if (viewer) {
       // Create Open GL viewer
       TGQt::SetCoinFlag(0);
