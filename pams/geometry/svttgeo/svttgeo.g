@@ -1,6 +1,9 @@
-* $Id: svttgeo.g,v 1.18 2001/09/10 17:35:51 nevski Exp $
+* $Id: svttgeo.g,v 1.19 2007/11/13 21:32:54 perev Exp $
 *
 * $Log: svttgeo.g,v $
+* Revision 1.19  2007/11/13 21:32:54  perev
+* ALKAP fixed and innermost radius increased
+*
 * Revision 1.18  2001/09/10 17:35:51  nevski
 * bug fix - outer radius for a single ladder corrected
 *
@@ -152,7 +155,7 @@ Module  SVTTGEO  is the SVT geometry for STAR
    Fill SVTG ! Basic SVT dimensions 
       Version   = 2          ! geometry version
       Nlayer    = 7          ! number of svt layers (was 7)
-      RsizeMin  = 4.006      ! STV innermost radius
+      RsizeMin  = 4.100      ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
@@ -356,9 +359,16 @@ Module  SVTTGEO  is the SVT geometry for STAR
         Component C5  A=12    Z=6  W=5
         Component H4  A=1     Z=1  W=4
         Component O2  A=16    Z=8  W=2
-        Component Al  A=27    Z=13 W=3
-      Mixture  ALKAP  Dens=1.65
+        Component Al  A=27    Z=13 W=0.2302
+      Mixture  ALKAP  Dens=1.432
 *
+* use aluminized mylar mixture for ssd shield
+        Component C5  A=12    Z=6  W=5
+        Component H4  A=1     Z=1  W=4
+        Component O2  A=16    Z=8  W=2
+        Component Al  A=27    Z=13 W=0.0986
+      Mixture  SSDALMY Dens=1.40845
+
 *     put real water only when manifold is installed
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
@@ -1729,7 +1739,7 @@ Endblock
 *
 Block SSSH is the separation shield cylinder
 * use aluminised mylar mixture instead of kapton
-      material  ALKAP
+      material  SSDAMY
       Attribute SSSH Seen=1 Colo=3
       Shape TUBE rmin=ssld_SSepRInn rmax=ssld_SSepROut,
                   dz=ssld_SSepLen
@@ -1739,7 +1749,7 @@ Endblock
 *
 Block SOSH is the separation shield cylinder
 * use aluminised mylar mixture instead of kapton
-      material  ALKAP
+      material  SSDAMY
       Attribute SOSH Seen=1 Colo=3
       Shape TUBE rmin=ssld_SOutRInn rmax=ssld_SOutROut,
                   dz=ssld_SOutLen
