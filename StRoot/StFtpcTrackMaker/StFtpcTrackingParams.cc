@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.33 2007/05/08 10:47:33 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.34 2007/11/13 10:30:40 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.34  2007/11/13 10:30:40  jcs
+// add code (commented out) which enables testing rotation values without changing the database
+//
 // Revision 1.33  2007/05/08 10:47:33  jcs
 // replace StMagUtilities with StarMagField as requested by Yuri
 //
@@ -808,6 +811,12 @@ Int_t StFtpcTrackingParams::InitCoordTransformation(ftpcCoordTrans_st* ftpcCoord
 
     mObservedVertexOffsetX[0] = ftpcCoordTrans->observedVertexOffsetX[0] * centimeter;
     mObservedVertexOffsetX[1] = ftpcCoordTrans->observedVertexOffsetX[1] * centimeter;
+
+//    For testing without changing the database, set rotation values here
+//    mObservedVertexOffsetY[0] = 0.0;
+//    mObservedVertexOffsetY[1] = 0.0;
+//    mObservedVertexOffsetX[0] = 0.0;
+//    mObservedVertexOffsetX[1] = 0.0;
 
     if ((mObservedVertexOffsetY[0] != oldY[0] || mObservedVertexOffsetY[1] != oldY[1]) && 
 	(oldY[0] < -9990. || oldY[1] < -9990.)) {
