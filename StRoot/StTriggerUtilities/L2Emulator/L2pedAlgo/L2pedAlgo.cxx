@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.7 2007/11/13 00:12:38 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.8 2007/11/13 23:06:09 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -140,10 +140,9 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
 		   int bemcIn, ushort *bemcData,
 		   int eemcIn, ushort *eemcData){
   // not used: L0trg, inpEveId
-   mAccept=false;
+  mAccept=true; // it never aborts
   /* STRICT TIME BUDGET  START ...., well a bit relaxed for this algo*/
-  long timeStart=0;
-  rdtscl_macro(timeStart);
+  rdtscl_macro(mEveTimeStart);
   nInp++;
   hA[10]->fill(0);
   myTrigData=trgData;
@@ -195,11 +194,9 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   
     (  par_pedSubtr <<6 ) ;
  
-  long timeStop=0;
-  rdtscl_macro(timeStop);
-
-  long timeDiff=timeStop-timeStart;
-  int kTick=timeDiff/1000;
+    rdtscl_macro(mEveTimeStop);
+  mEveTimeDiff=mEveTimeStop-mEveTimeStart;
+  int  kTick=mEveTimeDiff/1000;
   hA[11]->fill(kTick/20);
   
   //  printf("jkTick=%d\n",kTick);
@@ -211,7 +208,7 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   
   if(par_dbg) L2pedResults2006_print(&out);
   
-  return true;
+  return  mAccept;
 }
 
 /*========================================
@@ -380,6 +377,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.8  2007/11/13 23:06:09  balewski
+  toward more unified L2-algos
+
   Revision 1.7  2007/11/13 00:12:38  balewski
   added offline triggerID, take1
 

@@ -607,13 +607,12 @@ bool  L2gammaAlgo::doEvent( int L0trigger, int inputEventID, TrgDataType* trgDat
 {
   mAccept=false;
   if ( mEEmc ) {
-    return doEvent( inputEventID, trgData, eemcIn, eemcData );
+    mAccept=doEvent( inputEventID, trgData, eemcIn, eemcData );
   }
   else {
-    return doEvent( inputEventID, trgData, bemcIn, bemcData );
+    mAccept=doEvent( inputEventID, trgData, bemcIn, bemcData );
   } 
-  assert(2+2==5);
-  return false; 
+  return mAccept;
 }
 
 
