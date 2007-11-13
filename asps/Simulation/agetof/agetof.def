@@ -951,6 +951,7 @@ REPLACE [+CDE,AGECOM] with [;" - Advanced Geant interface ";
   Equivalence    (%Attribute,%Work),(%STEMAX,%DMAXMS),(%Alphax,%Alfax),
                  (%Alphay,%Alfay),(%Alphaz,%Alfaz),(%Twist,%Twis),(%NpDiv,%NpDv),
                  " temporarly " (%P1,%HX),(%P2,%HY);
+  real MIL_p,INCH_p;parameter (INCH_p=2.54,MIL_p=0.00254);
 ];
 Replace [+CDE,AGCKINE] with [;"   AGI general data card information "
       Integer          IKineOld,IdInp,Kevent,
