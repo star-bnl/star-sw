@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.162 2007/11/07 21:25:41 perev Exp $
+* $Id: geometry.g,v 1.163 2007/11/13 21:38:08 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.163  2007/11/13 21:38:08  perev
+* pipeFlag and Nsi==7 added
+*
 * Revision 1.162  2007/11/07 21:25:41  perev
 * btofgeo6 added by X.Dong
 *
@@ -771,9 +774,9 @@
 * X.Dong - global parameters for TOF trays
    real       tofX0, tofZ0
 
-   real       Par(1000),field,dcay(5),shift(2),wdm
+   real       Par(1000),field,dcay(5),shift(2),Wdm
 
-   Integer    LENOCC,LL,IPRIN,Nsi,NsiMin,i,j,l,kgeom,nmod(2),nonf(3),
+   Integer    LENOCC,LL,IPRIN,nSi,nSiMin,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               sisd_level,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf
@@ -789,6 +792,7 @@
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig
+   Integer    pipeFlag
 
 *             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
@@ -876,6 +880,8 @@ replace[;ON#{#;] with [
    TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
    VpddConfig  = 1 ! vpd...
 
+   pipeFlag = 3 ! pipe wrap + svt shield
+
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
 * If an empty or no DETP GEOM was issued, geometry is defined externally.
@@ -889,8 +895,8 @@ replace[;ON#{#;] with [
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
-   Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
-   NsiMin=1;             " the innermost layer of SVT                     "
+   nSi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
+   nSiMin=1;             " the innermost layer of SVT                     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
    mwx=2                 " for Year_1? mwx=1 limites x in mwc hits (<Y2K) "
    Itof=2                " use btofgeo2 - default starting from Y2000     "
@@ -947,7 +953,7 @@ If LL>1
   on YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
                   BtofConfig=4;
                   {RICH,ems}=on;  nmod={24,0}; shift={21,0};  
-                  nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
+                  nonf={0,2,2};  Itof=2;  Rv=2;                        nSi=6; }
 
   on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  BBCM=on;            }
 
@@ -956,9 +962,9 @@ If LL>1
 *************************************************************************************************************
   on COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
-                     nsi=7  " 3 bi-plane layers + ssd ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=7  " 3 bi-plane layers + ssd ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -991,7 +997,8 @@ If LL>1
                      SISD=off;
                      SisdConfig = 1;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag = 0;
                    PIXL=on;    " put the pixel detector in"
                    PixlConfig=1;
                 }
@@ -999,7 +1006,7 @@ If LL>1
 * corrected: MWC readout, RICH reconstructed position, no TOF 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
                   {VPDD,ECAL,FTPC,svtw}=off; {RICH,ems}=on; Field=2.5; 
-                  nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  Nsi=-3;}
+                  nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  nSi=-3;}
 
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
 
@@ -1020,14 +1027,14 @@ If LL>1
 * this was put here in recent versions (as of 1.50) and I believe this is wrong as
 * it destroys compatibility with earlier code: --max--
 *    ECAL=off;  
-                  nmod={24,0}; shift={21,0}; Itof=2; Rv=2; Mf=3;       Nsi=6; }  
+                  nmod={24,0}; shift={21,0}; Itof=2; Rv=2; Mf=3;       nSi=6; }  
                 
 ****************************************************************************************
   on YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
                   "svt: 3 layers ";
-                     nsi=6        " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0        " numbring is in the code   ";
-                     wdm=0        " width is in the code      ";
+                     nSi=6        " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0        " numbring is in the code   ";
+                     Wdm=0        " width is in the code      ";
                   "tpc: standard, i.e.  "
                      mwc=on       " Wultiwire chambers are read-out ";
                      pse=on       " inner sector has pseudo padrows ";
@@ -1056,9 +1063,9 @@ If LL>1
 ****************************************************************************************
   on YEAR2003   { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -1092,9 +1099,9 @@ If LL>1
 ****************************************************************************************
   on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -1130,9 +1137,9 @@ If LL>1
 ****************************************************************************************
   on Y2003B    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -1161,9 +1168,9 @@ If LL>1
 ****************************************************************************************
   on Y2003C    { Better SVT model on top of 2003B: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -1193,9 +1200,9 @@ If LL>1
 ****************************************************************************************
   on Y2003X    { same as y2003b but with full calorimeters and PHMD
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -1234,9 +1241,9 @@ If LL>1
 
   on Y2004X    { hypothetical 2004 geometry: full barrel. Standard cuts in PHMD.;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -1287,9 +1294,9 @@ If LL>1
 ****************************************************************************************
   on Y2004Y    { same as Y2004X but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -1351,9 +1358,9 @@ If LL>1
 ****************************************************************************************
   on Y2004A    { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD; 
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -1409,9 +1416,9 @@ If LL>1
 ****************************************************************************************
   on Y2004B    { corrected 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -1462,9 +1469,9 @@ If LL>1
 ****************************************************************************************
   on Y2004C    { same as Y2004B but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -1527,9 +1534,9 @@ If LL>1
 ****************************************************************************************
   on Y2004D    { Better SVT on top of Y2004B
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -1602,9 +1609,9 @@ If LL>1
 ****************************************************************************************
   on Y2004     { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with low cuts GSTPAR in PHMD; ; 
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -1660,9 +1667,9 @@ If LL>1
 ****************************************************************************************
   on Y2005X    { first cut of full CALB 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -1721,9 +1728,9 @@ If LL>1
 ****************************************************************************************
   on Y2005B    { TPC,FTPC,SVT and SSD correction of 2005 geometry
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -1791,9 +1798,9 @@ If LL>1
 ****************************************************************************************
   on Y2005C    { TPC,FTPC,SVT and SSD correction of 2005 geometry
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -1861,9 +1868,9 @@ If LL>1
 ****************************************************************************************
   on Y2005D    { Better SVT on top of Y2005C
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -1931,9 +1938,9 @@ If LL>1
 ****************************************************************************************
   on Y2005E    { Better SVT, bigger shield and SSD on top of Y2005C, and full barrel calorimeter
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -1998,9 +2005,9 @@ If LL>1
 ****************************************************************************************
   on Y2005F    { Y2005E + corrected SSD with gaps and dead area
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2066,9 +2073,9 @@ If LL>1
 ****************************************************************************************
   on Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2131,9 +2138,9 @@ If LL>1
 ****************************************************************************************
   on Y2006C   { Y2006B without the PHMD
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2201,9 +2208,9 @@ If LL>1
 ****************************************************************************************
   on Y2006B   { Y2006A + improved SSD with dead area + improved CALB
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2273,9 +2280,9 @@ If LL>1
 ****************************************************************************************
   on Y2006A   { Year 2006 baseline which is Y2005D+fixed TPC backplane+New SSD
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2344,9 +2351,9 @@ If LL>1
 ****************************************************************************************
   on Y2006    { Year 2006 baseline which is Y2005D+fixed TPC backplane+New SSD
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2415,9 +2422,9 @@ If LL>1
 ****************************************************************************************
   on Y2007A    { Year 2007 (see below) but with corrected SVT (carbon instead of Be water channels)
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=7  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2486,9 +2493,9 @@ If LL>1
 ****************************************************************************************
   on Y2007    { Year 2006 baseline which is Y2006+FMS
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=7  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2598,19 +2605,19 @@ If LL>1
 
 * important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
 
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 9; "SVTT version"
-                     SvshConfig = 2; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
+                     SupoConfig = 1; 		"FTPC Support"
+                     SvttConfig = -1; SVTT=off; "SVTT version"
+                     SvshConfig = 2; 		"SVT shield"
+                     DensConfig = 1; 		"gas density correction"
+                     FtpcConfig = 1; 		"ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
                      PHMD=on;
                      PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
+                     SISD=off;
+                     SisdConfig = -1; "fifth version, corrected radii, gaps, dead material"
 
 
                   "FTPC Readout barrel "
@@ -2624,6 +2631,7 @@ If LL>1
                      MutdConfig = 3;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
+                   PipeFlag = 1;  "pipe wrap only"
                 }
 ****************************************************************************************
   on DUMM01   { R and D geometry: TPC+DUMM
@@ -2661,7 +2669,8 @@ If LL>1
                      SISD=off;
                      SisdConfig = 0;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    DUMM=on;        " put the dummy in"
                 }
 ****************************************************************************************
@@ -2700,7 +2709,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 * HPD, IST off
@@ -2718,9 +2728,9 @@ If LL>1
 ****************************************************************************************
   on UPGR02    { R and D geometry: TPC+IST+HFT-SVT
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -2785,7 +2795,8 @@ If LL>1
                    IstbConfig=1;
 
 * careful! Achtung!
-                   pipeConfig=5;   " thinner pipe "
+                   PipeConfig=5;   " thinner pipe "
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " activate "
                    PixlConfig=3;   " source version "
 
@@ -2829,7 +2840,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 23;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=2;   " newer version decoupled from SVT"
 * Inner STAR tracker barrel
@@ -2884,7 +2896,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 35;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    HPDT=on;        " put the detector in"
                    HpdtConfig=1;   " base version"
                 }
@@ -2924,7 +2937,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
@@ -2983,7 +2997,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
@@ -3036,7 +3051,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
@@ -3085,7 +3101,8 @@ If LL>1
                      SISD=off;
                      SisdConfig = 0;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
@@ -3144,8 +3161,9 @@ If LL>1
                      SISD=off;
                      SisdConfig = 0;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
                    PIXL=on;        " put the pixel detector in"
+                   pipeFlag=0; ! No wrap no svt shield
                    PixlConfig=4;   " newest version by Andrew Rose"
 
                    HPDT=on;        " put the Hybrid Pixel detector in"
@@ -3203,7 +3221,8 @@ If LL>1
                      SISD=off;
                      SisdConfig = 0;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
@@ -3260,7 +3279,8 @@ If LL>1
                      PHMD=on;
                      PhmdConfig = 1;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
@@ -3320,7 +3340,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 45;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=4;   " newest version by Andrew Rose"
 
@@ -3379,7 +3400,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 65;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=5;   " newest version, thicker active Si"
 
@@ -3430,7 +3452,8 @@ If LL>1
                      SISD=on;
                      SisdConfig = 65;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=0; ! No wrap no svt shield
                    PIXL=on;        " put the pixel detector in"
                    PixlConfig=5;   " newest version, thicker active Si"
 
@@ -3449,9 +3472,9 @@ If LL>1
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -3518,9 +3541,9 @@ If LL>1
 ****************************************************************************************
   on DEV2007    { THIS TAG IS RESERVED FOR THE 2007 DEVELOPMENT ONLY
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -3590,9 +3613,9 @@ If LL>1
 ****************************************************************************************
 ****************************************************************************************
   on UPGR21    { Year UPGR20 + full tof;
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -3661,9 +3684,9 @@ If LL>1
 ****************************************************************************************
   on UPGR20    { Year 2007 + one TOF
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+                     nSi=6  " 3 bi-plane layers, nSi<=7 ";
+                     Wfr=0  " numbering is in the code   ";
+                     Wdm=0  " width is in the code      ";
 
                      ConeConfig=2 " new cable weight estimate ";
 
@@ -3760,7 +3783,7 @@ If LL>1
                      SVTT=on; }
   on SVTT_OFF   { Optionally remove the SVTT;
                      SVTT=off; }
-  on SISD_OFF   { Optionally remove the SISD ssd;
+  on SISD_OFF   { Optionally remove the SISD sisd;
                      SISD=off; }
   on ONLY_SVTT   { Only SVTT;
                   {PIPE,TPCE,ftpc,BTOF,VPDD,CALB,ECAL,MAGP,UPST,ZCAL,PHMD,FPDM,BBCM,FTRO}=off; }
@@ -3795,7 +3818,7 @@ If LL>1
                   <W> field; (' Modified field value =',F6.2,' KGS');         }
   on MWC_OFF    { Trigger Multy-wire readout off;   mwc=off;                  }
   on PSE_OFF    { No TPC pseudo-padrow generated;   pse=off;                  }
-  on 4TH_OFF    { SVT fourth layer off;             Nsi=min(Nsi,6);           }
+  on 4TH_OFF    { SVT fourth layer off;             nSi=min(nSi,6);           }
   on SPLIT_OFF  { events will not be split into subevents;     NtrSubEv=0;    }
   on SPLIT_ON   { events will be split into subevents;         NtrSubEv=1000; }
   on DEBUG_ON   { verbose mode, some graphics; Idebug=max(Idebug,1); Itest=1; }
@@ -3836,7 +3859,7 @@ If LL>1
    write(*,*) '                 MutdConfig: ',MutdConfig
    write(*,*) '                 GembConfig: ',GembConfig
    write(*,*) '                 PhmdConfig: ',PhmdConfig
-   write(*,*) '                 PipeConfig: ',PipeConfig
+   write(*,*) '                 PipeConfig: ',PipeConfig,'  PipeFlag: ',PipeFlag
    write(*,*) '                 PixlConfig: ',PixlConfig
    write(*,*) '                 SvshConfig: ',SvshConfig
    write(*,*) '                 SisdConfig: ',SisdConfig
@@ -3857,7 +3880,8 @@ If LL>1
 
 * Pipe:
    If (LL>1)        call AgDETP new ('PIPE')
-   call AgDETP add ('pipv.pipeConfig=',pipeConfig,1);
+   call AgDETP add ('pipv.PipeConfig=',PipeConfig,1);
+   call AgDETP add ('pipv.PipeFlag=',PipeFlag,1);
    if (PIPE)        Call pipegeo
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
@@ -3872,12 +3896,12 @@ If LL>1
 
    If (LL>1 & SVTT) then
      call AgDETP new ('SVTT')
-     if (Nsi < 7)           call AgDETP add ('svtg.nlayer=',   Nsi,1)
-     if (NsiMin > 1)        call AgDETP add ('svtg.nmin=',   NsiMin,1)
-     if (pipeConfig >= 4)   call AgDETP add ('svtg.ifMany=',     1,1)
-     if (Wfr > 0)           call AgDETP add ('svtl(3).nwafer=',wfr,1)
-     if (wdm > 0)           call AgDETP add ('swca.WaferWid=', wdm,1)
-     if (wdm > 0)           call AgDETP add ('swca.WaferLen=', wdm,1)
+     if (nSi < 7)           call AgDETP add ('svtg.nlayer=',   nSi,1)
+     if (nSiMin > 1)        call AgDETP add ('svtg.nmin=',  nSiMin,1)
+     if (PipeConfig >= 4)   call AgDETP add ('svtg.ifMany=',     1,1)
+     if (Wfr > 0)           call AgDETP add ('svtl(3).nwafer=',Wfr,1)
+     if (Wdm > 0)           call AgDETP add ('swca.WaferWid=', Wdm,1)
+     if (Wdm > 0)           call AgDETP add ('swca.WaferLen=', Wdm,1)
      if (.not.svtw)         call AgDETP add ('swam.Len=',       0, 1)
    endif
 
