@@ -7,10 +7,8 @@
 #include "L2DbConfig.h"
 
 // ---------------------------------------------------------------------------
-L2DbConfig::L2DbConfig( const Char_t *path )
+L2DbConfig::L2DbConfig( const Char_t *fname )
 {
-  char fname[1000];
-  sprintf(fname,"%s/L2DbTime.dat",path);
   mFilename=fname;
   ifstream inFile(fname, ifstream::in);  
   if ( !inFile )
@@ -20,6 +18,7 @@ L2DbConfig::L2DbConfig( const Char_t *path )
     }
   // check file for errors
 
+  printf("L2DbConfig::L2DbConfig, opened =%s=\n", fname);
   while ( !inFile.eof() )
     {
       L2DbTime c;
@@ -34,16 +33,20 @@ L2DbConfig::L2DbConfig( const Char_t *path )
     }
   std::cout << Form("L2DbConfig::Read in %i records from %s",mConfig.size(),fname) << std::endl;
   
-  
+  printf("L2DbConfig::L2DbConfig, done\n");
 }
 
-L2DbTime *L2DbConfig::getConfiguration( Int_t date, Int_t time )
+//=================================================================
+L2DbTime *L2DbConfig::getConfiguration( Int_t date, Int_t time, const Char_t *tag )
 {
-  std::cout << "L2DbConfig:: Get configuration for date=" << date << " time=" << time << std::endl;
+  std::cout << "L2DbConfig:: Get configuration for date=" << date << " time=" << time   <<" tag=" <<(tag? tag :"")<<"="<<std::endl;
   for ( UInt_t ii=0;ii<mConfig.size();ii++ )
     {
       if ( mConfig[ii].valid(date,time) )
-	return &mConfig[ii];
+      {
+	  if ( !tag ) return &mConfig[ii];
+	  if ( mConfig[ii].getTag().Contains(tag) ) return &mConfig[ii]; 
+      }
     }
   return 0; // could not find a match
 }

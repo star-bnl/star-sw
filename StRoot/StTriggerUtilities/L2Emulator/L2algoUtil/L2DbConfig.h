@@ -23,7 +23,8 @@ class L2DbConfig
   ~L2DbConfig(){ /* nada */ };
 
   // Get configuration from the specified date / time 
-  L2DbTime *getConfiguration( Int_t date, Int_t time );
+  L2DbTime *getConfiguration( Int_t date, Int_t time, const Char_t *tag=0 );
+
 
  private:
  protected:

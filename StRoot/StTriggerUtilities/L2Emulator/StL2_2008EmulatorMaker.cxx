@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-// StL2_2006EmulatorMaker  Jan Balewski  (Fall, 2007)
+// StL2_2008EmulatorMaker  Jan Balewski  (Fall, 2007)
 //
 // Goal: 
 //
@@ -29,11 +29,11 @@
 #include "L2gammaAlgo/L2gammaAlgo.h"
 #include "L2upsilon/L2upsilon.hh"
 
-#include "StL2_2006EmulatorMaker.h"
+#include "StL2_2008EmulatorMaker.h"
 
-ClassImp(StL2_2006EmulatorMaker)
+ClassImp(StL2_2008EmulatorMaker)
 
-StL2_2006EmulatorMaker::StL2_2006EmulatorMaker(const char *name):StMaker(name) {
+StL2_2008EmulatorMaker::StL2_2008EmulatorMaker(const char *name):StMaker(name) {
   mL2pedAlgo=0;
   mL2jetAlgo=0;
   mL2gammaEEmc=mL2gammaBEmc=0;
@@ -41,14 +41,14 @@ StL2_2006EmulatorMaker::StL2_2006EmulatorMaker(const char *name):StMaker(name) {
 }
 
 //========================================
-StL2_2006EmulatorMaker::~StL2_2006EmulatorMaker(){
+StL2_2008EmulatorMaker::~StL2_2008EmulatorMaker(){
 }
 
 
 //========================================
 //========================================
 Int_t  
-StL2_2006EmulatorMaker::InitRun(int runNo){
+StL2_2008EmulatorMaker::InitRun(int runNo){
   //WARN: do NOT use  runNo for any setup - it woul dberak for M-C
   //WARN: do NOT use run# to controll setup of L2-algos
   
@@ -115,7 +115,7 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
 
 //_____________________________________________________________________________
 void
-StL2_2006EmulatorMaker::addL2UpsilonAlgo2006(int runNo){
+StL2_2008EmulatorMaker::addL2UpsilonAlgo2006(int runNo){
   enum {mxPar=10}; // for any algo, separate ints & floats
   int intsPar[mxPar]; // params passed from run control gui
   float floatsPar[mxPar]; 
@@ -138,7 +138,7 @@ StL2_2006EmulatorMaker::addL2UpsilonAlgo2006(int runNo){
 
 //_____________________________________________________________________________
 void
-StL2_2006EmulatorMaker::addL2GammaAlgos2006(int runNo){
+StL2_2008EmulatorMaker::addL2GammaAlgos2006(int runNo){
   int L2ResOff = L2RESULTS_OFFSET_PIG;
   assert( mYearMonthDay >= 20060406 ); // before ppTrans
   assert( mYearMonthDay <= 20060607 ); // after ppLong2
@@ -204,7 +204,7 @@ StL2_2006EmulatorMaker::addL2GammaAlgos2006(int runNo){
 
 //_____________________________________________________________________________
 Int_t 
-StL2_2006EmulatorMaker::Init() {
+StL2_2008EmulatorMaker::Init() {
   init();
   LOG_INFO <<Form("Init()")<<endm;
   //  initHistoA("spj_");
@@ -214,15 +214,15 @@ StL2_2006EmulatorMaker::Init() {
 
 //========================================
 void 
-StL2_2006EmulatorMaker::Clear(const Option_t*){
+StL2_2008EmulatorMaker::Clear(const Option_t*){
   clear();
-  LOG_DEBUG<<"StL2_2006EmulatorMaker::Clear()"<<endm;
+  LOG_DEBUG<<"StL2_2008EmulatorMaker::Clear()"<<endm;
 }
 
 
 //========================================
 Int_t 
-StL2_2006EmulatorMaker::Make(){
+StL2_2008EmulatorMaker::Make(){
   if( mMCflag==0) getTriggerData(); // for monitoring only
 
   make();
@@ -248,7 +248,7 @@ StL2_2006EmulatorMaker::Make(){
 
 //========================================
 Int_t 
-StL2_2006EmulatorMaker::Finish(){
+StL2_2008EmulatorMaker::Finish(){
   finish();
   return kStOK;
 }
@@ -257,7 +257,7 @@ StL2_2006EmulatorMaker::Finish(){
 
 //========================================
 void
-StL2_2006EmulatorMaker::addTriggerList() {// based on emulated L2Result[..]
+StL2_2008EmulatorMaker::addTriggerList() {// based on emulated L2Result[..]
   int l2jetOff=-1;
   assert(mYear=2006); // other years not implemented
   if(mYear==2006) l2jetOff=L2RESULTS_OFFSET_DIJET;
@@ -289,7 +289,7 @@ StL2_2006EmulatorMaker::addTriggerList() {// based on emulated L2Result[..]
 //========================================
 //========================================
 bool 
-StL2_2006EmulatorMaker::getTriggerData(){
+StL2_2008EmulatorMaker::getTriggerData(){
   const StTriggerId *L1=0;
   //play with trigID
 
@@ -383,14 +383,14 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.8 2007/11/13 00:12:26 balewski Exp $
+// $Id: StL2_2008EmulatorMaker.cxx,v 1.1 2007/11/13 00:12:26 balewski Exp $
 //
 
 
 #if 0
 //_____________________________________________________________________________
 void
-StL2_2006EmulatorMaker::initHistoA(TString core) {
+StL2_2008EmulatorMaker::initHistoA(TString core) {
   LOG_INFO <<Form("initHistoA(),")<<endm;
 
   assert(mHList);

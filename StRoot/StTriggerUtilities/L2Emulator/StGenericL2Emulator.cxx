@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.5 2007/11/08 21:29:09 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.6 2007/11/13 00:12:26 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -139,10 +139,11 @@ StGenericL2Emulator::make(){
 
   
   int ia;
-  for(ia=0;ia<mL2algoN;ia++) //execute all instantiated L2algos 
-    if(mL2algo[ia]) mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
+  for(ia=0;ia<mL2algoN;ia++) {//execute all instantiated L2algos 
+    if(mL2algo[ia]==0) continue;
+    mL2algo[ia]->mAccept= mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
+  } // tmp, accept should be filled in internaly, in next iteration, Jan
   
-
   printf("gen i   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
   
  return;
@@ -152,8 +153,8 @@ StGenericL2Emulator::make(){
 //========================================
 //========================================
 void
-StGenericL2Emulator::initRun(){
-  //WARN: do NOT use  runNo for any setup - it woul dberak for M-C
+StGenericL2Emulator::initRun1(){
+  //WARN: do NOT use  runNo for any setup - it would berak for M-C
 
   St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("StarDb");
   assert(mydb);
@@ -168,23 +169,22 @@ StGenericL2Emulator::initRun(){
 
   //define path for L2 setup files & output
 
-  char setPath[1000];
-  sprintf(setPath,"%sL2/%d/db/",mSetupPath.Data(),mYear);
-  LOG_INFO <<"InitRun()  "<<"DB setPath="<<setPath<<" outPath="<<mOutPath<<endm;
- 
-  // read in time-dependent configuration
-  L2DbConfig config(setPath);
-  L2DbTime * myconfig = config.getConfiguration( mYearMonthDay, mHourMinSec );
-  assert( myconfig ); // trigger code has not been setup properly
+  //  char setPath[1000];
+  mSetPath=Form("%sL2/%d/db/",mSetupPath.Data(),mYear);
+  LOG_INFO <<"initRun1()  "<<"DB setPath="<<mSetPath.Data()<<" outPath="<<mOutPath.Data()<<endm;
+
+  // read in time-dependent L2 configuration
+  L2DbConfig confDB1(mSetPath+"/L2DbTime.dat");
+  L2DbTime * confL2 = confDB1.getConfiguration( mYearMonthDay, mHourMinSec );
+  assert( confL2 ); // trigger code has not been setup properly
 
 
   // create new L2Db instance , new per run
   if(mL2EmcDb) delete mL2EmcDb;
-  mL2EmcDb=new L2EmcDb(setPath,(char*)mOutPath.Data());
+  mL2EmcDb=new L2EmcDb((char*)mSetPath.Data(),(char*)mOutPath.Data());
   // override default ped and mask files
-  mL2EmcDb->setPedFile( myconfig->getPedFile() );
-  mL2EmcDb->setMaskFile( myconfig->getMaskFile() );
-
+  mL2EmcDb->setPedFile ( confL2->getPedFile() );
+  mL2EmcDb->setMaskFile( confL2->getMaskFile() );
 
 
   // access BTOW DB only re-map ADC back to rdo indexing
@@ -194,10 +194,37 @@ StGenericL2Emulator::initRun(){
   // this is how BTOW mapping is accesible
   mMappB = new StEmcDecoder(mydb->GetDateTime().GetDate(),mydb->GetDateTime().GetTime());
 
-  LOG_INFO  << "StGenericL2Emulator::InitRun() done"<<endm;
+  LOG_INFO  << "initRun1() done"<<endm;
 
   
 } 
+
+//========================================
+//========================================
+void
+StGenericL2Emulator::initRun2(){
+  //WARN: do NOT use  runNo for any setup - it would berak for M-C
+  // read in time-dependent L2 offline trigger ID's
+ LOG_INFO  << "initRun2()"<<endm;
+  L2DbConfig confDB2(mSetPath+"/L2TriggerIds.dat");
+
+  int ia;
+  for(ia=0;ia<mL2algoN;ia++) { //initialize trigger ID for given L2-algo
+    // printf("uu i=%d, =%s=\n",ia,mL2algo[ia]->getName());
+    if (mL2algo[ia]==0) continue;
+    TString algoName=mL2algo[ia]->getName();
+    L2DbTime *config = confDB2.getConfiguration(mYearMonthDay,mHourMinSec,algoName);
+    if(config==0) { 
+      LOG_WARN<<Form("initRun2(), no offline trigID found for L2alg=%s=, continue",algoName.Data())<<endm;
+      continue;
+    }
+    TString aa = config->getBuf2();
+    Int_t bb = atoi(aa.Data());
+    LOG_INFO<<Form("initRun2(), trigID=%d  set for L2alg=%s=",bb,algoName.Data())<<endm;
+    mL2algo[ia]->setOflTrigID(bb);
+  }
+ LOG_INFO  << "initRun2() done"<<endm;
+}
 
 //========================================
     
@@ -424,6 +451,9 @@ StGenericL2Emulator::printBEblocks(){
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.6  2007/11/13 00:12:26  balewski
+// added offline triggerID, take1
+//
 // Revision 1.5  2007/11/08 21:29:09  balewski
 // now L2emu runs on M-C
 //

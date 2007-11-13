@@ -54,7 +54,6 @@ std::ifstream &L2DbTime::read( std::ifstream &in )
 
   in >> buf1; mTag=buf1;
   if ( !TString(mTag).Contains(":") ) goto READ;
-  in >> mRunNumber;
   in >> mDateStart;
   in >> mTimeStart;
   in >> mDateFinish;
@@ -67,6 +66,6 @@ std::ifstream &L2DbTime::read( std::ifstream &in )
 
 void L2DbTime::print()
 {
-  std::cout << Form("L2DbTime::%s:\t%7i\t%7i\t%7i\t%7i\t%s\t%s",mTag.Data(),mDateStart,mDateFinish,mTimeStart,mTimeFinish,mPedFile.Data(),mMaskFile.Data()) << std::endl;
+  std::cout << Form("L2DbTime::=%s=\t%7i.%i\t%7i.%i\t%s\t%s",mTag.Data(),mDateStart,mTimeStart,mDateFinish,mTimeFinish,mPedFile.Data(),mMaskFile.Data()) << std::endl;
 }
 

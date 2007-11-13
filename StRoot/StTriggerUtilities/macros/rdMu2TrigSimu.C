@@ -5,16 +5,19 @@
 int total=0;
 
 void rdMu2TrigSimu( int nevents = 7e0,
-		    int flagMC=1,  // 0== off
+		    int flagMC=0,  // 0== off, 1=Alan
 		    int useEemc=1, // 0== off
-		    int useBemc=0, // 0== off
+		    int useBemc=1, // 0== off
 		    int useL2=1,   // 0== off
+		    int L2ConfigYear=2008, // possible 2008
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
 		    int playConfig=100, // jan:100_199
 		    int emcEveDump=0 // extrating raw EMC data in a custom format
 		    )  
 {
   const char *dirIn="runList/";
+  const char *file="emptyName";
+
   int nFiles = 20; // make this big if you want to read all events from a run
   
   char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
@@ -22,13 +25,17 @@ void rdMu2TrigSimu( int nevents = 7e0,
   
   if (flagMC==1){
       //const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
-    const char *file="rcf1308_203_2000evts.MuDst.root";
-    dirIn="/star/u/ahoffman/ForJan/";
+
+    // Alans file:
+    // file="rcf1308_203_2000evts.MuDst.root";   dirIn="/star/u/ahoffman/ForJan/";
+    // Pibero's file
+    file = "rcf1275_01_3348evts_161_mix.MuDst.root";
+    dirIn = "/star/data13/reco/pp200/pythia6_205/Upsminbias/cdf_a/y2006/gheisha_on/p06id/";
   }
   if (flagMC==0){
-    // const char *file="/star/institutions/iucf/balewski/prodOfficial06_muDst/7098001/st_physics_*.MuDst.root";
-    const char *file="R7100052.lis";
-  }
+    file="R7100052.lis"; // if you don't like run-list use the following line
+    //file="st_physics_7142017_raw_2030005.MuDst.root"; dirIn="/star/u/ahoffman/ForJan/";
+   }
   
  
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -54,15 +61,20 @@ void rdMu2TrigSimu( int nevents = 7e0,
   cout << " loading done " << endl;
   
   StChain *chain= new StChain("StChain"); 
-
-  if (flagMC){
+ if (flagMC){
     //Need ioMaker in order to access geant branch in MC
+    TString geantFile;
+    geantFile += dirIn;
+    geantFile += "/";
+    geantFile += file;
+    geantFile.ReplaceAll("MuDst.root", "geant.root");
+    printf("geantFile=%s\n", geantFile.Data());
     StIOMaker* ioMaker = new StIOMaker();
-    ioMaker->SetFile(file);
+    ioMaker->SetFile(geantFile);
     ioMaker->SetIOMode("r");
     ioMaker->SetBranch("*",0,"0");             //deactivate all branches
     ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
-    
+
     //Need StMCEventMaker to get g2t tables
     StMcEventMaker *evtMaker = new StMcEventMaker();
   }
@@ -154,9 +166,12 @@ void rdMu2TrigSimu( int nevents = 7e0,
        depending on the DB time stamp 
        both dierectiorie MUST exist, setup must be reasonable
     */
-    StL2_2006EmulatorMaker* simL2Mk= new StL2_2006EmulatorMaker;
-    ((StGenericL2Emulator*) simL2Mk)->setSetupPath(eemcSetupPath);
-    ((StGenericL2Emulator*) simL2Mk)->setOutPath(outDir.Data());
+    StGenericL2Emulator* simL2Mk=0;
+    if(L2ConfigYear==2006) simL2Mk= new StL2_2006EmulatorMaker;
+    else if(L2ConfigYear==2008) simL2Mk= new StL2_2008EmulatorMaker;
+    assert(simL2Mk);
+    simL2Mk->setSetupPath(eemcSetupPath);
+    simL2Mk->setOutPath(outDir.Data());
     if (flagMC) simL2Mk->setMC();
     //simL2Mk->useStEvent(); // default : use muDst
   }
@@ -179,8 +194,8 @@ void rdMu2TrigSimu( int nevents = 7e0,
     cout << "*************************1***************** " << endl;
     chain->Clear();
     int iret = chain->Make(iev);
-    total++;
-    if (iret) {
+    total++;   
+    if (iret % 10 == kStEOF || iret % 10 == kStFatal)  {
       cout << "Bad return code!" << endl;
       break;
     }

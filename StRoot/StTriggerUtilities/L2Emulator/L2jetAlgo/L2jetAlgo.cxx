@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2jetAlgo.cxx,v 1.5 2007/11/08 04:02:31 balewski Exp $
+ * $Id: L2jetAlgo.cxx,v 1.6 2007/11/13 00:12:36 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -327,7 +327,7 @@ bool
 L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData, 
 		   int bemcIn, ushort *bemcData,
 		   int eemcIn, ushort *eemcData){
-
+  mAccept=false;
   if(L0trg==1)   hA[10]->fill(1);
   else if(L0trg==2)   hA[10]->fill(2);
   
@@ -973,6 +973,9 @@ L2jetAlgo::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo.cxx,v $
+  Revision 1.6  2007/11/13 00:12:36  balewski
+  added offline triggerID, take1
+
   Revision 1.5  2007/11/08 04:02:31  balewski
   run on l2ana as well
 

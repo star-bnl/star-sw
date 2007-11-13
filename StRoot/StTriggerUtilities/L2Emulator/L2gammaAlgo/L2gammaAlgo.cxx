@@ -603,6 +603,7 @@ bool  L2gammaAlgo::doEvent( int L0trigger, int inputEventID, TrgDataType* trgDat
 			    int bemcIn, unsigned short *bemcData,
 			    int eemcIn, unsigned short *eemcData )
 {
+  mAccept=false;
   if ( mEEmc ) {
     return doEvent( inputEventID, trgData, eemcIn, eemcData );
   }

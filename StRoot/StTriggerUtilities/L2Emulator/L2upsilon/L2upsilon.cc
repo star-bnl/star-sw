@@ -169,6 +169,8 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
 			int bemcIn, unsigned short* bemcData,
 			int eemcIn, unsigned short* eemcData)
 {
+   mAccept=false;
+
 #ifndef IS_REAL_L2
   printf("L2upsilon::doEvent(int L0trg=%d, int eventNumber=%d, TrgDataType* trgData=%p, int bemcIn=%d, unsigned short* bemcData=%p, int eemcIn=%d, unsigned short* eemcData=%p)\n", L0trg, eventNumber, trgData, bemcIn, bemcData, eemcIn, eemcData);
 #endif
