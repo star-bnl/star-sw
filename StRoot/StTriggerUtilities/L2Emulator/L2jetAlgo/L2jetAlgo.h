@@ -1,7 +1,7 @@
 #ifndef L2JETALGO_H
 #define L2JETALGO_H
 /*********************************************************************
- * $Id: L2jetAlgo.h,v 1.4 2007/11/08 04:02:31 balewski Exp $
+ * $Id: L2jetAlgo.h,v 1.5 2007/11/13 23:06:07 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -36,7 +36,6 @@ class L2jetAlgo : public  L2VirtualAlgo {
   float  par_maxEt;
   unsigned short par_adcMask,par_pedOff; 
   int    par_hotTwEtThr; // only monitoring
-  FILE  *logFile;
 
   //..................... params set in initRun
   int   par_useBtowEast;
@@ -99,9 +98,9 @@ class L2jetAlgo : public  L2VirtualAlgo {
 
   //............... event-long variables
   TrgDataType*  eve_TrigData;
-  unsigned long eve_timeStart;
+  //unsigned long eve_timeStart;
   int  eve_ID; 
-  bool eve_decision;
+  // bool eve_decision;
   int  eve_patchEne[cl2jetMaxEtaBins*cl2jetMaxPhiBins];
   int  eve_phiEne[cl2jetMaxPhiBins+cl2jet_par_mxPhiBin-1];
   L2Jet * eve_Jet[mxJ];
@@ -134,6 +133,9 @@ class L2jetAlgo : public  L2VirtualAlgo {
 
 /**********************************************************************
   $Log: L2jetAlgo.h,v $
+  Revision 1.5  2007/11/13 23:06:07  balewski
+  toward more unified L2-algos
+
   Revision 1.4  2007/11/08 04:02:31  balewski
   run on l2ana as well
 

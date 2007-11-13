@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2jetAlgo.cxx,v 1.6 2007/11/13 00:12:36 balewski Exp $
+ * $Id: L2jetAlgo.cxx,v 1.7 2007/11/13 23:06:07 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -61,7 +61,7 @@ L2jetAlgo::paramsChanged( int *rc_ints, float *rc_floats) {
   return false;
 
  foundProblem:
-      if (logFile) fprintf(logFile,"L2jet-ghost initRun - inconsistent params, ABORT initialization\n");
+      if (mLogFile) fprintf(mLogFile,"L2jet-ghost initRun - inconsistent params, ABORT initialization\n");
   return true;
 }
 
@@ -75,15 +75,15 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
   // DB must be initialized prior to lookup tables
 
   if(run_number==runNo) {  
-    if (logFile) fprintf(logFile,"L2jet::initRun-%s(%d)=ghost already initilized, only check params\n",mName, runNo);
+    if (mLogFile) fprintf(mLogFile,"L2jet::initRun-%s(%d)=ghost already initilized, only check params\n",mName, runNo);
     printf("L2jet::initRun-%s(%d)=ghost already initilized, only checking params\n",mName, runNo);
     int ret= paramsChanged(rc_ints, rc_floats);
     // 0=ok, 1=fatal problem
     if(ret){
       run_number=-77;
-      if (logFile) { 
-	fprintf(logFile,"L2jet algorithm init: crashA in internal logic\n");
-	fclose(logFile);
+      if (mLogFile) { 
+	fprintf(mLogFile,"L2jet algorithm init: crashA in internal logic\n");
+	fclose(mLogFile);
       }
       return ret;     
     }
@@ -126,9 +126,9 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
   sprintf(Fname,"%s/run%d.l2jet.out",mOutDir,run_number);
   printf("L2jet::initRun-%s('%s') ...\n",mName,Fname);
 
-  logFile = fopen(Fname,"w");
-  if( logFile==0) printf(" L2jetAlgo() UNABLE to open run summary log file, continue anyhow\n");
-  //  logFile = stdout; //tmp
+  mLogFile = fopen(Fname,"w");
+  if( mLogFile==0) printf(" L2jetAlgo() UNABLE to open run summary log file, continue anyhow\n");
+  //  mLogFile = stdout; //tmp
 
   // unpack params from run control GUI
   par_cutTag     =  rc_ints[0];
@@ -158,14 +158,14 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
     par_rndAccThr=RAND_MAX;
     par_rndAccProb=1.0;
   }
-  if (logFile) { 
-    fprintf(logFile,"L2jet algorithm initRun(%d), compiled: %s , %s\n params:\n",run_number,__DATE__,__TIME__);
-    fprintf(logFile," - use BTOW: East=%d West=%d, Endcap=%d  L2ResOffset=%d\n", par_useBtowEast, par_useBtowWest,par_useEndcap ,mResultOffset);
-    fprintf(logFile," - threshold: ADC-ped> %d \n", par_adcThr);
-    fprintf(logFile," - min phi opening angle Jet1<->Jet2: %d in L2phiBins\n",par_minPhiBinDiff);   
-    fprintf(logFile," - diJet  Et thrHigh= %.2f (GeV)   thrLow= %.2f  (GeV)\n", par_diJetThrHigh, par_diJetThrLow); 
-    fprintf(logFile," - oneJet Et thr = %.2f (GeV) ; rndAccProb=%f;  cutTag=%d \n",par_oneJetThr,par_rndAccProb,par_cutTag);
-    fprintf(logFile," - debug=%d, hot tower threshold: Et> %.1f GeV ( only monitoring)\n",par_dbg, monTwEtThr);
+  if (mLogFile) { 
+    fprintf(mLogFile,"L2jet algorithm initRun(%d), compiled: %s , %s\n params:\n",run_number,__DATE__,__TIME__);
+    fprintf(mLogFile," - use BTOW: East=%d West=%d, Endcap=%d  L2ResOffset=%d\n", par_useBtowEast, par_useBtowWest,par_useEndcap ,mResultOffset);
+    fprintf(mLogFile," - threshold: ADC-ped> %d \n", par_adcThr);
+    fprintf(mLogFile," - min phi opening angle Jet1<->Jet2: %d in L2phiBins\n",par_minPhiBinDiff);   
+    fprintf(mLogFile," - diJet  Et thrHigh= %.2f (GeV)   thrLow= %.2f  (GeV)\n", par_diJetThrHigh, par_diJetThrLow); 
+    fprintf(mLogFile," - oneJet Et thr = %.2f (GeV) ; rndAccProb=%f;  cutTag=%d \n",par_oneJetThr,par_rndAccProb,par_cutTag);
+    fprintf(mLogFile," - debug=%d, hot tower threshold: Et> %.1f GeV ( only monitoring)\n",par_dbg, monTwEtThr);
   }
 
   // verify consistency of input params
@@ -182,16 +182,16 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
   kBad+=0x0200 * (par_diJetThrHigh>12.); 
   kBad+=0x0400 * (par_cutTag<=0 || par_cutTag>255);
   kBad+=0x0800 * (par_rndAccProb<0. || par_rndAccProb>1.);
-  if (logFile) {
-    fprintf(logFile,"L2jet initRun() params checked for consistency, Error flag=0x%04x\n",kBad);
-    if(kBad)   fprintf(logFile,"L2jet initRun()  ABORT\n");
+  if (mLogFile) {
+    fprintf(mLogFile,"L2jet initRun() params checked for consistency, Error flag=0x%04x\n",kBad);
+    if(kBad)   fprintf(mLogFile,"L2jet initRun()  ABORT\n");
   }
 
   if(kBad) {
     run_number=-66;
-    if (logFile) { 
-      fprintf(logFile,"L2jet algorithm init: crashB in internal logic\n");
-      fclose(logFile);
+    if (mLogFile) { 
+      fprintf(mLogFile,"L2jet algorithm init: crashB in internal logic\n");
+      fclose(mLogFile);
       return kBad;
     }
   }
@@ -221,7 +221,7 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
     float avrEta=(edgeEtaBinEtow[i]+edgeEtaBinEtow[i+1])/2.;
     coshEtow[i]=cosh(avrEta);
     idealGainEtow[i]=par_maxADC/par_maxEt/coshEtow[i];
-    // if (logFile && i%4==0)  fprintf(logFile,"aim: ETow iEtaBin=%d eta=%.3f idealG=%.2f (GeV E_T), cosH=%.3f\n",i,avrEta, idealGainEtow[i], coshEtow[i]);
+    // if (mLogFile && i%4==0)  fprintf(mLogFile,"aim: ETow iEtaBin=%d eta=%.3f idealG=%.2f (GeV E_T), cosH=%.3f\n",i,avrEta, idealGainEtow[i], coshEtow[i]);
   }
 
 
@@ -229,7 +229,7 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
     float avrEta=-0.975 +i*0.05; /* assume BTOW has fixed eta bin size */
     coshBtow[i]=cosh(avrEta);
     idealGainBtow[i]=par_maxADC/par_maxEt/coshBtow[i];
-    //  if (logFile && i%4==0)  fprintf(logFile,"aim: Btow iEtaBin=%2d eta=%.3f idealG=%.2f (GeV E_T), cosH=%.3f\n",i,avrEta, idealGainBtow[i], coshBtow[i]);
+    //  if (mLogFile && i%4==0)  fprintf(mLogFile,"aim: Btow iEtaBin=%2d eta=%.3f idealG=%.2f (GeV E_T), cosH=%.3f\n",i,avrEta, idealGainBtow[i], coshBtow[i]);
   }
 
   
@@ -304,17 +304,17 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
     
   }
 
-  if (logFile) {
-    fprintf(logFile,"L2jet algorithm: found  working/calibrated: %d/%d=ETOW  & %d/%d=BTOW, based on ASCII DB\n",nE,nEg,nB,nBg);
+  if (mLogFile) {
+    fprintf(mLogFile,"L2jet algorithm: found  working/calibrated: %d/%d=ETOW  & %d/%d=BTOW, based on ASCII DB\n",nE,nEg,nB,nBg);
   }
 
   return 0; //OK
   
  crashIt_1: /* fatal initialization error */
   run_number=-55;
-  if (logFile) { 
-    fprintf(logFile,"L2jet algorithm init: crashC in internal logic\n");
-    fclose(logFile);
+  if (mLogFile) { 
+    fprintf(mLogFile,"L2jet algorithm init: crashC in internal logic\n");
+    fclose(mLogFile);
   }
  return -6;
 
@@ -327,31 +327,30 @@ bool
 L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData, 
 		   int bemcIn, ushort *bemcData,
 		   int eemcIn, ushort *eemcData){
-  mAccept=false;
+  /* STRICT TIME BUDGET  START ....*/
+  rdtscl_macro(mEveTimeStart);
+
   if(L0trg==1)   hA[10]->fill(1);
   else if(L0trg==2)   hA[10]->fill(2);
   
-  if(eve_ID==inpEveId) return eve_decision; // this event has been processed
-  /* STRICT TIME BUDGET  START ....*/
-  rdtscl_macro(eve_timeStart);
- 
+  if(eve_ID!=inpEveId) {//UUUU
+    //.................... this event has NOT been processed
+
   /*
-    Chris doesn't want us to write something out 
+    Chris doesn't want us to write anything out 
     during event processing ...
   */
   
   eve_ID=inpEveId; // every events is processed only once
   run_nEventIn++;
-  clearEvent(); /* prise=13 kTicks */  
+  clearEvent(); /* price=13 kTicks */  
   int runTimeSec=time(0)- run_startUnix;
   hA[10]->fill(0);
   hA[12]->fill(runTimeSec);
   
   if(par_dbg>1) printf("\n......... in  L2Jet_doEvent(ID=%d)... bIn=%d eIn=%d\n",eve_ID,bemcIn,eemcIn);
   
-  if (!bemcIn && !eemcIn){
-    return eve_decision; // this algo has nothing to do w/o any Ecal data 
-  }
+  if (bemcIn || eemcIn){//VVVV this algo has nothing to do w/o any Ecal data 
   
   eve_TrigData=(TrgDataType* )trgData; /* internal copy of the pointer */
 
@@ -409,7 +408,7 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   bool acceptOneJet=( eve_Jet[0]->eneGeV> par_oneJetThr) ;
 
   bool acceptRnd=rand()< par_rndAccThr;
-  eve_decision=acceptDiJet || acceptOneJet || acceptRnd;
+  mAccept=acceptDiJet || acceptOneJet || acceptRnd;
 
   //====== step 5: update various monitorig histos
 
@@ -437,7 +436,7 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   int kphi2=int(eve_Jet[1]->phiRad*10.);
   int idelZeta=map_DelPhiJets[kphi1*MxPhiRad10 + kphi2];
 
-  if( eve_decision)  hA[10]->fill(8);
+  if( mAccept)  hA[10]->fill(8);
 
   if(acceptOneJet ){ 
     hA[10]->fill(4);
@@ -504,15 +503,14 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   out.jet2.jEta=(int)(eve_Jet[1]->fetaBin*10.);
   out.jet2.iEne=(unsigned short)(eve_Jet[1]->eneGeV*100.); // now 1=10 MeV
 
-  unsigned long timeStop=0;
-  rdtscl_macro(timeStop);
-  unsigned long timeDiff=timeStop-eve_timeStart;
-  int  kTick=timeDiff/1000;
+  rdtscl_macro(mEveTimeStop);
+  mEveTimeDiff=mEveTimeStop-mEveTimeStart;
+  int  kTick=mEveTimeDiff/1000;
   //printf("kk=%f \n",timeDiff/1000.);
   hA[11]->fill(kTick);
-  
+
   out.int0.kTick=  kTick>255 ? 255 : kTick;
-  
+ 
   //calculate and match the check sum
   out.int1.checkSum=-L2jetResults2006_doCheckSum(&out);
   // unsigned char  cSum=L2jetResults2006_doCheckSum(&out); printf("cSum2=%d\n",cSum);
@@ -521,30 +519,33 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   uint *outPlace=eve_TrigData->TrgSum.L2Result+mResultOffset;
   memcpy(outPlace,&out,sizeof( L2jetResults2006));
 
-
-
   // dirty tests, clean it up before real use
 
-  if(par_dbg){
+  if(par_dbg){//WWWW
     L2jetResults2006_print(&out);
     printf(" phiRad1=%f  phiRad2=%f \n",eve_Jet[0]->phiRad,eve_Jet[1]->phiRad);
     printf("idelZeta=%d  delZeta/deg=%.1f \n\n",idelZeta,idelZeta/31.416*180);
-  }
 
-  //tmp printouts of errors:
-  if( out.jet1.iEne+out.jet2.iEne > out.int1.iTotEne) {
-    printf("L2jet-fatal error, eve=%d, iEtot=%d < iEJ1=%d + iEJ2=%d, continue\n",inpEveId, out.int1.iTotEne,out.jet1.iEne,out.jet2.iEne);
-  }
-  if(iphi1==iphi2) {
-    printf("L2jet-fatal error,neveId=%d, phi1,2=%d,%d\n",run_nEventIn,iphi1,iphi2);
-    dumpPatchEneA();    
-  }
-  
-  if( L2jetResults2006_doCheckSum(&out)) {
-    printf("L2jet-fatal error, wrong cSum=%d\n", L2jetResults2006_doCheckSum(&out));
-    L2jetResults2006_print(&out);
-  }
-  return eve_decision;
+
+    //tmp printouts of errors:
+    if( out.jet1.iEne+out.jet2.iEne > out.int1.iTotEne) {
+      printf("L2jet-fatal error, eve=%d, iEtot=%d < iEJ1=%d + iEJ2=%d, continue\n",inpEveId, out.int1.iTotEne,out.jet1.iEne,out.jet2.iEne);
+    }
+    if(iphi1==iphi2) {
+      printf("L2jet-fatal error,neveId=%d, phi1,2=%d,%d\n",run_nEventIn,iphi1,iphi2);
+      dumpPatchEneA();    
+    }
+    
+    if( L2jetResults2006_doCheckSum(&out)) {
+      printf("L2jet-fatal error, wrong cSum=%d\n", L2jetResults2006_doCheckSum(&out));
+      L2jetResults2006_print(&out);
+    }
+  }  // end of WWWW
+  }// end of VVVV (etow or btow has some data)
+  }// end of UUUU event processing
+
+
+  return   mAccept;
 }
 
 
@@ -554,24 +555,24 @@ void
 L2jetAlgo::finishRun() {  /* called once at the end of the run */
   if(run_number<0) return; // already finished
 
-  if (logFile) {
-    fprintf(logFile,"L2-jet algorithm finishRun(%d)\n",run_number);
-    fprintf(logFile," - %d events seen by L2 di-jet\n",run_nEventIn);
-    fprintf(logFile," - accepted: rnd=%d  oneJet=%d diJet=%d \n", run_nEventRnd,  run_nEventOneJet, run_nEventDiJet);
+  if (mLogFile) {
+    fprintf(mLogFile,"L2-jet algorithm finishRun(%d)\n",run_number);
+    fprintf(mLogFile," - %d events seen by L2 di-jet\n",run_nEventIn);
+    fprintf(mLogFile," - accepted: rnd=%d  oneJet=%d diJet=%d \n", run_nEventRnd,  run_nEventOneJet, run_nEventDiJet);
 
     // print few basic histos
     
-    hA[10]->printCSV(logFile); // event accumulated
+    hA[10]->printCSV(mLogFile); // event accumulated
 
-    hA[11]->print(0,logFile); // avearge time
+    hA[11]->print(0,mLogFile); // avearge time
     int iMax=-3, iFWHM=-4;
     hA[11]->findMax( &iMax, &iFWHM);
-    fprintf(logFile,"L2jet  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",iMax, iFWHM,run_nEventIn);
+    fprintf(mLogFile,"L2jet  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",iMax, iFWHM,run_nEventIn);
     printf("L2jet  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",iMax, iFWHM,run_nEventIn);
     
   }
   finishRunHisto(); // still needs current DB
-  
+  finishCommonHistos();
   // save run summary histos
   char Fname[1000];
   sprintf(Fname,"%s/run%d.l2jet.hist.bin",mOutDir,run_number);
@@ -580,8 +581,8 @@ L2jetAlgo::finishRun() {  /* called once at the end of the run */
   FILE *hFile = fopen(Fname,"w");
   if( hFile==0) {
     printf(" L2jetAlgo: finishRun() UNABLE to open run summary log file, continue anyhow\n");
-    if (logFile)
-      fprintf(logFile,"L2 di-jet histos NOT saved, I/O error\n");
+    if (mLogFile)
+      fprintf(mLogFile,"L2 di-jet histos NOT saved, I/O error\n");
   } else { // save histos  
     int j;
     int nh=0;
@@ -591,15 +592,15 @@ L2jetAlgo::finishRun() {  /* called once at the end of the run */
       nh++;
     }
     fclose(hFile);
-    if (logFile)
-      fprintf(logFile,"L2 di-jet: %d histos saved to '%s'\n",nh,Fname);
+    if (mLogFile)
+      fprintf(mLogFile,"L2 di-jet: %d histos saved to '%s'\n",nh,Fname);
   }
 
   run_number=-2; // clear run #
  
   /* close the output file if it is open */
-  if (logFile && logFile!=stdout) {
-    fclose(logFile);
+  if (mLogFile && mLogFile!=stdout) {
+    fclose(mLogFile);
   }
   
 }
@@ -679,7 +680,8 @@ L2jetAlgo::clearEvent(){
   /*  printf("clearEvent_L2jet() executed\n"); */
 
   eve_TrigData=0;
-  eve_decision=false;
+  mAccept=false;
+  mEveTimeStart=mEveTimeStop=mEveTimeDiff=0;
   memset(eve_patchEne,0,sizeof(eve_patchEne));
   memset(eve_phiEne,0,sizeof(eve_phiEne));
   eve_Jet[0]->clear();
@@ -961,10 +963,10 @@ L2jetAlgo::finishRunHisto(){
 
     }// end of BTOW
   }
-  if (logFile){
-    fprintf(logFile,"L2jet::finishRun()\n");
-    fprintf(logFile,"#BTOW_hot tower _candidate_ (bHotSum=%d) :, softID %d , crate %d , chan %d , name %s\n",bHotSum,bHotId,xB->crate,xB->chan,xB->name); 
-   fprintf(logFile,"#ETOW_hot tower _candidate_ (eHotSum=%d) :, name %s , crate %d , chan %d\n",eHotSum,xE->name,xE->crate,xE->chan); 
+  if (mLogFile){
+    fprintf(mLogFile,"L2jet::finishRun()\n");
+    fprintf(mLogFile,"#BTOW_hot tower _candidate_ (bHotSum=%d) :, softID %d , crate %d , chan %d , name %s\n",bHotSum,bHotId,xB->crate,xB->chan,xB->name); 
+   fprintf(mLogFile,"#ETOW_hot tower _candidate_ (eHotSum=%d) :, name %s , crate %d , chan %d\n",eHotSum,xE->name,xE->crate,xE->chan); 
   }
 
 
@@ -973,6 +975,9 @@ L2jetAlgo::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo.cxx,v $
+  Revision 1.7  2007/11/13 23:06:07  balewski
+  toward more unified L2-algos
+
   Revision 1.6  2007/11/13 00:12:36  balewski
   added offline triggerID, take1
 

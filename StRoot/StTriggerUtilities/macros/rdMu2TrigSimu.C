@@ -9,7 +9,7 @@ void rdMu2TrigSimu( int nevents = 7e0,
 		    int useEemc=1, // 0== off
 		    int useBemc=1, // 0== off
 		    int useL2=1,   // 0== off
-		    int L2ConfigYear=2008, // possible 2008
+		    int L2ConfigYear=2006, // possible 2008
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
 		    int playConfig=100, // jan:100_199
 		    int emcEveDump=0 // extrating raw EMC data in a custom format
@@ -223,10 +223,13 @@ void rdMu2TrigSimu( int nevents = 7e0,
   outF+=".hist.root";
   printf("=%s=\n",outF.Data());
   hf=new TFile(outF,"recreate");
-  //HList->ls();
-  HList->Write();
-  printf("\n Histo saved -->%s<\n",outF.Data());
-  
+  if(hf.IsOpen()) {
+    //HList->ls();
+    HList->Write();
+    printf("\n Histo saved -->%s<\n",outF.Data());
+  } else {
+    printf("\n Failed to open Histo-file -->%s<, continue\n",outF.Data());
+  }
   cout <<Form("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",total,nEntries,rate,tMnt)<<endl;
 
 

@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo.h,v 1.7 2007/11/13 00:12:31 balewski Exp $
+ * $Id: L2VirtualAlgo.h,v 1.8 2007/11/13 23:06:02 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -11,7 +11,7 @@
  *********************************************************************
  */
 
-//#include "/usr/src/kernels/2.6.9-42.0.10.EL-smp-i686/include/asm-i386/msr.h" /* for rdtscl */
+//#include "/asm-i386/msr.h" /* for rdtscl */
 // Great suggestion from Pibero, to use ASM macro directly
 #define rdtscl_macro(low) \
      __asm__ __volatile__("rdtsc" : "=a" (low) : : "edx")
@@ -23,21 +23,25 @@
 #endif
 
 class L2EmcDb;
-
+class L2Histo;
 class L2VirtualAlgo {
   enum {mxTxt=1000};
  protected:  
   char mName[mxTxt];    
   char mOutDir[mxTxt];
   L2EmcDb* mDb;
+  FILE  *mLogFile;
   int mResultOffset;
   int oflTrigId;
-  
- public:
   bool mAccept;
+  unsigned long mEveTimeStart, mEveTimeStop,mEveTimeDiff;
+  void finishCommonHistos();
+  L2Histo *hT, *hN;
+ public:
   void setOflTrigID(int x) {oflTrigId=x;}
   int getOflTrigID() {return oflTrigId;}
-  bool accepted(){ return mAccept; }
+  bool isAccepted(){ return mAccept; }
+  bool accepted()  { return mAccept; }  // obsolete
   const char *getName(){ return mName; }
   L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff);
   virtual ~L2VirtualAlgo()=0; // memory leak NOT taken care off

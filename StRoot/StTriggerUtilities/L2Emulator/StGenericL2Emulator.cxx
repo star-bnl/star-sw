@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.6 2007/11/13 00:12:26 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.7 2007/11/13 23:05:59 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -141,7 +141,7 @@ StGenericL2Emulator::make(){
   int ia;
   for(ia=0;ia<mL2algoN;ia++) {//execute all instantiated L2algos 
     if(mL2algo[ia]==0) continue;
-    mL2algo[ia]->mAccept= mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
+    mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
   } // tmp, accept should be filled in internaly, in next iteration, Jan
   
   printf("gen i   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
@@ -451,6 +451,9 @@ StGenericL2Emulator::printBEblocks(){
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.7  2007/11/13 23:05:59  balewski
+// toward more unified L2-algos
+//
 // Revision 1.6  2007/11/13 00:12:26  balewski
 // added offline triggerID, take1
 //

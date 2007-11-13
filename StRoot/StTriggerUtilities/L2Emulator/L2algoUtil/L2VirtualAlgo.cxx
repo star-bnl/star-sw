@@ -2,9 +2,11 @@
 #include <stdio.h>
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
+  #include "../L2algoUtil/L2Histo.h"
   #include "trgStructures.h"
  #else
   #include "StDaqLib/TRG/trgStructures.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
 
 #include "L2VirtualAlgo.h"
@@ -13,7 +15,16 @@ L2VirtualAlgo::L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int re
   strncpy(mName, name,sizeof(mName));  
   strncpy(mOutDir,outDir,sizeof(mOutDir));
   setOflTrigID(0);
+  hT=new   L2Histo(1001,"L2 time used per input event;  x: time (CPU kTics), range=100muSec; y: events ",160);
 }
+
+//=============================================
+void 
+L2VirtualAlgo::finishCommonHistos() {
+  
+  // if (mLogFile) {
+}
+
 //=============================================
 
 L2VirtualAlgo::~L2VirtualAlgo(){};
