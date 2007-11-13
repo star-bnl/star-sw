@@ -1,6 +1,9 @@
-* $Id: svttgeo9.g,v 1.1 2007/07/12 20:13:24 potekhin Exp $
+* $Id: svttgeo9.g,v 1.2 2007/11/13 21:33:46 perev Exp $
 *
 * $Log: svttgeo9.g,v $
+* Revision 1.2  2007/11/13 21:33:46  perev
+* ALKAP fixed and innermost radius increased
+*
 * Revision 1.1  2007/07/12 20:13:24  potekhin
 * Support cones were traditionally located in the
 * SVT hierarchy of the geometry model; thus, even without the
@@ -116,7 +119,7 @@ Module  SVTTGEO9  is the SVT-less geometry of the support cones of STAR without 
    Fill SVTG ! Basic SVT dimensions 
       Version   = 2          ! geometry version
       Nlayer    = 7          ! number of svt layers (was 7)
-      RsizeMin  = 4.006      ! STV innermost radius
+      RsizeMin  = 4.100      ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
@@ -467,8 +470,8 @@ Module  SVTTGEO9  is the SVT-less geometry of the support cones of STAR without 
         Component C5  A=12    Z=6  W=5
         Component H4  A=1     Z=1  W=4
         Component O2  A=16    Z=8  W=2
-        Component Al  A=27    Z=13 W=3
-      Mixture  ALKAP  Dens=1.65
+        Component Al  A=27    Z=13 W=0.2302
+      Mixture  ALKAP  Dens=1.432
 *
 *     put real water only when manifold is installed
       Component H2     A=1   Z=1   W=2

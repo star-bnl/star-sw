@@ -1,6 +1,9 @@
-* $Id: svttgeo5.g,v 1.2 2006/01/18 23:12:07 potekhin Exp $
+* $Id: svttgeo5.g,v 1.3 2007/11/13 21:33:45 perev Exp $
 *
 * $Log: svttgeo5.g,v $
+* Revision 1.3  2007/11/13 21:33:45  perev
+* ALKAP fixed and innermost radius increased
+*
 * Revision 1.2  2006/01/18 23:12:07  potekhin
 * I have improved the "no svt" version of the SVT geometry by flushing out
 * extaneous support rings and such which aren't needed or can't be put
@@ -121,7 +124,7 @@ Module  SVTTGEO5  is the SVT geometry for STAR: without the central part
    Fill SVTG ! Basic SVT dimensions 
       Version   = 2          ! geometry version
       Nlayer    = 7          ! number of svt layers (was 7)
-      RsizeMin  = 4.006      ! STV innermost radius
+      RsizeMin  = 4.100      ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
@@ -472,8 +475,8 @@ Module  SVTTGEO5  is the SVT geometry for STAR: without the central part
         Component C5  A=12    Z=6  W=5
         Component H4  A=1     Z=1  W=4
         Component O2  A=16    Z=8  W=2
-        Component Al  A=27    Z=13 W=3
-      Mixture  ALKAP  Dens=1.65
+        Component Al  A=27    Z=13 W=0.2302
+      Mixture  ALKAP  Dens=1.432
 *
 *     put real water only when manifold is installed
       Component H2     A=1   Z=1   W=2

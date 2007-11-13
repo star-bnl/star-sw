@@ -1,6 +1,9 @@
-* $Id: svttgeo4.g,v 1.1 2005/03/24 20:04:39 potekhin Exp $
+* $Id: svttgeo4.g,v 1.2 2007/11/13 21:33:44 perev Exp $
 *
 * $Log: svttgeo4.g,v $
+* Revision 1.2  2007/11/13 21:33:44  perev
+* ALKAP fixed and innermost radius increased
+*
 * Revision 1.1  2005/03/24 20:04:39  potekhin
 * Need to correct a subtle and original bug in the
 * definition of the electronics and IC. Code change is small,
@@ -121,7 +124,7 @@ Module  SVTTGEO4  is the SVT geometry for STAR: corrected ELECTRONICS
    Fill SVTG ! Basic SVT dimensions 
       Version   = 2          ! geometry version
       Nlayer    = 7          ! number of svt layers (was 7)
-      RsizeMin  = 4.006      ! STV innermost radius
+      RsizeMin  = 4.100      ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
@@ -471,8 +474,14 @@ Module  SVTTGEO4  is the SVT geometry for STAR: corrected ELECTRONICS
         Component C5  A=12    Z=6  W=5
         Component H4  A=1     Z=1  W=4
         Component O2  A=16    Z=8  W=2
-        Component Al  A=27    Z=13 W=3
-      Mixture  ALKAP  Dens=1.65
+        Component Al  A=27    Z=13 W=0.2302
+      Mixture  ALKAP  Dens=1.432
+* use aluminized mylar mixture for ssd shield
+        Component C5  A=12    Z=6  W=5
+        Component H4  A=1     Z=1  W=4
+        Component O2  A=16    Z=8  W=2
+        Component Al  A=27    Z=13 W=0.0986
+      Mixture  SSDALMY Dens=1.40845
 *
 *     put real water only when manifold is installed
       Component H2     A=1   Z=1   W=2
@@ -1918,7 +1927,7 @@ Endblock
 *
 Block SSSH is the separation shield cylinder
 * use aluminised mylar mixture instead of kapton
-      material  ALKAP
+      material  SSDALMY
       Attribute SSSH Seen=1 Colo=3
       Shape TUBE rmin=ssld_SSepRInn rmax=ssld_SSepROut,
                   dz=ssld_SSepLen
@@ -1928,7 +1937,7 @@ Endblock
 *
 Block SOSH is the separation shield cylinder
 * use aluminised mylar mixture instead of kapton
-      material  ALKAP
+      material  SSDALMY
       Attribute SOSH Seen=1 Colo=3
       Shape TUBE rmin=ssld_SOutRInn rmax=ssld_SOutROut,
                   dz=ssld_SOutLen
