@@ -28,12 +28,13 @@ class L2DbTime
   double getFullFinishTime() { return  mDateFinish+mTimeFinish/1.e6; }
   TString getPedFile(){ return mPedFile; }
   TString getMaskFile(){ return mMaskFile; }
+  TString getBuf2(){ return mMaskFile; } // tmp, will clean it up later, JanB
+  TString getTag(){ return mTag; } 
 
   // overload << operator for read in
  private:
  protected:
   TString mTag;
-  Int_t mRunNumber;
   Int_t mDateStart;
   Int_t mDateFinish;
   Int_t mTimeStart;

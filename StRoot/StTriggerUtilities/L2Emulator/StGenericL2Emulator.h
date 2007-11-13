@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.6 2007/11/08 21:29:10 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.7 2007/11/13 00:12:26 balewski Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -23,6 +23,7 @@ class StGenericL2Emulator  {
  private:
   int  mTotInpEve;
   TString  mOutPath;
+  TString  mSetPath;
 
   void doBanksFromStRawData();
   void doBanksFromMuDst();
@@ -66,8 +67,9 @@ class StGenericL2Emulator  {
 
   void  init();
   void  make();
-  void  initRun();
-  void  finish();
+  void  initRun1(); // before algos are initialized
+  void  initRun2(); // after algos are initialized
+  void  finish(); 
   void  clear();
   void  useStEvent() {mUseMuDst=false;}
   void  setMC(int x=true) {mMCflag=x;}
@@ -82,6 +84,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.7  2007/11/13 00:12:26  balewski
+// added offline triggerID, take1
+//
 // Revision 1.6  2007/11/08 21:29:10  balewski
 // now L2emu runs on M-C
 //

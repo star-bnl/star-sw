@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo.h,v 1.6 2007/11/08 04:02:27 balewski Exp $
+ * $Id: L2VirtualAlgo.h,v 1.7 2007/11/13 00:12:31 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -31,8 +31,14 @@ class L2VirtualAlgo {
   char mOutDir[mxTxt];
   L2EmcDb* mDb;
   int mResultOffset;
+  int oflTrigId;
   
  public:
+  bool mAccept;
+  void setOflTrigID(int x) {oflTrigId=x;}
+  int getOflTrigID() {return oflTrigId;}
+  bool accepted(){ return mAccept; }
+  const char *getName(){ return mName; }
   L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff);
   virtual ~L2VirtualAlgo()=0; // memory leak NOT taken care off
   virtual int   initRun(int runNo, int *rc_ints, float *rc_floats)=0;

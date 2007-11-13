@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.6 2007/11/08 04:02:33 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.7 2007/11/13 00:12:38 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -140,7 +140,7 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
 		   int bemcIn, ushort *bemcData,
 		   int eemcIn, ushort *eemcData){
   // not used: L0trg, inpEveId
-
+   mAccept=false;
   /* STRICT TIME BUDGET  START ...., well a bit relaxed for this algo*/
   long timeStart=0;
   rdtscl_macro(timeStart);
@@ -380,6 +380,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.7  2007/11/13 00:12:38  balewski
+  added offline triggerID, take1
+
   Revision 1.6  2007/11/08 04:02:33  balewski
   run on l2ana as well
 
