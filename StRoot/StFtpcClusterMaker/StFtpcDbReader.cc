@@ -1,6 +1,11 @@
-// $Id: StFtpcDbReader.cc,v 1.39 2007/02/01 11:57:04 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.40 2007/11/13 10:54:37 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.40  2007/11/13 10:54:37  jcs
+// Code to mask out Ftpc East sectors 1,3 and 5
+// Necessary for calculating rotation offset values when one sector is turned off
+// as was the case for the 2007 RFF runs
+//
 // Revision 1.39  2007/02/01 11:57:04  jcs
 // move unessential output from INFO to DEBUG
 //
@@ -667,6 +672,10 @@ Float_t StFtpcDbReader::amplitudeSlope(Int_t i, Int_t padrow)
            Int_t isec = (i-1)/numberOfPads();
            Int_t ipad = i -isec*numberOfPads();
            i = (5-isec)*numberOfPads()+ipad;
+//         mask out Ftpc East sectors 1,3 and 5
+//         This is necessary for calculating rotation offset values when one sector is turned off as it was
+//         for a large part of the 2007 run. Using 5 sectors may cause a bias due to lack of azimuthal symmetry)
+//         if ( isec==0 || isec==2 || isec==4 ) return 0;
        }
        return ampslopeTable[padrow].slope[i-1];
     }
