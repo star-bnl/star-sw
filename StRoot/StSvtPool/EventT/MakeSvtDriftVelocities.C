@@ -4,12 +4,6 @@ class St_db_Maker;
 class TTable;
 St_db_Maker *dbMk = 0;
 TTable *table = 0;
-
-struct data_t {
-  Int_t type, idx, nrows, barrel, layer, ladder, wafer, hybrid, Npar;
-  Double_t v0, v1, v2, v3;
-  Char_t Comment[10];
-};
 #if 0
 // lines which should be added to Drift_ALL.h
 Int_t Drift = 1;
@@ -49,14 +43,20 @@ void MakeSvtDriftVelocities(){
 	  Data[j].ladder == row[i].ladder &&
 	  Data[j].wafer  == row[i].wafer  &&
 	  Data[j].hybrid == row[i].hybrid) {
+	  Double_t *par = &row[i].v0;
+	  Double_t *cor = &Data[j].v0;
+	  Int_t nu = row[i].npar%10;
+	  Int_t nv = (row[i].npar/10)%10;
 #ifdef DEBUG
 	cout << "Found Match" << endl;
 	svtHybridDriftVelocity->Print(i,1);
 	cout << Data[j].type    << ",\t" << Data[j].idx   << ",\t" << Data[j].nrows<< ",\t" 
 	     << Data[j].barrel  << ",\t" << Data[j].layer << ",\t" << Data[j].ladder<< ",\t" 
 	     << Data[j].wafer   << ",\t" << Data[j].hybrid<< ",\t" 
-	     << Data[j].Npar    << ",\t" << Data[j].v0    << ",\t" << Data[j].v1<< ",\t" << Data[j].v2<< ",\t" << Data[j].v3 << ",\t"
-	     << Data[j].Comment << endl;
+	     << Data[j].Npar    << ",\t";
+	cout << "\tnu = " << nu << "\tnv = " << nv << "\tNpar = " << Data[j].Npar;
+	for (Int_t l = 0; l <= Data[j].Npar; l++) cout << ",\t" << cor[l];
+	cout << "\t" << Data[j].Comment << endl;
 #endif 
 	if (row[i].type == 0 && row[i].npar == 0) {
 	  row[i].type = 2; row[i].v0 = 0;
@@ -64,21 +64,11 @@ void MakeSvtDriftVelocities(){
 	if (row[i].type == 2) {
 // 	  svtHybridDriftVelocity->Print(i,1);
 	  row[i].type = 2;
-	  Double_t *par = &row[i].v0;
-	  Double_t *cor = &Data[j].v0;
-	  Int_t nu = row[i].npar%10;
-	  Int_t nv = (row[i].npar/10)%10;
 	  //	  cout << "nu = " << nu << " nv = " << nv << endl;
 	  memset(drift, 0, 10*sizeof(Double_t));
 	  memset(anode, 0, 10*sizeof(Double_t));
 	  if (nu) memcpy (drift, &par[0], nu*sizeof(Double_t));
-	  if (nv) memcpy (drift, &par[nu], nv*sizeof(Double_t));
-// 	  for (Int_t k = 0; k < nu+nv; k++) {
-// 	    if (k < nu) cout << "\td:" << par[k] << "\t" << drift[k];
-// 	    else        cout << "\ta:" << par[k] << "\t" << anode[k-nu];
-// 	  }
-// 	  cout << endl;
-	  memset(par, 0, 10*sizeof(Double_t));
+	  if (nv) memcpy (anode, &par[nu], nv*sizeof(Double_t));
 	  if (Drift) {
 	    for (Int_t k = 0; k <= Data[j].Npar; k++) {
 	      drift[k] += cor[k];
@@ -91,8 +81,17 @@ void MakeSvtDriftVelocities(){
 	    if (nv <=  Data[j].Npar) nv = Data[j].Npar+1;
 	    
 	  }
+#ifdef DEBUG
+	  for (Int_t k = 0; k < nu+nv; k++) {
+	    if (k < nu) cout << "\td:" << par[k] << "\t" << drift[k];
+	    else        cout << "\ta:" << par[k] << "\t" << anode[k-nu];
+	  }
+	  cout << endl;
+#endif
 	  row[i].npar = 10*nv + nu;
+	  memset(par, 0, 10*sizeof(Double_t));
 	  for (Int_t k = 0; k < nu + nv; k++) {
+	    if (k >= 10) break;
 	    if (k < nu) par[k] = drift[k];
 	    else        par[k] = anode[k-nu];
 	  }
