@@ -3,9 +3,12 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
 
-* $Id: pipegeo.g,v 1.12 2006/10/06 22:33:42 potekhin Exp $
+* $Id: pipegeo.g,v 1.13 2007/11/13 21:36:21 perev Exp $
 *
 * $Log: pipegeo.g,v $
+* Revision 1.13  2007/11/13 21:36:21  perev
+* ALKAP fixed and lengths of shields swapped
+*
 * Revision 1.12  2006/10/06 22:33:42  potekhin
 * Remove the pipe and svt shields that are unnecessary
 * in the RandD "upgr" geometries. Done based on the config
@@ -50,7 +53,7 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       Content  PIPE,PIPC,PIPO,PIPS,PIPB,PIPT,PFLO,PFLT,PVAC,PVAO,PVAS,
                PVAB,PRIS,PRID,PRIB,PIPI,PVAI,PVAT,PWRP,PSLD
 
-      Structure PIPV {version,  int pipeConfig}
+      Structure PIPV {version,  int pipeConfig, int pipeFlag}
       Structure PIPG {config,
                       BeInnR,   BeOutR,   BeLeng,   char Material,
                       S1InnR,   S1OutR,   S1Leng,   S2InnR,   S2OutR,  S2Leng,
@@ -62,11 +65,15 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
                       SldInnR,  SldOutR,  SldLeng}
 
       Real    Z1,Z2,Z3,Z4,R1,R2,vacuum/1.e-5/ ! local variables for section positioning
+      Real    WrpThk,SldThk
 * -----------------------------------------------------------------------------
 *
+   WrpThk = (3.+1.5)*2*MIL_p
+   SldThk = (3.+0.1)  *MIL_p
    FILL PIPV    !  Beam pipe version
       version    =  1    ! geometry version
       pipeConfig =  2    ! pipe version (2 is the default, unfortunately)
+      pipeFlag   =  0   ! 1=PWRP !2=PSLD
    endFill
 
 * note that in the following configs 1 and 2 have been historically swapped
@@ -98,11 +105,11 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       RibOutR   = 4.8   ! Rib Outer Radius
       RibCent   = 454.5 ! Rib Set center 
       WrpInnR   = 4.0   ! inner radius of beampipe multi layer insulation
-      WrpOutR   = 4.003 ! outer radius of beampipe multi layer insulation
-      WrpLeng   = 56    ! length of beampipe multi layer insulation
-      SldInnR   = 4.003 ! inner radius of SVT beam pipe shield
-      SldOutR   = 4.006 ! outer radius of SVT beam pipe shield
-      SldLeng   = 300   ! length of SVT beam pipe shield
+      WrpOutR   = 4.0+WrpThk 		! outer radius of beampipe multi layer insulation
+      WrpLeng   = 300   		! length of beampipe multi layer insulation
+      SldInnR   = 4.0+WrpThk 		! inner radius of SVT beam pipe shield
+      SldOutR   = 4.0+WrpThk+SldThk	! outer radius of SVT beam pipe shield
+      SldLeng   = 56    		! length of SVT beam pipe shield
 
 * a pretty uninteresting old config with pipes'o'steel:
 
@@ -133,11 +140,11 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       RibOutR   = 4.8   ! Rib Outer Radius
       RibCent   = 454.5 ! Rib Set center 
       WrpInnR   = 4.0   ! inner radius of beampipe multi layer insulation
-      WrpOutR   = 4.003 ! outer radius of beampipe multi layer insulation
-      WrpLeng   = 56    ! length of beampipe multi layer insulation
-      SldInnR   = 4.003 ! inner radius of SVT beam pipe shield
-      SldOutR   = 4.006 ! outer radius of SVT beam pipe shield
-      SldLeng   = 300   ! length of SVT beam pipe shield
+      WrpOutR   = 4.0+WrpThk 		! outer radius of beampipe multi layer insulation
+      WrpLeng   = 300   		! length of beampipe multi layer insulation
+      SldInnR   = 4.0+WrpThk 		! inner radius of SVT beam pipe shield
+      SldOutR   = 4.0+WrpThk+SldThk	! outer radius of SVT beam pipe shield
+      SldLeng   = 56    		! length of SVT beam pipe shield
 
    endfill
 
@@ -176,11 +183,11 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       RibOutR   = 4.8   ! Rib Outer Radius
       RibCent   = 454.5 ! Rib Set center 
       WrpInnR   = 4.0   ! inner radius of beampipe multi layer insulation
-      WrpOutR   = 4.003 ! outer radius of beampipe multi layer insulation
-      WrpLeng   = 56    ! length of beampipe multi layer insulation
-      SldInnR   = 4.003 ! inner radius of SVT beam pipe shield
-      SldOutR   = 4.006 ! outer radius of SVT beam pipe shield
-      SldLeng   = 300   ! length of SVT beam pipe shield
+      WrpOutR   = 4.0+WrpThk 		! outer radius of beampipe multi layer insulation
+      WrpLeng   = 300   		! length of beampipe multi layer insulation
+      SldInnR   = 4.0+WrpThk 		! inner radius of SVT beam pipe shield
+      SldOutR   = 4.0+WrpThk+SldThk	! outer radius of SVT beam pipe shield
+      SldLeng   = 56    		! length of SVT beam pipe shield
 
    endfill
 *
@@ -212,11 +219,11 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       RibOutR   = 4.8   ! Rib Outer Radius
       RibCent   = 454.5 ! Rib Set center 
       WrpInnR   = 4.0   ! inner radius of beampipe multi layer insulation
-      WrpOutR   = 4.003 ! outer radius of beampipe multi layer insulation
-      WrpLeng   = 56    ! length of beampipe multi layer insulation
-      SldInnR   = 4.003 ! inner radius of SVT beam pipe shield
-      SldOutR   = 4.006 ! outer radius of SVT beam pipe shield
-      SldLeng   = 300   ! length of SVT beam pipe shield
+      WrpOutR   = 4.0+WrpThk 		! outer radius of beampipe multi layer insulation
+      WrpLeng   = 300   		! length of beampipe multi layer insulation
+      SldInnR   = 4.0+WrpThk 		! inner radius of SVT beam pipe shield
+      SldOutR   = 4.0+WrpThk+SldThk	! outer radius of SVT beam pipe shield
+      SldLeng   = 56    		! length of SVT beam pipe shield
 
    endfill
 *
@@ -279,8 +286,10 @@ Block PIPE is the STAR beam pipe mother volume
       Create and Position PFLT z=Z2                      " 2nd set of flanges "
       Create and Position PIPS z=Z3-pipg_S4Leng          " 5 inch steel sectn "
       Create and position PRIS z=(Z1+Z2)/2               " Steel Bellow Ribs  "
-      if(PIPV_pipeConfig.ne.4) then
+      if(iand(PIPV_pipeFlag,1).ne.0) then
           Create and position PWRP z=pipg_WrpLeng/2          " beampipe wrap "
+      endif
+      if(iand(PIPV_pipeFlag,2).ne.0) then
           Create and position PSLD z=pipg_SldLeng/2          " svt beam shield "
       endif
 endblock
@@ -425,8 +434,8 @@ Block PSLD is the svt beampipe shield
        Component C5     A=12    Z=6  W=5
        Component H4     A=1     Z=1  W=4
        Component O2     A=16    Z=8  W=2
-       Component Al     A=27    Z=13 W=3
-       Mixture   ALKAP  Dens=1.65
+       Component Al     A=27    Z=13 W=0.2302
+       Mixture   ALKAP  Dens=1.432
        Attribute PSLD   Seen=1  colo=3
        Shape     TUBE   Rmin=pipg_SldInnR  Rmax=pipg_SldOutR,
                         Dz=pipg_SldLeng/2 
