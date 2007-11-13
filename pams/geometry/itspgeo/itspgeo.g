@@ -1,6 +1,9 @@
-* $Id: itspgeo.g,v 1.1 2006/10/21 17:58:05 potekhin Exp $
+* $Id: itspgeo.g,v 1.2 2007/11/13 21:30:51 perev Exp $
 *
 * $Log: itspgeo.g,v $
+* Revision 1.2  2007/11/13 21:30:51  perev
+* material ALKAP fixed
+*
 * Revision 1.1  2006/10/21 17:58:05  potekhin
 * Adding a new crucial subsystem, which is the support structure
 * for the tracking upgrade configurations.
@@ -93,8 +96,8 @@ Module ITSPGEO  is the Inner Tracker Support
         Component C5  A=12    Z=6  W=5
         Component H4  A=1     Z=1  W=4
         Component O2  A=16    Z=8  W=2
-        Component Al  A=27    Z=13 W=3
-      Mixture  ALKAP  Dens=1.65
+        Component Al  A=27    Z=13 W=0.2302
+      Mixture  ALKAP  Dens=1.432
 *
       USE SSUP version=1
       write(*,*) '********* ITSP Support Cone Cable layer thickness: ', SSUP_CabThk

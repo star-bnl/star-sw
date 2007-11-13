@@ -1,5 +1,8 @@
-* $Id: fgtdgeo1.g,v 1.3 2007/02/23 21:16:37 potekhin Exp $
+* $Id: fgtdgeo1.g,v 1.4 2007/11/13 21:29:45 perev Exp $
 * $Log: fgtdgeo1.g,v $
+* Revision 1.4  2007/11/13 21:29:45  perev
+* material ALKAP fixed
+*
 * Revision 1.3  2007/02/23 21:16:37  potekhin
 * Replacing a dummy version (a placeholder) of the FGT (formerly known
 * as IGT) code with a piece that supposedly works, and has 6 GEM disks.
@@ -90,8 +93,8 @@ Module FGTDGEO1 is the geometry of the forward GEM tracking detector
       Component C5  A=12    Z=6  W=5
       Component H4  A=1     Z=1  W=4
       Component O2  A=16    Z=8  W=2
-      Component Al  A=27    Z=13 W=3
-      Mixture  ALKAP  Dens=1.65
+      Component Al  A=27    Z=13 W=0.2302
+      Mixture  ALKAP  Dens=1.432
 *     G10 is about 60% SiO2 and 40% epoxy
       Component Si  A=28.08  Z=14   W=0.6*1*28./60.
       Component O   A=16     Z=8    W=0.6*2*16./60.
