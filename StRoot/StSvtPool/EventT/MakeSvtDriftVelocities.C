@@ -10,22 +10,14 @@ struct data_t {
   Double_t v0, v1, v2, v3;
   Char_t Comment[10];
 };
-
-Int_t Drift = 1;
 #if 0
-//#include "Results.DriftBarrel_Pass214_RFB_all.h"
-//#include "Results.DriftBarrel_2Pass214_TpcSsd_RFBPlotsNFP25rCut0.5cm.h"
-//#include "Results.DriftBarrel_3Pass214_TpcSsd_RFBPlotsNFP25rCut0.5cm.h"
-Int_t time =       103; 
+// lines which should be added to Drift_ALL.h
+Int_t Drift = 1;
+Int_t time =       106; 
 Int_t date =  20070524;
-const Char_t *Pass = "Pass214 RFB"; 
-#else
-#include "Results.DriftBarrel_Pass214FFD_all.h"
-Int_t time =       104; 
-Int_t date =  20070321;
-const Char_t *Pass = "Pass214 FFD"; 
-#endif
-
+const Char_t *Pass = "Pass214 RFG"; 
+#endif 
+#include "Drift_ALL.h"
 static const Int_t N = sizeof(Data)/sizeof(data_t);
 
 
