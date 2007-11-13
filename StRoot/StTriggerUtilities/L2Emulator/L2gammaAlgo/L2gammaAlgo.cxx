@@ -240,36 +240,38 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
   //  setLogFile(clog);
   mLogFile=fopen(clog,"w");
   // assert(mLogFile);
+  if(mLogFile==0)  printf("%s ::initRun() for run=%d UNABLE to open log-file=%s=, it is not fatal, continue initialization\n",mName,run,clog);
 
-  fprintf(mLogFile,"\n\n====================================================================================================================================\n");
-  fprintf(mLogFile,"L2gammaAlgo start of run %d  summary, compiled: %s , %s\n",run,__DATE__,__TIME__);
-  fprintf(mLogFile,"calorimeter:              %s\n",mName);
-  fprintf(mLogFile,"run:                      %d\n",run);
-  fprintf(mLogFile,"use offline gains   I[0]: %d\n",mUseOfflineGains);
-  fprintf(mLogFile,"prescaled accept    I[1]: %d\n",mPrescale);
-  fprintf(mLogFile,"threshold level:          %d\n",mThresholdLevel);
-  fprintf(mLogFile,"tower threshold     F[0]: %-5.2f [GeV]\n",mTowerThreshold);
-  fprintf(mLogFile,"patch threshold     F[1]: %-5.2f [GeV]\n",mPatchThreshold);
-  fprintf(mLogFile,"patch size:               %s\n","3x3"); /* may change in later revisions */
-  fprintf(mLogFile,"logfile:                  %s\n",clog);
-  //  fprintf(mLogFile,"histograms:               %s\n",chis);
-  fprintf(mLogFile,"database at:              %p\n",mDb);
-  fprintf(mLogFile,"l2 input at:              %p\n",mL2input);
-
-  fprintf(mLogFile,"\nDetector Geometry\n");
-  fprintf(mLogFile,"mEtaBins  = {");
-  for ( int i=0;i<mNumEtas+1;i++ ) { 
-    fprintf(mLogFile,"%4.2f, ",mEtaBins[i]);
-    if ( !((i+1)%4) ) fprintf(mLogFile,"\n               ");
+  if(mLogFile) {
+    fprintf(mLogFile,"\n\n====================================================================================================================================\n");
+    fprintf(mLogFile,"L2gammaAlgo start of run %d  summary, compiled: %s , %s\n",run,__DATE__,__TIME__);
+    fprintf(mLogFile,"calorimeter:              %s\n",mName);
+    fprintf(mLogFile,"run:                      %d\n",run);
+    fprintf(mLogFile,"use offline gains   I[0]: %d\n",mUseOfflineGains);
+    fprintf(mLogFile,"prescaled accept    I[1]: %d\n",mPrescale);
+    fprintf(mLogFile,"threshold level:          %d\n",mThresholdLevel);
+    fprintf(mLogFile,"tower threshold     F[0]: %-5.2f [GeV]\n",mTowerThreshold);
+    fprintf(mLogFile,"patch threshold     F[1]: %-5.2f [GeV]\n",mPatchThreshold);
+    fprintf(mLogFile,"patch size:               %s\n","3x3"); /* may change in later revisions */
+    fprintf(mLogFile,"logfile:                  %s\n",clog);
+    //  fprintf(mLogFile,"histograms:               %s\n",chis);
+    fprintf(mLogFile,"database at:              %p\n",mDb);
+    fprintf(mLogFile,"l2 input at:              %p\n",mL2input);
+    
+    fprintf(mLogFile,"\nDetector Geometry\n");
+    fprintf(mLogFile,"mEtaBins  = {");
+    for ( int i=0;i<mNumEtas+1;i++ ) { 
+      fprintf(mLogFile,"%4.2f, ",mEtaBins[i]);
+      if ( !((i+1)%4) ) fprintf(mLogFile,"\n               ");
+    }
+    fprintf(mLogFile,"X}\n");
+    fprintf(mLogFile,"mMaxADC   = %4d\n",mMaxADC);
+    fprintf(mLogFile,"mMaxET    = %4.1f\n",mMaxET);
+    fprintf(mLogFile,"mIdealGainT = %5.3f\n",mIdealGainT);
+    fprintf(mLogFile,"\n");
+    
+    fprintf(mLogFile,"\n");
   }
-  fprintf(mLogFile,"X}\n");
-  fprintf(mLogFile,"mMaxADC   = %4d\n",mMaxADC);
-  fprintf(mLogFile,"mMaxET    = %4.1f\n",mMaxET);
-  fprintf(mLogFile,"mIdealGainT = %5.3f\n",mIdealGainT);
-  fprintf(mLogFile,"\n");
-
-  fprintf(mLogFile,"\n");
-
   if ( !mDb ) return 100;
 
    
@@ -282,28 +284,28 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
   mNumberLive=0;
 
   /// read in database for this run
-  fprintf(mLogFile,"initialize EMC ascii database\n\n");
+  if(mLogFile)  fprintf(mLogFile,"initialize EMC ascii database\n\n");
   //$$$ assume it's already initialized by a call in main??? gEmcCDb_init();
-  fprintf(mLogFile,"\n");
+  if(mLogFile)  fprintf(mLogFile,"\n");
 
   ///
   /// determine ideal gains for each of the eta bins
   ///
   //float emc_ideal_gains[mNumEtas];
   float *emc_ideal_gains = new float[mNumEtas];
-  fprintf(mLogFile,"configure ideal gains for %d eta bins\n",mNumEtas);
+  if(mLogFile)  fprintf(mLogFile,"configure ideal gains for %d eta bins\n",mNumEtas);
   for ( int i=0;i<mNumEtas;i++ )
     {
       float eta_mean = mEtaBins[ i ] + mEtaBins[ i+1 ];
       eta_mean /= 2.0;
       emc_ideal_gains[i] = mMaxADC / mMaxET / cosh(eta_mean);
-      fprintf(mLogFile,"+ etabin=%d eta=%5.2f bemc ideal gain=%5.2f\n", i+1, eta_mean, emc_ideal_gains[i]);
+     if(mLogFile)   fprintf(mLogFile,"+ etabin=%d eta=%5.2f bemc ideal gain=%5.2f\n", i+1, eta_mean, emc_ideal_gains[i]);
       
     }
 
   if ( mNumEtas != 12 && mNumEtas != 40 ) {
-    fprintf(mLogFile,"L2gammaEmCal::FATAL ERROR -- expect 12 or 40 etabins, got %d\n",mNumEtas);
-    fprintf(mLogFile,"  + likely cause -- invalid runtime parameter\n");
+    if(mLogFile)  fprintf(mLogFile,"L2gammaEmCal::FATAL ERROR -- expect 12 or 40 etabins, got %d\n",mNumEtas);
+    if(mLogFile)  fprintf(mLogFile,"  + likely cause -- invalid runtime parameter\n");
     delete emc_ideal_gains;
     return 10; /* EMC not properly configured */
   }
@@ -320,7 +322,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
       mTowerGain[index]=-1.0;
     }
 
-  fprintf(mLogFile,"\nInitializing tower ADC threshods\n");
+  if(mLogFile)  fprintf(mLogFile,"\nInitializing tower ADC threshods\n");
 
   /// loop over all db entries and calculate ADC thresholds
   for ( int index=0; index<EmcDbIndexMax; index++ ) 
@@ -371,7 +373,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
       ushort stat = x->stat;   
       ushort fail = x->fail;   
       if ( gain < 0.0 ) {
-	fprintf(mLogFile,"L2gammaEmCal::WARN %s gain=%5.2f will be masked\n",x->name,x->gain);
+	if(mLogFile) 	fprintf(mLogFile,"L2gammaEmCal::WARN %s gain=%5.2f will be masked\n",x->name,x->gain);
 	fail = 0xffff;
       }
 
@@ -412,7 +414,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 
   // fprintf(mLogFile,"L2gammaAlgo::initRun(%d) initialize 3x3 patch thresholds for ET=%5.2f\n",mRunNumber,mPatchThreshold);
 
-  fprintf(mLogFile,"Initializing 3x3 tower cluster thresholds\n");
+  if(mLogFile)  fprintf(mLogFile,"Initializing 3x3 tower cluster thresholds\n");
 
   /// second loop over all db entries, this time we calculate
   /// ADC thresholds on the 3x3 tower patch
@@ -474,7 +476,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 	      mTowerAdcCorrection[rdo];
 
 	    if ( jtow == 12 ) {
-	      fprintf(mLogFile,"+ name=%s ped=%5.2f gfact=%5.2f thresh=%5.2f\n",x->name,x->ped,mTowerAdcCorrection[rdo],mPatchAdcThreshold[jrdo] );
+	      if(mLogFile)  fprintf(mLogFile,"+ name=%s ped=%5.2f gfact=%5.2f thresh=%5.2f\n",x->name,x->ped,mTowerAdcCorrection[rdo],mPatchAdcThreshold[jrdo] );
 	    }
 
 	    // add ped for this channel to all patches 
@@ -542,7 +544,7 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
 #endif
 
 #if 1
-      fprintf(mLogFile,"tower=%s tow=%d rdo=%d ideal=%5.2f thr=%d patch=%5.2f GeV\n",
+   if(mLogFile)     fprintf(mLogFile,"tower=%s tow=%d rdo=%d ideal=%5.2f thr=%d patch=%5.2f GeV\n",
 	     x->name,
 	     mRdo2tower[rdo],
 	     rdo,
@@ -560,14 +562,14 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
     printPatchConfig(rdo);
 #endif
 
-
-  fprintf(mLogFile,"\n");
-  fprintf(mLogFile,"total number of towers:        %d\n",mNumTower);
-  fprintf(mLogFile,"number of unmasked towers:     %d\n",mNumberLive);
-  fprintf(mLogFile,"\n====================================================================================================================================\n\n");
-  fflush(mLogFile);
-
-
+ if(mLogFile) {
+   fprintf(mLogFile,"\n");
+   fprintf(mLogFile,"total number of towers:        %d\n",mNumTower);
+   fprintf(mLogFile,"number of unmasked towers:     %d\n",mNumberLive);
+   fprintf(mLogFile,"\n====================================================================================================================================\n\n");
+   fflush(mLogFile);
+ }
+ 
   /*
    * cleanup allocated memory
    */
@@ -914,11 +916,12 @@ void L2gammaAlgo::finishRun()
   char chis[128];
   printf("%s/run%d.l2%s.hist.bin\n",mOutDir,run,mName);
   sprintf(chis,"%s/run%d.l2%s.hist.bin",mOutDir,run,mName);
-  printf("L2pig:saving '%s'\n",chis);
+  printf("L2gamma:saving '%s'\n",chis);
   //  mLogFile=fopen(clog,"a");
   //  mLogFile=stdout;
+
   mHistFile=fopen(chis,"w");
-  
+  if(mHistFile==0)  printf("%s ::finishRun() for run=%d UNABLE to open histo-file=%s=, continue initialization\n",mName,run,chis); 
   //assert( mHistFile);
 
   //
@@ -930,103 +933,100 @@ void L2gammaAlgo::finishRun()
 
   //  if ( !mLogFile ) 
   //    mLogFile = stdout;
+ if(mLogFile) {
+   fprintf(mLogFile,"\n\n===================================================================================================================================\n");
+   fprintf(mLogFile,"L2gammaAlgo end of run %d summary\n",run);
+   fprintf(mLogFile,"run:            %d\n",run);
+   fprintf(mLogFile,"tower threshold: %5.2f [GeV]\n",mTowerThreshold);
+   fprintf(mLogFile,"patch threshold: %5.2f [GeV]\n",mPatchThreshold);
+   fprintf(mLogFile,"patch size:      3x3\n"); /* may change in later revisions */
+   fprintf(mLogFile,"eval time:      %d [kTicks]\n",mEvalTime);
+   fprintf(mLogFile,"avg time/event: %d [kTicks]\n",mEvalTime/mNumberInput);
+   fprintf(mLogFile,"# input:        %d\n",mNumberInput);
+   fprintf(mLogFile,"# ht accept:    %d\n",mNumberAcceptHT);
+   fprintf(mLogFile,"# ht+tp accept: %d\n",mNumberAcceptTP);
+   fprintf(mLogFile,"\n");
 
-  fprintf(mLogFile,"\n\n===================================================================================================================================\n");
-  fprintf(mLogFile,"L2gammaAlgo end of run %d summary\n",run);
-  fprintf(mLogFile,"run:            %d\n",run);
-  fprintf(mLogFile,"tower threshold: %5.2f [GeV]\n",mTowerThreshold);
-  fprintf(mLogFile,"patch threshold: %5.2f [GeV]\n",mPatchThreshold);
-  fprintf(mLogFile,"patch size:      3x3\n"); /* may change in later revisions */
-  fprintf(mLogFile,"eval time:      %d [kTicks]\n",mEvalTime);
-  fprintf(mLogFile,"avg time/event: %d [kTicks]\n",mEvalTime/mNumberInput);
-  fprintf(mLogFile,"# input:        %d\n",mNumberInput);
-  fprintf(mLogFile,"# ht accept:    %d\n",mNumberAcceptHT);
-  fprintf(mLogFile,"# ht+tp accept: %d\n",mNumberAcceptTP);
-  fprintf(mLogFile,"\n");
-
-
-  //
-  // first section, loop over the tower and patch frequencies
-  // to look for hot towers
-  //
-  float avgt=0,avgp=0;
-  int maxtf=0,maxpf=0;
-
-  for ( int tow=0;tow<mNumTower;tow++ )
-    {       
-      avgt+=mTowerFrequency[tow];
-      avgp+=mPatchFrequency[tow];      
-      if ( mTowerFrequency[tow]>maxtf ) maxtf=mTowerFrequency[tow];
-      if ( mPatchFrequency[tow]>maxpf ) maxpf=mTowerFrequency[tow];
-    }
-  avgt=( ((float)avgt)/(float)mNumberLive );
-  avgp=( ((float)avgp)/(float)mNumberLive );
-
-  //  fprintf(mLogFile,"sumt=%5.2f sump=%5.2f nlive=%d\n",avgt,avgp,mNumberLive);
-  fprintf(mLogFile,"max # ht accept in one tower:          %d\n",maxtf);
-  fprintf(mLogFile,"max # ht+tp accept in one tower:       %d\n",maxpf);
-  fprintf(mLogFile,"avg # ht accept:                       %6f\n",avgt);
-  fprintf(mLogFile,"avg # ht+tp accept:                    %6f\n",avgp);
-  fprintf(mLogFile,"expected # ht accept in one tower:     %6f\n",((float)mNumberAcceptHT)/mNumberLive);
-  fprintf(mLogFile,"expected # ht+tp accept in one tower:  %6f\n",((float)mNumberAcceptTP)/mNumberLive);
-  fprintf(mLogFile,"\n");
-
-
+   
+   //
+   // first section, loop over the tower and patch frequencies
+   // to look for hot towers
+   //
+   float avgt=0,avgp=0;
+   int maxtf=0,maxpf=0;
+   
+   for ( int tow=0;tow<mNumTower;tow++ )
+     {       
+       avgt+=mTowerFrequency[tow];
+       avgp+=mPatchFrequency[tow];      
+       if ( mTowerFrequency[tow]>maxtf ) maxtf=mTowerFrequency[tow];
+       if ( mPatchFrequency[tow]>maxpf ) maxpf=mTowerFrequency[tow];
+     }
+   avgt=( ((float)avgt)/(float)mNumberLive );
+   avgp=( ((float)avgp)/(float)mNumberLive );
+   
+   //  fprintf(mLogFile,"sumt=%5.2f sump=%5.2f nlive=%d\n",avgt,avgp,mNumberLive);
+   fprintf(mLogFile,"max # ht accept in one tower:          %d\n",maxtf);
+   fprintf(mLogFile,"max # ht+tp accept in one tower:       %d\n",maxpf);
+   fprintf(mLogFile,"avg # ht accept:                       %6f\n",avgt);
+   fprintf(mLogFile,"avg # ht+tp accept:                    %6f\n",avgp);
+   fprintf(mLogFile,"expected # ht accept in one tower:     %6f\n",((float)mNumberAcceptHT)/mNumberLive);
+   fprintf(mLogFile,"expected # ht+tp accept in one tower:  %6f\n",((float)mNumberAcceptTP)/mNumberLive);
+   fprintf(mLogFile,"\n");
+   
+   
   //#define DEBUG_PATCH_THRESHOLDS
 
 #ifndef DEBUG_PATCH_THRESHOLDS
-  fprintf(mLogFile,"Summary of hot towers (# ht accept > 3*average or # ht+tp accept > 3*average):\n\n");
+   fprintf(mLogFile,"Summary of hot towers (# ht accept > 3*average or # ht+tp accept > 3*average):\n\n");
 
-  for ( int tow=0;tow<mNumTower;tow++ )
-    {
-      int phi=tow/mNumEtas;
-      int eta=tow%mNumEtas;
-      int sec=phi/mNumSubs;
-      int sub=phi%mNumSubs;
-      int myrdo=mTower2rdo[tow];
-
-
-      bool hott = (mTowerFrequency[tow] > (3.0*avgt));
-      bool hotp = 0 && (mPatchFrequency[tow] > (3.0*avgp));
-
-      /*           ^^^^^^^^^^^^^ need a statistically robust sample or we will get noise! */
-
-      if ( hott||hotp ) fprintf(mLogFile,"\n");
-
-      if ( mBEmc ) 
-	{
-	  if ( hott )
-	    fprintf(mLogFile,"L2gammaAlgo::WARNING -- possible hot tower %02dt%c%02d freq=%d avg=%5.2f\n",sec+1,sub+'a',eta+1,mTowerFrequency[tow],avgt);
-	  if ( hotp )
-	    fprintf(mLogFile,"L2gammaAlgo::WARNING -- possible hot patch %02dt%c%02d freq=%d avg=%5.2f\n",sec+1,sub+'a',eta+1,mPatchFrequency[tow],avgp);
-	}
-      else 
-	{
-	  if ( hott )
-	    fprintf(mLogFile,"L2gammaAlgo::WARNING -- possible hot tower %02dT%c%02d freq=%d avg=%5.2f\n",sec+1,sub+'A',eta+1,mTowerFrequency[tow],avgt);
-	  if ( hotp )
-	    fprintf(mLogFile,"L2gammaAlgo::WARNING -- possible hot patch %02dT%c%02d freq=%d avg=%5.2f\n",sec+1,sub+'A',eta+1,mPatchFrequency[tow],avgp);
-	}
-
-      if ( hott || hotp )
-	{ 
-	  
-	  printPatchConfig( myrdo );
-
-	} 
-
-    }
+   for ( int tow=0;tow<mNumTower;tow++ )
+     {
+       int phi=tow/mNumEtas;
+       int eta=tow%mNumEtas;
+       int sec=phi/mNumSubs;
+       int sub=phi%mNumSubs;
+       int myrdo=mTower2rdo[tow];
+       
+       
+       bool hott = (mTowerFrequency[tow] > (3.0*avgt));
+       bool hotp = 0 && (mPatchFrequency[tow] > (3.0*avgp));
+       
+       /*           ^^^^^^^^^^^^^ need a statistically robust sample or we will get noise! */
+       
+       if ( hott||hotp ) fprintf(mLogFile,"\n");
+       
+       if ( mBEmc ) 
+	 {
+	   if ( hott )
+	     fprintf(mLogFile,"L2gammaAlgo::WARNING -- possible hot tower %02dt%c%02d freq=%d avg=%5.2f\n",sec+1,sub+'a',eta+1,mTowerFrequency[tow],avgt);
+	   if ( hotp )
+	     fprintf(mLogFile,"L2gammaAlgo::WARNING -- possible hot patch %02dt%c%02d freq=%d avg=%5.2f\n",sec+1,sub+'a',eta+1,mPatchFrequency[tow],avgp);
+	 }
+       else 
+	 {
+	   if ( hott )
+	     fprintf(mLogFile,"L2gammaAlgo::WARNING -- possible hot tower %02dT%c%02d freq=%d avg=%5.2f\n",sec+1,sub+'A',eta+1,mTowerFrequency[tow],avgt);
+	   if ( hotp )
+	     fprintf(mLogFile,"L2gammaAlgo::WARNING -- possible hot patch %02dT%c%02d freq=%d avg=%5.2f\n",sec+1,sub+'A',eta+1,mPatchFrequency[tow],avgp);
+	 }
+       
+       if ( hott || hotp )
+	 { 
+	   
+	   printPatchConfig( myrdo );
+	   
+	 } 
+       
+     }
+ }
 #endif
-
-  if ( mLogFile ) {
-    fprintf(mLogFile,"\n====================================================================================================================================\n\n");
-    fflush(mLogFile);
-  }
-  else {
-    printf("\n====================================================================================================================================\n\n");
-    fflush(stdout);
-  }
-
+   
+ if ( mLogFile ) {
+   fprintf(mLogFile,"\n====================================================================================================================================\n\n");
+   fflush(mLogFile);
+ }
+ 
   finish(); /* output histogram */
 
 }
