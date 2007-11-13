@@ -1133,7 +1133,7 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
   else                              outC.open(Out, ios::app);
   TH2 *h = 0;
   Int_t head = 0;
-  const Int_t NPol1 = NPOL;// first parameter reserved for degree of polynomial
+  Int_t NPol1 = NPOL;// first parameter reserved for degree of polynomial
   if (TString(tag) == "duvH") {NPol1 = 12 - NPOL;} // only 3 power for anodes
   const Int_t NPMax = NPol1;
   Double_t params[NPol1];
