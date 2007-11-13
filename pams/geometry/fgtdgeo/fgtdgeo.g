@@ -1,5 +1,8 @@
-* $Id: fgtdgeo.g,v 1.6 2005/04/19 19:39:22 potekhin Exp $
+* $Id: fgtdgeo.g,v 1.7 2007/11/13 21:30:03 perev Exp $
 * $Log: fgtdgeo.g,v $
+* Revision 1.7  2007/11/13 21:30:03  perev
+* material ALKAP fixed
+*
 * Revision 1.6  2005/04/19 19:39:22  potekhin
 * Minor naming convention fix, in the attribute name
 *
@@ -161,8 +164,8 @@ Block FGKP is the Kapton layer
       Component C5  A=12    Z=6  W=5
       Component H4  A=1     Z=1  W=4
       Component O2  A=16    Z=8  W=2
-      Component Al  A=27    Z=13 W=3
-      Mixture  ALKAP  Dens=1.65
+      Component Al  A=27    Z=13 W=0.2302
+      Mixture  ALKAP  Dens=1.432
 
       Attribute FGKP  Seen=1  colo=4
 

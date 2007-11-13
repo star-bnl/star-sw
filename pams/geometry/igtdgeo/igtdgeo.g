@@ -1,5 +1,8 @@
-* $Id: igtdgeo.g,v 1.5 2006/11/14 00:18:52 potekhin Exp $
+* $Id: igtdgeo.g,v 1.6 2007/11/13 21:30:34 perev Exp $
 * $Log: igtdgeo.g,v $
+* Revision 1.6  2007/11/13 21:30:34  perev
+* material ALKAP fixed
+*
 * Revision 1.5  2006/11/14 00:18:52  potekhin
 * Allow for a modified set of parameters as per recent change
 * in the IGT geometry (Ross, Bernd)
@@ -110,8 +113,8 @@ Module IGTDGEO is the geometry of the inner GEM tracking detector
       Component C5  A=12    Z=6  W=5
       Component H4  A=1     Z=1  W=4
       Component O2  A=16    Z=8  W=2
-      Component Al  A=27    Z=13 W=3
-      Mixture  ALKAP  Dens=1.65
+      Component Al  A=27    Z=13 W=0.2302
+      Mixture  ALKAP  Dens=1.432
 *     G10 is about 60% SiO2 and 40% epoxy
       Component Si  A=28.08  Z=14   W=0.6*1*28./60.
       Component O   A=16     Z=8    W=0.6*2*16./60.

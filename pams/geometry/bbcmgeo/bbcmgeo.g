@@ -61,8 +61,8 @@ Fill	HEXG					! hexagon tile geometry
           Component C5  A=12    Z=6  W=5
           Component H4  A=1     Z=1  W=4
           Component O2  A=16    Z=8  W=2
-          Component Al  A=27    Z=13 W=3
-        Mixture  ALKAP  Dens=1.65
+          Component Al  A=27    Z=13 W=0.2302
+        Mixture  ALKAP  Dens=1.432
 
 	Use HEXG type=1
 	srad = hexg_irad*6.0
