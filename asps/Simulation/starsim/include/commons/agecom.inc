@@ -1,4 +1,4 @@
-* $Id: agecom.inc,v 1.1.1.1 2004/01/12 23:49:49 potekhin Exp $
+* $Id: agecom.inc,v 1.2 2007/11/13 21:24:41 perev Exp $
 * $Name:  $
       CHARACTER*20 AG_MODULE,  AG_TITLE,  AG_EXNAME,   AG_PARLIST,
      +             AG_MATERIAL,AG_MIXTURE,AG_COMPONENT,AG_MEDIUM,
@@ -85,5 +85,6 @@ C local variables valid inside same block
      +             (AG_P1,AG_HX),         (AG_P2,AG_HY),
      +             (AG_NPDIV,AG_NPDV)
 *    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - *
-
-
+*Constants
+      real MIL_p,INCH_p
+      parameter (INCH_p=2.54,MIL_p=0.00254)
