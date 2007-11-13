@@ -1,11 +1,14 @@
  /*
- * $Id: StPixelFastSimMaker.cxx,v 1.36 2007/11/06 16:20:06 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.37 2007/11/13 19:09:51 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.37  2007/11/13 19:09:51  wleight
+ * Corrected bug causing pixel fast simulator to crash when there were no pixel and/or ist hits in the event
+ *
  * Revision 1.36  2007/11/06 16:20:06  wleight
  * Digitized Pixel, removed all hit smearing, and implemented idTruth
  *
@@ -301,10 +304,12 @@ Int_t StPixelFastSimMaker::Make()
     if (! mcEvent) {LOG_INFO << "No StMcEvent on input" << endl; return kStWarn;}
     TDataSetIter geant(GetInputDS("geant"));
     if (! gGeoManager) GetDataBase("VmcGeometry");
+    g2t_ist_hit_st* g2tIst=0;
+    g2t_pix_hit_st* g2tPix=0;
     St_g2t_ist_hit *g2t_ist_hit=(St_g2t_ist_hit *)geant("g2t_ist_hit");
     St_g2t_pix_hit *g2t_pix_hit=(St_g2t_pix_hit *)geant("g2t_pix_hit");
-    g2t_ist_hit_st* g2tIst=g2t_ist_hit->GetTable();
-    g2t_pix_hit_st* g2tPix=g2t_pix_hit->GetTable();
+    if(g2t_ist_hit) g2tIst=g2t_ist_hit->GetTable();
+    if(g2t_pix_hit) g2tPix=g2t_pix_hit->GetTable();
 
     // Store hits into RnD Hit Collection until we have our own
     StRnDHitCollection *col = new StRnDHitCollection;
@@ -428,22 +433,25 @@ Int_t StPixelFastSimMaker::Make()
 	      */
 	      double topdE=0,sumdE=0;
 	      int topHit=-999;
-	      for(multimap<int,int>::iterator iiit=itpair.first;iiit!=itpair.second;iiit++){
-		for(int ab=0;ab<g2t_pix_hit->GetNRows();ab++){
-		  if(g2tPix[ab].id==(*iiit).second){
-		    if(g2tPix[ab].de>topdE){
-		      topdE=g2tPix[ab].de;
-		      topHit=ab;
+	      if(g2t_pix_hit){
+		for(multimap<int,int>::iterator iiit=itpair.first;iiit!=itpair.second;iiit++){
+		  for(int ab=0;ab<g2t_pix_hit->GetNRows();ab++){
+		    if(g2tPix[ab].id==(*iiit).second){
+		      if(g2tPix[ab].de>topdE){
+			topdE=g2tPix[ab].de;
+			topHit=ab;
+		      }
+		      sumdE=sumdE+g2tPix[ab].de;
 		    }
-		    sumdE=sumdE+g2tPix[ab].de;
 		  }
+		  pixelToKey.erase(iiit);
 		}
-		pixelToKey.erase(iiit);
-	      }
-	      if(topHit!=-999){
-		int idTQual=static_cast<int>(topdE*100/sumdE);
-		tempHit->setIdTruth(g2tPix[topHit].track_p,idTQual);
-		tempHit->setKey(g2tPix[topHit].id);
+		if(topHit!=-999){
+		  int idTQual=static_cast<int>(topdE*100/sumdE);
+		  tempHit->setIdTruth(g2tPix[topHit].track_p,idTQual);
+		  tempHit->setKey(g2tPix[topHit].id);
+		}
+		else tempHit->setKey(99999);
 	      }
 	      else tempHit->setKey(99999);
 	      col->addHit(tempHit);
@@ -634,22 +642,25 @@ Int_t StPixelFastSimMaker::Make()
 		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair1=stripToKey.equal_range(oo+1);
 		    double topdE1=0,sumdE1=0;
 		    int topHit1=-999;
-		    for(multimap<int,int>::iterator iiit1=itpair1.first;iiit1!=itpair1.second;iiit1++){
-		      for(int aa=0;aa<g2t_ist_hit->GetNRows();aa++){
-			if(g2tIst[aa].id==(*iiit1).second){
-			  if(g2tIst[aa].de>topdE1){
-			    topdE1=g2tIst[aa].de;
-			    topHit1=aa;
+		    if(g2t_ist_hit){
+		      for(multimap<int,int>::iterator iiit1=itpair1.first;iiit1!=itpair1.second;iiit1++){
+			for(int aa=0;aa<g2t_ist_hit->GetNRows();aa++){
+			  if(g2tIst[aa].id==(*iiit1).second){
+			    if(g2tIst[aa].de>topdE1){
+			      topdE1=g2tIst[aa].de;
+			      topHit1=aa;
+			    }
+			    sumdE1=sumdE1+g2tIst[aa].de;
 			  }
-			  sumdE1=sumdE1+g2tIst[aa].de;
 			}
+			stripToKey.erase(iiit1);
 		      }
-		      stripToKey.erase(iiit1);
-		    }
-		    if(topHit1!=-999){
-		      int idTQual=static_cast<int>(topdE1*100/sumdE1);
-		      tempHit->setIdTruth(g2tIst[topHit1].track_p,idTQual);
-		      tempHit->setKey(g2tIst[topHit1].id);
+		      if(topHit1!=-999){
+			int idTQual=static_cast<int>(topdE1*100/sumdE1);
+			tempHit->setIdTruth(g2tIst[topHit1].track_p,idTQual);
+			tempHit->setKey(g2tIst[topHit1].id);
+		      }
+		      else tempHit->setKey(99999);
 		    }
 		    else tempHit->setKey(99999);
 		    tempHit->setLayer(i+1);           
@@ -702,22 +713,25 @@ Int_t StPixelFastSimMaker::Make()
 		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair2=strip1ToKey.equal_range(o+1);
 		    double topdE2=0,sumdE2=0;
 		    int topHit2=-999;
-		    for(multimap<int,int>::iterator iiit2=itpair2.first;iiit2!=itpair2.second;iiit2++){
-		      for(int bb=0;bb<g2t_ist_hit->GetNRows();bb++){
-			if(g2tIst[bb].id==(*iiit2).second){
-			  if(g2tIst[bb].de>topdE2){
-			    topdE2=g2tIst[bb].de;
-			    topHit2=bb;
+		    if(g2t_ist_hit){
+		      for(multimap<int,int>::iterator iiit2=itpair2.first;iiit2!=itpair2.second;iiit2++){
+			for(int bb=0;bb<g2t_ist_hit->GetNRows();bb++){
+			  if(g2tIst[bb].id==(*iiit2).second){
+			    if(g2tIst[bb].de>topdE2){
+			      topdE2=g2tIst[bb].de;
+			      topHit2=bb;
+			    }
+			    sumdE2=sumdE2+g2tIst[bb].de;
 			  }
-			  sumdE2=sumdE2+g2tIst[bb].de;
 			}
+			strip1ToKey.erase(iiit2);
 		      }
-		      strip1ToKey.erase(iiit2);
-		    }
-		    if(topHit2!=-999){
-		      int idTQual=static_cast<int>(topdE2*100/sumdE2);
-		      tempHit->setIdTruth(g2tIst[topHit2].track_p,idTQual);
-		      tempHit->setKey(g2tIst[topHit2].id);
+		      if(topHit2!=-999){
+			int idTQual=static_cast<int>(topdE2*100/sumdE2);
+			tempHit->setIdTruth(g2tIst[topHit2].track_p,idTQual);
+			tempHit->setKey(g2tIst[topHit2].id);
+		      }
+		      else tempHit->setKey(99999);
 		    }
 		    else tempHit->setKey(99999);
 		    tempHit->setLayer(i+1);           
@@ -766,22 +780,25 @@ Int_t StPixelFastSimMaker::Make()
 		    std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair3=strip2ToKey.equal_range(o+1);
 		    double topdE3=0,sumdE3=0;
 		    int topHit3=-999;
-		    for(multimap<int,int>::iterator iiit3=itpair3.first;iiit3!=itpair3.second;iiit3++){
-		      for(int ba=0;ba<g2t_ist_hit->GetNRows();ba++){
-			if(g2tIst[ba].id==(*iiit3).second){
-			  if(g2tIst[ba].de>topdE3){
-			    topdE3=g2tIst[ba].de;
-			    topHit3=ba;
+		    if(g2t_ist_hit){
+		      for(multimap<int,int>::iterator iiit3=itpair3.first;iiit3!=itpair3.second;iiit3++){
+			for(int ba=0;ba<g2t_ist_hit->GetNRows();ba++){
+			  if(g2tIst[ba].id==(*iiit3).second){
+			    if(g2tIst[ba].de>topdE3){
+			      topdE3=g2tIst[ba].de;
+			      topHit3=ba;
+			    }
+			    sumdE3=sumdE3+g2tIst[ba].de;
 			  }
-			  sumdE3=sumdE3+g2tIst[ba].de;
 			}
+			strip2ToKey.erase(iiit3);
 		      }
-		      strip2ToKey.erase(iiit3);
-		    }
-		    if(topHit3!=-999){
-		      int idTQual=static_cast<int>(topdE3*100/sumdE3);
-		      tempHit2->setIdTruth(g2tIst[topHit3].track_p,idTQual);
-		      tempHit2->setKey(g2tIst[topHit3].id);
+		      if(topHit3!=-999){
+			int idTQual=static_cast<int>(topdE3*100/sumdE3);
+			tempHit2->setIdTruth(g2tIst[topHit3].track_p,idTQual);
+			tempHit2->setKey(g2tIst[topHit3].id);
+		      }
+		      else tempHit2->setKey(99999);
 		    }
 		    else tempHit2->setKey(99999);
 		    tempHit2->setLayer(i+1);           
