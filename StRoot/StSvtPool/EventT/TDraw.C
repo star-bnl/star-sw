@@ -88,7 +88,7 @@ struct Rot_t {
   Double_t alpha, beta, gamma;
   Char_t  *Comment;
 };
-static const Int_t NPOL = 7;
+static const Int_t NPOL = 8;
 //________________________________________________________________________________
 Double_t PolN(Double_t *x,Double_t *par) {
   Double_t sum = par[NPOL-1];
