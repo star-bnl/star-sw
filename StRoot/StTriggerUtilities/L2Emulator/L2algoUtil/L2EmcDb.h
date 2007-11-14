@@ -1,8 +1,9 @@
 #ifndef L2EMCDB_H
 #define L2EMCDB_H
+#include <stdio.h>
 
 /*********************************************************************
- * $Id: L2EmcDb.h,v 1.3 2007/11/06 22:07:24 balewski Exp $
+ * $Id: L2EmcDb.h,v 1.4 2007/11/14 03:58:07 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -152,6 +153,9 @@ class L2EmcDb {
 /*
 *********************************************************************
   $Log: L2EmcDb.h,v $
+  Revision 1.4  2007/11/14 03:58:07  balewski
+  cleanup of common timing measurement
+
   Revision 1.3  2007/11/06 22:07:24  balewski
   added timeStamp controlled L2 setup from Jason
 

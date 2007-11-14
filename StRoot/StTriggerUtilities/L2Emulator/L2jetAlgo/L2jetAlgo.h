@@ -1,7 +1,7 @@
 #ifndef L2JETALGO_H
 #define L2JETALGO_H
 /*********************************************************************
- * $Id: L2jetAlgo.h,v 1.5 2007/11/13 23:06:07 balewski Exp $
+ * $Id: L2jetAlgo.h,v 1.6 2007/11/14 03:58:14 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -60,7 +60,7 @@ class L2jetAlgo : public  L2VirtualAlgo {
   int    run_number;
 
   // event counters
-  int run_nEventIn, run_nEventOneJet, run_nEventDiJet, run_nEventRnd;
+  int run_nEventOneJet, run_nEventDiJet, run_nEventRnd;
 
   /*  fast DB lookup tables */
   unsigned short db_btowThr[MaxBtowRdo];
@@ -98,9 +98,7 @@ class L2jetAlgo : public  L2VirtualAlgo {
 
   //............... event-long variables
   TrgDataType*  eve_TrigData;
-  //unsigned long eve_timeStart;
   int  eve_ID; 
-  // bool eve_decision;
   int  eve_patchEne[cl2jetMaxEtaBins*cl2jetMaxPhiBins];
   int  eve_phiEne[cl2jetMaxPhiBins+cl2jet_par_mxPhiBin-1];
   L2Jet * eve_Jet[mxJ];
@@ -133,6 +131,9 @@ class L2jetAlgo : public  L2VirtualAlgo {
 
 /**********************************************************************
   $Log: L2jetAlgo.h,v $
+  Revision 1.6  2007/11/14 03:58:14  balewski
+  cleanup of common timing measurement
+
   Revision 1.5  2007/11/13 23:06:07  balewski
   toward more unified L2-algos
 
