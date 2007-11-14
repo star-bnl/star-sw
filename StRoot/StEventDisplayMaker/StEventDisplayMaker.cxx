@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.128 2007/09/01 02:25:57 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.129 2007/11/14 22:42:16 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -309,6 +309,7 @@ static bool FindStiVolume(const char *name,TList *list) {
             const char *g3name = vol->GetName();
             if (!strcmp(g3name,"TPSS"))      g3name="TPC";
             else if (!strcmp(g3name,"STSI")) g3name="SVT";
+            else if (!strcmp(g3name,"SFSM")) g3name="SSD";
             found = pre.BeginsWith(g3name,TString::kIgnoreCase);
          }
       }
@@ -1501,6 +1502,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.129  2007/11/14 22:42:16  fine
+// Add GEANT volume to represent SSD
+//
 // Revision 1.128  2007/09/01 02:25:57  fine
 // introduce Event selection to fix isseu #1051
 //
