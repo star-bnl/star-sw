@@ -8,6 +8,8 @@
 #include "bemcConstants.h"
 #include "eemcConstants.h"
 
+void L2gammaAlgo::setLogFile( const char *fname){ mLogFile=fopen(fname,"w"); }
+void L2gammaAlgo::setHistFile( const char *fname  ){ mHistFile=fopen(fname,"w"); }
 
 //#define DEBUG
 //#define DEBUG_PATCH_THRESHOLDS
@@ -605,6 +607,7 @@ bool  L2gammaAlgo::doEvent( int L0trigger, int inputEventID, TrgDataType* trgDat
 			    int bemcIn, unsigned short *bemcData,
 			    int eemcIn, unsigned short *eemcData )
 {
+  rdtscl_macro(mEveTimeStart);
   mAccept=false;
   if ( mEEmc ) {
     mAccept=doEvent( inputEventID, trgData, eemcIn, eemcData );
@@ -612,6 +615,13 @@ bool  L2gammaAlgo::doEvent( int L0trigger, int inputEventID, TrgDataType* trgDat
   else {
     mAccept=doEvent( inputEventID, trgData, bemcIn, bemcData );
   } 
+
+  rdtscl_macro(mEveTimeStop);
+  mEveTimeDiff=mEveTimeStop-mEveTimeStart;
+  int  kTick=mEveTimeDiff/1000;
+  //   printf("gg=%f t1=%d t2=%d \n",mEveTimeDiff/1000.,mEveTimeStart,mEveTimeStop);
+  mhT->fill(kTick);
+  
   return mAccept;
 }
 
@@ -945,7 +955,6 @@ void L2gammaAlgo::finishRun()
    fprintf(mLogFile,"# ht accept:    %d\n",mNumberAcceptHT);
    fprintf(mLogFile,"# ht+tp accept: %d\n",mNumberAcceptTP);
    fprintf(mLogFile,"\n");
-
    
    //
    // first section, loop over the tower and patch frequencies
@@ -1023,6 +1032,8 @@ void L2gammaAlgo::finishRun()
    
  if ( mLogFile ) {
    fprintf(mLogFile,"\n====================================================================================================================================\n\n");
+   finishCommonHistos();
+
    fflush(mLogFile);
  }
  

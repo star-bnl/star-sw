@@ -173,7 +173,7 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
 #ifndef IS_REAL_L2
   printf("L2upsilon::doEvent(int L0trg=%d, int eventNumber=%d, TrgDataType* trgData=%p, int bemcIn=%d, unsigned short* bemcData=%p, int eemcIn=%d, unsigned short* eemcData=%p)\n", L0trg, eventNumber, trgData, bemcIn, bemcData, eemcIn, eemcData);
 #endif
-
+  rdtscl_macro(mEveTimeStart);
   mAccept=false;
   if (trgData && bemcData) {// UUUU , I inverted  logic to positive
 
@@ -273,6 +273,12 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
 #endif
   } // end of UUUU
   doEventEnd:
+  rdtscl_macro(mEveTimeStop);
+  mEveTimeDiff=mEveTimeStop-mEveTimeStart;
+  int  kTick=mEveTimeDiff/1000;
+  //   printf("uu=%f t1=%d t2=%d \n",mEveTimeDiff/1000.,mEveTimeStart,mEveTimeStop);
+  mhT->fill(kTick);
+ 
   return  mAccept;
 }
 
@@ -280,7 +286,7 @@ void L2upsilon::finishRun()
 {
   mUnfinished = false;
   fprintf(mLogFile, "L2upsilon::finishRun()\n");
-
+  finishCommonHistos() ;
   //
   // Write out events summary and close log file
   //

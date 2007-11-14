@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 /*********************************************************************
- * $Id: L2Histo.cxx,v 1.1 2007/10/11 00:33:14 balewski Exp $
+ * $Id: L2Histo.cxx,v 1.2 2007/11/14 03:58:07 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -164,7 +164,8 @@ L2Histo::fillW( int binX, int binY, int w){
 //=====================================
 void
 L2Histo::write(FILE *fd, int dbg) {
-  assert(fd);
+  if(fd==0) return;
+  //  assert(fd);
   if( head.nBin<=0) return;
   if(dbg) print(dbg-1);
   char *c;
@@ -326,6 +327,9 @@ L2Histo::y2c(float val){
 /*
 *********************************************************************
   $Log: L2Histo.cxx,v $
+  Revision 1.2  2007/11/14 03:58:07  balewski
+  cleanup of common timing measurement
+
   Revision 1.1  2007/10/11 00:33:14  balewski
   L2algo added
 

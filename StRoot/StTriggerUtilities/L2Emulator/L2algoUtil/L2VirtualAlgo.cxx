@@ -15,14 +15,23 @@ L2VirtualAlgo::L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int re
   strncpy(mName, name,sizeof(mName));  
   strncpy(mOutDir,outDir,sizeof(mOutDir));
   setOflTrigID(0);
-  hT=new   L2Histo(1001,"L2 time used per input event;  x: time (CPU kTics), range=100muSec; y: events ",160);
+  mhT=new   L2Histo(1001,"L2 time used per input event;  x: time (CPU kTics); y: events ",400);
 }
 
 //=============================================
 void 
 L2VirtualAlgo::finishCommonHistos() {
   
-  // if (mLogFile) {
+  int iMax=-3, iFWHM=-4;
+  mhT->findMax( &iMax, &iFWHM);
+  printf("L2:%s  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",mName,iMax, iFWHM,mEventsInRun);
+
+  if (mLogFile==0)  return; // failed open log file, skip
+  fprintf(mLogFile,"L2:%s  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",mName,iMax, iFWHM,mEventsInRun);
+  mhT->print(0,mLogFile); 
+  // mhT->printCSV(mLogFile);
+   
+ if (mHistFile) mhT->write(mHistFile);
 }
 
 //=============================================

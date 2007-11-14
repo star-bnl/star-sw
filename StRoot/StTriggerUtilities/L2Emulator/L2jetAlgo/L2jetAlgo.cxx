@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2jetAlgo.cxx,v 1.7 2007/11/13 23:06:07 balewski Exp $
+ * $Id: L2jetAlgo.cxx,v 1.8 2007/11/14 03:58:14 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -120,12 +120,13 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
   run_number  =runNo;  // serves as a flag this run is initialized
   raw_ints    =rc_ints;
   raw_floats  =rc_floats;
-  run_nEventIn=run_nEventOneJet=run_nEventDiJet= run_nEventRnd=0;
+  run_nEventOneJet=run_nEventDiJet= run_nEventRnd=0;
 
   char Fname[1000];
   sprintf(Fname,"%s/run%d.l2jet.out",mOutDir,run_number);
   printf("L2jet::initRun-%s('%s') ...\n",mName,Fname);
 
+  mEventsInRun=0;
   mLogFile = fopen(Fname,"w");
   if( mLogFile==0) printf(" L2jetAlgo() UNABLE to open run summary log file, continue anyhow\n");
   //  mLogFile = stdout; //tmp
@@ -342,7 +343,7 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   */
   
   eve_ID=inpEveId; // every events is processed only once
-  run_nEventIn++;
+  mEventsInRun++;
   clearEvent(); /* price=13 kTicks */  
   int runTimeSec=time(0)- run_startUnix;
   hA[10]->fill(0);
@@ -506,8 +507,8 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   rdtscl_macro(mEveTimeStop);
   mEveTimeDiff=mEveTimeStop-mEveTimeStart;
   int  kTick=mEveTimeDiff/1000;
-  //printf("kk=%f \n",timeDiff/1000.);
-  hA[11]->fill(kTick);
+  //   printf("jj=%f t1=%d t2=%d \n",mEveTimeDiff/1000.,mEveTimeStart,mEveTimeStop);
+  mhT->fill(kTick);
 
   out.int0.kTick=  kTick>255 ? 255 : kTick;
  
@@ -532,7 +533,7 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
       printf("L2jet-fatal error, eve=%d, iEtot=%d < iEJ1=%d + iEJ2=%d, continue\n",inpEveId, out.int1.iTotEne,out.jet1.iEne,out.jet2.iEne);
     }
     if(iphi1==iphi2) {
-      printf("L2jet-fatal error,neveId=%d, phi1,2=%d,%d\n",run_nEventIn,iphi1,iphi2);
+      printf("L2jet-fatal error,neveId=%d, phi1,2=%d,%d\n",mEventsInRun,iphi1,iphi2);
       dumpPatchEneA();    
     }
     
@@ -557,29 +558,22 @@ L2jetAlgo::finishRun() {  /* called once at the end of the run */
 
   if (mLogFile) {
     fprintf(mLogFile,"L2-jet algorithm finishRun(%d)\n",run_number);
-    fprintf(mLogFile," - %d events seen by L2 di-jet\n",run_nEventIn);
+    fprintf(mLogFile," - %d events seen by L2 di-jet\n",mEventsInRun);
     fprintf(mLogFile," - accepted: rnd=%d  oneJet=%d diJet=%d \n", run_nEventRnd,  run_nEventOneJet, run_nEventDiJet);
 
     // print few basic histos
     
     hA[10]->printCSV(mLogFile); // event accumulated
 
-    hA[11]->print(0,mLogFile); // avearge time
-    int iMax=-3, iFWHM=-4;
-    hA[11]->findMax( &iMax, &iFWHM);
-    fprintf(mLogFile,"L2jet  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",iMax, iFWHM,run_nEventIn);
-    printf("L2jet  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",iMax, iFWHM,run_nEventIn);
-    
   }
   finishRunHisto(); // still needs current DB
-  finishCommonHistos();
   // save run summary histos
   char Fname[1000];
   sprintf(Fname,"%s/run%d.l2jet.hist.bin",mOutDir,run_number);
   printf("L2jet::finishRun('%s') , save histo ...\n",Fname);
 
-  FILE *hFile = fopen(Fname,"w");
-  if( hFile==0) {
+  mHistFile = fopen(Fname,"w");
+  if( mHistFile==0) {
     printf(" L2jetAlgo: finishRun() UNABLE to open run summary log file, continue anyhow\n");
     if (mLogFile)
       fprintf(mLogFile,"L2 di-jet histos NOT saved, I/O error\n");
@@ -588,10 +582,12 @@ L2jetAlgo::finishRun() {  /* called once at the end of the run */
     int nh=0;
     for(j=0;j<mxHA;j++) {
       if(hA[j]==0) continue;
-      hA[j]->write(hFile);
+      hA[j]->write(mHistFile);
       nh++;
     }
-    fclose(hFile);
+    finishCommonHistos();
+    fclose(mHistFile);
+    mHistFile=0;
     if (mLogFile)
       fprintf(mLogFile,"L2 di-jet: %d histos saved to '%s'\n",nh,Fname);
   }
@@ -601,6 +597,7 @@ L2jetAlgo::finishRun() {  /* called once at the end of the run */
   /* close the output file if it is open */
   if (mLogFile && mLogFile!=stdout) {
     fclose(mLogFile);
+    mLogFile=0;
   }
   
 }
@@ -681,7 +678,7 @@ L2jetAlgo::clearEvent(){
 
   eve_TrigData=0;
   mAccept=false;
-  mEveTimeStart=mEveTimeStop=mEveTimeDiff=0;
+  mEveTimeDiff=0;
   memset(eve_patchEne,0,sizeof(eve_patchEne));
   memset(eve_phiEne,0,sizeof(eve_phiEne));
   eve_Jet[0]->clear();
@@ -975,6 +972,9 @@ L2jetAlgo::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo.cxx,v $
+  Revision 1.8  2007/11/14 03:58:14  balewski
+  cleanup of common timing measurement
+
   Revision 1.7  2007/11/13 23:06:07  balewski
   toward more unified L2-algos
 

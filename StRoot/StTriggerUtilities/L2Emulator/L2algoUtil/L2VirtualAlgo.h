@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo.h,v 1.8 2007/11/13 23:06:02 balewski Exp $
+ * $Id: L2VirtualAlgo.h,v 1.9 2007/11/14 03:58:08 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -30,13 +30,14 @@ class L2VirtualAlgo {
   char mName[mxTxt];    
   char mOutDir[mxTxt];
   L2EmcDb* mDb;
-  FILE  *mLogFile;
+  FILE  *mLogFile, *mHistFile;
   int mResultOffset;
   int oflTrigId;
   bool mAccept;
   unsigned long mEveTimeStart, mEveTimeStop,mEveTimeDiff;
   void finishCommonHistos();
-  L2Histo *hT, *hN;
+  L2Histo *mhT, *mhN;
+  int mEventsInRun;// run_nEventIn,
  public:
   void setOflTrigID(int x) {oflTrigId=x;}
   int getOflTrigID() {return oflTrigId;}

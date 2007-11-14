@@ -50,7 +50,7 @@ typedef unsigned short ushort;
  * An optional "prescaled accept" will accept some prescaled rate of input
  * events.
  *
- * $Id: L2gammaAlgo.h,v 1.3 2007/11/08 04:02:29 balewski Exp $
+ * $Id: L2gammaAlgo.h,v 1.4 2007/11/14 03:58:11 balewski Exp $
  *
  */
 
@@ -184,10 +184,10 @@ class L2gammaAlgo : public L2VirtualAlgo
 
 
   /// Set logfile for summary output (overrides constructor option)
-  void setLogFile( const char *fname = "./bsqueal.log" ){ mLogFile=fopen(fname,"w"); }
+  void setLogFile( const char *fname = "./bsqueal.log" );//{ mLogFile=fopen(fname,"w"); }
 
   /// Set filename for histogram output (overrides constructor option)
-  void setHistFile( const char *fname = "./bsqueal.dat" ){ mHistFile=fopen(fname,"w"); }
+  void setHistFile( const char *fname = "./bsqueal.dat" );//{ mHistFile=fopen(fname,"w"); }
 
 #ifdef OPT_PREPROCESS
   /// If OPT_PREPROCESS is selected at compile time, sets a pointer to
@@ -292,8 +292,8 @@ class L2gammaAlgo : public L2VirtualAlgo
   void jclear();
 
   /// Log file
-  FILE *mLogFile;
-  FILE *mHistFile;
+  // FILE *mLogFile;
+  // FILE *mHistFile;
 
   ushort phibin( ushort sec, ushort sub ) { return mNumSubs * sec + sub; }
   ushort tower( ushort phi, ushort eta ) { return mNumEtas * phi + eta; }
@@ -316,6 +316,9 @@ inline void L2gammaAlgo::setUseOfflineGains()
 }
 
 // $Log: L2gammaAlgo.h,v $
+// Revision 1.4  2007/11/14 03:58:11  balewski
+// cleanup of common timing measurement
+//
 // Revision 1.3  2007/11/08 04:02:29  balewski
 // run on l2ana as well
 //
