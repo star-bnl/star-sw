@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.11 2007/11/06 23:20:10 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.12 2007/11/14 02:25:28 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -181,7 +181,7 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
      if (dirCounter)       printf(" Total Tdirectory object merged: %d \n", dirCounter);
      if (histogramCounter) printf(" Total histogram merged: %d \n", histogramCounter);
      if (treeCounter)      printf(" Total TTree\'s merged: %d \n",treeCounter);
-     if (dirCounter || treeCounter) printf(" You have used the experimental version of the program. Please check the outoput file\n");
+     if (dirCounter || treeCounter) printf(" You have used the experimental version of the program. Please check the output file\n");
         
      time.Print("Merge");
   } else {
