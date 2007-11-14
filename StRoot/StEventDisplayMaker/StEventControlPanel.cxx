@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.18 2007/02/22 02:43:50 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.19 2007/11/14 22:42:16 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -208,7 +208,7 @@ void StEventControlPanel::Build()
          "TPC"	 ,"TPSS"	, 
          "FTPC" ,"SCON"	, 
          "SVT"	 ,"STSI"	, 
-         "SSD"	 ,"SSD"	, 
+         "SSD"	 ,"SFSM"	, 
          "RnD"  ,  0	   , 
          "EMC"	 ,"CALB"	, 
          "TOF"	 ,"BTOF"	
