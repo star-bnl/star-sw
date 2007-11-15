@@ -34,6 +34,10 @@ private:
   std::vector<int>  mFiredTriggers;
   std::set<int>     mAllTriggers;
   
+  std::vector<int> layer0;
+  std::vector<int> layer1;
+  std::vector<int> layer2;
+
   TObjArray *mHList;
  
   // pointers to useful objects we own
@@ -83,6 +87,9 @@ private:
 
   //Thresholds set by database in DSM Layer0
   Int_t HT_DSM0_threshold[kL0DsmModule], TP_DSM0_threshold[kL0DsmModule],HTTP_DSM0_threshold[kL0DsmModule];
+
+  //Bits out of DSMLayer0 and into DSMLayer1
+  Int_t DSM0_HT_Bit[kL0DsmModule],DSM0_TP_Bit[kL0DsmModule],DSM0_HTTP_Bit[kL0DsmModule];
 
   void getTowerStatus();
   void getDSM_TPStatus();
