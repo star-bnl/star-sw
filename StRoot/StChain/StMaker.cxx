@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.202 2007/10/13 01:27:04 perev Exp $
+// $Id: StMaker.cxx,v 1.203 2007/11/15 02:03:51 perev Exp $
 //
 //
 /*!
@@ -167,6 +167,9 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
+
+  // SVT/SSD is out
+  {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone in separate SCON"},
 
   // development tags
   {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1818,6 +1821,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.203  2007/11/15 02:03:51  perev
+// y2008
+//
 // Revision 1.202  2007/10/13 01:27:04  perev
 // u2007 ==> upgr20
 //
