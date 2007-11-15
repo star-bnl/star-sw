@@ -457,25 +457,41 @@ void StBemcTriggerSimu::DSMLayer0() {
     DSM0_HT_ADC[i]=0;
     DSM0_TP_ADC[i]=0;
     DSM0_TP_SUM[i]=0;
-    
+    DSM0_HT_Bit[i]=0;
+    DSM0_TP_Bit[i]=0;
+    DSM0_HTTP_Bit[i]=0;
+
     mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP);
 
+    //Loop over 10 inputs(TP) to each module
     for (int j=0;j<kL0DsmInputs;j++){
       int tpid=DSM_TP[j];
+      int jpid=-1;
+      int seq=-1;
+      mDecoder->GetJetPatchAndSequenceFromTriggerPatch(tpid, jpid, seq); 
+      cout<<" Module="<<i<<" Input="<<j<<" tpid="<<tpid<<" jpid="<<jpid<<endl;
       if (L0_HT_ADC[tpid]>DSM0_HT_ADC[i]) DSM0_HT_ADC[i]=L0_HT_ADC[tpid];
       if (L0_TP_ADC[tpid]>DSM0_TP_ADC[i]) DSM0_TP_ADC[i]=L0_TP_ADC[tpid];
-      DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];
+      DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];//need to add up only 5 for some modules
+    
       //this is temporary to get it out for Alan
       if ((L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))&&(L0_TP_ADC[tpid]>mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1))){
-	mFiredTriggers.push_back(137822);
+	mFiredTriggers.push_back(137611);
       }
-    }
 
-    // if (DSM0_HT_ADC[i] < GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_Bit=0;
-    //if ((DSM0_HT_ADC[i] < GetHT_DSM0_threshold(i,timestamp,1)) && (DSM0_HT_ADC[i] > GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_Bit=1;
-    //if ((DSM0_HT_ADC[i] < GetHT_DSM0_threshold(i,timestamp,2)) && (DSM0_HT_ADC[i] > GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_Bit=2;
-    //if (DSM0_HT_ADC[i] > GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_Bit=3;
+    }
     
+    if (DSM0_HT_ADC[i]  < mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_Bit[i]=0;
+    if ((DSM0_HT_ADC[i] < mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (DSM0_HT_ADC[i] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_Bit[i]=1;
+    if ((DSM0_HT_ADC[i] < mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (DSM0_HT_ADC[i] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_Bit[i]=2;
+    if (DSM0_HT_ADC[i]  > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_Bit[i]=3;
+    
+    if (DSM0_TP_ADC[i]  < mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_Bit[i]=0;
+    if ((DSM0_TP_ADC[i] < mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (DSM0_TP_ADC[i] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_Bit[i]=1;
+    if ((DSM0_TP_ADC[i] < mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (DSM0_TP_ADC[i] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_Bit[i]=2;
+    if (DSM0_TP_ADC[i]  > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_Bit=3[i];
+   
+
   }
 }
 //==================================================
