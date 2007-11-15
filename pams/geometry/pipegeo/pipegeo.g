@@ -3,9 +3,12 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
 
-* $Id: pipegeo.g,v 1.13 2007/11/13 21:36:21 perev Exp $
+* $Id: pipegeo.g,v 1.14 2007/11/15 22:37:14 perev Exp $
 *
 * $Log: pipegeo.g,v $
+* Revision 1.14  2007/11/15 22:37:14  perev
+* MLI=3MIL mylar + 1.5MIL alum defined
+*
 * Revision 1.13  2007/11/13 21:36:21  perev
 * ALKAP fixed and lengths of shields swapped
 *
@@ -418,12 +421,12 @@ EndBlock
 *
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block PWRP is the beampipe wrap of Kapton and aluminum 
-* use mylar mixture from svttgeo instead of kapton
+* Special mylar mixture 3MIL of mylar + 1.5MIL alum
        Component C5     A=12    Z=6  W=5
        Component H4     A=1     Z=1  W=4
        Component O2     A=16    Z=8  W=2
-       Component Al     A=27    Z=13 W=7
-       Mixture   MLI    Dens=1.91
+       Component Al     A=27    Z=13 W=3.45327
+       Mixture   MLI    Dens=1.82667
        Attribute Pwrp      Seen=1  colo=3
        Shape     TUBE      Rmin=pipg_WrpInnR  Rmax=pipg_WrpOutR,
                            Dz=pipg_WrpLeng/2 
