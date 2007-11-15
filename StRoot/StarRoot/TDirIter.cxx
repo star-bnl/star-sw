@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.8 2006/12/29 21:00:47 perev Exp $
+ * $Id: TDirIter.cxx,v 1.9 2007/11/15 22:38:19 perev Exp $
  *
  ***************************************************************************
  *
@@ -14,6 +14,7 @@
 #include <assert.h>
 #include "TSystem.h"
 #include "TObjArray.h"
+#include "TError.h"
 
 #include "TDirIter.h"
 
@@ -98,7 +99,12 @@ void TDirIter::ResetQQ(const char *path)
   if (fSele==0) {
     Long_t flags, id = 0, modtime = 0; Long64_t size=0;
     int noexi = gSystem->GetPathInfo(f,&id,&size,&flags,&modtime);
-    if (noexi) { fSele = -2;}
+    if (noexi) { 
+      fSele = -2;
+      Warning("TDirIter","*** File %s does not exist ***",f);}
+    else if (size==0) {
+      fSele = -2;
+      Warning("TDirIter","*** File %s is empty ***",f);}
     else       { if ((flags&2)==0) fSele = -1;}}
   
   fTop = fFile.Length();
