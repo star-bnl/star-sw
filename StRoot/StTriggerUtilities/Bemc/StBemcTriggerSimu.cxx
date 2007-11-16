@@ -81,9 +81,22 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(96211);
   mAllTriggers.insert(96221);
   mAllTriggers.insert(96233);
+
+  //2006
+  mAllTriggers.insert(127611);
+  mAllTriggers.insert(127641);
+  mAllTriggers.insert(127821);
+  mAllTriggers.insert(127831);
+  mAllTriggers.insert(137821);
+  mAllTriggers.insert(137822);
+  mAllTriggers.insert(137831);
+  mAllTriggers.insert(137832);
+  mAllTriggers.insert(137611);
+  mAllTriggers.insert(137622);
+  mAllTriggers.insert(137641);
+  mAllTriggers.insert(127212);
+  mAllTriggers.insert(137213);
   
-  // 2006 pp
-  mAllTriggers.insert(137822);//HTTP05
   
   Clear();
 }
@@ -302,10 +315,11 @@ void StBemcTriggerSimu::Make(){
   mEvent = static_cast<StEvent*> ( mHeadMaker->GetDataSet("StEvent") );
 
   FEEout();
-  get2006_DSMLayer0();
-  get2006_DSMLayer1();
-  get2006_DSMLayer2();
-  
+  if (year==2006){
+    get2006_DSMLayer0();
+    get2006_DSMLayer1();
+    get2006_DSMLayer2();
+  }
 
 }
 //==================================================
@@ -443,7 +457,7 @@ void StBemcTriggerSimu::FEEout() {
 //==================================================
 void StBemcTriggerSimu::get2006_DSMLayer0() {
 
-  //0-9(8) ADC sum Trigger Patches
+  //0-(8)9 ADC sum Trigger Patches
   //10-11  HT threshold bits
   //12-13  TP threshold bits
   //14-15  HT&&TP threshold bits
@@ -451,7 +465,11 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
   //Loop over modules
   int DSM_TP[kL0DsmInputs];
   for (int i=0;i<kL0DsmModule;i++){
-    
+
+
+    DSM0_TP_SUM[i]=0;
+    DSM0_TP_SUM_J1[i]=0;
+    DSM0_TP_SUM_J3[i]=0;
     DSM0_HT_Bit[i]=0;
     DSM0_TP_Bit[i]=0;
     DSM0_HTTP_Bit[i]=0;
