@@ -302,9 +302,9 @@ void StBemcTriggerSimu::Make(){
   mEvent = static_cast<StEvent*> ( mHeadMaker->GetDataSet("StEvent") );
 
   FEEout();
-  DSMLayer0();
-  DSMLayer1();
-  DSMLayer2();
+  get2006_DSMLayer0();
+  get2006_DSMLayer1();
+  get2006_DSMLayer2();
   
 
 }
@@ -441,66 +441,226 @@ void StBemcTriggerSimu::FEEout() {
 }
 //==================================================
 //==================================================
-void StBemcTriggerSimu::DSMLayer0() {
-  //2006 output 16 bits
-  //need to get the thresholds + the bit locations for each year
-  //0-9 ADC sum Trigger Patches
-  //10-11 HT threshold bits
-  //12-13 TP threshold bits
-  //14-15 HT&&TP threshold bits
+void StBemcTriggerSimu::get2006_DSMLayer0() {
 
+  //0-9(8) ADC sum Trigger Patches
+  //10-11  HT threshold bits
+  //12-13  TP threshold bits
+  //14-15  HT&&TP threshold bits
   
   //Loop over modules
   int DSM_TP[kL0DsmInputs];
   for (int i=0;i<kL0DsmModule;i++){
-  
-    DSM0_HT_ADC[i]=0;
-    DSM0_TP_ADC[i]=0;
-    DSM0_TP_SUM[i]=0;
+    
     DSM0_HT_Bit[i]=0;
     DSM0_TP_Bit[i]=0;
     DSM0_HTTP_Bit[i]=0;
+    DSM0_HT_Bit_J1[i]=0;
+    DSM0_TP_Bit_J1[i]=0;
+    DSM0_HTTP_Bit_J1[i]=0;
+    DSM0_HT_Bit_J3[i]=0;
+    DSM0_TP_Bit_J3[i]=0;
+    DSM0_HTTP_Bit_J3[i]=0;
 
+    for (int j=0;j<kL0DsmInputs;j++){ 
+      DSM0_HT_tp_Bit[j]=0;
+      DSM0_TP_tp_Bit[j]=0;
+      DSM0_HTTP_tp_Bit[j]=0; 
+      DSM0_HT_tp_Bit_J1[j]=0;
+      DSM0_TP_tp_Bit_J1[j]=0;
+      DSM0_HTTP_tp_Bit_J1[j]=0; 
+      DSM0_HT_tp_Bit_J3[j]=0;
+      DSM0_TP_tp_Bit_J3[j]=0;
+      DSM0_HTTP_tp_Bit_J3[j]=0;      
+    }
+	
     mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP);
-
-    //Loop over 10 inputs(TP) to each module
+    
+    //Loop over 10 inputs(TP) to each module 
     for (int j=0;j<kL0DsmInputs;j++){
+      
       int tpid=DSM_TP[j];
       int jpid=-1;
       int seq=-1;
       mDecoder->GetJetPatchAndSequenceFromTriggerPatch(tpid, jpid, seq); 
-      cout<<" Module="<<i<<" Input="<<j<<" tpid="<<tpid<<" jpid="<<jpid<<endl;
-      if (L0_HT_ADC[tpid]>DSM0_HT_ADC[i]) DSM0_HT_ADC[i]=L0_HT_ADC[tpid];
-      if (L0_TP_ADC[tpid]>DSM0_TP_ADC[i]) DSM0_TP_ADC[i]=L0_TP_ADC[tpid];
-      DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];//need to add up only 5 for some modules
+      
+      
+      //Skip modules 2,7,12,17,22,27 
+      if (((i+3)%5)!=0){
+	
+	//apply HT thresholds to each HT adc in each TP
+	if ( L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit[j]=0;
+	if ((L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit[j]=1;
+	if ((L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit[j]=2;
+	if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit[j]=3;
+	
+	//apply TP thresholds to each TP adc in each TP
+	if ( L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit[j]=0;
+	if ((L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit[j]=1;
+	if ((L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit[j]=2;
+	if ( L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit[j]=3;
+	
+	//apply HTTP condition - TP&&HT
+	if (DSM0_TP_tp_Bit[j] > DSM0_HT_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_TP_tp_Bit[j];
+	if (DSM0_HT_tp_Bit[j] > DSM0_TP_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_HT_tp_Bit[j];
+	
+	//add up TP adc for 2/3 of JP
+	DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];
+
+	//equivalent of ORing all TP and HT inputs
+	if (DSM0_HT_tp_Bit[j]>DSM0_HT_Bit[i]) DSM0_HT_Bit[i]=DSM0_HT_tp_Bit[j];
+	if (DSM0_TP_tp_Bit[j]>DSM0_TP_Bit[i]) DSM0_TP_Bit[i]=DSM0_TP_tp_Bit[j];  
     
-      //this is temporary to get it out for Alan
-      if ((L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))&&(L0_TP_ADC[tpid]>mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1))){
-	mFiredTriggers.push_back(137611);
+	//HTTP - will move to higher layer soon
+	if ((DSM0_TP_tp_Bit[j]>1)&&(DSM0_HT_tp_Bit[j]>1)){
+	  mFiredTriggers.push_back(127611);
+	  mFiredTriggers.push_back(127641);
+	  mFiredTriggers.push_back(127821);
+	  mFiredTriggers.push_back(127831);
+	  mFiredTriggers.push_back(137821);
+	  mFiredTriggers.push_back(137822);
+	  mFiredTriggers.push_back(137831);
+	  mFiredTriggers.push_back(137832);
+	  mFiredTriggers.push_back(137611);
+	  mFiredTriggers.push_back(137622);
+	  mFiredTriggers.push_back(137641);
+	}
+	
+	//HT - will move to higher layer soon
+	if (DSM0_HT_tp_Bit[j]>2){
+	  mFiredTriggers.push_back(127212);
+	  mFiredTriggers.push_back(137213);
+	}
+  
       }
-
+    
+      //Loop over 2x5 inputs(TP) for modules 2,7,12,17,22,29
+      if (((i+3)%5)==0){
+	
+	//apply HT thresholds to each HT adc in each TP
+	if (j>4) 
+	  {
+	    if ( L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J1[j]=0;
+	    if ((L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J1[j]=1;
+	    if ((L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J1[j]=2;
+	    if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J1[j]=3;
+	  }	
+	if (j<5)
+	  {
+	    if ( L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J3[j]=0;
+	    if ((L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J3[j]=1;
+	    if ((L0_HT_ADC[tpid] < mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J3[j]=2;
+	    if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J3[j]=3;
+	  }
+	
+	//apply TP thresholds to each TP adc in each TP
+	if (j>4)
+	  {
+	    if ( L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J1[j]=0;
+	    if ((L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J1[j]=1;
+	    if ((L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J1[j]=2;
+	    if ( L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J1[j]=3;
+	  }
+	if (j<5)
+	  {
+	    if ( L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J3[j]=0;
+	    if ((L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J3[j]=1;
+	    if ((L0_TP_ADC[tpid] < mDbThres->GetHTTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J3[j]=2;
+	    if ( L0_TP_ADC[tpid] > mDbThres->GetHTTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J3[j]=3;
+	  }									      
+	
+	//apply HTTP condition - TP&&HT
+	if (j>4) 
+	  {
+	    if (DSM0_TP_tp_Bit_J1[j] > DSM0_HT_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_TP_tp_Bit_J1[j];
+	    if (DSM0_HT_tp_Bit_J1[j] > DSM0_TP_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_HT_tp_Bit_J1[j];
+	  }
+	if (j<5)
+	  {
+	    if (DSM0_TP_tp_Bit_J3[j] > DSM0_HT_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_TP_tp_Bit_J3[j];
+	    if (DSM0_HT_tp_Bit_J3[j] > DSM0_TP_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_HT_tp_Bit_J3[j];
+	  }
+	
+	//add up TP adc for 1/3 of JP
+	if (j>4)
+	  {
+	    DSM0_TP_SUM_J1[i]+=L0_TP_ADC[tpid];
+	  }
+	if(j<5)
+	  {
+	    DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
+	  }
+	
+	//equivalent of ORing all TP and HT inputs
+	if (j>4)
+	  {
+	    if (DSM0_HT_tp_Bit_J1[j]>DSM0_TP_tp_Bit_J1[i]) DSM0_HTTP_tp_Bit_J1[i]=DSM0_HT_tp_Bit_J1[j];
+	    if (DSM0_TP_tp_Bit_J1[j]>DSM0_HT_tp_Bit_J1[i]) DSM0_HTTP_tp_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
+	  }
+	if (j>5)
+	  {
+	    if (DSM0_HT_tp_Bit_J3[j]>DSM0_TP_tp_Bit_J3[i]) DSM0_HTTP_tp_Bit_J3[i]=DSM0_HT_tp_Bit_J3[j];
+	    if (DSM0_TP_tp_Bit_J3[j]>DSM0_HT_tp_Bit_J3[i]) DSM0_HTTP_tp_Bit_J3[i]=DSM0_TP_tp_Bit_J3[j];
+	  }
+	
+	if (j>4) 
+	  { 
+	    if ((DSM0_TP_tp_Bit_J1[j]>1)&&(DSM0_HT_tp_Bit_J1[j]>1)){
+	      mFiredTriggers.push_back(127611);
+	      mFiredTriggers.push_back(127641);
+	      mFiredTriggers.push_back(127821);
+	      mFiredTriggers.push_back(127831);
+	      mFiredTriggers.push_back(137821);
+	      mFiredTriggers.push_back(137822);
+	      mFiredTriggers.push_back(137831);
+	      mFiredTriggers.push_back(137832);
+	      mFiredTriggers.push_back(137611);
+	      mFiredTriggers.push_back(137622);
+	      mFiredTriggers.push_back(137641);
+	    }
+	    
+	    //HT - will move to higher layer soon
+	    if (DSM0_HT_tp_Bit_J1[j]>2){
+	      mFiredTriggers.push_back(127212);
+	      mFiredTriggers.push_back(137213);
+	    }
+	  }
+	
+	if (j<5)
+	  {
+	    if ((DSM0_TP_tp_Bit_J3[j]>1)&&(DSM0_HT_tp_Bit_J3[j]>1)){
+	      mFiredTriggers.push_back(127611);
+	      mFiredTriggers.push_back(127641);
+	      mFiredTriggers.push_back(127821);
+	      mFiredTriggers.push_back(127831);
+	      mFiredTriggers.push_back(137821);
+	      mFiredTriggers.push_back(137822);
+	      mFiredTriggers.push_back(137831);
+	      mFiredTriggers.push_back(137832);
+	      mFiredTriggers.push_back(137611);
+	      mFiredTriggers.push_back(137622);
+	      mFiredTriggers.push_back(137641);
+	    }
+	    
+	    //HT - will move to higher layer soon
+	    if (DSM0_HT_tp_Bit_J3[j]>2){
+	      mFiredTriggers.push_back(127212);
+	      mFiredTriggers.push_back(137213);
+	    }
+	  }
+      }
     }
-    
-    if (DSM0_HT_ADC[i]  < mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_Bit[i]=0;
-    if ((DSM0_HT_ADC[i] < mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (DSM0_HT_ADC[i] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_Bit[i]=1;
-    if ((DSM0_HT_ADC[i] < mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (DSM0_HT_ADC[i] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_Bit[i]=2;
-    if (DSM0_HT_ADC[i]  > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_Bit[i]=3;
-    
-    if (DSM0_TP_ADC[i]  < mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_Bit[i]=0;
-    if ((DSM0_TP_ADC[i] < mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (DSM0_TP_ADC[i] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_Bit[i]=1;
-    if ((DSM0_TP_ADC[i] < mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (DSM0_TP_ADC[i] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_Bit[i]=2;
-    if (DSM0_TP_ADC[i]  > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_Bit=3[i];
-   
-
   }
 }
+
+
 //==================================================
 //==================================================
-void StBemcTriggerSimu::DSMLayer1(){
+void StBemcTriggerSimu::get2006_DSMLayer1(){
 
 }
 //==================================================
 //==================================================
-void StBemcTriggerSimu::DSMLayer2(){
+void StBemcTriggerSimu::get2006_DSMLayer2(){
 
 }

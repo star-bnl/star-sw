@@ -83,23 +83,28 @@ private:
   Int_t L0_HT_ADC[kNPatches], L0_TP_ADC[kNPatches], L0_TP_PED[kNPatches];
 
   //MAX TP ADC, MAX HT ADC and SUM TPC ADC for each DSM Module
-  Int_t DSM0_TP_ADC[kL0DsmModule],DSM0_HT_ADC[kL0DsmModule],DSM0_TP_SUM[kL0DsmModule];
-
-  //Thresholds set by database in DSM Layer0
-  Int_t HT_DSM0_threshold[kL0DsmModule], TP_DSM0_threshold[kL0DsmModule],HTTP_DSM0_threshold[kL0DsmModule];
+  Int_t DSM0_TP_SUM[kL0DsmModule], DSM0_TP_SUM_J1[kL0DsmModule], DSM0_TP_SUM_J3[kL0DsmModule];
 
   //Bits out of DSMLayer0 and into DSMLayer1
+  //Only modules 2,7,12,17,22,27 go into J3 and J1
+  //DSM_HT_Bit[2,7,12,17,22,27]==0
   Int_t DSM0_HT_Bit[kL0DsmModule],DSM0_TP_Bit[kL0DsmModule],DSM0_HTTP_Bit[kL0DsmModule];
-
+  Int_t DSM0_HT_Bit_J3[kL0DsmModule],DSM0_TP_Bit_J3[kL0DsmModule],DSM0_HTTP_Bit_J3[kL0DsmModule];
+  Int_t DSM0_HT_Bit_J1[kL0DsmModule],DSM0_TP_Bit_J1[kL0DsmModule],DSM0_HTTP_Bit_J1[kL0DsmModule];
+  //Intermediate bits for each trigger patch input to DSMLayer0
+  Int_t DSM0_HT_tp_Bit[kL0DsmInputs], DSM0_TP_tp_Bit[kL0DsmInputs], DSM0_HTTP_tp_Bit[kL0DsmInputs];
+  Int_t DSM0_HT_tp_Bit_J3[kL0DsmModule], DSM0_TP_tp_Bit_J3[kL0DsmModule],DSM0_HTTP_tp_Bit_J3[kL0DsmModule];
+  Int_t DSM0_HT_tp_Bit_J1[kL0DsmModule], DSM0_TP_tp_Bit_J1[kL0DsmModule],DSM0_HTTP_tp_Bit_J1[kL0DsmModule];
+												
   void getTowerStatus();
   void getDSM_TPStatus();
   void getDSM_HTStatus();
   void getLUT();
   void getPed();
   void FEEout();
-  void DSMLayer0();
-  void DSMLayer1();
-  void DSMLayer2();
+  void get2006_DSMLayer0();
+  void get2006_DSMLayer1();
+  void get2006_DSMLayer2();
   
 public:
   StBemcTriggerSimu();
