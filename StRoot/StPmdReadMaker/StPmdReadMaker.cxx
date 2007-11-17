@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.26 2007/11/02 11:03:00 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.27 2007/11/17 15:50:46 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.27  2007/11/17 15:50:46  rashmi
+ *correcting setting of mCalibFlag
+ *
  *Revision 1.26  2007/11/02 11:03:00  rashmi
  *Storing gains with hits, not applying gain calibration
  *
@@ -167,8 +170,8 @@ StPmdReadMaker::~StPmdReadMaker() {
 
 Int_t StPmdReadMaker::Init() {
   if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Init()");
-//  mCalibFlag = !(IAttr("pmdRaw"));
-  mCalibFlag = (IAttr("pmdRaw"));
+  mCalibFlag = !(IAttr("pmdRaw"));
+  //  mCalibFlag = (IAttr("pmdRaw"));
   bookHist();
 
   return StMaker::Init();
