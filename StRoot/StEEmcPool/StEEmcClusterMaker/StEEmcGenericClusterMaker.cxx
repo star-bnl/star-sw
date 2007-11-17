@@ -358,7 +358,7 @@ void StEEmcGenericClusterMaker::makeStEvent()
   StEmcDetector *detector=stevent->emcCollection()->detector(kEndcapEmcTowerId);
   if ( !detector )
     {
-      Warning("fillStEvent","detector == NULL, MAJOR StEvent problem, continuing");
+      // meh Warning("fillStEvent","detector == NULL, MAJOR StEvent problem, continuing");
       return;
     }
   ///
@@ -367,7 +367,7 @@ void StEEmcGenericClusterMaker::makeStEvent()
   detector=stevent->emcCollection()->detector(kEndcapEmcPreShowerId);
   if ( !detector )
     {
-      Warning("fillStEvent","detector == NULL for pre/post, no clusters for you");
+      // meh Warning("fillStEvent","detector == NULL for pre/post, no clusters for you");
       return;
     }
   ///
@@ -382,7 +382,7 @@ void StEEmcGenericClusterMaker::makeStEvent()
       detector=stevent->emcCollection()->detector(ids[iplane]);
       if ( !detector )
         {
-          Warning("fillStEvent","detector == NULL for smd plane, no clusters for you");
+          // meh Warning("fillStEvent","detector == NULL for smd plane, no clusters for you");
 	  return;
         }
 
