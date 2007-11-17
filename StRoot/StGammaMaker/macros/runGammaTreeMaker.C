@@ -49,13 +49,13 @@ void runGammaTreeMaker( Int_t nevents = -1,
       return;
     }
   gname.ReplaceAll("MuDst.root","geant.root");
-  StIOMaker* ioMaker = new StIOMaker();
+  StIOMaker* ioMaker = new StIOMaker;
   ioMaker->SetFile(gname);
   ioMaker->SetIOMode("r");
   ioMaker->SetBranch("*",0,"0");             //deactivate all branches
   ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
   
-  class StMcEventMaker *mcEventMaker = new StMcEventMaker();
+  StMcEventMaker* mcEventMaker = new StMcEventMaker;
   mcEventMaker->doPrintEventInfo = false;
   mcEventMaker->doPrintMemoryInfo = false;
 #endif
@@ -120,14 +120,16 @@ void runGammaTreeMaker( Int_t nevents = -1,
 
 
 
-  //get BEMC calibration 
-#ifndef MONTE_CARLO
-  StEmcADCtoEMaker *bemcAdc2E = new StEmcADCtoEMaker(); // this will just convert what's in MuDst to ADC, use for data only!
-  bemcAdc2E->setPrint(true);
-#endif
+  // Get BEMC calibration 
 #ifdef MONTE_CARLO
-  StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
-  StPreEclMaker* preEcl = new StPreEclMaker(); //need this to fill new StEvent information
+  // Use this instead to "redo" conversion from GEANT to ADC
+  StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker;
+  emcSim->setCheckStatus(kBarrelEmcTowerId,false); //this returns hits regardless of offline tower status
+  emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);//spread gains by 15%
+#else
+  // This will just convert what's in MuDst to ADC, use for data only!
+  StEmcADCtoEMaker* bemcAdc2E = new StEmcADCtoEMaker;
+  bemcAdc2E->setPrint(true);
 #endif
 
 
@@ -137,11 +139,11 @@ void runGammaTreeMaker( Int_t nevents = -1,
   StGammaPythiaEventMaker* pythia = new StGammaPythiaEventMaker;
 #endif
 
-  StGammaEventMaker *gemaker = new StGammaEventMaker();
-  StGammaRawMaker       *raw    = new StGammaRawMaker(); 
+  StGammaEventMaker    *gemaker = new StGammaEventMaker;
+  StGammaRawMaker       *raw    = new StGammaRawMaker; 
   StBarrelEmcClusterMaker* ecl  = new StBarrelEmcClusterMaker;
-  StGammaCandidateMaker *gcm    = new StGammaCandidateMaker();
-  StGammaTreeMaker      *gtm    = new StGammaTreeMaker();
+  StGammaCandidateMaker *gcm    = new StGammaCandidateMaker;
+  StGammaTreeMaker      *gtm    = new StGammaTreeMaker;
   gtm->SetFilename(ofile);
 
   mChain->ls(3);
@@ -149,47 +151,20 @@ void runGammaTreeMaker( Int_t nevents = -1,
   mChain->Init();
 
 
-#ifdef MONTE_CARLO
-  // Note: ------------ Must do this stuff after Init()
-  const int controlVal = 2;
-  controlEmcSimulatorMaker_st* simControl = emcSim->getControlSimulator()->GetTable();
-  simControl->calibSpread[0] = 0.15;
-  simControl->keyDB[0] = controlVal;
-  simControl->keyDB[1] = 0;
-  simControl->keyDB[2] = controlVal;
-  simControl->keyDB[3] = controlVal;
-  //keyDB[det] = 0 -> NO database (default value)
-  //           = 1 - only gains are applied
-  //           = 2 - gains and pedestals are applied
-  // In other words, for pure MC should be 2, and
-  // for embedding should be 1.
-
-#endif
-
-
-
-
-
   //-----------------------------------------------------------------
   //--
-  Int_t stat  = 0;    // error flag
   Int_t count = 0;    // event count
-  while ( stat == 0 ) {
+  for (Int_t ev = 1; ev <= nevents || nevents == -1; ++ev) {
 
-    std::cout << "------------------------------------------------";
-    std::cout << "event=" << count << std::endl;
-
-    if ( count++ >= nevents ) if ( nevents > 0 ) break;
+    cout << "------------------------------------------------";
+    cout << "event=" << count++ << endl;
 
     mChain -> Clear();
-    stat = mChain -> Make();
+    Int_t stat = mChain -> Make(ev);
+
+    if (stat % 10 == kStEOF || stat % 10 == kStFatal) break;
 
   }
   //--
   //-----------------------------------------------------------------
-
-  mChain -> Finish(); 
-
-  return;
-    
 }
