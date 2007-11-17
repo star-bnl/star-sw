@@ -6,6 +6,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.4  2007/11/17 20:11:33  kocolosk
+// remove printf
+//
 // Revision 1.3  2007/11/01 02:48:38  rfatemi
 // Dave Staszak update with additional GRSV grids
 //
@@ -205,10 +208,7 @@ inline void StPythiaEvent::setCosTheta(float cosTheta) { mCosTheta = cosTheta; }
 inline void StPythiaEvent::setX1(float x1) { mX1 = x1; }
 inline void StPythiaEvent::setX2(float x2) { mX2 = x2; }
 inline void StPythiaEvent::setPartonALL(float a) { mPartonALL = a; }
-inline void StPythiaEvent::setDF1(GRSV scenario, float val) { 
-  printf("StPythiaEvent::setDF1 - setting %d  to %f ",scenario, val); 
-  mDF1[scenario] = val; 
-}
+inline void StPythiaEvent::setDF1(GRSV scenario, float val) { mDF1[scenario] = val; }
 inline void StPythiaEvent::setDF2(GRSV scenario, float val) { mDF2[scenario] = val; }
 
 inline void StPythiaEvent::setF1(GRSV scenario, float val) 
