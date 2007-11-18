@@ -89,8 +89,8 @@ StTriggerSimuMaker::useBemc(){
 
 //________________________________________________
 void
-StTriggerSimuMaker::useL2(){
-  lTwo=new StL2TriggerSimu;
+StTriggerSimuMaker::useL2(StGenericL2Emulator* L2Mk){
+  lTwo=new StL2TriggerSimu(L2Mk);
   mSimulators.push_back(lTwo);
 }
 
@@ -120,7 +120,7 @@ void
 StTriggerSimuMaker::Clear(const Option_t*){
   LOG_DEBUG<<"StTriggerSimuMaker::Clear()"<<endm;
   
-  mTriggerList.clear();
+  //  mTriggerList.clear();
   
   for(unsigned i=0; i<mSimulators.size(); i++) {
     mSimulators[i]->Clear();
@@ -170,9 +170,12 @@ StTriggerSimuMaker::Finish() {
   return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.17 2007/11/08 20:59:33 kocolosk Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.18 2007/11/18 21:58:50 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.18  2007/11/18 21:58:50  balewski
+// L2algos triggerId list fixed
+//
 // Revision 1.17  2007/11/08 20:59:33  kocolosk
 // subdet isTrigger returns a bool
 // triggerDecision returns enumerator including kDoNotCare

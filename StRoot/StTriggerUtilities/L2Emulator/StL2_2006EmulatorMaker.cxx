@@ -216,7 +216,7 @@ StL2_2006EmulatorMaker::Init() {
 void 
 StL2_2006EmulatorMaker::Clear(const Option_t*){
   clear();
-  LOG_DEBUG<<"StL2_2006EmulatorMaker::Clear()"<<endm;
+  //  LOG_DEBUG<<"StL2_2006EmulatorMaker::Clear()"<<endm;
 }
 
 
@@ -227,10 +227,9 @@ StL2_2006EmulatorMaker::Make(){
 
   make();
 
-  addTriggerList(); // based on emulated L2Result[..]
 
 
-  //---------------- debugging is below ------------
+  //---------------- ONLY debugging is below ------------
   int l2jetOff=-1;
   if(mYear==2006) l2jetOff=L2RESULTS_OFFSET_DIJET;
   //dump L2jet  results calculated by offline-algo
@@ -254,36 +253,6 @@ StL2_2006EmulatorMaker::Finish(){
 }
 
 
-
-//========================================
-void
-StL2_2006EmulatorMaker::addTriggerList() {// based on emulated L2Result[..]
-  int l2jetOff=-1;
-  assert(mYear=2006); // other years not implemented
-  if(mYear==2006) l2jetOff=L2RESULTS_OFFSET_DIJET;
-  const unsigned int *l2res=( (TrgDataType*)mTrigData)->TrgSum.L2Result;
-  //  printf("aa off=%d\n",  l2jetOff);
-  L2jetResults2006 *out= ( L2jetResults2006 *) &l2res[l2jetOff];
-  
-  if(out->int0.decision & (3<<6)) {
-    //    printf(" FF  0x%0x 0x%0x \n", out->int0.decision,3<<6);
-    // always both, can't distinguish
-    mTriggerList.push_back(127652); // e-L2jet
-    mTriggerList.push_back(127622); // b-L2jet
-  }
-  // printf(" FFB  %d %d \n",  isTrigger(127652) , isTrigger(127622));
-
-  //new method of adding trigger ID's, should be moved to generic method
-  
-  int ia;
-  for(ia=0;ia<mL2algoN;ia++) {
-    if (mL2algo[ia]==0) continue;
-    if (!mL2algo[ia]->accepted()) continue;
-    if (mL2algo[ia]->getOflTrigID()==0) continue; // undefined triggerID
-    mTriggerList.push_back(mL2algo[ia]->getOflTrigID());
-  }
-
-}
 
 
 //========================================
@@ -383,7 +352,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.8 2007/11/13 00:12:26 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.9 2007/11/18 21:58:54 balewski Exp $
 //
 
 

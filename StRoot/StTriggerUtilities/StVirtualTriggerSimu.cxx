@@ -1,5 +1,5 @@
-// $Id: StVirtualTriggerSimu.cxx,v 1.3 2007/11/08 20:59:34 kocolosk Exp $
-//STAR
+// $Id: StVirtualTriggerSimu.cxx,v 1.4 2007/11/18 21:58:50 balewski Exp $
+
 #include <StMessMgr.h>
 
 #include "StVirtualTriggerSimu.h"
@@ -11,12 +11,13 @@ bool StVirtualTriggerSimu::isTrigger(int trigId) {
 
 void StVirtualTriggerSimu::Init() { /* no-op */ }
 
-//void StVirtualTriggerSimu::InitRun(int runnumber) {   LOG_INFO <<"L2VirtTrigSimu::Init() " <<endm; }
-
 void StVirtualTriggerSimu::Clear() { /* no-op */ }
 
 /*****************************************************************************
  * $Log: StVirtualTriggerSimu.cxx,v $
+ * Revision 1.4  2007/11/18 21:58:50  balewski
+ * L2algos triggerId list fixed
+ *
  * Revision 1.3  2007/11/08 20:59:34  kocolosk
  * subdet isTrigger returns a bool
  * triggerDecision returns enumerator including kDoNotCare

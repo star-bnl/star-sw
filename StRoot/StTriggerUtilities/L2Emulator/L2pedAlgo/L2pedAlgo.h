@@ -2,7 +2,7 @@
 #define L2PEDALGO_H
 
 /*********************************************************************
- * $Id: L2pedAlgo.h,v 1.4 2007/11/08 04:02:33 balewski Exp $
+ * $Id: L2pedAlgo.h,v 1.5 2007/11/18 21:58:59 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -28,6 +28,8 @@ class L2pedAlgo : public  L2VirtualAlgo {
   bool par_saveBinary;
   int  par_speedFact;
   int  par_dbg;
+  int  par_prescAccept;
+
 
   // speed-variables
   short s_stepE, s_stepB, s_lastE, s_lastB;
@@ -65,6 +67,9 @@ class L2pedAlgo : public  L2VirtualAlgo {
 
 /**********************************************************************
   $Log: L2pedAlgo.h,v $
+  Revision 1.5  2007/11/18 21:58:59  balewski
+  L2algos triggerId list fixed
+
   Revision 1.4  2007/11/08 04:02:33  balewski
   run on l2ana as well
 

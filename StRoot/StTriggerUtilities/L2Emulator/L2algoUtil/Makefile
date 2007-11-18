@@ -43,11 +43,8 @@ install:
 	cp -p $(HDRS)  $(INSTALPATH)/alg_include
 
 
-binH2rootH.o: binH2rootH.cxx
-	$(CXX) $(CFLAGS) $(ROOT_INC) -c $< -o $@
-
-binH2rootH: binH2rootH.o
-	$(LD) -o  $@ $^ $(LIBS) $(ROOT_LIB)
+binH2rootH: binH2rootH.cxx L2Histo.cxx
+	$(CXX) $(CFLAGS) $(ROOT_INC) -o $@ $^ $(LIBS) $(ROOT_LIB)
 
 
 
@@ -69,6 +66,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.7  2007/11/18 21:58:56  balewski
+# L2algos triggerId list fixed
+#
 # Revision 1.6  2007/11/08 21:29:13  balewski
 # now L2emu runs on M-C
 #

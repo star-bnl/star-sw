@@ -3,7 +3,7 @@
 //
 // StL2_2008EmulatorMaker Jan Balewski  (Fall, 2007)
 //
-// Goal: execute all L2-algos used in 2006 
+// Goal: execute all L2-algos used in 2008 
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -17,29 +17,20 @@
 #include "StGenericL2Emulator.h"
 
 
-// algos used in 2006 ...
+// algos used in 2008 ...
 class  L2pedAlgo;
-class  L2jetAlgo;
-class  L2gammaAlgo;
-class  L2upsilon;
 
 
 class StL2_2008EmulatorMaker : public StMaker, public StGenericL2Emulator{
 private:
 
   L2pedAlgo   *mL2pedAlgo;
-  L2jetAlgo   *mL2jetAlgo;
-  L2gammaAlgo *mL2gammaEEmc;
-  L2gammaAlgo *mL2gammaBEmc;
-  L2upsilon   *mL2upsilon;
-
-  void  addL2GammaAlgos2006(int runNo);
-  void  addL2UpsilonAlgo2006(int runNo);
+  void  addL2pedAlgo(int runNo); // left as example
   void  addTriggerList();
   bool  getTriggerData();
 
 public:
-  StL2_2008EmulatorMaker(const char *name="L2Emul2006");
+  StL2_2008EmulatorMaker(const char *name="L2Emul2008");
   virtual         ~StL2_2008EmulatorMaker();
   virtual Int_t   InitRun(int runumber);
   virtual Int_t   Init();
@@ -52,5 +43,5 @@ public:
 
 #endif
 
-// $Id: StL2_2008EmulatorMaker.h,v 1.1 2007/11/13 00:12:27 balewski Exp $
+// $Id: StL2_2008EmulatorMaker.h,v 1.2 2007/11/18 21:58:54 balewski Exp $
 //
