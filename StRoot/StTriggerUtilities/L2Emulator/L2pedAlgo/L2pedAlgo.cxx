@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.8 2007/11/13 23:06:09 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.9 2007/11/18 21:58:58 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -35,6 +35,7 @@ L2pedAlgo::L2pedAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff)
   par_pedSubtr=false;
   par_saveBinary=false;
   par_dbg=0;
+  par_prescAccept=0;
 
   int i;
   for(i=0;i<MaxBtowRdo;i++) {
@@ -83,7 +84,9 @@ L2pedAlgo::initRun(int runNo, int *rc_ints, float *rc_floats) {
   par_speedFact =rc_ints[1];
   par_saveBinary=rc_ints[2]!=0;
   par_dbg       =rc_ints[3];
+  par_prescAccept=rc_ints[4];
 
+  if(par_prescAccept<0) par_prescAccept=0; // prescale can't be negative
   //note speedFactor can be only powers of 2, range [1-256]
   if(par_speedFact<1) par_speedFact=1;
   if(par_speedFact>2) {// ASSURE ONLY POWERS OF 2, round down
@@ -121,7 +124,7 @@ L2pedAlgo::initRun(int runNo, int *rc_ints, float *rc_floats) {
     }
   }
   
-  printf("L2ped algorithm init()... params:\n  dbg=%d, pedSubtr=%d saveBinHist=%d  speedFact=%d\n  mapped channels: nBtow=%d nEtow=%d\n",par_dbg,par_pedSubtr,par_saveBinary,par_speedFact,nBtowOk,nEtowOk);
+  printf("L2ped algorithm init()... params:\n  dbg=%d, pedSubtr=%d saveBinHist=%d  speedFact=%d prescAccept=%d\n  mapped channels: nBtow=%d nEtow=%d\n",par_dbg,par_pedSubtr,par_saveBinary,par_speedFact,par_prescAccept,nBtowOk,nEtowOk);
 
   for(i=0;i<MaxBtowRdo;i++)  btowAdc[i]->reset();
   for(i=0;i<MaxEtowRdo;i++)  etowAdc[i]->reset();
@@ -145,6 +148,12 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   rdtscl_macro(mEveTimeStart);
   nInp++;
   hA[10]->fill(0);
+  if(par_prescAccept>0) { // value=1 accepts 100% at maximal speed
+    if((rand()>>4) % par_prescAccept ) return false;
+    hA[10]->fill(5);
+    return true;
+  }
+
   myTrigData=trgData;
   
   /* *****************************************
@@ -194,7 +203,7 @@ L2pedAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   
     (  par_pedSubtr <<6 ) ;
  
-    rdtscl_macro(mEveTimeStop);
+  rdtscl_macro(mEveTimeStop);
   mEveTimeDiff=mEveTimeStop-mEveTimeStart;
   int  kTick=mEveTimeDiff/1000;
   hA[11]->fill(kTick/20);
@@ -225,7 +234,7 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
   FILE *fd=fopen(fname,"w");
   if(fd==0) {printf("failed to open output %s file,skip ped_finish()\n",fname); return;}  
   fprintf(fd,"#L2-ped algorithm finishRun(%d), compiled: %s , %s\n",run_number,__DATE__,__TIME__);
-  fprintf(fd,"#params: pedSubtr=%d speedFact=%d saveBin=%d debug=%d\n",par_pedSubtr,par_speedFact,par_saveBinary,par_dbg);
+  fprintf(fd,"#params: pedSubtr=%d speedFact=%d saveBin=%d debug=%d prescAccept=%d\n",par_pedSubtr,par_speedFact,par_saveBinary,par_dbg,par_prescAccept);
   hA[10]->printCSV(fd); // event accumulated
   int iMax=-3, iFWHM=-4;
   hA[11]->findMax( &iMax, &iFWHM);
@@ -377,6 +386,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.9  2007/11/18 21:58:58  balewski
+  L2algos triggerId list fixed
+
   Revision 1.8  2007/11/13 23:06:09  balewski
   toward more unified L2-algos
 

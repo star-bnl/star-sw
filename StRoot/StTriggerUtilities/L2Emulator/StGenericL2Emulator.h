@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.7 2007/11/13 00:12:26 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.8 2007/11/18 21:58:53 balewski Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -16,7 +16,9 @@ class  StEEmcDbMaker;
 class  StEmcGeom;
 class  StEmcDecoder;
 class  L2EmcDb;
-class  L2VirtualAlgo;
+
+#include "L2algoUtil/L2VirtualAlgo.h"
+#include "StVirtualTriggerSimu.h"
 
 
 class StGenericL2Emulator  {
@@ -54,6 +56,14 @@ class StGenericL2Emulator  {
   int  mBTOW_in, mETOW_in;
   void *mTrigData; // I do not want to deal with this content here
 
+  void  init();
+  void  make();
+  void  addTriggerList();
+  void  initRun1(); // before algos are initialized
+  void  initRun2(); // after algos are initialized
+  void  finish(); 
+  void  clear();
+
  public: 
   StGenericL2Emulator();
   virtual       ~StGenericL2Emulator();
@@ -65,25 +75,23 @@ class StGenericL2Emulator  {
   int getBtowIn(){return mBTOW_in;}
   int getEtowIn(){return mETOW_in;}
 
-  void  init();
-  void  make();
-  void  initRun1(); // before algos are initialized
-  void  initRun2(); // after algos are initialized
-  void  finish(); 
-  void  clear();
   void  useStEvent() {mUseMuDst=false;}
   void  setMC(int x=true) {mMCflag=x;}
   void  setSetupPath(char *x) { mSetupPath=x;}
   void  setOutPath(char *x)   { mOutPath=x;}
 
-  vector <int> mTriggerList;
-  bool    isTrigger(int trigId);   
+  vector <int> mAcceptTriggerList;
+  vector <int> mVetoTriggerList;
+  StTriggerSimuDecision  isTrigger(int trigId);   
   ClassDef(StGenericL2Emulator,0) 
 };
 
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.8  2007/11/18 21:58:53  balewski
+// L2algos triggerId list fixed
+//
 // Revision 1.7  2007/11/13 00:12:26  balewski
 // added offline triggerID, take1
 //

@@ -28,6 +28,7 @@ class StBbcTriggerSimu;
 class StBemcTriggerSimu;
 class StEemcTriggerSimu;
 class StL2TriggerSimu;
+class StGenericL2Emulator;
 
 class StTriggerSimuMaker : public StMaker {
 private:
@@ -47,7 +48,7 @@ public:
   void    useEemc(int flag=0);  //0:just process ADC, 1:compare w/ trigData, see enum in Eemc class
   void    useBbc();
   void    useBemc();
-  void    useL2();
+  void    useL2(StGenericL2Emulator* );
   void    setMC(int x) {mMCflag=x;}
   
   virtual Int_t     Init();
@@ -59,7 +60,7 @@ public:
   TObjArray  *mHList; // output histo access point
   void setHList(TObjArray * x){mHList=x;}
   bool isTrigger(int trigId);
-  vector <int> mTriggerList;
+  // not used,JB vector <int> mTriggerList;
   
   //hang all activated trigger detectors below
   StBbcTriggerSimu  *bbc;
@@ -72,9 +73,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.13 2007/10/12 20:10:23 balewski Exp $
+// $Id: StTriggerSimuMaker.h,v 1.14 2007/11/18 21:58:50 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.14  2007/11/18 21:58:50  balewski
+// L2algos triggerId list fixed
+//
 // Revision 1.13  2007/10/12 20:10:23  balewski
 // cleanup
 //

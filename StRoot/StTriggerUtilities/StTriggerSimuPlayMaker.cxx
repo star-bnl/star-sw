@@ -92,17 +92,20 @@ void
 StTriggerSimuPlayMaker::janTest100(){
 
   int trigID=137611;
-  printf("in play:JanTest 100\n");
+  printf("%s:JanTest100()\n", GetName());
+
+
   hA[1]->Fill(2);
   StTriggerSimuMaker *trgSimMk= (StTriggerSimuMaker*) StMaker::GetChain()->GetMaker("StarTrigSimu");
   assert(trgSimMk);
-  printf("trigID=%d decision=%d ,",trigID,trgSimMk->isTrigger(trigID));
-  if(trgSimMk->bbc) printf("L0-BBC=%d ,",trgSimMk->bbc->isTrigger(trigID));
-  if(trgSimMk->bemc) printf("L0-BEMC=%d ,",trgSimMk->bemc->isTrigger(trigID));
-  if(trgSimMk->lTwo) printf("L2=%d ",trgSimMk->lTwo->isTrigger(trigID));
+  int dec=trgSimMk->isTrigger(trigID);
+  printf("trigID=%d final decision=%d ,",trigID,dec);
+  if(trgSimMk->bbc) printf("L0-BBC decision==%d ,",trgSimMk->bbc->triggerDecision(trigID));
+  if(trgSimMk->bemc) printf("L0-BEMC decision=%d ,",trgSimMk->bemc->triggerDecision(trigID));
+  if(trgSimMk->lTwo) printf("L2 decision=%d ",trgSimMk->lTwo->triggerDecision(trigID));
   printf("\n");
 }
 
 
-// $Id: StTriggerSimuPlayMaker.cxx,v 1.2 2007/11/08 04:53:52 balewski Exp $
+// $Id: StTriggerSimuPlayMaker.cxx,v 1.3 2007/11/18 21:58:50 balewski Exp $
 //

@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.7 2007/11/13 23:05:59 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.8 2007/11/18 21:58:53 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -13,7 +13,6 @@
 
 #include <StMessMgr.h>
 
-#include "StGenericL2Emulator.h"
 
 // ETOW stuff
 #include <StEEmcDbMaker/StEEmcDbMaker.h>
@@ -45,7 +44,6 @@
 
 //L2 stuff
 #include "L2algoUtil/L2EmcDb.h"
-#include "L2algoUtil/L2VirtualAlgo.h"
 #include "L2algoUtil/L2DbConfig.h"  // time-dep config
 #include "L2algoUtil/L2DbTime.h"  // time-dep config
 
@@ -57,6 +55,8 @@
 #include "StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Eemc/StEemcTriggerSimu.h"
 #include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"
+
+#include "StGenericL2Emulator.h"
 
   /* usefull dimensions */
 #define MaxBtowRdo (L2EmcDb::BTOW_MAXFEE*L2EmcDb::BTOW_DATSIZE)
@@ -103,7 +103,6 @@ void StGenericL2Emulator::init(){
   mL2EmcDb=0; // will be instantiated in InitRun
  
   LOG_INFO << Form("generic:init() , use: MuDst=1 (StEvent=0)=%d isMC=%d",mUseMuDst,mMCflag) <<endm;
- 
 }
 
 //____________________________________________________________
@@ -112,7 +111,6 @@ void StGenericL2Emulator::init(){
 void
 StGenericL2Emulator::make(){
   int L0trgSwitch=1; // flag passed to L2-algos, derived from L0 decision
-
 #if 0 // filter some events base on L0-trigger decision, if you want  
   StTriggerSimuMaker *L0trgSim=(StTriggerSimuMaker *)StMaker::GetChain()->GetMaker("StarTrigSimu");
   assert(L0trgSim);
@@ -144,8 +142,10 @@ StGenericL2Emulator::make(){
     mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
   } // tmp, accept should be filled in internaly, in next iteration, Jan
   
-  printf("gen i   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
-  
+  //  printf("L2Generic::make   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
+
+  addTriggerList(); 
+
  return;
 }
 
@@ -162,17 +162,11 @@ StGenericL2Emulator::initRun1(){
   mYearMonthDay=mydb->GetDateTime().GetDate();
   mHourMinSec=mydb->GetDateTime().GetTime();
 
-  assert(mYearMonthDay>=20060410);
-  // add other reference runs for later time stamps as appropriate
-  assert(mYearMonthDay<20060700);
-
 
   //define path for L2 setup files & output
-
-  //  char setPath[1000];
   mSetPath=Form("%sL2/%d/db/",mSetupPath.Data(),mYear);
   LOG_INFO <<"initRun1()  "<<"DB setPath="<<mSetPath.Data()<<" outPath="<<mOutPath.Data()<<endm;
-
+  
   // read in time-dependent L2 configuration
   L2DbConfig confDB1(mSetPath+"/L2DbTime.dat");
   L2DbTime * confL2 = confDB1.getConfiguration( mYearMonthDay, mHourMinSec );
@@ -193,7 +187,6 @@ StGenericL2Emulator::initRun1(){
   myTable->loadTables(maker );
   // this is how BTOW mapping is accesible
   mMappB = new StEmcDecoder(mydb->GetDateTime().GetDate(),mydb->GetDateTime().GetTime());
-
   LOG_INFO  << "initRun1() done"<<endm;
 
   
@@ -205,7 +198,7 @@ void
 StGenericL2Emulator::initRun2(){
   //WARN: do NOT use  runNo for any setup - it would berak for M-C
   // read in time-dependent L2 offline trigger ID's
- LOG_INFO  << "initRun2()"<<endm;
+  LOG_INFO  << "initRun2()"<<endm;
   L2DbConfig confDB2(mSetPath+"/L2TriggerIds.dat");
 
   int ia;
@@ -218,6 +211,7 @@ StGenericL2Emulator::initRun2(){
       LOG_WARN<<Form("initRun2(), no offline trigID found for L2alg=%s=, continue",algoName.Data())<<endm;
       continue;
     }
+
     TString aa = config->getBuf2();
     Int_t bb = atoi(aa.Data());
     LOG_INFO<<Form("initRun2(), trigID=%d  set for L2alg=%s=",bb,algoName.Data())<<endm;
@@ -228,14 +222,16 @@ StGenericL2Emulator::initRun2(){
 
 //========================================
     
-bool 
+StTriggerSimuDecision
 StGenericL2Emulator::isTrigger(int trigId) {
   uint j;
-  for(j=0; j<mTriggerList.size();j++) {
-    //  printf("aa j=%d,  %d %d  ret=%d\n",j, trigId, mTriggerList[j],trigId==mTriggerList[j]);
-    if(trigId==mTriggerList[j]) return true;
+  for(j=0; j<mAcceptTriggerList.size();j++) {
+    if(trigId==mAcceptTriggerList[j]) return kYes; 
   }
-  return false;
+  for(j=0; j<mVetoTriggerList.size();j++) {
+    if(trigId==mVetoTriggerList[j]) return kNo; 
+  }
+  return kDoNotCare;
 }
 
 //========================================
@@ -259,7 +255,8 @@ StGenericL2Emulator::clear( ){
   memset(mBTOW_BANK,0,MaxBtowRdo*sizeof(unsigned short));
   memset(mETOW_BANK,0,MaxEtowRdo*sizeof(unsigned short));
   memset(mTrigData,0,sizeof(TrgDataType));
-  mTriggerList.clear();
+  mAcceptTriggerList.clear();
+  mVetoTriggerList.clear();
 }
  
 
@@ -307,7 +304,6 @@ void StGenericL2Emulator::printBEtowers(){
       StSPtrVecEmcRawHit& emcTowerHits = stmod->hits();
       uint j;
       for ( j = 0; j < emcTowerHits.size(); j++) { 
-	//  printf("bbb=%d\n",j);
 	int adc= emcTowerHits[j]->adc();
 	int sec= emcTowerHits[j]->module()+1;
 	int sub= emcTowerHits[j]->sub()+'A';
@@ -450,7 +446,29 @@ StGenericL2Emulator::printBEblocks(){
 }
 
 
+
+//========================================
+void
+StGenericL2Emulator::addTriggerList() {
+ 
+ int ia;
+  for(ia=0;ia<mL2algoN;ia++) {
+    if (mL2algo[ia]==0) continue;
+    if (mL2algo[ia]->getOflTrigID()==0) continue; // undefined triggerID
+    if (mL2algo[ia]->accepted()) 
+      mAcceptTriggerList.push_back(mL2algo[ia]->getOflTrigID());
+    else
+      mVetoTriggerList.push_back(mL2algo[ia]->getOflTrigID());
+  }
+
+  LOG_INFO  << Form("addTriggerList() yesSize=%d vetoSize=%d",mAcceptTriggerList.size(),mVetoTriggerList.size())<<endm;
+}
+
+
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.8  2007/11/18 21:58:53  balewski
+// L2algos triggerId list fixed
+//
 // Revision 1.7  2007/11/13 23:05:59  balewski
 // toward more unified L2-algos
 //

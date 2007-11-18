@@ -20,17 +20,9 @@ StL2TriggerSimu::InitRun(int runnumber){
   St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("StarDb");
   assert(mydb);
   mYear=mydb->GetDateTime().GetYear();
-
-
-  LOG_INFO <<Form("L2TriggerSimu::InitRun() year=%d",mYear )<<endm;
-  if(mYear==2006)
-    mL2maker= (StGenericL2Emulator*) StMaker::GetChain()->GetMaker("L2Emul2006");
-  else if(mYear==2008)
-    mL2maker= (StGenericL2Emulator*) StMaker::GetChain()->GetMaker("L2Emul2008");
-  else
-    assert(1==2); // wrong year, not implemented
-
   assert(mL2maker);
+  LOG_INFO <<Form("L2TriggerSimu::InitRun() year=%d",mYear )<<endm;
+ 
 }
   
 
@@ -48,13 +40,15 @@ StL2TriggerSimu::Init(){
  
 StTriggerSimuDecision   
 StL2TriggerSimu::triggerDecision(int trigId){
-  // return mL2maker->isTrigger(trigId);// tmp
-  return kDoNotCare;
+  return mL2maker->isTrigger(trigId);
 }
 
 
 //
 // $Log: StL2TriggerSimu.cxx,v $
+// Revision 1.6  2007/11/18 21:58:53  balewski
+// L2algos triggerId list fixed
+//
 // Revision 1.5  2007/11/08 20:59:58  kocolosk
 // subdet isTrigger returns a bool
 // triggerDecision returns enumerator including kDoNotCare

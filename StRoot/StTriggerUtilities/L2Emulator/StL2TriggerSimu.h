@@ -15,7 +15,7 @@ class StL2TriggerSimu : public StVirtualTriggerSimu {
  private:
   StGenericL2Emulator *mL2maker;
   public:
-  StL2TriggerSimu(){mL2maker=0;};
+  StL2TriggerSimu(StGenericL2Emulator *x){mL2maker=x;};
   void Init();
   void InitRun(int runnumber);
   void Clear(){};
@@ -30,6 +30,9 @@ class StL2TriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StL2TriggerSimu.h,v $
+// Revision 1.7  2007/11/18 21:58:54  balewski
+// L2algos triggerId list fixed
+//
 // Revision 1.6  2007/11/08 20:59:58  kocolosk
 // subdet isTrigger returns a bool
 // triggerDecision returns enumerator including kDoNotCare

@@ -4,12 +4,12 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 7e0,
+void rdMu2TrigSimu( int nevents = 7e1,
 		    int flagMC=0,  // 0== off, 1=Alan
-		    int useEemc=1, // 0== off
-		    int useBemc=1, // 0== off
+		    int useEemc=0, // 0== off
+		    int useBemc=0, // 0== off
 		    int useL2=1,   // 0== off
-		    int L2ConfigYear=2006, // possible 2008
+		    int L2ConfigYear=2006, // possible: 2006, 2008
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
 		    int playConfig=100, // jan:100_199
 		    int emcEveDump=0 // extrating raw EMC data in a custom format
@@ -141,7 +141,6 @@ void rdMu2TrigSimu( int nevents = 7e0,
     simuTrig->useBemc();
     simuTrig->bemc->setConfig(bemcConfig);
   }
-  if(useL2)   simuTrig->useL2();
 
   if(flagMC && useEemc){
     // pass one argument to M-C as generic switch    
@@ -174,6 +173,7 @@ void rdMu2TrigSimu( int nevents = 7e0,
     simL2Mk->setOutPath(outDir.Data());
     if (flagMC) simL2Mk->setMC();
     //simL2Mk->useStEvent(); // default : use muDst
+    simuTrig->useL2(simL2Mk);
   }
 
   if(emcEveDump) new StJanEventMaker;
