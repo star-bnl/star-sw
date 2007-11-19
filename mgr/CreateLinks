@@ -29,7 +29,7 @@ if ( -e .i386_linux24) then
 	/bin/ln -s .i386_linux24 .i386_redhat72
     endif
 else
-    echo "Directory .i386_linux24, does not exists (ignoring)"
+    echo "The base OS support directory, .i386_linux24, does not exists"
 endif
 
 # ----------
@@ -79,34 +79,32 @@ endif
 #
 # Scientific Linux
 #
-
-if ( ! -e .sl44_gcc346 ) then
-    # Support of SL 4.4 Berylium
-    if ( "$1" == "init") then
-	# initial creation of backward compatible links for sl44
-	# Those will make bacward compatibility links
-	if ( -e .sl305_gcc323 ) then
-	    # Libs based on ROOT version 4.04.02
-	    if ( ! -l .sl305_gcc323 || -e root) then
-		echo "Assuming support  sl44_gcc346 -> sl305_gcc323"
-		/bin/ln -s .sl305_gcc323 .sl44_gcc346
-	    endif
-	endif
-	if ( -e .sl302_gcc323 && ! -e .sl44_gcc346 ) then
-	    # Libs based on ROOT version 4.00.04
-	    echo "Assuming support  sl44_gcc346 -> sl302_gcc323"
-	    /bin/ln -s .sl302_gcc323 .sl44_gcc346
-	endif
-    else
-	# real actions i.e. creates links for other OS relying on compatiblity
-	# with SL44
+if ( -e .sl44_gcc346) then
+    # support through SL44
+    if ( ! -e .sl45_gcc346 ) then
+	echo "Backward compatibility assumed between SL405 -> SL404"
+    	/bin/ln -s .sl44_gcc346 .sl45_gcc346
     endif
 endif
 
-
-
 if ( -e .sl305_gcc323) then
     # Support through SL 3.0.5
+    if ( ! -e .sl306_gcc323 ) then
+	echo "Backward compatibility assumed between SL306 -> SL305"
+    	/bin/ln -s .sl305_gcc323 .sl306_gcc323
+    endif
+    if ( ! -e .sl307_gcc323 ) then
+	echo "Backward compatibility assumed between SL307 -> SL305"
+    	/bin/ln -s .sl305_gcc323 .sl307_gcc323
+    endif
+    if ( ! -e .sl308_gcc323 ) then
+	echo "Backward compatibility assumed between SL308 -> SL305"
+    	/bin/ln -s .sl305_gcc323 .sl308_gcc323
+    endif
+    if ( ! -e .sl309_gcc323 ) then
+	echo "Backward compatibility assumed between SL309 -> SL305"
+    	/bin/ln -s .sl305_gcc323 .sl309_gcc323
+    endif
 endif
 
 if ( -e .sl302_gcc323) then
