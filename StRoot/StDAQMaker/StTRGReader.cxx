@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.cxx,v 1.8 2007/05/29 22:12:19 fine Exp $
+ * $Id: StTRGReader.cxx,v 1.9 2007/11/19 19:40:10 akio Exp $
  *
  * Author: Herbert Ward, Dec 28 1999, 13:10 EST.
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.cxx,v $
+ * Revision 1.9  2007/11/19 19:40:10  akio
+ * Change fro run8
+ *
  * Revision 1.8  2007/05/29 22:12:19  fine
  * Introduce logger-based output
  *
@@ -116,5 +119,11 @@ const TrgDataType2007 *StTRGReader::getDataType2007() const
 {
   if (getYear()!=2007) return 0;
   return (const TrgDataType2007*)getData();
+}
+//_____________________________________________________________________________
+const TrgDataType2008 *StTRGReader::getDataType2008() const
+{
+  if (getYear()!=2008) return 0;
+  return (const TrgDataType2008*)getData();
 }
  	
