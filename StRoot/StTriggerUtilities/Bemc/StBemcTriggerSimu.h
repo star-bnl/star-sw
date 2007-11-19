@@ -18,6 +18,7 @@
 #define kNSeq 10
 #define kL0DsmModule 30
 #define kL0DsmInputs 10
+#define kL1DsmModule 2
 
 class StEvent;
 class StEmcDecoder;
@@ -84,8 +85,9 @@ private:
 
   //MAX TP ADC, MAX HT ADC and SUM TPC ADC for each DSM Module
   Int_t DSM0_TP_SUM[kL0DsmModule], DSM0_TP_SUM_J1[kL0DsmModule], DSM0_TP_SUM_J3[kL0DsmModule];
+  Int_t DSM1_JP_ADC[kL0DsmModule];
 
-  //Bits out of DSMLayer0 and into DSMLayer1
+  //DSM0 Bits for HT, TP and HTTP
   //Only modules 2,7,12,17,22,27 go into J3 and J1
   //DSM_HT_Bit[2,7,12,17,22,27]==0
   Int_t DSM0_HT_Bit[kL0DsmModule],DSM0_TP_Bit[kL0DsmModule],DSM0_HTTP_Bit[kL0DsmModule];
@@ -93,9 +95,14 @@ private:
   Int_t DSM0_HT_Bit_J1[kL0DsmModule],DSM0_TP_Bit_J1[kL0DsmModule],DSM0_HTTP_Bit_J1[kL0DsmModule];
   //Intermediate bits for each trigger patch input to DSMLayer0
   Int_t DSM0_HT_tp_Bit[kL0DsmInputs], DSM0_TP_tp_Bit[kL0DsmInputs], DSM0_HTTP_tp_Bit[kL0DsmInputs];
-  Int_t DSM0_HT_tp_Bit_J3[kL0DsmModule], DSM0_TP_tp_Bit_J3[kL0DsmModule],DSM0_HTTP_tp_Bit_J3[kL0DsmModule];
-  Int_t DSM0_HT_tp_Bit_J1[kL0DsmModule], DSM0_TP_tp_Bit_J1[kL0DsmModule],DSM0_HTTP_tp_Bit_J1[kL0DsmModule];
-												
+  Int_t DSM0_HT_tp_Bit_J3[kL0DsmInputs], DSM0_TP_tp_Bit_J3[kL0DsmInputs],DSM0_HTTP_tp_Bit_J3[kL0DsmInputs];
+  Int_t DSM0_HT_tp_Bit_J1[kL0DsmInputs], DSM0_TP_tp_Bit_J1[kL0DsmInputs],DSM0_HTTP_tp_Bit_J1[kL0DsmInputs];
+  //DSM1 Bits for JP, HT, TP and HTTP
+  Int_t DSM1_JP_Bit[kL1DsmModule], DSM1_HT_Bit[kL1DsmModule], DSM1_TP_Bit[kL1DsmModule], DSM1_HTTP_Bit[kL1DsmModule];
+  Int_t DSM1_ETOT_ADC[kL1DsmModule];
+  //Intermediate bits for each jet patch constructed in DSMLayer1
+  Int_t DSM1_JP_jp_Bit[kNJet];
+  
   void getTowerStatus();
   void getDSM_TPStatus();
   void getDSM_HTStatus();
