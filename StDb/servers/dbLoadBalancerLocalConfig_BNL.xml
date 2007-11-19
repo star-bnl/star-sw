@@ -33,7 +33,7 @@
                         <Host name="db02.star.bnl.gov"  port="3316"/>
                         <Host name="db03.star.bnl.gov"  port="3316"/>
                         <Host name="db04.star.bnl.gov"  port="3316"/>
-                        <Host name="db11.star.bnl.gov"  port="3316" machinePower = ".4" />
+                        <Host name="db11.star.bnl.gov"  port="3316" machinePower = ".25" />
                         <Host name="db05.star.bnl.gov"  port="3316"/>
                         <Host name="db07.star.bnl.gov"  port="3316"/>
                         <Host name="db08.star.bnl.gov"  port="3316"/>
