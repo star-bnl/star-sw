@@ -113,10 +113,13 @@ private:
   void SanityCheck2004(char*, int);        //!
   void SanityCheck2005(char*, int);        //!
   void SanityCheck2007(char*, int);        //!
-
+  void SanityCheck2008(char*, int);        //!
   int  UnpackTrg2007(Bank_TRGP*);          //!
   int  Swap2007_DescSum(char*);            //!
   int  Swap2007_Raw(char*);                //!
+  int  UnpackTrg2008(Bank_TRGP*);          //!
+  int  Swap2008_DescSum(char*);            //!
+  int  Swap2008_Raw(char*);                //!
 };
 
 TRG_Reader *getTRGReader(EventReader *er);
