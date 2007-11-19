@@ -24,7 +24,7 @@
  
 //L2 stuff
 #include "L2algoUtil/L2EmcDb.h"
-#include "L2jetAlgo/L2jetAlgo.h"
+#include "L2jetAlgo/L2jetAlgo2006.h"
 #include "L2pedAlgo/L2pedAlgo.h"
 #include "L2gammaAlgo/L2gammaAlgo.h"
 #include "L2upsilon/L2upsilon.hh"
@@ -35,7 +35,7 @@ ClassImp(StL2_2006EmulatorMaker)
 
 StL2_2006EmulatorMaker::StL2_2006EmulatorMaker(const char *name):StMaker(name) {
   mL2pedAlgo=0;
-  mL2jetAlgo=0;
+  mL2jetAlgo2006=0;
   mL2gammaEEmc=mL2gammaBEmc=0;
   mL2upsilon=0;
 }
@@ -62,144 +62,41 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
   mL2algoN=5; // total # of L2 algos (ped, jet)
   mL2algo =new L2VirtualAlgo *[mL2algoN]; // not cleared memeory leak
   memset(mL2algo,0,mL2algoN*sizeof(void*));
-  //setup evry algo one by one, params may be time dependent
-
-  char fname[1000];
-  enum {mxPar=10}; // for any algo, separate ints & floats
-  int intsPar[mxPar]; // params passed from run control gui
-  float floatsPar[mxPar]; 
-
+  //setup every algo one by one, params may be time dependent
+  
   // ----------- L2 ped algo ----------------  slot 0
-  int  L2ResOff=L2RESULTS_OFFSET_EMC_PED;
-  sprintf(fname,"%sL2/%d/algos/algoPed.setup",mSetupPath.Data(),mYear);
-  assert( L2VirtualAlgo::readParams(fname,mxPar,intsPar,floatsPar)==4);
-  mL2pedAlgo=new L2pedAlgo("ped-algo",mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
-  assert(mL2pedAlgo->initRun( runNo,intsPar,floatsPar)==0); // zero tolerance for missing input files
-  mL2algo[0]=mL2pedAlgo;
+  mL2algo[0]=mL2pedAlgo=new L2pedAlgo("ped-algo",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_OFFSET_EMC_PED);
 
   // ----------- L2 jet algo ---------------- slot 1
-  L2ResOff=L2RESULTS_OFFSET_DIJET;
   //time dependent L2jet cuts are below 
   assert( mYearMonthDay>20060316); // before L2jet was not used
   assert( mYearMonthDay<20060620); // after L2jet was not used
-
-  if( mYearMonthDay<20060406) { // ppLong-1 period not implementd
-    assert(1==2);
-  } else if (  mYearMonthDay<200605011) { // ppTrans
-  sprintf(fname,"%sL2/%d/algos/algoJet.setup1",mSetupPath.Data(),mYear);
-  } else   { // ppLong-2, 62 geV  periods not implementd
-    assert(1==2);
-  }
-  assert( L2VirtualAlgo::readParams(fname,mxPar,intsPar,floatsPar)==10);
-  mL2jetAlgo=new L2jetAlgo("jet-algo",mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
-  assert(mL2jetAlgo->initRun(runNo,intsPar,floatsPar)==0); // zero tolerance for missing input files
-  mL2algo[1]=mL2jetAlgo;
-
+  
+  mL2algo[1]=mL2jetAlgo2006=new L2jetAlgo2006("jet06-algo",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_OFFSET_DIJET);
+  
   // ----------- L2 gamma algo ----------------uses  slots 2 & 3
-  addL2GammaAlgos2006(runNo); 
-  mL2algo[2]=mL2gammaEEmc; // add to list of algos to execute
-  mL2algo[3]=mL2gammaBEmc;
+  assert( mYearMonthDay >= 20060406 ); // before ppTrans
+  assert( mYearMonthDay <= 20060607 ); // after ppLong2
+  
+  mL2algo[2]=mL2gammaEEmc=new L2gammaAlgo("etow_gamma",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_OFFSET_PIG);
+  mL2algo[3]=mL2gammaBEmc=new L2gammaAlgo("btow_gamma",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_OFFSET_PIG);
 
   // ----------- L2 Upsilon algo ----------------  slot 4
-  addL2UpsilonAlgo2006(runNo);
-  mL2algo[4]=mL2upsilon; // add to list of algos to execute
-  
+  assert( mYearMonthDay >= 20060406 ); // before ppTrans
+  assert( mYearMonthDay <= 20060607 ); // after ppLong2
+
+  mL2algo[4]=mL2upsilon=new L2upsilon("upsilon", mL2EmcDb, mL2EmcDb->logPath,L2RESULTS_OFFSET_UPS); 
+  TString fullPath=Form("%sL2/%d/algos/btowXYZ.dat", mSetupPath.Data(), mYear);
+  mL2upsilon->readGeomXYZ(fullPath.Data());
+
   // ----------- L2 J/Psi algo ----------------  slot 5
   // add here
 
-  initRun2();
+  initRun2(runNo);
 
   LOG_INFO  << "::InitRun() done, run=" <<runNo<<" isMC="<<mMCflag<<endm;
     return kStOK; 
 }  
-
-//_____________________________________________________________________________
-void
-StL2_2006EmulatorMaker::addL2UpsilonAlgo2006(int runNo){
-  enum {mxPar=10}; // for any algo, separate ints & floats
-  int intsPar[mxPar]; // params passed from run control gui
-  float floatsPar[mxPar]; 
-  
-  int L2ResOff = L2RESULTS_OFFSET_UPS;
-  assert( mYearMonthDay >= 20060406 ); // before ppTrans
-  assert( mYearMonthDay <= 20060607 ); // after ppLong2
-  
-  TString fullPath=Form("%sL2/%d/algos/algoUpsilon.setup1", mSetupPath.Data(), mYear);
-  
-  
-  assert(L2VirtualAlgo::readParams(fullPath, mxPar, intsPar, floatsPar) == 10);
-  mL2upsilon = new L2upsilon("L2upsilon", mL2EmcDb, mL2EmcDb->logPath,L2ResOff);
-  fullPath=Form("%sL2/%d/algos/btowXYZ.dat", mSetupPath.Data(), mYear);
-  mL2upsilon->readGeomXYZ(fullPath.Data());
-
-  assert(mL2upsilon->initRun(runNo, intsPar, floatsPar) == 0);
-}
-
-
-//_____________________________________________________________________________
-void
-StL2_2006EmulatorMaker::addL2GammaAlgos2006(int runNo){
-  int L2ResOff = L2RESULTS_OFFSET_PIG;
-  assert( mYearMonthDay >= 20060406 ); // before ppTrans
-  assert( mYearMonthDay <= 20060607 ); // after ppLong2
-  
-  TString l2gammaEEmcSetup=Form("%sL2/%d/algos/l2gamma_eemc.setup",mSetupPath.Data(),mYear);
-  TString l2gammaBEmcSetup=Form("%sL2/%d/algos/l2gamma_bemc.setup",mSetupPath.Data(),mYear);
-  
-  // Note-- this breaks because physicists don't wait until midnight
-  // to make the swicth!
-  if ( mYearMonthDay >= 20060406 &&
-       mYearMonthDay <= 20060510 ) {
-    l2gammaEEmcSetup += 1;
-    l2gammaBEmcSetup += 1;
-  }
-  else if ( mYearMonthDay >  20060510 &&
-	    mYearMonthDay <= 20060513 ) {
-    l2gammaEEmcSetup += 2;
-    l2gammaBEmcSetup += 2;
-  }
-  else if ( mYearMonthDay >  20060513 &&
-	    mYearMonthDay <= 20060515 ) {
-    l2gammaEEmcSetup += 3;
-    l2gammaBEmcSetup += 3;
-  }
-  else {
-    l2gammaEEmcSetup += 4;
-    l2gammaBEmcSetup += 4;
-  }
-  
-  // create L2gamma 
-  Int_t   eemc_ints[5],   bemc_ints[5];
-  Float_t eemc_floats[5], bemc_floats[5];
-  Int_t etest = L2VirtualAlgo::readParams( l2gammaEEmcSetup.Data(), 5, eemc_ints, eemc_floats );
-  Int_t btest = L2VirtualAlgo::readParams( l2gammaBEmcSetup.Data(), 5, bemc_ints, bemc_floats );
-  
-  if ( etest != 10 ) {
-    LOG_ERROR << GetName() << Form(" -- error initializing EEMC params filename=%s code=%i",l2gammaEEmcSetup.Data(),etest)<<endm;
-    assert(2+2==5);
-  }
-  if ( btest != 10 ) {
-    LOG_ERROR << GetName() << Form(" -- error initializing BEMC params filename=%s code=%i",l2gammaBEmcSetup.Data(),btest)<<endm;
-  }
-  
-  mL2gammaEEmc = new L2gammaAlgo("etow_gamma",mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
-  mL2gammaBEmc = new L2gammaAlgo("btow_gamma",mL2EmcDb,mL2EmcDb->logPath,L2ResOff);
-  
-  
-  etest=  mL2gammaEEmc->initRun("eblah",runNo,eemc_ints,eemc_floats);
-  btest=  mL2gammaBEmc->initRun("bblah",runNo,bemc_ints,bemc_floats);
-  
-  if ( etest ) {
-    LOG_ERROR << Form("Problem initializing runtime parameters for eemc run=%i",runNo) << endm;
-    assert(1==2);
-  }
-  if ( btest ) {
-    LOG_ERROR << Form("Problem initializing runtime parameters for bemc run=%i",runNo) << endm;
-    assert(1==3);
-  }
-  
- 
-}
 
 
 //_____________________________________________________________________________
@@ -352,7 +249,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.9 2007/11/18 21:58:54 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.10 2007/11/19 22:18:17 balewski Exp $
 //
 
 

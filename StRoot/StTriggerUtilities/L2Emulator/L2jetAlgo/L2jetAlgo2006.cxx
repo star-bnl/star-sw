@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2jetAlgo.cxx,v 1.8 2007/11/14 03:58:14 balewski Exp $
+ * $Id: L2jetAlgo2006.cxx,v 1.1 2007/11/19 22:18:27 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -25,13 +25,13 @@
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
 
-#include "L2jetAlgo.h"
+#include "L2jetAlgo2006.h"
 #include "L2jetResults2006.h" // note, there may be another copy of it in ofl-CVS - do not mix them up, JB
 #include "Map_DeltaPhiJets.h"
 
 //=================================================
 //=================================================
-L2jetAlgo::L2jetAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff) 
+L2jetAlgo2006::L2jetAlgo2006(const char* name, L2EmcDb* db, char* outDir, int resOff) 
   :  L2VirtualAlgo( name,  db,  outDir, resOff) { 
   /* called one per days
      all memory allocation must be done here
@@ -42,7 +42,7 @@ L2jetAlgo::L2jetAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff)
   par_pedOff=0x10/2; //WARN, must match 'par_adcMask'
   createHisto();
   run_number=-1;
-  printf("L2jetAlgo instantiated, logPath='%s'\n",mOutDir);
+  printf("L2jetAlgo2006 instantiated, logPath='%s'\n",mOutDir);
   eve_Jet[0]=new L2Jet;
   eve_Jet[1]=new L2Jet;
 }
@@ -50,7 +50,7 @@ L2jetAlgo::L2jetAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff)
 /*========================================
   ======================================== */
 bool
-L2jetAlgo::paramsChanged( int *rc_ints, float *rc_floats) {
+L2jetAlgo2006::paramsChanged( int *rc_ints, float *rc_floats) {
   int i;
   for(i=0;i<5;i++)
     if(rc_ints[i]!=raw_ints[i]) goto  foundProblem;
@@ -68,7 +68,7 @@ L2jetAlgo::paramsChanged( int *rc_ints, float *rc_floats) {
 /*========================================
   ======================================== */
 int 
-L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
+L2jetAlgo2006::initRun( int runNo, int *rc_ints, float *rc_floats) {
 
   // update DB if run # has changed
   if(mDb->initRun(runNo)) return -7; 
@@ -128,7 +128,7 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
 
   mEventsInRun=0;
   mLogFile = fopen(Fname,"w");
-  if( mLogFile==0) printf(" L2jetAlgo() UNABLE to open run summary log file, continue anyhow\n");
+  if( mLogFile==0) printf(" L2jetAlgo2006() UNABLE to open run summary log file, continue anyhow\n");
   //  mLogFile = stdout; //tmp
 
   // unpack params from run control GUI
@@ -325,7 +325,7 @@ L2jetAlgo::initRun( int runNo, int *rc_ints, float *rc_floats) {
 /*========================================
   ======================================== */
 bool
-L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData, 
+L2jetAlgo2006::doEvent(int L0trg, int inpEveId, TrgDataType* trgData, 
 		   int bemcIn, ushort *bemcData,
 		   int eemcIn, ushort *eemcData){
   /* STRICT TIME BUDGET  START ....*/
@@ -553,8 +553,13 @@ L2jetAlgo::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
 /*========================================
   ======================================== */
 void 
-L2jetAlgo::finishRun() {  /* called once at the end of the run */
+L2jetAlgo2006::finishRun() {  /* called once at the end of the run */
   if(run_number<0) return; // already finished
+  // save run summary histos
+  char Fname[1000];
+  sprintf(Fname,"%s/run%d.l2jet.hist.bin",mOutDir,run_number);
+  printf("L2jet::finishRun('%s') , save histo ...\n",Fname);
+  mHistFile = fopen(Fname,"w");
 
   if (mLogFile) {
     fprintf(mLogFile,"L2-jet algorithm finishRun(%d)\n",run_number);
@@ -567,14 +572,9 @@ L2jetAlgo::finishRun() {  /* called once at the end of the run */
 
   }
   finishRunHisto(); // still needs current DB
-  // save run summary histos
-  char Fname[1000];
-  sprintf(Fname,"%s/run%d.l2jet.hist.bin",mOutDir,run_number);
-  printf("L2jet::finishRun('%s') , save histo ...\n",Fname);
 
-  mHistFile = fopen(Fname,"w");
   if( mHistFile==0) {
-    printf(" L2jetAlgo: finishRun() UNABLE to open run summary log file, continue anyhow\n");
+    printf(" L2jetAlgo2006: finishRun() UNABLE to open run summary log file, continue anyhow\n");
     if (mLogFile)
       fprintf(mLogFile,"L2 di-jet histos NOT saved, I/O error\n");
   } else { // save histos  
@@ -606,7 +606,7 @@ L2jetAlgo::finishRun() {  /* called once at the end of the run */
 //=======================================
 //=======================================
 void 
-L2jetAlgo::createHisto() {
+L2jetAlgo2006::createHisto() {
   memset(hA,0,sizeof(hA));
 
   hA[10]=new   L2Histo(10,"total event counter; x=cases",9);
@@ -673,7 +673,7 @@ L2jetAlgo::createHisto() {
 //=======================================
 //=======================================
 void 
-L2jetAlgo::clearEvent(){
+L2jetAlgo2006::clearEvent(){
   /*  printf("clearEvent_L2jet() executed\n"); */
 
   eve_TrigData=0;
@@ -690,7 +690,7 @@ L2jetAlgo::clearEvent(){
 //=======================================
 //=======================================
 int 
-L2jetAlgo::projectAdc( ushort *rawAdc, int nRdo,
+L2jetAlgo2006::projectAdc( ushort *rawAdc, int nRdo,
 	     ushort *thr, ushort *pedS, ushort *gainCorr,
 	     ushort *phiBin, ushort *patchBin,
 	     L2Histo *hHot	 ){
@@ -718,7 +718,7 @@ L2jetAlgo::projectAdc( ushort *rawAdc, int nRdo,
 //=======================================
 //=======================================
 int 
-L2jetAlgo::scanPhi(){
+L2jetAlgo2006::scanPhi(){
   /* build running sum for every 3 phi-bins:
      - clone data in extra 2 bins to avoid 'if' statement for circular phi
      - calculate running sum
@@ -789,7 +789,7 @@ L2jetAlgo::scanPhi(){
 //========================================
 //========================================
 void 
-L2jetAlgo::scanEta(int iJ){
+L2jetAlgo2006::scanEta(int iJ){
   L2Jet *J=eve_Jet[iJ];
   
   int iphi0=J->iphiBin;
@@ -855,7 +855,7 @@ L2jetAlgo::scanEta(int iJ){
 //========================================
 //========================================
 void 
-L2jetAlgo:: dumpPatchEneA(){
+L2jetAlgo2006:: dumpPatchEneA(){
   // dump L2 array with energy 
   int ix,iy;
   for(iy=0;iy<cl2jetMaxPhiBins;iy++) {
@@ -872,7 +872,7 @@ L2jetAlgo:: dumpPatchEneA(){
 //========================================
 //========================================
 void 
-L2jetAlgo::weightedPhi(int iJ){
+L2jetAlgo2006::weightedPhi(int iJ){
   L2Jet *J=eve_Jet[iJ];
 
   
@@ -920,7 +920,7 @@ L2jetAlgo::weightedPhi(int iJ){
 //=======================================
 //=======================================
 void 
-L2jetAlgo::finishRunHisto(){
+L2jetAlgo2006::finishRunHisto(){
   // auxialiary operations on histograms at the end of the run
 
   const int *data20=hA[20]->getData();
@@ -971,7 +971,10 @@ L2jetAlgo::finishRunHisto(){
 
 
 /**********************************************************************
-  $Log: L2jetAlgo.cxx,v $
+  $Log: L2jetAlgo2006.cxx,v $
+  Revision 1.1  2007/11/19 22:18:27  balewski
+  most L2algos provide triggerID's
+
   Revision 1.8  2007/11/14 03:58:14  balewski
   cleanup of common timing measurement
 

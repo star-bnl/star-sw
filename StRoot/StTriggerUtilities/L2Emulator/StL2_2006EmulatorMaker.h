@@ -19,7 +19,7 @@
 
 // algos used in 2006 ...
 class  L2pedAlgo;
-class  L2jetAlgo;
+class  L2jetAlgo2006;
 class  L2gammaAlgo;
 class  L2upsilon;
 
@@ -28,13 +28,11 @@ class StL2_2006EmulatorMaker : public StMaker, public StGenericL2Emulator{
 private:
 
   L2pedAlgo   *mL2pedAlgo;
-  L2jetAlgo   *mL2jetAlgo;
+  L2jetAlgo2006   *mL2jetAlgo2006;
   L2gammaAlgo *mL2gammaEEmc;
   L2gammaAlgo *mL2gammaBEmc;
   L2upsilon   *mL2upsilon;
 
-  void  addL2GammaAlgos2006(int runNo);
-  void  addL2UpsilonAlgo2006(int runNo);
   void  addTriggerList();
   bool  getTriggerData();
 
@@ -52,5 +50,5 @@ public:
 
 #endif
 
-// $Id: StL2_2006EmulatorMaker.h,v 1.5 2007/11/02 17:42:57 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.h,v 1.6 2007/11/19 22:18:17 balewski Exp $
 //

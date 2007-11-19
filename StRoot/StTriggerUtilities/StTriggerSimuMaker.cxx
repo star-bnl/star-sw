@@ -151,7 +151,25 @@ StTriggerSimuMaker::Make(){
   for(unsigned i=0; i<mSimulators.size(); i++) {
     mSimulators[i]->Make();
   }
+
+#if 0 
+  // move it to play-maker
+  // all code below is for Pibero for testing
+  int tpId;
+  EemcHttpInfo httpInfo;
+  for (tpId=0;tpId<90;tpId++){
+    bool found=eemc->getHttpInfo(tpId,httpInfo);
+    printf("StTriggerSimuMaker::Make() eemc_http(%d) ok=%d ",tpId,found);
+    if(!found) { printf("\n"); continue;}
+    httpInfo.print();
+    // details of this TP
+    eemc->feeTPTreeADC->TP(tpId)->print(3);
+    // do your job
+    //....
+  } 
   
+#endif
+
   return kStOK;
 }
 
@@ -170,9 +188,12 @@ StTriggerSimuMaker::Finish() {
   return StMaker::Finish();
 }
 
-// $Id: StTriggerSimuMaker.cxx,v 1.18 2007/11/18 21:58:50 balewski Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.19 2007/11/19 22:18:12 balewski Exp $
 //
 // $Log: StTriggerSimuMaker.cxx,v $
+// Revision 1.19  2007/11/19 22:18:12  balewski
+// most L2algos provide triggerID's
+//
 // Revision 1.18  2007/11/18 21:58:50  balewski
 // L2algos triggerId list fixed
 //
