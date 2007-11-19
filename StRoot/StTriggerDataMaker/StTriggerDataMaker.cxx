@@ -11,6 +11,8 @@
 #include "StEvent/StTriggerData2005.h"
 #include "StDaqLib/TRG/trgStructures2007.h"
 #include "StEvent/StTriggerData2007.h"
+#include "StDaqLib/TRG/trgStructures2008.h"
+#include "StEvent/StTriggerData2008.h"
 #include "TFile.h"
 #include "TH1.h"
 
@@ -42,6 +44,7 @@ Int_t StTriggerDataMaker::Make(){
   const TrgDataType2004 *trgdata2004=0;
   const TrgDataType2005 *trgdata2005=0;
   const TrgDataType2007 *trgdata2007=0;
+  const TrgDataType2008 *trgdata2008=0;
   switch(year){
   case 2003:
     trgdata2003=trgReader->getDataType2003();
@@ -62,6 +65,11 @@ Int_t StTriggerDataMaker::Make(){
     trgdata2007=trgReader->getDataType2007();
     if (!trgdata2007) return kStWarn;
     AddData(new TObjectSet("StTriggerData",new StTriggerData2007(trgdata2007,run),kTRUE));
+    break;
+  case 2008:
+    trgdata2008=trgReader->getDataType2008();
+    if (!trgdata2008) return kStWarn;
+    AddData(new TObjectSet("StTriggerData",new StTriggerData2008(trgdata2008,run),kTRUE));
     break;
   }	      
 
