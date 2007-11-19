@@ -23,8 +23,8 @@ class StBemcTriggerDbThresholds {
   void LoadTimeStamps();
   Int_t GetHtFEEbitOffset(Int_t);
   Int_t GetHT_DSM0_threshold(Int_t, UInt_t, Int_t);
-  Int_t GetJP_DSM0_threshold(Int_t, UInt_t, Int_t);
-  Int_t GetHTTP_DSM0_threshold(Int_t, UInt_t, Int_t);
+  Int_t GetJP_DSM1_threshold(Int_t, UInt_t, Int_t);
+  Int_t GetTP_DSM0_threshold(Int_t, UInt_t, Int_t);
 
 
   ClassDef(StBemcTriggerDbThresholds, 1)
