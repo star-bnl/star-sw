@@ -19,13 +19,14 @@
 
 // algos used in 2008 ...
 class  L2pedAlgo;
-
+class  L2jetAlgo2006;
 
 class StL2_2008EmulatorMaker : public StMaker, public StGenericL2Emulator{
 private:
 
-  L2pedAlgo   *mL2pedAlgo;
-  void  addL2pedAlgo(int runNo); // left as example
+  L2pedAlgo       *mL2pedAlgo;
+  L2jetAlgo2006   *mL2jetAlgo2006;
+
   void  addTriggerList();
   bool  getTriggerData();
 
@@ -43,5 +44,5 @@ public:
 
 #endif
 
-// $Id: StL2_2008EmulatorMaker.h,v 1.2 2007/11/18 21:58:54 balewski Exp $
+// $Id: StL2_2008EmulatorMaker.h,v 1.3 2007/11/19 22:18:18 balewski Exp $
 //

@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.8 2007/11/18 21:58:53 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.9 2007/11/19 22:18:16 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -195,10 +195,14 @@ StGenericL2Emulator::initRun1(){
 //========================================
 //========================================
 void
-StGenericL2Emulator::initRun2(){
+StGenericL2Emulator::initRun2(int runNo){
   //WARN: do NOT use  runNo for any setup - it would berak for M-C
   // read in time-dependent L2 offline trigger ID's
-  LOG_INFO  << "initRun2()"<<endm;
+  enum {mxPar=10}; // maximuma for any algo, separate ints & floats
+  int intsPar[mxPar]; // params passed from run control gui
+  float floatsPar[mxPar]; 
+
+  LOG_INFO  << Form("initRun2() run#=%d  begin",runNo)<<endm;
   L2DbConfig confDB2(mSetPath+"/L2TriggerIds.dat");
 
   int ia;
@@ -207,21 +211,21 @@ StGenericL2Emulator::initRun2(){
     if (mL2algo[ia]==0) continue;
     TString algoName=mL2algo[ia]->getName();
     L2DbTime *config = confDB2.getConfiguration(mYearMonthDay,mHourMinSec,algoName);
-    if(config==0) { 
-      LOG_WARN<<Form("initRun2(), no offline trigID found for L2alg=%s=, continue",algoName.Data())<<endm;
-      continue;
-    }
-
-    TString aa = config->getBuf2();
-    Int_t bb = atoi(aa.Data());
-    LOG_INFO<<Form("initRun2(), trigID=%d  set for L2alg=%s=",bb,algoName.Data())<<endm;
-    mL2algo[ia]->setOflTrigID(bb);
+    TString aa1 = config->getBuf1(); // setup name
+    TString aa2 = config->getBuf2();
+    Int_t trgId = atoi(aa2.Data());
+    LOG_INFO<<Form("L2algo=%s=initRun2(), trigID=%d  setup=%s= ",algoName.Data(),trgId,aa1.Data())<<endm;
+    
+    TString fullPath=Form("%sL2/%d/algos/%s", mSetupPath.Data(), mYear,aa1.Data());
+    L2VirtualAlgo::readParams(fullPath, mxPar, intsPar, floatsPar);// tmp, no check of # of params
+    assert(mL2algo[ia]->initRun( runNo,intsPar,floatsPar)==0);
+    mL2algo[ia]->setOflTrigID(trgId);
   }
- LOG_INFO  << "initRun2() done"<<endm;
+  LOG_INFO  << "initRun2() done"<<endm;
 }
 
 //========================================
-    
+
 StTriggerSimuDecision
 StGenericL2Emulator::isTrigger(int trigId) {
   uint j;
@@ -466,6 +470,9 @@ StGenericL2Emulator::addTriggerList() {
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.9  2007/11/19 22:18:16  balewski
+// most L2algos provide triggerID's
+//
 // Revision 1.8  2007/11/18 21:58:53  balewski
 // L2algos triggerId list fixed
 //

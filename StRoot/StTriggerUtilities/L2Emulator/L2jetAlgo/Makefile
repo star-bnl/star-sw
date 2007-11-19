@@ -1,8 +1,8 @@
 
 
 LIBNAME  =  L2jetAlgo
-HDRS     =  L2jetAlgo.h L2jetResults2006.h Map_DeltaPhiJets.h
-SRCS     =  L2jetAlgo.cxx
+HDRS     =  L2jetAlgo2006.h L2jetResults2006.h Map_DeltaPhiJets.h L2adc2energyAlgo.h
+SRCS     =  L2jetAlgo2006.cxx L2adc2energyAlgo.cxx
 
 
 CXX    = g++
@@ -25,9 +25,6 @@ endif
 INSTALPATH=../../../../onlineL2
 
 
-
-
-
 OBJS = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
 
 #
@@ -43,7 +40,7 @@ $(LIBNAME): $(HOSTN) $(OBJS)
 
 install:
 	cp -p lib$(LIBNAME).a  $(INSTALPATH)/alg_lib
-	cp -p  L2jetAlgo.h   $(INSTALPATH)/alg_include
+	cp -p  L2jetAlgo2006.h   L2adc2energyAlgo.h $(INSTALPATH)/alg_include
 
 
 clean:
@@ -63,6 +60,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.5  2007/11/19 22:18:28  balewski
+# most L2algos provide triggerID's
+#
 # Revision 1.4  2007/11/08 04:02:31  balewski
 # run on l2ana as well
 #

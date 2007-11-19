@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo.h,v 1.9 2007/11/14 03:58:08 balewski Exp $
+ * $Id: L2VirtualAlgo.h,v 1.10 2007/11/19 22:18:22 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -47,9 +47,11 @@ class L2VirtualAlgo {
   L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff);
   virtual ~L2VirtualAlgo()=0; // memory leak NOT taken care off
   virtual int   initRun(int runNo, int *rc_ints, float *rc_floats)=0;
-  virtual bool  doEvent(int  L0trg, int inpEveId, TrgDataType* trgData, 
+  // 2006 version
+  virtual bool  doEvent(int  L0trg, int inpEveId, TrgDataType* trgData,  
                         int  bemcIn, unsigned short *bemcData,
                         int  eemcIn, unsigned short *eemcData)=0;
+
   virtual void  finishRun()=0;// at the end of each run
   static int  readParams(const char *fileN, int mxPar, int *iPar, float *fPar);
   const char* name() const { return mName; }

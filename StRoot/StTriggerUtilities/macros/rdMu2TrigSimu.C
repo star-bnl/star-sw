@@ -6,8 +6,8 @@ int total=0;
 
 void rdMu2TrigSimu( int nevents = 7e1,
 		    int flagMC=0,  // 0== off, 1=Alan
-		    int useEemc=0, // 0== off
-		    int useBemc=0, // 0== off
+		    int useEemc=1, // 0== off
+		    int useBemc=1, // 0== off
 		    int useL2=1,   // 0== off
 		    int L2ConfigYear=2006, // possible: 2006, 2008
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
@@ -223,7 +223,7 @@ void rdMu2TrigSimu( int nevents = 7e1,
   outF+=".hist.root";
   printf("=%s=\n",outF.Data());
   hf=new TFile(outF,"recreate");
-  if(hf.IsOpen()) {
+  if(hf->IsOpen()) {
     //HList->ls();
     HList->Write();
     printf("\n Histo saved -->%s<\n",outF.Data());

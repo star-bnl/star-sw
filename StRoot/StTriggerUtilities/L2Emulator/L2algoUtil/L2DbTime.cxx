@@ -66,6 +66,6 @@ std::ifstream &L2DbTime::read( std::ifstream &in )
 
 void L2DbTime::print()
 {
-  std::cout << Form("L2DbTime::=%s=\t%7i.%i\t%7i.%i\t%s\t%s",mTag.Data(),mDateStart,mTimeStart,mDateFinish,mTimeFinish,mPedFile.Data(),mMaskFile.Data()) << std::endl;
+  std::cout << Form("  L2DbTime::=%s=\t%7i.%i\t%7i.%i\t%s\t%s",mTag.Data(),mDateStart,mTimeStart,mDateFinish,mTimeFinish,mPedFile.Data(),mMaskFile.Data()) << std::endl;
 }
 

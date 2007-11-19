@@ -15,8 +15,8 @@ L2VirtualAlgo::L2VirtualAlgo(const char* name, L2EmcDb* db, char* outDir, int re
   strncpy(mName, name,sizeof(mName));  
   strncpy(mOutDir,outDir,sizeof(mOutDir));
   setOflTrigID(0);
-  mhT=new   L2Histo(1001,"L2 time used per input event;  x: time (CPU kTics); y: events ",400);
-}
+  mhT=new   L2Histo(901,"L2 time used per input event;  x: time (CPU kTics); y: events ",400);
+} 
 
 //=============================================
 void 
@@ -31,7 +31,7 @@ L2VirtualAlgo::finishCommonHistos() {
   mhT->print(0,mLogFile); 
   // mhT->printCSV(mLogFile);
    
- if (mHistFile) mhT->write(mHistFile);
+  if (mHistFile) mhT->write(mHistFile);
 }
 
 //=============================================
@@ -49,7 +49,7 @@ L2VirtualAlgo::readParams(const char *fileN, int mxPar, int *iPar, float *fPar) 
   memset(iPar,0,mxPar*sizeof(int));
   memset(fPar,0,mxPar*sizeof(int));
   FILE *fd=fopen(fileN,"r");
-  if(fd==0) { printf("L2VirtualAlgo::readParams failed to open =%s=\n",fileN); return -2222;}
+  if(fd==0) { printf("   L2VirtualAlgo::readParams failed to open =%s=\n",fileN); return -2222;}
 
   int nVal=0; // sum of read in ints & floats
   int nInt=0, nFloat=0; // # of read in values
@@ -85,6 +85,6 @@ L2VirtualAlgo::readParams(const char *fileN, int mxPar, int *iPar, float *fPar) 
   }
 
   fclose(fd);
-  printf("L2VirtualAlgo::readParams %d from '%s'\n",nVal,fileN); 
+  printf("    L2VirtualAlgo::readParams %d from '%s'\n",nVal,fileN); 
   return nVal;
 }

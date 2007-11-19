@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.9 2007/11/18 21:58:58 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.10 2007/11/19 22:18:31 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -74,6 +74,7 @@ int
 L2pedAlgo::initRun(int runNo, int *rc_ints, float *rc_floats) {
   //myName is not used.
   // update DB if run # has changed
+  //printf("aaa L2pedAlgo::initRun runNo=%d\n",runNo);
   if(mDb->initRun(runNo)) return -27; 
   // DB must be initialized prior to lookup tables
 
@@ -386,6 +387,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.10  2007/11/19 22:18:31  balewski
+  most L2algos provide triggerID's
+
   Revision 1.9  2007/11/18 21:58:58  balewski
   L2algos triggerId list fixed
 

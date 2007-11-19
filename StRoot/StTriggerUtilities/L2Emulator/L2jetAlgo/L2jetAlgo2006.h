@@ -1,7 +1,7 @@
-#ifndef L2JETALGO_H
-#define L2JETALGO_H
+#ifndef L2JETALGO2006_H
+#define L2JETALGO2006_H
 /*********************************************************************
- * $Id: L2jetAlgo.h,v 1.6 2007/11/14 03:58:14 balewski Exp $
+ * $Id: L2jetAlgo2006.h,v 1.1 2007/11/19 22:18:28 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -17,7 +17,7 @@ class L2Histo;
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
 #endif
 
-class L2jetAlgo : public  L2VirtualAlgo {
+class L2jetAlgo2006 : public  L2VirtualAlgo {
  public:
   /* usefull dimensions */
 #define MaxBtowRdo (L2EmcDb::BTOW_MAXFEE*L2EmcDb::BTOW_DATSIZE)
@@ -118,8 +118,8 @@ class L2jetAlgo : public  L2VirtualAlgo {
   bool paramsChanged( int *rc_ints, float *rc_floats);
 
  public:
-  L2jetAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff);
-  // ~L2jetAlgo(){}; // memory leak NOT taken care of
+  L2jetAlgo2006(const char* name, L2EmcDb* db, char* outDir, int resOff);
+  // ~L2jetAlgo2006(){}; // memory leak NOT taken care of
   int   initRun( int runNo, int *rc_ints, float *rc_floats);
   bool  doEvent(int L0trg, int inpEveId, TrgDataType* trgData,  // for every event
 	      int bemcIn, ushort *bemcData,
@@ -130,7 +130,10 @@ class L2jetAlgo : public  L2VirtualAlgo {
 #endif 
 
 /**********************************************************************
-  $Log: L2jetAlgo.h,v $
+  $Log: L2jetAlgo2006.h,v $
+  Revision 1.1  2007/11/19 22:18:28  balewski
+  most L2algos provide triggerID's
+
   Revision 1.6  2007/11/14 03:58:14  balewski
   cleanup of common timing measurement
 

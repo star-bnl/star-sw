@@ -28,6 +28,7 @@ class L2DbTime
   double getFullFinishTime() { return  mDateFinish+mTimeFinish/1.e6; }
   TString getPedFile(){ return mPedFile; }
   TString getMaskFile(){ return mMaskFile; }
+  TString getBuf1(){ return mPedFile; } // tmp, will clean it up later, JanB
   TString getBuf2(){ return mMaskFile; } // tmp, will clean it up later, JanB
   TString getTag(){ return mTag; } 
 

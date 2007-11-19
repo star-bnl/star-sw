@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.8 2007/11/18 21:58:53 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.9 2007/11/19 22:18:17 balewski Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -60,7 +60,7 @@ class StGenericL2Emulator  {
   void  make();
   void  addTriggerList();
   void  initRun1(); // before algos are initialized
-  void  initRun2(); // after algos are initialized
+  void  initRun2(int runNo); // after algos are initialized
   void  finish(); 
   void  clear();
 
@@ -89,6 +89,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.9  2007/11/19 22:18:17  balewski
+// most L2algos provide triggerID's
+//
 // Revision 1.8  2007/11/18 21:58:53  balewski
 // L2algos triggerId list fixed
 //
