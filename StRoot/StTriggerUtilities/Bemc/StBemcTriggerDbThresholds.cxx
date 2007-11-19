@@ -68,25 +68,23 @@ Int_t  StBemcTriggerDbThresholds::GetHtFEEbitOffset(int year){
 
 //==================================================
 //==================================================
-Int_t  StBemcTriggerDbThresholds::GetHTTP_DSM0_threshold(Int_t DSMmodule, UInt_t timestamp, Int_t layer){
-
-  LOG_DEBUG <<"StBemcTriggerDbThresholds::GetHTTP_DSM0_threshold()"<<endm;
+Int_t  StBemcTriggerDbThresholds::GetTP_DSM0_threshold(Int_t DSMmodule, UInt_t timestamp, Int_t layer){
 
   Int_t threshold=-1;
 
-  //2006 HTTP thresholds
-  const Int_t HTTP0_TH_2006[6]  = {  1,  1,  1,  1,  1,  1};
-  const Int_t HTTP1_TH_2006[6]  = { 17, 17, 20, 20, 19, 19};
-  const Int_t HTTP2_TH_2006[6]  = { 31, 31, 31, 31, 31, 31};
+  //2006 TP thresholds
+  const Int_t TP0_TH_2006[6]  = {  1,  1,  1,  1,  1,  1};
+  const Int_t TP1_TH_2006[6]  = { 17, 17, 20, 20, 19, 19};
+  const Int_t TP2_TH_2006[6]  = { 31, 31, 31, 31, 31, 31};
   for (int i=0; i<6;i++)
     {
       if (DSMmodule<15)
 	{//WEST
 	  if ((timestamp>=start_2006[i].Get())&&(timestamp<=end_2006[i].Get()))
 	    {
-	      if (layer==0) threshold=HTTP0_TH_2006[i];
-	      if (layer==1) threshold=HTTP1_TH_2006[i];
-	      if (layer==2) threshold=HTTP2_TH_2006[i];
+	      if (layer==0) threshold=TP0_TH_2006[i];
+	      if (layer==1) threshold=TP1_TH_2006[i];
+	      if (layer==2) threshold=TP2_TH_2006[i];
 	    } 
 	}
       
@@ -95,9 +93,9 @@ Int_t  StBemcTriggerDbThresholds::GetHTTP_DSM0_threshold(Int_t DSMmodule, UInt_t
 	  if ((timestamp>=start_2006[i].Get())&&(timestamp<=end_2006[i].Get()))
 	    {
 	      
-	      if (layer==0) threshold=HTTP0_TH_2006[i];
-	      if (layer==1) threshold=HTTP1_TH_2006[i];
-	      if (layer==2) threshold=HTTP2_TH_2006[i];
+	      if (layer==0) threshold=TP0_TH_2006[i];
+	      if (layer==1) threshold=TP1_TH_2006[i];
+	      if (layer==2) threshold=TP2_TH_2006[i];
 	    }
 	}
     }
@@ -107,10 +105,8 @@ Int_t  StBemcTriggerDbThresholds::GetHTTP_DSM0_threshold(Int_t DSMmodule, UInt_t
 
 //==================================================
 //==================================================
-Int_t  StBemcTriggerDbThresholds::GetJP_DSM0_threshold(Int_t DSMmodule,UInt_t timestamp, Int_t layer){
+Int_t  StBemcTriggerDbThresholds::GetJP_DSM1_threshold(Int_t DSMmodule,UInt_t timestamp, Int_t layer){
 
-  LOG_INFO <<"StBemcTriggerDbThresholds::GetJP_DSM0_threshold()"<<endm;
-  
   Int_t threshold=-1;
 
   //2006 JP thresholds
@@ -148,8 +144,6 @@ Int_t  StBemcTriggerDbThresholds::GetJP_DSM0_threshold(Int_t DSMmodule,UInt_t ti
 //==================================================
 //==================================================
 Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t timestamp, Int_t layer){
-
-  LOG_DEBUG <<"StBemcTriggerDbThresholds::GetHT_DSM0_threshold()"<<endm;
 
   int threshold=-1;
 
