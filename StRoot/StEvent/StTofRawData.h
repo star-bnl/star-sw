@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofRawData.h,v 2.1 2005/04/11 22:35:25 calderon Exp $
+ * $Id: StTofRawData.h,v 2.2 2007/11/21 00:28:32 ullrich Exp $
  *
  * Author: Xin Dong, Feb 2005
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofRawData.h,v $
+ * Revision 2.2  2007/11/21 00:28:32  ullrich
+ * Added new data member mTray plus access functions. New overloaded constructor.
+ *
  * Revision 2.1  2005/04/11 22:35:25  calderon
  * Tof Classes for Run 5.  Modifications and additions from Xin to
  * take care of new TOF daq and electronics.  Added StTofRawData and
@@ -28,37 +31,47 @@
 
 class StTofRawData : public StObject {
 public:
-  StTofRawData();
+    StTofRawData();
 
     StTofRawData(unsigned short, unsigned short, unsigned int, unsigned short);
+    StTofRawData(unsigned short, unsigned short, unsigned short, unsigned int, unsigned short);
     ~StTofRawData();    
 
     int operator==(const StTofRawData&) const;
     int operator!=(const StTofRawData&) const;
 
     unsigned short  leteFlag() const; // 1 - leading; 2 - trailing
+    unsigned short  tray() const;
     unsigned short  channel() const;
     unsigned int    tdc() const;
     unsigned short  quality() const;
 
     void      setLeTeFlag(unsigned short);
+    void      setTray(unsigned short);
     void      setChannel(unsigned short);
     void      setTdc(unsigned int);
     void      setQuality(unsigned short);
     
 protected:
     UShort_t  mLeTeFlag;
+    UShort_t  mTray;
     UShort_t  mChannel;
     UInt_t    mTdc;
     UShort_t  mQuality;
 
-    ClassDef(StTofRawData,1)
+    ClassDef(StTofRawData,2)
 };
 
 inline void
 StTofRawData::setLeTeFlag(unsigned short iflag)
 {
     mLeTeFlag = iflag;
+}
+
+inline void
+StTofRawData::setTray(unsigned short itray)
+{
+    mTray = itray;
 }
 
 inline void
@@ -83,6 +96,12 @@ inline unsigned short
 StTofRawData::leteFlag() const
 {
     return mLeTeFlag;
+}
+
+inline unsigned short
+StTofRawData::tray()  const
+{
+    return mTray;
 }
 
 inline unsigned short
