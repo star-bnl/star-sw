@@ -24,6 +24,7 @@ typedef vector<Int_t, allocator<Int_t>>  IntVec;
 #endif
 
 struct TOFRawHit {
+  int tray;
   int channel;
   IntVec leadingTdc;
   IntVec trailingTdc;
@@ -52,7 +53,11 @@ class StSortTofRawData : public StObject {
   IntVec GetLeadingTdc(int channel);
   IntVec GetTrailingTdc(int channel);
 
-  ClassDef(StSortTofRawData,1)
+  IntVec GetValidChannel(int tray);
+  IntVec GetLeadingTdc(int tray, int channel);
+  IntVec GetTrailingTdc(int tray, int channel);
+
+  ClassDef(StSortTofRawData,2)
 };
 #endif
 
