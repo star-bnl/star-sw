@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.9 2007/11/21 18:03:12 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.10 2007/11/21 19:31:28 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,11 +12,8 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
- * Revision 1.9  2007/11/21 18:03:12  dongx
- * update for run8
- * - added trayId member in RawData
- * - added new Daq map table for run8++
- * - new StTofINLCorr class for inl correction
+ * Revision 1.10  2007/11/21 19:31:28  dongx
+ * added ValidTrays() for multi-tray system
  *
  * Revision 1.8  2007/04/17 23:01:52  dongx
  * replaced with standard STAR Loggers
@@ -46,6 +43,7 @@
 #include "tables/St_tofCamacDaqMap_Table.h"
 #include "tables/St_tofr5Maptable_Table.h"
 #include "tables/St_tofDaqMap_Table.h"
+#include "tables/St_tofTrayConfig_Table.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StTofrDaqMap.h"
@@ -194,17 +192,35 @@ void StTofrDaqMap::initFromDbaseGeneral(StMaker *maker) {
   for (Int_t i=0;i<mNTOF;i++) {
     mMRPC2TDIGChan[i] = (Int_t)(daqmap[0].MRPC2TDIGChanMap[i]);
     if(maker->Debug()) {
-      LOG_INFO << " i=" << i << "  TDC chan =" << mMRPC2TDIGChan[i] << endm;
+      LOG_INFO << " MRPC = " << i << "  TDC chan = " << mMRPC2TDIGChan[i] << endm;
     }
     mTDIG2MRPCChan[mMRPC2TDIGChan[i]] = i;
   }
   for (Int_t i=0;i<mNVPD;i++) {
     mPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[i]);
     mPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[i]);
+    if(maker->Debug()) {
+      LOG_INFO << " VPD = " << i << "  TDC Lechan = " << mPMT2TDIGLeChan[i] << "  TDC TeChan = " << mPMT2TDIGTeChan[i] << endm;
+    }
     mTDIGLe2PMTChan[mPMT2TDIGLeChan[i]] = i;
     mTDIGTe2PMTChan[mPMT2TDIGTeChan[i]] = i;
   }
 
+  // valid tray Id
+  St_tofTrayConfig* trayConfig = static_cast<St_tofTrayConfig*>(mDbTOFDataSet->Find("tofTrayConfig"));
+  if(!trayConfig) {
+    gMessMgr->Error("unable to get tof tray configuration","OS");
+    return; // kStErr;
+  }
+  tofTrayConfig_st* trayconf = static_cast<tofTrayConfig_st*>(trayConfig->GetArray());
+  if(maker->Debug()) LOG_INFO << " Valid Trays: " << endm;
+  for (Int_t i=0;i<mNTray;i++) {
+    mValidTrayId[i] = (Int_t)(trayconf[0].iTray[i]);
+    if(maker->Debug()) {
+      LOG_INFO << " " << mValidTrayId[i];
+    }
+  }
+  if(maker->Debug()) LOG_INFO << endm;
 
   return;
 }
@@ -491,4 +507,14 @@ Int_t StTofrDaqMap::TDIGTeChan2PMT( const Int_t iTdc )
   }
 
   return mTDIGTe2PMTChan[iTdc];
+}
+
+IntVec StTofrDaqMap::ValidTrays()
+{
+  IntVec trayId;
+  for(int i=0;i<mNTray;i++) {
+    trayId.push_back(mValidTrayId[i]);
+  }
+
+  return trayId;
 }

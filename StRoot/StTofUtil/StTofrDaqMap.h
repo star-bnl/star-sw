@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.h,v 1.4 2007/11/21 18:03:12 dongx Exp $
+ * $Id: StTofrDaqMap.h,v 1.5 2007/11/21 19:31:29 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,11 +12,8 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.h,v $
- * Revision 1.4  2007/11/21 18:03:12  dongx
- * update for run8
- * - added trayId member in RawData
- * - added new Daq map table for run8++
- * - new StTofINLCorr class for inl correction
+ * Revision 1.5  2007/11/21 19:31:29  dongx
+ * added ValidTrays() for multi-tray system
  *
  * Revision 1.3  2005/04/12 17:23:15  dongx
  * Update for year 5 new data format, writter by Jing Liu
@@ -57,7 +54,7 @@ class StTofrDaqMap{
   static const Int_t mNTOFR5 = 192;   // 192 for tofr5
 
   static const Int_t mNTOF = 192;    // 192 for tof in Run 8++
-  static const Int_t mNTray = 5;     // not used
+  static const Int_t mNTray = 5;     // # of valid trays
   static const Int_t mNModule = 32;  // 32 for tofr5++ 
   static const Int_t mNCell = 6;
   static const Int_t mNVPD = 19;    // 19 on each side
@@ -73,6 +70,9 @@ class StTofrDaqMap{
   Int_t mTDIG2MRPCChan[mNTOF]; // MRPC channel # of tdc channel
   Int_t mPMT2TDIGLeChan[mNVPD], mPMT2TDIGTeChan[mNVPD]; // tdc channel of vpd PMTs
   Int_t mTDIGLe2PMTChan[mNTOF], mTDIGTe2PMTChan[mNTOF]; // vpd PMT tube of tdc channels
+
+  // Valid tray Ids
+  Int_t mValidTrayId[mNTray];
 
  public:
   StTofrDaqMap();
@@ -108,7 +108,7 @@ class StTofrDaqMap{
   Int_t PMT2TDIGTeChan( const Int_t iTube );
   Int_t TDIGTeChan2PMT( const Int_t iTdc );
 
-  
+  IntVec ValidTrays();
 };
 
 #endif
