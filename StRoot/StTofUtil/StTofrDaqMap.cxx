@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.8 2007/04/17 23:01:52 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.9 2007/11/21 18:03:12 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,12 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.9  2007/11/21 18:03:12  dongx
+ * update for run8
+ * - added trayId member in RawData
+ * - added new Daq map table for run8++
+ * - new StTofINLCorr class for inl correction
+ *
  * Revision 1.8  2007/04/17 23:01:52  dongx
  * replaced with standard STAR Loggers
  *
@@ -39,6 +45,7 @@
 #include "tables/St_tofModuleConfig_Table.h"
 #include "tables/St_tofCamacDaqMap_Table.h"
 #include "tables/St_tofr5Maptable_Table.h"
+#include "tables/St_tofDaqMap_Table.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StTofrDaqMap.h"
@@ -163,6 +170,46 @@ void StTofrDaqMap::initFromDbaseY5(StMaker *maker) {
   return;
 }
 
+void StTofrDaqMap::initFromDbaseGeneral(StMaker *maker) {
+
+  gMessMgr->Info("StTofrDaqMap -- rertieving the tofr5 channel mapping","OS");
+  ///////////////////////////////////////////////////////
+  // Load configuration parameters from dbase
+  //    need "[shell] setenv Calibrations_tof reconV0"
+  ///////////////////////////////////////////////////////
+
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+  if(!mDbTOFDataSet) {
+    gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
+    //    assert(mDbTOFDataSet);
+    return; // kStErr;
+  }
+
+  St_tofDaqMap* tofDaqMap = static_cast<St_tofDaqMap*>(mDbTOFDataSet->Find("tofDaqMap"));
+  if(!tofDaqMap) {
+    gMessMgr->Error("unable to get tof Module map table","OS");
+    return; // kStErr;
+  }
+  tofDaqMap_st* daqmap = static_cast<tofDaqMap_st*>(tofDaqMap->GetArray());
+  for (Int_t i=0;i<mNTOF;i++) {
+    mMRPC2TDIGChan[i] = (Int_t)(daqmap[0].MRPC2TDIGChanMap[i]);
+    if(maker->Debug()) {
+      LOG_INFO << " i=" << i << "  TDC chan =" << mMRPC2TDIGChan[i] << endm;
+    }
+    mTDIG2MRPCChan[mMRPC2TDIGChan[i]] = i;
+  }
+  for (Int_t i=0;i<mNVPD;i++) {
+    mPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[i]);
+    mPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[i]);
+    mTDIGLe2PMTChan[mPMT2TDIGLeChan[i]] = i;
+    mTDIGTe2PMTChan[mPMT2TDIGTeChan[i]] = i;
+  }
+
+
+  return;
+}
+
+
 void StTofrDaqMap::Reset() {
   for(Int_t i=0;i<mNTOFR;i++) {
     mTrayId[i] = 0;
@@ -175,6 +222,17 @@ void StTofrDaqMap::Reset() {
   for(int i=0;i<mNTOFR5;i++){
     mGlobalTDCChan[i]=0;
     mGlobalModuleChan[i]=0;
+  }
+  // tof8++
+  for(int i=0;i<mNTOF;i++) {
+    mMRPC2TDIGChan[i] = -1;
+    mTDIG2MRPCChan[i] = -1;
+    mTDIGLe2PMTChan[i] = -1;
+    mTDIGTe2PMTChan[i] = -1;
+  }
+  for(int i=0;i<mNVPD;i++) {
+    mPMT2TDIGLeChan[i] = -1;
+    mPMT2TDIGTeChan[i] = -1;
   }
 
 }
@@ -351,4 +409,86 @@ Int_t StTofrDaqMap::Tofr5Cell2TDCChan( const Int_t iTray , const Int_t iModule, 
   }
 
   return mGlobalTDCChan[modulechan];
+}
+
+//tof8++
+IntVec StTofrDaqMap::TDIGChan2Cell( const Int_t iTdc)
+{
+  IntVec map;
+  map.clear();
+
+  if ( iTdc<0 || iTdc>=mNTOF ) {
+    LOG_INFO << " ERROR! Uncorrected TDC Channel number for Tof! " << endm;
+    return map;
+  }
+
+  Int_t ModuleChan = mTDIG2MRPCChan[iTdc];
+  Int_t Module = ModuleChan / mNCell + 1;
+  Int_t Cell   = ModuleChan % mNCell + 1;
+  map.push_back(Module);
+  map.push_back(Cell);
+
+  return map;
+}
+
+Int_t StTofrDaqMap::Cell2TDIGChan( const Int_t iModule, const Int_t iCell )
+{
+
+  if(iModule<1 || iModule>mNModule ) {
+    LOG_INFO<<"ERROR!!! Wrong module number !"<<endm;
+    return -1;
+  }
+  if(iCell <1 || iCell > mNCell) {
+    LOG_INFO<<"ERROR!!! Wrong cell number ! "<<endm; 
+    return -1;
+  }
+
+  Int_t modulechan = (iModule-1)*mNCell+(iCell-1);
+
+  if (modulechan<1 || modulechan>=mNTOF) {
+    LOG_INFO<<"ERROR!!! Wrong Module Cell channel number!"<<endm;
+    return -1;
+  }
+
+  return mMRPC2TDIGChan[modulechan];
+}
+
+Int_t StTofrDaqMap::PMT2TDIGLeChan( const Int_t iTube )
+{
+  if ( iTube<1 || iTube>mNVPD ) {
+    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
+    return -1;
+  }
+
+  return mPMT2TDIGLeChan[iTube];
+}
+
+Int_t StTofrDaqMap::PMT2TDIGTeChan( const Int_t iTube )
+{
+  if ( iTube<1 || iTube>mNVPD ) {
+    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
+    return -1;
+  }
+
+  return mPMT2TDIGTeChan[iTube];
+}
+
+Int_t StTofrDaqMap::TDIGLeChan2PMT( const Int_t iTdc )
+{
+  if ( iTdc<1 || iTdc>mNTOF ) {
+    LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
+    return -1;
+  }
+
+  return mTDIGLe2PMTChan[iTdc];
+}
+
+Int_t StTofrDaqMap::TDIGTeChan2PMT( const Int_t iTdc )
+{
+  if ( iTdc<1 || iTdc>mNTOF ) {
+    LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
+    return -1;
+  }
+
+  return mTDIGTe2PMTChan[iTdc];
 }

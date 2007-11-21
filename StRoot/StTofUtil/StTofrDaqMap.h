@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.h,v 1.3 2005/04/12 17:23:15 dongx Exp $
+ * $Id: StTofrDaqMap.h,v 1.4 2007/11/21 18:03:12 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,12 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.h,v $
+ * Revision 1.4  2007/11/21 18:03:12  dongx
+ * update for run8
+ * - added trayId member in RawData
+ * - added new Daq map table for run8++
+ * - new StTofINLCorr class for inl correction
+ *
  * Revision 1.3  2005/04/12 17:23:15  dongx
  * Update for year 5 new data format, writter by Jing Liu
  *
@@ -48,19 +54,25 @@ class StTofrDaqMap{
  private:
   static const Int_t mDAQOVERFLOW = 255;   // daq max channel #
   static const Int_t mNTOFR = 120;   // 72
-
   static const Int_t mNTOFR5 = 192;   // 192 for tofr5
 
-  static const Int_t mNTray = 1;
-  static const Int_t mNModule = 20;   // 12
-
-  static const Int_t mNModule5 = 32;   // 32 for tofr5 
-
+  static const Int_t mNTOF = 192;    // 192 for tof in Run 8++
+  static const Int_t mNTray = 5;     // not used
+  static const Int_t mNModule = 32;  // 32 for tofr5++ 
   static const Int_t mNCell = 6;
+  static const Int_t mNVPD = 19;    // 19 on each side
+
   Int_t mTrayId[mNTOFR], mModuleId[mNTOFR], mCellId[mNTOFR];
   Int_t mAdc[mNTOFR], mTdc[mNTOFR];
+
   // new arrays for tofr5
   Int_t mGlobalTDCChan[mNTOFR5], mGlobalModuleChan[mNTOFR5];
+
+  // General arrays for tof8++
+  Int_t mMRPC2TDIGChan[mNTOF]; // tdc channel # of MRPC channel
+  Int_t mTDIG2MRPCChan[mNTOF]; // MRPC channel # of tdc channel
+  Int_t mPMT2TDIGLeChan[mNVPD], mPMT2TDIGTeChan[mNVPD]; // tdc channel of vpd PMTs
+  Int_t mTDIGLe2PMTChan[mNTOF], mTDIGTe2PMTChan[mNTOF]; // vpd PMT tube of tdc channels
 
  public:
   StTofrDaqMap();
@@ -70,6 +82,7 @@ class StTofrDaqMap{
   void init(StMaker *maker);
   void initFromDbase(StMaker *maker);
   void initFromDbaseY5(StMaker *maker);    // tofr5 
+  void initFromDbaseGeneral(StMaker *maker);    // tof8++, general
   void Reset();
 
   IntVec DaqChan2Cell( const Int_t iTofrDaq );
@@ -87,6 +100,15 @@ class StTofrDaqMap{
   IntVec Tofr5TDCChan2Cell( const Int_t iTdc );
   Int_t Tofr5Cell2TDCChan( const Int_t iTray, const Int_t iModule, const Int_t iCell );
 
+  // general interface, tray number obseleted
+  IntVec TDIGChan2Cell( const Int_t iTdc );
+  Int_t Cell2TDIGChan( const Int_t iModule, const Int_t iCell );
+  Int_t PMT2TDIGLeChan( const Int_t iTube );
+  Int_t TDIGLeChan2PMT( const Int_t iTdc );
+  Int_t PMT2TDIGTeChan( const Int_t iTube );
+  Int_t TDIGTeChan2PMT( const Int_t iTdc );
+
+  
 };
 
 #endif
