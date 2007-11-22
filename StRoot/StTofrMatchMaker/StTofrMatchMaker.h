@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.8 2007/02/28 23:32:00 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.9 2007/11/22 00:22:37 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.9  2007/11/22 00:22:37  dongx
+ * update for run8 - first version
+ *
  * Revision 1.8  2007/02/28 23:32:00  dongx
  * completion for Run V matching
  *   - trailing tdc and leading tdc stored as adc and tdc in StTofCell
@@ -43,6 +46,11 @@
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
 
+#define VHRBIN2PS 24.414  // Very High resolution mode, pico-second per bin
+                          // 1000*25/1024 (ps/chn)
+#define HRBIN2PS 97.656   // High resolution mode, pico-second per bin
+                          // 97.65625= 1000*100/1024  (ps/chn)
+
 #include <string>
 #include <vector>
 #ifndef ST_NO_NAMESPACES
@@ -56,6 +64,7 @@ class StHelix;
 #include "StThreeVectorD.hh"
 class StTrackGeometry;
 #include "StTofUtil/StSortTofRawData.h"
+class StTofINLCorr;
 class StTofrGeometry;
 class StTofCollection;
 class StTofCellCollection;
@@ -100,6 +109,7 @@ public:
 
     Int_t processEventYear2to4();
     Int_t processEventYear5();
+    Int_t processEventYear8();
 
 private:
     StTrackGeometry* trackGeometry(StTrack*);//!
@@ -120,6 +130,9 @@ private:
     //    float GetINLcorr(int edgeid,int tempchan,int bin);
     //
 
+    //y8++ INL Corr moved here
+    float getINLCorr(int boardId, int tdcChanId);
+
 public:
     Bool_t  doPrintMemoryInfo;     //! 
     Bool_t  doPrintCpuInfo;        //!
@@ -131,6 +144,15 @@ private:
     static const Int_t mNTOFR = 120;
     static const Int_t mNTOFR5 = 192; 
     //    static const Float_t mWidthPad = 3.45;
+
+    static const Int_t mNTOF = 192;    // 192 for tof in Run 8++
+    static const Int_t mNTray = 5;     // not used
+    static const Int_t mNModule = 32;  // 32 for tofr5++ 
+    static const Int_t mNCell = 6;
+    static const Int_t mNVPD = 19;    //
+
+    static const Int_t mEastVpdTrayId = 901;
+    static const Int_t mWestVpdTrayId = 902;
 
     Float_t     mWidthPad;
     Float_t	mTofrAdc[mNTOFR];
@@ -162,6 +184,8 @@ private:
     StTofrGeometry *mTofrGeom; //! pointer to the TOFr geometry utility class
     StTofrDaqMap *mDaqMap; //! pointer to the TOFr daq map
     StSortTofRawData *mSortTofRawData; // sorted TOFr5 raw data
+    // tofr8++
+    StTofINLCorr *mTofINLCorr;   // INL Correction
     
     Bool_t mHisto; //! create, fill and write out histograms
     
@@ -169,6 +193,8 @@ private:
     Bool_t mYear3; //! STAR year3: TOFp+pVPD+TOFr
     Bool_t mYear4; //! STAR year4: TOFp+pVPD+TOFr'
     Bool_t mYear5; //! STAR year5: pVPD+TOFr5
+    Bool_t mYear8; //! STAR year8; upVPD+TOFr8
+
     Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
     Bool_t mGeometrySave;
 
@@ -191,7 +217,6 @@ private:
     unsigned int mMinFitPointsPerTrack; //! lower cut on #fitpoints per track
     Float_t mMaxDCA; //! upper cut (centimeters) on final (global) DCA
     
-
     //
 
     // TOFr histograms
@@ -255,7 +280,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.8 2007/02/28 23:32:00 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.9 2007/11/22 00:22:37 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
