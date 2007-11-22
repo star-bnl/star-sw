@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.10 2007/11/21 19:31:28 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.11 2007/11/22 00:04:13 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,8 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
- * Revision 1.10  2007/11/21 19:31:28  dongx
- * added ValidTrays() for multi-tray system
+ * Revision 1.11  2007/11/22 00:04:13  dongx
+ * - update for tof8++
+ * - added ValidTrays() function
  *
  * Revision 1.8  2007/04/17 23:01:52  dongx
  * replaced with standard STAR Loggers
@@ -476,7 +477,7 @@ Int_t StTofrDaqMap::PMT2TDIGLeChan( const Int_t iTube )
     return -1;
   }
 
-  return mPMT2TDIGLeChan[iTube];
+  return mPMT2TDIGLeChan[iTube-1];
 }
 
 Int_t StTofrDaqMap::PMT2TDIGTeChan( const Int_t iTube )
@@ -486,27 +487,27 @@ Int_t StTofrDaqMap::PMT2TDIGTeChan( const Int_t iTube )
     return -1;
   }
 
-  return mPMT2TDIGTeChan[iTube];
+  return mPMT2TDIGTeChan[iTube-1];
 }
 
 Int_t StTofrDaqMap::TDIGLeChan2PMT( const Int_t iTdc )
 {
-  if ( iTdc<1 || iTdc>mNTOF ) {
+  if ( iTdc<0 || iTdc>=mNTOF ) {
     LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
     return -1;
   }
 
-  return mTDIGLe2PMTChan[iTdc];
+  return mTDIGLe2PMTChan[iTdc] + 1;
 }
 
 Int_t StTofrDaqMap::TDIGTeChan2PMT( const Int_t iTdc )
 {
-  if ( iTdc<1 || iTdc>mNTOF ) {
+  if ( iTdc<0 || iTdc>=mNTOF ) {
     LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
     return -1;
   }
 
-  return mTDIGTe2PMTChan[iTdc];
+  return mTDIGTe2PMTChan[iTdc] + 1;
 }
 
 IntVec StTofrDaqMap::ValidTrays()
