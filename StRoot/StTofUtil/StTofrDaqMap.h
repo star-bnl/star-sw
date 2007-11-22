@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.h,v 1.5 2007/11/21 19:31:29 dongx Exp $
+ * $Id: StTofrDaqMap.h,v 1.6 2007/11/22 00:04:13 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,8 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.h,v $
- * Revision 1.5  2007/11/21 19:31:29  dongx
- * added ValidTrays() for multi-tray system
+ * Revision 1.6  2007/11/22 00:04:13  dongx
+ * - update for tof8++
+ * - added ValidTrays() function
  *
  * Revision 1.3  2005/04/12 17:23:15  dongx
  * Update for year 5 new data format, writter by Jing Liu

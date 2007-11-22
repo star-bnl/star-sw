@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofINLCorr.cxx,v 1.1 2007/11/21 18:05:49 dongx Exp $
+ * $Id: StTofINLCorr.cxx,v 1.2 2007/11/22 00:04:13 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,8 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofINLCorr.cxx,v $
- * Revision 1.1  2007/11/21 18:05:49  dongx
- * first release for run8++
+ * Revision 1.2  2007/11/22 00:04:13  dongx
+ * - update for tof8++
+ * - added ValidTrays() function
  *
  *
  *
