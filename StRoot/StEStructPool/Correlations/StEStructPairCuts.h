@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.12 2007/01/26 17:17:11 msd Exp $
+ * $Id: StEStructPairCuts.h,v 1.13 2007/11/26 19:55:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -37,7 +37,20 @@ protected:
   CutName mCoulombName;
   CutName mMergingName;
   CutName mCrossingName;
+  CutName mpionMomentumName;
+  CutName mKaonMomentumName;
+  CutName mprotonMomentumName;
 
+  CutName mpionOtherMassName;
+  CutName mpionpionMassName;
+  CutName mpionKaonMassName;
+  CutName mpionprotonMassName;
+  CutName mKaonOtherMassName;
+  CutName mKaonKaonMassName;
+  CutName mKaonprotonMassName;
+  CutName mprotonOtherMassName;
+  CutName mprotonprotonMassName;
+  CutName mOtherOtherMassName;
 
   float mdphi[2];
   float mdeta[2];
@@ -52,16 +65,35 @@ protected:
   float mCoulomb[4];
   float mMerging[2];
   float mCrossing[2];
+  float mdEdxMomentumCut[4][2];
+  float mpionOtherMass[2];
+  float mpionpionMass[2];
+  float mpionKaonMass[2];
+  float mpionprotonMass[2];
+  float mKaonOtherMass[2];
+  float mKaonKaonMass[2];
+  float mKaonprotonMass[2];
+  float mprotonOtherMass[2];
+  float mprotonprotonMass[2];
+  float mOtherOtherMass[2];
 
   bool  mdeltaPhiCut,    mdeltaEtaCut,    mdeltaMtCut;
   bool  mqInvCut,        mEntSepCut,      mExitSepCut,   mQualityCut;
   bool  mMidTpcSepLSCut, mMidTpcSepUSCut;
   bool  mHBTCut,         mCoulombCut,     mMergingCut,   mCrossingCut;
+  bool  mpionMomentumCut, mKaonMomentumCut, mprotonMomentumCut;
+  bool  mpionOtherMassCut, mpionpionMassCut, mpionKaonMassCut, mpionprotonMassCut;
+  bool  mKaonOtherMassCut, mKaonKaonMassCut, mKaonprotonMassCut, mprotonOtherMassCut;
+  bool  mprotonprotonMassCut, mOtherOtherMassCut;
 
-  int   mdphiCounter[4], mdetaCounter[4], mdmtCounter[4];
-  int   mqInvCounter[4],   mEntSepCounter[4],  mExitSepCounter[4],  mQualityCounter[4];
-  int   msplitLSCounter[4],  msplitUSCounter[4];
-  int   mHBTCounter[4],  mCoulombCounter[4], mMergingCounter[4], mCrossingCounter[4];  
+  int  mdphiCounter[4], mdetaCounter[4], mdmtCounter[4];
+  int  mqInvCounter[4],   mEntSepCounter[4],  mExitSepCounter[4],  mQualityCounter[4];
+  int  msplitLSCounter[4],  msplitUSCounter[4];
+  int  mHBTCounter[4],  mCoulombCounter[4], mMergingCounter[4], mCrossingCounter[4];  
+  int  mpionMomentumCounter[4], mKaonMomentumCounter[4], mprotonMomentumCounter[4];
+  int  mpionOtherMassCounter[4], mpionpionMassCounter[4], mpionKaonMassCounter[4], mpionprotonMassCounter[4];
+  int  mKaonOtherMassCounter[4], mKaonKaonMassCounter[4], mKaonprotonMassCounter[4], mprotonOtherMassCounter[4];
+  int  mprotonprotonMassCounter[4], mOtherOtherMassCounter[4];
 
   // if data stored for subsequent use.... e.g. next cut, histogramming
   float  mdeltaPhi, mdeltaEta, mdeltaMt;
@@ -100,6 +132,7 @@ public:
 
   float BField() const { return mBField; };
   void SetBField(const float bfield){ mBField=bfield; };
+  int  getdEdxPID(const StEStructTrack *t);
 
   // StEStructPairCuts stuff
 
@@ -186,6 +219,7 @@ const  StEStructTrack*      Track2() const;
        int  cutCoulomb();
        int  cutMerging();
        int  cutCrossing();
+       int  cutMass();
        
        // calls above set but fills histogramming variables
        int  cutDeltaPhiH();
@@ -477,6 +511,192 @@ inline int StEStructPairCuts::cutCrossing(){
   return ++(mCrossingCounter[mType]);
 }
 
+inline int StEStructPairCuts::cutMass() {
+    if (!(mpionOtherMassCut    | mpionpionMassCut | mpionKaonMassCut   | mpionprotonMassCut  |
+          mKaonOtherMassCut    | mKaonKaonMassCut | mKaonprotonMassCut | mprotonOtherMassCut |
+          mprotonprotonMassCut | mOtherOtherMassCut)) {
+        return 0;
+    }
+
+    int mode[4][4] = {{9, 0, 4, 7}, {0, 1, 2, 3}, {4, 2, 5, 6}, {7, 3, 6, 8}};
+    int it1 = getdEdxPID( Track1() );
+    int it2 = getdEdxPID( Track2() );
+    if (it1 < 0 || 3 < it1) {
+        return 0;
+    }
+    if (it2 < 0 || 3 < it2) {
+        return 0;
+    }
+    int iBin = mode[it1][it2];
+
+    double e, e1, e2, p1, p2, p[3], m, m1, m2;
+    p1   = Track1()->Ptot();
+    p2   = Track2()->Ptot();
+    p[0] = Track1()->Px() + Track2()->Px();
+    p[1] = Track1()->Py() + Track2()->Py();
+    p[2] = Track1()->Pz() + Track2()->Pz();
+    float Mass[]  = {0.1396,  0.1396,  0.497, 0.9383};
+    float Mass2[] = {0.01949, 0.01949, 0.247, 0.880};
+    if (9 == iBin) {
+        // For o-o try using m1 = m2 = 0.
+        m1 = 0;
+        m2 = 0;
+        e1 = p1;
+        e2 = p2;
+    } else {
+        m1 = Mass[it1];
+        m2 = Mass[it2];
+        e1 = sqrt(p1*p1 + Mass2[it1]);
+        e2 = sqrt(p2*p2 + Mass2[it2]);
+    }
+    e = e1 + e2;
+    m = sqrt(e*e - p[0]*p[0] - p[1]*p[1] - p[2]*p[2]);
+    // Cut on invariant mass to keep or exclude resonances.
+    switch(iBin) {
+        case 0: {  // pion-Other
+            if (mpionOtherMassCut) {
+                if (mpionOtherMass[0] < mpionOtherMass[1]) { // Exclude mass within window
+                    if ((mpionOtherMass[0] < m) && (m < mpionOtherMass[1])) {
+                        return ++(mpionOtherMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mpionOtherMass[1]) || (mpionOtherMass[0] < m)) {
+                        return ++(mpionOtherMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 1: {  // pion-pion
+            if (mpionpionMassCut) {
+                if (mpionpionMass[0] < mpionpionMass[1]) { // Exclude mass within window
+                    if ((mpionpionMass[0] < m) && (m < mpionpionMass[1])) {
+                        return ++(mpionpionMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mpionpionMass[1]) || (mpionpionMass[0] < m)) {
+                        return ++(mpionpionMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 2: {  // pion-Kaon
+            if (mpionKaonMassCut) {
+                if (mpionKaonMass[0] < mpionKaonMass[1]) { // Exclude mass within window
+                    if ((mpionKaonMass[0] < m) && (m < mpionKaonMass[1])) {
+                        return ++(mpionKaonMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mpionKaonMass[1]) || (mpionKaonMass[0] < m)) {
+                        return ++(mpionKaonMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 3: {  // pion-proton
+            if (mpionprotonMassCut) {
+                if (mpionprotonMass[0] < mpionprotonMass[1]) { // Exclude mass within window
+                    if ((mpionprotonMass[0] < m) && (m < mpionprotonMass[1])) {
+                        return ++(mpionprotonMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mpionprotonMass[1]) || (mpionprotonMass[0] < m)) {
+                        return ++(mpionprotonMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 4: {  // Kaon-Other
+            if (mKaonOtherMassCut) {
+                if (mKaonOtherMass[0] < mKaonOtherMass[1]) { // Exclude mass within window
+                    if ((mKaonOtherMass[0] < m) && (m < mKaonOtherMass[1])) {
+                        return ++(mKaonOtherMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mKaonOtherMass[1]) || (mKaonOtherMass[0] < m)) {
+                        return ++(mKaonOtherMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 5: {  // Kaon-Kaon
+            if (mKaonKaonMassCut) {
+                if (mKaonKaonMass[0] < mKaonKaonMass[1]) { // Exclude mass within window
+                    if ((mKaonKaonMass[0] < m) && (m < mKaonKaonMass[1])) {
+                        return ++(mKaonKaonMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mKaonKaonMass[1]) || (mKaonKaonMass[0] < m)) {
+                        return ++(mKaonKaonMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 6: {  // Kaon-proton
+            if (mKaonprotonMassCut) {
+                if (mKaonprotonMass[0] < mKaonprotonMass[1]) { // Exclude mass within window
+                    if ((mKaonprotonMass[0] < m) && (m < mKaonprotonMass[1])) {
+                        return ++(mKaonprotonMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mKaonprotonMass[1]) || (mKaonprotonMass[0] < m)) {
+                        return ++(mKaonprotonMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 7: {  // proton-Other
+            if (mprotonOtherMassCut) {
+                if (mprotonOtherMass[0] < mprotonOtherMass[1]) { // Exclude mass within window
+                    if ((mprotonOtherMass[0] < m) && (m < mprotonOtherMass[1])) {
+                        return ++(mprotonOtherMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mprotonOtherMass[1]) || (mprotonOtherMass[0] < m)) {
+                        return ++(mprotonOtherMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 8: {  // proton-proton
+            if (mprotonprotonMassCut) {
+                if (mprotonprotonMass[0] < mprotonprotonMass[1]) { // Exclude mass within window
+                    if ((mprotonprotonMass[0] < m) && (m < mprotonprotonMass[1])) {
+                        return ++(mprotonprotonMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mprotonprotonMass[1]) || (mprotonprotonMass[0] < m)) {
+                        return ++(mprotonprotonMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+        case 9: {  // Other-Other
+            if (mOtherOtherMassCut) {
+                if (mOtherOtherMass[0] < mOtherOtherMass[1]) { // Exclude mass within window
+                    if ((mOtherOtherMass[0] < m) && (m < mOtherOtherMass[1])) {
+                        return ++(mOtherOtherMassCounter[mType]);
+                    }
+                } else {  // Keep only pairs within mass windo
+                    if ((m < mOtherOtherMass[1]) || (mOtherOtherMass[0] < m)) {
+                        return ++(mOtherOtherMassCounter[mType]);
+                    }
+                }
+            }
+            break;
+        }
+    }
+    return 0;
+}
+
 inline int StEStructPairCuts::cutDeltaPhiH(){
   if(!mdeltaPhiCut) return 0;
   mretVal=cutDeltaPhi();
@@ -594,6 +814,13 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.13  2007/11/26 19:55:25  prindle
+ * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
+ *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
+ *    Binning          Added parent binning (for \hat{p_t}
+ *    CutBin:          Mode 5 extensively modified.
+ *                     Added invariant mass cuts (probably a bad idea in general.)
+ *
  * Revision 1.12  2007/01/26 17:17:11  msd
  * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.13 2007/01/26 17:17:08 msd Exp $
+ * $Id: StEStructBinning.h,v 1.14 2007/11/26 19:55:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -259,6 +259,12 @@ public:
   float etaMin()   { return minEta; }
   float getBinWidthEta() { return dEta; }
   int   etaBins() { return nEta; };
+  int   setNEtaBins( int nbins) {
+      nEta = nbins;
+      dEta = (maxEta-minEta)/(float)nEta;
+      calculateDEtaWeights();
+      return nEta;
+  };
 
   float ytMax()    { return maxYt; }
   float ytMin()    { return minYt; }
@@ -294,20 +300,25 @@ public:
   // For now symmetrize the histograms here.
   float dphiMax()   {
       if (nDPhi%2 > 0) {
-	return 3*M_PI/2 + M_PI/(hdphiBins()-1);
+          return 3*M_PI/2 + M_PI/(hdphiBins()-1);
       } else {
           return 3*M_PI/2;
       }
   }
   float dphiMin()   {
       if (nDPhi%2 > 0) {
-	return -M_PI/2 - M_PI/(hdphiBins()-1);
+          return -M_PI/2 - M_PI/(hdphiBins()-1);
       } else {
           return -M_PI/2;
       }
   }
   float getBinWidthDPhi() { return dDPhi; }
   int   dphiBins() { return nDPhi; }
+  int   setNDPhiBins( int nbins ) {
+      nDPhi = nbins;
+      dDPhi = M_PI/((float)nDPhi-1.0);
+      return nDPhi;
+  }
   int   hdphiBins() {
       if (nDPhi%2 > 0) {
           return 2*nDPhi-1;
@@ -320,6 +331,12 @@ public:
   float detaMin()   { return -maxDEta; }
   float getBinWidthDEta() { return dDEta; }
   int   detaBins() { return nDEta; };
+  int   setNDEtaBins( int nbins) {
+      nDEta = nbins;
+      dDEta = (maxDEta-minDEta)/((float)nDEta-0.5);
+      calculateDEtaWeights();
+      return nDEta;
+  };
   int   hdetaBins() { return 2*nDEta-1; };
 
   float dytMax()    { return maxDYt; }
@@ -341,6 +358,12 @@ public:
   float setaMin()   { return minSEta; }
   float getBinWidthSEta() { return dSEta; }
   int   setaBins() { return nSEta; };
+  int   setNSEtaBins( int nbins ) {
+      nSEta = nbins;
+      dSEta = (maxSEta-minSEta)/(float)nSEta;
+      calculateDEtaWeights();
+      return nSEta;
+  };
 
   float sytMax()    { return maxSYt; }
   float sytMin()    { return minSYt; }
@@ -440,7 +463,7 @@ inline float StEStructBinning::dphiVal(int idphi, int which) {
         if (dphi < M_PI/2) {
             return -dphi;
         } else {
-	  return 2*M_PI - dphi;
+            return 2*M_PI - dphi;
         }
     }
     return 99;
@@ -624,6 +647,13 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.14  2007/11/26 19:55:24  prindle
+ * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
+ *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
+ *    Binning          Added parent binning (for \hat{p_t}
+ *    CutBin:          Mode 5 extensively modified.
+ *                     Added invariant mass cuts (probably a bad idea in general.)
+ *
  * Revision 1.13  2007/01/26 17:17:08  msd
  * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
  *

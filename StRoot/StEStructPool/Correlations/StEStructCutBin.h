@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.8 2007/05/27 22:45:02 msd Exp $
+ * $Id: StEStructCutBin.h,v 1.9 2007/11/26 19:55:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -16,6 +16,7 @@
 
 #include "Stiostream.h"
 #include "TObject.h"
+#include "TH1D.h"
 #include "StEStructPairCuts.h"
 
 class StEStructTrack;
@@ -26,11 +27,13 @@ class StEStructCutBin : public TObject {
 
   int mcutMode;
   int mnumBins;
+  int mnumParentBins;
   char* mcutModeName;
 
   int mPtBins[100]; // returned list of indexes terminated by -1
   float mPtBinMax[100];
   float mPtBinMin[100];
+  TH1D** mHCutBinHists[8];
 
   static StEStructCutBin* mInstance;
   StEStructCutBin(): mcutMode(0), mnumBins(1), mcutModeName(0) { setMode(0); };
@@ -40,7 +43,7 @@ class StEStructCutBin : public TObject {
   int getCutBinMode2(StEStructPairCuts *pc);
   int getCutBinMode3(StEStructPairCuts *pc);
   int getCutBinMode4(StEStructPairCuts *pc);
-  int getCutBinMode5(StEStructPairCuts *pc);
+  int getCutBinMode5(StEStructPairCuts *pc, int pairCase);
   int getCutBinMode6(StEStructPairCuts *pc, int zbin);
   int getCutBinMode7(StEStructPairCuts *pc, int zbin);
   int ignorePair5(StEStructPairCuts *pc);
@@ -56,6 +59,8 @@ class StEStructCutBin : public TObject {
   void initPtBinMode6();
   void initPtBinMode7();
 
+  void writeCutBinHists5();
+
  public:
 
   static StEStructCutBin* Instance();
@@ -65,14 +70,17 @@ class StEStructCutBin : public TObject {
 
   void setMode(int mode);
   int  getMode();
+  // Save histograms (mHCutBinHists) to currently opened file.
+  void writeCutBinHists();
   int  getNumBins();
+  int  getNumParentBins();
+  int  getParentBin(StEStructPairCuts *p, StEStructTrack* trkPtr);
   int  getNumQABins();
-  int  getCutBin(StEStructPairCuts *pc, int zbin=0);
+  int  getCutBin(StEStructPairCuts *p, int pairCase=0);
   int  ignorePair(StEStructPairCuts *pc);
   int  symmetrizeYt(StEStructPairCuts *pc);
   int  switchYt(StEStructPairCuts *pc);
   int*  getPtBins(float pt);
-  int   getdEdxPID(const StEStructTrack *t);
   char* printCutBinName();
 
   ClassDef(StEStructCutBin,1)
@@ -82,6 +90,7 @@ class StEStructCutBin : public TObject {
 inline char* StEStructCutBin::printCutBinName(){ return mcutModeName; }
 
 inline int StEStructCutBin::getNumBins(){ return mnumBins; }
+inline int StEStructCutBin::getNumParentBins(){ return mnumParentBins; }
 inline int StEStructCutBin::getNumQABins(){
     if (5 == mcutMode) {
         return 4;
@@ -92,7 +101,7 @@ inline int StEStructCutBin::getNumQABins(){
     }
 }
 
-inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int zbin){
+inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int pairCase){
   int retVal=0;
 
  switch (mcutMode){
@@ -123,25 +132,40 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int zbin){
       }
   case 5:
       {
-	retVal=getCutBinMode5(pc);
+	retVal=getCutBinMode5(pc,pairCase);
 	break;
       }
  case 6:
    {
-     retVal=getCutBinMode6(pc, zbin);
+     retVal=getCutBinMode6(pc,pairCase);
      break;
    }
  case 7:
    {
-     retVal=getCutBinMode7(pc, zbin);
+     retVal=getCutBinMode7(pc,pairCase);
      break;
    }
-  default:
-      {
-	break;
-      }
  }
  return retVal;
+}
+inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* trkPtr) {
+    if (5 != mcutMode) {
+        return 0;
+    } else {
+        return pc->getdEdxPID(trkPtr);
+    }
+}
+inline void StEStructCutBin::writeCutBinHists() {
+    switch (mcutMode) {
+        case 5: {
+            writeCutBinHists5();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    return;
 }
 inline int StEStructCutBin::ignorePair(StEStructPairCuts *pc) {
     if (mcutMode != 5) {
@@ -193,6 +217,13 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.9  2007/11/26 19:55:25  prindle
+ * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
+ *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
+ *    Binning          Added parent binning (for \hat{p_t}
+ *    CutBin:          Mode 5 extensively modified.
+ *                     Added invariant mass cuts (probably a bad idea in general.)
+ *
  * Revision 1.8  2007/05/27 22:45:02  msd
  * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
  * Fixed bug in merging cut.
