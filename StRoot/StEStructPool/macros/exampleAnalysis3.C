@@ -5,8 +5,8 @@ TCanvas* c1=new TCanvas("c1");
 setupPalette();  // set up the colors
 c1->Clear();
 
-c1->SetWindowSize(750,500);
-c1->Divide(3,2);
+c1->SetWindowSize(500,500);
+c1->Divide(2,2);
 
 gStyle->SetOptTitle(0);
 gStyle->SetOptStat(0);
@@ -16,7 +16,7 @@ gROOT->LoadMacro("load2ptLibs.C");
 load2ptLibs();
 gSystem->Load("StEStructPoolSupport.so");
 
-int nCent = 6;
+int nCent = 3;
 TFile *tf[nCent][12];
 StEStructSupport *ehelp[nCent][12];
 TH2F **ytyt[nCent][12];
@@ -26,6 +26,7 @@ TH2F **dedp[nCent][12];
 const char* oname[]={"all","awayside","nearside","soft","softAS","softNS","neck","neckAS","neckNS","hard","hardAS","hardNS"};
 char fileName[1024];
 char *dir = "/common/star/stardata/estruct/prindle/Hijing/auau200/QuenchOff/noSymm_mode3";
+char *dir = "/common/star/stardata/estruct/prindle/Data/pp200/pidTest/productionMinBias_year5";
 //char *dir = "/star/data01/pwg/estruct/prindle/Data/auau19/2001/2pt/MinBias_FewerBins2";
 float sf[2] = {0.98,0.98};
 {
@@ -34,7 +35,7 @@ for (int ic=0;ic<nCent;ic++) {
         sprintf(fileName,"%s/data/Data%i%s.root",dir,ic,oname[it]);
         tf[ic][it] = new TFile(fileName);
         ehelp[ic][it] = new StEStructSupport(tf[ic][it],1);
-        ytyt[ic][it] = (TH2F**) ehelp[ic][it]->buildNChargeTypes("YtYt");
+        ytyt[ic][it] = (TH2F**) ehelp[ic][it]->buildChargeTypes("YtYt",0);
         for(int j=0;j<4;j++){
             float dx = ytyt[ic][it][j]->GetXaxis()->GetBinWidth(1);
             float dy = ytyt[ic][it][j]->GetYaxis()->GetBinWidth(1);
@@ -42,7 +43,7 @@ for (int ic=0;ic<nCent;ic++) {
             ytyt[ic][it][j]->Scale(1.0/sf2);
         }
         ptdedp[ic][it] = (TH2F**) ehelp[ic][it]->buildPtChargeTypes("DEtaDPhi",0,1);
-        dedp[ic][it] = (TH2F**) ehelp[ic][it]->buildNChargeTypes("DEtaDPhi");
+        dedp[ic][it] = (TH2F**) ehelp[ic][it]->buildChargeTypes("DEtaDPhi",0);
     }
 }
 }
@@ -73,7 +74,7 @@ const char* oname[]={"all","awayside","nearside","soft","softAS","softNS",
 char *chargeCombo[] = {"LS", "US", "CD", "CI"};
 char buffer[1024];
 int icut = 0;
-int icharge = 2;
+int icharge = 3;
 {
       for (int ic=0;ic<nCent;ic++) {
         c1->cd(ic+1);
