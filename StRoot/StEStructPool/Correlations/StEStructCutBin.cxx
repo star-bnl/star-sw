@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.9 2007/05/27 22:45:02 msd Exp $
+ * $Id: StEStructCutBin.cxx,v 1.10 2007/11/26 19:55:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,6 +45,7 @@ void StEStructCutBin::setMode(int mode){
   case 0:
     {
       mnumBins=1;
+      mnumParentBins=1;
       strcpy(mcutModeName," No Cut Binning ");
       initPtBinMode0();
       break;
@@ -52,6 +53,7 @@ void StEStructCutBin::setMode(int mode){
   case 1:
     { 
       mnumBins=27;
+      mnumParentBins=1;
       strcpy(mcutModeName," yt1 x yt2 Cut Binning, 27 bins ");
       initPtBinMode1();
       break;
@@ -59,6 +61,7 @@ void StEStructCutBin::setMode(int mode){
   case 2:
     {
       mnumBins=6;
+      mnumParentBins=1;
       strcpy(mcutModeName,"Simple soft/hard same-side/away-side, 6 bins");   // *** new change
       initPtBinMode2();
       break;
@@ -66,6 +69,7 @@ void StEStructCutBin::setMode(int mode){
   case 3:
     {
       mnumBins=16;
+      mnumParentBins=1;
       strcpy(mcutModeName," yt_sum, yt_delta, same-side, away-side Cut Binning, 16 bins");
       initPtBinMode3();
       break;
@@ -73,20 +77,25 @@ void StEStructCutBin::setMode(int mode){
   case 4:
     {
       mnumBins=32;
+      mnumParentBins=1;
       strcpy(mcutModeName," yt_sum, yt_delta, same-side, away-side, minijet fine binning, 16 bins");
       initPtBinMode4();
       break;
     }
   case 5:
     {
-      mnumBins=14;
-      strcpy(mcutModeName," same-side, away-side, identified particles, 14 bins");
+      // mnumBins=14;
+      mnumBins=10;
+      mnumParentBins=4;
+      // strcpy(mcutModeName," same-side, away-side, identified particles, 14 bins");
+      strcpy(mcutModeName," identified particles, 10 bins");
       initPtBinMode5();
       break;
     }
   case 6:
     {
       mnumBins=10;
+      mnumParentBins=1;
       strcpy(mcutModeName," event-wise z-vertex binning, 10 bins");
       initPtBinMode6();
       break;
@@ -94,6 +103,7 @@ void StEStructCutBin::setMode(int mode){
   case 7:
     {
       mnumBins=60;
+      mnumParentBins=1;
       strcpy(mcutModeName," event-wise z-vertex binning & soft/hard SS/AS, 60 bins");
       initPtBinMode7();
       break;
@@ -143,7 +153,6 @@ int StEStructCutBin::getCutBinMode1(StEStructPairCuts* pc){
   }
   return __yt1_x_yt2_bin[imin]+imax-imin;
 }
-
 void StEStructCutBin::initPtBinMode1(){
   // everyone is 0-6
 
@@ -213,6 +222,7 @@ void StEStructCutBin::initPtBinMode2(){
 } 
 
 
+
 //------------------------ Mode=3 -------------------------------------------
 //
 // --> now modified for 
@@ -272,7 +282,6 @@ int StEStructCutBin::getCutBinMode3(StEStructPairCuts* pc){
 
   return  __yt_deta_dphi_bin[iyt][idedp];
 }
-
 void StEStructCutBin::initPtBinMode3(){
 
     mPtBinMin[0]=mPtBinMin[1]=mPtBinMin[2]=mPtBinMin[3]=0.;
@@ -333,7 +342,6 @@ int StEStructCutBin::getCutBinMode4(StEStructPairCuts* pc){
   ival+=iside;
   return ival;
 }
-
 void StEStructCutBin::initPtBinMode4(){
 
   /***********************************************
@@ -403,80 +411,117 @@ void StEStructCutBin::initPtBinMode4(){
 
 //------------------------ Mode=5 -------------------------------------------
 //
-// Mode 3 with additions for dE/dx identifications.
+// Particle id using dE/dx identification.
 //    Use dE/dx to identify pi, K, p within momentum ranges where this
 //    is possible. 
-// No yt cut for now. Having problem with memory usage (I think)
-// and cutting on Ptot (because of dEdx selection) at mid-rapidity
-// turns out to be a cut in yt space.
+// No yt cut for since dEdx works over a limited momentum range.
 //
-// First bit used for eta-phi cut.
-//     0 = away-side
-//     1 = same-side
-// Next three bits for dE/dx (shift by 1 for actual value)
-//   000 = pi-pi
-//   001 = pi-K
-//   010 = pi-p
-//   011 = K-K
-//   100 = K-p
-//   101 = p-p
-//   110 = rest
-//
-// So a bin of 9 (for example) would mean K-p in dE/dx space,
-// and same side in eta-phi space.
-// Number of bins required is 14.
+// The cut values and their meanings are:
+//   0  pi-o  pair (where o is not pi, K or p)
+//   1  pi-pi pair.
+//   2  pi-K  pair
+//   3  pi-p  pair
+//   4  K-o   pair (where o is not pi, K or p)
+//   5  K-K   pair
+//   6  K-p   pair
+//   7  p-o   pair (where o is not pi, K or p)
+//   8  p-p   pair
+//   9  o-o   pair (where o is not pi, K or p)
 //
 // To check on charge symmetry we have split out the -+ from the +-
 // in the other parts of the Correlation code.
 
-int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc){
+int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc, int pairCase) {
 
-  //  float dphi = fabs(pc->DeltaPhi());
-  int idedp = 1;
-  if(!pc->sameSide()) {
-    idedp=0;
-  }
+    int mode[4][4] = {{9, 0, 4, 7}, {0, 1, 2, 3}, {4, 2, 5, 6}, {7, 3, 6, 8}};
 
-  int it1 = getdEdxPID( pc->Track1() );
-  int it2 = getdEdxPID( pc->Track2() );
-  int ipid = 6;
-  if (0 == it1 || 0 == it2) {
-      ipid = 6;
-      return idedp + 2*ipid;
-  }
+    int it1 = pc->getdEdxPID( pc->Track1() );
+    int it2 = pc->getdEdxPID( pc->Track2() );
+    if (it1 < 0 || 3 < it1) {
+        return -1;
+    }
+    if (it2 < 0 || 3 < it2) {
+        return -2;
+    }
+    int iBin = mode[it1][it2];
 
-  if (1 == it1) {
-      if (1 == it2) {
-          ipid = 0;
-      } else if (2 == it2) {
-          ipid = 1;
-      } else if (3 == it2) {
-          ipid = 2;
-      } else {
-          ipid = 6;
-      }
-  } else if (2 == it1) {
-      if (1 == it2) {
-          ipid = 1;
-      } else if (2 == it2) {
-          ipid = 3;
-      } else if (3 == it2) {
-          ipid = 4;
-      } else {
-          ipid = 6;
-      }
-  } else if (3 == it1) {
-      if (1 == it2) {
-          ipid = 2;
-      } else if (2 == it2) {
-          ipid = 4;
-      } else if (3 == it2) {
-          ipid = 5;
-      } else {
-          ipid = 6;
-      }
-  }
-  return  idedp + 2*ipid;
+    // Might want to make invariant mass cuts.
+    double e, e1, e2, p1, p2, p[3], m, m1, m2;
+    p1   = pc->Track1()->Ptot();
+    p2   = pc->Track2()->Ptot();
+    p[0] = pc->Track1()->Px() + pc->Track2()->Px();
+    p[1] = pc->Track1()->Py() + pc->Track2()->Py();
+    p[2] = pc->Track1()->Pz() + pc->Track2()->Pz();
+    float Mass[]  = {0.1396,  0.1396,  0.497, 0.9383};
+    float Mass2[] = {0.01949, 0.01949, 0.247, 0.880};
+    if (9 == iBin) {
+        // For o-o try using m1 = m2 = 0.
+        m1 = 0;
+        m2 = 0;
+        e1 = p1;
+        e2 = p2;
+    } else {
+        m1 = Mass[it1];
+        m2 = Mass[it2];
+        e1 = sqrt(p1*p1 + Mass2[it1]);
+        e2 = sqrt(p2*p2 + Mass2[it2]);
+    }
+    e = e1 + e2;
+    m = sqrt(e*e - p[0]*p[0] - p[1]*p[1] - p[2]*p[2]);
+/*
+ * Moved the invariant mass cuts to StEStructPairCuts code.
+ *
+    // Cut on invariant mass to keep or exclude resonances.
+    // (Not sure how to bring these in through a cuts file.)
+    int resType = 0;
+    switch(iBin) {
+        case 1: {  // K_short in pi^+ pi^-
+            if ((0.47 < m) && (m < 0.51)) {
+                resType = 1;
+            }
+            break;
+        }
+        case 2: {  // K^* in pi^- K^+
+            if ((0.85 < m) && (m < 0.93)) {
+                resType = 2;
+            }
+            break;
+        }
+        case 3: {  // Lambda in pi^- p
+            if ((1.10 < m) && (m < 1.125)) {
+                resType = 3;
+            }
+            break;
+        }
+        case 5: {  // phi in K^+K^-
+            if ((1.01 < m) && (m < 1.04)) {
+                resType = 4;
+            }
+            break;
+        }
+        case 6: {  // Lambda^* in K^- p
+            if ((1.49 < m) && (m < 1.55)) {
+                resType = 5;
+            }
+            break;
+        }
+        case 8: {  // Unknown threshold thing in pp (NOT in \bar p\bar p
+            if ((1.87 < m) && (m < 1.92)) {
+                resType = 6;
+            }
+            break;
+        }
+    }
+ */
+    mHCutBinHists[pairCase][iBin]->Fill(m - m1 - m2 + 0.1);
+
+    e1 = sqrt(p1*p1 + Mass2[1]);
+    e2 = sqrt(p2*p2 + Mass2[1]);
+    e = e1 + e2;
+    m = sqrt(e*e - p[0]*p[0] - p[1]*p[1] - p[2]*p[2]) - Mass[1] - Mass[1] + 0.1;
+    mHCutBinHists[pairCase][10]->Fill(m);
+
+    return iBin;
 }
 int StEStructCutBin::ignorePair5(StEStructPairCuts* pc) {
 
@@ -494,9 +539,12 @@ int StEStructCutBin::ignorePair5(StEStructPairCuts* pc) {
   * charge is negative.
   * In the main track pair loop every pair will come up twice, the
   * second time in reversed order and we only want it one time.
+  *
+  * If both particles are un-identified we put pair in ipid=9
+  * bin and treat as identical.
   */
-    int ip1 = getdEdxPID( pc->Track1() );
-    int ip2 = getdEdxPID( pc->Track2() );
+    int ip1 = pc->getdEdxPID( pc->Track1() );
+    int ip2 = pc->getdEdxPID( pc->Track2() );
     if (ip1 == ip2) {
         if (-1 == ic1) {
             return 1;
@@ -505,17 +553,11 @@ int StEStructCutBin::ignorePair5(StEStructPairCuts* pc) {
         }
     }
  /*
-  * For particles with different pid and opposite charge we only want
-  * pair if pi is before K or p or else K is before p.
+  * For particles with different pid and opposite charge we only keep if
+  * o < pi < K < p
   */
-    if (1 == ip1) {
-        if ((2 == ip2) || (3 == ip2)) {
-            return 0;
-        }
-    } else if (2 == ip1) {
-        if (3 == ip2) {
-            return 0;
-        }
+    if (ip1 < ip2) {
+        return 0;
     }
     return 1;
 }
@@ -523,11 +565,15 @@ int StEStructCutBin::symmetrizeYt5(StEStructPairCuts* pc) {
 
  /*
   * If particle types and charges are the same we symmetrize.
+  * If both particles are un-identified the pair will be treated
+  * as identical.
   */
     if ( pc->Track1()->Charge() != pc->Track2()->Charge() ) {
         return 0;
     }
-    if (getdEdxPID( pc->Track1() ) != getdEdxPID( pc->Track2() )) {
+    int ip1 = pc->getdEdxPID( pc->Track1() );
+    int ip2 = pc->getdEdxPID( pc->Track2() );
+    if (ip1 != ip2) {
         return 0;
     }
     return 1;
@@ -535,11 +581,11 @@ int StEStructCutBin::symmetrizeYt5(StEStructPairCuts* pc) {
 int StEStructCutBin::switchYt5(StEStructPairCuts* pc) {
 
  /*
-  * For different pid want pi before K and p, K before p.
+  * For different pid order as 0 < pi < K < p.
   * For same pid want + before -.
   */
-    int ipid1 = getdEdxPID( pc->Track1() );
-    int ipid2 = getdEdxPID( pc->Track2() );
+    int ipid1 = pc->getdEdxPID( pc->Track1() );
+    int ipid2 = pc->getdEdxPID( pc->Track2() );
     if (ipid1 == ipid2) {
         if ( (-1 == pc->Track1()->Charge()) &&
              (+1 == pc->Track2()->Charge()) ) {
@@ -547,14 +593,8 @@ int StEStructCutBin::switchYt5(StEStructPairCuts* pc) {
         }
         return 0;
     }
-    if (1 == ipid2) {
-        if ( (2 == ipid1) || (3 == ipid1) ) {
-            return 1;
-        }
-    } else if (2 == ipid2) {
-        if (3 == ipid1) {
-            return 1;
-        }
+    if (ipid2 < ipid1) {
+        return 1;
     }
     return 0;
 }
@@ -587,38 +627,43 @@ void StEStructCutBin::initPtBinMode5(){
   mPtBinMax[2] =    1.0;
   mPtBinMin[3] =    0.0;
   mPtBinMax[3] =    1.5;
+
+
+    TString hname;
+    char *types[] = {"Sibpp", "Sibpm", "Sibmp", "Sibmm",
+                     "Mixpp", "Mixpm", "Mixmp", "Mixmm"};
+    char *bases[] = {"piAll", "pipi", "piK", "pip",
+                     "KAll",  "KK",   "Kp",  "pAll",
+                     "pp",    "OO",   "All"};
+    for (int pairCase=0;pairCase<8;pairCase++) {
+        mHCutBinHists[pairCase] = new TH1D*[11];
+        for (int it=0;it<11;it++) {
+            hname  = "Mass";
+            hname += bases[it];
+            hname += types[pairCase];
+            mHCutBinHists[pairCase][it] = new TH1D(hname.Data(),hname.Data(),500,0.0,3.0);
+//            cout << "Creating histogram for " << hname.Data() << endl;
+        }
+    }
+}
+void StEStructCutBin::writeCutBinHists5() {
+    for (int pairCase=0;pairCase<8;pairCase++) {
+        if (mHCutBinHists[pairCase]) {
+            for (int it=0;it<11;it++) {
+                mHCutBinHists[pairCase][it]->Write();
+//                cout << "Deleting histogram [" << pairCase << "][" << it << "]" << endl;
+                if (mHCutBinHists[pairCase][it]) {
+                    delete mHCutBinHists[pairCase][it];
+                    mHCutBinHists[pairCase][it] = 0;
+                }
+            }
+//            cout << "Deleting array [" << pairCase << "]" << endl;
+            delete [] mHCutBinHists[pairCase];
+            mHCutBinHists[pairCase] = 0;
+        }
+    }
 }
 
-// pi  -> 1
-// K   -> 2
-// p   -> 3
-// Everything else
-//     -> 0
-//
-// June 8, 2006 djp If track is within 1sigma of electron we
-//                  exclude it as pi, K, p. (Tried 2sigma and
-//                  visually that looks really bad.)
-int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
-  float e  = fabs(t->PIDe());
-  if (e < 1) {
-      return 0;
-  }
-  float ptot = t->Ptot();
-  float pi = fabs(t->PIDpi());
-  float k  = fabs(t->PIDk());
-  float p  = fabs(t->PIDp());
-
-  if ((mPtBinMin[1]<ptot) && (ptot<mPtBinMax[1]) && (pi<2.0) && (k>2.0) && (p>2.0)) {
-      return 1;
-  }
-  if ((mPtBinMin[2]<ptot) && (ptot<mPtBinMax[2]) && (pi>2.0) && (k<2.0) && (p>2.0)) {
-      return 2;
-  }
-  if ((mPtBinMin[3]<ptot) && (ptot<mPtBinMax[3]) && (pi>2.0) && (k>2.0) && (p<2.0)) {
-      return 3;
-  }
-  return 0;
-}
 
 //------------------------ Mode=6 -------------------------------------------
 //  Event-wise z-vertex binning
@@ -626,10 +671,10 @@ int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
 //  pc object doesn't have event level info, so cutbin number is set in
 //    2ptanalysis by looking at mixing event buffer index.
 
-int StEStructCutBin::getCutBinMode6(StEStructPairCuts* pc, int zbin) {
+int StEStructCutBin::getCutBinMode6(StEStructPairCuts*, int zbin){
+  // This function should never be used, can't access z-vertex position from here...
   return zbin;
 }
-
 void StEStructCutBin::initPtBinMode6(){
   for(int i=0;i<10;i++){
     mPtBinMin[i]=0.;
@@ -663,7 +708,6 @@ int StEStructCutBin::getCutBinMode7(StEStructPairCuts* pc, int zbin){
   return retVal;
 
 }
-
 void StEStructCutBin::initPtBinMode7(){
   // check these in qa spectra 
 
@@ -676,14 +720,18 @@ void StEStructCutBin::initPtBinMode7(){
     mPtBinMax[i*6 + 2]=mPtBinMax[i*6 + 5]=999.;
   }
 }
-
-
-
-
+  
 
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.10  2007/11/26 19:55:24  prindle
+ * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
+ *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
+ *    Binning          Added parent binning (for \hat{p_t}
+ *    CutBin:          Mode 5 extensively modified.
+ *                     Added invariant mass cuts (probably a bad idea in general.)
+ *
  * Revision 1.9  2007/05/27 22:45:02  msd
  * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
  * Fixed bug in merging cut.

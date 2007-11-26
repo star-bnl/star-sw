@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.11 2007/05/27 22:45:01 msd Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.12 2007/11/26 19:55:23 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -53,11 +53,21 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
  protected:
 
   // Event-level hists needed for normalization and pt-correlations
-  TH1D*  mHNEvents[6];
+  TH1D** mHNEventsSib;
+  TH1D** mHNEventsMix;
+  TH1D** mHNEventsPosSib;
+  TH1D** mHNEventsPosMix;
+  TH1D** mHNEventsNegSib;
+  TH1D** mHNEventsNegMix;
   TH1D*  mHptAll;
-  TH1D** mHpt[2];
   TH2D*  mHmix;
   TH1D*  mHcb;  // my local hist for cutbin usage
+  TH1D **mHMeanPtP;
+  TH1D **mHMeanPtM;
+  TH1D **mHMeanYtP;
+  TH1D **mHMeanYtM;
+  TH1D **mHEtaP;
+  TH1D **mHEtaM;
 
   // HBT parameters
   qBins * mQinv[8]; //!  1D
@@ -184,8 +194,9 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   // generic histogram create functions to simplify the code
   //
 
-  void createHist2D(TH2D*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax, int ny, float ymin, float ymax);
-  void createHist1D(TH1D*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax);
+  void createHist2D(TH2D*** h, const char* name, int iknd, int icut, int zcut, int numCuts, int nx, float xmin, float xmax, int ny, float ymin, float ymax);
+  void createHist1D(TH1D*** h, const char* name, int iknd, int icut, int zcut, int numCuts, int nx, float xmin, float xmax);
+  void createHist1D(TH1F*** h, const char* name, int iknd, int icut, int zcut, int numCuts, int nx, float xmin, float xmax);
   void  moveEvents();
   void  initInternalData();
   int   bufferIndex();
@@ -216,6 +227,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   float kZBuffMin, kZBuffMax; // Read from Cuts file. Default +/- 75cm if not found.
   float kBuffWidth;           // Set to 5 cm in Initr().
   StEStructBuffer mbuffer[_MAX_ZVBINS_];  // kNumBuffers slices in z-vertex from kZBuffMin to +kZBuffMax
+
+  int mZBufferCutBinning;  // If true each z-buffer gets its own but bins.
   //  int             mbuffCounter[_MAX_ZVBINS_];
 
   //-> (pre) histograms & histograms for analysis.
@@ -226,6 +239,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   int numPairs[8];
   int numPairsProcessed[8];
   int mpossiblePairs[8];
+  int mInterestingPair;
 
   StEStruct2ptCorrelations(int mode=0);
   StEStruct2ptCorrelations(StEStructPairCuts* pcuts, int mode=0);
@@ -235,6 +249,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   void  setAnalysisMode(int mode);
   void  setCutFile(const char* cutFileName);  
   void  setZBuffLimits(StEStructCuts* cuts);// const char* cutFileName );
+  void  setZBufferBinning(int zBinning);
   void  setQAHists(StEStructQAHists* qaHists);
   void  setPairCuts(StEStructPairCuts* cuts);
 
@@ -265,6 +280,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   int   getNumPairs(int i){ return numPairs[i]; };
   int   getNumPairsProcessed(int i){ return numPairsProcessed[i]; };
   int   getPossiblePairs(int i){ return mpossiblePairs[i]; };
+  int   setInterestingPair(int interest);
+  int   getInterestingPair();
 
   void logStats(ostream& os);
 
@@ -285,6 +302,10 @@ inline void StEStruct2ptCorrelations::setOutputFileName(const char* fName){
   strcpy(moutFileName,fName);
 }
 
+inline void StEStruct2ptCorrelations::setZBufferBinning(int zBinning){
+  mZBufferCutBinning = zBinning;
+}
+
 inline void StEStruct2ptCorrelations::setQAHists(StEStructQAHists* qahists){
   mQAHists = qahists;
 }
@@ -301,6 +322,12 @@ inline void StEStruct2ptCorrelations::setQAOutputFileName(const char* fName){
 
 inline StEStructPairCuts* StEStruct2ptCorrelations::getPairCuts() {
   return mPairCuts;
+}
+inline int StEStruct2ptCorrelations::setInterestingPair(int interest) {
+  return mInterestingPair = interest;
+}
+inline int StEStruct2ptCorrelations::getInterestingPair() {
+  return mInterestingPair;
 }
 
 inline void StEStruct2ptCorrelations::logStats(ostream& os){
@@ -325,6 +352,13 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.12  2007/11/26 19:55:23  prindle
+ * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
+ *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
+ *    Binning          Added parent binning (for \hat{p_t}
+ *    CutBin:          Mode 5 extensively modified.
+ *                     Added invariant mass cuts (probably a bad idea in general.)
+ *
  * Revision 1.11  2007/05/27 22:45:01  msd
  * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
  * Fixed bug in merging cut.

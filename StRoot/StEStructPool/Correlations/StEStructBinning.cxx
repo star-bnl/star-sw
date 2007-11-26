@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.9 2007/01/26 17:17:07 msd Exp $
+ * $Id: StEStructBinning.cxx,v 1.10 2007/11/26 19:55:23 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,12 +45,15 @@ StEStructBinning::StEStructBinning(){
   dSPhi=(maxSPhi-minSPhi)/(float)nSPhi;
 
   //--> eta ranges <--
+  nEta  = ESTRUCT_ETA_BINS-1;
+  nDEta = ESTRUCT_DETA_BINS-1;
+  nSEta = ESTRUCT_SETA_BINS-1;
   setEtaRange(-1.0,1.0);
 
   //--> yt ranges <--
-  
-  minYt=0.9; //0.9; //0.15;
-  maxYt=4.5; //5.0;//4.5; // 0.925;
+
+  minYt=0.5; //0.9; //0.15;
+  maxYt=5.0; //5.0;//4.5; // 0.925;
   nYt = ESTRUCT_YT_BINS-1;
   dYt = (maxYt-minYt)/(float)nYt;
 
@@ -63,10 +66,10 @@ StEStructBinning::StEStructBinning(){
   minSYt=0.9; //2 * minYt;
   nSYt = ESTRUCT_SYT_BINS-1;
   dSYt=(maxSYt-minSYt)/(float)nSYt;
-  
- 
+
+
   //--> xt ranges <--
-  
+
   minXt= 1 - exp(-(sqrt(0.15*0.15+0.139*0.139)-0.139)/0.4);  // from Aya's code
   maxXt=0.99; // from Aya's code
   nXt = ESTRUCT_XT_BINS-1;
@@ -139,19 +142,16 @@ void StEStructBinning::setEtaRange(float xmin, float xmax){
 
   minEta=xmin;
   maxEta=xmax;
-  nEta = ESTRUCT_ETA_BINS-1;
   dEta= (maxEta-minEta)/(float)nEta;
 
   maxDEta=2*maxEta;//2*maxEta;
   minDEta=0.;//0; //2*minEta;
-  nDEta=ESTRUCT_DETA_BINS-1;
   dDEta=(maxDEta-minDEta)/((float)nDEta-0.5);
 
   calculateDEtaWeights(); // --> MUST do whenever setEtaRange is called!!!!
 
   maxSEta=2*maxEta;
   minSEta=2*minEta;
-  nSEta = ESTRUCT_SETA_BINS-1;
   dSEta=(maxSEta-minSEta)/(float)nSEta;
 
 }
@@ -161,7 +161,7 @@ void StEStructBinning::setEtaRange(float xmin, float xmax){
 void StEStructBinning::calculateDEtaWeights() {
 
     // init to 0
-    for(int i=0;i<ESTRUCT_DETA_BINS;i++) {
+    for(int i=0;i<=nDEta;i++) {
       mdetaWeights.x.deta[i]=0.;
     }
 
@@ -172,7 +172,7 @@ void StEStructBinning::calculateDEtaWeights() {
     // then use 1/4 shift ...
     double fdeta0 = dDEta/4.0;
     mdetaWeights.x.deta[0]  = 1.0/(1.0 - (fdeta0/maxDEta));
-    for(int i=1;i<ESTRUCT_DETA_BINS-1;i++){
+    for(int i=1;i<nDEta;i++){
         fdeta0 = fabs(detaVal(i));
         mdetaWeights.x.deta[i]  = 1.0/(1.0 - (fdeta0/maxDEta));
     }
@@ -182,6 +182,13 @@ void StEStructBinning::calculateDEtaWeights() {
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.10  2007/11/26 19:55:23  prindle
+ * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
+ *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
+ *    Binning          Added parent binning (for \hat{p_t}
+ *    CutBin:          Mode 5 extensively modified.
+ *                     Added invariant mass cuts (probably a bad idea in general.)
+ *
  * Revision 1.9  2007/01/26 17:17:07  msd
  * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
  *

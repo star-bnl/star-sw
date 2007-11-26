@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.7 2007/05/27 22:45:03 msd Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.8 2007/11/26 19:55:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,13 +45,34 @@ void StEStructPairCuts::initCuts(){
     mCoulomb[0]=mCoulomb[1]=mCoulomb[2]=mCoulomb[3]=0;
     mMerging[0]=mMerging[1]=0;
     mCrossing[0]=mCrossing[1]=0;
+
+    // Would be nice to have some way to change these without recompiling.
+    mdEdxMomentumCut[0][0] =   0.0;
+    mdEdxMomentumCut[0][1] = 999.0;
+    mdEdxMomentumCut[1][0] =   0.1;  // pi
+    mdEdxMomentumCut[1][1] =   1.0;
+    mdEdxMomentumCut[2][0] =   0.1;  // K
+    mdEdxMomentumCut[2][1] =   1.0;
+    mdEdxMomentumCut[3][0] =   0.2;  // p
+    mdEdxMomentumCut[3][1] =   1.5;
     
     mdeltaPhiCut=mdeltaEtaCut=mdeltaMtCut=mqInvCut=mEntSepCut=mExitSepCut=mQualityCut=mMidTpcSepLSCut=mMidTpcSepUSCut=false;
     mHBTCut=mCoulombCut=mMergingCut=mCrossingCut = false;
+    mpionMomentumCut=mKaonMomentumCut=mprotonMomentumCut = false;
+    mpionOtherMassCut=mpionpionMassCut=mpionKaonMassCut=mpionprotonMassCut = false;
+    mKaonOtherMassCut=mKaonKaonMassCut=mKaonprotonMassCut=mprotonOtherMassCut = false;
+    mprotonprotonMassCut=mOtherOtherMassCut = false;
 
-    for(int i=0;i<4;i++)
-    mdphiCounter[i]=mdetaCounter[i]=mdmtCounter[i]=mqInvCounter[i]=mEntSepCounter[i]=mExitSepCounter[i]=mQualityCounter[i]=msplitLSCounter[i]=msplitUSCounter[i]=mHBTCounter[i]=mCoulombCounter[i]=mMergingCounter[i]=mCrossingCounter[i]=0;
-    
+
+    for(int i=0;i<4;i++) {
+        mdphiCounter[i]=mdetaCounter[i]=mdmtCounter[i]=mqInvCounter[i]=mEntSepCounter[i]=0;
+        mExitSepCounter[i]=mQualityCounter[i]=msplitLSCounter[i]=msplitUSCounter[i]=0;
+        mHBTCounter[i]=mCoulombCounter[i]=mMergingCounter[i]=mCrossingCounter[i]=0;
+        mpionMomentumCounter[i]=mKaonMomentumCounter[i]=mprotonMomentumCounter[i]=0;
+        mpionOtherMassCounter[i]=mpionpionMassCounter[i]=mpionKaonMassCounter[i]=mpionprotonMassCounter[i]=0;
+        mKaonOtherMassCounter[i]=mKaonKaonMassCounter[i]=mKaonprotonMassCounter[i]=mprotonOtherMassCounter[i]=0;
+        mprotonprotonMassCounter[i]=mOtherOtherMassCounter[i]=0;
+    }
     mdeltaPhi=mdeltaEta=mdeltaMt=mqInvarient= mEntranceSeparation=mExitSeparation=mQualityVal=mMidTpcSeparationLS=mMidTpcSeparationUS=0;
 
     mapMask0 = 0xFFFFFF00;
@@ -77,6 +98,20 @@ void StEStructPairCuts::initNames(){
   strcpy(mCoulombName.name,"Coulomb");
   strcpy(mMergingName.name,"Merging");
   strcpy(mCrossingName.name,"Crossing");
+  strcpy(mpionMomentumName.name,"pionMomentumRange");
+  strcpy(mKaonMomentumName.name,"KaonMomentumRange");
+  strcpy(mprotonMomentumName.name,"protonMomentumRange");
+
+  strcpy(mpionOtherMassName.name,"pionOtherMass");
+  strcpy(mpionpionMassName.name,"pionpionMass");
+  strcpy(mpionKaonMassName.name,"pionKaonMass");
+  strcpy(mpionprotonMassName.name,"pionprotonMass");
+  strcpy(mKaonOtherMassName.name,"KaonOtherMass");
+  strcpy(mKaonKaonMassName.name,"KaonKaonMass");
+  strcpy(mKaonprotonMassName.name,"KaonprotonMass");
+  strcpy(mprotonOtherMassName.name,"protonOtherMass");
+  strcpy(mprotonprotonMassName.name,"protonprotonMass");
+  strcpy(mOtherOtherMassName.name,"OtherOtherMass");
   
 };
 
@@ -181,6 +216,77 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
     return true;
   }
 
+  if(!strcmp(name,mpionMomentumName.name)){
+    mdEdxMomentumCut[1][0]=atof(vals[0]); mdEdxMomentumCut[1][1]=atof(vals[1]);
+    mpionMomentumCut=true;
+    cout << " Loading pion momentum cut with range of values = "<<mdEdxMomentumCut[1][0]<<","<<mdEdxMomentumCut[1][1]<<endl;
+    return true;
+  }
+
+  if(!strcmp(name,mKaonMomentumName.name)){
+    mdEdxMomentumCut[2][0]=atof(vals[0]); mdEdxMomentumCut[2][1]=atof(vals[1]);
+    mKaonMomentumCut=true;
+    cout << " Loading Kaon momentum cut with range of values = "<<mdEdxMomentumCut[2][0]<<","<<mdEdxMomentumCut[2][1]<<endl;
+    return true;
+  }
+
+  if(!strcmp(name,mprotonMomentumName.name)){
+    mdEdxMomentumCut[3][0]=atof(vals[0]); mdEdxMomentumCut[3][1]=atof(vals[1]);
+    mprotonMomentumCut=true;
+    cout << " Loading proton momentum cut with range of values = "<<mdEdxMomentumCut[3][0]<<","<<mdEdxMomentumCut[3][1]<<endl;    return true;
+  }
+
+  if(!strcmp(name,mpionOtherMassName.name)){
+    mpionOtherMass[0]=atof(vals[0]); mpionOtherMass[1]=atof(vals[1]);
+    mpionOtherMassCut=true;
+    cout << " Loading pion-Other mass cut with range of values = "<<mpionOtherMass[0]<<","<<mpionOtherMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mpionpionMassName.name)){
+    mpionpionMass[0]=atof(vals[0]); mpionpionMass[1]=atof(vals[1]);
+    mpionpionMassCut=true;
+    cout << " Loading pion-pion mass cut with range of values = "<<mpionpionMass[0]<<","<<mpionpionMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mpionKaonMassName.name)){
+    mpionKaonMass[0]=atof(vals[0]); mpionKaonMass[1]=atof(vals[1]);
+    mpionKaonMassCut=true;
+    cout << " Loading pion-Kaon mass cut with range of values = "<<mpionKaonMass[0]<<","<<mpionKaonMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mpionprotonMassName.name)){
+    mpionprotonMass[0]=atof(vals[0]); mpionprotonMass[1]=atof(vals[1]);
+    mpionprotonMassCut=true;
+    cout << " Loading pion-proton mass cut with range of values = "<<mpionprotonMass[0]<<","<<mpionprotonMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mKaonOtherMassName.name)){
+    mKaonOtherMass[0]=atof(vals[0]); mKaonOtherMass[1]=atof(vals[1]);
+    mKaonOtherMassCut=true;
+    cout << " Loading Kaon-Other mass cut with range of values = "<<mKaonOtherMass[0]<<","<<mKaonOtherMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mKaonKaonMassName.name)){
+    mKaonKaonMass[0]=atof(vals[0]); mKaonKaonMass[1]=atof(vals[1]);
+    mKaonKaonMassCut=true;
+    cout << " Loading Kaon-Kaon mass cut with range of values = "<<mKaonKaonMass[0]<<","<<mKaonKaonMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mKaonprotonMassName.name)){
+    mKaonprotonMass[0]=atof(vals[0]); mKaonprotonMass[1]=atof(vals[1]);
+    mKaonprotonMassCut=true;
+    cout << " Loading Kaon-proton mass cut with range of values = "<<mKaonprotonMass[0]<<","<<mKaonprotonMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mprotonOtherMassName.name)){
+    mprotonOtherMass[0]=atof(vals[0]); mprotonOtherMass[1]=atof(vals[1]);
+    mprotonOtherMassCut=true;
+    cout << " Loading proton-Other mass cut with range of values = "<<mprotonOtherMass[0]<<","<<mprotonOtherMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mprotonprotonMassName.name)){
+    mprotonprotonMass[0]=atof(vals[0]); mprotonprotonMass[1]=atof(vals[1]);
+    mprotonprotonMassCut=true;
+    cout << " Loading proton-proton mass cut with range of values = "<<mprotonprotonMass[0]<<","<<mprotonprotonMass[1]<<endl;    return true;
+  }
+  if(!strcmp(name,mOtherOtherMassName.name)){
+    mOtherOtherMass[0]=atof(vals[0]); mOtherOtherMass[1]=atof(vals[1]);
+    mOtherOtherMassCut=true;
+    cout << " Loading Other-Other mass cut with range of values = "<<mOtherOtherMass[0]<<","<<mOtherOtherMass[1]<<endl;    return true;
+  }
+
   //  cout<<" didn't find any cut with this name "<<endl;
   return false;
 };
@@ -274,6 +380,72 @@ void StEStructPairCuts::printCutStats(ostream& ofs){
     printCutCounts(ofs,cutTypes[0],mCrossingCounter[0],mCrossingCounter[1]);
     printCutCounts(ofs,cutTypes[1],mCrossingCounter[2],mCrossingCounter[3]);
   }
+  if(mpionMomentumCut){
+    ofs<<mpionMomentumName.name<<","<<mdEdxMomentumCut[1][0]<<","<<mdEdxMomentumCut[1][1]<<"\t\t"<<" # pion momentum range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mpionMomentumCounter[0],mpionMomentumCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mpionMomentumCounter[2],mpionMomentumCounter[3]);
+  }
+  if(mKaonMomentumCut){
+    ofs<<mKaonMomentumName.name<<","<<mdEdxMomentumCut[2][0]<<","<<mdEdxMomentumCut[2][1]<<"\t\t"<<" # Kaon momentum range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mKaonMomentumCounter[0],mKaonMomentumCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mKaonMomentumCounter[2],mKaonMomentumCounter[3]);
+  }
+  if(mprotonMomentumCut){
+    ofs<<mprotonMomentumName.name<<","<<mdEdxMomentumCut[3][0]<<","<<mdEdxMomentumCut[3][1]<<"\t\t"<<" # proton momentum range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mprotonMomentumCounter[0],mprotonMomentumCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mprotonMomentumCounter[2],mprotonMomentumCounter[3]);
+  }
+
+  if(mpionOtherMassCut){
+    ofs<<mpionOtherMassName.name<<","<<mpionOtherMass[0]<<","<<mpionOtherMass[1]<<"\t\t"<<" # pion-Other mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mpionOtherMassCounter[0],mpionOtherMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mpionOtherMassCounter[2],mpionOtherMassCounter[3]);
+  }
+  if(mpionpionMassCut){
+    ofs<<mpionpionMassName.name<<","<<mpionpionMass[0]<<","<<mpionpionMass[1]<<"\t\t"<<" # pion-pion mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mpionpionMassCounter[0],mpionpionMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mpionpionMassCounter[2],mpionpionMassCounter[3]);
+  }
+  if(mpionKaonMassCut){
+    ofs<<mpionKaonMassName.name<<","<<mpionKaonMass[0]<<","<<mpionKaonMass[1]<<"\t\t"<<" # pion-Kaon mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mpionKaonMassCounter[0],mpionKaonMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mpionKaonMassCounter[2],mpionKaonMassCounter[3]);
+  }
+  if(mpionprotonMassCut){
+    ofs<<mpionprotonMassName.name<<","<<mpionprotonMass[0]<<","<<mpionprotonMass[1]<<"\t\t"<<" # pion-proton mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mpionprotonMassCounter[0],mpionprotonMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mpionprotonMassCounter[2],mpionprotonMassCounter[3]);
+  }
+  if(mKaonOtherMassCut){
+    ofs<<mKaonOtherMassName.name<<","<<mKaonOtherMass[0]<<","<<mKaonOtherMass[1]<<"\t\t"<<" # pion-Other mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mKaonOtherMassCounter[0],mKaonOtherMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mKaonOtherMassCounter[2],mKaonOtherMassCounter[3]);
+  }
+  if(mKaonKaonMassCut){
+    ofs<<mKaonKaonMassName.name<<","<<mKaonKaonMass[0]<<","<<mKaonKaonMass[1]<<"\t\t"<<" # Kaon-Kaon mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mKaonKaonMassCounter[0],mKaonKaonMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mKaonKaonMassCounter[2],mKaonKaonMassCounter[3]);
+  }
+  if(mKaonprotonMassCut){
+    ofs<<mKaonprotonMassName.name<<","<<mKaonprotonMass[0]<<","<<mKaonprotonMass[1]<<"\t\t"<<" # Kaon-proton mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mKaonprotonMassCounter[0],mKaonprotonMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mKaonprotonMassCounter[2],mKaonprotonMassCounter[3]);
+  }
+  if(mprotonOtherMassCut){
+    ofs<<mprotonOtherMassName.name<<","<<mprotonOtherMass[0]<<","<<mprotonOtherMass[1]<<"\t\t"<<" # proton-Other mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mprotonOtherMassCounter[0],mprotonOtherMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mprotonOtherMassCounter[2],mprotonOtherMassCounter[3]);
+  }
+  if(mprotonprotonMassCut){
+    ofs<<mprotonprotonMassName.name<<","<<mprotonprotonMass[0]<<","<<mprotonprotonMass[1]<<"\t\t"<<" # proton-proton mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mprotonprotonMassCounter[0],mprotonprotonMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mprotonprotonMassCounter[2],mprotonprotonMassCounter[3]);
+  }
+  if(mOtherOtherMassCut){
+    ofs<<mOtherOtherMassName.name<<","<<mOtherOtherMass[0]<<","<<mOtherOtherMass[1]<<"\t\t"<<" # Other-Other mass cut range cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mOtherOtherMassCounter[0],mOtherOtherMassCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mOtherOtherMassCounter[2],mOtherOtherMassCounter[3]);
+  }
 
 
 
@@ -327,6 +499,8 @@ int StEStructPairCuts::cutPair(){
   }
   
   if(cutQuality()) return 1;
+
+  if(cutMass()) return 1;
   
   //  if(cutExitSep() || cutQuality()) return 1;
   return 0;
@@ -472,9 +646,9 @@ StEStructPairCuts::NominalTpcZExitSeparation() const {
   //   points have z = (+/-) 200, and the z separation is exactly zero.
   // With normal eta and primaryVertex cuts, most tracks should exit the side of the TPC, 
   //   so we will just skip the problem pairs.
-  if ( abs(mTrack1->NominalTpcExitPoint().z())==200 || abs(mTrack2->NominalTpcExitPoint().z())==200 ) return -1;
+  if ( fabs(mTrack1->NominalTpcExitPoint().z())==200 || fabs(mTrack2->NominalTpcExitPoint().z())==200 ) return -1;
   StThreeVectorF diff = mTrack1->NominalTpcExitPoint() - mTrack2->NominalTpcExitPoint();
-  return (double)(abs(diff.z()+mZoffset));
+  return (double)(fabs(diff.z()+mZoffset));
 
 }
 
@@ -537,10 +711,72 @@ StEStructPairCuts::MidTpcZSeparation() const {
   return (double)(fabs(diff.z()+mZoffset));
 }
 
+// >>>>> Choose second version of getdEdxPID fir an attempt
+//       to use GEANT dE/dx information.
+// pi  -> 1
+// K   -> 2
+// p   -> 3
+// Everything else
+//     -> 0
+//
+// June 8, 2006 djp If track is within 1sigma of electron we
+//                  exclude it as pi, K, p. (Tried 2sigma and
+//                  visually that looks really bad.)
+int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
+  float e  = fabs(t->PIDe());
+  if (e < 1) {
+      return 0;
+  }
+  float ptot = t->Ptot();
+  float pi = fabs(t->PIDpi());
+  float k  = fabs(t->PIDk());
+  float p  = fabs(t->PIDp());
+
+  if ((mdEdxMomentumCut[1][0]<ptot) && (ptot<mdEdxMomentumCut[1][1]) && (pi<2.0) && (k>2.0) && (p>2.0)) {
+      return 1;
+  }
+  if ((mdEdxMomentumCut[2][0]<ptot) && (ptot<mdEdxMomentumCut[2][1]) && (pi>2.0) && (k<2.0) && (p>2.0)) {
+      return 2;
+  }
+  if ((mdEdxMomentumCut[3][0]<ptot) && (ptot<mdEdxMomentumCut[3][1]) && (pi>2.0) && (k>2.0) && (p<2.0)) {
+      return 3;
+  }
+  return 0;
+}
+// Here is a hack for dEdx in Pythia that has been run through GEANT.
+// The data I am looking at has dEdx off by about a factor of two
+// so PIDx does not work reasonably.
+//int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
+//    double a0 = 2.16e-5, b0 = 4.8e-5;
+//    double a1 = 2.52e-5, b1 = 2.8e-5;
+//
+//    double dedx = t->Dedx();
+//    double ptot = t->Ptot();
+//    if ((dedx < 1.0e-6) && (ptot < 0.6)) {
+//        return 1;
+//    }
+//    if (dedx < 2.0e-6) {
+//        return 0;
+//    }
+//    if (dedx < a0-b0*ptot) {
+//        return 2;
+//    }
+//    if (dedx < a1-b1*ptot) {
+//        return 3;
+//    }
+//    return 0;
+//}
 
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.8  2007/11/26 19:55:25  prindle
+ * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
+ *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
+ *    Binning          Added parent binning (for \hat{p_t}
+ *    CutBin:          Mode 5 extensively modified.
+ *                     Added invariant mass cuts (probably a bad idea in general.)
+ *
  * Revision 1.7  2007/05/27 22:45:03  msd
  * Added new cut bin modes 2 (soft/hard SS/AS), 6 (z-vertex binning), and 7 (modes 2*6).
  * Fixed bug in merging cut.
