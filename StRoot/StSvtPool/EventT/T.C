@@ -338,10 +338,8 @@ or
 			      Form("Matrix and right part for Least Squred Fit for barrel %i",barrel),
 			      BL[barrel-1]*28,0,BL[barrel-1]*28);
    //             T  B  l    W
-  //  TH2F *LocPlots[10][4][20][17];
-  // memset(LocPlots,0,10*4*20*17*sizeof(TH2F *));
-  TH2F *LocPlots[10][4][20][1];
-  memset(LocPlots,0,10*4*20*1*sizeof(TH2F *));
+  TH2F *LocPlots[10][4][20][17];
+  memset(LocPlots,0,10*4*20*17*sizeof(TH2F *));
   //  TH2F *LocPlots[9][4][20][17];
   //  memset(LocPlots,0,9*4*20*17*sizeof(TH2F *));
    for (Int_t L = 0; L < NoLayers; L++) {// over Layers
@@ -352,8 +350,7 @@ or
      //     if (! AllWafers) NoWafers = 2; // use wafer index for Positive / negatives
      for (Int_t ladder = 1; ladder <= NoLadders; ladder++) {
        if (barrel <= 3 && (ladder-1)%2 != layer%2) continue;
-       //       for (Int_t wafer = 0; wafer <= NoWafers; wafer++) {// wafer == 0 for whole ladder
-       for (Int_t wafer = 0; wafer < 1; wafer++) {// wafer == 0 for whole ladder
+       for (Int_t wafer = 0; wafer <= NoWafers; wafer++) {// wafer == 0 for whole ladder
 	 Int_t Id = ladder + 100*(wafer + 10*layer);
 	 for (Int_t t = 0; t < 10; t++) {
 	   if (NoWafers > 2 && wafer != 0) {
@@ -720,7 +717,7 @@ or
 
 	 Double32_t duOvertuP = du/tuP;
 	 Double32_t dvOvertvP = dv/tvP;
-#if 0
+#if 1
 	 if (AllWafers) {
 	   if (wafer == 0) {
 	     LocPlots[0][barrel-1][ladder-1][wafer]->Fill(tuP,du);
