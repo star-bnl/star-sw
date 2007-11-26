@@ -41,6 +41,7 @@ void selectAllM3(const char* dirname, const char *fileBase ){
 int num[12]={16,8,8,4,2,2,4,2,2,4,2,2};
 
 
+  int parentDistribution[1][2] = {0, 0};
   for(int k=0;k<12;k++){
     int nin = num[k];
     int * ndata=_map[k];
@@ -52,7 +53,7 @@ int num[12]={16,8,8,4,2,2,4,2,2,4,2,2};
     fname+=fileBase;
     fname+=oname[k];
     fname+=".root";
-    adder.addCuts(fname.Data(),tf,ndata,nin);
+    adder.addCuts(fname.Data(),tf,ndata,nin,parentDistribution,1);
   } 
 
   /*
