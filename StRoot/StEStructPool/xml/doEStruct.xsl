@@ -17,7 +17,7 @@
      I have problems writing 'main' with the variables resolved.
      Instead I match nodes I don't want to output. This is rather
      a pain. Seems to work though. -->
-<xsl:template match='jobControl|starSubmit|eventCuts|trackCuts|pairCuts|hijingParams'/>
+<xsl:template match='jobControl|starSubmit|eventCuts|trackCuts|pairCuts|hijingParams|therminatorParams'/>
 <xsl:template match='*[@id]'/>
 
 <!-- The rest of this macro is to resolve refersTo, listOf and sumOf etc.-->

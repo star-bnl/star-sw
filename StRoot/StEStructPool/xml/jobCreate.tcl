@@ -22,6 +22,9 @@ namespace eval ::jobCreate:: {
     variable numberOfInstances
     variable slaveInterpCount 0
     variable findString ""
+
+    variable addQAHistograms 1
+    variable addCutsHistograms 1
 }
 
 ################################################################################
@@ -273,9 +276,10 @@ proc ::jobCreate::createWindow {} {
     $m add cascade -label Edit -menu $edit
     $edit add command -label PlaceHolder
     set post [menu $m.post -postcommand [namespace code [list checkAnalysisType $m.post]]]
-    $m add cascade -label Post -menu $post
+    $m add cascade -label "Apr\u00e8s batch" -menu $post
     $post add command -label "Add histograms" -command [namespace code addHistograms]
-    $post add command -label "Run selectAll"  -command [namespace code runSelectAll]
+    $post add command -label "Combine centralities" -command [namespace code combineCentralities]
+    $post add command -label "selectAll macro"  -command [namespace code selectAll]
     set help [menu $m.help]
     $m add cascade -label Help -menu $help
     $help add command -label Help -command [namespace code [list displayHelp ""]]
@@ -331,13 +335,13 @@ proc ::jobCreate::+listDefaultXml {type t c b} {
                            dataAuAu200_2001_ProductionMinBias.lis \
                            dataAuAu200_2004_MinBias.lis \
                            dataCuCu62_2005_ProductionMinBias.lis \
-                           dataCuCu200_2005_ProductionMinBias.lis]
+                           dataCuCu62_2007ib_cuProductionMinBias.lis \
+                           dataCuCu200_2005_ProductionMinBias.lis \
+                           dataCuCu200_2007ib_cuProductionMinBias.lis]
         }
         GEANT {
             set vals [list GEANTAuAu200_b_0_3.lis \
-                           GEANTPP200_minbias.lis \
-                           dataCuCu62_2005_ProductionMinBias_nfc.lis \
-                           dataCuCu200_2005_ProductionMinBias_nfc.lis]
+                           GEANTPP200_minbias.lis]
         }
         Hijing {
             set vals [list hijing19GeVAuAuQuenchOn.lis   \
@@ -351,9 +355,10 @@ proc ::jobCreate::+listDefaultXml {type t c b} {
                            hijing200GeVAuAuJetOff.lis]
         }
         Pythia {
-            set vals [list flat.lis \
-                           pythia200GeVPP.lis \
-                           pythia2.lis]
+            set vals [list pythia200GeVPP.lis]
+        }
+        Therminator {
+            set vals [list therminator200GeV.lis]
         }
     }
     set ::jobCreate::jobLisFile ""
@@ -611,6 +616,39 @@ proc ::jobCreate::+pythiaInit {f} {
         ::DynamicHelp::register $f.$name balloon $comment
     }
 }
+# 9? ############################################################################
+proc ::jobCreate::+therminatorParams {f} {
+    set jNode [$::jobCreate::jobInfo getElementsByTagName therminatorParams]
+
+    set sNode [$::jobCreate::schemaInfo selectNodes //*\[@name='therminatorParams'\]]
+    foreach sN [$sNode getElementsByTagName xs:element] {
+        set name [$sN getAttribute ref]
+        set sN [$::jobCreate::schemaInfo selectNodes //*\[@name='$name'\]]
+        set cNode [$sN selectNodes .//*\[@name='Comment'\]]
+        set comment [$cNode text]
+        set wNode [$sN selectNodes .//*\[@name='widget'\]]
+
+        set node [$jNode getElementsByTagName $name]
+        if {[lsearch [$node attributes] widget] >= 0} {
+            set wType [$node getAttribute widget]
+        }
+        if {$wType eq "combobox"} {
+            m+TherminatorParameter $f $name $node
+        } elseif {$wType eq "entry"} {
+            label $f.$name -text $name
+            variable code${f}$name [$node text]
+            entry $f.${name}Code                \
+                    -textvariable ::jobCreate::code${f}$name \
+                    -width 40                   \
+                    -validate all               \
+                    -vcmd [namespace code "modifyTherminatorParam $node %P %W %V"]
+            grid $f.$name $f.${name}Code -sticky w
+        } else {
+            continue
+        }
+        ::DynamicHelp::register $f.$name balloon $comment
+    }
+}
 ################################################################################
 # Adapted from m+AnalysisType.
 # Give user choice of any of the enumerated types.
@@ -626,14 +664,35 @@ proc ::jobCreate::m+PythiaParameter {f el node} {
         lappend vals [$sN getAttribute value]
     }
 
-    label $f.l$el -text $el
+    label $f.$el -text $el
     variable cVal${f}$el $val
     ComboBox::create $f.combo$el \
             -editable     false  \
             -values       $vals  \
             -textvariable ::jobCreate::cVal${f}$el \
             -modifycmd   [namespace code "modifyPythiaParameter $node \[$f.combo$el get\] $f.combo$el %V"]
-    grid $f.l$el $f.combo$el -sticky w
+    grid $f.$el $f.combo$el -sticky w
+}
+################################################################################
+proc ::jobCreate::m+TherminatorParameter {f el node} {
+    set val [$node text]
+    set sNode [$::jobCreate::schemaInfo selectNodes //*\[@name='$el'\]]
+    set sR    [$sNode getElementsByTagName xs:restriction]
+    set type  [$sR getAttribute base]
+    set sR2   [$::jobCreate::schemaInfo selectNodes //*\[@name='$type'\]]
+    set vals [list]
+    foreach sN [$sR2 getElementsByTagName xs:enumeration] {
+        lappend vals [$sN getAttribute value]
+    }
+
+    label $f.$el -text $el
+    variable cVal${f}$el $val
+    ComboBox::create $f.combo$el \
+            -editable     false  \
+            -values       $vals  \
+            -textvariable ::jobCreate::cVal${f}$el \
+            -modifycmd   [namespace code "modifyTherminatorParam $node \[$f.combo$el get\] $f.combo$el %V"]
+    grid $f.$el $f.combo$el -sticky w
 }
 
 ################################################################################
@@ -651,14 +710,14 @@ proc ::jobCreate::m+MacroCombo {f el node} {
         lappend vals [$sN getAttribute value]
     }
 
-    label $f.l$el -text $el
+    label $f.$el -text $el
     variable cVal${f}$el $val
     ComboBox::create $f.combo$el \
             -editable     false  \
             -values       $vals  \
             -textvariable ::jobCreate::cVal${f}$el \
             -modifycmd   [namespace code "modifyMacroNode $node \[$f.combo$el get\] $f.combo$el %V"]
-    grid $f.l$el $f.combo$el -sticky w
+    grid $f.$el $f.combo$el -sticky w
 }
 ################################################################################
 # Adapted from m+XmlAtts.
@@ -677,14 +736,14 @@ proc ::jobCreate::m+AnalysisType {f el val} {
         lappend vals [$sN getAttribute value]
     }
 
-    label $f.l$el -text $el
+    label $f.$el -text $el
     variable cVal${f}$el $val
     ComboBox::create $f.combo$el \
             -editable     false  \
             -values       $vals  \
             -textvariable ::jobCreate::cVal${f}$el \
             -modifycmd   [namespace code "setAnalysisType $f \[$f.combo$el get\]"]
-    grid $f.l$el $f.combo$el -sticky w
+    grid $f.$el $f.combo$el -sticky w
 }
 ################################################################################
 # Fluctuations and Correlations have some independent elements.
@@ -972,6 +1031,16 @@ proc ::jobCreate::modifyPythiaParameter {node val e cond} {
     return true
 }
 ################################################################################
+# Wrapper around modifyNode for actions specific to changes in Therminator
+# parameters. Specifically, since I can't figure out how to add spaces
+# in xslt, I ensure the value has a space before.
+################################################################################
+proc ::jobCreate::modifyTherminatorParam {node val e cond} {
+    set new [string trim $val]
+    modifyNode $node " $new" $e $cond
+    return true
+}
+################################################################################
 # Wrapper around modifyNode for actions specific to changes in jobControl
 # information. Currently we make sure dispay of <job> or <main> is updated.
 ################################################################################
@@ -1017,6 +1086,7 @@ proc ::jobCreate::displayCode {node title} {
         $file add command -label Save
         $file add command -label Revert
         $file add command -label Close -command [namespace code "wm iconify .fileText"]
+        wm protocol .fileText WM_DELETE_WINDOW {wm iconify .fileText}
         set edit [menu $m.edit -postcommand [namespace code "checkUndo $m.edit .fileText.t"]]
         $m add cascade -label Edit -menu $edit
         $edit add command -label Undo -command [namespace code "undo $m.edit .fileText.t"]
@@ -1564,6 +1634,13 @@ proc ::jobCreate::createJobFiles {} {
         puts $f [applyXsl hijingParams.xsl asText]
         close $f
     }
+    # Might have Therminator Parameters
+    set hNode [$::jobCreate::jobInfo getElementsByTagName therminatorParams]
+    if {$hNode ne ""} {
+        set f [open $path/scripts/therminator.in w]
+        puts $f [applyXsl therminatorParams.xsl asText]
+        close $f
+    }
 
     # Save the dom tree as an xml file
     # (use value of jobName for the file name.)
@@ -1629,7 +1706,7 @@ proc ::jobCreate::submitJob {} {
     puts $fLog ">>>>>Information printed by star-submit<<<<<"
     set fid [open "|star-submit job.xml"]
     fconfigure $fid -blocking false -buffering line
-    fileevent $fid readable [namespace code "isReadable $fid $fLog"]
+    fileevent $fid readable [namespace code [list isReadable $fid $fLog]]
     set currCurs [.star-submit.t cget -cursor]
     .star-submit.t configure -cursor watch
 
@@ -1667,7 +1744,7 @@ proc ::jobCreate::checkProgressWindow {} {
         scrollbar .star-submit.y -command {.star-submit.t yview}
         scrollbar .star-submit.x -command {.star-submit.t xview} -orient horizontal
         grid .star-submit.t .star-submit.y
-        grid .star-submit.x ^
+        grid .star-submit.x x
         grid .star-submit.t -sticky news
         grid .star-submit.y -sticky ns
         grid .star-submit.x -sticky we
@@ -1759,97 +1836,66 @@ proc ::jobCreate::checkAnalysisType {menu} {
     set aType [$node text]
     if {$aType eq "StEStructCorrelation"} {
        $menu entryconfigure 2 -state normal
+       $menu entryconfigure 3 -state normal
     } else {
        $menu entryconfigure 2 -state disabled
+       $menu entryconfigure 3 -state disabled
     }
 }
 ################################################################################
 # addHistograms parses output directory for histograms and adds them
-# in hopefully appropriate ways. Need to open status window for
-# user feedback since addition of data files can take a long time.
+# in hopefully appropriate ways.
+# I have added a fair amount of user feed-back and control over histogram
+# adding process. Not fully debugged at this point (Nov. 6, 2007)
 ################################################################################
 proc ::jobCreate::addHistograms {} {
     if {![winfo exists .addHistograms]} {
         toplevel .addHistograms
         wm title .addHistograms "Adding histograms from job output"
+        set ctl [frame .addHistograms.control]
+        set dataFrame [labelframe .addHistograms.data -text "dataHists_M{cent}_*.root to add"]
         text .addHistograms.t -yscrollcommand {.addHistograms.y set} \
                               -xscrollcommand {.addHistograms.x set} -wrap word
         scrollbar .addHistograms.y -command {.addHistograms.t yview}
         scrollbar .addHistograms.x -command {.addHistograms.t xview} -orient horizontal
+        grid $ctl -sticky w
+        grid $dataFrame -sticky w
         grid .addHistograms.t .addHistograms.y
-        grid .addHistograms.x ^
+        grid .addHistograms.x x
         grid .addHistograms.t -sticky news
         grid .addHistograms.y -sticky ns
         grid .addHistograms.x -sticky we
         grid [frame  .addHistograms.b]
-        grid [button .addHistograms.b.action -text Cancel \
-                -command {set ::jobCreate::stopAddHistograms true}]
+        grid [button .addHistograms.b.action -text "Add em up" -state disabled]
         grid columnconfigure .addHistograms 0 -weight 1
-        grid rowconfigure    .addHistograms 0 -weight 1
-        .addHistograms.t tag configure input -foreground black
+        grid rowconfigure    .addHistograms 1 -weight 1
+        grid rowconfigure    .addHistograms 2 -weight 1
+        .addHistograms.t tag configure input        -foreground black
         .addHistograms.t tag configure normalOutput -foreground blue
-        .addHistograms.t tag configure errorOutput -foreground red
+        .addHistograms.t tag configure errorOutput  -foreground red
 
-        bind .addHistograms <Control-w> {destroy .addHistograms}
+        checkbutton $ctl.cbQA   -text "add QA histograms"    -variable ::jobCreate::addQAHistograms
+        checkbutton $ctl.cbCuts -text "add Cuts histograms"  -variable ::jobCreate::addCutsHistograms
+        pack $ctl.cbQA -anchor w
+        pack $ctl.cbCuts -anchor w
+
+        # Only want to allow destroying window when we have finished an atomic hadd.
+        # Have to think about how to insure this.
+        # bind .addHistograms <Control-w> {destroy .addHistograms}
     } else {
-        .addHistograms.b.action configure -text Cancel \
-                -command {set ::jobCreate::stopAddHistograms true}
+        set dataFrame .addHistograms.data
+        .addHistograms.b.action configure -text "Add em up" -state disabled
         raise .addHistograms
     }
     set ::jobCreate::stopAddHistograms false
-    set currCurs [.addHistograms.t cget -cursor]
-    .addHistograms.t configure -cursor watch
+
+    foreach w [winfo children $dataFrame] {destroy $w}
 
     set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
     set path [$node text]
     set node [$::jobCreate::jobInfo getElementsByTagName analysisType]
     set aType [$node text]
 
-    # Add QA files
-    set fileList [lsort -dictionary [glob [file join $path QA QA_*.root]]]
-    set QALogFile [file join $path QA addedQALog]
-    if {[file exists $QALogFile]} {
-        set fh [open $QALogFile a]
-    } else  {
-        set fh [open $QALogFile w]
-    }
-    set sum [file join $path QA QA.root]
-    .addHistograms.t insert end "hadd $sum $fileList\n" input
-    .addHistograms.t see end
-    update
-    puts $fh "hadd -f $sum $fileList"
-    if {[catch {eval exec hadd -f $sum $fileList} mess]} {
-        .addHistograms.t insert end $mess errorOutput
-    } else {
-        .addHistograms.t insert end $mess normalOutput
-    }
-    .addHistograms.t see end
-    close $fh
-
-    # Add cuts files
-    set fileList [lsort -dictionary [glob [file join $path cuts cutHists_*.root]]]
-    set cutsLogFile [file join $path cuts addedCutsLog]
-    if {[file exists $cutsLogFile]} {
-        set fh [open $cutsLogFile a]
-    } else  {
-        set fh [open $cutsLogFile w]
-    }
-    set sum [file join $path cuts Cuts.root]
-    .addHistograms.t insert end "hadd $sum $fileList\n" input
-    .addHistograms.t see end
-    update
-    puts $fh "hadd -f $sum $fileList"
-    if {[catch {eval exec hadd -f $sum $fileList} mess]} {
-        .addHistograms.t insert end $mess errorOutput
-    } else {
-        .addHistograms.t insert end $mess normalOutput
-    }
-    .addHistograms.t see end
-    close $fh
-
-    # Now for data histograms there is a difference between fluctuation
-    # and correlation. For fluctuations all centralities are contained in
-    # each file. For correlations we need to loop over centralities.
     set fileList [glob [file join $path data dataHists_*.root]]
     set top [lindex [lsort -dictionary $fileList] end]
     if {$aType eq "StEStructCorrelation"} {
@@ -1860,141 +1906,81 @@ proc ::jobCreate::addHistograms {} {
             .addHistograms.t see end
             return
         }
-        # Loop over centralities. For each centrality add groups of 15
-        # files together.
-        set tmpFile [list]
-        for {set i 0} {$i <= $nCents} {incr i} {
-            if {$::jobCreate::stopAddHistograms} {
-                break
-            }
-            set fl [glob [file join $path data dataHists_M${i}_*.root]]
-            set fileList [lsort -dictionary $fl]
+        incr nCents
+        set nCentralities $nCents
+        label $dataFrame.centrality  -text "Cent. bin"
+        label $dataFrame.avgFileSize -text "Avg. file size"
+        label $dataFrame.numPerSet   -text "Number per hadd"
+        label $dataFrame.addedFiles  -text "Added files"
+        label $dataFrame.filesToAdd  -text "Files to add"
+        grid $dataFrame.centrality $dataFrame.avgFileSize $dataFrame.numPerSet \
+             $dataFrame.addedFiles $dataFrame.filesToAdd -sticky w
 
-            # Look to see if we have a log file from previous addition of files
-            # If found parse it for files that have already been added and
-            # remove them from the list.
-            set reAdd false
-            set logFile [file join $path data addedFileNames_${i}_Log]
+        # Create one line per centrality for controlling how histograms are added.
+        for {set i 0} {$i < $nCentralities} {incr i} {
+            # If log file exists for this centrality scan it for histograms already added.
+            set ::jobCreate::alreadyAdded($i) [list]
+            set logFile [file join $path data addedFileNames${i}Log]
             if {[file exists $logFile]} {
-                .addHistograms.t insert end "Found a previous logfile. Will try appending new histograms to current sum." input
-                .addHistograms.t see end
-                set alreadyAdded [list]
                 set fh [open $logFile]
                 while {[gets $fh line] >= 0} {
                     set ll [split $line]
                     if {[lindex $line 0] eq "hadd"} {
-                        set alreadyAdded [concat $alreadyAdded [lrange $ll 2 end]]
+                        foreach f [lrange $ll 2 end] {
+                            if {[regexp {dataHists_M(\d)_(\d+).root} $f m c v]} {
+                                if {$c == $i} {
+                                    lappend ::jobCreate::alreadyAdded($i) $f
+                                }
+                            }
+                        }
                     }
                 }
-                if {[llength $alreadyAdded] > 0} {
-                    set reAdd true
-                    set fileList [lremove $fileList $alreadyAdded]
-                }
                 close $fh
             }
 
+            # Get all files for centrality and remove already added ones.
+            set fileList [glob [file join $path data dataHists_M${i}_*.root]]
+            set fileList [lremove $fileList $::jobCreate::alreadyAdded($i)]
+            set ::jobCreate::filesToAdd($i) [lsort -dictionary $fileList]
+
+            # Calculate average file size to estimate how many we can combine at once.
             set nFiles [llength $fileList]
-            set nSets [expr $nFiles/15]
-            for {set j 0} {$j < $nSets} {incr j} {
-                if {$::jobCreate::stopAddHistograms} {
-                    break
+            set numPerSet 25
+            set avgSize 0.0
+            if {$nFiles > 0} {
+                foreach f $fileList {
+                    set avgSize [expr $avgSize + [file size $f]]
                 }
-                set logFile [file join $path data addedFileNames_${i}_Log]
-                if {[file exists $logFile]} {
-                    set fh [open $logFile a]
-                } else  {
-                    set fh [open $logFile w]
+                set avgSize [expr $avgSize/($nFiles*1024*1024)]
+                if {$avgSize > 30.0} {
+                    set numPerSet 10
                 }
-                set start [expr $j*15]
-                set end   [expr $start+14]
-                set sumFile [file join $path data Data_${i}_${j}.root]
-                .addHistograms.t insert end "hadd $sumFile [lrange $fileList $start $end]" input
-                .addHistograms.t see end
-                update
-                puts $fh "hadd $sumFile [lrange $fileList $start $end]"
-#                set ::jobCreate::done false;
-#                eval exec hadd $sumFile [lrange $fileList $start $end] ;# set ::jobCreate::done true
-                if {[catch {eval exec hadd $sumFile [lrange $fileList $start $end]} mess]} {
-                    .addHistograms.t insert end $mess errorOutput
-                } else {
-                    .addHistograms.t insert end $mess normalOutput
-                }
-                .addHistograms.t see end
-#                vwait ::jobCreate::done
-                lappend tmpFiles $sumFile
-                close $fh
             }
-            if {($nFiles%15 != 0) && !$::jobCreate::stopAddHistograms} {
-                set logFile [file join $path data addedFileNames_${i}_Log]
-                if {[file exists $logFile]} {
-                    set fh [open $logFile a]
-                } else  {
-                    set fh [open $logFile w]
-                }
-                set start [expr $nSets*15]
-                set sumFile [file join $path data Data_${i}_${j}.root]
-                .addHistograms.t insert end "hadd $sumFile [lrange $fileList $start end]" input
-                .addHistograms.t see end
-                update
-                puts $fh "hadd $sumFile [lrange $fileList $start end]"
-#                set ::jobCreate::done false;
-#                eval exec hadd $sumFile [lrange $fileList $start end] ;# set ::jobCreate::done true
-                if {[catch {eval exec hadd $sumFile [lrange $fileList $start end]} mess]} {
-                    .addHistograms.t insert end $mess errorOutput
-                } else {
-                    .addHistograms.t insert end $mess normalOutput
-                }
-                .addHistograms.t see end
-#                vwait ::jobCreate::done
-                lappend tmpFiles $sumFile
-                close $fh
-            }
-        }
 
-        # Now add all of those groups together (for each centrality)
-        for {set i 0} {$i <= $nCents} {incr i} {
-            if {$::jobCreate::stopAddHistograms} {
-                break
+            # Now add row of widgets to dataFrame.
+            # Checkbox to add up this centrality.
+            # Label showing average file size.
+            # numberic entry for number of files to add.
+            # button to pop up list of already added files
+            # button to show (and deselect) files to be added.
+            if {![info exists ::jobCreate::addCentrality($i)]} {
+                set ::jobCreate::addCentrality($i) 1
+                set ::jobCreate::numPerSet($i) $numPerSet
             }
-            set logFile [file join $path data addedFileNames_${i}_Log]
-            set fh [open $logFile a]
-            set fileList [lsort -dictionary [glob [file join $path data Data_${i}_*.root]]]
-            set sumFile [file join $path data Data${i}.root]
+            checkbutton $dataFrame.centrality$i  -text "bin $i" -variable ::jobCreate::addCentrality($i)
+            label $dataFrame.avgFileSize$i -text [format %.2fMB $avgSize]
+            entry $dataFrame.numPerSet$i   -textvariable ::jobCreate::numPerSet($i)
+            button $dataFrame.addedFiles$i  -text [llength $::jobCreate::alreadyAdded($i)] \
+                    -command [namespace code [list showAddedFiles $i]]
+            button $dataFrame.filesToAdd$i  -text [llength $::jobCreate::filesToAdd($i)] \
+                    -command [namespace code [list editFilesToAdd $i]]
+            grid $dataFrame.centrality$i $dataFrame.avgFileSize$i $dataFrame.numPerSet$i \
+                 $dataFrame.addedFiles$i $dataFrame.filesToAdd$i -sticky w
 
-            if {$reAdd} {
-                set tmpName [file join $path data Data${i}Tmp.root]
-                if {![file exists $sumFile]} {
-                    error "I expected a previous sum for centrality $i in file $sumFile. File not found."
-                }
-                file rename $sumFile $tmpName
-                lappend fileList $tmpName
-                lappend tmpFiles $tmpName
+            if {[llength $::jobCreate::filesToAdd($i)] == 0} {
+                set ::jobCreate::addCentrality($i) 0
+                $dataFrame.centrality$i configure -selectcolor green
             }
-            if {[llength $fileList] > 1} {
-                .addHistograms.t insert end "hadd $sumFile $fileList" input
-                .addHistograms.t see end
-                update
-                puts $fh "hadd $sumFile $fileList"
-#                set ::jobCreate::done false
-#                eval exec hadd $sumFile $fileList ;# set ::jobCreate::done true
-                if {[catch {eval exec hadd $sumFile $fileList} mess]} {
-                    .addHistograms.t insert end $mess errorOutput
-                } else {
-                    .addHistograms.t insert end $mess normalOutput
-                }
-                .addHistograms.t see end
-#                vwait ::jobCreate::done
-            } else {
-                .addHistograms.t insert end "file rename $fileList $sumFile" input
-                .addHistograms.t see end
-                update
-                puts $fh "file rename $fileList $sumFile"
-                file rename $fileList $sumFile
-            }
-            close $fh
-        }
-        foreach tmp $tmpFiles {
-            catch {file delete $tmp}
         }
     } elseif {$aType eq "StEStructFluctuation"} {
         if {![regexp {_([0-9]+).} $top m nJobs]} {
@@ -2004,231 +1990,1200 @@ proc ::jobCreate::addHistograms {} {
             .addHistograms.t see end
             return
         }
-        # Add files similarly to how we do correlations above. No need for
-        # loop over centrality.
-        # Should actually combine these two sections somehow.
-        set fl [glob [file join $path data dataHists_*.root]]
-        set fileList [lsort -dictionary $fl]
+        set nCentralities ""
+        label $dataFrame.avgFileSize -text "Average file size"
+        label $dataFrame.numPerSet   -text "number per hadd"
+        label $dataFrame.addedFiles  -text "Previously added files"
+        label $dataFrame.filesToAdd  -text "New files to add"
+        grid $dataFrame.avgFileSize $dataFrame.numPerSet \
+             $dataFrame.addedFiles  $dataFrame.filesToAdd -sticky w
 
-        # Look to see if we have a log file from previous addition of files
-        # If found parse it for files that have already been added and
-        # remove them from the list.
-        set reAdd false
+        # If log file already exists scan it for already added files.
+        set ::jobCreate::alreadyAdded [list]
         set logFile [file join $path data addedFileNamesLog]
         if {[file exists $logFile]} {
-            .addHistograms.t insert end "Found a previous logfile. Will try appending new histograms to current sum." input
-            .addHistograms.t see end
-            set alreadyAdded [list]
             set fh [open $logFile]
             while {[gets $fh line] >= 0} {
                 set ll [split $line]
                 if {[lindex $line 0] eq "hadd"} {
-                    set alreadyAdded [concat $alreadyAdded [lrange $ll 2 end]]
+                    set ::jobCreate::alreadyAdded [concat $::jobCreate::alreadyAdded [lrange $ll 2 end]]
                 }
-            }
-            if {[llength $alreadyAdded] > 0} {
-                set reAdd true
-                set fileList [lremove $fileList $alreadyAdded]
             }
             close $fh
         }
 
+        # Get all fluctuation files, remove already added ones.
+        set fileList [glob [file join $path data dataHists_*.root]]
+        set fileList [lremove $fileList $::jobCreate::alreadyAdded]
+        set ::jobCreate::filesToAdd [lsort -dictionary $fileList]
+
+        # Calculate average file size to estimate how many we can combine at once.
         set nFiles [llength $fileList]
-        set nSets [expr $nFiles/15]
-        set tmpFile [list]
-        for {set j 0} {$j < $nSets} {incr j} {
-            if {$::jobCreate::stopAddHistograms} {
-                break
+        set numPerSet 25
+        set avgSize 0.0
+        if {$nFiles > 0} {
+            foreach f $fileList {
+                set avgSize [expr $avgSize + [file size $f]]
             }
-            set logFile [file join $path data addedFileNamesLog]
-            if {[file exists $logFile]} {
-                set fh [open $logFile a]
-            } else  {
-                set fh [open $logFile w]
+            set avgSize [expr $avgSize/($nFiles*1024*1024)]
+            if {$avgSize > 30.0} {
+                set numPerSet 10
             }
-            set start [expr $j*15]
-            set end   [expr $start+14]
-            set sumFile [file join $path data Data_${j}.root]
-            .addHistograms.t insert end "hadd $sumFile [lrange $fileList $start $end]" input
-            .addHistograms.t see end
-            update
-            puts $fh "hadd $sumFile [lrange $fileList $start $end]"
-#            set ::jobCreate::done false
-#            eval exec hadd $sumFile [lrange $fileList $start $end] ;# set ::jobCreate::done true
-            if {[catch {eval exec hadd $sumFile [lrange $fileList $start $end]} mess]} {
-                .addHistograms.t insert end $mess errorOutput
-            } else {
-                .addHistograms.t insert end $mess normalOutput
-            }
-            .addHistograms.t see end
-#            vwait ::jobCreate::done
-            lappend tmpFiles $sumFile
-            close $fh
         }
-        if {($nFiles%15 != 0) && !$::jobCreate::stopAddHistograms} {
-            set logFile [file join $path data addedFileNamesLog]
-            if {[file exists $logFile]} {
-                set fh [open $logFile a]
-            } else  {
-                set fh [open $logFile w]
-            }
-            set start [expr $nSets*15]
-            set sumFile [file join $path data Data_${j}.root]
-            .addHistograms.t insert end "hadd $sumFile [lrange $fileList $start end]" input
-            .addHistograms.t see end
-            update
-            puts $fh "hadd $sumFile [lrange $fileList $start end]"
-#            set ::jobCreate::done false
-#            eval exec hadd $sumFile [lrange $fileList $start end] ;# set ::jobCreate::done true
-            if {[catch {eval exec hadd $sumFile [lrange $fileList $start end]} mess]} {
-                .addHistograms.t insert end $mess errorOutput
-            } else {
-                .addHistograms.t insert end $mess normalOutput
-            }
-            .addHistograms.t see end
-#            vwait ::jobCreate::done
-            lappend tmpFiles $sumFile
-            close $fh
-        }
-        # Now add all of those groups together
-        if {!$::jobCreate::stopAddHistograms} {
-            set logFile [file join $path data addedFileNamesLog]
-            set fh [open $logFile a]
-            set fileList [lsort -dictionary [glob [file join $path data Data_*.root]]]
-            set sumFile [file join $path data Data.root]
 
-            if {$reAdd} {
-                set tmpName [file join $path data DataTmp.root]
-                if {![file exists $sumFile]} {
-                    error "I expected a previous sum in file $sumFile. File not found."
-                }
-                file rename $sumFile $tmpName
-                lappend fileList $tmpName
-                lappend tmpFiles $tmpName
-            }
-            if {[llength $fileList] > 1} {
-                .addHistograms.t insert end "hadd $sumFile $fileList" input
+        # Now add row of widgets to dataFrame.
+        # Checkbox to add up this centrality.
+        # Label showing average file size.
+        # numberic entry for number of files to add.
+        # button to pop up list of already added files
+        # button to show (and deselect) files to be added.
+        if {![info exists ::jobCreate::addCentrality]} {
+            set ::jobCreate::addCentrality 1
+            set ::jobCreate::numPerSet 1
+        }
+        checkbutton $dataFrame.centrality0  -text "bin 0" -variable ::jobCreate::addCentrality
+        label $dataFrame.avgFileSize0 -text  [format %.2fMB $avgSize]
+        entry $dataFrame.numPerSet0   -textvariable ::jobCreate::numPerSet
+        button $dataFrame.addedFiles0  -text [llength $::jobCreate::alreadyAdded] \
+                 -command [namespace code [list showAddedFiles 0]]
+        button $dataFrame.filesToAdd-  -text [llength $::jobCreate::filesToAdd] \
+                 -command [namespace code [list editFilesToAdd 0]]
+        grid $dataFrame.centrality0 $dataFrame.avgFileSize0 $dataFrame.numPerSet0 \
+             $dataFrame.addedFiles0 $dataFrame.filesToAdd0 -sticky w
+    }
+    .addHistograms.b.action configure -state normal \
+            -command [namespace code [list startAddingHistograms $nCentralities]]
+}
+################################################################################
+# showAddedFiles simply shows the files that have already been added.
+################################################################################
+proc ::jobCreate::showAddedFiles {centrality} {
+    if {![winfo exists .showAddedFiles]} {
+        toplevel .showAddedFiles
+        text .showAddedFiles.t -yscrollcommand {.showAddedFiles.y set} \
+                              -xscrollcommand {.showAddedFiles.x set} -wrap word
+        scrollbar .showAddedFiles.y -command {.showAddedFiles.t yview}
+        scrollbar .showAddedFiles.x -command {.showAddedFiles.t xview} -orient horizontal
+        grid .showAddedFiles.t .showAddedFiles.y
+        grid .showAddedFiles.x x
+        grid .showAddedFiles.t -sticky news
+        grid .showAddedFiles.y -sticky ns
+        grid .showAddedFiles.x -sticky we
+        grid columnconfigure .showAddedFiles 0 -weight 1
+        grid rowconfigure    .showAddedFiles 0 -weight 1
+        grid rowconfigure    .showAddedFiles 1 -weight 1
+        bind .showAddedFiles <Control-w> {destroy .showAddedFiles}
+    } else {
+        .showAddedFiles.t delete 0.0 end
+        raise .showAddedFiles
+    }
+    if {$centrality ne ""} {
+        wm title .showAddedFiles "Files that have already been summed for centrality $centrality"
+        foreach f $::jobCreate::alreadyAdded($centrality) {
+            .showAddedFiles.t insert end "[file tail $f]\n"
+        }
+    } else {
+        wm title .showAddedFiles "Files that have already been summed"
+        foreach f $::jobCreate::alreadyAdded {
+            .showAddedFiles.t insert end "[file tail $f]\n"
+        }
+    }
+}
+################################################################################
+# editFilesToAdd allows one to remove files from list to add.
+################################################################################
+proc ::jobCreate::editFilesToAdd {centrality} {
+    if {![winfo exists .editFilesToAdd]} {
+        toplevel .editFilesToAdd
+        set sw  [ScrolledWindow .editFilesToAdd.sw -relief sunken -borderwidth 2]
+        set sff [ScrollableFrame .editFilesToAdd.sw.f]
+        $sw setwidget $sff
+        set sf  [$sff getframe]
+        pack $sw -fill both -expand true
+        bind .editFilesToAdd <Control-w> {destroy .editFilesToAdd}
+    } else {
+        set sff .editFilesToAdd.sw.f
+        set sf  [$sff getframe]
+        foreach w [winfo child $sf] {
+            destroy $w
+        }
+        raise .editFilesToAdd
+    }
+    if {$centrality ne ""} {
+        wm title .editFilesToAdd "Files that will be summed for centrality $centrality"
+        set i 0
+        foreach f $::jobCreate::filesToAdd($centrality) {
+            checkbutton $sf.f$i -text [file tail $f] -command [namespace code [list toggleFileToAdd $f $centrality]]
+            pack $sf.f$i -anchor w
+            incr i
+        }
+    } else {
+        wm title .editFilesToAdd "Files that will be summed"
+        set i 0
+        foreach f $::jobCreate::filesToAdd {
+            checkbutton $sf.f$i -text [file tail $f] -command [namespace code [list toggleFileToAdd $f {}]]
+            pack $sf.f$i -anchor w
+            incr i
+        }
+    }
+}
+################################################################################
+# toggleFileToAdd removes or adds file to list to be added
+################################################################################
+proc ::jobCreate::toggleFileToAdd {f centrality} {
+    if {$centrality ne ""} {
+        if {[lsearch $::jobCreate::filesToAdd($centrality) $f] >= 0} {
+            set ::jobCreate::filesToAdd($centrality) [lremove $::jobCreate::filesToAdd($centrality) $f]
+        } else {
+            lappend ::jobCreate::filesToAdd($centrality) $f
+            set ::jobCreate::filesToAdd($centrality) [lsort -dictionary $::jobCreate::filesToAdd($centrality)]
+        }
+    } else {
+        if {[lsearch $::jobCreate::filesToAdd $f] >= 0} {
+            set ::jobCreate::filesToAdd [lremove $::jobCreate::filesToAdd $f]
+        } else {
+            lappend ::jobCreate::filesToAdd $f
+            set ::jobCreate::filesToAdd [lsort -dictionary $::jobCreate::filesToAdd]
+        }
+    }
+}
+################################################################################
+# addHistograms parses output directory for histograms and adds them
+# in hopefully appropriate ways. Need to open status window for
+# user feedback since addition of data files can take a long time.
+################################################################################
+proc ::jobCreate::startAddingHistograms {nCentralities} {
+    .addHistograms.b.action configure -text Cancel \
+            -command {set ::jobCreate::stopAddHistograms true}
+
+    set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+    set path [$node text]
+    set node [$::jobCreate::jobInfo getElementsByTagName analysisType]
+    set aType [$node text]
+
+    # Add QA files
+    if {$::jobCreate::addQAHistograms} {
+        .addHistograms.t insert end "About to sum QA files\n" input
+        .addHistograms.t see end
+        set fileList [lsort -dictionary [glob [file join $path QA QA_*.root]]]
+        set sumName [file join $path QA QA.root]
+        set QALogFile [file join $path QA addedQALog]
+        jobCreate::addSmallHistograms $fileList $sumName $QALogFile .addHistograms.control.cbQA
+    }
+
+    # Add cuts files
+    if {$::jobCreate::addCutsHistograms  && !$::jobCreate::stopAddHistograms} {
+        .addHistograms.t insert end "About to sum Cuts files\n" input
+        .addHistograms.t see end
+        set fileList [lsort -dictionary [glob [file join $path cuts cutHists_*.root]]]
+        set sumName [file join $path cuts Cuts.root]
+        set cutsLogFile [file join $path cuts addedCutsLog]
+        jobCreate::addSmallHistograms $fileList $sumName $cutsLogFile .addHistograms.control.cbCuts
+    }
+
+    # Now for data histograms we have given the user some control 
+    # over what to add. Use variables 
+    if {$nCentralities eq ""} {
+        if {$::jobCreate::addCentrality  && !$::jobCreate::stopAddHistograms} {
+            .addHistograms.t insert end "About to sum Fluctuation files\n" input
+            .addHistograms.t see end
+            set fl $::jobCreate::filesToAdd
+            set nPerSet $::jobCreate::numPerSet
+            addDataHistograms $fl $nPerSet {}
+        }
+    } else {
+        for {set i 0} {$i < $nCentralities} {incr i} {
+            if {$::jobCreate::addCentrality($i)  && !$::jobCreate::stopAddHistograms} {
+                .addHistograms.t insert end "About to sum Correlation files for centrality $i\n" input
                 .addHistograms.t see end
-                update
-                puts $fh "hadd $sumFile $fileList"
-#                set ::jobCreate::done false
-#                eval exec hadd $sumFile $fileList ;# set ::jobCreate::done true
-                if {[catch {eval exec hadd $sumFile $fileList} mess]} {
-                    .addHistograms.t insert end $mess errorOutput
-                } else {
-                    .addHistograms.t insert end $mess normalOutput
-                }
-                .addHistograms.t see end
-#                vwait ::jobCreate::done
-                close $fh
-            } else {
-                .addHistograms.t insert end "file rename $fileList $sumFile" input
-                .addHistograms.t see end
-                update
-                puts $fh "file rename $fileList $sumFile"
-                file rename $fileList $sumFile
-            }
-            if {[info exists tmpName]} {
-                file delete $tmpName
-                unset tmpName
+                set fl $::jobCreate::filesToAdd($i)
+                set nPerSet $::jobCreate::numPerSet($i)
+                addDataHistograms $fl $nPerSet $i
             }
         }
+    }
+    if {$::jobCreate::stopAddHistograms} {
+        .addHistograms.t insert end "Aborted adding histogram files\n" input
+        .addHistograms.t see end
+        .addHistograms.b.action configure -state normal -text "Continue adding" \
+                -command [namespace code [list startAddingHistograms $nCentralities]]
+        set ::jobCreate::stopAddHistograms false
+        return
+    } else {
+        .addHistograms.b.action configure -text Done -command {} -state disabled
+    }
+}
+################################################################################
+# addSmallHistograms takes list from addHistograms and adds them together.
+# This is usually quick, so don't look in previous log but just add everything up again.
+################################################################################
+proc ::jobCreate::addSmallHistograms {fileList sumName logName b} {
+    set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+    set path [$node text]
+
+    if {[file exists $logName]} {
+        set log [open $logName a]
+    } else  {
+        set log [open $logName w]
+    }
+    $b configure -selectcolor yellow
+    .addHistograms.t insert end "hadd $sumName $fileList\n" input
+    .addHistograms.t see end
+
+    set fid [open "|hadd -f $sumName $fileList"]
+    fconfigure $fid -blocking false -buffering line
+    fileevent $fid readable [namespace code [list addingReadable $fid $log]]
+    set currCurs [.addHistograms.t cget -cursor]
+    .addHistograms.t configure -cursor watch
+
+    # Wait for the fileevents (i.e. hadd) to finish.
+    vwait ::ADD-DONE
+
+    # Close the pipe
+    close $fid
+    close $log
+    $b configure -selectcolor green
+    .addHistograms.t conf -cursor $currCurs
+}
+################################################################################
+# addDataHistograms takes list from addHistograms and adds them together,
+# keeping a log of what has already been added.
+# For Fluctuation histograms centrality = "". Think everything just works.
+################################################################################
+proc ::jobCreate::addDataHistograms {fileList numPerSet centrality} {
+    set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+    set path [$node text]
+
+    # For correlations we are adding up histograms from a single centrality.
+    # Need to add add files to the correct centrality log (hence the centrality argument.)
+
+    # If user stopped adding of histograms by clicking on cancel button, then resumed
+    # adding via ADDS menu there will be Data_${centrality}_*.root files already exsiting.
+    # The files that were added to create them will be properly accounted for in the
+    # log files, so we want to include them in the grand sum.
+    set tmpFiles [lsort -dictionary [glob -nocomplain [file join $path data Data${centrality}_*.root]]]
+    set nTmp [llength $tmpFiles]
+
+    .addHistograms.data.centrality$centrality configure -selectcolor yellow
+
+    # If files to be added are too big root will crash. I don't
+    # know how to figure out how many files I can add at once.
+    # Let user decide (although we suggested defaults.)
+
+    set nFiles [llength $fileList]
+    set nSets [expr $nFiles/$numPerSet]
+    if {$nFiles%$numPerSet} {
+        incr nSets
+    }
+    for {set j 0} {$j < $nSets} {incr j} {
+        if {$::jobCreate::stopAddHistograms} {
+            return
+        }
+        set logFile [file join $path data addedFileNames${centrality}Log]
+        if {[file exists $logFile]} {
+            set addLog [open $logFile a]
+        } else  {
+            set addLog [open $logFile w]
+        }
+        set start [expr $j*$numPerSet]
+        set end   [expr $start+$numPerSet-1]
+        if {$end>=$nFiles} {
+            set end [expr $nFiles-1]
+        }
+        set sumFile [file join $path data Data${centrality}_${nTmp}.root]
+        if {$start == $end} {
+            set currCurs [.addHistograms.t cget -cursor]
+            .addHistograms.t configure -cursor watch
+            puts $addLog "file copy [lindex $fileList $start] $sumFile"
+            if {[catch {file copy [lindex $fileList $start] $sumFile} mess]} {
+                .addHistograms.t insert end $mess errorOutput
+                .addHistograms.t insert end "\n\n" errorOutput
+                puts $addLog "$mess"
+            } else {
+                .addHistograms.t insert end $mess normalOutput
+                .addHistograms.t insert end "\n\n" normalOutput
+            }
+            .addHistograms.t conf -cursor $currCurs
+            lappend ::jobCreate::alreadyAdded($centrality) [lrange $fileList $start]
+            set ::jobCreate::filesToAdd($centrality) [lremove $::jobCreate::filesToAdd($centrality) [lindex $fileList $start]]
+        } else {
+            set cmd "hadd $sumFile [lrange $fileList $start $end]"
+            puts $addLog "$cmd"
+            .addHistograms.t insert end "$cmd\n" input
+            .addHistograms.t see end
+
+            set fid [open "|$cmd"]
+            fconfigure $fid -blocking false -buffering line
+            fileevent $fid readable [namespace code [list addingReadable $fid $addLog]]
+            set currCurs [.addHistograms.t cget -cursor]
+            .addHistograms.t configure -cursor watch
+
+            # Wait for the fileevents (i.e. hadd) to finish.
+            vwait ::ADD-DONE
+
+            # Close the pipe
+            close $fid
+            .addHistograms.t conf -cursor $currCurs
+            set ::jobCreate::alreadyAdded($centrality) [concat $::jobCreate::alreadyAdded($centrality) [lrange $fileList $start $end]]
+            set ::jobCreate::filesToAdd($centrality) [lremove $::jobCreate::filesToAdd($centrality) [lrange $fileList $start $end]]
+        }
+        close $addLog
+        lappend tmpFiles $sumFile
+        incr nTmp
+        .addHistograms.data.addedFiles$centrality configure -text [llength $::jobCreate::alreadyAdded($centrality)]
+        .addHistograms.data.filesToAdd$centrality configure -text [llength $::jobCreate::filesToAdd($centrality)]
+    }
+
+    # Now add all of those groups together (for each centrality)
+    if {$::jobCreate::stopAddHistograms} {
+        return
+    }
+    if {$nTmp > 0} {
+        .addHistograms.data.centrality$centrality configure -selectcolor orange
+        set logFile [file join $path data addedFileNames${centrality}Log]
+        set addLog [open $logFile a]
+        set sumFile [file join $path data Data${centrality}.root]
+
+        if {[file exists $sumFile]} {
+            set tmpName [file join $path data Data${centrality}Tmp.root]
+            puts $addLog "file rename $sumFile $tmpName"
+            file rename $sumFile $tmpName
+            lappend tmpFiles $tmpName
+            incr nTmp
+            .addHistograms.t insert end "file rename $sumFile $tmpName\n" input
+            .addHistograms.t see end
+        }
+        if {[llength $tmpFiles] > 1} {
+            set cmd "hadd $sumFile $tmpFiles"
+            puts $addLog "$cmd"
+            .addHistograms.t insert end "$cmd\n" input
+            .addHistograms.t see end
+
+            set fid [open "|$cmd"]
+            fconfigure $fid -blocking false -buffering line
+            fileevent $fid readable [namespace code [list addingReadable $fid $addLog]]
+            set currCurs [.addHistograms.t cget -cursor]
+            .addHistograms.t configure -cursor watch
+
+            # Wait for the fileevents (i.e. hadd) to finish.
+            vwait ::ADD-DONE
+            close $fid
+            .addHistograms.t conf -cursor $currCurs
+        } else {
+            puts $addLog "file rename $tmpFiles $sumFile"
+            .addHistograms.t insert end "file rename $tmpFiles $sumFile\n" input
+            .addHistograms.t see end
+            file rename $tmpFiles $sumFile
+        }
+        close $addLog
         foreach tmp $tmpFiles {
             catch {file delete $tmp}
         }
     }
-    .addHistograms.t configure -cursor $currCurs
-    .addHistograms.b.action configure -text Done -command "destroy .addHistograms"
+
+    # Done with this centrality
+    .addHistograms.data.centrality$centrality configure -selectcolor green
+}
+################################################################################
+# addingReadable waits for output from various hadd commands and
+#  puts it into a text widget.
+################################################################################
+proc ::jobCreate::addingReadable {fid fLog} {
+    # The channel is readable; try to read it.
+    set status [catch { gets $fid line } result]
+    if { $status != 0 } {
+        # Error on the channel
+        puts $fLog ">>>>>error reading $fid: $result<<<<<"
+        .addHistograms.t insert end "error reading $fid: $result\n"
+        .addHistograms.t see end
+        set ::ADD-DONE 2
+    } elseif { [eof $fid] } {
+        set ::ADD-DONE 1
+    } elseif { $result >= 0 } {
+        puts $fLog $line
+        .addHistograms.t insert end "$line\n"
+        .addHistograms.t see end
+    } elseif { [fblocked $fid] } {
+        # Read blocked.  Just return
+    } else {
+        # Something else
+        puts $fLog ">>>>>Something impossible happened while reading output from hadd<<<<<"
+        .addHistograms.t insert end "What did you do?? the impossible happened while reading $fid: $result\n"
+        .addHistograms.t see end
+        set ::ADD-DONE 3
+    }
+}
+################################################################################
+# combineCentralities takes Datan{0}.root through Datan{m}.root and combines them
+# into one file called Sum{n1}_{nm}.root (we are assuming n1, n2, ... nm are consecutive
+# using this naming convention, although they do not have to be.)
+# Histograms that depend on z-vertex bins are renamed to have distinct names.
+# The support code that combines histograms to make \Delta\rho/\sqrt(\rho) knows
+# how to combine these.
+#
+# This proc only makes sense for Correlations (menu should be disabled for fluctuations.)
+################################################################################
+proc ::jobCreate::combineCentralities {} {
+    if {![winfo exists .combineCentralities]} {
+        set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+        set path [$node text]
+
+        set fileList [list]
+        foreach f [glob -nocomplain [file join $path data Data*.root]] {
+            set fn [file tail $f]
+            if {[regexp {Data(\d+).root} $fn ic]} {
+                lappend fileList $f
+            }
+        }
+        if {[llength $fileList] == 0} {
+            tk_messageBox -type ok -icon warning \
+                    -message "Did not find and Data{n}.root files. Perhaps you need to Add histograms first?"
+             return
+        }
+        set cents [list]
+        set fileList [lsort -dictionary $fileList]
+        foreach f $fileList {
+            set fn [file tail $f]
+            regexp {Data(\d+).root} $fn match ic
+            lappend cents $ic
+        }
+
+        toplevel .combineCentralities
+        wm title .combineCentralities "Combine centralities"
+        pack [labelframe .combineCentralities.found -text "Existing sum files"] -anchor w
+        set sumFrame [labelframe .combineCentralities.centralities -text "Sum files to create"]
+        pack $sumFrame -anchor w
+        set tFrame [frame .combineCentralities.tFrame]
+        pack $tFrame -fill both -expand true
+
+        text .combineCentralities.tFrame.t -yscrollcommand {.combineCentralities.tFrame.y set} \
+                              -xscrollcommand {.combineCentralities.tFrame.x set} -wrap word
+        scrollbar .combineCentralities.tFrame.y -command {.combineCentralities.tFrame.t yview}
+        scrollbar .combineCentralities.tFrame.x -command {.combineCentralities.tFrame.t xview} -orient horizontal
+        grid .combineCentralities.tFrame.t .combineCentralities.tFrame.y
+        grid .combineCentralities.tFrame.t -sticky news
+        grid .combineCentralities.tFrame.y -sticky ns
+        grid .combineCentralities.tFrame.x x -sticky we
+        grid columnconfigure .combineCentralities.tFrame 0 -weight 1
+        grid rowconfigure    .combineCentralities.tFrame 0 -weight 1
+
+        .combineCentralities.tFrame.t tag configure input -foreground black
+        .combineCentralities.tFrame.t tag configure normalOutput -foreground blue
+        .combineCentralities.tFrame.t tag configure errorOutput -foreground red
+
+        button .combineCentralities.addSum -text "Another sum file?" \
+            -command [namespace code [list addSumFileLine $fileList $cents]]
+        button .combineCentralities.addEm -text "Add em up" -state disabled \
+            -command [namespace code [list sumFilesUp]]
+        pack .combineCentralities.addSum .combineCentralities.addEm -side left
+
+        # Create labels for previously summed files.
+        set found [list]
+        foreach f [glob -nocomplain [file join $path data Sum*.root]] {
+            set fn [file tail $f]
+            if {[regexp {Sum(\d+_\d+).root} $fn ic]} {
+                lappend found [file rootname $fn]
+            }
+        }
+        set found [lsort -dictionary $found]
+        foreach fn $found {
+            pack [label .combineCentralities.found.l$fn -text $fn] -side left
+        }
+
+        # Labels for centralities of Data{n} files
+        label $sumFrame.sumFile  -text "Summed file"
+        set labs [list]
+        set nCentralities [llength $cents]
+        for {set ic 0} {$ic < $nCentralities} {incr ic} {
+            lappend labs [label $sumFrame.cent$ic -text "cent. $ic"]
+        }
+        eval grid $sumFrame.sumFile x $labs
+
+        # Create a line for specifying centralities to sum.
+        set n 1
+        if {[info exists ::jobCreate::numberSumFiles]} {
+            set n $::jobCreate::numberSumFiles
+        }
+        set ::jobCreate::numberSumFiles 0
+        # May have opened window, modified widgets, then destroyed it.
+        # Want to re-open to reflect previous state.
+        for {set i 0} {$i < $n} {incr i} {
+            addSumFileLine $fileList $cents
+        }
+    } else {
+        raise .combineCentralities
+    }
+    set state disabled
+    for {set j 0} {$j < $::jobCreate::numberSumFiles} {incr j} {
+        if {[llength $::jobCreate::sumFileNumbers($j)] > 0} {
+            set state normal
+        }
+    }
+    .combineCentralities.addEm configure -state $state
+}
+################################################################################
+# addSumFileLine creates a line of buttons to indicate which centralities
+# should be added together.
+################################################################################
+proc ::jobCreate::addSumFileLine {centFiles centList} {
+    set j $::jobCreate::numberSumFiles
+    set sumFrame .combineCentralities.centralities
+    if {![info exists ::jobCreate::sumFileName($j)]} {
+        set ::jobCreate::sumFileName($j) "Sum"
+    }
+    label $sumFrame.sumFile$j -textvariable ::jobCreate::sumFileName($j)
+    label $sumFrame.space$j -text "<-"
+    if {![info exists ::jobCreate::sumFileList($j)]} {
+        set ::jobCreate::sumFileList($j) [list]
+        set ::jobCreate::sumFileNumbers($j) [list]
+    }
+    set cbs [list]
+    foreach ic $centList fn $centFiles {
+        if {![info exists ::jobCreate::sumFileCB($j,$ic)]} {
+            set ::jobCreate::sumFileCB($j,$ic) 0
+        }
+        lappend cbs [checkbutton $sumFrame.cb${j}${ic} -text $ic -variable ::jobCreate::sumFileCB($j,$ic) \
+                -command [namespace code [list includeSumFile $centList $j $ic $fn]]]
+    }
+    eval grid $sumFrame.sumFile$j $sumFrame.space$j $cbs
+    incr ::jobCreate::numberSumFiles
+}
+################################################################################
+# includeSumFile appends or removes a file from the list to be summed up.
+################################################################################
+proc ::jobCreate::includeSumFile {centList sFile ic fn} {
+    if {$::jobCreate::sumFileCB($sFile,$ic)} {
+        lappend ::jobCreate::sumFileList($sFile) $fn
+        lappend ::jobCreate::sumFileNumbers($sFile) $ic
+    } else {
+        set ::jobCreate::sumFileList($sFile) [lremove $::jobCreate::sumFileList($sFile) $fn]
+        set ::jobCreate::sumFileNumbers($sFile) [lremove $::jobCreate::sumFileNumbers($sFile) $ic]
+    }
+
+    set state disabled
+    for {set j 0} {$j < $::jobCreate::numberSumFiles} {incr j} {
+        if {[llength $::jobCreate::sumFileNumbers($j)] > 0} {
+            set state normal
+        }
+    }
+
+    set oList [lsort -dictionary $::jobCreate::sumFileNumbers($sFile)]
+    set a [lindex $oList 0]
+    set b [lindex $oList end]
+    set ::jobCreate::sumFileName($sFile) "Sum${a}_$b"
+    .combineCentralities.addEm configure -state $state
+}
+################################################################################
+# sumFilesUp uses information from ::jobCreate::sumFileList to combine histogram centrality files.
+################################################################################
+proc ::jobCreate::sumFilesUp {} {
+    set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+    set path [file join [$node text] data]
+    # Assume addCentralities.C script is under the localDir job was submitted from.
+    set pwd [pwd]
+    set node [$::jobCreate::jobInfo getElementsByTagName localDir]
+    cd [file join [$node text] data]
+
+    set logFile [file join $path sumCentralitiesLog]
+    if {[file exists $logFile]} {
+        set sumLog [open $logFile a]
+    } else  {
+        set sumLog [open $logFile w]
+    }
+
+    set root [open "|root -l -b" r+]
+    fconfigure $root -blocking false -buffering line -buffersize 1
+    fileevent  $root readable [namespace code [list summingReadable $root $sumLog]]
+    set currCurs [.combineCentralities.tFrame.t cget -cursor]
+    .combineCentralities.tFrame.t configure -cursor watch
+    for {set j 0} {$j < $::jobCreate::numberSumFiles} {incr j} {
+        set outFile $::jobCreate::sumFileName($j)
+        set numFiles [llength $::jobCreate::sumFileNumbers($j)]
+
+        puts $sumLog "gROOT->LoadMacro(\"addCentralities.C\");"
+        puts $sumLog "int inFile\[\] = {[join $::jobCreate::sumFileNumbers($j) ,]};"
+        puts $sumLog "addCentralities(\"$path\",\"Data\",\"$outFile\",inFile,$numFiles);"
+
+        puts $root "cout << \"PLEASE COLOR ME $j yellow\" << endl;"
+        puts $root "gROOT->LoadMacro(\"addCentralities.C\");"
+        puts $root "int inFile\[\] = {[join $::jobCreate::sumFileNumbers($j) ,]};"
+        puts $root "addCentralities(\"$path\",\"Data\",\"$outFile\",inFile,$numFiles);"
+        puts $root "cout << \"PLEASE COLOR ME $j green\" << endl;"
+    }
+    # I don't know how to get root to close the pipe by telling it to quit.
+    # Instead make root ask for mercy.
+    puts $root "cout << \"PLEASE KILL ME\" << endl;"
+
+    vwait ::SUM-DONE
+    # Not sure closing the root process really kills it.
+    close $root
+    close $sumLog
+    .combineCentralities.tFrame.t conf -cursor $currCurs
+    .combineCentralities.addEm configure -text "Done" -state disabled
+    cd $pwd
+}
+################################################################################
+# summingReadable waits for output from a root process and
+#  puts it into a text widget.
+################################################################################
+proc ::jobCreate::summingReadable {fid fLog} {
+    # The channel is readable; try to read it.
+    set status [catch { gets $fid line } result]
+    if { $status != 0 } {
+        # Error on the channel
+        puts $fLog ">>>>>error reading $fid: $result<<<<<"
+        .combineCentralities.tFrame.t insert end "error reading $fid: $result\n"
+        .combineCentralities.tFrame.t see end
+        set ::SUM-DONE 2
+    } elseif {[eof $fid]} {
+        set ::SUM-DONE 1
+    } elseif {$result >= 0} {
+        if {$line eq "PLEASE KILL ME"} {
+            set ::SUM-DONE 5
+            return
+        } elseif {[string first "PLEASE COLOR ME " $line] == 0} {
+            foreach {j color} [string map {"PLEASE COLOR ME " ""} $line] {break}
+            foreach nf $::jobCreate::sumFileNumbers($j) {
+                .combineCentralities.centralities.cb${j}${nf} configure -selectcolor $color
+            }
+            if {![winfo exists .combineCentralities.found.l$::jobCreate::sumFileName($j)]} {
+                pack [label .combineCentralities.found.l$::jobCreate::sumFileName($j) -text $::jobCreate::sumFileName($j)] -side left
+            }
+            return
+        } else {
+            puts $fLog $line
+            .combineCentralities.tFrame.t insert end "$line\n"
+            .combineCentralities.tFrame.t see end
+        }
+    } elseif { [fblocked $fid] } {
+        set ::SUM-DONE 4
+        # Read blocked.  Just return
+    } else {
+        # Something else
+        puts $fLog ">>>>>Something impossible happened while reading output from hadd<<<<<"
+        .combineCentralities.tFrame.t insert end "What did you do?? the impossible happened while reading $fid: $result\n"
+        .combineCentralities.tFrame.t see end
+        set ::SUM-DONE 3
+    }
+}
+################################################################################
+# selectAll executes the appropriate version of selectAll for the
+# mode. Only available if analysisType is StEStructCorrelation.
+# Looks for Data{n} and Sum{n1}_{n2} files to operate on.
+################################################################################
+proc ::jobCreate::selectAll {} {
+    if {![winfo exists .selectAll]} {
+        set node [$::jobCreate::jobInfo getElementsByTagName cutMode]
+        set mode [$node text]
+        toplevel .selectAll
+        wm title .selectAll "Run Select macro on selected histogram files"
+        pack [labelframe .selectAll.found -text "Previously created files from selectAll$mode"] -anchor w
+        set selFrame [labelframe .selectAll.files -text "Invoke selectAll$mode with..."]
+        pack $selFrame -anchor w
+        pack [labelframe .selectAll.foundHists -text "Previously created files from combineHistograms$mode"] -anchor w
+        set hisFrame [labelframe .selectAll.hists -text "Group into \u0394\u03c1/\u221a\u03c1_ref histogram file (using combineHistograms${mode})"]
+        pack $hisFrame -anchor w
+        set tFrame [frame .selectAll.tFrame]
+        pack $tFrame -fill both -expand true
+
+        text .selectAll.tFrame.t -yscrollcommand {.selectAll.tFrame.y set} \
+                              -xscrollcommand {.selectAll.tFrame.x set} -wrap word
+        scrollbar .selectAll.tFrame.y -command {.selectAll.tFrame.t yview}
+        scrollbar .selectAll.tFrame.x -command {.selectAll.tFrame.t xview} -orient horizontal
+        grid .selectAll.tFrame.t .selectAll.tFrame.y
+        grid .selectAll.tFrame.x x
+        grid .selectAll.tFrame.t -sticky news
+        grid .selectAll.tFrame.y -sticky ns
+        grid .selectAll.tFrame.x -sticky we
+        grid columnconfigure .selectAll.tFrame 0 -weight 1
+        grid rowconfigure    .selectAll.tFrame 0 -weight 1
+        .selectAll.tFrame.t tag configure input -foreground black
+        .selectAll.tFrame.t tag configure normalOutput -foreground blue
+        .selectAll.tFrame.t tag configure errorOutput -foreground red
+
+        button .selectAll.runIt -text "Run selectAll" -state disabled \
+            -command [namespace code [list runSelectAll]]
+        button .selectAll.anotherGroup -text "Add \u0394\u03c1/\u221a\u03c1_ref file" \
+            -command [namespace code [list addDeltaRhoFile]]
+        button .selectAll.createDeltaRhoFile -text "Create \u0394\u03c1/\u221a\u03c1_ref files" -state disabled \
+            -command [namespace code [list createDeltaRhoFile]]
+        pack .selectAll.runIt .selectAll.anotherGroup .selectAll.createDeltaRhoFile -side left
+
+        # Want to only allow window to be destroyed when not in action?
+        #bind .selectAll <Control-w> {destroy .selectAll}
+
+        set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+        set path [file join [$node text] data]
+
+        # Look for log file from and parse it for previous runs of selectAll
+        set logFile [file join $path selectAllLog]
+        set found [list]
+        if {[file exists $logFile]} {
+            set log [open $logFile r]
+            while {[gets $log line] >= 0} {
+                if {[string first "Invoke selectAllM${mode}" $line] >= 0} {
+                    lappend found [lindex $line end]
+                }
+            }
+            close $log
+        }
+        set found [lsort -unique -dictionary $found]
+        foreach fn $found {
+            pack [label .selectAll.found.l$fn -text $fn]  -side left
+        }
+
+        # Look for log file from and parse it for previous runs of combineHistograms
+        set logFile [file join $path combineLog]
+        unset -nocomplain found
+        if {[file exists $logFile]} {
+            set log [open $logFile r]
+            while {[gets $log line] >= 0} {
+                if {[string first "Invoke combineHistogram$mode creating" $line] >= 0} {
+                    if {[regexp "Invoke combineHistogram$mode creating(.*)" $line m v]} {
+                        set found([lindex $v 0]) [lrange $v 2 end]
+                    }
+                }
+            }
+            close $log
+        }
+        foreach fn [array names found] {
+            pack [frame .selectAll.foundHists.f$fn] -anchor w
+            pack [label .selectAll.foundHists.f$fn.l$fn -text $fn] -side left
+            pack [label .selectAll.foundHists.f$fn.lArrow -text "<-"] -side left
+            foreach f [lsort -dictionary $found($fn)] {
+                pack [label .selectAll.foundHists.f$fn.l$f -text $f] -side left
+            }
+        }
+
+        # Get Data{n}.root files
+        set dList [list]
+        foreach fName [glob -nocomplain [file join $path Data*.root]] {
+            set f [file tail $fName]
+            if {[regexp {Data(\d+).root} $f m v]} {
+                lappend dList [file rootname $f]
+            }
+        }
+        # Get Sum{n1}_{n2}.root files
+        set sList [list]
+        foreach fName [glob -nocomplain [file join $path Sum*.root]] {
+            set f [file tail $fName]
+            if {[regexp {Sum(\d+)_(\d+).root} $f m v1 v2]} {
+                lappend sList [file rootname $f]
+            }
+        }
+        if {[llength $dList] == 0 && [llength $sList] == 0} {
+            .selectAll.tFrame.t insert end "Did not find a file that looked like \
+                a sum of the correlation histogram files in directory $path \n" errorOutput
+            .selectAll.tFrame.t see end
+            return
+        }
+        set dList [lsort -dictionary $dList]
+        set sList [lsort -dictionary $sList]
+
+        set ::jobCreate::selectAllFiles [list]
+
+        # Create row of buttons for Data{n} files.
+        # In case window was created, modified, then destroyed look for variables
+        # that would have been set and make widgets reflect those settings.
+        set bdList [label .selectAll.files.dSelect -text "Data"]
+        foreach d $dList {
+            regexp {Data(\d+)} $d m i
+            if {![info exists ::jobCreate::selectAllFiles$i]} {
+                set ::jobCreate::selectAllFiles$i 1
+            }
+            if {[lsearch $::jobCreate::selectAllFiles $d] >= 0} {
+                set ::jobCreate::selectAllFiles$i 1
+            } elseif {[set ::jobCreate::selectAllFiles$i]} {
+                lappend ::jobCreate::selectAllFiles $d
+            }
+            lappend bdList [checkbutton .selectAll.files.sel$i -text $i \
+                    -variable ::jobCreate::selectAllFiles$i \
+                    -command [namespace code [list includeInSelect $i $d]]]
+        }
+        eval grid $bdList -sticky w
+        set nCols [llength $bdList]
+
+        set bsList [label .selectAll.files.sSelect -text "Sum"]
+        foreach s $sList {
+            regexp {Sum(\d+_\d+)} $s m i
+            if {![info exists ::jobCreate::selectAllFiles$i]} {
+                set ::jobCreate::selectAllFiles$i 1
+            }
+            if {[lsearch $::jobCreate::selectAllFiles $s] >= 0} {
+                set ::jobCreate::selectAllFiles$i 1
+            } elseif {[set ::jobCreate::selectAllFiles$i]} {
+                lappend ::jobCreate::selectAllFiles $s
+            }
+            lappend bsList [checkbutton .selectAll.files.sel$i -text $i \
+                    -variable ::jobCreate::selectAllFiles$i \
+                    -command [namespace code [list includeInSelect $i $s]]]
+        }
+        eval grid $bsList -sticky w
+        if {[llength $bsList] > $nCols} {
+            set nCols [llength $bsList]
+        }
+        for {set i 3} {$i < $nCols} {incr i} {
+            grid columnconfigure .selectAll.files $i -uniform a
+        }
+
+        # Create lines for specifying files to combine in histograms.
+        set n 1
+        if {[info exists ::jobCreate::numberHistFiles]} {
+            set n $::jobCreate::numberHistFiles
+        }
+        set ::jobCreate::numberHistFiles 0
+        for {set i 0} {$i < $n} {incr i} {
+            addDeltaRhoFile $dList $sList
+        }
+
+        if {[llength $::jobCreate::selectAllFiles] > 0} {
+            .selectAll.runIt configure -state normal
+        }
+        .selectAll.anotherGroup configure -command [namespace code [list addDeltaRhoFile $dList $sList]]
+    } else {
+        raise .selectAll
+    }
+}
+################################################################################
+# addDeltaRhoFile creates a line of buttons to indicate which centralities
+# should be added together.
+# If window was deleted then recreated we want same buttons with same state.
+# This is why we check existance of variables.
+################################################################################
+proc ::jobCreate::addDeltaRhoFile {dList sList} {
+    set j $::jobCreate::numberHistFiles
+    set hFrame .selectAll.hists
+    lappend cbs [label $hFrame.histFile$j -text "DeltaRhoBySqrtRho_$j"]
+    lappend cbs [label $hFrame.space$j -text "<-"]
+    if {![info exists ::jobCreate::histFileList($j)]} {
+        set ::jobCreate::histFileList($j) [list]
+    }
+    foreach d $dList {
+        regexp {Data(\d+)} $d m ic
+        if {![info exists ::jobCreate::histFileCB($j,$ic)]} {
+            set ::jobCreate::histFileCB($j,$ic) 1
+        }
+        if {[lsearch $::jobCreate::histFileList($j) $d] >= 0} {
+            set ::jobCreate::histFileCB($j,$ic) 1
+        } elseif {$::jobCreate::histFileCB($j,$ic)} {
+            lappend ::jobCreate::histFileList($j) $d
+        }
+        lappend cbs [checkbutton $hFrame.cb${j}${ic} -text $ic -variable ::jobCreate::histFileCB($j,$ic) \
+                -command [namespace code [list toggleHistFile $j $ic $d]]]
+    }
+    eval grid $cbs -sticky w
+    set nCols [llength $cbs]
+
+    set cbs [list x x]
+    foreach s $sList {
+        regexp {Sum(\d+_\d+)} $s m ic
+        if {![info exists ::jobCreate::histFileCB($j,$ic)]} {
+            set ::jobCreate::histFileCB($j,$ic) 0
+        }
+        if {[lsearch $::jobCreate::histFileList($j) $s] >= 0} {
+            set ::jobCreate::histFileCB($j,$ic) 1
+        } elseif {$::jobCreate::histFileCB($j,$ic)} {
+            lappend ::jobCreate::histFileList($j) $s
+        }
+        lappend cbs [checkbutton $hFrame.cb${j}${ic} -text $ic -variable ::jobCreate::histFileCB($j,$ic) \
+                -command [namespace code [list toggleHistFile $j $ic $s]]]
+    }
+    eval grid $cbs -sticky w
+    if {[llength $cbs] > $nCols} {
+        set nCols [llength $cbs]
+    }
+    for {set i 3} {$i < $nCols} {incr i} {
+        grid columnconfigure $hFrame $i -uniform a
+    }
+
+    incr ::jobCreate::numberHistFiles
+    set nCheck 0
+    for {set j 0} {$j < $::jobCreate::numberHistFiles} {incr j} {
+        incr nCheck [llength $::jobCreate::histFileList($j)]
+    }
+    if {$nCheck > 0} {
+        .selectAll.createDeltaRhoFile configure -state normal
+    }
+}
+################################################################################
+# toggleHistFile removes(adds) file from(to) list.
+################################################################################
+proc ::jobCreate::toggleHistFile {j ic f} {
+    if {$::jobCreate::histFileCB($j,$ic)} {
+        lappend ::jobCreate::histFileList($j) $f
+    } else {
+        set ::jobCreate::histFileList($j) [lremove $::jobCreate::histFileList($j) $f]
+    }
+    set nCheck 0
+    for {set j 0} {$j < $::jobCreate::numberHistFiles} {incr j} {
+        incr nCheck [llength $::jobCreate::histFileList($j)]
+    }
+    if {$nCheck > 0} {
+        .selectAll.createDeltaRhoFile configure -state normal
+    }
+}
+################################################################################
+# includeInSelect removes(adds) file from(to) list.
+################################################################################
+proc ::jobCreate::includeInSelect {i f} {
+    set val [set ::jobCreate::selectAllFiles$i]
+    if {$val} {
+        lappend ::jobCreate::selectAllFiles $f
+    } else {
+        set ::jobCreate::selectAllFiles [lremove $::jobCreate::selectAllFiles $f]
+    }
+    if {[llength $::jobCreate::selectAllFiles] > 0} {
+        .selectAll.runIt configure -state normal
+    }
 }
 ################################################################################
 # runSelectAll executes the appropriate version of selectAll for the
-# mode. Only available if analysisTyps is StEStructCorrelation.
+# mode for all the files selected by selectAll.
 ################################################################################
 proc ::jobCreate::runSelectAll {} {
-    if {![winfo exists .addHistograms]} {
-        toplevel .addHistograms
-        wm title .addHistograms "Adding histograms from job output"
-        text .addHistograms.t -yscrollcommand {.addHistograms.y set} \
-                              -xscrollcommand {.addHistograms.x set} -wrap word
-        scrollbar .addHistograms.y -command {.addHistograms.t yview}
-        scrollbar .addHistograms.x -command {.addHistograms.t xview} -orient horizontal
-        grid .addHistograms.t .addHistograms.y
-        grid .addHistograms.x ^
-        grid .addHistograms.t -sticky news
-        grid .addHistograms.y -sticky ns
-        grid .addHistograms.x -sticky we
-        grid [frame  .addHistograms.b]
-        grid [button .addHistograms.b.action -text Cancel \
-                -command {set ::jobCreate::stopRunSelectAll true}]
-        grid columnconfigure .addHistograms 0 -weight 1
-        grid rowconfigure    .addHistograms 0 -weight 1
-        .addHistograms.t tag configure input -foreground black
-        .addHistograms.t tag configure normalOutput -foreground blue
-        .addHistograms.t tag configure errorOutput -foreground red
-
-        bind .addHistograms <Control-w> {destroy .addHistograms}
-    } else {
-        .addHistograms.b.action configure -text Cancel \
-                -command {set ::jobCreate::stopRunSelectAll true}
-        raise .addHistograms
-    }
-    set ::jobCreate::stopRunSelectAll false
-    set currCurs [.addHistograms.t cget -cursor]
-    .addHistograms.t configure -cursor watch
-
-    set node [$::jobCreate::jobInfo getElementsByTagName localDir]
-    set ldir [$node text]
-    set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
-    set path [$node text]
     set node [$::jobCreate::jobInfo getElementsByTagName cutMode]
     set mode [$node text]
+    set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+    set path [file join [$node text] data]
+    # Assume selectAllM${mode}.C script is under the localDir job was submitted from.
+    set pwd [pwd]
+    set node [$::jobCreate::jobInfo getElementsByTagName localDir]
+    cd [file join [$node text] data]
 
-    set currDir [pwd]
-    cd $ldir
-
-    # Assume we have less than 101 centralities.
-    set fileList [glob [file join $path data Data\[0-9\].root]]
-    lappend fileList [glob -nocomplain [file join $path data Data\[0-9\]\[0-9\].root]]
-    set top [lindex [lsort -dictionary $fileList] end]
-    if {![regexp {Data([0-9]+).root} $top m nCents]} {
-        .addHistograms.t insert end "Did not find a file that looked like \
-            a sum of the correlation histogram files in directory \
-            [file join $path data ]  \n" errorOutput
-        .addHistograms.t see end
-        return
+    set logFile [file join $path selectAllLog]
+    if {[file exists $logFile]} {
+        set log [open $logFile a]
+    } else  {
+        set log [open $logFile w]
     }
-    for {set i 0} {$i <= $nCents} {incr i} {
+    set ::jobCreate::stopRunSelectAll 0
+    .selectAll.runIt configure -text "Stop selectAll$mode" \
+            -command {set ::jobCreate::stopRunSelectAll 1}
+    foreach s $::jobCreate::selectAllFiles {
         if {$::jobCreate::stopRunSelectAll} {
             break
         }
-        set logFile [file join $path data selectAllLog]
-        if {[file exists $logFile]} {
-            set fh [open $logFile a]
-        } else  {
-            set fh [open $logFile w]
+        set cmd "root4star -q -b selectAllM${mode}.C\(\"$path\",\"[file rootname $s]\"\);"
+        puts $log "Invoke selectAllM$mode for [file rootname $s]"
+        puts $log $cmd
+        .selectAll.tFrame.t insert end "$cmd\n" input
+        .selectAll.tFrame.t see end
+
+        if {[regexp {Data(\d+)} $s m i]} {
+            set ok true
+        } elseif {[regexp {Sum(\d+_\d+)} $s m i]} {
+            set ok true
         }
-        set data [file join $path data]
-        .addHistograms.t insert end "root4star -q -b selectAllM${mode}.C\(\"$data\",\"Data${i}\"\);" input
-        .addHistograms.t see end
-        puts $fh "root4star -q -b selectAllM${mode}.C\(\"$data\",\"Data${i}\"\);"
-        # Hope this after command allows the gui to update.
-        update
-        if {[catch {exec root4star -q -b selectAllM${mode}.C\(\"$data\",\"Data${i}\"\);} mess]} {
-            .addHistograms.t insert end "$mess" errorOutput
-        } else {
-            .addHistograms.t insert end "$mess" normalOutput
+        if {!$ok} {
+            set abort [tk_messageBox -message "Problem parsing file name $f. Abort?" -type yesno \
+                    -icon question -title "in runSelectAll"]
+            if {$abort} {
+                break
+            } else {
+                continue
+            }
         }
-        .addHistograms.t see end
-        puts $fh "$mess"
-        close $fh
+        .selectAll.files.sel$i configure -selectcolor yellow
+
+        set fid [open "|$cmd"]
+        fconfigure $fid -blocking false -buffering line
+        fileevent $fid readable [namespace code [list selectAllReadable $fid $log]]
+        set currCurs [.selectAll.tFrame.t cget -cursor]
+        .selectAll.tFrame.t configure -cursor watch
+
+        # Wait for the fileevents (i.e. hadd) to finish.
+        vwait ::SEL-DONE
+
+        # Close the pipe
+        close $fid
+        set fn [file rootname $s]
+        if {![winfo exists .selectAll.found.l$fn]} {
+            pack [label .selectAll.found.l$fn -text $fn]  -side left
+        }
+        .selectAll.files.sel$i configure -selectcolor green
+        .selectAll.tFrame.t conf -cursor $currCurs
     }
-    .addHistograms.t configure -cursor $currCurs
-    .addHistograms.b.action configure -text Done -command "destroy .addHistograms"
-    cd $currDir
+    if {$::jobCreate::stopRunSelectAll} {
+        .selectAll.runIt configure -text "selectAll$mode was paused" \
+                -command [namespace code [list runSelectAll]]
+        set ::jobCreate::stopRunSelectAll 0
+    } else {
+        .selectAll.runIt configure -text Done -command "" -state disabled
+    }
+    cd $pwd
 }
- 
- 
- # displayHelp --
+################################################################################
+# createDeltaRhoFile executes the combineHistogram{mode} which will read histograms
+# produced by the selectAll{mode} macro, produce \Delta\rho/\rho_{ref} histograms
+# and then write all of these to one file.
+################################################################################
+proc ::jobCreate::createDeltaRhoFile {} {
+    set node [$::jobCreate::jobInfo getElementsByTagName cutMode]
+    set mode [$node text]
+    set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+    set path [file join [$node text] data]
+    # Assume combineHistograms.C script is under the localDir job was submitted from.
+    set pwd [pwd]
+    set node [$::jobCreate::jobInfo getElementsByTagName localDir]
+    cd [file join [$node text] data]
+
+    set logFile [file join $path combineLog]
+    if {[file exists $logFile]} {
+        set log [open $logFile a]
+    } else  {
+        set log [open $logFile w]
+    }
+    set ::jobCreate::stopCombineHistograms 0
+    .selectAll.createDeltaRhoFile configure -text "Stop combineHistograms$mode" \
+            -command {set ::jobCreate::stopCombineHistograms 1}
+
+    set root [open "|root -l -b" r+]
+    fconfigure $root -blocking false -buffering line -buffersize 1
+    fileevent  $root readable [namespace code [list selectAllReadable $root $log]]
+    set currCurs [.selectAll.tFrame.t cget -cursor]
+    .selectAll.tFrame.t configure -cursor watch
+
+    for {set j 0} {$j < $::jobCreate::numberHistFiles} {incr j} {
+        if {$::jobCreate::stopCombineHistograms} {
+            break
+        }
+        set fList [list]
+        set fN [list]
+        foreach h [lsort -dictionary $::jobCreate::histFileList($j)] {
+            set ok false
+            if {[regexp {Data(\d+)} $h m ic]} {
+                set ok true
+            } elseif {[regexp {Sum(\d+_\d+)} $h m ic]} {
+                set ok true
+            }
+            if {!$ok} {
+                set abort [tk_messageBox -message "Problem parsing file name $h. Abort?" -type yesno \
+                        -icon question -title "in createDeltaRhoFile"]
+                if {$abort} {
+                    break
+                } else {
+                    continue
+                }
+            }
+            lappend fList \"$h\"
+            lappend fN $h
+        }
+
+        set outFile DeltaRhoBySqrtRho_$j
+        set numFiles [llength $fList]
+        if {0 == $numFiles} {
+            continue
+        }
+
+        .selectAll.tFrame.t insert end "gROOT->LoadMacro(\"combineHistograms${mode}.C\");\n"
+        .selectAll.tFrame.t insert end "char *inFile\[\] = {[join $fList ,]}\n"
+        .selectAll.tFrame.t insert end "combineHistograms${mode}(\"$path\",inFile,\"$outFile\",$numFiles);\n"
+        .selectAll.tFrame.t see end
+        foreach h $::jobCreate::histFileList($j) {
+            if {[regexp {Data(\d+)} $h m ic]} {
+                set ok true
+            } elseif {[regexp {Sum(\d+_\d+)} $h m ic]} {
+                set ok true
+            }
+            puts $root "cout << \"PLEASE COLOR ME ${j}${ic} yellow\" << endl;"
+        }
+        puts $log "Invoke combineHistogram$mode creating $outFile from $fN"
+        puts $log "gROOT->LoadMacro(\"combineHistograms${mode}.C\");"
+        puts $log "char *inFile\[\] = {[join $fList ,]};"
+        puts $log "combineHistograms${mode}(\"$path\",inFile,\"$outFile\",$numFiles);"
+
+        puts $root "gROOT->LoadMacro(\"combineHistograms${mode}.C\");"
+        puts $root "char *inFile\[\] = {[join $fList ,]};"
+        puts $root "combineHistograms${mode}(\"$path\",inFile,\"$outFile\",$numFiles);"
+
+        foreach h $::jobCreate::histFileList($j) {
+            if {[regexp {Data(\d+)} $h m ic]} {
+                set ok true
+            } elseif {[regexp {Sum(\d+_\d+)} $h m ic]} {
+                set ok true
+            }
+            puts $root "cout << \"PLEASE COLOR ME ${j}${ic} green\" << endl;"
+        }
+        puts $root "cout << \"PLEASE UPDATE CREATED LABEL $outFile $fN\" << endl;"
+    }
+    # I don't know how to get root to close the pipe by telling it to quit.
+    # Instead make root ask for mercy.
+    puts $root "cout << \"PLEASE KILL ME\" << endl;"
+
+    vwait ::SUM-DONE
+    # Not sure closing the root process really kills it.
+    close $root
+    close $log
+    .selectAll.tFrame.t conf -cursor $currCurs
+
+    if {$::jobCreate::stopCombineHistograms} {
+        .selectAll.createDeltaRhoFile configure -text "combineHistograms$mode was paused" \
+                -command [namespace code [list createDeltaRhoFile]]
+        set ::jobCreate::stopCombineHistograms 0
+    } else {
+        .selectAll.createDeltaRhoFile configure -text Done -command "" -state disabled
+    }
+    cd $pwd
+}
+################################################################################
+# selectAllReadable waits for output from selectAll/histogram adding commands and
+#  puts it into a text widget.
+################################################################################
+proc ::jobCreate::selectAllReadable {fid fLog} {
+    # The channel is readable; try to read it.
+    set status [catch { gets $fid line } result]
+    if { $status != 0 } {
+        # Error on the channel
+        puts $fLog ">>>>>error reading $fid: $result<<<<<"
+        .selectAll.tFrame.t insert end "error reading $fid: $result\n"
+        .selectAll.tFrame.t see end
+        set ::SEL-DONE 2
+    } elseif { [eof $fid] } {
+        set ::SEL-DONE 1
+    } elseif { $result >= 0 } {
+        if {$line eq "PLEASE KILL ME"} {
+            set ::SUM-DONE 5
+            return
+        } elseif {[string first "PLEASE COLOR ME " $line] == 0} {
+            foreach {ind color} [string map {"PLEASE COLOR ME " ""} $line] {break}
+            .selectAll.hists.cb$ind configure -selectcolor $color
+            return
+        } elseif {[string first "PLEASE UPDATE CREATED LABEL " $line] == 0} {
+            set l [string map {"PLEASE UPDATE CREATED LABEL " ""} $line]
+            set fn [lindex $l 0]
+            if {![winfo exists .selectAll.foundHists.f$fn]} {
+                pack [frame .selectAll.foundHists.f$fn] -anchor w
+            }
+            if {![winfo exists .selectAll.foundHists.f$fn.l$fn]} {
+                pack [label .selectAll.foundHists.f$fn.l$fn -text $fn] -side left
+            }
+            if {![winfo exists .selectAll.foundHists.f$fn.lArrow]} {
+                pack [label .selectAll.foundHists.f$fn.lArrow -text "<-"] -side left
+            }
+            foreach f [lsort -dictionary [lrange $l 1 end]] {
+                if {![winfo exists .selectAll.foundHists.f$fn.l$f]} {
+                    pack [label .selectAll.foundHists.f$fn.l$f -text $f] -side left
+                }
+            }
+        } else {
+            puts $fLog $line
+            .selectAll.tFrame.t insert end "$line\n"
+            .selectAll.tFrame.t see end
+        }
+    } elseif { [fblocked $fid] } {
+        # Read blocked.  Just return
+    } else {
+        # Something else
+        puts $fLog ">>>>>Something impossible happened while reading output from hadd<<<<<"
+        .selectAll.tFrame.t insert end "What did you do?? the impossible happened while reading $fid: $result\n"
+        .selectAll.tFrame.t see end
+        set ::SEL-DONE 3
+    }
+}
+
+
+
+# displayHelp --
 #    Invoked via menu
 #
 # Arguments:
@@ -2328,26 +3283,36 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end " o Edit\n" bullet
     $w insert end "- Just a placeholder for now until I think of a use for it\n" n
 
-    $w insert end " o Post\n" bullet
+    $w insert end " o Apr\u00e8s batch\n" bullet
     $w insert end "- Add Histograms\n" n
     $w insert end "  For use after all jobs are finished. " n
     $w insert end "Add all cuts histograms to Cuts.root, all QA histograms " n
     $w insert end "to QA.root and all dataHistograms. For StEStructCorrelation " n
-    $w insert end "we want to end up with one DataN.root histograms for each " n
+    $w insert end "we end up with one DataN.root histograms for each " n
     $w insert end "centrality N. For StEStructFluctuations we end up with one " n
     $w insert end "file, Data.root, containing all centralities internally. " n
-    $w insert end "We add to intermediate files in groups of 15, then " n
+    $w insert end "Because of root memory limitation, we add small groups into intermediate files, then " n
     $w insert end "sum all these groups together, cleaning up the intermediate " n
     $w insert end "files at the end.\n " n
-    $w insert end "  This can take a while.\n" n
-    $w insert end " We always re-add the QA and cuts files, but for the data " n
-    $w insert end "we check the addedFiles logs and add only the files that " n
-    $w insert end "have not been included in the sum yet. Useful if you want " n
-    $w insert end "to look at results before all jobs have finished.\n" n
-    $w insert end "- Run selectAll\n" n
-    $w insert end "  For StEStructCorrelation only. " n
-    $w insert end "Uses the cutMode to decide which selectAll macro to run," n
-    $w insert end "then process all Datan.root files\n\n" n
+    $w insert end " This can take a while.\n" n
+    $w insert end " I have recently added visual feed-back and more user control " n
+    $w insert end "over the process. May not be 100% stable yet. \n\n" n
+    $w insert end "- Combine centralities\n" n
+    $w insert end "  For StEStructCorrelation only. \n" n
+    $w insert end "Allows user to specify which of the Data{n} files (where n " n
+    $w insert end "is a centrality bin) to merge creating Sum{n1}_{n2}. " n
+    $w insert end "Original Data{n} files are left. Merge is done by renaming " n
+    $w insert end "histograms (in the Sum{n1}_{n2} file) to include the centrality bin in the " n
+    $w insert end "the z vertex bin tag. \n\n" n
+    $w insert end "- selectAll macro\n" n
+    $w insert end "  For StEStructCorrelation only. \n" n
+    $w insert end "Allows user to speficy which Data{n} and Sum{n1}_{n2} files " n
+    $w insert end "to run through selectAllM{mode} macro. This macro combines cut bins " n
+    $w insert end "but doesn't create \u0394\u03c1/\u221a\u03c1_ref histograms. \n" n
+    $w insert end "After selectAllM{mode} macro has been run user can specify which " n
+    $w insert end "classes of files to turn into \u0394\u03c1/\u221a\u03c1_ref histograms " n
+    $w insert end "via the combineHistograms{mode} macro. Output of this macro " n
+    $w insert end "is a root histogram file that can be used without the STAR library. \n\n" n
 
 
     $w insert end "Analysis Type\n\n" header
@@ -2368,7 +3333,18 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end " o Pythia:\n" bullet
     $w insert end "- This allows the selection of from a set of 'standard' " n
     $w insert end "Pythia jobs. The user will be able to modify the parameters " n
-    $w insert end "that are used in the pythia initialization call.\n\n " n
+    $w insert end "that are used in the pythia initialization call.\n" n
+
+    $w insert end " o Therminator:\n" bullet
+    $w insert end "- This allows selection from 'standard' Therminator " n
+    $w insert end "parameter sets. The user will be able modify all of the Therminator " n
+    $w insert end "parameters (that are accessible via therminator.in.)  \n" n
+    $w insert end "NOTE: For each new parameter set Therminator will " n
+    $w insert end "integrate over particle distributions and store results in " n
+    $w insert end "fintegrandmax_*.txt and fmultiplicity_.txt files. " n
+    $w insert end "I recommend either creating these files outside of ADDS " n
+    $w insert end "or run a single job and wait for those files before " n
+    $w insert end "submitting the rest of them.\n\n " n
 
     $w insert end "After selecting one of the analysis types, select one " n
     $w insert end "of the specific jobs via the drop-down box and hitting " n
@@ -2456,6 +3432,12 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end "In principle this list could refer to any property of the event, as long as " n
     $w insert end "the reader supports that selection.\n\n" n
 
+    $w insert end " o keepZBuffers\n" bullet
+    $w insert end "- Space separated list. For each non-zero value we write separate histograms " n
+    $w insert end "for each z-buffer. This is important for 2pt analysis of central events. " n
+    $w insert end "If this list does not have one value for each centrality bin we ignore it. " n
+    $w insert end "This flag currently only makes sense for 2pt correlations.\n\n" n
+
     $w insert end " o analysisMode\n" bullet
     $w insert end "- Bit pattern passed to constructor of analsis object.\n\n" n
 
@@ -2531,8 +3513,42 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end " o pyEnergy\n" bullet
     $w insert end "- Energy in GeV for beam or CMS, depending on pyFrame.\n\n" n
 
-    $w insert end " o pyTune " bullet
-    $w insert end " - Chooses a group of options used to tune Pythia for a particular physics case.\n\n" n
+    $w insert end " o pyTune\n" bullet
+    $w insert end "- Chooses a group of options used to tune Pythia for a particular physics case.\n\n" n
+
+
+    $w insert end "therminatorParams\n" header
+
+    $w insert end " o thRandomize\n" bullet
+    $w insert end "- Start each event with a new random seed taken from current time\n" n
+    $w insert end " o thTableType\n" bullet
+    $w insert end "- Only choice is SHARE (for now).\n" n
+    $w insert end " o thOutputFile\n" bullet
+    $w insert end "- Normally we don't want to save the generated files, so leave this blank. " n
+    $w insert end "If you really want to save generated events in Therminator text format " n
+    $w insert end "then put the entire path here. \n" n
+    $w insert end " o thModel\n" bullet
+    $w insert end "- Choice of blastwave or single freeze out.\n" n
+    $w insert end " o thBWVt\n" bullet
+    $w insert end "- Only used in blastwave model. Radial Flow velocity.\n" n
+    $w insert end " o thTau\n" bullet
+    $w insert end "- Proper time at freeze-out \[fm\]\n" n
+    $w insert end " o thRhoMax\n" bullet
+    $w insert end "- Maximum transverse radius \[fm\]\n" n
+    $w insert end " o thTemperature\n" bullet
+    $w insert end "- Temperature \[GeV\]\n" n
+    $w insert end " o thMiuI\n" bullet
+    $w insert end "- Chemical potential for isospin \[GeV\]\n" n
+    $w insert end " o thMiuS\n" bullet
+    $w insert end "- Chemical potential for strangeness \[GeV\]\n" n
+    $w insert end " o thMiuB " bullet
+    $w insert end "- Chemical potential for baryon \[GeV\]\n" n
+    $w insert end " o thAlphaRange\n" bullet
+    $w insert end "- Range of integration for z-variable\n" n
+    $w insert end " o thRapidityRange\n" bullet
+    $w insert end "- Range of integration for z-variable\n" n
+    $w insert end " o thNumberOfIntegrateSamples " bullet
+    $w insert end "- Number of samples used in multiplicity and max. integrand determination.\n" n
 
 
     $w insert end "Display/Edit Window\n" header

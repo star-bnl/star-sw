@@ -14,7 +14,7 @@
      output directory (which is part of the jobControl element) -->
 
 
-<xsl:template match='Pythia|jobControl|eventCuts|trackCuts|pairCuts|hijingParams|doEStructMacro'/>
+<xsl:template match='Pythia|jobControl|eventCuts|trackCuts|pairCuts|hijingParams|therminatorParams|doEStructMacro'/>
 
 <xsl:template match='starSubmit'>
     <xsl:element name='job'>
