@@ -112,7 +112,7 @@
         <!-- The doEStruct macro is complicated.
              The main part should is in a generic file which we merge in. -->
         <doEStructMacro>
-            <analysisType id='analysisType' widget='combobox'>StEStructFluctuation</analysisType>
+            <analysisType id='analysisType' widget='combobox'>StEStructCorrelation</analysisType>
             <libraries id='libraries' widget='none'>
     gROOT->LoadMacro("getRandomSeed.C");
     gSystem-&gt;Load("THijing");

@@ -69,7 +69,7 @@
         <!-- The doEStruct macro is complicated.
              The main part should is in a generic file which we merge in. -->
         <doEStructMacro>
-            <analysisType id='analysisType' widget='combobox'>StEStructFluctuation</analysisType>
+            <analysisType id='analysisType' widget='combobox'>StEStructCorrelation</analysisType>
             <libraries id='libraries' widget='none'>
     gSystem-&gt;Load("StEStructPoolEventGenerators");
             </libraries>
@@ -77,14 +77,12 @@
             <ptCentralities id='ptCentralities'>0.0 2000.0</ptCentralities>
             <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
-    StEStructFlat** readers = new StEStructFlat*[numberOfAnalyses];
-    for (int i=0;i&lt;numberOfAnalyses;i++) {
-        int mCent = i;
-        if (!strcmp(analysisType,"StEStructFluctuation") &amp;&amp; numberOfAnalyses == 1) {
-            mCent = -1;
-        }
-        readers[i] = new StEStructFlat(ecuts[i],tcuts[i],skipMake[i],mCent,maxNumEvents);
-    }
+    >>>>>This probably won't work. Need to check StEStructFlat constructor for arguments.
+    StEStructFlat* reader = new StEStructFlat(mk,ecuts,tcuts);
+
+    // EventType is for qaHistograms. Depends on type of reader though.
+    int EventType = 0;
+
     char* procID = gSystem->Getenv("PROCESSID");
     int rSeed;
     if (!procID) {

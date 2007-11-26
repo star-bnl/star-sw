@@ -35,6 +35,9 @@ void doEStruct( const char* filelist,
     int mbNBins = <variable sumOf='centralities'/>
     cent-&gt;setCentralities(mbBins,mbNBins);
 
+    <variable listOf='keepZBuffers'/>
+    <variable sumOf='keepZBuffers'/>
+
     <variable listOf='ptCuts'/>
     <variable sumOf='ptCuts'/>
     <variable listOf='ptCentralities'/>
@@ -67,7 +70,6 @@ void doEStruct( const char* filelist,
                                                                                                                        
     // create the QAHist object (must come after centrality and cutbin objects)
     StEStructQAHists* qaHists = new StEStructQAHists(EventType);
-    qaHists-&gt;initHistograms();
     estructMaker-&gt;SetQAHists(qaHists);
 
     //  build the numberOfAnalyses readers and numberOfAnalyses analysis objects
@@ -84,6 +86,9 @@ void doEStruct( const char* filelist,
         estructMaker->SetReactionPlaneAnalysis(weightsFile);
     }
 
+    // Before start of event loop allow special processing.
+    <variable refersTo='beforeEventLoop'/>
+
     int counter=0, istat=0, i=0;
     while (istat!=2) {
 
@@ -97,6 +102,8 @@ void doEStruct( const char* filelist,
         if ( maxNumEvents!=0 &amp;&amp; i&gt;=maxNumEvents ) {
             istat=2;
         }
+        // Any special event loop code goes here.
+        <variable refersTo='insideEventLoop'/>
     }
     // --&gt; statistics file
     ofstream ofs(getOutFileName(outputDir,jobName,"stats"));
@@ -111,10 +118,15 @@ void doEStruct( const char* filelist,
     TFile *tfc = new TFile(getOutFileName(outputDir,jobName,"cuts"),"RECREATE");
     ecuts-&gt;writeCutHists(tfc);
     tcuts-&gt;writeCutHists(tfc);
+    StEStructCutBin* cb = StEStructCutBin::Instance();
+    cb-&gt;writeCutBinHists();
     tfc-&gt;Close();
 
     // --&gt; root QA histogram file
     estructMaker-&gt;writeQAHists(getOutFileName(outputDir,jobName,"QA"));
+
+    // Any special clean up code goes here.
+    <variable refersTo='afterEventLoop'/>
 
     // --&gt; Write out the data in the form of root histograms.
     estructMaker-&gt;Finish();
