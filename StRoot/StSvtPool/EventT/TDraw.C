@@ -535,7 +535,8 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
   Double_t *params = gp->GetParameters();
   params[0] -= TMath::Log(100.);
   gp->SetParameters(params);
-  SlicesYFit(h,0,0,10,"qnig3"); //g3
+  //  SlicesYFit(h,0,0,10,"qnig3"); //g3
+  SlicesYFit(h,0,0,10,"qni"); //g3
   TH1 *fit = (TH1 *) gDirectory->Get(Form("%s_1",h->GetName()));
   //       TH1 *sig = (TH1 *) gDirectory->Get(Form("%s_2",h->GetName()));
   //       TH1 *gra = (TH1 *) gDirectory->Get(Form("%s_3",h->GetName()));
@@ -864,6 +865,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
       TRVector  X(SInv,TRArray::kSxA,AmX); //cout << "X " << X << endl;
       TString line("");
       for (Int_t l = 0; l < 6; l++) {
+	//	if (l == 4) X(l) = -X(l);  // switch sign
 	Double_t scale = 1e4;
 	if (l > 2) scale = 1e3;
 	LSFit[l] = scale*X(l);
@@ -903,7 +905,8 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
       Double_t *params = gp->GetParameters();
       params[0] -= TMath::Log(100.);
       gp->SetParameters(params);
-      SlicesYFit(h,0,0,10,"qnig3"); // g3
+      //      SlicesYFit(h,0,0,10,"qnig3"); // g3
+      SlicesYFit(h,0,0,10,"qni"); // g3
       fit = (TH1 *) gDirectory->Get(Form("%s_1",h->GetName()));
       //       TH1 *sig = (TH1 *) gDirectory->Get(Form("%s_2",h->GetName()));
       //       TH1 *gra = (TH1 *) gDirectory->Get(Form("%s_3",h->GetName()));
@@ -930,7 +933,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
 // 	  pol1 = fit->GetFunction("PolN");
 // 	  prob = pol1->GetProb();
 // 	}
-	if (prob > 1.e-7) {
+	if (prob >= 0) {
 	  Mu     = pol1->GetParameter(0);
 	  dMu    = pol1->GetParError(0);
 	  if (dMu > 99.99e-4) dMu=  99.99e-4;
@@ -985,46 +988,43 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
 	  scale = 1e3;
 	  switch (m) {
 	  case 2:
-	    if (tag.Contains("dw")) {
-	      scale = 1e4;
-	      mu = scale*slope;
-	      dmu = scale*dslope;
-	      line += Form("|%7.2f+-%5.2f",mu,dmu); 
-	      lineC += Form(",%7.2f,%5.2f",mu,dmu); 
-	      lTitle += Form(" dw = %7.2f +- %5.2f (mkm)", mu, dmu); 
-	      break;
-	    }
-	    goto Empty; 
+	    if (! tag.Contains("dw")) goto Empty;
+	    scale = 1e4;
+	    mu = scale*slope;
+	    dmu = scale*dslope;
+	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
+	    lineC += Form(",%7.2f,%5.2f",mu,dmu); 
+	    lTitle += Form(" dw = %7.2f +- %5.2f (mkm)", mu, dmu); 
+	    break;
 	  case 3: 
-	    if (tag.Contains("alpha")) {
-  	      mu = scale*slope;
-	      dmu = scale*dslope;
-	      line += Form("|%7.2f+-%5.2f",mu,dmu);
-	      lineC += Form(",%7.2f,%5.2f",mu,dmu);
-	      lTitle += Form(" alpha = %7.2f +- %5.2f (mrad)", mu, dmu); break;}
-	    goto Empty;
+	    if (! tag.Contains("alpha")) goto Empty;
+	    //	    if (tag.Contains("-alpha")) slope = - slope;
+	    mu = scale*slope;
+	    dmu = scale*dslope;
+	    line += Form("|%7.2f+-%5.2f",mu,dmu);
+	    lineC += Form(",%7.2f,%5.2f",mu,dmu);
+	    lTitle += Form(" alpha = %7.2f +- %5.2f (mrad)", mu, dmu); 
+	    break;
 	  case 4: 
-	    if (tag.Contains("-beta")) slope = - slope;
+	    if (! tag.Contains("beta")) goto Empty;
+	    //	    if (! tag.Contains("-beta")) slope = - slope;
 	    mu = scale*slope;
 	    dmu = scale*dslope;
-	    if (tag.Contains("beta"))  {
-	      line += Form("|%7.2f+-%5.2f", mu,dmu); 
-	      lineC += Form(",%7.2f,%5.2f", mu,dmu); 
-	      lTitle += Form(" beta = %7.2f +- %5.2f (mrad)",  mu, dmu); 
-	      break;
-	    }
-	    goto Empty; 
+	    line += Form("|%7.2f+-%5.2f", mu,dmu); 
+	    lineC += Form(",%7.2f,%5.2f", mu,dmu); 
+	    lTitle += Form(" beta = %7.2f +- %5.2f (mrad)",  mu, dmu); 
+	    break;
 	  case 5:
-	    if (tag.Contains("-gamma")) slope = - slope;
+	    if (! tag.Contains("gamma")) goto Empty;
+	    //	    if (tag.Contains("-gamma")) slope = - slope;
 	    mu = scale*slope;
 	    dmu = scale*dslope;
-	    if (tag.Contains("gamma"))  {
-	      line += Form("|%7.2f+-%5.2f", mu,dmu); 
-	      lineC += Form(",%7.2f,%5.2f", mu,dmu); 
-	      lTitle += Form(" gamma = %7.2f +- %5.2f (mrad)",  mu, dmu); 
-	      break;
-	    }
-	  default:  goto Empty; 
+	    line += Form("|%7.2f+-%5.2f", mu,dmu); 
+	    lineC += Form(",%7.2f,%5.2f", mu,dmu); 
+	    lTitle += Form(" gamma = %7.2f +- %5.2f (mrad)",  mu, dmu); 
+	    break;
+	  default:  
+	    goto Empty; 
 	  };
           if (! Name.Contains("duOvertuP") && dslope > 0) {
 	    Double_t dev = mu - LSFit[m];
@@ -1203,7 +1203,8 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
       prof = h->ProfileX();
       prof->SetMarkerStyle(24);
       prof->SetMarkerColor(6);
-      SlicesYFit(h,0,0,10,"qnig3");
+      //      SlicesYFit(h,0,0,10,"qnig3");
+      SlicesYFit(h,0,0,10,"qni");
       fit = (TH1D *) gDirectory->Get(Form("%s_1",h->GetName()));
       if (! fit) goto ENDL; 
       Ymnx[0] = fit->GetMinimum();
