@@ -3,21 +3,30 @@
 <!-- This file should contain generic information to run a Data job. -->
 <jobDescription>
     <jobType>
-        <Pythia>
-            <pythiaInit>
-                <pyFrame  id='pyFrame'  Comment=' Reference frame' typedef='char *kinematics = ' widget='combobox'>CMS</pyFrame>
-                <pyBeam   id='pyBeam'   Comment=' Beam type      ' typedef='char *beam = ' widget='combobox'>p</pyBeam>
-                <pyTarget id='pyTarget' Comment=' Target type    ' typedef='char *target = ' widget='combobox'>p</pyTarget>
-                <pyEnergy id='pyEnergy' Comment=' Beam Energy    ' typedef='float energy = ' widget='entry'>200.0</pyEnergy>
-                <pyTune   id='pyTune'   Comment=' Pythia tune    ' typedef='int pythiaTune = ' widget='combobox'>0</pyTune>
-            </pythiaInit>
-        </Pythia>
+        <Therminator>
+            <therminatorParams>
+                <thRandomize  id='thRandomize'  Comment=' Start each event with a new random seed taken from current time' typedef='Randomize' widget='entry'>1</thRandomize>
+                <thTableType  id='thTableType'  Comment=' The type of input tables' typedef='TableType' widget='combobox'>SHARE</thTableType>
+                <thOutputFile id='thOutputFile' Comment=' File name (if we are saving events)' typedef='EventOutputFile' widget='entry'></thOutputFile>
+                <thModel      id='thModel'      Comment=' The model of freeze-out to use' typedef='FreezeOutModel' widget='combobox'>SingleFreezeOut</thModel>
+                <thBWVt       id='thBWVt'       Comment=' Radial flow velocity. Only used in BlastWave model' typedef='BWVt' widget='entry'>0.55</thBWVt>
+                <thTau        id='thTau'        Comment=' proper time at freeze-out [fm]' typedef='Tau' widget='entry'>9.74</thTau>
+                <thRhoMax     id='thRhoMax'     Comment=' maximum transverse radius [fm]' typedef='RhoMax' widget='entry'>7.74</thRhoMax>
+                <thTemperature id='thTemperature' Comment=' Temperature [GeV]' typedef='Temperature' widget='entry'>0.1656</thTemperature>
+                <thMiuI       id='thMiuI' Comment=' Chemical potential for Isospin [GeV]' typedef='MiuI' widget='entry'>-0.0009</thMiuI>
+                <thMiuS       id='thMiuS' Comment=' Chemical potential for Strangeness [GeV]' typedef='MiuS' widget='entry'>0.0069</thMiuS>
+                <thMiuB       id='thMiuB' Comment=' Chemical potential for Baryon [GeV]' typedef='MiuB' widget='entry'>0.0285</thMiuB>
+                <thAlphaRange id='thAlphaRange' Comment=' Range of integration for z-variable' typedef='AlphaRange' widget='entry'>8</thAlphaRange>
+                <thRapidityRange id='thRapidityRange' Comment=' Range of integration for z-variable' typedef='RapidityRange' widget='entry'>4</thRapidityRange>
+                <thNumberOfIntegrateSamples id='thNumberOfIntegrateSamples' Comment=' Number of samples used in multiplicity and max. integrand determination' typedef='NumberOfIntegrateSamples' widget='entry'>1000000</thNumberOfIntegrateSamples>
+            </therminatorParams>
+        </Therminator>
     </jobType>
 
     <standardElements>
         <jobControl>
             <jobName widget='entry' id='jobName'>DataTesting</jobName>
-            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Pythia/test</outputDir>
+            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Therminator/test</outputDir>
             <starLibVersion widget='entry' id='starLibVersion'>$env(STAR_VERSION)</starLibVersion>
             <localDir widget='entry' id='localDir'>[pwd]</localDir>
             <eventsPerJob widget='entry' id='eventsPerJob'>1000</eventsPerJob>
@@ -43,7 +52,7 @@
             <eventCut Comment = 'centrality cut, number of tracks in |eta| &lt; 0.5'>
                 <cutName>centrality</cutName>
                 <Value widget = 'entry'>1</Value>
-                <Value widget = 'entry'>50</Value>
+                <Value widget = 'entry'>2000</Value>
             </eventCut>
         </eventCuts>
 
@@ -77,24 +86,18 @@
             <analysisType id='analysisType' widget='entry'>StEStructCorrelation</analysisType>
             <libraries id='libraries' widget='none'>
     gSystem->Load("StEStructPoolEventGenerators");
-    // pythia stuff
-    gROOT->LoadMacro("loadPythiaLibs.C");
-    loadPythiaLibs();
-    gROOT->LoadMacro("getPythia.C");
-    gROOT->LoadMacro("getRandomSeed.C");
+    // Therminator stuff
+    gSystem->Load("StEStructPoolTherminator.so");
             </libraries>
-            <centralities id='centralities' widget='entry'>1 4 7 10 14 25</centralities>
-            <ptCentralities id='ptCentralities' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>1 4 7 10 14 25</ptCentralities>
+            <centralities id='centralities' widget='entry'>1 2000</centralities>
+            <ptCentralities id='ptCentralities' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>1 2000</ptCentralities>
     <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
-    TPythia6* pythia=getPythia(kinematics,beam,target,energy,pythiaTune);
-    int iseed = getRandomSeed();
-    pythia-&gt;SetMRPY(1,iseed);
-    cout&lt;&lt;"&lt;seedValue&gt;"&lt;&lt;iseed&lt;&lt;"&lt;/seedValue&gt;"&lt;&lt;endl;
+    Therminator *therm = new Therminator(scriptDir);
 
     //  reader = reader interface + pointer to Data Maker + cut classes
 
-    StEStructPythia** reader = new StEStructPythia(pythia,ecuts,tcuts,-1);
+    StEStructTherminator* reader = new StEStructTherminator(therm,ecuts,tcuts,-1);
 
     // EventType is for qaHistograms. Depends on type of reader though.
     int EventType = 2;

@@ -91,21 +91,15 @@
         <!-- The doEStruct macro is complicated.
              The main part is in a generic file. -->
         <doEStructMacro>
-            <analysisType id='analysisType' widget='entry'>StEStructFluctuation</analysisType>
+            <analysisType id='analysisType' widget='entry'>StEStructCorrelation</analysisType>
     <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
     //  reader = reader interface + pointer to Data Maker + cut classes
-    char fileListFile[1024];
-    sprintf(fileListFile,"%s/%s",scriptDir,filelist);
-    StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",500);
-    StEStructMuDstReader** readers       = new StEStructMuDstReader*[numberOfAnalyses];
-    for (int i=0;i&lt;numberOfAnalyses;i++) {
-        int mCent = i;
-        if (!strcmp(analysisType,"StEStructFluctuation") &amp;&amp; numberOfAnalyses == 1) {
-            mCent = -1;
-        }
-        readers[i] = new StEStructMuDstReader(mk,ecuts[i],tcuts[i],skipMake[i],mCent);
-    }
+    StMuDstMaker* mk = new StMuDstMaker(0,0,"",filelist,".",500);
+    StEStructMuDstReader* reader = new StEStructMuDstReader(mk,ecuts,tcuts);
+
+    // EventType is for qaHistograms. Depends on type of reader though.
+    int EventType = 0;
             </declareReader>
         </doEStructMacro>
 
