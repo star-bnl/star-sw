@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.9 2006/10/02 22:14:08 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.10 2007/11/26 19:52:23 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -91,6 +91,18 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	mtWord[1] = 76020;
 	validRun = 1; 
       }
+      else if (!strcmp("CuCu62GeVProductionMinBias2007ib",mRunPeriod)) {
+	// ...
+	mtWord[0] = 76002;  // Don't actually use these do we?
+	mtWord[1] = 76011;
+	validRun = 1; 
+      }
+      else if (!strcmp("CuCu200GeVProductionMinBias2007ib",mRunPeriod)) {
+	// ...
+	mtWord[0] = 76000;  // Don't actually use these do we?
+	mtWord[1] = 76020;
+	validRun = 1; 
+      }
       else if (!strcmp("dAu200GeVMinBias2003",mRunPeriod)) {
         // ...
         mtWord[0] = 2000; // untested  
@@ -163,6 +175,11 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.10  2007/11/26 19:52:23  prindle
+ * Add cucu62, cucu200 2007ib production datasets.
+ * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
+ * Add n^(1/4) histograms to QAHists
+ *
  * Revision 1.9  2006/10/02 22:14:08  prindle
  * Changed for QA histograms. Also addition of ppMinBiasYear5 as a data sample.
  *

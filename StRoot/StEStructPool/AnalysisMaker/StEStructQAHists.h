@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.h,v 1.2 2006/04/27 22:20:12 prindle Exp $
+ * $Id: StEStructQAHists.h,v 1.3 2007/11/26 19:52:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,6 +28,12 @@ class StEStructQAHists : public TObject {
 
   TH1D * mCents[2];
   TH1D * mptCents[3];
+  TH1D * mTotMult;
+  TH1D * mPosMult;
+  TH1D * mNegMult;
+  TH1D * mTotMult4;
+  TH1D * mPosMult4;
+  TH1D * mNegMult4;
 
   // --- a base set for aa event generators (e.g. hijing)
 
@@ -76,6 +82,11 @@ class StEStructQAHists : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructQAHists.h,v $
+ * Revision 1.3  2007/11/26 19:52:25  prindle
+ * Add cucu62, cucu200 2007ib production datasets.
+ * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
+ * Add n^(1/4) histograms to QAHists
+ *
  * Revision 1.2  2006/04/27 22:20:12  prindle
  * Some changes in trigger names for run periods.
  * Changed a couple of the Hijing QA histograms.

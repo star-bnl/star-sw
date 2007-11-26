@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.4 2006/04/27 22:20:10 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.5 2007/11/26 19:52:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -25,6 +25,8 @@ StEStructQAHists::StEStructQAHists(int itype){
   mEType=itype;
   mCents[0]=mCents[1]=NULL;
   mptCents[0]=mptCents[1]=mptCents[2]=NULL;
+  mTotMult=mPosMult=mNegMult=0;
+  mTotMult4=mPosMult4=mNegMult4=0;
   mntBins = 0;
   mhasAIndex=false;
   initHistograms();
@@ -69,7 +71,7 @@ void StEStructQAHists::initBaseHistograms(){
 
   StEStructCentrality* cent = StEStructCentrality::Instance();
   
-  int mbNBins= cent->numCentralities();
+  int mbNBins = cent->numCentralities();
   if(mbNBins>0){
      mCents[0] = new TH1D("cenClass","cenClass",mbNBins,-0.5,mbNBins-0.5);
      mCents[1] = new TH1D("centralityDefs","centralityDefs",mbNBins,0.5,mbNBins+0.5);
@@ -91,6 +93,13 @@ void StEStructQAHists::initBaseHistograms(){
     mptCents[2] = new TH1D("ptRanges","ptRanges",mbNPts,-0.5,mbNPts+0.5);
   }
   for (int i=0;i<mbNPts;i++) mptCents[i]->Fill(i,cent->ptLimit(i)); 
+
+  mTotMult = new TH1D("totalMultiplicity","totalMultiplicity",2500,-0.5,2500-0.5);
+  mPosMult = new TH1D("positiveMultiplicity","positiveMultiplicity",1500,-0.5,1500-0.5);
+  mNegMult = new TH1D("negativeMultiplicity","negativeMultiplicity",1500,-0.5,1500-0.5);
+  mTotMult4 = new TH1D("nTotOneQuarter","nTotOneQuarter",100,0.0,7.0);
+  mPosMult4 = new TH1D("nPosOneQuarter","nPosOneQuarter",100,0.0,7.0);
+  mNegMult4 = new TH1D("nNegOneQuarter","nNegOneQuarter",100,0.0,7.0);
 
   if(mEType==1) {  // AA monte carlo generator
      
@@ -136,6 +145,12 @@ void StEStructQAHists::fillBaseHistograms(StEStructEvent* event, StEStructEventR
   int ic = cent->centrality(event->Centrality());
   mCents[0]->Fill(ic);
   if(mptCents[0])mptCents[0]->Fill(ic);
+  mTotMult->Fill(event->Ntrack());
+  mPosMult->Fill(event->Npos());
+  mNegMult->Fill(event->Nneg());
+  mTotMult4->Fill(pow(event->Ntrack(),0.25));
+  mPosMult4->Fill(pow(event->Npos(),0.25));
+  mNegMult4->Fill(pow(event->Nneg(),0.25));
 
   if(mEType==1){
     if(aaGenImpact)aaGenImpact->Fill(reader->getImpact());
@@ -160,6 +175,12 @@ void StEStructQAHists::writeBaseHistograms(TFile* tf){
 
   for(int i=0;i<2;i++)if(mCents[i])mCents[i]->Write();
   for(int i=0;i<3;i++)if(mptCents[i])mptCents[i]->Write();
+  mTotMult->Write();
+  mPosMult->Write();
+  mNegMult->Write();
+  mTotMult4->Write();
+  mPosMult4->Write();
+  mNegMult4->Write();
   if(mEType==1){
     if(aaGenImpact)aaGenImpact->Write();
     for(int i=0;i<2;i++)if(aaGen[i])aaGen[i]->Write();
@@ -179,7 +200,6 @@ void StEStructQAHists::writeBaseHistograms(TFile* tf){
 void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
 
   if(mntBins>0)return; // already been here in init
-  cout<<"Really creating QA histograms "<<endl;
 
   mntBins = numBins;
   int qbins = 2*numBins;
@@ -294,6 +314,11 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.5  2007/11/26 19:52:25  prindle
+ * Add cucu62, cucu200 2007ib production datasets.
+ * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
+ * Add n^(1/4) histograms to QAHists
+ *
  * Revision 1.4  2006/04/27 22:20:10  prindle
  * Some changes in trigger names for run periods.
  * Changed a couple of the Hijing QA histograms.
