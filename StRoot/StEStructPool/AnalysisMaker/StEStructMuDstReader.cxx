@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.11 2007/05/27 22:43:35 msd Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.12 2007/11/26 19:52:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -116,17 +116,21 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
     unsigned int tword=muEvent->l0Trigger().triggerWord();
     mNumGoodTracks = 0;
 
-    float x=muEvent->eventSummary().primaryVertexPosition().x();
-    float y=muEvent->eventSummary().primaryVertexPosition().y();
-    float z=muEvent->eventSummary().primaryVertexPosition().z();
+    float x;
+    float y;
+    float z;
+    bool useEvent = true;
 
-    bool useEvent=true;
+    // Note: Recommended primary vertex cuts are made in StEStructEventCuts.h
+    x = muEvent->eventSummary().primaryVertexPosition().x();
+    y = muEvent->eventSummary().primaryVertexPosition().y();
+    z = muEvent->eventSummary().primaryVertexPosition().z();
 
     if ((fabs(x) < 1e-5) && (fabs(y) < 1e-5) && (fabs(z) < 1e-5)) {
         useEvent = false;
-    } else if ( !mECuts->goodTrigger(muEvent)  ||
+    } else if ( !mECuts->goodTrigger(muDst)  ||
                 !mECuts->goodPrimaryVertexZ(z) ) {
-        useEvent=false;
+        useEvent = false;
     }
 
     int nTracks = countGoodTracks();
@@ -335,6 +339,11 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.12  2007/11/26 19:52:24  prindle
+ * Add cucu62, cucu200 2007ib production datasets.
+ * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
+ * Add n^(1/4) histograms to QAHists
+ *
  * Revision 1.11  2007/05/27 22:43:35  msd
  * Added new centrality plots to Empty analysis
  *

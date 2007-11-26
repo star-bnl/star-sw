@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.9 2006/04/27 22:20:07 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.10 2007/11/26 19:52:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -14,7 +14,9 @@
 #define __STEBYEEVENTCUTS__H
 
 
+#include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StMuDSTMaker/COMMON/StMuL3EventSummary.h"
 #include "StEStructCuts.h"
 #include "Stiostream.h"
@@ -49,7 +51,7 @@ public:
   virtual void printCutStats(ostream& ofs);
 
 
-  bool goodTrigger(StMuEvent* muEvent);
+  bool goodTrigger(StMuDst* muDst);
   bool goodPrimaryVertexZ( float z );
   bool goodCentrality( float n);
 
@@ -64,9 +66,10 @@ public:
 
 inline void StEStructEventCuts::loadUserCuts(const char* name, const char** vals, int nvals){}
 
-inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
+inline bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
 
-  if(mtrgByRunPeriod){
+  StMuEvent* muEvent = muDst->event();
+  if (mtrgByRunPeriod) {
 
     if (!strcmp("CuCu62GeVProductionMinBias2005",mRunPeriod)) {
         if (muEvent->triggerIdCollection().nominal().isTrigger(76007) ||
@@ -77,6 +80,46 @@ inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
         if (muEvent->triggerIdCollection().nominal().isTrigger(66007)) {
             return true;
         }
+    } else if (!strcmp("CuCu62GeVProductionMinBias2007ib",mRunPeriod)) {
+        // Assume vertex characteristics essentially the same
+        // as the 200GeV CuCu data.
+        if (muEvent->runNumber()<6069077) {
+            if (!muEvent->triggerIdCollection().nominal().isTrigger(76002) &&
+                !muEvent->triggerIdCollection().nominal().isTrigger(76011)) {
+                return false;
+            }
+        } else {
+            if (!muEvent->triggerIdCollection().nominal().isTrigger(76007) &&
+                !muEvent->triggerIdCollection().nominal().isTrigger(76011)) {
+                return false;
+            }
+        }
+        bool keep = false;
+        if (muDst->event()->refMult() >= 17) {
+            if (fabs(muDst->primaryVertex()->meanDip())/muDst->event()->ctbMultiplicity() < (0.8/800)) {
+                 keep = true;
+            }
+        } else {
+            if (muDst->primaryVertex()->ranking()>-2.5) {
+                keep = true;
+            }
+        }
+        return keep;
+    } else if (!strcmp("CuCu200GeVProductionMinBias2007ib",mRunPeriod)) {
+        if (!muEvent->triggerIdCollection().nominal().isTrigger(66007)) {
+            return false;
+        }
+        bool keep = false;
+        if (muDst->event()->refMult() >= 17) {
+            if (fabs(muDst->primaryVertex()->meanDip())/muDst->event()->ctbMultiplicity() < (0.8/800)) {
+                 keep = true;
+            }
+        } else {
+            if (muDst->primaryVertex()->ranking()>-2.5) {
+                keep = true;
+            }
+        }
+        return keep;
     } else if (!strcmp("AuAu200GeVMinBias2004",mRunPeriod)) {
         if (muEvent->triggerIdCollection().nominal().isTrigger(25007) ||
             muEvent->triggerIdCollection().nominal().isTrigger(15007) ||
@@ -102,24 +145,28 @@ inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
             return true;
         }
     } else if (!strcmp("AuAu200GeVCentral2001",mRunPeriod)) {
-      StMuL3EventSummary l3 = muEvent->l3EventSummary();
-      if (!(l3.unbiasedTrigger())) {
-	return false;
-      }
-      unsigned int t = muEvent->l0Trigger().triggerWord();
-      if ( 0x1100 == t ) {
-	return true;
-      }
+        StMuL3EventSummary l3 = muEvent->l3EventSummary();
+        if (!(l3.unbiasedTrigger())) {
+	        return false;
+        }
+        unsigned int t = muEvent->l0Trigger().triggerWord();
+        if ( 0x1100 == t ) {
+	        return true;
+       }
     } else if (!strcmp("dAu200GeVMinBias2003",mRunPeriod)) {
-      if (muEvent->triggerIdCollection().nominal().isTrigger(2001) ||
-	  muEvent->triggerIdCollection().nominal().isTrigger(2003)) {
-	return true;
-      }
+        if (muEvent->triggerIdCollection().nominal().isTrigger(2001) ||
+	        muEvent->triggerIdCollection().nominal().isTrigger(2003)) {
+            return true;
+        }
     } else if(!strcmp("ppMinBias",mRunPeriod)){
-      if(muEvent->triggerIdCollection().nominal().isTrigger(8192)) return true;
+        if(muEvent->triggerIdCollection().nominal().isTrigger(8192)) {
+            return true;
+        }
     } else if(!strcmp("ppMinBiasYear5",mRunPeriod)){
-      if(muEvent->triggerIdCollection().nominal().isTrigger(96011) ||
-         muEvent->triggerIdCollection().nominal().isTrigger(106011)) return true;
+        if(muEvent->triggerIdCollection().nominal().isTrigger(96011) ||
+           muEvent->triggerIdCollection().nominal().isTrigger(106011)) {
+               return true;
+        }
     }
   } else {
         unsigned int t = muEvent->l0Trigger().triggerWord();
@@ -128,7 +175,7 @@ inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
                  (t>=mtWord[0] && t<=mtWord[1])  ) ;
   }
   return false;
- 
+
 }
 
 inline bool StEStructEventCuts::goodPrimaryVertexZ(float z) {
@@ -150,6 +197,11 @@ inline bool StEStructEventCuts::goodCentrality(float c){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.10  2007/11/26 19:52:24  prindle
+ * Add cucu62, cucu200 2007ib production datasets.
+ * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
+ * Add n^(1/4) histograms to QAHists
+ *
  * Revision 1.9  2006/04/27 22:20:07  prindle
  * Some changes in trigger names for run periods.
  * Changed a couple of the Hijing QA histograms.
