@@ -24,6 +24,7 @@ namespace eval ::jobMonitor:: {
     variable actionList
     variable viewMenu
     variable selectedJob ""
+    variable anchorJob ""
     variable IOwnProcess false
     variable types [list all UNKN SUBM PEND RUN DONE Eqw t qw r]
 }
@@ -112,7 +113,7 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
     $help add command -label Help -command [namespace code [list displayHelp ""]]
 
     # Create menu we will use in a popup to select a file to edit (or peek if job is running.)
-    set ::jobMonitor::viewMenu [menu $::jobMonitor::bWindow.view -postcommand [namespace code checkPeek]]
+    set ::jobMonitor::viewMenu [menu $::jobMonitor::bWindow.view -postcommand [namespace code checkPopup]]
     $::jobMonitor::viewMenu add command -label "edit csh"      -command [namespace code "editType script"]
     $::jobMonitor::viewMenu add command -label "edit log"      -command [namespace code "editType log"]
     $::jobMonitor::viewMenu add command -label "edit filelist" -command [namespace code "editType filelist"]
@@ -317,8 +318,10 @@ proc ::jobMonitor::searchPattern {jobName filename pattern ignoreCase} {
         set file [file tail $filename]
         variable ::jobMonitor::cbVar$jobName 0
         set cb [checkbutton $::jobMonitor::bWindow.f2.text.cb$jobName \
-                -command [namespace code "selectJob $jobName"]        \
                 -variable ::jobMonitor::cbVar$jobName]
+        bind $cb <Button-1> [namespace code "selectJob $jobName"]
+        bind $cb <Shift-Button-1> [namespace code "selectJobRange $jobName"]
+        bind $cb <Control-Button-1> [namespace code "toggleJob $jobName"]
         variable var$jobName
         set stat [button $::jobMonitor::bWindow.f2.text.stat$jobName \
                 -textvariable ::jobMonitor::var$jobName -width 5 -anchor w \
@@ -461,7 +464,9 @@ proc ::jobMonitor::countTypes {m} {
     }
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
-        incr count($val)
+        if {[info exists count($val)]} {
+            incr count($val)
+        }
         incr count(all)
     }
     set i 1
@@ -484,8 +489,11 @@ proc ::jobMonitor::countTypes {m} {
 # Side effects:
 #    Set selection indicators of all jobs that have a label matching
 #    type in their indicator buttons.
+#    Set anchorJob to "" so range selection with mouse is disabled (until
+#    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::selectJobs {type} {
+    set ::jobMonitor::anchorJob ""
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
         if {($type eq "all") || ($type eq $val)} {
@@ -502,13 +510,16 @@ proc ::jobMonitor::selectJobs {type} {
 # Side effects:
 #    Unset selection indicators of all jobs that have a label matching
 #    type in their indicator buttons.
+#    Set anchorJob to "" so range selection with mouse is disabled (until
+#    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::deselectJobs {type} {
+    set ::jobMonitor::anchorJob ""
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
         if {($type eq "all") || ($type eq $val)} {
             set ::jobMonitor::cbVar$job 0
-            set ::jobMonitor::actionList [lremove $::jobMonitor::actionList $job]
+            set ::jobMonitor::actionList [lremove -all $::jobMonitor::actionList $job]
         }
     }
 }
@@ -520,14 +531,17 @@ proc ::jobMonitor::deselectJobs {type} {
 # Side effects:
 #    Toggle the selection indicators of all jobs that have a label matching
 #    type in their indicator buttons.
+#    Set anchorJob to "" so range selection with mouse is disabled (until
+#    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::toggleSelect {type} {
+    set ::jobMonitor::anchorJob ""
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
         if {($type eq "all") || ($type eq $val)} {
             if {[set ::jobMonitor::cbVar$job]} {
                 set ::jobMonitor::cbVar$job 0
-                set ::jobMonitor::actionList [lremove $::jobMonitor::actionList $job]
+                set ::jobMonitor::actionList [lremove -all $::jobMonitor::actionList $job]
             } else {
                 set ::jobMonitor::cbVar$job 1
                 lappend ::jobMonitor::actionList $job
@@ -537,17 +551,70 @@ proc ::jobMonitor::toggleSelect {type} {
 }
 
 # selectJob --
-#    Invoked via checkbutton
+#    Invoked via binding for Button-1 on checkbutton
 #
 # Arguments: job name
 # Result: none
-# Side effects: Append job name to selected list for subsequent action.
+# Side effects: De-select all jobs. If this job was selected leave it
+#   un-selected. If this job was un-selected then select it.
+#   Make this job the anchor job for range selection.
+# Question: do we want to give a visual indication to the anchor button?
 #
 proc ::jobMonitor::selectJob {jobName} {
-    if {[set ::jobMonitor::cbVar$jobName]} {
-        lappend ::jobMonitor::actionList $jobName
+    foreach job $::jobMonitor::jobList {
+        set ::jobMonitor::cbVar$job 0
+    }
+    set ::jobMonitor::actionList $jobName
+    set ::jobMonitor::anchorJob  $jobName
+#    set ::jobMonitor::cbVar$job  1
+}
+# selectJobRange --
+#    Invoked via binding for Shift-Button-1 on checkbutton
+#
+# Arguments: job name.
+# Result: none
+# Side effects: Select all jobs between this button and anchor.
+#   Add them to selected list. Leave all other job selections alone.
+#   If anchorJob = "" this is a noop.
+#
+proc ::jobMonitor::selectJobRange {jobName} {
+    if {$::jobMonitor::anchorJob eq ""} {
+        return
+    }
+    set anchor [lsearch $::jobMonitor::jobList $::jobMonitor::anchorJob]
+    set current [lsearch $::jobMonitor::jobList $jobName]
+    if {$anchor > $current} {
+        set first $current
+        incr first
+        set last  $anchor
     } else {
-        set ::jobMonitor::actionList [lremove $::jobMonitor::actionList $jobName]
+        set first $anchor
+        set last  $current
+        incr last -1
+    }
+    foreach job [lrange $::jobMonitor::jobList $first $last] {
+        if {[lsearch $::jobMonitor::actionList $job] < 0} {
+            lappend ::jobMonitor::actionList $job
+            set ::jobMonitor::cbVar$job 1
+        }
+    }
+    lappend ::jobMonitor::actionList [lindex $::jobMonitor::jobList $current]
+}
+# toggleJob --
+#    Invoked via binding for Control-Button-1 on checkbutton
+#
+# Arguments: job name.
+# Result: none
+# Side effects: Toggle selection status of this job, leave all
+#   other jobs alone.
+#
+proc ::jobMonitor::toggleJob {jobName} {
+    if {[lsearch $::jobMonitor::actionList $jobName] < 0} {
+        lappend ::jobMonitor::actionList   $jobName
+        set ::jobMonitor::cbVar$jobName 0
+    } else {
+        set ::jobMonitor::actionList  [lremove -all $::jobMonitor::actionList $jobName]
+        set ::jobMonitor::cbVar$jobName 1
     }
 }
 
@@ -718,16 +785,17 @@ proc ::jobMonitor::editType {type} {
     }
     editFile $fileName
 }
-# checkPeek --
+# checkPopup --
 #    postcommand for viewMenu
 #
 # Arguments:
 # Result:
 # Side effects:
-#    If status button claims job is running then we include a peek option
-#    in the popup menu.
+#    If status button claims job is in "RUN" or "SSUS" mode we include a peek option.
+#    If there is no status (typical after job finishes in SGE) or indicates
+#    job is done in SGE (DONE?) we include qacct information option.
 #
-proc ::jobMonitor::checkPeek {} {
+proc ::jobMonitor::checkPopup {} {
     set job $::jobMonitor::selectedJob
     set status [set ::jobMonitor::var$job]
     if {($status eq "RUN") || ($status eq "SSUS")} {
@@ -736,6 +804,15 @@ proc ::jobMonitor::checkPeek {} {
         }
     } else {
         catch {$::jobMonitor::viewMenu delete "bpeek"}
+    }
+    set f [file join $::jobMonitor::logDir $job.log]
+    if {[file exists $f] &&
+       (($status eq "") || ($status eq "DONE"))} {
+        if {[catch {$::jobMonitor::viewMenu index qacct} err]} {
+            $::jobMonitor::viewMenu add command -label "qacct" -command [namespace code qacctJob]
+        }
+    } else {
+        catch {$::jobMonitor::viewMenu delete "qacct"}
     }
 }
 
@@ -765,6 +842,55 @@ proc ::jobMonitor::peekAtJob {} {
         catch {[eval exec bpeek $jobID]} text
     }
     displayText $text "bpeek $job: $jobID"
+}
+
+# qacctJob --
+#    Invoked via a popup menu
+#
+# Arguments:
+# Result:
+# Side effects:
+#    Look for accounting file and get relevant information for tthe selected job.
+#    Display it in a popup window.
+#
+proc ::jobMonitor::qacctJob {} {
+    global env
+
+    set base $env(SGE_ROOT)/default/common/accounting.6.0u4
+    set job $::jobMonitor::selectedJob
+    set jobName sched$::jobMonitor::selectedJob.csh
+    set f [file join $::jobMonitor::logDir $job.log]
+    set mTime [file mtime $f]
+    # mTime is last modified time. Accounting info may be in file corresponding
+    # to a day before or after. Check both those days as well.
+    set lTime $mTime
+    lappend lTime [clock scan yesterday -base $mTime]
+    lappend lTime [clock scan tomorrow -base $mTime]
+
+    foreach t $lTime {
+        set aTime [join [clock format $t -format "%Y %m %d"] .]
+        # If accounting file not found then try no file (i.e. job ran today.)
+        if {[catch {glob $base.$aTime*} aFile]} {
+            if {![catch {exec qacct -o $env(USER) -j $jobName} text]} {
+                displayText $text "qacct information for $job"
+                return
+            }
+        } else {
+            if {![catch {exec qacct -o $env(USER) -j $jobName -f $aFile} text]} {
+                displayText $text "qacct information for $job"
+                return
+            }
+        }
+    }
+    set text "Did not find information for job\n \
+               $jobName.\n \
+              We looked in accounting files for [clock format $t -format {%Y %m %d}] \
+              as well as the days before and after. If you want to search on your \
+              own you can try commands like\n \
+              qacct -o $env(USER) -j $jobName -f $base.YYYY.mm.dd.X\n \
+              where x is hours and minutes and you have to figure those out.\n \
+              Good luck."
+    displayText $text "Did not find qacct information for $job"
 }
 
 # submitSelected --
@@ -980,6 +1106,7 @@ proc ::jobMonitor::colorStatusIndicator {b v} {
         PEND {$b configure -fg blue}
         RUN  {$b configure -fg red}
         DONE {$b configure -fg green}
+        SUSP {$b configure -fg yellow}
         Eqw  {$b configure -fg yellow}
         t    {$b configure -fg orange}
         qw   {$b configure -fg blue}
@@ -1166,9 +1293,10 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "in the script directory and/or the log files in " n
     $w insert end "the logs directory. These are not displayed in " n
     $w insert end "this browser until a Search is made. The search " n
-    $w insert end "can be an empty string.\n" n
+    $w insert end "can be an empty string.\n\n" n
 
-    $w insert end " o New: You can give a directory containing scripts and logs " n
+    $w insert end "Note that on starting the job monitor using a shell " n
+    $w insert end "command line you can give a directory containing scripts and logs " n
     $w insert end "subdirectories on the command line.\n\n\n" n
 
     $w insert end "jobMonitor Window\n\n" header
@@ -1205,21 +1333,25 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "the file that contains a match to any of your " n
     $w insert end "regular expressions. The matches are color highlighted. " n
     $w insert end "The first five regular expressions get different colors.\n" n
+    $w insert end "- A checkbox on the line with the file will select/deselect " n
+    $w insert end "that file. The state of the checkbox can be modified by " n
+    $w insert end "menu items (see Menus below) and by mouse clicks on the " n
+    $w insert end "indicators (see Selections below).\n" n
+    $w insert end "- A button to the right of the checkbox will query the " n
+    $w insert end "batch system for the current job status and display the " n
+    $w insert end "status of that job. The actual status code depends on " n
+    $w insert end "the batch system. The status for all jobs can be updated " n
+    $w insert end "via a menu item (see Menus below.) \n" n
     $w insert end "- Left-Clicking on the filename will bring up a 'File " n
     $w insert end "Viewing Window' displaying the contents of that file.\n" n
-    $w insert end "- A checkbox on the line with the file will select/deselect " n
-    $w insert end "that file. This is used by some of the menu selections.\n" n
-    $w insert end "- A button to the left of the filename will query the " n
-    $w insert end "batch system for the current job status and display " n
-    $w insert end "status of that job. The actual status code depends on " n
-    $w insert end "the batch system.\n" n
     $w insert end "- Right clicking on the file name invokes a popup menu " n
     $w insert end "(which is described below.)\n\n" n
 
     $w insert end " o Status area:\n" bullet
     $w insert end "- The bottom of the main window contains a summary of searches. " n
     $w insert end "For each search item there is the string, the number of matches and " n
-    $w insert end "buttons to bring up to the next/previous matching batch job. " n
+    $w insert end "buttons to bring the next/previous matching job into the visible " n
+    $w insert end "region of the window. " n
     $w insert end "The search always starts at the location of the previous matching " n
     $w insert end "batch job (on the first line if no button has been clicked yet.)\n\n" n
 
@@ -1227,7 +1359,7 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "File Viewing Window\n\n" header
 
     $w insert end " o Log/csh file contents\n" bullet
-    $w insert end "The text of the selected file is displayed in the main " n
+    $w insert end "- The text of the selected file is displayed in the main " n
     $w insert end "area. The matches are colored as before. " n
     $w insert end "An empirical observation; when a job is run and the " n
     $w insert end "output file exists the new output " n
@@ -1287,10 +1419,31 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "it can be convenient to remove that data file " n
     $w insert end "and rerun the job.\n" n
     $w insert end " o bpeek\n" bullet
-    $w insert end "When the job is currently running under the lsf. " n
-    $w insert end "batch system this allows a peek at the cached output." n
+    $w insert end "When the job is currently running under lsf. \n" n
+    $w insert end "This displays results returned from bpeek in the file viewing window." n
     $w insert end "(Note that with SGE you can look at the partial " n
-    $w insert end "log file directly.)\n\n" n
+    $w insert end "log file directly.)\n" n
+    $w insert end " o qacct\n" bullet
+    $w insert end "When the job ran under SGE and is no longer running. \n" n
+    $w insert end "This displays the accounting information in the file viewing window.\n\n" n
+
+    $w insert end "Selections\n\n" header
+
+    $w insert end " o Button 1 mouse click\n" bullet
+    $w insert end "(I.e. left button).\n" n
+    $w insert end "- This will de-select all other jobs, select this job and set " n
+    $w insert end "the selection anchor to this job. \n" n
+    $w insert end " o Shift-Button 1 mouse click\n" bullet
+    $w insert end "- This selects all jobs between the selection anchor and this job. " n
+    $w insert end "If there is no selection anchor this will do nothing. " n
+    $w insert end "The selection anchor is not changed.\n" n
+    $w insert end " o Control-Button 1 mouse click\n" bullet
+    $w insert end "- This will toggle the selection state of this job " n
+    $w insert end "leaving the selection state of all other jobs and the " n
+    $w insert end "selection anchor unchanged.\n\n" n
+
+    $w insert end "Note that using any of the menus to modify job " n
+    $w insert end "selection status will cause the selection anchor to become undefined.\n\n" n
 
     $w config -state disabled
 }

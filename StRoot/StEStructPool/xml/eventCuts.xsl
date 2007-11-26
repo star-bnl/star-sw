@@ -13,7 +13,7 @@
 <!-- Note that I add a peroiod<cr> after Comment.
      Without some text the <cr> gets stripped. -->
 <xsl:template match='triggerTag'>
-    <xsl:text>triggerword,</xsl:text>
+    <xsl:text>triggerWord,</xsl:text>
     <xsl:value-of select='.'/>
     <xsl:text>        #</xsl:text>
     <xsl:value-of select='@Comment'/>
