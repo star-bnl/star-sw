@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.10 2007/05/27 22:46:02 msd Exp $
+ * $Id: StEStructSupport.h,v 1.11 2007/11/26 20:07:20 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,27 +28,34 @@ class StEStructSupport : public TObject {
 public:
 
   TFile* mtf;
-  float mNbar;
   float* mnpairs; //! for normalization comparing different cuts 
   int   mbgMode;
+  int   mNumZBins;
   char* mtmpString;
   bool  mapplyDEtaFix;
   bool  msilent;
+  bool  mDoSymmetrize;
+  bool  mPairNormalization;
+  bool  mIdenticalPair;
 
   bool  goodName(const char* name); // test if name is one of ours
+  bool  goodName_zBuf(const char* name, int zBin); // test if name is one of ours with zBuffer.
   char* getFrontName(int itype); 
   const char* getTypeName(int itype);
   const char* getChargeSignName(int ics);
   char* prepend(const char* name, const char* s1);
   char* swapIn(const char* name, const char* s1, const char* s2);
-  void rescale(TH1** hists);
+  void rescale(TH1** hists, int zBin);
+  void rescalePt(TH1** hists, int zBin);
+  void setSymmetrizeUS(bool symm);
+  void symmetrizeUS(const char *name, TH1** histos);
+  void symmetrizePtUS(const char *name, TH1** histos);
 
-  StEStructSupport(){};   
+  StEStructSupport() {};   
 
-  StEStructSupport(TFile* tf, int bgmode, float* npairs=0, float nbar=1.);
+  StEStructSupport(TFile* tf, int bgmode, float* npairs=0);
   virtual ~StEStructSupport();
   void setTFile(TFile* tf);
-  void setNBar(float nbar);
   void setBGMode( int mode);
   void setApplyDEtaFix();
   void unsetApplyDEtaFix(); // default
@@ -57,33 +64,47 @@ public:
   void unsetSilent();
   bool silent();
 
-  TH1** getHists(const char* name);
+  int getNZBins();
+  float *getCommonNumber(int zBin);
+  float *getCommonPairs(int zBin);
+  float *getChargeNumber(int zBin);
+  float *getChargePairs(int zBin);
+
+  double *getdNdEta(int zBin);
+  double *getptHat(int zBin);
+  TH1** getHists(const char* name, int zBin);
+  TH1** getLocalClones(const char* name, int zBin);
+  TH1** getPtHists(const char* name, int zBin);
+  TH1** getPtClones(const char* name, int zBin);
   float* getNorms(TH1** histArray);
-  TH1** getLocalClones(const char* name);
-  TH1** getPtHists(const char* name);
-  TH1** getPtClones(const char* name);
+  double getRatio(int iCombo, int zBin);
 
   // ++, +-, -+, --
   TH1** buildCommonRatios(const char* name);
+  TH1** buildCommonRatios(const char* name, int zBin);
   TH1** buildCommonCFunctions(const char* name);
+  TH1** buildCommonCFunctions(const char* name, int zBin);
   TH1** buildCommonRFunctions(const char* name);
+  TH1** buildCommonRFunctions(const char* name, int zBin);
   TH1** buildCommon(const char* name, int opt=0);
-
-  TH1** buildNCommon(const char* name);
+  TH1** buildCommon(const char* name, int opt, int zBin);
   TH1** buildPtCommon(const char* name, int opt=0, int subtract=0);
+  TH1** buildPtCommon(const char* name, int opt, int subtract, int zBin);
 
   // LS, US, CD, CI
   TH1** buildChargeTypeRatios(const char* name);
+  TH1** buildChargeTypeRatios(const char* name, int zBin);
   TH1** buildChargeTypeCFunctions(const char* name);
+  TH1** buildChargeTypeCFunctions(const char* name, int zBin);
   TH1** buildChargeTypeRFunctions(const char* name);
+  TH1** buildChargeTypeRFunctions(const char* name, int zBin);
   TH1** buildChargeTypes(const char* name, int opt, float* sf=0);
-
-  TH1** buildNChargeTypes_Old(const char* name);
-  TH1** buildNChargeTypes(const char* name);
-  TH1** buildPtChargeTypes_Old(const char* name, int opt=0, int subtract=0);
+  TH1** buildChargeTypes(const char* name, int opt, float* sf, int zBin);
   TH1** buildPtChargeTypes(const char* name, int opt=0, int subtract=0);
+  TH1** buildPtChargeTypes(const char* name, int opt, int subtract, int zBin);
 
   TH1** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf=0);
+  TH1** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf, int zBin);
   
   void scaleBackGround(TH1* sib, TH1* mix, float sf=0);
   TH1* getSqrt(TH1* h);
@@ -95,8 +116,10 @@ public:
   ClassDef(StEStructSupport,1)
 };
 
-inline void StEStructSupport::setTFile(TFile* tf){ mtf=tf; };
-inline void StEStructSupport::setNBar(float nbar){ mNbar=nbar;};
+inline void StEStructSupport::setTFile(TFile* tf){
+    mtf=tf;
+    getNZBins();
+};
 inline void StEStructSupport::setBGMode(int mode){ mbgMode=mode; };
 inline void StEStructSupport::setApplyDEtaFix()  { mapplyDEtaFix=true; };
 inline void StEStructSupport::unsetApplyDEtaFix(){ mapplyDEtaFix=false; };
@@ -110,6 +133,19 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.11  2007/11/26 20:07:20  prindle
+ * Modified to average \Delta\rho/sqrt(\rho) over z-bins (if more than one z-bin
+ * present for given centrality. Note: I weight by number of tracks, not number of
+ * pairs. This is important when we are also combining different centralities (which
+ * I do by combining centrality tag with z-bin tag in macro/addCentralities.)
+ *
+ * Scale mixed histograms by number of events. Integral of \Delta\rho need not be 0.
+ *
+ * delete items that are created and valgrind complained were lost. (Not a big deal
+ * since macro is run once)
+ *
+ * [Still need to commit StEStructHAdd.cxx which cvs complained that check-update failed.]
+ *
  * Revision 1.10  2007/05/27 22:46:02  msd
  * Added buildChargeTypes mode 3 which takes rho_ref from track counts.
  * Added buildChargeTypeSumOfRatios.
