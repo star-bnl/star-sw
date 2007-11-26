@@ -135,8 +135,30 @@ public:
   /// default tables come from emcSim or adc2e, but you can supply your own if you prefer
   void setTables(StBemcTables *tab) { mTables = tab; }
   
-  Int_t* getBEMC_L0_HT_ADC() {return L0_HT_ADC;}
-  Int_t* getBEMC_L0_TP_ADC() {return L0_TP_ADC;}
+  //out of FEE into DSM layer0
+  Int_t* getBEMC_FEE_HT_ADC() {return L0_HT_ADC;}
+  Int_t* getBEMC_FEE_TP_ADC() {return L0_TP_ADC;}
+
+  //out of DSM layer0 to DSM layer 1
+  Int_t* getBEMC_L0_SUM() {return DSM0_TP_SUM;}
+  Int_t* getBEMC_L0_SUM_J1() {return DSM0_TP_SUM_J1;}
+  Int_t* getBEMC_L0_SUM_J3() {return DSM0_TP_SUM_J3;}
+  Int_t* getBEMC_L0_HT_Bit() {return DSM0_HT_Bit;}
+  Int_t* getBEMC_L0_HT_Bit_J1() {return DSM0_HT_Bit_J3;}
+  Int_t* getBEMC_L0_HT_Bit_J3() {return DSM0_HT_Bit_J1;}
+  Int_t* getBEMC_L0_TP_Bit() {return DSM0_TP_Bit;}
+  Int_t* getBEMC_L0_TP_Bit_J1() {return DSM0_TP_Bit_J3;}
+  Int_t* getBEMC_L0_TP_Bit_J3() {return DSM0_TP_Bit_J1;}
+  Int_t* getBEMC_L0_HTTP_Bit() {return DSM0_HTTP_Bit;}
+  Int_t* getBEMC_L0_HTTP_Bit_J1() {return DSM0_HTTP_Bit_J3;}
+  Int_t* getBEMC_L0_HTTP_Bit_J3() {return DSM0_HTTP_Bit_J1;}
+
+  //out of DSM layer 1 to DSM layer 2
+  Int_t* getBEMC_L1_JP() {return DSM1_JP_Bit;}
+  Int_t* getBEMC_L1_HT() {return DSM1_HT_Bit;}
+  Int_t* getBEMC_L1_TP() {return DSM1_TP_Bit;}
+  Int_t* getBEMC_L1_HTTP() {return DSM1_HTTP_Bit;}
+  Int_t* getBEMC_L1_ETOT_ADC() {return DSM1_ETOT_ADC;}
 
   ClassDef(StBemcTriggerSimu, 1);
 };
