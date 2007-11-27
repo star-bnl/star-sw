@@ -1,5 +1,7 @@
 #!/opt/star/sl305_gcc323/bin/perl -w
 
+my $macro="runEEmcTiming.C"; 
+
 my $nevents = 30000;
 
 my @runs = ( 8095096, 8095097, 8095098, 8095099, 8095100, 8095104 ); 
@@ -16,7 +18,7 @@ foreach $run ( @runs ) {
 #    print "$run $tower_delays[$i] $mapmt_delays[$i]\n";
 
 #$cmd = "bsub -q star_cas_dd -o $run.log -J $run root4star -q -b runEEmcTiming.C\\\($nevents,\\\"$run.list\\\",\\\"$run.root\\\",$tower_delays[$i],$mapmt_delays[$i]\\\)\n";
-$cmd = "root4star -q -b runEEmcTiming.C\\\($nevents,\\\"$run.list\\\",\\\"$run.root\\\",$tower_delays[$i],$mapmt_delays[$i]\\\)\n";
+$cmd = "root4star -q -b $macro\\\($nevents,\\\"$run.list\\\",\\\"$run.root\\\",$tower_delays[$i],$mapmt_delays[$i]\\\)\n";
     open RUNIT, "$cmd|";
     while ( <RUNIT> ) { print; }
 
