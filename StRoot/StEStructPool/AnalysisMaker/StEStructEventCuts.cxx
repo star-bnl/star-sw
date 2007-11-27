@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.10 2007/11/26 19:52:23 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.11 2007/11/27 22:59:57 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -91,6 +91,12 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	mtWord[1] = 76020;
 	validRun = 1; 
       }
+      else if (!strcmp("CuCu22GeVProductionMinBiasP05if",mRunPeriod)) {
+	// ...
+	mtWord[0] = 86000;  // untested. Believe this includes all triggers except
+	mtWord[1] = 86033;  // zero-bias.
+	validRun = 1; 
+      }
       else if (!strcmp("CuCu62GeVProductionMinBias2007ib",mRunPeriod)) {
 	// ...
 	mtWord[0] = 76002;  // Don't actually use these do we?
@@ -175,6 +181,9 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.11  2007/11/27 22:59:57  prindle
+ * Added cucu22 GeV data set as possible input
+ *
  * Revision 1.10  2007/11/26 19:52:23  prindle
  * Add cucu62, cucu200 2007ib production datasets.
  * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
