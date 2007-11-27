@@ -24,6 +24,7 @@
 #include "StMessMgr.h"
 #include "StVertexId.h"
 #include "tables/St_vertexSeed_Table.h"
+#include "tables/St_vertexSeedTriggers_Table.h"
 #include "tables/St_beamInfo_Table.h"
 #include "TSystem.h"
 #include "TFile.h"
@@ -97,6 +98,7 @@ StVertexSeedMaker::StVertexSeedMaker(const char *name,
   nsize = 0;
   setArraySize(512);
   UseEventDateTime(); // By default, use the data & time from the first event
+  dbTriggersTable = 0;
   Reset();
 }
 //_____________________________________________________________________________
@@ -163,6 +165,8 @@ Int_t StVertexSeedMaker::Make(){
   if (a[0] == -888) {
     LOG_INFO << "Reading db values at the start..." << endm;
     Int_t status = FillAssumed();
+    if (status != kStOk) return status;
+    status = GetVertexSeedTriggers();
     if (status != kStOk) return status;
   }
 
@@ -236,149 +240,17 @@ Bool_t StVertexSeedMaker::CheckTriggers() {
 }
 //_____________________________________________________________________________
 Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
-
-      // Conditions for caveats on test triggers
-      Bool_t run4 = (date>20040000) && (date<20040700);
-      Bool_t run5 = (date>20050000) && (date<20050700);
-      Bool_t run5_400 = (date==20050602) || (date==20050603);
-      Bool_t run6_62 = (date>20060606) && (date<20060700);
-
-      Bool_t valid = kFALSE;
-
-      switch (tid) {
-
-        case (1000) :     // ppMinBias
-        case (1003) :     // ppFPDe-slow
-        case (1009) :     // ppFPDw-slow
-        case (2001) :     // dAuMinBias
-        case (2003) :     // dAuMinBias
-        case (2300) :     // dAuTOF
-
-// 2004 pp data
-        case (45201) :    // pp bht-1-slow
-        case (45202) :    // pp bht-2-slow
-        case (45203) :    // pp eht-1-slow
-        case (45204) :    // pp eht-2-slow
-        case (45010) :    // pp minbias
-        // see test triggers for the following:
-        //case (1)     :    // pp bht-1-slow test
-        //case (2)     :    // pp bht-2-slow test
-        //case (3)     :    // pp eht-1-slow test
-        //case (4)     :    // pp eht-2-slow test
-        //case (10)    :    // pp minbias test
-
-// 2005 pp data
-	case (96201) :    // bemc-ht1-mb
-	case (96211) :    // bemc-ht2-mb
-	case (96221) :    // bemc-jp1-mb
-	case (96233) :    // bemc-jp2-mb
-	case (96251) :    // eemc-ht1-mb
-	case (96261) :    // eemc-ht2-mb
-	case (96272) :    // eemc-jp1-mb-a
-	case (96282) :    // eemc-jp2-mb-a
-	case (96011) :    // ppMinBias
-	case (106201) :   // bemc-ht1-mb-tran
-	case (106211) :   // bemc-ht2-mb-tran
-	case (106221) :   // bemc-jp1-mb-tran
-	case (106233) :   // bemc-jp2-mb-tran
-	case (106251) :   // eemc-ht1-mb-tran
-	case (106261) :   // eemc-ht2-mb-tran
-	case (106272) :   // eemc-jp1-mb-tran
-	case (106282) :   // eemc-jp2-mb-tran
-	case (106011) :   // ppMinBias-tran
-        // see test triggers for the following:
-	//case (20)   :   // Jpsi(-tran)
-	//case (22)   :   // upsilon(-tran)
-
-// 2006 pp data
-	case (117001) :    // mb
-	case (117221) :    // bemc-jp1-mb
-	case (117501) :    // bemc-jp0-mb
-	case (117213) :    // bemc-ht2-mb-emul
-	case (117171) :    // eemc-jp1-mb
-	case (117551) :    // eemc-jp0-mb
-	case (117262) :    // eemc-ht2-mb-emul
-	case (127221) :    // bemc-jp1-mb (tran)
-	case (127501) :    // bemc-jp0-mb (tran)
-	case (127213) :    // bemc-ht2-mb-emul (tran)
-	case (127271) :    // eemc-jp1-mb (tran)
-	case (127551) :    // eemc-jp0-mb (tran)
-	case (127262) :    // eemc-ht2-mb-emul (tran)
-	case (137222) :    // bemc-jp1-mb (long)
-	case (137501) :    // bemc-jp0-mb (long)
-	case (137213) :    // bemc-ht2-mb-emul (long)
-	case (137273) :    // eemc-jp1-mb (long)
-	case (137551) :    // eemc-jp0-mb (long)
-	case (137262) :    // eemc-ht2-mb-emul (long)
-	case (117602) :    // upsilon
-	case (137603) :    // upsilon (long)
-	case (117705) :    // jpsi-mb
-	case (147001) :    // mb (62GeV)
-	case (147570) :    // bemc-jp0 (62GeV)
-	case (147621) :    // bemc-jp0-mb-L2jet (62GeV)
-	case (147611) :    // bemc-http-mb-l2gamma (62GeV)
-	case (147575) :    // eemc-jp0 (62GeV)
-	case (147651) :    // eemc-jp0-mb-L2jet (62GeV)
-	case (147641) :    // eemc-http-mb-L2gamma (62GeV)
-	case (147705) :    // jpsi-mb (62GeV)
-
-            valid = kTRUE;
-
-// test triggers (id < 1000)
-        case (1)     : if (
-                         run4    // 2004 pp bht-1-slow test
-	              || run5_400    // 2005 pp bemc-ht1-mb
-                          ) valid = kTRUE; break;
-        case (2)     : if (
-                         run4   // 2004 pp bht-2-slow test
-	              || run5_400    // 2005 pp bemc-jp2-mb-b
-                          ) valid = kTRUE; break;
-        case (3)     : if (
-                         run4   // p2004 p eht-1-slow test
-	              || run5_400    // 2005 pp eemc-ht2-mb
-	              || run6_62    // 2006 pp bemc-jp0
-                          ) valid = kTRUE; break;
-        case (4)     : if (
-                         run4   // 2004 pp eht-2-slow test
-	              || run5_400    // 2005 pp eemc-jp2-mb-a
-	              || run6_62    // 2006 pp eemc-jp0
-                          ) valid = kTRUE; break;
-        case (5)     : if (
-	                 run6_62    // 2006 pp bemc-http-mb-l2gamma
-                          ) valid = kTRUE; break;
-        case (6)     : if (
-	                 run6_62    // 2006 pp eemc-http-mb-l2gamma
-                          ) valid = kTRUE; break;
-        case (7)     : if (
-	                 run5_400    // 2005 pp bemc-ht1-mb
-	              || run6_62    // 2006 pp eemc-jp0-mb-L2jet
-                          ) valid = kTRUE; break;
-        case (8)     : if (
-	                 run5_400    // 2005 pp bemc-jp1-mb
-	              || run6_62    // 2006 pp bemc-jp0-mb-L2jet
-                          ) valid = kTRUE; break;
-        case (9)     : if (
-	                 run5_400    // 2005 pp eemc-ht1-mb
-	              || run6_62    // 2006 pp jpsi-mb
-                          ) valid = kTRUE; break;
-        case (10)    : if (
-                         run4   // 2004 pp minbias test
-	              || run5_400    // 2005 pp eemc-jp1-mb-a
-                          ) valid = kTRUE; break;
-	case (20)    : if (
-                         run5   // 2005 pp Jpsi(-tran)
-                          ) valid = kTRUE; break;
-	case (21)    : if (
-	                 run5_400    // 2005 pp ppMinBias
-                          ) valid = kTRUE; break;
-	case (22)    : if (
-                         run5   // 2005 pp upsilon(-tran)
-                          ) valid = kTRUE; break;
-
-        default     : {}
-      }
-      if (valid) trig = (float) tid;
-      return valid;
+  // Determine if trigger id is among valid set
+  vertexSeedTriggers_st* trigsTable = dbTriggersTable->GetTable();
+  Int_t nTrigs = (Int_t) dbTriggersTable->GetNRows();
+  for (Int_t i = 0; i < nTrigs; i++, trigsTable++) {
+    unsigned int dbTid = trigsTable->trigid;
+    if (dbTid > 0 && tid == dbTid) {
+      trig = (float) tid;
+      return kTRUE;
+    }
+  }
+  return kFALSE;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::GetEventData() {
@@ -447,7 +319,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.35 2007/07/12 19:46:56 fisyak Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.36 2007/11/27 23:42:47 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -544,6 +416,21 @@ Int_t StVertexSeedMaker::FillAssumed(){
     << "\n     y0 assumed = " << a[2] << " +/- " << ea[2]
     << "\n   dydz assumed = " << a[3] << " +/- " << ea[3]
     << endm;
+  return kStOk;
+}
+//_____________________________________________________________________________
+Int_t StVertexSeedMaker::GetVertexSeedTriggers(){
+  TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
+  if (!dbDataSet) {
+    LOG_ERROR << "Could not find Calibrations/rhic database" << endm;
+    return kStErr;
+  }
+  dbTriggersTable =
+    (St_vertexSeedTriggers*) (dbDataSet->FindObject("vertexSeedTriggers"));
+  if (!dbTriggersTable) {
+    LOG_ERROR << "Could not find vertexSeedTriggers in database" << endm;
+    return kStErr;
+  }
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -741,8 +628,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.35 2007/07/12 19:46:56 fisyak Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.36 2007/11/27 23:42:47 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.36  2007/11/27 23:42:47  genevb
+// Move valid triggers from code to DB
+//
 // Revision 1.35  2007/07/12 19:46:56  fisyak
 // Add includes for ROOT 5.16
 //
