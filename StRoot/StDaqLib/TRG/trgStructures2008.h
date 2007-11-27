@@ -226,4 +226,18 @@ TrgSumData2008     TrgSum;                /* Summary data: 608 bytes */
 RawTrgDet2008      rawTriggerDet[y8MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History: 11*8200 bytes */
 } ;         /* 90848  bytes */
 
+/*  Combined Trigger and EMC data block transferred from L2 to DAQ */
+
+typedef struct {
+  int offset;                           /* Offset (in bytes) from the start of TrgTowerTrnfer to data */
+  int length;                           /* Length (in bytes) of data */
+} TrgOfflen2008; 
+
+typedef struct {
+  int byteCount_Version;                  /* Transfer count in MS 24 bits; Version in LS 8 bits */
+  TrgOfflen2008 OffsetBlock[MAX_OFFSET];  /* Offset/length into transferData */
+  int transferData[1];                    /* Place holder array for trigger, BTOW and ETOW */
+} TrgTowerTrnfer2008;                     /* Maximum possible length 103124 bytes */ 
+
 #endif
+
