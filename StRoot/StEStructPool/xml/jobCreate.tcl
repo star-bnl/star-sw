@@ -334,6 +334,7 @@ proc ::jobCreate::+listDefaultXml {type t c b} {
                            dataAuAu200_2001_MinBiasVertex.lis \
                            dataAuAu200_2001_ProductionMinBias.lis \
                            dataAuAu200_2004_MinBias.lis \
+                           dataCuCu22_P05if_cuProductionMinBias.lis \
                            dataCuCu62_2005_ProductionMinBias.lis \
                            dataCuCu62_2007ib_cuProductionMinBias.lis \
                            dataCuCu200_2005_ProductionMinBias.lis \
@@ -2582,7 +2583,7 @@ proc ::jobCreate::sumFilesUp {} {
     # Assume addCentralities.C script is under the localDir job was submitted from.
     set pwd [pwd]
     set node [$::jobCreate::jobInfo getElementsByTagName localDir]
-    cd [file join [$node text] data]
+    cd [$node text]
 
     set logFile [file join $path sumCentralitiesLog]
     if {[file exists $logFile]} {
@@ -2948,7 +2949,7 @@ proc ::jobCreate::runSelectAll {} {
     # Assume selectAllM${mode}.C script is under the localDir job was submitted from.
     set pwd [pwd]
     set node [$::jobCreate::jobInfo getElementsByTagName localDir]
-    cd [file join [$node text] data]
+    cd [$node text]
 
     set logFile [file join $path selectAllLog]
     if {[file exists $logFile]} {
@@ -3025,7 +3026,7 @@ proc ::jobCreate::createDeltaRhoFile {} {
     # Assume combineHistograms.C script is under the localDir job was submitted from.
     set pwd [pwd]
     set node [$::jobCreate::jobInfo getElementsByTagName localDir]
-    cd [file join [$node text] data]
+    cd [$node text]
 
     set logFile [file join $path combineLog]
     if {[file exists $logFile]} {

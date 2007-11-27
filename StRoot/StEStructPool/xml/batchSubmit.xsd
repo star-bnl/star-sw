@@ -249,6 +249,7 @@ hell is in this directory.
 <xs:element name='triggerTag'>
     <xs:complexType>
         <xs:restriction base='xs:string'>
+            <xs:enumeration value='CuCu22GeVProductionMinBiasP05if'  Comment='tag for 2005, 22GeV CuCu minimum bias trigger'/>
             <xs:enumeration value='CuCu62GeVProductionMinBias2005'  Comment='tag for 2005, 62GeV CuCu minimum bias trigger'/>
             <xs:enumeration value='CuCu62GeVProductionMinBias2007ib' Comment='tag for 2005, 62GeV CuCu minimum bias trigger (2007ib production)'/>
             <xs:enumeration value='CuCu200GeVProductionMinBias2005' Comment='tag for 2005, 200GeV CuCu minimum bias trigger'/>
