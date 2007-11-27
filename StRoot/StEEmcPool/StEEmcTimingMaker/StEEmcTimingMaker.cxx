@@ -10,6 +10,8 @@
 #include <TPDF.h>
 #include <TCanvas.h>
 #include <TChain.h>
+#include <TFile.h>
+#include <TKey.h>
 
 #include <vector>
 
@@ -34,6 +36,50 @@ StEEmcTimingMaker::StEEmcTimingMaker(const Char_t *name):StMaker(name)
   mMapmtMin=50;
   mMapmtMax=150;
   mSupressZero=false;
+  mOutputFile="timing.root";
+
+  //  TH1F *hTower[ MaxTwCrates ][ MaxTwCrateCh ];
+  //  TH1F *hMapmt[ MaxMapmtCrates ][ MaxMapmtCrateCh ];
+  for ( Int_t i=0;i<MaxTwCrates;i++ )
+    for ( Int_t j=0;j<MaxTwCrateCh;j++ )
+      {
+	hTower[i][j]=0;
+	mTowerMask[i][j]=0;
+      }
+
+  for ( Int_t i=0;i<MaxMapmtCrates;i++ )
+    for ( Int_t j=0;j<MaxMapmtCrateCh;j++ )
+      {
+	hMapmt[i][j]=0;
+	mMapmtMask[i][j]=0;
+      }
+
+
+  // init summary arrays to zero
+  for ( Int_t icrate=0;icrate<MaxTwCrates;icrate++ )
+    {
+      mTowerCrateYield[icrate]=0;
+    }
+  for ( Int_t icrate=0;icrate<MaxMapmtCrates;icrate++ )
+    {
+      mMapmtCrateYield[icrate]=0;
+    }
+
+  for ( Int_t icrate=0;icrate<MaxTwCrates;icrate++ )
+    for ( Int_t ichan=0;ichan<MaxTwCrateCh;ichan++ )
+      {
+	mTowerChanYield[icrate][ichan]=0;
+	mTowerChanSlope[icrate][ichan]=0.;
+      }
+
+  for ( Int_t icrate=0;icrate<MaxMapmtCrates;icrate++ )
+    for ( Int_t ichan=0;ichan<MaxMapmtCrateCh;ichan++ )
+      {
+	mMapmtChanYield[icrate][ichan]=0;
+	mMapmtChanSlope[icrate][ichan]=0.;
+      }
+
+
 }
 
 void StEEmcTimingMaker::supressZeroAdc(){ mSupressZero=true; }
@@ -250,11 +296,18 @@ Int_t StEEmcTimingMaker::Make()
 Int_t StEEmcTimingMaker::Finish()
 {
 
+  static Int_t ncalled=0;
+  std::cout << Form("StEEmcTimingMaker::Finish() called for the %i-%s time",ncalled+1,(ncalled)?"nd":"st") << std::endl;
+  if ( ncalled ) return kStOK; // been there, done that
+  ncalled++;
+
   std::vector<TH1F*> histos;  
 
   for ( Int_t icrate=0;icrate<MaxTwCrates;icrate++ )
     for ( Int_t ichan=0;ichan<MaxTwCrateCh;ichan++ )
       {
+
+	if ( !hTower[icrate][ichan] ) continue; // skip null histograms
 	if ( hTower[icrate][ichan]->Integral()<10 ) continue;
 	histos.push_back( hTower[icrate][ichan] );
       }
@@ -262,6 +315,7 @@ Int_t StEEmcTimingMaker::Finish()
   for ( Int_t icrate=0;icrate<MaxMapmtCrates;icrate++ )
     for ( Int_t ichan=0;ichan<MaxMapmtCrateCh;ichan++ )
       {
+	if ( !hMapmt[icrate][ichan] ) continue; // skip null histograms
 	if ( hMapmt[icrate][ichan]->Integral()<10 ) continue;
 	histos.push_back(hMapmt[icrate][ichan]);
       }
@@ -276,6 +330,15 @@ Int_t StEEmcTimingMaker::Finish()
       fit.SetParameter(2, 0.90 );
       histos[ii]->GetXaxis()->SetRangeUser(xmax-10.,xmax+10.);
       histos[ii]->Fit(&fit,"RQ","",xmax-10.0,xmax+10.0);
+
+#if 0
+      std::cout << Form("+ fit %s: ped=%5.2f sig=%5.3f",histos[ii]->GetName(),fit.GetParameter(1),fit.GetParameter(2)) << std::endl;
+      if ( ii == 0 ) {
+	histos[ii]->GetListOfFunctions()->Print();
+	return kStOK;
+      }
+#endif
+
     }
 
 
@@ -291,6 +354,8 @@ Int_t StEEmcTimingMaker::Finish()
 	{
 
 	  TH1F *h=hTower[icrate][ichan];
+	  if ( !h ) continue; // skip null channels
+
 	  TString htitle=h->GetTitle(); 
 	  LOG_INFO<<"Fitting "<<htitle<<endl;
 
@@ -298,6 +363,13 @@ Int_t StEEmcTimingMaker::Finish()
 	  if ( !f ) continue;// no fit
 	  if ( f->IsA() != TF1::Class() ) {
 	    LOG_WARN<<" somebody inserted something into "<<h->GetName()<<"'s list of functions, and it's messing up the output"<<endm;
+#if 0
+	    std::cout << "Print out slot 0" << std::endl;
+	    f->Print();
+	    std::cout << "Print all functions" << std::endl;
+	    h->GetListOfFunctions()->Print();
+	    return kStOK;
+#endif
 	    continue;// object not a fit
 	  }
 	  Float_t xmean = f->GetParameter(1);
@@ -306,7 +378,7 @@ Int_t StEEmcTimingMaker::Finish()
 	  Float_t xmax  = xmean+mTowerMax;
 	  h->GetXaxis()->SetRangeUser(xmin,xmax);
 	  Float_t sum=h->Integral();
-	  mTowerCrateYield[icrate]+=(Int_t)sum;
+	  if ( !mTowerMask[icrate][ichan] ) mTowerCrateYield[icrate]+=(Int_t)sum;
 	  mTowerChanYield[icrate][ichan]+=(Int_t)sum;
 	  
 	  h->GetXaxis()->SetRangeUser(xmin-2.0*mTowerMin,xmax+mTowerMin);
@@ -353,6 +425,8 @@ Int_t StEEmcTimingMaker::Finish()
       for ( Int_t ichan=0;ichan<MaxMapmtCrateCh;ichan++ )
 	{
 	  TH1F *h=hMapmt[icrate][ichan];
+	  if ( !h ) continue; // skip null channels
+
 	  TString htitle=h->GetTitle();
 	  LOG_INFO<<"Fitting "<<htitle<<endl;
 
@@ -371,7 +445,7 @@ Int_t StEEmcTimingMaker::Finish()
 	  Float_t sum=h->Integral();
 
 
-	  mMapmtCrateYield[icrate]+=(Int_t)sum;
+	  if ( !mMapmtMask[icrate][ichan] ) mMapmtCrateYield[icrate]+=(Int_t)sum;
 	  mMapmtChanYield[icrate][ichan]+=(Int_t)sum;
 	  h->GetXaxis()->SetRangeUser(xmin-2.0*mMapmtMin,xmax+mMapmtMin);
 	  h->Draw();
@@ -411,7 +485,10 @@ Int_t StEEmcTimingMaker::Finish()
 
 
   // setup summary TTree
+  TFile *ff = new TFile(mOutputFile,"RECREATE");
+  ff->cd();
   TTree *tree=new TTree("timing","EEmc timing scan TTree");
+  mTree=tree;
 
   tree->Branch("mRunNumber",&mRunNumber,"mRunNumber/I");
   tree->Branch("mTowerDelay",&mTowerDelay,"mTowerDelay/F");
@@ -444,7 +521,8 @@ Int_t StEEmcTimingMaker::Finish()
 
   tree->Fill();
   
-  AddObj(tree,".hist");
+  //$$$ AddObj(tree,".hist");
+  ff->Write();
 
   return kStOK;
 }
@@ -571,8 +649,14 @@ void StEEmcTimingMaker::dumpPDF( const Char_t *fname )
 	      c1->cd(eta+1)->SetLogy();
 	      TString tname=sn[sec];tname+=ln[lay];tname+=bn[sub];tname+=sn[eta];
 	      TString hname="h";hname+=tname;
-	      TH1F *h=(TH1F*)GetHist(hname);	
-	      if (h)h->Draw();
+	      TH1F *h=0;
+	      h=(TH1F*)GetHist(hname);	
+	      if (h) h->Draw();
+	      else {
+		hname.ReplaceAll("h","a"); // from L2ped file
+		h=(TH1F*)GetHist(hname);
+		if ( h ) h->Draw();
+	      }
 	    }
 	  c1->Print(TString(fname)+"("); // print and leave open
 	  
@@ -673,6 +757,59 @@ void StEEmcTimingMaker::dumpPDF( const Char_t *fname )
 	  
 	}
 #endif
+
+
+}
+
+
+
+
+
+// ---------------------------------------------------
+void StEEmcTimingMaker::processFromL2( const Char_t *fname, int nevents )
+{
+
+  /*
+   * Load in the L2ped histogram/root file and set pointers
+   * to each of the tower histograms
+   *
+   * o We rely on the title of the histogram to contain the crate and channel number
+   *   (Jan likely gets this from the same place we would... the database).
+   *
+   * o Once tower histogram pointers are set, we should be able to call finish
+   *   which will perform the fitting and yield extractions
+   *
+   */
+
+
+
+  mTotalYield = nevents;
+  std::cout << Form("Timing from L2ped file: %s nevents: %i",fname,nevents) << std::endl;
+  TFile *f= new TFile(fname);
+  assert(f);
+  TList *l = f->GetListOfKeys();
+  TIter next(l);
+  TKey *key = 0;
+  while ( key = (TKey*)next() )
+    {
+      TObject *o = key->ReadObj();
+      TString name = o->GetName();
+      if ( !name.Contains("T") ) continue; // skip bemc towers
+      TH1F *h = (TH1F*)o;
+      TString title=h->GetTitle();
+      Int_t channel=-1;
+      Int_t crate = -1;
+
+      // this line needs to change if L2ped histogram title changes
+      sscanf(title.Data(),"%*s cr/ch=%03d/%03d",&crate,&channel);
+
+      std::cout << Form("+ name: %s title: %s crate: %i channel: %i",name.Data(),title.Data(),crate,channel) << std::endl;
+
+      assert(crate>0);                // crates count from 1
+      assert(channel>=0);             // channels count from 0
+      hTower[crate-1][channel] = h;   // add pointer
+
+    }
 
 
 }
