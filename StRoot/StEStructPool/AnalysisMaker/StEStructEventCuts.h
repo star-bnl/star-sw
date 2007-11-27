@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.10 2007/11/26 19:52:24 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.11 2007/11/27 23:00:02 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -71,7 +71,10 @@ inline bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
   StMuEvent* muEvent = muDst->event();
   if (mtrgByRunPeriod) {
 
-    if (!strcmp("CuCu62GeVProductionMinBias2005",mRunPeriod)) {
+    if (!strcmp("CuCu22GeVProductionMinBiasP05if",mRunPeriod)) {
+        // Accept all triggers.
+        return true;
+    } else if (!strcmp("CuCu62GeVProductionMinBias2005",mRunPeriod)) {
         if (muEvent->triggerIdCollection().nominal().isTrigger(76007) ||
             muEvent->triggerIdCollection().nominal().isTrigger(76011)) {
             return true;
@@ -197,6 +200,9 @@ inline bool StEStructEventCuts::goodCentrality(float c){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.11  2007/11/27 23:00:02  prindle
+ * Added cucu22 GeV data set as possible input
+ *
  * Revision 1.10  2007/11/26 19:52:24  prindle
  * Add cucu62, cucu200 2007ib production datasets.
  * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
