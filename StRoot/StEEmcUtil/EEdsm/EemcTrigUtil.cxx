@@ -52,9 +52,9 @@ EemcTrigUtil::getDsmThresholds(int yymmdd, int hhmmss, int *HTthr, int *TPthr, i
 
   EtotThr=EtotThrA;
 
-  // temp limits on the avaliable time stampe
-  assert(yymmdd>=20060408  ); // R7098001
-  //assert(yymmdd<=20060414  ); // R7103013
+  // temp limits on the avaliable time stamp to ppTrans
+  assert(yymmdd>=20060406  ); // R7096001
+  assert(yymmdd<=20060509  ); // R7129999
 
 }
 
