@@ -1,4 +1,4 @@
-#!/opt/star/sl305_gcc323/bin/perl -w
+#!/opt/star/sl44_gcc346/bin/perl -w
 
 my $macro="runEEmcTiming.C"; 
 
