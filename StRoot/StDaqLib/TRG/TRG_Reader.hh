@@ -118,6 +118,7 @@ private:
   int  Swap2007_DescSum(char*);            //!
   int  Swap2007_Raw(char*);                //!
   int  UnpackTrg2008(Bank_TRGP*);          //!
+  int  Swap2008_TrgTowerTrnfer(char*);     //!
   int  Swap2008_DescSum(char*);            //!
   int  Swap2008_Raw(char*);                //!
 };

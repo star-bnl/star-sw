@@ -234,10 +234,10 @@ typedef struct {
 } TrgOfflen2008; 
 
 typedef struct {
-  int byteCount_Version;                  /* Transfer count in MS 24 bits; Version in LS 8 bits */
-  TrgOfflen2008 OffsetBlock[MAX_OFFSET];  /* Offset/length into transferData */
-  int transferData[1];                    /* Place holder array for trigger, BTOW and ETOW */
-} TrgTowerTrnfer2008;                     /* Maximum possible length 103124 bytes */ 
+  int byteCount_Version;                    /* Transfer count in MS 24 bits; Version in LS 8 bits */
+  TrgOfflen2008 OffsetBlock[y8MAX_OFFSET];  /* Offset/length into transferData */
+  int transferData[1];                      /* Place holder array for trigger, BTOW and ETOW */
+} TrgTowerTrnfer2008;                       /* Maximum possible length 103124 bytes */ 
 
 #endif
 

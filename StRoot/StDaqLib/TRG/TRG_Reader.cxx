@@ -64,7 +64,8 @@ int TRG_Reader::YearOfData(char *data) {
   if(*data==0x30) return 2007; // trgStructures.h versions (eg, trgStructures2007.h).
   //Fixed version of 2007 trigger structure
   if(*data==0x31) return 2007; // trgStructures.h versions (eg, trgStructures2007.h).
-  if(*data==0x32) return 2008; // trgStructures.h versions (eg, trgStructures2008.h).
+  //From run8 this will be TrgTowerTrnfer version#
+  if(*data==0x10) return 2008; // trgStructures.h versions (eg, trgStructures2008.h).
   
   (void) printf("TRG_Reader::YearOfData : value %d=0x%x not treated\n",*data,*data);
   //assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
@@ -167,7 +168,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) :
       break;
 
     case 2008:
-      S_mode = 0;
+      S_mode = 0;      
       if(UnpackTrg2008(pBankTRGP) < 0){
         mErr = 2008;
         (void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__);
