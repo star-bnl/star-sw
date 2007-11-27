@@ -39,6 +39,28 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   //  printf("TRG_Reader::UnpackTrg2008: offset, header, trg, desc, sum, raw = %d %d %d %d %d %d\n",
   //	 ,size_off,size_head,size_trg,size_desc,size_sum,size_raw);
   
+  // New TrgTowerTrnfer structure and find trigger data itself
+  char* cttt = (char*)pTRGP + size_off + size_head;
+  TrgTowerTrnfer2008* ttt=(TrgTowerTrnfer2008*)cttt;
+  if(swap){
+    res=Swap2008_TrgTowerTrnfer(cttt);
+    if(res<0) {
+      printf("TRG_Reader::UnpackTrg2008: Swap TrgTowerTrnfer error %s %d.\n",__FILE__,__LINE__);
+      return -1;
+    }
+  }
+  int offset = ttt->OffsetBlock[y8TRG_INDEX].offset;
+  int length = ttt->OffsetBlock[y8TRG_INDEX].length;
+  if(length<=0) {
+    printf("TRG_Reader::UnpackTrg2008: No Trigger Data %s %d.\n",__FILE__,__LINE__);
+    return 0;
+  }
+  char* trg_version = (char*)pTRGP+size_off+size_head+offset;
+  if(*trg_version != 0x32) {
+    printf("TRG_Reader::UnpackTrg2008: Trigger version %x error %s %d.\n",*trg_version,__FILE__,__LINE__);
+    return -1;    
+  }
+
   //Create memory space for unpacked trigger bank
   if(pBankUnp!=0) delete[] pBankUnp;
   int sizeUnp = size_off + size_head + size_trg;
@@ -47,9 +69,10 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   TrgDataType2008* p=(TrgDataType2008*)trgd;
   
   //Copy Header, EvtDesc and TrgSum and byte swap
-  memcpy(pBankUnp, pTRGP, size_off+size_head+size_desc+size_sum);
+  memcpy(pBankUnp, pTRGP, size_off+size_head);
+  memcpy(pBankUnp+size_off+size_head, pTRGP+size_off+size_head+offset, size_desc+size_sum);
   
-  //Swap  EvtDesc and TrgSum
+  //Swap EvtDesc and TrgSum
   if(swap){
     res=Swap2008_DescSum(trgd);
     if(res<0) {
@@ -122,6 +145,12 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   pBankTRGP = (Bank_TRGP *)pBankUnp; 
   
   return 0;
+};
+
+int TRG_Reader::Swap2008_TrgTowerTrnfer(char *ptr){
+  TrgTowerTrnfer2008* p = (TrgTowerTrnfer2008 *)ptr;
+  pTRGD->swapHerb4bytes(&(p->byteCount_Version),1);
+  pTRGD->swapHerb4bytes(&(p->OffsetBlock[0].offset),2 * y8MAX_OFFSET);
 };
 
 int TRG_Reader::Swap2008_DescSum(char *ptr){
