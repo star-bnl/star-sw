@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 2.0 2007/01/13 00:03:03 jwebb Exp $
+// $Id: StEEmcSlowMaker.h,v 2.1 2007/11/28 16:17:34 jwebb Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -200,12 +200,16 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
   Float_t mRelativeLightYield[kNumberPrepost]; /* <N p.e.>/MIP for pre1, pre2 and post   */
   Float_t mSamplingFraction;                   /* sampling fraction from the fast simu   */
+  Float_t mSamplingFractionUser;               /* user-specified sampling fraction       */
   Float_t mTowerGains[kEEmcNumSectors];        /* tower gains from the fast simu         */
   Float_t mPrepostGains;                       /* pre/post ..                            */
   Float_t mSmdGains;                           /* smd ..                                 */
   Int_t   mMaxAdc;                             /* max ADC in fast simu                   */
 
   Bool_t  mDoLightYield;                       /* set false to disable tower pre/post relative light yield correction */
+
+  Float_t mTowerGainFact[kEEmcNumSectors][kEEmcNumSubSectors][kEEmcNumEtas];
+  Float_t mSmdGainFact[kEEmcNumSectors][kEEmcNumSmdUVs][kEEmcNumStrips];
   
  public: 
 
@@ -277,9 +281,20 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
   /// set false, no light yield correction is made.
   void setDoLightYield( Bool_t ly ){ mDoLightYield=ly; }
 
+  /// Changes the sampling fraction from the default 5% in the fast simulator
+  void setSamplingFraction( Float_t f ){ mSamplingFractionUser=f; }
+
+  /// Defines a spread in the tower gains
+  void setTowerGainSpread( Float_t s );
+
+  /// Defines a spread in the SMD gains
+  void setSmdGainSpread( Float_t s, Int_t sector, Int_t uv, Int_t strip_index );
+  void setSmdGainSpread( Float_t s, Int_t strip_index );
+  void setSmdGainSpread( Float_t s );
+
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.0 2007/01/13 00:03:03 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.1 2007/11/28 16:17:34 jwebb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -291,6 +306,13 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 2.1  2007/11/28 16:17:34  jwebb
+// Added the following features:
+//
+// 1. User may specify the sampling fraction.
+//
+// 2. Tower and SMD gain spreads.
+//
 // Revision 2.0  2007/01/13 00:03:03  jwebb
 // Upgrade of the slow simulator.  The following changes have been made:
 //
