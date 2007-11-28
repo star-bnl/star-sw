@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.1 2007/01/24 21:07:03 balewski Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.2 2007/11/28 16:17:30 jwebb Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -54,6 +54,7 @@ StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* muDstMakerName) 
 
   /// Copy and verify configuration of the fast simulator
   mSamplingFraction = StEEmcFastMaker::getSamplingFraction();
+  mSamplingFractionUser = mSamplingFraction;
 
   /// Copy fast simulator gains
   for ( Int_t ii=0;ii<kEEmcNumEtas;ii++ )
@@ -79,6 +80,22 @@ StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* muDstMakerName) 
 	LOG_WARN << "mTowerGains[etabin="<<ii<<"]="<<mTowerGains[ii]<<endm;
       assert(2+2==5);
     }
+
+  // initialize tower gain factors to 1
+  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
+    for ( Int_t sub=0;sub<kEEmcNumSubSectors;sub++ )
+      for ( Int_t eta=0;eta<kEEmcNumEtas;eta++ )
+	{
+	  mTowerGainFact[sec][sub][eta]=1.0;
+	}
+
+  // initialize SMD gain factors to 1
+  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
+    for ( Int_t uv=0;uv<kEEmcNumSmdUVs;uv++ )
+      for ( Int_t strip=0;strip<kEEmcNumStrips;strip++ )
+	{
+	  mSmdGainFact[sec][uv][strip]=1.0;
+	}
 
 }
 
@@ -326,7 +343,7 @@ void StEEmcSlowMaker::MakeTower( StMuEmcCollection *emc )
       // from double correcting.
 
       const EEmcDbItem *tower=eeDb-> getTile(sec,sub-1+'A', eta, 'T');
-      Float_t myadc = edeposit / mSamplingFraction * tower->gain;
+      Float_t myadc = edeposit / mSamplingFractionUser * tower->gain;
       myadc *= ( mRelativeLightYield[pre-1] - 1.0 );
 
       prepost_adc[sec-1][sub-1][eta-1] += myadc;
@@ -356,10 +373,13 @@ void StEEmcSlowMaker::MakeTower( StMuEmcCollection *emc )
       Float_t myadc=(Float_t)adc + 0.5;
       /// adc value originally computed using fast simulator gains.  we
       /// change to gains specified by the database.
-      myadc *= tower->gain / mTowerGains[eta-1];
+      myadc *= tower->gain / mTowerGains[eta-1] * mSamplingFraction / mSamplingFractionUser;
 
       /// Add in the pre/post brightness correction
       myadc += prepost_adc[sec-1][sub-1][eta-1];
+
+      /// Adjust for spread in tower gains (represents an uncertainty in measured gains)
+      myadc *= ( mTowerGainFact[sec-1][sub-1][eta-1] );
 
       /// Add pedestal offset
       if ( mAddPed )
@@ -372,6 +392,7 @@ void StEEmcSlowMaker::MakeTower( StMuEmcCollection *emc )
           myadc += ped;
         }
 
+      /// overwrite adc with new value (integerized) 
       adc = (Int_t)myadc;
       if ( mHList ) hA[5]->Fill(adc);
 
@@ -466,8 +487,10 @@ void StEEmcSlowMaker::MakePrePost( StMuEmcCollection *emc ){
 // ----------------------------------------------------------------------------
 void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc ) {
   
+  Int_t iuv = 0;
   Char_t uv='U';
   for ( uv='U'; uv <= 'V'; uv++ ) {
+    iuv++;
     
     Int_t sec,strip;
     for (Int_t i = 0; i < emc->getNEndcapSmdHits(uv); i++ ) {
@@ -513,6 +536,13 @@ void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc ) {
         }
       }
       
+
+      /// Add in factor from gain smearing
+      assert(strip-1>=0); // or die strips are counted from zero already
+      assert(sec-1>=0); // or die sectors are counted from zero already
+      newadc *= mSmdGainFact[sec-1][iuv][strip-1];
+
+
       /// Lookup pedestal in database (possibly zero)
       Float_t ped    = (mAddPed)?x -> ped:0;
       /// Smear the pedestal
@@ -844,7 +874,63 @@ void StEEmcSlowMaker::setRelativeLightYield( Float_t pre1, Float_t pre2, Float_t
 
 void StEEmcSlowMaker::setEmbeddingMode(Bool_t x){ mIsEmbeddingMode=x;} 
 
+// ----------------------------------------------------------------------------
+void StEEmcSlowMaker::setTowerGainSpread(Float_t s)
+{
+
+  // initialize tower gain factors to 1
+  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
+    for ( Int_t sub=0;sub<kEEmcNumSubSectors;sub++ )
+      for ( Int_t eta=0;eta<kEEmcNumEtas;eta++ )
+	{
+	  //	  mTowerGainFact[sec][sub][eta]=1.0;
+
+	  Float_t f = -1.0E9;
+	  while ( f <= -1. || f >= 1.0 )
+	    f = gRandom->Gaus(0., s);
+
+	  mTowerGainFact[sec][sub][eta] = 1.0 + f;
+
+	}
+
+}
+
+// ----------------------------------------------------------------------------
+void StEEmcSlowMaker::setSmdGainSpread( Float_t s )
+{
+  for ( Int_t strip=0;strip<kEEmcNumStrips;strip++ )
+    {
+      setSmdGainSpread(s,strip);
+    }
+}
+
+void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t strip )
+{
+  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
+    for ( Int_t uv=0;uv<kEEmcNumSmdUVs;uv++ )
+      setSmdGainSpread(s, sec,uv, strip );
+}
+
+void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t sec, Int_t uv, Int_t strip )
+{
+
+  Float_t f = -1.0E9;
+  while ( f <= -1. || f >= 1.0 )
+    f = gRandom->Gaus(0., s);
+
+  mSmdGainFact[sec][uv][strip]= 1.0 + f;
+  
+}
+
+
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.2  2007/11/28 16:17:30  jwebb
+// Added the following features:
+//
+// 1. User may specify the sampling fraction.
+//
+// 2. Tower and SMD gain spreads.
+//
 // Revision 2.1  2007/01/24 21:07:03  balewski
 // 1) no cout or printf, only new Logger
 // 2) EndcapMixer:
