@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.15 2007/11/22 00:22:37 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.16 2007/11/28 02:17:08 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,10 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.16  2007/11/28 02:17:08  dongx
+ * trayId for vpd in StTofCell: 901 (E), 902 (W)
+ * dataIndex for vpd in StTofData:  use 121 and 122 as trayId
+ *
  * Revision 1.15  2007/11/22 00:22:37  dongx
  * update for run8 - first version
  *
@@ -2339,7 +2343,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     float tetime = tmptdc_f*VHRBIN2PS;
 
     StThreeVectorF zero(0.,0.,0.);
-    StTofCell *tofCell = new StTofCell(trayId, 0, tubeId, lechan, 0, 0, 0, zero);
+    StTofCell *tofCell = new StTofCell(900+ewId, 0, tubeId, lechan, 0, 0, 0, zero);
     tofCell->setLeadingEdgeTime(letime);
     tofCell->setTrailingEdgeTime(tetime);
     mCellCollection->push_back(tofCell);
