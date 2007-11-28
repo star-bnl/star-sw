@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimulatorMaker
 #define STAR_StEmcSimulatorMaker
 
-// $Id: StEmcSimulatorMaker.h,v 1.24 2007/10/08 15:28:38 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.25 2007/11/28 16:18:58 kocolosk Exp $
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -9,9 +9,11 @@
 #include "StEmcVirtualSimulator.h"
 
 class StBemcTables;
+class StEmcPosition;
 class StEmcGeom;
 class StMcEmcHitCollection;
 class StMcEvent;
+class StMcTrack;
 class StEmcCollection;
 
 /*****************************************************************************
@@ -28,6 +30,7 @@ class StEmcSimulatorMaker : public StMaker
 {
 private:
     StBemcTables*           mTables;
+    StEmcPosition*          mPosition;
     StEmcGeom*              mGeom[MAXDETBARREL];
     
     StEmcVirtualSimulator*  mSimulator[MAXDETBARREL];
@@ -48,12 +51,17 @@ private:
     float                   mMaxAdc[MAXDETBARREL];
     float                   mMaxAdcSpread[MAXDETBARREL];
     
+    float                   mCrossTalk[MAXDETBARREL];
+    
     /// The simulators should not add pedestal noise if we're doing embedding.  This flag
     /// is set automatically by looking for StEmcRawMaker or StEmcADCtoEMaker in the chain.
     bool                    mEmbeddingMode;
     
     /// convert StMcCalorimeterHits to StEmcRawHits here
     void                    makeRawHits();
+    
+    /// Simulate the effects of optical cross talk
+    void                    makeCrossTalk(StMcTrack *track);
     
 public:
     /// check for embedding chain by looking for StEmcMixerMaker.
@@ -103,6 +111,8 @@ public:
     /// maximum possible ADC will be calculated by sampling Gaussian with this spread.  Default is 0 for all detectors.
     void setMaximumAdcSpread(StDetectorId det, float spread) { mMaxAdcSpread[det-kBarrelEmcTowerId] = spread; }
     
+    void setMaxCrossTalkPercentage(StDetectorId det, float percentage) { mCrossTalk[det - kBarrelEmcTowerId] = percentage / 100.0; }
+    
     StMcEmcHitCollection*   getEmcMcHits(Int_t det) { return mEmcMcHits[det-1]; }
     StMcEmcHitCollection*   getBemcMcHits()  { return getEmcMcHits(BTOW);  }
     StMcEmcHitCollection*   getBprsMcHits()  { return getEmcMcHits(BPRS);  }
@@ -118,7 +128,7 @@ public:
     StBemcTables*           getTables() { return mTables; }
 
     virtual const char*     GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.24 2007/10/08 15:28:38 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.25 2007/11/28 16:18:58 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -129,6 +139,10 @@ public:
 
 /*****************************************************************************
  * $Log: StEmcSimulatorMaker.h,v $
+ * Revision 1.25  2007/11/28 16:18:58  kocolosk
+ * optical cross-talk simulation by Mike Betancourt
+ * http://www.star.bnl.gov/HyperNews-star/protected/get/phana/144.html
+ *
  * Revision 1.24  2007/10/08 15:28:38  kocolosk
  * setMaximumAdc(Spread) methods allow for better simulation of BSMD ADC response
  * http://www.star.bnl.gov/HyperNews-star/get/emc2/2507.html
