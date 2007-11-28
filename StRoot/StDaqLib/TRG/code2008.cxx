@@ -51,13 +51,16 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   }
   int offset = ttt->OffsetBlock[y8TRG_INDEX].offset;
   int length = ttt->OffsetBlock[y8TRG_INDEX].length;
+  printf("TRG_Reader::UnpackTrg2008: TrgTowerTrnfer byet_version=0x%x offset=%d length=%d\n",
+	 ttt->byteCount_Version,offset,length);
   if(length<=0) {
     printf("TRG_Reader::UnpackTrg2008: No Trigger Data %s %d.\n",__FILE__,__LINE__);
     return 0;
   }
-  char* trg_version = (char*)pTRGP+size_off+size_head+offset;
+  char* trg_version = (char*)pTRGP + size_off + size_head + offset + 3;
+  printf("TRG_Reader::UnpackTrg2008: trg_version = 0x%x\n",*trg_version);
   if(*trg_version != 0x32) {
-    printf("TRG_Reader::UnpackTrg2008: Trigger version %x error %s %d.\n",*trg_version,__FILE__,__LINE__);
+    printf("TRG_Reader::UnpackTrg2008: Trigger version error %s %d.\n",*trg_version,__FILE__,__LINE__);
     return -1;    
   }
 
@@ -70,21 +73,18 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   
   //Copy Header, EvtDesc and TrgSum and byte swap
   memcpy(pBankUnp, pTRGP, size_off+size_head);
-  memcpy(pBankUnp+size_off+size_head, pTRGP+size_off+size_head+offset, size_desc+size_sum);
-  
-  //Swap EvtDesc and TrgSum
+  memcpy(pBankUnp+size_off+size_head, (char*)pTRGP+size_off+size_head+offset, size_desc+size_sum);
   if(swap){
     res=Swap2008_DescSum(trgd);
-    if(res<0) {
-      printf("TRG_Reader::UnpackTrg2008: Swap DescSum error %s %d.\n",__FILE__,__LINE__);
-      return -1;
-    }
   }
   npre  = p->EvtDesc.npre;
   npost = p->EvtDesc.npost;
-  printf("TRG_Reader::UnpackTrg2008: TCUdataBytes = %d\n",p->EvtDesc.TCUdataBytes);
-  printf("TRG_Reader::UnpackTrg2008: Token = %d\n",p->EvtDesc.TrgToken);
-  printf("TRG_Reader::UnpackTrg2008: Npre=%d Npost=%d\n",npre,npost);
+  printf("TRG_Reader::UnpackTrg2008: TCUdataBytes = %d Token = %d Npre/Npost=%d/%d\n",
+	 p->EvtDesc.TCUdataBytes, p->EvtDesc.TrgToken, npre,npost);
+  if(swap && res<0) {
+    printf("TRG_Reader::UnpackTrg2008: Swap DescSum error %s %d.\n",__FILE__,__LINE__);
+    return -1;
+  }
 
   if(p->EvtDesc.TrgToken>4096) {
     printf("TRG_Reader::UnpackTrg2008: Found Token beyond 4096\n");
@@ -96,7 +96,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   }
 
   //Set pointers for daq data and new unpacked data
-  char* p_daq = (char *)pTRGP    + size_off + size_head + size_desc + size_sum;
+  char* p_daq = (char *)pTRGP    + size_off + size_head + size_desc + size_sum + offset;
   char* p_unp = (char *)pBankUnp + size_off + size_head + size_desc + size_sum;
   
   //Zero out all raw data memory before copying partial data
@@ -107,7 +107,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
     unsigned short *nbytes = (unsigned short *)p_daq;
     if(swap) pTRGD->swapHerb2bytes(nbytes,1); //byte swap for # of bytes
     int n = *nbytes;
-    printf("TRG_Reader::UnpackTrg2008: Nprepost=%d   RawDat Size=%d (byte) [%d]\n",i,n,size_raw);
+    //printf("TRG_Reader::UnpackTrg2008: Nprepost=%d   RawDat Size=%d (byte) [%d]\n",i,n,size_raw);
     if(swap){
       //printf("-> Swapping on %p\n",pTRGD);
       pTRGD->swapHerb2bytes(nbytes,1); //swap back so that later whole things will swap correctly
@@ -122,7 +122,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
       return -1;
     }
 
-    printf("-> Doing memcpy to %p from %p\n",p_unp,p_daq);
+    //printf("-> Doing memcpy to %p from %p\n",p_unp,p_daq);
     memcpy(p_unp, p_daq, n);
 
     p_daq += n; 
@@ -130,9 +130,9 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   }
     
   //Byte Swap (if needed) for all raw data section
-  printf("-> Checking if swap is necessary\n");
+  //printf("-> Checking if swap is necessary\n");
   if(swap){
-    printf("-> Swap2008_Raw on %p\n",trgd);
+    //printf("-> Swap2008_Raw on %p\n",trgd);
     res = Swap2008_Raw(trgd);
     if(res<0){
       printf("TRG_Reader::UnpackTrg2008: Swap RawData error %s %d.\n",__FILE__,__LINE__);
@@ -141,7 +141,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   }
   
   //Switch bank pointer to fully restored data
-  printf("-> pBankTRGP set to (Bank_TRGP *) %p\n",pBankUnp);
+  //printf("-> pBankTRGP set to (Bank_TRGP *) %p\n",pBankUnp);
   pBankTRGP = (Bank_TRGP *)pBankUnp; 
   
   return 0;
@@ -232,7 +232,7 @@ int TRG_Reader::Swap2008_Raw(char *ptr) {
     pTRGD->swapHerb4bytes(&(p->rawTriggerDet[i].QQTdata[0]),1600);
     int nqt = p->rawTriggerDet[i].QQTdataBytes/4;
     int ac10 = p->rawTriggerDet[i].QQTdata[nqt-1];
-    printf("NQTdata = %d, AC10 = 0x%x\n",nqt,ac10);
+    printf("NQTdata = %d, Last word check = 0x%x (should be ac10)\n",nqt,ac10);
     if(nqt>0 && ac10 != 0xAC10){
       printf("Last word of QT data is not 0xAC10 but 0x%x\n ",ac10);
       return -1; 
