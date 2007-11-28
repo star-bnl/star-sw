@@ -1,11 +1,14 @@
  /*
- * $Id: StPixelFastSimMaker.cxx,v 1.37 2007/11/13 19:09:51 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.38 2007/11/28 20:16:33 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.38  2007/11/28 20:16:33  wleight
+ * Corrected a bug that put hits with local x or z position between -30 and 0 microns in the pixel corresponding to local x or z position between 0 and 30 microns
+ *
  * Revision 1.37  2007/11/13 19:09:51  wleight
  * Corrected bug causing pixel fast simulator to crash when there were no pixel and/or ist hits in the event
  *
@@ -329,6 +332,7 @@ Int_t StPixelFastSimMaker::Make()
   int nPixelPerWaferZ=640;
   int nWaferPerLadder=10;
   double pixelWidth=.003;
+  float pixWaferHalf=.96;
   unsigned int nPixLadders[2]={9,24};
   //int pixels[6400][640];
   vector<int> pixels;
@@ -378,16 +382,16 @@ Int_t StPixelFastSimMaker::Make()
 	      double localpos[3]={0,0,0};
 	      gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
 	      LOG_DEBUG<<"transformed local x: "<<localpos[0]<<"; local z: "<<localpos[2]<<"; local y: "<<localpos[1]<<endm;
-	      if(fabs(localpos[0])>.96){
+	      if(fabs(localpos[0])>pixWaferHalf){
 		LOG_INFO<<"bad hit position: local x="<<mcPixel->position().x()<<endm;
 		continue;
 	      }
-	      int xindex=static_cast<int>(localpos[0]/pixelWidth);
+	      int xindex=static_cast<int>((localpos[0]+pixWaferHalf)/pixelWidth)+1;
 	      LOG_DEBUG<<"localpos[0]: "<<localpos[0]<<"; pixelWidth: "<<pixelWidth<<"; xindex: "<<xindex<<endm;
-	      int zindex=static_cast<int>(localpos[2]/pixelWidth);
+	      int zindex=static_cast<int>((localpos[2]+pixWaferHalf*(nWaferPerLadder+1/2))/pixelWidth)+1;
 	      LOG_DEBUG<<"localpos[2]: "<<localpos[2]<<"; pixelWidth: "<<pixelWidth<<"; zindex: "<<zindex<<endm;
-	      zindex=zindex+nWaferPerLadder*nPixelPerWaferZ/2;
-	      xindex=xindex+nPixelPerWaferX/2;
+	      //zindex=zindex+nWaferPerLadder*nPixelPerWaferZ/2;
+	      //xindex=xindex+nPixelPerWaferX/2;
 	      int pixdex=nWaferPerLadder*nPixelPerWaferX*(xindex-1)+zindex;
 	      //pixels[xindex][zindex]=1;
 	      pixels.push_back(pixdex);
