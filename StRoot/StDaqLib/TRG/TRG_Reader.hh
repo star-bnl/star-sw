@@ -10,6 +10,9 @@
  *************************************************************************** 
 */
 
+#ifndef TRG_Reader.hh
+#define TRG_Reader.hh
+
 //////////////////////////////////////////////  includes  //////////////////////
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/GENERIC/RecHeaderFormats.hh"
@@ -124,3 +127,5 @@ private:
 };
 
 TRG_Reader *getTRGReader(EventReader *er);
+
+#endif
