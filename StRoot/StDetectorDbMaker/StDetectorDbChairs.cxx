@@ -22,7 +22,11 @@ St_ ## STRUCT ## C *St_ ## STRUCT ## C::fgInstance = 0; \
 St_ ## STRUCT ## C *St_ ## STRUCT ## C::instance() { \
     if (fgInstance) return fgInstance;					\
     St_ ## STRUCT *table = (St_ ## STRUCT *) StMaker::GetChain()->GetDataBase(MakeString(PATH)); \
-    assert(table);	DEBUGTABLE(STRUCT);					\
+    if (! table) {							\
+      LOG_WARN << "St_" << # STRUCT << "C::instance " << MakeString(PATH) << "\twas not found" << endm; \
+      assert(table);							\
+    }									\
+    DEBUGTABLE(STRUCT);							\
     fgInstance = new St_ ## STRUCT ## C(table);				\
     return fgInstance;							\
   }
