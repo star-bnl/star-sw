@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofINLCorr.h,v 1.2 2007/11/22 00:04:13 dongx Exp $
+ * $Id: StTofINLCorr.h,v 1.3 2007/11/29 22:39:30 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofINLCorr.h,v $
+ * Revision 1.3  2007/11/29 22:39:30  dongx
+ * vpd trayId changed to 121 (East) and 122 (West), be consistent
+ *
  * Revision 1.2  2007/11/22 00:04:13  dongx
  * - update for tof8++
  * - added ValidTrays() function
@@ -40,8 +43,8 @@ class StTofINLCorr{
   static const Int_t mNChanMAX = 1024;
   static const Int_t mNBoardIdMAX = 4800;
 
-  static const Int_t mEastVpdTrayId = 901;
-  static const Int_t mWestVpdTrayId = 902;
+  static const Int_t mEastVpdTrayId = 121;
+  static const Int_t mWestVpdTrayId = 122;
 
   Int_t mTdigOnTray[mNTray][mNTDIGOnTray];
   Int_t mTdigOnEastVpd[mNTDIGOnTray];
