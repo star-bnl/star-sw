@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.525 2007/11/29 18:14:48 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.526 2007/11/29 20:32:40 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -659,7 +659,7 @@ Int_t StBFChain::Instantiate()
 	   GetOption("SpcChgCalG"))   mk->SetMode(2);
       if ( GetOption("SCScalerCal") ) mk->SetMode(4);
     }
-    if (maker == "StEventQAMaker" )
+    if (maker == "StEventQAMaker" && GetOption("QAalltrigs"))
       ProcessLine(Form("((StEventQAMaker *) %p)->AllTriggers();",mk));
     //Special options for V0s and Xis using estGlobal tracks
     if(maker=="StV0FinderMaker" && Key=="v0svt"){
