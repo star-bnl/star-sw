@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.9 2007/11/22 00:22:37 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.10 2007/11/29 22:43:12 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.10  2007/11/29 22:43:12  dongx
+ * changed vpd trayId definition to 121 (East) and 122 (West)
+ *
  * Revision 1.9  2007/11/22 00:22:37  dongx
  * update for run8 - first version
  *
@@ -151,8 +154,8 @@ private:
     static const Int_t mNCell = 6;
     static const Int_t mNVPD = 19;    //
 
-    static const Int_t mEastVpdTrayId = 901;
-    static const Int_t mWestVpdTrayId = 902;
+    static const Int_t mEastVpdTrayId = 121;
+    static const Int_t mWestVpdTrayId = 122;
 
     Float_t     mWidthPad;
     Float_t	mTofrAdc[mNTOFR];
@@ -280,7 +283,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.9 2007/11/22 00:22:37 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.10 2007/11/29 22:43:12 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
