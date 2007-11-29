@@ -151,6 +151,7 @@ int TRG_Reader::Swap2008_TrgTowerTrnfer(char *ptr){
   TrgTowerTrnfer2008* p = (TrgTowerTrnfer2008 *)ptr;
   pTRGD->swapHerb4bytes(&(p->byteCount_Version),1);
   pTRGD->swapHerb4bytes(&(p->OffsetBlock[0].offset),2 * y8MAX_OFFSET);
+  return 0;
 };
 
 int TRG_Reader::Swap2008_DescSum(char *ptr){
