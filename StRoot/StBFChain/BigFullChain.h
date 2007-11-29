@@ -346,6 +346,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   //  {"testing"      ,"" ,"",   // just a damned test
   //   "B2006b,sdt20061211,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
   //                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+  {"B2008"       ,""       ,"","ry2008,in,tpc_daq,tpcI,fcf,Idst,tags,ctf,Tree,evout","",""
+                                                              ,"Base chain for 2008 ITTF (tpc)",kFALSE},
+  {"P2008"       ,"" ,"",
+   "B2008,IAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr5,analysis",
+                      "","","Production chain for 2008 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
 #endif /* __BFC2__ */
@@ -586,7 +591,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"detDb"  ,"detDb","","","StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
+  {"detDb","detDb","","db","StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
   {"magF"        ,"MagField","","StDbT,db","StMagFMaker","StarMagField,StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
