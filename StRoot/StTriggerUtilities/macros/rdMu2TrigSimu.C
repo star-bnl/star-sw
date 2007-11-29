@@ -12,28 +12,26 @@ void rdMu2TrigSimu( int nevents = 7e1,
 		    int L2ConfigYear=2006, // possible: 2006, 2008
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
 		    int playConfig=100, // jan:100_199
-		    int emcEveDump=0 // extrating raw EMC data in a custom format
-		    )  
+		    int emcEveDump=0, // extrating raw EMC data in a custom format
+		    char *file="R7136073.lis")
 {
-  const char *dirIn="runList/";
-  const char *file="emptyName";
+		    //R7100052.lis  R7101078.lis  R7133064.lis R70908001.lis    R7132001.lis  
 
-  int nFiles = 20; // make this big if you want to read all events from a run
+  int nFiles = 1000; // make this big if you want to read all events from a run
   
   char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
   TString outDir="./out2/"; 
   
   if (flagMC==1){
-      //const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
-
+    //const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
     // Alans file:
     // file="rcf1308_203_2000evts.MuDst.root";   dirIn="/star/u/ahoffman/ForJan/";
     // Pibero's file
     file = "rcf1275_01_3348evts_161_mix.MuDst.root";
-    dirIn = "/star/data13/reco/pp200/pythia6_205/Upsminbias/cdf_a/y2006/gheisha_on/p06id/";
+    char *dirIn = "/star/data13/reco/pp200/pythia6_205/Upsminbias/cdf_a/y2006/gheisha_on/p06id/";
   }
   if (flagMC==0){
-    file="R7100052.lis"; // if you don't like run-list use the following line
+    char *dirIn="/star/u/balewski/2008-trigAlgo-v4/runList/";
     //file="st_physics_7142017_raw_2030005.MuDst.root"; dirIn="/star/u/ahoffman/ForJan/";
    }
   
