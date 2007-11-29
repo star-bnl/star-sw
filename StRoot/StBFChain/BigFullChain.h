@@ -349,7 +349,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"B2008"       ,""       ,"","ry2008,in,tpc_daq,tpcI,fcf,Idst,tags,ctf,Tree,evout","",""
                                                               ,"Base chain for 2008 ITTF (tpc)",kFALSE},
   {"P2008"       ,"" ,"",
-   "B2008,IAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr5,analysis",
+   "B2008,IAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr3,alltrigger,-trg,analysis",
                       "","","Production chain for 2008 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
