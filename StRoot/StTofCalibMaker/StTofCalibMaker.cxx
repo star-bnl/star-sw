@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.13 2007/03/13 15:09:10 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.14 2007/11/30 17:11:23 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.14  2007/11/30 17:11:23  dongx
+ * removed tdcId in tofZCorr for tofZCorr.tdcId is not defined in db, and removed from idl definition
+ *
  * Revision 1.13  2007/03/13 15:09:10  dongx
  * Remove breaking of failure on number of return rows during db I/O for tofTotCorr and tofZCorr
  *
@@ -554,9 +557,9 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
       short trayId = zCorr[i].trayId;
       short moduleId = zCorr[i].moduleId;
       short cellId = zCorr[i].cellId;
-      short tdcId = zCorr[i].tdcId;
+//      short tdcId = zCorr[i].tdcId;
 
-      if(Debug()) gMessMgr->Info("","OS") << " module " << moduleId << " cell " << cellId << " tdcId " << tdcId << endm;
+      if(Debug()) gMessMgr->Info("","OS") << " module " << moduleId << " cell " << cellId << endm;
       for(Int_t j=0;j<mNBinMax;j++) {
 	if(trayId==93) { // TOFr5 tray
 	  mTofr5ZEdge[(moduleId-1)*6+cellId-1][j] = zCorr[i].z[j];
