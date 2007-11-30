@@ -10,8 +10,8 @@
  *************************************************************************** 
 */
 
-#ifndef TRG_Reader.hh
-#define TRG_Reader.hh
+#ifndef TRG_Reader_hh
+#define TRG_Reader_hh
 
 //////////////////////////////////////////////  includes  //////////////////////
 #include "StDaqLib/GENERIC/EventReader.hh"
