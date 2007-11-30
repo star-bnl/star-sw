@@ -76,38 +76,88 @@ void StBemcTriggerSimu::Init(){
 
   mDbThres->LoadTimeStamps();
   
-  // 2005 pp JP1/HT1/JP2/HT2
-  mAllTriggers.insert(96201);
-  mAllTriggers.insert(96211);
-  mAllTriggers.insert(96221);
-  mAllTriggers.insert(96233);
+  //2005
+  mAllTriggers.insert(96201);   //bemc-ht1-mb
+  mAllTriggers.insert(96211);   //bemc-ht2-mb
+  mAllTriggers.insert(96221);   //bemc-jp1-mb
+  mAllTriggers.insert(96233);   //bemc-jp2-mb-b
 
-  //2006 HTTP
-  mAllTriggers.insert(127611);
-  mAllTriggers.insert(127641);
-  mAllTriggers.insert(127821);
-  mAllTriggers.insert(127831);
-  mAllTriggers.insert(137821);
-  mAllTriggers.insert(137822);
-  mAllTriggers.insert(137831);
-  mAllTriggers.insert(137832);
-  mAllTriggers.insert(137611);
-  mAllTriggers.insert(137622);
-  mAllTriggers.insert(137641);
-  //2006 HT2
-  mAllTriggers.insert(127212);
-  mAllTriggers.insert(137213);
-  //2006 JP0
-  mAllTriggers.insert(127501);
-  mAllTriggers.insert(137501);
-  //2006 JP1
-  mAllTriggers.insert(127221);
-  mAllTriggers.insert(137221);
-  mAllTriggers.insert(137222);
-  //2006 JP0-etot-mb-L2jet
-  mAllTriggers.insert(127622);
-  mAllTriggers.insert(137622);
+  //2006
+  mAllTriggers.insert(117201);  //bemc-http-mb
   
+  mAllTriggers.insert(117211);  //bemc-ht2-mb
+  mAllTriggers.insert(117212);  //bemc-ht2-mb-emul
+  mAllTriggers.insert(127212);  //bemc-ht2-mb-emul
+  mAllTriggers.insert(127213);  //bemc-ht2-mb-emul
+  mAllTriggers.insert(137213);  //bemc-ht2-mb-emul
+  
+  mAllTriggers.insert(117221);  //bemc-jp1-mb
+  mAllTriggers.insert(127221);  //bemc-jp1-mb
+  mAllTriggers.insert(137221);  //bemc-jp1-mb
+  mAllTriggers.insert(137222);  //bemc-jp1-mb
+  
+  mAllTriggers.insert(117501);  //bemc-jp0-mb
+  mAllTriggers.insert(127501);  //bemc-jp0-mb
+  mAllTriggers.insert(137501);  //bemc-jp0-mb
+  
+  mAllTriggers.insert(117571);  //bemc-jp1
+  mAllTriggers.insert(127571);  //bemc-jp1
+  mAllTriggers.insert(137571);  //bemc-jp1
+  
+  mAllTriggers.insert(117575);  //bemc-jp0-etot
+  mAllTriggers.insert(127575);  //bemc-jp0-etot
+  mAllTriggers.insert(137575);  //bemc-jp0-etot
+  
+  mAllTriggers.insert(117585);  //bemc-jp2
+  mAllTriggers.insert(127585);  //bemc-jp2
+  mAllTriggers.insert(137585);  //bemc-jp2
+  
+  mAllTriggers.insert(117601);  //Upsilon
+  mAllTriggers.insert(117602);  //Upsilon
+  mAllTriggers.insert(137602);  //Upsilon
+  mAllTriggers.insert(137603);  //Upsilon
+  
+  mAllTriggers.insert(117611);  //bemc-http-mb-l2gamma
+  mAllTriggers.insert(127611);  //bemc-http-mb-l2gamma
+  mAllTriggers.insert(137611);  //bemc-http-mb-l2gamma
+  
+  mAllTriggers.insert(117621);  //bemc-jp0-etot-mb-l2jet
+  mAllTriggers.insert(117622);  //bemc-jp0-etot-mb-l2jet
+  mAllTriggers.insert(127622);  //bemc-jp0-etot-mb-l2jet
+  mAllTriggers.insert(137622);  //bemc-jp0-etot-mb-l2jet
+  
+  mAllTriggers.insert(117705);  //jpsi-mb
+  mAllTriggers.insert(137705);  //jpsi-mb
+  
+  mAllTriggers.insert(117821);  //bemc-http-mb-fast
+  mAllTriggers.insert(127821);  //bemc-http-mb-fast
+  mAllTriggers.insert(137821);  //bemc-http-mb-fast
+  mAllTriggers.insert(137822);  //bemc-http-mb-fast
+
+  mAllTriggers.insert(147570);  //bemc-jp0
+  mAllTriggers.insert(147585);  //bemc-http
+  mAllTriggers.insert(147611);  //bemc-http-mb-l2gamma
+  mAllTriggers.insert(147621);  //bemc-jp0-mb-l2jet
+  mAllTriggers.insert(147705);  //jpsi-mb
+  
+  //2007
+  mAllTriggers.insert(200211);  //bht2-mb
+  mAllTriggers.insert(200212);  //bht2-mb OR btag -- ARE YOU KIDDING ME?
+  mAllTriggers.insert(200220);  //bht2-mb
+  mAllTriggers.insert(200221);  //bht2-mb
+  mAllTriggers.insert(200222);  //bht2-mb
+  
+  mAllTriggers.insert(200213);  //btag
+  mAllTriggers.insert(200214);  //btag
+  
+  mAllTriggers.insert(200585);  //bht2
+  mAllTriggers.insert(200586);  //bht2
+  
+  mAllTriggers.insert(200601);  //L2-upsilon
+  mAllTriggers.insert(200602);  //L2-upsilon
+  
+  mAllTriggers.insert(200620);  //L2-gamma
+  mAllTriggers.insert(200621);  //L2-gamma
 
   Clear();
 }
@@ -321,10 +371,8 @@ void StBemcTriggerSimu::getLUT(){
 void StBemcTriggerSimu::Make(){
   LOG_DEBUG<<"StBemcTriggerSimu::Make()"<<endm;
   
-  mTables->loadTables(mHeadMaker);
-  
   mEvent = static_cast<StEvent*> ( mHeadMaker->GetDataSet("StEvent") );
-
+  
   FEEout();
   if (year==2006){
     get2006_DSMLayer0();
@@ -439,21 +487,20 @@ void StBemcTriggerSimu::FEEout() {
               }
               if (DSM_TPStatus[tpid]==1) {
                 L0_TP_ADC[tpid]+=adc08[did-1];
-		// This line needs to be replaced with LUT from the database in the case of online. For offline this is fine
+                // This line needs to be replaced with LUT from the database in the case of online. For offline this is fine
                 L0_TP_PED[tpid]++;
               }
 
               //Mask out 6 bit adc if that DSM HT/TP bit was masked out
               if (DSM_HTStatus[tpid]==0) L0_HT_ADC[tpid]=0;
               if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
-	      
-	      if (tpid==22) {
-		
-		cout<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
-		    <<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
-		    <<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[did-1]
-		    <<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" PedTargetValue="<<pedTargetValue<<endl;
-	      }
+              
+              if (tpid==22) {
+                cout<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
+                    <<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
+                    <<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[did-1]
+                    <<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" PedTargetValue="<<pedTargetValue<<endl;
+              }
             }
           }
         }
@@ -507,7 +554,7 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       DSM0_TP_tp_Bit_J3[j]=0;
       DSM0_HTTP_tp_Bit_J3[j]=0;      
     }
-	
+  
     mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP);
     
     //Loop over 10 inputs(TP) to each module 
@@ -520,114 +567,105 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       
       //Skip modules 2,7,12,17,22,27 
       if (((i+3)%5)!=0){
-	
-	//apply HT thresholds to each HT adc in each TP
-	if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit[j]=0;
-	if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit[j]=1;
-	if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit[j]=2;
-	if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit[j]=3;
+  
+  //apply HT thresholds to each HT adc in each TP
+  if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit[j]=0;
+  if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit[j]=1;
+  if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit[j]=2;
+  if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit[j]=3;
     
-	//apply TP thresholds to each TP adc in each TP
-	if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit[j]=0;
-	if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit[j]=1;
-	if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit[j]=2;
-	if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit[j]=3;
-	
-	//apply HTTP condition - TP&&HT
-	if (DSM0_TP_tp_Bit[j] >= DSM0_HT_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_HT_tp_Bit[j];
-	if (DSM0_HT_tp_Bit[j] >= DSM0_TP_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_TP_tp_Bit[j];
-	//then || each input
-	if (DSM0_HTTP_tp_Bit[j] > DSM0_HTTP_Bit[i]) DSM0_HTTP_Bit[i]=DSM0_HTTP_tp_Bit[j];
+  //apply TP thresholds to each TP adc in each TP
+  if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit[j]=0;
+  if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit[j]=1;
+  if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit[j]=2;
+  if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit[j]=3;
+  
+  //apply HTTP condition - TP&&HT
+  if (DSM0_TP_tp_Bit[j] >= DSM0_HT_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_HT_tp_Bit[j];
+  if (DSM0_HT_tp_Bit[j] >= DSM0_TP_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_TP_tp_Bit[j];
+  //then || each input
+  if (DSM0_HTTP_tp_Bit[j] > DSM0_HTTP_Bit[i]) DSM0_HTTP_Bit[i]=DSM0_HTTP_tp_Bit[j];
 
-	//add up TP adc for 2/5 of JP
-	DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];
+  //add up TP adc for 2/5 of JP
+  DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];
       
       }
     
       //Loop over 2x5 inputs(TP) for modules 2,7,12,17,22,29
       if (((i+3)%5)==0){
-	
-	//apply HT thresholds to each HT adc in each TP
-	if (j>4) 
-	  {
-	    if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J1[j]=0;
-	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J1[j]=1;
-	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J1[j]=2;
-	    if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J1[j]=3;
-	  }	
-	if (j<5)
-	  {
-	    if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J3[j]=0;
-	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J3[j]=1;
-	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J3[j]=2;
-	    if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J3[j]=3;
-	  }
-	
-	//apply TP thresholds to each TP adc in each TP
-	if (j>4)
-	  {
-	    if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J1[j]=0;
-	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J1[j]=1;
-	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J1[j]=2;
-	    if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J1[j]=3;
-	  }
-	if (j<5)
-	  {
-	    if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J3[j]=0;
-	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J3[j]=1;
-	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J3[j]=2;
-	    if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J3[j]=3;
-	  }									      
+  
+  //apply HT thresholds to each HT adc in each TP
+  if (j>4) 
+    {
+      if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J1[j]=0;
+      if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J1[j]=1;
+      if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J1[j]=2;
+      if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J1[j]=3;
+    } 
+  if (j<5)
+    {
+      if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J3[j]=0;
+      if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J3[j]=1;
+      if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J3[j]=2;
+      if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J3[j]=3;
+    }
+  
+  //apply TP thresholds to each TP adc in each TP
+  if (j>4)
+    {
+      if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J1[j]=0;
+      if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J1[j]=1;
+      if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J1[j]=2;
+      if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J1[j]=3;
+    }
+  if (j<5)
+    {
+      if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J3[j]=0;
+      if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J3[j]=1;
+      if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J3[j]=2;
+      if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J3[j]=3;
+    }                       
 
-	//apply HTTP condition - TP&&HT
-	if (j>4) {
-	  if (DSM0_TP_tp_Bit_J1[j] >= DSM0_HT_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_HT_tp_Bit_J1[j];
-	  if (DSM0_HT_tp_Bit_J1[j] >= DSM0_TP_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_TP_tp_Bit_J1[j];
-	  if (DSM0_HTTP_tp_Bit_J1[j] > DSM0_HTTP_Bit_J1[i]) DSM0_HTTP_Bit_J1[i]=DSM0_HTTP_tp_Bit_J1[j];
-	}
-	if (j<5){
-	  if (tpid==22) cout<<" HT="<<DSM0_HT_tp_Bit_J3[j]<<" TP="<<DSM0_TP_tp_Bit_J3[j]<<" HTTP="<<DSM0_HTTP_tp_Bit_J3[j]<<endl;
-	  if (DSM0_TP_tp_Bit_J3[j] >= DSM0_HT_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_HT_tp_Bit_J3[j];
-	  if (DSM0_HT_tp_Bit_J3[j] >= DSM0_TP_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_TP_tp_Bit_J3[j];
-	  if (DSM0_HTTP_tp_Bit_J3[j] > DSM0_HTTP_Bit_J3[i]) DSM0_HTTP_Bit_J3[i]=DSM0_HTTP_tp_Bit_J3[j];
-	  if (tpid==22) cout<<" HTTP after="<<DSM0_HTTP_tp_Bit_J3[j]<<endl;
-	}
+  //apply HTTP condition - TP&&HT
+  if (j>4) {
+    if (DSM0_TP_tp_Bit_J1[j] >= DSM0_HT_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_HT_tp_Bit_J1[j];
+    if (DSM0_HT_tp_Bit_J1[j] >= DSM0_TP_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_TP_tp_Bit_J1[j];
+    if (DSM0_HTTP_tp_Bit_J1[j] > DSM0_HTTP_Bit_J1[i]) DSM0_HTTP_Bit_J1[i]=DSM0_HTTP_tp_Bit_J1[j];
+  }
+  if (j<5){
+    if (tpid==22) cout<<" HT="<<DSM0_HT_tp_Bit_J3[j]<<" TP="<<DSM0_TP_tp_Bit_J3[j]<<" HTTP="<<DSM0_HTTP_tp_Bit_J3[j]<<endl;
+    if (DSM0_TP_tp_Bit_J3[j] >= DSM0_HT_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_HT_tp_Bit_J3[j];
+    if (DSM0_HT_tp_Bit_J3[j] >= DSM0_TP_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_TP_tp_Bit_J3[j];
+    if (DSM0_HTTP_tp_Bit_J3[j] > DSM0_HTTP_Bit_J3[i]) DSM0_HTTP_Bit_J3[i]=DSM0_HTTP_tp_Bit_J3[j];
+    if (tpid==22) cout<<" HTTP after="<<DSM0_HTTP_tp_Bit_J3[j]<<endl;
+  }
 
-	if (tpid==22) {
-	  cout<<"J3 j="<<j<<" i="<<i<<" HTADC="<<L0_HT_ADC[tpid]<<" TPADC="<<L0_TP_ADC[tpid]<<" HT="
-	      <<DSM0_HT_tp_Bit_J3[j]<<" TP="<<DSM0_TP_tp_Bit_J3[j]<<" HTTP="<<DSM0_HTTP_tp_Bit_J3[j]
-	      <<" DSM0_HTTP_Bit="<<DSM0_HTTP_Bit_J3[i]<<endl;
-	}
+  if (tpid==22) {
+    cout<<"J3 j="<<j<<" i="<<i<<" HTADC="<<L0_HT_ADC[tpid]<<" TPADC="<<L0_TP_ADC[tpid]<<" HT="
+        <<DSM0_HT_tp_Bit_J3[j]<<" TP="<<DSM0_TP_tp_Bit_J3[j]<<" HTTP="<<DSM0_HTTP_tp_Bit_J3[j]
+        <<" DSM0_HTTP_Bit="<<DSM0_HTTP_Bit_J3[i]<<endl;
+  }
 
-	//add up TP adc for 1/5 of JP
-	if (j>4) DSM0_TP_SUM_J1[i]+=L0_TP_ADC[tpid];
-	if (j<5) DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
-	
+  //add up TP adc for 1/5 of JP
+  if (j>4) DSM0_TP_SUM_J1[i]+=L0_TP_ADC[tpid];
+  if (j<5) DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
+  
       }
     }
 
     //NEED to eventually make this decision higher up but keep it here for now
-    if ((DSM0_HTTP_Bit[i]>1)||(DSM0_HTTP_Bit_J3[i]>1)||(DSM0_HTTP_Bit_J1[i]>1)) 
-      {
-	mFiredTriggers.push_back(127611);
-	mFiredTriggers.push_back(127641);
-	mFiredTriggers.push_back(127821);
-	mFiredTriggers.push_back(127831);
-	mFiredTriggers.push_back(137821);
-	mFiredTriggers.push_back(137822);
-	mFiredTriggers.push_back(137831);
-	mFiredTriggers.push_back(137832);
-	mFiredTriggers.push_back(137611);
-	mFiredTriggers.push_back(137622);
-	mFiredTriggers.push_back(137641);
-      }
+    if ((DSM0_HTTP_Bit[i]>1)||(DSM0_HTTP_Bit_J3[i]>1)||(DSM0_HTTP_Bit_J1[i]>1)) {
+      mFiredTriggers.push_back(127611);
+      mFiredTriggers.push_back(127821);
+      mFiredTriggers.push_back(137821);
+      mFiredTriggers.push_back(137822);
+      mFiredTriggers.push_back(137611);
+    }
     
-    if ((DSM0_HT_Bit[i]> 2)||(DSM0_HT_Bit_J3[i]>2)||(DSM0_HT_Bit_J1[i]>2)) 
-      {
-	mFiredTriggers.push_back(127212);
-	mFiredTriggers.push_back(137213);
-      }
-    
+    if ((DSM0_HT_Bit[i]> 2)||(DSM0_HT_Bit_J3[i]>2)||(DSM0_HT_Bit_J1[i]>2)) {
+      mFiredTriggers.push_back(127212);
+      mFiredTriggers.push_back(137213);
+    }
   }
 }
 
