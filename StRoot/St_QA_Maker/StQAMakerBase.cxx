@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.31 2007/04/24 00:33:38 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.32 2007/11/30 05:38:50 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.32  2007/11/30 05:38:50  genevb
+// Changes for Run8: mostly silicon removal, TOF addition
+//
 // Revision 2.31  2007/04/24 00:33:38  genevb
 // Always do PMD hists now
 //
@@ -114,10 +117,13 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 
   hists = 0;
   histsList.Expand(32);
+  Int_t i;
+  for (i=0;i<32;i++) histsList.AddAt(0,i);
   histsSet = StQA_Undef;
   eventClass = 3;
   ITTF = kFALSE;
   EST = -1; // -1 = unknown
+  allTrigs = kFALSE;
 
 //  - Set all the histogram booking constants
 
@@ -131,7 +137,7 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   mMultClass = 0;   // histogram for number of events in mult classes
   mTrigWord = 0;    // histogram for event trigger words
   mTrigBits = 0;    // histogram for event trigger bits
-  for (Int_t i=0; i<24; i++) mTpcSectorPlot[i] = 0;
+  for (i=0; i<24; i++) mTpcSectorPlot[i] = 0;
 
 // for method MakeEvSum - from table software monitor
   m_glb_trk_chg=0;          //! all charge east/west, tpc
@@ -216,6 +222,8 @@ Int_t StQAMakerBase::Make() {
   if (histsSet==StQA_AuAuOld) MakeHistFPD();
   // histograms from PMD in StEvent
   MakeHistPMD();
+  // histograms from TOF in StEvent
+  if (histsSet==StQA_run8) MakeHistTOF();
 
   eventCount++;
   return kStOk;
@@ -249,6 +257,10 @@ void StQAMakerBase::BookHist() {
 
   Int_t tempClass = eventClass;
 
+  if (allTrigs) {
+    prefix[0] = QAMakerType;
+    eventClass = 1;
+  } else {
   switch (histsSet) {
 
   // Real data with three multiplicity classes (low, medium, high)
@@ -262,6 +274,7 @@ void StQAMakerBase::BookHist() {
 
   // Real data with event classes for different triggers
 
+    case (StQA_run8) :
     case (StQA_AuAu) : {
       (prefix[0] = QAMakerType) += "MB";  // Minbias
       (prefix[1] = QAMakerType) += "CL";  // Central
@@ -288,6 +301,7 @@ void StQAMakerBase::BookHist() {
       prefix[0] = QAMakerType;
       eventClass = 1;
     }
+  }
   }
   
   QAH::maker = (StMaker*) (this);

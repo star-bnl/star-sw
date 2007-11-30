@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.58 2007/04/25 18:35:57 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.59 2007/11/30 05:38:50 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.59  2007/11/30 05:38:50  genevb
+// Changes for Run8: mostly silicon removal, TOF addition
+//
 // Revision 2.58  2007/04/25 18:35:57  genevb
 // Additional SSD hists
 //
@@ -198,6 +201,8 @@ ClassImp(StQABookHist)
   
 //_____________________________________________________________________________
 StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
+
+  silHists = kFALSE;
 
   int i = 0;
 
@@ -745,6 +750,8 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistVertex();
   BookHistPMD();
   if (histsSet==StQA_MC) BookHistEval();
+  if (histsSet==StQA_run8) BookHistTOF();
+  else silHists = kTRUE;
   
 }
 //_____________________________________________________________________________
@@ -759,6 +766,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_iflag    = QAH::H1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
   m_globtrk_good     = QAH::H1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
   m_globtrk_good_sm  = QAH::H1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,500.);
+  if (silHists)
   m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",150,0.,9000.);
   m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",150,0.,1500.,150,0.,1500.);
   m_globtrk_goodF->SetXTitle("FTPC East");
@@ -771,7 +779,7 @@ void StQABookHist::BookHistGlob(){
   m_dcaToBeamZ1      = QAH::H1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,200);
   m_dcaToBeamZ2      = QAH::H1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis",100,-50,50);
   m_dcaToBeamZ3      = QAH::H1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
-  m_zDcaTanl         = QAH::H2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl, tpc,tpc+svt",100,-25,25,32,-4,4);
+  m_zDcaTanl         = QAH::H2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl, tpc",100,-25,25,32,-4,4);
   m_zDcaTanl->SetXTitle("z-DCA");
   m_zDcaTanl->SetYTitle("tanl");
   m_zDcaZf           = QAH::H2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",100,-25,25,50,-300,300);
@@ -783,6 +791,7 @@ void StQABookHist::BookHistGlob(){
   m_zDcaPhi0         = QAH::H2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
   m_zDcaPhi0->SetXTitle("z-DCA");
   m_zDcaPhi0->SetYTitle("phi0");
+  if (silHists) {
   m_glb_sptsTS       = QAH::H1F("QaGtrkSptsTS","globtrk: number of svt points, tpc+svt",4,0.,4.);
   m_glb_ratiomTTS    = QAH::MH1F("QaGtrkRnmfTTS","globtrk: ratio Nfit/max pnt, tpc,svt", 55,0.,1.1,2);
   m_glb_ratiomTTS->SetMinimum(10);
@@ -822,6 +831,7 @@ void StQABookHist::BookHistGlob(){
 				25,0.,250.,25,0.,50.);
   m_fpoint_lengthTTS->SetXTitle("trk length");
   m_fpoint_lengthTTS->SetYTitle("Npoints on trk");
+  }
 
 // 1D tpc
 
@@ -950,6 +960,7 @@ void StQABookHist::BookHistGlob(){
      m_psi_phiT->SetXTitle("phi");
      m_psi_phiT->SetYTitle("psi");
 
+  if (silHists) {
 
 // 1D tpc + silicon (svt+ssd)
 
@@ -1064,6 +1075,7 @@ void StQABookHist::BookHistGlob(){
      m_psi_phiTS->SetXTitle("phi");
      m_psi_phiTS->SetYTitle("psi");
 
+  }
 
 // 1D ftpc
 
@@ -1218,6 +1230,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_iflag   = QAH::H1F("QaPtrkFlag",  "primtrk: iflag - all",160,-799.,900.);
   m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,500.);
+  if (silHists)
   m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",150,0.,4500.);
   m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",150,0.,1500.,150,0.,1500.);
   m_primtrk_goodF->SetXTitle("East");
@@ -1225,31 +1238,36 @@ void StQABookHist::BookHistPrim(){
   m_primglob_good   = QAH::H1F("QaPtrkGlob","primtrk: ratio primary/global tracks w/ iflag>0",50,0,1);
   m_primglob_fit    = QAH::H1F("QaPtrkGlobFit","primtrk: ratio primary/global nfit points",50,0,2);
   m_pdet_id         = QAH::H1F("QaPtrkDetId",  "primtrk: Detector ID good tracks - all",25,0.,25.);
+  if (silHists) {
   m_primtrk_meanptTTS = QAH::MH1F("QaPtrkMeanPtTTS","primtrk: <pT>, tpc, tpc+svt",50,0.,2.,2);
   m_primtrk_meanptTTS->Rebin(0,"TPC+SVT");
   m_primtrk_meanptTTS->Rebin(1,"TPC");
   m_primtrk_meanptTTS->SetStats(kFALSE);
+  }
   m_primtrk_meanptF = QAH::MH1F("QaPtrkMeanPtF","primtrk: <pT>, ftpc",50,0.,2.,2);
   m_primtrk_meanptF->Rebin(0,"East");
   m_primtrk_meanptF->Rebin(1,"West");
   m_primtrk_meanptF->SetStats(kFALSE);
+  if (silHists) {
   m_primtrk_meanetaTTS = QAH::MH1F("QaPtrkMeanEtaTTS","primtrk: <eta>, tpc, tpc+svt",40,-2.,2.,2);
   m_primtrk_meanetaTTS->Rebin(0,"TPC+SVT");
   m_primtrk_meanetaTTS->Rebin(1,"TPC");
   m_primtrk_meanetaTTS->SetStats(kFALSE);
+  }
   m_primtrk_meanetaF = QAH::MH1F("QaPtrkMeanEtaF","primtrk: |<eta>|, ftpc",40,2,5,2);
   m_primtrk_meanetaF->Rebin(0,"East");
   m_primtrk_meanetaF->Rebin(1,"West");
   m_primtrk_meanetaF->SetStats(kFALSE);
+  if (silHists) {
   m_ppsiTTS         = QAH::MH1F("QaPtrkPsiTTS","primtrk: psi (deg), tpc, svt", 36, 0.,360.,2);
   m_ppsiTTS->Rebin(0,"TPC+SVT");
   m_ppsiTTS->Rebin(1,"TPC");
   m_ppsiTTS->SetStats(kFALSE);
-  m_petaTTS         = QAH::MH1F("QaPtrkEtaTTS","primtrk: eta, tpc",40,-2.,2.,2);
+  m_petaTTS         = QAH::MH1F("QaPtrkEtaTTS","primtrk: eta, tpc,svt",40,-2.,2.,2);
   m_petaTTS->Rebin(0,"TPC+SVT");
   m_petaTTS->Rebin(1,"TPC");
   m_petaTTS->SetStats(kFALSE);
-  m_ppTTTS          = QAH::MH1F("QaPtrkPtTTS", "primtrk: pT, tpc",50,0.,5.,2);
+  m_ppTTTS          = QAH::MH1F("QaPtrkPtTTS", "primtrk: pT, tpc,svt",50,0.,5.,2);
   m_ppTTTS->Rebin(0,"TPC+SVT");
   m_ppTTTS->Rebin(1,"TPC");
   m_ppTTTS->SetStats(kFALSE);
@@ -1260,6 +1278,7 @@ void StQABookHist::BookHistPrim(){
   m_pfpoint_lengthTTS = QAH::H2F("QaPtrkFitPntLTTS","primtrk: N fit pnts vs length, tpc,tpc+svt",25,70.,350.,25,0.,50.);
   m_pfpoint_lengthTTS->SetXTitle("trk length");
   m_pfpoint_lengthTTS->SetYTitle("Npoints on trk");
+  }
 
 // 1D tpc
   m_ppointT      = QAH::H1F("QaPtrkNPntT",   "primtrk: N points on trk,tpc", 60, 0.,60.);
@@ -1340,6 +1359,7 @@ void StQABookHist::BookHistPrim(){
      m_ppsi_phiT->SetXTitle("phi");
      m_ppsi_phiT->SetYTitle("psi");
 
+  if (silHists) {
 // 1D tpc + silicon (svt+ssd)
   m_ppointTS      = QAH::H1F("QaPtrkNPntTS",   "primtrk: N points on trk,tpc+svt", 60, 0.,60.);
   m_pmax_pointTS  = QAH::H1F("QaPtrkNPntMaxTS","primtrk: N max pnts on trk, tpc+svt", 50, 0.,100.);
@@ -1417,6 +1437,7 @@ void StQABookHist::BookHistPrim(){
   m_ppsi_phiTS = QAH::H2F("QaPtrkPsiPhiTS","primtrk: psi vs phi, tpc+svt",36, 0.,360.,36,0.,360.);
     m_ppsi_phiTS->SetXTitle("phi");
     m_ppsi_phiTS->SetYTitle("psi");
+  }
 
 // 1D ftpc
   // east (solid) and west(dashed) on same plot
@@ -1535,6 +1556,7 @@ void StQABookHist::BookHistPrim(){
     m_pnpoint_lengthFW->SetYTitle("Npoints on trk");
 
 // 2D - SVT drift length
+  if (silHists)
   m_svt_loc = QAH::H2F("QaPtrkSvtLoc","primtrk: SVT hit time bins",256,0,128,432,-0.5,431.5);
 }
 //_____________________________________________________________________________
@@ -1642,8 +1664,10 @@ void StQABookHist::BookHistPoint(){
   m_pnt_id      = QAH::H1F("QaPointId","point: detector ID of hit",30,0.,30.);
 
   m_pnt_tpc     = QAH::H1F("QaPointTpc",  "point: # hits tpc ",100, 0.,300000.);
+  if (silHists) {
   m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",600, 0.,15000.);
   m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",200, 0.,5000.);
+  }
   // east and west on same plot
   m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,25000.,2);
   m_pnt_ftpc->Rebin(0,"East");
@@ -1652,6 +1676,7 @@ void StQABookHist::BookHistPoint(){
   // east and west on separate plots
   m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,25000.);
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
+  if (silHists) {
   m_pnt_svtLaser= QAH::H2F("QaPointSvtLaser","point: laser spots, svt ",150,0,600,65,0.,130.);
   m_pnt_svtLaser->SetXTitle("event in file");
   m_pnt_svtLaserDiff= QAH::MH2F("QaPointSvtLaserDiff","point: diff of laser spots, svt ",150,0,600,101,9.8,50.2,2);
@@ -1660,6 +1685,7 @@ void StQABookHist::BookHistPoint(){
   m_pnt_svtLaserDiff->Rebin(0,"Laser 1");
   m_pnt_svtLaserDiff->Rebin(1,"Laser 2");
   m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt,ssd",125,-25,25,125,-25,25);
+  }
   m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
   m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
@@ -1673,6 +1699,7 @@ void StQABookHist::BookHistPoint(){
   m_pnt_padrowT->SetStats(kFALSE);
   m_pnt_padrowT->SetXTitle("padrow number");
 
+  if (silHists) {
   m_pnt_zS      = QAH::H1F("QaPointZhitsS","point: z distribution of hits, svt",100,-35,35);
   m_pnt_phiS    = QAH::H1F("QaPointPhiS","point: #phi distribution of hits, svt",36,0,360);
   m_pnt_barrelS = QAH::H1F("QaPointBarrelS","point: barrel distribution of hits, svt",3,0.5,3.5);
@@ -1687,6 +1714,7 @@ void StQABookHist::BookHistPoint(){
   m_pnt_sizeSSD->Rebin(1,"N-side");
   m_pnt_sizeSSD->SetStats(kFALSE);
   m_pnt_eSSD = QAH::H1F("QaPointESSD","point: log10(energy) of hits, ssd",90,-5,-2);
+  }
 
   m_pnt_xyFE    = QAH::H2F("QaPointXYFtpcE","point: x-y distribution of hits, ftpcE",70,-35,35,70,-35,35);
   m_pnt_xyFW    = QAH::H2F("QaPointXYFtpcW","point: x-y distribution of hits, ftpcW",70,-35,35,70,-35,35);
@@ -1920,6 +1948,18 @@ void StQABookHist::BookHistPMD(){
   m_cpv_total_adc->SetXTitle("event id");
   m_cpv_total_adc->SetYTitle("log10");
   
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistTOF(){
+
+  m_tof_hit_tray = QAH::H2F("QaTofHitvsTray","TOF Hits vs tray",120,0.5,120.5,100,0.,100.);
+  m_tof_hit_module = QAH::H2F("QaTofHitvsModule","TOF Hits vs Module",65,-32.5,32.5,100,0.,100.);
+  m_tof_match_tray = QAH::H2F("QaTofMatchvsTray","TOF Matched Hits vs tray",120,0.5,120.5,100,0.,100.);
+  m_tof_match_module = QAH::H2F("QaTofMatchvsModule","TOF Matched Hits vs Module",65,-32.5,32.5,100,0.,100.);
+  m_tof_vpd_hit =  QAH::H2F("QaTofHitvsVpdHit","TOF Hits vs Vpd Hits",50,0.,50.,100,0.,5000.);
+  m_tof_vtx_z =  QAH::H2F("QaTofVpdZvsTpcZ","VPD vtxz vs TPC vtxz",100,-100.,100.,100,-100.,100.);
+  m_tof_PID =  QAH::H2F("QaTofPID","TOF InvBeta vs p",100,0.,5.,100,0.,4.);
+
 }
 //_____________________________________________________________________________
 
