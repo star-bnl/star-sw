@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.15 2005/02/08 17:22:46 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.16 2007/11/30 05:38:50 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.16  2007/11/30 05:38:50  genevb
+// Changes for Run8: mostly silicon removal, TOF addition
+//
 // Revision 2.15  2005/02/08 17:22:46  genevb
 // PMD histo changes, handle estGlobal/ITTF tracks
 //
@@ -61,7 +64,8 @@ enum StQAHistSetType {
   StQA_AuAuOld = 1,
   StQA_pp = 2,
   StQA_dAu = 3,
-  StQA_AuAu = 4
+  StQA_AuAu = 4,
+  StQA_run8 = 5
 };
 
 #include "StMaker.h"
@@ -83,7 +87,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.15 2005/02/08 17:22:46 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.16 2007/11/30 05:38:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -129,6 +133,7 @@ class StQAMakerBase : public StMaker {
   Bool_t fillHists;
   Bool_t ITTF;
   Int_t EST;
+  Bool_t allTrigs;
 
   virtual void NewQABookHist();
   virtual TH2F* MH1F(const Text_t* name, const Text_t* title,
@@ -152,6 +157,7 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistBBC() {}
   virtual void MakeHistFPD() {}
   virtual void MakeHistPMD() {}
+  virtual void MakeHistTOF() {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };

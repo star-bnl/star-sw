@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.27 2007/04/25 18:35:57 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.28 2007/11/30 05:38:50 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.28  2007/11/30 05:38:50  genevb
+// Changes for Run8: mostly silicon removal, TOF addition
+//
 // Revision 2.27  2007/04/25 18:35:57  genevb
 // Additional SSD hists
 //
@@ -115,7 +118,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.27 2007/04/25 18:35:57 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.28 2007/11/30 05:38:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -681,10 +684,21 @@ class StQABookHist : public TObject {
   TH2F* m_pnt_sizeSSD;         //!
   TH1F* m_pnt_eSSD;            //!
 
+  // X. Dong
+  // Hists for TOF
+  TH2F* m_tof_hit_tray;        //! # of hits vs tray # (int over modules)
+  TH2F* m_tof_hit_module;      //! # of hits vs module # (int over trays, east side use -32 - -1)
+  TH2F* m_tof_match_tray;      //! # of matched hits vs tray #
+  TH2F* m_tof_match_module;    //! # of matched hits vs module #
+  TH2F* m_tof_vpd_hit;         //! # of tof hits vs # of vpd hits
+  TH2F* m_tof_vtx_z;           //! vertex z from vpd vs verex z from TPC
+  TH2F* m_tof_PID;             //! TOF PID:  1/beta vs p
+
   // ********************** Members For Internal Use *************************
  protected:
 
   TString QAHistType; // character string to prepend to each hist name/title
+  bool silHists;
 
   virtual void   BookHistGlob();
   virtual void   BookHistDE();
@@ -697,6 +711,7 @@ class StQABookHist : public TObject {
   virtual void   BookHistBBC();
   virtual void   BookHistFPD();
   virtual void   BookHistPMD();
+  virtual void   BookHistTOF();
 
   ClassDef(StQABookHist,0)
 };

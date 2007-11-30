@@ -36,6 +36,8 @@
 #include "StPhmdDetector.h"
 #include "StPhmdModule.h"
 
+#include "StTofUtil/tofPathLength.hh"
+#include "tables/St_tofTotCorr_Table.h"
 
 static StEmcGeom* emcGeom[4];
 
@@ -79,8 +81,8 @@ Bool_t isTriggerAmong(const StTriggerId* tr, UInt_t n, ... ) {
 //_____________________________________________________________________________
 StEventQAMaker::StEventQAMaker(const char *name, const char *title) :
 StQAMakerBase(name,title,"StE"), event(0), mHitHist(0), mPmdGeom(0), maputil(0) {
-  allTrigs = kFALSE;
   mRunNumber = -1;
+  silHists = kFALSE;
 }
 
 
@@ -112,6 +114,24 @@ Int_t StEventQAMaker::InitRun(int runnumber) {
   if ((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))) {
     for(Int_t i=0; i<4; i++) {emcGeom[i] = StEmcGeom::getEmcGeom(i+1);} // 3-oct-2001 by PAI
   }
+
+  // vpd calibration parameters
+  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
+  St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(mDbDataSet->Find("tofTotCorr"));
+  if(!tofTotCorr) {
+    gMessMgr->Error("unable to get tof TotCorr table parameters","OS");
+    return kStWarn;
+  }
+  tofTotCorr_st* totCorr = static_cast<tofTotCorr_st*>(tofTotCorr->GetArray());
+  
+  for(Int_t i=0;i<mNVPD;i++) {
+    short trayId = totCorr[i].trayId;
+    short cellId = totCorr[i].cellId;
+
+    if(trayId==mEastVpdTrayId) mEastVpdCorr[cellId-1] = totCorr[i].corr[0];
+    if(trayId==mWestVpdTrayId) mWestVpdCorr[cellId-1] = totCorr[i].corr[0];    
+  }
+  
   return kStOK;
 }
 
@@ -144,7 +164,8 @@ Int_t StEventQAMaker::Make() {
   Int_t evClasses[32];
   Int_t nEvClasses = 1;
   Int_t run_num = event->runId();
-  Int_t run_year = run_num/1000000;         // Determine run year from run #
+  // Determine run year from run # (Oct. 1 goes to next year)
+  Int_t run_year = (run_num+727000)/1000000;
   if (allTrigs) {
     
     histsSet = StQA_pp;
@@ -230,7 +251,7 @@ Int_t StEventQAMaker::Make() {
 	histsSet = StQA_pp;
       }
       
-      // AuAu
+      // AuAu or generic
       
       if (isTriggerInSubRange(trigId,0,99)) {
 	//if (isTriggerInRange(trigId,15007,15099))
@@ -267,6 +288,8 @@ Int_t StEventQAMaker::Make() {
       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
     }
   }  // allTrigs
+  if (run_year >=9) histsSet = StQA_run8; // for now, everything from run8 on uses this set
+  else silHists = kTRUE;
   
   for (int bitn=0; bitn<32; bitn++) {
     if (tword>>(bitn) & 1U)
@@ -282,6 +305,8 @@ Int_t StEventQAMaker::Make() {
   if (!mNullPrimVtx) BookHist();
   
   multiplicity = event->trackNodes().size();
+  if (allTrigs) eventClass = 1;
+  else {
   switch (histsSet) {
     case (StQA_AuAuOld): {
       if (multiplicity < 50) eventClass = 0;
@@ -289,6 +314,7 @@ Int_t StEventQAMaker::Make() {
       else if (multiplicity < 2500) eventClass = 2;
       else eventClass = 3;
       break; }
+    case (StQA_run8):
     case (StQA_AuAu):
     case (StQA_dAu) : {
       eventClass = evClasses[0];
@@ -297,7 +323,8 @@ Int_t StEventQAMaker::Make() {
       eventClass = 1;
     }
   }
-  
+  }
+
   int makeStat = kStOk;
   float vertExists;
   
@@ -383,41 +410,6 @@ void StEventQAMaker::MakeHistGlob() {
   Int_t cnttrkgFE=0;
   Int_t cnttrkgFW=0;
   
-/*
-  // Determine if Sti was run:
-  if ((!ITTF) &&
-      ((GetChain()->GetMaker("StiMaker")) ||
-       (GetChain()->FindByName("StiRunco"))) ) {
-    ITTF = kTRUE;
-    EST = 0;
-  }
-
-  // Determine if EST was run:
-  // If ITTF, definitely no EST
-  // If estGlobal tracks, definitely EST
-  // Otherwise we are never really sure...?
-  //   (could be global tracks with no estGlobal tracks)
-  if ((!ITTF) && (EST <= 0)) {
-    int estTrackCount = 0;
-    int gloTrackCount = 0;
-    for (UInt_t i=0; i<theNodes.size(); i++) {
-      StTrack *globtrk = theNodes[i]->track(estGlobal);
-      if (!globtrk) continue;
-      estTrackCount += theNodes[i]->entries(estGlobal);
-    }
-    for (UInt_t i=0; i<theNodes.size(); i++) {
-      StTrack *globtrk = theNodes[i]->track(global);
-      if (!globtrk) continue;
-      gloTrackCount += theNodes[i]->entries(global);
-    }
-    if (estTrackCount > 0) EST = 1; // EST was run
-    else if (gloTrackCount > 0) EST = 0; // EST appears not to have been run
-    // else whatever state we were in before
-  }
-  StTrackType estOrGlobal = global;
-  if (EST > 0) estOrGlobal = estGlobal;
-*/
-
   for (UInt_t i=0; i<theNodes.size(); i++) {
     StTrackType estOrGlobal = estGlobal;
     StTrack *globtrk = theNodes[i]->track(estOrGlobal);
@@ -576,8 +568,10 @@ void StEventQAMaker::MakeHistGlob() {
           hists->m_glb_simpactT->Fill(sImpact,1.);
         }
         hists->m_glb_impactrT->Fill(globtrk->impactParameter());
+        if (silHists) {
         hists->m_glb_impactTTS->Fill(logImpact,1.);
         hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),1.);
+        }
 	
 	// TPC padrow histogram
 	StTpcCoordinateTransform transformer(gStTpcDb);
@@ -589,6 +583,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_pointT->Fill(detInfo->numberOfPoints());
         hists->m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
         hists->m_fit_pointT->Fill(fTraits.numberOfFitPoints());
+        if (silHists)
         hists->m_fit_pointTTS->Fill(fTraits.numberOfFitPoints(),1.);
         hists->m_glb_chargeT->Fill(geom->charge());
 	
@@ -612,18 +607,23 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_zfT->Fill(firstPoint.z());
         hists->m_glb_radfT->Fill(radf);
         hists->m_glb_ratiomT->Fill(nfitnmax);
+        if (silHists)
         hists->m_glb_ratiomTTS->Fill(nfitnmax,1.);
         hists->m_psiT->Fill(psi);
+        if (silHists)
         hists->m_psiTTS->Fill(psi,1.);
         hists->m_tanlT->Fill(TMath::Tan(geom->dipAngle()));
         hists->m_glb_thetaT->Fill(thetad);
         hists->m_etaT->Fill(eta);
+        if (silHists)
         hists->m_etaTTS->Fill(eta,1.);
         hists->m_pTT->Fill(pT);
+        if (silHists)
         hists->m_pTTTS->Fill(lmevpt,1.);
         hists->m_momT->Fill(gmom);
         hists->m_lengthT->Fill(globtrk->length());
         hists->m_chisq0T->Fill(chisq0);
+        if (silHists)
         hists->m_chisq0TTS->Fill(chisq0,1.);
 	
 	if (firstPoint.z()<0)
@@ -637,6 +637,7 @@ void StEventQAMaker::MakeHistGlob() {
 				      Float_t(detInfo->numberOfPoints()));
         hists->m_fpoint_lengthT->Fill(globtrk->length(),
 				      Float_t(fTraits.numberOfFitPoints()));
+        if (silHists)
         hists->m_fpoint_lengthTTS->Fill(globtrk->length(),
 					Float_t(fTraits.numberOfFitPoints()));
 	
@@ -661,7 +662,7 @@ void StEventQAMaker::MakeHistGlob() {
       
       // now fill all TPC+(SVT or SSD) histograms ------------------------------
       
-      else if (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId)) {
+      else if (silHists && (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId))) {
 
         if (map.hasHitInDetector(kSsdId)) {
           if (TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
@@ -927,6 +928,7 @@ void StEventQAMaker::MakeHistGlob() {
   hists->m_globtrk_tot->Fill(cnttrk); 
   hists->m_globtrk_good->Fill(cnttrkg);
   hists->m_globtrk_good_sm->Fill(cnttrkg);
+  if (silHists)
   hists->m_globtrk_goodTTS->Fill(cnttrkgTTS);
   hists->m_globtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
 }
@@ -1154,16 +1156,20 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_radfT->Fill(radf);
 	  hists->m_prim_ratiomT->Fill(nfitnmax);
 	  hists->m_ppsiT->Fill(psi);
+          if (silHists)
 	  hists->m_ppsiTTS->Fill(psi,1.);
 	  hists->m_ptanlT->Fill(TMath::Tan(geom->dipAngle()));
 	  hists->m_prim_thetaT->Fill(thetad);
 	  hists->m_petaT->Fill(eta);
+          if (silHists)
 	  hists->m_petaTTS->Fill(eta,1.);
 	  hists->m_ppTT->Fill(pT);
+          if (silHists)
 	  hists->m_ppTTTS->Fill(pT,1.);
 	  hists->m_pmomT->Fill(gmom);
 	  hists->m_plengthT->Fill(primtrk->length());
 	  hists->m_pchisq0T->Fill(chisq0);
+          if (silHists)
 	  hists->m_pchisq0TTS->Fill(chisq0,1.);
 	  
 	  // these are for TPC & FTPC
@@ -1178,6 +1184,7 @@ void StEventQAMaker::MakeHistPrim() {
 					 Float_t(detInfo->numberOfPoints()));
 	  hists->m_pfpoint_lengthT->Fill(primtrk->length(),
 					 Float_t(fTraits.numberOfFitPoints()));
+          if (silHists)
 	  hists->m_pfpoint_lengthTTS->Fill(primtrk->length(),
 					   Float_t(fTraits.numberOfFitPoints()));
 	  
@@ -1200,7 +1207,7 @@ void StEventQAMaker::MakeHistPrim() {
 	
         // now fill all TPC+(SVT or SSD) histograms ------------------------------
       
-        else if (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId)) {
+        else if (silHists && (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId))) {
 
           if (map.hasHitInDetector(kSsdId)) {
             if (TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
@@ -1406,23 +1413,26 @@ void StEventQAMaker::MakeHistPrim() {
     }
     hists->m_primtrk_good->Fill(cnttrkg);
     hists->m_primtrk_good_sm->Fill(cnttrkg);
+    if (silHists)
     hists->m_primtrk_goodTTS->Fill(cnttrkgT+cnttrkgTS);
     hists->m_primtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
   }
   mean_ptT   /= (cnttrkgT   +1.e-10);
-  mean_ptTS  /= (cnttrkgTS  +1.e-10);
   mean_ptFE  /= (pTcnttrkgFE+1.e-10);
   mean_ptFW  /= (pTcnttrkgFW+1.e-10);
   mean_etaT  /= (cnttrkgT   +1.e-10);
-  mean_etaTS /= (cnttrkgTS  +1.e-10);
   mean_etaFE /= (cnttrkgFE  +1.e-10);
   mean_etaFW /= (cnttrkgFW  +1.e-10);
+  if (silHists) {
+  mean_ptTS  /= (cnttrkgTS  +1.e-10);
+  mean_etaTS /= (cnttrkgTS  +1.e-10);
   hists->m_primtrk_meanptTTS->Fill(mean_ptTS,0.);
   hists->m_primtrk_meanptTTS->Fill(mean_ptT,1.);
-  hists->m_primtrk_meanptF->Fill(mean_ptFE,0.);
-  hists->m_primtrk_meanptF->Fill(mean_ptFW,1.);
   hists->m_primtrk_meanetaTTS->Fill(mean_etaTS,0.);
   hists->m_primtrk_meanetaTTS->Fill(mean_etaT,1.);
+  }
+  hists->m_primtrk_meanptF->Fill(mean_ptFE,0.);
+  hists->m_primtrk_meanptF->Fill(mean_ptFW,1.);
   hists->m_primtrk_meanetaF->Fill(fabs(mean_etaFE),0.);
   hists->m_primtrk_meanetaF->Fill(fabs(mean_etaFW),1.);
   
@@ -1577,12 +1587,6 @@ void StEventQAMaker::MakeHistVertex() {
   StSPtrVecV0Vertex &v0Vtx = event->v0Vertices();
   hists->m_v0->Fill(v0Vtx.size());
   
-  //  static TH1F v0PhiHist("voph","v0 Phi Hist",36,0.,360.);
-  //  static TH1F v0PhiHist2("voph2","v0 Phi Hist2",36,180.,540.);
-  //  static TSpectrum v0PhiSpec;
-  //  v0PhiHist.Reset();
-  //  v0PhiHist2.Reset();
-  
   for (UInt_t k=0; k<v0Vtx.size(); k++) {
     StV0Vertex *v0 = v0Vtx[k];
     if ((v0) && (v0->dcaParentToPrimaryVertex() >= 0.)) {
@@ -1623,38 +1627,9 @@ void StEventQAMaker::MakeHistVertex() {
 	Float_t r_dist = ::sqrt(::pow(v0->position().x()-pvert.x(),2)+
 				::pow(v0->position().y()-pvert.y(),2));
 	hists->m_vtx_r_dist->Fill(r_dist);
-	//        v0PhiHist.Fill(phi);
-	//        if (phi<180.) phi += 360.;
-	//        v0PhiHist2.Fill(phi);
       }
     }
   }
-  
-  /*
-   if (v0PhiHist.GetEntries()>=144) {
-     for (Float_t ssig=2.; ssig<100.; ssig+=2.) {
-       Int_t npeaks = v0PhiSpec.Search(&v0PhiHist,
-				       (Double_t) (ssig/v0PhiHist.GetBinWidth(0)));
-       Float_t* pks = v0PhiSpec.GetPositionX();
-       for (Int_t ipeak=0; ipeak<npeaks; ipeak++) {
-	 if ((pks[ipeak]>=90.)&&(pks[ipeak]<270.)) {
-	   hists->m_vtx_phi_dist->Fill(pks[ipeak], ssig);
-	 }
-       }
-       
-       npeaks = v0PhiSpec.Search(&v0PhiHist2,
-				 (Double_t) (ssig/v0PhiHist2.GetBinWidth(0)));
-       pks = v0PhiSpec.GetPositionX();
-       for (Int_t ipeak=0; ipeak<npeaks; ipeak++) {
-	 if ((pks[ipeak]>=270.)&&(pks[ipeak]<450.)) {
-	   Float_t phi2 = pks[ipeak];
-	   if (phi2>360.) phi2 -= 360.;
-	   hists->m_vtx_phi_dist->Fill(phi2, ssig);
-	 }
-       }
-     }
-   }
-   */
   
   // Xi vertices
   if (Debug()) 
@@ -2218,10 +2193,117 @@ void StEventQAMaker::MakeHistPMD() {
     }
   }
 }
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistTOF() {
+
+  StTofCollection *tofcol = (StTofCollection *)(event->tofCollection());
+  if (!tofcol) return;
+
+  int i;
+  double vz_tpc = -999.;
+  StPrimaryVertex *primVtx = event->primaryVertex();
+  if(primVtx) vz_tpc = primVtx->position().z();
+
+  // TOF and VPD hits
+  StSPtrVecTofData &tofData = tofcol->tofData();
+  Int_t nTofData = tofData.size();
+  Int_t nHitsvsTray[120] = {0};
+  Int_t nHitsvsModule[2][32] = {0};
+  Int_t nHitsTof = 0;
+  Int_t nHitsVpd[2] = {0};
+  for(i=0;i<nTofData;i++) {
+    StTofData *aHit = dynamic_cast<StTofData*>(tofData[i]);
+    if(!aHit) continue;
+    int index = aHit->dataIndex();
+    int trayId = index/192 + 1;
+    int moduleId = ( index%192 )/6 + 1;
+    if(trayId>0 && trayId<=120) { // tray
+      nHitsvsTray[trayId-1]++;
+      nHitsvsModule[(trayId-1)/60][moduleId]++;
+      nHitsTof++;
+    } else {  // vpd
+      nHitsVpd[trayId-121]++;
+    }
+  }
+  for(i=0;i<120;i++) {
+    hists->m_tof_hit_tray->Fill(i+1, nHitsvsTray[i]);
+  }
+  for(i=0;i<32;i++) {
+    hists->m_tof_hit_module->Fill(i+1, nHitsvsModule[0][i]);  // west side
+    hists->m_tof_hit_module->Fill(-(i+1), nHitsvsModule[1][i]);  // east side
+  }
+  hists->m_tof_vpd_hit->Fill(nHitsVpd[0]+nHitsVpd[1], nHitsTof);
+
+  // Matched TOF hits
+  StSPtrVecTofCell &tofCell = tofcol->tofCells();
+  Int_t nTofCell = tofCell.size();
+  Int_t nCellvsTray[120] = {0};
+  Int_t nCellvsModule[2][32] = {0};
+  Int_t nCellTof = 0;
+  for(i=0;i<nTofCell;i++) {
+    StTofCell *aCell = dynamic_cast<StTofCell*>(tofCell[i]);
+    if(!aCell) continue;
+    int trayId = aCell->trayIndex();
+    int moduleId = aCell->moduleIndex();
+    if(trayId>0 && trayId<=120) { // tray
+      nCellvsTray[trayId-1]++;
+      nCellvsModule[(trayId-1)/60][moduleId]++;
+      nCellTof++;
+
+      double tof = aCell->leadingEdgeTime();   // need an offset correction
+
+      StTrack *trk = (StTrack *)aCell->associatedTrack();
+      if(!trk) continue;
+      StPrimaryTrack *pTrk = dynamic_cast<StPrimaryTrack *>(trk->node()->track(primary));
+      if(!pTrk) continue;
+      double ptot = pTrk->geometry()->momentum().mag();
+
+      StTrackGeometry *theTrackGeometry = pTrk->outerGeometry();
+      if(primVtx) {
+	double L = tofPathLength(&primVtx->position(), &aCell->position(), theTrackGeometry->helix().curvature());
+	double beta = L/(tof*29.979);
+	hists->m_tof_PID->Fill(ptot, 1./beta);
+      }
+    }
+  }
+  for(i=0;i<120;i++) {
+    hists->m_tof_match_tray->Fill(i+1, nCellvsTray[i]);
+  }
+  for(i=0;i<32;i++) {
+    hists->m_tof_match_module->Fill(i+1, nCellvsModule[0][i]);  // west side
+    hists->m_tof_match_module->Fill(-(i+1), nCellvsModule[1][i]);  // east side
+  }
+
+  // Vpd vertex
+  double TSumEast = 0.;
+  double TSumWest = 0.;
+  int nEast = 0;
+  int nWest = 0;
+  for(i=0;i<nTofCell;i++) {
+    StTofCell *aCell = dynamic_cast<StTofCell*>(tofCell[i]);
+    if(!aCell) continue;
+    int trayId = aCell->trayIndex();
+    int tubeId = aCell->cellIndex();
+    if(trayId==mEastVpdTrayId) {  // east
+      TSumEast += aCell->leadingEdgeTime() - mEastVpdCorr[tubeId-1];
+      nEast++;
+    } else if(trayId==mWestVpdTrayId) {  // west
+      TSumWest += aCell->leadingEdgeTime() - mWestVpdCorr[tubeId-1];
+      nWest++;
+    }
+  }
+  double vz_vpd = -999.;
+  if(nEast&&nWest) vz_vpd = (TSumEast/nEast - TSumWest/nWest)/2./29.979;
+
+  hists->m_tof_vtx_z->Fill(vz_tpc, vz_vpd);
+}
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.83 2007/11/07 22:43:00 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.84 2007/11/30 05:38:49 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.84  2007/11/30 05:38:49  genevb
+// Changes for Run8: mostly silicon removal, TOF addition
+//
 // Revision 2.83  2007/11/07 22:43:00  genevb
 // Use highest rank primary vertex (one more)
 //
