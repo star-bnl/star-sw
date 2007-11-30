@@ -516,7 +516,6 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       int seq=-1;
       mDecoder->GetJetPatchAndSequenceFromTriggerPatch(tpid, jpid, seq); 
       
-      
       //Skip modules 2,7,12,17,22,27 
       if (((i+3)%5)!=0){
 	
@@ -535,15 +534,13 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	//apply HTTP condition - TP&&HT
 	if (DSM0_TP_tp_Bit[j] >= DSM0_HT_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_HT_tp_Bit[j];
 	if (DSM0_HT_tp_Bit[j] >= DSM0_TP_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_TP_tp_Bit[j];
+	//then || each input
 	if (DSM0_HTTP_tp_Bit[j] > DSM0_HTTP_Bit[i]) DSM0_HTTP_Bit[i]=DSM0_HTTP_tp_Bit[j];
+	//cout<<"J0 j="<<j<<" i="<<i<<" HT="<<DSM0_HT_tp_Bit[j]<<" TP="<<DSM0_TP_tp_Bit[j]<<" HTTP="<<DSM0_HTTP_tp_Bit[j]<<endl;    
 
 	//add up TP adc for 2/5 of JP
 	DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];
-
-	//equivalent of ORing all TP and HT inputs
-	if (DSM0_HT_tp_Bit[j]>DSM0_HT_Bit[i]) DSM0_HT_Bit[i]=DSM0_HT_tp_Bit[j];
-	if (DSM0_TP_tp_Bit[j]>DSM0_TP_Bit[i]) DSM0_TP_Bit[i]=DSM0_TP_tp_Bit[j];  
-    
+      
       }
     
       //Loop over 2x5 inputs(TP) for modules 2,7,12,17,22,29
@@ -580,35 +577,25 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	    if ((L0_TP_ADC[tpid] < mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J3[j]=2;
 	    if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J3[j]=3;
 	  }									      
-	
+
 	//apply HTTP condition - TP&&HT
-	if (j>4) 
-	  {
-	    if (DSM0_TP_tp_Bit_J1[j] > DSM0_HT_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_HT_tp_Bit_J1[j];
-	    if (DSM0_HT_tp_Bit_J1[j] > DSM0_TP_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_TP_tp_Bit_J1[j];
-	  }
-	if (j<5)
-	  {
-	    if (DSM0_TP_tp_Bit_J3[j] > DSM0_HT_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_HT_tp_Bit_J3[j];
-	    if (DSM0_HT_tp_Bit_J3[j] > DSM0_TP_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_TP_tp_Bit_J3[j];
-	  }
-	
+	if (j>4) {
+	  if (DSM0_TP_tp_Bit_J1[j] >= DSM0_HT_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_HT_tp_Bit_J1[j];
+	  if (DSM0_HT_tp_Bit_J1[j] >= DSM0_TP_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_TP_tp_Bit_J1[j];
+	  if (DSM0_HTTP_tp_Bit_J1[j] > DSM0_HTTP_Bit_J1[i]) DSM0_HTTP_Bit_J1[i]=DSM0_HTTP_tp_Bit_J1[j];
+	}
+	if (j>5){
+	  if (DSM0_TP_tp_Bit_J3[j] >= DSM0_HT_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_HT_tp_Bit_J3[j];
+	  if (DSM0_HT_tp_Bit_J3[j] >= DSM0_TP_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_TP_tp_Bit_J3[j];
+	  if (DSM0_HTTP_tp_Bit_J3[j] > DSM0_HTTP_Bit_J3[i]) DSM0_HTTP_Bit_J3[i]=DSM0_HTTP_tp_Bit_J3[j];
+	}
+	//cout<<"J1 input="<<j<<" module="<<i<<" HT="<<DSM0_HT_tp_Bit_J1[j]<<" TP="<<DSM0_TP_tp_Bit_J1[j]<<" HTTP="<<DSM0_HTTP_tp_Bit_J1[j]<<endl;    
+	//cout<<"J3 input="<<j<<" modeul="<<i<<" HT="<<DSM0_HT_tp_Bit_J3[j]<<" TP="<<DSM0_TP_tp_Bit_J3[j]<<" HTTP="<<DSM0_HTTP_tp_Bit_J3[j]<<endl;    
+
 	//add up TP adc for 1/5 of JP
 	if (j>4) DSM0_TP_SUM_J1[i]+=L0_TP_ADC[tpid];
 	if (j<5) DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
 	
-	//equivalent of ORing all TP and HT inputs
-	if (j>4)
-	  {
-	    if (DSM0_HT_tp_Bit_J1[j]>DSM0_TP_tp_Bit_J1[i]) DSM0_HTTP_tp_Bit_J1[i]=DSM0_HT_tp_Bit_J1[j];
-	    if (DSM0_TP_tp_Bit_J1[j]>DSM0_HT_tp_Bit_J1[i]) DSM0_HTTP_tp_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
-	  }
-	if (j>5)
-	  {
-	    if (DSM0_HT_tp_Bit_J3[j]>DSM0_TP_tp_Bit_J3[i]) DSM0_HTTP_tp_Bit_J3[i]=DSM0_HT_tp_Bit_J3[j];
-	    if (DSM0_TP_tp_Bit_J3[j]>DSM0_HT_tp_Bit_J3[i]) DSM0_HTTP_tp_Bit_J3[i]=DSM0_TP_tp_Bit_J3[j];
-	  }
-
       }
     }
 
