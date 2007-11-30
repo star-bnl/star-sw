@@ -19,7 +19,7 @@ Main EMC reader for towers and SMD.
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 #include "StDaqLib/GENERIC/swaps.hh"
-
+#include "StDaqLib/TRG/TRG_Reader.hh"
 
 struct Bank_EMCP: public Bank
 {
@@ -131,10 +131,10 @@ struct Bank_BSMDRMSR: public BSMDDATA{};
 
 class EMC_Reader 
 {
-      void              ProcessEvent(const Bank_EMCP *EmcPTR);///<Process EMC (tower+SMD) event
+      void              ProcessEvent(const Bank_EMCP *EmcPTR, const Bank_TRGP *TrgPTR);///<Process EMC (tower+SMD) event
 
   public:
-                        EMC_Reader(EventReader *er, Bank_EMCP *pEMCP);///<EMC_Reader constructor
+                        EMC_Reader(EventReader *er, Bank_EMCP *pEMCP, Bank_TRGP *pTRGP);///<EMC_Reader constructor
                         ~EMC_Reader() {}; ///<EMC_Reader destructor
 
       Bank_BTOWERADCR&  getBTOWERADCR();
