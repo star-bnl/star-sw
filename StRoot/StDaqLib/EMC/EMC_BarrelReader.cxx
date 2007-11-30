@@ -285,10 +285,14 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
 int EMC_BarrelReader::ProcessBarrelTower(const Bank_EMCP* EmcPTR, const Bank_TRGP* TrgPTR)
 {
     // first check if tower data is in trgp
-    char* cTTT = (char*)TrgPTR + (TrgPTR->theData.offset * 4) + sizeof(TrgPTR->header);
-    TrgTowerTrnfer2008* TTT=(TrgTowerTrnfer2008*)cTTT;
-    char* trg_version = cTTT + TTT->OffsetBlock[y8TRG_INDEX].offset + 3;    
-    if(TTT && (*trg_version == 0x32)) { return FillBarrelTower2008(TTT); }
+    if(TrgPTR) {
+        char* cTTT = (char*)TrgPTR + (TrgPTR->theData.offset * 4) + sizeof(TrgPTR->header);
+        TrgTowerTrnfer2008* TTT=(TrgTowerTrnfer2008*)cTTT;
+        if(TTT) {
+            char* trg_version = cTTT + TTT->OffsetBlock[y8TRG_INDEX].offset + 3;    
+            if(*trg_version == 0x32) { return FillBarrelTower2008(TTT); }
+        }
+    }
 
     // First Barrel Tower
     Bank_EMCSECP* barreltower=getBarrelSection(EmcPTR,0);
