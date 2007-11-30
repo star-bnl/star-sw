@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <Stiostream.h>
 #include <stdio.h>
-
+#include "StMessMgr.h"
 //ofstream fout("decode.out");
 
 EMC_BarrelReader::EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP):pBankEMCP(pEMCP),ercpy(er)
@@ -196,6 +196,19 @@ Bank_TOWERADCR* EMC_BarrelReader::getBarrelADC(Bank_EMCRBP* rbp)
     return pADCR;
 }
 ////////////////////////////////////////////////////////////////////
+int EMC_BarrelReader::FillBarrelTower2008(TrgTowerTrnfer2008* ttt) {
+    int offset = ttt->OffsetBlock[y8BTOW_INDEX].offset;
+    int length = ttt->OffsetBlock[y8BTOW_INDEX].length;
+    
+    if( length != y8BTOW_LEN ) {
+        LOG_ERROR << "Bad BTOW length found in TrgTowerTrnfer block" << endm;
+        return 0;
+    }
+    
+    Bank_TOWERADCR* fakeADCRptr = (Bank_TOWERADCR*) ( u_int(ttt) + offset - sizeof(Bank_Header) );
+    return FillBarrelTower(fakeADCRptr);
+}
+////////////////////////////////////////////////////////////////////
 int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
 {
     mTheTowerAdcR.BankType="TOWRADCR\n";
@@ -254,7 +267,7 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
                     if(stat_index)
                     {
                         int binstat=decoder->GetTowerBin(index_jose,m,e,s);
-                        //cout <<"index = "<<index<<"  soft = "<<index_jose<<"  module = "<<m<<"  eta = "<<e<<"  sub = "<<s<<" adc = "<<pADCR->fiberData[index]<<endl;
+                        LOG_DEBUG <<"index = "<<index<<"  soft = "<<index_jose<<"  module = "<<m<<"  eta = "<<e<<"  sub = "<<s<<" adc = "<<pADCR->fiberData[index]<<endm;
 
                         if(!binstat)
                             cout<<" problem in bin conversion "<<index<<endl;
@@ -265,11 +278,17 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
             }
         }
     }
+    
     return 1;
 }
 ////////////////////////////////////////////////////////////////////
-int EMC_BarrelReader::ProcessBarrelTower(const Bank_EMCP* EmcPTR)
+int EMC_BarrelReader::ProcessBarrelTower(const Bank_EMCP* EmcPTR, const Bank_TRGP* TrgPTR)
 {
+    // first check if tower data is in trgp
+    char* cTTT = (char*)TrgPTR + (TrgPTR->theData.offset * 4) + sizeof(TrgPTR->header);
+    TrgTowerTrnfer2008* TTT=(TrgTowerTrnfer2008*)cTTT;
+    if(TTT) { return FillBarrelTower2008(TTT); }
+
     // First Barrel Tower
     Bank_EMCSECP* barreltower=getBarrelSection(EmcPTR,0);
 
