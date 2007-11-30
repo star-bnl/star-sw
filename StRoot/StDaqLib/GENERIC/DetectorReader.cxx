@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.21 2007/08/07 19:44:09 perev Exp $
+ * $Id: DetectorReader.cxx,v 1.22 2007/11/30 01:22:36 genevb Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.22  2007/11/30 01:22:36  genevb
+ * Update for 2008 BEMC from A. Kocoloski
+ *
  * Revision 1.21  2007/08/07 19:44:09  perev
  * Gene scalers added
  *
@@ -194,17 +197,23 @@ SSD_Reader *getSSDReader(EventReader *er)
 }
 EMC_Reader *getEMCReader(EventReader *er)
 {
+  // SMD data is here, also towers for year < 2008
   Bank_EMCP *pEMCP;
   pEMCP = (Bank_EMCP *)er->findBank("EMCP");
+  
+  // towers are now in trg block
+  Bank_TRGP *pTRGP;
+  pTRGP = (Bank_TRGP *)er->findBank("TRGP");
+    
   if (pEMCP)  {
     if (!pEMCP->test_CRC())  printf("DetectorReader - getEMCReader: CRC error in EMCP: %s %d\n",
 					__FILE__,__LINE__) ;
     if (pEMCP->swap() < 0)   printf("DetectorReader - getEMCReader: swap error in EMCP: %s %d\n",
 					__FILE__,__LINE__) ;
     pEMCP->header.CRC = 0;
-    return new EMC_Reader(er,pEMCP);
   }
-  return NULL;
+  
+  return new EMC_Reader(er,pEMCP,pTRGP);
 }
 PMD_Reader *getPMDReader(EventReader *er)
 {
