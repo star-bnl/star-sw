@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.83 2007/05/08 09:02:35 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.84 2007/11/30 09:19:54 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.84  2007/11/30 09:19:54  jcs
+// Use the first primary vertex if any primary vertex exists
+// Multiple primary vertices have been ordered in StEvent
+//
 // Revision 1.83  2007/05/08 09:02:35  jcs
 // move database initialization from Init to InitRun as requested by Victor and Yuri
 // redefine m_nrec_track histogram and only fill if debug option on
@@ -528,14 +532,12 @@ Int_t StFtpcTrackMaker::Make()
 
   StFtpcVertex vertex; // create vertex (all parameters set to 0)
 
-  // Use Primary vertex if it exists
-  StPrimaryVertex *vtx = 0;
+  // Use the first primary vertex if any primary vertex exists
+  // Multiple vertices have been ordered in StEvent::addPrimaryVertex
 
-  if ((vtx = event->primaryVertex(0))) {        
-    if (vtx->type() == kEventVtxId && vtx->flag() == 1) {
-      vertex = StFtpcVertex(vtx);	  
-    }       
-  } 
+  if (event->numberOfPrimaryVertices() > 0) {
+        vertex = StFtpcVertex(event->primaryVertex(0));
+  }
 
   if (vertex.GetIFlag() == 0) { // Otherwise use TPC preVertex if it exists
 
@@ -903,7 +905,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.83 2007/05/08 09:02:35 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.84 2007/11/30 09:19:54 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
