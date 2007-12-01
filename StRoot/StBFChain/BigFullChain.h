@@ -54,6 +54,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2006","","","db,detDb"                                             ,"","","y2006 for p+p run",kFALSE},
 
   {"RY2007","","","db,detDb"                                            ,"","","y2007 for AuAu run",kFALSE},
+  {"RY2008","","","db,detDb"                                             ,"","","y2008 for dAu run",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
