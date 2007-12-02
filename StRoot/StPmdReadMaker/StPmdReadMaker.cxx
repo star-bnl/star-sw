@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.27 2007/11/17 15:50:46 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.28 2007/12/02 10:07:39 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.28  2007/12/02 10:07:39  rashmi
+ *Changing SMChain_GNF from MPVFactor to MeanFactor
+ *
  *Revision 1.27  2007/11/17 15:50:46  rashmi
  *correcting setting of mCalibFlag
  *
@@ -823,7 +826,8 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst()
     long chainNo=smchain->chain;
     float MeanFactor = smchain->mean_factor;
     float MPVFactor = smchain->mpv_factor;
-    SM_chain_factor[supmod-1][chainNo-1]=MPVFactor;
+    //    SM_chain_factor[supmod-1][chainNo-1]=MPVFactor;
+    SM_chain_factor[supmod-1][chainNo-1]=MeanFactor;
     
     //struct pmdSMChain_GNF {
     //   long sm;              /* super module */
