@@ -1,13 +1,13 @@
  /*
- * $Id: StPixelFastSimMaker.cxx,v 1.38 2007/11/28 20:16:33 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.39 2007/12/03 20:32:11 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
- * Revision 1.38  2007/11/28 20:16:33  wleight
- * Corrected a bug that put hits with local x or z position between -30 and 0 microns in the pixel corresponding to local x or z position between 0 and 30 microns
+ * Revision 1.39  2007/12/03 20:32:11  wleight
+ * Corrected problem with assigning keys and IdTruth values to StRndHits
  *
  * Revision 1.37  2007/11/13 19:09:51  wleight
  * Corrected bug causing pixel fast simulator to crash when there were no pixel and/or ist hits in the event
@@ -396,6 +396,7 @@ Int_t StPixelFastSimMaker::Make()
 	      //pixels[xindex][zindex]=1;
 	      pixels.push_back(pixdex);
 	      pixelToKey.insert(std::pair<int,int>(pixdex,mcPixel->key()));
+	      cout<<"added pixel-key pair "<<pixdex<<", "<<mcPixel->key()<<endl;
 	      LOG_DEBUG<<"x, z and total index for pixel containing this hit (offset by 1) are x: "<<xindex<<"; z: "<<zindex<<"; total: "<<pixdex<<endm;
 	      //StThreeVectorF pos(mcPixel->position());
 	      //StThreeVectorF mom(mcH->localMomentum());
@@ -429,6 +430,8 @@ Int_t StPixelFastSimMaker::Make()
 	      tempHit->setLadder(q+1);
 	      //multimap<int,int>::iterator piter=pixelToKey.find(pixels[temp]);
 	      std::pair<multimap<int,int>::iterator,multimap<int,int>::iterator> itpair=pixelToKey.equal_range(pixels[temp]);
+	      cout<<"there are "<<pixelToKey.count(pixels[temp])<<" pixel-key pairs containing the pixel "<<pixels[temp]<<endl;
+	      int pixelcount=pixelToKey.count(pixels[temp]);
 	      /*
 	      if(piter!=pixelToKey.end()){
 		tempHit->setKey((*piter).second);
@@ -437,10 +440,22 @@ Int_t StPixelFastSimMaker::Make()
 	      */
 	      double topdE=0,sumdE=0;
 	      int topHit=-999;
+	      cout<<"layer: "<<k+1<<"; ladder: "<<q+1<<endl;
+	      cout<<"pixel "<<pixels[temp]<<" is lit up"<<endl;
 	      if(g2t_pix_hit){
-		for(multimap<int,int>::iterator iiit=itpair.first;iiit!=itpair.second;iiit++){
+		cout<<"g2t_pix_hit found"<<endl;
+		cout<<"g2t_pix_hit number of rows: "<<g2t_pix_hit->GetNRows()<<endl;
+		//for(multimap<int,int>::iterator iiit=itpair.first;iiit!=itpair.second;iiit++){
+		multimap<int,int>::iterator current;
+		for(int tem=0;tem<pixelcount;tem++){
+		  //cout<<"now dealing with pixel-key pair "<<(*iiit).first<<", "<<(*iiit).second<<endl;
+		  current=pixelToKey.find(pixels[temp]);
+		  cout<<"now dealing with pixel-key pair "<<(*current).first<<", "<<(*current).second<<endl;
 		  for(int ab=0;ab<g2t_pix_hit->GetNRows();ab++){
-		    if(g2tPix[ab].id==(*iiit).second){
+		    //if(g2tPix[ab].id==(*iiit).second){
+		    if(g2tPix[ab].id==(*current).second){
+		      cout<<"g2tPix hit "<<ab<<" matches this pixel-key pair"<<endl;
+		      cout<<"this hit has energy "<<g2tPix[ab].de<<endl;
 		      if(g2tPix[ab].de>topdE){
 			topdE=g2tPix[ab].de;
 			topHit=ab;
@@ -448,8 +463,11 @@ Int_t StPixelFastSimMaker::Make()
 		      sumdE=sumdE+g2tPix[ab].de;
 		    }
 		  }
-		  pixelToKey.erase(iiit);
+		  //pixelToKey.erase(iiit);
+		  pixelToKey.erase(current);
+		  cout<<"topHit: "<<topHit<<"; sumdE: "<<sumdE<<endl;
 		}
+		cout<<"done with looping through pixel-key pairs"<<endl;
 		if(topHit!=-999){
 		  int idTQual=static_cast<int>(topdE*100/sumdE);
 		  tempHit->setIdTruth(g2tPix[topHit].track_p,idTQual);
@@ -457,7 +475,10 @@ Int_t StPixelFastSimMaker::Make()
 		}
 		else tempHit->setKey(99999);
 	      }
-	      else tempHit->setKey(99999);
+	      else{
+		tempHit->setKey(99999);
+		cout<<"g2t_pix_hit not found"<<endl;
+	      }
 	      col->addHit(tempHit);
 	      //pixels[t1][t2]=0;
 	      //}
