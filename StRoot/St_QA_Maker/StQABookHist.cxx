@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.59 2007/11/30 05:38:50 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.60 2007/12/03 16:51:09 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.60  2007/12/03 16:51:09  genevb
+// Out-of-order statements for pre-run8 data
+//
 // Revision 2.59  2007/11/30 05:38:50  genevb
 // Changes for Run8: mostly silicon removal, TOF addition
 //
@@ -737,6 +740,7 @@ void StQABookHist::BookHist(Int_t histsSet){
     mNullPrimVtxClass->SetXTitle("has primary vertex? (yes = 1, no = -1)");
     mNullPrimVtxClass->SetYTitle("# of events");
   }
+  if (histsSet!=StQA_run8) silHists = kTRUE;
   BookHistPoint();
   BookHistEMC();
   if (histsSet == StQA_AuAuOld) {
@@ -751,7 +755,6 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistPMD();
   if (histsSet==StQA_MC) BookHistEval();
   if (histsSet==StQA_run8) BookHistTOF();
-  else silHists = kTRUE;
   
 }
 //_____________________________________________________________________________
