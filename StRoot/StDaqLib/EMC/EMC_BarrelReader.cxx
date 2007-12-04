@@ -206,6 +206,7 @@ int EMC_BarrelReader::FillBarrelTower2008(TrgTowerTrnfer2008* ttt) {
     }
     
     Bank_TOWERADCR* fakeADCRptr = (Bank_TOWERADCR*) ( u_int(ttt) + offset - sizeof(Bank_Header) );
+    LOG_INFO << "Filling BTOW data structures from TrgTowerTrnfer (must be year >= 2008)" << endm;
     return FillBarrelTower(fakeADCRptr);
 }
 ////////////////////////////////////////////////////////////////////
@@ -267,7 +268,7 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
                     if(stat_index)
                     {
                         int binstat=decoder->GetTowerBin(index_jose,m,e,s);
-                        LOG_DEBUG <<"index = "<<index<<"  soft = "<<index_jose<<"  module = "<<m<<"  eta = "<<e<<"  sub = "<<s<<" adc = "<<pADCR->fiberData[index]<<endm;
+                        //LOG_DEBUG <<"index = "<<index<<"  soft = "<<index_jose<<"  module = "<<m<<"  eta = "<<e<<"  sub = "<<s<<" adc = "<<pADCR->fiberData[index]<<endm;
 
                         if(!binstat)
                             cout<<" problem in bin conversion "<<index<<endl;
@@ -284,46 +285,33 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
 ////////////////////////////////////////////////////////////////////
 int EMC_BarrelReader::ProcessBarrelTower(const Bank_EMCP* EmcPTR, const Bank_TRGP* TrgPTR)
 {
-    // first check if tower data is in trgp
-    if(TrgPTR) {
-        char* cTTT = (char*)TrgPTR + (TrgPTR->theData.offset * 4) + sizeof(TrgPTR->header);
-        TrgTowerTrnfer2008* TTT=(TrgTowerTrnfer2008*)cTTT;
-        if(TTT) {
-            char* trg_version = cTTT + TTT->OffsetBlock[y8TRG_INDEX].offset + 3;    
-            if(*trg_version == 0x32) { return FillBarrelTower2008(TTT); }
-        }
-    }
-
-    // First Barrel Tower
+    // first look in Bank_EMCP (year < 2008)
     Bank_EMCSECP* barreltower=getBarrelSection(EmcPTR,0);
-
-    if(barreltower)
-    {
+    if(barreltower) {
         Bank_EMCRBP* towerfiber=getBarrelTowerFiber(barreltower,0);
-
-        if(towerfiber)
-        {
+        if(towerfiber) {
             Bank_TOWERADCR* toweradc=getBarrelADC(towerfiber);
 
-            if(toweradc)
-                FillBarrelTower(toweradc);
-            else
-                cout<<" ADCR absent , looking for ADCD"<<endl;
+            if(toweradc) { 
+                FillBarrelTower(toweradc); 
+                return 1;
+            }
+            else { LOG_INFO <<" ADCR absent , looking for ADCD"<<endm; }
 
             toweradc=0;
         }
-        else
-        {
-            cout<<" BANK_EMRBP absent**"<<endl;
-            return 0;
-        }
+        else { LOG_INFO <<" BANK_EMRBP absent**"<<endm; }
     }
-    else
-    {
-        cout<<" BANK_EMCP absent**"<<endl;
-        return 0;
+    else { LOG_INFO <<" BANK_EMCP absent** (expected for year >= 2008, otherwise bad)"<<endm; }
+    
+    // ok, we couldn't find it there, try TrgTowerTrnfer (year >= 2008)
+    if(TrgPTR) {        
+        char* cTTT = (char*)TrgPTR + (TrgPTR->theData.offset * 4) + sizeof(TrgPTR->header);
+        TrgTowerTrnfer2008* TTT=(TrgTowerTrnfer2008*)cTTT;
+        if(TTT) { return FillBarrelTower2008(TTT); }
     }
-    return 1;
+    
+    return 0; // if we got here we couldn't find tower data
 }
 ////////////////////////////////////////////////////////////////////
 void EMC_BarrelReader::PrintTowerArray()
