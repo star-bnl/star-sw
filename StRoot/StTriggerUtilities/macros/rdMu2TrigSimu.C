@@ -1,12 +1,11 @@
 //This macro is set up to allow the user to emulate the trigger for the offline condition set
 //by the date in the dbMaker. This macro runs on real data (flagMC=0) and MC files (flagMC=1)
 
-
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 7e1,
+void rdMu2TrigSimu( int nevents = 1000,
 		    int flagMC=0,  // 0== off, 1=Alan
-		    int useEemc=1, // 0== off
+		    int useEemc=0, // 0== off
 		    int useBemc=1, // 0== off
 		    int useL2=1,   // 0== off
 		    int L2ConfigYear=2006, // possible: 2006, 2008
@@ -54,6 +53,7 @@ void rdMu2TrigSimu( int nevents = 7e1,
     assert( !gSystem->Load("StEpcMaker"));
   }
   assert( !gSystem->Load("StTriggerUtilities"));
+  assert( !gSystem->Load("StBemcTesterMaker"));
 
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
@@ -180,6 +180,11 @@ void rdMu2TrigSimu( int nevents = 7e1,
   playMk->setConfig(playConfig);
   playMk->setHList(HList);
 
+  TObjArray *BHList=new TObjArray;
+  StBemcTesterMaker *bTest=new StBemcTesterMaker("BemcTesterMaker",muDstMaker);//test BEMC L0 code
+  bTest->SetHList(BHList);
+  bTest->Histo();
+
 
   chain->ls(3);
   chain->Init();
@@ -212,6 +217,9 @@ void rdMu2TrigSimu( int nevents = 7e1,
   cout << "total number of events  " << total << endl;
   cout << "****************************************** " << endl;
 
+  TString outB="~rfatemi/UberTrig/BEMC_7142017_Online.hist.root";
+  TFile *bhf=new TFile(outB,"recreate");
+  BHList->Write();
 
   TString fileMu=file;
   printf("=%s=\n",fileMu.Data());

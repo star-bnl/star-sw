@@ -111,7 +111,6 @@ private:
   void FEEout();
   void get2006_DSMLayer0();
   void get2006_DSMLayer1();
-  void get2006_DSMLayer2();
   
 public:
   StBemcTriggerSimu();
