@@ -21,8 +21,10 @@ typedef unsigned char UINT8 ;
 #elif (TRG_VERSION == 0x22)
 #include "TRG/trgStructures_v22.h"
 #else	// default
-#define TRG_VERSION 0x30	// changed on Feb 22, 2007
-#include "TRG/trgStructures.h"
+//#define TRG_VERSION 0x30	// changed on Feb 22, 2007
+//#include "TRG/trgStructures.h"
+#define TRG_VERSION 0x32
+#include "TRG/trgStructures2008.h"
 #endif
 
 #define FMT_ADCD	(1 << 0)
@@ -389,7 +391,6 @@ struct EventDescriptor2001 {
 #endif
 
 
-
 struct DATAP {
 	struct bankHeader bh ;
 	UINT32 len ;
@@ -442,14 +443,24 @@ struct TRGP {
         struct offlen trgId;
 };
 
-
+#if (TRG_VERSION < 0x32)
 struct TRGD {
 	struct bankHeader	bh ;
 	EvtDescData	desc ;
 	TrgSumData	sum ;
 	RawTrgDet	raw[MAX_RAW_DATA_BLOCKS] ;
 } ;
-
+#else
+struct TRGD {
+	struct bankHeader	bh ;
+  /*
+	EvtDescData2008	desc ;
+	TrgSumData2008	sum ;
+	RawTrgDet2008	raw[y8MAX_RAW_DATA_BLOCKS] ;
+  */
+        TrgTowerTrnfer2008 tow ;
+} ;
+#endif
 
 // Level 3 structures
 // Level 3 banks - most are defined in  file included at end
