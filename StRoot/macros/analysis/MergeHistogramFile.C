@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.13 2007/11/14 15:54:33 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.14 2007/12/05 19:35:41 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -127,30 +127,34 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
                 histogramCounter++;
               }
            } else  if ( obj->IsA()->InheritsFrom(TTree::Class()) ) {
-              // descendant of TH1 -> merge it
-              // printf("Merging histogram: %s\n",obj->GetName() ); 
-//              std::cout << "Merging histogram " << obj->GetName() << std::endl;
+              // descendant of TTree  -> merge it
+              // printf("Merging Tree %p:%s\n",obj, obj->GetName() ); 
               TTree *tree = (TTree*)obj;
               TTree *dstTree = 0;
               // Check whether we found the new histogram
               if ( (dstTree = (TTree *)outDir->FindObject(tree->GetName()))) {
+                   // printf("Merging %p:%s with the existing Tree %p:%s\n"
+                   //       ,tree,tree->GetName(),dstTree, dstTree->GetName() ); 
                   // Merge  the  tree
-                  TList nextTree; nextTree.Add(tree);
-                  dstTree->Merge(&nextTree);
+                  TList *nextTree = new TList(); nextTree->Add(tree); 
+                  dstTree->Merge(nextTree);
                   delete tree;  // Optional, to reduce the memory consumption
+                  delete nextTree;
                   printf("t");
               } else {
-                // First time - move the histogram
+                // First time - move the TTree
                 TDirectory *saveDir = 0;
                 if (outDir != gDirectory) {
                    saveDir = gDirectory;
                    outDir->cd();
                 }
-                TList nextTree; nextTree.Add(tree);               
-                dstTree = TTree::MergeTrees(&nextTree);
+                TList *nextTree = new TList(); nextTree->Add(tree);               
+                dstTree = TTree::MergeTrees(nextTree);
                 if (saveDir) saveDir->cd();
-                printf(" The new TTree found: %s \n", tree->GetName() );
+                // printf(" The new TTree found: %p:%s \n",tree, tree->GetName() );
+                // printf(" Create the destination Tree %p:%s\n\n",dstTree, dstTree->GetName() );
                 delete tree;  // Optional, to reduce the memory consumption
+                delete nextTree;
                 treeCounter++;
               }
            } else if ( obj->IsA()->InheritsFrom(TDirectory::Class()) ) {
