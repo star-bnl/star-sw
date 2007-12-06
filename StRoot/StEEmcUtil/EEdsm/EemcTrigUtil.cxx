@@ -21,7 +21,7 @@ struct DsmThreshold
 
 // -----------------------------------------------------------------------------------------------------
 //
-// pp2006 run period
+// pp2006 run period http://drupal.star.bnl.gov/STAR/?q=node/8349
 //
 //                             date0    time0  dateF    timeF  HT[]      TP[]      JP[]       HTTP-select   // run number
 DsmThreshold _pp2006Long1a  = {20060323,141204,20060406,170325,{6,12,18},{1,17,31},{32,49,69},2};           // 7082079
