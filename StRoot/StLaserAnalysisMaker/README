@@ -15,7 +15,7 @@ The relase for Run VII
 StLaserAnalysisMaker is maker to produce the TTree
 The simplest chain is 
 root.exe -q -b 'bfc.C(9999,"LanaDV,ITTF","path_to_st_laser_daq_file")'
-
+(run for 10 events only is not advisable because it could be no laser tracks at all for this no. of events)
 macros:
 LoopOverLaserTrees.C+("./st_laser_*.tags.root")-- analysis of TTree files (*tags.root) and produce tpcDriftVelocity.*.C
 CheckLasers.C                                  -- compare Alexei table for mirror position and 
