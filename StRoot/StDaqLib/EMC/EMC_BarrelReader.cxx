@@ -285,7 +285,19 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
 ////////////////////////////////////////////////////////////////////
 int EMC_BarrelReader::ProcessBarrelTower(const Bank_EMCP* EmcPTR, const Bank_TRGP* TrgPTR)
 {
-    // first look in Bank_EMCP (year < 2008)
+    // first check if tower data is in trgp
+    if(TrgPTR) {
+        char* cTTT = (char*)TrgPTR + (TrgPTR->theData.offset * 4) + sizeof(TrgPTR->header);
+        TrgTowerTrnfer2008* TTT=(TrgTowerTrnfer2008*)cTTT;
+        if(TTT && (TTT->byteCount_Version & 0xff) == 0x10) {
+            char* trg_version = cTTT + TTT->OffsetBlock[y8TRG_INDEX].offset + 3;    
+            if(*trg_version == 0x32) { return FillBarrelTower2008(TTT); }
+        }
+    }
+
+    if (!EmcPTR) return 0;
+
+    // now look in Bank_EMCP
     Bank_EMCSECP* barreltower=getBarrelSection(EmcPTR,0);
     if(barreltower) {
         Bank_EMCRBP* towerfiber=getBarrelTowerFiber(barreltower,0);
@@ -302,14 +314,7 @@ int EMC_BarrelReader::ProcessBarrelTower(const Bank_EMCP* EmcPTR, const Bank_TRG
         }
         else { LOG_INFO <<" BANK_EMRBP absent**"<<endm; }
     }
-    else { LOG_INFO <<" BANK_EMCP absent** (expected for year >= 2008, otherwise bad)"<<endm; }
-    
-    // ok, we couldn't find it there, try TrgTowerTrnfer (year >= 2008)
-    if(TrgPTR) {        
-        char* cTTT = (char*)TrgPTR + (TrgPTR->theData.offset * 4) + sizeof(TrgPTR->header);
-        TrgTowerTrnfer2008* TTT=(TrgTowerTrnfer2008*)cTTT;
-        if(TTT) { return FillBarrelTower2008(TTT); }
-    }
+    else { LOG_INFO <<" BANK_EMCSECP absent**"<<endm; }
     
     return 0; // if we got here we couldn't find tower data
 }
