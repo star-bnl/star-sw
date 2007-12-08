@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.34 2007/10/03 21:58:21 fisyak Exp $
+ * $Id: FCFMaker.cxx,v 1.35 2007/12/08 21:34:17 perev Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.35  2007/12/08 21:34:17  perev
+ * WARN==>DEBUG
+ *
  * Revision 1.34  2007/10/03 21:58:21  fisyak
  * Fill size of cluster and local coordinate in StTpcHit
  *
@@ -1503,13 +1506,13 @@ int StRTSClientFCFMaker::anyClustersInFile()
 u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *len)
 {
   if(!daqReader) {
-    //LOG_WARN << "FCFMaker: No daq reader" << endm;  // already printed in initrun!
+    LOG_DEBUG << "FCFMaker: No daq reader" << endm;  // already printed in initrun!
     return NULL;
   }
   
   tpcReader = daqReader->getTPCReader();
   if(!tpcReader) {
-    LOG_WARN << "FCFMaker: No tpc reader" << endm;
+    LOG_DEBUG << "FCFMaker: No tpc reader" << endm;
     return NULL;
   }
   
