@@ -13,7 +13,7 @@
      ***************************************************************
      ***************************************************************
 </pre></b>
-STAR logger is a the <a href="http://wiki.apache.org/logging-log4j/Log4JProjectPages">logger-based</a> implementation of <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">
+STAR logger is a the <a href="http://wiki.apache.org/logging-log4j/Log4JProjectPages">logger-based</a> implementation of <a href="/public/comp/sofi/StMessMgr">
 STAR message manager interface</a>
 
 <p>
@@ -32,7 +32,7 @@ Table of Contents:
 <li><a href="#examples">"Examples (under construction yet)"</a>
 <li><a href="#stones">"Underwater stones"</a>
 <li><a href="#deprecated">"The deprecated<a> functionality 
-                          of <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">the old messager"</a>
+                          of <a href="/public/comp/sofi/StMessMgr">the old messager"</a>
 </ul>
 <!-- ------------------------------------------------------------------------------ -->
 <a name="logger"></a>
@@ -42,7 +42,7 @@ Table of Contents:
 
   Integration of the <a href="http://wiki.apache.org/logging-log4j/Log4JProjectPages">log4j</a> packages and STAR offline framework 
   was straightforward due to an already existing OO  
-  <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">design</a> 
+  <a href="/public/comp/sofi/StMessMgr">design</a> 
   for processing message streams. For the STAR C++ production code  the 
   <a href="http://logging.apache.org/log4cxx">C++ version</a> of the logger, 
   so-called <a href="http://logging.apache.org/log4cxx">log4cxx</a> 
@@ -90,7 +90,7 @@ Table of Contents:
   the severity for entire production chain or / and for each STAR maker subclass separately.
   The end user code is not to worry about the proper selection of the appropriated logger.
   The user via set of the CPP <a href="#macros">macro</a> or 
-  via the <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr#i1"><code>gMessMgr</code> 
+  via the <a href="/public/comp/sofi/StMessMgr#i1"><code>gMessMgr</code> 
   global pointer</a>
   communicate with the so-called "current logger".
    The base StMaker class internally governs the logger selection to make sure the current
@@ -112,7 +112,7 @@ Table of Contents:
 <blockquota>
   The <b><code>"QA"</code></b> logger is a dedicated global logger to  handle all messages 
   sent with <a href="#macros"><b><code>LOG_QA</code></b></a> macro (see: "New macro" section below)</a> 
-  for the so-called <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#i1">"QAInfo - Q"-type messages.</a> 
+  for the so-called <a href="/public/comp/sofi/StMessMgr/#i1">"QAInfo - Q"-type messages.</a> 
 </blockquota> 
 </ul>
 
@@ -290,13 +290,13 @@ To use the STAR message manager your code has to contain the STAR message manage
    As soon as the new logger is loaded the output files, format and level of 
    the verbosity may be defined by the external Logger configuration file.
    It recommended to avoid using any method of the STAR message manager describing with 
-   <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"> document</a> and use <a href"#macros">the macros</a>
+   <a href="/public/comp/sofi/StMessMgr"> document</a> and use <a href"#macros">the macros</a>
    mentioned above only. This is to make the ocde free of the run-time and compilation 
    time parameters this can be defined via the <a href="#conf">logger configuration</a> file.
  <p>
    
    In the other words the author of the code should not apply the "Advanced methods" described by   
-   <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"> "Section II"</a> 
+   <a href="/public/comp/sofi/StMessMgr"> "Section II"</a> 
    from the use code as soon as this can be done outside of the code at run-time.
  <p>
    It is enough to define the desirable messages and its level. 
@@ -664,23 +664,23 @@ printed more then one time</a>.
 
 Some redundant functions described by<br> 
 
-<a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"><b>Section II. Advanced features</b></a>,
+<a href="/public/comp/sofi/StMessMgr"><b>Section II. Advanced features</b></a>,
 namely, 
 <ul>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii1">II-1.  Message summary </a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii2">II-2.  Specifying options and output streams</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii3">II-3.  Non-accounted messages</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii4">II-4.  Turning off printing of message prefix</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii5">II-5.  Turning off printing of the leading "St"</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii6">II-6.  Turning on printing of the time-date stamp</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii7">II-7.  Access to the current message</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii8">II-8.  Finding a message</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii9">II-9.  Finding a list of messages</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii10">II-10. Finding messages within a list</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii11">II-11. Printing a list of messages</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii12">II-12. Formatting output</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii13">II-13. Limiting message counts</a>
-<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii14">II-14. Memory usage management </a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii1">II-1.  Message summary </a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii2">II-2.  Specifying options and output streams</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii3">II-3.  Non-accounted messages</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii4">II-4.  Turning off printing of message prefix</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii5">II-5.  Turning off printing of the leading "St"</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii6">II-6.  Turning on printing of the time-date stamp</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii7">II-7.  Access to the current message</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii8">II-8.  Finding a message</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii9">II-9.  Finding a list of messages</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii10">II-10. Finding messages within a list</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii11">II-11. Printing a list of messages</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii12">II-12. Formatting output</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii13">II-13. Limiting message counts</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii14">II-14. Memory usage management </a>
 </ul>
 <br>
 
