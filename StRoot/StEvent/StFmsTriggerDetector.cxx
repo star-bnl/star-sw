@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.cxx,v 2.3 2007/07/11 23:06:45 perev Exp $
+ * $Id: StFmsTriggerDetector.cxx,v 2.4 2007/12/08 21:43:33 jeromel Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.cxx,v $
+ * Revision 2.4  2007/12/08 21:43:33  jeromel
+ * Wraped with LOG_ERROR, remove assert()
+ *
  * Revision 2.3  2007/07/11 23:06:45  perev
  * Cleanup+fix StXXXTriggerDetector
  *
@@ -25,7 +28,7 @@
 #include "Stiostream.h"
 #include <stdio.h>
 
-static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.3 2007/07/11 23:06:45 perev Exp $";
+static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.4 2007/12/08 21:43:33 jeromel Exp $";
 
 ClassImp(StFmsTriggerDetector)
     
@@ -38,20 +41,25 @@ StFmsTriggerDetector::StFmsTriggerDetector()
 
 StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
 {
+    const unsigned char  *c=0;
+    const unsigned short *s=0;
+    const unsigned int   *i=0;
+
     memset(mBeg,0,mEnd-mBeg);
-const unsigned char  *c=0;
-const unsigned short *s=0;
-const unsigned int   *i=0;
+
     mNumHeader=-1;
     mNumQTdata = (int)t.nQTdata();
-    assert(mMaxLine>=mNumQTdata);
-    i = t.QTdata();       if (i) memcpy(mQTdata,i, mNumQTdata*sizeof(int ));  
-    c = t.getDsm_FMS()  ; if (c) memcpy(mDSM   ,c, sizeof(mDSM  ));
-    c = t.getDsm02_FMS(); if (c) memcpy(mDSM01 ,c, sizeof(mDSM01));
-    c = t.getDsm02_FMS(); if (c) memcpy(mDSM02 ,c, sizeof(mDSM02));
-    s = t.getDsm1_FMS() ; if (s) memcpy(mDSM1  ,s, sizeof(mDSM1 ));
-    s = t.getDsm2_FMS() ; if (s) memcpy(mDSM2  ,s, sizeof(mDSM2 ));
-    decode();
+    if( !(mMaxLine>=mNumQTdata)){
+      {LOG_ERROR << "StFmsTriggerDetector::StFmsTriggerDetector() mMaxLine < mNumQTdata" << endm;}
+    } else {
+      i = t.QTdata();       if (i) memcpy(mQTdata,i, mNumQTdata*sizeof(int ));  
+      c = t.getDsm_FMS()  ; if (c) memcpy(mDSM   ,c, sizeof(mDSM  ));
+      c = t.getDsm02_FMS(); if (c) memcpy(mDSM01 ,c, sizeof(mDSM01));
+      c = t.getDsm02_FMS(); if (c) memcpy(mDSM02 ,c, sizeof(mDSM02));
+      s = t.getDsm1_FMS() ; if (s) memcpy(mDSM1  ,s, sizeof(mDSM1 ));
+      s = t.getDsm2_FMS() ; if (s) memcpy(mDSM2  ,s, sizeof(mDSM2 ));
+      decode();
+    }
 }
 
 StFmsTriggerDetector::~StFmsTriggerDetector() {/* noop */}
@@ -79,11 +87,15 @@ StFmsTriggerDetector::decode()
             unsigned short dch   = getCHA(d);
             int tst=(char*)&mADC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]
                    -(char*)&mADC[0][0][0][0];
-            assert(tst>=0 && tst<(int)sizeof(mADC));
-            mADC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]=getADC(d);
-            mTDC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]=getTDC(d);
-            nline++;
-            if(mNumHeader==nline) header=1;
+	    
+	    if ( ! (tst>=0 && tst<(int)sizeof(mADC)) ){
+	      {LOG_ERROR << "StFmsTriggerDetector::decode() Sanity check failed in" << endm;}
+	    } else {
+	      mADC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]=getADC(d);
+	      mTDC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]=getTDC(d);
+	      nline++;
+	      if(mNumHeader==nline) header=1;
+	    }
         }
     }
 }
@@ -105,10 +117,10 @@ StFmsTriggerDetector::adc(int crate,  int addr,  int dcard,  int dch)
        addr  >= 0 && addr  < mMaxAddr && 
        dcard >= 0 && dcard < mMaxDCard && 
        dch   >= 0 && dch   < mMaxChan ){
-        return mADC[crate][addr][dcard][dch];
-    }else{
-        printf("StFmsTriggerDetector::adc() arguments out of range\n");
-        return 0;
+      return mADC[crate][addr][dcard][dch];
+    } else{
+      {LOG_WARN << "StFmsTriggerDetector::adc() arguments out of range" << endm;}
+      return 0;
     }
 }
 
@@ -122,10 +134,10 @@ StFmsTriggerDetector::tdc(int crate,  int addr,  int dcard,  int dch)
        addr  >= 0 && addr  < mMaxAddr && 
        dcard >= 0 && dcard < mMaxDCard && 
        dch   >= 0 && dch   < mMaxChan ){
-        return mTDC[crate][addr][dcard][dch];
+      return mTDC[crate][addr][dcard][dch];
     }else{
-        printf("StFmsTriggerDetector::tdc() arguments out of range\n");
-        return 0;
+      {LOG_WARN << "StFmsTriggerDetector::tdc() arguments out of range" << endm;}
+      return 0;
     }
 }
 
