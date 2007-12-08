@@ -1,13 +1,12 @@
 //StiHit.cxx
 //M.L. Miller (Yale Software)
 //04/01
+#include <TCL.h>
 #include <Stiostream.h>
 #include "StEventTypes.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
-#include "TSystem.h"
-#include "TRandom.h"
 #ifdef Sti_DEBUG
 #  include "TRMatrix.h"
 #  include "TRVector.h"
@@ -46,24 +45,21 @@ StiHit::~StiHit()
 void StiHit::rotate(double alpha)
 {
   assert(!mdetector);
+static float rotMx[3][3]={{1,0,0},{0,1,0},{0,0,1}}, s[6];
+
   mrefangle+=alpha;
   double ca = cos(alpha);
   double sa = sin(alpha);
-  double rxx = ca; double rxy = sa;
-  double ryx =-sa; double ryy = ca;
-  double x = rxx*mx + rxy*my;
-  double y = ryx*mx + ryy*my;
-  mx = x;
-  my = y;
-  // A=R*S
-  double axx = rxx*msxx + rxy*msxy;
-  double axy = rxx*msxy + rxy*msyy;
-  double ayx = ryx*msxx + ryy*msxy;
-  double ayy = ryx*msxy + ryy*msyy;
-  // S=A*Rt
-  msxx = axx*rxx + axy*rxy;
-  msxy = axx*ryx + axy*ryy;
-  msyy = ayx*ryx + ayy*ryy;
+  rotMx[0][0] = ca; rotMx[0][1] = sa;
+  rotMx[1][0] =-sa; rotMx[1][1] = ca;
+
+  double x = rotMx[0][0]*mx + rotMx[0][1]*my;
+  double y = rotMx[1][0]*mx + rotMx[1][1]*my;
+  mx = x; my = y;
+
+// 		S=R*S*Rt
+  memcpy(s,&msxx,sizeof(s));
+  TCL::trasat(rotMx[0],s,&msxx,3,3);
 }
 
 //_____________________________________________________________________________
@@ -177,9 +173,9 @@ void StiHit::setGlobal(const StiDetector * detector,
       my =  gy;
     }
   mz = gz;
-  msxx = 1.;//sxx;
-  msyy = 1.;//syy;
-  mszz = 1.;//szz;
+  msxx = -1.;//sxx;
+  msyy = -1.;//syy;
+  mszz = -1.;//szz;
   msxy = 0.;//sxy;
   msxz = 0.;//sxz;
   msyz = 0.;//syz;  
