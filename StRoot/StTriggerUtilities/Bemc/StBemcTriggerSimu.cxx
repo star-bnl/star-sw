@@ -700,7 +700,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
       if ((DSM1_JP_ADC[i] <= mDbThres->GetJP_DSM1_threshold(i,timestamp,1)) && (DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,0))) DSM1_JP_jp_Bit[i]=1;
       if ((DSM1_JP_ADC[i] <= mDbThres->GetJP_DSM1_threshold(i,timestamp,2)) && (DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,1))) DSM1_JP_jp_Bit[i]=2;
       if ( DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,2)) DSM1_JP_jp_Bit[i]=3;
-      cout<<" JetID="<<i<<" ADC="<<DSM1_JP_ADC[i]<<" bit="<<DSM1_JP_jp_Bit[i]<<endl;
+      //cout<<" JetID="<<i<<" ADC="<<DSM1_JP_ADC[i]<<" bit="<<DSM1_JP_jp_Bit[i]<<endl;
     }  
 
   
