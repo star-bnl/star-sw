@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.9 2007/11/19 22:18:16 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.10 2007/12/09 15:56:28 rfatemi Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -379,42 +379,30 @@ StGenericL2Emulator::doBanksFromStRawData(){
 
 
 
+
+
+
 //========================================
 //========================================
 void 
 StGenericL2Emulator::doBanksFromMuDst(){
+
   assert(mUseMuDst==true);
 
+  StEvent *mEvent = (StEvent*)StMaker::GetChain()-> GetInputDS("StEvent");
+  assert(mEvent);
+     
   StMuDstMaker *muMk = (StMuDstMaker*)StMaker::GetChain()->GetMaker("MuDst");
-  assert(muMk);
+  assert(muMk);  
 
-  StMuEmcCollection* emc = muMk->muDst()->muEmcCollection();
+  StMuEmcCollection* muEmc = muMk->muDst()->muEmcCollection();
   
-  //.........................  B T O W   ....................
-  int nB=0;
-  int id;
-  for (id=1; id <=4800 ; id++) {
-    int rawAdc= emc->getTowerADC(id);
-    int RDO;
-    assert(mMappB->GetDaqIdFromTowerId(id,RDO)==1);// is good range
-    mBTOW_BANK[RDO]=rawAdc;
-    nB++;
-  }
-  mBTOW_in=1; // tmp, it should detectd there is no BTOW data
-  /*The easiest way in muEmcCollection is
-    getCrateStatus(int crate, int detector = bemc)
-    This is just a placehold so there is no methods to check stuff. 
-    Alex
-  */
-  LOG_INFO << Form("doBanksFromMuDst() , BTOW nAdc=%d",nB)<<endm;
-  assert(nB==4800);
-
-  int nE=0;
   //.........................  E T O W   ....................
+  int nE=0;
   int i;
-  for (i=0; i < emc->getNEndcapTowerADC(); i++) {
+  for (i=0; i < muEmc->getNEndcapTowerADC(); i++) {
     int sec,eta,sub,rawAdc; //muDst  ranges:sec:1-12, sub:1-5, eta:1-12
-    emc->getEndcapTowerADC(i,rawAdc,sec,sub,eta);
+    muEmc->getEndcapTowerADC(i,rawAdc,sec,sub,eta);
     assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
     //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
     const EEmcDbItem *x=mDbE->getTile(sec,'A'+sub-1,eta,'T');
@@ -428,6 +416,71 @@ StGenericL2Emulator::doBanksFromMuDst(){
   mETOW_in=1; 
   LOG_INFO << Form("doBanksFromMuDst() , ETOW nAdc=%d",nE)<<endm;  assert(nE==720);
   
+  
+  //.........................  B T O W   ....................
+  //use StEvent as default  to get simulation right in BEMC
+  if( mEvent) 
+    {  
+    StEmcCollection *emc = mEvent->emcCollection();
+    if (emc)
+      {
+      StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
+      if(detector) 
+	{
+	for(Int_t m = 1; m <= 120; ++m) 
+	  {
+	  StEmcModule* module = detector->module(m);
+	  if(module) 
+	    {
+	    StSPtrVecEmcRawHit& rawHit=module->hits();
+	    for(UInt_t k = 0; k < rawHit.size(); ++k) 
+	      {
+	      if(rawHit[k]) 
+		{
+		  int did, RDO;
+		  
+		  Int_t m=rawHit[k]->module();
+		  Int_t e=rawHit[k]->eta();
+		  Int_t s=abs(rawHit[k]->sub());
+		  Int_t adc=rawHit[k]->adc();
+		  
+		  //Get software tower id to get DaqID
+		  mGeomB->getId(m,e,s,did);
+		  mMappB->GetDaqIdFromTowerId(did,RDO);
+		  mBTOW_BANK[RDO]=adc;
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }   
+  else
+    {
+      
+      int nB=0;
+      int id;
+      for (id=1; id <=4800 ; id++) 
+	{
+	  int rawAdc= muEmc->getTowerADC(id);
+	  int RDO;
+	  assert(mMappB->GetDaqIdFromTowerId(id,RDO)==1);// is good range
+	  mBTOW_BANK[RDO]=rawAdc;
+	  nB++;
+	}
+      
+      mBTOW_in=1; // tmp, it should detectd there is no BTOW data
+      /*The easiest way in muEmcCollection is
+	getCrateStatus(int crate, int detector = bemc)
+	This is just a placehold so there is no methods to check stuff. 
+	Alex
+      */
+      
+      LOG_INFO << Form("doBanksFromMuDst() , BTOW nAdc=%d",nB)<<endm;
+      assert(nB==4800);
+    
+    }
+
 }
 
 //========================================
@@ -470,6 +523,9 @@ StGenericL2Emulator::addTriggerList() {
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.10  2007/12/09 15:56:28  rfatemi
+// Allow BEMC to get ADC from StEvent instead of MuDst
+//
 // Revision 1.9  2007/11/19 22:18:16  balewski
 // most L2algos provide triggerID's
 //
