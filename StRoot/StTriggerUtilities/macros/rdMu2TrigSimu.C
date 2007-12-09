@@ -22,16 +22,16 @@ void rdMu2TrigSimu( int nevents = 1000,
   TString outDir="./out2/"; 
   
   if (flagMC==1){
-    //const char *fname="/star/data32/reco/pp200/pythia6_205/above_35gev/cdf_a/y2004y/gheisha_on/p05ih/rcf1230_11_4000evts.geant.root";
-    // Alans file:
-    // file="rcf1308_203_2000evts.MuDst.root";   dirIn="/star/u/ahoffman/ForJan/";
+    //Alan's file
+    file="rcf1308_186_2000evts.MuDst.root";
+    char *dirIn ="/star/u/ahoffman/MonteCarloStudies/";
     // Pibero's file
-    file = "rcf1275_01_3348evts_161_mix.MuDst.root";
-    char *dirIn = "/star/data13/reco/pp200/pythia6_205/Upsminbias/cdf_a/y2006/gheisha_on/p06id/";
+    //file = "rcf1275_01_3348evts_161_mix.MuDst.root";
+    // char *dirIn = "/star/data13/reco/pp200/pythia6_205/Upsminbias/cdf_a/y2006/gheisha_on/p06id/";
   }
   if (flagMC==0){
-    char *dirIn="/star/u/balewski/2008-trigAlgo-v4/runList/";
-    //file="st_physics_7142017_raw_2030005.MuDst.root"; dirIn="/star/u/ahoffman/ForJan/";
+    //char *dirIn="/star/u/balewski/2008-trigAlgo-v4/runList/";
+    file="st_physics_7142017_raw_2030005.MuDst.root"; dirIn="/star/u/ahoffman/ForJan/";
    }
   
  
@@ -53,7 +53,6 @@ void rdMu2TrigSimu( int nevents = 1000,
     assert( !gSystem->Load("StEpcMaker"));
   }
   assert( !gSystem->Load("StTriggerUtilities"));
-  assert( !gSystem->Load("StBemcTesterMaker"));
 
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
@@ -180,11 +179,6 @@ void rdMu2TrigSimu( int nevents = 1000,
   playMk->setConfig(playConfig);
   playMk->setHList(HList);
 
-  TObjArray *BHList=new TObjArray;
-  StBemcTesterMaker *bTest=new StBemcTesterMaker("BemcTesterMaker",muDstMaker);//test BEMC L0 code
-  bTest->SetHList(BHList);
-  bTest->Histo();
-
 
   chain->ls(3);
   chain->Init();
@@ -202,6 +196,16 @@ void rdMu2TrigSimu( int nevents = 1000,
       cout << "Bad return code!" << endl;
       break;
     }
+
+    int trigID=137611;
+    //StMuDst *muDst = muDstMaker->muDst();
+    //StMuEvent *muEvent = muDst->event();    
+    //StMuTriggerIdCollection trig = muEvent -> triggerIdCollection();
+    //StTriggerId l1trig = trig.nominal();
+    //if( l1trig.isTrigger(trigID)) {
+    cout<<" SimuTrigger 137611 ="<<simuTrig->isTrigger(trigID)<<" BEMC="<<simuTrig->bemc->triggerDecision(trigID)<<" L2="<<simuTrig->lTwo->triggerDecision(trigID)<<endl;
+      //}
+
     
 
   }
@@ -217,9 +221,6 @@ void rdMu2TrigSimu( int nevents = 1000,
   cout << "total number of events  " << total << endl;
   cout << "****************************************** " << endl;
 
-  TString outB="~rfatemi/UberTrig/BEMC_7142017_Online.hist.root";
-  TFile *bhf=new TFile(outB,"recreate");
-  BHList->Write();
 
   TString fileMu=file;
   printf("=%s=\n",fileMu.Data());
