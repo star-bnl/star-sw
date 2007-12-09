@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.9 2007/11/19 22:18:17 balewski Exp $
+// $Id: StGenericL2Emulator.h,v 1.10 2007/12/09 15:56:52 rfatemi Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -11,7 +11,7 @@ Interfaces L2 algos to the STAR ofl software
 #ifndef STAR_StGenericL2Emulator
 #define STAR_StGenericL2Emulator
 
-
+class  StTriggerSimuMaker;
 class  StEEmcDbMaker;
 class  StEmcGeom;
 class  StEmcDecoder;
@@ -34,6 +34,8 @@ class StGenericL2Emulator  {
   StEEmcDbMaker *mDbE;
   StEmcGeom     *mGeomB;
   StEmcDecoder  *mMappB; 
+  // StTriggerSimuMaker *mHeadMaker;
+  //void setHeadMaker(StTriggerSimuMaker *maker) { mHeadMaker = maker; }
 
   
  protected:
@@ -41,7 +43,6 @@ class StGenericL2Emulator  {
   int   mYear;
   bool  mUseMuDst;
   
-
   // holds all instantiated L2algos
   L2VirtualAlgo **mL2algo; // actual algos
   int mL2algoN;  //# of existing algos (time-stamp dependent)
@@ -89,6 +90,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.10  2007/12/09 15:56:52  rfatemi
+// allow BEMC to take adc from StEvent instead of MuDst
+//
 // Revision 1.9  2007/11/19 22:18:17  balewski
 // most L2algos provide triggerID's
 //
