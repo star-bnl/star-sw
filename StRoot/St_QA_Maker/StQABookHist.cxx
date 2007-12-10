@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.60 2007/12/03 16:51:09 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.61 2007/12/10 19:58:20 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.61  2007/12/10 19:58:20  genevb
+// Use log10 for number of secondary vertices
+//
 // Revision 2.60  2007/12/03 16:51:09  genevb
 // Out-of-order statements for pre-run8 data
 //
@@ -1635,14 +1638,14 @@ void StQABookHist::BookHistVertex(){
   m_vtx_z_dist  = QAH::H1F("QaV0VtxZDist",
             "V0 Z distribution relative to primvtx",60,-30.,30.);
 
-  m_v0             = QAH::H1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",100,0.,2000.);
-  m_ev0_lama_hist  = QAH::H1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",25,1.05,1.15);
-  m_ev0_k0ma_hist  = QAH::H1F("QaV0K0Mass","dst_v0_vertex: k0 mass",25,.4,.6);
+  m_v0             = QAH::H1F("QaV0Vtx","log10 total V0s (0 => -0.5)",45,-0.55,3.95);
+  m_ev0_lama_hist  = QAH::H1F("QaV0LambdaMass","V0: Lambda mass",25,1.05,1.15);
+  m_ev0_k0ma_hist  = QAH::H1F("QaV0K0Mass","V0: k0 mass",25,.4,.6);
 
-  m_xi_tot     = QAH::H1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices",100,0.,4000.);
-  m_xi_ma_hist = QAH::H1F("QaXiaMass",  "dst_xi_vertex: Xi mass",25,1.2,1.4);
+  m_xi_tot     = QAH::H1F("QaXiVtxTot", "log10 total Xis (0 => -0.5)",45,-0.55,3.95);
+  m_xi_ma_hist = QAH::H1F("QaXiaMass",  "Xi: Xi mass",25,1.2,1.4);
 
-  m_kink_tot   = QAH::H1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
+  m_kink_tot   = QAH::H1F("QaKinkTot",  "log10 total kinks (0 => -0.5)",35,-0.55,2.95);
 
   m_vtx_FtpcEastTpc_xy = QAH::H2F("QaVtxFtpcETpcXY",
 				  " vertex,prim: x(ftpcE)-x(tpc) vs y(ftpcE)-y(tpc)",

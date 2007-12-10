@@ -1585,9 +1585,10 @@ void StEventQAMaker::MakeHistVertex() {
     gMessMgr->Info(" *** in StEventQAMaker - filling dst_v0_vertex histograms ");
   
   StSPtrVecV0Vertex &v0Vtx = event->v0Vertices();
-  hists->m_v0->Fill(v0Vtx.size());
+  UInt_t v0Vtxs = v0Vtx.size();
+  hists->m_v0->Fill( v0Vtxs ? TMath::Log10(v0Vtxs) : -0.5 );
   
-  for (UInt_t k=0; k<v0Vtx.size(); k++) {
+  for (UInt_t k=0; k<v0Vtxs; k++) {
     StV0Vertex *v0 = v0Vtx[k];
     if ((v0) && (v0->dcaParentToPrimaryVertex() >= 0.)) {
       Float_t e1a = ::pow(abs(v0->momentumOfDaughter(positive)),2);
@@ -1636,9 +1637,10 @@ void StEventQAMaker::MakeHistVertex() {
     gMessMgr->Info(" *** in StEventQAMaker - filling dst_xi_vertex histograms ");
   
   StSPtrVecXiVertex &xiVtx = event->xiVertices();
-  hists->m_xi_tot->Fill(xiVtx.size());
+  UInt_t xiVtxs = xiVtx.size();
+  hists->m_xi_tot->Fill( xiVtxs ? TMath::Log10(xiVtxs) : -0.5 );
   
-  for (UInt_t l=0; l<xiVtx.size(); l++) {
+  for (UInt_t l=0; l<xiVtxs; l++) {
     StXiVertex *xi = xiVtx[l];
     if (xi) {
       const StThreeVectorF& pMom = xi->momentumOfBachelor();
@@ -1672,9 +1674,10 @@ void StEventQAMaker::MakeHistVertex() {
     gMessMgr->Info(" *** in StEventQAMaker - filling kink histograms ");
   
   StSPtrVecKinkVertex &kinkVtx = event->kinkVertices();
-  hists->m_kink_tot->Fill(kinkVtx.size());
+  UInt_t kinkVtxs = kinkVtx.size();
+  hists->m_kink_tot->Fill( kinkVtxs ? TMath::Log10(kinkVtxs) : -0.5 );
   
-  for (UInt_t m=0; m<kinkVtx.size(); m++) {
+  for (UInt_t m=0; m<kinkVtxs; m++) {
     StKinkVertex *kink = kinkVtx[m];
     if (kink) {
       //hists->m_v_detid->Fill(kink->det_id); 
@@ -1691,10 +1694,10 @@ void StEventQAMaker::MakeHistVertex() {
     }
   }
   
-  UInt_t cntrows = 0;
-  cntrows = event->numberOfPrimaryVertices() + v0Vtx.size() +
-    xiVtx.size() + kinkVtx.size(); //this gives 3 less than the DSTs!!
-				   //->needs to be fixed !!!
+  UInt_t cntrows = event->numberOfPrimaryVertices() +
+    v0Vtxs + xiVtxs + kinkVtxs;
+    //this gives 3 less than the DSTs!!  ->needs to be fixed !!!
+
   hists->m_v_num->Fill(cntrows);
   hists->m_v_num_sm->Fill(cntrows);
 }
@@ -2299,8 +2302,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.84 2007/11/30 05:38:49 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.85 2007/12/10 19:58:20 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.85  2007/12/10 19:58:20  genevb
+// Use log10 for number of secondary vertices
+//
 // Revision 2.84  2007/11/30 05:38:49  genevb
 // Changes for Run8: mostly silicon removal, TOF addition
 //
