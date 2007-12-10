@@ -7,10 +7,11 @@ Time-stamp: <01/05/07 14:02:55 fisyak>  Rework the package to improve laser drif
 
 * Purpose:
 Create TTree with predictions from reconstructed laser tracks at the mirrors, drift velocity calculation for each raft 
-
+(definition of raft can be found in "The laser system for the STAR time projection chamber", 
+J. Abel;e et al., NIM A 499 (2003) 692, Fig. 1 "Conseptual design of the laser system") 
 * History:
 The first release is for Run V, used in P07ib and P07ic production
-The relase for Run VII
+The release for Run VII
 ==========================
 StLaserAnalysisMaker is maker to produce the TTree
 The simplest chain is 

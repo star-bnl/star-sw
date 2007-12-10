@@ -1,3 +1,8 @@
+// $Id: Laser.C,v 1.5 2007/12/10 19:54:02 fisyak Exp $
+// $Log: Laser.C,v $
+// Revision 1.5  2007/12/10 19:54:02  fisyak
+// Add Id and Log, correct spelling error in README
+//
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //#include <ostream>
 #include "Riostream.h"

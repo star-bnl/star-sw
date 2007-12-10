@@ -1,4 +1,8 @@
-//$Id: LaserEvent.h,v 1.5 2007/10/16 15:26:02 fisyak Exp $
+//$Id: LaserEvent.h,v 1.6 2007/12/10 19:54:02 fisyak Exp $
+//$Log: LaserEvent.h,v $
+//Revision 1.6  2007/12/10 19:54:02  fisyak
+//Add Id and Log, correct spelling error in README
+//
 #ifndef Laser_Event
 #define Laser_Event
 //////////////////////////////////////////////////////////////////////////
