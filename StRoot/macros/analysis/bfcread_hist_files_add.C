@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.16 2007/04/03 21:15:13 genevb Exp $
+// $Id: bfcread_hist_files_add.C,v 2.17 2007/12/10 18:03:22 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.17  2007/12/10 18:03:22  genevb
+// Additional library needed
+//
 // Revision 2.16  2007/04/03 21:15:13  genevb
 // Minor fix for StIOMaker/StFile pairing
 //
@@ -96,6 +99,7 @@ void bfcread_hist_files_add(
   gSystem->Load("libStDb_Tables.so");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
+  gSystem->Load("StPmdUtil");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("StTreeMaker");
 
