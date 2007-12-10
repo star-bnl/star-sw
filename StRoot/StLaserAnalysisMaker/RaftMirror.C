@@ -1,5 +1,8 @@
-// $Id: RaftMirror.C,v 1.4 2007/12/10 19:54:03 fisyak Exp $
+// $Id: RaftMirror.C,v 1.5 2007/12/10 20:46:21 fisyak Exp $
 // $Log: RaftMirror.C,v $
+// Revision 1.5  2007/12/10 20:46:21  fisyak
+// Add comment
+//
 // Revision 1.4  2007/12/10 19:54:03  fisyak
 // Add Id and Log, correct spelling error in README
 //
@@ -208,7 +211,7 @@ void FillRM(Int_t Mirror) {
   FitRM(hist);
 }
 //________________________________________________________________________________
-void MembraneDip() {
+void MembraneDip() {// plots  dependence of East/West  membrane tracks dip versus  Phi. This is an example to use Laser TTree.
   TTree *laser = (TTree *) gDirectory->Get("laser");
   if (! laser ) return;
   TF1 *SS = new TF1("SS","[0]+[1]*TMath::Sin(x+[2])");
