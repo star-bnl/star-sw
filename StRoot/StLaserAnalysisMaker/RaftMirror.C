@@ -1,3 +1,8 @@
+// $Id: RaftMirror.C,v 1.4 2007/12/10 19:54:03 fisyak Exp $
+// $Log: RaftMirror.C,v $
+// Revision 1.4  2007/12/10 19:54:03  fisyak
+// Add Id and Log, correct spelling error in README
+//
 TChain *theChain = 0;
 //________________________________________________________________________________
 TChain *GetChain() {

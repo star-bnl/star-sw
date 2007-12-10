@@ -1,3 +1,8 @@
+// $Id: laserino.h,v 1.2 2007/12/10 19:54:03 fisyak Exp $
+// $Log: laserino.h,v $
+// Revision 1.2  2007/12/10 19:54:03  fisyak
+// Add Id and Log, correct spelling error in README
+//
 #ifndef laserino_H
 #define laserino_H
 #include "Riostream.h"
