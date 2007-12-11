@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.84 2007/11/30 09:19:54 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.85 2007/12/11 09:36:39 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.85  2007/12/11 09:36:39  jcs
+// Remove m_nrec_track histogram (never used)
+//
 // Revision 1.84  2007/11/30 09:19:54  jcs
 // Use the first primary vertex if any primary vertex exists
 // Multiple primary vertices have been ordered in StEvent
@@ -486,7 +489,6 @@ if (m_Mode >= 2) {
 				   100, -0.01, 0.01, 100, 6.5, 31.);
 
      if (Debug()) {
-        m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 10, 0.5, 10.5, 100, 0., 20.);
         m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", 
  	            		             "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 
 				             6, 0.5, 6.5,  80,  -2.,  2.);
@@ -781,8 +783,6 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
        StFtpcTrack *track = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
        TObjArray   *fhits = (TObjArray*) track->GetHits();
     
-        if (Debug()) m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
-    
        for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
       
          StFtpcPoint *mhit = (StFtpcPoint *) fhits->At(h_counter);
@@ -905,7 +905,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.84 2007/11/30 09:19:54 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.85 2007/12/11 09:36:39 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
