@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTablesWriter.h,v 1.1 2007/09/08 01:22:37 kocolosk Exp $
+ * $Id: StBemcTablesWriter.h,v 1.2 2007/12/11 19:54:46 kocolosk Exp $
  * Author:      Adam Kocoloski, MIT, kocolosk@mit.edu
  *
  ***************************************************************************/
@@ -27,6 +27,8 @@ public:
     
     void loadTables(const char *sqlTime, const char *flavor="ofl"); ///< load directly from DB, no Maker needed 
     void loadTableFromFile(TFile *f);
+    
+    void setTable(const char *tableName, void *data);
     
     void setCalib(int det, int softId, int power, float val);
     void setPedestal(int det, int softId, int cap, float val);
@@ -55,6 +57,9 @@ private:
 /***************************************************************************
  *
  * $Log: StBemcTablesWriter.h,v $
+ * Revision 1.2  2007/12/11 19:54:46  kocolosk
+ * allow direct setting of void * table
+ *
  * Revision 1.1  2007/09/08 01:22:37  kocolosk
  * StBemcTablesWriter provides common interface for inserting DB tables
  *
