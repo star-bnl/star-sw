@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.10 2007/12/09 15:56:28 rfatemi Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.11 2007/12/11 16:39:40 rfatemi Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -454,6 +454,7 @@ StGenericL2Emulator::doBanksFromMuDst(){
 	  }
 	}
       }
+    mBTOW_in=1;
     }   
   else
     {
@@ -523,6 +524,9 @@ StGenericL2Emulator::addTriggerList() {
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.11  2007/12/11 16:39:40  rfatemi
+// Fixed Bug in StGenericL2Emulator
+//
 // Revision 1.10  2007/12/09 15:56:28  rfatemi
 // Allow BEMC to get ADC from StEvent instead of MuDst
 //
