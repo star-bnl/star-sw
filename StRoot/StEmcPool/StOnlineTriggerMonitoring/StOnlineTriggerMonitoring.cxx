@@ -8,6 +8,8 @@ using namespace std;
 #include <TFile.h>
 #include <TString.h>
 
+#include "StMessMgr.h"
+
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
 #include "StDbLib/StDbTable.h"
@@ -18,6 +20,8 @@ using namespace std;
 #include "tables/St_emcTriggerLUT_Table.h"
 
 #include "StDaqLib/EMC/StEmcDecoder.h"
+
+#include "StEmcUtil/database/StBemcTablesWriter.h"
 
 char BITMASK[15][130];
 int PATCH[300], DSM[300], BIT[300], PA[300], HT[300], TOWER[30][160], PED[30][160], BITCONV[30][10];
@@ -442,6 +446,58 @@ void StOnlineTriggerMonitoring::saveTrigger(
 	    }
 	}
 	cout << "Finished filling tables" << endl;
+
+
+    // let's use the new StBemcTablesWriter instead
+    StBemcTablesWriter writer;
+    writer.loadTables(timestamp.Data());
+    
+    if(status && status_st) {
+        writer.setTable("bemcTriggerStatus", status_st);
+        if(saveDB) {
+            LOG_INFO << "Start uploading table bemcTriggerStatus" << endm;
+            writer.writeToDb("bemcTriggerStatus", timestamp.Data());
+            LOG_INFO << "Finished uploading table bemcTriggerStatus" << endm;
+        }
+        if(saveTables) {
+            FILENAME = tables_dir; FILENAME += "/bemcTriggerStatus."; FILENAME+=TS; FILENAME+=".root";
+            LOG_INFO << "Start saving table " << FILENAME << endm;
+            writer.writeToFile(FILENAME.Data());
+            LOG_INFO << "Finished saving table " << FILENAME << endm;
+        }
+    }
+    
+    if(pedestal && pedestals_st) {
+        writer.setTable("bemcTriggerPed", pedestals_st);
+        if(saveDB) {
+            LOG_INFO << "Start uploading table bemcTriggerPed" << endm;
+            writer.writeToDb("bemcTriggerPed", timestamp.Data());
+            LOG_INFO << "Finished uploading table bemcTriggerPed" << endm;
+        }
+        if(saveTables) {
+            FILENAME = tables_dir; FILENAME += "/bemcTriggerPed."; FILENAME+=TS; FILENAME+=".root";
+            LOG_INFO << "Start saving table " << FILENAME << endm;
+            writer.writeToFile(FILENAME.Data());
+            LOG_INFO << "Finished saving table " << FILENAME << endm;
+        }
+    }
+    
+    if(lut && lut_st) {
+        writer.setTable("bemcTriggerLUT", lut_st);
+        if(saveDB) {
+            LOG_INFO << "Start uploading table bemcTriggerLUT" << endm;
+            writer.writeToDb("bemcTriggerLUT", timestamp.Data());
+            LOG_INFO << "Finished uploading table bemcTriggerLUT" << endm;
+        }
+        if(saveTables) {
+            FILENAME = tables_dir; FILENAME += "/bemcTriggerLUT."; FILENAME+=TS; FILENAME+=".root";
+            LOG_INFO << "Start saving table " << FILENAME << endm;
+            writer.writeToFile(FILENAME.Data());
+            LOG_INFO << "Finished saving table " << FILENAME << endm;
+        }
+    }
+	
+	/*
 	
 	StDbManager* mgr = 0;
 	StDbConfigNode* node = 0;
@@ -537,5 +593,7 @@ void StOnlineTriggerMonitoring::saveTrigger(
 		cout << "Finished saving table " << FILENAME << endl;
 	    }
 	}
+	
+	*/
 }
 
