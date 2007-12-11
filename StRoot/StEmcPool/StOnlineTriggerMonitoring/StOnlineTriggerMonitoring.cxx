@@ -447,8 +447,6 @@ void StOnlineTriggerMonitoring::saveTrigger(
 	}
 	cout << "Finished filling tables" << endl;
 
-
-    // let's use the new StBemcTablesWriter instead
     StBemcTablesWriter writer;
     writer.loadTables(timestamp.Data());
     
@@ -496,104 +494,5 @@ void StOnlineTriggerMonitoring::saveTrigger(
             LOG_INFO << "Finished saving table " << FILENAME << endm;
         }
     }
-	
-	/*
-	
-	StDbManager* mgr = 0;
-	StDbConfigNode* node = 0;
-	StDbTable *t = 0;
-	if(saveDB) {
-	    TString dbName  = "Calibrations_emc";
-	    cout << "Started initiating DB mgr" << endl;
-	    mgr = StDbManager::Instance();
-	    cout << "... initiating DB mgr " << mgr << endl;
-	    if (mgr) {
-		cout << "... creating node " << dbName.Data() << endl;
-		node = mgr->initConfig(dbName.Data());
-		cout << "... creating node " << node << endl;
-	    } else {cerr << "Cannot create the DB mgr instance!" << endl;}
-	    cout << "Finished initiating DB mgr" << endl;
-	}
-
-	if (status) {
-	    if (saveDB && mgr && status_st) {
-		cout << "Start uploading table bemcTriggerStatus" << endl;
-		t = node ? node->addDbTable("bemcTriggerStatus") : 0;
-		if (t) {
-		    t->setFlavor("ofl");
-		    t->SetTable((char*)status_st,1);
-		    mgr->setStoreTime(timestamp.Data());
-		    mgr->storeDbTable(t);
-		}
-		cout << "Finished uploading table bemcTriggerStatus" << endl;
-	    }
-	    if (saveTables && status_t && status_st) {
-		FILENAME = tables_dir; FILENAME += "/bemcTriggerStatus."; FILENAME+=TS; FILENAME+=".root";
-		cout << "Start saving table " << FILENAME << endl;
-		TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
-		if (FF) {
-		    FF->cd();
-		    status_t->AddAt(status_st,0);
-		    status_t->Write();
-		    FF->Close();
-		    delete FF;
-		}
-		cout << "Finished saving table " << FILENAME << endl;
-	    }
-	}
-	if (pedestal) {
-	    if (saveDB && mgr && pedestals_st) {
-		cout << "Start uploading table bemcTriggerPed" << endl;
-		t = node ? node->addDbTable("bemcTriggerPed") : 0;
-	        if (t) {
-		    t->setFlavor("ofl");
-		    t->SetTable((char*)pedestals_st,1);
-		    mgr->setStoreTime(timestamp.Data());
-		    mgr->storeDbTable(t);
-		}
-		cout << "Finished uploading table bemcTriggerPed" << endl;
-	    }
-	    if (saveTables && pedestals_t && pedestals_st) {
-		FILENAME = tables_dir; FILENAME += "/bemcTriggerPed."; FILENAME+=TS; FILENAME+=".root";
-		cout << "Start saving table " << FILENAME << endl;
-		TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
-		if (FF) {
-		    FF->cd();
-		    pedestals_t->AddAt(pedestals_st,0);
-		    pedestals_t->Write();
-		    FF->Close();
-		    delete FF;
-		}
-		cout << "Finished saving table " << FILENAME << endl;
-	    }
-	}
-	if (lut) {
-	    if(saveDB && mgr && lut_st) {
-		cout << "Start uploading table bemcTriggerLUT" << endl;
-		t = node ? node->addDbTable("bemcTriggerLUT") : 0;
-		if (t) {
-		    t->setFlavor("ofl");
-		    t->SetTable((char*)lut_st,1);
-		    mgr->setStoreTime(timestamp.Data());
-		    mgr->storeDbTable(t);
-		}
-		cout << "Finished uploading table bemcTriggerLUT" << endl;
-	    }
-	    if (saveTables && lut_t && lut_st) {
-		FILENAME = tables_dir; FILENAME += "/bemcTriggerLUT."; FILENAME+=TS; FILENAME+=".root";
-		cout << "Start saving table " << FILENAME << endl;
-		TFile *FF = new TFile(FILENAME.Data(),"RECREATE");
-		if (FF) {
-		    FF->cd();
-		    lut_t->AddAt(lut_st,0);
-		    lut_t->Write();
-		    FF->Close();
-		    delete FF;
-		}
-		cout << "Finished saving table " << FILENAME << endl;
-	    }
-	}
-	
-	*/
 }
 
