@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.21 2007/04/27 15:39:29 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.22 2007/12/11 09:36:40 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.22  2007/12/11 09:36:40  jcs
+// Remove m_nrec_track histogram (never used)
+//
 // Revision 1.21  2007/04/27 15:39:29  jcs
 // Removed obsolete histogram (fpt_theta)
 // Only create and fill FTPC vertex by sector histograms if bfc debug option is on
@@ -104,7 +107,6 @@ class StFtpcTrackMaker : public StMaker {
 
   protected:
        TH1F          *m_vtx_pos;    //! vertex position
-       TH2F          *m_nrec_track; //! # points found per track vs. momentum
        TH1F          *m_maxadc_West;
        TH1F          *m_maxadc_East;
        TH1F          *m_charge_West;
@@ -138,7 +140,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.21 2007/04/27 15:39:29 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.22 2007/12/11 09:36:40 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 	   void   FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker,StFtpcSoftwareMonitor *ftpcMon);  // fills StEvent->StSoftwareMonitor->StFtpcSoftwareMonitor
