@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.h,v 2.2 2007/07/11 23:06:45 perev Exp $
+ * $Id: StFmsTriggerDetector.h,v 2.3 2007/12/11 18:11:13 ullrich Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.h,v $
+ * Revision 2.3  2007/12/11 18:11:13  ullrich
+ * Fix bugs in QT decoding (Akio).
+ *
  * Revision 2.2  2007/07/11 23:06:45  perev
  * Cleanup+fix StXXXTriggerDetector
  *
@@ -64,8 +67,8 @@ protected:
       mMaxAddr     = 16,
       mMaxDCard    = 4,
       mMaxChan     = 8,
-      mOffsetCrate = 10,
-      mOffsetAddr  = 15
+      mOffsetCrate = 11,
+      mOffsetAddr  = 16
     }; //!
     
     char mBeg[1];//!
@@ -86,11 +89,11 @@ protected:
 };
 
 inline unsigned int   StFmsTriggerDetector::nHit() const {return mNumQTdata;} 
-inline unsigned short StFmsTriggerDetector::getNHT(int v) const {return (unsigned short)  (v & 0x0000FFFF); }
+inline unsigned short StFmsTriggerDetector::getNHT(int v) const {return (unsigned short)  (v & 0x000000FF); }
 inline unsigned short StFmsTriggerDetector::getADR(int v) const {return (unsigned short) ((v & 0x001F0000) >> 16);}
 inline unsigned short StFmsTriggerDetector::getCRT(int v) const {return (unsigned short) ((v & 0xFF000000) >> 24);}
 inline unsigned short StFmsTriggerDetector::getADC(int v) const {return (unsigned short)  (v & 0x00000FFF);}
-inline unsigned short StFmsTriggerDetector::getTDC(int v) const {return (unsigned short) ((v & 0x0001F000) >> 12);}
+inline unsigned short StFmsTriggerDetector::getTDC(int v) const {return (unsigned short) ((v & 0x001F0000) >> 16);}
 inline unsigned short StFmsTriggerDetector::getQT8(int v) const {return (unsigned short) ((v & 0x18000000) >> 27);}
 inline unsigned short StFmsTriggerDetector::getCHA(int v) const {return (unsigned short) ((v & 0xE0000000) >> 29);} 
 

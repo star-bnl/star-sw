@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2008.cxx,v 2.1 2007/11/19 19:32:17 ullrich Exp $
+ * $Id: StTriggerData2008.cxx,v 2.2 2007/12/11 18:11:13 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2008.cxx,v $
+ * Revision 2.2  2007/12/11 18:11:13  ullrich
+ * Fix bugs in QT decoding (Akio).
+ *
  * Revision 2.1  2007/11/19 19:32:17  ullrich
  * Initial Revision.
  *
@@ -44,7 +47,7 @@ StTriggerData2008::StTriggerData2008(const TrgDataType2008* data, int run)
         + sizeof(RawTrgDet2008)*(npre+npost+1);    
     memcpy(mData,data,size); 
     memset((char*)mData+size,0,sizeof(TrgDataType2008)-size);
-    dump();
+    //dump();
 }
 
 unsigned int StTriggerData2008::version() const
