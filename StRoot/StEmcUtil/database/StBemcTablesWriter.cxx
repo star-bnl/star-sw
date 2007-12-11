@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTablesWriter.cxx,v 1.2 2007/10/01 16:57:29 kocolosk Exp $
+ * $Id: StBemcTablesWriter.cxx,v 1.3 2007/12/11 19:54:46 kocolosk Exp $
  * Author:      Adam Kocoloski, MIT, kocolosk@mit.edu
  *
  ***************************************************************************/
@@ -543,9 +543,93 @@ void StBemcTablesWriter::loadTableFromFile(TFile *f) {
     }
 }
 
+void StBemcTablesWriter::setTable(const char * tableName, void * data) {
+    string myName(tableName);
+    
+    if(myName.find("bemcPed") == 0) {
+        if(mBtowP) delete mBtowP;
+        mBtowP = (emcPed_st*)data;
+    }
+    else if(myName.find("bprsPed") == 0) {
+        if(mBprsP) delete mBprsP;
+        mBprsP = (emcPed_st*)data;
+    }
+    else if(myName.find("bsmdePed") == 0) {
+        if(mSmdeP) delete mSmdeP;
+        mSmdeP = (smdPed_st*)data;
+    }
+    else if(myName.find("bsmdpPed") == 0) {
+        if(mSmdpP) delete mSmdpP;
+        mSmdpP = (smdPed_st*)data;
+    }
+    else if(myName.find("bemcStatus") == 0) {
+        if(mBtowS) delete mBtowS;
+        mBtowS = (emcStatus_st*)data;
+    }
+    else if(myName.find("bprsStatus") == 0) {
+        if(mBprsS) delete mBprsS;
+        mBprsS = (emcStatus_st*)data;
+    }
+    else if(myName.find("bsmdeStatus") == 0) {
+        if(mSmdeS) delete mSmdeS;
+        mSmdeS = (smdStatus_st*)data;
+    }
+    else if(myName.find("bsmdpStatus") == 0) {
+        if(mSmdpS) delete mSmdpS;
+        mSmdpS = (smdStatus_st*)data;
+    }
+    else if(myName.find("bemcCalib") == 0) {
+        if(mBtowC) delete mBtowC;
+        mBtowC = (emcCalib_st*)data;
+    }
+    else if(myName.find("bprsCalib") == 0) {
+        if(mBprsC) delete mBprsC;
+        mBprsC = (emcCalib_st*)data;
+    }
+    else if(myName.find("bsmdeCalib") == 0) {
+        if(mSmdeC) delete mSmdeC;
+        mSmdeC = (smdCalib_st*)data;
+    }
+    else if(myName.find("bsmdpCalib") == 0) {
+        if(mSmdpC) delete mSmdpC;
+        mSmdpC = (smdCalib_st*)data;
+    }
+    else if(myName.find("bemcGain") == 0) {
+        if(mBtowG) delete mBtowG;
+        mBtowG = (emcGain_st*)data;
+    }
+    else if(myName.find("bprsGain") == 0) {
+        if(mBprsG) delete mBprsG;
+        mBprsG = (emcGain_st*)data;
+    }
+    else if(myName.find("bsmdeGain") == 0) {
+        if(mSmdeG) delete mSmdeG;
+        mSmdeG = (smdGain_st*)data;
+    }
+    else if(myName.find("bsmdpGain") == 0) {
+        if(mSmdpG) delete mSmdpG;
+        mSmdpG = (smdGain_st*)data;
+    }
+    else if(myName.find("bemcTriggerStatus") == 0) {
+        if(mTrigS) delete mTrigS;
+        mTrigS = (emcTriggerStatus_st*)data;
+    }
+    else if(myName.find("bemcTriggerPed") == 0) {
+        if(mTrigP) delete mTrigP;
+        mTrigP = (emcTriggerPed_st*)data;
+    }
+    else if(myName.find("bemcTriggerLUT") == 0) {
+        if(mTrigL) delete mTrigL;
+        mTrigL = (emcTriggerLUT_st*)data;
+    }
+}
+
 /***************************************************************************
  *
  * $Log: StBemcTablesWriter.cxx,v $
+ * Revision 1.3  2007/12/11 19:54:46  kocolosk
+ * allow direct setting of void * table
+ *
  * Revision 1.2  2007/10/01 16:57:29  kocolosk
  * allow to uploaded bemcTrigger* tables too
  *
