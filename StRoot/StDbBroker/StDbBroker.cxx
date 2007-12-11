@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.52 2007/10/10 15:29:10 deph Exp $
+ * $Id: StDbBroker.cxx,v 1.53 2007/12/11 20:31:08 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.53  2007/12/11 20:31:08  deph
+ * moved print statistics call to close db function so only prints upon a real close
+ *
  * Revision 1.52  2007/10/10 15:29:10  deph
  * Removed debug statements
  *
@@ -268,7 +271,10 @@ void StDbBroker::printStatistics(){
 //_____________________________________________________________________________
 
 void StDbBroker::CloseAllConnections(){
-  if(mgr)mgr->closeAllConnections();
+  if(mgr){
+           mgr->closeAllConnections();
+           StDbBroker::printStatistics();
+         }
 //   cout<<"MPD:GOT HERE connection to db closed"<<endl;
 };
 
@@ -279,7 +285,6 @@ void StDbBroker::Release(){
 //st_db_maker (Victor did not want to call CloseAllConnections to 
 //mainain abstraction) Also could add other utilities here later on.
    StDbBroker::CloseAllConnections();
-   StDbBroker::printStatistics();
 //   cout<<"MPD:connection to db closed"<<endl;
 }
 
