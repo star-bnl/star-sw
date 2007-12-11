@@ -11,10 +11,7 @@ char *bemcStatusCopy = "bemcStatus.txt",
 char *bceTable = "bce_table.txt",
 char *bcwTable = "bcw_table.txt"
 ) {
-    gSystem->Load("St_base");
-    gSystem->Load("St_Tables");
-    gSystem->Load("StChain");
-    gSystem->Load("StDbLib");
+    gROOT->Macro("loadMuDst.C");
     gSystem->Load("StDbBroker");
     gSystem->Load("St_db_Maker");
     gSystem->Load("StDaqLib");
