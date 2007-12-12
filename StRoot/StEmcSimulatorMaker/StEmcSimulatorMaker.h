@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimulatorMaker
 #define STAR_StEmcSimulatorMaker
 
-// $Id: StEmcSimulatorMaker.h,v 1.25 2007/11/28 16:18:58 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.26 2007/12/12 23:29:48 kocolosk Exp $
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -86,7 +86,7 @@ public:
     /// Default is true.
     void setCheckStatus(StDetectorId det, bool flag) { mCheckStatus[det-kBarrelEmcTowerId] = flag; }
     
-    /// simulate pedestal noise where no MC hits are found.  Default is false.
+    /// simulate pedestal noise where no MC hits are found.  Default is true for BTOW, false otherwise.
     void setMakeFullDetector(StDetectorId det, bool flag) { mMakeFullDetector[det-kBarrelEmcTowerId] = flag; }
     
     /// only save hits which pass pedestal cut.  Default is true for simulations, false for embedding.
@@ -111,6 +111,7 @@ public:
     /// maximum possible ADC will be calculated by sampling Gaussian with this spread.  Default is 0 for all detectors.
     void setMaximumAdcSpread(StDetectorId det, float spread) { mMaxAdcSpread[det-kBarrelEmcTowerId] = spread; }
     
+    /// this setting has no effect if det!=kBarrelSmdEtaStripId.  Simulate cross-talk from cross-capacitance, which falls linearly to 0 as eta => 1.0
     void setMaxCrossTalkPercentage(StDetectorId det, float percentage) { mCrossTalk[det - kBarrelEmcTowerId] = percentage / 100.0; }
     
     StMcEmcHitCollection*   getEmcMcHits(Int_t det) { return mEmcMcHits[det-1]; }
@@ -128,7 +129,7 @@ public:
     StBemcTables*           getTables() { return mTables; }
 
     virtual const char*     GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.25 2007/11/28 16:18:58 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.26 2007/12/12 23:29:48 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -139,6 +140,9 @@ public:
 
 /*****************************************************************************
  * $Log: StEmcSimulatorMaker.h,v $
+ * Revision 1.26  2007/12/12 23:29:48  kocolosk
+ * full pedestal simulation is now default for BTOW
+ *
  * Revision 1.25  2007/11/28 16:18:58  kocolosk
  * optical cross-talk simulation by Mike Betancourt
  * http://www.star.bnl.gov/HyperNews-star/protected/get/phana/144.html

@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.54 2007/12/12 22:12:47 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.55 2007/12/12 23:29:47 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -49,6 +49,9 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name) {
     
     // adc2e doesn't suppress BTOW hits, so we won't either
     mDoZeroSuppression[0] = false;
+
+    // trigger emulation expects full peds for BTOW
+    mMakeFullDetector[0] = true;
 
     mMcEvent = NULL;
     mEmcCollection = NULL;
@@ -507,6 +510,9 @@ void StEmcSimulatorMaker::makeCrossTalk(StMcTrack *track)
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.55  2007/12/12 23:29:47  kocolosk
+ *  full pedestal simulation is now default for BTOW
+ *
  *  Revision 1.54  2007/12/12 22:12:47  kocolosk
  *  push_back detector hits manually instead of using addHit to save (lots of) time
  *
