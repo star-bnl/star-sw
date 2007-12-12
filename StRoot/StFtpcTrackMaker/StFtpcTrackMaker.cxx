@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.85 2007/12/11 09:36:39 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.86 2007/12/12 12:49:34 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.86  2007/12/12 12:49:34  jcs
+// remove assert() and replace LOG_WARN with LOG_ERROR messages
+//
 // Revision 1.85  2007/12/11 09:36:39  jcs
 // Remove m_nrec_track histogram (never used)
 //
@@ -392,17 +395,18 @@ Int_t StFtpcTrackMaker::InitRun(Int_t run) {
 
   // get ftpc parameters
   TDataSet *ftpcParsDb = GetInputDB("ftpc");
-  assert(ftpcParsDb);
+  if (!ftpcParsDb) {
+     LOG_ERROR << "StFtpcTrackMaker::Error Getting FTPC parameter database" << endm;
+     return kStErr;
+  }
   TDataSetIter ftpcPars(ftpcParsDb);
 
   // get ftpc geometry
   TDataSet *ftpcGeometryDb = GetDataBase("Geometry/ftpc");
 
   if (!ftpcGeometryDb){
-    LOG_WARN << "StFtpcTrackMaker::Error Getting FTPC database: Geometry" << endm;
-    assert(ftpcGeometryDb);
-
-    return kStWarn;
+    LOG_ERROR << "StFtpcTrackMaker::Error Getting FTPC database: Geometry" << endm;
+    return kStErr;
   }
 
   TDataSetIter ftpcGeometry(ftpcGeometryDb);
@@ -421,22 +425,30 @@ Int_t StFtpcTrackMaker::InitRun(Int_t run) {
   				 (St_ftpcDimensions *)ftpcGeometry("ftpcDimensions"), 
   				 (St_ftpcPadrowZ *)ftpcGeometry("ftpcPadrowZ"));
 
+  if (StFtpcTrackingParams::Instance()->GetReturnCode() > 0) {
+    LOG_ERROR << " FATAL error in StFtpcTrackingParams return code = "<< StFtpcTrackingParams::Instance()->GetReturnCode() <<endm;
+    return kStErr;
+  }
+
   // get ftpc calibration db
   TDataSet *ftpcCalibrationsDb = GetDataBase("Calibrations/ftpc");
 
   if (!ftpcCalibrationsDb){
-    LOG_WARN << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
-    assert(ftpcCalibrationsDb);
-
-    return kStWarn;
+    LOG_ERROR << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
+    return kStErr;
   }
 
   TDataSetIter ftpcCalibrations(ftpcCalibrationsDb);
 
-  // get run dependend tracking parameters from database
+  // get run dependent tracking parameters from database
   StFtpcTrackingParams::Instance(kTRUE, 
 				 (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"),
 				 GetDataBase("RunLog"));
+  
+  if (StFtpcTrackingParams::Instance()->GetReturnCode() > 0) {
+    LOG_ERROR << " FATAL error in StFtpcTrackingParams return code = "<< StFtpcTrackingParams::Instance()->GetReturnCode() <<endm;
+    return kStErr;
+  }
 
   return kStOK;
 }
@@ -449,7 +461,7 @@ Int_t StFtpcTrackMaker::Init()
   // Create Histograms
 
 if (m_Mode >= 2) {
-   LOG_WARN << "StFtpcTrackMaker writing to DEBUGFILE" << endm;
+   LOG_INFO << "StFtpcTrackMaker writing to DEBUGFILE" << endm;
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
 }
 
@@ -529,6 +541,11 @@ Int_t StFtpcTrackMaker::Make()
     LOG_WARN << "No FTPC clusters available!" << endm;
     return kStWarn;
   }  
+  Int_t rc = StFtpcTrackingParams::Instance()->GetReturnCode();
+  if (rc > 0) {
+    LOG_ERROR << "FTPC Database not available. Return Code = " << rc << endm;
+    return kStErr;
+  }
 
   StEvent *event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );    
 
@@ -905,7 +922,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.85 2007/12/11 09:36:39 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.86 2007/12/12 12:49:34 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
