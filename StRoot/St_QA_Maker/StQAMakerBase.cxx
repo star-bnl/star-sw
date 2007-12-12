@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.32 2007/11/30 05:38:50 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.33 2007/12/12 19:50:55 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.33  2007/12/12 19:50:55  genevb
+// Update for trigger words
+//
 // Revision 2.32  2007/11/30 05:38:50  genevb
 // Changes for Run8: mostly silicon removal, TOF addition
 //
@@ -279,7 +282,8 @@ void StQAMakerBase::BookHist() {
       (prefix[0] = QAMakerType) += "MB";  // Minbias
       (prefix[1] = QAMakerType) += "CL";  // Central
       (prefix[2] = QAMakerType) += "HT";  // HighTower
-      eventClass = 3;
+      (prefix[3] = QAMakerType) += "XX";  // OtherPhysics
+      eventClass = 4;
       break; }
 
     case (StQA_dAu) : {
@@ -355,7 +359,7 @@ void StQAMakerBase::BookHistTrigger(){
   QAH::preString = QAMakerType;
   if (mTrigWord) return;
   mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
-  mTrigWord->SetXTitle("1=MinBias, 2=Central, 3=Other Physics, 4=pp, 7=Laser, 8=Other");
+  mTrigWord->SetXTitle("1=MinBias, 2=Central, 3=HiPt, 5=HiTower, 6=OtherPhys");
   mTrigBits = QAH::H1F("QaTrigBits","trigger bits",32,-0.5,31.5);
 }
 //_____________________________________________________________________________
