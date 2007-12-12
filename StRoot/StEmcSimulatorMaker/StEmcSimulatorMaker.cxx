@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.53 2007/11/28 16:18:58 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.54 2007/12/12 22:12:47 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -161,14 +161,9 @@ Int_t StEmcSimulatorMaker::Make() {
                 mcHit->setdE(0.0);
                 mcHit->setParentTrack(NULL);
                 
-                StMcEmcHitCollection::EAddHit retCode = mEmcMcHits[det-1]->addHit(mcHit);
-                if(retCode == StMcEmcHitCollection::kNew) {
-                    mcHit = new StMcCalorimeterHit(); // StMcEvent owns the old hit now
-                }
-                else {
-                    LOG_WARN << "Tried to simulate ped noise for det=" << det << " softId=" << softId 
-                        << " but retCode != kNew.  Instead retCode=" << retCode << endm;
-                }
+                // push_back manually instead of using addHit to save (lots of) time
+                mEmcMcHits[det-1]->module(module)->detectorHits().push_back(mcHit);
+                mcHit = new StMcCalorimeterHit();
             }
             else {
                 iter++;
@@ -512,6 +507,9 @@ void StEmcSimulatorMaker::makeCrossTalk(StMcTrack *track)
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.54  2007/12/12 22:12:47  kocolosk
+ *  push_back detector hits manually instead of using addHit to save (lots of) time
+ *
  *  Revision 1.53  2007/11/28 16:18:58  kocolosk
  *  optical cross-talk simulation by Mike Betancourt
  *  http://www.star.bnl.gov/HyperNews-star/protected/get/phana/144.html
