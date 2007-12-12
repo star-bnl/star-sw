@@ -1,5 +1,10 @@
-// $Id: StFtpcTrackingParams.hh,v 1.20 2007/05/14 19:44:16 jcs Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.21 2007/12/12 12:55:19 jcs Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.21  2007/12/12 12:55:19  jcs
+// Markus Oldenburg replaced assert() with a return code which can be tested in StFtpcTrackMaker
+// replaced 'return 1' with 'return kStOK'
+// replaced 'return 0' with 'return KStErr'
+//
 // Revision 1.20  2007/05/14 19:44:16  jcs
 // remove obsolete include statement
 //
@@ -84,6 +89,7 @@
 #include "SystemOfUnits.h"
 #include "StThreeVectorD.hh"
 #include "StMatrixD.hh"
+#include "Stypes.h"
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -113,6 +119,9 @@ private:
   static StFtpcTrackingParams* mInstance;
 
   char mStart;  //  start of simple variables
+
+  Int_t mReturnCode;
+
   /// FTPC geometry
   Double_t  mInnerRadius;
   Double_t  mOuterRadius;
@@ -225,7 +234,8 @@ public:
   
   void PrintParams();
 
-  
+  Int_t GetReturnCode() { return mReturnCode; }
+
   /// @name FTPC geometry
   //@{
   Double_t InnerRadius();
