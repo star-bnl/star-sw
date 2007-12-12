@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.93  2007/12/12 13:24:45  jcs
+// replace asserts with LOG_ERROR message and kStErr return code
+//
 // Revision 1.92  2007/04/28 17:56:09  perev
 // Redundant StChain.h removed
 //
@@ -493,7 +496,10 @@ Int_t StFtpcClusterMaker::Init(){
   }
 
   St_DataSet *ftpc = GetDataBase("ftpc");
-  assert(ftpc);
+  if (!ftpc) {
+     LOG_ERROR << "Exiting - run parameter database StarDb/ftpc not found"<<endm;
+     return kStErr;
+  }
   St_DataSetIter       local(ftpc);
 
   m_clusterpars  = (St_ftpcClusterPars *)local("ftpcClusterPars");
@@ -621,9 +627,15 @@ Int_t StFtpcClusterMaker::Make()
   if(daqDataset)
     {
       LOG_DEBUG << "Using StDAQReader to get StFTPCReader" << endm;
-      assert(daqDataset);
+      if (!daqDataset) {
+         LOG_ERROR << "Exiting - daqDataset not found" << endm;
+         return kStErr;
+      }
       daqReader=(StDAQReader *)(daqDataset->GetObject());
-      assert(daqReader);
+      if (!daqReader) {
+         LOG_ERROR << "Exiting - daqReader not found" << endm;
+         return kStErr;
+      }
       ftpcReader=daqReader->getFTPCReader();
 
       if (!ftpcReader || !ftpcReader->checkForData()) {
