@@ -244,7 +244,7 @@ Int_t StEventQAMaker::Make() {
       // pp
       
       if ((nEvClasses==0) && (isTriggerInRange(trigId,1000,1999))) {
-	mTrigWord->Fill(4.); // "pp Physics"
+	mTrigWord->Fill(1.); // "pp Physics" => Minbias trig word
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 1;
 	nEvClasses++;
@@ -254,7 +254,6 @@ Int_t StEventQAMaker::Make() {
       // AuAu or generic
       
       if (isTriggerInSubRange(trigId,0,99)) {
-	//if (isTriggerInRange(trigId,15007,15099))
 	mTrigWord->Fill(1.); // "MinBias"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 1;
@@ -262,23 +261,23 @@ Int_t StEventQAMaker::Make() {
 	histsSet = StQA_AuAu;
       }
       if (isTriggerInSubRange(trigId,100,199)) {
-	//if (isTriggerInRange(trigId,15105,15199))
 	mTrigWord->Fill(2.); // "Central"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 2;
 	nEvClasses++;
 	histsSet = StQA_AuAu;
       }
-      if (isTriggerInSubRange(trigId,200,299)) {
-	//if (isTriggerInRange(trigId,15202,15299))
+      if (isTriggerInSubRange(trigId,200,299) ||
+         (run_year >= 9 && isTriggerInSubRange(trigId,500,599))) {
 	mTrigWord->Fill(5.); // "High Tower"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 3;
 	nEvClasses++;
 	histsSet = StQA_AuAu;
       }
-      if ((nEvClasses==0) && (isTriggerInRange(trigId,15300,15999))) {
-	mTrigWord->Fill(3.); // "Other Physics"
+      if ((nEvClasses==0) && (isTriggerInRange(trigId,600,999))) {
+	mTrigWord->Fill(6.); // "Other Physics"
+	if (run_year >= 9) doEvent = kTRUE;
 	evClasses[nEvClasses] = 4;
 	nEvClasses++;
 	histsSet = StQA_AuAu;
@@ -2302,8 +2301,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.85 2007/12/10 19:58:20 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.86 2007/12/12 19:50:55 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.86  2007/12/12 19:50:55  genevb
+// Update for trigger words
+//
 // Revision 2.85  2007/12/10 19:58:20  genevb
 // Use log10 for number of secondary vertices
 //
