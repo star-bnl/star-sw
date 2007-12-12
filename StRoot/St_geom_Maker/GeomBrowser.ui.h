@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.27 2007/12/12 18:47:38 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.28 2007/12/12 19:58:08 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -368,27 +368,40 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                          , "Save the volulme  as"
                          , &selectedFilter);
  
-                      if (thatFile.isEmpty()) return;
-                      TDirectory *save = gDirectory;
-                      TFile f((const char *)thatFile,"RECREATE");
-                      volume->Write();
-                      f.Close();
-                      save->cd();
+                      if (thatFile.isEmpty()) {
+                         response = -1;
+                      } else {
+                         TDirectory *save = gDirectory;
+                         TFile f((const char *)thatFile,"RECREATE");
+                         volume->Write();
+                         f.Close();
+                         save->cd();
+                     }
                   } else if (response == menus[4]) { 
                      // Change the object color
-                     if (rootColor = -1)  {
-                        QRgb initial;
+                     Color_t oldColor = rootColor;
+                     if (rootColor == -1)  {
+                        Color_t vc = volume->GetLineColor();
+                        float r,g,b;
+                        int a = 0;
+                        gROOT->GetColor(vc)->GetRGB(r,g,b);
+                        Style_t vs = volume->GetFillStyle();
+                        if (4000 >= vs && vs < 5000) a = vs-4000;
+                        QRgb initial = qRgba(r*255,g*255,b*255,a);
                         bool ok;
                         QRgb color = QColorDialog::getRgba(initial, &ok, this,"Change the Volume Color" );
-                        if (!ok) return;
-                        int red   = qRed(color);
-                        int green = qGreen(color);
-                        int blue  = qBlue(color);
-                        int alpha = qAlpha(color);
-                        rootColor = TColor::GetColor(red, green, blue);
-                        if (alpha > 0) volume->SetFillStyle(4000+alpha);
+                        if (ok) {
+                           int red   = qRed(color);
+                           int green = qGreen(color);
+                           int blue  = qBlue(color);
+                           int alpha = qAlpha(color);
+                           rootColor = TColor::GetColor(red, green, blue);
+                           if ( (alpha > 0) && (alpha != vs-4000) ) volume->SetFillStyle(4000+alpha);
+                        } else {
+                           response = -1;
+                        }
                      }
-                     volume->SetLineColor(rootColor);                     
+                     if (oldColor != rootColor) volume->SetLineColor(rootColor);
                   } else { response = -1; }
                   // set visibility
                   if (volume->GetVisibility() != s) volume->SetVisibility(s);
