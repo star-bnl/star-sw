@@ -281,14 +281,42 @@ void StDbServiceBroker::RecommendHost()
           continue;
         }
 
-      if (mysql_query(conn, "show processlist") != 0 )
+      if (mysql_query(conn, "show status like \"%Threads_running\"") != 0 )
         {
           LOG_ERROR <<"StDbServiceBroker::RecommendHost() show processlist failed"<<endm;
           continue;
         }
 
-      MYSQL_RES *res_set = mysql_store_result(conn);
-      unsigned int nproc = mysql_num_rows(res_set);
+      unsigned int nproc = 0;
+
+
+      MYSQL_RES* res_set = mysql_store_result(conn);
+     if (res_set==0)
+        {
+          LOG_ERROR << "StDbServiceBroker::RecommendHost(): mysql_store_result failed"<<endm; 
+        }
+     else
+       {
+	 MYSQL_ROW row = mysql_fetch_row(res_set);
+	 if (row==0)
+	   {
+	     LOG_ERROR << "StDbServiceBroker::RecommendHost(): mysql_fetch_row failed"<<endm;
+	   }
+	 else
+	   {
+	     if(!from_string<unsigned int>(nproc,row[1],std::dec))
+	     {
+	       LOG_ERROR << "StDbServiceBroker::RecommendHost():  mysql_fetch_row returns non-numeric"<<endm;
+	     }
+	   }
+	 mysql_free_result(res_set);
+       }
+
+
+      //      unsigned int nproc = mysql_num_rows(res_set);
+
+
+
       double dproc = nproc/(*I).Power;
 #ifdef DEBUG
       LOG_DEBUG <<" Server "<<((*I).HostName).c_str()<< " actual "<< nproc << " effective "<< dproc <<" processes "<<endm;
