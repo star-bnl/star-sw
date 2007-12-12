@@ -1,5 +1,10 @@
-// $Id: StFtpcTrackingParams.cc,v 1.34 2007/11/13 10:30:40 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.35 2007/12/12 12:55:18 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.35  2007/12/12 12:55:18  jcs
+// Markus Oldenburg replaced assert() with a return code which can be tested in StFtpcTrackMaker
+// replaced 'return 1' with 'return kStOK'
+// replaced 'return 0' with 'return KStErr'
+//
 // Revision 1.34  2007/11/13 10:30:40  jcs
 // add code (commented out) which enables testing rotation values without changing the database
 //
@@ -269,7 +274,7 @@ StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcTrackingPars *trackPars,
 					   St_ftpcdEdxPars *dEdxPars,
 					   St_ftpcDimensions *dimensions, 
 					   St_ftpcPadrowZ *zrow) 
-  : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1)
+  : mReturnCode(0), mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1)
 {
   // zero everythig what possible
   memset(&mStart,0,&mEnd-&mStart+1);
@@ -299,7 +304,7 @@ StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcTrackingPars *trackPars,
 
 
 StFtpcTrackingParams::StFtpcTrackingParams()
-  : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1) 
+  : mReturnCode(0), mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1) 
 {
   // zero everythig what is possible
   memset(&mStart,0,&mEnd-&mStart+1);
@@ -643,7 +648,6 @@ StFtpcTrackingParams::~StFtpcTrackingParams() {
 
 Int_t StFtpcTrackingParams::InitTrackingParams(ftpcTrackingPars_st *trackParsTable) {
   // Sets tracking parameters.
-  
   if (trackParsTable) {
     
     // Vertex position
@@ -698,14 +702,13 @@ Int_t StFtpcTrackingParams::InitTrackingParams(ftpcTrackingPars_st *trackParsTab
     mMinPointRatio = trackParsTable->minPointRatio;
     mMaxPointRatio = trackParsTable->maxPointRatio;     
     
-    return 1;
+    return kStOK;
   }
   
   else {
     LOG_ERROR <<  "No data in table class St_TrackingPars." << endm;
-    assert(trackParsTable);
-    
-    return 0;
+    mReturnCode += 1;    
+    return kStErr;
   }
 }
 
@@ -725,14 +728,14 @@ Int_t StFtpcTrackingParams::InitdEdx(ftpcdEdxPars_st *dEdxParsTable) {
     mAip          = dEdxParsTable[0].a_i_p * 1.0e-9;  // in GeV 
     mALargeNumber = dEdxParsTable[0].a_large_number;
     
-    return 1;
+    return kStOK;
   }
   
   else {
     LOG_ERROR << "No data in table class St_ftpcdEdxPars." << endm;
-    assert(dEdxParsTable);
-    
-    return 0;
+    mReturnCode += 2;
+
+    return kStErr;
   }
 }
 
@@ -752,14 +755,14 @@ Int_t StFtpcTrackingParams::InitDimensions(ftpcDimensions_st* dimensionsTable) {
     mInstallationPointZ[0] = dimensionsTable->installationPointZ[0] * centimeter;
     mInstallationPointZ[1] = dimensionsTable->installationPointZ[1] * centimeter;
 
-    return 1;
+    return kStOK;
   }
   
   else {
     LOG_ERROR << "No data in table class St_ftpcDimensions." << endm;
-    assert(dimensionsTable);
-    
-    return 0;
+    mReturnCode += 4;
+
+    return kStErr;
   }
 }
 
@@ -774,14 +777,14 @@ Int_t StFtpcTrackingParams::InitPadRows(ftpcPadrowZ_st* padrowzTable) {
       mPadRowPosZ[i] = ((Float_t *)padrowzTable->z)[i];
     }
     
-    return 1;
+    return kStOK;
   } 
   
   else {
     LOG_ERROR <<  "No data in table class St_ftpcPadrowZ." << endm;
-    assert(padrowzTable);
-    
-    return 0;
+    mReturnCode += 8;
+
+    return kStErr;
   }
 }
 
@@ -794,7 +797,7 @@ Int_t StFtpcTrackingParams::InitCoordTransformation() {
   mObservedVertexOffsetX[0] = -9999.;
   mObservedVertexOffsetX[1] = -9999.;
 
-  return 1;
+  return kStOK;
 }
 
 
@@ -835,14 +838,14 @@ Int_t StFtpcTrackingParams::InitCoordTransformation(ftpcCoordTrans_st* ftpcCoord
 	       << oldX[1] << " to " <<  mObservedVertexOffsetX[1] << " (west)." << endm;
     }
 
-    return 1;
+    return kStOK;
   }
   
   else {
     LOG_ERROR << "No data in table class St_ftpcCoordTrans." << endm;
-    assert(ftpcCoordTrans);
+    mReturnCode += 16;
     
-    return 0;
+    return kStErr;
   }
 }
 
@@ -884,7 +887,8 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
   
   else {
     LOG_ERROR << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
-    assert(gStTpcDb->GlobalPosition());
+    mReturnCode += 32;
+    return kStErr;
   }
   
   // internal FTPC rotation [has do be done before local -> global]
@@ -1020,7 +1024,7 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 
   }
 
-  return 1;
+  return kStOK;
 }
   
 
