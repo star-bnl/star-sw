@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.25 2007/11/12 22:59:41 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.26 2007/12/12 18:33:59 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -25,6 +25,8 @@
 #include "TVirtualViewer3D.h"
 #endif
 
+#include <qcolordialog.h> 
+#include "TColor.h" 
 
 //_____________________________________________________________________________
 class TUpdateList {
@@ -315,13 +317,23 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
             int j =0;
             menus[j++] = itemPosition;
             contextMenu->setWhatsThis(itemPosition,"Make the selected volumes and its children visible");
+            
             contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("&Children")
                ,"Make the selected the children of the selected volumes visible but the volume itself none");
             menus[j++] = itemPosition;
+            
             contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("&None")
                ,"Make the selected the volumes invisible");
             menus[j++] = itemPosition;
-         }
+            contextMenu->insertSeparator();
+             contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("&Save")
+               ,"Save the selected object into ROOT file");
+            menus[j++] = itemPosition;
+           
+             contextMenu->setWhatsThis(itemPosition=contextMenu->insertItem("&Color")
+               ,"Change the color of the selected object");
+            menus[j++] = itemPosition;
+        }
          response = contextMenu->exec(QCursor::pos());
          if (response != -1 ) {
             TUpdateList listLock(listView1);
@@ -340,6 +352,38 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                      itemRoot->setState(QCheckListItem::NoChange); s = TVolume::kThisUnvisible;
                   } else if (response == menus[2]) { 
                      itemRoot->setState(QCheckListItem::Off)     ; s = TVolume::kNoneVisible;
+                  } else if (response == menus[3]) { 
+                     // Save the object
+                      QString filter = "ROOT file (*.root);";
+                      QString selectedFilter;
+                      QString dir = fSaveFileName;
+                      if (dir.isEmpty()) dir = gSystem->WorkingDirectory(); 
+                      else               dir = QFileInfo(dir).dirPath();
+
+                      QString thatFile = QFileDialog::getSaveFileName(dir
+                         , filter, this, "SaveAs"
+                         , "Save the volulme  as"
+                         , &selectedFilter);
+ 
+                      if (thatFile.isEmpty()) return;
+                      TDirectory *save = gDirectory;
+                      TFile f((const char *)thatFile,"RECREATE");
+                      volume->Write();
+                      f.Close();
+                      save->cd();
+                  } else if (response == menus[4]) { 
+                     // Change the object color
+                     QRgb initial;
+                     bool ok;
+                     QRgb color = QColorDialog::getRgba(initial, &ok, this,"Change the Volume Color" );
+                     if (!ok) return;
+                     int red   = qRed(color);
+                     int green = qGreen(color);
+                     int blue  = qBlue(color);
+                     int alpha = qAlpha(color);
+                     Int_t rootColor = TColor::GetColor(red, green, blue);
+                     if (alpha > 0) volume->SetFillStyle(4000+alpha);
+                     volume->SetLineColor(rootColor);                     
                   } else { response = -1; }
                   // set visibility
                   if (volume->GetVisibility() != s) volume->SetVisibility(s);
