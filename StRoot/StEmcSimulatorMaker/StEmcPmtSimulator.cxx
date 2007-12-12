@@ -1,4 +1,4 @@
-// $Id: StEmcPmtSimulator.cxx,v 1.12 2007/10/08 15:28:35 kocolosk Exp $
+// $Id: StEmcPmtSimulator.cxx,v 1.13 2007/12/12 22:12:24 kocolosk Exp $
 
 #include "StEmcPmtSimulator.h"
 
@@ -94,7 +94,7 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
     }
     
     // finally smear with any specified calibration jitter
-    ADC *= mRandom.Gaus(mCalibScale, mCalibSpread);
+    ADC = pedMean + (ADC-pedMean) * mRandom.Gaus(mCalibScale, mCalibSpread);
     
     // check for a valid ADC range
     double maxADC = mRandom.Gaus(mMaxADC, mMaxADCSpread);
@@ -115,6 +115,9 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
 
 /*****************************************************************************
  *  $Log: StEmcPmtSimulator.cxx,v $
+ *  Revision 1.13  2007/12/12 22:12:24  kocolosk
+ *  calibration spread should only operate on ped-subtracted ADCs, not raw
+ *
  *  Revision 1.12  2007/10/08 15:28:35  kocolosk
  *  setMaximumAdc(Spread) methods allow for better simulation of BSMD ADC response
  *  http://www.star.bnl.gov/HyperNews-star/get/emc2/2507.html
