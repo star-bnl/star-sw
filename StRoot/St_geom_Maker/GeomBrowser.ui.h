@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.26 2007/12/12 18:33:59 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.27 2007/12/12 18:47:38 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -338,11 +338,12 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
          if (response != -1 ) {
             TUpdateList listLock(listView1);
             QListViewItem  *i;
+            bool saved = false;
+            Int_t rootColor = -1;
             for ( i = lst.first(); i; i = lst.next() ) {     
                TQtObjectListItem* itemRoot =(TQtObjectListItem* )i;
                TObject *obj = itemRoot->Object();
                TVolume *volume = dynamic_cast<TVolume *>(obj);
-
                // check visibility
                if (volume) {
                   TVolume::ENodeSEEN s = volume->GetVisibility();
@@ -353,6 +354,8 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                   } else if (response == menus[2]) { 
                      itemRoot->setState(QCheckListItem::Off)     ; s = TVolume::kNoneVisible;
                   } else if (response == menus[3]) { 
+                      if (saved) return;
+                      saved  = true;
                      // Save the object
                       QString filter = "ROOT file (*.root);";
                       QString selectedFilter;
@@ -373,16 +376,18 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                       save->cd();
                   } else if (response == menus[4]) { 
                      // Change the object color
-                     QRgb initial;
-                     bool ok;
-                     QRgb color = QColorDialog::getRgba(initial, &ok, this,"Change the Volume Color" );
-                     if (!ok) return;
-                     int red   = qRed(color);
-                     int green = qGreen(color);
-                     int blue  = qBlue(color);
-                     int alpha = qAlpha(color);
-                     Int_t rootColor = TColor::GetColor(red, green, blue);
-                     if (alpha > 0) volume->SetFillStyle(4000+alpha);
+                     if (rootColor = -1)  {
+                        QRgb initial;
+                        bool ok;
+                        QRgb color = QColorDialog::getRgba(initial, &ok, this,"Change the Volume Color" );
+                        if (!ok) return;
+                        int red   = qRed(color);
+                        int green = qGreen(color);
+                        int blue  = qBlue(color);
+                        int alpha = qAlpha(color);
+                        rootColor = TColor::GetColor(red, green, blue);
+                        if (alpha > 0) volume->SetFillStyle(4000+alpha);
+                     }
                      volume->SetLineColor(rootColor);                     
                   } else { response = -1; }
                   // set visibility
