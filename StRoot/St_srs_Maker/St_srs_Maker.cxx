@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.37 2007/04/28 17:56:56 perev Exp $
+//$Id: St_srs_Maker.cxx,v 1.38 2007/12/12 22:49:22 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.38  2007/12/12 22:49:22  fisyak
+//Syncronize srs parameters with Calibrations/tracker/svtHitError
+//
 //Revision 1.37  2007/04/28 17:56:56  perev
 //Redundant StChain.h removed
 //
@@ -84,6 +87,7 @@
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "StDbUtilities/St_svtHybridDriftVelocityC.h"
+#include "tables/St_HitError_Table.h"
 ClassImp(St_srs_Maker)
 
 //_____________________________________________________________________________
@@ -104,53 +108,7 @@ St_srs_Maker::~St_srs_Maker(){
 //_____________________________________________________________________________
 Int_t St_srs_Maker::Init(){
 
-  //Get configuration setup
-
-   St_DataSet *dataSet = GetDataSet("StSvtConfig");
-   
-   if (dataSet){
-    setConfig((StSvtConfig*)(dataSet->GetObject()));
-   }
-   else{
-     dataSet = new St_ObjectSet("StSvtConfig");
-     AddConst(dataSet);  
-     mConfig = new StSvtConfig();
-     setConfig("FULL");
-     mConfig->setConfiguration(mConfigString.Data());
-     dataSet->SetObject((TObject*)mConfig);
-     
-   }
-   mCoordTransform =  new StSvtCoordinateTransform();
-
-// 		Create tables
-   St_DataSetIter       local(GetInputDB("svt"));
-
-
-// 		geometry parameters
-   m_shape       = (St_svg_shape   *) local("svgpars/shape");
-   m_config      = (St_svg_config  *) local("svgpars/config");
-   m_geom        = (St_svg_geom    *) local("svgpars/geom");
-
-   if (!m_geom) {
-     if (!(m_shape && m_config)){
-       cout << " St_params_Maker:tpg_pad_plane or tpg_detector do not exist" << endl;
-     }
-     else {
-       m_geom = new St_svg_geom("geom",216);
-       Int_t res = svg_am(m_config,m_shape,m_geom);
-       if (res != kSTAFCV_OK) return kStWarn;
-     }
-   }
-   m_srs_activea = (St_srs_activea *) local("srspars/srs_activea");
-   m_srs_srspar  = (St_srs_srspar  *) local("srspars/srs_srspar");
-   m_srs_direct  = (St_srs_direct  *) local("srspars/srs_direct");
-
-
-   //   Get Bad Anodes
-
-   GetBadAnodes();
-
-// 		Create Histograms    
+ // 		Create Histograms    
    m_x_vs_y = new TH2F("srs_x_vs_y","X vs Y of Si space points",
                            300,-30,30,300,-30,30);
    m_x_vs_y->SetYTitle("y cm");
@@ -194,6 +152,67 @@ Int_t St_srs_Maker::Init(){
    
 
    return StMaker::Init();
+}
+//________________________________________________________________________________
+Int_t St_srs_Maker::InitRun(Int_t runnuber) {
+ //Get configuration setup
+
+   St_DataSet *dataSet = GetDataSet("StSvtConfig");
+   
+   if (dataSet){
+    setConfig((StSvtConfig*)(dataSet->GetObject()));
+   }
+   else{
+     dataSet = new St_ObjectSet("StSvtConfig");
+     AddConst(dataSet);  
+     mConfig = new StSvtConfig();
+     setConfig("FULL");
+     mConfig->setConfiguration(mConfigString.Data());
+     dataSet->SetObject((TObject*)mConfig);
+     
+   }
+   mCoordTransform =  new StSvtCoordinateTransform();
+
+// 		Create tables
+   St_DataSetIter       local(GetInputDB("svt"));
+
+
+// 		geometry parameters
+   m_shape       = (St_svg_shape   *) GetInputDB("svt/svgpars/shape");
+   m_config      = (St_svg_config  *) GetInputDB("svt/svgpars/config");
+   m_geom        = (St_svg_geom    *) GetInputDB("svt/svgpars/geom");
+
+   if (!m_geom) {
+     if (!(m_shape && m_config)){
+       cout << " St_srs_Maker::InitRun svt/svgpars/geom do not exist" << endl;
+     }
+     else {
+       m_geom = new St_svg_geom("geom",216);
+       Int_t res = svg_am(m_config,m_shape,m_geom);
+       if (res != kSTAFCV_OK) return kStWarn;
+     }
+   }
+   m_srs_activea = (St_srs_activea *) GetInputDB("svt/srspars/srs_activea");
+   m_srs_srspar  = (St_srs_srspar  *) GetInputDB("svt/srspars/srs_srspar");
+   St_HitError  *stiSvtHitErrors = (St_HitError  *) GetInputDB("Calibrations/tracker/svtHitError");
+   assert(stiSvtHitErrors);
+   St_HitError  *stiSsdHitErrors = (St_HitError  *) GetInputDB("Calibrations/tracker/ssdHitError");
+   assert(stiSsdHitErrors);
+   m_srs_direct  = new St_srs_direct("srs_direct",2);
+   srs_direct_st *direct = m_srs_direct->GetTable();
+   HitError_st  *SvtHitErrors = stiSvtHitErrors->GetTable();
+   HitError_st  *SsdHitErrors = stiSsdHitErrors->GetTable();
+   direct->sd = TMath::Sqrt(SvtHitErrors->coeff[0]);
+   direct->st = TMath::Sqrt(SvtHitErrors->coeff[3]);
+   direct++;
+   direct->sd = TMath::Sqrt(SsdHitErrors->coeff[0]);
+   direct->st = TMath::Sqrt(SsdHitErrors->coeff[3]);
+   cout << "Replace hit errors from Calibrations/tracker/(ssd|svt)HitError" << endl;
+   m_srs_direct->Print(0,2);
+   //   Get Bad Anodes
+
+   GetBadAnodes();
+   return kStOK;
 }
 //___________________________________________________________________________
 

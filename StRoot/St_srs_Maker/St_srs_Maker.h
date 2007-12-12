@@ -51,6 +51,7 @@ class St_srs_Maker : public StMaker {
                   St_srs_Maker(const char *name="svt_hits");
    virtual       ~St_srs_Maker();
    virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t runnuber);
    virtual Int_t  Make();
    Int_t          setConfig(StSvtConfig* config);
    Int_t          setConfig(const char* config);
@@ -58,7 +59,7 @@ class St_srs_Maker : public StMaker {
    Int_t          GetBadAnodes();
    Int_t          FillHist(St_scs_spt* scs_spt);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.11 2003/09/10 19:47:50 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.12 2007/12/12 22:49:23 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_srs_Maker,0)   // chain virtual base class for Makers
 };
