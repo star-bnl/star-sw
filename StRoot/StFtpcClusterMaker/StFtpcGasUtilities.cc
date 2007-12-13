@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.22 2007/02/01 11:57:04 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.23 2007/12/13 21:04:52 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.23  2007/12/13 21:04:52  jcs
+//   insert missing LOG_DEBUG statement
+//
 //   Revision 1.22  2007/02/01 11:57:04  jcs
 //   move unessential output from INFO to DEBUG
 //
@@ -509,6 +512,11 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
         LOG_DEBUG<<" + "<<tempT->extra7East<<"(extra7East)"<<endm;
     }
     LOG_DEBUG<<" = "<<averageExtraTempsEast<<endm;
+
+     // calculate average extra temperature east
+    if (numberExtraTempsEast > 0) {
+       LOG_DEBUG<<"averageExtraTempsEast = "<<averageExtraTempsEast<<"/"<<numberExtraTempsEast<<" = "<<averageExtraTempsEast/numberExtraTempsEast<<endm;
+    }
 
     // calculate average extra temperature east
     if (numberExtraTempsEast > 0) {
