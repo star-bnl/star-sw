@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.14 2007/01/15 08:23:02 jcs Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.15 2007/12/13 10:35:21 jcs Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -155,13 +155,13 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
 StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
 
   if (!mTrkNodeMap.size()) {
-    LOG_WARN <<"StFtpcTrackToStEvent::FillEventPrimaries(). ERROR:"
+    LOG_WARN <<"StFtpcTrackToStEvent::FillEventPrimaries(): "
 	 << "Mapping between the StTrackNodes and the StFtpcTracks is empty.  Exit." << endm;
     return 0;
   }
   
   if (e==0 || t==0) {
-    LOG_WARN <<"StFtpcTrackToStEvent::FillEventPrimaries(). ERROR:"
+    LOG_WARN <<"StFtpcTrackToStEvent::FillEventPrimaries(): "
 	 <<"Null StEvent ("<<e<<") || TObjArray of tracks ("<<t<<").  Exit"<<endm;
     return 0;
   }
