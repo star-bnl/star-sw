@@ -25,7 +25,6 @@ ClassImp(StBemcTriggerSimu)
 //==================================================
 //==================================================
 StBemcTriggerSimu::StBemcTriggerSimu() {
-  LOG_DEBUG<<"StBemcTriggerSimu::constructor"<<endm; 
 
   mEvent    = NULL;
   mDecoder  = new StEmcDecoder();
@@ -39,14 +38,14 @@ StBemcTriggerSimu::StBemcTriggerSimu() {
 //==================================================
 //==================================================
 StBemcTriggerSimu::~StBemcTriggerSimu(){ 
-  LOG_DEBUG<<"StBemcTriggerSimu::~StBemcTriggerSimu()"<<endl;
+
   delete mDecoder;
   delete mDbThres;
 }
 //==================================================
 //==================================================
 void StBemcTriggerSimu::Init(){
-  LOG_DEBUG <<"StBemcTriggerSimu::Init()"<<endm;
+ 
   LOG_INFO <<Form("Bemc::Init() MC_flag=%d, config: flag=%d",mMCflag, mConfig)<<endm;
   assert(mConfig>=kOnline);
   assert(mConfig<=kExpert);
@@ -111,7 +110,7 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(117585);  //bemc-jp2
   mAllTriggers.insert(127585);  //bemc-jp2
   mAllTriggers.insert(137585);  //bemc-jp2
-  
+    
   mAllTriggers.insert(117601);  //Upsilon
   mAllTriggers.insert(117602);  //Upsilon
   mAllTriggers.insert(137602);  //Upsilon
@@ -181,13 +180,14 @@ void StBemcTriggerSimu::InitRun(int runnumber){
  //Get FEE window for HT from support class for offline operation
   //online replaced this with Db call in getPed()
   HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
+  
+  for ( int tpid=0;tpid<kNPatches;tpid++) numMaskTow[tpid]=0;
 
 }
 //==================================================
 //==================================================
 void StBemcTriggerSimu::Clear(){
   
-  LOG_DEBUG <<"StBemcTriggerSimu::Clear()"<<endm;
 
   for (int did=1; did<=kNTowers; did++){
     adc08[did-1]=0;
@@ -223,37 +223,43 @@ StTriggerSimuDecision StBemcTriggerSimu::triggerDecision(int trigId) {
 //==================================================
 //==================================================
 void StBemcTriggerSimu::getTowerStatus(){
-  LOG_DEBUG<<"StBemcTriggerSimu::getTowerStatus()"<<endm;
   
   for (int i=0;i<kNTowers;i++) TowerStatus[i]=1;
   
   if (mConfig==kOnline) {
-    for (int cr=1; cr <= kNCrates; cr++){
-      for (int ch=0; ch < kNChannels; ch++){
-        int did;
+    for (Int_t cr=1; cr <= kNCrates; cr++){
+      for (Int_t ch=0; ch < kNChannels; ch++){
+        Int_t did,tpid;
         mDecoder->GetTowerIdFromCrate(cr,ch,did);
         TowerStatus[did-1]=mTables->triggerTowerStatus(cr,ch);
+	mDecoder->GetTriggerPatchFromTowerId(did,tpid);
+	if (TowerStatus[did-1]!=1) numMaskTow[tpid]++;
       }
     }
   }
+  
 
   if (mConfig==kOffline){
     for (int did=1; did<=kNTowers; did++){
-      mTables->getStatus(BTOW, did, TowerStatus[did-1]);
+      Int_t tpid;
+      mTables->getStatus(BTOW, did, TowerStatus[did-1]); 
+      mDecoder->GetTriggerPatchFromTowerId(did,tpid);
+      if (TowerStatus[did-1]!=1) numMaskTow[tpid]++;
     }
   }
   
   if (mConfig==kExpert){
     for (int did=1; did<=kNTowers; did++){
+      Int_t tpid;
       TowerStatus[did-1]=1;
+      mDecoder->GetTriggerPatchFromTowerId(did,tpid);
+      if (TowerStatus[did-1]!=1) numMaskTow[tpid]++;
     }
   }
 }
 //==================================================
 //==================================================
 void StBemcTriggerSimu::getDSM_TPStatus(){
-
-  LOG_DEBUG<<"StBemcTriggerSimu::getDSM_TPStatus()"<<endm;
 
   for (int tpid=0;tpid<kNPatches;tpid++) DSM_TPStatus[tpid]=1;
    
@@ -283,8 +289,6 @@ void StBemcTriggerSimu::getDSM_TPStatus(){
 //==================================================
 void StBemcTriggerSimu::getDSM_HTStatus(){
   
-  LOG_DEBUG<<"StBemcTriggerSimu::getDSM_HTStatus()"<<endm;
-
   for (int tpid=0;tpid<kNPatches;tpid++) DSM_HTStatus[tpid]=1;
 
   //Online get DSM HT status from db
@@ -311,17 +315,8 @@ void StBemcTriggerSimu::getDSM_HTStatus(){
 //==================================================
 void StBemcTriggerSimu::getPed() {
 
-  LOG_DEBUG<<"StBemcTriggerSimu::getPed()"<<endm;
-
   for (int i=1;i<=kNTowers;i++) {ped12[i-1]=0;}
   
-  //Get Pedestal shift for HT which depends on calibration
-  //for (cr=1;cr<=kNCrates;cr++){
-  //  for (seq=0;seq<kNSeq;seq++){
-  //    bitConvValue[cr][seq]=mTables->triggerBitConversion(cr,seq);
-  // }
-  //}
-
   for (int did=1;did<=kNTowers;did++){
     bitConvValue[did-1]=mTables->triggerBitConversionByID(did);
   }
@@ -357,19 +352,23 @@ void StBemcTriggerSimu::getPed() {
 //==================================================
 //==================================================
 void StBemcTriggerSimu::getLUT(){
-  LOG_DEBUG<<"StBemcTriggerSimu::getLUT()"<<endm;
 
+  Int_t f,param[6];
   for (int cr=1;cr<=kNCrates;cr++){
     for (int seq=0; seq<kNSeq; seq++){
-      mTables->getTriggerFormulaTag(cr,seq,LUTtag[cr][seq]);
-      // mTables->getTriggerFormulaParameters(cr,seq,LUTbit[cr][seq]);
+      mTables->getTriggerFormulaTag(cr,seq,f);
+      mTables->getTriggerFormulaParameters(cr,seq,param);
+      formula[cr-1][seq]=f;
+      LUTscale[cr-1][seq]=param[0];
+      LUTped[cr-1][seq]=param[1];
+      LUTsig[cr-1][seq]=param[2];
+      LUTpow[cr-1][seq]=param[3];
     }
   }
 }
 //==================================================
 //==================================================
 void StBemcTriggerSimu::Make(){
-  LOG_DEBUG<<"StBemcTriggerSimu::Make()"<<endm;
   
   mEvent = static_cast<StEvent*> ( mHeadMaker->GetDataSet("StEvent") );
   
@@ -387,7 +386,14 @@ void StBemcTriggerSimu::FEEout() {
   //which is a C++ translation of the FEE code
   //ped1 == ped12Diff value2 == ped10Diff value1 == ped10DiffI
    
-  LOG_DEBUG<<"StBemcTriggerSimu::Fee()"<<endm;
+   
+  //  static int commonLUT[] = {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+  static int commonLUT[] = { 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+			    10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+			    35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+			    60, 61, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 
+			    62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 
+			    62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62}; 
   
   if(!mEvent) {LOG_WARN << "StBemcTriggerSimu -- no StEvent!" << endm;}
   
@@ -396,7 +402,7 @@ void StBemcTriggerSimu::FEEout() {
   
   StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
   if(!detector) {LOG_WARN << "StBemcTriggerSimu -- no StEmcDetector!" << endm;}
- 
+
   //loop through BEMC hits 
   //Store 8,10,12 bit pedestal adjusted ADC for hits
   //for online case online tower masks are applied
@@ -410,20 +416,21 @@ void StBemcTriggerSimu::FEEout() {
         StSPtrVecEmcRawHit& rawHit=module->hits();
         for(UInt_t k = 0; k < rawHit.size(); ++k) {
           if(rawHit[k]) {
-            int did, tpid, cr, seq;
+            int did, tpid;
             
             Int_t m=rawHit[k]->module();
             Int_t e=rawHit[k]->eta();
             Int_t s=abs(rawHit[k]->sub());
             Int_t adc=rawHit[k]->adc();
-            
-            //Get software tower id, trigger patch id, crate and seq
-            mGeo->getId(m,e,s,did);
+            //Float_t energy=rawHit[k]->energy();
+
+            //Get software tower id and trigger patch id
+            mGeo->getId(m,e,s,did);	  
             mDecoder->GetTriggerPatchFromTowerId(did,tpid);
-            mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq);
-            
+
             //apply tower masks
-            if (TowerStatus[did-1]==1) {
+	    if (TowerStatus[did-1]==1) {
+
               //12 bit ADC enters FEE and drop 2 bits immediately
               adc12[did-1]=adc;
               adc10[did-1]=adc12[did-1] >> 2;
@@ -486,14 +493,14 @@ void StBemcTriggerSimu::FEEout() {
               }
               if (DSM_TPStatus[tpid]==1) {
                 L0_TP_ADC[tpid]+=adc08[did-1];
-                // This line needs to be replaced with LUT from the database in the case of online. For offline this is fine
+		//Calculate LUT ped for OFFLINE
                 L0_TP_PED[tpid]++;
               }
-
+	      
               //Mask out 6 bit adc if that DSM HT/TP bit was masked out
               if (DSM_HTStatus[tpid]==0) L0_HT_ADC[tpid]=0;
               if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
-              
+	      
               if (0) {
                 cout<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
                     <<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
@@ -506,10 +513,64 @@ void StBemcTriggerSimu::FEEout() {
       }
     }
   }
-  
+
+  //Find LUT
   for (int tpid=0;tpid<kNPatches;tpid++){ 
-    if (mConfig==kOffline)  L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
-    if (mConfig==kOnline)   L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+   
+    Int_t cr, seq, chan, LUTindex;
+    mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq); 
+    chan=seq/16;
+
+    if ( ((L0_TP_ADC[tpid]+LUTped[cr-1][chan]+2)>=0) && (formula[cr-1][chan]==2) && (LUTscale[cr-1][chan]==1) && 
+	 (LUTpow[cr-1][chan]!=0) && (LUTsig[cr-1][chan]==0) && (pedTargetValue==24))
+      {
+	LUTindex=L0_TP_ADC[tpid] + LUTped[cr-1][chan] + numMaskTow[tpid];
+	LUT[tpid] = commonLUT[LUTindex];
+      }  
+    else
+      {
+	/*
+	float scale = LUTscale[cr-1][chan];
+	if (formula[cr-1][chan] == 1) {
+	  if (numMaskTow[tpid] != 16) 
+	    { 
+	      scale *= (16.0 - numMaskTow[tpid]) / 16.0;
+	    } 
+	  else 
+	    {
+	      scale = 1;
+	    }
+	}
+	float ped = LUTped[cr-1][chan];
+	if (LUTpow[cr-1][chan]) ped += 15;
+	if (formula[cr-1][chan] == 2) 
+	  {
+	    ped -= numMaskTow[tpid] * ((pedestalShift - 8.0) / 16.0);
+	  }
+	float value = (sum - ped) / scale;
+	if (value < 0) value = 0;
+	if (value > 62) value = 62;
+	if (L0_TP_ADC[tpid] - L0_TP_PED[tpid] < LUTsig[cr-1][ch]) value = 0;
+	LUT[tpid] = int(round(value));
+	*/
+      }
+    
+    if (0) 
+      {
+	cout<<" tpid="<<tpid<<" cr="<<cr<<" ch="<<chan<<" formula="<<formula[cr-1][chan]<<
+	  " TPadc="<<L0_TP_ADC[tpid]<<" OfflinePed="<<L0_TP_PED[tpid]<<" LUTped="<<LUTped[cr-1][chan]<<
+	  " numMaskTow="<<numMaskTow[tpid]<<" LUTindex="<<LUTindex<<" OnlineLUT="<<LUT[tpid]<<
+	  " diff="<<(L0_TP_ADC[tpid] - (L0_TP_PED[tpid]-1)) - (LUT[tpid])<<endl;   
+      }
+
+    if (mConfig==kOffline) {
+      L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+    }
+
+    if (mConfig==kOnline) L0_TP_ADC[tpid]=LUT[tpid];
+    
+  
+
   }
 }
 //==================================================

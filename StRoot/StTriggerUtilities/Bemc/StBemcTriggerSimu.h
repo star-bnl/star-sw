@@ -53,14 +53,6 @@ private:
   StTriggerSimuMaker *mHeadMaker;
   int mConfig; // see enum  
   
-  // simple iterators -- C++ style manual would say declare in local scope
-  //Int_t did;                               //BEMC tower id  (1-4800)
-  //Int_t tpid;                              //BEMC trigger Patch id (0-300)
-  //Int_t cr;                                //BEMC crate id (1-30)
-  //Int_t ch;                                //BEMC crate ch (0-159)
-  //Int_t seq;                               //BEMC start point for TP in crate (0-10)
-  
-  
   // DB information
   Int_t HT_FEE_Offset;                     //same as bitConvValue but set by support class
   Int_t DSM_HTStatus[kNPatches];           //DSM_HTStatus only set online
@@ -77,7 +69,9 @@ private:
   unsigned long pedTargetValue;            //value FEE shifts pedestal to (12 bit)
   Float_t ped12Diff, ped10Diff;
   Int_t ped10DiffI;
-  Int_t *LUTbit[kNCrates][kNSeq], LUTtag[kNCrates][kNSeq];
+  Int_t LUT[kNPatches];
+  Int_t formula[kNCrates][kNSeq], numMaskTow[kNPatches]; 
+  Int_t LUTscale[kNCrates][kNSeq], LUTped[kNCrates][kNSeq], LUTsig[kNCrates][kNSeq], LUTpow[kNCrates][kNSeq];
   char buffer[10];
 
   //HT/TP 6bit ADC out of FEE and into DSM Layer0
