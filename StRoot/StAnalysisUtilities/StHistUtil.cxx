@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.37 2007/04/28 20:36:15 perev Exp $
+// $Id: StHistUtil.cxx,v 2.38 2007/12/13 23:17:45 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.38  2007/12/13 23:17:45  genevb
+// Force 0 minimum on FTPC radial hists
+//
 // Revision 2.37  2007/04/28 20:36:15  perev
 // Redundant StChain.h removed
 //
@@ -554,6 +557,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                 } else {
                   hobj1 = hobjradialE; hobj2 = hobjradialW;
                 }
+                hobj1->SetMinimum(0);
 		hobj1->Draw();
 		gPad->Modified();
 		ruler.SetLineColor(kBlack);
