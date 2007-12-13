@@ -431,14 +431,16 @@ void StBemcTriggerSimu::FEEout() {
             //apply tower masks
 	    if (TowerStatus[did-1]==1) {
 
-              //12 bit ADC enters FEE and drop 2 bits immediately
-              adc12[did-1]=adc;
-              adc10[did-1]=adc12[did-1] >> 2;
-    
-              //need to shift ADC and ped to pedTargetValue 
+  
+	      //need to shift ADC and ped to pedTargetValue 
               //goal is to ultimately place DSM channel at 1
               ped12Diff=ped12[did-1]-pedTargetValue;
-
+	      
+	      //12 bit ADC enters FEE and drop 2 bits immediately
+              adc12[did-1]=adc;
+	      if (adc12[did-1]<=0) adc12[did-1]=ped12[did-1];
+              adc10[did-1]=adc12[did-1] >> 2;
+  
               //determine if pedestal is > or < pedTargetValue
               int operation=1;
               if(ped12Diff < 0) {
@@ -471,6 +473,7 @@ void StBemcTriggerSimu::FEEout() {
               //adjust pedestal of tower adc to 24(6) in 12(10) bit
               if(operation==1) adc10[did-1] -= ped10DiffI;
               if(operation==0) adc10[did-1] += ped10DiffI;
+	      //if (adc10[did-1] < 0) adc10[did-1]=0;
 
               //now adc10 and adc08 are the 10 and 8 bit pedestal shift adcs
               adc08[did-1]=adc10[did-1] >> 2;
@@ -501,12 +504,13 @@ void StBemcTriggerSimu::FEEout() {
               if (DSM_HTStatus[tpid]==0) L0_HT_ADC[tpid]=0;
               if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
 	      
-              if (0) {
-                cout<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]
-                    <<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
-                    <<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[did-1]
-                    <<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" PedTargetValue="<<pedTargetValue<<endl;
-              }
+	      if (0) 
+		{
+		  cout<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]	   
+		      <<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
+		      <<ped10Diff<<"HTholder="<<HTholder<<" HTL="<<HTL<<" HTH="<<HTH<<" B5="<<B5<<" BitConverValue="<<bitConvValue[did-1]
+		      <<" HT_FEE_Offset="<<HT_FEE_Offset<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<" PedTargetValue="<<pedTargetValue<<endl;
+		}
             }
           }
         }
@@ -517,6 +521,7 @@ void StBemcTriggerSimu::FEEout() {
   //Find LUT
   for (int tpid=0;tpid<kNPatches;tpid++){ 
    
+
     Int_t cr, seq, chan, LUTindex;
     mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq); 
     chan=seq/16;
@@ -566,6 +571,8 @@ void StBemcTriggerSimu::FEEout() {
     if (mConfig==kOffline) {
       L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
     }
+
+    if (L0_TP_ADC[tpid]<1) cout<<"TP#="<<tpid<<" PED="<<L0_TP_PED[tpid]<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<endl;
 
     if (mConfig==kOnline) L0_TP_ADC[tpid]=LUT[tpid];
     
