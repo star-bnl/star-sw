@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.94  2007/12/13 10:37:46  jcs
+// standardize looger messages
+//
 // Revision 1.93  2007/12/12 13:24:45  jcs
 // replace asserts with LOG_ERROR message and kStErr return code
 //
@@ -451,8 +454,8 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
-     LOG_WARN << "InitRun  - error Getting FTPC offline database Geometry/ftpc"<<endm;
-     return kStWarn;
+     LOG_ERROR << "InitRun  - error Getting FTPC offline database Geometry/ftpc"<<endm;
+     return kStErr;
   }
 
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
@@ -467,8 +470,8 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
   
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
-     LOG_WARN <<"InitRun - error getting FTPC offline database Calibrations/ftpc"<<endm;
-     return kStWarn;
+     LOG_ERROR <<"InitRun - error getting FTPC offline database Calibrations/ftpc"<<endm;
+     return kStErr;
   }
 
   St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
@@ -486,7 +489,7 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
   m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
   m_temps = (St_ftpcTemps *)dblocal_calibrations("ftpcTemps");
 
-  return 0;
+  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
@@ -647,8 +650,8 @@ Int_t StFtpcClusterMaker::Make()
        
       StDetectorDbFTPCGas *gas = StDetectorDbFTPCGas::instance();
       if ( !gas ){
-          LOG_WARN << "Error getting FTPC Offline database: Calibrations_ftpc/ftpcGasOut"<<endm;
-          return kStWarn;
+          LOG_ERROR << "Error getting FTPC Offline database: Calibrations_ftpc/ftpcGasOut"<<endm;
+          return kStErr;
       }	      
 
       Int_t  returnCode;
@@ -837,8 +840,8 @@ Int_t StFtpcClusterMaker::Make()
        
   StDetectorDbFTPCVoltageStatus *voltageStatus = StDetectorDbFTPCVoltageStatus::instance();
   if ( !voltageStatus) {
-      LOG_WARN << "Error getting FTPC Offline database: Calibrations_ftpc/ftpcVoltageStatus"<<endm;
-      return kStWarn;
+      LOG_ERROR << "Error getting FTPC Offline database: Calibrations_ftpc/ftpcVoltageStatus"<<endm;
+      return kStErr;
    }
   // if mVoltageStatus  and StEvent exists, set StDetectorState
   // (StDetectorState only set for events with FTPC data)
