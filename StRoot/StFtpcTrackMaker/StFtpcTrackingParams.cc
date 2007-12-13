@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.35 2007/12/12 12:55:18 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.36 2007/12/13 10:35:21 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.36  2007/12/13 10:35:21  jcs
+// standardize logger messages
+//
 // Revision 1.35  2007/12/12 12:55:18  jcs
 // Markus Oldenburg replaced assert() with a return code which can be tested in StFtpcTrackMaker
 // replaced 'return 1' with 'return kStOK'
@@ -479,9 +482,9 @@ StFtpcTrackingParams::StFtpcTrackingParams()
   mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
   
   if (ierr!=0) { 
-    LOG_ERROR << "Cant invert rotation matrix!" << endm;
-    LOG_ERROR << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
-    LOG_ERROR << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
+    LOG_WARN << "Cant invert rotation matrix!" << endm;
+    LOG_WARN << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
+    LOG_WARN << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
   }
     
   // internal FTPC rotation [has do be done before local -> global]
@@ -548,11 +551,11 @@ StFtpcTrackingParams::StFtpcTrackingParams()
     (*mFtpcRotationYInverse[i]) = (*mFtpcRotationY[i]).inverse(ierr);
     
     if (ierr!=0) { 
-      LOG_ERROR << "Can't invert FTPC ";
-      if (i == 0) { LOG_ERROR << " east rotation matrix Y!" << endm; }
-      else { LOG_ERROR << " west rotation matrix Y!" << endm; }
-      LOG_ERROR << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
-      LOG_ERROR << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
+      LOG_WARN << "Can't invert FTPC ";
+      if (i == 0) { LOG_WARN << " east rotation matrix Y!" << endm; }
+      else { LOG_WARN << " west rotation matrix Y!" << endm; }
+      LOG_WARN << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
+      LOG_WARN << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
     }
 
     // define rotation axis
@@ -605,11 +608,11 @@ StFtpcTrackingParams::StFtpcTrackingParams()
     (*mFtpcRotationXInverse[i]) = (*mFtpcRotationX[i]).inverse(ierr);
 
     if (ierr!=0) { 
-      LOG_ERROR << "Can't invert FTPC ";
-      if (i == 0) {LOG_ERROR << " east rotation matrix X !" << endm;}
-      else {LOG_ERROR << " west rotation matrix X !" << endm;}
-      LOG_ERROR << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
-      LOG_ERROR << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
+      LOG_WARN << "Can't invert FTPC ";
+      if (i == 0) {LOG_WARN << " east rotation matrix X !" << endm;}
+      else {LOG_WARN << " west rotation matrix X !" << endm;}
+      LOG_WARN << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
+      LOG_WARN << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
     }
 
     // combine Y and X rotation to rotation matrix
@@ -619,11 +622,11 @@ StFtpcTrackingParams::StFtpcTrackingParams()
 
 
     if (ierr!=0) { 
-      LOG_ERROR << "Can't invert FTPC ";
-      if (i == 0) {LOG_ERROR << " east rotation matrix!" << endm;}
-      else {LOG_ERROR << " west rotation matrix!" << endm;}
-      LOG_ERROR << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
-      LOG_ERROR << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
+      LOG_WARN << "Can't invert FTPC ";
+      if (i == 0) {LOG_WARN << " east rotation matrix!" << endm;}
+      else {LOG_WARN << " west rotation matrix!" << endm;}
+      LOG_WARN << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
+      LOG_WARN << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
     }
   }
 }
@@ -875,9 +878,9 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
     
     if (ierr!=0) { 
-      LOG_ERROR << "Cant invert rotation matrix!" << endm;
-      LOG_ERROR << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
-      LOG_ERROR << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
+      LOG_WARN << "Cant invert rotation matrix!" << endm;
+      LOG_WARN << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
+      LOG_WARN << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
     }
     
     mTpcPositionInGlobal.setX(gStTpcDb->GlobalPosition()->TpcCenterPositionX() * centimeter);
@@ -947,11 +950,11 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     (*mFtpcRotationYInverse[i]) = (*mFtpcRotationY[i]).inverse(ierr);
     
     if (ierr!=0) { 
-      LOG_ERROR << "Can't invert FTPC ";
-      if (i == 0) {LOG_ERROR << " east rotation matrix! Y" << endm;}
-      else {LOG_ERROR << " west rotation matrix! Y" << endm;}
-      LOG_ERROR << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
-      LOG_ERROR << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
+      LOG_WARN << "Can't invert FTPC ";
+      if (i == 0) {LOG_WARN << " east rotation matrix! Y" << endm;}
+      else {LOG_WARN << " west rotation matrix! Y" << endm;}
+      LOG_WARN << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
+      LOG_WARN << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
     }
 
     // define rotation axis
@@ -1001,11 +1004,11 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     (*mFtpcRotationXInverse[i]) = (*mFtpcRotationX[i]).inverse(ierr);
 
     if (ierr!=0) { 
-      LOG_ERROR << "Can't invert FTPC ";
-      if (i == 0) {LOG_ERROR << " east rotation matrix X !" << endm;}
-      else {LOG_ERROR << " west rotation matrix X !" << endm;}
-      LOG_ERROR << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
-      LOG_ERROR << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
+      LOG_WARN << "Can't invert FTPC ";
+      if (i == 0) {LOG_WARN << " east rotation matrix X !" << endm;}
+      else {LOG_WARN << " west rotation matrix X !" << endm;}
+      LOG_WARN << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
+      LOG_WARN << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
     }
 
     // combine Y and X rotation to rotation matrix
@@ -1015,11 +1018,11 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 
 
     if (ierr!=0) { 
-      LOG_ERROR << "Can't invert FTPC ";
-      if (i == 0) {LOG_ERROR << " east rotation matrix!" << endm;}
-      else {LOG_ERROR << " west rotation matrix!" << endm;}
-      LOG_ERROR << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
-      LOG_ERROR << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
+      LOG_WARN << "Can't invert FTPC ";
+      if (i == 0) {LOG_WARN << " east rotation matrix!" << endm;}
+      else {LOG_WARN << " west rotation matrix!" << endm;}
+      LOG_WARN << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
+      LOG_WARN << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
     }
 
   }
