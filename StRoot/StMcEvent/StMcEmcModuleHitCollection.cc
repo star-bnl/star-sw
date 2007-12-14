@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.cc,v $
+ * Revision 2.7  2007/12/14 20:23:50  calderon
+ * From Adam Kocoloski: fix a memory leak, hits were not deleted in destructor.
+ *
  * Revision 2.6  2007/10/05 00:01:21  calderon
  * Changes to include a EMC hit collection that does not care about
  * parent tracks, so that now there are two collections.  This
@@ -38,7 +41,7 @@
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcCalorimeterHit.hh"
 
-static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.6 2007/10/05 00:01:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.7 2007/12/14 20:23:50 calderon Exp $";
 
 ClassImp(StMcEmcModuleHitCollection)
 
@@ -63,6 +66,10 @@ StMcEmcModuleHitCollection::~StMcEmcModuleHitCollection()
     int n = mHits.size();
     for (int i=0; i<n; i++) {delete mHits[i];}
     mHits.clear();
+
+    n = mDetectorHits.size();
+    for (int i=0; i<n; i++) {delete mDetectorHits[i];}
+    mDetectorHits.clear();
 }
 
 unsigned long 
