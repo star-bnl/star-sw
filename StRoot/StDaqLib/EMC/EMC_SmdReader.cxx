@@ -1,4 +1,5 @@
 #include "EMC_SmdReader.hh"
+#include "StMessMgr.h"
 #include <assert.h>
 #define MAX_ADC 0xFFF
 #include <time.h>
@@ -29,7 +30,7 @@ EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP)
 
     if(date>20041201)
         mNSMD = 12;
-    cout<<"EMC_SMDreader** Event time (Unix time) = "<<UnixTime<<"  NSMD = "<<mNSMD<<endl;
+    LOG_INFO<<"EMC_SMDreader** Event time (Unix time) = "<<UnixTime<<"  NSMD = "<<mNSMD<<endm;
     Initialize();
 }
 /////////////////////////////////////////////////////////////////////
@@ -66,7 +67,7 @@ Bank_EMCSECP* EMC_SmdReader::getBarrelSmdSection(const Bank_EMCP* pBankEMCP,int 
         char str0[40];
         sprintf(str0,"getBarrelsection(hs %d)",section);
         ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0);
-        cout<<" SmdReader::getBarrelSection** , no offset or length for section**"<<section<<endl;
+        LOG_WARN<<" SmdReader::getBarrelSection** , no offset or length for section**"<<section<<endm;
         return NULL;
     }
 
@@ -76,7 +77,7 @@ Bank_EMCSECP* EMC_SmdReader::getBarrelSmdSection(const Bank_EMCP* pBankEMCP,int 
     if(strncmp(ptr->header.BankType,"EMCSECP",7))
     {
         char str0[40];
-        cout<<" error in header name**"<<endl;
+        LOG_WARN<<" error in header name**"<<endm;
         sprintf(str0,"getBarrelSection(hs %d)",section);
         ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__, str0);
         return NULL;
@@ -84,7 +85,7 @@ Bank_EMCSECP* EMC_SmdReader::getBarrelSmdSection(const Bank_EMCP* pBankEMCP,int 
     if(!ptr->test_CRC())
     {
         char str0[40];
-        cout<<"error in CRC**"<<endl;
+        LOG_WARN<<"error in CRC**"<<endm;
         sprintf(str0,"getBarrelsection(hs %d)",section);
         ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0);
         return NULL;
@@ -93,7 +94,7 @@ Bank_EMCSECP* EMC_SmdReader::getBarrelSmdSection(const Bank_EMCP* pBankEMCP,int 
     if(ptr->swap() < 0)
     {
         char str0[40];
-        cout<<"error in swap**"<<endl;
+        LOG_WARN<<"error in swap**"<<endm;
         sprintf(str0,"getBarrelsection(hs %d)",section);
         ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0);
         return NULL;
@@ -121,7 +122,7 @@ Bank_EMCRBP* EMC_SmdReader::getBarrelSmdFiber(Bank_EMCSECP* secp,int section)
     if(strncmp(ptr->header.BankType,"EMCRBP",6))
     {
         char str0[40];
-        cout<<" error in header name**"<<endl;
+        LOG_WARN<<" error in header name**"<<endm;
         sprintf(str0,"getBarrelSmdfiber(hs %d)",section);
         ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__, str0);
         return NULL;
@@ -129,7 +130,7 @@ Bank_EMCRBP* EMC_SmdReader::getBarrelSmdFiber(Bank_EMCSECP* secp,int section)
     if(!ptr->test_CRC())
     {
         char str0[40];
-        cout<<"error in CRC**"<<endl;
+        LOG_WARN<<"error in CRC**"<<endm;
         sprintf(str0,"getBarrelSmdfiber(hs %d)",section);
         ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0);
         return NULL;
@@ -137,7 +138,7 @@ Bank_EMCRBP* EMC_SmdReader::getBarrelSmdFiber(Bank_EMCSECP* secp,int section)
     if(ptr->swap() < 0)
     {
         char str0[40];
-        cout<<"error in swap**"<<endl;
+        LOG_WARN<<"error in swap**"<<endm;
         sprintf(str0,"getBarrelSmdFiber(hs %d)",section);
         ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0);
         return NULL;
@@ -153,7 +154,7 @@ Bank_SMDADCR* EMC_SmdReader::getSmdADC(Bank_EMCRBP* rbp)
         char str0[40];
         sprintf(str0,"getSmdADC(hs )");
         ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0);
-        cout<<" getBarrelADC** , no offset or length for ADCR**"<<endl;
+        LOG_WARN<<" getBarrelADC** , no offset or length for ADCR**"<<endm;
         return NULL;
     }
     Bank_SMDADCR* pADCR =(Bank_SMDADCR*)(((INT32 *)rbp)+rbp->EMCADCR.offset);
@@ -163,7 +164,7 @@ Bank_SMDADCR* EMC_SmdReader::getSmdADC(Bank_EMCRBP* rbp)
     if(strncmp(pADCR->header.BankType,"EMCADCR",7))
     {
         char str0[40];
-        cout<<" error in header name**"<<endl;
+        LOG_WARN<<" error in header name**"<<endm;
         sprintf(str0,"getSmdADC(hs)");
         ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__, str0);
         return NULL;
@@ -171,7 +172,7 @@ Bank_SMDADCR* EMC_SmdReader::getSmdADC(Bank_EMCRBP* rbp)
     if(!pADCR->test_CRC())
     {
         char str0[40];
-        cout<<"error in CRC**"<<endl;
+        LOG_WARN<<"error in CRC**"<<endm;
         sprintf(str0,"getSmdADC(hs)");
         ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0);
         return NULL;
@@ -179,7 +180,7 @@ Bank_SMDADCR* EMC_SmdReader::getSmdADC(Bank_EMCRBP* rbp)
     if(pADCR->swap() < 0)
     {
         char str0[40];
-        cout<<"error in swap**"<<endl;
+        LOG_WARN<<"error in swap**"<<endm;
         sprintf(str0,"getBankSVTSECP(hs)");
         ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0);
         return NULL;
@@ -200,7 +201,7 @@ int EMC_SmdReader::FillBarrelSmd(Bank_SMDADCR* pADCR,int RDO)
     mTheSmdAdcR.PedFlag=0;                           //Pedestal subtracted (1) or not (0)
     mTheSmdAdcR.SMDErrorFlag=0;                      // Error from SMD (0=good)
     mTheSmdAdcR.TimeBin[RDO]=pADCR->fiberHeader[32]; // To be taken from header
-    cout <<"SMD Time bin for RDO "<<RDO<<" = "<<mTheSmdAdcR.TimeBin[RDO]<<endl;
+    LOG_DEBUG <<"SMD Time bin for RDO "<<RDO<<" = "<<mTheSmdAdcR.TimeBin[RDO]<<endm;
     for(int i=0;i<128;i++)
         mTheSmdAdcR.SmdHeader[RDO][i]=pADCR->fiberHeader[i];
     int sum =0;
@@ -248,7 +249,7 @@ int EMC_SmdReader::ProcessBarrelSmd(const Bank_EMCP* EmcPTR)
     {
         for(int RDO=0;RDO<mNSMD;RDO++)
         {
-            cout<<" taking SMDfiber RDO *** "<<RDO<<endl;
+            LOG_DEBUG<<" taking SMDfiber RDO *** "<<RDO<<endm;
             Bank_EMCRBP* smdfiber=getBarrelSmdFiber(barrelsmd,RDO);
             if(smdfiber)
             {
@@ -259,11 +260,11 @@ int EMC_SmdReader::ProcessBarrelSmd(const Bank_EMCP* EmcPTR)
                 {
                     int fillstat= FillBarrelSmd(smdadc,RDO);
                     if(!fillstat)
-                        cout<<" Error on SMD Filling  "<<endl;
+                        LOG_WARN<<" Error on SMD Filling  "<<endm;
                 }
                 else
                 {
-                    cout<<" ADCR absent"<<endl;
+                    LOG_WARN<<" ADCR absent"<<endm;
                 }
                 if(smdadc)
                     smdadc=0;
@@ -274,7 +275,7 @@ int EMC_SmdReader::ProcessBarrelSmd(const Bank_EMCP* EmcPTR)
     }//barrelsmd
     else
     {
-        cout<<" BANK_EMCSECP for SMD absent**"<<endl;
+        LOG_WARN<<" BANK_EMCSECP for SMD absent**"<<endm;
         return 0;
     }//barrelsmd
     return 1;
