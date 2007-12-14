@@ -1,4 +1,4 @@
-// $Id: StEmcPmtSimulator.cxx,v 1.13 2007/12/12 22:12:24 kocolosk Exp $
+// $Id: StEmcPmtSimulator.cxx,v 1.14 2007/12/14 03:53:44 kocolosk Exp $
 
 #include "StEmcPmtSimulator.h"
 
@@ -62,7 +62,7 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
     float calib = mTables->calib(mDetectorId-8, softId);
     
     // totalGain is ADC per incident photoElectron in this case
-    double totalGain = samplingFraction(pseudoRapidity) * (mMipEnergyDeposit / mMipPhotoElectrons) / calib;
+    double totalGain = calib ? samplingFraction(pseudoRapidity) * (mMipEnergyDeposit / mMipPhotoElectrons) / calib : 0.0;
     
     double pedMean(0.0), pedRMS(0.0);
     if(!mEmbeddingMode) {
@@ -115,6 +115,9 @@ StEmcRawHit* StEmcPmtSimulator::makeRawHit(const StMcCalorimeterHit *mcHit) {
 
 /*****************************************************************************
  *  $Log: StEmcPmtSimulator.cxx,v $
+ *  Revision 1.14  2007/12/14 03:53:44  kocolosk
+ *  bugfix so channels with zero calibrations still get a simulated pedestal
+ *
  *  Revision 1.13  2007/12/12 22:12:24  kocolosk
  *  calibration spread should only operate on ped-subtracted ADCs, not raw
  *
