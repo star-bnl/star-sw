@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.38 2007/12/13 23:17:45 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.39 2007/12/14 02:18:29 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.39  2007/12/14 02:18:29  genevb
+// Add text of counts on NullPrimVtx plots
+//
 // Revision 2.38  2007/12/13 23:17:45  genevb
 // Force 0 minimum on FTPC radial hists
 //
@@ -140,6 +143,7 @@
 #include "TLegend.h"
 #include "TDatime.h"
 #include "TLine.h"
+#include "TLatex.h"
 #include "StMessMgr.h"
 
 #include "St_DataSetIter.h"
@@ -376,6 +380,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   TObject *obj = 0;
   Int_t chkdim=0;
   TLine ruler;
+  TLatex latex;
+
   while ((obj = nextHist())) {
 
     if (obj->InheritsFrom("TH1")) { 
@@ -579,6 +585,16 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             }
 	    else hobj->Draw();
 	  }
+
+          if (oName.Contains("NullPrimVtx")) {
+            latex.SetTextAngle(90);
+            latex.SetTextAlign(3);
+            latex.DrawLatex(0.5,0,Form("   found:  %d",
+              (int) (hobj->GetBinContent(hobj->FindBin(1.)))));
+            latex.SetTextAlign(1);
+            latex.DrawLatex(-0.5,0,Form("   missed:  %d",
+              (int) (hobj->GetBinContent(hobj->FindBin(-1.)))));
+          }
 
 	  if (!padAdvance) padCount--;
 	  else if (gPad) gPad->Update();
