@@ -427,10 +427,9 @@ void StBemcTriggerSimu::FEEout() {
             //Get software tower id and trigger patch id
             mGeo->getId(m,e,s,did);	  
             mDecoder->GetTriggerPatchFromTowerId(did,tpid);
-
+	    
             //apply tower masks
 	    if (TowerStatus[did-1]==1) {
-
   
 	      //need to shift ADC and ped to pedTargetValue 
               //goal is to ultimately place DSM channel at 1
@@ -438,7 +437,6 @@ void StBemcTriggerSimu::FEEout() {
 	      
 	      //12 bit ADC enters FEE and drop 2 bits immediately
               adc12[did-1]=adc;
-	      if (adc12[did-1]<=0) adc12[did-1]=ped12[did-1];
               adc10[did-1]=adc12[did-1] >> 2;
   
               //determine if pedestal is > or < pedTargetValue
@@ -504,7 +502,7 @@ void StBemcTriggerSimu::FEEout() {
               if (DSM_HTStatus[tpid]==0) L0_HT_ADC[tpid]=0;
               if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
 	      
-	      if (0) 
+	      if (0)
 		{
 		  cout<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]	   
 		      <<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
@@ -526,58 +524,36 @@ void StBemcTriggerSimu::FEEout() {
     mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq); 
     chan=seq/16;
 
-    if ( ((L0_TP_ADC[tpid]+LUTped[cr-1][chan]+2)>=0) && (formula[cr-1][chan]==2) && (LUTscale[cr-1][chan]==1) && 
-	 (LUTpow[cr-1][chan]!=0) && (LUTsig[cr-1][chan]==0) && (pedTargetValue==24))
+    if (mConfig==kOnline)
       {
-	LUTindex=L0_TP_ADC[tpid] + LUTped[cr-1][chan] + numMaskTow[tpid];
-	LUT[tpid] = commonLUT[LUTindex];
-      }  
-    else
-      {
-	/*
-	float scale = LUTscale[cr-1][chan];
-	if (formula[cr-1][chan] == 1) {
-	  if (numMaskTow[tpid] != 16) 
-	    { 
-	      scale *= (16.0 - numMaskTow[tpid]) / 16.0;
-	    } 
-	  else 
-	    {
-	      scale = 1;
-	    }
-	}
-	float ped = LUTped[cr-1][chan];
-	if (LUTpow[cr-1][chan]) ped += 15;
-	if (formula[cr-1][chan] == 2) 
+	if ( ((L0_TP_ADC[tpid]+LUTped[cr-1][chan]+2)>=0) && (formula[cr-1][chan]==2) && (LUTscale[cr-1][chan]==1) && 
+	     (LUTpow[cr-1][chan]!=0) && (LUTsig[cr-1][chan]==0) && (pedTargetValue==24))
 	  {
-	    ped -= numMaskTow[tpid] * ((pedestalShift - 8.0) / 16.0);
+	    LUTindex=L0_TP_ADC[tpid] + LUTped[cr-1][chan] + numMaskTow[tpid];
+	    LUT[tpid] = commonLUT[LUTindex];
+	  }  
+	else
+	  {
+	    cout<<" Something not right with LUT!"<<endl;
+	    assert(1);
 	  }
-	float value = (sum - ped) / scale;
-	if (value < 0) value = 0;
-	if (value > 62) value = 62;
-	if (L0_TP_ADC[tpid] - L0_TP_PED[tpid] < LUTsig[cr-1][ch]) value = 0;
-	LUT[tpid] = int(round(value));
-	*/
+	L0_TP_ADC[tpid]=LUT[tpid];    
       }
     
+    if (mConfig==kOffline) {
+      // MOCK up LUT table for Offline case
+      if ((L0_TP_PED[tpid]-1)>=L0_TP_ADC[tpid]) L0_TP_ADC[tpid]=1;
+      if ((L0_TP_PED[tpid]-1)< L0_TP_ADC[tpid]) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+      if (L0_TP_ADC[tpid] > 62) L0_TP_ADC[tpid]=62;
+    }
+        
     if (0) 
       {
 	cout<<" tpid="<<tpid<<" cr="<<cr<<" ch="<<chan<<" formula="<<formula[cr-1][chan]<<
 	  " TPadc="<<L0_TP_ADC[tpid]<<" OfflinePed="<<L0_TP_PED[tpid]<<" LUTped="<<LUTped[cr-1][chan]<<
 	  " numMaskTow="<<numMaskTow[tpid]<<" LUTindex="<<LUTindex<<" OnlineLUT="<<LUT[tpid]<<
 	  " diff="<<(L0_TP_ADC[tpid] - (L0_TP_PED[tpid]-1)) - (LUT[tpid])<<endl;   
-      }
-
-    if (mConfig==kOffline) {
-      L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
-    }
-
-    if (L0_TP_ADC[tpid]<1) cout<<"TP#="<<tpid<<" PED="<<L0_TP_PED[tpid]<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<endl;
-
-    if (mConfig==kOnline) L0_TP_ADC[tpid]=LUT[tpid];
-    
-  
-
+      }  
   }
 }
 //==================================================
