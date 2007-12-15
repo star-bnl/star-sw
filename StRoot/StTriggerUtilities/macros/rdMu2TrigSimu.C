@@ -5,7 +5,7 @@ int total=0;
 
 void rdMu2TrigSimu( int nevents = 1000,
 		    int flagMC=0,  // 0== off, 1=Alan
-		    int useEemc=0, // 0== off
+		    int useEemc=0, // 0== off, 1=kOnline, 2=kExpert
 		    int useBemc=1, // 0== off
 		    int useL2=1,   // 0== off
 		    int L2ConfigYear=2006, // possible: 2006, 2008
@@ -139,7 +139,7 @@ void rdMu2TrigSimu( int nevents = 1000,
     simuTrig->bemc->setConfig(bemcConfig);
   }
 
-  if(flagMC && useEemc){
+  if(flagMC && useEemc==2){
     // pass one argument to M-C as generic switch    
     // Endcap specific params -- ok Jan you need to change this to a default "online" setup
     int eemcDsmSetup[20]; // see StEemcTriggerSimu::initRun() for definition

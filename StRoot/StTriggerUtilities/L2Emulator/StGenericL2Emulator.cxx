@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.11 2007/12/11 16:39:40 rfatemi Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.12 2007/12/15 00:59:06 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -211,6 +211,10 @@ StGenericL2Emulator::initRun2(int runNo){
     if (mL2algo[ia]==0) continue;
     TString algoName=mL2algo[ia]->getName();
     L2DbTime *config = confDB2.getConfiguration(mYearMonthDay,mHourMinSec,algoName);
+    if(config==0) {
+      LOG_ERROR  << Form("initRun2() failed L2-%s algo configuration for yyyy=%d hhmmss=%d, ABORT",algoName.Data(),mYearMonthDay,mHourMinSec)<<endm;
+      assert(config);
+    }
     TString aa1 = config->getBuf1(); // setup name
     TString aa2 = config->getBuf2();
     Int_t trgId = atoi(aa2.Data());
@@ -524,6 +528,9 @@ StGenericL2Emulator::addTriggerList() {
 
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.12  2007/12/15 00:59:06  balewski
+// protect against unforeseen time stamp
+//
 // Revision 1.11  2007/12/11 16:39:40  rfatemi
 // Fixed Bug in StGenericL2Emulator
 //
