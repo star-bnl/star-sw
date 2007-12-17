@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.41 2007/09/21 00:08:17 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.42 2007/12/17 14:15:15 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.42  2007/12/17 14:15:15  fisyak
+ * Add reject for hits for invalid drift regions
+ *
  * Revision 1.41  2007/09/21 00:08:17  caines
  * Save out number of pixels and hits into StEvent hits
  *
@@ -197,8 +200,15 @@ Int_t StSvtHitMaker::Init()
 
   if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Init() ..."  << endm;
 
-  //  iWrite=1;
+  return  StMaker::Init();
     
+}
+
+//_____________________________________________________________________________
+Int_t StSvtHitMaker::InitRun(int runumber)
+{
+
+  if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::InitRun() ..."  << endm;
   // Get pointer to StSvtAnalysis
 
   if( GetSvtRawData()){
@@ -211,6 +221,20 @@ Int_t StSvtHitMaker::Init()
    St_DataSet *dataSet2 = GetDataSet("StSvtGeantHits");
   if (dataSet2)
     mSvtGeantHitColl = (StSvtHybridCollection*)(dataSet2->GetObject());
+
+  if( GetSvtGeometry() != kStOK) return kStWarn;
+
+  // drift velocity
+  if( GetSvtDriftVelocity() != kStOK) return kStWarn;
+
+  // drift curves from Robert
+  if( GetSvtDriftCurve() != kStOK) return kStWarn;
+
+  // t0
+  if( GetSvtT0() != kStOK) return kStWarn;
+
+  //  iWrite=1;
+    
 
   // 		Create tables
   //  St_DataSetIter       local(GetInputDB("svt"));
@@ -294,27 +318,24 @@ Int_t StSvtHitMaker::Init()
     mHitResolution->SetXTitle("delta X (timebucket)");
     mHitResolution->SetYTitle("delta Z (anode)");
   }
-  return  StMaker::Init();
+
+  // 		Add the Maker histograms in the Maker histograms list
+  // 		and remove it from the ROOT system directory
+  TObject  *objLast,*objHist;
+  gROOT->cd();
+  objLast = gDirectory->GetList()->Last();
+  TIter nextHist(gDirectory->GetList());
+  int ready = !objLast;
+  while((objHist=nextHist())) {// loop over gDirectory
+    if (!ready && objHist!=objLast)		continue;
+    ready = 1999;
+    if (objHist==objLast)			continue;
+    if (!objHist->InheritsFrom("TH1")) 	continue;
     
-}
-
-//_____________________________________________________________________________
-Int_t StSvtHitMaker::InitRun(int runumber)
-{
-
-  if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::InitRun() ..."  << endm;
-
-  if( GetSvtGeometry() != kStOK) return kStWarn;
-
-  // drift velocity
-  if( GetSvtDriftVelocity() != kStOK) return kStWarn;
-
-  // drift curves from Robert
-  if( GetSvtDriftCurve() != kStOK) return kStWarn;
-
-  // t0
-  if( GetSvtT0() != kStOK) return kStWarn;
-
+    // 		Move the histogram from the ROOT list into the "maker's" list
+    ((TH1*)objHist)->SetDirectory(0);
+    AddHist((TH1*)objHist);
+  }
   return kStOK;
  
 }
@@ -436,8 +457,8 @@ Int_t StSvtHitMaker::Make()
   TransformIntoSpacePoint();
   FillHistograms();
 
-  if (mSvtGeantHitColl)
-    Eval();
+//   if (mSvtGeantHitColl)
+//     Eval();
 
   return kStOK;
 }
@@ -480,7 +501,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	  if( !mSvtBigHit) continue;
 	  
 	  for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
-
+	    if (! driftVel->IsValidDriftRegion(barrel,ladder,wafer,hybrid, mSvtBigHit->WaferPosition()[clu].x())) continue;
 	    TotHits++;
 	    mSvtBigHit->svtHitData()[clu].id = TotHits;
 	    waferCoord.setTimeBucket(mSvtBigHit->WaferPosition()[clu].x());
@@ -492,7 +513,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 
 	    if( m_geom) {
 	      SvtGeomTrans(waferCoord,localCoord);
-
+#if 0
 
 	    // Flag as bad those hits not in the drift region
 	      if( (localCoord.position().x() < -0.01 && localCoord.hybrid()==2)
@@ -501,7 +522,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 		mSvtBigHit->svtHit()[clu].setFlag( 
 						  mSvtBigHit->svtHit()[clu].flag()+5);
 	      }
-	      
+#endif	      
 	      SvtGeomTrans(localCoord,globalCoord);
 	    }
 	    // 	    cout << " Timebucket=" << waferCoord.timebucket() << 
