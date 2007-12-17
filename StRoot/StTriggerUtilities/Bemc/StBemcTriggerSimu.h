@@ -18,7 +18,8 @@
 #define kNSeq 10
 #define kL0DsmModule 30
 #define kL0DsmInputs 10
-#define kL1DsmModule 2
+#define kNLayer0out 36
+#define kL1DsmModule 6
 
 class StEvent;
 class StEmcDecoder;
@@ -91,6 +92,7 @@ private:
   Int_t DSM0_HT_tp_Bit[kL0DsmInputs], DSM0_TP_tp_Bit[kL0DsmInputs], DSM0_HTTP_tp_Bit[kL0DsmInputs];
   Int_t DSM0_HT_tp_Bit_J3[kL0DsmInputs], DSM0_TP_tp_Bit_J3[kL0DsmInputs],DSM0_HTTP_tp_Bit_J3[kL0DsmInputs];
   Int_t DSM0_HT_tp_Bit_J1[kL0DsmInputs], DSM0_TP_tp_Bit_J1[kL0DsmInputs],DSM0_HTTP_tp_Bit_J1[kL0DsmInputs];
+  Int_t L0_16bit_Out[kNLayer0out];
   //DSM1 Bits for JP, HT, TP and HTTP
   Int_t DSM1_JP_Bit[kL1DsmModule], DSM1_HT_Bit[kL1DsmModule], DSM1_TP_Bit[kL1DsmModule], DSM1_HTTP_Bit[kL1DsmModule];
   Int_t DSM1_ETOT_ADC[kL1DsmModule];
@@ -132,7 +134,8 @@ public:
   Int_t* getBEMC_FEE_HT_ADC() {return L0_HT_ADC;}
   Int_t* getBEMC_FEE_TP_ADC() {return L0_TP_ADC;}
 
-  //out of DSM layer0 to DSM layer 1
+  //out of DSM layer0 to DSM layer1 
+  Int_t* getBEMC_L0_OUT() {return L0_16bit_Out;}
   Int_t* getBEMC_L0_SUM() {return DSM0_TP_SUM;}
   Int_t* getBEMC_L0_SUM_J1() {return DSM0_TP_SUM_J1;}
   Int_t* getBEMC_L0_SUM_J3() {return DSM0_TP_SUM_J3;}
@@ -145,6 +148,7 @@ public:
   Int_t* getBEMC_L0_HTTP_Bit() {return DSM0_HTTP_Bit;}
   Int_t* getBEMC_L0_HTTP_Bit_J1() {return DSM0_HTTP_Bit_J3;}
   Int_t* getBEMC_L0_HTTP_Bit_J3() {return DSM0_HTTP_Bit_J1;}
+ 
 
   //out of DSM layer 1 to DSM layer 2
   Int_t* getBEMC_L1_JP() {return DSM1_JP_Bit;}

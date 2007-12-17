@@ -566,26 +566,27 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
   //14-15  HT&&TP threshold bits
   
   //Loop over modules
+  int k=0;
   int DSM_TP[kL0DsmInputs];
   for (int i=0;i<kL0DsmModule;i++){
 
-
-    DSM0_TP_SUM[i]=0;
-    DSM0_TP_SUM_J1[i]=0;
-    DSM0_TP_SUM_J3[i]=0;
-
+    //Zero out 16 bit L0 TP/HT/HTTP outputs for each module
+    DSM0_TP_SUM[i]=0; 
     DSM0_HT_Bit[i]=0;
     DSM0_TP_Bit[i]=0;
     DSM0_HTTP_Bit[i]=0;
 
+    DSM0_TP_SUM_J1[i]=0;
     DSM0_HT_Bit_J1[i]=0;
     DSM0_TP_Bit_J1[i]=0;
     DSM0_HTTP_Bit_J1[i]=0;
 
+    DSM0_TP_SUM_J3[i]=0;
     DSM0_HT_Bit_J3[i]=0;
     DSM0_TP_Bit_J3[i]=0;
     DSM0_HTTP_Bit_J3[i]=0;
 
+    //Zero out 16 bit L0 TP/HT/HTTP outputs for each L0 input
     for (int j=0;j<kL0DsmInputs;j++){ 
       DSM0_HT_tp_Bit[j]=0;
       DSM0_TP_tp_Bit[j]=0;
@@ -598,9 +599,10 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       DSM0_HTTP_tp_Bit_J3[j]=0;      
     }
   
+    //Get array of TPid# from DSM module#
     mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP);
     
-    //Loop over 10 inputs(TP) to each module 
+    //Loop over 10 inputs to each module 
     for (int j=0;j<kL0DsmInputs;j++){
       
       int tpid=DSM_TP[j];
@@ -673,21 +675,57 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	if (j>4) {
 	  if (DSM0_TP_tp_Bit_J1[j] >= DSM0_HT_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_HT_tp_Bit_J1[j];
 	  if (DSM0_HT_tp_Bit_J1[j] >= DSM0_TP_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_TP_tp_Bit_J1[j];
-	  if (DSM0_HTTP_tp_Bit_J1[j] > DSM0_HTTP_Bit_J1[i]) DSM0_HTTP_Bit_J1[i]=DSM0_HTTP_tp_Bit_J1[j];
+	  if (DSM0_HTTP_tp_Bit_J1[j] > DSM0_HTTP_Bit_J1[j]) DSM0_HTTP_Bit_J1[j]=DSM0_HTTP_tp_Bit_J1[j];
 	}
 	if (j<5){
 	  if (DSM0_TP_tp_Bit_J3[j] >= DSM0_HT_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_HT_tp_Bit_J3[j];
 	  if (DSM0_HT_tp_Bit_J3[j] >= DSM0_TP_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_TP_tp_Bit_J3[j];
-	  if (DSM0_HTTP_tp_Bit_J3[j] > DSM0_HTTP_Bit_J3[i]) DSM0_HTTP_Bit_J3[i]=DSM0_HTTP_tp_Bit_J3[j];
+	  if (DSM0_HTTP_tp_Bit_J3[j] > DSM0_HTTP_Bit_J3[j]) DSM0_HTTP_Bit_J3[j]=DSM0_HTTP_tp_Bit_J3[j];
 	}
-	
 	
 	//add up TP adc for 1/5 of JP
 	if (j>4) DSM0_TP_SUM_J1[i]+=L0_TP_ADC[tpid];
 	if (j<5) DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
 	
+	//apply HT/TP/HTTP thresholds to bits
+	if (DSM0_HT_Bit[i]< DSM0_HT_tp_Bit[j]) DSM0_HT_Bit[i]=DSM0_HT_tp_Bit[j];
+	if (DSM0_TP_Bit[i]< DSM0_TP_tp_Bit[j]) DSM0_TP_Bit[i]=DSM0_TP_tp_Bit[j];
+	if (DSM0_HTTP_Bit[i]< DSM0_HTTP_tp_Bit[j]) DSM0_HTTP_Bit[i]=DSM0_TP_tp_Bit[j];
+	if (DSM0_HT_Bit_J1[i]< DSM0_HT_tp_Bit_J1[j]) DSM0_HT_Bit_J1[i]=DSM0_HT_tp_Bit_J1[j];
+	if (DSM0_TP_Bit_J1[i]< DSM0_TP_tp_Bit_J1[j]) DSM0_TP_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
+	if (DSM0_HTTP_Bit_J1[i]< DSM0_HTTP_tp_Bit_J1[j]) DSM0_HTTP_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
+	if (DSM0_HT_Bit_J3[i]< DSM0_HT_tp_Bit_J3[j]) DSM0_HT_Bit_J3[i]=DSM0_HT_tp_Bit_J3[j];
+	if (DSM0_TP_Bit_J3[i]< DSM0_TP_tp_Bit_J3[j]) DSM0_TP_Bit_J3[i]=DSM0_TP_tp_Bit_J3[j];
+	if (DSM0_HTTP_Bit_J3[i]< DSM0_HTTP_tp_Bit_J3[j]) DSM0_HTTP_Bit_J3[i]=DSM0_TP_tp_Bit_J3[j];
+      
       }
+
     }
+    
+    
+    //Construct total output bits from DSMLayer0
+    Int_t two10 = (Int_t) pow(2,10);
+    Int_t two12 = (Int_t) pow(2,12);
+    Int_t two14 = (Int_t) pow(2,14);
+
+    if (((i+3)%5)!=0)
+      {
+	L0_16bit_Out[k]=0;
+	L0_16bit_Out[k]=DSM0_TP_SUM[i]+DSM0_HT_Bit[i]*two10+ DSM0_TP_Bit[i]*two12+DSM0_HTTP_Bit[i]*two14;
+	k++;
+      }
+    if (((i+3)%5)==0)
+      {
+	L0_16bit_Out[k]=0;
+	L0_16bit_Out[k]=DSM0_TP_SUM_J1[i]+DSM0_HT_Bit_J1[i]*two10+DSM0_TP_Bit_J1[i]*two12+DSM0_HTTP_Bit_J1[i]*two14;
+	k++;
+
+	L0_16bit_Out[k]=0;
+	L0_16bit_Out[k]=DSM0_TP_SUM_J3[i]+DSM0_HT_Bit_J3[i]*two10+DSM0_TP_Bit_J3[i]*two12+DSM0_HTTP_Bit_J3[i]*two14;
+	k++;
+      }
+
+      
     
     //NEED to eventually make this decision higher up but keep it here for now
     if ((DSM0_HTTP_Bit[i]>1)||(DSM0_HTTP_Bit_J3[i]>1)||(DSM0_HTTP_Bit_J1[i]>1)) {
@@ -710,8 +748,18 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 //==================================================
 void StBemcTriggerSimu::get2006_DSMLayer1(){
 
-  // there are 2 L1 BEMC modules
-  int mod;
+
+  //DSM_Layer0 is passed to DSM_Layer1 in 8 UShort blocks (16 bits)
+  //There are 6 DSM_Layer1 boards and each can take 120 bits total
+  //So DSM_Layer0 passes 8 shorts (16*8=128) or 128 bits to each DSM_Layer1
+  int nShort[8] = {3, 2, 1, 0, 7, 6, 5, 4};
+  for (int i=0; i<kL1DsmModule; i++)
+    {
+      for (int j=0; j<6; j++) //only loop over 6 shorts 
+	{
+	  Int_t L0_Output_Channel = (i * 8) + nShort[j];
+	}
+    }
 
   //zero out the DSMLayer1 Bits passed to DSMLayer2
   for (int i=0;i<kL1DsmModule;i++){
@@ -747,7 +795,8 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
       //cout<<" JetID="<<i<<" ADC="<<DSM1_JP_ADC[i]<<" bit="<<DSM1_JP_jp_Bit[i]<<endl;
     }  
 
-  
+  // there are 2 L2 BEMC modules
+  int mod;
   //Translate JP's into 2 bits to pass to DSMLayer2
   for (int i=0;i<kNJet;i++){
     if (i < (kNJet/2)) mod = 0;
@@ -792,8 +841,6 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
     DSM1_ETOT_ADC[i]/=4;
     if (DSM1_ETOT_ADC[i]>31) DSM1_ETOT_ADC[i]=31;
   }
-
-
 }
 
 
