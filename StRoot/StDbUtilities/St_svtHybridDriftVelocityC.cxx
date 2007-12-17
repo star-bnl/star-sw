@@ -130,3 +130,13 @@ Double_t St_svtHybridDriftVelocityC::UnCalcV(Int_t hybrid, Double_t vd) {
   else             vd = WaferWidth()  - vd;
   return UnCalcTransLength(vd);
 }
+//________________________________________________________________________________
+Bool_t St_svtHybridDriftVelocityC::IsValidDriftRegion(Int_t barrel, Int_t ladder, Int_t wafer, Int_t hybrid, Double_t timeBin) {
+  svtHybridDriftVelocity_st *pp = p(barrel, ladder, wafer, hybrid);
+  if (! pp) return kFALSE;
+  Int_t I = (pp->npar/100)%10;
+  if (! I) return kTRUE;
+  Double_t u  = TMath::Abs(uHat(pp,timeBin));
+  if (u >= pp->dtmin && u <= pp->dtmax) return kTRUE;
+  return kFALSE;
+}
