@@ -34,6 +34,7 @@ class St_svtHybridDriftVelocityC : public TChair {
   Double_t                           UnCalcU(Int_t barrel, Int_t ladder, Int_t wafer, Int_t hybrid, Double_t timeBin);
   Double_t                           UnCalcV(Int_t hybrid, Double_t x);
   svtHybridDriftVelocity_st         *p(Int_t barrel, Int_t ladder, Int_t wafer, Int_t hybrid);
+  Bool_t                             IsValidDriftRegion(Int_t barrel, Int_t ladder, Int_t wafer, Int_t hybrid, Double_t timeBin);
   static void                        SetAnodePitch(Double_t pitch  = 0.0250) {mAnodePitch  = pitch;}
   static void                        SetWaferLength(Double_t length= 2.9928) {mWaferLength = length;}
   static void                        SetWaferWidth(Double_t width  = 3.0000) {mWaferWidth  = width;}
