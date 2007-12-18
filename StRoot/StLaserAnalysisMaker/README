@@ -25,6 +25,6 @@ CheckMirrors.C+("./st_laser_*.tags.root")      -- calculate difference between l
 ConverL.C                                      -- recalculate Alexei table into bunch of transformation
 Db2NtDv.C                                      -- look for correlation between TPC gas parameters in DB and drift velocities 
 Laser.C                                        -- production of  tpcDriftVelocity.*.C for Run V
-RaftMirror.C                                   -- adjustment ranf, bundle, mirror positions
+RaftMirror.C                                   -- adjustment raft, bundle, mirror positions
  
 </pre>
