@@ -118,6 +118,7 @@ void StBemcTriggerSimu::Init(){
   
   mAllTriggers.insert(117611);  //bemc-http-mb-l2gamma
   mAllTriggers.insert(127611);  //bemc-http-mb-l2gamma
+  mAllTriggers.insert(5);       //bemc-http-mb-l2gamma
   mAllTriggers.insert(137611);  //bemc-http-mb-l2gamma
   
   mAllTriggers.insert(117621);  //bemc-jp0-etot-mb-l2jet
@@ -734,6 +735,7 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       mFiredTriggers.push_back(137821);
       mFiredTriggers.push_back(137822);
       mFiredTriggers.push_back(137611);
+      mFiredTriggers.push_back(5);
     }
     
     if ((DSM0_HT_Bit[i]> 2)||(DSM0_HT_Bit_J3[i]>2)||(DSM0_HT_Bit_J1[i]>2)) {
@@ -757,7 +759,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
     {
       for (int j=0; j<6; j++) //only loop over 6 shorts 
 	{
-	  Int_t L0_Output_Channel = (i * 8) + nShort[j];
+	  // Int_t L0_Output_Channel = (i * 8) + nShort[j];
 	}
     }
 
