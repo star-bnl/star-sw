@@ -50,6 +50,7 @@ TComplex expOneD(TComplex x)
 
 const double Zero = 1.e-6;
 static TComplex sgCX1,sgCX2,sgCD1,sgCD2,sgImTet,sgCOne,sgCf1;
+static  int  SqEqu(double *, double *);
 #if 0
 //_____________________________________________________________________________
 static int myEqu(double *s, int na, double *b,int nb)
@@ -583,7 +584,33 @@ double THelixTrack::StepHZ(const double *su, int nsurf,
    }
 
 }
+//_____________________________________________________________________________
+double THelixTrack::Path(const THelixTrack &th,double *s2) const
+{
+   double SxyMe,SxyHe,SMe,SHe,dSMe=0,dSHe=0;
+   TCircle tcMe,tcHe;
+   Fill(tcMe);th.Fill(tcHe);
+   SxyMe = tcMe.Path(tcHe,&SxyHe);
+   if (SxyMe>1e33) return 3e33;
+   THelixTrack thMe(*this),thHe(th);
 
+   SMe = SxyMe/thMe.GetCos(); thMe.Move(SMe);
+   SHe = SxyHe/thHe.GetCos(); thHe.Move(SHe);
+   for (int ix=0;ix<3;ix++) {
+     if (fabs(thMe.Pos()[ix]-thHe.Pos()[ix])>100)return 3e33;}
+   for (int iter=0;iter<10; iter++) {
+     dSMe = thMe.Path(thHe.Pos());
+     if (dSMe>1e33) return 3e33;
+     SMe+=dSMe; thMe.Move(dSMe);
+     dSHe = thHe.Path(thHe.Pos());
+     if (dSHe>1e33) return 3e33;
+     SHe+=dSHe; thHe.Move(dSHe);
+     if(fabs(dSHe)+fabs(dSMe)<1e-5) break;
+   }
+   if(fabs(dSHe)+fabs(dSMe)> 1e-5)  return 3e33;
+   if(s2) *s2=SHe;
+   return SMe;
+}
 //_____________________________________________________________________________
 double THelixTrack::Path(double x,double y) const
 {
@@ -689,9 +716,6 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
                 Print();}
     assert(iter);
     step[0]+=ss;
-    fDCA[0] = ((point[0]-xnear[0])*(-pnear[1]) +(point[1]-xnear[1])*(pnear[0]))/fCosL;
-    if (fRho<0) fDCA[0] = - fDCA[0];
-    fDCA[1] = point[2]-xnear[2];
     return (xyz) ? Step(step[0],xyz,dir) : step[0];
 }
 //_____________________________________________________________________________
@@ -761,35 +785,6 @@ double THelixTrack::Dca(const double point[3]
 
 
 //_____________________________________________________________________________
-double THelixTrack::GetDCAxy() const
-{
-  return fDCA[0];
-}
-//_____________________________________________________________________________
-double THelixTrack::GetDCAz() const
-{
-  return fDCA[1];
-}
-//_____________________________________________________________________________
-double THelixTrack::GetDCA() const
-{
-  double tmp = sqrt(fDCA[0]*fDCA[0]+fDCA[1]*fDCA[1]);
-  if (fDCA[0]<0) tmp = -tmp;
-  return tmp;
-}
-//_____________________________________________________________________________
-double THelixTrack::GetDCA(double xx,double yy) const
-{
-  double xd[9]; 
-  memcpy(xd+0,fX,6*sizeof(fX[0]));
-  xd[6]=xx; xd[7]=yy;xd[8]=0;
-  xd[2]=0; xd[5]=0;	
-  THelixTrack myHlx(xd,xd+3,fRho);	
-  myHlx.Step(xd+6);
-  return myHlx.GetDCAxy();
-}	
-	
-//_____________________________________________________________________________
 double THelixTrack::GetPeriod() const
 {
    double per = (fabs(fRho) > 1.e-10) ? fabs(2.*M_PI/fRho):1.e+10;
@@ -826,7 +821,7 @@ void THelixTrack::Print(Option_t *) const
   
 }
 //_____________________________________________________________________________
-int THelixTrack::SqEqu(double *cba, double *sol)
+int SqEqu(double *cba, double *sol)
 {
 //	
 //	made from fortran routine GVPSQR (Geant320)
@@ -1013,6 +1008,33 @@ double dif = xnew[0]*xnew[0]+xnew[1]*xnew[1]-100;
 printf("s=%g dif=%g\n",s,dif);
 
 }
+//_____________________________________________________________________________
+void THelixTrack::Test5()
+{
+  double pars[4][2][7] = {
+   {{0,0,0, 1,1,1, -0.001},{0,0, 0, -1,1,-1,0.002}},
+   {{0,0,1, 1,1,1, -0.001},{0,0,-1, -1,1,-1,0.002}},
+   {{0,0,1, 1,1,1, -0.001},{0,0,-1,  1,1,-1,0.002}},
+  };
+  for (int ip=0;ip<3;ip++) {
+    THelixTrack th1(pars[ip][0],pars[ip][0]+3,pars[ip][0][6]); 
+    THelixTrack th2(pars[ip][1],pars[ip][1]+3,pars[ip][1][8]); 
+    th1.Move(-50);
+    th2.Move(-50);
+    double s2;
+    double s1 = th1.Path(th2,&s2);
+    th1.Move(s1);
+    th2.Move(s2);
+    double diff[3];
+    TCL::vsub(th1.Pos(),th2.Pos(),diff,3);
+    double dist = sqrt(TCL::vdot(diff,diff,3));
+    printf("s1=%g s2=%g dist=%g\n",s1,s2,dist);
+
+  }  
+
+
+
+}
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -1092,6 +1114,105 @@ double TCircle::Path(const double pnt[2],const double exy[3]) const
 
   return s+k*t;
 }
+//_____________________________________________________________________________
+double TCircle::Path(const TCircle &hlx,double *S2) const
+{
+  double s,s1=3e33,s2=3e33;
+  const static TComplex Im(0.,1.);
+  const TCircle *one = this;
+  const TCircle *two = &hlx;
+  if (fabs(fRho) > fabs(hlx.fRho)) { one=two; two=this; }
+  double Rho1 = one->Rho();
+  double Rho2 = two->Rho();
+  int kase = 0;
+  if (fabs(Rho1) > 1e-4) kase+=1;
+  if (fabs(Rho2) > 1e-4) kase+=2;
+  
+  int nSol = 0;
+  TComplex CX1(one->Pos()[0],one->Pos()[1]);
+  TComplex CX2(two->Pos()[0],two->Pos()[1]);
+  TComplex CP1(one->Dir()[0],one->Dir()[1]);
+  TComplex CP2(two->Dir()[0],two->Dir()[1]);
+  TComplex CdX = CX2-CX1;
+  double L[2];
+  switch(kase) {
+    case 2:;
+    case 3: {
+      if (kase==3) {
+	TComplex A = CP1/CP2*(Rho2/Rho1);
+	TComplex B = 1.-CdX/CP2*(Im*Rho2) - CP1/CP2*(Rho2/Rho1);
+	double a = A.Rho();
+	double b = B.Rho();
+	double alfa = A.Theta();
+	double beta = B.Theta();
+	double myCos = (1.-(a*a+b*b))/(2.*a*b);
+	double myAng = 0;
+             if (myCos>= 1.)	{nSol=1; myAng = 0.		;}
+	else if (myCos<=-1.) 	{nSol=1; myAng = M_PI		;}
+	else      		{nSol=2; myAng = acos(myCos)	;}
+	s  = ( myAng -(alfa-beta))/Rho1;
+        if (s<0) s+= 2.*M_PI/fabs(Rho1);
+        s1 = s;
+	if (nSol==2) {
+	  s =(-myAng -(alfa-beta))/Rho1;
+          if (s< 0) s+= 2.*M_PI/fabs(Rho1);
+          if (s<s1) s1 = s;
+	}
+      } else {
+	TComplex A = CP1/CP2*(Im*Rho2);
+	TComplex B = 1.-CdX/CP2*(Im*Rho2);
+	double cba[3]={B.Rho2()-1., 2*(A.Re()*B.Re()+A.Im()*B.Im()), A.Rho2()};
+	nSol = SqEqu(cba, L);
+	if (nSol< 0) break;
+	if (nSol==0) nSol=1;
+        if (L[0]>0) s1=L[0];
+        if (nSol>1 && L[1]>0 && L[1] <s1) s1 = L[1];
+      }
+
+      break;
+    }// end case 3
+    case 0: {
+      if (fabs((CdX/CP1).Im())>fabs((CP2/CP1).Im())*1e6) break;
+      nSol = 1;
+      s =  (CdX/CP2).Im()/(CP1/CP2).Im();
+      if (s<0) break;
+      s1 = s;
+      break;   
+    }//end case 0
+    default: assert(0);
+  }
+  if (nSol) {
+    TCircle tc1(*one),tc2(*two);
+    double xy[2];
+    tc1.Eval(s1,xy);   
+    s = tc2.Path(xy);
+    if (s<0 && kase) s += 2.*M_PI/fabs(Rho2);
+    if (s>0 ) s2 = s;
+  }
+
+
+  if (one != this) {s=s1;s1=s2;s2=s;}
+  if (S2) *S2=s2;
+  return s1;
+}
+//_____________________________________________________________________________
+void TCircle::Test4() 
+{
+  double pars[4][2][5] = {
+   {{0,0,1,0.,-0.001},{0,0.0,1,0,0.002}},
+   {{0,0,1,0.,-0.001},{0,0.1,1,0,0.002}},
+   {{0,0,1,0.,-0.001},{0,0.0,1,1,1e-8 }},
+   {{0,0,1,0.,-1e-8 },{0,0.0,1,1,1e-8 }}};
+  for (int ip=0;ip<4;ip++) {
+    TCircle tc1(pars[ip][0],pars[ip][0]+2,pars[ip][0][4]); 
+    TCircle tc2(pars[ip][1],pars[ip][1]+2,pars[ip][1][4]); 
+    tc1.Move(-20);
+    tc2.Move(-20);
+    double s2;
+    double s1 = tc1.Path(tc2,&s2);
+    printf("s1=%g s2=%g \n",s1,s2);
+  }  
+}   
 //______________________________________________________________________________
 double TCircle::Eval(double step,double *X, double *D) const
 {
@@ -2758,7 +2879,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.33 2007/10/24 22:43:24 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.34 2007/12/18 23:11:05 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2774,6 +2895,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.34  2007/12/18 23:11:05  perev
+ * Distance to helix & circle added
+ *
  * Revision 1.33  2007/10/24 22:43:24  perev
  * Implementation was forgotten. Thanx Adam
  *

@@ -20,6 +20,7 @@ const double* Dir() const 	{return fD;  }
 const double* Emx() const 	{return fEmx;  } 
 double Path(const double pnt[2]) const;
 double Path(const double pnt[2],const double exy[3]) const;
+double Path(const TCircle &tc,double *s2=0) const;
 double Move(double step);
 void   Rot(double angle);
 void   Rot(double cosa,double sina);
@@ -42,6 +43,7 @@ int    IsStrait()  			{return TestBit(1);}
 //	static funs
 static void Test2();
 static void Test3();
+static void Test4();
 
 private:
 void  MoveErrs(double l);
@@ -195,15 +197,14 @@ public:
 ///		DCA to given 2dim point (with error matrix)
         double Dca(double x,double y,double *dcaErr=0) const ;
 
+///		Distance to nearest point to other helix
+        double Path(const THelixTrack &hlx,double *s2=0) const ;
+
 
 ///		distance and DCAxy and DCAz to given space point (with error matrix)
         double Dca(const double point[3]
                   ,double &dcaXY,double &dcaZ,double dcaEmx[3]) const;
 
-        double GetDCA  () const;
-        double GetDCAz () const;
-        double GetDCAxy() const;
-        double GetDCA  (double xx,double yy) const;
         const double *GetXYZ() 	const {return fX;}
         const double *Pos()    	const {return fX;}
               double *Pos()           {return fX;}
@@ -224,8 +225,8 @@ static  void Test1();
 static  void Test2();
 static  void Test3();
 static  void Test4();
+static  void Test5();
 private:
-static  int  SqEqu(double *, double *);
 protected:
         double Step(double stmin,double stmax, const double *surf, int nsurf
 	           ,double *x=0, double *dir=0,int nearest=0) const;
@@ -240,7 +241,6 @@ protected:
 	double fCosL;
         double fEmxXY[6];
         double fEmxSZ[3];
-   	mutable double fDCA[2];
         char fEnd[1];
 ClassDef(THelixTrack,0)
 };
