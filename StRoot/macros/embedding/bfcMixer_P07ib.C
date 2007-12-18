@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_P07ib.C,v 1.4 2007/10/04 21:02:39 fisyak Exp $
+// $Id: bfcMixer_P07ib.C,v 1.5 2007/12/18 20:30:17 didenko Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -14,8 +14,8 @@ class StBFChain;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
 void bfcMixer_P07ib(const Int_t Nevents=1,
-	      const Char_t *daqfile="/star/data03/daq/2005/051/st_physics_adc_6051006_raw_1050001.daq",
-	      const Char_t *tagfile="/star/data32/reco/cuProductionMinBias/FullField/P07ib/2005/051/st_physics_adc_6051006_raw_1050001.tags.root",
+	      const Char_t *daqfile="/star/rcf/test/daq/2005/051/st_physics_adc_6051006_raw_1050001.daq",
+	      const Char_t *tagfile="/star/rcf/test/embedding/cuProductionMinBias/FullField/P07ic/2005/051/st_physics_adc_6051006_raw_1050001.tags.root",
 	      const Float_t zvertex_low=-175.0,
 	      const Float_t zvertex_high=175.0,
 	      const Char_t *mode="strange",
