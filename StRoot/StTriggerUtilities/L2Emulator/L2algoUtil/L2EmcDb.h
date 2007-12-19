@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 /*********************************************************************
- * $Id: L2EmcDb.h,v 1.4 2007/11/14 03:58:07 balewski Exp $
+ * $Id: L2EmcDb.h,v 1.5 2007/12/19 02:30:16 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -53,6 +53,7 @@ class L2EmcDb {
   bool  isETOW(const EmcCDbItem *x);
 
   int   initRun(int runNo);
+  int   getRun() { return run_number;}
   void  finishRun();
 
   enum {mxTxt=1000};
@@ -153,6 +154,9 @@ class L2EmcDb {
 /*
 *********************************************************************
   $Log: L2EmcDb.h,v $
+  Revision 1.5  2007/12/19 02:30:16  balewski
+  new L2-btow-calib-2008
+
   Revision 1.4  2007/11/14 03:58:07  balewski
   cleanup of common timing measurement
 
