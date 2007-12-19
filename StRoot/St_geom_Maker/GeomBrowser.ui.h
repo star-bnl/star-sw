@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.28 2007/12/12 19:58:08 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.29 2007/12/19 21:28:23 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -387,7 +387,7 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                         gROOT->GetColor(vc)->GetRGB(r,g,b);
                         Style_t vs = volume->GetFillStyle();
                         if (4000 >= vs && vs < 5000) a = vs-4000;
-                        QRgb initial = qRgba(r*255,g*255,b*255,a);
+                        QRgb initial = qRgba(int(r*255),int(g*255),int(b*255),a);
                         bool ok;
                         QRgb color = QColorDialog::getRgba(initial, &ok, this,"Change the Volume Color" );
                         if (ok) {
