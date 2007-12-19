@@ -13,15 +13,16 @@ ROOT_INC  = -I `root-config --incdir`
 
 
 LIBNAME  = L2algoUtil
-HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h 
-SRCS     = L2Histo.cxx  L2EmcDb.cxx L2VirtualAlgo.cxx 
-# tmp out: L2DbTime.hL2DbConfig.h L2DbTime.cxx L2DbConfig.cxx
+HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h L2VirtualAlgo2008.h L2btowCalAlgo08.h L2EmcGeom.h L2exampleAlgo08.h L2event2008.h
+
+SRCS     = L2Histo.cxx  L2EmcDb.cxx L2EmcGeom.cxx  L2VirtualAlgo.cxx  L2VirtualAlgo2008.cxx L2btowCalAlgo08.cxx L2exampleAlgo08.cxx
+
 
 CXX    = g++
 AR     = ar rul
 
-DEBUG  =-g -O 
-
+DEBUG  =-g  
+# -O
 #
 
 OBJS   = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
@@ -37,6 +38,7 @@ $(LIBNAME): $(OBJS)
 	$(AR)  lib$(LIBNAME).a $^
 	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
 	@echo install path=$(INSTALPATH)
+	echo $(OBJS)
 
 install:
 	cp -p lib$(LIBNAME).a  $(INSTALPATH)/alg_lib
@@ -66,6 +68,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.8  2007/12/19 02:30:19  balewski
+# new L2-btow-calib-2008
+#
 # Revision 1.7  2007/11/18 21:58:56  balewski
 # L2algos triggerId list fixed
 #
