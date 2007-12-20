@@ -705,9 +705,9 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
     
     
     //Construct total output bits from DSMLayer0
-    Int_t two10 = (Int_t) pow(2,10);
-    Int_t two12 = (Int_t) pow(2,12);
-    Int_t two14 = (Int_t) pow(2,14);
+    Int_t two10 = (Int_t) pow(2.0,10.0);
+    Int_t two12 = (Int_t) pow(2.0,12.0);
+    Int_t two14 = (Int_t) pow(2.0,14.0);
 
     if (((i+3)%5)!=0)
       {
