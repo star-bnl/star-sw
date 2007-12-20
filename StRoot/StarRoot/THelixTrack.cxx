@@ -1688,7 +1688,7 @@ static const int nAVERs = &fRr-&fXx;
 static int nCall=0; nCall++;
     int i;
     double xx, yy, xx2, yy2;
-    double f, g, h, p, q, t, g0, g02, a, b, c, d;
+    double f, g, h, p, q, t, g0, g02, a=0, b=0, c=0, d=0;
     double xroot, ff, fp;
     double dx, dy, nx,ny, xnom,wt,hord,tmp,radius2,radiuc2;
     fKase = fCase;
@@ -2879,7 +2879,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.34 2007/12/18 23:11:05 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.35 2007/12/20 00:47:27 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2895,6 +2895,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.35  2007/12/20 00:47:27  perev
+ * WarnOff
+ *
  * Revision 1.34  2007/12/18 23:11:05  perev
  * Distance to helix & circle added
  *
