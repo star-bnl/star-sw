@@ -2,7 +2,7 @@ void runSvtTree(const Char_t *input, const Char_t *output=0) {
   gROOT->LoadMacro("bfc.C");
   Load();
   TString Input(input);
-  TString Chain("in,StEvent,mysql,libPhysics,db,StiUtil,svtDb,ssdDb,StarMagField,SvtMatTree,nodefault");
+  TString Chain("in,StEvent,mysql,libPhysics,db,StarMagField,MagF,svtDb,ssdDb,SvtMatTree,nodefault");
   if (Input.Contains("rcf") || Input.Contains("gstar")) Chain += ",y2005e,simu";
   cout << "Chain used:\t" << Chain << endl;
   bfc(-1,Chain.Data(),input,0,output);

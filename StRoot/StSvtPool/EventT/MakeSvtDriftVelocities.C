@@ -7,9 +7,9 @@ TTable *table = 0;
 #if 0
 // lines which should be added to Drift_ALL.h
 Int_t Drift = 1;
-Int_t time =       106; 
-Int_t date =  20070524;
-const Char_t *Pass = "Pass214 RFG"; 
+Int_t time =       207; 
+Int_t date =  20070321;
+const Char_t *Pass = "Pass217 FFK"; 
 #endif 
 #include "Drift_ALL.h"
 static const Int_t N = sizeof(Data)/sizeof(data_t);
@@ -47,6 +47,7 @@ void MakeSvtDriftVelocities(){
 	  Double_t *cor = &Data[j].v0;
 	  Int_t nu = row[i].npar%10;
 	  Int_t nv = (row[i].npar/10)%10;
+	  Int_t I  = (row[i].npar/100)%10;
 #ifdef DEBUG
 	cout << "Found Match" << endl;
 	svtHybridDriftVelocity->Print(i,1);
@@ -88,7 +89,7 @@ void MakeSvtDriftVelocities(){
 	  }
 	  cout << endl;
 #endif
-	  row[i].npar = 10*nv + nu;
+	  row[i].npar = 100*I + 10*nv + nu;
 	  memset(par, 0, 10*sizeof(Double_t));
 	  for (Int_t k = 0; k < nu + nv; k++) {
 	    if (k >= 10) break;
@@ -112,16 +113,17 @@ void MakeSvtDriftVelocities(){
   out << "  if (!gROOT->GetClass(\"St_svtHybridDriftVelocity\")) return 0;" << endl;
   out << "  svtHybridDriftVelocity_st row[" << NN << "] = {//" << Pass << endl; 
   for (Int_t i = 0; i < NN; i++) {
-    out << Form("{%2i,%1i,%4i,%4i,%2i,%7i",row[i].type,row[i].status,row[i].idx,row[i].nrows,row[i].npar,row[i].Id);
+    out << Form("{%2i,%1i,%4i,%4i,%3i,%7i",row[i].type,row[i].status,row[i].idx,row[i].nrows,row[i].npar,row[i].Id);
     out << Form(",%1i,%2i,%1i,%1i",row[i].barrel,row[i].ladder,row[i].wafer,row[i].hybrid);
     out << Form(",%6.3f,%5.3f,%7.3f,%6.3f",row[i].tmin,row[i].dtmin,row[i].tmax,row[i].dtmax);
     Double_t *v = &row[i].v0;
     for (Int_t j = 0; j < 10; j++) {
       if (v[j]) out << Form(",%8.5f",v[j]);
-      else      out << ",0";
+      else      out << ", 0.00000";
     }
-    if (i < NN - 1)  out << "}," << endl;
-    else             out << "}"  << endl;
+    if (i < NN - 1)  out << "},";
+    else             out << "}";
+    out << Form("// B%iL%02iW%iH%i",row[i].barrel,row[i].ladder,row[i].wafer,row[i].hybrid) << endl;
   } 
   out << "  };" << endl;
   out << "  St_svtHybridDriftVelocity *tableSet = new St_svtHybridDriftVelocity(\"" << svtHybridDriftVelocity->GetName() << "\"," << NN << ");" << endl; 
