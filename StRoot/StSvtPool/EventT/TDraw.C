@@ -1141,6 +1141,8 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
   TLegend *leg = 0;
   Double_t Ymnx[2], Y;
   Int_t    p10;
+  Double_t xFmin[2] = {-1.08, 0.12};
+  Double_t xFmax[2] = {-0.12, 1.08};
   for (Int_t i = 0; i < nx; i++) {
     if (! head) {
       outC << "struct data_t {" << endl;
@@ -1169,8 +1171,8 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
     for (Int_t k = 0; k < 2; k++) {
       f[k] = (TF1 *) gROOT->GetFunction(funName[k]);
       if (! f[k]) {
-	if (k == 0) f[k] = new TF1(funName[k],STchebN,-1.2, 0.0,NPol1);
-	else        f[k] = new TF1(funName[k],STchebP, 0.0, 1.2,NPol1);
+	if (k == 0) f[k] = new TF1(funName[k],STchebN, xFmin[k], xFmax[k],NPol1);
+	else        f[k] = new TF1(funName[k],STchebP, xFmin[k], xFmax[k],NPol1);
       }
       f[k]->FixParameter(0,1); // N == 1
       f[k]->SetParameter(1,0);
@@ -1236,7 +1238,7 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
 	  for (Int_t n = 0; n < NPMax-1; n++) {
 	    f[k]->FixParameter(0,n);
 	    f[k]->ReleaseParameter(n+1);
-	    fitPN[k]->Fit(f[k],"erq");
+	    fitPN[k]->Fit(f[k],"erq","",xFmin[k],xFmax[k]);
 	    if (f[k]->GetNumberFitPoints() < 10) break;
 #ifdef __PROB_SELECTION__
 	    Double_t prob = f[k]->GetProb();
@@ -1315,9 +1317,13 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
 //________________________________________________________________________________
 void TDraw(Int_t k = 0) {
   if (k == 0) {TDrawG(); return;}
+  if (k == -3) {
+    for (Int_t i = 3; i >= 1; i--) TDrawL(-1,i);
+    return;
+  }
   if (k < 5)  {TDrawL(-1,k); return;}
   if (k == 5) {
-    for (Int_t i = 1; i <= 4; i++) TDrawL(-1,i);
+    for (Int_t i = 4; i >= 1; i--) TDrawL(-1,i);
     return;
   }
   if (k == 10) {
