@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.96 2007/09/10 00:34:28 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.96 2007/09/10 00:34:28 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.97 2007/12/20 01:10:18 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.97 2007/12/20 01:10:18 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.97  2007/12/20 01:10:18  perev
+ * WarnOff
+ *
  * Revision 2.96  2007/09/10 00:34:28  perev
  * member mgMaxRefiter added
  *
@@ -1299,7 +1302,7 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   if (nNBeg<=3) 	return 1;
   if (!mgMaxRefiter) 	return 0;
   StiKalmanTrackNode *inn= getInnerMostNode(3);
-  int fail,status;
+  int fail=0,status=0;
 
   StiNodePars pPrev;
   StiNodeErrs ePrev;
