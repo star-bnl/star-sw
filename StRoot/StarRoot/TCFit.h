@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TCFit.h,v 1.1 2007/12/18 23:12:15 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TCFit.h,v 1.2 2007/12/20 00:49:02 perev Exp $
 // Author: Victor Perev   05/07/2007
 // Class for Fit with constrains. 
 // TCFit   - fitter
@@ -107,7 +107,7 @@ int GetJd(int id)    const;		//get par jd by id
 const char *GetNam(int idx)    const; 	//get par name by id	
 int GetType(int id)    const;		//get type(Meas,Slac,Constr) by dd
 
-void FixPar (int ipar,int yes=1);       //(dis/en)able parameter 
+void FixPar (int ipar,int yes=1);       //(dis/en)able parameter/constrain
 int  IsFixed(int ipar) const ;        		//
 
     
@@ -259,6 +259,13 @@ public:
 
 class TCFitV0 : public TCFitData {
 public:
+enum eTCFitV0 { kDCA_0= 0,kZ_0  = 1,kPHI_0= 2,kPTIN_0= 3,kTANL_0= 4
+              , kDCA_1=10,kZ_1  =11,kPHI_1=12,kPTIN_1=13,kTANL_1=14
+              , kLEN_0=20,kLEN_1=21,kLEN_2=22
+              , kCX_0 =30,kCY_0 =31,kCZ_0 =32
+              , kCX_1 =33,kCY_1 =34,kCZ_1 =35
+              , kCNRJ =36 };
+public:
   TCFitV0();
  ~TCFitV0(){;}
   virtual double   Fcn();  			
@@ -273,26 +280,26 @@ public:
   virtual void Print(const char *name) const;
 public:
   void Reset();
-static void Test();
+static void Test(int mode=0);
 
 private:
 public:
-TkPars mTkBas[2];
-TkErrs mTEBas[2];
-TkPars mTkFit[2];
-TkPars mTkDif[2];
+TkPars mTkBas[2];		//Base parameters of two tracks
+TkErrs mTEBas[2];		//Errors of track parameters
+TkPars mTkFit[2];		//Fitted parameters of two tracks
+TkPars mTkDif[2];       	//
 
 char   mBeg[1];
 char   mReady;
 
-VxPars mVx;
-VxErrs mVE;
-double mLen[3];
+VxPars mVx;			//Vertex parameters. Not used now
+VxErrs mVE;			//Vertex errorss.    Not used now
+double mLen[3];			//Lengths to V0 vertex along tracks. 2==V0 track
 
-double mConr[7];
+double mConr[7];		//Constrains. 6=energy conservation 
 double mDFcn[2][5];
 double mDConDL[3][3];
-double mMas;
+double mMas;			//V0 mass
 char   mEnd[1];
 
 ClassDef(TCFitV0,0)

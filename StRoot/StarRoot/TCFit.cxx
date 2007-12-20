@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.1 2007/12/18 23:12:14 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.2 2007/12/20 00:49:07 perev Exp $
 // Author: Victor Perev   05/08/03
 
 
@@ -920,7 +920,7 @@ static double Pdk(double ma,double mb,double mc)
   return ans;
 }
 //______________________________________________________________________________
-void TCFitV0::Test()
+void TCFitV0::Test(int mode)
 {
 static const double D0Mass=1.8646,PiMass=.13956995,KMass=.493677;
 static const double D0Tau=0.415e-12,C=299792458e2;
@@ -931,12 +931,12 @@ static const double D0P=1
                    ,D0Len  = D0Tau*C*D0Gama*D0Beta;
 static const double HZ= (0.000299792458 * 4.98478);
 
-static const int NHISTS = 3;
+static const int NHISTS = 4;
 static TCanvas* myCanvas=0;
 static TH1F *hh[]={0,0,0,0,0,0};
-static const char *hNams[]= {"dL","dL/L", "Xi2",0};
-static const double LOW[] = {-D0Len,-3, 0.};
-static const double UPP[] = {-D0Len, 3,10.};
+static const char *hNams[]= {"dL","dL/L", "Xi2","Mass-D0"};
+static const double LOW[] = {-D0Len,-3, 0.,-1.5};
+static const double UPP[] = {-D0Len, 3,10., 1.5};
 
 
 
@@ -992,12 +992,17 @@ double Q = Pdk(D0Mass,PiMass,KMass);
       dat.mTEBas[ip].Set(1,1,pow(DX,2));
       dat.mTkBas[ip].Rand(dat.mTEBas[ip]);
     }
+    dat.Ready();
+    if (mode==1) dat.FixPar(kCNRJ);
     if (tc.Fit()) continue;
-    double dL = dat.GetPar(22)-dist;
-    double eL = sqrt(dat.ErMx(22,22));
+    double dL = dat.GetPar(kLEN_2)-dist;
+    double eL = sqrt(dat.ErMx(kLEN_2,kLEN_2));
     hh[0]->Fill(dL/eL);
     hh[1]->Fill(dL/dist);
     hh[2]->Fill(dat.GetFcn()/dat.GetNDF());
+    TLorentzVector D0V = dat.mTkFit[0].P4()+dat.mTkFit[1].P4();
+    hh[3]->Fill(D0V.M()-D0Mass);
+
   }
   myCanvas->Modified();
   myCanvas->Update();
