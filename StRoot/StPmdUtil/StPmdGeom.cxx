@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.24 2007/11/02 11:04:39 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.25 2007/12/21 09:48:01 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,8 +11,11 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.25  2007/12/21 09:48:01  rashmi
+ * Changes in readBoardDetail for dAu run by Subhasis
+ *
  * Revision 1.24  2007/11/02 11:04:39  rashmi
- * removed some print statements
+ *  removed some print statements
  *
  * Revision 1.23  2007/08/31 10:56:27  rashmi
  * removed a warning on chtemp ondate 31/08/07; removed some print statements
@@ -1911,9 +1914,35 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
     status[32][4]=0;
   }
   //access on 26/04/06
-  if(rn>114&&year==8){
+  if(rn>114&&year==8){ 
     status[46][6]=0;
   }
+
+//access on 26/04/06
+// ZA wrote (mail on dec 6,07, in pmd list) following boards were removed:
+// chain 39: 1,4,5,6
+// chain26: 8,13
+// Chain 23: 1,4,5
+// Chain29: 7,12
+// Chan37: 10
+// Numbering is assumed to start from 1 and not from 0 , to be checked
+
+  if(rn>300 && year==8){
+    status[38][0]=0;
+    status[38][3]=0;
+    status[38][4]=0;
+    status[38][5]=0;
+    status[25][7]=0;
+    status[25][12]=0;
+    status[22][0]=0;
+    status[22][3]=0;
+    status[22][4]=0;
+    status[28][6]=0;
+    status[28][11]=0;
+    status[36][9]=0;
+  }
+
+
   
   for(Int_t i=0;i<48;i++){
     for(Int_t ib=0;ib<36;ib++){
@@ -1949,7 +1978,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
   chmod=chtemp;
   //  cout<<"year,ch,chtemp,missing="<<year<<","<<ch<<","<<chtemp<<","<<missing<<endl;
 
-  if(year==8){
+ if(year==8){
     if(chain==1 || chain==7 || chain==19 || chain==20 || chain==23 || chain==24) {
       //      if(chtemp>=2304) cout<<"ch,chtemp="<<ch<<","<<chtemp<<endl;
       if( chtemp>=2304){return kStWarn;}
@@ -5874,7 +5903,7 @@ void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
   for(Int_t chain=1;chain<49;chain++){
     bmax[chain]=27;
     
-    if (year==8){
+    if (year==8){ 
       if(chain==1 || chain==7 || chain==19 || chain==20 || 
 	 chain==23 || chain==24) 
 	{bmax[chain]=36;}
