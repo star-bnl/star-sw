@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.49 2007/08/07 19:44:10 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.50 2007/12/22 01:14:58 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.50  2007/12/22 01:14:58  fine
+ * version compatible with new/old DAQ readers
+ *
  * Revision 1.49  2007/08/07 19:44:10  perev
  * Gene scalers added
  *
@@ -166,9 +169,17 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "Stypes.h"
+#include "StMessMgr.h"
+#include "StDAQReader.h"
 
 #include "StDaqLib/GENERIC/EventReader.hh"
-#include "StDAQReader.h"
+#ifndef OLD_EVP_READER
+    typedef unsigned int UINT32;
+#   include "RTS/include/evp.h"
+#   include "RTS/src/EVP_READER/cfgutil.h"
+#   include "RTS/src/EVP_READER/evpReaderClass.h"
+#endif
+
 #include "StTPCReader.h"
 #include "StEMCReader.h"
 #include "StSSDReader.h"
@@ -213,7 +224,7 @@ StDAQReader::StDAQReader(const char *file)
   setTPCVersion();
   setFTPCVersion();
   fTrigSummary = new StTrigSummary();
-
+  fDaqFileReader = 0;
   if(file && file[0]) open(file);
 }
 
@@ -221,6 +232,7 @@ StDAQReader::StDAQReader(const char *file)
 int StDAQReader::open(const char *file)
 {
   assert(file);
+#ifdef OLD_EVP_READER
   if (fFd!=(-1) && fFile && strcmp(file,fFile)==0) return 0;
   close();
   fFile = new char[strlen(file)+1];  strcpy(fFile,file);
@@ -231,6 +243,10 @@ int StDAQReader::open(const char *file)
      return kStErr;
   }
   fOffset =0;   
+#else
+  if (fDaqFileReader) close();
+  fDaqFileReader = new evpReader((char *)file);
+#endif
   return 0;  
 }
 //_____________________________________________________________________________
@@ -241,9 +257,13 @@ void StDAQReader::clear()
 //_____________________________________________________________________________
 int StDAQReader::close()
 {
+#ifdef OLD_EVP_READER
   delete [] fFile; fFile=0;
   if (fFd != (-1)) ::close(fFd);
   fFd = -1;
+#else
+  delete fDaqFileReader; fDaqFileReader = 0;
+#endif
   delete fEventReader;	fEventReader 	= 0;  
 
   if(fTPCReader) 	fTPCReader ->close();  
@@ -268,8 +288,59 @@ StDAQReader::~StDAQReader()
   close();
 }
 //_____________________________________________________________________________
+/// NextEvent - this method is called open the next daq file if any
+void StDAQReader::nextEvent()
+{
+#ifndef OLD_EVP_READER
+   // Create the next event from evp data
+   if (!fDaqFileReader) return;
+   int retStatus= 1; //StMaker::kOK;
+   // qDebug() << " StEvpReader::NextEvent() - fEventType = " <<  fEventType;
+   char *currentData = fDaqFileReader->get(0,EVP_TYPE_ANY); // EventNumber(),fEventType);
+   LOG_DEBUG << " StEvpReader::NextEvent - data = "
+           <<  (void *)currentData << fDaqFileReader
+//           << ", event # = " << EventNumber()
+//           << " event type " << fEventType << "::" << EVP_TYPE_ANY
+           << " status " << fDaqFileReader->status << " EVP_STAT_OK=" << EVP_STAT_OK
+           << " token " << fDaqFileReader->token
+           << endm
+          ;
+
+    if(currentData) {  // event not valid
+      retStatus =kStErr;
+       switch(fDaqFileReader->status) {
+          case EVP_STAT_OK :   // should retry as fast as possible...
+             // qDebug () << " StEvpReader::NextEvent - Ok" << this->token;
+             break;
+          case EVP_STAT_EOR :  // EOR or EOR - might contain token 0!
+             if(fDaqFileReader->isevp) { // keep going until the next run...
+                //                             retStatus = kOK;
+                //              fprintf(stderr," StEvpReader::NextEvent - waiting event \n") ;
+             } else {
+                retStatus = -2; //kEOF;
+                fOffset = -1;
+//                LOG_DEBUG << " StEvpReader::NextEvent - End Of File \n")  << endm;
+                // let's kill this reader
+             }
+             break;
+          case EVP_STAT_EVT :
+              LOG_DEBUG <<  "Problem getting event - skipping" << endm;
+             break;
+          case EVP_STAT_CRIT :
+               LOG_DEBUG << "Critical error - halting..." << endm;
+             break;
+       };
+       fEventStatus = fDaqFileReader->status;
+    }
+#endif
+ }
+
+//_____________________________________________________________________________
 int StDAQReader::readEvent()
 {  
+#ifndef OLD_EVP_READER
+  nextEvent();
+#endif  
   delete fEventReader;	fEventReader=0;
   delete fRICHReader; 	fRICHReader = 0;
   delete fL3Reader; 	fL3Reader   = 0;
@@ -279,11 +350,21 @@ int StDAQReader::readEvent()
   fEventReader = new EventReader();
   fEventReader->setVerbose(fVerbose);
   //  fEventReader->InitEventReader(fFd, fOffset, 0);
+#ifdef OLD_EVP_READER
   fEventReader->InitEventReader(fFd, fOffset);
   int oldOffset = fOffset;
   fOffset = fEventReader->NextEventOffset();
   if(fEventReader->eventIsCorrupted(fFd,oldOffset)) return kStErr; // Herb, Aug 28 2000
   if(fEventReader->errorNo()) return kStErr;  
+#else
+  if (fDaqFileReader->mem) {
+    fEventReader->InitEventReader(fDaqFileReader->mem);
+ } else {
+    delete fEventReader;
+    fEventReader = 0;
+    assert(0);
+ }
+#endif
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0){
      LOG_INFO << 
@@ -332,7 +413,7 @@ int StDAQReader::skipEvent(int nskip)
     if (fOffset == -1) {
       LOG_WARN << Form("EOF after record %d\n",isk)<< endm;
       break;}  
-      
+#ifdef OLD_EVP_READER
     fEventReader = new EventReader();
     //    fEventReader->InitEventReader(fFd, fOffset, 0);
     fEventReader->InitEventReader(fFd, fOffset);
@@ -340,6 +421,9 @@ int StDAQReader::skipEvent(int nskip)
       LOG_WARN << Form("<Warning: StDAQReader::skipEvent> ReadError on record %d",isk)<<endm;
       fOffset = -1; break;}  
     fOffset = fEventReader->NextEventOffset();
+#else
+    nextEvent();
+#endif        
   }
   return  nskip;
 }

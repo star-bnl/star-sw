@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.30 2007/08/07 19:44:11 perev Exp $
+ * $Id: StDAQReader.h,v 1.31 2007/12/22 01:14:59 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.31  2007/12/22 01:14:59  fine
+ * version compatible with new/old DAQ readers
+ *
  * Revision 1.30  2007/08/07 19:44:11  perev
  * Gene scalers added
  *
@@ -101,7 +104,7 @@
 #ifndef _StDAQReader_
 #define _StDAQReader_
 
-
+#define OLD_EVP_READER 1
 
 //		Forward declarations
 struct  EventInfo;
@@ -117,6 +120,7 @@ class StTRGReader ;
 class StSVTReader ;
 class StSCReader  ;
 class TDataSet    ;
+class evpReader   ; // new  2007 DAQ file reader
 #ifndef __CINT__
 
 #include "StDaqLib/RICH/RICH_Reader.hh"
@@ -201,6 +205,11 @@ public:
   virtual void printEventInfo();
   virtual int  getEventSize() const;
   virtual EventReader *getEventReader() const {return fEventReader;}  
+  virtual evpReader   *getFileReader() const  {return  fDaqFileReader;}
+
+protected:
+  void nextEvent();
+  int  fEventStatus;
 
 protected:
   int m_ZeroTokens;   //! number of events with token==0
@@ -226,6 +235,7 @@ protected:
   char fTPCVersion[12];
   char fFTPCVersion[12];
   StTrigSummary *fTrigSummary; //!
+  evpReader     *fDaqFileReader;
 };
 #ifndef __CINT__
 #include "StTPCReader.h"
