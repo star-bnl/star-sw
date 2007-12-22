@@ -80,6 +80,10 @@ class StTinyRcTrack {
   void setNAssocMc(Short_t val) { mNAssocMc=val; }
   void setNPossible(Short_t val) { mNPossible=val; }
 
+  void setEmcTowerAdc(Short_t val, size_t index) { if (index<3) mEmcTowerAdc[index]=val; }
+  void setEmcEnergyRcHit(Float_t val, size_t index) { if (index<3) mEmcEnergyRcHit[index]=val; }
+  void setEmcSoftIdHiTowerRc(Short_t val, size_t index) { if (index<3) mEmcSoftIdHiTowerRc[index]=val; }
+  
   float ptPr()const { return mPtPr; }
   float pxPr()const { return mPtPr*cos(mPhiPr); }
   float pyPr()const { return mPtPr*sin(mPhiPr); }
@@ -136,6 +140,11 @@ class StTinyRcTrack {
   short charge() const { return mCharge; }
   short nAssocMc() const { return mNAssocMc; }
   short nPossiblePts() const { return mNPossible; }
+
+  short emcTowerAdc(size_t index) const { if (index<3) return mEmcTowerAdc[index]; else return -999;}
+  float emcEnergyRcHit(size_t index) const {if (index<3) return mEmcEnergyRcHit[index]; else return -999;}
+  short emcSoftIdHiTowerRc(size_t index) const { if (index<3) return mEmcSoftIdHiTowerRc[index]; else return -999;}
+  
   virtual void Print(Option_t *option="") const;
 private:
   // primary stuff
@@ -214,12 +223,19 @@ private:
   Short_t      mNPossible;
   Char_t       mIsValidPr;
 
-  ClassDef(StTinyRcTrack,5)
+  Short_t      mEmcTowerAdc[3];
+  Float_t      mEmcEnergyRcHit[3];
+  Short_t      mEmcSoftIdHiTowerRc[3];
+  ClassDef(StTinyRcTrack,6)
 };
 
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.8  2007/12/22 20:37:53  calderon
+// Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
+// obtained from track extrapolation to BEMC of rec track.
+//
 // Revision 1.7  2007/02/23 17:07:01  fisyak
 // Add Ssd and DCA
 //
@@ -246,6 +262,10 @@ private:
 //
 // Revision 1.2  2002/06/06 18:58:30  calderon
 // Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.8  2007/12/22 20:37:53  calderon
+// Added Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
+// Added obtained from track extrapolation to BEMC of rec track.
+// Added
 // Added Revision 1.7  2007/02/23 17:07:01  fisyak
 // Added Add Ssd and DCA
 // Added
