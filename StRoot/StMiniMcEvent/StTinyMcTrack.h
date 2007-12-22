@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.7 2007/02/23 17:07:01 fisyak Exp $
+ * $Id: StTinyMcTrack.h,v 1.8 2007/12/22 20:37:53 calderon Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -29,6 +29,14 @@ class StTinyMcTrack : public TObject {
   void setNSvtHitMc(Short_t val) { mNSvtHitMc=val; }
   void setNSsdHitMc(Short_t val) { mNSsdHitMc=val; }
   void setNFtpcHitMc(Short_t val) { mNFtpcHitMc=val; }
+  void setNBemcHitMc(Short_t val) { mNBemcHitMc=val; }
+  void setNBprsHitMc(Short_t val) { mNBprsHitMc=val; }
+  void setNBsmdeHitMc(Short_t val) { mNBsmdeHitMc=val; }
+  void setNBsmdpHitMc(Short_t val) { mNBsmdpHitMc=val; }
+  void setNEemcHitMc(Short_t val) { mNEemcHitMc=val; }
+  void setNEprsHitMc(Short_t val) { mNEprsHitMc=val; }
+  void setNEsmduHitMc(Short_t val) { mNEsmduHitMc=val; }
+  void setNEsmdvHitMc(Short_t val) { mNEsmdvHitMc=val; }
   void setGeantId(Short_t val) { mGeantId=val; }
   void setChargeMc(Short_t val) { mChargeMc=val; }
   void setNAssocGl(Short_t val) { mNAssocGl=val; }
@@ -38,7 +46,11 @@ class StTinyMcTrack : public TObject {
   void setPrimary(Bool_t val) { mIsPrimary = val;}
   void setValid() {mIsValid = 1;}
   void setParentKey(Short_t val) { mParentKey=val; }
-    
+  void setParentGeantId(Short_t val) { mParentGeantId=val; }
+  void setEmcEnergyMcHit(Float_t val,size_t index) {if (index<3) mEmcEnergyMcHit[index]=val;}
+  void setEmcEnergyMcSum(Float_t val) {mEmcEnergyMcSum=val;}  
+  void setEmcSoftIdHiTowerMc(Short_t val,size_t index) {if (index<3) mEmcSoftIdHiTowerMc[index]=val;}
+  
   float ptMc() const { return mPtMc; }
   float pxMc() const { return mPtMc*cos(mPhiMc); }
   float pyMc() const { return mPtMc*sin(mPhiMc); }
@@ -50,6 +62,14 @@ class StTinyMcTrack : public TObject {
   short nSvtHitMc() const { return mNSvtHitMc; }
   short nSsdHitMc() const { return mNSsdHitMc; }
   short nFtpcHitMc() const { return mNFtpcHitMc; }
+  short nBemcHitMc() const { return mNBemcHitMc; }
+  short nBprsHitMc() const { return mNBprsHitMc; }
+  short nBsmdeHitMc() const { return mNBsmdeHitMc; }
+  short nBsmdpHitMc() const { return mNBsmdpHitMc; }
+  short nEemcHitMc() const { return mNEemcHitMc; }
+  short nEprsHitMc() const { return mNEprsHitMc; }
+  short nEsmduHitMc() const { return mNEsmduHitMc; }
+  short nEsmdvHitMc() const { return mNEsmdvHitMc; }
   short geantId() const { return mGeantId; }
   short chargeMc() const { return mChargeMc; }
   short nAssocGl() const { return mNAssocGl; }
@@ -60,7 +80,10 @@ class StTinyMcTrack : public TObject {
   Bool_t isValid() {return  mIsValid;}
   virtual void Print(Option_t *option="") const;
   short parentKey() const { return mParentKey; }
-    
+  short parentGeantId() const { return mParentGeantId; }
+  float emcEnergyMcHit(size_t index) const { if (index<3) return mEmcEnergyMcHit[index]; else return -999;}
+  float emcEnergyMcSum() const { return mEmcEnergyMcSum; }
+  short emcSoftIdHiTowerMc(size_t index) const { if (index<3) return mEmcSoftIdHiTowerMc[index]; else return -999; }
 private:
   // mc stuff
     
@@ -73,23 +96,39 @@ private:
   Short_t    mNSvtHitMc;
   Short_t    mNSsdHitMc;
   Short_t    mNFtpcHitMc;
+  Short_t    mNBemcHitMc;
+  Short_t    mNBprsHitMc;
+  Short_t    mNBsmdeHitMc;
+  Short_t    mNBsmdpHitMc;
+  Short_t    mNEemcHitMc;
+  Short_t    mNEprsHitMc;
+  Short_t    mNEsmduHitMc;
+  Short_t    mNEsmdvHitMc;
   Short_t    mGeantId;
   Short_t    mChargeMc;
   Float_t    mStopR;
   Short_t    mKey;
   Short_t    mParentKey;
-    
+  Short_t    mParentGeantId;
+  Float_t    mEmcEnergyMcHit[3];
+  Float_t    mEmcEnergyMcSum;
+  Short_t    mEmcSoftIdHiTowerMc[3];
+  
   // assoc stuff
   Short_t      mNAssocGl;
   Short_t      mNAssocPr;
   Bool_t     mIsPrimary;
 
-  ClassDef(StTinyMcTrack,4)
+  ClassDef(StTinyMcTrack,5)
 };
 
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.8  2007/12/22 20:37:53  calderon
+// Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
+// obtained from track extrapolation to BEMC of rec track.
+//
 // Revision 1.7  2007/02/23 17:07:01  fisyak
 // Add Ssd and DCA
 //

@@ -23,15 +23,21 @@ void StTinyMcTrack::Print(Option_t *option) const {
       Double_t R = mStopR;
       if (R < 0) R = 0;
       if (R > 999.99) R = 999.99;
-      cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%8.3f%4i%4i%4i%2i", 
+      cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%8.3f%4i%8.3f%8.3f%4i%4i%4i%4i%2i", 
 		   (int) mIsValid, mPtMc,  mPzMc,  mEtaMc,  mPhiMc,  
-		   mNHitMc,  mNSvtHitMc,  mNSsdHitMc,  mNFtpcHitMc,  
-		   mGeantId,  mChargeMc,  R,  mKey,  mNAssocGl,  mNAssocPr,  (int) mIsPrimary) << endl;
+		   mNHitMc,  mNSvtHitMc,  mNSsdHitMc,  mNFtpcHitMc,
+		   mNBemcHitMc, mNBprsHitMc, mNBsmdeHitMc, mNBsmdpHitMc,
+		   mNEemcHitMc, mNEprsHitMc, mNEsmduHitMc, mNEsmdvHitMc,		  
+		   mGeantId,  mChargeMc,  R,  mKey,  mParentKey, mEmcEnergyMcHit[0], mEmcEnergyMcSum, mEmcSoftIdHiTowerMc[0], mNAssocGl,  mNAssocPr,  (int) mIsPrimary) << endl;
     }
   }
 }
 //
 // $Log: StTinyMcTrack.cxx,v $
+// Revision 1.3  2007/12/22 20:37:53  calderon
+// Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
+// obtained from track extrapolation to BEMC of rec track.
+//
 // Revision 1.2  2007/02/23 17:07:00  fisyak
 // Add Ssd and DCA
 //
