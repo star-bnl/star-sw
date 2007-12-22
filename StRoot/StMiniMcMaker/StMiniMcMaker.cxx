@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.26 2007/04/26 04:08:05 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.27 2007/12/22 20:31:20 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.27  2007/12/22 20:31:20  calderon
+ * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
+ *
  * Revision 1.26  2007/04/26 04:08:05  perev
  * Hide StBFChain dependency
  *
@@ -130,6 +133,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.27  2007/12/22 20:31:20  calderon
+ * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
+ *
  * Revision 1.26  2007/04/26 04:08:05  perev
  * Hide StBFChain dependency
  *
@@ -248,7 +254,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.26 2007/04/26 04:08:05 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.27 2007/12/22 20:31:20 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -295,6 +301,9 @@
 #include "StTpcDedxPidAlgorithm.h"
 #include "StuProbabilityPidAlgorithm.h"
 
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
+
 #include "StMiniMcHelper.h"
 
 static int StMiniMcMakerErrorCount=0;
@@ -306,7 +315,27 @@ void dominatrackInfo(const StTrack*, short& dominatrackKey, short&, float&);
 inline bool hitCmp(StTpcHit* p1, StTpcHit* p2){
   return (p1->position().perp()<p2->position().perp());
 }
+// decreasing energy
+inline bool StMcCalorimeterHitCompdE(StMcCalorimeterHit* lhs, StMcCalorimeterHit* rhs) {
+  return (lhs->dE() > rhs->dE());
+}
+// decreasing energy
+inline bool StEmcRawHitCompEne(StEmcRawHit* lhs, StEmcRawHit* rhs) {
+  return (lhs->energy() > rhs->energy());
+}
 
+float scaleFactor(double Eta, int hitType=0) {
+//     hitType = 0 - towers
+//     hitType = 1 - pre shower
+//     hitType = 2 - shower max Eta
+//     hitType = 3 - shower max Phi
+    float P0[]={14.69,559.7,0.1185e6,0.1260e6};
+    float P1[]={-0.1022,-109.9,-0.3292e5,-0.1395e5};
+    float P2[]={0.7484,-97.81,0.3113e5,0.1971e5};
+    
+    float x=fabs(Eta);
+    return P0[hitType]+P1[hitType]*x+P2[hitType]*x*x;
+}
 
 ClassImp(StMiniMcMaker)
 
@@ -334,6 +363,7 @@ StMiniMcMaker::StMiniMcMaker(const Char_t *name, const Char_t *title)
   mMcVertexPos(0),
   mTpcDedxAlgo(0),
   mPidAlgo(0),
+  mEmcIndex(4801),
   mGhost(kTRUE), 
   mMinPt(0),mMaxPt(99999),
   mNSplit(0),mNRc(0),mNGhost(0),mNContam(0),
@@ -521,6 +551,9 @@ StMiniMcMaker::Make()
     return kStOk;
   }
 
+  // fill emc Helper array to index StEmcRawHits by
+  // SoftId.
+  buildEmcIndexArray();
   //
   // loop over the tracks
   //
@@ -616,9 +649,6 @@ StMiniMcMaker::trackLoop()
   // create the StMiniMcPair class which will hold all
   // enum Category types.
   //
-  StMiniMcPair* miniMcPair      = new StMiniMcPair;
-  StContamPair* contamPair      = new StContamPair;
-  StTinyMcTrack* tinyMcTrack    = new StTinyMcTrack;
 
 
   //
@@ -648,20 +678,32 @@ StMiniMcMaker::trackLoop()
       StMcTrack* mcGlobTrack = *allMcTrkIter;
       if(!acceptRaw(mcGlobTrack)) continue; // loose eta cut (4 units, so should include ftpc).
       if(accept(mcGlobTrack) || mcGlobTrack->ftpcHits().size()>=5) { // 10 tpc hits or 5 ftpc hits
+	if (Debug()>1) {
+	  cout << "accepted mc global track, key " << mcGlobTrack->key() << endl;
+	}
 	  // Ok, track is accepted, query the map for its reco tracks.
-	  StTrackPairInfo* candTrackPair = findBestMatchedGlobal(mcGlobTrack);
+
+	StTrackPairInfo* candTrackPair = findBestMatchedGlobal(mcGlobTrack);
+	
 	  if (candTrackPair) {
 	      // ok, found a match! Enter into the array and store the glob id
 	      // to only enter a glob track once
 	      StGlobalTrack* glTrack = candTrackPair->partnerTrack();
+
+	      if (Debug()>1) {
+		cout << "global match " << endl;
+		cout << "mc, rc pt " << mcGlobTrack->pt() << ", " << glTrack->geometry()->momentum().perp() << endl;
+	      }
+	      
 	      if (find(enteredGlobalTracks.begin(),enteredGlobalTracks.end(),glTrack->key())!=enteredGlobalTracks.end()) continue; //if it's already matched, skip it.
+	      StMiniMcPair* miniMcPair      = new StMiniMcPair;
 	      fillTrackPairInfo(miniMcPair, mcGlobTrack,
 				0, glTrack, 
 				candTrackPair->commonTpcHits()+((candTrackPair->commonSvtHits())*100), mRcTrackMap->count(glTrack),
 				mMcTrackMap->count(mcGlobTrack), 0,
 				kTRUE);
 	      mMiniMcEvent->addTrackPair(miniMcPair,MATGLOB);
-	      
+	      delete miniMcPair;
 	      enteredGlobalTracks.push_back(glTrack->key()); // store the keys of the tracks we've matched.
 	      nMatGlob++;
 	      
@@ -841,12 +883,14 @@ StMiniMcMaker::trackLoop()
 	    if(!foundBest){
 	      // 02/02/02 rc pt cut
 	      if(acceptPt(glTrack) || acceptPt(prTrack)){
+		StMiniMcPair* miniMcPair = new StMiniMcPair;
 		fillTrackPairInfo(miniMcPair, mergedMcTrack, 
 				  prTrack, glTrack, 
 				  mergedCommonHits+((mcMergedPair[i]->commonSvtHits())*100), nAssocMc,
 				  nAssocGlVec[i], nAssocPrVec[i],
 				  isBestContam);
 		mMiniMcEvent->addTrackPair(miniMcPair,MATCHED);
+		delete miniMcPair;
 	      }
 	      rcFoundMap[prTrack->key()]=1; // the value is meaningless
 	      nMatched++;
@@ -855,10 +899,12 @@ StMiniMcMaker::trackLoop()
 	    else{
 	      // 02/02/02 rc pt cut
 	      if(acceptPt(glTrack) || acceptPt(prTrack)){
+		StMiniMcPair* miniMcPair = new StMiniMcPair;
 		fillTrackPairInfo(miniMcPair,mergedMcTrack,prTrack,glTrack,
 				  mergedCommonHits+((mcMergedPair[i]->commonSvtHits())*100), nAssocMc,nAssocGlVec[i], 
 				  nAssocPrVec[i]);
 		 mMiniMcEvent->addTrackPair(miniMcPair,MERGED);
+		 delete miniMcPair;
 	      }
 	      if(Debug()==2 && acceptDebug(mergedMcTrack)) 
 		cout << "YES! satisfies cuts" << endl;
@@ -886,8 +932,10 @@ StMiniMcMaker::trackLoop()
     // 02/25/02
     // accept all mc primary tracks within some eta window
     if(acceptRaw(mcTrack)){
+      StTinyMcTrack* tinyMcTrack    = new StTinyMcTrack;
       fillMcTrackInfo(tinyMcTrack,mcTrack,nAssocGl,nAssocPr);
       mMiniMcEvent->addMcTrack(tinyMcTrack);
+      delete tinyMcTrack;
     }
   } // mc track iter
 
@@ -998,11 +1046,11 @@ StMiniMcMaker::trackLoop()
 	// yes, it's a split track
 	//
 	if(isPrimaryTrack(mcTrack)){
-	  
+	  StMiniMcPair* miniMcPair = new StMiniMcPair;
 	  fillTrackPairInfo(miniMcPair,mcTrack,prTrack,glTrack,
 			    commonHits+(((*iterBestMatchPair)->commonSvtHits())*100), nAssocMc, nAssocGl, nAssocPr);
 	  mMiniMcEvent->addTrackPair(miniMcPair,SPLIT);
-	  
+	  delete miniMcPair;
 	  nSplit++; 
 	  
 	  //
@@ -1011,13 +1059,14 @@ StMiniMcMaker::trackLoop()
 	  if(Debug()==2) checkSplit(mcTrack,glTrack,commonHits);
 	}
 	else{ // no, it's best matched to a non primary, contamination
+	  StContamPair* contamPair      = new StContamPair;
 	  
 	  fillTrackPairInfo(contamPair,mcTrack,
 			    prTrack,glTrack,commonHits+(((*iterBestMatchPair)->commonSvtHits())*100),
 			    nAssocMc,nAssocGl,nAssocPr);
 	  mMiniMcEvent->addContamPair(contamPair);
-	  
-	  if(Debug()==2) checkContam(mcTrack,glTrack,commonHits);
+	  delete contamPair;
+	  if(Debug()>=2) checkContam(mcTrack,glTrack,commonHits);
 	  nContam++;
 	}
       } // cand.size()?
@@ -1031,9 +1080,11 @@ StMiniMcMaker::trackLoop()
     // ghosts?
     //
     else if(mGhost && mRcTrackMap->count(glTrack)==0){
+      StMiniMcPair* miniMcPair = new StMiniMcPair;
       fillRcTrackInfo(miniMcPair,
 		      prTrack,glTrack,nAssocMc);
-      mMiniMcEvent->addTrackPair(miniMcPair,GHOST); 
+      mMiniMcEvent->addTrackPair(miniMcPair,GHOST);
+      delete miniMcPair;
       nGhost++;
       if(Debug()) {
 	cout << "#############" << endl;
@@ -1054,10 +1105,6 @@ StMiniMcMaker::trackLoop()
 		nMcGoodGlobal20,nMcNch,nMcHminus,
 		nMcFtpcENch, nMcFtpcWNch,nFtpcEUncorrected,nFtpcWUncorrected);
   
-  delete miniMcPair;
-  delete contamPair;
-  delete tinyMcTrack;
-
   // delete the most probable pid functor
   // 
   //  delete mPidAlgo;
@@ -1212,6 +1259,57 @@ StMiniMcMaker::trackLoopIdT() // match with IdTruth
 		nMcGoodGlobal20,nMcNch,nMcHminus,
 		nMcFtpcENch, nMcFtpcWNch,nFtpcEUncorrected,nFtpcWUncorrected);
 }
+
+void StMiniMcMaker::buildEmcIndexArray() {
+  
+  if (Debug()>1) cout << "StMiniMcMaker::buildEmcIndexArray" << endl;
+  // Put all the EMC hits into an array that can then be
+  // indexed by SoftId, for use when storing tower info for
+  // tracks.
+
+  // zero all pointers in the array
+  // Note: vector::clear() is not what should be used
+  // clear() removes all the elements from the vector, i.e. the
+  // size() after a clear() will be zero.
+  for (int softIdNum=1; softIdNum<4801; ++softIdNum) mEmcIndex[softIdNum]=0;
+
+  StEmcGeom* emcGeom = StEmcGeom::getEmcGeom(1);
+  StEmcDetector* bemcDet = mRcEvent->emcCollection()->detector(kBarrelEmcTowerId);
+  if (Debug()>1) {
+    cout << "emcGeom " << emcGeom << endl;
+    cout << "bemcDet " << bemcDet << endl;
+  }
+  // Loop over modules.  Note, the modules are returned by module number
+  // i.e. in the range 1-120 for BEMC.
+  for (size_t iMod=1; iMod<=bemcDet->numberOfModules(); ++iMod) {
+    StSPtrVecEmcRawHit& modHits = bemcDet->module(iMod)->hits();
+    if (Debug()>1) {
+      cout << "Module " << iMod << endl;
+      cout << "Hits in Module " << modHits.size() << endl;
+    }
+    for (size_t iHit=0; iHit<modHits.size(); ++iHit) {
+      StEmcRawHit* rawHit = modHits[iHit];
+      unsigned int softId = rawHit->softId(1); // 1 is "bemc" (see StEmcGeom::getDetNumFromName)
+      if (Debug()>2) {
+	cout << "iHit  " << iHit << endl;
+	cout << "soft Id " << softId << endl;
+	cout << "ene, mod, eta, sub   " << rawHit->energy()
+	     << ", " << rawHit->module()
+	     << ", " << rawHit->eta()
+	     << ", " << rawHit->sub()
+	     << endl;
+      }
+      // Make sure the softId is valid.
+      // Note: checkId returns 0 (false) when the softId is between 1 and mNRaw
+      // so need an extra "!" to use inside the if statement.
+      if (!emcGeom->checkId(softId)) { 
+	mEmcIndex[softId] = rawHit;
+      } //check for valid ID
+    } // loop over hits
+  } // loop over modules
+  return;
+}
+
 //________________________________________________________________________________
 /*
   Create the output root file and the TTree
@@ -1597,6 +1695,108 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setFitFtpc(ftpcFitPts);
     
   }
+
+  //
+  // EMC Information additions (Sept 2007) MCBS
+  // Add to the track information about EMC towers.
+  // - Find the tower at which the track points.
+  // - Obtain all 8 towers (StEmcRawHit) surrounding the above tower (9 total, modulo edge effects)
+  // - Sort all 9 towers according to their energy
+  // - Store the ADC and energy of the 3 highest towers out of these 9
+  // - Store the Soft Id of the highest tower
+  // - Store the energy of StEmcPoint related to this track, if any.
+  StEmcPosition emcPos;
+  StThreeVectorD *pos = new StThreeVectorD(0,0,0);
+  StThreeVectorD *mom = new StThreeVectorD(0,0,0);
+  double magField = mRcEvent->runInfo()->magneticField();
+
+  if (Debug()>2) {
+    cout << "fillRcTrack, EMC information" << endl;
+    cout << "Extrapolating to BEMC using B Field = " << magField*kilogauss/tesla << " tesla" << endl;
+//     if (glTrack) {
+//       cout << "hx curvature original from track: " << glTrack->outerGeometry()->curvature() << endl;
+//       StPhysicalHelixD helix(glTrack->outerGeometry()->momentum(),glTrack->outerGeometry()->origin(),magField*kilogauss,glTrack->outerGeometry()->charge());
+//       cout << "hx curvature as in EmcProjection: " << helix.curvature() << endl;
+//    }
+  }
+  
+  // Project Track onto BEMC radius.
+  // Use the mag field obtained from run Info above, it
+  // will get multiplied by tesla in StEmcPosition::projTrack.
+  bool projOk;
+  
+  if (prTrack) {
+    projOk = emcPos.trackOnEmc(pos,mom,prTrack,magField*kilogauss/tesla);
+  }
+  else {
+    projOk = emcPos.trackOnEmc(pos,mom,glTrack,magField*kilogauss/tesla);
+  }
+  if (projOk) {
+    // Track hits BEMC.  Find the 9 closest towers around the projection.
+    // Sort them according to energy.  Keep the highest 3.
+    int softIdProj;
+    vector<StEmcRawHit*> towersOfTrack;
+    StEmcGeom* emcGeom = StEmcGeom::getEmcGeom("bemc");
+    emcGeom->getId(pos->phi(),pos->pseudoRapidity(),softIdProj); // softId range [1,4800];
+    for(int idEta=-1; idEta<2; ++idEta) {
+      for (int idPhi=-1; idPhi<2; ++idPhi) {
+	int towerId = emcPos.getNextTowerId(softIdProj,idEta,idPhi);
+	if (!emcGeom->checkId(towerId)) {
+	  // Valid tower SoftId.  (Again, note that checkId returns "false" when the
+	  // softId is valid!)
+	  // Get StEmcRawHit corresponding to this softId
+	  // here is where the helper Emc container comes in handy
+	  StEmcRawHit* emcHit = mEmcIndex[towerId];
+	  if (emcHit!=0) {
+	    towersOfTrack.push_back(emcHit);
+	  } // check valid StEmcRawHit pointer
+	}// check valid tower id
+      }// dPhi loop
+    }// dEta loop
+    if (Debug()>1) {
+      cout << "Outer Helix " << glTrack->outerGeometry()->helix() << endl;
+      cout << "Track Projects to tower " << softIdProj << endl;
+      cout << "Track hits at R= " << pos->perp() << " eta,phi: " << pos->pseudoRapidity() << ", " << pos->phi() << endl;
+      cout << "Track Has " << towersOfTrack.size() << " total candidate towers" << endl;
+    }
+    if (towersOfTrack.size()>0) {
+      // Obtained all towers (9 at most).
+      // Sort them by energy, using helper function defined atop this file
+      sort(towersOfTrack.begin(),towersOfTrack.end(),StEmcRawHitCompEne);
+      
+      // Store the ADC, Energy and SoftId of the 3 highest towers
+      size_t maxTowers=3;
+      if (towersOfTrack.size()<maxTowers) maxTowers=towersOfTrack.size();
+      for (size_t iTow=0; iTow<maxTowers; ++iTow) {
+	tinyRcTrack->setEmcTowerAdc(towersOfTrack[iTow]->adc(),iTow);
+	tinyRcTrack->setEmcEnergyRcHit(towersOfTrack[iTow]->energy(),iTow);
+	tinyRcTrack->setEmcSoftIdHiTowerRc(towersOfTrack[iTow]->softId(1),iTow);
+      } //3 highest towers loop
+      
+    } // make sure there are towers
+    else {
+      for (size_t iTow=0; iTow<0; ++iTow) {
+	tinyRcTrack->setEmcTowerAdc(-9,iTow);
+	tinyRcTrack->setEmcEnergyRcHit(-9,iTow);
+	tinyRcTrack->setEmcSoftIdHiTowerRc(-9,iTow);
+      } //3 highest towers loop
+      
+    }
+    if (Debug()>1) {
+      cout << "rc track, key " << tinyRcTrack->recoKey() << endl;
+      cout << "n Tpc Fit Pts " << tinyRcTrack->fitPts() << endl;
+      cout << "3 bemc hit ene " << tinyRcTrack->emcEnergyRcHit(0)
+	   << ", " << tinyRcTrack->emcEnergyRcHit(1)
+	   << ", " << tinyRcTrack->emcEnergyRcHit(2) << endl;
+      cout << "3 HiTow SoftId Rc " << tinyRcTrack->emcSoftIdHiTowerRc(0)
+	   << ", " << tinyRcTrack->emcSoftIdHiTowerRc(1)
+	   << ", " << tinyRcTrack->emcSoftIdHiTowerRc(2) << endl;
+      float etaTow, phiTow;
+      emcGeom->getEtaPhi(tinyRcTrack->emcSoftIdHiTowerRc(0),etaTow,phiTow);
+      cout << "Hi Tow eta, phi Rc " <<  etaTow << ", " << phiTow << endl;
+      
+    }
+  }// track has valid projection to EMC.
   return;
 }
 
@@ -1635,7 +1835,10 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
     
     //  if(stopR<999) cout << ">>stop r=" << stopR << endl;
     tinyMcTrack->setKey(mcTrack->key());
-    if (mcTrack->parent()!=0) tinyMcTrack->setParentKey(mcTrack->parent()->key());
+    if (mcTrack->parent()!=0) {
+      tinyMcTrack->setParentKey(mcTrack->parent()->key());
+      tinyMcTrack->setParentGeantId(mcTrack->parent()->geantId());
+    }
     tinyMcTrack->setPtMc(mcMom.perp());
     tinyMcTrack->setPzMc(mcMom.z());
     tinyMcTrack->setEtaMc(mcMom.pseudoRapidity());
@@ -1643,14 +1846,101 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
     tinyMcTrack->setNHitMc(mcTrack->tpcHits().size());
     tinyMcTrack->setNSvtHitMc(mcTrack->svtHits().size());
     tinyMcTrack->setNFtpcHitMc(mcTrack->ftpcHits().size());
+    tinyMcTrack->setNBemcHitMc(mcTrack->bemcHits().size());
+    tinyMcTrack->setNBprsHitMc(mcTrack->bprsHits().size());
+    tinyMcTrack->setNBsmdeHitMc(mcTrack->bsmdeHits().size());
+    tinyMcTrack->setNBsmdpHitMc(mcTrack->bsmdpHits().size());
+    tinyMcTrack->setNEemcHitMc(mcTrack->eemcHits().size());
+    tinyMcTrack->setNBprsHitMc(mcTrack->bprsHits().size());
+    tinyMcTrack->setNBsmdeHitMc(mcTrack->bsmdeHits().size());
+    tinyMcTrack->setNBsmdpHitMc(mcTrack->bsmdpHits().size());
     tinyMcTrack->setGeantId(mcTrack->geantId());
 
     tinyMcTrack->setNAssocGl(nAssocGl);
     tinyMcTrack->setNAssocPr(nAssocPr);
-    
+
+    // Fill Mc Emc McTrack Information
+    // Find the 3 highest energy towers and store them
+    // This is done by copying the hits to a vector for sorting
+    // according to the hit energy (dE).  Then the first 3 values
+    // i.e. the highest values, of dE are copied into the StTinyMcTrack
+    // The total sum of dE for all Calorimeter hits is also computed and stored.
+    // The softId of the hit with the highest tower is also stored.
+    StPtrVecMcCalorimeterHit bemcHits = mcTrack->bemcHits();
+    if (bemcHits.size()>0) {
+      vector<StMcCalorimeterHit*> bemcHitsSorted(bemcHits.size());
+      int  hiEnergyHitSoftId(-999);
+      double sumEnergy(0);
+      copy(bemcHits.begin(),bemcHits.end(),bemcHitsSorted.begin());
+      sort(bemcHitsSorted.begin(),bemcHitsSorted.end(),StMcCalorimeterHitCompdE);
+      if (Debug()>2) {
+	cout << "fillMcTrackInfo() Check sorting of dE for StMcCalorimeterHits" << endl;
+      }
+      StEmcGeom* emcGeom = StEmcGeom::getEmcGeom("bemc");
+      for (StMcCalorimeterHitIterator bhi=bemcHitsSorted.begin();
+	   bhi!=bemcHitsSorted.end();
+	   ++bhi) {
+	StMcCalorimeterHit* bh = *bhi;
+	float eta;
+	emcGeom->getEta(bh->module(),bh->eta(),eta);
+	sumEnergy += (*bhi)->dE()*scaleFactor(eta);
+	if (Debug()>2) cout << bh->dE()*scaleFactor(eta) << endl;
+      }
+      // Fill top 3 towers into track class (energy and SoftId), but only if there are enough hits.
+      size_t maxHits = 3;
+      if (bemcHitsSorted.size()<maxHits) maxHits=bemcHitsSorted.size();
+      for (size_t iCalHit=0; iCalHit<maxHits; ++iCalHit) {
+	float eta;
+	emcGeom->getEta(bemcHitsSorted[iCalHit]->module(),bemcHitsSorted[iCalHit]->eta(),eta);	
+	tinyMcTrack->setEmcEnergyMcHit(bemcHitsSorted[iCalHit]->dE()*scaleFactor(eta),iCalHit);
+	emcGeom->getId(bemcHitsSorted[iCalHit]->module(),
+		       bemcHitsSorted[iCalHit]->eta(),
+		       bemcHitsSorted[iCalHit]->sub(),hiEnergyHitSoftId);
+	tinyMcTrack->setEmcSoftIdHiTowerMc(static_cast<Short_t>(hiEnergyHitSoftId),iCalHit);
+      }
+      // Fill the rest of the hits, from maxHits up to 3, with zeros
+      for (size_t iCalHit2=maxHits; iCalHit2<3; ++iCalHit2) {
+	tinyMcTrack->setEmcEnergyMcHit(-9,iCalHit2);	
+	tinyMcTrack->setEmcSoftIdHiTowerMc(-9,iCalHit2);
+	
+      }
+      tinyMcTrack->setEmcEnergyMcSum(sumEnergy);
+
+      if (Debug()>1) {
+	cout << "mc track, geant Id " << tinyMcTrack->geantId() << endl;
+	cout << "parent  geantId    " << tinyMcTrack->parentGeantId() << endl;
+	cout << "n Tpc Hits     " << tinyMcTrack->nHitMc() << endl;
+	cout << "n Bemc Hits    " << tinyMcTrack->nBemcHitMc() << endl;
+	cout << "3 bemc hit ene " << tinyMcTrack->emcEnergyMcHit(0)
+	     << ", " << tinyMcTrack->emcEnergyMcHit(1)
+	     << ", " << tinyMcTrack->emcEnergyMcHit(2) << endl;
+	cout << "MC 3 Hi SoftIds  " << tinyMcTrack->emcSoftIdHiTowerMc(0)
+	     << ", " << tinyMcTrack->emcSoftIdHiTowerMc(1)
+	     << ", " << tinyMcTrack->emcSoftIdHiTowerMc(2) << endl;
+	cout << "emc energy sum   " << tinyMcTrack->emcEnergyMcSum() << endl;
+	cout << "MC trk momentum  " << tinyMcTrack->pMc() << endl;
+	cout << "MC eta, phi      " << tinyMcTrack->etaMc() << ", " << tinyMcTrack->phiMc() << endl;
+	float etaTow, phiTow;
+	emcGeom->getEtaPhi(tinyMcTrack->emcSoftIdHiTowerMc(0),etaTow,phiTow);
+	cout << "MC HiTow eta,phi " <<  etaTow << ", " << phiTow << endl;
+	if (mEmcIndex[tinyMcTrack->emcSoftIdHiTowerMc(0)]) {
+	  StEmcRawHit* rawHit = mEmcIndex[tinyMcTrack->emcSoftIdHiTowerMc(0)];
+	  cout << "RC Ene for id " << rawHit->energy()
+	       << " m= " << rawHit->module()
+	       << " e= " << rawHit->eta()
+	       << " s= " << rawHit->sub()
+	       << endl;
+	  //cout << "RC id rawHit  " << rawHit->softId(kBarrelEmcTowerId) << endl; //doesn't work?
+	}
+	else {
+	  cout << "Soft Id Mc " << tinyMcTrack->emcSoftIdHiTowerMc(0) << " has no StEmcRawHit" << endl;
+	}
+      } // debug
+
+    } // if the track has bemc hits
     //  if(stopR<999) cout << ">>stop r=" << stopR << endl;
-    
-  } 
+  }// if (mcTrack)
+  return;
 }
 /*
   given a mc track, returns a vector of matched associated pairs.
@@ -2205,6 +2495,9 @@ size_t StMiniMcMaker::getIndex(size_t mult) {
 }
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.27  2007/12/22 20:31:20  calderon
+// Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
+//
 // Revision 1.26  2007/04/26 04:08:05  perev
 // Hide StBFChain dependency
 //
