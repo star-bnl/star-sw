@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.50 2007/12/22 01:14:58 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.51 2007/12/23 03:04:26 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.51  2007/12/23 03:04:26  fine
+ * Add the debug print puts to traceDAQ file problem
+ *
  * Revision 1.50  2007/12/22 01:14:58  fine
  * version compatible with new/old DAQ readers
  *
@@ -308,14 +311,17 @@ void StDAQReader::nextEvent()
 
     if(currentData) {  // event not valid
       retStatus =kStErr;
+       fOffset = -1;
        switch(fDaqFileReader->status) {
           case EVP_STAT_OK :   // should retry as fast as possible...
              // qDebug () << " StEvpReader::NextEvent - Ok" << this->token;
+             fOffset = 1;
              break;
           case EVP_STAT_EOR :  // EOR or EOR - might contain token 0!
              if(fDaqFileReader->isevp) { // keep going until the next run...
                 //                             retStatus = kOK;
-                //              fprintf(stderr," StEvpReader::NextEvent - waiting event \n") ;
+                LOG_ERROR << " StEvpReader::NextEvent - waiting event" << endm;
+                nextEvent();
              } else {
                 retStatus = -2; //kEOF;
                 fOffset = -1;
@@ -324,10 +330,12 @@ void StDAQReader::nextEvent()
              }
              break;
           case EVP_STAT_EVT :
-              LOG_DEBUG <<  "Problem getting event - skipping" << endm;
+              LOG_ERROR <<  "Problem getting event - skipping" << endm;
+              nextEvent();
              break;
           case EVP_STAT_CRIT :
-               LOG_DEBUG << "Critical error - halting..." << endm;
+              LOG_ERROR << "Critical error - halting..." << endm;
+              nextEvent();
              break;
        };
        fEventStatus = fDaqFileReader->status;
