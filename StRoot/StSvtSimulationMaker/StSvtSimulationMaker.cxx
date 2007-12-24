@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.34 2007/11/01 19:56:12 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.35 2007/12/24 17:37:19 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.35  2007/12/24 17:37:19  fisyak
+ * Add protection from missing geometry
+ *
  * Revision 1.34  2007/11/01 19:56:12  caines
  * Added routines to move SVT hits from GEANT geometry to real geometry
  *
@@ -530,8 +533,7 @@ Int_t StSvtSimulationMaker::getConfig()
 }
 
 //____________________________________________________________________________
-void StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  StThreeVector<double> *mtm, double charge, int *wafId){
-
+Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  StThreeVector<double> *mtm, double charge, int *wafId){
   StGlobalCoordinate globalCor(0,0,0);
   StThreeVector<double> x;
   // Find wafer geometry of wafer track passed through in Ideal Geom
@@ -540,6 +542,7 @@ void StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  S
 
   // Get normal and center position of the REAL wafer geom
     StSvtWaferGeometry* waferGeom = (StSvtWaferGeometry*)mSvtGeom->at(index);
+    if (! waferGeom) return kStSkip;
     StThreeVectorD wafCent(waferGeom->x(0),waferGeom->x(1),waferGeom->x(2));
     StThreeVectorD norm(waferGeom->n(0),waferGeom->n(1),waferGeom->n(2));
     
@@ -560,7 +563,7 @@ void StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  S
       mtm->setX(x.x());
       mtm->setY(x.y());
       mtm->setZ(x.z());
-      return ;
+      return kStOk;
     }
     
 
@@ -579,6 +582,7 @@ void StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  S
       
 	// Get normal and center position of the REAL wafer geom
 	waferGeom = (StSvtWaferGeometry*)mSvtGeom->at(index);
+	if (! waferGeom) continue;
 	wafCent.setX(waferGeom->x(0));
 	wafCent.setY(waferGeom->x(1));
 	wafCent.setZ(waferGeom->x(2));
@@ -600,7 +604,7 @@ void StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  S
 	  mtm->setX(x.x());
 	  mtm->setY(x.y());
 	  mtm->setZ(x.z());
-	  return;
+	  return kStOk;
 	}
       }
     }
@@ -613,6 +617,7 @@ void StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  S
       
 	// Get normal and center position of the REAL wafer geom
 	waferGeom = (StSvtWaferGeometry*)mSvtGeom->at(index);
+	if (! waferGeom) continue;
 	wafCent.setX(waferGeom->x(0));
 	wafCent.setY(waferGeom->x(1));
 	wafCent.setZ(waferGeom->x(2));
@@ -635,12 +640,12 @@ void StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  S
 	  mtm->setX(x.x());
 	  mtm->setY(x.y());
 	  mtm->setZ(x.z());
-	  return;
+	  return kStOk;
 	}
       }   
     }
     //cout << " Coming out " << *pos << endl;
-    return;
+    return kStSkip;
 }
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::Make()
@@ -724,7 +729,8 @@ Int_t StSvtSimulationMaker::Make()
 
       // Translate hit position from IDEAL geom coords to REAL geom coords in
       // global coordinates
-      ideal2RealTranslation(&VecG, &mtm, (double)g2tTrack[trackId-1].charge, &volId);
+      Int_t iok = ideal2RealTranslation(&VecG, &mtm, (double)g2tTrack[trackId-1].charge, &volId);
+      if (iok != kStOK) continue;
       //double energy = 96000.; 
       double  energy = trk_st[j].de*1e9; 
       globalCor.setPosition(VecG);

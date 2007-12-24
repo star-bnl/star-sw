@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.17 2007/11/01 19:56:16 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.18 2007/12/24 17:37:20 fisyak Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.18  2007/12/24 17:37:20  fisyak
+// Add protection from missing geometry
+//
 // Revision 1.17  2007/11/01 19:56:16  caines
 // Added routines to move SVT hits from GEANT geometry to real geometry
 //
@@ -137,7 +140,7 @@ class StSvtSimulationMaker : public StMaker
   
   ClassDef(StSvtSimulationMaker,4)       //!
  
-    void ideal2RealTranslation(StThreeVector<double> *pos, StThreeVector<double> *mtm, double charge, int *wafId);
+  Int_t ideal2RealTranslation(StThreeVector<double> *pos, StThreeVector<double> *mtm, double charge, int *wafId);
 
   // initial options
   double mLifeTime;        //!
@@ -183,7 +186,7 @@ class StSvtSimulationMaker : public StMaker
     
     
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.17 2007/11/01 19:56:16 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.18 2007/12/24 17:37:20 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 
   
