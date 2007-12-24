@@ -1,5 +1,8 @@
+#ifndef STAR_fee_pin
+#define STAR_fee_pin
+
 /***************************************************************************
- * $Id: fee_pin.h,v 1.5 2002/11/19 04:49:21 jeromel Exp $
+ * $Id: fee_pin.h,v 1.6 2007/12/24 05:42:52 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC sector readout hardware configuration
@@ -10,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: fee_pin.h,v $
+ * Revision 1.6  2007/12/24 05:42:52  fine
+ * add cpp protection
+ *
  * Revision 1.5  2002/11/19 04:49:21  jeromel
  * idef-ed 2 large structures (unused). Will remove later eventually.
  *
@@ -5508,4 +5514,5 @@ static unsigned short offset_vs_fee[182][32] = {
 
 #endif
 
+#endif
 #endif
