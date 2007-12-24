@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.51 2007/12/23 03:04:26 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.52 2007/12/24 05:19:58 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.52  2007/12/24 05:19:58  fine
+ * Introduce the shadow copy of the evp buffer for the new EVP_READER
+ *
  * Revision 1.51  2007/12/23 03:04:26  fine
  * Add the debug print puts to traceDAQ file problem
  *
@@ -228,6 +231,7 @@ StDAQReader::StDAQReader(const char *file)
   setFTPCVersion();
   fTrigSummary = new StTrigSummary();
   fDaqFileReader = 0;
+  fDATAP = 0;
   if(file && file[0]) open(file);
 }
 
@@ -288,6 +292,8 @@ StDAQReader::~StDAQReader()
   if (m_ZeroTokens > 1){
     LOG_WARN << m_ZeroTokens << " events with token==0" << endm;
   }
+  free(fDATAP);
+  fDATAP = 0;
   close();
 }
 //_____________________________________________________________________________
@@ -300,18 +306,19 @@ void StDAQReader::nextEvent()
    int retStatus= 1; //StMaker::kOK;
    // qDebug() << " StEvpReader::NextEvent() - fEventType = " <<  fEventType;
    char *currentData = fDaqFileReader->get(0,EVP_TYPE_ANY); // EventNumber(),fEventType);
-   LOG_DEBUG << " StEvpReader::NextEvent - data = "
-           <<  (void *)currentData << fDaqFileReader
+   assert(currentData);
+    LOG_DEBUG << " StEvpReader::NextEvent - data = "
+         <<  (void *)currentData <<" :: " << fDaqFileReader
 //           << ", event # = " << EventNumber()
 //           << " event type " << fEventType << "::" << EVP_TYPE_ANY
            << " status " << fDaqFileReader->status << " EVP_STAT_OK=" << EVP_STAT_OK
            << " token " << fDaqFileReader->token
            << endm
-          ;
+           ;
 
+    fOffset = -1;
     if(currentData) {  // event not valid
       retStatus =kStErr;
-       fOffset = -1;
        switch(fDaqFileReader->status) {
           case EVP_STAT_OK :   // should retry as fast as possible...
              // qDebug () << " StEvpReader::NextEvent - Ok" << this->token;
@@ -339,6 +346,8 @@ void StDAQReader::nextEvent()
              break;
        };
        fEventStatus = fDaqFileReader->status;
+    } else {
+       LOG_ERROR << " StEvpReader::NextEvent - read error" << endm;
     }
 #endif
  }
@@ -366,7 +375,15 @@ int StDAQReader::readEvent()
   if(fEventReader->errorNo()) return kStErr;  
 #else
   if (fDaqFileReader->mem) {
-    fEventReader->InitEventReader(fDaqFileReader->mem);
+     //
+     // the buffer of the new EVP_READER is mmap read-only file.
+     // This means one can not chnage the buffer the kind of thing
+     // the current STAR StDaqLib relies on.
+     // To fix the issue we have to create the memory resided copy of the buffer
+     // vf 26.12.2007
+     fDATAP = (char *)realloc(fDATAP, fDaqFileReader->tot_bytes);
+     memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->tot_bytes);
+     fEventReader->InitEventReader(fDATAP);
  } else {
     delete fEventReader;
     fEventReader = 0;
