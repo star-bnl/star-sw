@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0_ZS_SR.cxx,v 1.10 2004/03/24 18:44:58 ward Exp $
+ * $Id: TPCV1P0_ZS_SR.cxx,v 1.11 2007/12/24 06:04:32 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V1.0 Zero Suppressed Reader
@@ -15,6 +15,9 @@
  * 23-Jun-99 MJL change declaration of row, rcb outside of all for loops
  ***************************************************************************
  * $Log: TPCV1P0_ZS_SR.cxx,v $
+ * Revision 1.11  2007/12/24 06:04:32  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.10  2004/03/24 18:44:58  ward
  * Suppress debug messages.
  *
@@ -52,6 +55,7 @@
 #define MAKE_THE_DAMNED_COMPILER_SILENT
 #include "fee_pin.h"
 
+using namespace OLDEVP;
 
 
 TPCV1P0_ZS_SR::TPCV1P0_ZS_SR(int s, TPCV1P0_Reader *det)

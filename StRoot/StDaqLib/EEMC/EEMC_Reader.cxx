@@ -2,6 +2,7 @@
 #include "../EVP/emcReader.h" // Has prototypes for emcReader and getEemcTower.
 #include <assert.h>
 
+using namespace OLDEVP;
 
 int EEMC_Reader::isEemcBankIn( char type) {
   switch(type) {

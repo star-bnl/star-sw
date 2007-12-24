@@ -70,8 +70,10 @@ struct emc_t {
 
 } ;
 
+namespace OLDEVP {
 extern struct emc_t emc ;
 
 extern int emcReader(char *mem) ;
+}
 
 #endif

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RichEventReader.cxx,v 1.4 2004/02/18 20:17:52 ward Exp $
+ * $Id: RichEventReader.cxx,v 1.5 2007/12/24 06:04:23 fine Exp $
  * Author: Zhangbu Xu 
  ***************************************************************************
  * Description: Rich Event reader code for standalone data file
@@ -22,6 +22,9 @@
  *
  ***************************************************************************
  * $Log: RichEventReader.cxx,v $
+ * Revision 1.5  2007/12/24 06:04:23  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.4  2004/02/18 20:17:52  ward
  * Access SSD data in makers.
  *
@@ -115,6 +118,8 @@
 #include <unistd.h>
 #include "RichEventReader.hh"
 #include "RICH_Reader.hh"
+
+using namespace OLDEVP;
 
 RichEventReader *getRichEventReader(int fd, long offset, int MMap)
 {

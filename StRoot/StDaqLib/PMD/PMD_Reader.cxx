@@ -10,6 +10,8 @@
 #include <assert.h>
 #define MAX_ADC 0xFFF 
 
+using namespace OLDEVP;
+
 int PMD_Reader::ProcessEvent(const Bank_PMDP * PmdPTR)
 {
      int sec, type, ret;

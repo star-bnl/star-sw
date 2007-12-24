@@ -14,7 +14,10 @@
 #include "TString.h"		// Form()
 #include "StMessMgr.h"		// LOG_INFO, LOG_WARN, LOG_ERROR, LOG_DEBUG, etc.
 
+using namespace OLDEVP;
+namespace OLDEVP {
 struct emc_t emc ;
+}
 #define SWAP32(bk,x) ((bk->bh.byte_order==0x4030201)?(bk->x):swap32(bk->x))
 
 /*********************** BYTESWAPPING STUFF ***********************/
@@ -120,19 +123,19 @@ static char *inst2char(int inst)
 
 }
 
-
+namespace OLDEVP {
 char *getEmcTrgData(DATAP *datap,int index);
 int readBTOW(u_short *_data, int token);
 int readETOW(u_short *_data, int token);
 int DAQemcReader(char *m);
-
-int emcReader(char *m)
+}
+int OLDEVP::emcReader(char *m)
 {
   if (m == NULL) return EVP_DATA_ERR; // error
   return DAQemcReader(m);
 }
 
-int DAQemcReader(char *m) 
+int OLDEVP::DAQemcReader(char *m) 
 {
 	struct DATAP *datap = (struct DATAP *)m ;
 	struct DATAPX *datapx ;
@@ -455,7 +458,7 @@ int DAQemcReader(char *m)
 //    ie...   data = (u_int)emcadcr + 40
 //                 = (u_int)trg_btow_data
 //
-int readBTOW(u_short *_data, int token)
+int OLDEVP::readBTOW(u_short *_data, int token)
 {
   u_short *data ;
   int l, m ;
@@ -514,7 +517,7 @@ int readBTOW(u_short *_data, int token)
 //    ie...   data = (u_int)emcadcr + 40
 //                 = (u_int)trg_btow_data + 136
 //
-int readETOW(u_short *_data, int token) {
+int OLDEVP::readETOW(u_short *_data, int token) {
   u_short *data ;
   u_int tlo, thi ;
   int local_token;
@@ -562,7 +565,7 @@ int readETOW(u_short *_data, int token) {
   return 0;
 }
 
-char* getEmcTrgData(DATAP* datap, int index)
+char* OLDEVP::getEmcTrgData(DATAP* datap, int index)
 {
   LOG_INFO << "Starting EMC reader..." << endm;
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.cxx,v 1.5 1999/12/07 23:10:31 levine Exp $
+ * $Id: RecHeaderFormats.cxx,v 1.6 2007/12/24 06:04:17 fine Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.cxx,v $
+ * Revision 1.6  2007/12/24 06:04:17  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.5  1999/12/07 23:10:31  levine
  * changes to silence the gcc compiler warnings
  *
@@ -39,8 +42,9 @@
 #define NOCRCCHECKING
 
 // Functions valid on all BANKS
+using namespace OLDEVP;
 
-char* name2str(char* type) /* for everyone !!!! */
+char* OLDEVP::name2str(char* type) /* for everyone !!!! */
 {
   static char name[9] = {0}  ;
   memcpy(name,type,8) ;

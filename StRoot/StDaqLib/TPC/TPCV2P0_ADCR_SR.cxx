@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ADCR_SR.cxx,v 1.5 2003/09/02 17:55:33 perev Exp $
+ * $Id: TPCV2P0_ADCR_SR.cxx,v 1.6 2007/12/24 06:04:32 fine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: // TPC V2.0 ADC Raw Reader
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ADCR_SR.cxx,v $
+ * Revision 1.6  2007/12/24 06:04:32  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.5  2003/09/02 17:55:33  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -44,6 +47,7 @@
 #include "TPCV2P0.hh"
 
 //==================== ADC Raw  Reader =============================
+using namespace OLDEVP;
 
 TPCV2P0_ADCR_SR::TPCV2P0_ADCR_SR(int s, TPCV2P0_Reader *det)
 {

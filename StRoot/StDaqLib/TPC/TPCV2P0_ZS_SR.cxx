@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.27 2004/03/25 21:07:32 ward Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.28 2007/12/24 06:04:33 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.28  2007/12/24 06:04:33  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.27  2004/03/25 21:07:32  ward
  * Suppress more debug messages.
  *
@@ -127,6 +130,7 @@
 
 #include "fee_pin.h"
 // 
+using namespace OLDEVP;
 
 TPCV2P0_ZS_SR::TPCV2P0_ZS_SR(int s, TPCV2P0_Reader *det, char mergeSequences)
 {

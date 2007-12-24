@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SVTV1P0.Banks.cxx,v 1.6 2004/03/01 18:05:47 fisyak Exp $
+ * $Id: SVTV1P0.Banks.cxx,v 1.7 2007/12/24 06:04:27 fine Exp $
  *
  * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0.Banks.cxx,v $
+ * Revision 1.7  2007/12/24 06:04:27  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.6  2004/03/01 18:05:47  fisyak
  * Account for new place for rts.h, add osf
  *
@@ -36,6 +39,8 @@
 
 #include "StDaqLib/GENERIC/swaps.hh"
 #include "SVTV1P0.Banks.hh"
+
+using namespace OLDEVP;
 
 int classname(Bank_SVTRBP)::swap()
 {

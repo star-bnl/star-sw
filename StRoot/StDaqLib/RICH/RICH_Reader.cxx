@@ -21,6 +21,9 @@
 #include "RichEventReader.hh"
 #define MAX_ADC 0xFFF 
 
+using namespace OLDEVP;
+using namespace RICH_READER;
+
 void RICH_Reader::ProcessEvent(const Bank_RICP * RichPTR)
 {
   int cramBlock, cramBank, dataDWord ;

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: CRC.cxx,v 1.4 1999/12/07 23:10:30 levine Exp $
+ * $Id: CRC.cxx,v 1.5 2007/12/24 06:04:16 fine Exp $
  * Author: M.W. Schulz
  ***************************************************************************
  * Description: calculate and check the CRC
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: CRC.cxx,v $
+ * Revision 1.5  2007/12/24 06:04:16  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.4  1999/12/07 23:10:30  levine
  * changes to silence the gcc compiler warnings
  *
@@ -26,7 +29,7 @@
  **************************************************************************/
 #include "CRC.hh" 
 
-
+using namespace OLDEVP;
 
 #define LSWP0312  ch[0] = cdp[i*4 +3] ; ch[1] = cdp[i*4 + 2] ; ch[2] = cdp[i*4+1] ; ch[3] = cdp[i*4] ;
 #define LSWP12    ch[0] = cdp[i*4] ; ch[1] = cdp[i*4 + 2] ; ch[2] = cdp[i*4+1] ; ch[3] = cdp[i*4+3] ;

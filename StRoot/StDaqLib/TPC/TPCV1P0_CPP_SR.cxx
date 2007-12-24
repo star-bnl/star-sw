@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0_CPP_SR.cxx,v 1.5 2003/09/02 17:55:33 perev Exp $
+ * $Id: TPCV1P0_CPP_SR.cxx,v 1.6 2007/12/24 06:04:31 fine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: 
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: TPCV1P0_CPP_SR.cxx,v $
+ * Revision 1.6  2007/12/24 06:04:31  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.5  2003/09/02 17:55:33  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -42,6 +45,8 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV1P0.hh"
 // TPC V1.0 Raw Reader
+
+using namespace OLDEVP;
 
 TPCV1P0_CPP_SR::TPCV1P0_CPP_SR(int s, TPCV1P0_Reader *det)
 {

@@ -4,6 +4,8 @@
 #include "EMC_SmdReader.hh"
 #define MAX_ADC 0xFFF
 
+using namespace OLDEVP;
+
 void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR, const Bank_TRGP * TrgPTR)
 {
     // will process the event to fill the arrays for different detectors.

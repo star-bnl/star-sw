@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.cxx,v 1.10 2004/03/04 21:51:29 ward Exp $
+ * $Id: TPCV2P0.cxx,v 1.11 2007/12/24 06:04:32 fine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common TPC (V2) implementation stuff
@@ -19,6 +19,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0.cxx,v $
+ * Revision 1.11  2007/12/24 06:04:32  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.10  2004/03/04 21:51:29  ward
  * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
  *
@@ -72,6 +75,7 @@
 // TPCV2P0 implementation
 #include "TPCV2P0.hh"
 
+using namespace OLDEVP;
 
 TPCV2P0_PADK_SR::TPCV2P0_PADK_SR(int s, TPCV2P0_Reader *det)
 {

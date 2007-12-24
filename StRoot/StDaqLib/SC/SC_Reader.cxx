@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <math.h>
 
+using namespace OLDEVP;
+
 int SC_Reader::BBCEast() {
   return sc.rich_scalers[0];
 } 

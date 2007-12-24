@@ -8,6 +8,7 @@
 
 #include "StDaqLib/TRG/trgStructures2008.h"
 
+namespace OLDEVP {
 
 /*!\class EMC_BarrelReader
 \author Subhasis, Herbert Ward and Alexandre A. P. Suaide
@@ -41,4 +42,5 @@ class EMC_BarrelReader
       Bank_BTOWERPEDR  mTheTowerPedR;
       Bank_BTOWERRMSR  mTheTowerRMSR;
 };
+}
 #endif

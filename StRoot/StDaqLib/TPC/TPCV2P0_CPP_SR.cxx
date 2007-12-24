@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_CPP_SR.cxx,v 1.7 2003/09/02 17:55:33 perev Exp $
+ * $Id: TPCV2P0_CPP_SR.cxx,v 1.8 2007/12/24 06:04:32 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC reader for raw cluster pointer banks (TPCCPPR)
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_CPP_SR.cxx,v $
+ * Revision 1.8  2007/12/24 06:04:32  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.7  2003/09/02 17:55:33  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -50,6 +53,8 @@
 // 03-Jun-99 MJL added return TRUE to TPCV2P0_CPP_SR::initialize()
 // 21-Jun-99 MJL test for existence of CPP bank before printing ASIC params (line 38)
 // 23-Jun-99 MJL most output now supressed with EventReader.verbose
+
+using namespace OLDEVP;
 
 TPCV2P0_CPP_SR::TPCV2P0_CPP_SR(int s, TPCV2P0_Reader *det)
 {

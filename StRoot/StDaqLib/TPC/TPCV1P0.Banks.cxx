@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0.Banks.cxx,v 1.2 1999/07/02 04:43:22 levine Exp $
+ * $Id: TPCV1P0.Banks.cxx,v 1.3 2007/12/24 06:04:31 fine Exp $
  * Author: M.W. Shculz, Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: Overrides (mostly for the swap functions, 
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: TPCV1P0.Banks.cxx,v $
+ * Revision 1.3  2007/12/24 06:04:31  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.2  1999/07/02 04:43:22  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -23,6 +26,8 @@
 
 #include "StDaqLib/GENERIC/swaps.hh"
 #include "TPCV1P0.Banks.hh"
+
+using namespace OLDEVP;
 
 int classname(Bank_TPCRBP)::swap()
 {

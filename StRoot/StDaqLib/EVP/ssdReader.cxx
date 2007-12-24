@@ -11,8 +11,10 @@
 
 #include "evpSupport.h"
 #include "ssdReader.h"
-
+using namespace OLDEVP;
+namespace OLDEVP {
 struct ssd_t ssd ;
+}
 
 static int unpackRaw(int rb, int mz, int what, char *mem) ;
 //________________________________________________________________________________
@@ -50,7 +52,7 @@ static struct ssdMap {
 	{ {10,1}, {15,1} }
 } ;
 */
-int ssdReader(char *m)
+int OLDEVP::ssdReader(char *m)
 {
 	int sec ;
 	int rb, mz ;

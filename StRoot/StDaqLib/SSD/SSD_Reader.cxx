@@ -39,6 +39,8 @@ static unsigned short log8to10_table[256] = {
 // #include <mapPad.h>
 // #include <mapTime.h>
 
+using namespace OLDEVP;
+
 int SSD_Reader::ssdData(int  ladder,
 			char eastWest,
 			int  channel,

@@ -32,22 +32,23 @@
 #define RICH_PAD  MAX_CHANNEL_NUM/RICH_NUM_ROWS_PER_CRAM 
 #define RICH_ROW 2*RICH_NUM_CRAMS*RICH_NUM_ROWS_PER_CRAM
 //#define MAX_CHANNEL_NUM 575  
-  
+
+namespace RICH_READER {
 struct offlen {
   unsigned int off;
   unsigned int len;		
 } ;	
-
+}
 struct Bank_RICP: public Bank
 {
-  struct offlen CramPTR[2*MAX_NUM_CRAMS] ; /* number of CRAM blocks */
-  struct offlen Reserved[2];
+   struct RICH_READER::offlen CramPTR[2*MAX_NUM_CRAMS] ; /* number of CRAM blocks */
+  struct RICH_READER::offlen Reserved[2];
   
 } ;
 
 struct RICCRAMP: public Bank 
 { 
-  struct offlen banks[RICH_CRAM_BANKS];
+  struct RICH_READER::offlen banks[RICH_CRAM_BANKS];
 };
 
 
@@ -81,7 +82,7 @@ public:
 
 
 class RICH_Reader : public StRichReaderInterface {
-  void ProcessEvent(const Bank_RICP * RichPTR);
+   void ProcessEvent(const Bank_RICP * RichPTR);
 
 public:
 

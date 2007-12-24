@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_CPP_SR.cxx,v 1.4 2003/09/02 17:55:31 perev Exp $
+ * $Id: FTPV1P0_CPP_SR.cxx,v 1.5 2007/12/24 06:04:13 fine Exp $
  * Author: Jeff Landgraf, M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: 
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_CPP_SR.cxx,v $
+ * Revision 1.5  2007/12/24 06:04:13  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.4  2003/09/02 17:55:31  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -35,6 +38,7 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "FTPV1P0.hh"
 // FTP V1.0 Raw Reader
+using namespace OLDEVP;
 
 FTPV1P0_CPP_SR::FTPV1P0_CPP_SR(int s, FTPV1P0_Reader *det)
 {

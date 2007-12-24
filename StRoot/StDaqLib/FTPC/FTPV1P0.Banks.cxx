@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0.Banks.cxx,v 1.1 2000/01/18 18:01:19 levine Exp $
+ * $Id: FTPV1P0.Banks.cxx,v 1.2 2007/12/24 06:04:12 fine Exp $
  * Author: M.W. Shculz, Jeff Landgraf, M.J. LeVine, H.Klay, H.Huemmler
  ***************************************************************************
  * Description: Overrides (mostly for the swap functions, 
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0.Banks.cxx,v $
+ * Revision 1.2  2007/12/24 06:04:12  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.1  2000/01/18 18:01:19  levine
  * Hummler's implementaiton of FTPC reader. Note that method
  *
@@ -26,6 +29,7 @@
 
 #include "StDaqLib/GENERIC/swaps.hh"
 #include "FTPV1P0.Banks.hh"
+using namespace OLDEVP;
 
 /*--------------FTP IMPLEMENTATION-------------------*/
 

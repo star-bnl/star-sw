@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.12 2001/09/24 21:42:56 struck Exp $
+ * $Id: L3_Reader.cxx,v 1.13 2007/12/24 06:04:20 fine Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.13  2007/12/24 06:04:20  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.12  2001/09/24 21:42:56  struck
  * cs: changed vertex info to float (unit [cm]) in Bank_L3_GTD
  *
@@ -57,7 +60,7 @@
 //##########################################################
 //-     L3_Reader
 //##########################################################
-
+using namespace OLDEVP;
 L3_Reader::L3_Reader(EventReader *er, Bank_L3_P *pL3P)
 {
   mBankL3P = pL3P;

@@ -7,7 +7,7 @@
 // Note, even if bank is present, check
 // "sc.valid"... this says if the information is timely...
 //
-
+namespace  OLDEVP {
 struct sc_t {
   u_int valid;       
   u_int time;
@@ -19,5 +19,5 @@ struct sc_t {
 extern struct sc_t sc;
 
 extern int scReader(char *m);   // returns EVP_DATA_ERR
- 
+} 
 #endif

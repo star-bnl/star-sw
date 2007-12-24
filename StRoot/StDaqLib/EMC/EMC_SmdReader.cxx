@@ -7,6 +7,8 @@
 #include <Stiostream.h>
 #include <stdio.h>
 
+using namespace OLDEVP;
+
 /////////////////////////////////////////////////////////////////////
 EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP),ercpy(er)
 {

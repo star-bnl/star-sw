@@ -2,7 +2,7 @@
 #define STAR_fee_pin
 
 /***************************************************************************
- * $Id: fee_pin.h,v 1.6 2007/12/24 05:42:52 fine Exp $
+ * $Id: fee_pin.h,v 1.7 2007/12/24 06:04:33 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC sector readout hardware configuration
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: fee_pin.h,v $
+ * Revision 1.7  2007/12/24 06:04:33  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.6  2007/12/24 05:42:52  fine
  * add cpp protection
  *
@@ -5516,3 +5519,4 @@ static unsigned short offset_vs_fee[182][32] = {
 
 #endif
 #endif
+
