@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.24 2007/07/31 16:38:11 fisyak Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.25 2007/12/24 17:35:39 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.25  2007/12/24 17:35:39  fisyak
+ * spelling error StSvtRmsPedestal => StSvtRMSPedestal
+ *
  * Revision 1.24  2007/07/31 16:38:11  fisyak
  * Make request for SvtGeometry from GetRotations
  *
@@ -872,7 +875,7 @@ TDataSet  *StSvtDbMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
   if (ds) return ds;
   static const Char_t *SetNames[] = {"StSvtConfig",  "StSvtDriftVelocity", "StSvtDriftCurve", 
-				     "StSvtAnodeDriftCorr", "StSvtPedestal", "StSvtRmsPedestal", 
+				     "StSvtAnodeDriftCorr", "StSvtPedestal","StSvtRMSPedestal", 
 				     "StSvtGeometry", "StSvtBadAnodes", "StSvtT0", "StSvtDaq", 
 				     "StSvtGeometry", 0};
   TString Input(logInput);
@@ -889,7 +892,7 @@ TDataSet  *StSvtDbMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
     else if (! Input.CompareTo("StSvtDriftCurve"))    o = This->getDriftCurve(); 
     else if (! Input.CompareTo("StSvtAnodeDriftCorr"))o = This->getAnodeDriftCorr(); 
     else if (! Input.CompareTo("StSvtPedestal"))      o = This->getPedestals(); 
-    else if (! Input.CompareTo("StSvtRmsPedestal"))   o = This->getRms(); 
+    else if (! Input.CompareTo("StSvtRMSPedestal"))   o = This->getRms(); 
     else if (! Input.CompareTo("StSvtGeometry"))      o = This->getGeometry(); 
     else if (! Input.CompareTo("StSvtBadAnodes"))     o = This->getBadAnodes(); 
     else if (! Input.CompareTo("StSvtT0"))            o = This->getT0(); 
