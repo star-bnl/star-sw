@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: swaps.cxx,v 1.2 1999/07/02 04:37:42 levine Exp $
+ * $Id: swaps.cxx,v 1.3 2007/12/24 06:04:17 fine Exp $
  * Author: M.W. Schulz
  ***************************************************************************
  * Description: swap method and macros for use on DAQ banks
@@ -8,6 +8,9 @@
  *
  ***************************************************************************
  * $Log: swaps.cxx,v $
+ * Revision 1.3  2007/12/24 06:04:17  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.2  1999/07/02 04:37:42  levine
  * Many changes - see change logs in individual programs
  *
@@ -19,6 +22,7 @@
 #define SWP04    { help = data[i];  cdp[i*4]   = ch[3] ; cdp[i*4+1] = ch[1] ; cdp[i*4+2] = ch[2] ; cdp[i*4+3] = ch[0] ;}
 #define SWP_SHORT {help = data[i] ; cdp[i*4] =  ch[1] ; cdp[i*4+1] = ch[0] ; cdp[i*4+2] = ch[3] ; cdp[i*4+3] = ch[2] ;}
 
+namespace OLDEVP {
 
 int swap_raw(int data_byte_ordering,int* data, int size)
 {
@@ -44,7 +48,8 @@ int swap_short(int data_byte_ordering,int* data, int size)
   if(data_byte_ordering == 0x04020301) { return -1; }
   if(data_byte_ordering == 0x01030204) { return -1; }
   return(-1) ; /* realy bad */
-};
+}
+}
 #undef  SWP0312
 #undef  SWP12
 #undef  SWP04

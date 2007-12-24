@@ -46,9 +46,9 @@ struct ssd_t {
         int fenceZ;
 
 } ;
-
+namespace  OLDEVP {
 extern struct ssd_t ssd ;
 
 extern int ssdReader(char *mem) ;
-
+}
 #endif

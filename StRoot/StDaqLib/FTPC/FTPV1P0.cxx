@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0.cxx,v 1.5 2001/06/27 22:05:11 jcs Exp $
+ * $Id: FTPV1P0.cxx,v 1.6 2007/12/24 06:04:13 fine Exp $
  * Author: M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description:  FTPV1P0 implementation
@@ -10,6 +10,9 @@
  * JLK 11-Jul-2000 Added new geometry files to correctly navigate banks
  ***************************************************************************
  * $Log: FTPV1P0.cxx,v $
+ * Revision 1.6  2007/12/24 06:04:13  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.5  2001/06/27 22:05:11  jcs
  * Comment out unsed variable rcvb
  *
@@ -41,6 +44,8 @@
 
 #include "FTPV1P0.hh"
 #include "azim_to_rcvb.h"
+
+using namespace OLDEVP;
 
 FTPV1P0_PADK_SR::FTPV1P0_PADK_SR(int s, FTPV1P0_Reader *det)
 {

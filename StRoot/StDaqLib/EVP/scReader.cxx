@@ -11,10 +11,14 @@
 #include "evpSupport.h"
 #include "scReader.h"
 #define SWAP32(bk,x) ((bk->bh.byte_order==0x4030201)?(bk->x):swap32(bk->x))
+
+using namespace OLDEVP;
+namespace OLDEVP {
 struct sc_t sc;
+};
 
 // reads the Triggers event descriptor from DATAP directly...
-int scReader(char *m) 
+int OLDEVP::scReader(char *m) 
 {
   int len ;
   u_int off ;

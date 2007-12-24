@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.22 2007/11/30 01:22:36 genevb Exp $
+ * $Id: DetectorReader.cxx,v 1.23 2007/12/24 06:04:16 fine Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.23  2007/12/24 06:04:16  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.22  2007/11/30 01:22:36  genevb
  * Update for 2008 BEMC from A. Kocoloski
  *
@@ -104,6 +107,8 @@
 #include "TOF/TOF_Reader.hh"
 #include "FPD/FPD_Reader.hh"
 #include "SC/SC_Reader.hh"
+
+using namespace OLDEVP;
 
 DetectorReader *getDetectorReader(EventReader *er, string det)
 {

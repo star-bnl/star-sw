@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_CPP_SR.cxx,v 1.2 2003/09/02 17:55:33 perev Exp $
+ * $Id: SVTV1P0_CPP_SR.cxx,v 1.3 2007/12/24 06:04:27 fine Exp $
  *      
  * Author: M.J. LeVine and Marcelo Munhoz(for the SVT group)
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0_CPP_SR.cxx,v $
+ * Revision 1.3  2007/12/24 06:04:27  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.2  2003/09/02 17:55:33  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -25,6 +28,7 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "SVTV1P0.hh"
 
+using namespace OLDEVP;
 SVTV1P0_CPP_SR::SVTV1P0_CPP_SR(int w, SVTV1P0_Reader *det)
 {}
 

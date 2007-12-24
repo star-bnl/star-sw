@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ADCR_SR.cxx,v 1.3 2003/09/02 17:55:31 perev Exp $
+ * $Id: FTPV1P0_ADCR_SR.cxx,v 1.4 2007/12/24 06:04:13 fine Exp $
  * Author: Jeff Landgraf, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: FTP (v1.0) raw ADC reader 
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_ADCR_SR.cxx,v $
+ * Revision 1.4  2007/12/24 06:04:13  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.3  2003/09/02 17:55:31  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -33,6 +36,7 @@
 #include "FTPV1P0.hh"
 
 // FTP V1.0 ADC Raw Reader
+using namespace OLDEVP;
 
 //==================== ADC Raw  Reader =============================
 

@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: TOF_Reader.cxx,v 2.5 2007/04/17 23:00:16 dongx Exp $
+* $Id: TOF_Reader.cxx,v 2.6 2007/12/24 06:04:29 fine Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.cxx,v $
+* Revision 2.6  2007/12/24 06:04:29  fine
+* introduce OLDEVP namespace to allow ole and new EVP library concurrently
+*
 * Revision 2.5  2007/04/17 23:00:16  dongx
 * replaced with standard STAR Loggers
 *
@@ -40,6 +43,8 @@
 #include "TOF_Reader.hh"
 #include "StMessMgr.h"
 #include "TString.h"
+
+using namespace OLDEVP;
 
 bool TOF_Reader::year2Data(){return (mTofRawDataVersion==1);}
 bool TOF_Reader::year3Data(){return (mTofRawDataVersion==2);}

@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: FPD_Reader.cxx,v 1.3 2003/10/02 22:33:35 jeromel Exp $
+* $Id: FPD_Reader.cxx,v 1.4 2007/12/24 06:04:11 fine Exp $
 * Author: Akio Ogawa
 ***************************************************************************
 * Description:  FPD Event Reader
 ***************************************************************************
 * $Log: FPD_Reader.cxx,v $
+* Revision 1.4  2007/12/24 06:04:11  fine
+* introduce OLDEVP namespace to allow ole and new EVP library concurrently
+*
 * Revision 1.3  2003/10/02 22:33:35  jeromel
 * Cosmetic change
 *
@@ -16,6 +19,8 @@
 *
 **************************************************************************/
 #include "FPD_Reader.hh"
+
+using namespace OLDEVP;
 
 void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
   unsigned short numberOfDataWords;

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.9 2003/05/22 20:53:31 perev Exp $
+ * $Id: RecHeaderFormats.hh,v 1.10 2007/12/24 06:04:17 fine Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.10  2007/12/24 06:04:17  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.9  2003/05/22 20:53:31  perev
  * method added to remove unprintef chars
  *
@@ -59,8 +62,10 @@ typedef short INT16;  // SHORT according to data format
 #define FTP_MZPADS 320
 #define FTP_MXSEQUENCE 31
 
+namespace OLDEVP {
 char *name2str(char *type);
 void dump_data(char *buffer, int size, int width = 8);
+}
 
 struct Logical_Record_Header
 {

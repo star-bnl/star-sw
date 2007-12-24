@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ADCR_SR.cxx,v 1.4 2003/09/02 17:55:33 perev Exp $
+ * $Id: SVTV1P0_ADCR_SR.cxx,v 1.5 2007/12/24 06:04:27 fine Exp $
  *      
  * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0_ADCR_SR.cxx,v $
+ * Revision 1.5  2007/12/24 06:04:27  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.4  2003/09/02 17:55:33  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -34,6 +37,7 @@
 
 //==================== ADC Raw  Reader =============================
 
+using namespace OLDEVP;
 
 SVTV1P0_ADCR_SR::SVTV1P0_ADCR_SR(int w, SVTV1P0_Reader *det)
 {

@@ -14,6 +14,8 @@ typedef struct {
 } MarilynMonroe;
 MarilynMonroe *gs2004;
 
+using namespace OLDEVP;
+
 int Bank_TRGD::HerbSwap2004(char *ptr) {
   int numToSwap,returnValue,i;
 

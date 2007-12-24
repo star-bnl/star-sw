@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0.cxx,v 1.5 2000/01/11 22:03:44 levine Exp $
+ * $Id: TPCV1P0.cxx,v 1.6 2007/12/24 06:04:31 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description:  TPCV1P0 implementation
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: TPCV1P0.cxx,v $
+ * Revision 1.6  2007/12/24 06:04:31  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.5  2000/01/11 22:03:44  levine
  * convert string to char* via c_str() member
  * (from Brian Lasiuk)
@@ -31,6 +34,7 @@
 
 #include "TPCV1P0.hh"
 
+using namespace OLDEVP;
 
 
 TPCV1P0_PADK_SR::TPCV1P0_PADK_SR(int s, TPCV1P0_Reader *det)

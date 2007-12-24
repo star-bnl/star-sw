@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "trgStructures2008.h"
 #include "TRG_Reader.hh"
+using namespace OLDEVP;
 
 int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   int returnValue,npre,npost,swap,res;

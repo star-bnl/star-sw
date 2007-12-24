@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.50 2007/05/24 20:56:38 jeromel Exp $
+ * $Id: EventReader.cxx,v 1.51 2007/12/24 06:04:17 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.51  2007/12/24 06:04:17  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.50  2007/05/24 20:56:38  jeromel
  * (Pointer to) method returns FALSE instead of NULL fixed (+ one debug statement to remove later)
  *
@@ -200,6 +203,8 @@
 #include <unistd.h>
 #include "EventReader.hh"
 #include <assert.h>
+
+using namespace OLDEVP;
 
 void EventInfo::printEventInfo(FILE * fd)
 {

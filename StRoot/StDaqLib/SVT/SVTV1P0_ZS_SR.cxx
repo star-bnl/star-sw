@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ZS_SR.cxx,v 1.7 2007/08/07 19:44:10 perev Exp $
+ * $Id: SVTV1P0_ZS_SR.cxx,v 1.8 2007/12/24 06:04:28 fine Exp $
  *      
  * Author: J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0_ZS_SR.cxx,v $
+ * Revision 1.8  2007/12/24 06:04:28  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.7  2007/08/07 19:44:10  perev
  * Gene scalers added
  *
@@ -39,7 +42,7 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "SVTV1P0.hh"
 // 
-
+using namespace OLDEVP;
 SVTV1P0_ZS_SR::SVTV1P0_ZS_SR(int w, SVTV1P0_Reader *det)
 {
   int w1;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.cxx,v 1.4 2007/01/04 21:27:50 jml Exp $
+ * $Id: SVTV1P0.cxx,v 1.5 2007/12/24 06:04:27 fine Exp $
  *      
  * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.cxx,v $
+ * Revision 1.5  2007/12/24 06:04:27  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.4  2007/01/04 21:27:50  jml
  * zero suppressed reader no longer uses adcx, only seqd.  Fixes bug from early 2005
  *
@@ -29,6 +32,7 @@
 // SVT implementation
 #include "SVTV1P0.hh"
 
+using namespace OLDEVP;
 
 SVTV1P0_ANODK_SR::SVTV1P0_ANODK_SR(SVTV1P0_Reader *det)
 {

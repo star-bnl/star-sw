@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Banks.cxx,v 1.4 2001/08/20 05:37:36 struck Exp $
+ * $Id: L3_Banks.cxx,v 1.5 2007/12/24 06:04:20 fine Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: L3_Banks.cxx,v $
+ * Revision 1.5  2007/12/24 06:04:20  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.4  2001/08/20 05:37:36  struck
  * removed naming conflicts with 'Stl3Utils/foreign/L3Formats.h'
  *
@@ -42,6 +45,7 @@
 #include "L3_Banks.hh"
 #include <assert.h>
 
+using namespace OLDEVP;
 
 int Bank_L3_SUMD::swap()
 {

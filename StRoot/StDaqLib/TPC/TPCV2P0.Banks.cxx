@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.Banks.cxx,v 1.3 1999/07/22 17:56:26 levine Exp $
+ * $Id: TPCV2P0.Banks.cxx,v 1.4 2007/12/24 06:04:32 fine Exp $
  * Author: M.W. Schulz, Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: Overrides (mostly for the swap functions, 
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0.Banks.cxx,v $
+ * Revision 1.4  2007/12/24 06:04:32  fine
+ * introduce OLDEVP namespace to allow ole and new EVP library concurrently
+ *
  * Revision 1.3  1999/07/22 17:56:26  levine
  * add TPCMZCLD (mezz cluster pointer bank) description
  *
@@ -26,6 +29,8 @@
 
 #include "StDaqLib/GENERIC/swaps.hh"
 #include "TPCV2P0.Banks.hh"
+
+using namespace OLDEVP;
 
 int classname(Bank_TPCRBP)::swap()
 {

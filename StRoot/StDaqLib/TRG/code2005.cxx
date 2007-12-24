@@ -13,6 +13,7 @@ typedef struct {
   RawTrgDet2005   RAW[PREPOST];      
 } MarilynMonroe;
 MarilynMonroe *gs2005;
+using namespace OLDEVP;
 
 int Bank_TRGD::HerbSwap2005(char *ptr) {
   int numToSwap,returnValue,i;

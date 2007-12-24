@@ -7,6 +7,8 @@
 #include "trgStructures2003.h"
 #include "TRG_Reader.hh"
 
+using namespace OLDEVP;
+
 typedef struct {
   EvtDescData2003 EvtDesc;  /* L1 Event Descriptor Data */
   TrgSumData2003  TrgSum;   /* summary data */

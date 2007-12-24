@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "StMessMgr.h"
 //ofstream fout("decode.out");
+using namespace OLDEVP;
 
 EMC_BarrelReader::EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP):pBankEMCP(pEMCP),ercpy(er)
 {
