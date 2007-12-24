@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.12 2007/07/12 20:18:18 fisyak Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.13 2007/12/24 17:38:59 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
+ * Revision 1.13  2007/12/24 17:38:59  fisyak
+ * spelling error StSvtRmsPedestal => StSvtRMSPedestal
+ *
  * Revision 1.12  2007/07/12 20:18:18  fisyak
  * read Db by deman
  *
@@ -104,14 +107,14 @@ Int_t StSvtEmbeddingMaker::InitRun(int runumber)
 {
   if (mUsePixelRMS){
     gMessMgr->Warning()<<"StSvtEmbeddingMaker - reading individual pixel RMS values from database "<<endm;
-    mPedRMSColl= (StSvtHybridCollection*) ((TObjectSet *) GetData("StSvtRMSPedestal"))->GetObject();
+    mPedRMSColl= (StSvtHybridCollection*) ((TObjectSet *) GetDataSet("StSvtRMSPedestal"))->GetObject();
     if (mPedRMSColl) {gMessMgr->Warning()<<"StSvtEmbeddingMaker: Found RMS values for individual pixels."<<endm;}
     else {gMessMgr->Warning()<<"StSvtEmbeddingMaker: NO RMS values for individual pixels."<<endm;}
   }
 
   if (mUseHybridRMS){
     gMessMgr->Warning()<<"StSvtEmbeddingMaker - reading individual hybrid RMS values from database "<<endm;
-    mPedColl= (StSvtHybridCollection*) ((TObjectSet *) GetData("StSvtRMSPedestal"))->GetObject();
+    mPedColl= (StSvtHybridCollection*) ((TObjectSet *) GetDataSet("StSvtRMSPedestal"))->GetObject();
     if (mPedColl) {gMessMgr->Warning()<<"StSvtEmbeddingMaker: Found RMS values for individual hybrids."<<endm;}
     else {gMessMgr->Warning()<<"StSvtEmbeddingMaker: NO RMS values for individual hybrids."<<endm;}
   }
