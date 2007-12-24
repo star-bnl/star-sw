@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.31 2007/12/22 01:14:59 fine Exp $
+ * $Id: StDAQReader.h,v 1.32 2007/12/24 05:19:58 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.32  2007/12/24 05:19:58  fine
+ * Introduce the shadow copy of the evp buffer for the new EVP_READER
+ *
  * Revision 1.31  2007/12/22 01:14:59  fine
  * version compatible with new/old DAQ readers
  *
@@ -127,6 +130,7 @@ class evpReader   ; // new  2007 DAQ file reader
 #include "StDaqLib/L3/L3_Reader.hh"
 #include "StDaqLib/TOF/TOF_Reader.hh"
 #include "StDaqLib/FPD/FPD_Reader.hh"
+
 typedef RICH_Reader StRICHReader;
 typedef L3_Reader   StL3Reader;
 typedef TOF_Reader  StTOFReader;
@@ -236,6 +240,7 @@ protected:
   char fFTPCVersion[12];
   StTrigSummary *fTrigSummary; //!
   evpReader     *fDaqFileReader;
+  char *fDATAP;
 };
 #ifndef __CINT__
 #include "StTPCReader.h"
