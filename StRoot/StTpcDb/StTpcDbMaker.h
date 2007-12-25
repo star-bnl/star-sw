@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.19 2007/08/04 00:38:04 jeromel Exp $
+ * $Id: StTpcDbMaker.h,v 1.20 2007/12/25 17:39:31 fine Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.20  2007/12/25 17:39:31  fine
+ * Add the TPC coordinate transformation global function to the Root/Cint dictionary
+ *
  * Revision 1.19  2007/08/04 00:38:04  jeromel
  * SL4 issue: Removal of the inline func, moved to class implementation.
  *     Symbols may otherwise be hidden.
@@ -159,6 +162,27 @@ extern "C" {
 extern "C" {
   R__EXTERN int type_of_call tpc_hit_error_table_(int*, int*, int*, float*);
 }
+#else
+   int numberOfPadsAtRow_(int *);
+   int tpc_row_to_y_(float *,float *);
+   int tpc_pad_to_x_(float *,float *,float *);
+   int tpc_x_to_pad_(float *,float *,float *);
+   int tpc_local_to_global_err_(int &,const float *,float *);
+   int tpc_local_to_global_emx_(int &,const float *,float *);
+   int tpc_local_to_global_(int *,const float *,float *);
+   int tpc_localsector_to_local_(int *,const float *,float *);
+   int tpc_global_to_local_(int *,float *,float *);
+   int tpc_global_to_local_p_(int *,float *,float *);
+   int tpc_time_to_z_(int *,int *,int *,int *,float *);
+   int tpc_z_to_time_(float *,int *,int *,int *,int *);
+   int tpc_drift_velocity_(float *);
+   int tpc_drift_volume_length_(float *);
+   int tpc_row_par_(int *,float *,float *,float *);
+   int tpc_global_to_sector_(int*, float*);
+   int tpc_sec24_to_sec12_(int*, int*);
+   int tpc_pad_time_offset_(int*, int*, int*, float*);
+   int tpc_rdo_mask_(int*, int*);
+   int tpc_hit_error_table_(int*, int*, int*, float*);
 #endif
 class StTpcDb;
 class St_tpg_pad_plane;
@@ -192,7 +216,7 @@ class StTpcDbMaker : public StMaker {
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    virtual void SetTpc2Global();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.19 2007/08/04 00:38:04 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.20 2007/12/25 17:39:31 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };
