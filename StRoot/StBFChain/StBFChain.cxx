@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.526 2007/11/29 20:32:40 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.527 2007/12/26 18:31:30 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -471,6 +471,10 @@ Int_t StBFChain::Instantiate()
     // hit reco cuts. This will make allm hits saved to MuDST /ezTree.
     if ( maker == "StEmcRawMaker" && GetOption("BEmcDebug"))
       mk->SetMode(1); // only one option now, bit a bitmask
+    
+    // Use status tables for raw BEMC data (helpful for QA)
+    if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
+      mk->SetAttr("BEmcCheckStatus",kTRUE);
     
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only

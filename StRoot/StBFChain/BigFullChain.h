@@ -509,6 +509,7 @@ Bfc_st BFC2[] = { // ITTF Chains
     
   {"ezTree" ,""  ,"","",""                                               ,"","Create ezTree branch",kFALSE},
   {"BEmcDebug","" ,"","",""                            ,"","Turn OFF B-EMC hit reconstruction cuts",kFALSE},
+  {"BEmcChkStat","" ,"","",""                             ,"","Turn ON status checking in raw data",kFALSE},
     
     // Those options are for StTpcDbMaker
   {"useLDV" ,""  ,"","",""                                   ,"","... uses laserDV database flavor",kFALSE},
