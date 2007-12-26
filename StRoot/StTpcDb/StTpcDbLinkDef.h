@@ -8,7 +8,6 @@
 #pragma link C++ enum StTpcdEdxCorrection::ESector;
 #pragma link C++ enum StTpcdEdxCorrection::EOptions;
 
-#pragma link C++ function   numberOfPadsAtRow_(int *);
 #pragma link C++ function   tpc_row_to_y_(float *,float *);
 #pragma link C++ function   tpc_pad_to_x_(float *,float *,float *);
 #pragma link C++ function   tpc_x_to_pad_(float *,float *,float *);
