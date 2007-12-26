@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.2 2007/12/20 00:49:07 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.3 2007/12/26 23:31:07 fisyak Exp $
 // Author: Victor Perev   05/08/03
 
 
@@ -13,7 +13,11 @@
 #include "TRandom.h"
 #include "TLorentzVector.h"
 #include "THelixTrack.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 ClassImp(TCFit)
 //______________________________________________________________________________  
 TCFit::TCFit(const char *name,TCFitData *dat) :TNamed(name,"")
@@ -1006,24 +1010,6 @@ double Q = Pdk(D0Mass,PiMass,KMass);
   }
   myCanvas->Modified();
   myCanvas->Update();
-  while(!gSystem->ProcessEvents()){}; 
-
+  //  while(!gSystem->ProcessEvents()){}; 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
