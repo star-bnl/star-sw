@@ -26,7 +26,7 @@ public:
     Float_t   getPs(UInt_t entry = 0)                  {return St_triggerInfoC::instance()->ps();}
     UInt_t    getDefaultTriggerLevel()                 {return St_defaultTrgLvlC::instance()->level();}
 protected:
-    StDetectorDbIntegratedTriggerID();
+    StDetectorDbIntegratedTriggerID(){;}
 private:
     static StDetectorDbIntegratedTriggerID* fgInstance;
 };
