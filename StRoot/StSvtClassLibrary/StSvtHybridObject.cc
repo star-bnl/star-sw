@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridObject.cc,v 1.3 2007/03/21 17:22:20 fisyak Exp $
+ * $Id: StSvtHybridObject.cc,v 1.4 2007/12/26 02:30:52 fine Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridObject.cc,v $
+ * Revision 1.4  2007/12/26 02:30:52  fine
+ * Dummy impl of the missed StSvtHybridObject::SetName method
+ *
  * Revision 1.3  2007/03/21 17:22:20  fisyak
  * Ivan Kotov's drift velocities, use TGeoHMatrix for coordinate transformation
  *
@@ -33,3 +36,9 @@
 #include "StSvtHybridObject.hh"
 
 ClassImp(StSvtHybridObject)
+//______________________________________________
+void  StSvtHybridObject::SetName()
+{
+   // dummy method 
+   assert(0);
+}
