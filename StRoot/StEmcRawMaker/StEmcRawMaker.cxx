@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.15 2007/09/10 22:21:42 kocolosk Exp $
+// $Id: StEmcRawMaker.cxx,v 1.16 2007/12/26 17:47:35 kocolosk Exp $
 
 #include <math.h>
 
@@ -59,6 +59,11 @@ StEmcRawMaker::~StEmcRawMaker()
 Int_t StEmcRawMaker::Init()
 {
     //................BEMC stuff ..............
+    if(IAttr("BEmcCheckStatus")) {
+        LOG_INFO << "StEmcRawMaker will suppress hits from towers with bad status" << endm;
+        mBemcRaw->getControlTable()->CheckStatus[0] = 1;
+    }
+
     mBemcRaw->initHisto();
     mBemcRaw->printConf();
     if(m_Mode&0x1==1)
@@ -293,6 +298,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.16  2007/12/26 17:47:35  kocolosk
+// added support for "BEmcCheckStatus" attribute to suppress hot towers in fastOffline
+//
 // Revision 1.15  2007/09/10 22:21:42  kocolosk
 // Support for new BPRS swap fixes (off by default for 06/07 production, on for analysis).
 // StBemcTables now matches map fixes in case end users want to use this copy.
