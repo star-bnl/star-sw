@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.38 2007/12/12 22:49:22 fisyak Exp $
+//$Id: St_srs_Maker.cxx,v 1.39 2007/12/27 23:52:00 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.39  2007/12/27 23:52:00  fisyak
+//Fix bug with hit error setting
+//
 //Revision 1.38  2007/12/12 22:49:22  fisyak
 //Syncronize srs parameters with Calibrations/tracker/svtHitError
 //
@@ -199,14 +202,16 @@ Int_t St_srs_Maker::InitRun(Int_t runnuber) {
    St_HitError  *stiSsdHitErrors = (St_HitError  *) GetInputDB("Calibrations/tracker/ssdHitError");
    assert(stiSsdHitErrors);
    m_srs_direct  = new St_srs_direct("srs_direct",2);
-   srs_direct_st *direct = m_srs_direct->GetTable();
+   AddConst(m_srs_direct);
+   srs_direct_st direct;
    HitError_st  *SvtHitErrors = stiSvtHitErrors->GetTable();
    HitError_st  *SsdHitErrors = stiSsdHitErrors->GetTable();
-   direct->sd = TMath::Sqrt(SvtHitErrors->coeff[0]);
-   direct->st = TMath::Sqrt(SvtHitErrors->coeff[3]);
-   direct++;
-   direct->sd = TMath::Sqrt(SsdHitErrors->coeff[0]);
-   direct->st = TMath::Sqrt(SsdHitErrors->coeff[3]);
+   direct.sd = TMath::Sqrt(SvtHitErrors->coeff[0]);
+   direct.st = TMath::Sqrt(SvtHitErrors->coeff[3]);
+   m_srs_direct->AddAt(&direct.sd,0);
+   direct.sd = TMath::Sqrt(SsdHitErrors->coeff[0]);
+   direct.st = TMath::Sqrt(SsdHitErrors->coeff[3]);
+   m_srs_direct->AddAt(&direct.sd,1);
    cout << "Replace hit errors from Calibrations/tracker/(ssd|svt)HitError" << endl;
    m_srs_direct->Print(0,2);
    //   Get Bad Anodes
