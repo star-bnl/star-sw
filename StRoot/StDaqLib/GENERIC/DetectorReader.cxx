@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.23 2007/12/24 06:04:16 fine Exp $
+ * $Id: DetectorReader.cxx,v 1.24 2007/12/27 21:55:04 perev Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.24  2007/12/27 21:55:04  perev
+ * EEMCreader created even if no EEMC bank. TRG info assumed(Pibero)
+ *
  * Revision 1.23  2007/12/24 06:04:16  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -190,9 +193,8 @@ EEMC_Reader *getEEMCReader(EventReader *er)
     if (pEEMCP->swap() < 0)   printf("DetectorReader - getEMCReader: swap error in EEMCP: %s %d\n",
 					__FILE__,__LINE__) ;
     pEEMCP->header.CRC = 0;
-    return new EEMC_Reader(er,pEEMCP);
   }
-  return NULL;
+  return new EEMC_Reader(er,pEEMCP);
 }
 SSD_Reader *getSSDReader(EventReader *er)
 {
