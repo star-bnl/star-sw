@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.51 2007/12/24 06:04:17 fine Exp $
+ * $Id: EventReader.cxx,v 1.52 2007/12/27 21:46:40 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.52  2007/12/27 21:46:40  perev
+ * TRG as a part EMC (Pibero)
+ *
  * Revision 1.51  2007/12/24 06:04:17  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -721,7 +724,7 @@ enum {
 
   for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
     *p = !!(detpre&1); detpre>>=1;                                }
-  ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent);
+  ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
   return ei;
 }
 
