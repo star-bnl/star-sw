@@ -186,34 +186,33 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
 
   if (obj->InheritsFrom(StStrArray::Class())){
 //     if (obj->IsA()==StSPtrVecTrackNode::Class()) Break();
-     Long_t &inmap = (*fMap)(TMath::Hash(&obj,sizeof(void*)),(Long_t)obj);
+    if (((StStrArray*)obj)->size()) {
 
-     myFinder = myMap.find((long)obj);
-     assert((inmap==0) == (myFinder==myMap.end()));
-     if (inmap) return;
-     myMap.insert(MyPair((long)obj,2));     
+       Long_t &inmap = (*fMap)(TMath::Hash(&obj,sizeof(void*)),(Long_t)obj);
 
-     inmap = 2; fCount++;
-     int vecobj = ( obj->IsA() == StSPtrVecObject::Class());  
-//     printf("%8d %p %s::%s\n",fLevel,(void*)obj,obj->GetName(),bwname);
-     StStrArray *arr = (StStrArray*)obj; 
-     int sz = arr->size();
-     for (int idx=0;idx<sz; idx++) {
-       inobj = arr->at(idx);
-       Int_t count = fCount;
-       CheckIn(inobj);
-       if (count==fCount && !vecobj) break;  //if no action was made, no sense to continue
-     }
-     return;
-  }
+       myFinder = myMap.find((long)obj);
+       assert((inmap==0) == (myFinder==myMap.end()));
+       if (inmap) return;
+       myMap.insert(MyPair((long)obj,2));     
+
+       inmap = 2; fCount++;
+       int vecobj = ( obj->IsA() == StSPtrVecObject::Class());  
+  //     printf("%8d %p %s::%s\n",fLevel,(void*)obj,obj->GetName(),bwname);
+       StStrArray *arr = (StStrArray*)obj; 
+       int sz = arr->size();
+       for (int idx=0;idx<sz; idx++) {
+	 inobj = arr->at(idx);
+	 Int_t count = fCount;
+	 CheckIn(inobj);
+	 if (count==fCount && !vecobj) break;  //if no action was made, no sense to continue
+       }
+       return;
+  }  }
 
   char cbuf[1000];*cbuf=0;
   StEventInspector insp(fMap,fCount);
   obj->ShowMembers(insp,cbuf);
 }
-   
-
-
 //______________________________________________________________________________
 ClassImp(StEventHelper)
 //______________________________________________________________________________
