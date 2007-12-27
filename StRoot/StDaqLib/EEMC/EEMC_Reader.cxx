@@ -107,6 +107,9 @@ EEMC_Reader::EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP)
   pBankEEMCP = pEEMCP; //copy into class data member for use by other methods
   ercpy = er; // squirrel away pointer eventreader for our friends
 
+  // Protection against NULL pointer
+  if (!pEEMCP) return;
+
   if (!pBankEEMCP->test_CRC()) printf("CRC error in EEMCP: %s %d\n",__FILE__,__LINE__) ;
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +119,6 @@ EEMC_Reader::EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP)
   ////////////////////////////////////////////////////////////////////////////////
 
   pBankEEMCP->header.CRC = 0;
-
 }
 
 
