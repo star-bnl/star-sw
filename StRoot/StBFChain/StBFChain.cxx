@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.527 2007/12/26 18:31:30 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.528 2007/12/28 13:40:48 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -216,7 +216,6 @@ Int_t StBFChain::Instantiate()
 	} 
       }
     }
-    mk = 0;
     if (strlen(fBFC[i].Chain) > 0) myChain = GetMaker(fBFC[i].Chain);
     if (maker == "St_db_Maker"){
       if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
@@ -293,25 +292,27 @@ Int_t StBFChain::Instantiate()
     // need to take place before 'maker' is created.
     if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
     else                          mk = New(fBFC[i].Maker);
-    if (mk) {
-      strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
-      if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
-	Int_t NwGeant = 10; // default geant parameters
-	if (!GetOption("fzin") && !GetOption("ntin") &&
-	    !GetOption("gstar"))                       NwGeant =  5;
-	if (GetOption("big"))                          NwGeant = 20;
-	if (GetOption("bigbig"))                       NwGeant = 40;
-	ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
-	if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
-	if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
-	if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed")) {
-	  mk->SetActive(kTRUE);
-	  if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
-	}
-	else   mk->SetActive(kFALSE);
-	if (! mk) goto Error;
-	SetGeantOptions(mk);
+    if (! mk) {
+      LOG_FATAL  << Form("StBFChain::Instantiate() oproblem with instatiation %s",fBFC[i].Maker) << endm;
+      assert(mk);
+    }
+    strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
+    if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
+      Int_t NwGeant = 10; // default geant parameters
+      if (!GetOption("fzin") && !GetOption("ntin") &&
+	  !GetOption("gstar"))                       NwGeant =  5;
+      if (GetOption("big"))                          NwGeant = 20;
+      if (GetOption("bigbig"))                       NwGeant = 40;
+      ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
+      if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
+      if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
+      if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed")) {
+	mk->SetActive(kTRUE);
+	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
       }
+      else   mk->SetActive(kFALSE);
+      if (! mk) goto Error;
+	SetGeantOptions(mk);
     }
     
     // special maker options
@@ -582,7 +583,8 @@ Int_t StBFChain::Instantiate()
       
       // Beware of those ...
       Int_t                                                  mode = 0; // daq
-      if      (GetOption("Trs") || GetOption("Embedding"))   mode = 1; // trs
+      if      (GetOption("Trs") || GetOption("Embedding") || GetOption("TrsMini"))
+                                                             mode = 1; // trs
       else if (GetOption("Simu"))                            mode = 2; // daq, no gain
       if (mode) mk->SetMode(mode);
       // DAQ100 or Raw switch options -- Please, adjust StRTSClientFCFMaker block as well
@@ -771,6 +773,7 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
   Add2Chain:
+    if (! mk) continue;
     if (name == "") strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
     if (myChain) myChain->AddMaker(mk);
     continue;
@@ -1170,15 +1173,15 @@ void StBFChain::SetFlags(const Char_t *Chain)
   gMessMgr->QAInfo() << "============= You are in " << STAR_VERSION.Data() << " ===============" << endm;
   gMessMgr->QAInfo() << "Requested chain " << GetName() << " is :\t" << tChain.Data() << endm;
   SetOptions(tChain,"Chain");
-  if (!GetOption("NoDefault")) {
+  if (!GetOption("NoDefault")) { // Default
     // Check flags consistency
     if (gClassTable->GetID("TGiant3") >= 0) { // root4star
       SetOption("-VMC","Default,TGiant3");
       SetOption("-VMCPassive","Default,TGiant3");
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
-      if (!( GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed"))) {// Not Active geant
-	SetOption("geant","Default,-fzin,-ntin,-gstar,TGiant3");
+      if (!( GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed") || GetOption("Kalman"))) {// Not Active geant
+	SetOption("-geant","Default,-fzin,-ntin,-gstar,TGiant3");
 	SetOption("MagF","Default,-fzin,-ntin,-gstar,TGiant3");
       }
     } else {                                  // root
@@ -1201,6 +1204,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
       if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	SetOption("VMCPassive","Default,-TGiant3");
       }
+      SetOption("pgf77","Default,-TGiant3");
+      SetOption("mysql","Default,-TGiant3");
+      SetOption("minicern","Default,-TGiant3");
     }
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
