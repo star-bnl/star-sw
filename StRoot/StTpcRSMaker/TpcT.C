@@ -9,6 +9,7 @@
 #include "TLegend.h"
 #include "Riostream.h"
 #include "TSystem.h"
+#include "TMath.h"
 #include "TGraphErrors.h"
 //#include "StTpcMcAnalysisMaker/TpcCluster.h"
 TF1  *TpcT::mShaperResponse = 0;             //!
@@ -234,8 +235,14 @@ void DrawTpcTPlots(const Char_t *histname="OuterPad",const Char_t *Option="") {
       FitFiles[i]->cd();
       for (int type = 0; type < NT; type++) {
 	TProfile *h = (TProfile *) FitFiles[i]->Get(Form("%s%s",histname,types[type]));
-	if (! h) continue;
-	if (h->GetEntries() < 1) continue;
+	if (! h) {
+	  cout << Form("%s%s",histname,types[type]) << " has not been found." << endl;
+	  continue;
+	}
+	if (h->GetEntries() < 1) {
+	  cout << h->GetName() << " is empty." << endl;
+	  continue;
+	}
 	cout << "Draw " << h->GetName() << endl;
 	h->SetMarkerColor(2*i + 1 + type);
 	h->Draw(same.Data());
