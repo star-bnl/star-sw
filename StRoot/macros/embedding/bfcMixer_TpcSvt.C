@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvt.C,v 1.1 2007/12/26 23:26:55 fisyak Exp $
+// $Id: bfcMixer_TpcSvt.C,v 1.2 2007/12/28 15:29:59 didenko Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,7 +13,7 @@ StChain  *Chain=0;
 class StBFChain;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
-void bfcMixer_TpcSvt(const Int_t Nevents=1,Int_t isSvtIn=1, Int_t isSsdIn=0,
+void bfcMixer_TpcSvt(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsdIn=0,
 		    const Char_t *daqfile="/star/rcf/test/daq/2005/051/st_physics_adc_6051006_raw_1050001.daq",
 		    const Char_t *tagfile="/star/rcf/test/embedding/cuProductionMinBias/FullField/P07ic/2005/051/st_physics_adc_6051006_raw_1050001.tags.root",
 		    const Float_t zvertex_low=-175.0,
