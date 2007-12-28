@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.40 2007/08/04 00:38:04 jeromel Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.41 2007/12/28 00:30:06 fine Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.41  2007/12/28 00:30:06  fine
+ * Add a function to calculate the tpc coord transfoirmation in one step
+ *
  * Revision 1.40  2007/08/04 00:38:04  jeromel
  * SL4 issue: Removal of the inline func, moved to class implementation.
  *     Symbols may otherwise be hidden.
@@ -127,12 +130,14 @@
 #include "StTpcDbMaker.h"
 #include "StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
+#include "StDbUtilities/StTpcPadCoordinate.hh"
 #include "tables/St_tpg_pad_plane_Table.h"
 #include "tables/St_tpg_detector_Table.h"
 #include "tables/St_MagFactor_Table.h"
 #include "math_constants.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
+
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -416,6 +421,20 @@ int type_of_call tpc_hit_error_table_(int *i, int*j, int *k,float *val){
   *val = table[*i-1][*j-1][*k-1];
   return 1;
 
+}
+
+int type_of_call tpc_hit_postion(int sector, int row, int pad, int timebucket, float &x,float &y,float &z)
+{
+  StTpcCoordinateTransform transform(gStTpcDb);
+  // (const int sector, const int row, const int pad, const int tb) 
+  StTpcPadCoordinate padcoord(sector, row, pad, timebucket);
+  StGlobalCoordinate global;
+  transform(padcoord,global);
+  StThreeVector<double> p = global.position();
+  x = p.x();
+  y = p.y();
+  z = p.z();
+  return 0;
 }
 
 //_____________________________________________________________________________
