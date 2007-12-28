@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.78 2007/05/17 14:13:02 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.79 2007/12/28 13:47:39 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.79  2007/12/28 13:47:39  fisyak
+// Split tcl and tfs Makers
+//
 // Revision 1.78  2007/05/17 14:13:02  fisyak
 // replace printf and  cout by logger printouts
 //
@@ -92,9 +95,6 @@
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_xyz_newtab_Module.h"
 #include "tpc/St_tte_hit_match_Module.h"
-#include "tpc/St_tfs_g2t_Module.h"
-#include "tpc/St_tfs_filt_Module.h"
-#include "tpc/St_tfs_fill_tphit_pad_tmbk_Module.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "TH1.h"
@@ -174,16 +174,6 @@ Int_t St_tcl_Maker::InitRun(int runnumber) {
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
   tsspar->threshold = 1;
 
-
-  // 		TFS parameters
-  St_DataSet *tfspars = tpc->Find("tfspars");
-  assert(tfspars);
-  m_tfs_fspar = NULL;
-  m_tfs_fspar = (St_tfs_fspar *) tfspars->Find("tfs_fspar");
-  m_tfs_fsctrl= NULL;
-  m_tfs_fsctrl= (St_tfs_fsctrl*) tfspars->Find("tfs_fsctrl");
-
-
   //		Histograms     
   InitHistograms(); // book histograms
   return kStOK;
@@ -213,258 +203,206 @@ Int_t St_tcl_Maker::Make() {
   gMessMgr->Info() << "Drift velocity used: " << gStTpcDb->DriftVelocity() 
 		   << endm;
  
-  if (raw_data_tpc) {// Raw data exists -> make clustering
-    m_raw_data_tpc = kTRUE;
-    St_DataSetIter next(raw_data_tpc);
-    St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
-    //Get the adcxyz table
-    St_tfc_adcxyz *adcxyz = (St_tfc_adcxyz *) next("adcxyz");
-
-    //counters for calculating size tables
-    Int_t isumpix = 0;
-    Int_t isumseq = 0;
-
-    while ((sector=next())) {// loop over sectors
-      const Char_t *name= 0;
-      if ((name = strstr(sector->GetName(),"Sector"))) {
-	// look for the sector number
-	name  = strchr(name,'_')+1; Int_t indx = atoi(name);
-	if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
-	St_DataSetIter sect(sector);
-	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
-	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
-	Int_t ipin = pixel_data_in->GetNRows();
-	Int_t ipout = pixel_data_out->GetNRows();
-	isumpix += ipin + ipout;
-	if (Debug()) {gMessMgr->QAInfo()  << "Total number of pixels, " << isumpix << endm;}
-	St_raw_seq  *raw_seq_in  = (St_raw_seq *) sect("raw_seq_in");
-	St_raw_seq  *raw_seq_out = (St_raw_seq *) sect("raw_seq_out");
-	Int_t nseqin = raw_seq_in->GetNRows();
-	Int_t nseqout = raw_seq_out->GetNRows();
-	isumseq += nseqin + nseqout;
-	if (Debug()) {gMessMgr->QAInfo()  << "Total number of sequences, " << isumseq << endm;}
-      }
+  if (! raw_data_tpc) {Warning("Make","Raw data does not exist)"); return kStWarn;}
+  // Raw data exists -> make clustering
+  m_raw_data_tpc = kTRUE;
+  St_DataSetIter next(raw_data_tpc);
+  St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
+  //Get the adcxyz table
+  St_tfc_adcxyz *adcxyz = (St_tfc_adcxyz *) next("adcxyz");
+  
+  //counters for calculating size tables
+  Int_t isumpix = 0;
+  Int_t isumseq = 0;
+  
+  while ((sector=next())) {// loop over sectors
+    const Char_t *name= 0;
+    if ((name = strstr(sector->GetName(),"Sector"))) {
+      // look for the sector number
+      name  = strchr(name,'_')+1; Int_t indx = atoi(name);
+      if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
+      St_DataSetIter sect(sector);
+      St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
+      St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
+      Int_t ipin = pixel_data_in->GetNRows();
+      Int_t ipout = pixel_data_out->GetNRows();
+      isumpix += ipin + ipout;
+      if (Debug()) {gMessMgr->QAInfo()  << "Total number of pixels, " << isumpix << endm;}
+      St_raw_seq  *raw_seq_in  = (St_raw_seq *) sect("raw_seq_in");
+      St_raw_seq  *raw_seq_out = (St_raw_seq *) sect("raw_seq_out");
+      Int_t nseqin = raw_seq_in->GetNRows();
+      Int_t nseqout = raw_seq_out->GetNRows();
+      isumseq += nseqin + nseqout;
+      if (Debug()) {gMessMgr->QAInfo()  << "Total number of sequences, " << isumseq << endm;}
     }
-    
-    //calculate or estimate the size before creating the tables
-    if (Debug()) {gMessMgr->QAInfo()  << "making tcl_tp table with " << isumseq << " entries" << endm;}
-    tpseq = new St_tcl_tp_seq("tpseq",isumseq);      
-    m_DataSet->Add(tpseq);
+  }
+  
+  //calculate or estimate the size before creating the tables
+  if (Debug()) {gMessMgr->QAInfo()  << "making tcl_tp table with " << isumseq << " entries" << endm;}
+  tpseq = new St_tcl_tp_seq("tpseq",isumseq);      
+  m_DataSet->Add(tpseq);
 
-    // WARNING no knowledge of actual number of hits here but we create a
-    // table smart enough to contain biggest events. Try max number of hits
-    // equal to number of pixels divided by 10 (no 1 pad hits and estimated
-    // sequence length to be 5)
-    int max_hit = (int) ceil((float)(isumpix/10));
-    // We have to protect against DAQ event records that say there is TPC data
-    // when its empty.
-    if (isumpix < 1) {
-      Warning ("Make"," TPC data is empty, isumpix=%d dump event.",isumpix);
-      return kStWarn;
-    }
-      gMessMgr->Info() << "number of estimated hits used: " << max_hit 
-		       << endm;
-    // create tables used with a reasonable size
-    tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); 
-    m_DataSet->Add(tpcluster);
-
-    if(!morph && m_tclMorphOn) {
-      // UW morphology study 
-      morph = new St_tcc_morphology("morph",max_hit);    
-      m_DataSet->Add(morph);
-    }
-
-    if (!adcxyz && m_tclPixTransOn) {  
-      // create flat adcxyz Table for pixel viewing
-      gMessMgr->Info() << "making adcxyz table with " << isumpix 
-		       << " entries" << endm;
-      adcxyz = new St_tfc_adcxyz("adcxyz",isumpix);  
-      m_DataSet->Add(adcxyz);
-      adcxyz->SetNRows(0);
-    }
-    // end creation tables
-
-    next.Reset();
-
-    while ((sector=next())) {  // loop over sectors for TCL
-     const  Char_t *name = 0;
-      if ((name = strstr(sector->GetName(),"Sector"))) {
-	// look for the sector number
-	name  = strchr(name,'_') + 1; 
-	Int_t indx = atoi(name);
-	if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
-	tcl_sector_index_st *tcl_sector_index = m_tcl_sector_index->GetTable();
-	m_tcl_sector_index->SetNRows(1);
-	tcl_sector_index->CurrentSector = indx;
-        if (m_EastOff&&indx>12) continue;
-        if (m_WestOff&&indx<=12) continue;
-	St_DataSetIter sect(sector);
-	St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
-	St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
-	St_raw_pad         *raw_pad_in     = (St_raw_pad *) sect("raw_pad_in");
-	St_raw_pad         *raw_pad_out    = (St_raw_pad *) sect("raw_pad_out");
-	St_raw_seq         *raw_seq_in     = (St_raw_seq *) sect("raw_seq_in");
-	St_raw_seq         *raw_seq_out    = (St_raw_seq *) sect("raw_seq_out");
-	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
-	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
-	
-	if (m_tclPixTransOn) {	  // call the pixel translation
-	  if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","xyz_newtab",indx) << endm;}
-	  // Need to guard against zero size output tables
-          if(adcxyz->GetTableSize()){	  
-	    Int_t res = xyz_newtab(m_tpg_detector,
-				   m_tcl_sector_index,raw_sec_m,
-				   raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
-				   raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-				   adcxyz,m_tsspar);
-	    
-	    if (res != kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
-	  }
-	}
-	
-	//     	TCL
-        if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","tcl",indx) << endm;}
-	
+  // WARNING no knowledge of actual number of hits here but we create a
+  // table smart enough to contain biggest events. Try max number of hits
+  // equal to number of pixels divided by 10 (no 1 pad hits and estimated
+  // sequence length to be 5)
+  int max_hit = (int) ceil((float)(isumpix/10));
+  // We have to protect against DAQ event records that say there is TPC data
+  // when its empty.
+  if (isumpix < 1) {
+    Warning ("Make"," TPC data is empty, isumpix=%d dump event.",isumpix);
+    return kStWarn;
+  }
+  gMessMgr->Info() << "number of estimated hits used: " << max_hit 
+		   << endm;
+  // create tables used with a reasonable size
+  tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); 
+  m_DataSet->Add(tpcluster);
+  
+  if(!morph && m_tclMorphOn) {
+    // UW morphology study 
+    morph = new St_tcc_morphology("morph",max_hit);    
+    m_DataSet->Add(morph);
+  }
+  
+  if (!adcxyz && m_tclPixTransOn) {  
+    // create flat adcxyz Table for pixel viewing
+    gMessMgr->Info() << "making adcxyz table with " << isumpix 
+		     << " entries" << endm;
+    adcxyz = new St_tfc_adcxyz("adcxyz",isumpix);  
+    m_DataSet->Add(adcxyz);
+    adcxyz->SetNRows(0);
+  }
+  // end creation tables
+  
+  next.Reset();
+  
+  while ((sector=next())) {  // loop over sectors for TCL
+    const  Char_t *name = 0;
+    if ((name = strstr(sector->GetName(),"Sector"))) {
+      // look for the sector number
+      name  = strchr(name,'_') + 1; 
+      Int_t indx = atoi(name);
+      if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
+      tcl_sector_index_st *tcl_sector_index = m_tcl_sector_index->GetTable();
+      m_tcl_sector_index->SetNRows(1);
+      tcl_sector_index->CurrentSector = indx;
+      if (m_EastOff&&indx>12) continue;
+      if (m_WestOff&&indx<=12) continue;
+      St_DataSetIter sect(sector);
+      St_raw_row         *raw_row_in     = (St_raw_row *) sect("raw_row_in");
+      St_raw_row         *raw_row_out    = (St_raw_row *) sect("raw_row_out");
+      St_raw_pad         *raw_pad_in     = (St_raw_pad *) sect("raw_pad_in");
+      St_raw_pad         *raw_pad_out    = (St_raw_pad *) sect("raw_pad_out");
+      St_raw_seq         *raw_seq_in     = (St_raw_seq *) sect("raw_seq_in");
+      St_raw_seq         *raw_seq_out    = (St_raw_seq *) sect("raw_seq_out");
+      St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
+      St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
+      
+      if (m_tclPixTransOn) {	  // call the pixel translation
+	if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","xyz_newtab",indx) << endm;}
 	// Need to guard against zero size output tables
-	if(tpcluster->GetTableSize()){	  
-	  Int_t tcl_res = tcl(m_tpg_pad_plane, m_tcl_sector_index, raw_sec_m,
-			      raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
-			      raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-			      tpcluster,tpseq);
+	if(adcxyz->GetTableSize()){	  
+	  Int_t res = xyz_newtab(m_tpg_detector,
+				 m_tcl_sector_index,raw_sec_m,
+				 raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
+				 raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
+				 adcxyz,m_tsspar);
 	  
-	  if (tcl_res!=kSTAFCV_OK) Warning("Make","tcl == %d",tcl_res);
-	}
-	// Create morphology table only if needed
-	if (m_tclMorphOn) {
-	  if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","cluster_morphology",indx) << endm;}
-
-	  Int_t tcc_res = cluster_morphology( indx, pixel_data_in, pixel_data_out);
-	  if(tcc_res) {gMessMgr->Error() << Form("ERROR %d, tcl maker\n",tcc_res) << endm; return kStErr; }
+	  if (res != kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
 	}
       }
-    }
-    tpseq->Purge();
-    tpcluster->Purge();
-    tphit = new St_tcl_tphit("tphit",max_hit);
-    m_DataSet->Add(tphit);
-    next.Reset();
-
-    while ((sector=next())) {  // loop over sectors for TPH
-     const  Char_t *name = 0;
-      if ((name = strstr(sector->GetName(),"Sector"))) {
-	// look for the sector number
-	name  = strchr(name,'_') + 1; 
-	Int_t indx = atoi(name);
-	if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
-	tcl_sector_index_st *tcl_sector_index = m_tcl_sector_index->GetTable();
-	m_tcl_sector_index->SetNRows(1);
-	tcl_sector_index->CurrentSector = indx;
-        if (m_EastOff&&indx>12) continue;
-        if (m_WestOff&&indx<=12) continue;
-	St_DataSetIter sect(sector);
-	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
-	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
-	St_type_shortdata  *pixel_indx_in  = (St_type_shortdata *) sect("pixel_indx_in");
-	St_type_shortdata  *pixel_indx_out = (St_type_shortdata *) sect("pixel_indx_out");
-	if (! pixel_indx_in  ) {pixel_indx_in  = new St_type_shortdata("pixel_indx_in",1);  AddGarb(pixel_indx_in);}
-	if (! pixel_indx_out ) {pixel_indx_out = new St_type_shortdata("pixel_indx_out",1); AddGarb(pixel_indx_out);}
-	sector_tot++;
-
-	//      TPH
-	Int_t k = indx;
-	if (sector_tot == 1) {k = -k;}
-	tcl_sector_index->CurrentSector = k;
-        if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","tph",indx) << endm;}
-	// Need to guard against zero size output tables
-	if(tpcluster->GetTableSize()){	  
-	  Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
-			      m_tpg_pad_plane,
-			      pixel_data_in, pixel_data_out,
-			      pixel_indx_in, pixel_indx_out,
-			      tpseq, tpcluster, tphit);
-	  if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
-	}
+      
+      //     	TCL
+      if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","tcl",indx) << endm;}
+      
+      // Need to guard against zero size output tables
+      if(tpcluster->GetTableSize()){	  
+	Int_t tcl_res = tcl(m_tpg_pad_plane, m_tcl_sector_index, raw_sec_m,
+			    raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
+			    raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
+			    tpcluster,tpseq);
+	
+	if (tcl_res!=kSTAFCV_OK) Warning("Make","tcl == %d",tcl_res);
       }
-    }
-
-    if (sector_tot && m_tclEvalOn) { //slow simulation exist and evaluation switch set
-      if (Debug()) {gMessMgr->QAInfo()  << "start run_tte_hit_match" << endm;}
-      St_DataSet *geant = GetInputDS("geant");
-      if (geant) {
-	St_DataSetIter geantI(geant);
-	St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geantI("g2t_tpc_hit");
-	if (g2t_tpc_hit){//geant data exists too
-	  
-	  // create the index table, if any
-	  index = (St_tcl_tpc_index *) m_DataSet->Find("index");
-	  if (!index) {
-	    index = new St_tcl_tpc_index("index",2*max_hit); 
-	    m_DataSet->Add(index);
-	  }
-	  
-	  Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
-	  //		       ==============================================
-	  if (Res_tte !=  kSTAFCV_OK) {
-	     gMessMgr->Info() << "Problem with tte_hit_match.." << endm;
-	  }
-	  if (Debug()) {gMessMgr->QAInfo()  << "finish run_tte_hit_match" << endm;}
-	}
+      // Create morphology table only if needed
+      if (m_tclMorphOn) {
+	if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","cluster_morphology",indx) << endm;}
+	
+	Int_t tcc_res = cluster_morphology( indx, pixel_data_in, pixel_data_out);
+	if(tcc_res) {gMessMgr->Error() << Form("ERROR %d, tcl maker\n",tcc_res) << endm; return kStErr; }
       }
     }
   }
-  else {
-    // 		Raw data does not exist, check GEANT. if it does then use fast cluster simulation
+  tpseq->Purge();
+  tpcluster->Purge();
+  tphit = new St_tcl_tphit("tphit",max_hit);
+  m_DataSet->Add(tphit);
+  next.Reset();
+  
+  while ((sector=next())) {  // loop over sectors for TPH
+    const  Char_t *name = 0;
+    if ((name = strstr(sector->GetName(),"Sector"))) {
+      // look for the sector number
+      name  = strchr(name,'_') + 1; 
+      Int_t indx = atoi(name);
+      if (Debug()) {gMessMgr->QAInfo() << Form(" Sector = %d \n", indx) << endm;}
+      tcl_sector_index_st *tcl_sector_index = m_tcl_sector_index->GetTable();
+      m_tcl_sector_index->SetNRows(1);
+      tcl_sector_index->CurrentSector = indx;
+      if (m_EastOff&&indx>12) continue;
+      if (m_WestOff&&indx<=12) continue;
+      St_DataSetIter sect(sector);
+      St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
+      St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
+      St_type_shortdata  *pixel_indx_in  = (St_type_shortdata *) sect("pixel_indx_in");
+      St_type_shortdata  *pixel_indx_out = (St_type_shortdata *) sect("pixel_indx_out");
+      if (! pixel_indx_in  ) {pixel_indx_in  = new St_type_shortdata("pixel_indx_in",1);  AddGarb(pixel_indx_in);}
+      if (! pixel_indx_out ) {pixel_indx_out = new St_type_shortdata("pixel_indx_out",1); AddGarb(pixel_indx_out);}
+      sector_tot++;
+      
+      //      TPH
+      Int_t k = indx;
+      if (sector_tot == 1) {k = -k;}
+      tcl_sector_index->CurrentSector = k;
+      if(Debug()) {gMessMgr->QAInfo() << Form("Starting %20s for sector %2d.\n","tph",indx) << endm;}
+      // Need to guard against zero size output tables
+      if(tpcluster->GetTableSize()){	  
+	Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
+			    m_tpg_pad_plane,
+			    pixel_data_in, pixel_data_out,
+			    pixel_indx_in, pixel_indx_out,
+			    tpseq, tpcluster, tphit);
+	if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
+      }
+    }
+  }
+  
+  if (sector_tot && m_tclEvalOn) { //slow simulation exist and evaluation switch set
+    if (Debug()) {gMessMgr->QAInfo()  << "start run_tte_hit_match" << endm;}
     St_DataSet *geant = GetInputDS("geant");
     if (geant) {
       St_DataSetIter geantI(geant);
       St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geantI("g2t_tpc_hit");
-      int max_hit=0;
-      if (g2t_tpc_hit) { 
-	max_hit = g2t_tpc_hit->GetNRows();
-      }
-      else {
-	 gMessMgr->Info() << "No g2t_tpc_hit table!!!!!!" << endm;
-      }
-      St_g2t_track   *g2t_track   = (St_g2t_track   *) geantI("g2t_track");
-      St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex  *) geantI("g2t_vertex");
-      if (g2t_tpc_hit && g2t_track){
+      if (g2t_tpc_hit){//geant data exists too
+	
 	// create the index table, if any
 	index = (St_tcl_tpc_index *) m_DataSet->Find("index");
 	if (!index) {
 	  index = new St_tcl_tpc_index("index",2*max_hit); 
 	  m_DataSet->Add(index);
 	}
-	if (Debug()) {gMessMgr->QAInfo()  << "start tfs_run" << endm;}
-
-	// make a tphit table with the size of the number of geant hits
-	tphit = new St_tcl_tphit("tphit",max_hit); 
-	m_DataSet->Add(tphit);
 	
-	Int_t Res_tfs_g2t = tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
-				    m_tfs_fspar,m_tfs_fsctrl,
-				    index, m_type, tphit);
-	if (Res_tfs_g2t != kSTAFCV_OK) {
-	   gMessMgr->Info() << "Problem running tfs_g2t..." << endm;
+	Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
+	//		       ==============================================
+	if (Res_tte !=  kSTAFCV_OK) {
+	  gMessMgr->Info() << "Problem with tte_hit_match.." << endm;
 	}
-	else {
-	  Int_t Res_tfs_filt = tfs_filt(tphit);
-	  if ( Res_tfs_filt !=  kSTAFCV_OK){ 
-	     gMessMgr->Info() << " Problem running tfs_filt..." << endm;
-	  }
-	  
-	  Int_t Res_tfs_fill_tphit_pad_tmbk=
-	    tfs_fill_tphit_pad_tmbk(m_tpg_pad_plane,tphit);
-	  if ( Res_tfs_fill_tphit_pad_tmbk !=  kSTAFCV_OK){ 
-	     gMessMgr->Info() 
-	       << " Problem running tfs_fill_tphit_pad_tmbk..." << endm;
-	  }
-	  
-	}
-	if (Debug()) {gMessMgr->QAInfo()  << "finish tfs_run" << endm;}
+	if (Debug()) {gMessMgr->QAInfo()  << "finish run_tte_hit_match" << endm;}
       }
     }
   }
-
+  
   // Now move hits to global coordinates, if wanted
   if (m_GlobalHits) {
     gMessMgr->Info() << "Translating hits to Global Coordinates" << endm;
@@ -472,22 +410,22 @@ Int_t St_tcl_Maker::Make() {
     StGlobalCoordinate   global;
     tcl_tphit_st *spc = tphit -> GetTable() ;
     for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
-	  {
-	    StTpcLocalCoordinate local(spc->x,spc->y,spc ->z,(int)spc->row/100,(int)spc->row%100);
-	    transform(local,global);
-	    spc -> x = global.position().x();
-	    spc -> y = global.position().y();
-	    spc -> z = global.position().z();
-	    //            {gMessMgr->QAInfo()  << "Local Coordinates: " << local << endm;}
-	    //            {gMessMgr->QAInfo()  << "Global Coordinates: " << global << endm;}
-	  }
+      {
+	StTpcLocalCoordinate local(spc->x,spc->y,spc ->z,(int)spc->row/100,(int)spc->row%100);
+	transform(local,global);
+	spc -> x = global.position().x();
+	spc -> y = global.position().y();
+	spc -> z = global.position().z();
+	//            {gMessMgr->QAInfo()  << "Local Coordinates: " << local << endm;}
+	//            {gMessMgr->QAInfo()  << "Global Coordinates: " << global << endm;}
+      }
   }
   
-//		Histograms     
+  //		Histograms     
   MakeHistograms(); // clustering histograms
-
+  
   gMessMgr->Info() << "Got through St_tcl_Maker OK." << endm;
-
+  
   return kStOK;
 }
 
@@ -495,9 +433,9 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   {gMessMgr->QAInfo() << Form("**************************************************************\n") << endm;}
-  {gMessMgr->QAInfo() << Form("* $Id: St_tcl_Maker.cxx,v 1.78 2007/05/17 14:13:02 fisyak Exp $\n") << endm;}
+  {gMessMgr->QAInfo() << Form("* $Id: St_tcl_Maker.cxx,v 1.79 2007/12/28 13:47:39 fisyak Exp $\n") << endm;}
   {gMessMgr->QAInfo() << Form("**************************************************************\n") << endm;}
-
+  
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -511,17 +449,17 @@ Int_t St_tcl_Maker::Finish() {
 //----------------------------------------------------------------------
 
 void St_tcl_Maker::InitHistograms() {
-
+  
   // 		Create Histograms
-
+  
   // 		for TPH pam
-
+  
   m_tpc_row    = new TH1F("TclTphitRow" ,"tpc row num"   ,2345,100.5,2445.5);
   m_x_of_hit   = new TH1F("TclTphitHitX","x dist of hits",50,-200.,200.);
   m_y_of_hit   = new TH1F("TclTphitHitY","y dist of hits",50,-200.,200.);
   m_z_of_hit   = new TH1F("TclTphitHitZ","z dist of hits",50,-250.,250.);
   m_charge_hit = new TH1F("TclTphitTotChargeHit","total charge in hit",100,0.,0.00004);
-
+  
   m_nseq_hit     = new TH1F("TclTphitNseq","num seq in hit (empty for TFS)",
 			    200,0.5,200.5);
   // 		for TCL pam
@@ -536,8 +474,8 @@ void St_tcl_Maker::InitHistograms() {
 //----------------------------------------------------------------------
 
 void St_tcl_Maker::MakeHistograms() {
-
-
+  
+  
   // hit table
   tcl_tphit_st* pttphit = NULL; 
   // tphit is global pointer to tpc hit table
@@ -545,11 +483,11 @@ void St_tcl_Maker::MakeHistograms() {
     pttphit = tphit->GetTable();
   }
   else { 
-     gMessMgr->Info() << "Warning: tphit table header does not exist "  
-		      << endm; 
+    gMessMgr->Info() << "Warning: tphit table header does not exist "  
+		     << endm; 
   }
   if (!pttphit) { 
-     gMessMgr->Info() << "Warning: tphit table does not exist " << endm; 
+    gMessMgr->Info() << "Warning: tphit table does not exist " << endm; 
   }
   else {
     for(int i=0; i < tphit->GetNRows(); i++) {
@@ -572,12 +510,12 @@ void St_tcl_Maker::MakeHistograms() {
       pttpcl = tpcluster->GetTable();
     }
     else { 
-       gMessMgr->Info() 
-	 << "Warning: tphit cluster table header does not exist "   << endm; 
+      gMessMgr->Info() 
+	<< "Warning: tphit cluster table header does not exist "   << endm; 
     }
     if (!pttpcl) { 
-       gMessMgr->Info() << "Warning: tphit cluster table does not exist " 
-			<< endm; 
+      gMessMgr->Info() << "Warning: tphit cluster table does not exist " 
+		       << endm; 
     }
     else {
       for(int j=0; j < tpcluster->GetNRows(); j++) {
@@ -586,20 +524,20 @@ void St_tcl_Maker::MakeHistograms() {
       }
     }
   }
-
+  
 }
 
 //_____________________________________________________________________________
 
 Int_t St_tcl_Maker::cluster_morphology( 
-     	Int_t 		   sectorNumber,
-        St_type_shortdata *pixel_data_in, 
-        St_type_shortdata *pixel_data_out)
+				       Int_t 		   sectorNumber,
+				       St_type_shortdata *pixel_data_in, 
+				       St_type_shortdata *pixel_data_out)
 {
   type_shortdata_st *pixTbl;
   unsigned short charge[TCC_PAD][TCC_BIN];
   float meanPadEq3,meanTimeEq4,padSigma1Eq5,timeSigma1Eq6,padTimeSigma1Eq7,
-      padSigma2Eq12,timeSigma2Eq13;
+    padSigma2Eq12,timeSigma2Eq13;
   float padTimeSigma2Eq14,ecc1Eq15,ecc2Eq16,linEcc1Eq8,linEcc2Eq9;
   tcl_tp_seq_st *seqTbl = (tcl_tp_seq_st*) tpseq->GetTable();
   int pixBeg,pixEnd,nseq,padrow,sector,seqCnt;
@@ -608,13 +546,13 @@ Int_t St_tcl_Maker::cluster_morphology(
   int ipad,numberOfPixels;
   unsigned int totChargeEq1;
   static int lastRowPrevTime=-1;
-
+  
   nCluster=tpcluster->GetNRows();
   tcl_tpcluster_st *clusterTbl = (tcl_tpcluster_st*) tpcluster->GetTable();
   for(iClusterTbl=lastRowPrevTime+1;iClusterTbl<nCluster;iClusterTbl++) {
     if(iClusterTbl%473==0) {
       {gMessMgr->QAInfo() << Form("St_tcl_Maker::cluster_morphology Sector %2d, %3d percent done\n",
-             sectorNumber,(100*(iClusterTbl-lastRowPrevTime))/(nCluster-lastRowPrevTime)) << endm;}
+				  sectorNumber,(100*(iClusterTbl-lastRowPrevTime))/(nCluster-lastRowPrevTime)) << endm;}
     }
     sector=clusterTbl[iClusterTbl].tpc_row/100;
     if(sector!=sectorNumber) { {gMessMgr->QAInfo() << Form("cluster table may be corrupted.\n") << endm;} return 1; }
@@ -625,46 +563,46 @@ Int_t St_tcl_Maker::cluster_morphology(
     if(padrow<=13) pixTbl= pixel_data_in->GetTable();
     else           pixTbl=pixel_data_out->GetTable();
     npad=0; 		// count number of pads without assuming one sequence per pad
-
+    
     memset(charge,0,sizeof(charge));
     maxCharge=0; numberOfPixels=0;
-
+    
     for(seqCnt=0;seqCnt<nseq;seqCnt++) { // seqCnt is not table index, iSeqTbl is.
-
+      
       // Calculate whichPad, index into pads[]
-
+      
       for(ipad=npad-1;ipad>=0;ipad--) { if(pads[ipad]==seqTbl[iSeqTbl].secpad) { break; } }
       if(ipad>=0) whichPad=ipad;
       else { // create a new entry in pads[]
         if(npad>=TCC_PAD) 						return 55;
         whichPad=npad; pads[npad++]=seqTbl[iSeqTbl].secpad;
       }
-
+      
       pixBeg=seqTbl[iSeqTbl].jpix-1;
       pixEnd=pixBeg+seqTbl[iSeqTbl].tdc_hi-seqTbl[iSeqTbl].tdc_low;
-
+      
       if(seqTbl[iSeqTbl].tpc_row!=clusterTbl[iClusterTbl].tpc_row) 	return 3;
-
+      
       for(iPixTbl=pixBeg;iPixTbl<=pixEnd;iPixTbl++) {
         whichTimeBin=seqTbl[iSeqTbl].tdc_low+iPixTbl-pixBeg;
         if(whichTimeBin<0||whichTimeBin>=TCC_BIN) 			return 81;
         charge[whichPad][whichTimeBin]=pixTbl[iPixTbl].data;
         if(maxCharge<pixTbl[iPixTbl].data) maxCharge=pixTbl[iPixTbl].data;
         numberOfPixels++;
-
+	
       } // end of iPixTbl loop
-
+      
       iSeqTbl=seqTbl[iSeqTbl].next-1;
-
+      
     }// end of seqCnt loop
-
+    
     if(iSeqTbl!=-1) 							return 69;
     if(CalculateQuadrupoleMoms(
-             padrow,npad,pads,charge,
-             totChargeEq1,meanPadEq3,meanTimeEq4,
-             padSigma1Eq5,timeSigma1Eq6,padTimeSigma1Eq7, padSigma2Eq12,
-             timeSigma2Eq13,padTimeSigma2Eq14, ecc1Eq15,ecc2Eq16,
-             linEcc1Eq8,linEcc2Eq9)) 					return 111;
+			       padrow,npad,pads,charge,
+			       totChargeEq1,meanPadEq3,meanTimeEq4,
+			       padSigma1Eq5,timeSigma1Eq6,padTimeSigma1Eq7, padSigma2Eq12,
+			       timeSigma2Eq13,padTimeSigma2Eq14, ecc1Eq15,ecc2Eq16,
+			       linEcc1Eq8,linEcc2Eq9)) 					return 111;
 
     if(FillOneRowOfMorphTable(
        iClusterTbl,	padrow,	sector,	nseq,	numberOfPixels,
