@@ -25,7 +25,6 @@
 #include "TFile.h"
 #include "TNtuple.h"
 #include "TCanvas.h"
-#include "TClassTable.h"
 #include "TFileSet.h"
 #include "TDataSetIter.h"
 #include "TDataSet.h"
@@ -33,7 +32,6 @@
 #include "TClassTable.h"
 //#include "DeDxTree.C"
 #include "TMinuit.h"
-#include "TCanvas.h"
 #include "TSpectrum.h"
 #include "StBichsel/Bichsel.h"
 #include "TString.h"
@@ -622,7 +620,7 @@ TF1 *FitGF(TH1D *proj, Option_t *opt="") {
   if (! g2) {
     g2 = new TF1("GF",gfFunc, -5, 5, 9);
     g2->SetParName(0,"norm"); 
-    g2->SetParName(1,"mu");     g2->SetParLimits(1,-.5,0.5);
+    g2->SetParName(1,"mu");     //g2->SetParLimits(1,-1.5,1.5);
     g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.2,0.8);
     g2->SetParName(3,"P"); 
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.5);
@@ -634,23 +632,10 @@ TF1 *FitGF(TH1D *proj, Option_t *opt="") {
   }
   
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
-#if 0
-  TAxis *xx = proj->GetXaxis();
-  for (int i = 0; i <5; i++) {
-    Double_t x = 0;
-    if (i) x = peaks[i];
-    Int_t bin = xx->FindBin(x);
-    Int_t p = 0;
-    if (i != 0) p = i+3;
-    Double_t cont = proj->GetBinContent(bin);
-    g2->ReleaseParameter(p);
-    if (cont > 0) g2->SetParameter(p,TMath::Log(cont));
-    else          g2->FixParameter(p,-99.);
-  }
-#endif
-  g2->SetParameters(0, 1e-3, 0.32, 0.4, 0., 0., 0.,0.,-1.);
+  g2->SetParameters(0, 1e-3, 0.32, 0.4, 0.1, 0.1, 0.1,0.1,-1.);
   g2->FixParameter(7,total);
   g2->FixParameter(8,-1);
+  proj->Fit(g2,Opt.Data());
   Int_t iok = proj->Fit(g2,Opt.Data());
   if ( iok ) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
@@ -771,7 +756,7 @@ TF1 *FitGB(TH1D *proj, Option_t *opt="", Double_t dX = 2.364) {
   if (! g2) {
     g2 = new TF1("GB",gbFunc, -5, 5, 9);
     g2->SetParName(0,"norm"); 
-    g2->SetParName(1,"mu");     g2->SetParLimits(1,-.5,0.5);
+    g2->SetParName(1,"mu");     g2->SetParLimits(1,-1.5,1.5);
     g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.0,0.8);
     g2->SetParName(3,"P"); 
     g2->SetParName(4,"K"); 
