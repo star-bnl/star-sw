@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.23 2003/09/10 19:47:51 perev Exp $
+// $Id: St_tcl_Maker.h,v 1.24 2007/12/28 13:47:40 fisyak Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.24  2007/12/28 13:47:40  fisyak
+// Split tcl and tfs Makers
+//
 // Revision 1.23  2003/09/10 19:47:51  perev
 // ansi corrs
 //
@@ -95,10 +98,6 @@ class St_tpg_pad_plane;
 class St_tpg_detector;
 class St_tpg_pad;
 
-class St_tss_tsspar;
-class St_tfs_fspar;
-class St_tfs_fsctrl;
-
 class St_tcl_sector_index;
 class St_tcl_tclpar;
 class St_tcl_tpc_index_type;
@@ -112,7 +111,7 @@ class St_tcl_tphit;
 class St_tcl_tpcluster;
 class St_tcc_morphology;
 class St_tcl_tpc_index;
-
+class St_tss_tsspar;
 class TH1F;
 class TNtuple;
 
@@ -142,7 +141,7 @@ class St_tcl_Maker : public StMaker {
   virtual Int_t  Finish();
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.23 2003/09/10 19:47:51 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.24 2007/12/28 13:47:40 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  private:
 
@@ -168,9 +167,6 @@ class St_tcl_Maker : public StMaker {
 	                           		// how tcl works
   St_tcl_tpc_index_type* m_type;   		//!  Table of many-to-many index 
 	                           		// correlations for tpc evaluations
-  St_tfs_fspar*          m_tfs_fspar;   	//! TFS parameter table 
-  St_tfs_fsctrl*         m_tfs_fsctrl;  	//! TFS control switches
-
   St_tcl_tp_seq*         tpseq;                 //! TPC sequence table
   St_tcl_tphit*          tphit;                 //! TPC hit table
   St_tcl_tpcluster*      tpcluster;             //! TPC cluster table
