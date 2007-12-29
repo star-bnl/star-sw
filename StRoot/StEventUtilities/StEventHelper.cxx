@@ -372,10 +372,10 @@ int trackTypes[]= {global, primary, tpt, secondary, estGlobal, estPrimary,-1};
         if (!(flag&bty))	continue;
         trk=tn->track(ity);
 	if (!trk)		continue;
+	if (trk->IsZombie())  	continue;
    // See:  StRoot/St_base/StObject.h also
-	if (trk->IsZombie() || ( (flag& kMark2Draw) 
-         && trk->TestBit(flag & kMark2Draw )) ) 	break;
-	traks->Add(trk);	break;
+	if ((flag&kMark2Draw) && !trk->TestBit(kMark2Draw)) continue;
+	traks->Add(trk);	
       }//end track types
     }//end StTrackNode's
   }// end  StSPtrVecTrackNode's        
@@ -399,15 +399,15 @@ TObjArray *StEventHelper::SelHits(const char *RegEx, Int_t un, Int_t flag)
     if (!arr->at(0)->InheritsFrom(StHit::Class())) continue;
     for(int ih=0;ih<sz; ih++) {
       StHit *hit = (StHit*)arr->at(ih);
-      if (!hit) 	continue;
+      if (!hit) 		continue;
+      if (hit->IsZombie())	continue;
+      // See:  StRoot/St_base/StObject.h also
+      if ((flag&kMark2Draw) && !hit->TestBit(kMark2Draw)) continue;
       int used = (hit->trackReferenceCount()!=0);
       int take = 0;
-      // See:  StRoot/St_base/StObject.h also
-      if ( !(flag& kMark2Draw) || hit->TestBit(flag& kMark2Draw) ) {
-         if ( used && (un&kUSE)) take++;
-         if (!used && (un&kUNU)) take++;
-         if (take) hits->Add(hit);
-      }
+      if ( used && (un&kUSE)) take++;
+      if (!used && (un&kUNU)) take++;
+      if (take) hits->Add(hit);
     }
   }         
   delete conts;
@@ -428,12 +428,11 @@ TObjArray *StEventHelper::SelVertex(const char *sel,Int_t flag)
     if (!sz)	continue;
     for (int ivx=0; ivx<sz; ivx++) {
       StVertex *vx = (StVertex*)arr->at(ivx);
-      if (!vx) 	continue;
+      if (!vx) 			continue;
+      if (vx->IsZombie())	continue;
       // See:  StRoot/St_base/StObject.h also
-      if ( !(flag& kMark2Draw) || vx->TestBit(flag& kMark2Draw) ) {
-        verts->Add(vx);
-        nvtx++;
-      }
+      if ((flag&kMark2Draw) && !vx->TestBit(kMark2Draw)) continue;
+      verts->Add(vx);nvtx++;
     }
   }
   delete conts;
