@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.110 2007/09/10 02:19:25 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.111 2007/12/29 01:43:32 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.111  2007/12/29 01:43:32  perev
+// More dbStat
+//
 // Revision 1.110  2007/09/10 02:19:25  perev
 // StDbBroker::Release used
 //
@@ -264,6 +267,10 @@ St_db_Maker::St_db_Maker(const char *name
    fTimer[1].Stop();
    fTimer[2].Stop();
    fTimer[3].Stop();
+   fTimer[4].Stop();
+ 
+   memset(fEvents,0,sizeof(fEvents)+sizeof(fDataSize));
+
    fDirs[0] = dir0;
    fDirs[1] = dir1;
    fDirs[2] = dir2;
@@ -345,11 +352,35 @@ Int_t St_db_Maker::Init()
 //_____________________________________________________________________________
 Int_t St_db_Maker::Finish()
 {
-   for (int i=0;i<4;i++) fTimer[i].Stop();
-   printf("St_db_Maker::Init ");fTimer[0].Print();
-   printf("      MySQL::Init ");fTimer[2].Print();
-   printf("St_db_Maker::Make ");fTimer[1].Print();
-   printf("      MySQL::Make ");fTimer[3].Print();
+   for (int i=0;i<5;i++) fTimer[i].Stop();
+   Printf("St_db_Maker::Init ");fTimer[0].Print();
+   Printf("      MySQL::Init ");fTimer[2].Print();
+   Printf("St_db_Maker::Make ");fTimer[1].Print();
+   Printf("      MySQL::Make ");fTimer[3].Print();
+   Printf("      MySQL::Data ");fTimer[4].Print();
+
+   double eachEvt = double(fEvents[0]) /(fEvents[1]+3e-33);
+   double MperTim = (fDataSize[1]*1e-6)/(fTimer[4].RealTime()+3e-33);
+   double MperCpu = (fDataSize[1]*1e-6)/(fTimer[4].CpuTime() +3e-33);
+   double timPerE = fTimer[4].RealTime()/fEvents[1];
+   double cpuPerE = fTimer[4].CpuTime() /fEvents[1];
+
+   Info("dbStat","Evts = %d dbEvts=%d Evts/dbEvts = %4.1f\n"
+       ,fEvents[0], fEvents[1],eachEvt);
+       
+   Info("dbStat","dbData =%10.1f dbTime=%g dbData/dbTime=%g\n"   
+       ,fDataSize[1]*1e-6,fTimer[4].RealTime(),MperTim);
+
+   Info("dbStat","dbData =%10.1f dbCpu =%g dbData/dbCpu =%g\n"   
+       ,fDataSize[1]*1e-6,fTimer[4].CpuTime() ,MperCpu);
+
+   Info("dbStat","dbTime =%10.1f dbEvts=%d dbTime/dbEvts =%g\n"   
+       ,fTimer[4].RealTime(),fEvents[1],timPerE);
+
+   Info("dbStat","dbCpu  =%10.1f dbEvts=%d  dbCpu/dbEvts =%g\n"   
+       ,fTimer[4].CpuTime() ,fEvents[1],cpuPerE);
+
+
    Snapshot(1);
    return 0;
 }
@@ -375,6 +406,11 @@ Int_t St_db_Maker::Make()
 void St_db_Maker::Clear(const char *)
 {
   if (!fDBBroker) return;
+  fEvents[0]++;
+  if (fDataSize[0]) fEvents[1]++;
+  fDataSize[1]+=fDataSize[0];
+  fDataSize[0]=0;
+
   fDBBroker->Release();
 }
 //_____________________________________________________________________________
@@ -506,7 +542,9 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat
 
   fDBBroker->SetDateTime(req.GetDate(),req.GetTime());
   TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
-  fTimer[1].Stop(); fTimer[3].Start(0);
+  fTimer[1].Stop();
+  fTimer[3].Start(0);
+  fTimer[4].Start(0);
   fDBBroker->SetDictionary(rowTL);
   fDBBroker->SetTableName (dat->GetName());
   fDBBroker->SetStructName(dat->GetTitle());
@@ -542,7 +580,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat
     assert(! ( val[0].Get() >= val[1].Get()));
   }
 
-  fTimer[1].Start(0); fTimer[3].Stop();
+  fTimer[1].Start(0); fTimer[3].Stop();fTimer[4].Stop();
 
   if (!dbstruct) {
     dat->SetNRows(0);
@@ -554,6 +592,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat
   //		Adopt DB data in the new TTable
   dat->Adopt(nRows,dbstruct);
 //	check size.
+  fDataSize[0]+=nRows*dat->GetRowSize();
   if (!nRows || ((char*)dbstruct)[dat->GetRowSize()*nRows-1]) {}
 
   //  dat->Print(0,1);
