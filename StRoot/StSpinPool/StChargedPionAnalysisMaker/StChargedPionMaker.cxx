@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.8 2007/06/06 13:01:31 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.9 2007/12/31 19:53:04 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.9  2007/12/31 19:53:04  kocolosk
+* new tree structure separate from StJetSkimEvent
+*
 * Revision 1.8  2007/06/06 13:01:31  kocolosk
 * muDst is a pointer ... oops
 *
@@ -59,8 +62,17 @@
 #include "StMessMgr.h"
 
 //my headers
-#include "StChargedPionTrack.h"
 #include "StChargedPionMaker.h"
+#include "StChargedPionEvent.h"
+#include "StChargedPionVertex.h"
+#include "StChargedPionTrack.h"
+#include "StChargedPionJet.h"
+#include "StChargedPionJetParticle.h"
+
+//StJetMaker
+#include "StJetMaker/StJetSkimEvent.h"
+#include "StJetMaker/StJets.h"
+#include "StJetMaker/StJet.h"
 
 ClassImp(StChargedPionMaker)
 
@@ -249,3 +261,90 @@ StChargedPionTrack & StChargedPionMaker::chargedPionTrack(StMuTrack *muTrack)
     
     return (*cpTrack);
 }
+
+void StChargedPionMaker::translateEvent(StJetSkimEvent *skimEvent, StChargedPionEvent *ev) {
+    ev->setRunId(skimEvent->runId());
+    ev->setEventId(skimEvent->eventId());
+    ev->setBx7(skimEvent->bx7());
+    ev->setBbcTimeBin(skimEvent->bbcTimeBin());
+    
+    ev->setSpinBit(skimEvent->spin4usingBx48());
+    ev->setPolValid(skimEvent->isValid());
+    ev->setPolLong(skimEvent->isPolLong());
+    ev->setPolTrans(skimEvent->isPolTrans());
+    ev->setBxingMasked(skimEvent->isMaskedUsingBx48());
+    ev->setBxingOffset(skimEvent->offsetBx48minusBX7());
+    
+    for(int i=0; i<skimEvent->triggers()->GetEntriesFast(); i++) {
+        StJetSkimTrig *t = static_cast<StJetSkimTrig*>(skimEvent->triggers()->At(i));
+        if(t->didFire() > 0) ev->addTrigger(t->trigId());
+        if(t->shouldFire() > 0) ev->addSimuTrigger(t->trigId());
+    }
+    
+    if(skimEvent->eBbc() > 0 && skimEvent->wBbc() > 0) {
+        if(ev->runId() > 6000000 && ev->runId() < 7000000) {
+            ev->addSimuTrigger(96011);
+        }
+        else if(ev->runId() > 7000000 && ev->runId() < 8000000) {
+            ev->addSimuTrigger(117001);
+        }
+    }
+    
+    StChargedPionVertex v;
+    for(int i=0; i<skimEvent->vertices()->GetEntriesFast(); i++) {
+        StJetSkimVert *skv = static_cast<StJetSkimVert*>(skimEvent->vertices()->At(i));
+        v.SetX( skv->position()[0] );
+        v.SetY( skv->position()[1] );
+        v.SetZ( skv->position()[2] );
+        v.setRanking( skv->ranking() );
+        ev->addVertex(&v);
+    }
+}
+
+void StChargedPionMaker::translateJet(StJet* oldJet, vector<TrackToJetIndex*> particles, StChargedPionJet* jet) {    
+    *static_cast<TLorentzVector*>(jet) = *static_cast<TLorentzVector*>(oldJet);
+    
+    jet->setCharge(oldJet->charge);
+    jet->setNTpcTracks(oldJet->nTracks);
+    jet->setNBarrelTowers(oldJet->nBtowers);
+    jet->setNEndcapTowers(oldJet->nEtowers);
+    jet->setTpcEtSum(oldJet->tpcEtSum);
+    jet->setBarrelEtSum(oldJet->btowEtSum);
+    jet->setEndcapEtSum(oldJet->etowEtSum);
+    jet->setVertexZ(oldJet->zVertex);
+    
+    StChargedPionJetParticle particle;
+    StThreeVectorF dca(0.0);
+    for(unsigned i=0; i<particles.size(); i++) {
+        particle.SetPt ( particles[i]->Pt()  );
+        particle.SetEta( particles[i]->Eta() );
+        particle.SetPhi( particles[i]->Phi() );
+        particle.SetE( particles[i]->E() );
+        particle.setIndex( particles[i]->trackIndex() );
+        particle.setDetectorId( particles[i]->detectorId() );
+        particle.setCharge( particles[i]->charge());
+        particle.setNHits( particles[i]->nHits() );
+        particle.setNHitsFit( particles[i]->nHitsFit() );
+        particle.setNHitsPoss( particles[i]->nHitsPoss() );
+        particle.setNHitsDEdx( particles[i]->nHitsDedx() );
+        particle.setNSigmaPion( particles[i]->nSigmaPion() );
+        
+        dca.setY( float(particles[i]->Tdcaxy()) );
+        dca.setZ( float(particles[i]->Tdcaz()) );
+        particle.setGlobalDca( dca );
+        jet->addParticle(&particle);
+    }
+}
+
+void StChargedPionMaker::translateJets(StJets *jets, StChargedPionEvent *ev) {
+    StChargedPionJet myjet;
+    
+    TClonesArray *oldJets = jets->jets();
+    for(int i=0; i<oldJets->GetEntriesFast(); i++) {
+        StJet *oldJet = static_cast<StJet*>(oldJets->At(i));
+        translateJet(oldJet, jets->particles(i), &myjet);
+        ev->addJet(&myjet);
+        myjet.Clear();
+    }
+}
+
