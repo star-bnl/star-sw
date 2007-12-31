@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.h,v 1.4 2007/03/12 15:01:50 kocolosk Exp $
+* $Id: StChargedPionMaker.h,v 1.5 2007/12/31 19:53:04 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.h,v $
+* Revision 1.5  2007/12/31 19:53:04  kocolosk
+* new tree structure separate from StJetSkimEvent
+*
 * Revision 1.4  2007/03/12 15:01:50  kocolosk
 * use StChargedPionTrack instead of StMuTrack so we can read the trees offline
 *
@@ -38,44 +41,53 @@ class TString;
 
 class StMuDstMaker;
 class StMuTrack;
-
+class StJetSkimEvent;
+class StJet;
+class StJets;
+class TrackToJetIndex;
+class StChargedPionEvent;
 class StChargedPionTrack;
+class StChargedPionJet;
 
 class StChargedPionMaker : public StMaker {
 public:
-	StChargedPionMaker(const char *name = "chargedPionMaker", const char *outfile = "test.tracks.root");
-	virtual ~StChargedPionMaker();
-	
-	virtual void Clear(const char *option="");
-	virtual Int_t Init();
-	virtual Int_t Make();
-	virtual Int_t Finish();
-	
-	virtual const char* GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.4 2007/03/12 15:01:50 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
-	
+    StChargedPionMaker(const char *name = "chargedPionMaker", const char *outfile = "test.tracks.root");
+    virtual ~StChargedPionMaker();
+    
+    virtual void Clear(const char *option="");
+    virtual Int_t Init();
+    virtual Int_t Make();
+    virtual Int_t Finish();
+    
+    static void translateEvent(StJetSkimEvent *skimEvent, StChargedPionEvent *ev);
+    static void translateJet(StJet* oldJet, vector<TrackToJetIndex*> particles, StChargedPionJet* jet);
+    static void translateJets(StJets* jets, StChargedPionEvent *ev);
+    
+    virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.5 2007/12/31 19:53:04 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
+    
 private:
-	TFile *mFile;				//!
-	TTree *mTree;				//!
-	
-	TH1	*mBadTracks;			//!
-	enum badTrackTypes {kFlagged=1, kBadHelix, kBadOuterHelix, kMissingGlobal};
-	
-	Int_t mRun;					//!
-	Int_t mEvent;				//!
-	Int_t mNTracks;				//!
-	TClonesArray *mPrimaries;	//!
-	TClonesArray *mGlobals;		//!
-	
-	TString currentFile;		//!
+    TFile *mFile;               //!
+    TTree *mTree;               //!
+    
+    TH1 *mBadTracks;            //!
+    enum badTrackTypes {kFlagged=1, kBadHelix, kBadOuterHelix, kMissingGlobal};
+    
+    Int_t mRun;                 //!
+    Int_t mEvent;               //!
+    Int_t mNTracks;             //!
+    TClonesArray *mPrimaries;   //!
+    TClonesArray *mGlobals;     //!
+    
+    TString currentFile;        //!
 
-	//pointers to makers - get them in Init()
-	StMuDstMaker* muDstMaker;	//!
-	
-	//translate StMuTrack into StChargedPionTrack so we can read it anywhere
-	StChargedPionTrack & chargedPionTrack(StMuTrack *track);
-	
-	ClassDef(StChargedPionMaker,1)
+    //pointers to makers - get them in Init()
+    StMuDstMaker* muDstMaker;   //!
+    
+    //translate StMuTrack into StChargedPionTrack so we can read it anywhere
+    StChargedPionTrack & chargedPionTrack(StMuTrack *track);
+    
+    ClassDef(StChargedPionMaker,1)
 };
 
 #endif
