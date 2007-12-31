@@ -7,7 +7,7 @@ using std::vector;
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
 
-#include "StChargedPionJetParticle.h";
+#include "StChargedPionJetParticle.h"
 
 class StChargedPionJet : public TLorentzVector {
 public:
