@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.95  2008/01/02 11:29:09  jcs
+// bfc option fdbg selected if m_Mode==2
+//
 // Revision 1.94  2007/12/13 10:37:46  jcs
 // standardize looger messages
 //
@@ -494,8 +497,8 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
 
-  if (m_Mode >= 2) {
-    LOG_INFO << "Running with cluster/laser analysis turned on"<<endm;
+  if (m_Mode == 2) {
+    LOG_INFO << "Running with fdbg option selected"<<endm;
   }
 
   St_DataSet *ftpc = GetDataBase("ftpc");
@@ -759,7 +762,7 @@ Int_t StFtpcClusterMaker::Make()
       
     Int_t searchResult = kStOK;
 
-    if (m_Mode >= 2) {
+    if (m_Mode == 2) {
        StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
        cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), microsecondsPerTimebin, paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
 
