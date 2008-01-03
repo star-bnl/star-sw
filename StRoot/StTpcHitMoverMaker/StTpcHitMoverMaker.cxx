@@ -11,7 +11,7 @@
 
 #include "StEventTypes.h"
 #include "TMath.h"
-StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name), 
+StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name),
 						   mAlignSector(kFALSE),
 						   mSectorAligner(NULL),
 						   mExB(NULL) {
@@ -79,7 +79,7 @@ Int_t StTpcHitMover::Make() {
     if (TpcHitCollection) {
       UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
       StTpcLocalSectorCoordinate local;
-      StTpcLocalSectorCoordinate  coorLS; 
+      StTpcLocalSectorCoordinate  coorLS;
       StTpcLocalCoordinate  coorLT, coorLTD;
       StTpcLocalSectorAlignedCoordinate  coorLSA;
       StGlobalCoordinate    coorG;
@@ -98,7 +98,7 @@ Int_t StTpcHitMover::Make() {
 		  if (m_Mode < 0 && tpcHit->idTruth() && tpcHit->qaTruth() > 95) continue; // don't move embedded hits
 		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
 		  transform(coorL,coorLS);   // to sector 12
-		  transform(coorLS,coorLSA); // alignment 
+		  transform(coorLS,coorLSA); // alignment
 		  transform(coorLSA,coorLT); //
 		  coorLTD = coorLT;          // distortions
 		  // ExB corrections
@@ -125,7 +125,7 @@ Int_t StTpcHitMover::Make() {
 		    transform(coorLS,coorP);
 		    StTpcLocalSectorCoordinate  coorLSR; // reference for sector/row/pad
 		    transform(coorP,coorLSR);
-		    cout << "sector/row " << i+1 << "/" << j+1 
+		    cout << "sector/row " << i+1 << "/" << j+1
 			 << "\t xyzFCF\t" << pos[0] << "\t" << pos[1] << "\t" << pos[2] << endl;
 		    cout << "coorL " << coorL << endl;
 		    cout << "coorLS " <<  coorLS <<endl;
@@ -136,11 +136,11 @@ Int_t StTpcHitMover::Make() {
 		    cout << "coorLTD " << coorLTD << endl;
 		    cout << "coorG " << coorG << endl;
 		    cout << "xprime/xA";
-		    for (int i = 0; i < 3; i++) 
+		    for (int i = 0; i < 3; i++)
 		      cout << "\t" << xprime[i] << "/" << xA[i];
 		    cout << "\tdev\t" << dev << endl;
 		  }
-#endif		  
+#endif
 		  tpcHit->setPosition(xyzF);
 		}
 	      }
@@ -149,15 +149,15 @@ Int_t StTpcHitMover::Make() {
 	}
       }
     }
-    
-    return kStOK;        
+
+    return kStOK;
   }
-  
+
   St_DataSet *tpc_data = GetInputDS(mInputDataSetName);
   if (!tpc_data){
     // no TPC ???
     gMessMgr->Warning() << "StTpcHitMover::Make: no " << mInputDataSetName << endm;
-    return kStOk;   
+    return kStOk;
   }
 
   //tpc_data->ls(4);
@@ -168,13 +168,13 @@ Int_t StTpcHitMover::Make() {
   if (!tphit){
     // no cluster data?
     gMessMgr->Warning() << "StTpcHitMover::Make: no " << mInputHitName     << endm;
-    return kStWarn; 
+    return kStWarn;
   }
-  
+
   tcl_tphit_st* spc = tphit->GetTable();
   if (!spc)      return kStWarn;
 
-  gMessMgr->Info() << "StTpcHitMover::Make: Input hit table size is " << 
+  gMessMgr->Info() << "StTpcHitMover::Make: Input hit table size is " <<
     (int) tphit->GetNRows() << " m_Mode=" << m_Mode << endm;
 
   Float_t x[3];
@@ -186,9 +186,9 @@ Int_t StTpcHitMover::Make() {
     x[0] = spc->x;
     x[1] = spc->y;
     x[2] = spc->z;
-    
+
     moveTpcHit(x,xprime,sector,row);
-    
+
     if (mOutputMode == 0) {
       spc->x = xprime[0];
       spc->y = xprime[1];
@@ -233,7 +233,7 @@ void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
   posMoved[2] = pos[2];
 
   // align sector
-  if (mAlignSector) { 
+  if (mAlignSector) {
     if (! mSectorAligner) mSectorAligner = new StSectorAligner(gStTpcDb);
     mSectorAligner->moveHit(pos,posMoved,sector,row);
     pos[0] = posMoved[0];
@@ -259,6 +259,6 @@ void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
   posMoved[0] = global.position().x();
   posMoved[1] = global.position().y();
   posMoved[2] = global.position().z();
-} 
+}
 
 ClassImp(StTpcHitMover)
