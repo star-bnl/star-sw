@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.54 2008/01/06 02:55:21 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.55 2008/01/06 02:58:32 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.55  2008/01/06 02:58:32  fine
+ * clean up
+ *
  * Revision 1.54  2008/01/06 02:55:21  fine
  * treat new DAQ  EOF issue properly
  *
@@ -325,7 +328,6 @@ void StDAQReader::nextEvent()
        switch(fDaqFileReader->status) {
           case EVP_STAT_EOR :  // EOR or EOR - might contain token 0!
              if(fDaqFileReader->isevp) { // keep going until the next run...
-                //                             retStatus = kOK;
                 LOG_FATAL << "StEvpReader::NextEvent - waiting event" << endm;
                 nextEvent();
              } else {
@@ -394,25 +396,25 @@ int StDAQReader::readEvent()
     // return kStErr;  // Herb, July 5 2000
   }
 
-  if (fTPCReader  && TPCPresent() )     fTPCReader ->Update();
-  if (fFTPCReader && FTPCPresent())	fFTPCReader->Update();  
-  if (fTRGReader  && TRGPresent() ){     
-                                        fTRGReader ->Update();
-					if ( ! fTRGReader->thereIsTriggerData() ){
-                  LOG_INFO <<
-					   Form("StDAQReader::readEvent: No or bad TRG data - Skipping event")<< endm;
-					   return kStErr;
-					}
+  if (fTPCReader  && TPCPresent() ) fTPCReader ->Update();
+  if (fFTPCReader && FTPCPresent()) fFTPCReader->Update();
+  if (fTRGReader  && TRGPresent() ) {
+      fTRGReader ->Update();
+      if ( ! fTRGReader->thereIsTriggerData() ){
+         LOG_INFO <<
+            Form("StDAQReader::readEvent: No or bad TRG data - Skipping event")<< endm;
+            return kStErr;
+      }
   }
-  if (fSVTReader  && SVTPresent() ) 	fSVTReader ->Update();
-  if (fSSDReader  && SSDPresent() )     fSSDReader ->Update();
-  if (fEMCReader  && EMCPresent() ) 	fEMCReader ->Update();
-  if (fEEMCReader && EMCPresent() ) 	fEEMCReader->Update();
-  if (fPMDReader  && PMDPresent() ) 	fPMDReader ->Update();
+  if (fSVTReader  && SVTPresent() ) fSVTReader ->Update();
+  if (fSSDReader  && SSDPresent() ) fSSDReader ->Update();
+  if (fEMCReader  && EMCPresent() ) fEMCReader ->Update();
+  if (fEEMCReader && EMCPresent() ) fEEMCReader->Update();
+  if (fPMDReader  && PMDPresent() ) fPMDReader ->Update();
 
   // Must skip SCPresent check to handle missing SCPresent value in 2005-2006
   // (SCPresent value indicates not present, but it may in fact be present)
-  if (fSCReader                   )	fSCReader  ->Update();
+  if (fSCReader) fSCReader  ->Update();
 
 //	Trigger Summary, code provided by Herb
   Bank_DATAP *datap = (Bank_DATAP*)(fEventReader->getDATAP());
