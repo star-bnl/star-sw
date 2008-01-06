@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.52 2007/12/24 05:19:58 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.53 2008/01/06 01:48:01 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.53  2008/01/06 01:48:01  fine
+ * fix missuse of the tot_bytes member use bytes instead
+ *
  * Revision 1.52  2007/12/24 05:19:58  fine
  * Introduce the shadow copy of the evp buffer for the new EVP_READER
  *
@@ -381,8 +384,8 @@ int StDAQReader::readEvent()
      // the current STAR StDaqLib relies on.
      // To fix the issue we have to create the memory resided copy of the buffer
      // vf 26.12.2007
-     fDATAP = (char *)realloc(fDATAP, fDaqFileReader->tot_bytes);
-     memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->tot_bytes);
+     fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes);
+     memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes);
      fEventReader->InitEventReader(fDATAP);
  } else {
     delete fEventReader;
