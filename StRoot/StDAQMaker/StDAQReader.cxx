@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.53 2008/01/06 01:48:01 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.54 2008/01/06 02:55:21 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.54  2008/01/06 02:55:21  fine
+ * treat new DAQ  EOF issue properly
+ *
  * Revision 1.53  2008/01/06 01:48:01  fine
  * fix missuse of the tot_bytes member use bytes instead
  *
@@ -306,52 +309,42 @@ void StDAQReader::nextEvent()
 #ifndef OLD_EVP_READER
    // Create the next event from evp data
    if (!fDaqFileReader) return;
-   int retStatus= 1; //StMaker::kOK;
    // qDebug() << " StEvpReader::NextEvent() - fEventType = " <<  fEventType;
    char *currentData = fDaqFileReader->get(0,EVP_TYPE_ANY); // EventNumber(),fEventType);
-   assert(currentData);
-    LOG_DEBUG << " StEvpReader::NextEvent - data = "
-         <<  (void *)currentData <<" :: " << fDaqFileReader
-//           << ", event # = " << EventNumber()
-//           << " event type " << fEventType << "::" << EVP_TYPE_ANY
-           << " status " << fDaqFileReader->status << " EVP_STAT_OK=" << EVP_STAT_OK
-           << " token " << fDaqFileReader->token
-           << endm
+   LOG_DEBUG << " StEvpReader::NextEvent - data = "
+             <<  (void *)currentData <<" :: " << fDaqFileReader
+             << " status " << fDaqFileReader->status << " EVP_STAT_OK=" << EVP_STAT_OK
+             << " token " << fDaqFileReader->token
+             << endm
            ;
 
     fOffset = -1;
-    if(currentData) {  // event not valid
-      retStatus =kStErr;
+    if(currentData && (fDaqFileReader->status == EVP_STAT_OK) ) {
+       fOffset = 1;
+    } else { // event is not valid
        switch(fDaqFileReader->status) {
-          case EVP_STAT_OK :   // should retry as fast as possible...
-             // qDebug () << " StEvpReader::NextEvent - Ok" << this->token;
-             fOffset = 1;
-             break;
           case EVP_STAT_EOR :  // EOR or EOR - might contain token 0!
              if(fDaqFileReader->isevp) { // keep going until the next run...
                 //                             retStatus = kOK;
-                LOG_ERROR << " StEvpReader::NextEvent - waiting event" << endm;
+                LOG_FATAL << "StEvpReader::NextEvent - waiting event" << endm;
                 nextEvent();
              } else {
-                retStatus = -2; //kEOF;
-                fOffset = -1;
-//                LOG_DEBUG << " StEvpReader::NextEvent - End Of File \n")  << endm;
-                // let's kill this reader
+                LOG_DEBUG << "StEvpReader::NextEvent - End Of File"  << endm;
              }
              break;
           case EVP_STAT_EVT :
               LOG_ERROR <<  "Problem getting event - skipping" << endm;
               nextEvent();
-             break;
+              break;
           case EVP_STAT_CRIT :
               LOG_ERROR << "Critical error - halting..." << endm;
               nextEvent();
-             break;
+              break;
+          default:
+              LOG_FATAL << "Unknow DAQ file I/O problem " << endm;
        };
-       fEventStatus = fDaqFileReader->status;
-    } else {
-       LOG_ERROR << " StEvpReader::NextEvent - read error" << endm;
-    }
+    } 
+    fEventStatus = fDaqFileReader->status;
 #endif
  }
 
