@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.96  2008/01/07 14:46:10  jcs
+// create and fill the special set of Ftpc point histograms used to evaluate
+// the Ftpc gain scan runs when bfc option fgain is in the chain
+//
 // Revision 1.95  2008/01/02 11:29:09  jcs
 // bfc option fdbg selected if m_Mode==2
 //
@@ -497,8 +501,22 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
 
+  // m_Mode is used to pass bfc option information to the Maker
+  //        m_Mode            bfc option         Comments
+  //          0                                  normal setting for production runs
+  //          2               fdbg               open special Ftpc root file and fill with cluster information 
+  //                                             for analysis in StFtpcCalibMaker
+  //          4               fgain              initialize and fill the special set of Ftpc cluster histograms
+  //                                             used to evaluate the Ftpc gain scan runs
+
+  LOG_INFO << "StFtpcClusterMaker entered with m_Mode = "<< m_Mode <<endm;
+  
   if (m_Mode == 2) {
-    LOG_INFO << "Running with fdbg option selected"<<endm;
+    LOG_INFO << "StFtpcClusterMaker writing to DEBUGFILE (fdbg option selected)"<<endm;
+  }
+
+  if (m_Mode == 4) {
+    LOG_INFO << "Running with fgain option selected"<<endm;
   }
 
   St_DataSet *ftpc = GetDataBase("ftpc");
@@ -527,6 +545,17 @@ Int_t StFtpcClusterMaker::Init(){
   m_hitsvstime = NULL;
 
   if (IAttr(".histos")) {
+     if (m_Mode == 4) {
+        m_pnt_xyFW    = new TH2F("PointXYFtpcW","point: x-y distribution of hits, ftpcW",70,-35,35,70,-35,35);
+        m_pnt_xyFE    = new TH2F("PointXYFtpcE","point: x-y distribution of hits, ftpcE",70,-35,35,70,-35,35);
+        m_pnt_planeF  = new TH1F("PointPlaneF","point: plane distribution of hits, ftpc",20,0.5,20.5);
+        m_pnt_padtimeFW    = new TH2F("PointPadTimeFtpcW","point: #pads vs #timebins of hits, ftpcW",12,0.5,12.5,10,0.5,10.5);
+        m_pnt_padtimeFW->SetXTitle("#timebins");
+        m_pnt_padtimeFW->SetYTitle("#pads");
+        m_pnt_padtimeFE    = new TH2F("PointPadTimeFtpcE","point: #pads vs #timebins of hits, ftpcE",12,0.5,12.5,10,0.5,10.5);
+        m_pnt_padtimeFE->SetXTitle("#timebins");
+        m_pnt_padtimeFE->SetYTitle("#pads");
+     }
      m_maxadc_West = new TH1F("fcl_maxadcW","FTPCW MaxAdc",50,0.5,50.5);
      m_maxadc_East = new TH1F("fcl_maxadcE","FTPCE MaxAdc",50,0.5,50.5);
      m_charge_West = new TH1F("fcl_chargeW","FTPCW charge",50,0.5,500.5);
@@ -893,11 +922,16 @@ void StFtpcClusterMaker::MakeHistograms()
   for (Int_t i=0; i<mHitArray->GetEntriesFast();i++) {
     StFtpcPoint *hit = (StFtpcPoint*)mHitArray->At(i);
   
+    if (m_Mode == 4) m_pnt_planeF->Fill(hit->GetPadRow());
     //  created here because x,y still in FTPC internal coordinate system
     Float_t rpos = ::sqrt(hit->GetX()*hit->GetX() + hit->GetY()*hit->GetY());
     if (hit->GetPadRow() <=10 ) {
        m_cluster_radial_West->Fill(rpos);
        if (IAttr(".histos")) {
+          if (m_Mode == 4) {
+             m_pnt_xyFW->Fill(hit->GetX(),hit->GetY());
+             m_pnt_padtimeFW->Fill(hit->GetNumberBins(),hit->GetNumberPads());
+          }
           m_maxadc_West->Fill(hit->GetMaxADC());
           m_charge_West->Fill(hit->GetCharge());	 
        }	  
@@ -905,6 +939,10 @@ void StFtpcClusterMaker::MakeHistograms()
     else if (hit->GetPadRow() >=11 ) {
        m_cluster_radial_East->Fill(rpos);
        if (IAttr(".histos")) {
+          if (m_Mode == 4) {
+             m_pnt_xyFE->Fill(hit->GetX(),hit->GetY());
+             m_pnt_padtimeFE->Fill(hit->GetNumberBins(),hit->GetNumberPads());
+          }
           m_maxadc_East->Fill(hit->GetMaxADC());
           m_charge_East->Fill(hit->GetCharge());
        }	  

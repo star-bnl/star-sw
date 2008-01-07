@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.h,v 1.29 2005/10/14 07:29:01 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.30 2008/01/07 14:46:10 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.30  2008/01/07 14:46:10  jcs
+// create and fill the special set of Ftpc point histograms used to evaluate
+// the Ftpc gain scan runs when bfc option fgain is in the chain
+//
 // Revision 1.29  2005/10/14 07:29:01  jcs
 // Calculate microsecondsPerTimebin from RHIC ClockFrequency
 // If RHIC ClockFrequency = 0, use default value from database
@@ -142,7 +146,7 @@ class TObjArray;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.29 2005/10/14 07:29:01 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.30 2008/01/07 14:46:10 jcs Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -182,6 +186,11 @@ class StFtpcClusterMaker : public StMaker {
    TH1F            *m_sector;      //! sectors
    //TH1F            *m_pads;        //! pads
    //TH1F            *m_timebins;    //! timebins 
+   TH2F     *m_pnt_xyFW;    //! xy dist. of hits, ftpcW
+   TH2F     *m_pnt_xyFE;    //! xy dist. of hits, ftpcE
+   TH2F     *m_pnt_padtimeFW;    //! padlength vs timelength of hits, ftpcW
+   TH1F     *m_pnt_planeF;  //! plane dist. of hits, ftpc
+   TH2F     *m_pnt_padtimeFE;    //! padlength vs timelength of hits, ftpcE
    TH2F            *m_row_sector;  //! row vs. sector 
    //TH2F            *m_npad_nbin;   //! number of pads vs. number of timebins
    TH2F            *m_csteps;      //! charge step by (6*row)+sector
@@ -203,7 +212,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.29 2005/10/14 07:29:01 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.30 2008/01/07 14:46:10 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker,0)   //StAF chain virtual base class for Makers
 };
