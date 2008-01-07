@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.h,v 1.22 2007/12/11 09:36:40 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.23 2008/01/07 14:45:06 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.23  2008/01/07 14:45:06  jcs
+// create and fill the special set of Ftpc track histograms used to evaluate
+// the Ftpc gain scan runs when the bfc option fgain is in the chain
+//
 // Revision 1.22  2007/12/11 09:36:40  jcs
 // Remove m_nrec_track histogram (never used)
 //
@@ -106,6 +110,18 @@ class StFtpcTrackMaker : public StMaker {
  private:
 
   protected:
+       TH1F     *m_pointFW;       //! number of points on the track - ftpc west
+       TH1F     *m_pointFE;       //! number of points on the track - ftpc east
+       TH1F     *m_ratiomFW;      //! ratio of n fit pnts over max n pnts - ftpc west
+       TH1F     *m_ratiomFE;      //! ratio of n fit pnts over max n pnts - ftpc east
+       TH1F     *m_planefF;      //! plane of first hit on trk, ftpc
+       TH1F     *m_psiFW;         //! psi reconstructed, ftpc west
+       TH1F     *m_psiFE;         //! psi reconstructed, ftpc east
+       TH2F     *m_xf_yfFW; //! Y vs X of first hit on trk, ftpc west
+       TH2F     *m_xf_yfFE; //! Y vs X of first hit on trk, ftpc east
+       TH2F     *m_pnt_padtimeFW;    //! padlength vs timelength of hits, ftpcW
+       TH2F     *m_pnt_padtimeFE;    //! padlength vs timelength of hits, ftpcE
+       TH2F     *m_good_trk;         //! tot # tracks ftpcW vs. ftpcE
        TH1F          *m_vtx_pos;    //! vertex position
        TH1F          *m_maxadc_West;
        TH1F          *m_maxadc_East;
@@ -140,7 +156,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.22 2007/12/11 09:36:40 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.23 2008/01/07 14:45:06 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 	   void   FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker,StFtpcSoftwareMonitor *ftpcMon);  // fills StEvent->StSoftwareMonitor->StFtpcSoftwareMonitor

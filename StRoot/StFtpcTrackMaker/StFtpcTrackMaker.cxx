@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.86 2007/12/12 12:49:34 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.87 2008/01/07 14:45:06 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.87  2008/01/07 14:45:06  jcs
+// create and fill the special set of Ftpc track histograms used to evaluate
+// the Ftpc gain scan runs when the bfc option fgain is in the chain
+//
 // Revision 1.86  2007/12/12 12:49:34  jcs
 // remove assert() and replace LOG_WARN with LOG_ERROR messages
 //
@@ -424,6 +428,7 @@ Int_t StFtpcTrackMaker::InitRun(Int_t run) {
   				 (St_ftpcdEdxPars *)ftpcPars("ftpcdEdxPars"),
   				 (St_ftpcDimensions *)ftpcGeometry("ftpcDimensions"), 
   				 (St_ftpcPadrowZ *)ftpcGeometry("ftpcPadrowZ"));
+cout<<"InitRun StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() = "<<StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()<<endl;
 
   if (StFtpcTrackingParams::Instance()->GetReturnCode() > 0) {
     LOG_ERROR << " FATAL error in StFtpcTrackingParams return code = "<< StFtpcTrackingParams::Instance()->GetReturnCode() <<endm;
@@ -458,10 +463,22 @@ Int_t StFtpcTrackMaker::Init()
 {
   // Initialisation.
 
+  // m_Mode is used to pass bfc option information to the Maker
+  //        m_Mode            bfc option(s)      Comments
+  //          0                                  use TwoCycle tracking
+  //          1               flaser             use Laser Tracking - ALWAYS used in combination with the "fdbg" bfc option
+  //          2               fdbg               add tracking information to the special Ftpc root file created in StFtpcClusterMaker
+  //                                             for analysis in StFtpcCalibMaker
+  //          3               fdbg flaser        both "fdbg" and "flaser" bfc options selected
+  //          4               fgain              create and fill the special set of Ftpc track histograms used to evaluate
+  //                                             the Ftpc gain scan runs
+
+  LOG_INFO << "StFtpcTrackMaker entered with m_Mode = "<< m_Mode <<endm;
+
   // Create Histograms
 
-if (m_Mode >= 2) {
-   LOG_INFO << "StFtpcTrackMaker writing to DEBUGFILE" << endm;
+if (m_Mode == 2 || m_Mode == 3) {
+  LOG_INFO << "StFtpcTrackMaker writing to DEBUGFILE (fdbg option selected)" << endm;
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
 }
 
@@ -479,6 +496,27 @@ if (m_Mode >= 2) {
 //			      100, -10., 10.);
 
   if (IAttr(".histos")) {
+     if (m_Mode == 4) {
+        m_pointFW = new TH1F("NPntFW","N points on trk,ftpc west", 8, 4.,12.);
+        m_pointFE = new TH1F("NPntFE","N points on trk,ftpc east", 8, 4.,12.);
+        m_ratiomFW = new TH1F("RnmFW","ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
+        m_ratiomFE = new TH1F("RnmFE","ratio Nfit/max pnt, ftpc east", 55, 0., 1.1);
+        m_planefF = new TH1F("PlanefF","plane of first hit on trk, ftpc",20,0.5,20.5);
+        m_psiFW   = new TH1F("PsiFW","psi, ftpc west", 90, 0.,360.);
+        m_psiFE   = new TH1F("PsiFE","psi, ftpc east", 90, 0.,360.);
+        m_xf_yfFW = new TH2F("XfYfFW","Y vs X of first hit on trk, ftpcW", 70,-35.,35.,70,-35.,35.);
+        m_xf_yfFE = new TH2F("XfYfFE","Y vs X of first hit on trk, ftpcE", 70,-35.,35.,70,-35.,35.);
+        m_good_trk = new TH2F("NtrkGoodF","total number tracks found ftpcE vs. ftpcW",150,0.,1500.,150,0.,1500.);
+        m_good_trk->SetXTitle("FTPC East");
+        m_good_trk->SetYTitle("FTPC West");
+        m_pnt_padtimeFW    = new TH2F("PointPadTimeFtpcW","point: #pads vs #timebins of hits, ftpcW",12,0.5,12.5,10,0.5,10.5);
+        m_pnt_padtimeFW->SetXTitle("#timebins");
+        m_pnt_padtimeFW->SetYTitle("#pads");
+        m_pnt_padtimeFE    = new TH2F("PointPadTimeFtpcE","point: #pads vs #timebins of hits, ftpcE",12,0.5,12.5,10,0.5,10.5);
+        m_pnt_padtimeFE->SetXTitle("#timebins");
+        m_pnt_padtimeFE->SetYTitle("#pads");
+      }
+//   m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 10, 0.5, 10.5, 100, 0.0, 20.);
 
      m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 150, 0.5, 150.5);
      m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 150, 0.5, 150.5);
@@ -676,15 +714,15 @@ Int_t StFtpcTrackMaker::Make()
     tracker.TrackingInfo();
   }
 
-if (m_Mode >= 2) {
+if (m_Mode == 2 || m_Mode == 3) {
   Double_t vertexPos[3];
-  if (m_Mode%2 == 0) {
+  if (m_Mode == 2) {
      vertexPos[0] = vertex.GetX();
      vertexPos[1] = vertex.GetY();
      vertexPos[2] = vertex.GetZ();
      LOG_INFO<<"TWOCYCLETRACKING: vertexPos[0] = "<<vertexPos[0]<<" vertexPos[1] = "<<vertexPos[1]<<" vertexPos[2] = "<<vertexPos[2]<<endm;
   }
-  if (m_Mode%2 == 1) {
+  if (m_Mode == 3) {
      vertexPos[0] = 0.;
      vertexPos[1] = 0.;
      vertexPos[2] = 0.;
@@ -795,10 +833,41 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
   } 
 
   if (IAttr(".histos")) {
+     Int_t nTrkW = 0;
+     Int_t nTrkE = 0;
      for (Int_t t_counter = 0; t_counter < tracker->GetTracks()->GetEntriesFast(); t_counter++) {
     
        StFtpcTrack *track = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
        TObjArray   *fhits = (TObjArray*) track->GetHits();
+    
+       StFtpcPoint* firstPoint =  (StFtpcPoint*)track->GetHits()->First();
+       StFtpcPoint* lastPoint =  (StFtpcPoint*)track->GetHits()->Last();
+       Int_t iftpc = (firstPoint->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and1 for detId == 4
+       // StFtpcTrack lastPoint => StEvent firstPoint !!!
+       if (m_Mode == 4) m_planefF->Fill(lastPoint->GetPadRow());
+
+       //  momentum angle at start
+       Float_t psi = TMath::ATan2(track->GetPy(), track->GetPx())/degree;
+       if (psi<0) psi+=360;
+
+       if ( m_Mode == 4 ) {
+          if (iftpc==1) {
+              nTrkW++;
+              m_pointFW->Fill(track->GetNumberOfPoints());
+              m_ratiomFW->Fill(Float_t(track->GetNumberOfPoints())/Float_t(track->GetNMax()));
+              m_xf_yfFW->Fill(firstPoint->GetX(),firstPoint->GetY());
+              m_psiFW->Fill(psi);
+           }
+           if (iftpc==0) {
+               nTrkE++;
+               m_pointFE->Fill(track->GetNumberOfPoints());
+               m_ratiomFE->Fill(Float_t(track->GetNumberOfPoints())/Float_t(track->GetNMax()));
+               m_xf_yfFE->Fill(firstPoint->GetX(),firstPoint->GetY());
+               m_psiFE->Fill(psi);
+           }
+        }   
+
+//      m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
     
        for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
       
@@ -813,7 +882,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
          }
       
          if (mhit->GetPadRow() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
-	
+           if ( m_Mode == 4) m_pnt_padtimeFW->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
 	   m_maxadc_West->Fill(mhit->GetMaxADC());
 	   m_charge_West->Fill(mhit->GetCharge());
 	
@@ -824,7 +893,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
          }
 
          else if (mhit->GetPadRow() > StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
-	
+           if ( m_Mode == 4)  m_pnt_padtimeFE->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
 	   m_maxadc_East->Fill(mhit->GetMaxADC());
 	   m_charge_East->Fill(mhit->GetCharge());
 	
@@ -835,6 +904,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
          }
        } //end for h_counter
      } //end for t_counter
+     if ( m_Mode == 4 ) m_good_trk->Fill(nTrkE,nTrkW);
   } //end IAttr(".histos")
 }
 
@@ -922,7 +992,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.86 2007/12/12 12:49:34 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.87 2008/01/07 14:45:06 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
