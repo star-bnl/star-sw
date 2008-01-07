@@ -85,6 +85,9 @@ if ( -e .sl44_gcc346) then
 	echo "Backward compatibility assumed between SL405 -> SL404"
     	/bin/ln -s .sl44_gcc346 .sl45_gcc346
     endif
+    if ( ! -e .rh4_gcc346) then
+    	/bin/ln -s .sl44_gcc346 .rh4_gcc346
+    endif
 endif
 
 if ( -e .sl305_gcc323) then
