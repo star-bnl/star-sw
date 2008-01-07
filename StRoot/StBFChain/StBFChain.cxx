@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.528 2007/12/28 13:40:48 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.529 2008/01/07 21:12:11 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -293,7 +293,7 @@ Int_t StBFChain::Instantiate()
     if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
     else                          mk = New(fBFC[i].Maker);
     if (! mk) {
-      LOG_FATAL  << Form("StBFChain::Instantiate() oproblem with instatiation %s",fBFC[i].Maker) << endm;
+      LOG_FATAL  << Form("StBFChain::Instantiate() problem with instatiation %s",fBFC[i].Maker) << endm;
       assert(mk);
     }
     strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
@@ -1180,8 +1180,8 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCPassive","Default,TGiant3");
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
-      if (!( GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed") || GetOption("Kalman"))) {// Not Active geant
-	SetOption("-geant","Default,-fzin,-ntin,-gstar,TGiant3");
+      if (!( GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed"))) {// Not Active geant
+	SetOption("geant","Default,-fzin,-ntin,-gstar,TGiant3");
 	SetOption("MagF","Default,-fzin,-ntin,-gstar,TGiant3");
       }
     } else {                                  // root
