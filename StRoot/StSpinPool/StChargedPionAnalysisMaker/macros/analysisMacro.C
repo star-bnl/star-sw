@@ -9,6 +9,7 @@ void analysisMacro(const char* dir="/home/kocolosk/dv34/analysis/run6/test",
     gSystem->Load("StarMagField.so");
     gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
@@ -18,14 +19,14 @@ void analysisMacro(const char* dir="/home/kocolosk/dv34/analysis/run6/test",
     gSystem->Load("StEpcMaker");
     gSystem->Load("StEmcSimulatorMaker");
     gSystem->Load("StDbBroker");
-    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("St_db_Maker");
     gSystem->Load("libgeometry_Tables");
     gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StEEmcUtil");
     gSystem->Load("StEmcTriggerMaker");
     gSystem->Load("StSpinDbMaker");
-        
+    gSystem->Load("StMCAsymMaker");
+    
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
     gSystem->Load("StChargedPionAnalysisMaker");
