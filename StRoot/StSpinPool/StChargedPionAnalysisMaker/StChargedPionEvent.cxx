@@ -5,7 +5,6 @@
 #include "StChargedPionVertex.h"
 #include "StChargedPionTrack.h"
 #include "StChargedPionJet.h"
-//#include "StChargedPionJetParticle.h"
 
 ClassImp(StChargedPionEvent)
 
@@ -19,21 +18,17 @@ StChargedPionEvent::StChargedPionEvent() : TObject(), mSpinQA(0), mTriggerBits(0
     mVertices = new TClonesArray("StChargedPionVertex", 20);
     mTracks = new TClonesArray("StChargedPionTrack", 50);
     mJets = new TClonesArray("StChargedPionJet", 50);
-    //mJetParticles = new TClonesArray("StChargedPionJetParticles", 200);
     
     StChargedPionEvent::Class()->IgnoreTObjectStreamer();
     StChargedPionVertex::Class()->IgnoreTObjectStreamer();
     StChargedPionTrack::Class()->IgnoreTObjectStreamer();
     StChargedPionJet::Class()->IgnoreTObjectStreamer();
-    
-    //StChargedPionJetParticle::Class()->IgnoreTObjectStreamer();
 }
 
 StChargedPionEvent::~StChargedPionEvent() { 
     if(mVertices) delete mVertices;
     if(mTracks) delete mTracks;
     if(mJets) delete mJets;
-    //if(mJetParticles) delete mJetParticles; 
 }
 
 StChargedPionEvent::StChargedPionEvent(const StChargedPionEvent & e) : TObject(e),
@@ -58,15 +53,16 @@ StChargedPionEvent& StChargedPionEvent::operator=(const StChargedPionEvent & e) 
     if (this == &e) return *this;
     
     this->Clear();
-    mRunId          = e.mRunId;
-    mEventId        = e.mEventId;
-    mBx7            = e.mBx7;
-    mBbcTimeBin     = e.mBbcTimeBin;
-    mSpinBit        = e.mSpinBit;
-    mSpinQA         = e.mSpinQA;
-    mTriggerLookup  = e.mTriggerLookup;
-    mTriggerBits    = e.mTriggerBits;
-    mSimuTriggerBits= e.mSimuTriggerBits;
+    mRunId              = e.mRunId;
+    mEventId            = e.mEventId;
+    mBx7                = e.mBx7;
+    mBbcTimeBin         = e.mBbcTimeBin;
+    mSpinBit            = e.mSpinBit;
+    mSpinQA             = e.mSpinQA;
+    mTriggerLookup      = e.mTriggerLookup;
+    mTriggerPrescales   = e.mTriggerPrescales;
+    mTriggerBits        = e.mTriggerBits;
+    mSimuTriggerBits    = e.mSimuTriggerBits;
     
     for(unsigned i=0; i<e.nVertices(); ++i) {
         addVertex(e.vertex(i));
@@ -97,7 +93,10 @@ void StChargedPionEvent::Clear(Option_t* o) {
     // use ::Delete here so ROOT doesn't hold onto memory allocated for jet particles
     mJets->Delete();
     
-    //mJetParticles->Clear();
+    mTriggerPrescales.clear();
+    mHighTowers.clear();
+    mTriggerPatches.clear();
+    mJetPatches.clear();
 }
 
 bool StChargedPionEvent::isSpinValid() const { 
@@ -114,6 +113,30 @@ bool StChargedPionEvent::isSimuTrigger(unsigned int trigId) const {
     map<unsigned int, unsigned int>::const_iterator it = mTriggerLookup.find(trigId);
     if(it==mTriggerLookup.end()) return false;
     return mSimuTriggerBits & it->second;
+}
+
+float StChargedPionEvent::prescale(unsigned int trigId) const { 
+    map<unsigned int, float>::const_iterator it = mTriggerPrescales.find(trigId);
+    if(it==mTriggerPrescales.end()) return -1.0;
+    return it->second;
+}
+
+int StChargedPionEvent::highTowerAdc(short towerId) const {
+    map<short, int>::const_iterator it = mHighTowers.find(towerId);
+    if(it==mHighTowers.end()) return -1;
+    return it->second;
+}
+
+int StChargedPionEvent::triggerPatchAdc(short patchId) const {
+    map<short, int>::const_iterator it = mTriggerPatches.find(patchId);
+    if(it==mTriggerPatches.end()) return -1;
+    return it->second;
+}
+
+int StChargedPionEvent::jetPatchAdc(short patchId) const {
+    map<short, int>::const_iterator it = mJetPatches.find(patchId);
+    if(it==mJetPatches.end()) return -1;
+    return it->second;
 }
 
 StChargedPionVertex* StChargedPionEvent::vertex(int i) {
@@ -139,14 +162,6 @@ StChargedPionJet* StChargedPionEvent::jet(int i) {
 const StChargedPionJet* StChargedPionEvent::jet(int i) const {
     return static_cast<StChargedPionJet*>(mJets->At(i));
 }
-
-//StChargedPionJetParticle* StChargedPionEvent::jetParticle(int i) {
-//    return static_cast<StChargedPionJetParticle*>(mJetParticles->At(i));
-//}
-//
-//const StChargedPionJetParticle* StChargedPionEvent::jetParticle(int i) const {
-//    return static_cast<StChargedPionJetParticle*>(mJetParticles->At(i));
-//}
 
 void StChargedPionEvent::addTrigger(unsigned int trigId) {
     map<unsigned int, unsigned int>::const_iterator it = mTriggerLookup.find(trigId);
@@ -174,6 +189,3 @@ void StChargedPionEvent::addJet(const StChargedPionJet* j) {
     new ( (*mJets)[mJets->GetEntriesFast()] ) StChargedPionJet(*j);
 }
 
-//void StChargedPionEvent::addJetParticle(StChargedPionJetParticle* j) {
-//    new ( (*mJetParticles)[mJetParticles->GetEntriesFast()] ) StChargedPionJetParticle(*j);
-//}

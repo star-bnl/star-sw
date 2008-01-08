@@ -1,6 +1,9 @@
 #ifndef ST_CHARGED_PION_EVENT_HH
 #define ST_CHARGED_PION_EVENT_HH
 
+#include <string>
+using std::string;
+
 #include <vector>
 using std::vector;
 
@@ -13,7 +16,6 @@ using std::map;
 class StChargedPionVertex;
 class StChargedPionTrack;
 class StChargedPionJet;
-//class StChargedPionJetParticle;
 
 class StChargedPionEvent : public TObject
 {
@@ -31,6 +33,7 @@ public:
     unsigned int eventId() const;
     unsigned int bx7() const;
     unsigned int bbcTimeBin() const;
+    const string& muDstName() const;
     
     unsigned int spinBit() const;
     bool isSpinValid() const;
@@ -42,6 +45,11 @@ public:
     
     bool isTrigger(unsigned int trigId) const;
     bool isSimuTrigger(unsigned int trigId) const;
+    float prescale(unsigned int trigId) const;
+    
+    int highTowerAdc(short towerId) const;
+    int triggerPatchAdc(short patchId) const;
+    int jetPatchAdc(short patchId) const;
     
     unsigned int                    nVertices() const;
     TClonesArray*                   vertices();
@@ -54,10 +62,6 @@ public:
     unsigned int                    nJets() const;
     TClonesArray*                   jets();
     const TClonesArray*             jets() const;
-    
-    //unsigned int                    nJetParticles();
-    //TClonesArray*                   jetParticles();
-    //const TClonesArray*             jetParticles() const;
                                     
     StChargedPionVertex*            vertex(int i);
     const StChargedPionVertex*      vertex(int i) const;
@@ -67,15 +71,13 @@ public:
                                     
     StChargedPionJet*               jet(int i);
     const StChargedPionJet*         jet(int i) const;
-                                    
-    //StChargedPionJetParticle*       jetParticle(int i);
-    //const StChargedPionJetParticle* jetParticle(int i) const;
     
     
     void setRunId(unsigned int);
     void setEventId(unsigned int);
     void setBx7(unsigned char);
     void setBbcTimeBin(unsigned short);
+    void setMuDstName(const char*);
     
     void setSpinBit(unsigned char);
     void setPolValid(bool);
@@ -86,11 +88,15 @@ public:
     
     void addTrigger(unsigned int);
     void addSimuTrigger(unsigned int);
+    void setPrescale(unsigned int trigId, float prescale);
+    
+    void addHighTower(short towerId, int ADC);
+    void addTriggerPatch(short patchId, int ADC);
+    void addJetPatch(short patchId, int ADC);
     
     void addVertex(const StChargedPionVertex*);
     void addTrack(const StChargedPionTrack*);
     void addJet(const StChargedPionJet*);
-    //void addJetParticle(StChargedPionJetParticle*);
     
 private:
     UInt_t mRunId;
@@ -100,16 +106,20 @@ private:
     UChar_t mSpinBit;
     UChar_t mSpinQA;
     
-    //vector<UInt_t> mTriggers;
-    //vector<UInt_t> mSimuTriggers;
+    string mMuDstName;
+    
     map<unsigned int, unsigned int> mTriggerLookup; //!
+    map<unsigned int, float> mTriggerPrescales;
     UInt_t mTriggerBits;
     UInt_t mSimuTriggerBits;
+    
+    map<short, int> mHighTowers;
+    map<short, int> mTriggerPatches;
+    map<short, int> mJetPatches;
     
     TClonesArray *mVertices;
     TClonesArray *mTracks;
     TClonesArray *mJets;
-    //TClonesArray *mJetParticles;
     
     enum {kIsPolValid=0x01, kIsPolLong=0x02, kIsPolTrans=0x04, kIsBxingMasked=0x8, kNullOffset=0x10}; //!
     
@@ -120,6 +130,7 @@ inline unsigned int StChargedPionEvent::runId() const { return mRunId; }
 inline unsigned int StChargedPionEvent::eventId() const { return mEventId; }
 inline unsigned int StChargedPionEvent::bx7() const { return mBx7; }
 inline unsigned int StChargedPionEvent::bbcTimeBin() const { return mBbcTimeBin; }
+inline const string& StChargedPionEvent::muDstName() const { return mMuDstName; }
 
 inline unsigned int StChargedPionEvent::spinBit() const { return mSpinBit; }
 inline bool StChargedPionEvent::isPolValid() const { return mSpinQA & kIsPolValid; }
@@ -140,14 +151,11 @@ inline unsigned int StChargedPionEvent::nJets() const { return mJets->GetEntries
 inline TClonesArray* StChargedPionEvent::jets() { return mJets; }
 inline const TClonesArray* StChargedPionEvent::jets() const { return mJets; }
 
-//inline unsigned int StChargedPionEvent::nJetParticles() { return mJetParticles->GetEntriesFast(); }
-//inline TClonesArray* StChargedPionEvent::jetParticles() { return mJetParticles; }
-//inline const TClonesArray* StChargedPionEvent::jetParticles() const { return mJetParticles; }
-
 inline void StChargedPionEvent::setRunId(unsigned int a) { mRunId = a; }
 inline void StChargedPionEvent::setEventId(unsigned int a) { mEventId = a; }
 inline void StChargedPionEvent::setBx7(unsigned char a) { mBx7 = a; }
 inline void StChargedPionEvent::setBbcTimeBin(unsigned short a) { mBbcTimeBin = a; }
+inline void StChargedPionEvent::setMuDstName(const char* a) { mMuDstName = a; }
 
 inline void StChargedPionEvent::setSpinBit(unsigned char a) { mSpinBit = a; }
 inline void StChargedPionEvent::setPolValid(bool a) { a ? mSpinQA |= kIsPolValid : mSpinQA &= ~kIsPolValid; }
@@ -155,5 +163,11 @@ inline void StChargedPionEvent::setPolLong(bool a) { a ? mSpinQA |= kIsPolLong :
 inline void StChargedPionEvent::setPolTrans(bool a) { a ? mSpinQA |= kIsPolTrans : mSpinQA &= ~kIsPolTrans; }
 inline void StChargedPionEvent::setBxingMasked(bool a) { a ? mSpinQA |= kIsBxingMasked : mSpinQA &= ~kIsBxingMasked; }
 inline void StChargedPionEvent::setBxingOffset(int a) { (a==0) ? mSpinQA |= kNullOffset : mSpinQA &= ~kNullOffset; }
+
+inline void StChargedPionEvent::setPrescale(unsigned int trigId, float prescale) { mTriggerPrescales[trigId] = prescale; }
+
+inline void StChargedPionEvent::addHighTower(short towerId, int ADC) { mHighTowers[towerId] = ADC; }
+inline void StChargedPionEvent::addTriggerPatch(short patchId, int ADC) { mTriggerPatches[patchId] = ADC; }
+inline void StChargedPionEvent::addJetPatch(short patchId, int ADC) { mJetPatches[patchId] = ADC; }
 
 #endif

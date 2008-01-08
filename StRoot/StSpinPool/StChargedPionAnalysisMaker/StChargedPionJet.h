@@ -17,16 +17,19 @@ public:
     
     void Clear(Option_t* = "");
     
-    int charge();
-    unsigned int nTpcTracks();
-    unsigned int nBarrelTowers();
-    unsigned int nEndcapTowers();
+    int charge() const;
+    unsigned int nTpcTracks() const;
+    unsigned int nBarrelTowers() const;
+    unsigned int nEndcapTowers() const;
     
-    double tpcEtSum();
-    double barrelEtSum();
-    double endcapEtSum();
+    double tpcEtSum() const;
+    double barrelEtSum() const;
+    double endcapEtSum() const;
     
-    double vertexZ();
+    double vertexZ() const;
+    
+    float detectorEta() const;
+    float detectorEta(float vz, float r=231.72) const;
     
     vector<StChargedPionJetParticle>&       particles();
     const vector<StChargedPionJetParticle>& particles() const;
@@ -57,24 +60,19 @@ private:
     // something for geom triggers?
     
     // MUST keep these guys slim
-    //TClonesArray* mParticles;
     vector<StChargedPionJetParticle> mParticles;
     
     ClassDef(StChargedPionJet, 1)
 };
 
-inline int StChargedPionJet::charge() { return mCharge; }
-inline unsigned int StChargedPionJet::nTpcTracks() { return mTpcCount; }
-inline unsigned int StChargedPionJet::nBarrelTowers() { return mBtowCount; }
-inline unsigned int StChargedPionJet::nEndcapTowers() { return mEtowCount; }
-inline double StChargedPionJet::tpcEtSum() { return mTpcEtSum; }
-inline double StChargedPionJet::barrelEtSum() { return mBtowEtSum; }
-inline double StChargedPionJet::endcapEtSum() { return mEtowEtSum; }
-inline double StChargedPionJet::vertexZ() { return mVertexZ; }
-//inline unsigned int StChargedPionJet::nParticles() { return mParticles->GetEntriesFast(); }
-//inline TClonesArray* StChargedPionJet::particles() { return mParticles; }
-//inline const TClonesArray* StChargedPionJet::particles() const { return mParticles; }
-//inline unsigned int StChargedPionJet::nParticles() { return mParticles.size(); }
+inline int StChargedPionJet::charge() const { return mCharge; }
+inline unsigned int StChargedPionJet::nTpcTracks() const { return mTpcCount; }
+inline unsigned int StChargedPionJet::nBarrelTowers() const { return mBtowCount; }
+inline unsigned int StChargedPionJet::nEndcapTowers() const { return mEtowCount; }
+inline double StChargedPionJet::tpcEtSum() const { return mTpcEtSum; }
+inline double StChargedPionJet::barrelEtSum() const { return mBtowEtSum; }
+inline double StChargedPionJet::endcapEtSum() const { return mEtowEtSum; }
+inline double StChargedPionJet::vertexZ() const { return mVertexZ; }
 inline vector<StChargedPionJetParticle>& StChargedPionJet::particles() { return mParticles; }
 inline const vector<StChargedPionJetParticle>& StChargedPionJet::particles() const { return mParticles; }
 
