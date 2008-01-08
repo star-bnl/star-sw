@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.h,v 1.5 2007/12/31 19:53:04 kocolosk Exp $
+* $Id: StChargedPionMaker.h,v 1.6 2008/01/08 17:33:15 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,12 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.h,v $
+* Revision 1.6  2008/01/08 17:33:15  kocolosk
+* StChargedPionMaker fills a full StChargedPionEvent on its own now
+* Added trigger prescales and extra simulator info to Event
+* Added detectorEta() definition to Jet
+* Removed unused Header class
+*
 * Revision 1.5  2007/12/31 19:53:04  kocolosk
 * new tree structure separate from StJetSkimEvent
 *
@@ -38,8 +44,12 @@ class TFile;
 class TTree;
 class TClonesArray;
 class TString;
+class TUnixSystem;
 
 class StMuDstMaker;
+class StSpinDbMaker;
+class StEmcTriggerMaker;
+
 class StMuTrack;
 class StJetSkimEvent;
 class StJet;
@@ -56,6 +66,7 @@ public:
     
     virtual void Clear(const char *option="");
     virtual Int_t Init();
+    virtual Int_t InitRun(int runnumber);
     virtual Int_t Make();
     virtual Int_t Finish();
     
@@ -64,25 +75,27 @@ public:
     static void translateJets(StJets* jets, StChargedPionEvent *ev);
     
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.5 2007/12/31 19:53:04 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.6 2008/01/08 17:33:15 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 private:
     TFile *mFile;               //!
     TTree *mTree;               //!
+    StChargedPionEvent *mEvent; //!
+    
+    TFile *mJetFile;            //!
+    TTree *mJetTree;            //!
+    StJets *mJets;              //!
     
     TH1 *mBadTracks;            //!
     enum badTrackTypes {kFlagged=1, kBadHelix, kBadOuterHelix, kMissingGlobal};
     
-    Int_t mRun;                 //!
-    Int_t mEvent;               //!
-    Int_t mNTracks;             //!
-    TClonesArray *mPrimaries;   //!
-    TClonesArray *mGlobals;     //!
-    
     TString currentFile;        //!
+    TUnixSystem *theSystem;      //!
 
     //pointers to makers - get them in Init()
-    StMuDstMaker* muDstMaker;   //!
+    StMuDstMaker *muDstMaker;   //!
+    StSpinDbMaker *spDbMaker;   //!
+    StEmcTriggerMaker *emcTrgMaker; //!
     
     //translate StMuTrack into StChargedPionTrack so we can read it anywhere
     StChargedPionTrack & chargedPionTrack(StMuTrack *track);
