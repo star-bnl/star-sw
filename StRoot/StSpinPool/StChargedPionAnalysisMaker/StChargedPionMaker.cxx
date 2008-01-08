@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.10 2008/01/08 17:33:15 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.11 2008/01/08 19:31:12 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.11  2008/01/08 19:31:12  kocolosk
+* fix a leak
+*
 * Revision 1.10  2008/01/08 17:33:15  kocolosk
 * StChargedPionMaker fills a full StChargedPionEvent on its own now
 * Added trigger prescales and extra simulator info to Event
@@ -385,7 +388,9 @@ void StChargedPionMaker::translateEvent(StJetSkimEvent *skimEvent, StChargedPion
     ev->setEventId(skimEvent->eventId());
     ev->setBx7(skimEvent->bx7());
     ev->setBbcTimeBin(skimEvent->bbcTimeBin());
-    ev->setMuDstName( basename(skimEvent->mudstFileName().GetString().Data()) );
+    char *baseName = strrchr(skimEvent->mudstFileName().GetString().Data(), '/');
+    baseName = baseName + 1;
+    ev->setMuDstName( baseName );
     
     ev->setSpinBit(skimEvent->spin4usingBx48());
     ev->setPolValid(skimEvent->isValid());
@@ -404,20 +409,24 @@ void StChargedPionMaker::translateEvent(StJetSkimEvent *skimEvent, StChargedPion
         if(t->didFire() > 0) ev->addTrigger(t->trigId());
         if(t->shouldFire() > 0) ev->addSimuTrigger(t->trigId());
         
-        map<int,int> m(t->towersAboveThreshold(0));
-        for(map<int,int>::const_iterator it=m.begin(); it!=m.end(); it++) {
+        map<int,int> *m;
+        m = &(t->towersAboveThreshold(0));
+        for(map<int,int>::const_iterator it=m->begin(); it!=m->end(); it++) {
             ev->addHighTower(it->first, it->second);
         }
+        delete m;
         
-        m = t->triggerPatchesAboveThreshold(0);
-        for(map<int,int>::const_iterator it=m.begin(); it!=m.end(); it++) {
+        m = &(t->triggerPatchesAboveThreshold(0));
+        for(map<int,int>::const_iterator it=m->begin(); it!=m->end(); it++) {
             ev->addTriggerPatch(it->first, it->second);
         }
+        delete m;
         
-        m = t->jetPatchesAboveThreshold(0);
-        for(map<int,int>::const_iterator it=m.begin(); it!=m.end(); it++) {
+        m = &(t->jetPatchesAboveThreshold(0));
+        for(map<int,int>::const_iterator it=m->begin(); it!=m->end(); it++) {
             ev->addJetPatch(it->first, it->second);
         }
+        delete m;
     }
     
     if(skimEvent->eBbc() > 0 && skimEvent->wBbc() > 0) {
