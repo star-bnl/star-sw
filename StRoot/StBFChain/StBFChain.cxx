@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.529 2008/01/07 21:12:11 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.530 2008/01/08 20:08:50 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -728,6 +728,10 @@ Int_t StBFChain::Instantiate()
 	GetOption("fdbg"))                     mk->SetMode(mk->GetMode()+2);
     if ( maker == "StFtpcTrackMaker"       &&
 	 GetOption("flaser"))                  mk->SetMode(mk->GetMode()+1);
+    if ((maker == "StFtpcClusterMaker" ||
+	 maker == "StFtpcTrackMaker"    )  &&
+	GetOption("fgain"))                    mk->SetMode(mk->GetMode()+4);
+ 
     // FTPC
 
     // PMD
