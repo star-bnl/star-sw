@@ -12,14 +12,14 @@ crossing angle, and also Gaussian sigma vs those two variables.
 Then, it fits the width histograms to the functional form expected (see
 e.g. Blum and Rolandi)
 
-sigma^2 = sigma_int^2 + 
+sigma^2 = sigma_int^2 +
           sigma_diff^2*ddrift/cos^2(angle) +
           sigma_cross^2*tan^2(angle)
 
 where:
 sigma_int is the "intrinsic" resolution
 sigma_diff is the diffusion constant (transverse for local-x, longitudinal for z)
-sigma_cross quantifies the effect finite crossing-angle and wire coupling 
+sigma_cross quantifies the effect finite crossing-angle and wire coupling
 
 so, those three numbers should characterize the residuals.
 
