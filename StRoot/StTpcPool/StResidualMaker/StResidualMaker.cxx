@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StResidualMaker.cxx,v 1.5 2006/08/15 21:42:15 jeromel Exp $
+ * $Id: StResidualMaker.cxx,v 1.6 2008/01/09 23:56:07 jeromel Exp $
  *
  * Author: malisa
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StResidualMaker.cxx,v $
+ * Revision 1.6  2008/01/09 23:56:07  jeromel
+ * (ignore)
+ *
  * Revision 1.5  2006/08/15 21:42:15  jeromel
  * Fix rhic -> rhic.bnl.gov
  *
@@ -122,19 +125,19 @@ Int_t StResidualMaker::Init()
   // padrow radii stolen from Pavel Nevski's file
   // /afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/tpcegeo/tpcegeo.g
   // note numbering starts at ONE ("waste" zeroth position)
-  double rPadRows[46] = {0.0, 60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8, 
+  double rPadRows[46] = {0.0, 60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8,
 			   104.0,109.2,114.4,119.6,                     // done inner sector
-			   127.195, 129.195, 131.195, 133.195, 135.195, 
-			   137.195, 139.195, 141.195, 143.195, 145.195, 
-			   147.195, 149.195, 151.195, 153.195, 155.195, 
-			   157.195, 159.195, 161.195, 163.195, 165.195, 
-			   167.195, 169.195, 171.195, 173.195, 175.195, 
-			   177.195, 179.195, 181.195, 183.195, 185.195, 
+			   127.195, 129.195, 131.195, 133.195, 135.195,
+			   137.195, 139.195, 141.195, 143.195, 145.195,
+			   147.195, 149.195, 151.195, 153.195, 155.195,
+			   157.195, 159.195, 161.195, 163.195, 165.195,
+			   167.195, 169.195, 171.195, 173.195, 175.195,
+			   177.195, 179.195, 181.195, 183.195, 185.195,
 			   187.195, 189.195};
 
   unsigned int isector2;
   for (unsigned int ipr=1; ipr < 46; ipr++){
-    StThreeVectorD RowCenter(0.0,rPadRows[ipr],0.0); 
+    StThreeVectorD RowCenter(0.0,rPadRows[ipr],0.0);
     for (unsigned int isector=1; isector < 13; isector++){
       RowCenter.rotateZ(-M_PI/6.0);                // note minus sign
       mPadRowPlanes[isector][ipr] = RowCenter;
@@ -182,9 +185,9 @@ Int_t StResidualMaker::Finish()
 //=====================================================================
 Int_t StResidualMaker::Make()
 {
- 
+
   mEventCounter++;
-    
+
   StEvent* event;
   event = (StEvent *) GetInputDS("StEvent");
   if (!event) return kStOK;        // if no event, we're done
@@ -210,7 +213,7 @@ Int_t StResidualMaker::Make()
   //  See if this event survives the event filter.
   //  If not we stop here right away.
   //
-  if (!accept(event)) return kStOK;   
+  if (!accept(event)) return kStOK;
 
   cout << "Event accepted \n";
 
@@ -230,7 +233,7 @@ Int_t StResidualMaker::Make()
     track = nodes[j]->track(primary);
     if (track){
       nPrimaryTracks++;
-      if (accept(track)) 
+      if (accept(track))
 	{
 	  fill3Dhistos(track,mPrimaryHistos);
 	  nPrimaryAccepted++;
@@ -246,7 +249,7 @@ Int_t StResidualMaker::Make()
 //=====================================================================
 void StResidualMaker::fill3Dhistos(StTrack* track, TH1** histos)
 {
-  /* 
+  /*
    * job here is to loop over all hits on the track, find the x- and z-residuals,
    * and fill the appropriate histograms.  Note that "x" means ALONG THE PADROW
    */
@@ -264,7 +267,7 @@ void StResidualMaker::fill3Dhistos(StTrack* track, TH1** histos)
 
   StPtrVecHit TpcHits = track->detectorInfo()->hits(kTpcId);
   StTpcHit* tpcHit;
-  
+
   float drift;
   float lambda = (track->geometry()->dipAngle())*57.29578;  // to have it in degrees
   float alpha;
@@ -326,7 +329,7 @@ bool StResidualMaker::accept(StEvent* event)
     //  This is a kind of very simple event filter.
     //  We select only events with a valid event vertex,
     //  i.e. event->primaryVertex() returns a non-zero pointer.
-    // 
+    //
 
 
 
@@ -358,7 +361,7 @@ void StResidualMaker::ShowProjections(char PrimaryOrGlobal, char InnerOrOuter, c
   char CtempTitle[100];
 
   TH1** histos;
- 
+
   switch (PrimaryOrGlobal) {
   case 'p':
   case 'P':
@@ -488,7 +491,7 @@ TCanvas* StResidualMaker::fitRMShisto(TH1* rmshisto)
   fitfunc->SetParameter(2,0.005);
 
   h2->Fit("BlumRolandi","NW");
-  
+
   TCanvas* cv = new TCanvas("FitCanv","Fit_canv",200,10,600,600);
   cv->Divide(2,2);
   cv->cd(1);
@@ -553,7 +556,7 @@ TCanvas* StResidualMaker::fitRMShisto(TH1* rmshisto)
     YprojData->Draw("P,SAME");
     YprojFit->Draw("SAME");
   }
-  
+
   // now put some informational stuff in 4th panel
   cv->cd(4);
   gPad->Range(0.0,0.0,20.0,20.0);
@@ -633,7 +636,7 @@ void StResidualMaker::makeRMShisto(TH1* threeDhisto, TH1* twoDhisto, TH1* GaussS
 	NotReallyAnUncertainty = 10000000000000000000000.0;
       }
       // this little "two-step" below is such bullshit - why can't root handle this internally?
-      bin = h2->GetBin(iD,iA);	
+      bin = h2->GetBin(iD,iA);
       h2->SetBinContent(bin,RMS);
       //      h2->SetBinError(bin,NotReallyAnUncertainty);
       SigHist->SetBinContent(bin,Sigma);
@@ -671,7 +674,7 @@ void StResidualMaker::writeHistoFile()
   TH3D* h3d;
   TH2D* h2d;
   TH1D* h1d;
-    
+
 
 
   TFile* file = new TFile(FileName);
