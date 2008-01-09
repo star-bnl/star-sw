@@ -19,6 +19,8 @@ files. The tasks performed by this maker are:
 #include "tables/St_controlADCtoE_Table.h"
 #include "StBemcData.h"
 #include "StEmcRawMaker/defines.h"
+#include "StEvent/StEnumerations.h"
+
 
 class StEmcCollection;
 class StEmcDecoder;
@@ -51,6 +53,20 @@ public:
     virtual Int_t             Make(); ///< Process each event
     virtual Int_t             Finish(); ///< Finish function.
 
+    /// require raw hits to have status == 1 in order to be saved in the StEmcCollection.
+    /// Default is true.    
+    void setCheckStatus(StDetectorId det, int flag) { getControlTable()->CheckStatus[det-kBarrelEmcTowerId] = flag; }
+    
+    /// only save hits above pedestal.  Default is false for BTOW, true for others.
+    /// set this flag to 2 if you want to save hits from bad capacitors in BSMD, BPRS
+    void setDoZeroSuppression(StDetectorId det, int flag) { getControlTable()->DeductPedestal[det-kBarrelEmcTowerId] = flag; }
+    
+    /// suppress hits if (adc-ped) < nRMS*pedRMS.  Default is 1.5 for BSMD, BPRS.
+    void setPedestalCut(StDetectorId det, float nRMS) { getControlTable()->CutOff[det-kBarrelEmcTowerId] = nRMS; }
+    
+    /// suppress hits if crate fails corruption check.  Default is true.
+    void setCheckCrateHeaderCorruption(StDetectorId det, int flag) { getControlTable()->CheckCrate[det-kBarrelEmcTowerId] = flag; }
+    
     StBemcData*               getBemcData()
     {
         return mBemcData;
@@ -79,7 +95,7 @@ public:
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.50 2007/01/22 19:13:28 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.51 2008/01/09 15:58:54 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
