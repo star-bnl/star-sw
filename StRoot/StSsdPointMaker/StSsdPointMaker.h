@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.32 2007/09/25 13:40:46 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.33 2008/01/09 20:43:05 perev Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.33  2008/01/09 20:43:05  perev
+// Remove redundant class forward
+//
 // Revision 1.32  2007/09/25 13:40:46  bouchet
 // Use m_Mode to switch between pedestals used in real data/simulation ; move some message to DEBUG
 //
@@ -157,7 +160,6 @@ class ssdConfiguration_st;
 class StRunInfo;
 class StEventInfo;
 
-class St_db_Maker;
 
 class StSsdPointMaker : public StMaker {
  public:
@@ -256,7 +258,7 @@ class StSsdPointMaker : public StMaker {
   Float_t ratioP[20][16];
   Float_t ratioN[20][16];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.32 2007/09/25 13:40:46 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.33 2008/01/09 20:43:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
