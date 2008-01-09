@@ -18,7 +18,8 @@ void rdMu2TrigSimu( int nevents = 1000,
 
   int nFiles = 1000; // make this big if you want to read all events from a run
   
-  char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
+  //char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
+  char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";  
   TString outDir="./out2/"; 
   
   if (flagMC==1){
@@ -117,13 +118,17 @@ void rdMu2TrigSimu( int nevents = 1000,
   //Get BEMC adc values
   if (flagMC && useBemc) {
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
-    emcSim->setCheckStatus(kBarrelEmcTowerId,false); //this returns hits regardless of offline tower status
+    if (bemcConfig == 1) {
+        emcSim->setCheckStatus(kBarrelEmcTowerId,false); //this returns hits regardless of offline tower status
+    }
     emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);//spread gains by 15%
   }
   if (flagMC==0 && useBemc){
     StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();//for real data this sets calibration and status
+    if (bemcConfig == 1) {
+        bemcAdc->setCheckStatus(kBarrelEmcTowerId,false);
+    }
   }
-
  
   //Get TriggerMaker
   StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
