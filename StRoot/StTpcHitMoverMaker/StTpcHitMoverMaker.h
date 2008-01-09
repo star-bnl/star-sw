@@ -20,14 +20,14 @@ class StTpcHitMover : public StMaker {
   virtual Int_t Init();
   virtual Int_t InitRun(Int_t runnumber);
   virtual Int_t Make();
-  virtual Int_t Finish();  
+  virtual Int_t Finish();
   virtual void  AlignHits(Bool_t flag=kFALSE){mAlignSector=flag;}
   virtual void  FlushDB();
 
 
   void setInputDataSetName(const Char_t *inputDataSetName);
   inline TString getInputDataSetName() const {return mInputDataSetName;}
-  
+
   void setInputHitName(const Char_t *inputHitName);
   inline TString getInputHitName() const {return mInputHitName;}
 
@@ -37,12 +37,12 @@ class StTpcHitMover : public StMaker {
   void setExB(StMagUtilities* ExB) {mExB = ExB;}
   inline StMagUtilities* getExB() const {return mExB;}
 
-  virtual const Char_t *GetCVS() const { 
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.5 2004/06/26 22:30:43 genevb Exp $ built "__DATE__" "__TIME__; 
-    return cvs; 
+  virtual const Char_t *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.6 2008/01/09 19:06:04 jeromel Exp $ built "__DATE__" "__TIME__;
+    return cvs;
   }
  protected:
-  
+
  private:
   TString  mInputDataSetName;
   TString  mInputHitName;
@@ -51,10 +51,10 @@ class StTpcHitMover : public StMaker {
 
   StSectorAligner*  mSectorAligner; //!
   StMagUtilities*   mExB; //!
-  
+
   void moveTpcHit(Float_t pos[3], Float_t posMoved[3],
 		  Short_t sector, Short_t row);
-  
+
 
   ClassDef(StTpcHitMover,0)
 };
