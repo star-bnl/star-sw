@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.30 2007/12/29 01:43:24 perev Exp $
+// $Id: St_db_Maker.h,v 1.31 2008/01/09 20:44:52 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.31  2008/01/09 20:44:52  perev
+// Improve printout in Finish()
+//
 // Revision 1.30  2007/12/29 01:43:24  perev
 // More dbStat
 //
@@ -100,11 +103,11 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
-  TStopwatch  fTimer[5];        //!Timer object 
+  TStopwatch  fTimer[6];        //!Timer object 
   int         fEvents[2];	// [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];	// [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.30 2007/12/29 01:43:24 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.31 2008/01/09 20:44:52 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -146,7 +149,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.30 2007/12/29 01:43:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.31 2008/01/09 20:44:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   
 };
