@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.111 2007/12/29 01:43:32 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.112 2008/01/09 20:44:46 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.112  2008/01/09 20:44:46  perev
+// Improve printout in Finish()
+//
 // Revision 1.111  2007/12/29 01:43:32  perev
 // More dbStat
 //
@@ -262,12 +265,8 @@ St_db_Maker::St_db_Maker(const char *name
 )
 :StMaker(name)
 {
-
-   fTimer[0].Stop();
-   fTimer[1].Stop();
-   fTimer[2].Stop();
-   fTimer[3].Stop();
-   fTimer[4].Stop();
+   for (int i=0;i<5;i++) {fTimer[i].Stop();}
+   fTimer[5].Start(0);
  
    memset(fEvents,0,sizeof(fEvents)+sizeof(fDataSize));
 
@@ -352,36 +351,38 @@ Int_t St_db_Maker::Init()
 //_____________________________________________________________________________
 Int_t St_db_Maker::Finish()
 {
-   for (int i=0;i<5;i++) fTimer[i].Stop();
+   Snapshot(1);
+   for (int i=0;i<6;i++) fTimer[i].Stop();
    Printf("St_db_Maker::Init ");fTimer[0].Print();
    Printf("      MySQL::Init ");fTimer[2].Print();
    Printf("St_db_Maker::Make ");fTimer[1].Print();
    Printf("      MySQL::Make ");fTimer[3].Print();
    Printf("      MySQL::Data ");fTimer[4].Print();
 
+   if (fEvents[1]<=0) return 0;
+   double estiTime = fTimer[4].RealTime()*fTimer[5].CpuTime()/fTimer[5].RealTime();
    double eachEvt = double(fEvents[0]) /(fEvents[1]+3e-33);
-   double MperTim = (fDataSize[1]*1e-6)/(fTimer[4].RealTime()+3e-33);
-   double MperCpu = (fDataSize[1]*1e-6)/(fTimer[4].CpuTime() +3e-33);
-   double timPerE = fTimer[4].RealTime()/fEvents[1];
-   double cpuPerE = fTimer[4].CpuTime() /fEvents[1];
+   double MperTim = (fDataSize[1]*1e-6)/(estiTime+3e-33);
+   double timPerE = estiTime/(fEvents[1]+3e-33);
+   double cpuPerE = fTimer[4].CpuTime() /(fEvents[1]+3e-33);
+   double timPct  = fTimer[4].RealTime()/fTimer[5].RealTime() *100;
+   double cpuPct  = fTimer[4].CpuTime() /fTimer[5].CpuTime()  *100;
 
    Info("dbStat","Evts = %d dbEvts=%d Evts/dbEvts = %4.1f\n"
        ,fEvents[0], fEvents[1],eachEvt);
        
    Info("dbStat","dbData =%10.1f dbTime=%g dbData/dbTime=%g\n"   
-       ,fDataSize[1]*1e-6,fTimer[4].RealTime(),MperTim);
-
-   Info("dbStat","dbData =%10.1f dbCpu =%g dbData/dbCpu =%g\n"   
-       ,fDataSize[1]*1e-6,fTimer[4].CpuTime() ,MperCpu);
+       ,fDataSize[1]*1e-6,estiTime,MperTim);
 
    Info("dbStat","dbTime =%10.1f dbEvts=%d dbTime/dbEvts =%g\n"   
-       ,fTimer[4].RealTime(),fEvents[1],timPerE);
+       ,estiTime,fEvents[1],timPerE);
 
    Info("dbStat","dbCpu  =%10.1f dbEvts=%d  dbCpu/dbEvts =%g\n"   
        ,fTimer[4].CpuTime() ,fEvents[1],cpuPerE);
 
+   Info("dbStat","\dbTime/tot  =%10.1f\% dbCpu/tot=%10.1f\%d\n"   
+       ,timPct,cpuPct);
 
-   Snapshot(1);
    return 0;
 }
 
