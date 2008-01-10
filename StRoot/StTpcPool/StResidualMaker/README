@@ -9,7 +9,7 @@ as a function of drift distance and crossing angle (alpha for local-x, lambda
 for z).  Then, it generates 2D histograms of the RMS vs drift distance vs
 crossing angle, and also Gaussian sigma vs those two variables.
 
-Then, it fits the width histograms to the functional form expected (see
+Then, it fits the width histograms to the functional form expected  (see
 e.g. Blum and Rolandi)
 
 sigma^2 = sigma_int^2 +
