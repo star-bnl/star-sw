@@ -2,7 +2,7 @@ StResidualMaker - mike lisa (lisa@mps.ohio-state.edu)
 
 =============================================================================
 
-                     PURPOSE 
+                     PURPOSE
 
 This little package generates TPC hit residual distributions in local-x and z
 as a function of drift distance and crossing angle (alpha for local-x, lambda
