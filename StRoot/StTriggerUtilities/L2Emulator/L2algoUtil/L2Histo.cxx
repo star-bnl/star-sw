@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 /*********************************************************************
- * $Id: L2Histo.cxx,v 1.2 2007/11/14 03:58:07 balewski Exp $
+ * $Id: L2Histo.cxx,v 1.3 2008/01/10 22:45:39 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -29,7 +29,7 @@ L2Histo::set( int idx, char *tit, int nbx, int nby) {
   head.nBinX=nbx;
   head.nBinY=nby;
   head.dataSize=head.nBin*sizeof(int);
-  data=new int [head.dataSize];
+  data=new int [head.nBin];
   memset(data,0,head.dataSize);
   head.title[0]=0;
   strncpy(head.title,tit,mxTx);
@@ -327,6 +327,9 @@ L2Histo::y2c(float val){
 /*
 *********************************************************************
   $Log: L2Histo.cxx,v $
+  Revision 1.3  2008/01/10 22:45:39  balewski
+  reduce memory allocation for every histo
+
   Revision 1.2  2007/11/14 03:58:07  balewski
   cleanup of common timing measurement
 
