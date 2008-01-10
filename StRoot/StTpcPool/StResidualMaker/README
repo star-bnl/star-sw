@@ -7,7 +7,7 @@ StResidualMaker - mike lisa (lisa@mps.ohio-state.edu)
 This little package generates TPC hit residual distributions in local-x and z
 as a function of drift distance and crossing angle (alpha for local-x, lambda
 for z).  Then, it generates 2D histograms of the RMS vs drift distance vs
-crossing angle, and also Gaussian sigma vs those two variables. 
+crossing angle, and also Gaussian sigma vs those two variables.
 
 Then, it fits the width histograms to the functional form expected (see
 e.g. Blum and Rolandi)
