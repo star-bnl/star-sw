@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.55 2008/01/06 02:58:32 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.56 2008/01/10 01:27:56 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.56  2008/01/10 01:27:56  fine
+ * set the correct buffer size
+ *
  * Revision 1.55  2008/01/06 02:58:32  fine
  * clean up
  *
@@ -379,8 +382,13 @@ int StDAQReader::readEvent()
      // the current STAR StDaqLib relies on.
      // To fix the issue we have to create the memory resided copy of the buffer
      // vf 26.12.2007
+#if 0
      fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes);
      memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes);
+#else
+     fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes_mapped);
+     memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes_mapped);
+#endif
      fEventReader->InitEventReader(fDATAP);
  } else {
     delete fEventReader;
