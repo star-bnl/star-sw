@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.13 2007/04/11 03:29:11 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.14 2008/01/10 20:49:58 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -72,7 +72,7 @@ Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){
     // printf("\nStL0Trigger::token=%d\n",token);
     int runId=mEvent->runId();
 
-    if( headersAreSick(eemcRaw, token,  runId) )
+    if( headersAreSick(eeReader, eemcRaw, token,  runId) )
         return false;
     if (hs[0])
         hs[0]->Fill(3);
@@ -112,7 +112,7 @@ Bool_t   StEemcRaw::copyRawData(StEEMCReader *eeReader, StEmcRawData *raw)
 //____________________________________________________
 //____________________________________________________
 //____________________________________________________
-Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId)
+Bool_t   StEemcRaw::headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, int token, int runId)
 {
 
     if (! raw)
@@ -127,11 +127,19 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId)
     int icr;
     int totErrBit=0;
     int nOn=0;
+
+    LOG_INFO << "StEemcRaw::headersAreSick() --> Nfibers=" << mDb->getNFiber() << endm;
+    LOG_INFO << "StEemcRaw::headersAreSick() --> isEemcBankIn('T')=" << eeReader->isEemcBankIn('T') << endm;
+    LOG_INFO << "StEemcRaw::headersAreSick() --> isEemcBankIn('S')=" << eeReader->isEemcBankIn('S') << endm;
+
     for(icr=0;icr<mDb->getNFiber();icr++)
     {
         const EEmcDbCrate *fiber=mDb-> getFiber(icr);
         if(!fiber->useIt)
             continue; // drop masked out crates
+
+	if (fiber->type == 'T' && !eeReader->isEemcBankIn('T')) continue;
+	if (fiber->type == 'S' && !eeReader->isEemcBankIn('S')) continue;
 
         if(raw->sizeHeader(icr)<=0) {
 	 gMessMgr->Message("","W") <<Form("StEemcRaw::headersAreSick() sizeHeader(icr=%d)<=0,  crID=%d, skip it\n",icr,fiber->crID)<<endm;
@@ -386,6 +394,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.14  2008/01/10 20:49:58  balewski
+// now more warnings if ESMD is not in the run, thanks Pibero
+//
 // Revision 1.13  2007/04/11 03:29:11  balewski
 // undo hacks,
 // Endcap code is now in default configuration

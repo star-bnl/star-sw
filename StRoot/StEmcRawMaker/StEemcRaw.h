@@ -26,7 +26,7 @@ private:
     StEEmcDbMaker *mDb;
     TH1F *hs[8];
     Bool_t   copyRawData(StEEMCReader *eeReader, StEmcRawData *raw);
-    Bool_t   headersAreSick( StEmcRawData *raw, int token, int runId);
+    Bool_t   headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, int token, int runId);
     Bool_t   towerDataAreSick(StEmcRawData* raw);
     void     raw2pixels(StEvent* mEvent);
 
@@ -47,10 +47,13 @@ public:
 
 #endif
 
-// $Id: StEemcRaw.h,v 1.4 2006/01/16 11:12:00 suaide Exp $
+// $Id: StEemcRaw.h,v 1.5 2008/01/10 20:49:59 balewski Exp $
 
 /*
  * $Log: StEemcRaw.h,v $
+ * Revision 1.5  2008/01/10 20:49:59  balewski
+ * now more warnings if ESMD is not in the run, thanks Pibero
+ *
  * Revision 1.4  2006/01/16 11:12:00  suaide
  * tower map bug fixed and astyle run
  *
