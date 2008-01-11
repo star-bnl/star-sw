@@ -1,8 +1,11 @@
 
 
-// $Id: StSsdWafer.cc,v 1.7 2007/08/07 19:58:10 fine Exp $
+// $Id: StSsdWafer.cc,v 1.8 2008/01/11 10:40:38 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.8  2008/01/11 10:40:38  bouchet
+// Use of the wafer configuration table
+//
 // Revision 1.7  2007/08/07 19:58:10  fine
 // Protect against of died object
 //
@@ -48,6 +51,7 @@
 #include <Stiostream.h>
 #include "TMath.h"
 #include "StMessMgr.h"
+
 //________________________________________________________________________________
 StSsdWafer::StSsdWafer(Int_t nid) : TGeoHMatrix(), mDebug(0) {
   memset(first, 0, last-first);

@@ -1,6 +1,9 @@
-// $Id: StSsdLadder.hh,v 1.2 2007/03/21 17:20:41 fisyak Exp $
+// $Id: StSsdLadder.hh,v 1.3 2008/01/11 10:40:38 bouchet Exp $
 //
 // $Log: StSsdLadder.hh,v $
+// Revision 1.3  2008/01/11 10:40:38  bouchet
+// Use of the wafer configuration table
+//
 // Revision 1.2  2007/03/21 17:20:41  fisyak
 // use TGeoHMatrix for coordinate transformation
 //
@@ -30,6 +33,8 @@ A ladder is made of :
 
 #include "StSsdUtil/StSsdWafer.hh"
 class St_ssdWafersPosition;
+class St_ssdWaferConfiguration; 
+
 class StSsdLadder
 {
  public:
@@ -37,6 +42,7 @@ class StSsdLadder
  ~StSsdLadder();
 
   void         initWafers(St_ssdWafersPosition *wafpos);
+  void         initWafers(St_ssdWafersPosition *wafpos,Int_t WafStatus[20][16]); 
   Int_t        getLadderNumb()     { return mLadderNumb; }
   Int_t        getWaferPerLadder() { return mNWaferPerLadder; } 
   StSsdWafer*  getWafer(Int_t i)   { return mWafers[i];}
