@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.53 2007/09/25 13:40:46 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.54 2008/01/11 10:39:39 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.54  2008/01/11 10:39:39  bouchet
+// add method to read the Wafer configuration table
+//
 // Revision 1.53  2007/09/25 13:40:46  bouchet
 // Use m_Mode to switch between pedestals used in real data/simulation ; move some message to DEBUG
 //
@@ -163,7 +166,6 @@
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
 #include "TNtuple.h"
-
 #include "StSsdUtil/StSsdPoint.hh"
 #include "StSsdUtil/StSsdPackage.hh"
 #include "StSsdUtil/StSsdCluster.hh"
@@ -190,6 +192,7 @@
 #include "tables/St_ssdStripCalib_Table.h"
 #include "tables/St_ssdGainCalibWafer_Table.h"
 #include "tables/St_ssdNoise_Table.h"
+#include "tables/St_ssdWaferConfiguration_Table.h"
 #include "StEvent.h"
 #include "StSsdHitCollection.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
@@ -272,10 +275,11 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
   
   //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
   mode= gStSsdDbMaker->GetMode();
-  LOG_DEBUG <<" m_Mode = " << mode << endm;
+  LOG_INFO <<" m_Mode = " << mode << endm;
   NEvent         = 0;  
   UseCalibration = 1;
-  printf("UseCalibration=%d\n",UseCalibration);
+  UseWaferConfig = 1;
+  printf("UseCalibration=%d UseWaferTable=%d\n",UseCalibration,UseWaferConfig);
   St_slsCtrl* slsCtrlTable = (St_slsCtrl*) GetDataBase("Geometry/ssd/slsCtrl");
   if(! slsCtrlTable){LOG_ERROR << "InitRun : No access to slsCtrl table" << endm;}
   else  {
@@ -339,7 +343,9 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
     }
     default : {printf("no real data nor simu");}
     }
+
   (UseCalibration==1)?FillCalibTable():FillDefaultCalibTable();
+  (UseWaferConfig==1)?FillWaferTable():FillDefaultWaferTable();
   /*
     Init arrays for the reconstruction efficiency
   */
@@ -355,7 +361,6 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber) {
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::DeclareNtuple(){
-  
   TFile *f = GetTFile();
   if (f){
     f->cd();
@@ -451,7 +456,7 @@ Int_t StSsdPointMaker::Make()
       Int_t nClusterPerSide[2];
       nClusterPerSide[0] = 0;
       nClusterPerSide[1] = 0;
-      mySsd->doSideClusterisation(nClusterPerSide);
+      mySsd->doSideClusterisation(nClusterPerSide,WafStatus);
       LOG_INFO<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endm;
       LOG_INFO<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endm;
       mySsd->sortListCluster();
@@ -1494,7 +1499,7 @@ void StSsdPointMaker::FillCalibTable(){
     Int_t size = mGain->GetNRows();
     LOG_INFO<<Form("Size of gain table = %d",mGain->GetNRows())<<endm;
     for(Int_t i=0; i<size;i++){
-      //LOG_INFO<<Form(" Print entry %d : ladder=%d gain =%lf wafer=%d",i,g[i].nLadder,g[i].nGain,g[i].nWafer)<<endm;
+      LOG_DEBUG<<Form(" Print entry %d : ladder=%d gain =%lf wafer=%d",i,g[i].nLadder,g[i].nGain,g[i].nWafer)<<endm;
       CalibArray[i] = g[i].nGain;
     }
   }
@@ -1503,7 +1508,6 @@ void StSsdPointMaker::FillCalibTable(){
     LOG_WARN << "We will use the default table" <<endm;
     for(Int_t i=0; i<320;i++){
       CalibArray[i] = 1;
-      //LOG_INFO << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm;
     }
   }
 }
@@ -1515,7 +1519,39 @@ void StSsdPointMaker::FillDefaultCalibTable(){
     //LOG_INFO << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm; 
   }
 }
-//--------------------------------------------------------------------------------
+//_____________________________________________________________________________
+void StSsdPointMaker::FillWaferTable(){
+  mWafConfig    = (St_ssdWaferConfiguration*) GetDataBase("Calibrations/ssd/ssdWaferConfiguration"); 
+  if(mWafConfig){ 
+    ssdWaferConfiguration_st *g  = mWafConfig->GetTable() ;
+    Int_t size = mWafConfig->GetNRows();
+    for(Int_t i=0; i<size;i++){
+      LOG_DEBUG<<Form(" Print entry=%d : ladder=%d wafer=%d status=%d",i,g[i].nLadder,g[i].nWafer,g[i].nStatus)<<endm;
+      WafStatus[g[i].nLadder][g[i].nWafer] = g[i].nStatus; 
+    }
+  } 
+  else { 
+    LOG_WARN << "InitRun : No access to Wafer Config - will use the default wafer config" << endm;
+    LOG_WARN << "We will use the default table" <<endm;
+    for(Int_t i=0; i<20;i++){
+      for(Int_t j=0; j<16;j++){ 
+	WafStatus[i][j] = 1;
+      }
+    }
+  }
+}
+//_____________________________________________________________________________
+void StSsdPointMaker::FillDefaultWaferTable(){
+  LOG_INFO << " The wafer configuration table will not be used." << endm;
+  for(Int_t i=0; i<20;i++){ 
+    for(Int_t j=0; i<16;j++){  
+      WafStatus[i][j] = 1; 
+      LOG_DEBUG << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm; 
+    }
+  }
+}
+//_____________________________________________________________________________
+
 Int_t StSsdPointMaker::ReadNoiseTable(StSsdBarrel *mySsd,Int_t year){
   //ssdStripCalib is used for year <2007 and for the simulation
     if((year<7)||(mode==1))
@@ -1549,7 +1585,7 @@ Int_t StSsdPointMaker::ReadNoiseTable(StSsdBarrel *mySsd,Int_t year){
 }
 //____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {
-  LOG_INFO << Form("Finish() ...") << endm;
-  return kStOK;
+  LOG_INFO << Form("Finish()") << endm;
+   return kStOK;
 }
 

@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.33 2008/01/09 20:43:05 perev Exp $
+// $Id: StSsdPointMaker.h,v 1.34 2008/01/11 10:39:39 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.34  2008/01/11 10:39:39  bouchet
+// add method to read the Wafer configuration table
+//
 // Revision 1.33  2008/01/09 20:43:05  perev
 // Remove redundant class forward
 //
@@ -139,6 +142,7 @@ class St_ssdWafersPosition;
 class St_ssdStripCalib;
 class St_ssdGainCalibWafer;
 class St_ssdNoise;
+class St_ssdWaferConfiguration;
 
 class StEvent;
 class StSsdHitCollection;
@@ -180,6 +184,8 @@ class StSsdPointMaker : public StMaker {
   St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
   St_ssdNoise           *m_noise3;        //!< Pointer to the ssdNoise table (noise values)
   St_ssdGainCalibWafer  *mGain;           //!< Pointer to the ssdGainCalib table (calibration gain)) 
+  St_ssdWaferConfiguration *mWafConfig;  //!< Pointer to the ssdWaferConfiguration table (wafer status))
+
 #ifdef config_position_dimensions
   St_ssdWafersPosition  *position;
   ssdDimensions_st      *dimensions;
@@ -219,7 +225,9 @@ class StSsdPointMaker : public StMaker {
   void EvaluateEfficiency(StSsdBarrel *mySsd);//!
   void NormalizeEfficiency();
   void FillCalibTable();
+  void FillWaferTable();
   void FillDefaultCalibTable();
+  void FillDefaultWaferTable();
   Int_t ReadNoiseTable(StSsdBarrel *mySsd,Int_t year);
  protected:
 
@@ -250,15 +258,17 @@ class StSsdPointMaker : public StMaker {
   TH2F  *MatchedClusterP;//!
   TH2F  *MatchedClusterN;//!
   Int_t UseCalibration ;
+  Int_t UseWaferConfig ;
   Int_t NEvent;
   Int_t year;
   Int_t mode;
   Int_t noiseTableSize;
   Float_t CalibArray[320];
+  Int_t WafStatus[20][16];
   Float_t ratioP[20][16];
   Float_t ratioN[20][16];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.33 2008/01/09 20:43:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.34 2008/01/11 10:39:39 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
