@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.5 2007/07/14 13:53:45 bouchet Exp $
+// $Id: StSsdBarrel.hh,v 1.6 2008/01/11 10:40:38 bouchet Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.6  2008/01/11 10:40:38  bouchet
+// Use of the wafer configuration table
+//
 // Revision 1.5  2007/07/14 13:53:45  bouchet
 // add default pedestal/noise ; noise value is 60/16 = 3.75 adc
 //
@@ -57,6 +60,8 @@ class StSsdHitCollection;
 class St_ssdGainCalibWafer;
 class St_ssdNoise;
 
+class St_ssdWaferConfiguration; 
+
 class StSsdBarrel
 {
  public:
@@ -67,6 +72,7 @@ class StSsdBarrel
   StSsdBarrel& operator=(const StSsdBarrel  originalBarrel);
 
   void  initLadders(St_ssdWafersPosition *wafpos);
+
   //   Int_t   readDeadStripFromTable(table_head_st *condition_db_h, sdm_condition_db_st *condition_db); 
   void  addNoiseToStrip(slsCtrl_st* ctrl); //
   Int_t readStripFromTable(St_spa_strip *spa_strip);
@@ -88,9 +94,9 @@ class StSsdBarrel
   Int_t writeStripToTable(St_spa_strip * spa_strip,St_sls_strip *sls_strip); //
   Int_t writeNewNoiseToFile3(St_ssdPedStrip *pedStrip, char myLabel[]);
   void  doSideClusterisation(Int_t *numberOfCluster);   
+  void  doSideClusterisation(Int_t *numberOfCluster,Int_t WafStatus[20][16]);
   Int_t doClusterMatching(Float_t CalibArray[320]);
   void  doDaqSimulation(slsCtrl_st* ctrl); //
-  
   void  convertDigitToAnalog(StSsdDynamicControl *dynamicControl);
   void  convertGlobalFrameToOther();
   void  convertUFrameToOther();
@@ -146,7 +152,6 @@ class StSsdBarrel
   Float_t  mShift_elec;
   ssdDimensions_st *mDimensions;
   StSsdClusterControl *mClusterControl;
-
   Int_t    mDebug;
   Char_t   last[1];
   static   StSsdBarrel* fSsdBarrel;

@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.6 2007/08/02 19:34:13 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.7 2008/01/11 10:40:37 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.7  2008/01/11 10:40:37  bouchet
+// Use of the wafer configuration table
+//
 // Revision 1.6  2007/08/02 19:34:13  bouchet
 // bug fixed for trackReferenceCount
 //
@@ -105,12 +108,15 @@
 
 #include "tables/St_ssdGainCalibWafer_Table.h"
 #include "tables/St_ssdNoise_Table.h"
+
+#include "tables/St_ssdWaferConfiguration_Table.h"
+
 StSsdBarrel* StSsdBarrel::fSsdBarrel = 0;
 //________________________________________________________________________________
 /*!
 Constructor using the ssdDimensions_st and ssdConfiguration_st tables from the db
  */
-StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *config) : mDebug(0)
+StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *config ) : mDebug(0)
 {
   memset (first, 0, last-first);
   fSsdBarrel = this;
@@ -183,7 +189,7 @@ void StSsdBarrel::debugUnPeu (Int_t monladder, Int_t monwafer){
 	}
     }
 }
-//________________________________________________________________________________
+//______________________________________________________________
 void StSsdBarrel::initLadders(St_ssdWafersPosition *wafpos) {for (Int_t iLad = 0; iLad < mNLadder; iLad++) mLadders[iLad]->initWafers(wafpos);}
 //________________________________________________________________________________
 void StSsdBarrel::Reset() {for (Int_t iLad = 0; iLad < mNLadder; iLad++) mLadders[iLad]->Reset();}
@@ -841,6 +847,23 @@ void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster){
   //  delete[] wafNumbOfCluster;
 }
 //________________________________________________________________________________
+void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster,Int_t WafStatus[20][16]){
+  //  Int_t *wafNumbOfCluster = new int[2];
+  Int_t wafNumbOfCluster[2];
+  wafNumbOfCluster[0] = 0;
+  wafNumbOfCluster[1] = 0;
+  for (Int_t iLad = 0 ; iLad < mNLadder; iLad++)
+    for (Int_t iWaf = 0 ; iWaf < mNWaferPerLadder; iWaf++)
+      {
+	if(WafStatus[iLad][iWaf]!=0){
+	mLadders[iLad]->mWafers[iWaf]->doClusterisation(wafNumbOfCluster, mClusterControl);
+	barrelNumbOfCluster[0] += wafNumbOfCluster[0];
+	barrelNumbOfCluster[1] += wafNumbOfCluster[1];
+	}
+      }
+  //  delete[] wafNumbOfCluster;
+}
+//_______________________________________________________________________________________
 Int_t StSsdBarrel::doClusterMatching(Float_t *CalibArray){
   Int_t NumberOfPackage = 0;
   Int_t nSolved         = 0;

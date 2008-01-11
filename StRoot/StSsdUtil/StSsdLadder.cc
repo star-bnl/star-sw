@@ -1,6 +1,9 @@
-// $Id: StSsdLadder.cc,v 1.2 2007/03/21 17:20:41 fisyak Exp $
+// $Id: StSsdLadder.cc,v 1.3 2008/01/11 10:40:38 bouchet Exp $
 //
 // $Log: StSsdLadder.cc,v $
+// Revision 1.3  2008/01/11 10:40:38  bouchet
+// Use of the wafer configuration table
+//
 // Revision 1.2  2007/03/21 17:20:41  fisyak
 // use TGeoHMatrix for coordinate transformation
 //
@@ -17,6 +20,8 @@
 #include "StSsdUtil/StSsdLadder.hh"
 #include <Stiostream.h>
 
+#include "tables/St_ssdWaferConfiguration_Table.h"
+
 StSsdLadder::StSsdLadder(Int_t rLadderNumb,Int_t rSsdLayer,Int_t rNWaferPerLadder,Int_t rNStripPerSide) : mDebug(0)
 {
   // Note          iWaf = 0->15 whereas iW = 1->16 !
@@ -31,7 +36,6 @@ StSsdLadder::StSsdLadder(Int_t rLadderNumb,Int_t rSsdLayer,Int_t rNWaferPerLadde
   Int_t idWaf   = 0;
 
   mWafers = new StSsdWafer*[nWafer];
-
   for (Int_t iWaf=0; iWaf < nWafer; iWaf++)
     {
       idWaf   = waferNumbToIdWafer(iWaf);
@@ -45,7 +49,6 @@ StSsdLadder::~StSsdLadder()
   for (Int_t iWaf = 0 ; iWaf < mNWaferPerLadder ; iWaf++)
     delete mWafers[iWaf];
 }
-
 
 void StSsdLadder::initWafers(St_ssdWafersPosition *Position)
 {
@@ -61,6 +64,26 @@ void StSsdLadder::initWafers(St_ssdWafersPosition *Position)
 	  (mLadderNumb == idWafer%100-1)){
 	mWafers[iWaf]->init(idWafer, position[i].driftDirection, position[i].transverseDirection, position[i].normalDirection, position[i].centerPosition);}
     }
+}
+
+void StSsdLadder::initWafers(St_ssdWafersPosition *Position,Int_t WafStatus[20][16]) 
+{ 
+  Int_t idWafer = 0; 
+  Int_t iWaf    = 0; 
+  ssdWafersPosition_st *position = Position->GetTable(); 
+  Int_t N = Position->GetNRows(); 
+  for (Int_t i = 0; i < N; i++)    // loop over the full table now. 
+    { 
+      idWafer = position[i].id; 
+      iWaf = idWaferToWafer(idWafer); 
+      if ((idWafer > mSsdLayer*1000)&& 
+          (mLadderNumb == idWafer%100-1)){
+	if(WafStatus[mLadderNumb][iWaf]!=0){
+	  printf("Ladder %d Wafer %d  status %d\n",mLadderNumb,iWaf,WafStatus[mLadderNumb][iWaf]); 
+	  mWafers[iWaf]->init(idWafer, position[i].driftDirection, position[i].transverseDirection, position[i].normalDirection, position[i].centerPosition);
+	}
+      } 
+    } 
 }
 
 void StSsdLadder::Reset(){
