@@ -48,11 +48,11 @@ void analysisMacro(const char* dir="/home/kocolosk/dv34/analysis/run6/test",
     
     cout<<"start adding locally compiled makers"<<endl;
     
-    TString jetSkimFile(dir);
-    jetSkimFile += "/jetSkim_";
-    jetSkimFile += name;
-    jetSkimFile += ".tree.root";
-    StJetSkimEventMaker *jetSkim = new StJetSkimEventMaker("jetSkimMaker",muDstMaker,jetSkimFile.Data());
+    //TString jetSkimFile(dir);
+    //jetSkimFile += "/jetSkim_";
+    //jetSkimFile += name;
+    //jetSkimFile += ".tree.root";
+    //StJetSkimEventMaker *jetSkim = new StJetSkimEventMaker("jetSkimMaker",muDstMaker,jetSkimFile.Data());
         
     cout<<"add my maker"<<endl;
 
