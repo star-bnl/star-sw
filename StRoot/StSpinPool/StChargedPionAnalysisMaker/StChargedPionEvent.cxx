@@ -26,6 +26,21 @@ StChargedPionEvent::StChargedPionEvent() : TObject(), mSpinQA(0), mTriggerBits(0
     mTriggerLookup[106211] = 0x00004000;
     mTriggerLookup[106221] = 0x00008000;
     mTriggerLookup[106233] = 0x00010000;
+    mTriggerLookup[117402] = 0x00020000;
+    mTriggerLookup[117211] = 0x00040000;
+    mTriggerLookup[117212] = 0x00080000;
+    
+    // reuse some bits for transverse and first longitudinal running
+    mTriggerLookup[127212] = 0x00080000;
+    mTriggerLookup[127213] = 0x00000040;
+    mTriggerLookup[117221] = 0x00000080;
+    mTriggerLookup[127221] = 0x00000080;
+    mTriggerLookup[117585] = 0x00000200;
+    mTriggerLookup[127585] = 0x00000200;
+    mTriggerLookup[117611] = 0x00000400;
+    mTriggerLookup[127611] = 0x00000400;
+    mTriggerLookup[117622] = 0x00000800;
+    mTriggerLookup[127622] = 0x00000800;
     
     mVertices = new TClonesArray("StChargedPionVertex", 20);
     mTracks = new TClonesArray("StChargedPionTrack", 50);
