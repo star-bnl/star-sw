@@ -112,7 +112,7 @@ void StChargedPionEvent::Clear(Option_t* o) {
 }
 
 bool StChargedPionEvent::isSpinValid() const { 
-    return (isPolValid() && isPolLong() && !isPolTrans() && !isBxingMasked() && isNullOffset());
+    return (isPolValid() && !isBxingMasked() && isNullOffset());
 }
 
 bool StChargedPionEvent::isTrigger(unsigned int trigId) const {
