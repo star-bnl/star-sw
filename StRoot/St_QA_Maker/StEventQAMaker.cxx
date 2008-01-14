@@ -275,7 +275,7 @@ Int_t StEventQAMaker::Make() {
 	nEvClasses++;
 	histsSet = StQA_AuAu;
       }
-      if ((nEvClasses==0) && (isTriggerInRange(trigId,600,999))) {
+      if (isTriggerInSubRange(trigId,600,999)) {
 	mTrigWord->Fill(6.); // "Other Physics"
 	if (run_year >= 9) doEvent = kTRUE;
 	evClasses[nEvClasses] = 4;
@@ -2301,8 +2301,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.86 2007/12/12 19:50:55 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.87 2008/01/14 17:57:29 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.87  2008/01/14 17:57:29  genevb
+// Get OtherPhysics triggers working
+//
 // Revision 2.86  2007/12/12 19:50:55  genevb
 // Update for trigger words
 //
