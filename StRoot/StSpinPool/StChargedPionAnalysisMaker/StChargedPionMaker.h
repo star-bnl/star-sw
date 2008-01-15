@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.h,v 1.6 2008/01/08 17:33:15 kocolosk Exp $
+* $Id: StChargedPionMaker.h,v 1.7 2008/01/15 21:26:05 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.h,v $
+* Revision 1.7  2008/01/15 21:26:05  kocolosk
+* grab StJets from StJetMaker if it's in the chain
+*
 * Revision 1.6  2008/01/08 17:33:15  kocolosk
 * StChargedPionMaker fills a full StChargedPionEvent on its own now
 * Added trigger prescales and extra simulator info to Event
@@ -49,6 +52,7 @@ class TUnixSystem;
 class StMuDstMaker;
 class StSpinDbMaker;
 class StEmcTriggerMaker;
+class StJetMaker;
 
 class StMuTrack;
 class StJetSkimEvent;
@@ -75,7 +79,7 @@ public:
     static void translateJets(StJets* jets, StChargedPionEvent *ev);
     
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.6 2008/01/08 17:33:15 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.7 2008/01/15 21:26:05 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 private:
     TFile *mFile;               //!
@@ -96,6 +100,7 @@ private:
     StMuDstMaker *muDstMaker;   //!
     StSpinDbMaker *spDbMaker;   //!
     StEmcTriggerMaker *emcTrgMaker; //!
+    StJetMaker *jetMaker; //!
     
     //translate StMuTrack into StChargedPionTrack so we can read it anywhere
     StChargedPionTrack & chargedPionTrack(StMuTrack *track);

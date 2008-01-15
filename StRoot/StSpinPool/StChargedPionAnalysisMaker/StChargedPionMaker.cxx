@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.11 2008/01/08 19:31:12 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.12 2008/01/15 21:26:05 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.12  2008/01/15 21:26:05  kocolosk
+* grab StJets from StJetMaker if it's in the chain
+*
 * Revision 1.11  2008/01/08 19:31:12  kocolosk
 * fix a leak
 *
@@ -86,6 +89,7 @@
 #include "StJetMaker/StJetSkimEvent.h"
 #include "StJetMaker/StJets.h"
 #include "StJetMaker/StJet.h"
+#include "StJetMaker/StJetMaker.h"
 
 //StSpinDbMaker
 #include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
@@ -118,6 +122,7 @@ StChargedPionMaker::StChargedPionMaker(const char *name, const char *outputfile)
     muDstMaker = NULL;
     spDbMaker  = NULL;
     emcTrgMaker= NULL;
+    jetMaker   = NULL;
     
     theSystem = new TUnixSystem();
     
@@ -153,6 +158,7 @@ Int_t StChargedPionMaker::Init()
     muDstMaker  = dynamic_cast<StMuDstMaker*>(GetMaker("MuDst")); assert(muDstMaker);
     spDbMaker   = dynamic_cast<StSpinDbMaker*>(GetMaker("spinDb"));
     emcTrgMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); 
+    jetMaker    = dynamic_cast<StJetMaker*>(GetMakerInheritsFrom("StJetMaker"));
     
     this->Clear();
     
@@ -161,27 +167,37 @@ Int_t StChargedPionMaker::Init()
 }
 
 Int_t StChargedPionMaker::InitRun(int runnumber) {
-    std::ostringstream os;
-    if(runnumber < 7000000) {
-        os << "/star/institutions/mit/common/run5/jets/jets_" << runnumber << ".tree.root";        
-    }
-    else {
-        // best confirm this one with Murad first
-        os << "/star/institutions/mit/common/run6/jets/jets_" << runnumber << ".tree.root";
-    }
-    
-    if(mJetFile) mJetFile->Close();
-    mJetTree = NULL;
-    mJetFile = TFile::Open(os.str().c_str());
-    if(mJetFile) mJetTree = (TTree*) mJetFile->Get("jet");
-    if(mJetTree) {
+    if(jetMaker) {
         if(runnumber < 7000000) {
-            mJetTree->SetBranchAddress("ConeJets", &mJets);            
+            mJets = ((jetMaker->getJets()).find("ConeJets"))->second->getmuDstJets();
         }
         else {
-            mJetTree->SetBranchAddress("ConeJets12", &mJets);            
+            mJets = ((jetMaker->getJets()).find("ConeJets12"))->second->getmuDstJets();
         }
-        mJetTree->BuildIndex("mRunId","mEventId");
+    }
+    else { // try to get the jets off disk
+        std::ostringstream os;
+        if(runnumber < 7000000) {
+            os << "/star/institutions/mit/common/run5/jets/jets_" << runnumber << ".tree.root";        
+        }
+        else {
+            // best confirm this one with Murad first
+            os << "/star/institutions/mit/common/run6/jets/jets_" << runnumber << ".tree.root";
+        }
+        
+        if(mJetFile) mJetFile->Close();
+        mJetTree = NULL;
+        mJetFile = TFile::Open(os.str().c_str());
+        if(mJetFile) mJetTree = (TTree*) mJetFile->Get("jet");
+        if(mJetTree) {
+            if(runnumber < 7000000) {
+                mJetTree->SetBranchAddress("ConeJets", &mJets);            
+            }
+            else {
+                mJetTree->SetBranchAddress("ConeJets12", &mJets);            
+            }
+            mJetTree->BuildIndex("mRunId","mEventId");
+        }
     }
     
     return StMaker::InitRun(runnumber);
@@ -314,23 +330,14 @@ Int_t StChargedPionMaker::Make()
             cpTrack.setVertex(muDst->primaryVertex()->position());
             
             mEvent->addTrack(&cpTrack);
-            
-            //can do some unit tests here to make sure cpTrack is OK
-            /*cout << "------------------ cpTrack QA tests ------------------" << endl;
-            if(fabs(cpTrack.globalPt() - global->pt()) > 1.e-4)
-                printf("cp pt  = %12.8f     gl pt  = %12.8f     pr pt  = %12.8f\n",cpTrack.globalPt(track->firstPoint()),global->pt(),track->pt());
-            if(fabs(cpTrack.globalPhi() - global->phi()) > 1.e-3)
-                printf("cp phi = %12.8f     gl phi = %12.8f     pr phi = %12.8f\n",cpTrack.globalPhi(track->firstPoint()),global->phi(),track->phi());
-            if(fabs(cpTrack.globalEta() - global->eta()) > 1.e-4)
-                printf("cp eta = %12.8f     gl eta = %12.8f     pr eta = %12.8f\n",cpTrack.globalEta(track->firstPoint()),global->eta(),track->eta());
-            if(fabs(cpTrack.globalDca().mag() - global->dca().mag()) > 1.e-6)
-                printf("cp dca = %12.8f     gl dca = %12.8f     pr dca = %12.8f\n",cpTrack.globalDca().mag(),global->dca().mag(),track->dca().mag());
-            cout << "------------------------------------------------------" << endl;*/
         }
     }
     
     //and the jets
-    if(mJetTree) {
+    if(jetMaker) {
+        translateJets(mJets, mEvent);
+    }
+    else if(mJetTree) {
         mJetTree->GetEntryWithIndex(mEvent->runId(), mEvent->eventId());
         translateJets(mJets, mEvent);
     }
