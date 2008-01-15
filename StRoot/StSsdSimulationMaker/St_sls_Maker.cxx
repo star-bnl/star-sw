@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.14 2007/04/28 17:56:59 perev Exp $
+ * $Id: St_sls_Maker.cxx,v 1.15 2008/01/15 14:42:51 bouchet Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.15  2008/01/15 14:42:51  bouchet
+ * Set a default value for uninitialized variables
+ *
  * Revision 1.14  2007/04/28 17:56:59  perev
  * Redundant StChain.h removed
  *
@@ -93,7 +96,7 @@ Int_t St_sls_Maker::Make()
    LOG_INFO<<"####       START OF SSD LAZY SIMULATOR       ####"<<endm;
    LOG_INFO<<"####        SSD BARREL INITIALIZATION        ####"<<endm;
    LOG_INFO<<"####        SSD WAFERS INITIALIZATION        ####"<<endm;
-   Int_t nSsdHits;
+   Int_t nSsdHits = 0;
    if (g2t_ssd_hit)
      {
        nSsdHits = readPointFromTable(g2t_ssd_hit);
@@ -107,7 +110,7 @@ Int_t St_sls_Maker::Make()
      }    
    LOG_INFO <<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endm;
    StSsdBarrel::Instance()->convertGlobalFrameToOther();
-   Int_t inactiveHit;
+   Int_t inactiveHit = 0;
    if (g2t_ssd_hit)
      {
        inactiveHit = removeInactiveHitInTable(g2t_ssd_hit);
