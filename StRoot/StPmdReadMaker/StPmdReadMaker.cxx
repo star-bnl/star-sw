@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.28 2007/12/02 10:07:39 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.29 2008/01/15 19:32:22 perev Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.29  2008/01/15 19:32:22  perev
+ *No HOT CELLS, return with error flag
+ *
  *Revision 1.28  2007/12/02 10:07:39  rashmi
  *Changing SMChain_GNF from MPVFactor to MeanFactor
  *
@@ -773,9 +776,10 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst()
   
   // HOT CELLS
   mHotCells = (St_pmdHotCells*) mDb->Find("pmdHotCells");
-  if (!mHotCells) gMessMgr->Warning("pmdHotCells not found!");
-  //  if (!mHotCells) fout<<"pmdHotCells not found!"<<endl;
-  
+  if (!mHotCells) {
+     gMessMgr->Warning("pmdHotCells not found!");
+     return kFALSE;
+  }
   Int_t nhot = 0;
   for (int chain=1; chain <= 48; chain++) {
     pmdHotCells_st* chainCells = mHotCells->GetTable(chain-1);
