@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Unified.C,v 1.1 2007/12/22 01:19:57 lbarnby Exp $
+// $Id: bfcMixer_Unified.C,v 1.2 2008/01/15 15:34:31 lbarnby Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -16,8 +16,10 @@ StBFChain *chain1, *chain2, *chain3;
 void bfcMixer_Unified(const Int_t Nevents=1,
 	      const Char_t *daqfile="/star/rcf/test/daq/2005/051/st_physics_adc_6051006_raw_1050001.daq",
 	      const Char_t *tagfile="/star/rcf/test/embedding/cuProductionMinBias/FullField/P07ic/2005/051/st_physics_adc_6051006_raw_1050001.tags.root",
-	      const Float_t zvertex_low=-175.0,
-	      const Float_t zvertex_high=175.0,
+	      const Float_t pt_low=-0.1,
+	      const Float_t pt_high=5.0,
+	      const Int_t pid=9,
+	      const Double_t mult = 0.1,      
 	      const Char_t *mode="strange",
 	      const Char_t *acc_mode="off" ) {
   // production chain and geometry for P07ib
@@ -103,9 +105,9 @@ void bfcMixer_Unified(const Int_t Nevents=1,
   if (! embMk) return;
   embMk->SetTagFile(tagfile);
   //            pTlow,ptHigh,etaLow,etaHigh,phiLow,phiHigh
-  embMk->SetOpt(  0.1,    5.,  -1.3,    1.3,    0.,   6.28); 
+  embMk->SetOpt(  pt_low,    pt_high,  -1.3,    1.3,    0.,   6.28); 
   //                pid, mult
-  embMk->SetPartOpt(  8,0.05);
+  embMk->SetPartOpt(  pid,mult);
   TAttr::SetDebug(0);
   Chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   Chain->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
@@ -123,6 +125,9 @@ void bfcMixer_Unified(const Int_t Nevents=1,
 }
   
 // $Log: bfcMixer_Unified.C,v $
+// Revision 1.2  2008/01/15 15:34:31  lbarnby
+// Added arguments for pt limits, PID and multiplicity fractino or number and removed Zzvertex limit arguments as they were not being used
+//
 // Revision 1.1  2007/12/22 01:19:57  lbarnby
 // Initial revision with P07id chains for Y7 200 GeV Au+Au st_gamma and 20 GeV Au+Au reproduction
 //  
