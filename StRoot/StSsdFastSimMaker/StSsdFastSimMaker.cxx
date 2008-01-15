@@ -169,7 +169,7 @@ Int_t StSsdFastSimMaker::Make()
     Int_t currWafNumb = 0;
     Int_t currLadder  = 0;
     Int_t i           = 0;
-    unsigned char c;
+    unsigned char c   = 0;
     for (i = 0; i < g2t_ssd_hit->GetNRows() ; i++)    {
       currWafId=g2t[i].volume_id;
       if (currWafId > minWaf)   {
