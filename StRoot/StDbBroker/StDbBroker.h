@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.29 2007/09/10 02:36:08 perev Exp $
+ * $Id: StDbBroker.h,v 1.30 2008/01/15 20:37:44 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.30  2008/01/15 20:37:44  deph
+ * Removed DbFill and corresponding calls from StDbBroker
+ *
  * Revision 1.29  2007/09/10 02:36:08  perev
  * StDbBroker::Release added
  *
@@ -197,7 +200,7 @@ struct oldDescriptor {
     bool   UseRunLog(StDbTable* table);
 
     char  **GetComments(St_Table *parentTable);
-    void   Fill(void * pArray, const char **ElementComment);
+  //  void   Fill(void * pArray, const char **ElementComment);
 
     // Write Into Database methods
     //  with tabID -> assumes StDbBroker::InitConfig() has been called 
@@ -298,15 +301,15 @@ const char *GetFlavor();
 };
 
 // The old C-functions from Sasha's prototype & 1st integration
-extern "C" void DbFill(unsigned int *,         //datetime[4]
-		       const char *,  //tableName
-		       const char *,  //StructName
-		       unsigned int,           //nVar
-		       StDbBroker::oldDescriptor *d,
-		       const char **,       //Comments
-		       unsigned int,           //nRows
-		       unsigned int,           //sizeOfStruct
-		       void *);       //pData
+//extern "C" void DbFill(unsigned int *,         //datetime[4]
+//		       const char *,  //tableName
+//		       const char *,  //StructName
+//		       unsigned int,           //nVar
+//		       StDbBroker::oldDescriptor *d,
+//		       const char **,       //Comments
+//		       unsigned int,           //nRows
+//		       unsigned int,           //sizeOfStruct
+//		       void *);       //pData
 		       
 extern "C" void *DbUse(unsigned int*,           //&nRows,
 		       unsigned int *,         //datetime[4]

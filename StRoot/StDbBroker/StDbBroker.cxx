@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.53 2007/12/11 20:31:08 deph Exp $
+ * $Id: StDbBroker.cxx,v 1.54 2008/01/15 20:37:44 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.54  2008/01/15 20:37:44  deph
+ * Removed DbFill and corresponding calls from StDbBroker
+ *
  * Revision 1.53  2007/12/11 20:31:08  deph
  * moved print statistics call to close db function so only prints upon a real close
  *
@@ -289,35 +292,35 @@ void StDbBroker::Release(){
 }
 
 //_____________________________________________________________________________
-void StDbBroker::Fill(void * pArray, const char **Comments)
-{
-  if ( m_nElements==0 ) return;
+//void StDbBroker::Fill(void * pArray, const char **Comments)
+//{
+//  if ( m_nElements==0 ) return;
   //char **Comments = new char*[m_nElements]; 
   //TString Comment;
 
-  UInt_t i;
-  for (i=0;i<m_nElements;i++) {
+//  UInt_t i;
+//  for (i=0;i<m_nElements;i++) {
     
-    if(m_descriptor[i].fDimensions>1)
-      {
-	LOG_ERROR<<"dim>1, can't handle yet"<<endm;
-	return;
-      }
+//    if(m_descriptor[i].fDimensions>1)
+//      {
+//	LOG_ERROR<<"dim>1, can't handle yet"<<endm;
+//	return;
+//      }
     
-    m_descriptor[i].fColumnName[31]='\0';
-  }
+//    m_descriptor[i].fColumnName[31]='\0';
+//  }
   
-  Int_t  date, time;
+//  Int_t  date, time;
   //VP TDatime::GetDateTime(m_DateTime, date, time);
-  date = m_DateTime[0]; time = m_DateTime[1];
-  uint datetime[4]={0,0,0,0};
-  datetime[0]=date;
-  datetime[1]=time;
+//  date = m_DateTime[0]; time = m_DateTime[1];
+//  uint datetime[4]={0,0,0,0};
+//  datetime[0]=date;
+//  datetime[1]=time;
   
-  ::DbFill(datetime, (const char*) m_tableName, (const char*) m_structName, m_nElements,m_descriptor,Comments,m_nRows,m_sizeOfStruct,pArray);
+//  ::DbFill(datetime, (const char*) m_tableName, (const char*) m_structName, m_nElements,m_descriptor,Comments,m_nRows,m_sizeOfStruct,pArray);
   
-  delete [] Comments;
-}  
+//  delete [] Comments;
+//}  
 
 //_____________________________________________________________________________
 const char *StDbBroker::GetFlavor()
