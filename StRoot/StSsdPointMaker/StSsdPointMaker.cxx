@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.54 2008/01/11 10:39:39 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.55 2008/01/15 13:48:58 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.55  2008/01/15 13:48:58  bouchet
+// Set a default value for uninitialized variable
+//
 // Revision 1.54  2008/01/11 10:39:39  bouchet
 // add method to read the Wafer configuration table
 //
@@ -903,7 +906,7 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
-  Int_t found;
+  Int_t found = 0 ;
   LOG_DEBUG <<"PrintStripDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
@@ -957,7 +960,7 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
 void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
-  Int_t found;
+  Int_t found = 0;
   LOG_INFO <<"PrintClusterDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
