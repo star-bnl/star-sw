@@ -5,15 +5,14 @@
 #include <time.h>
 #include <math.h>
 
-/*********************************************************************
- * $Id: L2btowCalAlgo08.cxx,v 1.1 2007/12/19 02:30:18 balewski Exp $
- * \author Jan Balewski, IUCF, 2006 
- *********************************************************************
- * Descripion:
+/*********************************************************
+  $Id: L2btowCalAlgo08.cxx,v 1.2 2008/01/16 23:32:34 balewski Exp $
+  \author Jan Balewski, IUCF, 2006 
+ *****************************************************
+  Descripion:
   Reco of mono- & di-jets in L2 using BTOW+ETOW
   depends on L2-DB class 
- *********************************************************************
- */
+ *****************************************************/
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
@@ -30,7 +29,7 @@
 /************************
 the _only_ copy of L2event for all L2-algos
 **************************/
-L2event2008  globL2event2008;
+L2eventStream2008  globL2eventStream2008;
 /*************************/
 
 //=================================================
@@ -44,10 +43,15 @@ L2btowCalAlgo08::L2btowCalAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geoX,
 
   setMaxHist(32);
   createHisto();
-  
-  // map L2event variables for _write_
-  mEve_btow_hit=globL2event2008.btow_hit;
-}
+
+  // initilalize BTOW-Calibrated-data
+  int k;
+  globL2eventStream2008.nBadToken_btow=0;
+  for(k=0;k<L2eventStream2008::mxToken;k++){
+    L2BtowCalibData08 & btowCalibData=globL2eventStream2008.btow[k];  
+    btowCalibData.mon.nTotal=0;
+  }
+ }
 
 /* ========================================
   ======================================== */
@@ -153,11 +157,27 @@ L2btowCalAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 /* ========================================
   ======================================== */
 void 
-L2btowCalAlgo08::computeBtow(int flag, int inpL2EveId, int bemcIn, ushort *rawAdc){
-  // special case, code below will trurn off regular compute(), must have one exit  at the end
-  computeStart(flag, inpL2EveId);
+L2btowCalAlgo08::computeBtow(int token, int bemcIn, ushort *rawAdc){
+  // Btow calibration is a special case, code below will trurn off regular compute(), must have one exit  at the end
 
-  clearEvent(); /* large price tag in kTicks */
+  computeStart();
+
+  //...... Verify token is in range .......
+  if(token<=L2eventStream2008::tokenZero || token>=L2eventStream2008::mxToken) {
+    // clear ADC data & token for a bad token
+    bemcIn=0;
+    token=L2eventStream2008::tokenZero; // set non-physical token
+    globL2eventStream2008.nBadToken_btow++; // it is caled so rarely that can be slow
+    mhN->fill(6);
+  }
+  
+  //...... token is valid ........
+  L2BtowCalibData08 & btowCalibData=globL2eventStream2008.btow[token];  
+  btowCalibData.mon.nTotal++;
+  
+  // clear data for this token from previous event
+  btowCalibData.hitSize=0;
+
   int nTower=0; /* counts mapped & used ADC channels */
   int nHotTower=0;
   if(bemcIn && par_gainType>kGainZero) { // EVEVEVEVEVE
@@ -169,7 +189,7 @@ L2btowCalAlgo08::computeBtow(int flag, int inpL2EveId, int bemcIn, ushort *rawAd
     ushort *ped=geom->btow.ped_rdo;
     float *gain2ET=geom->btow.gain2ET_rdo;
     float *gain2Ene=geom->btow.gain2Ene_rdo;
-    HitTower *hit=globL2event2008. btow_hit;
+    HitTower1 *hit=btowCalibData.hit;
     for(rdo=0; rdo<BtowGeom::mxRdo; rdo++){
       if(rawAdc[rdo]<thr[rdo])continue;
       adc=rawAdc[rdo]-ped[rdo];  //do NOT correct for common pedestal noise
@@ -187,7 +207,7 @@ L2btowCalAlgo08::computeBtow(int flag, int inpL2EveId, int bemcIn, ushort *rawAd
 	nHotTower++;
       }
     }
-    globL2event2008.btow_hitSize=nTower;
+    btowCalibData.hitSize=nTower;
     
     // QA histos
     hA[13]->fill(nTower);
@@ -197,20 +217,21 @@ L2btowCalAlgo08::computeBtow(int flag, int inpL2EveId, int bemcIn, ushort *rawAd
 
   // debugging should be off for any time critical computation
   if(par_dbg>0){
-     printf("L2-%s-compute: set adcL size=%d, get=%d\n",getName(),nTower,*globEve_btow_hitSize);
+    printf("L2-%s-compute: set adcL size=%d, get=%d\n",getName(),nTower,999); //tmp
    printf("dbg=%s: found  nTw=%d\n",getName(),nTower);
-    if(par_dbg>0) print1();
-    print2();
+    if(par_dbg>0)   print0();
+    printCalibratedData(token);
   } 
   
-  computeStop();
+  computeStop(token);
 
 } 
 
 /* ========================================
   ======================================== */
 void 
-L2btowCalAlgo08::computeUser(int flag, int inpL2EveId){
+L2btowCalAlgo08::computeUser(int token ){
+
   printf("computeUser-%s FATAL CRASH\n If you see this message it means l2new is very badly misconfigured \n and L2-btow-calib algo was not executed properly\n before calling other individual L2-algos. \n\n l2new will aborted now - fix the code, Jan B.\n",getName());
   assert(1==2);
 }
@@ -249,6 +270,29 @@ L2btowCalAlgo08::finishRunUser() {  /* called once at the end of the run */
     fprintf(mLogFile,"#BTOW_hot tower _candidate_ (bHotSum=%d of %d eve) :, softID %d , crate %d , chan %d , name %s\n",bHotSum,mEventsInRun,bHotId,xB->crate,xB->chan,xB->name);
   }
   
+  //...... QA tokens .....
+  int tkn1=99999, tkn2=0; // min/max token
+  int nTkn=0;
+  int tkn3=-1, nTkn3=-1; // most often used token
+  
+  int k;
+  for(k=0;k<L2eventStream2008::mxToken;k++){
+    L2BtowCalibData08 & btowCalibData=globL2eventStream2008.btow[k];  
+    if(btowCalibData.mon.nTotal==0) continue;
+    hA[1]->fillW(k,btowCalibData.mon.nTotal);
+    if(nTkn3<btowCalibData.mon.nTotal){
+      nTkn3=btowCalibData.mon.nTotal;
+      tkn3=k;
+    }
+
+    nTkn++;
+    if(tkn1>k) tkn1=k;
+    if(tkn2<k) tkn2=k;
+  }
+  if (mLogFile){
+    fprintf(mLogFile,"#BTOW_token_QA:  _candidate_ hot token=%d used %d for %d events, token range [%d, %d], used %d tokens, %d bad tokens\n",tkn3,nTkn3,mEventsInRun,tkn1,tkn2,nTkn,globL2eventStream2008.nBadToken_btow);
+  }
+
 }
 
 
@@ -257,6 +301,8 @@ L2btowCalAlgo08::finishRunUser() {  /* called once at the end of the run */
 void 
 L2btowCalAlgo08::createHisto() {
   memset(hA,0,sizeof(hA));
+  //token related spectra
+  hA[1]=new  L2Histo(1,"L2-btow-calib: seen tokens;  x:  token value; y: events ",20);
   
   // BTOW  raw spectra
   hA[10]=new L2Histo(10,"btow hot tower 1", 4800); // title upadted in initRun
@@ -264,43 +310,24 @@ L2btowCalAlgo08::createHisto() {
   hA[12]=new L2Histo(12,"btow hot tower 3", 40,120); // title upadted in initRun  
   hA[13]=new L2Histo(13,"BTOW #tower w/ energy /event; x: # BTOW towers; y: counts", 100); 
   hA[14]=new L2Histo(14,"# hot towers/event", 100); 
-  
+
 }
 
-//=======================================
-//=======================================
-void 
-L2btowCalAlgo08::clearEvent(){
-  globL2event2008.btow_hitSize=0;
-}
 
 
 /* ========================================
   ======================================== */
 void 
-L2btowCalAlgo08::print1(){ // full ADC array
+L2btowCalAlgo08::print0(){ // full raw input  ADC array
+  // empty
  }
 
-  
-/* ========================================
-  ======================================== */
-void 
-L2btowCalAlgo08::print2(){ 
-  int i;
-  printf("pr2-%s: ---BTOW ADC list--- size=%d\n",getName(),*globEve_btow_hitSize);
-  const HitTower *hit=globEve_btow_hit;
-  for(i=0;i< *globEve_btow_hitSize;i++,hit++) {
-    int adc=hit->adc;
-    int rdo=hit->rdo;
-    float et=hit->et;
-    float ene=hit->ene;
-    printf("  btow: i=%2d rdo=%4d  adc=%d  et=%.3f  ene=%.3f\n",i,rdo,adc,et,ene);
-  }
-
-}
 
 /**********************************************************************
   $Log: L2btowCalAlgo08.cxx,v $
+  Revision 1.2  2008/01/16 23:32:34  balewski
+  toward token dependent compute()
+
   Revision 1.1  2007/12/19 02:30:18  balewski
   new L2-btow-calib-2008
 

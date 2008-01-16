@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 /*********************************************************************
- * $Id: L2Histo.cxx,v 1.3 2008/01/10 22:45:39 balewski Exp $
+ * $Id: L2Histo.cxx,v 1.4 2008/01/16 23:32:33 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -227,14 +227,14 @@ L2Histo::read(FILE *fd, int dbg) {
 bool 
 L2Histo::findMax( int *iMax, int *iFWHM) {
   // returns tru if both max & FWHM make sense
-  *iMax=*iFWHM=-5555;  
+  *iMax=*iFWHM=-1;  
 
   /* finds pedestal & FWHM */
   int maxVal=-1, maxJ=-1;
   int j;
   for(j=0; j<head.nBin;j++) {
     // printf("j=%d  maxVal=%d maxJ=%d  yield=%d\n",j,maxVal, maxJ,data[j]);
-    if(data[j]<maxVal) continue;
+    if(data[j]<=maxVal) continue;
     maxVal=data[j];
     maxJ=j;
   }
@@ -327,6 +327,9 @@ L2Histo::y2c(float val){
 /*
 *********************************************************************
   $Log: L2Histo.cxx,v $
+  Revision 1.4  2008/01/16 23:32:33  balewski
+  toward token dependent compute()
+
   Revision 1.3  2008/01/10 22:45:39  balewski
   reduce memory allocation for every histo
 

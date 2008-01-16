@@ -19,8 +19,7 @@ L2VirtualAlgo2008::L2VirtualAlgo2008(const char* name, L2EmcDb* db, char* outDir
   mOutDir1=outDir;
 
   // map L2event variables for _read_
-  globEve_btow_hitSize=globL2event2008.get_btow_hitSize();
-  globEve_btow_hit=globL2event2008.get_btow_hits();
+  mEveStream_btow=globL2eventStream2008.get_btow();
 
   setOflTrigID(0); // relevant only for offline analysis
   mhN =new   L2Histo(900,"total events 0=anyInput, 10=anyAccept; x=cases",19);
@@ -40,7 +39,6 @@ L2VirtualAlgo2008::L2VirtualAlgo2008(const char* name, L2EmcDb* db, char* outDir
   ======================================== */
 int 
 L2VirtualAlgo2008::initRun( int runNo, int *rc_ints, float *rc_floats) {
-  mEventID=-1; // clear local event identificator
   if(mDb->getRun()!=runNo) return -700; // L2EmcDb not initialized properly
   
   if(mRunNumber==runNo) {  
@@ -141,7 +139,7 @@ L2VirtualAlgo2008::finishCommonHistos() {
   
   const int nHt=3;
   L2Histo *hT[nHt]={mhTc,mhTd,mhTcd};
-  char *text[nHt]={"Compute  ","Decision ","Comp+Deci"};
+  char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
   int ih;
   for(ih=0;ih<nHt;ih++) {
     int iMax=-3, iFWHM=-4;
@@ -222,22 +220,28 @@ L2VirtualAlgo2008::readParams(const char *fileN, int mxPar, int *iPar, float *fP
  
 //=============================================
 void
-L2VirtualAlgo2008::compute(int flag, int inpL2EveId){
+L2VirtualAlgo2008::compute(int token){
   /* STRICT TIME BUDGET  START ....*/
-  if(mEventID==inpL2EveId) return; // never process the same event twice
-  computeStart(flag, inpL2EveId);
-  computeUser(flag, inpL2EveId);
-  computeStop();
+  computeStart();
+  mhN->fill(1);
+  if(token<=L2eventStream2008::tokenZero ||
+     token>=L2eventStream2008::mxToken) { 
+    mhN->fill(3); 
+    return;
+  }  else {   // protect compute against bad token
+    computeUser( token );
+    computeStop( token);
+  }
 }
 
 //=============================================
 void
-L2VirtualAlgo2008::computeStart(int flag, int inpL2EveId){
+L2VirtualAlgo2008::computeStart(){
+
   /* STRICT TIME BUDGET  START ....*/
   unsigned int high,low;
   rdtsc_macro(low,high);  // needs also high to get tim in seconds
 
-  mComputeTimeDiff=0;
   mComputeTimeStart=low;
   unsigned long long ticks = high;
   ticks  <<= 32;
@@ -248,7 +252,6 @@ L2VirtualAlgo2008::computeStart(int flag, int inpL2EveId){
  
   mhRc->fill(mSecondsInRun);
 
-  mEventID=inpL2EveId;
   mAccept=true; // by default accept every event
   mEventsInRun++;
 
@@ -257,14 +260,15 @@ L2VirtualAlgo2008::computeStart(int flag, int inpL2EveId){
 
 //=============================================
 void
-L2VirtualAlgo2008::computeStop(){
+L2VirtualAlgo2008::computeStop(int token){
 
   // HARDCODED DELAY
   // for(int i=0;i<5*100;i++) { float x=i*i; x=x;}// to add 5kTicks delay, tmp
 
   rdtscl_macro(mComputeTimeStop);
-  mComputeTimeDiff=mComputeTimeStop-mComputeTimeStart;
-  int  kTick=mComputeTimeDiff/1000;
+  unsigned long xxx=mComputeTimeStop-mComputeTimeStart;
+  mComputeTimeDiff[token]=xxx;
+  int  kTick=xxx/1000;
   //printf("jj delT/kTick=%f t1=%d t2=%d \n",mComputeTimeDiff/1000.,mComputeTimeStart,mComputeTimeStop);
   mhTc->fill(kTick);
 }
@@ -272,25 +276,27 @@ L2VirtualAlgo2008::computeStop(){
 
 //=============================================
 bool
-L2VirtualAlgo2008::decision(int flag, int inpL2EveId){
+L2VirtualAlgo2008::decision(int token){
   /* STRICT TIME BUDGET  START ....*/
   /*
     Chris doesn't want us to write  out anything
     during event processing ...
   */
 
-  if(mEventID!=inpL2EveId) return true; // accept every event which was not 'computed'
   rdtscl_macro(mDecisionTimeStart);
+  token&=0xfff; // only protect against bad token, Gerard's trick
   mDecisionTimeDiff=0;
 
-  mhN->fill(1);
   mhRd->fill(mSecondsInRun);
 
   // HARDCODED DELAY
   // tmporary, for testing of histos, it costs 3 kTicks
   for(int i=0;i<3*100;i++) { float x=i*i; x=x;}// to add 3kTicks delay, tmp
 
-  mAccept=decisionUser(flag, inpL2EveId);
+  mhN->fill(2);
+  mAccept=decisionUser(token);
+  // printf("compuDDDD tkn=%d  dec=%d\n",token,mAccept);
+
   if(mAccept) { 
     mhN->fill(10);
     mhRa->fill(mSecondsInRun);
@@ -301,7 +307,36 @@ L2VirtualAlgo2008::decision(int flag, int inpL2EveId){
  
   // printf("deci-%s compT=%d;  deciT=%d kTick=%d\n", getName(),mComputeTimeDiff,mDecisionTimeDiff,kTick);
   mhTd->fill(kTick);
-  kTick=(mDecisionTimeDiff+mComputeTimeDiff)/1000;
+  kTick=(mDecisionTimeDiff+mComputeTimeDiff[token])/1000;
   mhTcd->fill(kTick);
   return mAccept;
 }
+
+
+
+/* ========================================
+  ======================================== */
+void 
+L2VirtualAlgo2008::printCalibratedData(int token){ // 
+  int i;
+  const int hitSize=mEveStream_btow[token].get_hitSize();
+  printf("printCalibratedData-%s: ---BTOW ADC list--- size=%d\n",getName(),hitSize);
+   const HitTower1 *hit=mEveStream_btow[token].get_hits();
+  for(i=0;i< hitSize;i++,hit++) {
+    int adc=hit->adc;
+    int rdo=hit->rdo;
+    float et=hit->et;
+    float ene=hit->ene;
+    printf("  btow: i=%2d rdo=%4d  adc=%d  et=%.3f  ene=%.3f\n",i,rdo,adc,et,ene);
+  }
+}
+
+
+/******************************************************
+  $Log: L2VirtualAlgo2008.cxx,v $
+  Revision 1.2  2008/01/16 23:32:33  balewski
+  toward token dependent compute()
+
+
+ 
+*/
