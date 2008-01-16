@@ -1,7 +1,7 @@
 #ifndef L2btowCalAlgo08_H
 #define L2btowCalAlgo08_H
 /*********************************************************************
- * $Id: L2btowCalAlgo08.h,v 1.1 2007/12/19 02:30:18 balewski Exp $
+ * $Id: L2btowCalAlgo08.h,v 1.2 2008/01/16 23:32:34 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -15,6 +15,9 @@ class L2EmcGeom;
 #include "L2VirtualAlgo2008.h"
 
 class L2btowCalAlgo08 : public  L2VirtualAlgo2008 {
+  /* this class fills the folowing bins of counter histo (mhN)
+     6 - # of bad token out of range [1...4095]
+  */
  private:
 
   //..................... params set in initRun
@@ -28,20 +31,18 @@ class L2btowCalAlgo08 : public  L2VirtualAlgo2008 {
   L2EmcGeom *geom;
 
   //........ pointer current events
-  HitTower *mEve_btow_hit;
+  HitTower1 *mEve_btow_hit;
 
   // utility methods
   void createHisto();
-  void clearEvent();
 
- public:
+ public: 
   L2btowCalAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geo, char* outDir);
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
-  void  computeBtow(int flag, int inpL2EveId, int bemcIn, ushort *bemcData);
-  void  computeUser(int flag, int inpL2EveId); // bubby trap
-  void print1();
-  void print2();
+  void  computeBtow(int token, int bemcIn, ushort *bemcData);
+  void  computeUser(int token); // bubby trap
+  void print0();
 
 };
 
@@ -49,6 +50,9 @@ class L2btowCalAlgo08 : public  L2VirtualAlgo2008 {
 
 /**********************************************************************
   $Log: L2btowCalAlgo08.h,v $
+  Revision 1.2  2008/01/16 23:32:34  balewski
+  toward token dependent compute()
+
   Revision 1.1  2007/12/19 02:30:18  balewski
   new L2-btow-calib-2008
 

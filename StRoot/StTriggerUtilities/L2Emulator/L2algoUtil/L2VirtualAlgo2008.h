@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo2008.h,v 1.1 2007/12/19 02:30:17 balewski Exp $
+ * $Id: L2VirtualAlgo2008.h,v 1.2 2008/01/16 23:32:33 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -26,7 +26,7 @@
 #endif
 
 #include <string>
-#include "L2event2008.h"
+#include "L2eventStream2008.h"
    
 class L2EmcDb;
 class L2Histo;
@@ -36,17 +36,28 @@ class L2VirtualAlgo2008 {
   std::string mOutDir1, mName1;
   L2EmcDb *mDb;
   FILE    *mLogFile, *mHistFile;
-  L2Histo *mhN; /*  Neve/case */
+  L2Histo *mhN; /*  Neve(case),  
+		    bins: [0-4],[10-14], reserved for virtual08 algo
+		    0 - # of input events
+		    1 - # of calls computUser()  
+		    2 - # of calls decisionUser()  
+		    3 - # of bad tokens while compute()
+		    5...9 - user algo
+		    10 - # of accepted events 
+		    11..14 - free
+		    15...19 - user algo
+		*/
   L2Histo *mhTc,*mhTd,*mhTcd;/* time/eve : compute, decision, compute+decision */
   L2Histo *mhRc, *mhRd, *mhRa ; /*  rate/sec: compute, decision, accepted */
   int   oflTrigId; // important only for off-line analysis /w Makers
   int   mAccept;
   int   mEventsInRun;
   int   mSecondsInRun;
-  int   mEventID;
   int   mRunNumber;
+  const  L2BtowCalibData08 *mEveStream_btow;
+
   enum {par_cpuTicksPerSecond=1600000000};
-  unsigned long  mComputeTimeStart,  mComputeTimeStop,  mComputeTimeDiff;
+  unsigned long  mComputeTimeStart,  mComputeTimeStop,  mComputeTimeDiff[L2eventStream2008::mxToken];
   unsigned long  mDecisionTimeStart, mDecisionTimeStop, mDecisionTimeDiff;
   unsigned long long mRunStartTicks;
 
@@ -57,8 +68,8 @@ class L2VirtualAlgo2008 {
   }
   int finishCommonHistos(); 
 
-  void  computeStart(int flag, int inpL2EveId);
-  void  computeStop();
+  void  computeStart();
+  void  computeStop(int token);
 
  public:
   L2VirtualAlgo2008(const char* name, L2EmcDb* db, char* outDir);
@@ -71,19 +82,18 @@ class L2VirtualAlgo2008 {
   const char *getName() { return mName1.c_str();}
 
   int   initRun(int runNo, int *rc_ints, float *rc_floats);
-  void  compute (int flag, int inpL2EveId);
-  bool  decision(int flag, int inpL2EveId);
+  void  compute (int token);
+  bool  decision(int token);
   void  finishRun();
 
   // implement algo specific operations in the virtual functions
   virtual int   initRunUser(int runNo, int *rc_ints, float *rc_floats){ return 0;}
-  virtual void  computeUser(int flag, int inpL2EveId){};
-  virtual bool  decisionUser(int flag, int inpL2EveId){ return mAccept; }
+  virtual void  computeUser(int token){};
+  virtual bool  decisionUser(int token){ assert(4==8); return mAccept; } // must be token dependent
   virtual void  finishRunUser(){}// at the end of each run
 
   // read-only access to current 'global' event, updated in compute
-  const int *globEve_btow_hitSize; // it is just one value, use *-prefix
-  const HitTower  *globEve_btow_hit;
+  void printCalibratedData(int token);
 };
 
 
