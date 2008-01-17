@@ -29,6 +29,7 @@ class StBemcTriggerSimu;
 class StEemcTriggerSimu;
 class StL2TriggerSimu;
 class StGenericL2Emulator;
+class StTriggerSimuResult;
 
 class StTriggerSimuMaker : public StMaker {
 private:
@@ -40,6 +41,9 @@ private:
     
   /// collection of subdetector trigger simulators, individual pointers also available publicly below
   std::vector<StVirtualTriggerSimu*> mSimulators;
+  
+  /// detailed results for individual trigger simulations
+  std::vector<StTriggerSimuResult> mResults;
   
 public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
@@ -60,7 +64,9 @@ public:
   TObjArray  *mHList; // output histo access point
   void setHList(TObjArray * x){mHList=x;}
   bool isTrigger(int trigId);
-  // not used,JB vector <int> mTriggerList;
+  
+  /// returns object containing detailed information about simulation of given trigger
+  const StTriggerSimuResult& detailedResult(unsigned int trigId);
   
   //hang all activated trigger detectors below
   StBbcTriggerSimu  *bbc;
@@ -73,9 +79,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.14 2007/11/18 21:58:50 balewski Exp $
+// $Id: StTriggerSimuMaker.h,v 1.15 2008/01/17 01:58:25 kocolosk Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.15  2008/01/17 01:58:25  kocolosk
+// StTriggerSimuResult makes detailed emulation results persistent
+//
 // Revision 1.14  2007/11/18 21:58:50  balewski
 // L2algos triggerId list fixed
 //
