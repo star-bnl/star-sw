@@ -51,7 +51,7 @@ L2VirtualAlgo2008::initRun( int runNo, int *rc_ints, float *rc_floats) {
   mRunStartTicks=high;  mRunStartTicks <<= 32; mRunStartTicks  +=  low;
 
   mRunNumber  =runNo;  // serves as a flag this run is initialized
-  
+
   char Fname[1000];
   sprintf(Fname,"%s/run%d.l2%s.log",mOutDir1.c_str(),mRunNumber,getName());
   printf("L2-%s::initRun('%s') ...\n",getName(),Fname);
@@ -291,7 +291,7 @@ L2VirtualAlgo2008::decision(int token){
 
   // HARDCODED DELAY
   // tmporary, for testing of histos, it costs 3 kTicks
-  for(int i=0;i<3*100;i++) { float x=i*i; x=x;}// to add 3kTicks delay, tmp
+  for(int i=0;i<3*100;i++) { float x=i*i; x=x;}// to add 3kTicks delay, tmp - to see sth in the spectra
 
   mhN->fill(2);
   mAccept=decisionUser(token);
@@ -334,6 +334,9 @@ L2VirtualAlgo2008::printCalibratedData(int token){ //
 
 /******************************************************
   $Log: L2VirtualAlgo2008.cxx,v $
+  Revision 1.3  2008/01/17 23:15:51  balewski
+  bug in token-addressed memory fixed
+
   Revision 1.2  2008/01/16 23:32:33  balewski
   toward token dependent compute()
 
