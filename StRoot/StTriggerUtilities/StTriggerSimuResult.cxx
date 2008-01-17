@@ -1,4 +1,4 @@
-// $Id: StTriggerSimuResult.cxx,v 1.1 2008/01/17 01:58:25 kocolosk Exp $
+// $Id: StTriggerSimuResult.cxx,v 1.2 2008/01/17 17:04:08 kocolosk Exp $
 
 #include <utility>
 using std::make_pair;
@@ -13,6 +13,7 @@ using std::make_pair;
 #include "L2Emulator/L2gammaAlgo/L2gammaResult2006.h"
 #include "L2Emulator/L2upsilon/L2Result.h"
 
+ClassImp(HttpResult)
 ClassImp(StTriggerSimuResult)
 
 StTriggerSimuResult::StTriggerSimuResult() : TObject(), mBbcDecision(kDoNotCare),
@@ -57,40 +58,50 @@ int StTriggerSimuResult::jetPatchAdc(short jetPatchId) const {
     return -1;
 }
 
-pair<int, int> StTriggerSimuResult::httpAdcPair(short towerId) const {
+HttpResult StTriggerSimuResult::httpPair(short towerId) const {
+    HttpResult result;
+    result.towerId = -1;
+    result.towerAdc = -1;
+    result.triggerPatchId = -1;
+    result.triggerPatchAdc = -1;
     for(unsigned i=0; i<mHighTowerIds.size(); i++) {
         if(mHighTowerIds[i] == towerId) {
+            result.towerId = towerId;
+            result.towerAdc = mHighTowerAdcs[i];
             if(i<mTriggerPatchAdcs.size()) {
-                return make_pair( mHighTowerAdcs[i], mTriggerPatchAdcs[i] );                
+                result.triggerPatchId = mTriggerPatchIds[i];
+                result.triggerPatchAdc = mTriggerPatchAdcs[i];                
             }
             else {
                 LOG_WARN << "No matching TP is available for " << towerId << endm;
-                return make_pair( mHighTowerAdcs[i], -1 );                                
             }
         }
     }
-    return make_pair(-1,-1);
+    return result;
 }
 
-const L2pedResults2006& StTriggerSimuResult::l2PedResult2006() const {
-    return *(L2pedResults2006*)(mL2Result + L2RESULTS_OFFSET_EMC_PED);
+const void* StTriggerSimuResult::l2Result(L2ResultType algo, int year) const {
+    void *ptr = NULL;
+    switch(algo) {
+        case kPed:
+            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_EMC_PED);
+            break;
+        case kJet:
+            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_DIJET);
+            break;
+        case kGammaBemc:
+            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_PIG + 2);
+            break;
+        case kGammaEemc:
+            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_PIG + 0);
+            break;
+        case kUpsilon:
+            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_UPS);
+            break;
+    }
+    return ptr;
 }
 
-const L2jetResults2006& StTriggerSimuResult::l2JetResult2006() const {
-    return *(L2jetResults2006*)(mL2Result + L2RESULTS_OFFSET_DIJET);
-}
-
-const L2gammaResult& StTriggerSimuResult::l2GammaBemcResult2006() const {
-    return *(L2gammaResult*)(mL2Result + L2RESULTS_OFFSET_PIG + 3);
-}
-
-const L2gammaResult& StTriggerSimuResult::l2GammaEemcResult2006() const {
-    return *(L2gammaResult*)(mL2Result + L2RESULTS_OFFSET_PIG + 5);
-}
-
-const L2Result& StTriggerSimuResult::l2UpsilonResult2006() const {
-    return *(L2Result*)(mL2Result + L2RESULTS_OFFSET_UPS);
-}
 
 void StTriggerSimuResult::addHighTower(int towerId, int dsmAdc) {
     mHighTowerIds.push_back(towerId);
@@ -114,6 +125,9 @@ void StTriggerSimuResult::setL2Result(const unsigned int* result) {
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.cxx,v $
+ * Revision 1.2  2008/01/17 17:04:08  kocolosk
+ * some revisions to StTriggerSimuResult structure to hopefully improve clarity and maintainability
+ *
  * Revision 1.1  2008/01/17 01:58:25  kocolosk
  * StTriggerSimuResult makes detailed emulation results persistent
  *
