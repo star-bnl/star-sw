@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.54 2008/01/15 20:37:44 deph Exp $
+ * $Id: StDbBroker.cxx,v 1.55 2008/01/17 20:55:00 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.55  2008/01/17 20:55:00  deph
+ * Removed annoying repetative printing of Statistics
+ *
  * Revision 1.54  2008/01/15 20:37:44  deph
  * Removed DbFill and corresponding calls from StDbBroker
  *
@@ -276,7 +279,7 @@ void StDbBroker::printStatistics(){
 void StDbBroker::CloseAllConnections(){
   if(mgr){
            mgr->closeAllConnections();
-           StDbBroker::printStatistics();
+//           StDbBroker::printStatistics();
          }
 //   cout<<"MPD:GOT HERE connection to db closed"<<endl;
 };
