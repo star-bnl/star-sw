@@ -43,9 +43,16 @@ StL2TriggerSimu::triggerDecision(int trigId){
   return mL2maker->isTrigger(trigId);
 }
 
+const unsigned int* StL2TriggerSimu::result() const {
+    return mL2maker->result();
+}
+
 
 //
 // $Log: StL2TriggerSimu.cxx,v $
+// Revision 1.7  2008/01/17 01:56:52  kocolosk
+// export 128-byte emulated L2Result
+//
 // Revision 1.6  2007/11/18 21:58:53  balewski
 // L2algos triggerId list fixed
 //

@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.10 2007/12/09 15:56:52 rfatemi Exp $
+// $Id: StGenericL2Emulator.h,v 1.11 2008/01/17 01:56:52 kocolosk Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -83,13 +83,20 @@ class StGenericL2Emulator  {
 
   vector <int> mAcceptTriggerList;
   vector <int> mVetoTriggerList;
-  StTriggerSimuDecision  isTrigger(int trigId);   
+  StTriggerSimuDecision  isTrigger(int trigId);
+  
+  /// bag of 64 bytes whose interpretation changes year-by-year
+  const unsigned int* result() const;
+  
   ClassDef(StGenericL2Emulator,0) 
 };
 
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.11  2008/01/17 01:56:52  kocolosk
+// export 128-byte emulated L2Result
+//
 // Revision 1.10  2007/12/09 15:56:52  rfatemi
 // allow BEMC to take adc from StEvent instead of MuDst
 //

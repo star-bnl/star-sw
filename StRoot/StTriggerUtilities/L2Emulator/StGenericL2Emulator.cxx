@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.12 2007/12/15 00:59:06 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.13 2008/01/17 01:56:52 kocolosk Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -526,8 +526,14 @@ StGenericL2Emulator::addTriggerList() {
   LOG_INFO  << Form("addTriggerList() yesSize=%d vetoSize=%d",mAcceptTriggerList.size(),mVetoTriggerList.size())<<endm;
 }
 
+const unsigned int * StGenericL2Emulator::result() const {
+    return ( (TrgDataType*)mTrigData)->TrgSum.L2Result;
+}
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.13  2008/01/17 01:56:52  kocolosk
+// export 128-byte emulated L2Result
+//
 // Revision 1.12  2007/12/15 00:59:06  balewski
 // protect against unforeseen time stamp
 //
