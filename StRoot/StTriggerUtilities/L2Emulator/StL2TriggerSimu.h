@@ -12,24 +12,32 @@
 class StGenericL2Emulator;
 
 class StL2TriggerSimu : public StVirtualTriggerSimu {
- private:
-  StGenericL2Emulator *mL2maker;
-  public:
-  StL2TriggerSimu(StGenericL2Emulator *x){mL2maker=x;};
-  void Init();
-  void InitRun(int runnumber);
-  void Clear(){};
-  void Make(){};
-  StTriggerSimuDecision triggerDecision(int trigId);
+private:
+    StGenericL2Emulator *mL2maker;
 
-  ClassDef(StL2TriggerSimu, 1)
- };
+public:
+    StL2TriggerSimu(StGenericL2Emulator *x){mL2maker=x;};
+    void Init();
+    void InitRun(int runnumber);
+    void Clear(){};
+    void Make(){};
+    
+    StTriggerSimuDecision triggerDecision(int trigId);
+    
+    /// bag of 64 bytes whose interpretation changes year-by-year
+    const unsigned int* result() const;
+    
+    ClassDef(StL2TriggerSimu, 1)
+};
 
 
 #endif
 
 //
 // $Log: StL2TriggerSimu.h,v $
+// Revision 1.8  2008/01/17 01:56:52  kocolosk
+// export 128-byte emulated L2Result
+//
 // Revision 1.7  2007/11/18 21:58:54  balewski
 // L2algos triggerId list fixed
 //
