@@ -1,7 +1,7 @@
 #ifndef STAR_StTriggerSimuResult
 #define STAR_StTriggerSimuResult
 
-// $Id: StTriggerSimuResult.h,v 1.1 2008/01/17 01:58:26 kocolosk Exp $
+// $Id: StTriggerSimuResult.h,v 1.2 2008/01/17 17:04:08 kocolosk Exp $
 
 /*****************************************************************************
  * @class StTriggerSimuResult
@@ -24,6 +24,18 @@ class L2pedResults2006;
 class L2jetResults2006;
 class L2gammaResult;
 class L2Result;
+
+/// simple struct to return HHTP tower - trigger patch pairs
+class HttpResult {
+public:
+    int towerId;
+    int towerAdc;
+    int triggerPatchId;
+    int triggerPatchAdc;
+    ClassDef(HttpResult,1)
+};
+
+enum L2ResultType {kPed, kJet, kGammaBemc, kGammaEemc, kUpsilon};
 
 class StTriggerSimuResult : public TObject
 {
@@ -51,14 +63,11 @@ public:
     /// returns DSM ADC if above trigger threshold, otherwise -1
     int jetPatchAdc(short jetPatchId) const;
     
-    /// returns DSM ADC for <HT, TP> -- check that both are > 0
-    pair<int, int> httpAdcPair(short towerId) const;
+    /// returns simple struct encapsulating (id,adc) of HT and TP pair
+    HttpResult httpPair(short towerId) const;
     
-    const L2pedResults2006& l2PedResult2006() const;
-    const L2jetResults2006& l2JetResult2006() const;
-    const L2gammaResult& l2GammaBemcResult2006() const;
-    const L2gammaResult& l2GammaEemcResult2006() const;
-    const L2Result& l2UpsilonResult2006() const;
+    /// returns address of specific L2 result struct -- cast it yourself
+    const void* l2Result(L2ResultType algo, int year=2006) const;
     
     void setTriggerId(unsigned int);
     void setBbcDecision(StTriggerSimuDecision);
@@ -113,6 +122,9 @@ inline void StTriggerSimuResult::setL2Decision(StTriggerSimuDecision d) { mL2Dec
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.h,v $
+ * Revision 1.2  2008/01/17 17:04:08  kocolosk
+ * some revisions to StTriggerSimuResult structure to hopefully improve clarity and maintainability
+ *
  * Revision 1.1  2008/01/17 01:58:26  kocolosk
  * StTriggerSimuResult makes detailed emulation results persistent
  *

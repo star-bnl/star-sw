@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.20 2008/01/17 01:58:25 kocolosk Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.21 2008/01/17 17:04:07 kocolosk Exp $
 
 
 #include <Stiostream.h>
@@ -44,7 +44,6 @@
 
 //get L2
 #include "L2Emulator/StL2TriggerSimu.h"
-#include "L2Emulator/L2jetAlgo/L2jetResults2006.h"
 
 //get HEAD Maker
 #include "StTriggerSimuMaker.h"
@@ -178,6 +177,9 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.21  2008/01/17 17:04:07  kocolosk
+ * some revisions to StTriggerSimuResult structure to hopefully improve clarity and maintainability
+ *
  * Revision 1.20  2008/01/17 01:58:25  kocolosk
  * StTriggerSimuResult makes detailed emulation results persistent
  *
