@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2exampleAlgo08.cxx,v 1.2 2008/01/16 23:32:35 balewski Exp $
+ * $Id: L2exampleAlgo08.cxx,v 1.3 2008/01/17 23:15:51 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion: see .h
@@ -61,9 +61,12 @@ L2exampleAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   if(kBad) return kBad;    
   }
 
-  // clear content of all histograms
+  // clear content of all histograms & token-dependet memory
   int i;
   for (i=0; i<mxHA;i++) if(hA[i])hA[i]->reset();
+  memset(mBtow_fresh,0xffffffff,sizeof(mBtow_fresh));
+  memset(mBtow_clusterET,0,sizeof(mBtow_clusterET));
+  memset(mBtow_clusterET_size,0,sizeof(mBtow_clusterET_size));
 
   // update tiltles of histos
   char txt[1000];
@@ -125,7 +128,6 @@ L2exampleAlgo08::computeUser(int token){
      - doublcounts if 2 seeds are neighbours
   */
   
-
   clearEvent(token);
 
   // ----------- PROJECT INPUT LIST TO 2D ARRAY AND SCAN FOR SEED TOWERS ----
@@ -177,7 +179,9 @@ L2exampleAlgo08::computeUser(int token){
     //........record largest cluster....
     btow_clusterET[(*btow_clusterET_size)++]=maxET;
    }// end of cluster search
-   // printf("compuzzzzzzzzzzzzzzzzz s=%d  tkn=%d\n",*btow_clusterET_size,token);
+
+  mBtow_fresh[token]=kDataFresh;
+  // printf("compuzzzzzzzzzzzzzzzzz s=%d  tkn=%d\n",*btow_clusterET_size,token);
 
   // debugging should be off for any time critical computation
   if(par_dbg>0){
@@ -198,7 +202,12 @@ L2exampleAlgo08::decisionUser(int token){
   const float *btow_clusterET=mBtow_clusterET[token];
   int ic;  
 
+
   //...... some histos just for fun
+  if(btow_clusterET_size>= mxClust) mhN->fill(5);  // was overflow
+  if(mBtow_fresh[token]!=kDataFresh) mhN->fill(6); // stale data
+  mBtow_fresh[token]++; // mark the data as  stale
+
   hA[4]->fill(btow_clusterET_size);
 
   for(ic=0;ic<btow_clusterET_size;ic++) {
@@ -213,9 +222,15 @@ L2exampleAlgo08::decisionUser(int token){
   //........ compute the final decision
   for(ic=0;ic<btow_clusterET_size;ic++) {
     if(btow_clusterET[ic]<par_eventEtThres) continue;
-    return true;  
+    goto accepted;  
   }
   return false;
+
+  /****************/
+ accepted:
+  if(btow_clusterET_size>= mxClust) mhN->fill(15);
+  return true;
+
 } 
 
 
@@ -291,6 +306,9 @@ L2exampleAlgo08::print3(){ // seed list
 
 /**********************************************************************
   $Log: L2exampleAlgo08.cxx,v $
+  Revision 1.3  2008/01/17 23:15:51  balewski
+  bug in token-addressed memory fixed
+
   Revision 1.2  2008/01/16 23:32:35  balewski
   toward token dependent compute()
 

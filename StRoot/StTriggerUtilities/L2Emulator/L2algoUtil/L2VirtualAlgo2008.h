@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo2008.h,v 1.2 2008/01/16 23:32:33 balewski Exp $
+ * $Id: L2VirtualAlgo2008.h,v 1.3 2008/01/17 23:15:51 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -12,7 +12,7 @@
  */
 
 //#include "/asm-i386/msr.h" /* for rdtscl */
-// Great suggestion from Pibero, to use ASM macro directly
+// A great suggestion from Pibero, to use ASM macro directly
 #define rdtscl_macro(low) \
      __asm__ __volatile__("rdtsc" : "=a" (low) : : "edx")
  
@@ -39,9 +39,9 @@ class L2VirtualAlgo2008 {
   L2Histo *mhN; /*  Neve(case),  
 		    bins: [0-4],[10-14], reserved for virtual08 algo
 		    0 - # of input events
-		    1 - # of calls computUser()  
+		    1 - # of calls computeUser()  
 		    2 - # of calls decisionUser()  
-		    3 - # of bad tokens while compute()
+		    3 - # of bad tokens while computeUser()
 		    5...9 - user algo
 		    10 - # of accepted events 
 		    11..14 - free

@@ -1,7 +1,7 @@
 #ifndef L2exampleAlgo08_H
 #define L2exampleAlgo08_H
 /*********************************************************************
- * $Id: L2exampleAlgo08.h,v 1.2 2008/01/16 23:32:36 balewski Exp $
+ * $Id: L2exampleAlgo08.h,v 1.3 2008/01/17 23:15:52 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -19,9 +19,15 @@ class L2Histo;
 class L2EmcGeom;
 #include "L2VirtualAlgo2008.h"
 
+#include "L2exampleResult08.h"
+
 class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
-  /* this class fills the folowing bins of counter histo (mhN)
-     xx - # of bad token out of range [1...4095]
+  /* this class fills the folowing bins
+     of counter histo (mhN), see also L2VirtualAlgo2008.h
+     5 - # of eve w/ overflow # of clusters, on input
+     6 - # of eve w/ STALE data - very bad, on input
+
+     15 - # of eve w/ overflow # of clusters, accepted
   */
  public:
   enum {mxBtow=(BtowGeom::mxEtaBin) * (BtowGeom::mxPhiBin)}; // shortcut
@@ -44,10 +50,14 @@ class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
   float wrkBtow_et[mxBtow]; // full event
   int   wrkBtow_tower_seed[mxBtow]; // above seed thresholds, not cleared
   int   wrkBtow_tower_seed_size;
-  //............... preserved for Decision(), WARN : all is x 4096! 
+  //............... preserved for Decision(),
+  // WARN : all is x 4096! 
+  // remember to clear in initRun() to avoid stale data
 
-  float mBtow_clusterET[mxClust][mxBtow]; //above seed thresholds,not cleared
-  int   mBtow_clusterET_size[L2eventStream2008::mxToken];
+  enum {kDataFresh=0}; // if used 1 or more data are  not fresh
+  int   mBtow_fresh[L2eventStream2008::mxToken]; // for QA
+  int   mBtow_clusterET_size[L2eventStream2008::mxToken];// size of used data in the array below
+  float mBtow_clusterET[L2eventStream2008::mxToken][mxClust]; //above seed thresholds, not cleared
   
   // utility methods
   void  createHisto();
@@ -71,6 +81,9 @@ class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
 
 /**********************************************************************
   $Log: L2exampleAlgo08.h,v $
+  Revision 1.3  2008/01/17 23:15:52  balewski
+  bug in token-addressed memory fixed
+
   Revision 1.2  2008/01/16 23:32:36  balewski
   toward token dependent compute()
 
