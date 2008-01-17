@@ -2,7 +2,7 @@
 #define L2JETRESULTS2006_H
 
 /*********************************************************************
- * $Id: L2jetResults2006.h,v 1.1 2007/10/11 00:33:20 balewski Exp $
+ * $Id: L2jetResults2006.h,v 1.2 2008/01/17 01:57:25 kocolosk Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -57,7 +57,7 @@ struct L2jetResults2006{ // all output bits lump together
 // get value of n-th bit
 #define GET_OB(x,n) ( (x & 1 << n)!=0 ) 
 
-void 
+inline void 
 L2jetResults2006_print(L2jetResults2006 *p) {
   if(p==0) {printf("print L2jetResults2006 - NULL pointer ????\n"); return;}
 
@@ -76,7 +76,7 @@ L2jetResults2006_print(L2jetResults2006 *p) {
 
 //====================================
 //====================================
-unsigned char
+inline unsigned char
 L2jetResults2006_doCheckSum(L2jetResults2006 *p) {
   if(p==0) {printf("print L2jetResults2006 - NULL pointer ????\n"); return 0xffff;}
   unsigned char* buf=(unsigned char*) p;
@@ -90,6 +90,9 @@ L2jetResults2006_doCheckSum(L2jetResults2006 *p) {
 
 /**********************************************************************
   $Log: L2jetResults2006.h,v $
+  Revision 1.2  2008/01/17 01:57:25  kocolosk
+  inline printing and checksum functions
+
   Revision 1.1  2007/10/11 00:33:20  balewski
   L2algo added
 
