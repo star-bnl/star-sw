@@ -1,7 +1,7 @@
 #ifndef L2exampleAlgo08_H
 #define L2exampleAlgo08_H
 /*********************************************************************
- * $Id: L2exampleAlgo08.h,v 1.3 2008/01/17 23:15:52 balewski Exp $
+ * $Id: L2exampleAlgo08.h,v 1.4 2008/01/18 23:29:13 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -15,11 +15,25 @@
  */
 
 
+#include "L2VirtualAlgo2008.h"
+#include "L2exampleResult08.h"
+
+class L2exampleAlgo08 ;
 class L2Histo;
 class L2EmcGeom;
-#include "L2VirtualAlgo2008.h"
 
-#include "L2exampleResult08.h"
+// remember to clear in initRun() to avoid stale data
+class L2exampleEvent08 {// WARN : all is in RAM x 4096 tokens!
+ public: 
+  enum {mxClust=50}; // keep the size down
+  enum {kDataFresh=0}; // if used 1 or more times data are stale
+ private:
+  friend class L2exampleAlgo08 ;
+  int   isFresh; // for QA    
+  int   size;// size of used data in the array below
+  float clusterET[mxClust]; //above seed thresholds, not cleared
+  L2exampleResult08 resultBlob;
+};
 
 class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
   /* this class fills the folowing bins
@@ -31,7 +45,6 @@ class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
   */
  public:
   enum {mxBtow=(BtowGeom::mxEtaBin) * (BtowGeom::mxPhiBin)}; // shortcut
-  enum {mxClust=50}; // keep the size down, gets multiplied by 4096!
  private:
 
   //..................... params set in initRun
@@ -51,13 +64,7 @@ class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
   int   wrkBtow_tower_seed[mxBtow]; // above seed thresholds, not cleared
   int   wrkBtow_tower_seed_size;
   //............... preserved for Decision(),
-  // WARN : all is x 4096! 
-  // remember to clear in initRun() to avoid stale data
-
-  enum {kDataFresh=0}; // if used 1 or more data are  not fresh
-  int   mBtow_fresh[L2eventStream2008::mxToken]; // for QA
-  int   mBtow_clusterET_size[L2eventStream2008::mxToken];// size of used data in the array below
-  float mBtow_clusterET[L2eventStream2008::mxToken][mxClust]; //above seed thresholds, not cleared
+  L2exampleEvent08 mBtow[L2eventStream2008::mxToken]; //it is a lot of RAM!
   
   // utility methods
   void  createHisto();
@@ -69,7 +76,7 @@ class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
   void  computeUser(int token);
-  bool  decisionUser(int token);
+  bool  decisionUser(int token, void **myL2Result);
 
   void print1(int token);
   void print2();
@@ -81,6 +88,9 @@ class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
 
 /**********************************************************************
   $Log: L2exampleAlgo08.h,v $
+  Revision 1.4  2008/01/18 23:29:13  balewski
+  now L2result is exported
+
   Revision 1.3  2008/01/17 23:15:52  balewski
   bug in token-addressed memory fixed
 

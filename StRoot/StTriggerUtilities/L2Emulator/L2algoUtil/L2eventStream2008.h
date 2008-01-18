@@ -44,14 +44,13 @@ class L2EtowCalibData08{// Endcap calibrated data
 //========================================
 class L2eventStream2008{ //   E V E N T     S T R E A M  
  public:
-  enum {mxToken=4096, tokenZero=0};
+  enum {mxToken=4096, tokenZero=0, tokenMask=0xfff};
  private:
   friend class L2btowCalAlgo08;
   friend class L2etowCalAlgo08;   // not implemented yet
 
   L2BtowCalibData08 btow[mxToken];  
   L2EtowCalibData08 etow[mxToken];// not implemented yet
-  int nBadToken_btow;
   
   public:
   const L2BtowCalibData08 * get_btow() { return btow;}
