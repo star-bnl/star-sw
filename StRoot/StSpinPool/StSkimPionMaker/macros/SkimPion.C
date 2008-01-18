@@ -137,8 +137,7 @@ void SkimPion(const char* fileList, const char* fileId="Skim.root") {
     Int_t sizeMax = 4;
     Float_t energySeed = 0.4; // default is 0.7, usually 0.35
     Float_t energyAdd  = 0.05;  // default is 0.07, usually 0.035
-    pre_ecl->SetClusterConditions("bemc", sizeMax, energySeed, 
-				  energyAdd, 0.02, kFALSE);     
+    pre_ecl->SetClusterConditions("bemc", sizeMax, energySeed, energyAdd, 0.02, kFALSE);     
     // defaults for SMDs are ("...", 5, 0.4, 0.001, 0.1, kFALSE)
     pre_ecl->SetClusterConditions("bsmde", 5, 0.4,0.005, 0.1,kFALSE); // used 5, 0.2, 0.0005, 0.1
     pre_ecl->SetClusterConditions("bsmdp", 5, 0.4,0.005, 0.1,kFALSE);

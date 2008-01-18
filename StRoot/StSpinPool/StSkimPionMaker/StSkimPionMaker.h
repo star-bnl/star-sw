@@ -56,7 +56,6 @@ protected:
     float mPi0Mass; //!
     
     bool debug; //!
-    Int_t timestamp; //!
     
     bool mb; //!
     bool httpl2; //!
@@ -120,7 +119,7 @@ protected:
     
 public: 
     
-    StSkimPionMaker(const char *name="pi0AnaMaker", Bool_t mDoTracks=kTRUE, const char *mFileName="bla.root",Int_t timestamp = 6);
+    StSkimPionMaker(const char *name="pi0AnaMaker", Bool_t mDoTracks=kTRUE, const char *mFileName="bla.root");
     virtual       ~StSkimPionMaker();  
     
     virtual Int_t Init();
