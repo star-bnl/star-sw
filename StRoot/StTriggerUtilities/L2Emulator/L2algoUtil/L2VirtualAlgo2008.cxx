@@ -33,6 +33,8 @@ L2VirtualAlgo2008::L2VirtualAlgo2008(const char* name, L2EmcDb* db, char* outDir
   mhRa= new   L2Histo(907,"rate of ACCEPT; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
   printf("L2-%s instantiated, logPath='%s'\n",getName(),mOutDir1.c_str());
   
+  // consistency checks, should never fail
+  assert(L2eventStream2008::mxToken == L2eventStream2008::tokenMask+1);
 } 
 
 /*========================================
@@ -224,14 +226,11 @@ L2VirtualAlgo2008::compute(int token){
   /* STRICT TIME BUDGET  START ....*/
   computeStart();
   mhN->fill(1);
-  if(token<=L2eventStream2008::tokenZero ||
-     token>=L2eventStream2008::mxToken) { 
-    mhN->fill(3); 
-    return;
-  }  else {   // protect compute against bad token
-    computeUser( token );
-    computeStop( token);
-  }
+  token&=L2eventStream2008::tokenMask; // only protect against bad token, Gerard's trick
+  
+  computeUser( token );
+  computeStop( token);
+  
 }
 
 //=============================================
@@ -276,7 +275,7 @@ L2VirtualAlgo2008::computeStop(int token){
 
 //=============================================
 bool
-L2VirtualAlgo2008::decision(int token){
+L2VirtualAlgo2008::decision(int token, void **myL2Result){
   /* STRICT TIME BUDGET  START ....*/
   /*
     Chris doesn't want us to write  out anything
@@ -284,7 +283,7 @@ L2VirtualAlgo2008::decision(int token){
   */
 
   rdtscl_macro(mDecisionTimeStart);
-  token&=0xfff; // only protect against bad token, Gerard's trick
+  token&=L2eventStream2008::tokenMask; // only protect against bad token, Gerard's trick
   mDecisionTimeDiff=0;
 
   mhRd->fill(mSecondsInRun);
@@ -294,8 +293,8 @@ L2VirtualAlgo2008::decision(int token){
   for(int i=0;i<3*100;i++) { float x=i*i; x=x;}// to add 3kTicks delay, tmp - to see sth in the spectra
 
   mhN->fill(2);
-  mAccept=decisionUser(token);
-  // printf("compuDDDD tkn=%d  dec=%d\n",token,mAccept);
+  mAccept=decisionUser(token, myL2Result);
+  //printf("compuDDDD tkn=%d  dec=%d myRes=%p\n",token,mAccept, *myL2Result);
 
   if(mAccept) { 
     mhN->fill(10);
@@ -334,6 +333,9 @@ L2VirtualAlgo2008::printCalibratedData(int token){ //
 
 /******************************************************
   $Log: L2VirtualAlgo2008.cxx,v $
+  Revision 1.4  2008/01/18 23:29:12  balewski
+  now L2result is exported
+
   Revision 1.3  2008/01/17 23:15:51  balewski
   bug in token-addressed memory fixed
 

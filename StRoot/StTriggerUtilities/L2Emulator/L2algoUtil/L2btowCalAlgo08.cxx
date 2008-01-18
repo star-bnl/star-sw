@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2btowCalAlgo08.cxx,v 1.2 2008/01/16 23:32:34 balewski Exp $
+  $Id: L2btowCalAlgo08.cxx,v 1.3 2008/01/18 23:29:13 balewski Exp $
   \author Jan Balewski, IUCF, 2006 
  *****************************************************
   Descripion:
@@ -46,7 +46,6 @@ L2btowCalAlgo08::L2btowCalAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geoX,
 
   // initilalize BTOW-Calibrated-data
   int k;
-  globL2eventStream2008.nBadToken_btow=0;
   for(k=0;k<L2eventStream2008::mxToken;k++){
     L2BtowCalibData08 & btowCalibData=globL2eventStream2008.btow[k];  
     btowCalibData.mon.nTotal=0;
@@ -161,17 +160,9 @@ L2btowCalAlgo08::computeBtow(int token, int bemcIn, ushort *rawAdc){
   // Btow calibration is a special case, code below will trurn off regular compute(), must have one exit  at the end
 
   computeStart();
-
-  //...... Verify token is in range .......
-  if(token<=L2eventStream2008::tokenZero || token>=L2eventStream2008::mxToken) {
-    // clear ADC data & token for a bad token
-    bemcIn=0;
-    token=L2eventStream2008::tokenZero; // set non-physical token
-    globL2eventStream2008.nBadToken_btow++; // it is caled so rarely that can be slow
-    mhN->fill(6);
-  }
-  
-  //...... token is valid ........
+  token&=L2eventStream2008::tokenMask; // only protect against bad token, Gerard's trick
+ 
+  //...... token is valid no w ........
   L2BtowCalibData08 & btowCalibData=globL2eventStream2008.btow[token];  
   btowCalibData.mon.nTotal++;
   
@@ -290,7 +281,7 @@ L2btowCalAlgo08::finishRunUser() {  /* called once at the end of the run */
     if(tkn2<k) tkn2=k;
   }
   if (mLogFile){
-    fprintf(mLogFile,"#BTOW_token_QA:  _candidate_ hot token=%d used %d for %d events, token range [%d, %d], used %d tokens, %d bad tokens\n",tkn3,nTkn3,mEventsInRun,tkn1,tkn2,nTkn,globL2eventStream2008.nBadToken_btow);
+    fprintf(mLogFile,"#BTOW_token_QA:  _candidate_ hot token=%d used %d for %d events, token range [%d, %d], used %d tokens\n",tkn3,nTkn3,mEventsInRun,tkn1,tkn2,nTkn);
   }
 
 }
@@ -325,6 +316,9 @@ L2btowCalAlgo08::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2btowCalAlgo08.cxx,v $
+  Revision 1.3  2008/01/18 23:29:13  balewski
+  now L2result is exported
+
   Revision 1.2  2008/01/16 23:32:34  balewski
   toward token dependent compute()
 

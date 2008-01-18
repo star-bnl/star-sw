@@ -3,7 +3,7 @@
 
 
 /*********************************************************************
- * $Id: L2VirtualAlgo2008.h,v 1.3 2008/01/17 23:15:51 balewski Exp $
+ * $Id: L2VirtualAlgo2008.h,v 1.4 2008/01/18 23:29:13 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -41,7 +41,7 @@ class L2VirtualAlgo2008 {
 		    0 - # of input events
 		    1 - # of calls computeUser()  
 		    2 - # of calls decisionUser()  
-		    3 - # of bad tokens while computeUser()
+		    3,4  - free
 		    5...9 - user algo
 		    10 - # of accepted events 
 		    11..14 - free
@@ -76,20 +76,19 @@ class L2VirtualAlgo2008 {
   virtual ~L2VirtualAlgo2008(); // memory leak NOT taken care off
   void setOflTrigID(int x) {oflTrigId=x;} // only for Maker-analysis
   int  getOflTrigID() {return oflTrigId;} // only for Maker-analysis
-
-  bool   isAccepted(){ return mAccept; }
+  bool   isAccepted(){ return mAccept; } // only for Maker-analysis
   static int  readParams(const char *fileN, int mxPar, int *iPar, float *fPar);
   const char *getName() { return mName1.c_str();}
 
   int   initRun(int runNo, int *rc_ints, float *rc_floats);
   void  compute (int token);
-  bool  decision(int token);
+  bool  decision(int token, void **myL2Result);
   void  finishRun();
 
   // implement algo specific operations in the virtual functions
   virtual int   initRunUser(int runNo, int *rc_ints, float *rc_floats){ return 0;}
   virtual void  computeUser(int token){};
-  virtual bool  decisionUser(int token){ assert(4==8); return mAccept; } // must be token dependent
+  virtual bool  decisionUser(int token, void **myL2Result){myL2Result=0; return true;}
   virtual void  finishRunUser(){}// at the end of each run
 
   // read-only access to current 'global' event, updated in compute

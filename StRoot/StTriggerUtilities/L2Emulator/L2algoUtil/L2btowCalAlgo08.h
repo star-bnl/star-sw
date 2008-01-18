@@ -1,7 +1,7 @@
 #ifndef L2btowCalAlgo08_H
 #define L2btowCalAlgo08_H
 /*********************************************************************
- * $Id: L2btowCalAlgo08.h,v 1.2 2008/01/16 23:32:34 balewski Exp $
+ * $Id: L2btowCalAlgo08.h,v 1.3 2008/01/18 23:29:13 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -16,7 +16,7 @@ class L2EmcGeom;
 
 class L2btowCalAlgo08 : public  L2VirtualAlgo2008 {
   /* this class fills the folowing bins of counter histo (mhN)
-     6 - # of bad token out of range [1...4095]
+     xx -  add here
   */
  private:
 
@@ -50,6 +50,9 @@ class L2btowCalAlgo08 : public  L2VirtualAlgo2008 {
 
 /**********************************************************************
   $Log: L2btowCalAlgo08.h,v $
+  Revision 1.3  2008/01/18 23:29:13  balewski
+  now L2result is exported
+
   Revision 1.2  2008/01/16 23:32:34  balewski
   toward token dependent compute()
 

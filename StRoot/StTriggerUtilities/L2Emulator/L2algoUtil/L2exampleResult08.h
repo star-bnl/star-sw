@@ -9,9 +9,21 @@
 #define L2_EXAMPLE_RESULT_08_H
 
 struct L2exampleResult08 {
-  enum {mySizeChar=16};// negotiate the  size before extending it
-  unsigned short val1, val2;
-  float val3;
+  enum {mySizeChar=8};// negotiate size w/ John before extending 
+  unsigned char decision;
+  unsigned char numberOfL2Clust;  
+  unsigned short kTicksCompute;
+  float clusterET;
 };
+
+//...................................
+inline void 
+L2exampleResult2008_print(L2exampleResult08 *p){
+  if(p==0) {printf("print L2exampleResults08 - NULL pointer ????\n"); return;}
+  printf("print L2exampleResults08: decison=%d noClust=%d kTicks/Compute=%d clustET=%.3f GeV\n", p->decision, p->numberOfL2Clust,p->kTicksCompute,p->clusterET);
+
+};
+
+
 
 #endif
