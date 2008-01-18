@@ -1,7 +1,7 @@
 #ifndef STAR_StTriggerSimuResult
 #define STAR_StTriggerSimuResult
 
-// $Id: StTriggerSimuResult.h,v 1.2 2008/01/17 17:04:08 kocolosk Exp $
+// $Id: StTriggerSimuResult.h,v 1.3 2008/01/18 02:10:30 kocolosk Exp $
 
 /*****************************************************************************
  * @class StTriggerSimuResult
@@ -67,6 +67,14 @@ public:
     HttpResult httpPair(short towerId) const;
     
     /// returns address of specific L2 result struct -- cast it yourself
+    /**
+     returns address of a specific L2 result structure.  These structures are
+     documented at
+     L2ped2006:    StDaqLib/TRG/L2pedResults2006.h
+     L2jet2006:    StDaqLib/TRG/L2jetResults2006.h
+     L2gamma2006:  StDaqLib/TRG/L2gammaResult2006.h
+     along with examples of how to unpack them
+     **/
     const void* l2Result(L2ResultType algo, int year=2006) const;
     
     void setTriggerId(unsigned int);
@@ -122,6 +130,9 @@ inline void StTriggerSimuResult::setL2Decision(StTriggerSimuDecision d) { mL2Dec
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.h,v $
+ * Revision 1.3  2008/01/18 02:10:30  kocolosk
+ * add comment pointing to documentation of L2 result structures
+ *
  * Revision 1.2  2008/01/17 17:04:08  kocolosk
  * some revisions to StTriggerSimuResult structure to hopefully improve clarity and maintainability
  *
