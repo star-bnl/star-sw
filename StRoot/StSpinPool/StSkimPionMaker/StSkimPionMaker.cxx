@@ -100,7 +100,7 @@
 ClassImp(StSkimPionMaker);
     
 //________________________________________________________________________________________________________
-StSkimPionMaker::StSkimPionMaker(const char *name, Bool_t doTracks, const char *outfile,Int_t timestamp):StMaker(name)
+StSkimPionMaker::StSkimPionMaker(const char *name, Bool_t doTracks, const char *outfile):StMaker(name)
 {
     // constructor 
     mDoTracks = doTracks;
@@ -108,8 +108,6 @@ StSkimPionMaker::StSkimPionMaker(const char *name, Bool_t doTracks, const char *
     
     mPi = 3.1416;
     mPi0Mass = 0.13498;
-    indicator = timestamp;
-    cout<<"timestamp is: "<<indicator<<endl;
     
     debug = false; // debug mode  
     fnummixed = 10; // number of events for event-mixing  
