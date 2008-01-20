@@ -23,14 +23,16 @@
 #include "THelixTrack.h"
 #include <vector>
 //#endif
-#define EXP_FAKE
 #define SQ(X) ((X)*(X))
+#define PW2(X) ((X)*(X))
+#define PW3(X) ((X)*(X)*(X))
 
 enum {kNOBAGR=0,kNDETS=4,kMINHITS=50};
 static const double WINDOW_NSTD=3;
 
 static const double kAGREE=1e-7,kSMALL=1e-9,kBIG=1.,kDAMPR=0.1;
 static const int    MinErr[4][2] = {{200,200},{200,200},{30,500},{20,20}};
+static char  gTimeStamp[16]={0};
 class MyPull;
 class HitPars_t;
 int fiterr(const char *opt);
@@ -268,7 +270,7 @@ static const char *DETS[]={"OutY","OutZ","InnY","InnZ"
                           ,"SsdY","SsdZ","SvtY","SvtZ"};
 static const char *DETZ[]={"Out" ,"Inn","Ssd","Svt"};
   int FitOk[4]={0,0,0,0};
-static const char *dbFile[] = {
+static char dbFile[4][100] = {
 "StarDb/Calibrations/tracker/tpcOuterHitError.20050101.235959.C",  
 "StarDb/Calibrations/tracker/tpcInnerHitError.20050101.235959.C",  
 "StarDb/Calibrations/tracker/ssdHitError.20050101.235959.C"     , 
@@ -282,7 +284,8 @@ int fiterr(const char *opt)
   int optH = strstr(opt,"H")!=0;
   int optU = strstr(opt,"U")!=0;
   int optT = strstr(opt,"T")!=0;
-
+  memcpy(gTimeStamp,strstr(opt,"20"),15);
+  
   DbInit();
   if (optH) HInit();
   TTreeIter th(pulTree);
@@ -401,7 +404,8 @@ int fiterr(const char *opt)
   if (optH) FillPulls(1);
   if (optU) DbEnd();
   if (optH) HEnd();
-  return (maxPct<10) ? 99:0;
+//return (maxPct<10) ? 99:0;
+  return (maxPct< 3) ? 99:0;
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -1391,6 +1395,7 @@ void DbInit()
  TString command;
  TTable *newdat = 0;
  for (int idb=0;idb<4;idb++) {
+   memcpy(strstr(dbFile[idb],"20"),gTimeStamp,15);
    int ready=0;
    if (!gSystem->AccessPathName(dbFile[idb])) {//file exists
      command = ".L "; command += dbFile[idb];
@@ -2302,9 +2307,12 @@ void myTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: fiterr.C,v 1.5 2007/04/26 04:25:32 perev Exp $
+* $Id: fiterr.C,v 1.6 2008/01/20 00:43:02 perev Exp $
 *
 * $Log: fiterr.C,v $
+* Revision 1.6  2008/01/20 00:43:02  perev
+* Mess with timestamps fixed
+*
 * Revision 1.5  2007/04/26 04:25:32  perev
 * Cleanup
 *
@@ -2425,7 +2433,9 @@ static int nCall=0; nCall++;
     } } 
     if (iAkt==0 ) {
 
-      double det=12345; S.Invert(&det);
+      double det=S.Determinant(); 
+      if (fabs(det)<1e-100) return -99;
+      S.Invert(0);
 //      if (det<0) iAkt=1;
 //      else       add = (-1.)*(S*B);
       add = (-1.)*(S*B);
