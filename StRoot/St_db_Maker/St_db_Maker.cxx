@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.112 2008/01/09 20:44:46 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.113 2008/01/20 00:39:40 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.113  2008/01/20 00:39:40  perev
+// improve dbStat print
+//
 // Revision 1.112  2008/01/09 20:44:46  perev
 // Improve printout in Finish()
 //
@@ -380,7 +383,7 @@ Int_t St_db_Maker::Finish()
    Info("dbStat","dbCpu  =%10.1f dbEvts=%d  dbCpu/dbEvts =%g\n"   
        ,fTimer[4].CpuTime() ,fEvents[1],cpuPerE);
 
-   Info("dbStat","\dbTime/tot  =%10.1f\% dbCpu/tot=%10.1f\%d\n"   
+   Info("dbStat","\dbTime/tot  =%10.2f dbCpu/tot=%10.2f \n"   
        ,timPct,cpuPct);
 
    return 0;
