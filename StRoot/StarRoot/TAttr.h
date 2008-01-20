@@ -23,6 +23,7 @@ void        SetAttr(const char *key,const char* val);
 void        SetAttr(const char *key,int         val);
 void        SetAttr(const char *key,UInt_t      val);
 void        SetAttr(const char *key,double      val);
+int         SetAttr(const TAttr *att);
 void        RemAttr(const char *key                )	{return SetAttr(key,".remove");}
 int         IAttr(const char *key) const;
 UInt_t      UAttr(const char *key) const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TAttr.cxx,v 1.3 2007/07/12 20:38:41 fisyak Exp $
+ * $Id: TAttr.cxx,v 1.4 2008/01/20 00:41:18 perev Exp $
  *
  ***************************************************************************
  *
@@ -51,6 +51,14 @@ void TAttr::SetAttr(const char *key, const char *val)
    if (_debug)
      Info("SetAttr","(\"%s\",\"%s\",\")",tk.Data(),tv.Data());
 
+}
+//_____________________________________________________________________________
+int TAttr::SetAttr(const TAttr *att)
+{
+   TListIter iter(att,kIterBackward);
+   int add=0; const TNamed *tn=0; 
+   while (tn = (const TNamed*)iter()) {AddFirst(new TNamed(*tn));add++;}
+   return add;
 }
 //_____________________________________________________________________________
 void TAttr::SetAttr(const char *key, int val)
