@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.35 2007/12/08 21:34:17 perev Exp $
+ * $Id: FCFMaker.cxx,v 1.36 2008/01/20 00:38:23 perev Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.36  2008/01/20 00:38:23  perev
+ * Cleanup only
+ *
  * Revision 1.35  2007/12/08 21:34:17  perev
  * WARN==>DEBUG
  *
@@ -214,7 +217,7 @@ static TDataSet *fcfPixATop = 0;
 extern struct fcfPixAnnotate pixStruct[183][512] ;
 #endif
 #ifdef FCF_DEBUG_OUTPUT
-struct Hit_t {
+//______________________________________________________________________________struct Hit_t {
   double x, y, z, charge ; 
 };
 static Hit_t Hit;
@@ -274,6 +277,7 @@ static class fcfAfterburner fcf_after;
 
 
 
+//______________________________________________________________________________
 StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 {
   LOG_DEBUG << "Constructor for StRTSClientFCFMaker()" << endm;
@@ -312,6 +316,7 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
   // LOG_INFO << "splitRows="<<splitRows<<" (Are rows to be split as on i960's)"<<endm;
 }
 
+//______________________________________________________________________________
 StRTSClientFCFMaker::~StRTSClientFCFMaker() 
 {
   // Useless, as we are about to exit anyhow, but why not be picky?
@@ -336,6 +341,7 @@ StRTSClientFCFMaker::~StRTSClientFCFMaker()
 StDAQReader *daqReader;
 StTPCReader *tpcReader;
 
+//______________________________________________________________________________
 void StRTSClientFCFMaker::SetMode(Int_t mode)
 {
   m_Mode = mode;
@@ -357,6 +363,7 @@ void StRTSClientFCFMaker::SetMode(Int_t mode)
     printf("<FCFMaker:SetMode> no simulation information\n");
 }
 
+//______________________________________________________________________________
 Int_t StRTSClientFCFMaker::Init()
 {
   PrintInfo();
@@ -407,6 +414,7 @@ Int_t StRTSClientFCFMaker::Init()
 // Tonko: this should hold aaaall the gain/T0 correction tables
 // so that we don't have to redo them every time...
 
+//______________________________________________________________________________
 Int_t StRTSClientFCFMaker::InitRun(int run)
 {
 
@@ -437,6 +445,7 @@ Int_t StRTSClientFCFMaker::InitRun(int run)
   return kStOK ;
 }
 
+//______________________________________________________________________________
 Int_t StRTSClientFCFMaker::Make()
 {
   int t1,t2;
@@ -781,6 +790,7 @@ Int_t StRTSClientFCFMaker::Make()
   return kStOK;
 }
 
+//______________________________________________________________________________
 // Build cpp array from tables
 // Note: padrows[1-13] point to the inner sectors pixel buffer 
 //       padrows[14-45] point to the outer sectors pixel buffer
@@ -872,6 +882,7 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
   return offset;
 }
 
+//______________________________________________________________________________
 StDaqClfCppRow *StRTSClientFCFMaker::GetCPPRow(int r, int i, StDaqClfCppRow *storage)
 {
   if(splitRows) {   // split row up to 3 times as per i960
@@ -908,6 +919,7 @@ StDaqClfCppRow *StRTSClientFCFMaker::GetCPPRow(int r, int i, StDaqClfCppRow *sto
   return 0;
 }
 
+//______________________________________________________________________________
 // Copies from StTpcCoordinateTransform,
 //   except pad and tb need not be integers...
 double StRTSClientFCFMaker::lxFromPad(int row, double pad)
@@ -923,11 +935,13 @@ double StRTSClientFCFMaker::lxFromPad(int row, double pad)
   return(dist2move);
 }
 
+//______________________________________________________________________________
 double StRTSClientFCFMaker::lyFromRow(int row)
 {
   return (gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(row));
 }
 
+//______________________________________________________________________________
 // With offsets and t0 corrections
 double StRTSClientFCFMaker::lzFromTB(double timeBin, int sector, int row, int pad)
 {
@@ -958,6 +972,7 @@ double StRTSClientFCFMaker::lzFromTB(double timeBin, int sector, int row, int pa
   return(z - zoffset + t0zoffset);
 }
 
+//______________________________________________________________________________
 void StRTSClientFCFMaker::getCorrections(int sector, int row)
 {
   int pad;
@@ -1043,6 +1058,7 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
 }
 
 
+//______________________________________________________________________________
 // Save the cluster
 //
 // Assumes that sector is from 1...24
@@ -1229,6 +1245,7 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   }
 }
 
+//______________________________________________________________________________
 void StRTSClientFCFMaker::fillStEvent(tcl_tphit_st *hit)
 {
   assert(mStEvent);
@@ -1253,6 +1270,7 @@ void StRTSClientFCFMaker::fillStEvent(tcl_tphit_st *hit)
 
 }
 
+//______________________________________________________________________________
 void StRTSClientFCFMaker::filltphit(tcl_tphit_st *hit)
 {
   assert(mT_tphit);
@@ -1266,6 +1284,7 @@ void StRTSClientFCFMaker::filltphit(tcl_tphit_st *hit)
   mT_tphit->AddAt(hit, nUsed);
 }
 
+//______________________________________________________________________________
 int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr, 
 					  u_int *result_buff, 
 					  int sector,
@@ -1489,6 +1508,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
   return total_clusters;
 }
 
+//______________________________________________________________________________
 int StRTSClientFCFMaker::anyClustersInFile()
 {
   for(u_int hs=0;hs<24;hs += 2) {
@@ -1503,6 +1523,7 @@ int StRTSClientFCFMaker::anyClustersInFile()
   return 0;
 }
 
+//______________________________________________________________________________
 u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *len)
 {
   if(!daqReader) {
@@ -1584,6 +1605,7 @@ u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *l
   return tpcmzcld;
 }
 
+//______________________________________________________________________________
 int StRTSClientFCFMaker::build_daq_file_clusters(u_int sector,daq_out_t *daq_file_out, resptr_t *daq_file_resptr)
 {
   //printf("FCFMaker: build_daq_file_clusters\n");
@@ -1666,6 +1688,7 @@ int StRTSClientFCFMaker::build_daq_file_clusters(u_int sector,daq_out_t *daq_fil
   return nClusters;
 }
 
+//______________________________________________________________________________
 bool StRTSClientFCFMaker::checkSwap(int x)
 {
   return (x==0x04030201) ? false : true;
@@ -1683,6 +1706,7 @@ u_int StRTSClientFCFMaker::swap32(bool test, u_int x)
     }
 }
 
+//______________________________________________________________________________
 int StRTSClientFCFMaker::anyRawDataInFile()
 {  St_DataSet *data = (St_DataSet *)GetInputDS("tpc_raw");
   if(!data) return 0;
@@ -1704,18 +1728,19 @@ int StRTSClientFCFMaker::anyRawDataInFile()
 
     // Get the padrow tables...
     St_DataSetIter sectorIter(sector);
-    St_type_shortdata *Tadc_in, *Tadc_out;
+    St_type_shortdata *Tadc_in, *Tadc_ot;
     Tadc_in = (St_type_shortdata *)sectorIter.Find("pixel_data_in");
-    Tadc_out = (St_type_shortdata *)sectorIter.Find("pixel_data_out");
+    Tadc_ot = (St_type_shortdata *)sectorIter.Find("pixel_data_out");
 
     //printf("%ld %ld\n",Tadc_in->GetNRows(), Tadc_out->GetNRows());
-    if(Tadc_in->GetNRows() || Tadc_out->GetNRows())
-      return 1;
+    if(Tadc_ot && Tadc_ot->GetNRows())	return 1;
+    if(Tadc_in && Tadc_in->GetNRows())	return 1;
   }
  
   return 0;
 }
     
+//______________________________________________________________________________
 int StRTSClientFCFMaker::build_croat_clusters(u_int s, 
 					      croat_out_t *croat_out, 
 					      resptr_t *croat_resptr,
