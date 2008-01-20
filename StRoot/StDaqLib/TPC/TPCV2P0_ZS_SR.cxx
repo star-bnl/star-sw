@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.28 2007/12/24 06:04:33 fine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.29 2008/01/20 00:35:42 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.29  2008/01/20 00:35:42  perev
+ * Supress redundant print
+ *
  * Revision 1.28  2007/12/24 06:04:33  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -163,7 +166,7 @@ int TPCV2P0_ZS_SR::initialize()
   }
 
   // *** DEBUG LINE *** COMMENT LATER ***
-  cout << "TPCV2P0_ZS_SR::initialize : mMergeSequences=" << (mMergeSequences?"ON":"OFF") << endl;
+//VP  cout << "TPCV2P0_ZS_SR::initialize : mMergeSequences=" << (mMergeSequences?"ON":"OFF") << endl;
 
   int rcb; // define for following for loops
   // store pointers to the ADCD, ADCX, SEQD banks
