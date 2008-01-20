@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.530 2008/01/08 20:08:50 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.531 2008/01/20 00:32:50 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -267,6 +267,7 @@ Int_t StBFChain::Instantiate()
 	    "tpc_hitsBranch","tpc_rawBranch","tpc_tracksBranch","trgBranch",0};
 	  for (Int_t i = 0; allBranches[i]; i++) inpMk->SetBranch(allBranches[i],0,"r");
 	}
+        if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
 	goto Add2Chain;
       }
       goto Error;
@@ -297,6 +298,11 @@ Int_t StBFChain::Instantiate()
       assert(mk);
     }
     strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
+
+    if (maker == "StDAQMaker") { 
+      if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
+    } 
+
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
       Int_t NwGeant = 10; // default geant parameters
       if (!GetOption("fzin") && !GetOption("ntin") &&
