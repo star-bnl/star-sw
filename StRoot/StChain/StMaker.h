@@ -245,7 +245,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.84 2007/07/12 19:17:20 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.85 2008/01/20 00:33:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -264,6 +264,7 @@ int         SetAttr(const char *key,const char* val,const char *to=".");
 int         SetAttr(const char *key,int         val,const char *to=".");
 int         SetAttr(const char *key,UInt_t      val,const char *to=".");
 int         SetAttr(const char *key,double      val,const char *to=".");
+int         SetAttr(const StMaker *mk);
 int         RemAttr(const char *key,                const char *to=".")
             {return SetAttr(key,".remove",to);}
 const TAttr *GetAttr() const 	{return m_Attr;}
@@ -308,8 +309,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.84 2007/07/12 19:17:20 fisyak Exp $
+// $Id: StMaker.h,v 1.85 2008/01/20 00:33:56 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.85  2008/01/20 00:33:56  perev
+// Copy attributes from maker to maker added
+//
 // Revision 1.84  2007/07/12 19:17:20  fisyak
 // Add fTopChain - a pointer to TopChain (for embedding), add method GetMakerInheritsFrom
 //
