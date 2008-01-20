@@ -46,7 +46,7 @@ Int_t StDAQMaker::Open(const char*)
   if (fDAQReader && fDAQReader->isOpened()) return 0;
   LOG_INFO << "Open Input file" << GetFile() << endm;
   if(!fDAQReader) fDAQReader = new StDAQReader();
-  fDAQReader->setVerbose(GetDebug());
+  if (GetDebug()>1) fDAQReader->setVerbose(1);
   fDAQReader->open(GetFile());
   fDAQReaderSet->SetObject((TObject*)fDAQReader,kFALSE);
   return 0;
@@ -83,11 +83,12 @@ Int_t StDAQMaker::Make(){
   }  
 
   AddData(fDAQReader->getSCTable());
-
-  if (GetDebug()<=1) return 0;
+  int adcOnly = IAttr("adcOnly");
+  if (GetDebug()<=1 && !adcOnly) return 0;
 
 
   StTPCReader *myTPCReader = fDAQReader->getTPCReader();
+  int nPads=0;
   for (int sector =1; sector <=12; sector++)
   {
     unsigned char* padList;
@@ -96,9 +97,12 @@ Int_t StDAQMaker::Make(){
       int npad = myTPCReader->getPadList(sector,padRow,padList);
       if (npad <0) break;
       if (npad==0) continue;
+      nPads+=npad;
+      if (GetDebug()>1)
       LOG_INFO << Form("Sector=%2d PadRow=%2d nPads=%3d\n",sector,padRow,npad) << endm;
     }
   }
+  if (nPads==0 && adcOnly) return kStSKIP;
   return 0;
 }
 //_____________________________________________________________________________
