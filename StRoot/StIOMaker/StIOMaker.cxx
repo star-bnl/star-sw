@@ -280,16 +280,14 @@ StIOInterFace *StIOMaker::Load()
     assert (klass);
   }
   
-  ts = GetName();
-  ts +="_";
-  ts += IONAME[fCase]; 
+  ts = GetName(); ts +="_"; ts += IONAME[fCase]; 
   Mk = (StIOInterFace*)GetMaker(ts.Data());
   if (Mk){
      assert(Mk->InheritsFrom(StIOInterFace::Class()));
   } else {  
-    Mk = (StIOInterFace*)New(className,ts.Data());    
-    assert(Mk);
+    Mk = (StIOInterFace*)New(className,ts.Data()); assert(Mk);
   }  
+  Mk->SetAttr(this);
   AddMaker(Mk);
   Mk->SetIOMode(fIOMode);
   Mk->SetTreeName(fTreeName);
