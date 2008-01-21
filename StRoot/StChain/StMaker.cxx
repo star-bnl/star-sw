@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.204 2008/01/20 00:33:49 perev Exp $
+// $Id: StMaker.cxx,v 1.205 2008/01/21 01:23:02 perev Exp $
 //
 //
 /*!
@@ -1558,7 +1558,7 @@ int StMaker::SetAttr(const StMaker *mk)
   if (!mk) return 0;
   if (!mk->m_Attr) return 0;
   if (!m_Attr) m_Attr = new TAttr;
-  m_Attr->SetAttr(mk->m_Attr);
+  return m_Attr->SetAttr(mk->m_Attr);
 }  
 //_____________________________________________________________________________
 int StMaker::SetAttr(const char *key, int val, const char *to)
@@ -1828,6 +1828,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.205  2008/01/21 01:23:02  perev
+// WarnOff
+//
 // Revision 1.204  2008/01/20 00:33:49  perev
 // Copy attributes from maker to maker added
 //
