@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.12 2008/01/15 21:26:05 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.13 2008/01/21 23:19:46 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.13  2008/01/21 23:19:46  kocolosk
+* store geomTriggers in jet and work with new trigger emulator
+*
 * Revision 1.12  2008/01/15 21:26:05  kocolosk
 * grab StJets from StJetMaker if it's in the chain
 *
@@ -58,7 +61,6 @@
 #include "TTree.h"
 #include "TClonesArray.h"
 #include "TChain.h"
-#include "TUnixSystem.h"
 
 //StarClassLibrary
 #include "SystemOfUnits.h"
@@ -97,6 +99,10 @@
 //StEmcTriggerMaker
 #include "StEmcTriggerMaker/StEmcTriggerMaker.h"
 
+//StTriggerUtilities
+#include "StTriggerUtilities/StTriggerSimuMaker.h"
+#include "StTriggerUtilities/StTriggerSimuResult.h"
+
 ClassImp(StChargedPionMaker)
 
 StChargedPionMaker::StChargedPionMaker(const char *name, const char *outputfile) 
@@ -119,12 +125,11 @@ StChargedPionMaker::StChargedPionMaker(const char *name, const char *outputfile)
     mTree->SetAutoSave(autosave);
     mTree->SetMaxTreeSize(autosave);
     
-    muDstMaker = NULL;
-    spDbMaker  = NULL;
-    emcTrgMaker= NULL;
-    jetMaker   = NULL;
-    
-    theSystem = new TUnixSystem();
+    muDstMaker      = NULL;
+    spDbMaker       = NULL;
+    emcTrgMaker     = NULL;
+    jetMaker        = NULL;
+    trigSimuMaker   = NULL;
     
     mJetFile = NULL;
     mJetTree = NULL;
@@ -155,10 +160,11 @@ void StChargedPionMaker::Clear(const char*)
 
 Int_t StChargedPionMaker::Init()
 {
-    muDstMaker  = dynamic_cast<StMuDstMaker*>(GetMaker("MuDst")); assert(muDstMaker);
-    spDbMaker   = dynamic_cast<StSpinDbMaker*>(GetMaker("spinDb"));
-    emcTrgMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); 
-    jetMaker    = dynamic_cast<StJetMaker*>(GetMakerInheritsFrom("StJetMaker"));
+    muDstMaker      = dynamic_cast<StMuDstMaker*>(GetMaker("MuDst")); assert(muDstMaker);
+    spDbMaker       = dynamic_cast<StSpinDbMaker*>(GetMaker("spinDb"));
+    emcTrgMaker     = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); 
+    jetMaker        = dynamic_cast<StJetMaker*>(GetMakerInheritsFrom("StJetMaker"));
+    trigSimuMaker   = dynamic_cast<StTriggerSimuMaker*>(GetMakerInheritsFrom("StTriggerSimuMaker"));
     
     this->Clear();
     
@@ -168,6 +174,7 @@ Int_t StChargedPionMaker::Init()
 
 Int_t StChargedPionMaker::InitRun(int runnumber) {
     if(jetMaker) {
+        LOG_INFO << "found StJetMaker in the chain" << endm;
         if(runnumber < 7000000) {
             mJets = ((jetMaker->getJets()).find("ConeJets"))->second->getmuDstJets();
         }
@@ -208,14 +215,15 @@ Int_t StChargedPionMaker::Make()
     //get pointers to useful objects
     TChain* chain               = muDstMaker->chain(); assert(chain);
     StMuDst* muDst              = muDstMaker->muDst(); assert(muDst);
-    StMuEvent* event            = muDst->event(); assert(event);
+    StMuEvent* event            = StMuDst::event(); assert(event);
     
     //have we changed files?
     TString inputFile(chain->GetFile()->GetName());
     if(currentFile !=  inputFile){
         LOG_INFO << "opened file " << inputFile << endm;
         currentFile = inputFile;
-        mEvent->setMuDstName( theSystem->BaseName(currentFile.Data()) );
+        char *baseName = strrchr(currentFile.Data(), '/');
+        mEvent->setMuDstName( baseName );
     }
     
     //basic event info
@@ -246,48 +254,85 @@ Int_t StChargedPionMaker::Make()
         mEvent->addVertex(&vertex);
     }
     
-    //minbias simu trigger
-    int Npmt=event->bbcTriggerDetector().numberOfPMTs();
-    bool eastBBC(false), westBBC(false);
-    for (int pmt=0;pmt<Npmt;pmt++){
-        if(event->bbcTriggerDetector().adc(pmt) > 5) {
-            if(pmt<16) eastBBC = true;
-            if(pmt>23 && pmt<40) westBBC = true;
-        }
-    }
-    if(eastBBC && westBBC) {
-        mEvent->addSimuTrigger(96011);  
-        mEvent->addSimuTrigger(117011);
-    }
+    // see StDaqLib/TRG/trgStructures2005.h => L2RESULTS_OFFSET_DIJET==14
+    mEvent->setL2Result(event->L2Result().GetArray() + 14);
     
-    //triggers and prescales
-    map<int,float> prescaleMap = StDetectorDbTriggerID::instance()->getTotalPrescales();
-    for (map<int,float>::iterator it=prescaleMap.begin(); it!=prescaleMap.end(); ++it) {
-        int trigId = it->first;
-        
-        mEvent->setPrescale(trigId, it->second);
-        
-        if( event->triggerIdCollection().nominal().isTrigger(trigId) ) {
-            mEvent->addTrigger(trigId);
+    // trigger simulations
+    if(trigSimuMaker) {
+        map<int,float> prescaleMap = StDetectorDbTriggerID::instance()->getTotalPrescales();
+        for (map<int,float>::iterator it=prescaleMap.begin(); it!=prescaleMap.end(); ++it) {
+            int trigId = it->first;
+            
+            mEvent->setPrescale(trigId, it->second);
+            
+            if( event->triggerIdCollection().nominal().isTrigger(trigId) ) {
+                mEvent->addTrigger(trigId);
+            }
+            
+            if( trigSimuMaker->isTrigger(trigId) ) {
+                mEvent->addSimuTrigger(trigId);
+            }
+            
+            const StTriggerSimuResult result = trigSimuMaker->detailedResult(trigId);
+            for(unsigned i=0; i<result.highTowerIds().size(); i++) {
+                int tid = result.highTowerIds().at(i);
+                mEvent->addHighTower(tid, result.highTowerAdc(tid));
+            }
+            for(unsigned i=0; i<result.triggerPatchIds().size(); i++) {
+                int tid = result.triggerPatchIds().at(i);
+                mEvent->addTriggerPatch(tid, result.triggerPatchAdc(tid));
+            }
+            for(unsigned i=0; i<result.jetPatchIds().size(); i++) {
+                int tid = result.jetPatchIds().at(i);
+                mEvent->addJetPatch(tid, result.jetPatchAdc(tid));
+            }
+            mEvent->setL2Result(result.l2Result(kJet), true);
+        }
+    }
+    else if(emcTrgMaker) {
+        //minbias simu trigger
+        int Npmt=event->bbcTriggerDetector().numberOfPMTs();
+        bool eastBBC(false), westBBC(false);
+        for (int pmt=0;pmt<Npmt;pmt++){
+            if(event->bbcTriggerDetector().adc(pmt) > 5) {
+                if(pmt<16) eastBBC = true;
+                if(pmt>23 && pmt<40) westBBC = true;
+            }
+        }
+        if(eastBBC && westBBC) {
+            mEvent->addSimuTrigger(96011);  
+            mEvent->addSimuTrigger(117011);
         }
         
-        if ( emcTrgMaker->isTrigger(trigId) ) {
-            mEvent->addSimuTrigger(trigId);
-        }
-        
-        map<int,int> m( emcTrgMaker->barrelTowersAboveThreshold(trigId) );
-        for(map<int,int>::const_iterator iter=m.begin(); iter!=m.end(); iter++) {
-            mEvent->addHighTower(iter->first, iter->second);
-        }
-        
-        m = emcTrgMaker->barrelTriggerPatchesAboveThreshold(trigId);
-        for(map<int,int>::const_iterator iter=m.begin(); iter!=m.end(); iter++) {
-            mEvent->addTriggerPatch(iter->first, iter->second);
-        }
-        
-        m = emcTrgMaker->barrelJetPatchesAboveThreshold(trigId);
-        for(map<int,int>::const_iterator iter=m.begin(); iter!=m.end(); iter++) {
-            mEvent->addJetPatch(iter->first, iter->second);
+        //triggers and prescales
+        map<int,float> prescaleMap = StDetectorDbTriggerID::instance()->getTotalPrescales();
+        for (map<int,float>::iterator it=prescaleMap.begin(); it!=prescaleMap.end(); ++it) {
+            int trigId = it->first;
+            
+            mEvent->setPrescale(trigId, it->second);
+            
+            if( event->triggerIdCollection().nominal().isTrigger(trigId) ) {
+                mEvent->addTrigger(trigId);
+            }
+            
+            if ( emcTrgMaker->isTrigger(trigId) ) {
+                mEvent->addSimuTrigger(trigId);
+            }
+            
+            map<int,int> m( emcTrgMaker->barrelTowersAboveThreshold(trigId) );
+            for(map<int,int>::const_iterator iter=m.begin(); iter!=m.end(); iter++) {
+                mEvent->addHighTower(iter->first, iter->second);
+            }
+            
+            m = emcTrgMaker->barrelTriggerPatchesAboveThreshold(trigId);
+            for(map<int,int>::const_iterator iter=m.begin(); iter!=m.end(); iter++) {
+                mEvent->addTriggerPatch(iter->first, iter->second);
+            }
+            
+            m = emcTrgMaker->barrelJetPatchesAboveThreshold(trigId);
+            for(map<int,int>::const_iterator iter=m.begin(); iter!=m.end(); iter++) {
+                mEvent->addJetPatch(iter->first, iter->second);
+            }
         }
     }
     
@@ -338,8 +383,8 @@ Int_t StChargedPionMaker::Make()
         translateJets(mJets, mEvent);
     }
     else if(mJetTree) {
-        mJetTree->GetEntryWithIndex(mEvent->runId(), mEvent->eventId());
-        translateJets(mJets, mEvent);
+        int ok = mJetTree->GetEntryWithIndex(mEvent->runId(), mEvent->eventId());
+        if(ok > 0) translateJets(mJets, mEvent);
     }
 
     mTree->Fill();
@@ -467,6 +512,10 @@ void StChargedPionMaker::translateJet(StJet* oldJet, vector<TrackToJetIndex*> pa
     jet->setBarrelEtSum(oldJet->btowEtSum);
     jet->setEndcapEtSum(oldJet->etowEtSum);
     jet->setVertexZ(oldJet->zVertex);
+    
+    for(unsigned i=0; i<oldJet->geomTriggers().size(); i++) {
+        jet->addTrigger(oldJet->geomTriggers()[i]);
+    }
     
     StChargedPionJetParticle particle;
     StThreeVectorF dca(0.0);
