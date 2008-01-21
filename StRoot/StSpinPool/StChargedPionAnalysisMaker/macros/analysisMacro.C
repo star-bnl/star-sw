@@ -1,4 +1,4 @@
-void analysisMacro(const char* dir="/home/kocolosk/dv34/analysis/run6/test",
+void analysisMacro(const char* dir="/tmp",
                const char* name  = "test",
                const char* filelist = "myfiles.list",
                int nFiles = 2,
@@ -24,6 +24,7 @@ void analysisMacro(const char* dir="/home/kocolosk/dv34/analysis/run6/test",
     gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StEEmcUtil");
     gSystem->Load("StEmcTriggerMaker");
+    gSystem->Load("StTriggerUtilities");
     gSystem->Load("StSpinDbMaker");
     gSystem->Load("StMCAsymMaker");
     
@@ -43,8 +44,20 @@ void analysisMacro(const char* dir="/home/kocolosk/dv34/analysis/run6/test",
     
     StTriggerDetectorCollection *trgDetColl=new StTriggerDetectorCollection();
 
-    StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
-    emcTrig->setDbMaker(dbMaker);
+    //StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
+    //emcTrig->setDbMaker(dbMaker);
+    
+    new StEEmcDbMaker("eemcDb");
+    StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker;
+    simuTrig->setMC(false); // must be before individual detectors, to be passed
+    simuTrig->useBbc();
+    simuTrig->useBemc();
+    simuTrig->bemc->setConfig(StBemcTriggerSimu::kOffline);
+    StGenericL2Emulator* simL2Mk = new StL2_2006EmulatorMaker;
+    assert(simL2Mk);
+    simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
+    simL2Mk->setOutPath("./out2/");
+    simuTrig->useL2(simL2Mk);
     
     cout<<"start adding locally compiled makers"<<endl;
     
