@@ -46,6 +46,7 @@ public:
     bool isTrigger(unsigned int trigId) const;
     bool isSimuTrigger(unsigned int trigId) const;
     float prescale(unsigned int trigId) const;
+    static unsigned int triggerBit(unsigned int trigId);
     
     int highTowerAdc(short towerId) const;
     int triggerPatchAdc(short patchId) const;
@@ -72,7 +73,6 @@ public:
     StChargedPionJet*               jet(int i);
     const StChargedPionJet*         jet(int i) const;
     
-    
     void setRunId(unsigned int);
     void setEventId(unsigned int);
     void setBx7(unsigned char);
@@ -94,6 +94,9 @@ public:
     void addTriggerPatch(short patchId, int ADC);
     void addJetPatch(short patchId, int ADC);
     
+    /// address to dijet result
+    void setL2Result(const void *address, bool emulated=false);
+    
     void addVertex(const StChargedPionVertex*);
     void addTrack(const StChargedPionTrack*);
     void addJet(const StChargedPionJet*);
@@ -108,7 +111,7 @@ private:
     
     string mMuDstName;
     
-    map<unsigned int, unsigned int> mTriggerLookup; //!
+    static map<unsigned int, unsigned int> mTriggerLookup; //!
     map<unsigned int, float> mTriggerPrescales;
     UInt_t mTriggerBits;
     UInt_t mSimuTriggerBits;
@@ -117,13 +120,17 @@ private:
     map<short, int> mTriggerPatches;
     map<short, int> mJetPatches;
     
+    // this is enough to store L2Jet, L2Ped, L2GammaBemc, L2GammaEemc for 2006
+    UInt_t mL2Result[9];
+    UInt_t mL2ResultEmulated[9];
+    
     TClonesArray *mVertices;
     TClonesArray *mTracks;
     TClonesArray *mJets;
     
     enum {kIsPolValid=0x01, kIsPolLong=0x02, kIsPolTrans=0x04, kIsBxingMasked=0x8, kNullOffset=0x10}; //!
     
-    ClassDef(StChargedPionEvent,1)
+    ClassDef(StChargedPionEvent,2)
 };
 
 inline unsigned int StChargedPionEvent::runId() const { return mRunId; }
