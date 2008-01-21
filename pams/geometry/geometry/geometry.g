@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.163 2007/11/13 21:38:08 perev Exp $
+* $Id: geometry.g,v 1.164 2008/01/21 01:11:02 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.164  2008/01/21 01:11:02  perev
+* TOF weight corrected
+*
 * Revision 1.163  2007/11/13 21:38:08  perev
 * pipeFlag and Nsi==7 added
 *
@@ -2575,8 +2578,8 @@ If LL>1
 * X.Dong
                      Itof=6 " call btofgeo6 ";
 * NEW CONFIG!
-                     tofX0=-3.90;
-                     tofZ0=2.54;
+                     tofX0=0.00;
+                     tofZ0=0.00;
                      BtofConfig=11;
 
 * Full barrel in 2007
