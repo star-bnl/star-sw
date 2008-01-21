@@ -1,6 +1,7 @@
 #include "StChargedPionJet.h"
 
 #include "TMath.h"
+#include "StChargedPionEvent.h"
 #include "StChargedPionJetParticle.h"
 
 ClassImp(StChargedPionJet)
@@ -18,10 +19,13 @@ StChargedPionJet::StChargedPionJet(const StChargedPionJet& t) : TLorentzVector(t
     mVertexZ    = t.mVertexZ;
 }
 
-StChargedPionJet::~StChargedPionJet() { /* no-op */ }
+StChargedPionJet::~StChargedPionJet() { 
+    this->Clear();
+}
 
 void StChargedPionJet::Clear(Option_t * o) {
     mParticles.clear();
+    mGeomTriggers = 0;
 }
 
 float StChargedPionJet::detectorEta() const { 
@@ -41,6 +45,14 @@ float StChargedPionJet::detectorEta(float vz, float r) const {
         if (denom!=0.) {hold = atan2(r,denom);}
     }
     return -TMath::Log(TMath::Tan(hold/2));
+}
+
+bool StChargedPionJet::isTrigger(unsigned int trigId) const {
+    return mGeomTriggers & StChargedPionEvent::triggerBit(trigId);
+}
+
+void StChargedPionJet::addTrigger(unsigned int trigId) {
+    mGeomTriggers |= StChargedPionEvent::triggerBit(trigId);
 }
 
 void StChargedPionJet::addParticle(StChargedPionJetParticle* p) {
