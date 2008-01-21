@@ -1,51 +1,84 @@
 #include "StChargedPionEvent.h"
 
+#include <utility>
+using std::make_pair;
+
 #include "StMessMgr.h"
 
 #include "StChargedPionVertex.h"
 #include "StChargedPionTrack.h"
 #include "StChargedPionJet.h"
 
+#include "StTriggerUtilities/StTriggerSimuResult.h"
+
 ClassImp(StChargedPionEvent)
 
-StChargedPionEvent::StChargedPionEvent() : TObject(), mSpinQA(0), mTriggerBits(0), mSimuTriggerBits(0) {
-    mTriggerLookup[ 96011] = 0x00000001;
-    mTriggerLookup[ 96201] = 0x00000002;
-    mTriggerLookup[ 96211] = 0x00000004;
-    mTriggerLookup[ 96221] = 0x00000008;
-    mTriggerLookup[ 96233] = 0x00000010;
-    mTriggerLookup[117001] = 0x00000020;
-    mTriggerLookup[137213] = 0x00000040;
-    mTriggerLookup[137221] = 0x00000080;
-    mTriggerLookup[137222] = 0x00000100;
-    mTriggerLookup[137585] = 0x00000200;
-    mTriggerLookup[137611] = 0x00000400;
-    mTriggerLookup[137622] = 0x00000800;
-    mTriggerLookup[106011] = 0x00001000;
-    mTriggerLookup[106201] = 0x00002000;
-    mTriggerLookup[106211] = 0x00004000;
-    mTriggerLookup[106221] = 0x00008000;
-    mTriggerLookup[106233] = 0x00010000;
-    mTriggerLookup[117402] = 0x00020000;
-    mTriggerLookup[117211] = 0x00040000;
-    mTriggerLookup[117212] = 0x00080000;
-    
+// static member initialization
+std::pair<unsigned int, unsigned int> a[] = {
+    make_pair( 96011, 0x00000001),
+    make_pair( 96201, 0x00000002),
+    make_pair( 96211, 0x00000004),
+    make_pair( 96221, 0x00000008),
+    make_pair( 96233, 0x00000010),
+    make_pair(117001, 0x00000020),
+    make_pair(137213, 0x00000040),
+    make_pair(137221, 0x00000080),
+    make_pair(137222, 0x00000100),
+    make_pair(137585, 0x00000200),
+    make_pair(137611, 0x00000400),
+    make_pair(137622, 0x00000800),
+    make_pair(106011, 0x00001000),
+    make_pair(106201, 0x00002000),
+    make_pair(106211, 0x00004000),
+    make_pair(106221, 0x00008000),
+    make_pair(106233, 0x00010000),
+    make_pair(117402, 0x00020000),
+    make_pair(117211, 0x00040000),
+    make_pair(117212, 0x00080000),
+    make_pair(137262, 0x00100000),
+    make_pair(137271, 0x00200000),
+    make_pair(137272, 0x00400000),
+    make_pair(137273, 0x00800000),
+    make_pair(137641, 0x01000000),
+    make_pair(137652, 0x02000000),
     // reuse some bits for transverse and first longitudinal running
-    mTriggerLookup[127212] = 0x00080000;
-    mTriggerLookup[127213] = 0x00000040;
-    mTriggerLookup[117221] = 0x00000080;
-    mTriggerLookup[127221] = 0x00000080;
-    mTriggerLookup[117585] = 0x00000200;
-    mTriggerLookup[127585] = 0x00000200;
-    mTriggerLookup[117611] = 0x00000400;
-    mTriggerLookup[127611] = 0x00000400;
-    mTriggerLookup[117622] = 0x00000800;
-    mTriggerLookup[127622] = 0x00000800;
-    
+    make_pair(127212, 0x00080000),
+    make_pair(127213, 0x00000040),
+    make_pair(117221, 0x00000080),
+    make_pair(127221, 0x00000080),
+    make_pair(117585, 0x00000200),
+    make_pair(127585, 0x00000200),
+    make_pair(117611, 0x00000400),
+    make_pair(127611, 0x00000400),
+    make_pair(117622, 0x00000800),
+    make_pair(127622, 0x00000800),
+    make_pair(117262, 0x00100000),
+    make_pair(127262, 0x00100000),
+    make_pair(117271, 0x00200000),
+    make_pair(127271, 0x00200000),
+    make_pair(117641, 0x01000000),
+    make_pair(127641, 0x01000000),
+    make_pair(117652, 0x02000000),
+    make_pair(127652, 0x02000000)
+};
+
+map<unsigned int, unsigned int> 
+StChargedPionEvent::mTriggerLookup(a, a + sizeof(a)/sizeof(a[0]) );
+
+unsigned int StChargedPionEvent::triggerBit(unsigned int trigId) {
+    map<unsigned int, unsigned int>::const_iterator it = mTriggerLookup.find(trigId);
+    if(it==mTriggerLookup.end()) return 0;
+    return it->second;
+}
+
+StChargedPionEvent::StChargedPionEvent() : TObject(), mSpinQA(0), mTriggerBits(0), mSimuTriggerBits(0) {
     mVertices = new TClonesArray("StChargedPionVertex", 20);
     mTracks = new TClonesArray("StChargedPionTrack", 50);
     mJets = new TClonesArray("StChargedPionJet", 50);
     
+    memset(mL2Result, 0, 36);
+    memset(mL2ResultEmulated, 0, 36);
+        
     StChargedPionEvent::Class()->IgnoreTObjectStreamer();
     StChargedPionVertex::Class()->IgnoreTObjectStreamer();
     StChargedPionTrack::Class()->IgnoreTObjectStreamer();
@@ -60,8 +93,11 @@ StChargedPionEvent::~StChargedPionEvent() {
 
 StChargedPionEvent::StChargedPionEvent(const StChargedPionEvent & e) : TObject(e),
     mRunId(e.mRunId), mEventId(e.mEventId), mBx7(e.mBx7), mBbcTimeBin(e.mBbcTimeBin),
-    mSpinBit(e.mSpinBit), mSpinQA(e.mSpinQA), mTriggerLookup(e.mTriggerLookup),
+    mSpinBit(e.mSpinBit), mSpinQA(e.mSpinQA),
     mTriggerBits(e.mTriggerBits), mSimuTriggerBits(e.mSimuTriggerBits) {
+        
+        memcpy(mL2Result, e.mL2Result, 36);
+        memcpy(mL2ResultEmulated, e.mL2ResultEmulated, 36);
         
         for(unsigned i=0; i<e.nVertices(); ++i) {
             addVertex(e.vertex(i));
@@ -86,10 +122,12 @@ StChargedPionEvent& StChargedPionEvent::operator=(const StChargedPionEvent & e) 
     mBbcTimeBin         = e.mBbcTimeBin;
     mSpinBit            = e.mSpinBit;
     mSpinQA             = e.mSpinQA;
-    mTriggerLookup      = e.mTriggerLookup;
     mTriggerPrescales   = e.mTriggerPrescales;
     mTriggerBits        = e.mTriggerBits;
     mSimuTriggerBits    = e.mSimuTriggerBits;
+    
+    memcpy(mL2Result, e.mL2Result, 36);
+    memcpy(mL2ResultEmulated, e.mL2ResultEmulated, 36);
     
     for(unsigned i=0; i<e.nVertices(); ++i) {
         addVertex(e.vertex(i));
@@ -204,6 +242,17 @@ void StChargedPionEvent::addSimuTrigger(unsigned int trigId) {
     }
 }
 
+void StChargedPionEvent::setL2Result(const void *address, bool emulated) {
+    if(emulated) {
+        memcpy(mL2ResultEmulated, address, 20);
+        memcpy(mL2ResultEmulated+5, (int*)address+6, 16);
+    }
+    else {
+        memcpy(mL2Result, address, 20);
+        memcpy(mL2Result+5, (int*)address+6, 16);
+    }
+}
+
 void StChargedPionEvent::addVertex(const StChargedPionVertex* v) {
     new ( (*mVertices)[mVertices->GetEntriesFast()] ) StChargedPionVertex(*v);
 }
@@ -215,4 +264,3 @@ void StChargedPionEvent::addTrack(const StChargedPionTrack* t) {
 void StChargedPionEvent::addJet(const StChargedPionJet* j) {
     new ( (*mJets)[mJets->GetEntriesFast()] ) StChargedPionJet(*j);
 }
-
