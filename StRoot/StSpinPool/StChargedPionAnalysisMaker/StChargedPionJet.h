@@ -31,6 +31,8 @@ public:
     float detectorEta() const;
     float detectorEta(float vz, float r=231.72) const;
     
+    bool isTrigger(unsigned int trigId) const;
+    
     vector<StChargedPionJetParticle>&       particles();
     const vector<StChargedPionJetParticle>& particles() const;
     
@@ -42,6 +44,7 @@ public:
     void setBarrelEtSum(float);
     void setEndcapEtSum(float);
     void setVertexZ(float);
+    void addTrigger(unsigned int trigId);
     void addParticle(StChargedPionJetParticle*);
     
 private:
@@ -58,11 +61,12 @@ private:
     Float_t mVertexZ;
     
     // something for geom triggers?
+    UInt_t mGeomTriggers;
     
     // MUST keep these guys slim
     vector<StChargedPionJetParticle> mParticles;
     
-    ClassDef(StChargedPionJet, 1)
+    ClassDef(StChargedPionJet, 2)
 };
 
 inline int StChargedPionJet::charge() const { return mCharge; }
