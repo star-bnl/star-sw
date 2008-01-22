@@ -490,11 +490,13 @@ void StBemcTriggerSimu::FEEout() {
               HTadc06[did-1] = HTL+(B5<<5);
 
               //Fill DSM L0 with 6bit HT/TP in each TP
+	      HT6bit_adc_holder[did-1]=HTadc06[did-1];  //D.Staszak
               if (DSM_HTStatus[tpid]==1){
                 if (HTadc06[did-1]>L0_HT_ADC[tpid]) L0_HT_ADC[tpid]=HTadc06[did-1];
               }
               if (DSM_TPStatus[tpid]==1) {
                 L0_TP_ADC[tpid]+=adc08[did-1];
+		TP6bit_adc_holder[tpid]+=adc08[did-1]; //D.Staszak
 		//Calculate LUT ped for OFFLINE
                 L0_TP_PED[tpid]++;
               }
@@ -502,6 +504,7 @@ void StBemcTriggerSimu::FEEout() {
               //Mask out 6 bit adc if that DSM HT/TP bit was masked out
               if (DSM_HTStatus[tpid]==0) L0_HT_ADC[tpid]=0;
               if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
+              if (DSM_TPStatus[tpid]==0) TP6bit_adc_holder[tpid]=0; //D.Staszak
 	      
 	      if (0)
 		{
@@ -539,13 +542,23 @@ void StBemcTriggerSimu::FEEout() {
 	    assert(1);
 	  }
 	L0_TP_ADC[tpid]=LUT[tpid];    
+	TP6bit_adc_holder[tpid]=LUT[tpid]; //D.Staszak
       }
     
     if (mConfig==kOffline) {
       // MOCK up LUT table for Offline case
-      if ((L0_TP_PED[tpid]-1)>=L0_TP_ADC[tpid]) L0_TP_ADC[tpid]=1;
-      if ((L0_TP_PED[tpid]-1)< L0_TP_ADC[tpid]) L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
-      if (L0_TP_ADC[tpid] > 62) L0_TP_ADC[tpid]=62;
+      if ((L0_TP_PED[tpid]-1)>=L0_TP_ADC[tpid]) { 
+	L0_TP_ADC[tpid]=1;
+	TP6bit_adc_holder[tpid]=1; //D.Staszak
+      }
+      if ((L0_TP_PED[tpid]-1)< L0_TP_ADC[tpid]) {
+	L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
+	TP6bit_adc_holder[tpid]-=(TP6bit_adc_holder[tpid]-1);
+      }
+      if (L0_TP_ADC[tpid] > 62) {
+	L0_TP_ADC[tpid]=62;
+	TP6bit_adc_holder[tpid]=62; //D.Staszak
+      }
     }
         
     if (0) 
@@ -785,7 +798,10 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
   DSM1_JP_ADC[9]=DSM0_TP_SUM[23]+DSM0_TP_SUM[24]+DSM0_TP_SUM_J1[22];
   DSM1_JP_ADC[10]=DSM0_TP_SUM[25]+DSM0_TP_SUM[26]+DSM0_TP_SUM_J3[27];
   DSM1_JP_ADC[11]=DSM0_TP_SUM[28]+DSM0_TP_SUM[29]+DSM0_TP_SUM_J1[27];
-
+  for (int hh=0;hh<12;hh++) {
+    JP_adc_holder[hh]=DSM1_JP_ADC[hh];
+  }
+  
   //Test each JP and see if it passed
   for (int i=0;i<kNJet;i++)
     {
@@ -794,7 +810,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
       if ((DSM1_JP_ADC[i] <= mDbThres->GetJP_DSM1_threshold(i,timestamp,1)) && (DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,0))) DSM1_JP_jp_Bit[i]=1;
       if ((DSM1_JP_ADC[i] <= mDbThres->GetJP_DSM1_threshold(i,timestamp,2)) && (DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,1))) DSM1_JP_jp_Bit[i]=2;
       if ( DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,2)) DSM1_JP_jp_Bit[i]=3;
-      //cout<<" JetID="<<i<<" ADC="<<DSM1_JP_ADC[i]<<" bit="<<DSM1_JP_jp_Bit[i]<<endl;
+      cout<<" JetID="<<i<<" ADC="<<DSM1_JP_ADC[i]<<" bit="<<DSM1_JP_jp_Bit[i]<<endl;
     }  
 
   // there are 2 L2 BEMC modules
@@ -845,4 +861,70 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
   }
 }
 
+
+const vector< pair<int,int> > StBemcTriggerSimu::getTowersAboveThreshold(int trigId) const {  
+  vector< pair<int,int> > towers;
+  
+  for (int i=0;i<kNTowers;i++)
+    {
+      int tpid = -1;
+      int dsmid = -1;
+      
+      mDecoder->GetTriggerPatchFromTowerId(i,tpid);
+      mDecoder->GetDSMFromTriggerPatch(tpid,dsmid);
+
+      if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5) {
+	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,1)) {
+	  //cout << "In getTowersAboveThreshold: " << i+1 << "\tHT: " << HT6bit_adc_holder[i] << "\tThreshold: " << mDbThres->GetHT_DSM0_threshold(i,timestamp,1) << endl;
+	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
+	}
+      }
+      if (trigId==127212 || trigId==137213) {
+	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,2)) {
+	  //cout << "In getTowersAboveThreshold: " << i+1 << "\tHT: " << HT6bit_adc_holder[i] << "\tThreshold: " << mDbThres->GetHT_DSM0_threshold(i,timestamp,2) << endl;
+	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
+	}
+      }
+    }
+  return towers;
+}
+
+
+const vector< pair<int,int> > StBemcTriggerSimu::getTriggerPatchesAboveThreshold(int trigId) const {  
+  vector< pair<int,int> > patches;
+
+  for (int i=0;i<kNPatches;i++)
+    {
+      int dsmid;
+      mDecoder->GetDSMFromTriggerPatch(i,dsmid);
+
+      if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5) {
+	if (TP6bit_adc_holder[i] > mDbThres->GetTP_DSM0_threshold(dsmid,timestamp,1)) {	
+	  //cout << endl << "In getTPAboveThreshold: " << i+1 << "\tTP: " << TP6bit_adc_holder[i] << "\tThreshold: " << mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,0) << endl;
+	  patches.push_back( make_pair(i,TP6bit_adc_holder[i]) );
+	}
+      }
+    }
+  return patches;
+}
+
+
+const vector< pair<int,int> > StBemcTriggerSimu::getJetPatchesAboveThreshold(int trigId) const {  
+  vector< pair<int,int> > patches;
+  
+  for (int i=0;i<kNJet;i++)
+    {
+      if ((JP_adc_holder[i] <= mDbThres->GetJP_DSM1_threshold(i,timestamp,1)) && (JP_adc_holder[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,0))) {
+	if (trigId==127501 || trigId==137501 || trigId==127622 || trigId==137622) {
+	  patches.push_back( make_pair(i,JP_adc_holder[i]) );
+	}
+      }
+      if (JP_adc_holder[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,1)) {
+	if (trigId==127221 || trigId==137221 || trigId==137222 || trigId==127501 || trigId==137501 || trigId==127622 || trigId==137622) {
+	  patches.push_back( make_pair(i,JP_adc_holder[i]) );
+	}
+      }
+    }
+  return patches;
+}
 
