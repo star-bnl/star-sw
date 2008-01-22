@@ -31,9 +31,10 @@ if ( ! -e "config/Makefile.config"){
 
 # Now parse arguments
 $ULINK = $FIXIT = 0;
-while (shift @ARGV){
-    if ($_ eq "-fix"){      $FIXIT = 1;}
-    if ($_ eq "-unlink"){   $ULINK = 1;}
+while ( defined($arg = shift(@ARGV))) {
+    #print "$arg\n";
+    if ($arg eq "-fix"){      $FIXIT = 1;}
+    if ($arg eq "-unlink"){   $ULINK = 1;}
 }
 
 
@@ -84,9 +85,13 @@ if ( ! -e "$CERN/$CERNL/lib/libpacklib_noshift.a"){
     die "$CERN/$CERNL/lib/libpacklib_noshift.a does not exist. Would not know what to do...\n";
 }
 
+$ERR = 0;
 
-open(FI, "config/Makefile.config");
-open(FO,">config/Makefile.config.new");
+
+if ( ! open(FI, "config/Makefile.config") || ! open(FO,">config/Makefile.config.new") ){
+    print " * ERROR cannot open file - trying to proceed\n";
+    $ERR = 1;
+}
 
 $done = 0;
 
@@ -112,9 +117,9 @@ if ($done){
     rename("config/Makefile.config",    "config/Makefile.config.old");
     rename("config/Makefile.config.new","config/Makefile.config");
 
-    print "config/Makefile.config fixed\n";
+    print "=> config/Makefile.config fixed\n";
 } else {
-    print "config/Makefile.config already fixed\n";
+    print "=> config/Makefile.config already fixed\n";
     unlink("config/Makefile.config.new");
 }
 
@@ -140,7 +145,7 @@ if ( -l  "config.status" ){
 #
 # Now we can proceed with FIXIT additional tasks
 #
-$CONFIG = $SUP = "";
+$ARCH = $CONFIG = $SUP = "";
 
 if ( -e "config.log"){
     if ( open(FI,"config.log") ){
@@ -160,11 +165,22 @@ if ( -e "config.status"){
 	    if ($line =~ m/--enable/){
 		chomp($line);
 		$CONFIG = $line;
+		@items  = split(" ",$line);
+		$ARCH   = $items[0];
 	    }
 	}
 	close(FI);
     }
 }
+
+
+print
+    "\n".
+    "Checking bin/root-config\n".
+    " + ARCH   = [$ARCH] \n".
+    " + CONFIG = [$CONFIG]\n".
+    " + SUP    = [$SUP]\n";
+
 
 # now we have all we need to re-write root-config file
 # The below logic will also remove the link because it will re-generate
@@ -174,6 +190,14 @@ if ( -e "bin/root-config"){
 	if ( open(FO,">bin/root-config.new") ){
 	    while ( defined($line = <FI>) ){
 		chomp($line);
+		if ( $line =~ m/(arch=)(.*)/ ){
+		    #print "Match! [$line]\n";
+		    if ( $2 ne $ARCH && $ARCH ne ""){
+			$mod = 1;
+			print FO "arch=$ARCH\n";
+			next;
+		    }
+		}
 		if ( $line =~ m/(features=\")(.*)(\")/){
 		    if ( $2 ne $SUP && $SUP ne ""){
 			$mod = 1;
@@ -191,34 +215,42 @@ if ( -e "bin/root-config"){
 		print FO "$line\n";
 	    }
 	    close(FO);
+	} else {
+	    print " * ERROR could not open file for write (token issue?)\n";
+	    $ERR = 1;
 	}
 	close(FI);
     }
 }
 
+
 # if modifications are needed, rename else blabla and cleanup
+if ( $ERR){
+    die "Please fix errors above and try again\n";
+}
+
 if ($FIXIT){
     if ( $mod ){
 	$i = $f = "bin/root-config";
 	if ( -l $f){  $f = readlink($f);}
 	@stat = stat($f);
 
-	print "Modifying the file $i ".($i ne $f?"($f)":"")."\n";
+	print "=> Modifying the file $i ".($i ne $f?"($f)":"")."\n";
 	chmod($stat[2],"bin/root-config.new");
 	unlink("bin/root-config") if ( -e "bin/root-config");
 	rename("bin/root-config.new","bin/root-config");
     } else {
-	print "No change necessary\n";
+	print "=> No changes necessary\n";
 	unlink("bin/root-config.new") if ( -e "bin/root-config.new");
     }
 } else {
     unlink("bin/root-config.new") if ( -e "bin/root-config.new");
     if ($mod){
 	print 
-	    "NOTE bin/root-config need modifications\n".
-	    "If you are done with compilation, run this script with -fix argument\n";
+	    "=> NOTE bin/root-config need modifications\n".
+	    "=> If you are done with compilation, run this script with -fix argument\n";
     } else {
-	print "There is nothing to do with bin/root-config\n";
+	print "=> There is nothing to do with bin/root-config\n";
     }
 }
 
