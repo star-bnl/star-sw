@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.32 2007/12/24 05:19:58 fine Exp $
+ * $Id: StDAQReader.h,v 1.33 2008/01/22 21:13:01 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.33  2008/01/22 21:13:01  fine
+ * move the dependency from the class desclaration to class implematation to allo for the new EVP_READER
+ *
  * Revision 1.32  2007/12/24 05:19:58  fine
  * Introduce the shadow copy of the evp buffer for the new EVP_READER
  *
@@ -126,10 +129,10 @@ class TDataSet    ;
 class evpReader   ; // new  2007 DAQ file reader
 #ifndef __CINT__
 
-#include "StDaqLib/RICH/RICH_Reader.hh"
-#include "StDaqLib/L3/L3_Reader.hh"
-#include "StDaqLib/TOF/TOF_Reader.hh"
-#include "StDaqLib/FPD/FPD_Reader.hh"
+struct RICH_Reader;
+struct L3_Reader;
+struct TOF_Reader;
+struct FPD_Reader;
 
 typedef RICH_Reader StRICHReader;
 typedef L3_Reader   StL3Reader;
