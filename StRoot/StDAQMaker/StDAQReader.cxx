@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.56 2008/01/10 01:27:56 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.57 2008/01/22 21:13:01 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.57  2008/01/22 21:13:01  fine
+ * move the dependency from the class desclaration to class implematation to allo for the new EVP_READER
+ *
  * Revision 1.56  2008/01/10 01:27:56  fine
  * set the correct buffer size
  *
@@ -197,6 +200,11 @@
 #   include "RTS/src/EVP_READER/cfgutil.h"
 #   include "RTS/src/EVP_READER/evpReaderClass.h"
 #endif
+
+#include "StDaqLib/RICH/RICH_Reader.hh"
+#include "StDaqLib/L3/L3_Reader.hh"
+#include "StDaqLib/TOF/TOF_Reader.hh"
+#include "StDaqLib/FPD/FPD_Reader.hh"
 
 #include "StTPCReader.h"
 #include "StEMCReader.h"
