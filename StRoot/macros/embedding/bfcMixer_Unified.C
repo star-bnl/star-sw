@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Unified.C,v 1.2 2008/01/15 15:34:31 lbarnby Exp $
+// $Id: bfcMixer_Unified.C,v 1.3 2008/01/22 14:52:26 lbarnby Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ void bfcMixer_Unified(const Int_t Nevents=1,
   TString prod = prodP07idStGamma;
   TString geom = geomP07idStGamma;
 
-  TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput");
+  TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput adcOnly");
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geom;
   TString chain3Opt = prod;
@@ -125,6 +125,9 @@ void bfcMixer_Unified(const Int_t Nevents=1,
 }
   
 // $Log: bfcMixer_Unified.C,v $
+// Revision 1.3  2008/01/22 14:52:26  lbarnby
+// Add adcOnly option. Enables efficient processing of st_gamma daq files
+//
 // Revision 1.2  2008/01/15 15:34:31  lbarnby
 // Added arguments for pt limits, PID and multiplicity fractino or number and removed Zzvertex limit arguments as they were not being used
 //
