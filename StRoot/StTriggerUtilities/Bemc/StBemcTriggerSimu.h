@@ -3,10 +3,9 @@
 
 #include "TObject.h"
 #include "TString.h"
-#include <utility> //D.Staszak
+#include <utility>
 #include <vector>
 #include <set>
-//#include <map> //D.Staszak
 #include "TDatime.h"
 
 using std::pair;
@@ -105,7 +104,7 @@ private:
   //Intermediate bits for each jet patch constructed in DSMLayer1
   Int_t DSM1_JP_jp_Bit[kNJet];
 
-  // D.Staszak
+  //Storage of all HT/TP/JP for get*AboveThreshold functions
   Int_t HT6bit_adc_holder[kNTowers];
   Int_t TP6bit_adc_holder[kNPatches];
   Int_t JP_adc_holder[kNJet];
@@ -168,10 +167,7 @@ public:
   Int_t* getBEMC_L1_HTTP() {return DSM1_HTTP_Bit;}
   Int_t* getBEMC_L1_ETOT_ADC() {return DSM1_ETOT_ADC;}
 
-  //access to towers, patches  D.Staszak
-  //  std::map<int, int> getTowersAboveThreshold(int trigId);
-  //  std::map<int, int> getTriggerPatchesAboveThreshold(int trigId);
-  //  std::map<int, int> getJetPatchesAboveThreshold(int trigId);
+  //access to towers, patches
   const vector< pair<int, int> > getTowersAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getTriggerPatchesAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getJetPatchesAboveThreshold(int trigId) const;

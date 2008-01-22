@@ -490,13 +490,13 @@ void StBemcTriggerSimu::FEEout() {
               HTadc06[did-1] = HTL+(B5<<5);
 
               //Fill DSM L0 with 6bit HT/TP in each TP
-	      HT6bit_adc_holder[did-1]=HTadc06[did-1];  //D.Staszak
+	      HT6bit_adc_holder[did-1]=HTadc06[did-1]; 
               if (DSM_HTStatus[tpid]==1){
                 if (HTadc06[did-1]>L0_HT_ADC[tpid]) L0_HT_ADC[tpid]=HTadc06[did-1];
               }
               if (DSM_TPStatus[tpid]==1) {
                 L0_TP_ADC[tpid]+=adc08[did-1];
-		TP6bit_adc_holder[tpid]+=adc08[did-1]; //D.Staszak
+		TP6bit_adc_holder[tpid]+=adc08[did-1]; 
 		//Calculate LUT ped for OFFLINE
                 L0_TP_PED[tpid]++;
               }
@@ -504,7 +504,7 @@ void StBemcTriggerSimu::FEEout() {
               //Mask out 6 bit adc if that DSM HT/TP bit was masked out
               if (DSM_HTStatus[tpid]==0) L0_HT_ADC[tpid]=0;
               if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
-              if (DSM_TPStatus[tpid]==0) TP6bit_adc_holder[tpid]=0; //D.Staszak
+              if (DSM_TPStatus[tpid]==0) TP6bit_adc_holder[tpid]=0; 
 	      
 	      if (0)
 		{
@@ -542,14 +542,14 @@ void StBemcTriggerSimu::FEEout() {
 	    assert(1);
 	  }
 	L0_TP_ADC[tpid]=LUT[tpid];    
-	TP6bit_adc_holder[tpid]=LUT[tpid]; //D.Staszak
+	TP6bit_adc_holder[tpid]=LUT[tpid]; 
       }
     
     if (mConfig==kOffline) {
       // MOCK up LUT table for Offline case
       if ((L0_TP_PED[tpid]-1)>=L0_TP_ADC[tpid]) { 
 	L0_TP_ADC[tpid]=1;
-	TP6bit_adc_holder[tpid]=1; //D.Staszak
+	TP6bit_adc_holder[tpid]=1; 
       }
       if ((L0_TP_PED[tpid]-1)< L0_TP_ADC[tpid]) {
 	L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
@@ -557,7 +557,7 @@ void StBemcTriggerSimu::FEEout() {
       }
       if (L0_TP_ADC[tpid] > 62) {
 	L0_TP_ADC[tpid]=62;
-	TP6bit_adc_holder[tpid]=62; //D.Staszak
+	TP6bit_adc_holder[tpid]=62;
       }
     }
         
