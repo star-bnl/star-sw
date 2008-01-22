@@ -137,7 +137,7 @@ Int_t StSkimPionMaker::Init()
 {
     //initializes histograms and ntuples
     
-    cout << "++++++++++++ StSkimPionMaker::Init()" << endl;
+    if (debug) cout << "++++++++++++ StSkimPionMaker::Init()" << endl;
     
     mTables = new StBemcTables();
     
@@ -153,7 +153,7 @@ Int_t StSkimPionMaker::Init()
     
     //#include "/star/u/ahoffman/Emc_calib/c_factors.txt" //taken out for first run
 
-    cout << "StSkimPionMaker: Init done..." << endl;
+    if (debug) cout << "StSkimPionMaker: Init done..." << endl;
     
     return StMaker::Init();
 }
@@ -167,7 +167,7 @@ Int_t StSkimPionMaker::InitRun(int runnumber)
 //________________________________________________________________________________________________________
 Int_t StSkimPionMaker::Make()
 {
-    cout << "Entering StSkimPionMaker::Make, processed events: " << ievtot << endl;
+    //cout << "Entering StSkimPionMaker::Make, processed events: " << ievtot << endl;
     // the main function, gets called for each event
     
     ievtot++;
@@ -176,7 +176,7 @@ Int_t StSkimPionMaker::Make()
 	
     //if (ievtot%2000==0) pi0Tree->AutoSave(); //saveHistograms(); // save data regularly, always good in case the code crashes (not sure)
 	
-    cout << "Getting MuDst...\n";
+    //cout << "Getting MuDst...\n";
     mMuDst = (StMuDst*)GetInputDS("MuDst"); //mMuDstMaker->muDst();
     if (!mMuDst) return 1;
 	
@@ -186,7 +186,7 @@ Int_t StSkimPionMaker::Make()
 	
     if (!event)
 	{
-	    cout <<"++++++++++++ StSkimPionMaker::Make() Cannot get the event pointer"<<endl;
+	    if (debug) cout <<"++++++++++++ StSkimPionMaker::Make() Cannot get the event pointer"<<endl;
 	    return kStOK;
 	}
     
@@ -201,11 +201,11 @@ Int_t StSkimPionMaker::Make()
     // get the magnetic field
     mField = event->magneticField()/10.; // bFld in Tesla
     //if (debug) 
-    cout <<" StEvent::summary()->magneticField() = "<<mField<<" [Tesla]"<< endl;
+    //cout <<" StEvent::summary()->magneticField() = "<<mField<<" [Tesla]"<< endl;
 	
     if (fabs(mField)<0.01)
 	{
-	    cout << "BField read back as 0, setting default." << endl;
+	    if (debug) cout << "BField read back as 0, setting default." << endl;
 	    mField = 0.497952;
 	}
 	
@@ -217,12 +217,12 @@ Int_t StSkimPionMaker::Make()
     
     StTriggerSimuMaker* trigSim = dynamic_cast<StTriggerSimuMaker*>(GetMaker("StarTrigSimu"));
     if (trigSim) {
-	cout << "Found TriggSim Info for BBC\n";
+	//cout << "Found TriggSim Info for BBC\n";
 	mBBCTrig = (trigSim->bbc)->triggerDecision(137611);
-	cout << "BBC Trigger: " << mBBCTrig << endl;
+	//cout << "BBC Trigger: " << mBBCTrig << endl;
     }
     else {
-	cout << "StFranksPi0Maker::Make() could not find SimuTrig \n";
+	if (debug) cout << "StFranksPi0Maker::Make() could not find SimuTrig \n";
 	mBBCTrig = 0;
     }
 	
@@ -256,12 +256,12 @@ Int_t StSkimPionMaker::Make()
     int mcHTTPL2 = 0;
     if ((trigSim->bbc)->triggerDecision(137611)) mcMB = 1;
     if (trigSim) {
-	cout<<"Found Software Trigger Info...\n";
+	//cout<<"Found Software Trigger Info...\n";
 	if (trigSim->isTrigger(137611)) mcHTTPL2 = 1;
     }
 
     else {
-	cout<<"SkimPionMaker::Make() could not find the trigger emulator"<<endl;
+	if (debug) cout<<"SkimPionMaker::Make() could not find the trigger emulator"<<endl;
 	mHiTowerAdc6Bit = 0;
     }
 
@@ -273,7 +273,7 @@ Int_t StSkimPionMaker::Make()
     // also store mc vertex position, so that for simulations this can be used instead of reco vertex
     StThreeVectorF mcVertexPos;
 		
-    cout << "Getting Triggers...\n";	
+    //cout << "Getting Triggers...\n";	
     // check for trigger condidtions
     int startriggers[3] = {117001, 137611, 5}; //mb, http-l2gamma, http-l2gamma-test 2006
 		
@@ -290,7 +290,7 @@ Int_t StSkimPionMaker::Make()
     }
 		
     //get trigger prescales:
-    cout<<"Checking for Prescales..."<<endl;
+    //cout<<"Checking for Prescales..."<<endl;
     StDetectorDbTriggerID& v = *(StDetectorDbTriggerID::instance());
     for (int i=0;i<3;++i) {
 	prescales[i]=v.getTotalPrescaleByTrgId(startriggers[i]);
@@ -309,7 +309,7 @@ Int_t StSkimPionMaker::Make()
     //cout << "Accepting all triggers... If you want to change that, check out line 600" << endl;
 	
     if (!((mb)||(httpl2)||(httpl2_test)||(mcHTTPL2))) {
-	cout << " No Interesting trigger, opting out..." << endl;
+	//cout << " No Interesting trigger, opting out..." << endl;
 	pi0Event->Clear();
 	return kStOk;
     }		
@@ -341,13 +341,13 @@ Int_t StSkimPionMaker::Make()
   
     StEvent *stevent = (StEvent*)this->GetInputDS("StEvent");
     if (!stevent) {
-	cout << "++++++++++++ StSkimPionMaker::Make: Can't get StEvent pointer" << endl;
+	if (debug) cout << "++++++++++++ StSkimPionMaker::Make: Can't get StEvent pointer" << endl;
 	return kStOk;
     }
     
     StEmcCollection* emccol = (StEmcCollection*)stevent->emcCollection();
     if (!emccol) {
-	cout <<"++++++++++++ StSkimPionMaker::Make() No EMC Collection"<<endl;
+	if (debug) cout <<"++++++++++++ StSkimPionMaker::Make() No EMC Collection"<<endl;
 	//iemc++;
 	if ((mb)||(httpl2)||(httpl2_test)||(mcHTTPL2)) {
 	    iWrittenEvents++;
@@ -359,7 +359,7 @@ Int_t StSkimPionMaker::Make()
     
     StEmcDetector* bemc = emccol->detector(kBarrelEmcTowerId);
     if (!bemc) {
-	cout <<"++++++++++++ StSkimPionMaker::Make() No BEMC detector"<<endl;
+	if (debug) cout <<"++++++++++++ StSkimPionMaker::Make() No BEMC detector"<<endl;
 	//mEventInfoNtuple->Fill(eventInfo);
 	if ((mb)||(httpl2)||(httpl2_test)||(mcHTTPL2)) {
 	    pi0Tree->Fill();		
@@ -378,7 +378,7 @@ Int_t StSkimPionMaker::Make()
     long numberOfPrimaryTracks = mMuDst->primaryTracks()->GetEntries();
   
     // reject z_vertex==0 events 
-    cout << "StSkimPionMaker:  z_vertex: " << vPos.z() << endl;
+    //cout << "StSkimPionMaker:  z_vertex: " << vPos.z() << endl;
     pi0Event->SetVertex(vPos.x(),vPos.y(),vPos.z());
     
     if (vPos.z()==0) {
@@ -393,7 +393,7 @@ Int_t StSkimPionMaker::Make()
     
     if (!(vPos.z()>-100. && vPos.z()<100.)) 
 	{
-	    cout <<"++++++++++++ StSkimPionMaker::Make() z_vertex out of range!"<<endl;
+	    if (debug) cout <<"++++++++++++ StSkimPionMaker::Make() z_vertex out of range!"<<endl;
 	    if ((mb)||(httpl2)||(httpl2_test)||(mcHTTPL2)) {
 		pi0Tree->Fill();		
 		iWrittenEvents++;
@@ -411,7 +411,7 @@ Int_t StSkimPionMaker::Make()
 	if ((t->nHits() > 15)&&(t->dca().mag() < 3.0)&&(t->eta() > -1.)&&(t->eta() < 1.)) //using full barrell now.
 	    chargedPtSum += t->pt();
     }
-    cout << "Charged pt sum: " << chargedPtSum << endl;
+    //cout << "Charged pt sum: " << chargedPtSum << endl;
     pi0Event->SetChargedPtSum(chargedPtSum);
 	
 	
@@ -422,7 +422,7 @@ Int_t StSkimPionMaker::Make()
     // reject events with no BEMC hits  
     if (bEmcPoints.size()==0)
 	{
-	    cout <<"++++++++++++ StSkimPionMaker::Make() No BEMC points"<<endl;
+	    if (debug) cout <<"++++++++++++ StSkimPionMaker::Make() No BEMC points"<<endl;
 	    if ((mb)||(httpl2)||(httpl2_test)||(mcHTTPL2)) {
 		pi0Tree->Fill();
 		iWrittenEvents++;
@@ -440,7 +440,7 @@ Int_t StSkimPionMaker::Make()
     // read EMC point list
     if (!readPointList()) // here the photon list gets filled
 	{
-	    cout <<"+++  ERROR read readPointList()"<<endl;
+	    if (debug) cout <<"+++  ERROR read readPointList()"<<endl;
 	    if ((mb)||(httpl2)||(httpl2_test)||(mcHTTPL2)) {
 		pi0Tree->Fill();
 		iWrittenEvents++;
@@ -459,7 +459,7 @@ Int_t StSkimPionMaker::Make()
    
     // Get total neutral Energy in EMC
     Float_t neutralEnergy = getNeutralEnergySum(photonlist);
-    cout << "Total neutral Energy: " << neutralEnergy<< endl;
+    //cout << "Total neutral Energy: " << neutralEnergy<< endl;
     pi0Event->SetNeutralEnergy(neutralEnergy);
 	
 	
@@ -549,7 +549,7 @@ StThreeVectorF StSkimPionMaker::getPoint(StEmcPoint *p, Int_t &id, Float_t &e, F
 	StEmcCluster *clT=(StEmcCluster*)towerClus[0];
 	StPtrVecEmcRawHit& hT=clT->hit();
 	nTowerHits=hT.size();
-	cout<<"the number of towers is "<<nTowerHits<<endl;
+	if (debug) cout<<"the number of towers is "<<nTowerHits<<endl;
 	for (Int_t j=0; j<nTowerHits; j++) {
 	    //cout<<"getting tower cluster info for raw hit "<<j<<endl;
 	    StEmcRawHit *rawHit = (StEmcRawHit*)hT[j];
@@ -623,7 +623,7 @@ Int_t StSkimPionMaker::doTrackPtHist(float eT, float threshold, TObjArray *photo
     StEvent *event = (StEvent*)this->GetInputDS("StEvent");
     if (!event)
 	{
-	    cout << "StSkimPionMaker::doTrackPtHist: Can't get Event pointer" << endl;
+	    if (debug) cout << "StSkimPionMaker::doTrackPtHist: Can't get Event pointer" << endl;
 	    return kStOk;
 	}
     
@@ -681,7 +681,7 @@ Float_t StSkimPionMaker::getHiTowerEt(StEmcCollection* emccol)
     StEmcDetector* bemc = emccol->detector(kBarrelEmcTowerId);
     if (!bemc)
 	{
-	    cout <<"++++++++++ StSkimPionMaker::getHiTowerEt(): No BEMC detector"<<endl;
+	    if (debug) cout <<"++++++++++ StSkimPionMaker::getHiTowerEt(): No BEMC detector"<<endl;
 	    return 0;
 	}
     
@@ -728,13 +728,13 @@ Int_t StSkimPionMaker::associateTracksWithEmcPoints(StMaker* anyMaker)
     StEvent *event = (StEvent*)anyMaker->GetInputDS("StEvent");
     if (!event)
 	{
-	    cout << "++++++++++++ StSkimPionMaker::associateTracksWithEmcPoints: Can't get Event pointer" << endl;
+	    if (debug) cout << "++++++++++++ StSkimPionMaker::associateTracksWithEmcPoints: Can't get Event pointer" << endl;
 	    return kStOk;
 	}
     StEmcCollection* emccol = (StEmcCollection*)event->emcCollection();
     if (!emccol)
 	{
-	    cout << "++++++++++++ StSkimPionMaker::associateTracksWithEmcPoints: No EMC Collection" << endl;
+	    if (debug) cout << "++++++++++++ StSkimPionMaker::associateTracksWithEmcPoints: No EMC Collection" << endl;
 	    return kStOk;
 	}
     StSPtrVecEmcPoint& bEmcPoints = emccol->barrelPoints();
@@ -852,7 +852,7 @@ void StSkimPionMaker::getPhotonSpectra(TObjArray *photonlist, int runnm, float v
 	    StThreeVectorF v1 = getPoint(p1, id1,e1,pt1,n1,t1, eSMDe1, eSMDp1, eTower1,sSMDe1, sSMDp1, sTower1);
 	    //cout <<"--------------------> pt1 = " <<pt1<<endl;
 	    
-	    cout << "Photon track association: " << n1 << endl;
+	    if (debug) cout << "Photon track association: " << n1 << endl;
 	    
 	    if (n1==0)
 		{
@@ -975,7 +975,7 @@ void StSkimPionMaker::getInvMass(int mode, TObjArray *photonlist1, TObjArray *ph
 			    Float_t phi1;
 			    Float_t phi2;
 			    
-			    cout << "Pi0 candidate: tower1: " << id1 << " tower2: " << id2 << "  triggerTower: " << triggerTower << endl;
+			    if (debug) cout << "Pi0 candidate: tower1: " << id1 << " tower2: " << id2 << "  triggerTower: " << triggerTower << endl;
 			    getMass(v1rel,v2rel,e1,e2, mInvPi0,pPi0,asym,cosAng, phi1,phi2); // use v1 and v2 instead of v1rel and v2rel if you
 			    // assume that the photons come from 0,0,0
 			    
@@ -1058,13 +1058,13 @@ void StSkimPionMaker::getTowerHitInfo()
     StEvent *event = (StEvent*)this->GetInputDS("StEvent");
     if (!event)
 	{
-	    cout << "++++++++++++ StSkimPionMaker::getTowerHitInfo(): Can't get Event pointer" << endl;
+	    if (debug) cout << "++++++++++++ StSkimPionMaker::getTowerHitInfo(): Can't get Event pointer" << endl;
 	    return;
 	}
     StEmcCollection* emccol = (StEmcCollection*)event->emcCollection();
     if (!emccol)
 	{
-	    cout << "++++++++++++ StSkimPionMaker::getTowerHitInfo():  No EMC Collection" << endl;
+	    if (debug) cout << "++++++++++++ StSkimPionMaker::getTowerHitInfo():  No EMC Collection" << endl;
 	    return;
 	}
     StSPtrVecEmcPoint& bEmcPoints = emccol->barrelPoints();
@@ -1096,7 +1096,7 @@ void StSkimPionMaker::getTowerHitInfo()
 		}
 	} 
     else 
-	cout << "++++++++++ StSkimPionMaker::getTowerHitInfo(): no detector" << endl;
+	if (debug) cout << "++++++++++ StSkimPionMaker::getTowerHitInfo(): no detector" << endl;
     
     return;
 }
@@ -1110,13 +1110,13 @@ Bool_t StSkimPionMaker::readPointList()
     StEvent *event = (StEvent*)this->GetInputDS("StEvent");
     if (!event)
 	{
-	    cout << "++++++++++++ StSkimPionMaker::readPointList(): Can't get Event pointer" << endl;
+	    if (debug) cout << "++++++++++++ StSkimPionMaker::readPointList(): Can't get Event pointer" << endl;
 	    return kStWarn;
 	}
     StEmcCollection* emccol = (StEmcCollection*)event->emcCollection();
     if (!emccol)
 	{
-	    cout << "++++++++++++ StSkimPionMaker::readPointList():  No EMC Collection" << endl;
+	    if (debug) cout << "++++++++++++ StSkimPionMaker::readPointList():  No EMC Collection" << endl;
 	    return kStOk;
 	}
     StSPtrVecEmcPoint& bEmcPoints = emccol->barrelPoints();
