@@ -4,7 +4,7 @@
 void SkimPion(const char* fileList, const char* fileId="Skim.root") {
 
     int flagMC=0;  // 0== off, 1=Alan
-    int useEemc=0; // 0== off
+    int useEemc=1; // 0== off
     int useBemc=1; // 0== off
     int useL2=1;   // 0== off
     int L2ConfigYear=2006; // possible: 2006, 2008
@@ -13,7 +13,7 @@ void SkimPion(const char* fileList, const char* fileId="Skim.root") {
     int emcEveDump=0; // extrating raw EMC data in a custom format
     const char *dirIn="";
     int nFiles = 100000; // make this big if you want to read all events from a run
-    char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
+    char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
 
     TString outDir="./out2/"; 
 
