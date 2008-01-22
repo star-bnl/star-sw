@@ -3,11 +3,17 @@
 
 #include "TObject.h"
 #include "TString.h"
+#include <utility> //D.Staszak
 #include <vector>
 #include <set>
+//#include <map> //D.Staszak
 #include "TDatime.h"
 
+using std::pair;
+using std::vector;
+
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
+#include "StTriggerUtilities/StTriggerSimuResult.h"
 
 #define kNPatches 300
 #define kNJet 12
@@ -98,6 +104,11 @@ private:
   Int_t DSM1_ETOT_ADC[kL1DsmModule];
   //Intermediate bits for each jet patch constructed in DSMLayer1
   Int_t DSM1_JP_jp_Bit[kNJet];
+
+  // D.Staszak
+  Int_t HT6bit_adc_holder[kNTowers];
+  Int_t TP6bit_adc_holder[kNPatches];
+  Int_t JP_adc_holder[kNJet];
   
   void getTowerStatus();
   void getDSM_TPStatus();
@@ -156,6 +167,14 @@ public:
   Int_t* getBEMC_L1_TP() {return DSM1_TP_Bit;}
   Int_t* getBEMC_L1_HTTP() {return DSM1_HTTP_Bit;}
   Int_t* getBEMC_L1_ETOT_ADC() {return DSM1_ETOT_ADC;}
+
+  //access to towers, patches  D.Staszak
+  //  std::map<int, int> getTowersAboveThreshold(int trigId);
+  //  std::map<int, int> getTriggerPatchesAboveThreshold(int trigId);
+  //  std::map<int, int> getJetPatchesAboveThreshold(int trigId);
+  const vector< pair<int, int> > getTowersAboveThreshold(int trigId) const;
+  const vector< pair<int, int> > getTriggerPatchesAboveThreshold(int trigId) const;
+  const vector< pair<int, int> > getJetPatchesAboveThreshold(int trigId) const;
 
   ClassDef(StBemcTriggerSimu, 1);
 };
