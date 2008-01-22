@@ -421,8 +421,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
 #ifdef __BFC2__
   {"clearmem"    ,""  ,"",""                           				  ,"","","Obsolete",kFALSE},
-  {"adcOnly"     ,""  ,"",""                          ,"","","DAQMaker selects only TPC ADC events",kFALSE},
 #endif /* __BFC2__ */
+  {"adcOnly"     ,""  ,"",""                          ,"","","DAQMaker selects only TPC ADC events",kFALSE},
   {"InTree"      ,""  ,"","in",""                                     ,"","bfcTree Input Tree name",kFALSE},
   {"OutTree"     ,""  ,"","Tree",""                                  ,"","bfcTree Output Tree name",kFALSE},
   {"DstOut"      ,""  ,"","Tree"                                       ,"","","Write dst to StTree",kFALSE},
