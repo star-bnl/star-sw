@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.21 2008/01/17 17:04:07 kocolosk Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.22 2008/01/22 18:06:26 kocolosk Exp $
 
 
 #include <Stiostream.h>
@@ -157,7 +157,24 @@ const StTriggerSimuResult& StTriggerSimuMaker::detailedResult(unsigned int trigI
     }
     if(bemc) {
         result.setBemcDecision(bemc->triggerDecision(trigId));
-        // fill HT/TP/JP details here
+
+        if(bemc->triggerDecision(trigId)==1) {
+            // Record HTs above Threshold
+            vector< pair<int,int> > Towers=bemc->getTowersAboveThreshold(trigId);
+            for(vector< pair<int,int> >::iterator itr=Towers.begin(); itr!=Towers.end(); itr++){
+                result.addHighTower((*itr).first,(*itr).second);
+            }
+            // Record TPs above Threshold
+            vector< pair<int,int> > tPatches=bemc->getTriggerPatchesAboveThreshold(trigId);
+            for(vector< pair<int,int> >::iterator itr=tPatches.begin(); itr!=tPatches.end(); itr++){
+                result.addTriggerPatch((*itr).first,(*itr).second);
+            }
+            // Record JPs above Threshold
+            vector< pair<int,int> > jPatches=bemc->getJetPatchesAboveThreshold(trigId);
+            for(vector< pair<int,int> >::iterator itr=jPatches.begin(); itr!=jPatches.end(); itr++){
+                result.addJetPatch((*itr).first,(*itr).second);	    
+            }
+        }
     }
     if(eemc) {
         result.setEemcDecision(eemc->triggerDecision(trigId));
@@ -177,6 +194,10 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.22  2008/01/22 18:06:26  kocolosk
+ * added detailedResult code for BEMC L0, courtesy Dave Staszak
+ * fixed two bugs in vector accessors in result class (also thanks to Dave)
+ *
  * Revision 1.21  2008/01/17 17:04:07  kocolosk
  * some revisions to StTriggerSimuResult structure to hopefully improve clarity and maintainability
  *

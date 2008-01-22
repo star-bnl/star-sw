@@ -1,7 +1,7 @@
 #ifndef STAR_StTriggerSimuResult
 #define STAR_StTriggerSimuResult
 
-// $Id: StTriggerSimuResult.h,v 1.3 2008/01/18 02:10:30 kocolosk Exp $
+// $Id: StTriggerSimuResult.h,v 1.4 2008/01/22 18:06:27 kocolosk Exp $
 
 /*****************************************************************************
  * @class StTriggerSimuResult
@@ -118,8 +118,8 @@ inline StTriggerSimuDecision StTriggerSimuResult::eemcDecision() const { return 
 inline StTriggerSimuDecision StTriggerSimuResult::l2Decision() const { return (StTriggerSimuDecision)mL2Decision; }
 
 inline const vector<short>& StTriggerSimuResult::highTowerIds() const { return mHighTowerIds; }
-inline const vector<short>& StTriggerSimuResult::triggerPatchIds() const { return mTriggerPatchAdcs; }
-inline const vector<short>& StTriggerSimuResult::jetPatchIds() const { return mJetPatchAdcs; }
+inline const vector<short>& StTriggerSimuResult::triggerPatchIds() const { return mTriggerPatchIds; }
+inline const vector<short>& StTriggerSimuResult::jetPatchIds() const { return mJetPatchIds; }
 
 inline void StTriggerSimuResult::setTriggerId(unsigned int tid) { mTriggerId = tid; }
 inline void StTriggerSimuResult::setBbcDecision(StTriggerSimuDecision d) { mBbcDecision = d; }
@@ -130,6 +130,10 @@ inline void StTriggerSimuResult::setL2Decision(StTriggerSimuDecision d) { mL2Dec
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.h,v $
+ * Revision 1.4  2008/01/22 18:06:27  kocolosk
+ * added detailedResult code for BEMC L0, courtesy Dave Staszak
+ * fixed two bugs in vector accessors in result class (also thanks to Dave)
+ *
  * Revision 1.3  2008/01/18 02:10:30  kocolosk
  * add comment pointing to documentation of L2 result structures
  *
