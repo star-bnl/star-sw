@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.13 2008/01/17 01:56:52 kocolosk Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.14 2008/01/23 02:52:23 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -212,8 +212,9 @@ StGenericL2Emulator::initRun2(int runNo){
     TString algoName=mL2algo[ia]->getName();
     L2DbTime *config = confDB2.getConfiguration(mYearMonthDay,mHourMinSec,algoName);
     if(config==0) {
-      LOG_ERROR  << Form("initRun2() failed L2-%s algo configuration for yyyy=%d hhmmss=%d, ABORT",algoName.Data(),mYearMonthDay,mHourMinSec)<<endm;
-      assert(config);
+      LOG_ERROR  << Form("\n************\ninitRun2() failed L2-%s  configuration for yyyy=%d hhmmss=%d,\n On explicit request from Renee, the L2 emulator will continue with disabled L2-jet algo.\nThis will result with false positives - ignore emulated trigger results for this algo,\nIt would be much better to fix the setup and provide missing record.\nYou have been warned,  Jan B.\n***********",algoName.Data(),mYearMonthDay,mHourMinSec)<<endm;
+      mL2algo[ia]=0; continue;
+      // assert(config); disabed to let the code go dispite missing setup, Jan
     }
     TString aa1 = config->getBuf1(); // setup name
     TString aa2 = config->getBuf2();
@@ -531,6 +532,9 @@ const unsigned int * StGenericL2Emulator::result() const {
 }
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.14  2008/01/23 02:52:23  balewski
+// allow L2-algo to be disabled in initRun if setup time stamp is wrong.
+//
 // Revision 1.13  2008/01/17 01:56:52  kocolosk
 // export 128-byte emulated L2Result
 //

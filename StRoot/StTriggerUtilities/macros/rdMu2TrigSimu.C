@@ -5,14 +5,14 @@ int total=0;
 
 void rdMu2TrigSimu( int nevents = 1000,
 		    int flagMC=0,  // 0== off, 1=Alan
-		    int useEemc=0, // 0== off, 1=kOnline, 2=kExpert
+		    int useEemc=1, // 0== off, 1=kOnline, 2=kExpert
 		    int useBemc=1, // 0== off
 		    int useL2=1,   // 0== off
 		    int L2ConfigYear=2006, // possible: 2006, 2008
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
 		    int playConfig=100, // jan:100_199
 		    int emcEveDump=0, // extrating raw EMC data in a custom format
-		    char *file="R7136073.lis")
+		    char *file="R7132024.lis")
 {
 		    //R7100052.lis  R7101078.lis  R7133064.lis R70908001.lis    R7132001.lis  
 
@@ -21,18 +21,19 @@ void rdMu2TrigSimu( int nevents = 1000,
   //char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
   char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";  
   TString outDir="./out2/"; 
-  
+  char *dirIn ="runList/";
+
   if (flagMC==1){
     //Alan's file
     file="rcf1308_186_2000evts.MuDst.root";
-    char *dirIn ="/star/u/ahoffman/MonteCarloStudies/";
+    dirIn ="/star/u/ahoffman/MonteCarloStudies/";
     // Pibero's file
     //file = "rcf1275_01_3348evts_161_mix.MuDst.root";
     // char *dirIn = "/star/data13/reco/pp200/pythia6_205/Upsminbias/cdf_a/y2006/gheisha_on/p06id/";
   }
   if (flagMC==0){
     //char *dirIn="/star/u/balewski/2008-trigAlgo-v4/runList/";
-    file="st_physics_7142017_raw_2030005.MuDst.root"; dirIn="/star/u/ahoffman/ForJan/";
+    //file="st_physics_7142017_raw_2030005.MuDst.root"; dirIn="/star/u/ahoffman/ForJan/";
    }
   
  
