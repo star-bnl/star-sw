@@ -17,9 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.8 2007/04/28 17:56:23 perev Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.9 2008/01/23 19:10:32 fine Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.9  2008/01/23 19:10:32  fine
+//  Fix the lost L3_Reader class definition
+//
 //  Revision 1.8  2007/04/28 17:56:23  perev
 //  Redundant StChain.h removed
 //
@@ -59,6 +62,7 @@
 #include "StMessMgr.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StDAQMaker/StDAQReader.h"
+#include "StDaqLib/L3/L3_Reader.hh"
 #include "tables/St_l3RunSummary_Table.h"
 #include "tables/St_l3AlgorithmInfo_Table.h"
 #include "tables/St_l3AlgorithmCount_Table.h"
