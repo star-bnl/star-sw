@@ -170,7 +170,7 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
 			int eemcIn, unsigned short* eemcData)
 {
 
-#ifndef IS_REAL_L2
+#if 0 
   printf("L2upsilon::doEvent(int L0trg=%d, int eventNumber=%d, TrgDataType* trgData=%p, int bemcIn=%d, unsigned short* bemcData=%p, int eemcIn=%d, unsigned short* eemcData=%p)\n", L0trg, eventNumber, trgData, bemcIn, bemcData, eemcIn, eemcData);
 #endif
   rdtscl_macro(mEveTimeStart);
