@@ -866,7 +866,7 @@ bool L2gammaAlgo::doEvent( int inpEveId, TrgDataType* trgData,
    ** And write to L2result
    **/
   memcpy(pResult,&mResult,sizeof(L2gammaResult));
-#define __L2GAMMA_PRINT_RESULT__
+  //#define __L2GAMMA_PRINT_RESULT__
 #ifdef __L2GAMMA_PRINT_RESULT__
   print_L2gammaResult(mResult);
 #endif

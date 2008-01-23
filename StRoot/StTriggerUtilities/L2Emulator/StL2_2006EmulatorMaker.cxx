@@ -125,7 +125,7 @@ StL2_2006EmulatorMaker::Make(){
   make();
 
 
-
+#if 0
   //---------------- ONLY debugging is below ------------
   int l2jetOff=-1;
   if(mYear==2006) l2jetOff=L2RESULTS_OFFSET_DIJET;
@@ -138,6 +138,8 @@ StL2_2006EmulatorMaker::Make(){
   L2jetResults2006_print(out1);
   unsigned char cSum=L2jetResults2006_doCheckSum(out1);
   assert(cSum==0);
+
+#endif // end of debuging
 
   return kStOK;
 }
@@ -190,7 +192,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
     // read regular muDst   
     if(mMCflag==0) {
       TArrayI& l2Array = muMk->muDst()->event()->L2Result();
-      printf("AccessL2Decision() from regular muDst: L2Ar-size=%d\n",l2Array.GetSize());    
+      LOG_DEBUG <<Form("AccessL2Decision() from regular muDst: L2Ar-size=%d",l2Array.GetSize())<<endm;    
       l2res=(unsigned int *)l2Array.GetArray();
     }
 
@@ -213,6 +215,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
   }
 #endif
 
+#if 0 // just debugging & cross check
   if(mMCflag==0) {
     printf(" L2-jet online results below:\n");
     // int k;  for (k=0;k<32;k++) printf("k=%2d  val=0x%04x\n",k,l2res[k]);
@@ -222,7 +225,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
     unsigned char cSum=L2jetResults2006_doCheckSum(out1);
     assert(cSum==0);
   } // only for real data
-
+#endif // end of debugging
     
 #if 0
   vector<unsigned int> trgL=L1->triggerIds();
@@ -249,7 +252,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.10 2007/11/19 22:18:17 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.11 2008/01/23 16:22:26 balewski Exp $
 //
 
 
