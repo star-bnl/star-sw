@@ -12,6 +12,7 @@ using namespace std;
 #include "TFile.h"
 #include "StChain.h"
 #include "SystemOfUnits.h"
+#include "StMessMgr.h"
 
 //StMuDstMaker
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -119,7 +120,7 @@ Int_t StBET4pMaker::Init()
 
 void StBET4pMaker::Clear(Option_t* opt)
 {
-    cout <<"void StBET4pMaker::Clear(Option_t* opt)";
+    LOG_DEBUG <<"void StBET4pMaker::Clear(Option_t* opt)" << endm;
     mCorrupt = false;
     mDylanPoints = 0;
     mSumEmcEt = 0.;
@@ -138,15 +139,15 @@ void StBET4pMaker::Clear(Option_t* opt)
     }
     
     StFourPMaker::Clear(opt);
-    cout <<"\tvec:\t"<<mVec.size()<<"\ttracks:\t"<<tracks.size()<<endl;
+    LOG_DEBUG <<"\tvec:\t"<<mVec.size()<<"\ttracks:\t"<<tracks.size()<<endm;
     return;
 }
 
 Int_t StBET4pMaker::Make()
 {
 
-    cout <<"StBET4pMaker::Make()"<<endl;
-    cout <<"\tvec:\t"<<mVec.size()<<"\ttracks:\t"<<tracks.size()<<endl;
+    LOG_DEBUG <<"StBET4pMaker::Make()"<<endm;
+    LOG_DEBUG <<"\tvec:\t"<<mVec.size()<<"\ttracks:\t"<<tracks.size()<<endm;
 
     //get basic pointers:
     assert(mMuDstMaker);
@@ -166,13 +167,13 @@ Int_t StBET4pMaker::Make()
     //check for barrel corruption (only works for P04ik and later!
     if (mCorrupt==true) {
 	tracks.clear();
-	cout <<"StEmcTpcFourPMaker::Maker():\tFlag this as a corrupt event.  Clear 4-p container and return"<<endl;
+	LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\tFlag this as a corrupt event.  Clear 4-p container and return"<<endm;
 	return kStOk;
     }
 
     if (mSumEmcEt>200.) {
 	tracks.clear();
-	cout <<"StEmcTpcFourPMaker::Maker():\ttoo much energy:\t"<<mSumEmcEt<<"\tflag as corrupt. Clear 4-p container and return"<<endl;
+	LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\ttoo much energy:\t"<<mSumEmcEt<<"\tflag as corrupt. Clear 4-p container and return"<<endm;
 	return kStOk;
     }
     
@@ -265,9 +266,9 @@ Int_t StBET4pMaker::Make()
 	tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
     }
     
-    cout <<"skipped "<<badflag<<" for flag, "<<ftpc<<" for ftpc, "<<loweta<<" for loweta, "<<higheta<<" for higheta, "
-	 <<badr<<" for badr, "<<badhits<<" for hits"<<endl;
-    cout <<"Added:\t"<<ntkept<<"\ttracks to the container"<<endl;
+    LOG_DEBUG <<"skipped "<<badflag<<" for flag, "<<ftpc<<" for ftpc, "<<loweta<<" for loweta, "<<higheta<<" for higheta, "
+	 <<badr<<" for badr, "<<badhits<<" for hits"<<endm;
+    LOG_DEBUG <<"Added:\t"<<ntkept<<"\ttracks to the container"<<endm;
 
 
     //now loop on Barrel hits, correct energy, and push back for jet finding:
@@ -405,7 +406,7 @@ Int_t StBET4pMaker::Make()
 	}
     }
     
-    cout <<StMaker::GetName()<<"::Make()\tAdded:\t"<<tracks.size()<<"\tparticles to track container"<<endl;
+    LOG_DEBUG <<StMaker::GetName()<<"::Make()\tAdded:\t"<<tracks.size()<<"\tparticles to track container"<<endm;
 
     return StMaker::Make();
 }
@@ -433,11 +434,11 @@ void StBET4pMaker::fillBarrelHits()
     StEmcCollection* emc = 0;
     StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
     if (event) {
-	cout <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from StEvent"<<endl;
+	LOG_DEBUG <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from StEvent"<<endm;
 	emc = event->emcCollection();
     }
     else {
-	cout <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from MuDst"<<endl;
+	LOG_DEBUG <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from MuDst"<<endm;
 	emc = uDst->emcCollection();
     }
 
@@ -483,10 +484,10 @@ void StBET4pMaker::fillBarrelHits()
     //And now we can implement Alex's new StEmcAdc2EMaker test (thank god, this takes care of pre-P04k production)
     StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
     if (!adc2e) {
-	cout <<"StBET4pMaker::fillBarrelHits()\tno adc2e in chain"<<endl;
+	LOG_ERROR <<"StBET4pMaker::fillBarrelHits()\tno adc2e in chain"<<endm;
     }
     else {
-	cout <<"StBET4pMaker::fillBarrelHits()\tfound adc2e in chain"<<endl;
+	LOG_DEBUG <<"StBET4pMaker::fillBarrelHits()\tfound adc2e in chain"<<endm;
 	mCorrupt = adc2e->isCorrupted();
 	if (mCorrupt==true) {
 	    return;
@@ -558,7 +559,7 @@ void StBET4pMaker::fillBarrelHits()
 	    }
 	}
     }
-    cout <<"StBET4pMaker::fillBarrelHits\tnDylanPoints:\t"<<mDylanPoints<<"\tsumET:\t"<<mSumEmcEt<<endl;
+    LOG_DEBUG <<"StBET4pMaker::fillBarrelHits\tnDylanPoints:\t"<<mDylanPoints<<"\tsumET:\t"<<mSumEmcEt<<endm;
 }
 
 bool accept2003Tower(int id)
