@@ -928,3 +928,41 @@ const vector< pair<int,int> > StBemcTriggerSimu::getJetPatchesAboveThreshold(int
   return patches;
 }
 
+
+int StBemcTriggerSimu::getTowerThreshold(int trigId, int dsmid) const {  
+  int threshold =-1;
+
+  if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5) {
+    threshold = mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,1);
+  }
+  if (trigId==127212 || trigId==137213) {
+    threshold = mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,2);
+  }
+
+  return threshold;
+}
+
+
+int StBemcTriggerSimu::getTriggerPatchThreshold(int trigId, int dsmid) const {
+  int threshold = -1;
+
+  if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5) {
+    threshold = mDbThres->GetTP_DSM0_threshold(dsmid,timestamp,1);
+  }
+  return threshold;
+}
+
+
+int StBemcTriggerSimu::getJetPatchThreshold(int trigId, int dsmid) const {  
+  int threshold = -1;
+
+  if (trigId==127501 || trigId==137501 || trigId==127622 || trigId==137622) {  
+    threshold = mDbThres->GetJP_DSM1_threshold(dsmid,timestamp,0);
+  }
+  if (trigId==127221 || trigId==137221 || trigId==137222) {
+    threshold = mDbThres->GetJP_DSM1_threshold(dsmid,timestamp,1);
+  }
+  
+  return threshold;
+}
+
