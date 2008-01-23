@@ -172,6 +172,11 @@ public:
   const vector< pair<int, int> > getTriggerPatchesAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getJetPatchesAboveThreshold(int trigId) const;
 
+  //access to HT,TP,JP thresholds
+  int getTowerThreshold(int trigId, int dsmid) const;
+  int getTriggerPatchThreshold(int trigId, int dsmid) const;
+  int getJetPatchThreshold(int trigId, int dsmid) const;
+
   ClassDef(StBemcTriggerSimu, 1);
 };
 #endif
