@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.13 2008/01/21 23:19:46 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.14 2008/01/23 02:49:43 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.14  2008/01/23 02:49:43  kocolosk
+* pass name to StMaker ctor
+*
 * Revision 1.13  2008/01/21 23:19:46  kocolosk
 * store geomTriggers in jet and work with new trigger emulator
 *
@@ -105,7 +108,7 @@
 
 ClassImp(StChargedPionMaker)
 
-StChargedPionMaker::StChargedPionMaker(const char *name, const char *outputfile) 
+StChargedPionMaker::StChargedPionMaker(const char *name, const char *outputfile) : StMaker(name) 
 {
     LOG_INFO << "calling constructor" << endm;
     
