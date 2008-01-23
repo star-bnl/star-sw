@@ -66,6 +66,10 @@ public:
     int trigId() const;
     bool didFire() const;    
     int shouldFire() const;
+    int shouldFireBBC() const;
+    int shouldFireBemc() const;
+    int shouldFireEemc() const;
+    int shouldFireL2() const;
     
     //detector:  0 == BEMC, 1 == EEMC
     map<int,int>& towersAboveThreshold(int detector) const;
@@ -78,6 +82,10 @@ public:
     void setTrigId(int aTrigId);
     void setDidFire(bool aFire);
     void setShouldFire(int aFire);
+    void setShouldFireBBC(int aFireBBC);
+    void setShouldFireBemc(int aFireBemc);
+    void setShouldFireEemc(int aFireEemc);
+    void setShouldFireL2(int aFireL2);
     
     //detector:  0 == BEMC, 1 == EEMC
     void addTowerAboveThreshold(int detector, int aID, int aADC);    
@@ -92,6 +100,10 @@ private:
     Int_t       mTrigId;
     Int_t       mDidFire;
     Int_t       mShouldFire;
+    Int_t       mShouldFireBBC;
+    Int_t       mShouldFireBemc;
+    Int_t       mShouldFireEemc;
+    Int_t       mShouldFireL2;
     
     map<int,int> mTowers;
     map<int,int> mTriggerPatches;
@@ -105,11 +117,19 @@ private:
 inline int StJetSkimTrig::trigId() const {return mTrigId;}
 inline bool StJetSkimTrig::didFire() const  {return (mDidFire > 0) ? true : false;}
 inline int StJetSkimTrig::shouldFire() const  {return mShouldFire;}
+inline int StJetSkimTrig::shouldFireBBC() const  {return mShouldFireBBC;}
+inline int StJetSkimTrig::shouldFireBemc() const  {return mShouldFireBemc;}
+inline int StJetSkimTrig::shouldFireEemc() const  {return mShouldFireEemc;}
+inline int StJetSkimTrig::shouldFireL2() const  {return mShouldFireL2;}
 inline int StJetSkimTrig::totalEnergy() const {return mTotalEnergy;}
 
 inline void StJetSkimTrig::setTrigId(int aTrigId) {mTrigId = aTrigId;}
 inline void StJetSkimTrig::setDidFire(bool aFire) {mDidFire = aFire;}
 inline void StJetSkimTrig::setShouldFire(int aFire) {mShouldFire = aFire;}
+inline void StJetSkimTrig::setShouldFireBBC(int aFireBBC) {mShouldFireBBC = aFireBBC;}
+inline void StJetSkimTrig::setShouldFireBemc(int aFireBemc) {mShouldFireBemc = aFireBemc;}
+inline void StJetSkimTrig::setShouldFireEemc(int aFireEemc) {mShouldFireEemc = aFireEemc;}
+inline void StJetSkimTrig::setShouldFireL2(int aFireL2) {mShouldFireL2 = aFireL2;}
 inline void StJetSkimTrig::setTotalEnergy(int aEnergy) {mTotalEnergy = aEnergy;}
 
 class StJetSkimVert : public TObject {

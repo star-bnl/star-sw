@@ -39,6 +39,12 @@
 #include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"
 #include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
 
+//StTriggerUtilities
+#include "StTriggerUtilities/StTriggerSimuMaker.h"
+#include "StTriggerUtilities/StTriggerSimuResult.h"
+#include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
+
+
 void copyVertex(StMuPrimaryVertex& v, StJetSkimVert& sv);
 
 ClassImp(StJetSkimEventMaker)
@@ -280,68 +286,62 @@ void copyVertex(StMuPrimaryVertex& v, StJetSkimVert& sv)
 
 void StJetSkimEventMaker::fillTriggerSimulationInfo(StJetSkimTrig &skimTrig)
 {
-    StEmcTriggerMaker *emcTrigMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); 
-    if(emcTrigMaker == NULL) {
-        LOG_WARN << "StEmcTriggerMaker not in chain!  Trigger simulation info is junk" << endm;
-        return;
+
+  StTriggerSimuMaker* trigSimu = dynamic_cast<StTriggerSimuMaker*>(GetMaker("StarTrigSimu"));
+  if (trigSimu == NULL) {
+       LOG_WARN << "StJetSkimEventMaker::fillTriggerSimulationInfo --- could not find StTriggerSimuMaker" << endm;
+       return;
+  }
+  
+
+  StTriggerSimuResult trigResult = trigSimu->detailedResult(skimTrig.trigId());
+  skimTrig.setShouldFire(trigSimu->isTrigger(skimTrig.trigId()));
+  skimTrig.setShouldFireBBC(trigResult.bbcDecision());
+  skimTrig.setShouldFireBemc(trigResult.bemcDecision());
+  skimTrig.setShouldFireEemc(trigResult.eemcDecision());
+  skimTrig.setShouldFireL2(trigResult.l2Decision());
+
+  if (trigResult.bemcDecision()==1){
+    vector<short> towerId = trigResult.highTowerIds();
+    for (unsigned i=0; i<towerId.size(); i++) {
+      skimTrig.addTowerAboveThreshold(0,towerId[i],trigResult.highTowerAdc(towerId[i]));
     }
-    
-    skimTrig.setShouldFire(emcTrigMaker->isTrigger(skimTrig.trigId()));
-    //skimTrig.setTowerThreshold(emcTrigMaker->barrelTowerThreshold(skimTrig.trigId()));
-    //skimTrig.setTriggerPatchThreshold(emcTrigMaker->barrelTriggerPatchThreshold(skimTrig.trigId()));
-    //skimTrig.setJetPatchThreshold(emcTrigMaker->barrelJetPatchThreshold(skimTrig.trigId()));
-    //skimTrig.setTotalEnergyThreshold(emcTrigMaker->totalEnergyThreshold(skimTrig.trigId()));
-    
-    map<int,int> towerMap = emcTrigMaker->barrelTowersAboveThreshold(skimTrig.trigId());
-    for(map<int,int>::const_iterator it=towerMap.begin(); it!=towerMap.end(); it++) {
-        skimTrig.addTowerAboveThreshold(0,it->first, it->second);
+
+    vector<short> tpId = trigResult.triggerPatchIds();
+    for (unsigned i=0; i<tpId.size(); i++) {
+      skimTrig.addTriggerPatchAboveThreshold(0,tpId[i],trigResult.triggerPatchAdc(tpId[i]));
     }
-    
-    towerMap = emcTrigMaker->endcapTowersAboveThreshold(skimTrig.trigId());
-    for(map<int,int>::const_iterator it=towerMap.begin(); it!=towerMap.end(); it++) {
-        skimTrig.addTowerAboveThreshold(1,it->first, it->second);
+
+    vector<short> jpId = trigResult.jetPatchIds();
+    for (unsigned i=0; i<jpId.size(); i++) {
+      skimTrig.addJetPatchAboveThreshold(0,jpId[i],trigResult.jetPatchAdc(jpId[i]));
     }
-    
-    map<int,int> triggerPatchMap = emcTrigMaker->barrelTriggerPatchesAboveThreshold(skimTrig.trigId());
-    for(map<int,int>::const_iterator it=triggerPatchMap.begin(); it!=triggerPatchMap.end(); it++) {
-        skimTrig.addTriggerPatchAboveThreshold(0,it->first, it->second);
-    }
-    
-    triggerPatchMap = emcTrigMaker->endcapTriggerPatchesAboveThreshold(skimTrig.trigId());
-    for(map<int,int>::const_iterator it=triggerPatchMap.begin(); it!=triggerPatchMap.end(); it++) {
-        skimTrig.addTriggerPatchAboveThreshold(1,it->first, it->second);
-    }
-    
-    map<int,int> jetPatchMap = emcTrigMaker->barrelJetPatchesAboveThreshold(skimTrig.trigId());
-    for(map<int,int>::const_iterator it=jetPatchMap.begin(); it!=jetPatchMap.end(); it++) {
-        skimTrig.addJetPatchAboveThreshold(0,it->first, it->second);
-    }
-    
-    jetPatchMap = emcTrigMaker->endcapJetPatchesAboveThreshold(skimTrig.trigId());
-    for(map<int,int>::const_iterator it=jetPatchMap.begin(); it!=jetPatchMap.end(); it++) {
-        skimTrig.addJetPatchAboveThreshold(1,it->first, it->second);
-    }
-    
-    skimTrig.setTotalEnergy(emcTrigMaker->totalEnergy());
+  }
+
 }
 
 void StJetSkimEventMaker::fillThresholds(StJetSkimTrigHeader &header) {
-    StEmcTriggerMaker *emcTrigMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); 
-    if(emcTrigMaker == NULL) {
-        LOG_WARN << "StEmcTriggerMaker not in chain!  Trigger thresholds in header are junk" << endm;
-        return;
-    }
-    
-    header.eastBarrelTowerThreshold         = emcTrigMaker->barrelTowerThreshold(header.trigId,2401);
-    header.eastBarrelTriggerPatchThreshold  = emcTrigMaker->barrelTriggerPatchThreshold(header.trigId,150);
-    header.eastBarrelJetPatchThreshold      = emcTrigMaker->barrelJetPatchThreshold(header.trigId,6);
-    header.westBarrelTowerThreshold         = emcTrigMaker->barrelTowerThreshold(header.trigId);
-    header.westBarrelTriggerPatchThreshold  = emcTrigMaker->barrelTriggerPatchThreshold(header.trigId);
-    header.westBarrelJetPatchThreshold      = emcTrigMaker->barrelJetPatchThreshold(header.trigId);
+
+  StTriggerSimuMaker* trigSimu = dynamic_cast<StTriggerSimuMaker*>(GetMaker("StarTrigSimu"));
+  if (trigSimu == NULL) {
+       LOG_WARN << "StJetSkimEventMaker::fillThresholds --- could not find StTriggerSimuMaker" << endm;
+       return;
+  }
+
+  header.eastBarrelTowerThreshold         = (trigSimu->bemc)->getTowerThreshold(header.trigId,15);
+  header.eastBarrelTriggerPatchThreshold  = (trigSimu->bemc)->getTriggerPatchThreshold(header.trigId,15);
+  header.eastBarrelJetPatchThreshold      = (trigSimu->bemc)->getJetPatchThreshold(header.trigId,15);
+  header.westBarrelTowerThreshold         = (trigSimu->bemc)->getTowerThreshold(header.trigId,0);
+  header.westBarrelTriggerPatchThreshold  = (trigSimu->bemc)->getTriggerPatchThreshold(header.trigId,0);
+  header.westBarrelJetPatchThreshold      = (trigSimu->bemc)->getJetPatchThreshold(header.trigId,0);
+  
+  /*
     header.endcapTowerThreshold             = emcTrigMaker->endcapTowerThreshold(header.trigId);
     header.endcapTriggerPatchThreshold      = emcTrigMaker->endcapTriggerPatchThreshold(header.trigId);
     header.endcapJetPatchThreshold          = emcTrigMaker->endcapJetPatchThreshold(header.trigId);
     header.totalEnergyThreshold             = emcTrigMaker->totalEnergyThreshold(header.trigId);
+  */
+
 }
 
 Int_t StJetSkimEventMaker::Finish()

@@ -92,6 +92,10 @@ StJetSkimTrig::StJetSkimTrig(const StJetSkimTrig& t) : TObject()
     this->mTrigId                   = t.trigId();
     this->mDidFire                  = t.didFire();
     this->mShouldFire               = t.shouldFire();
+    this->mShouldFireBBC            = t.shouldFireBBC();
+    this->mShouldFireBemc           = t.shouldFireBemc();
+    this->mShouldFireEemc           = t.shouldFireEemc();
+    this->mShouldFireL2             = t.shouldFireL2();
     this->mTowers                   = t.mTowers;
     this->mTriggerPatches           = t.mTriggerPatches;
     this->mJetPatches               = t.mJetPatches;
@@ -109,6 +113,10 @@ StJetSkimTrig& StJetSkimTrig::operator=(const StJetSkimTrig& rhs)
         this->mTrigId                   = rhs.trigId();
         this->mDidFire                  = rhs.didFire();
         this->mShouldFire               = rhs.shouldFire();
+        this->mShouldFireBBC            = rhs.shouldFireBBC();
+        this->mShouldFireBemc           = rhs.shouldFireBemc();
+        this->mShouldFireEemc           = rhs.shouldFireEemc();
+        this->mShouldFireL2             = rhs.shouldFireL2();
         this->mTowers                   = rhs.mTowers;
         this->mTriggerPatches           = rhs.mTriggerPatches;
         this->mJetPatches               = rhs.mJetPatches;
@@ -122,6 +130,10 @@ void StJetSkimTrig::init() {
     this->mTrigId                       = -1;
     this->mDidFire                      = -1;
     this->mShouldFire                   = -1;
+    this->mShouldFireBBC                = -1;
+    this->mShouldFireBemc               = -1;
+    this->mShouldFireEemc               = -1;
+    this->mShouldFireL2                 = -1;
     this->mTotalEnergy                  = -1;
     this->mTowers.clear();
     this->mTriggerPatches.clear();
