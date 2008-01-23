@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.19 2007/04/28 17:56:24 perev Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.20 2008/01/23 19:10:33 fine Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.20  2008/01/23 19:10:33  fine
+//  Fix the lost L3_Reader class definition
+//
 //  Revision 1.19  2007/04/28 17:56:24  perev
 //  Redundant StChain.h removed
 //
@@ -64,6 +67,7 @@
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
 #include "StDAQMaker/StDAQReader.h"
+#include "StDaqLib/L3/L3_Reader.hh"
 #include "tables/St_l3RunSummary_Table.h"
 #include "tables/St_l3AlgorithmInfo_Table.h"
 #include "StEventTypes.h"
