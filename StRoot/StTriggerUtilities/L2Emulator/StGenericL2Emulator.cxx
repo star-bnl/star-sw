@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.14 2008/01/23 02:52:23 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.15 2008/01/23 16:22:26 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -212,7 +212,7 @@ StGenericL2Emulator::initRun2(int runNo){
     TString algoName=mL2algo[ia]->getName();
     L2DbTime *config = confDB2.getConfiguration(mYearMonthDay,mHourMinSec,algoName);
     if(config==0) {
-      LOG_ERROR  << Form("\n************\ninitRun2() failed L2-%s  configuration for yyyy=%d hhmmss=%d,\n On explicit request from Renee, the L2 emulator will continue with disabled L2-jet algo.\nThis will result with false positives - ignore emulated trigger results for this algo,\nIt would be much better to fix the setup and provide missing record.\nYou have been warned,  Jan B.\n***********",algoName.Data(),mYearMonthDay,mHourMinSec)<<endm;
+      LOG_ERROR  << Form("\n************\ninitRun2() failed L2-%s  configuration for yyyy=%d hhmmss=%d,\n On explicit request from Renee, the L2 emulator will continue with disabled L2-jet algo.\nThis will result with false positives - ignore emulated trigger results for this algo,\nIt would be much better to fix the setup and provide missing record.\nYou have been warned,  Jan B.\n***********\n",algoName.Data(),mYearMonthDay,mHourMinSec)<<endm;
       mL2algo[ia]=0; continue;
       // assert(config); disabed to let the code go dispite missing setup, Jan
     }
@@ -419,7 +419,7 @@ StGenericL2Emulator::doBanksFromMuDst(){
     nE++;
   }
   mETOW_in=1; 
-  LOG_INFO << Form("doBanksFromMuDst() , ETOW nAdc=%d",nE)<<endm;  assert(nE==720);
+  LOG_DEBUG << Form("doBanksFromMuDst() , ETOW nAdc=%d",nE)<<endm;  assert(nE==720);
   
   
   //.........................  B T O W   ....................
@@ -524,7 +524,7 @@ StGenericL2Emulator::addTriggerList() {
       mVetoTriggerList.push_back(mL2algo[ia]->getOflTrigID());
   }
 
-  LOG_INFO  << Form("addTriggerList() yesSize=%d vetoSize=%d",mAcceptTriggerList.size(),mVetoTriggerList.size())<<endm;
+  LOG_DEBUG  << Form("addTriggerList() yesSize=%d vetoSize=%d",mAcceptTriggerList.size(),mVetoTriggerList.size())<<endm;
 }
 
 const unsigned int * StGenericL2Emulator::result() const {
@@ -532,6 +532,9 @@ const unsigned int * StGenericL2Emulator::result() const {
 }
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.15  2008/01/23 16:22:26  balewski
+// make event loop silent
+//
 // Revision 1.14  2008/01/23 02:52:23  balewski
 // allow L2-algo to be disabled in initRun if setup time stamp is wrong.
 //

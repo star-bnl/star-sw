@@ -3,14 +3,14 @@
 
 int total=0;
 
-void rdMu2TrigSimu( int nevents = 1000,
+void rdMu2TrigSimu( int nevents = 200,
 		    int flagMC=0,  // 0== off, 1=Alan
 		    int useEemc=1, // 0== off, 1=kOnline, 2=kExpert
 		    int useBemc=1, // 0== off
 		    int useL2=1,   // 0== off
 		    int L2ConfigYear=2006, // possible: 2006, 2008
 		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
-		    int playConfig=100, // jan:100_199
+		    int playConfig=0, // jan:100_199
 		    int emcEveDump=0, // extrating raw EMC data in a custom format
 		    char *file="R7132024.lis")
 {
@@ -192,9 +192,9 @@ void rdMu2TrigSimu( int nevents = 1000,
   int t1=time(0);
 
   for (Int_t iev=0;iev<nevents; iev++) {
+    cout << "\n****************************************** " << endl;
+    cout << "Working on eventNumber:\t" << iev <<"\tof:\t"<<nevents<<endl;
     cout << "****************************************** " << endl;
-    cout << "\nWorking on eventNumber:\t" << iev <<"\tof:\t"<<nevents<<endl;
-    cout << "*************************1***************** " << endl;
     chain->Clear();
     int iret = chain->Make(iev);
     total++;   
