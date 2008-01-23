@@ -12,6 +12,8 @@
 #include <math.h>
 using namespace std;
 
+#include "StMessMgr.h"
+
 //StJetFinder
 #include "StJetFinder/FourVec.h"
 #include "StJetFinder/StProtoJet.h"
@@ -178,7 +180,7 @@ bool StppJetAnalyzer::acceptJet(StProtoJet &pj)
 
 void StppJetAnalyzer::fillLists(FourList &tracks)
 {
-    cout <<"StppJetAnalyzer::fillList()";
+    LOG_DEBUG <<"StppJetAnalyzer::fillList()" << endm;
     int nTracks=0;
     int nAcceptedTracks=0;
     int nAcceptedProtoJets=0;
@@ -195,8 +197,8 @@ void StppJetAnalyzer::fillLists(FourList &tracks)
 	    //}
 	}
     }
-    cout <<"\tnTracks:\t"<<nTracks<<"\tnAcceptedTracks:\t"<<nAcceptedTracks
-	 <<"\tnAcceptedProtoJets:\t"<<nAcceptedProtoJets<<endl;
+    LOG_DEBUG <<"\tnTracks:\t"<<nTracks<<"\tnAcceptedTracks:\t"<<nAcceptedTracks
+	 <<"\tnAcceptedProtoJets:\t"<<nAcceptedProtoJets<<endm;
 }
 
 void StppJetAnalyzer::setFourVec(FourList &tracks)
@@ -209,17 +211,18 @@ void StppJetAnalyzer::setFourVec(FourList &tracks)
 
 void StppJetAnalyzer::findJets()
 {
-    cout <<"StppJetAnalyzer::findJets().  Clustering will begin with:\t"<<mProtoJets.size()<<"\tprotoJets"<<endl;
+    LOG_DEBUG <<"StppJetAnalyzer::findJets().  Clustering will begin with:\t"<<mProtoJets.size()<<"\tprotoJets"<<endm;
     clock_t start = clock();
     mFinder->findJets(mProtoJets);
     clock_t stop = clock();
     double time = (double)(stop-start)/(double)(CLOCKS_PER_SEC);
-    cout <<"\ttime to find jets:\t"<<time<<endl;
+    LOG_DEBUG <<"\ttime to find jets:\t"<<time<<endm;
     acceptJets();
 }
 
 void StppJetAnalyzer::addBranch(const char *name, void *stppudst) 
 {
     TTree* ppuDst = (TTree *) stppudst;
-    ppuDst->Branch (name, "StJets", &muDstJets, 64000, 99);
+    //ppuDst->Branch (name, "StJets", &muDstJets, 64000, 99);
+    ppuDst->Branch (name, "StJets", &muDstJets);
 }

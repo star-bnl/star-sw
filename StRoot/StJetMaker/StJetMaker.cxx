@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.12 2007/04/28 17:56:20 perev Exp $
+ * $Id: StJetMaker.cxx,v 1.13 2008/01/23 20:18:38 staszak Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -40,6 +40,7 @@
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 
 //St_base
+#include "StMessMgr.h"
 
 //StEvent
 #include "StEvent.h"
@@ -113,19 +114,27 @@ void StJetMaker::InitFile(void)
 
 Int_t StJetMaker::Init() 
 {
+    // creating Jet nanoDst file name
+    TString jetFileName(outName);
+    cout << "StJetMaker: jet output file: " << jetFileName << endl;
+    
+    //open udst file
+    m_outfile = new TFile(jetFileName,"recreate");
+    
     //create udst & its branches    
-    jetTree  = new TTree("jet","jetTree",99);
+    //jetTree  = new TTree("jet","jetTree",99);
+    jetTree  = new TTree("jet","jetTree");
     for(jetBranchesMap::iterator i = jetBranches.begin(); i != jetBranches.end(); i++)	{
 	(*i).second->addBranch((*i).first.c_str(), jetTree);
     }
     
-    InitFile();
+    //InitFile();
     return StMaker::Init();
 }
 
 Int_t StJetMaker::Make()
 {
-    cout <<" Start StJetMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;
+    LOG_DEBUG <<" Start StJetMaker :: "<< GetName() <<" mode="<<m_Mode<<endm;
     ++mEventCounter;
     if(muDstMaker != NULL) {
 	mudst = muDstMaker->muDst();
@@ -154,7 +163,7 @@ Int_t StJetMaker::Make()
 	FourList &tracks = fourPMaker->getTracks();
 
 	thisAna->setFourVec(tracks);
-	cout << "call:\t" << (*jb).first <<".findJets() with:\t" << tracks.size() << "\t protoJets"<<endl;
+	LOG_DEBUG << "call:\t" << (*jb).first <<".findJets() with:\t" << tracks.size() << "\t protoJets"<<endm;
 	thisAna->findJets();
 	
 	typedef StppJetAnalyzer::JetList JetList;
@@ -169,7 +178,7 @@ Int_t StJetMaker::Make()
 	//Addd some info from StBet4pMaker
 	StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
 	if (bet4p) {
-	    cout <<"StJetMaker::Make()\tfound 4pmaker in chain"<<endl;
+	    LOG_DEBUG <<"StJetMaker::Make()\tfound 4pmaker in chain"<<endm;
 	    muDstJets->setDylanPoints( bet4p->nDylanPoints() );
 	    muDstJets->setSumEmcE( bet4p->sumEmcEt() );
 	}
@@ -178,11 +187,11 @@ Int_t StJetMaker::Make()
 
 	int ijet=0;
 	
-	cout <<"Number Jets Found(a):\t"<<cJets.size()<<endl;
+	LOG_DEBUG <<"Number Jets Found(a):\t"<<cJets.size()<<endm;
 	for(JetList::iterator it=cJets.begin(); it!=cJets.end(); ++it) {
 	    
 	    StProtoJet& pj = (*it);
-	    cout <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endl;
+	    LOG_DEBUG <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endm;
 	    /*
 	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
 	    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
@@ -211,10 +220,10 @@ Int_t StJetMaker::Make()
 	    ++ijet;
 	}
 	
-	cout << "Number Jets Found (b): " << muDstJets->nJets() << endl;	
+	LOG_DEBUG << "Number Jets Found (b): " << muDstJets->nJets() << endm;	
 	for(int i = 0; i < muDstJets->nJets(); i++) {
 	    StJet* jet = (StJet*) muDstJets->jets()->At(i);
-	    cout<<"jet "<<i<<"\t\t"<<jet->Pt()<<"\t\t"<<jet->Phi()<<"\t\t"<<jet->Eta()<<endl;
+	    LOG_DEBUG<<"jet "<<i<<"\t\t"<<jet->Pt()<<"\t\t"<<jet->Phi()<<"\t\t"<<jet->Eta()<<endm;
 	}
     }
     

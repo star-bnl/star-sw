@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.11 2007/05/17 14:33:22 mmiller Exp $
+// $Id: StJets.cxx,v 1.12 2008/01/23 20:18:38 staszak Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.12  2008/01/23 20:18:38  staszak
+// Courtesy of Adam - changes to use the STAR Logger, and compression added to output jet trees
+//
 // Revision 1.11  2007/05/17 14:33:22  mmiller
 // Added Murad's dca update.
 //
@@ -103,6 +106,8 @@
 //std
 #include "Stiostream.h"
 
+#include "StMessMgr.h"
+
 //StMuDst
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -151,7 +156,7 @@ void StJets::Clear(bool clearAll)
     mTrackToJetIndices->Clear();
     mDylanPoints = 0;
     mSumEmcE = 0.;
-    cout << "Cleared the Jets" <<endl;
+    LOG_DEBUG << "Cleared the Jets" <<endm;
 }
 
 void StJets::addProtoJet(StProtoJet& pj)
