@@ -12,6 +12,7 @@ using std::map;
 
 #include "TObject.h"
 #include "TClonesArray.h"
+#include "StEvent/StRunInfo.h"
 
 class StChargedPionVertex;
 class StChargedPionTrack;
@@ -34,6 +35,7 @@ public:
     unsigned int bx7() const;
     unsigned int bbcTimeBin() const;
     const string& muDstName() const;
+    const StRunInfo& runInfo() const;
     
     unsigned int spinBit() const;
     bool isSpinValid() const;
@@ -78,6 +80,7 @@ public:
     void setBx7(unsigned char);
     void setBbcTimeBin(unsigned short);
     void setMuDstName(const char*);
+    void setRunInfo(const StRunInfo&);
     
     void setSpinBit(unsigned char);
     void setPolValid(bool);
@@ -109,6 +112,8 @@ private:
     UChar_t mSpinBit;
     UChar_t mSpinQA;
     
+    StRunInfo mRunInfo;
+    
     string mMuDstName;
     
     static map<unsigned int, unsigned int> mTriggerLookup; //!
@@ -130,7 +135,7 @@ private:
     
     enum {kIsPolValid=0x01, kIsPolLong=0x02, kIsPolTrans=0x04, kIsBxingMasked=0x8, kNullOffset=0x10}; //!
     
-    ClassDef(StChargedPionEvent,2)
+    ClassDef(StChargedPionEvent,3)
 };
 
 inline unsigned int StChargedPionEvent::runId() const { return mRunId; }
@@ -138,6 +143,7 @@ inline unsigned int StChargedPionEvent::eventId() const { return mEventId; }
 inline unsigned int StChargedPionEvent::bx7() const { return mBx7; }
 inline unsigned int StChargedPionEvent::bbcTimeBin() const { return mBbcTimeBin; }
 inline const string& StChargedPionEvent::muDstName() const { return mMuDstName; }
+inline const StRunInfo& StChargedPionEvent::runInfo() const { return mRunInfo; }
 
 inline unsigned int StChargedPionEvent::spinBit() const { return mSpinBit; }
 inline bool StChargedPionEvent::isPolValid() const { return mSpinQA & kIsPolValid; }
@@ -163,6 +169,7 @@ inline void StChargedPionEvent::setEventId(unsigned int a) { mEventId = a; }
 inline void StChargedPionEvent::setBx7(unsigned char a) { mBx7 = a; }
 inline void StChargedPionEvent::setBbcTimeBin(unsigned short a) { mBbcTimeBin = a; }
 inline void StChargedPionEvent::setMuDstName(const char* a) { mMuDstName = a; }
+inline void StChargedPionEvent::setRunInfo(const StRunInfo& a) { mRunInfo = a; }
 
 inline void StChargedPionEvent::setSpinBit(unsigned char a) { mSpinBit = a; }
 inline void StChargedPionEvent::setPolValid(bool a) { a ? mSpinQA |= kIsPolValid : mSpinQA &= ~kIsPolValid; }

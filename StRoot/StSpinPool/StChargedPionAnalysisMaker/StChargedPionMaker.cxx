@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.14 2008/01/23 02:49:43 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.15 2008/01/24 18:28:49 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.15  2008/01/24 18:28:49  kocolosk
+* save StRunInfo in StChargedPionEvent
+*
 * Revision 1.14  2008/01/23 02:49:43  kocolosk
 * pass name to StMaker ctor
 *
@@ -234,6 +237,7 @@ Int_t StChargedPionMaker::Make()
     mEvent->setEventId( event->eventNumber() );
     mEvent->setBx7( event->l0Trigger().bunchCrossingId7bit(event->runId()) );
     mEvent->setBbcTimeBin( event->bbcTriggerDetector().onlineTimeDifference() );
+    mEvent->setRunInfo( event->runInfo() );
     
     //spin DB
     int bx48 =  event->l0Trigger().bunchCrossingId();
