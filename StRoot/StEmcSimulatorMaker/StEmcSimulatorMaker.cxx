@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.55 2007/12/12 23:29:47 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.56 2008/01/24 15:22:36 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -15,6 +15,8 @@
 #include "StEvent/StEmcDetector.h"
 #include "StEvent/StEmcCollection.h"
 #include "StEvent/StEvent.h"
+
+#include "StMuDSTMaker/COMMON/StMuDst.h"
 
 #include "StEmcUtil/database/StBemcTables.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
@@ -215,6 +217,10 @@ void StEmcSimulatorMaker::makeRawHits() {
         if(mEmcCollection == NULL) {
             mEmcCollection = new StEmcCollection();
             event->setEmcCollection(mEmcCollection);
+        }
+        StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
+        if(mudst) {
+            mudst->setEmcCollection(mEmcCollection);
         }
     }
     
@@ -510,6 +516,9 @@ void StEmcSimulatorMaker::makeCrossTalk(StMcTrack *track)
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.56  2008/01/24 15:22:36  kocolosk
+ *  set MuDst's StEmcCollection pointer
+ *
  *  Revision 1.55  2007/12/12 23:29:47  kocolosk
  *  full pedestal simulation is now default for BTOW
  *
