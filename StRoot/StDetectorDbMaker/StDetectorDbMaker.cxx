@@ -26,11 +26,12 @@ Int_t StDetectorDbMaker::Make(){
       new St_trigDetSumsC(table);
     }
   }
+#if 0
   // Jamie Asked for SpaceCharge to be counted every event
   LOG_QA << "Space Charge Correction = " << StDetectorDbSpaceCharge::instance()->getSpaceChargeCoulombs()
 	       << " Coulombs" << endm;
   LOG_QA << "Space Charge CorrectionR2 = " << StDetectorDbSpaceChargeR2::instance()->getSpaceChargeCoulombs()
 	       << " Coulombs" << endm;
-  
+#endif  
   return kStOK;
 }
