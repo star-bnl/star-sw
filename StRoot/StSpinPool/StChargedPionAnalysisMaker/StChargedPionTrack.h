@@ -73,7 +73,7 @@ public:
     void setVertex(StThreeVectorF aPosition) {mVertex = aPosition;}
     
     void setNHits(unsigned short aNHits) {mNHits = aNHits;}
-    void setNHitsPoss(unsigned short aNHitsPoss) {mNHits = aNHitsPoss;}
+    void setNHitsPoss(unsigned short aNHitsPoss) {mNHitsPoss = aNHitsPoss;}
     void setNHitsDedx(unsigned short aNHitsDedx) {mNHitsDedx = aNHitsDedx;}
     void setNHitsFit(unsigned short aNHitsFit) {mNHitsFit = aNHitsFit;}
     
