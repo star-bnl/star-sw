@@ -201,6 +201,8 @@ void StBemcTriggerSimu::Clear(){
     L0_TP_ADC[tpid]=0;
     L0_TP_PED[tpid]=0;
     HTadc06[tpid]=0;
+    TP6bit_adc_holder[tpid]=0;
+    HT6bit_adc_holder[tpid]=0;
   }
   
   mFiredTriggers.clear();
@@ -506,7 +508,7 @@ void StBemcTriggerSimu::FEEout() {
               if (DSM_TPStatus[tpid]==0) L0_TP_ADC[tpid]=0;
               if (DSM_TPStatus[tpid]==0) TP6bit_adc_holder[tpid]=0; 
 	      
-	      if (0)
+	      if  (0)
 		{
 		  cout<<"Tow#="<<did<<" TP#="<<tpid<<" adc12="<<adc12[did-1]<<" adc10="<<adc10[did-1]<<" adc08="<<adc08[did-1]	   
 		      <<" HTadc06="<<HTadc06[did-1]<<" ped12="<<ped12[did-1]<<" ped12diff="<<ped12Diff<<" ped10Diff="
@@ -527,7 +529,7 @@ void StBemcTriggerSimu::FEEout() {
     Int_t cr, seq, chan, LUTindex;
     mDecoder->GetCrateAndSequenceFromTriggerPatch(tpid,cr,seq); 
     chan=seq/16;
-
+    
     if (mConfig==kOnline)
       {
 	if ( ((L0_TP_ADC[tpid]+LUTped[cr-1][chan]+2)>=0) && (formula[cr-1][chan]==2) && (LUTscale[cr-1][chan]==1) && 
@@ -545,6 +547,7 @@ void StBemcTriggerSimu::FEEout() {
 	TP6bit_adc_holder[tpid]=LUT[tpid]; 
       }
     
+   
     if (mConfig==kOffline) {
       // MOCK up LUT table for Offline case
       if ((L0_TP_PED[tpid]-1)>=L0_TP_ADC[tpid]) { 
@@ -553,7 +556,7 @@ void StBemcTriggerSimu::FEEout() {
       }
       if ((L0_TP_PED[tpid]-1)< L0_TP_ADC[tpid]) {
 	L0_TP_ADC[tpid]-=(L0_TP_PED[tpid]-1);
-	TP6bit_adc_holder[tpid]-=(TP6bit_adc_holder[tpid]-1);
+	TP6bit_adc_holder[tpid]-=(L0_TP_PED[tpid]-1);
       }
       if (L0_TP_ADC[tpid] > 62) {
 	L0_TP_ADC[tpid]=62;
@@ -561,6 +564,7 @@ void StBemcTriggerSimu::FEEout() {
       }
     }
         
+
     if (0) 
       {
 	cout<<" tpid="<<tpid<<" cr="<<cr<<" ch="<<chan<<" formula="<<formula[cr-1][chan]<<
@@ -569,7 +573,7 @@ void StBemcTriggerSimu::FEEout() {
 	  " diff="<<(L0_TP_ADC[tpid] - (L0_TP_PED[tpid]-1)) - (LUT[tpid])<<endl;   
       }  
   }
-}
+  }
 //==================================================
 //==================================================
 void StBemcTriggerSimu::get2006_DSMLayer0() {
@@ -578,7 +582,8 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
   //10-11  HT threshold bits
   //12-13  TP threshold bits
   //14-15  HT&&TP threshold bits
-  
+
+
   //Loop over modules
   int k=0;
   int DSM_TP[kL0DsmInputs];
@@ -623,7 +628,7 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       int jpid=-1;
       int seq=-1;
       mDecoder->GetJetPatchAndSequenceFromTriggerPatch(tpid, jpid, seq); 
-      
+
       //Skip modules 2,7,12,17,22,27 
       if (((i+3)%5)!=0){
 	
@@ -633,21 +638,23 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit[j]=2;
 	if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit[j]=3;
 	
-	//apply TP thresholds to each TP adc in each TP
 	if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit[j]=0;
 	if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit[j]=1;
 	if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit[j]=2;
 	if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit[j]=3;
-	
+
 	//apply HTTP condition - TP&&HT
 	if (DSM0_TP_tp_Bit[j] >= DSM0_HT_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_HT_tp_Bit[j];
 	if (DSM0_HT_tp_Bit[j] >= DSM0_TP_tp_Bit[j]) DSM0_HTTP_tp_Bit[j]=DSM0_TP_tp_Bit[j];
 	//then || each input
 	if (DSM0_HTTP_tp_Bit[j] > DSM0_HTTP_Bit[i]) DSM0_HTTP_Bit[i]=DSM0_HTTP_tp_Bit[j];
-	
+
 	//add up TP adc for 2/5 of JP
 	DSM0_TP_SUM[i]+=L0_TP_ADC[tpid];
 	
+	if (DSM0_HT_Bit[i]< DSM0_HT_tp_Bit[j]) DSM0_HT_Bit[i]=DSM0_HT_tp_Bit[j];
+	if (DSM0_TP_Bit[i]< DSM0_TP_tp_Bit[j]) DSM0_TP_Bit[i]=DSM0_TP_tp_Bit[j];
+	if (DSM0_HTTP_Bit[i]< DSM0_HTTP_tp_Bit[j]) DSM0_HTTP_Bit[i]=DSM0_HTTP_tp_Bit[j];
       }
       
       //Loop over 2x5 inputs(TP) for modules 2,7,12,17,22,29
@@ -702,18 +709,14 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	if (j<5) DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
 	
 	//apply HT/TP/HTTP thresholds to bits
-	if (DSM0_HT_Bit[i]< DSM0_HT_tp_Bit[j]) DSM0_HT_Bit[i]=DSM0_HT_tp_Bit[j];
-	if (DSM0_TP_Bit[i]< DSM0_TP_tp_Bit[j]) DSM0_TP_Bit[i]=DSM0_TP_tp_Bit[j];
-	if (DSM0_HTTP_Bit[i]< DSM0_HTTP_tp_Bit[j]) DSM0_HTTP_Bit[i]=DSM0_TP_tp_Bit[j];
 	if (DSM0_HT_Bit_J1[i]< DSM0_HT_tp_Bit_J1[j]) DSM0_HT_Bit_J1[i]=DSM0_HT_tp_Bit_J1[j];
 	if (DSM0_TP_Bit_J1[i]< DSM0_TP_tp_Bit_J1[j]) DSM0_TP_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
-	if (DSM0_HTTP_Bit_J1[i]< DSM0_HTTP_tp_Bit_J1[j]) DSM0_HTTP_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
+	if (DSM0_HTTP_Bit_J1[i]< DSM0_HTTP_tp_Bit_J1[j]) DSM0_HTTP_Bit_J1[i]=DSM0_HTTP_tp_Bit_J1[j];
 	if (DSM0_HT_Bit_J3[i]< DSM0_HT_tp_Bit_J3[j]) DSM0_HT_Bit_J3[i]=DSM0_HT_tp_Bit_J3[j];
 	if (DSM0_TP_Bit_J3[i]< DSM0_TP_tp_Bit_J3[j]) DSM0_TP_Bit_J3[i]=DSM0_TP_tp_Bit_J3[j];
-	if (DSM0_HTTP_Bit_J3[i]< DSM0_HTTP_tp_Bit_J3[j]) DSM0_HTTP_Bit_J3[i]=DSM0_TP_tp_Bit_J3[j];
+	if (DSM0_HTTP_Bit_J3[i]< DSM0_HTTP_tp_Bit_J3[j]) DSM0_HTTP_Bit_J3[i]=DSM0_HTTP_tp_Bit_J3[j];
       
-      }
-
+      }      
     }
     
     
@@ -739,8 +742,8 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	k++;
       }
 
-      
-    
+
+    mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP); 
     //NEED to eventually make this decision higher up but keep it here for now
     if ((DSM0_HTTP_Bit[i]>1)||(DSM0_HTTP_Bit_J3[i]>1)||(DSM0_HTTP_Bit_J1[i]>1)) {
       mFiredTriggers.push_back(127611);
@@ -755,6 +758,7 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       mFiredTriggers.push_back(127212);
       mFiredTriggers.push_back(137213);
     }
+
   }
 }
 
@@ -767,7 +771,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
   //DSM_Layer0 is passed to DSM_Layer1 in 8 UShort blocks (16 bits)
   //There are 6 DSM_Layer1 boards and each can take 120 bits total
   //So DSM_Layer0 passes 8 shorts (16*8=128) or 128 bits to each DSM_Layer1
-//  int nShort[8] = {3, 2, 1, 0, 7, 6, 5, 4};
+  //  int nShort[8] = {3, 2, 1, 0, 7, 6, 5, 4};
   for (int i=0; i<kL1DsmModule; i++)
     {
       for (int j=0; j<6; j++) //only loop over 6 shorts 
@@ -810,7 +814,6 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
       if ((DSM1_JP_ADC[i] <= mDbThres->GetJP_DSM1_threshold(i,timestamp,1)) && (DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,0))) DSM1_JP_jp_Bit[i]=1;
       if ((DSM1_JP_ADC[i] <= mDbThres->GetJP_DSM1_threshold(i,timestamp,2)) && (DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,1))) DSM1_JP_jp_Bit[i]=2;
       if ( DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,2)) DSM1_JP_jp_Bit[i]=3;
-      //cout<<" JetID="<<i<<" ADC="<<DSM1_JP_ADC[i]<<" bit="<<DSM1_JP_jp_Bit[i]<<endl;
     }  
 
   // there are 2 L2 BEMC modules
@@ -874,13 +877,13 @@ const vector< pair<int,int> > StBemcTriggerSimu::getTowersAboveThreshold(int tri
       mDecoder->GetDSMFromTriggerPatch(tpid,dsmid);
 
       if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5) {
-	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,1)) {
+	if (L0_HT_ADC[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,1)) {
 	  //cout << "In getTowersAboveThreshold: " << i+1 << "\tHT: " << HT6bit_adc_holder[i] << "\tThreshold: " << mDbThres->GetHT_DSM0_threshold(i,timestamp,1) << endl;
 	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
 	}
       }
       if (trigId==127212 || trigId==137213) {
-	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,2)) {
+	if (L0_HT_ADC[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,2)) {
 	  //cout << "In getTowersAboveThreshold: " << i+1 << "\tHT: " << HT6bit_adc_holder[i] << "\tThreshold: " << mDbThres->GetHT_DSM0_threshold(i,timestamp,2) << endl;
 	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
 	}
@@ -900,7 +903,7 @@ const vector< pair<int,int> > StBemcTriggerSimu::getTriggerPatchesAboveThreshold
 
       if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5) {
 	if (TP6bit_adc_holder[i] > mDbThres->GetTP_DSM0_threshold(dsmid,timestamp,1)) {	
-	  //cout << endl << "In getTPAboveThreshold: " << i+1 << "\tTP: " << TP6bit_adc_holder[i] << "\tThreshold: " << mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,0) << endl;
+	  //cout << "In getTPAboveThreshold: " << i+1 << "\tTP: " << TP6bit_adc_holder[i] <<" dsmid"<<dsmid<<" tpid="<<i<< endl;
 	  patches.push_back( make_pair(i,TP6bit_adc_holder[i]) );
 	}
       }
