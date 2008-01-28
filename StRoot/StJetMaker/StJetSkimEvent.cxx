@@ -100,6 +100,8 @@ StJetSkimTrig::StJetSkimTrig(const StJetSkimTrig& t) : TObject()
     this->mTriggerPatches           = t.mTriggerPatches;
     this->mJetPatches               = t.mJetPatches;
     this->mTotalEnergy              = t.totalEnergy();
+
+    memcpy(this->mL2ResultEmulated, t.mL2ResultEmulated, 36);
 }
 
 StJetSkimTrig::~StJetSkimTrig() 
@@ -121,6 +123,8 @@ StJetSkimTrig& StJetSkimTrig::operator=(const StJetSkimTrig& rhs)
         this->mTriggerPatches           = rhs.mTriggerPatches;
         this->mJetPatches               = rhs.mJetPatches;
         this->mTotalEnergy              = rhs.totalEnergy();
+
+	memcpy(this->mL2ResultEmulated, rhs.mL2ResultEmulated, 36);
     }
         
     return *this;
@@ -138,6 +142,8 @@ void StJetSkimTrig::init() {
     this->mTowers.clear();
     this->mTriggerPatches.clear();
     this->mJetPatches.clear();
+
+    memset(mL2ResultEmulated, 0, 36);
 }   
 
 void StJetSkimTrig::clear() {
@@ -215,6 +221,11 @@ void StJetSkimTrig::addJetPatchAboveThreshold(int detector, int aID, int aADC) {
     }
 }
 
+void StJetSkimTrig::setL2ResultEmulated(const void *address) {
+    memcpy(mL2ResultEmulated, address, 20);
+    memcpy(mL2ResultEmulated+5, (int*)address+6, 16);
+}
+
 StJetSkimVert::StJetSkimVert()
 {
     for (int i=0; i<3; ++i) {
@@ -288,9 +299,10 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
     mEbbc = mWbbc = mBbcTimeBin = 0;
     mIsValid = mIsPolLong = mIsPolTrans = mIsMaskedUsingBx48 = mOffsetBx48minusBX7 = mSpin4usingBx48 = 0;
     //for (int i=0; i<32; ++i) {
-    for (int i=0; i<mL2Result.GetSize(); ++i) {
-        mL2Result[i] = 0;
-    }   
+    //    for (int i=0; i<mL2Result.GetSize(); ++i) {
+    //        mL2Result[i] = 0;
+    //    }   
+    memset(mL2Result, 0, 36);
 }
 
 StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
@@ -327,7 +339,8 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mIsMaskedUsingBx48 = other.isMaskedUsingBx48();
     this->mOffsetBx48minusBX7 = other.offsetBx48minusBX7();
     this->mSpin4usingBx48 = other.spin4usingBx48();
-    this->mL2Result     = other.l2Result();
+    //this->mL2Result     = other.l2Result();
+    memcpy(this->mL2Result, other.mL2Result, 36);
 }
 
 StJetSkimEvent::~StJetSkimEvent()
@@ -373,8 +386,8 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mIsMaskedUsingBx48 = rhs.isMaskedUsingBx48();
         this->mOffsetBx48minusBX7 = rhs.offsetBx48minusBX7();
         this->mSpin4usingBx48 = rhs.spin4usingBx48();
-        this->mL2Result     = rhs.l2Result();
-        
+        //this->mL2Result     = rhs.l2Result();
+	memcpy(this->mL2Result, rhs.mL2Result, 36);        
     }
     
     return *this;
@@ -392,9 +405,9 @@ void StJetSkimEvent::clear()
     mBestVertRef.Clear();
     mTrigHeaderArrayRef.Clear();
     //for (int i=0; i<32; ++i) {
-    for (int i=0; i<mL2Result.GetSize(); ++i) {
-        mL2Result[i] = 0;
-    }
+    //    for (int i=0; i<mL2Result.GetSize(); ++i) {
+    //        mL2Result[i] = 0;
+    //    }
     //mL2Result.Clear();
     
 }
@@ -435,6 +448,11 @@ void StJetSkimEvent::setL2Result(int* vals)
     }
 }
 */
+
+void StJetSkimEvent::setL2Result(const void *address) {
+    memcpy(mL2Result, address, 20);
+    memcpy(mL2Result+5, (int*)address+6, 16);
+}
 
 void StJetSkimEvent::setTrig(const StJetSkimTrig& t)
 {

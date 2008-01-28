@@ -77,6 +77,8 @@ public:
     map<int,int>& jetPatchesAboveThreshold(int detector) const;
     
     int totalEnergy() const;
+
+    UInt_t* L2ResultEmulated();
     
     //setters
     void setTrigId(int aTrigId);
@@ -93,6 +95,8 @@ public:
     void addJetPatchAboveThreshold(int detector, int aID, int aADC);
     
     void setTotalEnergy(int aEnergy);
+
+    void setL2ResultEmulated(const void *address);
     
 private:
     void init();
@@ -110,6 +114,8 @@ private:
     map<int,int> mJetPatches;
     
     Int_t mTotalEnergy;
+
+    UInt_t mL2ResultEmulated[9];
     
     ClassDef(StJetSkimTrig,3);
 };
@@ -122,6 +128,7 @@ inline int StJetSkimTrig::shouldFireBemc() const  {return mShouldFireBemc;}
 inline int StJetSkimTrig::shouldFireEemc() const  {return mShouldFireEemc;}
 inline int StJetSkimTrig::shouldFireL2() const  {return mShouldFireL2;}
 inline int StJetSkimTrig::totalEnergy() const {return mTotalEnergy;}
+inline UInt_t* StJetSkimTrig::L2ResultEmulated() {return mL2ResultEmulated;}
 
 inline void StJetSkimTrig::setTrigId(int aTrigId) {mTrigId = aTrigId;}
 inline void StJetSkimTrig::setDidFire(bool aFire) {mDidFire = aFire;}
@@ -255,8 +262,9 @@ public:
     void setSpin4UsingBx48(int i) {mSpin4usingBx48 = i;}
     
     //!void setL2Result(int* vals);
-    void setL2Result(const TArrayI& rhs) {mL2Result=rhs;}
-    
+    //void setL2Result(const TArrayI& rhs) {mL2Result=rhs;}
+    void setL2Result(const void *address);
+
     void setMcEvent(const StPythiaEvent *ptr) {mMcEvent = ptr;}
     
     //gets
@@ -290,8 +298,9 @@ public:
     const TClonesArray* vertices() const {return mVertices;}
     StJetSkimVert* bestVert() const;
 
-    const TArrayI& l2Result() const {return mL2Result;}
-    
+    //const TArrayI& l2Result() const {return mL2Result;}
+    UInt_t* L2Result() {return mL2Result;}
+
     const StPythiaEvent* mcEvent() const {return mMcEvent;}
     
 private:
@@ -331,8 +340,9 @@ private:
     ///L2 Trigger array:
     ///Direct copy from StMuEvent::L2Result()
     //!int mL2Result[32]; 
-    TArrayI mL2Result;
-    
+    //TArrayI mL2Result;
+    UInt_t mL2Result[9];
+
     ClassDef(StJetSkimEvent,4);
 };
 

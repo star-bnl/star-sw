@@ -326,7 +326,7 @@ void StJetReader::exampleFastAna()
 	
 	//best vertex info:
 	const float* bestPos = skEv->bestVert()->position();
-	cout <<"best Vertex (x,y,z):\t"<<bestPos[0]<<"\t"<<bestPos[1]<<"\t"<<bestPos[2]<<endl;
+	//cout <<"best Vertex (x,y,z):\t"<<bestPos[0]<<"\t"<<bestPos[1]<<"\t"<<bestPos[2]<<endl;
 	
 	//trigger info:
 	const TClonesArray* trigs = skEv->triggers();
@@ -338,6 +338,13 @@ void StJetReader::exampleFastAna()
 		if (trig->didFire() != 0) {
 //			cout <<"\tTriggerd:\t"<<trig->trigId()<<"\twith prescale:\t"<<trig->prescale()<<endl;
 		}
+		if (trig->shouldFireL2() == 1) {
+		  cout << "\tshTrigger L2: " << trig->trigId() <<endl;
+		  UInt_t *l2temp = trig->L2ResultEmulated();
+		  for (int ii=0; ii<9; ii++) {
+		    cout << "SimL2--- " << ii << "\t" << l2temp[ii] << endl;
+		  }
+		}
 	}
 		
 	//L2 Info:
@@ -347,7 +354,7 @@ void StJetReader::exampleFastAna()
 	for (int i=0; i<32; ++i) {
 		cout <<i<<"\t"<<l2Results[i]<<endl;
 	}
-	 */
+	 
 	const TArrayI& l2Results = skEv->l2Result();
 	for (int i=0; i<l2Results.GetSize(); ++i) {
 		int val = l2Results[i];
@@ -355,8 +362,13 @@ void StJetReader::exampleFastAna()
 			cout <<i<<"\t"<<val<<endl;
 		}
 	}
+	*/
+	UInt_t *l2temp = skEv->L2Result();
+	for (int ii=0; ii<9; ii++) {
+	  if (l2temp[ii]!=0)  cout << "DatL2--- " << ii << "\t" << l2temp[ii] << endl;
+	}
 	
-	
+
 	//vertex info:
 	const TClonesArray* verts = skEv->vertices();
 	assert(verts);
@@ -392,7 +404,7 @@ void StJetReader::exampleFastAna()
 			assert(j);
 			assert(verifyJet(stjets, ijet));
 			
-			cout <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endl;
+			cout <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<"\tdetEta:\t"<<j->detEta()<<endl;
 			
 			//look at 4-momenta in the jet:
 			typedef vector<TrackToJetIndex*> TrackToJetVec;

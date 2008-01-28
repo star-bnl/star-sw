@@ -49,6 +49,7 @@ public:
     void setUseEndcap(bool v) {mUseEndcap=v;}
     void setUse2003Cuts(bool v) {mUse2003Cuts=v;}
     void setUse2005Cuts(bool v) {mUse2005Cuts=v;}
+    void setUse2006Cuts(bool v) {mUse2006Cuts=v;}
 
     int nDylanPoints() const {return mDylanPoints;}
     double sumEmcEt() const {return mSumEmcEt;}
@@ -75,6 +76,7 @@ protected:
 
     bool mUse2003Cuts; //!
     bool mUse2005Cuts; //!
+    bool mUse2006Cuts; //!
     int mDylanPoints; //!
     double mSumEmcEt; //!
         

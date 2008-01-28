@@ -176,7 +176,8 @@ Int_t StJetSkimEventMaker::Make()
             skimTrig.clear();
         }
         TArrayI& l2Array = muEvent->L2Result();
-        mEvent->setL2Result(l2Array);
+        //mEvent->setL2Result(l2Array);
+	mEvent->setL2Result(l2Array.GetArray() + 14);
     }
     else {
         StJetSkimTrig skimTrig;
@@ -316,6 +317,10 @@ void StJetSkimEventMaker::fillTriggerSimulationInfo(StJetSkimTrig &skimTrig)
     for (unsigned i=0; i<jpId.size(); i++) {
       skimTrig.addJetPatchAboveThreshold(0,jpId[i],trigResult.jetPatchAdc(jpId[i]));
     }
+  }
+
+  if (trigResult.l2Decision()==1) {
+    skimTrig.setL2ResultEmulated(trigResult.l2Result(kJet));
   }
 
 }

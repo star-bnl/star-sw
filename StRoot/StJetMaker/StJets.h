@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.10 2007/05/17 14:33:22 mmiller Exp $
+// $Id: StJets.h,v 1.11 2008/01/28 03:37:26 staszak Exp $
 // $Log: StJets.h,v $
+// Revision 1.11  2008/01/28 03:37:26  staszak
+// A number of updates: i) Murad's use2006cuts function which extends tracks to SMD, and includes DCA cuts, ii) emulated L2 results now included and data L2 results restructured, iii) StJet zVertex and detEta now filled
+//
 // Revision 1.10  2007/05/17 14:33:22  mmiller
 // Added Murad's dca update.
 //
@@ -140,9 +143,10 @@ public:
   void setNhitsFit(unsigned short v) {mNhitsFit =v;}
   void setNsigmaPion(double v) {mNsigmaPion = v;}
   void setTdca(double v) {mTdca = v;} //jan 27, 2007
-  void setTdcaxyP(double v) {mTdcaxyP = v;} //jan 27, 2007
   void setTdcaz(double v) {mTdcaz = v;} //jan 27, 2007
   void setTdcaxy(double v) {mTdcaxy = v;} //jan 27, 2007
+  void setetaext(double v) {metaext = v;}
+  void setphiext(double v) {mphiext = v;}
 	
   Short_t charge() const {return mCharge;}
   unsigned short nHits() const {return mNhits;}     //< Return total number of hits on track.
@@ -151,9 +155,10 @@ public:
     unsigned short nHitsFit() const {return mNhitsFit;}  //< Return total number of hits used in fit. 
     double nSigmaPion() const {return mNsigmaPion;}      //< Rdistance to the calculated dE/dx band for pions in units of sigma.
     double Tdca() const {return mTdca;} //jan 27, 2007	
-    double TdcaxyP() const {return mTdcaxyP;} //jan 27, 2007
     double Tdcaz() const {return mTdcaz;} //jan 27, 2007	
     double Tdcaxy() const {return mTdcaxy;} //jan 27, 2007
+    double etaext() const {return metaext;}
+    double phiext() const {return mphiext;}
 private:
     int mJetIndex;
     int mTrackIndex;
@@ -165,10 +170,11 @@ private:
     unsigned short mNhitsDedx;
     unsigned short mNhitsFit;
     double mNsigmaPion;
-    double mTdca; //jan 27, 2007
-    double mTdcaxyP; //jan 27, 2007	
+    double mTdca; //jan 27, 2007	
     double mTdcaz; //jan 27, 2007
-    double mTdcaxy; //jan 27, 2007	
+    double mTdcaxy; //jan 27, 2007
+    double metaext;
+    double mphiext;
     ClassDef(TrackToJetIndex,2)
 };
 
@@ -211,7 +217,7 @@ public:
     void Clear(const char *opt);
         
     ///add a jet to the container
-    void addProtoJet(StProtoJet& pj);
+    void addProtoJet(StProtoJet& pj, const StMuDst* muDst);
 
     ///Set event-wise information:
     void setMuDst(const StMuDst*);

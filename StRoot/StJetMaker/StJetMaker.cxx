@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.13 2008/01/23 20:18:38 staszak Exp $
+ * $Id: StJetMaker.cxx,v 1.14 2008/01/28 03:37:27 staszak Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -216,7 +216,7 @@ Int_t StJetMaker::Make()
 	    //to here .............................
 	    */
 	    
-	    muDstJets->addProtoJet(*it);
+	    muDstJets->addProtoJet(*it, mudst);
 	    ++ijet;
 	}
 	
