@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.12 2008/01/23 20:18:38 staszak Exp $
+// $Id: StJets.cxx,v 1.13 2008/01/28 03:37:25 staszak Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.13  2008/01/28 03:37:25  staszak
+// A number of updates: i) Murad's use2006cuts function which extends tracks to SMD, and includes DCA cuts, ii) emulated L2 results now included and data L2 results restructured, iii) StJet zVertex and detEta now filled
+//
 // Revision 1.12  2008/01/23 20:18:38  staszak
 // Courtesy of Adam - changes to use the STAR Logger, and compression added to output jet trees
 //
@@ -111,9 +114,15 @@
 //StMuDst
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 //StJetFinder
 #include "StJetFinder/StProtoJet.h"
+
+//useful for extrapolations
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StFourPMakers/StMuEmcPosition.h"
 
 //StSpinMaker
 #include "StMuTrackFourVec.h"
@@ -159,8 +168,11 @@ void StJets::Clear(bool clearAll)
     LOG_DEBUG << "Cleared the Jets" <<endm;
 }
 
-void StJets::addProtoJet(StProtoJet& pj)
+void StJets::addProtoJet(StProtoJet& pj, const StMuDst* muDst)
 {
+
+  StMuEmcPosition*  mMuPosition = new StMuEmcPosition();
+
   //jetIndex == number of jets + 1, i.e., where to insert
   int jetIndex = mJets->GetLast()+1;
   
@@ -173,6 +185,10 @@ void StJets::addProtoJet(StProtoJet& pj)
   tempJet.jetEta = tempJet.Eta();
   tempJet.jetPhi = tempJet.Phi();
   
+  StMuEvent* event = muDst->event();
+  StThreeVectorF vPos = event->primaryVertexPosition();
+  tempJet.zVertex = vPos.z();
+
   for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
     StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
     if (!track) {
@@ -196,6 +212,13 @@ void StJets::addProtoJet(StProtoJet& pj)
       //and cache some properties if it really came from a StMuTrack:
       StMuTrack* muTrack = track->particle();
       if (muTrack) {  //this will fail for calorimeter towers ;)
+
+	//----------------------------------------------
+	double bField = 0.5; //to put it in Tesla
+	double rad=238.6;//geom->Radius()+5.;
+	StThreeVectorD momentumAt,positionAt;
+	bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt,
+					   muTrack, bField, rad );
 	t2j.setCharge( muTrack->charge() );
 	t2j.setNhits( muTrack->nHits() );
 	t2j.setNhitsPoss( muTrack->nHitsPoss() );
@@ -203,11 +226,12 @@ void StJets::addProtoJet(StProtoJet& pj)
 	t2j.setNhitsFit( muTrack->nHitsFit() );
 	t2j.setNsigmaPion( muTrack->nSigmaPion() );
 	t2j.setTdca ( muTrack->dcaGlobal().mag() ); //jan 27, 2007
-	t2j.setTdcaxyP ( muTrack->dcaGlobal().perp() ); //jan 27, 2007
 	t2j.setTdcaz ( muTrack->dcaZ() ); //jan 27, 2007
 	t2j.setTdcaxy ( muTrack->dcaD() ); //jan 27, 2007
+	t2j.setetaext ( positionAt.pseudoRapidity() );
+	t2j.setphiext ( positionAt.phi() );
       }
-      
+     
       //cout <<"here's the t2j:\t"<<t2j<<endl;
       
       new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );

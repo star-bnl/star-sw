@@ -62,7 +62,7 @@ ClassImp(StBET4pMaker)
     
     StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
 	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mTables(new StBemcTables(doTowerSwapFix)), 
-	  mUse2003Cuts(false), mUse2005Cuts(false)
+	  mUse2003Cuts(false), mUse2005Cuts(false), mUse2006Cuts(false)
 {
     cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
     mCorrupt = false;
@@ -219,6 +219,16 @@ Int_t StBET4pMaker::Make()
 	}
 	//MLM 8/17/05 -- adapt to use with multiple vertices:
 	if (track->dcaGlobal().mag()>3.) continue;
+
+	int dcaFlag=1;
+	if ( mUse2006Cuts==true){
+	  Double_t limit=3.-2.*track->pt();
+	  if(!((track->pt()<0.5&&track->dcaGlobal().mag()<=2.) ||
+	       ((track->pt()>=0.5&&track->pt()<1.0)&&
+		track->dcaGlobal().mag()<=limit) ||
+	       (track->pt()>=1.0&&track->dcaGlobal().mag()<=1.0))) dcaFlag=0;
+	}
+	if(dcaFlag==0) continue;
 
 	if (track->topologyMap().trackFtpcEast()==true || track->topologyMap().trackFtpcWest()==true) {
 	    ++ftpc;
