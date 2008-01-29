@@ -60,6 +60,19 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
     $PKG = $pkg;
 }
 $env1 = $env->clone('Package'  => $pkg);
+my $CXXFLAGS= $env1->{CXXFLAGS};
+my $FC      = $env1->{FC};
+my $CC      = $env1->{CC};
+my $FFLAGS  = $env1->{FFLAGS};
+my $FCPATH  = $env1->{FCPATH};
+my $FEXTEND = $env1->{FEXTEND};
+my $FPPFLAGS= $env1->{FPPFLAGS};
+my $FCCOM   = $env1->{FCCOM};
+my $LIBS    = $env1->{LIBS};
+my $LIBPATH = $env1->{LIBPATH};
+my $STIC    = $env1->{STIC};
+my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
+my $CPPFLAGS = $env1->{CPPFLAGS};
 
 my @idlL    = script::find_idl($Dir);
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
@@ -83,24 +96,42 @@ print "idlL = @idlL\n" if $param::debug;
 
 my (@src, @h_files, @idlM);
 my $CPPPATH = $env1->{CPPPATH};
-my $CXXFLAGS= $env1->{CXXFLAGS};
-my $FC      = $env1->{FC};
-my $CC      = $env1->{CC};
-my $FFLAGS  = $env1->{FFLAGS};
-my $FCPATH  = $env1->{FCPATH};
-my $FEXTEND = $env1->{FEXTEND};
-my $FPPFLAGS= $env1->{FPPFLAGS};
-my $FCCOM   = $env1->{FCCOM};
-my $LIBS    = $env1->{LIBS};
-my $LIBPATH = $env1->{LIBPATH};
-my $STIC    = $env1->{STIC};
-my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
-my $CPPFLAGS = $env1->{CPPFLAGS};
+#print "CPPPATH = $CPPPATH\n";
+my @RTS_pkgs = qw(SFS DAQ_TPX RTS_READER DAQ_TOF); #print "RTS_pkgs = @RTS_pkgs\n";
+foreach my $p (@RTS_pkgs) {
+  #  print "compare $p with pkg = $pkg\n";
+  if ($pkg eq $p) {
+    $CPPPATH = $main::PATH_SEPARATOR . "#online/RTS/include" . $main::PATH_SEPARATOR . "#online/RTS/trg/include" . $main::PATH_SEPARATOR . $CPPPATH;
+    #    print "new CPPPATH = $CPPPATH\n";
+    last;
+  }
+}
+if ($pkg eq "RTS") {
+  $CPPFLAGS .= ' -DRTS_PROJECT_STAR -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
+  $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" .
+    $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" .
+      $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC" .
+	$main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" .
+	  $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
+	    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
+}
+my @VF_daq_pkgs = qw(StDaqAdcMaker  StDAQMaker  StRtsReaderMaker  StTpcClusters    StTpxReaderMaker StRTSMaker  StTofEventMaker   StTpxEventMaker);
+foreach my $p (@VF_daq_pkgs) {
+  #  print "compare $p with pkg = $pkg\n";
+  if ($pkg eq $p) {
+    $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/src" .$main::PATH_SEPARATOR . "#StRoot/RTS/include" . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" . $main::PATH_SEPARATOR . $CPPPATH;
+    #    print "new CPPPATH = $CPPPATH\n";
+    last;
+  }
+}
+if ($pkg eq "StDAQMaker") {
+#   $CPPFLAGS .= " -DNEW_EVP_READER"; # we should uncomment that later
+}
 my ($i, $obj);
-my $LIBPKG = "";
+my $LIBPKG = ""; 
 my @g77pkgs = qw(geometry gen sim tls); 
 my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
-if ($FC eq 'pgf77' and ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/)) {
+if($FC eq 'pgf77' and ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/)) {
   $FC       = $env1->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env1->{G77FLAGS}; 
   $FEXTEND  = $env1->{G77EXTEND};
