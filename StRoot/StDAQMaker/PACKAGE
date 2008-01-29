@@ -1,0 +1,7 @@
+# $Id $
+# package StDAQMaker
+# author: 
+# weird dependence of StDAQMaker from StFtpcSlowSimMaker for StFssSectorReader
+#Library:libStDAQMaker.so:LIBS +=   -lStChain  -lStDaqLib  -lStFtpcSlowSimMaker
+Library:libStDAQMaker.so:LIBS +=   -lStChain  -lStDaqLib
+#Library:libStDAQMaker.so:LIBS +=   -lStChain  -lStDaqLib  -lStFtpcSlowSimMaker

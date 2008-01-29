@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.33 2008/01/22 21:13:01 fine Exp $
+ * $Id: StDAQReader.h,v 1.34 2008/01/29 01:55:56 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.34  2008/01/29 01:55:56  fine
+ * Add extra CPP flag to simply the Conscript
+ *
  * Revision 1.33  2008/01/22 21:13:01  fine
  * move the dependency from the class desclaration to class implematation to allo for the new EVP_READER
  *
@@ -109,9 +112,9 @@
  **************************************************************************/
 #ifndef _StDAQReader_
 #define _StDAQReader_
-
+#ifndef  NEW_EVP_READER
 #define OLD_EVP_READER 1
-
+#endif
 //		Forward declarations
 struct  EventInfo;
 typedef  EventInfo DAQEventInfo;
