@@ -107,7 +107,7 @@ foreach my $p (@RTS_pkgs) {
   }
 }
 if ($pkg eq "RTS") {
-  $CPPFLAGS .= ' -DRTS_PROJECT_STAR -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
+  $CPPFLAGS .= ' -DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
   $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" .
     $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" .
       $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC" .
