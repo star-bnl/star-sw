@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.83 2007/08/24 17:26:29 fine Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.84 2008/01/29 18:45:01 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -1657,7 +1657,7 @@ StEventMaker::printEventInfo()
         mCurrentEvent->kinkVertices()[0]->Dump();
     }
     
-    unsigned int       j, k, nhits;
+    unsigned int       j=0, k=0, nhits=0;
     Bool_t             gotOneHit;
     StTpcHitCollection *tpcColl = mCurrentEvent->tpcHitCollection();
     LOG_INFO << "---------------------------------------------------------" << endm;
@@ -1794,8 +1794,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.83 2007/08/24 17:26:29 fine Exp $
+ * $Id: StEventMaker.cxx,v 2.84 2008/01/29 18:45:01 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.84  2008/01/29 18:45:01  perev
+ * WarnOff
+ *
  * Revision 2.83  2007/08/24 17:26:29  fine
  * replace cout with LOG_INFO
  *

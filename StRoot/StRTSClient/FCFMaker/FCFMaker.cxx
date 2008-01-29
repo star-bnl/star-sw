@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.36 2008/01/20 00:38:23 perev Exp $
+ * $Id: FCFMaker.cxx,v 1.37 2008/01/29 18:41:53 perev Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.37  2008/01/29 18:41:53  perev
+ * WarnOff
+ *
  * Revision 1.36  2008/01/20 00:38:23  perev
  * Cleanup only
  *
@@ -1773,17 +1776,17 @@ int StRTSClientFCFMaker::build_croat_clusters(u_int s,
   int sectorIdx = s+1;
   haveRaw = 0;
 
-  St_raw_row *Trow_in, *Trow_out;
-  St_raw_pad *Tpad_in, *Tpad_out;
-  St_raw_seq *Tseq_in, *Tseq_out;
-  St_type_shortdata *Tadc_in, *Tadc_out;
-  St_type_shortdata *Ttrk_in, *Ttrk_out;
+  St_raw_row *Trow_in=0, *Trow_out=0;
+  St_raw_pad *Tpad_in=0, *Tpad_out=0;
+  St_raw_seq *Tseq_in=0, *Tseq_out=0;
+  St_type_shortdata *Tadc_in=0, *Tadc_out=0;
+  St_type_shortdata *Ttrk_in=0, *Ttrk_out=0;
   
   // c arrays for this sector
-  raw_row_st *row_in, *row_out;
-  raw_pad_st *pad_in, *pad_out;
-  raw_seq_st *seq_in, *seq_out;
-  unsigned short *adc_in, *adc_out;
+  raw_row_st *row_in=0, *row_out=0;
+  raw_pad_st *pad_in=0, *pad_out=0;
+  raw_seq_st *seq_in=0, *seq_out=0;
+  unsigned short *adc_in=0, *adc_out=0;
   unsigned short *trk_in=NULL;
   unsigned short *trk_out=NULL;
   
