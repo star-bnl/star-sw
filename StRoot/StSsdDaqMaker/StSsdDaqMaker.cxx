@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.19 2007/09/20 03:04:44 perev Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.20 2008/01/29 18:54:30 perev Exp $
 //
 // $log$
 //
@@ -208,7 +208,7 @@ void StSsdDaqMaker::DeclareNTuple(){
 // 
 // 
 Int_t StSsdDaqMaker::Make(){
-  int strip_number,id_wafer,id_side,count,my_channel;
+  int strip_number,id_wafer,id_side,count,my_channel=-9999;
   int ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
   int ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
   int data,pedestal,noise,channel,newchannel,ladder; char EastWest;
@@ -306,6 +306,7 @@ static const char EW[4]={'E','W','p','n'};
 			    if (ssd_ladder_mapP[kk]==channel) my_channel=kk;
 			  }
 			}
+                        assert(my_channel>=0);
 			strip_number=my_channel-(my_channel/mConfig->getNumberOfStrips())*mConfig->getNumberOfStrips()+1;
 			if (id_side==0)
 			  id_wafer=7000+100*(mConfig->getNumberOfWafers()-(my_channel/mConfig->getNumberOfStrips()))+ladder+1;

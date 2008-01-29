@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSector.cxx,v 1.8 2007/04/28 17:57:15 perev Exp $
+// $Id: StTpcCalibSector.cxx,v 1.9 2008/01/29 18:58:54 perev Exp $
 // $Log: StTpcCalibSector.cxx,v $
+// Revision 1.9  2008/01/29 18:58:54  perev
+// WarnOff
+//
 // Revision 1.8  2007/04/28 17:57:15  perev
 // Redundant StChain.h removed
 //
@@ -302,7 +305,7 @@ void StTpcCalibSector::updateGain(StTPCReader* aZSupReader){
 
   float tDistToPulseTBPos;
   int tFound;
-  double tPeakPos,tPeakAmp;
+  double tPeakPos=-9999,tPeakAmp=-9999;
   TPCSequence* tSeq;
   unsigned char* tPadList;
   int tADC;
