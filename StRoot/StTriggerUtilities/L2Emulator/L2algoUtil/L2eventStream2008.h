@@ -21,7 +21,7 @@ class L2BtowCalibData08{// Barrel calibrated data
   friend class L2eventStream2008;
   int hitSize;
   HitTower1 hit[BtowGeom::mxRdo]; 
-  int nInputBlock; // over the whole run
+  int nInputBlock; // counts seen blocks over the whole run
   public:
   const int get_hitSize()  const {return hitSize;}
   const HitTower1 *  get_hits() const { return hit;}
@@ -35,7 +35,7 @@ class L2EtowCalibData08{// Endcap calibrated data
   friend class L2eventStream2008;
   int hitSize;
   HitTower1 hit[EtowGeom::mxRdo]; 
-  int nInputBlock; // over the whole run
+  int nInputBlock; // counts seen blocks over the whole run
   public:
   const int get_hitSize()  const {return hitSize;}
   const HitTower1 *  get_hits() const { return hit;}
@@ -55,6 +55,7 @@ class L2eventStream2008{ //   E V E N T     S T R E A M
   
   public:
   const L2BtowCalibData08 * get_btow() { return btow;}
+  const L2EtowCalibData08 * get_etow() { return etow;}
 };
 
 extern L2eventStream2008 globL2eventStream2008;

@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2etowCalAlgo08.cxx,v 1.1 2008/01/30 00:47:16 balewski Exp $
+  $Id: L2etowCalAlgo08.cxx,v 1.2 2008/01/30 21:56:40 balewski Exp $
   \author Jan Balewski, MIT, 2008 
  *****************************************************
   Descripion:
@@ -29,7 +29,7 @@
 //=================================================
 //=================================================
 L2etowCalAlgo08::L2etowCalAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir)  :  L2VirtualAlgo2008( name,  db,  outDir) { 
-  /* called one per days
+  /* called once per days
      all memory allocation must be done here
   */
 
@@ -38,11 +38,12 @@ L2etowCalAlgo08::L2etowCalAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geoX,
   setMaxHist(32);
   createHisto();
 
-  // initilalize ETOW-Calibrated-data
+  // initilalize ETOW-Calibrated-data to zero
   int k;
   for(k=0;k<L2eventStream2008::mxToken;k++){
     L2EtowCalibData08 & etowCalibData=globL2eventStream2008.etow[k];  
     etowCalibData.nInputBlock=0;
+    etowCalibData.hitSize=0;
   }
  }
 
@@ -155,9 +156,8 @@ L2etowCalAlgo08::computeEtow(int token, int eemcIn, ushort *rawAdc){
  
   //...... now token is valid  ........
   L2EtowCalibData08 & etowCalibData=globL2eventStream2008.etow[token];  
-  etowCalibData.nInputBlock++;
-  
   // clear data for this token from previous event
+  etowCalibData.nInputBlock++;
   etowCalibData.hitSize=0;
 
   int nTower=0; /* counts mapped & used ADC channels */
@@ -174,7 +174,7 @@ L2etowCalAlgo08::computeEtow(int token, int eemcIn, ushort *rawAdc){
     HitTower1 *hit=etowCalibData.hit;
     for(rdo=0; rdo<EtowGeom::mxRdo; rdo++){
       if(rawAdc[rdo]<thr[rdo])continue;
-      adc=rawAdc[rdo]-ped[rdo];  //do NOT correct for common pedestal noise - bad for the jet finder
+      adc=rawAdc[rdo]-ped[rdo];  //did NOT correct for common pedestal noise - bad for the jet finder
       et=adc/gain2ET[rdo]; 
       hit->rdo=rdo;
       hit->adc=adc;
@@ -183,7 +183,6 @@ L2etowCalAlgo08::computeEtow(int token, int eemcIn, ushort *rawAdc){
       hit++;
       nTower++; 
       // only monitoring
-      // if(par_dbg>0) printf("pro rdo=%d adc=%d  nTw=%d\n",rdo,adc,tmpNused);
       if(et >par_hotEtThres) {
 	hA[10]->fill(rdo);
 	nHotTower++;
@@ -230,7 +229,7 @@ L2etowCalAlgo08::finishRunUser() {
   
   int eHotSum=1,eHotId=-1;
   const int *data20=hA[10]->getData();
-  const L2EmcDb::EmcCDbItem *xE=mDb->getByIndex(502); // some wired default?
+  const L2EmcDb::EmcCDbItem *xE=0; //mDb->getByIndex(502); // some wired default?
   
   int i;
   for(i=0; i<EmcDbIndexMax; i++) {
@@ -249,7 +248,8 @@ L2etowCalAlgo08::finishRunUser() {
     }
   }
   
-  if (mLogFile){
+  int par_nHotThresh=20;
+  if (mLogFile && eHotSum>par_nHotThresh){
     fprintf(mLogFile,"#ETOW_hot tower _candidate_ (eHotSum=%d of %d eve) :, softID %d , crate %d , chan %d , name %s\n",eHotSum,mEventsInRun,eHotId,xE->crate,xE->chan,xE->name);
   }
   
@@ -308,6 +308,9 @@ L2etowCalAlgo08::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2etowCalAlgo08.cxx,v $
+  Revision 1.2  2008/01/30 21:56:40  balewski
+  E+B high-enery-filter L2-algo fuly functional
+
   Revision 1.1  2008/01/30 00:47:16  balewski
   Added L2-Etow-calib
 
