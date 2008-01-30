@@ -27,7 +27,7 @@
 #include "L2jetAlgo/L2jetAlgo2006.h"
 #include "L2pedAlgo/L2pedAlgo.h"
 #include "L2gammaAlgo/L2gammaAlgo.h"
-#include "L2upsilon/L2upsilon.hh"
+#include "L2upsilon/L2upsilon2006.hh"
 
 #include "StL2_2006EmulatorMaker.h"
 
@@ -37,7 +37,7 @@ StL2_2006EmulatorMaker::StL2_2006EmulatorMaker(const char *name):StMaker(name) {
   mL2pedAlgo=0;
   mL2jetAlgo2006=0;
   mL2gammaEEmc=mL2gammaBEmc=0;
-  mL2upsilon=0;
+  mL2upsilon2006=0;
 }
 
 //========================================
@@ -85,9 +85,9 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
   assert( mYearMonthDay >= 20060406 ); // before ppTrans
   assert( mYearMonthDay <= 20060607 ); // after ppLong2
 
-  mL2algo[4]=mL2upsilon=new L2upsilon("upsilon", mL2EmcDb, mL2EmcDb->logPath,L2RESULTS_OFFSET_UPS); 
+  mL2algo[4]=mL2upsilon2006=new L2upsilon2006("upsilon", mL2EmcDb, mL2EmcDb->logPath,L2RESULTS_OFFSET_UPS); 
   TString fullPath=Form("%sL2/%d/algos/btowXYZ.dat", mSetupPath.Data(), mYear);
-  mL2upsilon->readGeomXYZ(fullPath.Data());
+  mL2upsilon2006->readGeomXYZ(fullPath.Data());
 
   // ----------- L2 J/Psi algo ----------------  slot 5
   // add here
@@ -252,7 +252,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.11 2008/01/23 16:22:26 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.12 2008/01/30 15:09:32 balewski Exp $
 //
 
 
