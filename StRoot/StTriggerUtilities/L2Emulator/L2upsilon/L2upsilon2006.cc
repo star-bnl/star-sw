@@ -9,8 +9,8 @@
 #include <algorithm>
 #include <functional>
 
-#include "L2Result.h"
-#include "L2upsilon.hh"
+#include "L2upsilonResult2006.h"
+#include "L2upsilon2006.hh"
 #ifdef  IS_REAL_L2  //in l2-ana  environment
   #include "trgStructures.h"
   #include "../L2algoUtil/L2EmcDb.h"
@@ -24,24 +24,24 @@
 #define L0_HT_TRIGGER_BIT_SHIFT 4
 #define CPU_MHZ 1603.680
 
-L2upsilon::L2upsilon(const char* name, L2EmcDb* db, char* outDir, int resOff) :
+L2upsilon2006::L2upsilon2006(const char* name, L2EmcDb* db, char* outDir, int resOff) :
   L2VirtualAlgo(name, db, outDir, resOff), mLogFile(stdout), mRunNumber(0), mUnfinished(false)
 {
   createHistograms();
 }
 
-L2upsilon::~L2upsilon()
+L2upsilon2006::~L2upsilon2006()
 {
   deleteHistograms();
 }
 
-int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
+int L2upsilon2006::initRun(int runNumber, int* userInt, float* userFloat)
 {
   //
   // Open log file and write out algorithm parameters
   //
   if (mUnfinished) {
-    fprintf(mLogFile, "L2upsilon: WARNING - finishRun() was not called for last run\n");
+    fprintf(mLogFile, "L2upsilon2006: WARNING - finishRun() was not called for last run\n");
     finishRun();
   }
 
@@ -54,9 +54,9 @@ int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
   if (FILE* fp = fopen(filename, "w"))
     mLogFile = fp;
   else
-    printf("L2upsilon: WARNING - Can't open log file %s\n", filename);
+    printf("L2upsilon2006: WARNING - Can't open log file %s\n", filename);
 
-  fprintf(mLogFile, "L2upsilon::initRun(char* name=\"%s\", int runNumber=%d, int* userInt=%p, float* userFloat=%p)\n", mName, runNumber, userInt, userFloat);
+  fprintf(mLogFile, "L2upsilon2006::initRun(char* name=\"%s\", int runNumber=%d, int* userInt=%p, float* userFloat=%p)\n", mName, runNumber, userInt, userFloat);
 
   //
   // Set float and int run control parameters
@@ -146,7 +146,7 @@ int L2upsilon::initRun(int runNumber, int* userInt, float* userFloat)
   return 0;
 }
 
-void L2upsilon::readGeomXYZ(const char *fname){
+void L2upsilon2006::readGeomXYZ(const char *fname){
   printf(" Get BTOW towers x, y, z from=%s=\n",fname);
 
   FILE* fp = fopen(fname, "r");
@@ -165,13 +165,13 @@ void L2upsilon::readGeomXYZ(const char *fname){
 }
 
 
-bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
+bool L2upsilon2006::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
 			int bemcIn, unsigned short* bemcData,
 			int eemcIn, unsigned short* eemcData)
 {
 
 #if 0 
-  printf("L2upsilon::doEvent(int L0trg=%d, int eventNumber=%d, TrgDataType* trgData=%p, int bemcIn=%d, unsigned short* bemcData=%p, int eemcIn=%d, unsigned short* eemcData=%p)\n", L0trg, eventNumber, trgData, bemcIn, bemcData, eemcIn, eemcData);
+  printf("L2upsilon2006::doEvent(int L0trg=%d, int eventNumber=%d, TrgDataType* trgData=%p, int bemcIn=%d, unsigned short* bemcData=%p, int eemcIn=%d, unsigned short* eemcData=%p)\n", L0trg, eventNumber, trgData, bemcIn, bemcData, eemcIn, eemcData);
 #endif
   rdtscl_macro(mEveTimeStart);
   mAccept=false;
@@ -199,7 +199,7 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
   L2Seeds.reserve(100);
   findSeedTowers(L0Seeds, L2Seeds);
 
-  L2Result result;
+  L2upsilonResult2006 result;
   for (size_t i = 0; i < L0Seeds.size(); ++i) {
     const int id1 = L0Seeds[i];
     calcCluster(id1);
@@ -282,10 +282,10 @@ bool L2upsilon::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
   return  mAccept;
 }
 
-void L2upsilon::finishRun()
+void L2upsilon2006::finishRun()
 {
   mUnfinished = false;
-  fprintf(mLogFile, "L2upsilon::finishRun()\n");
+  fprintf(mLogFile, "L2upsilon2006::finishRun()\n");
   finishCommonHistos() ;
   //
   // Write out events summary and close log file
@@ -299,7 +299,7 @@ void L2upsilon::finishRun()
   if (mLogFile != stdout) fclose(mLogFile);
 }
 
-void L2upsilon::findSeedTowers(vector<int>& L0Seeds, vector<int>& L2Seeds)
+void L2upsilon2006::findSeedTowers(vector<int>& L0Seeds, vector<int>& L2Seeds)
 {
   for (int rdo = 0; rdo < 4800; ++rdo) {
     if (bemcTower[rdo].fail) continue;
@@ -312,7 +312,7 @@ void L2upsilon::findSeedTowers(vector<int>& L0Seeds, vector<int>& L2Seeds)
   }
 }
 
-void L2upsilon::calcCluster(int rdo)
+void L2upsilon2006::calcCluster(int rdo)
 {
   bemcCluster[rdo].x = 0;
   bemcCluster[rdo].y = 0;
@@ -384,7 +384,7 @@ void L2upsilon::calcCluster(int rdo)
   }
 }
 
-void L2upsilon::createHistograms()
+void L2upsilon2006::createHistograms()
 {
   hL0SeedTowers = new L2Histo(100, "L0 seed towers;softId", 4800);
   hL2SeedTowers = new L2Histo(101, "L2 seed towers;softId", 4800);
@@ -417,13 +417,13 @@ void L2upsilon::createHistograms()
   mHistograms.push_back(hL2rate);
 }
 
-void L2upsilon::writeHistograms()
+void L2upsilon2006::writeHistograms()
 {
   char filename[FILENAME_MAX];
   sprintf(filename, "%s/run%d.l2ups.histo.bin", mOutDir, mRunNumber);
   FILE* fp = fopen(filename, "w");
   if (!fp) {
-    fprintf(mLogFile, "L2upsilon: WARNING - Can't open histogram file %s\n", filename);
+    fprintf(mLogFile, "L2upsilon2006: WARNING - Can't open histogram file %s\n", filename);
     return;
   }
   for (list<L2Histo*>::iterator i = mHistograms.begin(); i != mHistograms.end(); ++i)
@@ -431,12 +431,12 @@ void L2upsilon::writeHistograms()
   fclose(fp);
 }
 
-void L2upsilon::resetHistograms()
+void L2upsilon2006::resetHistograms()
 {
   for_each(mHistograms.begin(), mHistograms.end(), mem_fun(&L2Histo::reset));
 }
 
-void L2upsilon::deleteHistograms()
+void L2upsilon2006::deleteHistograms()
 {
   for (list<L2Histo*>::iterator i = mHistograms.begin(); i != mHistograms.end(); ++i) {
     delete *i;
@@ -444,9 +444,9 @@ void L2upsilon::deleteHistograms()
   }
 }
 
-void L2upsilon::print()
+void L2upsilon2006::print()
 {
-  L2Result* result = (L2Result*)&trgData->TrgSum.L2Result[mResultOffset];
+  L2upsilonResult2006* result = (L2upsilonResult2006*)&trgData->TrgSum.L2Result[mResultOffset];
   fprintf(mLogFile, "-----------------------------------------------\n");
   fprintf(mLogFile, "Number of L0 seed towers: %d\n", result->numberOfL0SeedTowers);
   fprintf(mLogFile, "Number of L2 seed towers: %d\n", result->numberOfL2SeedTowers);

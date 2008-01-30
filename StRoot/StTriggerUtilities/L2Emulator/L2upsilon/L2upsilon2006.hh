@@ -4,8 +4,8 @@
 // October 23, 2007
 //
 
-#ifndef L2upsilon_hh
-#define L2upsilon_hh
+#ifndef L2upsilon2006_hh
+#define L2upsilon2006_hh
 
 #include <cstdio>
 #include <vector>
@@ -20,7 +20,23 @@ class L2Histo;
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo.h"
 #endif
 
-#include "bemcTower.h"
+struct BemcTower {
+  int   softId;
+  int   crate;
+  int   crateSeq;
+  float gain;
+  float x;
+  float y;
+  float z;
+  float eta;
+  float phi;
+  float pedestal;
+  int   stat;
+  int   fail;
+  int   numberOfNeighbors;
+  int   neighbor[8];
+};
+
 
 class L2EmcDb;
 
@@ -40,10 +56,10 @@ private:
   time_t startTime;
 };
 
-class L2upsilon : public L2VirtualAlgo {
+class L2upsilon2006 : public L2VirtualAlgo {
 public:
-  L2upsilon(const char* name, L2EmcDb* db, char* outDir, int resOff);
-  ~L2upsilon();
+  L2upsilon2006(const char* name, L2EmcDb* db, char* outDir, int resOff);
+  ~L2upsilon2006();
 
   int initRun(int runNumber, int* userInt, float* userFloat);
   bool doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
@@ -117,7 +133,7 @@ private:
 inline void Timer::start() { startTime = std::time(0); }
 inline time_t Timer::time() const { return std::time(0) - startTime; }
 
-inline const char* L2upsilon::timeString() const
+inline const char* L2upsilon2006::timeString() const
 {
   time_t t = time(0);
   return ctime(&t);

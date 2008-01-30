@@ -1,7 +1,7 @@
 
 LIBNAME  =  L2upsilonAlgo
-HDRS     =  L2upsilon.hh 
-SRCS     =  L2upsilon.cc
+HDRS     =  L2upsilon2006.hh 
+SRCS     =  L2upsilon2006.cc
 
 CXX    = g++
 AR     = ar rul
@@ -38,7 +38,7 @@ $(LIBNAME): $(OBJS)
 
 install:
 	cp -p lib$(LIBNAME).a  $(INSTALPATH)/alg_lib
-	cp -p L2upsilon.hh  bemcTower.h   $(INSTALPATH)/alg_include
+	cp -p L2upsilon2006.hh     $(INSTALPATH)/alg_include
 
 clean:
 	-rm -f *.o $(LINK)  lib$(LIBNAME).*  .depend
@@ -57,6 +57,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.3  2008/01/30 15:09:39  balewski
+# Added upsilon2006, needs cleaunp in few days
+#
 # Revision 1.2  2007/11/08 04:02:36  balewski
 # run on l2ana as well
 #
