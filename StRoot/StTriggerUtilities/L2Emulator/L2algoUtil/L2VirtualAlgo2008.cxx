@@ -23,9 +23,9 @@ L2VirtualAlgo2008::L2VirtualAlgo2008(const char* name, L2EmcDb* db, char* outDir
 
   setOflTrigID(0); // relevant only for offline analysis
   mhN =new   L2Histo(900,"total events 0=anyInput, 10=anyAccept; x=cases",19);
-  mhTc=new   L2Histo(901,"L2 COMPUTE time per input event;  x: COMPUTE time (CPU kTics); y: events ",400);
-  mhTd=new   L2Histo(902,"L2 DECISION time per input event;  x: DECISION time (CPU kTics); y: events ",40);
-  mhTcd=new  L2Histo(903,"L2 COMP+DECI time per input event;  x: COMP+DECIS time (CPU kTics); y: events ",400);
+  mhTc=new   L2Histo(901,"L2 COMPUTE time per input event;  x: COMPUTE time (CPU kTics); y: events ",180);
+  mhTd=new   L2Histo(902,"L2 DECISION time per input event;  x: DECISION time (CPU kTics); y: events ",36);
+  mhTcd=new  L2Histo(903,"L2 COMP+DECI time per input event;  x: COMP+DECIS time (CPU kTics); y: events ",180);
 
   int mxRunDration=200;
   mhRc= new   L2Histo(905,"rate of COMPUTE; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
@@ -228,6 +228,10 @@ L2VirtualAlgo2008::compute(int token){
   mhN->fill(1);
   token&=L2eventStream2008::tokenMask; // only protect against bad token, Gerard's trick
   
+  // HARDCODED DELAY
+  // tmporary, for testing of histos, it costs 3 kTicks
+  for(int i=0;i<3*100;i++) { float x=i*i; x=x;}// to add 3kTicks delay, tmp - to see sth in the spectra
+
   computeUser( token );
   computeStop( token);
   
@@ -260,9 +264,6 @@ L2VirtualAlgo2008::computeStart(){
 //=============================================
 void
 L2VirtualAlgo2008::computeStop(int token){
-
-  // HARDCODED DELAY
-  // for(int i=0;i<5*100;i++) { float x=i*i; x=x;}// to add 5kTicks delay, tmp
 
   rdtscl_macro(mComputeTimeStop);
   unsigned long xxx=mComputeTimeStop-mComputeTimeStart;
@@ -333,6 +334,9 @@ L2VirtualAlgo2008::printCalibratedData(int token){ //
 
 /******************************************************
   $Log: L2VirtualAlgo2008.cxx,v $
+  Revision 1.5  2008/01/30 00:47:15  balewski
+  Added L2-Etow-calib
+
   Revision 1.4  2008/01/18 23:29:12  balewski
   now L2result is exported
 

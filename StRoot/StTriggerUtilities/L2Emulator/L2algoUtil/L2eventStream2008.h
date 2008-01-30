@@ -6,21 +6,13 @@
 class L2btowCalAlgo08;
 class L2etowCalAlgo08;
 
-
 //........................................
-class HitTower1{
+class HitTower1{// single tower container
  public:
   short rdo;
   short adc; // ADC, pedestal corrected 
   float et,ene; // GeV
 };
-
-//........................................
-class L2BlockMonitor{// related to multi-token computation
-  friend class L2btowCalAlgo08;
-  int nTotal; // # of received blocks
-};
-
 
 //........................................
 class L2BtowCalibData08{// Barrel calibrated data
@@ -29,17 +21,26 @@ class L2BtowCalibData08{// Barrel calibrated data
   friend class L2eventStream2008;
   int hitSize;
   HitTower1 hit[BtowGeom::mxRdo]; 
-  L2BlockMonitor mon;
+  int nInputBlock; // over the whole run
   public:
   const int get_hitSize()  const {return hitSize;}
   const HitTower1 *  get_hits() const { return hit;}
 };
 
+
 //........................................
 class L2EtowCalibData08{// Endcap calibrated data
-  int xxx;
-  // nop, add it later
+ private:
+  friend class L2etowCalAlgo08;
+  friend class L2eventStream2008;
+  int hitSize;
+  HitTower1 hit[EtowGeom::mxRdo]; 
+  int nInputBlock; // over the whole run
+  public:
+  const int get_hitSize()  const {return hitSize;}
+  const HitTower1 *  get_hits() const { return hit;}
 };
+
 
 //========================================
 class L2eventStream2008{ //   E V E N T     S T R E A M  

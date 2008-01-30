@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*****************************************************************
- * $Id: L2hienAlgo08.cxx,v 1.1 2008/01/29 00:17:13 balewski Exp $
+ * $Id: L2hienAlgo08.cxx,v 1.2 2008/01/30 00:47:23 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
  *****************************************************************
  * Descripion: see .h
@@ -98,7 +98,7 @@ L2hienAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
     sub = x->sub - 'a';
     int eta = x->eta - 1;
     int phi = BtowGeom::mxSubs *sec + sub;
-    int tow = BtowGeom::mxEtaBins *phi + eta; // phi- changes faster
+    int tow = BtowGeom::mxEtaBin *phi + eta; // phi- changes faster
     int rdo = x->rdo;
     assert(tow>=0); assert(tow<=mxBtow);
     assert(rdo>=0); assert(rdo<=mxBtow);
@@ -178,7 +178,7 @@ L2hienAlgo08::decisionUser(int token, void **myL2Result){
     int adc=(*value)>>16;
     int softID=(*value)&0xffff;
     adcSum+=adc;
-    printf(" got adc=%d softID=%d, ",adc,softID);
+    //printf(" got adc=%d softID=%d, ",adc,softID);
     hA[4]->fill(adc/10);
     if(adc<adcQaThres) continue;
     hA[5]->fill(mTowerID2etaBin[softID]);
@@ -186,7 +186,7 @@ L2hienAlgo08::decisionUser(int token, void **myL2Result){
   }
   hA[7]->fill(adcSum/50);
 
-  printf("\n");
+  // printf("\n");
 
   //........ fill (some) L2Result
   // btowEve->resultBlob.kTicksCompute=mComputeTimeDiff[token]/1000;
@@ -267,6 +267,9 @@ L2hienAlgo08::print2(int token){ // full , local ADC array
 
 /**********************************************************************
   $Log: L2hienAlgo08.cxx,v $
+  Revision 1.2  2008/01/30 00:47:23  balewski
+  Added L2-Etow-calib
+
   Revision 1.1  2008/01/29 00:17:13  balewski
   new algo filtering high-energy towers
 

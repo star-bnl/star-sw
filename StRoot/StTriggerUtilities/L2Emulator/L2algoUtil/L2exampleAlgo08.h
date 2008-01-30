@@ -1,8 +1,8 @@
 #ifndef L2exampleAlgo08_H
 #define L2exampleAlgo08_H
 /*********************************************************************
- * $Id: L2exampleAlgo08.h,v 1.4 2008/01/18 23:29:13 balewski Exp $
- * \author Jan Balewski, IUCF, 2006 
+ * $Id: L2exampleAlgo08.h,v 1.5 2008/01/30 00:47:17 balewski Exp $
+ * \author Jan Balewski, MIT, 2008 
  *********************************************************************
  * Descripion:
  *  example algo finding list of 2x2 BTOW clusters based on ET-seed list produced by L2-btow-calib algo
@@ -15,7 +15,7 @@
  */
 
 
-#include "L2VirtualAlgo2008.h"
+#include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo2008.h"
 #include "L2exampleResult08.h"
 
 class L2exampleAlgo08 ;
@@ -88,6 +88,9 @@ class L2exampleAlgo08 : public  L2VirtualAlgo2008 {
 
 /**********************************************************************
   $Log: L2exampleAlgo08.h,v $
+  Revision 1.5  2008/01/30 00:47:17  balewski
+  Added L2-Etow-calib
+
   Revision 1.4  2008/01/18 23:29:13  balewski
   now L2result is exported
 
