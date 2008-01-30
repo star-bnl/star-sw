@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2exampleAlgo08.cxx,v 1.5 2008/01/30 00:47:17 balewski Exp $
+ * $Id: L2exampleAlgo08.cxx,v 1.6 2008/01/30 21:56:40 balewski Exp $
  * \author Jan Balewski,MIT , 2008 
  *********************************************************************
  * Descripion: see .h
@@ -38,7 +38,7 @@ L2exampleAlgo08::L2exampleAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geoX,
   createHisto();
 
   //------- self-consistency checks, should never fail
-  printf("ZZ %d %d\n", sizeof(L2exampleResult08), L2exampleResult08::mySizeChar);
+  // printf("ZZ %d %d\n", sizeof(L2exampleResult08), L2exampleResult08::mySizeChar);
   assert(sizeof(L2exampleResult08)== L2exampleResult08::mySizeChar);
 }
 
@@ -326,6 +326,9 @@ L2exampleAlgo08::print3(){ // seed list
 
 /**********************************************************************
   $Log: L2exampleAlgo08.cxx,v $
+  Revision 1.6  2008/01/30 21:56:40  balewski
+  E+B high-enery-filter L2-algo fuly functional
+
   Revision 1.5  2008/01/30 00:47:17  balewski
   Added L2-Etow-calib
 

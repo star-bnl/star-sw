@@ -1,21 +1,29 @@
 #ifndef L2hienAlgo08_H
 #define L2hienAlgo08_H
 /*********************************************************************
- * $Id: L2hienAlgo08.h,v 1.1 2008/01/29 00:17:21 balewski Exp $
+ * $Id: L2hienAlgo08.h,v 1.2 2008/01/30 21:56:43 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
  *********************************************************************
 Descripion:
-this algo selecting high-energy towers  from  BTOW & ETOW data
- and taking advantage of common calibration to be deployed
+this algo selects high-energy towers  from  BTOW & ETOW data
+ and take advantage of common calibration to be deployed
  at L2 in February of 2008.
-The common (for B & E) ADC threshold will be defined
+The common (for B & E) ADC threshold is defined
  in units of adc above  ped i.e. in ET.
-The output is list of pairs {adc,softID} from both E & B
-There is a hardcoded limit on the max list length of 256 towers.
-In case of an overflow the _random_ first 100 towers (software limit)
- will be  recorded  
- *********************************************************************
- */
+The output of this algo _one_ lists of pairs {adc,softID}.
+You need 2 instances of this ago to cover E & B-EMC.
+Saving of those lists to disk is beyond the scope of this algo.
+SoftID is defined as follows:
+*BTOW : traditional softID [1-4800] used since 20th centry.
+*ETOW: range [0..719], eta index changes slower
+    int ieta= (x->eta-1);
+    int iphi= (x->sec-1)*EtowGeom::mxSubs + x->sub-'A' ;
+    int softId= iphi+EtowGeom::mxPhiBin*ieta;
+
+There is a hardcoded limit on the max list length at 256 towers.
+In case of an overflow a random (not realy) selection of towers  will be  added to the list until the software limit is reached. 
+**********************************************************
+*/
 
 
 #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2VirtualAlgo2008.h"
@@ -25,7 +33,7 @@ class L2Histo;
 class L2EmcGeom;
 
 // remember to clear in initRun() to avoid stale data
-class L2hienEvent08 {// WARN : all sits in RAM x 4096 tokens!
+class L2hienList08 {// WARN : all sits in RAM x 4096 tokens!
  public: 
   enum {mxListSize=150}; // keep this size small
   enum {kDataFresh=0}; // if used 1 or more times data are stale
@@ -36,6 +44,7 @@ class L2hienEvent08 {// WARN : all sits in RAM x 4096 tokens!
   unsigned int value[mxListSize]; //list, not cleared
 };
 
+//-------------------------------
 class L2hienAlgo08 : public  L2VirtualAlgo2008 {
   /* this class fills the folowing bins
      of counter histo (mhN), see also L2VirtualAlgo2008.h
@@ -44,29 +53,35 @@ class L2hienAlgo08 : public  L2VirtualAlgo2008 {
 
   */
  public:
-  enum {mxBtow=(BtowGeom::mxEtaBin) * (BtowGeom::mxPhiBin)}; // shortcut
+  // shortcuts
+  enum {mxBtow=(BtowGeom::mxEtaBin) * (BtowGeom::mxPhiBin)}; 
+  enum {mxEtow=(EtowGeom::mxEtaBin) * (EtowGeom::mxPhiBin)};
  private:
-
   //..................... params set in initRun
-  int   par_dbg;
-  int   par_maxList;
-  int   par_adcThres;
+  int  par_dbg;
+  int  par_maxList;
+  int  par_adcThres;
 
-  int mRdo2towerID[mxBtow];
-  int mTowerID2etaBin[mxBtow];
-  int mTowerID2phiBin[mxBtow];
+  //...................  BTOW lookup tables
+  int  mRdo2towerID_B[mxBtow];
+  int  mTowerID2etaBin_B[mxBtow]; // for QA only
+  int  mTowerID2phiBin_B[mxBtow]; // for QA only
+
+  //...................  ETOW lookup tables
+  int  mRdo2towerID_E[mxEtow];
+  int  mTowerID2etaBin_E[mxEtow]; // for QA only
+  int  mTowerID2phiBin_E[mxEtow]; // for QA only
 
   //---- event-long variables changed by COMPUTE() -----
   //............... preserved for Decision(),
-  L2hienEvent08 mHiEnTw[L2eventStream2008::mxToken]; //it is a lot of RAM!
+  L2hienList08 mHiEnTw[L2eventStream2008::mxToken]; //it is a lot of RAM!
   // add similar for the endcap
   
   // utility methods
   void  createHisto();
-  void  clearEvent(int token);
   
  public:
-  L2hienAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geo, char* outDir);
+  L2hienAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geo, char* outDir, L2VirtualAlgo2008::EmcSwitch  beSwitch);
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
   void  computeUser(int token);
@@ -83,6 +98,9 @@ class L2hienAlgo08 : public  L2VirtualAlgo2008 {
 
 /****************************************************
   $Log: L2hienAlgo08.h,v $
+  Revision 1.2  2008/01/30 21:56:43  balewski
+  E+B high-enery-filter L2-algo fuly functional
+
   Revision 1.1  2008/01/29 00:17:21  balewski
   new algo filtering high-energy towers
 

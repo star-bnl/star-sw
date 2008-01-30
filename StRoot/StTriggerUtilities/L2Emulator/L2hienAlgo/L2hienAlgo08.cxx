@@ -5,14 +5,13 @@
 #include <time.h>
 #include <math.h>
 
-/*****************************************************************
- * $Id: L2hienAlgo08.cxx,v 1.2 2008/01/30 00:47:23 balewski Exp $
+/***********************************************************
+ * $Id: L2hienAlgo08.cxx,v 1.3 2008/01/30 21:56:43 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
- *****************************************************************
+ ***********************************************************
  * Descripion: see .h
-  ***************************************************************
+ **********************************************************
  */
-
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
   #include "../L2algoUtil/L2EmcDb.h"
@@ -20,22 +19,23 @@
 #else
   #include "../L2algoUtil/L2EmcDb.h"
   #include "../L2algoUtil/L2Histo.h"
-//  #include "../L2algoUtil/L2EmcGeom.h"
 #endif
 
 #include "L2hienAlgo08.h"
 
-
 //=================================================
 //=================================================
-L2hienAlgo08::L2hienAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir)  :  L2VirtualAlgo2008( name,  db,  outDir) { 
+L2hienAlgo08::L2hienAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, L2VirtualAlgo2008::EmcSwitch  beSwitch)  :  L2VirtualAlgo2008( name,  db,  outDir) { 
   /* called one per days
      all memory allocation must be done here
   */
 
-  // geoX not used
+  // geoX is not used, ignore
+
+  assert(beSwitch==kIsBtow || beSwitch==kIsEtow);
+  mSwitch=beSwitch;
   setMaxHist(16); // set upper range, I uses only 2^N -it is easier to remember
-  createHisto();
+  createHisto(); // identical for B or EEMC
 
 }
 
@@ -55,10 +55,12 @@ L2hienAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
   // fix unreasonable params
   if(par_maxList<10 ) par_maxList=10;
-  if(par_maxList>L2hienEvent08::mxListSize ) par_maxList=L2hienEvent08::mxListSize; 
+  if(par_maxList>L2hienList08::mxListSize ) par_maxList=L2hienList08::mxListSize; 
 
   if (mLogFile) { 
-    fprintf(mLogFile,"L2%s algorithm initRun(R=%d), compiled: %s , %s\n params:\n",getName(),mRunNumber,__DATE__,__TIME__);
+    fprintf(mLogFile,"L2%s algorithm initRun(R=%d), compiled: %s , %s\n params for ",getName(),mRunNumber,__DATE__,__TIME__);
+    if(mSwitch==kIsBtow)  fprintf(mLogFile," BTOW setup:\n");
+    if(mSwitch==kIsEtow)  fprintf(mLogFile," ETOW setup:\n");
     fprintf(mLogFile," - use  adcThresh =%d, maxList=%d debug=%d\n", par_adcThres , par_maxList, par_dbg);
     fprintf(mLogFile,"initRun() params checked for consistency, Error flag=0x%04x\n",kBad);
   }
@@ -72,43 +74,76 @@ L2hienAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
   // update tiltles of histos, add values of params
   char txt[1000];
-  sprintf(txt,"compute: # towers ADC-ped>%d / event; x: # towers; y: counts",par_adcThres);
+  sprintf(txt,"compute: # towers w/ ADC-ped>%d / event; x: # towers; y: counts",par_adcThres);
   hA[2]->setTitle(txt);
 
-  sprintf(txt,"accepted: # towers ADC-ped>%d / event; x: # towers; y: counts",par_adcThres);
+  sprintf(txt,"accepted: # towers w/ ADC-ped>%d / event; x: # towers; y: counts",par_adcThres);
   hA[3]->setTitle(txt);
 
-  sprintf(txt,"accepted: # towers ADC-ped>%d vs. eta ring;x: eta-bin, 0=eta=-1.0; y: counts",par_adcThres*2);
-  hA[5]->setTitle(txt);
+  sprintf(txt,"accepted: # towers w/ ADC-ped>%d vs. eta ring;x: BTOW eta-bin, 0=eta=-1.0; y: counts",par_adcThres*2);
+  if(mSwitch==kIsEtow) 
+    sprintf(txt,"accepted: # towers w/ ADC-ped>%d vs. eta ring;x: ETOW eta-bin, 0=eta=+2.0; y: counts",par_adcThres*2);
+   hA[5]->setTitle(txt);
 
-  sprintf(txt,"accepted: # towers ADC-ped>%d vs. phi ring;x: phi-bin, 0=12:30, follows TPC; y: counts",par_adcThres*2);
+  sprintf(txt,"accepted: # towers w/ ADC-ped>%d vs. phi ring;x: phi-bin, 0=12:30, follows TPC; y: counts",par_adcThres*2);
   hA[6]->setTitle(txt);
 
-  sprintf(txt,"accpeted: ADC sum , towers w/ ADC-ped>%d ; ADC sum/50; y: counts",par_adcThres);
+  sprintf(txt,"accpeted: ADC sum over towers w/ ADC-ped>%d ; ADC sum/16; y: counts",par_adcThres);
   hA[7]->setTitle(txt);
 
-  // prepare BTOW lookup tables
+  // only one set is instantiated , but memory is reserved for both
 
-  for ( int index=0; index<EmcDbIndexMax; index++ )     {
-    const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
-    if ( x==0 ) continue;
-    if ( !mDb->isBTOW(x) ) continue; 
-    int sec = x->sec - 1;
-    int sub = 8192; 
-    sub = x->sub - 'a';
-    int eta = x->eta - 1;
-    int phi = BtowGeom::mxSubs *sec + sub;
-    int tow = BtowGeom::mxEtaBin *phi + eta; // phi- changes faster
-    int rdo = x->rdo;
-    assert(tow>=0); assert(tow<=mxBtow);
-    assert(rdo>=0); assert(rdo<=mxBtow);
-    
-    mRdo2towerID[ rdo ] = tow; // returns towerID vs.rdo
-    mTowerID2etaBin[tow]=eta; // range [0..39]
-    mTowerID2phiBin[tow]=phi; // range [0..120]
-  }
-  return 0; //OK
-  
+  // clear lookup tables for every new run
+  memset(mRdo2towerID_B,0,sizeof(mRdo2towerID_B));
+  memset(mTowerID2etaBin_B,0,sizeof(mTowerID2etaBin_B));
+  memset(mTowerID2phiBin_B,0,sizeof(mTowerID2phiBin_B));
+
+  memset(mRdo2towerID_E,0,sizeof(mRdo2towerID_E));
+  memset(mTowerID2etaBin_E,0,sizeof(mTowerID2etaBin_E));
+  memset(mTowerID2phiBin_E,0,sizeof(mTowerID2phiBin_E));
+
+  if(mSwitch==kIsBtow) // prepare BTOW  lookup tables
+    for ( int index=0; index<EmcDbIndexMax; index++ )     {
+      const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
+      if ( x==0 ) continue;
+      if ( !mDb->isBTOW(x) ) continue; 
+      int sec = x->sec - 1;
+      int sub = 8192; 
+      sub = x->sub - 'a';
+      int eta = x->eta - 1;
+      int phi = BtowGeom::mxSubs *sec + sub;
+      int tow = BtowGeom::mxEtaBin *phi + eta; // phi- changes faster
+      int rdo = x->rdo;
+      assert(tow>=0); assert(tow<=mxBtow);
+      assert(rdo>=0); assert(rdo<=mxBtow);
+      
+      mRdo2towerID_B[ rdo ] = tow; // returns towerID vs.rdo
+      mTowerID2etaBin_B[tow]=eta; // range [0..39]
+      mTowerID2phiBin_B[tow]=phi; // range [0..119]
+    }
+
+
+  if(mSwitch==kIsEtow) // prepare ETOW  lookup tables
+    for ( int index=0; index<EmcDbIndexMax; index++ )     {
+      const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
+      if ( x==0 ) continue;
+      if ( !mDb->isETOW(x) ) continue; 
+      int sec = x->sec - 1;
+      int sub = 8192; 
+      sub = x->sub - 'A';
+      int eta = x->eta - 1;
+      int phi = EtowGeom::mxSubs *sec + sub;
+      int tow = EtowGeom::mxEtaBin *phi + eta; // phi- changes faster
+      int rdo = x->rdo;
+      assert(tow>=0); assert(tow<=mxEtow);
+      assert(rdo>=0); assert(rdo<=mxEtow);
+      
+      mRdo2towerID_E[ rdo ] = tow; // returns towerID vs.rdo
+      mTowerID2etaBin_E[tow]=eta; // range [0..11]
+      mTowerID2phiBin_E[tow]=phi; // range [0..59]
+    }
+
+  return 0; //OK  
 }               
 
   
@@ -118,19 +153,30 @@ L2hienAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 void 
 L2hienAlgo08::computeUser(int token){
   // token range is guaranteed by virtual08-class
-
   // -----------  SCAN FOR HIGH TOWERS ----
   
-  clearEvent(token);
-
+  // reset # of towers for this token
+  mHiEnTw[token].size=0;// do not set 'fresh-flag here, only after compute() finishes
   int i;
   // get pointer to input list towers from calib-algo
-  const HitTower1 *hit=mEveStream_btow[token].get_hits();
-  const int hitSize=mEveStream_btow[token].get_hitSize();
-  // printf("L2-%s-compute: ---EMC ADC list---token=%d input size=%d\n",getName(),token,hitSize);
+  const HitTower1 *hit=0;
+  int   hitSize=0;
+  int  *mRdo2towerID=0;
 
+   if(mSwitch==kIsBtow) { //...... map pointers to Barrel
+     hit    =mEveStream_btow[token].get_hits();
+     hitSize=mEveStream_btow[token].get_hitSize();
+     mRdo2towerID=mRdo2towerID_B;
+   } else { //...... map pointers to Endcap
+     hit    =mEveStream_etow[token].get_hits();
+     hitSize=mEveStream_etow[token].get_hitSize();
+     mRdo2towerID=mRdo2towerID_E;
+   }
+
+  // printf("L2-%s-compute: ---EMC ADC list---token=%d input size=%d\n",getName(),token,hitSize);
   // get pointers to internal, token indexed, output event storage
-  L2hienEvent08 *hiTwEve=mHiEnTw+token;
+  // output is just one per instance, same format for B & ETOW
+  L2hienList08 *hiTwEve=mHiEnTw+token;
   unsigned int *value=hiTwEve->value;
 
   for(i=0;i< hitSize;i++,hit++) {
@@ -139,14 +185,14 @@ L2hienAlgo08::computeUser(int token){
     if(hiTwEve->size>=par_maxList) break;
     int softID=mRdo2towerID[hit->rdo];
     // printf("*");
-    (*value)= ((hit->adc)<<16 )+ softID;
+    (*value)= ((hit->adc)<<16 )+ softID; // store composite value
     // printf("A %p %x  adc=%d softID=%d \n", value, *value, hit->adc,softID); 
-    hiTwEve->size++;
-    value++;
+    hiTwEve->size++; //could be done outside the loop, some day
+    value++; // increment index 
   }
   //  printf("L2-%s-compute: saved: size%d val[0]=0x%x p=%p\n",getName(),hiTwEve->size,hiTwEve->value[0],hiTwEve->value); 
 
-  hiTwEve->isFresh=L2hienEvent08::kDataFresh;
+  hiTwEve->isFresh=L2hienList08::kDataFresh;
   hA[2]->fill(hiTwEve->size);
 } 
 
@@ -156,42 +202,50 @@ L2hienAlgo08::computeUser(int token){
 bool 
 L2hienAlgo08::decisionUser(int token, void **myL2Result){
   // INPUT: token + comput() results stored internally
-  // OUTPUT: yes-always &  NO pointer to  L2Result=empty
-
-  // get pointers to internal private event storage
-  L2hienEvent08 *hiTwEve=mHiEnTw+token;
+  // OUTPUT: always YES &  return  null L2Result pointer
   (*myL2Result)=0;// empty
 
+  // get pointers to internal private event storage
+  L2hienList08 *hiTwEve=mHiEnTw+token;
+  
   //printf("L2-%s-decision: ---EMC ADC list---token=%d size=%d val[0]=0x%x p=%p\n",getName(),token,hiTwEve->size,hiTwEve->value[0],hiTwEve->value);
 
+
+
   //...... some histos for QA 
-  if(hiTwEve->size>= par_maxList) mhN->fill(5);  // was overflow
-  if(hiTwEve->isFresh>L2hienEvent08::kDataFresh) mhN->fill(6); // stale data
-  hiTwEve->isFresh++; // mark the data as  stale 
 
   hA[3]->fill(hiTwEve->size);
+  if(hiTwEve->size>= par_maxList) mhN->fill(5); // was overflow
+  if(hiTwEve->isFresh>L2hienList08::kDataFresh) mhN->fill(6); // stale data
+  hiTwEve->isFresh++; // mark local data as stale 
+
+  // scan for very hot towers
+  int adcQaThres=2*par_adcThres;
+  int * mTowerID2etaBin=0 ,  *mTowerID2phiBin=0;
+  if(mSwitch==kIsBtow) { //...... map pointers to Barrel
+    mTowerID2etaBin=mTowerID2etaBin_B;
+    mTowerID2phiBin=mTowerID2phiBin_B;
+  } else { //...... map pointers to Endcap
+    mTowerID2etaBin=mTowerID2etaBin_E;
+    mTowerID2phiBin=mTowerID2phiBin_E;
+  }
+  
   unsigned int *value=hiTwEve->value;
   int ic;
-  int adcSum=0;
-  int adcQaThres=2*par_adcThres;
+  int adcSum4=0;
   for(ic=0;ic<hiTwEve->size;ic++,value++) {
-    int adc=(*value)>>16;
+    int adc4=(*value)>>(16+4); // reduced resolution
     int softID=(*value)&0xffff;
-    adcSum+=adc;
+    adcSum4+=adc4;
     //printf(" got adc=%d softID=%d, ",adc,softID);
-    hA[4]->fill(adc/10);
-    if(adc<adcQaThres) continue;
+    hA[4]->fill(adc4);
+    if(adc4<adcQaThres) continue;
     hA[5]->fill(mTowerID2etaBin[softID]);
     hA[6]->fill(mTowerID2phiBin[softID]);
   }
-  hA[7]->fill(adcSum/50);
+  if(adcSum4>0) hA[7]->fill(adcSum4);
 
   // printf("\n");
-
-  //........ fill (some) L2Result
-  // btowEve->resultBlob.kTicksCompute=mComputeTimeDiff[token]/1000;
-  //  btowEve->resultBlob.decision=0;
-  // btowEve->resultBlob.numberOfL2Clust=btowEve->size;
 
   
   // debugging should be off for any time critical computation
@@ -227,24 +281,23 @@ void
 L2hienAlgo08::createHisto() {
   memset(hA,0,sizeof(hA));
 
-  hA[2]=new L2Histo(2,"compute: #towers w/ .....energy /event; x: #  towers; y: counts", 100); // title set in initRun
-  hA[3]=new L2Histo(3,"decision: #towers w/ .....energy /event; x: #  towers; y: counts", 100); // title set in initRun
+  hA[2]=new L2Histo(2,"compute: #towers w/ .....energy /event; x: #  towers; y: counts", 35); // title set in initRun
+  hA[3]=new L2Histo(3,"decision: #towers w/ .....energy /event; x: #  towers; y: counts", 35); // title set in initRun
 
-  hA[4]=new L2Histo(4,"accepted: towers ET ; x: ADC/10", 200);
-  hA[5]=new L2Histo(5,"accepted: #towers w/ ..... vs. eta ring",40); // title set in initRun
-  hA[6]=new L2Histo(6,"accepted: #towers w/ .... vs. phi ring",120); // title set in initRun
-  hA[7]=new L2Histo(7,"accepted: ADC sum ...",200); // title set in initRun
+  int nEtaBin=BtowGeom::mxEtaBin;
+  int nPhiBin=BtowGeom::mxPhiBin;
+  if(mSwitch==kIsEtow) {
+    nEtaBin=EtowGeom::mxEtaBin;
+    nPhiBin=EtowGeom::mxPhiBin; 
+  }
+  hA[4]=new L2Histo(4,"accepted: towers ET (watch units!) ; x: (ADC-ped)/16", 100);
+  hA[5]=new L2Histo(5,"accepted: #towers w/ ..... vs. eta ring",nEtaBin); // title set in initRun
+  hA[6]=new L2Histo(6,"accepted: #towers w/ .... vs. phi ring",nPhiBin); // title set in initRun
+  hA[7]=new L2Histo(7,"accepted: ADC sum ...",100); // title set in initRun
 
   // printf("L2-%s::createHisto() done\n",getName());
 }
 
-//=======================================
-//=======================================
-void 
-L2hienAlgo08::clearEvent(int token){
-  mHiEnTw[token].size=0; // do not set 'fresh-flag here, only after compute() finishes
-  //  memset(&(mBtow[token].resultBlob),0, sizeof(L2hienResult08));
-}
   
 /* ========================================
   ======================================== */
@@ -267,6 +320,9 @@ L2hienAlgo08::print2(int token){ // full , local ADC array
 
 /**********************************************************************
   $Log: L2hienAlgo08.cxx,v $
+  Revision 1.3  2008/01/30 21:56:43  balewski
+  E+B high-enery-filter L2-algo fuly functional
+
   Revision 1.2  2008/01/30 00:47:23  balewski
   Added L2-Etow-calib
 

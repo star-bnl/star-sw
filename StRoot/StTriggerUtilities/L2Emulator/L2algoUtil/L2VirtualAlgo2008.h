@@ -2,13 +2,13 @@
 #define L2VirtualAlgo2008_h
 
 
-/*********************************************************************
- * $Id: L2VirtualAlgo2008.h,v 1.4 2008/01/18 23:29:13 balewski Exp $
+/*************************************************************
+ * $Id: L2VirtualAlgo2008.h,v 1.5 2008/01/30 21:56:40 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
- *********************************************************************
+ *************************************************************
  * Descripion:
  * all actual L2 algos should inherit from it the 4 methods
- *********************************************************************
+ *************************************************************
  */
 
 //#include "/asm-i386/msr.h" /* for rdtscl */
@@ -31,8 +31,13 @@
 class L2EmcDb;
 class L2Histo;
 class L2VirtualAlgo2008 { 
+ public:
+  enum EmcSwitch { kIsBad=0, kIsBtow, kIsEtow, kIsB_Etow }; // changes action of some methods
 
  protected:  
+  //..... main Barrel/Endcap/Both switch
+   EmcSwitch mSwitch; // use enum above
+
   std::string mOutDir1, mName1;
   L2EmcDb *mDb;
   FILE    *mLogFile, *mHistFile;
@@ -55,6 +60,7 @@ class L2VirtualAlgo2008 {
   int   mSecondsInRun;
   int   mRunNumber;
   const  L2BtowCalibData08 *mEveStream_btow;
+  const  L2EtowCalibData08 *mEveStream_etow;
 
   enum {par_cpuTicksPerSecond=1600000000};
   unsigned long  mComputeTimeStart,  mComputeTimeStop,  mComputeTimeDiff[L2eventStream2008::mxToken];
@@ -72,10 +78,10 @@ class L2VirtualAlgo2008 {
   void  computeStop(int token);
 
  public:
-  L2VirtualAlgo2008(const char* name, L2EmcDb* db, char* outDir);
-  virtual ~L2VirtualAlgo2008(); // memory leak NOT taken care off
-  void setOflTrigID(int x) {oflTrigId=x;} // only for Maker-analysis
-  int  getOflTrigID() {return oflTrigId;} // only for Maker-analysis
+  L2VirtualAlgo2008(const char* name, L2EmcDb* db, char*outDir);
+  virtual ~L2VirtualAlgo2008(); //memory leak NOT taken care off
+  void setOflTrigID(int x) {oflTrigId=x;} //only for Maker-analysis
+  int  getOflTrigID() {return oflTrigId;} //only for Maker-analysis
   bool   isAccepted(){ return mAccept; } // only for Maker-analysis
   static int  readParams(const char *fileN, int mxPar, int *iPar, float *fPar);
   const char *getName() { return mName1.c_str();}

@@ -11,6 +11,8 @@
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
 #endif
 
+//#define ADD_HARDCODED_DELAY // take it off for real on-line
+
 #include "L2VirtualAlgo2008.h"
 //=============================================
 L2VirtualAlgo2008::L2VirtualAlgo2008(const char* name, L2EmcDb* db, char* outDir) :  mDb(db) {
@@ -20,6 +22,7 @@ L2VirtualAlgo2008::L2VirtualAlgo2008(const char* name, L2EmcDb* db, char* outDir
 
   // map L2event variables for _read_
   mEveStream_btow=globL2eventStream2008.get_btow();
+  mEveStream_etow=globL2eventStream2008.get_etow();
 
   setOflTrigID(0); // relevant only for offline analysis
   mhN =new   L2Histo(900,"total events 0=anyInput, 10=anyAccept; x=cases",19);
@@ -76,6 +79,11 @@ L2VirtualAlgo2008::initRun( int runNo, int *rc_ints, float *rc_floats) {
   }
   if (mLogFile) {
     fprintf(mLogFile,"L2-%s initRun succesfull\n",getName());
+
+#ifdef ADD_HARDCODED_DELAY
+    fprintf(mLogFile,"WARN: HARDCODED_DELAY in compute() & decision() is ON\n");
+#endif 
+
   }
 
   // printf("L2initRaunVirtual2008-%s kBad=%d\n",getName(),kBad);
@@ -228,9 +236,12 @@ L2VirtualAlgo2008::compute(int token){
   mhN->fill(1);
   token&=L2eventStream2008::tokenMask; // only protect against bad token, Gerard's trick
   
-  // HARDCODED DELAY
-  // tmporary, for testing of histos, it costs 3 kTicks
-  for(int i=0;i<3*100;i++) { float x=i*i; x=x;}// to add 3kTicks delay, tmp - to see sth in the spectra
+#ifdef ADD_HARDCODED_DELAY
+  /* for testing of histos,  
+     adds 3kTicks delay,  - to see sth in the spectra 
+     even if algo is very fast */
+  for(int i=0;i<3*100;i++) { float x=i*i; x=x;}
+#endif 
 
   computeUser( token );
   computeStop( token);
@@ -289,9 +300,12 @@ L2VirtualAlgo2008::decision(int token, void **myL2Result){
 
   mhRd->fill(mSecondsInRun);
 
-  // HARDCODED DELAY
-  // tmporary, for testing of histos, it costs 3 kTicks
-  for(int i=0;i<3*100;i++) { float x=i*i; x=x;}// to add 3kTicks delay, tmp - to see sth in the spectra
+#ifdef ADD_HARDCODED_DELAY
+  /* for testing of histos,  
+     adds 3kTicks delay,  - to see sth in the spectra 
+     even if algo is very fast */
+  for(int i=0;i<3*100;i++) { float x=i*i; x=x;}
+#endif 
 
   mhN->fill(2);
   mAccept=decisionUser(token, myL2Result);
@@ -317,7 +331,8 @@ L2VirtualAlgo2008::decision(int token, void **myL2Result){
 /* ========================================
   ======================================== */
 void 
-L2VirtualAlgo2008::printCalibratedData(int token){ // 
+L2VirtualAlgo2008::printCalibratedData(int token){ //
+  // now print always BARREL - fix it later
   int i;
   const int hitSize=mEveStream_btow[token].get_hitSize();
   printf("printCalibratedData-%s: ---BTOW ADC list--- size=%d\n",getName(),hitSize);
@@ -334,6 +349,9 @@ L2VirtualAlgo2008::printCalibratedData(int token){ //
 
 /******************************************************
   $Log: L2VirtualAlgo2008.cxx,v $
+  Revision 1.6  2008/01/30 21:56:40  balewski
+  E+B high-enery-filter L2-algo fuly functional
+
   Revision 1.5  2008/01/30 00:47:15  balewski
   Added L2-Etow-calib
 
