@@ -1,11 +1,11 @@
 #ifndef L2btowCalAlgo08_H
 #define L2btowCalAlgo08_H
 /*********************************************************************
- * $Id: L2btowCalAlgo08.h,v 1.3 2008/01/18 23:29:13 balewski Exp $
- * \author Jan Balewski, IUCF, 2006 
+ * $Id: L2btowCalAlgo08.h,v 1.4 2008/01/30 00:47:16 balewski Exp $
+ * \author Jan Balewski, MIT, 2008 
  *********************************************************************
  * Descripion:
- * Reco of mono- & di-jets in L2 using BTOW+ETOW
+ * calibrates Barrel towers, result is used by other L2-algo
  *********************************************************************
  */
 
@@ -50,6 +50,9 @@ class L2btowCalAlgo08 : public  L2VirtualAlgo2008 {
 
 /**********************************************************************
   $Log: L2btowCalAlgo08.h,v $
+  Revision 1.4  2008/01/30 00:47:16  balewski
+  Added L2-Etow-calib
+
   Revision 1.3  2008/01/18 23:29:13  balewski
   now L2result is exported
 

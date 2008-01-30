@@ -6,12 +6,11 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2btowCalAlgo08.cxx,v 1.3 2008/01/18 23:29:13 balewski Exp $
-  \author Jan Balewski, IUCF, 2006 
+  $Id: L2btowCalAlgo08.cxx,v 1.4 2008/01/30 00:47:15 balewski Exp $
+  \author Jan Balewski, MIT, 2008 
  *****************************************************
-  Descripion:
-  Reco of mono- & di-jets in L2 using BTOW+ETOW
-  depends on L2-DB class 
+  Descripion: 
+  calibrates Barrel towers, result is used by other L2-algo
  *****************************************************/
 
 
@@ -48,7 +47,7 @@ L2btowCalAlgo08::L2btowCalAlgo08(const char* name, L2EmcDb* db, L2EmcGeom *geoX,
   int k;
   for(k=0;k<L2eventStream2008::mxToken;k++){
     L2BtowCalibData08 & btowCalibData=globL2eventStream2008.btow[k];  
-    btowCalibData.mon.nTotal=0;
+    btowCalibData.nInputBlock=0;
   }
  }
 
@@ -65,7 +64,13 @@ L2btowCalAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
   par_twEneThres = rc_floats[0];
   par_hotEtThres = rc_floats[1];;
- 
+
+  // verify consistency of input params
+  int kBad=0;
+  kBad+=0x00001 * (par_gainType<kGainZero || par_gainType>kGainOffline);
+  kBad+=0x00002 * (par_nSigPed<2 || par_nSigPed>5);
+  kBad+=0x00004 * (par_twEneThres<0.1 ||  par_twEneThres>1.5);
+
   if (mLogFile) { 
     fprintf(mLogFile,"L2%s algorithm initRun(R=%d), compiled: %s , %s\n params:\n",getName(),mRunNumber,__DATE__,__TIME__);
     fprintf(mLogFile," - use BTOW=%d,  gain Ideal=%d or Offline=%d, debug=%d\n",
@@ -73,14 +78,6 @@ L2btowCalAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
     fprintf(mLogFile," - thresholds: ADC-ped> %d*sigPed .AND. energy>%.2f GeV \n", par_nSigPed, par_twEneThres);
 
     fprintf(mLogFile," - hot tower thresholds:  ET/GeV=%.2f\n",par_hotEtThres);
-  }
-
-  // verify consistency of input params
-  int kBad=0;
-  kBad+=0x00001 * (par_gainType<kGainZero || par_gainType>kGainOffline);
-  kBad+=0x00002 * (par_nSigPed<2 || par_nSigPed>5);
-  kBad+=0x00004 * (par_twEneThres<0.1 ||  par_twEneThres>1.5);
-  if (mLogFile) {
     fprintf(mLogFile,"initRun() params checked for consistency, Error flag=0x%04x\n",kBad);
   }
   
@@ -130,7 +127,7 @@ L2btowCalAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
     }
     
     /* use rdo index to match RDO order in the ADC data banks */    
-    if(x->eta<=0 || x->eta>BtowGeom::mxEtaBins) return -90;
+    if(x->eta<=0 || x->eta>BtowGeom::mxEtaBin) return -90;
     int ietaTw= (x->eta-1); /* correct */
 
     // use ideal gains for now, hardcoded
@@ -157,14 +154,14 @@ L2btowCalAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   ======================================== */
 void 
 L2btowCalAlgo08::computeBtow(int token, int bemcIn, ushort *rawAdc){
-  // Btow calibration is a special case, code below will trurn off regular compute(), must have one exit  at the end
+  // Btow calibration is a special case,  must have one exit  at the end
 
   computeStart();
   token&=L2eventStream2008::tokenMask; // only protect against bad token, Gerard's trick
  
   //...... token is valid no w ........
   L2BtowCalibData08 & btowCalibData=globL2eventStream2008.btow[token];  
-  btowCalibData.mon.nTotal++;
+  btowCalibData.nInputBlock++;
   
   // clear data for this token from previous event
   btowCalibData.hitSize=0;
@@ -246,8 +243,7 @@ L2btowCalAlgo08::finishRunUser() {  /* called once at the end of the run */
     if (!mDb->isBTOW(x) ) continue;
     int softId=atoi(x->tube+2);
     int ieta= (x->eta-1);
-    int iphi= (x->sec-1)*10 + x->sub-'a' ;
-    //  if(data20[x->rdo]>20) { mDb->printItem(x); printf("softID=%d\n",softId);}
+    int iphi= (x->sec-1)*BtowGeom::mxSubs + x->sub-'a' ;
     hA[11]->fillW(softId,data20[x->rdo]);
     hA[12]->fillW(ieta, iphi,data20[x->rdo]);
     if(bHotSum<data20[x->rdo]) {
@@ -269,10 +265,10 @@ L2btowCalAlgo08::finishRunUser() {  /* called once at the end of the run */
   int k;
   for(k=0;k<L2eventStream2008::mxToken;k++){
     L2BtowCalibData08 & btowCalibData=globL2eventStream2008.btow[k];  
-    if(btowCalibData.mon.nTotal==0) continue;
-    hA[1]->fillW(k,btowCalibData.mon.nTotal);
-    if(nTkn3<btowCalibData.mon.nTotal){
-      nTkn3=btowCalibData.mon.nTotal;
+    if(btowCalibData.nInputBlock==0) continue;
+    hA[1]->fillW(k,btowCalibData.nInputBlock);
+    if(nTkn3<btowCalibData.nInputBlock){
+      nTkn3=btowCalibData.nInputBlock;
       tkn3=k;
     }
 
@@ -296,9 +292,9 @@ L2btowCalAlgo08::createHisto() {
   hA[1]=new  L2Histo(1,"L2-btow-calib: seen tokens;  x:  token value; y: events ",20);
   
   // BTOW  raw spectra
-  hA[10]=new L2Histo(10,"btow hot tower 1", 4800); // title upadted in initRun
-  hA[11]=new L2Histo(11,"btow hot tower 2", 4800); // title upadted in initRun
-  hA[12]=new L2Histo(12,"btow hot tower 3", 40,120); // title upadted in initRun  
+  hA[10]=new L2Histo(10,"btow hot tower 1", BtowGeom::mxRdo); // title upadted in initRun
+  hA[11]=new L2Histo(11,"btow hot tower 2", BtowGeom::mxRdo); // title upadted in initRun
+  hA[12]=new L2Histo(12,"btow hot tower 3", BtowGeom::mxEtaBin,BtowGeom::mxPhiBin); // title upadted in initRun  
   hA[13]=new L2Histo(13,"BTOW #tower w/ energy /event; x: # BTOW towers; y: counts", 100); 
   hA[14]=new L2Histo(14,"# hot towers/event", 100); 
 
@@ -316,6 +312,9 @@ L2btowCalAlgo08::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2btowCalAlgo08.cxx,v $
+  Revision 1.4  2008/01/30 00:47:15  balewski
+  Added L2-Etow-calib
+
   Revision 1.3  2008/01/18 23:29:13  balewski
   now L2result is exported
 

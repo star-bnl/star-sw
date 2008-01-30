@@ -6,8 +6,8 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2exampleAlgo08.cxx,v 1.4 2008/01/18 23:29:13 balewski Exp $
- * \author Jan Balewski, IUCF, 2006 
+ * $Id: L2exampleAlgo08.cxx,v 1.5 2008/01/30 00:47:17 balewski Exp $
+ * \author Jan Balewski,MIT , 2008 
  *********************************************************************
  * Descripion: see .h
   *********************************************************************
@@ -18,9 +18,9 @@
   #include "../L2algoUtil/L2EmcDb.h"
   #include "../L2algoUtil/L2Histo.h"
 #else
-  #include "L2EmcDb.h"
-  #include "L2Histo.h"
-  #include "L2EmcGeom.h"
+  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2Histo.h"
+  #include "../L2algoUtil/L2EmcGeom.h"
 #endif
 
 #include "L2exampleAlgo08.h"
@@ -53,17 +53,20 @@ L2exampleAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   par_clusterEtThres=  rc_floats[1];
   par_eventEtThres  =  rc_floats[2];
 
-  if (mLogFile) { 
-    fprintf(mLogFile,"L2%s algorithm initRun(R=%d), compiled: %s , %s\n params:\n",getName(),mRunNumber,__DATE__,__TIME__);
-    fprintf(mLogFile," - use  Thres/GeV seed=%.2f, clusterList=%.2f debug=%d\n", par_seedEtThres,par_clusterEtThres, par_dbg);
-    fprintf(mLogFile," - accept event cluster Thres/GeV=%.2f\n",par_eventEtThres);
-  
   // verify consistency of input params
   int kBad=0;
   kBad+=0x00001 * (par_seedEtThres<1.0);
   kBad+=0x00002 * (par_clusterEtThres<par_seedEtThres);
-  if(kBad) return kBad;    
+
+  if (mLogFile) { 
+    fprintf(mLogFile,"L2%s algorithm initRun(R=%d), compiled: %s , %s\n params:\n",getName(),mRunNumber,__DATE__,__TIME__);
+    fprintf(mLogFile," - use  Thres/GeV seed=%.2f, clusterList=%.2f debug=%d\n", par_seedEtThres,par_clusterEtThres, par_dbg);
+    fprintf(mLogFile," - accept event cluster Thres/GeV=%.2f\n",par_eventEtThres);
+    fprintf(mLogFile,"initRun() params checked for consistency, Error flag=0x%04x\n",kBad);
   }
+
+  if(kBad) return kBad;    
+
 
   // clear content of all histograms & token-dependet memory
   int i;
@@ -93,7 +96,7 @@ L2exampleAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
        sub = x->sub - 'a';
        int eta = x->eta - 1;
        int phi = BtowGeom::mxSubs *sec + sub;
-       int tow = BtowGeom::mxEtaBins *phi + eta; // phi- changes faster
+       int tow = BtowGeom::mxEtaBin *phi + eta; // phi- changes faster
        int rdo = x->rdo;
        assert(tow>=0); assert(tow<=mxBtow);
        assert(rdo>=0); assert(rdo<=mxBtow);
@@ -109,10 +112,10 @@ L2exampleAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   ======================================== */
 float
 L2exampleAlgo08::sumET(int phi, int eta) {
-  int tow = BtowGeom::mxEtaBins *phi + eta; // phi- changes faster
+  int tow = BtowGeom::mxEtaBin *phi + eta; // phi- changes faster
   float sum=wrkBtow_et[tow]+wrkBtow_et[tow+1];
   //  printf("tow : %d, %d --> %f %f \n",tow, tow+1,wrkBtow_et[tow],wrkBtow_et[tow+1]);
-  tow+=BtowGeom::mxEtaBins;
+  tow+=BtowGeom::mxEtaBin;
   // printf("tow : %d, %d --> %f %f \n",tow, tow+1,wrkBtow_et[tow],wrkBtow_et[tow+1]);
   sum+=wrkBtow_et[tow]+wrkBtow_et[tow+1];
   return sum;
@@ -132,7 +135,7 @@ L2exampleAlgo08::computeUser(int token){
   
   clearEvent(token);
 
-  // ----------- PROJECT INPUT LIST TO 2D ARRAY AND SCAN FOR SEED TOWERS ----
+  // ------ PROJECT INPUT LIST TO 2D ARRAY AND SCAN FOR SEED TOWERS ----
   int i;
   //  printf("L2-%s-compute: ---BTOW ADC list--- size=%d\n",getName(),*globEve_btow_hitSize);
 
@@ -155,8 +158,8 @@ L2exampleAlgo08::computeUser(int token){
   // compute & store values
   for(i=0;i<wrkBtow_tower_seed_size;i++) {
     int seedTow=wrkBtow_tower_seed[i];
-    int seedEta=seedTow%BtowGeom::mxEtaBins;
-    int seedPhi=seedTow/BtowGeom::mxEtaBins;
+    int seedEta=seedTow%BtowGeom::mxEtaBin;
+    int seedPhi=seedTow/BtowGeom::mxEtaBin;
     //    float seedET= wrkBtow_et[seedTow];
     // printf("sumE seed ET=%.3f tow=%d phiBin=%d etaBin=%d\n",seedET,seedTow,seedPhi,seedEta);
     
@@ -323,6 +326,9 @@ L2exampleAlgo08::print3(){ // seed list
 
 /**********************************************************************
   $Log: L2exampleAlgo08.cxx,v $
+  Revision 1.5  2008/01/30 00:47:17  balewski
+  Added L2-Etow-calib
+
   Revision 1.4  2008/01/18 23:29:13  balewski
   now L2result is exported
 

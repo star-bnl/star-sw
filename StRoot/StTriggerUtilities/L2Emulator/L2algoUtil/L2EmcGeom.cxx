@@ -12,7 +12,7 @@ L2EmcGeom::L2EmcGeom(){
 
 
   int i;
-  for(i=0;i<BtowGeom::mxEtaBins;i++ ){
+  for(i=0;i<BtowGeom::mxEtaBin;i++ ){
     float avrEta=-0.975 +i*0.05; /* assume BTOW has fixed eta bin size */
     if(i==0) avrEta=-0.970;// first & lost towers are smaller
     if(i==39) avrEta=0.970;

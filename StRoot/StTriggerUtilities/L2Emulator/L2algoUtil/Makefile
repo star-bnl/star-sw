@@ -13,9 +13,9 @@ ROOT_INC  = -I `root-config --incdir`
 
 
 LIBNAME  = L2algoUtil
-HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h L2VirtualAlgo2008.h L2btowCalAlgo08.h L2EmcGeom.h L2exampleAlgo08.h L2exampleResult08.h L2eventStream2008.h
+HDRS     = L2Histo.h  L2EmcDb.h L2VirtualAlgo.h L2VirtualAlgo2008.h L2btowCalAlgo08.h  L2etowCalAlgo08.h L2EmcGeom.h L2exampleAlgo08.h L2exampleResult08.h L2eventStream2008.h
 
-SRCS     = L2Histo.cxx  L2EmcDb.cxx L2EmcGeom.cxx  L2VirtualAlgo.cxx  L2VirtualAlgo2008.cxx L2btowCalAlgo08.cxx L2exampleAlgo08.cxx
+SRCS     = L2Histo.cxx  L2EmcDb.cxx L2EmcGeom.cxx  L2VirtualAlgo.cxx  L2VirtualAlgo2008.cxx L2btowCalAlgo08.cxx  L2etowCalAlgo08.cxx L2exampleAlgo08.cxx
 
 
 CXX    = g++
@@ -68,6 +68,9 @@ depend .depend : $(SRCS)
 #*********************************************************************
 #
 # $Log: Makefile,v $
+# Revision 1.11  2008/01/30 00:47:17  balewski
+# Added L2-Etow-calib
+#
 # Revision 1.10  2008/01/18 23:29:14  balewski
 # now L2result is exported
 #
