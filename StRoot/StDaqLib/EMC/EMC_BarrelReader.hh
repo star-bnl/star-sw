@@ -26,7 +26,6 @@ class EMC_BarrelReader
       Bank_EMCRBP*     getBarrelTowerFiber(Bank_EMCSECP*,int);
       Bank_TOWERADCR*  getBarrelADC(Bank_EMCRBP*);
       int              FillBarrelTower(Bank_TOWERADCR*);
-      int              FillBarrelTower2008(TrgTowerTrnfer2008*);
       void             PrintTowerArray();
       Bank_BTOWERADCR& getBTOWERADCR();
                        ~EMC_BarrelReader(); ///<EMC_BarrelReader destructor

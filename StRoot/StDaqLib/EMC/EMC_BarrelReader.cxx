@@ -7,6 +7,7 @@
 #include <Stiostream.h>
 #include <stdio.h>
 #include "StMessMgr.h"
+#include "StRTSClient/include/rts.h" // swap16(), swap32()
 //ofstream fout("decode.out");
 using namespace OLDEVP;
 
@@ -197,20 +198,6 @@ Bank_TOWERADCR* EMC_BarrelReader::getBarrelADC(Bank_EMCRBP* rbp)
     return pADCR;
 }
 ////////////////////////////////////////////////////////////////////
-int EMC_BarrelReader::FillBarrelTower2008(TrgTowerTrnfer2008* ttt) {
-    int offset = ttt->OffsetBlock[y8BTOW_INDEX].offset;
-    int length = ttt->OffsetBlock[y8BTOW_INDEX].length;
-    
-    if( length != y8BTOW_LEN ) {
-        LOG_ERROR << "Bad BTOW length found in TrgTowerTrnfer block" << endm;
-        return 0;
-    }
-    
-    Bank_TOWERADCR* fakeADCRptr = (Bank_TOWERADCR*) ( u_int(ttt) + offset - sizeof(Bank_Header) );
-    LOG_INFO << "Filling BTOW data structures from TrgTowerTrnfer (must be year >= 2008)" << endm;
-    return FillBarrelTower(fakeADCRptr);
-}
-////////////////////////////////////////////////////////////////////
 int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
 {
     mTheTowerAdcR.BankType="TOWRADCR\n";
@@ -286,38 +273,64 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
 ////////////////////////////////////////////////////////////////////
 int EMC_BarrelReader::ProcessBarrelTower(const Bank_EMCP* EmcPTR, const Bank_TRGP* TrgPTR)
 {
-    // first check if tower data is in trgp
-    if(TrgPTR) {
-        char* cTTT = (char*)TrgPTR + (TrgPTR->theData.offset * 4) + sizeof(TrgPTR->header);
-        TrgTowerTrnfer2008* TTT=(TrgTowerTrnfer2008*)cTTT;
-        if(TTT && (TTT->byteCount_Version & 0xff) == 0x10) {
-            char* trg_version = cTTT + TTT->OffsetBlock[y8TRG_INDEX].offset + 3;    
-            if(*trg_version == 0x32) { return FillBarrelTower2008(TTT); }
-        }
+  // first check if tower data is in trgp
+  if (TrgPTR) {
+    bool swap = TrgPTR->header.ByteOrder != 0x04030201;
+    int offset = TrgPTR->theData.offset;
+    if (swap) offset = swap32(offset);
+    char* cTTT = (char*)TrgPTR + offset * 4 + sizeof(TrgPTR->header);
+    if (cTTT) {
+      TrgTowerTrnfer2008* TTT = (TrgTowerTrnfer2008*)cTTT;
+      int byteCount_Version = TTT->byteCount_Version;
+      if (swap) byteCount_Version = swap32(TTT->byteCount_Version);
+      if ((byteCount_Version & 0xff) == 0x10) {
+	int offset = TTT->OffsetBlock[y8TRG_INDEX].offset;
+	if (swap) offset = swap32(offset);
+	char trg_version = cTTT[offset + 3];
+	if (trg_version == 0x32) {
+	  int offset = TTT->OffsetBlock[y8BTOW_INDEX].offset;
+	  int length = TTT->OffsetBlock[y8BTOW_INDEX].length;
+
+	  if (swap) {
+	    offset = swap32(offset);
+	    length = swap32(length);
+	  }
+
+	  if (length != y8BTOW_LEN) {
+	    LOG_ERROR << "Bad BTOW length found in TrgTowerTrnfer block" << endm;
+	    return 0;
+	  }
+
+	  Bank_TOWERADCR* fakeADCRptr = (Bank_TOWERADCR*)((char*)TTT + offset - sizeof(Bank_Header));
+
+	  return FillBarrelTower(fakeADCRptr);
+	}
+      }
     }
+  }
 
-    if (!EmcPTR) return 0;
+  if (!EmcPTR) return 0;
 
-    // now look in Bank_EMCP
-    Bank_EMCSECP* barreltower=getBarrelSection(EmcPTR,0);
-    if(barreltower) {
-        Bank_EMCRBP* towerfiber=getBarrelTowerFiber(barreltower,0);
-        if(towerfiber) {
-            Bank_TOWERADCR* toweradc=getBarrelADC(towerfiber);
+  // now look in Bank_EMCP
+  Bank_EMCSECP* barreltower=getBarrelSection(EmcPTR,0);
+  if(barreltower) {
+    Bank_EMCRBP* towerfiber=getBarrelTowerFiber(barreltower,0);
+    if(towerfiber) {
+      Bank_TOWERADCR* toweradc=getBarrelADC(towerfiber);
 
-            if(toweradc) { 
-                FillBarrelTower(toweradc); 
-                return 1;
-            }
-            else { LOG_INFO <<" ADCR absent , looking for ADCD"<<endm; }
+      if(toweradc) { 
+	FillBarrelTower(toweradc); 
+	return 1;
+      }
+      else { LOG_INFO <<" ADCR absent , looking for ADCD"<<endm; }
 
-            toweradc=0;
-        }
-        else { LOG_INFO <<" BANK_EMRBP absent**"<<endm; }
+      toweradc=0;
     }
-    else { LOG_INFO <<" BANK_EMCSECP absent**"<<endm; }
+    else { LOG_INFO <<" BANK_EMRBP absent**"<<endm; }
+  }
+  else { LOG_INFO <<" BANK_EMCSECP absent**"<<endm; }
     
-    return 0; // if we got here we couldn't find tower data
+  return 0; // if we got here we couldn't find tower data
 }
 ////////////////////////////////////////////////////////////////////
 void EMC_BarrelReader::PrintTowerArray()
