@@ -6,7 +6,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2hienAlgo08.cxx,v 1.3 2008/01/30 21:56:43 balewski Exp $
+ * $Id: L2hienAlgo08.cxx,v 1.4 2008/01/31 00:51:34 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -210,8 +210,6 @@ L2hienAlgo08::decisionUser(int token, void **myL2Result){
   
   //printf("L2-%s-decision: ---EMC ADC list---token=%d size=%d val[0]=0x%x p=%p\n",getName(),token,hiTwEve->size,hiTwEve->value[0],hiTwEve->value);
 
-
-
   //...... some histos for QA 
 
   hA[3]->fill(hiTwEve->size);
@@ -220,7 +218,7 @@ L2hienAlgo08::decisionUser(int token, void **myL2Result){
   hiTwEve->isFresh++; // mark local data as stale 
 
   // scan for very hot towers
-  int adcQaThres=2*par_adcThres;
+  int adc4QaThres=(par_adcThres/8); // it is 2x higher than minThres
   int * mTowerID2etaBin=0 ,  *mTowerID2phiBin=0;
   if(mSwitch==kIsBtow) { //...... map pointers to Barrel
     mTowerID2etaBin=mTowerID2etaBin_B;
@@ -239,7 +237,7 @@ L2hienAlgo08::decisionUser(int token, void **myL2Result){
     adcSum4+=adc4;
     //printf(" got adc=%d softID=%d, ",adc,softID);
     hA[4]->fill(adc4);
-    if(adc4<adcQaThres) continue;
+    if(adc4<adc4QaThres) continue;
     hA[5]->fill(mTowerID2etaBin[softID]);
     hA[6]->fill(mTowerID2phiBin[softID]);
   }
@@ -320,6 +318,9 @@ L2hienAlgo08::print2(int token){ // full , local ADC array
 
 /**********************************************************************
   $Log: L2hienAlgo08.cxx,v $
+  Revision 1.4  2008/01/31 00:51:34  balewski
+  bug fix
+
   Revision 1.3  2008/01/30 21:56:43  balewski
   E+B high-enery-filter L2-algo fuly functional
 
