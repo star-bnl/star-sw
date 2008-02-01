@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.59 2008/02/01 01:23:24 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.60 2008/02/01 15:00:31 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.60  2008/02/01 15:00:31  fine
+ * Fix the compilation problem
+ *
  * Revision 1.59  2008/02/01 01:23:24  fine
  * Add the message
  *
@@ -279,7 +282,7 @@ int StDAQReader::open(const char *file)
 #else
   if (fDaqFileReader) close();
   fDaqFileReader = new evpReader((char *)file);
-  LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via evpReader << endm;
+  LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via evpReader " << endm;
 #endif
   return 0;  
 }
