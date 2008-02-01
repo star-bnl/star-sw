@@ -877,13 +877,13 @@ const vector< pair<int,int> > StBemcTriggerSimu::getTowersAboveThreshold(int tri
       mDecoder->GetDSMFromTriggerPatch(tpid,dsmid);
 
       if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5) {
-	if (L0_HT_ADC[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,1)) {
+	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,1)) {
 	  //cout << "In getTowersAboveThreshold: " << i+1 << "\tHT: " << HT6bit_adc_holder[i] << "\tThreshold: " << mDbThres->GetHT_DSM0_threshold(i,timestamp,1) << endl;
 	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
 	}
       }
       if (trigId==127212 || trigId==137213) {
-	if (L0_HT_ADC[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,2)) {
+	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,2)) {
 	  //cout << "In getTowersAboveThreshold: " << i+1 << "\tHT: " << HT6bit_adc_holder[i] << "\tThreshold: " << mDbThres->GetHT_DSM0_threshold(i,timestamp,2) << endl;
 	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
 	}
