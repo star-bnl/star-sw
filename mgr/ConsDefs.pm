@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.99 2008/02/01 00:53:27 fine Exp $
+# $Id: ConsDefs.pm,v 1.100 2008/02/01 14:41:08 fine Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -516,7 +516,7 @@
     $CFLAGS    .= $ROOTCFLAGS;
     $CXXFLAGS  .= $ROOTCFLAGS;
     if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
-#--    $OSFID    .= " __ROOT__";
+    $OSFID    .= " __ROOT__";
     $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $OSFID ) );
     $CFLAGS   .= " -D" . join ( " -D", split ( " ", $OSFID ) );
 
