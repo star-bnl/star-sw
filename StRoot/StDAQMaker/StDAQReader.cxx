@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.57 2008/01/22 21:13:01 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.58 2008/02/01 01:20:57 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.58  2008/02/01 01:20:57  fine
+ * :fix the buffer size for DATAP
+ *
  * Revision 1.57  2008/01/22 21:13:01  fine
  * move the dependency from the class desclaration to class implematation to allo for the new EVP_READER
  *
@@ -390,7 +393,7 @@ int StDAQReader::readEvent()
      // the current STAR StDaqLib relies on.
      // To fix the issue we have to create the memory resided copy of the buffer
      // vf 26.12.2007
-#if 0
+#if 1
      fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes);
      memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes);
 #else
