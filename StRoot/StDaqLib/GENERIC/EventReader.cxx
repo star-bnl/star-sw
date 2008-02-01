@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.52 2007/12/27 21:46:40 perev Exp $
+ * $Id: EventReader.cxx,v 1.53 2008/02/01 19:27:13 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.53  2008/02/01 19:27:13  fine
+ * Replace printf with LOG. Thankx Matthew Walker
+ *
  * Revision 1.52  2007/12/27 21:46:40  perev
  * TRG as a part EMC (Pibero)
  *
@@ -206,6 +209,7 @@
 #include <unistd.h>
 #include "EventReader.hh"
 #include <assert.h>
+#include "StMessMgr.h"
 
 using namespace OLDEVP;
 
@@ -220,17 +224,20 @@ static const char *detnams[] =
 
   sprintf(ts,"%s",ctime((const time_t *)&UnixTime)) ;
   ts[24] = 0 ;
-  fprintf(fd,"===============  Event # %d  =============\n",EventSeqNo);
-  fprintf(fd,"Ev len (wds) %d\n",EventLength);
-  fprintf(fd,"Creation Time: %s \n",ts);
-  fprintf(fd,"Trigger word 0x%X\t\tTrigger Input word 0x%X\n",TrigWord,TrigInputWord);
-  fprintf(fd,"Token: %d \n",Token);
-  fprintf(fd,"Detectors present: ");
+  LOG_INFO<<"===============  Event # "<<EventSeqNo<<"  ============="<<endm;
+  LOG_INFO<<"Ev len (wds) "<<EventLength<<endm;
+  LOG_INFO<<"Creation Time: "<<ts<<endm;
+  LOG_INFO<<"Trigger word 0x"<<TrigWord<<"\t\tTrigger Input word 0x"<<TrigInputWord<<endm;
+  LOG_INFO<<"Token: "<<Token<<endm;
+  LOG_INFO<<"Detectors present: ";
   unsigned const char* p=0; int i=0;
   for (p=&TPCPresent,i=0; p<=&EMCPresent;p++,i++) {
-    if (*p) fprintf(fd,"%s ",detnams[i]);}
-  fprintf(fd,"\n");
-  fprintf(fd,"===========================================\n");
+    if (*p) {
+      LOG_INFO<<detnams[i]<<" ";
+    }
+  }
+  LOG_INFO<<endm;
+  LOG_INFO<<"==========================================="<<endm;
 }
 EventReader *getEventReader(int fd, long offset, int MMap)
 {
@@ -239,8 +246,8 @@ EventReader *getEventReader(int fd, long offset, int MMap)
     er->InitEventReader(fd, offset, MMap); // invoke the mapped version
     if(er->errorNo()) 
       {
-	cout << er->errstr().c_str() << endl;
-	cout << (er->err_string[er->errorNo()-1]) << endl;
+	LOG_ERROR << er->errstr().c_str() << endm;
+	LOG_ERROR << (er->err_string[er->errorNo()-1]) << endm;
 	delete er;
 	return NULL;
       }
@@ -249,8 +256,8 @@ EventReader *getEventReader(int fd, long offset, int MMap)
     er->InitEventReader(fd, offset); // invoke the unmapped version
     if(er->errorNo()) 
       {
-	cout << er->errstr().c_str() << endl;
-	cout << (er->err_string[er->errorNo()-1]) << endl;
+	LOG_ERROR << er->errstr().c_str() << endm;
+	LOG_ERROR << (er->err_string[er->errorNo()-1]) << endm;
 	delete er;
 	return NULL;
       }
@@ -271,8 +278,8 @@ EventReader *getEventReader(int fd, long offset, const char *logfile, int MMap)
   }
   if(er->errorNo()) 
   {
-    cout << er->errstr().c_str() << endl;
-    cout << (er->err_string[er->errorNo()-1]) << endl;
+    LOG_ERROR << er->errstr().c_str() << endm;
+    LOG_ERROR << (er->err_string[er->errorNo()-1]) << endm;
     delete er;
     return NULL;
   }
@@ -286,8 +293,8 @@ EventReader *getEventReader(char *event)
   er->InitEventReader(event);
   if(er->errorNo())
   {
-    cout << er->errstr().c_str() << endl;
-    cout << (er->err_string[er->errorNo()-1]) << endl;
+    LOG_ERROR << er->errstr().c_str() << endm;
+    LOG_ERROR << (er->err_string[er->errorNo()-1]) << endm;
     delete er;
     return NULL;
   }
@@ -321,11 +328,11 @@ EventReader::EventReader(const char *logfile) //pass a string with name of logfi
   verbose = 0;
   logfd = fopen(logfile,"a");
   if (logfd==NULL) {
-    perror("EventReader::EventReader() logfile failure");
-    printf("ERR: failed to open log file %s !!!!!!!\n",logfile);
+    LOG_ERROR<<"EventReader::EventReader() logfile failure"<<endm;;
+    LOG_ERROR<<" failed to open log file "<<logfile<<" !!!!!!!"<<endm;;
     assert(0);
   }
-  fprintf(logfd,"opening logfile...\n");
+  LOG_INFO<<"opening logfile..."<<endm;
 }
 
 //Memory mapped version
@@ -335,7 +342,9 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 
   off_t FileLength;
 
-  if (verbose) cout << "Initializing EventReader with a MAPPED file" << endl;
+  if (verbose) {
+    LOG_INFO<< "Initializing EventReader with a MAPPED file" << endm;
+  }
   
   //initialize the error strings
   strcpy(err_string[0],"ERROR: FILE");
@@ -355,7 +364,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   struct stat buf;
 
   if (fstat(fd,&buf)<0){
-   perror("error in DaqOpenTag");
+    LOG_ERROR<<"error in DaqOpenTag"<<endm;
    ERROR(ERR_FILE);
   }
   FileLength = buf.st_size;
@@ -365,7 +374,9 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 
   // Calculate the mmap offset - must be aligned to pagesize
   long pagesize = sysconf(_SC_PAGESIZE);
-  if (verbose) printf( "pagesize = %d\n",(int)pagesize);
+  if (verbose){
+    LOG_INFO<<"pagesize = "<<(int)pagesize<<endm;;
+  }
   int mmap_offset = (offset/pagesize)*pagesize;
 
   if(mmap_offset < 0) ERROR(ERR_FILE);
@@ -373,7 +384,9 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   int mapsize = buf.st_size - offset + pagesize;
                     //round up to the next page boundary
   if (mapsize<=0) {// <0 means previous event size exceeded file length
-    if (verbose) printf("end of file encountered\n");
+    if (verbose) {
+      LOG_ERROR<<"end of file encountered"<<endm;
+    }
     ERROR(INFO_END_FILE) ;
   }
   if (mapsize>MX_MAP_SIZE)    mapsize =  MX_MAP_SIZE;
@@ -385,7 +398,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 			   MAP_PRIVATE, fd, mmap_offset)) == (caddr_t) -1) { 
     char myerr[100];
     sprintf(myerr,"mapping file request 0x%x bytes",mapsize);
-    perror(myerr); 
+    LOG_ERROR<<myerr<<endm; 
     ERROR(ERR_MEM);
   }
 
@@ -398,7 +411,9 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 
   while (strncmp(DATAP,"LRHD", 4) == 0) {
     // copy the logical record into local struct lr
-    if (memcpy(&lr,DATAP,sizeof(lr))<0) perror("error in memcpy");
+    if (memcpy(&lr,DATAP,sizeof(lr))<0) {
+      LOG_ERROR<<"error in memcpy"<<endm;
+    }
     // check the CRC
     if (!lr.test_CRC()) ERROR(ERR_CRC);
     // swap bytes
@@ -410,13 +425,16 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 
     strncpy(lcopy,lr.RecordType,8);
     lcopy[8] = 0;
-    if (verbose) printf("lr.RecordType: %s\n",lcopy);
+    if (verbose) {
+      LOG_INFO<<"lr.RecordType: "<<lcopy<<endm;
+    }
 
     if(strncmp(lr.RecordType, "DATA", 4) != 0) { //not DATA
       //skip over this record 
       next_event_offset += 4 * lr.RecordLength;
-      if (verbose) printf("....skipping %d bytes\n",
-			  (unsigned int)next_event_offset);
+      if (verbose) {
+	LOG_INFO<<"....skipping "<<(unsigned int)next_event_offset<<" bytes"<<endm;
+      }
       DATAP += next_event_offset;
 
       //DATAP now points to beginning of next RECORD
@@ -436,8 +454,9 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 
   if(strncmp(DATAP,"DATAP", 5) != 0)
   {
-    if (verbose) printf("failed to find DATAP at offset 0x%x\n",
-			(unsigned int)next_event_offset);
+    if (verbose) {
+      LOG_ERROR<<"failed to find DATAP at offset 0x"<<(unsigned int)next_event_offset<<endm;
+    }
     ERROR(ERR_BANK);
   }
     
@@ -449,7 +468,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   if (datap->swap() < 0) ERROR(ERR_SWAP);
 
   if (offset + 4*datap->EventLength > buf.st_size) {
-    printf("event #%d continues beyond file boundary\n",datap->EventNumber);
+    LOG_ERROR<<"event #"<<datap->EventNumber<<" continues beyond file boundary"<<endm;
     ERROR(ERR_FILE) ;
   }
 
@@ -463,7 +482,9 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 void EventReader::InitEventReader(int fdes, long offset)
 {//InitER
   long c_offset = offset;
-  if (verbose) cout << "Initializing EventReader with a file" << endl;
+  if (verbose) {
+    LOG_INFO<< "Initializing EventReader with a file" << endm;
+  }
   
   //initialize the error strings
   strcpy(err_string[0],"ERROR: FILE");
@@ -528,7 +549,9 @@ void EventReader::InitEventReader(int fdes, long offset)
     int offset = 0;
     strncpy(lcopy,lr.RecordType,8);
     lcopy[8] = 0;
-    if (verbose) printf("lr.RecordType: %s\n",lcopy);
+    if (verbose) {
+      LOG_INFO<<"lr.RecordType: "<<lcopy<<endm;
+    }
 //     if (strncmp(lr.RecordType, "ENDR", 4)==0) { // check for ENDR record
 //       if (verbose) 
 // 	printf("ENDR encountered. Processing terminated\n"); fflush(stdout);
@@ -539,7 +562,9 @@ void EventReader::InitEventReader(int fdes, long offset)
       //skip over this record 
       offset = 4*lr.RecordLength-sizeof(lr);
 //       printf("%s::%d  c_offset=0x%x \n",__FILE__,__LINE__,c_offset);
-      if (verbose) printf("....skipping %d bytes\n",offset);
+      if (verbose) {
+	LOG_INFO<<"....skipping "<<offset<<" bytes"<<endm;
+      }
       lseek(fd,offset,SEEK_CUR);
       c_offset += offset;
       
@@ -628,7 +653,9 @@ void EventReader::InitEventReader(int fdes, long offset)
 
 void EventReader::InitEventReader(void *event)
 {
-  if (verbose) cout << "Creating EventReader with a pointer" << endl;
+  if (verbose){
+    LOG_INFO << "Creating EventReader with a pointer" << endm;
+  }
 
   if(strncmp((char *)event,"LRHD",4) == 0)
   {
@@ -720,7 +747,7 @@ enum {
   ei.TrigWord      = dp->TriggerWord;
   ei.TrigInputWord = dp->TriggerInWord;
   int detpre       = dp->DetectorPresence;
-  printf("EventReader::getEventInfo  detector presence = %x\n",detpre);
+  LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<<endm;
 
   for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
     *p = !!(detpre&1); detpre>>=1;                                }
@@ -754,15 +781,15 @@ char * EventReader::findBank(char *bankid)
   // Fix up DATAP
   Bank_DATAP *pBankDATAP = (Bank_DATAP *)getDATAP();
   if (!pBankDATAP) {
-    printf("DATAP not found: %s %d\n",__FILE__,__LINE__) ;
+    LOG_ERROR<<"DATAP not found: "<<__FILE__<<" "<<__LINE__<<endm;
     return NULL;
   }
   if (!pBankDATAP->test_CRC()) {
-    printf("CRC error in DATAP: %s %d\n",__FILE__,__LINE__) ;
+    LOG_ERROR<<"CRC error in DATAP: "<<__FILE__<<" "<<__LINE__<<endm;
     return NULL;
   }
   if (pBankDATAP->swap() < 0){
-    printf("swap error in DATAP: %s %d\n",__FILE__,__LINE__) ;
+    LOG_ERROR<<"swap error in DATAP: "<<__FILE__<<" "<<__LINE__<<endm;
     return NULL;
   }
   pBankDATAP->header.CRC = 0;
@@ -807,7 +834,7 @@ char * EventReader::findBank(char *bankid)
   if (!pBank)  return NULL;
 
   if(strncmp(pBank->BankType,bankid,4)) {
-    printf("detector %s not found in DATAP\n",bankid);
+    LOG_ERROR<<"detector "<<bankid<<" not found in DATAP"<<endm;
     return NULL;
   }
   return (char *)pBank;
@@ -918,7 +945,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   assert(header[5]==0x04030201); /* We have enought corruption checks above that this shouldn't happen. */
 
   numberOfDataWords=header[2]-10;
-  if(numberOfDataWords>DATA) { printf("%d %d, bankname=%s.\n",numberOfDataWords,DATA,bankname); }
+  if(numberOfDataWords>DATA) { LOG_INFO<<numberOfDataWords<<" "<<DATA<<", bankname="<<bankname<<endm; }
   assert(numberOfDataWords<=DATA);
   if(!strcmp(bankname,"TPCMZP")) { beg=0; end=numberOfDataWords-1; }
   else if(!strcmp(bankname,"EMCP")) { beg=0; end=0; }
