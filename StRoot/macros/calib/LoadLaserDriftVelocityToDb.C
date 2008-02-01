@@ -1,3 +1,11 @@
+//
+// LoadLaserDriftVelocityToDb.C
+// 
+// Modified 31 Jan 2008 by G. Van Buren
+// Account for case of single macro
+// output of LoopOverLaserTrees.C
+//
+
 #include <iostream>
 #include "TH1.h"
 #include "TH1F.h"
@@ -279,10 +287,13 @@ int getDriftVelocityDB(unsigned int funixTime, unsigned int& uitimedb, double& l
 //void LoadLaserDriftVelocityToDb(){
 //void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, int nMacros, const char* baseName){
 
-void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, const char* baseName){
+void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, const char* baseName, int mode=0){
   // 
   // Define some used values.
   // 
+
+  // mode = 0 is the method of taking several macros and selecting a best one
+  // mode = 1 uses just one macro to upload to DB
 
   //  const char* listOfMacros = "listOfLaserMacrosForTest.list";
   //   const int nMacros = 109; 
@@ -302,10 +313,8 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
   myCount += tmpLines;
 
 
-  // Change XML config ahead
-  TString StDbServerEnv("/star/u/starreco/dbServers_robinson.xml");
-  gSystem->Setenv("STDB_SERVERS",StDbServerEnv.Data());
-
+  // Prepare to read from the DB
+  gSystem->Setenv("DB_ACCESS_MODE","read");
 
   cout << "Executing: " << myCount.Data() << endl;
 
@@ -329,7 +338,6 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
   gSystem->Load("St_base");                          // Standard Libraries
   gSystem->Load("StUtilities");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("StDbUtilities");
   gSystem->Load("St_Tables");
   gSystem->Load("StDbLib");                          // DB Libraries
   
@@ -419,6 +427,13 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 	  // Good DV selection starts here
 	  //
 
+          if (mode == 1) {
+            // take all macros
+            macroToKeep[nMacroToKeep++] = iMacro;
+            macroStatus[iMacro] = iMacro;
+            continue;
+          }
+
 	  // Need to select all macros in one laser run
 	  // First macro in run
 	  if (nInRun==0){   lastTime = uidatetime;}
@@ -483,9 +498,10 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 
 
   cout << "\n" << "Processing information" << endl;
-  if (nInRun>=minFilesInRun-1){ // Have all macros for run, check if enough
+  if (mode==0) {
+  if (nInRun>=minFilesInRun-1 || mode==1){ // Have all macros for run, check if enough
     nTryToKeep++;
-    int keepIt = getDVInRun(nInRun,runMacro,runTime,runDVE);
+    int keepIt = mode || getDVInRun(nInRun,runMacro,runTime,runDVE);
     if (keepIt!=-1) {
       macroToKeep[nMacroToKeep++] = keepIt; // Keep the right macro
       for (int iInRun=0; iInRun<nInRun; iInRun++){
@@ -507,6 +523,8 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 
   cout << "Selected " << nMacroToKeep << " out of " << nTryToKeep 
        << " runs with enough macros." << endl;
+
+  } // mode==0
 
   TString LoadDone(dirName);    LoadDone   +="/Load/Done/";
   TString LoadFailed(dirName);  LoadFailed +="/Load/Failed/";
@@ -641,6 +659,9 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 //   TString CheckVarSel(dirName); CheckVarSel+="/Check/VarSel/";
 //   TString CheckVarOth(dirName); CheckVarOth+="/Check/VarOth/";
 
+
+    // Prepare to write to the DB
+    gSystem->Setenv("DB_ACCESS_MODE","write");
 
     // --> create a modifier object and set up table definitions  
     StDbModifier *dm = new StDbModifier();
