@@ -61,6 +61,7 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
 }
 $env1 = $env->clone('Package'  => $pkg);
 my $CXXFLAGS= $env1->{CXXFLAGS};
+my $CFLAGS  = $env1->{CFLAGS};
 my $FC      = $env1->{FC};
 my $CC      = $env1->{CC};
 my $FFLAGS  = $env1->{FFLAGS};
@@ -108,8 +109,8 @@ foreach my $p (@RTS_pkgs) {
 }
 if ($pkg eq "RTS") {
   $CPPFLAGS .= ' -DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
-  $CPPFLAGS =~ s/-D__ROOT__//;
-  $CFLAGS =~ s/-D__ROOT__//;
+  $CPPFLAGS =~ s/-D__ROOT__//;# print " ------------  CPPFLAGS ==== " .  $CPPFLAGS . "\n";
+  $CFLAGS =~   s/-D__ROOT__//;# print " ------------  CFLAGS WHERE \"__ROOT__\" coming from ??? ==== " .  $CFLAGS . "\n";
   $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" .
     $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" .
       $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC" .
@@ -444,6 +445,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   $env2 = $env1->clone('Package'  => $pkg,
 		       'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
 		       'CPPPATH'  => $CPPPATH,
+		       'CFLAGS'   => $CFLAGS,
 		       'CXXFLAGS' => $CXXFLAGS,
 		       'FC'       => $FC,
 		       'FFLAGS'   => $FFLAGS,
