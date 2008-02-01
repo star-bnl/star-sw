@@ -17,7 +17,6 @@ set TAR=/bin/tar
 set CP=/bin/cp
 set MV=/bin/mv
 set RM=/bin/rm
-set CUT=/usr/bin/cut
 set GREP=/bin/grep
 set COLRM=/usr/bin/colrm
 set DATEC=/bin/date
@@ -26,6 +25,7 @@ set SED=/bin/sed
 set CAT=/bin/cat
 set GZIP=/usr/bin/gzip
 set SORT=/bin/sort
+set FIND=/usr/bin/find
 
 if( "$1" == "") then
     set  DIR=/star/institutions/bnl/genevb/DRIFTVEL/work
@@ -46,29 +46,39 @@ endif
 set DATE=`$DATEC | $SED "s/ /_/g" | $SED "s/://g"`
 
 
+echo "Starting tpcDriftVelocity at `$DATEC`"
+
+set timeFile = $DIR/processingTime
+if (! -e $timeFile) then
+    $TOUCH $timeFile
+    exit
+endif
+
 #
-# Test if file exists and leave if not. 
+# Determine what new tags files exist
+# copy them to $DIR and determine runs to process
+#
+set tagdirs = (/star/data09/reco/laser_rhicclock /star/data10/reco/laser_rhicclock)
+set listOfRuns = ()
+foreach tagdir ($tagdirs)
+    cd $tagdir
+    set tagfiles = `$FIND . -name "st_laser_*tags.root" -cnewer $timeFile `
+    foreach tagfile ($tagfiles)
+        set run = ${tagfile:h:t}
+        if ($listOfRuns[$#listOfRuns] != $run) set listOfRuns = ($listOfRuns $run)
+        set runDir = $DIR/runs/$run
+        $MKDIR -p $runDir
+        $CP $tagfile $runDir
+    end
+end
+$TOUCH $timeFile
+
+#
+# Test if any new files and leave if not. 
 # This will prevent empty dirs
 #
-echo "Starting tpcDriftVelocity at `$DATEC`"
-cd $DIR
-$MKDIR -p runs
+if ($#listOfRuns == 0) exit
 
-#
-# Determine list of runs to be processed
-#
-set listOfRuns = ""
-set listOfFiles = `$LS st_laser*.tags.root`
-if ( $#listOfFiles == 0) exit
-
-foreach file ($listOfFiles)
-    set run = `echo $file | $CUT -d '_' -f 3`
-    if ($run == "adc") set run = `echo $file | $CUT -d '_' -f 4`
-    if ($listOfRuns[$#listOfRuns] != $run) set listOfRuns = ($listOfRuns $run)
-    set runDir = $DIR/runs/$run
-    $MKDIR -p $runDir
-    $MV $file $runDir
-end
 
 setenv STAR_LEVEL dev
 source ${GROUP_DIR}/.stardev
@@ -99,12 +109,13 @@ EOF
         set oldLaserMacro = `$LS -t -1 tpcDriftVelocity.*`
         if ( $#oldLaserMacro != 0) then
             set oldMacro = $oldLaserMacro[1]
-            set oldDate = `echo $oldMacro | $CUT -d '.' -f 2 `
-            set oldTime = `echo $oldMacro | $CUT -d '.' -f 3 `
+            set oldDate = ${oldMacro:r:r:e}
+            set oldTime = ${oldMacro:r:e}
             set oldHour = `echo $oldTime | $COLRM 3 `
             set oldMin = `echo $oldTime | $COLRM 1 2 | $COLRM 3 `
             set oldSec = `echo $oldTime | $COLRM 1 4 | $COLRM 3 `
             @ newSec = $oldSec + 1
+            # format for date command to convert (handles date/time rollovers properly)
             set newDateTime = "$oldDate ${oldHour}:${oldMin}:${newSec}"
             set newDT = ` $DATEC --date="$newDateTime" '+%Y%m%d.%k%M%S' `
             set fileToUpload = "tpcDriftVelocity.$newDT.C"
