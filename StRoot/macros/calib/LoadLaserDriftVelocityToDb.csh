@@ -1,23 +1,40 @@
 #!/bin/csh
 
+#
+# Based on work by J. Castillo
 # /star/u/jecc/tpcwrk/StarDb/Calibrations/tpc
+#
+# Modifieded on 31 Jan 2007 by G. Van Buren to use
+# tags.root files with LoopOverLaserTree.C and
+# handle possibility of additional files for
+# laser runs already processed
+#
 
 
 set MKDIR=/bin/mkdir
 set LS=/bin/ls
 set TAR=/bin/tar
+set CP=/bin/cp
 set MV=/bin/mv
 set RM=/bin/rm
+set CUT=/usr/bin/cut
+set GREP=/bin/grep
+set COLRM=/usr/bin/colrm
+set DATEC=/bin/date
+set TOUCH=/bin/touch
+set SED=/bin/sed
+set CAT=/bin/cat
+set GZIP=/usr/bin/gzip
+set SORT=/bin/sort
 
 if( "$1" == "") then
-    echo "Oups !! Need argument 1 = path."
-    echo "  Will use /star/u/jecc/tpcwrk/StarDb/Calibrations/tpc as default"
-    set  DIR=/star/u/jecc/tpcwrk/StarDb/Calibrations/tpc
-    set WDIR=/star/u/jecc/tpcwrk/
+    set  DIR=/star/institutions/bnl/genevb/DRIFTVEL/work
+    set WDIR=/star/institutions/bnl/genevb/DRIFTVEL/
+    echo "Oops !! Need argument 1 = path."
+    echo "  Will use $DIR as default"
 else
     set  DIR=$1
     set WDIR=/star/u/starreco/scripts
-#    set WDIR=/star/u/hjort/tpcwrk2
 endif
 if ( ! -d $DIR ) then
     echo "Sure !! $DIR not a directory ..."
@@ -26,21 +43,90 @@ endif
 
 
 # will use in post-fix
-set DATE=`/bin/date | /bin/sed "s/ /_/g" | /bin/sed "s/://g"`
+set DATE=`$DATEC | $SED "s/ /_/g" | $SED "s/://g"`
 
 
 #
 # Test if file exists and leave if not. 
 # This will prevent empty dirs
 #
-echo "Starting tpcDriftVelocity at `date`"
+echo "Starting tpcDriftVelocity at `$DATEC`"
 cd $DIR
+$MKDIR -p runs
 
-$LS tpcDriftVelocity* >&! listOfLaserMacros$DATE.list 
-if ( `/bin/grep 'No match' listOfLaserMacros$DATE.list` != "") then
-    $RM -f listOfLaserMacros$DATE.list 
-    exit
-endif
+#
+# Determine list of runs to be processed
+#
+set listOfRuns = ""
+set listOfFiles = `$LS st_laser*.tags.root`
+if ( $#listOfFiles == 0) exit
+
+foreach file ($listOfFiles)
+    set run = `echo $file | $CUT -d '_' -f 3`
+    if ($run == "adc") set run = `echo $file | $CUT -d '_' -f 4`
+    if ($listOfRuns[$#listOfRuns] != $run) set listOfRuns = ($listOfRuns $run)
+    set runDir = $DIR/runs/$run
+    $MKDIR -p $runDir
+    $MV $file $runDir
+end
+
+setenv STAR_LEVEL dev
+source ${GROUP_DIR}/.stardev
+
+# Location where the list of files to be uploaded will be kept
+set listLaserFiles = "listOfLaserFiles$DATE.list"
+set laserFiles = "$DIR/$listLaserFiles"
+if ( -e $laserFiles ) $RM $laserFiles
+
+#
+# Produce tpcDriftVelocity macro file for each run
+#
+foreach run ($listOfRuns)
+    set runDir = $DIR/runs/$run
+    cd $runDir
+    ${ROOTSYS}/bin/root.exe -b -l <<EOF 
+.x $WDIR/LoopOverLaserTrees.C+("st_laser_*tags.root")
+.q
+EOF
+    set laserMacro = `$LS tpcDriftVelocity*`
+    if ( $#laserMacro != 0) then
+        set macros = $runDir/macros
+        $MKDIR -p $macros
+        set fileToUpload = $laserMacro
+
+        # Look for old macro files
+        cd $macros
+        set oldLaserMacro = `$LS -t -1 tpcDriftVelocity.*`
+        if ( $#oldLaserMacro != 0) then
+            set oldMacro = $oldLaserMacro[1]
+            set oldDate = `echo $oldMacro | $CUT -d '.' -f 2 `
+            set oldTime = `echo $oldMacro | $CUT -d '.' -f 3 `
+            set oldHour = `echo $oldTime | $COLRM 3 `
+            set oldMin = `echo $oldTime | $COLRM 1 2 | $COLRM 3 `
+            set oldSec = `echo $oldTime | $COLRM 1 4 | $COLRM 3 `
+            @ newSec = $oldSec + 1
+            set newDateTime = "$oldDate ${oldHour}:${oldMin}:${newSec}"
+            set newDT = ` $DATEC --date="$newDateTime" '+%Y%m%d.%k%M%S' `
+            set fileToUpload = "tpcDriftVelocity.$newDT.C"
+        endif
+
+        $CP $runDir/$laserMacro $DIR/$fileToUpload
+        $MV $runDir/$laserMacro $macros/$fileToUpload
+        $TOUCH $laserFiles
+        echo $fileToUpload >> $laserFiles
+    endif
+end
+  
+
+#
+# Prepare for uploading to DB
+#
+if ( ! -e $laserFiles ) exit
+
+set tempfile = "/tmp/$listLaserFiles"
+$SORT -u $laserFiles >! $tempfile
+$RM $laserFiles
+$MV $tempfile $laserFiles
 
 
 #
@@ -78,22 +164,19 @@ $MKDIR $DIR/Check/VarOth || exit
 
 
 
-#set nLines='100'
-#.x LoadLaserDriftVelocityToDb.C("$DIR","listOfLaserMacros$DATE.list",$nLines,"tpcDriftVelocity")
-
 cd $WDIR
-echo `pwd`
-source ${GROUP_DIR}/.stardev
+echo `/bin/pwd`
 
-echo "$DIR listOfLaserMacros$DATE.list"
-$LS LoadLaserDriftVelocityToDb.C && ${STAR_BIN}/root4star -b <<EOF 
-.x LoadLaserDriftVelocityToDb.C("$DIR","listOfLaserMacros$DATE.list","tpcDriftVelocity")
+echo "$DIR $listLaserFiles"
+$LS LoadLaserDriftVelocityToDb.C && $STAR/.$STAR_HOST_SYS/bin/root4star -b -l <<EOF 
+.x $WDIR/LoadLaserDriftVelocityToDb.C("$DIR","$listLaserFiles","tpcDriftVelocity",1)
 .q
 EOF
 
 # The directory structure is used internally to the .C
 # We move now to target
 if( -e $DIR/Load ) then
+    $GZIP $DIR/Load/*.eps
     echo "Moving Load/ to Load$DATE/"
     $MV $DIR/Load $DIR/Load$DATE || exit
 endif
@@ -103,7 +186,24 @@ if( -e $DIR/Check ) then
     $MV $DIR/Check $DIR/Check$DATE || exit
 endif
 
-echo "Done on `date`"
+#
+# Cleanup of old laser runs
+# => erase if more than 1 week old
+#
+cd $DIR/runs
+set nowTime = `$DATEC --utc '+%s' `
+foreach run (`ls -1`)
+    set rfile = $DIR/runs/$run/first
+    if ( -e $rfile) then
+        set firstTime = `$CAT $rfile`
+        @ tdif = $nowTime - $firstTime
+        if ($tdif > 604800) $RM -rf $run
+    else
+        echo $nowTime > $rfile
+    endif
+end
+
+echo "Done on `$DATEC `"
 
 
 
