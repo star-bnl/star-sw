@@ -6,7 +6,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2hienAlgo08.cxx,v 1.4 2008/01/31 00:51:34 balewski Exp $
+ * $Id: L2hienAlgo08.cxx,v 1.5 2008/02/01 00:16:43 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -182,7 +182,7 @@ L2hienAlgo08::computeUser(int token){
   for(i=0;i< hitSize;i++,hit++) {
     // printf(" adc in=%d ",hit->adc);
     if(hit->adc<par_adcThres) continue;
-    if(hiTwEve->size>=par_maxList) break;
+    if(hiTwEve->size>=par_maxList) break; // overflow protection
     int softID=mRdo2towerID[hit->rdo];
     // printf("*");
     (*value)= ((hit->adc)<<16 )+ softID; // store composite value
@@ -318,6 +318,9 @@ L2hienAlgo08::print2(int token){ // full , local ADC array
 
 /**********************************************************************
   $Log: L2hienAlgo08.cxx,v $
+  Revision 1.5  2008/02/01 00:16:43  balewski
+  add mxListSize to BTOW/ETOW calibration
+
   Revision 1.4  2008/01/31 00:51:34  balewski
   bug fix
 
