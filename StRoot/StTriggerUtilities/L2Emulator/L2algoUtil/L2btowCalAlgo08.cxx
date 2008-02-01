@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2btowCalAlgo08.cxx,v 1.4 2008/01/30 00:47:15 balewski Exp $
+  $Id: L2btowCalAlgo08.cxx,v 1.5 2008/02/01 00:16:40 balewski Exp $
   \author Jan Balewski, MIT, 2008 
  *****************************************************
   Descripion: 
@@ -153,7 +153,7 @@ L2btowCalAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 /* ========================================
   ======================================== */
 void 
-L2btowCalAlgo08::computeBtow(int token, int bemcIn, ushort *rawAdc){
+L2btowCalAlgo08::calibrateBtow(int token, int bemcIn, ushort *rawAdc){
   // Btow calibration is a special case,  must have one exit  at the end
 
   computeStart();
@@ -180,6 +180,7 @@ L2btowCalAlgo08::computeBtow(int token, int bemcIn, ushort *rawAdc){
     HitTower1 *hit=btowCalibData.hit;
     for(rdo=0; rdo<BtowGeom::mxRdo; rdo++){
       if(rawAdc[rdo]<thr[rdo])continue;
+      if(nTower>=L2BtowCalibData08::mxListSize) break; // overflow protection
       adc=rawAdc[rdo]-ped[rdo];  //do NOT correct for common pedestal noise
       et=adc/gain2ET[rdo]; 
       hit->rdo=rdo;
@@ -187,9 +188,8 @@ L2btowCalAlgo08::computeBtow(int token, int bemcIn, ushort *rawAdc){
       hit->et=et;
       hit->ene=adc/gain2Ene[rdo]; 
       hit++;
-      nTower++; 
+      nTower++; //printf("nBt=%d\n",nTower);
       // only monitoring
-      // if(par_dbg>0) printf("pro rdo=%d adc=%d  nTw=%d\n",rdo,adc,tmpNused);
       if(et >par_hotEtThres) {
 	hA[10]->fill(rdo);
 	nHotTower++;
@@ -200,6 +200,7 @@ L2btowCalAlgo08::computeBtow(int token, int bemcIn, ushort *rawAdc){
     // QA histos
     hA[13]->fill(nTower);
     hA[14]->fill(nHotTower);
+    if(nTower>=L2BtowCalibData08::mxListSize) mhN->fill(5); // was overflow
   
   } // EVEVEVEVEVE
 
@@ -289,7 +290,7 @@ void
 L2btowCalAlgo08::createHisto() {
   memset(hA,0,sizeof(hA));
   //token related spectra
-  hA[1]=new  L2Histo(1,"L2-btow-calib: seen tokens;  x:  token value; y: events ",20);
+  hA[1]=new  L2Histo(1,"L2-btow-calib: seen tokens;  x:  token value; y: events ",L2eventStream2008::mxToken);
   
   // BTOW  raw spectra
   hA[10]=new L2Histo(10,"btow hot tower 1", BtowGeom::mxRdo); // title upadted in initRun
@@ -310,8 +311,11 @@ L2btowCalAlgo08::print0(){ // full raw input  ADC array
  }
 
 
-/**********************************************************************
+/****************************************************
   $Log: L2btowCalAlgo08.cxx,v $
+  Revision 1.5  2008/02/01 00:16:40  balewski
+  add mxListSize to BTOW/ETOW calibration
+
   Revision 1.4  2008/01/30 00:47:15  balewski
   Added L2-Etow-calib
 

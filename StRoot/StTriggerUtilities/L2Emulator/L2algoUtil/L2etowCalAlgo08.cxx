@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2etowCalAlgo08.cxx,v 1.2 2008/01/30 21:56:40 balewski Exp $
+  $Id: L2etowCalAlgo08.cxx,v 1.3 2008/02/01 00:16:40 balewski Exp $
   \author Jan Balewski, MIT, 2008 
  *****************************************************
   Descripion:
@@ -148,7 +148,7 @@ L2etowCalAlgo08::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 /* ========================================
   ======================================== */
 void 
-L2etowCalAlgo08::computeEtow(int token, int eemcIn, ushort *rawAdc){
+L2etowCalAlgo08::calibrateEtow(int token, int eemcIn, ushort *rawAdc){
   // Etow calibration is a special case, must have one exit  at the end
 
   computeStart();
@@ -174,6 +174,7 @@ L2etowCalAlgo08::computeEtow(int token, int eemcIn, ushort *rawAdc){
     HitTower1 *hit=etowCalibData.hit;
     for(rdo=0; rdo<EtowGeom::mxRdo; rdo++){
       if(rawAdc[rdo]<thr[rdo])continue;
+      if(nTower>=L2EtowCalibData08::mxListSize) break; // overflow protection
       adc=rawAdc[rdo]-ped[rdo];  //did NOT correct for common pedestal noise - bad for the jet finder
       et=adc/gain2ET[rdo]; 
       hit->rdo=rdo;
@@ -193,7 +194,7 @@ L2etowCalAlgo08::computeEtow(int token, int eemcIn, ushort *rawAdc){
     // QA histos
     hA[13]->fill(nTower);
     hA[14]->fill(nHotTower);
-  
+    if(nTower>=L2EtowCalibData08::mxListSize) mhN->fill(5); // was overflow 
   } // EVEVEVEVEVE
 
   // debugging should be off for any time critical computation
@@ -285,7 +286,7 @@ void
 L2etowCalAlgo08::createHisto() {
   memset(hA,0,sizeof(hA));
   //token related spectra
-  hA[1]=new  L2Histo(1,"L2-etow-calib: seen tokens;  x:  token value; y: events ",20);
+  hA[1]=new  L2Histo(1,"L2-etow-calib: seen tokens;  x:  token value; y: events ",L2eventStream2008::mxToken);
   
   // ETOW  raw spectra (zz 4 lines)
   hA[10]=new L2Histo(10,"etow hot tower 1", EtowGeom::mxRdo); // title upadted in initRun
@@ -308,6 +309,9 @@ L2etowCalAlgo08::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2etowCalAlgo08.cxx,v $
+  Revision 1.3  2008/02/01 00:16:40  balewski
+  add mxListSize to BTOW/ETOW calibration
+
   Revision 1.2  2008/01/30 21:56:40  balewski
   E+B high-enery-filter L2-algo fuly functional
 

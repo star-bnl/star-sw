@@ -16,11 +16,13 @@ class HitTower1{// single tower container
 
 //........................................
 class L2BtowCalibData08{// Barrel calibrated data
+ public:
+  enum {mxListSize=500}; // keep this size small
  private:
   friend class L2btowCalAlgo08;
   friend class L2eventStream2008;
   int hitSize;
-  HitTower1 hit[BtowGeom::mxRdo]; 
+  HitTower1 hit[mxListSize]; 
   int nInputBlock; // counts seen blocks over the whole run
   public:
   const int get_hitSize()  const {return hitSize;}
@@ -30,11 +32,13 @@ class L2BtowCalibData08{// Barrel calibrated data
 
 //........................................
 class L2EtowCalibData08{// Endcap calibrated data
+ public:
+  enum {mxListSize=200}; // keep this size small
  private:
   friend class L2etowCalAlgo08;
   friend class L2eventStream2008;
   int hitSize;
-  HitTower1 hit[EtowGeom::mxRdo]; 
+  HitTower1 hit[mxListSize]; 
   int nInputBlock; // counts seen blocks over the whole run
   public:
   const int get_hitSize()  const {return hitSize;}

@@ -1,9 +1,9 @@
 #ifndef L2hienAlgo08_H
 #define L2hienAlgo08_H
-/*********************************************************************
- * $Id: L2hienAlgo08.h,v 1.2 2008/01/30 21:56:43 balewski Exp $
+/*****************************************************
+ * $Id: L2hienAlgo08.h,v 1.3 2008/02/01 00:16:44 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
- *********************************************************************
+ *****************************************************
 Descripion:
 this algo selects high-energy towers  from  BTOW & ETOW data
  and take advantage of common calibration to be deployed
@@ -22,7 +22,7 @@ SoftID is defined as follows:
 
 There is a hardcoded limit on the max list length at 256 towers.
 In case of an overflow a random (not realy) selection of towers  will be  added to the list until the software limit is reached. 
-**********************************************************
+******************************************************
 */
 
 
@@ -60,7 +60,7 @@ class L2hienAlgo08 : public  L2VirtualAlgo2008 {
   //..................... params set in initRun
   int  par_dbg;
   int  par_maxList;
-  int  par_adcThres;
+  int  par_adcThres; // in ADC counts above peds
 
   //...................  BTOW lookup tables
   int  mRdo2towerID_B[mxBtow];
@@ -98,6 +98,9 @@ class L2hienAlgo08 : public  L2VirtualAlgo2008 {
 
 /****************************************************
   $Log: L2hienAlgo08.h,v $
+  Revision 1.3  2008/02/01 00:16:44  balewski
+  add mxListSize to BTOW/ETOW calibration
+
   Revision 1.2  2008/01/30 21:56:43  balewski
   E+B high-enery-filter L2-algo fuly functional
 
