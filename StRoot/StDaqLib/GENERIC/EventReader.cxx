@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.53 2008/02/01 19:27:13 fine Exp $
+ * $Id: EventReader.cxx,v 1.54 2008/02/01 21:18:08 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.54  2008/02/01 21:18:08  fine
+ * add strerror() to show the system erro messages. Thanx Matthew Walker
+ *
  * Revision 1.53  2008/02/01 19:27:13  fine
  * Replace printf with LOG. Thankx Matthew Walker
  *
@@ -209,6 +212,7 @@
 #include <unistd.h>
 #include "EventReader.hh"
 #include <assert.h>
+#include <errno.h>
 #include "StMessMgr.h"
 
 using namespace OLDEVP;
@@ -227,7 +231,8 @@ static const char *detnams[] =
   LOG_INFO<<"===============  Event # "<<EventSeqNo<<"  ============="<<endm;
   LOG_INFO<<"Ev len (wds) "<<EventLength<<endm;
   LOG_INFO<<"Creation Time: "<<ts<<endm;
-  LOG_INFO<<"Trigger word 0x"<<TrigWord<<"\t\tTrigger Input word 0x"<<TrigInputWord<<endm;
+  LOG_INFO<<"Trigger word "<< hex << (void *)TrigWord<<
+        "\t\tTrigger Input word "<< hex << (void *)TrigInputWord<<endm;
   LOG_INFO<<"Token: "<<Token<<endm;
   LOG_INFO<<"Detectors present: ";
   unsigned const char* p=0; int i=0;
@@ -328,8 +333,8 @@ EventReader::EventReader(const char *logfile) //pass a string with name of logfi
   verbose = 0;
   logfd = fopen(logfile,"a");
   if (logfd==NULL) {
-    LOG_ERROR<<"EventReader::EventReader() logfile failure"<<endm;;
-    LOG_ERROR<<" failed to open log file "<<logfile<<" !!!!!!!"<<endm;;
+    LOG_ERROR<<"EventReader::EventReader() logfile failure"<<endm;
+    LOG_ERROR << strerror(errno) << ": " << logfile<< " !!!!!!!"<<endm;;
     assert(0);
   }
   LOG_INFO<<"opening logfile..."<<endm;
@@ -364,7 +369,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   struct stat buf;
 
   if (fstat(fd,&buf)<0){
-    LOG_ERROR<<"error in DaqOpenTag"<<endm;
+   LOG_ERROR << "DaqOpenTag"<< strerror(errno) <<endm;
    ERROR(ERR_FILE);
   }
   FileLength = buf.st_size;
@@ -396,9 +401,8 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   // map to a file
   if((MMAPP = (char *)mmap(0, mapsize, PROT_READ | PROT_WRITE,
 			   MAP_PRIVATE, fd, mmap_offset)) == (caddr_t) -1) { 
-    char myerr[100];
-    sprintf(myerr,"mapping file request 0x%x bytes",mapsize);
-    LOG_ERROR<<myerr<<endm; 
+    LOG_ERROR<<strerror(errno)<<"mapping file request "
+                              <<hex<<(void*)mapsize<<" bytes"<<endm;
     ERROR(ERR_MEM);
   }
 
@@ -412,7 +416,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   while (strncmp(DATAP,"LRHD", 4) == 0) {
     // copy the logical record into local struct lr
     if (memcpy(&lr,DATAP,sizeof(lr))<0) {
-      LOG_ERROR<<"error in memcpy"<<endm;
+       LOG_ERROR<< strerror(errno)<<": error in memcpy"<<endm;
     }
     // check the CRC
     if (!lr.test_CRC()) ERROR(ERR_CRC);
