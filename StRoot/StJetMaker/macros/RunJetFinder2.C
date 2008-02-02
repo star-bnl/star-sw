@@ -4,7 +4,7 @@ int total = 0;
 
 void RunJetFinder2(
                    int nevents=100,
-                   const char* file="/star/data31/reco/ppProduction/FullField/P06ie/2006/085/7085049/st_physics_7085049_raw_1040001.MuDst.root",
+		   const char* file="/star/data30/reco/ppProductionLong/FullField/P06ie/2006/140/7140051/st_physics_7140051_raw_2020002.MuDst.root",
                    const char* outfile="blah.jet.root",
                    const char* skimFile="blah.jetSkim.root"
                    )
@@ -30,6 +30,7 @@ void RunJetFinder2(
      gSystem->Load("StSpinDbMaker");
      gSystem->Load("StEEmcUtil");
      gSystem->Load("StEmcTriggerMaker");
+     gSystem->Load("StTriggerUtilities");
      gSystem->Load("StMCAsymMaker");
      gSystem->Load("StJetFinder");
      gSystem->Load("StJetMaker");
@@ -60,23 +61,39 @@ void RunJetFinder2(
      StSpinDbMaker* spDbMaker = new StSpinDbMaker("spinDb");
      
      //cout <<"Database interface"<<endl;
-     StDetectorDbMaker* detDbMk = new StDetectorDbMaker();
+     //StDetectorDbMaker* detDbMk = new StDetectorDbMaker();
 
      //EmcAdc2EMaker
      StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
+
+     //Get TriggerMaker
+     //StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
+     //simuTrig->setMC(false); // must be before individual detectors, to be passed
+     //simuTrig->useBbc();
+     //simuTrig->useBemc();
+     //simuTrig->bemc->setConfig(StBemcTriggerSimu::kOffline);
+     //StGenericL2Emulator* simL2Mk = new StL2_2006EmulatorMaker;
+     //assert(simL2Mk);
+     //simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
+     //simL2Mk->setOutPath("/star/u/staszak/working/fullTriggerSimulator2/tempOut/");
+     //simuTrig->useL2(simL2Mk);
+     
+     //trigger simulater
+     //StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
+     //emcTrig->setDbMaker(dbMk);
      
      //test Mike's new 4p maker:
      //here we also tag whether or not to do the swap:
      bool doTowerSwapFix = true;
      bool use2003TowerCuts = false;
+     bool use2005TowerCuts = false;
+     bool use2006Cuts = false;
      StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker, doTowerSwapFix);
+     bet4pMaker->setUseEndcap(true);
      bet4pMaker->setUse2003Cuts(use2003TowerCuts);
+     bet4pMaker->setUse2003Cuts(use2005TowerCuts);
+     bet4pMaker->setUse2003Cuts(use2006Cuts);
      
-     /*
-      //test Mike's new 4p maker with Endcap (defualts to noEndcap)
-      StBET4pMaker* bet4pMaker2 = new StBET4pMaker("BET4pMaker",muDstMaker,adc);
-      bet4pMaker2->setUseEndcap(true);
-      */
      
      //Instantiate the JetMaker
      StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, outfile);
