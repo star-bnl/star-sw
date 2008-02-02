@@ -30,6 +30,7 @@ void RunFastJetReader(
     gSystem->Load("StSpinDbMaker");
     gSystem->Load("StEEmcUtil");
     gSystem->Load("StEmcTriggerMaker");
+    gSystem->Load("StTriggerUtilities");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
     
