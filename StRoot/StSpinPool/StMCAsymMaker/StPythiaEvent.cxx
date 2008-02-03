@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.4  2008/02/03 01:27:17  rfatemi
+// Included Gehrmann-Stirling PDFs
+//
 // Revision 1.3  2007/11/01 02:48:10  rfatemi
 // Dave Staszak update for additional GRSV grids
 //
@@ -47,7 +50,7 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
     mX2         = t.mX2;
     mPartonALL  = t.mPartonALL;
     
-    for(int i=0; i<16; i++) {
+    for(int i=0; i<19; i++) {
         mDF1[i] = t.mDF1[i];
         mDF2[i] = t.mDF2[i];
     }
@@ -80,7 +83,7 @@ StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs)
     mX2         = rhs.mX2;
     mPartonALL  = rhs.mPartonALL;
     
-    for(int i=0; i<16; i++) {
+    for(int i=0; i<19; i++) {
         mDF1[i] = rhs.mDF1[i];
         mDF2[i] = rhs.mDF2[i];
     }

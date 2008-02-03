@@ -24,59 +24,62 @@
       IMPLICIT NONE
 *
       INTEGER IDGROUP,ISET,NEW
-      INTEGER SPECIAL_F2,IDG,IINI
+      INTEGER SET_PDF,IDG,IINI
       DOUBLE PRECISION DX,DQ2
-      DOUBLE PRECISION POLPDF(-3:3), STRUCT(3)
-      DOUBLE PRECISION U,D,UB,DB,ST,GL,G1P,G1N,G1D,DGL
-      DOUBLE PRECISION UUB,DDB,SSB,UV,DV,QB,DQB,DG1P,DG1N
-      DOUBLE PRECISION DUBAR,DDBAR
-      DOUBLE PRECISION DUV,DDV,DSTR,DGLU
-      DOUBLE PRECISION DSF2
+      DOUBLE PRECISION U,D,G1P,G1N,G1D,DGL
+      DOUBLE PRECISION UV,DV,UB,DB,QB,ST,GL
       DOUBLE PRECISION PDFOUT(6)
       COMMON / INTINI / IINI
 
-*   COMMON:  The main program or the calling routine has to have    *
-*            a common block  COMMON / INTINI / IINI , and  IINI     *
-*            has always to be zero when PARPOL2 is called for the   *
-*            first time or when 'ISET' has been changed.            *
+*     FOR GRSV: The main program or the calling routine has  *
+*     to have a common block  COMMON / INTINI / IINI, and    *
+*     IINI must be zero when PARPOL2 is called for the       *
+*     first time or when 'ISET' has been changed.            *
 
-      SPECIAL_F2=IDGROUP
-*
-*      PRINT *,"INSIDE POLAR.f"
-*      PRINT *,"IDGROUP=",IDGROUP," X=",DX," Q2=",DQ2
- 
+*     FOR GS: Must call NLOINI first time                    *
+
+      SET_PDF=IDGROUP
+      IINI=1
+
+      IF (NEW.eq.0) THEN
+         IINI=0
+         IF (SET_PDF.gt.200) THEN
+            CALL NLOINI
+         ENDIF
+      ENDIF
+      NEW=1
+      
+*     
+*     PRINT *,"POLAR.F: IDGROUP=",IDGROUP," X=",DX," Q2=",DQ2
+*      
 *     IF IDG==0 then returns x*PDF 
 *     IF IDG!=0 then returns PDF only
       IDG=1
 *
-      IINI=1
-      IF (NEW.eq.0) IINI=0
-      NEW=1
-
 * GRSV pdf selection:
 *
-      IF (SPECIAL_f2.eq.101) THEN 
+      IF (SET_PDF.eq.101) THEN 
 *   
 * GRSV STANDARD LO
 *
          ISET=3
          call PARPOL(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.102) THEN 
+      ELSEIF (SET_PDF.eq.102) THEN 
 *   
 * GRSV STANDARD NLO 
 *        
          ISET=1
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.103) THEN 
+      ELSEIF (SET_PDF.eq.103) THEN 
 *  
 * GRSV STANDARD NLO deltag=0
 *        
          ISET=3
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.104) THEN 
+      ELSEIF (SET_PDF.eq.104) THEN 
 *   
 *  
 * GRSV STANDARD NLO deltag=maximum allowed g
@@ -84,8 +87,7 @@
          ISET=4
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.105) THEN 
-*   
+      ELSEIF (SET_PDF.eq.105) THEN 
 *   
 *  
 * GRSV STANDARD NLO deltag=minimum allowed g
@@ -93,7 +95,7 @@
          ISET=2
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.106) THEN 
+      ELSEIF (SET_PDF.eq.106) THEN 
 *   
 *   
 *  
@@ -102,7 +104,7 @@
          ISET=5
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.107) THEN 
+      ELSEIF (SET_PDF.eq.107) THEN 
 *   
 *   
 *  
@@ -111,7 +113,7 @@
          ISET=6
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.108) THEN 
+      ELSEIF (SET_PDF.eq.108) THEN 
 *   
 *   
 *  
@@ -120,7 +122,7 @@
          ISET=7
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.109) THEN 
+      ELSEIF (SET_PDF.eq.109) THEN 
 *   
 *   
 *  
@@ -129,7 +131,7 @@
          ISET=8
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.110) THEN 
+      ELSEIF (SET_PDF.eq.110) THEN 
 *   
 *   
 *  
@@ -138,7 +140,7 @@
          ISET=9
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.111) THEN 
+      ELSEIF (SET_PDF.eq.111) THEN 
 *   
 *   
 *  
@@ -147,7 +149,7 @@
          ISET=10
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
 *
-      ELSEIF (SPECIAL_f2.eq.112) THEN 
+      ELSEIF (SET_PDF.eq.112) THEN 
 *   
 *   
 *  
@@ -155,7 +157,7 @@
 *        
          ISET=11
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
-      ELSEIF (SPECIAL_f2.eq.113) THEN 
+      ELSEIF (SET_PDF.eq.113) THEN 
 *   
 *   
 *  
@@ -163,7 +165,7 @@
 *        
          ISET=12
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
-      ELSEIF (SPECIAL_f2.eq.114) THEN 
+      ELSEIF (SET_PDF.eq.114) THEN 
 *   
 *   
 *  
@@ -171,7 +173,7 @@
 *        
          ISET=13
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
-      ELSEIF (SPECIAL_f2.eq.115) THEN 
+      ELSEIF (SET_PDF.eq.115) THEN 
 *   
 *   
 *  
@@ -179,7 +181,7 @@
 *        
          ISET=14
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
-      ELSEIF (SPECIAL_f2.eq.116) THEN 
+      ELSEIF (SET_PDF.eq.116) THEN 
 *   
 *   
 *  
@@ -187,29 +189,96 @@
 *        
          ISET=15
          call PARPOL2(ISET,DX,DQ2,U,D,UB,DB,ST,GL,G1P,G1N)
-*
+      ELSEIF (SET_PDF.eq.201) THEN
+
+* Gehrmann-Stirling_NL0_A
+
+         ISET=0
+         call POLNLO(ISET,DX,DQ2,UV,DV,GL,UB,DB,ST)
+      ELSEIF (SET_PDF.eq.202) THEN
+
+* Gehrmann-Stirling_NL0_B
+        
+         ISET=1
+         call POLNLO(ISET,DX,DQ2,UV,DV,GL,UB,DB,ST)
+      ELSEIF (SET_PDF.eq.203) THEN         
+
+* Gehrmann-Stirling_NL0_C
+         
+         ISET=2
+         call POLNLO(ISET,DX,DQ2,UV,DV,GL,UB,DB,ST)
+         
       ENDIF
-*
 
-*      PRINT *," U=",U," D=",D," UB=",UB," DB=",DB," ST=",ST," GL=",GL
 
-      if (IDG.eq.1) then
-         PDFOUT(1)=U/DX
-         PDFOUT(2)=D/DX
-         PDFOUT(3)=UB/DX
-         PDFOUT(4)=DB/DX
-         PDFOUT(5)=ST/DX
-         PDFOUT(6)=GL/DX
-      endif
+      IF (SET_PDF.lt.200) THEN
 
-      if (IDG.eq.0) then
-         PDFOUT(1)=U
-         PDFOUT(2)=D
-         PDFOUT(3)=UB
-         PDFOUT(4)=DB
-         PDFOUT(5)=ST
-         PDFOUT(6)=GL
-      endif
+* GRSV Access Converntion
+*            OUTPUT:  U = x * DELTA u                               *
+*            D = x * DELTA d                                        *        
+*            UB = x * DELTA ubar                                    *   
+*            DB = x * DELTA dbar                                    * 
+*            ST = x * DELTA STRANGE                                 *     
+*            GL = x * DELTA GLUON                                   *
+*            G1P = g_1^proton                                       *
+*            G1N = g_1^neutron
+
+         if (IDG.eq.1) then
+            PDFOUT(1)=U/DX
+            PDFOUT(2)=D/DX
+            PDFOUT(3)=UB/DX
+            PDFOUT(4)=DB/DX
+            PDFOUT(5)=ST/DX
+            PDFOUT(6)=GL/DX
+         endif
+         
+         if (IDG.eq.0) then
+            PDFOUT(1)=U
+            PDFOUT(2)=D
+            PDFOUT(3)=UB
+            PDFOUT(4)=DB
+            PDFOUT(5)=ST
+            PDFOUT(6)=GL
+         endif
+
+      ENDIF
+
+      IF (SET_PDF.gt.200) THEN
+
+c ---- Gehrmann Stirling access convention         
+c ---- OUTPUT parameters (note that always x*distribution is returned)
+c ---- uval  = u-ubar
+c ---- dval  = d-dbar 
+c ---- glue 
+c ---- ubar  = 1/2 usea 
+c ---- dbar = 1/2 dsea
+c ---- str = sbar = 1/2 strsea
+
+         
+         if (IDG.eq.1) then
+            PDFOUT(1)=UV/DX
+            PDFOUT(2)=DV/DX
+            PDFOUT(3)=UB/DX
+            PDFOUT(4)=DB/DX
+            PDFOUT(5)=ST/DX
+            PDFOUT(6)=GL/DX
+         endif
+         
+         if (IDG.eq.0) then
+            PDFOUT(1)=UV
+            PDFOUT(2)=DV
+            PDFOUT(3)=UB
+            PDFOUT(4)=DB
+            PDFOUT(5)=ST
+            PDFOUT(6)=GL
+         endif
+
+c         if (ISET.eq.2) then
+c            PRINT *,"UV=",PDFOUT(1)," DV=",PDFOUT(2), " UB=",PDFOUT(3)
+c     &           ," DB=",PDFOUT(4)," ST=",PDFOUT(5)," GL=",PDFOUT(6)
+c         endif
+
+      ENDIF
 
 *
 
