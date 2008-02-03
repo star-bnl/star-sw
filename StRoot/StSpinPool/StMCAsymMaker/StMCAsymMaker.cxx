@@ -46,6 +46,18 @@ void StMCAsymMaker::Zero() {
     Q2=0;
     pid=0;
 
+    df1_NLO_GSA=0;
+    df2_NLO_GSA=0;
+    weight_NLO_GSA=0;
+
+    df1_NLO_GSB=0;
+    df2_NLO_GSB=0;
+    weight_NLO_GSB=0;
+
+    df1_NLO_GSC=0;
+    df2_NLO_GSC=0;
+    weight_NLO_GSC=0;
+
     df1_LO=0;
     df2_LO=0;
     f1_LO=0;
@@ -212,112 +224,133 @@ Int_t StMCAsymMaker::Make() {
     partonic_all=getPartonicALL(s,t,u,pid,flavor1,flavor2,flavor3,flavor4);
     Q2=hard_p*hard_p;
 
-    //LO
+    //NLO GS SCENARIO A
+    df1_NLO_GSA=get_polPDF_NLO_GSA(flavor1,x1,Q2);
+    df2_NLO_GSA=get_polPDF_NLO_GSA(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_GSA=(df1_NLO_GSA*df2_NLO_GSA*partonic_all)/(f1_NLO*f2_NLO);
+    
+    //NLO GS SCENARIO B
+    df1_NLO_GSB=get_polPDF_NLO_GSB(flavor1,x1,Q2);
+    df2_NLO_GSB=get_polPDF_NLO_GSB(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_GSB=(df1_NLO_GSB*df2_NLO_GSB*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO GS SCENARIO C
+    df1_NLO_GSC=get_polPDF_NLO_GSC(flavor1,x1,Q2);
+    df2_NLO_GSC=get_polPDF_NLO_GSC(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_GSC=(df1_NLO_GSC*df2_NLO_GSC*partonic_all)/(f1_NLO*f2_NLO);
+    
+    //LO GRSV
     df1_LO=get_polPDF_LO(flavor1,x1,Q2);
     df2_LO=get_polPDF_LO(flavor2,x2,Q2);
     f1_LO=get_unpolPDF_LO(flavor1,x1,Q2);
     f2_LO=get_unpolPDF_LO(flavor2,x2,Q2);
     weight_LO=(df1_LO*df2_LO*partonic_all)/(f1_LO*f2_LO);
 
-    //NLO
+    //NLO GRSV
     df1_NLO=get_polPDF_NLO(flavor1,x1,Q2);
     df2_NLO=get_polPDF_NLO(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO=(df1_NLO*df2_NLO*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_g0
+    //NLO_g0 GRSV
     df1_NLO_g0=get_polPDF_NLO_g0(flavor1,x1,Q2);
     df2_NLO_g0=get_polPDF_NLO_g0(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_g0=(df1_NLO_g0*df2_NLO_g0*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_gmax
+    //NLO_gmax  GRSV
     df1_NLO_gmax=get_polPDF_NLO_gmax(flavor1,x1,Q2);
     df2_NLO_gmax=get_polPDF_NLO_gmax(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_gmax=(df1_NLO_gmax*df2_NLO_gmax*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_gmin
+    //NLO_gmin  GRSV
     df1_NLO_gmin=get_polPDF_NLO_gmin(flavor1,x1,Q2);
     df2_NLO_gmin=get_polPDF_NLO_gmin(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_gmin=(df1_NLO_gmin*df2_NLO_gmin*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_m015
+    //NLO_m015 GRSV
     df1_NLO_m015=get_polPDF_NLO_m015(flavor1,x1,Q2);
     df2_NLO_m015=get_polPDF_NLO_m015(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_m015=(df1_NLO_m015*df2_NLO_m015*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_m030
+    //NLO_m030 GRSV
     df1_NLO_m030=get_polPDF_NLO_m030(flavor1,x1,Q2);
     df2_NLO_m030=get_polPDF_NLO_m030(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_m030=(df1_NLO_m030*df2_NLO_m030*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_m045
+    //NLO_m045 GRSV
     df1_NLO_m045=get_polPDF_NLO_m045(flavor1,x1,Q2);
     df2_NLO_m045=get_polPDF_NLO_m045(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_m045=(df1_NLO_m045*df2_NLO_m045*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_m060
+    //NLO_m060 GRSV
     df1_NLO_m060=get_polPDF_NLO_m060(flavor1,x1,Q2);
     df2_NLO_m060=get_polPDF_NLO_m060(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_m060=(df1_NLO_m060*df2_NLO_m060*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_m075
+    //NLO_m075 GRSV
     df1_NLO_m075=get_polPDF_NLO_m075(flavor1,x1,Q2);
     df2_NLO_m075=get_polPDF_NLO_m075(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_m075=(df1_NLO_m075*df2_NLO_m075*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_m090
+    //NLO_m090 GRSV
     df1_NLO_m090=get_polPDF_NLO_m090(flavor1,x1,Q2);
     df2_NLO_m090=get_polPDF_NLO_m090(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_m090=(df1_NLO_m090*df2_NLO_m090*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_m105
+    //NLO_m105 GRSV
     df1_NLO_m105=get_polPDF_NLO_m105(flavor1,x1,Q2);
     df2_NLO_m105=get_polPDF_NLO_m105(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_m105=(df1_NLO_m105*df2_NLO_m105*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_p030
+    //NLO_p030 GRSV
     df1_NLO_p030=get_polPDF_NLO_p030(flavor1,x1,Q2);
     df2_NLO_p030=get_polPDF_NLO_p030(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_p030=(df1_NLO_p030*df2_NLO_p030*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_p045
+    //NLO_p045 GRSV
     df1_NLO_p045=get_polPDF_NLO_p045(flavor1,x1,Q2);
     df2_NLO_p045=get_polPDF_NLO_p045(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_p045=(df1_NLO_p045*df2_NLO_p045*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_p060
+    //NLO_p060 GRSV
     df1_NLO_p060=get_polPDF_NLO_p060(flavor1,x1,Q2);
     df2_NLO_p060=get_polPDF_NLO_p060(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_p060=(df1_NLO_p060*df2_NLO_p060*partonic_all)/(f1_NLO*f2_NLO);
 
-    //NLO_p070
+    //NLO_p070 GRSV
     df1_NLO_p070=get_polPDF_NLO_p070(flavor1,x1,Q2);
     df2_NLO_p070=get_polPDF_NLO_p070(flavor2,x2,Q2);
     f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
@@ -370,7 +403,6 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setCosTheta(pythiaTable->cos_th);
     pythia->setX1(pythiaTable->bjor_1);
     pythia->setX2(pythiaTable->bjor_2);
-    
     pythia->setPartonALL(partonic_all);
     
     pythia->setDF1(StPythiaEvent::LO, df1_LO);
@@ -378,7 +410,6 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF1(StPythiaEvent::ZERO, df1_NLO_g0);
     pythia->setDF1(StPythiaEvent::MAX, df1_NLO_gmax);
     pythia->setDF1(StPythiaEvent::MIN, df1_NLO_gmin);
-
     pythia->setDF1(StPythiaEvent::M015, df1_NLO_m015);
     pythia->setDF1(StPythiaEvent::M030, df1_NLO_m030);
     pythia->setDF1(StPythiaEvent::M045, df1_NLO_m045);
@@ -386,18 +417,19 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF1(StPythiaEvent::M075, df1_NLO_m075);
     pythia->setDF1(StPythiaEvent::M090, df1_NLO_m090);
     pythia->setDF1(StPythiaEvent::M105, df1_NLO_m105);
-
     pythia->setDF1(StPythiaEvent::P030, df1_NLO_p030);
     pythia->setDF1(StPythiaEvent::P045, df1_NLO_p045);
     pythia->setDF1(StPythiaEvent::P060, df1_NLO_p060);
     pythia->setDF1(StPythiaEvent::P070, df1_NLO_p070);
+    pythia->setDF1(StPythiaEvent::GS_NLOA, df1_NLO_GSA);
+    pythia->setDF1(StPythiaEvent::GS_NLOB, df1_NLO_GSB);
+    pythia->setDF1(StPythiaEvent::GS_NLOC, df1_NLO_GSC);
     
     pythia->setDF2(StPythiaEvent::LO, df2_LO);
     pythia->setDF2(StPythiaEvent::NLO, df2_NLO);
     pythia->setDF2(StPythiaEvent::ZERO, df2_NLO_g0);
     pythia->setDF2(StPythiaEvent::MAX, df2_NLO_gmax);
     pythia->setDF2(StPythiaEvent::MIN, df2_NLO_gmin);
-
     pythia->setDF2(StPythiaEvent::M015, df2_NLO_m015);
     pythia->setDF2(StPythiaEvent::M030, df2_NLO_m030);
     pythia->setDF2(StPythiaEvent::M045, df2_NLO_m045);
@@ -405,12 +437,14 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF2(StPythiaEvent::M075, df2_NLO_m075);
     pythia->setDF2(StPythiaEvent::M090, df2_NLO_m090);
     pythia->setDF2(StPythiaEvent::M105, df2_NLO_m105);
-    
     pythia->setDF2(StPythiaEvent::P030, df2_NLO_p030);
     pythia->setDF2(StPythiaEvent::P045, df2_NLO_p045);
     pythia->setDF2(StPythiaEvent::P060, df2_NLO_p060);
     pythia->setDF2(StPythiaEvent::P070, df2_NLO_p070);
-
+    pythia->setDF2(StPythiaEvent::GS_NLOA, df2_NLO_GSA);
+    pythia->setDF2(StPythiaEvent::GS_NLOB, df2_NLO_GSB);
+    pythia->setDF2(StPythiaEvent::GS_NLOC, df2_NLO_GSC);
+    
     pythia->setF1(StPythiaEvent::LO, f1_LO);
     pythia->setF1(StPythiaEvent::NLO, f1_NLO);
     
@@ -422,7 +456,98 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     for (int i = 4; i < 8; ++i) pythia->addParticle(particleTable[i]);
 }
 
-//GRSV LO standard 
+//Gehrmann-Stirling NL0 Set A
+Double_t StMCAsymMaker::get_polPDF_NLO_GSA(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_GSA=201;
+    int polid=0;
+
+    //cout<<"get_polPDF_NLO_GSA: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;   
+    if ((Q2>=1.0)&&(Q2<=1E+06))  polar_(&polset_NLO_GSA, &x, &Q2, parpol, &polid);
+    //cout<<"get_polPDF_NLO_GSA: UV="<<parpol[0]<<" DV="<<parpol[1]<<" UB="<<parpol[3]<<" DB="<<parpol[4]<<" S+Sbar="<<parpol[5]<<" GL="<<parpol[2]<<endl;
+
+  
+    //parpol[0] = uv - ubar so it is only the valence contribution. Need to add back in ubar for pythia since we don't know the difference between the sea and valence
+    if (flavor==2) pdf=parpol[0]+parpol[2]; //uv + usea
+    //parpol[1] = dv - dbar
+    if (flavor==1) pdf=parpol[1]+parpol[3]; //dv + dsea quark
+    //parpol[2] = 1/2 usea= 1/2(usea +ubar) = ubar
+    if (flavor==-2) pdf=parpol[2];//ubar==1/2usea quark 
+    //parpol[3] = 1/2 dsea= 1/2(dsea +dbar) = dbar
+    if (flavor==-1) pdf=parpol[3];//dbar==1/2dsea quark
+    //parpol[4] = 1/2 strangesea = 1/2*(ssea+sbar) = sbar
+    if (abs(flavor)==3) pdf=parpol[4]; //s==1/2sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];//c+b+t == 1/2 strangesea
+
+  return pdf;
+}
+
+//Gehrmann-Stirling NL0 Set B
+Double_t StMCAsymMaker::get_polPDF_NLO_GSB(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_GSB=202;
+    int polid=0;
+
+    //cout<<"get_polPDF_NLO_GSB: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+    if ((Q2>=1.0)&&(Q2<=1E+06))  polar_(&polset_NLO_GSB, &x, &Q2, parpol, &polid);
+    //cout<<"get_polPDF_NLO_GSB: UV="<<parpol[0]<<" DV="<<parpol[1]<<" UB="<<parpol[3]<<" DB="<<parpol[4]<<" S+Sbar="<<parpol[5]<<" GL="<<parpol[2]<<endl;
+    
+  
+    //parpol[0] = uv - ubar so it is only the valence contribution. Need to add back in ubar for pythia since we don't know the difference between the sea and valence
+    if (flavor==2) pdf=parpol[0]+parpol[2]; //uv + usea
+    //parpol[1] = dv - dbar
+    if (flavor==1) pdf=parpol[1]+parpol[3]; //dv + dsea quark
+    //parpol[2] = 1/2 usea= 1/2(usea +ubar) = ubar
+    if (flavor==-2) pdf=parpol[2];//ubar==1/2usea quark 
+    //parpol[3] = 1/2 dsea= 1/2(dsea +dbar) = dbar
+    if (flavor==-1) pdf=parpol[3];//dbar==1/2dsea quark
+    //parpol[4] = 1/2 strangesea = 1/2*(ssea+sbar) = sbar
+    if (abs(flavor)==3) pdf=parpol[4]; //s==1/2sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];//c+b+t == 1/2 strangesea
+
+  return pdf;
+}
+
+//Gehrmann-Stirling NL0 Set C
+Double_t StMCAsymMaker::get_polPDF_NLO_GSC(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_GSC=203;
+    int polid=0;
+
+    //cout<<"get_polPDF_NLO_GSC: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+    if ((Q2>=1.0)&&(Q2<=1E+06))  polar_(&polset_NLO_GSC, &x, &Q2, parpol, &polid);
+    //cout<<"get_polPDF_NLO_GSC: UV="<<parpol[0]<<" DV="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" S+Sbar="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+   
+    //parpol[0] = uv - ubar so it is only the valence contribution. Need to add back in ubar for pythia since we don't know the difference between the sea and valence
+    if (flavor==2) pdf=parpol[0]+parpol[2]; //uv + usea
+    //parpol[1] = dv - dbar
+    if (flavor==1) pdf=parpol[1]+parpol[3]; //dv + dsea quark
+    //parpol[2] = 1/2 usea= 1/2(usea +ubar) = ubar
+    if (flavor==-2) pdf=parpol[2];//ubar==1/2usea quark 
+    //parpol[3] = 1/2 dsea= 1/2(dsea +dbar) = dbar
+    if (flavor==-1) pdf=parpol[3];//dbar==1/2dsea quark
+    //parpol[4] = 1/2 strangesea = 1/2*(ssea+sbar) = sbar
+    if (abs(flavor)==3) pdf=parpol[4]; //s==1/2sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];//c+b+t == 1/2 strangesea
+
+
+  return pdf;
+}
+
+
+
+
+
+//GRSV LO standard
 Double_t StMCAsymMaker::get_polPDF_LO(int flavor, double x, double Q2){
 
     double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
@@ -456,7 +581,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO(int flavor, double x, double Q2){
     //cout<<"get_polPDF_NLO: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
     if (Q2>=0.8) polar_(&polset_NLO, &x, &Q2, parpol, &polid);
-    //cout <<"getpolPDF_NLO:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+    //cout <<"get_polPDF_NLO:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
     if (flavor==2) pdf=parpol[0];      //uv + usea quark
