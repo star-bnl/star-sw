@@ -123,6 +123,7 @@ EOF
 
         $CP $runDir/$laserMacro $DIR/$fileToUpload
         $MV $runDir/$laserMacro $macros/$fileToUpload
+        $MV $runDir/LaserPlots.root $DIR/LaserPlots.$run.root
         $TOUCH $laserFiles
         echo $fileToUpload >> $laserFiles
     endif
@@ -188,6 +189,7 @@ EOF
 # We move now to target
 if( -e $DIR/Load ) then
     $GZIP $DIR/Load/*.eps
+    $MV $DIR/LaserPlots.*.root $DIR/Load
     echo "Moving Load/ to Load$DATE/"
     $MV $DIR/Load $DIR/Load$DATE || exit
 endif
