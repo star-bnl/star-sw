@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.31 2007/05/02 20:46:40 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.32 2008/02/05 22:51:50 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.32  2008/02/05 22:51:50  genevb
+// Correction on two histogram names for QA shift
+//
 // Revision 2.31  2007/05/02 20:46:40  genevb
 // Additional SVT plots
 //
@@ -144,7 +147,7 @@
   "QaGtrkPF",
   "QaGtrkChisq0T",
   "QaGtrkFlag",
-  "QaGtrkGoodTot",
+  "QaGtrkGood",
   "QaGtrkNPntFitTTS",
   "QaGtrkNPntF",
   "QaGtrkGoodTTS",
@@ -166,6 +169,7 @@
   "QaPtrkMeanEtaTTS",
   "QaPtrkMeanPtF",
   "QaPtrkMeanEtaF",
+  "QaPtrkGood",
   "QaPtrkGoodTTS",
   "QaPtrkChisq0TTS",
   "QaPtrkFlag",
