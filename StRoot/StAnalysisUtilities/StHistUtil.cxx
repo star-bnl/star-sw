@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.39 2007/12/14 02:18:29 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.40 2008/02/06 23:31:32 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.40  2008/02/06 23:31:32  genevb
+// missing reset of logZ
+//
 // Revision 2.39  2007/12/14 02:18:29  genevb
 // Add text of counts on NullPrimVtx plots
 //
@@ -454,9 +457,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	  gPad->SetGridy(0);
 	  gPad->SetGridx(0);
 	  
-          // set logY & logX scale off
-	  gPad->SetLogy(0);
-	  gPad->SetLogx(0);
+          // set logX,Y,Z scale on/off
 
 // Set logY scale on if: there is a loglist, if the hist name is on the list, if it has entries
 //    and if the max entries in all bins is > 0
@@ -464,7 +465,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	     hobj->GetEntries() && hobj->GetMaximum() ) {
 	    gPad->SetLogy(1);
             LOG_INFO << "       -- Will draw in logY scale: " << oname <<endm;
-	  }
+	  } else gPad->SetLogy(0);
 
 
 // Set logX scale on if: there is a loglist, if the hist name is on the list, if it has entries
@@ -473,14 +474,14 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	     hobj->GetEntries() && hobj->GetMaximum() ) {
 	    gPad->SetLogx(1);
             LOG_INFO << "       -- Will draw in logX scale: " << oname <<endm;
-	  }
+	  } else gPad->SetLogx(0);
 
 
 // Set logZ scale
           if (oName.EndsWith("PVsDedx")) {
             gPad->SetLogz(1);
             LOG_INFO << "       -- Will draw in logZ scale: " << oname <<endm;
-          }
+          } else gPad->SetLogz(0);
 
 // Limit x range for some histograms
           if (oName.EndsWith("QaPointTpc") ||
