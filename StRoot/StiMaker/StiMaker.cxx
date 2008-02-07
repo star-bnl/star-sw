@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.182 2008/02/07 02:27:40 perev Exp $
+// $Id: StiMaker.cxx,v 1.183 2008/02/07 18:26:17 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.183  2008/02/07 18:26:17  perev
+// Remove setMCS() call
+//
 // Revision 1.182  2008/02/07 02:27:40  perev
 // Add minPrecHits
 //
@@ -589,7 +592,7 @@ Int_t StiMaker::InitRun(int run)
         _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
 	_fitter->load("trackFitterPars.dat",*this);
 
-        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
+//        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
       }
       _eventFiller=0;
       if (IAttr("useEventFiller")) {
