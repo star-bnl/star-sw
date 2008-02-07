@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.181 2007/10/17 15:32:34 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.182 2008/02/07 02:27:40 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.182  2008/02/07 02:27:40  perev
+// Add minPrecHits
+//
 // Revision 1.181  2007/10/17 15:32:34  fisyak
 // rename Hft => Pxl
 //
@@ -575,13 +578,18 @@ Int_t StiMaker::InitRun(int run)
       _hitLoader  = _toolkit->getHitLoader();
       _tracker=0;
       if (IAttr("useTracker")) {
-        _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
-        _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
-	_tracker->load("trackFinderPars.dat",*this);
-	_fitter->load("trackFitterPars.dat",*this);
-        if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
-        if (IAttr("useTiming")) _tracker->setTiming();
 
+        _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
+        _tracker->setMinPrecHits(2);
+        if (*SAttr("minPrecHits")) _tracker->setMinPrecHits(IAttr("minPrecHits"));
+	_tracker->load("trackFinderPars.dat",*this);
+        if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
+        if ( IAttr("useTiming"    )) _tracker->setTiming();
+
+        _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
+	_fitter->load("trackFitterPars.dat",*this);
+
+        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
       }
       _eventFiller=0;
       if (IAttr("useEventFiller")) {
