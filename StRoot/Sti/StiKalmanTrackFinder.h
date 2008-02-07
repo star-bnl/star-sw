@@ -19,10 +19,7 @@ class StiTrackContainer;
 class StiTrack;
 class StiKalmanTrack;
 class StiKalmanTrackNode;
-class StEvent;
-class StiStEventFiller;
 template<class Factorized>class Factory;
-template<class Event,class Detector>class StiHitLoader;
 
 
 ///\class StiKalmanTrackFinder  
@@ -38,6 +35,7 @@ class StiKalmanTrackFinder : public Loadable, public StiTrackFinder, public Name
 {
 public:
   StiKalmanTrackFinder(StiToolkit *toolkit);
+  void setMinPrecHits(int minPrecHits);
   virtual ~StiKalmanTrackFinder();
   /// Initialize the finder
   virtual void initialize();
@@ -70,9 +68,6 @@ public:
   /// Get the track filter currently used by the tracker
   virtual Filter<StiTrack> * getTrackFilter();
   /// Get the vertex finder used by this track finder
-  virtual StiVertexFinder * getVertexFinder();
-  /// Set the vertex finder used by this tracker
-  virtual void setVertexFinder(StiVertexFinder *);
   void setParameters(const StiKalmanTrackFinderParameters &par);
   virtual EditableParameters & getParameters();
   void doInitLayer(int trackingDirection);
@@ -104,40 +99,14 @@ class QAFind;
     Filter<StiTrack>            * _trackFilter;
     StiTrackFinder              * _trackSeedFinder;
     Factory<StiKalmanTrackNode> * _trackNodeFactory;
-    Factory<StiKalmanTrack>     * _trackFactory;
-    Factory<StiHit>             * _hitFactory;
     StiDetectorContainer        * _detectorContainer;
-    StiHitLoader<StEvent,StiDetectorBuilder> * _hitLoader;
     StiHitContainer             * _hitContainer;
     StiTrackContainer           * _trackContainer;
-    StiVertexFinder             * _vertexFinder;
-    StiStEventFiller            * _eventFiller;
-    StEvent                     * _event;
 
 private:
-    
-    int       state;
-    int       visitedDet ;
-    int       position;
-    int       lastMove;
-    int       nAdded;
-    
+        
+    int mMinPrecHits;
     double    chi2;
-    double    bestChi2;
-    StiKalmanTrack         * track;
-    StiKalmanTrackNode * sNode;
-    StiKalmanTrackNode * tNode;
-    StiKalmanTrackNode * bestNode;
-    StiKalmanTrackNode * leadNode;
-    StiHit * bestHit;
-    StiHit * hit;
-    const StiDetector * sDet;
-    const StiDetector * tDet;
-    const StiDetector * leadDet;
-    bool trackDone;
-    bool scanningDone;
-    bool hasHit;
-    bool hasDet;
     TStopwatch *mTimg[3]; //seeds,traks,prims
     static int   _debug;
 };

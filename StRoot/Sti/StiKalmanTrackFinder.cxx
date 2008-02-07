@@ -34,7 +34,6 @@ using namespace std;
 #include "StiTrackContainer.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackNode.h"
-#include "StiVertexFinder.h"
 #include "StiDefaultTrackFilter.h"
 #include "StiTrackFinderFilter.h"
 #include "StiUtilities/StiDebug.h"
@@ -64,17 +63,13 @@ int gLevelOfFind = 0;
 void StiKalmanTrackFinder::initialize()
 {
   cout << "StiKalmanTrackFinder::initialize() -I- Started"<<endl;
-  lastMove = 0;
   _toolkit = StiToolkit::instance();
   _trackNodeFactory  = _toolkit->getTrackNodeFactory();
-  _trackFactory      = _toolkit->getTrackFactory();
-  _hitFactory        = _toolkit->getHitFactory();
   _detectorContainer = _toolkit->getDetectorContainer();
   _detectorContainer->reset();
   _trackSeedFinder   = _toolkit->getTrackSeedFinder();
   _hitContainer      = _toolkit->getHitContainer();
   _trackContainer    = _toolkit->getTrackContainer();
-  _vertexFinder      = _toolkit->getVertexFinder();
   /*
   StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("FinderTrackFilter","Reconstructed Track Filter");
   trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
@@ -94,18 +89,14 @@ void StiKalmanTrackFinder::initialize()
 }
 
 StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit*toolkit)
-: _toolkit(toolkit),
+:
+_toolkit(toolkit),
 _trackFilter(0),
 _trackSeedFinder(0),
 _trackNodeFactory(0),
-_trackFactory(0),
-_hitFactory(0),
 _detectorContainer(0),
 _hitContainer(0),
-_trackContainer(0),
-_vertexFinder(0),
-_eventFiller(0),
-_event(0)
+_trackContainer(0)
 {
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Started"<<endl;
 memset(mTimg,0,sizeof(mTimg));
@@ -115,6 +106,7 @@ StiKalmanTrackNode::setParameters(&_pars);
   if (!_toolkit)
     throw runtime_error("StiKalmanTrackFinder::StiKalmanTrackFinder(...) - FATAL - toolkit==0");
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
+  mMinPrecHits=2;
 }
 
 //______________________________________________________________________________
@@ -135,7 +127,6 @@ void StiKalmanTrackFinder::reset()
   //cout << "StiKalmanTrackFinder::reset() -I- Starting" <<endl;
   _detectorContainer->reset();
   _trackContainer->clear();
-  _trackFactory->reset();
   _trackNodeFactory->reset();
   _hitContainer->reset();
   _trackSeedFinder->reset();
@@ -156,7 +147,6 @@ void StiKalmanTrackFinder::clear()
 {
   //cout << "StiKalmanTrackFinder::clear() -I- Starting" <<endl;
   _hitContainer->clear();
-  _hitFactory->reset();
   reset();
   //cout << "StiKalmanTrackFinder::clear() -I- Done" <<endl;
 }
@@ -429,13 +419,8 @@ StiDebug::tally("Tracks");
     StThreeVectorD nearBeam;
     track->getNearBeam(&nearBeam);
     if (nearBeam.perp2()>RMAX2d*RMAX2d) 		continue;
-    StiKalmanTrackNode * inner = track->getInnerMostNode();
-    double r = inner->getRefPosition();
-    if (r>RMAX) 					continue;	
-//VP    if (r>RMIN) find(track,kOutsideIn);
     for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StiHit *vertex = vertices[iVertex];
-//VP  if (fabs(vertex->z_g()-nearBeam.z()) > ZMAX2d) 	continue;
       if (fabs(track->getDca(vertex)) > DMAX3d)    	continue;
 StiDebug::tally("PrimCandidates");
       if (mTimg[kPrimTimg]) mTimg[kPrimTimg]->Start(0);
@@ -510,7 +495,7 @@ StiKalmanTrackNode::Break(nCall);
   double lnBef,lnAft;
   
   if(direction) rmin=0; //no limitation to outside
-  track = dynamic_cast<StiKalmanTrack *> (t);
+  StiKalmanTrack *track = dynamic_cast<StiKalmanTrack *> (t);
   nnBef = track->getNNodes(3);
   lnBef = track->getTrackLength();
 
@@ -539,6 +524,7 @@ static const double ref1  = 50.*degToRad;
 static  const double ref1a  = 110.*degToRad;
   //  const double ref2a  = 2.*3.1415927-ref1a;
   gLevelOfFind++;
+  StiDetector *tDet=0;
   int status;
   StiKalmanTrackNode testNode;
   int position;
@@ -813,13 +799,15 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
 int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
 {
    int ians;
-   ians = qaBest.pits-qaTry.pits;
-   if (qaBest.pits+qaTry.pits==1) 			return ians;
+   ians = qaTry.pits-qaBest.pits;
+//	One SVT hit is worse than zero
+   if (!qaBest.pits && qaTry.pits  && qaTry.pits  < mMinPrecHits) return -1;
+   if (!qaTry.pits  && qaBest.pits && qaBest.pits < mMinPrecHits) return  1;
 #if 0
    if (qaBest.sum*qaTry.hits  <= qaTry.sum*qaBest.hits) return -1;
 #endif
 #if 1
-   ians =-ians;				if (ians)	return ians;
+   				        if (ians)	return ians;
    ians =  qaTry.hits-qaBest.hits;	if (ians)	return ians;
    ians = qaBest.nits- qaTry.nits;	if (ians)	return ians;
    if (qaBest.sum  <= qaTry.sum ) 			return -1;
@@ -880,21 +868,6 @@ EditableParameters & StiKalmanTrackFinder::getParameters()
 {
   return _pars;
 }
-
-//______________________________________________________________________________
-/// Get the vertex finder used by this track finder
-StiVertexFinder * StiKalmanTrackFinder::getVertexFinder()
-{
-  return _vertexFinder;
-}
-
-//______________________________________________________________________________
-/// Set the vertex finder used by this tracker
-void StiKalmanTrackFinder::setVertexFinder(StiVertexFinder *vertexFinder)
-{
-  _vertexFinder = vertexFinder;
-}
-
 
 //______________________________________________________________________________
 void StiKalmanTrackFinder::loadDS(TDataSet&ds)
