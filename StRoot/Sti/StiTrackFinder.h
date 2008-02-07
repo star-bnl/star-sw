@@ -3,7 +3,6 @@
 #include <vector>
 class StiHit;
 class StiTrack;
-class StiVertexFinder;
 class EditableParameters;
 template<class Filtered>class Filter;
 
@@ -30,10 +29,7 @@ public:
   virtual void clear()=0;
   /// Get the track filter currently used by the tracker
   virtual Filter<StiTrack> * getTrackFilter()= 0;
-  /// Get the vertex finder used by this track finder
-  virtual StiVertexFinder * getVertexFinder()=0;
   /// Set the vertex finder used by this tracker
-  virtual void setVertexFinder(StiVertexFinder *)=0;
   virtual EditableParameters & getParameters()=0;
   
   void setComb(int comb=7)		{mComb = comb;}
