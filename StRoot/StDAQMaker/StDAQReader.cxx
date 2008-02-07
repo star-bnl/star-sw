@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.60 2008/02/01 15:00:31 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.61 2008/02/07 22:06:35 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.61  2008/02/07 22:06:35  fine
+ * return the correct run number with the new EVP_READER. Tnx Fisyak
+ *
  * Revision 1.60  2008/02/01 15:00:31  fine
  * Fix the compilation problem
  *
@@ -486,7 +489,13 @@ void StDAQReader::setFTPCVersion(const char* vers)
 {strcpy(fFTPCVersion,vers);} 
 
 //_____________________________________________________________________________
-  int StDAQReader::getRunNumber()   const { return fEventReader->runno();}
+int StDAQReader::getRunNumber()   const 
+{
+     return  fDaqFileReader  ?
+             fDaqFileReader->run 
+           :
+             fEventReader->runno();
+}
 //_____________________________________________________________________________
   int StDAQReader::getEventNumber() const {return fEventInfo->EventSeqNo;}
 //_____________________________________________________________________________
