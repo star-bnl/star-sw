@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.61 2008/02/07 22:06:35 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.62 2008/02/08 15:38:50 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.62  2008/02/08 15:38:50  fine
+ * Add CPP flag to distinguish the old and new EVP_READER at the compilation time. Thankx Lidia
+ *
  * Revision 1.61  2008/02/07 22:06:35  fine
  * return the correct run number with the new EVP_READER. Tnx Fisyak
  *
@@ -491,9 +494,13 @@ void StDAQReader::setFTPCVersion(const char* vers)
 //_____________________________________________________________________________
 int StDAQReader::getRunNumber()   const 
 {
-     return  fDaqFileReader  ?
+     // return the run number from the DAQ file header
+   return
+#ifndef OLD_EVP_READER
+           fDaqFileReader  ?
              fDaqFileReader->run 
-           :
+          :
+#endif
              fEventReader->runno();
 }
 //_____________________________________________________________________________
