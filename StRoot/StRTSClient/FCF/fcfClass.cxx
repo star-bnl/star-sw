@@ -42,7 +42,7 @@
 #include <rtsSystems.h>
 #include <fcfClass.hh>
 
-static char *fcf_CVS_revision = "$Revision: 1.17 $" ;
+static char *fcf_CVS_revision = "$Revision: 1.18 $" ;
 
 #ifdef __ROOT__	// STAR Offline
 
@@ -71,6 +71,7 @@ static char *fcf_CVS_revision = "$Revision: 1.17 $" ;
 #pragma align 1
 #pragma pack 1
 #endif
+namespace OLDEVP {
 
 struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 	int t ;	// this may occasionally be negative!
@@ -94,6 +95,7 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 #endif
 
 } ;
+}
 
 #if __GNUC__ == 2 && __GNUC_MINOR__ < 8
 #pragma pack 0

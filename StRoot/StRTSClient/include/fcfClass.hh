@@ -4,14 +4,12 @@
 	
 */
 
-#ifndef _FCF_CLASS_HH_
-#define _FCF_CLASS_HH_
+#ifndef _FCF_CLASS_OLD_EVP_HH_
+#define _FCF_CLASS_OLD_EVP_HH_
 
 
 // steering - watch it!
 //#define FCF_ANNOTATE_CLUSTERS
-
-
 
 // flag definitions - NEVER CHANGE
 #define FCF_ONEPAD		1
@@ -34,6 +32,7 @@
 
 
 #define FCF_WORDS_PER_CLUSTER	2
+
 
 
 #if defined(__unix) || defined(__ROOT__)
@@ -60,6 +59,7 @@ typedef unsigned char u_char;
 
 #endif
 
+namespace OLDEVP {
 
 // used if the FCF_ANNOTATE_CLUSTERS is set...
 struct fcfPixAnnotate {
@@ -218,7 +218,6 @@ private :
 	int output(fcfHit *l) ;	// the cut function; return TRUE if accepted
 	int check_merge(fcfHit *l, fcfHit *r) ;	// merges r into l and returns TRUE 
 } ;
-
-
-
+}
+using namespace OLDEVP;
 #endif
