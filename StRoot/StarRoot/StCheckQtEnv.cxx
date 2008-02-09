@@ -1,6 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/10/2006
 //
-// $Id: StCheckQtEnv.cxx,v 1.7 2006/12/09 15:59:40 fine Exp $
+// $Id: StCheckQtEnv.cxx,v 1.8 2008/02/09 01:17:19 fine Exp $
 // This class sets the Qt/Root environment "on fly" and 
 // generates the correct ROOT resource ".rootrc" file 
 // also
@@ -85,7 +85,7 @@ Int_t StCheckQtEnv::SetRootResource(FILE *file, const char *plugin,
 }
 
 //__________________________________________________________________
-Long_t  StCheckQtEnv::SetQtEnv() {
+Long_t  StCheckQtEnv::SetQtEnv(bool checkCoin) {
   //------------------
   // Check GED library
   // Return value:
@@ -153,22 +153,25 @@ Long_t  StCheckQtEnv::SetQtEnv() {
      if ((c+=SetRootResource(f,plugins[iPlugin],plugins[iPlugin+1],plugins[iPlugin+2]))) {
        // Check Open Inventor
        Long_t savedC = c;
-       if (gSystem->DynamicPathName("libCoin",kTRUE)) {
-          iPlugin+=3;
-          c+=SetRootResource(f,plugins[iPlugin],plugins[iPlugin+1],plugins[iPlugin+2],kTRUE);
-       } else {
-          fprintf(stderr," ----------------------------------------------------------\n");
-          fprintf(stderr,"                        ATTENTION :                        \n");
-          fprintf(stderr,"\"Coin3d\" shared libraries has not beed detected\n");
-          fprintf(stderr," Please, run:\n\n"); 
-          fprintf(stderr,"=====  \"source $STAR/QtRoot/qtgl/qtcoin/setup.csh\"  =====\n\n");
-          fprintf(stderr," script to activated the advanced (recommended) Coin3D env.\n");
-          fprintf(stderr," ----------------------------------------------------------\n");
-          fprintf(stderr," and re-start your application\n");
-          fprintf(stderr," ----------------------------------------------------------\n");    
-          c = savedC; // no libCoin. we still can use it
-          gSystem->Sleep(5000);
- } } } }
+
+       if (checkCoin) {
+          if (gSystem->DynamicPathName("libCoin",kTRUE)) {
+             iPlugin+=3;
+             c+=SetRootResource(f,plugins[iPlugin],plugins[iPlugin+1],plugins[iPlugin+2],kTRUE);
+          } else {
+             fprintf(stderr," ----------------------------------------------------------\n");
+             fprintf(stderr,"                        ATTENTION :                        \n");
+             fprintf(stderr,"\"Coin3d\" shared libraries has not beed detected\n");
+             fprintf(stderr," Please, run:\n\n"); 
+             fprintf(stderr,"=====  \"source $STAR/QtRoot/qtgl/qtcoin/setup.csh\"  =====\n\n");
+             fprintf(stderr," script to activated the advanced (recommended) Coin3D env.\n");
+             fprintf(stderr," ----------------------------------------------------------\n");
+             fprintf(stderr," and re-start your application\n");
+             fprintf(stderr," ----------------------------------------------------------\n");    
+             c = savedC; // no libCoin. we still can use it
+             gSystem->Sleep(5000);
+          } }
+ } } }
  
  fclose(f);
  if (c == 0) {

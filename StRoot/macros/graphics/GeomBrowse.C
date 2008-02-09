@@ -20,15 +20,25 @@ void GeomDrawUsage() {
           printf("One always can select the geometry from the \"file menu\" of the GUI interface later on too\n");          
           printf("\n");                
           printf("---------------\n"); 
-          printf("\n$Id: GeomBrowse.C,v 1.5 2006/11/16 21:46:11 fine Exp $\n");
+          printf("\n$Id: GeomBrowse.C,v 1.6 2008/02/09 01:17:10 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 void GeomBrowse(const char *fzFile="complete")
 {
-   GeomDrawUsage();
-  // gSystem->Load("libGeomBrowser");  
+    GeomDrawUsage();
+   // gSystem->Load("libGeomBrowser");  
    gSystem->Load("St_base");
-   if (!StCheckQtEnv::SetQtEnv()) 
+   // check Coin env and load if present
+   TString ivrootDir = "$ROOT/5.99.99/Coin2/.$STAR_HOST_SYS/lib/";
+   gSystem->ExpandPathName(ivrootDir);
+   bool CheckCoin = true;
+   if (!gSystem->AccessPathName(ivrootDir.Data())) {
+      printf(" Loading ... libSoQt.so %d     \n",gSystem->Load(ivrootDir+"libSoQt"));
+      printf(" Loading ... libCoin.so %d     \n",gSystem->Load(ivrootDir+"libCoin"));
+      printf(" Loading ... libSmallChange %d \n",gSystem->Load(ivrootDir+"libSmallChange"));
+      CheckCoin = false;
+   }
+   if (!StCheckQtEnv::SetQtEnv(CheckCoin))
    {
       gSystem->Load("StChain");
       gSystem->Load("St_Tables");
