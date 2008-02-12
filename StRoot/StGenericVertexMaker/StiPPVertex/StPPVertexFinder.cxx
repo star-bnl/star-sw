@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.26 2007/03/22 08:42:05 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.27 2008/02/12 17:51:20 jeromel Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -157,7 +157,12 @@ StPPVertexFinder::InitRun(int runnumber){
   int dateY=mydb->GetDateTime().GetYear();
   
   if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
-  assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
+
+  //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
+  if ( dateY >= 2008){
+    LOG_WARN << "ATTENTION REQUIRED - We will be using a default value of mMinAdcBemc = 8" << endm;
+  }
+
   if(isMC) {
     LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
     if(dateY>2006)  LOG_WARN <<
@@ -722,7 +727,11 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
 //-------------------------------------------------
 void 
 StPPVertexFinder::exportVertices(){
-  assert(mVertexConstrain); // code is not ready for reco w/o beamLine
+  if ( ! mVertexConstrain ){
+    // code is not ready for reco w/o beamLine
+    LOG_FATAL << "StPPVertexFinder code is not ready for reco w/o beamLine" << endm;
+    assert(mVertexConstrain); 
+  }
   uint i;
   for(i=0;i<mVertexData.size();i++) {
     VertexData *V=&mVertexData[i];
@@ -1121,6 +1130,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.27  2008/02/12 17:51:20  jeromel
+ * Assert of Year number removed. Assert on beamLine left but added an explaination (so we won't have to rediscover this).
+ *
  * Revision 1.26  2007/03/22 08:42:05  balewski
  * extend validity of PPV for 2007 data taking
  *
