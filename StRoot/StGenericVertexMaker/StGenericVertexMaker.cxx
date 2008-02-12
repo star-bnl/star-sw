@@ -162,6 +162,15 @@ void StGenericVertexMaker::Clear(const char* opt){
 
 
 //_____________________________________________________________________________
+
+/*!
+
+  InitRun() will initialize the beam line constraint if this option
+  is selected. From BFChain, beamLine constraint is set via the "beamline"
+  option; this will intrinsically call the UseBeamLine() method BEFORE
+  InitRun() is called.
+
+ */
 Int_t StGenericVertexMaker::InitRun(int runnumber){
   theFinder->InitRun(runnumber);
   if (usebeamline) {
@@ -176,12 +185,11 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
      if (dbDataSet) {
        vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
 
-     x0 = vSeed->x0;
-     y0 = vSeed->y0;
-     dxdz = vSeed->dxdz;
-     dydz = vSeed->dydz;
-     }
-     else {
+       x0 = vSeed->x0;
+       y0 = vSeed->y0;
+       dxdz = vSeed->dxdz;
+       dydz = vSeed->dydz;
+     } else {
        LOG_INFO << "StGenericVertexMaker -- No Database for beamline" << endm;
      }
      LOG_INFO << "BeamLine Constraint: " << endm;
