@@ -33,12 +33,13 @@
                         <Host name="db02.star.bnl.gov"  port="3316"/>
                         <Host name="db03.star.bnl.gov"  port="3316"/>
                         <Host name="db04.star.bnl.gov"  port="3316"/>
-                        <Host name="db11.star.bnl.gov"  port="3316" machinePower = ".25" />
+                        <Host name="db11.star.bnl.gov"  port="3316" machinePower = ".35" />
                         <Host name="db05.star.bnl.gov"  port="3316"/>
+                        <Host name="stardb.ujf.cas.cz"  port="3306"/>
                         <Host name="db07.star.bnl.gov"  port="3316"/>
                         <Host name="db08.star.bnl.gov"  port="3316"/>
                         <Host name="bogart.star.bnl.gov"  port="3316"/>
-                        <Host name="db06.star.bnl.gov" port="3316" machinePower= ".4" />
+                        <Host name="db06.star.bnl.gov" port="3316" machinePower= ".5" />
                 </Server>
 
                <Server scope="Analysis" whenActive="night" accessMode="read">
@@ -47,7 +48,7 @@
                 </Server> 
 		
 
-               <Server scope="Analysis" user="fisyak,agerom,perev,balewski,jwebb,pibero" accessMode="read">
+               <Server scope="Analysis" user="fisyak,perev,balewski,jwebb,pibero" accessMode="read">
                         <Host name="db01.star.bnl.gov" port="3316"/>
                         <Host name="db10.star.bnl.gov" port="3316"/>
                 </Server>
