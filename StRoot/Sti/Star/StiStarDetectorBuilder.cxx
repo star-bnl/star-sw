@@ -88,7 +88,8 @@ void StiStarDetectorBuilder::useVMCGeometry() {
       pipeVolume->setGas(_vacuumMaterial);
       pipeVolume->setMaterial(_pipeMaterial);
       pipeVolume->setElossCalculator(pipeElossCalculator);
-      add(0,0,pipeVolume);
+      Int_t layer = getNRows();
+      add(layer+1,0,pipeVolume);
     }
   }
   cout << "StiStarDetectorBuilder::buildDetectors() -I- Done" << endl;
