@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.130 2007/12/29 01:44:53 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.131 2008/02/13 00:21:36 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -308,7 +308,8 @@ static bool FindStiVolume(const char *name,TList *list) {
             /*printf("%s %s\n",vol->GetName(),pre.Data()); */ 
             const char *g3name = vol->GetName();
             if (!strcmp(g3name,"TPSS"))      g3name="TPC";
-            else if (!strcmp(g3name,"STSI")) g3name="SVT";
+            else if (!strcmp(g3name,"STLI")) g3name="SVT";
+//            else if (!strcmp(g3name,"STSI")) g3name="SVT";
             else if (!strcmp(g3name,"SFSM")) g3name="SSD";
             found = pre.BeginsWith(g3name,TString::kIgnoreCase);
          }
@@ -1502,6 +1503,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.131  2008/02/13 00:21:36  perev
+// mape the correct SVT G3 name to Sti name
+//
 // Revision 1.130  2007/12/29 01:44:53  perev
 // BugFix || to |
 //
