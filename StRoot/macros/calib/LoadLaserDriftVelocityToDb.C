@@ -314,7 +314,7 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 
 
   // Prepare to read from the DB
-  gSystem->Setenv("DB_ACCESS_MODE","read");
+  //gSystem->Setenv("DB_ACCESS_MODE","read");
 
   cout << "Executing: " << myCount.Data() << endl;
 
@@ -661,7 +661,7 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 
 
     // Prepare to write to the DB
-    gSystem->Setenv("DB_ACCESS_MODE","write");
+    //gSystem->Setenv("DB_ACCESS_MODE","write");
 
     // --> create a modifier object and set up table definitions  
     StDbModifier *dm = new StDbModifier();
