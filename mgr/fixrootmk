@@ -69,7 +69,7 @@ foreach $file (("system.rootrc","root.mimes")){
 		unlink("etc/$file");
 	    } else {
 		print 
-		    " + etc/$file is a link - you may want to remove using -ulink\n";
+		    " + etc/$file is a link - you may want to remove using -unlink\n";
 		$ADDMESS = " * WARNING you MUST do this before starting compilation\n";
 	    }
 	}
