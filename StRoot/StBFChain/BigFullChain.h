@@ -490,7 +490,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
-  {"min2trkVtx"     ,""  ,"","",""                    ,"","...only 2 tracks needed for vertex finding",kFALSE},
+  {"min2trkVtx"     ,""  ,"","",""                 ,"","...only 2 tracks needed for vertex finding",kFALSE},
+  {"svt1hit",""  ,"","",""                                     ,"","Use 1 SVT hit only combination",kFALSE},
 
 #ifndef __BFC2__
   // This option does nothing in TPT mode
