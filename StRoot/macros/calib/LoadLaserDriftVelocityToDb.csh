@@ -180,6 +180,7 @@ cd $WDIR
 echo `/bin/pwd`
 
 echo "$DIR $listLaserFiles"
+setenv DB_ACCESS_MODE write
 $LS LoadLaserDriftVelocityToDb.C && $STAR/.$STAR_HOST_SYS/bin/root4star -b -l <<EOF 
 .x $WDIR/LoadLaserDriftVelocityToDb.C("$DIR","$listLaserFiles","tpcDriftVelocity",1)
 .q
