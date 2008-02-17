@@ -118,7 +118,7 @@ if ($pkg eq "RTS") {
 	  $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
 	    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
 }
-my @VF_daq_pkgs = qw(StDaqAdcMaker  StDAQMaker  StRtsReaderMaker  StTpcClusters    StTpxReaderMaker StRTSMaker  StTofEventMaker   StTpxEventMaker);
+my @VF_daq_pkgs = qw(StDaqAdcMaker  StDAQMaker  StRtsReaderMaker  StTpcClusters    StTpxReaderMaker StRTSMaker  StTofEventMaker   StTpxEventMaker Infrastructure QEvpClient HistogramGroups AA PlotClient );
 foreach my $p (@VF_daq_pkgs) {
   #  print "compare $p with pkg = $pkg\n";
   if ($pkg eq $p) {
