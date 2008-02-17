@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.13 2007/07/12 19:30:15 fisyak Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.14 2008/02/17 17:37:32 balewski Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -609,7 +609,7 @@ TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId ) {
   Int_t nU = getNStrips( sector, 0 );
   Int_t nV = getNStrips( sector, 1 );
   if ( uId >= nU || vId >= nV ) {
-    LOG_WARN<<"::getIntersection(...) passed invalid strip ID sector="<<sector<<" uId="<<uId<<" vId="<<vId<<std::endl;
+    LOG_DEBUG<<"::getIntersection(...) passed invalid strip ID sector="<<sector<<" uId="<<uId<<" vId="<<vId<<std::endl;
     return TVector3(1.,1.,-999.0);
   }
 
@@ -624,7 +624,7 @@ TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId, TVec
   Int_t nU = getNStrips( sector, 0 );
   Int_t nV = getNStrips( sector, 1 );
   if ( uId >= nU || vId >= nV ) {
-    LOG_WARN<<"::getIntersection(...) passed invalid strip ID sector="<<sector<<" uId="<<uId<<" vId="<<vId<<std::endl;
+    LOG_DEBUG<<"::getIntersection(...) passed invalid strip ID sector="<<sector<<" uId="<<uId<<" vId="<<vId<<std::endl;
     return TVector3(1.,1.,-999.0);
   }
 
@@ -689,7 +689,7 @@ TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
   Float_t scalev=scale_numerv/scale_denomv;
   if (scalev < 0 || scalev > 1) {
     TVector3 ErrorVector(1.,1.,-999.);
-    LOG_WARN<<GetName()<<"::getIntersection( ) passed non-intersecting SMD strips " << *u << " " << *v << endm;
+    LOG_DEBUG<<GetName()<<"::getIntersection( ) passed non-intersecting SMD strips " << *u << " " << *v << endm;
     return ErrorVector;
   }  
   
@@ -766,6 +766,9 @@ ostream& operator<<(ostream &os, const StructEEmcStrip strip)
 /////////////////////////////////////////////////////////////////////////////
 /*
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.14  2008/02/17 17:37:32  balewski
+ * demote warning about strips intersecting beyond modle to DEBUG
+ *
  * Revision 1.13  2007/07/12 19:30:15  fisyak
  * Add includes for ROOT 5.16
  *
