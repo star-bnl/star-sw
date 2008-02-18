@@ -25,7 +25,16 @@ if ( ! defined($CERN) ){
 
 if ( ! -e "config/Makefile.config"){
     die "You are probably not in the proper directory\n";
-} 
+} else {
+    # if -l, copy local otherwise it will be share by debug / no-debug
+    # version and create confusions.
+    if ( -l "config/Makefile.config"){
+	$link = readlink("config/Makefile.config");
+	unlink("config/Makefile.config");
+	system("/bin/cp -fp $link config/Makefile.config");
+	print "Made local config/Makefile.config\n";
+    }
+}
 
 
 
@@ -114,8 +123,12 @@ close(FO);
 
 
 if ($done){
+    unlink("config/Makefile.config.old") if ( -e "config/Makefile.config.old");
     rename("config/Makefile.config",    "config/Makefile.config.old");
     rename("config/Makefile.config.new","config/Makefile.config");
+    # one problem is timestamp restoration
+    @all = stat("config/Makefile.config.old");
+    utime($all[8],$all[9],"config/Makefile.config");
 
     print "=> config/Makefile.config fixed\n";
 } else {
