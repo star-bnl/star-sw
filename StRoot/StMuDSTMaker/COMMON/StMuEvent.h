@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.19 2007/09/21 02:27:12 mvl Exp $
+ * $Id: StMuEvent.h,v 1.20 2008/02/20 09:00:48 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -23,6 +23,7 @@
 #include "StEvent/StBbcTriggerDetector.h"
 #include "StEvent/StEmcTriggerDetector.h"
 #include "StEvent/StFpdTriggerDetector.h"
+#include "StEvent/StFmsTriggerDetector.h"
 #include "StEvent/StFpdCollection.h"
 #include "StEvent/StL0Trigger.h"
 #include "StEvent/StTriggerIdCollection.h"
@@ -62,6 +63,7 @@ class StMuEvent : public TObject {
   StBbcTriggerDetector& bbcTriggerDetector();
   StEmcTriggerDetector& emcTriggerDetector();
   StFpdTriggerDetector& fpdTriggerDetector();
+  StFmsTriggerDetector& fmsTriggerDetector();
   StFpdCollection& fpdCollection(); 
   StL0Trigger& l0Trigger(); 
   // Special classes for the muDst
@@ -116,6 +118,7 @@ class StMuEvent : public TObject {
   StBbcTriggerDetector mBbcTriggerDetector;
   StEmcTriggerDetector mEmcTriggerDetector;
   StFpdTriggerDetector mFpdTriggerDetector;
+  StFmsTriggerDetector mFmsTriggerDetector;
   StFpdCollection mFpdCollection; 
   StL0Trigger mL0Trigger; 
   // special classes from MuDst
@@ -142,7 +145,7 @@ class StMuEvent : public TObject {
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,10)
+  ClassDef(StMuEvent,11)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -159,6 +162,7 @@ inline StZdcTriggerDetector& StMuEvent::zdcTriggerDetector() {return mZdcTrigger
 inline StBbcTriggerDetector& StMuEvent::bbcTriggerDetector() {return mBbcTriggerDetector;}
 inline StEmcTriggerDetector& StMuEvent::emcTriggerDetector() {return mEmcTriggerDetector;}
 inline StFpdTriggerDetector& StMuEvent::fpdTriggerDetector() {return mFpdTriggerDetector;}
+inline StFmsTriggerDetector& StMuEvent::fmsTriggerDetector() {return mFmsTriggerDetector;}
 inline StFpdCollection& StMuEvent::fpdCollection() {return mFpdCollection;} 
 inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;} 
 // special classes for muDst
@@ -203,6 +207,9 @@ inline float StMuEvent::vpdTdiff() { return mVpdTdiff; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.20  2008/02/20 09:00:48  mvl
+ * Included FMS data (StFMSTriggerDetector) (code by Akio)
+ *
  * Revision 1.19  2007/09/21 02:27:12  mvl
  * Added calibrated VPD info from StTofCollection (run-8 prep)
  *

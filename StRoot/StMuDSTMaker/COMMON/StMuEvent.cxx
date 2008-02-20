@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.16 2007/09/21 02:27:12 mvl Exp $
+ * $Id: StMuEvent.cxx,v 1.17 2008/02/20 09:00:48 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -100,6 +100,7 @@ void StMuEvent::fill(const StEvent* event){
     mBbcTriggerDetector = event->triggerDetectorCollection()->bbc();
     mEmcTriggerDetector = event->triggerDetectorCollection()->emc();
     mFpdTriggerDetector = event->triggerDetectorCollection()->fpd();
+    mFmsTriggerDetector = event->triggerDetectorCollection()->fms();
   }
 
   if (event->fpdCollection())
@@ -181,6 +182,9 @@ unsigned short StMuEvent::refMultFtpc(int vtx_id) {return refMultFtpcEast(vtx_id
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.17  2008/02/20 09:00:48  mvl
+ * Included FMS data (StFMSTriggerDetector) (code by Akio)
+ *
  * Revision 1.16  2007/09/21 02:27:12  mvl
  * Added calibrated VPD info from StTofCollection (run-8 prep)
  *
