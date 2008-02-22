@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.14 2007/12/05 19:35:41 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.15 2008/02/22 05:10:56 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -200,7 +200,7 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
 
 
 //________________________________________________________________________________
-void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPattern=0, Bool_t simple=kTRUE) 
+void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPattern=0, Bool_t simple=kFALSE) 
 {  
    if (TargetName && TargetName[0] && inputFilesPattern && inputFilesPattern[0] ) {
       if (simple) {
