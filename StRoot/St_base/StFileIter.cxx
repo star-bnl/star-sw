@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.3 2007/11/02 18:48:25 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.4 2008/02/22 05:00:52 fine Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -290,6 +290,47 @@ TObject *StFileIter::Next(Int_t  nSkip)
    SkipObjects(nSkip);
    return GetObject();
 }
+
+//__________________________________________________________________________
+void StFileIter::PurgeKeys(TList *listOfKeys) {
+  assert(listOfKeys);
+  // Remove the TKey duplication,
+  // leave the keys with highest cycle number only
+  // Sort if first
+  listOfKeys->Sort();
+  TObjLink *lnk   = listOfKeys->FirstLink();
+  while(lnk) {
+     TKey *key = (TKey *)lnk->GetObject();
+     Short_t cycle = key->GetCycle(); 
+     const char *keyName = key->GetName();
+     // Check next object
+     lnk = lnk->Next();
+     if (lnk) {
+        TKey *nextkey = 0;
+        TObjLink *lnkThis = lnk;
+        while (     lnk
+             &&   (nextkey = (TKey *)lnk->GetObject()) 
+             &&  !strcmp(nextkey->GetName(), keyName) 
+            ) {
+            // compare the cycles
+            Short_t nextCycle = nextkey->GetCycle() ;
+            //printf(" StFileIter::PurgeKeys found new cycle %s :%d : %d\n",
+            //      keyName,cycle ,nextCycle);
+            assert(cycle != nextCycle);
+            TObjLink *lnkNext = lnk->Next();
+            if (cycle > nextCycle ) { 
+               delete listOfKeys->Remove(lnk);
+            } else {
+               delete listOfKeys->Remove(lnkThis);
+               cycle   = nextCycle;
+               lnkThis = lnk;
+            } 
+            lnk = lnkNext;
+         }
+      } 
+   }
+}
+
 //__________________________________________________________________________
 void StFileIter::Reset()
 {
@@ -303,7 +344,7 @@ void StFileIter::Reset()
    if (!fRootFile->IsWritable()) {
       TList *listOfKeys = fRootFile->GetListOfKeys();
       if (listOfKeys) {
-         if (!listOfKeys->IsSorted()) listOfKeys->Sort();
+         if (!listOfKeys->IsSorted()) PurgeKeys(listOfKeys);
          fList = listOfKeys;
          if (fDirection == kIterForward) {
             fCursorPosition = 0;
