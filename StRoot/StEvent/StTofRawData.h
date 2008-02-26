@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofRawData.h,v 2.2 2007/11/21 00:28:32 ullrich Exp $
+ * $Id: StTofRawData.h,v 2.3 2008/02/26 20:01:58 ullrich Exp $
  *
  * Author: Xin Dong, Feb 2005
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofRawData.h,v $
+ * Revision 2.3  2008/02/26 20:01:58  ullrich
+ * Added new member mTriggerrime and related methods.
+ *
  * Revision 2.2  2007/11/21 00:28:32  ullrich
  * Added new data member mTray plus access functions. New overloaded constructor.
  *
@@ -35,6 +38,7 @@ public:
 
     StTofRawData(unsigned short, unsigned short, unsigned int, unsigned short);
     StTofRawData(unsigned short, unsigned short, unsigned short, unsigned int, unsigned short);
+    StTofRawData(unsigned short, unsigned short, unsigned short, unsigned int, unsigned int, unsigned short);
     ~StTofRawData();    
 
     int operator==(const StTofRawData&) const;
@@ -44,12 +48,14 @@ public:
     unsigned short  tray() const;
     unsigned short  channel() const;
     unsigned int    tdc() const;
+    unsigned int    triggertime() const;
     unsigned short  quality() const;
 
     void      setLeTeFlag(unsigned short);
     void      setTray(unsigned short);
     void      setChannel(unsigned short);
     void      setTdc(unsigned int);
+    void      setTriggertime(unsigned int);
     void      setQuality(unsigned short);
     
 protected:
@@ -57,9 +63,10 @@ protected:
     UShort_t  mTray;
     UShort_t  mChannel;
     UInt_t    mTdc;
+    UInt_t    mTriggertime;
     UShort_t  mQuality;
 
-    ClassDef(StTofRawData,2)
+    ClassDef(StTofRawData,3)
 };
 
 inline void
@@ -84,6 +91,12 @@ inline void
 StTofRawData::setTdc(unsigned int rawTdc)
 {
     mTdc = rawTdc;
+}
+
+inline void
+StTofRawData::setTriggertime(unsigned int rawtriggertime)
+{
+    mTriggertime = rawtriggertime;
 }
 
 inline void
@@ -116,12 +129,16 @@ StTofRawData::tdc()  const
     return mTdc;
 }
 
+inline unsigned int
+StTofRawData::triggertime()  const
+{
+    return mTriggertime;
+}
+
 inline unsigned short
 StTofRawData::quality()  const
 {
     return mQuality;
 }
-
-//ostream& operator<<(ostream& os, const StTofRawData&);
 
 #endif
