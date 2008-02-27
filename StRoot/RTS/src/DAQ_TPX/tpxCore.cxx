@@ -809,7 +809,7 @@ void tpx_analyze_msc(int sector,int rb, char *buff)
 
 	LOG(NOTE,"Config for RB %d: sector %d, rdo %d",rb,rdo->sector,rdo->rdo) ;
 	LOG(NOTE,"remote %d, temp rdo %d, temp stratix %d",rdo->remote,rdo->temp_rdo,rdo->temp_stratix) ;
-	LOG(NOTE,"altro.c %s, trigger.c %s",rdo->altro_date,rdo->trigger_date) ;
+//	LOG(NOTE,"altro.c %s, trigger.c %s",rdo->altro_date,rdo->trigger_date) ;
 
 	LOG(NOTE,"\t FPGAs: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",
 	    rdo->fpga_usercode[0],

@@ -12,6 +12,10 @@
 
 #include <rtsLog.h>
 
+#include <byteswap.h>
+#define swap16(x) bswap_16(x)
+#define swap32(x) bswap_32(x)
+
 int debug = 0;
 
 /********************************/
@@ -167,6 +171,17 @@ int SFS_ittr::get(wrapfile *wrap)
 }
 
 
+void SFS_ittr::swapEntry()
+{
+  int swap;
+  if(entry.byte_order == 0x04030201) return;
+
+  entry.byte_order = swap32(entry.byte_order);
+
+  entry.byte_order = swap32(entry.byte_order);
+  entry.sz = swap32(entry.sz);
+  entry.reserved = swap16(entry.reserved);
+}
 
 // Return -1 on error
 // 0 on ok.
@@ -187,8 +202,6 @@ int SFS_ittr::next()
   }
 
   if(filepos == 2) {  
-
-
     // update ppath...
     LOG(DBG,"---DIR:  name=%s entry.attr = 0x%x headsz=%d",entry.name, entry.attr,entry.head_sz);
    
@@ -302,6 +315,9 @@ int SFS_ittr::next()
 	   entry.type[0],entry.type[1],entry.type[2],entry.type[3]);
     return -1;
   }
+
+  swapEntry();
+
   // printf("reading... bytes 0x%x,  head_sz %d,  sz = %d\n",
   // entry.byte_order, entry.head_sz, entry.sz);
 
