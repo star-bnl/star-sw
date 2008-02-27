@@ -1,0 +1,77 @@
+# Jeff's stuff
+#
+# Does not make:
+#	1. the myrinet drivers.  The relavent drivers are in
+#		/RTS/MYRI/gm-1.2	// vxworks lanai4
+#		/RTS/MYRI/gm-1.4	// vxworks lanai9 
+#		/RTS/MYRI/gm-1.6	// solaris
+#
+# 
+# All of the flavors of make build both solaris and vxworks
+# All of the flavors of make install unix libraris
+#
+# make        ---> builds everything except for the database spoolers
+# make all    ---> builds everything including the database spoolers 
+#                  (assumes that jeff porters StRoot/StDbLib is checked out in ../../StRoot
+#
+# make db     ---> builds just the db code under same assumptions
+#
+# make install --> to install binaries
+
+export HOST_SYSTEM := $(shell uname)
+
+ifeq (${HOST_SYSTEM},SunOS)
+	export RTS_SYSTEM := SUN
+else
+ifeq (${HOST_SYSTEM},Linux)
+	export RTS_SYSTEM := LINUX
+endif
+endif
+
+
+testing:
+	@echo Running on $(HOST_SYSTEM), RTS $(RTS_SYSTEM). OK...
+
+
+most:
+	(cd SUNRT; make)
+	(cd SUNRT; make install) 
+	(cd PFTP_MEM; make solaris)
+	(cd HANDLER; make)
+	(cd MOTHER; make)
+	(cd MYRI; make)
+	(cd MYRI/BUFFERED_UNIX; make)
+	(cd MYRI/BUFFERED_UNIX; make installlib)
+	(cd RTSCOM_UX; make)
+	(cd ETHLIB_UX; make)
+	(cd EVB; make)
+
+db:	
+	(cd ../../StRoot/StDbLib; /opt/star/bin/make)
+	(cd DB; make)
+
+all:	db most
+
+install: db most
+	(cd SUNRT; make install)
+	(cd HANDLER; make install)
+	(cd MOTHER; make install)
+	(cd MYRI; make install)
+	(cd MYRI/BUFFERED_UNIX; make installlib)
+	(cd MYRI/BUFFERED_UNIX; make install)
+	(cd RTSCOM_UX; make install)
+	(cd ETHLIB_UX; make install)
+	(cd EVB; make install)
+
+clean:	
+	(cd SUNRT; make clean)
+	(cd HANDLER; make clean)
+	(cd MOTHER; make clean)
+	(cd MYRI; make clean)
+	(cd MYRI/BUFFERED_UNIX; make clean)
+	(cd RTSCOM_UX; make clean)
+	(cd ETHLIB_UX; make clean)
+	(cd EVB; make clean)
+	(cd DB; make clean)
+	(cd ../../StRoot/StDbLib; make clean)
+	(cd PFTP_MEM; make clean)
