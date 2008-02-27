@@ -9,8 +9,8 @@
 #include <evpReader.hh>
 #include <evpSupport.h>
 #include <tofReader.h>
-#include <../RTS_READER/daq_dta.h>
-#include <../RTS_READER/daq_det.h>
+#include <RTS_READER/daq_dta.h>
+#include <RTS_READER/daq_det.h>
 
 struct tof_t tof ;
 

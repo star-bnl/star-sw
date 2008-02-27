@@ -89,6 +89,7 @@ class SFS_ittr {
   int next();
 
   wrapfile *wfile;
+  void swapEntry();
 };
 
 

@@ -16,10 +16,10 @@
 //#include <TPC/rowlen.h>
 
 #include <TPC/trans_table.hh>
-#include <../RTS_READER/rts_reader.h>	// for RR
-#include <../RTS_READER/daq_dta.h>
-#include <../RTS_READER/daq_det.h>
-#include <../DAQ_TPX/daq_tpx.h>		// for RR
+#include <RTS_READER/rts_reader.h>	// for RR
+#include <RTS_READER/daq_dta.h>
+#include <RTS_READER/daq_det.h>
+#include <DAQ_TPX/daq_tpx.h>		// for RR
 
 
 struct tpc_t tpc;
@@ -156,7 +156,8 @@ int tpcReader(char *m, int sector)
 	}
 
 	if(some_data) return some_data ;
-	else return EVP_NO_DET ;
+	else return EVP_NO_DATA ;     // Just because no tpx, doesn't mean tpc not present!
+	//else return EVP_NO_DET;
 
   }
 

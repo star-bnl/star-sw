@@ -25,12 +25,8 @@
 #include <ssdReader.h>
 #include "cfgutil.h"
 
-#  ifndef __ROOT__
-#     include <../SFS/sfs_index.h>
-#  else 
-#     include "SFS/sfs_index.h"
-#  endif
-#include <../RTS_READER/rts_reader.h>
+#include "SFS/sfs_index.h"
+#include "RTS_READER/rts_reader.h"
 
 
 #endif

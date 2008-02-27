@@ -6,6 +6,8 @@ export HOST_SYSTEM := $(shell uname)
 # useful for Linux
 export HOST_CPU := $(shell uname -m)
 
+
+
 # we want to treat daqman separately
 export HOST_NAME := $(shell uname -n)
 ifeq ($(HOST_NAME),daqman.starp.bnl.gov)
@@ -14,15 +16,19 @@ else
 	export ENABLE_CROSS_COMPILER := 0
 endif
 
+
+
 # go from "uname" to gcc -mcpu=TARGET_CPU variant
 ifeq ($(HOST_CPU),ppc)
 	export TARGET_CPU := 604
 else
-ifeq ($(HOST_CPU),alpha)
-	export TARGET_CPU := 21264
-else 
-	TARGET_CPU := $(HOST_CPU)
+	ifeq ($(HOST_CPU),alpha)
+		export TARGET_CPU := 21264
+	else 
+		export TARGET_CPU := $(HOST_CPU)
+	endif
 endif
+
 
 # Get the RTS_PROJECT. Currently STAR or PP2PP.
 # Set to STAR if not defined... 
@@ -30,6 +36,7 @@ endif
 ifndef RTS_PROJECT
 export RTS_PROJECT := STAR
 endif
+
 
 
 # If TARGET_SYSTEM not defined (either by user of before this Makefile)
@@ -47,6 +54,8 @@ ifeq (${HOST_SYSTEM},Linux)
 endif
 endif
 endif
+
+
 
 ifeq ($(TARGET_SYSTEM),SUN)
 	export TARGET_CPU := ultrasparc	# MANUAL override
@@ -110,8 +119,7 @@ IS_STROOT=$(findstring $(STROOT_STR), $(PWD))
 ifeq "$(STROOT_STR)" "$(IS_STROOT)" 
 	SAY="Working under StRoot"
 
-#	RTS_DIR_PATH = ../../online/RTS
-	RTS_DIR_PATH = ../../
+	RTS_DIR_PATH = ../../online/RTS
 	IS_STROOT=1
 else
 	SAY="Working under RTS"
@@ -269,7 +277,7 @@ endif
 endif
 endif
 endif
-endif
+#endif
 
 export LIBDIR = $(PROJDIR)/$(RTS_DEV_PREFIX)lib/${INSTALL_SUFFIX}
 export BINDIR = $(PROJDIR)/$(RTS_DEV_PREFIX)bin/${INSTALL_SUFFIX}
@@ -321,7 +329,7 @@ SUFFIXES += .cxx .hh
 
 
 ############ NEW boilerplate ##################
-RTS_AR = ar -rucv $@ $?
+RTS_AR = ar -rucvs $@ $?
 
 .PHONY: say libs clean depend install all subdirs update $(VPATH)
 
