@@ -12,7 +12,7 @@ extern int trgReader30(char *trgd);
 extern int trgReader32(char *trgd);     // called by trgReader10   2007 updates....
 extern int trgReader10(char *trgd);
 
-struct trg {
+struct trg_t {
 	int mode ;
 	u_int max_channels ;
 	u_int channels ;
@@ -63,7 +63,7 @@ struct trg {
         u_int   QQTdata[1600];
 } ;
 
-extern struct trg trg ;
+extern struct trg_t trg ;
 
 
 #endif

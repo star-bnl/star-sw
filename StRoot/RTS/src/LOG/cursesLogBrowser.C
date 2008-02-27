@@ -1,5 +1,5 @@
 //
-//   $Id: cursesLogBrowser.C,v 1.1 2008/02/27 16:35:04 fine Exp $
+//   $Id: cursesLogBrowser.C,v 1.2 2008/02/27 19:12:21 fine Exp $
 //
 //  Based on critServer.C written by Tonko Ljubicic
 //  Curses functionality and command line args added by M.J. LeVine 01/2003

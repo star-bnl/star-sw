@@ -26,7 +26,7 @@ inline float fswap(float swapped)
 #endif
 
 
-struct l3 {
+struct l3_t {
     int mode;
     int channels;
     int max_channels;
@@ -40,7 +40,7 @@ struct l3 {
     global_track track[L3_MAX_NR_TRACKS];
 };
 
-extern struct l3 l3;
+extern struct l3_t l3;
 
 extern int l3Reader(char *mem);
 extern int l3Reader(L3_P *l3p);

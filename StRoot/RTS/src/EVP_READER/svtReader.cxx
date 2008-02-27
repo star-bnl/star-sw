@@ -12,7 +12,7 @@
 #include <evpSupport.h>
 #include <svtReader.h>
 
-struct svt svt ;
+struct svt_t svt ;
 
 static int unpackRaw(int sec, int what, struct SVTANODK *padk, struct TPCCPPR_l *cppr, char *mem) ;
 

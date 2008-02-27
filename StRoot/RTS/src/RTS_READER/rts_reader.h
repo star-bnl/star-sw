@@ -13,16 +13,7 @@ Not sure if this shows up anywhere but I'll check with Yuri.
 
 */                                                                      
 
-#include <sys/types.h>
-#include <string.h>
-#include <assert.h>
-
-#include <rts.h>
-#include <rtsLog.h>		// DAQ logging
-#include <rtsSystems.h>
-
-
-#ifdef __ROOT__
+#ifdef __RTS_ROOT__
 #include <StMaker.h>
 #endif
 
@@ -38,12 +29,12 @@ class sfs_index ;
 class fs_dir ;
 class daq_det ;
 
-#ifndef __ROOT__
+#ifndef __RTS_ROOT__
 // DUUUUUUUMMMMMMMYYYYYYY!
-class StMaker {
+class St_Maker {
 public:
-	StMaker() {;} ;
-	virtual ~StMaker() {;} ;
+	St_Maker() {;} ;
+	virtual ~St_Maker() {;} ;
 
 	virtual int Make() { return 0 ; } ;
 	virtual int Init() { return 0 ; } ;
@@ -57,7 +48,7 @@ public:
 } ;
 #endif
 
-class rts_reader : public StMaker {
+class rts_reader : public St_Maker {
 private:
 	int sfs_owner ;
 
@@ -119,14 +110,23 @@ public:
 	u_int		cur_evt_ix ;				// this is the number after /# of the current entry
 
 
-#ifdef __ROOT__
-	ClassDef(rts_reader,0)
+#ifdef __RTS_ROOT__
+	Class_Def(rts_reader,0)
 #endif
 
 } ;
 
 // for convenience of the clients!
-#include <RTS_READER/daq_det.h>
-#include <RTS_READER/daq_dta.h>
+// This trick confuses the CINT dictionary generation
+// #include <RTS_READER/daq_det.h>
+// #include <RTS_READER/daq_dta.h>
+//  For convenience of the clients one needs 
+//  something  like this:
+//
+// rts_clients.h:
+// --------------
+// #include <RTS_READER/rts_reader.h>
+// #include <RTS_READER/daq_det.h>
+// #include <RTS_READER/daq_dta.h>
 
 #endif

@@ -10,7 +10,7 @@
 #include <evpSupport.h>
 #include <ftpReader.h>
 
-struct ftp ftp ;
+struct ftp_t ftp ;
 
 static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *cppr, char *mem) ;
 

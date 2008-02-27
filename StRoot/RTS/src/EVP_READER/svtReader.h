@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 
-struct svt {
+struct svt_t {
 	int channels ;
 	int mode ;	// 0 normal, 1 pedestals/RMSs
 	int max_channels ;
@@ -25,7 +25,7 @@ struct svt {
 	u_char H[24][3][6] ;	// ... to Hybrid
 } ;
 
-extern struct svt svt ;
+extern struct svt_t svt ;
 extern int svtReader(char *mem) ;
 
 

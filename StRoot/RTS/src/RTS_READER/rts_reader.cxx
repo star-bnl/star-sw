@@ -6,6 +6,14 @@
 
 #include "rts_reader.h"
 
+#include <sys/types.h>
+#include <string.h>
+#include <assert.h>
+
+#include <rts.h>
+#include <rtsLog.h>		// DAQ logging
+#include <rtsSystems.h>
+
 
 // all the dets we know about
 #include <SFS/sfs_index.h>

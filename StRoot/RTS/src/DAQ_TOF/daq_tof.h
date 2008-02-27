@@ -2,7 +2,7 @@
 #define _DAQ_TOF_H_
 
 
-#include <RTS_READER/rts_reader.h>
+#include <RTS_READER/daq_det.h>
 
 
 class daq_tof : public daq_det {
@@ -32,8 +32,8 @@ public:
                 static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
-#ifdef __ROOT__
-ClassDef(daq_tof,0)
+#ifdef __RTS_ROOT__
+Class_Def(daq_tof,0)
 #endif
 
 } ;

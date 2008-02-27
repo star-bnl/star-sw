@@ -6,6 +6,7 @@
 #include <daqFormats.h>
 
 #include <evpSupport.h>
+#include <rts.h>
 
 #define TRG_VERSION 0x32
 #include <daqFormats.h>

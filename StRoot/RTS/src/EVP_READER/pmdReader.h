@@ -5,7 +5,7 @@
 
 #include <daqFormats.h>	// for the size constants
 
-struct pmd {
+struct pmd_t {
 	int mode ;	// 0 normal, 1 ped
 	int channels ;
 	int max_channels ;	// 2*10*2*2016
@@ -21,7 +21,7 @@ struct pmd {
 
 } ;
 
-extern struct pmd pmd ;
+extern struct pmd_t pmd ;
 
 extern int pmdReader(char *mem) ;
 

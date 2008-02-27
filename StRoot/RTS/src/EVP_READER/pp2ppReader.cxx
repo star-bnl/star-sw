@@ -11,7 +11,7 @@
 #include "pp2ppReader.h"
 
 
-struct pp2pp pp2pp ;
+struct pp2pp_t pp2pp ;
 
 // taken from ppSEQ.C
 static unsigned char FromGrey[256] = {

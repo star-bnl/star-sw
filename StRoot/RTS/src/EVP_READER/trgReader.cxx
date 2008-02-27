@@ -14,7 +14,7 @@
 
 
 
-struct trg trg ;
+struct trg_t trg ;
 
 int DAQtrgReader(char *m);
 
