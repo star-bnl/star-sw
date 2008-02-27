@@ -11,7 +11,7 @@
 #include <ricReader.h>
 
 
-struct ric ric ;
+struct ric_t ric ;
 
 int DAQricReader(char *m);
 

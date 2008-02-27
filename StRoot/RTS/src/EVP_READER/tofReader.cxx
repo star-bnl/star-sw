@@ -9,8 +9,10 @@
 #include <evpReader.hh>
 #include <evpSupport.h>
 #include <tofReader.h>
+#include <../RTS_READER/daq_dta.h>
+#include <../RTS_READER/daq_det.h>
 
-struct tof tof ;
+struct tof_t tof ;
 
 enum { ADCD = 0, TDCD, A2DD, SCAD };
 

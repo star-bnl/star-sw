@@ -11,7 +11,7 @@
 
 //#define SHOW_DEBUG_INFO
 
-struct l3 l3 ;
+struct l3_t l3;
 
 int DAQl3Reader(char *m);
 

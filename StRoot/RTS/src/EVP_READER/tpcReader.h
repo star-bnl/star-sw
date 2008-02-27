@@ -13,12 +13,12 @@ struct tpc_cl  {
 	u_short charge ;
 	u_short flags ;
 	u_short t1, t2, p1, p2 ;
-#ifdef FCF_SIM_ON
+//#ifdef FCF_SIM_ON
 	u_short adc_max ;
-#endif
+//#endif
 } ;
 
-struct tpc {
+struct tpc_t {
 
 	int mode ;	// 0 normal, 1 pedestals/RMSs
 	int max_channels_all ;
@@ -48,7 +48,7 @@ struct tpc {
 	u_char rdo_present[6] ;	// boolean stating the presence of an RDO
 } ;
 
-extern struct tpc tpc ;
+extern struct tpc_t tpc ;
 
 extern int tpcReader(char *mem, int sector) ;
 extern int fcfReader(int sector, int *t0 = NULL, u_int *gain = NULL);

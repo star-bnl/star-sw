@@ -2,7 +2,6 @@
 #define _EVP_SUPPORT_H
 
 #include <sys/types.h>
-#include <rts.h>
 
 #define EVP_NO_DET	0
 #define EVP_NO_DATA	(-1)

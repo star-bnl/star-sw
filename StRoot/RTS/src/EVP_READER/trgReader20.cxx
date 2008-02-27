@@ -3,6 +3,8 @@
 #include <arpa/inet.h>
 
 #include <rtsLog.h>
+#include <rts.h>
+
 
 #include <rtsSystems.h>
 
@@ -13,10 +15,6 @@
 
 #include <evpSupport.h>
 #include <trgReader.h>
-
-
-
-extern struct trg trg ;
 
 // this maps from the raw data to the following representation
 // sector1,slat1,ch1 ... ch5, sector1,slat2,ch1.... ch5, sector2,slat1,ch1...

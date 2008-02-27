@@ -3,6 +3,10 @@
 
 #include <SFS/sfs_index.h>
 
+#include <rts.h>
+#include <rtsLog.h>		// DAQ logging
+#include <rtsSystems.h>
+
 int daq_det::presence() 
 { 
 

@@ -12,7 +12,7 @@
 #include <evpSupport.h>
 #include <emcReader.h>
 
-struct emc emc ;
+struct emc_t emc ;
 char *getEmcTrgData(DATAP *datap,int index);
 int readBTOW(u_short *_data, int token);
 int readETOW(u_short *_data, int token);

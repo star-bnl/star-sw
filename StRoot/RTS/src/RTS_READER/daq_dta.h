@@ -18,16 +18,16 @@ struct daq_trg_word {
 
 	u_int clock ;
 	u_int misc ;
-#ifdef __ROOT__
-ClassDef(daq_trg_word,0)
+#ifdef __RTS_ROOT__
+Class_Def(daq_trg_word,0)
 #endif
 } ;
 
 struct daq_adc_tb {
 	u_short adc ;
 	u_short tb ;
-#ifdef __ROOT__
-ClassDef(daq_adc_tb,0)
+#ifdef __RTS_ROOT__
+Class_Def(daq_adc_tb,0)
 #endif
 } ;
 
@@ -48,8 +48,8 @@ struct daq_cld {
 	u_short p1, p2 ;
 
 
-#ifdef __ROOT__
-ClassDef(daq_cld,0)
+#ifdef __RTS_ROOT__
+Class_Def(daq_cld,0)
 #endif
 
 } ;
@@ -259,8 +259,8 @@ public:
 		
 	u_int ncontent ;
 
-#ifdef __ROOT__
-ClassDef(daq_dta,0)
+#ifdef __RTS_ROOT__
+Class_Def(daq_dta,0)
 #endif
 
 } ;

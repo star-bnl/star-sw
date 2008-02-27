@@ -4,6 +4,12 @@
 
 
 #include "daq_tof.h"
+#include <RTS_READER/rts_reader.h>
+#include <RTS_READER/daq_dta.h>
+
+#include <rts.h>
+#include <rtsLog.h>		// DAQ logging
+#include <rtsSystems.h>
 
 #include <SFS/sfs_index.h>
 

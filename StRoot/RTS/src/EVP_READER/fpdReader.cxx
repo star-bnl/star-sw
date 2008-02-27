@@ -11,7 +11,7 @@
 #include <fpdReader.h>
 
 
-struct fpd fpd ;
+struct fpd_t fpd ;
 
 int DAQfpdReader(char *m);
 

@@ -4,7 +4,7 @@
 #include <sys/types.h>
 
 
-struct ric {
+struct ric_t {
 	int mode ;
 	int channels ;
 	int max_channels ;	// 16*960
@@ -12,7 +12,7 @@ struct ric {
 	u_short adc[16][960] ;
 } ;
 
-extern struct ric ric ;
+extern struct ric_t ric ;
 
 extern int ricReader(char *mem) ;
 

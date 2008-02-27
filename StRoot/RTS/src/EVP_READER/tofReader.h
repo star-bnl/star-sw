@@ -4,7 +4,7 @@
 #include <sys/types.h>
 
 
-struct tof {
+struct tof_t {
 	int mode ;
 	int channels ;
 	int max_channels ;
@@ -19,7 +19,7 @@ struct tof {
 	u_int ddl_words[4] ;	// the count of words (32bit) for above
 } ;
 
-extern struct tof tof ;
+extern struct tof_t tof ;
 
 extern int tofReader(char *mem) ;
 

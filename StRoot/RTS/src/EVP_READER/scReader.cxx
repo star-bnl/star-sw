@@ -14,7 +14,7 @@
 
 
 
-struct sc sc;
+struct sc_t sc;
 
 
 int DAQscReader(char *m);

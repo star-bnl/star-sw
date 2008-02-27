@@ -1,10 +1,12 @@
 #include <sys/types.h>
 #include <string.h>
 #include <ctype.h>
-
 #include <rtsLog.h>
 
 #include <evpSupport.h>
+#include <rts.h>
+#include "stdlib.h"
+#include "stdio.h"
 
 extern int is_bus_error(const char *addr) ;
 

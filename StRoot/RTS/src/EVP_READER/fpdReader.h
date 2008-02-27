@@ -14,7 +14,7 @@ struct bbc {
 	u_int scl[32] ;
 } ;
 
-struct fpd {
+struct fpd_t {
 	int mode ;
 	int channels ;
 	int max_channels ;
@@ -29,7 +29,7 @@ struct fpd {
 		
 } ;	
 
-extern struct fpd fpd ;
+extern struct fpd_t fpd ;
 
 extern int fpdReader(char *mem) ;
 

@@ -11,7 +11,7 @@
 #include <pmdReader.h>
 
 
-struct pmd pmd ;
+struct pmd_t pmd ;
 
 static int adcReader(int sec, struct PMDADCD *adcd) ;
 static int pedReader(int sec, int type, struct PMDPEDR *pedr) ;

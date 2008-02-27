@@ -12,7 +12,7 @@
 #define	MAXCHAN		128
 
 
-struct pp2pp {
+struct pp2pp_t {
 	int mode ;	// 0 normal, 1 ped
 	int channels ;
 	int max_channels ;
@@ -42,7 +42,7 @@ struct pp2pp {
 
 } ;
 
-extern struct pp2pp pp2pp ;
+extern struct pp2pp_t pp2pp ;
 
 extern int pp2ppReader(char *mem) ;
 

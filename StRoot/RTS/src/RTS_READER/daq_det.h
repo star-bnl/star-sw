@@ -3,6 +3,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 
 #include <RTS_READER/rts_reader.h>
@@ -25,7 +27,7 @@ class daq_dta ;
 class detHandler ;
 struct daq_trg_word ;
 
-class daq_det : public StMaker {
+class daq_det : public St_Maker {
 protected:
 	u_int file_ix ;
 	u_int evt_ix ;
@@ -206,8 +208,8 @@ public:
 	char *out_buffer ;
 	int out_bytes ;
 	
-#ifdef __ROOT__
-	ClassDef(daq_det,0)
+#ifdef __RTS_ROOT__
+	Class_Def(daq_det,0)
 #endif
 
 } ;

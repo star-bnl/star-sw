@@ -10,7 +10,7 @@
 extern int scReader(char *m);   // returns EVP_DATA_ERR
 
 
-struct sc {
+struct sc_t {
   u_int valid;       
   u_int time;
   int timelag;  // lag between read time and event time (to 1 sec)
@@ -18,7 +18,7 @@ struct sc {
   u_int rich_scalers[16];
 };
 
-extern struct sc sc;
+extern struct sc_t sc;
  
 
 #endif

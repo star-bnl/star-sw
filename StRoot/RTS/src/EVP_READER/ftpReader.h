@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 
-struct ftp {
+struct ftp_t {
 	int channels ;
 	int mode ;	// 0 normal, 1 pedestals/RMSs
 	int max_channels ;
@@ -18,7 +18,7 @@ struct ftp {
 
 } ;
 
-extern struct ftp ftp ;
+extern struct ftp_t ftp ;
 extern int ftpReader(char *mem) ;
 
 

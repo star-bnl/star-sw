@@ -3,6 +3,7 @@
 
 
 #include <RTS_READER/rts_reader.h>
+#include <RTS_READER/daq_det.h>
 
 
 class daq_algo ;
@@ -73,8 +74,8 @@ public:
 
 	void help() const { printf("%s\n%s\n",GetCVS(),help_string) ; } ;
 
-#ifdef __ROOT__
-ClassDef(daq_tpx,0)
+#ifdef __RTS_ROOT__
+Class_Def(daq_tpx,0)
 #endif
 } ;
 
