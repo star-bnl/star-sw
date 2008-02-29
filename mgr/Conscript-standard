@@ -128,7 +128,7 @@ foreach my $p (@VF_daq_pkgs) {
   }
 }
 if ($pkg eq "StDAQMaker") {
-   $CPPFLAGS .= " -DNEW_EVP_READER"; # we should uncomment that later
+#   $CPPFLAGS .= " -DNEW_EVP_READER"; # we should uncomment that later
 }
 my ($i, $obj);
 my $LIBPKG = ""; 
