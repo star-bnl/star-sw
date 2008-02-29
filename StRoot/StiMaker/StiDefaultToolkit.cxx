@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.39 2007/04/16 22:45:34 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.40 2008/02/29 16:28:00 fisyak Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.40  2008/02/29 16:28:00  fisyak
+ * Fix unassigned variable (_trackNodeInfFactory), synchronize name with BigFullChain.h
+ *
  * Revision 2.39  2007/04/16 22:45:34  perev
  * endl added
  *
@@ -168,6 +171,7 @@ StiDefaultToolkit::StiDefaultToolkit()
   _detectorNodeFactory(0),
   _trackNodeFactory(0),
   _trackNodeExtFactory(0),
+  _trackNodeInfFactory(0),
   _detectorBuilder(),
   _detectorContainer(0),
   _detectorGroups(0),
@@ -200,6 +204,7 @@ StiDefaultToolkit::~StiDefaultToolkit()
   StiDetectorFinder::kill(); 
   delete _trackNodeFactory;
   delete _trackNodeExtFactory;
+  delete _trackNodeInfFactory;
   delete _trackContainer;
   delete _trackFactory;
   delete _parameterFactory;

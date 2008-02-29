@@ -1,4 +1,4 @@
-// $Id: StiDetectorVolume.cxx,v 2.3 2007/02/22 17:11:17 fine Exp $
+// $Id: StiDetectorVolume.cxx,v 2.4 2008/02/29 16:28:00 fisyak Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiDetectorVolume.h"
@@ -111,6 +111,7 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
 {
   // Construct the TVolume from the StDetectorBuilder
   unsigned int nRows = builder.getNRows();
+  LOG_INFO << "Builder: " << builder.getName().c_str() << " has " << nRows << " rows" << endm;
   for (unsigned int i=0; i < nRows; i++) {
      unsigned int nSectors = builder.getNSectors(i);
      Int_t iColor  = 3 + i%6;

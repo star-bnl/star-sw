@@ -34,7 +34,7 @@ class StiMaker : public StMaker
 {
  public:
     
-    StiMaker(const char* name = "StiMaker");
+    StiMaker(const char* name = "Sti");
     virtual ~StiMaker();
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
@@ -46,7 +46,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.26 2007/09/22 03:28:30 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.27 2008/02/29 16:28:01 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
