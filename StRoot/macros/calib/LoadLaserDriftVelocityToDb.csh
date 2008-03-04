@@ -117,7 +117,7 @@ EOF
             @ newSec = $oldSec + 1
             # format for date command to convert (handles date/time rollovers properly)
             set newDateTime = "$oldDate ${oldHour}:${oldMin}:${newSec}"
-            set newDT = ` $DATEC --date="$newDateTime" '+%Y%m%d.%k%M%S' `
+            set newDT = ` $DATEC --date="$newDateTime" '+%Y%m%d.%H%M%S' `
             set fileToUpload = "tpcDriftVelocity.$newDT.C"
         endif
 
