@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.532 2008/02/15 18:40:32 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.533 2008/03/04 14:32:47 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -513,6 +513,7 @@ Int_t StBFChain::Instantiate()
       }
       ProcessLine(cmd);
     }
+    if (  maker == "StTpcHitMaker" && GetOption("doPulser")) mk->SetMode(1);
     if ( (maker == "StTpcHitMover" || maker == "St_tpt_Maker") && GetOption("ExB")){
       // bit 0 is ExB ON or OFF
       // The next 3 bits are reserved for yearly changes.

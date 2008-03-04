@@ -54,7 +54,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2006","","","db,detDb"                                             ,"","","y2006 for p+p run",kFALSE},
 
   {"RY2007","","","db,detDb"                                            ,"","","y2007 for AuAu run",kFALSE},
-  {"RY2008","","","db,detDb"                                             ,"","","y2008 for dAu run",kFALSE},
+  {"RY2008","","","db,detDb,,NosvtIT,NossdIT"                            ,"","","y2008 for dAu run",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -348,7 +348,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   //  {"testing"      ,"" ,"",   // just a damned test
   //   "B2006b,sdt20061211,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
   //                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
-  {"B2008"       ,""       ,"","ry2008,in,tpc_daq,tpcI,fcf,Idst,tags,ctf,Tree,evout","",""
+  {"B2008"       ,""       ,"","ry2008,MakeEvent,in,tpc_daq,tpcI,fcf,Idst,tags,ctf,Tree,evout","",""
                                                               ,"Base chain for 2008 ITTF (tpc)",kFALSE},
   // startup for calib
   {"P2008a"       ,"" ,"",
@@ -580,7 +580,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"vpd"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
-  {"daq"         ,""  ,"","",""                            ,"StDaqLib,StDAQMaker","Load StDAQMaker",kFALSE},
+  {"rts"         ,""  ,"","",""                                                ,"RTS","load libRTS",kFALSE},
+  {"daq"         ,""  ,"","rts",""                         ,"StDaqLib,StDAQMaker","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
   {"SvtCL"       ,""  ,"","",""                                     ,"libGeom,StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
@@ -663,6 +664,7 @@ Bfc_st BFC2[] = { // ITTF Chains
     
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"tpcI" ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,TpcHitMover","StMaker","StChain","tpc with ITTF",kFALSE},
+  {"tpcX" ,"tpcChain","","-tpcI,tpx"                      ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
   {"Trs"         ,"Trs","tpcChain","scl,tpcDB"                        ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"TrsMini"     ,"","tpcChain","scl,tpcDB,-Trs,-tpc_daq,Simu","StTrsMiniMaker","StTrsMiniMaker","",kFALSE},
     
@@ -677,6 +679,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"tfs"         ,"tpc_hits","tpcChain","MakeEvent,Simu,-trs,-tcl,-fcf,-tpc_daq,tls,St_tpc,StEvent" 
                                            ,"St_tfs_Maker","St_tcl_Maker","use tfs (no StTrsMaker)",kFALSE},
+  {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,-trs,-tcl,-fcf,-tpc_daq,-tfs,-St_tpc,StEvent,rts" 
+                                    ,"StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx",kFALSE},
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
 #ifndef __CLEANUP__  
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
@@ -779,7 +783,7 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
+  {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent,MuDST","StEmcSimulatorMaker","StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
   {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
                                      "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
@@ -874,6 +878,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
                                                                               "TOF Data base chain",kFALSE},
+  {"tofXDat" ,  "tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
+                                                                                    "TOF hit maker",kFALSE},
   {"tofsim"    ,"","TofChain","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker",
                                                                                     "TOF Simulator",kFALSE},
   {"tofrMatch" ,"","TofChain","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
@@ -982,7 +988,10 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Calibration chains","------------","-----------","-----------------------------------","","","",kFALSE},
   {"LanaDV"      ,"","","MakeEvent,trgd,in,tpc_daq,tpcI,fcf,LaserIT,VFMinuit,Lana,Analysis,Corr4",
    "",""                                                                                 ,"get LDV",kFALSE},
+  {"LanaDVtpx"   ,"","","MakeEvent,trgd,in,tpx,TpcHitMover,LaserIT,VFMinuit,Lana,Analysis,Corr4",
+   "",""                                                                        ,"get LDV with TPX",kFALSE},
   {"LaserDV.Chain","","","in,LaserCal,fcf,TpcHitMover,OGridLeak3D,OShortR,OSpaceZ2","","","get LDV",kFALSE},
+  {"doPulser"     ,"","","in,tpx",                                 "","","TPC+TPX pulser analysis", kFALSE},
 
   {"Production chain from Db","------------","-----------","-----------------------------","","","",kFALSE},
 #ifndef __BFC2__  /* non ITTF chains */
@@ -1366,15 +1375,15 @@ Bfc_st BFC2[] = { // ITTF Chains
    "","","/star/rcf/simu/rcf1237_01_500evts.fzd"                                                   ,kFALSE},
 #else
   {"Test.reco.ITTF","","","MakeEvent,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,"
-   "EventQA,tags,Tree,EvOut,StarMagField,FieldOn"                                         ,"","","",kFALSE},
+   "EventQA,tags,Tree,EvOut,StarMagField,FieldOn,CMuDst"                                  ,"","","",kFALSE},
   {"Test.fast.ITTF","","","gstar,tfs,Simu,srs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,SvtCL,"
    "tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,"
-   "StarMagField,FieldOn,IAna,y2007"
+   "StarMagField,FieldOn,IAna,y2007,CMuDst"
                                                                                           ,"","","",kFALSE},
   {"Test.default.ITTF","","","gstar,trs,Simu,sss,svt,ssd,fss,bbcSim,emcY2,McEvOut,GeantOut,IdTruth,"
-   "miniMcMk,McAna,Test.reco.ITTF"                                                        ,"","","",kFALSE},
+   "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
   {"Test.srs.ITTF","","",   "gstar,trs,Simu,srs,svt,ssd,fss,bbcSim,emcY2,McEvOut,GeantOut,IdTruth,"
-   "miniMcMk,McAna,Test.reco.ITTF"                                                        ,"","","",kFALSE},
+   "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
   {"Test.year_2003_dAuMinBias_daq.ittf", "","","DbV20040520,dau2003i,logger,ITTF,evout,in","","",
    "/star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq"                                ,kFALSE},
   {"Test.year_2004_auau_central_trs.ittf","","","trs,Simu,srs,fss,y2004a,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,"
