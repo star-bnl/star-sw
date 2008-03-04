@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDcaGeometry.cxx,v 2.1 2006/05/24 17:27:43 ullrich Exp $
+ * $Id: StDcaGeometry.cxx,v 2.2 2008/03/04 01:03:36 perev Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.cxx,v $
+ * Revision 2.2  2008/03/04 01:03:36  perev
+ * remove redundant mHz
+ *
  * Revision 2.1  2006/05/24 17:27:43  ullrich
  * Initial Revision.
  *
@@ -18,7 +21,7 @@
 
 ClassImp(StDcaGeometry)
     
-static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.1 2006/05/24 17:27:43 ullrich Exp $";
+static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.2 2008/03/04 01:03:36 perev Exp $";
 
 StDcaGeometry::StDcaGeometry()
 {
@@ -45,7 +48,7 @@ StThreeVectorF StDcaGeometry::momentum() const
 
 void StDcaGeometry::set(const float pars[7],const float errs[15])
 {
-    if (pars) memcpy(&mImp   ,pars,sizeof(float)*7 );
+    if (pars) memcpy(&mImp   ,pars,sizeof(float)*6 );
     if (pars) memcpy(&mImpImp,errs,sizeof(float)*15);
 }
 
@@ -88,7 +91,7 @@ THelixTrack StDcaGeometry::thelix() const
 	  }
 	  while(0);
         } }
-    errXY[3]*=mHz;errXY[4]*=mHz;errXY[5]*=mHz*mHz;
+    errXY[3]*=hz();errXY[4]*=hz();errXY[5]*=hz()*hz();
     myHelx.SetEmx(errXY,errSZ);
     return myHelx;
 }
