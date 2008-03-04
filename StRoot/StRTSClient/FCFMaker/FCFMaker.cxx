@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.37 2008/01/29 18:41:53 perev Exp $
+ * $Id: FCFMaker.cxx,v 1.38 2008/03/04 14:52:29 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.38  2008/03/04 14:52:29  fisyak
+ * Add drift velocity dependence on sector
+ *
  * Revision 1.37  2008/01/29 18:41:53  perev
  * WarnOff
  *
@@ -967,7 +970,7 @@ double StRTSClientFCFMaker::lzFromTB(double timeBin, int sector, int row, int pa
   //   }
 
   double z = 
-    gStTpcDb->DriftVelocity()*1e-6*         //cm/s->cm/us
+    gStTpcDb->DriftVelocity(sector)*1e-6*   //cm/s->cm/us
     (gStTpcDb->triggerTimeOffset()*1e6      // units are s
      + gStTpcDb->Electronics()->tZero()     // units are us 
      + (timeBin)*tbWidth ); 
