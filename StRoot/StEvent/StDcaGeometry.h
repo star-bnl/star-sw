@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDcaGeometry.h,v 2.2 2006/08/04 19:08:43 perev Exp $
+ * $Id: StDcaGeometry.h,v 2.3 2008/03/04 01:03:14 perev Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.h,v $
+ * Revision 2.3  2008/03/04 01:03:14  perev
+ * remove redundant mHz
+ *
  * Revision 2.2  2006/08/04 19:08:43  perev
  * CleanUpOnly
  *
@@ -51,7 +54,7 @@ public:
     //
     // Experts only set function
     //
-    void set(const float pars[7], const float errs[15]);
+    void set(const float pars[6], const float errs[15]);
 
 private:
     char mBeg[1];//!
@@ -69,8 +72,6 @@ private:
     float  mTan;
     /// signed curvature
     float  mCurv;
-    /// mag field at point (0,0,mZ) in units where mCurv = mHz*Pti
-    float  mHz;
     
     /// pars errors
     float  mImpImp;
@@ -80,10 +81,9 @@ private:
     float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
     char   mEnd[1];//!
     
-    ClassDef(StDcaGeometry,1)
+    ClassDef(StDcaGeometry,2)
 };
-
-inline int     StDcaGeometry::charge() const 		{return (mCurv*mHz>0)? -1:1;}
+inline int     StDcaGeometry::charge() const 		{return (mPti<0)? -1:1;}
 inline double  StDcaGeometry::impact() const 		{return mImp;}
 inline double  StDcaGeometry::curvature() const 	{return mCurv;}
 inline double  StDcaGeometry::psi()       const 	{return mPsi ;}
@@ -91,7 +91,7 @@ inline double  StDcaGeometry::dipAngle()  const 	{return atan(mTan);}
 inline double  StDcaGeometry::tanDip() const 		{return mTan ;}
 inline double  StDcaGeometry::pt()     const 		{return 1./fabs(mPti);}
 inline double  StDcaGeometry::z()      const 		{return mZ   ;}
-inline double  StDcaGeometry::hz()     const 		{return mHz  ;}
+inline double  StDcaGeometry::hz()     const 		{return mCurv/mPti;}
 inline const float* StDcaGeometry::errMatrix() const 	{return &mImpImp;}
 
 #endif
