@@ -157,6 +157,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << "'" << endm;
 #endif         
 #endif                
+  if (jBeg > 1) Skip(jBeg-1);
   for (jCur=jBeg; jCur<=jEnd; jCur++) {
      evnt.Reset(); evnt.Start("QAInfo:");
 
@@ -259,8 +260,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.67 2007/10/19 16:18:32 fine Exp $
+// $Id: StChain.cxx,v 1.68 2008/03/05 00:01:51 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.68  2008/03/05 00:01:51  fisyak
+// Move Skip method in base class
+//
 // Revision 1.67  2007/10/19 16:18:32  fine
 // new Db schema from TxCorp
 //

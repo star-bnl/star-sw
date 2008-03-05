@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.205 2008/01/21 01:23:02 perev Exp $
+// $Id: StMaker.cxx,v 1.206 2008/03/05 00:01:52 fisyak Exp $
 //
 //
 /*!
@@ -174,7 +174,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   // development tags
   {"dev2005",     20190101,     0, "dev2005",  "non-production"},
   {"complete",    20190101,     1, "complete", "non-production"},
-  {"ist1",        20190101,     2, "ist1",     "non-production"},
+  //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
@@ -1790,6 +1790,7 @@ TFile *StMaker::GetTFile() const
       }
     }
   }
+  if (! mk) return 0;
   const StChainOpt *opt = mk->GetChainOpt();
   if (!opt) return 0;
   return opt->GetTFile();
@@ -1825,9 +1826,31 @@ void StTestMaker::Print(const char *) const
               ClassName(),fNext->ClassName(),fNext->GetName(),(void*)fNext);
 #endif      
 }
+//________________________________________________________________________________
+Int_t StMaker::Skip(Int_t NoEventSkip)
+{
+   TURN_LOGGER(this);
+//   Loop on all makers
+   Int_t ret,run=-1,oldrun;
+   TList *tl = GetMakeList();
+   if (!tl) return kStOK;
+   StEvtHddr *hd = GetEvtHddr();   
+   TIter nextMaker(tl);
+   StMaker *maker;
+   fgFailedMaker = 0;
+   int curr = StMkDeb::GetCurrent();
+   while ((maker = (StMaker* )nextMaker())) {
+     if (!maker->IsActive()) continue;
+     maker->Skip(NoEventSkip);
+   }
+   return kStOK;
+}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.206  2008/03/05 00:01:52  fisyak
+// Move Skip method in base class
+//
 // Revision 1.205  2008/01/21 01:23:02  perev
 // WarnOff
 //
