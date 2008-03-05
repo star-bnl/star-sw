@@ -1,7 +1,10 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.7 2007/04/07 19:33:09 perev Exp $
+// $Id: StVMCMaker.cxx,v 1.8 2008/03/05 13:15:56 fisyak Exp $
 // $Log: StVMCMaker.cxx,v $
+// Revision 1.8  2008/03/05 13:15:56  fisyak
+// comply Skip signuture with base class
+//
 // Revision 1.7  2007/04/07 19:33:09  perev
 // Check for input file added
 //
@@ -255,7 +258,8 @@ void StVMCMaker::SetDateTime(Int_t id, Int_t it) {
   }  
  }
 //_____________________________________________________________________________
-void StVMCMaker::Skip(Int_t nskip) {
+Int_t StVMCMaker::Skip(Int_t nskip) {
+  return kStOk;
 }
 //_____________________________________________________________________________
 TDataSet  *StVMCMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
