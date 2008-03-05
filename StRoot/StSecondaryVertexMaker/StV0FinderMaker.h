@@ -12,8 +12,8 @@
 #include "StPhysicalHelixD.hh"
 #include <vector>
 
-class St_ev0_ev0par2;
-class ev0_ev0par2_st;
+class St_V0FinderParameters;
+class V0FinderParameters_st;
 class StEvent;
 class StV0Vertex;
 class StTrack;
@@ -174,13 +174,13 @@ class StV0FinderMaker : public StMaker {
   //end Betty
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.10 2004/08/26 03:00:46 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.11 2008/03/05 04:20:18 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  protected:
   virtual Int_t Prepare();         //!
-  St_ev0_ev0par2* ev0par2;         //!
-  ev0_ev0par2_st* pars;            //!
-  ev0_ev0par2_st* pars2;           //!
+  St_V0FinderParameters* v0pars;   //!
+  V0FinderParameters_st* pars;     //!
+  V0FinderParameters_st* pars2;    //!
   StEvent* event;                  //!
   StV0Vertex* v0Vertex;            //!
   
@@ -188,7 +188,6 @@ class StV0FinderMaker : public StMaker {
   StMuDstMaker* mMuDstMaker;       //!
   //end Betty
   
-  double ptV0sq;                   //! 
   double Bfield;		   //!
   unsigned short trks;		   //!
   Bool_t prepared;		   //!
@@ -233,8 +232,11 @@ class StV0FinderMaker : public StMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.h,v 1.10 2004/08/26 03:00:46 genevb Exp $
+// $Id: StV0FinderMaker.h,v 1.11 2008/03/05 04:20:18 genevb Exp $
 // $Log: StV0FinderMaker.h,v $
+// Revision 1.11  2008/03/05 04:20:18  genevb
+// Change to DB table of V0FinderParameters, reduce logger output, improve Bfield calc
+//
 // Revision 1.10  2004/08/26 03:00:46  genevb
 // Improved vector size management
 //

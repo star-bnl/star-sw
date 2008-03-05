@@ -14,7 +14,7 @@
 #include "StEvent/StEventTypes.h"
 #include "TMath.h"
 #include "TVector2.h"
-#include "tables/St_ev0_ev0par2_Table.h"
+#include "tables/St_V0FinderParameters_Table.h"
 
 ///Begin Betty
 ///#include "StEstMaker/StEstTracker.h"
@@ -40,7 +40,7 @@ ClassImp(StV0FinderMaker)
  
 //_____________________________________________________________________________
   StV0FinderMaker::StV0FinderMaker(const char *name):StMaker(name),
-         ev0par2(0),pars(0),pars2(0),event(0),v0Vertex(0),
+         v0pars(0),pars(0),pars2(0),event(0),v0Vertex(0),
          prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),
          useTracker(kTrackerUseBOTH),useSVT(kNoSVT),useEventModel(kUseStEvent),
          useV0Language(kV0LanguageUseCpp),useXiLanguage(kXiLanguageUseCppOnCppV0),
@@ -48,7 +48,6 @@ ClassImp(StV0FinderMaker)
          useRotating(kRotatingUseStandard)
 {
   // Initializes everything that wasn't yet :
-  ptV0sq = 0.;
   trks = 0;
   det_id_v0 = 0;
   ITTFflag = 0;
@@ -64,11 +63,10 @@ ClassImp(StV0FinderMaker)
   
   // Check for multiple instances
   if (mInstance != 0)
-    gMessMgr->Warning() << "StV0FinderMaker(" << name <<
+    gMessMgr->Warning() << "(" << name <<
       ") : MORE THAN ONE INSTANCE!" << endm;
   else mInstance = this;
 
-  ptV0sq = 3.5*3.5;
   Bfield = 1.e-10; //Random value for initialisation.
                    //If it isn't changed to correct value in
                    // Prepare() then something has gone wrong!
@@ -101,19 +99,19 @@ StV0FinderMaker::~StV0FinderMaker() {
 //_____________________________________________________________________________
 void StV0FinderMaker::GetPars()
 {
-  TDataSet* dbDataSet = GetDataBase("global/vertices");
+  TDataSet* dbDataSet = GetDataBase("Calibrations/tracker");
   if (!dbDataSet) {
     gMessMgr->Error(
-      "StV0FinderMaker::Init() : could not find appropriate database.");
+      "Init() : could not find Calibrations/tracker database.");
     return; 
   }
-  ev0par2 = (St_ev0_ev0par2*) (dbDataSet->FindObject("ev0par2"));
-  if (!ev0par2) {
+  v0pars = (St_V0FinderParameters*) (dbDataSet->FindObject("V0FinderParameters"));
+  if (!v0pars) {
     gMessMgr->Error(
-      "StV0FinderMaker::Init() : could not find ev0par2 in database.");
+      "Init() : could not find V0FinderParameters in database.");
     return;
   }
-  ///AddRunCont(ev0par2);
+  ///AddRunCont(v0pars);
 }
 
 
@@ -133,37 +131,37 @@ Int_t StV0FinderMaker::Init()
 {bool a,b,c;
  
  if ((useTracker!=kTrackerUseTPT) && (useTracker!=kTrackerUseITTF) && (useTracker!=kTrackerUseBOTH))
-    {gMessMgr->Error("StV0FinderMaker::Init() : wrong TrackerUsage parameter set.");
+    {gMessMgr->Error("Init() : wrong TrackerUsage parameter set.");
      return kStErr;
      }
  if ((useSVT!=kNoSVT) && (useSVT!=kUseSVT))
-    {gMessMgr->Error("StV0FinderMaker::Init() : wrong SVTUsage parameter set.");
+    {gMessMgr->Error("Init() : wrong SVTUsage parameter set.");
      return kStErr;
      }
  if ((useEventModel!=kUseStEvent) && (useEventModel!=kUseMuDst))
-    {gMessMgr->Error("StV0FinderMaker::Init() : wrong EventModelUsage parameter set.");
+    {gMessMgr->Error("Init() : wrong EventModelUsage parameter set.");
      return kStErr;
      }
  if ((useLikesign!=kLikesignUseStandard) && (useLikesign!=kLikesignUseLikesign))
-    {gMessMgr->Error("StV0FinderMaker::Init() : wrong LikesignUsage parameter set.");
+    {gMessMgr->Error("Init() : wrong LikesignUsage parameter set.");
      return kStErr;
      }
  if ((useRotating!=kRotatingUseStandard) && (useRotating!=kRotatingUseRotating) && (useRotating!=kRotatingUseSymmetry) && (useRotating!=kRotatingUseRotatingAndSymmetry))
-    {gMessMgr->Error("StV0FinderMaker::Init() : wrong RotatingUsage parameter set.");
+    {gMessMgr->Error("Init() : wrong RotatingUsage parameter set.");
      return kStErr;
      }
  
- if (useTracker == kTrackerUseTPT) gMessMgr->Info()<<"StV0FinderMaker : use TPT tracks."<<endm;
- if (useTracker == kTrackerUseITTF) gMessMgr->Info()<<"StV0FinderMaker : use ITTF tracks."<<endm;
- if (useTracker == kTrackerUseBOTH) gMessMgr->Info()<<"StV0FinderMaker : use TPT *and* ITTF tracks."<<endm;
- if (useSVT == kUseSVT) gMessMgr->Info()<<"StV0FinderMaker : use SVT points if possible."<<endm;
- if (useSVT == kNoSVT) gMessMgr->Info()<<"StV0FinderMaker : do not use SVT points."<<endm;
- if (useEventModel == kUseStEvent) gMessMgr->Info()<<"StV0FinderMaker : expect StEvent files in input."<<endm;
- if (useEventModel == kUseMuDst)  gMessMgr->Info()<<"StV0FinderMaker : expect MuDst files in input."<<endm;
- if (useLikesign == kLikesignUseLikesign) gMessMgr->Info()<<"StV0FinderMaker : does like-sign finding."<<endm;
- if (useRotating == kRotatingUseRotating) gMessMgr->Info()<<"StV0FinderMaker : does rotating finding."<<endm;
- if (useRotating == kRotatingUseSymmetry) gMessMgr->Info()<<"StV0FinderMaker : does symmetry finding."<<endm;
- if (useRotating == kRotatingUseRotatingAndSymmetry) gMessMgr->Info()<<"StV0FinderMaker : does rotating + symmetry finding."<<endm;
+ if (useTracker == kTrackerUseTPT) gMessMgr->Info()<<"use TPT tracks."<<endm;
+ if (useTracker == kTrackerUseITTF) gMessMgr->Info()<<"use ITTF tracks."<<endm;
+ if (useTracker == kTrackerUseBOTH) gMessMgr->Info()<<"use TPT *and* ITTF tracks."<<endm;
+ if (useSVT == kUseSVT) gMessMgr->Info()<<"use SVT points if possible."<<endm;
+ if (useSVT == kNoSVT) gMessMgr->Info()<<"do not use SVT points."<<endm;
+ if (useEventModel == kUseStEvent) gMessMgr->Info()<<"expect StEvent files in input."<<endm;
+ if (useEventModel == kUseMuDst)  gMessMgr->Info()<<"expect MuDst files in input."<<endm;
+ if (useLikesign == kLikesignUseLikesign) gMessMgr->Info()<<"does like-sign finding."<<endm;
+ if (useRotating == kRotatingUseRotating) gMessMgr->Info()<<"does rotating finding."<<endm;
+ if (useRotating == kRotatingUseSymmetry) gMessMgr->Info()<<"does symmetry finding."<<endm;
+ if (useRotating == kRotatingUseRotatingAndSymmetry) gMessMgr->Info()<<"does rotating + symmetry finding."<<endm;
 
  if (useLanguage != kLanguageUseSpecial)
     {a=(bool)(1&(useLanguage>>2));
@@ -173,36 +171,36 @@ Int_t StV0FinderMaker::Init()
      useXiLanguage=4*(b&(!(a^c)))+2*(a&b&(!c))+(a|c);
      }
  switch (useLanguage)
-    {case kLanguageUseOldRun : gMessMgr->Info()<<"StV0FinderMaker : Fortran run."<<endm;
+    {case kLanguageUseOldRun : gMessMgr->Info()<<"Fortran run."<<endm;
                                break;
-     case kLanguageUseRun : gMessMgr->Info()<<"StV0FinderMaker : C++ run."<<endm;
-                            gMessMgr->Info()<<"StV0FinderMaker : BE CAREFUL : you are NOT running the XiFinder !"<<endm;
+     case kLanguageUseRun : gMessMgr->Info()<<"C++ run."<<endm;
+                            gMessMgr->Info()<<"BE CAREFUL : you are NOT running the XiFinder !"<<endm;
                             break;
-     case kLanguageUseTestV0Finder : gMessMgr->Info()<<"StV0FinderMaker : Test V0Finder."<<endm;
+     case kLanguageUseTestV0Finder : gMessMgr->Info()<<"Test V0Finder."<<endm;
                                      break;
-     case kLanguageUseTestXiFinder : gMessMgr->Info()<<"StV0FinderMaker : Test XiFinder."<<endm;
-                                     gMessMgr->Info()<<"StV0FinderMaker : BE CAREFUL : you are NOT running the XiFinder !"<<endm;
+     case kLanguageUseTestXiFinder : gMessMgr->Info()<<"Test XiFinder."<<endm;
+                                     gMessMgr->Info()<<"BE CAREFUL : you are NOT running the XiFinder !"<<endm;
                                      break;
-     case kLanguageUseTestBothFinders : gMessMgr->Info()<<"StV0FinderMaker : Test V0Finder and XiFinder."<<endm;
-                                        gMessMgr->Info()<<"StV0FinderMaker : BE CAREFUL : you are NOT running the XiFinder !"<<endm;
+     case kLanguageUseTestBothFinders : gMessMgr->Info()<<"Test V0Finder and XiFinder."<<endm;
+                                        gMessMgr->Info()<<"BE CAREFUL : you are NOT running the XiFinder !"<<endm;
                                         break;
      case kLanguageUseSpecial : break;
-     default : gMessMgr->Error("StV0FinderMaker::Init() : wrong LanguageUsage parameter set.");
+     default : gMessMgr->Error("Init() : wrong LanguageUsage parameter set.");
                return kStErr;
      }
  if ((useV0Language!=kV0LanguageUseFortran) && (useV0Language!=kV0LanguageUseCpp) && (useV0Language!=kV0LanguageUseBoth))
-    {gMessMgr->Error("StV0FinderMaker::Init() : wrong V0LanguageUsage parameter set.");
+    {gMessMgr->Error("Init() : wrong V0LanguageUsage parameter set.");
      return kStErr;
      }
- if (1&useV0Language) gMessMgr->Info()<<"StV0FinderMaker :    Will store Fortran V0."<<endm;
- if (2&useV0Language) gMessMgr->Info()<<"StV0FinderMaker :    Will store C++ V0."<<endm;
- if (1&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    Will store Fortran Xi."<<endm;
- if (2&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
- if (4&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
+ if (1&useV0Language) gMessMgr->Info()<<"   Will store Fortran V0."<<endm;
+ if (2&useV0Language) gMessMgr->Info()<<"   Will store C++ V0."<<endm;
+ if (1&useXiLanguage) gMessMgr->Info()<<"   Will store Fortran Xi."<<endm;
+ if (2&useXiLanguage) gMessMgr->Info()<<"   BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
+ if (4&useXiLanguage) gMessMgr->Info()<<"   BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
 
  if (useEventModel)  { //initialize mMuDstMaker
    mMuDstMaker = (StMuDstMaker*)GetMaker("myMuDstMaker");
-   if(!mMuDstMaker) gMessMgr->Warning("StV0FinderMaker::Init can't find a valid MuDst");
+   if(!mMuDstMaker) gMessMgr->Warning("Init can't find a valid MuDst");
  }
  
  return StMaker::Init();
@@ -263,14 +261,14 @@ Int_t StV0FinderMaker::Prepare() {
   ///end of Betty
   
   if (!event)
-    {gMessMgr->Warning("StV0FinderMaker : no StEvent ; skipping event.");
+    {gMessMgr->Warning("no StEvent ; skipping event.");
     return kStWarn;
     }
   
   // Get Primary Vertex Position
   StPrimaryVertex* pvert = event->primaryVertex();
   if (!pvert)
-     {gMessMgr->Warning("StV0FinderMaker : no primary vertex ; skipping event.");
+     {gMessMgr->Warning("no primary vertex ; skipping event.");
       return kStWarn;
       }
   mainv = pvert->position();
@@ -284,6 +282,8 @@ Int_t StV0FinderMaker::Prepare() {
   
   // Find which global tracks to use
   trks=0;
+  double BfieldRunning = 0;
+  double nBfieldRunning = 0;
   for (i=0; i<nNodes; i++) {
     int nj = theNodes[i]->entries(global);
     for (j=0; j<nj; j++) {
@@ -347,27 +347,35 @@ Int_t StV0FinderMaker::Prepare() {
         map.numberOfHits(kSvtId) +
         map.numberOfHits(kSsdId);
       //Cut: number of hits
-      pars2 = ev0par2->GetTable(detId[trks]-1);
+      pars2 = v0pars->GetTable(detId[trks]-1);
       if (hits[trks] < pars2->n_point) continue;
       
-      if (!trks)
-        {StThreeVectorD p1 = triGeom->momentum();
+      //if (!trks)
+      if (nBfieldRunning<1e2) {
+        StThreeVectorD p1 = triGeom->momentum();
         StThreeVectorD p2 = heli[trks].momentum(Bfield);
 
-        if      (fabs(p2.x()) > 1.e-20) Bfield *= p1.x()/p2.x();
+        if      (fabs(p2.x()) > fabs(p2.y())) Bfield *= p1.x()/p2.x();
         else if (fabs(p2.y()) > 1.e-20) Bfield *= p1.y()/p2.y();
 	else continue;
+        // This method appears to only be accurate to about 1 part in 1000 for
+        //  single tracks. We can do better by using information from multiple
+        //  tracks. But Bfield is only used in momentum determination, which
+        //  is not likely to be that accurate anyhow, so no need to push too far.
+        //  (Bfield is not used in helix extrapolation for now.)
 
-        if (triGeom->charge()*triGeom->helicity() > 0) Bfield = -fabs(Bfield);
-               else Bfield = fabs(Bfield);
-        }
         if (fabs(Bfield)<1.e-20) return kStWarn;
-	      
+        Bfield = TMath::Sign(Bfield,-1.0*triGeom->charge()*triGeom->helicity());
+
+	BfieldRunning += Bfield;
+        nBfieldRunning += 1;
+      }
       if (triGeom->charge() > 0) ptrk.push_back(trks);
       else if (triGeom->charge() < 0) ntrk.push_back(trks);
       trks++;
     }
   }
+  if (nBfieldRunning>0) Bfield = BfieldRunning/nBfieldRunning;
 
   // Manage vector memory usage
   //   If maximum needed is less than half allocated for 10 events, resize
@@ -387,9 +395,9 @@ Int_t StV0FinderMaker::Prepare() {
                    (trkNodeRatioCnt + 1.);
   trkNodeRatioCnt++;
   
-  gMessMgr->Info() << "StV0FinderMaker : No. of nodes is : "
+  gMessMgr->Info() << "No. of nodes is : "
                    << nNodes << endm;
-  gMessMgr->Info() << "StV0FinderMaker : No. of tracks is : "
+  gMessMgr->Info() << "No. of tracks is : "
                    << trks << endm;
 
   prepared = kTRUE;
@@ -426,7 +434,7 @@ Int_t StV0FinderMaker::Make() {
 
   if (! (2&useV0Language)) return kStOk;
 
-  gMessMgr->Info("StV0FinderMaker::Make() : Starting...");
+  gMessMgr->Info("Make() : Starting...");
   
   // Prepare event and track variables
   iRes = Prepare();
@@ -434,12 +442,12 @@ Int_t StV0FinderMaker::Make() {
 
 
   StSPtrVecV0Vertex& v0Vertices = event->v0Vertices();
-  gMessMgr->Info()<<"StV0FinderMaker : coming in I have "<<v0Vertices.size()<<" V0s."<<endm;
+  gMessMgr->Info()<<"coming in I have "<<v0Vertices.size()<<" V0s."<<endm;
 
   if (!(1&useV0Language)) {
     //Erase existing V0s and Xis
     // (must do Xis too as they point to the V0s!)
-    gMessMgr->Info()<<"StV0FinderMaker : pre-existing V0s and Xis deleted."<<endm; 
+    gMessMgr->Info()<<"pre-existing V0s and Xis deleted."<<endm; 
     StSPtrVecV0Vertex v0Vertices2;
     v0Vertices = v0Vertices2;
     StSPtrVecXiVertex& xiVertices   = event->xiVertices();
@@ -477,9 +485,9 @@ Int_t StV0FinderMaker::Make() {
       det_id_v0 = TMath::Max(detId[i],detId[j]);
 
       // Primary   V0 cut parameters
-      pars  = ev0par2->GetTable(det_id_v0+2);
+      pars  = v0pars->GetTable(det_id_v0+2);
       // Primary and secondary V0 cut parameters
-      pars2 = ev0par2->GetTable(det_id_v0-1);
+      pars2 = v0pars->GetTable(det_id_v0-1);
 
       //Cut: number of hits
       //Now cut directly when filling the table of tracks in Prepare().
@@ -490,7 +498,7 @@ Int_t StV0FinderMaker::Make() {
       // (perform as early as possible)
       // V0 can't have pt larger than sum of pts of daughters
       temp = pt[i] + pt[j];
-      if ((temp*temp < 0.98*ptV0sq) &&
+      if ((temp < 0.99 * pars2->dcapn_pt) &&
           ((trk[i]->impactParameter() <= pars2->dcapnmin) ||
            (trk[j]->impactParameter() <= pars2->dcapnmin))) continue;
 
@@ -658,7 +666,7 @@ Int_t StV0FinderMaker::Make() {
       pperpsq = pp.perp2();
                   
       //Cut: dca of tracks to primary vertex (early as possible)
-      if ((pperpsq < ptV0sq) && 
+      if ((pperpsq < pars2->dcapn_pt * pars2->dcapn_pt) && 
           ((trk[i]->impactParameter() <= pars2->dcapnmin) ||
            (trk[j]->impactParameter() <= pars2->dcapnmin))) continue;
 
@@ -736,7 +744,7 @@ Int_t StV0FinderMaker::Make() {
       // Use primary V0 cut parameters
       isPrimaryV0 =
         (rmin < pars->dcav0) &&
-        ((pperpsq >= ptV0sq) ||
+        ((pperpsq >= pars->dcapn_pt * pars->dcapn_pt) ||
          ((trk[i]->impactParameter() > pars->dcapnmin) &&
           (trk[j]->impactParameter() > pars->dcapnmin)));
       
@@ -758,8 +766,8 @@ Int_t StV0FinderMaker::Make() {
     } // j-Loop
   } // i-Loop
 
-  gMessMgr->Info()<<"StV0FinderMaker : now I have "<<v0Vertices.size()<<" V0s."<<endm;
-  gMessMgr->Info()<<"StV0FinderMaker : using magnetic field : "<<Bfield/tesla<<" T."<<endm;
+  gMessMgr->Info()<<"now I have "<<v0Vertices.size()<<" V0s."<<endm;
+  gMessMgr->Info()<<"using magnetic field : "<<Bfield/tesla<<" T."<<endm;
 
   // Any cleanup involved for using KeepV0()
   
@@ -806,10 +814,10 @@ void StV0FinderMaker::Clear(Option_t *option){
 void StV0FinderMaker::Trim() {
   // Loop over V0s and remove those that don't satisfy the tight V0 cuts
 
-  gMessMgr->Info() << "StV0FinderMaker::Trim() : Starting..." << endm;
+  gMessMgr->Info() << "Trim() : Starting..." << endm;
 
   event = (StEvent*) GetInputDS("StEvent");
-  pars = ev0par2->GetTable(3);
+  pars = v0pars->GetTable(3);
   StSPtrVecV0Vertex& v0Vertices = event->v0Vertices();
   int iV0s = v0Vertices.size();
   for (int i=iV0s-1; i>=0; i--) {
@@ -820,7 +828,7 @@ void StV0FinderMaker::Trim() {
         (v0Vertex->dcaParentToPrimaryVertex() >= 0) &&
         // Is it not a primary V0?
         ! ((v0Vertex->dcaParentToPrimaryVertex() < pars->dcav0) &&
-           ((v0Vertex->momentum().perp2() >= ptV0sq) ||
+           ((v0Vertex->momentum().perp2() >= pars->dcapn_pt * pars->dcapn_pt) ||
             ((v0Vertex->dcaDaughterToPrimaryVertex(positive) > pars->dcapnmin) &&
              (v0Vertex->dcaDaughterToPrimaryVertex(negative) > pars->dcapnmin))))) {
       v0Vertex->makeZombie();
@@ -828,7 +836,7 @@ void StV0FinderMaker::Trim() {
     }
   } // V0 loop
 
-  gMessMgr->Info() << "StV0FinderMaker::Trim() : saving " << iV0s <<
+  gMessMgr->Info() << "Trim() : saving " << iV0s <<
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
@@ -849,8 +857,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.31 2006/06/12 15:17:48 caines Exp $
+// $Id: StV0FinderMaker.cxx,v 1.32 2008/03/05 04:20:18 genevb Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.32  2008/03/05 04:20:18  genevb
+// Change to DB table of V0FinderParameters, reduce logger output, improve Bfield calc
+//
 // Revision 1.31  2006/06/12 15:17:48  caines
 // Fix chisq flagging so chisq set for SVT even when sti and v02 flags are used
 //
