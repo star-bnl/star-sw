@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.533 2008/03/04 14:32:47 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.534 2008/03/05 00:01:29 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -869,40 +869,6 @@ Int_t StBFChain::Init() {
   return iok;
 }
 //_____________________________________________________________________
-/// Skip events by selecting according maker
-Int_t StBFChain::Skip(int nskip)
-{
-  StMaker *geant = 0;
-  StIOMaker      *inpMk = 0;
-  if (nskip<=0) return 0;
-  if (GetOption("fzin") || GetOption("ntin") )  {
-    geant = GetMakerInheritsFrom("St_geant_Maker");
-    if (geant && !geant->IsActive()) 	               	 geant = 0;
-    if (geant) {
-      gMessMgr->QAInfo() << "StBFChain::Skip -> St_geant_Make::Skip(" << nskip << ") Events" << endm;
-      ProcessLine(Form("((St_geant_Maker *) %p)->Skip(%i);",geant,nskip));
-      return 0;
-    }
-  }
-  if (GetOption("VMC"))  {
-    geant = GetMakerInheritsFrom("StVMCMaker");
-    if (geant && !geant->IsActive()) 	               	 geant = 0;
-    if (geant) {
-      gMessMgr->QAInfo() << "StBFChain::Skip -> StVMCMake::Skip(" << nskip << ") Events" << endm;
-      ProcessLine(Form("((StVMCMaker *) %p)->Skip(%i);",geant,nskip));
-      return 0;
-    }
-  }
-  inpMk = (StIOMaker *) GetMakerInheritsFrom("StIOMaker");
-  if (inpMk) {
-    gMessMgr->QAInfo() << "StBFChain::Skip -> StIOMaker::Skip(" << nskip << ") Events" << endm;
-    inpMk->Skip(nskip); return 0;
-  }
-  Error("Skip","No maker to Skip");
-  return kStErr;
-}
-
-//_____________________________________________________________________
 /// Really the destructor (close files, delete pointers etc ...)
 Int_t StBFChain::Finish()
 {
@@ -1610,11 +1576,4 @@ Long_t  StBFChain::ProcessLine(const char *line) {
     gSystem->Exit(1);
   }
   return res;
-}
-//________________________________________________________________________________
-Int_t StBFChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk) 
-{
-  if (jBeg>1) Skip(jBeg-1);
-  if (!outMk) outMk = GetMaker("outputStream");
-  return StChain::EventLoop(jBeg,jEnd,outMk);
 }

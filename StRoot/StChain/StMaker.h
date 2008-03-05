@@ -133,8 +133,7 @@ public:
 //  called WhiteBoard(name,&ptr)
    virtual void *WhiteBoard  (const char *name, void *v=0) const;
 //______________________________________________________________________________
-
-
+   virtual Int_t        Skip(Int_t nskip);     //Skip events
 
    virtual void         AddConst(TDataSet *data=0){AddData(data,".const");}
    virtual void         AddHist(TH1 *h,const char *dir=0);
@@ -245,7 +244,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.85 2008/01/20 00:33:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.86 2008/03/05 00:01:52 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -309,8 +308,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.85 2008/01/20 00:33:56 perev Exp $
+// $Id: StMaker.h,v 1.86 2008/03/05 00:01:52 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.86  2008/03/05 00:01:52  fisyak
+// Move Skip method in base class
+//
 // Revision 1.85  2008/01/20 00:33:56  perev
 // Copy attributes from maker to maker added
 //
