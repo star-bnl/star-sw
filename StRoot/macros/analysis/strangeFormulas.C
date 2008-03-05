@@ -63,7 +63,7 @@
 // void formulate(const char* name, const char* formula);
 TTree* strangeTree=0;
 TChain* strangeChain=0;
-TSeqCollection* ListofFuncs=0;
+TCollection* ListofFuncs=0;
 Int_t max_codes=0;
 static const char* defaultFile = "evMuDst.root";
 static const char* defaultTree = "StrangeMuDst";
@@ -911,8 +911,11 @@ Int_t strangeFormulas(TTree* tree) {
 
 }
 //______________________________________________________________________
-// $Id: strangeFormulas.C,v 3.11 2004/10/20 19:22:10 genevb Exp $
+// $Id: strangeFormulas.C,v 3.12 2008/03/05 15:47:25 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.12  2008/03/05 15:47:25  genevb
+// updated ROOT class for ListOfFunctions()
+//
 // Revision 3.11  2004/10/20 19:22:10  genevb
 // Compatibility with small ROOT and CINT changes
 //
