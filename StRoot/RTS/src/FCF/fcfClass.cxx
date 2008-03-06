@@ -42,7 +42,7 @@
 #include <rtsSystems.h>
 #include <fcfClass.hh>
 
-static char *fcf_cvs_revision = "$Revision: 1.2 $" ;
+static char *fcf_cvs_revision = "$Revision: 1.3 $" ;
 
 #ifdef __ROOT__	// STAR Offline
 
@@ -840,7 +840,7 @@ fcfClass::fcfClass(int det, u_short *table)
 	cvs_revision = 0 ;	// let's start with 0 here...
 
 	{	// bracket stuff
-	int i ;
+	size_t i ;
 	char tmp[10] ;
 	int num_start, num_end, num_dot ;
 

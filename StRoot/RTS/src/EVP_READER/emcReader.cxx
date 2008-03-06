@@ -505,10 +505,8 @@ char *getEmcTrgData(DATAP *datap, int idx)
   struct TRGP *trgp  ;
   struct TRGD *trgd ;
   UINT32 *ptr;
-  char *ctpr;
 
   int len, off ;
-  int trgp_banks ;
 
   int swapdatap=0;
   int swaptrgp=0;
