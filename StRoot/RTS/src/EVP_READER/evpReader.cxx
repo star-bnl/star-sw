@@ -424,7 +424,7 @@ char *evpReader::get(int num, int type)
 		  if(ret == STAT_TIMED_OUT) {	// retry ...
 		    timedout = 1;
 		    if((num == 0) ||
-		       (num > readall_lastevt)) {
+		       (num > int(readall_lastevt))) {
 #ifdef __linux
 		      sched_yield() ;
 #else
