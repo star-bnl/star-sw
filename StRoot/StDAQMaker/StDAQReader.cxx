@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.62 2008/02/08 15:38:50 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.63 2008/03/06 01:32:51 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.63  2008/03/06 01:32:51  fine
+ * Fix skip event problem
+ *
  * Revision 1.62  2008/02/08 15:38:50  fine
  * Add CPP flag to distinguish the old and new EVP_READER at the compilation time. Thankx Lidia
  *
@@ -284,12 +287,12 @@ int StDAQReader::open(const char *file)
      LOG_INFO << fFile << "  " << strerror( errno ) << endm;
      return kStErr;
   }
-  fOffset =0;   
 #else
   if (fDaqFileReader) close();
   fDaqFileReader = new evpReader((char *)file);
   LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via evpReader " << endm;
 #endif
+  fOffset =0;
   return 0;  
 }
 //_____________________________________________________________________________
@@ -478,7 +481,7 @@ int StDAQReader::skipEvent(int nskip)
     fOffset = fEventReader->NextEventOffset();
 #else
     nextEvent();
-#endif        
+#endif
   }
   return  nskip;
 }
