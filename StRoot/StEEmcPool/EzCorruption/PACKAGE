@@ -1,5 +1,0 @@
-# $Id $
-# package EzCorruption
-# author: 
-Library:libStEEmcPoolEzCorruption.so:LIBS +=   -lStChain  -l_StEEmcUtil  -l_StMuDSTMaker
-#Library:libStEEmcPoolEzCorruption.so:LIBS +=   -lStChain  -lStEEmcUtil  -lStMuDSTMaker
