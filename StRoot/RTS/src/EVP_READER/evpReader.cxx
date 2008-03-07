@@ -70,6 +70,7 @@ evpReader::evpReader(char *name)
 	sfs = NULL;
 	sfs_lastevt = 0;
 
+   memset(&runconfig,0,sizeof(runconfig));
 
 	rts_rr = 0 ;
 
