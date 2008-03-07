@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.15 2006/08/15 21:42:37 jeromel Exp $
+// $Id: bfcread_event_QAhist.C,v 1.16 2008/03/07 19:26:11 genevb Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.16  2008/03/07 19:26:11  genevb
+// Ye olde loading of StdetectorDbMaker library change
+//
 // Revision 1.15  2006/08/15 21:42:37  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -124,6 +127,7 @@ void bfcread_event_QAhist(
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
