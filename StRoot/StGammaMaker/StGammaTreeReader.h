@@ -26,21 +26,22 @@ class StGammaTreeReader : public StMaker
   void  Clear(Option_t *opts="");
 
   /// Returns the total number of entries for this chain of events
-  Long64_t getNumberOfEntries(){ return mChain->GetEntries(); }
+  Long64_t getNumberOfEvents(){ return mChain->GetEntries(); }
 
-  /// Retusn a specified entry number
+  /// Loads the specified entry in the chain.  Access using event() defined above.
   Int_t    getEvent(Long64_t entry); // read in by event
-  /// Returns a specified event for a specified run (do not add files after first 
-  /// call to this function).
+  /// Loads the specified entry in the chain via run and event number.  Access using event()
+  /// defined above.
   Int_t    getEvent(Int_t runNumber, Int_t eventNumber );
 
   /// Pointer to the chain itself
   TChain *chain(){ return mChain; }
 
+  /// This is a "self test".  Do not feed it alot of data. 
   void Test();
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StGammaTreeReader.h,v 1.1 2008/03/07 14:21:16 jwebb Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StGammaTreeReader.h,v 1.2 2008/03/07 18:02:25 jwebb Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 

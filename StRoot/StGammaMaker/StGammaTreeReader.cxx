@@ -49,7 +49,6 @@ Int_t StGammaTreeReader::getEvent(Long64_t i)
 
 Int_t StGammaTreeReader::getEvent(Int_t run, Int_t myevent)
 {
-
   if ( !mIndexed ) buildIndex();
   Long64_t mykey = key(run,myevent);
   Long64_t entry = mIndex[ mykey ];
@@ -58,7 +57,7 @@ Int_t StGammaTreeReader::getEvent(Int_t run, Int_t myevent)
     assert(myevent);
     return 0;
   }
-  return getEvent( entry );
+  return getEvent( entry - 1 ); // entry is offset by +1 when we buildIndex
 }
 
 void StGammaTreeReader::treeDetails()
@@ -66,8 +65,8 @@ void StGammaTreeReader::treeDetails()
   mFirst=false;
   std::cout << GetCVS() << std::endl;
   std::cout << mChain->GetTitle() << std::endl; 
-
 }
+
 // ----------------------------------------------------------------------------
 void StGammaTreeReader::Clear(Option_t *opts)
 {
@@ -90,8 +89,11 @@ void StGammaTreeReader::chainFile( const Char_t *file, const Char_t *matches )
 void StGammaTreeReader::buildIndex()
 {
 
+  TStopwatch timer;
+  timer.Start();
+
   // loop over all entries in TTree
-  Long64_t N = getNumberOfEntries();
+  Long64_t N = getNumberOfEvents();
   std::cout << GetName() << "::Indexing " << N << " entries" << std::endl;
 
   for ( Long64_t i=0;i<N;i++ )
@@ -100,9 +102,18 @@ void StGammaTreeReader::buildIndex()
       Int_t run   = mEvent->runNumber();
       Int_t event = mEvent->eventNumber();
       Long64_t mykey = key(run,event);       // generate key
-      mIndex[ mykey ] = i;                   // add event to index
+      mIndex[ mykey ] = i + 1;               // add event to index, offset by 1 so that 0 is an error condition
+      if ( i < 10 ) {
+	std::cout << Form("[%i] RUN: %i EVENT: %i KEY: ",(Int_t)i,run,event) << mykey << " INDEX: " << i << std::endl;
+      }
+
     }
   mIndexed=1;
+
+  timer.Stop();
+
+  std::cout << "[Time to build index for "<<N<<" events -- ";
+  std::cout << Form("real: %.2f s cpu: %.2f s]",timer.RealTime(),timer.CpuTime()) << std::endl;
 
 }
 
@@ -110,10 +121,9 @@ void StGammaTreeReader::buildIndex()
 void StGammaTreeReader::Test()
 {
 
-  static Int_t nmiss=0;
   static Int_t ngood=0;
 
- Long64_t N = getNumberOfEntries();
+ Long64_t N = getNumberOfEvents();
 
  std::vector<ID> ids;
  for ( Long64_t i=0;i<N;i++ )
@@ -123,6 +133,7 @@ void StGammaTreeReader::Test()
      myid.run = mEvent->runNumber();
      myid.evt = mEvent->eventNumber();
      ids.push_back(myid); // add this ID to list of IDs
+
    }
  
  // Shuffle events randomly
@@ -162,9 +173,11 @@ void StGammaTreeReader::Test()
 Long64_t StGammaTreeReader::key( Int_t run, Int_t event )
 {
  
-  Long64_t mykey=(Long64_t)run;
-  mykey  = ( mykey << 31 );
-  mykey += event;
+  Long64_t mykey=0;
+  mykey  = (Long64_t)run;    // assign run number
+  //mykey  = ( mykey << 32 );  // left shift it by 32 bits
+  mykey *= (Long64_t)1.0E10;  // better, so the key is readable
+  mykey += event;            
   
   //std::cout << Form("run=%i event=%i",run,event,mykey) << std::endl;
   return mykey;
