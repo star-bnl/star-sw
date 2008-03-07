@@ -58,9 +58,11 @@ endif
 # Determine what new tags files exist
 # copy them to $DIR and determine runs to process
 #
-set tagdirs = (/star/data09/reco/laser_rhicclock /star/data10/reco/laser_rhicclock)
+set tagdirs = (/star/data09/reco/laser_rhicclock  /star/data10/reco/laser_rhicclock \
+               /star/data09/reco/laser_localclock /star/data10/reco/laser_localclock)
 set listOfRuns = ()
 foreach tagdir ($tagdirs)
+  if (-d $tagdir) then
     cd $tagdir
     set tagfiles = `$FIND . -name "st_laser_*tags.root" -cnewer $timeFile `
     foreach tagfile ($tagfiles)
@@ -70,6 +72,7 @@ foreach tagdir ($tagdirs)
         $MKDIR -p $runDir
         $CP $tagfile $runDir
     end
+  endif
 end
 $TOUCH $timeFile
 
