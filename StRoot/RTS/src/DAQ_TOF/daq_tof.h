@@ -19,12 +19,12 @@ protected:
 
 
 public:
-	daq_tof(const char *dname="TOF", rts_reader *rts_caller=0, detHandler *det_h=0) ;
+	daq_tof(const char *dname="TOF", rts_reader *rts_caller=0) ;
 	~daq_tof() ;
 
 
 
-	void help() const { printf("%s",help_string) ; } ;
+
 
 	daq_dta  *get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
 
@@ -32,11 +32,6 @@ public:
                 static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
-#ifdef __RTS_ROOT__
-Class_Def(daq_tof,0)
-#endif
-
 } ;
-
 
 #endif	// _DAQ_TOF_H_

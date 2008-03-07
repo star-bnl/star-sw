@@ -1,18 +1,19 @@
+#include <assert.h>
 #include <sys/types.h>
 #include <errno.h>
 
-
-
-#include "daq_tof.h"
-#include <RTS_READER/rts_reader.h>
-#include <RTS_READER/daq_dta.h>
-
-#include <rts.h>
-#include <rtsLog.h>		// DAQ logging
+#include <rtsLog.h>
 #include <rtsSystems.h>
 
 #include <SFS/sfs_index.h>
 
+#include <RTS_READER/rts_reader.h>
+#include <RTS_READER/daq_dta.h>
+
+#include "daq_tof.h"
+
+// #include <rts.h>
+ 
 
 
 
@@ -27,7 +28,7 @@ Supported Banks: \n\
 
 
 
-daq_tof::daq_tof(const char *dname, rts_reader *rts_caller, detHandler *det_h) 
+daq_tof::daq_tof(const char *dname, rts_reader *rts_caller)
 {
 	rts_id = TOF_ID ;
 	name = rts2name(rts_id) ;
