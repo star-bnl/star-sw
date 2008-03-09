@@ -37,6 +37,8 @@ ClassImp(StSsdFastSimMaker)
     dX          = 0;
     dY          = 0;
     dZ          = 0;
+    Local       = 0;
+    Ratio       = 0;
   };
 
   StSsdFastSimMaker::~StSsdFastSimMaker(){ 
@@ -47,7 +49,8 @@ ClassImp(StSsdFastSimMaker)
     delete dX          ; 
     delete dY          ; 
     delete dZ          ; 
-
+    delete Local       ; 
+    delete Ratio       ;
 }
 
 int StSsdFastSimMaker::Init()
@@ -84,6 +87,14 @@ int StSsdFastSimMaker::Init()
     dZ->SetXTitle("z_{G} - z_{G}^{smear} [cm]");
     dZ->SetLabelSize(0.03,"X");
     dZ->SetLabelSize(0.03,"Y");
+    Local = new TH2F("Local","Local x vs local y : hits ",800,-4,4,250,-2.25,2.25);
+    Local->SetXTitle("x_{l}[cm]");
+    Local->SetYTitle("y_{l}[cm]");
+    Local->SetLabelSize(0.03,"X");
+    Local->SetLabelSize(0.03,"Y");
+    Ratio  = new TH1F("Ratio","Ratio between initial geant hits and after removal of the dead areas",120,0,1.2);
+    Ratio->SetLabelSize(0.03,"X");
+    Ratio->SetLabelSize(0.03,"Y");
   }
   return kStOk;
 }
@@ -162,14 +173,17 @@ Int_t StSsdFastSimMaker::Make()
   setSsdParameters(dimensions);
   if(Debug()>1) printSsdParameters();
   Int_t inContainer = 0;
+  Int_t goodHits    = 0;
   if(g2t_ssd_hit){
-    LOG_DEBUG<<Form("NumberOfRows = %d Size of g2t_ssd table=%d",g2t_ssd_hit->GetNRows(),g2t_ssd_hit->GetTableSize())<<endm;
+    LOG_INFO<<Form("NumberOfRows = %d Size of g2t_ssd table=%d",g2t_ssd_hit->GetNRows(),g2t_ssd_hit->GetTableSize())<<endm;
     Int_t minWaf      = mSsdLayer*1000;
     Int_t currWafId   = 0;
     Int_t currWafNumb = 0;
     Int_t currLadder  = 0;
     Int_t i           = 0;
     unsigned char c   = 0;
+    Int_t iok         = 0;
+    Int_t in          = 0;
     for (i = 0; i < g2t_ssd_hit->GetNRows() ; i++)    {
       currWafId=g2t[i].volume_id;
       if (currWafId > minWaf)   {
@@ -205,7 +219,15 @@ Int_t StSsdFastSimMaker::Make()
 	LOG_DEBUG<< "After : global position are :"<<endm;
 	LOG_DEBUG <<Form("x=%f y=%f z=%f",xgSmear[0],xgSmear[1],xgSmear[2])<<endm;
 	LOG_DEBUG <<Form("Smearing done...")<< endm;
-	mSmearedhit = new StSsdHit(xgSmear,error,currWafId,g2t[i].de,c);
+	in  = IsOnWafer(xlSmear[0],xlSmear[1]);
+	if(in==0)continue;
+	LOG_DEBUG << "good hit in wafer active area " << endm;
+	iok = RemoveTriangle(xlSmear[0],xlSmear[1]);
+	if(iok==0)continue;
+	goodHits++;
+	LOG_DEBUG << "good hit after triangle rejection" << endm;
+	Local->Fill(xlSmear[0],xlSmear[1]);
+	  mSmearedhit = new StSsdHit(xgSmear,error,currWafId,g2t[i].de,c);
 	//fill histograms
 	if(IAttr(".histos")){ 
 	  HitsMap->Fill(currLadder+1,currWafNumb+1,1);
@@ -233,12 +255,13 @@ Int_t StSsdFastSimMaker::Make()
   }
   if(inContainer){
     LOG_INFO<<"####   -> "<<inContainer<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;
+    Ratio->Fill(inContainer/(float)g2t_ssd_hit->GetNRows());
   }
   else {
     LOG_INFO<<"######### NO SSD HITS WRITTEN INTO CONTAINER  ####"<<endm;
   }
-  printf("ssd col ==%d\n",mCol->numberOfHits());
-  //mySsd->Reset();
+  LOG_DEBUG << "ssd col= "<<mCol->numberOfHits()<< " inContainer=" << inContainer <<" good hits = " << goodHits <<" initial # hits="<<g2t_ssd_hit->GetNRows()<<endm;
+  mySsd->Reset();
   return kStOK;
 }
 //________________________________________________________________________________
@@ -301,4 +324,46 @@ void StSsdFastSimMaker::printSsdParameters(){
 void StSsdFastSimMaker::Clear(Option_t *option)
 {
   /*noop*/
+}
+//________________________________________________________________________________
+Int_t StSsdFastSimMaker::RemoveTriangle(Float_t x, Float_t y)
+{
+  Int_t iok = 0; 
+  Float_t beta = (TMath::Pi()/2.) - (mTheta/2.);
+  Float_t X = (mDetectorSmallEdge/2.)*TMath::Tan(mTheta/2.);
+  Float_t l = (mDetectorLargeEdge/2.) -X ;
+  LOG_DEBUG <<Form("beta=%f arctan(beta)=%f X=%f l=%f mdetectorsmallEdge=%f mDetectorLargeEdge=%f\n",beta,TMath::ATan(beta),X,l,mDetectorSmallEdge,mDetectorLargeEdge)<<endm;
+  if(x>(mDetectorLargeEdge/2.) -X){
+    if(y < TMath::ATan(beta)*(x-l)){
+      LOG_DEBUG<<"upper right corner , hit rejected at x=" << x <<" y=" <<y << endm;
+      iok =0;
+    }
+    else 
+      if(y>-1*TMath::ATan(beta)*(x-l)){
+	LOG_DEBUG<<"bottom right corner , hit rejected at x=" << x <<" y=" <<y << endm;
+	  iok = 0; //bottom right corner
+      }
+  }
+  if(x<((-1*mDetectorLargeEdge/2.)+X)){
+    if(y<-1*TMath::ATan(beta)*(x+l)){
+      LOG_DEBUG<<"upper  left corner , hit rejected  at x=" << x <<" y=" <<y << endm;
+      iok =0; //upper left corner
+    }
+    else {
+      if(y>1*TMath::ATan(beta)*(x+l)){
+	LOG_DEBUG<<"bottom left corner , hit rejected  at x=" << x <<" y=" <<y << endm;
+	iok = 0; //bottom left corner
+      }
+    }
+  }  
+  else{ iok= 1;}
+return iok; // good hit
+}
+//_______________________________________________________________________________
+int StSsdFastSimMaker::IsOnWafer(Float_t x , Float_t y){
+  //Find out for a given z coord and Hardware pos is it on the wafer
+  if((x <(mDetectorLargeEdge/2.)) && (x > (-mDetectorLargeEdge/2.)) &&  
+     (y <(mDetectorSmallEdge/2.)) && (y > (-mDetectorSmallEdge/2.)))
+    return 1;   
+  return 0;
 }
