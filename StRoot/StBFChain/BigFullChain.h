@@ -348,7 +348,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   //  {"testing"      ,"" ,"",   // just a damned test
   //   "B2006b,sdt20061211,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
   //                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
-  {"B2008"       ,""       ,"","ry2008,MakeEvent,in,tpc_daq,tpcI,fcf,Idst,tags,ctf,Tree,evout","",""
+  {"B2008"       ,""       ,"","ry2008,in,tpc_daq,tpcI,fcf,Idst,tags,ctf,Tree,evout","",""
                                                               ,"Base chain for 2008 ITTF (tpc)",kFALSE},
   // startup for calib
   {"P2008a"       ,"" ,"",
