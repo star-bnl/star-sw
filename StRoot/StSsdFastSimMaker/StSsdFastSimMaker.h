@@ -75,8 +75,11 @@ class StSsdFastSimMaker : public StMaker {
   Int_t     idWaferToLadderNumb(Int_t idWafer);//  idwafer => ladder-1
   Int_t     waferNumbToIdWafer(Int_t waferNumb);// waferNumb = mNWaferPerLadder*(ladder-1) + waf - 1 => idwafer
   Int_t     idWaferToWafer(Int_t idWafer) {return (idWafer-7000)/100-1;}
+  Int_t     IsOnWafer(Float_t x, Float_t y);
+  Int_t     RemoveTriangle(Float_t x, Float_t y);
  
  private :
+  ssdDimensions_st *mDimensions;
   Int_t    mSsdLayer;
   Int_t    mNLadder;
   Int_t    mNWaferPerLadder;
@@ -86,7 +89,6 @@ class StSsdFastSimMaker : public StMaker {
   Float_t  mDetectorSmallEdge;
   Float_t  mStripPitch;
   Float_t  mTheta;
-  ssdDimensions_st *mDimensions;
   
  protected:
   StRandom* myRandom;
@@ -100,11 +102,15 @@ class StSsdFastSimMaker : public StMaker {
   TH1F      *dX;        //x-x(smeared) in cm
   TH1F      *dY;        //y-y(smeared) in cm
   TH1F      *dZ;        //z-z(smeared) in cm
+  TH2F      *Local;
+  TH1F      *Ratio;
+
+
 /* \brief Documentation method. GetCVS can be called from the chain, providing a list
    of all maker versions in use. */
  virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdFastSimMaker.h,v 1.1 2007/08/08 22:25:46 bouchet Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdFastSimMaker.h,v 1.2 2008/03/09 22:26:02 bouchet Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   ClassDef(StSsdFastSimMaker,0)   //StAF chain virtual base class for Makers
