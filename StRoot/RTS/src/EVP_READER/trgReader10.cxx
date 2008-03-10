@@ -28,7 +28,7 @@ int trgReader10(char *buff)
 
   int byteCount_Version = swap32(trg->byteCount_Version);
   
-  int byteCount = byteCount_Version >> 8;
+//--  int byteCount = byteCount_Version >> 8;
   int version = byteCount_Version & 0xff;
   
   if(version != 0x10) {
@@ -46,7 +46,7 @@ int trgReader10(char *buff)
   }
 
   EvtDescData *evtdesc = (EvtDescData *)(buff + evtdesc_off); 
-  u_int *x = (u_int *)evtdesc;
+//  u_int *x = (u_int *)evtdesc;
 
   int version2 = evtdesc->TrgDataFmtVer;
   
