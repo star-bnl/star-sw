@@ -171,7 +171,7 @@ int DAQsvtReader(char *m)
 					//     l2h32(mzp->banks[TPC_ADCX].len)*4);
 
 
-					TPCADCD *fb = adcd;
+//					TPCADCD *fb = adcd;
   // char buff[10];
 //   memset(buff, 0, sizeof(buff));
 //   memcpy(buff,fb->bh.bank_type,8);
