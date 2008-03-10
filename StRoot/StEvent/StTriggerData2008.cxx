@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2008.cxx,v 2.2 2007/12/11 18:11:13 ullrich Exp $
+ * $Id: StTriggerData2008.cxx,v 2.3 2008/03/10 19:35:31 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2008.cxx,v $
+ * Revision 2.3  2008/03/10 19:35:31  ullrich
+ * New methods: tofAtAddress() and tofMultiplicity().
+ *
  * Revision 2.2  2007/12/11 18:11:13  ullrich
  * Fix bugs in QT decoding (Akio).
  *
@@ -932,4 +935,15 @@ unsigned short StTriggerData2008::mtdTdc(StBeamDirection eastwest, int pmt, int 
     };
     if(pmt>=0 && pmt<8) { return mData->rawTriggerDet[prepostAddress(prepost)].MTD[map[eastwest][pmt]]; }
     return 0;
+}
+
+unsigned short StTriggerData2008::tofAtAddress(int address, int prepost) const 
+{
+    if (address>=0 && address<16){ return mData->rawTriggerDet[prepostAddress(prepost)].TOF[address]; }
+    return 0;
+}
+
+unsigned short StTriggerData2008::tofMultiplicity(int prepost) const 
+{
+    return mData->rawTriggerDet[prepostAddress(prepost)].TOF[8]; 
 }
