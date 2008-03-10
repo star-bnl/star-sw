@@ -13,15 +13,7 @@ Not sure if this shows up anywhere but I'll check with Yuri.
 
 */                                                                      
 
-#ifdef __RTS_ROOT__
-#include <StMaker.h>
-#endif
-
-#ifdef __CINT__
-typedef unsigned int u_int ;
-typedef unsigned short u_short ;
-typedef unsigned char u_char ;
-#endif
+#include <sys/types.h>	// needed for u_int etc.
 
 
 // forward decls...
@@ -29,26 +21,8 @@ class sfs_index ;
 class fs_dir ;
 class daq_det ;
 
-#ifndef __RTS_ROOT__
-// DUUUUUUUMMMMMMMYYYYYYY!
-class St_Maker {
-public:
-	St_Maker() {;} ;
-	virtual ~St_Maker() {;} ;
 
-	virtual int Make() { return 0 ; } ;
-	virtual int Init() { return 0 ; } ;
-	virtual int InitRun(int run) { return 0 ; } ;
-	virtual int FinishRun(int odl) { return 0 ; } ;
-
-	virtual void SetMode(int mode=0) { m_Mode=mode ;} ;
-	virtual int GetMode() { return m_Mode ; } ;
-	
-	int m_Mode ;
-} ;
-#endif
-
-class rts_reader : public St_Maker {
+class rts_reader {
 private:
 	int sfs_owner ;
 
@@ -56,6 +30,7 @@ private:
 	int handle_open() ;
 	void handle_close() ;
 
+	int m_Mode ;
 public:
 	rts_reader(const char *name="rts_rdr") ;	// Offline wants char stuff...
 	virtual ~rts_reader() ;
@@ -63,9 +38,15 @@ public:
 	virtual int Init() ;
 
 	virtual int InitRun(int run) ;
+	virtual int Make() ;	// Offline; advances to next event!
 	virtual int FinishRun(int old) ;
 
-	virtual int Make() ;	// Offline; advances to next event!
+
+
+	virtual void SetMode(int mode=0) { m_Mode=mode ;} ;
+	virtual int GetMode() { return m_Mode ; } ;
+	
+
 
 
 	virtual const char *GetCVS() const {	// Offline
@@ -109,24 +90,7 @@ public:
 	char		fs_cur_evt[128] ;			// name of the form "/#123123" or "/tpx", just that part!
 	u_int		cur_evt_ix ;				// this is the number after /# of the current entry
 
-
-#ifdef __RTS_ROOT__
-	Class_Def(rts_reader,0)
-#endif
-
 } ;
 
-// for convenience of the clients!
-// This trick confuses the CINT dictionary generation
-// #include <RTS_READER/daq_det.h>
-// #include <RTS_READER/daq_dta.h>
-//  For convenience of the clients one needs 
-//  something  like this:
-//
-// rts_clients.h:
-// --------------
-// #include <RTS_READER/rts_reader.h>
-// #include <RTS_READER/daq_det.h>
-// #include <RTS_READER/daq_dta.h>
 
 #endif

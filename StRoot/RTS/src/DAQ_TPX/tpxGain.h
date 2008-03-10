@@ -1,8 +1,9 @@
 #ifndef _TPX_GAIN_HH_
 #define _TPX_GAIN_HH_
 
+// #include <stdio.h>
 
-#include "tpxCore.h"
+// #include "tpxCore.h"
 
 
 
@@ -13,22 +14,29 @@ public:
 	~tpxGain() ;
 
 	
-	struct gains {
+	struct gains_t {
 		float g ;
 		float t0 ;
 	} ;
 
 	// used in running
-	struct gains *gains[24] ;	// pointers to sector contribs, [46][183]
+	struct gains_t *gains[24] ;	// pointers to sector contribs, [46][183]
 
-	struct gains *get_gains(int s, int r, int p) {
+	void set_gains(int s, int r, int p, float g, float t0) {
+		struct gains_t *gs = get_gains(s,r,p) ;
+
+		gs->g = g ;
+		gs->t0 = t0 ;
+	}
+
+	struct gains_t *get_gains(int s, int r, int p) {
 		return (gains[s-1] + r*182 + (p-1)) ;
 	}
 
 	u_int bad_fee[25][7][37] ;	// [x][y][36] contains the count!
 
 	// below used while calculating only
-	struct aux {
+	struct aux_t {
 		short low_pulse ;	// count of low gain
 		short noise ;		// count of noisy
 		short high_pulse ;	// count of pulse to high
@@ -37,11 +45,11 @@ public:
 		short need ;		// count of expected events!
 	} *aux	;	// [24][46][182]
 
-	struct aux *get_aux(int s, int r, int p) {
+	struct aux_t *get_aux(int s, int r, int p) {
 		return (aux + (s-1)*46*182 + r*182 + (p-1)) ;
 	} ;
 
-	struct means {
+	struct means_t {
 		double g ;
 		double t0 ;
 		double g_rms ;
@@ -49,7 +57,7 @@ public:
 
 	} *means ;	// [24][46]
 
-	struct means *get_means(int s, int r) {
+	struct means_t *get_means(int s, int r) {
 		return (means + (s-1)*46 + r) ;
 	} ;
 	

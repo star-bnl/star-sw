@@ -1,17 +1,24 @@
 #ifndef _TPX_FCF_HH_
 #define _TPX_FCF_HH_
 
-#include <sys/types.h>
+//#include <sys/types.h>
 
 #include "tpxCore.h"
 
-class tpxGain ;
 
-//#define FCF_DEBUG1
+// main tunable parameters
+#define FCF_ADC_NOISE           4
+#define FCF_ADC_MIN		4	// we additionally can kill 1d sequences where the maximum is below this
+#define FCF_MIN_WIDTH           1
+#define FCF_MIN_ADC_PAD_C       180
 
-#define FCF_DO_DOUBLE	// timebins, pads, averages are double instead of u_int
 
-//#define FCF_DO_INT 	// p1, t1 etc. are ints instead of shorts
+// timebins at which the gating grid opens & closes -- the gain is compromised if we cross them...
+#define TPC_GG_OPEN	22
+#define TPC_FF_CLOSE	380
+
+
+#define FCF_MAX_CL	32		// max 1D clusters per pad
 
 
 // flag definitions - NEVER CHANGE
@@ -30,12 +37,16 @@ class tpxGain ;
 #define FCF_DEAD_EDGE           64      // touches a dead pad
 #define FCF_IN_DOUBLE           128	// one should use the floating point in the union
 
-#define FCF_MAX_CL	32		// max 1D clusters per pad
 
 
-// timebins at which the gating grid opens & closes -- the gain is compromised if we cross them...
-#define TPC_GG_OPEN	22
-#define TPC_FF_CLOSE	380
+
+
+
+
+//#define FCF_DEBUG
+
+#define FCF_DO_DOUBLE	// timebins, pads, averages are double instead of u_int
+//#define FCF_DO_INT 	// p1, t1 etc. are ints instead of shorts
 
 
 #ifdef FCF_DO_DOUBLE
@@ -50,14 +61,7 @@ class tpxGain ;
 	typedef short fcf_short ;
 #endif
 
-#if defined(FCF_SIM_ON) || defined(FCF_ANNOTATE_CLUSTERS) || defined (FCF_DEBUG1)
-#define FCF_EXTENDED
-#endif
 
-#define FCF_ADC_NOISE           4
-#define FCF_ADC_MIN		4	// we additionally can kill 1d sequences where the maximum is below this
-#define FCF_MIN_WIDTH           1
-#define FCF_MIN_ADC_PAD_C       180
 
 
 struct tpxFCF_cl {
@@ -83,34 +87,39 @@ struct tpxFCF_cl {
 
 	fcf_short flags ;
 
-#ifdef FCF_EXTENDED
-	fcf_short pix ;	// count of pixels in blob
-	fcf_short max_adc ;	// the maximum adc
-	fcf_short id ;	// simulation id
-	fcf_short cl_id ;	// global cluster id
-#endif
-
 } ;
 
 
-
+// forwad decls
+class tpxGain ;
+struct daq_cld ;
+struct daq_sim_cld ;
 
 class tpxFCF {
 public:
 	tpxFCF() ;
 	~tpxFCF() ;
 
-	void config(u_int rb_mask) ;
+	void config(u_int rb_mask, int modes = 0) ;
 	void apply_gains(int sector, tpxGain *gains) ;
 
 	void start_evt() ;
 
-	int do_pad(tpx_altro_struct *a) ;
+	int do_pad(tpx_altro_struct *a, void *extra = 0) ;
 	int stage2(u_int *outbuff, int max_bytes) ;
+
 
 
 	char do_cuts ;
 	int ch_min ;
+
+	static int fcf_decode(u_int *p_buff, daq_cld *dc) ;
+	static int fcf_decode(u_int *p_buff, daq_sim_cld *sdc) ;
+
+	const char *GetCVS() const {	// Offline
+		static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+	}
+
 private:
 
 	u_int *loc_buff ;
@@ -126,6 +135,7 @@ private:
 		struct tpxFCF_cl cl[FCF_MAX_CL] ;		
 	} ;
 
+
 	struct stage1 *storage ;	// where I will allocate storage
 
 	void dump(tpxFCF_cl *cl) ;
@@ -139,11 +149,17 @@ private:
 	}
 
 
+
+
 	int row_ix[46] ;
+
+	int modes ;	// bit mask: 1 run extended, 2 run annotated
 
 	u_int rbs ;
 	int sector ;
 	tpxGain *gains ;
+
+
 } ;
 
 #endif

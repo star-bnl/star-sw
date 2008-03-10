@@ -20,8 +20,86 @@
 #include <DAQ_TPX/tpxGain.h>
 #include <DAQ_TPX/tpxFCF.h>
 
+#include <RTS_READER/daq_dta_structs.h>
+
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
+
+int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc)
+{
+	double p, t ;
+	int p1,p2,t1,t2,cha,fla ;
+	int ptmp ;
+
+	fla = 0 ;
+
+	// pad
+	u_int tmp = *p_buff & 0xFFFF ;
+	if(tmp & 0x8000) fla |= FCF_MERGED ;
+	if(tmp & 0x4000) fla |= FCF_DEAD_EDGE ;
+
+	p = (double)(tmp & 0x3FFF) / 32.0 ;
+				
+	// time
+	tmp = *p_buff >> 16 ;
+	if(tmp & 0x8000) fla |= FCF_ONEPAD ;
+	t = (double)(tmp & 0x7FFF) / 32.0 ;
+				
+	p_buff++ ;	// advance to next word
+	cha = *p_buff >> 16 ;
+
+	if(cha >= 0x8000) fla |= FCF_BIG_CHARGE ;
+	ptmp = *p_buff & 0xFFFF ;
+
+	if(ptmp & 0x8000) fla |= FCF_ROW_EDGE ;
+	if(ptmp & 0x4000) fla |= FCF_BROKEN_EDGE ;
+
+	t1 = ptmp & 0xF ;
+	t2 = (ptmp >> 4) & 0xF ;
+
+
+	p1 = (ptmp >> 8) & 0x7 ;
+	p2 = (ptmp >> 11) & 0x7 ;
+
+	t1 = (u_int)t - t1 ;
+	t2 = (u_int)t + t2 ;
+	p1 = (u_int)p - p1 ;
+	p2 = (u_int)p + p2 ;
+
+	dc->t1 = t1 ;
+	dc->t2 = t2 ;
+	dc->p1 = p1 ;
+	dc->p2 = p2 ;
+	dc->charge = cha ;
+	dc->flags = fla ;
+	dc->pad = p ;
+	dc->tb = t ;
+
+
+	return 2 ;	// 2 u_ints used
+
+}
+
+int tpxFCF::fcf_decode(u_int *p_buff, daq_sim_cld *sdc)
+{
+	int skip = fcf_decode(p_buff,&(sdc->cld)) ;
+
+
+	sdc->pix_count = 0 ;
+	sdc->max_adc = 0 ;
+	sdc->cl_id = 0 ;
+
+	sdc->track_id = 0 ;
+	sdc->quality = 100 ;
+
+	p_buff += skip ;
+
+	// decode the rest now
+
+
+	return skip ;
+}
+
 
 tpxFCF::tpxFCF() 
 {
@@ -53,10 +131,10 @@ tpxFCF::~tpxFCF()
 /*
 	Called once at startup
 */
-void tpxFCF::config(u_int mask)
+void tpxFCF::config(u_int mask, int mode)
 {
 	rbs = mask ;
-
+	modes = mode ;
 
 	int r ;
 	int row, pad ;
@@ -107,6 +185,8 @@ void tpxFCF::config(u_int mask)
 
 	// clear storage
 	memset(storage,0,tot_count * sizeof(struct stage1)) ;
+
+
 
 	// re-create offsets which we use in the row+pad navigation
 	tot_count = 0 ;	// re use...
@@ -217,14 +297,14 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 void tpxFCF::start_evt()
 {
-// possibly unnecessary
+
 	for(int r=0;r<=45;r++) {
 		if(row_ix[r] < 0) continue ;
 
 		for(int p=1;p<tpc_rowlen[r];p++) {
 			struct stage1 *o ;
 			o = get_stage1(r, p) ;
-			if(o==0) {
+			if(unlikely(o==0)) {
 				LOG(ERR,"No row pad %d:%d???",r,p) ;
 			}
 			else {
@@ -238,26 +318,24 @@ void tpxFCF::start_evt()
 }
 
 
-int tpxFCF::do_pad(tpx_altro_struct *a)
+int tpxFCF::do_pad(tpx_altro_struct *a, void *extra)
 {
 	struct stage1 *s ;
 
+
 	s = get_stage1(a->row, a->pad) ;
-	if(s==0) {
+	if(unlikely(s==0)) {
 		LOG(ERR,"Whoa -- no row:pad %d:%d???",a->row,a->pad) ;
 		return 0 ;
 	}
-	else {
-		//LOG(DBG,"RP %d:%d at 0x%08X",a->row,a->pad,s) ;
-	}
+
 
 	s->count = 0 ;
 
 
-	//LOG(DBG,"Sector %d: rp %d:%d, %d values",sector,a->row,a->pad,a->count) ;
 
-	if(a->row > 45) return 0 ;
-	if(a->count==0) return 0 ;
+	if(unlikely(a->row > 45)) return 0 ;
+	if(unlikely(a->count==0)) return 0 ;
 
 	u_int t_ave, charge ;
 	u_int tb_start ;
@@ -271,10 +349,9 @@ int tpxFCF::do_pad(tpx_altro_struct *a)
 
 	cl = s->cl ;	// start...
 	cl_max = &(s->cl[FCF_MAX_CL]) ;	// end of cl sentinel...
-
+	
 
 	u_int max_adc = 0 ;
-
 
 	last_falling = last_adc = 0 ;
 	t_ave = charge = 0 ;
@@ -282,6 +359,8 @@ int tpxFCF::do_pad(tpx_altro_struct *a)
 	tb_prev = tb_start = a->tb[0] ;
 	flags =  s->f & 0xFF ;
 	new_cluster = 0 ;
+
+
 
 	// start the loop over raw pixels in this pad...
 	for(int i=0;likely( i < a->count );i++) {
@@ -318,11 +397,9 @@ int tpxFCF::do_pad(tpx_altro_struct *a)
 			}
 		}
 
-		//printf("...%d:%d\t%2d: tb %3d, adc %3d: new %d, last_falling %d, tb %d - %d\n",
-		//       a->row,a->pad,i,tb,adc,new_cluster,last_falling,tb_start,tb_prev) ;
 
 		if(unlikely( new_cluster )) {
-			if(max_adc >= FCF_ADC_MIN) {
+			if(likely(max_adc >= FCF_ADC_MIN)) {
 				cl->t_ave = t_ave ;
 				cl->charge = charge ;
 
@@ -332,13 +409,15 @@ int tpxFCF::do_pad(tpx_altro_struct *a)
 				cl->flags = flags ;
 	
 				#ifdef FCF_EXTENDED
-				cl->pix = cl->t2 - cl->t1 + 1 ;
-				cl->max_adc = max_adc ;				
+				if(modes) {
+					clx->pix = cl->t2 - cl->t1 + 1 ;
+					clx->max_adc = max_adc ;				
+					clx->track_id = max_t_id ;
+					clx++ ;
+				}
 				#endif
 
-
 				cl++ ;
-	
 
 				// protect storage!
 				if(unlikely( cl >= cl_max )) goto pad_done ;	// to many!
@@ -357,8 +436,9 @@ int tpxFCF::do_pad(tpx_altro_struct *a)
 		}
 
 
-		if(unlikely( adc > max_adc )) max_adc = adc ;
-
+		if(unlikely( adc > max_adc )) {
+			max_adc = adc ;
+		}
 
 		last_adc = adc ;
 		tb_prev = tb ;
@@ -370,7 +450,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a)
 	}	// scan over the sequence
 	
 	// finish off the rest...
-	if(max_adc >= FCF_ADC_MIN) {
+	if(likely(max_adc >= FCF_ADC_MIN)) {
 		cl->t1 = tb_prev  ;	// t1 is the lower value
 		cl->t2 = tb_start ;
 
@@ -380,10 +460,13 @@ int tpxFCF::do_pad(tpx_altro_struct *a)
 		cl->t_ave = t_ave ;
 
 		#ifdef FCF_EXTENDED
-		cl->pix = cl->t2 - cl->t1 + 1 ;
-		cl->max_adc = max_adc ;
+		if(modes) {
+			clx->pix = cl->t2 - cl->t1 + 1 ;
+			clx->max_adc = max_adc ;
+			clx->track_id = max_t_id ;
+			clx++ ;
+		}
 		#endif
-
 
 		cl++ ;
 	}
@@ -406,7 +489,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a)
 		}
 	}
 
-#if 0
+#ifdef FCF_DEBUG
 	// debugging dump
 	cl = s->cl ;
 	for(int j=0;j<s->count;j++) {
@@ -455,6 +538,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 			//LOG(DBG,"RP %d:%d at 0x%08X, next at 0x%08X",r,p,old1,cur1) ;
 
+			// counters
+			//if(old1->count) LOG(DBG,"pad %d: count %d",p,old1->count) ;
+
 			//end sentinel
 			cur_end = cur + cur1->count ;
 			old_end = old + old1->count ;
@@ -476,6 +562,8 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 					else {
 						LOG(WARN,"Can;t be without ONEPAD %d:%d 0x%X?! %d..%d",r,p+1,cur->flags,cur->p1,cur->p2) ;
 					}
+
+					//LOG(DBG,"p %d: %d %d",p,old->t1,cur->t2) ;
 
 					if(unlikely((old->t1 - cur->t2) >= 1)) {
 						// the old guy is left behind and thus
@@ -636,9 +724,16 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 						}
 
 
+						
 						#ifdef FCF_EXTENDED
-						cur->pix += old->pix ;
-						if(cur->max_adc < old->max_adc) cur->max_adc = old->max_adc ;
+						if(modes) {
+							curx->pix += oldx->pix ;
+							if(curx->max_adc < oldx->max_adc) {
+								curx->max_adc = oldx->max_adc ;
+								curx->track_id = oldx->track_id ;
+							}
+							curx++ ;
+						}
 						#endif
 
 						cur++ ;	// don't use the new guy again...
@@ -647,12 +742,11 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 				}	// end of loop over new....
 
 
-				//LOG(NOTE,"Merge %d:%d = merge %d, t1..t2 %d:%d",r,p,merge,old->t1,old->t2) ;
+				//LOG(DBG,"Merge %d:%d = merge %d, t1..t2 %d:%d",r,p,merge,old->t1,old->t2) ;
 
 
 				switch(merge) {
 				case 1 :
-
 					// this is a real merge so keep the old guy...
 					break ;
 				default :
@@ -726,6 +820,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	}
 
 	//LOG(DBG,"dump: row %d: %d %d %d %d %f 0x%X",cur_row,cl->p1,cl->p2,cl->t_min,cl->t_max,cl->f_charge,cl->flags) ;
+
 
 	// cuts go here
 	if(likely(do_cuts)) {

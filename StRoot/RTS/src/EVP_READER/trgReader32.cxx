@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 
 #include <rtsLog.h>
+#include "rts.h"  // for the sake of swap32 entry
 
 #include <rtsSystems.h>
 
@@ -15,7 +16,6 @@
 
 #include <evpSupport.h>
 #include <trgReader.h>
-#include <rts.h>
 
 
 // this maps from the raw data to the following representation

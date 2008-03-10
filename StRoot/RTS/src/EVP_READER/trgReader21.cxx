@@ -5,6 +5,7 @@
 #include <rtsLog.h>
 
 #include <rtsSystems.h>
+#include "rts.h"  // fror the sake of swap32 entry
 
 // This reader works for TRG_VERSIONS: 0x21 (FY04 run); 0x22 (Nov 04)
 
@@ -15,7 +16,6 @@
 
 #include <evpSupport.h>
 #include <trgReader.h>
-#include <rts.h>
 
 // this maps from the raw data to the following representation
 // sector1,slat1,ch1 ... ch5, sector1,slat2,ch1.... ch5, sector2,slat1,ch1...

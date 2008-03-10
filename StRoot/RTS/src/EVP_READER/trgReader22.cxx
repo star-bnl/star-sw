@@ -11,11 +11,10 @@
 // one needs to diffuse the crummy trigger stuff first
 #define TRG_VERSION	0x22
 #include <daqFormats.h>
-
+#include "rts.h"  // for the sake of swap32 entry
 
 #include <evpSupport.h>
 #include <trgReader.h>
-#include <rts.h>
 
 
 // this maps from the raw data to the following representation

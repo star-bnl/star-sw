@@ -1,8 +1,13 @@
 
 #ifndef __CINT__
 
+#include <rtsLog.h>
+#include <stdio.h>
+
 #include <RTS_READER/rts_reader.h>
 #include <RTS_READER/daq_dta.h>
+#include <RTS_READER/daq_det.h>
+
 
 int root_example() ;
 

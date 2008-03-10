@@ -12,7 +12,8 @@
 
 #include "daq_tof.h"
 
- 
+
+
 
 
 
@@ -27,7 +28,7 @@ Supported Banks: \n\
 
 
 
-daq_tof::daq_tof(const char *dname, rts_reader *rts_caller)
+daq_tof::daq_tof(const char *dname, rts_reader *rts_caller) 
 {
 	rts_id = TOF_ID ;
 	name = rts2name(rts_id) ;

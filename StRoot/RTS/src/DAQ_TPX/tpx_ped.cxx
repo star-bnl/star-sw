@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 #include <rtsLog.h>
-#include <assert.h>
 
 
 #include <DAQ_TPX/tpxCore.h>

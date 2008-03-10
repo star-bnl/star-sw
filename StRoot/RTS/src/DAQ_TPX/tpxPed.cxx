@@ -96,7 +96,7 @@ void tpxPed::accum(char *evbuff, int bytes)
 
 	valid_evts[a.rdo]++ ;
 
-        LOG(WARN,"RDO %d: event %d: delta %u OK",rdo.rdo,evts[a.rdo],tpx_rdo_dbg[a.rdo].delta) ;
+        LOG(NOTE,"RDO %d: event %d: delta %u OK",rdo.rdo,evts[a.rdo],tpx_rdo_dbg[a.rdo].delta) ;
 
 	data_end = rdo.data_end ;
 
@@ -448,7 +448,8 @@ void tpxPed::smooth()
 		LOG(ERR,"ped::smooth already done!") ;
 		return ;
 	}
-
+#define TPX_GG_START	22
+#define TPX_GG_STOP	51	// was 32 before Feb 20, 2008!
 	LOG(TERR,"Smoothing pedestals...") ;
 	for(r=0;r<=45;r++) {
 	for(p=0;p<183;p++) {
@@ -477,7 +478,7 @@ void tpxPed::smooth()
 		mean = 0.0 ;
 		cou = 0 ;
 
-		for(t=0;t<22;t++) {	// before GG
+		for(t=0;t<TPX_GG_START;t++) {	// before GG
 			mean += ped->ped[t] ;
 			cou++ ;
 		}
@@ -485,17 +486,17 @@ void tpxPed::smooth()
 		mean /= (double)cou ;
 
 		// we need to round off correctly
-		for(t=0;t<22;t++) ped->ped[t] = (double) ((u_short) (mean+0.5)) ;	
+		for(t=0;t<TPX_GG_START;t++) ped->ped[t] = (double) ((u_short) (mean+0.5)) ;	
 
 
 		/****** during GG [22-32] ****************/
-		for(t=22;t<32;t++) {
+		for(t=TPX_GG_START;t<TPX_GG_STOP;t++) {
 			ped->ped[t] = (double) ((u_short) (ped->ped[t]+0.5)) ;
 
 		}
 
 		/****** after GG [33...] needs smoothing */
-		for(t=32;t<512;t++) {
+		for(t=TPX_GG_STOP;t<512;t++) {
 			mean = 0.0 ;
 			cou = 0 ;
 			for(int j=0;j<8;j++) {
@@ -509,7 +510,7 @@ void tpxPed::smooth()
 				mean /= (double) cou ;
 			}
 			else {
-				mean = 0.0 ;
+				mean = ped->ped[t] ;
 			}
 
 			ped->ped[t] = (double) ((u_short) (mean+0.5)) ;

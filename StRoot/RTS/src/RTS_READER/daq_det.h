@@ -1,13 +1,6 @@
 #ifndef _DAQ_DET_H_
 #define _DAQ_DET_H_
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-
-#include <RTS_READER/rts_reader.h>
 
 // the m_Modes are done such that the default value of 0
 // will do whatever default for Offline:
@@ -23,165 +16,72 @@
 
 #define m_Mode_DAQ_RT		(1<<31)		// working in realtime! Under ESB! do not use in Offline!
 
-class daq_dta ;
-class detHandler ;
-struct daq_trg_word ;
 
-class daq_det : public St_Maker {
+
+
+// forward declarations
+class daq_dta ;
+class rts_reader ;
+
+
+class daq_det {
 protected:
 	u_int file_ix ;
 	u_int evt_ix ;
 
-	int present ;
-	int legacy ;
+	int present ;	// in this event...
+	int legacy ;	// currently unused...
 
-	int run_num ;
+
+
+
+	int run_num ;	// of this run
 	u_int evt_num ;	// in the run!
 
 	int def_sector ;
 	int def_rdo ;
 
+	int m_Mode ;	// processing mode
 
+	// statics
 	static const int MAX_SEC = 0 ;
 	static const int MAX_RDO = 0 ;
 
+	static int endianess ;	// of the executing machine -- 0 is little, 1 is big
+
 private:
 
+
 public:
-	daq_det(const char *dname="internal", rts_reader *rts_caller=0) {
-		name = dname ;
-		rts_id = -1 ;		// this should be correctly overriden in the member
-
-		memset(mydet,0,sizeof(mydet)) ;
 
 
-		SetMode(0) ;
+	daq_det(const char *name = "internal", rts_reader *caller = 0) ;
+	virtual ~daq_det() ;
 
-		file_ix = 0 ;
-		evt_ix = 0 ;
+	virtual int Init() ;
+	virtual int InitRun(int run) ;
+	virtual int Make() ;
+	virtual int FinishRun(int old_run) ;
 
 
 
-		caller = rts_caller ;
-
-		multi_mask = 0 ;
-
-		present = 0 ;
-		legacy = 0 ;	// assume not legacy
-
-		run_num = -1 ;	// unknown at startup...
-		evt_num = 0 ;
-		
-		def_sector = def_rdo = -1 ;	// assume ALL
-
-		in_buffer = 0 ;
-		out_buffer = 0 ;
-		in_bytes = 0 ;
-		out_bytes = 0 ;
-
-		return ;
-	}
-
-
-
-	virtual ~daq_det() {
-
-		if(rts_id == -123) {	// I'm the special dispatcher!
-			for(int i=0;i<32;i++) {
-				if(mydet[i]) {
-					delete mydet[i] ;
-				}
-				mydet[i] = 0 ;
-			}
-		}
-
-		return ;
-	}
-
-	virtual int Make() {
-		evt_num++ ;
-		if(rts_id == -123) {
-			for(int i=0;i<32;i++) {
-				if(multi_mask & (1<<i)) {
-					assert(mydet[i]) ;
-					mydet[i]->Make() ;
-				}
-			}
-		}
-
-		return 0 ;
-	}
-
-	virtual int Init() {
-		if(rts_id == -123) {
-			for(int i=0;i<32;i++) {
-				if(multi_mask & (1<<i)) {
-					assert(mydet[i]) ;
-					mydet[i]->Init() ;
-				}
-			}
-
-			multi_mask = 0 ;
-		}
-		return 0 ;
-	}
-
-	virtual int InitRun(int run_number) {
-		run_num = run_number ;
-		evt_num = 0 ;
-
-		if(rts_id == -123) {
-			for(int i=0;i<32;i++) {
-				if(multi_mask & (1<<i)) {
-					assert(mydet[i]) ;
-					mydet[i]->InitRun(run_number) ;
-				}
-			}
-
-			multi_mask = 0 ;
-		}
-		return 0 ;
-	}
-
-	virtual int FinishRun(int old_run_number) {
-		if(rts_id == -123) {
-			for(int i=0;i<32;i++) {
-				if(multi_mask & (1<<i)) {
-					assert(mydet[i]) ;
-					mydet[i]->FinishRun(old_run_number) ;
-				}
-			}
-
-			multi_mask = 0 ;
-		}
-		return 0 ;
-	}
-
-	virtual void help() const {	
-		if(rts_id == -123) {
-			for(int i=0;i<32;i++) {
-				if(multi_mask & (1<<i)) {
-					assert(mydet[i]) ;
-					mydet[i]->help() ;
-				}
-			}
-		}
-		else {
-			printf("%s\nNo help written for %s\n",GetCVS(),name) ;
-		}
-	}
+	// needs to be overriden!
+	virtual daq_dta  *get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
+	// needs to be overriden!
+	virtual daq_dta  *put(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
 
 
 	virtual int presence() ;
 
-	// needs to be overriden!
-	virtual int get_token(char *buff, int buff_bytes) ;
+	virtual void help() const ;
 
-	// needs to be overriden!
-	virtual int get_l2(char *buff, int buff_bytes, daq_trg_word *trg, int prompt=0) ;
 
-	// needs to be overriden!
-	virtual daq_dta  *get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
+	virtual void SetMode(int mode=0) { 
+		m_Mode=mode ;
+	} ;
+	virtual int GetMode() { 
+		return m_Mode ; 
+	} ;
 
 	virtual void set_defaults(int sec, int rdo) { 
 		def_sector = sec; 
@@ -190,27 +90,28 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; 
+		return cvs;
 	}
 
 
-	// used for the container only and not subclases!
-	daq_det *mydet[32] ;
-	u_int multi_mask ;
 
 	rts_reader *caller ;
 	const char *name ;
 	int rts_id ;
 
 	u_int event_mode ;
+
 	char *in_buffer ;
 	int in_bytes ;
+
 	char *out_buffer ;
 	int out_bytes ;
-	
-#ifdef __RTS_ROOT__
-	Class_Def(daq_det,0)
-#endif
+
+
+	// used for the container only and not subclases!
+	daq_det *mydet[32] ;
+	u_int multi_mask ;
 
 } ;
 

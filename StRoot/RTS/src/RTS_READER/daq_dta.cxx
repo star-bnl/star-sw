@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -7,13 +6,43 @@
 
 #include <rtsLog.h>
 
-#include <RTS_READER/daq_dta.h>
+#include "daq_dta.h"
 
+daq_dta::daq_dta() 
+{
+	bytes_alloced = 0 ;
+	store = 0 ;
+	store_cur = 0 ;
+	do_swap = 0 ;	// obviosly
+	nitems = 0 ;
+} ;
 
 
 daq_dta::~daq_dta() {
 	release() ;
 }
+
+int daq_dta::iterate() 
+{
+	if(nitems==0) return 0 ;	// done!
+
+
+	sec = (store_cur->sec) ;
+	row = (store_cur->row) ;
+	pad = (store_cur->pad) ;
+	ncontent = (store_cur->nitems) ;
+
+
+	store_cur++ ;		// skip this standard header...
+	Byte = (unsigned char *) store_cur  ;	// ...point to start of data!
+
+	// and advance for next
+	store_cur = (daq_store *)((char *)store_cur + ncontent * hdr->obj_bytes) ;
+	nitems-- ;
+
+	return 1 ;	// return as "have data"
+}
+
 
 void daq_dta::release()
 {
@@ -100,23 +129,62 @@ void daq_dta::clear()
 
 }
 
-daq_store *daq_dta::get(u_int *ret_avail)
+
+void *daq_dta::request(u_int obj_cou)
+{
+	daq_store *tmp_store ;
+
+	tmp_store = get(obj_cou) ;
+
+
+	return (void *)(tmp_store + 1) ;
+
+}
+
+void daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+{
+	store_cur->sec = sec ;
+	store_cur->row = row ;
+	store_cur->pad = pad ;
+	store_cur->nitems = obj_cou ;
+
+
+	int bytes = sizeof(daq_store) + store_cur->nitems * hdr->obj_bytes ;
+	commit(bytes) ;
+
+
+	return ;
+}
+
+	
+//daq_store *daq_dta::get(u_int *ret_avail)
+daq_store *daq_dta::get(u_int obj_cou)
 {
 	int do_realloc = 0 ;
 	u_int avail ;
+	u_int need ;
+
+	if(obj_cou==0) {
+		need = bytes_alloced/5 ;
+	}
+	else {
+		need = 256 + sizeof(daq_store) + obj_cou * hdr->obj_bytes ;
+		if(need < bytes_alloced/5) need = bytes_alloced/5 ;
+	}
 
 	// attempt heuristics for storage reallocation
 	avail = bytes_alloced - hdr->bytes_used ;
 
-	if(avail < bytes_alloced/5) do_realloc = 1 ;
+	if(avail < need) do_realloc = 1 ;
 
+		
 	LOG(DBG,"get(): avail bytes %d",avail) ;
 
 	if(do_realloc) {
-		LOG(NOTE,"Reallocing from %d to %d",bytes_alloced,bytes_alloced+bytes_alloced/5) ;
+		LOG(NOTE,"Reallocing from %d to %d",bytes_alloced,bytes_alloced+need) ;
 
 
-		bytes_alloced += bytes_alloced/5 ;
+		bytes_alloced += need ;
 
 		LOG(DBG,"Before valloc %d",bytes_alloced) ;
 		char *new_store = (char *)valloc(bytes_alloced) ;
@@ -150,7 +218,6 @@ daq_store *daq_dta::get(u_int *ret_avail)
 	store_cur->sec = 0xFF ;
 	store_cur->nitems = 0 ;
 
-	if(ret_avail) *ret_avail = avail ;
 
 	return store_cur ;
 }
