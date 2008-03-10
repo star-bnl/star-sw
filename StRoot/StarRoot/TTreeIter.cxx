@@ -605,6 +605,7 @@ Int_t TTreeIter::TypeSize(Int_t ity)
   switch(t) {
      case kChar:; case kShort:; return t;
      case kInt:   		return sizeof(Int_t);
+     case kLong:   		return sizeof(Long_t);
      case kFloat: 		return sizeof(Float_t);
      case kDouble: 		return sizeof(Double_t);
      case kDouble32: 		return sizeof(Double_t);
