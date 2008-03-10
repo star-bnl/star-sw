@@ -6,10 +6,10 @@
 #include <daqFormats.h>
 
 #include <evpSupport.h>
-#include <rts.h>
 
 #define TRG_VERSION 0x32
 #include <daqFormats.h>
+#include "rts.h"  // for the sake of swap32 entry
 
 extern int trgReader32(char *trgd, int bytes, int swap);
 

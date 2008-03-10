@@ -38,6 +38,7 @@ static char logfiles[MAX_LOGFILES][128] = {
 	PROJDIR"/log/det.log"LOG_SUFFIX,
 	PROJDIR"/log/daq.log"LOG_SUFFIX,
 	PROJDIR"/log/tpx.log"LOG_SUFFIX,
+	PROJDIR"/log/esb.log"LOG_SUFFIX,
 
 } ;
 

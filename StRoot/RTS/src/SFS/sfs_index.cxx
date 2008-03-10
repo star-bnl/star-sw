@@ -173,7 +173,7 @@ int SFS_ittr::get(wrapfile *wrap)
 
 void SFS_ittr::swapEntry()
 {
-  int swap;
+//  int swap;
   if(entry.byte_order == 0x04030201) return;
 
   entry.byte_order = swap32(entry.byte_order);

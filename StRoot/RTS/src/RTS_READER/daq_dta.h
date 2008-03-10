@@ -7,56 +7,15 @@
 #include <rts.h>	// for swaps
 #include <sys/types.h>	// for u_int
 
-#include <RTS_READER/rts_reader.h>
+#include "daq_dta_structs.h"
 
 
-
-struct daq_trg_word {
-	u_short t ;
-	u_char daq ;
-	u_char trg ;
-
-	u_int clock ;
-	u_int misc ;
-#ifdef __RTS_ROOT__
-Class_Def(daq_trg_word,0)
-#endif
-} ;
-
-struct daq_adc_tb {
-	u_short adc ;
-	u_short tb ;
-#ifdef __RTS_ROOT__
-Class_Def(daq_adc_tb,0)
-#endif
-} ;
-
-struct daq_ped_rms {
-	u_short ped ;
-	u_short rms ;
-} ;
-
-
-struct daq_cld {
-	float tb ;
-	float pad ;
-
-	u_short charge ;
-	u_short flags ;
-
-	u_short t1, t2 ;
-	u_short p1, p2 ;
-
-
-#ifdef __RTS_ROOT__
-Class_Def(daq_cld,0)
-#endif
-
-} ;
-
-struct daq_gain {
-	float g ;
-	float t0 ;
+struct daq_store {
+	u_char sec ;
+	u_char row ;
+	u_char pad ;
+	char type ;		// 'r' raw; 'a' adc; 'c' clusters; 'p' pedestals; 'g' gains
+	u_int nitems ;		// usually 1 for raw; <512 for adc; <32 for clusters; 512 for pedestals; 1 for gains
 } ;
 
 
@@ -72,20 +31,13 @@ struct daq_store_hdr {
 //extend after this line
 } ;
 
-struct daq_store {
-	u_char sec ;
-	u_char row ;
-	u_char pad ;
-	char type ;		// 'r' raw; 'a' adc; 'c' clusters; 'p' pedestals; 'g' gains
-	u_int nitems ;		// usually 1 for raw; <512 for adc; <32 for clusters; 512 for pedestals; 1 for gains
-} ;
 
-#ifndef __CINT__
+
 #define DAQ_DTA_STRUCT(expr)	__STRING(expr),sizeof(expr)
 #define DAQ_DTA_ENDIANESS	0x04030201 
 #define DAQ_DTA_C_VERSION	0
 #define DAQ_DTA_H_VERSION	0
-#endif
+
 
 
 class daq_dta {
@@ -161,22 +113,20 @@ private:
 public:
 
 
-	daq_dta() {
-		bytes_alloced = 0 ;
-		store = 0 ;
-		store_cur = 0 ;
-		do_swap = 0 ;	// obviosly
-		nitems = 0 ;
-	} ;
+	daq_dta() ;
 
 	virtual ~daq_dta() ;
 
 	// used for writing!
 	daq_store *create(u_int bytes, char *name, int rts_id, const char *o_name, u_int obj_size) ;
 
-	daq_store *get(u_int *avail=0) ;
 
+	daq_store *get(u_int obj_cou=0) ;
 	void commit(u_int bytes=0) ;
+
+
+	void *request(u_int obj_cou) ;
+	void finalize(u_int obj_cou, int s=0, int row=0, int pad=0) ;
 
 	// used during reading
 	void rewind() ;	// rewinds at the beggining
@@ -187,26 +137,7 @@ public:
 
 	int is_empty() ;
 
-	int iterate() {
-		if(nitems==0) return 0 ;	// done!
-
-
-		sec = (store_cur->sec) ;
-		row = (store_cur->row) ;
-		pad = (store_cur->pad) ;
-		ncontent = (store_cur->nitems) ;
-
-
-		store_cur++ ;		// skip this standard header...
-		Byte = (unsigned char *) store_cur  ;	// ...point to start of data!
-
-		// and advance for next
-		store_cur = (daq_store *)((char *)store_cur + ncontent * hdr->obj_bytes) ;
-		nitems-- ;
-
-		return 1 ;	// return as "have data"
-	}
-
+	int iterate() ;
 
 		
 	daq_store *store ;
@@ -224,11 +155,17 @@ public:
 
 		// timebin based zero-suppressed dets:TPX, TPC, FTPC, SVT, SSD maybe
 		daq_adc_tb *adc ;
-		daq_ped_rms *ped ;
-		daq_gain *gain ;
+
+		// TPC/TPX cluster data
 		daq_cld *cld ;
 
+		// TPC simulated data
+		daq_sim_adc_tb *sim_adc ;
+		// TPC output of simulated clusters...
+		daq_sim_cld *sim_cld ;
 
+
+		daq_det_gain *gain ;
 
 		// special fixed arrays for misc dets...
 		unsigned short (*etow)[160] ;		// X 6 i.e. etow[6][160]
@@ -258,10 +195,6 @@ public:
 	int pad ;
 		
 	u_int ncontent ;
-
-#ifdef __RTS_ROOT__
-Class_Def(daq_dta,0)
-#endif
 
 } ;
 

@@ -21,7 +21,7 @@
 
 
 // counts sector & rdo from 1!
-static struct fee_found {
+static struct fee_found_t {
 	u_int got_one ;
 	int ch_count[256][16] ;	// ALtro ID & CH is the index...
 } fee_found[25][7] ;
@@ -84,22 +84,22 @@ void tpxGain::init(int sec)
 
 	memset(bad_fee,0,sizeof(bad_fee)) ;
 
-	bytes = sizeof(struct means) * 24 * 46 ;
+	bytes = sizeof(struct means_t) * 24 * 46 ;
 	if(means==0) {
-		means = (struct means *) malloc(bytes) ;
+		means = (struct means_t *) malloc(bytes) ;
 	}
 	memset(means,0,bytes) ;
 
-	bytes = sizeof(struct aux) * 24 * 46 * 182 ;
+	bytes = sizeof(struct aux_t) * 24 * 46 * 182 ;
 	if(aux==0) {
-		aux = (struct aux *) malloc(bytes) ;
+		aux = (struct aux_t *) malloc(bytes) ;
 	}
 	memset(aux,0,bytes) ;
 
 	for(int i=0;i<24;i++) {
-		bytes = sizeof(struct gains) * 46 * 182 ;
+		bytes = sizeof(struct gains_t) * 46 * 182 ;
 		if(gains[i]==0) {
-			gains[i] = (struct gains *) malloc(bytes) ;
+			gains[i] = (struct gains_t *) malloc(bytes) ;
 		}
 		memset(gains[i],0,bytes) ;
 	}
@@ -174,7 +174,7 @@ void tpxGain::ev_done()
 		
 		// re-clear!
 		for(int i=0;i<24;i++) {
-			memset(gains[i],0,sizeof(struct gains)*46*182) ;
+			memset(gains[i],0,sizeof(struct gains_t)*46*182) ;
 		}
 
 	}
@@ -197,8 +197,8 @@ void tpxGain::accum(char *evbuff, int bytes)
 	int sec ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
-	struct gains *gs ;
-	struct aux *as ;
+	struct gains_t *gs ;
+	struct aux_t *as ;
 
 	/*
 		1st event is used to determine the timebin window
@@ -507,20 +507,20 @@ void tpxGain::calc()
 void tpxGain::do_default(int sector)
 {
 	int s, r, p ;
-	struct gains *sg ;
+	struct gains_t *sg ;
 
 	// zap and create defaults in case the file is missing!
 	memset(bad_fee,0,sizeof(bad_fee)) ;
 
 	if(sector) {
 		if(gains[sector-1] == 0) {
-			gains[sector-1] = (struct gains *) malloc(sizeof(struct gains) * 46 * 182) ;
+			gains[sector-1] = (struct gains_t *) malloc(sizeof(struct gains_t) * 46 * 182) ;
 		}
 	}
 	else {
 		for(int i=0;i<24;i++) {
 			if(gains[i] == 0) {
-				gains[i] = (struct gains *) malloc(sizeof(struct gains) * 46 * 182) ;
+				gains[i] = (struct gains_t *) malloc(sizeof(struct gains_t) * 46 * 182) ;
 			}
 		}
 	}
@@ -547,7 +547,7 @@ int tpxGain::from_file(char *fname, int sec)
 	FILE *f ;
 	int s, r, p ;
 	float g, t0 ;
-	struct gains *sg ;
+	struct gains_t *sg ;
 	struct stat buff ;
 
 	// try file...
@@ -692,7 +692,7 @@ int tpxGain::to_file(char *fname)
 	for(s=s_start;s<=s_stop;s++) {
 	for(r=0;r<=45;r++) {
 	for(p=1;p<=tpc_rowlen[r];p++) {
-		struct aux *as ;
+		struct aux_t *as ;
 		// HACK!
 //		if(get_gains(s,r,p)->t0) 
 

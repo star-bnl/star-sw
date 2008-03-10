@@ -1,6 +1,8 @@
 #include <sys/types.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <rtsLog.h>
 
@@ -111,7 +113,7 @@ int main(int argc, char *argv[])
 		else {
 			LOG(DBG,"Got event %d",r.cur_event) ;
 		}
-#if 0
+
 		
 		/* 
 			Get the data of a specific detctor and bank.
@@ -125,13 +127,13 @@ int main(int argc, char *argv[])
 			And now iterate over the specific data.
 		*/
 		while(dta && dta->iterate()) {
-			// this is how one knows the coordinates
 			if(do_print) {
+				// this is how one knows the coordinates
 				printf("sec %2d, row %2d, pad %3d: %d items\n",dta->sec,dta->row,dta->pad,dta->ncontent) ;
 			}
 
 
-			// and now get the content
+				// and now get the content
 			for(u_int i=0;i<dta->ncontent;i++) {
 				if(do_print) {
 					printf("\t%4d:\t tb %3d = %3d adc\n",i,
@@ -144,7 +146,7 @@ int main(int argc, char *argv[])
 
 		}
 
-#endif
+
 
 		dta  = r.det("tpx")->get("cld",16) ;	// grab the "adc" banks
 
@@ -174,11 +176,23 @@ int main(int argc, char *argv[])
 
 		while(dta && dta->iterate()) {
 			if(do_print) {
-				printf("rdo %d: %d bytes\n",dta->rdo,dta->ncontent) ;
+				printf("sector %d: rdo %d: %d bytes\n",dta->sec,dta->rdo,dta->ncontent) ;
 			}
 
 			for(u_int i=0;i<dta->ncontent/4;i++) {
-				printf("%d: 0x%08X [%u dec]\n",i,dta->Int32[i],dta->Int32[i]) ;
+				if(do_print) printf("%d: 0x%08X [%u dec]\n",i,dta->Int32[i],dta->Int32[i]) ;
+			}
+		}
+
+		dta = r.det("pp2pp")->get("raw") ;
+
+		while(dta && dta->iterate()) {
+			if(do_print) {
+				printf("sector %d: rdo %d: %d bytes\n",dta->sec,dta->rdo,dta->ncontent) ;
+			}
+
+			for(u_int i=0;i<dta->ncontent/4;i++) {
+				if(do_print) printf("%d: 0x%08X [%u dec]\n",i,dta->Int32[i],dta->Int32[i]) ;
 			}
 		}
 

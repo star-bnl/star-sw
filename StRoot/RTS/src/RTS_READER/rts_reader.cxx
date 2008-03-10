@@ -2,24 +2,22 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdio.h>
 #include <fcntl.h>
 
-#include "rts_reader.h"
 
-#include <sys/types.h>
-#include <string.h>
-#include <assert.h>
-
-#include <rts.h>
-#include <rtsLog.h>		// DAQ logging
+#include <rtsLog.h>
 #include <rtsSystems.h>
-
 
 // all the dets we know about
 #include <SFS/sfs_index.h>
 
 #include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TOF/daq_tof.h>
+#include <DAQ_PP2PP/daq_pp2pp.h>
+
+#include "rts_reader.h"
+#include "daq_det.h"
 
 
 
@@ -117,6 +115,7 @@ int rts_reader::FinishRun(int old)
 int rts_reader::handle_open()
 {
 	// normally, we have an open descriptor and we just return ASAP
+
 	if(sfs && fs_root_dir) return 1 ;	// nothing to do...
 
 	if(sfs==0) {	// I have no object, need one
@@ -285,6 +284,8 @@ int rts_reader::Make()
 	reopen_new: ;
 
 
+	if(fs_root_dir) handle_close();
+
 	ret = handle_open() ;
 
 	if(ret < 0) {	// some error 
@@ -361,6 +362,10 @@ int rts_reader::enable(u_int rts_mask)
 			case TOF_ID :
 				rts_dets_enabled |= (1<<rts_id) ;
 				dispatcher->mydet[rts_id] = new daq_tof(name,this) ;
+				break ;
+			case PP_ID :
+				rts_dets_enabled |= (1<<rts_id) ;
+				dispatcher->mydet[rts_id] = new daq_pp2pp(name,this) ;
 				break ;
 
 			default :

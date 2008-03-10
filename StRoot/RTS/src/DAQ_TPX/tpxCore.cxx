@@ -267,7 +267,12 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 		case 0xFF000000 :	// fifo,skip
 		case 0xDD000000 :	// FIFO, but selftrigger
 			rh = rdo->trg[i].rhic_counter ;
-			rh_delta = rh - rh_prompt ;
+			if(rh_prompt) {
+				rh_delta = rh - rh_prompt ; 
+			}
+			else {
+				rh_delta = (rh - tpx_rdo_dbg[rdo->rdo-1].old_rhic) ;
+			}
 			break ;	
 		case 0xEE000000 :	// emulated!
 		default :		// real TCD prompt trigger
@@ -280,7 +285,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 
 		if(do_log) {
 		    if(rdo->rdo == 6) {
-			 LOG(TERR,"\tRDO %d: evt %d: trg %d: RHIC %u, CSR 0x%08X, data 0x%08X [t %d], bytes %u, delta %u",rdo->rdo,hdr->ev_cou,i,
+			 LOG(NOTE,"\tRDO %d: evt %d: trg %d: RHIC %u, CSR 0x%08X, data 0x%08X [t %d], bytes %u, delta %d",rdo->rdo,hdr->ev_cou,i,
 		    		rdo->trg[i].rhic_counter,
 		    		rdo->trg[i].csr,
 		    		rdo->trg[i].data,rdo->trg[i].data&0xFFF,
@@ -313,7 +318,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	//fee_mask[1] = l[1] ;
 	
 	if(do_log && (rdo->rdo==6)) {
-		LOG(TERR,"\t evt %d: %u %u",hdr->ev_cou,l[0],l[1]) ;
+		LOG(NOTE,"\t evt %d: %u %u",hdr->ev_cou,l[0],l[1]) ;
 	}
 
 	// 
@@ -798,18 +803,30 @@ void tpx_analyze_log(int sector,int rdo, char *buff)
 
 }
 
-void tpx_analyze_msc(int sector,int rb, char *buff)
+int tpx_analyze_msc(int sector,int rb, char *buff)
 {
 	struct tpx_rdo *rdo ;
+	u_char altro[256] ;
+	int err = 0 ;
 
 	rdo = (struct tpx_rdo *) buff ;
 
 
 	memcpy(&(tpx_rdo[rb]),buff,sizeof(struct tpx_rdo)) ;
 
-	LOG(NOTE,"Config for RB %d: sector %d, rdo %d",rb,rdo->sector,rdo->rdo) ;
-	LOG(NOTE,"remote %d, temp rdo %d, temp stratix %d",rdo->remote,rdo->temp_rdo,rdo->temp_stratix) ;
-//	LOG(NOTE,"altro.c %s, trigger.c %s",rdo->altro_date,rdo->trigger_date) ;
+
+	LOG(NOTE,"RDO %d: msc event, chould be %d bytes",rb+1,sizeof(struct tpx_rdo)) ;
+
+	if(rdo->sector != sector || (rb+1) != rdo->rdo) {
+		LOG(ERR,"Config for RDO %d: sector %d, rdo %d",rb+1,rdo->sector,rdo->rdo) ;
+		err |= 1 ;
+	}
+	else {
+		LOG(NOTE,"Config for RDO %d: sector %d, rdo %d",rb+1,rdo->sector,rdo->rdo) ;
+	}
+
+	LOG(NOTE,"Remote %d, temp rdo %d, temp stratix %d",rdo->remote,rdo->temp_rdo,rdo->temp_stratix) ;
+	LOG(NOTE,"Compiled on %s",rdo->compilation_date) ;
 
 	LOG(NOTE,"\t FPGAs: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",
 	    rdo->fpga_usercode[0],
@@ -821,12 +838,39 @@ void tpx_analyze_msc(int sector,int rb, char *buff)
 
 	if(rdo->status_xilinx) {
 		LOG(ERR,"RDO %d: xilinx status: 0x%02X",rdo->rdo,rdo->status_xilinx) ;
+		err |= 1 ;
 	}
 	else {
 		LOG(NOTE,"RDO %d: xilinx status: 0x%02X",rdo->rdo,rdo->status_xilinx) ;
 	}
+	if(rdo->status_cpld) {
+		LOG(ERR,"RDO %d: CPLD status: 0x%02X",rdo->rdo,rdo->status_cpld) ;
+		err |= 1 ;
+	}
+	else {
+		LOG(NOTE,"RDO %d: CPLD status: 0x%02X",rdo->rdo,rdo->status_cpld) ;
+	}
 
 
+	memset(altro,0,sizeof(altro)) ;
+
+	for(int a=0;a<256;a++) {
+	for(int c=0;c<16;c++) {
+		int row, pad ;
+
+		tpx_from_altro(rb,a,c,row,pad) ;
+
+		if(row <= 45) {
+			altro[a] |= 0x1 ;	// need!
+		}
+	}
+	}
+
+
+	u_int *dbg = (u_int *)&(rdo->fee[0][0]) ;
+	for(int i=0;i<37*3;i++) {
+		LOG(NOTE,"%2d: 0x%08X",i,dbg[i]) ;
+	}
 
 	int fcou = 1 ;
 	for(int b=0;b<3;b++) {
@@ -836,9 +880,13 @@ void tpx_analyze_msc(int sector,int rb, char *buff)
 				if(rdo->fee[b][c].fee_status == 1) {
 					int expect = ((rdo->fee[b][c].pad_id & 0x7F) << 1) ;
 
+
+					altro[rdo->fee[b][c].id] |= 0x2 ;
+					altro[rdo->fee[b][c].id+1] |= 0x2 ;
+
 					if((rdo->fee[b][c].jumpers != 3) || (expect != rdo->fee[b][c].id)) {
 
-						LOG(WARN,"RDO %d: %2d: FEE %3d (%3d,%d) [%d:%d:%d] = 0x%X",rdo->rdo,fcou,
+						LOG(ERR,"RDO %d: %2d: FEE %3d (%3d,%d) [%d:%d:%d] = 0x%X",rdo->rdo,fcou,
 						    rdo->fee[b][c].id,
 						    rdo->fee[b][c].pad_id,
 						    rdo->fee[b][c].jumpers,
@@ -864,15 +912,18 @@ void tpx_analyze_msc(int sector,int rb, char *buff)
 					}
 				}
 				else {
-						LOG(ERR,"RDO %d: %2d: FEE %3d (%3d,%d) [%d:%d:%d] = 0x%X",rdo->rdo,fcou,
-						    rdo->fee[b][c].id,
-						    rdo->fee[b][c].pad_id,
-						    rdo->fee[b][c].jumpers,
-						    b,
-						    rdo->fee[b][c].x_s>>4,
-						    rdo->fee[b][c].x_s&1,
-						    rdo->fee[b][c].fee_status
-						   ) ;
+					altro[rdo->fee[b][c].id] |= 0x8 ;
+					altro[rdo->fee[b][c].id+1] |= 0x8 ;
+
+					LOG(ERR,"RDO %d claims err: %2d: FEE %3d (%3d,%d) [%d:%d:%d] = 0x%X",rdo->rdo,fcou,
+					    rdo->fee[b][c].id,
+					    rdo->fee[b][c].pad_id,
+					    rdo->fee[b][c].jumpers,
+					    b,
+					    rdo->fee[b][c].x_s>>4,
+					    rdo->fee[b][c].x_s&1,
+					    rdo->fee[b][c].fee_status
+					   ) ;
 
 
 
@@ -885,5 +936,14 @@ void tpx_analyze_msc(int sector,int rb, char *buff)
 	}
 	
 
-	return ;
+	for(int a=0;a<256;a++) {
+		if(!(altro[a] & 1)) continue ;
+
+		if(altro[a] != 3) {
+			LOG(ERR,"RDO %d: altro %3d: status 0x%X",rb+1,a,altro[a]) ;
+			err |= 1 ;
+		}
+	}
+
+	return err ;
 }

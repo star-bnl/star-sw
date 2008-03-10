@@ -1,16 +1,19 @@
 #include <sys/types.h>
 #include <errno.h>
+#include <assert.h>
 
-
-
-#include "daq_tpx.h"
-#include <RTS_READER/daq_dta.h>
-
-#include <rts.h>
-#include <rtsLog.h>		// DAQ logging
+#include <rtsLog.h>
 #include <rtsSystems.h>
 
 #include <SFS/sfs_index.h>
+#include <RTS_READER/rts_reader.h>
+#include <RTS_READER/daq_dta.h>
+
+
+#include "daq_tpx.h"
+
+
+
 
 #include <DAQ_TPX/tpxCore.h>
 #include <DAQ_TPX/tpxGain.h>
@@ -49,21 +52,48 @@ Not yet done: \n\
 " ;
 
 
+void daq_tpx::help() const 
+{ 
+	printf("%s\n%s\n",GetCVS(),help_string) ; 
+} ;
 
 daq_tpx::daq_tpx(const char *dname, rts_reader *rts_caller) 
 {
+	// override mother...
+
 	rts_id = TPX_ID ;
 	name = rts2name(rts_id) ;
-
-
-	raw = new daq_dta ;
-	adc = new daq_dta ;
-	cld_raw = new daq_dta ;
-	cld = new daq_dta ;
-	
 	caller = rts_caller ;
+
+	// create now!
+
+	raw = new daq_dta ;	// in file, compressed
+	cld_raw = new daq_dta ;	// in file, compressed
+	ped_raw = new daq_dta ;
+
+	adc = new daq_dta ;	// from "raw", decompressed
+
+	cld = new daq_dta ;	// from "cld_raw", decompressed
+
+	adc_sim = new daq_dta ;	// external input
+	gain = new daq_dta ;
+	ped = new daq_dta ;
 	
-	LOG(DBG,"%s: constructor: caller %p, detHandler %p",name, rts_caller) ;
+	cld_sim = new daq_dta ;	// from "adc_sim", decompressed
+	
+	ped_c = new daq_dta ;
+	gain_c = new daq_dta ;
+
+
+	gain_algo = new tpxGain() ;	// always needed for bad pads...
+	stat_algo = 0 ;
+	ped_algo = 0 ;
+	for(int i=0;i<=24;i++) {
+		fcf_algo[i] = 0 ;
+	}
+	fcf_tmp_storage = 0 ;
+	
+	LOG(DBG,"%s: constructor: caller %p",name, caller) ;
 	return ;
 }
 
@@ -71,12 +101,33 @@ daq_tpx::~daq_tpx()
 {
 	LOG(DBG,"%s: DEstructor",name) ;
 
+	// daq data 
 	delete raw ;
-	delete adc ;
 	delete cld_raw ;
+	delete ped_raw ;
+
+	delete adc ;
+
 	delete cld ;
 
+	delete adc_sim ;
+	delete gain ;
+	delete ped ;
 
+	delete cld_sim ;
+
+	delete ped_c ;
+	delete gain_c ;
+
+	// algorithms and associated storage...
+	if(gain_algo) delete gain_algo ;
+	if(ped_algo) delete ped_algo ;
+	if(stat_algo) delete stat_algo ;
+
+	for(int i=0;i<=24;i++) {
+		if(fcf_algo[i]) delete fcf_algo[i] ;
+	}
+	if(fcf_tmp_storage) free(fcf_tmp_storage) ;
 
 	return ;
 }
@@ -214,81 +265,53 @@ int daq_tpx::InitRun(int run)
 
 	LOG(NOTE,"%s: InitRun(%d), m_Mode 0x%08X",name, run, mode) ;
 
-
+	
 	run_num = run ;
 	evt_num = 0 ;
-#if 0
+
+	// for all runs
+		
+
+
 	// when working in Online
 	if(mode & m_Mode_DAQ_RT) {
-		// let's not screw around let's just allocate what we need now
-		if(Ped == 0) {
-			Ped = new algo_tpx_ped ;
-		}
-
-		if(Gain == 0) {
-			Gain = new algo_tpx_gain ;
-		}
-		// I always need gains because of bad FEEs
-		Gain->from_file(def_sector, def_rdo) ;
-		Gain->to_altro(bad_fee) ;	// fill in that structure!
-
-		if(Physics == 0) {
-			Physics = new algo_tpx_physics ;
-		}
-
-		if(Fcf == 0) {
-			Fcf = new algo_tpx_fcf ;
-		}
+		LOG(ERR,"Not yet ready for Online!") ;
+		return -1 ;
 	}
-	else {	// offline
-		if(mode == 0) {	// Offline did not change the mode, by default they expect FCF!
-			mode |= m_Mode_DAQ_FCF ;
-			SetMode(mode) ;
+
+
+	// offline setup: try our canonical location first
+	gain_algo->from_file("/RTS/conf/tpx/tpx_gains.txt",0) ;	// all sectors!
+
+	// look into "gains" and set the found channels there
+	daq_dta *g = get("gains") ;
+
+	while(g && g->iterate()) {
+		for(u_int pad=1;pad<g->ncontent;pad++) {
+			gain_algo->set_gains(g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
 		}
 	}
 
-	// always!
-	if(Stat == 0) {
-		Stat = new algo_tpx_stat ;
-	}
-	Stat->InitRun(run) ;
 
 	
 	if(mode & m_Mode_DAQ_PED) {
-		if(Ped==0) {
-			Ped = new algo_tpx_ped ;
+		if(ped_algo==0) {
+			ped_algo = new tpxPed ;
 		}
 
-		Ped->InitRun(run) ;
+//		ped_algo->init() ;	// ALL sectors
+
 	}
-	else if(mode & m_Mode_DAQ_GAIN) {
-		if(Gain==0) {
-			Gain = new algo_tpx_gain ;
-		}
 	
-		Gain->InitRun(run) ;
+	if(mode & m_Mode_DAQ_GAIN) {
+//		gain_algo->init(def_sector) ;	// ALL sectors!
 	}
-	else {
-		if(mode & m_Mode_DAQ_FCF_RAW) {
-			if(Fcf==0) {
-				Fcf = new algo_tpx_fcf ;
-			}
-			
-			if(mode & m_Mode_DAQ_RT) {	// I have gains already
-				;
-			}
-			else {
-				if(Gain == 0) Gain = new algo_tpx_gain ;
 
-				Gain->from_db(def_sector, def_rdo) ;	
-			}
 
-			Fcf->InitRun(run) ;
-			Fcf->gain(Gain) ;
-		}
+	// what about FCF?
+	
 
-	}
-#endif
+
 	return 0 ;
 }
 
@@ -297,127 +320,55 @@ int daq_tpx::FinishRun(int old)
 	u_int mode = GetMode() ;
 
 	LOG(NOTE,"%s: Run %d finished with %d events, m_Mode 0x%08X",name,run_num,evt_num,mode) ;
-#if 0
+
 	if(mode & m_Mode_DAQ_PED) {
 		LOG(NOTE,"Calculating peds") ;
+			
+		assert(ped_algo) ;
 
-		Ped->FinishRun(old) ;
+//		ped_algo->calc() ;
 
-		if(mode & m_Mode_DAQ_RT) {
-			Ped->to_file() ;
-			Ped->to_sfs() ;	// for evb!
-
-			Ped->_to_altro() ;
-		}
-		else {	
-			Ped->to_store(ped) ;
-
-			delete Ped ;
-			Ped = 0 ;
-		}
+		// dump them to "ped_c"!
+		
+		delete(ped_algo) ;
+		ped_algo = 0 ;
 
 	}
-	else if(mode & m_Mode_DAQ_GAIN) {
+	
+	if(mode & m_Mode_DAQ_GAIN) {
 		
 		LOG(NOTE,"Calculating gains") ;
 
-		Gain->FinishRun(old) ;
+//		gain_algo->calc() ;
+	
+		// dump them to "gain_c"!
+	}
 
-		if(mode & m_Mode_DAQ_RT) {
-			Gain->to_file() ;
-			Gain->to_sfs() ;
 
-			Gain->_to_altro() ;
+	// we free FCF storage, if any!
+	for(int i=0;i<=24;i++) {
+		if(fcf_algo[i]) {
+			delete fcf_algo[i] ;
+			fcf_algo[i] = 0 ;
 		}
-		else {
-			Gain->to_store(gain) ;
-			delete Gain ;
-			Gain = 0 ;
-		}
-	}
-	else if(mode & m_Mode_FCF_RAW) {
-
-		Fcf->FinishRun(old) ;
-
 	}
 
-	Statistics->FinishRun(old) ;
-
-	if(mode & m_Mode_DAQ_RT) {
-		Statistics->to_file() ;
-		Statistics->to_sfs() ;
-	}
-	else {
-		Statistics->to_store(statistics) ;
+	if(fcf_tmp_storage) {
+		free(fcf_tmp_storage) ;
+		fcf_tmp_storage = 0 ;
 	}
 
-#endif 
+
 	return 0 ;
 }
 
-
-int daq_tpx::get_token(char *buff, int buff_bytes)
-{
-        struct tpx_rdo_event rdo ;
-
-        tpx_get_start(buff, buff_bytes/4, &rdo, 1) ;
-
-        if(rdo.token==0) return -ENOSYS ;       // error for TPX
-
-
-        return rdo.token ;
-}
-
-int daq_tpx::get_l2(char *buff, int buff_bytes, daq_trg_word *trgs, int prompt)
-{
-	struct tpx_rdo_event rdo ;
-	int cou = 0 ;
-	int words = buff_bytes / 4 ;
-
-
-	tpx_get_start(buff, words, &rdo, 0) ;
-
-	LOG(DBG,"trg cou %d",rdo.trg_cou) ;
-
-	for(u_int i=0;i<rdo.trg_cou;i++) {
-		u_int dta = rdo.trg[i].data ;
-		u_int marker = rdo.trg[i].csr >> 16 ;
-		trgs->clock = rdo.trg[i].rhic_counter ;
-		trgs->misc = rdo.trg[i].csr ;
-
-		LOG(DBG,"%d: 0x%08X 0x%08X",i,dta,rdo.trg[i].csr) ;
-
-		if(prompt) {
-			if((marker==0)||(marker==0xEEEE)) {	// prompt: 0 is real, 0xEEEE is self triggered
-				trgs->t = dta & 0xFFF ;
-				trgs->daq = (dta >> 12) & 0xF ;
-				trgs->trg = (dta >> 16) & 0xF ;
-				return 1 ;	// only 1, by definition
-			}
-
-		}
-		else {
-			if(marker==0xFFFF) {	// FIFO
-				trgs->t = dta & 0xFFF ;
-				trgs->daq = (dta >> 12) & 0xF ;
-				trgs->trg = (dta >> 16) & 0xF ;
-				trgs++ ;
-				cou++ ;
-			}
-		}
-	}
-
-	
-	return cou ;
-
-}
 
 
 daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, void *p2) 
 {
 	const char *bank ;
 
-	if(!presence()) return 0 ;	// this det is not in this event...
+
 
 	if(in_bank==0) {	// just wants to know if I'm here so return some read-only non-NULL memory
 		bank = "cld" ;	// default		
@@ -427,6 +378,25 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 	}
 
 	LOG(DBG,"%s: looking for bank %s",name,bank) ;
+
+
+	// list created banks first...
+	if(strcasecmp(bank,"adc_sim")==0) {
+		adc_sim->rewind() ;
+		return adc_sim ;
+	}
+	else if(strcasecmp(bank,"gain")==0) {
+		gain->rewind() ;	// we want to use the bank...
+		return gain ;
+	}
+	else if(strcasecmp(bank,"cld_sim")==0) {
+		return handle_cld_sim(sec,row) ;
+	}
+
+
+	// after this all the banks need to be in the file...
+	if(!presence()) return 0 ;	// this det is not in this event...
+
 
 	if(strcasecmp(bank,"raw")==0) {
 		return handle_raw(sec,row) ;		// actually sec, rdo; r
@@ -447,6 +417,26 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 
 	return 0 ;
 }
+
+daq_dta *daq_tpx::put(const char *in_bank, int sec, int row, int pad, void *p1, void *p2) 
+{
+
+	assert(in_bank) ;
+
+	if(strcasecmp(in_bank,"adc_sim")==0) {
+		adc_sim->create(32*1024,(char *)"adc_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_adc_tb)) ;
+		return adc_sim ;
+	}
+	else if(strcasecmp(in_bank,"gain")==0) {
+		gain->create(32*1024,(char *)"gain",rts_id,DAQ_DTA_STRUCT(daq_det_gain)) ;
+		return gain ;
+	}
+
+	LOG(ERR,"%s: unknown bank type \"%s\"",name,in_bank) ;
+	return 0 ;
+
+}
+
 
 daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 {
@@ -944,79 +934,163 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 
 	
 
-
-#if 0
-/* create clusters from raw data... */
-daq_dta *daq_tpx::handle_cld_c(char *bank, int sec, int rdo, char *force_store, int max_bytes, char *rdo_buff, int rdo_bytes)
+static int cmpr_sim_adc(const void *first, const void *second)
 {
-	return 0 ;
+	daq_sim_adc_tb *f = (daq_sim_adc_tb *)first ;
+	daq_sim_adc_tb *s = (daq_sim_adc_tb *)second ;
 
-	int o_cou ;
-	struct {
-		u_char sec ;
-		u_char rdo ;
-		char *ptr ;
-		u_int bytes ;
-	} obj[24*6] ;
+	if(f->tb == s->tb) return 0 ;
+	if(f->tb > s->tb) return -1 ;	// reverse sort!
 
-	o_cou = 0 ;
+	return 1 ;
+}
 
-	if(rdo_buff == 0) {	// from SFS!
-		int min_sec, max_sec ;
-		int min_rdo, max_rdo ;
 
-		max_bytes = 0 ;
+/*
+	cld_sim works on sector row!
+*/
+daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
+{
 
-		for(int s=min_sec;s<max_sec;s++) {
-		for(int r=min_rdo;r<max_rdo;r++) {
+	int min_sec, max_sec ;
+	int min_row, max_row ;
 
-			rdo_dta = handle_raw(s,r) ;
 
-			if(rdo_dta && rdo_dta->iterate()) {
-				obj[o_cou].sec = s ;
-				obj[o_cou].rdo = r ;
-				obj[o_cou].ptr = rdo_dta->Byte ;
-				obj[o_cou].bytes = rdo_dta->ncontent ;
-
-				o_cou++ ;
-
-				max_bytes += rdo_dta->ncontent ;
-
-			}
-
-		}
-		}
-
+	// sanity
+	if(sec <= 0) {
+		min_sec = 1 ;
+		max_sec = MAX_SEC ;
 	}
+	else if((sec<1) || (sec>24)) return 0 ;
 	else {
-		obj[0].ptr = rdo_buff ;
-		obj[0].bytes = rdo_bytes ;
-		obj[0].sec = sec ;
-		obj[0].rdo = rdo ;
-
-		obj_cou = 1 ;
+		min_sec = sec ;
+		max_sec = sec ;
 	}
 
-	if(strncasecmp(bank,"adc")) {
-		dd = adc ;
-		dd->algo = do_adc ;
+	if(row <= 0) {
+		min_row = 1 ;
+		max_row = 45 ;
 	}
-	else if(strncasecmp(bank,"cld_raw")) {
-		dd = cld_raw ;
-		dd->algo = do_fcf ;
+	else if((row<0) || (row>45)) return 0 ;
+	else {
+		min_row = max_row = row ;
 	}
 
-	// run raw clusterfinder and outout to force_store with max size max_bytes...
-	cld_raw->create(max_bytes,(char *)name,rts_id,DAQ_DTA_STRUCT(cld_raw), force_store) ;
+	// get a size estimate
+	int rows = 0 ;
+	
+	for(int s=min_sec;s<=max_sec;s++) {
+		if(fcf_algo[s]) {
+			fcf_algo[s]->start_evt() ;	// make sure we start a new event!
+		}
 
-	for(int i=0; i< obj_cou;i++) {
-		do_fcf(dd, obj[i].sec, obj[i].rdo, obj[i].in_buff, obj[i].in_bytes) ;	
+		for(int r=min_row;r<=max_row;r++) {
+			rows++ ;
+		}
+	}
+
+	// guess the byte size: assume 30 hits per row
+	int guess_bytes = rows * (sizeof(daq_store) + 30*sizeof(daq_sim_cld)) ;
+
+	cld_sim->create(guess_bytes,(char *)"cld_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_cld)) ;
+
+	// adc_sim data is flattened out so we will run if we find the sec/row
+	// requested
+	daq_dta *sim = get("adc_sim") ;
+
+	if(sim==0) {
+		LOG(ERR,"%s: you need to add simulated data first!",name) ;
+		return cld_sim ;
+	}
+
+
+	while(sim->iterate()) {
+		if((min_sec<=sim->sec) && (sim->sec<= max_sec) && (min_row<=sim->row) && (sim->row <= max_row)) ;
+		else continue ;
+
+		// this is how I allocate the algorithm
+		if(fcf_algo[sim->sec]==0) {
+			LOG(NOTE,"No algo assigned for sector %d -- creating one!",sim->sec) ;
+			fcf_algo[sim->sec] = new tpxFCF ;
+			fcf_algo[sim->sec]->config(0x3F,3) ;	// assume all 6 RDOs; extra data + annotations
+
+			fcf_algo[sim->sec]->apply_gains(sim->sec,gain_algo) ;
+			fcf_algo[sim->sec]->start_evt() ;
+			if(fcf_tmp_storage==0) {
+				fcf_tmp_storage = (u_int *)valloc(FCF_TMP_BYTES) ;
+			}
+		}
+
+		u_short track_id[512] ;
+		tpx_altro_struct a ;
+
+		a.row = sim->row ;
+		a.pad = sim->pad ;
+		a.count = 0 ;
+
+		// NEED to sort in falling timebin!
+		qsort(sim->sim_adc, sim->ncontent, sizeof(sim->sim_adc[0]),cmpr_sim_adc) ;
+
+	
+		for(u_int i=0;i<sim->ncontent;i++) {
+			a.adc[i] = sim->sim_adc[i].adc ;
+			a.tb[i] = sim->sim_adc[i].tb ;
+			track_id[i] = sim->sim_adc[i].track_id ;
+
+			a.count++ ;
+		}
+
+		fcf_algo[sim->sec]->do_pad(&a, track_id) ;
+	}
+
+
+
+	for(int s=min_sec;s<=max_sec;s++) {
+		if(fcf_algo[s]) {
+			int words = fcf_algo[s]->stage2(fcf_tmp_storage,FCF_TMP_BYTES) ;
+			if(words<=0) continue ;
+
+			LOG(DBG,"Sector %d: %d words",s,words) ;			
+			u_int *p_buff = fcf_tmp_storage ;
+			u_int *end_buff = p_buff + words ;
+
+			while(p_buff < end_buff) {
+				int row = *p_buff++ ;
+				int cou = *p_buff++ ;
+				int g_cou = 0 ;
+			
+				daq_sim_cld *cld = (daq_sim_cld *) cld_sim->request(cou) ;
+
+				while(cou) {
+					daq_cld dc ;
+					int skip = fcf_algo[s]->fcf_decode(p_buff, &dc) ;
+					
+					// addtional cuts here
+
+
+					
+
+
+
+					cld[g_cou].cld = dc ;	// copy!
+
+					
+					g_cou++ ;
+
+
+					p_buff += skip ;
+					cou-- ;
+
+				}
+			
+				cld_sim->finalize(g_cou,s,row) ;
+			}			
+		}
 	}
 
 	
-	cld_raw->rewind() ;
+	cld_sim->rewind() ;
 
-	return cld_raw ;
-
+	return cld_sim ;
 }
-#endif
+
