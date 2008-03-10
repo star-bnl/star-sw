@@ -719,7 +719,7 @@ int main(int argc, char *argv[])
 		}
 
 		
-#if defined(TPXREADER) && define(_TPC_READER_H_)
+#if defined(TPXREADER) && defined(_TPC_READER_H_)
 		ret = tpxReader(datap, 18-1, STYLE_TPX) ;
 		if(ret <= 0) {
 		  if(ret < 0) {
