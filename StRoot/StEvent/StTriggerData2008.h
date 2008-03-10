@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2008.h,v 2.1 2007/11/19 19:32:19 ullrich Exp $
+ * $Id: StTriggerData2008.h,v 2.2 2008/03/10 19:35:31 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2008.h,v $
+ * Revision 2.2  2008/03/10 19:35:31  ullrich
+ * New methods: tofAtAddress() and tofMultiplicity().
+ *
  * Revision 2.1  2007/11/19 19:32:19  ullrich
  * Initial Revision.
  *
@@ -128,6 +131,10 @@ public:
     unsigned short mtdAtAddress(int address, int prepost=0) const;
     unsigned short mtdAdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
+
+    //TOF
+    unsigned short tofAtAddress(int address, int prepost=0) const;
+    unsigned short tofMultiplicity(int prepost=0) const;
 
     // Experts only
     char*                getTriggerStructure();
