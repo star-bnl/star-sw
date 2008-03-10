@@ -124,7 +124,7 @@ int trgReader30(char *arg)
 // what the hell did I mean by this "40 is spurious"???
 //	int trg_length = len - sizeof(struct bankHeader) - 40 ;	// 40 is supurious
 
-	int trg_length = len - sizeof(struct bankHeader) ;
+	unsigned int trg_length = len - sizeof(struct bankHeader) ;
 
 	/* 
 	int exp_length = sizeof(EvtDescData) + sizeof(trgd->sum) + sizeof(trgd->raw[0]) + 
