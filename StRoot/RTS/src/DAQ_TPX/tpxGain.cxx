@@ -61,7 +61,7 @@ void tpxGain::free_store()
 		means = 0 ;
 	}
 
-	for(int i=0;i<=24;i++) {
+	for(int i=0;i<24;i++) {
 		if(gains[i]) {
 			free(gains[i]) ;
 			gains[i] = 0 ;
