@@ -96,6 +96,7 @@ public:
 #endif
 
   void dumpGTD(L3_GTD *gtd);
+  gl3Event *getL3Event() const { return gl3;}
 
 private:
 
