@@ -1,6 +1,12 @@
 #ifndef _EVP_READERCLASS_HH_
 #define _EVP_READERCLASS_HH_
 #include <sys/stat.h> 
+
+typedef unsigned int UINT32;
+
+#include "RTS/include/evp.h"
+#include "cfgutil.h"
+
 class sfs_index;
 class rts_reader;
 class evpReader {
