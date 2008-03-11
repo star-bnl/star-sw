@@ -218,7 +218,7 @@ Int_t StSkimPionMaker::Make()
     StTriggerSimuMaker* trigSim = dynamic_cast<StTriggerSimuMaker*>(GetMaker("StarTrigSimu"));
     if (trigSim) {
 	//cout << "Found TriggSim Info for BBC\n";
-	mBBCTrig = (trigSim->bbc)->triggerDecision(127611);
+	mBBCTrig = (trigSim->bbc)->triggerDecision(137611);
 	//cout << "BBC Trigger: " << mBBCTrig << endl;
     }
     else {
@@ -254,10 +254,10 @@ Int_t StSkimPionMaker::Make()
     int softwaretrigs[2] = {0,0};
     int mcMB = 0;
     int mcHTTPL2 = 0;
-    if ((trigSim->bbc)->triggerDecision(127611)) mcMB = 1;
+    if ((trigSim->bbc)->triggerDecision(137611)) mcMB = 1;
     if (trigSim) {
 	//cout<<"Found Software Trigger Info...\n";
-	if (trigSim->isTrigger(127611)) mcHTTPL2 = 1;
+	if ((trigSim->isTrigger(137611)) || (trigSim->isTrigger(127611))) mcHTTPL2 = 1;
     }
 
     else {
@@ -275,7 +275,7 @@ Int_t StSkimPionMaker::Make()
 		
     //cout << "Getting Triggers...\n";	
     // check for trigger condidtions
-    int startriggers[3] = {117001, 127611, 5}; //mb, http-l2gamma, http-l2gamma-test 2006
+    int startriggers[4] = {117001, 137611, 5}; //mb, http-l2gamma, http-l2gamma-test 2006
 		
     int trigs[3] = {0,0,0};
     int prescales[3] = {0,0,0};
@@ -288,6 +288,7 @@ Int_t StSkimPionMaker::Make()
 	    if (debug) cout << "Trigger condition " << i << " satisfied..." << endl;
 	}
     }
+    if (event->triggerIdCollection().nominal().isTrigger(127611)) trigs[1] = 1;
 		
     //get trigger prescales:
     //cout<<"Checking for Prescales..."<<endl;
@@ -295,6 +296,7 @@ Int_t StSkimPionMaker::Make()
     for (int i=0;i<3;++i) {
 	prescales[i]=v.getTotalPrescaleByTrgId(startriggers[i]);
     }
+    if (event->triggerIdCollection().nominal().isTrigger(127611)) prescales[1]=v.getTotalPrescaleByTrgId(127611);
 
     // I also have the global trigger variables that get used for histograms. Fill them here:
     mb = trigs[0];
