@@ -263,7 +263,10 @@ StIOInterFace *StIOMaker::Load()
   if (! klass || klass->Size()==0) {        // lib not loaded
     Int_t Loaded=0;      // library load stack may be self-sufficient, set to 1
 //  if (fCase==kStXDF)   gSystem->Load("xdf2root");
-    if (fCase==kStDAQ)   gSystem->Load("StDaqLib");
+    if (fCase==kStDAQ)   {
+       gSystem->Load("RTS");
+       gSystem->Load("StDaqLib");
+    }
     if (fCase==kStMuDst){
       Loaded = 1;
       gSystem->Load("St_Tables");
