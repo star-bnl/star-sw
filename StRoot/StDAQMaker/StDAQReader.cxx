@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.63 2008/03/06 01:32:51 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.64 2008/03/11 15:10:47 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.64  2008/03/11 15:10:47  fine
+ * adjust evpReaderClass header file
+ *
  * Revision 1.63  2008/03/06 01:32:51  fine
  * Fix skip event problem
  *
@@ -213,9 +216,6 @@
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #ifndef OLD_EVP_READER
-    typedef unsigned int UINT32;
-#   include "RTS/include/evp.h"
-#   include "RTS/src/EVP_READER/cfgutil.h"
 #   include "RTS/src/EVP_READER/evpReaderClass.h"
 #endif
 
