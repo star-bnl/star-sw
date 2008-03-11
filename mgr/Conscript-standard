@@ -177,19 +177,31 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   #ui     /opt/star/sl305_gcc323/qt/bin/uic GeomBrowser.ui -i GeomBrowser.h -o .ui/GeomBrowser.cpp
   #xpm    /opt/star/sl305_gcc323/qt/bin/uic  -embed -o .ui/qmake_image_collection.cpp
   my $uic = $env->{Packages}->{QT}->{BINDIR} . "/uic";
+  my $qt4 = ($env->{Packages}->{QT}->{QT_VERSION} == 4);
   my @QtDefs = ();
   my @uih = ();#   print "h_files: @h_files\n";
-  foreach my $h (@h_files) {if ($h =~ /ui\.h$/) {push @uih, $h;}}# print "uih : @uih\n";
+  foreach my $h (@h_files) {
+     if ((!$qt4 && ($h =~ /ui\.h$/)) || ($qt4 && ($h =~ /ui_.+\.h$/))) {
+       push @uih, $h;
+     }
+  }
+  # print "\$qt4 = $qt4 uih : @uih all: @h_files\n";
   foreach my $ui (@uiQT) {
-    my $dir =  File::Basename::dirname( $ui );
-    my $stem = File::Basename::basename( $ui, ".ui" );
-    my $uilocal =  File::Basename::basename( $ui );
-    my @out = ($stem . ".cxx", $stem . ".h");# print "out : @out ==> $uilocal\n";
-    my @dep = ($uilocal, @uih);
-    Command $env [$out[1]], @dep, qq(cd %1:d; $uic %1:f -o %>:f );
-    Command $env [@out[0]], ($uilocal,$out[1]), qq(cd %1:d; $uic %1:f  -i %2:f -o %>:f);
-    push @src, $out[0];
-    push @QtDefs, $out[1]; print "QtDefs from $ui  @QtDefs\n" if $param::debug;
+     my $dir     = File::Basename::dirname( $ui );
+     my $stem    = File::Basename::basename( $ui, ".ui" );
+     my $uilocal = File::Basename::basename( $ui );
+     my @dep = ($uilocal, @uih);
+     if ($qt4) {
+       my $out = "ui_". $stem . ".h"; print "Qt4: out : $out ==> $uilocal\n"; # if $param::debug ;
+       Command $env [$out], ($uilocal), qq(cd %1:d; $uic %1:f -o %>:f );
+       push @QtDefs, $out; print "QtDefs from $ui  @QtDefs\n"; # if $param::debug;
+     } else {
+       my @out = ($stem . ".cxx", $stem . ".h"); # print "Qt3: out : @out ==> $uilocal\n"
+       Command $env [$out[1]], @dep, qq(cd %1:d; $uic %1:f -o %>:f );
+       Command $env [@out[0]], ($uilocal,$out[1]), qq(cd %1:d; $uic %1:f  -i %2:f -o %>:f);
+       push @src, $out[0];
+       push @QtDefs, $out[1]; # print "QtDefs from $ui  @QtDefs\n" if $param::debug;
+     }
   }
   if ($#xpmQT >= 0) {
     my $out = $PKG . "_image_collection.cxx";
