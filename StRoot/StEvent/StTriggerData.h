@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.19 2007/07/02 17:03:02 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.20 2008/03/12 15:56:41 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.20  2008/03/12 15:56:41  ullrich
+ * Add new methods tofAtAddress() and tofMultiplicity().
+ *
  * Revision 2.19  2007/07/02 17:03:02  ullrich
  * Add two new members mtdAdc() and mtdTdc() (Akio).
  *
@@ -193,6 +196,10 @@ public:
     virtual unsigned short mtdAdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
 
+    //TOF
+    virtual unsigned short tofAtAddress(int address, int prepost=0) const;
+    virtual unsigned short tofMultiplicity(int prepost=0) const;
+
     // auxiliary information
     float zdcVertexZ() const;
     void  setZdcVertexZ(float);
@@ -299,6 +306,8 @@ inline unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
 inline unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
 inline unsigned short StTriggerData::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::tofAtAddress(int address, int prepost) const {return 0;}
+inline unsigned short StTriggerData::tofMultiplicity(int prepost) const {return 0;}
 inline unsigned      char*  StTriggerData::getDsm_FMS(int prepost) const {return 0;}
 inline unsigned      char*  StTriggerData::getDsm01_FMS(int prepost) const {return 0;}
 inline unsigned      char*  StTriggerData::getDsm02_FMS(int prepost) const {return 0;}
