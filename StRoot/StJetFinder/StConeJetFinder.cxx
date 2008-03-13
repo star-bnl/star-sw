@@ -16,6 +16,8 @@ using std::multimap;
 using std::for_each;
 using std::sort;
 
+#include "StMessMgr.h"
+
 //StJetFinder
 #include "StJetEtCell.h"
 #include "StConeJetFinder.h"
@@ -188,10 +190,10 @@ void StConeJetFinder::doMinimization()
 
 void StConeJetFinder::findJets(JetList& protojets)
 {
-    cout <<"StConeJetFinder::findJets()"<<endl;
+    LOG_DEBUG <<"StConeJetFinder::findJets()"<<endm;
     
     clear();
-    cout <<"\tfill grid"<<endl;
+    LOG_DEBUG <<"\tfill grid"<<endm;
     fillGrid(protojets);
     setSearchWindow();
     protojets.clear(); //clear 'em, add them back in as we find them
@@ -206,7 +208,7 @@ void StConeJetFinder::findJets(JetList& protojets)
     if (mPars.mDebug ) {print();}
 	
     //loop from highest et cell to lowest et cell.
-    cout <<"\tBegin search over seeds"<<endl;
+    LOG_DEBUG <<"\tBegin search over seeds"<<endm;
     for (CellVec::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
 		
 	StJetEtCell* centerCell = *vecIt;
@@ -230,16 +232,16 @@ void StConeJetFinder::findJets(JetList& protojets)
     }
     
     if (mPars.mAddMidpoints==true) { 	//add seeds at midpoints
-	cout <<"\tadd seeds at midpoints"<<endl;
+	LOG_DEBUG <<"\tadd seeds at midpoints"<<endm;
 	addSeedsAtMidpoint(); //old style, add midpoints before split/merge
     }
     
     if (mPars.mDoSplitMerge==true) {//split-merge
-	cout <<"\tsplit-merge"<<endl;
+	LOG_DEBUG <<"\tsplit-merge"<<endm;
 	mMerger->splitMerge(mPreJets);
     }
     
-    cout <<"\tcollect"<<endl;
+    LOG_DEBUG <<"\tcollect"<<endm;
     for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
 	StJetEtCell* rj = &(*realJetIt);
 	if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
@@ -322,8 +324,8 @@ void StConeJetFinder::addSeedsAtMidpoint()
 	    }
 	}
 	else {
-	    cout <<"StConeJetFinder::addSeedsAtMidpoint(). ERROR:\t"
-		 <<"midpoint is null.  This should never happen"<<endl;
+	    LOG_ERROR <<"StConeJetFinder::addSeedsAtMidpoint(). ERROR:\t"
+		 <<"midpoint is null.  This should never happen"<<endm;
 	    abort();
 	}
     }
