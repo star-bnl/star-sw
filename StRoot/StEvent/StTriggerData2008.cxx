@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2008.cxx,v 2.3 2008/03/10 19:35:31 ullrich Exp $
+ * $Id: StTriggerData2008.cxx,v 2.4 2008/03/13 16:58:28 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2008.cxx,v $
+ * Revision 2.4  2008/03/13 16:58:28  ullrich
+ * Move include file from .cxx to .h file
+ *
  * Revision 2.3  2008/03/10 19:35:31  ullrich
  * New methods: tofAtAddress() and tofMultiplicity().
  *
@@ -25,7 +28,6 @@
 #include <assert.h>
 #include <iostream>
 #include "StTriggerData2008.h"
-#include "StDaqLib/TRG/trgStructures2008.h"
 
 ClassImp(StTriggerData2008)
 
