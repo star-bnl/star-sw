@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.9 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StV0Vertex.cxx,v 2.10 2008/03/13 16:57:27 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
+ * Revision 2.10  2008/03/13 16:57:27  ullrich
+ * Add include to comply with ROOT.
+ *
  * Revision 2.9  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -47,6 +50,7 @@
 #include "StTrackGeometry.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_v0_vertex_Table.h"
+#include "TClass.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
@@ -54,7 +58,7 @@ using std::copy;
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.9 2004/07/15 16:36:26 ullrich Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.10 2008/03/13 16:57:27 ullrich Exp $";
 
 StV0Vertex::StV0Vertex()
 {

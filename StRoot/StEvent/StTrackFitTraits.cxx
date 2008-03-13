@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.16 2007/10/11 21:52:32 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.17 2008/03/13 16:57:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.17  2008/03/13 16:57:36  ullrich
+ * Add include to comply with ROOT.
+ *
  * Revision 2.16  2007/10/11 21:52:32  ullrich
  * Added member to handle number of fit points for PXL and IST.
  *
@@ -70,6 +73,7 @@
 #include "StParticleTypes.hh"
 #include "StParticleTable.hh"
 #include "tables/St_dst_track_Table.h"
+#include "TClass.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
@@ -77,7 +81,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.16 2007/10/11 21:52:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.17 2008/03/13 16:57:36 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
