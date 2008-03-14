@@ -17,5 +17,6 @@ struct spaceChargeCor {
    float   factor;    /*  Multiplicative Factor */
    float   detector;    /* 0=RICH, 1=BBCx, 2=ZDCx e+w, 4=BBCe+w */
    float   offset;      /* Offset at zero luminosity */
+   float   ewratio;      /* Ratio of charge east/west */
 
  };  
