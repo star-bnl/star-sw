@@ -118,7 +118,7 @@ if ($pkg eq "RTS") {
 	  $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
 	    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
 }
-my @VF_daq_pkgs = qw(StDaqAdcMaker  StDAQMaker  StRtsReaderMaker  StTpcClusters    StTpxReaderMaker StRTSMaker  StTofEventMaker   StTpxEventMaker Infrastructure QEvpClient HistogramGroups AA PlotClient );
+my @VF_daq_pkgs = qw(StDaqAdcMaker  StDAQMaker  StRtsReaderMaker  StTpcClusters    StTpxReaderMaker StRTSMaker  StTofEventMaker  StTpxEventMaker  OnlinePlots  );
 foreach my $p (@VF_daq_pkgs) {
   #  print "compare $p with pkg = $pkg\n";
   if ($pkg eq $p) {
@@ -181,22 +181,28 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   my @QtDefs = ();
   my @uih = ();#   print "h_files: @h_files\n";
   foreach my $h (@h_files) {
-     if ((!$qt4 && ($h =~ /ui\.h$/)) || ($qt4 && ($h =~ /ui_.+\.h$/))) {
+     if ((!$qt4 && ($h =~ /\.ui\.h$/)) || ($qt4 && ($h =~ /ui_.+\.h$/))) {
        push @uih, $h;
      }
   }
   # print "\$qt4 = $qt4 uih : @uih all: @h_files\n";
   foreach my $ui (@uiQT) {
      my $dir     = File::Basename::dirname( $ui );
+     my $dirbase = $dir;
+     $dirbase =~ s/$Dir//;
      my $stem    = File::Basename::basename( $ui, ".ui" );
-     my $uilocal = File::Basename::basename( $ui );
+     if ($dirbase) {
+        $dirbase =~ s|^/||;
+        $dirbase .= "/";
+     }
+     my $uilocal = $dirbase . File::Basename::basename( $ui );
      my @dep = ($uilocal, @uih);
      if ($qt4) {
-       my $out = "ui_". $stem . ".h"; print "Qt4: out : $out ==> $uilocal\n"; # if $param::debug ;
+       my $out = "$dirbase . ui_". $stem . ".h"; # print "Qt4: out : $out ==> $uilocal\n"; # if $param::debug ;
        Command $env [$out], ($uilocal), qq(cd %1:d; $uic %1:f -o %>:f );
        push @QtDefs, $out; print "QtDefs from $ui  @QtDefs\n"; # if $param::debug;
      } else {
-       my @out = ($stem . ".cxx", $stem . ".h"); # print "Qt3: out : @out ==> $uilocal\n"
+       my @out = ($dirbase . $stem . ".cxx", $dirbase . $stem . ".h") ; #   print "Qt3:$out[1]:d \n out @dep : @out ==> $uilocal\n";
        Command $env [$out[1]], @dep, qq(cd %1:d; $uic %1:f -o %>:f );
        Command $env [@out[0]], ($uilocal,$out[1]), qq(cd %1:d; $uic %1:f  -i %2:f -o %>:f);
        push @src, $out[0];
