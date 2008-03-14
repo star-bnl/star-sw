@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.h,v 1.2 2004/04/12 16:17:03 dongx Exp $
+ * $Id: StTofrNtupleMaker.h,v 1.3 2008/03/14 17:37:14 masayuki Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.h,v $
+ * Revision 1.3  2008/03/14 17:37:14  masayuki
+ * add
+ *
  * Revision 1.2  2004/04/12 16:17:03  dongx
  * add AdcLoRes in the ntuple
  *
@@ -22,12 +25,14 @@
 #ifndef StTofrNtupleMaker_hh     
 #define StTofrNtupleMaker_hh
 #include "StMaker.h"
+
 #define __SIGMA_SCALE__ 1000.
 #include <string>
 #ifndef ST_NO_NAMESPACES
 using std::string;
 #endif
 #include "StTofrCellData.h"
+#include <StPhysicalHelixD.hh>
 
 class StEvent;
 class StTofCollection;
@@ -36,8 +41,8 @@ class StSPtrVecTofData;
 class StTofrGeometry;
 //class StTofrDaqMap;
 class TFile;
-class TNtuple;
 class TTree;
+class TNtuple;
 
 class StTofrNtupleMaker : public StMaker {
  public:
@@ -66,11 +71,14 @@ class StTofrNtupleMaker : public StMaker {
 
 private:
   static const Int_t mNTOFR = 120;   //72;
-  static const Int_t mNPVPD = 6;
+  static const Int_t mNPVPD = 3; 
 
   Bool_t mYear2; //! STAR year2: TOFp+pVPD
   Bool_t mYear3; //! STAR year3: TOFp+pVPD+TOFr
   Bool_t mYear4;
+
+  StPhysicalHelixD* mBeamHelix;
+  float mBeamX, mBeamY;
 
   StTofrGeometry *mTofrGeom;  //! tofr geometry
   Bool_t mInitGeomFromOther;  //! geometry initial from other makers
@@ -103,14 +111,14 @@ private:
   Bool_t  doPrintMemoryInfo; //! control debug memory data
   Bool_t  doPrintCpuInfo; //! control debug timing data
 
-  TNtuple *mPvpdTuple; //! pVPD start ntuple
+  TTree *mPvpdTuple; //! pVPD start ntuple
   TTree *mCellTuple; //! Tofr calibration ntuple
   TTree *mMatchTuple; //! Tofr match ntuple
   TTree *mNoMatchTuple; //! Tofr match ntuple
   TNtuple *mHitPosTuple; //! Hit position data
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofrNtupleMaker.h,v 1.2 2004/04/12 16:17:03 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofrNtupleMaker.h,v 1.3 2008/03/14 17:37:14 masayuki Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofrNtupleMaker,1)
 };

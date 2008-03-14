@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.5 2007/04/17 23:11:12 dongx Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.6 2008/03/14 17:37:14 masayuki Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.6  2008/03/14 17:37:14  masayuki
+ * add
+ *
  * Revision 1.5  2007/04/17 23:11:12  dongx
  * replaced with standard STAR Loggers
  *
@@ -45,6 +48,7 @@
 #include "StarClassLibrary/StParticleTypes.hh"
 #include "StarClassLibrary/StParticleDefinition.hh"
 #include "StMuDSTMaker/COMMON/StMuUtilities.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StHelix.hh"
 #include "StTrackGeometry.h"
 #include "StParticleTypes.hh"
@@ -54,12 +58,14 @@
 #include "StEventUtilities/StuRefMult.hh"
 #include "PhysicalConstants.h"
 #include "StPhysicalHelixD.hh"
-#include "TNtuple.h"
+#include "TTree.h"
 #include "TFile.h"
 #include "StMemoryInfo.hh"
 #include "StMessMgr.h"
 #include "StTimer.hh"
 #include "tables/St_pvpdStrobeDef_Table.h"
+#include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
+#include "tables/St_vertexSeed_Table.h" //
 
 #include "StTofUtil/tofPathLength.hh"
 #include "StTofUtil/StTofrGeometry.h"
@@ -75,10 +81,6 @@ ClassImp(StTofrNtupleMaker)
 /// constructor sets default parameters
 StTofrNtupleMaker::StTofrNtupleMaker(const Char_t *name="tofrNtuple", const Char_t *outname="tofntuple.root") : StMaker(name) {
   mTupleFileName=outname;
-  setValidAdcRange(1,1200);
-  setValidTdcRange(1,2047);
-  setOuterTrackGeometry();
-  setInitGeomFromOther(kTRUE);
   
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
@@ -101,13 +103,14 @@ Int_t StTofrNtupleMaker::Init(){
   return kStOK;
 }
 
+
 Int_t StTofrNtupleMaker::InitRun(int runnumber) {
 
   if(mInitGeomFromOther) {
     TDataSet *geom = GetDataSet("tofrGeometry");
     mTofrGeom = (StTofrGeometry *)geom->GetObject();
   } else {
-    mTofrGeom = new StTofrGeometry("tofrGeoNtuple","tofGeo in NtuplaMaker");
+    mTofrGeom = new StTofrGeometry("tofrGeoNtuple","tofGeo in NtupleMaker");
     if(!mTofrGeom->IsInitDone()) {
       gMessMgr->Info("TofrGemetry initialization..." ,"OS");
       TVolume *starHall = (TVolume *)GetDataSet("HALL");
@@ -137,7 +140,49 @@ Int_t StTofrNtupleMaker::InitRun(int runnumber) {
       LOG_INFO << "tube " << strobeDef[i].id << "  min:"<< strobeDef[i].strobeTdcMin
 	   <<" max:"<< strobeDef[i].strobeTdcMax<< endm;
   }
+
+  //========== Set Beam Line ===================== 
+  double x0 = 0.;
+  double y0 = 0.;
+  double dxdz = 0.;
+  double dydz = 0.;
+
+  // Get Current Beam Line Constraint from database
+  TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic");
+
+  if (dbDataSet) {
+    vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
+
+  x0 = vSeed->x0;
+  y0 = vSeed->y0;
+  dxdz = vSeed->dxdz;
+  dydz = vSeed->dydz;
+  }
+  else {
+    LOG_INFO << "StGenericVertexMaker -- No Database for beamline" << endm;
+  }
+  LOG_INFO << "BeamLine Constraint: " << endm;
+  LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
+  LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
   
+  StThreeVectorD origin(x0,y0,0.0);
+  double pt = 88889999;
+  double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
+  if(nxy<1.e-5){ // beam line _MUST_ be tilted
+    LOG_WARN << "StppLMVVertexFinder:: Beam line must be tilted!" << endm;
+    nxy=dxdz=1.e-5;
+  }
+  double p0=pt/nxy;
+  double px   = p0*dxdz;
+  double py   = p0*dydz;
+  double pz   = p0; // approximation: nx,ny<<0
+  StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+  delete mBeamHelix;
+  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
+
+  mBeamX = x0;
+  mBeamY = y0;
+
   return kStOK;
 }
 
@@ -150,6 +195,7 @@ Int_t StTofrNtupleMaker::FinishRun(int runnumber)
   
   return kStOK;
 }
+
 
 /// write and close the ntuple file
 Int_t StTofrNtupleMaker::Finish() {
@@ -178,15 +224,16 @@ Int_t StTofrNtupleMaker::Make(){
 
   //.........................................................................
   // event selection ...
-  if (!event || !event->primaryVertex() ||
+  if (!event || 
+      //!event->primaryVertex() ||
       !event->tofCollection() ||
-      !event->tofCollection()->dataPresent()){
+      //!event->tofCollection()->dataPresent()
+      !event->tofCollection()->rawdataPresent()){
     LOG_INFO << "StTofrNtupleMaker -- nothing to do ... bye-bye"<< endm;
     return kStOK;
   }
 
   mAcceptedEvents++;
-
   StTimer timer;
   if (doPrintCpuInfo) timer.start();
   if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
@@ -201,274 +248,216 @@ Int_t StTofrNtupleMaker::Make(){
   // Collect global data for both ntuples
 
   //-- Primary vertex & trigger information
-  float xvtx = event->primaryVertex()->position().x();
-  float yvtx = event->primaryVertex()->position().y();
-  float zvtx = event->primaryVertex()->position().z();
+cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
+  float xvtx = -999.;
+  //xvtx = event->primaryVertex()->position().x();
+  float yvtx = -999.;
+  //yvtx = event->primaryVertex()->position().y();
+  float zvtx = -999.;
+  //zvtx = event->primaryVertex()->position().z();
+
   StL0Trigger* pTrigger = event->l0Trigger();
   unsigned int triggerWord = 0;
   if (pTrigger) triggerWord = pTrigger->triggerWord();
+  
+  //-------- fill event summary info -----------
+  mCellData.run = event->runId();    // the run number
+  mCellData.evt = event->id();       // the event number
+  mCellData.trgword = triggerWord;
+  mCellData.vertexX = xvtx;        
+  mCellData.vertexY = yvtx;              
+  mCellData.vertexZ = zvtx;              
+ 
+  if(Debug()){
+    LOG_INFO << " vertexZ: "<<mCellData.vertexZ<<endm;
+  } 
 
-  //-- Get the ZDC and CTB data (for pVPD ntuple)
-  StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
-  float zdcSumEast(-1.), zdcSumWest(-1), ctbSum(-1);
-  if (theTriggers){
-    StCtbTriggerDetector &theCtb = theTriggers->ctb();
-    StZdcTriggerDetector &theZdc = theTriggers->zdc();
-    zdcSumEast = theZdc.adcSum(east);
-    zdcSumWest = theZdc.adcSum(west);
-    ctbSum = 0;
-    for (unsigned int islat=0; islat<theCtb.numberOfSlats(); islat++) 
-      for (unsigned int itray=0; itray<theCtb.numberOfTrays(); itray++)
-	ctbSum += theCtb.mips(itray, islat, 0);
-  }
-
-  //-- Number of primary tracks
-  //  (note: different meaning in event.root and richtof.root)
-  int refmult(0);
-  bool richTofMuDST = (event->summary()->numberOfExoticTracks() == -999);
-  if (richTofMuDST)
-    refmult  = event->summary()->numberOfGoodTracks();
-  else
-    refmult = uncorrectedNumberOfPrimaries(*event);
-  if (Debug()){
-    LOG_INFO << " #Tracks           :" << event->summary()->numberOfTracks()
-	 << "\n #goodPrimaryTracks:" << event->summary()->numberOfGoodPrimaryTracks()
-	 << "\n #uncorr.prim.tracks  :" << refmult << endm;
-    if (!richTofMuDST)
-      LOG_INFO << " #goodTracks (global):" << event->summary()->numberOfGoodTracks() << endm;
-  }
-
-  //-- read in pVPD info
-  StTofCollection *theTof = event->tofCollection();
-  StSPtrVecTofData &tofData = theTof->tofData();
-  if(strobeEvent(tofData)) {
-    gMessMgr->Info("strobe event","OTS");
-    return kStOK;
-  }
-
-  for (int i=0;i<mNPVPD;i++){
-    mPvpdAdc[i] = tofData[42+i]->adc();
-//     if(mYear3||mYear4) {
-//       mPvpdAdc[i] = tofData[54+i]->adc();
-//     }
-    mPvpdAdcLoRes[i] = tofData[54+i]->adc();
-    mPvpdTdc[i] = tofData[42+i]->tdc(); 
-  }
-
-  // east, west
-  int Ieast = 0, Iwest=0;
-  float TdcSum, TdcSumEast, TdcSumWest;
-  for(int i=0;i<mNPVPD/2;i++) {
-    if(validAdc(mPvpdAdc[i])&&validTdc(mPvpdTdc[i])) {
-      Ieast++;
-      TdcSumEast += mPvpdTdc[i];
-      TdcSum += mPvpdTdc[i];
-    }
-    if(validAdc(mPvpdAdc[i+3])&&validTdc(mPvpdTdc[i+3])) {
-      Iwest++;
-      TdcSumWest += mPvpdTdc[i+3];
-      TdcSum += mPvpdTdc[i+3];
-    }
-  }
-
-  float TdcStart=(TdcSum*5.0e-02-(Ieast-Iwest)*zvtx/2.9979e+01)/(Ieast+Iwest);
-  float Tdiff = (TdcSumWest/Iwest-TdcSumEast/Ieast)/2.;
-
-  //.........................................................................
-  // build pVPD ntuple
-  if (!(mTupleFileName=="")){
-    int k(0);
-    float tuple[36];
-    tuple[k++] = event->runId();    // the run number
-    tuple[k++] = event->id();       // the event number
-    tuple[k++] = triggerWord;
-    tuple[k++] = event->summary()->magneticField();
-    tuple[k++] = zvtx;              // z-vertex
-    tuple[k++] = event->primaryVertex()->chiSquared(); // z-vertex chi2
-    tuple[k++] = ctbSum;            // CTB sum
-    tuple[k++] = zdcSumEast;        // ZDC sum east
-    tuple[k++] = zdcSumWest;        // ZDC sum west
-    tuple[k++] = refmult;           // STAR reference multiplicity  
-    tuple[k++] = event->summary()->numberOfGoodPrimaryTracks();  // #primary tracks
-    tuple[k++] = TdcStart;          // tdc start
-    tuple[k++] = Tdiff;             // time difference
-    tuple[k++] = Ieast;             // 
-    tuple[k++] = Iwest;
-    tuple[k++] = TdcSumEast;
-    tuple[k++] = TdcSumWest;
-    tuple[k++] = TdcSum;
-    for (int i=0;i<mNPVPD;i++) tuple[k++] = mPvpdTdc[i];
-    for (int i=0;i<mNPVPD;i++) tuple[k++] = mPvpdAdc[i];
-    for (int i=0;i<mNPVPD;i++) tuple[k++] = mPvpdAdcLoRes[i];
-
-    LOG_INFO << " pVPD update ..." << endm;
-    mPvpdTuple->Fill(tuple);
-    mPvpdEntries++;
-  }
-
-
-
-  //.........................................................................
-  // build Tofr ntuple
-
+  //-- read in TOFr info
   //-- make sure tofSlats are available
+  StTofCollection *theTof = event->tofCollection();
   if (event->tofCollection()->cellsPresent()){
 
     mTofrEvents++;
     int entriesThisEvent(0);
-
+    
+    //initialize vpd content
+    for(int i=0;i<19;i++){
+      mCellData.pvpdLeadingEdgeTimeEast[i] = 0;
+      mCellData.pvpdTotEast[i] = 0;
+      mCellData.pvpdLeadingEdgeTimeWest[i] = 0;
+      mCellData.pvpdTotWest[i] = 0;
+    } 
+    
     //-- Loop over the cell container and retrieve the relevant parameters
     StSPtrVecTofCell& cellTofVec = theTof->tofCells();
+    int ntofhits = 0;
+    float tdcsumeast = 0., tdcsumwest = 0.;
+    unsigned int vpdEast=0, vpdWest=0, nVpdEast=0, nVpdWest=0;
     for (size_t i = 0; i < cellTofVec.size(); i++) {
       StTofCell *thisCell = cellTofVec[i];
-      StTrack *thisTrack = thisCell->associatedTrack();
-      StTrack *globalTrack = thisTrack->node()->track(global);
-      StTrackGeometry *theTrackGeometry = 
+      int trayId = thisCell->trayIndex();
+      if(Debug()) LOG_INFO << " tray ID: "<< trayId<<endm;
+      if(trayId==122){ //pvpd east)
+        int tubeId = thisCell->cellIndex()-1;
+        vpdEast += 1<<tubeId;
+        nVpdEast++;
+
+        mCellData.pvpdLeadingEdgeTimeEast[tubeId] = thisCell->leadingEdgeTime();
+        mCellData.pvpdTotEast[tubeId] = thisCell->tot();
+
+        tdcsumeast += thisCell->leadingEdgeTime();
+        mPvpdEntries++;
+      }else if(trayId==121){ //pvpd west
+        int tubeId = thisCell->cellIndex()-1;
+        vpdWest += 1<<tubeId;
+        nVpdWest++;
+        mCellData.pvpdLeadingEdgeTimeWest[tubeId] = thisCell->leadingEdgeTime();
+        mCellData.pvpdTotWest[tubeId] = thisCell->tot();
+
+        tdcsumwest += thisCell->leadingEdgeTime();
+        mPvpdEntries++;
+      }else if(trayId<=120&&trayId>=0){ //tofr
+//        if(!(thisCell->matchFlag())) continue;
+        mCellData.tray[ntofhits] = trayId;
+        mCellData.module[ntofhits] = thisCell->moduleIndex();
+        mCellData.cell[ntofhits] = thisCell->cellIndex();
+        mCellData.daq[ntofhits] = thisCell->daqIndex();
+        mCellData.leadingEdgeTime[ntofhits] = thisCell->leadingEdgeTime();
+//        mCellData.leadingEdgeTime[ntofhits] = 0.025*thisCell->tdc();//for run5
+        mCellData.tot[ntofhits] = thisCell->tot();
+//        mCellData.tot[ntofhits] = 0.1*thisCell->adc() - 0.025*thisCell->tdc();//for run5
+
+        //mCellData.matchFlag[ntofhits] = thisCell->matchFlag();  
+ 
+        //- hit local position
+        if(Debug()) LOG_INFO << " trayID/moduleID/cellID/leadingEdgeTime/tot"<< trayId <<"/"<< mCellData.module[ntofhits]<<"/"<< mCellData.cell[ntofhits] << "/" << mCellData.leadingEdgeTime[ntofhits] << "/"<< mCellData.tot[ntofhits]<<"/"<<endm;
+
+        StThreeVectorD globalHit = thisCell->position();
+        StTofrGeomSensor* sensor = mTofrGeom->GetGeomSensor(thisCell->moduleIndex(), thisCell->trayIndex());
+        double local[3], globalp[3];
+        globalp[0] = globalHit.x();
+        globalp[1] = globalHit.y();
+        globalp[2] = globalHit.z();
+        sensor->Master2Local(&globalp[0], &local[0]);
+        StThreeVectorD localHit(local[0], local[1], local[2]);
+        float ycenter = (thisCell->cellIndex()-1)*3.45-8.625;
+        delete sensor;
+    
+        mCellData.xlocal[ntofhits] = (Float_t) localHit.x();
+        mCellData.ylocal[ntofhits] = (Float_t) localHit.y();
+        mCellData.zlocal[ntofhits] = (Float_t) localHit.z();
+        mCellData.deltay[ntofhits] = local[1] - ycenter;
+
+        if(Debug()){
+           LOG_INFO <<" global:("<<globalp[0]<<", "<<globalp[1]<<", "<<globalp[2]<<")"
+                <<"\n \t local:("<<localHit.x()<<", "<<localHit.y()<<", "<<localHit.z()<<")"<<endm;
+        }
+
+        //- track information
+        StTrack *thisTrack = thisCell->associatedTrack();
+        StTrack *globalTrack = thisTrack->node()->track(global);
+
+        StTrackGeometry *theTrackGeometry = 
 	(mOuterTrackGeometry)?thisTrack->outerGeometry():thisTrack->geometry();
-
-
-      const StThreeVectorF momentum = theTrackGeometry->momentum();
-
-      //- dig out from the dedx and rich pid traits
-      float dedx(0.), cherang(0), dedxerror(0);
-      int dedx_np(0), cherang_nph(0);
-      StSPtrVecTrackPidTraits& traits = thisTrack->pidTraits();
-      for (unsigned int it=0;it<traits.size();it++){
-	if (traits[it]->detector() == kTpcId){
-	  StDedxPidTraits *pid = dynamic_cast<StDedxPidTraits*>(traits[it]);
-	  if (pid && pid->method() ==kTruncatedMeanId){
-	    dedx    = pid->mean();
-	    dedx_np =  pid->numberOfPoints();
-	    dedxerror = pid->errorOnMean();
-	  }
-	} else if  (traits[it]->detector() == kRichId){
-	  StRichPidTraits *pid = dynamic_cast<StRichPidTraits*>(traits[it]);
-	  if (pid){ 
-	    StRichSpectra* pidinfo = pid->getRichSpectra();
-	    if (pidinfo && pidinfo->getCherenkovPhotons()>2){
-	      cherang     = pidinfo->getCherenkovAngle();
-	      cherang_nph = pidinfo->getCherenkovPhotons();
+        const StThreeVectorF momentum = theTrackGeometry->momentum();
+        //- dig out from the dedx and rich pid traits
+        float dedx(0.), cherang(0), dedxerror(0);
+        int dedx_np(0), cherang_nph(0);
+        StSPtrVecTrackPidTraits& traits = thisTrack->pidTraits();
+        for (unsigned int it=0;it<traits.size();it++){
+	  if (traits[it]->detector() == kTpcId){
+	    StDedxPidTraits *pid = dynamic_cast<StDedxPidTraits*>(traits[it]);
+	    if (pid && pid->method() ==kTruncatedMeanId){
+	      dedx    = pid->mean()*1e6;
+	      dedx_np =  pid->numberOfPoints();
+	      dedxerror = pid->errorOnMean()*1e6;
+	    }
+	  } else if  (traits[it]->detector() == kRichId){
+	    StRichPidTraits *pid = dynamic_cast<StRichPidTraits*>(traits[it]);
+	    if (pid){ 
+	      StRichSpectra* pidinfo = pid->getRichSpectra();
+	      if (pidinfo && pidinfo->getCherenkovPhotons()>2){
+	        cherang     = pidinfo->getCherenkovAngle();
+	        cherang_nph = pidinfo->getCherenkovPhotons();
+	      }
 	    }
 	  }
-	}
-      }
-				      
-      int mNSigmaElectron;
-      int mNSigmaPion;
-      int mNSigmaKaon;
-      int mNSigmaProton; 
-      
-      static StTpcDedxPidAlgorithm PidAlgorithm;
-      static StElectron* Electron = StElectron::instance();
-      static StPionPlus* Pion = StPionPlus::instance();
-      static StKaonPlus* Kaon = StKaonPlus::instance();
-      static StProton* Proton = StProton::instance();
-      const StParticleDefinition* pd = thisTrack->pidTraits(PidAlgorithm);
-      
-      if (pd) {
-	mNSigmaElectron = pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Electron),__SIGMA_SCALE__),   __SIGMA_SCALE__ );
-	mNSigmaPion =     pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Pion),__SIGMA_SCALE__),    __SIGMA_SCALE__ );
-	mNSigmaKaon =     pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Kaon),__SIGMA_SCALE__),     __SIGMA_SCALE__ );
-	mNSigmaProton =   pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Proton),__SIGMA_SCALE__),   __SIGMA_SCALE__ );
-      }
-      
-      //- Tofr Cell Ntuple entry for a single matched cell
-      mCellData.run      = event->runId();
-      mCellData.evt      = event->id();
-      mCellData.trgword  = triggerWord;
-      mCellData.magfield = event->summary()->magneticField();
-      mCellData.ctbsum   = ctbSum;
-      mCellData.zdcsum   = zdcSumEast + zdcSumWest;
-      mCellData.xvtx     = xvtx;
-      mCellData.yvtx     = yvtx;
-      mCellData.zvtx     = zvtx;
-      mCellData.zvtxchi2 = event->primaryVertex()->chiSquared();
-      mCellData.refmult  = refmult;
-      mCellData.nprimary = event->summary()->numberOfGoodPrimaryTracks();
-      mCellData.meanpt   = event->summary()->meanPt();
-      mCellData.TdcStart = TdcStart;
-      mCellData.Tdiff    = Tdiff;
-      mCellData.Ieast    = Ieast;
-      mCellData.Iwest    = Iwest;
-      mCellData.TdcSumEast = TdcSumEast;
-      mCellData.TdcSumWest = TdcSumWest;
-      mCellData.TdcSum     = TdcSum;
-      mCellData.te1 = (int)mPvpdTdc[0]; mCellData.te2 = (int)mPvpdTdc[1];
-      mCellData.te3 = (int)mPvpdTdc[2]; mCellData.tw1 = (int)mPvpdTdc[3];
-      mCellData.tw2 = (int)mPvpdTdc[4]; mCellData.tw3 = (int)mPvpdTdc[5];
-      //      if (mYear3 || mYear4) {
-      //       	mCellData.ae1 = (int)mPvpdAdcLoRes[0]; mCellData.ae2 = (int)mPvpdAdcLoRes[1];
-      //	mCellData.ae3 = (int)mPvpdAdcLoRes[2]; mCellData.aw1 = (int)mPvpdAdcLoRes[3];
-      //	mCellData.aw2 = (int)mPvpdAdcLoRes[4]; mCellData.aw3 = (int)mPvpdAdcLoRes[5];
-      //      } else {
-	mCellData.ae1 = (int)mPvpdAdc[0]; mCellData.ae2 = (int)mPvpdAdc[1];
-	mCellData.ae3 = (int)mPvpdAdc[2]; mCellData.aw1 = (int)mPvpdAdc[3];
-	mCellData.aw2 = (int)mPvpdAdc[4]; mCellData.aw3 = (int)mPvpdAdc[5];
-	mCellData.ale1 = (int)mPvpdAdcLoRes[0]; mCellData.ale2 = (int)mPvpdAdcLoRes[1];
-	mCellData.ale3 = (int)mPvpdAdcLoRes[2]; mCellData.alw1 = (int)mPvpdAdcLoRes[3];
-	mCellData.alw2 = (int)mPvpdAdcLoRes[4]; mCellData.alw3 = (int)mPvpdAdcLoRes[5];
-	//      }
-      mCellData.tray    = thisCell->trayIndex();
-      mCellData.module  = thisCell->moduleIndex();
-      mCellData.cell    = thisCell->cellIndex();
-      mCellData.daq     = thisCell->daqIndex();
-      mCellData.tdc	= thisCell->tdc();//mTofrTdc[jj];
-      mCellData.adc	= thisCell->adc();//(int)mTofrAdc[jj];
-      mCellData.hitprof   = 0; //newerCellHitVec[ii].hitProfile;
-      mCellData.matchflag = thisCell->matchFlag(); //newerCellHitVec[ii].matchFlag;
+        }
+   
+        StThreeVector<double> dcatof =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
 
-      //- retrieve and recalculate parameters
-      //--- calculate flight path
-      double pathLength = tofPathLength(&event->primaryVertex()->position(),
-					&thisCell->position(),
-					theTrackGeometry->helix().curvature());
-      StThreeVectorD globalhit = thisCell->position();
-      StTofrGeomSensor* sensor = mTofrGeom->GetGeomSensor(thisCell->moduleIndex(),thisCell->trayIndex());
-      double local[3], global[3];
-      global[0] = globalhit.x();
-      global[1] = globalhit.y();
-      global[2] = globalhit.z();
-      sensor->Master2Local(&global[0], &local[0]);
-      StThreeVectorD localhit(local[0], local[1], local[2]);      
-      float ycenter = (thisCell->cellIndex()-1)*3.45-8.625;
-      delete sensor;
-
-      mCellData.xlocal    = (float)localhit.x();
-      mCellData.ylocal    = (float)localhit.y();
-      mCellData.zlocal    = (float)localhit.z();
-      mCellData.deltay    = local[1] - ycenter;
-
-      mCellData.trackId     = (Int_t)thisTrack->key();
-      mCellData.charge      = theTrackGeometry->charge();
-      if(thisTrack->detectorInfo()) {
-	mCellData.ntrackpoints= thisTrack->detectorInfo()->numberOfPoints(kTpcId);
-      } else {
-	mCellData.ntrackpoints=0;
-      }
-      mCellData.nfitpoints  = thisTrack->fitTraits().numberOfFitPoints(kTpcId);
-      mCellData.dca         = globalTrack->geometry()->helix().distance(event->primaryVertex()->position());
-      mCellData.s           = (float)fabs(pathLength);
-      mCellData.p           = momentum.mag();
-      mCellData.pt	    = momentum.perp();
-      mCellData.px          = momentum.x();
-      mCellData.py          = momentum.y();
-      mCellData.pz          = momentum.z();
-      mCellData.eta         = momentum.pseudoRapidity();
-      mCellData.dedx        = dedx;
-      mCellData.dedxerror   = dedxerror;
-      mCellData.dedx_np     = dedx_np;
-      mCellData.cherang     = cherang;
-      mCellData.cherang_nph = cherang_nph;
-      mCellData.nSigE       = mNSigmaElectron;
-      mCellData.nSigPi      = mNSigmaPion;
-      mCellData.nSigK       = mNSigmaKaon;
-      mCellData.nSigP       = mNSigmaProton;
-
-      mCellTuple->Fill();
-      mTofrEntries++;
-      entriesThisEvent++;
+        float mNSigmaElectron;
+        float mNSigmaPion;
+        float mNSigmaKaon;
+        float mNSigmaProton; 
+        
+        static StTpcDedxPidAlgorithm PidAlgorithm;
+        static StElectron* Electron = StElectron::instance();
+        static StPionPlus* Pion = StPionPlus::instance();
+        static StKaonPlus* Kaon = StKaonPlus::instance();
+        static StProton* Proton = StProton::instance();
+        const StParticleDefinition* pd = thisTrack->pidTraits(PidAlgorithm);
+        
+        if (pd) {
+          mNSigmaElectron = fabsMin(PidAlgorithm.numberOfSigma(Electron), __SIGMA_SCALE__);
+          mNSigmaPion =     pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Pion),__SIGMA_SCALE__),    __SIGMA_SCALE__ );
+          mNSigmaKaon =     pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Kaon),__SIGMA_SCALE__),     __SIGMA_SCALE__ );
+          mNSigmaProton =   pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Proton),__SIGMA_SCALE__),   __SIGMA_SCALE__ );
+        }
+        
+        double pathLength = -999.;
+        //tofPathLength(&event->primaryVertex()->position(),
+        //  				&thisCell->position(),
+        //  				theTrackGeometry->helix().curvature());
+        pathLength = tofPathLength(&dcatof, &thisCell->position(), theTrackGeometry->helix().curvature());
+        if(Debug()) LOG_INFO << "dca(x,y,z) = (" << dcatof.x() <<", " << dcatof.y() 
+                             <<", " << dcatof.z() << "), tof pathLength = " << pathLength<<endm;
+        mCellData.trackId[ntofhits]     = (Int_t)thisTrack->key();
+        mCellData.charge[ntofhits]      = theTrackGeometry->charge();
+        if(thisTrack->detectorInfo()) {
+          mCellData.nHits[ntofhits] = thisTrack->detectorInfo()->numberOfPoints(kTpcId);
+        } else {
+          mCellData.nHits[ntofhits] = 0;
+        }
+        mCellData.nHitsFit[ntofhits]    = thisTrack->fitTraits().numberOfFitPoints(kTpcId);
+        mCellData.dcaX[ntofhits]         = dcatof.x();
+        mCellData.dcaY[ntofhits]         = dcatof.y();
+        mCellData.dcaZ[ntofhits]         = dcatof.z();
+        //globalTrack->geometry()->helix().distance(event->primaryVertex()->position());
+        mCellData.length[ntofhits]      = (float)fabs(pathLength);
+        mCellData.p[ntofhits]           = momentum.mag();
+        mCellData.pt[ntofhits]	        = momentum.perp();
+        mCellData.px[ntofhits]          = momentum.x();
+        mCellData.py[ntofhits]          = momentum.y();
+        mCellData.pz[ntofhits]          = momentum.z();
+        mCellData.eta[ntofhits]         = momentum.pseudoRapidity();
+        mCellData.dedx[ntofhits]        = dedx;
+        mCellData.dedxError[ntofhits]   = dedxerror;
+        mCellData.nHitsDedx[ntofhits]   = dedx_np;
+        mCellData.cherenkovAngle[ntofhits]    = cherang;
+        mCellData.cherenkovPhotons[ntofhits]  = cherang_nph;
+        mCellData.nSigE[ntofhits]       = mNSigmaElectron;
+        mCellData.nSigPi[ntofhits]      = mNSigmaPion;
+        mCellData.nSigK[ntofhits]       = mNSigmaKaon;
+        mCellData.nSigP[ntofhits]       = mNSigmaProton;
+        
+        ntofhits++;
+      }//end of tofr loop
     }
+    mCellData.vpdEast = vpdEast;
+    mCellData.vpdWest = vpdWest;
+    mCellData.numberOfVpdEast = nVpdEast;
+    mCellData.numberOfVpdWest = nVpdWest;
+    mCellData.nTofHits = ntofhits;
+    mPvpdTuple->Fill();
+    mCellTuple->Fill();
+    mTofrEntries = ntofhits;
+    entriesThisEvent = ntofhits;
 
+    if(Debug()){
+      LOG_INFO << " #vpd East:  "<<mCellData.numberOfVpdEast
+               << "\n \t #vpd West:  "<<mCellData.numberOfVpdWest<<endm;
+    }
     LOG_INFO << " Tofr update: " << entriesThisEvent << " entries" <<endm;
   }
 
@@ -497,50 +486,74 @@ void StTofrNtupleMaker::bookNtuples(){
        << mTupleFileName << " opened" << endm;
 
   // pVPD timing
-  string varList = "run:evt:trgwrd:magfield:zvtx:zvtxchi2:ctbsum"
-                   ":zdceast:zdcwest:refmult:nprimary"
-                   ":TdcStart:Tdiff:Ieast:Iwest:TdcSumEast:TdcSumWest:TdcSum"
-                   ":te1:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3"
-                   ":ale1:ale2:ale3:alw1:alw2:alw3";
-  mPvpdTuple = new TNtuple("pvpd","tofr timing",varList.c_str());
+  mPvpdTuple = new TTree("pvpd","tofr timing");
+  mPvpdTuple->Branch("run",&mCellData.run,"run/I");
+  mPvpdTuple->Branch("evt",&mCellData.evt,"evt/I");
+  mPvpdTuple->Branch("trgword",&mCellData.trgword,"trgword/I");
+  mPvpdTuple->Branch("vertexX",&mCellData.vertexX,"vertexX/F");
+  mPvpdTuple->Branch("vertexY",&mCellData.vertexY,"vertexY/F");
+  mPvpdTuple->Branch("vertexZ",&mCellData.vertexZ,"vertexZ/F");
+  mPvpdTuple->Branch("vpdEast",&mCellData.vpdEast,"vpdEast/I");
+  mPvpdTuple->Branch("vpdWest",&mCellData.vpdWest,"vpdWest/I");
+  mPvpdTuple->Branch("numberOfVpdEast",&mCellData.numberOfVpdEast,"numberOfVpdEast/I");
+  mPvpdTuple->Branch("numberOfVpdWest",&mCellData.numberOfVpdWest,"numberOfVpdWest/I");
+  mPvpdTuple->Branch("pvpdLeadingEdgeTimeEast",&mCellData.pvpdLeadingEdgeTimeEast,"pvpdLeadingEdgeTimeEast[19]/F");
+  mPvpdTuple->Branch("pvpdLeadingEdgeTimeWest",&mCellData.pvpdLeadingEdgeTimeWest,"pvpdLeadingEdgeTimeWest[19]/F");
+  mPvpdTuple->Branch("pvpdTotEast",&mCellData.pvpdTotEast,"pvpdTotEast[19]/F");
+  mPvpdTuple->Branch("pvpdTotWest",&mCellData.pvpdTotWest,"pvpdTotWest[19]/F");
 
   // Tofr calibration ntuple
   mCellTuple = new TTree("tofr","Tofr cell data");
   mCellTuple->Branch("run",&mCellData.run,"run/I");
   mCellTuple->Branch("evt",&mCellData.evt,"evt/I");
   mCellTuple->Branch("trgword",&mCellData.trgword,"trgword/I");
-  mCellTuple->Branch("magfield",&mCellData.magfield,"magfield/F");
-  mCellTuple->Branch("ctbsum",&mCellData.ctbsum,"ctbsum/F");
-  mCellTuple->Branch("zdcsum",&mCellData.zdcsum,"zdcsum/F");
-  mCellTuple->Branch("xvtx",&mCellData.xvtx,"xvtx/F");
-  mCellTuple->Branch("yvtx",&mCellData.yvtx,"yvtx/F");
-  mCellTuple->Branch("zvtx",&mCellData.zvtx,"zvtx/F");
-  mCellTuple->Branch("zvtxchi2",&mCellData.zvtxchi2,"zvtx/F");
-  mCellTuple->Branch("refmult",&mCellData.refmult,"refmult/I");
-  mCellTuple->Branch("nprimary",&mCellData.nprimary,"nprimary/I");
-  mCellTuple->Branch("meanpt",&mCellData.meanpt,"meanpt/F");
-  mCellTuple->Branch("pVPDall",&mCellData.TdcStart,"TdcStart/F:Tdiff/F:Ieast/I:Iwest/I:TdcSumEast/F:TdcSumWest/F:TdcSumEast/F:TdcSumWest/F:TdcSum/F");
-  mCellTuple->Branch("pvpd",&mCellData.te1,"te1/I:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3:ale1:ale2:ale3:alw1:alw2:alw3");
-  mCellTuple->Branch("cell",&mCellData.tray,"tray/I:module/I:cell/I:daq/I:tdc/I:adc/I:hitprof/I:matchflag/I:xlocal/F:ylocal/F:zlocal/F:deltay/F");
-  mCellTuple->Branch("track",&mCellData.trackId,"trackId/I:charge/I:ntrackpoints/I:nfitpoints/I:dca/F:s:p:pt:px:py:pz:eta:dedx/F:dedxerror/F:cherang/F:dedx_np/I:cherangle_nph/I:nSigE/I:nSigPi/I:nSigK/I:nSigP/I");
-
+  mCellTuple->Branch("vertexX",&mCellData.vertexX,"vertexX/F");
+  mCellTuple->Branch("vertexY",&mCellData.vertexY,"vertexY/F");
+  mCellTuple->Branch("vertexZ",&mCellData.vertexZ,"vertexZ/F");
+  mCellTuple->Branch("vpdEast",&mCellData.vpdEast,"vpdEast/I");
+  mCellTuple->Branch("vpdWest",&mCellData.vpdWest,"vpdWest/I");
+  mCellTuple->Branch("numberOfVpdEast",&mCellData.numberOfVpdEast,"numberOfVpdEast/I");
+  mCellTuple->Branch("numberOfVpdWest",&mCellData.numberOfVpdWest,"numberOfVpdWest/I");
+  mCellTuple->Branch("pvpdLeadingEdgeTimeEast",&mCellData.pvpdLeadingEdgeTimeEast,"pvpdLeadingEdgeTimeEast[19]/F");
+  mCellTuple->Branch("pvpdLeadingEdgeTimeWest",&mCellData.pvpdLeadingEdgeTimeWest,"pvpdLeadingEdgeTimeWest[19]/F");
+  mCellTuple->Branch("pvpdTotEast",&mCellData.pvpdTotEast,"pvpdTotEast[19]/F");
+  mCellTuple->Branch("pvpdTotWest",&mCellData.pvpdTotWest,"pvpdTotWest[19]/F");
+  mCellTuple->Branch("nTofHits",&mCellData.nTofHits,"nTofHits/I");
+  mCellTuple->Branch("tray",&mCellData.tray,"tray[nTofHits]/I");
+  mCellTuple->Branch("module",&mCellData.module,"mocule[nTofHits]/I");
+  mCellTuple->Branch("cell",&mCellData.cell,"cell[nTofHits]/I");
+  mCellTuple->Branch("daq",&mCellData.daq,"daq[nTofHits]/I");
+  mCellTuple->Branch("leadingEdgeTime",&mCellData.leadingEdgeTime,"leadingEdgeTime[nTofHits]/F");
+  mCellTuple->Branch("tot",&mCellData.tot,"tot[nTofHits]/F");
+//  mCellTuple->Branch("matchFlag",&mCellData.matchFlag,"matchFlag/I");
+  mCellTuple->Branch("xlocal",&mCellData.xlocal,"xlocal[nTofHits]/F");
+  mCellTuple->Branch("ylocal",&mCellData.ylocal,"ylocal[nTofHits]/F");
+  mCellTuple->Branch("zlocal",&mCellData.zlocal,"zlocal[nTofHits]/F");
+  mCellTuple->Branch("deltay",&mCellData.deltay,"deltay[nTofHits]/F");
+  mCellTuple->Branch("trackId",&mCellData.trackId,"trackId[nTofHits]/I");
+  mCellTuple->Branch("charge",&mCellData.charge,"charge[nTofHits]/I");
+  mCellTuple->Branch("p",&mCellData.p,"p[nTofHits]/F");
+  mCellTuple->Branch("pt",&mCellData.pt,"pt[nTofHits]/F");
+  mCellTuple->Branch("px",&mCellData.px,"px[nTofHits]/F");
+  mCellTuple->Branch("py",&mCellData.py,"py[nTofHits]/F");
+  mCellTuple->Branch("pz",&mCellData.pz,"pz[nTofHits]/F");
+  mCellTuple->Branch("eta",&mCellData.eta,"eta[nTofHits]/F");
+  mCellTuple->Branch("dcaX",&mCellData.dcaX,"dcaX[nTofHits]/F");
+  mCellTuple->Branch("dcaY",&mCellData.dcaY,"dcaY[nTofHits]/F");
+  mCellTuple->Branch("dcaZ",&mCellData.dcaZ,"dcaZ[nTofHits]/F");
+  mCellTuple->Branch("length",&mCellData.length,"length[nTofHits]/F");
+  mCellTuple->Branch("nHits",&mCellData.nHits,"nHits[nTofHits]/I");
+  mCellTuple->Branch("nHitsFit",&mCellData.nHitsFit,"nHitsFit[nTofHits]/I");
+  mCellTuple->Branch("nHitsDedx",&mCellData.nHitsDedx,"nHitsDedx[nTofHits]/I"); 
+  mCellTuple->Branch("dedx",&mCellData.dedx,"dedx[nTofHits]/F"); 
+  mCellTuple->Branch("dedxError",&mCellData.dedxError,"dedxError[nTofHits]/F"); 
+  mCellTuple->Branch("cherenkovAngle",&mCellData.cherenkovAngle,"cherenkovAngle[nTofHits]/F");
+  mCellTuple->Branch("cherenkovPhotons",&mCellData.cherenkovPhotons,"cherenkovPhotons[nTofHits]/I");
+  mCellTuple->Branch("nSigE",&mCellData.nSigE,"nSigE[nTofHits]/F");
+  mCellTuple->Branch("nSigPi",&mCellData.nSigPi,"nSigPi[nTofHits]/F");
+  mCellTuple->Branch("nSigK",&mCellData.nSigK,"nSigK[nTofHits]/F");
+  mCellTuple->Branch("nSigP",&mCellData.nSigP,"nSigP[nTofHits]/F");
+  
   return;
 }
 
-//---------------------------------------------------------------------------
-// determine pVPD event type (strobe or beam)
-bool StTofrNtupleMaker::strobeEvent(StSPtrVecTofData& tofData){
-  // determine strobe event from pVPD TDC data
-
-  int nStrobedPvpdTdcs=0;
-  for(int i=0;i<mNPVPD;i++)
-    if((tofData[42+i]->tdc()>mStrobeTdcMin[i]) &&
-       (tofData[42+i]->tdc()<mStrobeTdcMax[i]))
-  	nStrobedPvpdTdcs++;
-  
-  if (nStrobedPvpdTdcs==mNPVPD) return true;
-
-  return false;
-}
-
-//---------------------------------------------------------------------------
