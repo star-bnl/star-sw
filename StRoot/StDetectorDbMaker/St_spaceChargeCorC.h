@@ -18,6 +18,7 @@ class St_spaceChargeCorC : public TChair {
   Float_t 	factor(Int_t i = 0) 	        {return Struct(i)->factor;}
   Float_t 	detector(Int_t i = 0) 	        {return Struct(i)->detector;}
   Float_t 	offset(Int_t i = 0) 	        {return Struct(i)->offset;}
+  Float_t 	getEWRatio(Int_t i = 0) 	        {return Struct(i)->ewratio;}
   Double_t      getSpaceChargeCorrection(Double_t scaleFactor){
     Double_t value = 0;
     if(scaleFactor < -.75 && scaleFactor > -1.25) value = fullFieldB();
