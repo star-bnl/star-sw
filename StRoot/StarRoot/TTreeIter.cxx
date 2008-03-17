@@ -647,7 +647,7 @@ void TTreeIter::WhichTree(const char *fileName)
    
    
 
-   TFile *tfile = new TFile(fileNameS.Data());
+   TFile *tfile = TFile::Open(fileNameS.Data());
    if (tfile->IsZombie()) {
      printf("*** Can NOT open %s ***\n",fileNameS.Data());
      return;}
