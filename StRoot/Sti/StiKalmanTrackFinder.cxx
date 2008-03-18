@@ -403,7 +403,8 @@ static int myRefit=0;
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
 {
-  enum vertexLimits {ZMAX2d=6,RMAX2d=6,DMAX3d=4,RMAX=50,RMIN=5};
+static const double RMAX2d=_pars.maxDca2dZeroXY;
+static const double DMAX3d=_pars.maxDca3dVertex;
 
   StiKalmanTrackNode *extended=0;
   int goodCount= 0, plus=0, minus=0;
@@ -864,7 +865,7 @@ void StiKalmanTrackFinder::setParameters(const StiKalmanTrackFinderParameters & 
 }
 
 //______________________________________________________________________________
-EditableParameters & StiKalmanTrackFinder::getParameters()
+EditableParameters &StiKalmanTrackFinder::getParameters()
 {
   return _pars;
 }
