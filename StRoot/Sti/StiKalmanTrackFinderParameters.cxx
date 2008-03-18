@@ -85,12 +85,12 @@ void StiKalmanTrackFinderParameters::initialize()
 } 
 
 
-void StiKalmanTrackFinderParameters::loadDS(TDataSet & ds)
+void StiKalmanTrackFinderParameters::loadDS(TDataSet &ds)
 {
   cout << "StiKalmanTrackFinder::load(TDataSet&ds) -I- Starting" << endl;
-  St_KalmanTrackFinderParameters * a = static_cast<St_KalmanTrackFinderParameters*>(ds.Find("KalmanTrackFinderParameters" ));
+  St_KalmanTrackFinderParameters *a = static_cast<St_KalmanTrackFinderParameters*>(ds.Find("KalmanTrackFinderParameters" ));
   if (!a) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet&ds) -E- a==0");
-  KalmanTrackFinderParameters_st * b = a->GetTable();
+  KalmanTrackFinderParameters_st *b = a->GetTable();
   if (!b) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet&ds) -E- b==0");
   useMcAsRec      = b->useMcAsRec;               
   elossCalculated = b->elossCalculated;
@@ -101,7 +101,9 @@ void StiKalmanTrackFinderParameters::loadDS(TDataSet & ds)
   minContiguousHitCountForNullReset = b->minCountForReset;   
   maxChi2Vertex   = b->maxChi2Vertex;
   massHypothesis  = b->massHypothesis;	
-  cout << *this;
+  maxDca3dVertex  = b->maxDca3dVertex;
+  maxDca2dZeroXY  = b->maxDca2dZeroXY;
+cout << *this;
   cout << "StiKalmanTrackFinder::load(TDataSet*ds) -I- Done" << endl;
 }
 

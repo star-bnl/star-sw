@@ -10,6 +10,9 @@ class StiKalmanTrack;
 
 class StiKalmanTrackFinderParameters : public EditableParameters
 {
+  friend class StiKalmanTrackFinder;
+  friend class StiKalmanTrack;
+  friend class StiKalmanTrackNode;
 public: 
   StiKalmanTrackFinderParameters();
   StiKalmanTrackFinderParameters(const StiKalmanTrackFinderParameters & pars);
@@ -25,9 +28,6 @@ public:
   void setMaxContiguousNullCount(int count);
   double getMassHypothesis() const;
   void   initialize();
-  friend class StiKalmanTrackFinder;
-  friend class StiKalmanTrack;
-  friend class StiKalmanTrackNode;
   virtual void loadDS(TDataSet&);
   virtual void loadFS(ifstream& inFile);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& par);
@@ -42,6 +42,8 @@ public:
   int    minContiguousHitCountForNullReset;
   double maxChi2Vertex;
   double massHypothesis;
+  double maxDca2dZeroXY;
+  double maxDca3dVertex;
 };
 
 inline   void StiKalmanTrackFinderParameters::setElossCalculated(bool option)
