@@ -198,7 +198,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
      my $uilocal = $dirbase . File::Basename::basename( $ui );
      my @dep = ($uilocal, @uih);
      if ($qt4) {
-       my $out = "$dirbase . ui_". $stem . ".h"; # print "Qt4: out : $out ==> $uilocal\n"; # if $param::debug ;
+       my $out = "$dirbase". "ui_". $stem . ".h"; # print "Qt4: out : $out ==> $uilocal\n"; # if $param::debug ;
        Command $env [$out], ($uilocal), qq(cd %1:d; $uic %1:f -o %>:f );
        push @QtDefs, $out; print "QtDefs from $ui  @QtDefs\n"; # if $param::debug;
      } else {
