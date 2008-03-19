@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.17 2007/11/26 20:07:19 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.18 2008/03/19 22:08:38 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -36,9 +36,9 @@ bool StEStructSupport::goodName(const char* name){
   TString testName(_pair_typename[0]);
   testName+=_pair_chargename[0];
   testName+=name;
-  TObject* obj=mtf->Get(testName.Data());
+  TObject* obj = NULL;
+  mtf->GetObject(testName.Data(),obj);
   if(!obj) return false;
-  delete obj;
 
   return true;
 }
@@ -49,9 +49,9 @@ bool StEStructSupport::goodName_zBuf(const char* name, int zBin){
   testName+=_pair_chargename[0];
   testName+=name;
   testName+="_zBuf_"; testName += zBin;
-  TObject* obj=mtf->Get(testName.Data());
+  TObject* obj=NULL;
+  mtf->GetObject(testName.Data(),obj);
   if(!obj) return false;
-  delete obj;
 
   return true;
 }
@@ -130,11 +130,11 @@ int StEStructSupport::getNZBins(){
     for (iZBin=1;iZBin<99;iZBin++) {
         TString zBinName(hname.Data());
         zBinName += iZBin-1;
-        TH1* tmp=(TH1*)mtf->Get(zBinName.Data());
+        TH1* tmp = NULL;
+        mtf->GetObject(zBinName.Data(),tmp);
         if (!tmp) {
             break;
         }
-        delete tmp;
     }
     mNumZBins = iZBin-1;
     return mNumZBins;
@@ -152,26 +152,18 @@ int StEStructSupport::getNZBins(){
 float *StEStructSupport::getCommonNumber(int zBin) {
     float *number = new float[4];
     TString hname("");
-    TH1F *hpt[4];
+    TH1 *hpt[4];
 
-    hname = "meanPtPA_zBuf_"; hname += zBin;
-    hpt[0] = (TH1F *)mtf->Get(hname.Data());
-    hname = "meanPtMA_zBuf_"; hname += zBin;
-    hpt[1] = (TH1F *)mtf->Get(hname.Data());
-    hname = "meanPtPB_zBuf_"; hname += zBin;
-    hpt[2] = (TH1F *)mtf->Get(hname.Data());
-    hname = "meanPtMB_zBuf_"; hname += zBin;
-    hpt[3] = (TH1F *)mtf->Get(hname.Data());
+    hname = "meanPtPA_zBuf_"; hname += zBin;   mtf->GetObject(hname.Data(),hpt[0]);
+    hname = "meanPtMA_zBuf_"; hname += zBin;   mtf->GetObject(hname.Data(),hpt[1]);
+    hname = "meanPtPB_zBuf_"; hname += zBin;   mtf->GetObject(hname.Data(),hpt[2]);
+    hname = "meanPtMB_zBuf_"; hname += zBin;   mtf->GetObject(hname.Data(),hpt[3]);
 
     // Want pp, pm, mp, mm
     number[0] = hpt[0]->Integral() + hpt[2]->Integral();
     number[1] = hpt[0]->Integral() + hpt[3]->Integral();
     number[2] = hpt[1]->Integral() + hpt[2]->Integral();
     number[3] = hpt[1]->Integral() + hpt[3]->Integral();
-    delete hpt[0];
-    delete hpt[1];
-    delete hpt[2];
-    delete hpt[3];
     return number;
 };
 //---------------------------------------------------------
@@ -184,10 +176,10 @@ float *StEStructSupport::getCommonPairs(int zBin) {
         hname += _pair_chargename[i];
         hname += "NDEtaDPhi_zBuf_";
         hname += zBin;
-        TH1 *tmp = (TH1*) mtf->Get(hname.Data());
+        TH1 *tmp = NULL;
+        mtf->GetObject(hname.Data(),tmp);
         if (tmp) {
             pairs[i] = tmp->Integral();
-            delete tmp;
         } else {
             pairs[i] = 0;
         }
@@ -198,16 +190,12 @@ float *StEStructSupport::getCommonPairs(int zBin) {
 float *StEStructSupport::getChargeNumber(int zBin) {
     float *number = new float[4];
     TString hname("");
-    TH1F *hpt[4];
+    TH1 *hpt[4];
 
-    hname = "meanPtPA_zBuf_"; hname += zBin;
-    hpt[0] = (TH1F *)mtf->Get(hname.Data());
-    hname = "meanPtMA_zBuf_"; hname += zBin;
-    hpt[1] = (TH1F *)mtf->Get(hname.Data());
-    hname = "meanPtPB_zBuf_"; hname += zBin;
-    hpt[2] = (TH1F *)mtf->Get(hname.Data());
-    hname = "meanPtMB_zBuf_"; hname += zBin;
-    hpt[3] = (TH1F *)mtf->Get(hname.Data());
+    hname = "meanPtPA_zBuf_"; hname += zBin;   mtf->GetObject(hname.Data(),hpt[0]);
+    hname = "meanPtMA_zBuf_"; hname += zBin;   mtf->GetObject(hname.Data(),hpt[1]);
+    hname = "meanPtPB_zBuf_"; hname += zBin;   mtf->GetObject(hname.Data(),hpt[2]);
+    hname = "meanPtMB_zBuf_"; hname += zBin;   mtf->GetObject(hname.Data(),hpt[3]);
 
     // Want LS, US, CI, CD. Turns out to just be grand sum.
     number[0] = hpt[0]->Integral() + hpt[2]->Integral();
@@ -217,10 +205,6 @@ float *StEStructSupport::getChargeNumber(int zBin) {
     number[1] = number[0];
     number[2]+= number[0];
     number[3] = number[0];
-    delete hpt[0];
-    delete hpt[1];
-    delete hpt[2];
-    delete hpt[3];
     return number;
 };
 //---------------------------------------------------------
@@ -233,10 +217,10 @@ float *StEStructSupport::getChargePairs(int zBin) {
         hname += _pair_chargename[i];
         hname += "NDEtaDPhi_zBuf_";
         hname += zBin;
-        TH1 *tmp = (TH1*) mtf->Get(hname.Data());
+        TH1 *tmp = NULL;
+        mtf->GetObject(hname.Data(),tmp);
         if (tmp) {
             pairs[i] = tmp->Integral();
-            delete tmp;
         } else {
             pairs[i] = 0;
         }
@@ -249,81 +233,60 @@ float *StEStructSupport::getChargePairs(int zBin) {
 };
 
 //---------------------------------------------------------
-double *StEStructSupport::getdNdEta(int zBin) {
-    double* retVal=NULL;
-    retVal = new double[5];
-    // Because we calculate covariances we want combinations
-    // sqrt(nA+ * nB+), sqrt(nA+ * nB-), sqrt(nA- * nB+), sqrt(nA- * nB-), nA+ + nA- + nB+ + nB-.
+double *StEStructSupport::getd2NdEtadPhi(int zBin) {
+    double* retVal = new double[5];
+    // (nA+)*(nB+), (nA+)*(nB-), (nA-)*(nB+), (nA-)*(nB-), (nA+)+(nA-)+(nB+)+(nB-)
+    // where the () means {d^2() \over d\eta d\phi}
+    // Note that in cases where we don't distinguish a and b
+    // (nA+)*(nB-) and (nA-)*(nB+) are the same and retVal[2] is not necessary.
 
-    TString hSibName("NEventsSib_zBuf_"); hSibName += zBin;
-    TH1F* hNEventsSib = (TH1F*)mtf->Get(hSibName.Data());
-    double nEvents = hNEventsSib->Integral();
-    delete hNEventsSib;
+    TString hSibName("NEventsSib_zBuf_"); hSibName += zBin;  TH1* hNSum;  mtf->GetObject(hSibName.Data(),hNSum);
+    double nEvents = hNSum->Integral();
 
-    double nEventsAP, nEventsAM, nEventsBP, nEventsBM;
+    double nTracksAP, nTracksAM, nTracksBP, nTracksBM;
     double dNdEtaAP, dNdEtaAM, dNdEtaBP, dNdEtaBM;
-    TH1F *hEta;
+    TH1 *hEta;
     TString hname;
 
-    hname = "etaPA_zBuf_"; hname += zBin;
-    hEta = (TH1F *)mtf->Get(hname.Data());
-    nEventsAP = hEta->Integral();
-    delete hEta;
+    hname = "etaPA_zBuf_";  hname += zBin;  mtf->GetObject(hname.Data(),hEta);  nTracksAP = hEta->Integral();
+    hname = "etaMA_zBuf_";  hname += zBin;  mtf->GetObject(hname.Data(),hEta);  nTracksAM = hEta->Integral();
+    hname = "etaPB_zBuf_";  hname += zBin;  mtf->GetObject(hname.Data(),hEta);  nTracksBP = hEta->Integral();
+    hname = "etaMB_zBuf_";  hname += zBin;  mtf->GetObject(hname.Data(),hEta);  nTracksBM = hEta->Integral();
 
-    hname = "etaMA_zBuf_"; hname += zBin;
-    hEta = (TH1F *)mtf->Get(hname.Data());
-    nEventsAM = hEta->Integral();
-    delete hEta;
+    // The 0.5 is because we integrate tracks over two units of rapidity.
+    dNdEtaAP = 0.5 * nTracksAP / nEvents;
+    dNdEtaAM = 0.5 * nTracksAM / nEvents;
+    dNdEtaBP = 0.5 * nTracksBP / nEvents;
+    dNdEtaBM = 0.5 * nTracksBM / nEvents;
+    retVal[0] = dNdEtaAP*dNdEtaBP / pow(2*3.1415926,2);
+    retVal[1] = dNdEtaAP*dNdEtaBM / pow(2*3.1415926,2);
+    retVal[2] = dNdEtaAM*dNdEtaBP / pow(2*3.1415926,2);
+    retVal[3] = dNdEtaAM*dNdEtaBM / pow(2*3.1415926,2);
 
-    hname = "etaPB_zBuf_"; hname += zBin;
-    hEta = (TH1F *)mtf->Get(hname.Data());
-    nEventsBP = hEta->Integral();
-    delete hEta;
-
-    hname = "etaMB_zBuf_"; hname += zBin;
-    hEta = (TH1F *)mtf->Get(hname.Data());
-    nEventsBM = hEta->Integral();
-    delete hEta;
-
-    dNdEtaAP = 0.5 * nEventsAP / nEvents;
-    dNdEtaAM = 0.5 * nEventsAM / nEvents;
-    dNdEtaBP = 0.5 * nEventsBP / nEvents;
-    dNdEtaBM = 0.5 * nEventsBM / nEvents;
-    retVal[0] = sqrt(dNdEtaAP*dNdEtaBP);
-    retVal[1] = sqrt(dNdEtaAP*dNdEtaBM);
-    retVal[2] = sqrt(dNdEtaAM*dNdEtaBP);
-    retVal[3] = sqrt(dNdEtaAM*dNdEtaBM);
+    // There are factors of 2 when expanding the full correlation term that
+    // could be included in loops over pairs, but appear not to have been.
+    // Fix that up here.
     if (mIdenticalPair) {
-        retVal[1] += retVal[2];
-        retVal[2] = 0;
+        retVal[1] *= 2;
+        retVal[4] = (dNdEtaAP + dNdEtaAM) / (2*3.1415926);
+    } else {
+        retVal[0] *= 2;
+        retVal[2] *= 2;
+        retVal[3] *= 2;
+        retVal[4] = (dNdEtaAP + dNdEtaAM + dNdEtaBP + dNdEtaBM) / (2*3.1415926);
     }
     return retVal;
 }
 //---------------------------------------------------------
 double *StEStructSupport::getptHat(int zBin) {
     double* retVal = new double[4];
-    TH1F *hpt;
+    TH1 *hpt;
     TString hname;
 
-    hname = "meanPtPA_zBuf_"; hname += zBin;
-    hpt = (TH1F *)mtf->Get(hname.Data());
-    retVal[0] = hpt->GetMean();
-    delete hpt;
-
-    hname = "meanPtMA_zBuf_"; hname += zBin;
-    hpt = (TH1F *)mtf->Get(hname.Data());
-    retVal[1] = hpt->GetMean();
-    delete hpt;
-
-    hname = "meanPtPB_zBuf_"; hname += zBin;
-    hpt = (TH1F *)mtf->Get(hname.Data());
-    retVal[2] = hpt->GetMean();
-    delete hpt;
-
-    hname = "meanPtMB_zBuf_"; hname += zBin;
-    hpt = (TH1F *)mtf->Get(hname.Data());
-    retVal[3] = hpt->GetMean();
-    delete hpt;
+    hname = "meanPtPA_zBuf_"; hname += zBin;  mtf->GetObject(hname.Data(),hpt);  retVal[0] = hpt->GetMean();
+    hname = "meanPtMA_zBuf_"; hname += zBin;  mtf->GetObject(hname.Data(),hpt);  retVal[1] = hpt->GetMean();
+    hname = "meanPtPB_zBuf_"; hname += zBin;  mtf->GetObject(hname.Data(),hpt);  retVal[2] = hpt->GetMean();
+    hname = "meanPtMB_zBuf_"; hname += zBin;  mtf->GetObject(hname.Data(),hpt);  retVal[3] = hpt->GetMean();
 
     return retVal;
 }
@@ -340,14 +303,13 @@ TH1** StEStructSupport::getHists(const char* name, int zBin){
   retVal=new TH1*[8];
   TH1* tmpF;
   for(int i=0;i<_pair_totalmax;i++){
-    TString hname(getFrontName(i));
-    hname+=name; hname+= "_zBuf_"; hname+= zBin;
-    tmpF=(TH1*)mtf->Get(hname.Data());
+    TString hname(getFrontName(i));  hname+=name;  mtf->GetObject(hname.Data(),tmpF);
     if (!tmpF) {
-        TString hname(getFrontName(i));
-        hname+=name; hname+= "_zBuf_"; hname+= zBin;
-        tmpF=(TH1*)mtf->Get(hname.Data());
+        TString hname(getFrontName(i));  hname += name;  hname+= "_zBuf_";  hname+= zBin;
+        mtf->GetObject(hname.Data(),tmpF);
     }
+    // I think I only need the next line. Why do I need the tedious bin-by-bin copy?
+    //   retVal[i] = tmpF;
 
     TAxis * xa=tmpF->GetXaxis();
     TAxis * ya=tmpF->GetYaxis();
@@ -369,9 +331,7 @@ TH1** StEStructSupport::getHists(const char* name, int zBin){
       }
     }
   }
-  delete tmpF;
 
-  //   retVal[i] = (TH1*)mtf->Get(hname.Data());
 
   return retVal;
 }
@@ -399,14 +359,11 @@ void StEStructSupport::rescale(TH1** hists, int zBin) {
     if(!mtf) return;
 
     //>>>>>Need to rethink how to handle old cases where _zBuf_n is not in histogram name!!!!!
-    TString hSibName("NEventsSib_zBuf_"); hSibName += zBin;
-    TH1F* hNEventsSib = (TH1F*)mtf->Get(hSibName.Data());
-    double nSib = hNEventsSib->Integral();
-    delete hNEventsSib;
-    TString hMixName("NEventsMix_zBuf_"); hMixName += zBin;
-    TH1F* hNEventsMix = (TH1F*)mtf->Get(hMixName.Data());
-    double nMix = hNEventsMix->Integral();
-    delete hNEventsMix;
+    TH1 *hNum;
+    TString hSibName("NEventsSib_zBuf_");  hSibName += zBin;  mtf->GetObject(hSibName.Data(),hNum);
+    double nSib = hNum->Integral();
+    TString hMixName("NEventsMix_zBuf_");  hMixName += zBin;  mtf->GetObject(hMixName.Data(),hNum);
+    double nMix = hNum->Integral();
 
     for(int i=0;i<4;i++){
         if(hists[i]->Integral() > 0) {
@@ -457,10 +414,10 @@ TH1** StEStructSupport::getPtHists(const char* name, int zBin){
     hprname+="Pr"; hprname+=name; hprname+="_zBuf_"; hprname+=zBin;
     hpaname+="Pa"; hpaname+=name; hpaname+="_zBuf_"; hpaname+=zBin;
     hpbname+="Pb"; hpbname+=name; hpbname+="_zBuf_"; hpbname+=zBin;
-    retVal[i] = (TH1*)mtf->Get(hname.Data());
-    retVal[i+8] = (TH1*)mtf->Get(hprname.Data());
-    retVal[i+16] = (TH1*)mtf->Get(hpaname.Data());
-    retVal[i+24] = (TH1*)mtf->Get(hpbname.Data());
+    mtf->GetObject(hname.Data(),retVal[i]);
+    mtf->GetObject(hprname.Data(),retVal[i+8]);
+    mtf->GetObject(hpaname.Data(),retVal[i+16]);
+    mtf->GetObject(hpbname.Data(),retVal[i+24]);
   }
 
   return retVal;
@@ -468,6 +425,7 @@ TH1** StEStructSupport::getPtHists(const char* name, int zBin){
 //---------------------------------------------------------------
 TH1** StEStructSupport::getPtClones(const char* name, int zBin){
 
+  // hset contains pointers to in-memory histograms, _not_ copies.
   TH1** hset=getPtHists(name,zBin);
   if(!hset) return (TH1**)NULL;
 
@@ -475,9 +433,9 @@ TH1** StEStructSupport::getPtClones(const char* name, int zBin){
   TH1** hlocal=new TH1*[_pair_totalmax*4];
   for(int i=0;i<_pair_totalmax*4;i++) {
     hlocal[i]=(TH1*)hset[i]->Clone();
-    delete hset[i];
 //    hlocal[i]->Sumw2();  // trigger error propogation
   }
+  // Delete array containing pointers, but not objects being pointed to.
   delete [] hset;
 
   return hlocal;
@@ -488,14 +446,11 @@ void StEStructSupport::rescalePt(TH1** hists, int zBin) {
 
     if(!mtf) return;
 
-    TString hSibName("NEventsSib_zBuf_"); hSibName += zBin;
-    TH1F* hNEventsSib = (TH1F*)mtf->Get(hSibName.Data());
-    double nSib = hNEventsSib->GetEntries();
-    delete hNEventsSib;
-    TString hMixName("NEventsMix_zBuf_"); hMixName += zBin;
-    TH1F* hNEventsMix = (TH1F*)mtf->Get(hMixName.Data());
-    double nMix = hNEventsMix->GetEntries();
-    delete hNEventsMix;
+    TH1 *hNum;
+    TString hSibName("NEventsSib_zBuf_");  hSibName += zBin;  mtf->GetObject(hSibName.Data(),hNum);
+    double nSib = hNum->GetEntries();
+    TString hMixName("NEventsMix_zBuf_");  hMixName += zBin;  mtf->GetObject(hMixName.Data(),hNum);
+    double nMix = hNum->GetEntries();
 
     for(int i=0;i<4;i++) {
         for (int j=0;j<4;j++) {
@@ -627,33 +582,55 @@ TH1** StEStructSupport::buildCommonRFunctions(const char* name, int zBin){
   return buildCommon(name,2,zBin);
 }
 //---------------------------------------------------------
-// With no zBin as argument we take pair weighted averages for all z-bins
-// we find for this centrality.
-TH1** StEStructSupport::buildCommon(const char* name, int opt){
+// Note for all buildXXX functions:
+//  We have three basic quantities, \rho_{sib}, \rho_{ref} and {d^2N \over d\eta d\phi}
+//  We use {d^2N \over d\eta d\phi}^2 as a proxy for \rho_{ref} in cases where we want
+//  an acceptance/efficiency independent number. (Ok, there is still an average
+//  efficiency that we have to divide by.)
+//  When combining z-bins and/or centralities we want to add \Delta\rho, but
+//  each bin has a different efficiency correction. To account for this we define
+//   \hat\Delta\rho = {d^2N \over d\eta d\phi}^2 * \Delta\rho / \rho_{ref}.
+//   This takes role of \Delta\rho when we combine multiple bins.
+//  Option 0) \Delta\rho/\rho_{ref}       -> \Sum_1^n{\hat\Delta\rho} / {(1/n) \Sum_1^n{dN/d\eta}}^2
+//         1) \Delta\rho                  -> \hat\Delta\rho
+//         2) \Delta\rho/sqrt(\rho_{ref}) -> \Sum_1^n{\hat\Delta\rho} / {(1/n) \Sum_1^n{dN/d\eta}}
+
+// Common ->  {"PP","PM","MP","MM"};
+TH1** StEStructSupport::buildCommon(const char* name, int opt) {
+    double *d2NdEtadPhi = getd2NdEtadPhi(0);
+    double dNdEtadPhi = d2NdEtadPhi[4];
     TH1** retVal= buildCommon(name, opt, 0);
-    float *nPairs = getCommonNumber(0);
     for (int iType=0;iType<4;iType++) {
-        retVal[iType]->Scale(nPairs[iType]);
+        retVal[iType]->Scale(d2NdEtadPhi[iType]);
     }
+    delete [] d2NdEtadPhi;
+
     for (int iz=1;iz<mNumZBins;iz++) {
+        d2NdEtadPhi = getd2NdEtadPhi(iz);
+        dNdEtadPhi += d2NdEtadPhi[4];
         TH1** tmpVal= buildCommon(name, opt, iz);
-        float *tempPairs = getCommonNumber(iz);
         for (int iType=0;iType<4;iType++) {
-            retVal[iType]->Add(tmpVal[iType],tempPairs[iType]);
-            nPairs[iType]+=tempPairs[iType];
+            retVal[iType]->Add(tmpVal[iType],d2NdEtadPhi[iType]);
             delete tmpVal[iType];
         }
         delete [] tmpVal;
-        delete [] tempPairs;
+        delete [] d2NdEtadPhi;
     }
+    double sqrtRho = dNdEtadPhi / mNumZBins;
     for (int iType=0;iType<4;iType++) {
-        if (nPairs[iType]) {
-            retVal[iType]->Scale(1.0/nPairs[iType]);
+        if (0 < sqrtRho) {
+            // Note: I can imagine cases where a bin is empty (or nearly so) so it should
+            //       not count. Currently rely on some other QA to catch.
+            retVal[iType]->Scale(1.0/mNumZBins);
+            if (0 == opt) {
+                retVal[iType]->Scale(1.0/pow(sqrtRho,2));
+            } else if (2 == opt) {
+                retVal[iType]->Scale(1.0/sqrtRho);
+            }
         } else {
             retVal[iType]->Scale(0.0);
         }
     }
-    delete [] nPairs;
     return retVal;
 }
 
@@ -663,7 +640,8 @@ TH1** StEStructSupport::buildCommon(const char* name, int opt){
 // pi-K+ as an example but not for unidentified particles (as in mode 1
 // and mode 3) where we don't know what the particle types are.
 
-// opt: 0 = delta-rho/rho_mix;  1 = delta-rho;  2 = (1/2pi)*(dN/deta)*delta-rho/rho_mix;  3 = delta-rho/sqrt(rho_mix);
+// Ignore opt here, only use it for over-loading distinction.
+// Always return \Delta\rho/rho_{ref}
 TH1** StEStructSupport::buildCommon(const char* name, int opt, int zBin) {
 
     /* builds hist types = ++,+-,-+,-- */
@@ -692,27 +670,10 @@ TH1** StEStructSupport::buildCommon(const char* name, int opt, int zBin) {
         retVal[i]->Scale(0.); // zero the hists
     }
 
-    // Now form \Delta\rho, \Delta\rho/\rho_mix or \Delta\rho/sqrt(\rho_mix) depending on opt.
-    double *dNdEta = getdNdEta(zBin);
+    // \Delta\rho/\rho_{ref}
     for (int i=0;i<4;i++) {
-        retVal[i]->Add(hlocal[i],hlocal[i+4],1.0,-1.0); // delta rho: if opt=1 done
-        if ((0 == opt) || (2 == opt)) {
-            retVal[i]->Divide(hlocal[i+4]);  // delta-rho/rho_mix
-        }
-        if (2 == opt) {
-            retVal[i]->Scale(dNdEta[i]/(2*3.1415926)); // delta-rho/sqrt(rho_mix)
-        }
-        if (3 == opt) {
-            for (int ix=1;ix<=retVal[i]->GetNbinsX();ix++) {
-                for (int iy=1;iy<=retVal[i]->GetNbinsY();iy++) {
-                    double valS = retVal[i]->GetBinContent(ix,iy);
-                    double valM = hlocal[i+4]->GetBinContent(ix,iy);
-                    if (valM>0) {
-                        retVal[i]->SetBinContent(ix,iy,valS/sqrt(valM));
-                    }
-                }
-            }
-        }
+        retVal[i]->Add(hlocal[i],hlocal[i+4],1.0,-1.0); // delta rho
+        retVal[i]->Divide(hlocal[i+4]);                 // delta-rho/rho_{ref}
     }
 
     // Free memory of hlocal.
@@ -720,7 +681,6 @@ TH1** StEStructSupport::buildCommon(const char* name, int opt, int zBin) {
         delete hlocal[i];
     }
     delete [] hlocal;
-    delete [] dNdEta;
 
     return retVal;
 }
@@ -729,32 +689,41 @@ TH1** StEStructSupport::buildCommon(const char* name, int opt, int zBin) {
 // a covariance which will show up here. Subtract mixed pairs
 // to reduce this contribution.
 
-// opt: 0 = delta-rho/rho_mix;  1 = delta-rho;  2 = delta-rho/sqrt(rho_mix);  3 = delta-rho/sqrt(rho_mix) ALT
+// opt: 0 = delta-rho/rho_mix;  1 = delta-rho;  2 = delta-rho/sqrt(rho_mix);
 TH1** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract) {
+    double *d2NdEtadPhi = getd2NdEtadPhi(0);
+    double dNdEtadPhi = d2NdEtadPhi[4];
     TH1** retVal= buildPtCommon(name, opt, subtract, 0);
-    float *nPairs = getCommonNumber(0);
     for (int iType=0;iType<4;iType++) {
-        retVal[iType]->Scale(nPairs[iType]);
+        retVal[iType]->Scale(d2NdEtadPhi[iType]);
     }
+    delete [] d2NdEtadPhi;
+
     for (int iz=1;iz<mNumZBins;iz++) {
+        d2NdEtadPhi = getd2NdEtadPhi(iz);
+        dNdEtadPhi += d2NdEtadPhi[4];
         TH1** tmpVal= buildPtCommon(name, opt, subtract, iz);
-        float *tempPairs = getCommonNumber(iz);
         for (int iType=0;iType<4;iType++) {
-            retVal[iType]->Add(tmpVal[iType],tempPairs[iType]);
-            nPairs[iType]+=tempPairs[iType];
+            retVal[iType]->Add(tmpVal[iType],d2NdEtadPhi[iType]);
             delete tmpVal[iType];
         }
         delete [] tmpVal;
-        delete [] tempPairs;
+        delete [] d2NdEtadPhi;
     }
+
+    double sqrtRho = dNdEtadPhi/mNumZBins;
     for (int iType=0;iType<4;iType++) {
-        if (nPairs[iType]) {
-            retVal[iType]->Scale(1.0/nPairs[iType]);
+        if (0 < sqrtRho) {
+            retVal[iType]->Scale(1.0/mNumZBins);
+            if (0 == opt) {
+                retVal[iType]->Scale(1.0/pow(sqrtRho,2));
+            } else if (2 == opt) {
+                retVal[iType]->Scale(1.0/sqrtRho);
+            }
         } else {
             retVal[iType]->Scale(0.0);
         }
     }
-    delete [] nPairs;
     return retVal;
 }
 //---------------------------------------------------------
@@ -801,7 +770,7 @@ TH1** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract, i
     ptHatB[2] = ptHat[3];
     ptHatB[3] = ptHat[3];
     delete [] ptHat;
-    for(int i=0;i<4;i++){  // Note that i=0->3 is ++, +-, -+, --
+    for (int i=0;i<4;i++) {  // Note that i=0->3 is ++, +-, -+, --
         retVal[i]->Add(hlocal[i+ 8]);
         retVal[i]->Add(hlocal[i+16],-ptHatB[i]);
         retVal[i]->Add(hlocal[i+24],-ptHatA[i]);
@@ -813,17 +782,11 @@ TH1** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract, i
         mixVal[i]->Add(hlocal[i+ 4],ptHatA[i]*ptHatB[i]);
     }
 
-    double *dNdEta = getdNdEta(zBin);
-    for(int i=0;i<4;i++){
-        if (opt != 1) {
-            retVal[i]->Divide(hlocal[i]);
-            mixVal[i]->Divide(hlocal[i+4]);
-        }
+    for (int i=0;i<4;i++) {
+        retVal[i]->Divide(hlocal[i]);
+        mixVal[i]->Divide(hlocal[i+4]);
         if (subtract) {
             retVal[i]->Add(mixVal[i],-1);  // Subtract mixed event artifacts
-        }
-        if (opt >= 2) {
-            retVal[i]->Scale(dNdEta[i]/(2*3.1415926));
         }
     }
 
@@ -838,7 +801,6 @@ TH1** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract, i
     }
     delete [] mixVal;
     delete [] hlocal;
-    delete [] dNdEta;
 
     return retVal;
 }
@@ -868,73 +830,90 @@ TH1** StEStructSupport::buildChargeTypeRFunctions(const char* name, int zBin){
   return buildChargeTypes(name,2);
 }
 //---------------------------------------------------------
+// See comments before buildCommon about d2NdEtadPhi being turned into proxy for \rho_{ref}
+// ChargeTypes ->  {"LS","US","CD","CI"}
+// For opt=0 calculate \Delta\rho / rho_ref
+//         1           \Delta\rho
+//         2           \Delta\rh0 / sqrt(rho_ref)
 TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float *sf){
+    // Scale ++, +-, -+ and -- by their respective {d^2N \over d\eta d\phi}^2 to create
+    // \Delta\rho. Scale by appropriate amount of {d^2N \over d\eta d\phi} for opt.
+    // Finally add together to form LS, US, CD and CI.
+    double *d2NdEtadPhi = getd2NdEtadPhi(0);
+    double dNdEtadPhi = d2NdEtadPhi[4];
     TH1** retVal= buildChargeTypes(name, opt, sf, 0);
-    float *nPairs = getChargeNumber(0);
     for (int iType=0;iType<4;iType++) {
-        retVal[iType]->Scale(nPairs[iType]);
+        retVal[iType]->Scale(d2NdEtadPhi[iType]);
     }
+    delete [] d2NdEtadPhi;
+
     for (int iz=1;iz<mNumZBins;iz++) {
+        d2NdEtadPhi = getd2NdEtadPhi(iz);
+        dNdEtadPhi += d2NdEtadPhi[4];
         TH1** tmpVal= buildChargeTypes(name, opt, sf, iz);
-        float *tempPairs = getChargeNumber(iz);
         for (int iType=0;iType<4;iType++) {
-            retVal[iType]->Add(tmpVal[iType],tempPairs[iType]);
-            nPairs[iType]+=tempPairs[iType];
+            retVal[iType]->Add(tmpVal[iType],d2NdEtadPhi[iType]);
             delete tmpVal[iType];
         }
         delete [] tmpVal;
-        delete [] tempPairs;
+        delete [] d2NdEtadPhi;
     }
+    // Scale according to opt.
+    double sqrtRho = dNdEtadPhi/mNumZBins;
     for (int iType=0;iType<4;iType++) {
-        if (nPairs[iType]) {
-            retVal[iType]->Scale(1.0/nPairs[iType]);
+        if (0 < sqrtRho) {
+            retVal[iType]->Scale(1.0/mNumZBins);
+            if (0 == opt) {
+                retVal[iType]->Scale(1.0/pow(sqrtRho,2));
+            } else if (2 == opt) {
+                retVal[iType]->Scale(1.0/sqrtRho);
+            }
         } else {
             retVal[iType]->Scale(0.0);
         }
     }
-    delete [] nPairs;
+
+    // Now form LS, US, CD and CI
+    retVal[0]->Add(retVal[3]);
+    retVal[1]->Add(retVal[2]);
+    retVal[2]->Add(retVal[0],retVal[1],1,-1);
+    retVal[3]->Add(retVal[0],retVal[1]);
+
     return retVal;
 }
 
 //---------------------------------------------------------
-// For opt=0 calculate \Delta\rho / rho_ref
-//         1           \Delta\rho
-//         2           (1/2pi) * (dN/deta) * \Delta\rh0 / rho_ref
-//         3           \Delta\rh0 / sqrt(rho_ref)
-// Return LS, US, CD, CI combinations.
+// This routine always returns \Delta\rho/\rho_{ref}
 TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf, int zBin){
 
     // build hist types = LS, US, CD, CI
 
-    TH1** hlocal = getLocalClones(name, zBin);
-    if(!hlocal) {
-        return hlocal;
+    TH1** retVal = getLocalClones(name, zBin);
+    if(!retVal) {
+        return retVal;
     }
     if (mDoSymmetrize) {
-        symmetrizeUS(name,hlocal);
+        symmetrizeUS(name,retVal);
     }
 
     if (mnpairs) {  // manual scaling
         for(int i=0;i<8;i++) {
-            hlocal[i]->Scale(1.0/mnpairs[i]);
+            retVal[i]->Scale(1.0/mnpairs[i]);
         }
     } else {
-        rescale(hlocal, zBin);  // Divide out bin size, number of events to approximate density.
+        rescale(retVal, zBin);  // Divide out bin size, number of events to approximate density.
                                 // Optionally scale number of mix pairs to be same as sibling.
     }
     if (strstr(name,"DEta") || strstr(name,"SEta")) {
-        fixDEta((TH2**)hlocal,8); // does nothing unless mapplyDEtaFix is set
+        fixDEta((TH2**)retVal,8); // does nothing unless mapplyDEtaFix is set
     }
 
     // four returned hists
-    TH1** retVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
     const char* nm[4]={"LS","US","CD","CI"};
     const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
     for(int i=0;i<4;i++) {
-        retVal[i]=(TH1*)hlocal[0]->Clone();
-        retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
-        retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i]));
-        retVal[i]->Scale(0.); // zero the hists
+        retVal[i]->SetName(swapIn(retVal[0]->GetName(),"Sibpp",nm[i]));
+        retVal[i]->SetTitle(swapIn(retVal[0]->GetTitle(),"Sibling : +.+",tit[i]));
     }
 
     float scf1=0.;
@@ -947,48 +926,19 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf, i
     // This is important for Yt-Yt correlations. When we return to study those we
     // better double check this stuff is reasonable.
     if (1==mbgMode) {
-        scaleBackGround(hlocal[0],hlocal[4],scf1);
-        scaleBackGround(hlocal[1],hlocal[5],scf2);
-        scaleBackGround(hlocal[2],hlocal[6],scf2);
-        scaleBackGround(hlocal[3],hlocal[7],scf1);
+        scaleBackGround(retVal[0],retVal[4],scf1);
+        scaleBackGround(retVal[1],retVal[5],scf2);
+        scaleBackGround(retVal[2],retVal[6],scf2);
+        scaleBackGround(retVal[3],retVal[7],scf1);
 //        if (opt==3) {
-//            scaleBackGround(hlocal[2],hlocal[6]);
+//            scaleBackGround(retVal[2],retVal[6]);
 //        }
     }
 
-    double *dNdEta = getdNdEta(zBin);
     for(int i=0;i<4;i++){
-        hlocal[i]->Add(hlocal[i+4],-1);
-        if ((0 == opt) || (2 == opt)) {
-            hlocal[i]->Divide(hlocal[i+4]);
-        }
-        if (2 == opt) {
-            hlocal[i]->Scale(dNdEta[i]/(2*3.1415926));
-        }
-        if (3 == opt) {
-            for (int ix=1;ix<=hlocal[i]->GetNbinsX();ix++) {
-                for (int iy=1;iy<=hlocal[i]->GetNbinsY();iy++) {
-                    double valS = hlocal[i]->GetBinContent(ix,iy);
-                    double valM = hlocal[i+4]->GetBinContent(ix,iy);
-                    if (valM>0) {
-                        hlocal[i]->SetBinContent(ix,iy,valS/sqrt(valM));
-                    }
-                }
-            }
-        }
+        retVal[i]->Add(retVal[i+4],-1);
+        retVal[i]->Divide(retVal[i+4]);
     }
-    retVal[0]->Add(hlocal[0],hlocal[3]);
-    retVal[1]->Add(hlocal[1],hlocal[2]);
-    retVal[2]->Add(retVal[0],retVal[1],+1,-1);
-    retVal[3]->Add(retVal[0],retVal[1],+1,+1);
-
-    // Free local histograms.
-    for (int i=0;i<_pair_totalmax;i++) {
-        delete hlocal[i];
-    }
-    delete [] hlocal;
-    delete [] dNdEta;
-
     return retVal;
 }
 
@@ -1086,8 +1036,8 @@ TH1** StEStructSupport::buildChargeTypesSumOfRatios(const char* name, int opt, f
 
       if(opt>=2){    // dN/d\eta * (delta-rho/rho_mix)
         TString hSibName("NEventsSib_zBuf_"); hSibName += zBin;
-        TH1F* hNEventsSib = (TH1F*)mtf->Get(hSibName.Data());
-        double dNdeta = hNEventsSib->GetMean()/2;
+        TH1 *hNum;  mtf->GetObject(hSibName.Data(),hNum);
+        double dNdeta = hNum->GetMean()/2;
         retVal[i]->Scale(dNdeta/(2*3.1415926));
       }
     }
@@ -1106,33 +1056,49 @@ TH1** StEStructSupport::buildChargeTypesSumOfRatios(const char* name, int opt, f
 // a covariance which will show up here. Subtract mixed pairs
 // to reduce this contribution.
 TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtract){
+    // See comments in buildChargeTypes.
+    double *d2NdEtadPhi = getd2NdEtadPhi(0);
+    double dNdEtadPhi = d2NdEtadPhi[4];
     TH1** retVal= buildPtChargeTypes(name, opt, subtract, 0);
-    float *nPairs = getChargeNumber(0);
     for (int iType=0;iType<4;iType++) {
-        retVal[iType]->Scale(nPairs[iType]);
+        retVal[iType]->Scale(d2NdEtadPhi[iType]);
     }
+    delete [] d2NdEtadPhi;
+
     for (int iz=1;iz<mNumZBins;iz++) {
+        d2NdEtadPhi = getd2NdEtadPhi(iz);
+        dNdEtadPhi += d2NdEtadPhi[4];
         TH1** tmpVal= buildPtChargeTypes(name, opt, subtract, iz);
-        float *tempPairs = getChargeNumber(iz);
         for (int iType=0;iType<4;iType++) {
-            retVal[iType]->Add(tmpVal[iType],tempPairs[iType]);
-            nPairs[iType]+=tempPairs[iType];
+            retVal[iType]->Add(tmpVal[iType],d2NdEtadPhi[iType]);
             delete tmpVal[iType];
         }
         delete [] tmpVal;
-        delete [] tempPairs;
+        delete [] d2NdEtadPhi;
     }
+
+    double sqrtRho = dNdEtadPhi/mNumZBins;
     for (int iType=0;iType<4;iType++) {
-        if (nPairs[iType]) {
-            retVal[iType]->Scale(1.0/nPairs[iType]);
+        if (0 < sqrtRho) {
+            retVal[iType]->Scale(1.0/mNumZBins);
+            if (0 == opt) {
+                retVal[iType]->Scale(1.0/pow(sqrtRho,2));
+            } else if (2 == opt) {
+                retVal[iType]->Scale(1.0/sqrtRho);
+            }
         } else {
             retVal[iType]->Scale(0.0);
         }
     }
-    delete [] nPairs;
+
+    retVal[0]->Add(retVal[3]);
+    retVal[1]->Add(retVal[2]);
+    retVal[2]->Add(retVal[0],retVal[1],1,-1);
+    retVal[3]->Add(retVal[0],retVal[1]);
     return retVal;
 }
 //---------------------------------------------------------
+// This routine always returns \Delta\rho/\rho_{ref}
 TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtract, int zBin) {
 
     if(!mtf) return (TH1**)NULL;
@@ -1141,7 +1107,7 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtra
     //    4 groups of 8 (Sibpp,Sibpm,Sibmp,Sibmm,Mixpp,Mixpm,Mixmp,Mixmm) 
     //    1st 8 are number, 2nd 8 are pt1*pt2, 3rd 8 are pt1 and 4th 8 are pt2
 
-    TH1** hlocal=getPtClones(name,zBin);
+    TH1** hlocal = getPtClones(name,zBin);
     if(!hlocal) return hlocal;
     if (mDoSymmetrize) {
         symmetrizePtUS(name,hlocal);
@@ -1155,11 +1121,11 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtra
     const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
     TH1* mixVal[4]; // ++,+-,-+,--
     for(int i=0;i<4;i++){
-        retVal[i]=(TH1*)hlocal[0]->Clone();
+        retVal[i] = (TH1*) hlocal[0]->Clone();
         retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
         retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i]));
         retVal[i]->Scale(0.); // zero the hists
-        mixVal[i]=(TH1*)hlocal[0]->Clone();
+        mixVal[i] = (TH1*) hlocal[0]->Clone();
         mixVal[i]->Scale(0.); // zero the hists 
     }
 
@@ -1193,23 +1159,13 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtra
         mixVal[i]->Add(hlocal[i+ 4],ptHatA[i]*ptHatB[i]);
     }
 
-    double *dNdEta = getdNdEta(zBin);
     for (int i=0;i<4;i++) {
-        if (opt != 1) {
-            retVal[i]->Divide(hlocal[i]);
-            mixVal[i]->Divide(hlocal[i+4]);
-        }
+        retVal[i]->Divide(hlocal[i]);
+        mixVal[i]->Divide(hlocal[i+4]);
         if (subtract) {
             retVal[i]->Add(mixVal[i],-1);  // Subtract mixed event artifacts
         }
-        if (opt >= 2) {
-            retVal[i]->Scale(dNdEta[i]/(2*3.1415926));
-        }
     }
-    retVal[0]->Add(retVal[3]);
-    retVal[1]->Add(retVal[2]);
-    retVal[2]->Add(retVal[0],retVal[1],1.0,-1.0);
-    retVal[3]->Add(retVal[0],retVal[1],1.0,1.0);
 
     // Free local histograms.
     for (int i=1;i<4;i++) {
@@ -1219,7 +1175,6 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtra
         delete hlocal[i];
     }
     delete [] hlocal;
-    delete [] dNdEta;
 
     return retVal;
 
@@ -1421,6 +1376,13 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.18  2008/03/19 22:08:38  prindle
+ * Use GetObject instead of Get for type safety. Stop deleting objects we didn't create.
+ * Treat \Delta\rho = d^2n/dEtadphi (rho - rho_ref)/rho_ref as basic unit when combining
+ * centralities and z bins.
+ *
+ * This code should be check in more detail before being completely relied upon.
+ *
  * Revision 1.17  2007/11/26 20:07:19  prindle
  * Modified to average \Delta\rho/sqrt(\rho) over z-bins (if more than one z-bin
  * present for given centrality. Note: I weight by number of tracks, not number of

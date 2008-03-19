@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.11 2007/11/26 20:07:20 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.12 2008/03/19 22:08:39 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -70,7 +70,7 @@ public:
   float *getChargeNumber(int zBin);
   float *getChargePairs(int zBin);
 
-  double *getdNdEta(int zBin);
+  double *getd2NdEtadPhi(int zBin);
   double *getptHat(int zBin);
   TH1** getHists(const char* name, int zBin);
   TH1** getLocalClones(const char* name, int zBin);
@@ -133,6 +133,13 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.12  2008/03/19 22:08:39  prindle
+ * Use GetObject instead of Get for type safety. Stop deleting objects we didn't create.
+ * Treat \Delta\rho = d^2n/dEtadphi (rho - rho_ref)/rho_ref as basic unit when combining
+ * centralities and z bins.
+ *
+ * This code should be check in more detail before being completely relied upon.
+ *
  * Revision 1.11  2007/11/26 20:07:20  prindle
  * Modified to average \Delta\rho/sqrt(\rho) over z-bins (if more than one z-bin
  * present for given centrality. Note: I weight by number of tracks, not number of
