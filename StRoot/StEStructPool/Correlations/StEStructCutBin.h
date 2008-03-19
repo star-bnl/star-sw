@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.9 2007/11/26 19:55:25 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.10 2008/03/19 22:06:01 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,6 +29,7 @@ class StEStructCutBin : public TObject {
   int mnumBins;
   int mnumParentBins;
   char* mcutModeName;
+  int mcutBinHistMode;
 
   int mPtBins[100]; // returned list of indexes terminated by -1
   float mPtBinMax[100];
@@ -36,7 +37,7 @@ class StEStructCutBin : public TObject {
   TH1D** mHCutBinHists[8];
 
   static StEStructCutBin* mInstance;
-  StEStructCutBin(): mcutMode(0), mnumBins(1), mcutModeName(0) { setMode(0); };
+  StEStructCutBin(): mcutMode(0), mnumBins(1), mcutModeName(0), mcutBinHistMode(0) { setMode(0); };
   //  StEStructCutBin(int mode){ setMode(mode); };
 
   int getCutBinMode1(StEStructPairCuts *pc);
@@ -71,12 +72,16 @@ class StEStructCutBin : public TObject {
   void setMode(int mode);
   int  getMode();
   // Save histograms (mHCutBinHists) to currently opened file.
+  void setCutBinHistMode(int mode); // Non-zero means fill histograms.
+  int  getCutBinHistMode();
   void writeCutBinHists();
   int  getNumBins();
+  int  getNumPairDensityBins();
   int  getNumParentBins();
   int  getParentBin(StEStructPairCuts *p, StEStructTrack* trkPtr);
   int  getNumQABins();
   int  getCutBin(StEStructPairCuts *p, int pairCase=0);
+  int  getPairDensityBin(int ibin);
   int  ignorePair(StEStructPairCuts *pc);
   int  symmetrizeYt(StEStructPairCuts *pc);
   int  switchYt(StEStructPairCuts *pc);
@@ -90,6 +95,13 @@ class StEStructCutBin : public TObject {
 inline char* StEStructCutBin::printCutBinName(){ return mcutModeName; }
 
 inline int StEStructCutBin::getNumBins(){ return mnumBins; }
+inline int StEStructCutBin::getNumPairDensityBins() {
+    if (3 == mcutMode) {
+        return 4;
+    } else {
+        return mnumBins;
+    }
+}
 inline int StEStructCutBin::getNumParentBins(){ return mnumParentBins; }
 inline int StEStructCutBin::getNumQABins(){
     if (5 == mcutMode) {
@@ -148,11 +160,34 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int pairCase){
  }
  return retVal;
 }
-inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* trkPtr) {
-    if (5 != mcutMode) {
-        return 0;
+inline int StEStructCutBin::getPairDensityBin(int ibin){
+    if (3 == mcutMode) {
+        if (2 != ibin && 6 != ibin && 10 != ibin && 14 != ibin) {
+            return -1;
+        } else {
+            return (ibin-2)/4;
+        }
     } else {
+        return ibin;
+    }
+}
+inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* trkPtr) {
+    if (3 == mcutMode) {
+        float yt = trkPtr->Yt();
+        // These numbers are also used in StEStructCutBin::getCutBinMode3 (change both)
+        if (yt<1.8) {                        // soft
+            return 0;
+        } else if ((1.8<yt) && (yt<2.2)) {   // neck
+            return 1;
+        } else if (2.2<yt) {                 // hard
+            return 2;
+        } else {                             // everything not in soft, neck or hard.
+            return 3;
+        }
+    } else if (5 == mcutMode) {
         return pc->getdEdxPID(trkPtr);
+    } else {
+        return 0;
     }
 }
 inline void StEStructCutBin::writeCutBinHists() {
@@ -217,6 +252,16 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.10  2008/03/19 22:06:01  prindle
+ * Added doInvariantMass flag.
+ * Added some plots in pairDensityHistograms.
+ * SetZOffset used to only be done when doPairDensity was true.
+ * Moved creating/copying pairDensity histograms to same place as other histograms.
+ * Added cutBinHistMode
+ * mode3 neck was defined as yt1<2.2 && yt2<2.2 (and not soft)
+ *            now is        1.8<yt1<2.2  && 1.8<yt2<2.2
+ * Added gooddzdxy, Merging2 and Crossing2 to pair cuts.
+ *
  * Revision 1.9  2007/11/26 19:55:25  prindle
  * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
  *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
