@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.26 2008/03/19 14:51:04 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.27 2008/03/19 17:22:39 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -155,7 +155,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,9)
+  ClassDef(StMuTrack,10)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -205,6 +205,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.27  2008/03/19 17:22:39  fisyak
+ * Increase Version number
+ *
  * Revision 1.26  2008/03/19 14:51:04  fisyak
  * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
  *
