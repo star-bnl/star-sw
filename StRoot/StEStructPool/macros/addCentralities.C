@@ -22,8 +22,10 @@ void addCentralities(const char* dirName, const char* inFile, const char* outFil
   // Need to determine how many cutBins, parentBins and zBuffers in each file.
   // I think we need the same numbers of cutBins and parentBins, but we can
   // allow a different number of zBuffers
+  // Add copying of Density histograms if they are in the file.
     int nZBins, nzBin[20], ozBin[20], nTotZBins = 0;
     int nCuts, nCutBins;
+    int nDens, nDenBins;
     int nParents, nParentBins;
     for (int jf=0;jf<numFiles;jf++) {
         TString fileName(dirName); fileName += "/"; fileName += inFile; fileName += nFile[jf]; fileName += ".root";
@@ -53,12 +55,21 @@ cout << "Input file " << fileName.Data() << endl;
         }
         nCuts--;
 
+        nDens = 0;
+        name = "SibppTPCAvgTSep_cutBin_"; name += nDens; name += "_zBuf_0";
+        while (gDirectory->Get(name.Data())) {
+            name ="SibppTPCAvgTSep_cutBin_"; name += nDens; name += "_zBuf_0";
+            nDens++;
+        }
+        nDens--;
+
         nzBin[jf]  = nZBins;
         ozBin[jf]  = nTotZBins;
         nTotZBins += nZBins;
         if (0 == jf) {
             nParentBins = nParents;
             nCutBins = nCuts;
+            nDenBins = nDens;
         } else {
             if (nParents != nParentBins) {
                 cout<<"Error in ParentBins. First file had "<< nParentBins << " while file " << jf << " has " << nParents << endl;
@@ -66,6 +77,10 @@ cout << "Input file " << fileName.Data() << endl;
             }
             if (nCuts != nCutBins) {
                 cout<<"Error in CutBins. First file had "<< nCutBins << " while file " << jf << " has " << nCuts << endl;
+                return;
+            }
+            if (nDens != nDenBins) {
+                cout<<"Error in DensityBins. First file had "<< nDenBins << " while file " << jf << " has " << nDens << endl;
                 return;
             }
         }
@@ -78,6 +93,7 @@ cout << "Input file " << fileName.Data() << endl;
     TH1D *mHmix;
     TH1D *mHcb;
     TH1D *mHptAll;
+    TH2D *tmp2;
 
     // Hack: Should do memory allocation, but since these are only arrays of pointers
     // I will just declare them to be bigger than I need.
@@ -101,7 +117,7 @@ cout << "Input file " << fileName.Data() << endl;
     TH1D *mHEtaP[20][100];
     TH1D *mHEtaM[20][100];
 
-    if (nCutBins > 100) {
+    if (nCutBins > 40) {
         cout << "Oops... I declared number of Cut bins as less than 40. You have " << nCutBins << endl;
         return;
     }
@@ -136,6 +152,34 @@ cout << "Input file " << fileName.Data() << endl;
     TH1D *mHQinv[40][100][8];
     TH1D *mHNQinv[40][100][8];
 
+    // Density histograms. TPC separation
+    if (nDenBins > 40) {
+        cout << "Oops... I declared number of Density bins as less than 40. You have " << nDenBins << endl;
+        return;
+    }
+    TH1D *mHTPCAvgTSep[40][100][8];
+    TH1D *mHTPCAvgZSep[40][100][8];
+    TH1D *mHTPCEntTSep[40][100][8];
+    TH1D *mHTPCEntZSep[40][100][8];
+    TH1D *mHTPCMidTSep[40][100][8];
+    TH1D *mHTPCMidZSep[40][100][8];
+    TH1D *mHTPCExitTSep[40][100][8];
+    TH1D *mHTPCExitZSep[40][100][8];
+
+    TH1D *mHTPCMidTdptP[40][100][8];
+    TH1D *mHTPCMidTdptN[40][100][8];
+    TH1D *mHTPCMidZdptP[40][100][8];
+    TH1D *mHTPCMidZdptN[40][100][8];
+
+    TH2D *mHTPCAvgTZ[40][100][8];
+    TH2D *mHTPCEntTZ[40][100][8];
+    TH2D *mHTPCMidTZ[40][100][8];
+    TH2D *mHTPCMidTZC[40][100][8];
+    TH2D *mHTPCMidTZNC[40][100][8];
+    TH2D *mHTPCExitTZ[40][100][8];
+    TH2D *mHTPCEntTdpt[40][100][8];
+    TH2D *mHTPCMidTdpt[40][100][8];
+    TH2D *mHTPCExitTdpt[40][100][8];
 
     TString fileName(dirName); fileName += "/"; fileName += outFile; fileName += ".root";
     TFile *out = new TFile(fileName.Data(),"RECREATE");
@@ -485,6 +529,186 @@ cout << "Loop over main histograms:  zBin = " << iz << endl;
                 }
             }
         }
+
+        // Density histograms are per cutbin for most cutbinning modes.
+        char *type[] = {"Sibpp", "Sibpm", "Sibmp", "Sibmm", "Mixpp", "Mixpm", "Mixmp", "Mixmm"};
+
+
+        for (int iz=0;iz<nzBin[jf];iz++) {
+cout << "Loop over density histograms:  zBin = " << iz << endl;
+            for (int ic=0;ic<nDenBins;ic++) {
+                for (int it=0;it<8;it++) {
+                    in->cd();
+                    histName = type[it]; histName += "TPCAvgTSep_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCAvgTSep[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCAvgTSep_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCAvgTSep[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCAvgZSep_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCAvgZSep[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCAvgZSep_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCAvgZSep[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCEntTSep_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCEntTSep[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCEntTSep_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCEntTSep[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCEntZSep_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCEntZSep[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCEntZSep_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCEntZSep[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidTSep_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidTSep[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCMidTSep_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidTSep[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidZSep_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidZSep[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCMidZSep_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidZSep[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCExitTSep_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCExitTSep[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCExitTSep_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCExitTSep[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCExitZSep_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCExitZSep[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCExitZSep_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCExitZSep[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidTdptP_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidTdptP[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCMidTdptP_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidTdptP[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidTdptN_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidTdptN[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCMidTdptN_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidTdptN[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidZdptP_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidZdptP[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCMidZdptP_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidZdptP[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidZdptN_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp = (TH1D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidZdptN[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                    outName = type[it];  outName += "TPCMidZdptN_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidZdptN[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCAvgTZ_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCAvgTZ[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCAvgTZ_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCAvgTZ[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCEntTZ_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCEntTZ[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCEntTZ_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCEntTZ[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidTZ_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidTZ[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCMidTZ_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidTZ[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidTZC_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidTZC[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCMidTZC_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidTZC[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidTZNC_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidTZNC[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCMidTZNC_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidTZNC[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCExitTZ_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCExitTZ[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCExitTZ_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCExitTZ[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCEntTdpt_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCEntTdpt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCEntTdpt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCEntTdpt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCMidTdpt_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCMidTdpt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCMidTdpt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCMidTdpt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+
+                    in->cd();
+                    histName = type[it]; histName += "TPCExitTdpt_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    tmp2 = (TH2D *) gDirectory->Get(histName.Data());
+                    out->cd();
+                    mHTPCExitTdpt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                    outName = type[it];  outName += "TPCExitTdpt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                    mHTPCExitTdpt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                }
+            }
+        }
 cout << "Closing input file " << jf << endl;
 // Close seems to take an awfully long time. Try leaving file hanging and hope system cleans up quickly.
 //        in->Close();
@@ -544,6 +768,34 @@ cout << "Closing input file " << jf << endl;
 
                 mHQinv[ic][iz][it]->Write();
                 mHNQinv[ic][iz][it]->Write();
+            }
+        }
+
+        for (int ic=0;ic<nDenBins;ic++) {
+            for (int it=0;it<8;it++) {
+                mHTPCAvgTSep[ic][iz][it]->Write();
+                mHTPCAvgZSep[ic][iz][it]->Write();
+                mHTPCEntTSep[ic][iz][it]->Write();
+                mHTPCEntZSep[ic][iz][it]->Write();
+                mHTPCMidTSep[ic][iz][it]->Write();
+                mHTPCMidZSep[ic][iz][it]->Write();
+                mHTPCExitTSep[ic][iz][it]->Write();
+                mHTPCExitZSep[ic][iz][it]->Write();
+
+                mHTPCMidTdptP[ic][iz][it]->Write();
+                mHTPCMidTdptN[ic][iz][it]->Write();
+                mHTPCMidZdptP[ic][iz][it]->Write();
+                mHTPCMidZdptN[ic][iz][it]->Write();
+
+                mHTPCAvgTZ[ic][iz][it]->Write();
+                mHTPCEntTZ[ic][iz][it]->Write();
+                mHTPCMidTZ[ic][iz][it]->Write();
+                mHTPCMidTZC[ic][iz][it]->Write();
+                mHTPCMidTZNC[ic][iz][it]->Write();
+                mHTPCExitTZ[ic][iz][it]->Write();
+                mHTPCEntTdpt[ic][iz][it]->Write();
+                mHTPCMidTdpt[ic][iz][it]->Write();
+                mHTPCExitTdpt[ic][iz][it]->Write();
             }
         }
     }

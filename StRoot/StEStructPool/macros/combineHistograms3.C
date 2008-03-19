@@ -48,6 +48,10 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
             tf        = new TFile(inFileName);
             tf->cd();
             ehelp     = new StEStructSupport(tf,0);
+            ehelp->msilent            = true;
+            ehelp->mapplyDEtaFix      = false;
+            ehelp->mPairNormalization = false;
+            ehelp->mIdenticalPair     = true;
             int subtract = 1;
             ptdedpC   = (TH2F**) ehelp->buildPtCommon("DEtaDPhi",2,subtract);
             ptetaetaC = (TH2F**) ehelp->buildPtCommon("EtaEta",2,subtract);
