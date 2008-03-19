@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.10 2007/11/26 19:55:24 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.11 2008/03/19 22:06:01 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -69,7 +69,7 @@ void StEStructCutBin::setMode(int mode){
   case 3:
     {
       mnumBins=16;
-      mnumParentBins=1;
+      mnumParentBins=4;
       strcpy(mcutModeName," yt_sum, yt_delta, same-side, away-side Cut Binning, 16 bins");
       initPtBinMode3();
       break;
@@ -119,6 +119,12 @@ void StEStructCutBin::setMode(int mode){
   if (!silent) cout<<"  Cut Bin Mode = "<<printCutBinName()<<endl;
 }
 int StEStructCutBin::getMode() {
+    return mcutMode;
+}
+void StEStructCutBin::setCutBinHistMode(int mode) {
+    mcutBinHistMode = mode;
+}
+int StEStructCutBin::getCutBinHistMode() {
     return mcutMode;
 }
 //------------------------- Mode=0 ----------------------------------------
@@ -251,9 +257,13 @@ int StEStructCutBin::getCutBinMode3(StEStructPairCuts* pc){
   float yt1=pc->Track1()->Yt();
   float yt2=pc->Track2()->Yt();
 
+  // These numbers are also used in StEStructCutBin::getParentBin (change both)
   if(yt1<1.8 && yt2<1.8){
     iyt=0;
-  } else if(yt1<2.2 && yt2<2.2){
+//  } else if(yt1<2.2 && yt2<2.2){
+// This was getting the entire yt square below 2.2 minus the soft.
+// I thought we only wanted the case with both tracks below 2.2 AND ABOVE 1.8
+  } else if( ((1.8<yt1) && (yt1<2.2)) && ((1.8<yt2) && (yt2<2.2))) {
     iyt=1;
   } else if(yt1>=2.2 && yt2>=2.2){
     iyt=2;
@@ -445,6 +455,10 @@ int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc, int pairCase) {
     }
     int iBin = mode[it1][it2];
 
+    if (!mcutBinHistMode) {
+        return iBin;
+    }
+
     // Might want to make invariant mass cuts.
     double e, e1, e2, p1, p2, p[3], m, m1, m2;
     p1   = pc->Track1()->Ptot();
@@ -629,37 +643,41 @@ void StEStructCutBin::initPtBinMode5(){
   mPtBinMax[3] =    1.5;
 
 
-    TString hname;
-    char *types[] = {"Sibpp", "Sibpm", "Sibmp", "Sibmm",
-                     "Mixpp", "Mixpm", "Mixmp", "Mixmm"};
-    char *bases[] = {"piAll", "pipi", "piK", "pip",
-                     "KAll",  "KK",   "Kp",  "pAll",
-                     "pp",    "OO",   "All"};
-    for (int pairCase=0;pairCase<8;pairCase++) {
-        mHCutBinHists[pairCase] = new TH1D*[11];
-        for (int it=0;it<11;it++) {
-            hname  = "Mass";
-            hname += bases[it];
-            hname += types[pairCase];
-            mHCutBinHists[pairCase][it] = new TH1D(hname.Data(),hname.Data(),500,0.0,3.0);
-//            cout << "Creating histogram for " << hname.Data() << endl;
+    if (mcutBinHistMode) {
+        TString hname;
+        char *types[] = {"Sibpp", "Sibpm", "Sibmp", "Sibmm",
+                         "Mixpp", "Mixpm", "Mixmp", "Mixmm"};
+        char *bases[] = {"piAll", "pipi", "piK", "pip",
+                         "KAll",  "KK",   "Kp",  "pAll",
+                         "pp",    "OO",   "All"};
+        for (int pairCase=0;pairCase<8;pairCase++) {
+            mHCutBinHists[pairCase] = new TH1D*[11];
+            for (int it=0;it<11;it++) {
+                hname  = "Mass";
+                hname += bases[it];
+                hname += types[pairCase];
+                mHCutBinHists[pairCase][it] = new TH1D(hname.Data(),hname.Data(),500,0.0,3.0);
+//                cout << "Creating histogram for " << hname.Data() << endl;
+            }
         }
     }
 }
 void StEStructCutBin::writeCutBinHists5() {
-    for (int pairCase=0;pairCase<8;pairCase++) {
-        if (mHCutBinHists[pairCase]) {
-            for (int it=0;it<11;it++) {
-                mHCutBinHists[pairCase][it]->Write();
-//                cout << "Deleting histogram [" << pairCase << "][" << it << "]" << endl;
-                if (mHCutBinHists[pairCase][it]) {
-                    delete mHCutBinHists[pairCase][it];
-                    mHCutBinHists[pairCase][it] = 0;
+    if (mcutBinHistMode) {
+        for (int pairCase=0;pairCase<8;pairCase++) {
+            if (mHCutBinHists[pairCase]) {
+                for (int it=0;it<11;it++) {
+                    mHCutBinHists[pairCase][it]->Write();
+//                    cout << "Deleting histogram [" << pairCase << "][" << it << "]" << endl;
+                    if (mHCutBinHists[pairCase][it]) {
+                        delete mHCutBinHists[pairCase][it];
+                        mHCutBinHists[pairCase][it] = 0;
+                    }
                 }
+//                cout << "Deleting array [" << pairCase << "]" << endl;
+                delete [] mHCutBinHists[pairCase];
+                mHCutBinHists[pairCase] = 0;
             }
-//            cout << "Deleting array [" << pairCase << "]" << endl;
-            delete [] mHCutBinHists[pairCase];
-            mHCutBinHists[pairCase] = 0;
         }
     }
 }
@@ -725,6 +743,16 @@ void StEStructCutBin::initPtBinMode7(){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.11  2008/03/19 22:06:01  prindle
+ * Added doInvariantMass flag.
+ * Added some plots in pairDensityHistograms.
+ * SetZOffset used to only be done when doPairDensity was true.
+ * Moved creating/copying pairDensity histograms to same place as other histograms.
+ * Added cutBinHistMode
+ * mode3 neck was defined as yt1<2.2 && yt2<2.2 (and not soft)
+ *            now is        1.8<yt1<2.2  && 1.8<yt2<2.2
+ * Added gooddzdxy, Merging2 and Crossing2 to pair cuts.
+ *
  * Revision 1.10  2007/11/26 19:55:24  prindle
  * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
  *                     Change way \hat{p_t} is calculated for parent distributions in pid case.

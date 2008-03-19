@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.12 2007/11/26 19:55:23 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.13 2008/03/19 22:06:00 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -30,6 +30,7 @@
 
 
 #include "TROOT.h"
+#include "TRandom2.h"
 #include "StEStructPool/AnalysisMaker/StEStructAnalysis.h"
 #include "StEStructPool/AnalysisMaker/StEStructQAHists.h"
 #include "StEStructPool/EventMaker/StEStructCentrality.h"
@@ -145,45 +146,49 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
   // TPC Separation
   TPCSepBins *mTPCAvgTSep[8];  //1D
-  TPCSepBins *mTPCAvgZSep[8];  
-  TPCSepBins *mTPCEntTSep[8];  
-  TPCSepBins *mTPCEntZSep[8];  
-  TPCSepBins *mTPCMidTSep[8];  
-  TPCSepBins *mTPCMidZSep[8];  
-  TPCSepBins *mTPCExitTSep[8];  
-  TPCSepBins *mTPCExitZSep[8];  
+  TPCSepBins *mTPCAvgZSep[8];
+  TPCSepBins *mTPCEntTSep[8];
+  TPCSepBins *mTPCEntZSep[8];
+  TPCSepBins *mTPCMidTSep[8];
+  TPCSepBins *mTPCMidZSep[8];
+  TPCSepBins *mTPCExitTSep[8];
+  TPCSepBins *mTPCExitZSep[8];
 
   TPCSepBins *mTPCMidTdptP[8]; //! needed to differentiate by sign of deltaPt   
   TPCSepBins *mTPCMidTdptN[8]; //! to evaluate pair crossing cut   
-  TPCSepBins *mTPCMidZdptP[8];  
-  TPCSepBins *mTPCMidZdptN[8];  
+  TPCSepBins *mTPCMidZdptP[8];
+  TPCSepBins *mTPCMidZdptN[8];
 
-  TH1D **  mHTPCAvgTSep[8]; 
-  TH1D **  mHTPCAvgZSep[8];  
-  TH1D **  mHTPCEntTSep[8]; 
-  TH1D **  mHTPCEntZSep[8];  
-  TH1D **  mHTPCMidTSep[8]; 
-  TH1D **  mHTPCMidZSep[8];  
-  TH1D **  mHTPCExitTSep[8]; 
-  TH1D **  mHTPCExitZSep[8];  
+  TH1D **  mHTPCAvgTSep[8];
+  TH1D **  mHTPCAvgZSep[8];
+  TH1D **  mHTPCEntTSep[8];
+  TH1D **  mHTPCEntZSep[8];
+  TH1D **  mHTPCMidTSep[8];
+  TH1D **  mHTPCMidZSep[8];
+  TH1D **  mHTPCExitTSep[8];
+  TH1D **  mHTPCExitZSep[8];
 
-  TH1D **  mHTPCMidTdptP[8];  
-  TH1D **  mHTPCMidTdptN[8];  
-  TH1D **  mHTPCMidZdptP[8];  
+  TH1D **  mHTPCMidTdptP[8];
+  TH1D **  mHTPCMidTdptN[8];
+  TH1D **  mHTPCMidZdptP[8];
   TH1D **  mHTPCMidZdptN[8];
 
   TPCSepBins **mTPCAvgTZ[8];  //2D
-  TPCSepBins **mTPCEntTZ[8];  
-  TPCSepBins **mTPCMidTZ[8];  
-  TPCSepBins **mTPCExitTZ[8];  
+  TPCSepBins **mTPCEntTZ[8];
+  TPCSepBins **mTPCMidTZ[8];
+  TPCSepBins **mTPCMidTZC[8];
+  TPCSepBins **mTPCMidTZNC[8];
+  TPCSepBins **mTPCExitTZ[8];
   dptBins **mTPCEntTdpt[8];  // T vs delta-Pt; for joint hists, use bin type of y axis
   dptBins **mTPCMidTdpt[8];
-  dptBins **mTPCExitTdpt[8];   
+  dptBins **mTPCExitTdpt[8];
 
-  TH2D **  mHTPCAvgTZ[8];  
-  TH2D **  mHTPCEntTZ[8];  
-  TH2D **  mHTPCMidTZ[8];  
-  TH2D **  mHTPCExitTZ[8];  
+  TH2D **  mHTPCAvgTZ[8];
+  TH2D **  mHTPCEntTZ[8];
+  TH2D **  mHTPCMidTZ[8];
+  TH2D **  mHTPCMidTZC[8];
+  TH2D **  mHTPCMidTZNC[8];
+  TH2D **  mHTPCExitTZ[8];
   TH2D **  mHTPCEntTdpt[8];
   TH2D **  mHTPCMidTdpt[8];
   TH2D **  mHTPCExitTdpt[8];
@@ -209,6 +214,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   bool mdoPairCutHistograms; //!
   bool mdoPairDensityHistograms; 
   bool mskipEtaDeltaWeight; //!
+  bool mdoInvariantMassHistograms; //!
   bool mInit;  //! found need when overridding this class
   bool mDeleted;//! "     " ...
   bool mHistosWritten;//! "     " ...
@@ -230,6 +236,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
   int mZBufferCutBinning;  // If true each z-buffer gets its own but bins.
   //  int             mbuffCounter[_MAX_ZVBINS_];
+  TRandom2 mr2;
 
   //-> (pre) histograms & histograms for analysis.
   // All are arrays of 8 for 8 charged sign and combinatoric types;
@@ -352,6 +359,16 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.13  2008/03/19 22:06:00  prindle
+ * Added doInvariantMass flag.
+ * Added some plots in pairDensityHistograms.
+ * SetZOffset used to only be done when doPairDensity was true.
+ * Moved creating/copying pairDensity histograms to same place as other histograms.
+ * Added cutBinHistMode
+ * mode3 neck was defined as yt1<2.2 && yt2<2.2 (and not soft)
+ *            now is        1.8<yt1<2.2  && 1.8<yt2<2.2
+ * Added gooddzdxy, Merging2 and Crossing2 to pair cuts.
+ *
  * Revision 1.12  2007/11/26 19:55:23  prindle
  * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
  *                     Change way \hat{p_t} is calculated for parent distributions in pid case.

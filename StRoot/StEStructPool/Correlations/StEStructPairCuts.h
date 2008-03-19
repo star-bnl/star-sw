@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.13 2007/11/26 19:55:25 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.14 2008/03/19 22:06:01 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -26,6 +26,7 @@ protected:
 
   CutName mdphiName;
   CutName mdetaName;
+  CutName mgooddzdxyName;
   CutName mdmtName;
   CutName mqInvName;
   CutName mEntSepName;
@@ -36,7 +37,9 @@ protected:
   CutName mHBTName;
   CutName mCoulombName;
   CutName mMergingName;
+  CutName mMergingName2;
   CutName mCrossingName;
+  CutName mCrossingName2;
   CutName mpionMomentumName;
   CutName mKaonMomentumName;
   CutName mprotonMomentumName;
@@ -54,6 +57,7 @@ protected:
 
   float mdphi[2];
   float mdeta[2];
+  float mgooddzdxy[2];
   float mdmt[2];
   float mqInv[2];
   float mEntSep[2];
@@ -64,7 +68,9 @@ protected:
   float mHBT[4];
   float mCoulomb[4];
   float mMerging[2];
+  float mMerging2[2];
   float mCrossing[2];
+  float mCrossing2[2];
   float mdEdxMomentumCut[4][2];
   float mpionOtherMass[2];
   float mpionpionMass[2];
@@ -77,27 +83,27 @@ protected:
   float mprotonprotonMass[2];
   float mOtherOtherMass[2];
 
-  bool  mdeltaPhiCut,    mdeltaEtaCut,    mdeltaMtCut;
+  bool  mdeltaPhiCut,    mdeltaEtaCut,    mGooddeltaZdeltaXYCut, mdeltaMtCut;
   bool  mqInvCut,        mEntSepCut,      mExitSepCut,   mQualityCut;
   bool  mMidTpcSepLSCut, mMidTpcSepUSCut;
-  bool  mHBTCut,         mCoulombCut,     mMergingCut,   mCrossingCut;
+  bool  mHBTCut,         mCoulombCut,     mMergingCut,   mCrossingCut,     mMergingCut2,   mCrossingCut2;
   bool  mpionMomentumCut, mKaonMomentumCut, mprotonMomentumCut;
   bool  mpionOtherMassCut, mpionpionMassCut, mpionKaonMassCut, mpionprotonMassCut;
   bool  mKaonOtherMassCut, mKaonKaonMassCut, mKaonprotonMassCut, mprotonOtherMassCut;
   bool  mprotonprotonMassCut, mOtherOtherMassCut;
 
-  int  mdphiCounter[4], mdetaCounter[4], mdmtCounter[4];
+  int  mdphiCounter[4], mdetaCounter[4], mgooddzdxyCounter[4], mdmtCounter[4];
   int  mqInvCounter[4],   mEntSepCounter[4],  mExitSepCounter[4],  mQualityCounter[4];
   int  msplitLSCounter[4],  msplitUSCounter[4];
-  int  mHBTCounter[4],  mCoulombCounter[4], mMergingCounter[4], mCrossingCounter[4];  
+  int  mHBTCounter[4],  mCoulombCounter[4], mMergingCounter[4], mCrossingCounter[4], mMergingCounter2[4], mCrossingCounter2[4];
   int  mpionMomentumCounter[4], mKaonMomentumCounter[4], mprotonMomentumCounter[4];
   int  mpionOtherMassCounter[4], mpionpionMassCounter[4], mpionKaonMassCounter[4], mpionprotonMassCounter[4];
   int  mKaonOtherMassCounter[4], mKaonKaonMassCounter[4], mKaonprotonMassCounter[4], mprotonOtherMassCounter[4];
   int  mprotonprotonMassCounter[4], mOtherOtherMassCounter[4];
 
   // if data stored for subsequent use.... e.g. next cut, histogramming
-  float  mdeltaPhi, mdeltaEta, mdeltaMt;
-  float  mqInvarient,  mEntranceSeparation, mExitSeparation, mQualityVal;
+  float  mdeltaPhi, mdeltaEta, mdeltaZ, mdeltaXY, mdeltaMt;
+  float  mqInvariant,  mEntranceSeparation, mExitSeparation, mQualityVal;
   float  mMidTpcSeparationLS, mMidTpcSeparationUS;
   float  mBField;                   // magnetic field (kilogauss as MuDst)
 
@@ -201,8 +207,8 @@ const  StEStructTrack*      Track2() const;
        
        /* because of the expense 1st check wether we need to do further */
 
-       int  goodDeltaPhi();
-       int  goodDeltaEta();
+       int  goodDeltaXY();
+       int  goodDeltaZ();
        int  goodDeltaMt();
        
        int  cutDeltaPhi();
@@ -219,6 +225,8 @@ const  StEStructTrack*      Track2() const;
        int  cutCoulomb();
        int  cutMerging();
        int  cutCrossing();
+       int  cutMerging2();
+       int  cutCrossing2();
        int  cutMass();
        
        // calls above set but fills histogramming variables
@@ -336,16 +344,24 @@ inline bool StEStructPairCuts::sameSide() {
     return false;
 }
 
-inline int StEStructPairCuts::goodDeltaPhi(){
-  if ( mdeltaPhiCut &&
-       ( (mdeltaPhi=fabs(DeltaPhi())) < mdphi[1])) return 0;
-  return 1;
+// Both goodDeltaPhi and goodDeltaEta were looking for their deltas to
+// be smaller than the cut value. To speed up the pairCuts we want
+// to quickly identify pairs that will not be cut. Also, cuts are actually done
+// on difference in Z and XY directions. If either of these are too big we don't
+// want to bother trying rest of pair cuts that we know won't reject pair.
+inline int StEStructPairCuts::goodDeltaXY() {
+    // I suspect the fabs is unecessary. Not positive.
+    if (mGooddeltaZdeltaXYCut && ((mdeltaXY=fabs(MidTpcXYSeparation())) > mgooddzdxy[1])) {
+        return 1;
+    }
+    return 0;
 }
 
-inline int StEStructPairCuts::goodDeltaEta(){
-  if(mdeltaEtaCut &&
-     ( (mdeltaEta=fabs(DeltaEta())) <mdeta[1])) return 0;
-  return 1;
+inline int StEStructPairCuts::goodDeltaZ() {
+    if (mGooddeltaZdeltaXYCut && ((mdeltaZ=fabs(MidTpcZSeparation())) > mgooddzdxy[0])) {
+        return 1;
+    }
+    return 0;
 }
 
 inline int StEStructPairCuts::goodDeltaMt(){
@@ -381,7 +397,7 @@ inline int StEStructPairCuts::cutqInvORNominalEntranceSep(){
   /* small qInv and entrance cut */
 
   if( mqInvCut && mEntSepCut &&
-      (  (mqInvarient=qInv()) <mqInv[0]  &&
+      (  (mqInvariant=qInv()) <mqInv[0]  &&
 	 ((mEntranceSeparation=NominalTpcEntranceSeparation())<mEntSep[0]))
       ) return ++(mqInvCounter[mType]);
   return 0;
@@ -389,8 +405,8 @@ inline int StEStructPairCuts::cutqInvORNominalEntranceSep(){
 
 inline int StEStructPairCuts::cutqInv(){
   if( mqInvCut && 
-      (  (mqInvarient=qInv())<mqInv[0] 
-	 || mqInvarient>mqInv[1] 
+      (  (mqInvariant=qInv())<mqInv[0] 
+	 || mqInvariant>mqInv[1] 
 	 )                  
       ) return ++(mqInvCounter[mType]);
   return 0;
@@ -491,24 +507,75 @@ inline int StEStructPairCuts::cutCrossing(){
     float dpt =  mTrack1->Pt()- mTrack2->Pt();  // signed DeltaPt
     if (mType==1 || mType==3) {   // US pair
       if(mBField>=0) { // pos field
-	if (mTrack1->Charge()>0 && dphi>0)  mretVal = 1;  // + -
-	if (mTrack1->Charge()<0 && dphi<0)  mretVal = 1;  // - + 
+  if (mTrack1->Charge()>0 && dphi>0)  mretVal = 1;  // + -
+  if (mTrack1->Charge()<0 && dphi<0)  mretVal = 1;  // - + 
       } else {              // rev field
-	if (mTrack1->Charge()>0 && dphi<0)  mretVal = 1;  // rev +- : same as -+ above
+  if (mTrack1->Charge()>0 && dphi<0)  mretVal = 1;  // rev +- : same as -+ above
         if (mTrack1->Charge()<0 && dphi>0)  mretVal = 1;  // rev -+ : same as +- above
       } 
     } else {                      // LS pair
       if(mBField>=0) { // pos field
-	if (mTrack1->Charge()>0 && dphi*dpt<0)  mretVal = 1;  // + +
-	if (mTrack1->Charge()<0 && dphi*dpt>0)  mretVal = 1;  // - -
+  if (mTrack1->Charge()>0 && dphi*dpt<0)  mretVal = 1;  // + +
+  if (mTrack1->Charge()<0 && dphi*dpt>0)  mretVal = 1;  // - -
       } else {              // rev field
-	if (mTrack1->Charge()>0 && dphi*dpt>0)  mretVal = 1;  // rev ++ : same as --
+  if (mTrack1->Charge()>0 && dphi*dpt>0)  mretVal = 1;  // rev ++ : same as --
         if (mTrack1->Charge()<0 && dphi*dpt<0)  mretVal = 1;  // rev -- : same as ++
       }
     }
   }
-  if (mretVal==0) return 0;
-  return ++(mCrossingCounter[mType]);
+
+    // This should do what that does. Might be faster? 
+    // Problem is that although signbit is not zero if the bit is set it is not actually
+    // guaranteed to be 1.
+//    mretVal = 0;
+//    if ( MidTpcXYSeparation()<mCrossing[0] && MidTpcZSeparation()<mCrossing[1])  {
+//        int dphi = 1-2*signbit(mTrack1->Phi()-mTrack2->Phi()); // sign of DeltaPhi
+//        int chrg = 1-2*signbit(mBField*mTrack1->Charge());
+//        if (mType==1 || mType==3) {   // US pair
+//            if (chrg == dphi) mretVal = 1;
+//        } else {
+//            int dpt = 1-2*signbit(mTrack1->Pt()- mTrack2->Pt());  // sign of DeltaPt
+//            if (chrg != dpt*dphi) mretVal = 1;
+//        }
+//    }
+    if (mretVal==0) return 0;
+    return ++(mCrossingCounter[mType]);
+}
+
+// This cuts a triangular region extending to mMerging2[0] on the Z separation axis
+// and mMerging2[1] on the XY separation axis.
+inline int StEStructPairCuts::cutMerging2() {
+    if (!mMergingCut2) {
+        return 0;
+    }
+    float y = MidTpcXYSeparation();
+    float x = MidTpcZSeparation();
+    if (y*mMerging2[0]+x*mMerging2[1] < mMerging2[0]*mMerging2[1]) {
+        return ++(mMergingCounter2[mType]);
+    }
+    return 0;
+}
+inline int StEStructPairCuts::cutCrossing2() {
+  // If phi1-phi2 has a different sign at entrance and exit of TPC
+  // the tracks crossed. Discard pair only if within a \delta\eta window.
+
+    if (!mCrossingCut2) {
+        return 0;
+    }
+    if (MidTpcZSeparation() > mCrossing2[0]) {
+        return 0;
+    }
+
+    StThreeVectorF ent1 = mTrack1->NominalTpcEntrancePoint();
+    StThreeVectorF ent2 = mTrack2->NominalTpcEntrancePoint();
+    float sinEnt = (ent1.x()*ent2.y() - ent1.y()*ent2.x());
+    StThreeVectorF exit1 = mTrack1->NominalTpcExitPoint();
+    StThreeVectorF exit2 = mTrack2->NominalTpcExitPoint();
+    float sinExit = (exit1.x()*exit2.y() - exit1.y()*exit2.x());
+    if (sinEnt*sinExit > 0) {
+        return 0;
+    }
+    return ++(mCrossingCounter2[mType]);
 }
 
 inline int StEStructPairCuts::cutMass() {
@@ -724,7 +791,7 @@ inline int StEStructPairCuts::cutDeltaMtH(){
 inline int StEStructPairCuts::cutqInvH(){
   if(!mqInvCut) return 0;
   mretVal=cutqInv();
-  mvalues[mqInvName.idx]=mqInvarient;
+  mvalues[mqInvName.idx]=mqInvariant;
   return mretVal;
 }
 
@@ -814,6 +881,16 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.14  2008/03/19 22:06:01  prindle
+ * Added doInvariantMass flag.
+ * Added some plots in pairDensityHistograms.
+ * SetZOffset used to only be done when doPairDensity was true.
+ * Moved creating/copying pairDensity histograms to same place as other histograms.
+ * Added cutBinHistMode
+ * mode3 neck was defined as yt1<2.2 && yt2<2.2 (and not soft)
+ *            now is        1.8<yt1<2.2  && 1.8<yt2<2.2
+ * Added gooddzdxy, Merging2 and Crossing2 to pair cuts.
+ *
  * Revision 1.13  2007/11/26 19:55:25  prindle
  * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
  *                     Change way \hat{p_t} is calculated for parent distributions in pid case.

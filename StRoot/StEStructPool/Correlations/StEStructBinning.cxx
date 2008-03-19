@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.10 2007/11/26 19:55:23 prindle Exp $
+ * $Id: StEStructBinning.cxx,v 1.11 2008/03/19 22:06:00 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -87,8 +87,8 @@ StEStructBinning::StEStructBinning(){
   nPt = ESTRUCT_PT_BINS-1;
   dPt = (maxPt-minPt)/(float)nPt;
 
-  maxDPt=5.85;//maxPt;
-  minDPt=-5.85;//-maxPt;// 0; //-maxPt;
+  maxDPt=0.2;//maxPt;
+  minDPt=-0.2;//-maxPt;// 0; //-maxPt;
   nDPt= ESTRUCT_DPT_BINS-1;
   dDPt=(maxDPt-minDPt)/(float)nDPt; 
 
@@ -98,10 +98,15 @@ StEStructBinning::StEStructBinning(){
   dSPt=(maxSPt-minSPt)/(float)nSPt;
 
    //--> TPC Separation ranges <--
-  maxTPCSep = 50;  //cm
+  maxTPCSep = 25;  //cm
   minTPCSep = 0;
   nTPCSep = ESTRUCT_TPCSEP_BINS - 1;
   dTPCSep = (maxTPCSep-minTPCSep)/(float)nTPCSep;
+
+  maxTPCSepPhi =  1.0;  //radians (~57 degrees)
+  minTPCSepPhi = -1.0;
+  nTPCSepPhi = ESTRUCT_TPCSEPPHI_BINS - 1;
+  dTPCSepPhi = (maxTPCSepPhi-minTPCSepPhi)/(float)nTPCSepPhi;
 
    //--> dEdx ranges <--
   maxdEdx = 15.0e-6;  //ionization units?
@@ -182,6 +187,16 @@ void StEStructBinning::calculateDEtaWeights() {
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.11  2008/03/19 22:06:00  prindle
+ * Added doInvariantMass flag.
+ * Added some plots in pairDensityHistograms.
+ * SetZOffset used to only be done when doPairDensity was true.
+ * Moved creating/copying pairDensity histograms to same place as other histograms.
+ * Added cutBinHistMode
+ * mode3 neck was defined as yt1<2.2 && yt2<2.2 (and not soft)
+ *            now is        1.8<yt1<2.2  && 1.8<yt2<2.2
+ * Added gooddzdxy, Merging2 and Crossing2 to pair cuts.
+ *
  * Revision 1.10  2007/11/26 19:55:23  prindle
  * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
  *                     Change way \hat{p_t} is calculated for parent distributions in pid case.

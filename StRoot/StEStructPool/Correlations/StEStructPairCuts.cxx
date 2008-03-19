@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.8 2007/11/26 19:55:25 prindle Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.9 2008/03/19 22:06:01 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -34,6 +34,7 @@ void StEStructPairCuts::initCuts(){
 
     mdphi[0]=mdphi[1]=0;
     mdeta[0]=mdeta[1]=0;
+    mgooddzdxy[0]=mgooddzdxy[1]=0;
     mdmt[0]=mdmt[1]=0;
     mqInv[0]=mqInv[1]=0;
     mEntSep[0]=mEntSep[1]=0;
@@ -44,7 +45,9 @@ void StEStructPairCuts::initCuts(){
     mHBT[0]=mHBT[1]=mHBT[2]=mHBT[3]=0;
     mCoulomb[0]=mCoulomb[1]=mCoulomb[2]=mCoulomb[3]=0;
     mMerging[0]=mMerging[1]=0;
+    mMerging2[0]=mMerging2[1]=0;
     mCrossing[0]=mCrossing[1]=0;
+    mCrossing2[0]=mCrossing2[1]=0;
 
     // Would be nice to have some way to change these without recompiling.
     mdEdxMomentumCut[0][0] =   0.0;
@@ -56,8 +59,8 @@ void StEStructPairCuts::initCuts(){
     mdEdxMomentumCut[3][0] =   0.2;  // p
     mdEdxMomentumCut[3][1] =   1.5;
     
-    mdeltaPhiCut=mdeltaEtaCut=mdeltaMtCut=mqInvCut=mEntSepCut=mExitSepCut=mQualityCut=mMidTpcSepLSCut=mMidTpcSepUSCut=false;
-    mHBTCut=mCoulombCut=mMergingCut=mCrossingCut = false;
+    mdeltaPhiCut=mdeltaEtaCut=mGooddeltaZdeltaXYCut=mdeltaMtCut=mqInvCut=mEntSepCut=mExitSepCut=mQualityCut=mMidTpcSepLSCut=mMidTpcSepUSCut=false;
+    mHBTCut=mCoulombCut=mMergingCut=mCrossingCut=mMergingCut2=mCrossingCut2 = false;
     mpionMomentumCut=mKaonMomentumCut=mprotonMomentumCut = false;
     mpionOtherMassCut=mpionpionMassCut=mpionKaonMassCut=mpionprotonMassCut = false;
     mKaonOtherMassCut=mKaonKaonMassCut=mKaonprotonMassCut=mprotonOtherMassCut = false;
@@ -65,15 +68,15 @@ void StEStructPairCuts::initCuts(){
 
 
     for(int i=0;i<4;i++) {
-        mdphiCounter[i]=mdetaCounter[i]=mdmtCounter[i]=mqInvCounter[i]=mEntSepCounter[i]=0;
+        mdphiCounter[i]=mdetaCounter[i]=mgooddzdxyCounter[i]=mdmtCounter[i]=mqInvCounter[i]=mEntSepCounter[i]=0;
         mExitSepCounter[i]=mQualityCounter[i]=msplitLSCounter[i]=msplitUSCounter[i]=0;
-        mHBTCounter[i]=mCoulombCounter[i]=mMergingCounter[i]=mCrossingCounter[i]=0;
+        mHBTCounter[i]=mCoulombCounter[i]=mMergingCounter[i]=mCrossingCounter[i]=mMergingCounter2[i]=mCrossingCounter2[i]=0;
         mpionMomentumCounter[i]=mKaonMomentumCounter[i]=mprotonMomentumCounter[i]=0;
         mpionOtherMassCounter[i]=mpionpionMassCounter[i]=mpionKaonMassCounter[i]=mpionprotonMassCounter[i]=0;
         mKaonOtherMassCounter[i]=mKaonKaonMassCounter[i]=mKaonprotonMassCounter[i]=mprotonOtherMassCounter[i]=0;
         mprotonprotonMassCounter[i]=mOtherOtherMassCounter[i]=0;
     }
-    mdeltaPhi=mdeltaEta=mdeltaMt=mqInvarient= mEntranceSeparation=mExitSeparation=mQualityVal=mMidTpcSeparationLS=mMidTpcSeparationUS=0;
+    mdeltaPhi=mdeltaEta=mdeltaMt=mqInvariant= mEntranceSeparation=mExitSeparation=mQualityVal=mMidTpcSeparationLS=mMidTpcSeparationUS=0;
 
     mapMask0 = 0xFFFFFF00;
     mapMask1 = 0x1FFFFF;
@@ -87,6 +90,7 @@ void StEStructPairCuts::initNames(){
 
   strcpy(mdphiName.name,"DeltaPhi");
   strcpy(mdetaName.name,"DeltaEta");
+  strcpy(mgooddzdxyName.name,"GoodDeltaZDeltaXY");
   strcpy(mdmtName.name,"DeltaMt");
   strcpy(mqInvName.name,"qInv");
   strcpy(mEntSepName.name,"EntranceSep");
@@ -97,7 +101,9 @@ void StEStructPairCuts::initNames(){
   strcpy(mHBTName.name,"HBT");
   strcpy(mCoulombName.name,"Coulomb");
   strcpy(mMergingName.name,"Merging");
+  strcpy(mMergingName2.name,"Merging2");
   strcpy(mCrossingName.name,"Crossing");
+  strcpy(mCrossingName2.name,"Crossing2");
   strcpy(mpionMomentumName.name,"pionMomentumRange");
   strcpy(mKaonMomentumName.name,"KaonMomentumRange");
   strcpy(mprotonMomentumName.name,"protonMomentumRange");
@@ -130,6 +136,13 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
     mdeta[0]=atof(vals[0]); mdeta[1]=atof(vals[1]);
     mdetaName.idx=createCutHists(name,mdeta);
     mdeltaEtaCut=true;
+    return true;
+  }
+
+  if(!strcmp(name,mgooddzdxyName.name)){
+    mgooddzdxy[0]=atof(vals[0]); mgooddzdxy[1]=atof(vals[1]);
+    mgooddzdxyName.idx=createCutHists(name,mgooddzdxy);
+    mGooddeltaZdeltaXYCut=true;
     return true;
   }
 
@@ -208,11 +221,27 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
     return true;
   }
 
+  if(!strcmp(name,mMergingName2.name)){
+    mMerging2[0]=atof(vals[0]); mMerging2[1]=atof(vals[1]);
+    //mMergingName2.idx=createCutHists(name,mMerging2,2);  // not making cut histograms
+    mMergingCut2=true;
+    cout << " Loading Merging2 cut with range of cuts = "<<mMerging2[0]<<","<<mMerging2[1]<<endl;
+    return true;
+  }
+
   if(!strcmp(name,mCrossingName.name)){
     mCrossing[0]=atof(vals[0]); mCrossing[1]=atof(vals[1]);
     //mCrossingName.idx=createCutHists(name,mCrossing,2);  // not making cut histograms
     mCrossingCut=true;
     cout << " Loading Crossing cut with range of cuts = "<<mCrossing[0]<<","<<mCrossing[1]<<endl;
+    return true;
+  }
+
+  if(!strcmp(name,mCrossingName2.name)){
+    mCrossing2[0]=atof(vals[0]); mCrossing2[1]=atof(vals[1]);
+    //mCrossingName2.idx=createCutHists(name,mCrossing2,2);  // not making cut histograms
+    mCrossingCut2=true;
+    cout << " Loading Crossing2 cut with range of cuts = "<<mCrossing2[0]<<","<<mCrossing2[1]<<endl;
     return true;
   }
 
@@ -317,6 +346,11 @@ void StEStructPairCuts::printCutStats(ostream& ofs){
     printCutCounts(ofs,cutTypes[0],mdetaCounter[0],mdetaCounter[1]);
     printCutCounts(ofs,cutTypes[1],mdetaCounter[2],mdetaCounter[3]);
   }
+  if(mGooddeltaZdeltaXYCut){
+     ofs<<mgooddzdxyName.name<<","<<mgooddzdxy[0]<<","<<mgooddzdxy[1]<<"\t\t\t"<<" # pair deta cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mgooddzdxyCounter[0],mgooddzdxyCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mgooddzdxyCounter[2],mgooddzdxyCounter[3]);
+  }
 
   if(mdeltaMtCut){
      ofs<<mdmtName.name<<","<<mdmt[0]<<","<<mdmt[1]<<"\t\t\t"<<" # pair dmt cut"<<endl;
@@ -375,10 +409,20 @@ void StEStructPairCuts::printCutStats(ostream& ofs){
     printCutCounts(ofs,cutTypes[0],mMergingCounter[0],mMergingCounter[1]);
     printCutCounts(ofs,cutTypes[1],mMergingCounter[2],mMergingCounter[3]);
   }
+  if(mMergingCut2){
+    ofs<<mMergingName2.name<<","<<mMerging2[0]<<","<<mMerging2[1]<<"\t\t\t"<<" # pair Merging2 cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mMergingCounter2[0],mMergingCounter2[1]);
+    printCutCounts(ofs,cutTypes[1],mMergingCounter2[2],mMergingCounter2[3]);
+  }
   if(mCrossingCut){
     ofs<<mCrossingName.name<<","<<mCrossing[0]<<","<<mCrossing[1]<<"\t\t"<<" # pair Crossing cut"<<endl;
     printCutCounts(ofs,cutTypes[0],mCrossingCounter[0],mCrossingCounter[1]);
     printCutCounts(ofs,cutTypes[1],mCrossingCounter[2],mCrossingCounter[3]);
+  }
+  if(mCrossingCut2){
+    ofs<<mCrossingName2.name<<","<<mCrossing2[0]<<","<<mCrossing2[1]<<"\t\t"<<" # pair Crossing2 cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mCrossingCounter2[0],mCrossingCounter2[1]);
+    printCutCounts(ofs,cutTypes[1],mCrossingCounter2[2],mCrossingCounter2[3]);
   }
   if(mpionMomentumCut){
     ofs<<mpionMomentumName.name<<","<<mdEdxMomentumCut[1][0]<<","<<mdEdxMomentumCut[1][1]<<"\t\t"<<" # pion momentum range cut"<<endl;
@@ -481,29 +525,41 @@ int StEStructPairCuts::cutPair(){
     }*/
   // *** 
 
-  if( cutMerging() || cutCrossing() || cutCoulomb() || cutHBT() ) return 1;
-
-  if(!mdeltaEta) mdeltaEta=DeltaEta();  // may have been set above
-  
-  if(mdeltaEta<0.03){
-
-    //--> qInv and EntSep are combined for speed & small delta eta 
-    if(cutqInvORNominalEntranceSep()) return 1;
-    
-    if(mType==1 || mType==3) {
-       if(cutMidTpcSepUS()) return 1;
-    } else {
-      if(cutMidTpcSepLS()) return 1;
+    if (goodDeltaZ() || goodDeltaXY()) {
+        return 0;
     }
-    
-  }
-  
-  if(cutQuality()) return 1;
+    if(cutMerging() || cutCrossing()) {
+        return 1;
+    }
+    if(cutMerging2() || cutCrossing2()) {
+        return 1;
+    }
+    if(cutCoulomb() || cutHBT()) {
+        return 1;
+    }
 
-  if(cutMass()) return 1;
+    if (!mdeltaEta) {
+        mdeltaEta = fabs(DeltaEta());  // may have been set above
+    }
   
-  //  if(cutExitSep() || cutQuality()) return 1;
-  return 0;
+    if(mdeltaEta<0.03){
+
+        //--> qInv and EntSep are combined for speed & small delta eta 
+        if(cutqInvORNominalEntranceSep()) return 1;
+
+        if(mType==1 || mType==3) {
+            if(cutMidTpcSepUS()) return 1;
+        } else {
+            if(cutMidTpcSepLS()) return 1;
+        }
+    }
+
+    if(cutQuality()) return 1;
+
+    if(cutMass()) return 1;
+
+    //  if(cutExitSep() || cutQuality()) return 1;
+    return 0;
 }
 
 //------------------------------------------------------------
@@ -711,7 +767,7 @@ StEStructPairCuts::MidTpcZSeparation() const {
   return (double)(fabs(diff.z()+mZoffset));
 }
 
-// >>>>> Choose second version of getdEdxPID fir an attempt
+// >>>>> Choose second version of getdEdxPID for an attempt
 //       to use GEANT dE/dx information.
 // pi  -> 1
 // K   -> 2
@@ -770,6 +826,16 @@ int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.9  2008/03/19 22:06:01  prindle
+ * Added doInvariantMass flag.
+ * Added some plots in pairDensityHistograms.
+ * SetZOffset used to only be done when doPairDensity was true.
+ * Moved creating/copying pairDensity histograms to same place as other histograms.
+ * Added cutBinHistMode
+ * mode3 neck was defined as yt1<2.2 && yt2<2.2 (and not soft)
+ *            now is        1.8<yt1<2.2  && 1.8<yt2<2.2
+ * Added gooddzdxy, Merging2 and Crossing2 to pair cuts.
+ *
  * Revision 1.8  2007/11/26 19:55:25  prindle
  * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
  *                     Change way \hat{p_t} is calculated for parent distributions in pid case.

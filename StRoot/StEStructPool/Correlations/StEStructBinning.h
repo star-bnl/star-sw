@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.14 2007/11/26 19:55:24 prindle Exp $
+ * $Id: StEStructBinning.h,v 1.15 2008/03/19 22:06:00 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -22,7 +22,15 @@
  *  in another separate array.
  *
  */
-
+/*
+ * The pairdensity plots (which can be used to check pair cuts) use
+ * idpt and dptval. I think these used to be used to make pt plots
+ * covering much of the accpetance, but that role seems to have shifted
+ * to idyt and dytval. Co-opt the dpt stuff so the pairdensity plots
+ * have sensitivity to few MeV differences.
+ *
+ * djp 2-1-2008
+ */
 
 // 25 + 1 over&under
 #define ESTRUCT_PHI_BINS 26
@@ -44,10 +52,11 @@
 #define ESTRUCT_SPT_BINS 41
 
 #define ESTRUCT_Q_BINS 51
-#define ESTRUCT_TPCSEP_BINS 50
+#define ESTRUCT_TPCSEP_BINS 51
+#define ESTRUCT_TPCSEPPHI_BINS 51
 
-#define ESTRUCT_DEDX_BINS 150
-#define ESTRUCT_PTOT_BINS 150
+#define ESTRUCT_DEDX_BINS 151
+#define ESTRUCT_PTOT_BINS 151
 
 // 100 + 1 over&under for QA
 #define ESTRUCT_QAPHI_BINS 101
@@ -107,6 +116,9 @@ struct xtBins {
 
 struct TPCSepBins {
   float sep[ESTRUCT_TPCSEP_BINS];
+};
+struct TPCSepPhiBins {
+  float sep[ESTRUCT_TPCSEPPHI_BINS];
 };
 
 struct dEdxBins {
@@ -171,9 +183,10 @@ protected:
   int i,j;
 
   float maxTPCSep, minTPCSep, dTPCSep; //! TPC separation dist
+  float maxTPCSepPhi, minTPCSepPhi, dTPCSepPhi; //! TPC separation dist
   float maxdEdx, mindEdx, ddEdx;
   float maxPtot, minPtot, dPtot;
-  int   nTPCSep, ndEdx, nPtot;
+  int   nTPCSep, nTPCSepPhi, ndEdx, nPtot;
 
   float maxQAEta, minQAEta, dQAEta;
   float maxQAPhi, minQAPhi, dQAPhi;
@@ -204,6 +217,7 @@ public:
   int ipt(float pt);
   int iq(float q);
   int isep(float sep);
+  int isepphi(float sep);
   int idedx(float dedx);
   int iptot(float ptot);
   int iqaphi(float phi);
@@ -218,6 +232,7 @@ public:
   float ptVal(int ipt);
   float qVal(int iq);
   float sepVal(int is);
+  float sepphiVal(int is);
   float dedxVal(int idedx);
   float ptotVal(int iptot);
   float qaetaVal(int ieta);
@@ -378,6 +393,9 @@ public:
   float TPCSepMax()  { return maxTPCSep; }
   float TPCSepMin()  { return minTPCSep; }
   int   TPCSepBins() { return nTPCSep;   }
+  float TPCSepPhiMax()  { return maxTPCSepPhi; }
+  float TPCSepPhiMin()  { return minTPCSepPhi; }
+  int   TPCSepPhiBins() { return nTPCSepPhi;   }
 
   int   QAEtaBins() { return nQAEta; }
   int   QAPhiBins() { return nQAPhi; }
@@ -415,11 +433,23 @@ inline int StEStructBinning::iq(float q){
 inline float StEStructBinning::sepVal(int is){
   return minTPCSep+is*dTPCSep+dTPCSep/2;
 }
+inline float StEStructBinning::sepphiVal(int is){
+  return minTPCSepPhi+is*dTPCSepPhi+dTPCSepPhi/2;
+}
 
 inline int StEStructBinning::isep(float sep){
   if( sep < minTPCSep ) return ESTRUCT_TPCSEP_BINS - 1;
   int j = (int)((sep-minTPCSep)/dTPCSep);
   return (j > ESTRUCT_TPCSEP_BINS - 2) ? ESTRUCT_TPCSEP_BINS - 1 : j;
+}
+inline int StEStructBinning::isepphi(float dphi){
+    if (dphi>M_PI) {
+        dphi = 2*M_PI - dphi;
+    } else if (dphi<-M_PI) {
+        dphi = 2*M_PI + dphi;
+    }
+    int j = (int)((dphi + dTPCSepPhi/2 - minTPCSepPhi)/dTPCSepPhi);
+    return (j > ESTRUCT_TPCSEPPHI_BINS - 2) ? ESTRUCT_TPCSEPPHI_BINS - 1 : j;
 }
 
 inline int StEStructBinning::iphi(float phi){
@@ -647,6 +677,16 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.15  2008/03/19 22:06:00  prindle
+ * Added doInvariantMass flag.
+ * Added some plots in pairDensityHistograms.
+ * SetZOffset used to only be done when doPairDensity was true.
+ * Moved creating/copying pairDensity histograms to same place as other histograms.
+ * Added cutBinHistMode
+ * mode3 neck was defined as yt1<2.2 && yt2<2.2 (and not soft)
+ *            now is        1.8<yt1<2.2  && 1.8<yt2<2.2
+ * Added gooddzdxy, Merging2 and Crossing2 to pair cuts.
+ *
  * Revision 1.14  2007/11/26 19:55:24  prindle
  * In 2ptCorrelations: Support for keeping all z-bins of selected centralities
  *                     Change way \hat{p_t} is calculated for parent distributions in pid case.
