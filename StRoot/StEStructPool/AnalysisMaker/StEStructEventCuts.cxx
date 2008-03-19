@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.11 2007/11/27 22:59:57 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.12 2008/03/19 22:01:59 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -73,6 +73,12 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	mtWord[1] = 15;  //for some reason, the l0triggerWord in the MuDST is not the trigger ID       
 	validRun = 1;
       }
+      else if (!strcmp("2007LowLuminosity",mRunPeriod)) {
+	// For use with trgsetupname=2007ProductionMinBias; productions P07id; recommended |Vz|<10 (maybe 5)
+	mtWord[0] = 200003;
+	mtWord[1] = 200020;
+	validRun = 1;
+      }
       else if (!strcmp("AuAu62GeVMinBias2004",mRunPeriod)) {
 	// trgsetupname=production62Gev; productions P04id,P04ie,P05ic; recommended |Vz|<30
 	mtWord[0] = 35000;
@@ -97,13 +103,13 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	mtWord[1] = 86033;  // zero-bias.
 	validRun = 1; 
       }
-      else if (!strcmp("CuCu62GeVProductionMinBias2007ib",mRunPeriod)) {
+      else if (!strcmp("CuCu62GeVProductionMinBias2007ic",mRunPeriod)) {
 	// ...
 	mtWord[0] = 76002;  // Don't actually use these do we?
 	mtWord[1] = 76011;
 	validRun = 1; 
       }
-      else if (!strcmp("CuCu200GeVProductionMinBias2007ib",mRunPeriod)) {
+      else if (!strcmp("CuCu200GeVProductionMinBias2007ic",mRunPeriod)) {
 	// ...
 	mtWord[0] = 76000;  // Don't actually use these do we?
 	mtWord[1] = 76020;
@@ -115,10 +121,28 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
         mtWord[1] = 2010;
         validRun = 1;
       }
-      else if (!strcmp("ppMinBiasYear5",mRunPeriod)) {
+      else if (!strcmp("ppProductionMinBias2005",mRunPeriod)) {
         // ...
         mtWord[0] =  96011; // untested  
         mtWord[1] = 106011;
+        validRun = 1;
+      }
+      else if (!strcmp("pp400MinBias2005",mRunPeriod)) {
+        // ...
+        mtWord[0] =  96011; // untested  
+        mtWord[1] = 106011;
+        validRun = 1;
+      }
+      else if (!strcmp("pp2006MinBias2006",mRunPeriod)) {
+        // ...
+        mtWord[0] = 117001; // untested  
+        mtWord[1] = 117001;
+        validRun = 1;
+      }
+      else if (!strcmp("ppProductionMB622006",mRunPeriod)) {
+        // ...
+        mtWord[0] = 147001; // untested  
+        mtWord[1] = 147001;
         validRun = 1;
       }
       if (validRun) {
@@ -181,6 +205,9 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.12  2008/03/19 22:01:59  prindle
+ * Updated some dataset definitions.
+ *
  * Revision 1.11  2007/11/27 22:59:57  prindle
  * Added cucu22 GeV data set as possible input
  *

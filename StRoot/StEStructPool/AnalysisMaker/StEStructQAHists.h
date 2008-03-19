@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.h,v 1.3 2007/11/26 19:52:25 prindle Exp $
+ * $Id: StEStructQAHists.h,v 1.4 2008/03/19 22:02:00 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -74,6 +74,10 @@ class StEStructQAHists : public TObject {
   virtual void fillTrackHistograms(StEStructTrack* track, int ibin);
   virtual void writeTrackHistograms(TFile* tf);
 
+//  virtual void initPairHistograms(int numBins, int analysisIndex=-1);
+//  virtual void fillPairHistograms(StEStructTrack* track1, StEStructTrack* track2, int ibin, int after);
+//  virtual void writePairHistograms(TFile* tf);
+
   ClassDef(StEStructQAHists,1)
 };
 
@@ -82,6 +86,9 @@ class StEStructQAHists : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructQAHists.h,v $
+ * Revision 1.4  2008/03/19 22:02:00  prindle
+ * Updated some dataset definitions.
+ *
  * Revision 1.3  2007/11/26 19:52:25  prindle
  * Add cucu62, cucu200 2007ib production datasets.
  * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
