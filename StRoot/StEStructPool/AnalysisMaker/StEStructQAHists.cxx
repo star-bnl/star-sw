@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.5 2007/11/26 19:52:25 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.6 2008/03/19 22:02:00 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -310,10 +310,22 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
     mHdEdxPtot[i]->Write();
   }
 
-}
+};
+
+// Maybe implement these.
+// Probably want to control via a doPairHistogram flag or something.
+//void StEStructQAHists::initPairHistograms(int numBins, int aIndex){
+//};
+//void StEStructQAHists::fillPairHistograms(StEStructTrack* t1, StEStructTrack* t2, int ib, int after){
+//};
+//void StEStructQAHists::writePairHistograms(TFile* tf){
+//};
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.6  2008/03/19 22:02:00  prindle
+ * Updated some dataset definitions.
+ *
  * Revision 1.5  2007/11/26 19:52:25  prindle
  * Add cucu62, cucu200 2007ib production datasets.
  * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.11 2007/11/27 23:00:02 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.12 2008/03/19 22:01:59 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -83,7 +83,7 @@ inline bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
         if (muEvent->triggerIdCollection().nominal().isTrigger(66007)) {
             return true;
         }
-    } else if (!strcmp("CuCu62GeVProductionMinBias2007ib",mRunPeriod)) {
+    } else if (!strcmp("CuCu62GeVProductionMinBias2007ic",mRunPeriod)) {
         // Assume vertex characteristics essentially the same
         // as the 200GeV CuCu data.
         if (muEvent->runNumber()<6069077) {
@@ -108,10 +108,34 @@ inline bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
             }
         }
         return keep;
-    } else if (!strcmp("CuCu200GeVProductionMinBias2007ib",mRunPeriod)) {
+    } else if (!strcmp("CuCu200GeVProductionMinBias2007ic",mRunPeriod)) {
         if (!muEvent->triggerIdCollection().nominal().isTrigger(66007)) {
             return false;
         }
+        bool keep = false;
+        if (muDst->event()->refMult() >= 17) {
+            if (fabs(muDst->primaryVertex()->meanDip())/muDst->event()->ctbMultiplicity() < (0.8/800)) {
+                 keep = true;
+            }
+        } else {
+            if (muDst->primaryVertex()->ranking()>-2.5) {
+                keep = true;
+            }
+        }
+        return keep;
+    } else if (!strcmp("2007LowLuminosity",mRunPeriod)) {
+        // This is 200GeV AuAu data from 2007
+        // First triggerId has killer bits on, second killer bits off.
+        // I don't know what killer bits are. Are they important?
+        // Trigger page suggests ID 200001 should be in mbvpd.
+        // Multiplicity distribution of that id is cleary wrong.
+        if (!muEvent->triggerIdCollection().nominal().isTrigger(200001) &&
+            !muEvent->triggerIdCollection().nominal().isTrigger(200003) &&
+            !muEvent->triggerIdCollection().nominal().isTrigger(200013) &&
+            !muEvent->triggerIdCollection().nominal().isTrigger(200020)) {
+            return false;
+        }
+        // Not sure these vertex criteria have been optimized.
         bool keep = false;
         if (muDst->event()->refMult() >= 17) {
             if (fabs(muDst->primaryVertex()->meanDip())/muDst->event()->ctbMultiplicity() < (0.8/800)) {
@@ -165,9 +189,23 @@ inline bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
         if(muEvent->triggerIdCollection().nominal().isTrigger(8192)) {
             return true;
         }
-    } else if(!strcmp("ppMinBiasYear5",mRunPeriod)){
+    } else if(!strcmp("ppProductionMinBias2005",mRunPeriod)){
         if(muEvent->triggerIdCollection().nominal().isTrigger(96011) ||
            muEvent->triggerIdCollection().nominal().isTrigger(106011)) {
+               return true;
+        }
+    } else if(!strcmp("pp400MinBias2005",mRunPeriod)){
+        // Not 100% sure of these triggers. Small data set, probably not worth spending much time on.
+        if(muEvent->triggerIdCollection().nominal().isTrigger(96011) ||
+           muEvent->triggerIdCollection().nominal().isTrigger(106011)) {
+               return true;
+        }
+    } else if(!strcmp("pp2006MinBias2006",mRunPeriod)){
+        if(muEvent->triggerIdCollection().nominal().isTrigger(117001)) {
+               return true;
+        }
+    } else if(!strcmp("ppProductionMB622006",mRunPeriod)){
+        if(muEvent->triggerIdCollection().nominal().isTrigger(147001)) {
                return true;
         }
     }
@@ -200,6 +238,9 @@ inline bool StEStructEventCuts::goodCentrality(float c){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.12  2008/03/19 22:01:59  prindle
+ * Updated some dataset definitions.
+ *
  * Revision 1.11  2007/11/27 23:00:02  prindle
  * Added cucu22 GeV data set as possible input
  *

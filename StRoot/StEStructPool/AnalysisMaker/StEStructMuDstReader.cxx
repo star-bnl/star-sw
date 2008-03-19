@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.12 2007/11/26 19:52:24 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.13 2008/03/19 22:01:59 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -332,13 +332,23 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
   eTrack->SetCharge(mTrack->charge());
 
   eTrack->SetHelix(mTrack->helix());
-
+  // It seems that the calculation of entrance, mid and exit points still works
+  // when we use the outerHelix instead of helix (which should be helix parameters
+  // at the point closest to the primary vertex). I believe the two are different
+  // to account for multiple scattering and energy loss. Expect properties of the
+  // track within the TPC to be described better by outerHelix.
+  //>>>>>Make this modification with the next set of updates (where I expect we will
+  //     be using global tracks instead of primary tracks.)
+//  eTrack->SetHelix(mTrack->outerHelix());
 }; 
   
 
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.13  2008/03/19 22:01:59  prindle
+ * Updated some dataset definitions.
+ *
  * Revision 1.12  2007/11/26 19:52:24  prindle
  * Add cucu62, cucu200 2007ib production datasets.
  * Included vertex cuts for case of ranked vertices. (Pass muDst pointer to EventCuts)
