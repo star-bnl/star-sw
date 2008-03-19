@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.15 2005/07/15 21:45:08 mvl Exp $
+ * $Id: StMuArrays.h,v 1.16 2008/03/19 14:51:03 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -21,7 +21,7 @@ enum emcTypes {muEmcTow=0, muEmcPrs, muEmcSmde, muEmcSmdp, muEEmcPrs, muEEmcSmdu
 enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
 
 /// @enum enumeration to to index the arrays
-enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject}; 
+enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject, muCovGlobTrack, muCovPrimTrack}; 
 
 /// @enum pmdTypes enumeration to to index the pmdArrays
 enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster}; 
@@ -34,7 +34,7 @@ enum tofTypes {muTofHit=0, muTofData, muTofRawData};
 enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
 
 enum NARRAYS {
-__NARRAYS__        =10,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  
+__NARRAYS__        =12,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  (add two more for global and primary track covariance matrices)
 __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
@@ -84,6 +84,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.16  2008/03/19 14:51:03  fisyak
+ * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
+ *
  * Revision 1.15  2005/07/15 21:45:08  mvl
  * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
  *
