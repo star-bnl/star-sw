@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.31 2007/09/18 02:29:58 mvl Exp $
+ * $Id: StMuDst.h,v 1.32 2008/03/19 14:51:03 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -46,6 +46,9 @@ class EztEventHeader;
 class EztTrigBlob;
 class EztFpdBlob;
 class EztEmcRawData;
+
+class StDcaGeometry;
+class StMuPrimaryTrackCovariance;
 
 #include "StPhysicalHelixD.hh"
 
@@ -162,6 +165,8 @@ public:
   static TClonesArray* l3AlgoAccept() { return arrays[muAccept]; }
   /// returns pointer to list rejected l3 algorithms 
   static TClonesArray* l3AlgoReject() { return arrays[muReject]; }
+  static TClonesArray* covGlobTrack() {return arrays[muCovGlobTrack];}
+  static TClonesArray* covPrimTrack() {return arrays[muCovPrimTrack];}
 
   /// returns pointer to current StMuEvent (class holding the event wise information, e.g. event number, run number)
   static StMuEvent* event() { return (StMuEvent*)arrays[muEvent]->UncheckedAt(0); }
@@ -185,7 +190,9 @@ public:
   static StL3AlgorithmInfo* l3AlgoAccept(int i) { return (StL3AlgorithmInfo*)arrays[muAccept]->UncheckedAt(i); }
   /// returns pointer to i-th rejected StL3AlgorithmInfo
   static StL3AlgorithmInfo* l3AlgoReject(int i) { return (StL3AlgorithmInfo*)arrays[muReject]->UncheckedAt(i); }
-
+  static StDcaGeometry* covGlobTracks(int i) { return (StDcaGeometry*)arrays[muCovGlobTrack]->UncheckedAt(i); }
+  static StMuPrimaryTrackCovariance* covPrimTracks(int i) { return (StMuPrimaryTrackCovariance*)arrays[muCovPrimTrack]->UncheckedAt(i); }
+ 
   /// returns pointer to current StStrangeEvMuDst (class holding the event wise information, e.g. event number, run number)
   static StStrangeEvMuDst* strangeEvent() { return (StStrangeEvMuDst*)strangeArrays[smuEv]->UncheckedAt(0); }
   /// returns pointer to MC version of current StStrangeEvMuDst
@@ -267,6 +274,8 @@ public:
   static unsigned int numberOfDetectorStates() { return arrays[muState]->GetEntries(); }
   static unsigned int numberOfL3AlgoAccepts()  { return arrays[muAccept]->GetEntries(); }
   static unsigned int numberOfL3AlgoRejects()  { return arrays[muReject]->GetEntries(); }
+  static unsigned int numberOfCovGlobTracks()  { return arrays[muCovGlobTrack]->GetEntries(); }
+  static unsigned int numberOfCovPrimTracks()  { return arrays[muCovPrimTrack]->GetEntries(); }
   static unsigned int numberOfV0s()            { return strangeArrays[smuV0]->GetEntries(); }
   static unsigned int numberOfV0sMc()          { return strangeArrays[smuV0Mc]->GetEntries(); }
   static unsigned int numberOfV0Assoc()        { return strangeArrays[smuV0Assoc]->GetEntries(); }
@@ -324,6 +333,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.32  2008/03/19 14:51:03  fisyak
+ * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
+ *
  * Revision 1.31  2007/09/18 02:29:58  mvl
  * Added basic printing functionality. For convenience and to assist data consistency checks
  *

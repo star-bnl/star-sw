@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.84 2007/08/31 01:55:05 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.85 2008/03/19 14:51:03 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -16,12 +16,13 @@
 #include "StEvent/StEventTypes.h"
 #include "StEvent/StRunInfo.h"
 #include "StEvent/StEventInfo.h"
-
+#include "StEvent/StDcaGeometry.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
 
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StarClassLibrary/StTimer.hh"
+#include "StarClassLibrary/StMatrixF.hh"
 
 #include "StIOMaker/StIOMaker.h"
 #include "StTreeMaker/StTreeMaker.h"
@@ -55,7 +56,7 @@
 #include "StMuTofHit.h"
 #include "StMuTofHitCollection.h"
 #include "StMuTofUtil.h"
-
+#include "StMuPrimaryTrackCovariance.h"
 #include "StMuEzTree.h"
 #include "EztEventHeader.h"
 #include "EztEmcRawData.h"
@@ -300,6 +301,9 @@ StMuDstMaker::~StMuDstMaker() {
     the data members of the base class TObject
 */
 void  StMuDstMaker::streamerOff() {
+  StMuEvent::Class()->IgnoreTObjectStreamer();
+  StMuL3EventSummary::Class()->IgnoreTObjectStreamer();
+
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
   StV0MuDst::Class()->IgnoreTObjectStreamer();
   StXiMuDst::Class()->IgnoreTObjectStreamer();
@@ -309,6 +313,8 @@ void  StMuDstMaker::streamerOff() {
   StKinkMc::Class()->IgnoreTObjectStreamer();
   StMuTrack::Class()->IgnoreTObjectStreamer();
   StMuPrimaryVertex::Class()->IgnoreTObjectStreamer();
+  StDcaGeometry::Class()->IgnoreTObjectStreamer();
+  StMuPrimaryTrackCovariance::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
   StMuEmcHit::Class()->IgnoreTObjectStreamer();
   StMuEmcTowerData::Class()->IgnoreTObjectStreamer();
@@ -960,7 +966,7 @@ void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
   StSPtrVecTrackNode& nodes= ev->trackNodes();
   DEBUGVALUE2(nodes.size());
   for (StSPtrVecTrackNodeConstIterator iter=nodes.begin(); iter!=nodes.end(); iter++) {
-    addTrackNode(ev, *iter, cut, mArrays[muGlobal], mArrays[muPrimary], mArrays[muOther], false);
+    addTrackNode(ev, *iter, cut, mArrays[muGlobal], mArrays[muPrimary], mArrays[muOther], mArrays[muCovGlobTrack], mArrays[muCovPrimTrack], false);
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -977,7 +983,7 @@ void StMuDstMaker::fillL3Tracks(StEvent* ev, StMuCut* cut) {
   StSPtrVecTrackNode& nodes= ev->l3Trigger()->trackNodes();
   DEBUGVALUE2(nodes.size());
   for (StSPtrVecTrackNodeConstIterator iter=nodes.begin(); iter!=nodes.end(); iter++) {
-    addTrackNode(ev, *iter, cut, mArrays[muL3], 0, 0, true );
+    addTrackNode(ev, *iter, cut, mArrays[muL3], 0, 0, 0, 0, true );
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -1002,7 +1008,7 @@ void StMuDstMaker::fillDetectorStates(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut,
-				  TClonesArray* gTCA, TClonesArray* pTCA, TClonesArray* oTCA, bool l3) {
+				  TClonesArray* gTCA, TClonesArray* pTCA, TClonesArray* oTCA, TClonesArray* covgTCA, TClonesArray* covpTCA, bool l3) {
   DEBUGMESSAGE3("");
   const StTrack* tr=0;
 
@@ -1017,13 +1023,13 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
        vtx = ev->primaryVertex();	
 	
     tr= node->track(global);
-    if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, vtx, cut, -1, l3);
+    if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, vtx, cut, -1, l3, covgTCA, covpTCA);
   }
   /// do primary track track
   int index;
   if (pTCA) {
     tr = node->track(primary);
-    if (tr && !tr->bad()) index = addTrack(pTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
+    if (tr && !tr->bad()) index = addTrack(pTCA, ev, tr, tr->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
   }
   /// all other tracks
   if (oTCA) {
@@ -1039,7 +1045,8 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
-int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack* track, const StVertex *vtx, StMuCut* cut, int index2Global, bool l3) {
+int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack* track, const StVertex *vtx, StMuCut* cut, int index2Global, bool l3,
+			   TClonesArray* covgTCA, TClonesArray* covpTCA) {
   DEBUGMESSAGE3("");
   StRichSpectra typeOfStRichSpectra;
   int index = -1;
@@ -1054,7 +1061,33 @@ int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack
     if (rich) {
       index2RichSpectra  =  addType( mArrays[muRich], *rich );
     }
-    new((*tca)[counter]) StMuTrack(event, track, vtx, index2Global, index2RichSpectra, l3, &mVtxList);
+    StMuTrack *muTrack = new((*tca)[counter]) StMuTrack(event, track, vtx, index2Global, index2RichSpectra, l3, &mVtxList);
+    if (track->type() == primary) {
+      if (covpTCA) {
+	Int_t countCOVPTCA = covpTCA->GetEntries();
+#if 0
+	const StMatrixF covMatrix = track->fitTraits().covariantMatrix();
+	new((*covpTCA)[countCOVPTCA]) StMuPrimaryTrackCovariance(covMatrix);
+#else
+	//	cout << track->fitTraits().covariantMatrix() << endl;
+	const Float_t*    cov      = track->fitTraits().covariance();
+	new((*covpTCA)[countCOVPTCA]) StMuPrimaryTrackCovariance(cov);
+#endif
+	muTrack->setIndex2Cov(countCOVPTCA);
+      }
+    }
+    else {
+      if (track->type() == global) {
+	if (covgTCA) {
+	  Int_t countCOVGTCA = covgTCA->GetEntries();
+	  const StDcaGeometry *dcaGeometry = ((StGlobalTrack *)track)->dcaGeometry();
+	  if (dcaGeometry) {
+	    new((*covgTCA)[countCOVGTCA]) StDcaGeometry(*dcaGeometry);
+	    muTrack->setIndex2Cov(countCOVGTCA);
+	  }
+	}
+      }
+    }
     index = counter;
   }
   catch (StMuException e) {
@@ -1294,6 +1327,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.85  2008/03/19 14:51:03  fisyak
+ * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
+ *
  * Revision 1.84  2007/08/31 01:55:05  mvl
  * Added protection against corrupted files by checking for return code -1 from TTree:GetEntry(). StMuDstMaker will silently skip these events; StMuIOMaker returns kStWarn.
  *

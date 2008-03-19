@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.45 2007/04/20 06:26:01 mvl Exp $
+ * $Id: StMuDstMaker.h,v 1.46 2008/03/19 14:51:04 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -152,7 +152,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.45 2007/04/20 06:26:01 mvl Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.46 2008/03/19 14:51:04 fisyak Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -260,8 +260,10 @@ virtual   void closeRead();
   template <class T, class U> int addType(TClonesArray* tcaTo  , U &u, T *t);
   template <class T>          int addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t);
   template <class T>          int addType(TClonesArray* tcaTo  , T &t);
-  void addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut, TClonesArray* gTCA=0, TClonesArray* pTCA=0, TClonesArray* oTCA=0, bool l3=false);
-  int  addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, const StVertex *vtx, StMuCut* cut, int index2Global, bool l3=false);
+  void addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut, TClonesArray* gTCA=0, TClonesArray* pTCA=0, TClonesArray* oTCA=0, 
+		    TClonesArray* covgTCA=0, TClonesArray* covpTCA=0, bool l3=false);
+  int  addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, const StVertex *vtx, StMuCut* cut, int index2Global, bool l3=false, 
+		TClonesArray* covgTCA=0, TClonesArray* covpTCA=0);
 /*   int addType(TClonesArray* tcaTo , StMuEmcCollection t); */
 
   StRichSpectra* richSpectra(const StTrack* track);
@@ -338,6 +340,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.46  2008/03/19 14:51:04  fisyak
+ * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
+ *
  * Revision 1.45  2007/04/20 06:26:01  mvl
  * Removed Q-vector calculation. Will implement utility class instead.
  *

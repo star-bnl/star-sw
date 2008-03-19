@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.33 2007/10/18 03:44:23 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.34 2008/03/19 14:51:04 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -27,7 +27,11 @@ double StMuTrack::mProbabilityPidCentrality=0;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.) {
+StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : 
+  mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), 
+  mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), 
+  /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ 
+  mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.), mIndex2Cov(-1) {
 
   const StGlobalTrack* globalTrack = dynamic_cast<const StGlobalTrack*>(track->node()->track(global));
 
@@ -141,8 +145,6 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
         mVertexIndex = -1;
         mDCA = StThreeVectorF(-999,-999,-999);
         mDCAGlobal = StThreeVectorF(-999,-999,-999);
-        mSigmaDcaD = -999;
-        mSigmaDcaZ = -999;
       }
       mDCA = dca(track, vertex);
       if (globalTrack && globalTrack->dcaGeometry()) {
@@ -159,17 +161,6 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
           mP   = StThreeVectorF(mom[0],mom[1],mom[2]);
           mP  *= dcaGeometry->momentum().mag();
         }
-        double emxXY[6],emxSZ[3];
-        thelix.GetEmx(emxXY,emxSZ);
-//	THelixTrack::Dca(): cos(Lambda) **4 to account that we are in the nearest point
-        double cosl = sqrt(mom[0]*mom[0]+mom[1]*mom[1]);
-        emxSZ[0]*=pow(cosl,4);
-        if (emxXY[0] > 0) mSigmaDcaD = TMath::Sqrt(emxXY[0]);
-        if (emxSZ[0] > 0) mSigmaDcaZ = TMath::Sqrt(emxSZ[0]);
-      } else { // no DCA geometry, calculate DCA from helix
-        if ( globalTrack ) mDCAGlobal = dca(globalTrack, vertex);
-        mSigmaDcaD = -999;
-        mSigmaDcaZ = -999;
       }
 
       mPt = mP.perp();
@@ -427,7 +418,7 @@ void StMuTrack::Print(Option_t *option) const {
   cout << "momentum " << mP << endl;
   cout << "eta  " << mEta << ", phi " << mPhi << ", pt " << mPt << endl;
   cout << "DCA  " << mDCA << endl;
-  cout << "\t radial " << dcaD() << " +- " << mSigmaDcaD << ", z " << dcaZ() << " +- " << mSigmaDcaZ << endl;
+  cout << "\t radial " << dcaD()  << ", z " << dcaZ() << endl;
   cout << "global DCA " << mDCAGlobal << endl;
   cout << "Total hits: " << nHits() << ", fitted " << nHitsFit()
        << "\t ( TPC "
@@ -454,6 +445,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.34  2008/03/19 14:51:04  fisyak
+ * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
+ *
  * Revision 1.33  2007/10/18 03:44:23  mvl
  * Added Ist and Pixel hits to mNPossInner and mNFitInner
  *
