@@ -25,7 +25,7 @@
         </eventCuts>
 
         <doEStructMacro>
-            <centralities id='centralities' widget='entry'>1 47 123 350 600</centralities>
+            <centralities id='centralities' widget='entry'>4 16 39 80 225</centralities>
             <ptCentralities id='ptCentralities' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>5 17 32 57 93 146 184 300</ptCentralities>
         </doEStructMacro>
     </standardElements>

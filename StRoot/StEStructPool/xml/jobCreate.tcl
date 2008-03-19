@@ -327,18 +327,22 @@ proc ::jobCreate::+listDefaultXml {type t c b} {
     switch $type {
         Data {
             set vals [list dataPP200_MinBias.lis \
-                           data_ppProductionMinBias_year5.lis \
+                           data_ppProductionMinBias_2005.lis \
+                           data_pp400MinBias_2005.lis \
+                           data_pp2006MinBias_2006.lis \
+                           data_ppProductionMB62_2006.lis \
                            dataAuAu19_2001_MinBias.lis \
                            dataAuAu62_2004_MinBias.lis \
                            dataAuAu130_2000_MinBias.lis \
                            dataAuAu200_2001_MinBiasVertex.lis \
                            dataAuAu200_2001_ProductionMinBias.lis \
                            dataAuAu200_2004_MinBias.lis \
+                           dataAuAu200_2007_MinBias.lis \
                            dataCuCu22_P05if_cuProductionMinBias.lis \
                            dataCuCu62_2005_ProductionMinBias.lis \
-                           dataCuCu62_2007ib_cuProductionMinBias.lis \
+                           dataCuCu62_2007ic_cuProductionMinBias.lis \
                            dataCuCu200_2005_ProductionMinBias.lis \
-                           dataCuCu200_2007ib_cuProductionMinBias.lis]
+                           dataCuCu200_2007ic_cuProductionMinBias.lis]
         }
         GEANT {
             set vals [list GEANTAuAu200_b_0_3.lis \
@@ -1520,7 +1524,7 @@ proc ::jobCreate::createJobFiles {} {
             # Check that we have all the directories we expect and only
             # those directories.
             set dirs [list]
-            foreach dir [glob $path/*/] {
+            foreach dir [glob -nocomplain $path/*/] {
                 lappend dirs [file tail $dir]
             }
             set normal [list QA logs cuts data scripts txt stats StRoot]
@@ -1897,8 +1901,8 @@ proc ::jobCreate::addHistograms {} {
     set node [$::jobCreate::jobInfo getElementsByTagName analysisType]
     set aType [$node text]
 
-    set fileList [glob [file join $path data dataHists_*.root]]
-    set top [lindex [lsort -dictionary $fileList] end]
+    set fileList [glob -nocomplain [file join $path data dataHists_*.root]]
+    set top [file tail [lindex [lsort -dictionary $fileList] end]]
     if {$aType eq "StEStructCorrelation"} {
         if {![regexp {([0-9]+)_([0-9]+)} $top m nCents nJobs]} {
             .addHistograms.t insert end "Did not find a file that looked like \
@@ -1928,7 +1932,7 @@ proc ::jobCreate::addHistograms {} {
                     set ll [split $line]
                     if {[lindex $line 0] eq "hadd"} {
                         foreach f [lrange $ll 2 end] {
-                            if {[regexp {dataHists_M(\d)_(\d+).root} $f m c v]} {
+                            if {[regexp {dataHists_M(\d+)_(\d+).root} $f m c v]} {
                                 if {$c == $i} {
                                     lappend ::jobCreate::alreadyAdded($i) $f
                                 }
@@ -1940,7 +1944,7 @@ proc ::jobCreate::addHistograms {} {
             }
 
             # Get all files for centrality and remove already added ones.
-            set fileList [glob [file join $path data dataHists_M${i}_*.root]]
+            set fileList [glob -nocomplain [file join $path data dataHists_M${i}_*.root]]
             set fileList [lremove $fileList $::jobCreate::alreadyAdded($i)]
             set ::jobCreate::filesToAdd($i) [lsort -dictionary $fileList]
 
@@ -2014,7 +2018,7 @@ proc ::jobCreate::addHistograms {} {
         }
 
         # Get all fluctuation files, remove already added ones.
-        set fileList [glob [file join $path data dataHists_*.root]]
+        set fileList [glob -nocomplain [file join $path data dataHists_*.root]]
         set fileList [lremove $fileList $::jobCreate::alreadyAdded]
         set ::jobCreate::filesToAdd [lsort -dictionary $fileList]
 
@@ -2155,7 +2159,8 @@ proc ::jobCreate::toggleFileToAdd {f centrality} {
 ################################################################################
 proc ::jobCreate::startAddingHistograms {nCentralities} {
     .addHistograms.b.action configure -text Cancel \
-            -command {set ::jobCreate::stopAddHistograms true}
+            -command {set ::jobCreate::stopAddHistograms true; \
+                      addHistograms.b.action configure -text "...waiting for current hadd to finish"}
 
     set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
     set path [$node text]
@@ -2166,7 +2171,7 @@ proc ::jobCreate::startAddingHistograms {nCentralities} {
     if {$::jobCreate::addQAHistograms} {
         .addHistograms.t insert end "About to sum QA files\n" input
         .addHistograms.t see end
-        set fileList [lsort -dictionary [glob [file join $path QA QA_*.root]]]
+        set fileList [lsort -dictionary [glob -nocomplain [file join $path QA QA_*.root]]]
         set sumName [file join $path QA QA.root]
         set QALogFile [file join $path QA addedQALog]
         jobCreate::addSmallHistograms $fileList $sumName $QALogFile .addHistograms.control.cbQA
@@ -2176,7 +2181,7 @@ proc ::jobCreate::startAddingHistograms {nCentralities} {
     if {$::jobCreate::addCutsHistograms  && !$::jobCreate::stopAddHistograms} {
         .addHistograms.t insert end "About to sum Cuts files\n" input
         .addHistograms.t see end
-        set fileList [lsort -dictionary [glob [file join $path cuts cutHists_*.root]]]
+        set fileList [lsort -dictionary [glob -nocomplain [file join $path cuts cutHists_*.root]]]
         set sumName [file join $path cuts Cuts.root]
         set cutsLogFile [file join $path cuts addedCutsLog]
         jobCreate::addSmallHistograms $fileList $sumName $cutsLogFile .addHistograms.control.cbCuts
@@ -2833,8 +2838,14 @@ proc ::jobCreate::selectAll {} {
             set n $::jobCreate::numberHistFiles
         }
         set ::jobCreate::numberHistFiles 0
+        set ::jobCreate::histFileList(0) $dList
         for {set i 0} {$i < $n} {incr i} {
             addDeltaRhoFile $dList $sList
+        }
+        # Sum up Data{n} for one DeltaRho file by default.
+        foreach d $dList {
+            regexp {Data(\d+)} $d m ic
+            set ::jobCreate::histFileCB(0,$ic) 1
         }
 
         if {[llength $::jobCreate::selectAllFiles] > 0} {
@@ -2862,7 +2873,7 @@ proc ::jobCreate::addDeltaRhoFile {dList sList} {
     foreach d $dList {
         regexp {Data(\d+)} $d m ic
         if {![info exists ::jobCreate::histFileCB($j,$ic)]} {
-            set ::jobCreate::histFileCB($j,$ic) 1
+            set ::jobCreate::histFileCB($j,$ic) 0
         }
         if {[lsearch $::jobCreate::histFileList($j) $d] >= 0} {
             set ::jobCreate::histFileCB($j,$ic) 1
@@ -2872,8 +2883,10 @@ proc ::jobCreate::addDeltaRhoFile {dList sList} {
         lappend cbs [checkbutton $hFrame.cb${j}${ic} -text $ic -variable ::jobCreate::histFileCB($j,$ic) \
                 -command [namespace code [list toggleHistFile $j $ic $d]]]
     }
-    eval grid $cbs -sticky w
     set nCols [llength $cbs]
+    if {$nCols > 0} {
+        eval grid $cbs -sticky w
+    }
 
     set cbs [list x x]
     foreach s $sList {
@@ -2889,9 +2902,12 @@ proc ::jobCreate::addDeltaRhoFile {dList sList} {
         lappend cbs [checkbutton $hFrame.cb${j}${ic} -text $ic -variable ::jobCreate::histFileCB($j,$ic) \
                 -command [namespace code [list toggleHistFile $j $ic $s]]]
     }
-    eval grid $cbs -sticky w
-    if {[llength $cbs] > $nCols} {
-        set nCols [llength $cbs]
+    set mCols [llength $cbs]
+    if {$mCols > 2} {
+        eval grid $cbs -sticky w
+    }
+    if {$mCols > $nCols} {
+        set nCols $mCols
     }
     for {set i 3} {$i < $nCols} {incr i} {
         grid columnconfigure $hFrame $i -uniform a

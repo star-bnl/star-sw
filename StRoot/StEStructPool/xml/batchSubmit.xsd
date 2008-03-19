@@ -251,16 +251,20 @@ hell is in this directory.
         <xs:restriction base='xs:string'>
             <xs:enumeration value='CuCu22GeVProductionMinBiasP05if'  Comment='tag for 2005, 22GeV CuCu minimum bias trigger'/>
             <xs:enumeration value='CuCu62GeVProductionMinBias2005'  Comment='tag for 2005, 62GeV CuCu minimum bias trigger'/>
-            <xs:enumeration value='CuCu62GeVProductionMinBias2007ib' Comment='tag for 2005, 62GeV CuCu minimum bias trigger (2007ib production)'/>
+            <xs:enumeration value='CuCu62GeVProductionMinBias2007ic' Comment='tag for 2005, 62GeV CuCu minimum bias trigger (2007ic production)'/>
             <xs:enumeration value='CuCu200GeVProductionMinBias2005' Comment='tag for 2005, 200GeV CuCu minimum bias trigger'/>
-            <xs:enumeration value='CuCu200GeVProductionMinBias2007ib' Comment='tag for 2005, 200GeV CuCu minimum bias trigger (2007ib production)'/>
+            <xs:enumeration value='CuCu200GeVProductionMinBias2007ic' Comment='tag for 2005, 200GeV CuCu minimum bias trigger (2007ic production)'/>
+            <xs:enumeration value='2007LowLuminosity' Comment='tag for 2007, 200GeV AuAu minimum Low Luminosity trigger set'/>
             <xs:enumeration value='AuAu200GeVMinBias2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVMinBias2001' Comment='tag for 2001, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVCentral2001' Comment='tag for 2001, 200GeV AuAu central trigger'/>
             <xs:enumeration value='dAu200GeVMinBias2003' Comment='tag for 2003, 200GeV dAu minimum bias trigger'/>
             <xs:enumeration value='ppMinBias' Comment='tag for 2001, 200GeV pp minimum bias trigger'/>
-            <xs:enumeration value='ppMinBiasYear5' Comment='tag for 2004, 200GeV pp minimum bias trigger'/>
+            <xs:enumeration value='ppProductionMinBias2005' Comment='tag for 2005, 200GeV pp minimum bias trigger'/>
+            <xs:enumeration value='pp400MinBias2005' Comment='tag for 2005, 400GeV pp minimum bias trigger'/>
+            <xs:enumeration value='pp2006MinBias2006' Comment='tag for 2006, 200GeV pp minimum bias trigger'/>
+            <xs:enumeration value='ppProductionMB622006' Comment='tag for 2006, 62GeV pp minimum bias trigger'/>
         </xs:restriction>
         <xs:attribute name='Comment' type='xs:string' use='required'/>
     </xs:complexType>
@@ -410,6 +414,9 @@ hell is in this directory.
         <xs:enumeration value='DeltaEta'>
             <xs:Comment>min, max: Cut on Eta separation</xs:Comment>
         </xs:enumeration>
+        <xs:enumeration value='GoodDeltaZDeltaXY'>
+            <xs:Comment>dZ, dXY: Pairs with larger separation on either variable never get cut</xs:Comment>
+        </xs:enumeration>
         <xs:enumeration value='DeltaMt'>
             <xs:Comment>min, max: Cut in transvers mass difference</xs:Comment>
         </xs:enumeration>
@@ -440,8 +447,14 @@ hell is in this directory.
         <xs:enumeration value='Merging'>
             <xs:Comment>max avg XY sep, max avg Z sep  (Michaels cut)</xs:Comment>
         </xs:enumeration>
+        <xs:enumeration value='Merging2'>
+            <xs:Comment>mid TPC Z, XY separations (Usually 5cm)</xs:Comment>
+        </xs:enumeration>
         <xs:enumeration value='Crossing'>
             <xs:Comment>Look in StEStructPairCuts.h for details (Michaels cut)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Crossing2'>
+            <xs:Comment>Mid TPC Z separation for tracks that crossed in phi (only need one value, usually 5cm)</xs:Comment>
         </xs:enumeration>
         <xs:enumeration value='pionOtherMass'>
             <xs:Comment>Assume both tracks pions. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
