@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.13 2007/10/11 21:52:32 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.14 2008/03/19 14:40:56 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.14  2008/03/19 14:40:56  fisyak
+ * Add access to covariance matrix array
+ *
  * Revision 2.13  2007/10/11 21:52:32  ullrich
  * Added member to handle number of fit points for PXL and IST.
  *
@@ -98,6 +101,7 @@ public:
     unsigned short         numberOfFitPoints(StDetectorId) const;
     StParticleDefinition*  pidHypothesis() const;
     StMatrixF              covariantMatrix() const;
+    const Float_t*         covariance() const {return mCovariantMatrix.GetArray();}
     double                 chi2(unsigned int = 0) const;
     bool                   primaryVertexUsedInFit() const;
 
