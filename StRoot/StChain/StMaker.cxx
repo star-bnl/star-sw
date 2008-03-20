@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.206 2008/03/05 00:01:52 fisyak Exp $
+// $Id: StMaker.cxx,v 1.207 2008/03/20 18:59:35 perev Exp $
 //
 //
 /*!
@@ -190,6 +190,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr12",      20190101,    15, "upgr12",   ""},
   {"upgr13",      20190101,    16, "upgr13",   ""},
   {"upgr14",      20190101,    17, "upgr14",   ""},
+  {"upgr15",      20190101,    18, "upgr15",   ""},
   // Future development:
   {"simpletpc",   20200102,    16, "simpletpc",""},
   {"upgr20",      20200102,    17, "upgr20",    "y2007 +  one TOF"}, // advertized simu 20061101
@@ -1831,14 +1832,11 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 {
    TURN_LOGGER(this);
 //   Loop on all makers
-   Int_t ret,run=-1,oldrun;
    TList *tl = GetMakeList();
    if (!tl) return kStOK;
-   StEvtHddr *hd = GetEvtHddr();   
    TIter nextMaker(tl);
    StMaker *maker;
    fgFailedMaker = 0;
-   int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker* )nextMaker())) {
      if (!maker->IsActive()) continue;
      maker->Skip(NoEventSkip);
@@ -1848,6 +1846,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.207  2008/03/20 18:59:35  perev
+// upgr15 added
+//
 // Revision 1.206  2008/03/05 00:01:52  fisyak
 // Move Skip method in base class
 //
