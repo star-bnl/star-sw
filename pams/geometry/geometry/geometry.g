@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.164 2008/01/21 01:11:02 perev Exp $
+* $Id: geometry.g,v 1.165 2008/03/20 18:45:28 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.165  2008/03/20 18:45:28  perev
+* Simplest.gerrit upgr15 added
+*
 * Revision 1.164  2008/01/21 01:11:02  perev
 * TOF weight corrected
 *
@@ -3473,6 +3476,65 @@ If LL>1
                    ITSP=off; "prototype of the Inner Tracker SuPport structure"
                 }
 ****************************************************************************************
+*The reason for naming these three file xxxxgeo00.g is to indicate that these
+*are the most simple geometries that can be made. As such they don't fit in
+*with the existing naming scheme where the increasing numbers indicate a
+*next step of evolution, better understanding of material, better design, etc.
+*I explicitly wanted to break with this scheme to make it clear that these
+*designs are just for testing purposes. Gerrit
+
+  on UPGR15   { New Tracking: HFT+IST+TPC+SSD-SVT
+                     SVTT=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Multiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "CALB" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ECAL"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     BBCM=on
+                  "forward pion detector "
+                     FPDM=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     PHMD=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     SISD=on;
+                     SisdConfig = 65;
+* careful! Achtung!
+                   PipeConfig=-1;   " Simplest.Gerrit"
+                   pipeFlag=-1; !   " Simplest.Gerrit"
+                   PIXL=on;        " put the pixel detector in"
+                   PixlConfig=-1;   " Simplest.Gerrit"
+
+                   ISTB=on;  "IST barrel"
+                   IstbConfig=-1;
+
+                   FSTD=off;  "no pixel based forward tracker in this tag"
+                   FstdConfig=0;
+
+* Forward STAR tracker disk
+                   FGTD=on;  "GEM forward tracker"
+                   FgtdConfig=2;
+* On Gerrit's request, we disable the cone:
+                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
+                }
+****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
                      nSi=6  " 3 bi-plane layers, nSi<=7 ";
@@ -3885,7 +3947,13 @@ If LL>1
    If (LL>1)        call AgDETP new ('PIPE')
    call AgDETP add ('pipv.PipeConfig=',PipeConfig,1);
    call AgDETP add ('pipv.PipeFlag=',PipeFlag,1);
-   if (PIPE)        Call pipegeo
+   if (PIPE)        then
+     if (PipeConfig == -1) then 
+       Call pipegeo00
+     else                  
+       Call pipegeo
+     endif
+   endif
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
    if (UPST)        Call upstgeo
@@ -4127,6 +4195,7 @@ If LL>1
    if (MUTD.and.MutdConfig==2) Call mutdgeo2
    if (MUTD.and.MutdConfig==3) Call mutdgeo3
 
+   if (PIXL.and.PixlConfig==-1)Call pixlgeo00
    if (PIXL.and.PixlConfig==1) Call pixlgeo
    if (PIXL.and.PixlConfig==2) Call pixlgeo1
    if (PIXL.and.PixlConfig==3) Call pixlgeo2
@@ -4137,6 +4206,7 @@ If LL>1
          call pixlgeo3
    endif
 
+   if (ISTB.and.IstbConfig==-1)Call istbgeo00
    if (ISTB.and.IstbConfig==1) Call istbgeo
    if (ISTB.and.IstbConfig==2) Call istbgeo1
    if (ISTB.and.IstbConfig==3) Call istbgeo2
