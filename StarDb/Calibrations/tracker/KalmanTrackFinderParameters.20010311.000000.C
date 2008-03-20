@@ -13,7 +13,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.useTrackFilter	 =         1; // Whether a track filter should be used internally;
     row.elossCalculated	 =         1; // Whether the Energy loss should be calculated while propagating tracks;
     row.mcsCalculated	 =         1; // Whether multiple coulomb scattering should be include in erro matrices;
-    row.field	 =                0.5;// Value of the field;
+    row.field	 	 =       0.5;// Value of the field;
     row.maxNullCount	 =        13; // Maximum number of null hits on active detector layers;
     row.maxContigNullCount =       8; // Maximum number of contiguous null hits;
     row.minCountForReset   =       2; // Number of adjacent layers with hits before nullContiguous is reset to zero ;
@@ -21,6 +21,8 @@ memset(&row,0,tableSet->GetRowSize());
     row.massHypothesis	   =      0.139;// mass used in the tracking for mcs and eloss calculation purposes;
     row.maxDca2dZeroXY     =      6.; //max 2d dca to X=Y=0  for primary track
     row.maxDca3dVertex     =      4.; //max 3d dca to vertex for primary track
+    row.mHitRegions        =    5020; //5020 means 0<svtHit<20, 20<ssdHit<50
+    row.mHitWeights 	   =    2111; //Coeffs of nhits. sum must be >=20
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;

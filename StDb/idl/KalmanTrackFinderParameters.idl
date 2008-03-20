@@ -16,6 +16,8 @@ struct KalmanTrackFinderParameters {
   long    maxNullCount; 	/*Maximum number of null hits on active detector layers*/
   long    maxContigNullCount; 	/*Maximum number of contiguous null hits*/ 
   long    minCountForReset; 	/*Number of adjacent layers with hits before nullContiguous is reset to zero */
+  long    mHitRegions;		/*2050 means 0<svtHit<20, 20<ssdHit<50*/
+  long    mHitWeights;	        /*Coeffs of nhits. sum must be >=20*/
   double  maxChi2Vertex; 	/*max vertex incremental chi2 value acceptable*/ 
   double  massHypothesis; 	/*mass used in the tracking for mcs and eloss calculation purposes*/
   double  maxDca2dZeroXY; 	/*max 2d dca to X=Y=0  for primary track*/ 
