@@ -106,7 +106,6 @@ StiKalmanTrackNode::setParameters(&_pars);
   if (!_toolkit)
     throw runtime_error("StiKalmanTrackFinder::StiKalmanTrackFinder(...) - FATAL - toolkit==0");
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
-  mMinPrecHits=2;
 }
 
 //______________________________________________________________________________

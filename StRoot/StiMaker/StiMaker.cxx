@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.183 2008/02/07 18:26:17 perev Exp $
+// $Id: StiMaker.cxx,v 1.184 2008/03/20 02:01:36 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.184  2008/03/20 02:01:36  perev
+// setMinPrecHits(..) obsolete
+//
 // Revision 1.183  2008/02/07 18:26:17  perev
 // Remove setMCS() call
 //
@@ -583,8 +586,6 @@ Int_t StiMaker::InitRun(int run)
       if (IAttr("useTracker")) {
 
         _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
-        _tracker->setMinPrecHits(2);
-        if (*SAttr("minPrecHits")) _tracker->setMinPrecHits(IAttr("minPrecHits"));
 	_tracker->load("trackFinderPars.dat",*this);
         if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
         if ( IAttr("useTiming"    )) _tracker->setTiming();
