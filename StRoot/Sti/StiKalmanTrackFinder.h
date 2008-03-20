@@ -35,7 +35,6 @@ class StiKalmanTrackFinder : public Loadable, public StiTrackFinder, public Name
 {
 public:
   StiKalmanTrackFinder(StiToolkit *toolkit);
-  void setMinPrecHits(int minPrecHits)	{mMinPrecHits=minPrecHits;}
   virtual ~StiKalmanTrackFinder();
   /// Initialize the finder
   virtual void initialize();
@@ -105,7 +104,6 @@ class QAFind;
 
 private:
         
-    int mMinPrecHits;
     double    chi2;
     TStopwatch *mTimg[3]; //seeds,traks,prims
     static int   _debug;
