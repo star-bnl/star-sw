@@ -236,7 +236,7 @@ class StiKalmanTrack : public StiTrack
    		/// Accessor method returns the inner most hit node associated with the track.
    StiKalmanTrackNode * getInnerMostHitNode(int qua=0)   const;
    int                  getNNodes(int qua=0) const;
-   
+   int                  releaseHits(double rMin=0,double rMax=50);
    /// Accessor method returns the first node associated with the track.
    StiKalmanTrackNode * getFirstNode()  const { return firstNode; };
    /// Accessor method returns the last node associated with the track.
@@ -294,6 +294,8 @@ class StiKalmanTrack : public StiTrack
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
   StiKalmanTrack &operator=(const StiKalmanTrack &tk);
+  int rejectByHitSet()  const;
+  
 
 protected:
   friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);

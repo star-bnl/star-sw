@@ -473,7 +473,7 @@ public:
   double sum; 	//summ of chi2
   int    hits;  //total number of hits
   int    nits;  //total number of no hits
-  int    pits;  //total number of precision hits
+  int    wits;  //total weight of precision hits
   int    qa;	// quality flag for current level
 		//   qa =  1 == new hit accepted
 		//   qa =  0 == no hits was expected. dead material or edge
@@ -483,7 +483,7 @@ public:
 		//   qa = -4 == track can not be continued, stop processing of it
 
   	QAFind()		{reset();                  }
-void 	reset()			{rmin=0; sum=0; hits =0; nits=0; qa=0;pits=0;}
+void 	reset()			{rmin=0; sum=0; hits =0; nits=0; qa=0;wits=0;}
 };
 
 //______________________________________________________________________________
@@ -770,8 +770,7 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
     qa.sum += node->getChi2() + log(node->getDeterm());
     qa.hits++; qa.qa=1;
     if (node->getRxy() < kRMinTpc) {
-      qa.pits++;
-      if (detector->getGroupId() == kSsdId)  qa.pits++; //double count to force alone ssd hit2
+      qa.wits+=_pars.hitWeight((int)node->getRxy());
     }
     node->getHitCount()++;
     node->getContigHitCount()++;
@@ -800,19 +799,14 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
 int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
 {
    int ians;
-   ians = qaTry.pits-qaBest.pits;
+   ians = qaTry.wits-qaBest.wits;
 //	One SVT hit is worse than zero
-   if (!qaBest.pits && qaTry.pits  && qaTry.pits  < mMinPrecHits) return -1;
-   if (!qaTry.pits  && qaBest.pits && qaBest.pits < mMinPrecHits) return  1;
-#if 0
-   if (qaBest.sum*qaTry.hits  <= qaTry.sum*qaBest.hits) return -1;
-#endif
-#if 1
+   if (!qaBest.wits &&  qaTry.wits &&  qaTry.wits < _pars.sumWeight()) return -1;
+   if ( !qaTry.wits && qaBest.wits && qaBest.wits < _pars.sumWeight()) return  1;
    				        if (ians)	return ians;
    ians =  qaTry.hits-qaBest.hits;	if (ians)	return ians;
    ians = qaBest.nits- qaTry.nits;	if (ians)	return ians;
    if (qaBest.sum  <= qaTry.sum ) 			return -1;
-#endif
    							return  1;
 }
 
