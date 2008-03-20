@@ -4,20 +4,24 @@
 #include "Sti/Base/Factory.h" 
 #include "Sti/Base/EditableParameter.h" 
  
+//______________________________________________________________________________
 StiKalmanTrackFinderParameters::StiKalmanTrackFinderParameters() 
   : EditableParameters("KalmanTrackFinderParameters","KalmanTrackFinderParameters") 
 { 
   initialize(); 
 } 
    
+//______________________________________________________________________________
 StiKalmanTrackFinderParameters::~StiKalmanTrackFinderParameters() 
 {}   
  
  
+//______________________________________________________________________________
 StiKalmanTrackFinderParameters::StiKalmanTrackFinderParameters(const StiKalmanTrackFinderParameters & p) 
 { 
 } 
  
+//______________________________________________________________________________
 const StiKalmanTrackFinderParameters & StiKalmanTrackFinderParameters::operator=(const StiKalmanTrackFinderParameters & p) 
 { 
   clear(); 
@@ -27,64 +31,16 @@ const StiKalmanTrackFinderParameters & StiKalmanTrackFinderParameters::operator=
 } 
 
 
+//______________________________________________________________________________
 void StiKalmanTrackFinderParameters::initialize() 
 { 
   _enabled  = true; 
   _editable = true; 
-  Factory<EditableParameter> * f = StiToolkit::instance()->getParameterFactory(); 
-  if (!f) 
-    { 
-      cout << "StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null" << endl; 
-      throw logic_error("StiKalmanTrackFinderParameters::initialize() -F- Parameter factory is null"); 
-    } 
-  add(f->getInstance()->set("mcsCalculated",       
-                            "mcsCalculated",    
-                            &mcsCalculated, 
-                            true,  
-                            0)); 
-  add(f->getInstance()->set("field",     
-                            "field",  
-                            &field, 
-                            0.5,  
-                            -2.,  
-                            2.,  
-                            0.1,  
-                            0)); 
-  add(f->getInstance()->set("maxNullCount",     
-                            "maxNullCount", 
-                            &maxNullCount, 
-                            13, 
-                            0, 
-                            30, 
-                            1, 
-                            0)); 
-  add(f->getInstance()->set("maxContiguousNullCount",  
-                            "maxContiguousNullCount",  
-                            &maxContiguousNullCount,   
-                            8, 
-                            0, 
-                            20, 
-                            1, 
-                            0)); 
-  add(f->getInstance()->set("minContiguousHitCountForNullReset",     
-                            "minContiguousHitCountForNullReset",  
-                            &minContiguousHitCountForNullReset, 
-                            2, 
-                            1, 
-                            10, 
-                            1, 
-                            0));
-  add(f->getInstance()->set("maxChi2Vertex",  
-                            "maxChi2Vertex",   
-                            &maxChi2Vertex, 
-                            1000., 0., 20000., 0.1, 0)); 
-  add(f->getInstance()->set("massHypothesis", 
-                            "massHypothesis",  
-                            &massHypothesis,  
-                            0.139, 0.1, 20., 0.01, 0)); 
+  memset(mBeg,0,mEnd-mBeg+1);
 } 
 
 
+//______________________________________________________________________________
 void StiKalmanTrackFinderParameters::loadDS(TDataSet &ds)
 {
   cout << "StiKalmanTrackFinder::load(TDataSet&ds) -I- Starting" << endl;
@@ -103,27 +59,31 @@ void StiKalmanTrackFinderParameters::loadDS(TDataSet &ds)
   massHypothesis  = b->massHypothesis;	
   maxDca3dVertex  = b->maxDca3dVertex;
   maxDca2dZeroXY  = b->maxDca2dZeroXY;
+  setHitRegions(b->mHitRegions);
+  setHitWeights(b->mHitWeights);
+
+
 cout << *this;
   cout << "StiKalmanTrackFinder::load(TDataSet*ds) -I- Done" << endl;
 }
-
-
-void StiKalmanTrackFinderParameters::loadFS(ifstream& inFile)
-{
-  cout << "StiKalmanTrackFinderParameters::load(ifstream& inFile) -I- Starting" << endl;
-  inFile >> useMcAsRec;
-  inFile >> elossCalculated;
-  inFile >> mcsCalculated;
-  inFile >> field;
-  inFile >> maxNullCount;
-  inFile >> maxContiguousNullCount;
-  inFile >> minContiguousHitCountForNullReset;
-  inFile >> maxChi2Vertex;
-  inFile >> massHypothesis;
-  cout << *this;
-  cout << "StiKalmanTrackFinderParameters::load(ifstream& inFile) -I- Done" << endl;
-}
-
+// //______________________________________________________________________________
+// void StiKalmanTrackFinderParameters::loadFS(ifstream& inFile)
+// {
+//   cout << "StiKalmanTrackFinderParameters::load(ifstream& inFile) -I- Starting" << endl;
+//   inFile >> useMcAsRec;
+//   inFile >> elossCalculated;
+//   inFile >> mcsCalculated;
+//   inFile >> field;
+//   inFile >> maxNullCount;
+//   inFile >> maxContiguousNullCount;
+//   inFile >> minContiguousHitCountForNullReset;
+//   inFile >> maxChi2Vertex;
+//   inFile >> massHypothesis;
+//   cout << *this;
+//   cout << "StiKalmanTrackFinderParameters::load(ifstream& inFile) -I- Done" << endl;
+// }
+// 
+//______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& p)
 {
   os << p.getName() << endl
@@ -138,3 +98,25 @@ ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& p)
      << "                     massHypothesis: " << p.massHypothesis << endl;
   return os;
 }
+//______________________________________________________________________________
+void StiKalmanTrackFinderParameters::setHitRegions(int rs)
+{
+  int i=0;
+  for (i=0;rs;i++) {mHitRegions[i]=rs%100; rs/=100;}
+  mHitRegions[i]=10000;
+}
+//______________________________________________________________________________
+void StiKalmanTrackFinderParameters::setHitWeights(int ws)
+{
+  int i=0;
+  for (i=0;ws;i++) {mHitWeights[i]=ws%100; ws/=100;}
+  mHitWeights[i]=0;
+}
+//______________________________________________________________________________
+int StiKalmanTrackFinderParameters::hitWeight(int rxy) const
+{
+  if (rxy>50) return 0;
+  int i=0; for (i=0;rxy>mHitRegions[i];i++) {}
+  return mHitWeights[i];
+}
+

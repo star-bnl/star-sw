@@ -26,24 +26,33 @@ public:
   void setMinContiguousHitCount(int count);
   void setMaxNullCount(int count);
   void setMaxContiguousNullCount(int count);
+  void setHitRegions(int rs);
+  void setHitWeights(int ws);
+  int  hitWeight(int rxy) const;
+  int  sumWeight()	  const {return 20;}
   double getMassHypothesis() const;
   void   initialize();
   virtual void loadDS(TDataSet&);
-  virtual void loadFS(ifstream& inFile);
+//  virtual void loadFS(ifstream& inFile);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& par);
 
  protected:
+  char   mBeg[1];
   bool   useMcAsRec;
   bool   elossCalculated;
   bool   mcsCalculated; 
-  double field; 
   int    maxNullCount;
   int    maxContiguousNullCount; 
   int    minContiguousHitCountForNullReset;
+  int    mHitRegions[4];	//20,50 means 0<svtHit<20, 20<ssdHit<50
+  int    mHitWeights[4];	//Coeffs of nhits. sum must be >=20
+  double field; 
   double maxChi2Vertex;
   double massHypothesis;
   double maxDca2dZeroXY;
   double maxDca3dVertex;
+  char   mEnd[1];
+
 };
 
 inline   void StiKalmanTrackFinderParameters::setElossCalculated(bool option)

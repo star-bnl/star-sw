@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.97 2007/12/20 01:10:18 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.97 2007/12/20 01:10:18 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.98 2008/03/20 01:31:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.98 2008/03/20 01:31:16 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.98  2008/03/20 01:31:16  perev
+ * HitSet rejecting via StiKalmanTrackFinderParameters
+ *
  * Revision 2.97  2007/12/20 01:10:18  perev
  * WarnOff
  *
@@ -497,7 +500,7 @@ double  StiKalmanTrack::getChi2() const
   double theChi2 = 1.e+60;
   if (!firstNode) return theChi2;
   theChi2 = 0;
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
   for (it=begin();it!=end();it++)  {
     StiKalmanTrackNode *node = &(*it);
     if (!node->isValid()) continue;
@@ -525,7 +528,7 @@ int StiKalmanTrack::getPointCount(int detectorId) const
 {
   const StiDetector *detector=0;   
   int nPts = 0;
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
   for (it=begin();it!=end();it++) {
     StiKalmanTrackNode *node = &(*it);
     if (!node->isValid()) 	continue;
@@ -553,7 +556,7 @@ int StiKalmanTrack::getPointCount(int detectorId) const
 int StiKalmanTrack::getMaxPointCount(int detectorId) const
 {
   int nPts = 0;
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
 
   for (it=begin();it!=end();it++){
     const StiKalmanTrackNode *node = &(*it);
@@ -584,7 +587,7 @@ int    StiKalmanTrack::getGapCount()    const
   int gaps = 0;
   if (firstNode)
     {
-      StiKTNBidirectionalIterator it;
+      StiKTNIterator it;
       bool inGap = false;
       for (it=begin();it!=end();it++)
 	{
@@ -625,7 +628,7 @@ int    StiKalmanTrack::getGapCount()    const
 int StiKalmanTrack::getFitPointCount(int detectorId)    const  
 {
   int fitPointCount  = 0;
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
   for (it=begin();it!=end();it++)  {
     StiKalmanTrackNode* node = &(*it); 
     if(!node->isValid())		continue;
@@ -651,7 +654,7 @@ void StiKalmanTrack::getAllPointCount(int count[1][3],int maxDetId) const
 enum {kPP=0,kMP=1,kFP=2};
 
   memset(count[0],0,(maxDetId+1)*3*sizeof(int));
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
 
   for (it=begin();it!=end();it++){
     const StiKalmanTrackNode *node = &(*it);
@@ -689,7 +692,7 @@ double StiKalmanTrack::getTrackLength() const
   double x[2][4],len=0;
   int iready=0;
   StiKalmanTrackNode *node;
-  StiKTNBidirectionalIterator it = begin();
+  StiKTNIterator it = begin();
   for (;(node=it());it++){
     if (!node->isValid()) 	continue;
     if (!node->getHit()) 	continue;
@@ -739,7 +742,7 @@ double StiKalmanTrack::getTrackRadLength() const
   double totalR=0.;
   //Are we going in or out? Makes a difference which material to call
 
-  StiKTNBidirectionalIterator tNode = begin();
+  StiKTNIterator tNode = begin();
 
   //set initial conditions for tNode, the 'current' node;
   //will also need 'nextNode', ie node which is next 
@@ -844,7 +847,7 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
  }
   
   StiKalmanTrackNode *node;
-  StiKTNBidirectionalIterator it =(inot) ? begin():rbegin();
+  StiKTNIterator it =(inot) ? begin():rbegin();
   for (;(node=it());it++){
     if (!node->isValid()) 				continue;
     StiHit *hit = node->getHit();
@@ -882,7 +885,7 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 int StiKalmanTrack::getNNodes(int qua)  const
 {
   StiKalmanTrackNode *node;
-  StiKTNBidirectionalIterator it = begin();
+  StiKTNIterator it = begin();
   int nn=0;
   for (;(node=it());it++){
     if (!node->isValid()) 				continue;
@@ -916,7 +919,7 @@ bool  StiKalmanTrack::isPrimary() const
 ///return vector of nodes with hits
 vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
 {
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
   vector<StiKalmanTrackNode*> nodeVec;
   for (it=begin();it!=end();++it) {
           StiKalmanTrackNode* node = &(*it);
@@ -935,7 +938,7 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
 ///return hits;
 vector<const StMeasuredPoint*> StiKalmanTrack::stHits() const
 {
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
   vector<const StMeasuredPoint*> hits;
   for (it=begin();it!=end();++it) {
     const StiKalmanTrackNode* node = &(*it);
@@ -1213,8 +1216,8 @@ ostream& operator<<(ostream& os, const StiKalmanTrack& track)
     {
       os << *((StiTrack *) &track);
       os <<"List of nodes" << endl;
-      StiKTNBidirectionalIterator tNode = track.begin();
-      StiKTNBidirectionalIterator eNode = track.end();
+      StiKTNIterator tNode = track.begin();
+      StiKTNIterator eNode = track.end();
       //set initial conditions for tNode, the 'current' node;
       //will also need 'nextNode', ie node which is next 
       while (tNode != eNode) {
@@ -1340,12 +1343,16 @@ if (oldRefit) {
 //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
     if (worstNode && worstNode->getChi2()>fitpars->getMaxChi2())     
-      {worstNode->setHit(0); worstNode->setChi2(3e33); 		continue;}
+      {worstNode->getHit()->setTimesUsed(0);
+       worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
+    if (rejectByHitSet()) { releaseHits()            ; continue;}
+    
     if (!fail) 							break;
     
     StiKalmanTrackNode *flipFlopNode= sTNH.getFlipFlop();
     if (flipFlopNode && flipFlopNode->getFlipFlop()>kMaxIter/3)     
-      {flipFlopNode->setHit(0); flipFlopNode->setChi2(3e33); 	continue;}
+      {flipFlopNode->getHit()->setTimesUsed(0);
+       flipFlopNode->setHit(0); flipFlopNode->setChi2(3e33); 	continue;}
     break;
 //	The last resource
 //    errConfidence = 0.5*(errConfidence+1);
@@ -1367,15 +1374,17 @@ if (oldRefit) {
   }
   if (!fail) { //Cleanup. Hits of bad nodes set to zero
     StiKalmanTrackNode *node;
-    StiKTNBidirectionalIterator it = begin();
+    StiKTNIterator it = begin();
     for (;(node=it());it++){
       if (node == vertexNode)				continue;
       StiHit *hit = node->getHit();
       if(!hit) 						continue;
+      hit->setTimesUsed(0);
       node->setHit(0);
       if (!node->isValid()) 				continue;
       if (node->getChi2()>10000.)			continue;
       assert(node->getChi2()<=fitpars->getMaxChi2());
+      hit->setTimesUsed(1);
       node->setHit(hit);
     }
   }
@@ -1401,7 +1410,7 @@ int StiKalmanTrack::refitL()
 static int nCall=0;nCall++;
   StiDebug::Break(nCall);
 
-  StiKTNBidirectionalIterator source;
+  StiKTNIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
   int iNode=0, status = 0,isStarted=0,restIsWrong=0;
   for (source=rbegin();source!=rend();source++) {
@@ -1444,14 +1453,14 @@ static int nCall=0;nCall++;
 //_____________________________________________________________________________
 void StiKalmanTrack::reduce() 
 {
-  StiKTNBidirectionalIterator source;
+  StiKTNIterator source;
   for (source=begin();source!=end();source++) {(*source).reduce();}
 }
 //_____________________________________________________________________________
 void StiKalmanTrack::unset() 
 {
   if (!lastNode) return;
-  StiKTNBidirectionalIterator source;
+  StiKTNIterator source;
   for (source=begin();source!=end();source++) {BFactory::Free(&(*source));}
   lastNode=0; firstNode=0;
 }
@@ -1461,7 +1470,7 @@ void StiKalmanTrack::print(const char *opt) const
   LOG_DEBUG <<
     Form("Track %p",(void*)this) << endm;
 
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
   int n=0;
   for (it=begin();it!=end();++it) {
     StiKalmanTrackNode *node = &(*it);
@@ -1504,7 +1513,7 @@ double Xi2=0;
   StiHitErrs hr;
 //		Loop over nodes and collect global xyz
 
-  StiKTNBidirectionalIterator source;
+  StiKTNIterator source;
   StiKalmanTrackNode *targetNode;
   nNode=0;
   double hz=0; 
@@ -1620,7 +1629,7 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
   _dca	       =tk._dca;
   _vChi2       =tk._vChi2;		//
 
-  StiKTNBidirectionalIterator it;
+  StiKTNIterator it;
   for (it=tk.begin();it!=tk.end();it++){
     const StiKalmanTrackNode *node = &(*it);
     if (!node->isValid()) continue;
@@ -1642,5 +1651,37 @@ StThreeVector<double> StiKalmanTrack::getPoint(int firstLast) const
 void StiKalmanTrack::setMaxRefiter(int maxRefiter) 
 {
   mgMaxRefiter = maxRefiter;
+}
+//_____________________________________________________________________________
+int StiKalmanTrack::rejectByHitSet()  const
+{
+  StiKalmanTrackNode *node;
+  int sum=0;
+  for (StiKTNIterator it = rbegin();(node=it());it++){
+    if (node->x()>50)		break;
+    if (!node->isValid()) 	continue;
+    StiHit *hit = node->getHit();
+    if (!hit) 			continue;
+    if (node->getChi2()>1000) 	continue;
+    sum+= pars->hitWeight(int(hit->x()));
+  }
+  if (!sum) return 0;
+  return sum < pars->sumWeight();
+}
+//_____________________________________________________________________________
+int StiKalmanTrack::releaseHits(double rMin,double rMax)
+{
+  StiKalmanTrackNode *node;
+  int sum=0;
+  for (StiKTNIterator it = rbegin();(node=it());it++){
+    StiHit *hit = node->getHit();
+    if (!hit) 			continue;
+    if (hit->x()<rMin)		continue;
+    if (hit->x()>rMax)		break;
+    sum++;
+    node->setHit(0);
+    hit->setTimesUsed(0);
+  }
+  return sum;
 }
 
