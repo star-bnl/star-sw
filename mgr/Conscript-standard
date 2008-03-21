@@ -239,8 +239,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       }
       my $qrclocal = $dirbase . File::Basename::basename( $qrc );
       my $out = "$dirbase". "qrc_". $stem . ".cxx"; # print "Qt4:  ut : $out ==> $qrclocal\n"; # if $param::debug ;
-#      Command $env [$out], ($qrc), qq(cd %1:d; $rcc %1:f -o %>:f );
-#      push @src, $out
+#       Command $env [$out], ($qrc), qq(cd %1:d; $rcc %1:f -o %>:f );
+#       push @src, $out
     }
   }
   $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
