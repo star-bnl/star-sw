@@ -91,7 +91,9 @@ my @idlML    = script::find_idlM($Dir);
 my @srcL     = script::find_sources($Dir);
 my @h_filesL = script::find_hfiles($Dir);
 my @uiQT     = script::find_ui($Dir);
-my @xpmQT     = script::find_xpm($Dir);
+my @xpmQT    = script::find_xpm($Dir);
+my @qrcQT    = script::find_qrc($Dir);
+
 
 print "idlL = @idlL\n" if $param::debug;
 
@@ -178,6 +180,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   #xpm    /opt/star/sl305_gcc323/qt/bin/uic  -embed -o .ui/qmake_image_collection.cpp
   my $uic = $env->{Packages}->{QT}->{BINDIR} . "/uic";
   my $qt4 = ($env->{Packages}->{QT}->{QT_VERSION} == 4);
+  my $rcc =$uic;
+  $rcc =  $env->{Packages}->{QT}->{BINDIR} . "/rcc" if ($qt4);
   my @QtDefs = ();
   my @uih = ();#   print "h_files: @h_files\n";
   foreach my $h (@h_files) {
@@ -212,8 +216,32 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   if ($#xpmQT >= 0) {
     my $out = $PKG . "_image_collection.cxx";
     my @xpm = map (File::Basename::basename( $_), @xpmQT);
-    Command $env [$out], @xpm, qq($uic -embed %< -o %> );
-    push @src, $out
+    if ($qt4) {
+       # create qt4 resource file
+       my  $qrc = $out.".qrc";
+       #Command $env [$qrc], @xpm, qq(cat >%>; );
+       #Command $env [$out], $qrc, qq($uic -embed %< -o %> );
+
+    } else {
+       Command $env [$out], @xpm, qq($uic -embed %< -o %> );
+       push @src, $out
+    }
+  }
+  if ($qt4) {
+    foreach my $qrc (@qrcQT) {
+      my $dir     = File::Basename::dirname( $qrc );
+      my $dirbase = $dir;
+      $dirbase =~ s/$Dir//;
+      my $stem    = File::Basename::basename( $qrc);
+      if ($dirbase) {
+        $dirbase =~ s|^/||;
+       $dirbase .= "/";
+      }
+      my $qrclocal = $dirbase . File::Basename::basename( $qrc );
+      my $out = "$dirbase". "qrc_". $stem . ".cxx"; # print "Qt4:  ut : $out ==> $qrclocal\n"; # if $param::debug ;
+#      Command $env [$out], ($qrc), qq(cd %1:d; $rcc %1:f -o %>:f );
+#      push @src, $out
+    }
   }
   $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
   $SO_PKG_PLAIN = $SO_PKG;
