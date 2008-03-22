@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.534 2008/03/05 00:01:29 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.535 2008/03/22 23:45:43 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -92,6 +92,12 @@ void StBFChain::Setup(Int_t mode) {
   }
   FDate  = FTime  = 0;
   FDateS = FTimeS = 0;
+
+  Gproperty  = ".gopt.";
+  Gvalue     = "";
+  Gpattern   = "*";
+
+  
 }
 //_____________________________________________________________________________
 /// Destructor. Call Finish() . See this method for detail on what is cleaned.
@@ -808,6 +814,10 @@ Int_t StBFChain::Instantiate()
 
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Sti");
 
+  gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
+  SetAttr(Gproperty.Data(),Gvalue.Data(),Gpattern.Data());
+
+
   return status;
 }
 //_____________________________________________________________________
@@ -972,9 +982,15 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     if       (Tag ==  opt) {return  i;}
     else {if (Tag == nopt) {return -i;}}
   }
+  // {sdt|dbv}YYYYMMDD -> {sdt|dbv} 3 / YYYYMMDD 8 = 11
   if ( (strncmp( Tag.Data() ,"dbv",3) ||
 	strncmp( Tag.Data() ,"sdt",3)   ) &&
        strlen(Tag.Data()) == 11 ) return 0;
+
+  // GoptXXXvvvvvv -> Gopt 4 / XXX 3 / vvvvvv 6 = 13
+  if ( strncmp( Tag.Data() ,"gopt",4) &&
+       strlen(Tag.Data()) == 13 ) return 0;
+
   if (Check) {
     gMessMgr->Error() << "Option " << Tag.Data() << " has not been recognized" << endm;
     abort(); //assert(1);
@@ -1025,6 +1041,30 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  (void) sscanf(Tag.Data(),"sdt%d",&FDateS);
 	  gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (DateTime)     "
 	       << FDateS << endm;
+	} else if (  ! strncmp( Tag.Data() ,"gopt",4) && strlen(Tag.Data()) == 13){
+	  char GOptName[3],GOptValue[6];
+	  //TString property(".gopt.");
+	  //TString pattern("*");
+
+	  (void) sscanf(Tag.Data(),"gopt%3s%6s",GOptName,GOptValue);
+	  
+	  // see StBFChain::Setup() for default values
+	  Gproperty += GOptName;
+	  // JL
+	  // pattern is case sensitive, need more checks on this before
+	  // setting to something else than "*"
+	  //Gpattern  += GOptName;
+	  //Gpattern  += "*";
+	  Gvalue = GOptValue;
+
+	  gMessMgr->QAInfo() << Tag.Data() << " ... this will set an general attribute " 
+			     << Gproperty.Data() << " with value " << GOptValue << " to " 
+			     << Gpattern.Data() << endm;
+	  // Attr() need to be set after the maker exist
+	  //SetAttr(property.Data(),GOptValue,pattern.Data());
+	  //SetAttr(property.Data(),GOptValue,pattern.Data());
+
+	  
 	} else { // Check for predefined db time stamps ?
 	  kgo = kOpt(Tag.Data(),kFALSE);
 	  if (kgo != 0){
@@ -1117,7 +1157,7 @@ Char_t *StBFChain::GetOptionString(const Char_t *Opt)
   the extraneous information passed through the comment if applies. Two
   special flags exists, that is, dbv and sdt for database interraction ...
   - The <tt>dbv</tt> tag is used to setup the end-time for entries (time after
-  which any database insertions will be ignored). It used to provide a
+  which any database insertions will be ignored). This is used to provide a
   mechanism by which we can run production with a stable set of calibration
   constant and still allow for development value insertion to get in.
   - The <tt>sdt</tt> tag is used to setup the database look-up time stamp
@@ -1125,9 +1165,19 @@ Char_t *StBFChain::GetOptionString(const Char_t *Opt)
   want to decouple Geant geometry and database calibration constants.
   This may also be used to get database values when you do not run over
   a raw data file.
-  - The geometry options are now dynamic. This includes BOTH Y geometries
-  and RY geometry options. They are defined now in StMaker as a static
-  map.
+  - The geometry options are now dynamic. This includes BOTH Y(ear) based 
+  geometries and RY geometry (Real data) options. They are defined now in 
+  StMaker as a static map.
+  
+  The <tt>GOptXXXvvvvvv</tt> options are used to pass an flexible option
+  value <tt>vvvvvv</tt> to makers in the chain matching the name <tt>XXX</tt>.
+  The three letter acronym will be following the detector sub-systems naming.
+  If a maker uses such convenience, the basic rule applies:
+  - the Maker MUST use a centralized conversion function of <tt>vvvvvv</tt>
+  to a private structure with explicit naming of each switches
+  - explaination on usage and the thourough explaination of the meaning
+  of the values <tt>vvvvvv</tt> must be clearly added to the documentation
+
 */
 void StBFChain::SetFlags(const Char_t *Chain)
 {
