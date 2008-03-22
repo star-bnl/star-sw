@@ -6,7 +6,7 @@
 
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
- \date   1999/07/29 , 2001-2007
+ \date   1999/07/29 , 2001-2008
 
  Class to control "BFC" chain
 
@@ -23,7 +23,7 @@
 #include "TTable.h"
 #include "Ttypes.h"
 
-/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.44 2008/03/05 00:01:29 fisyak Exp $ */
+/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.45 2008/03/22 23:45:43 jeromel Exp $ */
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
@@ -56,8 +56,13 @@ class StBFChain : public StChain {
   Int_t               FDateS;     // floating timestamp date (DateTime)
   Int_t               FTimeS;     // floating timestamp time (DateTime)
   Int_t               fNoChainOptions;
+  TString             Gproperty;  // a global property name
+  TString             Gpattern;   // a global pattern
+  TString             Gvalue;     // a global value
+
   St_Bfc             *fchainOpt;
   Int_t               fkChain;    // Master chain option
+
  public:
   StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE) :
             StChain(name,UseOwnHeader)
@@ -110,7 +115,7 @@ class StBFChain : public StChain {
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.44 2008/03/05 00:01:29 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.45 2008/03/22 23:45:43 jeromel Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
