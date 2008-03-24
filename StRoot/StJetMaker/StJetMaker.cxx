@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.14 2008/01/28 03:37:27 staszak Exp $
+ * $Id: StJetMaker.cxx,v 1.15 2008/03/24 23:01:12 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -68,11 +68,11 @@ ClassImp(StJetMaker)
   StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker, 
   StMuDstMaker* uDstMaker, const char *outputName) 
   : StMaker(name), fourPMaker(fPMaker), muDstMaker(uDstMaker),
-  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0), mOfstream(0)
+  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0)
 */
     StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
 	: StMaker(name), muDstMaker(uDstMaker),
-	  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0), mOfstream(0)
+	  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0)
 {
     infoLevel = 0;
     mudst=0;
@@ -104,12 +104,6 @@ void StJetMaker::InitFile(void)
     m_outfile->SetCompressionLevel(1);
     
     jetTree->SetDirectory(m_outfile);
-
-    if (0) {
-	string jetCheck(outName);
-	jetCheck += ".run.txt";
-	mOfstream = new ofstream(jetCheck.c_str());
-    }
 }
 
 Int_t StJetMaker::Init() 
@@ -238,12 +232,6 @@ void StJetMaker::FinishFile(void)
     m_outfile->Write();
     m_outfile->Close();
     delete m_outfile;
-
-    if (mOfstream) {
-	mOfstream->close();
-	delete mOfstream;
-	mOfstream=0;
-    }
 }
 
 Int_t StJetMaker::Finish()

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.5 2006/12/15 23:25:32 mmiller Exp $
+ * $Id: StJetMaker.h,v 1.6 2008/03/24 23:01:11 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.6  2008/03/24 23:01:11  tai
+ * deleted mOfstream for it was not used.
+ *
  * Revision 1.5  2006/12/15 23:25:32  mmiller
  * First release of StJetSkimEvent and StJetSkimEventMaker to allow for
  * a MuDst'less analysis once the jet finding pass is completed.
@@ -145,9 +148,6 @@ private:
     Int_t            infoLevel;
     int mEventCounter;
 
-    //temp, MLM
-    ofstream* mOfstream; //!
-    
     ClassDef(StJetMaker,0)
 	};
 
