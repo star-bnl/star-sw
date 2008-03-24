@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.13 2008/01/28 03:37:25 staszak Exp $
+// $Id: StJets.cxx,v 1.14 2008/03/24 22:43:18 tai Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.14  2008/03/24 22:43:18  tai
+// added particles_() to make test easier.
+//
 // Revision 1.13  2008/01/28 03:37:25  staszak
 // A number of updates: i) Murad's use2006cuts function which extends tracks to SMD, and includes DCA cuts, ii) emulated L2 results now included and data L2 results restructured, iii) StJet zVertex and detEta now filled
 //
@@ -269,6 +272,17 @@ vector<TrackToJetIndex*> StJets::particles(int jetIndex)
     }
     return vec;
 }
+
+TObjArray StJets::particles_(int jetIndex)
+{
+  TObjArray ret;
+
+  vector<TrackToJetIndex*> vec = particles(jetIndex);
+  for (vector<TrackToJetIndex*>::iterator iter = vec.begin(); iter != vec.end(); ++iter)
+    ret.Add(*iter);
+
+  return ret;
+} 
 
 //right now it's a linear search, even though the JetsToTrackIndices is ordered by jetIndex
 StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
