@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.6 2008/03/24 23:01:11 tai Exp $
+ * $Id: StJetMaker.h,v 1.7 2008/03/24 23:54:51 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.7  2008/03/24 23:54:51  tai
+ * deleted some #include lines for they were not used.
+ *
  * Revision 1.6  2008/03/24 23:01:11  tai
  * deleted mOfstream for it was not used.
  *
@@ -80,11 +83,10 @@
 
 #include "StMaker.h"
 #include "StppJetAnalyzer.h"
+
 #include <string>
-#include <iostream>
-#include <fstream>
 #include <map>
-#include <algorithm>
+
 using namespace std;
 
 class TFile;
