@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.11 2008/01/28 03:37:26 staszak Exp $
+// $Id: StJets.h,v 1.12 2008/03/24 22:43:17 tai Exp $
 // $Log: StJets.h,v $
+// Revision 1.12  2008/03/24 22:43:17  tai
+// added particles_() to make test easier.
+//
 // Revision 1.11  2008/01/28 03:37:26  staszak
 // A number of updates: i) Murad's use2006cuts function which extends tracks to SMD, and includes DCA cuts, ii) emulated L2 results now included and data L2 results restructured, iii) StJet zVertex and detEta now filled
 //
@@ -237,6 +240,9 @@ public:
     
     ///Here's how you get the 4-momenta of a particles in a given jet.  This contains tracks and energy-corrected-towers.  Use this for Frag. Function
     vector<TrackToJetIndex*> particles(int jetIndex);
+
+    // don't use this. this is for test.
+    TObjArray particles_(int jetIndex);
     
     ///Access to a container of the charged-tracks associated with a jet
     TrackVec jetParticles(StMuDst*, int jetIndex);
