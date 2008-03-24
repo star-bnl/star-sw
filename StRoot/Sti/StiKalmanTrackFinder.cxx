@@ -765,7 +765,7 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
   StiHit *hit = node->getHit();
   if (hit) {
     if (debug() > 2)cout << " got Hit! "<<endl ;
-    const StiDetector *detector = hit->detector();
+//  const StiDetector *detector = hit->detector();
     qa.sum += node->getChi2() + log(node->getDeterm());
     qa.hits++; qa.qa=1;
     if (node->getRxy() < kRMinTpc) {

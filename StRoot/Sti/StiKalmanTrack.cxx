@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.98 2008/03/20 01:31:16 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.98 2008/03/20 01:31:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.99 2008/03/24 19:32:03 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.99 2008/03/24 19:32:03 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.99  2008/03/24 19:32:03  perev
+ * BugFix vertex is not SvtHit
+ *
  * Revision 2.98  2008/03/20 01:31:16  perev
  * HitSet rejecting via StiKalmanTrackFinderParameters
  *
@@ -1662,6 +1665,7 @@ int StiKalmanTrack::rejectByHitSet()  const
     if (!node->isValid()) 	continue;
     StiHit *hit = node->getHit();
     if (!hit) 			continue;
+    if (!hit->detector())	continue;
     if (node->getChi2()>1000) 	continue;
     sum+= pars->hitWeight(int(hit->x()));
   }
@@ -1676,6 +1680,7 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
   for (StiKTNIterator it = rbegin();(node=it());it++){
     StiHit *hit = node->getHit();
     if (!hit) 			continue;
+    if (!hit->detector())	continue;
     if (hit->x()<rMin)		continue;
     if (hit->x()>rMax)		break;
     sum++;

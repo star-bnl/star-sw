@@ -115,7 +115,7 @@ void StiKalmanTrackFinderParameters::setHitWeights(int ws)
 //______________________________________________________________________________
 int StiKalmanTrackFinderParameters::hitWeight(int rxy) const
 {
-  if (rxy>50) return 0;
+  if (4>rxy || rxy>50) return 0;
   int i=0; for (i=0;rxy>mHitRegions[i];i++) {}
   return mHitWeights[i];
 }
