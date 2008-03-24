@@ -11,6 +11,7 @@
 #include "Sti/Star/StiStarDetectorBuilder.h"
 #include "Sti/StiElossCalculator.h"
 #include "TMath.h"
+#include "TError.h"
 //________________________________________________________________________________
 void StiStarDetectorBuilder::buildDetectors(StMaker&s) {
   assert(StiVMCToolKit::GetVMC());
@@ -33,7 +34,11 @@ void StiStarDetectorBuilder::useVMCGeometry() {
   Double_t dPhi = 2*TMath::Pi();
   _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
   for (Int_t i = 1; i < 5; i += 2) {// loop over Be and Steel pipes
-    TGeoVolume *pipe = gGeoManager->GetVolume(PipeVolumes[i  ].name);
+    TGeoVolume *pipe = gGeoManager->GetVolume(PipeVolumes[i].name);
+    if (!pipe) { //No volume (??)
+      Warning("StiStarDetectorBuilder::useVMCGeometry","No %s volume\n",PipeVolumes[i].name);
+      continue;
+    }
     TGeoMaterial *pipeMaterial = pipe->GetMaterial();
     Double_t PotI = StiVMCToolKit::GetPotI(pipeMaterial);
     _pipeMaterial = add(new StiMaterial(pipeMaterial->GetName(),
@@ -48,6 +53,10 @@ void StiStarDetectorBuilder::useVMCGeometry() {
     Double_t Rmax = pipeShape->GetRmax();
     Double_t dZ   = pipeShape->GetDz();
     TGeoVolume *vac  = gGeoManager->GetVolume(PipeVolumes[i+1].name);
+    if (!vac) { //No volume (??)
+      Warning("StiStarDetectorBuilder::useVMCGeometry","No %s volume\n",PipeVolumes[i+1].name);
+      continue;
+    }
     TGeoTube *vacShape = (TGeoTube *) vac->GetShape();
     Double_t Rmin = vacShape->GetRmax();
     Double_t radius = (Rmin + Rmax)/2;
