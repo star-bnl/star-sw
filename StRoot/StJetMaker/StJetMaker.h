@@ -1,7 +1,14 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.13 2008/03/25 00:49:06 tai Exp $
+ * $Id: StJetMaker.h,v 1.14 2008/03/25 01:28:11 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.14  2008/03/25 01:28:11  tai
+ * changed some member variables name to conform the coding convention.
+ * stopped including unused header files.
+ * deleted commented out peace of codes.
+ * deleted standard out messange for producing wrong information.
+ * changed spacing.
+ *
  * Revision 1.13  2008/03/25 00:49:06  tai
  * changed spacing
  *
@@ -136,27 +143,27 @@ public:
   virtual Int_t Finish();
     
   ///Access to the Tree of StJets branches
-  TTree* tree() { return jetTree; }
+  TTree* tree() { return mJetTree; }
     
   ///Construct a new jet analysis.
   void addAnalyzer(const StppAnaPars*, const StJetPars*, StFourPMaker*, const char* anaName);
     
   ///Access to StJets objects, stored in a std::map keyed by the StJets name
-  jetBranchesMap& getJets() { return jetBranches; }
+  jetBranchesMap& getJets() { return mJetBranches; }
     
 protected:
 
   void FinishFile(void);
-  jetBranchesMap jetBranches;  
+  jetBranchesMap  mJetBranches;
 
-  StMuDstMaker*   muDstMaker;   //!
+  StMuDstMaker*   mMuDstMaker;   //!
 
 private:
 
-  const char *outName;     //!
-  StMuDst *mudst;          //!
-  TFile *m_outfile;        //!
-  TTree *jetTree;          //!
+  const char *mOutName;     //!
+  StMuDst *mMuDst;          //!
+  TFile *mOutFile;        //!
+  TTree *mJetTree;          //!
   int mEventCounter;
 
   ClassDef(StJetMaker, 0)
