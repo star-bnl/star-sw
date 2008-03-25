@@ -31,13 +31,6 @@ const double bFactor = 0.0029979 ;
 #define sgn(a)      (float)( ( (a) > 0   ) ? (1) :(-1) )
 #define square(a)   (float)( (a) * (a) )
 
-
-extern double fmod(double,double);
-extern double sqrt(double);
-extern double fabs(double);
-extern double atan2(double,double);
-
-
 class FtfContainer{
    public:
      void *first; 
