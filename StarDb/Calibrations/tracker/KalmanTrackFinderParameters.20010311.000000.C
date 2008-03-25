@@ -13,7 +13,6 @@ memset(&row,0,tableSet->GetRowSize());
     row.useTrackFilter	 =         1; // Whether a track filter should be used internally;
     row.elossCalculated	 =         1; // Whether the Energy loss should be calculated while propagating tracks;
     row.mcsCalculated	 =         1; // Whether multiple coulomb scattering should be include in erro matrices;
-    row.field	 	 =       0.5;// Value of the field;
     row.maxNullCount	 =        13; // Maximum number of null hits on active detector layers;
     row.maxContigNullCount =       8; // Maximum number of contiguous null hits;
     row.minCountForReset   =       2; // Number of adjacent layers with hits before nullContiguous is reset to zero ;
