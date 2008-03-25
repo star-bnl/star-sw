@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.8 2008/03/25 00:00:28 tai Exp $
+ * $Id: StJetMaker.h,v 1.9 2008/03/25 00:32:41 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.9  2008/03/25 00:32:41  tai
+ * deleted InitFile() for not being used.
+ *
  * Revision 1.8  2008/03/25 00:00:28  tai
  * moved "using namespace std;" from the .h file to the .cxx file
  *
@@ -132,7 +135,7 @@ public:
     jetBranchesMap& getJets();
     
 protected:
-    void InitFile(void);
+  //    void InitFile(void);
     void FinishFile(void);
 
     jetBranchesMap jetBranches;  
