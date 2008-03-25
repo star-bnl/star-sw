@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.12 2008/03/25 00:44:29 tai Exp $
+ * $Id: StJetMaker.h,v 1.13 2008/03/25 00:49:06 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.13  2008/03/25 00:49:06  tai
+ * changed spacing
+ *
  * Revision 1.12  2008/03/25 00:44:29  tai
  * moved the inline functions to inside the class definition.
  *
@@ -121,44 +124,42 @@ class StppAnaPars;
  */
 
 class StJetMaker : public StMaker {
+
 public:
 
-    ///A useful typedef for the map of StJets objects.
-    typedef std::map<std::string, StppJetAnalyzer*, std::less<std::string> > jetBranchesMap;
+  typedef std::map<std::string, StppJetAnalyzer*, std::less<std::string> > jetBranchesMap;
     
-    ///The constructor requires a valid instance of both a StFourPMaker and a StMuDstMaker
-    //!StJetMaker(const Char_t *name, StFourPMaker* fPMaker, StMuDstMaker* uDstMaker, const char *outputFile);
-    StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
+  StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
     
-    virtual Int_t Init();
-    virtual Int_t Make();
-    virtual Int_t Finish();
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual Int_t Finish();
     
-    ///Access to the Tree of StJets branches
-    TTree* tree() { return jetTree; }
+  ///Access to the Tree of StJets branches
+  TTree* tree() { return jetTree; }
     
-    ///Construct a new jet analysis.
-    void addAnalyzer(const StppAnaPars*, const StJetPars*, StFourPMaker*, const char* anaName);
+  ///Construct a new jet analysis.
+  void addAnalyzer(const StppAnaPars*, const StJetPars*, StFourPMaker*, const char* anaName);
     
-    ///Access to StJets objects, stored in a std::map keyed by the StJets name
-    jetBranchesMap& getJets() { return jetBranches; }
+  ///Access to StJets objects, stored in a std::map keyed by the StJets name
+  jetBranchesMap& getJets() { return jetBranches; }
     
 protected:
-    void FinishFile(void);
 
-    jetBranchesMap jetBranches;  
+  void FinishFile(void);
+  jetBranchesMap jetBranches;  
 
-protected:
-    StMuDstMaker*   muDstMaker;   //!
+  StMuDstMaker*   muDstMaker;   //!
 
 private:
-    const char*     outName;      //!
-    StMuDst*        mudst;        //!
-    TFile           *m_outfile;   //!
-    TTree           *jetTree;      //!
-    int mEventCounter;
 
-    ClassDef(StJetMaker,0)
-	};
+  const char *outName;     //!
+  StMuDst *mudst;          //!
+  TFile *m_outfile;        //!
+  TTree *jetTree;          //!
+  int mEventCounter;
 
-#endif
+  ClassDef(StJetMaker, 0)
+};
+
+#endif // StJetMaker_h
