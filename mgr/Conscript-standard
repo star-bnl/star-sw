@@ -238,8 +238,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
        $dirbase .= "/";
       }
       my $qrclocal = $dirbase . File::Basename::basename( $qrc );
+      my @xpm = map (File::Basename::basename( $_), @xpmQT);
+      my @dep = ($qrclocal,@xpm );
       my $out = "$dirbase". "qrc_". $stem . ".cxx"; # print "Qt4:  ut : $out ==> $qrclocal\n"; # if $param::debug ;
-      Command $env [$out], $qrclocal, qq(cd %1:d; $rcc %1:f -o %>:f );
+      Command $env [$out], @dep, qq(cd %1:d; $rcc %1:f -o %>:f );
       push @src, $out
     }
   }
