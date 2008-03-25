@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.20 2008/03/25 00:33:44 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.21 2008/03/25 00:40:15 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -64,15 +64,13 @@ ClassImp(StJetMaker)
   StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker, 
   StMuDstMaker* uDstMaker, const char *outputName) 
   : StMaker(name), fourPMaker(fPMaker), muDstMaker(uDstMaker),
-  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0)
+  outName(outputName), mEventCounter(0)
 */
     StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
 	: StMaker(name), muDstMaker(uDstMaker),
-	  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0)
+	  outName(outputName), mEventCounter(0)
 {
-    infoLevel = 0;
     mudst=0;
-
     }
 /*!
   Constructing a new jet analysis requires three elements:
@@ -199,8 +197,8 @@ Int_t StJetMaker::Finish()
     FinishFile();
     cout << "=================================================================\n";
     cout << "StJetMaker statistics:\n";
-    cout << "events with StJetMaker data: " << mGoodCounter << endl;
-    cout << "events without StJetMaker data: " << mBadCounter << endl;
+    cout << "events with StJetMaker data: 0" << endl;
+    cout << "events without StJetMaker data: 0" << endl;
     cout << "=================================================================\n";    
     StMaker::Finish();
     return kStOK;

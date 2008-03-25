@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.10 2008/03/25 00:33:44 tai Exp $
+ * $Id: StJetMaker.h,v 1.11 2008/03/25 00:40:15 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.11  2008/03/25 00:40:15  tai
+ * deletec unused member variables.
+ *
  * Revision 1.10  2008/03/25 00:33:44  tai
  * deleted InitFile() for not being used.
  *
@@ -149,11 +152,8 @@ protected:
 private:
     const char*     outName;      //!
     StMuDst*        mudst;        //!
-    size_t          mGoodCounter; //!
-    size_t          mBadCounter;  //!
     TFile           *m_outfile;   //!
     TTree           *jetTree;      //!
-    Int_t            infoLevel;
     int mEventCounter;
 
     ClassDef(StJetMaker,0)
