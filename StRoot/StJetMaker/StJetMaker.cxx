@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.19 2008/03/25 00:32:41 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.20 2008/03/25 00:33:44 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -88,19 +88,6 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourP
 {
     jetBranches[name] = new StppJetAnalyzer(ap, jp, fp);
 }
-
-//void StJetMaker::InitFile(void)
-//{
-//    // creating Jet nanoDst file name
-//    TString jetFileName(outName);
-//    cout << "StJetMaker: jet output file: " << jetFileName << endl;
-//    
-//    //open udst file
-//    m_outfile = new TFile(jetFileName,"recreate");
-//    m_outfile->SetCompressionLevel(1);
-//    
-//    jetTree->SetDirectory(m_outfile);
-//}
 
 Int_t StJetMaker::Init() 
 {
