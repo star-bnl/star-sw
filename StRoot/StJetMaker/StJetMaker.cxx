@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.15 2008/03/24 23:01:12 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.16 2008/03/25 00:00:28 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -55,6 +55,8 @@
 #include "StJetMaker/StJet.h"
 #include "StJetMaker/StFourPMakers/StFourPMaker.h"
 #include "StJetMaker/StFourPMakers/StBET4pMaker.h"
+
+using namespace std;
 
 //temp, MLM
 void dumpProtojetToStream(int event, int jet, ostream& os, StProtoJet& pj);
