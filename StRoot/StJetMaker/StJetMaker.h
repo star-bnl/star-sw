@@ -1,7 +1,14 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.14 2008/03/25 01:28:11 tai Exp $
+ * $Id: StJetMaker.h,v 1.15 2008/03/25 02:08:42 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.15  2008/03/25 02:08:42  tai
+ * deleted keyword virtual for this class is a concrete class.
+ * moved the content of FinishFile() to Finish and deleted FinishFile()
+ * changed the type of mOutName from char* to std::string
+ * deleted mEventCounter for not being used
+ * changed spacing
+ *
  * Revision 1.14  2008/03/25 01:28:11  tai
  * changed some member variables name to conform the coding convention.
  * stopped including unused header files.
@@ -138,9 +145,9 @@ public:
     
   StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
     
-  virtual Int_t Init();
-  virtual Int_t Make();
-  virtual Int_t Finish();
+  Int_t Init();
+  Int_t Make();
+  Int_t Finish();
     
   ///Access to the Tree of StJets branches
   TTree* tree() { return mJetTree; }
@@ -153,18 +160,15 @@ public:
     
 protected:
 
-  void FinishFile(void);
   jetBranchesMap  mJetBranches;
-
-  StMuDstMaker*   mMuDstMaker;   //!
+  StMuDstMaker*   mMuDstMaker;
 
 private:
 
-  const char *mOutName;     //!
-  StMuDst *mMuDst;          //!
-  TFile *mOutFile;        //!
-  TTree *mJetTree;          //!
-  int mEventCounter;
+  std::string mOutName;
+  StMuDst *mMuDst;
+  TFile *mOutFile;
+  TTree *mJetTree;
 
   ClassDef(StJetMaker, 0)
 };
