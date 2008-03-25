@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.17 2008/03/25 00:05:32 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.18 2008/03/25 00:13:48 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -182,30 +182,7 @@ Int_t StJetMaker::Make()
 	    
 	    StProtoJet& pj = (*it);
 	    LOG_DEBUG <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endm;
-	    /*
-	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
-	    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
-		AbstractFourVec* v = (*it2);
-		cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
-	    }
-	    */
-	    
-	    /*
-	    //temp check from here.................
-	    //dumpProtojetToStream(mudst->event()->eventId(), ijet, *mOfstream, *it);
-	    StProtoJet& pj = (*it);
-	    cout <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endl;
-	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.	    
-	    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
-		//AbstractFourVec* v = (*it2);
-		//cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
-		StMuTrackFourVec* fv = dynamic_cast<StMuTrackFourVec*>(*it2);
-		assert(fv);
-		cout <<"\t\t\t"<<(*fv)<<endl;
-	    }
-	    //to here .............................
-	    */
-	    
+
 	    muDstJets->addProtoJet(*it, mudst);
 	    ++ijet;
 	}
