@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.22 2008/03/25 01:28:11 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.23 2008/03/25 02:08:42 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -58,7 +58,6 @@ StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *
   , mOutName(outputName)
   , mMuDst(0)
   , mJetTree(0)
-  , mEventCounter(0)
 {
 
 }
@@ -80,105 +79,94 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourP
 
 Int_t StJetMaker::Init() 
 {
-    TString jetFileName(mOutName);
-    cout << "StJetMaker: jet output file: " << jetFileName << endl;
+  cout << "StJetMaker: jet output file: " << mOutName << endl;
     
-    mOutFile = new TFile(jetFileName, "recreate");
+  mOutFile = new TFile(mOutName.c_str(), "recreate");
     
-    mJetTree  = new TTree("jet","jetTree");
-    for(jetBranchesMap::iterator i = mJetBranches.begin(); i != mJetBranches.end(); i++)	{
-	(*i).second->addBranch((*i).first.c_str(), mJetTree);
-    }
+  mJetTree  = new TTree("jet", "jetTree");
+  for(jetBranchesMap::iterator i = mJetBranches.begin(); i != mJetBranches.end(); ++i) {
+    (*i).second->addBranch((*i).first.c_str(), mJetTree);
+  }
     
-    return StMaker::Init();
+  return StMaker::Init();
 }
 
 Int_t StJetMaker::Make()
 {
-  LOG_DEBUG << " Start StJetMaker :: " << GetName() << " mode=" << m_Mode<<endm;
-    ++mEventCounter;
-    if(mMuDstMaker != NULL) {
-	mMuDst = mMuDstMaker->muDst();
-    }
+  LOG_DEBUG << " Start StJetMaker :: " << GetName() << " mode=" << m_Mode << endm;
+  if(mMuDstMaker != NULL) {
+    mMuDst = mMuDstMaker->muDst();
+  }
     
-    //Find the Jets, using the fourPMaker information:
-    bool hadJets = false;
+  for(jetBranchesMap::iterator jb = mJetBranches.begin(); jb != mJetBranches.end(); ++jb) {
+    StppJetAnalyzer* thisAna = (*jb).second;
+    if(!thisAna) {
+      cout << "StJetMaker::Make() ERROR:\tjetBranches[" << (*jb).first << "]==0. abort()" << endl;
+      abort();
+    }
 
-    for(jetBranchesMap::iterator jb = mJetBranches.begin(); jb != mJetBranches.end(); ++jb) {
-      StppJetAnalyzer* thisAna = (*jb).second;
-      if(!thisAna) {
-	cout << "StJetMaker::Make() ERROR:\tjetBranches[" << (*jb).first << "]==0. abort()" << endl;
-	abort();
-      }
+    StFourPMaker* fourPMaker = thisAna->fourPMaker();
+    
+    if(fourPMaker == NULL) {
+      cout << "StJetMaker::Make() ERROR:\tfourPMaker is NULL! abort()" << endl;
+      abort();
+    }
 
-      StFourPMaker* fourPMaker = thisAna->fourPMaker();
+    thisAna->clear();
 	
-      if(fourPMaker == NULL) {
-	cout << "StJetMaker::Make() ERROR:\tfourPMaker is NULL! abort()" << endl;
-	abort();
-      }
+    FourList &tracks = fourPMaker->getTracks();
 
-      thisAna->clear();
+    thisAna->setFourVec(tracks);
+    LOG_DEBUG << "call:\t" << (*jb).first <<".findJets() with:\t" << tracks.size() << "\t protoJets" << endm;
+    thisAna->findJets();
 	
-      FourList &tracks = fourPMaker->getTracks();
+    typedef StppJetAnalyzer::JetList JetList;
+    JetList &cJets = thisAna->getJets();
+	
+    StJets *muDstJets = thisAna->getmuDstJets();
+    muDstJets->Clear();
+    muDstJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
 
-      thisAna->setFourVec(tracks);
-      LOG_DEBUG << "call:\t" << (*jb).first <<".findJets() with:\t" << tracks.size() << "\t protoJets"<<endm;
-      thisAna->findJets();
-	
-      typedef StppJetAnalyzer::JetList JetList;
-      JetList &cJets = thisAna->getJets();
-	
-      StJets *muDstJets = thisAna->getmuDstJets();
-      muDstJets->Clear();
-      muDstJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
+    muDstJets->setMuDst(mMuDst);
 
-      muDstJets->setMuDst(mMuDst);
-
-      //Addd some info from StBet4pMaker
-      StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
-      if (bet4p) {
-	LOG_DEBUG << "StJetMaker::Make()\tfound 4pmaker in chain" << endm;
-	muDstJets->setDylanPoints( bet4p->nDylanPoints() );
-	muDstJets->setSumEmcE( bet4p->sumEmcEt() );
-      }
+    //Addd some info from StBet4pMaker
+    StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
+    if (bet4p) {
+      LOG_DEBUG << "StJetMaker::Make()\tfound 4pmaker in chain" << endm;
+      muDstJets->setDylanPoints( bet4p->nDylanPoints() );
+      muDstJets->setSumEmcE( bet4p->sumEmcEt() );
+    }
 	
-      if (cJets.size() > 0) hadJets = true;
-
-      int ijet(0);
+    int ijet(0);
 	
-      LOG_DEBUG << "Number Jets Found(a):\t" << cJets.size() << endm;
-      for(JetList::iterator it = cJets.begin(); it != cJets.end(); ++it) {
+    LOG_DEBUG << "Number Jets Found(a):\t" << cJets.size() << endm;
+    for(JetList::iterator it = cJets.begin(); it != cJets.end(); ++it) {
 	    
-	StProtoJet& pj = (*it);
-	LOG_DEBUG << "jet " << ijet << "\t\t" << pj.pt() << "\t" << pj.phi() << "\t" << pj.eta() << endm;
+      StProtoJet& pj = (*it);
+      LOG_DEBUG << "jet " << ijet << "\t\t" << pj.pt() << "\t" << pj.phi() << "\t" << pj.eta() << endm;
 
-	muDstJets->addProtoJet(*it, mMuDst);
-	++ijet;
-      }
-	
-      LOG_DEBUG << "Number Jets Found (b): " << muDstJets->nJets() << endm;	
-      for(int i = 0; i < muDstJets->nJets(); i++) {
-	StJet* jet = (StJet*) muDstJets->jets()->At(i);
-	LOG_DEBUG<<"jet "<<i<<"\t\t"<<jet->Pt()<<"\t\t"<<jet->Phi()<<"\t\t"<<jet->Eta()<<endm;
-      }
+      muDstJets->addProtoJet(*it, mMuDst);
+      ++ijet;
     }
+	
+    LOG_DEBUG << "Number Jets Found (b): " << muDstJets->nJets() << endm;	
+    for(int i = 0; i < muDstJets->nJets(); i++) {
+      StJet* jet = (StJet*) muDstJets->jets()->At(i);
+      LOG_DEBUG << "jet " << i << "\t\t" << jet->Pt() << "\t\t" << jet->Phi() << "\t\t" << jet->Eta() << endm;
+    }
+  }
     
-    mJetTree->Fill();
+  mJetTree->Fill();
     
-    return kStOk;
-}
-
-void StJetMaker::FinishFile(void) 
-{
-  mOutFile->Write();
-  mOutFile->Close();
-  delete mOutFile;
+  return kStOk;
 }
 
 Int_t StJetMaker::Finish()
 {
-  FinishFile();
+  mOutFile->Write();
+  mOutFile->Close();
+  delete mOutFile;
+
   StMaker::Finish();
   return kStOK;
 }
