@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.11 2008/03/25 00:40:15 tai Exp $
+ * $Id: StJetMaker.h,v 1.12 2008/03/25 00:44:29 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.12  2008/03/25 00:44:29  tai
+ * moved the inline functions to inside the class definition.
+ *
  * Revision 1.11  2008/03/25 00:40:15  tai
  * deletec unused member variables.
  *
@@ -132,13 +135,13 @@ public:
     virtual Int_t Finish();
     
     ///Access to the Tree of StJets branches
-    TTree* tree();
+    TTree* tree() { return jetTree; }
     
     ///Construct a new jet analysis.
     void addAnalyzer(const StppAnaPars*, const StJetPars*, StFourPMaker*, const char* anaName);
     
     ///Access to StJets objects, stored in a std::map keyed by the StJets name
-    jetBranchesMap& getJets();
+    jetBranchesMap& getJets() { return jetBranches; }
     
 protected:
     void FinishFile(void);
@@ -146,7 +149,6 @@ protected:
     jetBranchesMap jetBranches;  
 
 protected:
-    //!StFourPMaker*   fourPMaker;   //!
     StMuDstMaker*   muDstMaker;   //!
 
 private:
@@ -158,18 +160,5 @@ private:
 
     ClassDef(StJetMaker,0)
 	};
-
-//inlines
-
-inline TTree* StJetMaker::tree()
-{
-    return jetTree;
-}
-
-
-inline StJetMaker::jetBranchesMap& StJetMaker::getJets()
-{
-    return jetBranches;
-}
 
 #endif
