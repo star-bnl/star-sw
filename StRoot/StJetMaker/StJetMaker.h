@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.7 2008/03/24 23:54:51 tai Exp $
+ * $Id: StJetMaker.h,v 1.8 2008/03/25 00:00:28 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.8  2008/03/25 00:00:28  tai
+ * moved "using namespace std;" from the .h file to the .cxx file
+ *
  * Revision 1.7  2008/03/24 23:54:51  tai
  * deleted some #include lines for they were not used.
  *
@@ -87,8 +90,6 @@
 #include <string>
 #include <map>
 
-using namespace std;
-
 class TFile;
 class TTree;
 class StMuDst;
@@ -111,7 +112,7 @@ class StJetMaker : public StMaker {
 public:
 
     ///A useful typedef for the map of StJets objects.
-    typedef map<string, StppJetAnalyzer*, less<string> > jetBranchesMap;
+    typedef std::map<std::string, StppJetAnalyzer*, std::less<std::string> > jetBranchesMap;
     
     ///The constructor requires a valid instance of both a StFourPMaker and a StMuDstMaker
     //!StJetMaker(const Char_t *name, StFourPMaker* fPMaker, StMuDstMaker* uDstMaker, const char *outputFile);
