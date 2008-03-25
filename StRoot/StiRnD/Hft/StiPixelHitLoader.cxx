@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.20 2007/10/16 19:50:25 fisyak Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.21 2008/03/25 20:02:28 andrewar Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.21  2008/03/25 20:02:28  andrewar
+ * Removed hit smearing.
+ *
  * Revision 1.20  2007/10/16 19:50:25  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -114,20 +117,6 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 	if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
 	stiHit->reset();
 
-	double dCos = cos(detector->getPlacement()->getNormalRefAngle());
-	double dSin = sin(detector->getPlacement()->getNormalRefAngle());
-        double x = pxlH->position().x() * dCos + pxlH->position().y() * dSin;
-        double y = pxlH->position().x() * -1.*dSin + pxlH->position().y() * dCos;
-	double z = pxlH->position().z();
-
-	y = y + pxlH->positionError().y();
-
-	double xg = dCos * x - dSin * y;
-	double yg = dSin * x + dCos * y;
-	double zg = z + pxlH->positionError().z();
-
-	const StThreeVectorF newPos(xg,yg,zg);
-	pxlH->setPosition(newPos);
 
 	
 	stiHit->setGlobal(detector, pxlH,
