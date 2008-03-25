@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.184 2008/03/20 02:01:36 perev Exp $
+// $Id: StiMaker.cxx,v 1.185 2008/03/25 18:03:11 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.185  2008/03/25 18:03:11  perev
+// remove field field from everythere
+//
 // Revision 1.184  2008/03/20 02:01:36  perev
 // setMinPrecHits(..) obsolete
 //
@@ -478,7 +481,6 @@ Int_t StiMaker::Init()
 {
 
   StiDebug::Init();
-  runField =0.;
   StiTimer::Init("StiTrackFinder::find() TIMING"
 	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
   
@@ -626,18 +628,7 @@ Int_t StiMaker::Make()
 
   if (!event) return kStWarn;
 
-  // Retrieve bfield in Tesla
-  Double_t x[3] = {0,0,0};
-  Double_t h[3];
-  StarMagField::Instance()->BField(x,h);
-  double field = h[2]/10;
-
-  if (runField==0) runField=field;
-  if (field==0 && field != runField) field=runField;
-
-  cout << "StiMaker::Make() -I- Reading eventSummary()->magneticField() " << field << endl; 
   if (_tracker) {
-    static_cast<StiKalmanTrackFinderParameters&>(_tracker->getParameters()).setField(field);
   _tracker->clear();
   }
   try {
