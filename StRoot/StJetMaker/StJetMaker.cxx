@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.16 2008/03/25 00:00:28 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.17 2008/03/25 00:05:32 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -57,12 +57,6 @@
 #include "StJetMaker/StFourPMakers/StBET4pMaker.h"
 
 using namespace std;
-
-//temp, MLM
-void dumpProtojetToStream(int event, int jet, ostream& os, StProtoJet& pj);
-
-double gDeltaPhi(double p1, double p2);
-double gDeltaR(const TLorentzVector* jet, const StThreeVectorF& track);
 
 ClassImp(StJetMaker)
   
