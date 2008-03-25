@@ -20,7 +20,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.maxChi2Vertex	   =     900; // max vertex  chi2 value acceptable;
     row.massHypothesis	   =      0.139;// mass used in the tracking for mcs and eloss calculation purposes;
     row.maxDca2dZeroXY     =      6.; //max 2d dca to X=Y=0  for primary track
-    row.maxDca3dVertex     =      4.; //max 3d dca to vertex for primary track
+    row.maxDca3dVertex     =      3.; //max 3d dca to vertex for primary track
     row.mHitRegions        =    5020; //5020 means 0<svtHit<20, 20<ssdHit<50
     row.mHitWeights 	   =    2111; //Coeffs of nhits. sum must be >=20
 tableSet->AddAt(&row);
