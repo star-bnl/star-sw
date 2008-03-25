@@ -12,7 +12,6 @@ struct KalmanTrackFinderParameters {
   long   useTrackFilter; 	/*Whether a track filter should be used internally*/
   long   elossCalculated; 	/*Whether the Energy loss should be calculated while propagating tracks*/
   long   mcsCalculated; 	/*Whether multiple coulomb scattering should be include in erro matrices*/ 
-  double field; 		/*Value of the field*/ 
   long    maxNullCount; 	/*Maximum number of null hits on active detector layers*/
   long    maxContigNullCount; 	/*Maximum number of contiguous null hits*/ 
   long    minCountForReset; 	/*Number of adjacent layers with hits before nullContiguous is reset to zero */
