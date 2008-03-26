@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.23 2008/03/25 02:08:42 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.24 2008/03/26 00:28:06 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -56,7 +56,6 @@ StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *
   : StMaker(name)
   , mMuDstMaker(uDstMaker)
   , mOutName(outputName)
-  , mMuDst(0)
   , mJetTree(0)
 {
 
@@ -94,11 +93,9 @@ Int_t StJetMaker::Init()
 Int_t StJetMaker::Make()
 {
   LOG_DEBUG << " Start StJetMaker :: " << GetName() << " mode=" << m_Mode << endm;
-  if(mMuDstMaker != NULL) {
-    mMuDst = mMuDstMaker->muDst();
-  }
-    
+
   for(jetBranchesMap::iterator jb = mJetBranches.begin(); jb != mJetBranches.end(); ++jb) {
+
     StppJetAnalyzer* thisAna = (*jb).second;
     if(!thisAna) {
       cout << "StJetMaker::Make() ERROR:\tjetBranches[" << (*jb).first << "]==0. abort()" << endl;
@@ -106,8 +103,7 @@ Int_t StJetMaker::Make()
     }
 
     StFourPMaker* fourPMaker = thisAna->fourPMaker();
-    
-    if(fourPMaker == NULL) {
+    if(!fourPMaker) {
       cout << "StJetMaker::Make() ERROR:\tfourPMaker is NULL! abort()" << endl;
       abort();
     }
@@ -127,7 +123,8 @@ Int_t StJetMaker::Make()
     muDstJets->Clear();
     muDstJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
 
-    muDstJets->setMuDst(mMuDst);
+    StMuDst *muDst = mMuDstMaker->muDst();
+    muDstJets->setMuDst(muDst);
 
     //Addd some info from StBet4pMaker
     StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
@@ -145,7 +142,7 @@ Int_t StJetMaker::Make()
       StProtoJet& pj = (*it);
       LOG_DEBUG << "jet " << ijet << "\t\t" << pj.pt() << "\t" << pj.phi() << "\t" << pj.eta() << endm;
 
-      muDstJets->addProtoJet(*it, mMuDst);
+      muDstJets->addProtoJet(*it, muDst);
       ++ijet;
     }
 	
