@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.15 2008/03/25 02:08:42 tai Exp $
+ * $Id: StJetMaker.h,v 1.16 2008/03/26 00:28:05 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.16  2008/03/26 00:28:05  tai
+ * changed mMuDst from a class member to a local variable in a method.
+ * changed the definition of jetBranchesMap.
+ * moved all members in protected to private.
+ * and some other minor changes
+ *
  * Revision 1.15  2008/03/25 02:08:42  tai
  * deleted keyword virtual for this class is a concrete class.
  * moved the content of FinishFile() to Finish and deleted FinishFile()
@@ -121,7 +127,6 @@
 
 class TFile;
 class TTree;
-class StMuDst;
 class StMuDstMaker;
 class StFourPMaker;
 class StJetPars;
@@ -141,7 +146,7 @@ class StJetMaker : public StMaker {
 
 public:
 
-  typedef std::map<std::string, StppJetAnalyzer*, std::less<std::string> > jetBranchesMap;
+  typedef std::map<std::string, StppJetAnalyzer*> jetBranchesMap;
     
   StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
     
@@ -158,15 +163,12 @@ public:
   ///Access to StJets objects, stored in a std::map keyed by the StJets name
   jetBranchesMap& getJets() { return mJetBranches; }
     
-protected:
+private:
 
   jetBranchesMap  mJetBranches;
   StMuDstMaker*   mMuDstMaker;
 
-private:
-
   std::string mOutName;
-  StMuDst *mMuDst;
   TFile *mOutFile;
   TTree *mJetTree;
 
