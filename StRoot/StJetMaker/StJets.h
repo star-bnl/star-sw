@@ -1,7 +1,19 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.13 2008/03/26 01:13:13 tai Exp $
+// $Id: StJets.h,v 1.14 2008/03/26 23:42:03 tai Exp $
 // $Log: StJets.h,v $
+// Revision 1.14  2008/03/26 23:42:03  tai
+// initialize all member variables at their constructors.
+// StJets::addProtoJet()
+//    -  this method will be moved to the class StJetMaker
+//    -  to prepare for the move
+//         +  fixed a memory leak from mMuPosition
+//         +  cleaned up the codes
+//         +  changed the direct operations on the member variables
+//            to operations through member methods
+// added StJets::addTrackToIndex()
+// added StJets::addJet()
+//
 // Revision 1.13  2008/03/26 01:13:13  tai
 // moved the definitions of some inline functions inside the class definition.
 // add four setter functions.
@@ -239,8 +251,12 @@ public:
     ///Access to the jets in this event.
     TClonesArray* jets() {return mJets;}
 
+  void addJet(StJet& jet);
+
     ///The track to jet indices TClonesArray: this contains _all_ the 4momenta contained in jets for jet finding!  This is for expert use only
     TClonesArray* indices() {return mTrackToJetIndices;}
+
+  void addTrackToIndex(TrackToJetIndex &t2j);
     
     ///Here's how you get the 4-momenta of a particles in a given jet.  This contains tracks and energy-corrected-towers.  Use this for Frag. Function
     vector<TrackToJetIndex*> particles(int jetIndex);
