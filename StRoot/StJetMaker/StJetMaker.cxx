@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.24 2008/03/26 00:28:06 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.25 2008/03/26 01:26:51 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -41,6 +41,7 @@
 
 //StMuDstMaker
 #include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
 //StJetMaker
@@ -123,8 +124,11 @@ Int_t StJetMaker::Make()
     muDstJets->Clear();
     muDstJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
 
-    StMuDst *muDst = mMuDstMaker->muDst();
-    muDstJets->setMuDst(muDst);
+    StMuEvent* event = mMuDstMaker->muDst()->event();
+    muDstJets->seteventId(event->eventId());
+    muDstJets->seteventNumber(event->eventNumber());
+    muDstJets->setrunId(event->runId());
+    muDstJets->setrunNumber(event->runNumber());
 
     //Addd some info from StBet4pMaker
     StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
@@ -142,6 +146,7 @@ Int_t StJetMaker::Make()
       StProtoJet& pj = (*it);
       LOG_DEBUG << "jet " << ijet << "\t\t" << pj.pt() << "\t" << pj.phi() << "\t" << pj.eta() << endm;
 
+      StMuDst *muDst = mMuDstMaker->muDst();
       muDstJets->addProtoJet(*it, muDst);
       ++ijet;
     }
@@ -167,13 +172,3 @@ Int_t StJetMaker::Finish()
   StMaker::Finish();
   return kStOK;
 }
-
-
-
-
-
-
-
-
-
-
