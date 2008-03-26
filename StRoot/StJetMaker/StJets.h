@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.12 2008/03/24 22:43:17 tai Exp $
+// $Id: StJets.h,v 1.13 2008/03/26 01:13:13 tai Exp $
 // $Log: StJets.h,v $
+// Revision 1.13  2008/03/26 01:13:13  tai
+// moved the definitions of some inline functions inside the class definition.
+// add four setter functions.
+//
 // Revision 1.12  2008/03/24 22:43:17  tai
 // added particles_() to make test easier.
 //
@@ -226,8 +230,8 @@ public:
     void setMuDst(const StMuDst*);
 
     ///Set the BEMC corrupt flag.  true --> event is corrupt, no jet finding was performed
-    void setBemcCorrupt(bool v);
-    bool bemcCorrupt() const;
+  void setBemcCorrupt(bool v) { mCorrupt = v; }
+  bool bemcCorrupt() const { return mCorrupt; }
 
     ///The number of jets found in this event
     int nJets() {return mJets->GetLast()+1;}
@@ -248,10 +252,15 @@ public:
     TrackVec jetParticles(StMuDst*, int jetIndex);
     
     ///access to event numbers, used to synchronize with StMuDstMaker for simultaneous reading
-    int eventId();
-    int eventNumber();
-    int runId();
-    int runNumber();
+  int eventId() { return mEventId; }
+  int eventNumber() {return mEventNumber; }
+  int runId() { return mRunId; }
+  int runNumber() { return mRunNumber; }
+
+  void seteventId(int v) { mEventId = v; }
+  void seteventNumber(int v) { mEventNumber = v; }
+  void setrunId(int v) { mRunId = v; }
+  void setrunNumber(int v) { mRunNumber = v; }
 
     ///A double check, used to synchronize with StMuDstMaker for simultaneous reading
     bool isSameEvent(const StMuDst*);
@@ -296,26 +305,6 @@ private:
 };
 
 //inlines
-inline int StJets::eventId()
-{
-    return mEventId;
-}
-
-inline int StJets::eventNumber()
-{
-    return mEventNumber;
-}
-
-inline int StJets::runId()
-{
-    return mRunId;
-}
-
-inline int StJets::runNumber()
-{
-    return mRunNumber;
-}
-
 inline void StJets::Clear(const char *opt)
 {
     TObject::Clear(opt);
@@ -323,15 +312,6 @@ inline void StJets::Clear(const char *opt)
     mCorrupt = false;
 }
 
-inline void StJets::setBemcCorrupt(bool v)
-{
-    mCorrupt = v;
-}
-
-inline bool StJets::bemcCorrupt() const
-{
-    return mCorrupt;
-}
 
 
 //non-members ---------------------
