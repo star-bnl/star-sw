@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofINLCorr.cxx,v 1.2 2007/11/22 00:04:13 dongx Exp $
+ * $Id: StTofINLCorr.cxx,v 1.3 2008/03/27 00:15:38 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofINLCorr.cxx,v $
+ * Revision 1.3  2008/03/27 00:15:38  dongx
+ * Update for Run8 finished.
+ *
  * Revision 1.2  2007/11/22 00:04:13  dongx
  * - update for tof8++
  * - added ValidTrays() function
@@ -66,7 +69,8 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
   tofTDIGOnTray_st* tdigOnTray = static_cast<tofTDIGOnTray_st*>(tofTDIGOnTray->GetArray());
 
   Int_t numRows = tofTDIGOnTray->GetNRows();
-  for (Int_t i=0;i<numRows;i++) {
+  LOG_INFO << "number of rows = " << numRows << endm;
+  for (Int_t i=0;i<mNValidTrays+2;i++) {
     Int_t trayId = (Int_t)tdigOnTray[i].trayId;
 
     if(trayId==mEastVpdTrayId) {  // east vpd
@@ -81,11 +85,11 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
     }
 
     if(maker->Debug()) {
-      LOG_INFO << " tray id=" << trayId;
+      cout << " tray id=" << trayId;
       for(int j=0;j<mNTDIGOnTray;j++) {
-	LOG_INFO << "  " << tdigOnTray[i].tdigId[j];
+	cout << "  " << tdigOnTray[i].tdigId[j];
       }
-      LOG_INFO << endm;
+      cout << endl;
     }
 
   }
@@ -126,10 +130,10 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
       mINLCorr[NTdig-1][tdcChanId][j] = corr;
       
       if(maker->Debug()&&(j%200==0)) {
-	LOG_INFO << " " << corr;
+	cout << " " << corr;
       }
     }
-    LOG_INFO << endm;
+    cout << endl;
   }
 
   LOG_INFO << " Total # of boards read in : " << NTdig << endm;
@@ -171,6 +175,7 @@ void StTofINLCorr::Reset() {
     mBoardId2Index[i] = -1;
   }
 
+  mNValidTrays = 0;
 }
 
 float StTofINLCorr::getTrayINLCorr(int trayId, int globalTdcChan, int bin) {
@@ -194,7 +199,7 @@ float StTofINLCorr::getVpdINLCorr(int ewId, int globalTdcChan, int bin) {
   int iTdig = globalTdcChan/mNChanOnTDIG;  // 0-7
 
   int boardId;
-  if(ewId==1) { // east pvpd
+  if(ewId==2) { // east pvpd
     boardId = mTdigOnEastVpd[iTdig];
   } else {  // west pvpd
     boardId = mTdigOnWestVpd[iTdig];

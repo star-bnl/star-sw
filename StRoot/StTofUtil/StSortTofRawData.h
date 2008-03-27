@@ -5,6 +5,7 @@ class StEvent;
 class StTofRawData;
 class StTofCollection;
 class StTofRawDataCollection;
+class StTofrDaqMap;
 
 #include "StObject.h"
 #include "TDataSet.h"
@@ -26,6 +27,7 @@ typedef vector<Int_t, allocator<Int_t>>  IntVec;
 struct TOFRawHit {
   int tray;
   int channel;
+  int triggertime;
   IntVec leadingTdc;
   IntVec trailingTdc;
 };
@@ -40,13 +42,22 @@ struct TOFRawHit {
 class StSortTofRawData : public StObject {
  private:
   tofRawHitVector mRawHitVec;
-
+  
+  static const Int_t mNTOF = 192;
+  Int_t mTDIGLeChan2WestPMT[mNTOF], mTDIGTeChan2WestPMT[mNTOF]; //
+  Int_t mTDIGLeChan2EastPMT[mNTOF], mTDIGTeChan2EastPMT[mNTOF]; //
+  
+  //--added by Zebo 
+  Float_t mTimeWindow[122][2];  
+  //--end
  public:
   StSortTofRawData();
   StSortTofRawData(StTofCollection*);
+  StSortTofRawData(StTofCollection*, StTofrDaqMap*);
   ~StSortTofRawData();
   
   void Init(StTofCollection*);
+  void InitRun8(StTofCollection*);
   void Reset();
   
   IntVec GetValidChannel();
@@ -56,8 +67,15 @@ class StSortTofRawData : public StObject {
   IntVec GetValidChannel(int tray);
   IntVec GetLeadingTdc(int tray, int channel);
   IntVec GetTrailingTdc(int tray, int channel);
+  //--added by Zebo
+  IntVec GetLeadingTdc(int tray, int channel, bool triggerevent);
+  IntVec GetTrailingTdc(int tray, int channel, bool triggerevent);
+  //--end
+  Int_t GetTriggerTime(int tray, int channel);
+  
+  void SetVPDMap(StTofrDaqMap* daqMap);
 
-  ClassDef(StSortTofRawData,2)
+  ClassDef(StSortTofRawData,3)
 };
 #endif
 
