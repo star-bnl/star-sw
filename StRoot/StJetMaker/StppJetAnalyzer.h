@@ -1,57 +1,58 @@
-//StppJetAnalyzer.h
-//M.L. Miller (Yale Software)
-//07/02
-//Modified by Thomas Henry
-//8/02 -- Turned StppJetAnalyzer into the interface between
-//analyzers and events
+// $Id: StppJetAnalyzer.h,v 1.6 2008/03/27 22:08:05 tai Exp $
+//
+// Author List: M.L. Miller
+//              Thomas Henry
+//              Tai Sakuma
 
 #ifndef STPPJETANALYZER_HH
 #define STPPJETANALYZER_HH
 
-#include "TObject.h"
+#include <TObject.h>
 
-#include "StJetFinder/StJetFinder.h"
-#include "StJetFinder/FourVec.h"
-#include "StJetFinder/StProtoJet.h"
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include <list>
+#include <vector>
 
+class StMuTrack;
+class AbstractFourVec;
+class StJetPars;
+class StProtoJet;
+class StJetFinder;
 class StFourPMaker;
 class StMuTrackFourVec;
 
 /*!
   \class StppAnaPars
-  \author M.L. Miller (MIT Softwarw)
+  \author M.L. Miller
   StppAnaPars is a simple class to encapsulate the run-time track and jet cuts that are necessary
   for a jet analysis.
  */
-class StppAnaPars {
+class StppAnaPars : public TObject {
 
 public:
 
-  //gets/sets for run-time pars
-  virtual void setCutPtMin(double v) {mPtMin=v;}
-  virtual double ptMin() const {return mPtMin;}
+  void setCutPtMin(double v) { mPtMin = v; }
+  double ptMin() const { return mPtMin; }
 
-  virtual void setAbsEtaMax(double v) {mEtaMax=v;}
-  virtual double etaMax() const {return mEtaMax;}
+  void setAbsEtaMax(double v) { mEtaMax = v; }
+  double etaMax() const { return mEtaMax; }
 
-  virtual void setJetPtMin(double v) {mJetPtMin=v;}
-  virtual double jetPtMin() const {return mJetPtMin;}
+  void setJetPtMin(double v) { mJetPtMin = v; }
+  double jetPtMin() const { return mJetPtMin; }
 
-  virtual void setJetEtaMax(double v) {mJetEtaMax=v;}
-  virtual double jetEtaMax() const {return mJetEtaMax;}
+  void setJetEtaMax(double v) { mJetEtaMax = v; }
+  double jetEtaMax() const { return mJetEtaMax; }
 
-  virtual void setJetEtaMin(double v) {mJetEtaMin=v;}
-  virtual double jetEtaMin() const {return mJetEtaMin;}
+  void setJetEtaMin(double v) { mJetEtaMin =v; }
+  double jetEtaMin() const { return mJetEtaMin; }
 
-  virtual void setJetNmin(int v) {mJetNmin=v;}
-  virtual int jetNmin() const {return mJetNmin;}
+  void setJetNmin(int v) { mJetNmin = v; }
+  int jetNmin() const { return mJetNmin; }
 
-  virtual void setNhits(int v) {mNhits=v;}
-  virtual int nHits() const {return mNhits;}
+  void setNhits(int v) { mNhits=v; }
+  int nHits() const { return mNhits; }
 
-  virtual void setFlagMin(int v) {mFlagMin = v;}
-  virtual int flagMin() const {return mFlagMin;}
+  void setFlagMin(int v) { mFlagMin = v; }
+  int flagMin() const { return mFlagMin; }
 
 private:
 
@@ -84,12 +85,12 @@ private:
   there are 'n' StppJetAnalyzers constructed, and there are 'n' StJets objects hung on the
   jet TTree.
  */
-class StppJetAnalyzer {
+class StppJetAnalyzer : public TObject {
 
 public:
 
-  typedef StJetFinder::JetList JetList;
-  typedef vector<AbstractFourVec*> FourList;
+  typedef std::list<StProtoJet> JetList;
+  typedef std::vector<AbstractFourVec*> FourList;
 
   ///Construct a new Analyzer
   StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp);
@@ -98,14 +99,14 @@ public:
   ///simple gets/sets
 
   ///Set the container of (unfiltered) four vectors
-  virtual void setFourVec(FourList &tracks);
-  virtual void print();
+  void setFourVec(FourList &tracks);
+  void print();
 
   ///filter the list, call StJetFinder::findJets(), and filter the jets
-  virtual void findJets();
+  void findJets();
 
   ///internal clear
-  virtual void clear();
+  void clear();
     
   ///Access to the stl container of protojets
   JetList& getJets(void) {return mProtoJets;} //!
@@ -113,7 +114,9 @@ public:
   ///Access to the FourPMaker associated with this analyzer.  This 4-p may be shared with other analyzers
   StFourPMaker* fourPMaker() {return mFourPMaker;}
 
-protected:
+private:
+
+  StppJetAnalyzer();
 
   bool accept(StMuTrack*);
   bool accept(StMuTrackFourVec*);
@@ -123,16 +126,14 @@ protected:
   void fillLists();
   void fillLists(FourList &tracks);
     
-  StJetFinder* mFinder; //!
+  StJetFinder* mFinder;
 
-  JetList mProtoJets; //!
-  FourList mFourList; //!
-  StFourPMaker* mFourPMaker; //!
+  JetList mProtoJets;
+  FourList mFourList;
+  StFourPMaker* mFourPMaker;
 
-private:
-
-  StppJetAnalyzer(); //Not implemented
   StppAnaPars mPars;
+
   ClassDef(StppJetAnalyzer,1)
 };
 

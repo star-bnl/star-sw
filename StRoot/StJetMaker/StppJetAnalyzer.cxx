@@ -1,18 +1,13 @@
-//StppJetAnalyzer.cxx
-//M.L. Miller (Yale Software)
-//07/02
-//Modified by Thomas Henry
-//08/02 StppJetAnalyzer converted to an interface class
+// $Id: StppJetAnalyzer.cxx,v 1.10 2008/03/27 22:08:05 tai Exp $
+//
+// Author List: M.L. Miller
+//              Thomas Henry
+//              Tai Sakuma
 
-//std
-#include <list>
-#include <time.h>
-#include <algorithm>
-#include "Stiostream.h"
-#include <math.h>
-using namespace std;
+#include "StppJetAnalyzer.h"
 
 #include "StMessMgr.h"
+#include "Stiostream.h"
 
 //StJetFinder
 #include "StJetFinder/FourVec.h"
@@ -30,14 +25,21 @@ using namespace std;
 //StJetMaker
 #include "StMuTrackFourVec.h"
 #include "StJet.h"
-#include "StppJetAnalyzer.h"
+
+//std
+#include <ctime>
+
+using namespace std;
 
 ClassImp(StppJetAnalyzer)
 ClassImp(StppAnaPars)
     
     
 StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars, StFourPMaker* fp)
-  : mFourPMaker(fp)
+  : mFinder(0)
+  , mProtoJets(0)
+  , mFourList(0)
+  , mFourPMaker(fp)
   , mPars(*ap)
 {
   cout <<"StppJetAnalyzer::StppJetAnalyzer()"<<endl;
