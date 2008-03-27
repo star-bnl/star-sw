@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.27 2008/03/27 01:50:10 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.28 2008/03/27 02:32:01 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -146,10 +146,6 @@ void StJetMaker::fillJet(StJets &jets, StProtoJet& pj)
   StProtoJet::FourVecList &trackList = pj.list();
 	
   StJet tempJet( pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0 );
-  tempJet.jetEt = pj.eT();
-  tempJet.jetPt = tempJet.Pt();
-  tempJet.jetEta = tempJet.Eta();
-  tempJet.jetPhi = tempJet.Phi();
   
   StThreeVectorF vPos = mMuDstMaker->muDst()->event()->primaryVertexPosition();
   tempJet.zVertex = vPos.z();
