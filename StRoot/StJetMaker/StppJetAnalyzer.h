@@ -117,9 +117,6 @@ public:
   ///Access to the FourPMaker associated with this analyzer.  This 4-p may be shared with other analyzers
   StFourPMaker* fourPMaker() {return mFourPMaker;}
 
-  ///Hang the owned StJets object on the TTree
-  void addBranch(const char *name, void *stppudst); 
-
 protected:
 
   bool accept(StMuTrack*);

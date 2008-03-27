@@ -197,9 +197,3 @@ void StppJetAnalyzer::findJets()
   acceptJets();
 }
 
-void StppJetAnalyzer::addBranch(const char *name, void *stppudst) 
-{
-  TTree* ppuDst = (TTree *) stppudst;
-  //ppuDst->Branch (name, "StJets", &muDstJets, 64000, 99);
-  ppuDst->Branch (name, "StJets", &muDstJets);
-}

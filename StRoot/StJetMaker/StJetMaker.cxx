@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.30 2008/03/27 17:49:58 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.31 2008/03/27 20:40:29 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -97,7 +97,7 @@ Int_t StJetMaker::Init()
     
   mJetTree  = new TTree("jet", "jetTree");
   for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
-    (*it).mAnalyzer->addBranch((*it).mBranchName.c_str(), mJetTree);
+    mJetTree->Branch ((*it).mBranchName.c_str(), "StJets", &((*it).mJets));
   }
 
   return StMaker::Init();
@@ -108,7 +108,6 @@ Int_t StJetMaker::Make()
 
   for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
     StppJetAnalyzer* thisAna = (*it).mAnalyzer;
-
 
     StFourPMaker* fourPMaker = thisAna->fourPMaker();
 
