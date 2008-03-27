@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.31 2008/03/27 20:40:29 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.32 2008/03/27 21:34:07 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -48,9 +48,10 @@
 #include "StJetFinder/StProtoJet.h"
 
 //StJetMaker
-#include "StJetMaker/StJet.h"
-#include "StJetMaker/StFourPMakers/StFourPMaker.h"
-#include "StJetMaker/StFourPMakers/StBET4pMaker.h"
+#include "StJets.h"
+#include "StJet.h"
+#include "StFourPMakers/StFourPMaker.h"
+#include "StFourPMakers/StBET4pMaker.h"
 #include "StFourPMakers/StMuEmcPosition.h"
 
 using namespace std;
@@ -84,7 +85,7 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourP
   AnalyzerCtl anaCtl;
   anaCtl.mBranchName = name;
   anaCtl.mAnalyzer = analyzer;
-  anaCtl.mJets = analyzer->getmuDstJets();
+  anaCtl.mJets = new StJets();
 
   mAnalyzerCtl.push_back(anaCtl);
 }
@@ -108,6 +109,7 @@ Int_t StJetMaker::Make()
 
   for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
     StppJetAnalyzer* thisAna = (*it).mAnalyzer;
+    StJets* jets = (*it).mJets;
 
     StFourPMaker* fourPMaker = thisAna->fourPMaker();
 
@@ -116,7 +118,7 @@ Int_t StJetMaker::Make()
     thisAna->setFourVec(fourPMaker->getTracks());
     thisAna->findJets();
 	
-    fillTree(thisAna, fourPMaker);
+    fillTree(*jets, thisAna, fourPMaker);
 
   }
     
@@ -125,27 +127,26 @@ Int_t StJetMaker::Make()
   return kStOk;
 }
 
-void StJetMaker::fillTree(StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker)
+void StJetMaker::fillTree(StJets& jets, StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker)
 {
-  StJets *stJets = thisAna->getmuDstJets();
-  stJets->Clear();
-  stJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
+  jets.Clear();
+  jets.setBemcCorrupt(fourPMaker->bemcCorrupt() );
 
   StMuEvent* event = mMuDstMaker->muDst()->event();
-  stJets->seteventId(event->eventId());
-  stJets->seteventNumber(event->eventNumber());
-  stJets->setrunId(event->runId());
-  stJets->setrunNumber(event->runNumber());
+  jets.seteventId(event->eventId());
+  jets.seteventNumber(event->eventNumber());
+  jets.setrunId(event->runId());
+  jets.setrunNumber(event->runNumber());
 
   StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
   if (bet4p) {
-    stJets->setDylanPoints( bet4p->nDylanPoints() );
-    stJets->setSumEmcE( bet4p->sumEmcEt() );
+    jets.setDylanPoints( bet4p->nDylanPoints() );
+    jets.setSumEmcE( bet4p->sumEmcEt() );
   }
 	
   StppJetAnalyzer::JetList &cJets = thisAna->getJets();
   for(StppJetAnalyzer::JetList::iterator it = cJets.begin(); it != cJets.end(); ++it) {
-    fillJet(*stJets, *it);
+    fillJet(jets, *it);
   }
 }
 

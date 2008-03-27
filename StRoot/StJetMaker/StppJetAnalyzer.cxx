@@ -69,15 +69,11 @@ StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars, S
     abort();
   }
 
-  //setup the tree
-  muDstJets = new StJets();
-  muDstJets->Clear();
 }
 
 StppJetAnalyzer::~StppJetAnalyzer()
 {
-  cout <<"StppJetAnalyzer::~StppJetAnalyzer()"<<endl;
-  delete muDstJets;
+
 }
 
 void StppJetAnalyzer::clear()

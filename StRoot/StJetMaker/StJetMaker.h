@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.19 2008/03/27 17:49:58 tai Exp $
+ * $Id: StJetMaker.h,v 1.20 2008/03/27 21:34:08 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.20  2008/03/27 21:34:08  tai
+ * moved the field StppJetAnalyzer::muDstJets to StJetMaker::AnalyzerCtl::mJetsy
+ *
  * Revision 1.19  2008/03/27 17:49:58  tai
  * removed typedef map<> jetBranchesMap
  * introduced struct AnalyzerCtl
@@ -184,7 +187,7 @@ private:
 
   std::vector<AnalyzerCtl> mAnalyzerCtl;
 
-  void fillTree(StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker);
+  void fillTree(StJets& jets, StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker);
   void fillJet(StJets &jets, StProtoJet& pj);
 
   StMuDstMaker*   mMuDstMaker;
