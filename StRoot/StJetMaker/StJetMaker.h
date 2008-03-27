@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.16 2008/03/26 00:28:05 tai Exp $
+ * $Id: StJetMaker.h,v 1.17 2008/03/27 00:41:09 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.17  2008/03/27 00:41:09  tai
+ * moved the method addProtoJet() from the class StJets
+ * to the class StJetMaker.
+ *
  * Revision 1.16  2008/03/26 00:28:05  tai
  * changed mMuDst from a class member to a local variable in a method.
  * changed the definition of jetBranchesMap.
@@ -131,6 +135,8 @@ class StMuDstMaker;
 class StFourPMaker;
 class StJetPars;
 class StppAnaPars;
+class StProtoJet;
+class StJets;
 
 /*!
   \class StJetMaker
@@ -164,6 +170,8 @@ public:
   jetBranchesMap& getJets() { return mJetBranches; }
     
 private:
+
+  void addProtoJet(StJets &jets, StProtoJet& pj);
 
   jetBranchesMap  mJetBranches;
   StMuDstMaker*   mMuDstMaker;

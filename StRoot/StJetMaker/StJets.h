@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.14 2008/03/26 23:42:03 tai Exp $
+// $Id: StJets.h,v 1.15 2008/03/27 00:41:09 tai Exp $
 // $Log: StJets.h,v $
+// Revision 1.15  2008/03/27 00:41:09  tai
+// moved the method addProtoJet() from the class StJets
+// to the class StJetMaker.
+//
 // Revision 1.14  2008/03/26 23:42:03  tai
 // initialize all member variables at their constructors.
 // StJets::addProtoJet()
@@ -236,7 +240,7 @@ public:
     void Clear(const char *opt);
         
     ///add a jet to the container
-    void addProtoJet(StProtoJet& pj, const StMuDst* muDst);
+    //    void addProtoJet(StProtoJet& pj, const StMuDst* muDst);
 
     ///Set event-wise information:
     void setMuDst(const StMuDst*);
