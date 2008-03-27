@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.3 2007/06/05 21:56:11 kocolosk Exp $
+// $Id: StJet.h,v 1.4 2008/03/27 02:25:03 tai Exp $
 // $Log: StJet.h,v $
+// Revision 1.4  2008/03/27 02:25:03  tai
+// moved the definitions of the construcors from .h to .cxx
+// set jetEt and 3 other variables in a constructor
+//
 // Revision 1.3  2007/06/05 21:56:11  kocolosk
 // added data members for zVertex and geometric trigger associations, plus methods for detEta (barrel only)
 //
@@ -73,22 +77,11 @@
 class StJet : public TLorentzVector {
 
 public:  
-    StJet() : TLorentzVector(0,0,0,0), nCell(0), charge(0)
-    {
-	nTracks = nBtowers = nEtowers = 0;
-	tpcEtSum = btowEtSum = etowEtSum = 0.;
-    zVertex = -999;
-    }
 
-    StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
-	: TLorentzVector(lpx, lpy, lpz, lE), nCell(size), charge(c)
-    {
-	nTracks = nBtowers = nEtowers = 0;
-	tpcEtSum = btowEtSum = etowEtSum = 0.;
-    zVertex = -999;
-    }
+  StJet();
+  StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c);
     
-    virtual ~StJet();
+  virtual ~StJet();
 
     ///The number of 4-vectors contributing to this jet
     Int_t nCell;
