@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.8 2007/04/17 23:01:52 dongx Exp $
+ * $Id: StTofrGeometry.cxx,v 1.9 2008/03/27 00:15:39 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.9  2008/03/27 00:15:39  dongx
+ * Update for Run8 finished.
+ *
  * Revision 1.8  2007/04/17 23:01:52  dongx
  * replaced with standard STAR Loggers
  *
@@ -2158,6 +2161,185 @@ const
 }
 
 //_____________________________________________________________________________
+Bool_t StTofrGeometry::HelixCross(const StHelixD &helix)
+const
+{
+   //
+   // return "kTRUE" if any cell is crossed by this helix
+   //
+
+   IntVec idVec;
+   DoubleVec pathVec;
+   PointVec crossVec;
+
+   Bool_t crossed = HelixCrossCellIds(helix,idVec,pathVec,crossVec);
+
+   return crossed;
+}
+
+//_____________________________________________________________________________
+Bool_t StTofrGeometry::HelixCrossCellIds(const StHelixD &helix,
+                       IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec)
+const
+{
+   //
+   // return "kTRUE" if any cell is crossed by this helix
+   //  and also fill the cellIds which are crossed by the helix
+   //  and the path length of the helix before crossing the cell
+   //
+
+   Double_t pathLen;
+   Int_t cellId;
+   StThreeVectorD cross;
+   idVec.clear();
+   pathVec.clear();
+   crossVec.clear();
+
+   for(int i=0;i<mNValidTrays;i++) {
+     if(!mTofrTray[i]) continue;
+     int trayId = mTofrTray[i]->Index();
+
+     for(int j=0;j<mNValidModules;j++) {
+       if(!mTofrSensor[i][j]) continue;
+       int moduleId = mTofrSensor[i][j]->Index();
+       if ( mTofrSensor[i][j]->HelixCross(helix,pathLen,cross) ) {	   
+	 Double_t global[3], local[3];
+	 global[0] = cross.x();
+	 global[1] = cross.y();
+	 global[2] = cross.z();
+	 mTofrSensor[i][j]->Master2Local(global,local);
+	 Int_t icell = mTofrSensor[i][j]->FindCellIndex(local);
+	 cellId = CalcCellId(icell, moduleId, trayId);
+	 if (cellId>=0) {    // a bug before // reject hit in the edge of module;
+	   pathVec.push_back(pathLen);
+	   idVec.push_back(cellId);
+	   crossVec.push_back(cross);
+	 }
+       }
+     } // end for (j)
+   } // end for (i)
+   
+
+   /*
+   TDataSetIter nextSector(mTopNode);
+   TVolumeView *sectorVolume = 0;
+   //   StTofrGeomTray *tray = 0;
+
+   Int_t ibtoh = 0, i = 0;
+   while ( (sectorVolume = (TVolumeView *)nextSector()) ) {
+     i++;
+     if ( i>mSectorsInBTOH ) ibtoh = 1;
+     //
+     // For tray-tofr, select tray #83 directly to save time
+     //
+     if ( !mTofrConf ) {
+       int trayindex = ibtoh * mSectorsInBTOH + sectorVolume->GetPosition()->GetId();
+       if ( trayindex!=mY03TrayIndex ) {
+	 //       	 cout << " skip tray " << trayindex << endl;
+	 continue;
+       }
+     }
+     //
+     StTofrGeomTray *tray = new StTofrGeomTray(ibtoh, sectorVolume, mTopNode);
+     //     TVolumeView *trayVolume = tray->GetfView();
+     if ( tray->HelixCross(helix,pathLen,cross) ) {
+
+       cout << " Helix cross tray # = " << tray->Index() << endl;
+       if (!tray->GetfView()->GetListSize()) {
+	 delete tray;
+	 return kFALSE;
+       }
+
+       TDataSetIter nextSensor(tray->GetfView());
+
+       TVolumeView *sensorVolume = 0;
+
+       while ( (sensorVolume = (TVolumeView *)nextSensor()) ) {
+	 StTofrGeomSensor *sensor = new StTofrGeomSensor(sensorVolume, mTopNode);
+	 if ( sensor->HelixCross(helix,pathLen,cross) ) {
+	   
+	   //	   cout << "   hit the sensor volume " << endl;
+	   Double_t global[3], local[3];
+	   global[0] = cross.x();
+	   global[1] = cross.y();
+	   global[2] = cross.z();
+	   sensor->Master2Local(global,local);
+	   Int_t icell = sensor->FindCellIndex(local);
+	   cellId = CalcCellId(icell, sensor->Index(), tray->Index());
+	   if (cellId>0) {    // reject hit in the edge of module;
+	     pathVec.push_back(pathLen);
+	     idVec.push_back(cellId);
+	     crossVec.push_back(cross);
+	   }
+	 }
+	 delete sensor;
+       }
+
+     } // end if
+     delete tray;
+     
+   }
+   */
+   /*
+   TObject *obj;
+   StTofrNode *node;
+
+   // find out the tray crossed by the helix, and one tray can be crossed
+   // but there is totally only one tray of TOFr at this moment
+   StTofrGeomTray *tray=NULL;
+   //   TList *list = mTopNode->GetListOfNodes();
+   TList *list = mTopNode->Nodes();
+   TIter next(list);
+   while ( (obj=next()) != 0) {
+      node = dynamic_cast<StTofrNode*> (obj);
+      if ( node->HelixCross(helix,pathLen,cross) ) {
+         tray = dynamic_cast<StTofrGeomTray*> (obj);
+         break;
+      }
+   }
+
+   if (!tray) return kFALSE;
+ 
+   // find out modules crossed by the helix
+   // and next cells further
+   //
+   StTofrGeomSensor *sensor;
+   //   list = tray->GetListOfNodes();
+   list = tray->GetfView()->Nodes();
+   TIter next2(list);
+   while ( (obj=next2()) != 0 ) {
+      node = dynamic_cast<StTofrNode*> (obj);
+      if ( node->HelixCross(helix,pathLen,cross) ) { //module crossed
+         sensor = dynamic_cast<StTofrGeomSensor*> (obj);
+
+         // Method-1: just Look up the cell the point of cross is in
+         //
+         Double_t global[3], local[3];
+         global[0] = cross.x();
+         global[1] = cross.y();
+         global[2] = cross.z();
+         sensor->Master2Local(global,local);
+         Int_t icell = sensor->FindCellIndex(local);
+         cellId = CalcCellId(icell, sensor->Index(), tray->Index());
+         pathVec.push_back(pathLen);
+         idVec.push_back(cellId);
+         crossVec.push_back(cross);
+      }
+   }
+   */
+
+   if (idVec.size()>0) {
+     //     mleak1.PrintMem(" normal return true");
+     return kTRUE;
+   }
+   else {
+     //     mleak1.PrintMem(" normal return false");
+     return kFALSE;
+   }
+}
+
+
+//_____________________________________________________________________________
 Bool_t StTofrGeometry::HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec)
 const
 {
@@ -2232,7 +2414,7 @@ const
 	     mTofrSensor[i][j]->Master2Local(global,local);
 	     Int_t icell = mTofrSensor[i][j]->FindCellIndex(local);
 	     cellId = CalcCellId(icell, moduleId, trayId);
-	     if (cellId>0) {    // reject hit in the edge of module;
+	     if (cellId>=0) {   // a bug before // reject hit in the edge of module;
 	       pathVec.push_back(pathLen);
 	       idVec.push_back(cellId);
 	       crossVec.push_back(cross);

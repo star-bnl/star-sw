@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.11 2007/11/22 00:04:13 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.12 2008/03/27 00:15:38 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.12  2008/03/27 00:15:38  dongx
+ * Update for Run8 finished.
+ *
  * Revision 1.11  2007/11/22 00:04:13  dongx
  * - update for tof8++
  * - added ValidTrays() function
@@ -192,19 +195,29 @@ void StTofrDaqMap::initFromDbaseGeneral(StMaker *maker) {
   tofDaqMap_st* daqmap = static_cast<tofDaqMap_st*>(tofDaqMap->GetArray());
   for (Int_t i=0;i<mNTOF;i++) {
     mMRPC2TDIGChan[i] = (Int_t)(daqmap[0].MRPC2TDIGChanMap[i]);
+    mTDIG2MRPCChan[mMRPC2TDIGChan[i]] = i;
     if(maker->Debug()) {
       LOG_INFO << " MRPC = " << i << "  TDC chan = " << mMRPC2TDIGChan[i] << endm;
     }
-    mTDIG2MRPCChan[mMRPC2TDIGChan[i]] = i;
   }
   for (Int_t i=0;i<mNVPD;i++) {
-    mPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[i]);
-    mPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[i]);
+    mWestPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[i]);
+    mWestPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[i]);
     if(maker->Debug()) {
-      LOG_INFO << " VPD = " << i << "  TDC Lechan = " << mPMT2TDIGLeChan[i] << "  TDC TeChan = " << mPMT2TDIGTeChan[i] << endm;
+      LOG_INFO << " VPD = " << i << "  TDC Lechan = " << mWestPMT2TDIGLeChan[i] << "  TDC TeChan = " << mWestPMT2TDIGTeChan[i] << endm;
     }
-    mTDIGLe2PMTChan[mPMT2TDIGLeChan[i]] = i;
-    mTDIGTe2PMTChan[mPMT2TDIGTeChan[i]] = i;
+    mTDIGLe2WestPMTChan[mWestPMT2TDIGLeChan[i]] = i;
+    mTDIGTe2WestPMTChan[mWestPMT2TDIGTeChan[i]] = i;
+
+    int j=i+mNVPD;
+
+    mEastPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[j]);
+    mEastPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[j]);
+    if(maker->Debug()) {
+      LOG_INFO << " VPD = " << i << "  TDC Lechan = " << mEastPMT2TDIGLeChan[i] << "  TDC TeChan = " << mEastPMT2TDIGTeChan[i] << endm;
+    }
+    mTDIGLe2EastPMTChan[mEastPMT2TDIGLeChan[i]] = i;
+    mTDIGTe2EastPMTChan[mEastPMT2TDIGTeChan[i]] = i;
   }
 
   // valid tray Id
@@ -215,13 +228,13 @@ void StTofrDaqMap::initFromDbaseGeneral(StMaker *maker) {
   }
   tofTrayConfig_st* trayconf = static_cast<tofTrayConfig_st*>(trayConfig->GetArray());
   if(maker->Debug()) LOG_INFO << " Valid Trays: " << endm;
-  for (Int_t i=0;i<mNTray;i++) {
+  for (Int_t i=0;i<mNValidTrays;i++) {
     mValidTrayId[i] = (Int_t)(trayconf[0].iTray[i]);
     if(maker->Debug()) {
-      LOG_INFO << " " << mValidTrayId[i];
+      cout << " " << mValidTrayId[i];
     }
   }
-  if(maker->Debug()) LOG_INFO << endm;
+  if(maker->Debug()) cout << endl;
 
   return;
 }
@@ -244,14 +257,19 @@ void StTofrDaqMap::Reset() {
   for(int i=0;i<mNTOF;i++) {
     mMRPC2TDIGChan[i] = -1;
     mTDIG2MRPCChan[i] = -1;
-    mTDIGLe2PMTChan[i] = -1;
-    mTDIGTe2PMTChan[i] = -1;
+    mTDIGLe2WestPMTChan[i] = -1;
+    mTDIGTe2WestPMTChan[i] = -1;
+    mTDIGLe2EastPMTChan[i] = -1;
+    mTDIGTe2EastPMTChan[i] = -1;
   }
   for(int i=0;i<mNVPD;i++) {
-    mPMT2TDIGLeChan[i] = -1;
-    mPMT2TDIGTeChan[i] = -1;
+    mEastPMT2TDIGLeChan[i] = -1;
+    mEastPMT2TDIGTeChan[i] = -1;
+    mWestPMT2TDIGLeChan[i] = -1;
+    mWestPMT2TDIGTeChan[i] = -1;
   }
 
+  mNValidTrays = 0;
 }
 
 IntVec StTofrDaqMap::DaqChan2Cell( const Int_t iTofrDaq )
@@ -420,7 +438,8 @@ Int_t StTofrDaqMap::Tofr5Cell2TDCChan( const Int_t iTray , const Int_t iModule, 
 
   Int_t modulechan = (iModule-1)*6+(iCell-1);
 
-  if (modulechan<1 || modulechan>=mNTOFR5) {
+//  if (modulechan<1 || modulechan>=mNTOFR5) {
+  if (modulechan<0 || modulechan>=mNTOFR5) {
     LOG_INFO<<"ERROR!!! Wrong Module Cell channel number!"<<endm;
     return -1;
   }
@@ -462,7 +481,8 @@ Int_t StTofrDaqMap::Cell2TDIGChan( const Int_t iModule, const Int_t iCell )
 
   Int_t modulechan = (iModule-1)*mNCell+(iCell-1);
 
-  if (modulechan<1 || modulechan>=mNTOF) {
+//  if (modulechan<1 || modulechan>=mNTOF) {
+  if (modulechan<0 || modulechan>=mNTOF) {
     LOG_INFO<<"ERROR!!! Wrong Module Cell channel number!"<<endm;
     return -1;
   }
@@ -470,50 +490,90 @@ Int_t StTofrDaqMap::Cell2TDIGChan( const Int_t iModule, const Int_t iCell )
   return mMRPC2TDIGChan[modulechan];
 }
 
-Int_t StTofrDaqMap::PMT2TDIGLeChan( const Int_t iTube )
+Int_t StTofrDaqMap::WestPMT2TDIGLeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
     LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
     return -1;
   }
 
-  return mPMT2TDIGLeChan[iTube-1];
+  return mWestPMT2TDIGLeChan[iTube-1];
 }
 
-Int_t StTofrDaqMap::PMT2TDIGTeChan( const Int_t iTube )
+Int_t StTofrDaqMap::WestPMT2TDIGTeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
     LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
     return -1;
   }
 
-  return mPMT2TDIGTeChan[iTube-1];
+  return mWestPMT2TDIGTeChan[iTube-1];
 }
 
-Int_t StTofrDaqMap::TDIGLeChan2PMT( const Int_t iTdc )
+Int_t StTofrDaqMap::TDIGLeChan2WestPMT( const Int_t iTdc )
 {
   if ( iTdc<0 || iTdc>=mNTOF ) {
     LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
     return -1;
   }
 
-  return mTDIGLe2PMTChan[iTdc] + 1;
+  return mTDIGLe2WestPMTChan[iTdc] + 1;
 }
 
-Int_t StTofrDaqMap::TDIGTeChan2PMT( const Int_t iTdc )
+Int_t StTofrDaqMap::TDIGTeChan2WestPMT( const Int_t iTdc )
 {
   if ( iTdc<0 || iTdc>=mNTOF ) {
     LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
     return -1;
   }
 
-  return mTDIGTe2PMTChan[iTdc] + 1;
+  return mTDIGTe2WestPMTChan[iTdc] + 1;
+}
+
+Int_t StTofrDaqMap::EastPMT2TDIGLeChan( const Int_t iTube )
+{
+  if ( iTube<1 || iTube>mNVPD ) {
+    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
+    return -1;
+  }
+
+  return mEastPMT2TDIGLeChan[iTube-1];
+}
+
+Int_t StTofrDaqMap::EastPMT2TDIGTeChan( const Int_t iTube )
+{
+  if ( iTube<1 || iTube>mNVPD ) {
+    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
+    return -1;
+  }
+
+  return mEastPMT2TDIGTeChan[iTube-1];
+}
+
+Int_t StTofrDaqMap::TDIGLeChan2EastPMT( const Int_t iTdc )
+{
+  if ( iTdc<0 || iTdc>=mNTOF ) {
+    LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
+    return -1;
+  }
+
+  return mTDIGLe2EastPMTChan[iTdc] + 1;
+}
+
+Int_t StTofrDaqMap::TDIGTeChan2EastPMT( const Int_t iTdc )
+{
+  if ( iTdc<0 || iTdc>=mNTOF ) {
+    LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
+    return -1;
+  }
+
+  return mTDIGTe2EastPMTChan[iTdc] + 1;
 }
 
 IntVec StTofrDaqMap::ValidTrays()
 {
   IntVec trayId;
-  for(int i=0;i<mNTray;i++) {
+  for(int i=0;i<mNValidTrays;i++) {
     trayId.push_back(mValidTrayId[i]);
   }
 
