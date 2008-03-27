@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.15 2008/03/26 23:42:03 tai Exp $
+// $Id: StJets.cxx,v 1.16 2008/03/27 00:41:09 tai Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.16  2008/03/27 00:41:09  tai
+// moved the method addProtoJet() from the class StJets
+// to the class StJetMaker.
+//
 // Revision 1.15  2008/03/26 23:42:03  tai
 // initialize all member variables at their constructors.
 // StJets::addProtoJet()
@@ -200,81 +204,6 @@ void StJets::Clear(bool clearAll)
     mDylanPoints = 0;
     mSumEmcE = 0.;
     LOG_DEBUG << "Cleared the Jets" <<endm;
-}
-
-void StJets::addProtoJet(StProtoJet& pj, const StMuDst* muDst)
-{
-  StProtoJet::FourVecList &trackList = pj.list();
-	
-  StJet tempJet( pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0 );
-  tempJet.jetEt = pj.eT();
-  tempJet.jetPt = tempJet.Pt();
-  tempJet.jetEta = tempJet.Eta();
-  tempJet.jetPhi = tempJet.Phi();
-  
-  StMuEvent* event = muDst->event();
-  StThreeVectorF vPos = event->primaryVertexPosition();
-  tempJet.zVertex = vPos.z();
-
-  for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
-    StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
-    if (!track) {
-      cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
-      return;
-    }
-    int muTrackIndex = track->getIndex();
-    if (muTrackIndex <0) {
-      cout <<"Error, muTrackIndex<0. abort()"<<endl;
-      abort();
-    }
-      
-    TrackToJetIndex t2j( nJets(), muTrackIndex, track->detectorId() );
-    t2j.SetPxPyPzE(track->px(), track->py(), track->pz(), track->e() );
-      
-    //and cache some properties if it really came from a StMuTrack:
-    StMuTrack* muTrack = track->particle();
-    if (muTrack) {  //this will fail for calorimeter towers ;)
-
-      //----------------------------------------------
-      double bField = 0.5; //to put it in Tesla
-      double rad=238.6;//geom->Radius()+5.;
-      StThreeVectorD momentumAt,positionAt;
-
-      StMuEmcPosition mMuPosition;
-      mMuPosition.trackOnEmc(&positionAt, &momentumAt, muTrack, bField, rad );
-
-      t2j.setCharge( muTrack->charge() );
-      t2j.setNhits( muTrack->nHits() );
-      t2j.setNhitsPoss( muTrack->nHitsPoss() );
-      t2j.setNhitsDedx( muTrack->nHitsDedx() );
-      t2j.setNhitsFit( muTrack->nHitsFit() );
-      t2j.setNsigmaPion( muTrack->nSigmaPion() );
-      t2j.setTdca ( muTrack->dcaGlobal().mag() ); //jan 27, 2007
-      t2j.setTdcaz ( muTrack->dcaZ() ); //jan 27, 2007
-      t2j.setTdcaxy ( muTrack->dcaD() ); //jan 27, 2007
-      t2j.setetaext ( positionAt.pseudoRapidity() );
-      t2j.setphiext ( positionAt.phi() );
-    }
-     
-    addTrackToIndex(t2j);
-
-    //ok, get track/tower properties here:
-    StDetectorId mDetId = track->detectorId();
-    if (mDetId==kTpcId) {
-      tempJet.nTracks++;
-      tempJet.tpcEtSum += track->eT();
-    }
-    else if (mDetId==kBarrelEmcTowerId) {
-      tempJet.nBtowers++;
-      tempJet.btowEtSum += track->eT();
-    }
-    else if (mDetId==kEndcapEmcTowerId) {
-      tempJet.nEtowers++;
-      tempJet.etowEtSum += track->eT();
-    }
-  }
-
-  addJet(tempJet);
 }
 
 void StJets::addTrackToIndex(TrackToJetIndex& t2j)
