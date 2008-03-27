@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.11 2008/03/27 00:16:03 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.12 2008/03/27 18:12:12 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,8 +12,11 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.12  2008/03/27 18:12:12  dongx
+ * Update the HPTDC bin width to full precision
+ *
  * Revision 1.11  2008/03/27 00:16:03  dongx
- * update for Run8 finished.
+ *  update for Run8 finished.
  *
  * Revision 1.10  2007/11/29 22:43:12  dongx
  * changed vpd trayId definition to 121 (East) and 122 (West)
@@ -52,10 +55,10 @@
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
 
-#define VHRBIN2PS 24.414  // Very High resolution mode, pico-second per bin
-                          // 1000*25/1024 (ps/chn)
-#define HRBIN2PS 97.656   // High resolution mode, pico-second per bin
-                          // 97.65625= 1000*100/1024  (ps/chn)
+#define VHRBIN2PS 24.4140625  // Very High resolution mode, pico-second per bin
+                              // 1000*25/1024 (ps/chn)
+#define HRBIN2PS 97.65625     // High resolution mode, pico-second per bin
+                              // 97.65625= 1000*100/1024  (ps/chn)
 
 #include <string>
 #include <vector>
@@ -328,7 +331,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.11 2008/03/27 00:16:03 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.12 2008/03/27 18:12:12 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
