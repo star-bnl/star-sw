@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.37 2007/07/12 19:20:42 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.38 2008/03/27 00:09:54 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.38  2008/03/27 00:09:54  jhthomas
+ * Modify previous magfield changes and set 'zero' field to ~1 Gauss in a more robust way.
+ * Add SpaceChargeEWRatio and appropriate functions that allow us to calibrate d-Au collisions.
+ *
  * Revision 1.37  2007/07/12 19:20:42  fisyak
  * Account that StDetectorDbSpaceChargeR2 is not inherit from StDetectorDbSpaceCharge anymore
  *
@@ -232,6 +236,7 @@ class StMagUtilities {
   Float_t  TensorV1 ;                   // Omega Tau tensor parameter - in the ExB direction
   Float_t  TensorV2 ;                   // Omega Tau tensor parameter - in the direction perpendicular to ExB and Z axis
   Float_t  Const_0, Const_1, Const_2  ; // OmegaTau parameters
+  Float_t  SpaceChargeEWRatio         ; // Ratio of East/West Space charge ... for example, d-Au should be ratio 6/5, Au-Au ratio 1/1
   Double_t SpaceCharge, SpaceChargeR2 ; // Space Charge parameters (uniform or 1/R**2 in the TPC - arbitrary units)
   Double_t InnerGridLeakStrength      ; // Relative strength of the Inner grid leak
   Double_t InnerGridLeakRadius        ; // Location (in local Y coordinates) of the Inner grid leak 
@@ -331,11 +336,13 @@ class StMagUtilities {
 
   virtual Int_t    GetSpaceChargeMode();
   virtual void     ManualSpaceCharge(Double_t SpcChg)   { SpaceCharge   = SpcChg ; fSpaceCharge   = 0 ; }
-  virtual void     ManualSpaceChargeR2(Double_t SpcChg) { SpaceChargeR2 = SpcChg ; fSpaceChargeR2 = 0 ; }
+  virtual void     ManualSpaceChargeR2(Double_t SpcChg, Float_t EWRatio = 1.0 ) { SpaceChargeR2 = SpcChg ; fSpaceChargeR2 = 0 ; 
+                                                                                  SpaceChargeEWRatio = EWRatio ; }
   virtual void     AutoSpaceCharge()   {GetSpaceCharge()  ; } // use DB
   virtual void     AutoSpaceChargeR2() {GetSpaceChargeR2(); } // use DB
   virtual Double_t CurrentSpaceCharge()   {return SpaceCharge  ;}
   virtual Double_t CurrentSpaceChargeR2() {return SpaceChargeR2;}
+  virtual Float_t  CurrentSpaceChargeEWRatio() { return SpaceChargeEWRatio ; }
   virtual Bool_t   UpdateShortedRing();
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
