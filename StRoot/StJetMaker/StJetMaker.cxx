@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.28 2008/03/27 02:32:01 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.29 2008/03/27 02:57:41 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -142,15 +142,11 @@ void StJetMaker::fillTree(StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker)
 
 void StJetMaker::fillJet(StJets &jets, StProtoJet& pj)
 {
+  StJet aJet(pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0);
+  aJet.zVertex = mMuDstMaker->muDst()->event()->primaryVertexPosition().z();
 
   StProtoJet::FourVecList &trackList = pj.list();
-	
-  StJet tempJet( pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0 );
-  
-  StThreeVectorF vPos = mMuDstMaker->muDst()->event()->primaryVertexPosition();
-  tempJet.zVertex = vPos.z();
-
-  for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
+  for(StProtoJet::FourVecList::iterator it2 = trackList.begin(); it2 != trackList.end(); ++it2)  {
     StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
     if (!track) {
       cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
@@ -194,20 +190,20 @@ void StJetMaker::fillJet(StJets &jets, StProtoJet& pj)
     //ok, get track/tower properties here:
     StDetectorId mDetId = track->detectorId();
     if (mDetId==kTpcId) {
-      tempJet.nTracks++;
-      tempJet.tpcEtSum += track->eT();
+      aJet.nTracks++;
+      aJet.tpcEtSum += track->eT();
     }
     else if (mDetId==kBarrelEmcTowerId) {
-      tempJet.nBtowers++;
-      tempJet.btowEtSum += track->eT();
+      aJet.nBtowers++;
+      aJet.btowEtSum += track->eT();
     }
     else if (mDetId==kEndcapEmcTowerId) {
-      tempJet.nEtowers++;
-      tempJet.etowEtSum += track->eT();
+      aJet.nEtowers++;
+      aJet.etowEtSum += track->eT();
     }
   }
 
-  jets.addJet(tempJet);
+  jets.addJet(aJet);
 
 }
 
