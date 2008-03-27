@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.cxx,v 1.3 2007/06/07 01:36:06 kocolosk Exp $
+// $Id: StJet.cxx,v 1.4 2008/03/27 02:25:04 tai Exp $
 // $Log: StJet.cxx,v $
+// Revision 1.4  2008/03/27 02:25:04  tai
+// moved the definitions of the construcors from .h to .cxx
+// set jetEt and 3 other variables in a constructor
+//
 // Revision 1.3  2007/06/07 01:36:06  kocolosk
 // fix minor AutoBuild warnings
 //
@@ -47,6 +51,47 @@
 #include "StJet.h"
 
 ClassImp(StJet)
+
+StJet::StJet()
+  : TLorentzVector(0,0,0,0)
+  , nCell(0)
+  , charge(0)
+  , nTracks(0)
+  , nBtowers(0)
+  , nEtowers(0)
+  , tpcEtSum(0.0)
+  , btowEtSum(0.0)
+  , etowEtSum(0.0)
+  , jetEt(0.0)
+  , jetPt(0.0)
+  , jetEta(0.0)
+  , jetPhi(0.0)
+  , zVertex(-999)
+{
+  jetPhi = Phi();
+}
+
+StJet::StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
+  : TLorentzVector(lpx, lpy, lpz, lE)
+  , nCell(size)
+  , charge(c)
+  , nTracks(0)
+  , nBtowers(0)
+  , nEtowers(0)
+  , tpcEtSum(0.0)
+  , btowEtSum(0.0)
+  , etowEtSum(0.0)
+  , jetEt(0.0)
+  , jetPt(0.0)
+  , jetEta(0.0)
+  , jetPhi(0.0)
+  , zVertex(-999)
+{
+  jetEt = Et();
+  jetPt = Pt();
+  jetEta = Eta();
+  jetPhi = Phi();
+}
 
 StJet::~StJet()
 {
