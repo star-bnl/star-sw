@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.10 2007/11/29 22:43:12 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.11 2008/03/27 00:16:03 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.11  2008/03/27 00:16:03  dongx
+ * update for Run8 finished.
+ *
  * Revision 1.10  2007/11/29 22:43:12  dongx
  * changed vpd trayId definition to 121 (East) and 122 (West)
  *
@@ -77,6 +80,7 @@ class StSPtrVecTofData;
 class StTofrDaqMap;
 class TH1D;
 class TH2D;
+class TTree;
 
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
 typedef vector<Int_t>  IntVec;
@@ -105,6 +109,7 @@ public:
     void setValidTdcRange(Int_t, Int_t);
     void setMinHitsPerTrack(Int_t);
     void setMinFitPointsPerTrack(Int_t);
+    void setMinFitPointsOverMax(Float_t);
     void setMaxDCA(Float_t);
     void setHistoFileName(Char_t*);
     void setNtupleFileName(Char_t*);
@@ -149,14 +154,20 @@ private:
     //    static const Float_t mWidthPad = 3.45;
 
     static const Int_t mNTOF = 192;    // 192 for tof in Run 8++
-    static const Int_t mNTray = 5;     // not used
     static const Int_t mNModule = 32;  // 32 for tofr5++ 
     static const Int_t mNCell = 6;
     static const Int_t mNVPD = 19;    //
 
-    static const Int_t mEastVpdTrayId = 121;
-    static const Int_t mWestVpdTrayId = 122;
+    static const Int_t mEastVpdTrayId = 122;
+    static const Int_t mWestVpdTrayId = 121;
 
+    static const Int_t mNValidTrays_Run3 = 1;
+    static const Int_t mNValidTrays_Run4 = 1;
+    static const Int_t mNValidTrays_Run5 = 1;
+    static const Int_t mNValidTrays_Run6 = 0;
+    static const Int_t mNValidTrays_Run7 = 0;
+    static const Int_t mNValidTrays_Run8 = 5;
+    
     Float_t     mWidthPad;
     Float_t	mTofrAdc[mNTOFR];
     Float_t	mTofrTdc[mNTOFR];
@@ -218,6 +229,7 @@ private:
     Float_t	mMaxValidAdc; //! upper cut on ADC value
     unsigned int mMinHitsPerTrack; //! lower cut on #hits per track
     unsigned int mMinFitPointsPerTrack; //! lower cut on #fitpoints per track
+    Float_t mMinFitPointsOverMax; //! lower cut on #fitpoints / #maxpoints
     Float_t mMaxDCA; //! upper cut (centimeters) on final (global) DCA
     
     //
@@ -233,6 +245,24 @@ private:
     TH1D* mDaqOccupancyValid;
     TH1D* mDaqOccupancyProj;
     TH2D* mHitsPosition;
+    
+    TH1D* mDaqOccupancyValidAll;
+    TH1D* mDaqOccupancyProjAll;
+    TH1D* mDaqOccupancyVpd;
+    TH1D* mDaqOccupancyValidVpd;
+    
+    TH2D* mHitCorr[mNValidTrays_Run8];
+    TH2D* mHitCorrModule[mNValidTrays_Run8];
+    TH2D* mHitCorrAll;
+
+
+    TH2D* mTrackPtEta;
+    TH2D* mTrackPtPhi;
+    TH1D* mTrackNFitPts;
+    TH2D* mTrackdEdxvsp;
+    TH2D* mNSigmaPivsPt;
+
+    TTree* mTrackTree;
     
     TH1D* mCellsPerEventMatch1;
     TH1D* mHitsPerEventMatch1;
@@ -274,6 +304,21 @@ private:
       Float_t yhit;
     };
     
+    struct TRACKTREE{
+      Float_t pt;
+      Float_t eta;
+      Float_t phi;
+      Int_t   nfitpts;
+      Float_t dEdx;
+      Int_t   ndEdxpts;
+      Int_t   charge;
+      Int_t   projTrayId;
+      Int_t   projCellChan;
+      Float_t projY;
+      Float_t projZ;
+    };
+    TRACKTREE trackTree;
+    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     typedef vector<StructCellHit> tofCellHitVector;
 #else
@@ -283,7 +328,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.10 2007/11/29 22:43:12 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.11 2008/03/27 00:16:03 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
@@ -305,6 +350,8 @@ inline void StTofrMatchMaker::setStandardTrackGeometry(){mOuterTrackGeometry=fal
 inline void StTofrMatchMaker::setMinHitsPerTrack(Int_t nhits){mMinHitsPerTrack=nhits;}
 
 inline void StTofrMatchMaker::setMinFitPointsPerTrack(Int_t nfitpnts){mMinFitPointsPerTrack=nfitpnts;}
+
+inline void StTofrMatchMaker::setMinFitPointsOverMax(Float_t ratio) {mMinFitPointsOverMax=ratio;}
 
 inline void StTofrMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 
