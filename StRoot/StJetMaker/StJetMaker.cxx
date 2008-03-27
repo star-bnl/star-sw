@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.26 2008/03/27 00:41:09 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.27 2008/03/27 01:50:10 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -97,69 +97,17 @@ Int_t StJetMaker::Init()
 
 Int_t StJetMaker::Make()
 {
-  LOG_DEBUG << " Start StJetMaker :: " << GetName() << " mode=" << m_Mode << endm;
-
   for(jetBranchesMap::iterator jb = mJetBranches.begin(); jb != mJetBranches.end(); ++jb) {
-
     StppJetAnalyzer* thisAna = (*jb).second;
-    if(!thisAna) {
-      cout << "StJetMaker::Make() ERROR:\tjetBranches[" << (*jb).first << "]==0. abort()" << endl;
-      abort();
-    }
-
     StFourPMaker* fourPMaker = thisAna->fourPMaker();
-    if(!fourPMaker) {
-      cout << "StJetMaker::Make() ERROR:\tfourPMaker is NULL! abort()" << endl;
-      abort();
-    }
 
     thisAna->clear();
 	
-    FourList &tracks = fourPMaker->getTracks();
-
-    thisAna->setFourVec(tracks);
-    LOG_DEBUG << "call:\t" << (*jb).first <<".findJets() with:\t" << tracks.size() << "\t protoJets" << endm;
+    thisAna->setFourVec(fourPMaker->getTracks());
     thisAna->findJets();
 	
-    typedef StppJetAnalyzer::JetList JetList;
-    JetList &cJets = thisAna->getJets();
-	
-    StJets *muDstJets = thisAna->getmuDstJets();
-    muDstJets->Clear();
-    muDstJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
+    fillTree(thisAna, fourPMaker);
 
-    StMuEvent* event = mMuDstMaker->muDst()->event();
-    muDstJets->seteventId(event->eventId());
-    muDstJets->seteventNumber(event->eventNumber());
-    muDstJets->setrunId(event->runId());
-    muDstJets->setrunNumber(event->runNumber());
-
-    //Addd some info from StBet4pMaker
-    StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
-    if (bet4p) {
-      LOG_DEBUG << "StJetMaker::Make()\tfound 4pmaker in chain" << endm;
-      muDstJets->setDylanPoints( bet4p->nDylanPoints() );
-      muDstJets->setSumEmcE( bet4p->sumEmcEt() );
-    }
-	
-    int ijet(0);
-	
-    LOG_DEBUG << "Number Jets Found(a):\t" << cJets.size() << endm;
-    for(JetList::iterator it = cJets.begin(); it != cJets.end(); ++it) {
-	    
-      StProtoJet& pj = (*it);
-      LOG_DEBUG << "jet " << ijet << "\t\t" << pj.pt() << "\t" << pj.phi() << "\t" << pj.eta() << endm;
-
-      addProtoJet(*muDstJets, *it);
-
-      ++ijet;
-    }
-	
-    LOG_DEBUG << "Number Jets Found (b): " << muDstJets->nJets() << endm;	
-    for(int i = 0; i < muDstJets->nJets(); i++) {
-      StJet* jet = (StJet*) muDstJets->jets()->At(i);
-      LOG_DEBUG << "jet " << i << "\t\t" << jet->Pt() << "\t\t" << jet->Phi() << "\t\t" << jet->Eta() << endm;
-    }
   }
     
   mJetTree->Fill();
@@ -167,9 +115,33 @@ Int_t StJetMaker::Make()
   return kStOk;
 }
 
-void StJetMaker::addProtoJet(StJets &jets, StProtoJet& pj)
+void StJetMaker::fillTree(StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker)
 {
-  StMuDst *muDst = mMuDstMaker->muDst();
+  StJets *stJets = thisAna->getmuDstJets();
+  stJets->Clear();
+  stJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
+
+  StMuEvent* event = mMuDstMaker->muDst()->event();
+  stJets->seteventId(event->eventId());
+  stJets->seteventNumber(event->eventNumber());
+  stJets->setrunId(event->runId());
+  stJets->setrunNumber(event->runNumber());
+
+  StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
+  if (bet4p) {
+    stJets->setDylanPoints( bet4p->nDylanPoints() );
+    stJets->setSumEmcE( bet4p->sumEmcEt() );
+  }
+	
+  StppJetAnalyzer::JetList &cJets = thisAna->getJets();
+  for(StppJetAnalyzer::JetList::iterator it = cJets.begin(); it != cJets.end(); ++it) {
+    fillJet(*stJets, *it);
+  }
+}
+
+
+void StJetMaker::fillJet(StJets &jets, StProtoJet& pj)
+{
 
   StProtoJet::FourVecList &trackList = pj.list();
 	
@@ -179,8 +151,7 @@ void StJetMaker::addProtoJet(StJets &jets, StProtoJet& pj)
   tempJet.jetEta = tempJet.Eta();
   tempJet.jetPhi = tempJet.Phi();
   
-  StMuEvent* event = muDst->event();
-  StThreeVectorF vPos = event->primaryVertexPosition();
+  StThreeVectorF vPos = mMuDstMaker->muDst()->event()->primaryVertexPosition();
   tempJet.zVertex = vPos.z();
 
   for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
@@ -200,13 +171,12 @@ void StJetMaker::addProtoJet(StJets &jets, StProtoJet& pj)
       
     //and cache some properties if it really came from a StMuTrack:
     StMuTrack* muTrack = track->particle();
-    if (muTrack) {  //this will fail for calorimeter towers ;)
+    if (muTrack) {  //this will fail for calorimeter towers
 
-      //----------------------------------------------
-      double bField = 0.5; //to put it in Tesla
-      double rad=238.6;//geom->Radius()+5.;
-      StThreeVectorD momentumAt,positionAt;
+      double bField(0.5); // to put it in Tesla
+      double rad(238.6);// geom->Radius()+5.;
 
+      StThreeVectorD momentumAt, positionAt;
       StMuEmcPosition mMuPosition;
       mMuPosition.trackOnEmc(&positionAt, &momentumAt, muTrack, bField, rad );
 
@@ -216,9 +186,9 @@ void StJetMaker::addProtoJet(StJets &jets, StProtoJet& pj)
       t2j.setNhitsDedx( muTrack->nHitsDedx() );
       t2j.setNhitsFit( muTrack->nHitsFit() );
       t2j.setNsigmaPion( muTrack->nSigmaPion() );
-      t2j.setTdca ( muTrack->dcaGlobal().mag() ); //jan 27, 2007
-      t2j.setTdcaz ( muTrack->dcaZ() ); //jan 27, 2007
-      t2j.setTdcaxy ( muTrack->dcaD() ); //jan 27, 2007
+      t2j.setTdca ( muTrack->dcaGlobal().mag() );
+      t2j.setTdcaz ( muTrack->dcaZ() );
+      t2j.setTdcaxy ( muTrack->dcaD() );
       t2j.setetaext ( positionAt.pseudoRapidity() );
       t2j.setphiext ( positionAt.phi() );
     }
