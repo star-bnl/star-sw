@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.16 2008/03/27 00:41:09 tai Exp $
+// $Id: StJets.cxx,v 1.17 2008/03/27 21:34:08 tai Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.17  2008/03/27 21:34:08  tai
+// moved the field StppJetAnalyzer::muDstJets to StJetMaker::AnalyzerCtl::mJetsy
+//
 // Revision 1.16  2008/03/27 00:41:09  tai
 // moved the method addProtoJet() from the class StJets
 // to the class StJetMaker.
@@ -179,7 +182,7 @@ StJets::StJets()
   , mEventNumber(0)
   , mRunId(0)
   , mRunNumber(0)
-  , mCorrupt(0)
+  , mCorrupt(false)
   , mJets(new TClonesArray("StJet",100))
   , mTrackToJetIndices(new TClonesArray("TrackToJetIndex",200)) 
 {

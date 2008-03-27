@@ -14,7 +14,6 @@
 #include "StJetFinder/FourVec.h"
 #include "StJetFinder/StProtoJet.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
-#include "StJets.h"
 
 class StFourPMaker;
 class StMuTrackFourVec;
@@ -111,9 +110,6 @@ public:
   ///Access to the stl container of protojets
   JetList& getJets(void) {return mProtoJets;} //!
     
-  ///Access to the StJets object  associated with this analyzer
-  StJets* getmuDstJets(void) { return muDstJets; };
-
   ///Access to the FourPMaker associated with this analyzer.  This 4-p may be shared with other analyzers
   StFourPMaker* fourPMaker() {return mFourPMaker;}
 
@@ -131,7 +127,6 @@ protected:
 
   JetList mProtoJets; //!
   FourList mFourList; //!
-  StJets *muDstJets; //!
   StFourPMaker* mFourPMaker; //!
 
 private:
