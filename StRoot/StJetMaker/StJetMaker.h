@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.17 2008/03/27 00:41:09 tai Exp $
+ * $Id: StJetMaker.h,v 1.18 2008/03/27 01:50:09 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.18  2008/03/27 01:50:09  tai
+ * changed the method name addProtoJet() to fillJet()
+ * added a private method fillTree()
+ * and some other minor changes
+ *
  * Revision 1.17  2008/03/27 00:41:09  tai
  * moved the method addProtoJet() from the class StJets
  * to the class StJetMaker.
@@ -171,7 +176,8 @@ public:
     
 private:
 
-  void addProtoJet(StJets &jets, StProtoJet& pj);
+  void fillTree(StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker);
+  void fillJet(StJets &jets, StProtoJet& pj);
 
   jetBranchesMap  mJetBranches;
   StMuDstMaker*   mMuDstMaker;
