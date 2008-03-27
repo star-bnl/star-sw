@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.29 2008/03/27 02:57:41 tai Exp $
+ * $Id: StJetMaker.cxx,v 1.30 2008/03/27 17:49:58 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -59,6 +59,7 @@ ClassImp(StJetMaker)
   
 StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
   : StMaker(name)
+  , mAnalyzerCtl(0)
   , mMuDstMaker(uDstMaker)
   , mOutName(outputName)
   , mJetTree(0)
@@ -78,7 +79,14 @@ StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *
 */
 void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp, const char* name)
 {
-  mJetBranches[name] = new StppJetAnalyzer(ap, jp, fp);
+  StppJetAnalyzer* analyzer = new StppJetAnalyzer(ap, jp, fp);
+
+  AnalyzerCtl anaCtl;
+  anaCtl.mBranchName = name;
+  anaCtl.mAnalyzer = analyzer;
+  anaCtl.mJets = analyzer->getmuDstJets();
+
+  mAnalyzerCtl.push_back(anaCtl);
 }
 
 Int_t StJetMaker::Init() 
@@ -88,17 +96,20 @@ Int_t StJetMaker::Init()
   mOutFile = new TFile(mOutName.c_str(), "recreate");
     
   mJetTree  = new TTree("jet", "jetTree");
-  for(jetBranchesMap::iterator i = mJetBranches.begin(); i != mJetBranches.end(); ++i) {
-    (*i).second->addBranch((*i).first.c_str(), mJetTree);
+  for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
+    (*it).mAnalyzer->addBranch((*it).mBranchName.c_str(), mJetTree);
   }
-    
+
   return StMaker::Init();
 }
 
 Int_t StJetMaker::Make()
 {
-  for(jetBranchesMap::iterator jb = mJetBranches.begin(); jb != mJetBranches.end(); ++jb) {
-    StppJetAnalyzer* thisAna = (*jb).second;
+
+  for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
+    StppJetAnalyzer* thisAna = (*it).mAnalyzer;
+
+
     StFourPMaker* fourPMaker = thisAna->fourPMaker();
 
     thisAna->clear();

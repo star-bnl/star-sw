@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.18 2008/03/27 01:50:09 tai Exp $
+ * $Id: StJetMaker.h,v 1.19 2008/03/27 17:49:58 tai Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.19  2008/03/27 17:49:58  tai
+ * removed typedef map<> jetBranchesMap
+ * introduced struct AnalyzerCtl
+ *
  * Revision 1.18  2008/03/27 01:50:09  tai
  * changed the method name addProtoJet() to fillJet()
  * added a private method fillTree()
@@ -132,7 +136,8 @@
 #include "StppJetAnalyzer.h"
 
 #include <string>
-#include <map>
+#include <vector>
+// #include <map>
 
 class TFile;
 class TTree;
@@ -157,8 +162,6 @@ class StJetMaker : public StMaker {
 
 public:
 
-  typedef std::map<std::string, StppJetAnalyzer*> jetBranchesMap;
-    
   StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
     
   Int_t Init();
@@ -171,15 +174,19 @@ public:
   ///Construct a new jet analysis.
   void addAnalyzer(const StppAnaPars*, const StJetPars*, StFourPMaker*, const char* anaName);
     
-  ///Access to StJets objects, stored in a std::map keyed by the StJets name
-  jetBranchesMap& getJets() { return mJetBranches; }
-    
 private:
+
+  struct AnalyzerCtl {
+    std::string mBranchName;
+    StppJetAnalyzer* mAnalyzer;
+    StJets *mJets;
+  };
+
+  std::vector<AnalyzerCtl> mAnalyzerCtl;
 
   void fillTree(StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker);
   void fillJet(StJets &jets, StProtoJet& pj);
 
-  jetBranchesMap  mJetBranches;
   StMuDstMaker*   mMuDstMaker;
 
   std::string mOutName;
