@@ -11,10 +11,6 @@ class TH1F;
 class TH2F;
 class TTree;
 class TClonesArray;
-class TFile;
-class TTree;
-
-class StEEmcMixEvent;
 
 #include "StEEmcPair.h"
 
@@ -42,16 +38,9 @@ class StEEmcPi0Maker : public StMaker
   void setCheckTrigger(Bool_t t);
   Bool_t checkTrigger();
 
-  void   setFile( TFile *file );
-  TTree *tree();
 
  private:
  protected:
-
-  TFile *mFile;
-  TTree *mTree;
-
-  StEEmcMixEvent *mPi0Event;
 
   std::vector<Int_t> mTriggerList;
   Bool_t mCheckTrigger;

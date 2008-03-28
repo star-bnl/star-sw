@@ -18,10 +18,6 @@
 #include "TH1F.h"
 #include "TH2F.h"
 
-#include "TFile.h"
-#include "TTree.h"
-#include "StEEmcMixEvent.h"
-
 ClassImp(StEEmcPi0Maker);
 
 //34567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -37,12 +33,7 @@ StEEmcPi0Maker::StEEmcPi0Maker( const Char_t *name,
   mEEclusters=cl;  assert(cl);
   mEEpoints=pt;    assert(pt);
   mCheckTrigger=false;
-  setFile(0);
-  mTree=0;
 }
-
-void   StEEmcPi0Maker::setFile( TFile *f ){ mFile=f; }
-TTree *StEEmcPi0Maker::tree(){ return mTree; }
 
 // ---------------------------------------------------------------------------
 Int_t StEEmcPi0Maker::Init()
@@ -81,14 +72,6 @@ Int_t StEEmcPi0Maker::Init()
 
   //hdEds   = new TH2F("hdEds","smd energy derivative; #frac{1}{E}#frac{dE}{ds}; rel. strip",30,-2.0,1.0,10,-5.,5.);
 
-  if ( mFile ) 
-    {
-      mTree=new TTree("mPi0Tree","EEmc pi0 events");
-      mPi0Event=new StEEmcMixEvent();
-      mTree->Branch("pi0event",&mPi0Event,32000,99);
-      mTree->SetDirectory( mFile );
-    }
-
   return StMaker::Init();
 }
 
@@ -116,8 +99,6 @@ Int_t StEEmcPi0Maker::Make()
   if ( points.size() < 2 ) return kStOK;
   hEvents->Fill("two+ points",1.0);
 
-  mPi0Event->setEvent( mudst->muDst()->event() );
-
   // loop over all pairs of points
   for ( UInt_t ipoint=0;ipoint<points.size();ipoint++ )
     {
@@ -129,65 +110,66 @@ Int_t StEEmcPi0Maker::Make()
 	  if (ipoint>=jpoint) continue;
 	  StEEmcPoint p2=points[jpoint];
 
+#if 0
+	  /*
+	   * Weihong's energy correction
+	   */
+	  Float_t e1=p1.energy();
+	  Float_t e2=p2.energy();
+	  Float_t r1=e1/(e1+e2);
+	  Float_t r2=e2/(e1+e2);
+	  Float_t sum = 0.;
 
-	  Int_t phibin1 = p1.tower(0).phibin();
-	  Int_t phibin2 = p2.tower(0).phibin();
-
-	  Int_t etabin1 = p1.tower(0).etabin();
-	  Int_t etabin2 = p2.tower(0).etabin();
-
-	  Int_t deta = TMath::Abs(etabin1-etabin2);
-	  Int_t dphi = phibin1-phibin2;
-	  if ( dphi < 0 ) dphi+=60;
-	  if ( dphi > 30 ) dphi=60-dphi;
-
-	  if ( dphi > 10 ) continue; /** limit distance between points to +/- 10 towers **/
-
-
-	  StEEmcPair pair(p1,p2,vertex,vertex);
-
-	  
-	  /***********************************************
-	   **
-	   ** Fill the TTre and the list of pi0 pairs
-	   **
-	   ***********************************************/
-
-	  mPairs.push_back( pair );
-	  mPi0Event->addPair( pair );
-
-	  Int_t index1 = p1.tower(0).index();
-	  Int_t index2 = p2.tower(0).index();
-	  
-	  StEEmcClusterVec_t tower_clusters; // tower clusters associated w/ pair (should be 1 or 2)
-	  StEEmcCluster c1 = p1.clusters(0)[0];
-	  StEEmcCluster c2 = p2.clusters(0)[0];
-	  tower_clusters.push_back( c1 );
-	  if ( c1.key() != c2.key() ) {
-	    tower_clusters.push_back(c2);
+	  Float_t epre1[720]; for ( Int_t ii=0;ii<720;ii++ ) epre1[ii]=0.;
+	  Float_t epre2[720]; for ( Int_t ii=0;ii<720;ii++ ) epre2[ii]=0.;
+	  StEEmcTower t1=p1.tower(0);
+	  StEEmcTower t2=p2.tower(0);
+	  epre1[ t1.index() ] = mEEanalysis->tower( t1.index(), 1 ).energy();
+	  epre1[ t2.index() ] = mEEanalysis->tower( t2.index(), 1 ).energy();
+	  epre2[ t1.index() ] = mEEanalysis->tower( t1.index(), 2 ).energy();
+	  epre2[ t2.index() ] = mEEanalysis->tower( t2.index(), 2 ).energy();
+	  for ( Int_t jj=0;jj<t1.numberOfNeighbors();jj++ )
+	    {
+	      StEEmcTower n1=mEEanalysis->tower( t1.neighbor(jj).index(), 1 );
+	      StEEmcTower n2=mEEanalysis->tower( t1.neighbor(jj).index(), 2 );
+	      epre1[ n1.index() ] = n1.energy();
+	      epre2[ n2.index() ] = n2.energy();
+	    }
+	  for ( Int_t jj=0;jj<t2.numberOfNeighbors();jj++ )
+	    {
+	      StEEmcTower n1=mEEanalysis->tower( t2.neighbor(jj).index(), 1 );
+	      StEEmcTower n2=mEEanalysis->tower( t2.neighbor(jj).index(), 2 );
+	      epre1[ n1.index() ] = n1.energy();
+	      epre2[ n2.index() ] = n2.energy();
+	    }
+	  for ( Int_t ii=0;ii<720;ii++ ) {
+	    sum += epre1[ii];
+	    sum += epre2[ii];
 	  }
 
-	  mPi0Event->mNumberOfTowerClusters.push_back( (Int_t)tower_clusters.size() );
 
-	  Int_t ntracks = 0;
-	  Int_t npoints = 0;
-	  for ( UInt_t i=0;i<tower_clusters.size();i++ )
-	    {
-	      ntracks += mEEclusters->numberOfTracks( tower_clusters[i] );
-	      npoints += mEEpoints->numberOfPoints( tower_clusters[i] );
-	    }
-	  mPi0Event->mNumberOfTracks.push_back( ntracks );
-	  mPi0Event->mNumberOfPoints.push_back( npoints );
+	  Float_t energy=e1+e2+18.0*sum;
 
 
-
-	  /***********************************************/
+	  /*
+	   * Add in SMD energy
+	   */
+	  Float_t eadd=0.;
+	  eadd += p1.cluster(0).energy();	  
+	  eadd += p1.cluster(1).energy();
+	  eadd += p2.cluster(0).energy();	  
+	  eadd += p2.cluster(1).energy();
+	  energy += eadd;
 	  
+	  e1=energy*r1+p1.cluster(0).energy()+18.0*p1.cluster(1).energy();	 
+	  e2=energy*r2+p2.cluster(0).energy()+18.0*p2.cluster(1).energy();	 
 
+	  p1.energy(e1);
+	  p2.energy(e2);
+#endif
 
-
-	  /// the rest is gravy
-
+	  StEEmcPair pair(p1,p2,vertex,vertex);
+	  mPairs.push_back( pair );
 
 	  hEvents->Fill("pair",1.0);
 
@@ -289,10 +271,6 @@ Int_t StEEmcPi0Maker::Make()
 
 	}
     }
-
-  if ( mTree )
-    mTree->Fill();
-  
   return kStOK;
 }
 
@@ -302,7 +280,6 @@ Int_t StEEmcPi0Maker::Make()
 void StEEmcPi0Maker::Clear(Option_t *opts)
 {
   mPairs.clear();
-  mPi0Event->Clear();
 }
 
 
