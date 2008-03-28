@@ -1,8 +1,5 @@
-// $Id: StHistUtil.cxx,v 2.28 2006/04/24 21:23:13 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.27 2006/03/28 21:35:31 genevb Exp $
 // $Log: StHistUtil.cxx,v $
-// Revision 2.28  2006/04/24 21:23:13  genevb
-// Fix problem with overlayed hists, and Patch for missing titles
-//
 // Revision 2.27  2006/03/28 21:35:31  genevb
 // Single page output capability for eps,jpg,png,gif,tiff,etc. [see TPad::Print()]
 //
@@ -322,7 +319,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   graphPad->Divide(m_PadColumns,m_PadRows);
 
   Int_t padCount = 0;
-  Bool_t padAdvance = kTRUE;
 
 
   // Now find the histograms
@@ -400,8 +396,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           }
 
           // go to next pad 
-	  graphPad->cd(++padCount);
-	  padAdvance = kTRUE;
+          graphPad->cd(++padCount);
 //NOTE! (13jan00,kt) -->  this cd is really acting on gPad!!!
 //   --> gPad is a global variable & one uses it to set attributes of current pad
 //  --> you can see the full list of global variables by starting ROOT and entering .g
@@ -489,8 +484,10 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                      !oName.CompareTo("fcl_radialE")) {
 	      if (!oName.CompareTo("fcl_radialW")) hobjradialW = (TH1*) obj;
 	      if (!oName.CompareTo("fcl_radialE")) hobjradialE = (TH1*) obj;
-	      if ( hobjradialW || hobjradialE) {
 	      if ( hobjradialW && hobjradialE) {
+		// go to previous pad                   
+                graphPad->cd(--padCount);
+	        if (gPad) gPad->Update();
 		hobjradialW->SetStats(kFALSE);     
 		hobjradialW->GetXaxis()->SetRangeUser(7.0,9.0);
 		hobjradialE->SetStats(kFALSE);     
@@ -523,38 +520,11 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                 legend->AddEntry(hobjradialE,"FtpcEast","l");
                 legend->AddEntry(hobjradialW,"FtpcWest","l");
                 legend->Draw();
-	      } else {
-	        padAdvance = kFALSE; // wait for both histograms before drawing
-	      }
-	      }
+	      }	 
             }
 	    else hobj->Draw();
 	  }
-
-// Temporary patch for missing titles; should not need in Root vers. 5.X
-// Find the hist title's TPaveText object and change the alignment
-          TString ntitle = obj->GetTitle();
-          if (((m_PadColumns>1) && (ntitle.Length() > 60)) ||
-              ((m_PadColumns>2) && (ntitle.Length() > 38))) {
-            gPad->Draw();
-            TList* list = gPad->GetListOfPrimitives();
-            TPaveText* pp=0;
-            int li = 0;
-            while (!pp) {
-              if (li == list->GetSize()) {
-                printf("StHistUtil:: ERROR with hist title patch!!!\n");
-                return histCounter;
-              }
-              TObject* lobj = list->At(li++);
-              if ((lobj->IsA() == TPaveText::Class()) &&
-                  (!strcmp(lobj->GetName(),"title"))) pp = (TPaveText*) lobj;
-            }
-            pp->SetTextAlign(12); // better than pp->AddText("");
-          }
-// end patch
-
-	  if (!padAdvance) padCount--;
-	  else if (gPad) gPad->Update();
+	  if (gPad) gPad->Update();
         }
       }
 
