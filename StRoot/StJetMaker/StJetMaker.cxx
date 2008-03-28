@@ -1,31 +1,6 @@
-/***************************************************************************
- *
- * $Id: StJetMaker.cxx,v 1.32 2008/03/27 21:34:07 tai Exp $
- * 
- * Author: Thomas Henry February 2003
- ***************************************************************************
- *
- * Description:  Jet Nano-Dst Creator
- *
- ***************************************************************************
- *
- * Revision 1.0  2003/02/20 thenry
- * StJetMaker was modified and adapted from Akio Ogawa's StppuDstMaker
- * to allow multiple jet analysis modules to be
- * run simultaneosly with various parameters while the Maker loads the events
- * and analyses them.  Four different jet analyzers exist:
- *
- * Konstanin's Analyzers:
- *     Kt type: StppKonstKtJetAnalyzer
- *     Cone type: StppKonstConeJetAnalyzer
- *
- * Mike's Analyzers:
- *     Kt type: StppMikeKtJetAnalyzer
- *     Cone type: StppMikeConeJetAnalyzer
- *
- * These modules all require the StJetFinder modules.
- *
- **************************************************************************/
+//--------------------------------------------------------------------------
+// $Id: StJetMaker.cxx,v 1.33 2008/03/28 00:14:55 tai Exp $
+//--------------------------------------------------------------------------
 
 #include "StJetMaker.h"
 
