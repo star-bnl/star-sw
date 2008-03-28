@@ -1,0 +1,6 @@
+# $Id $
+# package StMuDSTMaker
+# author: 
+#Library:libStMuDSTMaker.so:LIBS +=   -lStChain  -lStDbUtilities    -l_StEvent  -l_StEventUtilities  -lStRrsMaker  -lStStrangeMuDstMaker  -lStTofUtil  -lStTreeMaker  -lPhysics
+Library:libStMuDSTMaker.so:LIBS +=   -lStChain  -l_StTpcDb -lStDbUtilities -l_StEvent  -l_StEventUtilities  -lStStrangeMuDstMaker  -lStTofUtil  -lStTreeMaker  -lPhysics
+#Library:libStMuDSTMaker.so:LIBS +=   -lStChain  -lStDbUtilities  -lStEmcUtil  -lStEvent  -lStEventUtilities  -lStRrsMaker  -lStStrangeMuDstMaker  -lStTofUtil  -lStTreeMaker  -lPhysics

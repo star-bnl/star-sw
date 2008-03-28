@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.73 2006/02/08 23:35:36 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.74 2006/07/28 18:25:11 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -623,6 +623,7 @@ void StMuDstMaker::read(){
   if (GetDebug()>1) printArrays();
   mStMuDst->set(this);
   fillHddr();
+  mStMuDst->setVertexIndex(0);
   mStMuDst->collectVertexTracks();   // Make temp list of tracks for current prim vtx
   return;
 }
@@ -1263,6 +1264,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.74  2006/07/28 18:25:11  mvl
+ * Added call to StMuDst::setVertexIndex(0) to StMuDstMaker::read() to reset the current vertex index to 0 for every event
+ *
  * Revision 1.73  2006/02/08 23:35:36  mvl
  * Added overloaded version for StIOInterface::GetFile() to return name
  * of current input or output file (depending on read or write mode)

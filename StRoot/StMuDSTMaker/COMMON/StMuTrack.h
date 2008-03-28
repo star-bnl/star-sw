@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.17 2005/12/13 03:12:13 mvl Exp $
+ * $Id: StMuTrack.h,v 1.20 2006/07/27 18:55:42 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -148,7 +148,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,6)
+  ClassDef(StMuTrack,8)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -197,6 +197,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.20  2006/07/27 18:55:42  fisyak
+ * Remove DCA hack used in SSD+SVT test production (P06id)
+ *
  * Revision 1.17  2005/12/13 03:12:13  mvl
  * Changes to StMuDst2StEventMaker (code in StMuDst) and StMuDstFilterMaker
  * to no longer rely on track keys for matching global and primary tracks.

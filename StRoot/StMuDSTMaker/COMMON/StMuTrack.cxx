@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.24 2005/08/19 19:46:06 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.26 2006/07/27 18:55:41 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -342,6 +342,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.26  2006/07/27 18:55:41  fisyak
+ * Remove DCA hack used in SSD+SVT test production (P06id)
+ *
  * Revision 1.24  2005/08/19 19:46:06  mvl
  * Further updates for multiple vertices. The main changes are:
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks

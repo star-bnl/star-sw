@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.8 2006/05/31 04:09:52 fisyak Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.9 2006/06/26 13:25:15 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.9  2006/06/26 13:25:15  fisyak
+ * gDCA->impact() has the sign, thanks Marco for finding this
+ *
  * Revision 1.8  2006/05/31 04:09:52  fisyak
  * Use dca track parameters for primary vertex fit
  *
@@ -515,7 +518,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	  mWidthScale = 0.1;// 1./TMath::Sqrt(5.);
 	  StDcaGeometry* gDCA = g->dcaGeometry();
 	  if (! gDCA) continue;
-	  if (gDCA->impact() >  mRImpactMax) continue;
+	  if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
 	  mDCAs.push_back(gDCA);
 // 	  StPhysicalHelixD helix = gDCA->helix(); 
 // 	  mHelices.push_back(helix);
