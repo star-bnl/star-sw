@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.28 2007/08/24 21:02:11 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.27 2007/08/20 18:21:29 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
- * Revision 1.28  2007/08/24 21:02:11  deph
- * *** empty log message ***
- *
  * Revision 1.27  2007/08/20 18:21:29  deph
  * New Version of Load Balancer
  *
@@ -542,7 +539,7 @@ void StDbManagerImpl::lookUpServers(){
 
 	if (!fGlobalConfig)
 	  {
-	    //LOG_ERROR << "StDbManagerImpl::lookUpServers(): DB_SERVER_GLOBAL_CONFIG is undefined! "<<endm;
+	    LOG_ERROR << "StDbManagerImpl::lookUpServers(): DB_SERVER_GLOBAL_CONFIG is undefined! "<<endm;
 	  }
 	else
 	  {

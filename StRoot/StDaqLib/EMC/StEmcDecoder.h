@@ -39,7 +39,9 @@ protected:
     int       TriggerPatch[30];
     int       TriggerSequence[10];
     int       TowerBugFixIndex[4800];
+    int       PreshowerBugFixIndex[4800];
     bool      fixTowerMap;
+    bool      fixPreshowerMap;
 
     int       JetPatchFromTriggerPatch[300];
     int       JetPatchSeqFromTriggerPatch[300];
@@ -65,6 +67,7 @@ protected:
     int       getSmdPin(int,int,int,int&) const;///<Get SMD pin number
     int       getSmdpStrip(int,int&,int&) const;///<Get SMDP strip
     void      fixTowerBugIndexes();///<fixes the array in order to correct the tower bug
+    void      fixPreshowerBugIndexes();///<fixes the array in order to correct the preshower mapping
 
     void      Init(unsigned int,unsigned int);///< Init method
 
@@ -77,6 +80,7 @@ public:
     void      SetFixTowerMapBug(bool fix);///< Sets the tower map bug fix
 
     int       GetTowerBugCorrectionShift(int id_original, int &shift) const;///<Returns the index shift for the tower in original map
+    int       GetPreshowerBugCorrectionShift(int id_original, int &shift) const;///<Returns the index shift for the preshower in original map
 
 	//methods to get another basis from softId
     int       GetTowerBin(int softId,int &m,int &e,int &s) const;///<Convert from softId to m,e,s for towers only
@@ -103,6 +107,12 @@ public:
     int       GetCrateAndSequenceFromTriggerPatch(int patchId, int &crate, int &sequence) const; ///< returns the crate number and start point for a given trigger patch
     int       GetTriggerPatchFromJetPatch(int jetPatch, int sequence, int &patchId) const; ///< returns the trigger patch from big jet patch and the sequence in it
     int       GetJetPatchAndSequenceFromTriggerPatch(int patchId, int &jetPatch, int &sequence) const; ///< return the big jet patch and sequence number within it from the
+    
+    /// dsmModule is set to the DSM module containing this trigger patch (0-299)
+    int       GetDSMFromTriggerPatch(int patchId, int &dsmModule) const;
+    
+    /// triggerPatches is an int[10]; contents will be set to the TPs of the supplied DSM #
+    int       GetTriggerPatchesFromDSM(int dsmModule, int *triggerPatches) const;
 
 	//smd methods
     int       GetSmdCoord(int RDO, int posInFiber, int &det, int &m, int &e, int &s, bool print=false) const;///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
@@ -120,9 +130,15 @@ public:
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 2.15 2007/04/04 17:35:12 kocolosk Exp $
+// $Id: StEmcDecoder.h,v 2.17 2007/10/09 18:02:24 kocolosk Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 2.17  2007/10/09 18:02:24  kocolosk
+// two extra support functions for TP <=> DSM module mapping
+//
+// Revision 2.16  2007/09/11 02:41:37  kocolosk
+// added code to fix preshower swaps in 2006 and beyond
+//
 // Revision 2.15  2007/04/04 17:35:12  kocolosk
 // Added methods GetCrateFromTowerId, GetTDCFromTowerId, GetTDCFromTowerId, GetTriggerPatchFromTowerId, GetJetPatchFromTowerId, and GetTowerIdFromBin.  Also implemented const-correctness and used meaningful argument names in method declarations to improve readability.
 //

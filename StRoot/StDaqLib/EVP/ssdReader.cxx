@@ -6,16 +6,37 @@
 #include <arpa/inet.h>
 
 #include "daqFormats.h"
-#include "rtsSystemsEVP.h"
-#include "rtsLog.h"
+#include "rtsSystems.h"
 
 
 #include "evpSupport.h"
 #include "ssdReader.h"
 
-struct ssd ssd ;
+struct ssd_t ssd ;
 
 static int unpackRaw(int rb, int mz, int what, char *mem) ;
+//________________________________________________________________________________
+ssd_t::ssd_t()
+{
+  memset(this,0,sizeof(ssd_t));
+  fenceA=1946;
+  fenceZ=1946;
+	// set the max channel num - constant
+  max_channels = 20*16*2*768 ;
+}
+//________________________________________________________________________________
+void ssd_t::reset()
+{
+	// clear total channels 
+  ssd.channels = 0 ;
+}
+//________________________________________________________________________________
+int ssd_t::check()
+{
+ assert(fenceA==1946);
+ assert(fenceZ==1946);
+ return 0;
+}
 
 
 /* UNUSED 
@@ -52,11 +73,9 @@ int ssdReader(char *m)
 	struct DATAPX *datapx ;
 
 
+        ssd.check();
 	// clear total channels 
-	ssd.channels = 0 ;
-
-	// set the max channel num - constant
-	ssd.max_channels = 20*16*2*768 ;
+	ssd.reset() ;
 
 
 	if(m == NULL) return EVP_DATA_ERR ;
@@ -273,7 +292,7 @@ int ssdReader(char *m)
 	}
 
 	
-
+        ssd.check();
 	return len ;
 }
 

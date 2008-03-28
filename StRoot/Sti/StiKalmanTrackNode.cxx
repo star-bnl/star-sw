@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.112 2007/08/30 19:13:27 fine Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.113 2007/09/10 21:26:52 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.113  2007/09/10 21:26:52  perev
+ * getPt non positive bug fix. introduces 3 month ago
+ *
  * Revision 2.112  2007/08/30 19:13:27  fine
  * replace the repmaining cout with LOG_DEBUG
  *
@@ -507,7 +510,7 @@ void StiKalmanTrackNode::get(double& alpha,
 //______________________________________________________________________________
 double StiKalmanTrackNode::getPt() const
 {
-  return (fabs(mFP._ptin)<1e-6) ? 1e6: 1./mFP._ptin;
+  return (fabs(mFP._ptin)<1e-6) ? 1e6: 1./fabs(mFP._ptin);
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)

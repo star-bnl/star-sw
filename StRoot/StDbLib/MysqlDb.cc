@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.45 2007/08/29 21:08:13 deph Exp $
+ * $Id: MysqlDb.cc,v 1.44 2007/08/20 18:21:28 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
- * Revision 1.45  2007/08/29 21:08:13  deph
- * Separated out string copy for load  lbalancer (host name too long for legacy code) deafual
- *
  * Revision 1.44  2007/08/20 18:21:28  deph
  * New Version of Load Balancer
  *
@@ -313,6 +310,10 @@ bool MysqlDb::reConnect(){
 bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,  const char *aDb, const int aPort){
 #define __METHOD__ "Connect(host,user,pw,database,port)"
 
+  if(mdbhost) delete [] mdbhost;
+  mdbhost  = new char[strlen(aHost)+1];   
+strcpy(mdbhost,aHost);
+
   if(aUser){
    if(mdbuser) delete [] mdbuser;
    mdbuser  = new char[strlen(aUser)+1];   strcpy(mdbuser,aUser);
@@ -336,13 +337,8 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
       short mSBStatus = my_manager->myServiceBroker->GetStatus();
       if (mSBStatus==st_db_service_broker::NO_ERROR)
 	{
-          
-	  const char* lbHostName = (my_manager->myServiceBroker->GiveHostName()).c_str();
-	  if(mdbhost) delete [] mdbhost;
-	  mdbhost = new char[strlen(lbHostName)+1];
-          strcpy(mdbhost,lbHostName);
-
-          mdbPort = my_manager->myServiceBroker->GiveHostPort();
+	  strcpy(mdbhost,(my_manager->myServiceBroker->GiveHostName()).c_str());
+	  mdbPort = my_manager->myServiceBroker->GiveHostPort();
 	}
       else
 	{
@@ -352,11 +348,6 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
   finish = clock();
   lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
   cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
-#else
-  if(mdbhost) delete [] mdbhost;
-  mdbhost  = new char[strlen(aHost)+1];   
-strcpy(mdbhost,aHost);
-
 #endif
 
 
