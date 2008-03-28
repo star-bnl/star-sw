@@ -53,6 +53,7 @@ StDetectorDbClock::StDetectorDbClock(){
     mStarClockOnl = 0;
     mNumRows = 0;
     mTable = 0;
+    mMaker = 0;
 };
 
 /// Returns Number of Entries in database

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.7 2006/08/08 14:28:09 deph Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.8 2007/08/08 20:51:04 fine Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.8  2007/08/08 20:51:04  fine
+ * replace the cutom messanger with the standard STAR logger
+ *
  * Revision 1.7  2006/08/08 14:28:09  deph
  * fixed delete to delete allocated array
  *
@@ -52,36 +55,47 @@ StDbWrappedMessenger::printMessage(const char* message, StDbMessLevel dbLevel, i
 
 if(dbLevel<mdbLevel)return;
 
+ int n = strlen(message)+1000;
+ char * str = new char[n];
+
+ sprintf(str,"%s::%s line=%d %s",className,methodName,lineNumber,message);
+
  char lString[64];
  switch(dbLevel){
  case dbMDebug:
    {
       strcpy(lString,"I");
+      LOG_DEBUG << str << endm;
       break;
    }
  case dbMWarn:
    {
       strcpy(lString,"W");
+      LOG_WARN << str << endm;
       break;
    }
  case dbMConnect:
    {
       strcpy(lString,"I");
+      LOG_INFO << str << endm;
       break;
    }
  case dbMErr:
    {
      strcpy(lString,"E");
+     LOG_ERROR << str << endm;
      break;
    }
  default:
    { 
      strcpy(lString," ");
+     LOG_INFO << str << endm;
      break;
    }
+   delete [] str;
  }
 
-printMessage(message,(const char*)lString,lineNumber,className,methodName);
+// printMessage(message,(const char*)lString,lineNumber,className,methodName);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -95,6 +109,7 @@ StDbWrappedMessenger::printMessage(const char* message, const char* levelString,
   //
 
 //  char str[1024];
+  assert(0);
   int n = strlen(message)+1000;
   char * str = new char[n];
 

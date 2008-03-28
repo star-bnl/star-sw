@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.38 2007/04/28 17:57:19 perev Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.40 2007/08/04 00:38:04 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.40  2007/08/04 00:38:04  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
+ * Revision 1.39  2007/07/12 20:21:09  fisyak
+ * Drift velocity depends on TPC half, use online RHIC clock
+ *
  * Revision 1.38  2007/04/28 17:57:19  perev
  * Redundant StChain.h removed
  *
@@ -442,8 +449,9 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 
   // Set Table Flavors
    if (m_Mode%1000000==1){
-     const Char_t *tabNames[4] = {"tpcGlobalPosition","tpcSectorPosition", "tpcISTimeOffsets", "tpcOSTimeOffsets"};
-     for (Int_t i = 0; i < 4; i++) {
+     const Char_t *tabNames[5] = {"tpcGlobalPosition","tpcSectorPosition", "tpcISTimeOffsets", 
+				  "tpcOSTimeOffsets","starClockOnl"};
+     for (Int_t i = 0; i < 5; i++) {
        SetFlavor("sim",tabNames[i]); 
        gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for table " << "\t" << tabNames[i] << endm;
      }
@@ -613,5 +621,6 @@ void StTpcDbMaker::SetTpc2Global() {
 }
 
 
+StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
 
 
