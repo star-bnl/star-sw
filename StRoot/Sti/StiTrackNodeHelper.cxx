@@ -74,6 +74,14 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   mDetector   = mTargetNode->getDetector();
   if (!mDetector) mVertexNode = mTargetNode;
   mHit        = mTargetNode->getHit();
+  if (mHit) {
+    double time = 0;
+    if (mHit->vy() || mHit->vz()) time = mTargetNode->getTime();
+    mHitPars[0]=mHit->x();
+    mHitPars[1]=mHit->y(time);
+    mHitPars[2]=mHit->z(time);
+  }
+
   if (!mIter) mTargetNode->mFlipFlop=0;
 }
 //______________________________________________________________________________
@@ -110,7 +118,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   
 //  	Propagation 
   x1 = rotPars._x;
-  x2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHit->x();
+  x2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHitPars[0];
   dx = x2-x1;
   rho = 0.5*(mTargetHz*rotPars._ptin+rotPars._curv);
   dsin = rho*dx;
@@ -749,12 +757,9 @@ double StiTrackNodeHelper::evalChi2()
   if (fabs(mPredPars._eta)       >kMaxEta) 	return 1e41;
   if (fabs(mPredPars._curv)      >kMaxCur)      return 1e41;
   if (!mDetector) 	{ //Primay vertex
-    double hitPars[3];
-    hitPars[0] = mPredPars._x;
-    hitPars[1] = mHit->y();
-    hitPars[2] = mHit->z();
-//    chi2 = joinVtx(hitPars,mHrr.A,mPredPars.P,mPredErrs.A);
-    chi2 = joinVtx(hitPars,mHrr,mPredPars,mPredErrs);
+    mHitPars[0] = mPredPars._x;
+//    chi2 = joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A);
+    chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs);
   } else 		{ //Normal hit
 
     r00=mPredErrs._cYY+mHrr.hYY;
@@ -767,8 +772,8 @@ double StiTrackNodeHelper::evalChi2()
     }
     double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
 
-    double dyt=(mPredPars._y-mHit->y());
-    double dzt=(mPredPars._z-mHit->z());
+    double dyt=(mPredPars._y-mHitPars[1]);
+    double dzt=(mPredPars._z-mHitPars[2]);
     chi2 = (dyt*r00*dyt + 2*r01*dyt*dzt + dzt*r11*dzt)/mDetm;
   }
   return chi2;
@@ -778,15 +783,15 @@ double StiTrackNodeHelper::evalChi2()
  * double StiTrackNodeHelper::joinChi2() 
  * {
  *   double chi2;
- *   double mergPars[3],hitPars[3],mergErrs[6];
+ *   double mergPars[3],mHitPars[3],mergErrs[6];
  *   chi2 = joinTwo(3,mPredPars.P         ,mPredErrs.A
  *                 ,3,mTargetNode->mPP().P,mTargetNode->mPE().A
  *                   ,mergPars            ,mergErrs);
  *   
- *   hitPars[0] = mHit->x();
- *   hitPars[1] = mHit->y();
- *   hitPars[2] = mHit->z();
- *   chi2 = joinTwo(3,mergPars,mergErrs,3,hitPars,mHrr.A);
+ *   mHitPars[0] = mHit->x();
+ *   mHitPars[1] = mHit->y();
+ *   mHitPars[2] = mHit->z();
+ *   chi2 = joinTwo(3,mergPars,mergErrs,3,mHitPars,mHrr.A);
  * // 	Save untouched by current hit node's y,z & errors for alignment
  *   mUnTouch.mPar[0] = mergPars[1];
  *   mUnTouch.mPar[1] = mergPars[2];
@@ -802,13 +807,9 @@ double StiTrackNodeHelper::recvChi2()
   if (fabs(mJoinPars._sinCA)>0.99        )	return 1e41;
   if (fabs(mJoinPars._eta)       >kMaxEta) 	return 1e41;
   if (fabs(mJoinPars._curv)      >kMaxCur)      return 1e41;
-  double hitPars[3];
-  hitPars[0]=mHit->x();
-  hitPars[1]=mHit->y();
-  hitPars[2]=mHit->z();
   if (!mDetector) {//Primary vertex
-//  double chi2 =joinVtx(hitPars,mHrr.A,mPredPars.P,mPredErrs.A);
-    double chi2 =joinVtx(hitPars,mHrr  ,mPredPars  ,mPredErrs  );
+//  double chi2 =joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A);
+    double chi2 =joinVtx(mHitPars,mHrr  ,mPredPars  ,mPredErrs  );
     return chi2;
   }
 
@@ -824,11 +825,11 @@ double StiTrackNodeHelper::recvChi2()
   if (r11*r22-r12*r12<0)			return 1e41;	  
 
 
-  double chi2 = joinTwo(3,hitPars    ,    myHrr.A
+  double chi2 = joinTwo(3,mHitPars    ,    myHrr.A
                        ,3,mJoinPars.P,mJoinErrs.A
 		         ,recovPars.P,recovErrs.A);
-  if (fabs(recovPars._y-hitPars[1])>10) StiDebug::Break(-1);
-  if (fabs(recovPars._z-hitPars[2])>10) StiDebug::Break(-1);
+  if (fabs(recovPars._y-mHitPars[1])>10) StiDebug::Break(-1);
+  if (fabs(recovPars._z-mHitPars[2])>10) StiDebug::Break(-1);
 
   mUnTouch.set(recovPars,recovErrs);
   return -chi2; //account that result is negative
@@ -866,14 +867,12 @@ int StiTrackNodeHelper::updateNode()
 static int nCall=0; nCall++;
   mState = StiTrackNode::kTNFitBeg;
   assert(mPredErrs._cXX<1e-8);
-  double r00,r01,r11,hitPars[3];
+  double r00,r01,r11;
   StiDebug::Break(mTargetNode->mId);
   if (!mDetector)	{ //Primary vertex
-    hitPars[0] = mPredPars._x;
-    hitPars[1] = mHit->y();
-    hitPars[2] = mHit->z();
-//  double chi2 = joinVtx(hitPars,mHrr.A,mPredPars.P,mPredErrs.A,mFitdPars.P,mFitdErrs.A);
-    double chi2 = joinVtx(hitPars,mHrr,mPredPars,mPredErrs,&mFitdPars,&mFitdErrs);
+    mHitPars[0] = mPredPars._x;
+//  double chi2 = joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A,mFitdPars.P,mFitdErrs.A);
+    double chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs,&mFitdPars,&mFitdErrs);
     mFitdPars._curv = mTargetHz*mFitdPars._ptin;
     assert(chi2>900 || fabs(mChi2-chi2)<1e-10);
   } else 		{ //Normal Hit
@@ -896,8 +895,8 @@ static int nCall=0; nCall++;
 
     double myY = mPredPars._y;
     double myZ = mPredPars._z;
-    double dyt  = mHit->y() - myY;
-    double dzt  = mHit->z() - myZ;
+    double dyt  = mHitPars[1] - myY;
+    double dzt  = mHitPars[2] - myZ;
     double dPt  = k30*dyt + k31*dzt;
     double dEt  = k20*dyt + k21*dzt;
     double dTa  = k40*dyt + k41*dzt;
@@ -927,7 +926,7 @@ static int nCall=0; nCall++;
     mFitdPars._sinCA = sinCA;
     mFitdPars._cosCA = ::sqrt((1.-mFitdPars._sinCA)*(1.+mFitdPars._sinCA)); 
     if (!mDetector) 
-      assert(fabs(mFitdPars._y-hitPars[1])>1e-10 ||  fabs(hitPars[0])<4);
+      assert(fabs(mFitdPars._y-mHitPars[1])>1e-10 ||  fabs(mHitPars[0])<4);
 //??    cutStep(&mFitdPars,&mPredPars);
 //??    cutStep(&mFitdPars,&mBestPars);
     if (mFitdPars.check()) return -11;
@@ -1017,11 +1016,11 @@ int StiTrackNodeHelper::nudge()
   if(!mHit) return 0;
   StiNodePars *pars = &mBestPars;
   for (int i=0;i<2;i++,pars =&mPredPars) {
-    double deltaX = mHit->x()-pars->_x;
+    double deltaX = mHitPars[0]-pars->_x;
     if (fabs(deltaX) <1e-6) continue;
     double deltaL = deltaX/pars->_cosCA;
     double deltaE = pars->_curv*deltaL;
-    pars->_x      = mHit->x();
+    pars->_x      = mHitPars[0];
     pars->_y     += pars->_sinCA *deltaL;
     pars->_z     += pars->_tanl  *deltaL;
     pars->_eta   +=               deltaE;

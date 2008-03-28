@@ -130,6 +130,7 @@ StiNodeErrs mBestParentErrs;    //best parent errors
 
 StiNodeMtx mMtx;
 StiMcsErrs mMcs;
+double     mHitPars[3];
 StiHitErrs mHrr;
 StiNode2Pars mUnTouch;
 // locals
