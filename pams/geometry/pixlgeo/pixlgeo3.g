@@ -1,6 +1,16 @@
 *
-* $Id: pixlgeo3.g,v 1.3 2006/10/23 00:10:03 potekhin Exp $
+* $Id: pixlgeo3.g,v 1.5 2007/03/21 21:10:16 potekhin Exp $
 * $Log: pixlgeo3.g,v $
+* Revision 1.5  2007/03/21 21:10:16  potekhin
+* A new backward-compatible version with (a) refactoring of the data
+* structures for better modification support (b) switchable
+* "thick" active layer configuration (c) lots of small purely
+* cosmetic changes
+*
+* Revision 1.4  2007/03/15 19:57:00  potekhin
+* Added a useful diagnostic printout about the thicknesses
+* of the Si layers (passive and active)
+*
 * Revision 1.3  2006/10/23 00:10:03  potekhin
 * The opening angle of the sector needs to be increased (one ladder
 * was sticking outside.
@@ -27,105 +37,126 @@ Module PIXLGEO3 is the the STAR pixel detector and beam pipe support
 
       Content  PXMO, PSEC, PLMO, PLAC, PLPS, PXBX
 *
-      Structure PIXG {Ladder, Rin, Rout, TotalLength,
-                      LadderWidth,LadderThk,PassiveThk,ActiveThk,
-                      r,a,pOffset,aOffset}
+      Structure PXLV {int version, LadVer}
+
+      Structure PXLD {version, TotalLength,
+                      LadderWidth,LadderThk,PassiveThk,ActiveThk, Rin, Rout}
+
+      Structure PIXG {Ladder,r,a,pOffset,aOffset}
       Structure PXBG {version, Length, Rin, Thk}
 *
 * -----------------------------------------------------------------------------
 *
-   Fill PIXG                   ! Pixel detector data
-      Ladder     =  1          ! ladder index
-      Rin        =  2.4        ! Inner radius
-      Rout       =  8.3        ! Outer radius
-      TotalLength=  20.0       ! Overal length of the detector
 *
+  Fill PXLV                    ! Pixel ladder data
+      Version    =  1.0        ! config version
+      LadVer=1.0               ! Ladder Version
+  EndFill
+
+  Fill PXLD                    ! Pixel ladder data
+      Version    =  1.0        ! version
+      TotalLength=  20.0       ! Overal length of the detector
       LadderWidth=  2.00       ! Ladder Width
       LadderThk  =  0.0240     ! Total ladder Thickness
       PassiveThk =  0.0220     ! Passive silicon Thickness
       ActiveThk  =  0.0020     ! Active  silicon Thickness
-*
-      r          =  2.5      ! 1st ladder nominal radius
-      a          =  100.        ! 1st ladder nominal position angle
-      aOffset    =  103.      ! Angular offset
+      Rin        =  2.4        ! Inner radius
+      Rout       =  8.3        ! Outer radius
+  EndFill
+
+  Fill PXLD                    ! Pixel ladder data
+      Version    =  2.0        ! version
+      LadderWidth=  2.00       ! Ladder Width
+      LadderThk  =  0.0240     ! Total ladder Thickness
+      PassiveThk =  0.0120     ! Passive silicon Thickness
+      ActiveThk  =  0.0120     ! Active  silicon Thickness
+      Rin        =  2.4        ! Inner radius
+      Rout       =  8.3        ! Outer radius
+  EndFill
+
+   Fill PIXG                   ! Pixel detector data
+      Ladder     =  1          ! ladder index
+      r          =  2.5        ! 1st ladder nominal radius
+      a          =  100.       ! 1st ladder nominal position angle
+      aOffset    =  103.       ! Angular offset
 *
       pOffset    =  0.0        ! Position offset (shift)
    EndFill
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  2          ! ladder index
-      r          =  2.5      ! 2nd ladder nominal radius
-      a          =  60.      ! 2nd ladder nominal position angle
-      aOffset    =  103.      ! Angular offset
+      r          =  2.5        ! 2nd ladder nominal radius
+      a          =  60.        ! 2nd ladder nominal position angle
+      aOffset    =  103.       ! Angular offset
    EndFill
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  3          ! ladder index
-      r          =  2.5      ! 2nd ladder nominal radius
-      a          =  20.      ! 2nd ladder nominal position angle
-      aOffset    =  103.      ! Angular offset
+      r          =  2.5        ! 2nd ladder nominal radius
+      a          =  20.        ! 2nd ladder nominal position angle
+      aOffset    =  103.       ! Angular offset
    EndFill
 
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  4          ! ladder index
-      r          =  6.5      ! 2nd ladder nominal radius
-      a          =  105.      ! 2nd ladder nominal position angle
-      aOffset    =  90.      ! Angular offset
+      r          =  6.5        ! 2nd ladder nominal radius
+      a          =  105.       ! 2nd ladder nominal position angle
+      aOffset    =  90.        ! Angular offset
    EndFill
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  5          ! ladder index
-      r          =  7.5      ! 3rd ladder radius
-      a          =  90.      ! 3rd ladder nominal position angle
-      aOffset    =  90.      ! Angular offset
+      r          =  7.5        ! 3rd ladder radius
+      a          =  90.        ! 3rd ladder nominal position angle
+      aOffset    =  90.        ! Angular offset
    EndFill
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  6          ! ladder index
-      r          =  6.5      ! 4th ladder nominal radius
-      a          =  75.      ! 4th ladder nominal position angle
-      aOffset    =  90.      ! Angular offset
+      r          =  6.5        ! 4th ladder nominal radius
+      a          =  75.        ! 4th ladder nominal position angle
+      aOffset    =  90.        ! Angular offset
    EndFill
 
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  7          ! ladder index
-      r          =  7.5      ! 3rd ladder radius
-      a          =  60.      ! 3rd ladder nominal position angle
-      aOffset    =  90.      ! Angular offset
+      r          =  7.5        ! 3rd ladder radius
+      a          =  60.        ! 3rd ladder nominal position angle
+      aOffset    =  90.        ! Angular offset
    EndFill
 
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  8          ! ladder index
-      r          =  6.5      ! 4th ladder nominal radius
-      a          =  45.      ! 4th ladder nominal position angle
-      aOffset    =  90.      ! Angular offset
+      r          =  6.5        ! 4th ladder nominal radius
+      a          =  45.        ! 4th ladder nominal position angle
+      aOffset    =  90.        ! Angular offset
    EndFill
 
 
    Fill PIXG                   ! Pixel detector data
       Ladder     =  9          ! ladder index
-      r          =  7.5      ! 3rd ladder radius
-      a          =  30.      ! 3rd ladder nominal position angle
-      aOffset    =  90.      ! Angular offset
+      r          =  7.5        ! 3rd ladder radius
+      a          =  30.        ! 3rd ladder nominal position angle
+      aOffset    =  90.        ! Angular offset
    EndFill
 
 
-  Fill PIXG                   ! Pixel detector data
-      Ladder     =  10          ! ladder index
-      r          =  6.5      ! 4th ladder nominal radius
-      a          =  15.      ! 4th ladder nominal position angle
-      aOffset    =  90.      ! Angular offset
+  Fill PIXG                    ! Pixel detector data
+      Ladder     =  10         ! ladder index
+      r          =  6.5        ! 4th ladder nominal radius
+      a          =  15.        ! 4th ladder nominal position angle
+      aOffset    =  90.        ! Angular offset
    EndFill
 
 
    Fill PIXG                   ! Pixel detector data
-      Ladder     =  11          ! ladder index
-      r          =  7.5      ! 3rd ladder radius
-      a          =  0.      ! 3rd ladder nominal position angle
-      aOffset    =  90.      ! Angular offset
+      Ladder     =  11         ! ladder index
+      r          =  7.5        ! 3rd ladder radius
+      a          =  0.         ! 3rd ladder nominal position angle
+      aOffset    =  90.        ! Angular offset
    EndFill
 
 
@@ -137,12 +168,14 @@ Module PIXLGEO3 is the the STAR pixel detector and beam pipe support
    EndFill
 
 ******************************************************
-      USE      PIXG  
+      USE      PXLV
+      USE      PXLD version=PXLV_LadVer
 *
-      write(*,*) 'This is the new pixel geometry, pixlgeo3'
+      write(*,*) 'This is the new pixel geometry, pixlgeo3. Ladder version is ', PXLV_LadVer
       raddeg=3.14159265/180.0
 
       write(*,*) '=======  Constructing the Pixel Detector with Beam Pipe Support ========'
+      write(*,*) 'HFT thk: Passive, active, total ',PXLD_PassiveThk,',',PXLD_ActiveThk,',',PXLD_LadderThk
       Create   PXMO
       Position PXMO in CAVE   Konly='ONLY'
 
@@ -153,7 +186,7 @@ Block PXMO is the mother of the pixel detector volumes
       Material  Air
       Attribute PXMO  Seen=1  colo=6
 
-      Shape TUBE Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0
+      Shape TUBE Rmin=PXLD_Rin Rmax=PXLD_Rout Dz=PXLD_TotalLength/2.0
 
 * The "sector" is defined as a group of 5 ladders, we
 * have a total of 6 overlapping sectors placed with rotational symmetry
@@ -175,7 +208,7 @@ EndBlock
 Block PSEC is a group of ladders
       Material  Air
       Attribute PSEC   Seen=1  colo=5
-      Shape TUBS  Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0 Phi1=-11.0 Phi2=122.0
+      Shape TUBS  Rmin=PXLD_Rin Rmax=PXLD_Rout Dz=PXLD_TotalLength/2.0 Phi1=-11.0 Phi2=122.0
 
 
        do nLadder=1,11 ! Inner loop, create ladders inside the sector
@@ -208,10 +241,10 @@ endblock
 Block PLMO is the mother of the silicon ladder
       Material  Air
       Attribute PLMO   Seen=1  colo=4
-      Shape BOX dX=PIXG_LadderWidth/2.0 dY=PIXG_LadderThk/2.0 Dz=PIXG_TotalLength/2.0
+      Shape BOX dX=PXLD_LadderWidth/2.0 dY=PXLD_LadderThk/2.0 Dz=PXLD_TotalLength/2.0
 
-      Create and position PLAC y=-PIXG_LadderThk/2.0+PIXG_ActiveThk/2.0
-      Create and position PLPS y=-PIXG_LadderThk/2.0+PIXG_ActiveThk+PIXG_PassiveThk/2.0
+      Create and position PLAC y=-PXLD_LadderThk/2.0+PXLD_ActiveThk/2.0
+      Create and position PLPS y=-PXLD_LadderThk/2.0+PXLD_ActiveThk+PXLD_PassiveThk/2.0
 
 endblock
 *
@@ -221,7 +254,7 @@ Block PLAC is the active layer of the ladder
       Material  Sensitive  Isvol=1
       Attribute PLAC   Seen=1  colo=4
 
-      Shape BOX dX=PIXG_LadderWidth/2.0 dY=PIXG_ActiveThk/2.0 Dz=PIXG_TotalLength/2.0
+      Shape BOX dX=PXLD_LadderWidth/2.0 dY=PXLD_ActiveThk/2.0 Dz=PXLD_TotalLength/2.0
 
       call      GSTPAR (%Imed,'STRA',1.)
 
@@ -234,7 +267,7 @@ endblock
 Block PLPS is the passive layer of the ladder
       Material  Silicon
       Attribute PLPS   Seen=1  colo=2
-      Shape BOX dX=PIXG_LadderWidth/2.0 dY=PIXG_PassiveThk/2.0 Dz=PIXG_TotalLength/2.0
+      Shape BOX dX=PXLD_LadderWidth/2.0 dY=PXLD_PassiveThk/2.0 Dz=PXLD_TotalLength/2.0
 endblock
 
       END

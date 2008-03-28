@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.17 2006/11/30 16:37:19 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.18 2007/03/30 02:14:19 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.18  2007/03/30 02:14:19  andrewar
+ * Removed some debug output.
+ *
  * Revision 1.17  2006/11/30 16:37:19  andrewar
  * Removed call to dbase for tracking parameter loading for the review. Dynamic
  * access will be debugged and restored after the STAR review. Hit errors are
@@ -166,8 +169,8 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	      add(0,(sector-18),pDetector);
 	    }
 
-	  cout << "Setting detector: " << name << " with key values: "
-	       << pDetector->getKey(1) << " "  << pDetector->getKey(2) << endl;
+	  //cout << "Setting detector: " << name << " with key values: "
+	  //     << pDetector->getKey(1) << " "  << pDetector->getKey(2) << endl;
 	}
     }
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Done" << endl;
@@ -256,10 +259,10 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
       return;
     }
 
-  gMessMgr->Info() << "StiPixelDetectorBuilder::AverageVolume -I- TGeoPhysicalNode: " 
-		   << nodeP->GetName()
-		   << endl;
-  printf("StiPixelDetectorBuilder::AverageVolume -I- TGeoPhysicalNode: %s\n",nodeP->GetName());
+  //gMessMgr->Info() << "StiPixelDetectorBuilder::AverageVolume -I- TGeoPhysicalNode: " 
+//		   << nodeP->GetName()
+//		   << endl;
+  //printf("StiPixelDetectorBuilder::AverageVolume -I- TGeoPhysicalNode: %s\n",nodeP->GetName());
 
   // Note:
   // Volumes are currently all planes. I am coding this routine appropriately. Other
@@ -307,7 +310,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     //In ittf parlance, normalVector is the vector normal to the detector plane that passes through 0,0
     if( normalVector.magnitude() != 1. ) 
       {
-	printf("StiPixelDetectorBuilder -I- Normal vector is not a unit vector!\n");
+	//printf("StiPixelDetectorBuilder -I- Normal vector is not a unit vector!\n");
 	normalVector/=normalVector.magnitude();
       }
     normalVector *= centerVector.magnitude()*cos(normalVector.phi()-centerVector.phi());
@@ -371,7 +374,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     mother.Remove(0,startMoth);
     mother.Remove(1,mother.Length());
     int motherN=mother.Atoi();
-    printf("Mother Volume: %i for %s and %s\n", motherN,nameP.Data(), mother.Data());
+    //printf("Mother Volume: %i for %s and %s\n", motherN,nameP.Data(), mother.Data());
 
     TString ladderNme(nameP);
     ladderNme.Remove(0, startLadder);
@@ -403,11 +406,11 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     char name[50];
     sprintf(name, "Pixel/Layer_%d/Ladder_%d", layer, ladder);
     p->setName(name);
-    gMessMgr->Info() <<"StiPixelDetectorBuilder: -I- built detector "
-		     << p->getName()
-		     << " from " << nameP.Data()<<endl;
-    printf("StiPixelDetectorBuilder: -I- built detector %s from %s at phi: %g\n", 
-	   p->getName().c_str(), nameP.Data(), centerVector.phi());
+    //gMessMgr->Info() <<"StiPixelDetectorBuilder: -I- built detector "
+//		     << p->getName()
+//		     << " from " << nameP.Data()<<endl;
+  //  printf("StiPixelDetectorBuilder: -I- built detector %s from %s at phi: %g\n", 
+    //	   p->getName().c_str(), nameP.Data(), centerVector.phi());
 
 
     p->setKey(1, layer);

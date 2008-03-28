@@ -1,11 +1,17 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.12 2006/12/21 18:11:59 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.14 2007/04/06 14:55:11 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.14  2007/04/06 14:55:11  andrewar
+ * Shift of HFT hit to face of ladder.
+ *
+ * Revision 1.13  2007/03/28 13:33:45  mmiller
+ * Removed cout/printf's.
+ *
  * Revision 1.12  2006/12/21 18:11:59  wleight
  * Fixed UPGR09 compatibility so it works with all versions
  *
@@ -73,6 +79,7 @@ using namespace std;
 #include "StarClassLibrary/StRandom.hh"
 #include "tables/St_HitError_Table.h"
 #include "StBFChain.h"
+#include <fstream.h>
 
 ClassImp(StPixelFastSimMaker)
 
@@ -114,7 +121,7 @@ int StPixelFastSimMaker::InitRun(int RunNo)
   HitError_st* hitError = tableSet->GetTable();
   resXHpd = sqrt(hitError->coeff[0]);
   resZHpd = sqrt(hitError->coeff[3]);
-  cout << "Smearing HPD hits by " << resXHpd << " " << resZHpd << " cm in the HPD " << endl;
+ 
   St_HitError *ist1TableSet = (St_HitError *)set->Find("ist1HitError");
   St_HitError *ist2TableSet = (St_HitError *)set->Find("ist2HitError");
   HitError_st* ist1HitError = ist1TableSet->GetTable();
@@ -123,6 +130,34 @@ int StPixelFastSimMaker::InitRun(int RunNo)
   HitError_st* ist2HitError = ist2TableSet->GetTable();
   resXIst2 = sqrt(ist2HitError->coeff[0]);
   resZIst2 = sqrt(ist2HitError->coeff[3]);
+
+
+     bool pileUpOut=false;
+     fstream file_op("pileup.dat",ios::in);
+     StThreeVectorD * pH=0;
+     if(!pileUpOut)
+       {
+        if(file_op && ! file_op.eof())
+	 {
+	  double x,y,z,layer,ladder;
+	  file_op>>x>>y>>z>>layer>>ladder;
+	  if(x!=-999)
+	    {
+	      pH=new StThreeVectorD(x,y,z);
+	      pileupHits.push_back(pH);
+	      pair<double, double>* pD = new pair<double,double>(layer,ladder);
+	      pileupDet.push_back(pD);
+	      
+	    }
+       	
+	 }//end if file op
+       }//end if pileup output
+    else
+      { //try file input
+      }
+
+
+
 
   return kStOk;
 }
@@ -156,7 +191,47 @@ Int_t StPixelFastSimMaker::Make()
     StThreeVectorF mHitError(0.,0.,0.);
 
     //Get MC Pixel hit collection. This contains all pixel hits.
-  const StMcPixelHitCollection* pixHitCol = mcEvent->pixelHitCollection();					  
+  const StMcPixelHitCollection* pixHitCol = mcEvent->pixelHitCollection();			     
+
+  bool pileupOut=true;
+  if(pileupOut)
+    {
+      fstream file_op("pileup.dat",ios::app);
+      
+      if(file_op)
+	{
+	    Int_t nhits = pixHitCol->numberOfHits();				
+	    if (nhits)								
+	      {									
+		Int_t id = 0;							
+		for (UInt_t k=0; k<pixHitCol->numberOfLayers(); k++)		       
+		  if (pixHitCol->layer(k))						
+		    {								
+		      UInt_t nh = pixHitCol->layer(k)->hits().size();		
+		      for (UInt_t i = 0; i < nh; i++) {
+		  
+			StMcHit *mcH = pixHitCol->layer(k)->hits()[i];
+			if (!mcH) continue;
+
+			StThreeVectorD mRndHitError(0.,0.,0.);
+			smearGaus(mRndHitError, 8.6, 8.6);
+			//8.6 is the design resolution of the detector
+			StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);
+			file_op<< mcH->position().x() + mRndHitError.x()<<" "
+			       <<mcH->position().y() + mRndHitError.y()<<" "
+			       <<mcH->position().z() + mRndHitError.z()<<" "
+			       <<mcP->layer()<<" "<<mcP->ladder()<<endl;
+       		      }                                                           
+		    }								 
+	      }//end if nhits
+	    file_op<<"-999 -999 -999 0. 0."<<endl; //send end of event flag
+	    file_op.close();
+	}//end if file op
+    }//end if pileup output
+  else
+    { //try file input
+    }
+
   if (pixHitCol)							
     {									
       Int_t nhits = pixHitCol->numberOfHits();				
@@ -174,17 +249,22 @@ Int_t StPixelFastSimMaker::Make()
 
 		  StThreeVectorD mRndHitError(0.,0.,0.);
 		  smearGaus(mRndHitError, 8.6, 8.6);
+
+		  StThreeVectorF pos(mcH->position());
+		  StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);
+		  StThreeVectorF mom(mcH->localMomentum());
+		  shiftHit(pos, mom ,mcP->layer(), mcP->ladder());
 		  //8.6 is the design resolution of the detector
 
-		  StRnDHit* tempHit = new StRnDHit(mcH->position(), 
+		  StRnDHit* tempHit = new StRnDHit(mcP->position(), 
 						   mRndHitError, 1, 1., 0, 
 						   1, 1, id++, kHftId);
 		  //cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
 		  //     <<*tempHit<<endl;
 		  tempHit->setDetectorId(kHftId);
-		  tempHit->setVolumeId(mcH->volumeId());                   
-		  tempHit->setKey(mcH->key());                             
-		  StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);     
+		  tempHit->setVolumeId(mcP->volumeId());                   
+		  tempHit->setKey(mcP->key());                             
+		  //StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);     
 		  if(mcP){                                                
 		    tempHit->setLayer(mcP->layer());           
 		    tempHit->setLadder(mcP->ladder());           
@@ -234,7 +314,7 @@ Int_t StPixelFastSimMaker::Make()
 		  gGeoManager->RestoreMasterVolume();
 		  gGeoManager->cd(Path);
 		  TGeoNode* node=gGeoManager->GetCurrentNode();
-		  cout<<"hit location: "<<mcH->position()<<endl;
+		  //MLM cout<<"hit location: "<<mcH->position()<<endl;
 		  double pos[3]={mcH->position().x(),mcH->position().y(),mcH->position().z()};
 		  double localpos[3]={0,0,0};
 		  gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
@@ -244,7 +324,7 @@ Int_t StPixelFastSimMaker::Make()
 		  if(mcI->layer()==1) pos[2]=distortHit(pos[2],resZIst1,100);
 		  else pos[2]=distortHit(pos[2],resZIst2,100);
 		  StThreeVectorF smearedpos(pos);
-		  cout<<"smeared hit location: "<<smearedpos<<endl;
+		  //MLM cout<<"smeared hit location: "<<smearedpos<<endl;
 		  StRnDHit* tempHit = new StRnDHit(smearedpos, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		  tempHit->setDetectorId(kIstId); 
 		  tempHit->setVolumeId(mcH->volumeId());                   
@@ -542,4 +622,164 @@ void StPixelFastSimMaker::smearGaus(StThreeVectorD &mError,
     mError.setX(mError.x()+z1*sigma1/1.e04);
     mError.setY(mError.y()+z1*sigma1/1.e04);
     mError.setZ(mError.z()+z2*sigma2/1.e04);
+}
+
+int StPixelFastSimMaker::sector(int layer, int ladder)
+{
+  printf("Layer %i ladder %i\n",layer, ladder);
+  if (layer ==1)
+    {
+      if ( ladder < 4 ) return 1;
+      if ( ladder < 7 ) return 2;
+      return 3;
+    }
+  else
+    {
+      if ( ladder < 9 ) return 1;
+      if ( ladder < 18 ) return 2;
+      return 3;
+    }
+
+  
+}
+
+int StPixelFastSimMaker::secLadder(int layer, int ladder)
+{
+  if (layer ==1 )
+      return ladder - 3*(sector(layer, ladder)-1);
+  else
+    return ladder - 8*(sector(layer,ladder)-1);
+}
+
+
+
+double StPixelFastSimMaker::phiForLadder(int layer, int ladder)
+{
+  int sec = sector(layer,ladder);
+  int secLad = secLadder(layer,ladder);
+  double phi=0.;
+  double secPhi=0.;
+  double ladPhi=0.;
+  switch (sec)
+    {
+    case 1:
+      secPhi=0.;
+      break;
+    case 2:
+      secPhi=120.;
+      break;
+    case 3:
+      secPhi=240.;
+      break;
+    }
+
+    switch (secLad)
+      {
+	case 1:
+	  ladPhi=100.;
+	  break;
+	case 2:
+	  ladPhi=60.;
+	  break;
+	case 3:
+	  ladPhi=20.;
+	  break;
+	case 4:
+	  ladPhi=105.;
+	  break;
+	case 5:
+	  ladPhi=90.;
+	  break;
+	case 6:
+	  ladPhi=75.;
+	  break;
+	case 7:
+	  ladPhi=60.;
+	  break;
+	case 8:
+	  ladPhi=45.;
+	  break;
+	case 9:
+	  ladPhi=30.;
+	  break;
+	case 10:
+	  ladPhi=15.;
+	  break;
+	case 11:
+	  ladPhi=0.;
+	  break;
+      }
+
+    return secPhi+ladPhi;
+}
+
+ 
+void StPixelFastSimMaker::shiftHit(StThreeVectorF &position,StThreeVectorF &mom, int layer, int ladder)
+{
+
+  //printf("Entering hit shift code. %i %i\n",
+  // sector(layer,ladder), secLadder(layer,ladder));
+
+  TString Path("");
+  Path = Form("/HALL_1/CAVE_1/PXMO_1/PSEC_%i/PLMO_%i/PLAC_1",
+	      sector(layer,ladder),secLadder(layer,ladder));
+  gGeoManager->RestoreMasterVolume();
+   printf("Master volume.\n");
+ 
+  gGeoManager->CdTop();
+  gGeoManager->cd(Path);
+  TGeoPhysicalNode* node= (TGeoPhysicalNode*)(gGeoManager->GetCurrentNode());
+  if (!node ) printf("Failed to get node for %i %i",
+		     sector(layer,ladder), secLadder(layer, ladder));
+ 
+  double pos[3]={position.x(),position.y(),position.z()};
+  double localpos[3]={0,0,0};
+  gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
+    printf("old hit: %g %g %g\n",localpos[0],localpos[1],localpos[2]);
+ 
+  //get ladder phi 
+  //TGeoHMatrix  *hmat   = (TGeoHMatrix*)(node->GetMatrix());
+  TGeoHMatrix  *hmat   =  gGeoManager->GetCurrentMatrix();
+ 
+  if (! hmat )
+    {
+      printf("Can't shift hit - no hmat.\n");
+    }
+  
+  Double_t     *rot    = hmat->GetRotationMatrix();
+  if (! rot )
+    {
+      printf("Can't shift hit - no rotation matrix.\n");
+    }
+ 
+  StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
+  double momentum = mom.magnitude();
+  StThreeVectorF momUnit(mom);
+  momUnit/=momUnit.magnitude();
+ 
+  //momentum mag, pt and z stay the same; angle changes 
+  momUnit.setPhi( momUnit.phi() - phiForLadder(layer,ladder)*3.141592654/180.);
+  printf("Mom dir: %g\n",momUnit.phi());
+  
+  // shift = x + y * tan(phi)
+  //.006 is the half thickness of the active area. Hardcoded; not good; blah, blah.
+  double dx = (.006)*(momUnit.y()/momUnit.x());
+  double dz = (.006)*(momUnit.y()/momUnit.z());
+  localpos[0] = localpos[0] - dx;
+  localpos[2] = localpos[2] - dz;
+  localpos[1] = localpos[1] - .006; //this isn't exactly right. The local position is just off of radius -.006, but it's close (~1-5 um).
+   
+
+  printf("new hit: %g %g %g\n",localpos[0],localpos[1],localpos[2]);
+
+  if ( fabs( localpos[0] ) > 2. ) 
+    printf("StPixelFastSimMaker::shiftHit -E- shifted hit too far!!!! value=%g\n", localpos[0]);
+      
+  if ( fabs( localpos[2] ) > 20. ) 
+    printf("StPixelFastSimMaker::shiftHit -E- shifted hit too far!!!! value=%g\n", localpos[2]);
+
+  gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,pos);
+
+  printf("exit shift code.\n");
+
 }

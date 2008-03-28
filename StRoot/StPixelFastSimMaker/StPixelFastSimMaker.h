@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.5 2006/12/15 02:17:20 wleight Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.6 2007/04/06 14:55:33 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.6  2007/04/06 14:55:33  andrewar
+ * Shift of HFT to face of ladder.
+ *
  * Revision 1.5  2006/12/15 02:17:20  wleight
  * Ist now gets hit smearing parameters from the database
  *
@@ -112,9 +115,15 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.5 2006/12/15 02:17:20 wleight Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.6 2007/04/06 14:55:33 andrewar Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
+
+  void shiftHit(StThreeVectorF &pos, StThreeVectorF &mom, int, int);
+  int sector(int,int);
+  int secLadder(int,int);
+  double phiForLadder(int,int);
+
 
  protected:
   StRandom* myRandom;
@@ -130,9 +139,15 @@ class StPixelFastSimMaker : public StMaker {
   double radiusHpd;
   double waferLengthHpd;
   double ladderWidthHpd;
+
+
+
   int mSmear; //to turn smearing on and off
+
+  vector<StThreeVectorD*> pileupHits;
+  vector<pair<double,double>*> pileupDet;
   
-  ClassDef(StPixelFastSimMaker,0)   //StAF chain virtual base class for Makers
+  ClassDef(StPixelFastSimMaker,1)   //StAF chain virtual base class for Makers
 };
 #endif
 
