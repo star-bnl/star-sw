@@ -20,6 +20,10 @@
 #pragma link C++ enum StDetectorId;
 #pragma link C++ enum StRichHitFlag;
 #pragma link C++ enum StPwg;
+#pragma link C++ enum StL2AlgorithmId;
+#pragma link C++ enum StL2TriggerResultType;
+#pragma link C++ enum StVertexFinderId;
+#pragma link C++ enum StPrimaryVertexOrder;
 #pragma link C++ class StTriggerData+;
 #pragma link C++ class StTriggerData2003+;
 #pragma link C++ class StTriggerData2004+;

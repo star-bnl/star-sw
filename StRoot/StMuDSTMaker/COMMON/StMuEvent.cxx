@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.10 2005/08/19 19:46:05 mvl Exp $
+ * $Id: StMuEvent.cxx,v 1.12 2006/09/20 17:23:39 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -37,7 +37,7 @@ ClassImp(StMuEvent)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuEvent::StMuEvent() : mPrimaryVertexError(-999.,-999.,-999) {
+StMuEvent::StMuEvent() : mPrimaryVertexError(-999.,-999.,-999) { 
   DEBUGMESSAGE("");
   int n = (char*)mReactionPlanePtWgt - (char*)&mRefMultPos+sizeof(mReactionPlanePtWgt);
   memset(&mRefMultPos,0,n);
@@ -45,7 +45,7 @@ StMuEvent::StMuEvent() : mPrimaryVertexError(-999.,-999.,-999) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuEvent::StMuEvent(const StEvent* event) : mPrimaryVertexError(-999.,-999.,-999.) {
+StMuEvent::StMuEvent(const StEvent* event) : mPrimaryVertexError(-999.,-999.,-999.) { 
   try {
     fill(event);
   }
@@ -114,10 +114,8 @@ void StMuEvent::fill(const StEvent* event){
   mRefMultFtpcEast = uncorrectedNumberOfFtpcEastPrimaries(*event);
   mRefMultFtpcWest = uncorrectedNumberOfFtpcWestPrimaries(*event); 
 
-//!   mReactionPlane[0] = event->mReactionPlane[0];              
-//!   mReactionPlane[1] = event->mReactionPlane[1];              
-//!   mReactionPlanePtWgt[0] = event->mReactionPlanePtWgt[0];              
-//!   mReactionPlanePtWgt[1] = event->mReactionPlanePtWgt[1];              
+  if (event->triggerData()) // MC has no triggerData
+    mL2Result.Set(event->triggerData()->l2ResultLength(),(const Int_t*) event->triggerData()->l2Result());
 } 
 
 unsigned short StMuEvent::refMultPos(int vtx_id) {
@@ -170,6 +168,12 @@ unsigned short StMuEvent::refMultFtpc(int vtx_id) {return refMultFtpcEast(vtx_id
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.12  2006/09/20 17:23:39  mvl
+ * Added protected for events with StTriggerData (e.g. simulation)
+ *
+ * Revision 1.11  2006/09/20 01:50:35  mvl
+ * Added data member and code for L2Result array (TArrayI).
+ *
  * Revision 1.10  2005/08/19 19:46:05  mvl
  * Further updates for multiple vertices. The main changes are:
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks

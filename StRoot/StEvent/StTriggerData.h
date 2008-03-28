@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.14 2006/09/13 23:59:55 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.16 2006/09/20 00:44:56 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.16  2006/09/20 00:44:56  ullrich
+ * Modified method to return length of L2 results.
+ *
+ * Revision 2.15  2006/09/19 22:53:55  ullrich
+ * Added access method to L2 results.
+ *
  * Revision 2.14  2006/09/13 23:59:55  ullrich
  * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
  *
@@ -174,6 +180,8 @@ public:
     virtual unsigned short int * getDsm1_EEMC(int prepost=0) const =0;
     virtual unsigned short int * getDsm2_EMC()  const =0;
     virtual unsigned short int * getDsm3()      const =0;
+    virtual unsigned int         l2ResultLength() const = 0;  // Length of raw info
+    virtual const unsigned int*  l2Result() const = 0;  // Pointer to raw info
 
 protected:
     int prepostAddress(int prepost) const; //get pre&post xsing addess, return negative if bad.

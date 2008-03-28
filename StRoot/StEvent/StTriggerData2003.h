@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.11 2006/09/13 23:59:55 ullrich Exp $
+ * $Id: StTriggerData2003.h,v 2.13 2006/09/20 00:44:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.13  2006/09/20 00:44:55  ullrich
+ * Modified method to return length of L2 results.
+ *
+ * Revision 2.12  2006/09/19 22:53:55  ullrich
+ * Added access method to L2 results.
+ *
  * Revision 2.11  2006/09/13 23:59:55  ullrich
  * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
  *
@@ -148,6 +154,8 @@ public:
     unsigned short int * getDsm1_EEMC(int prepost=0) const;
     unsigned short int * getDsm2_EMC()  const;
     unsigned short int * getDsm3()      const;
+    unsigned int         l2ResultLength() const;
+    const unsigned int*  l2Result() const;
     
 protected:
     TrgDataType2003 *mData;

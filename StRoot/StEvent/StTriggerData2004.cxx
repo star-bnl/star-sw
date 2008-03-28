@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.cxx,v 2.15 2006/09/13 23:59:55 ullrich Exp $
+ * $Id: StTriggerData2004.cxx,v 2.17 2006/09/20 00:44:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.cxx,v $
+ * Revision 2.17  2006/09/20 00:44:55  ullrich
+ * Modified method to return length of L2 results.
+ *
+ * Revision 2.16  2006/09/19 22:53:55  ullrich
+ * Added access method to L2 results.
+ *
  * Revision 2.15  2006/09/13 23:59:55  ullrich
  * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
  *
@@ -819,18 +825,32 @@ int StTriggerData2004::getRawSize() const
   return  rawSize;
 }
 
-unsigned char * StTriggerData2004::getDsm0_EEMC(int prepost) const {
-  return   mData->rawTriggerDet[prepostAddress(prepost)].EEMC;
+unsigned char * StTriggerData2004::getDsm0_EEMC(int prepost) const
+{
+    return   mData->rawTriggerDet[prepostAddress(prepost)].EEMC;
 }
 
-unsigned short int  * StTriggerData2004::getDsm1_EEMC(int prepost) const{
-  return   mData->rawTriggerDet[prepostAddress(prepost)].EEMClayer1;
+unsigned short int  * StTriggerData2004::getDsm1_EEMC(int prepost) const
+{
+    return   mData->rawTriggerDet[prepostAddress(prepost)].EEMClayer1;
 }
 
-unsigned short int  * StTriggerData2004::getDsm2_EMC() const{
-  return   mData->TrgSum.DSMdata.EMC;
+unsigned short int  * StTriggerData2004::getDsm2_EMC() const
+{
+    return   mData->TrgSum.DSMdata.EMC;
 }
 
-unsigned short int  * StTriggerData2004::getDsm3() const{
-  return   mData->TrgSum.DSMdata.lastDSM;
+unsigned short int  * StTriggerData2004::getDsm3() const
+{
+    return   mData->TrgSum.DSMdata.lastDSM;
+}
+
+unsigned int StTriggerData2004::l2ResultLength() const
+{
+    return sizeof(mData->TrgSum.L2Result)/sizeof(unsigned int);
+}
+
+const unsigned int* StTriggerData2004::l2Result() const
+{
+    return mData->TrgSum.L2Result;
 }
