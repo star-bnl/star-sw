@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.8 2006/06/13 21:50:36 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.5 2006/05/30 23:05:23 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -92,10 +92,9 @@ Int_t StBemcBeamBckgFinderMaker::Init(){
 
 void StBemcBeamBckgFinderMaker::Clear(const Option_t* option){
 
-  mevtH[0]->Reset();    //keep only eta-phi-adc histogram for the last event processed.
-  memset(mAdcArray,   0,sizeof(mAdcArray));   //array cleared for each event
-  memset(mPattSoftId, 0,sizeof(mPattSoftId)); //array cleared for each event
-  
+  mevtH[0]->Reset();    //keep only the last eta-phi-adc histogram for the last event we processed.
+  memset(mAdcArray,       0,sizeof(mAdcArray));
+
   mDecision=0;
   metaBegin=0;
   metaEnd=0;
@@ -123,7 +122,7 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
 
   StMuEmcCollection *emc = muMk->muDst()->muEmcCollection();
 
-  //========process 7-bit Bunch-Crossing (bx7)==================================
+  //========process 7-bit Bunch-Crossing (bx7)==================
   StMuDst *dst = muMk->muDst();
   StMuEvent *muEve = dst->event();
   StL0Trigger &trig = muEve->l0Trigger();
@@ -133,9 +132,9 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
   mhisto[5]->Fill(bx7);  //fill 7bit bunch crossing for every event we processed. 
 
   //printf("eve=%d bx7=%d\n",mInpEve,bx7);
+
   
-  
-  //========process trigger info==================================================
+  //========process trigger info==================================
  
   assert(muEve);
   StMuTriggerIdCollection ticB = muEve -> triggerIdCollection();
@@ -156,10 +155,10 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
   mAccEve++;
  
   
-  //...........................................................................//
-  //.........................  B T O W   ......................................//
+  //..........................................................//
+  //.........................  B T O W   ....................//
 
-  int id;                        // id = this is soft ID
+  int id;                                 // id== this is soft ID
 
   for (id=0; id<mxSoftId; id++) {
     
@@ -229,7 +228,8 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
       sprintf(mLocation,"West");
     }
 	
-     //printf("Finally my background pattern starts at: phi=%d eta=%d pattern length=%d sum adc=%f\n", myphipattern,myetapattern, mypatternlength, myadcsum);
+    
+    //printf("Finally my background pattern starts at: phi=%d eta=%d pattern length=%d sum adc=%f\n", myphipattern,myetapattern, mypatternlength, myadcsum);
   }
 
   else {
@@ -321,8 +321,7 @@ Int_t StBemcBeamBckgFinderMaker::InitRun(int runNo){
 
     mdb_btowetaBin[softID-1] = kEta;
     mdb_btowphiBin[softID-1] = kPhi; 
-
-    mSoftId[kPhi][kEta] = softID;
+ 
   
     //printf("soft=%4d Rdo=%d ped=%f eta=%.2f phi(rad)=%f Etabin=%d Phibin=%d\n",softID,Rdo,ped,etaF,phiF,kEta,kPhi);
 
@@ -398,7 +397,7 @@ void StBemcBeamBckgFinderMaker::FillAdc(float adc,int ieta,int iphi,int isoft){
   assert(iphi<mxPhi);
 
   mAdcArray[iphi][ieta] = adc;
- 
+
   //printf("In FillAdcUsed(): ieta=%d iphi=%d isoftid=%d mAdcArray[iphi][ieta]=%f\n",ieta,iphi,isoft,adc);
 
 }
@@ -457,8 +456,6 @@ Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin,
     float *adc = mAdcArray[i];
     n = 0;                      //counter over adjacent towers
     maxLength = 0;  
-    memset(mPattSoftId,  0,sizeof(mPattSoftId));
-   
 
     for(j=0; j<mxEta; j++){    //loop over eta
       if(adc[j]<=0) continue;  
@@ -467,9 +464,6 @@ Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin,
       FirstEtaFound=j;
       FirstEtaAdc = adc[j];
       sum = FirstEtaAdc;                  
-      mPattSoftId[n-1] = mSoftId[i][j]; //[n-1] to make sure array starts from zero 
-
-      //printf("start mPattSoftId[%d]=%d\n",n,mPattSoftId[n-1]);
       //printf("(Start probing from: phi=%d eta=%d adc=%f n=%d\n",i,j,adc[j],n);
       
       for(k=j+1; k<mxEta; k++){
@@ -480,11 +474,9 @@ Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin,
 	} 
 	
 	sum = sum + adc[k];
-	n++;
-	mPattSoftId[n-1] = mSoftId[i][k];
+	  n++;
 
-	//printf("next mPattSoftId[%d]=%d\n",n,mPattSoftId[n-1]);
-	//printf("(k=eta+1 i.e, looping over adjacent towers if any) In k loop: phi=%d eta=%d k=%d adc=%f n=%d\n",i,j,k,adc[k],n);
+	  //printf("(k=eta+1 i.e, looping over adjacent towers if any) In k loop: phi=%d eta=%d k=%d adc=%f n=%d\n",i,j,k,adc[k],n);
       }
 
       maxLength=0;
@@ -551,15 +543,6 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
-  Revision 1.8  2006/06/13 21:50:36  qattan
-  *** empty log message ***
-
-  Revision 1.7  2006/06/13 21:42:42  qattan
-  *** empty log message ***
-
-  Revision 1.6  2006/06/13 21:26:25  qattan
-  *** empty log message ***
-
   Revision 1.5  2006/05/30 23:05:23  qattan
   check5
 

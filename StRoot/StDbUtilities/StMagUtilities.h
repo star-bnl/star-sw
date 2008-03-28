@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.32 2005/05/24 18:53:20 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.33 2006/06/27 18:17:47 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.33  2006/06/27 18:17:47  jhthomas
+ * ADD new PredictSpaceCharge() function so that it includes fit errors in the prediction
+ * It is now capable of including the SSD and SVT hits in the predictor/corrector loop
+ *
  * Revision 1.32  2005/05/24 18:53:20  jhthomas
  * Add 3DGridLeak Distortion Correction and Utilities to support it.
  *
@@ -289,13 +293,24 @@ class StMagUtilities {
 					       const unsigned int RowMask2 = 0x1FFFFF,
 					       const Float_t VertexError = 0.0200 ) ;
 
-  virtual Int_t   PredictSpaceChargeDistortion (Int_t Charge, 
+  virtual Int_t   PredictSpaceChargeDistortion (Int_t   Charge, 
 						Float_t Pt, 
 						Float_t VertexZ, 
 						Float_t PseudoRapidity, 
 						Float_t DCA,  
 						const unsigned int RowMask1, 
 						const unsigned int RowMask2, 
+						Float_t &pSpace ) ;
+
+  virtual Int_t   PredictSpaceChargeDistortion (Int_t   Charge, 
+						Float_t Pt, 
+						Float_t VertexZ, 
+						Float_t PseudoRapidity, 
+						Float_t DCA,  
+						const unsigned int RowMask1, 
+						const unsigned int RowMask2, 
+						Float_t RowMaskErrorR[64], 
+						Float_t RowMaskErrorRPhi[64], 
 						Float_t &pSpace ) ;
 
   virtual Int_t    GetSpaceChargeMode();

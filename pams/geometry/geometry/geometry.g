@@ -1,10 +1,5 @@
-* $Id: geometry.g,v 1.125 2006/06/12 18:34:28 potekhin Exp $
+* $Id: geometry.g,v 1.124 2006/06/08 19:36:36 potekhin Exp $
 * $Log: geometry.g,v $
-* Revision 1.125  2006/06/12 18:34:28  potekhin
-* Created the tag Y2006A, which will allow for the all-new
-* FPD to be properly included, as well as otherpotential changes
-* to be implemented in mid-year.
-*
 * Revision 1.124  2006/06/08 19:36:36  potekhin
 * By an unfortunate slip of the wrist, I deleted year2000
 * and year2001 during the previous check-in. Now they are restored.
@@ -1864,77 +1859,6 @@ If LL>1
                 }
 
 ****************************************************************************************
-  on Y2006A   { Year 2006 baseline which is Y2005D+fixed TPC backplane+New SSD
-                  "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-* NEW CONFIG!
-                     BtofConfig=8;
-
-* Full barrel in 2006
-                  "calb" 
-                     ems=on ;
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-
-
-                  "ecal"
-                     ecal_config=1   " one ecal patch, west "
-                     ecal_fill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     bbcm=on
-
-                  "forward pion detector "
-                     fpdm=on
-                     FpdmConfig  = 2 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     vpdd=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
-                     SvshConfig = 2; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     sisd=on;
-                     SisdConfig = 35; "third version, full barrel newly corrected radii"
-
-
-                  "FTPC Readout barrel "
-                     ftro=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     mutd = on;
-                     MutdConfig = 1;
-                  "We need a bigger Cave"
-                     CaveConfig = 3;
-                }
-****************************************************************************************
   on Y2006    { Year 2006 baseline which is Y2005D+fixed TPC backplane+New SSD
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -2612,8 +2536,7 @@ If LL>1
    if (bbcm) Call bbcmgeo
 
    if (fpdm.and.FpdmConfig==0) Call fpdmgeo
-   if (fpdm.and.FpdmConfig==1) Call fpdmgeo1
-   if (fpdm.and.FpdmConfig==2) Call fpdmgeo2
+   if (fpdm.and.FpdmConfig>0)  Call fpdmgeo1
 
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo

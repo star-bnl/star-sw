@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.64 2005/06/01 20:52:53 perev Exp $
+ * $Id: StMagUtilities.cxx,v 1.65 2006/06/27 18:18:24 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.65  2006/06/27 18:18:24  jhthomas
+ * ADD new PredictSpaceCharge() function so that it includes fit errors in the prediction
+ * It is now capable of including the SSD and SVT hits in the predictor/corrector loop
+ *
  * Revision 1.64  2005/06/01 20:52:53  perev
  * Workaround for new version TMatrix
  *
@@ -498,6 +502,12 @@ void StMagUtilities::CommonStart ( Int_t mode )
       for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) Ring[i] = 0 ; 
       for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) MissingResistance[i] = 0 ; 
       for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) Resistor[i] = 0 ;
+      // JT Test of shorted ring repair
+      // ShortTableRows = 1 ;
+      // Ring[0] = 20.5 ; Ring[1] = 182.5 ; Ring[2] = 182.5 ;
+      // MissingResistance[0] = 1.0 ; MissingResistance[1] = 0.0 ; MissingResistance[2] = 0.0 ;
+      // Resistor[0] = 0.0 ;  Resistor[1] = 0.0 ; Resistor[2] = 0.0 ;
+      // End JT Test 
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ;
     } 
   else  cout << "StMagUtilities::CommonSta  Using TPC voltages from the DB."   << endl ; 
@@ -1707,7 +1717,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       
       for ( Int_t i = 0 ; i < ShortTableRows ; i++ )
 	{
-	  if ( ( Side[i] + Cage[i] + Ring[i] + MissingResistance[i] + Resistor[i] ) == 0.0 ) continue ;
+	  if ( ( Side[i] + Cage[i] + Ring[i] + TMath::Abs(MissingResistance[i]) + TMath::Abs(Resistor[i]) ) == 0.0 ) continue ;
 	  if ( Side[i] == 0 && Cage[i] == 0 ) 
 	    { NumberOfEastInnerShorts++ ; EastInnerMissingSum += MissingResistance[i] ; EastInnerExtraSum += Resistor[i] ; 
 	    EastInnerMissingOhms[NumberOfEastInnerShorts-1]  = MissingResistance[i] ; 
@@ -1729,7 +1739,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       // Don't fill the tables if there aren't any shorts
       if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
 	  { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; DoOnce = 1 ; return ; }
-      
+
       Float_t Rtot   =  R0 + 181*RStep + R182     ;    // Total resistance of the (normal) resistor chain
       Float_t Rfrac  =  RStep*TPC_Z0/(Rtot*Pitch) ;    // Fraction of full resistor chain inside TPC drift volume (~1.0)
       Float_t EastInnerRtot = Rtot + EastInnerExtraSum - EastInnerMissingSum ;  // Total resistance of the real resistor chain
@@ -1802,7 +1812,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   
   if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
        { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
-
+  
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
   if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
@@ -2938,6 +2948,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
 //________________________________________
 
 
+
 /// Apply the (1/R**2) space charge correction to selected data from the microDSTs. 
 /*! 
   Given the charge and momentum of a particle and a point on the circular path described by the particle , 
@@ -3056,7 +3067,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
      }
    
    Int_t Index = 0 ;
-   unsigned int OneBit =  1 ;
+   unsigned int OneBit = 1 ;
    for ( Int_t i = 0 ; i < ROWS ; i++ )  // Delete rows not in the bit masks
      {
        if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) == 0 )) continue ;  // Skip this row if not in bit mask
@@ -3156,13 +3167,36 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
 
 
 
-/// Input Physical-Signed DCA and get back spacecharge parameter plus a success or failure flag.
+/// PredictSpaceCharge - Input Physical-Signed DCA and get back spacecharge parameter plus a success or failure flag.
 /*!
 Add comments here.
+TPC Hits only.  Does not include SVT or SSD or any other inner tracking detectors.
 */
 Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Float_t VertexZ, Float_t PseudoRapidity, 
 	       Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, Float_t &pSpace )
 {
+
+   const Int_t   INNER            =  13  ;       // Number of TPC rows in the inner sector
+   const Int_t   ROWS             =  45  ;       // Total number of TPC rows per sector (Inner + Outer)
+   const Int_t   RefIndex         =   7  ;       // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm)
+   const Int_t   MinInnerTPCHits  =   5  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
+   const Int_t   MinOuterTPCHits  =  10  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
+   const Int_t   DEBUG            =   0  ;       // Turn on debugging statements and plots
+
+   unsigned int OneBit = 1 ;
+   Int_t InnerTPCHits = 0, OuterTPCHits = 0 ;
+   for ( Int_t i = 0 ; i < ROWS ; i++ ) 
+     {
+       if ( i < INNER )
+	 {
+	   if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) != 0 )) InnerTPCHits++ ;  
+	 }
+       else
+	 {
+	   if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) != 0 )) OuterTPCHits++ ;  
+	   if ( ( i >= 24 ) && (( RowMask2 & OneBit<<(i-24) ) != 0 )) OuterTPCHits++ ;  
+	 }
+     }
 
    pSpace  = 0 ;
 
@@ -3171,12 +3205,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    if ( (PseudoRapidity < -1.0) || (PseudoRapidity > 1.0) )  return(0) ; // Fail
    if ( (Charge != 1) && (Charge != -1) )                    return(0) ; // Fail
    if ( (DCA < -4.0) || (DCA > 4.0) )                        return(0) ; // Fail
-
-   const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sector
-   const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
-   const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
-   const Int_t   MinHits  = 15  ;        // Minimum number of hits on a track.  If less than this, then no action taken.
-   const Int_t   DEBUG    =  0  ;        // Turn on debugging statements and plots
+   if ( InnerTPCHits < MinInnerTPCHits )                     return(0) ; // No action if too few hits in the TPC   
+   if ( OuterTPCHits < MinOuterTPCHits )                     return(0) ; // No action if too few hits in the TPC   
 
    Int_t    ChargeB ;
    Float_t  B[3], Direction, xx[3], xxprime[3] ;
@@ -3259,7 +3289,6 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
      }
    
    Int_t Index = -1 ;
-   unsigned int OneBit =  1 ;
    for ( Int_t i = 0 ; i < ROWS ; i++ )  // Delete rows not in the bit masks
      {
        if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) == 0 )) continue ;  // Skip this row if not in bit mask
@@ -3291,8 +3320,6 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 	 }
      }
 
-   if ( count < MinHits ) return(0) ;                      // No action if too few hits
-   
    TGraphErrors gre( count+1, U, V, eU, eV ) ;     
    gre.Fit("pol1","Q") ;
    TF1 *fit = gre.GetFunction("pol1" ) ;
@@ -3324,6 +3351,221 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    // Restore settings for spacechargeR2
    fSpaceChargeR2 = tempfSpaceChargeR2 ;
    SpaceChargeR2 = tempSpaceChargeR2 ;
+   
+   return(1) ; // Success 
+
+}
+
+
+/// PredictSpaceCharge - Input Physical-Signed DCA and get back spacecharge estimate.  Includes the SVT and SSD.
+/*!
+  Input the parameters for a global track fit and get back an estimate of the spacecharge that distorted the track.
+
+  Input for the track includes the Charge, Pt, VertexZ, PseudoRapidity, and measured DCA. 
+
+  The code attempts to be as realistic as possible when it does the refit.  Therefore, it asks you for
+  the hit masks from the microDSTs.  These masks tell you which TPC rows were used in the original track fit
+  and whether or not there were hits in the SVT and/or SSD detectors.  It the masks have bits set for the
+  SVT then this will affect the track and will pull the fits. For future reference, the masks come in two words.  
+  The first 8 bits of the first word describe the vertex, then six layers of the SVT, and finally the SSD.  
+  The vertex bit is only set for primary tracks and is not used by this routine.  You should only input global tracks.
+  The remaining bits of the first word cover TPC rows 1-24.  The second word covers rows 25-45.  So, for example
+  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC and no SVT or SSD hits.
+
+  You must provide the hit errors by instantiating with two vectors that include the track errors in both X and Y.  
+  RowMaskErrorR[]    is the array of hit errors in the radial direction (ie in the direction of a high pt track)
+  RowMaskErrorRPhi[] is the array of hit errors in the r-phi direction  (ie tranvsverse to the direction of a high pt track)
+  
+  pSpace contains the estimate of the space charge in the TPC that caused the distortion on the original track.
+
+  The function returns one if it succeeds and pSpace will be finite.
+  The function returns zero if it fails and pSpace will be zero.  
+  The function returns zero if there are too few hits in the TPC inner and outer sectors.  
+  There are also cuts on Pt and rapdity, etc, that can cause the funtion to return zero.
+
+*/
+Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Float_t VertexZ, Float_t PseudoRapidity, 
+						    Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, 
+						    Float_t RowMaskErrorR[64], Float_t RowMaskErrorRPhi[64], Float_t &pSpace )
+{
+
+   const Int_t   INNERDETECTORS   =   6  ;       // Number of inner detector rows in represented in the bit masks
+   const Int_t   SSDLAYERS        =   1  ;       // Number of SSD layers
+   const Int_t   INNER            =  13  ;       // Number of TPC rows in the inner sector
+   const Int_t   TPCROWS          =  45  ;       // Total number of TPC rows per sector (Inner + Outer)
+   const Int_t   MinInnerTPCHits  =   5  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
+   const Int_t   MinOuterTPCHits  =  10  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
+   const Int_t   DEBUG            =   0  ;       // Turn on debugging statements and plots
+
+   const Int_t   TPCOFFSET = INNERDETECTORS + SSDLAYERS + 1 ;   // Add one for the vertex in 0th position in RowMasks
+   const Int_t   BITS      = INNERDETECTORS + TPCROWS + SSDLAYERS + 1 ;  // Number of bits in the row masks (45 TPC Rows + etc.)
+
+   unsigned int OneBit = 1 ;
+   Int_t InnerTPCHits = 0, OuterTPCHits = 0 ;
+   for ( Int_t i = 0 ; i < TPCROWS ; i++ ) 
+     {
+       if ( i < INNER )
+	 {
+	   if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) != 0 )) InnerTPCHits++ ;  
+	 }
+       else
+	 {
+	   if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) != 0 )) OuterTPCHits++ ;  
+	   if ( ( i >= 24 ) && (( RowMask2 & OneBit<<(i-24) ) != 0 )) OuterTPCHits++ ;  
+	 }
+     }
+
+   pSpace  = 0 ;
+
+   if ( (Pt < 0.3) || (Pt > 2.0) )                           return(0) ; // Fail
+   if ( (VertexZ < -50) || (VertexZ > 50) )                  return(0) ; // Fail
+   if ( (PseudoRapidity < -1.0) || (PseudoRapidity > 1.0) )  return(0) ; // Fail
+   if ( (Charge != 1) && (Charge != -1) )                    return(0) ; // Fail
+   if ( (DCA < -4.0) || (DCA > 4.0) )                        return(0) ; // Fail
+   if ( InnerTPCHits < MinInnerTPCHits )                     return(0) ; // No action if too few hits in the TPC   
+   if ( OuterTPCHits < MinOuterTPCHits )                     return(0) ; // No action if too few hits in the TPC   
+
+   Int_t    ChargeB ;
+   Float_t  B[3], xx[3], xxprime[3] ;
+   Double_t Xtrack[BITS], Ytrack[BITS], Ztrack[BITS] ;
+   Double_t R[BITS], X0, Y0, R0, Pz, DeltaTheta ;
+   Double_t Xprime[BITS+1], Yprime[BITS+1], Zprime[BITS+1], dX[BITS+1], dY[BITS+1] ;  
+
+   // Temporarily overide settings for space charge data (only)
+   StDetectorDbSpaceCharge* tempfSpaceChargeR2 = fSpaceChargeR2 ;
+   Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
+   ManualSpaceChargeR2(0.01);    // Set "medium to large" value of the spacecharge parameter for tests, not critical.
+     
+   Float_t x[3] = { 0, 0, 0 } ;  // Get the B field at the vertex 
+   BField(x,B) ;
+   ChargeB = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
+   R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
+   X0 = ChargeB *  0.0 * R0  ;   // Assume a test particle that shoots out at 0 degrees
+   Y0 = ChargeB * -1.0 * R0  ;
+   Pz = Pt * TMath::SinH(PseudoRapidity) ;
+   
+   //JT Test Hardwire the radius of the vertex - this is not real and not used.  Vertex is not compatible with DCA input.
+   R[0] = 0.0    ;  // This is a place holder so sequence and order matches that in the ROWmask.  Not Used.
+
+   //JT TEST Hardwire the radii for the SVT.  Note that this is a disgusting kludge.
+   R[1] =  6.37  ;  // SVT layer 1          (2nd bit)
+   R[2] =  7.38  ;  // SVT layer 1 prime
+   R[3] = 10.38  ;  // SVT layer 2
+   R[4] = 11.27  ;  // SVT layer 2 prime
+   R[5] = 14.19  ;  // SVT layer 3 
+   R[6] = 15.13  ;  // SVT layer 3 prime    (7th bit)
+    
+   //JT TEST Hardwire the radii for the SSD.  Note that this is a disgusting kludge. 
+   R[7] = 22.8   ;  // SSD (average) Radius (8th bit)
+
+   // JT TEST Add the radii for the TPC Rows.  Note the hardwired offsets.
+   for ( Int_t i = TPCOFFSET ; i < TPCROWS+TPCOFFSET ; i++ )
+     {
+       if ( (i-TPCOFFSET) < INNER )  R[i] = 60.0 + (i-TPCOFFSET)*4.8 ; // Not completly correct because TPC rows are flat.
+       else                          R[i] = 127.195 + (i-TPCOFFSET-INNER)*2.0 ;
+     }
+
+   for ( Int_t i = 0 ; i < BITS ; i++ )
+     {
+
+       Xtrack[i] = R[i] ;
+       Ytrack[i] = -1 * ChargeB * ( R0 - TMath::Sqrt(R0*R0-R[i]*R[i]) ) ;
+       DeltaTheta  =  TMath::ATan2(-1*Y0,-1*X0) - TMath::ATan2(Ytrack[i]-Y0,Xtrack[i]-X0) ;
+       while ( DeltaTheta < -1*TMath::Pi() ) DeltaTheta += TMath::TwoPi() ;
+       while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ;
+       Ztrack[i]  =   VertexZ + ChargeB*DeltaTheta*R0*Pz / Pt ;
+       
+       if ( R[i] < IFCRadius || R[i] > OFCRadius ) continue ;   // Check if point is inside the TPC.  Do nothing if it is not.
+
+       xx[0] = Xtrack[i] ; xx[1] = Ytrack[i] ; xx[2] = Ztrack[i] ;
+
+       if (mDistortionMode & kSpaceChargeR2) {    // Daisy Chain all possible distortions and sort on flags
+	 UndoSpaceChargeR2Distortion ( xx, xxprime ) ;
+	 for ( unsigned int j = 0 ; j < 3; ++j ) 
+	   {
+	     xx[j] = xxprime[j];
+	   }
+       }
+       if (mDistortionMode & kGridLeak) { 
+	 UndoGridLeakDistortion ( xx, xxprime ) ;
+	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
+	   {
+	     xx[j] = xxprime[j];
+	 }
+       }
+       if (mDistortionMode & k3DGridLeak) { 
+	 Undo3DGridLeakDistortion ( xx, xxprime ) ;
+	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
+	   {
+	     xx[j] = xxprime[j];
+	 }
+       }
+
+       Xtrack[i] = 2*Xtrack[i] - xx[0] ;   // Distort the tracks
+       Ytrack[i] = 2*Ytrack[i] - xx[1] ;  
+       Ztrack[i] = 2*Ztrack[i] - xx[2] ; 
+       
+     }
+   
+   Int_t Index = -1 ;                    // Count number of 'hits' in the bit mask
+   Int_t TPCIndex = -1 ;                 // Count the number of these hits in the TPC
+   for ( Int_t i = 1 ; i < BITS ; i++ )  // Delete rows not in the bit masks.  Note i=1 to skip the vertex.
+     {
+       if ( ( i <  32 ) && (( RowMask1 & OneBit<<(i)    ) == 0 )) continue ;  // Skip this row if not in bit mask
+       if ( ( i >= 32 ) && (( RowMask2 & OneBit<<(i-32) ) == 0 )) continue ;  // Skip this row if not in bit mask
+       Index++ ;   if ( i >= TPCOFFSET ) TPCIndex++ ;
+       Xprime[Index] = Xtrack[i] ;        Yprime[Index] = Ytrack[i] ;         Zprime[Index] = Ztrack[i] ;
+       dX[Index]     = RowMaskErrorR[i] ;     dY[Index] = RowMaskErrorRPhi[i] ;   
+       printf("%9.2f  %9.2f  %9.2f  %9.2f  %9.2f \n", Xprime[Index], Yprime[Index], Zprime[Index], dX[Index], dY[Index] ) ;
+     }
+
+   TGraphErrors gre(Index+1,Xprime,Yprime,dX,dY) ;  
+
+   // Note that circle fitting has ambiguities.  The "+" solution is for Y points greater than Y0.  "-" for Y < Y0.
+   Double_t DCA_new ;
+   TF1 newDCAplus ("newDCAplus" , "( [1] + sqrt( [1]**2 - x**2 + 2*x*[0] + [2]*[2] - [2]*(2*sqrt([0]**2+[1]**2))) )" );
+   TF1 newDCAminus("newDCAminus", "( [1] - sqrt( [1]**2 - x**2 + 2*x*[0] + [2]*[2] - [2]*(2*sqrt([0]**2+[1]**2))) )" );
+
+   if (ChargeB > 0 ) 
+     {
+       newDCAplus.SetParameter( 0,  X0 );  
+       newDCAplus.SetParameter( 1,  Y0 );  
+       newDCAplus.SetParameter( 2, 0.0 );  
+       gre.Fit("newDCAplus","Q") ;
+       DCA_new = newDCAplus.GetParameter( 2 ) ;  // Negative means that (0,0) is inside the circle
+     }
+   else
+     {
+       newDCAminus.SetParameter( 0,  X0 );  
+       newDCAminus.SetParameter( 1,  Y0 );  
+       newDCAminus.SetParameter( 2, 0.0 );  
+       gre.Fit("newDCAminus","Q") ;
+       DCA_new = newDCAminus.GetParameter( 2 ) ;  // Negative means that (0,0) is inside the circle
+     }
+   // End of circle fitting
+
+   if ( DEBUG ) 
+     { // Begin debugging plots
+       TCanvas* c1  = new TCanvas("A Simple Fit","The Fit", 250, 10, 700, 500) ;
+       TCanvas* c2  = new TCanvas("The circles are OK","The circles ", 250, 800, 700, 500) ;
+       c1  -> cd() ;
+       gre.Draw("A*") ;
+       c1  -> Update() ;
+       TGraph* gra  = new TGraph( Index+1, Xprime, Yprime ) ;
+       c2  -> cd() ;
+       gra -> SetMaximum(200)  ;
+       gra -> SetMinimum(-200) ;
+       //gra -> Draw("A*") ;  // Have to draw twice in order to get the Axis (?)
+       gra -> GetXaxis() -> SetLimits(-200.,200.) ;
+       gra -> Draw("A*") ;
+       c2  -> Update() ;
+     } // End debugging plots 
+   
+   pSpace  =  (DCA * ChargeB) * SpaceChargeR2 / DCA_new ;    // Work with Physical-Signed DCA from Chain or MuDST 
+
+   // Restore settings for spacechargeR2
+   fSpaceChargeR2  =  tempfSpaceChargeR2 ;
+   SpaceChargeR2   =  tempSpaceChargeR2  ;
    
    return(1) ; // Success 
 

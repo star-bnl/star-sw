@@ -1,5 +1,5 @@
 #!/usr/local/bin/tcsh
-# $Id: ShowSomething.csh,v 1.3 2006/06/12 18:37:48 fine Exp $
+# $Id: ShowSomething.csh,v 1.2 2006/06/05 18:52:04 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the procedure to work with  logger Db
 echo Total number of the tasks:
@@ -118,7 +118,7 @@ FROM  TaskDescription,
            AND JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
   WHERE  completed_jobs = TaskDescription.nProcesses 
 #          AND TaskDescription.TaskUser='fine' 
-          AND TaskDescription.taskId = tbl.taskId
+          AND TaskDescription.taskId = tbl.taskId;
  
 # --- Print the number of the uncompleted tasks
 
@@ -141,8 +141,7 @@ FROM  TaskDescription,
      WHERE     JobTracking.StepEventId = "Finish" 
           AND JobTracking.StepContext = "ProgSize"
           AND JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
-  WHERE 
-#      completed_jobs <> TaskDescription.nProcesses AND
-#          TaskDescription.TaskUser='fine' AND
-         TaskDescription.taskId = tbl.taskId ;  
+  WHERE     completed_jobs <> TaskDescription.nProcesses 
+#         AND TaskDescription.TaskUser='fine' 
+         AND TaskDescription.taskId = tbl.taskId ;  
 MYSQLCODE

@@ -341,13 +341,21 @@ void THelixTrack::GetSpot(const double axis[3][3],double emx[3]) const
 /// axis[2]    - normal vector of plane
 /// emx[3] error matrix of coordinates according vectors in plane.
 
-
+//   transformation matrix from "helix" coordinate to global
    double my[3][3] = {{-fP[1]/fCosL, 0,fP[0]}
                      ,{ fP[0]/fCosL, 0,fP[1]}
                      ,{           0, 1,fP[2]}};
 
-   double T[3][3],t[2][2];
+   double T[3][3],tmp[3][3],g[6],t[2][2];
    TCL::mxmpy (axis[0],my[0],T[0],3,3,3);
+//   	now account that matrix axis may be non orthogonal
+   TCL::traat(axis[0],g,3,3);
+   if (fabs(g[0]-1)+fabs(g[1])+fabs(g[2]-1)
+      +fabs(g[3])+fabs(g[4])+fabs(g[5]-1)>1e-10) {//non orthogonal case
+     TCL::trsinv(g,g,3);
+     memcpy(tmp[0],T[0],sizeof(T));
+     TCL::trsa  (g,tmp[0],T[0],3,3);
+   }
    TCL::vlinco(T[0],1.,T[2],-T[0][2]/T[2][2],t[0],2);
    TCL::vlinco(T[1],1.,T[2],-T[1][2]/T[2][2],t[1],2);
    double myerr[3]={fEmxXY[0],0,fEmxSZ[0]};
@@ -665,6 +673,39 @@ double THelixTrack::Dca(const double *point,double *dcaErr) const
    th.GetSpot(T,emx);
    *dcaErr=emx[0];
    return dca;
+}
+//_____________________________________________________________________________
+double THelixTrack::Dca(const double point[3]
+                       ,double &dcaXY,double &dcaZ,double dcaEmx[3]) const
+/// Full 3d dca evaluation
+/// point[3] - x,y,z of vertex
+/// dcaXY - dca in xy plane
+/// dcaZ  - dca in Z direction
+/// dcaEmx[3] - err(dcaXY*dcaXY),err(dcaXY*dcaZ),err(dcaZ*dcaZ)
+/// return distance to dca point
+{
+   double dif[3];
+   double s = Path(point);
+   THelixTrack th(*this);
+   th.Move(s);
+   const double *x=th.Pos();
+   const double *d=th.Dir();
+
+   for (int i=0;i<3;i++) {dif[i]=x[i]-point[i];}
+   double nor = th.GetCos();
+   double T[3][3]={{-d[1]/nor, d[0]/nor,    0}
+                  ,{        0,        0,    1}
+		  ,{ d[0]/nor, d[1]/nor,    0}};
+
+   dcaXY = T[0][0]*dif[0]+T[0][1]*dif[1];
+   dcaZ  = dif[2];
+   double emxXY[6],emxSZ[3];
+   th.GetEmx(emxXY,emxSZ);
+   dcaEmx[0] = emxXY[0];
+   dcaEmx[1] = 0;
+//	cos(Lambda) **4 to account that we are in the nearest point
+   dcaEmx[2] = emxSZ[0]*pow(th.GetCos(),4);
+   return s;
 }
 
 
@@ -1452,7 +1493,7 @@ void  TCircleFitter::AddZ(double z,double ez)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.21 2006/06/09 19:53:51 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.23 2006/06/28 18:39:07 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -1468,6 +1509,12 @@ void  TCircleFitter::AddZ(double z,double ez)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.23  2006/06/28 18:39:07  perev
+ * cos(dip)**4 added to Dca(...) to account z err in the nearest point
+ *
+ * Revision 1.22  2006/06/26 19:09:21  perev
+ * DcaXY & DcaZ with errors added
+ *
  * Revision 1.21  2006/06/09 19:53:51  perev
  * double Dca(double x,double y,double *dcaErr=0) added
  *
@@ -2452,7 +2499,7 @@ void THelixFitter::Test(int kase)
   double RERR = 0.1;
   double ZERR = 0.1;
 TRandom ran;
-static TCanvas* myCanvas[2]={0,0};
+static TCanvas* myCanvas[9]={0,0,0,0,0,0,0,0,0};
 static TH1F *hh[nHH]={0,0,0,0,0,0,0};
 static const char *hNams[]={"pH","pA","pC","pZ","pD","Xi2","Xi2E",0};
   if(!myCanvas[0])  myCanvas[0]=new TCanvas("C1","",600,800);
@@ -2478,6 +2525,19 @@ static const char *h2Nams[]={"targYY","targZZ","targYZ","calcYZ",0};
     myCanvas[1]->cd(i+1); h2h[i]->Draw();
   }
 //		End Init Second histo group 
+
+//		Init 3rd histo group 
+static TH1F *h3h[4]={0,0,0,0};
+static const char *h3Nams[]={"dcaXY","dcaXYNor","dcaZ","dcaZNor",0};
+  int n3h=4;
+  if(!myCanvas[2])  myCanvas[2]=new TCanvas("C3","",600,800);
+  myCanvas[2]->Clear();
+  myCanvas[2]->Divide(1,n3h);
+  for (int i=0;i<n3h;i++) { 
+    delete h3h[i]; h3h[i]= new TH1F(h3Nams[i],h3Nams[i],100,-5,5);
+    myCanvas[2]->cd(i+1); h3h[i]->Draw();
+  }
+//		End Init 3rd histo group 
 
 
   double spotSurf[4]= {-100,1,0,0};
@@ -2619,11 +2679,22 @@ if (kase&128) helx.Show();
 //        h2h[3]->Fill(eSpot[1]*100);
 //		End 2nd histo group
 
+//		Fill 3rd histo group
+        double dcaXY,dcaZ,dcaEmx[3];
+        double sDca = helx.Dca(trakPars,dcaXY,dcaZ,dcaEmx);
+        if (fabs(sDca)<1000) {
+          h3h[0]->Fill(dcaXY);
+          h3h[1]->Fill(dcaXY/sqrt(dcaEmx[0]));
+          h3h[2]->Fill(dcaZ );
+          h3h[3]->Fill(dcaZ /sqrt(dcaEmx[2]));
+        }
+//		End 3rd histo group
+
     } 		//end sign
   }		//end ang0
   } 		// curv
 }		// dip
-  for (int ih=0;ih<2;ih++) {
+  for (int ih=0;myCanvas[ih];ih++) {
     myCanvas[ih]->Modified();
     myCanvas[ih]->Update();
   }

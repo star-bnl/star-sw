@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.47 2006/06/09 16:02:16 jeromel Exp $
+// $Id: rootlogon.C,v 1.46 2006/04/30 21:55:02 jeromel Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -105,8 +105,6 @@
   // this to switch to a beta version of the client library.
   //ROOT->GetPluginManager()->AddHandler("TFile","^root:","TXNetFile", "Netx", "TXNetFile(const char*,Option_t*,const char*,Int_t,Int_t)"); 
 
-  // This will help tracing failure on XrdOpen() if any
-  gEnv->SetValue("XNet.DebugTimestamp","1"); 
 
 
   //  Print version

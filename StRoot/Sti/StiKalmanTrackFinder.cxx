@@ -671,7 +671,7 @@ static  const double ref1a  = 110.*degToRad;
         nHits=1;
       } else {
         nHits=hitCont.getNHits();
-        if (testNode.getX()< 20 || !nHits) nHits++;
+        if (testNode.getX()< 55 || !nHits) nHits++;
       }
 #ifdef ASSIGNVP
       do {
@@ -744,17 +744,17 @@ static  const double ref1a  = 110.*degToRad;
 void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
                                  ,int active,QAFind &qa)
 {
-static const double HiPrec=200.*200.*1e-8;
-
   int maxNullCount           = _pars.maxNullCount+3;
   int maxContiguousNullCount = _pars.maxContiguousNullCount+3;
 //		Check and count node
   StiHit *hit = node->getHit();
   if (hit) {
     if (debug() > 2)cout << " got Hit! "<<endl ;
+    const StiDetector *detector = hit->detector();
     qa.sum += node->getChi2() + log(node->getDeterm());
     qa.hits++; qa.qa=1;
-    if (node->hitErrs()[2]<HiPrec) qa.pits++;
+    if (detector->getGroupId() == kSvtId)  qa.pits++;
+    if (detector->getGroupId() == kSsdId)  qa.pits+=2; //to force alone ssd hit added 2
     node->getHitCount()++;
     node->getContigHitCount()++;
     if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset)

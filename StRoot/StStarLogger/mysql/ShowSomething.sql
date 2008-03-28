@@ -1,11 +1,7 @@
-#!/usr/local/bin/tcsh
-# $Id: ShowSomething.sql,v 1.9 2006/06/12 18:37:49 fine Exp $
+# $Id: ShowSomething.sql,v 1.8 2006/05/15 17:47:44 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the procedure to work with  logger Db
-#mysql  -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
  use logger;
-
- SELECT COUNT(*)  FROM  logger.TaskDescription;
 
  SELECT COUNT(*)  FROM  logger.TaskDescription
     WHERE TaskDescription.TaskUser='fine';
@@ -77,4 +73,3 @@ FROM  TaskDescription,
   WHERE     completed_jobs <> TaskDescription.nProcesses 
          AND TaskDescription.TaskUser='fine' 
          AND TaskDescription.taskId = tbl.taskId ;  
-#MYSQLCODE
