@@ -22,6 +22,7 @@ if ($env->{ENV}->{STAR_SYS} =~ /i386/) {
 }
 
 my $CXX_VERSION= $env->{CXX_VERSION};
+#print "DEBUG CXX_VERSION -- $CXX_VERSION\n";
 
 $CPPPATH = "#" . $Dir . "/src" .  $main::PATH_SEPARATOR . $ObjDir . "/src";
 my $LD        = $env->{LD}; #!
@@ -31,7 +32,7 @@ if ($LD eq 'g++') {
 my $LDFLAGS   = $env->{LDFLAGS};
 # if ($LD eq 'gcc' and $STAR_SYS !~ /^sl4/) {$LDFLAGS = "-Wl,-Bstatic";}
 if ($LD eq 'gcc' and $CXX_VERSION < 4) {
-    $LDFLAGS = "-Wl,-Bstatic";
+    $LDFLAGS = "-static -Wl,-Bstatic";
 }
 
 $env2 = $env->clone('CPPPATH'      => $CPPPATH, 
