@@ -6,13 +6,12 @@
 #include <arpa/inet.h>
 
 #include "daqFormats.h"
-#include "rtsSystemsEVP.h"
-#include "rtsLog.h"
+#include "rtsSystems.h"
 
 #include "evpSupport.h"
 #include "scReader.h"
-
-struct sc sc;
+#define SWAP32(bk,x) ((bk->bh.byte_order==0x4030201)?(bk->x):swap32(bk->x))
+struct sc_t sc;
 
 // reads the Triggers event descriptor from DATAP directly...
 int scReader(char *m) 
@@ -29,25 +28,22 @@ int scReader(char *m)
   datap = (struct DATAP *)m ;
 
 
-  len = l2h32(datap->det[EXT_ID].len) ;
+  len = SWAP32(datap,det[EXT_ID].len) ;
   if(len == 0) return EVP_NO_DET;
   assert(len>0&&len<99999); 
 
-  off = l2h32(datap->det[EXT_ID].off);
+  off = SWAP32(datap,det[EXT_ID].off);
   if(off == 0) return EVP_NO_DET;
 
   datapx = (struct DATAPX *)((u_int *)m+off);
 
   // verify bank
-  if(checkBank(datapx->bh.bank_type,CHAR_DATAPX) < 0) assert (0);
+  assert(checkBank(datapx->bh.bank_type,CHAR_DATAPX) == 0);
 
-  len = l2h32(datapx->det[SC_ID-10].len);
-  if(datapx->bh.byte_order != 0x04030201) len = swap32(len);
+  len = SWAP32(datapx,det[SC_ID-10].len);
   if(len == 0) return EVP_NO_DET ;
-  len *= 4;
 
-  off = l2h32(datapx->det[SC_ID-10].off);
-  if(datapx->bh.byte_order != 0x04030201) off = swap32(off);
+  off = SWAP32(datapx,det[SC_ID-10].off);
   if(off == 0) return EVP_NO_DET;
 
   //LOG(DBG,"SC raw len %d (0x%x), off %d(0x%x)",len,len,off,off,0) ;
@@ -59,8 +55,7 @@ int scReader(char *m)
     //LOG(DBG,"Token 0 - skipping...",0,0,0,0,0) ;
     return EVP_NO_DET ;
   }
-  
-  int sz = l2h32(scd->bh.length) * 4;
+  int sz = SWAP32(scd,bh.length);
   
   if((len != sz) ||
      ((u_int)len > sizeof(SCD))) {
@@ -72,14 +67,14 @@ int scReader(char *m)
   
 
   // copy scd data into sc
-  sc.time = l2h32(scd->time);
-  int mag = l2h32(scd->mag_field);
-  memcpy(&sc.mag_field, &mag, 4);
+  sc.time = SWAP32(scd,time);
+  int mag = SWAP32(scd,mag_field);
+  sc.mag_field= *((float*)&mag);
   for(int i=0;i<16;i++) {
-    sc.rich_scalers[i] = l2h32(scd->rich_scalers[i]);
+    sc.rich_scalers[i] = SWAP32(scd,rich_scalers[i]);
   }
 
-  sc.timelag = l2h32(datap->time) - sc.time;
+  sc.timelag = SWAP32(datap,time) - sc.time;
 
   int alag = sc.timelag > 0 ? sc.timelag : -sc.timelag;
 

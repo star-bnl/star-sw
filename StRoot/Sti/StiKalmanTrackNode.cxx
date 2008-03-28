@@ -1,10 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.111 2007/08/16 20:21:24 fine Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.113 2007/09/10 21:26:52 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.113  2007/09/10 21:26:52  perev
+ * getPt non positive bug fix. introduces 3 month ago
+ *
+ * Revision 2.112  2007/08/30 19:13:27  fine
+ * replace the repmaining cout with LOG_DEBUG
+ *
  * Revision 2.111  2007/08/16 20:21:24  fine
  * replace printf with logger
  *
@@ -356,8 +362,8 @@ using namespace std;
 #include "TRVector.h"
 #include "StarMagField.h"
 #include "TMath.h"
-#define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
-#define PrPP(A,B) {cout << "=== StiKalmanTrackNode::" << (#A); PrP((B)); cout << endl;}
+#define PrP(A)    { LOG_DEBUG << "\t" << (#A) << " = \t" << ( A ) }
+#define PrPP(A,B) {LOG_DEBUG  << "=== StiKalmanTrackNode::" << (#A); PrP((B)); LOG_DEBUG << endm;}
 // Local Track Model
 //
 // x[0] = y  coordinate
@@ -504,7 +510,7 @@ void StiKalmanTrackNode::get(double& alpha,
 //______________________________________________________________________________
 double StiKalmanTrackNode::getPt() const
 {
-  return (fabs(mFP._ptin)<1e-6) ? 1e6: 1./mFP._ptin;
+  return (fabs(mFP._ptin)<1e-6) ? 1e6: 1./fabs(mFP._ptin);
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
@@ -1101,12 +1107,12 @@ void StiKalmanTrackNode::propagateError()
   
   if (debug() & 1) 
     {
-      cout << "Prior Error:"
-	   << "cYY:"<<mFE._cYY<<endl
-	   << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endl
-	   << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endl
-	   << "cPY:"<<mFE._cPY<<" cPZ:"<<mFE._cPZ<<endl
-	   << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endl;
+      LOG_DEBUG << "Prior Error:"
+	   << "cYY:"<<mFE._cYY<<endm;
+	   LOG_DEBUG << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
+      LOG_DEBUG << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
+      LOG_DEBUG << "cPY:"<<mFE._cPY<<" cPZ:"<<mFE._cPZ<<endm;
+      LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
     }
   propagateMtx();
   errPropag6(mFE.A,mMtx().A,kNPars);
@@ -1134,12 +1140,12 @@ void StiKalmanTrackNode::propagateError()
 #endif
   if (debug() & 1) 
     {
-      cout << "Post Error:"
-	   << "cYY:"<<mFE._cYY<<endl
-	   << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endl
-	   << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endl
-	   << "cCY:"<<mFE._cPY<<" cCZ:"<<mFE._cPZ<<endl
-	   << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endl;
+      LOG_DEBUG << "Post Error:"
+	   << "cYY:"<<mFE._cYY<<endm;
+	   LOG_DEBUG << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
+	   LOG_DEBUG << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
+	   LOG_DEBUG << "cCY:"<<mFE._cPY<<" cCZ:"<<mFE._cPZ<<endm;
+	   LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
     }
 // now set hiterrors
    if (_hit) setHitErrors();
@@ -1243,7 +1249,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
     Double_t diff = chisq - cc;
     Double_t sum  = chisq + cc;
     if (diff > 1e-7 || (sum > 2. && (2 * diff ) / sum > 1e-7)) {
-      cout << "Failed:\t" << chisq << "\t" << cc << "\tdiff\t" << diff << endl;
+      LOG_DEBUG << "Failed:\t" << chisq << "\t" << cc << "\tdiff\t" << diff << endm;
     }
   }
 #endif
@@ -1500,13 +1506,13 @@ static int nCall=0; nCall++;
 //VP  mFP._y += k00*dy + k01*dz;
   if (fabs(p0)>200.) 
     {
-      cout << "updateNode()[1] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endl;
+      LOG_DEBUG << "updateNode()[1] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endm;
       return -12;
     }
   double p1 = mFP._z + k10*dyt + k11*dzt;
   if (fabs(p1)>200.) 
     {
-      cout << "updateNode()[2] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endl;
+      LOG_DEBUG << "updateNode()[2] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endm;
       return -13;
     }
   //mFP._tanl += k40*dyt + k41*dzt;
@@ -2003,7 +2009,7 @@ void   StiKalmanTrackNode::PrintpT(Char_t *opt) {
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {
-  cout << comment << "\t" << commentdEdx << endl;
+  LOG_DEBUG << comment << "\t" << commentdEdx << endm;
   ResetComment();
 }
 //________________________________________________________________________________

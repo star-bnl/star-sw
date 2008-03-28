@@ -59,6 +59,7 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
   mEvent = 0;
   primV = 0;
   theFinder = 0;
+  minTracks = -1;
 }
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
@@ -102,6 +103,7 @@ Int_t StGenericVertexMaker::Init()
 
   if ( m_Mode & 0x1){
     theFinder= new StMinuitVertexFinder();
+    if (minTracks >= 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
     isMinuit=true;
 
   } else if ( m_Mode & 0x2){
