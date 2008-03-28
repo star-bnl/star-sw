@@ -1,16 +1,14 @@
-07/06/06 M.Potekhin
-Please send me a note when and if you want
-to use any of the macros in this directory -
-in the past 8 years, a lot of things have changed
-and none of these old codes are guaranteed to work
 
-10/26/98 K.Turner
+10/26/98 K. Turner
+
+
 To run the standard way: 
  Use  $STAR/kumacs/sim/run_gstar_g2t.kumac or
               /chain/call_bfc_gstar_g2t 
          -> uses geometry & physics setups specified in
                $STAR/pams/geometry/geometry/geometry.g
          which one can't change (have to ask Pavel).
+
 
 To run the way where you get more control:
   Use $STAR/kumacs/sim/run_gstar_g2t_full.kumac

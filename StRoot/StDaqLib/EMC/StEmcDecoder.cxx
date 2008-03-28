@@ -42,6 +42,21 @@ void StEmcDecoder::fixTowerBugIndexes()
     //  cout <<"****** TOWER BUG - id_original = "<<i+1<<"   id_new = "<<TowerBugFixIndex[i]<<endl;
 }
 //--------------------------------------------------------
+/*!
+fixes the software indexes for the preshower based on 2006/2007 mapping indexes
+many changes correspond to the tower mapping bugs
+*/
+void StEmcDecoder::fixPreshowerBugIndexes()
+{
+    for(int i=0; i<4800; i++) {
+        int id = i+1;
+        if(PreshowerBugFixIndex[i] != id) {
+            int newId = PreshowerBugFixIndex[i];
+            PreshowerBugFixIndex[newId-1] = id;
+        }
+    }
+}
+//--------------------------------------------------------
 void StEmcDecoder::SetDateTime(unsigned int date, unsigned int time)
 {
     this->Init(date, time);
@@ -198,7 +213,7 @@ FIXBUG:
         goto FEE;
     }
 
-    if(date >= 20021001) // year 2002/2003 pp and dAu runs
+    if(date >= 20021001 && date < 20070101)
     {
         int SmdModules_tmp[8][15]={
                                       {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 0
@@ -215,6 +230,25 @@ FIXBUG:
                 SmdModules[i][j]=SmdModules_tmp[i][j];
         goto FEE;
     }
+    
+    if(date >= 20070101)
+    {
+        int SmdModules_tmp[8][15]={
+                                      {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 0
+                                      {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},                         //RDO 1
+                                      {31,32,33,34,35,36,37,38,39,40,41,42,43,44,45},                //RDO 2
+                                      {30,29,28,27,26,25,24,23,22,21,20,19,18,17,16},                //RDO 3
+                                      {61,62,63,64,65,66,67,68,69,70,71,72,73,74,75},                //RDO 4
+                                      {76,77,78,79,80,81,82,83,84,85,86,87,88,89,90},                //RDO 5
+                                      {105,104,103,102,101,100,99,98,97,96,95,94,93,92,91},          //RDO 6
+                                      {106,107,108,109,110,111,112,113,114,115,116,117,118,119,120}  //RDO 7
+                                  };
+        for(int i=0;i<8;i++)
+            for(int j=0;j<15;j++)
+                SmdModules[i][j]=SmdModules_tmp[i][j];
+        goto FEE;
+    }
+    
 
 FEE:
     int FEE1_tmp[4]={1,4,3,2};
@@ -290,6 +324,17 @@ PSDTables:
     for(int i=0;i<60;i++)
         PsdStart[i] = PsdStart_tmp[i];
 
+    //fix preshower softIds based on 2006/7 mapping studies
+    for(int i=0; i<4800; i++) {
+        PreshowerBugFixIndex[i] = i+1;
+    }
+    if(date >= 20060101) //use mapping determined from Run 7 for Run 6 data as well
+    {
+        #include "PreshowerBug2007.txt"
+        if(date >= 20080101) fixPreshowerMap = true;
+    }
+    fixPreshowerBugIndexes();
+    
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     // these tables are for TRIGGER decoding //////////////////////////////
@@ -415,6 +460,19 @@ the tower index (software) in the original map
 int StEmcDecoder::GetTowerBugCorrectionShift(int id_original,int& id_shift) const
 {
     int id_new = TowerBugFixIndex[id_original - 1];
+    id_shift = id_new-id_original;
+    return 1;
+}
+//--------------------------------------------------------
+/*!
+GetPreshowerBugCorrectionShift method - returns the id shift with respect to
+the preshower index (software) in the original map
+\param id_original is the soft_id in the original map
+\param id_shift is the shift that should be applied to the id. In this case, id_corrected = Id_original+id_shift
+*/
+int StEmcDecoder::GetPreshowerBugCorrectionShift(int id_original,int& id_shift) const
+{
+    int id_new = PreshowerBugFixIndex[id_original - 1];
     id_shift = id_new-id_original;
     return 1;
 }
@@ -661,6 +719,23 @@ int StEmcDecoder::GetJetPatchAndSequenceFromTriggerPatch(int triggerPatch, int &
         return 0;
     jetPatch = JetPatchFromTriggerPatch[triggerPatch];
     jetPatch_seq = JetPatchSeqFromTriggerPatch[triggerPatch];
+    return 1;
+}
+
+int StEmcDecoder::GetDSMFromTriggerPatch(int patchId, int &dsmModule) const {
+    if(patchId < 0 || patchId >= 300) return 0;
+    
+    dsmModule = patchId/10;
+    return 1;
+}
+
+int StEmcDecoder::GetTriggerPatchesFromDSM(int dsmModule, int *triggerPatches) const {
+    if(dsmModule < 0 || dsmModule >= 30) return 0;
+    
+    for(int i=0; i<10; i++) {
+        triggerPatches[i] = dsmModule*10 + i;
+    }
+    
     return 1;
 }
 
@@ -1015,7 +1090,9 @@ int StEmcDecoder::GetPsdId(int RDO,int index, int& id, int& PMTBox, int& wire, i
         id-=2400;
     if(PMTBox==32 && id>4800)
         id-=2400;
-
+        
+    if(fixPreshowerMap) id = PreshowerBugFixIndex[id-1];
+    
     if(print)
         sprintf(line,"%s  PMTB=%2d  start=%4d  offset=%2d  half=%2d  SoftId=%4d",line,PMTBox,start,offset,half,id);
     if(print)
@@ -1035,6 +1112,9 @@ int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index) const
     index=0;
     if(id<1 || id>4800)
         return 0;
+        
+    if(fixPreshowerMap) id = PreshowerBugFixIndex[id-1];
+    
     RDO = PsdRDO[id-1];
     index = PsdIndex[id-1];
     return 1;
@@ -1170,9 +1250,24 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.48 2007/08/07 19:44:07 perev Exp $
+// $Id: StEmcDecoder.cxx,v 2.53 2007/10/10 22:12:35 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.53  2007/10/10 22:12:35  kocolosk
+// SMD module date correction: 20070101, not 20071001
+//
+// Revision 2.52  2007/10/10 18:52:13  kocolosk
+// SMD crate mapping fix for Run 7 and beyond from Oleg
+//
+// Revision 2.51  2007/10/09 18:02:24  kocolosk
+// two extra support functions for TP <=> DSM module mapping
+//
+// Revision 2.50  2007/09/11 13:30:13  kocolosk
+// removed ClassImp that was left in by accident
+//
+// Revision 2.49  2007/09/11 02:41:37  kocolosk
+// added code to fix preshower swaps in 2006 and beyond
+//
 // Revision 2.48  2007/08/07 19:44:07  perev
 // Gene scalers added
 //

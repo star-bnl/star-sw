@@ -8,5 +8,4 @@
 #pragma link C++ class EvtHddr_st+;
 #pragma link C++ enum  EChainBits;
 #pragma link C++ class StMkDeb-;
-#pragma link C++ class DbAlias_t;
 #endif

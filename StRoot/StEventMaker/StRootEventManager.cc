@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.15 2007/08/24 15:37:43 perev Exp $
+ * $Id: StRootEventManager.cc,v 2.14 2007/06/04 21:53:46 fine Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,9 +12,6 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
- * Revision 2.15  2007/08/24 15:37:43  perev
- * Decrease prints
- *
  * Revision 2.14  2007/06/04 21:53:46  fine
  * replace cerr with LOG_INFO
  *
@@ -148,7 +145,6 @@ RETURN_TABLE(dst_xi_vertex,xi_vertex)
 dst_track_st*
 StRootEventManager::returnTable_dst_globtrk(long& nentries) const
 {
-static int n13=13;
     dst_track_st* table = NULL;
     St_dst_track  *tableWrap;
     const char *nm =  "globtrk";
@@ -161,7 +157,7 @@ static int n13=13;
 	table = tableWrap->GetTable();
 	nentries = tableWrap->GetNRows();
     }
-    else if (--n13 >0) {
+    else {
 	   LOG_INFO <<  "StRootEventManager: Table type  " << nt << 
 	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
@@ -172,7 +168,6 @@ static int n13=13;
 dst_track_st*
 StRootEventManager::returnTable_dst_primtrk(long& nentries) const
 {
-static int n13=13;
     dst_track_st* table = NULL;
     St_dst_track  *tableWrap;
     const char *nm =  "primtrk";
@@ -185,7 +180,7 @@ static int n13=13;
 	table = tableWrap->GetTable();
 	nentries = tableWrap->GetNRows();
     }
-    else if(--n13 >0) {
+    else {
 	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
 	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
@@ -196,7 +191,6 @@ static int n13=13;
 dst_track_st*
 StRootEventManager::returnTable_CpyTrk(long& nentries) const
 {
-static int n13=13;
     dst_track_st* table = NULL;
     St_dst_track  *tableWrap;
     const char *nm =  "CpyTrk";
@@ -208,7 +202,7 @@ static int n13=13;
 	table = tableWrap->GetTable();
 	nentries = tableWrap->GetNRows();
     }
-    else if(--n13 >0) {
+    else {
 	   LOG_INFO  << "StRootEventManager: Table type  " << nt << 
 	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
@@ -219,7 +213,6 @@ static int n13=13;
 dst_track_st*
 StRootEventManager::returnTable_EstGlobal(long& nentries) const
 {
-static int n13=13;
     dst_track_st* table = NULL;
     St_dst_track  *tableWrap;
     const char *nm =  "EstGlobal";
@@ -232,7 +225,7 @@ static int n13=13;
 	table = tableWrap->GetTable();
 	nentries = tableWrap->GetNRows();
     }
-    else if(--n13 >0) {
+    else {
 	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
 	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
@@ -243,7 +236,6 @@ static int n13=13;
 dst_track_st*
 StRootEventManager::returnTable_EstPrimary(long& nentries) const
 {
-static int n13=13;
     dst_track_st* table = NULL;
     St_dst_track  *tableWrap;
     const char *nm =  "EstPrimary";
@@ -256,7 +248,7 @@ static int n13=13;
 	table = tableWrap->GetTable();
 	nentries = tableWrap->GetNRows();
     }
-    else if(--n13 >0){
+    else {
 	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
 	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
 	nentries = 0;
