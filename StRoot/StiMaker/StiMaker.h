@@ -46,7 +46,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.27 2008/02/29 16:28:01 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.28 2008/03/25 18:03:11 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
@@ -61,7 +61,6 @@ class StiMaker : public StMaker
  private:
     void  MyClear();
 
-    double 		 runField;
     bool                 eventIsFinished;
     bool                 _initialized;
     StiToolkit  *        _toolkit;

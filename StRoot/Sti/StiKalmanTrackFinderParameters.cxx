@@ -51,7 +51,6 @@ void StiKalmanTrackFinderParameters::loadDS(TDataSet &ds)
   useMcAsRec      = b->useMcAsRec;               
   elossCalculated = b->elossCalculated;
   mcsCalculated   = b->mcsCalculated; 
-  field           = b->field; 
   maxNullCount    = b->maxNullCount;
   maxContiguousNullCount            = b->maxContigNullCount; 
   minContiguousHitCountForNullReset = b->minCountForReset;   
@@ -73,7 +72,6 @@ cout << *this;
 //   inFile >> useMcAsRec;
 //   inFile >> elossCalculated;
 //   inFile >> mcsCalculated;
-//   inFile >> field;
 //   inFile >> maxNullCount;
 //   inFile >> maxContiguousNullCount;
 //   inFile >> minContiguousHitCountForNullReset;
@@ -90,7 +88,6 @@ ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& p)
      << "                         useMcAsRec: " << p.useMcAsRec << endl
      << "                    elossCalculated: " << p.elossCalculated << endl
      << "                      mcsCalculated: " << p.mcsCalculated << endl
-     << "                              field: " << p.field << endl
      << "                       maxNullCount: " << p.maxNullCount << endl
      << "             maxContiguousNullCount: " << p.maxContiguousNullCount << endl
      << "  minContiguousHitCountForNullReset: " << p.minContiguousHitCountForNullReset << endl
@@ -115,7 +112,7 @@ void StiKalmanTrackFinderParameters::setHitWeights(int ws)
 //______________________________________________________________________________
 int StiKalmanTrackFinderParameters::hitWeight(int rxy) const
 {
-  if (rxy>50) return 0;
+  if (4>rxy || rxy>50) return 0;
   int i=0; for (i=0;rxy>mHitRegions[i];i++) {}
   return mHitWeights[i];
 }

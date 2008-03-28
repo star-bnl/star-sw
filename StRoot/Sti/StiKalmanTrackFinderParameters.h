@@ -21,7 +21,6 @@ public:
 
   void setElossCalculated(bool option);
   void setMCSCalculated(bool option);
-  void setField(double f);
   void setMassHypothesis(double m);
   void setMinContiguousHitCount(int count);
   void setMaxNullCount(int count);
@@ -46,7 +45,6 @@ public:
   int    minContiguousHitCountForNullReset;
   int    mHitRegions[4];	//20,50 means 0<svtHit<20, 20<ssdHit<50
   int    mHitWeights[4];	//Coeffs of nhits. sum must be >=20
-  double field; 
   double maxChi2Vertex;
   double massHypothesis;
   double maxDca2dZeroXY;
@@ -63,11 +61,6 @@ inline   void StiKalmanTrackFinderParameters::setElossCalculated(bool option)
 inline   void StiKalmanTrackFinderParameters::setMCSCalculated(bool option)
 {
   mcsCalculated = option;
-}
-
-inline   void StiKalmanTrackFinderParameters::setField(double f)
-{
-  field = f;
 }
 
 inline   void StiKalmanTrackFinderParameters::setMassHypothesis(double m)

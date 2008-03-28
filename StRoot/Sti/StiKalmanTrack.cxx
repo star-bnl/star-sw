@@ -1,11 +1,17 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.98 2008/03/20 01:31:16 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.98 2008/03/20 01:31:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.100 2008/03/24 21:38:46 jeromel Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.100 2008/03/24 21:38:46 jeromel Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.100  2008/03/24 21:38:46  jeromel
+ * Undo setTimesUsed() - seeding seems to not take advantage of more hits (TBC)
+ *
+ * Revision 2.99  2008/03/24 19:32:03  perev
+ * BugFix vertex is not SvtHit
+ *
  * Revision 2.98  2008/03/20 01:31:16  perev
  * HitSet rejecting via StiKalmanTrackFinderParameters
  *
@@ -1343,7 +1349,7 @@ if (oldRefit) {
 //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
     if (worstNode && worstNode->getChi2()>fitpars->getMaxChi2())     
-      {worstNode->getHit()->setTimesUsed(0);
+      {//worstNode->getHit()->setTimesUsed(0);
        worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
     if (rejectByHitSet()) { releaseHits()            ; continue;}
     
@@ -1351,7 +1357,7 @@ if (oldRefit) {
     
     StiKalmanTrackNode *flipFlopNode= sTNH.getFlipFlop();
     if (flipFlopNode && flipFlopNode->getFlipFlop()>kMaxIter/3)     
-      {flipFlopNode->getHit()->setTimesUsed(0);
+      {//flipFlopNode->getHit()->setTimesUsed(0);
        flipFlopNode->setHit(0); flipFlopNode->setChi2(3e33); 	continue;}
     break;
 //	The last resource
@@ -1379,12 +1385,12 @@ if (oldRefit) {
       if (node == vertexNode)				continue;
       StiHit *hit = node->getHit();
       if(!hit) 						continue;
-      hit->setTimesUsed(0);
+      //hit->setTimesUsed(0);
       node->setHit(0);
       if (!node->isValid()) 				continue;
       if (node->getChi2()>10000.)			continue;
       assert(node->getChi2()<=fitpars->getMaxChi2());
-      hit->setTimesUsed(1);
+      //hit->setTimesUsed(1);
       node->setHit(hit);
     }
   }
@@ -1662,6 +1668,7 @@ int StiKalmanTrack::rejectByHitSet()  const
     if (!node->isValid()) 	continue;
     StiHit *hit = node->getHit();
     if (!hit) 			continue;
+    if (!hit->detector())	continue;
     if (node->getChi2()>1000) 	continue;
     sum+= pars->hitWeight(int(hit->x()));
   }
@@ -1676,6 +1683,7 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
   for (StiKTNIterator it = rbegin();(node=it());it++){
     StiHit *hit = node->getHit();
     if (!hit) 			continue;
+    if (!hit->detector())	continue;
     if (hit->x()<rMin)		continue;
     if (hit->x()>rMax)		break;
     sum++;

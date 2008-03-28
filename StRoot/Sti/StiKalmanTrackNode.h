@@ -125,6 +125,7 @@ public:
   /// Calculates and returns the transverse momentum of the track at this node.
   double getPt() const;
   /// Calculates and returns the Z mag field in the current point.
+  /// units: PGeV = Hz*Radcurv_in_CM
   double getHz() const;
     
   double x_g() const;
@@ -209,7 +210,6 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   double evaluateChi2(const StiHit *hit); 
   int updateNode(); 
   int rotate(double alpha); 
-  double getField()   const;
   int    getHelicity()const;
   double getPhase()   const;
   double getPsi()     const;
@@ -354,7 +354,7 @@ inline StThreeVectorF StiKalmanTrackNode::getGlobalMomentumF() const
 
 inline int StiKalmanTrackNode::getCharge() const
 {
-  return (pars->field*mFP._curv > 0) ? -1 : 1;
+  return (getHz()*mFP._curv > 0) ? -1 : 1;
 }
 
 inline double StiKalmanTrackNode::getTanL() const

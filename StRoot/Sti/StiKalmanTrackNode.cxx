@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.113 2007/09/10 21:26:52 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.114 2008/03/25 18:02:53 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.114  2008/03/25 18:02:53  perev
+ * remove field field from everythere
+ *
  * Revision 2.113  2007/09/10 21:26:52  perev
  * getPt non positive bug fix. introduces 3 month ago
  *
@@ -705,14 +708,6 @@ static       double fak[6] = {1,0,1,1,DEG,0};
   }}
 
 }
-
-
-//______________________________________________________________________________
-double StiKalmanTrackNode::getField()  const
-{
-  return pars->field;
-}
-
 //______________________________________________________________________________
 double StiKalmanTrackNode::getPhase() const
 {
@@ -841,7 +836,7 @@ Break(nCall);
   if (debug() & 8) { PrintpT("E");}
 
   // Multiple scattering
-  if (pars->mcsCalculated && fabs(pars->field)>0 )  propagateMCS(pNode,tDet);
+  if (pars->mcsCalculated && fabs(getHz())>1e-5 )  propagateMCS(pNode,tDet);
   if (debug() & 8) { PrintpT("M");}
   return position;
 }
