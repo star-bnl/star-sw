@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.10 2004/09/22 19:24:55 perev Exp $
+ * $Id: StPmdClusterMaker.h,v 1.11 2007/08/31 10:54:39 rashmi Exp $
  *
  * Author:
  *
@@ -14,6 +14,9 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
+ * Revision 1.11  2007/08/31 10:54:39  rashmi
+ * Included ReadCalibration to read PMD_MIP value from DB; Included inline SetAdcCutOff()
+ *
  * Revision 1.10  2004/09/22 19:24:55  perev
  * Leak fixed + mess with i,j indexes
  *
@@ -47,14 +50,20 @@
 #include <TCanvas.h>
 #include <TNtuple.h>
 #include <TFile.h>
+#include "tables/St_pmdSMChain_GNF_Table.h"
 
 class StPmdCollection;
 class StPmdDetector;
 class StPmdClusterMaker: public StMaker{
-
-   private:
- Bool_t mOptHist; 
-   protected:
+  
+ private:
+  
+  Bool_t mOptHist; 
+  Double_t adccutoff;
+  Float_t SM_chain_factor[24][48];
+  Float_t PMD_MIP;
+  TDataSet * mDb;  
+ protected:
   
   // booking Pmd cluster histograms
   TH1F *mNclust;      //!  supermodule no for Pmd
@@ -98,6 +107,8 @@ class StPmdClusterMaker: public StMaker{
   ~StPmdClusterMaker();//!
 
   virtual Int_t Init();
+  virtual Int_t  InitRun(Int_t runnr);          // Init for every run to read D\B
+
   virtual Int_t Make();
   virtual Int_t  Finish();
 
@@ -108,14 +119,21 @@ class StPmdClusterMaker: public StMaker{
   void  FillHistograms(StPmdDetector*, StPmdDetector*); //! filling histograms
   void  setPrint(Bool_t a) { mOptHist = a;}
   void  Browse(TBrowser* b); 
+  void SetAdcCutOff(Double_t adccutoff);
+  Bool_t ReadCalibrationsConst();
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.10 2004/09/22 19:24:55 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.11 2007/08/31 10:54:39 rashmi Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
- 
+  
   ClassDef(StPmdClusterMaker,0) 
-};
+    };
+    
+    inline void StPmdClusterMaker::SetAdcCutOff(Double_t cutoff){
+      adccutoff = cutoff;
+    }
+
 
 #endif
 

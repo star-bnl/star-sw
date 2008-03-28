@@ -1,11 +1,17 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.28 2007/05/17 13:18:52 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.30 2007/09/09 17:00:32 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.30  2007/09/09 17:00:32  fisyak
+ * Fix bug 1056
+ *
+ * Revision 1.29  2007/09/08 00:33:05  andrewar
+ * Modifications for pileup hit read in.
+ *
  * Revision 1.28  2007/05/17 13:18:52  andrewar
  * Removed cout in shiftHit.
  *
@@ -96,6 +102,7 @@
 
 #include "StMcPixelHit.hh"
 #include "StMcEventTypes.hh"
+#ifdef bug1056
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
@@ -104,16 +111,22 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiDetectorBuilder.h"
+#endif
 #include <stdio.h>
 #include <map>
 #include <exception>
 using namespace std;
 #include <stdexcept>
+#ifdef bug1056
 #include "Sti/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
 #include "Sti/StiVMCToolKit.h"
+#else
+#include "TGeoManager.h"
+#include "TGeoMatrix.h"
+#endif
 #include "StarClassLibrary/StRandom.hh"
 #include "tables/St_HitError_Table.h"
 #include <fstream>
@@ -249,6 +262,26 @@ Int_t StPixelFastSimMaker::Make()
     }//end if pileup output
   else
     { //try file input
+      if(pixHitCol){
+	vector<pair<double,double>*>::iterator iD=pileupDet.begin();
+        for(vector<StThreeVectorD*>::iterator iH=pileupHits.begin();
+	  iH<pileupHits.end();
+	  iH++, iD++)
+	{
+	  int id = col->numberOfHits();
+	   			
+	    StThreeVectorD mRndHitError(0.,0.,0.);
+	    StThreeVectorD p((*iH)->x(),(*iH)->y(),(*iH)->z());
+	    StRnDHit* tempHit = new StRnDHit(p,mRndHitError, 1, 1., 0, 
+						   1, 1, id++, kHftId);
+	    tempHit->setDetectorId(kHftId);
+	    tempHit->setVolumeId(999);
+	    tempHit->setKey(999);
+	    tempHit->setLayer((*iD)->first);
+	    tempHit->setLadder((*iD)->second);
+	    col->addHit(tempHit);
+	}
+      }//end if pixelhitcol
     }
 
   if (pixHitCol)							
@@ -256,7 +289,7 @@ Int_t StPixelFastSimMaker::Make()
       Int_t nhits = pixHitCol->numberOfHits();				
       if (nhits)								
 	{									
-	  Int_t id = 0;							
+	  Int_t id = col->numberOfHits();							
 	  for (UInt_t k=0; k<pixHitCol->numberOfLayers(); k++)		       
 	    if (pixHitCol->layer(k))						
 	      {								
@@ -735,7 +768,7 @@ double StPixelFastSimMaker::distortHit(double x, double res, double detLength){
   double test;
   if(mSmear){
     test = x + myRandom->gauss(0,res);
-    while( fabs(x) > detLength){
+    while( fabs(test) > detLength){
       test = x + myRandom->gauss(0,res);
     }
     //cout << " x was " <<x<< " and is now " << test<< endl;

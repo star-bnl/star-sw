@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.40 2007/04/13 16:10:34 fisyak Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.41 2007/08/31 22:15:28 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -198,7 +198,7 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 
 void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWaferCoordinate& b)
 {
-  StThreeVector<double> pos(0,0,0);
+  //StThreeVector<double> pos(0,0,0);
 
   b.setLayer(a.layer());
   b.setLadder(a.ladder());
@@ -210,8 +210,8 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWa
   b.setTimeBucket(-99);
   b.setAnode(-99);
   if (d) {
-    b.setTimeBucket(d->UnCalcU(b.barrel(),b.ladder(),b.wafer(),b.hybrid(),pos.x()));
-    b.setAnode(d->UnCalcV(b.hybrid(),pos.y()));
+    b.setTimeBucket(d->UnCalcU(b.barrel(),b.ladder(),b.wafer(),b.hybrid(),a.position().x()));
+    b.setAnode(d->UnCalcV(b.hybrid(),a.position().y()));
   }
   return;
 

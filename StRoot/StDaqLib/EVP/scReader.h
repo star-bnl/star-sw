@@ -8,7 +8,7 @@
 // "sc.valid"... this says if the information is timely...
 //
 
-struct sc {
+struct sc_t {
   u_int valid;       
   u_int time;
   int timelag;  // lag between read time and event time (to 1 sec)
@@ -16,7 +16,7 @@ struct sc {
   u_int rich_scalers[17];
 };
 
-extern struct sc sc;
+extern struct sc_t sc;
 
 extern int scReader(char *m);   // returns EVP_DATA_ERR
  

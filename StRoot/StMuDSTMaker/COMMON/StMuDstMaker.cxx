@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.83 2007/08/02 20:46:47 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.84 2007/08/31 01:55:05 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -633,16 +633,16 @@ void StMuDstMaker::read(){
 
   if ( !mEventList ) {
     int bytes = mChain->GetEntry(mEventCounter++);
-    while (bytes==0 ) {
+    while (bytes<=0 ) {
       DEBUGVALUE3(mEventCounter);
-      if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
+      if ( mEventCounter >= mChain->GetEntriesFast() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
       bytes = mChain->GetEntry(mEventCounter++);
       DEBUGVALUE3(bytes);
     }
   }
   else {
     int bytes = mChain->GetEntry( mEventList->GetEntry( mEventCounter++ ) );
-    while ( bytes==0 ) {
+    while ( bytes<=0 ) {
       DEBUGVALUE3(mEventCounter);
       if ( mEventCounter >= mEventList->GetN() ) throw StMuExceptionEOF("end of event list",__PRETTYF__);
       bytes = mChain->GetEntry( mEventList->GetEntry( mEventCounter++ ) );
@@ -1294,6 +1294,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.84  2007/08/31 01:55:05  mvl
+ * Added protection against corrupted files by checking for return code -1 from TTree:GetEntry(). StMuDstMaker will silently skip these events; StMuIOMaker returns kStWarn.
+ *
  * Revision 1.83  2007/08/02 20:46:47  mvl
  * Switch off Q-vector branhces in StMuDstMaker and increase version number in StMuEvent.
  * This is to avoid wranings when reading P07ib data which has Q-vector information stored with more recent libraries.

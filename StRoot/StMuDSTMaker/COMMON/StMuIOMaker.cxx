@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.14 2007/05/16 18:50:48 mvl Exp $
+ * $Id: StMuIOMaker.cxx,v 1.15 2007/08/31 01:55:14 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -98,6 +98,7 @@ int StMuIOMaker::Make(){
 	@param  the index of the event to read
 	@return kStEOF if the requested index is greater that the number of events in the chain
 	@return kStErr if the requested index does not exists
+        @return kStWarn if there is a problem with reading the tree (e.g. file corrupt)
 	@return kStOk if the requested event was read successfully 
 	If for any reason no event is read, the pointers to the TClonesArrays 
 	are set to 0. It will cause a crash if you will try to access 
@@ -117,6 +118,11 @@ int StMuIOMaker::Make(int index){
   if ( mCurrentIndex < 0 ) return kStErr;
   if (!mChain) return kStEOF;
   int bytes = mChain->GetEntry(mCurrentIndex);
+  if (bytes <= 0) {
+     LOG_WARN << "#### " << fFile.Data() << " could not read event " << index 
+              << ", TTree::GetEntry returned " << bytes << endm;
+     return kStWarn;
+  }
 
   DEBUGVALUE(mMuSave);
   if(mMuSave) mOutTree->Fill();
@@ -295,6 +301,9 @@ void StMuIOMaker::closeMuWrite(){
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.15  2007/08/31 01:55:14  mvl
+ * Added protection against corrupted files by checking for return code -1 from TTree:GetEntry(). StMuDstMaker will silently skip these events; StMuIOMaker returns kStWarn.
+ *
  * Revision 1.14  2007/05/16 18:50:48  mvl
  * Cleanup of output. Replaced cout with LOG_INFO etc.
  *

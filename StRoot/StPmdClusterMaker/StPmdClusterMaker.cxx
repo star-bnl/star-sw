@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.17 2007/04/26 04:10:34 perev Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.20 2007/11/02 10:59:30 rashmi Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,15 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.20  2007/11/02 10:59:30  rashmi
+ * Applying hitcalibration; eta,phi wrt primary vertex
+ *
+ * Revision 1.19  2007/10/26 18:14:18  rashmi
+ * fixed some warnings
+ *
+ * Revision 1.18  2007/08/31 10:53:30  rashmi
+ * Included ReadCalibration to read PMD_MIP value from DB;Setting cutoff in StPmdClusteringas 15%PMD_MIP
+ *
  * Revision 1.17  2007/04/26 04:10:34  perev
  * Remove StBFChain dependency
  *
@@ -73,17 +82,29 @@
 #include "StPmdUtil/StPmdClusterCollection.h" //! will be obtained 
 #include "StPmdUtil/StPmdCluster.h" //! will be obtained 
 
+#include "StDbLib/StDbManager.hh"
+#include "StDbLib/StDbTable.h"
+#include "StDbLib/StDbConfigNode.hh"
+//ofstream clout("cluster_out.dat");
 
 #include "StEventTypes.h"
+#include "StThreeVectorD.hh"
+#include "StHelixD.hh"
+#include "StPhysicalHelixD.hh"
+#include "StThreeVector.hh"
+#include "StHelix.hh"
+#include "SystemOfUnits.h"
 
 ClassImp(StPmdClusterMaker)
   
   TDataSet *clusterIn;
 StPmdCollection *cluster_hit;
+Float_t xv,yv,zv;
 //-------------------- 
 StPmdClusterMaker::StPmdClusterMaker(const char *name):StMaker(name)
 {
 	mOptHist=kFALSE;
+	PMD_MIP=0.0;
 
 }
 //-------------------
@@ -98,6 +119,17 @@ Int_t StPmdClusterMaker::Init()
   if(mOptHist)bookHistograms();
   
   return StMaker::Init();
+}
+//--------------------------------------
+                                                                         
+Int_t StPmdClusterMaker::InitRun(Int_t runnr) {
+                                                                         
+  if(Debug())cout<<"StPmdClusterMaker::InitRun with run "<<runnr<<endl;
+                                                                         
+  ReadCalibrationsConst();
+                                                                         
+  return StMaker::InitRun(runnr);
+                                                                         
 }
 
 //--------------------------------------
@@ -160,6 +192,29 @@ Int_t StPmdClusterMaker::Make()
       if(choice==1){
       if(cpv_det && pmd_det){
 	StPmdClustering *clust1 = new StPmdClustering(pmd_det, cpv_det); //instantiates clustering
+	// If the PMD_MIP is finite (non-zero)
+        if(PMD_MIP>0){
+	  //	  clout<<"PMD_MIP_MPV="<< PMD_MIP<<" in make"<<endl;
+          Double_t adccutoff = (Double_t)(PMD_MIP*0.15);
+	  //	  clout<<" adccutoff="<<adccutoff<<endl;
+          clust1->SetAdcCutOff(adccutoff);
+        }else{
+          clust1->SetAdcCutOff(7.0);
+        }
+	
+  	// Getting the vertex info to set it in StPmdClustering routine.
+	StEvent *currevent = (StEvent*)GetInputDS("StEvent");
+	if(!currevent){
+	  cout<<"ClusterMaker **, No StEvent Pointer "<<endl;
+	}
+  	StPrimaryVertex* Vertex=currevent->primaryVertex();
+	//  	if(!Vertex) return kStError;
+  	if(Vertex){
+	  StThreeVectorF v = Vertex->position();
+	  //	  cout<<"In StPmdClusterMaker: vertex="<<v.x()<<","<<v.y()<<","<<v.z()<<endl;
+	  clust1->SetVertexPos(v);
+	}
+	
 	if(clust1)
 	  {
 	    for(Int_t d=0;d<2;d++)  // Loop over detectors
@@ -167,22 +222,25 @@ Int_t StPmdClusterMaker::Make()
 		StPmdDetector *det = cluster_hit->detector(d); //PMD = 1 and 0 for CPV in PmdCollection
 		clust1->findPmdClusters(det); //! find Clustering 
 	      } //for loop 'd'
-         }
+	  }
 	else
 	  {
 	    cout<<"clust1 not made"<<endl;
-	   return kStOK;
+	    return kStOK;
 	  }
-      FillStEvent(pmd_det,cpv_det);
-      cout<<"stevent filled , to go hist "<<endl;
-      if(mOptHist)FillHistograms(pmd_det,cpv_det);
-      cout<<"hist filled  "<<endl;
-	  }
+	FillStEvent(pmd_det,cpv_det);
+	if(Debug())cout<<" NUmber of pmd clusters="<<((StPmdClusterCollection*)pmd_det->cluster())->Nclusters()<<endl;
+	if(Debug())cout<<" NUmber of cpv clusters="<<((StPmdClusterCollection*)cpv_det->cluster())->Nclusters()<<endl;
+	
+	//      cout<<"stevent filled , to go hist "<<endl;
+	if(mOptHist)FillHistograms(pmd_det,cpv_det);
+	//      cout<<"hist filled  "<<endl;
+      }
       } // if loop 'choice'
     }
-   clock.Stop();
-     cout <<"Time to run StPmdClusterEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
-     cout <<"*******************************************************************************************\n\n\n";
+  //   clock.Stop();
+  //     cout <<"Time to run StPmdClusterEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
+  //     cout <<"*******************************************************************************************\n\n\n";
 
 
   return kStOK;
@@ -287,7 +345,7 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 {
   cout<<"Filling StEvent in ClusterMaker"<<endl;
   // Get StEvent
-  StPhmdCollection * PmdCollection; 
+  StPhmdCollection * PmdCollection=NULL; 
   StEvent *currevent = (StEvent*)GetInputDS("StEvent");
   if(!currevent){
     cout<<"ClusterMaker **, No StEvent Pointer "<<endl;
@@ -382,6 +440,7 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      Int_t SigInt=tempL*10000+tempS;
 	      Int_t mod=spmcl2->Module();
 	      Float_t ncell=spmcl2->NumofMems();
+	      
 	      // Filling PmdCluster for StEvent
 	      StPhmdCluster *pcls = new StPhmdCluster();
 	      // supmod filled as 0-11, earlier it was 1-12 (earlier version it was a mistake, it was changed for pmd not for cpv)
@@ -397,10 +456,47 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	    }       
 	}
     }
-    cout<<"Filled PMD StEvent in ClusterMaker"<<endl;
+  cout<<"Filled PMD StEvent in ClusterMaker"<<endl;
 }
 
 
+//---------------------------------------------------------------------
 
-
+Bool_t StPmdClusterMaker::ReadCalibrationsConst()
+{
+  if(Debug())cout<<" I AM IN READCALIB "<<endl;
+                                                                         
+  StDbManager* mgr=StDbManager::Instance();
+  StDbConfigNode* node=mgr->initConfig("Calibrations_pmd");
+  node->setVersion("SMChain");
+                                                                         
+  mDb=NULL;
+  TString DbName = "Calibrations/pmd";
+  mDb=GetInputDB(DbName.Data());
+  //  clout<<"after mDB"<<endl;
+  if(!mDb) return kFALSE;
+  //clout<<"after !mDb"<<mDb->GetTimeStamp()<<endl;
+                                                                         
+  for(Int_t ism=0;ism<24;ism++){
+    for(Int_t chain=0;chain<48;chain++){
+      SM_chain_factor[ism][chain]=0.;
+    }
+  }
+                                                                         
+  St_pmdSMChain_GNF * tab = (St_pmdSMChain_GNF*) mDb->Find("pmdSMChain_GNF");
+  if (!tab) {
+    cout<<"No pmdSMChain_GNF DBTable. Stopping."<<endl;
+    return kFALSE;
+  }
+                                                                         
+  //  clout<<"Got SmChain tables"<<endl;
+                                                                         
+  //Getting the PMD_MIP values
+  pmdSMChain_GNF_st* smchain = tab->GetTable(64);
+  PMD_MIP = smchain->mpv_factor;
+  //  clout<<"sm="<<smchain->sm<<" chain="<<smchain->chain<<" PMD_MIP_Mean="<<smchain->mean_factor<<" PMD_MIP_MPV="<<smchain->mpv_factor<<endl;
+                                                                         
+  return kTRUE;
+                                                                         
+}
 

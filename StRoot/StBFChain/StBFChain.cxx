@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.515 2007/07/12 19:14:06 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.524 2007/10/31 15:18:29 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -304,8 +304,11 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
 	if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
 	if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
-	if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed")) mk->SetActive(kTRUE);
-	else                                                              mk->SetActive(kFALSE);
+	if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed")) {
+	  mk->SetActive(kTRUE);
+	  if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
+	}
+	else   mk->SetActive(kFALSE);
 	if (! mk) goto Error;
 	SetGeantOptions(mk);
       }
@@ -336,10 +339,12 @@ Int_t StBFChain::Instantiate()
 	  mk->SetAttr("useSvt"	,kTRUE);
 	  mk->SetAttr("activeSvt"	,kTRUE);
 	}
-      if (GetOption("SsdIT")){
-	mk->SetAttr("useSsd"	,kTRUE);
-	mk->SetAttr("activeSsd"	,kTRUE);
-      }
+      if (GetOption("NoSsdIT")) mk->SetAttr("useSsd"	,kFALSE);
+      else 
+	if (GetOption("SsdIT")){
+	  mk->SetAttr("useSsd"	,kTRUE);
+	  mk->SetAttr("activeSsd"	,kTRUE);
+	}
       if (GetOption("PixelIT")){
 	mk->SetAttr("usePixel"	,kTRUE);
 	mk->SetAttr("activePixel",kTRUE);
@@ -375,10 +380,11 @@ Int_t StBFChain::Instantiate()
       mk->SetMode(VtxOpt);
       
       // All VertexFinders implement those (or not)
-      if (GetOption("beamLine") || GetOption("CtbMatchVtx")) {
+      if (GetOption("beamLine") || GetOption("CtbMatchVtx") || GetOption("min2trkVtx")) {
 	TString  cmd(Form("StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) %p;",mk));
 	if (GetOption("beamLine"))    {cmd += "gvtxMk->UseBeamLine();";}
 	if (GetOption("CtbMatchVtx")) {cmd += "gvtxMk->UseCTB();";}
+	if (GetOption("min2trkVtx"))  {cmd += "gvtxMk->SetMinimumTracks(2);";}
 	ProcessLine(cmd);
       }
     }
@@ -684,8 +690,10 @@ Int_t StBFChain::Instantiate()
       if (mode) mk->SetMode(mode);
     }
 #endif
-    if ((maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) &&
-	GetOption("Simu"))  mk->SetMode(-10);
+    if (maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) {
+      if (GetOption("Simu"))  mk->SetMode(-10);
+      if (GetOption("Embedding")) mk->SetMode(-11);
+    }
     if (maker == "StTpcDbMaker"){
       mk->SetMode(0);
       // this change may be temporary i.e. if Simulation includes
@@ -715,6 +723,11 @@ Int_t StBFChain::Instantiate()
     if ( maker == "StFtpcTrackMaker"       &&
 	 GetOption("flaser"))                  mk->SetMode(mk->GetMode()+1);
     // FTPC
+
+    // PMD
+    if ( maker == "StPmdReadMaker"         &&
+         GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw",kTRUE);
+    // PMD
     
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
@@ -1472,7 +1485,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
 		       << " Maker set time = "
 		       << db->GetDateTime().GetDate() << "."
 		       << db->GetDateTime().GetTime() << endm;
-    if (GetOption("VMC") && m_EvtHddr) {
+    if (GetOption("SIMU") && m_EvtHddr) {
       gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
       m_EvtHddr->SetDateTime(db->GetDateTime());
     }
