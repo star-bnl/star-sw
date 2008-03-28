@@ -103,41 +103,84 @@ String MySQLAppender::getLogStatement(const spi::LoggingEventPtr& event)
 }
 
 //_________________________________________________________________________
-unsigned int  MySQLAppender::execute(const String& sql)
+void MySQLAppender::execute(const String& sql)
 {
-	SQLRETURN ret=1;
+	SQLRETURN ret;
 	SQLHDBC con = SQL_NULL_HDBC;
 	SQLHSTMT stmt = SQL_NULL_HSTMT;
-   if (getConnection()) {
+
+
+#ifdef TRY
+try
+#endif
+	{
+		con = getConnection();
       fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
-//          String query = "INSERT INTO StarLogger VALUES (\"";
-//          query += sql;
-//          query += "\");";
+//       String query = "INSERT INTO StarLogger VALUES (\"";
+//       query += sql;
+//       query += "\");";
 
       String query = sql; // 
-      if (( ret = mysql_query(connection,query.c_str()) )) {
-          fprintf(stderr, "MYSQL QUERY: %s  \n",mysql_error(connection));
-      }  else {
-//        
-//         unsigned int last = mysql_insert_id(connection);
+		if (mysql_query(con,query.c_str())) {
+         printf("QUERY: %s  \n",mysql_error(connection));
+       }  else {
+//       
+//         unsigned int last = mysql_insert_id(con);
 //         if (last && !fLastId) fLastId = last;
 //         fprintf(stderr," ID = %d\n",fLastId);
-      }
-    }
-    fprintf(stderr,"MYSQL:  ---- >  return=%d \n",ret);
-	 return ret;
+       }
+
+      
+      ret = 1;   
+
+//		ret = SQLAllocHandle(SQL_HANDLE_STMT, con, &stmt);
+		if (ret < 0)
+		{
+			SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+	      closeConnection(con);
+	      throw SQLException(ret);
+		}
+
+#if defined(HAVE_MS_MySQL)
+		ret = SQLExecDirect(stmt, (SQLTCHAR *)sql.c_str(), SQL_NTS);
+#else
+		USES_CONVERSION;
+		ret = SQLExecDirect(stmt, (SQLCHAR *)T2A(sql.c_str()), SQL_NTS);
+#endif
+		if (ret < 0)
+		{
+			SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+	      closeConnection(con);
+			throw SQLException(ret);
+		}
+	} 
+#ifdef TRY   
+	catch (SQLException& e)
+	{
+		if (stmt != SQL_NULL_HSTMT)
+		{
+			SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+		}
+      fprintf(stderr," Catching the execute exceptions: %s\n",(const char*)sql.c_str());
+	   closeConnection(con);
+		throw e;
+	}
+#endif   
+ 
+	SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+	closeConnection(con);
+	
 	//tcout << _T("Execute: ") << sql << std::endl;
 }
 
 //_________________________________________________________________________
-/* The default behavior holds a single connection open until the appender is closed (typically when garbage collected). */
-void MySQLAppender::closeConnection()
+/* The default behavior holds a single connection open until the appender
+is closed (typically when garbage collected).*/
+void MySQLAppender::closeConnection(SQLHDBC con)
 {
-  if (fIsConnectionOpen) {
-     fprintf(stderr," ++++++++ ----> closing the connection %p\n", (void *)connection);
-     mysql_close(connection); 
-     if (mysql_errno(connection))   fprintf(stderr,"MYSQL close ERROR %s  \n",mysql_error(connection));
-     connection = 0;
+  if (fIsConnectionOpen ) {
+     fprintf(stderr,"\n ++++++++ ----> closing the connection\n");
+     mysql_close(connection); connection = 0;
      fIsConnectionOpen = false;
   }
 }
@@ -149,17 +192,17 @@ MYSQL *MySQLAppender::getConnection()
    
    if (!fIsConnectionOpen) {
    
-     if ( !(connection= mysql_init(connection)) ) {
-         fprintf(stderr,"MYSQL:  ---- > No init connection \n");
-     } else {    
+     if ( !(connection= mysql_init(connection)) ) 
+         printf("No init connection \n");
+     else {    
 
          const char *host   = "heston.star.bnl.gov";
          const char *user   = "StarLogger";
          const char *passwd = "logger";
          const char *db     = "logger";
          unsigned int port  = 3306;
-         fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n", fIsConnectionOpen);
-         if (!(mysql_real_connect(connection
+          fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n\n", fIsConnectionOpen);
+         if (!(connection = mysql_real_connect(connection
                      , host
                      , user
                      , passwd
@@ -168,23 +211,98 @@ MYSQL *MySQLAppender::getConnection()
                      , 0,0
                      )))
          {
-             fprintf(stderr, "MYSQL:  ---- > No connection: %s  \n",mysql_error(connection));
-             connection = 0;
-             fIsConnectionOpen = false;
+                     printf("No connection: %s  \n",mysql_error(connection));
+                     
          } else {
             fIsConnectionOpen = true;
          }
       }
    }
-   fprintf(stderr,"MYSQL:  ---- > MySQL Connection open %d %p\n", fIsConnectionOpen,connection);
+
+
+#if 0
+	if (env == SQL_NULL_HENV)
+	{
+		ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env);
+		if (ret < 0)
+		{
+			env = SQL_NULL_HENV;
+			throw SQLException(ret);
+		}
+		
+		ret = SQLSetEnvAttr(env, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_INTEGER);
+		if (ret < 0)
+		{
+			SQLFreeHandle(SQL_HANDLE_ENV, env);
+			env = SQL_NULL_HENV;
+			throw SQLException(ret);
+		}
+	}
+	
+	if (connection == SQL_NULL_HDBC)
+	{
+		ret = SQLAllocHandle(SQL_HANDLE_DBC, env, &connection);
+		if (ret < 0)
+		{
+			connection = SQL_NULL_HDBC;
+			throw SQLException(ret);
+		}
+
+
+#if defined(HAVE_MS_MySQL)
+		ret = SQLConnect(connection,
+			(SQLTCHAR *)databaseURL.c_str(), SQL_NTS,
+			(SQLTCHAR *)databaseUser.c_str(), SQL_NTS,
+			(SQLTCHAR *)databasePassword.c_str(), SQL_NTS);
+#else
+		USES_CONVERSION;
+		std::string URL = T2A(databaseURL.c_str());
+		std::string user = T2A(databaseUser.c_str());
+		std::string password = T2A(databasePassword.c_str());
+      tcout << _T("getConnection: ") << _T("URL=") << URL << _T(": password=") << databasePassword << std::endl;
+//      fprintf(stderr," %s:%s -  %s\n", __FUNCTION__, __LINE__, (const char *)URL.c_str());
+		ret = SQLConnect(connection,
+			(SQLCHAR *)URL.c_str(), SQL_NTS,
+			(SQLCHAR *)user.c_str(), SQL_NTS,
+			(SQLCHAR *)password.c_str(), SQL_NTS);
+#endif
+		if (ret < 0)
+		{
+         tcout << _T("getConnection: ") << _T("ret=") << ret  << std::endl;
+			SQLFreeHandle(SQL_HANDLE_DBC, connection);
+			connection = SQL_NULL_HDBC;
+			throw SQLException(ret);
+		}
+	}
+#endif 	
 	return connection;
 }
 
 //_________________________________________________________________________
 void MySQLAppender::close()
 {
-   flushBuffer();
-   closeConnection();
+	try
+	{
+		flushBuffer();
+	} 
+	catch (SQLException& e)
+	{
+		errorHandler->error(_T("Error closing connection"), 
+			e, ErrorCode::GENERIC_FAILURE);
+	}
+#if 0
+	if (connection != SQL_NULL_HDBC)
+	{
+		SQLDisconnect(connection);
+		SQLFreeHandle(SQL_HANDLE_DBC, connection);
+	}
+	
+	if (env != SQL_NULL_HENV)
+	{
+		SQLFreeHandle(SQL_HANDLE_ENV, env);
+	}
+#endif
+   closeConnection(connection);
 	this->closed = true;
 }
 //_________________________________________________________________________
@@ -218,16 +336,18 @@ void MySQLAppender::flushBuffer()
 	//removes.ensureCapacity(buffer.size());
    static bool TaskEntryDone = false;
 	std::list<spi::LoggingEventPtr>::iterator i;
-   if ( getConnection()) {
-      for (i = buffer.begin(); i != buffer.end(); i++)
-	   {
-	     TString expandCommand;
-        String sql;  
-        if (!TaskEntryDone) {
+	for (i = buffer.begin(); i != buffer.end(); i++)
+	{
+	  TString expandCommand;
+     if (!TaskEntryDone) {
+   	  try
+	  	  {
+			  const LoggingEventPtr& logEvent = *i;
+			  String sql;  
          
 ///--- Task description         
          
-           expandCommand ="INSERT DELAYED IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
+         expandCommand ="INSERT DELAYED IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
          " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"Test Task\",\"$SUMS_AUTHENTICATED_USER\");";
 // Edit meta symbols
 //-----------------------
@@ -236,32 +356,42 @@ void MySQLAppender::flushBuffer()
 //  $SUMSJobId     = $REQUESTID 
 //  $SUMSProcessID = $PROCESSID
 
-             ReplaceVariable(expandCommand, "REQUESTID");
-             ReplaceVariable(expandCommand, "SUMS_nProcesses");
-             ReplaceVariable(expandCommand, "SUBMIT_TIME");
+           ReplaceVariable(expandCommand, "REQUESTID");
+           ReplaceVariable(expandCommand, "SUMS_nProcesses");
+           ReplaceVariable(expandCommand, "SUBMIT_TIME");
            
-             ReplaceVariable(expandCommand, "SUMS_name");
-             ReplaceVariable(expandCommand, "SUMS_USER");
-             ReplaceVariable(expandCommand, "SUMS_AUTHENTICATED_USER");
-             sql = expandCommand.Data();
-		       if (!execute(sql))  TaskEntryDone = true;
-       }
-// -- TaksDescription block 
-       if (TaskEntryDone) {
+           ReplaceVariable(expandCommand, "SUMS_name");
+           ReplaceVariable(expandCommand, "SUMS_USER");
+           ReplaceVariable(expandCommand, "SUMS_AUTHENTICATED_USER");
+           sql = expandCommand.Data();
+           TaskEntryDone = true;
+		  	  execute(sql);
+        }
+         
+		  catch (SQLException& e)
+		  {
+	        TaskEntryDone = false;
+			  errorHandler->error(_T("Failed to execute TaskDescription sql"), e,
+				  ErrorCode::FLUSH_FAILURE);
+		  }
+   	  try
+	  	  {
+			  const LoggingEventPtr& logEvent = *i;
+			  String sql;  
 //--- Job description         
 
-           expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
+         expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
 
-           expandCommand +=  "taskId = (SELECT taskId FROM TaskDescription WHERE  jobID_MD5=\"$REQUESTID\")";
-                             expandCommand += ", ";                  
-           expandCommand += "jobID_MD5=\"$REQUESTID\"";
-                             expandCommand += ", ";
-           expandCommand += "processID=\"$PROCESSID\"";
-                             expandCommand += ", ";
-           expandCommand +=  "node=\"$HOSTNAME\"";
-                             expandCommand += ", ";
-           expandCommand +=  "JobUser=\"$USER\"";
-                             expandCommand += "; ";
+         expandCommand +=  "taskId = (SELECT taskId FROM TaskDescription WHERE  jobID_MD5=\"$REQUESTID\")";
+                           expandCommand += ", ";                  
+         expandCommand += "jobID_MD5=\"$REQUESTID\"";
+                           expandCommand += ", ";
+         expandCommand += "processID=\"$PROCESSID\"";
+                           expandCommand += ", ";
+         expandCommand +=  "node=\"$HOSTNAME\"";
+                           expandCommand += ", ";
+         expandCommand +=  "JobUser=\"$USER\"";
+                           expandCommand += "; ";
 // Edit meta symbols
 //-----------------------
 //  $hostid        = $HOSTNAME            
@@ -269,33 +399,45 @@ void MySQLAppender::flushBuffer()
 //  $SUMSJobId     = $REQUESTID 
 //  $SUMSProcessID = $PROCESSID
 
-             ReplaceVariable(expandCommand, "USER");
-             ReplaceVariable(expandCommand, "HOSTNAME");
-             ReplaceVariable(expandCommand, "REQUESTID");
-             ReplaceVariable(expandCommand, "PROCESSID");
-             sql = expandCommand.Data();
-             if (!execute(sql) ) {
- 		  
-        
-// Job tracking block
-			       const LoggingEventPtr& logEvent = *i;
-			       String sql = getLogStatement(logEvent);
-                expandCommand = sql.c_str();
-         
-                ReplaceVariable(expandCommand, "REQUESTID");
-                ReplaceVariable(expandCommand, "PROCESSID");
-         
-                sql = expandCommand.Data();
-			       if (execute(sql)) {
-                   // clear the buffer of reported events
-     	             fprintf(stderr," MYSQL ----> skip and lose event \n");
-               }
-            }
-         }
+           ReplaceVariable(expandCommand, "USER");
+           ReplaceVariable(expandCommand, "HOSTNAME");
+           ReplaceVariable(expandCommand, "REQUESTID");
+           ReplaceVariable(expandCommand, "PROCESSID");
+           sql = expandCommand.Data();
+           TaskEntryDone = true;
+			  execute(sql);
+ 		  }
+		  catch (SQLException& e)
+		  {
+	        TaskEntryDone = false;
+  		       errorHandler->error(_T("Failed to execute JobDescription sql"), e,
+				  ErrorCode::FLUSH_FAILURE);
+		  }
+
       }
-      buffer.clear();
-   } 
-   closeConnection();	
+      // -------------------
+  		try
+		{
+			const LoggingEventPtr& logEvent = *i;
+			String sql = getLogStatement(logEvent);
+         expandCommand = sql.c_str();
+         
+         ReplaceVariable(expandCommand, "REQUESTID");
+         ReplaceVariable(expandCommand, "PROCESSID");
+         
+         sql = expandCommand.Data();
+			execute(sql);                  
+		}
+		catch (SQLException& e)
+		{
+			errorHandler->error(_T("Failed to excute sql"), e,
+				ErrorCode::FLUSH_FAILURE);
+		}
+
+	}
+	
+	// clear the buffer of reported events
+	buffer.clear();
 }
 
 //_________________________________________________________________________

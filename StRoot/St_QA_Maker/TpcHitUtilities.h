@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.h,v 1.5 2005/07/06 23:21:04 fisyak Exp $
+// $Id: TpcHitUtilities.h,v 1.6 2006/05/20 03:17:21 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.h,v $
+// Revision 1.6  2006/05/20 03:17:21  genevb
+// Changed MapKey to MapQAKey to make it unique for QA
+//
 // Revision 1.5  2005/07/06 23:21:04  fisyak
 // use templated StThreeVectorD
 //
@@ -40,7 +43,7 @@ using std::pair;
 
 #include "TpcMapUtilities.h"
 
-typedef map<HitMapKey, PadrowLocation, MapKeyLessThan>::value_type padrowMapValType;
+typedef map<HitMapQAKey, PadrowLocation, MapQAKeyLessThan>::value_type padrowMapValType;
 
 class TpcHitUtilities {
 public:
@@ -66,7 +69,7 @@ protected:
     const StThreeVectorD sectorNormal(int sector); //Return the normal vector to a given sector
     
     map<int, StThreeVectorD> m_SectorNormalMap; //! Map of normal vectors to a sector
-    map<HitMapKey, PadrowLocation, MapKeyLessThan> m_PadrowMap; //! Map of 3 points in each padrow
+    map<HitMapQAKey, PadrowLocation, MapQAKeyLessThan> m_PadrowMap; //! Map of 3 points in each padrow
 
     //Members-------------------------------
     vector<StTpcHit*> m_tpcHitVec; //!

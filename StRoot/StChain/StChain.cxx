@@ -124,6 +124,8 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Start'"
+         << ",Cpu="         << evnt.GetCpuTime("QAInfo:")
+         << ",RealTime="    << evnt.GetRealTime("QAInfo:")
          << ",StepContext=" << "'MemUsed',"  << "MessageId='='"
          << ",ProgrammMessage='" << int(TMemStat::Used())
          << "'" << endm;
@@ -206,11 +208,8 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.58 2006/05/16 18:54:23 fine Exp $
+// $Id: StChain.cxx,v 1.57 2006/05/12 18:48:48 fine Exp $
 // $Log: StChain.cxx,v $
-// Revision 1.58  2006/05/16 18:54:23  fine
-// fix StChain and MySql
-//
 // Revision 1.57  2006/05/12 18:48:48  fine
 // reshape jobn tracking. remove the redundand table columns
 //

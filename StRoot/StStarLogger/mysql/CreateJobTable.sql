@@ -1,4 +1,4 @@
-# $Id: CreateJobTable.sql,v 1.13 2006/05/15 17:47:10 fine Exp $
+# $Id: CreateJobTable.sql,v 1.12 2006/05/12 18:48:49 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the job description table
 
@@ -6,7 +6,7 @@ use logger;
 
 CREATE TABLE TaskDescription (
                  taskId          INT         NOT NULL AUTO_INCREMENT  KEY  COMMENT 'Task #id',
-                 jobID_MD5       VARCHAR(40) NOT NULL                      COMMENT 'SUMS $REQUESTID',
+                 jobID_MD5       VARCHAR(32) NOT NULL                      COMMENT 'SUMS $REQUESTID',
                  nProcesses      INT                                       COMMENT 'SUMS $nProcesses - the total number of the process for the task',
                  submissionTime  DATETIME                                  COMMENT 'SUMS time stampt - the time the task was created by the user with SUMS',
                  time            TIMESTAMP                                 COMMENT 'Submission time'   ,
@@ -20,7 +20,7 @@ CREATE TABLE TaskDescription (
 CREATE TABLE JobDescription (
                  jobId           INT         NOT NULL AUTO_INCREMENT  KEY  COMMENT 'Job #id',
                  taskId          INT                                       COMMENT 'Task #id from TaskDescription',
-                 jobID_MD5       VARCHAR(40) NOT NULL                      COMMENT 'SUMS $REQUESTID',
+                 jobID_MD5       VARCHAR(32) NOT NULL                      COMMENT 'SUMS $REQUESTID',
                  processID       INT                                       COMMENT 'SUMS $PROCESSID',
                  time            TIMESTAMP                                 COMMENT 'Current time'   ,
                  node            VARCHAR(32)                               COMMENT 'Computer name'  ,  
