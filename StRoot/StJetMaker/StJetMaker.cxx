@@ -1,28 +1,20 @@
-//--------------------------------------------------------------------------
-// $Id: StJetMaker.cxx,v 1.33 2008/03/28 00:14:55 tai Exp $
-//--------------------------------------------------------------------------
+// $Id: StJetMaker.cxx,v 1.34 2008/03/28 00:54:27 tai Exp $
 
 #include "StJetMaker.h"
 
-//root
 #include "TFile.h"
 #include "TTree.h"
 
-//St_base
 #include "StMessMgr.h"
 
-//StEvent
 #include "StEvent.h"
 
-//StMuDstMaker
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
-//StJetFinder
 #include "StJetFinder/StProtoJet.h"
 
-//StJetMaker
 #include "StJets.h"
 #include "StJet.h"
 #include "StFourPMakers/StFourPMaker.h"
@@ -43,23 +35,11 @@ StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *
 
 }
 
-/*!
-  Constructing a new jet analysis requires three elements:
-  (1) An instance of StppAnaPars that defines the track and jet cuts used in the analysis.
-  See StRoot/StJetMaker/StppJetAnalyzer.h for specifics
-  (2) A derived instance of StJetPars (i.e., StConePars or StKtPars) that defines the internal
-  parameters used in the jet finding algorithm (e.g., cone radius, etc).  See
-  StRoot/StJetFinder/StConeJetFinder.h and StKtCluJetFinder.h for specifics
-  (3) A unique character string which is used to identify this branch in the jets TTree
-
-*/
 void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp, const char* name)
 {
-  StppJetAnalyzer* analyzer = new StppJetAnalyzer(ap, jp, fp);
-
   AnalyzerCtl anaCtl;
   anaCtl.mBranchName = name;
-  anaCtl.mAnalyzer = analyzer;
+  anaCtl.mAnalyzer = new StppJetAnalyzer(ap, jp, fp);
   anaCtl.mJets = new StJets();
 
   mAnalyzerCtl.push_back(anaCtl);
@@ -67,11 +47,10 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourP
 
 Int_t StJetMaker::Init() 
 {
-  cout << "StJetMaker: jet output file: " << mOutName << endl;
-    
   mOutFile = new TFile(mOutName.c_str(), "recreate");
     
   mJetTree  = new TTree("jet", "jetTree");
+
   for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
     mJetTree->Branch ((*it).mBranchName.c_str(), "StJets", &((*it).mJets));
   }
@@ -83,17 +62,14 @@ Int_t StJetMaker::Make()
 {
 
   for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
-    StppJetAnalyzer* thisAna = (*it).mAnalyzer;
-    StJets* jets = (*it).mJets;
+    StppJetAnalyzer* analyzer = (*it).mAnalyzer;
 
-    StFourPMaker* fourPMaker = thisAna->fourPMaker();
-
-    thisAna->clear();
+    analyzer->clear();
 	
-    thisAna->setFourVec(fourPMaker->getTracks());
-    thisAna->findJets();
+    analyzer->setFourVec(analyzer->fourPMaker()->getTracks());
+    analyzer->findJets();
 	
-    fillTree(*jets, thisAna, fourPMaker);
+    fillTree(*(*it).mJets, analyzer, analyzer->fourPMaker());
 
   }
     
@@ -102,7 +78,7 @@ Int_t StJetMaker::Make()
   return kStOk;
 }
 
-void StJetMaker::fillTree(StJets& jets, StppJetAnalyzer* thisAna, StFourPMaker* fourPMaker)
+void StJetMaker::fillTree(StJets& jets, StppJetAnalyzer* analyzer, StFourPMaker* fourPMaker)
 {
   jets.Clear();
   jets.setBemcCorrupt(fourPMaker->bemcCorrupt() );
@@ -119,7 +95,7 @@ void StJetMaker::fillTree(StJets& jets, StppJetAnalyzer* thisAna, StFourPMaker* 
     jets.setSumEmcE( bet4p->sumEmcEt() );
   }
 	
-  StppJetAnalyzer::JetList &cJets = thisAna->getJets();
+  StppJetAnalyzer::JetList &cJets = analyzer->getJets();
   for(StppJetAnalyzer::JetList::iterator it = cJets.begin(); it != cJets.end(); ++it) {
     fillJet(jets, *it);
   }
@@ -173,7 +149,6 @@ void StJetMaker::fillJet(StJets &jets, StProtoJet& pj)
      
     jets.addTrackToIndex(t2j);
 
-    //ok, get track/tower properties here:
     StDetectorId mDetId = track->detectorId();
     if (mDetId==kTpcId) {
       aJet.nTracks++;
@@ -198,6 +173,7 @@ Int_t StJetMaker::Finish()
   mOutFile->Write();
   mOutFile->Close();
   delete mOutFile;
+  mOutFile = 0;
 
   StMaker::Finish();
   return kStOK;
