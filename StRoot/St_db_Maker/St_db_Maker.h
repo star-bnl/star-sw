@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.26 2006/08/15 21:42:21 jeromel Exp $
+// $Id: St_db_Maker.h,v 1.27 2007/03/09 20:01:03 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.27  2007/03/09 20:01:03  perev
+// Request by user defined time now allowed
+//
 // Revision 1.26  2006/08/15 21:42:21  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -89,7 +92,7 @@ private:
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
   TStopwatch  fTimer[4];        //!Timer object 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.26 2006/08/15 21:42:21 jeromel Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.27 2007/03/09 20:01:03 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -99,7 +102,7 @@ private:
 			      ,const char *dir3 = ""
                    );
    virtual        ~St_db_Maker();
-   virtual TDataSet *GetDataBase(const char* logInput);
+   virtual TDataSet *GetDataBase(const char* logInput, const TDatime *td=0);
    virtual TDatime GetDateTime() const;
    virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
    virtual void    SetDateTime(int idat,int itim);
@@ -115,9 +118,9 @@ private:
    virtual void    Clear(Option_t *opt=""){if(opt){/*unused*/}};
    virtual Int_t   Finish();
            void    SetMaxEntryTime(Int_t idate,Int_t itime);
-protected:
+private:
    virtual TDataSet* UpdateDB (TDataSet* ds);
-   virtual int UpdateTable(UInt_t parId, TTable* dat, TDatime val[2]);
+   virtual int UpdateTable(UInt_t parId, TTable* dat, const TDatime &req, TDatime val[2]);
    virtual TDataSet *LoadTable(TDataSet* left);
    virtual TDataSet *FindLeft(StValiSet *val, TDatime vals[2]);
    virtual TDataSet *OpenMySQL(const char* dbname);
@@ -125,12 +128,13 @@ protected:
 
    static EDataSetPass UpdateDB (TDataSet* ds,void *user );
    static EDataSetPass PrepareDB(TDataSet* ds,void *user );
+          int UpdateValiSet(StValiSet *val,const TDatime &currenTime);
 public:
    static TDatime  Time(const char *filename);
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.26 2006/08/15 21:42:21 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.27 2007/03/09 20:01:03 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   
 };

@@ -1,6 +1,10 @@
 *
-* $Id: pixlgeo3.g,v 1.3 2006/10/23 00:10:03 potekhin Exp $
+* $Id: pixlgeo3.g,v 1.4 2007/03/15 19:57:00 potekhin Exp $
 * $Log: pixlgeo3.g,v $
+* Revision 1.4  2007/03/15 19:57:00  potekhin
+* Added a useful diagnostic printout about the thicknesses
+* of the Si layers (passive and active)
+*
 * Revision 1.3  2006/10/23 00:10:03  potekhin
 * The opening angle of the sector needs to be increased (one ladder
 * was sticking outside.
@@ -143,6 +147,7 @@ Module PIXLGEO3 is the the STAR pixel detector and beam pipe support
       raddeg=3.14159265/180.0
 
       write(*,*) '=======  Constructing the Pixel Detector with Beam Pipe Support ========'
+      write(*,*) 'HFT thk: Passive, active, total ',PIXG_PassiveThk,',',PIXG_ActiveThk,',',PIXG_LadderThk
       Create   PXMO
       Position PXMO in CAVE   Konly='ONLY'
 

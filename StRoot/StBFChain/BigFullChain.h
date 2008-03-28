@@ -48,6 +48,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2005c","","","db,detDb"                                      ,"","","the best Year5 geometry",kFALSE},
   {"RY2005d","","","db,detDb"                                             ,"","","y2005c + new SVT",kFALSE},
   {"RY2006","","","db,detDb"                                             ,"","","y2006 for p+p run",kFALSE},
+  {"RY2007","","","db,detDb"                                            ,"","","y2007 for AuAu run",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -282,6 +283,11 @@ Bfc_st BFC2[] = { // ITTF Chains
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
+  {"B2007","","","ry2007,MakeEvent,in,tpc_daq,tpcI,fcf,svt_daq,SvtD,ssddat,spt,Physics,Idst,l0,tags,Tree,evout",
+                                                        "","","Base chain for 2007 ITTF (tpc+svt+ssd)",kFALSE},
+  {"P2007"       ,"" ,"",
+   "B2007,IAna,KeepSvtHit,hitfilt,skip1row,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr5",
+                      "","","Production chain for 2007 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   //  {"testing"      ,"" ,"",   // just a damned test
   //   "B2006b,sdt20061211,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
   //                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
@@ -359,13 +365,13 @@ Bfc_st BFC2[] = { // ITTF Chains
     
   {"Corr1"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13","","",
                                                       "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
-  {"Corr2"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC","","",
-                                          "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
+  {"Corr2"       ,""  ,"","Corr1,OTwist,OIFC"                     ,"","","...Corr1+OTwist,OIFC ...",kFALSE},
   {"Corr3"       ,""  ,"","AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC","","",
                                         "... AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC ...",kFALSE},
-  {"Corr4"       ,""  ,"","AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC,OShortR","","",
-                               "... AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC , OShortR...",kFALSE},
-
+  {"Corr4"       ,""  ,"","Corr3,OShortR"                             ,"","","... Corr3+OShortR...",kFALSE},
+  {"Corr5"       ,""  ,"","Corr4,SCEbyE,OGridLeak3D,OSpaceZ2","","",
+                                                         "... Corr4+SCEbyE,OGridLeak3D,OSpaceZ2...",kFALSE},
+  
   {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},

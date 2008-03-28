@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.38 2005/11/22 23:13:24 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.39 2007/03/03 00:35:43 fine Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.39  2007/03/03 00:35:43  fine
+// Fix the leak of the ROOT objects and introduce the method to return the source code filename  for the arbitrary geometry node
+//
 // Revision 1.38  2005/11/22 23:13:24  fisyak
 // Add default kinematics if there is no input fiels and if maker is active
 //
@@ -70,19 +73,22 @@ class TH1F;
 class TShape;
 class TGeoVolume;
 class St_geom_gdat;
-class TGeoVolume;
+class TFileSet;
 
 class St_geant_Maker : public StMaker {
 protected:
   Int_t  fNwGeant;     // No. of words in GCBANK common block
   Int_t  fNwPaw;       // No. of words in PAWC  common block
   Int_t  fIwType;      // HIGZ interface (=0 no HIGZ)
-  TDataSet*   fVolume;   //!
+  TDataSet*   fVolume; //!
   TGeoVolume* fTopGeoVolume; //!
   TString fInputFile; // 
+  TFileSet  *fGeoDirectory; // the pointer the STAR geometry source code
   StEvtHddr *fEvtHddr;//! pointer to Event Header
+  Bool_t   fRemakeGeometry;// Flag whether we need to remake the geometry
   virtual TShape  *MakeShape(TString *name, Int_t ivo);
   virtual TVolume *MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers);
+  virtual void ClearRootGeoms();
 
  private:
 
@@ -111,6 +117,8 @@ public:
    virtual Int_t  GetNwGEANT () {return fNwGeant;}
    virtual Int_t  GetNwPAW   () {return fNwPaw  ;}
    virtual Int_t  GetIwtype  () {return fIwType ;}
+   Bool_t  Remake() const { return fRemakeGeometry;}
+   void    SetRemake(Bool_t remake=kTRUE) {fRemakeGeometry=remake;}
    virtual Int_t  Skip(Int_t Nskip=1);                        // *MENU*
    virtual TDataSet *Work();
    virtual void   Mark(TVolume *topvol);
@@ -124,6 +132,7 @@ public:
            Int_t SetInputFile(const char* file);
 
    TDataSet* GetVolume() { return fVolume; }
+   const TFileSet *GetGeoDirectory() const { return fGeoDirectory;}
    TGeoVolume* GetTopGeoVolume() {return fTopGeoVolume;}
    static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
 			    Int_t &k, Char_t *iq);
@@ -154,6 +163,7 @@ public:
 			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
    
   TGeoVolume* Ag2Geom();
+  TString GetVolumeSrcFile(const char *volumeName) const;
  protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -172,7 +182,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.38 2005/11/22 23:13:24 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.39 2007/03/03 00:35:43 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
