@@ -95,23 +95,8 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
         DsmAdc[i] = -1;
     }
 
-   
-
-    for (int i=0;i<12;i++){
-      JP12005array[i]=-1;
-      JP22005array[i]=-1;
-    }
-    for (int i=0; i<4800; i++){
-      HT12005array[i]=-1;
-      HT22005array[i]=-1;
-    }
-    for (int i=0; i<5; i++) {
-      numHT[i]=-1;
-      numJP[i]=-1;
-    }
 
 }
-
 //____________________________________________________________________________
 StEmcTriggerMaker::~StEmcTriggerMaker()
 {}
@@ -155,13 +140,11 @@ Int_t StEmcTriggerMaker::Make()
     int* isTrig = mBemcTrigger->isTrigEvent();
     int* TowJetId = mBemcTrigger->getTowPatchId();
     int* DsmAdc = mBemcTrigger->getTowPatchDSM();
-    int* numHT = mBemcTrigger->getNHT();
-    int* numJP = mBemcTrigger->getNJP();
-    int* HT12005array = mBemcTrigger->getHT12005array();
-    int* HT22005array = mBemcTrigger->getHT22005array();
-    int* JP12005array = mBemcTrigger->getJP12005array();
-    int* JP22005array = mBemcTrigger->getJP22005array();
 
+    for (int z=0;z<10;z++)
+    {
+        printf("i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d\n",z,isTrig[z],TowJetId[z],DsmAdc[z]);
+    }
 
     //2003 HT1 ==  1101
     mIs2003HT1=isTrig[0];
@@ -192,43 +175,26 @@ Int_t StEmcTriggerMaker::Make()
     mIs2005HT1=isTrig[5];
     HT1_ID_2005=TowJetId[5];
     HT1_DSM_2005=DsmAdc[5];
-    numHT1_2005=numHT[3];
-    for (int i=0;i<numHT1_2005;i++){
-      HT1_2005_array[i]=HT12005array[i];
-    }      
 
     //2005 HT2=96211
     mIs2005HT2=isTrig[6];
     HT2_ID_2005=TowJetId[6];
     HT2_DSM_2005=DsmAdc[6];
-    numHT2_2005=numHT[4];
-    for (int i=0;i<numHT2_2005;i++){
-      HT2_2005_array[i]=HT22005array[i];
-    }      
 
     //2005 JP1=96221
     mIs2005JP1=isTrig[7];
     JP1_ID_2005=TowJetId[7];
     JP1_DSM_2005=DsmAdc[7];
-    numJP1_2005=numJP[2];
-    for (int i=0;i<numJP1_2005;i++){
-      JP1_2005_array[i]=JP12005array[i];
-    }
 
     //2005 JP2=96233
     mIs2005JP2=isTrig[8];
     JP2_ID_2005=TowJetId[8];
     JP2_DSM_2005=DsmAdc[8];
-    numJP2_2005=numJP[3];
-    for (int i=0;i<numJP2_2005;i++){
-      JP2_2005_array[i]=JP22005array[i];
-    }
 
     //2005 ADJP = 96241
     mIs2005ADJ=isTrig[9];
     ADJ_ID_2005=TowJetId[9];
     ADJ_DSM_2005=DsmAdc[9];
-
 
     //access TP 6 bit DSMsum
     for (int j=0;j<300;j++)
@@ -304,27 +270,6 @@ void StEmcTriggerMaker::saveHistograms(char* file)
     delete f;
     return;
 }
-
-void StEmcTriggerMaker::get2005HT1_TOWS(int index, int *id){
-  *id=-1;
-  if (index<4800) *id=HT1_2005_array[index];
-}
-
-void StEmcTriggerMaker::get2005HT2_TOWS(int index, int *id){
-  *id=-1;
-  if (index<4800) *id=HT2_2005_array[index];
-}
-
-void StEmcTriggerMaker::get2005JP1_PATCHES(int index, int *id){
-  *id=-1;
-  if (index<12) *id=JP1_2005_array[index];
-}
-
-void StEmcTriggerMaker::get2005JP2_PATCHES(int index, int *id){
-  *id=-1;
-  if (index<12) *id=JP2_2005_array[index];
-}
-
 
 //_____________________________________________________________________________
 void StEmcTriggerMaker::fillStEvent(StEvent *event)

@@ -1,7 +1,7 @@
 class  StChain;
 StChain *chain;
 
-void rdMuFindBckg(int nevents=100, char* outDir="./") { 
+void rdMuFindBckg(int nevents=100 , char* outDir="./") { 
 
  char *muDstFile;
 
@@ -127,38 +127,29 @@ void rdMuFindBckg(int nevents=100, char* outDir="./") {
     chain->Clear();
     int iret = chain->Make(iev); 
 
-    printf("*******************************************************************************\n");
-    printf("Working on eventNumber = %d:\n",iev+1);
+    printf("*******************************************************************\n");
+    printf("Working on eventNumber=%d:\n",iev+1);
 
 
     myMk->GetDecision(Decision,eta1,phi1,eta2,Length,Adcsum);
-    const int *idL=myMk->GetSoftIdList();
 
     if(Decision==1) {
 
-      printf("\n");
-      printf("EventDecision = YES --> THIS EVENT IS A BACKGROUND LOCATED AT: (eta1=%d phi1=%d eta2=%d), PATTERN LENGTH=%d, ADCSUM=%f\n",eta1,phi1,eta2,Length,Adcsum);
+      printf("===================================================================\n");
+      printf("eventDecision = YES --> THIS EVENT IS A BACKGROUND LOCATED AT (#eta1=%d #phi1=%d #eta2=%d), PATTERN LENGTH=%d, ADCSUM=%f\n",eta1,phi1,eta2,Length,Adcsum);
+      printf("===================================================================\n");
       
-      printf("List of towers SoftIds in the background pattern found:\t");
-      int len=0;
-      while(*idL>0) { 
-	printf("%d, ", *idL);
-	len++;
-	idL++;
-      }
-      printf("\n===============================================================================\n");    
-
     } else {      
      
       if(Decision==0) {
-	printf("===============================================================================\n");
-	printf("EventDecision = NO --> THIS EVENT IS NOT A BACKGROUND.\n");
-	printf("===============================================================================\n");
+	printf("===================================================================\n");
+	printf("eventDecision = NO --> THIS EVENT IS NOT A BACKGROUND.\n");
+	printf("===================================================================\n");
       } else {
  
-	printf("===============================================================================\n");
-	printf("EventDecision = NOT SEARCHED ..... NOT OF TRIGGER TYPE.\n");
-	printf("===============================================================================\n");
+	printf("===================================================================\n");
+	printf("eventDecision = NOT SEARCHED.....NOT OF TRIGGER TYPE.\n");
+	printf("===================================================================\n");
       } 
     }
     
@@ -172,13 +163,13 @@ void rdMuFindBckg(int nevents=100, char* outDir="./") {
 
 
   chain->Finish(); 
-  printf("\n*******************************************************************************\n");      
+  printf("****************************************** \n");      
   //  return;
   int t2=time(0);
   if(t2==t1) t2=t1+1;
   float tMnt=(t2-t1)/60.;
   float rate=1.*eventCounter/(t2-t1);
-  printf("Sorting Done: %d of nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",eventCounter,nEntries,rate,tMnt);
+  printf("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",eventCounter,nEntries,rate,tMnt);
 
 
   TString outF=outDir; outF+=RunNumber; outF+=".hist.root";
