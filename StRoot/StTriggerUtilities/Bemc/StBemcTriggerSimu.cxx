@@ -705,9 +705,9 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
     
     
     //Construct total output bits from DSMLayer0
-    Int_t two10 = (Int_t) pow(2,10);
-    Int_t two12 = (Int_t) pow(2,12);
-    Int_t two14 = (Int_t) pow(2,14);
+    Int_t two10 = (Int_t) pow(2.0,10.0);
+    Int_t two12 = (Int_t) pow(2.0,12.0);
+    Int_t two14 = (Int_t) pow(2.0,14.0);
 
     if (((i+3)%5)!=0)
       {
@@ -754,7 +754,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
   //DSM_Layer0 is passed to DSM_Layer1 in 8 UShort blocks (16 bits)
   //There are 6 DSM_Layer1 boards and each can take 120 bits total
   //So DSM_Layer0 passes 8 shorts (16*8=128) or 128 bits to each DSM_Layer1
-  int nShort[8] = {3, 2, 1, 0, 7, 6, 5, 4};
+//  int nShort[8] = {3, 2, 1, 0, 7, 6, 5, 4};
   for (int i=0; i<kL1DsmModule; i++)
     {
       for (int j=0; j<6; j++) //only loop over 6 shorts 
