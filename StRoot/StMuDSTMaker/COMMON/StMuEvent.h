@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.16 2007/04/20 06:25:21 mvl Exp $
+ * $Id: StMuEvent.h,v 1.17 2007/08/02 20:46:46 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -126,7 +126,7 @@ class StMuEvent : public TObject {
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,8)
+  ClassDef(StMuEvent,9)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -171,6 +171,10 @@ inline TArrayI &StMuEvent::L2Result() { return mL2Result; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.17  2007/08/02 20:46:46  mvl
+ * Switch off Q-vector branhces in StMuDstMaker and increase version number in StMuEvent.
+ * This is to avoid wranings when reading P07ib data which has Q-vector information stored with more recent libraries.
+ *
  * Revision 1.16  2007/04/20 06:25:21  mvl
  * Removed Q-vectors (will implement utility class).
  * Added Vpd info.

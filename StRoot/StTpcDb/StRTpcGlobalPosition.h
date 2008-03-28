@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcGlobalPosition.h,v 1.2 2002/02/12 22:50:35 hardtke Exp $
+ * $Id: StRTpcGlobalPosition.h,v 1.3 2007/08/04 00:38:03 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRTpcGlobalPosition.h,v $
+ * Revision 1.3  2007/08/04 00:38:03  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
  * Revision 1.2  2002/02/12 22:50:35  hardtke
  * separate geometrical tpc rotation from field twist
  *
@@ -66,24 +70,6 @@ public:
  ClassDef(StRTpcGlobalPosition,0)
 
 };
-inline double  StRTpcGlobalPosition::TpcCenterPositionX() const { return (*mGlobalPosition)[0].LocalxShift;}
-
-inline double  StRTpcGlobalPosition::TpcCenterPositionY() const { return (*mGlobalPosition)[0].LocalyShift;}
-
-inline double  StRTpcGlobalPosition::TpcCenterPositionZ() const { return (*mGlobalPosition)[0].LocalzShift;}
-
-inline double  StRTpcGlobalPosition::TpcRotationAroundGlobalAxisX() const { return (*mGlobalPosition)[0].PhiYZ_geom;}
-
-inline double  StRTpcGlobalPosition::TpcRotationAroundGlobalAxisY() const { return (*mGlobalPosition)[0].PhiXZ_geom;}
-
-inline double  StRTpcGlobalPosition::TpcRotationAroundGlobalAxisZ() const { return (*mGlobalPosition)[0].PhiXY_geom;}
-
-inline double  StRTpcGlobalPosition::TpcEFieldRotationX() const { return (*mGlobalPosition)[0].PhiYZ;}
-
-inline double  StRTpcGlobalPosition::TpcEFieldRotationY() const { return (*mGlobalPosition)[0].PhiXZ;}
-
-inline double  StRTpcGlobalPosition::TpcEFieldRotationZ() const { return (*mGlobalPosition)[0].PhiXY;}
-
 
 #endif
 
