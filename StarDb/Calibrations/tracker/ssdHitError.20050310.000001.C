@@ -12,7 +12,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.coeff[0]	 =      9e-06; // *;
     row.coeff[1]	 =          0;
     row.coeff[2]	 =          0;
-    row.coeff[3]	 = 0.004933679;
+    row.coeff[3]	 = 0.004893877;
     row.coeff[4]	 =          0;
     row.coeff[5]	 =          0;
 tableSet->AddAt(&row);

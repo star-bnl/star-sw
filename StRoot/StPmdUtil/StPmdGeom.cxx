@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.19 2007/04/18 04:54:44 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.18 2007/04/17 11:19:47 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,9 +11,6 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
- * Revision 1.19  2007/04/18 04:54:44  rashmi
- * status after 11April07 access
- *
  * Revision 1.18  2007/04/17 11:19:47  rashmi
  * Chain19 mapping corrected, functions to return nboards in a chain/SMs added
  *
@@ -1877,19 +1874,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
     status[45][17]=0;
     status[45][18]=0;
   }
-  //access on 11April 2007
-  if(rn>101&&year==8){
-    //chain 25  FEE board 5
-    status[24][4]=0;
-    //chain 29   FEE board 7, 12, 26
-    status[28][6]=0;
-    status[28][11]=0;
-    status[28][25]=0;
-    //chain 33   FEE board 1, 5
-    status[32][0]=0;
-    status[32][4]=0;
-  }
-    
+  
   for(Int_t i=0;i<48;i++){
     for(Int_t ib=0;ib<36;ib++){
       alive_stat[i]=alive_stat[i]+status[i][ib];

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.29 2007/03/08 21:54:40 deph Exp $
+ * $Id: StDbSql.cc,v 1.30 2007/04/21 03:20:33 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.30  2007/04/21 03:20:33  deph
+ * removed extra check for endTime replacement
+ *
  * Revision 1.29  2007/03/08 21:54:40  deph
  * Added quotes to identifier `schema` for compatibility to mysql 5.0.x
  *
@@ -431,7 +434,8 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
 	 }
 
   Db.Release();  
-   if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
+  //MPD - removed this to remove extra table scans updating end time
+  // if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
 
   delete [] idMap;
   delete [] dataIDList;
@@ -460,16 +464,23 @@ bool StDbSql::updateEndTime(StDbTable* table, const char* dataTable, unsigned in
      earlier than requestTime
     ********************************/
 
+#define __METHOD__ "updateEndTime(table,table,time)"
   bool retVal = true;
   if(!checkColumn(dataTable,"endTime")) return retVal;
   int nrows;
   int* wrows = table->getWrittenRows(nrows);
   
+   StString mpdOut, mpdOut2;
+
+
   Db<<" select unix_timestamp(Min(endTime)) as mendTime from "<<dataTable;
  // Db<<" where dataID In("<<getElementList(wrows,nrows)<<")"<<endsql;
   Db<<" where dataID "<<getElementList(wrows,nrows)<<endsql;
 
-  if( (Db.NbRows()>0) && Db.Output(&buff)){
+     sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);  
+  
+
+if( (Db.NbRows()>0) && Db.Output(&buff)){
     unsigned int t1 = table->getEndTime();
     unsigned int t2;
     buff.ReadScalar(t2,"mendTime");
@@ -479,6 +490,7 @@ bool StDbSql::updateEndTime(StDbTable* table, const char* dataTable, unsigned in
   }
 
   Db.Release();
+#undef __METHOD__
   return retVal;
 }
 

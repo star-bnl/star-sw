@@ -1,13 +1,10 @@
 /***************************************************************************
-* $Id: TOF_Reader.cxx,v 2.5 2007/04/17 23:00:16 dongx Exp $
+* $Id: TOF_Reader.cxx,v 2.4 2005/04/13 16:02:38 dongx Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.cxx,v $
-* Revision 2.5  2007/04/17 23:00:16  dongx
-* replaced with standard STAR Loggers
-*
 * Revision 2.4  2005/04/13 16:02:38  dongx
 * update for a warning message on the return value
 *
@@ -38,8 +35,6 @@
 **************************************************************************/
 #include <assert.h>
 #include "TOF_Reader.hh"
-#include "StMessMgr.h"
-#include "TString.h"
 
 bool TOF_Reader::year2Data(){return (mTofRawDataVersion==1);}
 bool TOF_Reader::year3Data(){return (mTofRawDataVersion==2);}
@@ -52,12 +47,12 @@ void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
   int unpackerr=0;
   if(year2Data()||year3Data()||year4Data()) {
      unpackerr=UnpackYear2to4Data(TofPTR);
-     if(unpackerr>0) LOG_INFO<<"TOF_READER::UnPack Year2-4 data ERROR!"<<endm;
+     if(unpackerr>0) cout<<"TOF_READER::UnPack Year2-4 data ERROR!"<<endl;
   }
 
   if(year5Data()){ 
      unpackerr=UnpackYear5Data(TofPTR);
-     if(unpackerr>0) LOG_INFO<<"TOF_READER::UnPack Year5 Data ERROR!"<<endm;
+     if(unpackerr>0) cout<<"TOF_READER::UnPack Year5 Data ERROR!"<<endl;
   }
 
 }
@@ -68,17 +63,17 @@ TOF_Reader::TOF_Reader(EventReader *er, Bank_TOFP *pTOFP)
   pBankTOFP = pTOFP; 
   ercpy = er;
   if (!pBankTOFP->test_CRC()) {
-    LOG_DEBUG << Form("CRC error in TOFP: %s %d",__FILE__,__LINE__) << endm;
+    printf("CRC error in TOFP: %s %d\n",__FILE__,__LINE__) ;
   }
   if (pBankTOFP->swap() < 0) {
-    LOG_DEBUG << Form("swap error in TOFP: %s %d",__FILE__,__LINE__) << endm;
+    printf("swap error in TOFP: %s %d\n",__FILE__,__LINE__) ;
   }
 
   pBankTOFP->header.CRC = 0;
   int Token = pBankTOFP->header.Token;
   Bank_DATAP *dp = (Bank_DATAP *)ercpy->getDATAP();
   if(Token !=dp->header.Token){
-    LOG_DEBUG << Form("Token mismatch between global %d and TOF %d",dp->header.Token,Token) << endm;
+    printf("Token mismatch between global %d and TOF %d\n",dp->header.Token,Token);
   }
 
   mTofRawDataVersion = pBankTOFP->header.FormatNumber;
@@ -105,7 +100,7 @@ TOF_Reader::TOF_Reader(EventReader *er, Bank_TOFP *pTOFP)
 
 unsigned short TOF_Reader::GetAdc(int daqId){
   if ((daqId<0) || (daqId>mMaxAdcChannels-1)){
-    LOG_INFO << "TOF_Reader::GetAdc slatId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetAdc slatId out of range " << daqId << endl;
     return 0;
   }
   return mTheTofArray.AdcData[daqId];
@@ -115,7 +110,7 @@ unsigned short TOF_Reader::GetAdcFromSlat(int slatId){return GetAdc(slatId);}
 
 unsigned short TOF_Reader::GetTdc(int daqId){
   if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
-    LOG_INFO << "TOF_Reader::GetTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
     return 0;
   }
   return mTheTofArray.TdcData[daqId];
@@ -126,7 +121,7 @@ unsigned short TOF_Reader::GetTdcFromSlat(int slatId){return GetTdc(slatId);}
 
 unsigned short TOF_Reader::GetTofpAdc(int slatId){
   if ((slatId<0) || (slatId>41)){
-    LOG_INFO << "TOF_Reader::GetTofpAdc slatId out of range " << slatId << endm;
+    cout << "TOF_Reader::GetTofpAdc slatId out of range " << slatId << endl;
     return 0;
   }
   return mTheTofArray.AdcData[slatId];
@@ -135,7 +130,7 @@ unsigned short TOF_Reader::GetTofpAdc(int slatId){
 
 unsigned short TOF_Reader::GetTofpTdc(int slatId){
   if ((slatId<0) || (slatId>41)){
-    LOG_INFO << "TOF_Reader::GetTofpTdc slatId out of range " << slatId << endm;
+    cout << "TOF_Reader::GetTofpTdc slatId out of range " << slatId << endl;
     return 0;
   }
   return mTheTofArray.TdcData[slatId];
@@ -144,18 +139,18 @@ unsigned short TOF_Reader::GetTofpTdc(int slatId){
 
 unsigned short TOF_Reader::GetTofrAdc(int padId){
   if (year2Data()){
-    LOG_INFO << "TOF_Reader: TOFr ADC data not available for year2 data" << endm;
+    cout << "TOF_Reader: TOFr ADC data not available for year2 data" << endl;
     return 0;
   }
   if (year3Data()) {
     if((padId<0) || (padId>71)) {
-      LOG_INFO << "TOF_Reader::GetTofrAdc padId out of range " << padId << endm;
+      cout << "TOF_Reader::GetTofrAdc padId out of range " << padId << endl;
       return 0;
     }
   }
   if (year4Data()) {
     if ((padId<0) || (padId>119)){
-      LOG_INFO << "TOF_Reader::GetTofrAdc padId out of range " << padId << endm;
+      cout << "TOF_Reader::GetTofrAdc padId out of range " << padId << endl;
       return 0;
     }
   }
@@ -165,19 +160,19 @@ unsigned short TOF_Reader::GetTofrAdc(int padId){
 
 unsigned short TOF_Reader::GetTofrTdc(int padId){
   if (year2Data()){
-    LOG_INFO << "TOF_Reader: TOFr TDC data not available for year2 data" << endm;
+    cout << "TOF_Reader: TOFr TDC data not available for year2 data" << endl;
     return 0;
   }
   if (year3Data()) {
     if((padId<0) || (padId>71)) {
-      LOG_INFO << "TOF_Reader::GetTofrTdc padId out of range " << padId << endm;
+      cout << "TOF_Reader::GetTofrTdc padId out of range " << padId << endl;
       return 0;
     }
     return mTheTofArray.TdcData[48+padId];
   }
   if (year4Data()) {
     if ((padId<0) || (padId>119)){
-      LOG_INFO << "TOF_Reader::GetTofrTdc padId out of range " << padId << endm;
+      cout << "TOF_Reader::GetTofrTdc padId out of range " << padId << endl;
       return 0;
     }
     int offset = 0;
@@ -197,11 +192,11 @@ unsigned short TOF_Reader::GetTofrTdc(int padId){
 
 unsigned short TOF_Reader::GetTofrTOT(int totId){
   if(year2Data()||year3Data()) {
-    LOG_INFO << "TOF_Reader:: TOFr TOT data not available for year3 and year3 data" << endm;
+    cout << "TOF_Reader:: TOFr TOT data not available for year3 and year3 data" << endl;
     return 0;
   }
   if((totId<0) || (totId>9)) {
-    LOG_INFO << "TOF_Reader::GetTofrTOT totId out of range " << totId << endm;
+    cout << "TOF_Reader::GetTofrTOT totId out of range " << totId << endl;
   }
   unsigned short tdcId[10] = {72, 73, 98, 99, 124, 125, 176, 177, 178, 179};
 
@@ -210,7 +205,7 @@ unsigned short TOF_Reader::GetTofrTOT(int totId){
    
 unsigned short TOF_Reader::GetPvpdAdc(int pvpdId){
   if ((pvpdId<0) || (pvpdId>5)){
-    LOG_INFO << "TOF_Reader::GetPvpdAdc pvpdId out of range " << pvpdId << endm;
+    cout << "TOF_Reader::GetPvpdAdc pvpdId out of range " << pvpdId << endl;
     return 0;
   }
   return mTheTofArray.AdcData[43+pvpdId];
@@ -219,11 +214,11 @@ unsigned short TOF_Reader::GetPvpdAdc(int pvpdId){
 
 unsigned short TOF_Reader::GetPvpdAdcHigh(int pvpdId){
   if (year2Data()){
-    LOG_INFO << "TOF_Reader: pVPD high gain data not available for year2 data" << endm;
+    cout << "TOF_Reader: pVPD high gain data not available for year2 data" << endl;
     return 0;
   }
   if ((pvpdId<0) || (pvpdId>5)){
-    LOG_INFO << "TOF_Reader::GetPvpdAdcHigh pvpdId out of range " << pvpdId << endm;
+    cout << "TOF_Reader::GetPvpdAdcHigh pvpdId out of range " << pvpdId << endl;
     return 0;
   }
   return mTheTofArray.TdcData[54+pvpdId];
@@ -231,7 +226,7 @@ unsigned short TOF_Reader::GetPvpdAdcHigh(int pvpdId){
 
 unsigned short TOF_Reader::GetPvpdTdc(int pvpdId){
   if ((pvpdId<0) || (pvpdId>5)){
-    LOG_INFO << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endm;
+    cout << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endl;
     return 0;
   }
   return mTheTofArray.TdcData[43+pvpdId];
@@ -242,7 +237,7 @@ unsigned short TOF_Reader::GetClockAdc(){return mTheTofArray.AdcData[42];}
 
 short TOF_Reader::GetTc(int chanId){
   if ((chanId<0) || (chanId>mMaxA2dChannels-1)){
-    LOG_INFO << "TOF_Reader::GetTc chanId out of range " << chanId << endm;
+    cout << "TOF_Reader::GetTc chanId out of range " << chanId << endl;
     return 0;
   }
   return mTheTofArray.A2dData[chanId];
@@ -251,7 +246,7 @@ short TOF_Reader::GetTc(int chanId){
 
 unsigned short TOF_Reader::GetSc(int chanId){
   if ((chanId<0) || (chanId>mMaxScaChannels-1)){
-    LOG_INFO << "TOF_Reader::GetSc chanId out of range " << chanId << endm;
+    cout << "TOF_Reader::GetSc chanId out of range " << chanId << endl;
     return 0;
   }
   return mTheTofArray.ScaData[chanId];
@@ -263,23 +258,23 @@ unsigned int TOF_Reader::GetEventNumber(){
 }
 
 void TOF_Reader::printRawData(){
-  LOG_INFO << "StDaqLib/TOF/TOF_Reader  Printing Raw Data...";
-  LOG_INFO << "\n --- ADCD: ";
-  for (int i=0;i<mMaxAdcChannels;i++) LOG_INFO << " " << mTheTofArray.AdcData[i];
-  LOG_INFO << "\n --- TDCD: ";
-  for (int i=0;i<mMaxTdcChannels;i++) LOG_INFO << " " << mTheTofArray.TdcData[i];
-  LOG_INFO << "\n --- A2DD: ";
-  for (int i=0;i<mMaxA2dChannels;i++) LOG_INFO << " " << mTheTofArray.A2dData[i];
-  LOG_INFO << "\n --- SCAD: ";
-  for (int i=0;i<mMaxScaChannels;i++) LOG_INFO << " " << mTheTofArray.ScaData[i];
-  LOG_INFO << "\nStDaqLib/TOF/TOF_Reader  Done Printing Raw Data..." << endm;
+  cout << "StDaqLib/TOF/TOF_Reader  Printing Raw Data...";
+  cout << "\n --- ADCD: ";
+  for (int i=0;i<mMaxAdcChannels;i++) cout << " " << mTheTofArray.AdcData[i];
+  cout << "\n --- TDCD: ";
+  for (int i=0;i<mMaxTdcChannels;i++) cout << " " << mTheTofArray.TdcData[i];
+  cout << "\n --- A2DD: ";
+  for (int i=0;i<mMaxA2dChannels;i++) cout << " " << mTheTofArray.A2dData[i];
+  cout << "\n --- SCAD: ";
+  for (int i=0;i<mMaxScaChannels;i++) cout << " " << mTheTofArray.ScaData[i];
+  cout << "\nStDaqLib/TOF/TOF_Reader  Done Printing Raw Data..." << endl;
 }
 
 
 //Jing Liu, FY05--- tofr5-------------------
 unsigned int TOF_Reader::GetLdTdc(int daqId){
   if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
-    LOG_INFO << "TOF_Reader::GetTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
     return 0;
   }
   return mTheTofArray.LdTdcData[daqId];
@@ -287,7 +282,7 @@ unsigned int TOF_Reader::GetLdTdc(int daqId){
 
 unsigned int TOF_Reader::GetTrTdc(int daqId){
   if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
-    LOG_INFO << "TOF_Reader::GetTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
     return 0;
   }
   return mTheTofArray.TrTdcData[daqId];
@@ -295,7 +290,7 @@ unsigned int TOF_Reader::GetTrTdc(int daqId){
 
 unsigned int TOF_Reader::GetLdmTdc(int daqId,int n){
   if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
-    LOG_INFO << "TOF_Reader::GetTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
     return 0;
   }
   int chan=0;
@@ -308,7 +303,7 @@ unsigned int TOF_Reader::GetLdmTdc(int daqId,int n){
 
 unsigned int TOF_Reader::GetTrmTdc(int daqId,int n){
   if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
-    LOG_INFO << "TOF_Reader::GetTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
     return 0;
   }
   int chan=0;
@@ -321,7 +316,7 @@ unsigned int TOF_Reader::GetTrmTdc(int daqId,int n){
 
 unsigned short TOF_Reader::GetNLdHits(int daqId){
   if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
-    LOG_INFO << "TOF_Reader::GetTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
     return 0;
   }
   return mTheTofArray.LdNHit[daqId];
@@ -329,7 +324,7 @@ unsigned short TOF_Reader::GetNLdHits(int daqId){
 
 unsigned short TOF_Reader::GetNTrHits(int daqId){
   if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
-    LOG_INFO << "TOF_Reader::GetTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
     return 0;
   }
   return mTheTofArray.TrNHit[daqId];
@@ -337,7 +332,7 @@ unsigned short TOF_Reader::GetNTrHits(int daqId){
 
 unsigned int TOF_Reader::GetPvpdLdTdc(int pvpdId){
   if ((pvpdId<0) || (pvpdId>5)){
-    LOG_INFO << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endm;
+    cout << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endl;
     return 0;
   }
   return mTheTofArray.LdTdcData[192+pvpdId];
@@ -345,7 +340,7 @@ unsigned int TOF_Reader::GetPvpdLdTdc(int pvpdId){
 
 unsigned int TOF_Reader::GetPvpdTrTdc(int pvpdId){
   if ((pvpdId<0) || (pvpdId>5)){
-    LOG_INFO << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endm;
+    cout << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endl;
     return 0;
   }
   return mTheTofArray.TrTdcData[192+pvpdId];
@@ -353,7 +348,7 @@ unsigned int TOF_Reader::GetPvpdTrTdc(int pvpdId){
 
 unsigned int TOF_Reader::GetPvpdLdmTdc(int daqId,int n){
   if ((daqId<0) || (daqId>5)){
-    LOG_INFO << "TOF_Reader::GetPvpdTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetPvpdTdc daqId out of range " << daqId << endl;
     return 0;
   }
   int chan=0;
@@ -366,7 +361,7 @@ unsigned int TOF_Reader::GetPvpdLdmTdc(int daqId,int n){
 
 unsigned int TOF_Reader::GetPvpdTrmTdc(int daqId,int n){
   if ((daqId<0) || (daqId>5)){
-    LOG_INFO << "TOF_Reader::GetPvpdTdc daqId out of range " << daqId << endm;
+    cout << "TOF_Reader::GetPvpdTdc daqId out of range " << daqId << endl;
     return 0;
   }
   int chan=0;
@@ -440,18 +435,18 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
   //TofPTR->print();
   unsigned short Token = TofPTR->header.Token;
   if (Token==0){
-    LOG_INFO << "TOF_Reader: do not know how to handle token==0"<<endm;
+    cout << "TOF_Reader: do not know how to handle token==0"<<endl;
     //return;
   }
   mTheTofArray.EventNumber = Token;
-//  LOG_INFO << " Token = " << Token << endm;
+//  cout << " Token = " << Token << endl;
   mTheTofArray.ByteSwapped = 0x04030201;
 
   int tofRawDataVersion = TofPTR->header.FormatNumber;
-//  LOG_INFO << " Raw Data Versions = " << tofRawDataVersion << endm;
+//  cout << " Raw Data Versions = " << tofRawDataVersion << endl;
 
   if ((tofRawDataVersion <1) || (tofRawDataVersion >3)){
-    LOG_INFO << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endm;
+    cout << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endl;
     return 1;
   }
 
@@ -465,13 +460,13 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
     //TofAdcD->print();
     TofAdcD->swap();
     if (TofAdcD->header.Token!=Token){
-      LOG_INFO << "TOF_Reader: Token mismatch TOFP "<< Token 
-	   << " ADCD " << TofAdcD->header.Token << endm;
+      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
+	   << " ADCD " << TofAdcD->header.Token << endl;
       mTheTofArray.EventNumber=0;
     }
     numberOfDataWords=TofAdcD->header.BankLength - (INT32)sizeof(TofAdcD->header)/4;
     if (numberOfDataWords!=mMaxAdcChannels){
-      LOG_INFO << "TOF_Reader: ADCD #channels mismatch " << numberOfDataWords  << endm;
+      cout << "TOF_Reader: ADCD #channels mismatch " << numberOfDataWords  << endl;
       if (numberOfDataWords>mMaxAdcChannels) numberOfDataWords=mMaxAdcChannels;
     }
     // decode and fill data structure
@@ -493,13 +488,13 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
     //TofTdcD->print();
     TofTdcD->swap();
     if (TofTdcD->header.Token!=Token){
-      LOG_INFO << "TOF_Reader: Token mismatch TOFP "<< Token 
-	   << " TDCD " << TofTdcD->header.Token << endm;
+      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
+	   << " TDCD " << TofTdcD->header.Token << endl;
       mTheTofArray.EventNumber=0;
     }
     numberOfDataWords=TofTdcD->header.BankLength - (INT32)sizeof(TofTdcD->header)/4;
     if (numberOfDataWords!=mMaxTdcChannels){
-      LOG_INFO << "TOF_Reader: TDCD #channels mismatch " << numberOfDataWords  << endm;
+      cout << "TOF_Reader: TDCD #channels mismatch " << numberOfDataWords  << endl;
       if (numberOfDataWords>mMaxTdcChannels) numberOfDataWords=mMaxTdcChannels;
     }
     // decode and fill data structure
@@ -521,13 +516,13 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
     //TofA2dD->print();
     TofA2dD->swap();
     if (TofA2dD->header.Token!=Token){
-      LOG_INFO << "TOF_Reader: Token mismatch TOFP "<< Token 
-	   << " A2DD " << TofA2dD->header.Token << endm;
+      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
+	   << " A2DD " << TofA2dD->header.Token << endl;
       mTheTofArray.EventNumber=0;
     }
     numberOfDataWords=TofA2dD->header.BankLength - (INT32)sizeof(TofA2dD->header)/4;
     if (numberOfDataWords!=mMaxA2dChannels){
-      LOG_INFO << "TOF_Reader: A2DD #channels mismatch " << numberOfDataWords  << endm;
+      cout << "TOF_Reader: A2DD #channels mismatch " << numberOfDataWords  << endl;
       if (numberOfDataWords>mMaxA2dChannels) numberOfDataWords=mMaxA2dChannels;
     }
     // decode and fill data structure
@@ -549,13 +544,13 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
     //TofScaD->print();
     TofScaD->swap();
     if (TofScaD->header.Token!=Token){
-      LOG_INFO << "TOF_Reader: Token mismatch TOFP "<< Token 
-	   << " SCAD " << TofScaD->header.Token << endm;
+      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
+	   << " SCAD " << TofScaD->header.Token << endl;
       mTheTofArray.EventNumber=0;
     }
     numberOfDataWords=TofScaD->header.BankLength - (INT32)sizeof(TofScaD->header)/4;
     if (numberOfDataWords!=mMaxScaChannels){
-      LOG_INFO << "TOF_Reader: SCAD #channels mismatch " << numberOfDataWords  << endm;
+      cout << "TOF_Reader: SCAD #channels mismatch " << numberOfDataWords  << endl;
       if (numberOfDataWords>mMaxScaChannels) numberOfDataWords=mMaxScaChannels;
     }
     // decode and fill data structure
@@ -572,25 +567,25 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
 
 int TOF_Reader::UnpackYear5Data(const Bank_TOFP * TofPTR) {
 
-  //LOG_INFO<<"TOF READER 2005! "<<endm;
-  //LOG_INFO<<"run no "<<ercpy->runno()<<endm;
+  //cout<<"TOF READER 2005! "<<endl;
+  //cout<<"run no "<<ercpy->runno()<<endl;
   //TofPTR->print();
 
   unsigned short Token = TofPTR->header.Token;
   if (Token==0){
-    LOG_INFO << "TOF_Reader: do not know how to handle token==0"<<endm;
+    cout << "TOF_Reader: do not know how to handle token==0"<<endl;
     //return;
   }
   mTheTofArray.EventNumber = Token;
-  //  LOG_INFO << " Token = " << Token << endm;
+  //  cout << " Token = " << Token << endl;
   mTheTofArray.ByteSwapped = 0x04030201;
 
   int tofRawDataVersion = TofPTR->header.FormatNumber;
-//  LOG_INFO << " Raw Data Versions = " << tofRawDataVersion << endm;
+//  cout << " Raw Data Versions = " << tofRawDataVersion << endl;
 
   // run 5 - dongx
   if ((tofRawDataVersion <0) || (tofRawDataVersion >3)){
-    LOG_INFO << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endm;
+    cout << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endl;
     //Jing Liu, the value of rawdataversion is 0 now, should change according somewhere.... 
    //return;
   }
@@ -603,10 +598,10 @@ int TOF_Reader::UnpackYear5Data(const Bank_TOFP * TofPTR) {
 
   for(int ifib=0;ifib<4;ifib++) {   // raw data are read out from 4 fibers.
     if(ifib>2) continue;          // for year5 run, only 3 fibers used.
-    //LOG_INFO << " offset = " << TofPTR->DDLRPTR[ifib].offset << endm;
-    //LOG_INFO << " length = " << dec << TofPTR->DDLRPTR[ifib].length-10 << endm;
+    //cout << " offset = " << TofPTR->DDLRPTR[ifib].offset << endl;
+    //cout << " length = " << dec << TofPTR->DDLRPTR[ifib].length-10 << endl;
     if (TofPTR->DDLRPTR[ifib].length<=0) {
-      LOG_INFO<<"No data words in this fiber! "<<endm;
+      cout<<"No data words in this fiber! "<<endl;
       continue;
     }
     TOFDDLR *TofDdlr = (TOFDDLR *)((unsigned long *)TofPTR + TofPTR->DDLRPTR[ifib].offset);
@@ -622,7 +617,7 @@ int TOF_Reader::UnpackYear5Data(const Bank_TOFP * TofPTR) {
     if(runnumber>=6055081) for(int i=0;i<6;i++){fiboffset[i]=fiboffset2[i];}
  
     for (int iword=0;iword<nword;iword++) {
-       //LOG_INFO << hex << TofDdlr->data[iword] << endm;
+       //cout << hex << TofDdlr->data[iword] << endl;
        int dataword=TofDdlr->data[iword];
        // now process data word seperately, get TDC information from data words.
        if( (dataword&0xF0000000)>>28 == 0xe) continue;   // separator words, skip it.            
@@ -633,7 +628,7 @@ int TOF_Reader::UnpackYear5Data(const Bank_TOFP * TofPTR) {
        if((edgeid !=LEADING) && (edgeid!=TRAILING)) continue;   // if not leading edge or trailing data, skip it.
        int tdcid = (dataword & 0x0f000000)>>24;   // tdcid here is 0-15 
        int tdcchan=0;
-       //LOG_INFO<<"ifib="<<ifib<<" dataword=0x"<<hex<<dataword<<endm;
+       //cout<<"ifib="<<ifib<<" dataword=0x"<<hex<<dataword<<endl;
        if(edgeid == LEADING) {     // leading edge data
          TofRawHit templdhit;
          templdhit.fiberid=ifib;
@@ -662,19 +657,19 @@ int TOF_Reader::UnpackYear5Data(const Bank_TOFP * TofPTR) {
          } 
          mTheTofArray.TofTrailingHits.push_back(temptrhit);
        }  else {
-         LOG_INFO<<" UNKNOWN TDC data ! "<<endm;
+         cout<<" UNKNOWN TDC data ! "<<endl;
          return 1;
        }
-       //LOG_INFO<<"ifib="<<ifib<<" dataword="<<hex<<dataword<<" tdcid="<<tdcid<<" tdcchan="<<tdcchan<<" time="<<dec<<timeinbin<<endm;
+       //cout<<"ifib="<<ifib<<" dataword="<<hex<<dataword<<" tdcid="<<tdcid<<" tdcchan="<<tdcchan<<" time="<<dec<<timeinbin<<endl;
     }   // end loop data words
   }     // end loop fibers
   // dump out info. for check
 /*
   for(unsigned int i=0;i<mTheTofArray.TofLeadingHits.size();i++){
-    LOG_INFO<<"leading: fiber="<<mTheTofArray.TofLeadingHits[i].fiberid<<" channel="<<mTheTofArray.TofLeadingHits[i].globaltdcchan<<" time="<<mTheTofArray.TofLeadingHits[i].tdc<<endm;
+    cout<<"leading: fiber="<<mTheTofArray.TofLeadingHits[i].fiberid<<" channel="<<mTheTofArray.TofLeadingHits[i].globaltdcchan<<" time="<<mTheTofArray.TofLeadingHits[i].tdc<<endl;
   }
   for(unsigned int i=0;i<mTheTofArray.TofTrailingHits.size();i++){
-    LOG_INFO<<"trailing: fiber="<<mTheTofArray.TofTrailingHits[i].fiberid<<" channel="<<mTheTofArray.TofTrailingHits[i].globaltdcchan<<" time="<<mTheTofArray.TofTrailingHits[i].tdc<<endm;
+    cout<<"trailing: fiber="<<mTheTofArray.TofTrailingHits[i].fiberid<<" channel="<<mTheTofArray.TofTrailingHits[i].globaltdcchan<<" time="<<mTheTofArray.TofTrailingHits[i].tdc<<endl;
   }
 */
   // count multi hit for each channels
@@ -708,8 +703,8 @@ int TOF_Reader::UnpackYear5Data(const Bank_TOFP * TofPTR) {
   }
   /*
   for(int i=0;i<TOF_MAX_TDC_CHANNELS;i++){
-    if(mTheTofArray.LdTdcData[i]>0)LOG_INFO<<" ld chan ="<<i<<" time="<<mTheTofArray.LdTdcData[i]<<endm;
-    if(mTheTofArray.TrTdcData[i]>0)LOG_INFO<<" tr chan ="<<i<<" time="<<mTheTofArray.TrTdcData[i]<<endm;
+    if(mTheTofArray.LdTdcData[i]>0)cout<<" ld chan ="<<i<<" time="<<mTheTofArray.LdTdcData[i]<<endl;
+    if(mTheTofArray.TrTdcData[i]>0)cout<<" tr chan ="<<i<<" time="<<mTheTofArray.TrTdcData[i]<<endl;
   }
   */
   return -1;
