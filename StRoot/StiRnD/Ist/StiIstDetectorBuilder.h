@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.h,v 1.3 2006/10/20 18:43:12 wleight Exp $
+// $Id: StiIstDetectorBuilder.h,v 1.4 2006/12/14 22:01:48 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.h,v $
+// Revision 1.4  2006/12/14 22:01:48  wleight
+// Changed hit errors so that they are obtained from the database and are different for each layer
+//
 // Revision 1.3  2006/10/20 18:43:12  wleight
 // Changes to make perfect hits in the IST work with UPGR05
 //
@@ -39,7 +42,7 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 	virtual ~StiIstDetectorBuilder(); 
 	virtual void buildDetectors(StMaker& source);
 	virtual void AverageVolume(TGeoPhysicalNode *nodeP);
-	//virtual void loadDS(TDataSet&);
+	virtual void loadDS(TDataSet&);
 	//virtual void setDefaults();
 	virtual void useVMCGeometry();		
 	void    setSiMat(StiMaterial     *m) {_siMat = m;}
@@ -57,6 +60,7 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 	//StSsdConfig   * _config;
 	//StSsdGeometry * _geometry;
 	//StSsdGeometry * _dimensions;
-	StiDefaultHitErrorCalculator _hitCalculator;
+	StiDefaultHitErrorCalculator _hitCalculator1;
+	StiDefaultHitErrorCalculator _hitCalculator2;
 };
 #endif 

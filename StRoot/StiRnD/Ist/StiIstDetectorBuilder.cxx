@@ -1,6 +1,12 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.11 2006/10/20 18:43:12 wleight Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.13 2006/12/14 22:01:47 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.13  2006/12/14 22:01:47  wleight
+// Changed hit errors so that they are obtained from the database and are different for each layer
+//
+// Revision 1.12  2006/11/28 22:18:01  wleight
+// Changed hit errors to 60 microns for x and 1.9 mm for y
+//
 // Revision 1.11  2006/10/20 18:43:12  wleight
 // Changes to make perfect hits in the IST work with UPGR05
 //
@@ -41,9 +47,10 @@ using namespace std;
 #include "Sti/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "StiPixel/StiIstIsActiveFunctor.h" 
-#include "StiPixel/StiIstDetectorBuilder.h" 
+#include "StiRnD/Ist/StiIstIsActiveFunctor.h" 
+#include "StiRnD/Ist/StiIstDetectorBuilder.h" 
 #include "Sti/StiElossCalculator.h"
+#include "StiRnD/Ist/StiIstDetectorBuilder.h"
 //#include "StSsdUtil/StSsdConfig.hh"
 //#include "StSsdUtil/StSsdGeometry.hh"
 //#include "StSsdUtil/StSsdWaferGeometry.hh"
@@ -54,13 +61,19 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFi
     : StiDetectorBuilder("Ist",active,inputFile), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
-    _trackingParameters.setName("ssdTrackingParameters");
-    _hitCalculator.setName("ssdHitError");
-    _hitCalculator.set(1.0, 0., 0.,1.0, 0., 0.);
+    _trackingParameters.setName("istTrackingParameters");
+    _hitCalculator1.setName("ist1HitError");
+    _hitCalculator2.setName("ist2HitError");
 }
 
 StiIstDetectorBuilder::~StiIstDetectorBuilder()
 {} 
+
+void StiIstDetectorBuilder::loadDS(TDataSet& ds){
+  cout<<"StiIstDetectorBuilder::loadDS(TDataSet& ds) -I- started: "<<endl;
+  _hitCalculator1.loadDS(ds);
+  _hitCalculator2.loadDS(ds);
+}
 
 
 void StiIstDetectorBuilder::buildDetectors(StMaker & source)
@@ -68,7 +81,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker & source)
     char name[50];  
     int nRows = 1 ;
     gMessMgr->Info() << "StiIstDetectorBuilder::buildDetectors() - I - Started "<<endm;
-    //load(_inputFile, source);
+    load(_inputFile, source);
     
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
@@ -261,7 +274,8 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
-  pDetector->setHitErrorCalculator(&_hitCalculator);
+  if(layer==1) pDetector->setHitErrorCalculator(&_hitCalculator1);
+  else pDetector->setHitErrorCalculator(&_hitCalculator2);
   //  add(2*(layer-1)+side-1,wafer-1,pDetector);
   add(2*(layer-1)+side-1,ladder,pDetector);  
   //add(2*ladder-3+side,0,pDetector);

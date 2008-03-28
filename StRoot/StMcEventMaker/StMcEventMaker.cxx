@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.62 2006/09/25 14:21:46 fisyak Exp $
+ * $Id: StMcEventMaker.cxx,v 1.63 2006/11/22 21:18:24 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.63  2006/11/22 21:18:24  fisyak
+ * Add check that coming from g2t tables : iTrkId >= 0 && iTrkId < NTracks
+ *
  * Revision 1.62  2006/09/25 14:21:46  fisyak
  * Add Hpd Hits
  *
@@ -279,10 +282,27 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.62 2006/09/25 14:21:46 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.63 2006/11/22 21:18:24 fisyak Exp $";
 ClassImp(StMcEventMaker)
-
-
+#define AddHit2Track(G2Type,DET) \
+  Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
+  if (iTrkId >= 0 && iTrkId < NTracks ) {			\
+    th->setParentTrack(ttemp[iTrkId]);				\
+    ttemp[iTrkId]->add ## DET ## Hit(th);			\
+  }
+#define AddHits(G2Type,det,DET)					\
+  if (doUse ## DET) {							\
+    if (g2t_ ## G2Type ## _hitTablePointer) {				\
+      StMc ## DET ## Hit* th = 0;					\
+      Int_t  NHits = g2t_ ## G2Type ## _hitTablePointer->GetNRows();	\
+      for(Int_t ihit=0; ihit<NHits; ihit++) {				\
+	th = new StMc ## DET ## Hit(& G2Type ## HitTable[ihit]);	\
+	mCurrentMcEvent-> det ## HitCollection()->addHit(th);		\
+	AddHit2Track(G2Type,DET);					\
+      }									\
+      if (Debug())  cout << "Filled " << mCurrentMcEvent-> det ## HitCollection()->numberOfHits() << #DET << " Hits" << endl; \
+    } else if (Debug()) cout << "No " << #DET << "/" << #det << " Hits in this event" << endl; \
+  }
 //_____________________________________________________________________________
 
     
@@ -970,7 +990,6 @@ Int_t StMcEventMaker::Make()
 	    if (g2t_tpc_hitTablePointer) {
 		StMcTpcHit* th = 0;
 		long NHits = g2t_tpc_hitTablePointer->GetNRows();
-		long iTrkId = 0;
 		long nBadVolId = 0;
 		long nPseudoPadrow = 0;
 		long ihit;
@@ -992,12 +1011,7 @@ Int_t StMcEventMaker::Make()
 		    }
 		    // point hit to its parent and add it to collection
 		    // of the appropriate track
-		    
-		    iTrkId = (tpcHitTable[ihit].track_p) - 1;
-		    
-		    th->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addTpcHit(th);
-	    
+		    AddHit2Track(tpc,Tpc);
 		} // hit loop
 		if (Debug()) {
 		    cout << "Filled " << mCurrentMcEvent->tpcHitCollection()->numberOfHits() << " TPC Hits" << endl;
@@ -1040,9 +1054,8 @@ Int_t StMcEventMaker::Make()
 	//
 	if (doUseSvt) {
 	if (g2t_svt_hitTablePointer) {
-	    StMcSvtHit* sh = 0;
+	    StMcSvtHit* th = 0;
 	    long NHits = g2t_svt_hitTablePointer->GetNRows();
-	    long iTrkId = 0;
 	    long nBadVolId = 0;
 	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
@@ -1050,21 +1063,17 @@ Int_t StMcEventMaker::Make()
 		    nBadVolId++;
 		    continue;
 		}
-		sh = new StMcSvtHit(&svtHitTable[ihit]);
-		if (!mCurrentMcEvent->svtHitCollection()->addHit(sh)) {// adds hit sh to collection
+		th = new StMcSvtHit(&svtHitTable[ihit]);
+		if (!mCurrentMcEvent->svtHitCollection()->addHit(th)) {// adds hit th to collection
 		    nBadVolId++;
-		    delete sh; // If the hit couldn't be assigned, delete it.
-		    sh = 0;
+		    delete th; // If the hit couldn't be assigned, delete it.
+		    th = 0;
 		    continue;
 		}
-		
+
 		// point hit to its parent and add it to collection
 		// of the appropriate track
-		
-		iTrkId = (svtHitTable[ihit].track_p) - 1;
-		sh->setParentTrack(ttemp[iTrkId]);
-		ttemp[iTrkId]->addSvtHit(sh);
-		
+		AddHit2Track(svt,Svt);
 	    }
 	    if (Debug()) {
 		cout << "Filled " << mCurrentMcEvent->svtHitCollection()->numberOfHits() << " SVT Hits" << endl;
@@ -1098,9 +1107,8 @@ Int_t StMcEventMaker::Make()
 	//
 	if (doUseSsd) {
 	  if (g2t_ssd_hitTablePointer) {
-	    StMcSsdHit* sh = 0;
+	    StMcSsdHit* th = 0;
 	    long NHits = g2t_ssd_hitTablePointer->GetNRows();
-	    long iTrkId = 0;
 	    long nBadVolId = 0;
 	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
@@ -1108,21 +1116,17 @@ Int_t StMcEventMaker::Make()
 		    nBadVolId++;
 		    continue;
 		}
-		sh = new StMcSsdHit(&ssdHitTable[ihit]);
-		if (!mCurrentMcEvent->ssdHitCollection()->addHit(sh)) {// adds hit sh to collection
+		th = new StMcSsdHit(&ssdHitTable[ihit]);
+		if (!mCurrentMcEvent->ssdHitCollection()->addHit(th)) {// adds hit th to collection
 		    nBadVolId++;
-		    delete sh; // If the hit couldn't be assigned, delete it.
-		    sh = 0;
+		    delete th; // If the hit couldn't be assigned, delete it.
+		    th = 0;
 		    continue;
 		}
 		
 		// point hit to its parent and add it to collection
 		// of the appropriate track
-		
-		iTrkId = (ssdHitTable[ihit].track_p) - 1;
-		sh->setParentTrack(ttemp[iTrkId]);
-		ttemp[iTrkId]->addSsdHit(sh);
-		
+		AddHit2Track(ssd,Ssd);
 	    }
 	    if (Debug()) {
 		cout << "Filled " << mCurrentMcEvent->ssdHitCollection()->numberOfHits() << " SSD Hits" << endl;
@@ -1144,9 +1148,8 @@ Int_t StMcEventMaker::Make()
 	//
 	if (doUseFtpc) {
 	if (g2t_ftp_hitTablePointer) {
-	    StMcFtpcHit* fh = 0;
+	    StMcFtpcHit* th = 0;
 	    long  NHits = g2t_ftp_hitTablePointer->GetNRows();
-	    long  iTrkId = 0;
 	    long  nBadVolId = 0;
 	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
@@ -1159,21 +1162,17 @@ Int_t StMcEventMaker::Make()
 		    continue;
 		}
 
-		fh = new StMcFtpcHit(&ftpHitTable[ihit]);
+		th = new StMcFtpcHit(&ftpHitTable[ihit]);
 
-		if (!mCurrentMcEvent->ftpcHitCollection()->addHit(fh)){ // adds hit fh to collection
+		if (!mCurrentMcEvent->ftpcHitCollection()->addHit(th)){ // adds hit th to collection
 		    nBadVolId++;
-		    delete fh;
-		    fh = 0;
+		    delete th;
+		    th = 0;
 		    continue;
 		}
 		// point hit to its parent and add it to collection
 		// of the appropriate track
-		
-		iTrkId = (ftpHitTable[ihit].track_p) - 1;
-		fh->setParentTrack(ttemp[iTrkId]);
-		ttemp[iTrkId]->addFtpcHit(fh);
-		
+		AddHit2Track(ftp,Ftpc);
 	    }
 	    if (Debug()) {
 		cout << "Filled " << mCurrentMcEvent->ftpcHitCollection()->numberOfHits() << " FTPC Hits" << endl;
@@ -1193,325 +1192,16 @@ Int_t StMcEventMaker::Make()
 	    if (Debug()) cout << "No FTPC Hits in this event" << endl;
 	}
 	}// do use ftpc
-
-	//
-	// RICH Hits
-	//
-	if (doUseRich) {
-	if (g2t_rch_hitTablePointer) {
-	    StMcRichHit* rh = 0;
-	    long  NHits = g2t_rch_hitTablePointer->GetNRows();
-	    long  iTrkId = 0;
-	    long ihit;
-	    for(ihit=0; ihit<NHits; ihit++) {
-	
-		rh = new StMcRichHit(&rchHitTable[ihit]);
-		mCurrentMcEvent->richHitCollection()->addHit(rh); // adds hit rh to collection
-		
-		// point hit to its parent and add it to collection
-		// of the appropriate track
-		
-		iTrkId = (rchHitTable[ihit].track_p) - 1;
-		rh->setParentTrack(ttemp[iTrkId]);
-		ttemp[iTrkId]->addRichHit(rh);
-		
-	    }
-	    if (Debug()) {
-		cout << "Filled " << mCurrentMcEvent->richHitCollection()->numberOfHits() << " RICH Hits" << endl;
-	    }
-	}
-	else {
-	    if (Debug()) cout << "No RICH Hits in this event" << endl;
-	}
-	} // do use rich
-
-	if (doUseCtb) {
-	if (g2t_ctb_hitTablePointer) {
-	    StMcCtbHit* ch = 0;
-	    long  NHits = g2t_ctb_hitTablePointer->GetNRows();
-	    long  iTrkId = 0;
-	    long ihit;
-	    for(ihit=0; ihit<NHits; ihit++) {
-		
-		ch = new StMcCtbHit(&ctbHitTable[ihit]);
-		mCurrentMcEvent->ctbHitCollection()->addHit(ch); // adds hit ch to collection
-		
-		// point hit to its parent and add it to collection
-		// of the appropriate track
-		
-		iTrkId = (ctbHitTable[ihit].track_p) - 1;
-		ch->setParentTrack(ttemp[iTrkId]);
-		ttemp[iTrkId]->addCtbHit(ch);
-		
-	    }
-	    if (Debug()) {
-		cout << "Filled " << mCurrentMcEvent->ctbHitCollection()->numberOfHits() << " Ctb Hits" << endl;
-	    }
-	}
-	else {
-	    if (Debug()) cout << "No Ctb Hits in this event" << endl;
-	}
-	}
-	// TOFp hits
-	long nTofpHits(0);
-	if (doUseTofp) {
-	    if (g2t_tof_hitTablePointer) {
-		StMcTofHit* ch = 0;
-		long  NHits = g2t_tof_hitTablePointer->GetNRows();
-		long  iTrkId = 0;
-		long ihit;
-		
-		for(ihit=0; ihit<NHits; ihit++) {
-		    ch = new StMcTofHit(&tofHitTable[ihit]);
-		    mCurrentMcEvent->tofHitCollection()->addHit(ch);
-		    
-		    // point hit to its parent and add it to collection
-		    // of the appropriate track
-		    
-		    iTrkId = (tofHitTable[ihit].track_p) - 1;
-		    ch->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addTofHit(ch);
-		}
-		
-		nTofpHits =  mCurrentMcEvent->tofHitCollection()->numberOfHits();
-		if (Debug()) {
-		    cout << "Filled " <<nTofpHits << " TOFp Hits" << endl;
-		}
-	    }
-	    else {
-		if (Debug()) cout << "No TOFp Hits in this event" << endl;
-	    }
-        }
-	
-	// TOFr hits
-        if (doUseTof) {
-	    if (g2t_tfr_hitTablePointer) {
-		StMcTofHit* ch = 0;
-		long  NHits = g2t_tfr_hitTablePointer->GetNRows();
-		long  iTrkId = 0;
-		long ihit;
-		
-		for(ihit=0; ihit<NHits; ihit++) {
-		    ch = new StMcTofHit(&tfrHitTable[ihit]);
-		    mCurrentMcEvent->tofHitCollection()->addHit(ch);
-		    
-		    // point hit to its parent and add it to collection
-		    // of the appropriate track
-		    
-		    iTrkId = (tfrHitTable[ihit].track_p) - 1;
-		    ch->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addTofHit(ch);
-		}
-		if (Debug()) {
-		    cout << "Filled " << mCurrentMcEvent->tofHitCollection()->numberOfHits() - nTofpHits
-			 << " TOFr Hits" << endl;
-		}
-	    }
-	    else {
-		if (Debug()) cout << "No TOFr Hits in this event" << endl;
-	    }
-        }
-	
-	//
-	// Pixel Hits
-	//
-	if (doUsePixel) {
-	    if (g2t_pix_hitTablePointer) {    
-		StMcPixelHit* fh = 0;
-		long  NHits = g2t_pix_hitTablePointer->GetNRows();
-		long  iTrkId = 0;
-		long ihit;
-		for(ihit=0; ihit<NHits; ihit++) {
-		    //cout << ihit << " " << &pixHitTable[ihit] << endl;
-		    fh = new StMcPixelHit(&pixHitTable[ihit]);
-		    //cout << *fh << endl;
-		    if (!mCurrentMcEvent->pixelHitCollection()->addHit(fh)){ 
-			delete fh;
-			fh = 0;
-			continue;
-		    }
-		    // point hit to its parent and add it to collection
-		    // of the appropriate track
-		    iTrkId = (pixHitTable[ihit].track_p) - 1;
-		    fh->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addPixelHit(fh);
-		}
-		if (Debug()) {
-		cout << "Filled " << mCurrentMcEvent->pixelHitCollection()->numberOfHits() << " Pixel Hits" << endl;
-		}
-	    }
-	    else {
-		if (Debug()) cout << "No Pixel Hits in this event" << endl;
-	    }
-	}// do use pixel
-	
-	//
-	// Ist Hits
-	//
-	if (doUseIst) {
-	    if (g2t_ist_hitTablePointer) {    
-		StMcIstHit* fh = 0;
-		long  NHits = g2t_ist_hitTablePointer->GetNRows();
-		long  iTrkId = 0;
-		long ihit;
-		for(ihit=0; ihit<NHits; ihit++) {
-		    //cout << ihit << " " << &istHitTable[ihit] << endl;
-		    fh = new StMcIstHit(&istHitTable[ihit]);
-		    //cout << *fh << endl;
-		    if (!mCurrentMcEvent->istHitCollection()->addHit(fh)){ 
-			delete fh;
-			fh = 0;
-			continue;
-		    }
-		    // point hit to its parent and add it to collection
-		    // of the appropriate track
-		    iTrkId = (istHitTable[ihit].track_p) - 1;
-		    fh->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addIstHit(fh);
-		}
-		if (Debug()) {
-		    cout << "Filled " << mCurrentMcEvent->istHitCollection()->numberOfHits() << " Ist Hits" << endl;
-		}
-	    }
-	    else {
-		if (Debug()) cout << "No Ist Hits in this event" << endl;
-	    }
-	}// do use ist
-	//
-	// HPD Hits
-	//
-	if (doUseHpd) {
-	    if (g2t_hpd_hitTablePointer) {    
-		StMcHpdHit* fh = 0;
-		long  NHits = g2t_hpd_hitTablePointer->GetNRows();
-		cout << "Found " << NHits << " hpd hits in McEventMaker "<< endl;
-		long  iTrkId = 0;
-		long ihit;
-		for(ihit=0; ihit<NHits; ihit++) {
-		    fh = new StMcHpdHit(&hpdHitTable[ihit]);
-		    //cout << *fh << endl;
-		    if (!mCurrentMcEvent->hpdHitCollection()->addHit(fh)){ 
-		      delete fh;
-			fh = 0;
-			continue;
-		    }
-		    // point hit to its parent and add it to collection
-		    // of the appropriate track
-		    iTrkId = (hpdHitTable[ihit].track_p) - 1;
-		    fh->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addHpdHit(fh);
-		}
-		if (Debug()) {
-		    cout << "Filled " << mCurrentMcEvent->hpdHitCollection()->numberOfHits() << " Hpd Hits" << endl;
-		}
-	    }
-	    else {
-		if (Debug()) cout << "No Hpd Hits in this event" << endl;
-	    }
-	}// do use hpd
-
-	//
-	// Igt Hits
-	//
-	if (doUseIgt) {
-	    if (g2t_igt_hitTablePointer) {    
-		StMcIgtHit* fh = 0;
-		long  NHits = g2t_igt_hitTablePointer->GetNRows();
-		long  iTrkId = 0;
-		long ihit;
-		for(ihit=0; ihit<NHits; ihit++) {
-		    fh = new StMcIgtHit(&igtHitTable[ihit]);
-		    if (!mCurrentMcEvent->igtHitCollection()->addHit(fh)){ 
-			delete fh;
-			fh = 0;
-			continue;
-		    }
-		    // point hit to its parent and add it to collection
-		    // of the appropriate track
-		    iTrkId = (igtHitTable[ihit].track_p) - 1;
-		    fh->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addIgtHit(fh);
-		}
-		if (Debug()) {
-		    cout << "Filled " << mCurrentMcEvent->igtHitCollection()->numberOfHits() << " Igt Hits" << endl;
-		}
-	    }
-	    else {
-		if (Debug()) cout << "No Igt Hits in this event" << endl;
-	    }
-	}// do use igt
-
-	//
-	// Fst Hits
-	//
-	if (doUseFst) {
-	    if (g2t_fst_hitTablePointer) {    
-		StMcFstHit* fh = 0;
-		long  NHits = g2t_fst_hitTablePointer->GetNRows();
-		long  iTrkId = 0;
-		long ihit;
-		cout << "Number of FST hits in table " << NHits << endl;
-		for(ihit=0; ihit<NHits; ihit++) {
-		    //cout << ihit << " " << &fstHitTable[ihit] << endl;
-		    fh = new StMcFstHit(&fstHitTable[ihit]);
-		    //cout << *fh << endl;
-		    if (!mCurrentMcEvent->fstHitCollection()->addHit(fh)){ 
-			delete fh;
-			fh = 0;
-			continue;
-		    }
-		    // point hit to its parent and add it to collection
-		    // of the appropriate track
-		    iTrkId = (fstHitTable[ihit].track_p) - 1;
-		    fh->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addFstHit(fh);
-		}
-		if (Debug()) {
-		    cout << "Filled " << mCurrentMcEvent->fstHitCollection()->numberOfHits() << " Fst Hits" << endl;
-		}
-	    }
-	    else {
-		if (Debug()) cout << "No Fst Hits in this event" << endl;
-	    }
-	}// do use fst
-
-	
-
-	//
-	// Fgt Hits
-	//
-	if (doUseFgt) {
-	    if (g2t_fgt_hitTablePointer) {    
-		StMcFgtHit* fh = 0;
-		long  NHits = g2t_fgt_hitTablePointer->GetNRows();
-		long  iTrkId = 0;
-		long ihit;
-		cout << "Number of FGT hits in table " << NHits << endl;
-		for(ihit=0; ihit<NHits; ihit++) {
-		    //cout << ihit << " " << &fgtHitTable[ihit] << endl;
-		    fh = new StMcFgtHit(&fgtHitTable[ihit]);
-		    //cout << *fh << endl;
-		    if (!mCurrentMcEvent->fgtHitCollection()->addHit(fh)){ 
-			delete fh;
-			fh = 0;
-			continue;
-		    }
-		    // point hit to its parent and add it to collection
-		    // of the appropriate track
-		    iTrkId = (fgtHitTable[ihit].track_p) - 1;
-		    fh->setParentTrack(ttemp[iTrkId]);
-		    ttemp[iTrkId]->addFgtHit(fh);
-		}
-		if (Debug()) {
-		    cout << "Filled " << mCurrentMcEvent->fgtHitCollection()->numberOfHits() << " Fgt Hits" << endl;
-		}
-	    }
-	    else {
-		if (Debug()) cout << "No Fgt Hits in this event" << endl;
-	    }
-	}// do use fgt
-
-
+	AddHits(rch,rich,Rich);
+	AddHits(ctb,ctb,Ctb);
+	AddHits(tof,tof,Tof);
+	AddHits(tfr,tof,Tof);
+	AddHits(pix,pixel,Pixel);
+	AddHits(ist,ist,Ist);
+	AddHits(hpd,hpd,Hpd);
+	AddHits(igt,igt,Igt);
+	AddHits(fst,fst,Fst);
+	AddHits(fgt,fgt,Fgt);
 
 	// BEMC and BPRS Hits
 	if (doUseBemc) fillBemc(g2t_emc_hitTablePointer);

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.181 2006/11/03 16:24:56 jeromel Exp $
+// $Id: StMaker.cxx,v 1.184 2006/12/14 23:44:09 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -163,12 +163,16 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"dev2005",     20190101,     0, "dev2005",  "non-production"},
   {"complete",    20190101,     1, "complete", "non-production"},
   {"ist1",        20190101,     2, "ist1",     "non-production"},
-  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
+  //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
   {"upgr03",      20190101,     6, "upgr03",   ""},
   {"upgr04",      20190101,     7, "upgr04",   ""},
   {"upgr05",      20190101,     8, "upgr05",   ""},
+  {"upgr06",      20190101,     9, "upgr06",   ""},  // what happened to 6? Historical not re-used
+  {"upgr07",      20190101,    10, "upgr07",   ""},
+  {"upgr08",      20190101,    11, "upgr08",   ""},
+  {"upgr09",      20190101,    12, "upgr09",   ""},
   {0,                    0,     0,        0,    0}
 };
 
@@ -1726,6 +1730,15 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.184  2006/12/14 23:44:09  fisyak
+// Add upgr06 and upgr09
+//
+// Revision 1.183  2006/12/01 17:50:14  jeromel
+// upgr08 added
+//
+// Revision 1.182  2006/11/21 16:34:38  fisyak
+// remove geometry pix1 and add upgr07
+//
 // Revision 1.181  2006/11/03 16:24:56  jeromel
 // Oops. hard-coded should be greater than advertized.
 //

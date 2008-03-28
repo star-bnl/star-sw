@@ -9,7 +9,7 @@ public:
     StiHpdDetectorBuilder(bool active, const string & inputFile);
     virtual ~StiHpdDetectorBuilder(); 	
     virtual void buildDetectors(StMaker&source);
-
+    virtual void loadDS(TDataSet&);
 protected:
     StiMaterial * _gas;
     StiMaterial * _fcMaterial;
