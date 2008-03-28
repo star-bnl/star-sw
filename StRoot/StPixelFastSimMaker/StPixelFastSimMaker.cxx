@@ -1,11 +1,17 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.4 2006/10/13 20:15:45 fisyak Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.7 2006/11/29 21:42:07 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.7  2006/11/29 21:42:07  andrewar
+ * Update with Pixel resolution smearing.
+ *
+ * Revision 1.6  2006/11/28 22:37:42  wleight
+ * Fixed minor smearing bug
+ *
  * Revision 1.4  2006/10/13 20:15:45  fisyak
  * Add Hpd fast simulation (Sevil)
  *
@@ -34,6 +40,25 @@
 #include "StMcHpdHit.hh"
 #include "StMcPixelHit.hh"
 #include "StMcEventTypes.hh"
+#include "Sti/Base/Factory.h"
+#include "Sti/StiPlanarShape.h"
+#include "Sti/StiCylindricalShape.h"
+#include "Sti/StiMaterial.h"
+#include "Sti/StiPlacement.h"
+#include "Sti/StiDetector.h"
+#include "Sti/StiToolkit.h"
+#include "Sti/StiDetectorBuilder.h"
+#include <stdio.h>
+#include <map>
+#include <exception>
+using namespace std;
+#include <stdexcept>
+#include "Sti/StiHitErrorCalculator.h"
+#include "Sti/StiIsActiveFunctor.h"
+#include "Sti/StiNeverActiveFunctor.h"
+#include "Sti/StiElossCalculator.h"
+#include "Sti/StiVMCToolKit.h"
+#include "StarClassLibrary/StRandom.hh"
 
 ClassImp(StPixelFastSimMaker)
 
@@ -42,6 +67,26 @@ StPixelFastSimMaker::~StPixelFastSimMaker(){ /*noop*/ }
 
 int StPixelFastSimMaker::Init()
 {
+  int seed=time(NULL);
+  myRandom=new StRandom();
+  myRandom->setSeed(seed);
+
+  // Define various HPD specific geom. variables
+  resXHpd = 0.0012;
+  resZHpd = 0.0120;
+  double raddeg = acos(-1.)/180.0;
+  tiltAngleHpd = 60.*raddeg;
+  int nLadders = 48;
+  rotAngleHpd = 360*raddeg/(double)nLadders;
+  offsetAngleHpd = 3.75*raddeg;
+  radiusHpd = 9.1;
+  double activeLength = 1.36;
+  double guardLength = 0.112/2.;
+  double pLength = 0.001/2.;
+  double cellLength = activeLength+2*guardLength+pLength;
+  waferLengthHpd = 5*cellLength;
+  ladderWidthHpd = 1.28;
+  mSmear=1;
   return kStOk;
 }
 void StPixelFastSimMaker::Clear(Option_t *option){ /*noop*/}
@@ -55,10 +100,17 @@ Int_t StPixelFastSimMaker::Make()
     if (! rcEvent) {cout << "No StEvent on input" << endl; return kStWarn;}
     StMcEvent* mcEvent = (StMcEvent *) GetInputDS("StMcEvent");
     if (! mcEvent) {cout << "No StMcEvent on input" << endl; return kStWarn;}
+    if (! gGeoManager) GetDataBase("VmcGeometry");
+
     
     // Store hits into RnD Hit Collection until we have our own
     StRnDHitCollection *col = new StRnDHitCollection;
-    
+    if (!col ) 
+      {
+        printf("StPixelFastSimMaker -E- no RnDHitCollection!\n");
+        abort();
+      }
+
     // Don't use realistic hit errors for now. When we transit to smeared
     // hits, this would be a good place to store offset info
     StThreeVectorF mHitError(0.,0.,0.);
@@ -76,9 +128,16 @@ Int_t StPixelFastSimMaker::Make()
 	      {								
 		UInt_t nh = pixHitCol->layer(k)->hits().size();		
 		for (UInt_t i = 0; i < nh; i++) {
-		  StMcHit *mcH = pixHitCol->layer(k)->hits()[i];          
+		  
+		  StMcHit *mcH = pixHitCol->layer(k)->hits()[i];
+		  if (!mcH) continue;
+
+		  StThreeVectorD mRndHitError(0.,0.,0.);
+		  smearGaus(mRndHitError, 8.6, 8.6);
+		  //8.6 is the design resolution of the detector
+
 		  StRnDHit* tempHit = new StRnDHit(mcH->position(), 
-						   mHitError, 1, 1., 0, 
+						   mRndHitError, 1, 1., 0, 
 						   1, 1, id++, kHftId);
 		  //cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
 		  //     <<*tempHit<<endl;
@@ -107,7 +166,7 @@ Int_t StPixelFastSimMaker::Make()
     {									
       Int_t nhits = istHitCol->numberOfHits();
       if (nhits)								
-	{									
+	{						 			
 	  Int_t id = 0;							
 	  //StSPtrVecHit *cont = new StSPtrVecHit();				
 	  //rcEvent->addHitCollection(cont, # Name );				
@@ -117,12 +176,41 @@ Int_t StPixelFastSimMaker::Make()
 		UInt_t nh = istHitCol->layer(k)->hits().size();	
 		for (UInt_t i = 0; i < nh; i++) { 
 		  StMcHit *mcH = istHitCol->layer(k)->hits()[i];
-		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
+		  /*StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		  tempHit->setDetectorId(kIstId); 
 		  tempHit->setVolumeId(mcH->volumeId());                   
-		  tempHit->setKey(mcH->key());                             
+		  tempHit->setKey(mcH->key());   */                          
 		                                                 
+		  //		  char path[100];
+		  TString Path("");
 		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
+		  cout<<"about to try to move between local+global coords with VMC"<<endl;
+		  if(mcI->layer()==1) Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
+		  else                Path = Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
+		  cout<<"path: "<<Path.Data()<<endl;
+		  if(!gGeoManager) cout<<"no gGeoManager?"<<endl;
+		  cout<<"RMV"<<endl;
+		  gGeoManager->RestoreMasterVolume();
+		  cout<<"go to path"<<endl;
+		  gGeoManager->cd(Path);
+		  cout<<"get node"<<endl;
+		  TGeoNode* node=gGeoManager->GetCurrentNode();
+		  cout<<"hit location: "<<mcH->position()<<endl;
+		  double pos[3]={mcH->position().x(),mcH->position().y(),mcH->position().z()};
+		  double localpos[3]={0,0,0};
+		  gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
+		  cout<<"local hit location: "<<localpos[0]<<" "<<localpos[1]<<" "<<localpos[2]<<endl;
+		  localpos[0]=distortHit(localpos[0],.0017,100);
+		  //localpos[1]=distortHit(localpos[1],.055);
+		  gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,pos);
+		  cout<<"hit location after 1 smear: "<<pos[0]<<" "<<pos[1]<<" "<<pos[2]<<endl;
+		  pos[2]=distortHit(pos[2],.055,100);
+		  StThreeVectorF smearedpos(pos);
+		  cout<<"smeared hit location: "<<smearedpos<<endl;
+		  StRnDHit* tempHit = new StRnDHit(smearedpos, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
+		  tempHit->setDetectorId(kIstId); 
+		  tempHit->setVolumeId(mcH->volumeId());                   
+		  tempHit->setKey(mcH->key());    
 		  if(mcI){
 		    tempHit->setLayer(mcI->layer());           
 		    tempHit->setLadder(mcI->ladder());           
@@ -154,18 +242,24 @@ Int_t StPixelFastSimMaker::Make()
 	      {								
 		UInt_t nh = hpdHitCol->layer(k)->hits().size();	
 		for (UInt_t i = 0; i < nh; i++) { 
-		  StMcHit *mcH = hpdHitCol->layer(k)->hits()[i];
-		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++, kHpdId);  
-		  tempHit->setDetectorId(kHpdId); 
-		  tempHit->setVolumeId(mcH->volumeId());                   
-		  tempHit->setKey(mcH->key());                             
-		                                                 
+		  StMcHit *mcH = hpdHitCol->layer(k)->hits()[i];                          
 		  StMcHpdHit *mcI = dynamic_cast<StMcHpdHit*>(mcH); 
 		  if(mcI){
+
+		    StThreeVectorF local = global2LocalHpd(mcI->position(), mcI->ladder()-1);
+		    local.setX(distortHit(local.x(), resXHpd, ladderWidthHpd));
+		    local.setZ(distortHit(local.z(), resZHpd, 2*waferLengthHpd));
+		    StThreeVectorF global = local2GlobalHpd(local, mcI->ladder()-1);
+    
+		    StRnDHit* tempHit = new StRnDHit(global, mHitError, 1, 1., 0, 1, 1, id++, kHpdId);  
+		    tempHit->setDetectorId(kHpdId); 
+		    tempHit->setVolumeId(mcH->volumeId());                   
+		    tempHit->setKey(mcH->key());     
 		    tempHit->setLayer(mcI->layer());           
-		    tempHit->setLadder(mcI->ladder());                   
-		  }                                                         
-		  col->addHit(tempHit);                                 
+		    tempHit->setLadder(mcI->ladder());             
+                                                       
+		    col->addHit(tempHit); 
+		  }                                
 		}                                                           
 	      }	
 	  }							 
@@ -292,10 +386,122 @@ Bool_t StPixelFastSimMaker::accept(StMcEvent* event){
   return event ? true : false;
 }
 
+double StPixelFastSimMaker::distortHit(double x, double res, double detLength){
+  double test;
+  if(mSmear){
+    test = x + myRandom->gauss(0,res);
+    while( fabs(x) > detLength){
+      test = x + myRandom->gauss(0,res);
+    }
+    //cout << " x was " <<x<< " and is now " << test<< endl;
+    return test;
+  }
+  else return x;
+}
+
+StThreeVectorF StPixelFastSimMaker::global2LocalHpd(const StThreeVectorF& global, int ladder){
+  // Local X direction is in r/phi of STAR global coords.
+  // Local Z is in STAR's Z direction
+  // Local Y is into the thickness of the wafer and ==0
+  StThreeVectorF local;
+
+   // Find mid point of detector
+
+  double x0 = radiusHpd*cos(rotAngleHpd*(double)ladder+offsetAngleHpd);
+  double y0 = radiusHpd*sin(rotAngleHpd*(double)ladder+offsetAngleHpd);
+
+  double x = global.x()-x0;
+  double y = global.y()-y0;
+
+
+  // Rotate coords by tilt angle
+  local.setX(x*cos(tiltAngleHpd) + y*sin(tiltAngleHpd));
+  local.setY(y*cos(tiltAngleHpd) - x*sin(tiltAngleHpd));   
+
+  x = local.x();
+  y = local.y();
+  // Rotate coords by global rotation angle and shift to average radius
+
+
+   local.setX(x*cos(rotAngleHpd*(double)ladder+offsetAngleHpd) +
+  	     y*sin(rotAngleHpd*(double)ladder+offsetAngleHpd));
+  
+   local.setY(y*cos(rotAngleHpd*(double)ladder+offsetAngleHpd) -
+	      x*sin(rotAngleHpd*(double)ladder+offsetAngleHpd));
+
+
+  // Z stays z
+   // local.setZ(global.z()-z0);
+   local.setZ(global.z());
+   return local;
+}
+
+//__________________________________________________________________________
+StThreeVectorF StPixelFastSimMaker::local2GlobalHpd(const StThreeVectorF& local, int ladder){
+  // Local X direction is in r/phi of STAR global coords.
+  // Local Z is in STAR's Z direction
+  // Local Y is into the thickness of the wafer and ==0
+  StThreeVectorF global;
+
+  // Find mid point of detector
+  double x0 = radiusHpd*cos(rotAngleHpd*(double)ladder+offsetAngleHpd);
+  double y0 = radiusHpd*sin(rotAngleHpd*(double)ladder+offsetAngleHpd);
+
+  // Rotate coords by global rotation angle and shift to average radius
+
+
+  global.setX(local.x()*cos(rotAngleHpd*(double)ladder+offsetAngleHpd) -
+	      local.y()*sin(rotAngleHpd*(double)ladder+offsetAngleHpd));
+  
+  global.setY(local.x()*sin(rotAngleHpd*(double)ladder+offsetAngleHpd) +
+	      local.y()*cos(rotAngleHpd*(double)ladder+offsetAngleHpd));
+  
+
+  // Rotate coords by tilt angle
+
+  double x = global.x();
+  double y = global.y();
+  global.setX(x*cos(tiltAngleHpd) - y*sin(tiltAngleHpd));
+  global.setY(x*sin(tiltAngleHpd) + y*cos(tiltAngleHpd)); 
+
+  global.setX(global.x()+ x0);
+  global.setY(global.y()+ y0);
+
+  // Z stays z
+  global.setZ(local.z() );
+  
+  return global;
+
+}
 
 
 
+void StPixelFastSimMaker::smearGaus(StThreeVectorD &mError, 
+                                    double sigma1, double sigma2)
+{
 
+    // smear hit in transverse plane, 
+    // sigma's are in microns
+    double u1, u2, v1, v2;
+    double r = 2.;
+    double z1 = 10.;
+    double z2 = 10.;
+    while(fabs(z1)>2. || fabs(z2)>2.) // sigma
+      {
+         r = 2.;
+         while(r>1.)
+           {
+              u1 = rand()/double(RAND_MAX); 
+              u2 = rand()/double(RAND_MAX);
+              v1 = 2*u1 - 1.;  
+              v2 = 2*u2 - 1.; 
+              r = pow(v1,2) + pow(v2,2);
+           }
+           z1 = v1*sqrt(-2.*log(r)/r);  z2 = v2*sqrt(-2.*log(r)/r);
+       }
 
-
-
+    //set to be cumulative with other transforms 
+    mError.setX(mError.x()+z1*sigma1/1.e04);
+    mError.setY(mError.y()+z1*sigma1/1.e04);
+    mError.setZ(mError.z()+z2*sigma2/1.e04);
+}

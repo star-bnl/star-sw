@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.11 2006/10/20 18:43:12 wleight Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.12 2006/11/28 22:18:01 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.12  2006/11/28 22:18:01  wleight
+// Changed hit errors to 60 microns for x and 1.9 mm for y
+//
 // Revision 1.11  2006/10/20 18:43:12  wleight
 // Changes to make perfect hits in the IST work with UPGR05
 //
@@ -56,7 +59,7 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFi
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
     _trackingParameters.setName("ssdTrackingParameters");
     _hitCalculator.setName("ssdHitError");
-    _hitCalculator.set(1.0, 0., 0.,1.0, 0., 0.);
+    _hitCalculator.set(.006, 0., 0.,.19, 0., 0.);
 }
 
 StiIstDetectorBuilder::~StiIstDetectorBuilder()

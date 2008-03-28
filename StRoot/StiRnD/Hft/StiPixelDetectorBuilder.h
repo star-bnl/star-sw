@@ -11,13 +11,18 @@ public:
     virtual void buildDetectors(StMaker&source);
     double phiForSector(unsigned int iSector) const;
 
+
+    void useVMCGeometry();
+    void AverageVolume(TGeoPhysicalNode *nodeP);
+
     /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]
     double phiForPixelSector(unsigned int iSector) const;
     double radiusForPixelSector(unsigned int iSector) const;
     double psiForPixelSector(unsigned int iSector) const;
 
+    void loadDS(TDataSet&ds);
+    
  protected:
-    StiMaterial * _gas;
     StiMaterial * _fcMaterial;
     StiDefaultHitErrorCalculator _calculator;
 };

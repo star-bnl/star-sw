@@ -25,7 +25,7 @@ StiHpdDetectorBuilder::StiHpdDetectorBuilder(bool active, const string & inputFi
     _trackingParameters.setName("HpdTrackingParameters");
     _calculator.setName("HpdHitErrors");
     //_calculator = new StiDefaultHitErrorCalculator();
-    _calculator.set(1.e-2, 0., 0., 1.e-2, 0., 0.);
+    _calculator.set(1.e-2, 0., 0., 4.e-2, 0., 0.);
     //StiTrackingParameters * trackingPars = getTrackingParameters();
 
 

@@ -1,5 +1,25 @@
-* $Id: geometry.g,v 1.133 2006/11/14 00:21:03 potekhin Exp $
+* $Id: geometry.g,v 1.137 2006/12/01 19:26:58 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.137  2006/12/01 19:26:58  potekhin
+* Removing the SSD from the R&D geometry UPGR05, resulting
+* in a new configuration, UPGR08
+*
+* Revision 1.136  2006/11/28 00:02:09  potekhin
+* Added Y2007 and set it up to include the new FMS (FPD)
+*
+* Revision 1.135  2006/11/22 17:41:49  potekhin
+* Added a tag which will be used exclusively for the material
+* balance effect study, i.e. it won't contains any realistic
+* detectors in the center of STAR, and feature a variable
+* thickness cylinder instead.
+*
+* Revision 1.134  2006/11/18 02:56:17  potekhin
+* Rewrote UPGR01 to better conform with
+* other UPGR0X tags in terms of actual code
+* (same version of SSD, identical flags in most
+* places). UPGR01 is HFT+SSD in central tracking,
+* and nothing else.
+*
 * Revision 1.133  2006/11/14 00:21:03  potekhin
 * Improved steering for the IGTD (gem disks), in order to
 * provide the possibility of a proper versioning. This is
@@ -614,7 +634,7 @@
               btof,vpdd,magp,calb,ecal,upst,
               rich,zcal,mfld,bbcm,fpdm,phmd,
               pixl,istb,gemb,fstd,ftro,fgtd,
-              shld,quad,mutd,igtd,hpdt,itsp
+              shld,quad,mutd,igtd,hpdt,itsp,dumm
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -741,7 +761,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd,hpdt,itsp} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd,hpdt,itsp,dumm} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -2113,7 +2133,7 @@ If LL>1
                      CaveConfig = 3;
                 }
 ****************************************************************************************
-  on UPGR01    { R and D geometry: TPC+SSD+HFT-SVT
+  on Y2007    { Year 2006 baseline which is Y2006+FMS
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -2130,14 +2150,11 @@ If LL>1
 * NEW CONFIG!
                      BtofConfig=8;
 
+* Full barrel in 2006
                   "calb" 
-                     ems=on
-                     CalbConfig = 1
-* remember that with this config, the following parameters have
-* a different meaning because we have to (unfortunately) switch
-* from divisions to copies and introduce a map, which DOES
-* control the configuration
-                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
 
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
@@ -2148,7 +2165,7 @@ If LL>1
 
                   "forward pion detector "
                      fpdm=on
-                     FpdmConfig  = 1 "switch to a different lead glass source code"
+                     FpdmConfig  = 3 "switch to a different lead glass source code"
 
                   "pseudo Vertex Position Detector"
                      vpdd=on;
@@ -2160,7 +2177,8 @@ If LL>1
 * important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
 
                      SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 5; "SVTT version"
+                     SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
                      DensConfig = 1; "gas density correction"
                      FtpcConfig = 1; "ftpc configuration"
 
@@ -2170,21 +2188,110 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 24; "second version, full barrel with corrected radii"
+                     SisdConfig = 35; "third version, full barrel newly corrected radii"
 
 
                   "FTPC Readout barrel "
                      ftro=on;
                      FtroConfig = 1;
 
-* careful! Achtung!
-                   pipeConfig=5;   " thinner pipe "
-                   pixl=on;        " activate "
-                   PixlConfig=3;   " source version "
-
                   "New version of the TPC backplane "
                      TpceConfig = 3;
+                  "Muon Trigger System"
+                     mutd = on;
+                     MutdConfig = 1;
+                  "We need a bigger Cave"
+                     CaveConfig = 3;
+                }
+****************************************************************************************
+  on DUMM01   { R and D geometry: TPC+DUMM
 
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=off;
+                     PhmdConfig = 0;
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 0;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   dumm=on;        " put the dummy in"
+                }
+****************************************************************************************
+  on UPGR01   { R and D geometry: TPC+SSD+HFT-SVT
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 45;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+* HPD, IST off
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* Forward GEM disks in this tag
+                   igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
                 }
 ****************************************************************************************
   on UPGR02    { R and D geometry: TPC+IST+HFT-SVT
@@ -2466,6 +2573,65 @@ If LL>1
 
                    igtd=on; "Forward GEM disks in this tag"
                    itsp=on; "prototype of the Inner Tracker SuPport structure"
+                }
+****************************************************************************************
+  on UPGR08   { New Tracking: HFT+HPD+IST+TPC-SVT-SSD
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 0;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+
+                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HpdtConfig=1;   " base version"
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=3;
+* Inner STAR GEM barrel
+                   gemb=off;  
+                   GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* Forward GEM disks in this tag
+                   igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
                 }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
@@ -2873,6 +3039,7 @@ If LL>1
    if (fpdm.and.FpdmConfig==0) Call fpdmgeo
    if (fpdm.and.FpdmConfig==1) Call fpdmgeo1
    if (fpdm.and.FpdmConfig==2) Call fpdmgeo2
+   if (fpdm.and.FpdmConfig==3) Call fpdmgeo3
 
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
@@ -2923,6 +3090,11 @@ If LL>1
       call phmdgeo
    endif
 
+
+********************************************************************
+   if(dumm) then
+      call dummgeo
+   endif
 ****************  Magnetic Field  ********************************
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5

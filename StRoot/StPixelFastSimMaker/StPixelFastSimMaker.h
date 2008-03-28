@@ -1,11 +1,17 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.1 2006/02/03 20:11:57 fisyak Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.3 2006/11/29 21:42:20 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.3  2006/11/29 21:42:20  andrewar
+ * Update with Pixel resolution smearing.
+ *
+ * Revision 1.2  2006/11/28 21:29:13  wleight
+ * Added smearing for Hpd and Ist and a switch to turn it on and off
+ *
  * Revision 1.1  2006/02/03 20:11:57  fisyak
  * The initial revision
  *
@@ -37,8 +43,13 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "StThreeVectorF.hh"
+#include "StThreeVectorD.hh"
+
 class StEvent;
 class StMcEvent;
+class StRandom;
+
 class StPixelFastSimMaker : public StMaker {
  public:
 
@@ -77,15 +88,36 @@ class StPixelFastSimMaker : public StMaker {
   /* \brief Accept method for monte carlo event. */
   virtual Bool_t accept(StMcEvent* event);
 
+  //Routines for transforming HPD hits
+  StThreeVectorF local2GlobalHpd(const StThreeVectorF& local, int ladder);
+  StThreeVectorF global2LocalHpd(const StThreeVectorF& global, int ladder);
+
+  //Routine to smear hit by resolution with gaussian, mean zero and width res
+  double distortHit(double x, double res, double detLength);
+
+  /* \brief Method for adding a gaussian smearing to the hit error vector */
+  void smearGaus(StThreeVectorD &mError, double sigma1, double sigma2);
 
   /* \brief Documentation method. GetCVS can be called from the chain, providing a list
      of all maker versions in use.
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.1 2006/02/03 20:11:57 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.3 2006/11/29 21:42:20 andrewar Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
+
+ protected:
+  StRandom* myRandom;
+  double resXHpd;
+  double resZHpd;
+  double tiltAngleHpd;
+  double rotAngleHpd;
+  double offsetAngleHpd;
+  double radiusHpd;
+  double waferLengthHpd;
+  double ladderWidthHpd;
+  int mSmear; //to turn smearing on and off
   
   ClassDef(StPixelFastSimMaker,0)   //StAF chain virtual base class for Makers
 };
