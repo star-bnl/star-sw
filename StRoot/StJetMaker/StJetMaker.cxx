@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.35 2008/03/29 18:45:21 tai Exp $
+// $Id: StJetMaker.cxx,v 1.36 2008/03/29 20:09:20 tai Exp $
 
 #include "StJetMaker.h"
 
@@ -42,10 +42,11 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourP
   anaCtl.mAnalyzer = new StppJetAnalyzer(ap, jp, fp);
   anaCtl.mJets = new StJets();
 
-  // for backword compatability
-  anaCtl.mAnalyzer->setmuDstJets(anaCtl.mJets);
-
   mAnalyzerCtl.push_back(anaCtl);
+
+  // for backword compatability
+  mJetBranches[name] = anaCtl.mAnalyzer;
+  anaCtl.mAnalyzer->setmuDstJets(anaCtl.mJets);
 }
 
 Int_t StJetMaker::Init() 
