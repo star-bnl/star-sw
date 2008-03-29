@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer.cxx,v 1.10 2008/03/27 22:08:05 tai Exp $
+// $Id: StppJetAnalyzer.cxx,v 1.11 2008/03/29 18:45:22 tai Exp $
 //
 // Author List: M.L. Miller
 //              Thomas Henry
@@ -41,6 +41,7 @@ StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars, S
   , mFourList(0)
   , mFourPMaker(fp)
   , mPars(*ap)
+  , muDstJets(0)
 {
   cout <<"StppJetAnalyzer::StppJetAnalyzer()"<<endl;
     

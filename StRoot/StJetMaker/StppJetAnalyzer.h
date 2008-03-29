@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer.h,v 1.6 2008/03/27 22:08:05 tai Exp $
+// $Id: StppJetAnalyzer.h,v 1.7 2008/03/29 18:45:23 tai Exp $
 //
 // Author List: M.L. Miller
 //              Thomas Henry
@@ -9,16 +9,18 @@
 
 #include <TObject.h>
 
+#include "StJetFinder/StProtoJet.h"
+
 #include <list>
 #include <vector>
 
 class StMuTrack;
 class AbstractFourVec;
 class StJetPars;
-class StProtoJet;
 class StJetFinder;
 class StFourPMaker;
 class StMuTrackFourVec;
+class StJets;
 
 /*!
   \class StppAnaPars
@@ -114,6 +116,10 @@ public:
   ///Access to the FourPMaker associated with this analyzer.  This 4-p may be shared with other analyzers
   StFourPMaker* fourPMaker() {return mFourPMaker;}
 
+  // for backword compatability
+  StJets* getmuDstJets(void) { return muDstJets; };
+  void setmuDstJets(StJets* v) { muDstJets = v; };
+
 private:
 
   StppJetAnalyzer();
@@ -133,6 +139,9 @@ private:
   StFourPMaker* mFourPMaker;
 
   StppAnaPars mPars;
+
+  // for backword compatability
+  StJets* muDstJets;
 
   ClassDef(StppJetAnalyzer,1)
 };
