@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCell.h,v 2.7 2007/09/19 17:32:18 ullrich Exp $
+ * $Id: StTofCell.h,v 2.8 2008/03/31 20:09:35 ullrich Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCell.h,v $
+ * Revision 2.8  2008/03/31 20:09:35  ullrich
+ * Changed typr of mLeadingEdgeTime and mTrailingEdgeTime from float to double
+ *
  * Revision 2.7  2007/09/19 17:32:18  ullrich
  * New member (mLeadingEdgeTime,  mTrailingEdgeTime) and related functions and updates added.
  *
@@ -63,8 +66,8 @@ public:
     int                   daqIndex() const;
     int                   adc() const;
     int                   tdc() const;
-    float                 leadingEdgeTime() const;
-    float                 trailingEdgeTime() const;
+    double                leadingEdgeTime() const;
+    double                trailingEdgeTime() const;
     float                 tot() const;
     StTrack*              associatedTrack();
     const StTrack*        associatedTrack() const;
@@ -78,8 +81,8 @@ public:
     void      setDaqIndex(int);
     void      setAdc(int);
     void      setTdc(int);
-    void      setLeadingEdgeTime(float);
-    void      setTrailingEdgeTime(float);
+    void      setLeadingEdgeTime(double);
+    void      setTrailingEdgeTime(double);
     void      setAssociatedTrack(StTrack*);
     void      setZHit(float);
     void      setMatchFlag(int);
@@ -92,8 +95,8 @@ protected:
     Int_t    mDaqIndex;
     Int_t    mAdc;
     Int_t    mTdc;
-    Float_t  mLeadingEdgeTime;
-    Float_t  mTrailingEdgeTime;
+    Double_t mLeadingEdgeTime;
+    Double_t mTrailingEdgeTime;
     //    StTrack* mAssociatedTrack;   //$LINK
 #ifdef __CINT__
     StObjLink        mAssociatedTrack;		
@@ -104,7 +107,7 @@ protected:
     Int_t    mMatchFlag;
     StThreeVectorD mPosition;
 
-    ClassDef(StTofCell,3)
+    ClassDef(StTofCell,4)
 };
 
 
@@ -145,15 +148,15 @@ StTofCell::setTdc(int rawTdc)
 }
 
 inline void
-StTofCell::setLeadingEdgeTime(float leTime)
+StTofCell::setLeadingEdgeTime(double val)
 {
-    mLeadingEdgeTime = leTime;
+    mLeadingEdgeTime = val;
 }
 
 inline void
-StTofCell::setTrailingEdgeTime(float teTime)
+StTofCell::setTrailingEdgeTime(double val)
 {
-    mTrailingEdgeTime = teTime;
+    mTrailingEdgeTime = val;
 }
 
 inline void
@@ -201,13 +204,13 @@ StTofCell::tdc()  const
     return mTdc;
 }
 
-inline float
+inline double 
 StTofCell::leadingEdgeTime()  const
 {
     return mLeadingEdgeTime;
 }
 
-inline float
+inline double 
 StTofCell::trailingEdgeTime()  const
 {
     return mTrailingEdgeTime;
