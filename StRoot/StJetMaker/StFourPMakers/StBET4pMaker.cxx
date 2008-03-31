@@ -442,37 +442,25 @@ void StBET4pMaker::fillBemcTowerHits()
 
       int ADC = theRawHit->adc(); //not pedestal subtracted!
 
-      if ( mUse2003Cuts  && ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(id) ) {
-      	mBTowHits[id] = theRawHit;
-      }
-      else if ( mUse2005Cuts && id>2400 ) {
-      	mBTowHits[id] = 0;
-      }
-      else if ( ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) {
-      	mBTowHits[id] = theRawHit;
+      if (mUse2003Cuts) {
+      	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(id) ) {
+      	  mBTowHits[id] = theRawHit;
+      	} else {
+      	  mBTowHits[id] = 0;
+      	}
+      } else if (mUse2005Cuts) {
+      	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && id <= 2400) {
+      	  mBTowHits[id] = theRawHit;
+      	} else {
+      	  mBTowHits[id] = 0;
+      	} 
       } else {
-      	mBTowHits[id] = 0;
+      	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) {
+      	  mBTowHits[id] = theRawHit;
+      	} else {
+      	  mBTowHits[id] = 0;
+      	}
       }
-
-      // if (mUse2003Cuts) {
-      // 	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(id) ) {
-      // 	  mBTowHits[id] = theRawHit;
-      // 	} else {
-      // 	  mBTowHits[id] = 0;
-      // 	}
-      // } else if (mUse2005Cuts) {
-      // 	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && id <= 2400) {
-      // 	  mBTowHits[id] = theRawHit;
-      // 	} else {
-      // 	  mBTowHits[id] = 0;
-      // 	} 
-      // } else {
-      // 	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) {
-      // 	  mBTowHits[id] = theRawHit;
-      // 	} else {
-      // 	  mBTowHits[id] = 0;
-      // 	}
-      // }
     }
   }
   
