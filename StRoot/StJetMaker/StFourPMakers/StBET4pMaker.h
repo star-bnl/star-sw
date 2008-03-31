@@ -52,7 +52,10 @@ private:
   StEmcCollection *find_StEmCCollection();
   bool isCorrupted();
 
-  void fillBarrelHits();
+  void fillBemcTowerHits();
+  double sumEnergyOverBemcTowers(double minE);
+  int numberOfBemcTowersWithEnergyAbove(double minE);
+
 
   typedef std::vector<StMuTrackFourVec*> BET4Vec;
   BET4Vec mVec;

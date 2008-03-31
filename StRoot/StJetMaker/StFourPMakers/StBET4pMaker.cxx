@@ -117,7 +117,11 @@ Int_t StBET4pMaker::Make()
   LOG_DEBUG <<"\tvec:\t"<<mVec.size()<<"\ttracks:\t"<<tracks.size()<<endm;
 
   //next fill Barrel hit array, subtract energy later:
-  fillBarrelHits();
+  fillBemcTowerHits();
+
+  mSumEmcEt = sumEnergyOverBemcTowers(0.4);
+
+  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4);
 
   //check for barrel corruption (only works for P04ik and later!
   if (mCorrupt) {
@@ -405,7 +409,7 @@ bool StBET4pMaker::isCorrupted()
 }
 
 
-void StBET4pMaker::fillBarrelHits()
+void StBET4pMaker::fillBemcTowerHits()
 {
   mCorrupt = isCorrupted();
   if(mCorrupt) return;
@@ -437,36 +441,64 @@ void StBET4pMaker::fillBarrelHits()
       mTables->getPedestal(BTOW, id, CAP, pedestal, rms);
 
       int ADC = theRawHit->adc(); //not pedestal subtracted!
-      //modified (MLM 3/06/2006) to account for Dylan/Steve 2003 cuts:
+
       if ( mUse2003Cuts  && ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(id) ) {
-
-	mBTowHits[id] = theRawHit;
-
-	if (theRawHit->energy() > 0.4) {
-	  mDylanPoints++;
-	  mSumEmcEt += theRawHit->energy();
-	}
-
+      	mBTowHits[id] = theRawHit;
       }
-      //modified (DDS 9/05/2007) to reject east barrel towers for 2005 analysis:
-      else if ( mUse2005Cuts && id>2400 ) { //ignore
-	mBTowHits[id] = 0;
+      else if ( mUse2005Cuts && id>2400 ) {
+      	mBTowHits[id] = 0;
       }
-      //if the status is good, add it to the array, otherwise add a null pointer
-      else if ( ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) { //it's good
-	mBTowHits[id] = theRawHit;
+      else if ( ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) {
+      	mBTowHits[id] = theRawHit;
+      } else {
+      	mBTowHits[id] = 0;
+      }
 
-	if (theRawHit->energy() > 0.4) {
-	  mDylanPoints++;
-	  mSumEmcEt += theRawHit->energy();
-	}
-		
-      } else { //marked as bad:
-	mBTowHits[id] = 0;
-      }
+      // if (mUse2003Cuts) {
+      // 	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(id) ) {
+      // 	  mBTowHits[id] = theRawHit;
+      // 	} else {
+      // 	  mBTowHits[id] = 0;
+      // 	}
+      // } else if (mUse2005Cuts) {
+      // 	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && id <= 2400) {
+      // 	  mBTowHits[id] = theRawHit;
+      // 	} else {
+      // 	  mBTowHits[id] = 0;
+      // 	} 
+      // } else {
+      // 	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) {
+      // 	  mBTowHits[id] = theRawHit;
+      // 	} else {
+      // 	  mBTowHits[id] = 0;
+      // 	}
+      // }
     }
   }
-  LOG_DEBUG <<"StBET4pMaker::fillBarrelHits\tnDylanPoints:\t"<<mDylanPoints<<"\tsumET:\t"<<mSumEmcEt<<endm;
+  
+
+}
+
+double StBET4pMaker::sumEnergyOverBemcTowers(double minE)
+{
+  double ret(0.0);
+  for(int id = 1; id <= 4800; ++id) {
+    if(mBTowHits[id] && mBTowHits[id]->energy() > minE) {
+      ret += mBTowHits[id]->energy();
+    }
+  }
+  return ret;
+}
+
+int StBET4pMaker::numberOfBemcTowersWithEnergyAbove(double minE)
+{
+  int ret(0);
+  for(int id = 1; id <= 4800; ++id) {
+    if(mBTowHits[id] && mBTowHits[id]->energy() > 0.4) {
+      ret++;
+    }
+  }
+  return ret;
 }
 
 bool accept2003Tower(int id)
