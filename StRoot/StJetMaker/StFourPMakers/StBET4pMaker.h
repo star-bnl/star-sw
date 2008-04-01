@@ -56,6 +56,7 @@ private:
   double sumEnergyOverBemcTowers(double minE);
   int numberOfBemcTowersWithEnergyAbove(double minE);
 
+  bool shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID);
 
   typedef std::vector<StMuTrackFourVec*> BET4Vec;
   BET4Vec mVec;

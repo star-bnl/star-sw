@@ -417,62 +417,67 @@ void StBET4pMaker::fillBemcTowerHits()
   StEmcCollection* emc = find_StEmCCollection();
   StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
 
-  //now gather hits into pointer array:
-    
-  for(int m = 1; m <= 120; ++m) { //loop on modules...
+  static const int nBemcModules = 120;
+  for(int m = 1; m <= nBemcModules; ++m) { //loop on modules...
     StEmcModule* module = detector->module(m);
     assert(module);
-	
+  	
     StSPtrVecEmcRawHit& rawHits = module->hits();
     for(UInt_t k = 0; k < rawHits.size(); ++k) { //loop on hits in modules
       StEmcRawHit* theRawHit = rawHits[k];
-	    
+  	    
       StEmcGeom* geom = StEmcGeom::instance("bemc"); 
-      int id;
-      geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),id); // to get the software id
-	    
-      //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
-      int status;
-      mTables->getStatus(BTOW, id, status);
+      int bemcTowerID;
+      geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
+  
+      if (shouldKeepThisBemcHit(theRawHit, bemcTowerID)) 
+	mBTowHits[bemcTowerID] = theRawHit;
+      else
+	mBTowHits[bemcTowerID] = 0;
 
-      //check for ADC that is 2-sigma above RMS:
-      float pedestal, rms;
-      int CAP(0); //this arument matters only for SMD
-      mTables->getPedestal(BTOW, id, CAP, pedestal, rms);
-
-      int ADC = theRawHit->adc(); //not pedestal subtracted!
-
-      if (mUse2003Cuts) {
-      	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(id) ) {
-      	  mBTowHits[id] = theRawHit;
-      	} else {
-      	  mBTowHits[id] = 0;
-      	}
-      } else if (mUse2005Cuts) {
-      	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && id <= 2400) {
-      	  mBTowHits[id] = theRawHit;
-      	} else {
-      	  mBTowHits[id] = 0;
-      	} 
-      } else {
-      	if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) {
-      	  mBTowHits[id] = theRawHit;
-      	} else {
-      	  mBTowHits[id] = 0;
-      	}
-      }
     }
   }
   
 
 }
 
+bool StBET4pMaker::shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID)
+{
+  //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
+  int status;
+  mTables->getStatus(BTOW, bemcTowerID, status);
+  
+  //check for ADC that is 2-sigma above RMS:
+  float pedestal, rms;
+  int CAP(0); //this arument matters only for SMD
+  mTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
+  
+  int ADC = theRawHit->adc(); //not pedestal subtracted!
+
+  if (mUse2003Cuts)
+    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(bemcTowerID) )
+      return true;
+    else
+      return false;
+  else if (mUse2005Cuts)
+    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && bemcTowerID <= 2400)
+      return true;
+    else
+      return false;
+  else
+    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1)
+      return true;
+    else
+      return false;
+}
+
+
 double StBET4pMaker::sumEnergyOverBemcTowers(double minE)
 {
   double ret(0.0);
-  for(int id = 1; id <= 4800; ++id) {
-    if(mBTowHits[id] && mBTowHits[id]->energy() > minE) {
-      ret += mBTowHits[id]->energy();
+  for(int bemcTowerID = 1; bemcTowerID <= 4800; ++bemcTowerID) {
+    if(mBTowHits[bemcTowerID] && mBTowHits[bemcTowerID]->energy() > minE) {
+      ret += mBTowHits[bemcTowerID]->energy();
     }
   }
   return ret;
@@ -481,8 +486,8 @@ double StBET4pMaker::sumEnergyOverBemcTowers(double minE)
 int StBET4pMaker::numberOfBemcTowersWithEnergyAbove(double minE)
 {
   int ret(0);
-  for(int id = 1; id <= 4800; ++id) {
-    if(mBTowHits[id] && mBTowHits[id]->energy() > 0.4) {
+  for(int bemcTowerID = 1; bemcTowerID <= 4800; ++bemcTowerID) {
+    if(mBTowHits[bemcTowerID] && mBTowHits[bemcTowerID]->energy() > 0.4) {
       ret++;
     }
   }
