@@ -49,6 +49,10 @@ public:
     
 private:
 
+  void collectChargedTracksFromTPC();
+  void collectEnergyFromBEMC();
+  void collectEnergyFromEEMC();
+
   StEmcCollection *find_StEmCCollection();
   bool isCorrupted();
 
@@ -58,8 +62,6 @@ private:
 
   bool shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID);
 
-  typedef std::vector<StMuTrackFourVec*> BET4Vec;
-  BET4Vec mVec;
   bool mCorrupt;
   bool mUseEndcap;
   double mField;
