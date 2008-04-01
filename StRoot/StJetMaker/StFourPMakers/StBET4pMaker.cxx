@@ -46,7 +46,6 @@ ClassImp(StBET4pMaker)
     
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
-  , mVec(0)
   , mCorrupt(false)
   , mUseEndcap(false)
   , mField(0.0)
@@ -94,11 +93,11 @@ void StBET4pMaker::Clear(Option_t* opt)
   mSumEmcEt = 0.;
   mField = 0.;
     
-  for (BET4Vec::iterator it = mVec.begin(); it != mVec.end(); ++it) {
+  for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
     delete (*it);
     (*it) = 0;
   }
-  mVec.clear();
+  tracks.clear();
 
   //reset pointers to Barrel hits
   for (int i = 1; i < 4801; ++i) {
@@ -106,17 +105,13 @@ void StBET4pMaker::Clear(Option_t* opt)
     mNtracksOnTower[i] = 0;
   }
     
-  StFourPMaker::Clear(opt);
-  LOG_DEBUG <<"\tvec:\t"<<mVec.size()<<"\ttracks:\t"<<tracks.size()<<endm;
-  return;
+  return StMaker::Clear(opt);
 }
 
 Int_t StBET4pMaker::Make()
 {
   LOG_DEBUG <<"StBET4pMaker::Make()"<<endm;
-  LOG_DEBUG <<"\tvec:\t"<<mVec.size()<<"\ttracks:\t"<<tracks.size()<<endm;
 
-  //next fill Barrel hit array, subtract energy later:
   fillBemcTowerHits();
 
   mSumEmcEt = sumEnergyOverBemcTowers(0.4);
@@ -135,26 +130,34 @@ Int_t StBET4pMaker::Make()
     LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\ttoo much energy:\t"<<mSumEmcEt<<"\tflag as corrupt. Clear 4-p container and return"<<endm;
     return kStOk;
   }
-    
+
+  collectChargedTracksFromTPC();
+  collectEnergyFromBEMC();
+  collectEnergyFromEEMC();
+
+  LOG_DEBUG <<StMaker::GetName()<<"::Make()\tAdded:\t"<<tracks.size()<<"\tparticles to track container"<<endm;
+
+  return StMaker::Make();
+}
+
+void StBET4pMaker::collectChargedTracksFromTPC()
+{
   StMuDst* uDst = mMuDstMaker->muDst();
 
   //next, loop on tracks and add to the 4p list:
   long nTracks = uDst->numberOfPrimaryTracks();
 
-  int ntkept, badflag, ftpc, loweta, higheta, badr, badhits;
-  ntkept = badflag = ftpc = loweta = higheta = badr = badhits = 0;
   for(int i = 0; i < nTracks; ++i) {
     StMuTrack* track = uDst->primaryTracks(i);
     assert(track);
     if(track->flag() < 0) {
-      ++badflag;
       continue;
     }
     //MLM 8/17/05 -- adapt to use with multiple vertices:
-    if (track->dcaGlobal().mag()>3.) continue;
+    if (track->dcaGlobal().mag() > 3.) continue;
 
     int dcaFlag=1;
-    if ( mUse2006Cuts==true){
+    if (mUse2006Cuts){
       Double_t limit=3.-2.*track->pt();
       if(!((track->pt()<0.5&&track->dcaGlobal().mag()<=2.) ||
 	   ((track->pt()>=0.5&&track->pt()<1.0)&&
@@ -163,37 +166,30 @@ Int_t StBET4pMaker::Make()
     }
     if(dcaFlag==0) continue;
 
-    if (track->topologyMap().trackFtpcEast()==true || track->topologyMap().trackFtpcWest()==true) {
-      ++ftpc;
+    if (track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) {
       continue;
     }
     if(track->eta() < GetEtaLow()) { //GetEtaLow defined in StFourPMaker.cxx
-      ++loweta;
       continue;
     }
     if(track->eta() > GetEtaHigh()) {
-      ++higheta;
       continue;
     }
     if(static_cast<double>(track->nHits())/static_cast<double>(track->nHitsPoss()) < .51) {
-      ++badhits;
       continue;
     }
-    ++ntkept;
 
     //check projection to BEMC and remember for later: ---------------------------------------------
     StThreeVectorD momentumAt, positionAt;
 	
     mField = uDst->event()->magneticField()/10.0; //to put it in Tesla
     StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-    bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius() );
+    bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius());
     if(tok) {
       int m,e,s,id=0;
-      float eta=positionAt.pseudoRapidity();
-      float phi=positionAt.phi();
-      int stat = geom->getBin(phi,eta,m,e,s);
-      stat = geom->getId(m,e,s,id);
-      if(stat==0) {
+      geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
+      int bad = geom->getId(m,e,s,id);
+      if(bad == 0) {
 	mNtracksOnTower[id]++; //increment number of tracks on this tower
       }
     }
@@ -207,14 +203,13 @@ Int_t StBET4pMaker::Make()
     //now construct StMuTrackFourVec object for jetfinding
     StMuTrackFourVec* pmu = new StMuTrackFourVec();
     pmu->Init(track, p4, i, kTpcId );
-    mVec.push_back(pmu); //this is for memory ownership.  StBET4pMaker has to delete these in Clear()
     tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
   }
-    
-  LOG_DEBUG <<"skipped "<<badflag<<" for flag, "<<ftpc<<" for ftpc, "<<loweta<<" for loweta, "<<higheta<<" for higheta, "
-	    <<badr<<" for badr, "<<badhits<<" for hits"<<endm;
-  LOG_DEBUG <<"Added:\t"<<ntkept<<"\ttracks to the container"<<endm;
+}
 
+void StBET4pMaker::collectEnergyFromBEMC()
+{
+  StMuDst* uDst = mMuDstMaker->muDst();
 
   //now loop on Barrel hits, correct energy, and push back for jet finding:
   for (int id = 1; id <= 4800; ++id) { //id==software id: [1,4800]
@@ -282,14 +277,17 @@ Int_t StBET4pMaker::Make()
     //now construct StMuTrackFourVec object for jetfinding
     StMuTrackFourVec* pmu = new StMuTrackFourVec();
     pmu->Init(0, p4, id, kBarrelEmcTowerId );
-    mVec.push_back(pmu);  //for memory ownership
     tracks.push_back(pmu); //for jet finding interface
 
     //cout <<"corrected energy"<<endl;
     //cout <<"E:\t"<<pmu->e()<<"\tp:\t"<<pmu->p()<<"\tm:\t"<<pmu->mass()<<"\tE^2-p^2:\t"<<pmu->e()*pmu->e() - pmu->p()*pmu->p()<<endl;
 	    
   }
+}
 
+void StBET4pMaker::collectEnergyFromEEMC()
+{
+  StMuDst* uDst = mMuDstMaker->muDst();
 
   if (mUseEndcap) {
 	
@@ -339,16 +337,10 @@ Int_t StBET4pMaker::Make()
       //now construct StMuTrackFourVec object for jetfinding
       StMuTrackFourVec* pmu = new StMuTrackFourVec();
       pmu->Init(0, p4, id, kEndcapEmcTowerId );
-      mVec.push_back(pmu);  //for memory ownership
       tracks.push_back(pmu); //for jet finding interface
     }
   }
-    
-  LOG_DEBUG <<StMaker::GetName()<<"::Make()\tAdded:\t"<<tracks.size()<<"\tparticles to track container"<<endm;
-
-  return StMaker::Make();
 }
-
 
 StEmcCollection *StBET4pMaker::find_StEmCCollection() {
 
