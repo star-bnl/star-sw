@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.9 2007/11/15 22:38:19 perev Exp $
+ * $Id: TDirIter.cxx,v 1.10 2008/04/02 22:41:45 fisyak Exp $
  *
  ***************************************************************************
  *
@@ -197,7 +197,7 @@ TString TDirIter::MakeWild(const char *re)
   for (int i=0;re[i];i++)
   {
     if (i == 0)		{ts+="^" ;}
-    if (re[i]=='*')	{ts+="[a-zA-Z0-9_\\.-]*"; 	continue;}
+    if (re[i]=='*')	{ts+="[a-zA-Z0-9_\\.,-]*"; 	continue;}
     if (re[i]=='#')	{ts+=".*"; 			continue;}
     if (re[i] == '.')	{ts+="\\.";			continue;}		
     ts += re[i];
