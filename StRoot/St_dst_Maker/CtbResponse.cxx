@@ -109,7 +109,7 @@ CtbResponse::CtbResponse(StVertexMaker *head, int *ipar, float *fpar,unsigned in
   if( this->GetCTBMode() == 1 || this->GetCTBMode() == 2 ) {
     LOG_INFO <<"use M-C for CTB hits\nI will write CTB ADC's into DAQ Table with 2 MeV=> 5 ADC!!!"<<endm;
     St_DataSet *gds=head->GetDataSet("geant"); 
-    head->ls();
+//VP    head->ls();
     assert(gds);
     
     // -------------- E X T R A C T    C T B   H I T S   --------------------
