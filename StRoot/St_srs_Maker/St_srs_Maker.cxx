@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.39 2007/12/27 23:52:00 fisyak Exp $
+//$Id: St_srs_Maker.cxx,v 1.40 2008/04/02 20:46:31 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.40  2008/04/02 20:46:31  perev
+//Debug level for ls() increased
+//
 //Revision 1.39  2007/12/27 23:52:00  fisyak
 //Fix bug with hit error setting
 //
@@ -267,7 +270,7 @@ Int_t St_srs_Maker::Make()
                    m_geom,      m_config,    m_shape,
                    m_srs_srspar,m_srs_direct,m_srs_activea);
     if(res!=kSTAFCV_OK) return kStWarn;
-    if (Debug()) m_DataSet->ls("*");
+    if (Debug()>1) m_DataSet->ls("*");
   }
 
 
