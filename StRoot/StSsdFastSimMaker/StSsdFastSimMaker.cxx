@@ -31,7 +31,6 @@ ClassImp(StSsdFastSimMaker)
   
   StSsdFastSimMaker::StSsdFastSimMaker(const char *name):StMaker(name){
     mHit        = new StSsdHit();
-    mSmearedhit = new StSsdHit();
     WaferNumb   = 0;
     HitsMap     = 0;
     dX          = 0;
@@ -43,7 +42,6 @@ ClassImp(StSsdFastSimMaker)
 
   StSsdFastSimMaker::~StSsdFastSimMaker(){ 
     delete mHit;
-    delete mSmearedhit ;
     delete WaferNumb   ; 
     delete HitsMap     ; 
     delete dX          ; 
@@ -227,7 +225,7 @@ Int_t StSsdFastSimMaker::Make()
 	goodHits++;
 	LOG_DEBUG << "good hit after triangle rejection" << endm;
 	Local->Fill(xlSmear[0],xlSmear[1]);
-	  mSmearedhit = new StSsdHit(xgSmear,error,currWafId,g2t[i].de,c);
+	StSsdHit  *mSmearedhit = new StSsdHit(xgSmear,error,currWafId,g2t[i].de,c);
 	//fill histograms
 	if(IAttr(".histos")){ 
 	  HitsMap->Fill(currLadder+1,currWafNumb+1,1);
