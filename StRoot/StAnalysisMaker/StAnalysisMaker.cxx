@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.8 2004/02/04 01:36:40 jeromel Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.9 2008/04/02 23:15:35 fisyak Exp $
  *
  */
 
@@ -299,8 +299,8 @@ StAnalysisMaker::Make()
 	if (track) allGlobals++;
 	if (accept(track)) goodGlobals++;
     }
-    tuple[k++] = static_cast<float>(goodGlobals)/allGlobals;
-
+    if (allGlobals) tuple[k++] = static_cast<float>(goodGlobals)/allGlobals;
+    else            tuple[k++] = -1;
     //
     //  That's it.
     //  Store the current tuple. See you next event.
@@ -337,6 +337,9 @@ bool StAnalysisMaker::accept(StTrack* track)
 
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.9  2008/04/02 23:15:35  fisyak
+ * Add protection against allGlobals == 0
+ *
  * Revision 2.8  2004/02/04 01:36:40  jeromel
  * Minor change for user's education. Use of gMessMgr
  *
