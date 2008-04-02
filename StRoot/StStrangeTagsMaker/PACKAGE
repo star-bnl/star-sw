@@ -1,0 +1,5 @@
+# $Id $
+# package StStrangeTagsMaker
+# author: 
+Library:libStStrangeTagsMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -l_StEvent
+#Library:libStStrangeTagsMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStEvent
