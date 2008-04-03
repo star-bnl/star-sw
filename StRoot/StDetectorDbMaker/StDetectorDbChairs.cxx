@@ -1,60 +1,5 @@
-#include <assert.h>
-#include "StMaker.h"
-#include "TDatime.h"
+#include "StarChairDefs.h"
 #include "St_db_Maker/St_db_Maker.h"
-#define DEBUGTABLE(STRUCT)						\
-  St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetChain()->Maker("db");	\
-  if (dbMk && dbMk->Debug() ) {						\
-    TDatime t[2];							\
-    dbMk->GetValidity(table,t);					        \
-    Int_t Nrows = table->GetNRows();					\
-    LOG_WARN << "St_" << # STRUCT << "C::instance found table " << table->GetName() \
-	 << " with NRows = " << Nrows << " in db" << endm;		\
-    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	\
-	 << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; \
-    if (Nrows > 10) Nrows = 10;						\
-    table->Print(0,Nrows);						\
-  }
-#define MakeString(PATH) # PATH
-#define MakeChairInstance(STRUCT,PATH)					\
-ClassImp(St_ ## STRUCT ## C); \
-St_ ## STRUCT ## C *St_ ## STRUCT ## C::fgInstance = 0; \
-St_ ## STRUCT ## C *St_ ## STRUCT ## C::instance() { \
-    if (fgInstance) return fgInstance;					\
-    St_ ## STRUCT *table = (St_ ## STRUCT *) StMaker::GetChain()->GetDataBase(MakeString(PATH)); \
-    if (! table) {							\
-      LOG_WARN << "St_" << # STRUCT << "C::instance " << MakeString(PATH) << "\twas not found" << endm; \
-      assert(table);							\
-    }									\
-    DEBUGTABLE(STRUCT);							\
-    fgInstance = new St_ ## STRUCT ## C(table);				\
-    return fgInstance;							\
-  }
-#define MakeChairOptionalInstance(STRUCT,PATH)			\
-  ClassImp(St_ ## STRUCT ## C);						\
-  St_ ## STRUCT ## C *St_ ## STRUCT ## C::fgInstance = 0;		\
-  St_ ## STRUCT ## C *St_ ## STRUCT ## C::instance() {			\
-    if (fgInstance) return fgInstance;					\
-    St_ ## STRUCT *table = (St_ ## STRUCT *) StMaker::GetChain()->GetDataBase(MakeString(PATH)); \
-    if (! table) {							\
-      table = new St_ ## STRUCT(# STRUCT ,0);				\
-      table->Mark();							\
-      LOG_WARN << "St_" << # STRUCT << "C::instance create optional " << # STRUCT << " table" << endm; \
-    }									\
-    assert(table);	DEBUGTABLE(STRUCT);				\
-    fgInstance = new St_ ## STRUCT ## C(table);				\
-    return fgInstance;							\
-  }
-#define MakeChairInstance2(STRUCT,CLASS,PATH)			\
-  ClassImp(CLASS);						\
-  CLASS *CLASS::fgInstance = 0;						\
-  CLASS *CLASS::instance() {						\
-    if (fgInstance) return fgInstance;					\
-    St_ ## STRUCT *table = (St_ ## STRUCT *) StMaker::GetChain()->GetDataBase(MakeString(PATH)); \
-    assert(table);	  DEBUGTABLE(STRUCT);				\
-    fgInstance = new CLASS(table);					\
-    return fgInstance;							\
-  }
 //___________________Calibrations/ftpc_____________________________________________________________
 #include "StDetectorDbFTPCGas.h"
 StDetectorDbFTPCGas* StDetectorDbFTPCGas::fgInstance = 0; 
@@ -104,6 +49,8 @@ MakeChairInstance(tpcISGains,Calibrations/tpc/tpcISGains);
 MakeChairInstance(tpcOSGains,Calibrations/tpc/tpcOSGains);
 #include "St_tpcHighVoltagesC.h"
 MakeChairInstance(tpcHighVoltages,Calibrations/tpc/tpcHighVoltages);
+#include "St_tpcGainC.h"
+MakeChairInstance(tpcGain,Calibrations/tpc/tpcGain);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -143,7 +90,7 @@ MakeChairInstance(beamInfo,RunLog/onl/beamInfo);
 #include "St_tpcRDOMasksC.h"
 MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
 //________________________________________________________________________________
-UInt_t       St_tpcRDOMasksC:: getSectorMask(UInt_t sector) {
+UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sector) {
   UInt_t MASK = 0x0000; // default is to mask it out
   //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
   if(sector < 1 || sector > 24 || getNumRows() == 0){
@@ -157,6 +104,7 @@ UInt_t       St_tpcRDOMasksC:: getSectorMask(UInt_t sector) {
   }
   // Otherwise want lower 6 bits    
   MASK &= 0x000003F; // Mask out higher order bits
+  if (sector == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
   return MASK;
 }
 //________________________________________________________________________________
@@ -266,7 +214,6 @@ MakeChairInstance(tpcPadPlanes,Geometry/tpc/tpcPadPlanes);
 MakeChairInstance(tpcGlobalPosition,Geometry/tpc/tpcGlobalPosition);
 #include "St_tpcFieldCageShortC.h"
 MakeChairInstance(tpcFieldCageShort,Geometry/tpc/tpcFieldCageShort);
-#undef MakeString
-#undef MakeChairInstance
-#undef MakeChairOptionalInstance
-#undef MakeChairInstance2
+//___________________Calibration/tpc_____________________________________________________________
+#include "St_tpcSectorT0offsetC.h"
+MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
