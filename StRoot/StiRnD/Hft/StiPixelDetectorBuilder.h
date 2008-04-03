@@ -2,7 +2,6 @@
 #define StiPixelDetectorBuilder_H
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiHitErrorCalculator.h"
-
 class StiPixelDetectorBuilder : public StiDetectorBuilder
 {
 public:
@@ -20,11 +19,8 @@ public:
     double radiusForPixelSector(unsigned int iSector) const;
     double psiForPixelSector(unsigned int iSector) const;
 
-    void loadDS(TDataSet&ds);
-    
  protected:
     StiMaterial * _fcMaterial;
-    StiDefaultHitErrorCalculator _hitCalculator;
 };
 
 inline double StiPixelDetectorBuilder::phiForSector(unsigned int sector) const

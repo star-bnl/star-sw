@@ -82,7 +82,7 @@ public:
   virtual ~StiKalmanTrackNode(){reduce();mId=-1;};
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode &node);  
   
-  static double mcs2(double relRadThickness, double beta2, double p2);
+  static double mcs2(double relRadThickness, double beta2, double p2) {return 14.1*14.1*relRadThickness/(beta2*p2*1e6);}
   /// Resets the node to a "null" un-used state
   void reset();
   void unset();
@@ -104,7 +104,7 @@ public:
   void getGlobalTpt   (float   x[6],float   e[15]);
 
   /// Get the charge (sign) of the track at this node
-  int getCharge() const;
+    int getCharge() const {return (mFP._ptin > 0) ? -1 : 1;}
   /// Convenience Method that returns the track momentum at this node
   StThreeVectorF getMomentumF() const;
   /// Convenience Method that returns the track momentum at this node
@@ -116,18 +116,18 @@ public:
   /// in the local reference frame of this node.
   void getMomentum(double p[3], double e[6]=0) const;
   /// Calculates and returns the tangent of the track pitch angle at this node.
-  double getCurvature() const;
-  void setCurvature(double curvature);
-  double getDipAngle() const;
-  double getTanL() const;
-  /// Calculates and returns the momentum of the track at this node.
-  double getP() const;
+    double getCurvature() const {return mFP._curv;}
+    void setCurvature(double curvature) {mFP._curv=curvature;}
+  double getDipAngle() const {return atan(mFP._tanl);}
+  double getTanL() const {return mFP._tanl;}
   /// Calculates and returns the transverse momentum of the track at this node.
-  double getPt() const;
+    double getPt() const;
+  /// Calculates and returns the momentum of the track at this node.
+    double getP() const {return (getPt()*::sqrt(1.+mFP._tanl*mFP._tanl));}
   /// Calculates and returns the Z mag field in the current point.
   /// units: PGeV = Hz*Radcurv_in_CM
   double getHz() const;
-    
+  double getField() const {return getHz();}
   double x_g() const;
   double y_g() const;
   double z_g() const;
@@ -210,14 +210,14 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   double evaluateChi2(const StiHit *hit); 
   int updateNode(); 
   int rotate(double alpha); 
-  int    getHelicity()const;
+  int    getHelicity()const {return (mFP._curv < 0) ? -1 : 1;}
   double getPhase()   const;
   double getPsi()     const;
   double getWindowY();
   double getWindowZ();
-  double pitchAngle() const;
-  double crossAngle() const;
-  double sinCrossAngle() const;
+  double pitchAngle() const {return atan(mFP._tanl);}
+  double crossAngle() const {return asin(mFP._sinCA);}
+  double sinCrossAngle() const {return mFP._sinCA;}
   double pathlength() const;
   double pathLToNode(const StiKalmanTrackNode * const oNode);
   StThreeVectorD* getLengths(StiKalmanTrackNode *nextNode);
@@ -229,7 +229,6 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   StThreeVector<double> getHelixCenter() const;
   void setHitErrors(const StiHit *hit=0);
   StiHitErrs getGlobalHitErrs(const StiHit *hit) const;
- static void   setParameters(StiKalmanTrackFinderParameters *parameters);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
   double getX0() const;
@@ -293,8 +292,6 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   char   _end[1];
   StiNodeExt *_ext;
   StiNodeInf *_inf;
-  static StiKalmanTrackFinderParameters * pars;
-
   static StiNodeStat  mgP;
   static bool   useCalculatedHitError;
 //  debug variables
@@ -314,16 +311,6 @@ inline double StiKalmanTrackNode::nice(double angle)
   if (angle <= -M_PI) angle += 2*M_PI;
   if (angle >   M_PI) angle -= 2*M_PI;
   return angle;
-}
-
-inline double StiKalmanTrackNode::getCurvature() const
-{
-  return mFP._curv;
-}
-
-inline double StiKalmanTrackNode::getDipAngle() const
-{
-  return atan(mFP._tanl);
 }
 
 inline StThreeVector<double> StiKalmanTrackNode::getMomentum() const
@@ -352,54 +339,6 @@ inline StThreeVectorF StiKalmanTrackNode::getGlobalMomentumF() const
   return p;
 }
 
-inline int StiKalmanTrackNode::getCharge() const
-{
-  return (getHz()*mFP._curv > 0) ? -1 : 1;
-}
-
-inline double StiKalmanTrackNode::getTanL() const
-{
-  return mFP._tanl;
-}
-
-inline int StiKalmanTrackNode::getHelicity()  const
-{
-  return (mFP._curv < 0) ? -1 : 1;
-}
-
-
-inline double StiKalmanTrackNode::pitchAngle() const
-{
-  return atan(mFP._tanl);
-}
-
-inline double StiKalmanTrackNode::sinCrossAngle() const
-{
-  return mFP._sinCA;
-}
-
-inline double StiKalmanTrackNode::crossAngle() const
-{
-  return asin(mFP._sinCA);
-}
-
-
-/*! Calculate/return the track momentum
-  <p>
-  Calculate the track  momentum in GeV/c based on this node's track parameters.
-  <p>
-  The momentum is calculated based on the track curvature held by this node. A minimum
-  curvature of 1e-12 is allowed. 
-*/
-inline double StiKalmanTrackNode::getP() const
-{
-  return (getPt()*::sqrt(1.+mFP._tanl*mFP._tanl));
-}
-
-inline double StiKalmanTrackNode::mcs2(double relRadThickness, double beta2, double p2)
-{
-  return 14.1*14.1*relRadThickness/(beta2*p2*1e6);
-}
 
 //stl helper functor
 
@@ -487,12 +426,6 @@ inline double StiKalmanTrackNode::getDedx() const
   if(dx>0 && de>0) return de/dx;
   return -1;
 }
-
-inline void StiKalmanTrackNode::setCurvature(double curvature)
-{
-  mFP._curv=curvature;
-}
-
 
 #endif
 

@@ -10,7 +10,6 @@ using namespace std;
 
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
-#include "Sti/Base/Loadable.h"
 
 class Parameter;
 
@@ -18,7 +17,7 @@ typedef vector<Parameter*> ParameterVector;
 typedef ParameterVector::iterator ParameterIterator;
 typedef ParameterVector::const_iterator ParameterConstIterator;
 
-class Parameters  : public Named, public Described, public Loadable
+class Parameters  : public Named, public Described
 {
  public:
   Parameters();

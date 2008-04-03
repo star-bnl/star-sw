@@ -1,7 +1,12 @@
 //StiHit.cxx
 //M.L. Miller (Yale Software)
 //04/01
-#include <TCL.h>
+#include "RVersion.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include <Stiostream.h>
 #include "StEventTypes.h"
 #include "StiHit.h"

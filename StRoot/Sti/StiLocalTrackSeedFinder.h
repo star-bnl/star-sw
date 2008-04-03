@@ -52,8 +52,6 @@ public:
   friend ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder & f);
 
 protected:
-  void loadDS(TDataSet&);
-  void loadFS(ifstream&);
   StiKalmanTrack*makeTrack(StiHit* hit);
   ///Extend hit looking for closest neighbor in z
   bool extendHit(StiHit & hit);
@@ -75,7 +73,6 @@ protected:
 //VP  StiHelixCalculator     _helixCalculator;
 //VP  StiHelixFitter         _helixFitter;
   StiDefaultTrackFilter  _trackFilter;
-  StiLocalTrackSeedFinderParameters _pars;
   double fRxyMin;
  private:
   //The following are not implemented, as they are non-trivial
@@ -105,11 +102,6 @@ inline bool StiLocalTrackSeedFinder::isReset()
 inline Filter<StiTrack> * StiLocalTrackSeedFinder::getTrackFilter() 
 {
   return &_trackFilter;
-}
-
-inline EditableParameters       & StiLocalTrackSeedFinder::getParameters()
-{
-  return _pars;
 }
 
 #endif

@@ -3,10 +3,8 @@
 #ifndef StiKalmanTrackFinder_H_INCLUDED
 #define StiKalmanTrackFinder_H_INCLUDED
 #include "Sti/StiTrackFinder.h"
-#include "Sti/StiKalmanTrackFinderParameters.h"
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
-#include "Sti/Base/Loadable.h"
 
 class TStopwatch;
 class StiDetector;
@@ -31,7 +29,7 @@ template<class Factorized>class Factory;
 ///to us gracioulsy by Jouri Belikov from the ALICE       
 ///collaboration. i.e. code reproduced with autorization. 
 ///
-class StiKalmanTrackFinder : public Loadable, public StiTrackFinder, public Named, public Described
+class StiKalmanTrackFinder : public StiTrackFinder, public Named, public Described
 {
 public:
   StiKalmanTrackFinder(StiToolkit *toolkit);
@@ -40,8 +38,6 @@ public:
   virtual void initialize();
   /// Set timing of tracking
           void setTiming();
-  /// Set default tracking parameter values
-  virtual void setDefaults();
   /// Find all tracks of the currently loaded event
   virtual void findTracks(); 
   /// Find/extend the given track, in the given direction
@@ -58,8 +54,8 @@ public:
           void extendTracksToVertices(const std::vector<StiHit*> &vertices);
   /// Reset the tracker
   virtual void reset();
-  virtual void unset(){;}
-
+  virtual void unset(){}
+  
   /// Clear the tracker
   virtual void clear();
   /// Finish the tracker
@@ -67,22 +63,11 @@ public:
   /// Get the track filter currently used by the tracker
   virtual Filter<StiTrack> * getTrackFilter();
   /// Get the vertex finder used by this track finder
-  void setParameters(const StiKalmanTrackFinderParameters &par);
-  virtual EditableParameters & getParameters();
   void doInitLayer(int trackingDirection);
   void doNextDetector();
   void doFinishLayer();
   void doFinishTrackSearch();
   void doNextTrackStep();
-  
-  void load(const string & userFileName, StMaker & source)
-    {
-      Loadable::load(userFileName,source);
-    }
-  void loadDS(TDataSet&);
-  void loadFS(ifstream&);
-  
-  StiKalmanTrackFinderParameters  _pars;
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
 private:

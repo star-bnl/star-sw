@@ -39,8 +39,9 @@ void StiTpcHitLoader::loadHits(StEvent* source,
   StiHit* stiHit;
   const StTpcHitCollection* tpcHits = source->tpcHitCollection();
   if (!tpcHits) return;
-  unsigned int stiSector;
-  for (unsigned int sector=_minSector-1; sector<_maxSector; sector++)    {
+  UInt_t stiSector;
+  UInt_t noHitsLoaded = 0;
+  for (UInt_t sector=_minSector-1; sector<_maxSector; sector++)    {
 #if 0
     stiSector = sector;
 #else
@@ -52,9 +53,9 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       cout << "StiTpcHitLoader::loadHits(StEvent* source) -W- no hits for sector:"<<sector<<endl;
       break;
     }
-    //    for (unsigned int row=0; row<45; row++)
+    //    for (UInt_t row=0; row<45; row++)
     Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
-    for (unsigned int row=_minRow-1; row<_maxRow; row++) {
+    for (UInt_t row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
       if (!padrowHits) break;
@@ -75,7 +76,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	if (hit->sector() <= 12) stiHit->setVz( driftvel);
 	else                     stiHit->setVz(-driftvel);
         _hitContainer->add( stiHit );
-	
+	noHitsLoaded++;
       }
       if (hitTest.width()>0.1) {
 	printf("**** TPC hits too wide (%g) sector=%d row%d\n"
@@ -84,6 +85,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       
     }
   }
-  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done" << endl;
+  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done with " << noHitsLoaded << " hits" <<  endl;
 }
 //________________________________________________________________________________

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.82 2007/10/17 15:32:35 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.83 2008/04/03 20:04:05 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.83  2008/04/03 20:04:05  fisyak
+ * Straighten out DB access via chairs
+ *
  * Revision 2.82  2007/10/17 15:32:35  fisyak
  * rename Hft => Pxl
  *
@@ -794,7 +797,6 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       StHit *hh = (StHit*)stiHit->stHit();
 // 	Fill StHit errors for Gene
       FillStHitErr(hh,node);
-
       if (!detector) 		continue;
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());

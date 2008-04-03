@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.185 2008/03/25 18:03:11 perev Exp $
+// $Id: StiMaker.cxx,v 1.186 2008/04/03 20:04:05 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.186  2008/04/03 20:04:05  fisyak
+// Straighten out DB access via chairs
+//
 // Revision 1.185  2008/03/25 18:03:11  perev
 // remove field field from everythere
 //
@@ -367,7 +370,6 @@ More detailed: 				<br>
 #include "StiMaker.h"
 #include "TFile.h"
 #include "TCanvas.h"
-#include "Sti/StiTrackingParameters.h"
 #include "Sti/StiKalmanTrackFinderParameters.h"
 #include "Sti/StiKalmanTrackFitterParameters.h"
 #include "StiTpc/StiTpcDetectorBuilder.h"
@@ -377,7 +379,6 @@ More detailed: 				<br>
 #include "StiUtilities/StiDebug.h"
 #include "StiUtilities/StiPullEvent.h"
 #include "TDataSet.h"
-#include "tables/St_TrackingParameters_Table.h"
 #include "tables/St_KalmanTrackFinderParameters_Table.h"
 #include "tables/St_KalmanTrackFitterParameters_Table.h"
 #include "tables/St_HitError_Table.h"
@@ -588,12 +589,10 @@ Int_t StiMaker::InitRun(int run)
       if (IAttr("useTracker")) {
 
         _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
-	_tracker->load("trackFinderPars.dat",*this);
         if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
         if ( IAttr("useTiming"    )) _tracker->setTiming();
 
         _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
-	_fitter->load("trackFitterPars.dat",*this);
 
 //        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
       }

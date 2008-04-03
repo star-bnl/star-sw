@@ -1,90 +1,63 @@
-#ifndef StiKalmanTrackFinderParameters_H
-#define StiKalmanTrackFinderParameters_H 1
+#ifndef StiKalmanTrackFinderParameters_h
+#define StiKalmanTrackFinderParameters_h
+#include <string.h>
+#include "TChair.h"
+#include "tables/St_KalmanTrackFinderParameters_Table.h"
 
-#include "Sti/Base/EditableParameters.h"
-#include "TDataSet.h"
-
-class StiKalmanTrackFinder;
-class StiKalmanTrackNode;
-class StiKalmanTrack;
-
-class StiKalmanTrackFinderParameters : public EditableParameters
-{
-  friend class StiKalmanTrackFinder;
-  friend class StiKalmanTrack;
-  friend class StiKalmanTrackNode;
-public: 
-  StiKalmanTrackFinderParameters();
-  StiKalmanTrackFinderParameters(const StiKalmanTrackFinderParameters & pars);
-  ~StiKalmanTrackFinderParameters();
-  const StiKalmanTrackFinderParameters & operator=(const StiKalmanTrackFinderParameters & p);
-
-  void setElossCalculated(bool option);
-  void setMCSCalculated(bool option);
-  void setMassHypothesis(double m);
-  void setMinContiguousHitCount(int count);
-  void setMaxNullCount(int count);
-  void setMaxContiguousNullCount(int count);
-  void setHitRegions(int rs);
-  void setHitWeights(int ws);
-  int  hitWeight(int rxy) const;
-  int  sumWeight()	  const {return 20;}
-  double getMassHypothesis() const;
-  void   initialize();
-  virtual void loadDS(TDataSet&);
-//  virtual void loadFS(ifstream& inFile);
-  friend ostream& operator<<(ostream& os, const StiKalmanTrackFinderParameters& par);
-
+class StiKalmanTrackFinderParameters : public TChair {
+ public:
+  static StiKalmanTrackFinderParameters* 	instance();
+  KalmanTrackFinderParameters_st 	*Struct(Int_t i = 0) 	{return ((St_KalmanTrackFinderParameters*) Table())->GetTable()+i;}
+  UInt_t        getNumRows()                    {return GetNRows();}
+  Int_t         useMcAsRec(Int_t i = 0)         {return Struct(i)->useMcAsRec;}
+  Int_t         useTrackFilter(Int_t i = 0)     {return Struct(i)->useTrackFilter;}
+  Int_t         elossCalculated(Int_t i = 0)    {return Struct(i)->elossCalculated;}
+  Int_t         mcsCalculated(Int_t i = 0)      {return Struct(i)->mcsCalculated;}
+  //  Double_t      field(Int_t i = 0)      {return Struct(i)->field;}
+  Int_t         maxNullCount(Int_t i = 0)       {return Struct(i)->maxNullCount;}
+  Int_t         maxContigNullCount(Int_t i = 0) {return Struct(i)->maxContigNullCount;}
+  Int_t         minCountForReset(Int_t i = 0)   {return Struct(i)->minCountForReset;}
+  Int_t         HitRegions(Int_t i = 0)         {return Struct(i)->mHitRegions;}
+  Int_t         HitWeights(Int_t i = 0)         {return Struct(i)->mHitWeights;}
+  Double_t      maxChi2Vertex(Int_t i = 0)      {return Struct(i)->maxChi2Vertex;}
+  Double_t      massHypothesis(Int_t i = 0)     {return Struct(i)->massHypothesis;}
+  Double_t      maxDca2dZeroXY(Int_t i = 0)     {return Struct(i)->maxDca2dZeroXY;}
+  Double_t      maxDca3dVertex(Int_t i = 0)     {return Struct(i)->maxDca3dVertex;}
+  Double_t      getMassHypothesis()             {return massHypothesis();}
+  Int_t         maxContiguousNullCount()        {return maxContigNullCount();}
+  Int_t         minContiguousHitCountForNullReset() {return minCountForReset();}
+  void          setHitRegions(Int_t rs) {
+    Int_t i=0;
+    for (i=0;rs;i++) {mHitRegions[i]=rs%100; rs/=100;}
+    mHitRegions[i]=10000;
+  }
+  void          setHitWeights(Int_t ws) {
+    Int_t i=0;
+    for (i=0;ws;i++) {mHitWeights[i]=ws%100; ws/=100;}
+    mHitWeights[i]=0;
+  }
+  Int_t         hitWeight(Int_t rxy) const {
+    if (rxy>50) return 0;
+    Int_t i=0; for (i=0;rxy>mHitRegions[i];i++) {}
+    return mHitWeights[i];
+  }
+  Int_t         sumWeight()	  const {return 20;}
+  
  protected:
-  char   mBeg[1];
-  bool   useMcAsRec;
-  bool   elossCalculated;
-  bool   mcsCalculated; 
-  int    maxNullCount;
-  int    maxContiguousNullCount; 
-  int    minContiguousHitCountForNullReset;
-  int    mHitRegions[4];	//20,50 means 0<svtHit<20, 20<ssdHit<50
-  int    mHitWeights[4];	//Coeffs of nhits. sum must be >=20
-  double maxChi2Vertex;
-  double massHypothesis;
-  double maxDca2dZeroXY;
-  double maxDca3dVertex;
-  char   mEnd[1];
-
+  StiKalmanTrackFinderParameters(St_KalmanTrackFinderParameters *table=0) : 
+    TChair(table) {
+    memset(mBeg,0,mEnd-mBeg+1);
+    setHitRegions(HitRegions());
+    setHitWeights(HitWeights());
+  }
+  virtual ~StiKalmanTrackFinderParameters() {fgInstance = 0;}
+  Char_t   mBeg[1];
+  Int_t    mHitRegions[4];	//20,50 means 0<svtHit<20, 20<ssdHit<50
+  Int_t    mHitWeights[4];	//Coeffs of nhits. sum must be >=20
+  Char_t   mEnd[1];
+ private:
+  static StiKalmanTrackFinderParameters* fgInstance;
+  ClassDefineChair(StiKalmanTrackFinderParameters,St_KalmanTrackFinderParameters, KalmanTrackFinderParameters_st )
+  ClassDef(StiKalmanTrackFinderParameters,1)  //C++ TChair for KalmanTrackFinderParameters table class
 };
-
-inline   void StiKalmanTrackFinderParameters::setElossCalculated(bool option)
-{
-  elossCalculated = option;
-}
-
-inline   void StiKalmanTrackFinderParameters::setMCSCalculated(bool option)
-{
-  mcsCalculated = option;
-}
-
-inline   void StiKalmanTrackFinderParameters::setMassHypothesis(double m)
-{
-  massHypothesis = m;
-}
-
-inline   void   StiKalmanTrackFinderParameters::setMinContiguousHitCount(int count)
-{
-  minContiguousHitCountForNullReset = count;
-}
-
-inline   void   StiKalmanTrackFinderParameters::setMaxNullCount(int count)
-{
-  maxNullCount = count;
-}
-
-inline   void   StiKalmanTrackFinderParameters::setMaxContiguousNullCount(int count)
-{
-  maxContiguousNullCount = count;
-}
-
-inline  double   StiKalmanTrackFinderParameters::getMassHypothesis() const
-{
-  return massHypothesis;
-}
 #endif

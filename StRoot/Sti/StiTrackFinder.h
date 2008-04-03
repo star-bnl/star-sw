@@ -30,7 +30,6 @@ public:
   /// Get the track filter currently used by the tracker
   virtual Filter<StiTrack> * getTrackFilter()= 0;
   /// Set the vertex finder used by this tracker
-  virtual EditableParameters & getParameters()=0;
   
   void setComb(int comb=7)		{mComb = comb;}
   int  useComb() const			{return mComb;}

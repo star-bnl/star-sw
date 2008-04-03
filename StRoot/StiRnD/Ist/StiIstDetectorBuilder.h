@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.h,v 1.5 2007/04/23 00:44:58 wleight Exp $
+// $Id: StiIstDetectorBuilder.h,v 1.6 2008/04/03 20:04:21 fisyak Exp $
 // 
 // $Log: StiIstDetectorBuilder.h,v $
+// Revision 1.6  2008/04/03 20:04:21  fisyak
+// Straighten out DB access via chairs
+//
 // Revision 1.5  2007/04/23 00:44:58  wleight
 // Made all layers, not just inner ones, active
 //
@@ -45,8 +48,6 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 	virtual ~StiIstDetectorBuilder(); 
 	virtual void buildDetectors(StMaker& source);
 	virtual void AverageVolume(TGeoPhysicalNode *nodeP);
-	virtual void loadDS(TDataSet&);
-	//virtual void setDefaults();
 	virtual void useVMCGeometry();		
 	void    setSiMat(StiMaterial     *m) {_siMat = m;}
 	void    setHybridMat(StiMaterial *m) {_hybridMat = m;}
@@ -60,11 +61,5 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 	StiMaterial *_hybridMat;
 	StiPlanarShape * _waferShape[1];
 	StiPlanarShape * _hybridShape[1];
-	//StSsdConfig   * _config;
-	//StSsdGeometry * _geometry;
-	//StSsdGeometry * _dimensions;
-	StiDefaultHitErrorCalculator _hitCalculator1;
-	StiDefaultHitErrorCalculator _hitCalculator2;
-	StiDefaultHitErrorCalculator _hitCalculator3;
 };
 #endif 

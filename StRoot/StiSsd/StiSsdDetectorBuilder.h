@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.h,v 1.11 2006/10/09 15:47:59 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.h,v 1.12 2008/04/03 20:04:22 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.h,v $
+// Revision 1.12  2008/04/03 20:04:22  fisyak
+// Straighten out DB access via chairs
+//
 // Revision 1.11  2006/10/09 15:47:59  fisyak
 // use Normal represantation, remove StiDedxCalculator
 //
@@ -34,8 +37,6 @@ class StiSsdDetectorBuilder : public StiDetectorBuilder
         StiSsdDetectorBuilder(bool active,const string & inputFile);
 	virtual ~StiSsdDetectorBuilder(); 
 	virtual void buildDetectors(StMaker& source);
-	virtual void loadDS(TDataSet&);
-	virtual void setDefaults();
 	virtual void useVMCGeometry();		
 	void         setSiMat(StiMaterial     *m) {_siMat = m;}
 	void         setHybridMat(StiMaterial *m) {_hybridMat = m;}
@@ -45,7 +46,6 @@ class StiSsdDetectorBuilder : public StiDetectorBuilder
  protected:
 	StiMaterial *_siMat;
 	StiMaterial *_hybridMat;
-	StiDefaultHitErrorCalculator _hitCalculator;
 	ssdWafersPosition_st *ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers);
 };
 #endif 

@@ -2,18 +2,15 @@
 #define StiTrackFitter_H 1
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
-#include "Sti/Base/Loadable.h"
 
 class StiTrack;
 class EditableParameters;
 
-class StiTrackFitter //: public Named, public Described, public Loadable
-{
+class StiTrackFitter {
 public:
     StiTrackFitter() {	}
     virtual ~StiTrackFitter() {}
     virtual int fit(StiTrack * track, int direction)=0;
-    virtual EditableParameters & getParameters()=0;
 };
 
 #endif

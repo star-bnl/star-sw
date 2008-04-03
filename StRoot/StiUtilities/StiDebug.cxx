@@ -8,6 +8,7 @@
 #include "TGraph.h"
 #include "TSystem.h"
 #include "TObjArray.h"
+#include "TH1.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 static int myReady=0;

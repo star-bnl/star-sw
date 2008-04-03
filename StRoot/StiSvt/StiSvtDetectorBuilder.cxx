@@ -17,31 +17,47 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiIsSvtActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
+#include "StiSvtHitErrorCalculator.h"
+#include "StiSvtTrackingParameters.h"
 #include <stdio.h>
 #include "tables/St_HitError_Table.h"
 #include "StiSvtLayerLadder.h"
 #include "StThreeVectorD.hh"
 /*
   Geant names: SVTT the mother of all SVT volumes
-               SFMO: is the mother of all Silicon Strip Detector volumes
-	       SOUM: Outer shileding structure
-	       SXR[L,1,2]: Circular water feeds
-	       SCBM: Mother of All Cables
-	       SALM: aluminum shield mesh
-	       SOSH: SVT outer shield "
-	       SISH: SVT inner shield "
-	       SLY[D,1,2,3,4,5]: layer mother
-	       SROD: Support rod
-	       SBSP: Beampipe support mother
-	       SCON: Support cone mother
-	       SBWC: water manifold to support cone bracket mother
-	       SWMM: water manifold mother
-	       SIES: Volume to hold inner endring screws
-	       SOES: Volume to hold outer endring screws
-	       SBRG: Bracket joining the end rungs
-	       SOER: outer end ring
-	       SIRT: inner end ring tube piece 
-               SIRP: inner end ring polygon piece 
+                 SFMO: is the mother of all Silicon Strip Detector volumes
+	         SOUM: Outer shileding structure
+	         SXR[L,1,2]: Circular water feeds
+	         SCBM: Mother of All Cables
+	         SALM: aluminum shield mesh
+	         SOSH: SVT outer shield "
+	         SISH: SVT inner shield "
+	         SLY[D,1,2,3,4,5]: layer mother
+	            SLS[D,1,2,3,4,5]: ladder mother
+                      SELE: electronics mother volume
+                      SLDI: a ladder volume
+		        SPCB: the G10 PCB
+			SRHC: roha cell wafer supports
+			STAB: the Berrillium tabs and the ends of the wafer carriers
+			SBER: the Berillium wafer carrier rails
+			STLI: the wafer pack container
+			  STSI:  a single waver container
+			    SVTD: an active wafer volume
+			      SSIR: a non-sensitive up-down border of the wafer
+			      SSID: a non-sensitive left-right border of the wafer
+			      STRA: a trapezoid of triangular shape
+			        Total epoxy: ~10 pounds = 4.57 kG ==> 4.57 / 216 = 21.16 g/wafer *7 => 148.1 g/big ladder
+	         SROD: Support rod
+	         SBSP: Beampipe support mother
+	         SCON: Support cone mother
+	         SBWC: water manifold to support cone bracket mother
+	         SWMM: water manifold mother
+	         SIES: Volume to hold inner endring screws
+	         SOES: Volume to hold outer endring screws
+	         SBRG: Bracket joining the end rungs
+	         SOER: outer end ring
+	         SIRT: inner end ring tube piece 
+                 SIRP: inner end ring polygon piece 
 
   SVT Layer and Ladder Naming Convention
   Hardware       StiSvtBuilder
@@ -88,21 +104,15 @@
  */
 static Int_t _debug = 0;
 StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, const string & inputFile)
-  : StiDetectorBuilder("Svt",active,inputFile), _siMat(0), _hybridMat(0)
-{
-  _trackingParameters.setName("svtTrackingParameters");
-  _calc.setName("svtHitError");
-}
+  : StiDetectorBuilder("Svt",active,inputFile), _siMat(0), _hybridMat(0){}
 
-StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
-{}
+StiSvtDetectorBuilder::~StiSvtDetectorBuilder() {}
 
 void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 {
   char name[50];  
 	int nRows;
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Started" << endl;
-	load(_inputFile, source);
 
 	St_DataSet *dataSet = NULL;
   dataSet = source.GetDataSet("StSvtConfig");
@@ -131,6 +141,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
   double ionization = _siMat->getIonization();
   StiElossCalculator * siElossCalculator = 
     new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
+  _trackingParameters = (StiTrackingParameters *) StiSvtTrackingParameters::instance();
   for (int layer=0;layer<nRows;layer++)    {
     cout << "  "<<layer<<"     "<<_config->getNumberOfLadders(1+layer/2)/2 << "   " 
 	 << _geometry->getBarrelRadius(layer+1) << endl;
@@ -197,7 +208,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
       pLadder->setMaterial(_siMat);
       pLadder->setShape(_waferShape[layer]);
       pLadder->setPlacement(pPlacement); 
-      pLadder->setHitErrorCalculator(&_calc);
+      pLadder->setHitErrorCalculator(StiSvtHitErrorCalculator::instance());
       pLadder->setKey(1,layer);
       pLadder->setKey(2,ladder);
       pLadder->setElossCalculator(siElossCalculator);
@@ -215,36 +226,6 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
       }
     }
   }
-}
-//________________________________________________________________________________
-void StiSvtDetectorBuilder::loadFS(ifstream& iFile)
-{
-	cout << "StiSvtDetectorBuilder::loadFS(ifstream& iFile) -I- Started" << endl;
-	_trackingParameters.loadFS(iFile);
-	_calc.loadFS(iFile);
-	cout << "StiSvtDetectorBuilder::loadFS(ifstream& iFile) -I- Started" << endl;
-}
-
-void StiSvtDetectorBuilder::loadDS(TDataSet& ds)
-{
-	cout << "StiSvtDetectorBuilder::loadDS(TDataSet* ds) -I- Started" << endl;
-	_trackingParameters.loadDS(ds);
-	_calc.loadDS(ds);
-	cout << "StiSvtDetectorBuilder::loadDS(TDataSet* ds) -I- Done" << endl;
-}
-
-
-void StiSvtDetectorBuilder::setDefaults()
-{
-  cout << "StiSvtDetectorBuilder::setDefaults() -I- Started" << endl;
-  _trackingParameters.setMaxChi2ForSelection(5.);
-  _trackingParameters.setMinSearchWindow(1.);
-  _trackingParameters.setMaxSearchWindow(4.);
-  _trackingParameters.setSearchWindowScaling(10.);
-  _calc.set(.0009,0.004,0.04,.0009,0.0032,0.09); 
-  cout << _trackingParameters << endl;
-  cout << _calc<<endl;
-  cout << "StiSvtDetectorBuilder::setDefaults() -I- Done" << endl;
 }
 //________________________________________________________________________________
 void StiSvtDetectorBuilder::useVMCGeometry() {
@@ -318,7 +299,7 @@ void StiSvtDetectorBuilder::useVMCGeometry() {
     gGeoManager->CdTop();
     gGeoManager->cd(pathT); path = pathT;
     TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-    if (! nodeT) continue;;
+    if (! nodeT) continue;
     StiVMCToolKit::LoopOverNodes(nodeT, path, SvtVolumes[i].name, MakeAverageVolume);
   }
 }

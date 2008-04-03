@@ -1,121 +1,27 @@
-/*!
- * $Id: StiTrackingParameters.h,v 2.5 2004/02/19 20:42:03 pruneau Exp $  
- *
- * $Log: StiTrackingParameters.h,v $
- * Revision 2.5  2004/02/19 20:42:03  pruneau
- * Added the noton of loadable
- *
- * Revision 2.4  2004/01/30 21:29:42  pruneau
- * Added load function to load values from db
- *
- * Revision 2.3  2003/10/28 15:55:42  andrewar
- * Added set method for parameters from input txt file.
- *
- * Revision 2.2  2003/07/30 17:04:20  andrewar
- * Added log and version id bars.
- *
- *
- */
+#ifndef StiTrackingParameters_h
+#define StiTrackingParameters_h
 
-#ifndef StiTrackingParameters_H
-#define StiTrackingParameters_H 1
+#include "TChair.h"
+#include "tables/St_TrackingParameters_Table.h"
 
-#include "Sti/Base/EditableParameters.h"
-#include "TDataSet.h"
-#include "Stiostream.h"
-
-class StiTracking;
-class StiKalmanTrackNode;
-class StiKalmanTrack;
-class TrackingParameters_st;
-
-using std::iostream;
-using std::ifstream;
-
-
-class StiTrackingParameters : public EditableParameters
-{
-public: 
-  StiTrackingParameters();
-	StiTrackingParameters(const string & name,
-												const string & description);
-  StiTrackingParameters(const string & name,
-			const string & description,
-			double minSearchWindow,
-			double maxSearchWindow,
-			double searchWindowScaling,
-			double maxChi2ForSelection);
-  StiTrackingParameters(const StiTrackingParameters & pars);
-  ~StiTrackingParameters();
-  const StiTrackingParameters & operator=(const StiTrackingParameters & p);
-  virtual void initialize();
-	virtual void loadDS(TDataSet&);
-  virtual void loadFS(ifstream& inFile);
-  void setMaxChi2ForSelection(double chi);
-  void setMinSearchWindow(double val);
-  void setMaxSearchWindow(double val);
-  void setSearchWindowScaling(double val);
-  friend ostream& operator<<(ostream& os, const StiTrackingParameters& par);
-  bool   active() const;
-  double getMinSearchWindow() const;
-  double getMaxSearchWindow() const;
-  double getSearchWindowScale() const;
-  double getMaxChi2ForSelection() const;
-	void setDefaults(){};
+class StiTrackingParameters : public TChair {
+ public:
+  TrackingParameters_st   *Struct(Int_t i = 0)  const {return ((St_TrackingParameters*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	const {return GetNRows();}
+  Double_t 	minSearch(Int_t i = 0)   	const {return Struct(i)->minSearch;}
+  Double_t 	maxSearch(Int_t i = 0)   	const {return Struct(i)->maxSearch;}
+  Double_t 	scaling(Int_t i = 0)     	const {return Struct(i)->scaling;}
+  Double_t 	maxChi2(Int_t i = 0)     	const {return Struct(i)->maxChi2;}
+  Double_t      getMinSearchWindow()            const {return minSearch();}
+  Double_t      getMaxSearchWindow()            const {return maxSearch();}
+  Double_t      getSearchWindowScale()          const {return scaling();}
+  Double_t      getMaxChi2ForSelection()        const {return maxChi2();}
+  
  protected:
-  bool   _active;
-  bool   _used;
-  double _minSearchWindow;
-  double _maxSearchWindow;
-  double _searchWindowScaling;
-  double _maxChi2ForSelection;
+  StiTrackingParameters(St_TrackingParameters *table=0) : TChair(table) {}
+  virtual ~StiTrackingParameters() {}
+ private:
+  ClassDefineChair(StiTrackingParameters,St_TrackingParameters, TrackingParameters_st )
+  ClassDef(StiTrackingParameters,1) //C++ TChair for TrackingParameters table class
 };
-
-inline void StiTrackingParameters::setMaxChi2ForSelection(double chi)
-{
-  _maxChi2ForSelection = chi;
-}
-
-inline void StiTrackingParameters::setMinSearchWindow(double val)
-{
-  _minSearchWindow = val;
-}
-
-inline void StiTrackingParameters::setMaxSearchWindow(double val)
-{
-  _maxSearchWindow = val;
-}
-
-inline void StiTrackingParameters::setSearchWindowScaling(double val)
-{
-  _searchWindowScaling = val;
-}
-
-
-inline double StiTrackingParameters::getMinSearchWindow() const
-{
-  return _minSearchWindow;
-}
-
-inline double StiTrackingParameters::getMaxSearchWindow() const
-{
-  return _maxSearchWindow;
-}
-
-inline double StiTrackingParameters::getSearchWindowScale() const
-{
-  return _searchWindowScaling;
-}
-
-inline double StiTrackingParameters::getMaxChi2ForSelection() const
-{
-  return _maxChi2ForSelection;
-}
-
-inline bool StiTrackingParameters::active() const
-{
-  return _active;
-}
-
-
 #endif

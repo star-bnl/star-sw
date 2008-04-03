@@ -1,37 +1,32 @@
-#ifndef StiLocalTrackSeedFinderParameters_H
-#define StiLocalTrackSeedFinderParameters_H
-#include "Sti/Base/EditableParameters.h"
+#ifndef StiLocalTrackSeedFinderParameters_h
+#define StiLocalTrackSeedFinderParameters_h
 
-class StiLocalTrackSeedFinderParameters : public EditableParameters
-{
-public: 
-  StiLocalTrackSeedFinderParameters();
-  StiLocalTrackSeedFinderParameters(const StiLocalTrackSeedFinderParameters & pars);
-  ~StiLocalTrackSeedFinderParameters();
-  const StiLocalTrackSeedFinderParameters & operator=(const StiLocalTrackSeedFinderParameters & p);
-  void   initialize();
-  void loadDS(TDataSet&);
-  void loadFS(ifstream& inFile);
-  friend class StiLocalTrackSeedFinder;
-  friend  ostream& operator<<(ostream& os, const StiLocalTrackSeedFinderParameters& par);
+#include "TChair.h"
+#include "tables/St_LocalTrackSeedFinder_Table.h"
+
+class StiLocalTrackSeedFinderParameters : public TChair {
+ public:
+  static StiLocalTrackSeedFinderParameters* 	instance();
+  LocalTrackSeedFinder_st 	*Struct(Int_t i = 0) 	{return ((St_LocalTrackSeedFinder*) Table())->GetTable()+i;}
+  UInt_t     	getNumRows()                	{return GetNRows();}
+  Double_t 	deltaY(Int_t i = 0) 	{return Struct(i)->deltaY;}
+  Double_t 	deltaZ(Int_t i = 0) 	{return Struct(i)->deltaZ;}
+  Double_t 	mExtrapDeltaY(Int_t i = 0) 	{return Struct(i)->mExtrapDeltaY;}
+  Double_t 	mExtrapDeltaZ(Int_t i = 0) 	{return Struct(i)->mExtrapDeltaZ;}
+  Int_t 	seedLength(Int_t i = 0) 	{return Struct(i)->seedLength;}
+  Int_t 	maxSkipped(Int_t i = 0) 	{return Struct(i)->maxSkipped;}
+  Int_t 	extrapMaxLength(Int_t i = 0) 	{return Struct(i)->extrapMaxLength;}
+  Int_t 	extrapMinLength(Int_t i = 0) 	{return Struct(i)->extrapMinLength;}
+  Int_t 	useOrigin(Int_t i = 0) 	{return Struct(i)->useOrigin;}
+  Double_t 	extrapDeltaY() 	{return mExtrapDeltaY();}
+  Double_t 	extrapDeltaZ() 	{return mExtrapDeltaZ();}
+  
  protected:
-
-  //define search window in the next layer when connecting two points
-  double _deltaY;
-  double _deltaZ;
-  //define the number of points to connect
-  int _seedLength;
-  //define search window in the next layer when extending a coonection of points
-  double _extrapDeltaY;
-  double _extrapDeltaZ;
-  //Define the max number we can skip
-  int _maxSkipped;
-  //define the Min/Max number of points to extrapolate
-  int _extrapMinLength;
-  int _extrapMaxLength;
-  //Use the origin to calculate helix?
-  bool _useOrigin;  
-  bool _doHelixFit; //true-> fit, false-> calculate
+  StiLocalTrackSeedFinderParameters(St_LocalTrackSeedFinder *table=0) : TChair(table) {}
+  virtual ~StiLocalTrackSeedFinderParameters() {fgInstance = 0;}
+ private:
+  static StiLocalTrackSeedFinderParameters* fgInstance;
+  ClassDefineChair(StiLocalTrackSeedFinderParameters,St_LocalTrackSeedFinder, LocalTrackSeedFinder_st )
+  ClassDef(StiLocalTrackSeedFinderParameters,1) //C++ TChair for LocalTrackSeedFinder table class
 };
-
 #endif

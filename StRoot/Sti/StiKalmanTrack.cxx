@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.100 2008/03/24 21:38:46 jeromel Exp $
- * $Id: StiKalmanTrack.cxx,v 2.100 2008/03/24 21:38:46 jeromel Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.101 2008/04/03 20:03:33 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.101 2008/04/03 20:03:33 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.101  2008/04/03 20:03:33  fisyak
+ * Straighten out DB access via chairs
+ *
  * Revision 2.100  2008/03/24 21:38:46  jeromel
  * Undo setTimesUsed() - seeding seems to not take advantage of more hits (TBC)
  *
@@ -266,7 +269,7 @@
  *
  * Revision 2.22  2003/04/22 21:20:05  pruneau
  * Added hit filter
- * Tuning og finder pars
+ * Tuning of finder pars
  * Tuning of KalmanTrackNode
  *
  * Revision 2.21  2003/04/10 12:02:13  pruneau
@@ -343,12 +346,10 @@
 #else
 #include "TCernLib.h"
 #endif
-
+#include "StMessMgr.h"
 ostream& operator<<(ostream&, const StiHit&);
 
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
-StiKalmanTrackFinderParameters* StiKalmanTrack::pars = 0;
-StiKalmanTrackFitterParameters* StiKalmanTrack::fitpars = 0;
 int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
 int debugCount=0;
@@ -495,14 +496,14 @@ int StiKalmanTrack::getCharge() const
 /// Return the track chi2 per dof
 /// <p>
 /// The track chi2 is calculated from the incremental chi2 of all nodes carrying a hit that contributed to the fit of the track. 
-/// Note that a hit is not counted as contributing to the fit if its chi2 exceeds "fitpars->getMaxChi2()"
+/// Note that a hit is not counted as contributing to the fit if its chi2 exceeds "StiKalmanTrackFitterParameters::instance()->getMaxChi2()"
 /// Note that this function returns "-1" if the number of fit points is smaller than 6
 double  StiKalmanTrack::getChi2() const
 {
   double fitHits   = 0;
   double trackChi2 = 0;
   double nodeChi2  = 0;
-  double maxChi2   = fitpars->getMaxChi2();
+  double maxChi2   = StiKalmanTrackFitterParameters::instance()->getMaxChi2();
   double theChi2 = 1.e+60;
   if (!firstNode) return theChi2;
   theChi2 = 0;
@@ -1068,9 +1069,9 @@ static int nCall=0; nCall++;
 	cout << "StiKalmanTrack::extendToVertex: TrackBefore:" << *this << endl;
 #endif
 
-//    if (chi2<pars->maxChi2Vertex  && d<4.)
+//    if (chi2<StiKalmanTrackFinderParameters::instance()->maxChi2Vertex  && d<4.)
 //    if (                             d<4.)
-      if (chi2<pars->maxChi2Vertex)
+	if (chi2<StiKalmanTrackFinderParameters::instance()->maxChi2Vertex())
 	{
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
 	  *myHit = localVertex;
@@ -1163,19 +1164,6 @@ StiDebug::Break(nCall);
   //cout << " find track done" << endl;
   return trackExtended||trackExtendedOut;
 }
-
-//_____________________________________________________________________________
-void StiKalmanTrack::setParameters(StiKalmanTrackFinderParameters *parameters)
-{
-  pars = parameters;
-}
-
-//_____________________________________________________________________________
-void StiKalmanTrack::setFitParameters(StiKalmanTrackFitterParameters *parameters)
-{
-  fitpars = parameters;
-}
-
 ///Return all the hits associated with this track, including those with a large incremental
 ///chi2 that may not contribute to the fit.
 //_____________________________________________________________________________
@@ -1321,7 +1309,7 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   for (int ITER=0;ITER<mgMaxRefiter;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
-      sTNH.set(fitpars->getMaxChi2()*10,fitpars->getMaxChi2Vtx()*100,errConfidence,iter);
+      sTNH.set(StiKalmanTrackFitterParameters::instance()->getMaxChi2()*10,StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx()*100,errConfidence,iter);
       pPrev = inn->fitPars();
       ePrev = inn->fitErrs(); 
       
@@ -1348,7 +1336,7 @@ if (oldRefit) {
     if (fail>0) 						break;
 //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
-    if (worstNode && worstNode->getChi2()>fitpars->getMaxChi2())     
+    if (worstNode && worstNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2())     
       {//worstNode->getHit()->setTimesUsed(0);
        worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
     if (rejectByHitSet()) { releaseHits()            ; continue;}
@@ -1371,7 +1359,7 @@ if (oldRefit) {
     fail = 13;			//prim node invalid
     if (!vertexNode->isValid()) 				break;
     fail = 99;			//prim node Chi2 too big
-    if ( vertexNode->getChi2()>fitpars->getMaxChi2Vtx())	break;
+    if ( vertexNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx())	break;
     fail = 98;			//too many dropped nodes 
     if (nNBeg*kPctLoss/100 < nNBeg-nNEnd
     &&  nNEnd+kHitLoss < nNBeg)					break;
@@ -1389,7 +1377,7 @@ if (oldRefit) {
       node->setHit(0);
       if (!node->isValid()) 				continue;
       if (node->getChi2()>10000.)			continue;
-      assert(node->getChi2()<=fitpars->getMaxChi2());
+      assert(node->getChi2()<=StiKalmanTrackFitterParameters::instance()->getMaxChi2());
       //hit->setTimesUsed(1);
       node->setHit(hit);
     }
@@ -1670,10 +1658,10 @@ int StiKalmanTrack::rejectByHitSet()  const
     if (!hit) 			continue;
     if (!hit->detector())	continue;
     if (node->getChi2()>1000) 	continue;
-    sum+= pars->hitWeight(int(hit->x()));
+    sum+= StiKalmanTrackFinderParameters::instance()->hitWeight(int(hit->x()));
   }
   if (!sum) return 0;
-  return sum < pars->sumWeight();
+  return sum < StiKalmanTrackFinderParameters::instance()->sumWeight();
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::releaseHits(double rMin,double rMax)
