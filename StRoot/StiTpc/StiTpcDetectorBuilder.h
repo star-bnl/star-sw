@@ -4,7 +4,6 @@
 #include "Sti/StiHitErrorCalculator.h"
 class StTpcPadPlaneI;
 class StTpcDimensionsI;
-class HitError;
 
 class StiTpcDetectorBuilder : public StiDetectorBuilder
 {
@@ -18,9 +17,6 @@ public:
     double phiForSector(unsigned int iSector,     unsigned int nSectors) const;
     double phiForWestSector(unsigned int iSector, unsigned int nSectors) const;
     double phiForEastSector(unsigned int iSector, unsigned int nSectors) const;
-    virtual void loadDS(TDataSet&ds);
-    virtual void loadFS(ifstream &);	
-    virtual void setDefaults();
     void         useVMCGeometry();		
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
  protected:
@@ -28,8 +24,6 @@ public:
     StiMaterial * _fcMaterial;    
     StTpcPadPlaneI   * _padPlane; 
     StTpcDimensionsI * _dimensions; 
-    StiDefaultHitErrorCalculator  _innerCalc;
-    StiDefaultHitErrorCalculator  _outerCalc;
 };
 
 /// Get the azimuthal angle of the given sector

@@ -9,7 +9,6 @@
 #include "Sti/StiTrackingParameters.h"
 #include "Sti/StiMapUtilities.h"
 #include "Sti/Base/Named.h"
-#include "Sti/Base/Loadable.h"
 #include "StThreeVector.hh"
 #include "StiVMCToolKit.h"
 #include "TMath.h"
@@ -39,7 +38,7 @@ typedef detectorMap::value_type detectorMapValType;
   \author Ben Norman (Kent State University) Aug 1, 2001
   \author Claude Pruneau (Wayne State University) Oct 16, 2002
 */
-class StiDetectorBuilder : public Named, public Loadable
+class StiDetectorBuilder : public Named
 {
 public:
 
@@ -55,25 +54,24 @@ public:
   virtual StiDetector * findDetector(const string& szName) const;
   virtual StiDetector * getDetector(unsigned int layer, unsigned int sector) const;
   virtual void setDetector(unsigned int layer, unsigned int sector, StiDetector * detector);
-  virtual unsigned int  getNRows() const;
+///Returns the number of active rows in the detector
+///Rows can be counted radially or longitudinally
+  virtual void setNRows(unsigned int nRows) {if (_detectors.size() < nRows) _detectors.resize(nRows);}
+  virtual unsigned int  getNRows() const {return _detectors.size();}
   virtual unsigned int  getNSectors(unsigned int row=0) const;
-  virtual void setNRows(unsigned int nRows);
-  virtual void setNSectors(unsigned int row, unsigned int nSectors);
+  virtual void setNSectors(unsigned int row, unsigned int nSectors) {
+    setNRows(row+1);if (_detectors[row].size() < nSectors) _detectors[row].resize(nSectors);
+  }
   virtual bool hasMore() const;
   virtual StiDetector* next();
   virtual void build(StMaker&source);
   virtual void buildDetectors(StMaker&source);
-	void load(const string & userFileName, StMaker & source)
-		{
-			Loadable::load(userFileName,source);
-		}
 
   double nice(double angle) const;
-  void setGroupId(int id);
-  int  getGroupId() const;
-  void setTrackingParameters(const TrackingParameters_st & pars);
+  void setGroupId(int id) { _groupId = id;}
+  int  getGroupId() const {return _groupId;}
   void setTrackingParameters(const StiTrackingParameters & pars);
-  StiTrackingParameters & getTrackingParameters();
+  StiTrackingParameters *getTrackingParameters() { return  _trackingParameters;}
   Factory<StiDetector>* getDetectorFactory() {return _detectorFactory;}
   void SetCurrentDetectorBuilder(StiDetectorBuilder *m) {fCurrentDetectorBuilder = m;}
   static StiDetectorBuilder *GetCurrentDetectorBuilder() {return fCurrentDetectorBuilder;}
@@ -96,19 +94,12 @@ public:
   detectorIterator    mDetectorIterator; 
   vector< vector<StiDetector*> > _detectors;
   Factory<StiDetector>*_detectorFactory;
-  StiTrackingParameters _trackingParameters;
+  StiTrackingParameters *_trackingParameters;
   string _inputFile;
   static StiDetectorBuilder* fCurrentDetectorBuilder;
   StiMaterial    * _gasMat; // Mother Volume material
   static   int     _debug;
 };
-
-///Returns the number of active rows in the detector
-///Rows can be counted radially or longitudinally
-inline unsigned int  StiDetectorBuilder::getNRows() const
-{
-  return _detectors.size();
-}
 
 ///Returns the number of sectors (or segments) in a the
 ///given row. Sector are expected to be azimuthally
@@ -124,19 +115,6 @@ inline unsigned int  StiDetectorBuilder::getNSectors(unsigned int row) const
       throw runtime_error(message.c_str());
     }
   return _detectors[row].size();
-}
-
-///Sets the number of the number of rows of active
-///detectors.
-inline void StiDetectorBuilder::setNRows(unsigned int nRows)
-{
-  if (_detectors.size() < nRows) _detectors.resize(nRows);
-}
-
-inline void StiDetectorBuilder::setNSectors(unsigned int row, unsigned int nSectors)
-{
-  setNRows(row+1);
-  if (_detectors[row].size() < nSectors) _detectors[row].resize(nSectors);
 }
 
 inline double StiDetectorBuilder::nice(double angle) const 
@@ -161,31 +139,10 @@ inline  StiDetector * StiDetectorBuilder::getDetector(unsigned int row, unsigned
   return _detectors[row][sector];
 }
 
-
 inline  void StiDetectorBuilder::setDetector(unsigned int row, unsigned int sector, StiDetector *detector)
 {
   setNSectors(row+1,sector+1);
    _detectors[row][sector] = detector;
-}
-
-inline void StiDetectorBuilder::setGroupId(int id)
-{
-  _groupId = id;
-}
-
-inline int  StiDetectorBuilder::getGroupId() const
-{
-  return _groupId;
-}
-
-inline void StiDetectorBuilder::setTrackingParameters(const StiTrackingParameters & pars)
-{
-  _trackingParameters = pars;
-}
-
-inline  StiTrackingParameters & StiDetectorBuilder::getTrackingParameters()
-{
-  return  _trackingParameters;
 }
 
 #endif // ifndef STI_DETECTOR_BUILDER_H

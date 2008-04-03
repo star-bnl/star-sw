@@ -4,16 +4,7 @@
 #include "StiKTNIterator.h"
 
 
-int StiKalmanTrackFitter::_debug = 0;
-
-StiKalmanTrackFitter::StiKalmanTrackFitter()
-{
-  StiKalmanTrack::setFitParameters(&_pars);
-  _pars.setName("KalmanTrackFitterParameters");
-}
-
-StiKalmanTrackFitter::~StiKalmanTrackFitter()
-{}
+Int_t StiKalmanTrackFitter::_debug = 0;
 
 /*! Fit given track with helicoical track model.
   <h3>Notes</h3>
@@ -27,10 +18,10 @@ StiKalmanTrackFitter::~StiKalmanTrackFitter()
       and updates are performed only if nodes hold a hit.
 	</ol>
 */
-int StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
+Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw (Exception)
 {
    enum {kMaxNErr=333};
-static int nCall=0; nCall++;
+static Int_t nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
 
   if (debug() > 2) cout << "SKTFitter::fit() -I- Started:"<<endl;
@@ -43,8 +34,8 @@ StiKalmanTrackNode::Break(nCall);
   StiKTNBidirectionalIterator first;
   StiKTNBidirectionalIterator last;
   StiKTNBidirectionalIterator source;
-  double chi2;
-  int status = 0,nerr =0;
+  Double_t chi2;
+  Int_t status = 0,nerr =0;
   if (!fitDirection) {
     first = track->begin();
     last  = track->end();
@@ -54,12 +45,12 @@ StiKalmanTrackNode::Break(nCall);
   }
   if (debug()) cout << "StiKalmanTrackFitter::fit direction = "  << fitDirection << endl;
 // 1st count number of accepted already good nodes
-  int nGoodNodes = track->getNNodes(3);
+  Int_t nGoodNodes = track->getNNodes(3);
   if (nGoodNodes<3) 			return 1;
 
 
   StiKalmanTrackNode *pNode = 0;
-  int iNode=0; status = 0;
+  Int_t iNode=0; status = 0;
   for (source=first;source!=last;source++) {
     if (nerr>kMaxNErr) return nerr;
     do { //do refit block
@@ -67,8 +58,8 @@ StiKalmanTrackNode::Break(nCall);
       targetNode = &(*source);
       targetDet = targetNode->getDetector();
       targetHit = targetNode->getHit();
-      double oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
-static int myKount=0;myKount++;
+      Double_t oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
+static Int_t myKount=0;myKount++;
       if (!pNode && !targetNode->isValid()) continue;
       //begin refit at first hit
       status = 0;
@@ -97,7 +88,7 @@ static int myKount=0;myKount++;
         targetNode->setChi2(1e52);
         if (tryNode.nudge(targetHit))	{nerr++; break;}
 	chi2 = tryNode.evaluateChi2(targetHit);
-        if ((chi2>_pars.getMaxChi2()))	{nerr++; break;}	//Chi2 is bad
+        if ((chi2>StiKalmanTrackFitterParameters::instance()->getMaxChi2()))	{nerr++; break;}	//Chi2 is bad
         status = tryNode.updateNode();
         if (status) 			{nerr++; break;}
         tryNode.setChi2(chi2);
@@ -115,53 +106,21 @@ static int myKount=0;myKount++;
   return (nerr>kMaxNErr)? nerr:0;
 }
 
-void StiKalmanTrackFitter::setParameters(const StiKalmanTrackFitterParameters & pars)
-{
-  _pars = pars;
-}
-
-EditableParameters & StiKalmanTrackFitter::getParameters()
-{
-  return _pars;
-}
-
-void StiKalmanTrackFitter::loadDS(TDataSet&ds)
-{
-  cout << "StiKalmanTrackFitter::load(TDataSet*ds) -I- Starting" << endl;
-  _pars.loadDS(ds); 
-  cout << "StiKalmanTrackFitter::load(TDataSet*ds) -I- Done" << endl;
-}
-
-void StiKalmanTrackFitter::loadFS(ifstream& inFile)
-{
-  cout << "StiKalmanTrackFitter::load(ifstream& inFile) -I- Starting" << endl;
-  _pars.loadFS(inFile); 
-  cout << "StiKalmanTrackFitter::load(ifstream& inFile) -I- Done" << endl;
-}
-
-void  StiKalmanTrackFitter::setDefaults()
-{
-  cout << "StiKalmanTrackFitter::setDefaults() -I- Starting" << endl;
-  _pars.setDefaults();
-  cout << "StiKalmanTrackFitter::setDefaults() -I- Done" << endl;
-}
-
-
 /*
 	useful diagnostic tool - do not delete.
 
 	if (!targetNode) continue;
 	    {
-	      cout << " StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) -E- [1] targetNode==0" << endl;
+	      cout << " StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) -E- [1] targetNode==0" << endl;
 	      cout << " FIT != TRACKING --- Original Track" << endl;
 	      StiKTNForwardIterator it2(track->getLastNode());
 	      StiKTNForwardIterator end2 = it2.end();
 	      while (it2!=end2) 
 		{
 		  const StiKalmanTrackNode& node2 = *it2;
-		  double x_g = node2.x_g();
-		  double y_g = node2.y_g();
-		  double rt_g2 = sqrt(x_g*x_g+y_g*y_g);
+		  Double_t x_g = node2.x_g();
+		  Double_t y_g = node2.y_g();
+		  Double_t rt_g2 = sqrt(x_g*x_g+y_g*y_g);
 		  cout << "rt=" << rt_g2 << " " << node2 << endl;
 		  ++it2;
 		}

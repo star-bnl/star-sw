@@ -36,8 +36,8 @@ public:
     
     // accessors
     bool isOn() const 			{ return on;}
-    inline bool isActive(double dYlocal, double dZlocal) const;
-    inline bool isActive() const;
+    inline bool isActive(double dYlocal, double dZlocal) const {return (*isActiveFunctor)(dYlocal, dZlocal);}
+    inline bool isActive()                               const {return isActiveFunctor->isActive();}
     bool isContinuousMedium() const 	{ return continuousMedium; }
     bool isDiscreteScatterer() const 	{ return discreteScatterer; }
 
@@ -47,7 +47,7 @@ public:
     StiShape* getShape() const { return shape; }
     StiPlacement* getPlacement() const 	{ return placement; }
 
-    StiIsActiveFunctor* getIsActiveFunctor();
+    StiIsActiveFunctor* getIsActiveFunctor() {return isActiveFunctor;}
 
     // mutators
     void setIsOn(bool val) {on = val;}
@@ -76,14 +76,14 @@ public:
     void setTreeNode( StiCompositeTreeNode<StiDetector> * val) {mNode=val;}
     StiCompositeTreeNode<StiDetector> * getTreeNode() const {return mNode;}
     
-    void setHitErrorCalculator(const StiHitErrorCalculator * calculator);
-    const StiHitErrorCalculator * getHitErrorCalculator() const;
+    void setHitErrorCalculator(const StiHitErrorCalculator * calculator) {_hitErrorCalculator = calculator;}
+    const StiHitErrorCalculator * getHitErrorCalculator() const {return _hitErrorCalculator;}
 
-    void setGroupId(int id);
-    int  getGroupId() const;
+    void setGroupId(int id) {  _groupId = id;}
+    int  getGroupId() const {return _groupId;}
 
-    void setTrackingParameters(const StiTrackingParameters * pars);
-    const StiTrackingParameters * getTrackingParameters() const;
+    void setTrackingParameters(const StiTrackingParameters * pars) {_pars = pars;}
+    const StiTrackingParameters * getTrackingParameters() const {return _pars;}
 
     friend ostream& operator<<(ostream&os, const StiDetector & det);
 
@@ -163,53 +163,4 @@ public:
     StiElossCalculator * _elossCalculator;
     char mEnd[1];
 };
-
-inline void StiDetector::setHitErrorCalculator(const StiHitErrorCalculator * calculator)
-{
-  _hitErrorCalculator = calculator;
-}
-
-inline const StiHitErrorCalculator * StiDetector::getHitErrorCalculator() const
-{
-  return _hitErrorCalculator;
-}
-
-
-inline void StiDetector::setGroupId(int id)
-{
-  _groupId = id;
-}
-
-inline int  StiDetector::getGroupId() const
-{
-  return _groupId;
-}
-
-inline bool StiDetector::isActive(double dYlocal, double dZlocal) const
-{
-  return (*isActiveFunctor)(dYlocal, dZlocal);
-} // isActive
-
-inline bool StiDetector::isActive() const 
-{
-  return isActiveFunctor->isActive();
-} // isActive
-
-
-inline void StiDetector::setTrackingParameters(const StiTrackingParameters * pars)
-{
-  _pars = pars;
-}
-
-inline const StiTrackingParameters * StiDetector::getTrackingParameters() const
-{
-  return _pars;
-}
-
-
-inline StiIsActiveFunctor* StiDetector::getIsActiveFunctor()
-{
-  return isActiveFunctor;
-}
-
 #endif

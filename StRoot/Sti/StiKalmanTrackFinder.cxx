@@ -37,6 +37,9 @@ using namespace std;
 #include "StiDefaultTrackFilter.h"
 #include "StiTrackFinderFilter.h"
 #include "StiUtilities/StiDebug.h"
+#include "Sti/StiKalmanTrackFinderParameters.h"
+#include "StMessMgr.h"
+
 #define TIME_StiKalmanTrackFinder
 #ifdef TIME_StiKalmanTrackFinder
 #include "Sti/StiTimer.h"
@@ -100,9 +103,6 @@ _trackContainer(0)
 {
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Started"<<endl;
 memset(mTimg,0,sizeof(mTimg));
-StiKalmanTrack::setParameters(&_pars);
-StiKalmanTrackNode::setParameters(&_pars);
-  _pars.setName("KalmanTrackFinderParameters");
   if (!_toolkit)
     throw runtime_error("StiKalmanTrackFinder::StiKalmanTrackFinder(...) - FATAL - toolkit==0");
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
@@ -402,8 +402,8 @@ static int myRefit=0;
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
 {
-static const double RMAX2d=_pars.maxDca2dZeroXY;
-static const double DMAX3d=_pars.maxDca3dVertex;
+  static const double RMAX2d=StiKalmanTrackFinderParameters::instance()->maxDca2dZeroXY();
+  static const double DMAX3d=StiKalmanTrackFinderParameters::instance()->maxDca3dVertex();
 
   StiKalmanTrackNode *extended=0;
   int goodCount= 0, plus=0, minus=0;
@@ -759,8 +759,8 @@ static  const double ref1a  = 110.*degToRad;
 void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
                                  ,int active,QAFind &qa)
 {
-  int maxNullCount           = _pars.maxNullCount+3;
-  int maxContiguousNullCount = _pars.maxContiguousNullCount+3;
+  int maxNullCount           = StiKalmanTrackFinderParameters::instance()->maxNullCount()+3;
+  int maxContiguousNullCount = StiKalmanTrackFinderParameters::instance()->maxContiguousNullCount()+3;
 //		Check and count node
   StiHit *hit = node->getHit();
   if (hit) {
@@ -769,11 +769,11 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
     qa.sum += node->getChi2() + log(node->getDeterm());
     qa.hits++; qa.qa=1;
     if (node->getRxy() < kRMinTpc) {
-      qa.wits+=_pars.hitWeight((int)node->getRxy());
+      qa.wits+=StiKalmanTrackFinderParameters::instance()->hitWeight((int)node->getRxy());
     }
     node->getHitCount()++;
     node->getContigHitCount()++;
-    if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset)
+    if (node->getContigHitCount()>StiKalmanTrackFinderParameters::instance()->minContiguousHitCountForNullReset())
        node->getContigNullCount() = 0;
 
   } else if (position>0 || !active) {// detectors edge - don't really expect a hit here
@@ -800,8 +800,8 @@ int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
    int ians;
    ians = qaTry.wits-qaBest.wits;
 //	One SVT hit is worse than zero
-   if (!qaBest.wits &&  qaTry.wits &&  qaTry.wits < _pars.sumWeight()) return -1;
-   if ( !qaTry.wits && qaBest.wits && qaBest.wits < _pars.sumWeight()) return  1;
+   if (!qaBest.wits &&  qaTry.wits &&  qaTry.wits < StiKalmanTrackFinderParameters::instance()->sumWeight()) return -1;
+   if ( !qaTry.wits && qaBest.wits && qaBest.wits < StiKalmanTrackFinderParameters::instance()->sumWeight()) return  1;
    				        if (ians)	return ians;
    ians =  qaTry.hits-qaBest.hits;	if (ians)	return ians;
    ians = qaBest.nits- qaTry.nits;	if (ians)	return ians;
@@ -851,42 +851,6 @@ assert(0);
  }
  */
 
-//______________________________________________________________________________
-void StiKalmanTrackFinder::setParameters(const StiKalmanTrackFinderParameters & par)
-{
-  _pars = par;
-}
-
-//______________________________________________________________________________
-EditableParameters &StiKalmanTrackFinder::getParameters()
-{
-  return _pars;
-}
-
-//______________________________________________________________________________
-void StiKalmanTrackFinder::loadDS(TDataSet&ds)
-{
-  cout << "StiKalmanTrackFinder::loadDS(TDataSet*ds) -I- Starting" << endl;
-  _pars.loadDS(ds);
-  cout << "StiKalmanTrackFinder::loadDS(TDataSet*ds) -I- Done" << endl;
-}
-
-//______________________________________________________________________________
-void StiKalmanTrackFinder::loadFS(ifstream & iFile)
-{
-  cout << "StiKalmanTrackFinder::loadFS(ifstream&) -I- Starting" << endl;
-  _pars.loadFS(iFile);
-  cout << "StiKalmanTrackFinder::loadFS(ifstream&) -I- Done" << endl;
-}
-
-
-//______________________________________________________________________________
-void StiKalmanTrackFinder::setDefaults()
-{
-  cout << "StiKalmanTrackFinder::setDefaults() -I- Starting" << endl;
-  _pars.setDefaults();
-  cout << "StiKalmanTrackFinder::setDefaults() -I- Done" << endl;
-}
 //______________________________________________________________________________
 void StiKalmanTrackFinder::setTiming()
 {

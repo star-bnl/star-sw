@@ -18,14 +18,15 @@
 #include "Rtypes.h"
 #include "Stiostream.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StiTpcInnerHitErrorCalculator.h"
+#include "StiTpcOuterHitErrorCalculator.h"
+#include "StiTpcTrackingParameters.h"
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpcIsActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StTpcDb/StTpcDb.h"
-#include "tables/St_HitError_Table.h"
 #include "StMatrixD.hh"
 
 //#define TPC_IDEAL_GEOM
@@ -33,9 +34,6 @@
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
   : StiDetectorBuilder("Tpc",active,inputFile), _fcMaterial(0), _padPlane(0), _dimensions(0)
 {
-  _trackingParameters.setName("tpcTrackingParameters");
-  _innerCalc.setName("tpcInnerHitError");
-  _outerCalc.setName("tpcOuterHitError");
 }
 
 
@@ -57,48 +55,8 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
   if (!gStTpcDb)
     throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- gStTpcDb==0");
-  load(_inputFile,source);
   useVMCGeometry();
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
-}
-
-
-
-void StiTpcDetectorBuilder::loadDS(TDataSet &ds)
-{
-	cout << "StiTpcDetectorBuilder::load(TDataSet * ds) -I- Loading TPC tracking parameters from tracking database" << endl;
-	getTrackingParameters().loadDS(ds);
-	_innerCalc.loadDS(ds);
-	_outerCalc.loadDS(ds);
-	cout << "StiTpcDetectorBuilder::load(TDataSet * ds) -I- Loading TPC tracking parameters from tracking database" << endl;
-}
-
-void StiTpcDetectorBuilder::loadFS(ifstream & inputFileStream)
-{
-	cout <<"StiTpcDetectorBuilder::load(ifstream &) -I- Loading TPC tracking parameters from file" << endl;
-	getTrackingParameters().loadFS(inputFileStream);
-	_innerCalc.loadFS(inputFileStream);
-	_outerCalc.loadFS(inputFileStream);
-	cout <<"StiTpcDetectorBuilder::load(ifstream &) -I- Done loading TPC tracking parameters from file" << endl;
-}
-
-void StiTpcDetectorBuilder::setDefaults()
-{
-double iTpt[6] = {0.00168243, 0.005233, 0.05753410, 0.00312735, 0.015106, 0.02438060};
-double oTpt[6] = {0.00020278, 0.003552, 0.06456100, 0.00815800, 0.005696, 0.04484400};
-
-  cout <<"StiTpcDetectorBuilder::setDefaults() -I- Tracking Parameters set from class default values."<<endl;
-  _trackingParameters.setMaxChi2ForSelection(10.);
-  _trackingParameters.setMinSearchWindow(1.6);
-  _trackingParameters.setMaxSearchWindow(7.);
-  _trackingParameters.setSearchWindowScaling(15.);
-_innerCalc.set(iTpt[0], iTpt[1],iTpt[2], iTpt[3],iTpt[4], iTpt[5]);
-_outerCalc.set(oTpt[0], oTpt[1],oTpt[2], oTpt[3],oTpt[4], oTpt[5]);
-
-  cout << _trackingParameters << endl;
-  cout << _innerCalc << endl;
-  cout << _outerCalc << endl;
-  cout <<"StiTpcDetectorBuilder::setDefaults() -I- Tracking Parameters set from class default values."<<endl;
 }
 //________________________________________________________________________________
 void StiTpcDetectorBuilder::useVMCGeometry() {
@@ -150,6 +108,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   Double_t ionization = _gasMat->getIonization();
   StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
+  _trackingParameters = (StiTrackingParameters *) StiTpcTrackingParameters::instance();
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows
@@ -254,9 +213,9 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pDetector->setShape(pShape);
       pDetector->setPlacement(pPlacement);
       if (row<13)
-	pDetector->setHitErrorCalculator(&_innerCalc);
+	pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
       else
-	pDetector->setHitErrorCalculator(&_outerCalc);
+	pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
       pDetector->setElossCalculator(gasElossCalculator);
       pDetector->setKey(1,row);
       pDetector->setKey(2,sector);

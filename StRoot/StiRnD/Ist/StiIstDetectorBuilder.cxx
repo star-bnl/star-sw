@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.17 2007/04/27 18:44:03 wleight Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.18 2008/04/03 20:04:21 fisyak Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.18  2008/04/03 20:04:21  fisyak
+// Straighten out DB access via chairs
+//
 // Revision 1.17  2007/04/27 18:44:03  wleight
 // Corrected a problem with incorrect assignment of hit errors
 //
@@ -45,6 +48,9 @@ using namespace std;
 #include "StiRnD/Ist/StiIstDetectorBuilder.h" 
 #include "Sti/StiElossCalculator.h"
 #include "StiRnD/Ist/StiIstDetectorBuilder.h"
+#include "StiIst1HitErrorCalculator.h"
+#include "StiIst2HitErrorCalculator.h"
+#include "StiIst3HitErrorCalculator.h"
 //#include "StSsdUtil/StSsdConfig.hh"
 //#include "StSsdUtil/StSsdGeometry.hh"
 //#include "StSsdUtil/StSsdWaferGeometry.hh"
@@ -55,29 +61,16 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFi
     : StiDetectorBuilder("Ist",active,inputFile), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
-    _trackingParameters.setName("istTrackingParameters");
-    _hitCalculator1.setName("ist1HitError");
-    _hitCalculator2.setName("ist2HitError");
-    _hitCalculator3.setName("ist3HitError");
 }
 
 StiIstDetectorBuilder::~StiIstDetectorBuilder()
 {} 
-
-void StiIstDetectorBuilder::loadDS(TDataSet& ds){
-  cout<<"StiIstDetectorBuilder::loadDS(TDataSet& ds) -I- started: "<<endl;
-  _hitCalculator1.loadDS(ds);
-  _hitCalculator2.loadDS(ds);
-  _hitCalculator3.loadDS(ds);
-}
 
 
 void StiIstDetectorBuilder::buildDetectors(StMaker & source)
 {
     char name[50];  
     int nRows = 1 ;
-    gMessMgr->Info() << "StiIstDetectorBuilder::buildDetectors() - I - Started "<<endm;
-    load(_inputFile, source);
     
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
@@ -270,13 +263,15 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
-  if(layer==1) pDetector->setHitErrorCalculator(&_hitCalculator1);
-  if(layer==2 && side==1) pDetector->setHitErrorCalculator(&_hitCalculator3);
-  if(layer==2 && side==2) pDetector->setHitErrorCalculator(&_hitCalculator2);
+  if(layer==1) pDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
+  if(layer==2 && side==1) pDetector->setHitErrorCalculator(StiIst3HitErrorCalculator::instance());
+  if(layer==2 && side==2) pDetector->setHitErrorCalculator(StiIst2HitErrorCalculator::instance());
   //  add(2*(layer-1)+side-1,wafer-1,pDetector);
   add(2*(layer-1)+side-1,ladder,pDetector);  
   //add(2*ladder-3+side,0,pDetector);
+  if (debug()) {
   LOG_INFO<<"layer/ladder/wafer/side "<< layer << "/" << ladder << "/" << wafer << "/" << side << endm;
   LOG_INFO<<"the numbers defining this volume are 2*(layer-1)+side-1: "<<2*(layer-1)+side-1<<" and "<<ladder<<endm;
+  }
 }
 

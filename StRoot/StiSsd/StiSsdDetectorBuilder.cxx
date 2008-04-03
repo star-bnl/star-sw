@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.28 2007/07/12 20:39:13 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.29 2008/04/03 20:04:22 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.29  2008/04/03 20:04:22  fisyak
+// Straighten out DB access via chairs
+//
 // Revision 1.28  2007/07/12 20:39:13  fisyak
 // Remove default errors for SSD
 //
@@ -59,13 +62,12 @@ using namespace std;
 #include "StiSsd/StiSsdIsActiveFunctor.h" 
 #include "StiSsd/StiSsdDetectorBuilder.h" 
 #include "StSsdUtil/StSsdBarrel.hh"
-
+#include "StiSsdHitErrorCalculator.h"
+#include "StiSsdTrackingParameters.h"
 StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active, const string & inputFile)
     : StiDetectorBuilder("Ssd",active,inputFile), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
-    _trackingParameters.setName("ssdTrackingParameters");
-    _hitCalculator.setName("ssdHitError");
 }
 
 StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
@@ -77,7 +79,6 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
     char name[50];  
     assert(StiVMCToolKit::GetVMC());
     gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
-    load(_inputFile, source);
     StSsdBarrel *mySsd = StSsdBarrel::Instance();
     assert(mySsd);
     int nRows = 1 ;
@@ -117,6 +118,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       ----> ladder # 1  ===> module 7101 
       ----> ladder # 20 ===> module 7120
     */
+    _trackingParameters = (StiTrackingParameters *) StiSsdTrackingParameters::instance();
     for (Int_t ladder = 0; ladder < NL; ladder++) {
       Ladder = mySsd->getLadder(ladder);
       if (! Ladder) continue;
@@ -153,33 +155,13 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       pLadder->setMaterial(_siMat);
       pLadder->setShape(ladderShape);
       pLadder->setPlacement(pPlacement); 
-      pLadder->setHitErrorCalculator(&_hitCalculator);
+      pLadder->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
       pLadder->setKey(1,0);
       pLadder->setKey(2,ladder-1);
       pLadder->setElossCalculator(siElossCalculator);
       add(layer,ladder,pLadder); 
     }
     useVMCGeometry();
-}
-void StiSsdDetectorBuilder::loadDS(TDataSet& ds)
-{
-	cout << "StiSsdDetectorBuilder::loadDS(TDataSet* ds) -I- Started" << endl;
-	_trackingParameters.loadDS(ds);
-	_hitCalculator.loadDS(ds);
-	cout << "StiSsdDetectorBuilder::loadDS(TDataSet* ds) -I- Done" << endl;
-}
-
-void StiSsdDetectorBuilder::setDefaults()
-{
-    cout << "StiSsdDetectorBuilder::setDefaults() -I- Started" << endl;
-    _trackingParameters.setMaxChi2ForSelection(5.);
-    _trackingParameters.setMinSearchWindow(1.);
-    _trackingParameters.setMaxSearchWindow(4.);
-    _trackingParameters.setSearchWindowScaling(10.);
-    _hitCalculator.set(0.002, 0., 0., 0.002, 0., 0.);  //!< Hit error parameters set to 20 um in x&y directions
-    cout << _trackingParameters << endl;
-    cout << _hitCalculator <<endl;
-    cout << "StiSsdDetectorBuilder::setDefaults() -I- Done" << endl;
 }
 //________________________________________________________________________________
 void StiSsdDetectorBuilder::useVMCGeometry() {

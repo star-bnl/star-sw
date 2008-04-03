@@ -89,7 +89,9 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit& hit)
   if (p->getLayerRadius() < fRxyMin) return false;
   StiHit* closestHit = _hitContainer->getNearestHit(p->getLayerRadius(),
 						    p->getLayerAngle(),
-						    hit.y(), hit.z(),_pars._deltaY, _pars._deltaZ);
+						    hit.y(), hit.z(),
+						    StiLocalTrackSeedFinderParameters::instance()->deltaY(), 
+						    StiLocalTrackSeedFinderParameters::instance()->deltaZ());
   
   if (!closestHit ) return false;
   _seedHits.push_back(closestHit);
@@ -107,29 +109,34 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
   _seedHits.push_back(hit);
   //Recursively extend track:
   bool go=true;
-  while ( go && _seedHits.size()<(unsigned int) _pars._seedLength) 
+  while ( go && _seedHits.size()<(UInt_t) StiLocalTrackSeedFinderParameters::instance()->seedLength()) 
     {
       go = extendHit( *_seedHits.back() );
     }
-  //Extension failed if current track length less than _pars._seedLength
+  //Extension failed if current track length less than StiLocalTrackSeedFinderParameters::instance()->seedLength()
   //Return 0.
-  if ( _seedHits.size()<(unsigned int)_pars._seedLength ) 
+  if ( _seedHits.size()<(UInt_t)StiLocalTrackSeedFinderParameters::instance()->seedLength() ) 
     {
-      //cout <<"StiLocalTrackSeedFidnder::makeTrack() -W- Hit extension failed because size()<_pars._seedLength"<<endl;
+      //cout <<"StiLocalTrackSeedFidnder::makeTrack() -W- Hit extension failed because size()<StiLocalTrackSeedFinderParameters::instance()->seedLength()"<<endl;
       return track;
     }
   //now use straight line propogation to recursively extend
   _skipped = 0;
   go=true;
-  while ( go && _skipped<=_pars._maxSkipped && _seedHits.size()<=(unsigned int)( _pars._seedLength+_pars._extrapMaxLength) ) 
+  while ( go && _skipped<=StiLocalTrackSeedFinderParameters::instance()->maxSkipped() && 
+	  _seedHits.size()<=(UInt_t)( StiLocalTrackSeedFinderParameters::instance()->seedLength()+
+				      StiLocalTrackSeedFinderParameters::instance()->extrapMaxLength()) ) 
     {
       go = extrapolate();
     }
-  //Extension failed if current track length less than _pars._seedLength+_pars._extrapMinLength
+  //Extension failed if current track length less than StiLocalTrackSeedFinderParameters::instance()->seedLength()+
+  //StiLocalTrackSeedFinderParameters::instance()->extrapMinLength()
   //Return 0.
-  if ( _seedHits.size()<(unsigned int)( _pars._seedLength+_pars._extrapMinLength) )
+  if ( _seedHits.size()<(UInt_t)( StiLocalTrackSeedFinderParameters::instance()->seedLength()+
+				  StiLocalTrackSeedFinderParameters::instance()->extrapMinLength()) )
     {
-      //cout <<"StiLocalTrackSeedFinder::makeTrack() -W- Extension failed size()<_pars._seedLength+_pars._extrapMinLength"<<endl;
+      //cout <<"StiLocalTrackSeedFinder::makeTrack() -W- Extension failed size()<StiLocalTrackSeedFinderParameters::instance()->seedLength()+
+      //StiLocalTrackSeedFinderParameters::instance()->extrapMinLength()"<<endl;
       return track;
     }
   track = initializeTrack(_trackFactory->getInstance());
@@ -216,7 +223,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   //Now calculate the projection of window onto that plane:
   double beta_ry = atan2(dr, dy);
   double rho_ry = ::sqrt(dr*dr + dy*dy);
-  double alpha_ry = atan2(_pars._extrapDeltaY, 2.*rho_ry);
+  double alpha_ry = atan2(StiLocalTrackSeedFinderParameters::instance()->extrapDeltaY(), 2.*rho_ry);
   double tanplus_ry = tan(beta_ry+alpha_ry);
   double tanminus_ry = tan(beta_ry-alpha_ry);
   if (tanplus_ry==0. || tanminus_ry==0.) 
@@ -229,7 +236,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
 
   double beta_rz = atan2(dr, dz);
   double rho_rz = ::sqrt(dr*dr + dz*dz);
-  double alpha_rz = atan2(_pars._extrapDeltaZ, 2.*rho_rz);
+  double alpha_rz = atan2(StiLocalTrackSeedFinderParameters::instance()->extrapDeltaZ(), 2.*rho_rz);
   double tanplus_rz = tan(beta_rz+alpha_rz);
   double tanminus_rz = tan(beta_rz-alpha_rz);
   if (tanplus_rz==0. || tanminus_rz==0.) 
@@ -354,27 +361,12 @@ void StiLocalTrackSeedFinder::print() const
     {
       cout << **it <<endl;
     }
-  cout <<"\n Search Window in Y:\t"<<_pars._deltaY<<endl;
-  cout <<"\n Search Window in Z:\t"<<_pars._deltaZ<<endl;
-}
-
-void StiLocalTrackSeedFinder::loadDS(TDataSet&ds)
-{
-  cout << "StiLocalTrackSeedFinder::loadDS(TDataSet&) -I- Started" << endl;
-  _pars.loadDS(ds);
-  cout << "StiLocalTrackSeedFinder::loadDS(TDataSet&) -I- Done" << endl;
-}
-
-//______________________________________________________________________________
-void StiLocalTrackSeedFinder::loadFS(ifstream& inFile)
-{
-  cout << "StiLocalTrackSeedFinder::loadFS(ifstream& inFile) -I- Started" << endl;
-  _pars.loadFS(inFile);
-  cout << "StiLocalTrackSeedFinder::loadFS(ifstream& inFile) -I- Done" << endl;
+  cout <<"\n Search Window in Y:\t"<<StiLocalTrackSeedFinderParameters::instance()->deltaY()<<endl;
+  cout <<"\n Search Window in Z:\t"<<StiLocalTrackSeedFinderParameters::instance()->deltaZ()<<endl;
 }
 
 //______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder & f)
 {
-  return os << " StiLocalTrackSeedFinder " << endl << f._pars << endl;
+  return os << " StiLocalTrackSeedFinder " << endl;
 }

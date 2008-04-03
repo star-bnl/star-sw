@@ -1,9 +1,10 @@
 #ifndef STAR_StiGeomMake
 #define STAR_StiGeomMake
-// $Id: StiDetectorVolume.h,v 2.2 2006/12/06 20:15:41 fine Exp $
+// $Id: StiDetectorVolume.h,v 2.3 2008/04/03 20:04:04 fisyak Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "TVolume.h"
+#include "StMessMgr.h"
 
 class TVolumePosition;
 class TShape;

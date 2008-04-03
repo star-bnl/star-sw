@@ -32,8 +32,6 @@ using namespace std;
 class StiHit;
 class StiTrackNode;
 class StiKalmanTrackNode;
-class StiKalmanTrackFinderParameters;
-class StiKalmanTrackFitterParameters;
 
 /*! 
   \class StiKalmanTrack
@@ -107,8 +105,6 @@ class StiKalmanTrack : public StiTrack
   
   /// Set the factory used for the creation of kalman track nodes.
   static void setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>*);
-  static void setParameters(StiKalmanTrackFinderParameters* p);
-  static void setFitParameters(StiKalmanTrackFitterParameters* p);
   static void setMaxRefiter(int maxRefiter);
 
   void reset();
@@ -256,7 +252,6 @@ class StiKalmanTrack : public StiTrack
   int initialize(const vector<StiHit*> &);
 
     /// Method to return the pointer to the fitter parameters.
-    StiKalmanTrackFitterParameters* fitPars() const {return fitpars;}
   
    StThreeVector<double> getMomentumAtOrigin() const;
    StThreeVector<double> getPoint(int firstLast=0) const;
@@ -301,8 +296,6 @@ protected:
   friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 protected:
     
-  static StiKalmanTrackFinderParameters * pars;
-  static StiKalmanTrackFitterParameters * fitpars;
   static int mgMaxRefiter;		//max number of refit iteratins allowed
   static Factory<StiKalmanTrackNode> * trackNodeFactory;
   

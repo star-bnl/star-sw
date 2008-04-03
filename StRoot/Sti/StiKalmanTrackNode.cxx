@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.114 2008/03/25 18:02:53 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.115 2008/04/03 20:03:36 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.115  2008/04/03 20:03:36  fisyak
+ * Straighten out DB access via chairs
+ *
  * Revision 2.114  2008/03/25 18:02:53  perev
  * remove field field from everythere
  *
@@ -365,6 +368,8 @@ using namespace std;
 #include "TRVector.h"
 #include "StarMagField.h"
 #include "TMath.h"
+#include "StMessMgr.h"
+
 #define PrP(A)    { LOG_DEBUG << "\t" << (#A) << " = \t" << ( A ) }
 #define PrPP(A,B) {LOG_DEBUG  << "=== StiKalmanTrackNode::" << (#A); PrP((B)); LOG_DEBUG << endm;}
 // Local Track Model
@@ -375,15 +380,11 @@ using namespace std;
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
-static const double kMaxEta = 1.;
+static const double kMaxEta = 1.25; // 72 degrees for laser tracks
 static const double kMaxSinEta = sin(kMaxEta);
 static const double kMaxCur = 0.2;
 static const double kFarFromBeam = 10.;
-
-
-StiKalmanTrackFinderParameters * StiKalmanTrackNode::pars = 0;
-
-StiNodeStat StiKalmanTrackNode::mgP;
+StiNodeStat StiKalmanTrackNode::mgP; 
 
 
 static const int    idx33[3][3] = {{0,1,3},{1,2,4},{3,4,5}};
@@ -836,7 +837,7 @@ Break(nCall);
   if (debug() & 8) { PrintpT("E");}
 
   // Multiple scattering
-  if (pars->mcsCalculated && fabs(getHz())>1e-5 )  propagateMCS(pNode,tDet);
+  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated() && fabs(getHz())>1e-5 )  propagateMCS(pNode,tDet);
   if (debug() & 8) { PrintpT("M");}
   return position;
 }
@@ -1351,7 +1352,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
     }
   if (pt > 0.350 && TMath::Abs(getHz()) < 1e-3) pt = 0.350;
   double p2=(1.+mFP._tanl*mFP._tanl)*pt*pt;
-  double m=pars->massHypothesis;
+  double m=StiKalmanTrackFinderParameters::instance()->massHypothesis();
   double m2=m*m;
   double e2=p2+m2;
   double beta2=p2/e2;
@@ -1708,14 +1709,6 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
   double sinAlpha = sin(_alpha);
   return (StThreeVector<double>(cosAlpha*xt0-sinAlpha*yt0,sinAlpha*xt0+cosAlpha*yt0,zt0));
 }
-
-//______________________________________________________________________________
-void StiKalmanTrackNode::setParameters(StiKalmanTrackFinderParameters *parameters)
-{
-  pars = parameters;
-}
-
-
 //______________________________________________________________________________
 int StiKalmanTrackNode::locate()
 {
@@ -2165,7 +2158,7 @@ double StiKalmanTrackNode::getTime() {
     if (pt>0.1) {
       pt = 1./pt;
       double p2=(1.+mFP._tanl*mFP._tanl)*pt*pt;
-      double m=pars->massHypothesis;
+      double m=StiKalmanTrackFinderParameters::instance()->massHypothesis();
       double m2=m*m;
       double e2=p2+m2;
       double beta2=p2/e2;

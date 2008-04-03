@@ -4,6 +4,8 @@
 #include "StiTrackNodeHelper.h"
 #include "StiElossCalculator.h"
 #include "StiHitErrorCalculator.h"
+#include "StMessMgr.h"
+#include "TArrayD.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -709,7 +711,7 @@ int StiTrackNodeHelper::propagateMCS()
   double tanl   = mBestPars._tanl;
   double pti    = mBestPars._ptin; 
   double p2     = (1.+tanl*tanl)*pt*pt;
-  double m      = StiKalmanTrackNode::pars->getMassHypothesis();
+  double m      = StiKalmanTrackFinderParameters::instance()->getMassHypothesis();
   double m2     = m*m;
   double e2     = p2+m2;
   double beta2  = p2/e2;

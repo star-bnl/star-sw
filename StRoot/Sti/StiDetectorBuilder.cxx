@@ -9,6 +9,7 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
+#include "Sti/StiDefaultTrackingParameters.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
@@ -19,8 +20,9 @@ StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const st
     _groupId(-1),
     _active(active),
     _detectorFactory( StiToolkit::instance()->getDetectorFactory() ),
+    _trackingParameters(0),
     _inputFile(inputFile),
-     _gasMat(0)
+    _gasMat(0)
 {
   cout << "StiDetectorBuilder::StiDetectorBuilder() - INFO - Instantiating builder named:"<<name<<endl;
   fCurrentDetectorBuilder = this;
@@ -100,7 +102,10 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   // in the base class nothing is actually done
   // but ROOT stuff is built in the drawable version of this class.
   detector->setGroupId(_groupId);
-  detector->setTrackingParameters(&_trackingParameters);
+  if (_trackingParameters) 
+    detector->setTrackingParameters(_trackingParameters);
+  else 
+    detector->setTrackingParameters(StiDefaultTrackingParameters::instance());
   return detector;
 }
 

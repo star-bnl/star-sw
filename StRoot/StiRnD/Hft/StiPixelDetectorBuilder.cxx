@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.22 2007/10/20 00:16:27 fisyak Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.23 2008/04/03 20:04:20 fisyak Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.23  2008/04/03 20:04:20  fisyak
+ * Straighten out DB access via chairs
+ *
  * Revision 1.22  2007/10/20 00:16:27  fisyak
  * Active hit errors from DB
  *
@@ -57,7 +60,8 @@
 #include "Sti/StiElossCalculator.h"
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
-
+#include "StiPixelHitErrorCalculator.h"
+#include "StiPixelTrackingParameters.h"
 #include "TDataSetIter.h"
 #include "tables/St_HitError_Table.h"
 #include "StEvent.h"
@@ -70,8 +74,6 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
 	//Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
         //returns average error once you actually want to do tracking, the results
         //depend strongly on the numbers below. 
-    _trackingParameters.setName("PixelTrackingParameters");
-    _hitCalculator.setName("PixelHitError");
 }
 
 StiPixelDetectorBuilder::~StiPixelDetectorBuilder()
@@ -82,10 +84,8 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 {
 
   char name[50];
-  LOG_INFO << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endl;
+  LOG_INFO << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endm;
 
-  //Now pulling values from the DBase for the tracking parameters
-  load(_inputFile, source);
 
   unsigned int nRows=1;
 
@@ -109,7 +109,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 								  material->getA(),
 								  material->getZ(),
 								  material->getDensity());
-  
+  _trackingParameters = (StiTrackingParameters *) StiPixelTrackingParameters::instance();
   StiPlanarShape *pShape;
   for (unsigned int row=0; row<nRows; row++) 
     {
@@ -148,7 +148,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	  pDetector->setGroupId(kPxlId);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
-	  pDetector->setHitErrorCalculator(&_hitCalculator);
+	  pDetector->setHitErrorCalculator(StiPixelHitErrorCalculator::instance());
 	  pDetector->setElossCalculator(siElossCalculator);
 	  if (sector<18)
 	    {
@@ -172,7 +172,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 
 void StiPixelDetectorBuilder::useVMCGeometry() {
   LOG_INFO << "StiPixelDetectorBuilder::buildDetectors() -I- Use VMC geometry" 
-       << endl;
+       << endm;
   SetCurrentDetectorBuilder(this);
 
   // Build materials. In the Pixel detector we have two: Air for the mother volume,
@@ -214,16 +214,12 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
       //{"PSEC","Ladder group mother","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/*","",""}
       //{"PLMO","Ladder Mother Volume","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/PLMO_1-11/*","",""}
       {"PLAC","Active ladder volume","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/PLMO_1-11/PLAC_1/*","",""}
-      //{"PLPS","Passive ladder volume","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/PLMO_1-11/PLPS_1/*","",""}
     };
 
   Int_t NoPxlVols = sizeof(PxlVolumes)/sizeof(VolumeMap_t);
-  TString pathT("HALL_1/CAVE_1/PXMO_1");
+  TString pathT("HALL_1/CAVE_1");
   gGeoManager->RestoreMasterVolume(); 
   gGeoManager->CdTop();
-  if (! gGeoManager->cd(pathT)) {
-    pathT = "HALL_1/CAVE_1/PXMO_1";
-  }
   TString path("");
   for (Int_t i = 0; i < NoPxlVols; i++) {
     gGeoManager->RestoreMasterVolume(); 
@@ -235,8 +231,8 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
 	if (! nodeT) continue;;
 	StiVMCToolKit::LoopOverNodes(nodeT, path, PxlVolumes[i].name, MakeAverageVolume);
       } 
-    else LOG_INFO << "StiPixelDetectorBuilder::useVMCGeometry skip node " 
-			  << pathT.Data() << endl;
+    else {LOG_INFO << "StiPixelDetectorBuilder::useVMCGeometry skip node " 
+		   << pathT.Data() << endm;}
   }
 }
 
@@ -248,7 +244,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     {
       LOG_INFO << "StiPixelDetectorBuilder::AverageVolume -E- no TGeoPhysicalNode. "
 		       << " Perhaps Pixel is turned on in tracking, but not present in simulation. Returning."
-		       << endl;
+		       << endm;
      
       return;
     }
@@ -305,7 +301,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
       }
     normalVector *= centerVector.magnitude()*cos(normalVector.phi()-centerVector.phi());
     LOG_INFO <<"Setting detector normal angle: "
-	     << normalVector.phi()<<endl;
+	     << normalVector.phi()<<endm;
 
     double r = normalVector.perp();
     //Set the offset - this will be the difference between the two vectors. Set magnitude from vector difference...
@@ -321,7 +317,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     pPlacement->setLayerAngle(centerVector.phi()); //this is only used for ordering in detector container...
     LOG_INFO << " -I- Setting detector center angle: " << centerVector.phi()
 	     << " offset: " << dY << " Ist style offset: "
-	     << centerVector.magnitude()*TMath::Sin(normalVector.phi() - centerVector.phi()) << endl;
+	     << centerVector.magnitude()*TMath::Sin(normalVector.phi() - centerVector.phi()) << endm;
 
     pPlacement->setRegion(StiPlacement::kMidRapidity);
     pPlacement->setNormalRep(normalVector.phi(), r, dY); 
@@ -333,7 +329,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     else 
     {
       LOG_INFO <<"StiPixelDetectorBuilder::AverageVolume() -E- StiPlanarShape build unsuccessful. Returning."
-	       <<endl;
+	       <<endm;
       return;
     }
     if( pPlacement ) {}
@@ -341,7 +337,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
       {
         LOG_INFO <<"StiPixelDetectorBuilder::AverageVolume() -E- StiPlacement unsuccessful. "
 		 << "Volume: "<<nameP.Data()<<". Returning."
-		 <<endl;
+		 <<endm;
         return;
       }
 
@@ -349,7 +345,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     StiDetector *p =getDetectorFactory()->getInstance();
     if ( !p ) 
       {
-	LOG_INFO <<"StiPixelDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." <<endl;
+	LOG_INFO <<"StiPixelDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." <<endm;
 	return;
       }
 
@@ -361,10 +357,10 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     p->setShape(sh);
     p->setPlacement(pPlacement);
     p->setGas(GetCurrentDetectorBuilder()->getGasMat());
-    if(!p->getGas()) LOG_INFO <<"gas not there!"<<endl;
+    if(!p->getGas()) LOG_INFO <<"gas not there!"<<endm;
     p->setMaterial(matS);
     p->setElossCalculator(ElossCalculator);
-    p->setHitErrorCalculator(&_hitCalculator);
+    p->setHitErrorCalculator(StiPixelHitErrorCalculator::instance());
 
     int startMoth   = nameP.Index("PSEC_",5) + 5;
     int startLadder = nameP.Index("PLMO_",5) + 5;
@@ -406,14 +402,9 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     LOG_INFO <<"StiPixelDetectorBuilder: -I- built detector "
 	     << p->getName()
 	     << " from " << nameP.Data()<<" center: "
-	     <<centerVector.phi() <<" normal: "<<normalVector.phi()<<endl;
+	     <<centerVector.phi() <<" normal: "<<normalVector.phi()<<endm;
   
     p->setKey(1, layer);
     p->setKey(2, ladder);
     add(layer,ladder, p);
-}
-
-void StiPixelDetectorBuilder::loadDS(TDataSet &ds)
-{
-  _hitCalculator.loadDS(ds);
 }
