@@ -77,11 +77,7 @@ struct tpcDimensions {
    double  outerZExtraAl[5];   /*   z positions  */
    double  outerDXExtraAl[5];   /*   x thickness  */
    double  outerDZExtraAl[5];   /*   z thickness  */
-  double xtwist_west;   /*X Displacement of West end of TPC (cm) wrt TPC_Z0*/
-  double ytwist_west;   /*Y Displacement of West end of TPC (cm) wrt TPC_Z0*/
-  double eastClockError; /*Phi rotation of East end of TPC in milli-radians*/
-  double westClockError; /*Phi rotation of West end of TPC in milli-radians*/
- };  
+};  
 
 
 
