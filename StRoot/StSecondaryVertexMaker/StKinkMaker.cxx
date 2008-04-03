@@ -77,19 +77,6 @@ StKinkMaker::~StKinkMaker(){
 
 */
 Int_t StKinkMaker::Init(){
-  TDataSet* dbDataSet = GetDataBase("Calibrations/tracker");
-  if (!dbDataSet) {
-    gMessMgr->Error(
-      "StKinkMaker::Init() : could not find appropriate database.");
-    return kStErr; 
-  }
-  m_tkfpar = (St_tkf_tkfpar*) (dbDataSet->FindObject("tkf_tkfpar"));
-  if (!m_tkfpar) {
-    gMessMgr->Error(
-      "StKinkMaker::Init() : could not find tkf_tkfpar in database.");
-    return kStErr;
-  }
-  AddRunCont(m_tkfpar);
 
   // m_Mode -> SetTrackerUsage()
   if      (m_Mode == 1) SetTrackerUsage(kTrackerUseTPT);
@@ -99,6 +86,16 @@ Int_t StKinkMaker::Init(){
  
   return StMaker::Init();
 }
+//=============================================================================
+Int_t StKinkMaker::InitRun(int runumber) {
+  m_tkfpar = (St_tkf_tkfpar*) GetDataBase("Calibrations/tracker/tkf_tkfpar");
+  if (!m_tkfpar) {
+    gMessMgr->Error(
+      "StKinkMaker::InitRun() : could not find tkf_tkfpar in database.");
+    return kStErr;
+  }
+  return StMaker::InitRun(runumber);
+ }
 //=============================================================================
 Int_t StKinkMaker::Make(){//called for each event
 

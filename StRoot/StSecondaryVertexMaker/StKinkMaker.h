@@ -36,14 +36,15 @@ public:
   //  StKinkMaker(const char* name);
   StKinkMaker(const char* name="KinkMaker");
   virtual  ~StKinkMaker(); 
-  virtual  Int_t  Init();
-  virtual  Int_t  Make();
+  virtual Int_t   Init();
+  virtual Int_t   InitRun(int runumber);
+  virtual Int_t   Make();
   virtual void    SetTrackerUsage(Int_t opt=0);
   virtual Int_t   GetTrackerUsage(){return mUseTracker;}
   virtual void Crop();// used to trim the kinks in which on daughter shares two parents
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.10 2005/08/25 14:34:18 cmironov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.11 2008/04/03 19:58:35 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:

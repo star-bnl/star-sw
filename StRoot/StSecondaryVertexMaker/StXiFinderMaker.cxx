@@ -27,47 +27,13 @@ ClassImp(StXiFinderMaker)
 
 //_____________________________________________________________________________
 StXiFinderMaker::StXiFinderMaker(const char *name):StV0FinderMaker(name),
-exipar(0),parsXi(0),xiVertex(0),det_id_xi(0)
-{
-}
-
-
-
-
-
-
-
-
-
+exipar(0),parsXi(0),xiVertex(0),det_id_xi(0){}
 
 //_____________________________________________________________________________
-StXiFinderMaker::~StXiFinderMaker() {
-}
-
-
-
-
-
-
-
-
-
+StXiFinderMaker::~StXiFinderMaker() {}
 //_____________________________________________________________________________
 Int_t StXiFinderMaker::Init()
 {bool a,b,c;
- TDataSet* dbDataSet = GetDataBase("global/vertices");
-
- if (!dbDataSet)
-    {gMessMgr->Error("StXiFinderMaker::Init() : could not find appropriate database.");
-     return kStErr;
-     }
- exipar = (St_exi_exipar*) (dbDataSet->FindObject("exipar"));
- if (!exipar)
-    {gMessMgr->Error("StXiFinderMaker::Init() : could not find exipar in database.");
-     return kStErr;
-     }
- ///AddRunCont(exipar);
- 
  if ((useTracker!=kTrackerUseTPT) && (useTracker!=kTrackerUseITTF) && (useTracker!=kTrackerUseBOTH))
     {gMessMgr->Error("StXiFinderMaker::Init() : wrong TrackerUsage parameter set.");
      return kStErr;
@@ -157,18 +123,16 @@ Int_t StXiFinderMaker::Init()
  
  return StMaker::Init();
  }
-
-
-
-
-
-
-
-
-
-
-
-
+//=============================================================================
+Int_t StXiFinderMaker::InitRun(int runumber) {
+ exipar = (St_exi_exipar*) GetDataBase("global/vertices/exipar");
+ if (!exipar)
+    {gMessMgr->Error("StXiFinderMaker::Init() : could not find exipar in database.");
+     return kStErr;
+     }
+  return StMaker::InitRun(runumber);
+ }
+//=============================================================================
 //_____________________________________________________________________________
 Int_t StXiFinderMaker::Make() {
 
@@ -221,18 +185,6 @@ Int_t StXiFinderMaker::Make() {
 
   return kStOk;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 //_____________________________________________________________________________
 Bool_t StXiFinderMaker::UseV0() {
   
@@ -701,8 +653,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.22 2005/07/19 22:10:14 perev Exp $
+// $Id: StXiFinderMaker.cxx,v 1.23 2008/04/03 19:58:36 fisyak Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.23  2008/04/03 19:58:36  fisyak
+// move parameters initialization from Init into InitRun
+//
 // Revision 1.22  2005/07/19 22:10:14  perev
 // STARFPE
 //
