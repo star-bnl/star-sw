@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.27 2008/02/12 17:51:20 jeromel Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.28 2008/04/03 16:24:31 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -28,7 +28,6 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
-#include "StiMaker/StiMaker.h"
 #include "Sti/StiTrackContainer.h"
 
 #include "St_db_Maker/St_db_Maker.h"
@@ -119,14 +118,8 @@ StPPVertexFinder::Init() {
   default:;
   }
 
-  //get a pointer to StiMaker:
-  StiMaker* sti = (StiMaker*)StMaker::GetChain()->GetMaker("Sti");
-  if(sti==0) {
-    LOG_WARN <<"no STi Maker,  PPV will be OFF"<<endm;
-    return ;
-  }
   //get pointer to Sti toolkit
-  mToolkit = sti->getToolkit();
+  mToolkit = StiToolkit::instance();
   assert(mToolkit); // internal error of Sti
   
   ctbList =new CtbHitList;
@@ -1130,6 +1123,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.28  2008/04/03 16:24:31  fisyak
+ * replace sti->getToolkit() by StiToolkit::instance()
+ *
  * Revision 1.27  2008/02/12 17:51:20  jeromel
  * Assert of Year number removed. Assert on beamLine left but added an explaination (so we won't have to rediscover this).
  *
