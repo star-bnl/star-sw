@@ -49,7 +49,6 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , mCorrupt(false)
   , mUseEndcap(false)
   , mField(0.0)
-  , mMuPosition(new StMuEmcPosition())
   , mMuDstMaker(uDstMaker)
   , mTables(new StBemcTables(doTowerSwapFix))
   , mUse2003Cuts(false)
@@ -150,41 +149,16 @@ void StBET4pMaker::collectChargedTracksFromTPC()
   for(int i = 0; i < nTracks; ++i) {
     StMuTrack* track = uDst->primaryTracks(i);
     assert(track);
-    if(track->flag() < 0) {
-      continue;
-    }
-    //MLM 8/17/05 -- adapt to use with multiple vertices:
-    if (track->dcaGlobal().mag() > 3.) continue;
 
-    int dcaFlag=1;
-    if (mUse2006Cuts){
-      Double_t limit=3.-2.*track->pt();
-      if(!((track->pt()<0.5&&track->dcaGlobal().mag()<=2.) ||
-	   ((track->pt()>=0.5&&track->pt()<1.0)&&
-	    track->dcaGlobal().mag()<=limit) ||
-	   (track->pt()>=1.0&&track->dcaGlobal().mag()<=1.0))) dcaFlag=0;
-    }
-    if(dcaFlag==0) continue;
-
-    if (track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) {
-      continue;
-    }
-    if(track->eta() < GetEtaLow()) { //GetEtaLow defined in StFourPMaker.cxx
-      continue;
-    }
-    if(track->eta() > GetEtaHigh()) {
-      continue;
-    }
-    if(static_cast<double>(track->nHits())/static_cast<double>(track->nHitsPoss()) < .51) {
-      continue;
-    }
+    if (!isUsableTrack(track)) continue;
 
     //check projection to BEMC and remember for later: ---------------------------------------------
     StThreeVectorD momentumAt, positionAt;
 	
     mField = uDst->event()->magneticField()/10.0; //to put it in Tesla
     StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-    bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius());
+    StMuEmcPosition muEmcPosition;
+    bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius());
     if(tok) {
       int m,e,s,id=0;
       geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
@@ -206,6 +180,41 @@ void StBET4pMaker::collectChargedTracksFromTPC()
     tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
   }
 }
+
+bool StBET4pMaker::isUsableTrack(StMuTrack* track)
+{
+    if(track->flag() < 0) 
+      return false;
+
+    if (track->dcaGlobal().mag() > 3.)
+      return false;
+      
+    int dcaFlag=1;
+    if (mUse2006Cuts){
+      Double_t limit=3.-2.*track->pt();
+      if(!((track->pt()<0.5&&track->dcaGlobal().mag()<=2.) ||
+	   ((track->pt()>=0.5&&track->pt()<1.0)&&
+	    track->dcaGlobal().mag()<=limit) ||
+	   (track->pt()>=1.0&&track->dcaGlobal().mag()<=1.0))) dcaFlag=0;
+    }
+    if(dcaFlag == 0)
+      return false;
+
+    if (track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest())
+      return false;
+
+    if(track->eta() < GetEtaLow())
+      return false;
+
+    if(track->eta() > GetEtaHigh())
+      return false;
+
+    if(static_cast<double>(track->nHits())/static_cast<double>(track->nHitsPoss()) < .51)
+      return false;
+
+  return true;
+}
+
 
 void StBET4pMaker::collectEnergyFromBEMC()
 {

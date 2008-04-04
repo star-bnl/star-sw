@@ -12,13 +12,10 @@
 
 #include "StFourPMaker.h"
 
-#include <vector>
-
 class StEmcCollection;
 class StMuTrackFourVec;
 class StMuDstMaker;
 class StEmcRawHit;
-class StMuEmcPosition;
 class EEmcGeomSimple;
 class StBemcTables;
 class StEEmcDbMaker;
@@ -50,6 +47,8 @@ public:
 private:
 
   void collectChargedTracksFromTPC();
+  bool isUsableTrack(StMuTrack* track);
+
   void collectEnergyFromBEMC();
   void collectEnergyFromEEMC();
 
@@ -69,9 +68,6 @@ private:
   //these arrays are used to correlate tracks w/ towers
   StEmcRawHit* mBTowHits[4801]; // indexed from [1,4800]
   int mNtracksOnTower[4801]; // indexed form [1,4800] (number of tracks incident on this tower)
-
-  // utility used for track-> towe rprojection
-  StMuEmcPosition*  mMuPosition;
 
   StMuDstMaker* mMuDstMaker;
   StBemcTables* mTables;
