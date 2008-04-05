@@ -51,6 +51,8 @@ private:
   void countTracksOnBemcTower(const StMuTrack& track);
 
   void collectEnergyFromBEMC();
+  double correctBemcTowerEnergyForTracks(double energy, int bemcTowerId);
+
   void collectEnergyFromEEMC();
 
   StEmcCollection *find_StEmCCollection();
@@ -64,11 +66,12 @@ private:
 
   bool mCorrupt;
   bool mUseEndcap;
-  double mField;
 
   //these arrays are used to correlate tracks w/ towers
-  StEmcRawHit* mBTowHits[4801]; // indexed from [1,4800]
-  int mNtracksOnTower[4801]; // indexed form [1,4800] (number of tracks incident on this tower)
+  static const int mNOfBemcTowers = 4800;
+
+  StEmcRawHit* mBTowHits[mNOfBemcTowers + 1]; // indexed from [1,4800]
+  int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
 
   StMuDstMaker* mMuDstMaker;
   StBemcTables* mTables;
