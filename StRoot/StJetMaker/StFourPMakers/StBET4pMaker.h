@@ -47,7 +47,8 @@ public:
 private:
 
   void collectChargedTracksFromTPC();
-  bool isUsableTrack(StMuTrack* track);
+  bool isUsableTrack(const StMuTrack& track) const;
+  void countTracksOnBemcTower(const StMuTrack& track);
 
   void collectEnergyFromBEMC();
   void collectEnergyFromEEMC();

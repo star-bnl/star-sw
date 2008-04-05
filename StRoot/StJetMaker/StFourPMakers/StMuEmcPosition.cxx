@@ -30,7 +30,7 @@ StMuEmcPosition::~StMuEmcPosition()
 }
 
 bool StMuEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-				StMuTrack* track, double magField, double radius, int option)
+				const StMuTrack* track, double magField, double radius, int option)
 {
     StThreeVectorD Zero(0,0,0);
     *atFinal=Zero;
@@ -130,7 +130,7 @@ bool StMuEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
     return goProj;
 }
 
-bool StMuEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum, StMuTrack* track, double magField, double emcRadius )
+bool StMuEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum, const StMuTrack* track, double magField, double emcRadius )
 {  
     // There's no check for primary or secondary tracks
 
