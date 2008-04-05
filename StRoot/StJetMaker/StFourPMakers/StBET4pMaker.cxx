@@ -150,24 +150,10 @@ void StBET4pMaker::collectChargedTracksFromTPC()
     StMuTrack* track = uDst->primaryTracks(i);
     assert(track);
 
-    if (!isUsableTrack(track)) continue;
+    if (!isUsableTrack(*track)) continue;
 
-    //check projection to BEMC and remember for later: ---------------------------------------------
-    StThreeVectorD momentumAt, positionAt;
-	
-    mField = uDst->event()->magneticField()/10.0; //to put it in Tesla
-    StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-    StMuEmcPosition muEmcPosition;
-    bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, track, mField, geom->Radius());
-    if(tok) {
-      int m,e,s,id=0;
-      geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
-      int bad = geom->getId(m,e,s,id);
-      if(bad == 0) {
-	mNtracksOnTower[id]++; //increment number of tracks on this tower
-      }
-    }
-	
+    countTracksOnBemcTower(*track);
+
     //construct four momentum
     StThreeVectorF momentum = track->momentum();
     double mass = 0.1395700; //assume pion+ mass for now
@@ -181,40 +167,60 @@ void StBET4pMaker::collectChargedTracksFromTPC()
   }
 }
 
-bool StBET4pMaker::isUsableTrack(StMuTrack* track)
+bool StBET4pMaker::isUsableTrack(const StMuTrack& track) const
 {
-    if(track->flag() < 0) 
+    if(track.flag() < 0) 
       return false;
 
-    if (track->dcaGlobal().mag() > 3.)
+    if (track.dcaGlobal().mag() > 3.)
       return false;
       
     int dcaFlag=1;
     if (mUse2006Cuts){
-      Double_t limit=3.-2.*track->pt();
-      if(!((track->pt()<0.5&&track->dcaGlobal().mag()<=2.) ||
-	   ((track->pt()>=0.5&&track->pt()<1.0)&&
-	    track->dcaGlobal().mag()<=limit) ||
-	   (track->pt()>=1.0&&track->dcaGlobal().mag()<=1.0))) dcaFlag=0;
+      Double_t limit=3.-2.*track.pt();
+      if(!((track.pt()<0.5&&track.dcaGlobal().mag()<=2.) ||
+	   ((track.pt()>=0.5&&track.pt()<1.0)&&
+	    track.dcaGlobal().mag()<=limit) ||
+	   (track.pt()>=1.0&&track.dcaGlobal().mag()<=1.0))) dcaFlag=0;
     }
     if(dcaFlag == 0)
       return false;
 
-    if (track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest())
+    if (track.topologyMap().trackFtpcEast() || track.topologyMap().trackFtpcWest())
       return false;
 
-    if(track->eta() < GetEtaLow())
+    if(track.eta() < GetEtaLow())
       return false;
 
-    if(track->eta() > GetEtaHigh())
+    if(track.eta() > GetEtaHigh())
       return false;
 
-    if(static_cast<double>(track->nHits())/static_cast<double>(track->nHitsPoss()) < .51)
+    if(static_cast<double>(track.nHits())/static_cast<double>(track.nHitsPoss()) < .51)
       return false;
 
   return true;
 }
 
+void StBET4pMaker::countTracksOnBemcTower(const StMuTrack& track)
+{
+  StMuDst* uDst = mMuDstMaker->muDst();
+
+  //check projection to BEMC and remember for later: ---------------------------------------------
+  StThreeVectorD momentumAt, positionAt;
+	
+  mField = uDst->event()->magneticField()/10.0; //to put it in Tesla
+  StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
+  StMuEmcPosition muEmcPosition;
+  bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, &track, mField, geom->Radius());
+  if(tok) {
+    int m,e,s,id=0;
+    geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
+    int bad = geom->getId(m,e,s,id);
+    if(bad == 0) {
+      mNtracksOnTower[id]++; //increment number of tracks on this tower
+    }
+  }
+}
 
 void StBET4pMaker::collectEnergyFromBEMC()
 {

@@ -37,10 +37,10 @@ public:
     StMuEmcPosition();
     virtual  ~StMuEmcPosition();
 
-    bool projTrack(StThreeVectorD*,StThreeVectorD*,StMuTrack*,double,double=225.405,int=1); ///< Track projection utility
+    bool projTrack(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405,int=1); ///< Track projection utility
     bool projTrack(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405,int=1); ///< Track projection utility
     
-    bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMuTrack*,double,double=225.405); ///< Track projection utility
+    bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405); ///< Track projection utility
     bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405); ///< Track projection utility
     
     int getTowerEtaPhi(double, double, float*, float*); ///< Return tower eta/phi

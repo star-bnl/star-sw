@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.3 2004/11/30 19:01:42 mmiller Exp $
+ * $Id: StFourPMaker.h,v 1.4 2008/04/05 18:40:23 tai Exp $
  * $Log: StFourPMaker.h,v $
+ * Revision 1.4  2008/04/05 18:40:23  tai
+ * cleaned up the codes
+ *
  * Revision 1.3  2004/11/30 19:01:42  mmiller
  * Back compatibility for pre P04k bemc corrupt events
  *
@@ -75,8 +78,8 @@ public:
 
     void SetEtaLow(Float_t eta_low) { eta_low_lim = eta_low; };
     void SetEtaHigh(Float_t eta_high) { eta_high_lim = eta_high; };
-    Float_t GetEtaLow(void) { return eta_low_lim; };
-    Float_t GetEtaHigh(void) { return eta_high_lim; };
+    Float_t GetEtaLow(void) const { return eta_low_lim; };
+    Float_t GetEtaHigh(void) const { return eta_high_lim; };
 
     ///Access to BEMC event corruption flag
     bool bemcCorrupt() const {return mCorrupt;}
