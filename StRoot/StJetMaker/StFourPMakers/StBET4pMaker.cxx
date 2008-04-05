@@ -27,7 +27,6 @@
 
 //StJetMaker
 #include "../StMuTrackFourVec.h"
-#include "../StJetHist/StJetHistMaker.h"
 
 //local subdirectory
 #include "StMuEmcPosition.h"
@@ -43,12 +42,12 @@ bool accept2003Tower(int id);
 
 ClassImp(StBET4pMaker)
     
-    
+const int StBET4pMaker::mNOfBemcTowers;
+
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
   , mCorrupt(false)
   , mUseEndcap(false)
-  , mField(0.0)
   , mMuDstMaker(uDstMaker)
   , mTables(new StBemcTables(doTowerSwapFix))
   , mUse2003Cuts(false)
@@ -65,7 +64,6 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
 
 Int_t StBET4pMaker::InitRun(Int_t runId)
 {
-  cout <<"Welcome to HistMaker::InitRun()"<<endl;
   mTables->loadTables((StMaker*)this);
 
   return kStOk;
@@ -90,7 +88,6 @@ void StBET4pMaker::Clear(Option_t* opt)
   mCorrupt = false;
   mDylanPoints = 0;
   mSumEmcEt = 0.;
-  mField = 0.;
     
   for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
     delete (*it);
@@ -99,7 +96,7 @@ void StBET4pMaker::Clear(Option_t* opt)
   tracks.clear();
 
   //reset pointers to Barrel hits
-  for (int i = 1; i < 4801; ++i) {
+  for (int i = 1; i <= mNOfBemcTowers; ++i) {
     mBTowHits[i] = 0;
     mNtracksOnTower[i] = 0;
   }
@@ -208,10 +205,10 @@ void StBET4pMaker::countTracksOnBemcTower(const StMuTrack& track)
   //check projection to BEMC and remember for later: ---------------------------------------------
   StThreeVectorD momentumAt, positionAt;
 	
-  mField = uDst->event()->magneticField()/10.0; //to put it in Tesla
+  double magneticField = uDst->event()->magneticField()/10.0; //to put it in Tesla
   StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
   StMuEmcPosition muEmcPosition;
-  bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, &track, mField, geom->Radius());
+  bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, &track, magneticField, geom->Radius());
   if(tok) {
     int m,e,s,id=0;
     geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
@@ -227,77 +224,63 @@ void StBET4pMaker::collectEnergyFromBEMC()
   StMuDst* uDst = mMuDstMaker->muDst();
 
   //now loop on Barrel hits, correct energy, and push back for jet finding:
-  for (int id = 1; id <= 4800; ++id) { //id==software id: [1,4800]
-    StEmcRawHit* hit = mBTowHits[id];
+  for (int bemcTowerId = 1; bemcTowerId <= mNOfBemcTowers; ++bemcTowerId) { //bemcTowerId==software bemcTowerId: [1,4800]
+    StEmcRawHit* hit = mBTowHits[bemcTowerId];
     if (!hit) continue; //either no hit here or status!=1
 	
     float energy = hit->energy();
-    if(energy<=0.) continue; //skip it, E=0 can happen from gain=0. in calib table
+    if(energy <= 0.) continue; //skip it, E=0 can happen from gain=0. in calib table
+
+    double corrected_energy = correctBemcTowerEnergyForTracks(energy, bemcTowerId);
+    
+    if (corrected_energy <= 0.) continue;
+
+    float eta, phi;
+    StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
+    geom->getEtaPhi(bemcTowerId,eta,phi); // to convert software bemcTowerId into eta/phi
+
+    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
+
+    double pMag = (corrected_energy > mass) ? sqrt(corrected_energy*corrected_energy - mass*mass) : corrected_energy;
+
+    //now correct for eta-shift due to non-zero z_vertex (but note, no correction to Energy!)
+    //double RSMD = 2.2625*100.; //radius of SMD in cm
+    float towerX, towerY, towerZ;
+    geom->getXYZ(bemcTowerId, towerX, towerY, towerZ);
+    StThreeVectorF towerLocation(towerX, towerY, towerZ);
+
+    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
+	    
+    StThreeVectorF momentum(1., 1., 1.);
+    momentum.setPhi(phi);
+    momentum.setTheta(towerLocation.theta()); //use corrected theta
+    momentum.setMag(pMag);
+    StLorentzVectorF p4(corrected_energy, momentum);
+	    
+    //now construct StMuTrackFourVec object for jetfinding
+    StMuTrackFourVec* pmu = new StMuTrackFourVec();
+    pmu->Init(0, p4, bemcTowerId, kBarrelEmcTowerId );
+    tracks.push_back(pmu); //for jet finding interface
+  }
+}
+
+double StBET4pMaker::correctBemcTowerEnergyForTracks(double energy, int bemcTowerId)
+{
 
     //Get eta, phi
     float eta, phi;
     StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-    geom->getEtaPhi(id,eta,phi); // to convert software id into eta/phi
+    geom->getEtaPhi(bemcTowerId,eta,phi); // to convert software bemcTowerId into eta/phi
 
-    float pedestal, rms;
-    int CAP=0; //this arument matters only for SMD (capacitor?)
-    mTables->getPedestal(BTOW, id, CAP, pedestal, rms);
-	    
     //construct four momentum
-    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
 	    
     float theta=2.*atan(exp(-eta));
 
     //do a quick correction for hadronic MIP eneryg deposition:
     double MipE = 0.261*(1.+0.056*eta*eta)/sin(theta); //GeV
-    double nMipsOnTower = static_cast<double>(mNtracksOnTower[id]);
-    double corrected_energy = energy - nMipsOnTower*MipE;
-    //cout <<"Subtracting:\t"<<nMipsOnTower*MipE<<"\tfrom energy:\t"<<energy<<"\tfrom:\t"<<nMipsOnTower<<"\tmips"<<endl;
-	    
-    //quick, fill some histograms here:
-    StJetHistMaker* histMaker = dynamic_cast<StJetHistMaker*>(GetMaker("StJetHistMaker"));
-    if (histMaker!=0) {
-      if (nMipsOnTower==1) {
-	histMaker->mipHistVsEta->Fill(eta, hit->adc() - pedestal);
-	histMaker->mipEvsEta->Fill( eta, hit->energy() );
-      }
-      histMaker->towerEvsId->Fill(id, hit->energy());
-      histMaker->towerAdcvsId->Fill(id, hit->adc());
-    }
-	    
-    if (corrected_energy<=0.) continue;
 
-    //NOTE, MLM fix 11/07/05
-    //double pMag = (energy>mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
-    double pMag = (corrected_energy>mass) ? sqrt(corrected_energy*corrected_energy - mass*mass) : corrected_energy;
-
-    //now correct for eta-shift due to non-zero z_vertex (but note, no correction to Energy!)
-    //double RSMD = 2.2625*100.; //radius of SMD in cm
-    float towerX, towerY, towerZ;
-    geom->getXYZ(id, towerX, towerY, towerZ);
-    StThreeVectorF towerLocation(towerX, towerY, towerZ);
-    //cout <<"id:\t"<<id<<"\tlocation:\t"<<towerLocation<<"\teta:\t"<<towerLocation.pseudoRapidity()<<endl;
-
-    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
-    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
-    //cout <<"\tvert:\t"<<vertex.z()<<"\tnewEta:\t"<<towerLocation.pseudoRapidity()<<endl;
-	    
-    StThreeVectorF momentum(1., 1., 1.);
-    momentum.setPhi(phi);
-    momentum.setTheta( towerLocation.theta() ); //use corrected theta
-    momentum.setMag(pMag);
-    StLorentzVectorF p4(corrected_energy, momentum);
-    //cout <<zVertex<<"\t"<<phi<<"\t"<<theta<<"\t"<<p4.phi()<<"\t"<<p4.theta()<<"\t"<<energy<<"\t"<<corrected_energy<<endl;
-	    
-    //now construct StMuTrackFourVec object for jetfinding
-    StMuTrackFourVec* pmu = new StMuTrackFourVec();
-    pmu->Init(0, p4, id, kBarrelEmcTowerId );
-    tracks.push_back(pmu); //for jet finding interface
-
-    //cout <<"corrected energy"<<endl;
-    //cout <<"E:\t"<<pmu->e()<<"\tp:\t"<<pmu->p()<<"\tm:\t"<<pmu->mass()<<"\tE^2-p^2:\t"<<pmu->e()*pmu->e() - pmu->p()*pmu->p()<<endl;
-	    
-  }
+    return energy - mNtracksOnTower[bemcTowerId]*MipE;
 }
 
 void StBET4pMaker::collectEnergyFromEEMC()
@@ -310,13 +293,11 @@ void StBET4pMaker::collectEnergyFromEEMC()
     StMuEmcCollection* muEmc = uDst->muEmcCollection();
     assert(muEmc);
 
-    for (int id=0; id<muEmc->getNEndcapTowerADC(); ++id) {
+    for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
 
       int rawadc, sec, sub, etabin;
-      double adc, energy;
-
       muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
-      assert(sec>0 && sec<=MaxSectors);
+      assert(sec >0 && sec <= MaxSectors);
 	
       //find eta and phi values from sector, subsector and etabin assuming z=0,0,0
       TVector3 towerCenter = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1); //careful, this is indexed from 0
@@ -329,13 +310,13 @@ void StBET4pMaker::collectEnergyFromEEMC()
       if(dbItem->gain<=0.) continue; // drop it, unless you work with ADC spectra
       if(rawadc<dbItem->thr) continue; // drop raw ADC < ped+N*sigPed, N==3 in init
 	    
-      adc = rawadc - (dbItem->ped);
-      energy=adc/(dbItem->gain);
+      double adc = rawadc - (dbItem->ped);
+      double energy = adc/(dbItem->gain);
       if(energy < 0.01) continue; // drop if less than 10MeV for now
 	    
       //construct four momentum
       double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
-      double pMag = (energy>mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
+      double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
 
       //correct for eta shift
       StThreeVectorD towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
@@ -482,7 +463,7 @@ bool StBET4pMaker::shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID
 double StBET4pMaker::sumEnergyOverBemcTowers(double minE)
 {
   double ret(0.0);
-  for(int bemcTowerID = 1; bemcTowerID <= 4800; ++bemcTowerID) {
+  for(int bemcTowerID = 1; bemcTowerID <= mNOfBemcTowers; ++bemcTowerID) {
     if(mBTowHits[bemcTowerID] && mBTowHits[bemcTowerID]->energy() > minE) {
       ret += mBTowHits[bemcTowerID]->energy();
     }
@@ -493,7 +474,7 @@ double StBET4pMaker::sumEnergyOverBemcTowers(double minE)
 int StBET4pMaker::numberOfBemcTowersWithEnergyAbove(double minE)
 {
   int ret(0);
-  for(int bemcTowerID = 1; bemcTowerID <= 4800; ++bemcTowerID) {
+  for(int bemcTowerID = 1; bemcTowerID <= mNOfBemcTowers; ++bemcTowerID) {
     if(mBTowHits[bemcTowerID] && mBTowHits[bemcTowerID]->energy() > 0.4) {
       ret++;
     }
