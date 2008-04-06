@@ -1,166 +1,87 @@
 //StMuTrackFourVec.h
 //M.L. Miller (Yale Software)
 //07/02
-
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
-#include <iostream>
-#include <string>
-using namespace std;
-
 #include "StJetFinder/FourVec.h"
-#include "StarClassLibrary/StParticleDefinition.hh"
+
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StarClassLibrary/StLorentzVectorF.hh"
 #include "StDetectorId.h"
+
+#include <iostream>
+#include <string>
+
+class StMuTrack;
 
 class StMuTrackFourVec : public AbstractFourVec
 {
 public:
     
-    StMuTrackFourVec(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
-    StMuTrackFourVec(StMuTrack*);
-    StMuTrackFourVec(StMuTrack*, Int_t i);
-    StMuTrackFourVec();
-    virtual ~StMuTrackFourVec() {};
+  StMuTrackFourVec(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
+  StMuTrackFourVec(StMuTrack*);
+  StMuTrackFourVec(StMuTrack*, Int_t i);
+  StMuTrackFourVec();
+  virtual ~StMuTrackFourVec() {};
     
-    ///momenta
-    virtual double pt() const;
-    virtual double px() const;
-    virtual double py() const;
-    virtual double pz() const;
-    virtual double p() const;
+  ///momenta
+  double pt() const { return mVec.perp();}
+  double px() const { return mVec.px(); } 
+  double py() const { return mVec.py(); }
+  double pz() const { return mVec.pz(); }
+  double p() const  { return mVec.vect().mag(); }
 
-    ///angles
-    virtual double theta() const;
-    virtual double phi() const;
-    virtual double eta() const;
-    virtual double rapidity() const;
+  ///angles
+  double theta()    const { return mVec.theta(); }
+  double phi()      const { return mVec.phi(); }
+  double eta()      const { return mVec.pseudoRapidity(); }
+  double rapidity() const { return mVec.rapidity(); }
 
-    ///4-th component
-    virtual double eT() const;
-    virtual double eZ() const;
-    virtual double e() const;
-    virtual double mass() const;
+  ///4-th component
+  double eT()   const { return ::sqrt(e()*e()*pt()*pt()/(p()*p())); }
+  double eZ()   const { return eT()*sinh(eta()); }
+  double e()    const { return mVec.e(); }
+  double mass() const { return mVec.m(); }
 
-    ///charge
-    virtual double charge() const;
+  ///charge
+  double charge() const { return !mTrack ? 0 : (double)mTrack->charge(); }
 
-    ////Mu Track (null if it's an emc tower/hit/point) this will change soon
-    StMuTrack* particle() const {return mTrack;}
+  ////Mu Track (null if it's an emc tower/hit/point) this will change soon
+  StMuTrack* particle() const {return mTrack;}
 
-    ///Index of the track/tower/cluster/point in the container that it came from
-    Int_t getIndex(void) const { return index; }
+  ///Index of the track/tower/cluster/point in the container that it came from
+  Int_t getIndex(void) const { return index; }
     
-    ///Id of the detector that generated this 4-vector
-    StDetectorId detectorId() const {return mDetId;}
+  ///Id of the detector that generated this 4-vector
+  StDetectorId detectorId() const {return mDetId;}
     
-    void Init(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
+  void Init(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
 
-    const StLorentzVectorF& vec() const {return mVec;}
+  const StLorentzVectorF& vec() const {return mVec;}
     
 protected:
-    StMuTrack* mTrack;
-    StLorentzVectorF mVec;
-    Int_t index;
-    StDetectorId mDetId;
+  StMuTrack* mTrack;
+  StLorentzVectorF mVec;
+  Int_t index;
+  StDetectorId mDetId;
 };
-
-// --- inlines
-
-inline double StMuTrackFourVec::pt() const
-{
-    return mVec.perp();
-}
-
-inline double StMuTrackFourVec::px() const
-{
-    return mVec.px();
-}
-
-inline double StMuTrackFourVec::py() const
-{
-    return mVec.py();
-}
-
-inline double StMuTrackFourVec::pz() const
-{
-    return mVec.pz();
-}
-
-inline double StMuTrackFourVec::p() const
-{
-    return mVec.vect().mag();
-}
-
-//angles
-inline double StMuTrackFourVec::theta() const
-{
-    return mVec.theta();
-}
-
-inline double StMuTrackFourVec::phi() const
-{
-    return mVec.phi();
-}
-
-inline double StMuTrackFourVec::eta() const
-{
-    return mVec.pseudoRapidity();
-}
-
-inline double StMuTrackFourVec::rapidity() const
-{
-    return mVec.rapidity();
-}
-
-//4-th component
-inline double StMuTrackFourVec::eT() const
-{
-    return ::sqrt(e()*e()*pt()*pt()/(p()*p()));
-}
-
-inline double StMuTrackFourVec::eZ() const
-{
-    return eT()*sinh(eta());
-}
-
-inline double StMuTrackFourVec::e() const
-{
-    return mVec.e();
-}
-
-inline double StMuTrackFourVec::mass() const
-{
-    return mVec.m();
-}
-
-//charge
-inline double StMuTrackFourVec::charge() const
-{
-    if(!mTrack) return 0;
-    return static_cast<double>( mTrack->charge() );
-}
 
 inline ostream& operator<<(ostream& os, const StMuTrackFourVec& f)
 {
-    string idstring;
-    StDetectorId mDetId = f.detectorId();
-    if (mDetId==kTpcId) {
-	idstring = "kTpcId";
-    }
-    else if (mDetId==kBarrelEmcTowerId) {
-	idstring = "kBarrelEmcTowerId";
-    }
-    else if (mDetId==kEndcapEmcTowerId) {
-	idstring = "kEndcapEmcTowerId";
-    }
-    else {
-	idstring = "kUnknown";
-    }
+  std::string idstring;
+  StDetectorId mDetId(f.detectorId());
+
+  if (mDetId == kTpcId)
+    idstring = "kTpcId";
+  else if (mDetId == kBarrelEmcTowerId)
+    idstring = "kBarrelEmcTowerId";
+  else if (mDetId == kEndcapEmcTowerId)
+    idstring = "kEndcapEmcTowerId";
+  else
+    idstring = "kUnknown";
     
-    return os <<"index:\t"<<f.getIndex()<<"\tP:\t"<<f.vec()<<"\tdetId:\t"<<f.detectorId()<<"\t"<<idstring;
+  return os << "index:\t" << f.getIndex() << "\tP:\t" << f.vec() << "\tdetId:\t" << f.detectorId() << "\t" << idstring;
 
 }
 #endif

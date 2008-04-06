@@ -2,43 +2,44 @@
 //M.L. Miller (Yale Software)
 //07/02
 
-//std
-#include "Stiostream.h"
-#include <string>
-using namespace std;
-
-//SCL
-#include "StarClassLibrary/StParticleTypes.hh"
-
-//local
 #include "StMuTrackFourVec.h"
 
+#include "Stiostream.h"
+
+#include "StarClassLibrary/StParticleTypes.hh"
+
 StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t, StLorentzVectorF P, Int_t i, StDetectorId detId)
-    : mTrack(t), mVec(P), index(i), mDetId(detId)
+  : mTrack(t)
+  , mVec(P)
+  , index(i)
+  , mDetId(detId)
 {
 }
 
-StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t) : mTrack(t)
+StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t)
+  : mTrack(t)
+  , mVec(StLorentzVectorF( t->momentum().massHypothesis(StPionPlus::instance()->mass() ), t->momentum()))
+  , index(-1)
+  , mDetId(kUnknownId)
 {
-    index = -1;
-    mDetId = kUnknownId;
-    StThreeVectorF mom = t->momentum();
-    //everything is a pion for now!!!!
-    mVec = StLorentzVectorF( mom.massHypothesis(StPionPlus::instance()->mass() ) , mom);
+
 }
 
-StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t, Int_t i) : mTrack(t), index(i)
+StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t, Int_t i)
+  : mTrack(t)
+  , mVec(StLorentzVectorF( t->momentum().massHypothesis(StPionPlus::instance()->mass() ), t->momentum()))
+  , index(i)
+  , mDetId(kUnknownId)
 {
-    mDetId = kUnknownId;
-    index = i;
-    StThreeVectorF mom = t->momentum();
-    //everything is a pion for now!!!!
-    mVec = StLorentzVectorF( mom.massHypothesis(StPionPlus::instance()->mass() ) , mom);
+
 }
 
-StMuTrackFourVec::StMuTrackFourVec() : mTrack(NULL), index(0)
+StMuTrackFourVec::StMuTrackFourVec() 
+  : mTrack(NULL)
+  , index(0)
+  , mDetId(kUnknownId)
 {
-    mDetId = kUnknownId;
+
 }
 
 void StMuTrackFourVec::Init(StMuTrack *track, StLorentzVectorF P, Int_t i, StDetectorId id)
@@ -47,5 +48,4 @@ void StMuTrackFourVec::Init(StMuTrack *track, StLorentzVectorF P, Int_t i, StDet
   mVec = P;
   mTrack = track;
   mDetId = id;
-  //cout <<(*this)<<endl;
 }
