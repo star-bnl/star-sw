@@ -164,7 +164,7 @@ Int_t StSsdFastSimMaker::Make()
   LOG_DEBUG << "Geometry Loaded" << endm;
   St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
   if (! g2t_ssd_hit) {
-    LOG_WARN << "g2t_ssd_hit on input, bye bye" << endm; return kStWarn;
+    LOG_WARN << "No g2t_ssd_hit on input, bye bye" << endm; return kStWarn;
     return kStWarn;
   }
   g2t_ssd_hit_st *g2t         = g2t_ssd_hit->GetTable();
