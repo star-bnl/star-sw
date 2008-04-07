@@ -26,12 +26,16 @@
 //   - scaler detector used in that dataset (see dets strings below)
 //   - SpaceCharge rate used in that dataset
 //   - GridLeak multiplier used in that dataset
+//   - (optional) SpaceCharge offset used in that dataset (set "!" below)
 //
 // There should be at least 3 datasets with different GridLeaks!
 // Example 3 dataset file which used bbce+bbcw would look like this:
 //    histsSetA/* 4 1.7e-8 9.0
 //    histsSetB/* 4 1.7e-8 12.0
 //    histsSetC/* 4 1.7e-8 15.0
+// A ! at the beginning of a file spec will cause the optional SpaceCharge
+// oofset to be read in on that line:
+//    !histsSetC/* 4 0 12.0 550
 // A # at the beginning of a file spec will cause that dataset to be skipped:
 //    #histsSetC/* 4 0 12.0
 // If this file is named input.dat, it could be analyzed with:
@@ -279,7 +283,7 @@ for (i=0; i<nfi; i++) {
 c1->Clear();
 c1->Divide(2,2,0.01,0.025);
 
-double p0,p1,p2,p3;
+double p0,p1,p2,p3,ep0,ep1;
 
 gr_go->Fit("pol1","0Q");
 TF1* go_fit = gr_go->GetFunction("pol1");
@@ -332,8 +336,11 @@ lk_fit->SetLineColor(4);
 gr_lk->Draw("AP");
 p0 = lk_fit->GetParameter(0);
 p1 = lk_fit->GetParameter(1);
+ep0 = lk_fit->GetParError(0);
+ep1 = lk_fit->GetParError(1);
 double scXgl = -p0/p1;
-printf("* Constraint on SC x GL = %5.3g\n",scXgl);
+double escXgl = scXgl*TMath::Sqrt(pow(ep0/p0,2)+pow(ep1/p1,2));
+printf("* Constraint on SC x GL = %5.3g +/- %5.3g\n",scXgl,escXgl);
 
 if (!scgl_fit) scgl_fit = new TF1("scgl_fit","[0]/x",-5.,100.);
 scgl_fit->SetParameter(0,scXgl);
@@ -401,7 +408,12 @@ glp = scXgl/scp;
 // Find via SC-cubic
 gr_sc->Fit("pol2","Q");
 gr_sc->Draw("AP");
-scgl_fit->Draw("same");
+scgl_fit->DrawCopy("same");
+scgl_fit->SetLineStyle(7);
+scgl_fit->SetParameter(0,scXgl+escXgl);
+scgl_fit->DrawCopy("same");
+scgl_fit->SetParameter(0,scXgl-escXgl);
+scgl_fit->DrawCopy("same");
 TF1* sc_fi2 = gr_sc->GetFunction("pol2");
 p0 = sc_fi2->GetParameter(0);
 p1 = sc_fi2->GetParameter(1);
@@ -492,6 +504,14 @@ printf(" with GL = %5.2f\n\n",glp);
 
 c1->Update(); c1->Draw();
 
+// Set colors/markers for any further fun
+for (i=0;i<nfi;i++) {
+  int color = 60+40.0*((float) i)/((float) (nfi-1));
+  SCi[i]->SetMarkerColor(color);
+  SCi[i]->SetLineColor(color);
+  SCi[i]->SetMarkerStyle(22+i);
+}
+
 }
 
 
@@ -508,11 +528,10 @@ int FitLine(TTree* SC, const char* v0, const char* v1, double window,
   fline.SetParameters(0,0);
   p0 = 0; p1 = 0;
   int i,j,nbinsc = 12;
-  if (!gr_temp) {
-    gr_temp = new TGraphErrors(nbinsc);
-    gr_temp->SetMarkerStyle(25);
-    gr_temp->SetMarkerColor(4);
-  }
+  if (gr_temp) delete gr_temp;
+  gr_temp = new TGraphErrors(nbinsc);
+  gr_temp->SetMarkerStyle(25);
+  gr_temp->SetMarkerColor(4);
 
   TCut cut2 = "";
   TString plot = Form("%s:%s",v0,v1);
@@ -598,8 +617,11 @@ void FindMinMax(TH1* h, double& min, double& max) {
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 1.2 2008/04/01 22:17:52 genevb Exp $
+// $Id: Calib_SC_GL.C,v 1.3 2008/04/07 19:41:33 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 1.3  2008/04/07 19:41:33  genevb
+// Minor updates to documentation, graphing
+//
 // Revision 1.2  2008/04/01 22:17:52  genevb
 // Improvements in documentation, fitting, graphing
 //
