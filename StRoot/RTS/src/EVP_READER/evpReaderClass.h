@@ -4,7 +4,7 @@
 
 typedef unsigned int UINT32;
 
-#include "RTS/include/evp.h"
+#include "evp.h"
 #include "cfgutil.h"
 
 class sfs_index;
