@@ -618,7 +618,7 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 
 		if(size <= 0) {
 			if(size < 0) {
-				LOG(WARN,"%s: %s: not found in this event",name,str) ;
+				LOG(NOTE,"%s: %s: not found in this event",name,str) ;
 			}
 			continue ;
 		}
@@ -721,7 +721,7 @@ daq_dta *daq_tpx::handle_cld_raw(int sec, int rdo)
 
 		if(size <= 0) {
 			if(size < 0) {
-				LOG(WARN,"%s: %s: not found in this event",name,str) ;
+				LOG(NOTE,"%s: %s: not found in this event",name,str) ;
 			}
 			continue ;
 		}
@@ -850,6 +850,18 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 			int row = *p_buff++ ;
 			int cou = *p_buff++ ;
 
+			daq_cld *dc = (daq_cld *) cld->request(cou) ;
+	
+
+			for(int i=0;i<cou;i++) {
+				p_buff += fcf_algo[0]->fcf_decode(p_buff,dc) ;
+				dc++ ;
+			}
+
+			cld->finalize(cou,s,row,0) ;
+
+		
+#ifdef OLD_WAY
 			while(cou) {
 				daq_store *st = cld->get() ;
 				
@@ -857,7 +869,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 				st->row = row ;
 				st->nitems = 1 ;	// just one
 
-				daq_cld *dc = (daq_cld *)(st+1) ;
+				//daq_cld *dc = (daq_cld *)(st+1) ;
 
 				double p, t ;
 				int p1,p2,t1,t2,cha,fla ;
@@ -915,6 +927,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 				//LOG(INFO,"\trow %d\t%d: %f [%d:%d], %f [%d:%d] %d 0x%04X",row,cou,p,p1,p2,t,t1,t2,cha,fla) ;
 				cou-- ;
 			}
+#endif
 
 		}
 
@@ -1016,6 +1029,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 
 			fcf_algo[sim->sec]->apply_gains(sim->sec,gain_algo) ;
 			fcf_algo[sim->sec]->start_evt() ;
+
 			if(fcf_tmp_storage==0) {
 				fcf_tmp_storage = (u_int *)valloc(FCF_TMP_BYTES) ;
 			}
@@ -1073,8 +1087,6 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 
 
 					cld[g_cou].cld = dc ;	// copy!
-
-					
 					g_cou++ ;
 
 
@@ -1094,3 +1106,160 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 	return cld_sim ;
 }
 
+
+// knows how to get the token out of an event while trying also find a l0 command
+int daq_tpx::get_token(char *addr, int words)
+{
+	daq_trg_word trgs[128] ;
+
+	get_l2(addr, words, trgs, 1) ;
+
+	
+
+	if(trgs[0].t==0) {
+		LOG(ERR,"Token 0 not allowed but I will try to use the other triggers...") ;
+		trgs[0].t = 4097 ;
+	}
+
+
+	return trgs[0].t ;
+
+}
+
+// dumps the known accept/abort trigger decisions from
+// the FIFO part of the event.
+// returns the count
+int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt)
+{
+	struct tpx_rdo_event rdo ;
+	int cou = 0 ;
+	u_int collision = 0 ;
+
+
+	tpx_get_start(addr, words, &rdo, prompt) ;
+
+	LOG(DBG,"rdo %d, rdo token %d, trg cou %d",rdo.rdo,rdo.token,rdo.trg_cou) ;
+
+	for(u_int i=0;i<rdo.trg_cou;i++) {
+		u_int dta = rdo.trg[i].data ;
+		u_int marker = rdo.trg[i].csr >> 24 ;
+		u_int rhic = rdo.trg[i].rhic_counter ;
+
+		if((marker==0) || (marker==0xEE)) {	// marks the prompt configuration
+
+			trgs[cou].t = dta & 0xFFF ;
+			trgs[cou].daq = (dta >> 12) & 0xF ;
+			trgs[cou].trg = (dta >> 16) & 0xF ;
+			//trgs[cou].trg = 4 ;	// need to force this for old code...
+			trgs[cou].rhic_delta = 0 ;
+			trgs[cou].rhic = rhic ;
+
+			if(trgs[cou].t==0) {
+				LOG(ERR,"RDO %d: token 0 -- ignoring",rdo.rdo) ;
+				continue ;
+			}
+			// check for overrun
+			if((dta & 0x3000000) != 0x2000000) {
+				LOG(ERR,"RDO %d: T %d: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+			}
+
+			cou++ ;
+
+			collision = rhic ;
+		}
+
+	}
+	
+	if(cou==0) {	// no prompt trigger contrib; use the one from the RDO header.
+		// either for a logging event (4096) or the one from the trigger-only (4097)
+		
+		if(rdo.token != 4096) {
+			rdo.token = 4097 ;
+			LOG(NOTE,"No triggers in event, making it %d",rdo.token) ;
+		}
+
+		trgs[cou].t = rdo.token ;
+		trgs[cou].daq = 0 ;
+		trgs[cou].trg = 5 ;	// dummy
+		trgs[cou].rhic_delta = 0 ;
+		trgs[cou].rhic = 0 ;
+		
+
+		cou++ ;
+
+	}
+	else if (cou > 1) {
+		LOG(ERR,"RDO %d: token %d? -- too many prompt contributions!",rdo.rdo,trgs[0].t) ;
+	}
+
+	// at this point at least one contribution exists (i.e. cou>=1):
+	// real L0 t
+	// 4096 for log events
+	// 4097 for events without an L0
+
+	if(trgs[0].t == 0) {
+		LOG(ERR,"Token 0 in RDO %d: making it 4097",rdo.rdo) ;
+		trgs[0].t = 4097 ;
+	}
+
+	for(u_int i=0;i<rdo.trg_cou;i++) {
+		u_int dta = rdo.trg[i].data ;
+		u_int marker = rdo.trg[i].csr >> 24 ;
+		u_int rhic = rdo.trg[i].rhic_counter ;
+
+		if(marker==0xFF) {	// FIFO
+			trgs[cou].t = dta & 0xFFF ;
+			trgs[cou].daq = (dta >> 12) & 0xF ;
+			trgs[cou].trg = (dta >> 16) & 0xF ;
+			trgs[cou].rhic = rhic ;
+
+
+
+			switch(trgs[cou].trg) {
+			case 13 :
+			case 15 :
+				break ;
+			default :
+				// check for overrun
+				if((dta & 0x3000000) != 0x2000000) {
+					LOG(ERR,"RDO %d: T %d: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+				}
+				continue ;
+			}
+
+			// we took out all the FIFO l0 contribs here!
+
+			if(rhic >= collision) {
+				trgs[cou].rhic_delta = rhic - collision ;
+			}
+			else {
+				trgs[cou].rhic_delta = -(collision - rhic) ;
+			}
+
+			if(trgs[cou].t == 0) {
+				LOG(ERR,"RDO %d: token 0 in L2 contribution 0x%08X -- skipping",rdo.rdo,dta) ;
+				continue ;
+			}
+
+			cou++ ;
+		}
+
+	}
+
+#if 0
+// older NIOS code...
+	if((trgs[0].t<4096) && (rdo.trg_cou == 1) && (tcd_in_use == 0)) {	// no TCD, badly emulated
+		trgs[cou].t = trgs[0].t ;
+		trgs[cou].daq = 0 ;
+		trgs[cou].trg = 15 ;	// accept!
+		trgs[cou].rhic = (trgs[0].rhic) + 1 ;
+		trgs[cou].rhic_delta = 1 ;
+
+
+		cou++ ;
+	}
+#endif
+
+
+	return cou ;
+}

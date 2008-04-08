@@ -51,7 +51,6 @@ protected:
 
 private:
 
-
 public:
 
 
@@ -67,6 +66,7 @@ public:
 
 	// needs to be overriden!
 	virtual daq_dta  *get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
+
 	// needs to be overriden!
 	virtual daq_dta  *put(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
 
@@ -74,6 +74,9 @@ public:
 	virtual int presence() ;
 
 	virtual void help() const ;
+
+	virtual int get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt) ;
+	virtual int get_token(char *buff, int buff_bytes) ;
 
 
 	virtual void SetMode(int mode=0) { 

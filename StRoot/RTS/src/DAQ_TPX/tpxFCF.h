@@ -3,7 +3,7 @@
 
 //#include <sys/types.h>
 
-#include "tpxCore.h"
+//#include "tpxCore.h"
 
 
 // main tunable parameters
@@ -78,16 +78,19 @@ struct tpxFCF_cl {
 	fcf_type p_ave ;
 
 
-
 	// extents
 	fcf_short t1, t_min ;
 	fcf_short t2, t_max ;
+
 	fcf_short p1 ;
 	fcf_short p2 ;
 
 	fcf_short flags ;
+	u_short track_id ;
 
+	u_int quality ;	
 } ;
+
 
 
 // forwad decls
@@ -105,7 +108,7 @@ public:
 
 	void start_evt() ;
 
-	int do_pad(tpx_altro_struct *a, void *extra = 0) ;
+	int do_pad(tpx_altro_struct *a, u_short *extra = 0) ;
 	int stage2(u_int *outbuff, int max_bytes) ;
 
 

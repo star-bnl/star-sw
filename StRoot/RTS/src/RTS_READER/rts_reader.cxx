@@ -15,6 +15,8 @@
 #include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TOF/daq_tof.h>
 #include <DAQ_PP2PP/daq_pp2pp.h>
+#include <DAQ_ESMD/daq_esmd.h>
+#include <DAQ_TPC/daq_tpc.h>
 
 #include "rts_reader.h"
 #include "daq_det.h"
@@ -49,6 +51,9 @@ rts_reader::rts_reader(const char *name)
 	sfs = 0 ;		// no sfs yet...
 	sfs_owner = 0 ;		// did I do new?
 
+	legacy_p = 0 ;
+	legacy_bytes = 0 ;
+
 	dets_enabled[0] = 0 ;	// make empty string
 	rts_dets_enabled = 0 ;
 
@@ -77,7 +82,7 @@ rts_reader::~rts_reader()
 		if(sfs_owner) delete sfs ;
 	}
 
-//	if(datap) delete datap ;
+	if(legacy_p) free(legacy_p) ;
 
 	dispatcher = 0 ;
 	sfs = 0 ;
@@ -173,7 +178,7 @@ int rts_reader::handle_open()
 		return -1 ;
 	}
 	else {
-		LOG(DBG,"opendir OK...") ;
+		LOG(DBG,"sfs->opendir(/) OK...") ;
 	}
 
 	return 1 ;	// all OK...
@@ -228,6 +233,8 @@ int rts_reader::get_event()
 	assert(fs_root_dir) ;
 
 	entry = sfs->readdir(fs_root_dir) ;
+	LOG(DBG,"readdir returns %p",entry) ;
+
 	if(entry == 0) {
 		LOG(DBG,"No more entries in SFS...") ;
 		return EOF ;	// done!
@@ -245,13 +252,14 @@ int rts_reader::get_event()
 		simple sanity checks:
 		1) must have size 0 i.e. be a directory
 		2) name must start with "/"
-		3) dir name must be "/"
 	*/
-	if(bytes != 0) {
-		LOG(ERR,"%s:%s:%s: not a directory, bytes == %d",iname,select_files[cur_file_ix],n,bytes) ;
+	if(bytes != 0) {	// this is possible if there was some sort of special data in the root
+		LOG(WARN,"%s:%s:%s: not a directory, bytes == %d",iname,select_files[cur_file_ix],n,bytes) ;
+		goto next_entry ;
 	}
-	if(*n != '/') {
+	if(*n != '/') {		// this is an error
 		LOG(ERR,"%s:%s:%s: no slash as first char?",iname,select_files[cur_file_ix],n) ;
+		return EOF ;	// no point in continuing -- stuff is garbled
 	}
 
 	u_int ix = is_physics(n) ;
@@ -284,12 +292,16 @@ int rts_reader::Make()
 	reopen_new: ;
 
 
-	if(fs_root_dir) handle_close();
+	if(!sfs_owner && fs_root_dir) {
+		handle_close();
+	}
 
 	ret = handle_open() ;
 
 	if(ret < 0) {	// some error 
 		LOG(ERR,"%s: file \"%s\": open error [%s]",iname,select_files[cur_file_ix],strerror(errno)) ;
+		if(!sfs_owner) return EOF ;	// nothing we can do...
+
 		cur_file_ix++ ;
 		goto reopen_new ;
 	}
@@ -306,24 +318,30 @@ int rts_reader::Make()
 	if(ret < 0) {		// end of file....
 		LOG(DBG,"get event returns %d",ret) ;
 		handle_close() ;
-		// that's it if we are running via a sfs object instead of a file...
-		if(!sfs_owner) {
-			LOG(NOTE,"No more events in the sfs object -- done") ;
+
+
+		if(!sfs_owner) {	// single sfs can't return end-of-file?
+			LOG(WARN,"No more events in the sfs object -- done") ;
 			return EOF ;
 		}
 
 		cur_file_ix++ ;
 		goto reopen_new ;
 	}
-	// release all of the previous data before we return with good news
-	//det("*")->release() ;
 
-	assert(dispatcher) ;
-	dispatcher->multi_mask = rts_dets_enabled ;
-	dispatcher->Make() ;	// call the dets Make()!
 
 	LOG(DBG,"%s: Make: cur_file \"%s\" [%d], file evt %d, tot event %d",iname,
 		select_files[cur_file_ix],cur_file_ix,cur_event_in_file,cur_event) ;
+
+
+
+	assert(dispatcher) ;	
+
+	handle_legacy() ;
+
+	dispatcher->multi_mask = rts_dets_enabled ;
+	dispatcher->Make() ;	// call the dets Make()!
+	
 
 	return 1 ;
 }
@@ -367,7 +385,14 @@ int rts_reader::enable(u_int rts_mask)
 				rts_dets_enabled |= (1<<rts_id) ;
 				dispatcher->mydet[rts_id] = new daq_pp2pp(name,this) ;
 				break ;
-
+			case ESMD_ID :
+				rts_dets_enabled |= (1<<rts_id) ;
+				dispatcher->mydet[rts_id] = new daq_esmd(name,this) ;
+				break ;
+			case TPC_ID :
+				rts_dets_enabled |= (1<<rts_id) ;
+				dispatcher->mydet[rts_id] = new daq_tpc(name,this) ;
+				break ;
 			default :
 				if(rts_mask != 0xFFFFFFFF) LOG(ERR,"%s: %s[%d] has not been coded at this time!",iname,name,rts_id) ;
 				dispatcher->mydet[rts_id] = new daq_det(name,this) ;
@@ -405,6 +430,9 @@ int rts_reader::enable(const char *which)
 	return enable(mask) ;
 }
 
+/*
+	Reusing the sfs from i.e. EVP_READER
+*/
 int rts_reader::add_input(class sfs_index *use_sfs)
 {
 	if(sfs) {	// I already own sfs?
@@ -418,7 +446,9 @@ int rts_reader::add_input(class sfs_index *use_sfs)
 	return 0 ;
 }
 
-
+/*
+	Input from a file
+*/
 int rts_reader::add_input(const char *fname)
 {
 	u_int max_files ;
@@ -551,3 +581,85 @@ static int rts_non_physics(const char *name)
 	return name2rts(name) ;	// name2rts will only look at starting characters i.e. "/tpx/asdasdasd" & "/tpxadssssss" will both match!
 }
 
+
+int rts_reader::find_leaf(const char *top, const char *leaf, char *result)
+{
+	int ret = 0 ;
+	fs_dir *dir ;
+	fs_dirent *e ;
+
+	*result = 0 ;
+
+	LOG(DBG,"Entering: looking for %s in %s",leaf,top) ;
+
+	if(strstr(top,leaf)) {
+		LOG(DBG,"Got %s for %s",top,leaf) ;
+		strcpy(result,top) ;
+		return 1 ;
+	}
+
+	dir = sfs->opendir((char *)top) ;
+
+	if(dir==0) return ret ;
+
+	for(;;) {
+		e = sfs->readdir(dir) ;
+		if(e) {
+			LOG(DBG,"top %s: sub %s, sz %d",top,e->full_name,e->sz) ;
+			if(e->sz == 0) {
+				LOG(DBG,"Trying %s...",e->full_name) ;
+				if(find_leaf(e->full_name,leaf,result)) {
+					ret = 1 ;
+					break ;
+				}
+			}
+			else if(strstr(e->full_name,leaf)) {
+				LOG(DBG,"Got HERE: %s for %s",e->full_name,leaf) ;
+				strcpy(result,e->full_name) ;
+				ret = 1 ;
+				break ;
+			}
+
+		}
+		else {
+			break ;
+		}
+	}
+
+	sfs->closedir(dir) ;
+
+	return ret ;
+}
+
+	
+int rts_reader::handle_legacy()
+{
+	char sfs_name[256] ;
+	int ret ;
+
+	if(legacy_p) free(legacy_p) ;
+	legacy_bytes = 0 ;
+
+	if(find_leaf(fs_cur_evt,"legacy",sfs_name)==0) {
+		return 0 ;
+	}
+
+
+	legacy_bytes = sfs->fileSize(sfs_name) ;
+
+	legacy_p = (char *)malloc(legacy_bytes) ;
+
+	ret = sfs->read(sfs_name, legacy_p, legacy_bytes) ;
+
+	if((int)legacy_bytes != ret) {
+		LOG(ERR,"Legacy read returned %d, expecting %d",ret,legacy_bytes) ;
+		free(legacy_p) ;
+		legacy_p = 0 ;
+		return 0 ;
+	}
+	
+	LOG(NOTE,"Found legacy bank %s of %d bytes",sfs_name,legacy_bytes) ;
+
+	return legacy_bytes ;	
+
+}

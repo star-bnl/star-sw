@@ -3,12 +3,14 @@
 
 // Trigger basics
 struct daq_trg_word {
-	unsigned short t ;
-	unsigned char daq ;
-	unsigned char trg ;
+	short t ;		// token
+	unsigned char daq ;	// daq command
+	unsigned char trg ;	// trigger command
+	
+	unsigned int rhic ;	// rhic clock timestamp
+	int rhic_delta ;		// delta from previous
 
-	unsigned int clock ;
-	unsigned int misc ;
+	unsigned int reserved[5] ;
 } ;
 
 
@@ -45,11 +47,6 @@ struct daq_cld {
 struct daq_sim_cld {
 	// same as from file
 	struct daq_cld cld ;
-
-	// extended info
-	unsigned short pix_count ;
-	unsigned short max_adc ;
-	unsigned int cl_id ;	// global cluster id
 
 	// embedding info
 	unsigned short track_id ;

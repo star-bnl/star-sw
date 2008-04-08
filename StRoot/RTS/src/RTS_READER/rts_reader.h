@@ -30,6 +30,9 @@ private:
 	int handle_open() ;
 	void handle_close() ;
 
+	int handle_legacy() ;
+	int find_leaf(const char *top, const char *leaf, char *result) ;
+
 	int m_Mode ;
 public:
 	rts_reader(const char *name="rts_rdr") ;	// Offline wants char stuff...
@@ -89,6 +92,9 @@ public:
 
 	char		fs_cur_evt[128] ;			// name of the form "/#123123" or "/tpx", just that part!
 	u_int		cur_evt_ix ;				// this is the number after /# of the current entry
+
+	char		*legacy_p ;
+	u_int		legacy_bytes ;
 
 } ;
 

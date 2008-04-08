@@ -84,18 +84,19 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_sim_cld *sdc)
 {
 	int skip = fcf_decode(p_buff,&(sdc->cld)) ;
 
-
-	sdc->pix_count = 0 ;
-	sdc->max_adc = 0 ;
-	sdc->cl_id = 0 ;
-
 	sdc->track_id = 0 ;
-	sdc->quality = 100 ;
+	sdc->quality = 0 ;
 
+	
 	p_buff += skip ;
 
-	// decode the rest now
+//	if(modes) {
+		sdc->quality = (*p_buff) >> 16 ;
+		sdc->track_id = (*p_buff) & 0xFFFF ;
 
+		// took one int so...
+		skip++ ;
+//	}
 
 	return skip ;
 }
@@ -318,7 +319,7 @@ void tpxFCF::start_evt()
 }
 
 
-int tpxFCF::do_pad(tpx_altro_struct *a, void *extra)
+int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
 {
 	struct stage1 *s ;
 
@@ -408,14 +409,6 @@ int tpxFCF::do_pad(tpx_altro_struct *a, void *extra)
 		
 				cl->flags = flags ;
 	
-				#ifdef FCF_EXTENDED
-				if(modes) {
-					clx->pix = cl->t2 - cl->t1 + 1 ;
-					clx->max_adc = max_adc ;				
-					clx->track_id = max_t_id ;
-					clx++ ;
-				}
-				#endif
 
 				cl++ ;
 
@@ -459,15 +452,6 @@ int tpxFCF::do_pad(tpx_altro_struct *a, void *extra)
 		cl->charge = charge ;
 		cl->t_ave = t_ave ;
 
-		#ifdef FCF_EXTENDED
-		if(modes) {
-			clx->pix = cl->t2 - cl->t1 + 1 ;
-			clx->max_adc = max_adc ;
-			clx->track_id = max_t_id ;
-			clx++ ;
-		}
-		#endif
-
 		cl++ ;
 	}
 
@@ -498,6 +482,57 @@ int tpxFCF::do_pad(tpx_altro_struct *a, void *extra)
 	}
 
 #endif
+
+	if(geant_id && modes) {	// FCF_ANNOTATION for simulated data!
+		cl = s->cl ;
+		
+		for(int i=0;i<s->count;i++) {
+		
+			int t_lo = cl->t1 ;
+			int t_hi = cl->t2 ;
+			int adc_min = 0 ;
+
+			cl->track_id = 0 ;
+			cl->quality = 0 ;
+
+			u_int adc_sum = 0 ;
+			u_int t_sum = 0 ;
+
+			// get thr track id from the pixel with the maximum ADC
+			for(int i=0;i<a->count;i++) {
+				if((a->tb[i] >= t_lo) && (a->tb[i]<=t_hi)) {	// belong to this sequence
+					adc_sum += a->adc[i] ;
+
+					if(a->adc[i] >= adc_min) {
+						cl->track_id = geant_id[i] ;
+					}
+				}
+			}
+
+			// get thr track id from the pixel with the maximum ADC
+			for(int i=0;i<a->count;i++) {
+				if((a->tb[i] >= t_lo) && (a->tb[i]<=t_hi)) {	// belong to this sequence
+					if(cl->track_id == geant_id[i]) {
+						t_sum += a->adc[i] ;
+					}
+				}
+			}
+
+			if(adc_sum) {
+				cl->quality = (t_sum * 100) / adc_sum ;
+			
+			}
+			else {
+				cl->quality = 0 ;
+			}
+
+
+			cl++ ;
+
+		}
+
+	}
+
 
 	return s->count ;	// returns count...
 }
@@ -587,6 +622,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 						// merge part of "old" and dump "old"
 						//LOG(DBG,"Merge") ;
 
+						// move to double and gain correct!
 						if(unlikely(cur->flags & FCF_IN_DOUBLE)) {
 
 
@@ -631,7 +667,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 								cur->p_ave += sc_p_tmp ;
 								cur->f_t_ave += ((cur->t1 + cur->t2) * sc_tmp) * 0.5 ;
 								
-
+								
 								old->flags |= FCF_DOUBLE_PAD ;
 								old->f_charge -= sc_tmp ;
 								old->p_ave -= sc_p_tmp ;
@@ -639,6 +675,8 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 								
 
 								//LOG(DBG,"Split!") ;
+
+								
 
 								cur++ ;	// don't use the new guy again...
 								merge = 3 ;
@@ -665,16 +703,8 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 						}
 						if(!(cur->flags & FCF_IN_DOUBLE)) {
 							LOG(ERR,"Can't be -- I must be in double here!") ;
+
 						}						
-						// correct our charge & t0 and move to float!!!
-
-						//cur->f_charge = cur->charge * cur1->g ;
-						//cur->scharge = cur->f_charge ;	// GAIN corrected!						
-
-						//cur->f_t_ave = cur->t_ave * cur1->g ;
-						//cur->f_t_ave += cur1->g * cur1->t0 ;
-						//cur->p_ave = (p+1) * cur->f_charge + old->p_ave ;
-
 						// also correct the charge if the old pad
 						// is still 1pad wide...
 						if(old->flags & FCF_ONEPAD) {
@@ -699,14 +729,34 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 						cur->flags |= old->flags ;
 						cur->flags &= ~FCF_ONEPAD ;
 
+						if(modes) {	// merge annotated stuff
+							double qua ;
+
+							if(cur->track_id == old->track_id) {
+								qua = cur->quality * cur->f_charge + old->quality * old->f_charge ;
+							}
+							else if(cur->f_charge < old->f_charge) {
+								cur->track_id = old->track_id ;
+
+								qua = old->quality * old->f_charge ;
+
+							}
+							else {
+								qua = cur->quality * cur->f_charge ;
+							}
+							
+							qua /= (cur->f_charge + old->f_charge) ;
+
+							cur->quality = (u_int )qua ;
+
+						}
+
 
 
 						cur->f_charge += old->f_charge ;
 						cur->f_t_ave += old->f_t_ave ;
 						cur->p_ave += old->p_ave ;
 						cur->p1 = old->p1 ;
-
-						
 
 
 						if(cur->t1 > old->t1) {
@@ -723,18 +773,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 							cur->t_max = cur->t2 ;
 						}
 
-
 						
-						#ifdef FCF_EXTENDED
-						if(modes) {
-							curx->pix += oldx->pix ;
-							if(curx->max_adc < oldx->max_adc) {
-								curx->max_adc = oldx->max_adc ;
-								curx->track_id = oldx->track_id ;
-							}
-							curx++ ;
-						}
-						#endif
 
 						cur++ ;	// don't use the new guy again...
 						break ;
@@ -817,6 +856,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	else {
 		if(cl->flags & FCF_ONEPAD) return ;
 		LOG(ERR,"Not in double?") ;
+		return ;
 	}
 
 	//LOG(DBG,"dump: row %d: %d %d %d %d %f 0x%X",cur_row,cl->p1,cl->p2,cl->t_min,cl->t_max,cl->f_charge,cl->flags) ;
@@ -835,7 +875,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 
 	}
 
-	int cha = (int) (cl->f_charge + 0.5) ;
+	int cha = (int) (cl->f_charge + 0.5) ;	// integerized version; 0.5 is for correct roundoff
 
 	// clear the FALLING flag 
 	fla &= (~FCF_FALLING) ;
@@ -890,61 +930,10 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	*loc_buff++ = (cha << 16) | tmp_fl ;
 
 
-#ifdef FCF_SIM_ON
-	//if(fla==0) printf("PIX %d %d %d %d %d\n",cl->cl_id,fla,cha,cl->pix,cl->adc_max) ;
-
-	{
-	int i, j ;
-
-	int quality = 1 ;
-
-	if(simout) {
-
-		u_int sim_cha, all_cha ;
-
-		sim_cha = all_cha = 0 ;
-
-		for(i=1;i<=182;i++) {
-			for(j=0;j<512;j++) {
-				if(pixStruct[i][j].cl_id == cl->cl_id) {
-					if(cl->id == pixStruct[i][j].id_simtrk) {
-						sim_cha += pixStruct[i][j].adc ;
-					}
-					all_cha += pixStruct[i][j].adc ;
-				}
-			}
-		}
-
-		if(all_cha) {
-			quality = (int)(100.0*(double)sim_cha/(double)all_cha) ;
-		}
-		else {
-			quality = 0 ;
-		}
-
-
-		struct FcfSimOutput *s = (struct FcfSimOutput *) simout ;
-
-		s->id_simtrk = cl->id ;
-		s->id_quality = quality ;
-
-		s->cl_id = cl->cl_id ;	// put the local cluster id
-
-		simout += sizeof(struct FcfSimOutput)/4 ;	// advance here
-		
+	if(modes) {	// FCF Annotation
+		*loc_buff++ = (cl->quality << 16) | cl->track_id ;
 	}
 
-#if defined(FCF_ANNOTATE_CLUSTERS) && !defined(__ROOT__)
-	for(i=1;i<=182;i++) {
-		for(j=0;j<512;j++) {
-			if(pixStruct[i][j].adc) {
-				fcfPixA[row-1][i-1][j] = pixStruct[i][j] ;
-			}
-		}
-	}
-#endif
-	}
-#endif	// FCF_SIM_ON!
 
 	cur_row_clusters++ ;
 	
