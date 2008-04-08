@@ -113,7 +113,7 @@ daq_dta *daq_tof::handle_raw(int sec, int rdo)
 		LOG(DBG,"Got %d",size) ;
 
 		if(size <= 0) {
-			LOG(WARN,"%s: %s: not found in this event",name,str) ;
+			LOG(DBG,"%s: %s: not found in this event",name,str) ;
 			continue ;
 		}
 		else {
@@ -124,7 +124,7 @@ daq_dta *daq_tof::handle_raw(int sec, int rdo)
 			o_cou++ ;
 	
 			tot_bytes += size ;
-			LOG(INFO,"%s: %s: reading in \"%s\": bytes %d",name,str,"raw", size) ;
+			LOG(NOTE,"%s: %s: reading in \"%s\": bytes %d",name,str,"raw", size) ;
 		}
 	}
 	}
@@ -159,4 +159,107 @@ daq_dta *daq_tof::handle_raw(int sec, int rdo)
 
 	raw->rewind() ;
 	return raw ;
+}
+
+
+// knows how to get the token out of an event...
+int daq_tof::get_token(char *addr, int words)
+{
+	int cou ;
+	struct daq_trg_word trg[128] ;
+
+	cou = get_l2(addr,words,trg,1) ;
+
+	if(cou==0) return -1000 ;	// special marker...
+	if(trg[0].t==0) return -ENOSYS ;
+
+	return trg[0].t ;
+}
+
+// knows how to get a/the L2 command out of the event...
+int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int prompt)
+{
+	u_int *w ;
+	int cou = 0 ;
+	int t_cou = 0 ;
+
+
+	w = (u_int *)addr ;
+	words-- ;	// point to last datum now...
+
+	LOG(NOTE,"First words 0x%08X 0x%08X 0x%08X, last words 0x%08X 0x%08X 0x%08X [+0x%08X], %u",
+	    w[0],w[1],w[2],w[words-2],w[words-1],w[words],w[words+1],words+1) ;
+
+
+	// prompt token is in word 0!
+	trg[t_cou].t = w[0] & 0xFFF ;
+	trg[t_cou].daq = (w[0]>>12) & 0xF ;
+	trg[t_cou].trg = (w[0]>>16) & 0xF ;
+	trg[t_cou].rhic = 0 ;
+	trg[t_cou].rhic_delta = 0 ;
+	t_cou++ ;
+
+
+	if(prompt) LOG(NOTE,"[%d] prompt: T %4d, trg %d, daq %d",prompt,trg[0].t,trg[0].trg,trg[0].daq) ;
+	if(trg[0].t == 0) {
+		LOG(ERR,"[%d] prompt: T %4d, trg %d, daq %d",prompt,trg[0].t,trg[0].trg,trg[0].daq) ;
+		trg[0].t = 4097 ;
+	}
+
+	if((w[0] >> 28) != 0xA) {
+		LOG(ERR,"First word in data has an incorrect signature 0x%08X",w[0]) ;
+		trg[0].t = 4097 ;
+	}
+
+	// move backwards to the start of the trigger block
+	while(words) {
+		if((w[words] >> 28)==0xA) {	// trigger stuff
+			// fish trigger command
+			int daq = (w[words]>>12) & 0xF ; 
+			int cmd = (w[words]>>16) & 0xF ;
+			int t = (w[words]) & 0xFFF ;
+			
+			if(prompt) LOG(NOTE,"   [%d] FIFO %d: T %4d, trg %d, daq %d",prompt,cou,t,cmd,daq);
+
+			words-- ;
+			cou++ ;
+		}
+		else {
+			break ;
+		}
+	}
+
+
+
+	words++ ;	// move forward to start of trigger
+
+	// words not points to the first trigger of the FIFO block
+
+	for(int i=0;i<cou;i++) {
+		
+		trg[t_cou].t = w[words+i] & 0xFFF ;
+		trg[t_cou].daq = (w[words+i]>>12) & 0xF ;
+		trg[t_cou].trg = (w[words+i]>>16) & 0xF ;
+		trg[t_cou].rhic = i+1 ;
+		trg[t_cou].rhic_delta = i+1 ;
+
+		if(trg[t_cou].t == 0) {
+			LOG(ERR,"   [%d] FIFO %d: T %4d, trg %d, daq %d",prompt,i,trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq);
+			continue ;
+		}
+
+		// we will take all the non-L2 components here...
+		switch(trg[t_cou].trg) {
+		case 13 :
+		case 15 :
+			break ;
+		default :		// take out ALL L0 commands!
+			continue ;
+		}
+
+		t_cou++ ;
+	}
+
+
+	return t_cou ;
 }

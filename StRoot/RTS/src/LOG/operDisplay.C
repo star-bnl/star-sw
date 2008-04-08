@@ -10,7 +10,7 @@
 #include <utime.h>
 
 #define MAX_LOGFILES 10
-#define LOGLINES	100 
+#define LOGLINES	400 
 
 #define DATA_1	"/online/tonko/log_content_old.html"
 #define DATA_2	"/online/tonko/log_content.html"

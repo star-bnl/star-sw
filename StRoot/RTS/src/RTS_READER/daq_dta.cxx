@@ -143,12 +143,15 @@ void *daq_dta::request(u_int obj_cou)
 
 void daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
 {
+	if(obj_cou==0) return ;
+
 	store_cur->sec = sec ;
 	store_cur->row = row ;
 	store_cur->pad = pad ;
 	store_cur->nitems = obj_cou ;
 
 
+	
 	int bytes = sizeof(daq_store) + store_cur->nitems * hdr->obj_bytes ;
 	commit(bytes) ;
 

@@ -21,7 +21,7 @@
 
 
 // counts sector & rdo from 1!
-static struct fee_found_t {
+static struct fee_found {
 	u_int got_one ;
 	int ch_count[256][16] ;	// ALtro ID & CH is the index...
 } fee_found[25][7] ;
@@ -38,6 +38,9 @@ tpxGain::tpxGain()
 	aux = 0 ;
 	means = 0 ;
 	memset(gains,0,sizeof(gains)) ;
+
+	// bad_fee's are sticky and can only be entered via a file!
+	memset(bad_fee,0,sizeof(bad_fee)) ;
 
 	return ;
 }
@@ -82,24 +85,25 @@ void tpxGain::init(int sec)
 	load_time = 0 ;	// force reload next time if I reinit gains!
 	sector = sec ;
 
-	memset(bad_fee,0,sizeof(bad_fee)) ;
+	
 
-	bytes = sizeof(struct means_t) * 24 * 46 ;
+	bytes = sizeof(struct means) * 24 * 46 ;
 	if(means==0) {
-		means = (struct means_t *) malloc(bytes) ;
+		means = (struct means *) malloc(bytes) ;
 	}
 	memset(means,0,bytes) ;
 
-	bytes = sizeof(struct aux_t) * 24 * 46 * 182 ;
+	bytes = sizeof(struct aux) * 24 * 46 * 182 ;
 	if(aux==0) {
-		aux = (struct aux_t *) malloc(bytes) ;
+		aux = (struct aux *) malloc(bytes) ;
 	}
 	memset(aux,0,bytes) ;
 
+
 	for(int i=0;i<24;i++) {
-		bytes = sizeof(struct gains_t) * 46 * 182 ;
+		bytes = sizeof(struct gains) * 46 * 182 ;
 		if(gains[i]==0) {
-			gains[i] = (struct gains_t *) malloc(bytes) ;
+			gains[i] = (struct gains *) malloc(bytes) ;
 		}
 		memset(gains[i],0,bytes) ;
 	}
@@ -174,7 +178,7 @@ void tpxGain::ev_done()
 		
 		// re-clear!
 		for(int i=0;i<24;i++) {
-			memset(gains[i],0,sizeof(struct gains_t)*46*182) ;
+			memset(gains[i],0,sizeof(struct gains)*46*182) ;
 		}
 
 	}
@@ -197,8 +201,8 @@ void tpxGain::accum(char *evbuff, int bytes)
 	int sec ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
-	struct gains_t *gs ;
-	struct aux_t *as ;
+	struct gains *gs ;
+	struct aux *as ;
 
 	/*
 		1st event is used to determine the timebin window
@@ -507,20 +511,20 @@ void tpxGain::calc()
 void tpxGain::do_default(int sector)
 {
 	int s, r, p ;
-	struct gains_t *sg ;
+
 
 	// zap and create defaults in case the file is missing!
 	memset(bad_fee,0,sizeof(bad_fee)) ;
 
 	if(sector) {
 		if(gains[sector-1] == 0) {
-			gains[sector-1] = (struct gains_t *) malloc(sizeof(struct gains_t) * 46 * 182) ;
+			gains[sector-1] = (struct gains *) malloc(sizeof(struct gains) * 46 * 182) ;
 		}
 	}
 	else {
 		for(int i=0;i<24;i++) {
 			if(gains[i] == 0) {
-				gains[i] = (struct gains_t *) malloc(sizeof(struct gains_t) * 46 * 182) ;
+				gains[i] = (struct gains *) malloc(sizeof(struct gains) * 46 * 182) ;
 			}
 		}
 	}
@@ -530,10 +534,7 @@ void tpxGain::do_default(int sector)
 	for(r=0;r<=45;r++) {
 	for(p=1;p<=182;p++) {
 		if(gains[s-1]) {
-			sg = get_gains(s,r,p) ;
-
-			sg->g = 1.0 ;
-			sg->t0 = 0.0 ;
+			set_gains(s,r,p,1.0,0.0) ;
 		}
 	}
 	}
@@ -547,7 +548,6 @@ int tpxGain::from_file(char *fname, int sec)
 	FILE *f ;
 	int s, r, p ;
 	float g, t0 ;
-	struct gains_t *sg ;
 	struct stat buff ;
 
 	// try file...
@@ -581,7 +581,7 @@ int tpxGain::from_file(char *fname, int sec)
 
 	load_time = time(NULL) ;
 	do_default(sector) ;	// zap to all 1...
-
+	
 	LOG(TERR,"reading gains from \"%s\" for sector %d...",fname, sector) ;
 
 	while(!feof(f)) {
@@ -592,33 +592,34 @@ int tpxGain::from_file(char *fname, int sec)
 		if(strlen(str)==0) continue ;	// empty
 		if((str[0]=='#') || (str[0]=='/')) continue ;	// comment
 
-		//LOG(INFO,"---%s---",str) ;
 
 		int ret = sscanf(str,"%d %d %d %f %f\n",&s,&r,&p,&g,&t0) ;
 
 		if(ret != 5) continue ;
-
-		if(s < 0) {
+	
+		if(s < 0) {	// special case! the whole TPC-FEE in "pad" is bad
 			s *= -1 ;
+
+			int altro ;
 
 			// counter is in location 0!
 			int c = bad_fee[s][r][0] ;
-			bad_fee[s][r][c+1] = p ;
+
+
+			altro = (p<<1) & 0xFF ;
+			bad_fee[s][r][c+1] = altro ;
+
 			bad_fee[s][r][0]++ ;
 
-			LOG(INFO,"Bad FEE %d: sector %2d, RB %d, FEE %3d",bad_fee[s][r][0],s,r,p) ;
+			LOG(INFO,"Bad FEE %d: sector %2d, RB %d, TPX-FEE %3d, TPC-FEE %3d",bad_fee[s][r][0],s,r,altro,p) ;
 
 			continue ;
 		}
 
 		if(sector && (s != sector)) continue ;
 
-		//LOG(INFO,"Getting %d %d %d",s,r,p) ;
 
-		sg = get_gains(s,r,p) ;
-
-		sg->g = g ;	
-		sg->t0 = t0 ;
+		set_gains(s,r,p,g,t0) ;
 
 	}
 	fclose(f) ;
@@ -635,8 +636,8 @@ int tpxGain::from_file(char *fname, int sec)
 
 				fee = bad_fee[s][r][c+1] ;
 
-				for(int i=0;i<2;i++) {
-				for(int ch=0;ch<16;ch++) {
+				for(int i=0;i<2;i++) {		// kill both ALTROs...
+				for(int ch=0;ch<16;ch++) {	// ...all channels..
 					int row, pad ;
 					
 					tpx_from_altro(r-1,fee+i,ch, row, pad) ;
@@ -646,8 +647,8 @@ int tpxGain::from_file(char *fname, int sec)
 						continue ;
 					}
 
-					sg = get_gains(s,row,pad) ;
-					sg->g = 0.0 ;
+					set_gains(s,row,pad,0.0,-5.0) ;	// t0 -5 signifies the whole FEE was killed...
+
 
 					LOG(DBG,"Killing rp %d:%d for bad FEE %3d in sector %2d",row,pad,fee,s) ;
 				}
@@ -692,7 +693,7 @@ int tpxGain::to_file(char *fname)
 	for(s=s_start;s<=s_stop;s++) {
 	for(r=0;r<=45;r++) {
 	for(p=1;p<=tpc_rowlen[r];p++) {
-		struct aux_t *as ;
+		struct aux *as ;
 		// HACK!
 //		if(get_gains(s,r,p)->t0) 
 

@@ -166,3 +166,55 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 	raw->rewind() ;
 	return raw ;
 }
+
+int daq_pp2pp::get_token(char *addr, int words)
+{
+	int cou ;
+	struct daq_trg_word trg[8] ;
+
+	cou = get_l2(addr,words,trg,1) ;
+
+	if(cou==0) return -1000 ;
+	if(trg[0].t==0) return -ENOSYS ;
+
+	return trg[0].t ;
+}
+
+
+int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt)
+{
+	u_int *d = (u_int *)addr ;
+	int t_cou = 0 ;
+	u_int datum ;
+
+	// for now:
+	datum = d[1] ;
+	datum = swap32(datum) ;	// endianess swap
+	
+
+	// shift left 1
+	datum >>= 1 ;
+
+	trgs[t_cou].t = (datum&0xF00) | ((datum & 0xF000)>>8) | ((datum & 0xF0000)>>16);
+	trgs[t_cou].daq = (datum>>4) & 0xF ;
+	trgs[t_cou].trg = datum & 0xF ;
+	trgs[t_cou].rhic = 0 ;
+	trgs[t_cou].rhic_delta = 0 ;
+	t_cou++ ;
+
+	if(prompt) {
+		LOG(TERR,"    dta 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",d[0],d[1],d[2],d[3],d[4]) ;
+		LOG(TERR,"    addr 0x%08X, word 0x%08X: daq %d, trg %d, T %4d, bytes %d",addr,d[1],trgs[0].daq,trgs[0].trg,trgs[0].t,words*4) ;
+	}
+
+	// I add a L2
+        trgs[t_cou].t = trgs[0].t ;
+        trgs[t_cou].daq = 0 ;
+        trgs[t_cou].trg = 15 ;
+        trgs[t_cou].rhic = 1 ;
+        trgs[t_cou].rhic_delta = 1 ;
+        t_cou++ ;
+
+	
+	return t_cou ;	
+}

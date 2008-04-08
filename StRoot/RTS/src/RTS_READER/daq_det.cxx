@@ -8,7 +8,7 @@
 #include <SFS/sfs_index.h>
 #include <RTS_READER/rts_reader.h>
 #include <RTS_READER/daq_det.h>
-
+#include <RTS_READER/daq_dta.h>
 
 
 int daq_det::endianess = 1 ;
@@ -192,17 +192,13 @@ int daq_det::presence()
 
 
 		// traverse it finding "this_det" 
-		if(legacy==0) {
-			while((e = caller->sfs->readdir(dir))) {
-				//LOG(TERR,"%s:%s:full %s: dir %s...",name,dir->full_name,e->full_name,e->d_name) ;
-				if(strncasecmp(e->d_name,name,strlen(name))==0) {
-					present = 1 ;
-					break ;
-				}
+		while((e = caller->sfs->readdir(dir))) {
+			//LOG(TERR,"%s:%s:full %s: dir %s...",name,dir->full_name,e->full_name,e->d_name) ;
+			if(strncasecmp(e->d_name,name,strlen(name))==0) {
+				present = 1 ;
+				break ;
 			}
-		}
-		else {
-			LOG(ERR,"%s: is legacy and I have not coded this yet!",name) ;
+
 		}
 
 		// must remember to closedir!
@@ -220,11 +216,26 @@ int daq_det::presence()
 } ;
 
 
-#if 0 
-int daq_det::get_token(char *buff, int buff_bytes)
+
+int daq_det::get_token(char *addr, int words)
 {
-	LOG(ERR,"%s: get_token() not written!",name) ;
-	return -1 ;
+	daq_trg_word trgs[128] ;
+
+	int ret = get_l2(addr, words, trgs, 1) ;
+	if(ret == 0) {
+		LOG(ERR,"No triggers?") ;
+		return -1000 ;
+	}
+	
+
+	if(trgs[0].t==0) {
+		LOG(ERR,"Token 0 not allowed but I will try to use the other triggers...") ;
+		trgs[0].t = 4097 ;
+	}
+
+
+	return trgs[0].t ;
+
 }
 
 
@@ -234,11 +245,11 @@ int daq_det::get_l2(char *buff, int buff_bytes, daq_trg_word *trg, int prompt)
 	LOG(ERR,"%s: get_l2() not written!",name) ;
 	return 0 ;
 }
-#endif
+
 
 daq_dta  *daq_det::get(const char *bank,int c1, int c2, int c3, void *p1, void *p2) 
 {
-	LOG(ERR,"%s: get() not written!",name) ;
+	LOG(NOTE,"%s: get() not written!",name) ;
 
 	return 0 ;
 }

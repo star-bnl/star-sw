@@ -32,10 +32,10 @@ endif
 
 
 
-OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxStat.o daq_tpx.o tpx_ped.o
+OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxStat.o daq_tpx.o
 
 LIBS = libtpx.a
-BINS = 
+BINS = sim_tester
 
 all: $(LIBS) $(BINS)
 
@@ -44,18 +44,22 @@ libs: $(LIBS)
 libtpx.a : $(OBJS)
 	@$(RTS_AR)
 
+sim_tester: sim_tester.o ../RTS_READER/librts_reader.a libtpx.a ../DAQ_TOF/libtof.a ../DAQ_PP2PP/libpp2pp.a ../SFS/libsfs.a ../LOG/librtslog.a
+
 
 # DO NOT DELETE
 
-daq_tpx.o: daq_tpx.h
-daq_tpx.o: ../RTS_READER/rts_reader.h
-daq_tpx.o: ../../include/rts.h
 daq_tpx.o: ../../include/rtsLog.h
 daq_tpx.o: ../../include/rtsSystems.h
-daq_tpx.o: ../RTS_READER/daq_det.h
-daq_tpx.o: ../RTS_READER/daq_dta.h
 daq_tpx.o: ../SFS/sfs_index.h
 daq_tpx.o: ../SFS/fs_index.h
+daq_tpx.o: ../SFS/sfs_base.h
+daq_tpx.o: ../RTS_READER/rts_reader.h
+daq_tpx.o: ../RTS_READER/daq_dta.h
+daq_tpx.o: ../../include/rts.h
+daq_tpx.o: ../RTS_READER/daq_dta_structs.h
+daq_tpx.o: daq_tpx.h
+daq_tpx.o: ../RTS_READER/daq_det.h
 daq_tpx.o: ../DAQ_TPX/tpxCore.h
 daq_tpx.o: ../../include/TPX/tpx_rdo.h
 daq_tpx.o: ../DAQ_TPX/tpxGain.h
@@ -70,12 +74,20 @@ tpxCore.o: ../../include/DAQ1000/ddl_struct.h
 tpxCore.o: ../../include/TPC/fee_readout.h
 tpxCore.o: ../DAQ_TPX/tpxCore.h
 tpxCore.o: ../../include/TPX/tpx_rdo.h
+tpxFCF3.o: ../../include/rtsLog.h
+tpxFCF3.o: ../../include/I386/i386Lib.h
+tpxFCF3.o: ../../include/TPC/rowlen.h
+tpxFCF3.o: ../DAQ_TPX/tpxGain.h
+tpxFCF3.o: tpxCore.h
+tpxFCF3.o: ../DAQ_TPX/tpxFCF.h
+tpxFCF3.o: ../RTS_READER/daq_dta_structs.h
 tpxFCF.o: ../../include/rtsLog.h
 tpxFCF.o: ../../include/I386/i386Lib.h
 tpxFCF.o: ../../include/TPC/rowlen.h
 tpxFCF.o: ../DAQ_TPX/tpxGain.h
 tpxFCF.o: tpxCore.h
 tpxFCF.o: ../DAQ_TPX/tpxFCF.h
+tpxFCF.o: ../RTS_READER/daq_dta_structs.h
 tpxGain.o: ../../include/rtsLog.h
 tpxGain.o: ../../include/TPC/rowlen.h
 tpxGain.o: ../../include/TPX/tpx_altro_to_pad.h
@@ -89,9 +101,7 @@ tpx_ped.o: ../../include/TPX/tpx_rdo.h
 tpx_ped.o: ../RTS_READER/daq_algo.h
 tpx_ped.o: ../RTS_READER/daq_dta.h
 tpx_ped.o: ../../include/rts.h
-tpx_ped.o: ../RTS_READER/rts_reader.h
-tpx_ped.o: ../../include/rtsSystems.h
-tpx_ped.o: ../RTS_READER/daq_det.h
+tpx_ped.o: ../RTS_READER/daq_dta_structs.h
 tpxPed.o: ../../include/rtsLog.h
 tpxPed.o: ../../include/TPC/rowlen.h
 tpxPed.o: ../DAQ_TPX/tpxCore.h
@@ -103,13 +113,14 @@ tpxStat.o: ../../include/daqModes.h
 tpxStat.o: ../DAQ_TPX/tpxCore.h
 tpxStat.o: ../../include/TPX/tpx_rdo.h
 tpxStat.o: ../DAQ_TPX/tpxStat.h
-daq_tpx.o: ../RTS_READER/rts_reader.h
-daq_tpx.o: ../../include/rts.h
-daq_tpx.o: ../../include/rtsLog.h
-daq_tpx.o: ../../include/rtsSystems.h
+sim_tester.o: ../../include/rtsLog.h
+sim_tester.o: ../RTS_READER/rts_reader.h
+sim_tester.o: ../RTS_READER/daq_dta.h
+sim_tester.o: ../../include/rts.h
+sim_tester.o: ../RTS_READER/daq_dta_structs.h
+sim_tester.o: ../DAQ_TPX/daq_tpx.h
+sim_tester.o: ../RTS_READER/daq_det.h
 daq_tpx.o: ../RTS_READER/daq_det.h
-daq_tpx.o: ../RTS_READER/daq_dta.h
 tpxCore.o: ../../include/TPX/tpx_rdo.h
-tpxFCF.o: tpxCore.h
 tpxGain.o: tpxCore.h
 tpxPed.o: tpxCore.h
