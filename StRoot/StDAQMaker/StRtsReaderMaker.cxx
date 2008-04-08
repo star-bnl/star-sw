@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.2 2008/04/08 22:19:56 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.3 2008/04/08 22:39:47 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.3  2008/04/08 22:39:47  fine
+ * typo
+ *
  * Revision 1.2  2008/04/08 22:19:56  fine
  * Synch old and new EVP and RTS DAQ readers
  *
@@ -152,7 +155,7 @@ static const char*RtsDataTypeByBankName(const char *bankName)
    //______________________________________________________
    //
    // Here we can do something more clever of course
-   // The ideas l solution:
+   // The idea l solution:
    // the mapping should be provided by the class rts_reader
    //______________________________________________________
    //
