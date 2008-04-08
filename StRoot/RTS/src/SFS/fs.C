@@ -9,12 +9,11 @@
 #include <time.h>
 #include <ctype.h>
 #include <SUNRT/clock.h>
-#include "daqr_index.h"
 #include "sfs_index.h"
 #include "get_line.h"
-#include "fsBankReader.h"
 #include <rtsLog.h>
 
+char g_filename[100];
 fs_index *idx;
 int idx_fd;
 
@@ -37,37 +36,37 @@ char *striptodir(char *str)
 }
 
 
-void write_env(char *var, char *value)
-{
-  //printf("Hereasf\n");
-  char *user = getenv("USER");
-  if(!user) return;
-  char fn[256];
-  sprintf(fn, "/tmp/%s_FS_%s",user,var);
-  unlink(fn);
-  int fd = open(fn, O_WRONLY | O_CREAT, 0666);
-  write(fd, value, strlen(value));
-  close(fd);
-}
+// void write_env(char *var, char *value)
+// {
+//   //printf("Hereasf\n");
+//   char *user = getenv("USER");
+//   if(!user) return;
+//   char fn[256];
+//   sprintf(fn, "/tmp/%s_FS_%s",user,var);
+//   unlink(fn);
+//   int fd = open(fn, O_WRONLY | O_CREAT, 0666);
+//   write(fd, value, strlen(value));
+//   close(fd);
+// }
 
-char *read_env(char *var)
-{
-  char *user = getenv("USER");
-  if(!user) return NULL;
+// char *read_env(char *var)
+// {
+//   char *user = getenv("USER");
+//   if(!user) return NULL;
 
-  char fn[256];
-  sprintf(fn, "/tmp/%s_FS_%s",user,var);
-  int fd = open(fn, O_RDONLY);
+//   char fn[256];
+//   sprintf(fn, "/tmp/%s_FS_%s",user,var);
+//   int fd = open(fn, O_RDONLY);
   
-  if(fd < 0) return NULL;
+//   if(fd < 0) return NULL;
 
-  static char res[256];
-  memset(res,0,sizeof(res));
-  read(fd, res, 256);
+//   static char res[256];
+//   memset(res,0,sizeof(res));
+//   read(fd, res, 256);
 
-  close(fd);
-  return res;
-}
+//   close(fd);
+//   return res;
+// }
 
 int fs_cd(int argc, char *argv[])
 {
@@ -77,30 +76,30 @@ int fs_cd(int argc, char *argv[])
     printf("%s is invalid directory\n",argv[1]);
   }
   
-  write_env("PWD", idx->cwd);
+  //write_env("PWD", idx->cwd);
   printf("pwd set to %s\n", idx->cwd);
   
   return 0;
 }
 
-char *fs_getpwd()
-{
-  char cd[256];
-  char mount[256];
-  static char pwd[256];
-  char *tmp;
+//char *fs_getpwd()
+//{
+//char cd[256];
+// char mount[256];
+//static char pwd[256];
+//char *tmp;
 
-  tmp = read_env("PWD");
-  if(!tmp) tmp = "NONE";
-  strcpy(cd,tmp);
+  //tmp = read_env("PWD");
+  //if(!tmp) tmp = "NONE";
+  //strcpy(cd,tmp);
 
-  tmp = read_env("MOUNT");
-  if(!tmp) tmp = "NONE";
-  strcpy(mount,tmp);
+  //tmp = read_env("MOUNT");
+  //if(!tmp) tmp = "NONE";
+  //strcpy(mount,tmp);
 
-  sprintf(pwd, "%s:%s",mount,cd);
-  return pwd;
-}
+  //sprintf(pwd, "%s:%s",mount,cd);
+  //return pwd;
+  //}
 
 
 int fs_pwd()
@@ -143,8 +142,10 @@ int fs_mount(int argc, char *argv[])
   idx_fd = open(fn, O_RDONLY);
   if(idx_fd < 0) {
     printf("Error reading file %s\n",fn);
-    write_env("MOUNT", "NONE");
-    write_env("PWD", "NONE");
+    strcpy(g_filename, "NONE");
+    
+    //write_env("MOUNT", "NONE");
+    //write_env("PWD", "NONE");
     return -1;
   }
 
@@ -171,10 +172,11 @@ int fs_mount(int argc, char *argv[])
   idx->mount(fn, O_RDONLY);
   t = record_time();
   printf("Mounted file %s: %d bytes in %5.2f sec\n",fn,(int)filestat.st_size,t);
-  write_env("MOUNT", fn);
-  write_env("PWD", "/");
+  //write_env("MOUNT", fn);
+  //write_env("PWD", "/");
 
   // printf("MNTDI\n");
+  strcpy(g_filename, fn);
   return 0;
 }
 
@@ -295,7 +297,7 @@ int fs_cat(int argc, char *argv[])
     //printf("Header:\n");
     //fsBankReader::headerdump(buff);
     //printf("Data:\n");
-    fsBankReader::hexdump(buff, entry->sz);
+    fs_index::hexdump(buff, entry->sz);
     printf("\n");
   }
   else {   // strings...
@@ -342,21 +344,6 @@ int help()
 
 int docmd(int argc, char *argv[]) 
 {  
-
-  struct stat sstat;
-
-  int ret = stat(argv[0], &sstat);
-  if(ret == 0) {
-    char *nargv[10];
-    int nargc=argc+1;
-    nargv[0] = "mount";
-    for(int i=0;i<argc;i++) {
-      nargv[i+1] = argv[i];
-    }
-    fs_mount(nargc, nargv);
-    return 1;
-  }
-
   if((strcmp(argv[0], "mount") == 0)) {
     fs_mount(argc, argv);
     return 0;
@@ -407,28 +394,30 @@ int main(int argc, char *argv[])
 {
   // Parse cmds...
   char *av[10];
-  char ac = 0;
-  char fn[256];
-
+  int ac = 0;
+  //  char fn[256];
+  
   rtsLogOutput(2);
-  // rtsLogLevel(DBG);
+  rtsLogLevel(WARN);
+  strcpy(g_filename, "none");
 
-  // Mount...
-  char *mnt = read_env("MOUNT");
-  if(!mnt) mnt = "NONE";
-  strcpy(fn,mnt);
-  av[1] = fn;
-  ac = 2;
-  fs_mount(ac,av);
-
-  char *pwd = read_env("PWD");
-  if(!pwd) pwd = "NONE";
-
-  if(idx)
-    idx->cd(pwd);
+  idx = NULL;
 
   if(argc > 1) {
-    if(docmd(argc-1, &argv[1]) == 0) return 0;
+    // Try mounting...
+    struct stat sstat;
+    
+    int ret = stat(argv[1], &sstat);
+    if(ret == 0) {
+      av[0] = "mount";
+      av[1] = argv[1];
+      ac = 2;
+
+      docmd(ac, av);
+    }
+    else {
+      printf("No file %s\n",argv[1]);
+    }
     
     if(argc > 2) {
       docmd(argc-2, &argv[2]);
@@ -438,8 +427,17 @@ int main(int argc, char *argv[])
     
   for(;;) {
     char buff[256];
+    char pwd[100];
 
-    printf("%s > ", fs_getpwd());
+    if(!idx) {
+      strcpy(pwd, "none");
+    }
+    else {
+      strcpy(pwd, idx->pwd());
+    }
+
+    printf("%s:%s > ", g_filename, pwd);
+
     fflush(stdout);
 
     get_line(buff);

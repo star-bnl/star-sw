@@ -111,6 +111,8 @@ class fs_index {
   void umount();
   int mountsz();
 
+  static void hexdump(char *buff, int sz);
+
   int cd(char *fn);
   char *pwd() { return cwd; };
 

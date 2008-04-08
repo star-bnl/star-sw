@@ -30,18 +30,6 @@ int main(int argc, char *argv[])
       sfs.mem_ls(&list, 1, dir);
       for(int i=0;i<list.n;i++) {
 	printf(":::%s\n",list.filename[i]);
-
-// 	if(strcmp(list.filename[i], "/#1439/tpx/sec16/rb06/adc") == 0) {
-// 	  fs_dirent *de = sfs.readdirent("/#1439/tpx/sec16/rb06/adc");
-// 	  int *mem = (int *)malloc(de->sz);
-// 	  sfs.read("/#1439/tpx/sec16/rb06/adc",(char *)mem,de->sz);
-// 	  for(int ii=0;ii<100;ii++) {
-// 	    printf("blah[%d] = 0x%x\n",ii,mem[ii]);
-// 	  }
-
-// 	  free(mem);
-// 	  return 0;
-// 	}
       }
     }
     else {
