@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.29 2008/04/08 01:28:41 fine Exp $
+ * $Id: StDbManagerImpl.cc,v 1.30 2008/04/08 02:08:34 fine Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
- * Revision 1.29  2008/04/08 01:28:41  fine
- * remove the redunda code entail the valgrind messages
+ * Revision 1.30  2008/04/08 02:08:34  fine
+ * restore the previouse version
  *
  * Revision 1.28  2007/08/24 21:02:11  deph
  * *** empty log message ***
@@ -259,6 +259,7 @@
 #endif
 
 //#include <stdio.h>
+extern char** environ;
 
 #define __CLASS__ "StDbManagerImpl"
 
@@ -1071,18 +1072,34 @@ char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
 }
   
 ////////////////////////////////////////////////////////////////
-dbEnvList*  StDbManagerImpl::getEnvList(const char* name) {
-   dbEnvList* retVal = 0;
-   if (name && name[0] ) {
-      char *value = getenv(name);
-      if (value) {
-          retVal=new dbEnvList;
-          retVal->envVar[retVal->num]=mstringDup(name);
-          retVal->envDef[retVal->num]=mstringDup(value);
-          retVal->num++;
-      }
-   }
-   return retVal;
+dbEnvList*  StDbManagerImpl::getEnvList(const char* name){
+
+  dbEnvList* retVal=new dbEnvList;
+
+  for(int i=0;;i++){
+    if(!environ[i])break;
+    if(strstr(environ[i],name)){
+      char* tmpName=mstringDup(environ[i]);
+      char* id=strstr(tmpName,"=");
+      if(id){
+        *id='\0';id++;
+	if(strstr(tmpName,name)){
+           retVal->envVar[retVal->num]=mstringDup(tmpName);
+           retVal->envDef[retVal->num]=mstringDup(id);
+           retVal->num++;
+	} // check of name in env-var side
+        id--;*id='='; 
+      } // check of "=" in env-var
+      delete [] tmpName;
+    } // check of name in env-var
+  } // loop over all env-vars
+
+  if(retVal->num==0){
+    delete retVal;
+    retVal=0;
+  }
+
+  return retVal;
 }
 
 ////////////////////////////////////////////////////////////////
