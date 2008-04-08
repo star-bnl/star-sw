@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <ctype.h>
 
 #include <rts.h>
 #include <rtsLog.h>
@@ -146,9 +147,7 @@ int wrapfile::close()
   return 0;
 }
       
-    
-
-    
+        
 
 fs_index::fs_index()
 {
@@ -168,6 +167,38 @@ fs_index::~fs_index()
   }
 }
 
+void fs_index::hexdump(char *buff, int sz)
+{
+  for(int i=0;i<sz;i+=16) {
+    int k= sz-i;
+    if(k>16) k=16;
+
+  
+    printf("0x%08x:  ",i);
+
+    for(int j=0;j<16;j++) {
+      if(j==8) printf("    ");
+      int x = buff[i+j] & 0x00ff;
+      if(j<k)
+	printf(" %02x",x);
+      else printf("   ");
+    }
+
+    printf("     ");
+    for(int j=0;j<16;j++) {
+      
+      if(j == 8) printf(" ");
+
+      if(j<k) {
+	if(isprint(buff[i+j]))
+	  printf("%c",buff[i+j]);
+	else
+	  printf("."); 
+      }
+    }
+    printf("\n");
+  }      
+}
 
 int fs_index::mountmem(char *buffer, int sz, int flags)
 {

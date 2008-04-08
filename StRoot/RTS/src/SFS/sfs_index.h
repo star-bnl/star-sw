@@ -9,6 +9,8 @@ typedef unsigned int UINT32;
 typedef unsigned short UINT16;
 typedef unsigned char UINT8;
 
+#include "sfs_base.h"
+
 // File Format
 //
 // ----------------
@@ -36,31 +38,7 @@ typedef unsigned char UINT8;
 //   xxx/xxx/yyy   xxx/xxx/ is "directory part" 
 
 
-#define SFS_ATTR_INVALID 0x01
-#define SFS_ATTR_NOCD    0x08
-#define SFS_ATTR_CD      0x00
-#define SFS_ATTR_STICKY_CD 0x02
-#define SFS_ATTR_POPSTICKY 0x04    // path relative to last "sticky_cd"
 
-struct SFS_VolumeSpec {
-  char fs[12];      // "SFS V00.01"
-};
-
-struct SFS_Header {
-  char type[4];     // "HEAD"
-  UINT32 byte_order;
-  UINT32 time;
-};
-
-struct SFS_File {
-  char type[4];     // "FILE"
-  UINT32 byte_order;
-  UINT32 sz;        // any number, but file will be padded to be x4
-  UINT8 head_sz;    // must be x4
-  UINT8 attr;
-  UINT16 reserved;
-  char name[4];     // get rid of padding confusions... by alligning
-};
 
 class SFS_ittr {
  public:
@@ -75,6 +53,7 @@ class SFS_ittr {
   int fileoffset;  // from start of file.
   int filepos;  // 0 start of header, 1 end of header, 2 end of file record, -1 at end of file system
 
+  int legacy;
   SFS_ittr() {
     fileoffset = 0;
   };
@@ -84,9 +63,13 @@ class SFS_ittr {
   };
 
   int get(wrapfile *wrap);
+  int legacy_get(wrapfile *wrap);
   //  int get(char *buff, int sz);
 
   int next();
+  int legacy_next();
+
+  int checkIfLegacy();
 
   wrapfile *wfile;
   void swapEntry();
@@ -133,7 +116,7 @@ class sfs_index : public fs_index {
   int writev_sticky(fs_iovec *iovec, int n, char *sticky);
   int write(char *fn, char *buff, int sz);
   
-  int getfileheadersz(char *fn);
+  static int getfileheadersz(char *fn);
   int putfileheader(char *ptr, char *fn, int filesz, int flags=SFS_ATTR_NOCD);
 
  private:

@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <rts.h>
-#include "daqr_index.h"
 #include "sfs_index.h"
 #include <SUNRT/clock.h>
 
@@ -29,17 +28,17 @@ int main(int argc, char *argv[])
   read(fd, ff, 4);
   lseek(fd, 0, SEEK_SET);
   
-  if(memcmp(ff, "SFS", 3) == 0) {
+  //if(memcmp(ff, "SFS", 3) == 0) {
     // sfs file...
     printf("SFS format input file...\n");
     
     idx = new sfs_index;
-  }
-  else {
-    printf("DAQ format input file...\n");
+    //}
+    //else {
+    // printf("DAQ format input file...\n");
 
-    idx = new daqr_index;
-  }
+    //idx = new daqr_index;
+    //}
 
   close(fd);
   //idx->ls(fd);

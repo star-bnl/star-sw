@@ -105,15 +105,136 @@ void stripfile(char *str)
   else strcpy(ostr, "/");
 }
 
+int SFS_ittr::checkIfLegacy()
+{
+  char buff[12];
+
+  // First find the current file position, just to be sure...
+  int cfpos = wfile->lseek(0,SEEK_CUR);
+
+  // Read to first "FILE" entry
+  // Or first entry after a "DATAP" record
+  int found_datap=0;
+  int ret = 0;
+
+  for(;;) {
+    ret = wfile->read(buff, 8);
+    if(ret != 8) {
+      LOG(ERR,"Error reading headers...");
+      return -1;
+    }
+    wfile->lseek(-8, SEEK_CUR);
+
+    if(memcmp(buff, "FILE", 4) == 0) {
+      LOG(DBG, "Not legacy");
+      ret = 0;    // Not legacy!
+      break;
+    }
+
+    if(found_datap) {   // we've found a datap, but not followed by "FILE"
+      LOG(DBG, "Legacy");
+      ret = 1;
+      break;
+    }
+
+    // Now navigate over irrelavent objects...
+    if(memcmp(buff, "SFS V", 5) == 0) {
+      LOG(DBG,"Found SFS version");
+      wfile->lseek(12, SEEK_CUR);
+      //fileoffset += 12;
+      continue;
+    }
+    else if(memcmp(buff, "LRHD", 4) == 0) {
+      LOG(DBG,"Found LRHD");
+      wfile->lseek(60, SEEK_CUR);
+      //fileoffset += 60;
+      continue;
+    }
+    else if(memcmp(buff, "DATAP", 5) == 0) {
+      LOG(DBG,"Found DATAP");
+      found_datap = 1;
+      wfile->lseek(204, SEEK_CUR);
+      //fileoffset += 204;
+      continue;
+    } 
+    else if(memcmp(buff, "HEAD", 4) == 0) {
+      LOG(DBG,"Found HEAD");
+      wfile->lseek(12, SEEK_CUR);
+      // fileoffset += 12;
+      continue;
+    } 
+    else {
+      LOG(DBG, "(%s) is not a valid specifier",buff);
+      ret = -1;
+      break;
+    }
+  }
+  
+  // restore to initial fileposition...
+  wfile->lseek(cfpos, SEEK_SET);
+  return ret;
+}
+
+int SFS_ittr::legacy_get(wrapfile *wrap)
+{
+  char buff[12];
+  wfile = wrap;
+
+  for(;;) {
+    int ret = wfile->read(buff, 8);
+    if(ret != 8) {
+      LOG(ERR,"Error reading headers...");
+      return -1;
+    }
+    wfile->lseek(-8, SEEK_CUR);
+
+    if(memcmp(buff, "LRHD", 4) == 0) {
+      LOG(DBG,"Found LRHD");
+
+      wfile->lseek(48, SEEK_CUR);
+      
+      ret = wfile->read(buff, 4);
+      if(ret != 4) {
+	LOG(ERR, "Error reading logrec_type");
+	return -1;
+      }
+
+      wfile->lseek(-52, SEEK_CUR);
+      filepos = 0;
+
+      if(memcmp(buff, "DATA", 4) == 0) {   // at the start...
+	return 0;
+      }
+
+      // otherwise skip & move on...
+      wfile->lseek(60, SEEK_CUR);
+      fileoffset += 60;
+    }
+    else {
+      LOG(ERR, "Error reading legacy datafile");
+      return -1;
+    }
+  }
+  return -1;
+}
+
 int SFS_ittr::get(wrapfile *wrap)
 {
   //  printf("ittr get file 0x%x %d\n",wrapbuff, fd);
+  
   char buff[12];
   memset(buff, 0, sizeof(buff));
 
   wfile = wrap;
 
+  legacy = checkIfLegacy();
+  LOG(DBG, "Legacy = %d",legacy);
+
+  if(legacy) return legacy_get(wrap);
+
+
   //fileoffset = 0;   // set by constructor...
+  
 
   for(;;) {
     int ret = wfile->read(buff, 8);
@@ -173,7 +294,7 @@ int SFS_ittr::get(wrapfile *wrap)
 
 void SFS_ittr::swapEntry()
 {
-//  int swap;
+  //  int swap;
   if(entry.byte_order == 0x04030201) return;
 
   entry.byte_order = swap32(entry.byte_order);
@@ -183,10 +304,86 @@ void SFS_ittr::swapEntry()
   entry.reserved = swap16(entry.reserved);
 }
 
+int SFS_ittr::legacy_next()
+{
+  if(filepos == 1) {  // need to skip next file
+    LOG(DBG, "filepos was 1?");
+    wfile->lseek(entry.sz, SEEK_CUR);
+    fileoffset += entry.sz;
+    filepos = 0;
+  }
+
+  
+  int ccc = wfile->lseek(0, SEEK_CUR);
+  LOG(DBG, "ccc=%d fileoffset=%d",ccc,fileoffset);
+
+  filepos = 1;
+
+  // Now...should be pointing to LHRD
+  // need the size  (offset = 40 bytes)
+  // need the seq   (offset = 60 + 40 + 8 bytes)
+  char buff[112];
+  int ret = wfile->read(buff, 112);
+
+  LOG(DBG, "buff: %c%c%c%c%c",buff[0],buff[1],buff[2],buff[3],buff[4]);
+  LOG(DBG, "buff: %c%c%c%c",buff[48],buff[49],buff[50],buff[51]);
+  if(ret == 0) {
+    filepos = -1;
+    return 0;
+  }
+
+  if(ret != 112) {
+    LOG(ERR, "Error reading legacy data");
+    return -1;
+  }
+  wfile->lseek(-112, SEEK_CUR);
+
+  int *tmp;
+  tmp = (int *)&buff[20];
+  int ord1 = *tmp;
+  tmp = (int *)&buff[40];
+  int sz = *tmp;
+  if(ord1 != 0x04030201) sz = swap32(sz);
+  sz *= 4;
+  tmp = (int *)&buff[80];
+  int ord2 = *tmp;
+  tmp = (int *)&buff[108];
+  int seq = *tmp;
+  if(ord2 != 0x04030201) seq = swap32(seq);
+
+
+
+  LOG(NOTE, "sz = %d,seq = %d 0x%x 0x%x", sz, seq,ord1,ord2);
+  
+  
+  memcpy(entry.type,"FILE",4);
+  entry.byte_order = 0x04030201;
+  entry.sz = sz;
+  sprintf(entry.name, "/#%d/legacy",seq);
+  //entry.head_sz = sfs_index::getfileheadersz(entry.name);
+  entry.head_sz = 0;
+  entry.attr = 0;  
+
+  strcpy(fullpath, entry.name);
+  strcpy(ppath, entry.name);
+  striptofile(entry.name);
+  stripfile(ppath);
+
+  ccc = wfile->lseek(0,SEEK_CUR);
+
+  LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %d (%d)/%d, sz %d  head_sz %d",
+      fullpath, entry.name, fileoffset, ccc, filepos, entry.sz, entry.head_sz);
+
+  return 0;
+}
+
+
 // Return -1 on error
 // 0 on ok.
 int SFS_ittr::next() 
 {
+  if(legacy) return legacy_next();
+
   int ret;
 
   //printf("ittr next\n");
@@ -343,7 +540,7 @@ int SFS_ittr::next()
     strcat(fullpath, entry.name);
   }
 
-  if(debug) LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %d/%d, sz %d  head_sz %d",
+  LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %d/%d, sz %d  head_sz %d",
 	 fullpath, entry.name, fileoffset, filepos, entry.sz, entry.head_sz);
 
   filepos = 1;
@@ -546,7 +743,7 @@ int sfs_index::writev(fs_iovec *fsiovec, int n)
 int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
 {
   iovec iovec[20];
-  char _buff[sizeof(SFS_File) + 40];
+  char _buff[(sizeof(SFS_File) + 40)*50];
   char *b = _buff;
 
   int i;
@@ -559,6 +756,8 @@ int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
 //   char *b = writevbuff;
 
   for(i=0;i<n;i++) {   // each file...
+
+    LOG(DBG, "i=%d\n",i);
 
     if(fsiovec[i].filename) {
       SFS_File *file = (SFS_File *)b;
@@ -578,6 +777,13 @@ int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
 
       iovec[vec].iov_base = b;
       iovec[vec].iov_len = file->head_sz;
+      LOG(DBG, "fn:   iovec[%d] name=%s: base=0x%x(0x%x) len=%d",
+	vec,fsiovec[i].filename,
+	iovec[vec].iov_base,
+	  
+	iovec[vec].iov_len);
+
+
       vec++;
    
       b += file->head_sz;
@@ -585,7 +791,15 @@ int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
      
     iovec[vec].iov_base = fsiovec[i].buff;
     iovec[vec].iov_len = seeksize(fsiovec[i].len);
+
+    LOG(DBG, "iovec[%d] name=%s: base=0x%x len=%d",
+	vec,fsiovec[vec].filename,
+	iovec[vec].iov_base,
+	iovec[vec].iov_len);
+
     vec++;
+
+ 
   }
 
   // we need this check when writing over ethernet!
@@ -742,6 +956,8 @@ int sfs_index::_create()
   cw_inode = root;
  
   SFS_ittr ittr;
+
+  
 
 
   if(ittr.get(&wfile) < 0) {
@@ -938,17 +1154,6 @@ int sfs_index::getfileheadersz(char *fn)
 
 int sfs_index::putfileheader(char *ptr, char *fn, int filesz, int flags)
 {
-  SFS_File *file = (SFS_File *)ptr;
-  int n = getfileheadersz(fn);
-
-  memcpy(file->type, "FILE", 4);
-  file->byte_order = 0x04030201;
-  file->sz = filesz;
-  file->head_sz = n;
-  file->attr = flags;
-  file->reserved = 0;
-  memcpy(file->name + n - 4, "\0\0\0\0", 4);
-  strcpy(file->name, fn);
-  return n;
+  return sfs_putfileheader(ptr,fn,filesz,flags);
 }
 
