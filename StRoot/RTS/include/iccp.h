@@ -36,9 +36,7 @@
  
 // need daq1000 defintions as well, for ethernet 
 // but only in linux...
-#ifdef linux
 #include "iccp2k.h"     
-#endif
 
 typedef unsigned int   uint ;
 typedef unsigned short ushort ;

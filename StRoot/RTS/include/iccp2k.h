@@ -11,6 +11,11 @@
 #define CMD2_RUN_DONE 0x04
 #define CMD2_LOG      0x05
 
+#define EVBFLAG_RAW_DATA (1<<0)
+#define EVBFLAG_FCF_DATA (1<<1)
+#define EVBFLAG_L25ABORT (1<<2)
+
+#ifdef RTS_LITTLE_ENDIAN
 struct iccp2k {   
   u_int words;        // words of the bank to follow (not including this header)
   u_short srcNode;      // source node
@@ -23,28 +28,45 @@ struct iccp2k {
   u_char pad2;
   u_char pad3;
 };
+#else
+struct iccp2k {   
+  u_int words;        // words of the bank to follow (not including this header)
+  //-----
+  u_short dstNode;
+  u_short srcNode;      
+  //----
+  u_short token;
+  u_char dstTask;
+  u_char srcTask;
+  //----
+  u_char pad3;
+  u_char pad2;
+  u_char pad1;
+  u_char cmd;
+};
+#endif
 
 
 struct gbPayload {
-  uint eventDesc[10] ;   // take from data!  // big endian
+  u_int eventDesc[10] ;   // take from data!  // big endian
 
   // The rest is all little endian...
-  uint L3summary[4] ;
-  uint L2summary[2];
-  uint L1summary[2];
-  uint rtsDetMask;
-  uint eventNumber;
-  uint sec;
-  uint usec;
-  uint flags;            // bit 0 set, tpc raw data inside
-  uint evp;
-  uint token;
+  u_int L3summary[4] ;
+  u_int L2summary[2];
+  u_int L1summary[2];
+  u_int rtsDetMask;
+  u_int eventNumber;
+  u_int sec;
+  u_int usec;
+  u_int flags;            // bit 0 set, tpc raw data inside
+  u_int evp;
+  u_int token;
 };
 
 struct evpPayload {
-  uint run;
-  uint type;
-  uint seq;
+  u_int run;
+  u_int type;
+  u_int seq;
 };
 
 struct tapeMsg {
