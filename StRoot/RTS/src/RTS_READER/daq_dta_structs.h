@@ -59,5 +59,8 @@ struct daq_det_gain {
 	float t0 ;
 } ;
 
+
+const char *daq_dta_dict(const char *det, const char *bank) ;
+
 #endif
 

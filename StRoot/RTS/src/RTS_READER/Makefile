@@ -15,7 +15,7 @@ BINS =  Reader
 
 LIBS = librts_reader.a
 
-OBJS = rts_reader.o daq_det.o daq_dta.o
+OBJS = rts_reader.o daq_det.o daq_dta.o daq_dta_dict.o
 
 
 
