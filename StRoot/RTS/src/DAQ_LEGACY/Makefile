@@ -26,3 +26,13 @@ libs: $(LIBS)
 liblegacy.a : $(OBJS)
 	@$(RTS_AR)
 
+# DO NOT DELETE
+
+daq_legacy.o: ../../include/rtsLog.h
+daq_legacy.o: ../../include/rtsSystems.h
+daq_legacy.o: ../../include/rts.h
+daq_legacy.o: ../../include/daqFormats.h
+daq_legacy.o: ../../include/SECTOR/sector.h
+daq_legacy.o: ../../trg/include/trgStructures.h
+daq_legacy.o: ../../include/L3/L3Formats.h
+daq_legacy.o: daq_legacy.h
