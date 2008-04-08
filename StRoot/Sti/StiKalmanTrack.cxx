@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.102 2008/04/07 19:20:53 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.102 2008/04/07 19:20:53 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.103 2008/04/08 14:21:17 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.103 2008/04/08 14:21:17 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.103  2008/04/08 14:21:17  fisyak
+ * 2 cm => StiKalmanTrackFinderParameters::instance()->maxDca3dVertex() in StiKalmanTrack::isPrimary()
+ *
  * Revision 2.102  2008/04/07 19:20:53  perev
  * More clear isPrimary()
  *
@@ -923,8 +926,7 @@ bool  StiKalmanTrack::isPrimary() const
   if (node->getDetector()) 	return 0;
   const StiHit *hit = node->getHit();
   if (hit->isDca()) 		return 0;
-  assert(fabs(node->x())<2.);
-  return 1;
+  return (fabs(node->getX())< StiKalmanTrackFinderParameters::instance()->maxDca3dVertex());
 }
 
 
