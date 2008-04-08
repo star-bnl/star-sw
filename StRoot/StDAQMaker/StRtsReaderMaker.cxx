@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.1 2008/04/08 20:03:52 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.2 2008/04/08 22:19:56 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.2  2008/04/08 22:19:56  fine
+ * Synch old and new EVP and RTS DAQ readers
+ *
  * Revision 1.1  2008/04/08 20:03:52  fine
  * add the maker to communicate with the new RTS_READER from RTS
  *
@@ -108,9 +111,8 @@ Int_t StRtsReaderMaker::Init() {
 //_____________________________________________________________
 rts_reader *StRtsReaderMaker::InitReader()
 {
-{
    // Init EVP_READER 
-   if (!fRtsReader) { 
+   if (!fRtsReader) {
       StDAQReader *daqReader = 0;
       LOG_INFO << "StRtsReaderMaker::InitReader"  << endm;
       TDataSet *dr = GetDataSet("StDAQReader");
@@ -132,8 +134,8 @@ rts_reader *StRtsReaderMaker::InitReader()
       }
    }
    return fRtsReader;
-}  
 }
+
 //_____________________________________________________________
 void StRtsReaderMaker::Clear(Option_t *option)
 {
@@ -222,7 +224,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
    //                                 16th sector of tpx
    // Return the RTS bank  decorated as TGenericTable
    //--------------------------------------------------------------
-
+  
   TString rtsRequest = logInput;
   Bool_t rtsSystem   = false;
   TDataSet *ds       = 0;
@@ -230,7 +232,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
 
   if (fLastQuery == rtsRequest) {
      rtsSystem = true;
-  } else {
+  } else if (fRtsReader) {
      TObjArray *tokens = rtsRequest.Tokenize("/[],");
      Int_t nItems = tokens->GetEntries();  
      if ( !strcmp(tokens->At(0)->GetName(),"RTS") ) {
@@ -245,8 +247,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
               case 1:
                  thisMaker->fBank = rts_det->get( tokens->At(2)->GetName() );
                  break;
-
-              case 2:
+               case 2:
                  thisMaker->fBank = rts_det->get( tokens->At(2)->GetName()
                                  ,atoi(tokens->At(3)->GetName()));
                  LOG_INFO <<" StRtsReaderMaker::FindDataSet det(\"" <<
@@ -255,8 +256,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
                        << ")  "
                        << "fBank = "<< thisMaker->fBank << endm;
                  break;
-
-              case 3:
+               case 3:
                  thisMaker->fBank = rts_det->get( tokens->At(2)->GetName()
                                  ,atoi(tokens->At(3)->GetName())
                                  ,atoi(tokens->At(4)->GetName()));
@@ -300,15 +300,15 @@ Int_t StRtsReaderMaker::Make()
 {
    // Force  RTS_READER to get the next event if it is not slave
    int res = kStOk;
+   InitReader();
    if (fSlaveMode)  return kStOk;
    
-   InitReader();
    //-------------------------------------
    int rtsReturn = fRtsReader->Make();  //
    //-------------------------------------
    
    // Check the outcome:
-   if (rtsReturn == EOF)  { 
+   if (rtsReturn == EOF)  {
       res = kStEOF;
    } else {
       if(fRtsReader->l_errno) {

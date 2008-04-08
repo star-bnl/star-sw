@@ -9,17 +9,17 @@
 #include "StDAQMaker.h"
 #include "StDAQReader.h"
 #include "StTPCReader.h"
+#include "StRtsReaderMaker.h"
 
 ClassImp(StDAQMaker)
 
 //_____________________________________________________________________________
   StDAQMaker::StDAQMaker(const char *name, const char *inputFile):
-    StIOInterFace(name)
+    StIOInterFace(name),fEvtHddr(0),fDAQReader(0),fDAQReaderSet(0),fRtsReader(0)
 {
-  fDAQReader 	= 0;
   if (inputFile && inputFile[0]) SetFile(inputFile);
-  fEvtHddr = 0;
-  fDAQReaderSet = 0;
+  // Create the RTS  slave reader
+  fRtsReader = new StRtsReaderMaker;
 }
 //_____________________________________________________________________________
 StDAQMaker::~StDAQMaker()
@@ -65,7 +65,8 @@ Int_t StDAQMaker::Skip(int nskip){
 Int_t StDAQMaker::Make(){
 
   int iret = fDAQReader->readEvent();  
-
+  if (fRtsReader) fRtsReader->Make(); // To synch "old" and "new" makers
+  
   if (iret==kStErr) return kStErr; // Herb, July 5 2000.  Skip "Token 0" events.
   if (iret) iret = kStEOF;
   if (iret) return iret;
