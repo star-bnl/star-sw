@@ -15,7 +15,7 @@
 
 #include "daq_tpc.h"
 
-extern int tpcReader(char *m, int type, int sec, daq_dta **ddta) ;
+extern int tpc_reader(char *m, int type, int sec, daq_dta **ddta) ;
 
 daq_tpc::daq_tpc(const char *dname, rts_reader *rts_caller) 
 {
@@ -80,7 +80,7 @@ daq_dta *daq_tpc::handle_cld(int sec, int rdo)
 	cld->create(100,(char *)"cld",TPC_ID,DAQ_DTA_STRUCT(daq_cld)) ;
 
 	for(int i=min_sec;i<=max_sec;i++) {
-		tpcReader(caller->legacy_p, 1, i, &cld) ;
+		tpc_reader(caller->legacy_p, 1, i, &cld) ;
 	}
 
 	cld->rewind() ;
@@ -103,7 +103,7 @@ daq_dta *daq_tpc::handle_adc(int sec, int rdo)
 	adc->create(100,(char *)"adc_tb",TPC_ID,DAQ_DTA_STRUCT(daq_adc_tb)) ;
 
 	for(int i=min_sec;i<=max_sec;i++) {
-		tpcReader(caller->legacy_p, 0, i, &adc) ;
+		tpc_reader(caller->legacy_p, 0, i, &adc) ;
 	}
 
 	adc->rewind() ;

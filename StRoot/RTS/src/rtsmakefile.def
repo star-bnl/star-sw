@@ -119,7 +119,7 @@ IS_STROOT=$(findstring $(STROOT_STR), $(PWD))
 ifeq "$(STROOT_STR)" "$(IS_STROOT)" 
 	SAY="Working under StRoot"
 
-	RTS_DIR_PATH = ../../online/RTS
+	RTS_DIR_PATH = ../../
 	IS_STROOT=1
 else
 	SAY="Working under RTS"

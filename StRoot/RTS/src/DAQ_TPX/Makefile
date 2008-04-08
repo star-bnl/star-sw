@@ -1,8 +1,6 @@
 ################ boilerplate #######################
 -include ../rtsmakefile.def
--include ../../online/RTS/src/rtsmakefile.def
-
-include $(RTS_DIR_PATH)/src/rtsplus.def
+-include ../rtsplus.def
 
 # now fix and/or stuff to what out rtsmakefile.def did...
 
@@ -11,13 +9,6 @@ LDLIBS =
 
 HOSTFLAGS +=  -fomit-frame-pointer -funroll-loops
 DEFINES += -DRTS_LOG_COLORED
-
-
-ifdef IS_STROOT
-	DEFINES += -DRTS_DISABLE_LOG
-else
-endif
-
 
 # If I'm in Zagreb...
 ifeq ($(HOST_NAME),lvedaq.irb.lo)
@@ -35,7 +26,7 @@ endif
 OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxStat.o daq_tpx.o
 
 LIBS = libtpx.a
-BINS = sim_tester
+#BINS = sim_tester
 
 all: $(LIBS) $(BINS)
 
@@ -44,7 +35,7 @@ libs: $(LIBS)
 libtpx.a : $(OBJS)
 	@$(RTS_AR)
 
-sim_tester: sim_tester.o ../RTS_READER/librts_reader.a libtpx.a ../DAQ_TOF/libtof.a ../DAQ_PP2PP/libpp2pp.a ../SFS/libsfs.a ../LOG/librtslog.a
+#sim_tester: sim_tester.o ../RTS_READER/librts_reader.a libtpx.a ../DAQ_TOF/libtof.a ../DAQ_PP2PP/libpp2pp.a ../SFS/libsfs.a ../LOG/librtslog.a
 
 
 # DO NOT DELETE
@@ -53,7 +44,6 @@ daq_tpx.o: ../../include/rtsLog.h
 daq_tpx.o: ../../include/rtsSystems.h
 daq_tpx.o: ../SFS/sfs_index.h
 daq_tpx.o: ../SFS/fs_index.h
-daq_tpx.o: ../SFS/sfs_base.h
 daq_tpx.o: ../RTS_READER/rts_reader.h
 daq_tpx.o: ../RTS_READER/daq_dta.h
 daq_tpx.o: ../../include/rts.h
@@ -74,13 +64,6 @@ tpxCore.o: ../../include/DAQ1000/ddl_struct.h
 tpxCore.o: ../../include/TPC/fee_readout.h
 tpxCore.o: ../DAQ_TPX/tpxCore.h
 tpxCore.o: ../../include/TPX/tpx_rdo.h
-tpxFCF3.o: ../../include/rtsLog.h
-tpxFCF3.o: ../../include/I386/i386Lib.h
-tpxFCF3.o: ../../include/TPC/rowlen.h
-tpxFCF3.o: ../DAQ_TPX/tpxGain.h
-tpxFCF3.o: tpxCore.h
-tpxFCF3.o: ../DAQ_TPX/tpxFCF.h
-tpxFCF3.o: ../RTS_READER/daq_dta_structs.h
 tpxFCF.o: ../../include/rtsLog.h
 tpxFCF.o: ../../include/I386/i386Lib.h
 tpxFCF.o: ../../include/TPC/rowlen.h

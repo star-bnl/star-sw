@@ -15,7 +15,7 @@
 
 #include "daq_esmd.h"
 
-extern int emcReader(char *m, int rts_id, char *retval[12], int retbytes[12]) ;
+extern int emc_reader(char *m, int rts_id, char *retval[12], int retbytes[12]) ;
 
 daq_esmd::daq_esmd(const char *dname, rts_reader *rts_caller) 
 {
@@ -83,7 +83,7 @@ daq_dta *daq_esmd::handle_raw()
 	if(!presence()) {	// not in SFS
 		
 		// try legacy DATAP
-		if(emcReader(caller->legacy_p, rts_id, fiber_p, fiber_bytes)==0) {	// not in legacy
+		if(emc_reader(caller->legacy_p, rts_id, fiber_p, fiber_bytes)==0) {	// not in legacy
 			return 0 ;
 		}
 

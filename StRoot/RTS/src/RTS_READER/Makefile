@@ -1,12 +1,5 @@
-
-# need to figure out if I'm inside StRoot or src
-
-# silently attempt to include the rtsmakefile.def from
-# the possible places:
 -include ../rtsmakefile.def	# for RTS
--include ../../online/RTS/src/rtsmakefile.def	# if in StRoot tree
-
-include $(RTS_DIR_PATH)/src/rtsplus.def
+-include ../rtsplus.def
 
 
 
@@ -53,7 +46,6 @@ $(LIBS): $(OBJS)
 daq_det.o: ../../include/rtsLog.h
 daq_det.o: ../SFS/sfs_index.h
 daq_det.o: ../SFS/fs_index.h
-daq_det.o: ../SFS/sfs_base.h
 daq_det.o: ../RTS_READER/rts_reader.h
 daq_det.o: ../RTS_READER/daq_det.h
 daq_det.o: ../RTS_READER/daq_dta.h
@@ -67,23 +59,17 @@ rts_reader.o: ../../include/rtsLog.h
 rts_reader.o: ../../include/rtsSystems.h
 rts_reader.o: ../SFS/sfs_index.h
 rts_reader.o: ../SFS/fs_index.h
-rts_reader.o: ../SFS/sfs_base.h
 rts_reader.o: ../DAQ_TPX/daq_tpx.h
 rts_reader.o: ../RTS_READER/daq_det.h
 rts_reader.o: ../DAQ_TOF/daq_tof.h
 rts_reader.o: ../DAQ_PP2PP/daq_pp2pp.h
 rts_reader.o: ../DAQ_ESMD/daq_esmd.h
+rts_reader.o: ../DAQ_TPC/daq_tpc.h
 rts_reader.o: rts_reader.h
 rts_reader.o: daq_det.h
 dump_sfs.o: ../SFS/sfs_index.h
 dump_sfs.o: ../SFS/fs_index.h
-dump_sfs.o: ../SFS/sfs_base.h
 dump_sfs.o: ../../include/rtsLog.h
-legacy.o: ../../include/rtsLog.h
-legacy.o: rts_reader.h
-legacy.o: ../SFS/sfs_index.h
-legacy.o: ../SFS/fs_index.h
-legacy.o: ../SFS/sfs_base.h
 Reader.o: ../../include/rtsLog.h
 Reader.o: ../RTS_READER/rts_reader.h
 Reader.o: ../RTS_READER/daq_dta.h

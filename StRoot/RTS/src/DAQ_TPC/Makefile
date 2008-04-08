@@ -14,7 +14,7 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 
-OBJS := daq_tpc.o tpcReader.o
+OBJS := daq_tpc.o tpc_reader.o
 
 LIBS = libtpc.a
 BINS = 
