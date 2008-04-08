@@ -85,6 +85,8 @@ int main(int argc, char *argv[])
 	if(do_help) {
 		daq_dta d ;
 
+		printf("%s\n",daq_dta_dict("tpx","adc")) ;
+
 		printf("rts_reader: %s\n",r.GetCVS()) ;
 		printf("daq_det: %s\n",r.det("*")->GetCVS()) ;
 		printf("daq_dta: %s\n",d.GetCVS()) ;
