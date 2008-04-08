@@ -39,33 +39,12 @@ READER_FILES = msgNQLib.o evpSupport.o evpReader.o tpcReader.o svtReader.o ftpRe
 		ssdReader.o pp2ppReader.o \
 		sanityCheckers.o scReader.o tpcFCFReader.o fcfClass.o fcfAfterburner.o cfgutil.o 
 
-# tpxReader.o 
-# tpxCore.o
-#FCF_SRCS = ../FCF
-#fcfClass.o : $(FCF_SRCS)/fcfClass.cxx
-#	$(CC) $(CXXFLAGS) -c $(FCF_SRCS)/fcfClass.cxx
-#fcfAfterburner.o : $(FCF_SRCS)/fcfAfterburner.cxx
-#	$(CC) $(CXXFLAGS) -c $(FCF_SRCS)/fcfAfterburner.cxx
-#SFS_FILES = fs_index.o sfs_index.o daqr_index.o get_line.o fsBankReader.o
-#AUX_FILES = rtsLogUnix.o
-# assumes the src/LOG directory is here!
-#rtsLogUnix.o : ../LOG/rtsLogUnix.c
-#	$(CC) $(CXXFLAGS) -c $?
-#fs_index.o : ../SFS/fs_index.cxx
-#	$(CC) $(CXXFLAGS) -c $?
-#sfs_index.o : ../SFS/sfs_index.cxx 
-#	$(CC) $(CXXFLAGS) -c $?
-#daqr_index.o : ../SFS/daqr_index.cxx
-#	$(CC) $(CXXFLAGS) -c $?
-#get_line.o : ../SFS/get_line.cxx
-#	$(CC) $(CXXFLAGS) -c $?
-#fsBankReader.o : ../SFS/fsBankReader.cxx
-#	$(CC) $(CXXFLAGS) -c $?
 
 # Tonko: new style
-VPATH_AUX = rtsLogUnix.o fcfClass.o fcfAfterburner.o fs_index.o sfs_index.o daqr_index.o get_line.o fsBankReader.o \
-	daq_tpx.o rts_reader.o daq_det.o daq_dta.o daq_tof.o tpxCore.o tpxFCF.o
-VPATH = ../RTS_READER ../DAQ_TOF ../DAQ_TPX ../LOG ../SFS ../FCF
+VPATH_AUX = rtsLogUnix.o fcfClass.o fcfAfterburner.o fs_index.o sfs_index.o  get_line.o  \
+	daq_tpx.o rts_reader.o daq_det.o daq_dta.o daq_tof.o tpxCore.o tpxFCF.o tpxGain.o tpxPed.o \
+	daq_pp2pp.o  daq_esmd.o emc_reader.o daq_tpc.o tpc_reader.o daq_legacy.o
+VPATH = ../RTS_READER ../DAQ_TOF ../DAQ_TPX ../DAQ_PP2PP ../DAQ_ESMD ../DAQ_TPC ../DAQ_LEGACY ../LOG ../SFS ../FCF
 
 libevp.${VERSION}.a : ${READER_FILES} $(VPATH_AUX)
 	@$(RTS_AR) libevp.${VERSION}.a $?
