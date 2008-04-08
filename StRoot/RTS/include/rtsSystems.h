@@ -261,6 +261,7 @@ so we keep it here for source compatibility
 
 #define EVB_SUBSYS	1
 #define GB_SUBSYS	2
+#define EVBL_SUBSYS     3
 
 /*
   Instances (overloaded for each system)
@@ -279,10 +280,10 @@ so we keep it here for source compatibility
 //#define GB_INSTANCE     4
 #define BDB_INSTANCE	4	// we'll keep the BDB controller's node_id the same...
 
-#define BB2_INSTANCE    5
+//#define BB2_INSTANCE    5
 //#define TM_INSTANCE     GB_INSTANCE
-#define EVB_INSTANCE    BB_INSTANCE
-#define EVB02_INSTANCE	BB2_INSTANCE
+//#define EVB_INSTANCE    BB_INSTANCE
+//#define EVB02_INSTANCE	BB2_INSTANCE
 #define RC_CLIENT_INSTANCE 14
 #define CLIENT_INSTANCE 15
 
@@ -328,9 +329,9 @@ so we keep it here for source compatibility
 		in the main crate will continue to be called
 		BDB_NODE
 */
-#define EVB_NODES(x)	((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
-#define EVBL_NODES(x)   ((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
-#define EVBX_NODES(x)   ((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x+2))
+//#define EVB_NODES(x)	((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
+#define EVBL_NODES(x)   ((DAQ_SYSTEM<<12) | (EVBL_SUBSYS<<8) | (x))
+#define EVBX_NODES(x)   ((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
 #define GB_NODES(x)	((DAQ_SYSTEM<<12) | (GB_SUBSYS<<8 ) | (x))
 #define GB_NODE		GB_NODES(1)
 
@@ -365,7 +366,7 @@ so we keep it here for source compatibility
 //#define EVB02_NODE      BB2_NODE
 //#define EVB_NODE	EVB01_NODE
 // this will also go away!
-#define EVB_NODE	EVB_NODES(1)
+//#define EVB_NODE	EVB_NODES(1)
 
 
 #define BDB_NODE	((DAQ_SYSTEM<<12) | BDB_INSTANCE) // old GB...
@@ -662,10 +663,10 @@ extern inline u_int grp2rts_mask(int grp)
 	ret = 0 ;
 
 	if(grp & (1<<TPC_GRP)) {
-		ret  = (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM) | (1<<PP_SYSTEM);
+		ret  = (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM);
 	}
 	if(grp & (1<<TPX_GRP)) {
-		ret |= (1<<TPX_SYSTEM) | (1<<TOF_SYSTEM) | (1<<SSD_SYSTEM) ;
+		ret |= (1<<TPX_SYSTEM) | (1<<TOF_SYSTEM) | (1<<SSD_SYSTEM) | (1 << PP_SYSTEM) ;
 	}
 	if(grp & (1<<ETOW_GRP)) {
 		ret |= (1<<ETOW_SYSTEM) ;
@@ -695,13 +696,13 @@ extern inline int rts2grp(int rts)
     case TPC_ID: 
     case SVT_ID: 
     case FTP_ID:
-    case PP_ID :
     case PMD_ID:
     case HFT_ID:
 	return TPC_GRP ;
     case TOF_ID :
     case TPX_ID :
     case SSD_ID :
+    case PP_ID : 
 	return TPX_GRP ;
     case FPD_ID: return FPD_GRP;
     case FP2_ID: return FPD_GRP;

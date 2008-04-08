@@ -160,6 +160,7 @@ struct rtsMonEVB {
 	u_int mb_run ;	// MB stored in this run 
 	u_int gb_free ;	// still free on all disks
         u_int run_number ;
+	struct rtsMonGB gb ;	// new in FY09 -- EVB sends GB stuff as well!
 } ;
 
 
@@ -213,6 +214,10 @@ struct rtsMonRC {
 		u_short task ;
 		u_int state ;
 	} nodes[256] ;
+	struct {
+		char name[32] ;	// if strlen() == NULL, unused..
+		u_int off_id ;		// offline id number i.e. 5001
+	} trgs[32] ;
 } ;
 
 
