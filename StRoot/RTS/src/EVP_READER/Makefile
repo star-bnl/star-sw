@@ -48,6 +48,7 @@ VPATH = ../RTS_READER ../DAQ_TOF ../DAQ_TPX ../DAQ_PP2PP ../DAQ_ESMD ../DAQ_TPC 
 
 libevp.${VERSION}.a : ${READER_FILES} $(VPATH_AUX)
 	@$(RTS_AR) libevp.${VERSION}.a $?
+
 #	ld -G -o libevpSO.${VERSION}.so $?
 
 special: special.o libevp.${VERSION}.a
@@ -62,39 +63,6 @@ cfgutil: cfgutil.o libevp.${VERSION}.a
 
 
 ppreader: ppreader.o msgNQLib.o evpSupport.o evpReader.o pp2ppReader.o rtsLogUnix.o
-
-# Builds the tar files, but does not install them,
-# use tarinstall to install on web and delete the TAR directory
-tarfiles:
-	rm -rf TAR
-	mkdir -p TAR
-	cp ../LOG/rtsLogUnix.c TAR
-	cp Makefile_tar TAR/Makefile
-	cp *.C *.h *.hh TAR
-	(cd ../../include ; cp rtsLog.h rtsSystems.h daqFormats.h evp.h rts.h iccp.h cmds.h rtsCmds.h tasks.h status.h iccpHeader.h ../src/EVP_READER/TAR)
-	(cd TAR ; mkdir -p TPC SVT TRG SECTOR L3)
-	(cd TAR ; cp ../../../include/TPC/rowlen.h TPC ; cp ../../../include/TPC/offsets.h TPC; cp ../../../include/TPC/padfinder.h TPC ; cp ../../../include/adcLogTable.h . ; cp ../../../include/TPC/trans_table.hh TPC ;\
-	cp ../../../include/iccp2k.h . ; \
-	cp ../../../include/SVT/key_map.h SVT ; \
-	cp ../../../include/SECTOR/sector.h SECTOR ; \
-	cp ../../../include/TRG/trgStructures.h TRG; cp ../../../include/TRG/trgStructures-Jan2002.h TRG ; cp ../../../include/TRG/trgStructures_20.h TRG ; cp ../../../include/TRG/trgStructures_21.h TRG ;\
-	cp ../../../include/L3/L3Formats.h L3 ; \
-	cp ../../../include/RC_Config.h . )
-	cp ../../../StRoot/StRTSClient/include/fcfClass.hh TAR
-	cp ../../../StRoot/StRTSClient/FCF/fcfAfterburner.cxx TAR/fcfAfterburner.C
-	cp ../../../StRoot/StRTSClient/FCF/fcfClass.cxx TAR/fcfClass.C
-	(cd TAR; make; make tar) 
-	cp TAR/evp_reader.tar .
-
-# name makes more sense to jml
-#
-tarinstall:  tarrer
-
-# This is still the original Tonko target, although the first half
-# is handled by the "tarfiles" target
-tarrer: tarfiles
-	rm -rf TAR
-	$(INSTALL) evp_reader.tar /afs/rhic.bnl.gov/star/doc_public/www/daq/EVP_READER
 
 clean :
 	@rm -f *.o *.a *.so
