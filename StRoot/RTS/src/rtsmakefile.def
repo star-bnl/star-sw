@@ -119,16 +119,15 @@ IS_STROOT=$(findstring $(STROOT_STR), $(PWD))
 ifeq "$(STROOT_STR)" "$(IS_STROOT)" 
 	SAY="Working under StRoot"
 
-	RTS_DIR_PATH = ../../
 	IS_STROOT=1
 else
 	SAY="Working under RTS"
 
-	RTS_DIR_PATH = ../../
 	IS_STROOT=
 endif
+RTS_DIR_PATH=../../../../StRoot/RTS
 
-INCLUDES =  -I. -I.. -I$(RTS_DIR_PATH)/include -I$(RTS_DIR_PATH)/trg/include
+INCLUDES =  -I. -I.. -I$(RTS_DIR_PATH)/include -I$(RTS_DIR_PATH)/trg/include -I$(RTS_DIR_PATH)/src
 
 # List misc. defaults assuming the target system is the
 # same as the local system. Can be overriden later.
