@@ -12,6 +12,7 @@ class StRtsTable : public TGenericTable {
 
    public:
       StRtsTable(const char* structName, Int_t n) : TGenericTable(structName,n){}
+      StRtsTable(size_t structLength, Int_t n);
       void  SetAll(Int_t sec,Int_t pad,Int_t rdo,Int_t row);
       void  SetSector (Int_t s);
       void  SetPad (Int_t p);
