@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.3 2008/04/08 22:39:47 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.4 2008/04/09 21:05:03 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.4  2008/04/09 21:05:03  fine
+ * Add  the generic way to treat the DAQ RTS structures
+ *
  * Revision 1.3  2008/04/08 22:39:47  fine
  * typo
  *
@@ -78,6 +81,7 @@
 #include "RTS/src/RTS_READER/rts_reader.h"
 #include "RTS/src/RTS_READER/daq_det.h"
 #include "RTS/src/RTS_READER/daq_dta.h"
+#include "RTS/src/RTS_READER/daq_dta_structs.h"
     typedef unsigned int UINT32;
 #   include "RTS/include/evp.h"
 #   include "RTS/src/EVP_READER/cfgutil.h"
@@ -175,7 +179,7 @@ static const char*RtsDataTypeByBankName(const char *bankName)
 }
 
 //_____________________________________________________________
-StRtsTable *StRtsReaderMaker::InitTable(const char *bankName)
+StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName)
 {
    // Create the new instance of the StRtsTable
    if (fRtsTable) {
@@ -184,12 +188,23 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *bankName)
                 << fLastQuery << " has not been used yet" << endm;
        delete fRtsTable; fRtsTable = 0;
    }
+#ifndef OLDAPPROACH   
    const char *dtBankType = RtsDataTypeByBankName(bankName);
    if ( dtBankType)  {
        // we will reallocate it within FillTable() method
       fRtsTable = new StRtsTable(dtBankType,2); 
+      LOG_INFO << "Table size = " << fRtsTable->GetTableSize()<< endm;
       AddData(fRtsTable);
    }
+#else
+   int dtBankSize = daq_dta_dict(detName,bankName);
+   if ( dtBankSize )  {
+       // we will reallocate it within FillTable() method
+      fRtsTable = new StRtsTable(dtBankSize,2);
+      fRtsTable->Print();
+      AddData(fRtsTable);
+   }
+#endif
    return fRtsTable;
 }
 
@@ -267,7 +282,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
               default:  thisMaker->fBank = 0; break;
            };
            if (fBank) {
-              thisMaker->InitTable(tokens->At(2)->GetName());
+              thisMaker->InitTable(detName,tokens->At(2)->GetName());
               rtsSystem = true;
               thisMaker->fLastQuery = rtsRequest;
            } else {
