@@ -82,6 +82,8 @@ int DAQtrgReader(char *m)
 	trg.channels = 0 ;
 	trg.trgc = NULL ;
 
+	trg.daqbits = evp_daqbits;   // ugly hack...
+
 	if(m == NULL) return EVP_DATA_ERR ;
 	datap = (struct DATAP *) m ;
 	if(datap->bh.byte_order != DAQ_RAW_FORMAT_ORDER) 
