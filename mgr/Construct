@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.156 2006/08/16 20:14:30 fisyak Exp $
+# $Id: Construct,v 1.157 2008/04/09 22:03:46 fine Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -165,7 +165,7 @@ my @packages = ();
 #find_PACKAGE(\&find_PACKAGE,"."); #print "Packages found: @packages\n";
 my @subdirs = ();
 # install includes
-my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg";
+my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg  StRoot/RTS/src/RTS_READER/.includes_for_export.flg";
 @DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
 my @DirsIdlInc = glob "pams/*/idl pams/*/inc";
 print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
