@@ -60,7 +60,7 @@ struct daq_det_gain {
 } ;
 
 
-const char *daq_dta_dict(const char *det, const char *bank) ;
+size_t daq_dta_dict(const char *det, const char *bank) ;
 
 #endif
 
