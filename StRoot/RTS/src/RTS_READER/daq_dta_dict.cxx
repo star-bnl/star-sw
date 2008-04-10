@@ -1,8 +1,9 @@
 #include <string.h>
 
 #include <rtsLog.h>
+#include <daq_dta_structs.h>
 
-const char *daq_dta_dict(const char *det, const char *bank)
+size_t daq_dta_dict(const char *det, const char *bank)
 {
 	
 	if((det==0) || (bank==0)) return 0 ;	// tough luck...
@@ -11,20 +12,10 @@ const char *daq_dta_dict(const char *det, const char *bank)
 	/************ TPX ****************/
 	if(!strcasecmp(det,"tpx")) {
 		if(!strcasecmp(bank,"adc")) {
-			return "struct daq_adc_tb { \
-				unsigned short adc ; \
-				unsigned short tb ; \
-			}" ;
+			return sizeof(struct daq_adc_tb) ;
 		}
 		if(strcasecmp(bank,"cld")) {
-			return "struct daq_cld { \
-				float tb ;	\
-				float pad ;	\
-				unsigned short charge ;	\
-				unsigned short flags ;	\
-				unsigned short t1, t2 ;	\
-				unsigned short p1, p2 ;	\
-			}" ;
+			return sizeof(struct daq_cld) ;
 		}
 
 	}
@@ -32,14 +23,14 @@ const char *daq_dta_dict(const char *det, const char *bank)
 	/************** TOF ****************/
 	if(!strcasecmp(det,"tof")) {
 		if(!strcasecmp(bank,"raw")) {
-			return	"unsigned int" ;
+			return	4 ;	// by definition!
 		}
 	}
 
 	/************** PP2PP ****************/
 	if(!strcasecmp(det,"pp2pp")) {
 		if(!strcasecmp(bank,"raw")) {
-			return	"unsigned char" ;
+			return	1 ;	// by definition
 		}
 	}
 
@@ -47,13 +38,13 @@ const char *daq_dta_dict(const char *det, const char *bank)
 	/*************** ESMD ***************/
 	if(!strcasecmp(det,"esmd")) {
 		if(!strcasecmp(bank,"adc")) {
-			return	"unsigned short (*)[192]" ;
+			return	sizeof(unsigned short (*)[192]) ;
 		}
 		if(!strcasecmp(bank,"raw")) {
-			return "unsigned short" ;
+			return 2 ;	// by definition
 		}
 		if(!strcasecmp(bank,"preamble")) {
-			return "unsigned short (*)[4]" ;
+			return sizeof(unsigned short (*)[4]) ;
 		}
 	}
 
