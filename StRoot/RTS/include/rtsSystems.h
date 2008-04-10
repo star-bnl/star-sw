@@ -97,10 +97,10 @@
 //	membership!
 #define TPC_GRP		0
 #define FPD_GRP		1
-#define BAD_GRP		2	// this used to be TOF but somethings wrong with the hardware...
+#define ETOW_GRP	2	// this used to be TOF but somethings wrong with the hardware...
 #define BTOW_GRP	3
 #define BSMD_GRP	4
-#define ETOW_GRP	5
+#define UNUSED_GRP	5
 #define ESMD_GRP	6
 #define TPX_GRP		7
 
