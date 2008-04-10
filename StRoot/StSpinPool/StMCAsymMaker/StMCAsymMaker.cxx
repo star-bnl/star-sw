@@ -155,6 +155,9 @@ Int_t StMCAsymMaker::Make() {
     //GET PYTHIA RECORD from particleTable
     TDataSetIter geantDstI(Event);
     particleTabPtr = (St_particle  *) geantDstI("particle");
+    if ( !particleTabPtr ) {
+      return kStOK;    
+    } 
     particle_st* particleTable = particleTabPtr->GetTable();//particleTabPtr->Print();
 
     //GET EVTID and SUBPROCESS ID from struct g2t_event
