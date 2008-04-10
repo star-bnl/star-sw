@@ -157,8 +157,9 @@ extern inline unsigned int swap32(unsigned int x)
 /* Don't let floats get casts to ints before swapping.... */
 extern inline float swapf(float f)
 {
-  (unsigned int &)f = swap32((unsigned int &)f);
-  return f;
+  //(unsigned int &)f = swap32((unsigned int &)f);
+  unsigned int x = swap32((unsigned int)f);
+  return (float)x;
 }
 
 extern inline void swapBuff32(unsigned int *buff, int n)
