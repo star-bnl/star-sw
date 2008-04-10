@@ -1,10 +1,9 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.535 2008/03/22 23:45:43 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.536 2008/04/10 16:22:37 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
 #include "TObjString.h"
-#include "TRegexp.h"
 #include "TSystem.h"
 #include "TInterpreter.h"
 #include "TClassTable.h"
@@ -519,7 +518,13 @@ Int_t StBFChain::Instantiate()
       }
       ProcessLine(cmd);
     }
-    if (  maker == "StTpcHitMaker" && GetOption("doPulser")) mk->SetMode(1);
+    if (  maker == "StTpcHitMaker") {
+      Char_t *options[] = {"TpcDoPulser", "TpcPadMonitor", "TpcDumpPixels2Ntuple","TpcRawData",0};
+      Int_t i = 0;
+      for (; options[i]; i++) {
+	if (GetOption(options[i])) mk->SetAttr(options[i],1);
+      }
+    }
     if ( (maker == "StTpcHitMover" || maker == "St_tpt_Maker") && GetOption("ExB")){
       // bit 0 is ExB ON or OFF
       // The next 3 bits are reserved for yearly changes.
@@ -1020,13 +1025,15 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
       Tag.ToLower();
       // printf ("Chain %s\n",tChain.Data());
       kgo = kOpt(Tag.Data(),kFALSE);
-      if (kgo > 0){
+      if (kgo != 0){
 	SetOption(kgo,chain);
-	TString Comment(fBFC[kgo].Comment);
-	if (Tag.BeginsWith("Test.",TString::kIgnoreCase) && Comment.BeginsWith("/star/") ) {
-	  fkChain = kgo;
-	  gMessMgr->QAInfo() << "Default Test chain set " << fBFC[fkChain].Key << " with input " << fBFC[fkChain].Comment << endm;
-	} 
+	if (kgo > 0) {
+	  TString Comment(fBFC[kgo].Comment);
+	  if (Tag.BeginsWith("Test.",TString::kIgnoreCase) && Comment.BeginsWith("/star/") ) {
+	    fkChain = kgo;
+	    gMessMgr->QAInfo() << "Default Test chain set " << fBFC[fkChain].Key << " with input " << fBFC[fkChain].Comment << endm;
+	  } 
+	}
       } else {
 	// it is 0 i.e. was not recognized. Check if it is a dbvXXXXXXXX
 	// with a 8 digit long time stamp. We can do all of that in the
@@ -1102,10 +1109,13 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 //_____________________________________________________________________
 /// Enable/disable valid command line options
 void StBFChain::SetOption(const Int_t k, const Char_t *chain) {
-  if (k > 0 && !fBFC[k].Flag) {
-    if (strlen(fBFC[k].Opts) > 0) SetOptions(fBFC[k].Opts,fBFC[k].Key);
-    fBFC[k].Flag = kTRUE;
-    gMessMgr->QAInfo() << Form(" Switch On  %20s by %s", fBFC[k].Key, chain) << endm;
+  if (k > 0) {
+    Int_t n = strlen(fBFC[k].Opts);
+    if (n >  0) SetOptions(fBFC[k].Opts,fBFC[k].Key);
+    if (!fBFC[k].Flag) {
+      fBFC[k].Flag = kTRUE;
+      gMessMgr->QAInfo() << Form(" Switch On  %20s by %s", fBFC[k].Key, chain) << endm;
+    }
   } else {
     if (k < 0 && fBFC[-k].Flag) {
       fBFC[-k].Flag = kFALSE;
