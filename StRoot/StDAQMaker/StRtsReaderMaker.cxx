@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.4 2008/04/09 21:05:03 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.5 2008/04/10 16:23:34 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.5  2008/04/10 16:23:34  fine
+ * Activate the generic RTS_READER interface
+ *
  * Revision 1.4  2008/04/09 21:05:03  fine
  * Add  the generic way to treat the DAQ RTS structures
  *
@@ -153,6 +156,7 @@ void StRtsReaderMaker::Clear(Option_t *option)
    StMaker::Clear(option);
 }
 
+#if 0
 //_____________________________________________________________
 static const char*RtsDataTypeByBankName(const char *bankName) 
 {
@@ -177,6 +181,7 @@ static const char*RtsDataTypeByBankName(const char *bankName)
    }
    return 0;
 }
+#endif
 
 //_____________________________________________________________
 StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName)
@@ -188,23 +193,13 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
                 << fLastQuery << " has not been used yet" << endm;
        delete fRtsTable; fRtsTable = 0;
    }
-#ifndef OLDAPPROACH   
-   const char *dtBankType = RtsDataTypeByBankName(bankName);
-   if ( dtBankType)  {
-       // we will reallocate it within FillTable() method
-      fRtsTable = new StRtsTable(dtBankType,2); 
-      LOG_INFO << "Table size = " << fRtsTable->GetTableSize()<< endm;
-      AddData(fRtsTable);
-   }
-#else
-   int dtBankSize = daq_dta_dict(detName,bankName);
+   size_t dtBankSize = daq_dta_dict(detName,bankName);
    if ( dtBankSize )  {
        // we will reallocate it within FillTable() method
       fRtsTable = new StRtsTable(dtBankSize,2);
       fRtsTable->Print();
       AddData(fRtsTable);
    }
-#endif
    return fRtsTable;
 }
 
