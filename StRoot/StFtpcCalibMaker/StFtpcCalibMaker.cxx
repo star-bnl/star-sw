@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.6 2007/04/28 17:56:08 perev Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.7 2008/04/11 17:00:55 nav Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.7  2008/04/11 17:00:55  nav
+// *** empty log message ***
+//
 // Revision 1.6  2007/04/28 17:56:08  perev
 // Redundant StChain.h removed
 //
@@ -197,7 +200,10 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
   if (ftpc == 2) deltap = deltapE;
 
   // Laser t0 = 1.0
-  tZero = 1.0;
+  // tZero = 1.0;
+
+ // Laser t0 = 1.57
+  tZero = 1.57;//changed 04/03/08 by navneet
 
   if (atof(t0)!=0 || atof(gas)!=0)
     {
