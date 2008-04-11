@@ -75,6 +75,11 @@ struct tapeMsg {
   int stream;
 };
 
+// network byte order...
+struct evtDoneMsg {
+  u_short token;
+  u_short status;
+};
 
 
 #endif
