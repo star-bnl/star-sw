@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.2 2007/11/28 16:17:30 jwebb Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.3 2008/04/11 14:37:17 jwebb Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -27,6 +27,11 @@ StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* muDstMakerName) 
   mHList=0;
   nInpEve=0; 
   memset(hA,0,sizeof(hA));
+
+  /// By default, enable all three simulator subsystems
+  mEnableTower=true;
+  mEnableSMD=true;
+  mEnablePrePost=true;
 
   /// By default, we do not add a pedestal offset
   mAddPed   = false;
@@ -226,13 +231,13 @@ Int_t StEEmcSlowMaker::Make(){
       }
 
       /// Run slow simulator on towers
-      MakeTower(emc);
+      if ( mEnableTower) MakeTower(emc);
 
       /// Run slow simulator on pre/postshower
-      MakePrePost(emc);
+      if ( mEnablePrePost ) MakePrePost(emc);
 
       /// Run slow simulator on smd
-      MakeSMD(emc);
+      if ( mEnableSMD ) MakeSMD(emc);
     }
     break;
 
@@ -265,13 +270,13 @@ Int_t StEEmcSlowMaker::Make(){
       }
 
       /// Run slow simulator on towers
-      MakeTower(emc);
+      if ( mEnableTower ) MakeTower(emc);
 
       /// Run slow simulator on pre/postshower
-      MakePrePost(emc);
+      if ( mEnablePrePost ) MakePrePost(emc);
 
       /// Run slow simulator on smd
-      MakeSMD(emc);
+      if ( mEnableSMD) MakeSMD(emc);
     }
     break;
 
@@ -924,6 +929,9 @@ void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t sec, Int_t uv, Int_t st
 
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.3  2008/04/11 14:37:17  jwebb
+// Added options to disable operation of individual slow simulaor subsystems.
+//
 // Revision 2.2  2007/11/28 16:17:30  jwebb
 // Added the following features:
 //
