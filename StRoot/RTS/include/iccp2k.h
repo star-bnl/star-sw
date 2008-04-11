@@ -15,7 +15,7 @@
 #define EVBFLAG_FCF_DATA (1<<1)
 #define EVBFLAG_L25ABORT (1<<2)
 
-#ifdef RTS_LITTLE_ENDIAN
+//#ifdef RTS_LITTLE_ENDIAN
 struct iccp2k {   
   u_int words;        // words of the bank to follow (not including this header)
   u_short srcNode;      // source node
@@ -28,23 +28,23 @@ struct iccp2k {
   u_char pad2;
   u_char pad3;
 };
-#else
-struct iccp2k {   
-  u_int words;        // words of the bank to follow (not including this header)
-  //-----
-  u_short dstNode;
-  u_short srcNode;      
-  //----
-  u_short token;
-  u_char dstTask;
-  u_char srcTask;
-  //----
-  u_char pad3;
-  u_char pad2;
-  u_char pad1;
-  u_char cmd;
-};
-#endif
+/* #else */
+/* struct iccp2k {    */
+/*   u_int words;        // words of the bank to follow (not including this header) */
+/*   //----- */
+/*   u_short dstNode; */
+/*   u_short srcNode;       */
+/*   //---- */
+/*   u_short token; */
+/*   u_char dstTask; */
+/*   u_char srcTask; */
+/*   //---- */
+/*   u_char pad3; */
+/*   u_char pad2; */
+/*   u_char pad1; */
+/*   u_char cmd; */
+/* }; */
+/* #endif */
 
 
 struct gbPayload {
