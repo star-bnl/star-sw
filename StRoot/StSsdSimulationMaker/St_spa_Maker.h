@@ -25,31 +25,36 @@ class St_slsCtrl;
 class ssdConfiguration_st;
 
 class St_spa_Maker : public StMaker {
+  protected :
+    Int_t mPed;
  private:
   St_ssdStripCalib     *m_noise;    //!
   St_sdm_condition_db  *m_condition;//!
   St_slsCtrl           *m_ctrl;     //!
   ssdConfiguration_st  *m_config;   //!
  public: 
-                  St_spa_Maker(const char *name="spa_strip");
-   virtual       ~St_spa_Maker();
-   virtual Int_t  Init();
-   virtual Int_t  InitRun(Int_t runumber);
-   virtual Int_t  Make();
-   virtual Int_t  Finish();
-   virtual void   PrintInfo();
-
-    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.10 2007/03/21 17:19:56 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  St_spa_Maker(const char *name="spa_strip");
+  virtual       ~St_spa_Maker();
+  virtual Int_t  Init();
+  virtual Int_t  InitRun(Int_t runumber);
+  virtual Int_t  Make();
+  virtual Int_t  Finish();
+  virtual void   PrintInfo();
+  virtual Int_t  GetModePedestal(){return mPed;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.11 2008/04/12 14:21:29 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_spa_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 
  /**************************************************************************
- * $Id: St_spa_Maker.h,v 1.10 2007/03/21 17:19:56 fisyak Exp $
+ * $Id: St_spa_Maker.h,v 1.11 2008/04/12 14:21:29 bouchet Exp $
  *
  * $Log: St_spa_Maker.h,v $
+ * Revision 1.11  2008/04/12 14:21:29  bouchet
+ * Add a switch to use constant noise and pedestal
+ *
  * Revision 1.10  2007/03/21 17:19:56  fisyak
  * use new StSsdBarrel
  *
