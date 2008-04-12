@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.34 2008/01/11 10:39:39 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.35 2008/04/12 14:20:39 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.35  2008/04/12 14:20:39  bouchet
+// Add a switch to use constant noise and pedestal ; remove some printing
+//
 // Revision 1.34  2008/01/11 10:39:39  bouchet
 // add method to read the Wafer configuration table
 //
@@ -158,6 +161,7 @@ class StSsdCluster;
 class StSsdClusterList;
 class StSsdPackage;
 class StSsdPackageList;
+class St_spa_Maker;
 class ssdWafersPosition_st;
 class ssdDimensions_st;
 class ssdConfiguration_st;
@@ -185,7 +189,7 @@ class StSsdPointMaker : public StMaker {
   St_ssdNoise           *m_noise3;        //!< Pointer to the ssdNoise table (noise values)
   St_ssdGainCalibWafer  *mGain;           //!< Pointer to the ssdGainCalib table (calibration gain)) 
   St_ssdWaferConfiguration *mWafConfig;  //!< Pointer to the ssdWaferConfiguration table (wafer status))
-
+  St_spa_Maker          *spaMk;
 #ifdef config_position_dimensions
   St_ssdWafersPosition  *position;
   ssdDimensions_st      *dimensions;
@@ -235,7 +239,6 @@ class StSsdPointMaker : public StMaker {
   StSsdHitCollection     *mSsdHitColl;     //!
   StSsdDynamicControl    *mDynamicControl; //!
   StSsdClusterControl    *mClusterControl; //!
-  
   TFile *ScfCtrlFile;  //!
 
   TH1F  *noisDisP;     //! p-side distribution of noise.
@@ -262,13 +265,14 @@ class StSsdPointMaker : public StMaker {
   Int_t NEvent;
   Int_t year;
   Int_t mode;
+  Int_t pedestalMode;
   Int_t noiseTableSize;
   Float_t CalibArray[320];
   Int_t WafStatus[20][16];
   Float_t ratioP[20][16];
   Float_t ratioN[20][16];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.34 2008/01/11 10:39:39 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.35 2008/04/12 14:20:39 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };
