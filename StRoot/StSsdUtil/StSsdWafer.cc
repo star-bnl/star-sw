@@ -1,8 +1,11 @@
 
 
-// $Id: StSsdWafer.cc,v 1.8 2008/01/11 10:40:38 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.9 2008/04/12 14:22:36 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.9  2008/04/12 14:22:36  bouchet
+// Add a method to fill with constant noise and pedestal
+//
 // Revision 1.8  2008/01/11 10:40:38  bouchet
 // Use of the wafer configuration table
 //
@@ -267,7 +270,7 @@ void  StSsdWafer::doCleanListStrip(StSsdStripList *myStripList)
   StSsdStrip *copyStrip = cleanListStrip->first(); 
   int        size       = cleanListStrip->getSize();   
   for(Int_t i=0;i<size;i++){  
-    //printf("%d over %d strips signal=%d id=%d noise=%f\n",i,cleanListStrip->getSize(),copyStrip->getDigitSig(),copyStrip->getNStrip(),copyStrip->getSigma()); 
+    //printf("%d over %d strips signal=%d id=%d noise=%f\n",i,cleanListStrip->getSize()-1,copyStrip->getDigitSig(),copyStrip->getNStrip(),copyStrip->getSigma()); 
     myStrip = copyStrip; 
     copyStrip = myStripList->next(copyStrip); 
     if((myStrip->getSigma()==0)||(myStrip->getDigitSig()<lowCut*myStrip->getSigma())){

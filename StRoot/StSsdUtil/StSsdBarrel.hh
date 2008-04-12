@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.6 2008/01/11 10:40:38 bouchet Exp $
+// $Id: StSsdBarrel.hh,v 1.7 2008/04/12 14:22:36 bouchet Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.7  2008/04/12 14:22:36  bouchet
+// Add a method to fill with constant noise and pedestal
+//
 // Revision 1.6  2008/01/11 10:40:38  bouchet
 // Use of the wafer configuration table
 //
@@ -82,6 +85,7 @@ class StSsdBarrel
   Int_t readNoiseFromTable(St_ssdStripCalib *noise); //
   Int_t readNoiseFromTable(St_ssdNoise *strip_noise, StSsdDynamicControl *dynamicControl); 
   Int_t readNoiseDefault(StSsdDynamicControl *dynamicControl);
+  Int_t readNoiseDefaultForSimu();
   Int_t readConditionDbFromTable(St_sdm_condition_db *condition);//
   Int_t writeNoiseToFile(St_spa_strip *spa_strip);
   Int_t writeNoiseToFile(St_ssdPedStrip *pedStrip, char myLabel[]);

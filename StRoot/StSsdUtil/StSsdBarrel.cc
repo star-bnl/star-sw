@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.7 2008/01/11 10:40:37 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.8 2008/04/12 14:22:36 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.8  2008/04/12 14:22:36  bouchet
+// Add a method to fill with constant noise and pedestal
+//
 // Revision 1.7  2008/01/11 10:40:37  bouchet
 // Use of the wafer configuration table
 //
@@ -203,8 +206,8 @@ Int_t StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip){
   Int_t iLad          = 0;
   Int_t nStrip        = 0;
   Int_t iSide         = 0;
-  Float_t sigma       = 3.;
-  Int_t iPedestal     = 100;
+  Float_t sigma       = 3.0;
+  Int_t iPedestal     = 120;
   Int_t idMcHit[5]    = {0,0,0,0,0};
   Int_t e = 0;
   for (Int_t i = 0 ; i < spa_strip->GetNRows(); i++)
@@ -357,9 +360,9 @@ Int_t  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynam
 }
 //---------------------------------------------------------------------------------------------
 Int_t StSsdBarrel::readNoiseDefault(StSsdDynamicControl *dynamicControl){
-  Int_t rms           = 60  ; 
+  Int_t rms           = 48  ; 
   // the noise is coded as 16*rms then for each strip, noise = 60/16 = 3.75 adc
-  Int_t ped           = 140 ;
+  Int_t ped           = 120 ;
   Int_t NumberOfNoise = 0;
   for(Int_t i=0;i<mNLadder;i++)
     {
@@ -389,7 +392,7 @@ Int_t  StSsdBarrel::readNoiseFromTable(St_ssdNoise *strip_noise, StSsdDynamicCon
   Int_t iLad          = 0;
   Int_t nStrip        = 0;
   Int_t iSide         = 0;
-  Int_t pedestal      = 150;//constant, not used later
+  Int_t pedestal      = 120;//constant, not used later
   printf("size of m_noise3 table = %d\n",(int)strip_noise->GetNRows());
   for (Int_t i = 0 ; i < strip_noise->GetNRows(); i++)
     {
@@ -1103,7 +1106,7 @@ Int_t  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib)
   Int_t nElectronInAMip      = 22500;
   Int_t adcDynamic           = 20;
   const Float_t   AdctoE     =  (adcDynamic*nElectronInAMip)/(float)(NAdcChannel);
-  printf("AdctoE = %f\n",AdctoE);
+  if(Debug()) {printf("AdctoE = %f\n",AdctoE);}
   
   Int_t idWaf  = 0, iWaf = 0, iLad = 0;
   Int_t nStrip = 0;
@@ -1125,7 +1128,6 @@ Int_t  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib)
 	ent++;
       }
     }
-  printf("Entries = %d\n",ent);
   return ent;
 }
 //________________________________________________________________________________
@@ -1276,3 +1278,29 @@ void  StSsdBarrel::doDaqSimulation(slsCtrl_st *ctrl){
     }  
 }
 //____________________________________________________________________
+Int_t StSsdBarrel::readNoiseDefaultForSimu(){
+  Int_t rms              = 48;
+  // the noise is coded as 16*rms then for each strip, noise = 60/16 = 3.75 adc
+  Int_t ped              = 120 ;
+  Int_t NAdcChannel      = (int)pow(2.0,10.0*1.0);
+  Int_t nElectronInAMip  = 22500;
+  Int_t adcDynamic       = 20;
+  const Float_t   AdctoE = (adcDynamic*nElectronInAMip)/(float)(NAdcChannel);
+  Int_t NumberOfNoise = 0;
+  for(Int_t iLad=0;iLad<mNLadder;iLad++)
+    {
+      for(Int_t iWaf=0;iWaf<mNWaferPerLadder;iWaf++)
+	{
+	  for(Int_t NStrip=0;NStrip<mNStripPerSide;NStrip++)
+	    {
+	      for(Int_t iSide=0;iSide<2;iSide++)
+		{
+		  StSpaNoise *newStrip = new StSpaNoise(NStrip+1 ,(int)(ped*AdctoE),(int)((rms*AdctoE)/16.));
+		  mLadders[iLad]->mWafers[iWaf]->addNoiseToStripSignal(newStrip,iSide);
+		  NumberOfNoise++;
+		}
+	    }
+	}
+    }
+  return NumberOfNoise;
+}
