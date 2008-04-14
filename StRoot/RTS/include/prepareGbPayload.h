@@ -146,7 +146,7 @@ public:
 
     evtNumber++;
     pay->eventNumber = l2h32(evtNumber);
-    pay->token = swap16(evt->TrgToken);
+    pay->token = l2h16(evt->TrgToken);
 
     // The rest should be little endian 
     pay->L1summary[0] = l2h32(l1trg);
