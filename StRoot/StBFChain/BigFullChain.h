@@ -724,7 +724,7 @@ Bfc_st BFC2[] = { // ITTF Chains
     
   {"srs","svt_hits","svtChain","svtDb,tls,Simu,St_tpc,St_svt,SvtCL,-sss,-SvtSlowSim,StEvent,MakeEvent"
                                                 ,"St_srs_Maker","StSvtClusterMaker,St_srs_Maker","",kFALSE},
-  {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL,MakeEvent","StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
+  {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL"          ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
   {"SvtClu"   ,"SvtClu","svtChain","svt_T,StEvent,SvtCL","StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
   {"SvtCluAnal" ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},
@@ -769,7 +769,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   /*  {"ssd_daq","SpaStrip","","daq,ssddb,St_svt,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker"
       ,"... SSD Daq",                                                                                  kFALSE}, */
-  {"ssd_daq","","","ssddb,St_svt,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker",  "... SSD Daq",kFALSE},
+  {"ssd_daq","","","ssddb,St_svt,-sls,-spa,ssdUtil","StSsdDaqMaker" ,"StSsdDaqMaker", "... SSD Daq",kFALSE},
   {"ssdfast"     ,"","","StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
    "... SSD fast simulator"                                                                        ,kFALSE},
   {"ssd"         ,"","","sls,spa,spt"                        ,"","","SSD full chain for simulation",kFALSE},
