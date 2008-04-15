@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.3 2008/04/11 14:37:17 jwebb Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.4 2008/04/15 00:15:52 jwebb Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -545,7 +545,8 @@ void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc ) {
       /// Add in factor from gain smearing
       assert(strip-1>=0); // or die strips are counted from zero already
       assert(sec-1>=0); // or die sectors are counted from zero already
-      newadc *= mSmdGainFact[sec-1][iuv][strip-1];
+      assert(iuv-1>=0&&iuv-1<2); 
+      newadc *= mSmdGainFact[sec-1][iuv-1][strip-1];
 
 
       /// Lookup pedestal in database (possibly zero)
@@ -929,6 +930,9 @@ void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t sec, Int_t uv, Int_t st
 
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.4  2008/04/15 00:15:52  jwebb
+// Fixed bug in sector 12V.
+//
 // Revision 2.3  2008/04/11 14:37:17  jwebb
 // Added options to disable operation of individual slow simulaor subsystems.
 //
