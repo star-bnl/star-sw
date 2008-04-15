@@ -507,6 +507,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"VFPPV"          ,""  ,"","genvtx",""                      ,"","... Pile-up proof vertex finder",kFALSE},
   {"VFPPVnoCTB"     ,""  ,"","genvtx",""               ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
   {"VFMinuit"       ,""  ,"","genvtx",""                ,"","... Generic VF will use Minuit method",kFALSE},
+  {"VFMinuit2"      ,""  ,"","genvtx","",  "","... Generic VF will use Minuit method w/rank mode 2",kFALSE},
   {"VFFV"           ,""  ,"","genvtx",""                            ,"","... Fixed dummy VF method",kFALSE},
   {"VFMCE"          ,""  ,"","genvtx",""                        ,"","... Fixed vertex from MCEvent",kFALSE},
 
