@@ -25,8 +25,6 @@ class St_slsCtrl;
 class ssdConfiguration_st;
 
 class St_spa_Maker : public StMaker {
-  protected :
-    Int_t mPed;
  private:
   St_ssdStripCalib     *m_noise;    //!
   St_sdm_condition_db  *m_condition;//!
@@ -40,18 +38,20 @@ class St_spa_Maker : public StMaker {
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   PrintInfo();
-  virtual Int_t  GetModePedestal(){return mPed;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.11 2008/04/12 14:21:29 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.12 2008/04/15 21:04:43 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_spa_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 
  /**************************************************************************
- * $Id: St_spa_Maker.h,v 1.11 2008/04/12 14:21:29 bouchet Exp $
+ * $Id: St_spa_Maker.h,v 1.12 2008/04/15 21:04:43 bouchet Exp $
  *
  * $Log: St_spa_Maker.h,v $
+ * Revision 1.12  2008/04/15 21:04:43  bouchet
+ * remove latest change
+ *
  * Revision 1.11  2008/04/12 14:21:29  bouchet
  * Add a switch to use constant noise and pedestal
  *
