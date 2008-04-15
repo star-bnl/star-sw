@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.13 2008/04/12 14:21:28 bouchet Exp $
+ * $Id: St_spa_Maker.cxx,v 1.14 2008/04/15 21:04:43 bouchet Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.14  2008/04/15 21:04:43  bouchet
+ * remove latest change
+ *
  * Revision 1.13  2008/04/12 14:21:28  bouchet
  * Add a switch to use constant noise and pedestal
  *
@@ -56,18 +59,10 @@
 #include "tables/St_ssdStripCalib_Table.h"
 #include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_ssdConfiguration_Table.h"
-#include "tables/St_ssdGainCalibWafer_Table.h"
-#include "tables/St_ssdNoise_Table.h"
-#include "tables/St_ssdWaferConfiguration_Table.h"
 ClassImp(St_spa_Maker)
   
 //_____________________________________________________________________________
-  St_spa_Maker::St_spa_Maker(const char *name): StMaker(name){
-  m_noise     = 0;
-  m_condition = 0;
-  m_ctrl      = 0;
-  mPed        = 0;
-}
+  St_spa_Maker::St_spa_Maker(const char *name): StMaker(name),m_noise(0),m_condition(0),m_ctrl(0) {}
 //_____________________________________________________________________________
 St_spa_Maker::~St_spa_Maker(){}
 //_____________________________________________________________________________
@@ -109,8 +104,7 @@ Int_t St_spa_Maker::InitRun(Int_t runnumber){
     return kStFatal;
   }
   //mConfig = new StSsdConfig();
-  //mPed = 1; // mPed = 0 : use noise from db ; mPed = 1 ; fix the noise =3 adc and pedestal = 140 adc 
-
+  
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -135,7 +129,7 @@ Int_t St_spa_Maker::Make()
   mySsd->readStripFromTable(sls_strip);
   LOG_INFO<<"####        NUMBER OF SLS STRIPS "<<sls_strip->GetNRows()<<"       ####"<<endm;
   Int_t numberOfNoise = 0;
-  (mPed==0)?numberOfNoise = mySsd->readNoiseFromTable(m_noise):numberOfNoise = mySsd->readNoiseDefaultForSimu();
+  numberOfNoise = mySsd->readNoiseFromTable(m_noise);
   LOG_INFO<<"####       NUMBER OF DB ENTRIES "<<numberOfNoise<<"       ####"<<endm;
   mySsd->readConditionDbFromTable(m_condition);
   LOG_INFO<<"####             ADD SPA NOISE               ####"<<endm;
