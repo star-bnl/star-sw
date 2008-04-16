@@ -1,30 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.15 2008/03/27 00:41:09 tai Exp $
+// $Id: StJets.h,v 1.11 2008/01/28 03:37:26 staszak Exp $
 // $Log: StJets.h,v $
-// Revision 1.15  2008/03/27 00:41:09  tai
-// moved the method addProtoJet() from the class StJets
-// to the class StJetMaker.
-//
-// Revision 1.14  2008/03/26 23:42:03  tai
-// initialize all member variables at their constructors.
-// StJets::addProtoJet()
-//    -  this method will be moved to the class StJetMaker
-//    -  to prepare for the move
-//         +  fixed a memory leak from mMuPosition
-//         +  cleaned up the codes
-//         +  changed the direct operations on the member variables
-//            to operations through member methods
-// added StJets::addTrackToIndex()
-// added StJets::addJet()
-//
-// Revision 1.13  2008/03/26 01:13:13  tai
-// moved the definitions of some inline functions inside the class definition.
-// add four setter functions.
-//
-// Revision 1.12  2008/03/24 22:43:17  tai
-// added particles_() to make test easier.
-//
 // Revision 1.11  2008/01/28 03:37:26  staszak
 // A number of updates: i) Murad's use2006cuts function which extends tracks to SMD, and includes DCA cuts, ii) emulated L2 results now included and data L2 results restructured, iii) StJet zVertex and detEta now filled
 //
@@ -240,14 +217,14 @@ public:
     void Clear(const char *opt);
         
     ///add a jet to the container
-    //    void addProtoJet(StProtoJet& pj, const StMuDst* muDst);
+    void addProtoJet(StProtoJet& pj, const StMuDst* muDst);
 
     ///Set event-wise information:
     void setMuDst(const StMuDst*);
 
     ///Set the BEMC corrupt flag.  true --> event is corrupt, no jet finding was performed
-  void setBemcCorrupt(bool v) { mCorrupt = v; }
-  bool bemcCorrupt() const { return mCorrupt; }
+    void setBemcCorrupt(bool v);
+    bool bemcCorrupt() const;
 
     ///The number of jets found in this event
     int nJets() {return mJets->GetLast()+1;}
@@ -255,32 +232,20 @@ public:
     ///Access to the jets in this event.
     TClonesArray* jets() {return mJets;}
 
-  void addJet(StJet& jet);
-
     ///The track to jet indices TClonesArray: this contains _all_ the 4momenta contained in jets for jet finding!  This is for expert use only
     TClonesArray* indices() {return mTrackToJetIndices;}
-
-  void addTrackToIndex(TrackToJetIndex &t2j);
     
     ///Here's how you get the 4-momenta of a particles in a given jet.  This contains tracks and energy-corrected-towers.  Use this for Frag. Function
     vector<TrackToJetIndex*> particles(int jetIndex);
-
-    // don't use this. this is for test.
-    TObjArray particles_(int jetIndex);
     
     ///Access to a container of the charged-tracks associated with a jet
     TrackVec jetParticles(StMuDst*, int jetIndex);
     
     ///access to event numbers, used to synchronize with StMuDstMaker for simultaneous reading
-  int eventId() { return mEventId; }
-  int eventNumber() {return mEventNumber; }
-  int runId() { return mRunId; }
-  int runNumber() { return mRunNumber; }
-
-  void seteventId(int v) { mEventId = v; }
-  void seteventNumber(int v) { mEventNumber = v; }
-  void setrunId(int v) { mRunId = v; }
-  void setrunNumber(int v) { mRunNumber = v; }
+    int eventId();
+    int eventNumber();
+    int runId();
+    int runNumber();
 
     ///A double check, used to synchronize with StMuDstMaker for simultaneous reading
     bool isSameEvent(const StMuDst*);
@@ -325,6 +290,26 @@ private:
 };
 
 //inlines
+inline int StJets::eventId()
+{
+    return mEventId;
+}
+
+inline int StJets::eventNumber()
+{
+    return mEventNumber;
+}
+
+inline int StJets::runId()
+{
+    return mRunId;
+}
+
+inline int StJets::runNumber()
+{
+    return mRunNumber;
+}
+
 inline void StJets::Clear(const char *opt)
 {
     TObject::Clear(opt);
@@ -332,6 +317,15 @@ inline void StJets::Clear(const char *opt)
     mCorrupt = false;
 }
 
+inline void StJets::setBemcCorrupt(bool v)
+{
+    mCorrupt = v;
+}
+
+inline bool StJets::bemcCorrupt() const
+{
+    return mCorrupt;
+}
 
 
 //non-members ---------------------

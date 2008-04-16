@@ -1,11 +1,20 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.101 2008/04/03 20:03:33 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.101 2008/04/03 20:03:33 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.104 2008/04/08 21:39:43 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.104 2008/04/08 21:39:43 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.104  2008/04/08 21:39:43  perev
+ * No any cuts in isPrimary()
+ *
+ * Revision 2.103  2008/04/08 14:21:17  fisyak
+ * 2 cm => StiKalmanTrackFinderParameters::instance()->maxDca3dVertex() in StiKalmanTrack::isPrimary()
+ *
+ * Revision 2.102  2008/04/07 19:20:53  perev
+ * More clear isPrimary()
+ *
  * Revision 2.101  2008/04/03 20:03:33  fisyak
  * Straighten out DB access via chairs
  *
@@ -917,8 +926,10 @@ int StiKalmanTrack::getNNodes(int qua)  const
 bool  StiKalmanTrack::isPrimary() const
 {
   StiKalmanTrackNode * node = getInnerMostHitNode(3);
-  if (node->getDetector()) return 0;
-  return (fabs(node->getX())<2.);
+  if (node->getDetector()) 	return 0;
+  const StiHit *hit = node->getHit();
+  if (hit->isDca()) 		return 0;
+  return 1;
 }
 
 

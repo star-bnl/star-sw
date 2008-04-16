@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofINLCorr.h,v 1.4 2008/03/27 00:15:38 dongx Exp $
+ * $Id: StTofINLCorr.h,v 1.3 2007/11/29 22:39:30 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,9 +10,6 @@
  *****************************************************************
  *
  * $Log: StTofINLCorr.h,v $
- * Revision 1.4  2008/03/27 00:15:38  dongx
- * Update for Run8 finished.
- *
  * Revision 1.3  2007/11/29 22:39:30  dongx
  * vpd trayId changed to 121 (East) and 122 (West), be consistent
  *
@@ -46,8 +43,8 @@ class StTofINLCorr{
   static const Int_t mNChanMAX = 1024;
   static const Int_t mNBoardIdMAX = 4800;
 
-  static const Int_t mEastVpdTrayId = 122;
-  static const Int_t mWestVpdTrayId = 121;
+  static const Int_t mEastVpdTrayId = 121;
+  static const Int_t mWestVpdTrayId = 122;
 
   Int_t mTdigOnTray[mNTray][mNTDIGOnTray];
   Int_t mTdigOnEastVpd[mNTDIGOnTray];
@@ -57,8 +54,7 @@ class StTofINLCorr{
   Int_t mBoardId2Index[mNBoardIdMAX];   // index in mNTDIGMAX for board #Id
   Float_t mINLCorr[mNTDIGMAX][mNChanOnTDIG][mNChanMAX];
 
-  Int_t mNValidTrays;
-  
+
  public:
   StTofINLCorr();
   ~StTofINLCorr();
@@ -70,10 +66,6 @@ class StTofINLCorr{
 
   float getTrayINLCorr(int trayId, int globalTdcChan, int bin);
   float getVpdINLCorr(int ewId, int globalTdcChan, int bin);
-  
-  void setNValidTrays(int ntrays);
 };
-
-inline void StTofINLCorr::setNValidTrays(int ntrays) { mNValidTrays = ntrays; }
 
 #endif

@@ -1,8 +1,5 @@
-// $Id: St_db_Maker.h,v 1.32 2008/04/02 20:22:33 perev Exp $
+// $Id: St_db_Maker.h,v 1.31 2008/01/09 20:44:52 perev Exp $
 // $Log: St_db_Maker.h,v $
-// Revision 1.32  2008/04/02 20:22:33  perev
-// WarnOff
-//
 // Revision 1.31  2008/01/09 20:44:52  perev
 // Improve printout in Finish()
 //
@@ -68,7 +65,7 @@
 //
 // Revision 1.10  2000/02/26 01:45:04  fine
 // CVS id has been introduced
-//
+// 
 //
 #ifndef STAR_St_db_Maker
 #define STAR_St_db_Maker
@@ -82,8 +79,8 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
-#endif
-#include "TTable.h"
+#endif 
+#include "TTable.h"                      
 
 #include "TDatime.h"
 #include "StDbBroker/dbConfig.h"
@@ -99,25 +96,25 @@ class St_db_Maker : public StMaker {
 private:
 
   TDataSet    *fDataBase;       //! DB structure
-  StDbBroker  *fDBBroker;       //!MySql broker
-  St_dbConfig *fHierarchy;      //!
+  StDbBroker  *fDBBroker;	//!MySql broker 
+  St_dbConfig *fHierarchy; 	//!
   TString     fDirs[10];        //! Array of dirs with DBs
-  Int_t       fIsDBTime;        //! flag to use own time stamp
-  TDatime     fDBTime;          //! Own DB time stamp
-  Int_t       fUpdateMode;      //!
+  Int_t       fIsDBTime;	//! flag to use own time stamp
+  TDatime     fDBTime;		//! Own DB time stamp
+  Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
-  TStopwatch  fTimer[6];        //!Timer object
-  int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
-  int         fDataSize[2];     // [0]=mysql data this event; [1]=total
+  TStopwatch  fTimer[6];        //!Timer object 
+  int         fEvents[2];	// [0]=nEvents [1]=events with mysql request
+  int         fDataSize[2];	// [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.32 2008/04/02 20:22:33 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.31 2008/01/09 20:44:52 perev Exp $";
  protected:
- public:
+ public: 
                    St_db_Maker(const char *name
-                              ,const char *dir0
-                              ,const char *dir1 = ""
-                              ,const char *dir2 = ""
-                              ,const char *dir3 = ""
+			      ,const char *dir0
+			      ,const char *dir1 = ""
+			      ,const char *dir2 = ""
+			      ,const char *dir3 = ""
                    );
    virtual        ~St_db_Maker();
    virtual TDataSet *GetDataBase(const char* logInput, const TDatime *td=0);
@@ -152,15 +149,15 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.32 2008/04/02 20:22:33 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.31 2008/01/09 20:44:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_db_Maker, 0)
+   ClassDef(St_db_Maker, 0)   
 };
 
-class St_dbConfig : public TTable
-{
-  ClassDefTable(St_dbConfig,dbConfig_st)
-  ClassDef(St_dbConfig,2)
-};
-
+class St_dbConfig : public TTable   
+{                                          
+  ClassDefTable(St_dbConfig,dbConfig_st)   
+  ClassDef(St_dbConfig,2)   
+};                                                            
+                                           
 #endif

@@ -7,85 +7,85 @@
   StBETMuTrackFourVec for every final state particle in the event.
 */
 
-#ifndef STBET4PMAKER_HH
-#define STBET4PMAKER_HH
-
-#include "StFourPMaker.h"
+#ifndef StBET4pMaker_HH
+#define StPYthia4pMaker_HH
 
 #include <vector>
+using namespace std;
 
-class StEmcCollection;
 class StMuTrackFourVec;
 class StMuDstMaker;
+class StEmcADCtoEMaker;
 class StEmcRawHit;
 class StMuEmcPosition;
 class EEmcGeomSimple;
 class StBemcTables;
 class StEEmcDbMaker;
 
+#include "StJetMaker/StFourPMakers/StFourPMaker.h"
 
-class StBET4pMaker : public StFourPMaker {
-
+class StBET4pMaker : public StFourPMaker
+{
 public:
     
-  StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix = true);
+    ///Require StMuDstMaker pointer at instantiation
+    //StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e);
+    StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix=true);
     
-  virtual ~StBET4pMaker() {};
+    ///Default destructor
+    virtual ~StBET4pMaker() {};
     
-  Int_t Init();    
-  Int_t Make();
+    ///Fill the lists
+    virtual Int_t Make();
     
-  void Clear(Option_t* opt);
+    ///Clear the lists
+    virtual void Clear(Option_t* opt);
 
-  Int_t InitRun(Int_t runId);
+    ///Initialize
+    virtual Int_t Init();    
+    Int_t InitRun(Int_t runId);
 
-  void setUseEndcap(bool v) { mUseEndcap = v; }
-  void setUse2003Cuts(bool v) { mUse2003Cuts = v; }
-  void setUse2005Cuts(bool v) { mUse2005Cuts = v; }
-  void setUse2006Cuts(bool v) { mUse2006Cuts = v; }
 
-  int nDylanPoints() const { return mDylanPoints; }
-  double sumEmcEt() const { return mSumEmcEt; }
+    void setUseEndcap(bool v) {mUseEndcap=v;}
+    void setUse2003Cuts(bool v) {mUse2003Cuts=v;}
+    void setUse2005Cuts(bool v) {mUse2005Cuts=v;}
+    void setUse2006Cuts(bool v) {mUse2006Cuts=v;}
+
+    int nDylanPoints() const {return mDylanPoints;}
+    double sumEmcEt() const {return mSumEmcEt;}
     
-private:
+protected:
+    void fillBarrelHits();
 
-  void collectChargedTracksFromTPC();
-  void collectEnergyFromBEMC();
-  void collectEnergyFromEEMC();
+    typedef vector<StMuTrackFourVec*> BET4Vec;
+    BET4Vec mVec;
+    bool mCorrupt;
+    bool mUseEndcap;
+    double mField;
 
-  StEmcCollection *find_StEmCCollection();
-  bool isCorrupted();
+    //these arrays are used to correlate tracks w/ towers
+    StEmcRawHit* mBTowHits[4801]; //!indexed from [1,4800]
+    int mNtracksOnTower[4801]; //!indexed form [1,4800] (number of tracks incident on this tower)
 
-  void fillBemcTowerHits();
-  double sumEnergyOverBemcTowers(double minE);
-  int numberOfBemcTowersWithEnergyAbove(double minE);
+    //utility used for track-> towe rprojection
+    StMuEmcPosition*  mMuPosition; //!
 
-  bool shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID);
+    StMuDstMaker* mMuDstMaker; //!
+    //StEmcADCtoEMaker* mAdc2E; //!
+    StBemcTables* mTables;//!
 
-  bool mCorrupt;
-  bool mUseEndcap;
-  double mField;
-
-  //these arrays are used to correlate tracks w/ towers
-  StEmcRawHit* mBTowHits[4801]; // indexed from [1,4800]
-  int mNtracksOnTower[4801]; // indexed form [1,4800] (number of tracks incident on this tower)
-
-  // utility used for track-> towe rprojection
-  StMuEmcPosition*  mMuPosition;
-
-  StMuDstMaker* mMuDstMaker;
-  StBemcTables* mTables;
-
-  bool mUse2003Cuts;
-  bool mUse2005Cuts;
-  bool mUse2006Cuts;
-  int mDylanPoints;
-  double mSumEmcEt;
+    bool mUse2003Cuts; //!
+    bool mUse2005Cuts; //!
+    bool mUse2006Cuts; //!
+    int mDylanPoints; //!
+    double mSumEmcEt; //!
         
-  EEmcGeomSimple* mEeGeom;
-  StEEmcDbMaker* mEeDb;
-  
-  ClassDef(StBET4pMaker,1)
-};
+    EEmcGeomSimple* mEeGeom;
+    StEEmcDbMaker* mEeDb;
 
-#endif // STBET4PMAKER_HH
+
+    ClassDef(StBET4pMaker,1)
+	};
+
+
+#endif

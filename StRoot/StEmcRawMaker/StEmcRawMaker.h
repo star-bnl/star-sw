@@ -1,4 +1,4 @@
-// $Id: StEmcRawMaker.h,v 1.7 2008/03/27 19:54:16 genevb Exp $
+// $Id: StEmcRawMaker.h,v 1.6 2007/01/22 19:13:37 kocolosk Exp $
 
 /*!\class StEmcRawMaker
 \author Alexandre A. P. Suaide
@@ -7,37 +7,13 @@ This class copies the BEMC raw data from DAQ file into StEvent.
 This make should run only in production or when reading DAQ
 files. The tasks performed by this maker are:
  
-  1. Get EMC data from DAQ files \n
-  2. Fills B+E emcRawData with the daq data \n
-  3.a Check for BEMC corruption but does not remove BEMC sub-event. \n
-  3.b Check for EEMC corruption and  does remove EEMC sub-event. \n
+  1. Get EMC data from DAQ files
+  2. Fills B+E emcRawData with the daq data
+  3.a Check for BEMC corruption but does not remove BEMC sub-event.
+  3.b Check for EEMC corruption and  does remove EEMC sub-event.
   4. Fills StEmcRawHits depending on the BEMC settings defined
-     by the user. For EEMC works only daqReader->StEvent. \n
-  5. Fills some QA histograms for BEMC & EEMC \n
-
-The controlADCtoE tables can be partially controlled in the
-BFC chain by use of the GoptEMC option. The option is immediately
-followed by 6 hexadecimal numbers corresponding to the 6 components
-of the EMC system as follows:
-
-  BTOW \n
-  ETOW \n
-  BSMD \n
-  ESMD \n
-  BPSD \n
-  EPSD \n
-
-...where PSD means both pre and post shower components.
-Each hexadecimal number is a bit patter of what to do for that
-particular detector. Implemented so far are values of 1 or 0 for
-these bits in the BEMC (where bit 0 is the least significant bit):
-
- bit 0: sets CheckStatus to 1 or 0 \n
- bit 1: sets CutOffType to 1 or 0 \n
-
-An example would be using the chain option "GoptEMC000020" which
-would set CheckStatus to 0 for BTOW+BSMD+BPSD, and CutOffType to
-0 for BTOW+BSMD and 1 for BPSD.
+     by the user. For EEMC works only daqReader->StEvent.
+  5. Fills some QA histograms for BEMC & EEMC
 */
 
 #ifndef STAR_StEmcRawMaker
@@ -88,7 +64,7 @@ public:
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.7 2008/03/27 19:54:16 genevb Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.6 2007/01/22 19:13:37 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -98,9 +74,6 @@ public:
 #endif
 
 // $Log: StEmcRawMaker.h,v $
-// Revision 1.7  2008/03/27 19:54:16  genevb
-// Utilize new BFC option for GoptEMC for controlADCtoE table
-//
 // Revision 1.6  2007/01/22 19:13:37  kocolosk
 // use STAR logger for all output
 //

@@ -194,32 +194,6 @@ map<int,int>& StJetSkimTrig::jetPatchesAboveThreshold(int detector) const{
     return (*theMap);
 }
 
-TArrayI StJetSkimTrig::towersAboveThreshold_(int detector) const
-{
-  return map2tarrayI(towersAboveThreshold(detector));
- }
-
-TArrayI StJetSkimTrig::triggerPatchesAboveThreshold_(int detector) const
-{
-  return map2tarrayI(triggerPatchesAboveThreshold(detector));
- }
-
-TArrayI StJetSkimTrig::jetPatchesAboveThreshold_(int detector) const
-{
-  return map2tarrayI(jetPatchesAboveThreshold(detector));
- }
-
-TArrayI StJetSkimTrig::map2tarrayI(map<int, int>& theMap) const
-{
- TArrayI ret(theMap.size()*2);
-  int i(0);
-  for(map<int, int>::const_iterator it = theMap.begin(); it != theMap.end(); ++it) {
-    ret[i++] = it->first;
-    ret[i++] = it->second;
-  }
-  return ret;
-}
-
 void StJetSkimTrig::addTowerAboveThreshold(int detector, int aID, int aADC) {
     pair<int,int> p1(aID,aADC);
     if(detector == 1) p1.first = (-1)*aID;

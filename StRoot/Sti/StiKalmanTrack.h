@@ -154,8 +154,6 @@ class StiKalmanTrack : public StiTrack
    * Returns the distance of closest approach of this track to the primary vertex 
    * @return dca
    */
-   double getPrimaryDca() const;
-
 	 /// Return the number of hits associated with this track.
    int getPointCount(int detectorId=0) const;
 
@@ -568,10 +566,6 @@ inline const StiKTNBidirectionalIterator &StiKalmanTrack::rend() const
   <li>Not implemented</li>
   </ol>
 */
-inline double StiKalmanTrack::getPrimaryDca() const
-{
-  return 0;
-}
 
 /*! Accessor method returns the outer most node associated with the track.
    <h3>Notes</h3>
