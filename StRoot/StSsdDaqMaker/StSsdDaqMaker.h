@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.h,v 1.7 2007/04/04 01:20:33 bouchet Exp $
+// $Id: StSsdDaqMaker.h,v 1.8 2008/04/16 20:06:30 fisyak Exp $
 //
 // $Log: StSsdDaqMaker.h,v $
+// Revision 1.8  2008/04/16 20:06:30  fisyak
+// rename maker to be compline with StSsdPointMaker expectations
+//
 // Revision 1.7  2007/04/04 01:20:33  bouchet
 // Cosmetic changes to print the active ladders according to the ssdConfiguration Table
 //
@@ -94,7 +97,7 @@ class StSsdDaqMaker : public StMaker {
   TH2S *noise_high_ladN; //number of strips of n-side wafers for which noise = 255
   int  mPedOut;          //to turn the fill of TNtuple on and off
  public: 
-  StSsdDaqMaker(const char *name="StSsdDaqMaker");
+  StSsdDaqMaker(const char *name="SpaStrip");
   virtual       ~StSsdDaqMaker();
   virtual Int_t Init();
   virtual Int_t InitRun(int runumber);
@@ -105,7 +108,7 @@ class StSsdDaqMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.7 2007/04/04 01:20:33 bouchet Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.8 2008/04/16 20:06:30 fisyak Exp $ built "__DATE__" "__TIME__; 
     return cvs;
   }
 
