@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.7 2008/04/14 21:53:35 kocolosk Exp $
+ * $Id: StEmcGeom.cxx,v 1.8 2008/04/16 20:57:05 kocolosk Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.8  2008/04/16 20:57:05  kocolosk
+ * rollback to 1.6 till we get RT#1162 ironed out
+ *
  * Revision 1.7  2008/04/14 21:53:35  kocolosk
  * fix mapping between GEANT volume ID and m-e-s space for BTOW/BPRS, eta<0 (see RT# 1162)
  *
@@ -592,7 +595,7 @@ Int_t StEmcGeom::getVolIdBemc(const Int_t ivid, Int_t &module,Int_t &eta,Int_t &
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
       module=phi+60;
-      sub = 3-sub;
+      sub   =(sub+1)%2+1;
     }
     else{
     LOG_ERROR << Form("<E> getVolIdBemc -- error decoding BEMC Geant volume Id %i; rl=%i", ivid, rl) << endm;
