@@ -1,12 +1,10 @@
-//StMuTrackFourVec.h
-//M.L. Miller (Yale Software)
-//07/02
+// -*- mode: c++;-*-
+// $Id: StMuTrackFourVec.h,v 1.5 2008/04/17 20:12:12 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
-#include "StJetFinder/FourVec.h"
+#include "StJetFinder/AbstractFourVec.h"
 
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StarClassLibrary/StLorentzVectorF.hh"
 #include "StDetectorId.h"
 
@@ -20,8 +18,6 @@ class StMuTrackFourVec : public AbstractFourVec
 public:
     
   StMuTrackFourVec(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
-  StMuTrackFourVec(StMuTrack*);
-  StMuTrackFourVec(StMuTrack*, Int_t i);
   StMuTrackFourVec();
   virtual ~StMuTrackFourVec() {};
     
@@ -45,7 +41,7 @@ public:
   double mass() const { return mVec.m(); }
 
   ///charge
-  double charge() const { return !mTrack ? 0 : (double)mTrack->charge(); }
+  double charge() const { return mCharge; }
 
   ////Mu Track (null if it's an emc tower/hit/point) this will change soon
   StMuTrack* particle() const {return mTrack;}
@@ -60,11 +56,12 @@ public:
 
   const StLorentzVectorF& vec() const {return mVec;}
     
-protected:
+private:
   StMuTrack* mTrack;
   StLorentzVectorF mVec;
   Int_t index;
   StDetectorId mDetId;
+  double mCharge;
 };
 
 inline ostream& operator<<(ostream& os, const StMuTrackFourVec& f)
@@ -84,4 +81,4 @@ inline ostream& operator<<(ostream& os, const StMuTrackFourVec& f)
   return os << "index:\t" << f.getIndex() << "\tP:\t" << f.vec() << "\tdetId:\t" << f.detectorId() << "\t" << idstring;
 
 }
-#endif
+#endif // StMuTrackFourVec_HH

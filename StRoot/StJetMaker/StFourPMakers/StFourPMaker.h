@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.4 2008/04/05 18:40:23 tai Exp $
+ * $Id: StFourPMaker.h,v 1.5 2008/04/17 20:12:18 tai Exp $
  * $Log: StFourPMaker.h,v $
+ * Revision 1.5  2008/04/17 20:12:18  tai
+ * cleaned up the code.
+ *
  * Revision 1.4  2008/04/05 18:40:23  tai
  * cleaned up the codes
  *
@@ -50,9 +53,11 @@
 #ifndef StFourPMaker_h
 #define StFourPMaker_h
 #include <map>
-#include "StMaker.h"
-#include "StJetFinder/StProtoJet.h"
-#include "StJetMaker/StMuTrackFourVec.h"
+
+#include <StMaker.h>
+
+#include "../StMuTrackFourVec.h"
+#include "StJetFinder/AbstractFourVec.h"
 
 class StEvent;
 class StEmcClusterCollection;    
@@ -63,7 +68,8 @@ class StMuDst;
 class StMuEmcCollection;
 class StMuDstMaker;
 
-typedef StProtoJet::FourVecList FourList;
+typedef std::vector<AbstractFourVec*> FourList;
+//typedef StProtoJet::FourVecList ;
 
 class StFourPMaker : public StMaker {
 public:

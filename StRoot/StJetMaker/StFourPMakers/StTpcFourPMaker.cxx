@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.1 2004/10/12 18:18:04 mmiller Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.2 2008/04/17 20:12:18 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -23,6 +23,7 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StJetMaker/StMuTrackFourVec.h"

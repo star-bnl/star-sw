@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.7 2004/12/07 20:03:49 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.8 2008/04/17 20:12:17 tai Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -28,6 +28,7 @@ using namespace std;
 
 //StMuDstMaker
 #include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"

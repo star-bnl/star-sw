@@ -6,6 +6,7 @@
 #include "StMessMgr.h"
 
 //StMuDstMaker
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -158,8 +159,7 @@ void StBET4pMaker::collectChargedTracksFromTPC()
     StLorentzVectorF p4(energy, momentum);
 
     //now construct StMuTrackFourVec object for jetfinding
-    StMuTrackFourVec* pmu = new StMuTrackFourVec();
-    pmu->Init(track, p4, i, kTpcId );
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(track, p4, i, kTpcId);
     tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
   }
 }
@@ -259,8 +259,7 @@ void StBET4pMaker::collectEnergyFromBEMC()
     StLorentzVectorF p4(corrected_energy, momentum);
 	    
     //now construct StMuTrackFourVec object for jetfinding
-    StMuTrackFourVec* pmu = new StMuTrackFourVec();
-    pmu->Init(0, p4, bemcTowerId, kBarrelEmcTowerId );
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, bemcTowerId, kBarrelEmcTowerId);
     tracks.push_back(pmu); //for jet finding interface
   }
 }
@@ -331,8 +330,7 @@ void StBET4pMaker::collectEnergyFromEEMC()
       StLorentzVectorF p4(energy, momentum);
 	    
       //now construct StMuTrackFourVec object for jetfinding
-      StMuTrackFourVec* pmu = new StMuTrackFourVec();
-      pmu->Init(0, p4, id, kEndcapEmcTowerId );
+      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, id, kEndcapEmcTowerId);
       tracks.push_back(pmu); //for jet finding interface
     }
   }
