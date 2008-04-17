@@ -14,6 +14,8 @@
 #include "StProtoJetPair.h"
 #include "StJetFinder.h"
 
+using namespace std;
+
 StJetFinder::StJetFinder()
 {
     cout <<"StJetFinder::StJetFinder()"<<endl;
