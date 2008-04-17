@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: FourVec.h,v 1.7 2008/04/17 17:30:02 tai Exp $
+// $Id: FourVec.h,v 1.8 2008/04/17 17:41:45 tai Exp $
 
 #ifndef FourVec_HH
 #define FourVec_HH
@@ -45,53 +45,6 @@ public:
 	
 private:
 
-};
-
-/*!
-  \class FourVec
-  \author M.L. Miller (Yale Software)
-  Template class derived from AbstractFourVec to simultaneously implement interface of a
-  four vector and to wrap the corresponding functionality of the template arguement mParticle.
-  i.e., a class to interface, e.g. StMuTrack with StAbstractFourVec
- */
-template <class T>
-class FourVec : public AbstractFourVec {
-
-public:
-  FourVec(T* p) : mParticle(p) {};
-  //virtual ~FourVec() {};
-  virtual ~FourVec() {};//{delete mParticle;mParticle=0;}
-	
-  //required accessors
-	
-  //momenta
-  virtual double pt() const {return mParticle->pt();}
-  virtual double px() const {return mParticle->px();}
-  virtual double py() const {return mParticle->py();}
-  virtual double pz() const {return mParticle->pz();}
-  virtual double p() const {return ::sqrt(pt()*pt()+pz()*pz());}
-	
-  //angles
-  virtual double theta() const {return mParticle->theta();}
-  virtual double phi() const {return mParticle->phi();}
-  virtual double rapidity() const {return mParticle->rapidity();}
-  virtual double eta() const {return mParticle->eta();}
-	
-  //fourth component
-  virtual double eT() const {return mParticle->eT(); }
-  virtual double eZ() const {return mParticle->eZ(); }
-  virtual double e() const {return mParticle->e(); }
-  virtual double mass() const {return mParticle->mass();}
-	
-  //charge
-  virtual double charge() const {return mParticle->charge();}
-	
-  //access to base object
-  T* particle() {return mParticle;}
-	
-protected:
-  FourVec() {}; //not implemented
-  T* mParticle;
 };
 
 class StFourVec {
