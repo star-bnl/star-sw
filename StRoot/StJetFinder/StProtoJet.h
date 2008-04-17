@@ -61,7 +61,7 @@ public:
     ///clear
     void clear();
 	
-    friend ostream& operator<<(ostream& os, const StProtoJet& j);
+  friend std::ostream& operator<<(std::ostream& os, const StProtoJet& j);
 	
 private:
     FourVecList mList;
@@ -73,12 +73,12 @@ inline void StProtoJet::clear()
     mPx=mPy=mPz=mE=0.;
 }
 
-inline ostream& operator<<(ostream& os, const StProtoJet& j)
+inline std::ostream& operator<<(std::ostream& os, const StProtoJet& j)
 {
     os <<"et: "<<j.eT()<<"\tphi: "<<j.phi()<<"\teta: "<<j.eta()
-       <<"\tmass: "<<j.mass()<<"\tcharge: "<<j.charge()<<"\tParticles"<<endl;
+       <<"\tmass: "<<j.mass()<<"\tcharge: "<<j.charge()<<"\tParticles"<< std::endl;
     for (StProtoJet::FourVecList::const_iterator it=j.mList.begin(); it!=j.mList.end(); ++it) {
-	os << **it <<endl;
+      os << **it << std::endl;
     }
     return os;
 }

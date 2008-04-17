@@ -21,6 +21,8 @@
 
 #include "StKtCluJetFinder.h"
 
+using namespace std;
+
 ClassImp(StKtCluPars)
 
     

@@ -102,7 +102,7 @@ public:
     unsigned int size() const; 
 
 protected:
-    friend ostream& operator<<(ostream& os, const StJetEtCell& cell);
+  friend std::ostream& operator<<(std::ostream& os, const StJetEtCell& cell);
     friend struct PreJetUpdater;
     friend struct PreJetInitializer;
     friend struct PostMergeUpdater;
@@ -205,14 +205,14 @@ inline double StJetEtCell::deltaEta(const StJetEtCell& rhs) const
     return eta()-rhs.eta();
 }
 
-inline ostream& operator<<(ostream& os, const StJetEtCell& cell)
+inline std::ostream& operator<<(std::ostream& os, const StJetEtCell& cell)
 {
     os <<"eta: "<<cell.eta()<<"\tphi: "<<cell.phi()<<"\tet: "<<cell.eT()
 	//<<"\tsize: "<<cell.size()<<"\tnUsed: "<<cell.nTimesUsed();
-       <<"\tcells:"<<endl;
+       <<"\tcells:"<< std::endl;
     const StJetEtCell::CellList& l = cell.cellList();
     for (StJetEtCell::CellList::const_iterator it=l.begin(); it!=l.end(); ++it) {
-	cout <<**it;
+      std::cout <<**it;
     }
 
     return os;

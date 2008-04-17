@@ -16,6 +16,8 @@ using std::find;
 #include "StProtoJet.h"
 //!#include "StJetMaker/StMuTrackFourVec.h"
 
+using namespace std;
+
 StProtoJet::StProtoJet()
 {
 }
