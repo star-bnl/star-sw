@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.5 2008/04/17 20:12:12 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.6 2008/04/17 21:40:04 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
@@ -11,18 +11,21 @@
 #include <iostream>
 #include <string>
 
-class StMuTrack;
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StarClassLibrary/StParticleTypes.hh"
 
-class StMuTrackFourVec : public AbstractFourVec
-{
+class StMuTrackFourVec : public AbstractFourVec {
+
 public:
     
-  StMuTrackFourVec(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
-  StMuTrackFourVec();
-  virtual ~StMuTrackFourVec() {};
+  StMuTrackFourVec() : mTrack(NULL), index(0), mDetId(kUnknownId), mCharge(0) { }
+  StMuTrackFourVec(StMuTrack* t, StLorentzVectorF P, Int_t i, StDetectorId detId)
+    : mTrack(t), mVec(P), index(i), mDetId(detId), mCharge(!t ? 0 : (double)t->charge()) { }
+
+  virtual ~StMuTrackFourVec() { }
     
   ///momenta
-  double pt() const { return mVec.perp();}
+  double pt() const { return mVec.perp(); }
   double px() const { return mVec.px(); } 
   double py() const { return mVec.py(); }
   double pz() const { return mVec.pz(); }
@@ -52,8 +55,6 @@ public:
   ///Id of the detector that generated this 4-vector
   StDetectorId detectorId() const {return mDetId;}
     
-  void Init(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
-
   const StLorentzVectorF& vec() const {return mVec;}
     
 private:

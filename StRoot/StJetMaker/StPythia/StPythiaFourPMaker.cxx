@@ -116,10 +116,10 @@ Int_t StPythiaFourPMaker::Make()
 			
 			if (fabs(p4.pseudoRapidity())<5.0) {
 				
-				StMuTrackFourVec* pmu = new StMuTrackFourVec();
+				StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, i, kUnknownId);
 				
 				//void Init(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
-				pmu->Init(0, p4, i, kUnknownId );
+				// pmu->Init(0, p4, i, kUnknownId);
 				
 				mVec.push_back(pmu);
 				tracks.push_back(pmu);
