@@ -1,11 +1,9 @@
-//StMuTrackFourVec.cxx
-//M.L. Miller (Yale Software)
-//07/02
-
+// $Id: StMuTrackFourVec.cxx,v 1.4 2008/04/17 20:12:12 tai Exp $
 #include "StMuTrackFourVec.h"
 
 #include "Stiostream.h"
 
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StarClassLibrary/StParticleTypes.hh"
 
 StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t, StLorentzVectorF P, Int_t i, StDetectorId detId)
@@ -13,31 +11,15 @@ StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t, StLorentzVectorF P, Int_t i, St
   , mVec(P)
   , index(i)
   , mDetId(detId)
+  , mCharge(!t ? 0 : (double)t->charge())
 {
-}
-
-StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t)
-  : mTrack(t)
-  , mVec(StLorentzVectorF( t->momentum().massHypothesis(StPionPlus::instance()->mass() ), t->momentum()))
-  , index(-1)
-  , mDetId(kUnknownId)
-{
-
-}
-
-StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t, Int_t i)
-  : mTrack(t)
-  , mVec(StLorentzVectorF( t->momentum().massHypothesis(StPionPlus::instance()->mass() ), t->momentum()))
-  , index(i)
-  , mDetId(kUnknownId)
-{
-
 }
 
 StMuTrackFourVec::StMuTrackFourVec() 
   : mTrack(NULL)
   , index(0)
   , mDetId(kUnknownId)
+  , mCharge(0)
 {
 
 }
@@ -48,4 +30,5 @@ void StMuTrackFourVec::Init(StMuTrack *track, StLorentzVectorF P, Int_t i, StDet
   mVec = P;
   mTrack = track;
   mDetId = id;
+  mCharge = !track ? 0 : (double)track->charge();
 }

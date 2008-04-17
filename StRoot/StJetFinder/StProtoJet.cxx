@@ -1,20 +1,6 @@
-#ifdef WIN32
-#include "stdafx.h"
-#endif
+// $Id: StProtoJet.cxx,v 1.7 2008/04/17 20:12:05 tai Exp $
 
-//StProtoJet.cxx
-//M.L. Miller (Yale Software)
-//4/02
-
-//std
-#include <iostream>
-#include <algorithm>
-using std::copy;
-using std::find;
-
-//JetFinder
 #include "StProtoJet.h"
-//!#include "StJetMaker/StMuTrackFourVec.h"
 
 using namespace std;
 

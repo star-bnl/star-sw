@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.4 2007/01/10 19:18:45 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.5 2008/04/17 20:12:17 tai Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.5  2008/04/17 20:12:17  tai
+ * cleaned up the code.
+ *
  * Revision 1.4  2007/01/10 19:18:45  mmiller
  * Fixed a compiler warning in depricated code (StEmcTpcFourpMaker, which is no longer used).
  *
@@ -118,6 +121,7 @@ using namespace std;
 
 #include "StLorentzVectorD.hh"
 #include "StMuDSTMaker/COMMON/StMuEmcPoint.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StJetMaker/StFourPMakers/StFourPMaker.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 

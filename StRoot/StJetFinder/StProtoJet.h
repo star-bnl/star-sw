@@ -1,26 +1,15 @@
-//StProtoJet.h
-//M.L. Miller (Yale Software)
-//4/02
-
+// -*- mode: c++;-*-
+// $Id: StProtoJet.h,v 1.7 2008/04/17 20:12:05 tai Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
+#include "AbstractFourVec.h"
+#include "StFourVec.h"
+
 #include <iostream>
-#include <math.h>
-
-#include <list>
-using std::list;
-
 #include <vector>
-using std::vector;
+#include <cmath>
 
-#include <algorithm>
-using std::copy;
-
-#include <iterator>
-using std::ostream_iterator;
-
-#include "FourVec.h"
 
 /*!
   \class StProtoJet
@@ -31,40 +20,41 @@ using std::ostream_iterator;
  */
 class StProtoJet : public StFourVec
 {
-public:
-    typedef vector<AbstractFourVec*> FourVecList;
-	
-    StProtoJet();
-    StProtoJet(AbstractFourVec*);
-    virtual ~StProtoJet();
-	
-    //access
-	
-    ///Number of particles in this protojet
-    unsigned int numberOfParticles() const {return size();}
-    unsigned int size() const {return mList.size();}
-    FourVecList& list() {return mList;}
-	
-    ///The d=et^2 of the protojet
-    double d() const {return eT()*eT();}
-	
-    ///Add a protojet to this one and calculate new parameters.  
-    void merge(const StProtoJet&);
-	
-    ///Add a protojet to this one w/o calculating the new parameters
-    void add(const StProtoJet&);
-    void remove(StProtoJet&);
 
-    ///update the parameters of this protojet (in case some have been added via add())
-    void update();
+public:
+  typedef std::vector<AbstractFourVec*> FourVecList;
 	
-    ///clear
-    void clear();
+  StProtoJet();
+  StProtoJet(AbstractFourVec*);
+  virtual ~StProtoJet();
+	
+  //access
+	
+  ///Number of particles in this protojet
+  unsigned int numberOfParticles() const {return size();}
+  unsigned int size() const {return mList.size();}
+  FourVecList& list() {return mList;}
+	
+  ///The d=et^2 of the protojet
+  double d() const {return eT()*eT();}
+	
+  ///Add a protojet to this one and calculate new parameters.  
+  void merge(const StProtoJet&);
+	
+  ///Add a protojet to this one w/o calculating the new parameters
+  void add(const StProtoJet&);
+  void remove(StProtoJet&);
+
+  ///update the parameters of this protojet (in case some have been added via add())
+  void update();
+	
+  ///clear
+  void clear();
 	
   friend std::ostream& operator<<(std::ostream& os, const StProtoJet& j);
 	
 private:
-    FourVecList mList;
+  FourVecList mList;
 };
 
 inline void StProtoJet::clear()
