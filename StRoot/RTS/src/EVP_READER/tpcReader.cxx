@@ -976,8 +976,13 @@ static int unpackCld(int sec, struct TPCMZCLD_local *mzcld)
 
 			double dpad, dtimebin ;
 
+			/* pre Apr 18, 2008 there was a 0.5 shift 
 			dpad = (double)(pad)/64.0 + 0.5 ;	// make pads count from 1.5
 			dtimebin = (double)(tm)/64.0 + 0.5 ;	// make timebins count from 0.5
+			*/
+
+			dpad = (double)(pad)/64.0  ;	
+			dtimebin = (double)(tm)/64.0 ;	
 
 			LOG(DBG,"   pad %d, timebin %d, charge %d, flags 0x%04X, t1 %d, t2 %d, p1 %d, p2 %d",(int)dpad,(int)dtimebin,charge,flags,t1,t2,p1,p2) ;
 
