@@ -44,3 +44,32 @@ depend:
 	@$(MAKEDEPEND)
 
 
+# DO NOT DELETE
+
+fs_index.o: ../../include/rts.h
+fs_index.o: ../../include/rtsLog.h
+fs_index.o: fs_index.h
+sfs_index.o: sfs_index.h
+sfs_index.o: fs_index.h
+sfs_index.o: sfs_base.h
+sfs_index.o: ../../include/rtsLog.h
+blastSFS.o: ../../include/SUNRT/clock.h
+fs.o: ../../include/SUNRT/clock.h
+fs.o: sfs_index.h
+fs.o: fs_index.h
+fs.o: sfs_base.h
+fs.o: get_line.h
+fs.o: ../../include/rtsLog.h
+fs_ex.o: ../../include/rts.h
+fs_ex.o: sfs_index.h
+fs_ex.o: fs_index.h
+fs_ex.o: sfs_base.h
+fs_ex.o: ../../include/SUNRT/clock.h
+sfs_single.o: sfs_index.h
+sfs_single.o: fs_index.h
+sfs_single.o: sfs_base.h
+sfsTest.o: sfs_index.h
+sfsTest.o: fs_index.h
+sfsTest.o: sfs_base.h
+sfs_index.o: fs_index.h
+sfs_index.o: sfs_base.h

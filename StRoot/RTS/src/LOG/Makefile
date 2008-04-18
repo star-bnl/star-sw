@@ -25,6 +25,6 @@ operDisplay.sh:
 
 # DO NOT DELETE
 
-logTest.o: ../../include/rtsLog.h
-rtsLog.o: ../../include/rtsLog.h
-rtsLogUnix.o: ../../include/rtsLog.h
+logTest.o: ../../../../StRoot/RTS/include/rtsLog.h
+rtsLog.o: ../../../../StRoot/RTS/include/rtsLog.h
+rtsLogUnix.o: ../../../../StRoot/RTS/include/rtsLog.h
