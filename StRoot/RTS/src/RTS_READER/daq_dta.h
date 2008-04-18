@@ -140,7 +140,7 @@ public:
 	int iterate() ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.5 2008/04/18 17:27:31 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
