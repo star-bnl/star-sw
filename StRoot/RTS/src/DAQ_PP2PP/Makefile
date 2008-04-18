@@ -25,12 +25,13 @@ libpp2pp.a : $(OBJS)
 
 # DO NOT DELETE
 
-daq_pp2pp.o: ../../include/rtsLog.h
-daq_pp2pp.o: ../../include/rtsSystems.h
+daq_pp2pp.o: ../../../../StRoot/RTS/include/rtsLog.h
+daq_pp2pp.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_pp2pp.o: ../SFS/sfs_index.h
 daq_pp2pp.o: ../SFS/fs_index.h
+daq_pp2pp.o: ../SFS/sfs_base.h
 daq_pp2pp.o: ../RTS_READER/daq_dta.h
-daq_pp2pp.o: ../../include/rts.h
+daq_pp2pp.o: ../../../../StRoot/RTS/include/rts.h
 daq_pp2pp.o: ../RTS_READER/daq_dta_structs.h
 daq_pp2pp.o: ../RTS_READER/rts_reader.h
 daq_pp2pp.o: daq_pp2pp.h
