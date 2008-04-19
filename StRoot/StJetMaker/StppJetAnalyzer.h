@@ -1,4 +1,5 @@
-// $Id: StppJetAnalyzer.h,v 1.7 2008/03/29 18:45:23 tai Exp $
+// -*- mode: c++;-*-
+// $Id: StppJetAnalyzer.h,v 1.8 2008/04/19 00:58:40 tai Exp $
 //
 // Author List: M.L. Miller
 //              Thomas Henry
@@ -12,7 +13,6 @@
 #include "StJetFinder/StProtoJet.h"
 
 #include <list>
-#include <vector>
 
 class StMuTrack;
 class AbstractFourVec;
@@ -92,16 +92,12 @@ class StppJetAnalyzer : public TObject {
 public:
 
   typedef std::list<StProtoJet> JetList;
-  typedef std::vector<AbstractFourVec*> FourList;
 
   ///Construct a new Analyzer
   StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp);
   virtual ~StppJetAnalyzer();
 
-  ///simple gets/sets
 
-  ///Set the container of (unfiltered) four vectors
-  void setFourVec(FourList &tracks);
   void print();
 
   ///filter the list, call StJetFinder::findJets(), and filter the jets
@@ -124,18 +120,18 @@ private:
 
   StppJetAnalyzer();
 
-  bool accept(StMuTrack*);
-  bool accept(StMuTrackFourVec*);
-  bool accept(const StProtoJet& pj);
-  void acceptJets(void);
+
+  bool accept4p(StMuTrackFourVec* p);
+
+  bool isChargedTrack(StMuTrackFourVec* p);
+
+  void acceptJets();
   bool acceptJet(StProtoJet &pj);
   void fillLists();
-  void fillLists(FourList &tracks);
     
   StJetFinder* mFinder;
 
   JetList mProtoJets;
-  FourList mFourList;
   StFourPMaker* mFourPMaker;
 
   StppAnaPars mPars;
