@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.6 2008/04/17 21:40:04 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.7 2008/04/19 02:09:55 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
@@ -29,35 +29,35 @@ public:
   double px() const { return mVec.px(); } 
   double py() const { return mVec.py(); }
   double pz() const { return mVec.pz(); }
-  double p() const  { return mVec.vect().mag(); }
 
   ///angles
-  double theta()    const { return mVec.theta(); }
   double phi()      const { return mVec.phi(); }
   double eta()      const { return mVec.pseudoRapidity(); }
-  double rapidity() const { return mVec.rapidity(); }
-
-  ///4-th component
+  
+  //4-th component
   double eT()   const { return ::sqrt(e()*e()*pt()*pt()/(p()*p())); }
-  double eZ()   const { return eT()*sinh(eta()); }
+
   double e()    const { return mVec.e(); }
   double mass() const { return mVec.m(); }
 
-  ///charge
+  //charge
   double charge() const { return mCharge; }
 
-  ////Mu Track (null if it's an emc tower/hit/point) this will change soon
+  // Mu Track (null if it's an emc tower/hit/point) this will change soon
   StMuTrack* particle() const {return mTrack;}
 
-  ///Index of the track/tower/cluster/point in the container that it came from
+  //Index of the track/tower/cluster/point in the container that it came from
   Int_t getIndex(void) const { return index; }
     
-  ///Id of the detector that generated this 4-vector
+  //Id of the detector that generated this 4-vector
   StDetectorId detectorId() const {return mDetId;}
     
   const StLorentzVectorF& vec() const {return mVec;}
     
 private:
+
+  double p() const  { return mVec.vect().mag(); }
+
   StMuTrack* mTrack;
   StLorentzVectorF mVec;
   Int_t index;

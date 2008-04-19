@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.23 2008/03/29 18:45:22 tai Exp $
+// $Id: StJetMaker.h,v 1.24 2008/04/19 02:09:55 tai Exp $
 
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
@@ -12,6 +12,7 @@
 
 class TFile;
 class TTree;
+class StMuDst;
 class StMuDstMaker;
 class StFourPMaker;
 class StJetPars;
@@ -54,7 +55,7 @@ private:
 
   std::vector<AnalyzerCtl> mAnalyzerCtl;
 
-  void fillTree(StJets& jets, StppJetAnalyzer* analyzer, StFourPMaker* fourPMaker);
+  void fillTree(StJets& jets, StppJetAnalyzer* analyzer);
   void fillJet(StJets &jets, StProtoJet& pj);
 
   StMuDstMaker*   mMuDstMaker;

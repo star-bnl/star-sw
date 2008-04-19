@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StppJetAnalyzer.h,v 1.8 2008/04/19 00:58:40 tai Exp $
+// $Id: StppJetAnalyzer.h,v 1.9 2008/04/19 02:09:56 tai Exp $
 //
 // Author List: M.L. Miller
 //              Thomas Henry
@@ -103,9 +103,6 @@ public:
   ///filter the list, call StJetFinder::findJets(), and filter the jets
   void findJets();
 
-  ///internal clear
-  void clear();
-    
   ///Access to the stl container of protojets
   JetList& getJets(void) {return mProtoJets;} //!
     
