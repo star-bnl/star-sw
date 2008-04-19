@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.37 2008/04/19 00:58:40 tai Exp $
+// $Id: StJetMaker.cxx,v 1.38 2008/04/19 02:09:55 tai Exp $
 
 #include "StJetMaker.h"
 
@@ -68,11 +68,9 @@ Int_t StJetMaker::Make()
   for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
     StppJetAnalyzer* analyzer = (*it).mAnalyzer;
 
-    analyzer->clear();
-	
     analyzer->findJets();
 	
-    fillTree(*(*it).mJets, analyzer, analyzer->fourPMaker());
+    fillTree(*(*it).mJets, analyzer);
 
   }
     
@@ -81,8 +79,10 @@ Int_t StJetMaker::Make()
   return kStOk;
 }
 
-void StJetMaker::fillTree(StJets& jets, StppJetAnalyzer* analyzer, StFourPMaker* fourPMaker)
+void StJetMaker::fillTree(StJets& jets, StppJetAnalyzer* analyzer)
 {
+  StFourPMaker* fourPMaker = analyzer->fourPMaker();
+
   jets.Clear();
   jets.setBemcCorrupt(fourPMaker->bemcCorrupt() );
 

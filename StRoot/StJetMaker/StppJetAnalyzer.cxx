@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer.cxx,v 1.12 2008/04/19 00:58:40 tai Exp $
+// $Id: StppJetAnalyzer.cxx,v 1.13 2008/04/19 02:09:55 tai Exp $
 //
 // Author List: M.L. Miller
 //              Thomas Henry
@@ -160,11 +160,6 @@ bool StppJetAnalyzer::acceptJet(StProtoJet &pj)
     return false;
 
   return true;
-}
-
-void StppJetAnalyzer::clear()
-{
-  mProtoJets.clear();
 }
 
 void StppJetAnalyzer::print()
