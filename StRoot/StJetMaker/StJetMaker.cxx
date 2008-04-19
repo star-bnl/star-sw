@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.36 2008/03/29 20:09:20 tai Exp $
+// $Id: StJetMaker.cxx,v 1.37 2008/04/19 00:58:40 tai Exp $
 
 #include "StJetMaker.h"
 
@@ -70,7 +70,6 @@ Int_t StJetMaker::Make()
 
     analyzer->clear();
 	
-    analyzer->setFourVec(analyzer->fourPMaker()->getTracks());
     analyzer->findJets();
 	
     fillTree(*(*it).mJets, analyzer, analyzer->fourPMaker());

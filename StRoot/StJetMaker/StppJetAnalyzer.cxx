@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer.cxx,v 1.11 2008/03/29 18:45:22 tai Exp $
+// $Id: StppJetAnalyzer.cxx,v 1.12 2008/04/19 00:58:40 tai Exp $
 //
 // Author List: M.L. Miller
 //              Thomas Henry
@@ -17,6 +17,7 @@
 #include "StJetFinder/StConeJetFinder.h"
 #include "StJetFinder/StCdfChargedConeJetFinder.h"
 
+
 //StMuDst
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -25,9 +26,10 @@
 //StJetMaker
 #include "StMuTrackFourVec.h"
 #include "StJet.h"
+#include "StFourPMakers/StFourPMaker.h"
 
-//std
 #include <ctime>
+#include <vector>
 
 using namespace std;
 
@@ -38,7 +40,6 @@ ClassImp(StppAnaPars)
 StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars, StFourPMaker* fp)
   : mFinder(0)
   , mProtoJets(0)
-  , mFourList(0)
   , mFourPMaker(fp)
   , mPars(*ap)
   , muDstJets(0)
@@ -79,9 +80,90 @@ StppJetAnalyzer::~StppJetAnalyzer()
 
 }
 
+void StppJetAnalyzer::findJets()
+{
+  fillLists();
+
+  clock_t start = clock();
+  mFinder->findJets(mProtoJets);
+  clock_t stop = clock();
+
+  double time = (double)(stop-start)/(double)(CLOCKS_PER_SEC);
+  LOG_DEBUG << "\ttime to find jets:\t" << time << endm;
+
+  acceptJets();
+}
+
+
+void StppJetAnalyzer::fillLists()
+{
+  vector<AbstractFourVec*> &tracks = mFourPMaker->getTracks();
+
+  mProtoJets.clear();
+
+  for (vector<AbstractFourVec*>::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+    if (accept4p(dynamic_cast<StMuTrackFourVec*>(*i))) {
+      mProtoJets.push_back(StProtoJet(*i));
+    }
+  }
+}
+
+
+bool StppJetAnalyzer::accept4p(StMuTrackFourVec* p)
+{
+  if (p == 0)
+    return false;
+  if (p->pt() <= mPars.mPtMin)
+    return false;
+  if (fabs(p->eta()) >= mPars.mEtaMax)
+    return false;
+
+  if(isChargedTrack(p)) {
+    StMuTrack* track = p->particle();
+    if (track->flag() <= mPars.mFlagMin)
+      return false;
+    if (track->nHits() <= mPars.mNhits)
+      return false;
+  }
+
+
+  return true;
+}
+	
+bool StppJetAnalyzer::isChargedTrack(StMuTrackFourVec* p)
+{
+  return p->particle() != 0;
+}
+
+void StppJetAnalyzer::acceptJets()
+{
+  JetList newList;
+  for (JetList::iterator it=mProtoJets.begin(); it!=mProtoJets.end(); ++it)  {
+    newList.push_back(*it);
+  }
+  mProtoJets.clear();
+
+  for (JetList::iterator it=newList.begin(); it!=newList.end(); ++it) {
+    if(acceptJet(*it)) mProtoJets.push_back(*it);
+  }
+}
+
+bool StppJetAnalyzer::acceptJet(StProtoJet &pj)
+{
+  if (pj.pt() <= mPars.mJetPtMin)
+    return false;
+  if (fabs(pj.eta()) >= mPars.mJetEtaMax)
+    return false;
+  if (fabs(pj.eta()) <= mPars.mJetEtaMin)
+    return false;
+  if ((int)pj.numberOfParticles() < mPars.mJetNmin)
+    return false;
+
+  return true;
+}
+
 void StppJetAnalyzer::clear()
 {
-  mFourList.clear();
   mProtoJets.clear();
 }
 
@@ -91,108 +173,5 @@ void StppJetAnalyzer::print()
   for (JetList::const_iterator it2=mProtoJets.begin(); it2!=mProtoJets.end(); ++it2) {
     cout <<*it2<<endl;
   }
-}
-
-bool StppJetAnalyzer::accept(StMuTrack* p)
-{
-  if (!p) {
-    cout <<"StppJetAnalyzer::accept(StMuTrack*) ERROR:\t p==0"<<endl;
-  }
-  bool passedP = (p!=0) ? true : false;
-  bool passedFlag = p->flag() > mPars.mFlagMin;
-  bool passedPt = p->pt() > mPars.mPtMin;
-  bool passedEta = fabs(p->eta()) < mPars.mEtaMax;
-  bool passedNHits = p->nHits() > mPars.mNhits;
-  //cout <<"p:\t"<<passedP<<"\tflag:\t"<<passedFlag<<"\tpt:\t"<<passedPt<<"\teta:\t"<<passedEta
-  //<<"\tnhits:\t"<<passedNHits<<endl;
-    return passedP && passedFlag && passedPt && passedEta && passedNHits;
-}
-
-bool StppJetAnalyzer::accept(StMuTrackFourVec* p)
-{
-  if(p->particle()) 
-    return accept(p->particle());
-
-  return (p
-	  && p->pt()>mPars.mPtMin
-	  && fabs(p->eta())<mPars.mEtaMax
-	  );
-}
-	
-
-bool StppJetAnalyzer::accept(const StProtoJet& pj)
-{
-  return (
-	  pj.pt() > mPars.mPtMin
-	  && fabs(pj.eta()) < mPars.mEtaMax
-	  );
-}
-
-void StppJetAnalyzer::acceptJets(void)
-{
-  JetList newList;
-  for (JetList::iterator it=mProtoJets.begin(); it!=mProtoJets.end(); ++it)
-    {
-      newList.push_back(*it);
-    }
-  mProtoJets.clear();
-  //loop on jets
-  for (JetList::iterator it=newList.begin(); it!=newList.end(); ++it) 
-    {
-      if(acceptJet(*it)) 
-	mProtoJets.push_back(*it);
-    }
-}
-
-bool StppJetAnalyzer::acceptJet(StProtoJet &pj)
-{
-  return (
-	  (pj.pt() > mPars.mJetPtMin)
-	  && (fabs(pj.eta()) < mPars.mJetEtaMax)
-	  && (fabs(pj.eta()) > mPars.mJetEtaMin)
-	  && ((int)pj.numberOfParticles() >= mPars.mJetNmin)
-	  );
-}
-
-void StppJetAnalyzer::fillLists(FourList &tracks)
-{
-  LOG_DEBUG <<"StppJetAnalyzer::fillList()" << endm;
-  int nTracks(0);
-  int nAcceptedTracks(0);
-  int nAcceptedProtoJets(0);
-  for (FourList::iterator i = tracks.begin(); i != tracks.end(); ++i) {
-    ++nTracks;
-    if (accept( ((StMuTrackFourVec*) *i) )  ) {
-      ++nAcceptedTracks;
-      mFourList.push_back(*i) ; //for ownership
-      StProtoJet tempPj(*i);
-      //This is a dangerous call!!!  Commented out, MLM 6/04
-      //if (accept(tempPj)) { //check to make sure that nothing is wrong w/ protojet, as well!!!
-      ++nAcceptedProtoJets;
-      mProtoJets.push_back( tempPj ); //for jet finding
-      //}
-    }
-  }
-  LOG_DEBUG <<"\tnTracks:\t"<<nTracks<<"\tnAcceptedTracks:\t"<<nAcceptedTracks
-	    <<"\tnAcceptedProtoJets:\t"<<nAcceptedProtoJets<<endm;
-}
-
-void StppJetAnalyzer::setFourVec(FourList &tracks)
-{
-  mFourList.clear();
-  mProtoJets.clear();
-
-  fillLists(tracks);
-}
-
-void StppJetAnalyzer::findJets()
-{
-  LOG_DEBUG <<"StppJetAnalyzer::findJets().  Clustering will begin with:\t"<<mProtoJets.size()<<"\tprotoJets"<<endm;
-  clock_t start = clock();
-  mFinder->findJets(mProtoJets);
-  clock_t stop = clock();
-  double time = (double)(stop-start)/(double)(CLOCKS_PER_SEC);
-  LOG_DEBUG <<"\ttime to find jets:\t"<<time<<endm;
-  acceptJets();
 }
 
