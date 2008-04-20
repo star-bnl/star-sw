@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.26 2008/04/20 20:57:54 tai Exp $
+// $Id: StJetMaker.h,v 1.27 2008/04/20 21:38:50 tai Exp $
 
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
@@ -50,14 +50,10 @@ private:
   // for backword compatability
   jetBranchesMap  mJetBranches;
 
-  std::vector<AnalyzerCtl> mAnalyzerCtl;
+  std::vector<StSpinJet::AnalyzerCtl> mAnalyzerCtl;
 
   void findJets();
-  void fillJetTree();
-
-  void fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer);
-  void fillJet(StJets &jets, StProtoJet& pj);
-
+  
   StMuDstMaker*   mMuDstMaker;
 
   std::string mOutName;

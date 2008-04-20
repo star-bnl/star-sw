@@ -1,4 +1,4 @@
-// $Id: StJetTreeWriter.cxx,v 1.1 2008/04/20 20:57:54 tai Exp $
+// $Id: StJetTreeWriter.cxx,v 1.2 2008/04/20 21:38:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 # include "StJetTreeWriter.h"
 
@@ -21,8 +21,10 @@
 
 namespace StSpinJet {
 
-StJetTreeWriter::StJetTreeWriter(StMuDstMaker& uDstMaker)
+  StJetTreeWriter::StJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName)
   : _uDstMaker(uDstMaker)
+  , _OutFileName(outFileName)
+  , _outFile(0)
 {
 
 }
@@ -30,6 +32,17 @@ StJetTreeWriter::StJetTreeWriter(StMuDstMaker& uDstMaker)
 StJetTreeWriter::~StJetTreeWriter()
 {
 
+}
+
+void StJetTreeWriter::Init()
+{
+  _outFile = new TFile(_OutFileName.c_str(), "recreate");
+}
+
+void StJetTreeWriter::Finish()
+{
+  _outFile->Write();
+  _outFile->Close();
 }
 
 void StJetTreeWriter::fillJetTree(std::vector<AnalyzerCtl> &mAnalyzerCtl, TTree *mJetTree)
