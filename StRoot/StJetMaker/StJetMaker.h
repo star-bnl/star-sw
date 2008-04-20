@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.24 2008/04/19 02:09:55 tai Exp $
+// $Id: StJetMaker.h,v 1.25 2008/04/20 19:48:54 tai Exp $
 
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
@@ -55,7 +55,10 @@ private:
 
   std::vector<AnalyzerCtl> mAnalyzerCtl;
 
-  void fillTree(StJets& jets, StppJetAnalyzer* analyzer);
+  void findJets();
+  void fillJetTrees();
+
+  void fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer);
   void fillJet(StJets &jets, StProtoJet& pj);
 
   StMuDstMaker*   mMuDstMaker;
