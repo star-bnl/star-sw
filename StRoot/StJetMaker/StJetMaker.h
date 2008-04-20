@@ -1,11 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.25 2008/04/20 19:48:54 tai Exp $
+// $Id: StJetMaker.h,v 1.26 2008/04/20 20:57:54 tai Exp $
 
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
 #include "StMaker.h"
 #include "StppJetAnalyzer.h"
+#include "AnalyzerCtl.h"
 
 #include <string>
 #include <vector>
@@ -20,7 +21,9 @@ class StppAnaPars;
 class StProtoJet;
 class StJets;
 
-
+namespace StSpinJet {
+  class StJetTreeWriter;
+}
 
 class StJetMaker : public StMaker {
 
@@ -47,16 +50,10 @@ private:
   // for backword compatability
   jetBranchesMap  mJetBranches;
 
-  struct AnalyzerCtl {
-    std::string mBranchName;
-    StppJetAnalyzer* mAnalyzer;
-    StJets *mJets;
-  };
-
   std::vector<AnalyzerCtl> mAnalyzerCtl;
 
   void findJets();
-  void fillJetTrees();
+  void fillJetTree();
 
   void fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer);
   void fillJet(StJets &jets, StProtoJet& pj);
@@ -66,6 +63,8 @@ private:
   std::string mOutName;
   TFile *mOutFile;
   TTree *mJetTree;
+
+  StSpinJet::StJetTreeWriter *_treeWriter;
 
   ClassDef(StJetMaker, 0)
 };

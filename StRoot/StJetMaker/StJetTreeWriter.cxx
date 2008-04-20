@@ -1,98 +1,38 @@
-// $Id: StJetMaker.cxx,v 1.40 2008/04/20 20:57:54 tai Exp $
-
-#include "StJetMaker.h"
-
-#include "TFile.h"
-#include "TTree.h"
-
-#include "StMessMgr.h"
-
-#include "StEvent.h"
-
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-
-#include "StJetFinder/StProtoJet.h"
+// $Id: StJetTreeWriter.cxx,v 1.1 2008/04/20 20:57:54 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
+# include "StJetTreeWriter.h"
 
 #include "StJets.h"
 #include "StJet.h"
-#include "StFourPMakers/StFourPMaker.h"
+#include "StMuTrackFourVec.h"
+#include "StppJetAnalyzer.h"
+
+#include <StJetFinder/StProtoJet.h>
+
+#include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
+
+#include <StFourPMakers/StMuEmcPosition.h>
+#include <StFourPMakers/StFourPMaker.h>
 #include "StFourPMakers/StBET4pMaker.h"
-#include "StFourPMakers/StMuEmcPosition.h"
 
-#include "StJetTreeWriter.h"
+#include <TTree.h>
 
-using namespace std;
-using namespace StSpinJet;
+namespace StSpinJet {
 
-ClassImp(StJetMaker)
-  
-StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
-  : StMaker(name)
-  , mAnalyzerCtl(0)
-  , mMuDstMaker(uDstMaker)
-  , mOutName(outputName)
-  , mJetTree(0)
-  , _treeWriter(new StJetTreeWriter(*uDstMaker))
+StJetTreeWriter::StJetTreeWriter(StMuDstMaker& uDstMaker)
+  : _uDstMaker(uDstMaker)
 {
 
 }
 
-void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp, const char* name)
+StJetTreeWriter::~StJetTreeWriter()
 {
-  AnalyzerCtl anaCtl;
-  anaCtl.mBranchName = name;
-  anaCtl.mAnalyzer = new StppJetAnalyzer(ap, jp, fp);
-  anaCtl.mJets = new StJets();
 
-  mAnalyzerCtl.push_back(anaCtl);
-
-  // for backword compatability
-  mJetBranches[name] = anaCtl.mAnalyzer;
-  anaCtl.mAnalyzer->setmuDstJets(anaCtl.mJets);
 }
 
-Int_t StJetMaker::Init() 
-{
-  mOutFile = new TFile(mOutName.c_str(), "recreate");
-    
-  mJetTree  = new TTree("jet", "jetTree");
-
-  for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
-    mJetTree->Branch ((*it).mBranchName.c_str(), "StJets", &((*it).mJets));
-  }
-
-  return StMaker::Init();
-}
-
-Int_t StJetMaker::Make()
-{
-  findJets();
-  _treeWriter->fillJetTree(mAnalyzerCtl, mJetTree);
-  return kStOk;
-}
-
-Int_t StJetMaker::Finish()
-{
-  mOutFile->Write();
-  mOutFile->Close();
-  delete mOutFile;
-  mOutFile = 0;
-
-  StMaker::Finish();
-  return kStOK;
-}
-
-void StJetMaker::findJets()
-{
-  for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
-    StppJetAnalyzer* analyzer = (*it).mAnalyzer;
-    analyzer->findJets();
-  }
-}
-
-void StJetMaker::fillJetTree()
+void StJetTreeWriter::fillJetTree(std::vector<AnalyzerCtl> &mAnalyzerCtl, TTree *mJetTree)
 {
   for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
     StppJetAnalyzer* analyzer = (*it).mAnalyzer;
@@ -101,14 +41,14 @@ void StJetMaker::fillJetTree()
   mJetTree->Fill();
 }
 
-void StJetMaker::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer)
+void StJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer)
 {
   StFourPMaker* fourPMaker = analyzer->fourPMaker();
 
   jets.Clear();
   jets.setBemcCorrupt(fourPMaker->bemcCorrupt() );
 
-  StMuEvent* event = mMuDstMaker->muDst()->event();
+  StMuEvent* event = _uDstMaker.muDst()->event();
   jets.seteventId(event->eventId());
   jets.seteventNumber(event->eventNumber());
   jets.setrunId(event->runId());
@@ -126,11 +66,10 @@ void StJetMaker::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnaly
   }
 }
 
-
-void StJetMaker::fillJet(StJets &jets, StProtoJet& pj)
+void StJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
 {
   StJet aJet(pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0);
-  aJet.zVertex = mMuDstMaker->muDst()->event()->primaryVertexPosition().z();
+  aJet.zVertex = _uDstMaker.muDst()->event()->primaryVertexPosition().z();
 
   StProtoJet::FourVecList &trackList = pj.list();
   for(StProtoJet::FourVecList::iterator it2 = trackList.begin(); it2 != trackList.end(); ++it2)  {
@@ -190,5 +129,7 @@ void StJetMaker::fillJet(StJets &jets, StProtoJet& pj)
   }
 
   jets.addJet(aJet);
+
+}
 
 }
