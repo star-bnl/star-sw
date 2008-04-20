@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.38 2008/04/19 02:09:55 tai Exp $
+// $Id: StJetMaker.cxx,v 1.39 2008/04/20 19:48:53 tai Exp $
 
 #include "StJetMaker.h"
 
@@ -64,22 +64,40 @@ Int_t StJetMaker::Init()
 
 Int_t StJetMaker::Make()
 {
-
-  for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
-    StppJetAnalyzer* analyzer = (*it).mAnalyzer;
-
-    analyzer->findJets();
-	
-    fillTree(*(*it).mJets, analyzer);
-
-  }
-    
-  mJetTree->Fill();
-    
+  findJets();
+  fillJetTrees();
   return kStOk;
 }
 
-void StJetMaker::fillTree(StJets& jets, StppJetAnalyzer* analyzer)
+Int_t StJetMaker::Finish()
+{
+  mOutFile->Write();
+  mOutFile->Close();
+  delete mOutFile;
+  mOutFile = 0;
+
+  StMaker::Finish();
+  return kStOK;
+}
+
+void StJetMaker::findJets()
+{
+  for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
+    StppJetAnalyzer* analyzer = (*it).mAnalyzer;
+    analyzer->findJets();
+  }
+}
+
+void StJetMaker::fillJetTrees()
+{
+  for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
+    StppJetAnalyzer* analyzer = (*it).mAnalyzer;
+    fillJetTreeForOneJetFindingAlgorithm(*(*it).mJets, analyzer);
+  }
+  mJetTree->Fill();
+}
+
+void StJetMaker::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer)
 {
   StFourPMaker* fourPMaker = analyzer->fourPMaker();
 
@@ -169,15 +187,4 @@ void StJetMaker::fillJet(StJets &jets, StProtoJet& pj)
 
   jets.addJet(aJet);
 
-}
-
-Int_t StJetMaker::Finish()
-{
-  mOutFile->Write();
-  mOutFile->Close();
-  delete mOutFile;
-  mOutFile = 0;
-
-  StMaker::Finish();
-  return kStOK;
 }
