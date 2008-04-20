@@ -1,6 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.27 2008/04/20 21:38:50 tai Exp $
-
+// $Id: StJetMaker.h,v 1.28 2008/04/20 23:34:26 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -11,15 +10,11 @@
 #include <string>
 #include <vector>
 
-class TFile;
 class TTree;
-class StMuDst;
 class StMuDstMaker;
 class StFourPMaker;
 class StJetPars;
 class StppAnaPars;
-class StProtoJet;
-class StJets;
 
 namespace StSpinJet {
   class StJetTreeWriter;
@@ -36,7 +31,7 @@ public:
   Int_t Make();
   Int_t Finish();
     
-  TTree* tree() { return mJetTree; }
+  TTree* tree() const;
     
   void addAnalyzer(const StppAnaPars*, const StJetPars*, StFourPMaker*, const char* anaName);
     
@@ -50,16 +45,10 @@ private:
   // for backword compatability
   jetBranchesMap  mJetBranches;
 
-  std::vector<StSpinJet::AnalyzerCtl> mAnalyzerCtl;
+  std::vector<StppJetAnalyzer*> _jetFinderList;
 
   void findJets();
   
-  StMuDstMaker*   mMuDstMaker;
-
-  std::string mOutName;
-  TFile *mOutFile;
-  TTree *mJetTree;
-
   StSpinJet::StJetTreeWriter *_treeWriter;
 
   ClassDef(StJetMaker, 0)

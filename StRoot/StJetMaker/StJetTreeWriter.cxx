@@ -1,4 +1,4 @@
-// $Id: StJetTreeWriter.cxx,v 1.2 2008/04/20 21:38:50 tai Exp $
+// $Id: StJetTreeWriter.cxx,v 1.3 2008/04/20 23:34:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 # include "StJetTreeWriter.h"
 
@@ -19,11 +19,14 @@
 
 #include <TTree.h>
 
+using namespace std;
+
 namespace StSpinJet {
 
   StJetTreeWriter::StJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName)
   : _uDstMaker(uDstMaker)
   , _OutFileName(outFileName)
+  , _jetTree(0)
   , _outFile(0)
 {
 
@@ -34,24 +37,36 @@ StJetTreeWriter::~StJetTreeWriter()
 
 }
 
+void StJetTreeWriter::push_back(AnalyzerCtl anaCtl)
+{
+  _analyzerCtlList.push_back(anaCtl);
+}
+
 void StJetTreeWriter::Init()
 {
   _outFile = new TFile(_OutFileName.c_str(), "recreate");
+  _jetTree  = new TTree("jet", "jetTree");
+
+  for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
+    _jetTree->Branch ((*it).mBranchName.c_str(), "StJets", &((*it).mJets));
+  }
 }
 
 void StJetTreeWriter::Finish()
 {
   _outFile->Write();
   _outFile->Close();
+  delete _outFile;
+  _outFile = 0;
 }
 
-void StJetTreeWriter::fillJetTree(std::vector<AnalyzerCtl> &mAnalyzerCtl, TTree *mJetTree)
+void StJetTreeWriter::fillJetTree()
 {
-  for(std::vector<AnalyzerCtl>::iterator it = mAnalyzerCtl.begin(); it != mAnalyzerCtl.end(); ++it) {
+  for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
     StppJetAnalyzer* analyzer = (*it).mAnalyzer;
     fillJetTreeForOneJetFindingAlgorithm(*(*it).mJets, analyzer);
   }
-  mJetTree->Fill();
+  _jetTree->Fill();
 }
 
 void StJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer)

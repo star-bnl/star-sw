@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTreeWriter.h,v 1.2 2008/04/20 21:38:50 tai Exp $
+// $Id: StJetTreeWriter.h,v 1.3 2008/04/20 23:34:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETTREEWRITER_H
 #define STJETTREEWRITER_H
@@ -28,18 +28,23 @@ public:
   void Init();
   void Finish();
 
-  void fillJetTree(std::vector<AnalyzerCtl> &mAnalyzerCtl, TTree *mJetTree);
+  TTree* jetTree() const { return _jetTree; }
+
+  void fillJetTree();
   void fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer);
   void fillJet(StJets &jets, StProtoJet& pj);
+
+  void push_back(AnalyzerCtl anaCtl);
 
 private:
 
   StMuDstMaker& _uDstMaker;
   std::string _OutFileName;
+  TTree *_jetTree;
   TFile *_outFile;
+  std::vector<StSpinJet::AnalyzerCtl> _analyzerCtlList;
 
 };
-
 
 }
 
