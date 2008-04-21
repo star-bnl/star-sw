@@ -1,4 +1,4 @@
-// $Id: StJetTreeWriter.cxx,v 1.4 2008/04/21 00:24:57 tai Exp $
+// $Id: StJetTreeWriter.cxx,v 1.5 2008/04/21 16:01:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 # include "StJetTreeWriter.h"
 
@@ -53,7 +53,7 @@ void StJetTreeWriter::Init()
   _jetTree  = new TTree("jet", "jetTree");
 
   for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
-    _jetTree->Branch ((*it).mBranchName.c_str(), "StJets", &((*it).mJets));
+    _jetTree->Branch((*it).mBranchName.c_str(), "StJets", &((*it).mJets));
   }
 }
 
