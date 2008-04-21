@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer2.cxx,v 1.3 2008/04/21 21:20:26 tai Exp $
+// $Id: StppJetAnalyzer2.cxx,v 1.4 2008/04/21 21:37:05 tai Exp $
 #include "StppJetAnalyzer2.h"
 
 
@@ -23,11 +23,11 @@ using namespace std;
 
 ClassImp(StppJetAnalyzer2)
     
-StppJetAnalyzer2::StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* pars, StFourPMaker* fp, JetList& protoJets)
-  : mFinder(pars->constructJetFinder())
-  , mProtoJets(protoJets)
-  , mFourPMaker(fp)
-  , mPars(*ap)
+StppJetAnalyzer2::StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* pars, StFourPMaker* fp, ProtoJetList& protoJets)
+  : _jetFinder(pars->constructJetFinder())
+  , _protoJetList(protoJets)
+  , _fourPMaker(fp)
+  , _anaPar(*ap)
 {
 
 }
@@ -39,28 +39,23 @@ StppJetAnalyzer2::~StppJetAnalyzer2()
 
 void StppJetAnalyzer2::findJets()
 {
-  fillLists();
+  collectFourMomentum();
 
-  clock_t start = clock();
-  mFinder->findJets(mProtoJets);
-  clock_t stop = clock();
+  _jetFinder->findJets(_protoJetList);
 
-  double time = (double)(stop-start)/(double)(CLOCKS_PER_SEC);
-  LOG_DEBUG << "\ttime to find jets:\t" << time << endm;
-
-  acceptJets();
+  applyCuts();
 }
 
 
-void StppJetAnalyzer2::fillLists()
+void StppJetAnalyzer2::collectFourMomentum()
 {
-  vector<AbstractFourVec*> &tracks = mFourPMaker->getTracks();
+  vector<AbstractFourVec*> &tracks = _fourPMaker->getTracks();
 
-  mProtoJets.clear();
+  _protoJetList.clear();
 
   for (vector<AbstractFourVec*>::iterator i = tracks.begin(); i != tracks.end(); ++i) {
     if (accept4p(dynamic_cast<StMuTrackFourVec*>(*i))) {
-      mProtoJets.push_back(StProtoJet(*i));
+      _protoJetList.push_back(StProtoJet(*i));
     }
   }
 }
@@ -70,16 +65,16 @@ bool StppJetAnalyzer2::accept4p(StMuTrackFourVec* p)
 {
   if (p == 0)
     return false;
-  if (p->pt() <= mPars.mPtMin)
+  if (p->pt() <= _anaPar.mPtMin)
     return false;
-  if (fabs(p->eta()) >= mPars.mEtaMax)
+  if (fabs(p->eta()) >= _anaPar.mEtaMax)
     return false;
 
   if(isChargedTrack(p)) {
     StMuTrack* track = p->particle();
-    if (track->flag() <= mPars.mFlagMin)
+    if (track->flag() <= _anaPar.mFlagMin)
       return false;
-    if (track->nHits() <= mPars.mNhits)
+    if (track->nHits() <= _anaPar.mNhits)
       return false;
   }
 
@@ -92,38 +87,29 @@ bool StppJetAnalyzer2::isChargedTrack(StMuTrackFourVec* p)
   return p->particle() != 0;
 }
 
-void StppJetAnalyzer2::acceptJets()
+void StppJetAnalyzer2::applyCuts()
 {
-  JetList newList;
-  for (JetList::iterator it=mProtoJets.begin(); it!=mProtoJets.end(); ++it)  {
+  ProtoJetList newList;
+  for (ProtoJetList::iterator it=_protoJetList.begin(); it!=_protoJetList.end(); ++it)  {
     newList.push_back(*it);
   }
-  mProtoJets.clear();
+  _protoJetList.clear();
 
-  for (JetList::iterator it=newList.begin(); it!=newList.end(); ++it) {
-    if(acceptJet(*it)) mProtoJets.push_back(*it);
+  for (ProtoJetList::iterator it=newList.begin(); it!=newList.end(); ++it) {
+    if(acceptJet(*it)) _protoJetList.push_back(*it);
   }
 }
 
 bool StppJetAnalyzer2::acceptJet(StProtoJet &pj)
 {
-  if (pj.pt() <= mPars.mJetPtMin)
+  if (pj.pt() <= _anaPar.mJetPtMin)
     return false;
-  if (fabs(pj.eta()) >= mPars.mJetEtaMax)
+  if (fabs(pj.eta()) >= _anaPar.mJetEtaMax)
     return false;
-  if (fabs(pj.eta()) <= mPars.mJetEtaMin)
+  if (fabs(pj.eta()) <= _anaPar.mJetEtaMin)
     return false;
-  if ((int)pj.numberOfParticles() < mPars.mJetNmin)
+  if ((int)pj.numberOfParticles() < _anaPar.mJetNmin)
     return false;
 
   return true;
 }
-
-void StppJetAnalyzer2::print()
-{
-  cout <<"\t---   Contents of mProtoJets ---"<<endl;
-  for (JetList::const_iterator it2=mProtoJets.begin(); it2!=mProtoJets.end(); ++it2) {
-    cout <<*it2<<endl;
-  }
-}
-
