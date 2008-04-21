@@ -1,38 +1,16 @@
-
+// -*- mode: c++;-*-
+// $Id: StKtCluJetFinder.h,v 1.3 2008/04/21 16:22:34 tai Exp $
 #ifndef StKtCluJetFinder_HH
 #define StKtCluJetFinder_HH
 
-/*!
-  \class StKtCluPars
-  \author M.L. Miller (MIT Software)
-  A small class to encapsulate the requisite run-time parameters of the KtClu jet algorithm
- */
+#include "StJetFinder.h"
+#include "StKtCluPars.h"
 
 /*!
   \class StKtCluJetFinder
   \author M.L. Miller (Yale Software)
   Implementation of the Ellis/Soper kt-cluster algorithm
  */
-
-class StKtCluPars : public StJetPars
-{
-public:
-
-    ///Set the distance measure, called d by Ellis/Soper
-    void setR(double r) {mR=r;}
-    double r() const {return mR;}
-
-    ///Toggle the debug stream on/off
-    void setDebug(bool v) {mDebug = v;}
-    bool debug() const {return mDebug;}
-
-private:
-    double mR;
-    bool mDebug;
-    ClassDef(StKtCluPars,1)
-};
-
-
 class StKtCluJetFinder : public StJetFinder
 {
 public:
