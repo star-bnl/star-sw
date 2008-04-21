@@ -1,6 +1,5 @@
-//StCdfChargedConeJetFinder.h
-//M.L. Miller (Yale Software)
-//12/02
+// -*- mode: c++;-*-
+// $Id: StCdfChargedConeJetFinder.h,v 1.4 2008/04/21 16:41:59 tai Exp $
 
 /*!
   This is an implemenation of the CDF Charged jet finder (analagous to "Simple UA1 Jet Finder" but
@@ -12,21 +11,13 @@
 #define StCdfChargedConeJetFinder_HH
 
 #include "StConeJetFinder.h"
+#include "StCdfChargedConePars.h"
 
 /*!
   \class StCdfChargedConePars
   \author M.L. Miller (MIT Software)
   A simple class to encapsulate the requisite run-time parameters of the cdf-charged cone jet algorithm.
 */
-
-///Run time pars
-class StCdfChargedConePars : public StConePars
-{
-private:    
-    ClassDef(StCdfChargedConePars,1)
-	};
-
-
 class StCdfChargedConeJetFinder : public StConeJetFinder
 {
 public:

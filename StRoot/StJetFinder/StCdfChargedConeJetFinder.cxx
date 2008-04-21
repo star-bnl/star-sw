@@ -18,8 +18,6 @@ using std::sort;
 #include "StCdfChargedJetEtCell.h"
 #include "StCdfChargedConeJetFinder.h"
 
-ClassImp(StCdfChargedConePars)
-    
 //careful, can't use buildGrid() call in base class constructor or we'll sef-fault because it calls
 //a virtual function in the constructor while the derived class doesn't yet exist
 StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(const StCdfChargedConePars& pars) : StConeJetFinder(pars)
