@@ -1,4 +1,4 @@
-// $Id: StJetTreeWriter.cxx,v 1.3 2008/04/20 23:34:26 tai Exp $
+// $Id: StJetTreeWriter.cxx,v 1.4 2008/04/21 00:24:57 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 # include "StJetTreeWriter.h"
 
@@ -37,8 +37,13 @@ StJetTreeWriter::~StJetTreeWriter()
 
 }
 
-void StJetTreeWriter::push_back(AnalyzerCtl anaCtl)
+void StJetTreeWriter::addAnalyzer(StppJetAnalyzer* analyzer, StJets *stJets, const char* name)
 {
+  AnalyzerCtl anaCtl;
+  anaCtl.mBranchName = name;
+  anaCtl.mAnalyzer = analyzer;
+  anaCtl.mJets = stJets;
+
   _analyzerCtlList.push_back(anaCtl);
 }
 
