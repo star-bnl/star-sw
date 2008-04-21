@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StppAnaPars.h,v 1.1 2008/04/21 16:03:10 tai Exp $
+// $Id: StppAnaPars.h,v 1.2 2008/04/21 19:32:21 tai Exp $
 #ifndef STPPANAPARS_h
 #define STPPANAPARS_h
 
@@ -47,6 +47,7 @@ private:
   int mJetNmin;
 
   friend class StppJetAnalyzer;
+  friend class StppJetAnalyzer2;
 
   ClassDef(StppAnaPars,1)
 };
