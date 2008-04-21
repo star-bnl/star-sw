@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTreeWriter.h,v 1.5 2008/04/21 18:36:25 tai Exp $
+// $Id: StJetTreeWriter.h,v 1.6 2008/04/21 19:14:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETTREEWRITER_H
 #define STJETTREEWRITER_H
@@ -27,7 +27,7 @@ public:
   void Init();
   void Finish();
 
-  void addAnalyzer(StFourPMaker* fourPMaker, std::list<StProtoJet>* protoJetList, StJets *stJets, const char* name);
+  void addJetFinder(StFourPMaker* fourPMaker, std::list<StProtoJet>* protoJetList, const char* name);
 
   TTree* jetTree() const { return _jetTree; }
 
@@ -37,12 +37,15 @@ public:
 
 
 private:
+  
+  friend class StJetMaker;
+  StJets *getLastStJets() { return _analyzerCtlList[_analyzerCtlList.size()]._jets; }
 
   struct AnalyzerCtl {
-    std::string mBranchName;
+    std::string _branchName;
     StFourPMaker* _fourPMaker;
     std::list<StProtoJet>* _protoJetList;
-    StJets *mJets;
+    StJets *_jets;
   };
 
   StMuDstMaker& _uDstMaker;
