@@ -1,11 +1,10 @@
-// $Id: StJetTreeWriter.cxx,v 1.5 2008/04/21 16:01:46 tai Exp $
+// $Id: StJetTreeWriter.cxx,v 1.6 2008/04/21 18:36:25 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 # include "StJetTreeWriter.h"
 
 #include "StJets.h"
 #include "StJet.h"
 #include "StMuTrackFourVec.h"
-#include "StppJetAnalyzer.h"
 
 #include <StJetFinder/StProtoJet.h>
 
@@ -37,11 +36,12 @@ StJetTreeWriter::~StJetTreeWriter()
 
 }
 
-void StJetTreeWriter::addAnalyzer(StppJetAnalyzer* analyzer, StJets *stJets, const char* name)
+void StJetTreeWriter::addAnalyzer(StFourPMaker* fourPMaker, list<StProtoJet>* protoJetList, StJets *stJets, const char* name)
 {
   AnalyzerCtl anaCtl;
   anaCtl.mBranchName = name;
-  anaCtl.mAnalyzer = analyzer;
+  anaCtl._fourPMaker = fourPMaker;
+  anaCtl._protoJetList = protoJetList;
   anaCtl.mJets = stJets;
 
   _analyzerCtlList.push_back(anaCtl);
@@ -68,16 +68,15 @@ void StJetTreeWriter::Finish()
 void StJetTreeWriter::fillJetTree()
 {
   for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
-    StppJetAnalyzer* analyzer = (*it).mAnalyzer;
-    fillJetTreeForOneJetFindingAlgorithm(*(*it).mJets, analyzer);
+    StFourPMaker* fourPMaker = (*it)._fourPMaker;
+    std::list<StProtoJet>* protoJetList = (*it)._protoJetList;
+    fillJetTreeForOneJetFindingAlgorithm(*(*it).mJets, protoJetList, fourPMaker);
   }
   _jetTree->Fill();
 }
 
-void StJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJetAnalyzer* analyzer)
+void StJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
 {
-  StFourPMaker* fourPMaker = analyzer->fourPMaker();
-
   jets.Clear();
   jets.setBemcCorrupt(fourPMaker->bemcCorrupt() );
 
@@ -93,8 +92,7 @@ void StJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, StppJet
     jets.setSumEmcE( bet4p->sumEmcEt() );
   }
 	
-  StppJetAnalyzer::JetList &cJets = analyzer->getJets();
-  for(StppJetAnalyzer::JetList::iterator it = cJets.begin(); it != cJets.end(); ++it) {
+  for(list<StProtoJet>::iterator it = protoJetList->begin(); it != protoJetList->end(); ++it) {
     fillJet(jets, *it);
   }
 }
