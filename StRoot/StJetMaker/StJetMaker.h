@@ -1,11 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.28 2008/04/20 23:34:26 tai Exp $
+// $Id: StJetMaker.h,v 1.29 2008/04/21 00:24:57 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
 #include "StMaker.h"
 #include "StppJetAnalyzer.h"
-#include "AnalyzerCtl.h"
 
 #include <string>
 #include <vector>

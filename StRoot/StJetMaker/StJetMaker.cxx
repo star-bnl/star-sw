@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.42 2008/04/20 23:34:26 tai Exp $
+// $Id: StJetMaker.cxx,v 1.43 2008/04/21 00:24:56 tai Exp $
 #include "StJetMaker.h"
 
 #include "StMessMgr.h"
@@ -21,20 +21,16 @@ StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *
 void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp, const char* name)
 {
 
-  StppJetAnalyzer* anAnalyzer = new StppJetAnalyzer(ap, jp, fp);
-  StJets *aStJets = new StJets();
+  StppJetAnalyzer* analyzer = new StppJetAnalyzer(ap, jp, fp);
+  StJets *stJets = new StJets();
 
-  AnalyzerCtl anaCtl;
-  anaCtl.mBranchName = name;
-  anaCtl.mAnalyzer = anAnalyzer;
-  anaCtl.mJets = aStJets;
+  _treeWriter->addAnalyzer(analyzer, stJets, name);
 
-  _treeWriter->push_back(anaCtl);
-  _jetFinderList.push_back(anaCtl.mAnalyzer);
+  _jetFinderList.push_back(analyzer);
 
   // for backword compatability
-  mJetBranches[name] = anAnalyzer;
-  anAnalyzer->setmuDstJets(aStJets);
+  mJetBranches[name] = analyzer;
+  analyzer->setmuDstJets(stJets);
 }
 
 Int_t StJetMaker::Init() 
