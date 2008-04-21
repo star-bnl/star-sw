@@ -1,13 +1,6 @@
-// $Id: StppJetAnalyzer.cxx,v 1.15 2008/04/21 17:31:29 tai Exp $
-//
-// Author List: M.L. Miller
-//              Thomas Henry
-//              Tai Sakuma
-
+// $Id: StppJetAnalyzer.cxx,v 1.16 2008/04/21 17:45:26 tai Exp $
 #include "StppJetAnalyzer.h"
 
-#include "StMessMgr.h"
-#include "Stiostream.h"
 
 //StJetFinder
 #include "StJetFinder/FourVec.h"
@@ -16,8 +9,6 @@
 
 
 //StMuDst
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 //StJetMaker
