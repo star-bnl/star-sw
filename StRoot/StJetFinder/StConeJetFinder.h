@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.7 2008/04/21 16:35:10 tai Exp $
+// $Id: StConeJetFinder.h,v 1.8 2008/04/21 16:50:08 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -128,8 +128,6 @@ protected:
 	
 };
 
-//inlines
-
 inline StConePars StConeJetFinder::pars() const
 {
     return mPars;
@@ -146,45 +144,6 @@ inline int StConeJetFinder::findPhiKey(double phi) const
     while(phi<-M_PI) {phi+=2*M_PI;}
     return int( (phi-mPars.mPhiMin)/(mPars.mPhiMax-mPars.mPhiMin)*mPars.mNphi );
 }
-
-inline void StConePars::setSeedEtMin(double v)
-{
-    mSeedEtMin = v;
-}
-
-inline double StConePars::seedEtMin() const
-{
-    return mSeedEtMin;
-}
-
-inline void StConePars::setAssocEtMin(double v)
-{
-    mAssocEtMin = v;
-}
-
-inline double StConePars::assocEtMin() const
-{
-    return mAssocEtMin;
-}
-
-
-inline void StConePars::setSplitFraction(double v)
-{
-   mSplitFraction = v;
-}
-
-inline double StConePars::splitFraction() const
-{
-    return mSplitFraction;
-}
-
-inline void StConePars::setGridSpacing(int nEta, double etaMin, double etaMax,
-				int nPhi, double phiMin, double phiMax)
-{
-    mNeta = nEta; mEtaMin = etaMin; mEtaMax = etaMax;
-    mNphi = nPhi; mPhiMin = phiMin; mPhiMax = phiMax;
-}
-
 //non-members
 
 struct PreJetUpdater //don't assume proto-jet updated
