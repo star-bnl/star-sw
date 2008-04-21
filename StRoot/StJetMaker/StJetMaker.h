@@ -1,15 +1,17 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.29 2008/04/21 00:24:57 tai Exp $
+// $Id: StJetMaker.h,v 1.30 2008/04/21 01:53:30 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
 #include "StMaker.h"
-#include "StppJetAnalyzer.h"
+
+#include "StJetMakerBackwordCompatibility.h"
 
 #include <string>
 #include <vector>
 
 class TTree;
+class StppJetAnalyzer;
 class StMuDstMaker;
 class StFourPMaker;
 class StJetPars;
@@ -23,7 +25,6 @@ class StJetMaker : public StMaker {
 
 public:
 
-
   StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
     
   Int_t Init();
@@ -34,15 +35,10 @@ public:
     
   void addAnalyzer(const StppAnaPars*, const StJetPars*, StFourPMaker*, const char* anaName);
     
-  // for backword compatability
-  typedef std::map<std::string, StppJetAnalyzer*> jetBranchesMap;
-  // for backword compatability
-  jetBranchesMap& getJets() { return mJetBranches; }
+  typedef StSpinJet::StJetMakerBackwordCompatibility::jetBranchesMap jetBranchesMap;
+  jetBranchesMap& getJets() const { return _backwordCompatibility->getJets(); }
 
 private:
-
-  // for backword compatability
-  jetBranchesMap  mJetBranches;
 
   std::vector<StppJetAnalyzer*> _jetFinderList;
 
@@ -50,7 +46,10 @@ private:
   
   StSpinJet::StJetTreeWriter *_treeWriter;
 
+  StSpinJet::StJetMakerBackwordCompatibility *_backwordCompatibility;
+
   ClassDef(StJetMaker, 0)
+
 };
 
 #endif // STJETMAKER_HH

@@ -1,8 +1,8 @@
-// $Id: StJetMaker.cxx,v 1.43 2008/04/21 00:24:56 tai Exp $
+// $Id: StJetMaker.cxx,v 1.44 2008/04/21 01:53:30 tai Exp $
 #include "StJetMaker.h"
 
-#include "StMessMgr.h"
 #include "StJetTreeWriter.h"
+#include "StppJetAnalyzer.h"
 
 #include "StJets.h"
 
@@ -14,13 +14,13 @@ ClassImp(StJetMaker)
 StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
   : StMaker(name)
   , _treeWriter(new StJetTreeWriter(*uDstMaker, string(outputName)))
+  , _backwordCompatibility(new StJetMakerBackwordCompatibility)
 {
 
 }
 
 void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp, const char* name)
 {
-
   StppJetAnalyzer* analyzer = new StppJetAnalyzer(ap, jp, fp);
   StJets *stJets = new StJets();
 
@@ -28,15 +28,12 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourP
 
   _jetFinderList.push_back(analyzer);
 
-  // for backword compatability
-  mJetBranches[name] = analyzer;
-  analyzer->setmuDstJets(stJets);
+  _backwordCompatibility->addAnalyzer(analyzer, stJets, name);
 }
 
 Int_t StJetMaker::Init() 
 {
   _treeWriter->Init();
-
   return StMaker::Init();
 }
 
@@ -65,4 +62,4 @@ void StJetMaker::findJets()
 TTree* StJetMaker::tree() const 
 {
   return _treeWriter->jetTree();
- }
+}
