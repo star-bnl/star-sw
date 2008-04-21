@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer.cxx,v 1.14 2008/04/21 16:03:10 tai Exp $
+// $Id: StppJetAnalyzer.cxx,v 1.15 2008/04/21 17:31:29 tai Exp $
 //
 // Author List: M.L. Miller
 //              Thomas Henry
@@ -13,9 +13,6 @@
 #include "StJetFinder/FourVec.h"
 #include "StJetFinder/StProtoJet.h"
 #include "StJetFinder/StJetFinder.h"
-#include "StJetFinder/StKtCluJetFinder.h"
-#include "StJetFinder/StConeJetFinder.h"
-#include "StJetFinder/StCdfChargedConeJetFinder.h"
 
 
 //StMuDst
@@ -35,41 +32,13 @@ using namespace std;
 
 ClassImp(StppJetAnalyzer)
     
-StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars, StFourPMaker* fp)
-  : mFinder(0)
+StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, StJetPars* pars, StFourPMaker* fp)
+  : mFinder(pars->constructJetFinder())
   , mProtoJets(0)
   , mFourPMaker(fp)
   , mPars(*ap)
   , muDstJets(0)
 {
-  cout <<"StppJetAnalyzer::StppJetAnalyzer()"<<endl;
-    
-    //Set the finder!
-    
-  if (dynamic_cast<const StKtCluPars*>(pars)) {
-    const StKtCluPars* temp = dynamic_cast<const StKtCluPars*>(pars);
-    cout <<"StppJetAnalyzer, instantiate StKtCluJetFinder"<<endl;
-    StKtCluJetFinder* jf = new StKtCluJetFinder(*temp);
-    mFinder = jf;
-  }
-  else if (dynamic_cast<const StCdfChargedConePars*>(pars)) { //note, this if MUST come before the StConePars test
-    cout <<"StppJetAnalyzer, instantiate StCdfChargedConeJetFinder"<<endl;
-    const StCdfChargedConePars* temp = dynamic_cast<const StCdfChargedConePars*>(pars);
-    StCdfChargedConeJetFinder* jf = new StCdfChargedConeJetFinder(*temp);
-    mFinder = jf;
-    jf->print();
-  }
-  else if (dynamic_cast<const StConePars*>(pars)) {	
-    cout <<"StppJetAnalyzer, instantiate StConeJetFinder"<<endl;
-    const StConePars* temp = dynamic_cast<const StConePars*>(pars);
-    StConeJetFinder* jf = new StConeJetFinder(*temp);
-    mFinder = jf;
-    jf->print();
-  }
-  else {
-    cout <<"StppJetAnalyzer, unkown algorithm"<<endl;
-    abort();
-  }
 
 }
 

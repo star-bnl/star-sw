@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StppJetAnalyzer.h,v 1.10 2008/04/21 16:03:10 tai Exp $
+// $Id: StppJetAnalyzer.h,v 1.11 2008/04/21 17:31:29 tai Exp $
 #ifndef STPPJETANALYZER_HH
 #define STPPJETANALYZER_HH
 
@@ -38,7 +38,7 @@ public:
   typedef std::list<StProtoJet> JetList;
 
   ///Construct a new Analyzer
-  StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp);
+  StppJetAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker* fp);
   virtual ~StppJetAnalyzer();
 
 

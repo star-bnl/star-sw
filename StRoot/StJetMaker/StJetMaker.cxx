@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.44 2008/04/21 01:53:30 tai Exp $
+// $Id: StJetMaker.cxx,v 1.45 2008/04/21 17:31:28 tai Exp $
 #include "StJetMaker.h"
 
 #include "StJetTreeWriter.h"
@@ -19,7 +19,7 @@ StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *
 
 }
 
-void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp, const char* name)
+void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker* fp, const char* name)
 {
   StppJetAnalyzer* analyzer = new StppJetAnalyzer(ap, jp, fp);
   StJets *stJets = new StJets();
