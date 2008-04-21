@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConePars.h,v 1.2 2008/04/21 16:50:08 tai Exp $
+// $Id: StConePars.h,v 1.3 2008/04/21 17:29:24 tai Exp $
 #ifndef STCONEPARS_H
 #define STCONEPARS_H
 
@@ -8,6 +8,8 @@
 class StConePars : public StJetPars {
 
 public:
+
+  virtual StJetFinder* constructJetFinder();
 
   ///Set the grid spacing:
   void setGridSpacing(int nEta, double etaMin, double etaMax,
