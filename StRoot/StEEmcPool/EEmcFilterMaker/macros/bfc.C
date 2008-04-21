@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.2 2008/04/21 17:57:12 balewski Exp $
+// $Id: bfc.C,v 1.3 2008/04/21 18:01:55 balewski Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -137,7 +137,7 @@ void bfc(Int_t First, Int_t Last,
 
 #if 1 
   gSystem->Load("StEEmcA2EMaker");
-  gSystem->Load("EEmcFilterMaker");
+  gSystem->Load("StEEmcPoolEEmcFilterMaker");
 
   StEEmcA2EMaker *EEa2eMK=new StEEmcA2EMaker("EE_A2E");
   EEa2eMK->database("eeDb");   // sets db connection
