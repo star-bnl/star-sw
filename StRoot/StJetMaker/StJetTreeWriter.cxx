@@ -1,4 +1,4 @@
-// $Id: StJetTreeWriter.cxx,v 1.6 2008/04/21 18:36:25 tai Exp $
+// $Id: StJetTreeWriter.cxx,v 1.7 2008/04/21 19:14:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 # include "StJetTreeWriter.h"
 
@@ -22,7 +22,7 @@ using namespace std;
 
 namespace StSpinJet {
 
-  StJetTreeWriter::StJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName)
+StJetTreeWriter::StJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName)
   : _uDstMaker(uDstMaker)
   , _OutFileName(outFileName)
   , _jetTree(0)
@@ -36,13 +36,13 @@ StJetTreeWriter::~StJetTreeWriter()
 
 }
 
-void StJetTreeWriter::addAnalyzer(StFourPMaker* fourPMaker, list<StProtoJet>* protoJetList, StJets *stJets, const char* name)
+void StJetTreeWriter::addJetFinder(StFourPMaker* fourPMaker, list<StProtoJet>* protoJetList, const char* name)
 {
   AnalyzerCtl anaCtl;
-  anaCtl.mBranchName = name;
+  anaCtl._branchName = name;
   anaCtl._fourPMaker = fourPMaker;
   anaCtl._protoJetList = protoJetList;
-  anaCtl.mJets = stJets;
+  anaCtl._jets = new StJets();
 
   _analyzerCtlList.push_back(anaCtl);
 }
@@ -53,7 +53,7 @@ void StJetTreeWriter::Init()
   _jetTree  = new TTree("jet", "jetTree");
 
   for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
-    _jetTree->Branch((*it).mBranchName.c_str(), "StJets", &((*it).mJets));
+    _jetTree->Branch((*it)._branchName.c_str(), "StJets", &((*it)._jets));
   }
 }
 
@@ -70,7 +70,7 @@ void StJetTreeWriter::fillJetTree()
   for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
     StFourPMaker* fourPMaker = (*it)._fourPMaker;
     std::list<StProtoJet>* protoJetList = (*it)._protoJetList;
-    fillJetTreeForOneJetFindingAlgorithm(*(*it).mJets, protoJetList, fourPMaker);
+    fillJetTreeForOneJetFindingAlgorithm(*(*it)._jets, protoJetList, fourPMaker);
   }
   _jetTree->Fill();
 }
