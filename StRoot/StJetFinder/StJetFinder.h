@@ -15,16 +15,8 @@ using std::list;
 
 #include "StProtoJet.h"
 
-/*!
-  \class StJetPars
-  \author M.L. Miller (MIT Software)
-  A base class useful for the interface to StJetMaker::addAnalyzer() method.
- */
-class StJetPars
-{
-private:
-    ClassDef(StJetPars,1)
-};
+#include "StJetPars.h"
+
 
 /*!
   \class StJetFinder
