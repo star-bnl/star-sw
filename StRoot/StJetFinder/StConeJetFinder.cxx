@@ -1,9 +1,6 @@
 //#if defined(WIN32)
-//#include "stdafx.h"
-
-//StConeJetnder.cxx
-//M.L. Miller (Yale Software)
-//07/02
+// $Id: StConeJetFinder.cxx,v 1.7 2008/04/21 16:35:10 tai Exp $
+#include "StConeJetFinder.h"
 
 #include "TObject.h"
 
@@ -20,11 +17,8 @@ using std::sort;
 
 //StJetFinder
 #include "StJetEtCell.h"
-#include "StConeJetFinder.h"
 #include "StJetSpliterMerger.h"
 #include "StProtoJet.h"
-
-ClassImp(StConePars)
 
 StConeJetFinder::StConeJetFinder(const StConePars& pars) : mPars(pars)
 {
