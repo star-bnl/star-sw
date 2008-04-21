@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer2.cxx,v 1.2 2008/04/21 20:00:29 tai Exp $
+// $Id: StppJetAnalyzer2.cxx,v 1.3 2008/04/21 21:20:26 tai Exp $
 #include "StppJetAnalyzer2.h"
 
 
@@ -28,7 +28,6 @@ StppJetAnalyzer2::StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* pars, StFou
   , mProtoJets(protoJets)
   , mFourPMaker(fp)
   , mPars(*ap)
-  , muDstJets(0)
 {
 
 }

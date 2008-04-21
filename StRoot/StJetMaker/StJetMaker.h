@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.33 2008/04/21 20:42:26 tai Exp $
+// $Id: StJetMaker.h,v 1.34 2008/04/21 21:20:26 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -7,7 +7,6 @@
 
 #include "StJetMakerBackwordCompatibility.h"
 
-#include <string>
 #include <vector>
 
 class TTree;
