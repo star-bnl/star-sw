@@ -1,0 +1,19 @@
+This bfc.C was taken from dev in April of 2008,
+It has been modified to work with M-C events and
+to make use of the EndcapFilterMaker which aborts events if too little energy is seen in the endcap.
+Note, this BFC uses also beam line constrain shifted off x=y=0 - a special DB table is used for that.
+
+Search for string 'JAN' to find where bfc.c was changed.
+
+The goal is to reduce the footprint of output files.
+For example for QCD events partonic pt 10-30, already filtered on the pythia level by requirement 20 GeV ET we can get another factor of ~50 in the reduction if Endcap response >17 GeV is imposed in BFC.
+
+For QCD events with partonic pt 30-inf generated the same way, we win factor of 18.
+
+For W-event we win factor of 3.
+
+I run the following BFC options:
+
+bsub -q star_cas_big -J Qcd-b3 -o LogBb3 root4star -b -q bfc.C'(1000,"DbV20080310 trs -ssd upgr13  Idst IAna l0 tpcI fcf -ftpc Tree logger ITTF Sti StiRnd  -IstIT -SvtIt -NoSvtIt SvtCL,svtDb -SsdIt MakeEvent McEvent geant evout geantout IdTruth  bbcSim emcY2 EEfs bigbig -dstout fzin -MiniMcMk McEvOut clearmem -ctbMatchVtx VFPPV eemcDb beamLine","/star/institutions/iucf/balewski/2008-FGT-simu/setC5-pilot/mit0018_3_5000evts.fzd")'
+ 
+Jan Balewski, April, 2008
