@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.32 2008/04/21 20:00:28 tai Exp $
+// $Id: StJetMaker.h,v 1.33 2008/04/21 20:42:26 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -41,7 +41,7 @@ public:
 
 private:
 
-  std::vector<StppJetAnalyzer*> _jetFinderList;
+  std::vector<StppJetAnalyzer2*> _jetFinderList;
 
   void findJets();
   
