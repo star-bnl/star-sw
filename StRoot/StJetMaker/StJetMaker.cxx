@@ -1,8 +1,13 @@
-// $Id: StJetMaker.cxx,v 1.47 2008/04/21 19:14:17 tai Exp $
+// $Id: StJetMaker.cxx,v 1.48 2008/04/21 20:00:28 tai Exp $
 #include "StJetMaker.h"
 
 #include "StJetTreeWriter.h"
 #include "StppJetAnalyzer.h"
+#include "StppJetAnalyzer2.h"
+
+#include <StJetFinder/StProtoJet.h>
+
+#include <list>
 
 using namespace std;
 using namespace StSpinJet;
@@ -19,9 +24,12 @@ StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *
 
 void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker* fp, const char* name)
 {
-  StppJetAnalyzer* analyzer = new StppJetAnalyzer(ap, jp, fp);
+  list<StProtoJet>* protoJetList = new list<StProtoJet>;
 
-  _treeWriter->addJetFinder(fp, &(analyzer->getJets()), name);
+  StppJetAnalyzer* analyzer = new StppJetAnalyzer(ap, jp, fp, *protoJetList);
+  StppJetAnalyzer2* analyzer2 = new StppJetAnalyzer2(ap, jp, fp, *protoJetList);
+
+  _treeWriter->addJetFinder(fp, protoJetList, name);
 
   _jetFinderList.push_back(analyzer);
 

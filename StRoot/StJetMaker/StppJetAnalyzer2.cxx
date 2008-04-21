@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer2.cxx,v 1.1 2008/04/21 19:32:22 tai Exp $
+// $Id: StppJetAnalyzer2.cxx,v 1.2 2008/04/21 20:00:29 tai Exp $
 #include "StppJetAnalyzer2.h"
 
 
@@ -23,9 +23,9 @@ using namespace std;
 
 ClassImp(StppJetAnalyzer2)
     
-StppJetAnalyzer2::StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* pars, StFourPMaker* fp)
+StppJetAnalyzer2::StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* pars, StFourPMaker* fp, JetList& protoJets)
   : mFinder(pars->constructJetFinder())
-  , mProtoJets(0)
+  , mProtoJets(protoJets)
   , mFourPMaker(fp)
   , mPars(*ap)
   , muDstJets(0)
