@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.1 2008/04/21 15:47:12 balewski Exp $
+// $Id: bfc.C,v 1.2 2008/04/21 17:57:12 balewski Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -145,7 +145,7 @@ void bfc(Int_t First, Int_t Last,
   EEa2eMK->scale(1.0);      // scale reco Endcap energy by a factor
 
   StEEmcFilterMaker *eeFltMk=new StEEmcFilterMaker; // Brian's filter
-  eeFltMk->setEtThres(15.);// (GeV), event-eta used 
+  eeFltMk->setEtThres(16.);// (GeV), event-eta used 
   eeFltMk->setZvertCut(-60.,15.); // (cm), Z0, delatZ
   chain->AddBefore("MuDst",EEa2eMK);// WARN, order is important
   chain->AddBefore("MuDst",eeFltMk);
