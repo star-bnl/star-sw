@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerBackwordCompatibility.h,v 1.1 2008/04/21 01:53:30 tai Exp $
+// $Id: StJetMakerBackwordCompatibility.h,v 1.2 2008/04/21 01:58:56 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETMAKERBACKWORDCOMPATIBILITY_H
 #define STJETMAKERBACKWORDCOMPATIBILITY_H
@@ -26,7 +26,7 @@ public:
     analyzer->setmuDstJets(stJets);
   }
 
-  jetBranchesMap& getJets() const { return _jetBranches; }
+  jetBranchesMap& getJets() { return _jetBranches; }
 
 private:
 
