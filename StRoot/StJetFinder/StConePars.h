@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConePars.h,v 1.1 2008/04/21 16:35:11 tai Exp $
+// $Id: StConePars.h,v 1.2 2008/04/21 16:50:08 tai Exp $
 #ifndef STCONEPARS_H
 #define STCONEPARS_H
 
@@ -79,5 +79,44 @@ protected:
     
   ClassDef(StConePars,1)
 };
+
+
+inline void StConePars::setSeedEtMin(double v)
+{
+    mSeedEtMin = v;
+}
+
+inline double StConePars::seedEtMin() const
+{
+    return mSeedEtMin;
+}
+
+inline void StConePars::setAssocEtMin(double v)
+{
+    mAssocEtMin = v;
+}
+
+inline double StConePars::assocEtMin() const
+{
+    return mAssocEtMin;
+}
+
+
+inline void StConePars::setSplitFraction(double v)
+{
+   mSplitFraction = v;
+}
+
+inline double StConePars::splitFraction() const
+{
+    return mSplitFraction;
+}
+
+inline void StConePars::setGridSpacing(int nEta, double etaMin, double etaMax,
+				int nPhi, double phiMin, double phiMax)
+{
+    mNeta = nEta; mEtaMin = etaMin; mEtaMax = etaMax;
+    mNphi = nPhi; mPhiMin = phiMin; mPhiMax = phiMax;
+}
 
 #endif // STCONEPARS_H
