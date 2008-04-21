@@ -25,7 +25,7 @@
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
-int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc)
+int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 {
 	double p, t ;
 	int p1,p2,t1,t2,cha,fla ;
@@ -38,13 +38,24 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc)
 	if(tmp & 0x8000) fla |= FCF_MERGED ;
 	if(tmp & 0x4000) fla |= FCF_DEAD_EDGE ;
 
-	p = (double)(tmp & 0x3FFF) / 32.0 ;
-				
+	if(version==FCF_V_FY08) {
+		p = (double)(tmp & 0x3FFF) / 32.0 ;
+	}
+	else {
+		p = (double)(tmp & 0x3FFF) / 64.0 ;
+	}			
+
 	// time
 	tmp = *p_buff >> 16 ;
 	if(tmp & 0x8000) fla |= FCF_ONEPAD ;
-	t = (double)(tmp & 0x7FFF) / 32.0 ;
-				
+
+	if(version == FCF_V_FY08) {
+		t = (double)(tmp & 0x7FFF) / 32.0 ;
+	}
+	else {
+		t = (double)(tmp & 0x7FFF) / 64.0 ;
+	}			
+
 	p_buff++ ;	// advance to next word
 	cha = *p_buff >> 16 ;
 
@@ -80,9 +91,9 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc)
 
 }
 
-int tpxFCF::fcf_decode(u_int *p_buff, daq_sim_cld *sdc)
+int tpxFCF::fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version)
 {
-	int skip = fcf_decode(p_buff,&(sdc->cld)) ;
+	int skip = fcf_decode(p_buff,&(sdc->cld), version) ;
 
 	sdc->track_id = 0 ;
 	sdc->quality = 0 ;
@@ -90,13 +101,16 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_sim_cld *sdc)
 	
 	p_buff += skip ;
 
-//	if(modes) {
-		sdc->quality = (*p_buff) >> 16 ;
-		sdc->track_id = (*p_buff) & 0xFFFF ;
 
-		// took one int so...
-		skip++ ;
-//	}
+	sdc->quality = (*p_buff) >> 16 ;
+	sdc->track_id = (*p_buff) & 0xFFFF ;
+
+
+	//LOG(TERR,"Q %d, T %d",sdc->quality, sdc->track_id) ;
+
+	// took one int so...
+	skip++ ;
+
 
 	return skip ;
 }
@@ -114,6 +128,9 @@ tpxFCF::tpxFCF()
 
 	memset(row_ix,0xFF,sizeof(row_ix)) ;
 	storage = 0 ;
+
+
+	read_version = do_version = 0 ;
 
 	return ;
 }
@@ -486,7 +503,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
 	if(geant_id && modes) {	// FCF_ANNOTATION for simulated data!
 		cl = s->cl ;
 		
-		for(int i=0;i<s->count;i++) {
+		for(int j=0;j<s->count;j++) {
 		
 			int t_lo = cl->t1 ;
 			int t_hi = cl->t2 ;
@@ -527,6 +544,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
 			}
 
 
+			//LOG(TERR,"%d: track id %d, qua %d",j,cl->track_id, cl->quality) ;
 			cl++ ;
 
 		}
@@ -828,7 +846,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 		// end of row. We either enter the count in the header or go back 1 int...
 		if(cur_row_clusters) {
-			*row_cache = r ;
+			*row_cache = (do_version<<16) | r ;
 			*clust_count_cache = cur_row_clusters ;
 			//LOG(DBG,"In row %2d: found %d clusters",r,cur_row_clusters) ;
 		}
@@ -850,6 +868,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	int time_c ;	// time_c can go negative due to T0 corrections!
 	double dp, dt ;
 	u_int p1, p2 ;
+	int div_fact = 64 ;
 
 	// integerize charge
 	if(cl->flags & FCF_IN_DOUBLE) ;
@@ -883,15 +902,17 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	dp = cl->p_ave / cl->f_charge ;
 	dt = cl->f_t_ave / cl->f_charge ;
 
-	// we dump an integerized version ("fixed point") which is 32 times larges
-	time_c = (u_int) (dt * 32.0 + 0.5) ;	// 0.5 for correct roundoff
-	pad_c = (u_int) (dp * 32.0 + 0.5) ;
 
+	if(do_version == FCF_V_FY08) {
+		div_fact = 32 ;
+	}
 
-//	LOG(INFO,"\tCL: %f[%d:%d] %f[%d:%d] %f 0x%04X",dp,cl->p1,cl->p2,dt,cl->t_min,cl->t_max,cl->charge,fla) ;
+	// we dump an integerized version ("fixed point")
+	time_c = (u_int) (dt * div_fact + 0.5) ;	// 0.5 for correct roundoff
+	pad_c = (u_int) (dp * div_fact + 0.5) ;
 
 	// get pad extents
-	tmp_p  = pad_c / 32   ;
+	tmp_p  = pad_c / div_fact   ;
 		
 	p1 = tmp_p - cl->p1 ;
 	p2 = cl->p2 - tmp_p ;
@@ -903,7 +924,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 
 
 	// get timebin extents
-	tmp_p = time_c / 32   ;
+	tmp_p = time_c / div_fact   ;
 		
 	p1 = tmp_p - cl->t_min ;
 	p2 = cl->t_max - tmp_p ;

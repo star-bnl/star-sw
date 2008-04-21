@@ -1,10 +1,6 @@
 #ifndef _TPX_FCF_HH_
 #define _TPX_FCF_HH_
 
-//#include <sys/types.h>
-
-//#include "tpxCore.h"
-
 
 // main tunable parameters
 #define FCF_ADC_NOISE           4
@@ -19,6 +15,10 @@
 
 
 #define FCF_MAX_CL	32		// max 1D clusters per pad
+
+// version/flavor reminders
+#define FCF_V_FY08	0x0000		// used in the FY08 run; has the /32 "bug"
+#define FCF_V_FY09	0x0001		// /32 bug fixed 
 
 
 // flag definitions - NEVER CHANGE
@@ -36,9 +36,6 @@
 #define FCF_BROKEN_EDGE         32      // touches one of the mezzanine edges
 #define FCF_DEAD_EDGE           64      // touches a dead pad
 #define FCF_IN_DOUBLE           128	// one should use the floating point in the union
-
-
-
 
 
 
@@ -116,11 +113,11 @@ public:
 	char do_cuts ;
 	int ch_min ;
 
-	static int fcf_decode(u_int *p_buff, daq_cld *dc) ;
-	static int fcf_decode(u_int *p_buff, daq_sim_cld *sdc) ;
+	static int fcf_decode(u_int *p_buff, daq_cld *dc, u_short version=0) ;
+	static int fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version=0) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.4 2008/04/21 08:08:49 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:
@@ -162,7 +159,8 @@ private:
 	int sector ;
 	tpxGain *gains ;
 
-
+	u_int do_version ;
+	u_int read_version ;
 } ;
 
 #endif
