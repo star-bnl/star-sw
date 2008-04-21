@@ -847,14 +847,18 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 		u_int *p_buff = buff ;
 
 		while(p_buff < end_buff) {
-			int row = *p_buff++ ;
-			int cou = *p_buff++ ;
+			u_int row = *p_buff++ ;
+			u_int cou = *p_buff++ ;
+			
+
+			u_int version = (row >> 16) ;
+			row &= 0xFFFF ;
 
 			daq_cld *dc = (daq_cld *) cld->request(cou) ;
 	
 
-			for(int i=0;i<cou;i++) {
-				p_buff += fcf_algo[0]->fcf_decode(p_buff,dc) ;
+			for(u_int i=0;i<cou;i++) {
+				p_buff += fcf_algo[0]->fcf_decode(p_buff, dc, version) ;
 				dc++ ;
 			}
 
@@ -1069,15 +1073,18 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			u_int *end_buff = p_buff + words ;
 
 			while(p_buff < end_buff) {
-				int row = *p_buff++ ;
-				int cou = *p_buff++ ;
+				u_int row = *p_buff++ ;
+				u_int cou = *p_buff++ ;
 				int g_cou = 0 ;
 			
+
+				u_int version = (row >> 16) ;
+				row &= 0xFFFF ;
+
 				daq_sim_cld *cld = (daq_sim_cld *) cld_sim->request(cou) ;
 
 				while(cou) {
-					daq_cld dc ;
-					int skip = fcf_algo[s]->fcf_decode(p_buff, &dc) ;
+					int skip = fcf_algo[s]->fcf_decode(p_buff, cld, version) ;
 					
 					// addtional cuts here
 
@@ -1086,7 +1093,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 
 
 
-					cld[g_cou].cld = dc ;	// copy!
+					
 					g_cou++ ;
 
 
