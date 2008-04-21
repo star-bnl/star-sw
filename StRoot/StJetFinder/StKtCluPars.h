@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StKtCluPars.h,v 1.1 2008/04/21 16:22:35 tai Exp $
+// $Id: StKtCluPars.h,v 1.2 2008/04/21 17:29:25 tai Exp $
 #ifndef STKTCLUPARS_H
 #define STKTCLUPARS_H
 
@@ -8,6 +8,8 @@
 class StKtCluPars : public StJetPars {
 
 public:
+
+  virtual StJetFinder* constructJetFinder();
 
     ///Set the distance measure, called d by Ellis/Soper
     void setR(double r) {mR=r;}
