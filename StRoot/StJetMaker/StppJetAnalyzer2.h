@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StppJetAnalyzer2.h,v 1.2 2008/04/21 20:00:29 tai Exp $
+// $Id: StppJetAnalyzer2.h,v 1.3 2008/04/21 20:42:26 tai Exp $
 #ifndef STPPJETANALYZER2_HH
 #define STPPJETANALYZER2_HH
 
@@ -72,7 +72,7 @@ private:
     
   StJetFinder* mFinder;
 
-  JetList mProtoJets;
+  JetList& mProtoJets;
   StFourPMaker* mFourPMaker;
 
   StppAnaPars mPars;
