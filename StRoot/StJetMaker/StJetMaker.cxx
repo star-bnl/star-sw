@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.49 2008/04/21 20:42:26 tai Exp $
+// $Id: StJetMaker.cxx,v 1.50 2008/04/21 21:20:25 tai Exp $
 #include "StJetMaker.h"
 
 #include "StJetTreeWriter.h"
@@ -7,6 +7,7 @@
 
 #include <StJetFinder/StProtoJet.h>
 
+#include <string>
 #include <list>
 
 using namespace std;
@@ -28,23 +29,24 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 
   _treeWriter->addJetFinder(fp, protoJetList, name);
 
-  StppJetAnalyzer2* analyzer2 = new StppJetAnalyzer2(ap, jp, fp, *protoJetList);
-  _jetFinderList.push_back(analyzer2);
+  _jetFinderList.push_back(new StppJetAnalyzer2(ap, jp, fp, *protoJetList));
 
-  StppJetAnalyzer* analyzer = new StppJetAnalyzer(*protoJetList);
-  _backwordCompatibility->addAnalyzer(analyzer, _treeWriter->getLastStJets(), name);
+  _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), _treeWriter->getLastStJets(), name);
 }
 
 Int_t StJetMaker::Init() 
 {
   _treeWriter->Init();
-  return StMaker::Init();
+
+  return kStOk;
 }
 
 Int_t StJetMaker::Make()
 {
   findJets();
+
   _treeWriter->fillJetTree();
+
   return kStOk;
 }
 
@@ -52,7 +54,6 @@ Int_t StJetMaker::Finish()
 {
   _treeWriter->Finish();
 
-  StMaker::Finish();
   return kStOK;
 }
 
