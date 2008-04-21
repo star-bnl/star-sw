@@ -1,12 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StppJetAnalyzer.h,v 1.9 2008/04/19 02:09:56 tai Exp $
-//
-// Author List: M.L. Miller
-//              Thomas Henry
-//              Tai Sakuma
-
+// $Id: StppJetAnalyzer.h,v 1.10 2008/04/21 16:03:10 tai Exp $
 #ifndef STPPJETANALYZER_HH
 #define STPPJETANALYZER_HH
+
+#include "StppAnaPars.h"
 
 #include <TObject.h>
 
@@ -21,59 +18,6 @@ class StJetFinder;
 class StFourPMaker;
 class StMuTrackFourVec;
 class StJets;
-
-/*!
-  \class StppAnaPars
-  \author M.L. Miller
-  StppAnaPars is a simple class to encapsulate the run-time track and jet cuts that are necessary
-  for a jet analysis.
- */
-class StppAnaPars : public TObject {
-
-public:
-
-  void setCutPtMin(double v) { mPtMin = v; }
-  double ptMin() const { return mPtMin; }
-
-  void setAbsEtaMax(double v) { mEtaMax = v; }
-  double etaMax() const { return mEtaMax; }
-
-  void setJetPtMin(double v) { mJetPtMin = v; }
-  double jetPtMin() const { return mJetPtMin; }
-
-  void setJetEtaMax(double v) { mJetEtaMax = v; }
-  double jetEtaMax() const { return mJetEtaMax; }
-
-  void setJetEtaMin(double v) { mJetEtaMin =v; }
-  double jetEtaMin() const { return mJetEtaMin; }
-
-  void setJetNmin(int v) { mJetNmin = v; }
-  int jetNmin() const { return mJetNmin; }
-
-  void setNhits(int v) { mNhits=v; }
-  int nHits() const { return mNhits; }
-
-  void setFlagMin(int v) { mFlagMin = v; }
-  int flagMin() const { return mFlagMin; }
-
-private:
-
-    //cuts that particles must pass to be used for jet-finding
-  double mPtMin;
-  double mEtaMax;
-  int mNhits;
-  int mFlagMin;
-    
-  //Cut to accept found-jets
-  double mJetPtMin;
-  double mJetEtaMax;
-  double mJetEtaMin;
-  int mJetNmin;
-
-  friend class StppJetAnalyzer;
-
-  ClassDef(StppAnaPars,1)
-};
 
 /*!
   \class StppJetAnalyzer

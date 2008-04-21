@@ -1,4 +1,4 @@
-// $Id: StppJetAnalyzer.cxx,v 1.13 2008/04/19 02:09:55 tai Exp $
+// $Id: StppJetAnalyzer.cxx,v 1.14 2008/04/21 16:03:10 tai Exp $
 //
 // Author List: M.L. Miller
 //              Thomas Henry
@@ -34,8 +34,6 @@
 using namespace std;
 
 ClassImp(StppJetAnalyzer)
-ClassImp(StppAnaPars)
-    
     
 StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars, StFourPMaker* fp)
   : mFinder(0)
