@@ -1,10 +1,5 @@
-#ifdef WIN32
-#include "stdafx.h"
-#endif
-
-//StKtCluJetFinder.cxx
-//M.L. Miller (Yale Software)
-//5/02
+// -*- mode: c++;-*-
+#include "StKtCluJetFinder.h"
 
 //std
 #include <cmath>
@@ -19,11 +14,8 @@
 #include "StProtoJetPair.h"
 #include "StJetFinder.h"
 
-#include "StKtCluJetFinder.h"
 
 using namespace std;
-
-ClassImp(StKtCluPars)
 
     
 StKtCluJetFinder::StKtCluJetFinder(const StKtCluPars& pars) : mPars(pars)
