@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.29 2007/12/19 21:28:23 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.30 2008/04/22 19:08:18 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -339,8 +339,9 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
             TUpdateList listLock(listView1);
             QListViewItem  *i;
             bool saved = false;
-            Int_t rootColor = -1;
-            for ( i = lst.first(); i; i = lst.next() ) {     
+            Color_t rootColor = -1;
+            Style_t rootStyle = -1;
+            for ( i = lst.first(); i; i = lst.next() ) {
                TQtObjectListItem* itemRoot =(TQtObjectListItem* )i;
                TObject *obj = itemRoot->Object();
                TVolume *volume = dynamic_cast<TVolume *>(obj);
@@ -379,13 +380,12 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                      }
                   } else if (response == menus[4]) { 
                      // Change the object color
-                     Color_t oldColor = rootColor;
+                     Color_t vc = volume->GetLineColor();
+                     Style_t vs = volume->GetFillStyle();
                      if (rootColor == -1)  {
-                        Color_t vc = volume->GetLineColor();
                         float r,g,b;
                         int a = 0;
                         gROOT->GetColor(vc)->GetRGB(r,g,b);
-                        Style_t vs = volume->GetFillStyle();
                         if (4000 >= vs && vs < 5000) a = vs-4000;
                         QRgb initial = qRgba(int(r*255),int(g*255),int(b*255),a);
                         bool ok;
@@ -396,12 +396,13 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                            int blue  = qBlue(color);
                            int alpha = qAlpha(color);
                            rootColor = TColor::GetColor(red, green, blue);
-                           if ( (alpha > 0) && (alpha != vs-4000) ) volume->SetFillStyle(4000+alpha);
+                           if ( (alpha > 0) && (alpha != vs-4000) ) rootStyle = 4000+alpha;
                         } else {
                            response = -1;
                         }
                      }
-                     if (oldColor != rootColor) volume->SetLineColor(rootColor);
+                     if (rootColor != -1 && vc != rootColor) volume->SetLineColor(rootColor);
+                     if (rootStyle != -1 && vs != rootStyle) volume->SetFillStyle(rootStyle);
                   } else { response = -1; }
                   // set visibility
                   if (volume->GetVisibility() != s) volume->SetVisibility(s);
