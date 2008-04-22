@@ -63,12 +63,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -152,12 +160,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -241,12 +257,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -330,12 +354,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -419,12 +451,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -508,12 +548,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -597,12 +645,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -686,12 +742,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -775,12 +839,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -864,12 +936,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -953,12 +1033,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1042,12 +1130,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1131,12 +1227,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1220,12 +1324,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1298,12 +1410,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1365,12 +1485,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1432,12 +1560,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1499,12 +1635,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1577,12 +1721,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1644,12 +1796,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1711,12 +1871,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1789,12 +1957,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1856,12 +2032,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1923,12 +2107,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -1990,12 +2182,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2057,12 +2257,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2135,12 +2343,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2202,12 +2418,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2269,12 +2493,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2347,12 +2579,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2414,12 +2654,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2481,12 +2729,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2548,12 +2804,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2615,12 +2879,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2693,12 +2965,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2760,12 +3040,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
@@ -2827,12 +3115,20 @@ DEF ShapesNode Separator {
 
                     DEF CoinShapeNode Separator {
 
-                      Material {
-                        diffuseColor 1 0 0
-                        specularColor 0.69999999 0.69999999 0.69999999
-                        shininess 0.89999998
-                        transparency 0.5
+                      DEF Transparent_Shape Group {
 
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
                       }
                       NormalBinding {
                         value PER_FACE
