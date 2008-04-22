@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.30 2008/04/22 19:08:18 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.31 2008/04/22 20:26:53 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -341,6 +341,8 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
             bool saved = false;
             Color_t rootColor = -1;
             Style_t rootStyle = -1;
+            TVolume *topVolumeToSave = 0;
+            TFile  *file2Save = 0;
             for ( i = lst.first(); i; i = lst.next() ) {
                TQtObjectListItem* itemRoot =(TQtObjectListItem* )i;
                TObject *obj = itemRoot->Object();
@@ -355,28 +357,30 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                   } else if (response == menus[2]) { 
                      itemRoot->setState(QCheckListItem::Off)     ; s = TVolume::kNoneVisible;
                   } else if (response == menus[3]) { 
-                      if (saved) return;
-                      saved  = true;
-                     // Save the object
-                      QString filter = "ROOT file (*.root);";
-                      QString selectedFilter;
-                      QString dir = fSaveFileName;
-                      if (dir.isEmpty()) dir = gSystem->WorkingDirectory(); 
-                      else               dir = QFileInfo(dir).dirPath();
+                      if (topVolumeToSave) {
+                         topVolumeToSave->Add(volume);
+                      } else if (!saved) {
+                         saved  = true;
+                        // Save the object
+                         QString filter = "ROOT file (*.root);";
+                         QString selectedFilter;
+                         QString dir = fSaveFileName;
+                         if (dir.isEmpty()) dir = gSystem->WorkingDirectory(); 
+                         else               dir = QFileInfo(dir).dirPath();
 
-                      QString thatFile = QFileDialog::getSaveFileName(dir
-                         , filter, this, "SaveAs"
-                         , "Save the volulme  as"
-                         , &selectedFilter);
- 
-                      if (thatFile.isEmpty()) {
-                         response = -1;
-                      } else {
-                         TDirectory *save = gDirectory;
-                         TFile f((const char *)thatFile,"RECREATE");
-                         volume->Write();
-                         f.Close();
-                         save->cd();
+                         QString thatFile = QFileDialog::getSaveFileName(dir
+                            , filter, this, "SaveAs"
+                            , "Save the volulme  as"
+                            , &selectedFilter);
+  
+                         if (thatFile.isEmpty()) {
+                            response = -1;
+                         } else {
+                            TDirectory *save = gDirectory;
+                            file2Save = TFile::Open((const char *)thatFile,"RECREATE");
+                            topVolumeToSave = new TVolume("GeomBrowse","saved",(TShape *)0);
+                            save->cd();
+                        }
                      }
                   } else if (response == menus[4]) { 
                      // Change the object color
@@ -407,6 +411,14 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                   // set visibility
                   if (volume->GetVisibility() != s) volume->SetVisibility(s);
                }
+            }
+            if (file2Save) {
+               TDirectory *save = gDirectory;
+               file2Save->cd();
+               topVolumeToSave->Write();
+               file2Save->Close();
+               delete file2Save; file2Save=0;
+               save->cd();
             }
          }
          if (response != -1) RefreshCanvas(tQtWidget1);
