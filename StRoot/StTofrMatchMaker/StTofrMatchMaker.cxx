@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.19 2008/04/22 20:55:13 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.20 2008/04/22 22:31:22 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.20  2008/04/22 22:31:22  dongx
+ * leadingEdgeTime and trailingEdgeTime stored as double precision in StTofCell
+ *
  * Revision 1.19  2008/04/22 20:55:13  dongx
  * leadingEdgeTime and trailingEdgeTime stored as double precision in StTofCell
  *
@@ -1913,7 +1916,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     }
     int nfitpts = theTrack->fitTraits().numberOfFitPoints(kTpcId);
 //    cout << " dEdx = " << dEdx << endl;
-    cout << " nSigmaPi = " << nSigmaPion << endl;
+//    cout << " nSigmaPi = " << nSigmaPion << endl;
 //    if (pt<0.2) continue;
 
     // make sure we have a track, a miniDST might have removed it...
