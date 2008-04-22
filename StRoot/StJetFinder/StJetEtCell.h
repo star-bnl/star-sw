@@ -1,16 +1,16 @@
+// -*- mode: c++;-*-
+// $Id: StJetEtCell.h,v 1.7 2008/04/22 01:55:24 tai Exp $
 //StJetEtCell.h
 //M.L. Miller (Yale Software) (adapted from Akio Ogawa's work)
 //07/02
-
 #ifndef StJetEtCell_HH
 #define StJetEtCell_HH
 
-#include <list>
-using std::list;
+#include "StProtoJet.h"
 
+#include <list>
 #include <iostream>
 
-#include "StProtoJet.h"
 
 double deltaphi(double p1, double p2);
 
@@ -23,29 +23,28 @@ double deltaphi(double p1, double p2);
   computation efficiency.
  */
 
-class StJetEtCell
-{
+class StJetEtCell {
 public:
-    typedef list<StProtoJet> JetList;
-    typedef StProtoJet::FourVecList FourList;
-    typedef list<StJetEtCell*> CellList;
+  typedef std::list<StProtoJet> JetList;
+  typedef StProtoJet::FourVecList FourList;
+  typedef std::list<StJetEtCell*> CellList;
 
     StJetEtCell(); 
     StJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax);
     virtual ~StJetEtCell();
 
     //simple access
-    double eta() const;
-    double phi() const;
-    virtual double eT() const;
-    double etaMin() const;
-    double etaMax() const;
-    double phiMin() const;
-    double phiMax() const;
-    int nTimesUsed() const;
+  double eta() const { return (mEtaMax+mEtaMin)/2.; }
+  double phi() const { return (mPhiMax+mPhiMin)/2.; }
+  virtual double eT() const { return mEt; }
+  double etaMin() const { return mEtaMin; }
+  double etaMax() const { return mEtaMax; }
+  double phiMin() const { return mPhiMin; }
+  double phiMax() const { return mPhiMax; } 
+  int nTimesUsed() const { return mNtimesUsed; }
 
-    ///Allow jet-finder power to over-ride eT
-    void setEt(double v) {mEt=v;}
+  ///Allow jet-finder power to over-ride eT
+  void setEt(double v) { mEt=v; }
 
     ///operators (sort by Et)
     virtual bool operator>(const StJetEtCell& rhs) const {
@@ -77,14 +76,14 @@ public:
     virtual void add(StJetEtCell* cell);
 
     ///count how many jets ref this cell
-    void setNtimesUsed(int);
-    ///internal reset for next pass at jet-finding
-    virtual void clear(); 
+  void setNtimesUsed(int v) { mNtimesUsed = v; }
+  ///internal reset for next pass at jet-finding
+  virtual void clear(); 
 
     ///distance measures (to be moved to polymorphic behavior)
-    double deltaPhi(const StJetEtCell& rhs) const;
+  double deltaPhi(const StJetEtCell& rhs) const { return deltaphi( phi(), rhs.phi() ); }
     ///distance measures (to be moved to polymorphic behavior)
-    double deltaEta(const StJetEtCell& rhs) const;
+  double deltaEta(const StJetEtCell& rhs) const { return eta()-rhs.eta(); }
     ///distance measures (to be moved to polymorphic behavior)
     double distance(const StJetEtCell& rhs) const;
 
@@ -92,14 +91,14 @@ public:
     StProtoJet& protoJet() {return mProtoJet;}
 
     ///daugter cells of this one
-    CellList& cellList();
-    const CellList& cellList() const;
+  CellList& cellList() { return mCells; }
+  const CellList& cellList() const{ return mCells; }
 
     ///does this cell itself have any energy
     bool empty() const {return mProtoJet.size()==0;}
 
     ///number of particles in protojet
-    unsigned int size() const; 
+  unsigned int size() const { return mProtoJet.size(); }
 
 protected:
   friend std::ostream& operator<<(std::ostream& os, const StJetEtCell& cell);
@@ -123,88 +122,6 @@ protected:
     StProtoJet mProtoJet;
 };
 
-//inlines
-inline void StJetEtCell::clear()
-{
-    mEt=0.;
-    mNtimesUsed=0;
-    //mProtoJets.clear();
-    mCells.clear();
-    mProtoJet.clear();
-    mUpToDate=false;
-}
-
-inline double StJetEtCell::eta() const
-{
-    return (mEtaMax+mEtaMin)/2.;
-}
-
-inline double StJetEtCell::phi() const
-{
-    return (mPhiMax+mPhiMin)/2.;
-}
-
-inline double StJetEtCell::eT() const
-{
-    return mEt;
-}
-
-//private access
-inline double StJetEtCell::etaMin() const
-{
-    return mEtaMin;
-}
-
-inline double StJetEtCell::etaMax() const
-{
-    return mEtaMax;
-}
-
-inline double StJetEtCell::phiMin() const
-{
-    return mPhiMin;
-}
-
-inline double StJetEtCell::phiMax() const
-{
-    return mPhiMax;
-}
-
-inline int StJetEtCell::nTimesUsed() const
-{
-    return mNtimesUsed;
-}
-
-inline void StJetEtCell::setNtimesUsed(int v)
-{
-    mNtimesUsed=v;
-}
-
-inline const StJetEtCell::CellList& StJetEtCell::cellList() const
-{
-    return mCells;
-}
-
-inline StJetEtCell::CellList& StJetEtCell::cellList()
-{
-    return mCells;
-}
-
-inline unsigned int StJetEtCell::size() const
-{
-    return mProtoJet.size();
-}
-
-inline double StJetEtCell::deltaPhi(const StJetEtCell& rhs) const
-{
-    return deltaphi( phi(), rhs.phi() );
-}
-
-inline double StJetEtCell::deltaEta(const StJetEtCell& rhs) const
-{
-    return eta()-rhs.eta();
-}
-
 inline std::ostream& operator<<(std::ostream& os, const StJetEtCell& cell)
 {
     os <<"eta: "<<cell.eta()<<"\tphi: "<<cell.phi()<<"\tet: "<<cell.eT()
@@ -216,7 +133,6 @@ inline std::ostream& operator<<(std::ostream& os, const StJetEtCell& cell)
     }
 
     return os;
-
 }
 #endif
 
