@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.18 2008/03/27 00:16:03 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.19 2008/04/22 20:55:13 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,8 +12,11 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.19  2008/04/22 20:55:13  dongx
+ * leadingEdgeTime and trailingEdgeTime stored as double precision in StTofCell
+ *
  * Revision 1.18  2008/03/27 00:16:03  dongx
- * update for Run8 finished.
+ *  update for Run8 finished.
  *
  * Revision 1.17  2007/11/29 22:43:11  dongx
  * changed vpd trayId definition to 121 (East) and 122 (West)
@@ -2325,13 +2328,13 @@ Int_t StTofrMatchMaker::processEventYear8(){
     //
     int tmptdc = (mSortTofRawData->GetLeadingTdc(tray,jj,kTRUE))[0];
     int bin = (int)tmptdc&0x3ff;
-    float tmptdc_f = tmptdc + mTofINLCorr->getTrayINLCorr(tray, jj, bin);
-    float letime = tmptdc_f*VHRBIN2PS;
+    double tmptdc_f = tmptdc + mTofINLCorr->getTrayINLCorr(tray, jj, bin);
+    double letime = tmptdc_f*VHRBIN2PS;
 
     tmptdc=(mSortTofRawData->GetTrailingTdc(tray,jj,kTRUE))[0];
     bin = (int)tmptdc&0x3ff;
     tmptdc_f = tmptdc + mTofINLCorr->getTrayINLCorr(tray, jj, bin);
-    float tetime = tmptdc_f*VHRBIN2PS;
+    double tetime = tmptdc_f*VHRBIN2PS;
 
     // get track-id from cell hit vector
     unsigned int trackNode = FinalMatchedCellsVec[ii].trackIdVec[0];
