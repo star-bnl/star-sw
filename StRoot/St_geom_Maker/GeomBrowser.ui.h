@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.31 2008/04/22 20:26:53 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.32 2008/04/22 20:29:18 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -418,6 +418,7 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
                topVolumeToSave->Write();
                file2Save->Close();
                delete file2Save; file2Save=0;
+               delete topVolumeToSave; topVolumeToSave = 0;
                save->cd();
             }
          }
