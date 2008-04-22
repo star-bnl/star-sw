@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StProtoJet.h,v 1.7 2008/04/17 20:12:05 tai Exp $
+// $Id: StProtoJet.h,v 1.8 2008/04/22 22:22:05 tai Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
@@ -49,19 +49,20 @@ public:
   void update();
 	
   ///clear
-  void clear();
+  void clear()
+  {
+    mList.clear();
+    StFourVec::clear(); 
+  }
 	
   friend std::ostream& operator<<(std::ostream& os, const StProtoJet& j);
 	
 private:
+
   FourVecList mList;
+
 };
 
-inline void StProtoJet::clear()
-{
-    mList.clear();
-    mPx=mPy=mPz=mE=0.;
-}
 
 inline std::ostream& operator<<(std::ostream& os, const StProtoJet& j)
 {

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StFourVec.h,v 1.1 2008/04/17 17:57:05 tai Exp $
+// $Id: StFourVec.h,v 1.2 2008/04/22 22:22:05 tai Exp $
 #ifndef STFOURVEC_H
 #define STFOURVEC_H
 
@@ -11,35 +11,35 @@ class StFourVec {
 public:
   StFourVec() : mPx(0), mPy(0), mPz(0), mE(0), mCharge(0) {}
 	
-  StFourVec(double pt, double phi, double eta, double m, double charge=0.)
+  StFourVec(double pt, double phi, double eta, double m, double charge = 0)
     : mPx(pt*cos(phi)), mPy(pt*sin(phi)), mPz(pt*sinh(eta))
     , mE(::sqrt(fabs(mPx*mPx + mPy*mPy +mPz*mPz + m*m)))
     , mCharge(charge)
   { }
 	
-  virtual ~StFourVec() {};
+  virtual ~StFourVec() { };
 	
   //momenta
-  virtual double pt() const;
-  virtual double px() const;
-  virtual double py() const;
-  virtual double pz() const;
-  virtual double p() const;
+  double pt() const;
+  double px() const;
+  double py() const;
+  double pz() const;
+  double p() const;
 	
   //angles
-  virtual double theta() const;
-  virtual double phi() const;
-  virtual double eta() const;
-  virtual double rapidity() const;
+  double theta() const;
+  double phi() const;
+  double eta() const;
+  double rapidity() const;
 	
   //4-th component
-  virtual double eT() const;
-  virtual double eZ() const;
-  virtual double e() const;
-  virtual double mass() const;
+  double eT() const;
+  double eZ() const;
+  double e() const;
+  double mass() const;
 	
   //charge
-  virtual double charge() const;
+  double charge() const;
 	
   //actions (these should be templated)
   void add(const StFourVec& other);
