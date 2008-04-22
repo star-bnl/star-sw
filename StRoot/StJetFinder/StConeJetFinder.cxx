@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.9 2008/04/22 01:55:23 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.10 2008/04/22 17:40:28 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -195,27 +195,26 @@ void StConeJetFinder::findJets(JetList& protojets)
   protojets.clear(); //clear 'em, add them back in as we find them
 	
   //we partition them so that we don't waste operations on empty cells:
-  mTheEnd = std::partition(mVec.begin(), mVec.end(), StJetEtCellIsNotEmpty() );
+  mTheEnd = std::partition(mVec.begin(), mVec.end(), StJetEtCellIsNotEmpty());
   std::for_each(mVec.begin(), mVec.end(), PreJetUpdater() );
 	
   //now we sort them in descending order in et: (et1>et2>...>etn)
-  std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() );
+  std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan());
 	
   if (mPars.mDebug ) {print();}
 	
   //loop from highest et cell to lowest et cell.
-  LOG_DEBUG <<"\tBegin search over seeds"<<endm;
-  for (CellVec::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
+  // Begin search over seeds 
+  for (CellVec::iterator vecIt = mVec.begin(); vecIt != mTheEnd; ++vecIt) {
     
     StJetEtCell* centerCell = *vecIt;
-    if (centerCell->eT()<=mPars.mSeedEtMin) {break;} //we're all done
+    if (centerCell->eT() <= mPars.mSeedEtMin) break; //we're all done
 		
-    if (acceptSeed(centerCell) ) {
-			
-      //cout <<"-------------- new Seed --------------- "<<endl;
+    if (acceptSeed(centerCell)) {
+      //new Seed
 			
       //use a work object: mWorkCell
-      this->initializeWorkCell(centerCell);
+      initializeWorkCell(centerCell);
 			
       if (mPars.mDoMinimization) {
 	doMinimization();
@@ -331,7 +330,7 @@ StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiM
 
 void StConeJetFinder::buildGrid()
 {
-  double dEta = mPars.mEtaMax-mPars.mEtaMin;
+  double dEta = mPars.mEtaMax - mPars.mEtaMin;
   double dPhi = mPars.mPhiMax - mPars.mPhiMin;
   double etaBinWidth = dEta/static_cast<double>(mPars.mNeta);
   double phiBinWidth = dPhi/static_cast<double>(mPars.mNphi);
@@ -486,29 +485,23 @@ StJetEtCell* StConeJetFinder::findCellByKey(const StEtGridKey& key)
 
 void StConeJetFinder::fillGrid(JetList& protojets)
 {
-    for (JetList::iterator it=protojets.begin(); it!=protojets.end(); ++it) {
-	const StProtoJet& pj = (*it);
-	double eta = pj.eta();
-	double phi = pj.phi();
-	StEtGridKey key = findKey(eta, phi);
-	CellMap::iterator where = mMap.find(key);
-	if (where!=mMap.end()) {
-	    //const StEtGridKey& key = (*where).first;
-	    StJetEtCell* cell = (*where).second;
-	    cell->add(pj);
-	}
-	else {
-	    cout <<"StConeJetFinder::fillGrid(). ERROR:\t"
-		 <<"Could not fill jet in grid."<<endl<<pj<<endl;
-	}
-    }
+  for (JetList::iterator protoJet = protojets.begin(); protoJet != protojets.end(); ++protoJet) {
+    CellMap::iterator where = mMap.find(findKey((*protoJet).eta(), (*protoJet).phi()));
+    if (where != mMap.end())
+      (*where).second->add(*protoJet);
+    else
+      cout << "StConeJetFinder::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet <<endl;
+  }
 }
+
+struct StJetEtCellClearer { void operator()(StJetEtCell* lhs) { lhs->clear(); } };
 
 void StConeJetFinder::clear()
 {
-    mPreJets.clear();
-    mSearchCounter=0;
-    for_each(mVec.begin(), mTheEnd, StJetEtCellClearer() );
+  mPreJets.clear();
+  mSearchCounter = 0;
+
+  for_each(mVec.begin(), mTheEnd, StJetEtCellClearer());
 }
 
 void StConeJetFinder::print()

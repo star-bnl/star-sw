@@ -31,21 +31,20 @@ bool StJetEtCellEtLessThan::operator()(StJetEtCell* lhs, StJetEtCell* rhs)
     return lhs->eT()<rhs->eT();
 }
 
-//bool StJetEtCellEtGreaterThan::operator()(const StJetEtCell* lhs, const StJetEtCell* rhs) const
-bool StJetEtCellEtGreaterThan::operator()(StJetEtCell* lhs, StJetEtCell* rhs)
-{
-    return lhs->eT()>rhs->eT();
-}
+// bool StJetEtCellEtGreaterThan::operator()(StJetEtCell* lhs, StJetEtCell* rhs)
+// {
+//     return lhs->eT()>rhs->eT();
+// }
 
-void StJetEtCellClearer::operator()(StJetEtCell* lhs)
-{
-    lhs->clear();
-}
+// void StJetEtCellClearer::operator()(StJetEtCell* lhs)
+// {
+//     lhs->clear();
+// }
 
-bool StJetEtCellIsNotEmpty::operator ()(const StJetEtCell* cell)
-{
-    return !cell->empty();
-}
+// bool StJetEtCellIsNotEmpty::operator ()(const StJetEtCell* cell)
+// {
+//     return !cell->empty();
+// }
 
 void StProtoJetUpdater::operator()(StJetEtCell* cell)
 {
