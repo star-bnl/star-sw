@@ -1,4 +1,4 @@
-// $Id: StProtoJet.cxx,v 1.7 2008/04/17 20:12:05 tai Exp $
+// $Id: StProtoJet.cxx,v 1.8 2008/04/22 22:22:05 tai Exp $
 
 #include "StProtoJet.h"
 
@@ -48,36 +48,15 @@ void StProtoJet::remove(StProtoJet& rhs)
 
 void StProtoJet::add(const StProtoJet& rhs)
 {
-    for (FourVecList::const_iterator it=rhs.mList.begin(); it!=rhs.mList.end(); ++it) {
-	mList.push_back(*it);
-    }
+  for (FourVecList::const_iterator it = rhs.mList.begin(); it!=rhs.mList.end(); ++it) {
+    mList.push_back(*it);
+  }
 }
 
 void StProtoJet::merge(const StProtoJet& rhs)
 {
-    //First copy the Particls from rhs to this:
-    for (FourVecList::const_iterator it=rhs.mList.begin(); it!=rhs.mList.end(); ++it) {
-	mList.push_back(*it);
-	StFourVec::add(**it);
-    }
-	
-    //Now calculate the new jet characteristics 	
-    // ala Ellis-Soper
-    /*
-      double et_k = mEt + rhs.mEt;
-      mEta= (mEt*mEta + rhs.mEt*rhs.mEta)/et_k;
-      mPhi = (mEt*mPhi + rhs.mEt*rhs.mPhi)/et_k;
-      mEt = et_k;
-    */
-	
-}
-
-/*!
-  vector<int> StProtoJet::tracks(void)
-  {
-  vector<int> trackvec;
-  for(FourVecList::const_iterator it=mList.begin(); it!=mList.end(); ++it)
-  trackvec.push_back(static_cast<StMuTrackFourVec*>(*it)->getIndex());
-  return trackvec;
+  for (FourVecList::const_iterator it = rhs.mList.begin(); it != rhs.mList.end(); ++it) {
+    mList.push_back(*it);
+    StFourVec::add(**it);
   }
-*/
+}

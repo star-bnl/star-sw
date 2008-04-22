@@ -47,51 +47,47 @@ void StCdfChargedConeJetFinder::Init()
 
 void StCdfChargedConeJetFinder::findJets(JetList& protojets)
 {
-    cout <<"StCdfChargedConeJetFinder::findJets()"<<endl;
+  clear();
+  fillGrid(protojets);
+  setSearchWindow();
+  protojets.clear(); //clear 'em, add them back in as we find them
     
-    clear();
-    cout <<"\tfill grid"<<endl;
-    fillGrid(protojets);
-    setSearchWindow();
-    protojets.clear(); //clear 'em, add them back in as we find them
+  //we partition them so that we don't waste operations on empty cells:
+  mTheEnd = std::partition(mVec.begin(), mVec.end(), StJetEtCellIsNotEmpty() ); //keep
+  std::for_each(mVec.begin(), mVec.end(), PreJetUpdater() ); //CHANGE!
     
-    //we partition them so that we don't waste operations on empty cells:
-    mTheEnd = std::partition(mVec.begin(), mVec.end(), StJetEtCellIsNotEmpty() ); //keep
+  //now we sort them in descending order in LcpPt
+  //    std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
+  mVec.sort(StJetEtCellEtGreaterThan());
     
-    std::for_each(mVec.begin(), mVec.end(), PreJetUpdater() ); //CHANGE!
+  if (mPars.mDebug ) {print();}
     
-    //now we sort them in descending order in LcpPt
-    //    std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
-    mVec.sort(StJetEtCellEtGreaterThan());
-    
-    if (mPars.mDebug ) {print();}
-    
-    //loop from highest lcp-pt cell to lowest lcp-pt cell.
-    cout <<"\tBegin search over seeds"<<endl;
-    for (CellList::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
+  //loop from highest lcp-pt cell to lowest lcp-pt cell.
+  cout <<"\tBegin search over seeds"<<endl;
+  for (CellList::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
 	
-	StJetEtCell* centerCell = *vecIt;
-	if (centerCell->eT()<=mPars.mSeedEtMin) {break;} //we're all done (lcp-pt below threshold
+    StJetEtCell* centerCell = *vecIt;
+    if (centerCell->eT()<=mPars.mSeedEtMin) {break;} //we're all done (lcp-pt below threshold
 	
-	if (acceptSeed(centerCell) ) {
+    if (acceptSeed(centerCell) ) {
 	    
-	    //cout <<"-------------- new Seed --------------- "<<endl;
+      //cout <<"-------------- new Seed --------------- "<<endl;
 	    
-	    //use a work object: mWorkCell
-	    this->initializeWorkCell(centerCell);
+      //use a work object: mWorkCell
+      initializeWorkCell(centerCell);
 	    
-	    doSearch();
-	    addToPrejets(&mWorkCell);
-	}
+      doSearch();
+      addToPrejets(&mWorkCell);
     }
+  }
     
-    cout <<"\tcollect"<<endl;
-    for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
-	StJetEtCell* rj = &(*realJetIt);
-	if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
-	    protojets.push_back( collectCell(rj) );
-	}
+  cout <<"\tcollect"<<endl;
+  for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
+    StJetEtCell* rj = &(*realJetIt);
+    if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
+      protojets.push_back( collectCell(rj) );
     }
+  }
 }
 
 bool StCdfChargedConeJetFinder::acceptSeed(const StJetEtCell* cell)

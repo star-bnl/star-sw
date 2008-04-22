@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.11 2008/04/22 19:13:29 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.12 2008/04/22 22:22:05 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -199,6 +199,7 @@ void StConeJetFinder::findJets(JetList& protojets)
   std::for_each(mVec.begin(), mVec.end(), PreJetUpdater() );
 	
   //now we sort them in descending order in et: (et1>et2>...>etn)
+  //  std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
   mVec.sort(StJetEtCellEtGreaterThan());
 
   if (mPars.mDebug ) {print();}
