@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.8 2008/04/16 20:57:05 kocolosk Exp $
+ * $Id: StEmcGeom.cxx,v 1.9 2008/04/22 12:24:52 kocolosk Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.9  2008/04/22 12:24:52  kocolosk
+ * bug was actually in the BSMDP mapping the whole time -- see RT #1162
+ *
  * Revision 1.8  2008/04/16 20:57:05  kocolosk
  * rollback to 1.6 till we get RT#1162 ironed out
  *
@@ -662,8 +665,17 @@ Int_t StEmcGeom::getVolIdBsmd(const Int_t ivid, Int_t &module,Int_t &eta,Int_t &
     else if(t==3){
       detector = BSMDP;
       eta  = abs(eta);
-      //      sub  = strip;
-      sub  = 16 - strip; // 28-jul-2001
+      
+      // SMDP West: sub = 16 - strip
+      // SMDP East: sub  = strip
+      switch (rl) {
+        case 1:
+          sub = 16 - strip;
+          break;
+        case 2:
+          sub = strip;
+          break;
+      }
     }
     else {
 		LOG_ERROR << Form("<E> getVolIdBsmd: Type mismatch %i ",t) << endm;
