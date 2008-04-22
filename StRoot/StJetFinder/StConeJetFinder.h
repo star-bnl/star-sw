@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.8 2008/04/21 16:50:08 tai Exp $
+// $Id: StConeJetFinder.h,v 1.9 2008/04/22 00:14:59 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -30,8 +30,8 @@ class StConeJetFinder;
   \author M.L. Miller (Yale Software)
   Implementation of the cone algorithm, circa Tevatron RunII Jet Physics working group specification.
 */
-class StConeJetFinder : public StJetFinder
-{
+class StConeJetFinder : public StJetFinder {
+
 public:
 	
     ///useful typdefs
@@ -45,6 +45,8 @@ public:
     StConeJetFinder(const StConePars& pars);
     virtual ~StConeJetFinder();
 	
+  virtual void Init();
+
     ///simple access to the parameters
     StConePars pars() const; 
 	

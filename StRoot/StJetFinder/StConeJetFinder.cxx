@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.7 2008/04/21 16:35:10 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.8 2008/04/22 00:14:59 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -20,14 +20,12 @@ using std::sort;
 #include "StJetSpliterMerger.h"
 #include "StProtoJet.h"
 
-StConeJetFinder::StConeJetFinder(const StConePars& pars) : mPars(pars)
+StConeJetFinder::StConeJetFinder(const StConePars& pars)
+  : mPars(pars)
+  , mSearchCounter(0)
+  , mMerger(new StJetSpliterMerger())
 {
-    cout <<"StConeJetFinder::StConeJetFinder()"<<endl;
-	
-    mSearchCounter=0;
-    mMerger = new StJetSpliterMerger();
     mMerger->setSplitFraction(mPars.mSplitFraction);
-    
     buildGrid();
     mTheEnd = mVec.end();
 }
@@ -47,6 +45,13 @@ void StConeJetFinder::clearAndDestroy()
     }
 }
 
+
+void StConeJetFinder::Init()
+{
+//    mMerger->setSplitFraction(mPars.mSplitFraction);
+//    buildGrid();
+//    mTheEnd = mVec.end();
+}
 
 //StConeJetFinder::SearchResult StConeJetFinder::doSearch(StJetEtCell* centerCell)
 StConeJetFinder::SearchResult StConeJetFinder::doSearch()

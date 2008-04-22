@@ -28,6 +28,11 @@ StKtCluJetFinder::~StKtCluJetFinder()
     cout <<"StKtCluJetFinder::~StKtCluJetFinder()"<<endl;
 }
 
+void StKtCluJetFinder::Init()
+{
+
+}
+
 void StKtCluJetFinder::findJets(JetList& pj)
 {
     if (pj.size()<2) return; //nothing to be done!

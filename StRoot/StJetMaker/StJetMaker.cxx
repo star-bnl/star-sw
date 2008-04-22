@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.50 2008/04/21 21:20:25 tai Exp $
+// $Id: StJetMaker.cxx,v 1.51 2008/04/22 00:15:05 tai Exp $
 #include "StJetMaker.h"
 
 #include "StJetTreeWriter.h"
@@ -36,6 +36,10 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 
 Int_t StJetMaker::Init() 
 {
+  for(vector<StppJetAnalyzer2*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
+    (*jetFinder)->Init();
+  }
+
   _treeWriter->Init();
 
   return kStOk;
@@ -43,7 +47,9 @@ Int_t StJetMaker::Init()
 
 Int_t StJetMaker::Make()
 {
-  findJets();
+  for(vector<StppJetAnalyzer2*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
+    (*jetFinder)->findJets();
+  }
 
   _treeWriter->fillJetTree();
 
@@ -55,13 +61,6 @@ Int_t StJetMaker::Finish()
   _treeWriter->Finish();
 
   return kStOK;
-}
-
-void StJetMaker::findJets()
-{
-  for(vector<StppJetAnalyzer2*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
-    (*jetFinder)->findJets();
-  }
 }
 
 TTree* StJetMaker::tree() const 
