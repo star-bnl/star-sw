@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.9 2008/04/22 00:14:59 tai Exp $
+// $Id: StConeJetFinder.h,v 1.10 2008/04/22 19:13:29 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -37,7 +37,6 @@ public:
     ///useful typdefs
     typedef map<StEtGridKey, StJetEtCell*, StEtGridKeyLessThan> CellMap;
     typedef CellMap::value_type CellMapValType;
-    typedef vector<StJetEtCell*> CellVec;
     typedef StJetEtCell::CellList CellList;
     typedef list<StJetEtCell> ValueCellList;
 	
@@ -115,8 +114,8 @@ protected:
     StConePars mPars; ///run-time pars
 	
     CellMap mMap; ///the map references the objects in the vector
-    CellVec mVec; ///the vector holds the actual objects
-    CellVec::iterator mTheEnd;
+    CellList mVec; ///the vector holds the actual objects
+    CellList::iterator mTheEnd;
 	
     StJetEtCell mWorkCell;
     int mSearchCounter;

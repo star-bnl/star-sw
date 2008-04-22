@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.10 2008/04/22 17:40:28 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.11 2008/04/22 19:13:29 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -39,7 +39,7 @@ StConeJetFinder::~StConeJetFinder()
 
 void StConeJetFinder::clearAndDestroy()
 {
-    for (CellVec::iterator it=mVec.begin(); it!=mVec.end(); ++it) {
+    for (CellList::iterator it=mVec.begin(); it!=mVec.end(); ++it) {
 	delete *it;
 	*it=0;
     }
@@ -199,13 +199,13 @@ void StConeJetFinder::findJets(JetList& protojets)
   std::for_each(mVec.begin(), mVec.end(), PreJetUpdater() );
 	
   //now we sort them in descending order in et: (et1>et2>...>etn)
-  std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan());
-	
+  mVec.sort(StJetEtCellEtGreaterThan());
+
   if (mPars.mDebug ) {print();}
 	
   //loop from highest et cell to lowest et cell.
   // Begin search over seeds 
-  for (CellVec::iterator vecIt = mVec.begin(); vecIt != mTheEnd; ++vecIt) {
+  for (CellList::iterator vecIt = mVec.begin(); vecIt != mTheEnd; ++vecIt) {
     
     StJetEtCell* centerCell = *vecIt;
     if (centerCell->eT() <= mPars.mSeedEtMin) break; //we're all done
@@ -506,7 +506,6 @@ void StConeJetFinder::clear()
 
 void StConeJetFinder::print()
 {
-
     cout <<"\nStConeJetFinder::print()"<<endl;
     cout <<"mNeta:\t"<<mPars.mNeta<<endl;
     cout <<"mNphi:\t"<<mPars.mNphi<<endl;
@@ -528,25 +527,6 @@ void StConeJetFinder::print()
     cout <<"splitFraction():\t"<<mMerger->splitFraction()<<endl;
     cout <<"mRequireStableMidpoints:\t"<<mPars.mRequireStableMidpoints<<endl;
     cout <<"mDebug:\t"<<mPars.mDebug<<endl;
-    
-    /*
-      cout <<"non-empty contents of vector"<<endl;
-      for (CellVec::iterator it1=mVec.begin(); it1!=mVec.end(); ++it1) {
-      //const StJetEtCell* cell = *it1;
-      //if (cell->empty()==false) {
-      //cout <<*cell<<endl;
-      //}
-      }
-      
-      cout <<"\nnon-empty contents of map"<<endl;
-      for (CellMap::iterator it2=mMap.begin(); it2!=mMap.end(); ++it2) {
-      const StEtGridKey& key = (*it2).first;
-      const StJetEtCell* cell = (*it2).second;
-      if (cell->empty()==false) {
-      cout <<key<<"\t"<<*cell<<endl;
-      }
-      }
-    */
 }
 
 StConeJetFinder::CellMap::iterator 

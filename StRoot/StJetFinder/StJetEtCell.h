@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCell.h,v 1.8 2008/04/22 17:40:28 tai Exp $
+// $Id: StJetEtCell.h,v 1.9 2008/04/22 19:13:29 tai Exp $
 //StJetEtCell.h
 //M.L. Miller (Yale Software) (adapted from Akio Ogawa's work)
 //07/02
@@ -8,6 +8,7 @@
 
 #include "StProtoJet.h"
 
+#include <vector>
 #include <list>
 #include <iostream>
 
@@ -48,11 +49,13 @@ public:
 
   ///operators (sort by Et)
   virtual bool operator>(const StJetEtCell& rhs) const {
+    //    abort();
     return eT() > rhs.eT();
   }
     
   ///operators (sort by Et)
   virtual bool operator<(const StJetEtCell& rhs) const {
+    //    abort();
     return eT() < rhs.eT();
   }
 

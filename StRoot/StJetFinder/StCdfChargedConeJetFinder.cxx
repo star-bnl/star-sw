@@ -61,13 +61,14 @@ void StCdfChargedConeJetFinder::findJets(JetList& protojets)
     std::for_each(mVec.begin(), mVec.end(), PreJetUpdater() ); //CHANGE!
     
     //now we sort them in descending order in LcpPt
-    std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
+    //    std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
+    mVec.sort(StJetEtCellEtGreaterThan());
     
     if (mPars.mDebug ) {print();}
     
     //loop from highest lcp-pt cell to lowest lcp-pt cell.
     cout <<"\tBegin search over seeds"<<endl;
-    for (CellVec::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
+    for (CellList::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
 	
 	StJetEtCell* centerCell = *vecIt;
 	if (centerCell->eT()<=mPars.mSeedEtMin) {break;} //we're all done (lcp-pt below threshold
