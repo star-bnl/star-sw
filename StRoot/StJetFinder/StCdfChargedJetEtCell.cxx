@@ -2,12 +2,6 @@
 //M.L. Miller (Yale Software)
 //12/02
 
-//std
-#include <iostream>
-#include <cmath>
-#include <algorithm>
-
-//StJetFinder
 #include "StCdfChargedJetEtCell.h"
 
 StCdfChargedJetEtCell::StCdfChargedJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax)

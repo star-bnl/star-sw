@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.8 2008/04/22 00:14:59 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.9 2008/04/22 01:55:23 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -189,64 +189,58 @@ void StConeJetFinder::doMinimization()
 
 void StConeJetFinder::findJets(JetList& protojets)
 {
-    LOG_DEBUG <<"StConeJetFinder::findJets()"<<endm;
+  clear();
+  fillGrid(protojets);
+  setSearchWindow();
+  protojets.clear(); //clear 'em, add them back in as we find them
+	
+  //we partition them so that we don't waste operations on empty cells:
+  mTheEnd = std::partition(mVec.begin(), mVec.end(), StJetEtCellIsNotEmpty() );
+  std::for_each(mVec.begin(), mVec.end(), PreJetUpdater() );
+	
+  //now we sort them in descending order in et: (et1>et2>...>etn)
+  std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() );
+	
+  if (mPars.mDebug ) {print();}
+	
+  //loop from highest et cell to lowest et cell.
+  LOG_DEBUG <<"\tBegin search over seeds"<<endm;
+  for (CellVec::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
     
-    clear();
-    LOG_DEBUG <<"\tfill grid"<<endm;
-    fillGrid(protojets);
-    setSearchWindow();
-    protojets.clear(); //clear 'em, add them back in as we find them
-	
-    //we partition them so that we don't waste operations on empty cells:
-    mTheEnd = std::partition(mVec.begin(), mVec.end(), StJetEtCellIsNotEmpty() );
-    std::for_each(mVec.begin(), mVec.end(), PreJetUpdater() );
-	
-    //now we sort them in descending order in et: (et1>et2>...>etn)
-    std::sort(mVec.begin(), mTheEnd, StJetEtCellEtGreaterThan() );
-	
-    if (mPars.mDebug ) {print();}
-	
-    //loop from highest et cell to lowest et cell.
-    LOG_DEBUG <<"\tBegin search over seeds"<<endm;
-    for (CellVec::iterator vecIt=mVec.begin(); vecIt!=mTheEnd; ++vecIt) {
+    StJetEtCell* centerCell = *vecIt;
+    if (centerCell->eT()<=mPars.mSeedEtMin) {break;} //we're all done
 		
-	StJetEtCell* centerCell = *vecIt;
-	if (centerCell->eT()<=mPars.mSeedEtMin) {break;} //we're all done
-		
-	if (acceptSeed(centerCell) ) {
+    if (acceptSeed(centerCell) ) {
 			
-	    //cout <<"-------------- new Seed --------------- "<<endl;
+      //cout <<"-------------- new Seed --------------- "<<endl;
 			
-	    //use a work object: mWorkCell
-	    this->initializeWorkCell(centerCell);
+      //use a work object: mWorkCell
+      this->initializeWorkCell(centerCell);
 			
-	    if (mPars.mDoMinimization==true) {
-		doMinimization();
-	    }
-	    else {
-		doSearch();
-		addToPrejets(&mWorkCell);
-	    }
-	}
+      if (mPars.mDoMinimization) {
+	doMinimization();
+      }
+      else {
+	doSearch();
+	addToPrejets(&mWorkCell);
+      }
     }
+  }
     
-    if (mPars.mAddMidpoints==true) { 	//add seeds at midpoints
-	LOG_DEBUG <<"\tadd seeds at midpoints"<<endm;
-	addSeedsAtMidpoint(); //old style, add midpoints before split/merge
-    }
+  if (mPars.mAddMidpoints) { 	//add seeds at midpoints
+    addSeedsAtMidpoint(); //old style, add midpoints before split/merge
+  }
     
-    if (mPars.mDoSplitMerge==true) {//split-merge
-	LOG_DEBUG <<"\tsplit-merge"<<endm;
-	mMerger->splitMerge(mPreJets);
-    }
+  if (mPars.mDoSplitMerge) {//split-merge
+    mMerger->splitMerge(mPreJets);
+  }
     
-    LOG_DEBUG <<"\tcollect"<<endm;
-    for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
-	StJetEtCell* rj = &(*realJetIt);
-	if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
-	    protojets.push_back( collectCell(rj) );
-	}
+  for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
+    StJetEtCell* rj = &(*realJetIt);
+    if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
+      protojets.push_back( collectCell(rj) );
     }
+  }
 }
 
 double midpoint(double v1, double v2)
@@ -337,50 +331,36 @@ StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiM
 
 void StConeJetFinder::buildGrid()
 {
-    
-    clock_t start = clock();
+  double dEta = mPars.mEtaMax-mPars.mEtaMin;
+  double dPhi = mPars.mPhiMax - mPars.mPhiMin;
+  double etaBinWidth = dEta/static_cast<double>(mPars.mNeta);
+  double phiBinWidth = dPhi/static_cast<double>(mPars.mNphi);
 	
-    double dEta = mPars.mEtaMax-mPars.mEtaMin;
-    double dPhi = mPars.mPhiMax - mPars.mPhiMin;
-    double etaBinWidth = dEta/static_cast<double>(mPars.mNeta);
-    double phiBinWidth = dPhi/static_cast<double>(mPars.mNphi);
-	
-    for(int i=0; i<mPars.mNeta; i++){
+  for(int i = 0; i < mPars.mNeta; ++i){
 		
-	double etaMin = mPars.mEtaMin + static_cast<double>(i)*etaBinWidth;
-	double etaMax = etaMin+etaBinWidth;
+    double etaMin = mPars.mEtaMin + static_cast<double>(i)*etaBinWidth;
+    double etaMax = etaMin + etaBinWidth;
 		
-	for(int j=0; j<mPars.mNphi; j++){
+    for(int j = 0; j < mPars.mNphi; ++j){
 			
-	    double phiMin = mPars.mPhiMin + static_cast<double>(j)*phiBinWidth;
-	    double phiMax = phiMin + phiBinWidth;
+      double phiMin = mPars.mPhiMin + static_cast<double>(j)*phiBinWidth;
+      double phiMax = phiMin + phiBinWidth;
 
-	    StJetEtCell* cell = makeCell(etaMin, etaMax, phiMin, phiMax);
+      StJetEtCell* cell = makeCell(etaMin, etaMax, phiMin, phiMax);
 			
-	    //add it to the vector for ownership and et sorting
-	    mVec.push_back( cell );
+      //add it to the vector for ownership and et sorting
+      mVec.push_back(cell);
 			
-	    //now add it to the map for cluster finding
-	    double eta = cell->eta();
-	    double phi = cell->phi();
+      //now add it to the map for cluster finding
+      double eta = cell->eta();
+      double phi = cell->phi();
 			
-	    StEtGridKey key = findKey(eta, phi);
-	    CellMapValType val(key, cell);
+      StEtGridKey key = findKey(eta, phi);
+      CellMapValType val(key, cell);
 			
-	    mMap.insert(val);
-			
-	    //retrieve it and "touch" it to test
-	    //StJetEtCell* refCell = mVec.back();
-	    //CellMap::iterator where = mMap.find(key);
-	    //StJetEtCell* found = (*where).second;
-	    //found->setNtimesUsed(999);
-			
-	}
+      mMap.insert(val);
     }
-    clock_t stop = clock();
-    double elapsed = static_cast<double>(stop-start)/
-	static_cast<double>(CLOCKS_PER_SEC);
-    cout <<"\tTime to build grid:\t"<<elapsed<<endl;	
+  }
 }
 
 bool StConeJetFinder::inVolume(double eta, double phi)

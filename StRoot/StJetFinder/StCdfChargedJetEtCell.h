@@ -1,3 +1,5 @@
+// -*- mode: c++;-*-
+// $Id: StCdfChargedJetEtCell.h,v 1.3 2008/04/22 01:55:23 tai Exp $
 //StCdfChargedJetEtCell.h
 //M.L. Miller (Yale Software)
 //12/02
