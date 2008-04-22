@@ -8,7 +8,7 @@
 using namespace std;
 #include <iostream>
 
-class StJetEtCell;
+#include "StJetEtCell.h"
 
 struct StJetEtCellEquals
 {
@@ -37,21 +37,14 @@ struct StJetEtCellEtLessThan
     bool operator()(StJetEtCell* lhs, StJetEtCell* rhs);
 };
 
-struct StJetEtCellEtGreaterThan
-{
-    //bool operator()(const StJetEtCell* lhs, const StJetEtCell* rhs) const;
-    bool operator()(StJetEtCell* lhs, StJetEtCell* rhs);
-};
+struct StJetEtCellEtGreaterThan { bool operator()(StJetEtCell* lhs, StJetEtCell* rhs) { return lhs->eT() > rhs->eT(); } };
 
-struct StJetEtCellClearer
-{
-    void operator()(StJetEtCell* lhs);
-};
+// struct StJetEtCellClearer
+// {
+//     void operator()(StJetEtCell* lhs);
+// };
 
-struct StJetEtCellIsNotEmpty
-{
-    bool operator()(const StJetEtCell*);
-};
+struct StJetEtCellIsNotEmpty { bool operator()(const StJetEtCell* c) { return !c->empty(); } };
 
 class StProtoJet;
 
