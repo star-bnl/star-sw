@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StKtCluJetFinder.h,v 1.3 2008/04/21 16:22:34 tai Exp $
+// $Id: StKtCluJetFinder.h,v 1.4 2008/04/22 00:15:00 tai Exp $
 #ifndef StKtCluJetFinder_HH
 #define StKtCluJetFinder_HH
 
@@ -16,6 +16,8 @@ class StKtCluJetFinder : public StJetFinder
 public:
     StKtCluJetFinder(const StKtCluPars& pars);
     virtual ~StKtCluJetFinder();
+
+  virtual void Init();
 
     /*! Pass a list of protojets.  This list will be packed with jets+beam jets after..
       The user is responsible for filtering the jets. */

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StppJetAnalyzer2.h,v 1.5 2008/04/21 21:37:05 tai Exp $
+// $Id: StppJetAnalyzer2.h,v 1.6 2008/04/22 00:15:05 tai Exp $
 #ifndef STPPJETANALYZER2_HH
 #define STPPJETANALYZER2_HH
 
@@ -28,6 +28,8 @@ public:
   StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* jp, StFourPMaker* fp, ProtoJetList& protoJets);
 
   virtual ~StppJetAnalyzer2();
+
+  void Init();
 
   void findJets();
 

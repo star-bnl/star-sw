@@ -20,12 +20,12 @@ using std::sort;
 
 //careful, can't use buildGrid() call in base class constructor or we'll sef-fault because it calls
 //a virtual function in the constructor while the derived class doesn't yet exist
-StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(const StCdfChargedConePars& pars) : StConeJetFinder(pars)
+StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(const StCdfChargedConePars& pars) 
+  : StConeJetFinder(pars)
 {
-    cout <<"StCdfChargedConeJetFinder::StCdfChargedConeJetFinder()"<<endl;
-    mPars= pars;
-    buildGrid();
-    mTheEnd = mVec.end();
+  mPars= pars;
+  buildGrid();
+  mTheEnd = mVec.end();
 }
 
 StCdfChargedConeJetFinder::~StCdfChargedConeJetFinder()
@@ -36,6 +36,13 @@ StJetEtCell* StCdfChargedConeJetFinder::makeCell(double etaMin, double etaMax,
 						 double phiMin, double phiMax)
 {
     return new StCdfChargedJetEtCell(etaMin, etaMax, phiMin, phiMax);
+}
+
+void StCdfChargedConeJetFinder::Init()
+{
+  //    mMerger->setSplitFraction(mPars.mSplitFraction);
+  //    buildGrid();
+  //    mTheEnd = mVec.end();
 }
 
 void StCdfChargedConeJetFinder::findJets(JetList& protojets)

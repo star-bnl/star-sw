@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.34 2008/04/21 21:20:26 tai Exp $
+// $Id: StJetMaker.h,v 1.35 2008/04/22 00:15:05 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -42,8 +42,6 @@ private:
 
   std::vector<StppJetAnalyzer2*> _jetFinderList;
 
-  void findJets();
-  
   StSpinJet::StJetTreeWriter *_treeWriter;
 
   StSpinJet::StJetMakerBackwordCompatibility *_backwordCompatibility;

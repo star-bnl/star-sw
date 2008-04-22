@@ -1,15 +1,16 @@
-// $Id: StppJetAnalyzer2.cxx,v 1.4 2008/04/21 21:37:05 tai Exp $
+// $Id: StppJetAnalyzer2.cxx,v 1.5 2008/04/22 00:15:05 tai Exp $
 #include "StppJetAnalyzer2.h"
 
 
 //StJetFinder
-#include "StJetFinder/FourVec.h"
-#include "StJetFinder/StProtoJet.h"
-#include "StJetFinder/StJetFinder.h"
+#include <StJetFinder/FourVec.h>
+#include <StJetFinder/StProtoJet.h>
+#include <StJetFinder/StJetFinder.h>
+#include <StJetFinder/StJetPars.h>
 
 
 //StMuDst
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include <StMuDSTMaker/COMMON/StMuTrack.h>
 
 //StJetMaker
 #include "StMuTrackFourVec.h"
@@ -35,6 +36,11 @@ StppJetAnalyzer2::StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* pars, StFou
 StppJetAnalyzer2::~StppJetAnalyzer2()
 {
 
+}
+
+void StppJetAnalyzer2::Init()
+{
+  _jetFinder->Init();
 }
 
 void StppJetAnalyzer2::findJets()
