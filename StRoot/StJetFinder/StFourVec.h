@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StFourVec.h,v 1.2 2008/04/22 22:22:05 tai Exp $
+// $Id: StFourVec.h,v 1.3 2008/04/23 00:44:19 tai Exp $
 #ifndef STFOURVEC_H
 #define STFOURVEC_H
 
@@ -20,33 +20,41 @@ public:
   virtual ~StFourVec() { };
 	
   //momenta
-  double pt() const;
-  double px() const;
-  double py() const;
-  double pz() const;
-  double p() const;
-	
+  double pt() const { return ::sqrt(mPx*mPx + mPy*mPy); }
+  double px() const { return mPx; }
+  double py() const { return mPy; }
+  double pz() const { return mPz; }
+  
   //angles
-  double theta() const;
-  double phi() const;
-  double eta() const;
-  double rapidity() const;
-	
+  double phi() const { return atan2(mPy, mPx); }
+  double eta() const
+  {
+    double arg = tan(theta()/2.);
+    return (arg > 0) ? -::log(arg) : -999;
+  }
+
   //4-th component
-  double eT() const;
-  double eZ() const;
-  double e() const;
-  double mass() const;
+  double e() const { return fabs(mE); }
+  double eT() const
+  {
+    if(p() == 0.0) return 0.0;
+    return ::sqrt(e()*e()*pt()*pt()/(p()*p()));
+  }
+  double mass() const { return ::sqrt(fabs(mE*mE - p()*p() ) ); }
 	
   //charge
-  double charge() const;
+  double charge() const { return mCharge; }
 	
   //actions (these should be templated)
   void add(const StFourVec& other);
   void add(const AbstractFourVec& rhs);
   void operator=(const StFourVec& rhs);
   void operator=(const AbstractFourVec& rhs);
-  void clear();
+
+  void clear()
+  {
+    mPx = mPy = mPz = mE = mCharge = 0;
+  }
 	
 protected:
   double mPx;
@@ -54,91 +62,14 @@ protected:
   double mPz;
   double mE;
   double mCharge;
+
+private:
+  double p() const { return ::sqrt(mPx*mPx + mPy*mPy + mPz*mPz); }
+  double theta() const { return acos( mPz/p()); }
+
 };
 
-inline void StFourVec::clear()
-{
-	mPx=mPy=mPz=mE=mCharge=0.;
-}
 
-inline double StFourVec::pt() const
-{
-    return ::sqrt( mPx*mPx + mPy*mPy );
-}
-
-inline double StFourVec::px() const
-{
-    return mPx;
-}
-
-inline double StFourVec::py() const
-{
-    return mPy;
-}
-
-inline double StFourVec::pz() const
-{
-    return mPz;
-}
-
-inline double StFourVec::p() const
-{
-    return ::sqrt(mPx*mPx + mPy*mPy + mPz*mPz);
-}
-
-inline double StFourVec::theta() const
-{
-    return acos( mPz/p() );
-}
-
-inline double StFourVec::phi() const
-{
-    return atan2(mPy, mPx);
-}
-
-inline double StFourVec::rapidity() const
-{
-    double num = e()+mPz;
-    double den = e()-mPz;
-	
-    if (den==0.) {return -999;}
-    double arg = num/den;
-    if (arg<0.) {return -999;}
-    return 0.5 * ::log(arg);
-}
-
-inline double StFourVec::eta() const
-{
-    double arg = tan(theta()/2.);
-    return (arg>0.) ? -::log(arg) : -999;
-}
-
-//4-th component
-inline double StFourVec::eT() const
-{
-    if(p() == 0.0) return 0.0;
-    return ::sqrt(e()*e()*pt()*pt()/(p()*p()));
-}
-
-inline double StFourVec::eZ() const
-{
-    return eT()*sinh(eta());
-}
-
-inline double StFourVec::e() const
-{
-    return fabs(mE);
-}
-
-inline double StFourVec::mass() const
-{
-    return ::sqrt(fabs(mE*mE - p()*p() ) );
-}
-
-inline double StFourVec::charge() const
-{
-    return mCharge;
-}
 
 inline void StFourVec::add(const StFourVec& rhs)
 {
