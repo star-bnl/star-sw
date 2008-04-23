@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StProtoJet.h,v 1.11 2008/04/23 20:00:01 tai Exp $
+// $Id: StProtoJet.h,v 1.12 2008/04/23 20:16:51 tai Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
@@ -20,33 +20,27 @@
 class StProtoJet {
 
 public:
+
   typedef std::vector<AbstractFourVec*> FourVecList;
 	
   StProtoJet();
-  StProtoJet(AbstractFourVec*);
+  StProtoJet(AbstractFourVec* particle);
   virtual ~StProtoJet();
 	
-  //access
-	
-  ///Number of particles in this protojet
-  unsigned int numberOfParticles() const {return mList.size();}
-  unsigned int size() const {return mList.size();}
-  FourVecList& list() {return mList;}
+  unsigned int numberOfParticles() const {return _particleList.size();}
+  unsigned int size() const {return _particleList.size();}
+  FourVecList& list() {return _particleList;}
 	
   ///The d=et^2 of the protojet
   double d() const {return eT()*eT();}
 	
-  ///Add a protojet to this one and calculate new parameters.  
-  void merge(const StProtoJet&);
+  void merge(const StProtoJet& protoJet);
 	
-  ///Add a protojet to this one w/o calculating the new parameters
-  void add(const StProtoJet&);
-  void add(const AbstractFourVec& rhs);
+  void add(const StProtoJet& protoJet);
+  void add(const AbstractFourVec& particle);
 
-  ///update the parameters of this protojet (in case some have been added via add())
   void update();
 	
-  ///clear
   void clear();
 	
   friend std::ostream& operator<<(std::ostream& os, const StProtoJet& j);
@@ -75,14 +69,14 @@ public:
   double mass() const { return ::sqrt(fabs(mE*mE - p()*p() ) ); }
 	
   //charge
-  double charge() const { return mCharge; }
+  double charge() const { return _charge; }
 	
 private:
 
   double p() const { return ::sqrt(mPx*mPx + mPy*mPy + mPz*mPz); }
   double theta() const { return acos( mPz/p()); }
 
-  FourVecList mList;
+  FourVecList _particleList;
 
 
   double mPx;
@@ -90,19 +84,19 @@ private:
   double mPz;
   double mE;
 
-  double mCharge;
+  double _charge;
 
 };
 
 
 inline std::ostream& operator<<(std::ostream& os, const StProtoJet& j)
 {
-    os <<"et: "<<j.eT()<<"\tphi: "<<j.phi()<<"\teta: "<<j.eta()
-       <<"\tmass: "<<j.mass()<<"\tcharge: "<<j.charge()<<"\tParticles"<< std::endl;
-    for (StProtoJet::FourVecList::const_iterator it=j.mList.begin(); it!=j.mList.end(); ++it) {
-      os << **it << std::endl;
-    }
-    return os;
+  os <<"et: "<<j.eT()<<"\tphi: "<<j.phi()<<"\teta: "<<j.eta()
+     <<"\tmass: "<<j.mass()<<"\tcharge: "<<j.charge()<<"\tParticles"<< std::endl;
+  for (StProtoJet::FourVecList::const_iterator it=j._particleList.begin(); it!=j._particleList.end(); ++it) {
+    os << **it << std::endl;
+  }
+  return os;
 }
 
 #endif

@@ -1,4 +1,4 @@
-// $Id: StProtoJet.cxx,v 1.11 2008/04/23 20:00:01 tai Exp $
+// $Id: StProtoJet.cxx,v 1.12 2008/04/23 20:16:50 tai Exp $
 
 #include "StProtoJet.h"
 
@@ -6,16 +6,16 @@ using namespace std;
 
 StProtoJet::StProtoJet()
   : mPx(0), mPy(0), mPz(0), mE(0)
-  , mCharge(0) 
+  , _charge(0) 
 {
 
 }
 
-StProtoJet::StProtoJet(AbstractFourVec* vec)
-  : mPx(vec->px()), mPy(vec->py()), mPz(vec->pz()), mE(vec->e())
-  , mCharge(vec->charge())
+StProtoJet::StProtoJet(AbstractFourVec* particle)
+  : mPx(particle->px()), mPy(particle->py()), mPz(particle->pz()), mE(particle->e())
+  , _charge(particle->charge())
 {
-    mList.push_back(vec);
+  _particleList.push_back(particle);
 }
 
 StProtoJet::~StProtoJet()
@@ -24,53 +24,52 @@ StProtoJet::~StProtoJet()
 
 void StProtoJet::update()
 {
-    mPx = mPy = mPz = mE = mCharge = 0.;
-    // add 4-momenta
-    for (FourVecList::const_iterator it2=mList.begin(); it2!=mList.end(); ++it2) {
-	AbstractFourVec* vec = *it2;
-	mPx += vec->px();
-	mPy += vec->py();
-	mPz += vec->pz();
-	mE  += vec->e();
-	mCharge += vec->charge();
-    }
-}
-
-void StProtoJet::add(const StProtoJet& rhs)
-{
-  mPx += rhs.mPx;
-  mPy += rhs.mPy;
-  mPz += rhs.mPz;
-  mE  += rhs.mE;
-  mCharge += rhs.mCharge;
-  for (FourVecList::const_iterator it = rhs.mList.begin(); it!=rhs.mList.end(); ++it) {
-    mList.push_back(*it);
+  mPx = mPy = mPz = mE = _charge = 0.;
+  // add 4-momenta
+  for (FourVecList::const_iterator particle = _particleList.begin(); particle != _particleList.end(); ++particle) {
+    mPx += (*particle)->px();
+    mPy += (*particle)->py();
+    mPz += (*particle)->pz();
+    mE  += (*particle)->e();
+    _charge += (*particle)->charge();
   }
 }
 
-void StProtoJet::add(const AbstractFourVec& rhs)
+void StProtoJet::add(const StProtoJet& protoJet)
 {
-    mPx += rhs.px();
-    mPy += rhs.py();
-    mPz += rhs.pz();
-    mE  += rhs.e();
-    mCharge += rhs.charge();
+  mPx += protoJet.mPx;
+  mPy += protoJet.mPy;
+  mPz += protoJet.mPz;
+  mE  += protoJet.mE;
+  _charge += protoJet._charge;
+  for (FourVecList::const_iterator particle = protoJet._particleList.begin(); particle != protoJet._particleList.end(); ++particle) {
+    _particleList.push_back(*particle);
+  }
 }
 
-void StProtoJet::merge(const StProtoJet& rhs)
+void StProtoJet::add(const AbstractFourVec& particle)
 {
-  for (FourVecList::const_iterator it = rhs.mList.begin(); it != rhs.mList.end(); ++it) {
-    mList.push_back(*it);
-    mPx += (*it)->px();
-    mPy += (*it)->py();
-    mPz += (*it)->pz();
-    mE  += (*it)->e();
-    mCharge += (*it)->charge();
+  mPx += particle.px();
+  mPy += particle.py();
+  mPz += particle.pz();
+  mE  += particle.e();
+  _charge += particle.charge();
+}
+
+void StProtoJet::merge(const StProtoJet& protoJet)
+{
+  for (FourVecList::const_iterator particle = protoJet._particleList.begin(); particle != protoJet._particleList.end(); ++particle) {
+    _particleList.push_back(*particle);
+    mPx += (*particle)->px();
+    mPy += (*particle)->py();
+    mPz += (*particle)->pz();
+    mE  += (*particle)->e();
+    _charge += (*particle)->charge();
   }
 }
 
 void StProtoJet::clear()
 {
-  mList.clear();
-  mPx = mPy = mPz = mE = mCharge = 0;
+  _particleList.clear();
+  mPx = mPy = mPz = mE = _charge = 0;
 }
