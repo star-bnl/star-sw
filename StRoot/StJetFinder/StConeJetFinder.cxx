@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.12 2008/04/22 22:22:05 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.13 2008/04/23 01:28:53 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -102,7 +102,8 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
     }
 	
     //finished with walk, compare centroid to cone center
-    const StFourVec& centroid = mWorkCell.centroid();
+    const StProtoJet& centroid = mWorkCell.centroid();
+    //    const StFourVec& centroid = mWorkCell.centroid();
     StEtGridKey centroidKey;
 	
     if (this->inVolume(centroid.eta(), centroid.phi() )) {
