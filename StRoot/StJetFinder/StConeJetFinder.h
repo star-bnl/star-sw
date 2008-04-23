@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.10 2008/04/22 19:13:29 tai Exp $
+// $Id: StConeJetFinder.h,v 1.11 2008/04/23 21:04:53 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -113,8 +113,8 @@ protected:
 	
     StConePars mPars; ///run-time pars
 	
-    CellMap mMap; ///the map references the objects in the vector
-    CellList mVec; ///the vector holds the actual objects
+    CellMap _EtCellMap; ///the map references the objects in the vector
+    CellList _EtCellList; ///the vector holds the actual objects
     CellList::iterator mTheEnd;
 	
     StJetEtCell mWorkCell;
