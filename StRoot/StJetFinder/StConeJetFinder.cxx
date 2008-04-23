@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.14 2008/04/23 21:04:52 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.15 2008/04/23 21:31:10 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -198,49 +198,58 @@ void StConeJetFinder::findJets(JetList& protoJetList)
   //we partition them so that we don't waste operations on empty cells:
   mTheEnd = std::partition(_EtCellList.begin(), _EtCellList.end(), StJetEtCellIsNotEmpty());
   std::for_each(_EtCellList.begin(), _EtCellList.end(), PreJetUpdater() );
-	
+
   //now we sort them in descending order in et: (et1>et2>...>etn)
   //  std::sort(_EtCellList.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
   _EtCellList.sort(StJetEtCellEtGreaterThan());
 
   if (mPars.mDebug ) {print();}
-	
+
   //loop from highest et cell to lowest et cell.
   // Begin search over seeds 
   for (CellList::iterator vecIt = _EtCellList.begin(); vecIt != mTheEnd; ++vecIt) {
-    
+
     StJetEtCell* centerCell = *vecIt;
     if (centerCell->eT() <= mPars.mSeedEtMin) break; //we're all done
-		
+
     if (acceptSeed(centerCell)) {
       //new Seed
-			
+
       //use a work object: mWorkCell
       initializeWorkCell(centerCell);
-			
-      if (mPars.mDoMinimization) {
-	doMinimization();
-      }
-      else {
-	doSearch();
-	addToPrejets(&mWorkCell);
-      }
+
+      findJets_sub1();
     }
   }
     
+  findJets_sub2();
+
+  for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
+    StJetEtCell* rj = &(*realJetIt);
+    if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
+      protoJetList.push_back( collectCell(rj) );
+    }
+  }
+}
+
+void StConeJetFinder::findJets_sub1()
+{
+  if (mPars.mDoMinimization) {
+    doMinimization();
+  } else {
+    doSearch();
+    addToPrejets(&mWorkCell);
+  }
+}
+
+void StConeJetFinder::findJets_sub2()
+{
   if (mPars.mAddMidpoints) { 	//add seeds at midpoints
     addSeedsAtMidpoint(); //old style, add midpoints before split/merge
   }
     
   if (mPars.mDoSplitMerge) {//split-merge
     mMerger->splitMerge(mPreJets);
-  }
-    
-  for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
-    StJetEtCell* rj = &(*realJetIt);
-    if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
-      protoJetList.push_back( collectCell(rj) );
-    }
   }
 }
 
