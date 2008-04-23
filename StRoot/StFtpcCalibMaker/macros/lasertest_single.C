@@ -1,6 +1,9 @@
-// $Id: lasertest_single.C,v 1.4 2006/04/05 08:50:36 jcs Exp $
+// $Id: lasertest_single.C,v 1.5 2008/04/23 19:42:18 jcs Exp $
 //
 // $Log: lasertest_single.C,v $
+// Revision 1.5  2008/04/23 19:42:18  jcs
+// load the libStDb_Tables.so and StDetectorDbMaker.so which are needed as of STAR version SL07d
+//
 // Revision 1.4  2006/04/05 08:50:36  jcs
 // set t0 = ".000001" if t0 = "0" and gas = "0" to avoid seg fault
 //
@@ -47,6 +50,8 @@ void lasertest_single(TString filename,int ftpc, int lsec, int straight, int gfi
   gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
 
+  gSystem->Load("libStDb_Tables.so");
+  gSystem->Load("StDetectorDbMaker.so");  
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib.so");
   gSystem->Load("StDbBroker.so");
