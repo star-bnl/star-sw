@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: AbstractFourVec.h,v 1.2 2008/04/19 02:09:52 tai Exp $
+// $Id: AbstractFourVec.h,v 1.3 2008/04/23 19:24:09 tai Exp $
 #ifndef ABSTRACTFOURVEC_H
 #define ABSTRACTFOURVEC_H
 
@@ -39,6 +39,20 @@ public:
 	
 private:
 
+};
+
+
+inline std::ostream& operator<<(std::ostream& os, const AbstractFourVec& v)
+{
+    return os <<"et: "<<v.eT()<<"\tphi: "<<v.phi()<<"\teta: "<<v.eta()<<"\tmass: "<<v.mass()
+		<<"\tcharge: "<<v.charge();
+}
+
+struct StreamFourVec
+{
+    void operator()(AbstractFourVec* v) {
+      std::cout << *v << std::endl;
+    }
 };
 
 
