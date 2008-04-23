@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.12 2008/04/23 21:31:10 tai Exp $
+// $Id: StConeJetFinder.h,v 1.13 2008/04/23 21:40:41 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -111,9 +111,6 @@ protected:
 	
 protected:
 
-  virtual void findJets_sub1();
-  virtual void findJets_sub2();
-
     StConePars mPars; ///run-time pars
 	
     CellMap _EtCellMap; ///the map references the objects in the vector
@@ -130,6 +127,11 @@ protected:
     typedef vector<ValueCellListItPair> VCLItPairVec;
     VCLItPairVec mMidpointVec;
 	
+private:
+
+  virtual void findJets_sub1();
+  virtual void findJets_sub2();
+
 };
 
 inline StConePars StConeJetFinder::pars() const
