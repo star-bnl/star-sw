@@ -69,7 +69,7 @@ double StJetEtCell::distance(const StJetEtCell& rhs) const
   return ::sqrt(dEta*dEta + dPhi*dPhi);
 }
 
-const StFourVec& StJetEtCell::centroid()
+const StProtoJet& StJetEtCell::centroid()
 {
   if (!mUpToDate) {
 

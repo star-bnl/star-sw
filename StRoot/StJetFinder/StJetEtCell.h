@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCell.h,v 1.9 2008/04/22 19:13:29 tai Exp $
+// $Id: StJetEtCell.h,v 1.10 2008/04/23 01:28:53 tai Exp $
 //StJetEtCell.h
 //M.L. Miller (Yale Software) (adapted from Akio Ogawa's work)
 //07/02
@@ -71,7 +71,7 @@ public:
   };
 
   ///access to the centroid.  If mUpToDate==true, just return.  Else calculate, store, return
-  const StFourVec& centroid();
+  const StProtoJet& centroid();
 
   ///Add a protojet to this cell
   virtual void add(const StProtoJet&);
@@ -119,7 +119,7 @@ protected:
 
   ///lazy cache of centroid
   bool mUpToDate;
-  StFourVec mCentroid;
+  StProtoJet mCentroid;
 
   ///remember the cells cluster w/ this one
   CellList mCells;

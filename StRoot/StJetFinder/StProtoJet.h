@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StProtoJet.h,v 1.8 2008/04/22 22:22:05 tai Exp $
+// $Id: StProtoJet.h,v 1.9 2008/04/23 01:28:53 tai Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
@@ -43,6 +43,7 @@ public:
 	
   ///Add a protojet to this one w/o calculating the new parameters
   void add(const StProtoJet&);
+  void add(const AbstractFourVec& rhs) { StFourVec::add(rhs); }
   void remove(StProtoJet&);
 
   ///update the parameters of this protojet (in case some have been added via add())
