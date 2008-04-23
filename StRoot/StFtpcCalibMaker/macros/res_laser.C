@@ -1,8 +1,8 @@
-// $Id: res_laser.C,v 1.3 2008/04/23 20:10:09 jcs Exp $
+// $Id: res_laser.C,v 1.4 2008/04/23 20:28:56 jcs Exp $
 //
 // $Log: res_laser.C,v $
-// Revision 1.3  2008/04/23 20:10:09  jcs
-// add instructions, remove old code
+// Revision 1.4  2008/04/23 20:28:56  jcs
+// clean up code
 //
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
@@ -14,6 +14,7 @@
 //       cat *_res.log >> res.log
 
  
+#include "Gtypes.h"
 #include "iostream.h"
 
 float calc_min(float b1,float b2)
@@ -54,8 +55,7 @@ void res_laser()
   
   float gas_temp, t0_temp, c2,rad, err, resphi_temp, resrad_temp;
 
-  //for (int i=1;i<=nhits-1;i++)
-  int i==0;
+  int ihits==0;
   while(!feof(file1))
     {
 
@@ -73,35 +73,35 @@ void res_laser()
       //cout<<t0_temp<<endl;
       //if (t0_temp!=0)
 	{
-	  t0[i]=t0_temp;
-	  gas[i]=gas_temp;
-	  resphi[i]=resphi_temp;
-	  resrad[i]=resrad_temp;
-	  cout<<i<<" t0["<<i<<"] = "<<t0_temp<<" gas["<<i<<"] = "<<gas_temp<<" resphi["<<i<<"] = "<<resphi_temp<<" resrad["<<i<<"] = "<<resrad_temp<<endl;
-	  i++;
+	  t0[ihits]=t0_temp;
+	  gas[ihits]=gas_temp;
+	  resphi[ihits]=resphi_temp;
+	  resrad[ihits]=resrad_temp;
+	  cout<<ihits<<" t0["<<ihits<<"] = "<<t0_temp<<" gas["<<ihits<<"] = "<<gas_temp<<" resphi["<<ihits<<"] = "<<resphi_temp<<" resrad["<<ihits<<"] = "<<resrad_temp<<endl;
+	  ihits++;
 	}
     }
 
   TF1 *g=new TF1("g","[0]+[1]*x^2",0,0.6);
   g->SetParameters(0.01,0.001);
-  g->SetLineColor(2);
+  g->SetLineColor(kRed);
 
-  TGraph *gerad = new TGraph(nhits,gas,resphi);
+  TGraph *gerad = new TGraph(ihits,gas,resphi);
   gerad->SetMarkerStyle(22);
-  gerad->SetMarkerColor(2);
+  gerad->SetMarkerColor(kRed);
   gerad->SetMarkerSize(1);
   gerad->Draw("P"); 
   //gerad->Fit(g,"R");
 
   //cout<<"Min phi = "<<calc_min(g->GetParameter(0),g->GetParameter(1))<<endl;
 
-  TGraph *gerad1 = new TGraph(nhits,gas,resrad);
+  TGraph *gerad1 = new TGraph(ihits,gas,resrad);
   gerad1->SetMarkerStyle(23);
-  gerad1->SetMarkerColor(3);
+  gerad1->SetMarkerColor(kGreen);
   gerad1->SetMarkerSize(1);
   gerad1->Draw("P"); 
    
-  g->SetLineColor(3);
+  //g->SetLineColor(kGreen);
   //gerad1->Fit(g,"R");
 
   //cout<<"Min rad = "<<calc_min(g->GetParameter(0),g->GetParameter(1))<<endl;
