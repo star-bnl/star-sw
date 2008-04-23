@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.20 2008/04/22 22:31:22 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.21 2008/04/23 18:20:15 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.21  2008/04/23 18:20:15  dongx
+ * vpd letime and tetime stored in double precision
+ *
  * Revision 1.20  2008/04/22 22:31:22  dongx
  * leadingEdgeTime and trailingEdgeTime stored as double precision in StTofCell
  *
@@ -2392,13 +2395,13 @@ Int_t StTofrMatchMaker::processEventYear8(){
 
     int tmptdc = aData->leadingTdc();
     int bin = (int)tmptdc&0x3ff;
-    float tmptdc_f = tmptdc + mTofINLCorr->getVpdINLCorr(ewId, lechan, bin);
-    float letime = tmptdc_f*VHRBIN2PS;
+    double tmptdc_f = tmptdc + mTofINLCorr->getVpdINLCorr(ewId, lechan, bin);
+    double letime = tmptdc_f*VHRBIN2PS;
 
     tmptdc = aData->trailingTdc();
     bin = (int)tmptdc&0x3ff;
     tmptdc_f = tmptdc + mTofINLCorr->getVpdINLCorr(ewId, techan, bin);
-    float tetime = tmptdc_f*VHRBIN2PS;
+    double tetime = tmptdc_f*VHRBIN2PS;
 
     StThreeVectorF zero(0.,0.,0.);
     StTofCell *tofCell = new StTofCell(120+ewId, 0, tubeId, lechan, 0, 0, 0, zero);
