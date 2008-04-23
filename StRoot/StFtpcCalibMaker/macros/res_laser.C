@@ -1,10 +1,19 @@
-// $Id: res_laser.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: res_laser.C,v 1.3 2008/04/23 20:10:09 jcs Exp $
 //
 // $Log: res_laser.C,v $
+// Revision 1.3  2008/04/23 20:10:09  jcs
+// add instructions, remove old code
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
 
+// analyze the *_res.log files produced by lasertest.C macro
+// to use create the res.log file with the following 2 commands
+//       touch res.log
+//       cat *_res.log >> res.log
+
+ 
 #include "iostream.h"
 
 float calc_min(float b1,float b2)
@@ -36,15 +45,6 @@ void res_laser()
   hr->DrawCopy(); 
   //
 
-  //FILE *file1=fopen ("log/t0_0.9-unf_b1_s_scan.log","r");
-  //FILE *file1=fopen ("log/nov_res_b0.log","r");
-  //FILE *file1=fopen ("jan_res_newclf_50_b0.log","r");
-  //FILE *file1=fopen ("nov_res_newclf_50_b0.log","r");
-  //FILE *file1=fopen ("nov_res_newclf_50.log","r");
-  //FILE *file1=fopen ("b1_50/l_jan_b1_50_4500_schraeg.log","r");
-  //FILE *file1=fopen ("b-1_jan_lsec_1_typ_1.log","r");
-  //FILE *file1=fopen ("l_jan_b0_50_4500_schraeg.log","r");
-  //FILE *file1=fopen ("b-1_jan_lsec1_typ1.log","r");
   FILE *file1=fopen ("res.log","r");
   Int_t datab1,datab0;
 
@@ -77,7 +77,7 @@ void res_laser()
 	  gas[i]=gas_temp;
 	  resphi[i]=resphi_temp;
 	  resrad[i]=resrad_temp;
-	  cout<<i<<" "<<gas_temp<<" "<<gas[i]<<" "<<resrad[i]<<endl;
+	  cout<<i<<" t0["<<i<<"] = "<<t0_temp<<" gas["<<i<<"] = "<<gas_temp<<" resphi["<<i<<"] = "<<resphi_temp<<" resrad["<<i<<"] = "<<resrad_temp<<endl;
 	  i++;
 	}
     }
