@@ -1,4 +1,4 @@
-// $Id: StProtoJet.cxx,v 1.8 2008/04/22 22:22:05 tai Exp $
+// $Id: StProtoJet.cxx,v 1.9 2008/04/23 01:13:08 tai Exp $
 
 #include "StProtoJet.h"
 
@@ -48,6 +48,7 @@ void StProtoJet::remove(StProtoJet& rhs)
 
 void StProtoJet::add(const StProtoJet& rhs)
 {
+  StFourVec::add(rhs);
   for (FourVecList::const_iterator it = rhs.mList.begin(); it!=rhs.mList.end(); ++it) {
     mList.push_back(*it);
   }

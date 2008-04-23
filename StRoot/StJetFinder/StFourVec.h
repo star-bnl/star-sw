@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StFourVec.h,v 1.3 2008/04/23 00:44:19 tai Exp $
+// $Id: StFourVec.h,v 1.4 2008/04/23 01:13:08 tai Exp $
 #ifndef STFOURVEC_H
 #define STFOURVEC_H
 
@@ -68,7 +68,6 @@ private:
   double theta() const { return acos( mPz/p()); }
 
 };
-
 
 
 inline void StFourVec::add(const StFourVec& rhs)
