@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.165 2008/03/20 18:45:28 perev Exp $
+* $Id: geometry.g,v 1.166 2008/04/23 22:00:29 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.166  2008/04/23 22:00:29  perev
+* tofZ0=0.00 ==> tofZ0=-0.50 /xin
+*
 * Revision 1.165  2008/03/20 18:45:28  perev
 * Simplest.gerrit upgr15 added
 *
@@ -2581,8 +2584,8 @@ If LL>1
 * X.Dong
                      Itof=6 " call btofgeo6 ";
 * NEW CONFIG!
-                     tofX0=0.00;
-                     tofZ0=0.00;
+                     tofX0= 0.00;
+                     tofZ0=-0.50;
                      BtofConfig=11;
 
 * Full barrel in 2007
