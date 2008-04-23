@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.11 2008/04/23 21:04:53 tai Exp $
+// $Id: StConeJetFinder.h,v 1.12 2008/04/23 21:31:10 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -110,7 +110,10 @@ protected:
     void setSearchWindow();
 	
 protected:
-	
+
+  virtual void findJets_sub1();
+  virtual void findJets_sub2();
+
     StConePars mPars; ///run-time pars
 	
     CellMap _EtCellMap; ///the map references the objects in the vector
