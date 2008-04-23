@@ -29,18 +29,7 @@ int Draw3DInit(){
    if (___draw_3d_init) return 1;
    ___draw_3d_init = 1;
    gROOT->Macro("Load.C");
-
-   // check Coin env and load if present
-   TString ivrootDir = "$ROOT/5.99.99/Coin2/.$STAR_HOST_SYS/lib/";
-   gSystem->ExpandPathName(ivrootDir);
-   bool CheckCoin = true;
-   if (!gSystem->AccessPathName(ivrootDir.Data())) {
-      printf(" Loading ... libSoQt.so %d     \n",gSystem->Load(ivrootDir+"libSoQt"));
-      printf(" Loading ... libCoin.so %d     \n",gSystem->Load(ivrootDir+"libCoin"));
-      printf(" Loading ... libSmallChange %d \n",gSystem->Load(ivrootDir+"libSmallChange"));
-      CheckCoin = false;
-   }
-   if (!StCheckQtEnv::SetQtEnv(CheckCoin)) {
+   if (!StCheckQtEnv::SetQtEnv(false)) {
       // define the background image
       const char *backShape = "$STAR/StRoot/macros/graphics/StarTPC.iv";
       printf(" Setting the background shape to be 	%s\n", backShape);
