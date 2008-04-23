@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StProtoJet.h,v 1.10 2008/04/23 19:24:09 tai Exp $
+// $Id: StProtoJet.h,v 1.11 2008/04/23 20:00:01 tai Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
@@ -29,7 +29,7 @@ public:
   //access
 	
   ///Number of particles in this protojet
-  unsigned int numberOfParticles() const {return size();}
+  unsigned int numberOfParticles() const {return mList.size();}
   unsigned int size() const {return mList.size();}
   FourVecList& list() {return mList;}
 	
@@ -42,18 +42,12 @@ public:
   ///Add a protojet to this one w/o calculating the new parameters
   void add(const StProtoJet&);
   void add(const AbstractFourVec& rhs);
-  void remove(StProtoJet&);
 
   ///update the parameters of this protojet (in case some have been added via add())
   void update();
 	
   ///clear
-  void clear()
-  {
-    mList.clear();
-    mPx = mPy = mPz = mE = mCharge = 0;
-    //    StFourVec::clear(); 
-  }
+  void clear();
 	
   friend std::ostream& operator<<(std::ostream& os, const StProtoJet& j);
 	
@@ -90,10 +84,12 @@ private:
 
   FourVecList mList;
 
+
   double mPx;
   double mPy;
   double mPz;
   double mE;
+
   double mCharge;
 
 };
