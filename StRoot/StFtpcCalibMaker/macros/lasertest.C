@@ -1,6 +1,9 @@
-// $Id: lasertest.C,v 1.5 2006/08/02 11:02:34 jcs Exp $
+// $Id: lasertest.C,v 1.6 2008/04/23 19:42:18 jcs Exp $
 //
 // $Log: lasertest.C,v $
+// Revision 1.6  2008/04/23 19:42:18  jcs
+// load the libStDb_Tables.so and StDetectorDbMaker.so which are needed as of STAR version SL07d
+//
 // Revision 1.5  2006/08/02 11:02:34  jcs
 // add comments
 // remove commented out old code
@@ -51,6 +54,8 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int 
   gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
 
+  gSystem->Load("libStDb_Tables.so");
+  gSystem->Load("StDetectorDbMaker.so");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib.so");
   gSystem->Load("StDbBroker.so");
