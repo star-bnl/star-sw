@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.15 2008/04/24 01:57:34 tai Exp $
+// $Id: StConeJetFinder.h,v 1.16 2008/04/24 23:39:09 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -148,7 +148,7 @@ inline int StConeJetFinder::findPhiKey(double phi) const
 {
     while(phi>M_PI) {phi-=2*M_PI;}
     while(phi<-M_PI) {phi+=2*M_PI;}
-    return int( (phi-mPars.mPhiMin)/(mPars.mPhiMax-mPars.mPhiMin)*mPars.mNphi );
+    return int( (phi-mPars.PhiMin())/(mPars.PhiMax()-mPars.PhiMin())*mPars.mNphi );
 }
 //non-members
 

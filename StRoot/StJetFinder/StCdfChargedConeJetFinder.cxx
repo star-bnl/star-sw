@@ -85,10 +85,10 @@ bool StCdfChargedConeJetFinder::acceptPair(const StJetEtCell* centerCell,
 	     && otherCell->empty()==false 
 	     
 	     //cut on associated eT
-	     && otherCell->eT()>mPars.mAssocEtMin
+	     && otherCell->eT()>mPars.assocEtMin()
 	     
 	     //within cone?
-	     && centerCell->distance(*otherCell)<mPars.mR 
+	     && centerCell->distance(*otherCell)<mPars.coneRadius() 
 		
 	     );
 }
