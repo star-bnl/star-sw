@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCell.h,v 1.10 2008/04/23 01:28:53 tai Exp $
+// $Id: StJetEtCell.h,v 1.11 2008/04/24 01:17:21 tai Exp $
 //StJetEtCell.h
 //M.L. Miller (Yale Software) (adapted from Akio Ogawa's work)
 //07/02
@@ -47,15 +47,19 @@ public:
   ///Allow jet-finder power to over-ride eT
   void setEt(double v) { mEt=v; }
 
+  void update() {
+    protoJet().update();
+    mEt = protoJet().eT();
+  }
+
+
   ///operators (sort by Et)
   virtual bool operator>(const StJetEtCell& rhs) const {
-    //    abort();
     return eT() > rhs.eT();
   }
     
   ///operators (sort by Et)
   virtual bool operator<(const StJetEtCell& rhs) const {
-    //    abort();
     return eT() < rhs.eT();
   }
 
