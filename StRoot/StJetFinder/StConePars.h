@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConePars.h,v 1.3 2008/04/21 17:29:24 tai Exp $
+// $Id: StConePars.h,v 1.4 2008/04/24 19:01:56 tai Exp $
 #ifndef STCONEPARS_H
 #define STCONEPARS_H
 
@@ -13,45 +13,70 @@ public:
 
   ///Set the grid spacing:
   void setGridSpacing(int nEta, double etaMin, double etaMax,
-		      int nPhi, double phiMin, double phiMax);
+		      int nPhi, double phiMin, double phiMax)
+  {
+    mNeta = nEta; mEtaMin = etaMin; mEtaMax = etaMax;
+    mNphi = nPhi; mPhiMin = phiMin; mPhiMax = phiMax;
+  }
     
   ///minimum et threshold to be considered a seed
-  void setSeedEtMin(double);
-  double seedEtMin() const;
-    
+  void setSeedEtMin(double v) { mSeedEtMin = v; }
+
   ///minimum et threshold to be considered for addition to the seed
-  void setAssocEtMin(double);
-  double assocEtMin() const;
-    
+  void setAssocEtMin(double v) { mAssocEtMin = v; }
+
   ///split jets if E_shared/E_neighbor>splitFraction
-  void setSplitFraction(double v);
-  double splitFraction() const;
-	
+  void setSplitFraction(double v) { mSplitFraction = v; }
+
   ///Let jet wander to minimum?
   void setPerformMinimization(bool v) {mDoMinimization=v;}
-  bool performMinimization() const {return mDoMinimization;}
-	
+
   ///Add seeds at midpoints?
   void setAddMidpoints(bool v) {mAddMidpoints=v;}
-  bool addMidpoints() const {return mAddMidpoints;}
-	
+
   ///Do Split/Merge step?
   void setDoSplitMerge(bool v) {mDoSplitMerge=v;}
-  bool doSplitMerge() const {return mDoSplitMerge;}
 
   ///Require stable midpoints?
   void setRequireStableMidpoints(bool v) {mRequireStableMidpoints=v;}
-  bool requiredStableMidpoints() const {return mRequireStableMidpoints;}
 
   ///Set cone radius:
   void setConeRadius(double v) {mR = v;}
-  double coneRadius() const {return mR;}
 
   ///Toggle debug streams on/off
   void setDebug(bool v) {mDebug = v;}
+
+  int    Neta()   const { return mNeta; }
+  int    Nphi()	  const { return mNphi; } 
+  double EtaMin() const { return mEtaMin; }
+  double EtaMax() const { return mEtaMax; }
+  double PhiMin() const { return mPhiMin; }
+  double PhiMax() const { return mPhiMax; }
+
+  double coneRadius() const {return mR;}
+
+  double seedEtMin() const { return mSeedEtMin; }
+  double assocEtMin() const { return mAssocEtMin; }
+
+  double splitFraction() const { return mSplitFraction; }
+
+  bool performMinimization() const {return mDoMinimization;}
+
+  bool addMidpoints() const {return mAddMidpoints;}
+
+  bool requiredStableMidpoints() const {return mRequireStableMidpoints;}
+
+  bool doSplitMerge() const {return mDoSplitMerge;}
+
   bool debug() const {return mDebug;}
     
-protected:
+  double phiWidth() const { return mphiWidth; }
+  double etaWidth() const { return metaWidth; }
+  int    deltaPhi() const { return mdeltaPhi; }
+  int    deltaEta() const { return mdeltaEta; }
+
+private:
+
   friend class StConeJetFinder;
   friend class StCdfChargedConeJetFinder;
 
@@ -64,61 +89,28 @@ protected:
 
   double mR;
     
-  double mAssocEtMin;
   double mSeedEtMin;
+  double mAssocEtMin;
     
+  double mSplitFraction;
+
+  bool mDoMinimization;
+
+  bool mAddMidpoints;
+
+  bool mRequireStableMidpoints;
+
+  bool mDoSplitMerge;
+  bool mDebug;
+
+  ///////////////////////////////
   double mphiWidth;
   double metaWidth;
   int mdeltaPhi;
   int mdeltaEta;
     
-  bool mDoMinimization;
-  bool mAddMidpoints;
-  bool mDoSplitMerge;
-  double mSplitFraction;
-  bool mRequireStableMidpoints;
-  bool mDebug;
     
   ClassDef(StConePars,1)
 };
-
-
-inline void StConePars::setSeedEtMin(double v)
-{
-    mSeedEtMin = v;
-}
-
-inline double StConePars::seedEtMin() const
-{
-    return mSeedEtMin;
-}
-
-inline void StConePars::setAssocEtMin(double v)
-{
-    mAssocEtMin = v;
-}
-
-inline double StConePars::assocEtMin() const
-{
-    return mAssocEtMin;
-}
-
-
-inline void StConePars::setSplitFraction(double v)
-{
-   mSplitFraction = v;
-}
-
-inline double StConePars::splitFraction() const
-{
-    return mSplitFraction;
-}
-
-inline void StConePars::setGridSpacing(int nEta, double etaMin, double etaMax,
-				int nPhi, double phiMin, double phiMax)
-{
-    mNeta = nEta; mEtaMin = etaMin; mEtaMax = etaMax;
-    mNphi = nPhi; mPhiMin = phiMin; mPhiMax = phiMax;
-}
 
 #endif // STCONEPARS_H
