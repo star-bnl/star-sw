@@ -552,8 +552,15 @@ int St_tpcdaq_Maker::Output() {
           if(skip) continue;
         }
         nPixelThisPad=0;
-        float gain = (mCorrectionMask&kGainCorr)? fGain[ipadrow][pad-1]:1.;
-        seqStatus=getSequences(gain,ipadrow+1,pad,&nseq,&listOfSequences,&listOfIdt);
+	Double_t gaincorrection = 1; // L3
+	if(mCorrectionMask&kGainCorr) {
+	  assert(pad>0&&pad<=182);
+	  if (fGain[ipadrow][pad-1] < 0.125 || fGain[ipadrow][pad-1] > 8.0)  continue;
+	  //          if (m_Mode == 2) gaincorrection = 1; // Trs
+	  if (m_Mode == 0) gaincorrection = fGain[ipadrow][pad-1];
+//yf (not ready yet to use uncorrected Trs)     if(mCorrectionMask&kGainCorr) gaincorrection = fGain[ipadrow][pad-1];
+	}
+        seqStatus=getSequences(gaincorrection,ipadrow+1,pad,&nseq,&listOfSequences,&listOfIdt);
 
         if(seqStatus<0) { Warning("Output","%d A",seqStatus); mErr=2; return 1; }
         if(!nseq) continue;
@@ -591,14 +598,6 @@ int St_tpcdaq_Maker::Output() {
           m_seq_padNumber->Fill((Float_t)pad);
           m_seq_padRowNumber->Fill((Float_t)(ipadrow+1));
 #endif
-          Double_t gaincorrection = 1; // L3
-          if(mCorrectionMask&kGainCorr) {
-            assert(pad>0&&pad<=182);
-            if (fGain[ipadrow][pad-1] < 0.125 || fGain[ipadrow][pad-1] > 8.0)  continue;
-//          if (m_Mode == 2) gaincorrection = 1; // Trs
-	    if (m_Mode == 0) gaincorrection = fGain[ipadrow][pad-1];
-//yf (not ready yet to use uncorrected Trs)     if(mCorrectionMask&kGainCorr) gaincorrection = fGain[ipadrow][pad-1];
-          }
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++; conversion=log8to10_table[*(pointerToAdc++)];
@@ -892,6 +891,9 @@ char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.92  2008/04/24 20:54:00  fisyak
+// Bug(1141) in logic of dead pads accounting
+//
 // Revision 1.91  2007/04/28 17:57:18  perev
 // Redundant StChain.h removed
 //
