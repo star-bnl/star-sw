@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.16 2008/04/24 01:17:21 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.17 2008/04/24 01:57:34 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -113,7 +113,7 @@ void StConeJetFinder::addToPrejets(StJetEtCell* cell)
 {
     PreJetInitializer initializer(*this);
     initializer(*cell); //test, try to initialize as we add
-    mPreJets.push_back( *cell );
+    mPreJets.push_back(*cell);
 }
 
 void StConeJetFinder::initializeWorkCell(const StJetEtCell* other)
@@ -505,13 +505,6 @@ StConeJetFinder::CellMap::iterator StConeJetFinder::findIterator(const StEtGridK
 
 //non members ---
 
-void PreJetUpdater ::operator()(StJetEtCell* cell) 
-{
-    cell->protoJet().update();
-    cell->mEt = cell->protoJet().eT();
-    sumEt += cell->eT();
-}
-
 void PreJetLazyUpdater ::operator()(StJetEtCell& cell)
 {
     sumEt += cell.eT();
@@ -535,32 +528,33 @@ void PostMergeUpdater::operator()(StJetEtCell& cell)
 void PreJetInitializer::operator()(StJetEtCell& cell) 
 {
 	
-    //first find the pointer to the cell in the grid (not this local copy)
-    StEtGridKey key = mConeFinder.findKey(cell.eta(), cell.phi() );
-    StJetEtCell* realCell = mConeFinder.findCellByKey(key);
+  //first find the pointer to the cell in the grid (not this local copy)
+  StEtGridKey key = mConeFinder.findKey(cell.eta(), cell.phi() );
+  StJetEtCell* realCell = mConeFinder.findCellByKey(key);
 	
-    if (!realCell) {
-	cout <<"PreJetInitializer(). ERROR:\t"
-	     <<"real Celldoesn't exist.  key:\t"<<key<<"\tabort()"<<endl;
-	abort();
+  if (!realCell) {
+    cout <<"PreJetInitializer(). ERROR:\t"
+	 <<"real Celldoesn't exist.  key:\t"<<key<<"\tabort()"<<endl;
+    abort();
+  }
+	
+  //now add this into the cone-cell collection, *if* it's not already there
+  //this shouldn't happen, temp check to get rid of relic bug
+  StConeJetFinder::CellList& cells = cell.cellList();
+  StConeJetFinder::CellList::iterator where = std::find(cells.begin(), cells.end(), realCell);
+  if (realCell->empty()==false) {
+    if (where==cells.end()) {
+      cout <<"\tADDING SELF IN CONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+      cell.add(realCell);
     }
+  }
 	
-    //now add this into the cone-cell collection, *if* it's not already there
-    //this shouldn't happen, temp check to get rid of relic bug
-    StConeJetFinder::CellList& cells = cell.cellList();
-    StConeJetFinder::CellList::iterator where = std::find(cells.begin(), cells.end(), realCell);
-    if (realCell->empty()==false) {
-	if (where==cells.end()) {
-	    cout <<"\tADDING SELF IN CONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-	    cell.add(realCell);
-	}
-    }
-	
-    //now update each cell:
-    PreJetUpdater updater;
-    updater = for_each( cell.cellList().begin(), cell.cellList().end(), updater );
-	
-    //now update jet-eT
-    cell.mEt = updater.sumEt;
+  cell.mEt = 0;
+  for(StConeJetFinder::CellList::iterator etCell = cell.cellList().begin(); etCell != cell.cellList().end(); ++etCell) {
+    (*etCell)->update();
+    cell.mEt += (*etCell)->eT();
+  }
+
+
 }
 
