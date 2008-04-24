@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConePars.h,v 1.4 2008/04/24 19:01:56 tai Exp $
+// $Id: StConePars.h,v 1.5 2008/04/24 23:39:09 tai Exp $
 #ifndef STCONEPARS_H
 #define STCONEPARS_H
 
@@ -75,33 +75,11 @@ public:
   int    deltaPhi() const { return mdeltaPhi; }
   int    deltaEta() const { return mdeltaEta; }
 
-private:
-
-  friend class StConeJetFinder;
-  friend class StCdfChargedConeJetFinder;
 
   int mNeta;
   int mNphi;
   double mEtaMin;
   double mEtaMax;
-  double mPhiMin;
-  double mPhiMax;
-
-  double mR;
-    
-  double mSeedEtMin;
-  double mAssocEtMin;
-    
-  double mSplitFraction;
-
-  bool mDoMinimization;
-
-  bool mAddMidpoints;
-
-  bool mRequireStableMidpoints;
-
-  bool mDoSplitMerge;
-  bool mDebug;
 
   ///////////////////////////////
   double mphiWidth;
@@ -109,7 +87,23 @@ private:
   int mdeltaPhi;
   int mdeltaEta;
     
+private:
+
+  //  friend class StConeJetFinder;
+  //  friend class StCdfChargedConeJetFinder;
     
+  double mPhiMin;
+  double mPhiMax;
+  double mR;
+  double mSeedEtMin;
+  double mAssocEtMin;
+  double mSplitFraction;
+  bool mDoMinimization;
+  bool mAddMidpoints;
+  bool mRequireStableMidpoints;
+  bool mDoSplitMerge;
+  bool mDebug;
+
   ClassDef(StConePars,1)
 };
 

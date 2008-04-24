@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.17 2008/04/24 01:57:34 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.18 2008/04/24 23:39:09 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -25,7 +25,7 @@ StConeJetFinder::StConeJetFinder(const StConePars& pars)
   , mSearchCounter(0)
   , mMerger(new StJetSpliterMerger())
 {
-    mMerger->setSplitFraction(mPars.mSplitFraction);
+    mMerger->setSplitFraction(mPars.splitFraction());
     buildGrid();
     mTheEnd = _EtCellList.end();
 }
@@ -48,7 +48,7 @@ void StConeJetFinder::clearAndDestroy()
 
 void StConeJetFinder::Init()
 {
-//    mMerger->setSplitFraction(mPars.mSplitFraction);
+//    mMerger->setSplitFraction(mPars.splitFraction());
 //    buildGrid();
 //    mTheEnd = _EtCellList.end();
 }
@@ -58,7 +58,7 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
     
   ++mSearchCounter;
 
-  if (mPars.mDoMinimization == true && mSearchCounter > 100) {
+  if (mPars.performMinimization() && mSearchCounter > 100) {
     return kTooManyTries;
   }
     
@@ -178,11 +178,11 @@ void StConeJetFinder::findJets(JetList& protoJetList)
   //  std::sort(_EtCellList.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
   _EtCellList.sort(StJetEtCellEtGreaterThan());
 
-  if (mPars.mDebug ) {print();}
+  if (mPars.debug()) {print();}
 
   for (CellList::iterator etCell = _EtCellList.begin(); etCell != mTheEnd; ++etCell) {
 
-    if ((*etCell)->eT() <= mPars.mSeedEtMin) break; //we're all done
+    if ((*etCell)->eT() <= mPars.seedEtMin()) break; //we're all done
 
     if (!acceptSeed((*etCell))) continue;
 
@@ -204,7 +204,7 @@ void StConeJetFinder::findJets(JetList& protoJetList)
 
 void StConeJetFinder::findJets_sub1()
 {
-  if (mPars.mDoMinimization) {
+  if (mPars.performMinimization()) {
     doMinimization();
   } else {
     doSearch();
@@ -214,11 +214,11 @@ void StConeJetFinder::findJets_sub1()
 
 void StConeJetFinder::findJets_sub2()
 {
-  if (mPars.mAddMidpoints) { 	//add seeds at midpoints
+  if (mPars.addMidpoints()) { 	//add seeds at midpoints
     addSeedsAtMidpoint(); //old style, add midpoints before split/merge
   }
     
-  if (mPars.mDoSplitMerge) {//split-merge
+  if (mPars.doSplitMerge()) {//split-merge
     mMerger->splitMerge(mPreJets);
   }
 }
@@ -257,7 +257,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
 	for (ValueCellList::iterator pj2=pj1; pj2!=mPreJets.end(); ++pj2) {
 	    //don't double count.  ignore same iterators and jets w/ same center location
 	    if (pj1!=pj2 && (*pj1==*pj2)==false ) { 
-		if ( (*pj1).distance(*pj2) <= 2.* mPars.mR ) { 
+		if ( (*pj1).distance(*pj2) <= 2.* mPars.coneRadius()) { 
 		    //remember this combination
 		    VCLItPairVec::value_type temp(pj1, pj2);
 		    mMidpointVec.push_back(temp);
@@ -287,8 +287,8 @@ void StConeJetFinder::addSeedsAtMidpoint()
 	    //add in the cone
 	    mSearchCounter=0;
 	    SearchResult res = doSearch();
-	    if (mPars.mRequireStableMidpoints==true) {
-		if (res==kConverged) {
+	    if (mPars.requiredStableMidpoints()) {
+		if (res == kConverged) {
 		    addToPrejets(&mWorkCell);
 		}	
 	    }	
@@ -312,7 +312,7 @@ StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiM
 void StConeJetFinder::buildGrid()
 {
   double dEta = mPars.mEtaMax - mPars.mEtaMin;
-  double dPhi = mPars.mPhiMax - mPars.mPhiMin;
+  double dPhi = mPars.PhiMax() - mPars.PhiMin();
   double etaBinWidth = dEta/static_cast<double>(mPars.mNeta);
   double phiBinWidth = dPhi/static_cast<double>(mPars.mNphi);
 	
@@ -323,7 +323,7 @@ void StConeJetFinder::buildGrid()
 		
     for(int j = 0; j < mPars.mNphi; ++j){
 			
-      double phiMin = mPars.mPhiMin + static_cast<double>(j)*phiBinWidth;
+      double phiMin = mPars.PhiMin() + static_cast<double>(j)*phiBinWidth;
       double phiMax = phiMin + phiBinWidth;
 
       StJetEtCell* cell = makeCell(etaMin, etaMax, phiMin, phiMax);
@@ -369,18 +369,18 @@ bool StConeJetFinder::acceptPair(const StJetEtCell* centerCell, const StJetEtCel
   if (!centerCell) return false;
   if (!otherCell) return false;
   if (otherCell->empty()) return false;
-  if (otherCell->eT() <= mPars.mAssocEtMin) return false; 
-  if (centerCell->distance(*otherCell) >= mPars.mR) return false; 
+  if (otherCell->eT() <= mPars.assocEtMin()) return false; 
+  if (centerCell->distance(*otherCell) >= mPars.coneRadius()) return false; 
   return true;
 }
 
 
 void StConeJetFinder::setSearchWindow()
 {
-    mPars.mphiWidth = (mPars.mPhiMax-mPars.mPhiMin)/static_cast<double>(mPars.mNphi);
+    mPars.mphiWidth = (mPars.PhiMax()-mPars.PhiMin())/static_cast<double>(mPars.mNphi);
     mPars.metaWidth = (mPars.mEtaMax-mPars.mEtaMin)/static_cast<double>(mPars.mNeta);
-    mPars.mdeltaPhi = static_cast<int>(floor( mPars.mR / mPars.mphiWidth)) + 1;
-    mPars.mdeltaEta = static_cast<int>(floor( mPars.mR / mPars.metaWidth)) + 1;
+    mPars.mdeltaPhi = static_cast<int>(floor( mPars.coneRadius() / mPars.mphiWidth)) + 1;
+    mPars.mdeltaEta = static_cast<int>(floor( mPars.coneRadius() / mPars.metaWidth)) + 1;
 }
 
 const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
@@ -466,22 +466,22 @@ void StConeJetFinder::print()
     cout <<"mNphi:\t"<<mPars.mNphi<<endl;
     cout <<"mEtaMin:\t"<<mPars.mEtaMin<<endl;
     cout <<"mEtaMax:\t"<<mPars.mEtaMax<<endl;    
-    cout <<"mPhiMin:\t"<<mPars.mPhiMin<<endl;
-    cout <<"mPhiMax:\t"<<mPars.mPhiMax<<endl;
-    cout <<"mR:\t"<<mPars.mR<<endl;
-    cout <<"mAssocEtMin:\t"<<mPars.mAssocEtMin<<endl;
-    cout <<"mSeedEtMin:\t"<<mPars.mSeedEtMin<<endl;
+    cout <<"mPhiMin:\t"<<mPars.PhiMin()<<endl;
+    cout <<"mPhiMax:\t"<<mPars.PhiMax()<<endl;
+    cout <<"mR:\t"<<mPars.coneRadius()<<endl;
+    cout <<"mAssocEtMin:\t"<<mPars.assocEtMin()<<endl;
+    cout <<"mSeedEtMin:\t"<<mPars.seedEtMin()<<endl;
     cout <<"mphiWidth:\t"<<mPars.mphiWidth<<endl;
     cout <<"metaWidth:\t"<<mPars.metaWidth<<endl;
     cout <<"mdeltaPhi:\t"<<mPars.mdeltaPhi<<endl;
     cout <<"mdeltaEta:\t"<<mPars.mdeltaEta<<endl;
-    cout <<"mDoMinimization:\t"<<mPars.mDoMinimization<<endl;
-    cout <<"mAddMidpoints:\t"<<mPars.mAddMidpoints<<endl;
-    cout <<"mDoSplitMerge:\t"<<mPars.mDoSplitMerge<<endl;
-    cout <<"mSplitFraction:\t"<<mPars.mSplitFraction<<endl;
+    cout <<"mDoMinimization:\t"<<mPars.performMinimization()<<endl;
+    cout <<"mAddMidpoints:\t"<<mPars.addMidpoints()<<endl;
+    cout <<"mDoSplitMerge:\t"<<mPars.doSplitMerge()<<endl;
+    cout <<"mSplitFraction:\t"<<mPars.splitFraction()<<endl;
     cout <<"splitFraction():\t"<<mMerger->splitFraction()<<endl;
-    cout <<"mRequireStableMidpoints:\t"<<mPars.mRequireStableMidpoints<<endl;
-    cout <<"mDebug:\t"<<mPars.mDebug<<endl;
+    cout <<"mRequireStableMidpoints:\t"<<mPars.requiredStableMidpoints()<<endl;
+    cout <<"mDebug:\t"<<mPars.debug()<<endl;
 }
 
 StConeJetFinder::CellMap::iterator 
