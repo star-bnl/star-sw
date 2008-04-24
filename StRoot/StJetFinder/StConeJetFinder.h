@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.13 2008/04/23 21:40:41 tai Exp $
+// $Id: StConeJetFinder.h,v 1.14 2008/04/24 01:17:21 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -87,7 +87,7 @@ protected:
 	
     StJetEtCell* defineMidpoint(const StJetEtCell& pj1, const StJetEtCell& pj2) ;
 	
-    virtual bool acceptSeed(const StJetEtCell* cell);
+  virtual bool acceptSeed(const StJetEtCell* cell);
     virtual bool acceptPair(const StJetEtCell* center, const StJetEtCell* assoc) const;
 	
     const StProtoJet& collectCell(StJetEtCell* seed);
@@ -141,7 +141,7 @@ inline StConePars StConeJetFinder::pars() const
 
 inline int StConeJetFinder::findEtaKey(double eta) const
 {
-    return int( (eta-mPars.mEtaMin)/(mPars.mEtaMax-mPars.mEtaMin)*mPars.mNeta );
+    return int( (eta - mPars.mEtaMin)/(mPars.mEtaMax - mPars.mEtaMin)*mPars.mNeta );
 }
 
 inline int StConeJetFinder::findPhiKey(double phi) const

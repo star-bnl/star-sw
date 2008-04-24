@@ -15,15 +15,16 @@ struct StJetEtCellEquals
 	bool operator()(const StJetEtCell* lhs, const StJetEtCell* rhs) const;
 };
 
-struct StEtGridKey
-{
-	StEtGridKey() : iEta(0), iPhi(0) {};
-    StEtGridKey(int ie, int ip) : iEta(ie), iPhi(ip) {};
-	bool operator==(const StEtGridKey & rhs) {
-		return (iEta==rhs.iEta) && (iPhi==rhs.iPhi);
-	}
-    int iEta;
-    int iPhi;
+struct StEtGridKey {
+
+  StEtGridKey() : iEta(0), iPhi(0) {};
+  StEtGridKey(int ie, int ip) : iEta(ie), iPhi(ip) {};
+
+  bool operator==(const StEtGridKey & rhs) {
+    return (iEta == rhs.iEta) && (iPhi == rhs.iPhi);
+  }
+  int iEta;
+  int iPhi;
 };
 
 struct StEtGridKeyLessThan
@@ -33,18 +34,8 @@ struct StEtGridKeyLessThan
 
 struct StJetEtCellEtLessThan
 {
-    //bool operator()(const StJetEtCell* lhs, const StJetEtCell* rhs) const;
     bool operator()(StJetEtCell* lhs, StJetEtCell* rhs);
 };
-
-struct StJetEtCellEtGreaterThan { bool operator()(StJetEtCell* lhs, StJetEtCell* rhs) { return lhs->eT() > rhs->eT(); } };
-
-// struct StJetEtCellClearer
-// {
-//     void operator()(StJetEtCell* lhs);
-// };
-
-struct StJetEtCellIsNotEmpty { bool operator()(const StJetEtCell* c) { return !c->empty(); } };
 
 class StProtoJet;
 

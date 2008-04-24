@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.15 2008/04/23 21:31:10 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.16 2008/04/24 01:17:21 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -53,82 +53,60 @@ void StConeJetFinder::Init()
 //    mTheEnd = _EtCellList.end();
 }
 
-//StConeJetFinder::SearchResult StConeJetFinder::doSearch(StJetEtCell* centerCell)
 StConeJetFinder::SearchResult StConeJetFinder::doSearch()
 {
-    //cout <<"--- new cell ---"<<endl;
     
-    ++mSearchCounter;
-    if (mPars.mDoMinimization==true && mSearchCounter>100) {
-	return kTooManyTries;
-    }
+  ++mSearchCounter;
+
+  if (mPars.mDoMinimization == true && mSearchCounter > 100) {
+    return kTooManyTries;
+  }
     
-    //now search for clusters!  We walk in a square in eta-phi space, testing 
-    //each cluster for it's distance from the centerCell
-    //define the search window as phi +- deltaPhi, same for eta
-    //The walk in eta is easy, strictly linear.
-    //The walk in phi is just a little trickier, since phi is periodic
+  //now search for clusters!  We walk in a square in eta-phi space, testing 
+  //each cluster for it's distance from the centerCell
+  //define the search window as phi +- deltaPhi, same for eta
+  //The walk in eta is easy, strictly linear.
+  //The walk in phi is just a little trickier, since phi is periodic
+
+  //find this entry in map (this is a double check, not really necessary)
+  StEtGridKey centerKey = findKey(mWorkCell.eta(), mWorkCell.phi());
 	
-    //find this entry in map (this is a double check, not really necessary)
-    StEtGridKey centerKey = findKey( mWorkCell.eta(), mWorkCell.phi() );
+  //begin walk in eta:
+
+  int iEtaMin = centerKey.iEta - mPars.mdeltaEta;
+  if (iEtaMin < 0) iEtaMin = 0 ; //avoid wasted searches in eta
 	
-    //begin walk in eta:
-    //cout <<"\nClustering around key:\t"<<centerKey<<endl;
-	
-    int iEtaMin = centerKey.iEta-mPars.mdeltaEta;
-    if (iEtaMin<0) iEtaMin=0; //avoid wasted searches in eta
-	
-    for (int iEta=iEtaMin; (iEta<=centerKey.iEta+mPars.mdeltaEta) && (iEta<mPars.mNeta); ++iEta) {
+  for (int iEta = iEtaMin; (iEta <= centerKey.iEta + mPars.mdeltaEta) && (iEta < mPars.mNeta); ++iEta) {
 		
-	//begin walk in phi:
-	for (int iPhi=centerKey.iPhi-mPars.mdeltaPhi; iPhi<=centerKey.iPhi+mPars.mdeltaPhi; ++iPhi) {
+    //begin walk in phi:
+    for (int iPhi = centerKey.iPhi - mPars.mdeltaPhi; iPhi <= centerKey.iPhi + mPars.mdeltaPhi; ++iPhi) {
 			
-	    int iModPhi=iPhi;
-	    if (iModPhi<0) iModPhi= iModPhi+mPars.mNphi;
-	    if (iModPhi>=mPars.mNphi) iModPhi = iModPhi-mPars.mNphi;
+      int iModPhi = iPhi;
+      if (iModPhi < 0) iModPhi = iModPhi + mPars.mNphi;
+      if (iModPhi >= mPars.mNphi) iModPhi = iModPhi - mPars.mNphi;
 			
-	    StEtGridKey key(iEta, iModPhi);
+      StJetEtCell* otherCell = findCellByKey(StEtGridKey(iEta, iModPhi));
+      if (!otherCell) {
+	//	cout <<"otherCell doesn't exist.  key:\t"<<key<<endl;
+      }
 			
-	    StJetEtCell* otherCell = findCellByKey(key);
-	    if (!otherCell) {
-		cout <<"otherCell doesn't exist.  key:\t"<<key<<endl;
-	    }
-			
-	    if (acceptPair(&mWorkCell, otherCell) ) {//add it!
-		//cout <<"Adding cell w/ key:\t"<<key<<endl;
-		mWorkCell.add(otherCell);
-	    }
-	}
+      if (acceptPair(&mWorkCell, otherCell) ) {//add it!
+	//cout <<"Adding cell w/ key:\t"<<key<<endl;
+	mWorkCell.add(otherCell);
+      }
     }
+  }
 	
-    //finished with walk, compare centroid to cone center
-    const StProtoJet& centroid = mWorkCell.centroid();
-    //    const StFourVec& centroid = mWorkCell.centroid();
-    StEtGridKey centroidKey;
+  //finished with walk, compare centroid to cone center
+  const StProtoJet& centroid = mWorkCell.centroid();
+
+  if (!inVolume(centroid.eta(), centroid.phi())) return kLeftVolume;
+
+  StEtGridKey centroidKey = findKey(centroid.eta(), centroid.phi());
 	
-    if (this->inVolume(centroid.eta(), centroid.phi() )) {
-	centroidKey = findKey( centroid.eta(), centroid.phi() );
-    }
-    else {
-	return kLeftVolume;
-    }
-	
-    //temp debug
-    /*
-      cout <<"c_phi:   \t"<<centroid.phi()<<"\tc_eta:      "<<centroid.eta()<<endl;
-      cout <<"cell_phi:\t"<<mWorkCell.phi()<<"\tcell_eta:\t"<<mWorkCell.eta()<<endl;
-      cout <<"centroid key:\t"<<centroidKey<<endl;
-      cout <<"cell key:\t"<<centerKey<<endl;
-    */
-	
-    //enum SearchResult {kTooManyTries, kLeftVolume, kConverged, kContinueSearch};
-    if (centroidKey==centerKey) {
-	//cout <<"CONVERGED WITH:\t"<<mWorkCell.cellList().size()<<"\tcells in cone"<<endl;
-	return kConverged;
-    }
-    else {
-	return kContinueSearch;
-    }
+  if (centroidKey == centerKey) return kConverged;
+
+  return kContinueSearch;
 }
 
 void StConeJetFinder::addToPrejets(StJetEtCell* cell)
@@ -150,43 +128,36 @@ void StConeJetFinder::initializeWorkCell(const StJetEtCell* other)
     }
 }
 
-//void StConeJetFinder::doMinimization(StJetEtCell& workCell) 
 void StConeJetFinder::doMinimization()
 {
-    mSearchCounter=0;
+    mSearchCounter = 0;
 	
-    //enum SearchResult {kTooManyTries, kLeftVolume, kConverged, kContinueSearch};
-	
-    SearchResult res=kContinueSearch;
-    while (res==kContinueSearch) {
+    SearchResult res = kContinueSearch;
+    while(res == kContinueSearch) {
 		
-	//cout <<"\t\t mSearchCounter:\t"<<mSearchCounter<<endl;
-	//search in this cone
-	res = doSearch();
+      res = doSearch();
 	
-	//cout <<"\t\t\tRESULT:\t"<<res<<endl;
-		
-	if (res!=kConverged) {
-			
-	    //find cell corresponding to centroid of cone
-	    StEtGridKey key = findKey(mWorkCell.centroid().eta(), mWorkCell.centroid().phi() );
-	    StJetEtCell* newCenterCell = findCellByKey(key);
-	    if (!newCenterCell) {
-		cout <<"newCenterCell doesn't exist.  key:\t"<<key<<endl;
-		res=kLeftVolume;
-	    }
-	    else {
-		initializeWorkCell(newCenterCell);
-	    }
-	}
-	else {
-	    //add to jet-list
-	    addToPrejets(&mWorkCell);
-	}
+      if (res == kConverged) {
+	addToPrejets(&mWorkCell);
+	break;
+      }			
+
+      //find cell corresponding to centroid of cone
+      StEtGridKey key = findKey(mWorkCell.centroid().eta(), mWorkCell.centroid().phi() );
+      StJetEtCell* newCenterCell = findCellByKey(key);
+      if (!newCenterCell) {
+	cout <<"newCenterCell doesn't exist.  key:\t"<<key<<endl;
+	res = kLeftVolume;
+      } else {
+	initializeWorkCell(newCenterCell);
+      }
     }
-    
-    //cout <<"\tSEARCH FINISHED WITH RESULT:\t"<<res<<"\tin:\t"<<mSearchCounter<<"\titerations"<<endl;
+
 }
+
+struct StJetEtCellIsNotEmpty { bool operator()(const StJetEtCell* c) { return !c->empty(); } };
+
+struct StJetEtCellEtGreaterThan { bool operator()(StJetEtCell* lhs, StJetEtCell* rhs) { return lhs->eT() > rhs->eT(); } };
 
 void StConeJetFinder::findJets(JetList& protoJetList)
 {
@@ -197,7 +168,11 @@ void StConeJetFinder::findJets(JetList& protoJetList)
   
   //we partition them so that we don't waste operations on empty cells:
   mTheEnd = std::partition(_EtCellList.begin(), _EtCellList.end(), StJetEtCellIsNotEmpty());
-  std::for_each(_EtCellList.begin(), _EtCellList.end(), PreJetUpdater() );
+
+  for(CellList::iterator etCell = _EtCellList.begin(); etCell !=  _EtCellList.end(); ++etCell) {
+    (*etCell)->update();
+  }
+
 
   //now we sort them in descending order in et: (et1>et2>...>etn)
   //  std::sort(_EtCellList.begin(), mTheEnd, StJetEtCellEtGreaterThan() ); //This is ok, sorts by lcp-pt here
@@ -205,21 +180,16 @@ void StConeJetFinder::findJets(JetList& protoJetList)
 
   if (mPars.mDebug ) {print();}
 
-  //loop from highest et cell to lowest et cell.
-  // Begin search over seeds 
-  for (CellList::iterator vecIt = _EtCellList.begin(); vecIt != mTheEnd; ++vecIt) {
+  for (CellList::iterator etCell = _EtCellList.begin(); etCell != mTheEnd; ++etCell) {
 
-    StJetEtCell* centerCell = *vecIt;
-    if (centerCell->eT() <= mPars.mSeedEtMin) break; //we're all done
+    if ((*etCell)->eT() <= mPars.mSeedEtMin) break; //we're all done
 
-    if (acceptSeed(centerCell)) {
-      //new Seed
+    if (!acceptSeed((*etCell))) continue;
 
-      //use a work object: mWorkCell
-      initializeWorkCell(centerCell);
+    //use a work object: mWorkCell
+    initializeWorkCell((*etCell));
 
-      findJets_sub1();
-    }
+    findJets_sub1();
   }
     
   findJets_sub2();
@@ -369,7 +339,7 @@ bool StConeJetFinder::inVolume(double eta, double phi)
 {
     int iEta = findEtaKey(eta);
     int iPhi = findPhiKey(phi);
-    if (iEta<0 || iPhi<0) {
+    if (iEta < 0 || iPhi < 0) {
 	return false;
     }
     //const StJetEtCell* cell = findCellByKey( StEtGridKey(iEta, iPhi) );
@@ -380,7 +350,7 @@ StEtGridKey StConeJetFinder::findKey(double eta, double phi) const
 {
   int iEta = findEtaKey(eta);
   int iPhi = findPhiKey(phi);
-  if (iEta<0 || iPhi<0) {
+  if (iEta < 0 || iPhi < 0) {
     cout <<"StConeJetFinder::findKey(double, double). ERROR:\t"
 	 <<"eta:\t"<<eta<<"\tphi:\t"<<phi<<"\t"
 	 <<"iEta<0|| iPhi<0\tabort()"<<endl;
@@ -391,35 +361,17 @@ StEtGridKey StConeJetFinder::findKey(double eta, double phi) const
 
 bool StConeJetFinder::acceptSeed(const StJetEtCell* cell)
 {
-    //return (cell->nTimesUsed()==0 && cell->empty()==false);
     return (cell->empty()==false);
 }
 
 bool StConeJetFinder::acceptPair(const StJetEtCell* centerCell, const StJetEtCell* otherCell) const
-    //bool StConeJetFinder::acceptPair(StJetEtCell* centerCell, StJetEtCell* otherCell)
 {
-    return  (
-		
-	     //both valid
-	     centerCell && otherCell 
-		
-	     //don't add to self
-	     //&& ( centerCell->eta()!=otherCell->eta() || centerCell->phi()!=otherCell->phi() )
-	     //&& otherCell!=centerCell
-		
-	     //allow non-unique assignment?
-	     //&& otherCell->nTimesUsed()==0
-		
-	     //no noise
-	     && otherCell->empty()==false 
-		
-	     //cut on associated eT
-	     && otherCell->eT()>mPars.mAssocEtMin
-		
-	     //within cone?
-	     && centerCell->distance(*otherCell)<mPars.mR 
-		
-	     );
+  if (!centerCell) return false;
+  if (!otherCell) return false;
+  if (otherCell->empty()) return false;
+  if (otherCell->eT() <= mPars.mAssocEtMin) return false; 
+  if (centerCell->distance(*otherCell) >= mPars.mR) return false; 
+  return true;
 }
 
 
@@ -486,14 +438,14 @@ StJetEtCell* StConeJetFinder::findCellByKey(const StEtGridKey& key)
     return (where!=_EtCellMap.end()) ? (*where).second : 0;
 }
 
-void StConeJetFinder::fillGrid(JetList& protojets)
+void StConeJetFinder::fillGrid(JetList& protoJetList)
 {
-  for (JetList::iterator protoJet = protojets.begin(); protoJet != protojets.end(); ++protoJet) {
+  for (JetList::iterator protoJet = protoJetList.begin(); protoJet != protoJetList.end(); ++protoJet) {
     CellMap::iterator where = _EtCellMap.find(findKey((*protoJet).eta(), (*protoJet).phi()));
     if (where != _EtCellMap.end())
       (*where).second->add(*protoJet);
     else
-      cout << "StConeJetFinder::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet <<endl;
+      cout << "StConeJetFinder::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
   }
 }
 
