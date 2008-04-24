@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.14 2008/04/24 01:17:21 tai Exp $
+// $Id: StConeJetFinder.h,v 1.15 2008/04/24 01:57:34 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -152,15 +152,6 @@ inline int StConeJetFinder::findPhiKey(double phi) const
 }
 //non-members
 
-struct PreJetUpdater //don't assume proto-jet updated
-{
-    PreJetUpdater() : sumEt(0.) {};
-    double sumEt;
-	
-    //make sure that cell eT reflects the energy *only* in the physical cell
-    void operator()(StJetEtCell* cell);
-};
-
 struct PreJetLazyUpdater //assume proto-jet updated
 {
     PreJetLazyUpdater() : sumEt(0.) {};
@@ -175,14 +166,12 @@ struct PostMergeUpdater
     void operator()(StJetEtCell& cell);
 };
 
-class StConeJetFinder;
-
 struct PreJetInitializer
 {
-    PreJetInitializer(StConeJetFinder& j) : mConeFinder(j) {};
-    StConeJetFinder& mConeFinder;
+  PreJetInitializer(StConeJetFinder& j) : mConeFinder(j) {};
+  StConeJetFinder& mConeFinder;
 	
-    void operator()(StJetEtCell& cell);
+  void operator()(StJetEtCell& cell);
 };
 
 #endif
