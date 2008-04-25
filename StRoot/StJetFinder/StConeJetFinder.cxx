@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.18 2008/04/24 23:39:09 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.19 2008/04/25 01:21:04 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -357,6 +357,18 @@ StEtGridKey StConeJetFinder::findKey(double eta, double phi) const
     //abort();
   }
   return StEtGridKey(iEta, iPhi);
+}
+
+int StConeJetFinder::findEtaKey(double eta) const
+{
+  return int((mPars.Neta()/(mPars.EtaMax() - mPars.EtaMin()))*(eta - mPars.EtaMin()));
+}
+
+int StConeJetFinder::findPhiKey(double phi) const
+{
+  while(phi > M_PI) phi -= 2*M_PI;
+  while(phi < -M_PI) phi += 2*M_PI;
+  return int( mPars.Nphi()*((phi - mPars.PhiMin())/(mPars.PhiMax() - mPars.PhiMin())));
 }
 
 bool StConeJetFinder::acceptSeed(const StJetEtCell* cell)
