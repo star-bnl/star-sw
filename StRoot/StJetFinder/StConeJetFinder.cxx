@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.20 2008/04/25 01:32:44 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.21 2008/04/25 01:50:59 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -73,13 +73,13 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
 	
   //begin walk in eta:
 
-  int iEtaMin = centerKey.iEta - mPars.mdeltaEta;
+  int iEtaMin = centerKey.iEta - mPars.deltaEta();
   if (iEtaMin < 0) iEtaMin = 0 ; //avoid wasted searches in eta
 	
-  for (int iEta = iEtaMin; (iEta <= centerKey.iEta + mPars.mdeltaEta) && (iEta < mPars.Neta()); ++iEta) {
+  for (int iEta = iEtaMin; (iEta <= centerKey.iEta + mPars.deltaEta()) && (iEta < mPars.Neta()); ++iEta) {
 		
     //begin walk in phi:
-    for (int iPhi = centerKey.iPhi - mPars.mdeltaPhi; iPhi <= centerKey.iPhi + mPars.mdeltaPhi; ++iPhi) {
+    for (int iPhi = centerKey.iPhi - mPars.deltaPhi(); iPhi <= centerKey.iPhi + mPars.deltaPhi(); ++iPhi) {
 			
       int iModPhi = iPhi;
       if (iModPhi < 0) iModPhi = iModPhi + mPars.Nphi();
@@ -163,7 +163,6 @@ void StConeJetFinder::findJets(JetList& protoJetList)
 {
   clear();
   fillGrid(protoJetList);
-  setSearchWindow();
   protoJetList.clear(); //clear 'em, add them back in as we find them
   
   //we partition them so that we don't waste operations on empty cells:
@@ -386,14 +385,6 @@ bool StConeJetFinder::acceptPair(const StJetEtCell* centerCell, const StJetEtCel
   return true;
 }
 
-
-void StConeJetFinder::setSearchWindow()
-{
-    mPars.mphiWidth = (mPars.PhiMax()-mPars.PhiMin())/static_cast<double>(mPars.Nphi());
-    mPars.metaWidth = (mPars.EtaMax()-mPars.EtaMin())/static_cast<double>(mPars.Neta());
-    mPars.mdeltaPhi = static_cast<int>(floor( mPars.coneRadius() / mPars.mphiWidth)) + 1;
-    mPars.mdeltaEta = static_cast<int>(floor( mPars.coneRadius() / mPars.metaWidth)) + 1;
-}
 
 const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
 {
