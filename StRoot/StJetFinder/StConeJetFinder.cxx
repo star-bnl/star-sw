@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.19 2008/04/25 01:21:04 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.20 2008/04/25 01:32:44 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -76,14 +76,14 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
   int iEtaMin = centerKey.iEta - mPars.mdeltaEta;
   if (iEtaMin < 0) iEtaMin = 0 ; //avoid wasted searches in eta
 	
-  for (int iEta = iEtaMin; (iEta <= centerKey.iEta + mPars.mdeltaEta) && (iEta < mPars.mNeta); ++iEta) {
+  for (int iEta = iEtaMin; (iEta <= centerKey.iEta + mPars.mdeltaEta) && (iEta < mPars.Neta()); ++iEta) {
 		
     //begin walk in phi:
     for (int iPhi = centerKey.iPhi - mPars.mdeltaPhi; iPhi <= centerKey.iPhi + mPars.mdeltaPhi; ++iPhi) {
 			
       int iModPhi = iPhi;
-      if (iModPhi < 0) iModPhi = iModPhi + mPars.mNphi;
-      if (iModPhi >= mPars.mNphi) iModPhi = iModPhi - mPars.mNphi;
+      if (iModPhi < 0) iModPhi = iModPhi + mPars.Nphi();
+      if (iModPhi >= mPars.Nphi()) iModPhi = iModPhi - mPars.Nphi();
 			
       StJetEtCell* otherCell = findCellByKey(StEtGridKey(iEta, iModPhi));
       if (!otherCell) {
@@ -311,17 +311,17 @@ StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiM
 
 void StConeJetFinder::buildGrid()
 {
-  double dEta = mPars.mEtaMax - mPars.mEtaMin;
+  double dEta = mPars.EtaMax() - mPars.EtaMin();
   double dPhi = mPars.PhiMax() - mPars.PhiMin();
-  double etaBinWidth = dEta/static_cast<double>(mPars.mNeta);
-  double phiBinWidth = dPhi/static_cast<double>(mPars.mNphi);
+  double etaBinWidth = dEta/static_cast<double>(mPars.Neta());
+  double phiBinWidth = dPhi/static_cast<double>(mPars.Nphi());
 	
-  for(int i = 0; i < mPars.mNeta; ++i){
+  for(int i = 0; i < mPars.Neta(); ++i){
 		
-    double etaMin = mPars.mEtaMin + static_cast<double>(i)*etaBinWidth;
+    double etaMin = mPars.EtaMin() + static_cast<double>(i)*etaBinWidth;
     double etaMax = etaMin + etaBinWidth;
 		
-    for(int j = 0; j < mPars.mNphi; ++j){
+    for(int j = 0; j < mPars.Nphi(); ++j){
 			
       double phiMin = mPars.PhiMin() + static_cast<double>(j)*phiBinWidth;
       double phiMax = phiMin + phiBinWidth;
@@ -389,8 +389,8 @@ bool StConeJetFinder::acceptPair(const StJetEtCell* centerCell, const StJetEtCel
 
 void StConeJetFinder::setSearchWindow()
 {
-    mPars.mphiWidth = (mPars.PhiMax()-mPars.PhiMin())/static_cast<double>(mPars.mNphi);
-    mPars.metaWidth = (mPars.mEtaMax-mPars.mEtaMin)/static_cast<double>(mPars.mNeta);
+    mPars.mphiWidth = (mPars.PhiMax()-mPars.PhiMin())/static_cast<double>(mPars.Nphi());
+    mPars.metaWidth = (mPars.EtaMax()-mPars.EtaMin())/static_cast<double>(mPars.Neta());
     mPars.mdeltaPhi = static_cast<int>(floor( mPars.coneRadius() / mPars.mphiWidth)) + 1;
     mPars.mdeltaEta = static_cast<int>(floor( mPars.coneRadius() / mPars.metaWidth)) + 1;
 }
@@ -474,19 +474,19 @@ void StConeJetFinder::clear()
 void StConeJetFinder::print()
 {
     cout <<"\nStConeJetFinder::print()"<<endl;
-    cout <<"mNeta:\t"<<mPars.mNeta<<endl;
-    cout <<"mNphi:\t"<<mPars.mNphi<<endl;
-    cout <<"mEtaMin:\t"<<mPars.mEtaMin<<endl;
-    cout <<"mEtaMax:\t"<<mPars.mEtaMax<<endl;    
+    cout <<"mNeta:\t"<<mPars.Neta()<<endl;
+    cout <<"mNphi:\t"<<mPars.Nphi()<<endl;
+    cout <<"mEtaMin:\t"<<mPars.EtaMin()<<endl;
+    cout <<"mEtaMax:\t"<<mPars.EtaMax()<<endl;    
     cout <<"mPhiMin:\t"<<mPars.PhiMin()<<endl;
     cout <<"mPhiMax:\t"<<mPars.PhiMax()<<endl;
     cout <<"mR:\t"<<mPars.coneRadius()<<endl;
     cout <<"mAssocEtMin:\t"<<mPars.assocEtMin()<<endl;
     cout <<"mSeedEtMin:\t"<<mPars.seedEtMin()<<endl;
-    cout <<"mphiWidth:\t"<<mPars.mphiWidth<<endl;
-    cout <<"metaWidth:\t"<<mPars.metaWidth<<endl;
-    cout <<"mdeltaPhi:\t"<<mPars.mdeltaPhi<<endl;
-    cout <<"mdeltaEta:\t"<<mPars.mdeltaEta<<endl;
+    cout <<"mphiWidth:\t"<<mPars.phiWidth()<<endl;
+    cout <<"metaWidth:\t"<<mPars.etaWidth()<<endl;
+    cout <<"mdeltaPhi:\t"<<mPars.deltaPhi()<<endl;
+    cout <<"mdeltaEta:\t"<<mPars.deltaEta()<<endl;
     cout <<"mDoMinimization:\t"<<mPars.performMinimization()<<endl;
     cout <<"mAddMidpoints:\t"<<mPars.addMidpoints()<<endl;
     cout <<"mDoSplitMerge:\t"<<mPars.doSplitMerge()<<endl;
