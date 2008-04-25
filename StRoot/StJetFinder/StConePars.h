@@ -1,9 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StConePars.h,v 1.6 2008/04/25 01:32:45 tai Exp $
+// $Id: StConePars.h,v 1.7 2008/04/25 01:50:59 tai Exp $
 #ifndef STCONEPARS_H
 #define STCONEPARS_H
 
 #include "StJetPars.h"
+
+#include <cmath>
 
 class StConePars : public StJetPars {
 
@@ -70,23 +72,14 @@ public:
 
   bool debug() const {return mDebug;}
     
-  double phiWidth() const { return mphiWidth; }
-  double etaWidth() const { return metaWidth; }
-  int    deltaPhi() const { return mdeltaPhi; }
-  int    deltaEta() const { return mdeltaEta; }
+  double phiWidth() const { return (PhiMax() - PhiMin())/static_cast<double>(Nphi()); }
+  double etaWidth() const { return (EtaMax() - EtaMin())/static_cast<double>(Neta()); }
+  int    deltaPhi() const { return static_cast<int>(floor(coneRadius()/phiWidth())) + 1; }
+  int    deltaEta() const { return static_cast<int>(floor(coneRadius()/etaWidth())) + 1; }
 
 
-  ///////////////////////////////
-  double mphiWidth;
-  double metaWidth;
-  int mdeltaPhi;
-  int mdeltaEta;
-    
 private:
 
-  //  friend class StConeJetFinder;
-  //  friend class StCdfChargedConeJetFinder;
-    
   int mNeta;
   int mNphi;
   double mEtaMin;

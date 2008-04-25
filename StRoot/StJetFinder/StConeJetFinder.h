@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.17 2008/04/25 01:21:04 tai Exp $
+// $Id: StConeJetFinder.h,v 1.18 2008/04/25 01:50:59 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -106,8 +106,6 @@ protected:
     CellMap::iterator findIterator(double eta, double phi);
     ///find iterators into grid
     CellMap::iterator findIterator(const StEtGridKey&);
-	
-    void setSearchWindow();
 	
 protected:
 
