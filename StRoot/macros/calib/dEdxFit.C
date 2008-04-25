@@ -162,7 +162,7 @@ Double_t fithfcn(Double_t *x,Double_t *par) {
 void FitH(const Char_t *set="z", Int_t Hyp = -1, Int_t Bin=-1) {
   if (!gBichsel) {
     gSystem->Load("StBichsel");
-    gBichsel = new Bichsel();
+    gBichsel = Bichsel::Instance();
   }
   TString Set(set);
   const Double_t window = 0.4;
@@ -746,7 +746,7 @@ Double_t gbFunc(Double_t *x, Double_t *par) {
 TF1 *FitGB(TH1D *proj, Option_t *opt="", Double_t dX = 2.364) {
   if (!gBichsel) {
     gSystem->Load("StBichsel");
-    gBichsel = new Bichsel();
+    gBichsel = Bichsel::Instance();
   }
   // fit in momentum range p = 0.45 - 0.50 GeV/c
   if (! proj) return 0;
@@ -2409,7 +2409,7 @@ void bFitMip(const Int_t iX = 8,const Int_t iY=8) {
   TDirectory *dir = gDirectory; cout << "Directory: " << dir->GetName() << endl;
   if (! gBichsel) {
     gSystem->Load("StBichsel");
-    gBichsel = new Bichsel();
+    gBichsel = Bichsel::Instance();
   };
   dir->cd(); cout << "Directory: " << gDirectory->GetName() << endl;
   TString name3D("SecRow3Mip");
