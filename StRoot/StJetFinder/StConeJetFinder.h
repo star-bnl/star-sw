@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.16 2008/04/24 23:39:09 tai Exp $
+// $Id: StConeJetFinder.h,v 1.17 2008/04/25 01:21:04 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -139,17 +139,6 @@ inline StConePars StConeJetFinder::pars() const
     return mPars;
 }
 
-inline int StConeJetFinder::findEtaKey(double eta) const
-{
-    return int( (eta - mPars.mEtaMin)/(mPars.mEtaMax - mPars.mEtaMin)*mPars.mNeta );
-}
-
-inline int StConeJetFinder::findPhiKey(double phi) const
-{
-    while(phi>M_PI) {phi-=2*M_PI;}
-    while(phi<-M_PI) {phi+=2*M_PI;}
-    return int( (phi-mPars.PhiMin())/(mPars.PhiMax()-mPars.PhiMin())*mPars.mNphi );
-}
 //non-members
 
 struct PreJetLazyUpdater //assume proto-jet updated
