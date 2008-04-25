@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConePars.h,v 1.5 2008/04/24 23:39:09 tai Exp $
+// $Id: StConePars.h,v 1.6 2008/04/25 01:32:45 tai Exp $
 #ifndef STCONEPARS_H
 #define STCONEPARS_H
 
@@ -76,11 +76,6 @@ public:
   int    deltaEta() const { return mdeltaEta; }
 
 
-  int mNeta;
-  int mNphi;
-  double mEtaMin;
-  double mEtaMax;
-
   ///////////////////////////////
   double mphiWidth;
   double metaWidth;
@@ -92,6 +87,10 @@ private:
   //  friend class StConeJetFinder;
   //  friend class StCdfChargedConeJetFinder;
     
+  int mNeta;
+  int mNphi;
+  double mEtaMin;
+  double mEtaMax;
   double mPhiMin;
   double mPhiMax;
   double mR;
