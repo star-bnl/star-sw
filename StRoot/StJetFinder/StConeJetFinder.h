@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.18 2008/04/25 01:50:59 tai Exp $
+// $Id: StConeJetFinder.h,v 1.19 2008/04/28 01:14:10 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -35,7 +35,7 @@ class StConeJetFinder : public StJetFinder {
 public:
 	
     ///useful typdefs
-    typedef map<StEtGridKey, StJetEtCell*, StEtGridKeyLessThan> CellMap;
+    typedef map<StEtGridKey, StJetEtCell*> CellMap;
     typedef CellMap::value_type CellMapValType;
     typedef StJetEtCell::CellList CellList;
     typedef list<StJetEtCell> ValueCellList;
