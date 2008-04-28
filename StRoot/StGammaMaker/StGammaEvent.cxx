@@ -29,6 +29,14 @@ void StGammaEvent::Clear(Option_t *opts)
 
   mFlags=0x0000;
 
+  mSpinDbValid        = false;
+  mSpin4              = kUnknownSpin4;
+  mBunchCrossing7bit  = 255;
+  mBunchCrossing48bit = 255;
+  mBunchCrossingStar  = 255;
+  mPolarizationType   = kUnknownPol;
+  mDsmVertex          = 255;
+
   if (mPythia) mPythia->Clear(opts);
 }
 
