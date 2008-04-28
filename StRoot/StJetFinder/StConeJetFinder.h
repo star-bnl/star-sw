@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.19 2008/04/28 01:14:10 tai Exp $
+// $Id: StConeJetFinder.h,v 1.20 2008/04/28 21:59:07 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -24,6 +24,38 @@ class StJetSpliterMerger;
 class StConeJetFinder;
 
 #include "StConePars.h"
+
+class StJetEtCellFactory {
+
+public:
+  virtual StJetEtCell* create(double etaMin, double etaMax, double phiMin, double phiMax)
+  { return new StJetEtCell(etaMin, etaMax, phiMin, phiMax); }
+};
+
+
+class StJetEtCellGrid {
+
+public:
+
+  typedef map<StEtGridKey, StJetEtCell*> CellMap;
+  typedef CellMap::value_type CellMapValType;
+  typedef StJetEtCell::CellList CellList;
+  typedef list<StJetEtCell> ValueCellList;
+
+  StJetEtCellGrid(StConePars& pars) : _pars(pars) { }
+
+  void buildGrid(CellList& cellList, CellMap& cellMap, StJetEtCellFactory* cellFactory);
+
+private:
+
+  StEtGridKey findKey(double eta, double phi) const;
+  int findEtaKey(double eta) const;
+  int findPhiKey(double phi) const;
+
+
+  StConePars& _pars;
+
+};
 
 /*!
   \class StConeJetFinder
@@ -66,6 +98,9 @@ protected:
     virtual StJetEtCell* makeCell(double etaMin, double etaMax, double phiMin, double phiMax);
     ///build the grid at construction time
     virtual void buildGrid();
+
+  virtual StJetEtCellFactory* makeCellFactory();
+
 	
     ///put 'em in the grid
     virtual void fillGrid(JetList& protoJets); 
@@ -109,21 +144,23 @@ protected:
 	
 protected:
 
-    StConePars mPars; ///run-time pars
+  StConePars mPars; ///run-time pars
 	
-    CellMap _EtCellMap; ///the map references the objects in the vector
-    CellList _EtCellList; ///the vector holds the actual objects
-    CellList::iterator mTheEnd;
+  CellMap _EtCellMap; ///the map references the objects in the vector
+  CellList _EtCellList; ///the vector holds the actual objects
+  CellList::iterator mTheEnd;
 	
-    StJetEtCell mWorkCell;
-    int mSearchCounter;
+  StJetEtCell mWorkCell;
+  int mSearchCounter;
 	
-    StJetSpliterMerger* mMerger;
-    ValueCellList mPreJets;
+  StJetSpliterMerger* mMerger;
+  ValueCellList mPreJets;
 	
-    typedef std::pair<ValueCellList::iterator, ValueCellList::iterator> ValueCellListItPair;
-    typedef vector<ValueCellListItPair> VCLItPairVec;
-    VCLItPairVec mMidpointVec;
+  typedef std::pair<ValueCellList::iterator, ValueCellList::iterator> ValueCellListItPair;
+  typedef vector<ValueCellListItPair> VCLItPairVec;
+  VCLItPairVec mMidpointVec;
+
+  StJetEtCellGrid _cellGrid;
 	
 private:
 

@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.22 2008/04/28 01:14:10 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.23 2008/04/28 21:59:06 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -24,6 +24,7 @@ StConeJetFinder::StConeJetFinder(const StConePars& pars)
   : mPars(pars)
   , mSearchCounter(0)
   , mMerger(new StJetSpliterMerger())
+  , _cellGrid(mPars)
 {
     mMerger->setSplitFraction(mPars.splitFraction());
     buildGrid();
@@ -303,6 +304,11 @@ void StConeJetFinder::addSeedsAtMidpoint()
     }
 }
 
+StJetEtCellFactory* StConeJetFinder::makeCellFactory()
+{
+  return new StJetEtCellFactory;
+}
+
 StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiMin, double phiMax)
 {
   return new StJetEtCell(etaMin, etaMax, phiMin, phiMax);
@@ -310,23 +316,72 @@ StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiM
 
 void StConeJetFinder::buildGrid()
 {
-  for(int i = 0; i < mPars.Neta(); ++i){
-		
-    double etaMin = mPars.EtaMin() + static_cast<double>(i)*mPars.etaWidth();
-    double etaMax = etaMin + mPars.etaWidth();
-		
-    for(int j = 0; j < mPars.Nphi(); ++j){
-			
-      double phiMin = mPars.PhiMin() + static_cast<double>(j)*mPars.phiWidth();
-      double phiMax = phiMin + mPars.phiWidth();
+  _cellGrid.buildGrid(_EtCellList, _EtCellMap, makeCellFactory());
 
-      StJetEtCell* cell = makeCell(etaMin, etaMax, phiMin, phiMax);
+  // for(int i = 0; i < mPars.Neta(); ++i){
+  // 		
+  //   double etaMin = mPars.EtaMin() + static_cast<double>(i)*mPars.etaWidth();
+  //   double etaMax = etaMin + mPars.etaWidth();
+  // 		
+  //   for(int j = 0; j < mPars.Nphi(); ++j){
+  // 			
+  //     double phiMin = mPars.PhiMin() + static_cast<double>(j)*mPars.phiWidth();
+  //     double phiMax = phiMin + mPars.phiWidth();
+  // 
+  //     StJetEtCell* cell = makeCell(etaMin, etaMax, phiMin, phiMax);
+  // 			
+  //     _EtCellList.push_back(cell);
+  // 			
+  //     _EtCellMap.insert(CellMapValType(findKey(cell->eta(), cell->phi()), cell));
+  //   }
+  // }
+}
+
+void StJetEtCellGrid::buildGrid(CellList& cellList, CellMap& cellMap, StJetEtCellFactory* cellFactory)
+{
+  for(int i = 0; i < _pars.Neta(); ++i){
+		
+    double etaMin = _pars.EtaMin() + static_cast<double>(i)*_pars.etaWidth();
+    double etaMax = etaMin + _pars.etaWidth();
+		
+    for(int j = 0; j < _pars.Nphi(); ++j){
 			
-      _EtCellList.push_back(cell);
+      double phiMin = _pars.PhiMin() + static_cast<double>(j)*_pars.phiWidth();
+      double phiMax = phiMin + _pars.phiWidth();
+
+      StJetEtCell* cell = cellFactory->create(etaMin, etaMax, phiMin, phiMax);
 			
-      _EtCellMap.insert(CellMapValType(findKey(cell->eta(), cell->phi()), cell));
+      cellList.push_back(cell);
+			
+      cellMap.insert(CellMapValType(findKey(cell->eta(), cell->phi()), cell));
     }
   }
+
+}
+
+StEtGridKey StJetEtCellGrid::findKey(double eta, double phi) const
+{
+  int iEta = findEtaKey(eta);
+  int iPhi = findPhiKey(phi);
+  if (iEta < 0 || iPhi < 0) {
+    cout << "StEtGridKey::findKey(double, double). ERROR:\t"
+	 << "eta:\t" << eta << "\tphi:\t" << phi << "\t"
+	 << "iEta<0|| iPhi<0\tabort()" << endl;
+  }
+  return StEtGridKey(iEta, iPhi);
+}
+
+
+int StJetEtCellGrid::findEtaKey(double eta) const
+{
+  return int((_pars.Neta()/(_pars.EtaMax() - _pars.EtaMin()))*(eta - _pars.EtaMin()));
+}
+
+int StJetEtCellGrid::findPhiKey(double phi) const
+{
+  while(phi > M_PI) phi -= 2*M_PI;
+  while(phi < -M_PI) phi += 2*M_PI;
+  return int( _pars.Nphi()*((phi - _pars.PhiMin())/(_pars.PhiMax() - _pars.PhiMin())));
 }
 
 bool StConeJetFinder::inVolume(double eta, double phi)
