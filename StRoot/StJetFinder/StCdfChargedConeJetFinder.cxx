@@ -38,6 +38,11 @@ StJetEtCell* StCdfChargedConeJetFinder::makeCell(double etaMin, double etaMax,
     return new StCdfChargedJetEtCell(etaMin, etaMax, phiMin, phiMax);
 }
 
+StJetEtCellFactory* StCdfChargedConeJetFinder::makeCellFactory()
+{
+  return new StCdfChargedJetEtCellFactory;
+}
+
 void StCdfChargedConeJetFinder::Init()
 {
   //    mMerger->setSplitFraction(mPars.mSplitFraction);

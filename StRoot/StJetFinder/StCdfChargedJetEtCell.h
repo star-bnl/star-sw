@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedJetEtCell.h,v 1.3 2008/04/22 01:55:23 tai Exp $
+// $Id: StCdfChargedJetEtCell.h,v 1.4 2008/04/28 21:59:06 tai Exp $
 //StCdfChargedJetEtCell.h
 //M.L. Miller (Yale Software)
 //12/02
@@ -43,7 +43,6 @@ protected:
     double mLcpPt;
 };
 
-#endif
 
 //inlines
 inline void StCdfChargedJetEtCell::clear()
@@ -51,3 +50,5 @@ inline void StCdfChargedJetEtCell::clear()
     mLcpPt=0.0;
     StJetEtCell::clear();
 }
+
+#endif // StCdfChargedJetEtCell_HH
