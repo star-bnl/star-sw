@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.5 2008/04/10 16:23:34 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.6 2008/04/28 15:12:36 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.6  2008/04/28 15:12:36  fine
+ * Fix the messages
+ *
  * Revision 1.5  2008/04/10 16:23:34  fine
  * Activate the generic RTS_READER interface
  *
@@ -96,7 +99,7 @@ ClassImp(StRtsReaderMaker);
 StRtsReaderMaker::StRtsReaderMaker(const char *name):StMaker(name)
       ,fRtsReader(0),fRtsTable(0),fBank(0),fSlaveMode(true)
 {
-  LOG_INFO << "StRtsReaderMaker::ctor"  << endm;
+  LOG_DEBUG << "StRtsReaderMaker::ctor"  << endm;
 }
 
 //_____________________________________________________________
@@ -135,7 +138,7 @@ rts_reader *StRtsReaderMaker::InitReader()
          if(daqEvp == NULL) {
             LOG_INFO << "StRtsReaderMaker::InitReader No evpReader available..." << endm;
          } else {
-            LOG_INFO << "StTpcClusters::InitReader: evpReader was found: "  << daqEvp << endm;
+            LOG_INFO << "StRtsReaderMaker::InitReader: evpReader was found: "  << daqEvp << endm;
             fRtsReader = daqEvp->rts_rr;
             if (!fRtsReader) {
               LOG_ERROR << "StRtsReaderMaker::InitReader: no rts_reader was found!" << endm;
