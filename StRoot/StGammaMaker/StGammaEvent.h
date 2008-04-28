@@ -1,5 +1,3 @@
-// -*- mode: C++ -*-
-
 #ifndef __StGammaEvent_h__
 #define __StGammaEvent_h__
 
@@ -27,7 +25,7 @@ class StGammaPythiaEvent;
 #define TPC_VERTEX 0x0001
 
 class StGammaEvent : public TObject {
-  
+
  public:
   StGammaEvent();
   ~StGammaEvent(){ /* nada */ }
@@ -93,6 +91,36 @@ class StGammaEvent : public TObject {
   Float_t magneticField() const { return mMagneticField; } /// Magnetic field (kG)
   StGammaPythiaEvent* pythia() { return mPythia; } /// Pythia event
   
+
+  //                                                      Spin information from spindb
+  //
+ public:
+  enum Spin4State { kBlueUpYellUp=5, kBlueUpYellDn=6, kBlueDnYellUp=9, kBlueDnYellDn=10, kUnknownSpin4=42 };
+  enum PolarizationType { kUnpolarized=0, kLongLong, kTransTrans, kRadRad, kUnknownPol=42 };
+  // see http://www.star.bnl.gov/protected/spin/balewski/2005-spinDB/definitions/
+
+ protected:
+  Bool_t    mSpinDbValid;          
+  UShort_t  mSpin4;
+  UShort_t  mBunchCrossing7bit;
+  UShort_t  mBunchCrossing48bit;
+  UShort_t  mBunchCrossingStar;
+  UShort_t  mPolarizationType;
+
+  UShort_t  mDsmVertex;
+
+ public:
+  void SetValidDb( Bool_t v ){ mSpinDbValid=v; }
+  void SetSpin4( UShort_t s ){ mSpin4=s; }
+  void SetBunchCrossing7bit( UShort_t b ){ mBunchCrossing7bit=b; }
+  void SetBunchCrossing48bit( UShort_t b ){ mBunchCrossing48bit=b; }
+  void SetBunchCrossingStar( UShort_t b ){ mBunchCrossingStar=b; }
+  void SetPolarizationType( UShort_t t ){ mPolarizationType=t; }
+  void SetDsmVertex( UShort_t v ){ mDsmVertex=v; }
+
+
+
+
  private:
   //                                                 Towers, tracks and strips
   Int_t InitArrays();
