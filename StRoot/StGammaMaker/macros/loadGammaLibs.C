@@ -30,5 +30,7 @@ void loadGammaLibs()
   gSystem->Load("StEEmcPointMaker");
   gSystem->Load("StEEmcPi0Mixer");
   gSystem->Load("StMCAsymMaker");
+  gSystem->Load("StSpinDbMaker");
   gSystem->Load("StGammaMaker");
+
 }
