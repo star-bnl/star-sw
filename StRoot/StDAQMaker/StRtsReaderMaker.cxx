@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.6 2008/04/28 15:12:36 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.7 2008/04/28 18:44:53 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.7  2008/04/28 18:44:53  fine
+ * Add the third numeric parameter for get method
+ *
  * Revision 1.6  2008/04/28 15:12:36  fine
  * Fix the messages
  *
@@ -276,6 +279,12 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
                  thisMaker->fBank = rts_det->get( tokens->At(2)->GetName()
                                  ,atoi(tokens->At(3)->GetName())
                                  ,atoi(tokens->At(4)->GetName()));
+                 break;
+               case 4:
+                 thisMaker->fBank = rts_det->get( tokens->At(2)->GetName()
+                                 ,atoi(tokens->At(3)->GetName())
+                                 ,atoi(tokens->At(4)->GetName())
+                                 ,atoi(tokens->At(5)->GetName()));
                  break;
               default:  thisMaker->fBank = 0; break;
            };
