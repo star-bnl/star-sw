@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.21 2008/04/25 01:50:59 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.22 2008/04/28 01:14:10 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -73,13 +73,13 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
 	
   //begin walk in eta:
 
-  int iEtaMin = centerKey.iEta - mPars.deltaEta();
+  int iEtaMin = centerKey.eta() - mPars.deltaEta();
   if (iEtaMin < 0) iEtaMin = 0 ; //avoid wasted searches in eta
 	
-  for (int iEta = iEtaMin; (iEta <= centerKey.iEta + mPars.deltaEta()) && (iEta < mPars.Neta()); ++iEta) {
+  for (int iEta = iEtaMin; (iEta <= centerKey.eta() + mPars.deltaEta()) && (iEta < mPars.Neta()); ++iEta) {
 		
     //begin walk in phi:
-    for (int iPhi = centerKey.iPhi - mPars.deltaPhi(); iPhi <= centerKey.iPhi + mPars.deltaPhi(); ++iPhi) {
+    for (int iPhi = centerKey.phi() - mPars.deltaPhi(); iPhi <= centerKey.phi() + mPars.deltaPhi(); ++iPhi) {
 			
       int iModPhi = iPhi;
       if (iModPhi < 0) iModPhi = iModPhi + mPars.Nphi();
@@ -310,20 +310,15 @@ StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiM
 
 void StConeJetFinder::buildGrid()
 {
-  double dEta = mPars.EtaMax() - mPars.EtaMin();
-  double dPhi = mPars.PhiMax() - mPars.PhiMin();
-  double etaBinWidth = dEta/static_cast<double>(mPars.Neta());
-  double phiBinWidth = dPhi/static_cast<double>(mPars.Nphi());
-	
   for(int i = 0; i < mPars.Neta(); ++i){
 		
-    double etaMin = mPars.EtaMin() + static_cast<double>(i)*etaBinWidth;
-    double etaMax = etaMin + etaBinWidth;
+    double etaMin = mPars.EtaMin() + static_cast<double>(i)*mPars.etaWidth();
+    double etaMax = etaMin + mPars.etaWidth();
 		
     for(int j = 0; j < mPars.Nphi(); ++j){
 			
-      double phiMin = mPars.PhiMin() + static_cast<double>(j)*phiBinWidth;
-      double phiMax = phiMin + phiBinWidth;
+      double phiMin = mPars.PhiMin() + static_cast<double>(j)*mPars.phiWidth();
+      double phiMax = phiMin + mPars.phiWidth();
 
       StJetEtCell* cell = makeCell(etaMin, etaMax, phiMin, phiMax);
 			
