@@ -13,7 +13,7 @@ StRtsTable::StRtsTable(size_t structLength, Int_t n) :
          row.fType=kUChar;
       fSize = dsc->Sizeof();
    }
-   if ( !dsc || !fSize) Warning("TGenericTable","Wrong table format");
+   if ( !dsc || !fSize ) Warning("TGenericTable","Wrong table format");
    if (n > 0) Set(n);
    SetGenericType();
  }
