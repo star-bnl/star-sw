@@ -5,8 +5,8 @@
 #include "Gtypes.h"
 #include <map>
   //
-  // class StDraw3D - to draw the 3D primitice like 3d point and 3D line
-  // decorterated with the STAR detector geometry
+  // class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
+  // decoratated with the STAR detector geometry
   //
 class TVirtualPad;
 
