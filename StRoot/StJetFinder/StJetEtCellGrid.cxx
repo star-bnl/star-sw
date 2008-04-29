@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.cxx,v 1.2 2008/04/29 00:53:30 tai Exp $
+// $Id: StJetEtCellGrid.cxx,v 1.3 2008/04/29 01:55:52 tai Exp $
 #include "StJetEtCellGrid.h"
 
 #include "StConePars.h"
@@ -30,6 +30,32 @@ void StJetEtCellGrid::buildGrid(StJetEtCellFactory* cellFactory)
   }
 
 }
+
+void StJetEtCellGrid::fillGridWith(JetList& protoJetList)
+{
+  for(CellList::iterator etCell = _EtCellList.begin(); etCell != _EtCellList.end(); ++etCell) {
+    (*etCell)->clear();
+  }
+
+  for (JetList::iterator protoJet = protoJetList.begin(); protoJet != protoJetList.end(); ++protoJet) {
+    CellMap::iterator where = _EtCellMap.find(findKey((*protoJet).eta(), (*protoJet).phi()));
+    if (where != _EtCellMap.end())
+      (*where).second->add(*protoJet);
+    else
+      cout << "StJetEtCellGrid::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
+  }
+
+  for(CellList::iterator etCell = _EtCellList.begin(); etCell !=  _EtCellList.end(); ++etCell) {
+    (*etCell)->update();
+  }
+}
+
+StJetEtCellGrid::CellList StJetEtCellGrid::EtSortedCellList()
+{
+  _EtCellList.sort(StJetEtCellEtGreaterThan());
+  return _EtCellList;
+}
+
 
 StEtGridKey StJetEtCellGrid::findKey(double eta, double phi) const
 {

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.h,v 1.2 2008/04/29 00:53:30 tai Exp $
+// $Id: StJetEtCellGrid.h,v 1.3 2008/04/29 01:55:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETETCELLGRID_H
 #define STJETETCELLGRID_H
@@ -17,6 +17,7 @@ class StJetEtCellGrid {
 
 public:
 
+  typedef std::list<StProtoJet> JetList;
   typedef std::map<StEtGridKey, StJetEtCell*> CellMap;
   typedef CellMap::value_type CellMapValType;
   typedef StJetEtCell::CellList CellList;
@@ -25,6 +26,9 @@ public:
   StJetEtCellGrid(StConePars& pars) : _pars(pars) { }
 
   void buildGrid(StJetEtCellFactory* cellFactory);
+
+  void fillGridWith(JetList& protoJetList);
+  CellList EtSortedCellList();
 
   CellMap& EtCellMap() { return _EtCellMap; }
   CellList& EtCellList() { return _EtCellList; }

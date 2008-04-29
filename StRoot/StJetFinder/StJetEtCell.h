@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCell.h,v 1.11 2008/04/24 01:17:21 tai Exp $
+// $Id: StJetEtCell.h,v 1.12 2008/04/29 01:55:52 tai Exp $
 //StJetEtCell.h
 //M.L. Miller (Yale Software) (adapted from Akio Ogawa's work)
 //07/02
@@ -128,6 +128,15 @@ protected:
   ///remember the cells cluster w/ this one
   CellList mCells;
   StProtoJet mProtoJet;
+};
+
+struct StJetEtCellEtGreaterThan {
+
+  bool operator()(StJetEtCell* lhs, StJetEtCell* rhs)
+  {
+    return lhs->eT() > rhs->eT();
+  }
+
 };
 
 inline std::ostream& operator<<(std::ostream& os, const StJetEtCell& cell)
