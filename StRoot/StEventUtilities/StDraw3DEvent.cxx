@@ -1,8 +1,10 @@
-#  include "StDraw3DEvent.h"
-#  include "TVirtualPad.h"
-#  include "StEventHelper.h"
-#  include "StTrack.h"
-#  include "StMeasuredPoint.h"
+// $Id: StDraw3DEvent.cxx,v 1.2 2008/04/29 17:16:58 fine Exp $
+// *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
+#include "StDraw3DEvent.h"
+#include "TVirtualPad.h"
+#include "StEventHelper.h"
+#include "StTrack.h"
+#include "StMeasuredPoint.h"
 
 //___________________________________________________
 StDraw3DEvent::StDraw3DEvent(TVirtualPad *pad): StDraw3D(pad)
