@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.5 2008/04/29 17:17:09 fine Exp $
+// $Id: StDraw3D.h,v 1.6 2008/04/29 22:37:38 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -56,7 +56,8 @@ public:
    virtual ~StDraw3D(){;}
    static int Draw3DInit();
    virtual const StDraw3DStyle &AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz);
-
+   TVirtualPad *Pad() const { return fPad;}
+   
    virtual TObject *Draw(TObject *o);
    virtual void  Draw(Option_t *option="") {TObject::Draw(option);} 
    virtual const StDraw3DStyle &Style(EDraw3DStyle type);
