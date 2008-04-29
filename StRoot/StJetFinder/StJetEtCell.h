@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCell.h,v 1.12 2008/04/29 01:55:52 tai Exp $
+// $Id: StJetEtCell.h,v 1.13 2008/04/29 20:25:45 tai Exp $
 //StJetEtCell.h
 //M.L. Miller (Yale Software) (adapted from Akio Ogawa's work)
 //07/02
@@ -45,7 +45,10 @@ public:
   int nTimesUsed() const { return mNtimesUsed; }
 
   ///Allow jet-finder power to over-ride eT
-  void setEt(double v) { mEt=v; }
+  void setEt(double v) { mEt = v; }
+
+  double Et() const { return mEt; }
+
 
   void update() {
     protoJet().update();

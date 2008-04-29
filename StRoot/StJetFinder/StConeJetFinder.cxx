@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.27 2008/04/29 01:55:52 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.28 2008/04/29 20:25:44 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -25,7 +25,6 @@ StConeJetFinder::StConeJetFinder(const StConePars& pars)
   , mSearchCounter(0)
   , mMerger(new StJetSpliterMerger())
   , _cellGrid(mPars)
-  , _EtCellMap(_cellGrid.EtCellMap())
 {
     mMerger->setSplitFraction(mPars.splitFraction());
 }
@@ -133,7 +132,7 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
       if (iModPhi < 0) iModPhi = iModPhi + mPars.Nphi();
       if (iModPhi >= mPars.Nphi()) iModPhi = iModPhi - mPars.Nphi();
 			
-      StJetEtCell* otherCell = findCellByKey(StEtGridKey(iEta, iModPhi));
+      StJetEtCell* otherCell = _cellGrid.CellI(iEta, iModPhi);
       if (!otherCell) {
 	//	cout <<"otherCell doesn't exist.  key:\t"<<key<<endl;
       }
@@ -157,11 +156,43 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
   return kContinueSearch;
 }
 
-void StConeJetFinder::addToPrejets(StJetEtCell* cell)
+void StConeJetFinder::addToPrejets(StJetEtCell* cellp)
 {
-    PreJetInitializer initializer(*this);
-    initializer(*cell); //test, try to initialize as we add
-    mPreJets.push_back(*cell);
+  //    PreJetInitializer initializer(*this);
+  //    initializer(*cell); //test, try to initialize as we add
+  //first find the pointer to the cell in the grid (not this local copy)
+
+  StJetEtCell& cell = (*cellp);
+
+  // from void PreJetInitializer::operator()(StJetEtCell& cell) 
+  StJetEtCell* realCell = _cellGrid.CellD(cell.eta(), cell.phi());
+  if (!realCell) {
+    cout << "PreJetInitializer(). ERROR:\t"
+	 << "real Cell doesn't exist." << endl;
+    abort();
+  }
+	
+  //now add this into the cone-cell collection, *if* it's not already there
+  //this shouldn't happen, temp check to get rid of relic bug
+  CellList& cells = cell.cellList();
+  CellList::iterator where = std::find(cells.begin(), cells.end(), realCell);
+  if (realCell->empty()==false) {
+    if (where==cells.end()) {
+      cout <<"\tADDING SELF IN CONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+      cell.add(realCell);
+    }
+  }
+	
+  cell.setEt(0);
+  for(CellList::iterator etCell = cell.cellList().begin(); etCell != cell.cellList().end(); ++etCell) {
+    (*etCell)->update();
+    //    cell.mEt += (*etCell)->eT();
+    cell.setEt(cell.Et() + (*etCell)->eT());
+  }
+  /////////////////////////////////////////////////////////////////////////////
+
+
+    mPreJets.push_back(cell);
 }
 
 void StConeJetFinder::initializeWorkCell(const StJetEtCell* other)
@@ -191,10 +222,9 @@ void StConeJetFinder::doMinimization()
       }			
 
       //find cell corresponding to centroid of cone
-      StEtGridKey key = findKey(mWorkCell.centroid().eta(), mWorkCell.centroid().phi() );
-      StJetEtCell* newCenterCell = findCellByKey(key);
+      StJetEtCell* newCenterCell = _cellGrid.CellD(mWorkCell.centroid().eta(), mWorkCell.centroid().phi());
       if (!newCenterCell) {
-	cout <<"newCenterCell doesn't exist.  key:\t"<<key<<endl;
+	cout << "newCenterCell doesn't exist.  key:\t" << endl;
 	res = kLeftVolume;
       } else {
 	initializeWorkCell(newCenterCell);
@@ -216,7 +246,7 @@ StJetEtCell* StConeJetFinder::defineMidpoint(const StJetEtCell& pj1, const StJet
 {
     double etaMid = midpoint(pj1.eta(), pj2.eta() );
     double phiMid = midpoint(pj1.phi(), pj2.phi() );
-    return findCellByKey( findKey(etaMid, phiMid) ); //can be void!
+    return _cellGrid.CellD(etaMid, phiMid);
 }
 
 //add a seed at the midpoint between any two jets separated by d<2.*coneRadius();
@@ -291,8 +321,7 @@ bool StConeJetFinder::inVolume(double eta, double phi)
     if (iEta < 0 || iPhi < 0) {
 	return false;
     }
-    //const StJetEtCell* cell = findCellByKey( StEtGridKey(iEta, iPhi) );
-    return (findCellByKey( StEtGridKey(iEta, iPhi) )) ? true : false;
+    return (_cellGrid.CellI(iEta, iPhi)) ? true : false;
 }
 
 StEtGridKey StConeJetFinder::findKey(double eta, double phi) const
@@ -385,12 +414,6 @@ const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
     }
 }
 
-StJetEtCell* StConeJetFinder::findCellByKey(const StEtGridKey& key)
-{
-    CellMap::iterator where = _EtCellMap.find(key);
-    return (where!=_EtCellMap.end()) ? (*where).second : 0;
-}
-
 void StConeJetFinder::print()
 {
     cout <<"\nStConeJetFinder::print()"<<endl;
@@ -416,24 +439,6 @@ void StConeJetFinder::print()
     cout <<"mDebug:\t"<<mPars.debug()<<endl;
 }
 
-StConeJetFinder::CellMap::iterator 
-StConeJetFinder::findIterator(double eta, double phi)
-{
-    StEtGridKey centerKey = findKey( eta, phi );
-    return findIterator(centerKey);
-}
-
-
-StConeJetFinder::CellMap::iterator StConeJetFinder::findIterator(const StEtGridKey& centerKey)
-{
-    CellMap::iterator where = _EtCellMap.find(centerKey);
-    if (where==_EtCellMap.end() ) {
-	cout <<"StConeJetFinder::findIterator(). ERROR:\t"
-	     <<"Mismatch in containers.  Calling abort"<<endl;
-	abort();
-    }
-    return where;
-}
 
 //non members ---
 
@@ -455,38 +460,5 @@ void PostMergeUpdater::operator()(StJetEtCell& cell)
 	
     //now update jet-eT
     cell.mEt = updater.sumEt;
-}
-
-void PreJetInitializer::operator()(StJetEtCell& cell) 
-{
-	
-  //first find the pointer to the cell in the grid (not this local copy)
-  StEtGridKey key = mConeFinder.findKey(cell.eta(), cell.phi() );
-  StJetEtCell* realCell = mConeFinder.findCellByKey(key);
-	
-  if (!realCell) {
-    cout <<"PreJetInitializer(). ERROR:\t"
-	 <<"real Celldoesn't exist.  key:\t"<<key<<"\tabort()"<<endl;
-    abort();
-  }
-	
-  //now add this into the cone-cell collection, *if* it's not already there
-  //this shouldn't happen, temp check to get rid of relic bug
-  StConeJetFinder::CellList& cells = cell.cellList();
-  StConeJetFinder::CellList::iterator where = std::find(cells.begin(), cells.end(), realCell);
-  if (realCell->empty()==false) {
-    if (where==cells.end()) {
-      cout <<"\tADDING SELF IN CONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-      cell.add(realCell);
-    }
-  }
-	
-  cell.mEt = 0;
-  for(StConeJetFinder::CellList::iterator etCell = cell.cellList().begin(); etCell != cell.cellList().end(); ++etCell) {
-    (*etCell)->update();
-    cell.mEt += (*etCell)->eT();
-  }
-
-
 }
 
