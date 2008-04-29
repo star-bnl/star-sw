@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.h,v 1.1 2008/04/29 00:11:11 tai Exp $
+// $Id: StJetEtCellGrid.h,v 1.2 2008/04/29 00:53:30 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETETCELLGRID_H
 #define STJETETCELLGRID_H
@@ -24,7 +24,7 @@ public:
 
   StJetEtCellGrid(StConePars& pars) : _pars(pars) { }
 
-  void buildGrid(CellList& cellList, CellMap& cellMap, StJetEtCellFactory* cellFactory);
+  void buildGrid(StJetEtCellFactory* cellFactory);
 
   CellMap& EtCellMap() { return _EtCellMap; }
   CellList& EtCellList() { return _EtCellList; }

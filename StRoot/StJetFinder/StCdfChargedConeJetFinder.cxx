@@ -23,29 +23,16 @@ using std::sort;
 StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(const StCdfChargedConePars& pars) 
   : StConeJetFinder(pars)
 {
-  //  mPars= pars;
-  //  buildGrid();
+
 }
 
 StCdfChargedConeJetFinder::~StCdfChargedConeJetFinder()
 {
 }
 
-StJetEtCell* StCdfChargedConeJetFinder::makeCell(double etaMin, double etaMax,
-						 double phiMin, double phiMax)
-{
-    return new StCdfChargedJetEtCell(etaMin, etaMax, phiMin, phiMax);
-}
-
 StJetEtCellFactory* StCdfChargedConeJetFinder::makeCellFactory()
 {
   return new StCdfChargedJetEtCellFactory;
-}
-
-void StCdfChargedConeJetFinder::Init()
-{
-  //    mMerger->setSplitFraction(mPars.mSplitFraction);
-  buildGrid();
 }
 
 void StCdfChargedConeJetFinder::findJets_sub1()
