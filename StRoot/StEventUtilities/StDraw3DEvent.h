@@ -1,6 +1,9 @@
 #ifndef STAR_StDraw3DEvent
 #define STAR_StDraw3DEvent
 
+// $Id: StDraw3DEvent.h,v 1.2 2008/04/29 17:16:58 fine Exp $
+// *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
+
 #include "StDraw3D.h"
   //
   // class StDraw3DEvent - to draw the StEvent primitives like 3StTrack and StMeasuredPoint 

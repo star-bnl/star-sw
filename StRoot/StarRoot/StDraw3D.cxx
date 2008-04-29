@@ -1,12 +1,14 @@
-#  include "StDraw3D.h"
-#  include "TVirtualPad.h"
-#  include "TPolyMarker3D.h"
-#  include "TPolyLine3D.h"
-#  include "TSystem.h"
-#  include "TROOT.h"
-#  include "TEnv.h"
-#  include "StCheckQtEnv.h"
-#  include "TStyle.h"
+// $Id: StDraw3D.cxx,v 1.4 2008/04/29 17:17:09 fine Exp $
+//*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
+#include "StDraw3D.h"
+#include "TVirtualPad.h"
+#include "TPolyMarker3D.h"
+#include "TPolyLine3D.h"
+#include "TSystem.h"
+#include "TROOT.h"
+#include "TEnv.h"
+#include "StCheckQtEnv.h"
+#include "TStyle.h"
 
 int StDraw3D::fgDraw_3d_init = 0;
 

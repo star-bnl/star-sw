@@ -1,5 +1,7 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
+// $Id: StDraw3D.h,v 1.5 2008/04/29 17:17:09 fine Exp $
+// *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
 #include "Gtypes.h"
