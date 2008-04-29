@@ -18,44 +18,36 @@ Int_t StiKalmanTrackFitter::_debug = 0;
       and updates are performed only if nodes hold a hit.
 	</ol>
 */
-Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw (Exception)
+//______________________________________________________________________________
+int StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
 {
-   enum {kMaxNErr=333};
-static Int_t nCall=0; nCall++;
+  enum {kMaxNErr=333};
+static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
 
   if (debug() > 2) cout << "SKTFitter::fit() -I- Started:"<<endl;
-  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
-  assert(track); 
-  StiHit * targetHit;
-  StiKalmanTrackNode * targetNode; // parent node
-  const StiDetector * targetDet;  // parent detector
+  StiKalmanTrack * track = (StiKalmanTrack*)(stiTrack);
+  StiHit *targetHit=0;
+  StiKalmanTrackNode *targetNode=0; // parent node
+  const StiDetector * targetDet=0;  // parent detector
   
-  StiKTNBidirectionalIterator first;
-  StiKTNBidirectionalIterator last;
   StiKTNBidirectionalIterator source;
-  Double_t chi2;
-  Int_t status = 0,nerr =0;
-  if (!fitDirection) {
-    first = track->begin();
-    last  = track->end();
-  } else {
-    last  = track->rend();
-    first = track->rbegin();
-  }
+  double chi2;
+  int status = 0,nerr =0;
+  if (!fitDirection) {source = track->begin() ;}
+  else               {source = track->rbegin();}
   if (debug()) cout << "StiKalmanTrackFitter::fit direction = "  << fitDirection << endl;
 // 1st count number of accepted already good nodes
-  Int_t nGoodNodes = track->getNNodes(3);
+  int nGoodNodes = track->getNNodes(3);
   if (nGoodNodes<3) 			return 1;
 
 
-  StiKalmanTrackNode *pNode = 0;
-  Int_t iNode=0; status = 0;
-  for (source=first;source!=last;source++) {
+  StiKalmanTrackNode *pNode = 0;		//parent node
+  int iNode=0; status = 0;
+ for (;(targetNode=source());source++) {
     if (nerr>kMaxNErr) return nerr;
     do { //do refit block
       iNode++;
-      targetNode = &(*source);
       targetDet = targetNode->getDetector();
       targetHit = targetNode->getHit();
       Double_t oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
@@ -66,9 +58,9 @@ static Int_t myKount=0;myKount++;
       if (pNode) {
         targetNode->setChi2(1e51);
 	if (targetDet)
-	  status = targetNode->propagate(pNode,targetDet,fitDirection);	// hit
-	else if (targetHit)
-	  status = targetNode->propagate(pNode,targetHit,fitDirection);  // vertex
+	  {status = targetNode->propagate(pNode,         targetDet,fitDirection);}// hit
+	else 
+	  {status = targetNode->propagate(pNode,(StiHit*)targetHit,fitDirection);}// vertex
 	if (status)			{nerr++; continue;}
       }
       else  {
@@ -81,9 +73,8 @@ static Int_t myKount=0;myKount++;
 // target node has parameters now but not fitted
 // if targetNode has hit, get chi2 and update track parameters accordingly
       do {// Fit
-        targetNode->setChi2(0.);
-        if (!targetHit) 		break; //There is no hit.
-        assert(targetNode->getHit()==targetHit);
+        targetNode->setChi2(0.2);
+        if (!targetHit) 			 break; //There is no hit.
         StiKalmanTrackNode tryNode = *targetNode;
         targetNode->setChi2(1e52);
         if (tryNode.nudge(targetHit))	{nerr++; break;}
@@ -106,25 +97,3 @@ static Int_t myKount=0;myKount++;
   return (nerr>kMaxNErr)? nerr:0;
 }
 
-/*
-	useful diagnostic tool - do not delete.
-
-	if (!targetNode) continue;
-	    {
-	      cout << " StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) -E- [1] targetNode==0" << endl;
-	      cout << " FIT != TRACKING --- Original Track" << endl;
-	      StiKTNForwardIterator it2(track->getLastNode());
-	      StiKTNForwardIterator end2 = it2.end();
-	      while (it2!=end2) 
-		{
-		  const StiKalmanTrackNode& node2 = *it2;
-		  Double_t x_g = node2.x_g();
-		  Double_t y_g = node2.y_g();
-		  Double_t rt_g2 = sqrt(x_g*x_g+y_g*y_g);
-		  cout << "rt=" << rt_g2 << " " << node2 << endl;
-		  ++it2;
-		}
-	      cout << " report done"<<endl;
-	      throw runtime_error("StiKalmanTrack::fit() -E- [1] targetNode==0"); 
-	    }
-*/
