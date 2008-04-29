@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.cxx,v 1.3 2008/04/29 01:55:52 tai Exp $
+// $Id: StJetEtCellGrid.cxx,v 1.4 2008/04/29 20:25:45 tai Exp $
 #include "StJetEtCellGrid.h"
 
 #include "StConePars.h"
@@ -56,6 +56,17 @@ StJetEtCellGrid::CellList StJetEtCellGrid::EtSortedCellList()
   return _EtCellList;
 }
 
+StJetEtCell* StJetEtCellGrid::CellD(double eta, double phi)
+{
+  CellMap::iterator it = _EtCellMap.find(findKey(eta, phi));
+  return (it != _EtCellMap.end()) ? (*it).second : 0;
+}
+
+StJetEtCell* StJetEtCellGrid::CellI(int iEta, int iPhi)
+{
+  CellMap::iterator it = _EtCellMap.find(StEtGridKey(iEta, iPhi));
+  return (it != _EtCellMap.end()) ? (*it).second : 0;
+}
 
 StEtGridKey StJetEtCellGrid::findKey(double eta, double phi) const
 {

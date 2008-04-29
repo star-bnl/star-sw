@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.h,v 1.3 2008/04/29 01:55:53 tai Exp $
+// $Id: StJetEtCellGrid.h,v 1.4 2008/04/29 20:25:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETETCELLGRID_H
 #define STJETETCELLGRID_H
@@ -30,8 +30,8 @@ public:
   void fillGridWith(JetList& protoJetList);
   CellList EtSortedCellList();
 
-  CellMap& EtCellMap() { return _EtCellMap; }
-  CellList& EtCellList() { return _EtCellList; }
+  StJetEtCell* CellI(int iEta, int iPhi);
+  StJetEtCell* CellD(double eta, double phi);
 
 private:
 

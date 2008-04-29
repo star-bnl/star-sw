@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.23 2008/04/29 01:55:52 tai Exp $
+// $Id: StConeJetFinder.h,v 1.24 2008/04/29 20:25:45 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -38,11 +38,8 @@ class StConeJetFinder : public StJetFinder {
 
 public:
 	
-    ///useful typdefs
-    typedef map<StEtGridKey, StJetEtCell*> CellMap;
-    typedef CellMap::value_type CellMapValType;
-    typedef StJetEtCell::CellList CellList;
-    typedef list<StJetEtCell> ValueCellList;
+  typedef StJetEtCell::CellList CellList;
+  typedef list<StJetEtCell> ValueCellList;
 	
     ///cstr-dstr
     StConeJetFinder(const StConePars& pars);
@@ -72,8 +69,6 @@ protected:
 
     void addToPrejets(StJetEtCell* cell);
 	
-    StJetEtCell* findCellByKey(const StEtGridKey& key);
-	
     enum SearchResult {kTooManyTries=0, kLeftVolume=1, kConverged=2, kContinueSearch=3};	
     SearchResult doSearch();
 	
@@ -98,11 +93,6 @@ protected:
     ///find a key.  If out of bounds, it aborts program flow.  otherwise, nasty run-time errors!
     StEtGridKey findKey(double eta, double phi) const;
 	
-    ///find iterators into grid
-    CellMap::iterator findIterator(double eta, double phi);
-    ///find iterators into grid
-    CellMap::iterator findIterator(const StEtGridKey&);
-	
 protected:
 
   StConePars mPars; ///run-time pars
@@ -119,8 +109,6 @@ protected:
 
   StJetEtCellGrid _cellGrid;
 	
-  CellMap& _EtCellMap; ///the map references the objects in the vector
-
 private:
 
   virtual void findJets_sub1();
@@ -147,14 +135,6 @@ struct PreJetLazyUpdater //assume proto-jet updated
 struct PostMergeUpdater
 {
     void operator()(StJetEtCell& cell);
-};
-
-struct PreJetInitializer
-{
-  PreJetInitializer(StConeJetFinder& j) : mConeFinder(j) {};
-  StConeJetFinder& mConeFinder;
-	
-  void operator()(StJetEtCell& cell);
 };
 
 #endif
