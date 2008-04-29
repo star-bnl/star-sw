@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.104 2008/04/08 21:39:43 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.104 2008/04/08 21:39:43 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.105 2008/04/29 03:16:34 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.105 2008/04/29 03:16:34 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.105  2008/04/29 03:16:34  perev
+ * Silicon nodes dropped first
+ *
  * Revision 2.104  2008/04/08 21:39:43  perev
  * No any cuts in isPrimary()
  *
@@ -1306,6 +1309,9 @@ static int nCall=0; nCall++;
 StiDebug::Break(nCall);
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
 static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
+  double maxXi2 = StiKalmanTrackFitterParameters::instance()->getMaxChi2();
+
+
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
   if (nNBeg<=3) 	return 1;
   if (!mgMaxRefiter) 	return 0;
@@ -1317,6 +1323,7 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   int iter=0,igor=0;
   double qA;
   double errConfidence = defConfidence;
+  StiKalmanTrackNode *vertexNode=0;
   for (int ITER=0;ITER<mgMaxRefiter;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
@@ -1346,8 +1353,26 @@ if (oldRefit) {
     }
     if (fail>0) 						break;
 //		
-    StiKalmanTrackNode *worstNode= sTNH.getWorst();
-    if (worstNode && worstNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2())     
+//    StiKalmanTrackNode *worstNode= sTNH.getWorst();
+    vertexNode= sTNH.getVertexNode();
+    StiKalmanTrackNode *worstNode=0;
+    {
+      StiKalmanTrackNode *node = 0;
+      double worstXi2 = maxXi2,rMax=50;
+      for (StiKTNIterator source=rbegin();(node=source());++source) {
+	if (node->x()>rMax) {
+	  if (worstNode) break;
+	  rMax = 1000;
+	}				
+	if (node==vertexNode) 		continue;		
+	if (!node->getHit()) 		continue;		
+	if (!node->isValid()) 		continue;
+	if ( node->getChi2()<worstXi2)	continue;
+	worstNode = node; worstXi2=node->getChi2();
+      }
+    }
+
+    if (worstNode && worstNode->getChi2()>maxXi2)     
       {//worstNode->getHit()->setTimesUsed(0);
        worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
     if (rejectByHitSet()) { releaseHits()            ; continue;}
@@ -1363,7 +1388,6 @@ if (oldRefit) {
 //    errConfidence = 0.5*(errConfidence+1);
 //    if (errConfidence>0.99) 					break;
   }
-  StiKalmanTrackNode *vertexNode= sTNH.getVertexNode();
 
 //		Test for primary 
   while (!fail && vertexNode) {
