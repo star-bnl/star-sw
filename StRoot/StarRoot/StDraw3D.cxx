@@ -51,10 +51,16 @@ void StDraw3D::SetBkColor(Color_t newBkColor)
    fBkColor = newBkColor;
 }
 //___________________________________________________
-StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz)
+const StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz)
 {
    fStyles.insert(std::pair<EDraw3DStyle,StDraw3DStyle>(type,StDraw3DStyle(type,col,sty,siz)));
-   return fStyles[type];
+   return Style(type);
+}
+
+//___________________________________________________
+const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
+{
+    return fStyles[type];
 }
 
 //___________________________________________________
@@ -84,7 +90,7 @@ TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_
 //___________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, EDraw3DStyle sty)
 {
-  const StDraw3DStyle &style =  fStyles[sty];
+  const StDraw3DStyle &style =  Style(sty);
   return Points(n, xyz, style.Col(),style.Sty(),style.Siz());
 }
 //___________________________________________________
@@ -102,7 +108,7 @@ TObject *StDraw3D::Point(float x, float y, float z, Color_t col,Style_t sty,Size
 //___________________________________________________
 TObject *StDraw3D::Point(float x, float y, float z, EDraw3DStyle sty)
 {
-   const StDraw3DStyle &style =  fStyles[sty];
+   const StDraw3DStyle &style =  Style(sty);
    return Point(x,y, z, style.Col(),style.Sty(),style.Siz());
 }
 
@@ -127,7 +133,7 @@ TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t
 //___________________________________________________
 TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
 {
-   const StDraw3DStyle &style =  fStyles[sty];
+   const StDraw3DStyle &style =  Style(sty);
    return Line(n,xyz,  style.Col(),style.Sty(),style.Siz() );
 }
 
