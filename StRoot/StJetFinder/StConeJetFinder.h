@@ -1,7 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.20 2008/04/28 21:59:07 tai Exp $
+// $Id: StConeJetFinder.h,v 1.21 2008/04/29 00:11:09 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
+
+#include "StJetEtCellFactory.h"
 
 #include "TObject.h"
 
@@ -25,37 +27,7 @@ class StConeJetFinder;
 
 #include "StConePars.h"
 
-class StJetEtCellFactory {
-
-public:
-  virtual StJetEtCell* create(double etaMin, double etaMax, double phiMin, double phiMax)
-  { return new StJetEtCell(etaMin, etaMax, phiMin, phiMax); }
-};
-
-
-class StJetEtCellGrid {
-
-public:
-
-  typedef map<StEtGridKey, StJetEtCell*> CellMap;
-  typedef CellMap::value_type CellMapValType;
-  typedef StJetEtCell::CellList CellList;
-  typedef list<StJetEtCell> ValueCellList;
-
-  StJetEtCellGrid(StConePars& pars) : _pars(pars) { }
-
-  void buildGrid(CellList& cellList, CellMap& cellMap, StJetEtCellFactory* cellFactory);
-
-private:
-
-  StEtGridKey findKey(double eta, double phi) const;
-  int findEtaKey(double eta) const;
-  int findPhiKey(double phi) const;
-
-
-  StConePars& _pars;
-
-};
+#include "StJetEtCellGrid.h"
 
 /*!
   \class StConeJetFinder
@@ -82,8 +54,7 @@ public:
     StConePars pars() const; 
 	
     ///inherited interface
-    virtual void findJets(JetList& protojets);     
-    virtual void clear();
+    void findJets(JetList& protojets);     
     virtual void print();
 	
 protected:
@@ -102,8 +73,6 @@ protected:
   virtual StJetEtCellFactory* makeCellFactory();
 
 	
-    ///put 'em in the grid
-    virtual void fillGrid(JetList& protoJets); 
 	
     void clearAndDestroy();
 
@@ -146,10 +115,6 @@ protected:
 
   StConePars mPars; ///run-time pars
 	
-  CellMap _EtCellMap; ///the map references the objects in the vector
-  CellList _EtCellList; ///the vector holds the actual objects
-  CellList::iterator mTheEnd;
-	
   StJetEtCell mWorkCell;
   int mSearchCounter;
 	
@@ -162,6 +127,9 @@ protected:
 
   StJetEtCellGrid _cellGrid;
 	
+  CellMap& _EtCellMap; ///the map references the objects in the vector
+  CellList& _EtCellList; ///the vector holds the actual objects
+
 private:
 
   virtual void findJets_sub1();

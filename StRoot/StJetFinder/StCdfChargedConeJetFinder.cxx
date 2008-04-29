@@ -23,9 +23,8 @@ using std::sort;
 StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(const StCdfChargedConePars& pars) 
   : StConeJetFinder(pars)
 {
-  mPars= pars;
+  //  mPars= pars;
   buildGrid();
-  mTheEnd = _EtCellList.end();
 }
 
 StCdfChargedConeJetFinder::~StCdfChargedConeJetFinder()
@@ -47,7 +46,6 @@ void StCdfChargedConeJetFinder::Init()
 {
   //    mMerger->setSplitFraction(mPars.mSplitFraction);
   //    buildGrid();
-  //    mTheEnd = _EtCellList.end();
 }
 
 void StCdfChargedConeJetFinder::findJets_sub1()
