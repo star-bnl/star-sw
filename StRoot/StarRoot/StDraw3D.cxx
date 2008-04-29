@@ -21,6 +21,15 @@ Color_t StDraw3D::fgBkColor      = kBlack;
 //___________________________________________________
 StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad)
 {
+   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
+   static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
+   static const Style_t TrakSty = 1; static const Size_t TrakSiz = 1.00; static const Color_t TrakCol=kRed;
+   static const Style_t VertSty = 5; static const Size_t VertSiz = 3.50; static const Color_t VertCol=kYellow;
+   AddStyle(kVtx,         VertCol,VertSty,VertSiz);
+   AddStyle(kPrimaryTrack,TrakCol,TrakSty,TrakSiz);
+   AddStyle(kGlobalTrack, TrakCol,TrakSty,TrakSiz);
+   AddStyle(kUsedHit,     UHitCol,UHitSty,UHitSiz);
+   AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
 }
 
 //___________________________________________________
@@ -101,7 +110,7 @@ TObject *StDraw3D::Point(float x, float y, float z, EDraw3DStyle sty)
 TObject *StDraw3D::Draw3D(int n,  const float *xyz)
 {
    if (!fgDraw_3d_init) Draw3DInit();
-   return Points(n,xyz);
+   return Points(n,xyz,kVtx);
 }
 
 //___________________________________________________
@@ -140,7 +149,7 @@ void StDraw3D::Draw3DTest(){
    const float *fff = (const float *)&xyz[0];
    fprintf(stderr," %d %p\n", sizeXYZ,fff);
    Draw3D(sizeXYZ,fff);
-   Line(sizeXYZ,fff);
+   Line(sizeXYZ,fff,kPrimaryTrack);
 }
 #if 0
 //___________________________________________________
