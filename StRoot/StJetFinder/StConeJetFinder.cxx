@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.25 2008/04/29 00:25:16 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.26 2008/04/29 00:53:30 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -29,7 +29,6 @@ StConeJetFinder::StConeJetFinder(const StConePars& pars)
   , _EtCellList(_cellGrid.EtCellList())
 {
     mMerger->setSplitFraction(mPars.splitFraction());
-    //    buildGrid();
 }
 
 StConeJetFinder::~StConeJetFinder()
@@ -48,8 +47,86 @@ void StConeJetFinder::clearAndDestroy()
 
 void StConeJetFinder::Init()
 {
-//    mMerger->setSplitFraction(mPars.splitFraction());
-  buildGrid();
+  _cellGrid.buildGrid(makeCellFactory());
+}
+
+StJetEtCellFactory* StConeJetFinder::makeCellFactory()
+{
+  return new StJetEtCellFactory;
+}
+
+struct StJetEtCellEtGreaterThan { bool operator()(StJetEtCell* lhs, StJetEtCell* rhs) { return lhs->eT() > rhs->eT(); } };
+
+void StConeJetFinder::findJets(JetList& protoJetList)
+{
+  mPreJets.clear();
+  mSearchCounter = 0;
+
+  for(CellList::iterator etCell = _EtCellList.begin(); etCell != _EtCellList.end(); ++etCell) {
+    (*etCell)->clear();
+  }
+
+  for (JetList::iterator protoJet = protoJetList.begin(); protoJet != protoJetList.end(); ++protoJet) {
+    CellMap::iterator where = _EtCellMap.find(findKey((*protoJet).eta(), (*protoJet).phi()));
+    if (where != _EtCellMap.end())
+      (*where).second->add(*protoJet);
+    else
+      cout << "StConeJetFinder::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
+  }
+
+  for(CellList::iterator etCell = _EtCellList.begin(); etCell !=  _EtCellList.end(); ++etCell) {
+    (*etCell)->update();
+  }
+
+
+  //now we sort them in descending order in et: (et1>et2>...>etn)
+  _EtCellList.sort(StJetEtCellEtGreaterThan());
+
+  if (mPars.debug()) {print();}
+
+  for (CellList::iterator etCell = _EtCellList.begin(); etCell != _EtCellList.end(); ++etCell) {
+
+    if ((*etCell)->eT() <= mPars.seedEtMin()) break; //we're all done
+
+    if (!acceptSeed((*etCell))) continue;
+
+    //use a work object: mWorkCell
+    initializeWorkCell((*etCell));
+
+    findJets_sub1();
+  }
+    
+  findJets_sub2();
+
+  protoJetList.clear(); //clear 'em, add them back in as we find them
+  
+  for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
+    StJetEtCell* rj = &(*realJetIt);
+    if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
+      protoJetList.push_back( collectCell(rj) );
+    }
+  }
+}
+
+void StConeJetFinder::findJets_sub1()
+{
+  if (mPars.performMinimization()) {
+    doMinimization();
+  } else {
+    doSearch();
+    addToPrejets(&mWorkCell);
+  }
+}
+
+void StConeJetFinder::findJets_sub2()
+{
+  if (mPars.addMidpoints()) { 	//add seeds at midpoints
+    addSeedsAtMidpoint(); //old style, add midpoints before split/merge
+  }
+    
+  if (mPars.doSplitMerge()) {//split-merge
+    mMerger->splitMerge(mPreJets);
+  }
 }
 
 StConeJetFinder::SearchResult StConeJetFinder::doSearch()
@@ -154,82 +231,6 @@ void StConeJetFinder::doMinimization()
 
 }
 
-struct StJetEtCellIsNotEmpty { bool operator()(const StJetEtCell* c) { return !c->empty(); } };
-
-struct StJetEtCellEtGreaterThan { bool operator()(StJetEtCell* lhs, StJetEtCell* rhs) { return lhs->eT() > rhs->eT(); } };
-
-void StConeJetFinder::findJets(JetList& protoJetList)
-{
-  mPreJets.clear();
-  mSearchCounter = 0;
-
-  for(CellList::iterator etCell = _EtCellList.begin(); etCell != _EtCellList.end(); ++etCell) {
-    (*etCell)->clear();
-  }
-
-  for (JetList::iterator protoJet = protoJetList.begin(); protoJet != protoJetList.end(); ++protoJet) {
-    CellMap::iterator where = _EtCellMap.find(findKey((*protoJet).eta(), (*protoJet).phi()));
-    if (where != _EtCellMap.end())
-      (*where).second->add(*protoJet);
-    else
-      cout << "StConeJetFinder::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
-  }
-
-  for(CellList::iterator etCell = _EtCellList.begin(); etCell !=  _EtCellList.end(); ++etCell) {
-    (*etCell)->update();
-  }
-
-
-  //now we sort them in descending order in et: (et1>et2>...>etn)
-  _EtCellList.sort(StJetEtCellEtGreaterThan());
-
-  if (mPars.debug()) {print();}
-
-  for (CellList::iterator etCell = _EtCellList.begin(); etCell != _EtCellList.end(); ++etCell) {
-
-    if ((*etCell)->eT() <= mPars.seedEtMin()) break; //we're all done
-
-    if (!acceptSeed((*etCell))) continue;
-
-    //use a work object: mWorkCell
-    initializeWorkCell((*etCell));
-
-    findJets_sub1();
-  }
-    
-  findJets_sub2();
-
-  protoJetList.clear(); //clear 'em, add them back in as we find them
-  
-  for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
-    StJetEtCell* rj = &(*realJetIt);
-    if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
-      protoJetList.push_back( collectCell(rj) );
-    }
-  }
-}
-
-void StConeJetFinder::findJets_sub1()
-{
-  if (mPars.performMinimization()) {
-    doMinimization();
-  } else {
-    doSearch();
-    addToPrejets(&mWorkCell);
-  }
-}
-
-void StConeJetFinder::findJets_sub2()
-{
-  if (mPars.addMidpoints()) { 	//add seeds at midpoints
-    addSeedsAtMidpoint(); //old style, add midpoints before split/merge
-  }
-    
-  if (mPars.doSplitMerge()) {//split-merge
-    mMerger->splitMerge(mPreJets);
-  }
-}
-
 double midpoint(double v1, double v2)
 {
     double high, low;
@@ -309,21 +310,6 @@ void StConeJetFinder::addSeedsAtMidpoint()
 	    abort();
 	}
     }
-}
-
-StJetEtCellFactory* StConeJetFinder::makeCellFactory()
-{
-  return new StJetEtCellFactory;
-}
-
-StJetEtCell* StConeJetFinder::makeCell(double etaMin, double etaMax, double phiMin, double phiMax)
-{
-  return new StJetEtCell(etaMin, etaMax, phiMin, phiMax);
-}
-
-void StConeJetFinder::buildGrid()
-{
-  _cellGrid.buildGrid(_EtCellList, _EtCellMap, makeCellFactory());
 }
 
 bool StConeJetFinder::inVolume(double eta, double phi)

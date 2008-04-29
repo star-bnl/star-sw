@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.cxx,v 1.1 2008/04/29 00:11:10 tai Exp $
+// $Id: StJetEtCellGrid.cxx,v 1.2 2008/04/29 00:53:30 tai Exp $
 #include "StJetEtCellGrid.h"
 
 #include "StConePars.h"
@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void StJetEtCellGrid::buildGrid(CellList& cellList, CellMap& cellMap, StJetEtCellFactory* cellFactory)
+void StJetEtCellGrid::buildGrid(StJetEtCellFactory* cellFactory)
 {
   for(int i = 0; i < _pars.Neta(); ++i){
 		
@@ -23,9 +23,9 @@ void StJetEtCellGrid::buildGrid(CellList& cellList, CellMap& cellMap, StJetEtCel
 
       StJetEtCell* cell = cellFactory->create(etaMin, etaMax, phiMin, phiMax);
 			
-      cellList.push_back(cell);
+      _EtCellList.push_back(cell);
 			
-      cellMap.insert(CellMapValType(findKey(cell->eta(), cell->phi()), cell));
+      _EtCellMap.insert(CellMapValType(findKey(cell->eta(), cell->phi()), cell));
     }
   }
 

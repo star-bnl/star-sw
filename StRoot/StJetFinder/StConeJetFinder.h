@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.21 2008/04/29 00:11:09 tai Exp $
+// $Id: StConeJetFinder.h,v 1.22 2008/04/29 00:53:30 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -48,7 +48,7 @@ public:
     StConeJetFinder(const StConePars& pars);
     virtual ~StConeJetFinder();
 	
-  virtual void Init();
+  void Init();
 
     ///simple access to the parameters
     StConePars pars() const; 
@@ -64,11 +64,6 @@ protected:
 	
     ///Only available for derived classes
     StConeJetFinder();
-
-    ///make a polymorphic cell
-    virtual StJetEtCell* makeCell(double etaMin, double etaMax, double phiMin, double phiMax);
-    ///build the grid at construction time
-    virtual void buildGrid();
 
   virtual StJetEtCellFactory* makeCellFactory();
 
