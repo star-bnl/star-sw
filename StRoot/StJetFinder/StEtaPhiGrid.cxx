@@ -1,6 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.cxx,v 1.5 2008/04/29 20:32:14 tai Exp $
-#include "StJetEtCellGrid.h"
+// $Id: StEtaPhiGrid.cxx,v 1.1 2008/04/29 20:36:41 tai Exp $
+#include "StEtaPhiGrid.h"
 
 #include "StConePars.h"
 #include "StJetEtCellFactory.h"
@@ -11,7 +11,7 @@ using namespace std;
 
 namespace StSpinJet {
 
-void StJetEtCellGrid::buildGrid(StJetEtCellFactory* cellFactory)
+void StEtaPhiGrid::buildGrid(StJetEtCellFactory* cellFactory)
 {
   for(int i = 0; i < _pars.Neta(); ++i){
 		
@@ -33,7 +33,7 @@ void StJetEtCellGrid::buildGrid(StJetEtCellFactory* cellFactory)
 
 }
 
-void StJetEtCellGrid::fillGridWith(JetList& protoJetList)
+void StEtaPhiGrid::fillGridWith(JetList& protoJetList)
 {
   for(CellList::iterator etCell = _EtCellList.begin(); etCell != _EtCellList.end(); ++etCell) {
     (*etCell)->clear();
@@ -44,7 +44,7 @@ void StJetEtCellGrid::fillGridWith(JetList& protoJetList)
     if (where != _EtCellMap.end())
       (*where).second->add(*protoJet);
     else
-      cout << "StJetEtCellGrid::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
+      cout << "StEtaPhiGrid::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
   }
 
   for(CellList::iterator etCell = _EtCellList.begin(); etCell !=  _EtCellList.end(); ++etCell) {
@@ -52,25 +52,25 @@ void StJetEtCellGrid::fillGridWith(JetList& protoJetList)
   }
 }
 
-StJetEtCellGrid::CellList StJetEtCellGrid::EtSortedCellList()
+StEtaPhiGrid::CellList StEtaPhiGrid::EtSortedCellList()
 {
   _EtCellList.sort(StJetEtCellEtGreaterThan());
   return _EtCellList;
 }
 
-StJetEtCell* StJetEtCellGrid::CellD(double eta, double phi)
+StJetEtCell* StEtaPhiGrid::CellD(double eta, double phi)
 {
   CellMap::iterator it = _EtCellMap.find(findKey(eta, phi));
   return (it != _EtCellMap.end()) ? (*it).second : 0;
 }
 
-StJetEtCell* StJetEtCellGrid::CellI(int iEta, int iPhi)
+StJetEtCell* StEtaPhiGrid::CellI(int iEta, int iPhi)
 {
   CellMap::iterator it = _EtCellMap.find(StEtGridKey(iEta, iPhi));
   return (it != _EtCellMap.end()) ? (*it).second : 0;
 }
 
-StEtGridKey StJetEtCellGrid::findKey(double eta, double phi) const
+StEtGridKey StEtaPhiGrid::findKey(double eta, double phi) const
 {
   int iEta = findEtaKey(eta);
   int iPhi = findPhiKey(phi);
@@ -83,12 +83,12 @@ StEtGridKey StJetEtCellGrid::findKey(double eta, double phi) const
 }
 
 
-int StJetEtCellGrid::findEtaKey(double eta) const
+int StEtaPhiGrid::findEtaKey(double eta) const
 {
   return int((_pars.Neta()/(_pars.EtaMax() - _pars.EtaMin()))*(eta - _pars.EtaMin()));
 }
 
-int StJetEtCellGrid::findPhiKey(double phi) const
+int StEtaPhiGrid::findPhiKey(double phi) const
 {
   while(phi > M_PI) phi -= 2*M_PI;
   while(phi < -M_PI) phi += 2*M_PI;
