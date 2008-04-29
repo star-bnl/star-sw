@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.24 2008/04/29 20:25:45 tai Exp $
+// $Id: StConeJetFinder.h,v 1.25 2008/04/29 20:32:14 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -107,7 +107,7 @@ protected:
   typedef vector<ValueCellListItPair> VCLItPairVec;
   VCLItPairVec mMidpointVec;
 
-  StJetEtCellGrid _cellGrid;
+  StSpinJet::StJetEtCellGrid _cellGrid;
 	
 private:
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.h,v 1.4 2008/04/29 20:25:46 tai Exp $
+// $Id: StJetEtCellGrid.h,v 1.5 2008/04/29 20:32:14 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETETCELLGRID_H
 #define STJETETCELLGRID_H
@@ -12,6 +12,8 @@
 
 class StJetEtCellFactory;
 class StConePars;
+
+namespace StSpinJet {
 
 class StJetEtCellGrid {
 
@@ -44,5 +46,7 @@ private:
   CellList _EtCellList;
 
 };
+
+}
 
 #endif // STJETETCELLGRID_H

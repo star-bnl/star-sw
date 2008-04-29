@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.28 2008/04/29 20:25:44 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.29 2008/04/29 20:32:14 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -19,6 +19,8 @@ using std::sort;
 #include "StJetEtCell.h"
 #include "StJetSpliterMerger.h"
 #include "StProtoJet.h"
+
+using namespace StSpinJet;
 
 StConeJetFinder::StConeJetFinder(const StConePars& pars)
   : mPars(pars)
