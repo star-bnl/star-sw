@@ -24,7 +24,7 @@
 	Oct 2004: made ANSI compliant, added OSF; Tonko
 	first try, June 2003, tonko
 */
-
+#include <string.h>
 
 #ifndef _RTS_H_
 #define _RTS_H_
@@ -157,9 +157,11 @@ extern inline unsigned int swap32(unsigned int x)
 /* Don't let floats get casts to ints before swapping.... */
 extern inline float swapf(float f)
 {
-  //(unsigned int &)f = swap32((unsigned int &)f);
-  unsigned int x = swap32((unsigned int)f);
-  return (float)x;
+  unsigned int x;
+  memcpy((char *)&x, (char *)&f, 4);
+  x = swap32(x);
+  memcpy((char *)&f, (char *)&x, 4);
+  return f;
 }
 
 extern inline void swapBuff32(unsigned int *buff, int n)
