@@ -10,7 +10,7 @@
   //
 class TVirtualPad;
 
-enum EDraw3DStyle {kVtx,kPrimaryTrack,kGlobal,kUsedHit,kUnusedHit,kUser};
+enum EDraw3DStyle {kVtx,kPrimaryTrack,kGlobalTrack,kUsedHit,kUnusedHit,kUser};
 
 class StDraw3DStyle {
    private:
