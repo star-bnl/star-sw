@@ -15,9 +15,9 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-Int_t AggregateVtxSeed(char* dir=0);
+Int_t AggregateVtxSeed(char* dir=0, const char* cuts="");
 
-Int_t AggregateVtxSeed(char* dir) {
+Int_t AggregateVtxSeed(char* dir, const char* cuts) {
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
@@ -30,12 +30,15 @@ Int_t AggregateVtxSeed(char* dir) {
 
   StVertexSeedMaker vtxSeedMk;
   //vtxSeedMk.UseFillDateTimeFromFile();
-  Int_t nfiles = vtxSeedMk.Aggregate(dir);
+  Int_t nfiles = vtxSeedMk.Aggregate(dir,cuts);
   return nfiles;
 }
 
-// $Id: AggregateVtxSeed.C,v 1.1 2006/05/09 21:48:45 genevb Exp $
+// $Id: AggregateVtxSeed.C,v 1.2 2008/04/29 23:30:57 genevb Exp $
 // $Log: AggregateVtxSeed.C,v $
+// Revision 1.2  2008/04/29 23:30:57  genevb
+// Added cuts capability to Aggregate
+//
 // Revision 1.1  2006/05/09 21:48:45  genevb
 // move macro to calib directory
 //
