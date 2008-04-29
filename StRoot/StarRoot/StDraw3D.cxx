@@ -1,7 +1,7 @@
-// $Id: StDraw3D.cxx,v 1.4 2008/04/29 17:17:09 fine Exp $
+// $Id: StDraw3D.cxx,v 1.5 2008/04/29 22:37:38 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
-#include "TVirtualPad.h"
+#include "TCanvas.h"
 #include "TPolyMarker3D.h"
 #include "TPolyLine3D.h"
 #include "TSystem.h"
@@ -32,6 +32,12 @@ StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad)
    AddStyle(kGlobalTrack, TrakCol,TrakSty,TrakSiz);
    AddStyle(kUsedHit,     UHitCol,UHitSty,UHitSiz);
    AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
+   if (!fPad) {
+      fPad = new TCanvas("STAR","Event Viewer", 400,400);
+      fPad->SetFillColor(fBkColor);
+      fPad->Modified();
+      fPad->Update();
+   }
 }
 
 //___________________________________________________
@@ -40,9 +46,13 @@ TObject *StDraw3D::Draw(TObject *o)
    // Draw the 3d object 
    // and set the new background color if needed
    if (o) {
+      if (!fgDraw_3d_init) Draw3DInit();
+      TVirtualPad *sav = 0;
+      if (fPad) fPad->cd();
+      else      sav = gPad;
       o->Draw();
-      if (gPad->GetFillColor() != fBkColor)
-      gPad->SetFillColor(fBkColor);
+      if (!fPad) fPad = gPad;
+      else  if (sav) sav->cd();
    }
    return o;
 }
@@ -51,6 +61,8 @@ void StDraw3D::SetBkColor(Color_t newBkColor)
 {
    // Set the canvas background color;
    fBkColor = newBkColor;
+   if (fPad->GetFillColor() != fBkColor)
+       fPad->SetFillColor(fBkColor);
 }
 //___________________________________________________
 const StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz)
