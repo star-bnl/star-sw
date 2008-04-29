@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.h,v 1.5 2008/04/29 20:32:14 tai Exp $
+// $Id: StEtaPhiGrid.h,v 1.1 2008/04/29 20:36:41 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
-#ifndef STJETETCELLGRID_H
-#define STJETETCELLGRID_H
+#ifndef STETAPHIGRID_H
+#define STETAPHIGRID_H
 
 #include "StEtGridKey.h"
 #include "StJetEtCell.h"
@@ -15,7 +15,7 @@ class StConePars;
 
 namespace StSpinJet {
 
-class StJetEtCellGrid {
+class StEtaPhiGrid {
 
 public:
 
@@ -25,7 +25,7 @@ public:
   typedef StJetEtCell::CellList CellList;
   typedef std::list<StJetEtCell> ValueCellList;
 
-  StJetEtCellGrid(StConePars& pars) : _pars(pars) { }
+  StEtaPhiGrid(StConePars& pars) : _pars(pars) { }
 
   void buildGrid(StJetEtCellFactory* cellFactory);
 
@@ -49,4 +49,4 @@ private:
 
 }
 
-#endif // STJETETCELLGRID_H
+#endif // STETAPHIGRID_H
