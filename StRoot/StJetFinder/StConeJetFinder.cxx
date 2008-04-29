@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.26 2008/04/29 00:53:30 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.27 2008/04/29 01:55:52 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -26,23 +26,13 @@ StConeJetFinder::StConeJetFinder(const StConePars& pars)
   , mMerger(new StJetSpliterMerger())
   , _cellGrid(mPars)
   , _EtCellMap(_cellGrid.EtCellMap())
-  , _EtCellList(_cellGrid.EtCellList())
 {
     mMerger->setSplitFraction(mPars.splitFraction());
 }
 
 StConeJetFinder::~StConeJetFinder()
 {
-  delete mMerger;  mMerger=0;
-  clearAndDestroy();
-}
 
-void StConeJetFinder::clearAndDestroy()
-{
-  for (CellList::iterator it=_EtCellList.begin(); it!=_EtCellList.end(); ++it) {
-    delete *it;
-    *it=0;
-  }
 }
 
 void StConeJetFinder::Init()
@@ -55,36 +45,18 @@ StJetEtCellFactory* StConeJetFinder::makeCellFactory()
   return new StJetEtCellFactory;
 }
 
-struct StJetEtCellEtGreaterThan { bool operator()(StJetEtCell* lhs, StJetEtCell* rhs) { return lhs->eT() > rhs->eT(); } };
-
 void StConeJetFinder::findJets(JetList& protoJetList)
 {
   mPreJets.clear();
   mSearchCounter = 0;
 
-  for(CellList::iterator etCell = _EtCellList.begin(); etCell != _EtCellList.end(); ++etCell) {
-    (*etCell)->clear();
-  }
-
-  for (JetList::iterator protoJet = protoJetList.begin(); protoJet != protoJetList.end(); ++protoJet) {
-    CellMap::iterator where = _EtCellMap.find(findKey((*protoJet).eta(), (*protoJet).phi()));
-    if (where != _EtCellMap.end())
-      (*where).second->add(*protoJet);
-    else
-      cout << "StConeJetFinder::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
-  }
-
-  for(CellList::iterator etCell = _EtCellList.begin(); etCell !=  _EtCellList.end(); ++etCell) {
-    (*etCell)->update();
-  }
-
-
-  //now we sort them in descending order in et: (et1>et2>...>etn)
-  _EtCellList.sort(StJetEtCellEtGreaterThan());
+  _cellGrid.fillGridWith(protoJetList);
 
   if (mPars.debug()) {print();}
 
-  for (CellList::iterator etCell = _EtCellList.begin(); etCell != _EtCellList.end(); ++etCell) {
+  CellList etSortedCellList = _cellGrid.EtSortedCellList();
+
+  for (CellList::iterator etCell = etSortedCellList.begin(); etCell != etSortedCellList.end(); ++etCell) {
 
     if ((*etCell)->eT() <= mPars.seedEtMin()) break; //we're all done
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.22 2008/04/29 00:53:30 tai Exp $
+// $Id: StConeJetFinder.h,v 1.23 2008/04/29 01:55:52 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -68,9 +68,6 @@ protected:
   virtual StJetEtCellFactory* makeCellFactory();
 
 	
-	
-    void clearAndDestroy();
-
     void initializeWorkCell(const StJetEtCell* other);
 
     void addToPrejets(StJetEtCell* cell);
@@ -123,7 +120,6 @@ protected:
   StJetEtCellGrid _cellGrid;
 	
   CellMap& _EtCellMap; ///the map references the objects in the vector
-  CellList& _EtCellList; ///the vector holds the actual objects
 
 private:
 
