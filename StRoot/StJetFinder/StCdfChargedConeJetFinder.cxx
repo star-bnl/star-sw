@@ -24,7 +24,7 @@ StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(const StCdfChargedConePars&
   : StConeJetFinder(pars)
 {
   //  mPars= pars;
-  buildGrid();
+  //  buildGrid();
 }
 
 StCdfChargedConeJetFinder::~StCdfChargedConeJetFinder()
@@ -45,7 +45,7 @@ StJetEtCellFactory* StCdfChargedConeJetFinder::makeCellFactory()
 void StCdfChargedConeJetFinder::Init()
 {
   //    mMerger->setSplitFraction(mPars.mSplitFraction);
-  //    buildGrid();
+  buildGrid();
 }
 
 void StCdfChargedConeJetFinder::findJets_sub1()

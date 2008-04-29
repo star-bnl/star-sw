@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.24 2008/04/29 00:11:09 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.25 2008/04/29 00:25:16 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -29,7 +29,7 @@ StConeJetFinder::StConeJetFinder(const StConePars& pars)
   , _EtCellList(_cellGrid.EtCellList())
 {
     mMerger->setSplitFraction(mPars.splitFraction());
-    buildGrid();
+    //    buildGrid();
 }
 
 StConeJetFinder::~StConeJetFinder()
@@ -49,7 +49,7 @@ void StConeJetFinder::clearAndDestroy()
 void StConeJetFinder::Init()
 {
 //    mMerger->setSplitFraction(mPars.splitFraction());
-//    buildGrid();
+  buildGrid();
 }
 
 StConeJetFinder::SearchResult StConeJetFinder::doSearch()
