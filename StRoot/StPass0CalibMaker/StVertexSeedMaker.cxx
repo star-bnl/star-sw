@@ -30,6 +30,7 @@
 #include "TFile.h"
 #include "TVirtualFitter.h"
 #include "TNtuple.h"
+#include "TEventList.h"
 #include "TArrayF.h"
 #include "StTree.h"
 #include "TMath.h"
@@ -320,7 +321,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.37 2008/04/29 19:06:06 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.38 2008/04/29 23:30:33 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -545,7 +546,7 @@ void StVertexSeedMaker::FitData() {
      minuit->GetParameter(i, pname, p[i], ep[i], plow[i], phigh[i]);
 }
 //_____________________________________________________________________________
-Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
+Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   // Format of filenames for parsing must be:
   // vertexseedhist.DDDDDDDD.TTTTTT.root
   // where D and T are 8 and 6 digit representations of date and time
@@ -605,9 +606,15 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
     if (currentFile) currentFile->Close();
     currentFile = new TFile(fileName);
     TNtuple* curNtuple = (TNtuple*) currentFile->Get("resNtuple");
-    Int_t nentries = (Int_t) curNtuple->GetEntries();
+    if (!curNtuple) {
+      LOG_ERROR << "No resNtuple found in " << fileName << endm;
+      continue;
+    }
+    curNtuple->Draw(">>elist",cuts);
+    TEventList* elist = (TEventList*) gDirectory->Get("elist");
+    Int_t nentries = (Int_t) elist->GetN();
     for (Int_t entryn = 0; entryn < nentries; entryn++) {
-      curNtuple->GetEvent(entryn);
+      curNtuple->GetEntry(elist->GetEntry(entryn));
       vals = curNtuple->GetArgs();
       unsigned int tid = (unsigned int) vals[5];
       if (ValidTrigger(tid)) {
@@ -629,8 +636,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.37 2008/04/29 19:06:06 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.38 2008/04/29 23:30:33 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.38  2008/04/29 23:30:33  genevb
+// Added cuts capability to Aggregate
+//
 // Revision 1.37  2008/04/29 19:06:06  genevb
 // handle no DB access
 //
