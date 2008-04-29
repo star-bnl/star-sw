@@ -241,6 +241,7 @@ Bool_t StVertexSeedMaker::CheckTriggers() {
 //_____________________________________________________________________________
 Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
   // Determine if trigger id is among valid set
+  if (!dbTriggersTable) return kTRUE; // running without DB access
   vertexSeedTriggers_st* trigsTable = dbTriggersTable->GetTable();
   Int_t nTrigs = (Int_t) dbTriggersTable->GetNRows();
   for (Int_t i = 0; i < nTrigs; i++, trigsTable++) {
@@ -319,7 +320,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.36 2007/11/27 23:42:47 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.37 2008/04/29 19:06:06 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -628,8 +629,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.36 2007/11/27 23:42:47 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.37 2008/04/29 19:06:06 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.37  2008/04/29 19:06:06  genevb
+// handle no DB access
+//
 // Revision 1.36  2007/11/27 23:42:47  genevb
 // Move valid triggers from code to DB
 //
