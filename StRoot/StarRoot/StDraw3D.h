@@ -53,10 +53,11 @@ public:
    StDraw3D(TVirtualPad *pad = 0);
    virtual ~StDraw3D(){;}
    static int Draw3DInit();
-   virtual StDraw3DStyle &AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz);
+   virtual const StDraw3DStyle &AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz);
 
    virtual TObject *Draw(TObject *o);
    virtual void  Draw(Option_t *option="") {TObject::Draw(option);} 
+   virtual const StDraw3DStyle &Style(EDraw3DStyle type);
    virtual void  SetBkColor(Color_t newBkColor);
 
    virtual TObject *Draw3D(int n,  const float *xyz);
