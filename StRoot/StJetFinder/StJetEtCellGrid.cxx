@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellGrid.cxx,v 1.4 2008/04/29 20:25:45 tai Exp $
+// $Id: StJetEtCellGrid.cxx,v 1.5 2008/04/29 20:32:14 tai Exp $
 #include "StJetEtCellGrid.h"
 
 #include "StConePars.h"
@@ -8,6 +8,8 @@
 #include <iostream>
 
 using namespace std;
+
+namespace StSpinJet {
 
 void StJetEtCellGrid::buildGrid(StJetEtCellFactory* cellFactory)
 {
@@ -93,3 +95,4 @@ int StJetEtCellGrid::findPhiKey(double phi) const
   return int( _pars.Nphi()*((phi - _pars.PhiMin())/(_pars.PhiMax() - _pars.PhiMin())));
 }
 
+}
