@@ -1,5 +1,5 @@
 //#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.29 2008/04/29 20:32:14 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.30 2008/04/30 00:05:42 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -111,51 +111,37 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
     return kTooManyTries;
   }
     
-  //now search for clusters!  We walk in a square in eta-phi space, testing 
-  //each cluster for it's distance from the centerCell
-  //define the search window as phi +- deltaPhi, same for eta
-  //The walk in eta is easy, strictly linear.
-  //The walk in phi is just a little trickier, since phi is periodic
+  CellList cellList = _cellGrid.WithinTheConeRadiusCellList(mWorkCell);
 
-  //find this entry in map (this is a double check, not really necessary)
-  StEtGridKey centerKey = findKey(mWorkCell.eta(), mWorkCell.phi());
-	
-  //begin walk in eta:
-
-  int iEtaMin = centerKey.eta() - mPars.deltaEta();
-  if (iEtaMin < 0) iEtaMin = 0 ; //avoid wasted searches in eta
-	
-  for (int iEta = iEtaMin; (iEta <= centerKey.eta() + mPars.deltaEta()) && (iEta < mPars.Neta()); ++iEta) {
-		
-    //begin walk in phi:
-    for (int iPhi = centerKey.phi() - mPars.deltaPhi(); iPhi <= centerKey.phi() + mPars.deltaPhi(); ++iPhi) {
-			
-      int iModPhi = iPhi;
-      if (iModPhi < 0) iModPhi = iModPhi + mPars.Nphi();
-      if (iModPhi >= mPars.Nphi()) iModPhi = iModPhi - mPars.Nphi();
-			
-      StJetEtCell* otherCell = _cellGrid.CellI(iEta, iModPhi);
-      if (!otherCell) {
-	//	cout <<"otherCell doesn't exist.  key:\t"<<key<<endl;
-      }
-			
-      if (acceptPair(&mWorkCell, otherCell) ) {//add it!
-	//cout <<"Adding cell w/ key:\t"<<key<<endl;
-	mWorkCell.add(otherCell);
-      }
-    }
+  for (CellList::iterator cell = cellList.begin(); cell != cellList.end(); ++cell) {
+    if(shouldNotAddToTheCell(mWorkCell, **cell)) continue;
+    mWorkCell.add(*cell);
   }
-	
-  //finished with walk, compare centroid to cone center
+
   const StProtoJet& centroid = mWorkCell.centroid();
 
-  if (!inVolume(centroid.eta(), centroid.phi())) return kLeftVolume;
+  if (!isInTheVolume(centroid.eta(), centroid.phi())) return kLeftVolume;
 
-  StEtGridKey centroidKey = findKey(centroid.eta(), centroid.phi());
-	
-  if (centroidKey == centerKey) return kConverged;
+  if(areTheyInTheSameCell(mWorkCell.eta(), mWorkCell.phi(), centroid.eta(), centroid.phi())) return kConverged;
 
   return kContinueSearch;
+}
+
+bool StConeJetFinder::isInTheVolume(double eta, double phi)
+{
+    return (_cellGrid.CellD(eta, phi)) ? true : false;
+}
+
+bool StConeJetFinder::shouldNotAddToTheCell(const StJetEtCell& theCell, const StJetEtCell& otherCell) const
+{
+  if (otherCell.empty()) return true;
+  if (otherCell.eT() <= mPars.assocEtMin()) return true; 
+  return false;
+}
+
+bool StConeJetFinder::areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2)
+{
+  return(_cellGrid.CellD(eta1, phi1) == _cellGrid.CellD(eta2, phi2));
 }
 
 void StConeJetFinder::addToPrejets(StJetEtCell* cellp)
@@ -316,56 +302,10 @@ void StConeJetFinder::addSeedsAtMidpoint()
     }
 }
 
-bool StConeJetFinder::inVolume(double eta, double phi)
-{
-    int iEta = findEtaKey(eta);
-    int iPhi = findPhiKey(phi);
-    if (iEta < 0 || iPhi < 0) {
-	return false;
-    }
-    return (_cellGrid.CellI(iEta, iPhi)) ? true : false;
-}
-
-StEtGridKey StConeJetFinder::findKey(double eta, double phi) const
-{
-  int iEta = findEtaKey(eta);
-  int iPhi = findPhiKey(phi);
-  if (iEta < 0 || iPhi < 0) {
-    cout <<"StConeJetFinder::findKey(double, double). ERROR:\t"
-	 <<"eta:\t"<<eta<<"\tphi:\t"<<phi<<"\t"
-	 <<"iEta<0|| iPhi<0\tabort()"<<endl;
-    //abort();
-  }
-  return StEtGridKey(iEta, iPhi);
-}
-
-int StConeJetFinder::findEtaKey(double eta) const
-{
-  return int((mPars.Neta()/(mPars.EtaMax() - mPars.EtaMin()))*(eta - mPars.EtaMin()));
-}
-
-int StConeJetFinder::findPhiKey(double phi) const
-{
-  while(phi > M_PI) phi -= 2*M_PI;
-  while(phi < -M_PI) phi += 2*M_PI;
-  return int( mPars.Nphi()*((phi - mPars.PhiMin())/(mPars.PhiMax() - mPars.PhiMin())));
-}
-
 bool StConeJetFinder::acceptSeed(const StJetEtCell* cell)
 {
     return (cell->empty()==false);
 }
-
-bool StConeJetFinder::acceptPair(const StJetEtCell* centerCell, const StJetEtCell* otherCell) const
-{
-  if (!centerCell) return false;
-  if (!otherCell) return false;
-  if (otherCell->empty()) return false;
-  if (otherCell->eT() <= mPars.assocEtMin()) return false; 
-  if (centerCell->distance(*otherCell) >= mPars.coneRadius()) return false; 
-  return true;
-}
-
 
 const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
 {

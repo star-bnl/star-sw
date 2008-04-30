@@ -56,29 +56,11 @@ void StCdfChargedConeJetFinder::print()
 {
 }
 
-bool StCdfChargedConeJetFinder::acceptPair(const StJetEtCell* centerCell,
-					   const StJetEtCell* otherCell) const
+bool StCdfChargedConeJetFinder::shouldNotAddToTheCell(const StJetEtCell& theCell, const StJetEtCell& otherCell) const
 {
-    return  (
-	     
-	     //both valid
-	     centerCell && otherCell 
-	     
-	     //don't add to self
-	     //&& ( centerCell->eta()!=otherCell->eta() || centerCell->phi()!=otherCell->phi() )
-	     //&& otherCell!=centerCell
-	     
-	     //allow non-unique assignment?
-	     && otherCell->nTimesUsed()==0
-	     
-	     //no noise
-	     && otherCell->empty()==false 
-	     
-	     //cut on associated eT
-	     && otherCell->eT()>mPars.assocEtMin()
-	     
-	     //within cone?
-	     && centerCell->distance(*otherCell)<mPars.coneRadius() 
-		
-	     );
+  if (otherCell.nTimesUsed()) return true;
+  if (otherCell.empty()) return true;
+  if (otherCell.eT() <= mPars.assocEtMin()) return true; 
+  return false;
 }
+

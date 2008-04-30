@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.26 2008/04/29 20:36:41 tai Exp $
+// $Id: StConeJetFinder.h,v 1.27 2008/04/30 00:05:43 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -79,22 +79,10 @@ protected:
     StJetEtCell* defineMidpoint(const StJetEtCell& pj1, const StJetEtCell& pj2) ;
 	
   virtual bool acceptSeed(const StJetEtCell* cell);
-    virtual bool acceptPair(const StJetEtCell* center, const StJetEtCell* assoc) const;
-	
-    const StProtoJet& collectCell(StJetEtCell* seed);
-	
-    ///action
-    int findPhiKey(double phi) const;
-    int findEtaKey(double eta) const;
-	
-    ///is this point in the detector volume?
-    bool inVolume(double eta, double phi);
-	
-    ///find a key.  If out of bounds, it aborts program flow.  otherwise, nasty run-time errors!
-    StEtGridKey findKey(double eta, double phi) const;
-	
-protected:
 
+	
+  const StProtoJet& collectCell(StJetEtCell* seed);
+	
   StConePars mPars; ///run-time pars
 	
   StJetEtCell mWorkCell;
@@ -111,8 +99,14 @@ protected:
 	
 private:
 
+
   virtual void findJets_sub1();
   virtual void findJets_sub2();
+
+  virtual bool shouldNotAddToTheCell(const StJetEtCell& theCell, const StJetEtCell& otherCell) const;
+
+  bool isInTheVolume(double eta, double phi);
+  bool areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2);
 
 };
 
