@@ -89,6 +89,7 @@ TCut cut;
 
 //double MAX_GAPD = 0.012; // 0.005
 //double MAX_SC = 0.0010; // 0.0003
+double MAX_GAPF = 0.025; // 0.005
 double MAX_GAPD = 0.015; // 0.005
 double MAX_SC = 0.0010; // 0.0003
 //double MAX_GAPD = 0.010; // 0.005
@@ -186,7 +187,7 @@ for (i=0;i<nfi;i++) { // run
     const char* dt = dets[j].Data();
   
     // Determine GridLeak
-    result = FitLine(SCi[i],"gapd",dt,MAX_GAPD,pgo,pg,pgoE,pgE,debug);
+    result = FitLine(SCi[i],"gapf",dt,MAX_GAPF,pgo,pg,pgoE,pgE,debug);
     if (result<0) return;
 
     // Determine SpaceCharge
@@ -554,13 +555,26 @@ int FitLine(TTree* SC, const char* v0, const char* v1, double window,
     SC->Draw(prof.Data(),cut&&cut2,"prof"); // prof vs. profs doesn't seem to make a difference
     SC->Draw(profp.Data(),cut&&cut2,"prof");
     i = 0;
+    double xi,yi,xf,yf;
     for (j=1; j<=nbinsc; j++) {
       if (TMath::Abs(hscap.GetBinError(j)) > 1e-10) {
         gr_temp->SetPoint(i,hscap.GetBinContent(j),hsca.GetBinContent(j));
         gr_temp->SetPointError(i,hscap.GetBinError(j),hsca.GetBinError(j));
+        if (!count) {
+          if (i>0) {
+            xf = hscap.GetBinContent(j); yf = hsca.GetBinContent(j);
+          } else {
+            xi = hscap.GetBinContent(j); yi = hsca.GetBinContent(j);
+          }
+        }
         i++;
       }
     }
+    if (i<2) {
+      printf("Problem with fit! Too few points remain!\n");
+      break;
+    }
+    if (!count) fline.SetParameter(1,(yf-yi)/(xf-xi));
     gr_temp->Set(i);
     //hsca.Fit(&fline,"C");
     gr_temp->Fit(&fline,"QC");
@@ -617,8 +631,11 @@ void FindMinMax(TH1* h, double& min, double& max) {
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 1.3 2008/04/07 19:41:33 genevb Exp $
+// $Id: Calib_SC_GL.C,v 1.4 2008/04/30 14:54:38 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 1.4  2008/04/30 14:54:38  genevb
+// Use gapf; get initial guess on linear fit
+//
 // Revision 1.3  2008/04/07 19:41:33  genevb
 // Minor updates to documentation, graphing
 //
