@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.27 2008/04/30 00:05:43 tai Exp $
+// $Id: StConeJetFinder.h,v 1.28 2008/04/30 00:23:33 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -67,7 +67,7 @@ protected:
 	
     void initializeWorkCell(const StJetEtCell* other);
 
-    void addToPrejets(StJetEtCell* cell);
+    void addToPrejets(StJetEtCell& cell);
 	
     enum SearchResult {kTooManyTries=0, kLeftVolume=1, kConverged=2, kContinueSearch=3};	
     SearchResult doSearch();

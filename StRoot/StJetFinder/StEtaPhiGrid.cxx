@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.cxx,v 1.2 2008/04/30 00:05:43 tai Exp $
+// $Id: StEtaPhiGrid.cxx,v 1.3 2008/04/30 00:23:34 tai Exp $
 #include "StEtaPhiGrid.h"
 
 #include "StConePars.h"
@@ -86,7 +86,7 @@ StEtaPhiGrid::CellList StEtaPhiGrid::WithinTheConeRadiusCellList(const StJetEtCe
   return ret;
 }
 
-StJetEtCell* StEtaPhiGrid::CellD(double eta, double phi)
+StJetEtCell* StEtaPhiGrid::Cell(double eta, double phi)
 {
   CellMap::iterator it = _EtCellMap.find(findKey(eta, phi));
   return (it != _EtCellMap.end()) ? (*it).second : 0;

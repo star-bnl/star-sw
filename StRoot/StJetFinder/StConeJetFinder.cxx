@@ -1,5 +1,4 @@
-//#if defined(WIN32)
-// $Id: StConeJetFinder.cxx,v 1.30 2008/04/30 00:05:42 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.31 2008/04/30 00:23:32 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -9,8 +8,6 @@
 #include <algorithm>
 #include <time.h>
 #include <map>
-using std::multimap;
-using std::for_each;
 using std::sort;
 
 #include "StMessMgr.h"
@@ -87,7 +84,7 @@ void StConeJetFinder::findJets_sub1()
     doMinimization();
   } else {
     doSearch();
-    addToPrejets(&mWorkCell);
+    addToPrejets(mWorkCell);
   }
 }
 
@@ -129,7 +126,7 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
 
 bool StConeJetFinder::isInTheVolume(double eta, double phi)
 {
-    return (_cellGrid.CellD(eta, phi)) ? true : false;
+    return (_cellGrid.Cell(eta, phi)) ? true : false;
 }
 
 bool StConeJetFinder::shouldNotAddToTheCell(const StJetEtCell& theCell, const StJetEtCell& otherCell) const
@@ -141,19 +138,17 @@ bool StConeJetFinder::shouldNotAddToTheCell(const StJetEtCell& theCell, const St
 
 bool StConeJetFinder::areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2)
 {
-  return(_cellGrid.CellD(eta1, phi1) == _cellGrid.CellD(eta2, phi2));
+  return(_cellGrid.Cell(eta1, phi1) == _cellGrid.Cell(eta2, phi2));
 }
 
-void StConeJetFinder::addToPrejets(StJetEtCell* cellp)
+void StConeJetFinder::addToPrejets(StJetEtCell& cell)
 {
   //    PreJetInitializer initializer(*this);
   //    initializer(*cell); //test, try to initialize as we add
   //first find the pointer to the cell in the grid (not this local copy)
 
-  StJetEtCell& cell = (*cellp);
-
   // from void PreJetInitializer::operator()(StJetEtCell& cell) 
-  StJetEtCell* realCell = _cellGrid.CellD(cell.eta(), cell.phi());
+  StJetEtCell* realCell = _cellGrid.Cell(cell.eta(), cell.phi());
   if (!realCell) {
     cout << "PreJetInitializer(). ERROR:\t"
 	 << "real Cell doesn't exist." << endl;
@@ -205,12 +200,12 @@ void StConeJetFinder::doMinimization()
       res = doSearch();
 	
       if (res == kConverged) {
-	addToPrejets(&mWorkCell);
+	addToPrejets(mWorkCell);
 	break;
       }			
 
       //find cell corresponding to centroid of cone
-      StJetEtCell* newCenterCell = _cellGrid.CellD(mWorkCell.centroid().eta(), mWorkCell.centroid().phi());
+      StJetEtCell* newCenterCell = _cellGrid.Cell(mWorkCell.centroid().eta(), mWorkCell.centroid().phi());
       if (!newCenterCell) {
 	cout << "newCenterCell doesn't exist.  key:\t" << endl;
 	res = kLeftVolume;
@@ -234,7 +229,7 @@ StJetEtCell* StConeJetFinder::defineMidpoint(const StJetEtCell& pj1, const StJet
 {
     double etaMid = midpoint(pj1.eta(), pj2.eta() );
     double phiMid = midpoint(pj1.phi(), pj2.phi() );
-    return _cellGrid.CellD(etaMid, phiMid);
+    return _cellGrid.Cell(etaMid, phiMid);
 }
 
 //add a seed at the midpoint between any two jets separated by d<2.*coneRadius();
@@ -287,11 +282,11 @@ void StConeJetFinder::addSeedsAtMidpoint()
 	    SearchResult res = doSearch();
 	    if (mPars.requiredStableMidpoints()) {
 		if (res == kConverged) {
-		    addToPrejets(&mWorkCell);
+		    addToPrejets(mWorkCell);
 		}	
 	    }	
 	    else {
-		addToPrejets(&mWorkCell);
+		addToPrejets(mWorkCell);
 	    }
 	}
 	else {
