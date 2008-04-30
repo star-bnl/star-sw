@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.105 2008/04/29 03:16:34 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.105 2008/04/29 03:16:34 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.106 2008/04/30 22:43:27 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.106 2008/04/30 22:43:27 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.106  2008/04/30 22:43:27  perev
+ * Remove cut for drooped nodes in refit
+ *
  * Revision 2.105  2008/04/29 03:16:34  perev
  * Silicon nodes dropped first
  *
@@ -1026,8 +1029,8 @@ static int nCall=0; nCall++;
 
   StiKalmanTrackNode * innerMostHitNode = getInnerMostHitNode();
   if (!innerMostHitNode) 		return 0;
-  // track with hits in the outer portion of the TPC only are not considered
-  if (innerMostHitNode->getX()>100.) 	return 0;
+// 		track with hits in the outer portion of the TPC only are not considered
+ if (!dcaHit && innerMostHitNode->getX()>100.) 	return 0;
 		
   StiHit localVertex = *vertex;
   sNode = getInnerMostNode();
@@ -1307,10 +1310,10 @@ int StiKalmanTrack::refit()
 {
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
-  enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
+  enum {kMaxIter=30,kPctLoss=30,kHitLoss=5};
 static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
-  double maxXi2 = StiKalmanTrackFitterParameters::instance()->getMaxChi2();
-
+  double maxXi2    = StiKalmanTrackFitterParameters::instance()->getMaxChi2();
+  double maxXi2Vtx = StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx();
 
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
   if (nNBeg<=3) 	return 1;
@@ -1327,7 +1330,7 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   for (int ITER=0;ITER<mgMaxRefiter;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
-      sTNH.set(StiKalmanTrackFitterParameters::instance()->getMaxChi2()*10,StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx()*100,errConfidence,iter);
+      sTNH.set(maxXi2 ,maxXi2Vtx*100,errConfidence,iter);
       pPrev = inn->fitPars();
       ePrev = inn->fitErrs(); 
       
@@ -1338,14 +1341,10 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
       if (!inn->isValid() || inn->getChi2()>1000) {
         inn = getInnerMostNode(3); fail=-1;continue;}	
       qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
-static int oldRefit = StiDebug::iFlag("StiOldRefit");
-if (oldRefit) {
-      if (qA>0.5)		{fail=-2;continue;} 
-} else {
       if (qA <1 && errConfidence>0.1) errConfidence = 0.1;
       if (qA>0.01)		{fail=-2;continue;} 
       if (sTNH.isCutStep())	{fail=-2;continue;} 
-}
+
       double info[2][8];
       sTNH.mCurvQa.getInfo(info[0]);
       sTNH.mTanlQa.getInfo(info[1]);
@@ -1364,21 +1363,25 @@ if (oldRefit) {
 	  if (worstNode) break;
 	  rMax = 1000;
 	}				
-	if (node==vertexNode) 		continue;		
-	if (!node->getHit()) 		continue;		
 	if (!node->isValid()) 		continue;
-	if ( node->getChi2()<worstXi2)	continue;
+	if (node==vertexNode) 		continue;		
+       const StiHit *hit = node->getHit();
+	if (!hit) 			continue;		
+        if (!hit->detector())		continue;
+	if ( node->getChi2()<=worstXi2)	continue;
 	worstNode = node; worstXi2=node->getChi2();
       }
     }
 
-    if (worstNode && worstNode->getChi2()>maxXi2)     
+//		Eliminate worst node
+    if (worstNode )     
       {//worstNode->getHit()->setTimesUsed(0);
        worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
+
+//		Eliminate rejected by policy
     if (rejectByHitSet()) { releaseHits()            ; continue;}
     
-    if (!fail) 							break;
-    
+//		Eliminate rejected flip flop node
     StiKalmanTrackNode *flipFlopNode= sTNH.getFlipFlop();
     if (flipFlopNode && flipFlopNode->getFlipFlop()>kMaxIter/3)     
       {//flipFlopNode->getHit()->setTimesUsed(0);
@@ -1394,29 +1397,28 @@ if (oldRefit) {
     fail = 13;			//prim node invalid
     if (!vertexNode->isValid()) 				break;
     fail = 99;			//prim node Chi2 too big
-    if ( vertexNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx())	break;
-    fail = 98;			//too many dropped nodes 
-    if (nNBeg*kPctLoss/100 < nNBeg-nNEnd
-    &&  nNEnd+kHitLoss < nNBeg)					break;
+    if ( vertexNode->getChi2()>maxXi2Vtx)			break;
+//     fail = 98;			//too many dropped nodes 
+//     if (nNBeg*kPctLoss/100 < nNBeg-nNEnd
+//     &&  nNEnd+kHitLoss < nNBeg)					break;
     fail = 0;
     break;    
   }
-  if (!fail) { //Cleanup. Hits of bad nodes set to zero
-    StiKalmanTrackNode *node;
-    StiKTNIterator it = begin();
-    for (;(node=it());it++){
-      if (node == vertexNode)				continue;
-      StiHit *hit = node->getHit();
-      if(!hit) 						continue;
-      //hit->setTimesUsed(0);
-      node->setHit(0);
-      if (!node->isValid()) 				continue;
-      if (node->getChi2()>10000.)			continue;
-      assert(node->getChi2()<=StiKalmanTrackFitterParameters::instance()->getMaxChi2());
-      //hit->setTimesUsed(1);
-      node->setHit(hit);
-    }
-  }
+//   if (!fail) { //Cleanup. Hits of bad nodes set to zero
+//     StiKalmanTrackNode *node;
+//     StiKTNIterator it = begin();
+//     for (;(node=it());it++){
+//       if (node == vertexNode)				continue;
+//       StiHit *hit = node->getHit(); if(!hit) 		continue;
+//       //hit->setTimesUsed(0);
+//       node->setHit(0);
+//       if (!node->isValid()) 				continue;
+//       if (node->getChi2()>10000.)			continue;
+//       assert(node->getChi2()<=maxXi2);
+//       //hit->setTimesUsed(1);
+//       node->setHit(hit);
+//     }
+//   }
 static int VPDEBUG=0;
 if (VPDEBUG) {
   if (fail>0) {
