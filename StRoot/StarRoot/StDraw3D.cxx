@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.5 2008/04/29 22:37:38 fine Exp $
+// $Id: StDraw3D.cxx,v 1.6 2008/04/30 21:13:14 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -9,6 +9,7 @@
 #include "TEnv.h"
 #include "StCheckQtEnv.h"
 #include "TStyle.h"
+#include "TVirtualViewer3D.h"
 
 int StDraw3D::fgDraw_3d_init = 0;
 
@@ -21,7 +22,7 @@ Style_t StDraw3D::fgStyDefault   = Style_t(-1);
 Size_t  StDraw3D::fgSizDefault   = Size_t (-1);
 Color_t StDraw3D::fgBkColor      = kBlack;
 //___________________________________________________
-StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad)
+StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fViewer(0)
 {
    static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
    static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
@@ -39,6 +40,19 @@ StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad)
       fPad->Update();
    }
 }
+//___________________________________________________
+static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad) 
+{
+   TVirtualViewer3D *viewer = 0;
+   if (pad && (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")))
+   {
+      // Create Open GL viewer
+//      TGQt::SetCoinFlag(1);
+      viewer->BeginScene();
+      viewer->EndScene();
+    }
+    return viewer;
+}
 
 //___________________________________________________
 TObject *StDraw3D::Draw(TObject *o)
@@ -53,6 +67,7 @@ TObject *StDraw3D::Draw(TObject *o)
       o->Draw();
       if (!fPad) fPad = gPad;
       else  if (sav) sav->cd();
+      if (!fViewer) fViewer = InitCoin(fPad);
    }
    return o;
 }
