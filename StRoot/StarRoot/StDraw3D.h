@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.6 2008/04/29 22:37:38 fine Exp $
+// $Id: StDraw3D.h,v 1.7 2008/04/30 21:13:15 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -11,6 +11,7 @@
   // decoratated with the STAR detector geometry
   //
 class TVirtualPad;
+class TVirtualViewer3D;
 
 enum EDraw3DStyle {kVtx,kPrimaryTrack,kGlobalTrack,kUsedHit,kUnusedHit,kUser};
 
@@ -46,6 +47,7 @@ class StDraw3D : public TObject
        std::map<EDraw3DStyle,StDraw3DStyle> fStyles;
        TVirtualPad *fPad;
        Color_t  fBkColor; // background color
+       TVirtualViewer3D *fViewer; 
        static Color_t fgColorDefault;
        static Style_t fgStyDefault;
        static Size_t  fgSizDefault;
