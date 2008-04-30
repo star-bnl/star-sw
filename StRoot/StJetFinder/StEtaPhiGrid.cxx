@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.cxx,v 1.1 2008/04/29 20:36:41 tai Exp $
+// $Id: StEtaPhiGrid.cxx,v 1.2 2008/04/30 00:05:43 tai Exp $
 #include "StEtaPhiGrid.h"
 
 #include "StConePars.h"
@@ -58,15 +58,43 @@ StEtaPhiGrid::CellList StEtaPhiGrid::EtSortedCellList()
   return _EtCellList;
 }
 
+StEtaPhiGrid::CellList StEtaPhiGrid::WithinTheConeRadiusCellList(const StJetEtCell& theCell) const
+{
+  CellList ret;
+
+  StEtGridKey centerKey = findKey(theCell.eta(), theCell.phi());
+
+  int iEtaMin = centerKey.eta() - _pars.deltaEta();
+  if (iEtaMin < 0) iEtaMin = 0 ;
+
+  for(int iEta = iEtaMin; (iEta <= centerKey.eta() + _pars.deltaEta()) && (iEta < _pars.Neta()); ++iEta) {
+    for (int iPhi = centerKey.phi() - _pars.deltaPhi(); iPhi <= centerKey.phi() + _pars.deltaPhi(); ++iPhi) {
+
+      int iModPhi = iPhi;
+      if (iModPhi < 0) iModPhi = iModPhi + _pars.Nphi();
+      if (iModPhi >= _pars.Nphi()) iModPhi = iModPhi - _pars.Nphi();
+
+      StJetEtCell* otherCell = CellI(iEta, iModPhi);
+
+      if(theCell.distance(*otherCell) >= _pars.coneRadius()) continue; 
+
+      ret.push_back(otherCell);
+
+    }
+  }
+
+  return ret;
+}
+
 StJetEtCell* StEtaPhiGrid::CellD(double eta, double phi)
 {
   CellMap::iterator it = _EtCellMap.find(findKey(eta, phi));
   return (it != _EtCellMap.end()) ? (*it).second : 0;
 }
 
-StJetEtCell* StEtaPhiGrid::CellI(int iEta, int iPhi)
+StJetEtCell* StEtaPhiGrid::CellI(int iEta, int iPhi) const
 {
-  CellMap::iterator it = _EtCellMap.find(StEtGridKey(iEta, iPhi));
+  CellMap::const_iterator it = _EtCellMap.find(StEtGridKey(iEta, iPhi));
   return (it != _EtCellMap.end()) ? (*it).second : 0;
 }
 
