@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.31 2008/04/30 00:23:32 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.32 2008/04/30 01:43:08 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -78,6 +78,24 @@ void StConeJetFinder::findJets(JetList& protoJetList)
   }
 }
 
+bool StConeJetFinder::acceptSeed(const StJetEtCell* cell)
+{
+    return (cell->empty()==false);
+}
+
+void StConeJetFinder::initializeWorkCell(const StJetEtCell* other)
+{
+    mWorkCell.clear();
+    mWorkCell = *other;
+    mWorkCell.setEt(0.);
+    if (mWorkCell.cellList().empty()==false) {
+	cout <<"StConeJetFinder::initializeWorkCell(). ERROR:\t"
+	     <<"workCell is not empty. abort()"<<endl;
+	abort();
+    }
+}
+
+
 void StConeJetFinder::findJets_sub1()
 {
   if (mPars.performMinimization()) {
@@ -143,27 +161,11 @@ bool StConeJetFinder::areTheyInTheSameCell(double eta1, double phi1, double eta2
 
 void StConeJetFinder::addToPrejets(StJetEtCell& cell)
 {
-  //    PreJetInitializer initializer(*this);
-  //    initializer(*cell); //test, try to initialize as we add
-  //first find the pointer to the cell in the grid (not this local copy)
-
-  // from void PreJetInitializer::operator()(StJetEtCell& cell) 
   StJetEtCell* realCell = _cellGrid.Cell(cell.eta(), cell.phi());
   if (!realCell) {
     cout << "PreJetInitializer(). ERROR:\t"
 	 << "real Cell doesn't exist." << endl;
     abort();
-  }
-	
-  //now add this into the cone-cell collection, *if* it's not already there
-  //this shouldn't happen, temp check to get rid of relic bug
-  CellList& cells = cell.cellList();
-  CellList::iterator where = std::find(cells.begin(), cells.end(), realCell);
-  if (realCell->empty()==false) {
-    if (where==cells.end()) {
-      cout <<"\tADDING SELF IN CONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-      cell.add(realCell);
-    }
   }
 	
   cell.setEt(0);
@@ -172,22 +174,8 @@ void StConeJetFinder::addToPrejets(StJetEtCell& cell)
     //    cell.mEt += (*etCell)->eT();
     cell.setEt(cell.Et() + (*etCell)->eT());
   }
-  /////////////////////////////////////////////////////////////////////////////
 
-
-    mPreJets.push_back(cell);
-}
-
-void StConeJetFinder::initializeWorkCell(const StJetEtCell* other)
-{
-    mWorkCell.clear();
-    mWorkCell = *other;
-    mWorkCell.setEt(0.);
-    if (mWorkCell.cellList().empty()==false) {
-	cout <<"StConeJetFinder::initializeWorkCell(). ERROR:\t"
-	     <<"workCell is not empty. abort()"<<endl;
-	abort();
-    }
+  mPreJets.push_back(cell);
 }
 
 void StConeJetFinder::doMinimization()
@@ -219,136 +207,100 @@ void StConeJetFinder::doMinimization()
 double midpoint(double v1, double v2)
 {
     double high, low;
-    if (v1>v2) {high=v1; low=v2;}
-    else {high=v2; low=v1;}
-    return (high-low)/2. + low;
+    if (v1 > v2) {
+      high =v1;
+      low=v2;
+    }
+    else { 
+      high = v2;
+      low=v1;
+    }
+    return (high - low)/2. + low;
 }
 
-//void StConeJetFinder::defineMidpoint(const StJetEtCell& pj1, const StJetEtCell& pj2, StJetEtCell& workCell) 
 StJetEtCell* StConeJetFinder::defineMidpoint(const StJetEtCell& pj1, const StJetEtCell& pj2) 
 {
-    double etaMid = midpoint(pj1.eta(), pj2.eta() );
-    double phiMid = midpoint(pj1.phi(), pj2.phi() );
+    double etaMid = midpoint(pj1.eta(), pj2.eta());
+    double phiMid = midpoint(pj1.phi(), pj2.phi());
     return _cellGrid.Cell(etaMid, phiMid);
 }
 
-//add a seed at the midpoint between any two jets separated by d<2.*coneRadius();
 void StConeJetFinder::addSeedsAtMidpoint()
 {
     //we have to first locate and remember pairs separated by d<2.*r.  
-    //we then have to add midpoints.  You cannot add the midpoint when you locate the 
-    //pair without invalidating the iterators that you are using to control your loop
-    //That's why we need two loops.  Even an algorithm call to for_each will not advert this.
+    //we then have to add midpoints.
 	
-    //cout <<"--- StConeJetFinder::addSeedsAtMidpoint() ---"<<endl;
+  mMidpointVec.clear();
 	
-    mMidpointVec.clear();
-	
-    //cout <<"------------------ conents of PreJets: ---------------"<<endl;
-    for (ValueCellList::iterator pj1=mPreJets.begin(); pj1!=mPreJets.end(); ++pj1) {
-	//cout <<*pj1<<endl;
-	for (ValueCellList::iterator pj2=pj1; pj2!=mPreJets.end(); ++pj2) {
-	    //don't double count.  ignore same iterators and jets w/ same center location
-	    if (pj1!=pj2 && (*pj1==*pj2)==false ) { 
-		if ( (*pj1).distance(*pj2) <= 2.* mPars.coneRadius()) { 
-		    //remember this combination
-		    VCLItPairVec::value_type temp(pj1, pj2);
-		    mMidpointVec.push_back(temp);
-		}				
-	    }
-	}
+  for (ValueCellList::iterator pj1 = mPreJets.begin(); pj1 != mPreJets.end(); ++pj1) {
+    for (ValueCellList::iterator pj2 = pj1; pj2 != mPreJets.end(); ++pj2) {
+      if (*pj1 == *pj2) continue;
+
+      if ((*pj1).distance(*pj2) > 2.0*mPars.coneRadius()) continue;
+
+      mMidpointVec.push_back(VCLItPairVec::value_type(pj1, pj2));
+
     }
+  }
 	
-    //cout <<"StConeJetFinder::addSeedsAtMidpoint().  Adding:\t"<<mMidpointVec.size()<<"\tseeds"<<endl;
-	
-    for (VCLItPairVec::iterator it=mMidpointVec.begin(); it!=mMidpointVec.end(); ++it) {
-	//clear the work cell
-	mWorkCell.clear();
+  for (VCLItPairVec::iterator it = mMidpointVec.begin(); it != mMidpointVec.end(); ++it) {
+
+    mWorkCell.clear();
 		
-	//see if the midpoint is within the volume.  Should always be true, but double check
-	StJetEtCell* mp = defineMidpoint(*(*it).first, *(*it).second );
-	if (0) {
-	    cout <<"--- new midpoint:"<<endl;
-	    cout <<"midpoint j1:\t"<<*(*it).first<<endl;
-	    cout <<"midpoint j2:\t"<<*(*it).second<<endl;
-	}
-	if (mp) {
+    StJetEtCell* mp = defineMidpoint(*(*it).first, *(*it).second );
 
-	    //initialize the work cell to the midpoint
-	    initializeWorkCell(mp);
+    initializeWorkCell(mp);
 	    
-	    //add in the cone
-	    mSearchCounter=0;
-	    SearchResult res = doSearch();
-	    if (mPars.requiredStableMidpoints()) {
-		if (res == kConverged) {
-		    addToPrejets(mWorkCell);
-		}	
-	    }	
-	    else {
-		addToPrejets(mWorkCell);
-	    }
-	}
-	else {
-	    LOG_ERROR <<"StConeJetFinder::addSeedsAtMidpoint(). ERROR:\t"
-		 <<"midpoint is null.  This should never happen"<<endm;
-	    abort();
-	}
+    mSearchCounter = 0;
+    SearchResult res = doSearch();
+    if (mPars.requiredStableMidpoints()) {
+      if (res == kConverged) {
+	addToPrejets(mWorkCell);
+      }	
+    } else {
+      addToPrejets(mWorkCell);
     }
-}
-
-bool StConeJetFinder::acceptSeed(const StJetEtCell* cell)
-{
-    return (cell->empty()==false);
+  }
 }
 
 const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
 {
-    //cout <<"StConeJetFinder::collectCell()"<<endl;
-    if (seed->cellList().empty()==true) {
-	StProtoJet& center = seed->protoJet();
-	center.update();
-	cout <<"\treturn w/o action.  empty cell"<<endl;
-	return center;
-    }
+
+  if (seed->cellList().empty()) {
+    StProtoJet& center = seed->protoJet();
+    center.update();
+    cout <<"\treturn w/o action.  empty cell"<<endl;
+    return center;
+  }
     
-    else {
 	
-	//arbitrarily choose protojet from first cell in list
-	CellList& cells = seed->cellList();
-	StJetEtCell* centerCell = cells.front();
-	StProtoJet& center = centerCell->protoJet();
+  //arbitrarily choose protojet from first cell in list
+  CellList& cells = seed->cellList();
+  StJetEtCell* centerCell = cells.front();
+  StProtoJet& center = centerCell->protoJet();
 	
-	//cout <<"\tcombine protojets from other cells"<<endl;
-	//int icell=0;
 		
-	//now combine protojets from other cells
-	for (CellList::iterator it=cells.begin(); it!=cells.end(); ++it) {
-	    if (it!=cells.begin()) { //don't double count first!
-		StJetEtCell* cell = (*it);
-		if (!cell) {
-		    cout <<"\tStConeJetFinder::collectCell(). ERROR:\t"
-			 <<"null cell.  skip"<<endl;
-		}
-		if (centerCell==*it) {
-		    cout <<"\tStConeJetFinder::collectCell(). ERROR:\t"
-			 <<"attempt to add self! skip"<<endl;
-		}
-		else {
-		    //cout <<"\t\tadding cell:\t"<<icell++<<endl;
-		    if (cell->empty()==false) {
-			center.add( cell->protoJet() );
-		    }
-		}
-	    }
+  //now combine protojets from other cells
+  for (CellList::iterator it = cells.begin(); it != cells.end(); ++it) {
+    if (it != cells.begin()) { //don't double count first!
+      StJetEtCell* cell = (*it);
+      if (!cell) {
+	cout <<"\tStConeJetFinder::collectCell(). ERROR:\t"
+	     <<"null cell.  skip"<<endl;
+      }
+      if (centerCell==*it) {
+	cout <<"\tStConeJetFinder::collectCell(). ERROR:\t"
+	     <<"attempt to add self! skip"<<endl;
+      }	else {
+	//cout <<"\t\tadding cell:\t"<<icell++<<endl;
+	if (cell->empty()==false) {
+	  center.add( cell->protoJet() );
 	}
-	//cout <<"\tupdate protojet"<<endl;
-	center.update();
-	//double pet = center.eT();
-	//cout <<"\tcet:\t"<<cet<<"\tpet:\t"<<pet<<endl;
-	//cout <<"\tfinished"<<endl;
-	return center;
+      }
     }
+  }
+  center.update();
+  return center;
 }
 
 void StConeJetFinder::print()

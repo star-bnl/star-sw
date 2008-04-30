@@ -1,3 +1,5 @@
+// -*- mode: c++;-*-
+// $Id: StJetSpliterMerger.h,v 1.3 2008/04/30 01:43:09 tai Exp $
 //StJetSpliterMerger.h
 //M.L. Miller (Yale Software)
 //10/02

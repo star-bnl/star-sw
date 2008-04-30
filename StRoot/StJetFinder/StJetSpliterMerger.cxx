@@ -1,7 +1,4 @@
-#ifdef WIN32
-#include "stdafx.h"
-#endif
-
+// $Id: StJetSpliterMerger.cxx,v 1.5 2008/04/30 01:43:09 tai Exp $
 //StJetSpliterMerger.cxx
 //M.L. Miller (Yale Software)
 //10/02
@@ -30,124 +27,62 @@ using std::sort;
 
 void StJetSpliterMerger::splitMerge(ValueCellList& preJets)
 {
-    //cout <<"--- StJetSpliterMerger::splitMerge(CellList&) ---"<<endl;
-    clock_t begin = clock(); if(begin) {/*touch*/}
+  clock_t begin = clock(); if(begin) {/*touch*/}
 	
-    //copy into work array
-    copyPreJets(preJets);
-
-    if (0) {
-	cout <<"\n------- Pre- Jet List ------------------------------------------ "<<endl;
-	//for (ValueCellList::const_iterator it=mPreJets.begin(); it!=mPreJets.end(); ++it) {
-	for (ValueCellList::iterator it=mPreJets.begin(); it!=mPreJets.end(); ++it) {
-	    cout <<"\n"<<*it<<endl;
-	}
-    }
+  copyPreJets(preJets);
 		
-    //now begin loop
+  while(!mPreJets.empty()) {
+
+    mOverlapMap.clear();
+
+    //sort them in descending order in et: (et1>et2>...>etn)
+    mPreJets.sort(std::greater<StJetEtCell>());
 	
-    //bool go=true;
-    //while (go) { go=false;
-    while (mPreJets.empty()==false) {
-
-	mOverlapMap.clear();
-
-	//sort them in descending order in et: (et1>et2>...>etn)
-#ifndef __SUNPRO_CC
-	mPreJets.sort( 	std::greater<StJetEtCell>());
-#else
-	cout <<"StJetSpliterMerger::splitMerge(). ERROR:\t"
-	     <<"This function not supported under current version of SOLARIS. abort()"<<endl;
-	abort();
-#endif
-	
-	if (0) {
-	    cout <<"\n------- Pre- Jet List ------------------------------------------ "<<endl;
-	    //for (ValueCellList::const_iterator it=mPreJets.begin(); it!=mPreJets.end(); ++it) {
-	    for (ValueCellList::iterator it=mPreJets.begin(); it!=mPreJets.end(); ++it) {
-		cout <<"\n"<<*it<<endl;
-	    }
-	}
+    ValueCellList::iterator rootIt = mPreJets.begin();
+    StJetEtCell& root = *rootIt;
+    StJetEtCell::CellList& rootCells = root.cellList();
 		
-	//for (ValueCellList::iterator rootIt = mPreJets.begin(); rootIt!=mPreJets.end(); ++rootIt) {
+    // We define a comparison between the "root" jet and the "other" jet.
 		
-	ValueCellList::iterator rootIt = mPreJets.begin();
-	StJetEtCell& root = *rootIt;
-	StJetEtCell::CellList& rootCells = root.cellList();
-		
-	// We define a comparison between the "root" jet and the "other" jet.
-		
-	for (ValueCellList::iterator otherIt=rootIt; otherIt!=mPreJets.end(); ++otherIt) {
+    for (ValueCellList::iterator otherIt = rootIt; otherIt != mPreJets.end(); ++otherIt) {
 			
-	    if (otherIt!=rootIt) { //don't compare to self
+      if (otherIt != rootIt) { //don't compare to self
 				
-		StJetEtCell::CellList& otherCells = (*otherIt).cellList();
-		EtNeighbor neighbor;
+	StJetEtCell::CellList& otherCells = (*otherIt).cellList();
+	EtNeighbor neighbor;
 				
-		for (StJetEtCell::CellList::iterator rootSetIt=rootCells.begin(); rootSetIt!=rootCells.end(); ++rootSetIt) {
-		    for (StJetEtCell::CellList::iterator otherSetIt=otherCells.begin(); otherSetIt!=otherCells.end(); ++otherSetIt) {
-						
-			//now test root_set =? other_set
-			if ( neighbor.check(*rootSetIt, *otherSetIt)==true) { //this cell common
-			    //cout <<"common cell:\t"<<*rootSetIt<<endl;
-			}
-		    }
-		}
-				
-		if (neighbor.nCommonCells>0) {
-		    if (0) { //debug info
-			cout <<"\n ------- New Root ------- "<<endl;
-			cout <<"--- rootCell:\n"<<*rootIt<<endl;		
-			cout <<"--- otherCell:\n"<<*otherIt<<endl;
-			cout <<" These jets share:\t"<<neighbor.sharedEt<<"\tGeV over:\t"<<neighbor.nCommonCells<<"\tcells"<<endl;
-		    }
-		    neighbor.location = otherIt;
-		    EtNeighborMap::value_type myN(neighbor, neighbor);
-		    mOverlapMap.insert( myN );
-		    //mOverlapMap[neighbor]=neighbor;
-		}
-	    }
+	for (StJetEtCell::CellList::iterator rootSetIt = rootCells.begin(); rootSetIt != rootCells.end(); ++rootSetIt) {
+	  for (StJetEtCell::CellList::iterator otherSetIt = otherCells.begin(); otherSetIt != otherCells.end(); ++otherSetIt) {
+	    neighbor.check(*rootSetIt, *otherSetIt);
+	  }
 	}
-	if (0) {
-	    cout <<"\t\tContents of map"<<endl;
-	    cout <<"\t\t--------------"<<endl;
-	    for (EtNeighborMap::const_iterator itt=mOverlapMap.begin(); itt!=mOverlapMap.end(); ++itt) {
-		cout <<(*itt).second<<endl;
-	    }
+	  
+	if (neighbor.nCommonCells>0) {
+	  neighbor.location = otherIt;
+	  EtNeighborMap::value_type myN(neighbor, neighbor);
+	  mOverlapMap.insert( myN );
 	}
-
-	if (mOverlapMap.empty()==true) { //this guy shares no eT!
-	    //cout <<"root Jet shares no eT, he's done!"<<endl;
-	    //if (root.eT()!=0.) { //don't return empty cells as jets
-	    preJets.push_back(root);
-	    //}
-	    mPreJets.erase(rootIt);
-	    //mPreJets.remove(root); //slow, error prone
-	}
-	else {
-	    EtNeighbor& n = (*(mOverlapMap.begin())).second;
-	    StJetEtCell& neighborJet = *(n.location);
-
-	    if (n.sharedEt/neighborJet.eT() > splitFraction() ) { //merge these two
-		//cout <<"MERGE THESE JETS"<<endl;
-		merge(root, neighborJet, n.cells);
-
-		//remove neighbor jet
-		mPreJets.erase(n.location);
-		//mPreJets.remove(neighborJet); //shit,this removes *all* jets that compare ==
-	    }
-	    else { //split these two
-		//cout <<"SPLIT THESE JETS"<<endl;
-		split(root, neighborJet, n.cells);
-	    }
-	}
-	//}
+      }
     }
+
+    if (mOverlapMap.empty()) { //this guy shares no eT!
+      preJets.push_back(root);
+      mPreJets.erase(rootIt);
+    } else {
+      EtNeighbor& n = (*(mOverlapMap.begin())).second;
+      StJetEtCell& neighborJet = *(n.location);
+
+      if (n.sharedEt/neighborJet.eT() > splitFraction() ) { //merge these two
+	merge(root, neighborJet, n.cells);
+
+	//remove neighbor jet
+	mPreJets.erase(n.location);
+      } else { //split these two
+	split(root, neighborJet, n.cells);
+      }
+    }
+  }
 	
-    //copyPostJets(preJets);
-    //clock_t end = clock();
-    //double elapsedTime = static_cast<double>(end-begin)/static_cast<double>(CLOCKS_PER_SEC);
-    //cout <<"\tFinished in:\t"<<elapsedTime<<"\tcpu sec"<<endl;
 
 }
 

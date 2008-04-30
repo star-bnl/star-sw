@@ -1,5 +1,4 @@
-// -*- mode: c++;-*-
-// $Id: StJetEtCellFactory.cxx,v 1.1 2008/04/29 00:11:10 tai Exp $
+// $Id: StJetEtCellFactory.cxx,v 1.2 2008/04/30 01:43:09 tai Exp $
 #include "StJetEtCellFactory.h"
 
 #include "StJetEtCell.h"
