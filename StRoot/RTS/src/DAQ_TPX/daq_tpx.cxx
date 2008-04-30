@@ -1049,6 +1049,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 		// NEED to sort in falling timebin!
 		qsort(sim->sim_adc, sim->ncontent, sizeof(sim->sim_adc[0]),cmpr_sim_adc) ;
 
+		
 	
 		for(u_int i=0;i<sim->ncontent;i++) {
 			a.adc[i] = sim->sim_adc[i].adc ;
@@ -1084,24 +1085,16 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 				daq_sim_cld *cld = (daq_sim_cld *) cld_sim->request(cou) ;
 
 				while(cou) {
-					int skip = fcf_algo[s]->fcf_decode(p_buff, cld, version) ;
-					
-					// addtional cuts here
-
-
-					
-
-
-
+					int skip = fcf_algo[s]->fcf_decode(p_buff, cld + g_cou, version) ;
 					
 					g_cou++ ;
-
 
 					p_buff += skip ;
 					cou-- ;
 
 				}
 			
+				
 				cld_sim->finalize(g_cou,s,row) ;
 			}			
 		}
