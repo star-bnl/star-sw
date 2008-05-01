@@ -1,11 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StppJetAnalyzer2.h,v 1.6 2008/04/22 00:15:05 tai Exp $
+// $Id: StppJetAnalyzer2.h,v 1.7 2008/05/01 17:32:29 tai Exp $
 #ifndef STPPJETANALYZER2_HH
 #define STPPJETANALYZER2_HH
 
 #include "StppAnaPars.h"
-
-#include <TObject.h>
 
 #include "StJetFinder/StProtoJet.h"
 
@@ -17,9 +15,10 @@ class StJetPars;
 class StJetFinder;
 class StFourPMaker;
 class StMuTrackFourVec;
-class StJets;
 
-class StppJetAnalyzer2 : public TObject {
+namespace StSpinJet {
+
+class StppJetAnalyzer2 {
 
 public:
 
@@ -36,13 +35,13 @@ public:
 private:
 
   void collectFourMomentum();
-  void applyCuts();
+  void applyCutsOnJets();
 
-  bool accept4p(StMuTrackFourVec* p);
+  bool shoudNotPassToJetFinder(AbstractFourVec* particle);
 
   bool isChargedTrack(StMuTrackFourVec* p);
 
-  bool acceptJet(StProtoJet &pj);
+  bool shouldNotKeep(StProtoJet &pj);
     
   StJetFinder* _jetFinder;
 
@@ -51,10 +50,9 @@ private:
 
   StppAnaPars _anaPar;
 
-
-  ClassDef(StppJetAnalyzer2,1)
 };
 
+}
 
 #endif // STPPJETANALYZER2_HH
 
