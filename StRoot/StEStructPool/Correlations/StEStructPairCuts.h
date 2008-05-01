@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.14 2008/03/19 22:06:01 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.15 2008/05/01 23:39:14 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -542,15 +542,19 @@ inline int StEStructPairCuts::cutCrossing(){
     return ++(mCrossingCounter[mType]);
 }
 
-// This cuts a triangular region extending to mMerging2[0] on the Z separation axis
-// and mMerging2[1] on the XY separation axis.
 inline int StEStructPairCuts::cutMerging2() {
     if (!mMergingCut2) {
         return 0;
     }
-    float y = MidTpcXYSeparation();
-    float x = MidTpcZSeparation();
-    if (y*mMerging2[0]+x*mMerging2[1] < mMerging2[0]*mMerging2[1]) {
+    float xy = MidTpcXYSeparation();
+    float z  = MidTpcZSeparation();
+    // This cuts a triangular region extending to mMerging2[0] on the Z separation axis
+    // and mMerging2[1] on the XY separation axis.
+    //if (xy*mMerging2[0]+z*mMerging2[1] < mMerging2[0]*mMerging2[1]) {
+    //    return ++(mMergingCounter2[mType]);
+    //}
+    // Here is a rectangular cut.
+    if (z<mMerging2[0] && xy<mMerging2[1]) {
         return ++(mMergingCounter2[mType]);
     }
     return 0;
@@ -881,6 +885,10 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.15  2008/05/01 23:39:14  prindle
+ * I was using a triangular region for the merging cut. Decided a rectangular
+ * region was safer.
+ *
  * Revision 1.14  2008/03/19 22:06:01  prindle
  * Added doInvariantMass flag.
  * Added some plots in pairDensityHistograms.
