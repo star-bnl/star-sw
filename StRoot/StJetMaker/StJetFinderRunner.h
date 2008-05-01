@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetFinderRunner.h,v 1.2 2008/05/01 21:28:37 tai Exp $
+// $Id: StJetFinderRunner.h,v 1.3 2008/05/01 21:31:34 tai Exp $
 #ifndef STJETFINDERRUNNER_HH
 #define STJETFINDERRUNNER_HH
 
@@ -26,7 +26,7 @@ public:
 
   void Init();
 
-  void findJets();
+  void Run();
 
 private:
 
