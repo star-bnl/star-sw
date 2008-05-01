@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetCuts.h,v 1.1 2008/05/01 21:55:13 tai Exp $
+// $Id: StJetCuts.h,v 1.2 2008/05/01 22:23:48 tai Exp $
 #ifndef STJETCUTS_HH
 #define STJETCUTS_HH
 
@@ -20,22 +20,16 @@ public:
 
   typedef std::list<StProtoJet> ProtoJetList;
 
-  StJetCuts(const StppAnaPars* ap, StJetPars* jp, ProtoJetList& protoJets);
+  StJetCuts(const StppAnaPars* ap, ProtoJetList& protoJets);
 
   virtual ~StJetCuts();
 
-  void Init();
-
-  void Run();
+  void Apply();
 
 private:
 
-  void applyCutsOnJets();
-
   bool shouldNotKeep(StProtoJet &pj);
     
-  StJetFinder* _jetFinder;
-
   ProtoJetList& _protoJetList;
 
   StppAnaPars _anaPar;

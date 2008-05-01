@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.39 2008/05/01 21:54:19 tai Exp $
+// $Id: StJetMaker.h,v 1.40 2008/05/01 22:23:49 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -18,6 +18,7 @@ class StppAnaPars;
 namespace StSpinJet {
   class StParticleCollector;
   class StJetFinderRunner;
+  class StJetCuts;
   class StJetTreeWriter;
 }
 
@@ -43,6 +44,8 @@ private:
   std::vector<StSpinJet::StParticleCollector*> _particleCollectorList;
 
   std::vector<StSpinJet::StJetFinderRunner*> _jetFinderList;
+
+  std::vector<StSpinJet::StJetCuts*> _jetCutsList;
 
   StSpinJet::StJetTreeWriter *_treeWriter;
 
