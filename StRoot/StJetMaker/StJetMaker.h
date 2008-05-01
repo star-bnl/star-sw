@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.38 2008/05/01 21:28:38 tai Exp $
+// $Id: StJetMaker.h,v 1.39 2008/05/01 21:54:19 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -10,7 +10,6 @@
 #include <vector>
 
 class TTree;
-class StppJetAnalyzer;
 class StMuDstMaker;
 class StFourPMaker;
 class StJetPars;
