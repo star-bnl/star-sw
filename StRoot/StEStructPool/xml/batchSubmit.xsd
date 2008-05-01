@@ -74,8 +74,8 @@ hell is in this directory.
 </xs:element>
 
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-<!-- This is for items that span files used in batch jobs
-     and a few things didn't fit other places.  -->
+<!-- This is for items that span files used in batch jobs -->
+<!-- and a few things didn't fit other places.  -->
 <xs:element name='jobControl'>
     <xs:complexType>
         <xs:all>
@@ -125,8 +125,8 @@ hell is in this directory.
     </xs:complexType>
 </xs:element>
 
-<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     Here we define a schema for the file that is passed to star-submit. -->
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- Here we define a schema for the file that is passed to star-submit. -->
 <xs:element name='starSubmit'>
     <xs:complexType>
         <xs:attribute name='simulateSubmission' type='xs:boolean' default='false'
@@ -195,13 +195,13 @@ hell is in this directory.
             </xs:element>
             <xs:element name='input' minOccurs='0' maxOccurs='unbounded'>
                 <xs:complexType>
-                    <!-- nFiles, singleCopy and preferStorage only apply when input
-                         is from a catalog query. I don't know how to enforce this
-                         through shemas yet. -->
+                    <!-- nFiles, singleCopy and preferStorage only apply when input -->
+                    <!-- is from a catalog query. I don't know how to enforce this -->
+                    <!-- through shemas yet. -->
                     <xs:attribute name='URL' type='xs:string'
                             Comment='Data source. Often a file catalog query.'/>
-                    <!-- Note that nFiles should be an integer OR the string 'all'
-                         Not sure how to do this right off, so make it a string. -->
+                    <!-- Note that nFiles should be an integer OR the string 'all' -->
+                    <!-- Not sure how to do this right off, so make it a string. -->
                     <xs:attribute name='nFiles' type='xs:string' default='100'
                             Comment='An integer or all. Number of files to be returned by catalog query'/>
                     <xs:attribute name='singleCopy' type='xs:boolean' default='true'
@@ -231,11 +231,11 @@ hell is in this directory.
 </xs:simpleType>
 
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-<!-- Here we define a schema for event cuts.
-     Allow one trigger selection and any number of event cuts.
-     Note that trigger selection and trigger cut are redundant,
-     but they are allowed by the code that read the cuts file and I'm
-     currently too lazy to figure out how to enforce a choice of only one. -->
+<!-- Here we define a schema for event cuts. -->
+<!-- Allow one trigger selection and any number of event cuts. -->
+<!-- Note that trigger selection and trigger cut are redundant, -->
+<!-- but they are allowed by the code that read the cuts file and I'm -->
+<!-- currently too lazy to figure out how to enforce a choice of only one. -->
 <xs:element name='eventCuts'>
     <xs:complexType>
         <xs:all>
@@ -254,7 +254,8 @@ hell is in this directory.
             <xs:enumeration value='CuCu62GeVProductionMinBias2007ic' Comment='tag for 2005, 62GeV CuCu minimum bias trigger (2007ic production)'/>
             <xs:enumeration value='CuCu200GeVProductionMinBias2005' Comment='tag for 2005, 200GeV CuCu minimum bias trigger'/>
             <xs:enumeration value='CuCu200GeVProductionMinBias2007ic' Comment='tag for 2005, 200GeV CuCu minimum bias trigger (2007ic production)'/>
-            <xs:enumeration value='2007LowLuminosity' Comment='tag for 2007, 200GeV AuAu minimum Low Luminosity trigger set'/>
+            <xs:enumeration value='2007ProductionMinBias' Comment='tag for 2007, 200GeV AuAu minimum bias produced for PMD'/>
+            <xs:enumeration value='2007LowLuminosity' Comment='tag for 2007, 200GeV AuAu minimum bias Low Luminosity trigger set'/>
             <xs:enumeration value='AuAu200GeVMinBias2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVMinBias2001' Comment='tag for 2001, 200GeV AuAu minimum bias trigger'/>
@@ -297,9 +298,9 @@ hell is in this directory.
     </xs:restriction>
 </xs:simpleType>
 
-<!-- Each value is an un-restricted decimal number but we associate
-     a widget. This is a suggestions to a gui about how to present an
-     edit field for this value. -->
+<!-- Each value is an un-restricted decimal number but we associate -->
+<!-- a widget. This is a suggestions to a gui about how to present an -->
+<!-- edit field for this value. -->
 <xs:element name='Value'>
     <xs:complexType>
         <xs:restriction base='xs:decimal'/>
@@ -490,9 +491,9 @@ hell is in this directory.
 </xs:simpleType>
 
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-<!-- doEStruct macro is mostly text.
-     We modify this text for different types of analysis.
-     One way of doing this is using elements as variables. -->
+<!-- doEStruct macro is mostly text.  -->
+<!-- We modify this text for different types of analysis. -->
+<!-- One way of doing this is using elements as variables. -->
 <xs:element name='doEStructMacro'>
     <xs:complexType>
         <xs:all>
@@ -505,6 +506,7 @@ hell is in this directory.
             <xs:element ref='ptCentralities' minOccurs='0'/>
             <xs:element ref='cutMode' minOccurs='0'/>
             <xs:element ref='analysisMode' minOccurs='0'/>
+            <xs:element ref='useGlobalTracks' minOccurs='0'/>
             <xs:element ref='declareAnalysis'/>
             <xs:element ref='declareReader'/>
             <xs:element ref='allocateAnalysis'/>
@@ -626,6 +628,15 @@ hell is in this directory.
         <xs:attribute name='Comment' type='xs:string'>Used by 2pt correlation code as flag for switching options</xs:attribute>
     </xs:complexType>
 </xs:element>
+<xs:element name='useGlobalTracks'>
+    <xs:complexType>
+        <xs:restriction base='xs:boolean'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>Used to switch MuDstReader from primary to global tracks</xs:attribute>
+    </xs:complexType>
+</xs:element>
 <xs:element name='declareAnalysis'>
     <xs:complexType>
         <xs:attribute name='id' type='xs:string' use='required'/>
@@ -718,9 +729,9 @@ hell is in this directory.
 
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 <!-- All Hijing parameters need to exist in the file and in the proper order. -->
-<!-- There must be a better way than defining a different element for
-     all the parameters, but I haven't found it and want to get on with
-     the rest of the project. -->
+<!-- There must be a better way than defining a different element for -->
+<!-- all the parameters, but I haven't found it and want to get on with -->
+<!-- the rest of the project. -->
 <xs:element name='hijingParams'>
     <xs:complexType>
         <xs:sequence>
@@ -866,10 +877,10 @@ hell is in this directory.
     </xs:complexType>
 </xs:element>
 
-<!-- We only allow Frame to be CMS or FIXT.
-     To include 3MOM, 4MOM and 5MOM we need to add an interface to P (which
-     I think is a variable in a common block.) If this is useful we can do
-     it, but I will wait till it is requested by someone who will test it. -->
+<!-- We only allow Frame to be CMS or FIXT. -->
+<!-- To include 3MOM, 4MOM and 5MOM we need to add an interface to P (which -->
+<!-- I think is a variable in a common block.) If this is useful we can do -->
+<!-- it, but I will wait till it is requested by someone who will test it. -->
 <xs:element name='pyFrame'>
     <xs:complexType>
         <xs:restriction base='pyKinematicFrame'/>
@@ -890,8 +901,8 @@ hell is in this directory.
 </xs:simpleType>
 
 
-<!-- pyBeam and pyTarget are restricted to the types of particles
-     Pythia knows about.. -->
+<!-- pyBeam and pyTarget are restricted to the types of particles -->
+<!-- Pythia knows about.. -->
 <xs:element name='pyBeam'>
     <xs:restriction base='particleType'/>
     <xs:attribute name='id' type='xs:string' use='required'/>
@@ -918,13 +929,13 @@ hell is in this directory.
     </xs:complexType>
 </xs:element>
 
-<!-- The event cut name is restricted to valid cut names.
-     We omit a number of gamma from e, mu tau which look for
-     kinematic limits in array CKIN. If these are of interest we
-     can include an interface to this array.
-     Also pomerons and reggeons are not included in this particle
-     list since the documentation says the distribution functions
-     for these are not included and they will not work. -->
+<!-- The event cut name is restricted to valid cut names. -->
+<!-- We omit a number of gamma from e, mu tau which look for -->
+<!-- kinematic limits in array CKIN. If these are of interest we -->
+<!-- can include an interface to this array. -->
+<!-- Also pomerons and reggeons are not included in this particle -->
+<!-- list since the documentation says the distribution functions -->
+<!-- for these are not included and they will not work. -->
 <xs:simpleType name='particleType'>
     <xs:complexType>
         <xs:restriction base='xs:string'>
@@ -963,9 +974,9 @@ hell is in this directory.
     </xs:complexType>
 </xs:simpleType>
 
-<!-- We only allow tune to be 1, 2 or 3.
-     Doing this as enumeration instead of restricted integer will cause
-     a combobox to appear in the gui. -->
+<!-- We only allow tune to be 1, 2 or 3. -->
+<!-- Doing this as enumeration instead of restricted integer will cause -->
+<!-- a combobox to appear in the gui. -->
 <xs:element name='pyTune'>
     <xs:complexType>
         <xs:restriction base='pyTuneDef'/>

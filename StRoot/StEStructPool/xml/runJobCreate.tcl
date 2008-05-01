@@ -2,6 +2,12 @@
  # \
  exec tclsh "$0" "$@"
 
+if {[file exists /star/u/prindle/bin/lib]} {
+    if {[lsearch $auto_path /star/u/prindle/bin/lib] < 0} {
+        lappend auto_path /star/u/prindle/bin/lib
+    }
+}
+
 namespace eval ::jobCreate:: {
 }
 # We assume jobCreate.tcl is in the same directory that runjobCreate.tcl is.

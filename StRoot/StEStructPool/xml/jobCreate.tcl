@@ -159,6 +159,9 @@ proc ::jobCreate::merge {n2 doc1} {
     if {$n1 eq ""} {
         # n2 not found in doc1. The asXML command will include all children
         # so we do not need to recurse for this node.
+        #>>>>> Note to self: there may be an -keepEmpties switch when using
+        #      asXML (also asText?). Maybe I can fix the annoying problem that spaces
+        #      and new lines get eaten by XSLT? (also an -indent none switch.)
         set par2 [$n2 parentNode]
         set p [$par2 toXPath]
         set n1 [$doc1 selectNodes $p]
@@ -280,6 +283,7 @@ proc ::jobCreate::createWindow {} {
     $post add command -label "Add histograms" -command [namespace code addHistograms]
     $post add command -label "Combine centralities" -command [namespace code combineCentralities]
     $post add command -label "selectAll macro"  -command [namespace code selectAll]
+    $post add command -label "copy to HPSS"  -command [namespace code copyToHPSS]
     set help [menu $m.help]
     $m add cascade -label Help -menu $help
     $help add command -label Help -command [namespace code [list displayHelp ""]]
@@ -338,6 +342,7 @@ proc ::jobCreate::+listDefaultXml {type t c b} {
                            dataAuAu200_2001_ProductionMinBias.lis \
                            dataAuAu200_2004_MinBias.lis \
                            dataAuAu200_2007_MinBias.lis \
+                           dataAuAu200_2007_PMD.lis \
                            dataCuCu22_P05if_cuProductionMinBias.lis \
                            dataCuCu62_2005_ProductionMinBias.lis \
                            dataCuCu62_2007ic_cuProductionMinBias.lis \
@@ -2310,7 +2315,7 @@ proc ::jobCreate::addDataHistograms {fileList numPerSet centrality} {
                 .addHistograms.t insert end "\n\n" normalOutput
             }
             .addHistograms.t conf -cursor $currCurs
-            lappend ::jobCreate::alreadyAdded($centrality) [lrange $fileList $start]
+            lappend ::jobCreate::alreadyAdded($centrality) [lindex $fileList $start]
             set ::jobCreate::filesToAdd($centrality) [lremove $::jobCreate::filesToAdd($centrality) [lindex $fileList $start]]
         } else {
             set cmd "hadd $sumFile [lrange $fileList $start $end]"
@@ -3197,7 +3202,156 @@ proc ::jobCreate::selectAllReadable {fid fLog} {
         set ::SEL-DONE 3
     }
 }
+################################################################################
+# copyToHPSS uses htar to copy entire tree to HPSS.
+################################################################################
+proc ::jobCreate::copyToHPSS {} {
+    if {![winfo exists .copyToHPSS]} {
+        toplevel .copyToHPSS
+        wm title .copyToHPSS "Copy job directory tree to HPSS"
+        set tFrame [frame .copyToHPSS.tFrame]
+        pack $tFrame -fill both -expand true
 
+        text .copyToHPSS.tFrame.t -yscrollcommand {.copyToHPSS.tFrame.y set} \
+                              -xscrollcommand {.copyToHPSS.tFrame.x set} -wrap word
+        scrollbar .copyToHPSS.tFrame.y -command {.copyToHPSS.tFrame.t yview}
+        scrollbar .copyToHPSS.tFrame.x -command {.copyToHPSS.tFrame.t xview} -orient horizontal
+        grid .copyToHPSS.tFrame.t .copyToHPSS.tFrame.y
+        grid .copyToHPSS.tFrame.x x
+        grid .copyToHPSS.tFrame.t -sticky news
+        grid .copyToHPSS.tFrame.y -sticky ns
+        grid .copyToHPSS.tFrame.x -sticky we
+        grid columnconfigure .copyToHPSS.tFrame 0 -weight 1
+        grid rowconfigure    .copyToHPSS.tFrame 0 -weight 1
+        .copyToHPSS.tFrame.t tag configure input -foreground black
+        .copyToHPSS.tFrame.t tag configure normalOutput -foreground blue
+        .copyToHPSS.tFrame.t tag configure errorOutput -foreground red
+
+        button .copyToHPSS.runIt -text "Start Copy" -command [namespace code [list doCopyToHPSS]]
+        pack .copyToHPSS.runIt -side left
+
+        # Want to only allow window to be destroyed when not in action?
+        #bind .copyToHPSS <Control-w> {destroy .copyToHPSS}
+    } else {
+        raise .copyToHPSS
+    }
+}
+################################################################################
+# doCopyToHPSS invokes htar.
+################################################################################
+proc ::jobCreate::doCopyToHPSS {} {
+    global env
+    global errorCode
+    global errorInfo
+
+    # Get output dir (root of tree for this job) and create HPSS name by stripping
+    # $env(MYDATA) from start.
+    set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
+    set path [$node text]
+    set node [$::jobCreate::jobInfo getElementsByTagName jobName]
+    set jobName [$node text]
+    set myData \$env(MYDATA)
+    if {![catch {subst $myData} v]} {
+        set myData $v
+    }
+    set hPath [string map "$myData/ {}" $path]
+
+    # The -P option will create the HPSS path if it doesn't exist (Couldn't find
+    # this actually documented, but seems to work.)
+    # Need to check if archive file already exists. Would be silently over-written.
+    # hsi (at least via exec) writes to stderr but errorCode is "NONE" if there was really no erro.
+    catch {exec hsi ls $hPath/$jobName.tar} result
+    if {$errorCode eq "NONE"} {
+        set msg "It appears that archive file
+$hPath/$jobName.tar
+already exists. Continue and overwrite?
+        "
+        set cont [tk_messageBox -message $msg -type yesno \
+                -icon warning -title "Archive file already exists" -default no]
+        if {!$cont} {
+            return
+        }
+    }
+        
+    set logFile [file join $path copyToHPSSLog]
+    if {[file exists $logFile]} {
+        set log [open $logFile a]
+    } else  {
+        set log [open $logFile w]
+    }
+
+    # htar seems to require that pwd is in same file system as directory to archive?
+    set dir [file tail $path]
+    set currPwd [pwd]
+    cd $path
+    cd ..
+    set cmd "htar -c -f $hPath/$jobName.tar -P $dir"
+
+    puts $log "Starting to htar from disk directory $path to HPSS directory $hPath"
+    puts $log $cmd
+    .copyToHPSS.tFrame.t insert end "$cmd\n" input
+    .copyToHPSS.tFrame.t see end
+
+    # It appears that 
+    set fid [open "|$cmd"]
+    fconfigure $fid -blocking false -buffering line
+    fileevent $fid readable [namespace code [list htarReadable $fid $log]]
+    set currCurs [.copyToHPSS.tFrame.t cget -cursor]
+    .copyToHPSS.tFrame.t configure -cursor watch
+
+    # Closing the pipeline may kill htar. If not, I need to get the pid and exec a kill.
+    .copyToHPSS.runIt configure -text "Stop copy to HPSS" \
+            -command [namespace code [list stopHPSSCopy $fid $currCurs]]
+
+    cd $currPwd
+
+    # Wait for the fileevents (i.e. htar) to finish.
+    vwait ::HTAR-DONE
+
+    # Close the pipe
+    catch {close $fid}
+
+    .copyToHPSS.tFrame.t conf -cursor $currCurs
+    .copyToHPSS.runIt configure -text Done -command "" -state disabled
+}
+################################################################################
+# htarReadable waits for output from htar and
+#  puts it into a text widget.
+################################################################################
+proc ::jobCreate::htarReadable {fid fLog} {
+    # The channel is readable; try to read it.
+    set status [catch { gets $fid line } result]
+    if { $status != 0 } {
+        # Error on the channel
+        puts $fLog ">>>>>error reading $fid: $result<<<<<"
+        .copyToHPSS.tFrame.t insert end "error reading $fid: $result\n"
+        .copyToHPSS.tFrame.t see end
+        set ::HTAR-DONE 2
+    } elseif { [eof $fid] } {
+        set ::HTAR-DONE 1
+    } elseif { $result >= 0 } {
+        puts $fLog $line
+        .copyToHPSS.tFrame.t insert end "$line\n"
+        .copyToHPSS.tFrame.t see end
+    } elseif { [fblocked $fid] } {
+        # Read blocked.  Just return
+    } else {
+        # Something else
+        puts $fLog ">>>>>Something impossible happened while reading output from hadd<<<<<"
+        .copyToHPSS.tFrame.t insert end "What did you do?? the impossible happened while reading $fid: $result\n"
+        .copyToHPSS.tFrame.t see end
+        set ::HTAR-DONE 3
+    }
+}
+################################################################################
+# stopHPSSCopy closes pipeline, hoping that is enough to kill htar.
+#  Also resets cursor and button.
+################################################################################
+proc ::jobCreate::stopHPSSCopy {fid cursor} {
+    catch {close $fid}
+    .copyToHPSS.tFrame.t conf -cursor $currCurs
+    .copyToHPSS.runIt configure -text "Copy cancelled" -command "" -state disabled
+}
 
 
 # displayHelp --
@@ -3330,6 +3484,14 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end "classes of files to turn into \u0394\u03c1/\u221a\u03c1_ref histograms " n
     $w insert end "via the combineHistograms{mode} macro. Output of this macro " n
     $w insert end "is a root histogram file that can be used without the STAR library. \n\n" n
+    $w insert end "- copy to HPSS\n" n
+    $w insert end "  Copy the output directory tree to HPSS using htar. \n" n
+    $w insert end "This will result in a tar file named \$jobName.tar (jobName is described " n
+    $w insert end "in the jobControl section below). The resulting HPSS directory (which will " n
+    $w insert end "be created if it doesn't exist) is taken from outputDir (described in " n
+    $w insert end "the jobControl section below) with the contents of the environment " n
+    $w insert end "variable MYDATA stripped from the start. If the archive file already " n
+    $w insert end "exists you will be warned and given options to over-write it or not. \n\n" n
 
 
     $w insert end "Analysis Type\n\n" header
@@ -3377,7 +3539,10 @@ proc ::jobCreate::displayHelp {w} {
 
     $w insert end " o jobName:\n" bullet
     $w insert end "- A scratch directory with this name is created in /tmp/\$USER " n
-    $w insert end "where the output root files are written.\n" n
+    $w insert end "where the output root files are written. After the job finishes " n
+    $w insert end "the files are copied to outputDir. " n
+    $w insert end "We also use this as the name of the tar file when you " n
+    $w insert end "use the \"copy to HPSS\" menu (see Menus/Apr\u00e8s batch section above). \n" n
 
     $w insert end " o outputDir:\n" bullet
     $w insert end "- Output root files are copied to this directory at end of job. " n
@@ -3457,6 +3622,9 @@ proc ::jobCreate::displayHelp {w} {
 
     $w insert end " o analysisMode\n" bullet
     $w insert end "- Bit pattern passed to constructor of analsis object.\n\n" n
+
+    $w insert end " o useGlobalTracks\n" bullet
+    $w insert end "- If true MuDstReader will use global tracks instaed of primaries..\n\n" n
 
     $w insert end " o declareAnalysis\n" bullet
     $w insert end "- Code to declare the analysis. Clicking on button will make this information editable. " n
