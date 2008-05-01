@@ -1,11 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StppAnaPars.h,v 1.4 2008/05/01 17:44:51 tai Exp $
+// $Id: StppAnaPars.h,v 1.5 2008/05/01 21:28:39 tai Exp $
 #ifndef STPPANAPARS_h
 #define STPPANAPARS_h
 
 #include <TObject.h>
 
 namespace StSpinJet {
+  class StParticleCollector;
   class StJetFinderRunner;
 }
 
@@ -51,6 +52,7 @@ private:
   int mJetNmin;
 
   friend class StppJetAnalyzer;
+  friend class StSpinJet::StParticleCollector;
   friend class StSpinJet::StJetFinderRunner;
 
   ClassDef(StppAnaPars,1)
