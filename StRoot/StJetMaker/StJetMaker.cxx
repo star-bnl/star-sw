@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.53 2008/05/01 21:28:38 tai Exp $
+// $Id: StJetMaker.cxx,v 1.54 2008/05/01 21:31:35 tai Exp $
 #include "StJetMaker.h"
 
 #include "StParticleCollector.h"
@@ -57,7 +57,7 @@ Int_t StJetMaker::Make()
   }
 
   for(vector<StJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
-    (*jetFinder)->findJets();
+    (*jetFinder)->Run();
   }
 
   _treeWriter->fillJetTree();

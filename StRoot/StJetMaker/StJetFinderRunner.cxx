@@ -1,4 +1,4 @@
-// $Id: StJetFinderRunner.cxx,v 1.2 2008/05/01 21:28:37 tai Exp $
+// $Id: StJetFinderRunner.cxx,v 1.3 2008/05/01 21:31:33 tai Exp $
 #include "StJetFinderRunner.h"
 
 
@@ -31,7 +31,7 @@ void StJetFinderRunner::Init()
   _jetFinder->Init();
 }
 
-void StJetFinderRunner::findJets()
+void StJetFinderRunner::Run()
 {
   _jetFinder->findJets(_protoJetList);
 
