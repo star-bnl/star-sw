@@ -168,7 +168,7 @@ public:
 
     pay->flags = l2h32(pay->flags);
     
-    UINT32 detmask = b2h32(evt->actionWdDetectorBitMask);
+    UINT32 detmask = b2h16(evt->actionWdDetectorBitMask);
     detmask = grp2rts_mask(detmask);
     detmask &= dets_in_run_mask;
     detmask |= (1<<TRG_SYSTEM);
