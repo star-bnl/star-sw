@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.13 2008/03/19 22:01:59 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.14 2008/05/01 23:35:57 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -33,6 +33,7 @@ StEStructMuDstReader::StEStructMuDstReader() {
     mTCuts        = 0;
     mInChain      = false;
     mAmDone       = false;
+    mUseGlobalTracks=false;
 };
 StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
                                            StEStructEventCuts* ecuts,
@@ -43,6 +44,7 @@ StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
     setTrackCuts(tcuts);
     mInChain      = false;
     mAmDone       = false;
+    mUseGlobalTracks=false;
 };
 
 //-------------------------------------------------------------------------
@@ -62,6 +64,9 @@ void StEStructMuDstReader::setTrackCuts(StEStructTrackCuts* tcuts) {
         dEdxAfter  = new TH2F("dEdxCut","dEdxCut",150,0,1.5,150,0,0.000015);
         mTCuts->addCutHists(dEdxBefore, dEdxAfter, "dEdXPlots");
     }
+};
+void StEStructMuDstReader::setUseGlobalTracks(bool global) {
+    mUseGlobalTracks=global;
 };
 
 inline bool StEStructMuDstReader::setInChain(bool inChain) {
@@ -186,16 +191,26 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
     //
 
     StMuDst* muDst=mMaker->muDst();
-    int numPrimaries=muDst->primaryTracks()->GetEntries();
-    if (0==numPrimaries) {
+    int numTracks;
+    if (mUseGlobalTracks) {
+        numTracks = muDst->globalTracks()->GetEntries();
+    } else {
+        numTracks = muDst->primaryTracks()->GetEntries();
+    }
+    if (0==numTracks) {
         return false;
     }
 
     StEStructTrack* eTrack = new StEStructTrack();
-    for(int i=0; i<numPrimaries; i++) {
+    for(int i=0; i<numTracks; i++) {
         bool useTrack=true;
         eTrack->SetInComplete();
-        StMuTrack* track=muDst->primaryTracks(i);
+        StMuTrack* track;
+        if (mUseGlobalTracks) {
+            track = muDst->globalTracks(i);
+        } else {
+            track = muDst->primaryTracks(i);
+        }
 
         if (mhasdEdxCuts) {
             dEdxBefore->Fill((track->p()).mag(),track->dEdx());
@@ -226,7 +241,11 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
     useTrack = (mTCuts->goodCharge(track->charge()) && useTrack);
     useTrack = (mTCuts->goodNFitPoints(track->nHitsFit()) && useTrack);
     useTrack = (mTCuts->goodNFitNMax((float)((float)track->nHitsFit()/(float)track->nHitsPoss())) && useTrack);
-    useTrack = (mTCuts->goodGlobalDCA(track->dcaGlobal().magnitude()) && useTrack);
+    if (mUseGlobalTracks) {
+        useTrack = (mTCuts->goodGlobalDCA(track->dca().magnitude()) && useTrack);
+    } else {
+        useTrack = (mTCuts->goodGlobalDCA(track->dcaGlobal().magnitude()) && useTrack);
+    }
     useTrack = (mTCuts->goodEta(track->eta()) && useTrack);
     useTrack = (mTCuts->goodChi2(track->chi2()) && useTrack);
     useTrack = (mTCuts->goodPhi(track->phi()) && useTrack);
@@ -272,13 +291,24 @@ bool StEStructMuDstReader::isTrackGoodToUse(StMuTrack* track){
 int StEStructMuDstReader::countGoodTracks() {
     mNumGoodTracks=0;
     StMuDst* muDst=mMaker->muDst();
-    int numPrimaries=muDst->primaryTracks()->GetEntries();
-    if (0==numPrimaries) {
+    int numTracks;
+    if (mUseGlobalTracks) {
+        numTracks = muDst->globalTracks()->GetEntries();
+    } else {
+        numTracks = muDst->primaryTracks()->GetEntries();
+    }
+    if (0==numTracks) {
         return 0;
     }
-    for(int i=0; i<numPrimaries; i++) {
-      if (isTrackGood(muDst->primaryTracks(i))) {
-            mNumGoodTracks++;
+    for(int i=0; i<numTracks; i++) {
+        if (mUseGlobalTracks) {
+            if (isTrackGood(muDst->globalTracks(i))) {
+                mNumGoodTracks++;
+            }
+        } else {
+            if (isTrackGood(muDst->primaryTracks(i))) {
+                mNumGoodTracks++;
+            }
         }
     }
     return mNumGoodTracks;
@@ -297,11 +327,23 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
   eTrack->SetBy(b.y());
   eTrack->SetBz(b.z());
 
-  StThreeVectorF gb=mTrack->dcaGlobal();
+  StThreeVectorF gb;
+  // In some productions we have dcaGlobal() = (0,0,0) for global tracks.
+  // dca() seems to be useful though.
+  if (mUseGlobalTracks) {
+      gb = mTrack->dca();
+  } else {
+      gb = mTrack->dcaGlobal();
+  }
+  if (0 == gb.x() && 0 == gb.y() && 0 == gb.z()) {
+      printf("Found track with dca = (0,0,0)\n");
+  }
   eTrack->SetBxGlobal(gb.x());
   eTrack->SetByGlobal(gb.y());
   eTrack->SetBzGlobal(gb.z());
 
+  // Note: For global tracks eta and phi are calculated at DCA to primary vertex.
+  //       (Not sure how far back this goes. Need to check if using globals with old data)
   eTrack->SetEta(mTrack->eta());
   eTrack->SetPhi(mTrack->phi());
 
@@ -346,6 +388,10 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.14  2008/05/01 23:35:57  prindle
+ * Found that for global tracks we sometimes have global dca = (0,0,0)
+ * Now use dca() when we are using global tracks.
+ *
  * Revision 1.13  2008/03/19 22:01:59  prindle
  * Updated some dataset definitions.
  *
