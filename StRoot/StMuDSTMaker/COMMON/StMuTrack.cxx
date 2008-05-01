@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.34 2008/03/19 14:51:04 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.35 2008/05/01 20:53:59 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -147,20 +147,28 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
         mDCAGlobal = StThreeVectorF(-999,-999,-999);
       }
       mDCA = dca(track, vertex);
-      if (globalTrack && globalTrack->dcaGeometry()) {
-        const StDcaGeometry *dcaGeometry = globalTrack->dcaGeometry();
-        const StThreeVectorF &pvert = vertex->position();
-        Double_t        vtx[3] = {pvert[0],pvert[1],pvert[2]};
-        THelixTrack     thelix =  dcaGeometry->thelix();
-        thelix.Move(thelix.Path(vtx));
-        const Double_t *pos = thelix.Pos();
-        const Double_t *mom = thelix.Dir();
-        mDCAGlobal = StThreeVectorF(pos[0],pos[1],pos[2]) - vertex->position();
-        if (track->type() == global) {
-          mDCA = StThreeVectorF(pos[0],pos[1],pos[2]) -  vertex->position();
-          mP   = StThreeVectorF(mom[0],mom[1],mom[2]);
-          mP  *= dcaGeometry->momentum().mag();
+      if (globalTrack) {
+        if (globalTrack->dcaGeometry()) {
+          const StDcaGeometry *dcaGeometry = globalTrack->dcaGeometry();
+          const StThreeVectorF &pvert = vertex->position();
+          Double_t        vtx[3] = {pvert[0],pvert[1],pvert[2]};
+          THelixTrack     thelix =  dcaGeometry->thelix();
+          thelix.Move(thelix.Path(vtx));
+          const Double_t *pos = thelix.Pos();
+          const Double_t *mom = thelix.Dir();
+          mDCAGlobal = StThreeVectorF(pos[0],pos[1],pos[2]) - vertex->position();
+          if (track->type() == global) {
+            mDCA = mDCAGlobal;
+            mP   = StThreeVectorF(mom[0],mom[1],mom[2]);
+            mP  *= dcaGeometry->momentum().mag();
+          }
         }
+        else {  // No StDcaGeometry; use helix
+          mDCAGlobal = dca(globalTrack, vertex);
+        }
+      }
+      else {  // No global track available
+        mDCAGlobal = StThreeVectorF(-999,-999,-999);
       }
 
       mPt = mP.perp();
@@ -310,15 +318,22 @@ StThreeVectorF StMuTrack::dca(Int_t vtx_id) const {
 StThreeVectorF StMuTrack::dcaGlobal(Int_t vtx_id) const {
   if (vtx_id == -1)
     vtx_id = StMuDst::currentVertexIndex();
-  if (vtx_id==mVertexIndex)
+  if (vtx_id==mVertexIndex) {
     return mDCAGlobal;
-  else if (mVertexIndex == -1)  // should not happen
+  }
+  else if (mVertexIndex == -1)  { // should not happen
     return StThreeVectorF(-999,-999,-999);
-
-  if (globalTrack())
-    return globalTrack()->dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
-  else 
+  }
+  const StMuTrack *gTrack = 0;
+  if (mType == global)
+     gTrack = this;
+  else
+     gTrack = globalTrack();
+  if (gTrack)
+    return gTrack->dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
+  else {
     return StThreeVectorF(-999,-999,-999);
+  }
 }
 
 StThreeVectorF StMuTrack::dca(const StThreeVectorF pos) const {
@@ -445,6 +460,10 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.35  2008/05/01 20:53:59  mvl
+ * Changed/fixed handling of DCA for global tracks without StDcaGeometry: now calculate DCA based on helix (previous behaviour was to default to (0,0,0); only affected globals without primaries).
+ * Changed globalDca() function to also work for globals that are attached to a different primary vertex. Used to return -999, now use helix to calculate.
+ *
  * Revision 1.34  2008/03/19 14:51:04  fisyak
  * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
  *
