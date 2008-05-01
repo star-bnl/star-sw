@@ -1,6 +1,5 @@
-// $Id: StJetFinderRunner.cxx,v 1.3 2008/05/01 21:31:33 tai Exp $
+// $Id: StJetFinderRunner.cxx,v 1.4 2008/05/01 21:54:36 tai Exp $
 #include "StJetFinderRunner.h"
-
 
 #include <StJetFinder/StProtoJet.h>
 #include <StJetFinder/StJetFinder.h>
@@ -57,14 +56,13 @@ void StJetFinderRunner::applyCutsOnJets()
 
 bool StJetFinderRunner::shouldNotKeep(StProtoJet &pj)
 {
-  if (pj.pt() <= _anaPar.mJetPtMin)
-    return true;
-  if (fabs(pj.eta()) >= _anaPar.mJetEtaMax)
-    return true;
-  if (fabs(pj.eta()) <= _anaPar.mJetEtaMin)
-    return true;
-  if ((int)pj.numberOfParticles() < _anaPar.mJetNmin)
-    return true;
+  if(pj.pt() <= _anaPar.mJetPtMin) return true;
+
+  if(fabs(pj.eta()) >= _anaPar.mJetEtaMax) return true;
+
+  if(fabs(pj.eta()) <= _anaPar.mJetEtaMin) return true;
+
+  if((int)pj.numberOfParticles() < _anaPar.mJetNmin)  return true;
 
   return false;
 }
