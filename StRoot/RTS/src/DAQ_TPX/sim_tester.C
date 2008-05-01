@@ -57,33 +57,39 @@ int main(int argc, char *argv[])
 	r.InitRun(123) ;
 
 
+	for(int ev=0;ev<10;ev++) {
+	// loop over sectors
+	for(int sec=1;sec<=24;sec++) {
+	for(int row=1;row<=45;row++) {
 
-	// loop over events
-	for(int ev=0;ev<2;ev++) {
 		// create (or reuse) the adc_sim bank...
 		dta = r.det("tpx")->put("adc_sim") ;
 
-		int sec = ev + 1 ;	// invent sector
-		int row = ev + 2 ;	// invent row ;
 
-		// add a bunch of adc data for a specific sector:row:pad
-		for(int pad=5;pad<10;pad++) {	// invent these pads...
-			
+		// add a bunch of adc data for a specific sector:row
+		for(int cou=0;cou<1;cou++) {
+		for(int pad=(1+cou*10+sec);pad<(4+cou*10+sec);pad++) {	// invent these pads...
+			int tb_cou ;
+
 			// allocate space for at least 512 pixels (timebins)
 			daq_sim_adc_tb *d = (daq_sim_adc_tb *) dta->request(512) ;
 
+			tb_cou = 0 ;
+
 			// add adc data for this specific sector:row:pad
-			for(u_int k=0;k<12;k++) {
+			for(u_int k=0;k<5;k++) {
 				d[k].adc = 10+k ;
 				d[k].tb = 100+k ;
-				d[k].track_id = pad+100 ;
+				d[k].track_id = cou+100 ;
+				tb_cou++ ;
 			}
 
 			// we used 12 pixels...
-			dta->finalize(12,sec,row,pad) ;
+			dta->finalize(tb_cou,sec,row,pad) ;
 		}
-
-
+		}
+		
+#define SIM_VERIFY	
 #ifdef SIM_VERIFY
 		// verify data!
 		dta = r.det("tpx")->get("adc_sim") ;
@@ -105,10 +111,13 @@ int main(int argc, char *argv[])
 		dta = r.det("tpx")->get("cld_sim") ;
 
 		while(dta->iterate()) {
+			if((dta->row != row) || (dta->sec != sec)) {
+				fprintf(stderr,"Big error!\n") ;
+			}
 			printf("CLD sec %2d: row %2d: %d clusters\n",dta->sec, dta->row, dta->ncontent) ;
 
 			for(u_int i=0;i<dta->ncontent;i++) {
-			       printf("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X\n",
+			       printf("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X: track %d, Q %d\n",
 				      dta->sim_cld[i].cld.pad,
 				      dta->sim_cld[i].cld.p1,
 				      dta->sim_cld[i].cld.p2,
@@ -116,16 +125,18 @@ int main(int argc, char *argv[])
 				      dta->sim_cld[i].cld.t1,
 				      dta->sim_cld[i].cld.t2,
 				      dta->sim_cld[i].cld.charge,
-				      dta->sim_cld[i].cld.flags
+				      dta->sim_cld[i].cld.flags,
+				      dta->sim_cld[i].track_id,
+				      dta->sim_cld[i].quality
 				      );
 			}
 
 		}
 
 		
-
 	}
-
+	}
+	}
 
 	return 0 ;
 }
