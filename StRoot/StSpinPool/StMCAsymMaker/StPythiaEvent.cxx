@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.5  2008/05/01 01:36:39  rfatemi
+// check in D. Staszak modifications - additional grids
+//
 // Revision 1.4  2008/02/03 01:27:17  rfatemi
 // Included Gehrmann-Stirling PDFs
 //
@@ -50,7 +53,7 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
     mX2         = t.mX2;
     mPartonALL  = t.mPartonALL;
     
-    for(int i=0; i<19; i++) {
+    for(int i=0; i<30; i++) {
         mDF1[i] = t.mDF1[i];
         mDF2[i] = t.mDF2[i];
     }
@@ -83,7 +86,7 @@ StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs)
     mX2         = rhs.mX2;
     mPartonALL  = rhs.mPartonALL;
     
-    for(int i=0; i<19; i++) {
+    for(int i=0; i<30; i++) {
         mDF1[i] = rhs.mDF1[i];
         mDF2[i] = rhs.mDF2[i];
     }
