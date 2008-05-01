@@ -5,6 +5,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.6  2008/05/01 01:36:39  rfatemi
+// check in D. Staszak modifications - additional grids
+//
 // Revision 1.5  2008/02/03 01:27:17  rfatemi
 // Included Gehrmann-Stirling PDFs
 //
@@ -36,7 +39,8 @@ public:
   StPythiaEvent(const StPythiaEvent& other);
   StPythiaEvent& operator=(const StPythiaEvent& rhs); 
   
-  enum PDF { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15, GS_NLOA=16, GS_NLOB=17, GS_NLOC=18};
+  enum PDF { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15, 
+	     GS_NLOA=16, GS_NLOB=17, GS_NLOC=18, DSSV=19, LSS1=20, LSS2=21, LSS3=22, AAC1=23, AAC2=24, AAC3=25, BB1=26, BB2=27, DNS1=28, DNS2=29 };
   int runId() const;
   int eventId() const;
   int processId() const;
@@ -94,8 +98,8 @@ private:
   float mX1;
   float mX2;
   float mPartonALL;
-  float mDF1[19];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC]
-  float mDF2[19];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC]
+  float mDF1[30];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2]
+  float mDF2[30];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2]
   float mF1[2];   //[LO][NLO]
   float mF2[2];   //[LO][NLO]
   
@@ -155,7 +159,18 @@ inline float StPythiaEvent::ALL(PDF scenario) const
     case(P070):  return (mDF1[15]*mDF2[15]*mPartonALL) / (mF1[1]*mF2[1]);
     case(GS_NLOA):  return (mDF1[16]*mDF2[16]*mPartonALL) / (mF1[1]*mF2[1]);
     case(GS_NLOB):  return (mDF1[17]*mDF2[17]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(GS_NLOC):  return (mDF1[18]*mDF2[18]*mPartonALL) / (mF1[1]*mF2[1]);	
+    case(GS_NLOC):  return (mDF1[18]*mDF2[18]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(DSSV):  return (mDF1[19]*mDF2[19]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(LSS1):  return (mDF1[20]*mDF2[20]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(LSS2):  return (mDF1[21]*mDF2[21]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(LSS3):  return (mDF1[22]*mDF2[22]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(AAC1):  return (mDF1[23]*mDF2[23]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(AAC2):  return (mDF1[24]*mDF2[24]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(AAC3):  return (mDF1[25]*mDF2[25]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(BB1):  return (mDF1[26]*mDF2[26]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(BB2):  return (mDF1[27]*mDF2[27]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(DNS1):  return (mDF1[28]*mDF2[28]*mPartonALL) / (mF1[1]*mF2[1]);
+    case(DNS2):  return (mDF1[29]*mDF2[29]*mPartonALL) / (mF1[1]*mF2[1]);
     default:    return -999;
     }
 }
@@ -191,7 +206,7 @@ inline void StPythiaEvent::Clear(Option_t* option)
     mX1 = 0;
     mX2 = 0;
     mPartonALL = 0;
-    for (int ii=0; ii<16; ii++) {
+    for (int ii=0; ii<30; ii++) {
       mDF1[ii] = 0;
       mDF2[ii] = 0;
     }

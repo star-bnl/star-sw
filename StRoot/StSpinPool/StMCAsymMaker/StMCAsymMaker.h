@@ -78,6 +78,21 @@ private:
     double df1_NLO_p060,df2_NLO_p060,weight_NLO_p060;   //NLO P060 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
     double df1_NLO_p070,df2_NLO_p070,weight_NLO_p070;   //NLO P070 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
 
+    double df1_NLO_DSSV,df2_NLO_DSSV,weight_NLO_DSSV;   //NLO de Florian, Sassot, Stratman, & Vogelsang PDF
+
+    double df1_NLO_LSS1,df2_NLO_LSS1,weight_NLO_LSS1;   //NLO Leader, Sidorov, & Stamenov PDF Scenario 1/2/3
+    double df1_NLO_LSS2,df2_NLO_LSS2,weight_NLO_LSS2;   //NLO Leader, Sidorov, & Stamenov PDF Scenario 1/2/3
+    double df1_NLO_LSS3,df2_NLO_LSS3,weight_NLO_LSS3;   //NLO Leader, Sidorov, & Stamenov PDF Scenario 1/2/3
+
+    double df1_NLO_AAC1,df2_NLO_AAC1,weight_NLO_AAC1;   //NLO Asymmetry Analysis Collaboration PDF Scenario 1/2/3
+    double df1_NLO_AAC2,df2_NLO_AAC2,weight_NLO_AAC2;   //NLO Asymmetry Analysis Collaboration PDF Scenario 1/2/3
+    double df1_NLO_AAC3,df2_NLO_AAC3,weight_NLO_AAC3;   //NLO Asymmetry Analysis Collaboration PDF Scenario 1/2/3
+
+    double df1_NLO_BB1,df2_NLO_BB1,weight_NLO_BB1;      //NLO Blumlein & Bottcher PDF Scenario 1/2
+    double df1_NLO_BB2,df2_NLO_BB2,weight_NLO_BB2;      //NLO Blumlein & Bottcher PDF Scenario 1/2
+
+    double df1_NLO_DNS1,df2_NLO_DNS1,weight_NLO_DNS1;   //NLO de Florian, Navarro, & Sassot PDF Scenario 1/2
+    double df1_NLO_DNS2,df2_NLO_DNS2,weight_NLO_DNS2;   //NLO de Florian, Navarro, & Sassot PDF Scenario 1/2
 
 public: 
 
@@ -103,6 +118,27 @@ public:
     static Double_t get_polPDF_NLO_p045(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_p060(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_p070(int flavor, double x1, double Q2);
+    
+    //DSSV PDF
+    static Double_t get_polPDF_NLO_DSSV(int flavor, double x1, double Q2);
+
+    //LSS PDF
+    static Double_t get_polPDF_NLO_LSS1(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_LSS2(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_LSS3(int flavor, double x1, double Q2);
+
+    //AAC PDF
+    static Double_t get_polPDF_NLO_AAC1(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_AAC2(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_AAC3(int flavor, double x1, double Q2);
+
+    //BB PDF
+    static Double_t get_polPDF_NLO_BB1(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_BB2(int flavor, double x1, double Q2);
+
+    //DNS PDF
+    static Double_t get_polPDF_NLO_DNS1(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_DNS2(int flavor, double x1, double Q2);
 
     static Double_t get_unpolPDF_LO(int flavor, double x1, double Q2); 
     static Double_t get_unpolPDF_NLO(int flavor, double x1, double Q2);
@@ -121,7 +157,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.7 2008/02/03 01:27:17 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.8 2008/05/01 01:36:39 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 

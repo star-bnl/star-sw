@@ -125,6 +125,51 @@ void StMCAsymMaker::Zero() {
     df1_NLO_p070=0;
     df2_NLO_p070=0;
     weight_NLO_p070=0;
+
+    df1_NLO_DSSV=0;
+    df2_NLO_DSSV=0;
+    weight_NLO_DSSV=0;
+
+    df1_NLO_LSS1=0;
+    df2_NLO_LSS1=0;
+    weight_NLO_LSS1=0;
+
+    df1_NLO_LSS2=0;
+    df2_NLO_LSS2=0;
+    weight_NLO_LSS2=0;
+
+    df1_NLO_LSS3=0;
+    df2_NLO_LSS3=0;
+    weight_NLO_LSS3=0;
+
+    df1_NLO_AAC1=0;
+    df2_NLO_AAC1=0;
+    weight_NLO_AAC1=0;
+
+    df1_NLO_AAC2=0;
+    df2_NLO_AAC2=0;
+    weight_NLO_AAC2=0;
+
+    df1_NLO_AAC3=0;
+    df2_NLO_AAC3=0;
+    weight_NLO_AAC3=0;
+
+    df1_NLO_BB1=0;
+    df2_NLO_BB1=0;
+    weight_NLO_BB1=0;
+
+    df1_NLO_BB2=0;
+    df2_NLO_BB2=0;
+    weight_NLO_BB2=0;
+
+    df1_NLO_DNS1=0;
+    df2_NLO_DNS1=0;
+    weight_NLO_DNS1=0;
+
+    df1_NLO_DNS2=0;
+    df2_NLO_DNS2=0;
+    weight_NLO_DNS2=0;
+
 }
 
 void StMCAsymMaker::Clear(const Option_t* c) {
@@ -155,9 +200,6 @@ Int_t StMCAsymMaker::Make() {
     //GET PYTHIA RECORD from particleTable
     TDataSetIter geantDstI(Event);
     particleTabPtr = (St_particle  *) geantDstI("particle");
-    if ( !particleTabPtr ) {
-      return kStOK;    
-    } 
     particle_st* particleTable = particleTabPtr->GetTable();//particleTabPtr->Print();
 
     //GET EVTID and SUBPROCESS ID from struct g2t_event
@@ -220,8 +262,6 @@ Int_t StMCAsymMaker::Make() {
 	cout << endl;
 	cout << "flavor1: " << flavor1 << "  flavor2: " << flavor2 << "  flavor3: " << flavor3 << "  flavor4: " << flavor4 << endl << endl;
     }
-
-
 
     //Get partonic a_LL, polarized/unpolarized pdfs using Q2 = partonic_pT^2
     partonic_all=getPartonicALL(s,t,u,pid,flavor1,flavor2,flavor3,flavor4);
@@ -360,25 +400,117 @@ Int_t StMCAsymMaker::Make() {
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_p070=(df1_NLO_p070*df2_NLO_p070*partonic_all)/(f1_NLO*f2_NLO);
 
+    //NLO DSSV
+    df1_NLO_DSSV=get_polPDF_NLO_DSSV(flavor1,x1,Q2);
+    df2_NLO_DSSV=get_polPDF_NLO_DSSV(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_DSSV=(df1_NLO_DSSV*df2_NLO_DSSV*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO LSS SCENARIO 1
+    df1_NLO_LSS1=get_polPDF_NLO_LSS1(flavor1,x1,Q2);
+    df2_NLO_LSS1=get_polPDF_NLO_LSS1(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_LSS1=(df1_NLO_LSS1*df2_NLO_LSS1*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO LSS SCENARIO 2
+    df1_NLO_LSS2=get_polPDF_NLO_LSS2(flavor1,x1,Q2);
+    df2_NLO_LSS2=get_polPDF_NLO_LSS2(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_LSS2=(df1_NLO_LSS2*df2_NLO_LSS2*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO LSS SCENARIO 3
+    df1_NLO_LSS3=get_polPDF_NLO_LSS3(flavor1,x1,Q2);
+    df2_NLO_LSS3=get_polPDF_NLO_LSS3(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_LSS3=(df1_NLO_LSS3*df2_NLO_LSS3*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO AAC SCENARIO 1
+    df1_NLO_AAC1=get_polPDF_NLO_AAC1(flavor1,x1,Q2);
+    df2_NLO_AAC1=get_polPDF_NLO_AAC1(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_AAC1=(df1_NLO_AAC1*df2_NLO_AAC1*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO AAC SCENARIO 2
+    df1_NLO_AAC2=get_polPDF_NLO_AAC2(flavor1,x1,Q2);
+    df2_NLO_AAC2=get_polPDF_NLO_AAC2(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_AAC2=(df1_NLO_AAC2*df2_NLO_AAC2*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO AAC SCENARIO 3
+    df1_NLO_AAC3=get_polPDF_NLO_AAC3(flavor1,x1,Q2);
+    df2_NLO_AAC3=get_polPDF_NLO_AAC3(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_AAC3=(df1_NLO_AAC3*df2_NLO_AAC3*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO BB SCENARIO 1
+    df1_NLO_BB1=get_polPDF_NLO_BB1(flavor1,x1,Q2);
+    df2_NLO_BB1=get_polPDF_NLO_BB1(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_BB1=(df1_NLO_BB1*df2_NLO_BB1*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO BB SCENARIO 2
+    df1_NLO_BB2=get_polPDF_NLO_BB2(flavor1,x1,Q2);
+    df2_NLO_BB2=get_polPDF_NLO_BB2(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_BB2=(df1_NLO_BB2*df2_NLO_BB2*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO DNS SCENARIO 1
+    df1_NLO_DNS1=get_polPDF_NLO_DNS1(flavor1,x1,Q2);
+    df2_NLO_DNS1=get_polPDF_NLO_DNS1(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_DNS1=(df1_NLO_DNS1*df2_NLO_DNS1*partonic_all)/(f1_NLO*f2_NLO);
+
+    //NLO DNS SCENARIO 2
+    df1_NLO_DNS2=get_polPDF_NLO_DNS2(flavor1,x1,Q2);
+    df2_NLO_DNS2=get_polPDF_NLO_DNS2(flavor2,x2,Q2);
+    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+    weight_NLO_DNS2=(df1_NLO_DNS2*df2_NLO_DNS2*partonic_all)/(f1_NLO*f2_NLO);
+
+
     if (0) {
-        printf("LO:  df1_LO=%f, df2_LO=%f, f1_LO=%f, f2_LO=%f, weight_LO=%f\n",df1_LO,df2_LO,f1_LO,f2_LO,weight_LO);
-        printf("NLO:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO,df2_NLO,f1_NLO,f2_NLO,weight_NLO);
-        printf("NLO_gmin:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmin,df2_NLO_gmin,f1_NLO,f2_NLO,weight_NLO_gmin);
-        printf("NLO_g0:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_g0,df2_NLO_g0,f1_NLO,f2_NLO,weight_NLO_g0);
-        printf("NLO_gmax:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmax,df2_NLO_gmax,f1_NLO,f2_NLO,weight_NLO_gmax);
-
-        printf("NLO_m015:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m015,df2_NLO_m015,f1_NLO,f2_NLO,weight_NLO_m015);
-        printf("NLO_m030:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m030,df2_NLO_m030,f1_NLO,f2_NLO,weight_NLO_m030);
-        printf("NLO_m045:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m045,df2_NLO_m045,f1_NLO,f2_NLO,weight_NLO_m045);
-        printf("NLO_m060:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m060,df2_NLO_m060,f1_NLO,f2_NLO,weight_NLO_m060);
-        printf("NLO_m075:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m075,df2_NLO_m075,f1_NLO,f2_NLO,weight_NLO_m075);
-        printf("NLO_m090:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m090,df2_NLO_m090,f1_NLO,f2_NLO,weight_NLO_m090);
-        printf("NLO_m105:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m105,df2_NLO_m105,f1_NLO,f2_NLO,weight_NLO_m105);
-
-        printf("NLO_p030:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p030,df2_NLO_p030,f1_NLO,f2_NLO,weight_NLO_p030);
-        printf("NLO_p045:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p045,df2_NLO_p045,f1_NLO,f2_NLO,weight_NLO_p045);
-        printf("NLO_p060:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p060,df2_NLO_p060,f1_NLO,f2_NLO,weight_NLO_p060);
-        printf("NLO_p070:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p070,df2_NLO_p070,f1_NLO,f2_NLO,weight_NLO_p070);
+      printf("LO:  df1_LO=%f, df2_LO=%f, f1_LO=%f, f2_LO=%f, weight_LO=%f\n",df1_LO,df2_LO,f1_LO,f2_LO,weight_LO);
+      printf("NLO:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO,df2_NLO,f1_NLO,f2_NLO,weight_NLO);
+      printf("NLO_gmin:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmin,df2_NLO_gmin,f1_NLO,f2_NLO,weight_NLO_gmin);
+      printf("NLO_g0:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_g0,df2_NLO_g0,f1_NLO,f2_NLO,weight_NLO_g0);
+      printf("NLO_gmax:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmax,df2_NLO_gmax,f1_NLO,f2_NLO,weight_NLO_gmax);
+      
+      printf("NLO_m015:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m015,df2_NLO_m015,f1_NLO,f2_NLO,weight_NLO_m015);
+      printf("NLO_m030:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m030,df2_NLO_m030,f1_NLO,f2_NLO,weight_NLO_m030);
+      printf("NLO_m045:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m045,df2_NLO_m045,f1_NLO,f2_NLO,weight_NLO_m045);
+      printf("NLO_m060:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m060,df2_NLO_m060,f1_NLO,f2_NLO,weight_NLO_m060);
+      printf("NLO_m075:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m075,df2_NLO_m075,f1_NLO,f2_NLO,weight_NLO_m075);
+      printf("NLO_m090:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m090,df2_NLO_m090,f1_NLO,f2_NLO,weight_NLO_m090);
+      printf("NLO_m105:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m105,df2_NLO_m105,f1_NLO,f2_NLO,weight_NLO_m105);
+      
+      printf("NLO_p030:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p030,df2_NLO_p030,f1_NLO,f2_NLO,weight_NLO_p030);
+      printf("NLO_p045:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p045,df2_NLO_p045,f1_NLO,f2_NLO,weight_NLO_p045);
+      printf("NLO_p060:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p060,df2_NLO_p060,f1_NLO,f2_NLO,weight_NLO_p060);
+      printf("NLO_p070:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p070,df2_NLO_p070,f1_NLO,f2_NLO,weight_NLO_p070);
+      
+      
+      printf("DSSV:  df1_DSSV=%f, df2_DSSV=%f, f1_DSSV=%f, f2_DSSV=%f, weight_DSSV=%f\n",df1_NLO_DSSV,df2_NLO_DSSV,f1_NLO,f2_NLO,weight_NLO_DSSV);
+      printf("LSS1:  df1_LSS1=%f, df2_LSS1=%f, f1_LSS1=%f, f2_LSS1=%f, weight_LSS1=%f\n",df1_NLO_LSS1,df2_NLO_LSS1,f1_NLO,f2_NLO,weight_NLO_LSS1);
+      printf("LSS2:  df1_LSS2=%f, df2_LSS2=%f, f1_LSS2=%f, f2_LSS2=%f, weight_LSS2=%f\n",df1_NLO_LSS2,df2_NLO_LSS2,f1_NLO,f2_NLO,weight_NLO_LSS2);
+      printf("LSS3:  df1_LSS3=%f, df2_LSS3=%f, f1_LSS3=%f, f2_LSS3=%f, weight_LSS3=%f\n",df1_NLO_LSS3,df2_NLO_LSS3,f1_NLO,f2_NLO,weight_NLO_LSS3);
+      printf("AAC1:  df1_AAC1=%f, df2_AAC1=%f, f1_AAC1=%f, f2_AAC1=%f, weight_AAC1=%f\n",df1_NLO_AAC1,df2_NLO_AAC1,f1_NLO,f2_NLO,weight_NLO_AAC1);
+      printf("AAC2:  df1_AAC2=%f, df2_AAC2=%f, f1_AAC2=%f, f2_AAC2=%f, weight_AAC2=%f\n",df1_NLO_AAC2,df2_NLO_AAC2,f1_NLO,f2_NLO,weight_NLO_AAC2);
+      printf("AAC3:  df1_AAC3=%f, df2_AAC3=%f, f1_AAC3=%f, f2_AAC3=%f, weight_AAC3=%f\n",df1_NLO_AAC3,df2_NLO_AAC3,f1_NLO,f2_NLO,weight_NLO_AAC3);
+      
+      printf("BB1:  df1_BB1=%f, df2_BB1=%f, f1_BB1=%f, f2_BB1=%f, weight_BB1=%f\n",df1_NLO_BB1,df2_NLO_BB1,f1_NLO,f2_NLO,weight_NLO_BB1);
+      printf("BB2:  df1_BB2=%f, df2_BB2=%f, f1_BB2=%f, f2_BB2=%f, weight_BB2=%f\n",df1_NLO_BB2,df2_NLO_BB2,f1_NLO,f2_NLO,weight_NLO_BB2);
+      printf("DNS1:  df1_DNS1=%f, df2_DNS1=%f, f1_DNS1=%f, f2_DNS1=%f, weight_DNS1=%f\n",df1_NLO_DNS1,df2_NLO_DNS1,f1_NLO,f2_NLO,weight_NLO_DNS1);
+      printf("DNS2:  df1_DNS2=%f, df2_DNS2=%f, f1_DNS2=%f, f2_DNS2=%f, weight_DNS2=%f\n",df1_NLO_DNS2,df2_NLO_DNS2,f1_NLO,f2_NLO,weight_NLO_DNS2);
     }
 
     fillPythiaEvent(mEvent);
@@ -427,7 +559,18 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF1(StPythiaEvent::GS_NLOA, df1_NLO_GSA);
     pythia->setDF1(StPythiaEvent::GS_NLOB, df1_NLO_GSB);
     pythia->setDF1(StPythiaEvent::GS_NLOC, df1_NLO_GSC);
-    
+    pythia->setDF1(StPythiaEvent::DSSV, df1_NLO_DSSV);
+    pythia->setDF1(StPythiaEvent::LSS1, df1_NLO_LSS1);
+    pythia->setDF1(StPythiaEvent::LSS2, df1_NLO_LSS2);
+    pythia->setDF1(StPythiaEvent::LSS3, df1_NLO_LSS3);
+    pythia->setDF1(StPythiaEvent::AAC1, df1_NLO_AAC1);
+    pythia->setDF1(StPythiaEvent::AAC2, df1_NLO_AAC2);
+    pythia->setDF1(StPythiaEvent::AAC3, df1_NLO_AAC3);
+    pythia->setDF1(StPythiaEvent::BB1, df1_NLO_BB1);
+    pythia->setDF1(StPythiaEvent::BB2, df1_NLO_BB2);
+    pythia->setDF1(StPythiaEvent::DNS1, df1_NLO_DNS1);
+    pythia->setDF1(StPythiaEvent::DNS2, df1_NLO_DNS2);
+
     pythia->setDF2(StPythiaEvent::LO, df2_LO);
     pythia->setDF2(StPythiaEvent::NLO, df2_NLO);
     pythia->setDF2(StPythiaEvent::ZERO, df2_NLO_g0);
@@ -447,6 +590,17 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF2(StPythiaEvent::GS_NLOA, df2_NLO_GSA);
     pythia->setDF2(StPythiaEvent::GS_NLOB, df2_NLO_GSB);
     pythia->setDF2(StPythiaEvent::GS_NLOC, df2_NLO_GSC);
+    pythia->setDF2(StPythiaEvent::DSSV, df2_NLO_DSSV);
+    pythia->setDF2(StPythiaEvent::LSS1, df2_NLO_LSS1);
+    pythia->setDF2(StPythiaEvent::LSS2, df2_NLO_LSS2);
+    pythia->setDF2(StPythiaEvent::LSS3, df2_NLO_LSS3);
+    pythia->setDF2(StPythiaEvent::AAC1, df2_NLO_AAC1);
+    pythia->setDF2(StPythiaEvent::AAC2, df2_NLO_AAC2);
+    pythia->setDF2(StPythiaEvent::AAC3, df2_NLO_AAC3);
+    pythia->setDF2(StPythiaEvent::BB1, df2_NLO_BB1);
+    pythia->setDF2(StPythiaEvent::BB2, df2_NLO_BB2);
+    pythia->setDF2(StPythiaEvent::DNS1, df2_NLO_DNS1);
+    pythia->setDF2(StPythiaEvent::DNS2, df2_NLO_DNS2);
     
     pythia->setF1(StPythiaEvent::LO, f1_LO);
     pythia->setF1(StPythiaEvent::NLO, f1_NLO);
@@ -467,9 +621,9 @@ Double_t StMCAsymMaker::get_polPDF_NLO_GSA(int flavor, double x, double Q2){
     int polset_NLO_GSA=201;
     int polid=0;
 
-    //cout<<"get_polPDF_NLO_GSA: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;   
+    //    cout<<"get_polPDF_NLO_GSA: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;   
     if ((Q2>=1.0)&&(Q2<=1E+06))  polar_(&polset_NLO_GSA, &x, &Q2, parpol, &polid);
-    //cout<<"get_polPDF_NLO_GSA: UV="<<parpol[0]<<" DV="<<parpol[1]<<" UB="<<parpol[3]<<" DB="<<parpol[4]<<" S+Sbar="<<parpol[5]<<" GL="<<parpol[2]<<endl;
+    //    cout<<"get_polPDF_NLO_GSA: UV="<<parpol[0]<<" DV="<<parpol[1]<<" UB="<<parpol[3]<<" DB="<<parpol[4]<<" S+Sbar="<<parpol[5]<<" GL="<<parpol[2]<<endl;
 
   
     //parpol[0] = uv - ubar so it is only the valence contribution. Need to add back in ubar for pythia since we don't know the difference between the sea and valence
@@ -908,6 +1062,259 @@ Double_t StMCAsymMaker::get_polPDF_NLO_p070(int flavor, double x, double Q2){
     //cout<<"get_polPDF_NLO_p070: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
     if (Q2>=0.8) polar_(&polset_NLO_p070, &x, &Q2, parpol, &polid);
+    //cout <<"getpolPDF_NLO_p070:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//DSSV NLO
+Double_t StMCAsymMaker::get_polPDF_NLO_DSSV(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_DSSV=301;
+    int polid=0;
+    //cout<<"get_polPDF_NLO_DSSV: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_DSSV, &x, &Q2, parpol, &polid);
+    //cout <<"getpolPDF_NLO_DSSV:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1]+parpol[2];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0]+parpol[3];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//LSS NLO Scenario 1
+Double_t StMCAsymMaker::get_polPDF_NLO_LSS1(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_LSS1=401;
+    int polid=0;
+    //    cout<<"get_polPDF_NLO_LSS1: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_LSS1, &x, &Q2, parpol, &polid);
+    //    cout <<"getpolPDF_NLO_LSS1:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//LSS NLO Scenario 2
+Double_t StMCAsymMaker::get_polPDF_NLO_LSS2(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_LSS2=402;
+    int polid=0;
+    //    cout<<"get_polPDF_NLO_LSS2: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_LSS2, &x, &Q2, parpol, &polid);
+    //    cout <<"getpolPDF_NLO_LSS2:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//LSS NLO Scenario 3
+Double_t StMCAsymMaker::get_polPDF_NLO_LSS3(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_LSS3=403;
+    int polid=0;
+    //    cout<<"get_polPDF_NLO_LSS3: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_LSS3, &x, &Q2, parpol, &polid);
+    //    cout <<"getpolPDF_NLO_LSS3:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//AAC NLO Scenario 1
+Double_t StMCAsymMaker::get_polPDF_NLO_AAC1(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_AAC1=501;
+    int polid=0;
+    //cout<<"get_polPDF_NLO_AAC1: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_AAC1, &x, &Q2, parpol, &polid);
+    //cout <<"getpolPDF_NLO_AAC1:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//AAC NLO Scenario 2
+Double_t StMCAsymMaker::get_polPDF_NLO_AAC2(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_AAC2=502;
+    int polid=0;
+    //cout<<"get_polPDF_NLO_AAC2: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_AAC2, &x, &Q2, parpol, &polid);
+    //cout <<"getpolPDF_NLO_AAC2:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//AAC NLO Scenario 3
+Double_t StMCAsymMaker::get_polPDF_NLO_AAC3(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_AAC3=503;
+    int polid=0;
+    //cout<<"get_polPDF_NLO_AAC3: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_AAC3, &x, &Q2, parpol, &polid);
+    //cout <<"getpolPDF_NLO_AAC3:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//BB NLO Scenario 1
+Double_t StMCAsymMaker::get_polPDF_NLO_BB1(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_BB1=601;
+    int polid=0;
+    //cout<<"get_polPDF_NLO_BB1: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_BB1, &x, &Q2, parpol, &polid);
+    //cout <<"get_polPDF_NLO_BB1:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//BB NLO Scenario 2
+Double_t StMCAsymMaker::get_polPDF_NLO_BB2(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_BB2=602;
+    int polid=0;
+    //cout<<"get_polPDF_NLO_BB2: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_BB2, &x, &Q2, parpol, &polid);
+    //cout <<"get_polPDF_NLO_BB2:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//DNS NLO Scenario 1
+Double_t StMCAsymMaker::get_polPDF_NLO_DNS1(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_DNS1=701;
+    int polid=0;
+    //cout<<"get_polPDF_NLO_p070: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_DNS1, &x, &Q2, parpol, &polid);
+    //cout <<"getpolPDF_NLO_p070:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
+
+    if (flavor==1) pdf=parpol[1];      //dv + dsea quark
+    if (flavor==2) pdf=parpol[0];      //uv + usea quark
+    if (flavor==-1) pdf=parpol[3];     //dbar==dsea quark
+    if (flavor==-2) pdf=parpol[2];     //ubar==usea quark
+    if (abs(flavor)==3) pdf=parpol[4]; //s==sbar quark
+    if (flavor==21) pdf=parpol[5];     //gluon
+    if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
+
+    return pdf;
+}
+
+//DNS NLO Scenario 2
+Double_t StMCAsymMaker::get_polPDF_NLO_DNS2(int flavor, double x, double Q2){
+
+    double parpol[6]={0.0,0.0,0.0,0.0,0.0,0.0};
+    double pdf=1000;
+    int polset_NLO_DNS2=702;
+    int polid=0;
+    //cout<<"get_polPDF_NLO_p070: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
+
+    if (Q2>=0.8) polar_(&polset_NLO_DNS2, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_p070:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
