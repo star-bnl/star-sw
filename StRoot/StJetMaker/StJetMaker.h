@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.36 2008/05/01 17:32:28 tai Exp $
+// $Id: StJetMaker.h,v 1.37 2008/05/01 17:44:50 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -18,7 +18,7 @@ class StppAnaPars;
 
 namespace StSpinJet {
   class StJetTreeWriter;
-  class StppJetAnalyzer2;
+  class StJetFinderRunner;
 }
 
 class StJetMaker : public StMaker {
@@ -40,7 +40,7 @@ public:
 
 private:
 
-  std::vector<StSpinJet::StppJetAnalyzer2*> _jetFinderList;
+  std::vector<StSpinJet::StJetFinderRunner*> _jetFinderList;
 
   StSpinJet::StJetTreeWriter *_treeWriter;
 

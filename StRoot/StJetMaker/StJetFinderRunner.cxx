@@ -1,5 +1,5 @@
-// $Id: StppJetAnalyzer2.cxx,v 1.6 2008/05/01 17:32:29 tai Exp $
-#include "StppJetAnalyzer2.h"
+// $Id: StJetFinderRunner.cxx,v 1.1 2008/05/01 17:44:50 tai Exp $
+#include "StJetFinderRunner.h"
 
 
 //StJetFinder
@@ -24,7 +24,7 @@ using namespace std;
 
 namespace StSpinJet {
 
-StppJetAnalyzer2::StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* pars, StFourPMaker* fp, ProtoJetList& protoJets)
+StJetFinderRunner::StJetFinderRunner(const StppAnaPars* ap, StJetPars* pars, StFourPMaker* fp, ProtoJetList& protoJets)
   : _jetFinder(pars->constructJetFinder())
   , _protoJetList(protoJets)
   , _fourPMaker(fp)
@@ -33,17 +33,17 @@ StppJetAnalyzer2::StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* pars, StFou
 
 }
 
-StppJetAnalyzer2::~StppJetAnalyzer2()
+StJetFinderRunner::~StJetFinderRunner()
 {
 
 }
 
-void StppJetAnalyzer2::Init()
+void StJetFinderRunner::Init()
 {
   _jetFinder->Init();
 }
 
-void StppJetAnalyzer2::findJets()
+void StJetFinderRunner::findJets()
 {
   collectFourMomentum();
 
@@ -53,7 +53,7 @@ void StppJetAnalyzer2::findJets()
 }
 
 
-void StppJetAnalyzer2::collectFourMomentum()
+void StJetFinderRunner::collectFourMomentum()
 {
   vector<AbstractFourVec*> &particleList = _fourPMaker->getTracks();
 
@@ -69,7 +69,7 @@ void StppJetAnalyzer2::collectFourMomentum()
 }
 
 
-bool StppJetAnalyzer2::shoudNotPassToJetFinder(AbstractFourVec* particle)
+bool StJetFinderRunner::shoudNotPassToJetFinder(AbstractFourVec* particle)
 {
   StMuTrackFourVec* p = dynamic_cast<StMuTrackFourVec*>(particle);
 
@@ -92,12 +92,12 @@ bool StppJetAnalyzer2::shoudNotPassToJetFinder(AbstractFourVec* particle)
   return false;
 }
 	
-bool StppJetAnalyzer2::isChargedTrack(StMuTrackFourVec* p)
+bool StJetFinderRunner::isChargedTrack(StMuTrackFourVec* p)
 {
   return p->particle() != 0;
 }
 
-void StppJetAnalyzer2::applyCutsOnJets()
+void StJetFinderRunner::applyCutsOnJets()
 {
   ProtoJetList newList(_protoJetList);
 
@@ -112,7 +112,7 @@ void StppJetAnalyzer2::applyCutsOnJets()
   }
 }
 
-bool StppJetAnalyzer2::shouldNotKeep(StProtoJet &pj)
+bool StJetFinderRunner::shouldNotKeep(StProtoJet &pj)
 {
   if (pj.pt() <= _anaPar.mJetPtMin)
     return true;
