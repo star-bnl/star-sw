@@ -1,12 +1,13 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.11 2007/02/05 17:20:09 msd Exp $
+ * $Id: StEStructEvent.cxx,v 1.12 2008/05/01 23:41:44 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
  **********************************************************************
  *
  * Description:  Event quantities + list of (primary) tracks
+ *               Depending on option may use global tracks
  *
  **********************************************************************/
 
@@ -254,6 +255,9 @@ void StEStructEvent::SetPhiWgt(const char* weightFile) {
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.12  2008/05/01 23:41:44  prindle
+ * Just different comments.
+ *
  * Revision 1.11  2007/02/05 17:20:09  msd
  * Added include statement
  *
