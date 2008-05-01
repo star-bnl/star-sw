@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.6 2008/04/30 21:13:14 fine Exp $
+// $Id: StDraw3D.cxx,v 1.7 2008/05/01 17:01:32 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -44,7 +44,20 @@ StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fViewer(0)
 static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad) 
 {
    TVirtualViewer3D *viewer = 0;
-   if (pad && (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")))
+   // check Coin env and load if present
+   TString ivrootDir = gSystem->Getenv("IVROOT");
+   if (ivrootDir.IsNull() ) ivrootDir = "$ROOT/5.99.99/Coin2/.$STAR_HOST_SYS";
+   ivrootDir +=   "/lib/";
+   gSystem->ExpandPathName(ivrootDir);
+   static bool CheckCoin = false;
+   if (!gSystem->AccessPathName(ivrootDir.Data())) {
+      if (     !gSystem->Load(ivrootDir+"libSoQt") 
+            && !gSystem->Load(ivrootDir+"libCoin")
+            && !gSystem->Load(ivrootDir+"libSmallChange"));
+      CheckCoin = true;
+   }
+
+   if (CheckCoin && pad && (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")))
    {
       // Create Open GL viewer
 //      TGQt::SetCoinFlag(1);
@@ -97,7 +110,6 @@ int StDraw3D::Draw3DInit(){
    // check the correct env and load the plugins
    if (fgDraw_3d_init) return 1;
    fgDraw_3d_init = 1;
-   // gROOT->Macro("Load.C");
    if (!StCheckQtEnv::SetQtEnv(false)) {
       // define the background image
       const char *backShape = "$STAR/StRoot/macros/graphics/StarTPC.iv";

@@ -51,3 +51,5 @@
 #pragma link C++ function operator-(Double_t,const TRVector &);
 
 #pragma link C++ class StCheckQtEnv;
+#pragma link C++ class StDraw3DStyle;
+#pragma link C++ enum  EDraw3DStyle;
