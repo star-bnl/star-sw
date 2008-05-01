@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.10 2007/11/26 20:23:20 prindle Exp $
+ * $Id: StEStructHAdd.cxx,v 1.11 2008/05/01 23:46:39 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -59,8 +59,8 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
         for (int j=0;j<4;j++) {
             for (int k=0;k<26;k++) {
 
-                TH2 *outhist=0;
-                TH2 *tmp=0, *cpy=0;
+                TH2D *outhist=0;
+                TH2D *tmp=0, *cpy=0;
                 inFile->cd();
                 int zBin = 0;
                 while (zBin<99) {
@@ -74,12 +74,12 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                     htype+=base[i]; htype+=tpe[j]; htype+=knd[k];
                     for (int n=0;n<ntot;n++) {
                         TString fullName(htype.Data()); fullName+=nlist[n];
-                        tmp=(TH2*)inFile->Get(fullName.Data());
+                        inFile->GetObject(fullName.Data(),tmp);
                         if(tmp) {
                             // Histogram with older naming style was found.
                             // No z-binning here.
                             if (0==n) {
-                                outhist=(TH2*)tmp->Clone();
+                                outhist=(TH2D *)tmp->Clone();
                                 // This part is only intended to be used with mode 5 (pid)
                                 if (symmXX && isXXHist[k]) {
                                     if (unSymmed[nlist[n]][j]) {
@@ -89,7 +89,7 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                                 outhist->SetName(htype.Data());
                                 outhist->SetTitle(tmp->GetTitle());
                             } else {
-                                cpy = (TH2*)tmp->Clone();
+                                cpy = (TH2D *)tmp->Clone();
                                 // This part is only intended to be used with mode 5 (pid)
                                 if (symmXX && isXXHist[k]) {
                                     if (unSymmed[nlist[n]][j]) {
@@ -103,13 +103,13 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                         } else {
                             TString fullName(htype.Data()); fullName+="_cutBin_"; fullName+=nlist[n]; fullName+="_zBuf_"; fullName+=zBin;
                             TString hName(htype.Data()); hName+="_zBuf_"; hName+=zBin;
-                            tmp=(TH2*)inFile->Get(fullName.Data());
+                            inFile->GetObject(fullName.Data(),tmp);
                             if (!tmp) {
                                 // Presumably have processed all zbins by now.
                                 goto lastZ;
                             }
                             if (0==n) {
-                                outhist=(TH2*)tmp->Clone();
+                                outhist=(TH2D *)tmp->Clone();
                                 // This part is only intended to be used with mode 5 (pid)
                                 if (symmXX && isXXHist[k]) {
                                     if (unSymmed[nlist[n]][j]) {
@@ -119,7 +119,7 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                                 outhist->SetName(hName.Data());
                                 outhist->SetTitle(tmp->GetTitle());
                             } else {
-                                cpy = (TH2*)tmp->Clone();
+                                cpy = (TH2D *)tmp->Clone();
                                 // This part is only intended to be used with mode 5 (pid)
                                 if (symmXX && isXXHist[k]) {
                                     if (unSymmed[nlist[n]][j]) {
@@ -223,6 +223,9 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                                     tmp->Fill(eta1,phi2,val);
                                 }
                             }
+                            if(tmp->GetBinContent(1,1)==0) {  // fill the repeated bin
+                                for(int ieta=0;ieta<tmp->GetNbinsX();ieta++) tmp->SetBinContent(ieta+1,1, tmp->GetBinContent(ieta+1,tmp->GetNbinsY()));
+                            }
                             delete outhist;
                             outhist = tmp;
                         }
@@ -242,8 +245,8 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
 
 
     inFile->cd();
-    TH1* sib=(TH1*)inFile->Get("NEventsSame");
-    TH1* mix=(TH1*)inFile->Get("NEventsMixed");
+    TH1D* sib; inFile->GetObject("NEventsSame",sib);
+    TH1D* mix; inFile->GetObject("NEventsMixed",mix);
     if(sib && mix) {
         // Histogram with older naming style was found.
         // No z-binning here.
@@ -266,12 +269,12 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
             TString fullSibNegName(hSibNegName.Data()); fullSibNegName+=zBin;
             TString fullMixNegName(hMixNegName.Data()); fullMixNegName+=zBin;
             inFile->cd();
-            sib=(TH1*)inFile->Get(fullSibName.Data());
-            mix=(TH1*)inFile->Get(fullMixName.Data());
-            TH1* sibPos=(TH1*)inFile->Get(fullSibPosName.Data());
-            TH1* mixPos=(TH1*)inFile->Get(fullMixPosName.Data());
-            TH1* sibNeg=(TH1*)inFile->Get(fullSibNegName.Data());
-            TH1* mixNeg=(TH1*)inFile->Get(fullMixNegName.Data());
+            inFile->GetObject(fullSibName.Data(),sib);
+            inFile->GetObject(fullMixName.Data(),mix);
+            TH1D *sibPos; inFile->GetObject(fullSibPosName.Data(),sibPos);
+            TH1D *mixPos; inFile->GetObject(fullMixPosName.Data(),mixPos);
+            TH1D *sibNeg; inFile->GetObject(fullSibNegName.Data(),sibNeg);
+            TH1D *mixNeg; inFile->GetObject(fullMixNegName.Data(),mixNeg);
             if (sib && mix) {
                 outFile->cd();
                 sib->Write();
@@ -297,19 +300,15 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                     etaPName = "etaP_parentBin";    etaPName += jPar; etaPName += "_zBuf_"; etaPName += zBin;
                     etaMName = "etaM_parentBin";    etaMName += jPar; etaMName += "_zBuf_"; etaMName += zBin;
                     if (0 == iPar) {
-                        ptP  = (TH1 *) inFile->Get(ptPName.Data());
-                        ptM  = (TH1 *) inFile->Get(ptMName.Data());
-                        etaP = (TH1 *) inFile->Get(etaPName.Data());
-                        etaM = (TH1 *) inFile->Get(etaMName.Data());
+                        inFile->GetObject(ptPName.Data(),ptP);
+                        inFile->GetObject(ptMName.Data(),ptM);
+                        inFile->GetObject(etaPName.Data(),etaP);
+                        inFile->GetObject(etaMName.Data(),etaM);
                     } else {
-                        tmp = (TH1 *) inFile->Get(ptPName.Data());
-                        ptP->Add(tmp);
-                        tmp = (TH1 *) inFile->Get(ptMName.Data());
-                        ptM->Add(tmp);
-                        tmp = (TH1 *) inFile->Get(etaPName.Data());
-                        etaP->Add(tmp);
-                        tmp = (TH1 *) inFile->Get(etaMName.Data());
-                        etaM->Add(tmp);
+                        inFile->GetObject(ptPName.Data(),tmp);  ptP->Add(tmp);
+                        inFile->GetObject(ptMName.Data(),tmp);  ptM->Add(tmp);
+                        inFile->GetObject(etaPName.Data(),tmp); etaP->Add(tmp);
+                        inFile->GetObject(etaMName.Data(),tmp); etaM->Add(tmp);
                     }
                 }
                 outFile->cd();
@@ -339,7 +338,6 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
         }
     }
     outFile->Close();
-
 };
 //--------------------------------------------------------------------------
 void StEStructHAdd::addCuts(const char* outfile, const char* infile,
@@ -362,6 +360,86 @@ void StEStructHAdd::symmetrizeXX(TH2 *hist) {
     }
 
 };
+//------------------------------------------------------------------------
+void StEStructHAdd::addDensities(const char* outfile, TFile* inFile) {
+
+    TFile* outFile = new TFile(outfile,"RECREATE");
+
+    // If pair density histograms are in input file add z and cut bins,
+    // form LS and US, take ratio of sibling to mixed and write to output file.
+    inFile->cd();
+    TH2 *sibDens; inFile->GetObject("SibppTPCMidTZ_cutBin_0_zBuf_0",sibDens);
+    TH2 *mixDens; inFile->GetObject("MixppTPCMidTZ_cutBin_0_zBuf_0",mixDens);
+    if(sibDens && mixDens) {
+        int nCut = 0;
+        int nZBuf = 0;
+        TString hSibName("SibppTPCMidTZ_cutBin_");
+        while (nCut<99) {
+            TString full(hSibName.Data()); full += nCut; full += "_zBuf_0";
+            inFile->GetObject(full.Data(),sibDens);
+            if (sibDens) {
+                nCut++;
+            } else {
+                break;
+            }
+        }
+        while (nZBuf<99) {
+            TString full(hSibName.Data()); full += "0_zBuf_"; full += nZBuf;
+            inFile->GetObject(full.Data(),sibDens);
+            if (sibDens) {
+                nZBuf++;
+            } else {
+                break;
+            }
+        }
+
+        TH2D *ls[6], *us[6], *tmp;
+        inFile->GetObject("SibppTPCMidTZ_cutBin_0_zBuf_0",tmp);
+        for (int i=0;i<6;i++) {
+            ls[i] = (TH2D *) tmp->Clone();  ls[i]->Clear();
+            us[i] = (TH2D *) tmp->Clone();  us[i]->Clear();
+        }
+        TString hDensName;
+        char *typePP[] = {"SibppTPCMidTZ_cutBin_", "SibppTPCMidTZC_cutBin_", "SibppTPCMidTZNC_cutBin_", "MixppTPCMidTZ_cutBin_", "MixppTPCMidTZC_cutBin_", "MixppTPCMidTZNC_cutBin_"};
+        char *typeMM[] = {"SibmmTPCMidTZ_cutBin_", "SibmmTPCMidTZC_cutBin_", "SibmmTPCMidTZNC_cutBin_", "MixmmTPCMidTZ_cutBin_", "MixmmTPCMidTZC_cutBin_", "MixmmTPCMidTZNC_cutBin_"};
+        char *typePM[] = {"SibpmTPCMidTZ_cutBin_", "SibpmTPCMidTZC_cutBin_", "SibpmTPCMidTZNC_cutBin_", "MixpmTPCMidTZ_cutBin_", "MixpmTPCMidTZC_cutBin_", "MixpmTPCMidTZNC_cutBin_"};
+        char *typeMP[] = {"SibmpTPCMidTZ_cutBin_", "SibmpTPCMidTZC_cutBin_", "SibmpTPCMidTZNC_cutBin_", "MixmpTPCMidTZ_cutBin_", "MixmpTPCMidTZC_cutBin_", "MixmpTPCMidTZNC_cutBin_"};
+        for (int iCut=0;iCut<nCut;iCut++) {
+            for (int zBuf=0;zBuf<nZBuf;zBuf++) {
+                for (int it=0;it<6;it++) {
+                    hDensName = typePP[it]; hDensName += iCut; hDensName += "_zBuf_"; hDensName += zBuf;
+                    inFile->GetObject(hDensName.Data(),tmp);
+                    ls[it]->Add(tmp);
+                    hDensName = typeMM[it]; hDensName += iCut; hDensName += "_zBuf_"; hDensName += zBuf;
+                    inFile->GetObject(hDensName.Data(),tmp);
+                    ls[it]->Add(tmp);
+
+                    hDensName = typePM[it]; hDensName += iCut; hDensName += "_zBuf_"; hDensName += zBuf;
+                    inFile->GetObject(hDensName.Data(),tmp);
+                    us[it]->Add(tmp);
+                    hDensName = typeMP[it]; hDensName += iCut; hDensName += "_zBuf_"; hDensName += zBuf;
+                    inFile->GetObject(hDensName.Data(),tmp);
+                    us[it]->Add(tmp);
+                }
+            }
+        }
+        ls[0]->Divide(ls[3]);  ls[0]->SetName("TPCMidTZ_LS");
+        ls[1]->Divide(ls[4]);  ls[1]->SetName("TPCMidTZC_LS");
+        ls[2]->Divide(ls[5]);  ls[2]->SetName("TPCMidTZNC_LS");
+        us[0]->Divide(us[3]);  us[0]->SetName("TPCMidTZ_US");
+        us[1]->Divide(us[4]);  us[1]->SetName("TPCMidTZC_US");
+        us[2]->Divide(us[5]);  us[2]->SetName("TPCMidTZNC_US");
+        outFile->cd();
+        ls[0]->Write();
+        ls[1]->Write();
+        ls[2]->Write();
+        us[0]->Write();
+        us[1]->Write();
+        us[2]->Write();
+    }
+    outFile->Close();
+}
+
 //------------------------------------------------------------------------
 void StEStructHAdd::combineUS(TFile * modFile) {
 
@@ -503,6 +581,12 @@ void StEStructHAdd::combineUS(TFile * modFile) {
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.11  2008/05/01 23:46:39  prindle
+ * Changed to use TH1D and TH2D (instead of TH1 and TH2) in some places so
+ * we can use GetObject method to enforce type checking. Found I had missed
+ * duplicating a \phi_\Delta row in one case. Also added a method to include
+ * sum of pairdensity histograms in output file.
+ *
  * Revision 1.10  2007/11/26 20:23:20  prindle
  * (Hadd to trick cvs to allow me to commit this modified file?)
  * Modifications to support saving of individual z-bins and the concept
