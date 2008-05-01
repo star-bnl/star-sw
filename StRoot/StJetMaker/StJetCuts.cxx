@@ -1,8 +1,7 @@
-// $Id: StJetCuts.cxx,v 1.1 2008/05/01 21:55:13 tai Exp $
+// $Id: StJetCuts.cxx,v 1.2 2008/05/01 22:23:47 tai Exp $
 #include "StJetCuts.h"
 
 #include <StJetFinder/StProtoJet.h>
-#include <StJetFinder/StJetFinder.h>
 #include <StJetFinder/StJetPars.h>
 
 #include <algorithm>
@@ -12,9 +11,8 @@ using namespace std;
 
 namespace StSpinJet {
 
-StJetCuts::StJetCuts(const StppAnaPars* ap, StJetPars* pars, ProtoJetList& protoJets)
-  : _jetFinder(pars->constructJetFinder())
-  , _protoJetList(protoJets)
+StJetCuts::StJetCuts(const StppAnaPars* ap, ProtoJetList& protoJets)
+  : _protoJetList(protoJets)
   , _anaPar(*ap)
 {
 
@@ -25,19 +23,7 @@ StJetCuts::~StJetCuts()
 
 }
 
-void StJetCuts::Init()
-{
-  _jetFinder->Init();
-}
-
-void StJetCuts::Run()
-{
-  _jetFinder->findJets(_protoJetList);
-
-  applyCutsOnJets();
-}
-
-void StJetCuts::applyCutsOnJets()
+void StJetCuts::Apply()
 {
   ProtoJetList newList;
 
