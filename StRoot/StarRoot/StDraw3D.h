@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.7 2008/04/30 21:13:15 fine Exp $
+// $Id: StDraw3D.h,v 1.8 2008/05/01 17:01:32 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -35,6 +35,12 @@ class StDraw3DStyle {
      Style_t      &Sty()  { return fSty;  }
      Size_t       &Siz()  { return fSiz;  }
      EDraw3DStyle &Type() { return fType; }
+     void         SetCol(Color_t col) { Col() = col;}
+     void         SetSty(Style_t sty) { Sty() = sty;}
+     void         SetSiz(Size_t  siz) { Siz() = siz;}
+     void         SetType(Color_t col, Style_t sty, Size_t  siz)
+                  { SetCol(col); SetSiz(siz); SetSty(sty);  }
+     
  //    operator Color_t ()  const { return Col();}
  //    operator Style_t ()  const { return Sty();}
  //    operator Size_t  ()  const { return Siz();}
