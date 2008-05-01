@@ -1,12 +1,13 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.8 2007/05/27 22:45:18 msd Exp $
+ * $Id: StEStructEvent.h,v 1.9 2008/05/01 23:41:45 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
  **********************************************************************
  *
  * Description:  Event quantities + list of (primary) tracks
+ *               Depending on option may use global tracks
  *
  **********************************************************************/
 
@@ -132,6 +133,9 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.9  2008/05/01 23:41:45  prindle
+ * Just different comments.
+ *
  * Revision 1.8  2007/05/27 22:45:18  msd
  * Added Npos() and Nneg().
  *
