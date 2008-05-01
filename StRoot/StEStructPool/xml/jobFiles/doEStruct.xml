@@ -47,6 +47,7 @@ void doEStruct( const char* filelist,
 
     <variable inLine='cutMode'/>
     <variable inLine='analysisMode'/>
+    <variable inLine='useGlobalTracks'/>
     <variable refersTo='declareAnalysis'/>
 
     // Need an EStruct maker.

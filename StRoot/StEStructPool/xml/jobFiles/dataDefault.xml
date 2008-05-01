@@ -93,15 +93,17 @@
             </trackCut>
         </trackCuts>
 
-        <!-- The doEStruct macro is complicated.
-             The main part is in a generic file. -->
+        <!-- The doEStruct macro is complicated. -->
+        <!-- The main part is in a generic file. -->
         <doEStructMacro>
             <analysisType id='analysisType' widget='entry'>StEStructCorrelation</analysisType>
+            <useGlobalTracks id='useGlobalTracks' widget='entry' Comment='if true we use global tracks' typedef='bool useGlobalTracks = '>false</useGlobalTracks>
     <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
     //  reader = reader interface + pointer to Data Maker + cut classes
     StMuDstMaker*         mk     = new StMuDstMaker(0,0,"",filelist,".",500);
     StEStructMuDstReader* reader = new StEStructMuDstReader(mk,ecuts,tcuts);
+    reader->setUseGlobalTracks(useGlobalTracks);
 
     // EventType is for qaHistograms. Depends on type of reader though.
     int EventType = 0;
