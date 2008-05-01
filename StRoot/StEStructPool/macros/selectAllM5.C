@@ -62,6 +62,11 @@ void selectAllM5(const char* dirName, const char* inFile){
     adder.addCuts(fname.Data(),tf,nList,1,parentD,nParentDist);
   }
 
+  TString fname(dirname);
+  fname+="/";
+  fname+=fileBase;
+  fname+="_pairDensities.root";
+  adder.addDensities(fname.Data(),tf);
 };
 
 

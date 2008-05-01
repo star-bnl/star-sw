@@ -63,6 +63,12 @@ void selectAllM3(const char* dirname, const char *fileBase ){
     }
     adder.addCuts(fname.Data(),tf,ndata,nin,parentSum,nParentDist);
   } 
+
+  TString fname(dirname);
+  fname+="/";
+  fname+=fileBase;
+  fname+="_pairDensities.root";
+  adder.addDensities(fname.Data(),tf);
 };
 
 

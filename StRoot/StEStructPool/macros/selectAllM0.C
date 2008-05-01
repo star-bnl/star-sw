@@ -31,6 +31,12 @@ void selectAllM0(const char* dirname, const char *fileBase ){
     int ndata[] = {0};
     int parentSum[1][2] = {0, 0};
     adder.addCuts(fname.Data(),tf,ndata,1,parentSum,1);
+
+    TString fname(dirname);
+    fname+="/";
+    fname+=fileBase;
+    fname+="_pairDensities.root";
+    adder.addDensities(fname.Data(),tf);
 };
 
 
