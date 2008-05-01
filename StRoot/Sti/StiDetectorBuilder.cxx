@@ -13,6 +13,7 @@
 #include "StThreeVector.hh"
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
+#include "TMath.h"
 StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 int StiDetectorBuilder::_debug = 0;
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const string & inputFile)
@@ -194,20 +195,34 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   if (!pPlacement)  {// BBox
     shapeP->ComputeBBox();
     TGeoBBox *box = (TGeoBBox *)shapeP;
-    if (! sh) {
-      sh = new StiPlanarShape(volP->GetName(),// Name
-			      box->GetDZ(),   // halfDepth
-			      box->GetDX(),   // thickness
-			      box->GetDY());  // halfWidth
-      add(sh);
-    }
+    Double_t dx = box->GetDX();
+    Double_t dy = box->GetDY();
     StThreeVectorD centerVector(xyz[0],xyz[1],xyz[2]);
     StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
     double prod = centerVector*normalVector;
-    if (prod < 0) normalVector *= -1;
+    if (prod < -1e-7) normalVector *= -1;
     double phi  = centerVector.phi();
     double phiD = normalVector.phi();
+    Double_t dPhi = phi - phiD;
+    if (dPhi < - TMath::Pi()) dPhi += 2*TMath::Pi();
+    if (dPhi >   TMath::Pi()) dPhi -= 2*TMath::Pi();
+    if (TMath::Abs(TMath::Abs(dPhi) - TMath::Pi()/2) < 1e-7) { // x <==> y
+      normalVector = StThreeVectorD(rot[0],rot[3],rot[6]);
+      prod = centerVector*normalVector;
+      if (prod < -1e-7) normalVector *= -1;
+      phiD = normalVector.phi();
+      Double_t temp = dy;
+      dy = dx;
+      dy = temp;
+    }
     double r = centerVector.perp();
+    if (! sh) {
+      sh = new StiPlanarShape(volP->GetName(),// Name
+			      box->GetDZ(),   // halfDepth
+			      dx,             // thickness
+			      dy);            // halfWidth
+      add(sh);
+    }
     pPlacement = new StiPlacement;
     pPlacement->setZcenter(xyz[2]);
     pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
