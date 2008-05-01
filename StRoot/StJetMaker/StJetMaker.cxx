@@ -1,9 +1,9 @@
-// $Id: StJetMaker.cxx,v 1.51 2008/04/22 00:15:05 tai Exp $
+// $Id: StJetMaker.cxx,v 1.52 2008/05/01 17:44:50 tai Exp $
 #include "StJetMaker.h"
 
 #include "StJetTreeWriter.h"
 #include "StppJetAnalyzer.h"
-#include "StppJetAnalyzer2.h"
+#include "StJetFinderRunner.h"
 
 #include <StJetFinder/StProtoJet.h>
 
@@ -29,14 +29,14 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 
   _treeWriter->addJetFinder(fp, protoJetList, name);
 
-  _jetFinderList.push_back(new StppJetAnalyzer2(ap, jp, fp, *protoJetList));
+  _jetFinderList.push_back(new StJetFinderRunner(ap, jp, fp, *protoJetList));
 
   _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), _treeWriter->getLastStJets(), name);
 }
 
 Int_t StJetMaker::Init() 
 {
-  for(vector<StppJetAnalyzer2*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
+  for(vector<StJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
     (*jetFinder)->Init();
   }
 
@@ -47,7 +47,7 @@ Int_t StJetMaker::Init()
 
 Int_t StJetMaker::Make()
 {
-  for(vector<StppJetAnalyzer2*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
+  for(vector<StJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
     (*jetFinder)->findJets();
   }
 

@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StppJetAnalyzer2.h,v 1.7 2008/05/01 17:32:29 tai Exp $
-#ifndef STPPJETANALYZER2_HH
-#define STPPJETANALYZER2_HH
+// $Id: StJetFinderRunner.h,v 1.1 2008/05/01 17:44:50 tai Exp $
+#ifndef STJETFINDERRUNNER_HH
+#define STJETFINDERRUNNER_HH
 
 #include "StppAnaPars.h"
 
@@ -18,15 +18,15 @@ class StMuTrackFourVec;
 
 namespace StSpinJet {
 
-class StppJetAnalyzer2 {
+class StJetFinderRunner {
 
 public:
 
   typedef std::list<StProtoJet> ProtoJetList;
 
-  StppJetAnalyzer2(const StppAnaPars* ap, StJetPars* jp, StFourPMaker* fp, ProtoJetList& protoJets);
+  StJetFinderRunner(const StppAnaPars* ap, StJetPars* jp, StFourPMaker* fp, ProtoJetList& protoJets);
 
-  virtual ~StppJetAnalyzer2();
+  virtual ~StJetFinderRunner();
 
   void Init();
 
@@ -54,5 +54,5 @@ private:
 
 }
 
-#endif // STPPJETANALYZER2_HH
+#endif // STJETFINDERRUNNER_HH
 
