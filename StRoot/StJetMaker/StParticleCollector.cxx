@@ -1,9 +1,8 @@
-// $Id: StParticleCollector.cxx,v 1.2 2008/05/01 21:28:39 tai Exp $
+// $Id: StParticleCollector.cxx,v 1.3 2008/05/01 21:54:53 tai Exp $
 #include "StParticleCollector.h"
 
 #include <StJetFinder/AbstractFourVec.h>
 #include <StJetFinder/StProtoJet.h>
-
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
 
@@ -11,7 +10,6 @@
 #include "StJet.h"
 #include "StFourPMakers/StFourPMaker.h"
 
-#include <ctime>
 #include <vector>
 
 using namespace std;
@@ -51,21 +49,20 @@ bool StParticleCollector::shoudNotPassToJetFinder(AbstractFourVec* particle)
 {
   StMuTrackFourVec* p = dynamic_cast<StMuTrackFourVec*>(particle);
 
-  if (p == 0)
-    return true;
-  if (p->pt() <= _anaPar.mPtMin)
-    return true;
-  if (fabs(p->eta()) >= _anaPar.mEtaMax)
-    return true;
+  if (p == 0) return true;
+
+  if (p->pt() <= _anaPar.mPtMin) return true;
+
+  if (fabs(p->eta()) >= _anaPar.mEtaMax) return true;
 
   if(isChargedTrack(p)) {
-    StMuTrack* track = p->particle();
-    if (track->flag() <= _anaPar.mFlagMin)
-      return true;
-    if (track->nHits() <= _anaPar.mNhits)
-      return true;
-  }
 
+    StMuTrack* track = p->particle();
+    if (track->flag() <= _anaPar.mFlagMin) return true;
+
+    if (track->nHits() <= _anaPar.mNhits)  return true;
+
+  }
 
   return false;
 }
