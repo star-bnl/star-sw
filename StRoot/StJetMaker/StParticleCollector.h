@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StParticleCollector.h,v 1.4 2008/05/02 16:15:34 tai Exp $
+// $Id: StParticleCollector.h,v 1.5 2008/05/02 17:07:12 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STPARTICLECOLLECTOR_HH
 #define STPARTICLECOLLECTOR_HH
 
 #include "StppAnaPars.h"
-
-#include <StJetFinder/StProtoJet.h>
 
 #include <list>
 
@@ -20,9 +18,9 @@ class StParticleCollector {
 
 public:
 
-  typedef std::list<StProtoJet> ProtoJetList;
+  typedef std::vector<const AbstractFourVec*> ParticleList;
 
-  StParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ProtoJetList& protoJets);
+  StParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ParticleList& particleList);
 
   virtual ~StParticleCollector();
 
@@ -34,8 +32,8 @@ private:
 
   bool isChargedTrack(const StMuTrackFourVec* p) const;
 
-  ProtoJetList& _protoJetList;
   StFourPMaker* _fourPMaker;
+  ParticleList& _particleList;
 
   StppAnaPars _anaPar;
 
