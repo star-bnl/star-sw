@@ -1,4 +1,4 @@
-// $Id: StDraw3DEvent.cxx,v 1.2 2008/04/29 17:16:58 fine Exp $
+// $Id: StDraw3DEvent.cxx,v 1.3 2008/05/02 18:19:28 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -14,7 +14,9 @@ StDraw3DEvent::StDraw3DEvent(TVirtualPad *pad): StDraw3D(pad)
 TObject *StDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size_t siz)
 {
    StTrackPoints trPnt(&track);
-   return Line(trPnt.GetN(),trPnt.GetP(),col,sty,siz);
+   TObject *l = Line(trPnt.GetN(),trPnt.GetP(),col,sty,siz);
+   SetModel((TObject*)&track);
+   return l;
 }
 
 //___________________________________________________
@@ -30,7 +32,9 @@ TObject *StDraw3DEvent::Hit(const StMeasuredPoint &hit
 {
    // Draw the StMeasuredPoint, StHit, StVertex with the graphical attribute provided
    const StThreeVectorF& position = hit.position();
-   return Point(position.x(),position.y(),position.z(),col,sty,siz);
+   TObject *p = Point(position.x(),position.y(),position.z(),col,sty,siz);
+   SetModel((TObject*)&hit);
+   return p;
 }
 
 //___________________________________________________
