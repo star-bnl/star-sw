@@ -308,7 +308,7 @@ void MySQLAppender::flushBuffer()
                 sql = expandCommand.Data();
 			       if (!execute(sql)) {
 #ifdef  NEWTABLE_EXPANSION
-                  expandCommand = "UPDATE IGNORE Jobs SET updateTime=NOW() WHERE brokerJobID=\"$JOBINDEX\"" AND taskID=(SELECT taskID FROM Tasks WHERE brokerTaskID=\"$REQUESTID\");";
+                  expandCommand = "UPDATE LOW_PRIORITY IGNORE Jobs SET updateTime=NOW() WHERE brokerJobID=\"$JOBINDEX\"" AND taskID=(SELECT taskID FROM Tasks WHERE brokerTaskID=\"$REQUESTID\");";
                   ReplaceVariable(expandCommand, "REQUESTID");
                   ReplaceVariable(expandCommand, "JOBINDEX");
 			         if (execute(sql)) {
