@@ -5,6 +5,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.7  2008/05/02 02:36:48  rfatemi
+// update ClassDef
+//
 // Revision 1.6  2008/05/01 01:36:39  rfatemi
 // check in D. Staszak modifications - additional grids
 //
@@ -105,7 +108,7 @@ private:
   
   TClonesArray* mParticles;
   
-  ClassDef(StPythiaEvent, 2);
+  ClassDef(StPythiaEvent, 3);
 };
 
 inline int StPythiaEvent::runId() const { return mRunId; }
