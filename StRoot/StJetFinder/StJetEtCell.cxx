@@ -93,7 +93,7 @@ const StProtoJet& StJetEtCell::centroid()
 	//loop on four-list
 	for (StProtoJet::FourVecList::const_iterator it2=l.begin(); it2!=l.end(); ++it2) {
 	  // add 4-momenta
-	  AbstractFourVec* vec = *it2;
+	  const AbstractFourVec* vec = *it2;
 	  mCentroid.add(*vec);
 	}
       }

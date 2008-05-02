@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StProtoJet.h,v 1.13 2008/05/02 17:05:55 tai Exp $
+// $Id: StProtoJet.h,v 1.14 2008/05/02 18:45:06 tai Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
@@ -21,7 +21,7 @@ class StProtoJet {
 
 public:
 
-  typedef std::vector<AbstractFourVec*> FourVecList;
+  typedef std::vector<const AbstractFourVec*> FourVecList;
 	
   StProtoJet();
   StProtoJet(const AbstractFourVec* particle);
