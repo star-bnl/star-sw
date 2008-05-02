@@ -1,4 +1,4 @@
-// $Id: StProtoJet.cxx,v 1.13 2008/05/02 17:05:55 tai Exp $
+// $Id: StProtoJet.cxx,v 1.14 2008/05/02 18:45:06 tai Exp $
 
 #include "StProtoJet.h"
 
@@ -15,7 +15,7 @@ StProtoJet::StProtoJet(const AbstractFourVec* particle)
   : mPx(particle->px()), mPy(particle->py()), mPz(particle->pz()), mE(particle->e())
   , _charge(particle->charge())
 {
-  _particleList.push_back(const_cast<AbstractFourVec*>(particle));
+  _particleList.push_back(particle);
 }
 
 StProtoJet::~StProtoJet()

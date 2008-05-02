@@ -1,4 +1,4 @@
-// $Id: StJetTreeWriter.cxx,v 1.7 2008/04/21 19:14:17 tai Exp $
+// $Id: StJetTreeWriter.cxx,v 1.8 2008/05/02 18:45:10 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 # include "StJetTreeWriter.h"
 
@@ -104,7 +104,7 @@ void StJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
 
   StProtoJet::FourVecList &trackList = pj.list();
   for(StProtoJet::FourVecList::iterator it2 = trackList.begin(); it2 != trackList.end(); ++it2)  {
-    StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
+    const StMuTrackFourVec *track = dynamic_cast<const StMuTrackFourVec*>(*it2);
     if (!track) {
       cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
       return;
