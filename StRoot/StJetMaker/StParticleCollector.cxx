@@ -1,4 +1,4 @@
-// $Id: StParticleCollector.cxx,v 1.3 2008/05/01 21:54:53 tai Exp $
+// $Id: StParticleCollector.cxx,v 1.4 2008/05/02 16:15:34 tai Exp $
 #include "StParticleCollector.h"
 
 #include <StJetFinder/AbstractFourVec.h>
@@ -31,11 +31,11 @@ StParticleCollector::~StParticleCollector()
 
 void StParticleCollector::Do()
 {
-  vector<AbstractFourVec*> &particleList = _fourPMaker->getTracks();
+  const vector<AbstractFourVec*> &particleList = _fourPMaker->getTracks();
 
   _protoJetList.clear();
 
-  for(vector<AbstractFourVec*>::iterator particle = particleList.begin(); particle  != particleList.end(); ++particle) {
+  for(vector<AbstractFourVec*>::const_iterator particle = particleList.begin(); particle  != particleList.end(); ++particle) {
 
     if(shoudNotPassToJetFinder(*particle)) continue;
 
@@ -45,9 +45,9 @@ void StParticleCollector::Do()
 }
 
 
-bool StParticleCollector::shoudNotPassToJetFinder(AbstractFourVec* particle)
+bool StParticleCollector::shoudNotPassToJetFinder(const AbstractFourVec* particle) const
 {
-  StMuTrackFourVec* p = dynamic_cast<StMuTrackFourVec*>(particle);
+  const StMuTrackFourVec* p = dynamic_cast<const StMuTrackFourVec*>(particle);
 
   if (p == 0) return true;
 
@@ -67,7 +67,7 @@ bool StParticleCollector::shoudNotPassToJetFinder(AbstractFourVec* particle)
   return false;
 }
 	
-bool StParticleCollector::isChargedTrack(StMuTrackFourVec* p)
+bool StParticleCollector::isChargedTrack(const StMuTrackFourVec* p) const
 {
   return p->particle() != 0;
 }

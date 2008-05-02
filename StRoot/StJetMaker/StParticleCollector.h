@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StParticleCollector.h,v 1.3 2008/05/01 21:54:53 tai Exp $
+// $Id: StParticleCollector.h,v 1.4 2008/05/02 16:15:34 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STPARTICLECOLLECTOR_HH
 #define STPARTICLECOLLECTOR_HH
@@ -30,9 +30,9 @@ public:
 
 private:
 
-  bool shoudNotPassToJetFinder(AbstractFourVec* particle);
+  bool shoudNotPassToJetFinder(const AbstractFourVec* particle) const;
 
-  bool isChargedTrack(StMuTrackFourVec* p);
+  bool isChargedTrack(const StMuTrackFourVec* p) const;
 
   ProtoJetList& _protoJetList;
   StFourPMaker* _fourPMaker;
