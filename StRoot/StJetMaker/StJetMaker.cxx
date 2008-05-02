@@ -1,10 +1,12 @@
-// $Id: StJetMaker.cxx,v 1.56 2008/05/02 17:07:12 tai Exp $
+// $Id: StJetMaker.cxx,v 1.57 2008/05/02 21:47:01 tai Exp $
 #include "StJetMaker.h"
 
 #include "StParticleCollector.h"
 #include "StJetFinderRunner.h"
 #include "StJetCuts.h"
+
 #include "StJetTreeWriter.h"
+#include "StDefaultJetTreeWriter.h"
 
 #include "StppJetAnalyzer.h"
 
@@ -21,7 +23,7 @@ ClassImp(StJetMaker)
   
 StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
   : StMaker(name)
-  , _treeWriter(new StJetTreeWriter(*uDstMaker, string(outputName)))
+  , _treeWriter(new StDefaultJetTreeWriter(*uDstMaker, string(outputName)))
   , _backwordCompatibility(new StJetMakerBackwordCompatibility)
 {
 
@@ -42,7 +44,7 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
   _treeWriter->addJetFinder(fp, protoJetList, name);
 
 
-  _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), _treeWriter->getLastStJets(), name);
+  _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), dynamic_cast<StDefaultJetTreeWriter*>(_treeWriter)->getLastStJets(), name);
 }
 
 Int_t StJetMaker::Init() 
