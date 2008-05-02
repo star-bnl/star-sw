@@ -1,19 +1,14 @@
 // -*- mode: c++;-*-
-// $Id: StJetTreeWriter.h,v 1.7 2008/05/02 19:02:31 tai Exp $
+// $Id: StJetTreeWriter.h,v 1.8 2008/05/02 21:47:02 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETTREEWRITER_H
 #define STJETTREEWRITER_H
 
-class StMuDstMaker;
-class StJets;
 class StProtoJet;
 class StFourPMaker;
 
 class TTree;
-class TFile;
 
-#include <string>
-#include <vector>
 #include <list>
 
 namespace StSpinJet {
@@ -21,37 +16,21 @@ namespace StSpinJet {
 class StJetTreeWriter {
 
 public:
-  StJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName);
-  virtual ~StJetTreeWriter();
 
-  void Init();
-  void Finish();
+  StJetTreeWriter() { }
+  virtual ~StJetTreeWriter() { }
 
-  void addJetFinder(StFourPMaker* fourPMaker, std::list<StProtoJet>* protoJetList, const char* name);
+  virtual void Init() { }
+  virtual void Finish() { }
 
-  TTree* jetTree() const { return _jetTree; }
+  virtual void addJetFinder(StFourPMaker* fourPMaker, std::list<StProtoJet>* protoJetList, const char* name) = 0;
 
-  void fillJetTree();
-  void fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
-  void fillJet(StJets &jets, StProtoJet& pj);
+  virtual void fillJetTree() = 0;
 
-  StJets *getLastStJets() { return _analyzerCtlList[_analyzerCtlList.size()]._jets; }
+  virtual TTree* jetTree() const = 0;
 
 private:
-  
-  struct AnalyzerCtl {
-    std::string _branchName;
-    StFourPMaker* _fourPMaker;
-    std::list<StProtoJet>* _protoJetList;
-    StJets *_jets;
-  };
 
-  StMuDstMaker& _uDstMaker;
-  std::string _OutFileName;
-  TTree *_jetTree;
-  TFile *_outFile;
-
-  std::vector<AnalyzerCtl> _analyzerCtlList;
 };
 
 }

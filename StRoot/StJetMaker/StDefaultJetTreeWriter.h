@@ -1,8 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StDefaultJetTreeWriter.h,v 1.1 2008/05/02 21:27:30 tai Exp $
+// $Id: StDefaultJetTreeWriter.h,v 1.2 2008/05/02 21:47:00 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STDEFAULTJETTREEWRITER_H
 #define STDEFAULTJETTREEWRITER_H
+
+#include "StJetTreeWriter.h"
 
 class StMuDstMaker;
 class StJets;
@@ -18,7 +20,7 @@ class TFile;
 
 namespace StSpinJet {
 
-class StDefaultJetTreeWriter {
+class StDefaultJetTreeWriter : public StJetTreeWriter {
 
 public:
   StDefaultJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName);
@@ -32,13 +34,13 @@ public:
   TTree* jetTree() const { return _jetTree; }
 
   void fillJetTree();
-  void fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
-  void fillJet(StJets &jets, StProtoJet& pj);
-
   StJets *getLastStJets() { return _analyzerCtlList[_analyzerCtlList.size()]._jets; }
 
 private:
   
+  void fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
+  void fillJet(StJets &jets, StProtoJet& pj);
+
   struct AnalyzerCtl {
     std::string _branchName;
     StFourPMaker* _fourPMaker;
