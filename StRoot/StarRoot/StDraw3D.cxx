@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.8 2008/05/02 17:48:12 fine Exp $
+// $Id: StDraw3D.cxx,v 1.9 2008/05/02 18:14:53 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -58,7 +58,7 @@ class view_3D  {
       TObject *fModel;
       TString  fComment;
       TString  fObjectInfo;
-      void MakeInfo()
+      void makeInfo()
       {
          fObjectInfo="";
          if (fModel) {
@@ -68,22 +68,13 @@ class view_3D  {
       }
    public:
      view_3D(TObject *model = 0, const char *comment="") : fModel(model),fComment(comment)
-     { MakeInfo(); }
+     { makeInfo(); }
      ~view_3D(){;}
-     TObject *Model() const { return fModel;}
-     void SetModel(TObject *model) {fModel = model;             MakeInfo();}
-     void SetComment(const char *comment) {fComment  = comment; MakeInfo();}
-     void AddComment(const char *comment) {fComment += comment; MakeInfo();}
-     const TString &GetObjectInfo() const {
-        return fObjectInfo;
-     } 
-     const char  *GetModelInfo(Int_t x, Int_t y) const {
-        const TString &customInfo = GetObjectInfo();
-        const char *info = 0;
-        if (customInfo.IsNull()) info = fModel->GetObjectInfo(x,y);
-        else info = customInfo.Data();
-        return info;
-     }
+     TObject *model() const               { return fModel;                   }
+     void setModel(TObject *model)        { fModel     = model ; makeInfo(); }
+     void setComment(const char *comment) { fComment  = comment; makeInfo(); }
+     void addComment(const char *comment) { fComment += comment; makeInfo(); }
+     const TString &info() const { return fObjectInfo;              }
 };
 
 //___________________________________________________
@@ -92,11 +83,17 @@ class view_3D  {
 //___________________________________________________
 class poly_line_3D : public TPolyLine3D, public view_3D {
    public:
-     poly_line_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyLine3D(n,p){;}
+     poly_line_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyLine3D(n,p),view_3D(){;}
      virtual ~poly_line_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
-        return (char *)GetModelInfo(x,y);
+        const TString &customInfo = info();
+        const char *info = 0;
+        if (customInfo.IsNull()) 
+           info = TPolyLine3D::GetObjectInfo(x,y);
+        else 
+           info = customInfo.Data();
+        return (char *)info;
      }
 };
 
@@ -106,11 +103,17 @@ class poly_line_3D : public TPolyLine3D, public view_3D {
 //___________________________________________________
 class poly_marker_3D : public TPolyMarker3D, public view_3D {
    public:
-     poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p){;}
+     poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p),view_3D(){;}
      virtual ~poly_marker_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
-        return (char*)GetModelInfo(x,y);
+        const TString &customInfo = info();
+        const char *info = 0;
+        if (customInfo.IsNull()) 
+           info = TPolyMarker3D::GetObjectInfo(x,y);
+        else 
+           info = customInfo.Data();
+        return (char *)info;
      }
 };
 //___________________________________________________
@@ -266,21 +269,21 @@ TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
 void StDraw3D::SetModel(TObject *model)
 {
    // add the "model" reference to the current view
-   if (fView) fView->SetModel(model);
+   if (fView) fView->setModel(model);
 }
 
 //___________________________________________________
 void StDraw3D::SetComment(const char *cmnt)
 {
    // set the "model" comment for the current view
-   if (fView) fView->SetComment(cmnt);
+   if (fView) fView->setComment(cmnt);
 }
 
 //___________________________________________________
 void StDraw3D::AddComment(const char *cmnt)
 {
    // add the "model" comment for the current view
-   if (fView) fView->AddComment(cmnt);
+   if (fView) fView->addComment(cmnt);
 }
 
 //___________________________________________________
