@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StProtoJet.h,v 1.12 2008/04/23 20:16:51 tai Exp $
+// $Id: StProtoJet.h,v 1.13 2008/05/02 17:05:55 tai Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
@@ -24,7 +24,7 @@ public:
   typedef std::vector<AbstractFourVec*> FourVecList;
 	
   StProtoJet();
-  StProtoJet(AbstractFourVec* particle);
+  StProtoJet(const AbstractFourVec* particle);
   virtual ~StProtoJet();
 	
   unsigned int numberOfParticles() const {return _particleList.size();}
