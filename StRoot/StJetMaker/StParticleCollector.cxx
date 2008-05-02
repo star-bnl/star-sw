@@ -1,8 +1,7 @@
-// $Id: StParticleCollector.cxx,v 1.4 2008/05/02 16:15:34 tai Exp $
+// $Id: StParticleCollector.cxx,v 1.5 2008/05/02 17:07:12 tai Exp $
 #include "StParticleCollector.h"
 
 #include <StJetFinder/AbstractFourVec.h>
-#include <StJetFinder/StProtoJet.h>
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
 
@@ -16,9 +15,9 @@ using namespace std;
 
 namespace StSpinJet {
 
-StParticleCollector::StParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ProtoJetList& protoJets)
-  : _protoJetList(protoJets)
-  , _fourPMaker(fp)
+StParticleCollector::StParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ParticleList& particleList)
+  : _fourPMaker(fp)
+  , _particleList(particleList)
   , _anaPar(*ap)
 {
 
@@ -32,16 +31,16 @@ StParticleCollector::~StParticleCollector()
 void StParticleCollector::Do()
 {
   const vector<AbstractFourVec*> &particleList = _fourPMaker->getTracks();
-
-  _protoJetList.clear();
-
-  for(vector<AbstractFourVec*>::const_iterator particle = particleList.begin(); particle  != particleList.end(); ++particle) {
-
+  
+  _particleList.clear();
+  
+  for(vector<AbstractFourVec*>::const_iterator particle = particleList.begin(); particle != particleList.end(); ++particle) {
+  
     if(shoudNotPassToJetFinder(*particle)) continue;
-
-    _protoJetList.push_back(StProtoJet(*particle));
-
+  
+    _particleList.push_back(*particle);
   }
+
 }
 
 

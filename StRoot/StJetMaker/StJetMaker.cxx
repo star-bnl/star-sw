@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.55 2008/05/01 22:23:48 tai Exp $
+// $Id: StJetMaker.cxx,v 1.56 2008/05/02 17:07:12 tai Exp $
 #include "StJetMaker.h"
 
 #include "StParticleCollector.h"
@@ -12,6 +12,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 
 using namespace std;
 using namespace StSpinJet;
@@ -30,9 +31,11 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 {
   list<StProtoJet>* protoJetList = new list<StProtoJet>;
 
-  _particleCollectorList.push_back(new StParticleCollector(ap, fp, *protoJetList));
+  vector<const AbstractFourVec*> *particleList = new vector<const AbstractFourVec*>;
 
-  _jetFinderList.push_back(new StJetFinderRunner(jp, *protoJetList));
+  _particleCollectorList.push_back(new StParticleCollector(ap, fp, *particleList));
+
+  _jetFinderList.push_back(new StJetFinderRunner(jp, *particleList, *protoJetList));
 
   _jetCutsList.push_back(new StJetCuts(ap, *protoJetList));
 
