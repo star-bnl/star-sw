@@ -1,7 +1,7 @@
 #ifndef STAR_StDraw3DEvent
 #define STAR_StDraw3DEvent
 
-// $Id: StDraw3DEvent.h,v 1.3 2008/05/03 00:06:30 fine Exp $
+// $Id: StDraw3DEvent.h,v 1.4 2008/05/03 00:08:55 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
@@ -46,7 +46,7 @@ class StDraw3DEvent : public StDraw3D
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
      template <class T> TObject *Vector(const StThreeVector<T> &vector, EDraw3DStyle sty=kVtx);
-      ClassDef(StDraw3DEvent,0);
+     ClassDef(StDraw3DEvent,0);
 };
 
 //___________________________________________________
