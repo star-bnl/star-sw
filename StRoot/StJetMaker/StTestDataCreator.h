@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StTestDataCreator.h,v 1.2 2008/05/03 01:06:32 tai Exp $
+// $Id: StTestDataCreator.h,v 1.3 2008/05/03 01:23:04 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STTESTDATACREATOR_H
 #define STTESTDATACREATOR_H
@@ -33,9 +33,18 @@ public:
 
 private:
 
+  struct DataCtl {
+    std::string _name;
+    StFourPMaker* _fourPMaker;
+    const std::vector<const AbstractFourVec*>* _particleList;
+    std::list<StProtoJet>* _protoJetList;
+  };
+
   std::string _OutFileName;
   TTree *_jetTree;
   TFile *_outFile;
+
+  std::vector<DataCtl> _dataCtlList;
 
   ClassDef(StTestDataCreator, 0)
 
