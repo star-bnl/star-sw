@@ -1,4 +1,4 @@
-// $Id: StTestDataCreator.cxx,v 1.4 2008/05/03 03:13:34 tai Exp $
+// $Id: StTestDataCreator.cxx,v 1.5 2008/05/03 03:56:02 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #include "StTestDataCreator.h"
 
@@ -31,7 +31,7 @@ void StTestDataCreator::Init()
 {
 
   _outFile = TFile::Open(_OutFileName.c_str(), "RECREATE");
-  _particleTree = new TTree("T", "T");
+  _particleTree = new TTree("particleTree", "particleTree");
   _particleTree->Branch("ParticleList", &_particleListBranch, "eventID/I:name[128]/C:px/D:py/D:pz/D:phi/D:eta/D:eT/D:e/D:mass/D:charge/D");
   _particleListBranch.eventID = 0;
 }
