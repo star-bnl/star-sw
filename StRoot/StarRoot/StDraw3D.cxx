@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.11 2008/05/03 21:22:00 fine Exp $
+// $Id: StDraw3D.cxx,v 1.12 2008/05/03 22:09:08 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -22,6 +22,9 @@ Style_t StDraw3D::fgStyDefault   = Style_t(-1);
 Size_t  StDraw3D::fgSizDefault   = Size_t (-1);
 Color_t StDraw3D::fgBkColor      = kBlack;
 
+ClassImp(StDraw3D)
+           
+  ////////////////////////////////////////////////////////////////////////
   //
   //  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
   //  decoratated with the STAR detector geometry
@@ -29,6 +32,9 @@ Color_t StDraw3D::fgBkColor      = kBlack;
   //  It provides the simple way to visualize the event 
   //  primitives in 3D quickly against of the STAR detector 
   //  geometry.
+  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
+  //
+  ////////////////////////////////////////////////////////////////////////
 
 //___________________________________________________
 static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad) 

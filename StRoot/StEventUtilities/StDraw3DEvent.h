@@ -1,17 +1,22 @@
 #ifndef STAR_StDraw3DEvent
 #define STAR_StDraw3DEvent
 
-// $Id: StDraw3DEvent.h,v 1.4 2008/05/03 00:08:55 fine Exp $
+// $Id: StDraw3DEvent.h,v 1.5 2008/05/03 22:09:08 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
 #include "StThreeVector.hh"
 
+  ///////////////////////////////////////////////////////////////////////
   //
-  // class StDraw3DEvent - to draw the StEvent primitives like 3StTrack and StMeasuredPoint 
+  // class StDraw3DEvent - to draw the StEvent primitives like StTrack and StMeasuredPoint 
   // as 3D points and 3D lines
   // decoratated with the STAR detector geometry
   //
+  //
+  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
+  //
+  ///////////////////////////////////////////////////////////////////////
   
 class StTrack;
 class StMeasuredPoint;
