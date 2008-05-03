@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.10 2008/05/03 21:18:58 fine Exp $
+// $Id: StDraw3D.h,v 1.11 2008/05/03 22:09:09 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -14,6 +14,8 @@
   //  It provides the simple way to visualize the event 
   //  primitives in 3D quickly against of the STAR detector 
   //  geometry.
+  //
+  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
   
 class TVirtualPad;
 class TVirtualViewer3D;

@@ -1,4 +1,4 @@
-// $Id: StDraw3DEvent.cxx,v 1.3 2008/05/02 18:19:28 fine Exp $
+// $Id: StDraw3DEvent.cxx,v 1.4 2008/05/03 22:09:08 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -6,6 +6,19 @@
 #include "StTrack.h"
 #include "StMeasuredPoint.h"
 
+ClassImp(StDraw3DEvent)
+           
+  ////////////////////////////////////////////////////////////////////////
+  //
+  //  Class StDraw3DEvent - to draw the 3D StEvent primitives like StTrack, StHit, StVertex
+  //  decoratated with the STAR detector geometry
+  //
+  //  It provides the simple way to visualize the event 
+  //  primitives in 3D quickly against of the STAR detector 
+  //  geometry.
+  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
+  //
+  ////////////////////////////////////////////////////////////////////////
 //___________________________________________________
 StDraw3DEvent::StDraw3DEvent(TVirtualPad *pad): StDraw3D(pad)
 { }
