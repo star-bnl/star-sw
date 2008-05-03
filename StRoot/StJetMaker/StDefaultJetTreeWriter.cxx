@@ -1,4 +1,4 @@
-// $Id: StDefaultJetTreeWriter.cxx,v 1.2 2008/05/02 22:13:59 tai Exp $
+// $Id: StDefaultJetTreeWriter.cxx,v 1.3 2008/05/03 01:06:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #include "StDefaultJetTreeWriter.h"
 
@@ -36,7 +36,7 @@ StDefaultJetTreeWriter::~StDefaultJetTreeWriter()
 
 }
 
-void StDefaultJetTreeWriter::addJetFinder(StFourPMaker* fourPMaker, list<StProtoJet>* protoJetList, const char* name)
+void StDefaultJetTreeWriter::addJetFinder(StFourPMaker* fourPMaker, const vector<const AbstractFourVec*>* particleList, list<StProtoJet>* protoJetList, const char* name)
 {
   AnalyzerCtl anaCtl;
   anaCtl._branchName = name;

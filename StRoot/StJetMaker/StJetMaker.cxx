@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.57 2008/05/02 21:47:01 tai Exp $
+// $Id: StJetMaker.cxx,v 1.58 2008/05/03 01:06:31 tai Exp $
 #include "StJetMaker.h"
 
 #include "StParticleCollector.h"
@@ -41,10 +41,16 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 
   _jetCutsList.push_back(new StJetCuts(ap, *protoJetList));
 
-  _treeWriter->addJetFinder(fp, protoJetList, name);
+  _treeWriter->addJetFinder(fp, particleList, protoJetList, name);
 
 
-  _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), dynamic_cast<StDefaultJetTreeWriter*>(_treeWriter)->getLastStJets(), name);
+  _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), _treeWriter, name);
+}
+
+void StJetMaker::SetTreeWriter(StJetTreeWriter *treeWriter)
+{
+  delete _treeWriter;
+  _treeWriter = treeWriter;
 }
 
 Int_t StJetMaker::Init() 
