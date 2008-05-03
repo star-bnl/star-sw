@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.10 2008/05/03 21:18:58 fine Exp $
+// $Id: StDraw3D.cxx,v 1.11 2008/05/03 21:22:00 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -349,8 +349,10 @@ void StDraw3D::AddComment(const char *cmnt)
 
 //___________________________________________________
 void StDraw3D::Draw3DTest(){
-   //
+   //  ------------------------------------------------
    //  The  method to test the class
+   //   It should produce the #D Coin widget:
+   //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
    //  ------------------------------------------------
    //                 x             y              z  
    //  ------------------------------------------------
