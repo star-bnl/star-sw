@@ -1,10 +1,12 @@
 #ifndef STAR_StDraw3DEvent
 #define STAR_StDraw3DEvent
 
-// $Id: StDraw3DEvent.h,v 1.2 2008/04/29 17:16:58 fine Exp $
+// $Id: StDraw3DEvent.h,v 1.3 2008/05/03 00:06:30 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
+#include "StThreeVector.hh"
+
   //
   // class StDraw3DEvent - to draw the StEvent primitives like 3StTrack and StMeasuredPoint 
   // as 3D points and 3D lines
@@ -39,6 +41,24 @@ class StDraw3DEvent : public StDraw3D
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
      virtual TObject *TrackInOut(const StTrack &track, EDraw3DStyle sty=kUsedHit, Bool_t in=kTRUE);
-     ClassDef(StDraw3DEvent,0);
+     template <class T> TObject *Vector(const StThreeVector<T> &vector
+                  ,  Color_t col
+                  ,  Style_t sty= Style_t(-1)
+                  ,  Size_t siz = Size_t (-1));
+     template <class T> TObject *Vector(const StThreeVector<T> &vector, EDraw3DStyle sty=kVtx);
+      ClassDef(StDraw3DEvent,0);
 };
+
+//___________________________________________________
+template<class T> TObject *StDraw3DEvent::Vector(const StThreeVector<T> &vector
+                  ,  Color_t col,  Style_t sty,  Size_t siz)
+{  return Point(vector.x(),vector.y(),vector.z(),col,sty,siz); }
+
+//___________________________________________________
+template <class T> TObject *StDraw3DEvent::Vector(const StThreeVector<T> &vector, EDraw3DStyle sty)
+{
+     const StDraw3DStyle &style =  Style(sty);
+     return Vector(vector.x(),vector.y(),vector.z(),style.Col(),style.Sty(),style.Siz()); 
+}
+
 #endif
