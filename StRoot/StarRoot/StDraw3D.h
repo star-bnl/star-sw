@@ -1,15 +1,20 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.9 2008/05/02 17:48:12 fine Exp $
+// $Id: StDraw3D.h,v 1.10 2008/05/03 21:18:58 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
 #include "Gtypes.h"
 #include <map>
+
   //
-  // class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
-  // decoratated with the STAR detector geometry
+  //  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
+  //  decoratated with the STAR detector geometry
   //
+  //  It provides the simple way to visualize the event 
+  //  primitives in 3D quickly against of the STAR detector 
+  //  geometry.
+  
 class TVirtualPad;
 class TVirtualViewer3D;
 
