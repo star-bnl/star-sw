@@ -1,10 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StTestDataCreator.h,v 1.3 2008/05/03 01:23:04 tai Exp $
+// $Id: StTestDataCreator.h,v 1.4 2008/05/03 03:13:34 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STTESTDATACREATOR_H
 #define STTESTDATACREATOR_H
 
 #include "StJetTreeWriter.h"
+
+#include "StTestData.h"
 
 class StProtoJet;
 class StFourPMaker;
@@ -29,7 +31,7 @@ public:
 
   void fillJetTree();
 
-  TTree* jetTree() const { return _jetTree; }
+  TTree* jetTree() const { return _particleTree; }
 
 private:
 
@@ -41,10 +43,12 @@ private:
   };
 
   std::string _OutFileName;
-  TTree *_jetTree;
+  TTree *_particleTree;
   TFile *_outFile;
 
   std::vector<DataCtl> _dataCtlList;
+
+  TestParticle_t _particleListBranch;
 
   ClassDef(StTestDataCreator, 0)
 
