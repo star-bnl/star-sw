@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.40 2008/05/01 22:23:49 tai Exp $
+// $Id: StJetMaker.h,v 1.41 2008/05/03 01:06:31 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -10,6 +10,7 @@
 #include <vector>
 
 class TTree;
+
 class StMuDstMaker;
 class StFourPMaker;
 class StJetPars;
@@ -34,6 +35,8 @@ public:
     
   TTree* tree() const;
     
+  void SetTreeWriter(StSpinJet::StJetTreeWriter *treeWriter);
+
   void addAnalyzer(const StppAnaPars*, StJetPars*, StFourPMaker*, const char* anaName);
     
   typedef StSpinJet::StJetMakerBackwordCompatibility::jetBranchesMap jetBranchesMap;

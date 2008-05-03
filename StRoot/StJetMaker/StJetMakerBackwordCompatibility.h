@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerBackwordCompatibility.h,v 1.2 2008/04/21 01:58:56 tai Exp $
+// $Id: StJetMakerBackwordCompatibility.h,v 1.3 2008/05/03 01:06:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETMAKERBACKWORDCOMPATIBILITY_H
 #define STJETMAKERBACKWORDCOMPATIBILITY_H
@@ -11,6 +11,8 @@
 
 namespace StSpinJet {
 
+class StJetTreeWriter;
+
 class StJetMakerBackwordCompatibility {
 
 public:
@@ -20,11 +22,7 @@ public:
 
   typedef std::map<std::string, StppJetAnalyzer*> jetBranchesMap;
 
-  void addAnalyzer(StppJetAnalyzer* analyzer, StJets *stJets, const char* name)
-  {
-    _jetBranches[name] = analyzer;
-    analyzer->setmuDstJets(stJets);
-  }
+  void addAnalyzer(StppJetAnalyzer* analyzer, StJetTreeWriter* treeWriter, const char* name);
 
   jetBranchesMap& getJets() { return _jetBranches; }
 
