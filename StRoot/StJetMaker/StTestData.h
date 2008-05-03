@@ -1,7 +1,9 @@
-// $Id: StTestData.h,v 1.1 2008/05/03 03:13:33 tai Exp $
+// $Id: StTestData.h,v 1.2 2008/05/03 03:56:02 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STTESTDATA_H
 #define STTESTDATA_H
+
+#include <Rtypes.h>
 
 struct TestParticle_t {
   Int_t     eventID;
