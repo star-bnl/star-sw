@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.9 2008/05/02 18:14:53 fine Exp $
+// $Id: StDraw3D.cxx,v 1.10 2008/05/03 21:18:58 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -21,6 +21,14 @@ Color_t StDraw3D::fgColorDefault = Color_t(-1);
 Style_t StDraw3D::fgStyDefault   = Style_t(-1);
 Size_t  StDraw3D::fgSizDefault   = Size_t (-1);
 Color_t StDraw3D::fgBkColor      = kBlack;
+
+  //
+  //  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
+  //  decoratated with the STAR detector geometry
+  //
+  //  It provides the simple way to visualize the event 
+  //  primitives in 3D quickly against of the STAR detector 
+  //  geometry.
 
 //___________________________________________________
 static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad) 
@@ -95,6 +103,10 @@ class poly_line_3D : public TPolyLine3D, public view_3D {
            info = customInfo.Data();
         return (char *)info;
      }
+     void Inspect() const {
+        if ( model() ) model()->Inspect();
+        else TPolyLine3D::Inspect();
+     }
 };
 
 //___________________________________________________
@@ -114,6 +126,10 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
         else 
            info = customInfo.Data();
         return (char *)info;
+     }
+     void Inspect() const {
+        if ( model() ) model()->Inspect();
+        else TPolyMarker3D::Inspect();
      }
 };
 //___________________________________________________
@@ -209,7 +225,13 @@ int StDraw3D::Draw3DInit(){
 }
 //___________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_t siz)
-{
+{ 
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyMarker3D class
+   // with the ROOT color, style, size attributes
+   //
+   
    if (!fgDraw_3d_init) Draw3DInit();
    poly_marker_3D *plMk  = new poly_marker_3D(n,(Float_t*)xyz);
    if (col != colorDefault) plMk->SetMarkerColor(col);
@@ -221,12 +243,39 @@ TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_
 //___________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, EDraw3DStyle sty)
 {
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyMarker3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   
   const StDraw3DStyle &style =  Style(sty);
   return Points(n, xyz, style.Col(),style.Sty(),style.Siz());
+}
+
+//___________________________________________________
+TObject *StDraw3D::Draw3D(int n,  const float *xyz)
+{
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // and the kVtx attrbute
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   if (!fgDraw_3d_init) Draw3DInit();
+   return Points(n,xyz,kVtx);
 }
 //___________________________________________________
 TObject *StDraw3D::Point(float x, float y, float z, Color_t col,Style_t sty,Size_t siz)
 {
+   //
+   // Draw ONE 3D marker with ROOT TPolyMarker3D class at x,y,z position
+   // with the ROOT color, style, size attributes
+   //
+   
    if (!fgDraw_3d_init) Draw3DInit();
    float xyz[]={x,y,z};
    return Points(1,xyz,col,sty,siz);
@@ -235,20 +284,25 @@ TObject *StDraw3D::Point(float x, float y, float z, Color_t col,Style_t sty,Size
 //___________________________________________________
 TObject *StDraw3D::Point(float x, float y, float z, EDraw3DStyle sty)
 {
+   //
+   // Draw ONE 3D marker with ROOT TPolyMarker3D class at x,y,z position
+   // and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
    const StDraw3DStyle &style =  Style(sty);
    return Point(x,y, z, style.Col(),style.Sty(),style.Siz());
 }
 
 //___________________________________________________
-TObject *StDraw3D::Draw3D(int n,  const float *xyz)
-{
-   if (!fgDraw_3d_init) Draw3DInit();
-   return Points(n,xyz,kVtx);
-}
-
-//___________________________________________________
 TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t siz)
 {
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyline3D class
+   // with the ROOT color, style, size attributes
+   //
    if (!fgDraw_3d_init) Draw3DInit();
    poly_line_3D *plLine  = new poly_line_3D(n,(Float_t*)xyz);
    if (col != colorDefault) plLine->SetLineColor(col);
@@ -261,6 +315,13 @@ TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t
 //___________________________________________________
 TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
 {
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyLine3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
    const StDraw3DStyle &style =  Style(sty);
    return Line(n,xyz,  style.Col(),style.Sty(),style.Siz() );
 }
@@ -288,23 +349,27 @@ void StDraw3D::AddComment(const char *cmnt)
 
 //___________________________________________________
 void StDraw3D::Draw3DTest(){
-   if (!fgDraw_3d_init) Draw3DInit();
+   //
+   //  The  method to test the class
+   //  ------------------------------------------------
+   //                 x             y              z  
+   //  ------------------------------------------------
    float xyz[] = { 189.195,       27.951,       123.966
-                 ,187.195,       28.6187,       122.89
-                 ,181.195       ,30.6788       ,119.556
-                 ,179.195       ,31.3387       ,118.454
-                 ,177.195       ,32.0065       ,117.328
-                 ,175.195       ,32.6132       ,116.26
-                 ,173.195       ,33.2385       ,115.146
-                 ,171.195       ,33.8552       ,114.016
-                 ,169.195       ,34.3924       ,112.964
+                  ,187.195,       28.6187,      122.89
+                  ,181.195       ,30.6788      ,119.556
+                  ,179.195       ,31.3387      ,118.454
+                  ,177.195       ,32.0065      ,117.328
+                  ,175.195       ,32.6132      ,116.26
+                  ,173.195       ,33.2385      ,115.146
+                  ,171.195       ,33.8552      ,114.016
+                  ,169.195       ,34.3924      ,112.964
          };
 
    int sizeXYZ = sizeof(xyz)/sizeof(float)/3;
-   const float *fff = (const float *)&xyz[0];
-   fprintf(stderr," %d %p\n", sizeXYZ,fff);
-   Draw3D(sizeXYZ,fff);
+   
+   Draw3D(sizeXYZ,xyz);
    SetComment("The hits from the TPC sector");
-   Line(sizeXYZ,fff,kPrimaryTrack);
+   
+   Line(sizeXYZ,xyz,kPrimaryTrack);
    SetComment("The recontstructed track");
 }
