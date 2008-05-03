@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.41 2008/05/03 01:06:31 tai Exp $
+// $Id: StJetMaker.h,v 1.42 2008/05/03 22:00:57 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -28,7 +28,8 @@ class StJetMaker : public StMaker {
 public:
 
   StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
-    
+  virtual ~StJetMaker();
+
   Int_t Init();
   Int_t Make();
   Int_t Finish();
@@ -50,6 +51,7 @@ private:
 
   std::vector<StSpinJet::StJetCuts*> _jetCutsList;
 
+  StSpinJet::StJetTreeWriter *_defaultTreeWriter;
   StSpinJet::StJetTreeWriter *_treeWriter;
 
   StSpinJet::StJetMakerBackwordCompatibility *_backwordCompatibility;
