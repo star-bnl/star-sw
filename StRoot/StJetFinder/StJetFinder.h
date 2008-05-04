@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetFinder.h,v 1.7 2008/04/29 00:11:11 tai Exp $
+// $Id: StJetFinder.h,v 1.8 2008/05/04 00:43:51 tai Exp $
 #ifndef StJetFinder_HH
 #define StJetFinder_HH
 
@@ -14,16 +14,15 @@ public:
 
   typedef StProtoJet::FourVecList FourVecList;
 
-  StJetFinder();
-  virtual ~StJetFinder();
+  StJetFinder() { }
+  virtual ~StJetFinder() { }
 
   virtual void Init() = 0;
 
   virtual void findJets(JetList& protojets) = 0;
-  //  virtual void clear() = 0;
-  //  virtual void print() = 0;
 
 protected:
+
     JetList mJets;
 
 };
