@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedConeJetFinder.h,v 1.11 2008/04/30 00:05:42 tai Exp $
+// $Id: StCdfChargedConeJetFinder.h,v 1.12 2008/05/04 23:29:16 tai Exp $
 
 /*!
   This is an implemenation of the CDF Charged jet finder (analagous to "Simple UA1 Jet Finder" but
@@ -12,7 +12,6 @@
 
 #include "StConeJetFinder.h"
 #include "StCdfChargedConePars.h"
-#include "StCdfChargedJetEtCell.h"
 
 #include "StCdfChargedJetEtCellFactory.h"
 
