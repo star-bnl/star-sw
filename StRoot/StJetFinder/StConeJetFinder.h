@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.31 2008/05/05 21:08:14 tai Exp $
+// $Id: StConeJetFinder.h,v 1.32 2008/05/05 21:10:32 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -89,13 +89,8 @@ protected:
   int mSearchCounter;
 	
   StJetSpliterMerger* mMerger;
-  //  ValueCellList mPreJets;
   CellList _preJets;
 	
-//   typedef std::pair<ValueCellList::iterator, ValueCellList::iterator> ValueCellListItPair;
-//   typedef vector<ValueCellListItPair> VCLItPairVec;
-//   VCLItPairVec mMidpointVec;
-
   typedef vector<std::pair<CellList::iterator, CellList::iterator> > CellPairList;
   CellPairList _cellPairList;
 
