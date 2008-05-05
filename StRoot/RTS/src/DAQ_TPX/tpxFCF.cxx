@@ -319,7 +319,8 @@ void tpxFCF::start_evt()
 	for(int r=0;r<=45;r++) {
 		if(row_ix[r] < 0) continue ;
 
-		for(int p=1;p<tpc_rowlen[r];p++) {
+// BUG IN FY08 run:		for(int p=1;p<tpc_rowlen[r];p++) {
+		for(int p=1;p<=tpc_rowlen[r];p++) {
 			struct stage1 *o ;
 			o = get_stage1(r, p) ;
 			if(unlikely(o==0)) {
@@ -551,7 +552,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
 
 	}
 
-
+	
 	return s->count ;	// returns count...
 }
 
@@ -588,6 +589,8 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 			cur1 = get_stage1(r,p+1) ;
 			cur = cur1->cl ;
+
+			//LOG(DBG,"row %d: pad %d:%d, pad++ %d:%d",r,p,old1->count,p+1,cur1->count) ;
 
 			//LOG(DBG,"RP %d:%d at 0x%08X, next at 0x%08X",r,p,old1,cur1) ;
 
@@ -834,6 +837,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 		old = old1->cl ;
 
 		//LOG(DBG,"end of row %d: pad %d, leftower count %d",r,p,old1->count) ;
+		if(old1->count) {
+			LOG(DBG,"Leftover at row %d:%d, %d",r,p,old1->count) ;
+		}
 
 		for(c=0;c<old1->count;c++) {	// loop over old
 
