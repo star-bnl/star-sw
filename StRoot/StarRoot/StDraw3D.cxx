@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.16 2008/05/05 16:34:46 fine Exp $
+// $Id: StDraw3D.cxx,v 1.17 2008/05/05 20:08:44 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -214,7 +214,7 @@ void StDraw3D::SetBkColor(Color_t newBkColor)
 {
    // Set the canvas background color;
    fBkColor = newBkColor;
-   if (fPad->GetFillColor() != fBkColor)
+   if (fPad && fPad->GetFillColor() != fBkColor)
        fPad->SetFillColor(fBkColor);
 }
 //___________________________________________________
