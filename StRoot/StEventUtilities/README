@@ -317,6 +317,21 @@ Description: The class derived from the StDraw3D (StarRoot package)
              To see how it wokrs one can merely invoke the Draw3DTest() method
 
                           gEventDisplay->Draw3DTest();
+                          
+Example:   For example to draw  all tracks for StEvent object the 
+           ROOT sessionas follows can be used:
+           
+           >  root.exe
+
+           root[0] .x Load.C
+           root[1] .x bfc.C(0,"doevents","st_physics_6048025_raw_1020002.event.root")
+           root[2] chain->MakeEvent(); // to read the next event
+           root[3] StEvent *event = chain->GetDataSet("StEvent"); // to access the StEvent pointer
+           root[4] gEventDisplay->Tracks(event);  // to draw the tracks
+
+           to produce the picture:
+
+           http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/StEventTpcTracks.png               
 
 
 
