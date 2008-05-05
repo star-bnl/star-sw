@@ -1,4 +1,4 @@
-// $Id: StJetSpliterMerger.cxx,v 1.7 2008/05/05 19:43:31 tai Exp $
+// $Id: StJetSpliterMerger.cxx,v 1.8 2008/05/05 21:21:14 tai Exp $
 //StJetSpliterMerger.cxx
 //M.L. Miller (Yale Software)
 //10/02
@@ -77,79 +77,6 @@ void StJetSpliterMerger::splitMerge(CellList& preJets)
   }
 }
 
-void StJetSpliterMerger::splitMerge(ValueCellList& preJets)
-{
-  CellList preJets_;
-
-  for (ValueCellList::iterator it = preJets.begin(); it != preJets.end(); ++it) {
-    preJets_.push_back(&(*it));
-  }
-
-  splitMerge(preJets_);
-
-  ValueCellList ret;
-
-  for (CellList::iterator it = preJets_.begin(); it != preJets_.end(); ++it) {
-    ret.push_back(**it);
-  }
-
-  preJets.clear();
-
-  copy(ret.begin(), ret.end(), back_inserter(preJets));
-
-  return;
-
-  copyPreJets(preJets);
-		
-  while(!mPreJets.empty()) {
-
-    _OverlapList.clear();
-
-    //sort them in descending order in et: (et1>et2>...>etn)
-    mPreJets.sort(std::greater<StEtaPhiCell>());
-	
-    for (ValueCellList::iterator otherIt = ++(mPreJets.begin()); otherIt != mPreJets.end(); ++otherIt) {
-			
-      StEtaPhiCell::CellList& otherCells = (*otherIt).cellList();
-      EtNeighbor neighbor;
-				
-      for (StEtaPhiCell::CellList::iterator rootSetIt = mPreJets.front().cellList().begin(); rootSetIt != mPreJets.front().cellList().end(); ++rootSetIt) {
-	for (StEtaPhiCell::CellList::iterator otherSetIt = otherCells.begin(); otherSetIt != otherCells.end(); ++otherSetIt) {
-	  neighbor.check(*rootSetIt, *otherSetIt);
-	}
-      }
-	  
-      if (neighbor.nCommonCells <= 0) continue;
-
-
-      neighbor.location = otherIt;
-      _OverlapList.push_back(neighbor);
-
-    }
-
-    if (_OverlapList.empty()) { //this guy shares no eT!
-      preJets.push_back(mPreJets.front());
-      mPreJets.erase(mPreJets.begin());
-    } else {
-
-      EtNeighbor& n = *min_element(_OverlapList.begin(), _OverlapList.end());
-
-      StEtaPhiCell& neighborJet = *(n.location);
-
-      if (n.sharedEt/neighborJet.eT() > splitFraction() ) { //merge these two
-	merge(mPreJets.front(), neighborJet, n.cells);
-
-	//remove neighbor jet
-	mPreJets.erase(n.location);
-      } else { //split these two
-	split(mPreJets.front(), neighborJet, n.cells);
-      }
-    }
-  }
-	
-
-}
-
 //this really has to be encapsulated in StEtaPhiCell class.  For now we bust out the guts of the code here
 void StJetSpliterMerger::merge(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells)
 {
@@ -191,9 +118,3 @@ void StJetSpliterMerger::split(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellV
 
 }
 
-void StJetSpliterMerger::copyPreJets(ValueCellList& preJets)
-{
-    mPreJets.clear();
-    copy(preJets.begin(), preJets.end(), back_inserter(mPreJets));
-    preJets.clear();
-}

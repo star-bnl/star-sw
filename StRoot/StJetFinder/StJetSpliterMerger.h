@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetSpliterMerger.h,v 1.5 2008/05/05 19:43:31 tai Exp $
+// $Id: StJetSpliterMerger.h,v 1.6 2008/05/05 21:21:14 tai Exp $
 //StJetSpliterMerger.h
 //M.L. Miller (Yale Software)
 //10/02
@@ -21,17 +21,15 @@ using std::multimap;
 //useful struct for recording overlaping jets
 struct EtNeighbor {
 
-  typedef StConeJetFinder::ValueCellList ValueCellList;
+  //  typedef StConeJetFinder::ValueCellList ValueCellList;
   typedef vector<StEtaPhiCell*> CellVec;
 	
   EtNeighbor() : nCommonCells(0), sharedEt(0) { }
-  EtNeighbor(ValueCellList::iterator it, int n, double et) : location(it), nCommonCells(n), sharedEt(et) { }
 	
     //are these the same?  If so, book-keep
   void check(StEtaPhiCell* lhs, StEtaPhiCell* rhs);
 	
     //careful, this gets invalidated after insert/delete/sorts in list
-    ValueCellList::iterator location; 
     StEtaPhiCell::CellList::iterator _otherCell; 
 	
     //book-keep
@@ -56,7 +54,6 @@ struct EtNeighbor {
 class StJetSpliterMerger
 {
 public:
-    typedef StConeJetFinder::ValueCellList ValueCellList;
     typedef StEtaPhiCell::CellList CellList;
 
     StJetSpliterMerger() {};
@@ -67,19 +64,15 @@ public:
     double splitFraction() const {return mSplitFraction;}
 
     ///action
-    void splitMerge(ValueCellList& jets);
     void splitMerge(CellList& jets);
 
 private:
 
   typedef vector<StEtaPhiCell*> CellVec;
-  void copyPreJets(ValueCellList& preJets);
-  //void copyPostJets(ValueCellList& preJets);
   void split(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells);
   void merge(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells);
 
   double mSplitFraction;
-  ValueCellList mPreJets;
 
   CellList _preJets;
   std::list<EtNeighbor> _OverlapList;
