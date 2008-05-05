@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.11 2008/05/03 22:09:09 fine Exp $
+// $Id: StDraw3D.h,v 1.12 2008/05/05 00:31:18 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -70,6 +70,7 @@ class StDraw3D : public TObject
        static Style_t fgStyDefault;
        static Size_t  fgSizDefault;
        static Color_t fgBkColor;
+       TVirtualPad *InitPad();
 
 public:
    StDraw3D(TVirtualPad *pad = 0);

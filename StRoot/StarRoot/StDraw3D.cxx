@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.12 2008/05/03 22:09:08 fine Exp $
+// $Id: StDraw3D.cxx,v 1.13 2008/05/05 00:31:17 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -150,15 +150,20 @@ StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fViewer(0),fView(0)
    AddStyle(kGlobalTrack, TrakCol,TrakSty,TrakSiz);
    AddStyle(kUsedHit,     UHitCol,UHitSty,UHitSiz);
    AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
+}
 
+//___________________________________________________
+TVirtualPad *StDraw3D::InitPad() 
+{
    if (!fPad) {
       fPad = new TCanvas("STAR","Event Viewer", 400,400);
       fPad->SetFillColor(fBkColor);
       fPad->Modified();
       fPad->Update();
    }
+   return fPad;
 }
-  
+
 //___________________________________________________
 StDraw3D::~StDraw3D()
 {
@@ -185,12 +190,11 @@ TObject *StDraw3D::Draw(TObject *o)
    // and set the new background color if needed
    if (o) {
       if (!fgDraw_3d_init) Draw3DInit();
-      TVirtualPad *sav = 0;
-      if (fPad) fPad->cd();
-      else      sav = gPad;
+      TVirtualPad *sav = gPad;
+      if (!fPad)        InitPad();
+      if (fPad != sav)  fPad->cd();
       o->Draw();
-      if (!fPad) fPad = gPad;
-      else  if (sav) sav->cd();
+      if (sav && (fPad != sav)) sav->cd();
       if (!fViewer) fViewer = InitCoin(fPad);
    }
    return o;
