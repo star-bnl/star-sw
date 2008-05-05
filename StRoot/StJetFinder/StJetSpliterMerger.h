@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetSpliterMerger.h,v 1.4 2008/05/05 00:32:49 tai Exp $
+// $Id: StJetSpliterMerger.h,v 1.5 2008/05/05 19:43:31 tai Exp $
 //StJetSpliterMerger.h
 //M.L. Miller (Yale Software)
 //10/02
@@ -10,6 +10,7 @@
 //std
 #include <vector>
 #include <map>
+#include <list>
 using std::vector;
 using std::multimap;
 
@@ -20,30 +21,28 @@ using std::multimap;
 //useful struct for recording overlaping jets
 struct EtNeighbor {
 
-    typedef StConeJetFinder::ValueCellList ValueCellList;
-    typedef vector<StEtaPhiCell*> CellVec;
+  typedef StConeJetFinder::ValueCellList ValueCellList;
+  typedef vector<StEtaPhiCell*> CellVec;
 	
-    EtNeighbor();
-    EtNeighbor(ValueCellList::iterator it, int n, double et);
+  EtNeighbor() : nCommonCells(0), sharedEt(0) { }
+  EtNeighbor(ValueCellList::iterator it, int n, double et) : location(it), nCommonCells(n), sharedEt(et) { }
 	
     //are these the same?  If so, book-keep
-    bool check(StEtaPhiCell* lhs, StEtaPhiCell* rhs);
+  void check(StEtaPhiCell* lhs, StEtaPhiCell* rhs);
 	
     //careful, this gets invalidated after insert/delete/sorts in list
     ValueCellList::iterator location; 
+    StEtaPhiCell::CellList::iterator _otherCell; 
 	
     //book-keep
     int nCommonCells;
     double sharedEt;
     CellVec cells; //shared cells
-};
 
-//order the EtNeighbor objects
-struct EtNeighborLessThan
-{
-    bool operator()(const EtNeighbor& lhs, const EtNeighbor& rhs) const {
-	return lhs.sharedEt<rhs.sharedEt;
-    };
+  friend bool operator<(const EtNeighbor& lhs, const EtNeighbor& rhs){
+	return lhs.sharedEt < rhs.sharedEt;
+  }
+
 };
 
 /*!
@@ -69,37 +68,34 @@ public:
 
     ///action
     void splitMerge(ValueCellList& jets);
+    void splitMerge(CellList& jets);
 
 private:
-    typedef vector<StEtaPhiCell*> CellVec;
-    void copyPreJets(ValueCellList& preJets);
-    //void copyPostJets(ValueCellList& preJets);
-    void split(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells);
-    void merge(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells);
 
-private:
-    double mSplitFraction;
-    ValueCellList mPreJets;
+  typedef vector<StEtaPhiCell*> CellVec;
+  void copyPreJets(ValueCellList& preJets);
+  //void copyPostJets(ValueCellList& preJets);
+  void split(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells);
+  void merge(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells);
 
-    typedef multimap<EtNeighbor, EtNeighbor, EtNeighborLessThan> EtNeighborMap;
-    EtNeighborMap mOverlapMap;
+  double mSplitFraction;
+  ValueCellList mPreJets;
+
+  CellList _preJets;
+  std::list<EtNeighbor> _OverlapList;
 	
 };
 
 //non-members
 
 //are these the same?  If so, book-keep
-inline bool EtNeighbor::check(StEtaPhiCell* lhs, StEtaPhiCell* rhs) 
+inline void EtNeighbor::check(StEtaPhiCell* lhs, StEtaPhiCell* rhs) 
 {
-    if (*lhs==*rhs) {
-	sharedEt += lhs->eT();
-	++nCommonCells;
-	cells.push_back(lhs);
-	return true;
-    }
-    else {
-	return false;
-    }
+  if (!(*lhs==*rhs)) return;
+
+  sharedEt += lhs->eT();
+  ++nCommonCells;
+  cells.push_back(lhs);
 }
 
 inline ostream& operator<<(ostream& os, const EtNeighbor& n) 
