@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.35 2008/05/05 14:49:53 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.36 2008/05/05 21:08:13 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -46,7 +46,11 @@ StJetEtCellFactory* StConeJetFinder::makeCellFactory()
 
 void StConeJetFinder::findJets(JetList& protoJetList)
 {
-  mPreJets.clear();
+  for(CellList::iterator it = _preJets.begin(); it != _preJets.end(); ++it) {
+    delete *it;
+  }
+  _preJets.clear();
+  //  mPreJets.clear();
   mSearchCounter = 0;
 
   _cellGrid.fillGridWith(protoJetList);
@@ -65,18 +69,27 @@ void StConeJetFinder::findJets(JetList& protoJetList)
     initializeWorkCell((*etCell));
 
     findJets_sub1();
+
   }
     
   findJets_sub2();
 
   protoJetList.clear(); //clear 'em, add them back in as we find them
   
-  for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
-    StEtaPhiCell* rj = &(*realJetIt);
+  // for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
+  //   StEtaPhiCell* rj = &(*realJetIt);
+  //   if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
+  //     protoJetList.push_back( collectCell(rj) );
+  //   }
+  // }
+
+  for (CellList::iterator realJetIt = _preJets.begin(); realJetIt != _preJets.end(); ++realJetIt) {
+    StEtaPhiCell* rj = *realJetIt;
     if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
       protoJetList.push_back( collectCell(rj) );
     }
   }
+
 }
 
 bool StConeJetFinder::acceptSeed(const StEtaPhiCell* cell)
@@ -112,10 +125,21 @@ void StConeJetFinder::findJets_sub2()
   if (mPars.addMidpoints()) { 	//add seeds at midpoints
     addSeedsAtMidpoint(); //old style, add midpoints before split/merge
   }
+
     
   if (mPars.doSplitMerge()) {//split-merge
-    mMerger->splitMerge(mPreJets);
+    //    mMerger->splitMerge(mPreJets);
+    mMerger->splitMerge(_preJets);
   }
+//   cout << "++++++++++++++++++ "<< _preJets.size() << " " << mPreJets.size() << endl;
+//   CellList::iterator it1 = _preJets.begin();
+//   ValueCellList::iterator it2 = mPreJets.begin();
+//   for(unsigned int i = 0; i != _preJets.size(); ++i) {
+//     cout << "-----------------" << (**it1 == *it2) << endl;
+//     ++it1;
+//     ++it2;
+//   }
+	
 }
 
 StConeJetFinder::SearchResult StConeJetFinder::doSearch()
@@ -175,7 +199,9 @@ void StConeJetFinder::addToPrejets(StEtaPhiCell& cell)
     cell.setEt(cell.Et() + (*etCell)->eT());
   }
 
-  mPreJets.push_back(cell);
+  _preJets.push_back(new StEtaPhiCell(cell));
+  //  mPreJets.push_back(cell);
+
 }
 
 void StConeJetFinder::doMinimization()
@@ -230,24 +256,57 @@ void StConeJetFinder::addSeedsAtMidpoint()
     //we have to first locate and remember pairs separated by d<2.*r.  
     //we then have to add midpoints.
 	
-  mMidpointVec.clear();
-	
-  for (ValueCellList::iterator pj1 = mPreJets.begin(); pj1 != mPreJets.end(); ++pj1) {
-    for (ValueCellList::iterator pj2 = pj1; pj2 != mPreJets.end(); ++pj2) {
-      if (*pj1 == *pj2) continue;
+//  mMidpointVec.clear();
 
-      if ((*pj1).distance(*pj2) > 2.0*mPars.coneRadius()) continue;
+//   for (ValueCellList::iterator pj1 = mPreJets.begin(); pj1 != mPreJets.end(); ++pj1) {
+//     for (ValueCellList::iterator pj2 = pj1; pj2 != mPreJets.end(); ++pj2) {
+//       if (*pj1 == *pj2) continue;
+// 
+//       if ((*pj1).distance(*pj2) > 2.0*mPars.coneRadius()) continue;
+// 
+//       mMidpointVec.push_back(VCLItPairVec::value_type(pj1, pj2));
+// 
+//     }
+//   }
+// 	
+//   for (VCLItPairVec::iterator it = mMidpointVec.begin(); it != mMidpointVec.end(); ++it) {
+// 
+//     mWorkCell->clear();
+// 		
+//     StEtaPhiCell* mp = defineMidpoint(*(*it).first, *(*it).second );
+// 
+//     initializeWorkCell(mp);
+// 	    
+//     mSearchCounter = 0;
+//     SearchResult res = doSearch();
+//     if (mPars.requiredStableMidpoints()) {
+//       if (res == kConverged) {
+// 	addToPrejets(*mWorkCell);
+//       }	
+//     } else {
+//       addToPrejets(*mWorkCell);
+//     }
+//   }
 
-      mMidpointVec.push_back(VCLItPairVec::value_type(pj1, pj2));
+  _cellPairList.clear();
+
+  for (CellList::iterator pj1 = _preJets.begin(); pj1 != _preJets.end(); ++pj1) {
+    for (CellList::iterator pj2 = pj1; pj2 != _preJets.end(); ++pj2) {
+
+      if (**pj1 == **pj2) continue;
+
+      if ((*pj1)->distance(**pj2) > 2.0*mPars.coneRadius()) continue;
+
+      _cellPairList.push_back(CellPairList::value_type(pj1, pj2));
 
     }
   }
 	
-  for (VCLItPairVec::iterator it = mMidpointVec.begin(); it != mMidpointVec.end(); ++it) {
+  for (CellPairList::iterator it = _cellPairList.begin(); it != _cellPairList.end(); ++it) {
 
     mWorkCell->clear();
 		
-    StEtaPhiCell* mp = defineMidpoint(*(*it).first, *(*it).second );
+    StEtaPhiCell* mp = defineMidpoint(**(*it).first, **(*it).second );
 
     initializeWorkCell(mp);
 	    
@@ -261,6 +320,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
       addToPrejets(*mWorkCell);
     }
   }
+
 }
 
 const StProtoJet& StConeJetFinder::collectCell(StEtaPhiCell* seed)
