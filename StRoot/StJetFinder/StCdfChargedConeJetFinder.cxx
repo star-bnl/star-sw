@@ -1,4 +1,4 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.18 2008/04/30 00:23:31 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.19 2008/05/05 00:32:47 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
@@ -32,7 +32,7 @@ void StCdfChargedConeJetFinder::findJets_sub2()
 
 }
 
-bool StCdfChargedConeJetFinder::acceptSeed(const StJetEtCell* cell)
+bool StCdfChargedConeJetFinder::acceptSeed(const StEtaPhiCell* cell)
 {
   return (cell->nTimesUsed()==0 && cell->empty()==false);
 }
@@ -41,7 +41,7 @@ void StCdfChargedConeJetFinder::print()
 {
 }
 
-bool StCdfChargedConeJetFinder::shouldNotAddToTheCell(const StJetEtCell& theCell, const StJetEtCell& otherCell) const
+bool StCdfChargedConeJetFinder::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const
 {
   if (otherCell.nTimesUsed()) return true;
   if (otherCell.empty()) return true;

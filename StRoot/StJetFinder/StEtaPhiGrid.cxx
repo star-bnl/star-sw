@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.cxx,v 1.3 2008/04/30 00:23:34 tai Exp $
+// $Id: StEtaPhiGrid.cxx,v 1.4 2008/05/05 00:32:48 tai Exp $
 #include "StEtaPhiGrid.h"
 
 #include "StConePars.h"
@@ -23,7 +23,7 @@ void StEtaPhiGrid::buildGrid(StJetEtCellFactory* cellFactory)
       double phiMin = _pars.PhiMin() + static_cast<double>(j)*_pars.phiWidth();
       double phiMax = phiMin + _pars.phiWidth();
 
-      StJetEtCell* cell = cellFactory->create(etaMin, etaMax, phiMin, phiMax);
+      StEtaPhiCell* cell = cellFactory->create(etaMin, etaMax, phiMin, phiMax);
 			
       _EtCellList.push_back(cell);
 			
@@ -58,7 +58,7 @@ StEtaPhiGrid::CellList StEtaPhiGrid::EtSortedCellList()
   return _EtCellList;
 }
 
-StEtaPhiGrid::CellList StEtaPhiGrid::WithinTheConeRadiusCellList(const StJetEtCell& theCell) const
+StEtaPhiGrid::CellList StEtaPhiGrid::WithinTheConeRadiusCellList(const StEtaPhiCell& theCell) const
 {
   CellList ret;
 
@@ -74,7 +74,7 @@ StEtaPhiGrid::CellList StEtaPhiGrid::WithinTheConeRadiusCellList(const StJetEtCe
       if (iModPhi < 0) iModPhi = iModPhi + _pars.Nphi();
       if (iModPhi >= _pars.Nphi()) iModPhi = iModPhi - _pars.Nphi();
 
-      StJetEtCell* otherCell = CellI(iEta, iModPhi);
+      StEtaPhiCell* otherCell = CellI(iEta, iModPhi);
 
       if(theCell.distance(*otherCell) >= _pars.coneRadius()) continue; 
 
@@ -86,13 +86,13 @@ StEtaPhiGrid::CellList StEtaPhiGrid::WithinTheConeRadiusCellList(const StJetEtCe
   return ret;
 }
 
-StJetEtCell* StEtaPhiGrid::Cell(double eta, double phi)
+StEtaPhiCell* StEtaPhiGrid::Cell(double eta, double phi)
 {
   CellMap::iterator it = _EtCellMap.find(findKey(eta, phi));
   return (it != _EtCellMap.end()) ? (*it).second : 0;
 }
 
-StJetEtCell* StEtaPhiGrid::CellI(int iEta, int iPhi) const
+StEtaPhiCell* StEtaPhiGrid::CellI(int iEta, int iPhi) const
 {
   CellMap::const_iterator it = _EtCellMap.find(StEtGridKey(iEta, iPhi));
   return (it != _EtCellMap.end()) ? (*it).second : 0;

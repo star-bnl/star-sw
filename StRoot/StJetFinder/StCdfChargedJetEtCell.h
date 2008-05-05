@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedJetEtCell.h,v 1.4 2008/04/28 21:59:06 tai Exp $
+// $Id: StCdfChargedJetEtCell.h,v 1.5 2008/05/05 00:32:47 tai Exp $
 //StCdfChargedJetEtCell.h
 //M.L. Miller (Yale Software)
 //12/02
@@ -33,7 +33,7 @@ public:
     virtual void add(const StProtoJet&);
     
     ///Add another cell to this one
-    virtual void add(StJetEtCell* cell);
+    virtual void add(StEtaPhiCell* cell);
     
     ///internal reset for next pass at jet-finding
     virtual void clear(); 
@@ -48,7 +48,7 @@ protected:
 inline void StCdfChargedJetEtCell::clear()
 {
     mLcpPt=0.0;
-    StJetEtCell::clear();
+    StEtaPhiCell::clear();
 }
 
 #endif // StCdfChargedJetEtCell_HH

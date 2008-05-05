@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedConeJetFinder.h,v 1.12 2008/05/04 23:29:16 tai Exp $
+// $Id: StCdfChargedConeJetFinder.h,v 1.13 2008/05/05 00:32:47 tai Exp $
 
 /*!
   This is an implemenation of the CDF Charged jet finder (analagous to "Simple UA1 Jet Finder" but
@@ -35,9 +35,9 @@ private:
   void findJets_sub1();
   void findJets_sub2();
 
-  bool shouldNotAddToTheCell(const StJetEtCell& theCell, const StJetEtCell& otherCell) const;
+  bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
 
-  bool acceptSeed(const StJetEtCell* cell);
+  bool acceptSeed(const StEtaPhiCell* cell);
 
   StJetEtCellFactory* makeCellFactory();
 

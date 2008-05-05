@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.32 2008/04/30 01:43:08 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.33 2008/05/05 00:32:48 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -71,19 +71,19 @@ void StConeJetFinder::findJets(JetList& protoJetList)
   protoJetList.clear(); //clear 'em, add them back in as we find them
   
   for (ValueCellList::iterator realJetIt=mPreJets.begin(); realJetIt!=mPreJets.end(); ++realJetIt) {
-    StJetEtCell* rj = &(*realJetIt);
+    StEtaPhiCell* rj = &(*realJetIt);
     if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
       protoJetList.push_back( collectCell(rj) );
     }
   }
 }
 
-bool StConeJetFinder::acceptSeed(const StJetEtCell* cell)
+bool StConeJetFinder::acceptSeed(const StEtaPhiCell* cell)
 {
     return (cell->empty()==false);
 }
 
-void StConeJetFinder::initializeWorkCell(const StJetEtCell* other)
+void StConeJetFinder::initializeWorkCell(const StEtaPhiCell* other)
 {
     mWorkCell.clear();
     mWorkCell = *other;
@@ -147,7 +147,7 @@ bool StConeJetFinder::isInTheVolume(double eta, double phi)
     return (_cellGrid.Cell(eta, phi)) ? true : false;
 }
 
-bool StConeJetFinder::shouldNotAddToTheCell(const StJetEtCell& theCell, const StJetEtCell& otherCell) const
+bool StConeJetFinder::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const
 {
   if (otherCell.empty()) return true;
   if (otherCell.eT() <= mPars.assocEtMin()) return true; 
@@ -159,9 +159,9 @@ bool StConeJetFinder::areTheyInTheSameCell(double eta1, double phi1, double eta2
   return(_cellGrid.Cell(eta1, phi1) == _cellGrid.Cell(eta2, phi2));
 }
 
-void StConeJetFinder::addToPrejets(StJetEtCell& cell)
+void StConeJetFinder::addToPrejets(StEtaPhiCell& cell)
 {
-  StJetEtCell* realCell = _cellGrid.Cell(cell.eta(), cell.phi());
+  StEtaPhiCell* realCell = _cellGrid.Cell(cell.eta(), cell.phi());
   if (!realCell) {
     cout << "PreJetInitializer(). ERROR:\t"
 	 << "real Cell doesn't exist." << endl;
@@ -193,7 +193,7 @@ void StConeJetFinder::doMinimization()
       }			
 
       //find cell corresponding to centroid of cone
-      StJetEtCell* newCenterCell = _cellGrid.Cell(mWorkCell.centroid().eta(), mWorkCell.centroid().phi());
+      StEtaPhiCell* newCenterCell = _cellGrid.Cell(mWorkCell.centroid().eta(), mWorkCell.centroid().phi());
       if (!newCenterCell) {
 	cout << "newCenterCell doesn't exist.  key:\t" << endl;
 	res = kLeftVolume;
@@ -218,7 +218,7 @@ double midpoint(double v1, double v2)
     return (high - low)/2. + low;
 }
 
-StJetEtCell* StConeJetFinder::defineMidpoint(const StJetEtCell& pj1, const StJetEtCell& pj2) 
+StEtaPhiCell* StConeJetFinder::defineMidpoint(const StEtaPhiCell& pj1, const StEtaPhiCell& pj2) 
 {
     double etaMid = midpoint(pj1.eta(), pj2.eta());
     double phiMid = midpoint(pj1.phi(), pj2.phi());
@@ -247,7 +247,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
 
     mWorkCell.clear();
 		
-    StJetEtCell* mp = defineMidpoint(*(*it).first, *(*it).second );
+    StEtaPhiCell* mp = defineMidpoint(*(*it).first, *(*it).second );
 
     initializeWorkCell(mp);
 	    
@@ -263,7 +263,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
   }
 }
 
-const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
+const StProtoJet& StConeJetFinder::collectCell(StEtaPhiCell* seed)
 {
 
   if (seed->cellList().empty()) {
@@ -276,14 +276,14 @@ const StProtoJet& StConeJetFinder::collectCell(StJetEtCell* seed)
 	
   //arbitrarily choose protojet from first cell in list
   CellList& cells = seed->cellList();
-  StJetEtCell* centerCell = cells.front();
+  StEtaPhiCell* centerCell = cells.front();
   StProtoJet& center = centerCell->protoJet();
 	
 		
   //now combine protojets from other cells
   for (CellList::iterator it = cells.begin(); it != cells.end(); ++it) {
     if (it != cells.begin()) { //don't double count first!
-      StJetEtCell* cell = (*it);
+      StEtaPhiCell* cell = (*it);
       if (!cell) {
 	cout <<"\tStConeJetFinder::collectCell(). ERROR:\t"
 	     <<"null cell.  skip"<<endl;
@@ -331,17 +331,17 @@ void StConeJetFinder::print()
 
 //non members ---
 
-void PreJetLazyUpdater ::operator()(StJetEtCell& cell)
+void PreJetLazyUpdater ::operator()(StEtaPhiCell& cell)
 {
     sumEt += cell.eT();
 }
 
-void PreJetLazyUpdater ::operator()(StJetEtCell* cell)
+void PreJetLazyUpdater ::operator()(StEtaPhiCell* cell)
 {
     (*this)(*cell);
 }
 
-void PostMergeUpdater::operator()(StJetEtCell& cell)
+void PostMergeUpdater::operator()(StEtaPhiCell& cell)
 {
     //now update each cell:
     PreJetLazyUpdater updater;

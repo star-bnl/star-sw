@@ -1,10 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedJetEtCellFactory.cxx,v 1.1 2008/04/29 00:11:09 tai Exp $
+// $Id: StCdfChargedJetEtCellFactory.cxx,v 1.2 2008/05/05 00:32:47 tai Exp $
 #include "StCdfChargedJetEtCellFactory.h"
 
 #include "StCdfChargedJetEtCell.h"
 
-StJetEtCell* StCdfChargedJetEtCellFactory::create(double etaMin, double etaMax, double phiMin, double phiMax)
+StEtaPhiCell* StCdfChargedJetEtCellFactory::create(double etaMin, double etaMax, double phiMin, double phiMax)
 { 
   return new StCdfChargedJetEtCell(etaMin, etaMax, phiMin, phiMax);
 }

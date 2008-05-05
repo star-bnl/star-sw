@@ -1,4 +1,4 @@
-// $Id: StJetSpliterMerger.cxx,v 1.5 2008/04/30 01:43:09 tai Exp $
+// $Id: StJetSpliterMerger.cxx,v 1.6 2008/05/05 00:32:49 tai Exp $
 //StJetSpliterMerger.cxx
 //M.L. Miller (Yale Software)
 //10/02
@@ -21,7 +21,7 @@ using std::find_first_of;
 using std::sort;
 
 #include "StProtoJet.h"
-#include "StJetEtCell.h"
+#include "StEtaPhiCell.h"
 #include "Functors.h"
 #include "StJetSpliterMerger.h"
 
@@ -36,11 +36,11 @@ void StJetSpliterMerger::splitMerge(ValueCellList& preJets)
     mOverlapMap.clear();
 
     //sort them in descending order in et: (et1>et2>...>etn)
-    mPreJets.sort(std::greater<StJetEtCell>());
+    mPreJets.sort(std::greater<StEtaPhiCell>());
 	
     ValueCellList::iterator rootIt = mPreJets.begin();
-    StJetEtCell& root = *rootIt;
-    StJetEtCell::CellList& rootCells = root.cellList();
+    StEtaPhiCell& root = *rootIt;
+    StEtaPhiCell::CellList& rootCells = root.cellList();
 		
     // We define a comparison between the "root" jet and the "other" jet.
 		
@@ -48,11 +48,11 @@ void StJetSpliterMerger::splitMerge(ValueCellList& preJets)
 			
       if (otherIt != rootIt) { //don't compare to self
 				
-	StJetEtCell::CellList& otherCells = (*otherIt).cellList();
+	StEtaPhiCell::CellList& otherCells = (*otherIt).cellList();
 	EtNeighbor neighbor;
 				
-	for (StJetEtCell::CellList::iterator rootSetIt = rootCells.begin(); rootSetIt != rootCells.end(); ++rootSetIt) {
-	  for (StJetEtCell::CellList::iterator otherSetIt = otherCells.begin(); otherSetIt != otherCells.end(); ++otherSetIt) {
+	for (StEtaPhiCell::CellList::iterator rootSetIt = rootCells.begin(); rootSetIt != rootCells.end(); ++rootSetIt) {
+	  for (StEtaPhiCell::CellList::iterator otherSetIt = otherCells.begin(); otherSetIt != otherCells.end(); ++otherSetIt) {
 	    neighbor.check(*rootSetIt, *otherSetIt);
 	  }
 	}
@@ -70,7 +70,7 @@ void StJetSpliterMerger::splitMerge(ValueCellList& preJets)
       mPreJets.erase(rootIt);
     } else {
       EtNeighbor& n = (*(mOverlapMap.begin())).second;
-      StJetEtCell& neighborJet = *(n.location);
+      StEtaPhiCell& neighborJet = *(n.location);
 
       if (n.sharedEt/neighborJet.eT() > splitFraction() ) { //merge these two
 	merge(root, neighborJet, n.cells);
@@ -86,8 +86,8 @@ void StJetSpliterMerger::splitMerge(ValueCellList& preJets)
 
 }
 
-//this really has to be encapsulated in StJetEtCell class.  For now we bust out the guts of the code here
-void StJetSpliterMerger::merge(StJetEtCell& root, StJetEtCell& neighbor, CellVec& commonCells)
+//this really has to be encapsulated in StEtaPhiCell class.  For now we bust out the guts of the code here
+void StJetSpliterMerger::merge(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells)
 {
     CellList& rootList = root.cellList();
     CellList& neighborList = neighbor.cellList();
@@ -118,8 +118,8 @@ void StJetSpliterMerger::merge(StJetEtCell& root, StJetEtCell& neighbor, CellVec
     //cout <<"root after merge:    \t"<<root<<endl;
 }
 
-//this really has to be encapsulated in StJetEtCell class.  For now we bust out the guts of the code here
-void StJetSpliterMerger::split(StJetEtCell& root, StJetEtCell& neighbor, CellVec& commonCells)
+//this really has to be encapsulated in StEtaPhiCell class.  For now we bust out the guts of the code here
+void StJetSpliterMerger::split(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells)
 {
     CellList& rootList = root.cellList();
     CellList& neighborList = neighbor.cellList();

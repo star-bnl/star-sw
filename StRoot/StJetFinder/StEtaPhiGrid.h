@@ -1,11 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.h,v 1.3 2008/04/30 00:23:34 tai Exp $
+// $Id: StEtaPhiGrid.h,v 1.4 2008/05/05 00:32:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STETAPHIGRID_H
 #define STETAPHIGRID_H
 
 #include "StEtGridKey.h"
-#include "StJetEtCell.h"
+#include "StEtaPhiCell.h"
 
 #include <map>
 #include <list>
@@ -20,10 +20,10 @@ class StEtaPhiGrid {
 public:
 
   typedef std::list<StProtoJet> JetList;
-  typedef std::map<StEtGridKey, StJetEtCell*> CellMap;
+  typedef std::map<StEtGridKey, StEtaPhiCell*> CellMap;
   typedef CellMap::value_type CellMapValType;
-  typedef StJetEtCell::CellList CellList;
-  typedef std::list<StJetEtCell> ValueCellList;
+  typedef StEtaPhiCell::CellList CellList;
+  typedef std::list<StEtaPhiCell> ValueCellList;
 
   StEtaPhiGrid(StConePars& pars) : _pars(pars) { }
 
@@ -32,13 +32,13 @@ public:
   void fillGridWith(JetList& protoJetList);
 
   CellList EtSortedCellList();
-  CellList WithinTheConeRadiusCellList(const StJetEtCell& theCell) const;
+  CellList WithinTheConeRadiusCellList(const StEtaPhiCell& theCell) const;
 
-  StJetEtCell* Cell(double eta, double phi);
+  StEtaPhiCell* Cell(double eta, double phi);
 
 private:
 
-  StJetEtCell* CellI(int iEta, int iPhi) const;
+  StEtaPhiCell* CellI(int iEta, int iPhi) const;
 
   StEtGridKey findKey(double eta, double phi) const;
   int findEtaKey(double eta) const;

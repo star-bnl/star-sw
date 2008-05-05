@@ -19,13 +19,13 @@ StCdfChargedJetEtCell::~StCdfChargedJetEtCell()
 
 void StCdfChargedJetEtCell::add(const StProtoJet& pj)
 {
-    StJetEtCell::add(pj);
+    StEtaPhiCell::add(pj);
     if (pj.pt()>mLcpPt) {
 	mLcpPt = pj.pt();
     }
 }
 
-void StCdfChargedJetEtCell::add(StJetEtCell* cell)
+void StCdfChargedJetEtCell::add(StEtaPhiCell* cell)
 {
-    StJetEtCell::add(cell);
+    StEtaPhiCell::add(cell);
 }

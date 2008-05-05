@@ -1,9 +1,9 @@
-// $Id: StJetEtCellFactory.cxx,v 1.2 2008/04/30 01:43:09 tai Exp $
+// $Id: StJetEtCellFactory.cxx,v 1.3 2008/05/05 00:32:49 tai Exp $
 #include "StJetEtCellFactory.h"
 
 #include "StJetEtCell.h"
 
-StJetEtCell* StJetEtCellFactory::create(double etaMin, double etaMax, double phiMin, double phiMax)
+StEtaPhiCell* StJetEtCellFactory::create(double etaMin, double etaMax, double phiMin, double phiMax)
 { 
   return new StJetEtCell(etaMin, etaMax, phiMin, phiMax);
 }

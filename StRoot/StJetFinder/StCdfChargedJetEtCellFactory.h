@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedJetEtCellFactory.h,v 1.1 2008/04/29 00:11:09 tai Exp $
+// $Id: StCdfChargedJetEtCellFactory.h,v 1.2 2008/05/05 00:32:48 tai Exp $
 #ifndef STCDFCHARGEDJETETCELLFACTORY_H
 #define STCDFCHARGEDJETETCELLFACTORY_H
 
@@ -8,7 +8,7 @@
 class StCdfChargedJetEtCellFactory : public StJetEtCellFactory {
 
 public:
-  StJetEtCell* create(double etaMin, double etaMax, double phiMin, double phiMax);
+  StEtaPhiCell* create(double etaMin, double etaMax, double phiMin, double phiMax);
 
 };
 
