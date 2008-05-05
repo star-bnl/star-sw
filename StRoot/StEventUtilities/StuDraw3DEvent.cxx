@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.3 2008/05/05 05:02:12 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.4 2008/05/05 20:09:09 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -130,7 +130,9 @@ void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes)
          if (pt > 1.5 ) hue = 0;
          Int_t r,g,b;
          TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
-         Color_t trackColor =  TColor::GetColor(r,g,b);
+         // Normalize
+         float factor = 1./TMath::Sqrt(1.*r*r+1.*g*g+1.*b*b);
+         Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
          Track(*track,trackColor);
       }
    }    
