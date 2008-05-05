@@ -1,9 +1,16 @@
-// $Id: StuDraw3DEvent.cxx,v 1.1 2008/05/05 01:06:48 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.2 2008/05/05 02:28:37 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
+#include "TColor.h"
 #include "StEventHelper.h"
+#include "StEvent.h"
 #include "StTrack.h"
+#include "StHit.h"
+#include "StTpcHit.h"
+#include "StTrackNode.h"
+#include "StTrackGeometry.h"
+#include "StTpcHitCollection.h"
 #include "StMeasuredPoint.h"
 
 ClassImp(StuDraw3DEvent)
@@ -84,6 +91,72 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_
 {
    const StDraw3DStyle &style =  Style(sty);
    return TrackInOut(track, in, style.Col(),style.Sty(),style.Siz() );
+}
+
+//___________________________________________________
+void StuDraw3DEvent::Tracks(const StEvent* event)
+{
+   const StSPtrVecTrackNode& theNodes = event->trackNodes();
+   Tracks(theNodes);
+}
+
+//___________________________________________________
+void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes)
+{
+   // const double lineWidth    = 0.4;
+ //  const double sstep        = mFewerPointsPerTrack ? 4 : 1;
+   const Int_t lightness    = 50;
+   const Int_t saturation   = 100;
+   Int_t hue  = 0;
+
+   //
+   //  Handle options
+   //
+   // int  trackGrayLevel = mBlackBackground ? 1 : 0;
+
+   StTrack *track;
+   StThreeVectorD p;
+   unsigned int i;
+   // double pt;
+   //    int  minFitPoints = mAllGlobalTracks ? 1 : mMinFitPoints;
+   for (i=0; i<theNodes.size(); i++) {
+      track = theNodes[i]->track(global);
+      if (track && track->flag() > 0
+         //  &&   track->fitTraits().numberOfFitPoints(kTpcId) >= minFitPoints) 
+         )
+      {
+         double pt = track->geometry()->momentum().perp();
+         hue = Int_t(256.*(1.-pt/1.5)); //color code from StuPostscript
+         if (pt > 1.5 ) hue = 0;
+         Int_t r,g,b;
+         TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
+         Color_t trackColor =  TColor::GetColor(r,g,b);
+         Track(*track,trackColor);
+      }
+   }    
+}
+
+//___________________________________________________
+void StuDraw3DEvent::Hits(const StEvent *event,bool trackHitsOnly)
+{
+   if (event) 
+    Hits(event->tpcHitCollection(),trackHitsOnly);
+}
+
+//___________________________________________________
+void StuDraw3DEvent::Hits(const StTpcHitCollection* hits,bool trackHitsOnly)
+{
+   if (!hits) return;
+   unsigned int m, n, h;
+   const StTpcHit *hit;            
+   for (n=0; n<hits->numberOfSectors(); n++) {
+      for (m=0; m<hits->sector(n)->numberOfPadrows(); m++) { 
+         for (h=0; h<hits->sector(n)->padrow(m)->hits().size(); h++) {
+            hit = hits->sector(n)->padrow(m)->hits()[h];
+            if (!trackHitsOnly || hit->trackReferenceCount())   Hit(*hit);
+         }
+      }
+   }
 }
 
 //___________________________________________________
