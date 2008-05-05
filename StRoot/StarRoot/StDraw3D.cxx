@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.13 2008/05/05 00:31:17 fine Exp $
+// $Id: StDraw3D.cxx,v 1.14 2008/05/05 02:46:30 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -167,9 +167,11 @@ TVirtualPad *StDraw3D::InitPad()
 //___________________________________________________
 StDraw3D::~StDraw3D()
 {
-    Clear();
-    delete fPad; 
-    fPad = 0;
+    if (fPad) {
+       fPad->Clear();
+       delete fPad;
+       fPad = 0;
+    }
 }
 
 //___________________________________________________
@@ -178,8 +180,8 @@ void  StDraw3D::Clear(Option_t *opt)
    // Clear the view
    if (fPad) {
       fPad->Clear(opt);
-      fPad->Modified();
-      fPad->Update();
+      Modified();
+      Update();
    }
 }
 
@@ -355,6 +357,18 @@ void StDraw3D::AddComment(const char *cmnt)
 {
    // add the "model" comment for the current view
    if (fView) fView->addComment(cmnt);
+}
+
+//___________________________________________________
+void StDraw3D::Update()
+{
+   if (fPad) fPad->Update();
+}
+
+//___________________________________________________
+void StDraw3D::Modified()
+{
+   if (fPad) fPad->Modified();
 }
 
 //___________________________________________________
