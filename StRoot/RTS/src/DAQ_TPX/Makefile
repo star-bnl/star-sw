@@ -36,7 +36,7 @@ libs: $(LIBS)
 libtpx.a : $(OBJS)
 	@$(RTS_AR)
 
-#sim_tester: sim_tester.o ../RTS_READER/librts_reader.a libtpx.a ../DAQ_TOF/libtof.a ../DAQ_PP2PP/libpp2pp.a ../SFS/libsfs.a ../LOG/librtslog.a
+sim_tester: sim_tester.o ../RTS_READER/librts_reader.a libtpx.a  ../DAQ_ESMD/libesmd.a ../DAQ_TPC/libtpc.a ../DAQ_TOF/libtof.a ../DAQ_PP2PP/libpp2pp.a ../DAQ_LEGACY/liblegacy.a ../SFS/libsfs.a ../LOG/librtslog.a
 
 
 # DO NOT DELETE

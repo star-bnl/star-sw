@@ -998,6 +998,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 	
 	for(int s=min_sec;s<=max_sec;s++) {
 		if(fcf_algo[s]) {
+			LOG(DBG,"start_evt(): sec %d\n",s) ;
 			fcf_algo[s]->start_evt() ;	// make sure we start a new event!
 		}
 
@@ -1060,6 +1061,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 		}
 
 		fcf_algo[sim->sec]->do_pad(&a, track_id) ;
+		LOG(DBG,"do_pad(): sec %d, row %d, pad %d: %d",sim->sec,a.row,a.pad,a.count) ;
 	}
 
 
