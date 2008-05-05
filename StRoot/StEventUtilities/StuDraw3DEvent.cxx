@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.2 2008/05/05 02:28:37 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.3 2008/05/05 05:02:12 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -34,7 +34,7 @@ StuDraw3DEvent::StuDraw3DEvent(TVirtualPad *pad): StDraw3D(pad)
 TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size_t siz)
 {
    StTrackPoints trPnt(&track);
-   TObject *l = Line(trPnt.GetN(),trPnt.GetP(),col,sty,siz);
+   TObject *l = Line(trPnt.Size(),trPnt.GetXYZ(0),col,sty,siz);
    SetModel((TObject*)&track);
    return l;
 }
@@ -83,7 +83,7 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
                   ,  Color_t col,  Style_t sty,  Size_t siz)
 {
    StInnOutPoints trInOut(&track,in);
-   return Points(trInOut.GetN(),trInOut.GetP(),col,sty,siz);
+   return Points(trInOut.Size(),trInOut.GetXYZ(0),col,sty,siz);
 }
 
 //___________________________________________________
