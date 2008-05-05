@@ -1,7 +1,7 @@
 #ifndef STAR_StDraw3DEvent
 #define STAR_StDraw3DEvent
 
-// $Id: StDraw3DEvent.h,v 1.5 2008/05/03 22:09:08 fine Exp $
+// $Id: StDraw3DEvent.h,v 1.6 2008/05/05 00:31:17 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
@@ -23,9 +23,14 @@ class StMeasuredPoint;
 
 class StDraw3DEvent : public StDraw3D
 {
+  private:
+     StDraw3DEvent(const StDraw3DEvent&){;}
+     void operator=(const StDraw3DEvent&){;}
+
   public:
      StDraw3DEvent(TVirtualPad *pad = 0);
      virtual ~StDraw3DEvent(){;}
+     static StDraw3DEvent *Display();
      virtual TObject *Track(const StTrack &track
                   ,  Color_t col
                   ,  Style_t sty= Style_t(-1)
@@ -53,6 +58,8 @@ class StDraw3DEvent : public StDraw3D
      template <class T> TObject *Vector(const StThreeVector<T> &vector, EDraw3DStyle sty=kVtx);
      ClassDef(StDraw3DEvent,0);
 };
+
+extern StDraw3DEvent *gEventDisplay;
 
 //___________________________________________________
 template<class T> TObject *StDraw3DEvent::Vector(const StThreeVector<T> &vector

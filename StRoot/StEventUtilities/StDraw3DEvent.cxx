@@ -1,4 +1,4 @@
-// $Id: StDraw3DEvent.cxx,v 1.4 2008/05/03 22:09:08 fine Exp $
+// $Id: StDraw3DEvent.cxx,v 1.5 2008/05/05 00:31:16 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -86,3 +86,7 @@ TObject *StDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_t
    return TrackInOut(track, in, style.Col(),style.Sty(),style.Siz() );
 }
 
+//___________________________________________________
+StDraw3DEvent *StDraw3DEvent::Display(){ return gEventDisplay;}
+
+StDraw3DEvent *gEventDisplay = new StDraw3DEvent();
