@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.14 2008/05/05 02:46:30 fine Exp $
+// $Id: StDraw3D.cxx,v 1.15 2008/05/05 15:49:12 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -139,7 +139,7 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
      }
 };
 //___________________________________________________
-StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fViewer(0),fView(0)
+StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fViewer(0),fView(0),fBkColor(fgBkColor)
 {
    static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
    static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
