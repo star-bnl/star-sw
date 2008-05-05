@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
 		// add a bunch of adc data for a specific sector:row
 		for(int cou=0;cou<1;cou++) {
-		for(int pad=(1+cou*10+sec);pad<(4+cou*10+sec);pad++) {	// invent these pads...
+		for(int pad=86;pad<=88;pad++) {	// invent these pads...
 			int tb_cou ;
 
 			// allocate space for at least 512 pixels (timebins)
