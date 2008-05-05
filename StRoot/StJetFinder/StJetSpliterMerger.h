@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetSpliterMerger.h,v 1.3 2008/04/30 01:43:09 tai Exp $
+// $Id: StJetSpliterMerger.h,v 1.4 2008/05/05 00:32:49 tai Exp $
 //StJetSpliterMerger.h
 //M.L. Miller (Yale Software)
 //10/02
@@ -15,19 +15,19 @@ using std::multimap;
 
 //local
 #include "StConeJetFinder.h"
-#include "StJetEtCell.h"
+#include "StEtaPhiCell.h"
 
 //useful struct for recording overlaping jets
 struct EtNeighbor {
 
     typedef StConeJetFinder::ValueCellList ValueCellList;
-    typedef vector<StJetEtCell*> CellVec;
+    typedef vector<StEtaPhiCell*> CellVec;
 	
     EtNeighbor();
     EtNeighbor(ValueCellList::iterator it, int n, double et);
 	
     //are these the same?  If so, book-keep
-    bool check(StJetEtCell* lhs, StJetEtCell* rhs);
+    bool check(StEtaPhiCell* lhs, StEtaPhiCell* rhs);
 	
     //careful, this gets invalidated after insert/delete/sorts in list
     ValueCellList::iterator location; 
@@ -58,7 +58,7 @@ class StJetSpliterMerger
 {
 public:
     typedef StConeJetFinder::ValueCellList ValueCellList;
-    typedef StJetEtCell::CellList CellList;
+    typedef StEtaPhiCell::CellList CellList;
 
     StJetSpliterMerger() {};
     virtual ~StJetSpliterMerger() {};
@@ -71,11 +71,11 @@ public:
     void splitMerge(ValueCellList& jets);
 
 private:
-    typedef vector<StJetEtCell*> CellVec;
+    typedef vector<StEtaPhiCell*> CellVec;
     void copyPreJets(ValueCellList& preJets);
     //void copyPostJets(ValueCellList& preJets);
-    void split(StJetEtCell& root, StJetEtCell& neighbor, CellVec& commonCells);
-    void merge(StJetEtCell& root, StJetEtCell& neighbor, CellVec& commonCells);
+    void split(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells);
+    void merge(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellVec& commonCells);
 
 private:
     double mSplitFraction;
@@ -89,7 +89,7 @@ private:
 //non-members
 
 //are these the same?  If so, book-keep
-inline bool EtNeighbor::check(StJetEtCell* lhs, StJetEtCell* rhs) 
+inline bool EtNeighbor::check(StEtaPhiCell* lhs, StEtaPhiCell* rhs) 
 {
     if (*lhs==*rhs) {
 	sharedEt += lhs->eT();

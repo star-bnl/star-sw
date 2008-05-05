@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.28 2008/04/30 00:23:33 tai Exp $
+// $Id: StConeJetFinder.h,v 1.29 2008/05/05 00:32:48 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -38,8 +38,8 @@ class StConeJetFinder : public StJetFinder {
 
 public:
 	
-  typedef StJetEtCell::CellList CellList;
-  typedef list<StJetEtCell> ValueCellList;
+  typedef StEtaPhiCell::CellList CellList;
+  typedef list<StEtaPhiCell> ValueCellList;
 	
     ///cstr-dstr
     StConeJetFinder(const StConePars& pars);
@@ -65,9 +65,9 @@ protected:
   virtual StJetEtCellFactory* makeCellFactory();
 
 	
-    void initializeWorkCell(const StJetEtCell* other);
+    void initializeWorkCell(const StEtaPhiCell* other);
 
-    void addToPrejets(StJetEtCell& cell);
+    void addToPrejets(StEtaPhiCell& cell);
 	
     enum SearchResult {kTooManyTries=0, kLeftVolume=1, kConverged=2, kContinueSearch=3};	
     SearchResult doSearch();
@@ -76,16 +76,16 @@ protected:
 	
     void addSeedsAtMidpoint();
 	
-    StJetEtCell* defineMidpoint(const StJetEtCell& pj1, const StJetEtCell& pj2) ;
+    StEtaPhiCell* defineMidpoint(const StEtaPhiCell& pj1, const StEtaPhiCell& pj2) ;
 	
-  virtual bool acceptSeed(const StJetEtCell* cell);
+  virtual bool acceptSeed(const StEtaPhiCell* cell);
 
 	
-  const StProtoJet& collectCell(StJetEtCell* seed);
+  const StProtoJet& collectCell(StEtaPhiCell* seed);
 	
   StConePars mPars; ///run-time pars
 	
-  StJetEtCell mWorkCell;
+  StEtaPhiCell mWorkCell;
   int mSearchCounter;
 	
   StJetSpliterMerger* mMerger;
@@ -103,7 +103,7 @@ private:
   virtual void findJets_sub1();
   virtual void findJets_sub2();
 
-  virtual bool shouldNotAddToTheCell(const StJetEtCell& theCell, const StJetEtCell& otherCell) const;
+  virtual bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
 
   bool isInTheVolume(double eta, double phi);
   bool areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2);
@@ -122,13 +122,13 @@ struct PreJetLazyUpdater //assume proto-jet updated
     PreJetLazyUpdater() : sumEt(0.) {};
     double sumEt;
 	
-    void operator()(StJetEtCell& cell);
-    void operator()(StJetEtCell* cell);
+    void operator()(StEtaPhiCell& cell);
+    void operator()(StEtaPhiCell* cell);
 };
 
 struct PostMergeUpdater
 {
-    void operator()(StJetEtCell& cell);
+    void operator()(StEtaPhiCell& cell);
 };
 
 #endif

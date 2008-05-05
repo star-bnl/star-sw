@@ -1,16 +1,16 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCellFactory.h,v 1.1 2008/04/29 00:11:10 tai Exp $
+// $Id: StJetEtCellFactory.h,v 1.2 2008/05/05 00:32:49 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STJETETCELLFACTORY_H
 #define STJETETCELLFACTORY_H
 
 
-class StJetEtCell;
+class StEtaPhiCell;
 
 class StJetEtCellFactory {
 
 public:
-  virtual StJetEtCell* create(double etaMin, double etaMax, double phiMin, double phiMax);
+  virtual StEtaPhiCell* create(double etaMin, double etaMax, double phiMin, double phiMax);
 };
 
 
