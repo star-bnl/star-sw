@@ -299,6 +299,26 @@ Known Problems: The side view and text are not compatible. It works
                 bit doesn't look nice. 
 
 
+** StuDraw3DEvent: OpenInventor Event Display
+------------------------------------------
+Files:       StuDraw3DEvent.h StuDraw3DEvent.h
+Author:      Valeri Fine
+Date:        May 2008
+Description:
+
+The class derived from the StDraw3D (StarRoot package) to draw rhe StEvent
+component using OpenGL graphics and OpenInventor Viewer
+
+Upon loading the StEventUtilities shared library one global instance of the class 
+is to be created automatically and ready to be used.
+
+It is available via and availbelt via "gEventDisplay" global pointer.
+
+To see how it wokrs one can merely invoke the Draw3DTest() method
+
+          gEventDisplay->Draw3DTest();
+
+
 
 * Template
   Please use the following template for documentation.

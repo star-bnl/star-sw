@@ -1,7 +1,7 @@
-#ifndef STAR_StDraw3DEvent
-#define STAR_StDraw3DEvent
+#ifndef STAR_StuDraw3DEvent
+#define STAR_StuDraw3DEvent
 
-// $Id: StDraw3DEvent.h,v 1.7 2008/05/05 01:06:48 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.1 2008/05/05 01:06:48 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
@@ -9,7 +9,7 @@
 
   ///////////////////////////////////////////////////////////////////////
   //
-  // class StDraw3DEvent - to draw the StEvent primitives like StTrack and StMeasuredPoint 
+  // class StuDraw3DEvent - to draw the StEvent primitives like StTrack and StMeasuredPoint 
   // as 3D points and 3D lines
   // decoratated with the STAR detector geometry
   //
@@ -21,16 +21,16 @@
 class StTrack;
 class StMeasuredPoint;
 
-class StDraw3DEvent : public StDraw3D
+class StuDraw3DEvent : public StDraw3D
 {
   private:
-     StDraw3DEvent(const StDraw3DEvent&){;}
-     void operator=(const StDraw3DEvent&){;}
+     StuDraw3DEvent(const StuDraw3DEvent&){;}
+     void operator=(const StuDraw3DEvent&){;}
 
   public:
-     StDraw3DEvent(TVirtualPad *pad = 0);
-     virtual ~StDraw3DEvent(){;}
-     static StDraw3DEvent *Display();
+     StuDraw3DEvent(TVirtualPad *pad = 0);
+     virtual ~StuDraw3DEvent(){;}
+     static StuDraw3DEvent *Display();
      virtual TObject *Track(const StTrack &track
                   ,  Color_t col
                   ,  Style_t sty= Style_t(-1)
@@ -56,18 +56,18 @@ class StDraw3DEvent : public StDraw3D
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
      template <class T> TObject *Vector(const StThreeVector<T> &vector, EDraw3DStyle sty=kVtx);
-     ClassDef(StDraw3DEvent,0);
+     ClassDef(StuDraw3DEvent,0);
 };
 
-extern StDraw3DEvent *g_EventDisplay;
+extern StuDraw3DEvent *gEventDisplay;
 
 //___________________________________________________
-template<class T> TObject *StDraw3DEvent::Vector(const StThreeVector<T> &vector
+template<class T> TObject *StuDraw3DEvent::Vector(const StThreeVector<T> &vector
                   ,  Color_t col,  Style_t sty,  Size_t siz)
 {  return Point(vector.x(),vector.y(),vector.z(),col,sty,siz); }
 
 //___________________________________________________
-template <class T> TObject *StDraw3DEvent::Vector(const StThreeVector<T> &vector, EDraw3DStyle sty)
+template <class T> TObject *StuDraw3DEvent::Vector(const StThreeVector<T> &vector, EDraw3DStyle sty)
 {
      const StDraw3DStyle &style =  Style(sty);
      return Vector(vector.x(),vector.y(),vector.z(),style.Col(),style.Sty(),style.Siz()); 

@@ -1,16 +1,16 @@
-// $Id: StDraw3DEvent.cxx,v 1.6 2008/05/05 01:06:47 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.1 2008/05/05 01:06:48 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
-#include "StDraw3DEvent.h"
+#include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
 #include "StEventHelper.h"
 #include "StTrack.h"
 #include "StMeasuredPoint.h"
 
-ClassImp(StDraw3DEvent)
+ClassImp(StuDraw3DEvent)
            
   ////////////////////////////////////////////////////////////////////////
   //
-  //  Class StDraw3DEvent - to draw the 3D StEvent primitives like StTrack, StHit, StVertex
+  //  Class StuDraw3DEvent - to draw the 3D StEvent primitives like StTrack, StHit, StVertex
   //  decoratated with the STAR detector geometry
   //
   //  It provides the simple way to visualize the event 
@@ -20,11 +20,11 @@ ClassImp(StDraw3DEvent)
   //
   ////////////////////////////////////////////////////////////////////////
 //___________________________________________________
-StDraw3DEvent::StDraw3DEvent(TVirtualPad *pad): StDraw3D(pad)
+StuDraw3DEvent::StuDraw3DEvent(TVirtualPad *pad): StDraw3D(pad)
 { }
 
 //___________________________________________________
-TObject *StDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size_t siz)
+TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size_t siz)
 {
    StTrackPoints trPnt(&track);
    TObject *l = Line(trPnt.GetN(),trPnt.GetP(),col,sty,siz);
@@ -33,14 +33,14 @@ TObject *StDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size
 }
 
 //___________________________________________________
-TObject *StDraw3DEvent::Track(const StTrack &track, EDraw3DStyle sty)
+TObject *StuDraw3DEvent::Track(const StTrack &track, EDraw3DStyle sty)
 {
    const StDraw3DStyle &style =  Style(sty);
    return Track(track, style.Col(),style.Sty(),style.Siz() );
 }
 
 //___________________________________________________
-TObject *StDraw3DEvent::Hit(const StMeasuredPoint &hit
+TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit
                   ,  Color_t col,  Style_t sty,  Size_t siz)
 {
    // Draw the StMeasuredPoint, StHit, StVertex with the graphical attribute provided
@@ -51,28 +51,28 @@ TObject *StDraw3DEvent::Hit(const StMeasuredPoint &hit
 }
 
 //___________________________________________________
-TObject *StDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
+TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
 {
    const StDraw3DStyle &style =  Style(sty);
    return Hit(hit, style.Col(),style.Sty(),style.Siz() );
 }
 
 //___________________________________________________
-TObject *StDraw3DEvent::Vertex(const StMeasuredPoint &vertex
+TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vertex
                   ,  Color_t col,  Style_t sty, Size_t siz)
 {
    return Hit(vertex,col,sty,siz);
 }
 
 //___________________________________________________
-TObject *StDraw3DEvent::Vertex(const StMeasuredPoint &vtx, EDraw3DStyle sty)
+TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vtx, EDraw3DStyle sty)
 {
    const StDraw3DStyle &style =  Style(sty);
    return Vertex(vtx, style.Col(),style.Sty(),style.Siz() );
 }
 
 //___________________________________________________
-TObject *StDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
+TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
                   ,  Color_t col,  Style_t sty,  Size_t siz)
 {
    StInnOutPoints trInOut(&track,in);
@@ -80,13 +80,13 @@ TObject *StDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
 }
 
 //___________________________________________________
-TObject *StDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_t in)
+TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_t in)
 {
    const StDraw3DStyle &style =  Style(sty);
    return TrackInOut(track, in, style.Col(),style.Sty(),style.Siz() );
 }
 
 //___________________________________________________
-StDraw3DEvent *StDraw3DEvent::Display(){ return g_EventDisplay;}
+StuDraw3DEvent *StuDraw3DEvent::Display(){ return gEventDisplay;}
 
-StDraw3DEvent *g_EventDisplay = new StDraw3DEvent();
+StuDraw3DEvent *gEventDisplay = new StuDraw3DEvent();
