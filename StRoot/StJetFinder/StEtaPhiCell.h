@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiCell.h,v 1.2 2008/05/05 00:32:48 tai Exp $
+// $Id: StEtaPhiCell.h,v 1.3 2008/05/05 01:46:06 tai Exp $
 #ifndef STETAPHICELL_H
 #define STETAPHICELL_H
 
@@ -26,6 +26,8 @@ public:
   //simple access
   double eta() const { return (mEtaMax+mEtaMin)/2.; }
   double phi() const { return (mPhiMax+mPhiMin)/2.; }
+
+  //  virtual double eT() const = 0;
   virtual double eT() const { return mEt; }
 
   int nTimesUsed() const { return mNtimesUsed; }
@@ -67,14 +69,17 @@ public:
   const StProtoJet& centroid();
 
   ///Add a protojet to this cell
+  //  virtual void add(const StProtoJet&) = 0;
   virtual void add(const StProtoJet&);
   ///Add another cell to this cell
+  //  virtual void add(StEtaPhiCell* cell) = 0;
   virtual void add(StEtaPhiCell* cell);
 
   ///count how many jets ref this cell
   void setNtimesUsed(int v) { mNtimesUsed = v; }
   ///internal reset for next pass at jet-finding
-  virtual void clear(); 
+  virtual void clear();
+  //  virtual void clear() = 0;
 
   ///distance measures (to be moved to polymorphic behavior)
   double deltaPhi(const StEtaPhiCell& rhs) const { return deltaphi( phi(), rhs.phi() ); }
