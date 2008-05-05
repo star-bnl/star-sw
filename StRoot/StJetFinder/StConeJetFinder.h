@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.29 2008/05/05 00:32:48 tai Exp $
+// $Id: StConeJetFinder.h,v 1.30 2008/05/05 01:46:06 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -85,7 +85,7 @@ protected:
 	
   StConePars mPars; ///run-time pars
 	
-  StEtaPhiCell mWorkCell;
+  StEtaPhiCell *mWorkCell;
   int mSearchCounter;
 	
   StJetSpliterMerger* mMerger;

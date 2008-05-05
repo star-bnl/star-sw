@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.33 2008/05/05 00:32:48 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.34 2008/05/05 01:46:05 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -21,6 +21,7 @@ using namespace StSpinJet;
 
 StConeJetFinder::StConeJetFinder(const StConePars& pars)
   : mPars(pars)
+  , mWorkCell(new StJetEtCell)
   , mSearchCounter(0)
   , mMerger(new StJetSpliterMerger())
   , _cellGrid(mPars)
@@ -85,10 +86,10 @@ bool StConeJetFinder::acceptSeed(const StEtaPhiCell* cell)
 
 void StConeJetFinder::initializeWorkCell(const StEtaPhiCell* other)
 {
-    mWorkCell.clear();
-    mWorkCell = *other;
-    mWorkCell.setEt(0.);
-    if (mWorkCell.cellList().empty()==false) {
+    mWorkCell->clear();
+    *mWorkCell = *other;
+    mWorkCell->setEt(0.);
+    if (mWorkCell->cellList().empty()==false) {
 	cout <<"StConeJetFinder::initializeWorkCell(). ERROR:\t"
 	     <<"workCell is not empty. abort()"<<endl;
 	abort();
@@ -102,7 +103,7 @@ void StConeJetFinder::findJets_sub1()
     doMinimization();
   } else {
     doSearch();
-    addToPrejets(mWorkCell);
+    addToPrejets(*mWorkCell);
   }
 }
 
@@ -126,18 +127,18 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
     return kTooManyTries;
   }
     
-  CellList cellList = _cellGrid.WithinTheConeRadiusCellList(mWorkCell);
+  CellList cellList = _cellGrid.WithinTheConeRadiusCellList(*mWorkCell);
 
   for (CellList::iterator cell = cellList.begin(); cell != cellList.end(); ++cell) {
-    if(shouldNotAddToTheCell(mWorkCell, **cell)) continue;
-    mWorkCell.add(*cell);
+    if(shouldNotAddToTheCell(*mWorkCell, **cell)) continue;
+    mWorkCell->add(*cell);
   }
 
-  const StProtoJet& centroid = mWorkCell.centroid();
+  const StProtoJet& centroid = mWorkCell->centroid();
 
   if (!isInTheVolume(centroid.eta(), centroid.phi())) return kLeftVolume;
 
-  if(areTheyInTheSameCell(mWorkCell.eta(), mWorkCell.phi(), centroid.eta(), centroid.phi())) return kConverged;
+  if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) return kConverged;
 
   return kContinueSearch;
 }
@@ -188,12 +189,12 @@ void StConeJetFinder::doMinimization()
       res = doSearch();
 	
       if (res == kConverged) {
-	addToPrejets(mWorkCell);
+	addToPrejets(*mWorkCell);
 	break;
       }			
 
       //find cell corresponding to centroid of cone
-      StEtaPhiCell* newCenterCell = _cellGrid.Cell(mWorkCell.centroid().eta(), mWorkCell.centroid().phi());
+      StEtaPhiCell* newCenterCell = _cellGrid.Cell(mWorkCell->centroid().eta(), mWorkCell->centroid().phi());
       if (!newCenterCell) {
 	cout << "newCenterCell doesn't exist.  key:\t" << endl;
 	res = kLeftVolume;
@@ -245,7 +246,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
 	
   for (VCLItPairVec::iterator it = mMidpointVec.begin(); it != mMidpointVec.end(); ++it) {
 
-    mWorkCell.clear();
+    mWorkCell->clear();
 		
     StEtaPhiCell* mp = defineMidpoint(*(*it).first, *(*it).second );
 
@@ -255,10 +256,10 @@ void StConeJetFinder::addSeedsAtMidpoint()
     SearchResult res = doSearch();
     if (mPars.requiredStableMidpoints()) {
       if (res == kConverged) {
-	addToPrejets(mWorkCell);
+	addToPrejets(*mWorkCell);
       }	
     } else {
-      addToPrejets(mWorkCell);
+      addToPrejets(*mWorkCell);
     }
   }
 }

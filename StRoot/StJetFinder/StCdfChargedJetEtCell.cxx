@@ -5,11 +5,11 @@
 #include "StCdfChargedJetEtCell.h"
 
 StCdfChargedJetEtCell::StCdfChargedJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax)
-    : StJetEtCell(etaMin, etaMax, phiMin, phiMax), mLcpPt(0.0)
+    : StEtaPhiCell(etaMin, etaMax, phiMin, phiMax), mLcpPt(0.0)
 {
 }
 
-StCdfChargedJetEtCell::StCdfChargedJetEtCell() : StJetEtCell(), mLcpPt(0.0)
+StCdfChargedJetEtCell::StCdfChargedJetEtCell() : StEtaPhiCell(), mLcpPt(0.0)
 {
 }
 

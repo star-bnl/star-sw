@@ -1,4 +1,4 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.19 2008/05/05 00:32:47 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.20 2008/05/05 01:46:05 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
@@ -24,7 +24,7 @@ StJetEtCellFactory* StCdfChargedConeJetFinder::makeCellFactory()
 void StCdfChargedConeJetFinder::findJets_sub1()
 {
   doSearch();
-  addToPrejets(mWorkCell);
+  addToPrejets(*mWorkCell);
 }
 
 void StCdfChargedConeJetFinder::findJets_sub2()
