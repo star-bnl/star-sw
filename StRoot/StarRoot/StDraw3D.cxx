@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.15 2008/05/05 15:49:12 fine Exp $
+// $Id: StDraw3D.cxx,v 1.16 2008/05/05 16:34:46 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -21,6 +21,8 @@ Color_t StDraw3D::fgColorDefault = Color_t(-1);
 Style_t StDraw3D::fgStyDefault   = Style_t(-1);
 Size_t  StDraw3D::fgSizDefault   = Size_t (-1);
 Color_t StDraw3D::fgBkColor      = kBlack;
+// Canvas counter to create the Unique Canvas names
+Int_t   StDraw3D::fDrawCanvasCounter = -1; 
 
 ClassImp(StDraw3D)
            
@@ -139,7 +141,7 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
      }
 };
 //___________________________________________________
-StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fViewer(0),fView(0),fBkColor(fgBkColor)
+StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
 {
    static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
    static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
@@ -156,7 +158,13 @@ StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fViewer(0),fView(0),fBkColor(fgB
 TVirtualPad *StDraw3D::InitPad() 
 {
    if (!fPad) {
-      fPad = new TCanvas("STAR","Event Viewer", 400,400);
+      fDrawCanvasCounter++;
+      TString canvasName = "STAR";
+      if (fDrawCanvasCounter) {
+           canvasName+="_";
+           canvasName += fDrawCanvasCounter;
+      }
+      fPad = new TCanvas(canvasName.Data(),"Event Viewer", 400,400);
       fPad->SetFillColor(fBkColor);
       fPad->Modified();
       fPad->Update();
