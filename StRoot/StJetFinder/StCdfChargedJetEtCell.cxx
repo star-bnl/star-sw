@@ -9,12 +9,24 @@ StCdfChargedJetEtCell::StCdfChargedJetEtCell(double etaMin, double etaMax, doubl
 {
 }
 
+StCdfChargedJetEtCell::StCdfChargedJetEtCell(const StCdfChargedJetEtCell& c)
+  : StEtaPhiCell(c)
+{
+
+}
+
 StCdfChargedJetEtCell::StCdfChargedJetEtCell() : StEtaPhiCell(), mLcpPt(0.0)
 {
+
 }
 
 StCdfChargedJetEtCell::~StCdfChargedJetEtCell()
 {
+}
+
+StEtaPhiCell* StCdfChargedJetEtCell::clone() const
+{
+  return new StCdfChargedJetEtCell(*this);
 }
 
 void StCdfChargedJetEtCell::add(const StProtoJet& pj)

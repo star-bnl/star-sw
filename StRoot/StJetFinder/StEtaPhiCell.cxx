@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiCell.cxx,v 1.1 2008/05/05 01:46:06 tai Exp $
+// $Id: StEtaPhiCell.cxx,v 1.2 2008/05/06 02:13:15 tai Exp $
 #include "StEtaPhiCell.h"
 
 #include <cmath>
@@ -33,6 +33,11 @@ StEtaPhiCell::~StEtaPhiCell()
 {
 
 }
+
+// StEtaPhiCell* StEtaPhiCell::clone() const
+// {
+//   return new StEtaPhiCell(*this);
+// }
 
 void StEtaPhiCell::add(const StProtoJet& pj)
 {

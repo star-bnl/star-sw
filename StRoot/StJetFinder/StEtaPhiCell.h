@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiCell.h,v 1.3 2008/05/05 01:46:06 tai Exp $
+// $Id: StEtaPhiCell.h,v 1.4 2008/05/06 02:13:16 tai Exp $
 #ifndef STETAPHICELL_H
 #define STETAPHICELL_H
 
@@ -22,6 +22,8 @@ public:
   StEtaPhiCell(); 
   StEtaPhiCell(double etaMin, double etaMax, double phiMin, double phiMax);
   virtual ~StEtaPhiCell();
+
+  virtual StEtaPhiCell* clone() const = 0;
 
   //simple access
   double eta() const { return (mEtaMax+mEtaMin)/2.; }
