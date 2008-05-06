@@ -1,5 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedConeJetFinder.h,v 1.13 2008/05/05 00:32:47 tai Exp $
+// $Id: StCdfChargedConeJetFinder.h,v 1.14 2008/05/06 19:34:05 tai Exp $
+#ifndef STCDFCHARGEDCONEJETFINDER_H
+#define STCDFCHARGEDCONEJETFINDER_H
 
 /*!
   This is an implemenation of the CDF Charged jet finder (analagous to "Simple UA1 Jet Finder" but
@@ -7,10 +9,8 @@
   into a grid, but we sort the grid by it's leading charged particle.
  */
 
-#ifndef StCdfChargedConeJetFinder_HH
-#define StCdfChargedConeJetFinder_HH
 
-#include "StConeJetFinder.h"
+#include "StConeJetFinderBase.h"
 #include "StCdfChargedConePars.h"
 
 #include "StCdfChargedJetEtCellFactory.h"
@@ -20,7 +20,7 @@
   \author M.L. Miller (MIT Software)
   A simple class to encapsulate the requisite run-time parameters of the cdf-charged cone jet algorithm.
 */
-class StCdfChargedConeJetFinder : public StConeJetFinder
+class StCdfChargedConeJetFinder : public StConeJetFinderBase
 {
 public:
 
@@ -43,4 +43,5 @@ private:
 
 };
 
-#endif
+#endif // STCDFCHARGEDCONEJETFINDER_H
+
