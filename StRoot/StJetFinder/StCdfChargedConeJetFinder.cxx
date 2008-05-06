@@ -1,4 +1,4 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.20 2008/05/05 01:46:05 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.21 2008/05/06 19:34:04 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
@@ -7,7 +7,7 @@
 #include "StCdfChargedJetEtCell.h"
 
 StCdfChargedConeJetFinder::StCdfChargedConeJetFinder(const StCdfChargedConePars& pars) 
-  : StConeJetFinder(pars)
+  : StConeJetFinderBase(pars)
 {
 
 }
