@@ -10,12 +10,6 @@ using namespace std;
 
 #include "StJetEtCell.h"
 
-struct StJetEtCellEquals
-{
-  bool operator()(const StJetEtCell* lhs, const StJetEtCell* rhs) const
-  { return (*lhs)==(*rhs); }
-};
-
 #include "StEtGridKey.h"
 
 struct StJetEtCellEtLessThan

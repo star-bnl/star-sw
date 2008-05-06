@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.38 2008/05/06 02:13:15 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.39 2008/05/06 03:06:10 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -138,7 +138,7 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
 
   for (CellList::iterator cell = cellList.begin(); cell != cellList.end(); ++cell) {
     if(shouldNotAddToTheCell(*mWorkCell, **cell)) continue;
-    mWorkCell->add(*cell);
+    mWorkCell->addCell(*cell);
   }
 
   const StProtoJet& centroid = mWorkCell->centroid();
@@ -244,7 +244,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
   for (CellList::iterator pj1 = _preJets.begin(); pj1 != _preJets.end(); ++pj1) {
     for (CellList::iterator pj2 = pj1; pj2 != _preJets.end(); ++pj2) {
 
-      if (**pj1 == **pj2) continue;
+      if ((*pj1)->isSamePosition(**pj2)) continue;
 
       if ((*pj1)->distance(**pj2) > 2.0*mPars.coneRadius()) continue;
 

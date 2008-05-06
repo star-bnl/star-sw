@@ -29,15 +29,15 @@ StEtaPhiCell* StCdfChargedJetEtCell::clone() const
   return new StCdfChargedJetEtCell(*this);
 }
 
-void StCdfChargedJetEtCell::add(const StProtoJet& pj)
+void StCdfChargedJetEtCell::addProtoJet(const StProtoJet& pj)
 {
-    StEtaPhiCell::add(pj);
+    StEtaPhiCell::addProtoJet(pj);
     if (pj.pt()>mLcpPt) {
 	mLcpPt = pj.pt();
     }
 }
 
-void StCdfChargedJetEtCell::add(StEtaPhiCell* cell)
+void StCdfChargedJetEtCell::addCell(StEtaPhiCell* cell)
 {
-    StEtaPhiCell::add(cell);
+    StEtaPhiCell::addCell(cell);
 }

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCell.h,v 1.16 2008/05/06 02:13:16 tai Exp $
+// $Id: StJetEtCell.h,v 1.17 2008/05/06 03:06:12 tai Exp $
 //StJetEtCell.h
 //M.L. Miller (Yale Software) (adapted from Akio Ogawa's work)
 //07/02
@@ -37,8 +37,8 @@ public:
 
   double eT() const { return mEt; }
 
-  void add(const StProtoJet&);
-  void add(StEtaPhiCell* cell);
+  void addProtoJet(const StProtoJet&);
+  void addCell(StEtaPhiCell* cell);
   void clear(); 
 
 };

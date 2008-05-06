@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.cxx,v 1.4 2008/05/05 00:32:48 tai Exp $
+// $Id: StEtaPhiGrid.cxx,v 1.5 2008/05/06 03:06:12 tai Exp $
 #include "StEtaPhiGrid.h"
 
 #include "StConePars.h"
@@ -42,7 +42,7 @@ void StEtaPhiGrid::fillGridWith(JetList& protoJetList)
   for (JetList::iterator protoJet = protoJetList.begin(); protoJet != protoJetList.end(); ++protoJet) {
     CellMap::iterator where = _EtCellMap.find(findKey((*protoJet).eta(), (*protoJet).phi()));
     if (where != _EtCellMap.end())
-      (*where).second->add(*protoJet);
+      (*where).second->addProtoJet(*protoJet);
     else
       cout << "StEtaPhiGrid::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
   }

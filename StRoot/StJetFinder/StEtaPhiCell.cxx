@@ -1,30 +1,30 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiCell.cxx,v 1.2 2008/05/06 02:13:15 tai Exp $
+// $Id: StEtaPhiCell.cxx,v 1.3 2008/05/06 03:06:11 tai Exp $
 #include "StEtaPhiCell.h"
 
 #include <cmath>
 #include <algorithm>
 
 StEtaPhiCell::StEtaPhiCell(double etaMin, double etaMax, double phiMin, double phiMax)
-  : mEtaMin(etaMin)
+  : mNtimesUsed(0)
+  , mEt(0.)
+  , mUpToDate(false)
+  , mEtaMin(etaMin)
   , mEtaMax(etaMax)
   , mPhiMin(phiMin)
   , mPhiMax(phiMax)
-  , mEt(0.)
-  , mNtimesUsed(0)
-  , mUpToDate(false)
 {
 
 }
 
 StEtaPhiCell::StEtaPhiCell()
-  : mEtaMin(0)
+  : mNtimesUsed(0)
+  , mEt(0)
+  , mUpToDate(false)
+  , mEtaMin(0)
   , mEtaMax(0)
   , mPhiMin(0)
   , mPhiMax(0)
-  , mEt(0)
-  , mNtimesUsed(0)
-  , mUpToDate(false)
 {
 
 }
@@ -34,12 +34,7 @@ StEtaPhiCell::~StEtaPhiCell()
 
 }
 
-// StEtaPhiCell* StEtaPhiCell::clone() const
-// {
-//   return new StEtaPhiCell(*this);
-// }
-
-void StEtaPhiCell::add(const StProtoJet& pj)
+void StEtaPhiCell::addProtoJet(const StProtoJet& pj)
 {
   mEt += pj.eT();
   mProtoJet.add(pj);
@@ -55,7 +50,7 @@ void StEtaPhiCell::clear()
   mUpToDate = false;
 }
 
-void StEtaPhiCell::add(StEtaPhiCell* cell)
+void StEtaPhiCell::addCell(StEtaPhiCell* cell)
 {
   mEt += cell->eT();
   mCells.push_back(cell);
@@ -85,7 +80,7 @@ const StProtoJet& StEtaPhiCell::centroid()
     //loop on daughter cells:
     for (CellList::iterator it1 = mCells.begin(); it1 != mCells.end(); ++it1) {
 
-      if ( ((*this)==(*it1))==false ) { //don't add to self!
+      if (!isSamePosition(**it1)) { //don't add to self!
 				
 	//for each cell, get proto-jet four-list
 	StProtoJet& pj = (*it1)->protoJet();
