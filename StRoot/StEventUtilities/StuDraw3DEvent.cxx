@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.4 2008/05/05 20:09:09 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.5 2008/05/06 17:55:56 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -12,6 +12,7 @@
 #include "StTrackGeometry.h"
 #include "StTpcHitCollection.h"
 #include "StMeasuredPoint.h"
+#include "StTrackDetectorInfo.h"
 
 ClassImp(StuDraw3DEvent)
            
@@ -94,14 +95,14 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_
 }
 
 //___________________________________________________
-void StuDraw3DEvent::Tracks(const StEvent* event)
+void StuDraw3DEvent::Tracks(const StEvent* event, StTrackType type)
 {
-   const StSPtrVecTrackNode& theNodes = event->trackNodes();
-   Tracks(theNodes);
+   Hits(event,kTracksOnly,type);
 }
 
 //___________________________________________________
-void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes)
+void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes
+      , StTrackType type)
 {
    // const double lineWidth    = 0.4;
  //  const double sstep        = mFewerPointsPerTrack ? 4 : 1;
@@ -120,7 +121,7 @@ void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes)
    // double pt;
    //    int  minFitPoints = mAllGlobalTracks ? 1 : mMinFitPoints;
    for (i=0; i<theNodes.size(); i++) {
-      track = theNodes[i]->track(global);
+      track = theNodes[i]->track(type);
       if (track && track->flag() > 0
          //  &&   track->fitTraits().numberOfFitPoints(kTpcId) >= minFitPoints) 
          )
@@ -135,29 +136,80 @@ void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes)
          Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
          Track(*track,trackColor);
       }
-   }    
+   }
 }
 
 //___________________________________________________
-void StuDraw3DEvent::Hits(const StEvent *event,bool trackHitsOnly)
+void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType type)
 {
-   if (event) 
-    Hits(event->tpcHitCollection(),trackHitsOnly);
-}
-
-//___________________________________________________
-void StuDraw3DEvent::Hits(const StTpcHitCollection* hits,bool trackHitsOnly)
-{
-   if (!hits) return;
+   if (!event) return; // no event
+   const StTpcHitCollection* hits = event->tpcHitCollection();
+   if (!hits) return; // there is no hits
    unsigned int m, n, h;
-   const StTpcHit *hit;            
-   for (n=0; n<hits->numberOfSectors(); n++) {
-      for (m=0; m<hits->sector(n)->numberOfPadrows(); m++) { 
-         for (h=0; h<hits->sector(n)->padrow(m)->hits().size(); h++) {
-            hit = hits->sector(n)->padrow(m)->hits()[h];
-            if (!trackHitsOnly || hit->trackReferenceCount())   Hit(*hit);
+   if (trackHitsOnly != kUnusedHitsOnly) {
+      const Int_t lightness    = 50;
+      const Int_t saturation   = 100;
+      Int_t hue  = 0;
+
+      StHit *hit;
+      Style_t sty = Style(kUsedHit).Sty();
+      Size_t  siz = Style(kUsedHit).Siz();
+      Style_t styPnt = Style(kTrackBegin).Sty();
+      Size_t  sizPnt = Style(kTrackBegin).Siz();
+
+      const StSPtrVecTrackNode& theNodes = event->trackNodes();
+      for (unsigned int i=0; i<theNodes.size(); i++) {
+         StTrack *track = theNodes[i]->track(type);
+         if (track && track->flag() > 0
+               && track->detectorInfo() 
+         //  &&   track->fitTraits().numberOfFitPoints(kTpcId) >= minFitPoints) 
+         )
+        {
+            double pt = track->geometry()->momentum().perp();
+            hue = Int_t(256.*(1.-pt/1.5)); //color code from StuPostscript
+            if (pt > 1.5 ) hue = 0;
+            Int_t r,g,b;
+            TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
+            // Normalize
+            float factor = 1./TMath::Sqrt(1.*r*r+1.*g*g+1.*b*b);
+            Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
+            if ( trackHitsOnly != kUsedHits) {
+               Track(*track,trackColor);
+               TrackInOut(*track, true,  trackColor,  styPnt, sizPnt);
+               TrackInOut(*track, false, trackColor,  styPnt, sizPnt);
+            }
+            if ( trackHitsOnly != kTracksOnly) {
+               // look for the hits:
+               std::vector<float> hitPoints;
+               const StPtrVecHit& trackHits = track->detectorInfo()->hits(kTpcId);
+               for (m=0; m<trackHits.size(); m++) {
+                  hit = trackHits[m];
+                  hitPoints.push_back( hit->position().x());
+                  hitPoints.push_back( hit->position().y());
+                  hitPoints.push_back( hit->position().z());
+              }
+              std::vector<float>::iterator xyz = hitPoints.begin();
+              Points(hitPoints.size()/3,&*xyz,trackColor,sty,siz);
+              if (trackHitsOnly == kUsedHits) SetModel(track);
+           }
+        }
+     }
+   } else {
+      const StTpcHit *hit;
+      std::vector<float> hitPoints;
+      for (n=0; n<hits->numberOfSectors(); n++) {
+         for (m=0; m<hits->sector(n)->numberOfPadrows(); m++) { 
+            for (h=0; h<hits->sector(n)->padrow(m)->hits().size(); h++) {
+               hit = hits->sector(n)->padrow(m)->hits()[h];
+                hitPoints.push_back( hit->position().x());
+                hitPoints.push_back( hit->position().y());
+                hitPoints.push_back( hit->position().z());
+            }
          }
       }
+      std::vector<float>::iterator xyz = hitPoints.begin();
+      Points(hitPoints.size()/3,&*xyz,kUnusedHit);
+      SetComment("Unused TPC hits");
    }
 }
 

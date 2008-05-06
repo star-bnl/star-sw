@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.17 2008/05/05 20:08:44 fine Exp $
+// $Id: StDraw3D.cxx,v 1.18 2008/05/06 17:55:54 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -123,7 +123,7 @@ class poly_line_3D : public TPolyLine3D, public view_3D {
 //___________________________________________________
 class poly_marker_3D : public TPolyMarker3D, public view_3D {
    public:
-     poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p),view_3D(){;}
+     poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p,1,option),view_3D(){;}
      virtual ~poly_marker_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
@@ -150,6 +150,8 @@ StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),f
    AddStyle(kVtx,         VertCol,VertSty,VertSiz);
    AddStyle(kPrimaryTrack,TrakCol,TrakSty,TrakSiz);
    AddStyle(kGlobalTrack, TrakCol,TrakSty,TrakSiz);
+   AddStyle(kTrackBegin,  VertCol,VertSty,VertSiz);
+   AddStyle(kTrackEnd,    VertCol,VertSty,VertSiz);
    AddStyle(kUsedHit,     UHitCol,UHitSty,UHitSiz);
    AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
 }
