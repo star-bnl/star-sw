@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrCellData.h,v 1.3 2008/03/14 17:37:13 masayuki Exp $
+ * $Id: StTofrCellData.h,v 1.4 2008/05/06 18:42:09 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,8 +10,8 @@
  *****************************************************************
  *
  * $Log: StTofrCellData.h,v $
- * Revision 1.3  2008/03/14 17:37:13  masayuki
- * add
+ * Revision 1.4  2008/05/06 18:42:09  dongx
+ * Updated for Run8 analysis
  *
  * Revision 1.2  2004/04/12 16:17:03  dongx
  * add AdcLoRes in the ntuple

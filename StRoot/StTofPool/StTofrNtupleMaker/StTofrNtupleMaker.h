@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.h,v 1.3 2008/03/14 17:37:14 masayuki Exp $
+ * $Id: StTofrNtupleMaker.h,v 1.4 2008/05/06 18:42:09 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,8 +11,8 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.h,v $
- * Revision 1.3  2008/03/14 17:37:14  masayuki
- * add
+ * Revision 1.4  2008/05/06 18:42:09  dongx
+ * Updated for Run8 analysis
  *
  * Revision 1.2  2004/04/12 16:17:03  dongx
  * add AdcLoRes in the ntuple
@@ -118,9 +118,9 @@ private:
   TNtuple *mHitPosTuple; //! Hit position data
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofrNtupleMaker.h,v 1.3 2008/03/14 17:37:14 masayuki Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofrNtupleMaker.h,v 1.4 2008/05/06 18:42:09 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StTofrNtupleMaker,1)
+  ClassDef(StTofrNtupleMaker,2)
 };
 
 inline void StTofrNtupleMaker::setOuterTrackGeometry(){mOuterTrackGeometry=true;}
