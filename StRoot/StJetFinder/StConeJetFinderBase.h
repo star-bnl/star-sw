@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.2 2008/05/06 19:40:58 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.3 2008/05/06 22:43:49 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -29,8 +29,6 @@ class StConeJetFinderBase;
 
 #include "StEtaPhiGrid.h"
 
-double midpoint(double v1, double v2);
-
 /*!
   \class StConeJetFinder
   \author M.L. Miller (Yale Software)
@@ -52,8 +50,7 @@ public:
     ///simple access to the parameters
     StConePars pars() const; 
 	
-    ///inherited interface
-    void findJets(JetList& protojets);     
+  virtual void findJets(JetList& protojets) = 0;
 	
 protected:
 		
@@ -73,13 +70,7 @@ protected:
     enum SearchResult {kTooManyTries=0, kLeftVolume=1, kConverged=2, kContinueSearch=3};	
     SearchResult doSearch();
 	
-    void doMinimization();
-	
-    void addSeedsAtMidpoint();
-	
-    StEtaPhiCell* defineMidpoint(const StEtaPhiCell& pj1, const StEtaPhiCell& pj2) ;
-	
-  virtual bool acceptSeed(const StEtaPhiCell* cell);
+  virtual bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
 
 	
   const StProtoJet& collectCell(StEtaPhiCell* seed);
@@ -89,7 +80,6 @@ protected:
   StEtaPhiCell *mWorkCell;
   int mSearchCounter;
 	
-  StJetSpliterMerger* mMerger;
   CellList _preJets;
 	
   typedef vector<std::pair<CellList::iterator, CellList::iterator> > CellPairList;
@@ -97,18 +87,20 @@ protected:
 
   StSpinJet::StEtaPhiGrid _cellGrid;
 	
-private:
 
   void clearPreviousResult();
 
   CellList generateEtOrderedList(JetList& protoJetList);
 
-  void findProtoJets(CellList& orderedList);
+  CellList generateToSearchListFrom(CellList& orderedList);
 
-  virtual void findJets_sub1();
-  virtual void findJets_sub2();
+  void findProtoJets(CellList& toSearchList);
 
   void storeTheResultIn(JetList& protoJetList);
+
+private:
+
+  virtual void findJetAroundThis(StEtaPhiCell* cell) = 0;
 
   virtual bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
 
