@@ -1,11 +1,12 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.3 2008/05/05 02:31:35 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.4 2008/05/06 17:55:56 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
 #include "StThreeVector.hh"
+#include "StEnumerations.h"
 
   ///////////////////////////////////////////////////////////////////////
   //
@@ -24,6 +25,8 @@ class StEvent;
 class StTpcHitCollection;
 class StSPtrVecTrackNode;
 
+enum EStuDraw3DEvent {kUnusedHitsOnly=-1,kUsedHits=0,kUsedHitsTracks=1,kTracksOnly=2};
+
 class StuDraw3DEvent : public StDraw3D
 {
   private:
@@ -34,8 +37,8 @@ class StuDraw3DEvent : public StDraw3D
      StuDraw3DEvent(TVirtualPad *pad = 0);
      virtual ~StuDraw3DEvent(){;}
      static StuDraw3DEvent *Display();
-     virtual void     Tracks(const StEvent* event);
-     virtual void     Tracks(const StSPtrVecTrackNode &tracks);
+     virtual void     Tracks(const StEvent* event, StTrackType type=global);
+     virtual void     Tracks(const StSPtrVecTrackNode &tracks, StTrackType type=global);
      virtual TObject *Track(const StTrack &track
                   ,  Color_t col
                   ,  Style_t sty= Style_t(-1)
@@ -45,8 +48,7 @@ class StuDraw3DEvent : public StDraw3D
                   ,  Color_t col
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
-     virtual void    Hits(const StEvent* event, bool trackHitsOnly=true);
-     virtual void    Hits(const StTpcHitCollection* hits, bool trackHitsOnly=true);
+     virtual void    Hits(const StEvent* event, EStuDraw3DEvent trackHitsOnly=kUsedHits, StTrackType type=global);
      virtual TObject *Hit(const StMeasuredPoint &hit, EDraw3DStyle sty=kUsedHit);
      virtual TObject *Vertex(const StMeasuredPoint &hit
                   ,  Color_t col
