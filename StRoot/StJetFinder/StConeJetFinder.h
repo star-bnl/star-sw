@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.37 2008/05/06 23:33:50 tai Exp $
+// $Id: StConeJetFinder.h,v 1.38 2008/05/06 23:58:55 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -26,9 +26,6 @@ private:
 
   void doMinimization();
 	
-  enum SearchResult {kLeftVolume=1, kConverged=2, kContinueSearch=3};	
-  SearchResult doCountingSearch();
-
   bool isInTheVolume(double eta, double phi);
 
   bool areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2);

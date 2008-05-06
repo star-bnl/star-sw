@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.44 2008/05/06 23:33:50 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.45 2008/05/06 23:58:55 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
@@ -89,11 +89,14 @@ void StConeJetFinder::addSeedsAtMidpoint()
 
     initializeWorkCell(mp);
 	    
-    SearchResult res = doCountingSearch();
+    doSearch();
     if (mPars.requiredStableMidpoints()) {
-      if (res == kConverged) {
-	addToPrejets(*mWorkCell);
-      }	
+      const StProtoJet& centroid = mWorkCell->centroid();
+      if (isInTheVolume(centroid.eta(), centroid.phi())) {
+	if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) {
+	  addToPrejets(*mWorkCell);
+	}	
+      }
     } else {
       addToPrejets(*mWorkCell);
     }
@@ -126,43 +129,30 @@ void StConeJetFinder::doMinimization()
 {
   int _searchCounter = 0;
 	
-    SearchResult res = kContinueSearch;
-    while(res == kContinueSearch) {
+  while(1) {
 
-      if (++_searchCounter > 100) break;
+    if (++_searchCounter > 100) break;
     
-      res = doCountingSearch();
+    doSearch();
 	
-      if (res == kConverged) {
-	addToPrejets(*mWorkCell);
-	break;
-      }			
+    const StProtoJet& centroid = mWorkCell->centroid();
 
-      //find cell corresponding to centroid of cone
-      StEtaPhiCell* newCenterCell = _cellGrid.Cell(mWorkCell->centroid().eta(), mWorkCell->centroid().phi());
-      if (!newCenterCell) {
-	cout << "newCenterCell doesn't exist.  key:\t" << endl;
-	res = kLeftVolume;
-      } else {
-	initializeWorkCell(newCenterCell);
-      }
-    }
+    if (!isInTheVolume(centroid.eta(), centroid.phi())) break;
+
+    if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) {
+      addToPrejets(*mWorkCell);
+      break;
+    }			
+
+    StEtaPhiCell* newCenterCell = _cellGrid.Cell(mWorkCell->centroid().eta(), mWorkCell->centroid().phi());
+    if (!newCenterCell) break;
+
+    initializeWorkCell(newCenterCell);
+
+  }
 
 }
 
-StConeJetFinder::SearchResult StConeJetFinder::doCountingSearch()
-{
-    
-  doSearch();
-
-  const StProtoJet& centroid = mWorkCell->centroid();
-
-  if (!isInTheVolume(centroid.eta(), centroid.phi())) return kLeftVolume;
-
-  if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) return kConverged;
-
-  return kContinueSearch;
-}
 
 bool StConeJetFinder::isInTheVolume(double eta, double phi)
 {
