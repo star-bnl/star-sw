@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedJetEtCell.h,v 1.7 2008/05/06 02:13:15 tai Exp $
+// $Id: StCdfChargedJetEtCell.h,v 1.8 2008/05/06 03:06:10 tai Exp $
 //StCdfChargedJetEtCell.h
 //M.L. Miller (Yale Software)
 //12/02
@@ -33,10 +33,10 @@ public:
     double eT() const {return mLcpPt;}
 
     ///Add a protojet to the cell
-    void add(const StProtoJet&);
+    void addProtoJet(const StProtoJet&);
     
     ///Add another cell to this one
-    void add(StEtaPhiCell* cell);
+    void addCell(StEtaPhiCell* cell);
     
     ///internal reset for next pass at jet-finding
     void clear(); 

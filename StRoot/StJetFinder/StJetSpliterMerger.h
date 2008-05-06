@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetSpliterMerger.h,v 1.6 2008/05/05 21:21:14 tai Exp $
+// $Id: StJetSpliterMerger.h,v 1.7 2008/05/06 03:06:13 tai Exp $
 //StJetSpliterMerger.h
 //M.L. Miller (Yale Software)
 //10/02
@@ -84,7 +84,8 @@ private:
 //are these the same?  If so, book-keep
 inline void EtNeighbor::check(StEtaPhiCell* lhs, StEtaPhiCell* rhs) 
 {
-  if (!(*lhs==*rhs)) return;
+  //  if (!(*lhs==*rhs)) return;
+  if (!lhs->isSamePosition(*rhs)) return;
 
   sharedEt += lhs->eT();
   ++nCommonCells;

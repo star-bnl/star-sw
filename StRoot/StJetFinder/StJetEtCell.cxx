@@ -1,4 +1,4 @@
-// $Id: StJetEtCell.cxx,v 1.11 2008/05/06 02:13:16 tai Exp $
+// $Id: StJetEtCell.cxx,v 1.12 2008/05/06 03:06:12 tai Exp $
 #include "StJetEtCell.h"
 
 StJetEtCell::StJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax)
@@ -28,7 +28,7 @@ StEtaPhiCell* StJetEtCell::clone() const
   return new StJetEtCell(*this);
 }
 
-void StJetEtCell::add(const StProtoJet& pj)
+void StJetEtCell::addProtoJet(const StProtoJet& pj)
 {
   mEt += pj.eT();
   mProtoJet.add(pj);
@@ -44,7 +44,7 @@ void StJetEtCell::clear()
   mUpToDate = false;
 }
 
-void StJetEtCell::add(StEtaPhiCell* cell)
+void StJetEtCell::addCell(StEtaPhiCell* cell)
 {
   mEt += cell->eT();
   mCells.push_back(cell);
