@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.1 2008/05/06 18:55:45 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.2 2008/05/06 19:40:57 tai Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -55,14 +55,7 @@ void StConeJetFinderBase::findJets(JetList& protoJetList)
   // midpoint split/merge
   findJets_sub2();
 
-  protoJetList.clear();
-  
-  for (CellList::iterator jet = _preJets.begin(); jet != _preJets.end(); ++jet) {
-
-    if ((*jet)->cellList().size() == 0) continue;
-
-    protoJetList.push_back( collectCell(*jet) );
-  }
+  storeTheResultIn(protoJetList);
 
 }
 
@@ -93,6 +86,18 @@ void StConeJetFinderBase::findProtoJets(CellList& orderedList)
 
     findJets_sub1();
 
+  }
+}
+
+void StConeJetFinderBase::storeTheResultIn(JetList& protoJetList)
+{
+  protoJetList.clear();
+  
+  for (CellList::iterator jet = _preJets.begin(); jet != _preJets.end(); ++jet) {
+
+    if ((*jet)->cellList().size() == 0) continue;
+
+    protoJetList.push_back( collectCell(*jet) );
   }
 }
 

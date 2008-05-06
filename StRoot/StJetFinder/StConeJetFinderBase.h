@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.1 2008/05/06 18:55:46 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.2 2008/05/06 19:40:58 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -107,6 +107,8 @@ private:
 
   virtual void findJets_sub1();
   virtual void findJets_sub2();
+
+  void storeTheResultIn(JetList& protoJetList);
 
   virtual bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
 
