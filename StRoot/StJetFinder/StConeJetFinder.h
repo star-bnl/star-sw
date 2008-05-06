@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.35 2008/05/06 19:15:17 tai Exp $
+// $Id: StConeJetFinder.h,v 1.36 2008/05/06 22:43:48 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -11,15 +11,23 @@ public:
 	
   StConeJetFinder(const StConePars& pars);
   virtual ~StConeJetFinder();
-	
-protected:
-		
-  friend struct PreJetInitializer; 
-	
-  StConeJetFinder();
 
+  void findJets(JetList& protojets);     
+	
 private:
 
+  void findJetAroundThis(StEtaPhiCell* cell);
+
+  bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
+
+  void addSeedsAtMidpoint();
+
+  StEtaPhiCell* defineMidpoint(const StEtaPhiCell& pj1, const StEtaPhiCell& pj2) ;
+
+  void doMinimization();
+	
+
+  StJetSpliterMerger* mMerger;
 };
 
 #endif

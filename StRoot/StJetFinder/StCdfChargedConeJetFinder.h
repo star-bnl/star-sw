@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedConeJetFinder.h,v 1.14 2008/05/06 19:34:05 tai Exp $
+// $Id: StCdfChargedConeJetFinder.h,v 1.15 2008/05/06 22:43:48 tai Exp $
 #ifndef STCDFCHARGEDCONEJETFINDER_H
 #define STCDFCHARGEDCONEJETFINDER_H
 
@@ -24,20 +24,18 @@ class StCdfChargedConeJetFinder : public StConeJetFinderBase
 {
 public:
 
-    //cstr-dstr
     StCdfChargedConeJetFinder(const StCdfChargedConePars& pars);
     virtual ~StCdfChargedConeJetFinder();
     
-  void print();
+  void findJets(JetList& protojets);
 
 private:    
 
-  void findJets_sub1();
-  void findJets_sub2();
+  void findJetAroundThis(StEtaPhiCell* cell);
 
   bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
 
-  bool acceptSeed(const StEtaPhiCell* cell);
+  bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
 
   StJetEtCellFactory* makeCellFactory();
 

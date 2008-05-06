@@ -1,4 +1,4 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.21 2008/05/06 19:34:04 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.22 2008/05/06 22:43:47 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
@@ -21,24 +21,35 @@ StJetEtCellFactory* StCdfChargedConeJetFinder::makeCellFactory()
   return new StCdfChargedJetEtCellFactory;
 }
 
-void StCdfChargedConeJetFinder::findJets_sub1()
+void StCdfChargedConeJetFinder::findJets(JetList& protoJetList)
 {
+  clearPreviousResult();
+
+  CellList orderedList = generateEtOrderedList(protoJetList);
+
+  CellList toSearchList = generateToSearchListFrom(orderedList);
+
+  findProtoJets(toSearchList);
+
+  storeTheResultIn(protoJetList);
+
+}
+
+void StCdfChargedConeJetFinder::findJetAroundThis(StEtaPhiCell* cell)
+{
+  initializeWorkCell(cell);
+  
   doSearch();
   addToPrejets(*mWorkCell);
 }
 
-void StCdfChargedConeJetFinder::findJets_sub2()
+bool StCdfChargedConeJetFinder::shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const
 {
+  if (cell->nTimesUsed()) return true;
 
-}
+  if (cell->empty()) return true;
 
-bool StCdfChargedConeJetFinder::acceptSeed(const StEtaPhiCell* cell)
-{
-  return (cell->nTimesUsed()==0 && cell->empty()==false);
-}
-
-void StCdfChargedConeJetFinder::print()
-{
+  return false;
 }
 
 bool StCdfChargedConeJetFinder::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const
