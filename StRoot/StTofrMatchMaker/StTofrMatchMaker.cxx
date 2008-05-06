@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.21 2008/04/23 18:20:15 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.22 2008/05/06 18:41:39 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,10 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.22  2008/05/06 18:41:39  dongx
+ * - Fixed bug in ouput histogram filename switch
+ * - Added switch for tpc track tree output
+ *
  * Revision 1.21  2008/04/23 18:20:15  dongx
  * vpd letime and tetime stored in double precision
  *
@@ -139,6 +143,8 @@ StTofrMatchMaker::StTofrMatchMaker(const Char_t *name): StMaker(name){
   setMaxDCA(9999.);
 
   setCreateHistoFlag(kFALSE);
+  setHistoFileName("tofana.root");
+  setCreateTreeFlag(kFALSE);
   setSaveGeometry(kFALSE);
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
@@ -161,7 +167,7 @@ Int_t StTofrMatchMaker::Init(){
   
   // m_Mode can be set by SetMode() method
   if(m_Mode) {
-    setHistoFileName("tofana.root");
+//    setHistoFileName("tofana.root");
   } else {
     setHistoFileName("");
   }
@@ -1932,17 +1938,19 @@ Int_t StTofrMatchMaker::processEventYear8(){
         if(fabs(nSigmaPion)<5.) mNSigmaPivsPt->Fill(pt, nSigmaPion+5.*theTrack->geometry()->charge());
       }
 
-      trackTree.pt = pt;
-      trackTree.eta = eta;
-      trackTree.phi = phi;
-      trackTree.nfitpts = nfitpts;
-      trackTree.dEdx = dEdx*1.e6;
-      trackTree.ndEdxpts = ndEdxpts;
-      trackTree.charge = theTrack->geometry()->charge();      
-      trackTree.projTrayId = 0;
-      trackTree.projCellChan = -1;
-      trackTree.projY = -999.;
-      trackTree.projZ = -999.;
+      if(mSaveTree) {
+        trackTree.pt = pt;
+        trackTree.eta = eta;
+        trackTree.phi = phi;
+        trackTree.nfitpts = nfitpts;
+        trackTree.dEdx = dEdx*1.e6;
+        trackTree.ndEdxpts = ndEdxpts;
+        trackTree.charge = theTrack->geometry()->charge();      
+        trackTree.projTrayId = 0;
+        trackTree.projCellChan = -1;
+        trackTree.projY = -999.;
+        trackTree.projZ = -999.;
+      }
 
       nAllTracks++;
       StPhysicalHelixD theHelix = trackGeometry(theTrack)->helix();
@@ -2008,10 +2016,12 @@ Int_t StTofrMatchMaker::processEventYear8(){
                 }
 	      }
 	      
-              trackTree.projTrayId = itray;
-              trackTree.projCellChan = (imodule-1)*mNCell+(icell-1);
-              trackTree.projY = local[1];
-              trackTree.projZ = local[2];
+              if(mSaveTree) {
+                trackTree.projTrayId = itray;
+                trackTree.projCellChan = (imodule-1)*mNCell+(icell-1);
+                trackTree.projY = local[1];
+                trackTree.projZ = local[2];
+              }
 
 	      if(Debug()) {
 		gMessMgr->Info("","OS") <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
@@ -2022,7 +2032,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
       } // endif(helixcross...)
       if(ncells>0&&mHisto) mHitsMultPerTrack->Fill(ncells);
 
-      if(mHisto) mTrackTree->Fill();
+      if(mHisto && mSaveTree) mTrackTree->Fill();
 
     } // if(ValidTrack).. 
   } // loop over nodes
@@ -2565,6 +2575,7 @@ void StTofrMatchMaker::bookHistograms(void){
   mHitCorrAll = new TH2D("Tray_All","",960,0,960,960,0,960);
 
   // TPC tracks
+  if(mSaveTree) {
   mTrackTree = new TTree("track","track");
   mTrackTree->Branch("pt",&trackTree.pt,"pt/F");
   mTrackTree->Branch("eta",&trackTree.eta,"eta/F");
@@ -2577,6 +2588,7 @@ void StTofrMatchMaker::bookHistograms(void){
   mTrackTree->Branch("projCellChan",&trackTree.projCellChan,"projCellChan/I");
   mTrackTree->Branch("projY",&trackTree.projY,"projY/F");
   mTrackTree->Branch("projZ",&trackTree.projZ,"projZ/F");
+  }
 
   mTrackPtEta = new TH2D("trackPtEta","",100,0.,5.,60,-1.5,1.5);
   mTrackPtPhi = new TH2D("trackPtPhi","",100,0.,5.,120,0.,2*3.14159);
@@ -2677,11 +2689,13 @@ void StTofrMatchMaker::writeHistogramsToFile(){
    
   }
 
-  TFile *theTreeFile =  new TFile((mHistoFileName+".tree.root").c_str(), "RECREATE");
-  theTreeFile->cd();
-  if(mHisto) mTrackTree->Write();
-  theTreeFile->Write();
-  theTreeFile->Close();
+  if(mSaveTree) {
+    TFile *theTreeFile =  new TFile((mHistoFileName+".tree.root").c_str(), "RECREATE");
+    theTreeFile->cd();
+    mTrackTree->Write();
+    theTreeFile->Write();
+    theTreeFile->Close();
+  }
 
   return;
 }
