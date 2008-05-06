@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.12 2008/03/27 18:12:12 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.13 2008/05/06 18:41:40 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,10 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.13  2008/05/06 18:41:40  dongx
+ * - Fixed bug in ouput histogram filename switch
+ * - Added switch for tpc track tree output
+ *
  * Revision 1.12  2008/03/27 18:12:12  dongx
  * Update the HPTDC bin width to full precision
  *
@@ -106,6 +110,7 @@ public:
     Int_t  Finish();
     
     void setCreateHistoFlag(Bool_t histos=kTRUE);
+    void setCreateTreeFlag(Bool_t tree=kTRUE);
     void setOuterTrackGeometry();
     void setStandardTrackGeometry();
     void setValidAdcRange(Int_t, Int_t);
@@ -205,6 +210,7 @@ private:
     StTofINLCorr *mTofINLCorr;   // INL Correction
     
     Bool_t mHisto; //! create, fill and write out histograms
+    Bool_t mSaveTree; //! create, fill and write out trees for tpc tracks
     
     Bool_t mYear2; //! STAR year2: TOFp+pVPD
     Bool_t mYear3; //! STAR year3: TOFp+pVPD+TOFr
@@ -331,7 +337,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.12 2008/03/27 18:12:12 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.13 2008/05/06 18:41:40 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
@@ -361,6 +367,8 @@ inline void StTofrMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 inline void StTofrMatchMaker::setHistoFileName(Char_t* filename){mHistoFileName=filename;}
 
 inline void StTofrMatchMaker::setCreateHistoFlag(Bool_t histos){mHisto = histos;}
+
+inline void StTofrMatchMaker::setCreateTreeFlag(Bool_t tree){mSaveTree = tree;}
 
 inline void StTofrMatchMaker::setSaveGeometry(Bool_t geomSave){mGeometrySave = geomSave; }
 
