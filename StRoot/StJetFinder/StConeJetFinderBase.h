@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.3 2008/05/06 22:43:49 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.4 2008/05/06 23:33:51 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -67,8 +67,7 @@ protected:
 
     void addToPrejets(StEtaPhiCell& cell);
 	
-    enum SearchResult {kTooManyTries=0, kLeftVolume=1, kConverged=2, kContinueSearch=3};	
-    SearchResult doSearch();
+    void doSearch();
 	
   virtual bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
 
@@ -78,7 +77,6 @@ protected:
   StConePars mPars; ///run-time pars
 	
   StEtaPhiCell *mWorkCell;
-  int mSearchCounter;
 	
   CellList _preJets;
 	
@@ -103,9 +101,6 @@ private:
   virtual void findJetAroundThis(StEtaPhiCell* cell) = 0;
 
   virtual bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
-
-  bool isInTheVolume(double eta, double phi);
-  bool areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2);
 
 };
 

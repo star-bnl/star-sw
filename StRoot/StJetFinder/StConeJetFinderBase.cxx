@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.3 2008/05/06 22:43:48 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.4 2008/05/06 23:33:50 tai Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -22,7 +22,6 @@ using namespace StSpinJet;
 StConeJetFinderBase::StConeJetFinderBase(const StConePars& pars)
   : mPars(pars)
   , mWorkCell(new StJetEtCell)
-  , mSearchCounter(0)
   , _cellGrid(mPars)
 {
 
@@ -49,7 +48,6 @@ void StConeJetFinderBase::clearPreviousResult()
     delete *it;
   }
   _preJets.clear();
-  mSearchCounter = 0;
 }
 
 StEtaPhiCell::CellList StConeJetFinderBase::generateEtOrderedList(JetList& protoJetList)
@@ -112,34 +110,14 @@ void StConeJetFinderBase::initializeWorkCell(const StEtaPhiCell* other)
     }
 }
 
-StConeJetFinderBase::SearchResult StConeJetFinderBase::doSearch()
+void StConeJetFinderBase::doSearch()
 {
-    
-  ++mSearchCounter;
-
-  if (mPars.performMinimization() && mSearchCounter > 100) {
-    return kTooManyTries;
-  }
-    
   CellList cellList = _cellGrid.WithinTheConeRadiusCellList(*mWorkCell);
 
   for (CellList::iterator cell = cellList.begin(); cell != cellList.end(); ++cell) {
     if(shouldNotAddToTheCell(*mWorkCell, **cell)) continue;
     mWorkCell->addCell(*cell);
   }
-
-  const StProtoJet& centroid = mWorkCell->centroid();
-
-  if (!isInTheVolume(centroid.eta(), centroid.phi())) return kLeftVolume;
-
-  if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) return kConverged;
-
-  return kContinueSearch;
-}
-
-bool StConeJetFinderBase::isInTheVolume(double eta, double phi)
-{
-    return (_cellGrid.Cell(eta, phi)) ? true : false;
 }
 
 bool StConeJetFinderBase::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const
@@ -147,11 +125,6 @@ bool StConeJetFinderBase::shouldNotAddToTheCell(const StEtaPhiCell& theCell, con
   if (otherCell.empty()) return true;
   if (otherCell.eT() <= mPars.assocEtMin()) return true; 
   return false;
-}
-
-bool StConeJetFinderBase::areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2)
-{
-  return(_cellGrid.Cell(eta1, phi1)->isSamePosition(*_cellGrid.Cell(eta2, phi2)));
 }
 
 void StConeJetFinderBase::addToPrejets(StEtaPhiCell& cell)

@@ -1,8 +1,11 @@
-// $Id: StConeJetFinder.cxx,v 1.43 2008/05/06 22:43:48 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.44 2008/05/06 23:33:50 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
 
+#include <iostream>
+
+using namespace std;
 using namespace StSpinJet;
 
 StConeJetFinder::StConeJetFinder(const StConePars& pars)
@@ -86,8 +89,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
 
     initializeWorkCell(mp);
 	    
-    mSearchCounter = 0;
-    SearchResult res = doSearch();
+    SearchResult res = doCountingSearch();
     if (mPars.requiredStableMidpoints()) {
       if (res == kConverged) {
 	addToPrejets(*mWorkCell);
@@ -122,12 +124,14 @@ StEtaPhiCell* StConeJetFinder::defineMidpoint(const StEtaPhiCell& pj1, const StE
 
 void StConeJetFinder::doMinimization()
 {
-    mSearchCounter = 0;
+  int _searchCounter = 0;
 	
     SearchResult res = kContinueSearch;
     while(res == kContinueSearch) {
-		
-      res = doSearch();
+
+      if (++_searchCounter > 100) break;
+    
+      res = doCountingSearch();
 	
       if (res == kConverged) {
 	addToPrejets(*mWorkCell);
@@ -145,4 +149,30 @@ void StConeJetFinder::doMinimization()
     }
 
 }
+
+StConeJetFinder::SearchResult StConeJetFinder::doCountingSearch()
+{
+    
+  doSearch();
+
+  const StProtoJet& centroid = mWorkCell->centroid();
+
+  if (!isInTheVolume(centroid.eta(), centroid.phi())) return kLeftVolume;
+
+  if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) return kConverged;
+
+  return kContinueSearch;
+}
+
+bool StConeJetFinder::isInTheVolume(double eta, double phi)
+{
+    return (_cellGrid.Cell(eta, phi)) ? true : false;
+}
+
+bool StConeJetFinder::areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2)
+{
+  return(_cellGrid.Cell(eta1, phi1)->isSamePosition(*_cellGrid.Cell(eta2, phi2)));
+}
+
+
 
