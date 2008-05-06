@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedJetEtCell.h,v 1.6 2008/05/05 01:46:05 tai Exp $
+// $Id: StCdfChargedJetEtCell.h,v 1.7 2008/05/06 02:13:15 tai Exp $
 //StCdfChargedJetEtCell.h
 //M.L. Miller (Yale Software)
 //12/02
@@ -22,9 +22,12 @@ class StCdfChargedJetEtCell : public StEtaPhiCell
 
 public:
 
-    StCdfChargedJetEtCell(); 
+    StCdfChargedJetEtCell();
+  StCdfChargedJetEtCell(const StCdfChargedJetEtCell& c); 
     StCdfChargedJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax);
     virtual ~StCdfChargedJetEtCell();
+
+  StEtaPhiCell* clone() const;
 
     ///order cells by lcp-pt instead of overall et
     double eT() const {return mLcpPt;}

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEtCell.h,v 1.15 2008/05/05 01:46:07 tai Exp $
+// $Id: StJetEtCell.h,v 1.16 2008/05/06 02:13:16 tai Exp $
 //StJetEtCell.h
 //M.L. Miller (Yale Software) (adapted from Akio Ogawa's work)
 //07/02
@@ -29,9 +29,11 @@ class StJetEtCell : public StEtaPhiCell {
 public:
 
   StJetEtCell(); 
+  StJetEtCell(const StJetEtCell& c);
   StJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax);
   virtual ~StJetEtCell();
 
+  StEtaPhiCell* clone() const;
 
   double eT() const { return mEt; }
 

@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.37 2008/05/05 21:10:32 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.38 2008/05/06 02:13:15 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -182,7 +182,8 @@ void StConeJetFinder::addToPrejets(StEtaPhiCell& cell)
     cell.setEt(cell.Et() + (*etCell)->eT());
   }
 
-  _preJets.push_back(new StEtaPhiCell(cell));
+  //  _preJets.push_back(new StEtaPhiCell(cell));
+  _preJets.push_back(cell.clone());
 
 }
 

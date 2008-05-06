@@ -1,8 +1,14 @@
-// $Id: StJetEtCell.cxx,v 1.10 2008/05/05 01:46:06 tai Exp $
+// $Id: StJetEtCell.cxx,v 1.11 2008/05/06 02:13:16 tai Exp $
 #include "StJetEtCell.h"
 
 StJetEtCell::StJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax)
   : StEtaPhiCell(etaMin, etaMax, phiMin, phiMax)
+{
+
+}
+
+StJetEtCell::StJetEtCell(const StJetEtCell& c)
+  : StEtaPhiCell(c)
 {
 
 }
@@ -15,6 +21,11 @@ StJetEtCell::StJetEtCell()
 StJetEtCell::~StJetEtCell()
 {
 
+}
+
+StEtaPhiCell* StJetEtCell::clone() const
+{
+  return new StJetEtCell(*this);
 }
 
 void StJetEtCell::add(const StProtoJet& pj)
