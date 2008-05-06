@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.6 2008/03/14 17:37:14 masayuki Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.7 2008/05/06 18:42:09 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,8 +11,8 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
- * Revision 1.6  2008/03/14 17:37:14  masayuki
- * add
+ * Revision 1.7  2008/05/06 18:42:09  dongx
+ * Updated for Run8 analysis
  *
  * Revision 1.5  2007/04/17 23:11:12  dongx
  * replaced with standard STAR Loggers
@@ -165,6 +165,10 @@ Int_t StTofrNtupleMaker::InitRun(int runnumber) {
   LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
   LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
   
+  //beam line not be calibrated yet
+  //x0 shift by 0.5
+  x0 = 0.5;
+ 
   StThreeVectorD origin(x0,y0,0.0);
   double pt = 88889999;
   double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
@@ -304,7 +308,7 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
 
         mCellData.pvpdLeadingEdgeTimeEast[tubeId] = thisCell->leadingEdgeTime();
         mCellData.pvpdTotEast[tubeId] = thisCell->tot();
-
+        cout<<" tray/tube "<< trayId<<"/"<<tubeId<<" letime/tot "<< thisCell->leadingEdgeTime()<<"/"<< thisCell->tot()<<endl;
         tdcsumeast += thisCell->leadingEdgeTime();
         mPvpdEntries++;
       }else if(trayId==121){ //pvpd west
