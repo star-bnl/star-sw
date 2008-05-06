@@ -1,9 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.34 2008/05/06 18:55:45 tai Exp $
-#ifndef StConeJetFinder_HH
-#define StConeJetFinder_HH
-
-#include "StConeJetFinderBase.h"
+// $Id: StConeJetFinderBase.h,v 1.1 2008/05/06 18:55:46 tai Exp $
+#ifndef STCONEJETFINDERBASE_H
+#define STCONEJETFINDERBASE_H
 
 #include "StJetEtCellFactory.h"
 
@@ -25,18 +23,20 @@ using std::pair;
 #include "StJetEtCell.h"
 
 class StJetSpliterMerger;
-class StConeJetFinder;
+class StConeJetFinderBase;
 
 #include "StConePars.h"
 
 #include "StEtaPhiGrid.h"
+
+double midpoint(double v1, double v2);
 
 /*!
   \class StConeJetFinder
   \author M.L. Miller (Yale Software)
   Implementation of the cone algorithm, circa Tevatron RunII Jet Physics working group specification.
 */
-class StConeJetFinder : public StConeJetFinderBase {
+class StConeJetFinderBase : public StJetFinder {
 
 public:
 	
@@ -44,8 +44,8 @@ public:
   typedef list<StEtaPhiCell> ValueCellList;
 	
     ///cstr-dstr
-    StConeJetFinder(const StConePars& pars);
-    virtual ~StConeJetFinder();
+    StConeJetFinderBase(const StConePars& pars);
+    virtual ~StConeJetFinderBase();
 	
   void Init();
 
@@ -61,7 +61,7 @@ protected:
     friend struct PreJetInitializer; 
 	
     ///Only available for derived classes
-    StConeJetFinder();
+    StConeJetFinderBase();
 
   virtual StJetEtCellFactory* makeCellFactory();
 
@@ -84,18 +84,18 @@ protected:
 	
   const StProtoJet& collectCell(StEtaPhiCell* seed);
 	
-  // StConePars mPars; ///run-time pars
-  // 	
-  // StEtaPhiCell *mWorkCell;
-  // int mSearchCounter;
-  // 	
-  // StJetSpliterMerger* mMerger;
-  // CellList _preJets;
+  StConePars mPars; ///run-time pars
+	
+  StEtaPhiCell *mWorkCell;
+  int mSearchCounter;
+	
+  StJetSpliterMerger* mMerger;
+  CellList _preJets;
 	
   typedef vector<std::pair<CellList::iterator, CellList::iterator> > CellPairList;
-  // CellPairList _cellPairList;
-  // 
-  // StSpinJet::StEtaPhiGrid _cellGrid;
+  CellPairList _cellPairList;
+
+  StSpinJet::StEtaPhiGrid _cellGrid;
 	
 private:
 
@@ -115,12 +115,27 @@ private:
 
 };
 
-inline StConePars StConeJetFinder::pars() const
+inline StConePars StConeJetFinderBase::pars() const
 {
     return mPars;
 }
 
 //non-members
 
-#endif
+struct PreJetLazyUpdater //assume proto-jet updated
+{
+    PreJetLazyUpdater() : sumEt(0.) {};
+    double sumEt;
+	
+    void operator()(StEtaPhiCell& cell);
+    void operator()(StEtaPhiCell* cell);
+};
+
+struct PostMergeUpdater
+{
+    void operator()(StEtaPhiCell& cell);
+};
+
+#endif // STCONEJETFINDERBASE_H
+
 

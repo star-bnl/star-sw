@@ -1,5 +1,5 @@
-// $Id: StConeJetFinder.cxx,v 1.41 2008/05/06 18:55:45 tai Exp $
-#include "StConeJetFinder.h"
+// $Id: StConeJetFinderBase.cxx,v 1.1 2008/05/06 18:55:45 tai Exp $
+#include "StConeJetFinderBase.h"
 
 #include "TObject.h"
 
@@ -19,28 +19,32 @@ using std::sort;
 
 using namespace StSpinJet;
 
-StConeJetFinder::StConeJetFinder(const StConePars& pars)
-  : StConeJetFinderBase(pars)
+StConeJetFinderBase::StConeJetFinderBase(const StConePars& pars)
+  : mPars(pars)
+  , mWorkCell(new StJetEtCell)
+  , mSearchCounter(0)
+  , mMerger(new StJetSpliterMerger())
+  , _cellGrid(mPars)
+{
+    mMerger->setSplitFraction(mPars.splitFraction());
+}
+
+StConeJetFinderBase::~StConeJetFinderBase()
 {
 
 }
 
-StConeJetFinder::~StConeJetFinder()
-{
-
-}
-
-void StConeJetFinder::Init()
+void StConeJetFinderBase::Init()
 {
   _cellGrid.buildGrid(makeCellFactory());
 }
 
-StJetEtCellFactory* StConeJetFinder::makeCellFactory()
+StJetEtCellFactory* StConeJetFinderBase::makeCellFactory()
 {
   return new StJetEtCellFactory;
 }
 
-void StConeJetFinder::findJets(JetList& protoJetList)
+void StConeJetFinderBase::findJets(JetList& protoJetList)
 {
   clearPreviousResult();
 
@@ -62,7 +66,7 @@ void StConeJetFinder::findJets(JetList& protoJetList)
 
 }
 
-void StConeJetFinder::clearPreviousResult()
+void StConeJetFinderBase::clearPreviousResult()
 {
   for(CellList::iterator it = _preJets.begin(); it != _preJets.end(); ++it) {
     delete *it;
@@ -71,13 +75,13 @@ void StConeJetFinder::clearPreviousResult()
   mSearchCounter = 0;
 }
 
-StEtaPhiCell::CellList StConeJetFinder::generateEtOrderedList(JetList& protoJetList)
+StEtaPhiCell::CellList StConeJetFinderBase::generateEtOrderedList(JetList& protoJetList)
 {
   _cellGrid.fillGridWith(protoJetList);
   return _cellGrid.EtSortedCellList();
 }
 
-void StConeJetFinder::findProtoJets(CellList& orderedList)
+void StConeJetFinderBase::findProtoJets(CellList& orderedList)
 {
   for (CellList::iterator cell = orderedList.begin(); cell != orderedList.end(); ++cell) {
 
@@ -92,25 +96,25 @@ void StConeJetFinder::findProtoJets(CellList& orderedList)
   }
 }
 
-bool StConeJetFinder::acceptSeed(const StEtaPhiCell* cell)
+bool StConeJetFinderBase::acceptSeed(const StEtaPhiCell* cell)
 {
     return (cell->empty()==false);
 }
 
-void StConeJetFinder::initializeWorkCell(const StEtaPhiCell* other)
+void StConeJetFinderBase::initializeWorkCell(const StEtaPhiCell* other)
 {
     mWorkCell->clear();
     *mWorkCell = *other;
     mWorkCell->setEt(0.);
     if (mWorkCell->cellList().empty()==false) {
-	cout <<"StConeJetFinder::initializeWorkCell(). ERROR:\t"
+	cout <<"StConeJetFinderBase::initializeWorkCell(). ERROR:\t"
 	     <<"workCell is not empty. abort()"<<endl;
 	abort();
     }
 }
 
 
-void StConeJetFinder::findJets_sub1()
+void StConeJetFinderBase::findJets_sub1()
 {
   if (mPars.performMinimization()) {
     doMinimization();
@@ -120,7 +124,7 @@ void StConeJetFinder::findJets_sub1()
   }
 }
 
-void StConeJetFinder::findJets_sub2()
+void StConeJetFinderBase::findJets_sub2()
 {
   if (mPars.addMidpoints()) { 	//add seeds at midpoints
     addSeedsAtMidpoint(); //old style, add midpoints before split/merge
@@ -133,7 +137,7 @@ void StConeJetFinder::findJets_sub2()
 	
 }
 
-StConeJetFinder::SearchResult StConeJetFinder::doSearch()
+StConeJetFinderBase::SearchResult StConeJetFinderBase::doSearch()
 {
     
   ++mSearchCounter;
@@ -158,24 +162,24 @@ StConeJetFinder::SearchResult StConeJetFinder::doSearch()
   return kContinueSearch;
 }
 
-bool StConeJetFinder::isInTheVolume(double eta, double phi)
+bool StConeJetFinderBase::isInTheVolume(double eta, double phi)
 {
     return (_cellGrid.Cell(eta, phi)) ? true : false;
 }
 
-bool StConeJetFinder::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const
+bool StConeJetFinderBase::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const
 {
   if (otherCell.empty()) return true;
   if (otherCell.eT() <= mPars.assocEtMin()) return true; 
   return false;
 }
 
-bool StConeJetFinder::areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2)
+bool StConeJetFinderBase::areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2)
 {
   return(_cellGrid.Cell(eta1, phi1)->isSamePosition(*_cellGrid.Cell(eta2, phi2)));
 }
 
-void StConeJetFinder::addToPrejets(StEtaPhiCell& cell)
+void StConeJetFinderBase::addToPrejets(StEtaPhiCell& cell)
 {
   StEtaPhiCell* realCell = _cellGrid.Cell(cell.eta(), cell.phi());
   if (!realCell) {
@@ -195,7 +199,7 @@ void StConeJetFinder::addToPrejets(StEtaPhiCell& cell)
 
 }
 
-void StConeJetFinder::doMinimization()
+void StConeJetFinderBase::doMinimization()
 {
     mSearchCounter = 0;
 	
@@ -221,14 +225,28 @@ void StConeJetFinder::doMinimization()
 
 }
 
-StEtaPhiCell* StConeJetFinder::defineMidpoint(const StEtaPhiCell& pj1, const StEtaPhiCell& pj2) 
+double midpoint(double v1, double v2)
+{
+    double high, low;
+    if (v1 > v2) {
+      high =v1;
+      low=v2;
+    }
+    else { 
+      high = v2;
+      low=v1;
+    }
+    return (high - low)/2. + low;
+}
+
+StEtaPhiCell* StConeJetFinderBase::defineMidpoint(const StEtaPhiCell& pj1, const StEtaPhiCell& pj2) 
 {
     double etaMid = midpoint(pj1.eta(), pj2.eta());
     double phiMid = midpoint(pj1.phi(), pj2.phi());
     return _cellGrid.Cell(etaMid, phiMid);
 }
 
-void StConeJetFinder::addSeedsAtMidpoint()
+void StConeJetFinderBase::addSeedsAtMidpoint()
 {
     //we have to first locate and remember pairs separated by d<2.*r.  
     //we then have to add midpoints.
@@ -268,7 +286,7 @@ void StConeJetFinder::addSeedsAtMidpoint()
 
 }
 
-const StProtoJet& StConeJetFinder::collectCell(StEtaPhiCell* seed)
+const StProtoJet& StConeJetFinderBase::collectCell(StEtaPhiCell* seed)
 {
 
   if (seed->cellList().empty()) {
@@ -290,11 +308,11 @@ const StProtoJet& StConeJetFinder::collectCell(StEtaPhiCell* seed)
     if (it != cells.begin()) { //don't double count first!
       StEtaPhiCell* cell = (*it);
       if (!cell) {
-	cout <<"\tStConeJetFinder::collectCell(). ERROR:\t"
+	cout <<"\tStConeJetFinderBase::collectCell(). ERROR:\t"
 	     <<"null cell.  skip"<<endl;
       }
       if (centerCell==*it) {
-	cout <<"\tStConeJetFinder::collectCell(). ERROR:\t"
+	cout <<"\tStConeJetFinderBase::collectCell(). ERROR:\t"
 	     <<"attempt to add self! skip"<<endl;
       }	else {
 	//cout <<"\t\tadding cell:\t"<<icell++<<endl;
@@ -307,3 +325,28 @@ const StProtoJet& StConeJetFinder::collectCell(StEtaPhiCell* seed)
   center.update();
   return center;
 }
+
+
+
+//non members ---
+
+void PreJetLazyUpdater ::operator()(StEtaPhiCell& cell)
+{
+    sumEt += cell.eT();
+}
+
+void PreJetLazyUpdater ::operator()(StEtaPhiCell* cell)
+{
+    (*this)(*cell);
+}
+
+void PostMergeUpdater::operator()(StEtaPhiCell& cell)
+{
+    //now update each cell:
+    PreJetLazyUpdater updater;
+    updater = for_each( cell.cellList().begin(), cell.cellList().end(), updater );
+	
+    //now update jet-eT
+    cell.mEt = updater.sumEt;
+}
+
