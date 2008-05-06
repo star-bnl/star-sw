@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.39 2008/05/06 03:06:10 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.40 2008/05/06 18:26:18 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "TObject.h"
@@ -46,42 +46,54 @@ StJetEtCellFactory* StConeJetFinder::makeCellFactory()
 
 void StConeJetFinder::findJets(JetList& protoJetList)
 {
+  clearPreviousResult();
+
+  CellList orderedList = generateEtOrderedList(protoJetList);
+
+  findProtoJets(orderedList);
+
+  // midpoint split/merge
+  findJets_sub2();
+
+  protoJetList.clear();
+  
+  for (CellList::iterator jet = _preJets.begin(); jet != _preJets.end(); ++jet) {
+
+    if ((*jet)->cellList().size() == 0) continue;
+
+    protoJetList.push_back( collectCell(*jet) );
+  }
+
+}
+
+void StConeJetFinder::clearPreviousResult()
+{
   for(CellList::iterator it = _preJets.begin(); it != _preJets.end(); ++it) {
     delete *it;
   }
   _preJets.clear();
   mSearchCounter = 0;
+}
 
+StEtaPhiCell::CellList StConeJetFinder::generateEtOrderedList(JetList& protoJetList)
+{
   _cellGrid.fillGridWith(protoJetList);
+  return _cellGrid.EtSortedCellList();
+}
 
-  if (mPars.debug()) {print();}
+void StConeJetFinder::findProtoJets(CellList& orderedList)
+{
+  for (CellList::iterator cell = orderedList.begin(); cell != orderedList.end(); ++cell) {
 
-  CellList etSortedCellList = _cellGrid.EtSortedCellList();
+    if ((*cell)->eT() <= mPars.seedEtMin()) break;
 
-  for (CellList::iterator etCell = etSortedCellList.begin(); etCell != etSortedCellList.end(); ++etCell) {
+    if (!acceptSeed((*cell))) continue;
 
-    if ((*etCell)->eT() <= mPars.seedEtMin()) break; //we're all done
-
-    if (!acceptSeed((*etCell))) continue;
-
-    //use a work object: mWorkCell
-    initializeWorkCell((*etCell));
+    initializeWorkCell((*cell));
 
     findJets_sub1();
 
   }
-    
-  findJets_sub2();
-
-  protoJetList.clear(); //clear 'em, add them back in as we find them
-  
-  for (CellList::iterator realJetIt = _preJets.begin(); realJetIt != _preJets.end(); ++realJetIt) {
-    StEtaPhiCell* rj = *realJetIt;
-    if ( rj->cellList().size()>0 ) { //at least one non-empty cell in cone
-      protoJetList.push_back( collectCell(rj) );
-    }
-  }
-
 }
 
 bool StConeJetFinder::acceptSeed(const StEtaPhiCell* cell)
@@ -164,7 +176,7 @@ bool StConeJetFinder::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const S
 
 bool StConeJetFinder::areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2)
 {
-  return(_cellGrid.Cell(eta1, phi1) == _cellGrid.Cell(eta2, phi2));
+  return(_cellGrid.Cell(eta1, phi1)->isSamePosition(*_cellGrid.Cell(eta2, phi2)));
 }
 
 void StConeJetFinder::addToPrejets(StEtaPhiCell& cell)
@@ -314,30 +326,6 @@ const StProtoJet& StConeJetFinder::collectCell(StEtaPhiCell* seed)
   return center;
 }
 
-void StConeJetFinder::print()
-{
-    cout <<"\nStConeJetFinder::print()"<<endl;
-    cout <<"mNeta:\t"<<mPars.Neta()<<endl;
-    cout <<"mNphi:\t"<<mPars.Nphi()<<endl;
-    cout <<"mEtaMin:\t"<<mPars.EtaMin()<<endl;
-    cout <<"mEtaMax:\t"<<mPars.EtaMax()<<endl;    
-    cout <<"mPhiMin:\t"<<mPars.PhiMin()<<endl;
-    cout <<"mPhiMax:\t"<<mPars.PhiMax()<<endl;
-    cout <<"mR:\t"<<mPars.coneRadius()<<endl;
-    cout <<"mAssocEtMin:\t"<<mPars.assocEtMin()<<endl;
-    cout <<"mSeedEtMin:\t"<<mPars.seedEtMin()<<endl;
-    cout <<"mphiWidth:\t"<<mPars.phiWidth()<<endl;
-    cout <<"metaWidth:\t"<<mPars.etaWidth()<<endl;
-    cout <<"mdeltaPhi:\t"<<mPars.deltaPhi()<<endl;
-    cout <<"mdeltaEta:\t"<<mPars.deltaEta()<<endl;
-    cout <<"mDoMinimization:\t"<<mPars.performMinimization()<<endl;
-    cout <<"mAddMidpoints:\t"<<mPars.addMidpoints()<<endl;
-    cout <<"mDoSplitMerge:\t"<<mPars.doSplitMerge()<<endl;
-    cout <<"mSplitFraction:\t"<<mPars.splitFraction()<<endl;
-    cout <<"splitFraction():\t"<<mMerger->splitFraction()<<endl;
-    cout <<"mRequireStableMidpoints:\t"<<mPars.requiredStableMidpoints()<<endl;
-    cout <<"mDebug:\t"<<mPars.debug()<<endl;
-}
 
 
 //non members ---

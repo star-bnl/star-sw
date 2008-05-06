@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.32 2008/05/05 21:10:32 tai Exp $
+// $Id: StConeJetFinder.h,v 1.33 2008/05/06 18:26:35 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -52,7 +52,6 @@ public:
 	
     ///inherited interface
     void findJets(JetList& protojets);     
-    virtual void print();
 	
 protected:
 		
@@ -98,6 +97,11 @@ protected:
 	
 private:
 
+  void clearPreviousResult();
+
+  CellList generateEtOrderedList(JetList& protoJetList);
+
+  void findProtoJets(CellList& orderedList);
 
   virtual void findJets_sub1();
   virtual void findJets_sub2();
