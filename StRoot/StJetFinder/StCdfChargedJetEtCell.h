@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedJetEtCell.h,v 1.8 2008/05/06 03:06:10 tai Exp $
+// $Id: StCdfChargedJetEtCell.h,v 1.9 2008/05/07 22:43:08 tai Exp $
 //StCdfChargedJetEtCell.h
 //M.L. Miller (Yale Software)
 //12/02
@@ -30,7 +30,7 @@ public:
   StEtaPhiCell* clone() const;
 
     ///order cells by lcp-pt instead of overall et
-    double eT() const {return mLcpPt;}
+    double eT() const {return _leadingPt;}
 
     ///Add a protojet to the cell
     void addProtoJet(const StProtoJet&);
@@ -41,16 +41,16 @@ public:
     ///internal reset for next pass at jet-finding
     void clear(); 
 
-protected:
+private:
     ///pt of Leading charged particle in cell
-    double mLcpPt;
+    double _leadingPt;
 };
 
 
 //inlines
 inline void StCdfChargedJetEtCell::clear()
 {
-    mLcpPt=0.0;
+    _leadingPt = 0.0;
     StEtaPhiCell::clear();
 }
 

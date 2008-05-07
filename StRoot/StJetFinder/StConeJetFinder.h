@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.39 2008/05/07 21:44:44 tai Exp $
+// $Id: StConeJetFinder.h,v 1.40 2008/05/07 22:43:09 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -15,6 +15,8 @@ public:
   void findJets(JetList& protojets);     
 	
 private:
+
+  CellList generateEtOrderedList(JetList& protoJetList);
 
   void findJetAroundThis(StEtaPhiCell* cell);
 

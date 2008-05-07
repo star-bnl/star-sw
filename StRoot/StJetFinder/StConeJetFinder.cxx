@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.46 2008/05/07 21:44:43 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.47 2008/05/07 22:43:09 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
@@ -42,6 +42,12 @@ void StConeJetFinder::findJets(JetList& protoJetList)
 
   storeTheResultIn(protoJetList);
 
+}
+
+StEtaPhiCell::CellList StConeJetFinder::generateEtOrderedList(JetList& protoJetList)
+{
+  _cellGrid.fillGridWith(protoJetList);
+  return _cellGrid.EtSortedCellList();
 }
 
 void StConeJetFinder::findJetAroundThis(StEtaPhiCell* cell)
