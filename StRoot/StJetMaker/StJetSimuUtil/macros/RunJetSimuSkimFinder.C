@@ -30,6 +30,7 @@ void RunJetSimuSkimFinder(const int nevents = 100,
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
   gSystem->Load("StEmcTriggerMaker");
+  gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
   gSystem->Load("StJetFinder");    
   gSystem->Load("StJetMaker");

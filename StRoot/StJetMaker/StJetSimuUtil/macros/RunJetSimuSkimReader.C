@@ -10,9 +10,11 @@ void RunJetSimuSkimReader(int nevents=100,
 
     gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     loadSharedLibraries();
+    gSystem->Load("St_db_Maker");
     gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StSpinDbMaker");
     gSystem->Load("StEmcTriggerMaker");
+    gSystem->Load("StTriggerUtilities");
     gSystem->Load("StMCAsymMaker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
