@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedJetEtCell.h,v 1.9 2008/05/07 22:43:08 tai Exp $
+// $Id: StCdfChargedJetEtCell.h,v 1.10 2008/05/07 22:43:59 tai Exp $
 //StCdfChargedJetEtCell.h
 //M.L. Miller (Yale Software)
 //12/02
@@ -22,27 +22,27 @@ class StCdfChargedJetEtCell : public StEtaPhiCell
 
 public:
 
-    StCdfChargedJetEtCell();
+  StCdfChargedJetEtCell();
   StCdfChargedJetEtCell(const StCdfChargedJetEtCell& c); 
-    StCdfChargedJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax);
-    virtual ~StCdfChargedJetEtCell();
+  StCdfChargedJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax);
+  virtual ~StCdfChargedJetEtCell();
 
   StEtaPhiCell* clone() const;
 
-    ///order cells by lcp-pt instead of overall et
-    double eT() const {return _leadingPt;}
+  ///order cells by lcp-pt instead of overall et
+  double eT() const {return _leadingPt;}
 
-    ///Add a protojet to the cell
-    void addProtoJet(const StProtoJet&);
+  ///Add a protojet to the cell
+  void addProtoJet(const StProtoJet&);
     
-    ///Add another cell to this one
-    void addCell(StEtaPhiCell* cell);
+  ///Add another cell to this one
+  void addCell(StEtaPhiCell* cell);
     
-    ///internal reset for next pass at jet-finding
-    void clear(); 
+  ///internal reset for next pass at jet-finding
+  void clear(); 
 
 private:
-    ///pt of Leading charged particle in cell
+  ///pt of Leading charged particle in cell
     double _leadingPt;
 };
 
@@ -50,8 +50,8 @@ private:
 //inlines
 inline void StCdfChargedJetEtCell::clear()
 {
-    _leadingPt = 0.0;
-    StEtaPhiCell::clear();
+  _leadingPt = 0.0;
+  StEtaPhiCell::clear();
 }
 
 #endif // STCDFCHARGEDJETETCELL_HH
