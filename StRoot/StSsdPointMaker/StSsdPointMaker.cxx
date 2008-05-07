@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.57 2008/04/15 21:05:22 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.58 2008/05/07 22:45:24 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.58  2008/05/07 22:45:24  bouchet
+// add mcEvent dependence for embedding
+//
 // Revision 1.57  2008/04/15 21:05:22  bouchet
 // remove latest change
 //
@@ -481,19 +484,22 @@ Int_t StSsdPointMaker::Make()
       mySsd->convertUFrameToOther();
       PrintPointSummary(mySsd);
       //Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
-      /*
+      if(Debug()){
 	for(Int_t i=1;i<=20;i++)
-	{
-	for(Int_t j=1;j<=16;j++)
-	{
-	//PrintStripDetails(mySsd,7000+(100*j)+i);
-	//PrintClusterDetails(mySsd,7000+(100*j)+i);
-	//PrintPointDetails(mySsd,7000+(100*j)+i);
-	//PrintPackageDetails(mySsd,7000+(100*j)+i);
-	}
-	}
-      */
-      Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
+	  {
+	    for(Int_t j=1;j<=16;j++)
+	      {
+		//PrintStripDetails(mySsd,7000+(100*j)+i);
+		//PrintClusterDetails(mySsd,7000+(100*j)+i);
+		//PrintPointDetails(mySsd,7000+(100*j)+i);
+		//PrintPackageDetails(mySsd,7000+(100*j)+i);
+	      }
+	  }
+      }
+      //get McEvent here
+      StMcEvent* mcEvent = 0;
+      mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
+      Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster,spa_strip,mDynamicControl,mcEvent);
       LOG_INFO<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endm;
       if(mSsdHitColl){
 	if (mSsdHitColl->numberOfHits()>0) {
@@ -925,7 +931,7 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
           else {
             LOG_DEBUG<<"PrintStripDetails() - "
 		     <<mySsd->mLadders[i]->mWafers[j]->getStripP()->getSize()<<" strip(s) on the P-side of this wafer "<< endm;  
-            LOG_DEBUG<<"PrintStripDetails() - Strip/Adc/Ped/Noise"<< endm;  
+            LOG_DEBUG<<"PrintStripDetails() - Strip/Adc/Ped/Noise/Analog"<< endm;  
             StSsdStrip *pStripP = mySsd->mLadders[i]->mWafers[j]->getStripP()->first();
             while (pStripP){
               LOG_DEBUG<<"PrintStripDetails() - "
@@ -933,7 +939,9 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
 		       <<pStripP->getDigitSig()<<" "
 		       <<pStripP->getPedestal()<<" "
 		       <<pStripP->getSigma()<<" "
+		       <<pStripP->getAnalogSig()<<" "
 		       <<endm;  
+	      for(Int_t e=0;e<5;e++){printf("e=%d idMcHit=%d idMcTrack=%d\n",e,pStripP->getIdMcHit(e),pStripP->getIdMcTrack(e));}
               pStripP    = mySsd->mLadders[i]->mWafers[j]->getStripP()->next(pStripP);
             }
 	  }
@@ -944,7 +952,7 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
           else {
             LOG_DEBUG<<"PrintStripDetails() - "
 		     <<mySsd->mLadders[i]->mWafers[j]->getStripN()->getSize()<<" strip(s) on the N-side of this wafer "<< endm;  
-            LOG_DEBUG <<"StSsdPointMaker::PrintStripDetails() - Strip/Adc/Ped/Noise"<< endm;  
+            LOG_DEBUG <<"StSsdPointMaker::PrintStripDetails() - Strip/Adc/Ped/Noise/Analog"<< endm;  
             StSsdStrip *pStripN = mySsd->mLadders[i]->mWafers[j]->getStripN()->first();
             while (pStripN){
               LOG_DEBUG<<"PrintStripDetails() - "
@@ -952,7 +960,9 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
 		       <<pStripN->getDigitSig()<<" "
 		       <<pStripN->getPedestal()<<" "
 		       <<pStripN->getSigma()<<" "
+		       <<pStripN->getAnalogSig()<<" "
 		       <<endm;  
+	      for(Int_t e=0;e<5;e++){printf("e=%d idMcHit=%d idMcTrack=%d\n",e,pStripN->getIdMcHit(e),pStripN->getIdMcTrack(e));}
               pStripN    = mySsd->mLadders[i]->mWafers[j]->getStripN()->next(pStripN);
             }     
           }
@@ -993,6 +1003,7 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
 		      <<pClusterP->getLastAdc()<<" "
 		      <<pClusterP->getTotNoise()<<" "
 		      <<endm;  
+	      for(Int_t e=0;e<5;e++){printf("e=%d idMcHit=%d \n",e,pClusterP->getIdMcHit(e));}
               pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);
             }
 	  }
@@ -1017,6 +1028,7 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
 		      <<pClusterN->getLastAdc()<<" "
 		      <<pClusterN->getTotNoise()<<" "
 		      <<endm;  
+	      for(Int_t e=0;e<5;e++){printf("e=%d idMcHit=%d \n",e,pClusterN->getIdMcHit(e));}
               pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
             }     
           }
@@ -1067,6 +1079,7 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer)
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
   Int_t found;
   found=0;
+  Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
   LOG_INFO <<"PrintPointDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
@@ -1079,27 +1092,33 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer)
           else {
             LOG_INFO<<"PrintPointDetails() - "<<mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()<<" hit(s) in this wafer "<< endm; 
  
-            LOG_INFO<<"PrintPointDetails() - Hit/Flag/NMatched/IdClusP/IdClusN/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]/Xg[0]/Xg[1]/Xg[2]/Xl[0]/Xl[1]/Xl[2]"<<endm;  
+            LOG_INFO<<"PrintPointDetails() - Hit/Flag/NMatched/IdClusP/IdClusN/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]/Xg[0]/Xg[1]/Xg[2]/Xl[0]/Xl[1]/Xl[2]/a/b"<<endm;  
             StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
             while (pSpt){
+	      Float_t a = 0, b = 0;
+	      a = convMeVToAdc*(pSpt->getDe(0)+pSpt->getDe(1));
+	      b = convMeVToAdc*(pSpt->getDe(0)-pSpt->getDe(1));
               LOG_INFO<<"PrintPointDetails() - "
-		      <<pSpt->getNPoint()<<" "
-		      <<pSpt->getFlag()<<" "
-		      <<pSpt->getNMatched()<<" "
+		      <<pSpt->getNPoint()    <<" "
+		      <<pSpt->getFlag()      <<" "
+		      <<pSpt->getNMatched()  <<" "
 		      <<pSpt->getIdClusterP()<<" "
 		      <<pSpt->getIdClusterN()<<" "
-		      <<pSpt->getNMchit(0)<<" "
-		      <<pSpt->getNMchit(1)<<" "
-		      <<pSpt->getNMchit(2)<<" "
-		      <<pSpt->getNMchit(3)<<" "
-		      <<pSpt->getNMchit(4)<<" "
-		      <<pSpt->getXg(0)    <<" "
-		      <<pSpt->getXg(1)    <<" "
-		      <<pSpt->getXg(2)    <<" "
-		      <<pSpt->getXl(0)    <<" "
-		      <<pSpt->getXl(1)    <<" "
-		      <<pSpt->getXl(2)    <<" "
-		      <<endm;  
+		      <<pSpt->getNMchit(0)   <<" "
+		      <<pSpt->getNMchit(1)   <<" "
+		      <<pSpt->getNMchit(2)   <<" "
+		      <<pSpt->getNMchit(3)   <<" "
+		      <<pSpt->getNMchit(4)   <<" "
+		      <<pSpt->getXg(0)       <<" "
+		      <<pSpt->getXg(1)       <<" "
+		      <<pSpt->getXg(2)       <<" "
+		      <<pSpt->getXl(0)       <<" "
+		      <<pSpt->getXl(1)       <<" "
+		      <<pSpt->getXl(2)       <<" "
+		      <<a                    <<" "
+		      <<b                    <<" "
+		      <<endm;
+	      printf("pulseP =%f pulseN = %f\n",a,b);  
               pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
             }     
           }
