@@ -1,4 +1,4 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.23 2008/05/07 21:44:43 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.24 2008/05/07 22:43:08 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
@@ -25,7 +25,7 @@ void StCdfChargedConeJetFinder::findJets(JetList& protoJetList)
 {
   clearPreviousResult();
 
-  CellList orderedList = generateEtOrderedList(protoJetList);
+  CellList orderedList = generateLeadingPtOrderedList(protoJetList);
 
   CellList toSearchList = generateToSearchListFrom(orderedList);
 
@@ -33,6 +33,12 @@ void StCdfChargedConeJetFinder::findJets(JetList& protoJetList)
 
   storeTheResultIn(protoJetList);
 
+}
+
+StEtaPhiCell::CellList StCdfChargedConeJetFinder::generateLeadingPtOrderedList(JetList& protoJetList)
+{
+  _cellGrid.fillGridWith(protoJetList);
+  return _cellGrid.EtSortedCellList();
 }
 
 void StCdfChargedConeJetFinder::findJetAroundThis(StEtaPhiCell* cell)

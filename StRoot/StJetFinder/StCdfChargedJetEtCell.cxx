@@ -5,7 +5,7 @@
 #include "StCdfChargedJetEtCell.h"
 
 StCdfChargedJetEtCell::StCdfChargedJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax)
-    : StEtaPhiCell(etaMin, etaMax, phiMin, phiMax), mLcpPt(0.0)
+    : StEtaPhiCell(etaMin, etaMax, phiMin, phiMax), _leadingPt(0.0)
 {
 }
 
@@ -15,7 +15,7 @@ StCdfChargedJetEtCell::StCdfChargedJetEtCell(const StCdfChargedJetEtCell& c)
 
 }
 
-StCdfChargedJetEtCell::StCdfChargedJetEtCell() : StEtaPhiCell(), mLcpPt(0.0)
+StCdfChargedJetEtCell::StCdfChargedJetEtCell() : StEtaPhiCell(), _leadingPt(0.0)
 {
 
 }
@@ -32,8 +32,8 @@ StEtaPhiCell* StCdfChargedJetEtCell::clone() const
 void StCdfChargedJetEtCell::addProtoJet(const StProtoJet& pj)
 {
     StEtaPhiCell::addProtoJet(pj);
-    if (pj.pt()>mLcpPt) {
-	mLcpPt = pj.pt();
+    if (pj.pt() > _leadingPt) {
+	_leadingPt = pj.pt();
     }
 }
 

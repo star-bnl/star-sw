@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.5 2008/05/07 21:44:44 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.6 2008/05/07 22:43:09 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -77,8 +77,6 @@ protected:
 	
 
   void clearPreviousResult();
-
-  CellList generateEtOrderedList(JetList& protoJetList);
 
   CellList generateToSearchListFrom(CellList& orderedList);
 

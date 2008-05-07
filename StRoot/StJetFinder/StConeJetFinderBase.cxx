@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.5 2008/05/07 21:44:44 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.6 2008/05/07 22:43:09 tai Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -48,12 +48,6 @@ void StConeJetFinderBase::clearPreviousResult()
     delete *it;
   }
   _preJets.clear();
-}
-
-StEtaPhiCell::CellList StConeJetFinderBase::generateEtOrderedList(JetList& protoJetList)
-{
-  _cellGrid.fillGridWith(protoJetList);
-  return _cellGrid.EtSortedCellList();
 }
 
 StEtaPhiCell::CellList StConeJetFinderBase::generateToSearchListFrom(CellList& orderedList)
