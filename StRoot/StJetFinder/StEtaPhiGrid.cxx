@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.cxx,v 1.5 2008/05/06 03:06:12 tai Exp $
+// $Id: StEtaPhiGrid.cxx,v 1.6 2008/05/07 21:44:45 tai Exp $
 #include "StEtaPhiGrid.h"
 
 #include "StConePars.h"
@@ -122,5 +122,26 @@ int StEtaPhiGrid::findPhiKey(double phi) const
   while(phi < -M_PI) phi += 2*M_PI;
   return int( _pars.Nphi()*((phi - _pars.PhiMin())/(_pars.PhiMax() - _pars.PhiMin())));
 }
+
+double StEtaPhiGrid::midpoint(double v1, double v2)
+{
+    double high, low;
+    if (v1 > v2) {
+      high =v1;
+      low=v2;
+    }
+    else { 
+      high = v2;
+      low=v1;
+    }
+    return (high - low)/2. + low;
+}
+
+StEtaPhiCell* StEtaPhiGrid::findMidpointCell(const StEtaPhiCell& cell1, const StEtaPhiCell& cell2)
+{
+  //  return Cell((cell1.eta() + cell2.eta())/2.0, (cell1.phi() + cell2.phi())/2.0);
+  return Cell(midpoint(cell1.eta(), cell2.eta()), midpoint(cell1.phi(), cell2.phi()));
+}
+
 
 }

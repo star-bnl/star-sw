@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.4 2008/05/06 23:33:51 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.5 2008/05/07 21:44:44 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -8,14 +8,6 @@
 #include "TObject.h"
 
 
-//std
-#include <utility>
-#include <map>
-#include <vector>
-#include <cmath>
-using std::map;
-using std::vector;
-using std::pair;
 
 //StJetFinder
 #include "StJetFinder.h"
@@ -67,7 +59,7 @@ protected:
 
     void addToPrejets(StEtaPhiCell& cell);
 	
-    void doSearch();
+    void formCone();
 	
   virtual bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
 
@@ -80,8 +72,6 @@ protected:
 	
   CellList _preJets;
 	
-  typedef vector<std::pair<CellList::iterator, CellList::iterator> > CellPairList;
-  CellPairList _cellPairList;
 
   StSpinJet::StEtaPhiGrid _cellGrid;
 	
