@@ -1,8 +1,11 @@
 
 
-// $Id: StSsdWafer.cc,v 1.9 2008/04/12 14:22:36 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.10 2008/05/07 22:48:37 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.10  2008/05/07 22:48:37  bouchet
+// calculation of quality of hits used embedding
+//
 // Revision 1.9  2008/04/12 14:22:36  bouchet
 // Add a method to fill with constant noise and pedestal
 //
@@ -2830,8 +2833,8 @@ void StSsdWafer::convertHitToStrip(Float_t Pitch,
 	    {
 	      if ( tabInd[st] > 0 && tabInd[st] < nStripPerSide+1 )
 		{
+		  if (Debug())printf("st =%d id =%d tabDe(%d)=%f charge=%f NId=%d McHit=%d MvTrack=%d\n",st,tabInd[st],st,tabDe[st],ptr->getDe(),ptr->getNId(),ptr->getMcHit(),ptr->getMcTrack());
 		  StSsdStrip *newStrip = new StSsdStrip(tabInd[st], ptr->getNId(), ptr->getMcHit(), ptr->getMcTrack(), tabDe[st]);
-
 		  switch (iSide)
 		    {
 		    case 0:

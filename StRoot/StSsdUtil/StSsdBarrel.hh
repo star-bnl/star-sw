@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.7 2008/04/12 14:22:36 bouchet Exp $
+// $Id: StSsdBarrel.hh,v 1.8 2008/05/07 22:48:36 bouchet Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.8  2008/05/07 22:48:36  bouchet
+// calculation of quality of hits used embedding
+//
 // Revision 1.7  2008/04/12 14:22:36  bouchet
 // Add a method to fill with constant noise and pedestal
 //
@@ -64,7 +67,7 @@ class St_ssdGainCalibWafer;
 class St_ssdNoise;
 
 class St_ssdWaferConfiguration; 
-
+class StMcEvent;
 class StSsdBarrel
 {
  public:
@@ -93,7 +96,8 @@ class StSsdBarrel
   Int_t writeClusterToTable(St_scf_cluster *cluster);
   Int_t writeClusterToTable(St_scf_cluster *scf_cluster,St_spa_strip *spa_strip);
   Int_t writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl);
-  Int_t writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster);    
+  Int_t writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster);
+  Int_t writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster,St_spa_strip *spa_strip,StSsdDynamicControl *dynamicControl,StMcEvent *mcEvent);    
   Int_t writeStripToTable(St_spa_strip * spa_strip); //
   Int_t writeStripToTable(St_spa_strip * spa_strip,St_sls_strip *sls_strip); //
   Int_t writeNewNoiseToFile3(St_ssdPedStrip *pedStrip, char myLabel[]);

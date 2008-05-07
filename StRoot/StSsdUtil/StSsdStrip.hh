@@ -1,6 +1,9 @@
-// $Id: StSsdStrip.hh,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSsdStrip.hh,v 1.2 2008/05/07 22:48:36 bouchet Exp $
 //
 // $Log: StSsdStrip.hh,v $
+// Revision 1.2  2008/05/07 22:48:36  bouchet
+// calculation of quality of hits used embedding
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -16,6 +19,7 @@
 class StSsdStrip
 {
  public:
+
   StSsdStrip(Int_t rNStrip, Int_t rDigitSig, Float_t rSigma, Int_t rPedestal);
   StSsdStrip(Int_t rNStrip, Int_t rDigitSig, Float_t rSigma, Int_t rPedestal, Int_t *rMcHit);
   // Sls
