@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.14 2008/04/15 21:04:43 bouchet Exp $
+ * $Id: St_spa_Maker.cxx,v 1.15 2008/05/07 22:59:11 bouchet Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.15  2008/05/07 22:59:11  bouchet
+ * EmbeddingMaker:initial version ; modified reading of GEANT hits
+ *
  * Revision 1.14  2008/04/15 21:04:43  bouchet
  * remove latest change
  *
@@ -73,7 +76,6 @@ Int_t St_spa_Maker::Init(){
   TDataSetIter       local(ssdparams);
   
   m_condition = (St_sdm_condition_db  *)local("sdm_condition_db");
-  
   return StMaker::Init();
 }
 //_____________________________________________________________________________

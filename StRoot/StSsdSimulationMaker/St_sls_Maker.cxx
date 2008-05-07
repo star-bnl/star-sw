@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.15 2008/01/15 14:42:51 bouchet Exp $
+ * $Id: St_sls_Maker.cxx,v 1.16 2008/05/07 22:59:11 bouchet Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.16  2008/05/07 22:59:11  bouchet
+ * EmbeddingMaker:initial version ; modified reading of GEANT hits
+ *
  * Revision 1.15  2008/01/15 14:42:51  bouchet
  * Set a default value for uninitialized variables
  *
@@ -60,7 +63,31 @@
 #include "tables/St_ssdConfiguration_Table.h"
 #include "StSsdUtil/StSsdBarrel.hh"
 
+#include "StBFChain.h"
+#include "StChain.h"
+#include "StMaker.h"
+
+#include "tables/St_g2t_track_Table.h"
+#include "StThreeVectorD.hh"
+#include "StPhysicalHelixD.hh"
+#include "SystemOfUnits.h"
+#include "StarMagField.h"
+#include "StMcEvent/StMcSsdHitCollection.hh"
+#include "StMcEvent.hh"
+#include "StEventTypes.h"
+#include "StMcEventTypes.hh"
+#include "StDAQMaker/StDAQReader.h"
+#include "St_ObjectSet.h"
+#include "StThreeVectorF.hh"
+
 ClassImp(St_sls_Maker);
+//_____________________________________________________________________________
+Int_t St_sls_Maker::Init(){
+  if (IAttr(".histos")) {
+    hRejected = new TH1F("hRejected","hits after removal / hits GEANT",110,0,1.1);
+  }
+  return kStOk;
+}
 //_____________________________________________________________________________
 Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
   assert(StSsdBarrel::Instance());
@@ -71,27 +98,46 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
   }
   TDataSetIter    local(ssdparams);
   m_ctrl        = (St_slsCtrl           *)local("slsCtrl");
+  m_dimensions  = (St_ssdDimensions     *)local("ssdDimensions"); 
+  m_positions   = (St_ssdWafersPosition *)local("ssdWafersPosition");
   if (!m_ctrl) {
     LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;
   }   
-  return kStOK;
+  St_ssdConfiguration* configTable = (St_ssdConfiguration*) local("ssdConfiguration");
+  if (!configTable) {
+    LOG_ERROR << "InitRun : No access to ssdConfiguration database" << endm;
+    return kStFatal;
+  }
+  m_config = (ssdConfiguration_st*) configTable->GetTable() ;
+  Float_t center[3]={0,0,0}; 
+  Float_t B[3]={0,0,0};  
+  StarMagField::Instance()->BField(center,B);
+  mBField   = B[2]*kilogauss;
+  return kStOk;
 }
 //_____________________________________________________________________________
 Int_t St_sls_Maker::Make()
 { 
   if (Debug()==true)  {LOG_DEBUG << "Make() ..." << endm;}
   // 		Create output tables
-   Int_t res = 0;
-   St_sls_strip  *sls_strip = new St_sls_strip("sls_strip",40000);
-   m_DataSet->Add(sls_strip);
-
-   TDataSetIter geant(GetInputDS("geant"));
-   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
-   St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
-
-   slsCtrl_st *ctrl = m_ctrl->GetTable();
-
+ 
+  ssdDimensions_st     *dimensions = m_dimensions->GetTable();
+  
+  setSsdParameters(dimensions);
+  if(Debug()){
+    printSsdParameters();}
+  
+  Int_t res = 0;
+  St_sls_strip  *sls_strip = new St_sls_strip("sls_strip",40000);
+  m_DataSet->Add(sls_strip);
+  
+  TDataSetIter geant(GetInputDS("geant"));
+  St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
+  St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
+  
+  slsCtrl_st *ctrl = m_ctrl->GetTable();
+  
    LOG_INFO<<"#################################################"<<endm;
    LOG_INFO<<"####       START OF SSD LAZY SIMULATOR       ####"<<endm;
    LOG_INFO<<"####        SSD BARREL INITIALIZATION        ####"<<endm;
@@ -99,7 +145,19 @@ Int_t St_sls_Maker::Make()
    Int_t nSsdHits = 0;
    if (g2t_ssd_hit)
      {
-       nSsdHits = readPointFromTable(g2t_ssd_hit);
+       //nSsdHits = readPointFromTable(g2t_ssd_hit);
+       // Get g2t tracks
+       St_DataSet *g2t_tracks  =  GetDataSet("g2t_track");
+       St_DataSetIter g2t_track_it(g2t_tracks);
+       St_g2t_track *g2t_track = (St_g2t_track *) g2t_track_it.Find("g2t_track");
+       if(!g2t_track){
+	 LOG_WARN <<" no track table , abort event because we cannot procede IdealTorealMethod()" << endm;
+	 return kStErr;
+       }
+       LOG_INFO<<Form("Num of SSD geant hits =%ld",g2t_ssd_hit->GetNRows());
+       //nSsdHits = readPointFromTable(g2t_ssd_hit);
+       nSsdHits = readPointFromTableWithEmbedding(g2t_ssd_hit,g2t_track,m_positions);
+       if(g2t_ssd_hit->GetNRows())hRejected->Fill((float)nSsdHits/g2t_ssd_hit->GetNRows());
      }
    if (nSsdHits == 0)
      {
@@ -178,7 +236,6 @@ Int_t St_sls_Maker::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit) {
   return counter;
 }
 //________________________________________________________________________________
-
 Int_t St_sls_Maker::removeInactiveHitInTable(St_g2t_ssd_hit *g2t_ssd_hit) {
   g2t_ssd_hit_st *g2t = g2t_ssd_hit->GetTable();
   StSsdPointList *inactiveHits = StSsdBarrel::Instance()->getInactiveHitList();
@@ -280,7 +337,6 @@ Int_t St_sls_Maker::writeStripToTable(St_sls_strip *sls_strip) {
       Int_t idCurrentWaf = StSsdBarrel::Instance()->getSsdLayer()*1000 +((iWaf+1)*100)+(iLad+1);
       StSsdStripList *stripP = wafer->getStripP();
       StSsdStripList *stripN = wafer->getStripN();
-      
       StSsdStrip *pStripP = stripP->first();
       Int_t iP = 0;
       for (iP = 0; iP < stripP->getSize() ; iP++) {
@@ -295,6 +351,7 @@ Int_t St_sls_Maker::writeStripToTable(St_sls_strip *sls_strip) {
 	  strip.id_hit[i]     = pStripP->getIdHit(i);
 	  strip.id_mchit[i]   = pStripP->getIdMcHit(i);
 	  strip.id_mctrack[i] = pStripP->getIdMcTrack(i);
+	  LOG_DEBUG<<Form("idwafer=%d strip_id=%d side P i=%d IdMcHit=%d IdMcTrack=%d signal(adc)=%d signal(GeV)=%f\n",idCurrentWaf,pStripP->getNStrip(),i,pStripP->getIdMcHit(i),pStripP->getIdMcTrack(i),pStripP->getDigitSig(),pStripP->getAnalogSig())<<endm;
 	}
 	sls_strip->AddAt(&strip);
 	currRecord++;
@@ -315,6 +372,7 @@ Int_t St_sls_Maker::writeStripToTable(St_sls_strip *sls_strip) {
 	  strip.id_hit[i]     = pStripN->getIdHit(i);
 	  strip.id_mchit[i]   = pStripN->getIdMcHit(i);
 	  strip.id_mctrack[i] = pStripN->getIdMcTrack(i);
+	  LOG_DEBUG <<Form("idwafer=%d strip_id=%d side N i=%d IdMcHit=%d IdMcTrack=%d signal(adc)=%d signal(GeV)=%f\n",idCurrentWaf,pStripN->getNStrip(),i,pStripN->getIdMcHit(i),pStripN->getIdMcTrack(i),pStripN->getDigitSig(),pStripN->getAnalogSig())<<endm;
 	}
 	sls_strip->AddAt(&strip);
 	currRecord++;
@@ -323,3 +381,311 @@ Int_t St_sls_Maker::writeStripToTable(St_sls_strip *sls_strip) {
     }
   return currRecord;
 }
+//_______________________________________________________________
+
+Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,St_g2t_track *g2t_track,St_ssdWafersPosition *m_positions){
+  StMcEvent* mcEvent = 0;
+  mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
+ 
+  StMcSsdHitCollection* mcCol; 
+  StMcSsdHitCollection* mcCol1; 
+  if(mcEvent)
+    {
+      mcCol  = mcEvent->ssdHitCollection();
+      if (!mcCol)  
+	{ 
+	  LOG_WARN <<"StSsdEmbeddingMaker -E- no SsdHitCollection!" << endm; 
+	  mcCol = new StMcSsdHitCollection; 
+	  mcEvent->setSsdHitCollection(mcCol); 
+	  LOG_WARN <<"Make() has added a non existing StSsdHitCollection" <<endm; 
+	}
+      else {
+	SafeDelete(mcCol);
+	//assert(mcEvent);
+	mcCol1 = new StMcSsdHitCollection; 
+	mcEvent->setSsdHitCollection(mcCol1);
+      }
+    }
+  
+  g2t_ssd_hit_st *g2t             = g2t_ssd_hit->GetTable(); 
+  g2t_track_st *g2tTrack          = 0;
+  g2tTrack                        = g2t_track->GetTable();
+  LOG_DEBUG << "Size of track Table=" << g2t_track->GetNRows()   << endm;
+  LOG_DEBUG << "Size of SSD Table="   << g2t_ssd_hit->GetNRows() << endm;
+  ssdWafersPosition_st *positions = m_positions->GetTable(); 
+  if(Debug()){
+    for(Int_t i =0;i<m_positions->GetNRows();i++)
+      {
+	for(Int_t ii=0;ii<3;ii++){
+	  LOG_INFO <<"Id " << positions[i].id <<" drift["<<ii<<"] ="<< positions[i].driftDirection[ii]<< endm;
+	  LOG_INFO <<" Transverse["<<ii<<"] ="<< positions[i].transverseDirection[ii]<< endm;
+	  LOG_INFO <<" Id " << positions[i].id <<" normal["<<ii<<"] ="<< positions[i].normalDirection[ii]<< endm; 
+	  LOG_INFO <<" center["<<ii<<"] ="<< positions[i].centerPosition[ii]<< endm;  
+	}
+      }
+  }
+  StThreeVector<double> VecG(0,0,0);
+  StThreeVector<double> VecL(0,0,0);
+  StThreeVector<double> mtm(0,0,0);
+  Double_t myVectG[3] = {0,0,0};
+  Double_t myVectL[3] = {0,0,0};
+  Int_t    NumOfHits    = 0;
+  Int_t   foundGoodHits = 0;
+  Int_t   currWafId     = 0;
+  Int_t   currLadder    = 0;
+  Int_t   currWafNumb   = 0;
+  Int_t   trackId       = 0;
+  Int_t   FinalLadder   = 0;
+  Int_t   FinalWafer    = 0;
+  Int_t   N             = 0;
+  Int_t   idWafer       = 0;
+  Int_t   iWaf          = 0;
+  Float_t Flag_Energy   = 1.0;
+  N         = m_positions->GetNRows();
+  NumOfHits = g2t_ssd_hit->GetNRows();
+  if (NumOfHits>0){
+    for (int j=0;j<NumOfHits ;j++)
+      {
+	Flag_Energy =1.0;
+	currWafId = g2t[j].volume_id;
+	trackId   = g2t[j].track_p;
+	if( currWafId < mSsdLayer*1000) continue; // ssd hit
+	currLadder  = StSsdBarrel::Instance()->idWaferToLadderNumb(currWafId); 
+	currWafNumb = StSsdBarrel::Instance()->idWaferToWafer(currWafId); 
+	LOG_DEBUG <<"geant hit #"<<j<<" volumeID="<< currWafId << " x=" << g2t[j].x[0] << " y=" << g2t[j].x[1] << " z=" <<  g2t[j].x[2]<<endm;
+	VecG.setX(g2t[j].x[0]);
+	VecG.setY(g2t[j].x[1]);
+	VecG.setZ(g2t[j].x[2]);
+	mtm.setX(g2t[j].p[0]);
+	mtm.setY(g2t[j].p[1]);
+	mtm.setZ(g2t[j].p[2]);
+	for (Int_t i = 0; i < N; i++)    // loop over the full wafer table now.
+	  {
+	    idWafer = positions[i].id;
+	    iWaf    = idWaferToWafer(idWafer);
+	    if ((idWafer > mSsdLayer*1000)&&
+		(idWafer == currWafId)){ // find the good wafer
+	      if(Debug()){
+		for(Int_t ii=0;ii<3;ii++){
+		  LOG_INFO <<"Id " << idWafer <<" drift["<<ii<<"] ="<< positions[i].driftDirection[ii]<< endm;
+		  LOG_INFO <<" Transverse["<<ii<<"] ="<< positions[i].transverseDirection[ii]<< endm;
+		  LOG_INFO <<" Id " << idWafer <<" normal["<<ii<<"] ="<< positions[i].normalDirection[ii]<< endm; 
+		  LOG_INFO <<" center["<<ii<<"] ="<< positions[i].centerPosition[ii]<< endm;  
+		}
+	      }
+	      LOG_DEBUG << " idWafer =" << idWafer << " TrackId="<<trackId <<" hit id="<<g2t[j].id <<endm; 
+	      Int_t iok = ideal2RealTranslation(&VecG,&mtm,(double)g2tTrack[trackId].charge,currWafId,i,m_positions,&FinalLadder,&FinalWafer);
+	      if(iok==kStSkip){
+		LOG_DEBUG << "Not found correct wafer "<<endm;
+		Flag_Energy =-1.0;// we mark the energy as -1*energy for this hit : do not use hit 
+	      }
+	      // fill stMcEvent
+	      g2t[j].de = Flag_Energy*g2t[j].de;
+	      StMcSsdHit *mHit =0;
+	      //mHit = new StMcSsdHit(&g2t[j]);
+	      Int_t finalVolumeId = 7000+(FinalLadder+1)+(FinalWafer+1)*100;
+	      LOG_DEBUG<<Form("New ladder=%d New Wafer=%d New volume id =%d\n",FinalLadder,FinalWafer,finalVolumeId);
+	      g2t[j].volume_id = (long)finalVolumeId;
+	      StMcTrack *t = 0;
+	      t = new StMcTrack(&(g2tTrack[trackId-1]));
+	      //mHit = new StMcSsdHit(g2t[j].x,g2t[j].p,g2t[j].de,0,0,0,finalVolumeId,t);
+	      mHit = new StMcSsdHit(&g2t[j]);
+	      LOG_DEBUG<<Form("from mHit:ladder=%d wafer=%d energy =%f x=%f y=%f z=%f",mHit->ladder(),mHit->wafer(),mHit->dE(),mHit->position().x(),mHit->position().y(),mHit->position().z())<<endm;
+	      mHit->setParentTrack(t);
+	      //mHit->setVolumeId(finalVolumeId);
+	      t->addSsdHit(mHit);
+	      mcEvent->ssdHitCollection()->addHit(mHit);
+	      LOG_DEBUG<<Form("check :finalVolumeid =%d fromhit ladder=%d wafer=%d ParentTrack=%ld\n",finalVolumeId,mHit->ladder(),mHit->wafer(),mHit->parentTrack()->key())<<endm;
+	      if (iok != kStOK) continue;
+	      foundGoodHits++;
+	      //dump the 3-vector to Double_t[3] for MasterToLocal
+	      myVectG[0] = VecG.x();
+	      myVectG[1] = VecG.y();
+	      myVectG[2] = VecG.z();
+	      StSsdBarrel::Instance()->mLadders[currLadder]->mWafers[currWafNumb]->MasterToLocal(myVectG,myVectL);
+	      //dump the local Double_t[3] to a 3-vector for the FillGeantHits method 
+	      VecL.setX(myVectL[0]);
+	      VecL.setY(myVectL[1]);
+	      VecL.setZ(myVectL[2]);
+	      //########### fill the barrel with proper hits ##########
+	      Float_t p[3],tempo[3];
+	      for (Int_t jj = 0; jj<3; jj++) {p[jj] = g2t[j].p[jj];tempo[jj] = myVectG[jj];}
+	      trackId   = g2t[j].track_p;
+	      LOG_DEBUG<<Form("Final Ladder=%d FinalWafer=%d geantId=%d xg=%f yg=%f zg=%f energy=%f trackId=%d\n",FinalLadder,FinalWafer,g2t[j].id,myVectG[0],myVectG[1],myVectG[2],g2t[j].de,trackId)<<endm;
+	      StSsdBarrel::Instance()->mLadders[FinalLadder]->mWafers[FinalWafer]->addHit(g2t[j].id, g2t[j].id, trackId, tempo, g2t[j].de, p);
+	    }
+	  }
+      }
+  }
+  if(mcCol) LOG_DEBUG <<Form("Size of (old) collection =%ld",mcCol->numberOfHits())<<endm; 
+  if(mcCol1)LOG_DEBUG <<Form("Size of (new) collection =%ld",mcCol1->numberOfHits())<<endm;
+  return foundGoodHits;
+}
+
+//_______________________________________________________________________
+Int_t St_sls_Maker::idWaferToWaferNumb(Int_t idWafer)
+{
+  // idwafer = layer*1000+waf*100+ladder
+  Int_t iW = (int)((idWafer - mSsdLayer*1000)/100);
+  Int_t iL = idWafer - mSsdLayer*1000 - iW*100;
+  return ((iL-1)*mNWaferPerLadder + iW -1);
+}
+//________________________________________________________________________
+Int_t St_sls_Maker::idWaferToLadderNumb(Int_t idWafer)
+{
+  // idwafer = layer*1000+waf*100+ladder
+  Int_t iW = (int)((idWafer - mSsdLayer*1000)/100);
+  Int_t iL = idWafer - mSsdLayer*1000 - iW*100;
+  return iL-1;
+}
+//_________________________________________________________________________
+Int_t St_sls_Maker::waferNumbToIdWafer(Int_t waferNumb)
+{
+  Int_t iL = 1+(int)((waferNumb)/mNLadder);
+  Int_t iW = waferNumb-((iL-1)*mNLadder)+1;
+  return mSsdLayer*1000 + iW*100 + iL;
+}
+//__________________________________________________________________________
+void St_sls_Maker::setSsdParameters(ssdDimensions_st *geom_par){
+  mDimensions          = geom_par;
+  mSsdLayer            = 7; 
+  mDetectorLargeEdge   = 2.*geom_par[0].waferHalfActLength;
+  mDetectorSmallEdge   = 2.*geom_par[0].waferHalfActWidth;
+  mNLadder             = 20;
+  mNWaferPerLadder     = geom_par[0].wafersPerLadder;
+  mNStripPerSide       = geom_par[0].stripPerSide;
+  mStripPitch          = geom_par[0].stripPitch;
+  mTheta               = geom_par[0].stereoAngle;
+}
+//___________________________________________________________________________
+void St_sls_Maker::printSsdParameters(){
+  LOG_INFO << "###Ladders = " <<mNLadder<<"###"<< endm;
+  LOG_INFO << "###Wafers per Ladder = " <<mNWaferPerLadder<<"###"<< endm;
+  LOG_INFO << "###half Active LargeEdge = " << mDetectorLargeEdge << "###" << endm;
+  LOG_INFO << "###half Active SmallEdge = " << mDetectorSmallEdge << "###" << endm;
+}
+//_____________________________________________________________________________
+void St_sls_Maker::debugUnPeu() { 
+  Int_t monladder,monwafer; 
+  for(monladder=0;monladder<mNLadder;monladder++)
+    for(monwafer=0;monwafer<mNWaferPerLadder;monwafer++)
+      StSsdBarrel::Instance()->debugUnPeu(monladder,monwafer);
+}
+//_____________________________________________________________________________
+ int St_sls_Maker::IsOnWafer(const StThreeVector<double>& LocalPosition){
+   //Find out for a given z coord and Hardware pos is it on the wafer
+   if((LocalPosition[0] >(mDetectorLargeEdge/2.)) || (LocalPosition[0] < (-mDetectorLargeEdge/2.)) || 
+      ( LocalPosition[1]>(mDetectorSmallEdge/2.)) || (LocalPosition[1] < (-mDetectorSmallEdge/2.)))
+     return 0;
+   else return 1;
+   /*
+   if((LocalPosition[0] <(mDetectorLargeEdge/2.)) || (LocalPosition[0] > (-mDetectorLargeEdge/2.)) ||
+      (LocalPosition[1] <(mDetectorSmallEdge/2.)) || (LocalPosition[1] > (-mDetectorSmallEdge/2.)))
+     return 1;   
+   return 0;
+   */
+ }
+//____________________________________________________________________________
+Int_t St_sls_Maker::ideal2RealTranslation(StThreeVector<double> *pos, StThreeVector<double> *mtm, double charge, int wafId, int index, St_ssdWafersPosition *m_positions,Int_t *IL,Int_t *IW){
+  StThreeVector<double> x(0,0,0);
+  // Get normal and center position of the wafer geom
+  ssdWafersPosition_st *WafersPosition    = m_positions->GetTable(); 
+  StThreeVector<double> wafCent(0,0,0);
+  StThreeVector<double> wafNorm(0,0,0);
+  wafCent.setX(WafersPosition[index].centerPosition[0]);
+  wafCent.setY(WafersPosition[index].centerPosition[1]);
+  wafCent.setZ(WafersPosition[index].centerPosition[2]);
+  wafNorm.setX(WafersPosition[index].normalDirection[0]);
+  wafNorm.setY(WafersPosition[index].normalDirection[1]);
+  wafNorm.setZ(WafersPosition[index].normalDirection[2]);
+  Int_t Ladder  = idWaferToLadderNumb(wafId);  
+  Int_t Wafer   = idWaferToWafer(wafId);  
+  // Move helix of track from IDEAL geom to find where it hit REAL wafer geom
+  StPhysicalHelixD tHelix( *mtm, *pos, mBField, charge);
+  LOG_DEBUG <<  "pos going in : "<< *pos << endm;
+  double s = tHelix.pathLength(wafCent,wafNorm);
+  x = tHelix.at(s); 
+  LOG_DEBUG << "Helix pathLength="<< s <<" x="<<x.x()<<" y="<<x.y()<<" z="<<x.z()<<endm;
+  pos->setX(x.x());
+  pos->setY(x.y());
+  pos->setZ(x.z());
+  LOG_DEBUG << "Track projection on Global x =" << pos->x() <<" y =" << pos->y() <<" z =" << pos->z() <<endm; 
+  Double_t xg[3] = {0,0,0};
+  xg[0] = pos->x();
+  xg[1] = pos->y();
+  xg[2] = pos->z();
+  Double_t xl[3] = {0,0,0};
+  // get the local coordinate of the track projection to the real wafer
+  StSsdBarrel::Instance()->mLadders[Ladder]->mWafers[Wafer]->MasterToLocal(xg,xl); 
+  if (Debug()){
+    for(Int_t i=0;i<3;i++){
+      LOG_DEBUG << "xg["<<i<<"] = "<<xg[i] << "--> to local --> xl["<<i<<"] = "<<xl[i] <<endm;}
+  }
+  if(IsOnWafer(xl))
+    {
+      LOG_DEBUG << " First Pass Coming out " << *pos << endm;
+      x = tHelix.momentumAt(s,mBField);
+      mtm->setX(x.x());
+      mtm->setY(x.y());
+      mtm->setZ(x.z());
+      *IL = Ladder;
+      *IW = Wafer;
+      return kStOK;
+    }
+  LOG_DEBUG <<"not found at the first pass, continue "<<endm; 
+  // If the hit is now on a different wafer look for it by looping
+  // over one ladder before and one after
+  Int_t iladder,theLadder = 0;
+  StThreeVector<double> newx(0,0,0);
+  for( iladder = -1; iladder <= 1; iladder++){
+    theLadder = Ladder + iladder;
+    if( theLadder==20) theLadder=0;
+    else 
+      if( theLadder==-1) theLadder=19;
+    for( Int_t iwaf = 0;  iwaf < mNWaferPerLadder; iwaf++){
+      LOG_DEBUG << "Wafer ="<< iwaf << " Ladder="<<theLadder << endm;
+      wafId = 1000*mSsdLayer + 100*(iwaf+1) + (theLadder+1);
+      Int_t NewLadder  = idWaferToLadderNumb(wafId);  
+      Int_t NewWafer   = idWaferToWafer(wafId);  
+      index = idWaferToWaferNumb(wafId);
+      wafCent.setX(WafersPosition[index].centerPosition[0]);
+      wafCent.setY(WafersPosition[index].centerPosition[1]);
+      wafCent.setZ(WafersPosition[index].centerPosition[2]);
+      wafNorm.setX(WafersPosition[index].normalDirection[0]);
+      wafNorm.setY(WafersPosition[index].normalDirection[1]);
+      wafNorm.setZ(WafersPosition[index].normalDirection[2]);
+      double news = tHelix.pathLength(wafCent,wafNorm);
+      if(TMath::Abs(news)>5) continue;
+      newx = tHelix.at(news); 
+      pos->setX(newx.x());
+      pos->setY(newx.y());
+      pos->setZ(newx.z());
+      Double_t XG[3]={0,0,0};
+      XG[0] = newx.x();
+      XG[1] = newx.y();
+      XG[2] = newx.z();
+      Double_t XL[3]={0,0,0};
+      StSsdBarrel::Instance()->mLadders[NewLadder]->mWafers[NewWafer]->MasterToLocal(XG,XL);  
+        if(IsOnWafer(XL))
+	{
+	  LOG_DEBUG << " after search, found it Coming out " << *pos << endm;
+	  newx = tHelix.momentumAt(news,mBField);
+	  mtm->setX(newx.x());
+	  mtm->setY(newx.y());
+	  mtm->setZ(newx.z());
+	  *IL = NewLadder;
+	  *IW = NewWafer;
+	  return kStOk;
+	}
+      else{LOG_DEBUG <<" Not found wafer for this hit/track projection, will reject the hit"<<endm;}
+    }
+  }
+  return kStSkip;
+}
+//____________________________________________________________________________
+void St_sls_Maker::Clear(Option_t *option)
+{
+  LOG_DEBUG << "Clear()" <<endm;
+  StMaker::Clear();
+}
+//________________________________________________________________________________
