@@ -1,4 +1,4 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.22 2008/05/06 22:43:47 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.23 2008/05/07 21:44:43 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
@@ -39,7 +39,7 @@ void StCdfChargedConeJetFinder::findJetAroundThis(StEtaPhiCell* cell)
 {
   initializeWorkCell(cell);
   
-  doSearch();
+  formCone();
   addToPrejets(*mWorkCell);
 }
 

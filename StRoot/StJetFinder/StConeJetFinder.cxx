@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.45 2008/05/06 23:58:55 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.46 2008/05/07 21:44:43 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
@@ -31,7 +31,9 @@ void StConeJetFinder::findJets(JetList& protoJetList)
   findProtoJets(toSearchList);
 
   if (mPars.addMidpoints()) {
-    addSeedsAtMidpoint();
+    CellList midpointList = generateMidpointList();
+
+    findProtoJetsAroundMidpoints(midpointList);
   }
 
   if (mPars.doSplitMerge()) {
@@ -47,9 +49,9 @@ void StConeJetFinder::findJetAroundThis(StEtaPhiCell* cell)
   initializeWorkCell(cell);
   
   if (mPars.performMinimization()) {
-    doMinimization();
+    findJetWithStableCone();
   } else {
-    doSearch();
+    formCone();
     addToPrejets(*mWorkCell);
   }
 
@@ -62,12 +64,9 @@ bool StConeJetFinder::shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) 
   return false;
 }
 
-void StConeJetFinder::addSeedsAtMidpoint()
+StEtaPhiCell::CellList StConeJetFinder::generateMidpointList()
 {
-    //we have to first locate and remember pairs separated by d<2.*r.  
-    //we then have to add midpoints.
-
-  _cellPairList.clear();
+  CellList midpointList;
 
   for (CellList::iterator pj1 = _preJets.begin(); pj1 != _preJets.end(); ++pj1) {
     for (CellList::iterator pj2 = pj1; pj2 != _preJets.end(); ++pj2) {
@@ -76,20 +75,20 @@ void StConeJetFinder::addSeedsAtMidpoint()
 
       if ((*pj1)->distance(**pj2) > 2.0*mPars.coneRadius()) continue;
 
-      _cellPairList.push_back(CellPairList::value_type(pj1, pj2));
+      midpointList.push_back(_cellGrid.findMidpointCell(**pj1, **pj2));
 
     }
   }
-	
-  for (CellPairList::iterator it = _cellPairList.begin(); it != _cellPairList.end(); ++it) {
+  return midpointList;
+}
 
-    mWorkCell->clear();
-		
-    StEtaPhiCell* mp = defineMidpoint(**(*it).first, **(*it).second );
+void StConeJetFinder::findProtoJetsAroundMidpoints(CellList& midpointList)
+{
+  for (CellList::iterator it = midpointList.begin(); it != midpointList.end(); ++it) {
 
-    initializeWorkCell(mp);
+    initializeWorkCell(*it);
 	    
-    doSearch();
+    formCone();
     if (mPars.requiredStableMidpoints()) {
       const StProtoJet& centroid = mWorkCell->centroid();
       if (isInTheVolume(centroid.eta(), centroid.phi())) {
@@ -101,39 +100,20 @@ void StConeJetFinder::addSeedsAtMidpoint()
       addToPrejets(*mWorkCell);
     }
   }
-
 }
 
-double midpoint(double v1, double v2)
+void StConeJetFinder::findJetWithStableCone()
 {
-    double high, low;
-    if (v1 > v2) {
-      high =v1;
-      low=v2;
-    }
-    else { 
-      high = v2;
-      low=v1;
-    }
-    return (high - low)/2. + low;
-}
 
-StEtaPhiCell* StConeJetFinder::defineMidpoint(const StEtaPhiCell& pj1, const StEtaPhiCell& pj2) 
-{
-    double etaMid = midpoint(pj1.eta(), pj2.eta());
-    double phiMid = midpoint(pj1.phi(), pj2.phi());
-    return _cellGrid.Cell(etaMid, phiMid);
-}
+  static const int maxAttempt = 100;
 
-void StConeJetFinder::doMinimization()
-{
   int _searchCounter = 0;
 	
   while(1) {
 
-    if (++_searchCounter > 100) break;
+    if (++_searchCounter > maxAttempt) break;
     
-    doSearch();
+    formCone();
 	
     const StProtoJet& centroid = mWorkCell->centroid();
 

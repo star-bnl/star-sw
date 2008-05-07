@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.38 2008/05/06 23:58:55 tai Exp $
+// $Id: StConeJetFinder.h,v 1.39 2008/05/07 21:44:44 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -20,17 +20,18 @@ private:
 
   bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
 
-  void addSeedsAtMidpoint();
-
-  StEtaPhiCell* defineMidpoint(const StEtaPhiCell& pj1, const StEtaPhiCell& pj2) ;
-
-  void doMinimization();
+  void findJetWithStableCone();
 	
+  CellList generateMidpointList();
+
+  void findProtoJetsAroundMidpoints(CellList& midpointList);
+
   bool isInTheVolume(double eta, double phi);
 
   bool areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2);
 
   StJetSpliterMerger* mMerger;
+
 
 };
 

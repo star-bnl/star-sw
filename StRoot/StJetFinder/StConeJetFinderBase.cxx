@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.4 2008/05/06 23:33:50 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.5 2008/05/07 21:44:44 tai Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -110,7 +110,7 @@ void StConeJetFinderBase::initializeWorkCell(const StEtaPhiCell* other)
     }
 }
 
-void StConeJetFinderBase::doSearch()
+void StConeJetFinderBase::formCone()
 {
   CellList cellList = _cellGrid.WithinTheConeRadiusCellList(*mWorkCell);
 
@@ -142,7 +142,6 @@ void StConeJetFinderBase::addToPrejets(StEtaPhiCell& cell)
     cell.setEt(cell.Et() + (*etCell)->eT());
   }
 
-  //  _preJets.push_back(new StEtaPhiCell(cell));
   _preJets.push_back(cell.clone());
 
 }

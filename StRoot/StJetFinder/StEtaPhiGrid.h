@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.h,v 1.4 2008/05/05 00:32:48 tai Exp $
+// $Id: StEtaPhiGrid.h,v 1.5 2008/05/07 21:44:45 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STETAPHIGRID_H
 #define STETAPHIGRID_H
@@ -34,6 +34,8 @@ public:
   CellList EtSortedCellList();
   CellList WithinTheConeRadiusCellList(const StEtaPhiCell& theCell) const;
 
+  StEtaPhiCell* findMidpointCell(const StEtaPhiCell& cell1, const StEtaPhiCell& cell2);
+
   StEtaPhiCell* Cell(double eta, double phi);
 
 private:
@@ -43,6 +45,8 @@ private:
   StEtGridKey findKey(double eta, double phi) const;
   int findEtaKey(double eta) const;
   int findPhiKey(double phi) const;
+
+  double midpoint(double v1, double v2);
 
   StConePars& _pars;
   CellMap _EtCellMap;
