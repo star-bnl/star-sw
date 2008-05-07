@@ -1,6 +1,9 @@
-// $Id: StSsdStripList.cc,v 1.1 2006/10/16 16:43:30 bouchet Exp $
+// $Id: StSsdStripList.cc,v 1.2 2008/05/07 22:48:36 bouchet Exp $
 //
 // $Log: StSsdStripList.cc,v $
+// Revision 1.2  2008/05/07 22:48:36  bouchet
+// calculation of quality of hits used embedding
+//
 // Revision 1.1  2006/10/16 16:43:30  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -309,7 +312,6 @@ void StSsdStripList::updateStrip(StSsdStrip *ptr)
       Float_t tmpSig = stripScan->getAnalogSig();
       stripScan->setNHits(dum+1);
       stripScan->setAnalogSig(ptr->getAnalogSig()+tmpSig) ;
-      
       if (dum<5)
 	{
 	  stripScan->setIdHit(ptr->getIdHit(0), dum);
