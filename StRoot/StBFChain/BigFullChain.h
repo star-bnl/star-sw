@@ -672,7 +672,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Trs"         ,"Trs","tpcChain","scl,tpcDB,TrsToF,StEvent"         ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"TrsMini"    ,"","tpcChain","scl,tpcDB,-Trs,Simu"          ,"StTrsMiniMaker","StTrsMiniMaker","",kFALSE},
     
-  {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
+  {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
   {"St_tpc"      ,"","","tpc_T,tpcDb"                                               ,"","St_tpc","",kFALSE},
   {"St_svt"      ,"","","svt_T,tls,svtDb"                                           ,"","St_svt","",kFALSE},
   //  {"StGlobal"     ,"","","globT",                                                 ,"","St_global","",kFALSE},
@@ -836,8 +836,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                            ,"StMaker","StChain","",kFALSE},
   {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu",
 "StFtpcSlowSimMaker","StFtpcSlowSimMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC Slow simulator",kFALSE},
-  {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
-                    "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
+  {"Fcl"       ,"ftpc_hits","ftpcChain","SCL,daq","StFtpcClusterMaker",
+                                        "StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
   {"fpt"      ,"ftpc_tracks","ftpcChain","SCL"
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
   {"fgain"     ,"","","fcl,fpt","","",
