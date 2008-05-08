@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.42 2008/05/08 04:07:23 tai Exp $
+// $Id: StConeJetFinder.h,v 1.43 2008/05/08 04:40:04 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -11,6 +11,8 @@ public:
 	
   StConeJetFinder(const StConePars& pars);
   virtual ~StConeJetFinder();
+
+  StJetEtCellFactory* makeCellFactory();
 
   void findJets(JetList& protoJetList, const FourVecList& particleList);
 	
@@ -28,13 +30,15 @@ private:
   StEtaPhiCell* createJetCellFor(StEtaPhiCell& cell);
   StEtaPhiCell* findJetWithStableCone();
 	
-  CellList generateMidpointList();
+  CellList generateMidpointList(const CellList& protoJetCellList);
 
-  void findProtoJetsAroundMidpoints(CellList& midpointList);
+  CellList findProtoJetsAroundMidpoints(CellList& midpointList);
 
   bool isInTheVolume(double eta, double phi);
 
   bool areTheyInTheSameCell(double eta1, double phi1, double eta2, double phi2);
+
+  void storeTheResults(JetList& protoJetList, const CellList& protoJetCellList);
 
   StJetSpliterMerger* mMerger;
 

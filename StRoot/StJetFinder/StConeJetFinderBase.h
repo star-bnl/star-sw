@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.8 2008/05/08 04:07:23 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.9 2008/05/08 04:40:04 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -31,15 +31,12 @@ class StConeJetFinderBase : public StJetFinder {
 public:
 	
   typedef StEtaPhiCell::CellList CellList;
-  //  typedef list<StEtaPhiCell> ValueCellList;
 	
   StConeJetFinderBase(const StConePars& pars);
   virtual ~StConeJetFinderBase();
 	
   void Init();
 
-  StConePars pars() const; 
-	
   virtual void findJets(JetList& protoJetList, const FourVecList& particleList) = 0;
 	
 protected:
@@ -50,7 +47,7 @@ protected:
     ///Only available for derived classes
     StConeJetFinderBase();
 
-  virtual StJetEtCellFactory* makeCellFactory();
+  virtual StJetEtCellFactory* makeCellFactory() = 0;
 
 	
     void initializeWorkCell(const StEtaPhiCell* other);
@@ -89,13 +86,6 @@ private:
   virtual bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
 
 };
-
-inline StConePars StConeJetFinderBase::pars() const
-{
-    return mPars;
-}
-
-//non-members
 
 struct PreJetLazyUpdater //assume proto-jet updated
 {

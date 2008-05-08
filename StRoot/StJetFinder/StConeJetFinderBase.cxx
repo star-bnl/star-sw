@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.7 2008/05/08 04:07:23 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.8 2008/05/08 04:40:04 tai Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -35,11 +35,6 @@ StConeJetFinderBase::~StConeJetFinderBase()
 void StConeJetFinderBase::Init()
 {
   _cellGrid.buildGrid(makeCellFactory());
-}
-
-StJetEtCellFactory* StConeJetFinderBase::makeCellFactory()
-{
-  return new StJetEtCellFactory;
 }
 
 void StConeJetFinderBase::clearPreviousResult()
