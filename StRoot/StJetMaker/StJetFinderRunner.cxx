@@ -1,13 +1,8 @@
-// $Id: StJetFinderRunner.cxx,v 1.7 2008/05/08 02:22:34 tai Exp $
+// $Id: StJetFinderRunner.cxx,v 1.8 2008/05/08 02:27:13 tai Exp $
 #include "StJetFinderRunner.h"
 
-#include <StJetFinder/StProtoJet.h>
 #include <StJetFinder/StJetFinder.h>
 #include <StJetFinder/StJetPars.h>
-
-#include <vector>
-
-using namespace std;
 
 namespace StSpinJet {
 
@@ -31,12 +26,6 @@ void StJetFinderRunner::Init()
 
 void StJetFinderRunner::Run()
 {
-  //_protoJetList.clear();
-  //
-  //for(vector<const AbstractFourVec*>::const_iterator particle = _particleList.begin(); particle != _particleList.end(); ++particle) {
-  //  _protoJetList.push_back(StProtoJet(*particle));
-  //}
-
   _jetFinder->findJets(_protoJetList, _particleList);
 }
 
