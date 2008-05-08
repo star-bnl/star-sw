@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.41 2008/05/08 02:22:25 tai Exp $
+// $Id: StConeJetFinder.h,v 1.42 2008/05/08 04:07:23 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -16,13 +16,17 @@ public:
 	
 private:
 
-  CellList generateEtOrderedList(JetList& protoJetList);
+  CellList generateEtOrderedCellList(const FourVecList& particleList);
 
-  void findJetAroundThis(StEtaPhiCell* cell);
+  CellList findProtoJetsAroundCells(CellList& toSearchList);
+
+  StEtaPhiCell* findJetAroundThis(StEtaPhiCell* cell);
+
 
   bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
 
-  void findJetWithStableCone();
+  StEtaPhiCell* createJetCellFor(StEtaPhiCell& cell);
+  StEtaPhiCell* findJetWithStableCone();
 	
   CellList generateMidpointList();
 

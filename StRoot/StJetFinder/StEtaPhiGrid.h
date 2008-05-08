@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.h,v 1.5 2008/05/07 21:44:45 tai Exp $
+// $Id: StEtaPhiGrid.h,v 1.6 2008/05/08 04:07:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STETAPHIGRID_H
 #define STETAPHIGRID_H
@@ -23,7 +23,6 @@ public:
   typedef std::map<StEtGridKey, StEtaPhiCell*> CellMap;
   typedef CellMap::value_type CellMapValType;
   typedef StEtaPhiCell::CellList CellList;
-  typedef std::list<StEtaPhiCell> ValueCellList;
 
   StEtaPhiGrid(StConePars& pars) : _pars(pars) { }
 
