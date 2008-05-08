@@ -1,17 +1,4 @@
-/***************************************************************************
- *
- * $Id: StFourPMaker.cxx,v 1.3 2005/01/26 20:42:53 mmiller Exp $
- * 
- * Author: Thomas Henry February 2003
- ***************************************************************************
- *
- * Description:  Maker which creates a list of Four Momentums (base class)
- *
- ***************************************************************************
- *
- * Revision 1.0  2003/02/20 thenry
- *
- **************************************************************************/
+// $Id: StFourPMaker.cxx,v 1.4 2008/05/08 21:11:49 tai Exp $
 #include <string>
 #include <iostream>
 
@@ -34,8 +21,9 @@
 ClassImp(StFourPMaker)
   
 StFourPMaker::StFourPMaker(const char* name, StMuDstMaker* uDstMaker) 
-  : StMaker(name), muDst(uDstMaker), me(0.000511), mpr(0.9383), 
-    mpi(0.1396), mk(0.4937), eta_high_lim(2.0), eta_low_lim(-2.0)
+  : StMaker(name)
+  , eta_high_lim(2.0)
+  , eta_low_lim(-2.0)
 {
 }
 
