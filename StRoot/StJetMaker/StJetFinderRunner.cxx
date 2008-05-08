@@ -1,4 +1,4 @@
-// $Id: StJetFinderRunner.cxx,v 1.8 2008/05/08 02:27:13 tai Exp $
+// $Id: StJetFinderRunner.cxx,v 1.9 2008/05/08 02:31:46 tai Exp $
 #include "StJetFinderRunner.h"
 
 #include <StJetFinder/StJetFinder.h>
@@ -6,7 +6,7 @@
 
 namespace StSpinJet {
 
-StJetFinderRunner::StJetFinderRunner(StJetPars* pars, ParticleList& particleList, ProtoJetList& protoJets)
+StJetFinderRunner::StJetFinderRunner(StJetPars* pars, const ParticleList& particleList, ProtoJetList& protoJets)
   : _jetFinder(pars->constructJetFinder())
   , _particleList(particleList)
   , _protoJetList(protoJets)
