@@ -1,4 +1,4 @@
-// $Id: StJetFinderRunner.cxx,v 1.6 2008/05/02 17:07:11 tai Exp $
+// $Id: StJetFinderRunner.cxx,v 1.7 2008/05/08 02:22:34 tai Exp $
 #include "StJetFinderRunner.h"
 
 #include <StJetFinder/StProtoJet.h>
@@ -31,13 +31,13 @@ void StJetFinderRunner::Init()
 
 void StJetFinderRunner::Run()
 {
-  _protoJetList.clear();
-  
-  for(vector<const AbstractFourVec*>::const_iterator particle = _particleList.begin(); particle != _particleList.end(); ++particle) {
-    _protoJetList.push_back(StProtoJet(*particle));
-  }
+  //_protoJetList.clear();
+  //
+  //for(vector<const AbstractFourVec*>::const_iterator particle = _particleList.begin(); particle != _particleList.end(); ++particle) {
+  //  _protoJetList.push_back(StProtoJet(*particle));
+  //}
 
-  _jetFinder->findJets(_protoJetList);
+  _jetFinder->findJets(_protoJetList, _particleList);
 }
 
 }

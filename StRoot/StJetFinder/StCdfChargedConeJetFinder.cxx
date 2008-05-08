@@ -1,4 +1,4 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.24 2008/05/07 22:43:08 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.25 2008/05/08 02:22:25 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
@@ -21,8 +21,14 @@ StJetEtCellFactory* StCdfChargedConeJetFinder::makeCellFactory()
   return new StCdfChargedJetEtCellFactory;
 }
 
-void StCdfChargedConeJetFinder::findJets(JetList& protoJetList)
+void StCdfChargedConeJetFinder::findJets(JetList& protoJetList, const FourVecList& particleList)
 {
+  protoJetList.clear();
+  
+  for(FourVecList::const_iterator particle = particleList.begin(); particle != particleList.end(); ++particle) {
+    protoJetList.push_back(StProtoJet(*particle));
+  }
+
   clearPreviousResult();
 
   CellList orderedList = generateLeadingPtOrderedList(protoJetList);

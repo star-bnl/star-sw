@@ -33,8 +33,14 @@ void StKtCluJetFinder::Init()
 
 }
 
-void StKtCluJetFinder::findJets(JetList& pj)
+void StKtCluJetFinder::findJets(JetList& pj, const FourVecList& particleList)
 {
+  pj.clear();
+  
+  for(FourVecList::const_iterator particle = particleList.begin(); particle != particleList.end(); ++particle) {
+    pj.push_back(StProtoJet(*particle));
+  }
+
     if (pj.size()<2) return; //nothing to be done!
     
     mJets.clear();

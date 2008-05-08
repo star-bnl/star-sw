@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StKtCluJetFinder.h,v 1.4 2008/04/22 00:15:00 tai Exp $
+// $Id: StKtCluJetFinder.h,v 1.5 2008/05/08 02:22:26 tai Exp $
 #ifndef StKtCluJetFinder_HH
 #define StKtCluJetFinder_HH
 
@@ -19,9 +19,7 @@ public:
 
   virtual void Init();
 
-    /*! Pass a list of protojets.  This list will be packed with jets+beam jets after..
-      The user is responsible for filtering the jets. */
-    virtual void findJets(JetList& protojets);
+  void findJets(JetList& protoJetList, const FourVecList& particleList);
 
     ///No operation
     virtual void clear() {};

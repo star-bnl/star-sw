@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.47 2008/05/07 22:43:09 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.48 2008/05/08 02:22:25 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
@@ -20,8 +20,14 @@ StConeJetFinder::~StConeJetFinder()
 
 }
 
-void StConeJetFinder::findJets(JetList& protoJetList)
+void StConeJetFinder::findJets(JetList& protoJetList, const FourVecList& particleList)
 {
+  protoJetList.clear();
+  
+  for(FourVecList::const_iterator particle = particleList.begin(); particle != particleList.end(); ++particle) {
+    protoJetList.push_back(StProtoJet(*particle));
+  }
+
   clearPreviousResult();
 
   CellList orderedList = generateEtOrderedList(protoJetList);
