@@ -43,6 +43,8 @@ public:
 
   int nDylanPoints() const { return mDylanPoints; }
   double sumEmcEt() const { return mSumEmcEt; }
+
+  bool bemcCorrupt() const { return mCorrupt; }
     
 private:
 
