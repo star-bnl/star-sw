@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StFourPMaker.h,v 1.6 2008/05/08 21:11:49 tai Exp $
+// $Id: StFourPMaker.h,v 1.7 2008/05/08 23:00:29 tai Exp $
 #ifndef StFourPMaker_h
 #define StFourPMaker_h
 #include <map>
@@ -36,12 +36,12 @@ public:
     Float_t GetEtaHigh(void) const { return eta_high_lim; };
 
     ///Access to BEMC event corruption flag
-    bool bemcCorrupt() const {return mCorrupt;}
+  virtual bool bemcCorrupt() const { return false; }
 
 protected:
 
   FourList tracks;
-  bool mCorrupt; 
+  //  bool mCorrupt; 
 
 
 public:
