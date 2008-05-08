@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.6 2008/05/07 22:43:09 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.7 2008/05/08 02:22:25 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -33,16 +33,14 @@ public:
   typedef StEtaPhiCell::CellList CellList;
   typedef list<StEtaPhiCell> ValueCellList;
 	
-    ///cstr-dstr
-    StConeJetFinderBase(const StConePars& pars);
-    virtual ~StConeJetFinderBase();
+  StConeJetFinderBase(const StConePars& pars);
+  virtual ~StConeJetFinderBase();
 	
   void Init();
 
-    ///simple access to the parameters
-    StConePars pars() const; 
+  StConePars pars() const; 
 	
-  virtual void findJets(JetList& protojets) = 0;
+  virtual void findJets(JetList& protoJetList, const FourVecList& particleList) = 0;
 	
 protected:
 		

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.40 2008/05/07 22:43:09 tai Exp $
+// $Id: StConeJetFinder.h,v 1.41 2008/05/08 02:22:25 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -12,7 +12,7 @@ public:
   StConeJetFinder(const StConePars& pars);
   virtual ~StConeJetFinder();
 
-  void findJets(JetList& protojets);     
+  void findJets(JetList& protoJetList, const FourVecList& particleList);
 	
 private:
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedConeJetFinder.h,v 1.16 2008/05/07 22:43:08 tai Exp $
+// $Id: StCdfChargedConeJetFinder.h,v 1.17 2008/05/08 02:22:25 tai Exp $
 #ifndef STCDFCHARGEDCONEJETFINDER_H
 #define STCDFCHARGEDCONEJETFINDER_H
 
@@ -27,7 +27,7 @@ public:
     StCdfChargedConeJetFinder(const StCdfChargedConePars& pars);
     virtual ~StCdfChargedConeJetFinder();
     
-  void findJets(JetList& protojets);
+  void findJets(JetList& protoJetList, const FourVecList& particleList);
 
 private:    
 
