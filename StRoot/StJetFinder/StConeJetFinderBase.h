@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.7 2008/05/08 02:22:25 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.8 2008/05/08 04:07:23 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -31,7 +31,7 @@ class StConeJetFinderBase : public StJetFinder {
 public:
 	
   typedef StEtaPhiCell::CellList CellList;
-  typedef list<StEtaPhiCell> ValueCellList;
+  //  typedef list<StEtaPhiCell> ValueCellList;
 	
   StConeJetFinderBase(const StConePars& pars);
   virtual ~StConeJetFinderBase();
@@ -78,13 +78,13 @@ protected:
 
   CellList generateToSearchListFrom(CellList& orderedList);
 
-  void findProtoJets(CellList& toSearchList);
+  //  virtual void findProtoJets(CellList& toSearchList);
 
   void storeTheResultIn(JetList& protoJetList);
 
 private:
 
-  virtual void findJetAroundThis(StEtaPhiCell* cell) = 0;
+  //  virtual void findJetAroundThis(StEtaPhiCell* cell) = 0;
 
   virtual bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
 

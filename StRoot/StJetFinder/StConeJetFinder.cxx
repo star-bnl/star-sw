@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.48 2008/05/08 02:22:25 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.49 2008/05/08 04:07:23 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
@@ -22,19 +22,15 @@ StConeJetFinder::~StConeJetFinder()
 
 void StConeJetFinder::findJets(JetList& protoJetList, const FourVecList& particleList)
 {
-  protoJetList.clear();
-  
-  for(FourVecList::const_iterator particle = particleList.begin(); particle != particleList.end(); ++particle) {
-    protoJetList.push_back(StProtoJet(*particle));
-  }
-
   clearPreviousResult();
 
-  CellList orderedList = generateEtOrderedList(protoJetList);
+  CellList orderedCellList = generateEtOrderedCellList(particleList);
 
-  CellList toSearchList = generateToSearchListFrom(orderedList);
+  CellList toSearchCellList = generateToSearchListFrom(orderedCellList);
 
-  findProtoJets(toSearchList);
+  CellList protoJetCellList = findProtoJetsAroundCells(toSearchCellList);
+
+  //  cout << "++++++++++++++++++++++++++++++++++++++++ " << (protoJetCellList.size() == _preJets.size()) <<endl;
 
   if (mPars.addMidpoints()) {
     CellList midpointList = generateMidpointList();
@@ -50,23 +46,57 @@ void StConeJetFinder::findJets(JetList& protoJetList, const FourVecList& particl
 
 }
 
-StEtaPhiCell::CellList StConeJetFinder::generateEtOrderedList(JetList& protoJetList)
+StEtaPhiCell::CellList StConeJetFinder::generateEtOrderedCellList(const FourVecList& particleList)
 {
+  JetList protoJetList;
+  
+  for(FourVecList::const_iterator particle = particleList.begin(); particle != particleList.end(); ++particle) {
+    protoJetList.push_back(StProtoJet(*particle));
+  }
+
   _cellGrid.fillGridWith(protoJetList);
   return _cellGrid.EtSortedCellList();
 }
 
-void StConeJetFinder::findJetAroundThis(StEtaPhiCell* cell)
+StEtaPhiCell::CellList StConeJetFinder::findProtoJetsAroundCells(CellList& toSearchList)
+{
+  CellList protoJetCellList;
+
+  for (CellList::iterator cell = toSearchList.begin(); cell != toSearchList.end(); ++cell) {
+  
+    if (shouldNotSearchForJetAroundThis((*cell))) continue;
+
+    if(StEtaPhiCell* jetCell = findJetAroundThis(*cell)) {
+      protoJetCellList.push_back(jetCell);
+    }
+  }
+
+  return protoJetCellList;
+}
+
+
+StEtaPhiCell* StConeJetFinder::findJetAroundThis(StEtaPhiCell* cell)
 {
   initializeWorkCell(cell);
   
   if (mPars.performMinimization()) {
-    findJetWithStableCone();
+    return findJetWithStableCone();
   } else {
     formCone();
     addToPrejets(*mWorkCell);
+    return createJetCellFor(*mWorkCell);
   }
 
+}
+
+StEtaPhiCell* StConeJetFinder::createJetCellFor(StEtaPhiCell& cell)
+{
+  cell.setEt(0);
+  for(CellList::iterator etCell = cell.cellList().begin(); etCell != cell.cellList().end(); ++etCell) {
+    (*etCell)->update();
+    cell.setEt(cell.Et() + (*etCell)->eT());
+  }
+  return cell.clone();
 }
 
 bool StConeJetFinder::shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const
@@ -114,8 +144,9 @@ void StConeJetFinder::findProtoJetsAroundMidpoints(CellList& midpointList)
   }
 }
 
-void StConeJetFinder::findJetWithStableCone()
+StEtaPhiCell* StConeJetFinder::findJetWithStableCone()
 {
+  StEtaPhiCell* ret(0);
 
   static const int maxAttempt = 100;
 
@@ -133,6 +164,7 @@ void StConeJetFinder::findJetWithStableCone()
 
     if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) {
       addToPrejets(*mWorkCell);
+      ret = createJetCellFor(*mWorkCell);
       break;
     }			
 
@@ -143,6 +175,7 @@ void StConeJetFinder::findJetWithStableCone()
 
   }
 
+  return ret;
 }
 
 

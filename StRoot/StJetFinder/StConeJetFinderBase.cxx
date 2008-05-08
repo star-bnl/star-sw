@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.6 2008/05/07 22:43:09 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.7 2008/05/08 04:07:23 tai Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -65,16 +65,6 @@ StEtaPhiCell::CellList StConeJetFinderBase::generateToSearchListFrom(CellList& o
   return toSearchList;
 }
 
-void StConeJetFinderBase::findProtoJets(CellList& toSearchList)
-{
-    for (CellList::iterator cell = toSearchList.begin(); cell != toSearchList.end(); ++cell) {
-  
-      if (shouldNotSearchForJetAroundThis((*cell))) continue;
-
-      findJetAroundThis(*cell);
-    }
-}
-
 void StConeJetFinderBase::storeTheResultIn(JetList& protoJetList)
 {
   protoJetList.clear();
@@ -123,13 +113,6 @@ bool StConeJetFinderBase::shouldNotAddToTheCell(const StEtaPhiCell& theCell, con
 
 void StConeJetFinderBase::addToPrejets(StEtaPhiCell& cell)
 {
-  StEtaPhiCell* realCell = _cellGrid.Cell(cell.eta(), cell.phi());
-  if (!realCell) {
-    cout << "PreJetInitializer(). ERROR:\t"
-	 << "real Cell doesn't exist." << endl;
-    abort();
-  }
-	
   cell.setEt(0);
   for(CellList::iterator etCell = cell.cellList().begin(); etCell != cell.cellList().end(); ++etCell) {
     (*etCell)->update();

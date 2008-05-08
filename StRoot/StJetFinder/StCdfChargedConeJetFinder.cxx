@@ -1,4 +1,4 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.25 2008/05/08 02:22:25 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.26 2008/05/08 04:07:22 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
@@ -39,6 +39,16 @@ void StCdfChargedConeJetFinder::findJets(JetList& protoJetList, const FourVecLis
 
   storeTheResultIn(protoJetList);
 
+}
+
+void StCdfChargedConeJetFinder::findProtoJets(CellList& toSearchList)
+{
+    for (CellList::iterator cell = toSearchList.begin(); cell != toSearchList.end(); ++cell) {
+  
+      if (shouldNotSearchForJetAroundThis((*cell))) continue;
+
+      findJetAroundThis(*cell);
+    }
 }
 
 StEtaPhiCell::CellList StCdfChargedConeJetFinder::generateLeadingPtOrderedList(JetList& protoJetList)
