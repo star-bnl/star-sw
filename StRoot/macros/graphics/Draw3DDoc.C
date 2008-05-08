@@ -4,6 +4,5 @@ void Draw3DDoc()
    THtml doc;
    doc.SetSourceDir(".:src:inc:StRoot:StRoot/StarRoot:StRoot/StEventUtilities");
    doc.MakeClass("StDraw3D");
-   doc.MakeClass("StDraw3DEvent");
    doc.MakeClass("StuDraw3DEvent");
 }
