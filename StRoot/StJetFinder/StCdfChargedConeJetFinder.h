@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StCdfChargedConeJetFinder.h,v 1.18 2008/05/08 04:07:23 tai Exp $
+// $Id: StCdfChargedConeJetFinder.h,v 1.19 2008/05/08 05:02:13 tai Exp $
 #ifndef STCDFCHARGEDCONEJETFINDER_H
 #define STCDFCHARGEDCONEJETFINDER_H
 
@@ -33,6 +33,10 @@ private:
 
   CellList generateLeadingPtOrderedList(JetList& protoJetList);
 
+  void clearPreviousResult();
+
+  void storeTheResultIn(JetList& protoJetList);
+
   void findProtoJets(CellList& toSearchList);
 
   void findJetAroundThis(StEtaPhiCell* cell);
@@ -41,8 +45,12 @@ private:
 
   bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
 
+  void addToPrejets(StEtaPhiCell& cell);
+	
   StJetEtCellFactory* makeCellFactory();
 
+  CellList _preJets;
+	
 };
 
 #endif // STCDFCHARGEDCONEJETFINDER_H

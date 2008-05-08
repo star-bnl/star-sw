@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinderBase.h,v 1.9 2008/05/08 04:40:04 tai Exp $
+// $Id: StConeJetFinderBase.h,v 1.10 2008/05/08 05:02:13 tai Exp $
 #ifndef STCONEJETFINDERBASE_H
 #define STCONEJETFINDERBASE_H
 
@@ -52,12 +52,8 @@ protected:
 	
     void initializeWorkCell(const StEtaPhiCell* other);
 
-    void addToPrejets(StEtaPhiCell& cell);
-	
     void formCone();
 	
-  virtual bool shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const;
-
 	
   const StProtoJet& collectCell(StEtaPhiCell* seed);
 	
@@ -65,40 +61,20 @@ protected:
 	
   StEtaPhiCell *mWorkCell;
 	
-  CellList _preJets;
-	
 
   StSpinJet::StEtaPhiGrid _cellGrid;
 	
-
-  void clearPreviousResult();
 
   CellList generateToSearchListFrom(CellList& orderedList);
 
   //  virtual void findProtoJets(CellList& toSearchList);
 
-  void storeTheResultIn(JetList& protoJetList);
-
 private:
 
   //  virtual void findJetAroundThis(StEtaPhiCell* cell) = 0;
 
-  virtual bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
+  virtual bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const = 0;
 
-};
-
-struct PreJetLazyUpdater //assume proto-jet updated
-{
-    PreJetLazyUpdater() : sumEt(0.) {};
-    double sumEt;
-	
-    void operator()(StEtaPhiCell& cell);
-    void operator()(StEtaPhiCell* cell);
-};
-
-struct PostMergeUpdater
-{
-    void operator()(StEtaPhiCell& cell);
 };
 
 #endif // STCONEJETFINDERBASE_H

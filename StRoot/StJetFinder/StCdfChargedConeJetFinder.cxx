@@ -1,8 +1,7 @@
-// $Id: StCdfChargedConeJetFinder.cxx,v 1.26 2008/05/08 04:07:22 tai Exp $
+// $Id: StCdfChargedConeJetFinder.cxx,v 1.27 2008/05/08 05:02:13 tai Exp $
 #include "StCdfChargedConeJetFinder.h"
 
 #include "StJetEtCell.h"
-#include "StJetSpliterMerger.h"
 #include "StProtoJet.h"
 #include "StCdfChargedJetEtCell.h"
 
@@ -39,6 +38,26 @@ void StCdfChargedConeJetFinder::findJets(JetList& protoJetList, const FourVecLis
 
   storeTheResultIn(protoJetList);
 
+}
+
+void StCdfChargedConeJetFinder::clearPreviousResult()
+{
+  for(CellList::iterator it = _preJets.begin(); it != _preJets.end(); ++it) {
+    delete *it;
+  }
+  _preJets.clear();
+}
+
+void StCdfChargedConeJetFinder::storeTheResultIn(JetList& protoJetList)
+{
+  protoJetList.clear();
+  
+  for (CellList::iterator jet = _preJets.begin(); jet != _preJets.end(); ++jet) {
+
+    if ((*jet)->cellList().size() == 0) continue;
+
+    protoJetList.push_back( collectCell(*jet) );
+  }
 }
 
 void StCdfChargedConeJetFinder::findProtoJets(CellList& toSearchList)
@@ -80,5 +99,17 @@ bool StCdfChargedConeJetFinder::shouldNotAddToTheCell(const StEtaPhiCell& theCel
   if (otherCell.empty()) return true;
   if (otherCell.eT() <= mPars.assocEtMin()) return true; 
   return false;
+}
+
+void StCdfChargedConeJetFinder::addToPrejets(StEtaPhiCell& cell)
+{
+  cell.setEt(0);
+  for(CellList::iterator etCell = cell.cellList().begin(); etCell != cell.cellList().end(); ++etCell) {
+    (*etCell)->update();
+    cell.setEt(cell.Et() + (*etCell)->eT());
+  }
+
+  _preJets.push_back(cell.clone());
+
 }
 

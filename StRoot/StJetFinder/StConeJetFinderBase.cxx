@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.8 2008/05/08 04:40:04 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.9 2008/05/08 05:02:13 tai Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -37,14 +37,6 @@ void StConeJetFinderBase::Init()
   _cellGrid.buildGrid(makeCellFactory());
 }
 
-void StConeJetFinderBase::clearPreviousResult()
-{
-  for(CellList::iterator it = _preJets.begin(); it != _preJets.end(); ++it) {
-    delete *it;
-  }
-  _preJets.clear();
-}
-
 StEtaPhiCell::CellList StConeJetFinderBase::generateToSearchListFrom(CellList& orderedList)
 {
   CellList toSearchList;
@@ -58,23 +50,6 @@ StEtaPhiCell::CellList StConeJetFinderBase::generateToSearchListFrom(CellList& o
   }
  
   return toSearchList;
-}
-
-void StConeJetFinderBase::storeTheResultIn(JetList& protoJetList)
-{
-  protoJetList.clear();
-  
-  for (CellList::iterator jet = _preJets.begin(); jet != _preJets.end(); ++jet) {
-
-    if ((*jet)->cellList().size() == 0) continue;
-
-    protoJetList.push_back( collectCell(*jet) );
-  }
-}
-
-bool StConeJetFinderBase::shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const
-{
-  return false;
 }
 
 void StConeJetFinderBase::initializeWorkCell(const StEtaPhiCell* other)
@@ -97,25 +72,6 @@ void StConeJetFinderBase::formCone()
     if(shouldNotAddToTheCell(*mWorkCell, **cell)) continue;
     mWorkCell->addCell(*cell);
   }
-}
-
-bool StConeJetFinderBase::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const
-{
-  if (otherCell.empty()) return true;
-  if (otherCell.eT() <= mPars.assocEtMin()) return true; 
-  return false;
-}
-
-void StConeJetFinderBase::addToPrejets(StEtaPhiCell& cell)
-{
-  cell.setEt(0);
-  for(CellList::iterator etCell = cell.cellList().begin(); etCell != cell.cellList().end(); ++etCell) {
-    (*etCell)->update();
-    cell.setEt(cell.Et() + (*etCell)->eT());
-  }
-
-  _preJets.push_back(cell.clone());
-
 }
 
 const StProtoJet& StConeJetFinderBase::collectCell(StEtaPhiCell* seed)
@@ -156,29 +112,5 @@ const StProtoJet& StConeJetFinderBase::collectCell(StEtaPhiCell* seed)
   }
   center.update();
   return center;
-}
-
-
-
-//non members ---
-
-void PreJetLazyUpdater ::operator()(StEtaPhiCell& cell)
-{
-    sumEt += cell.eT();
-}
-
-void PreJetLazyUpdater ::operator()(StEtaPhiCell* cell)
-{
-    (*this)(*cell);
-}
-
-void PostMergeUpdater::operator()(StEtaPhiCell& cell)
-{
-    //now update each cell:
-    PreJetLazyUpdater updater;
-    updater = for_each( cell.cellList().begin(), cell.cellList().end(), updater );
-	
-    //now update jet-eT
-    cell.mEt = updater.sumEt;
 }
 

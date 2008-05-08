@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetSpliterMerger.h,v 1.7 2008/05/06 03:06:13 tai Exp $
+// $Id: StJetSpliterMerger.h,v 1.8 2008/05/08 05:02:14 tai Exp $
 //StJetSpliterMerger.h
 //M.L. Miller (Yale Software)
 //10/02
@@ -96,6 +96,21 @@ inline ostream& operator<<(ostream& os, const EtNeighbor& n)
 {
     return os <<"sumEt:\t"<<n.sharedEt<<"\tnCells:\t"<<n.nCommonCells;
 }
+
+struct PreJetLazyUpdater //assume proto-jet updated
+{
+    PreJetLazyUpdater() : sumEt(0.) {};
+    double sumEt;
+	
+    void operator()(StEtaPhiCell& cell);
+    void operator()(StEtaPhiCell* cell);
+};
+
+struct PostMergeUpdater
+{
+    void operator()(StEtaPhiCell& cell);
+};
+
 
 //inlines
 
