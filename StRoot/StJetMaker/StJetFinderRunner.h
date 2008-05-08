@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetFinderRunner.h,v 1.7 2008/05/08 02:27:13 tai Exp $
+// $Id: StJetFinderRunner.h,v 1.8 2008/05/08 02:31:46 tai Exp $
 #ifndef STJETFINDERRUNNER_HH
 #define STJETFINDERRUNNER_HH
 
@@ -20,7 +20,7 @@ public:
   typedef std::list<StProtoJet> ProtoJetList;
   typedef std::vector<const AbstractFourVec*> ParticleList;
 
-  StJetFinderRunner(StJetPars* jp, ParticleList& particleList, ProtoJetList& protoJets);
+  StJetFinderRunner(StJetPars* jp, const ParticleList& particleList, ProtoJetList& protoJets);
 
   virtual ~StJetFinderRunner();
 
@@ -32,7 +32,7 @@ private:
 
   StJetFinder* _jetFinder;
 
-  ParticleList& _particleList;
+  const ParticleList& _particleList;
 
   ProtoJetList& _protoJetList;
 
