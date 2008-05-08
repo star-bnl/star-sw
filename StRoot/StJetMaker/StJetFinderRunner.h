@@ -1,11 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StJetFinderRunner.h,v 1.6 2008/05/02 17:07:11 tai Exp $
+// $Id: StJetFinderRunner.h,v 1.7 2008/05/08 02:27:13 tai Exp $
 #ifndef STJETFINDERRUNNER_HH
 #define STJETFINDERRUNNER_HH
 
 #include <StJetFinder/StProtoJet.h>
 
 #include <list>
+#include <vector>
 
 class StJetPars;
 class StJetFinder;
