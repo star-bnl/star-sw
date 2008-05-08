@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrCellData.h,v 1.4 2008/05/06 18:42:09 dongx Exp $
+ * $Id: StTofrCellData.h,v 1.5 2008/05/08 21:09:36 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofrCellData.h,v $
+ * Revision 1.5  2008/05/08 21:09:36  dongx
+ * Changed precision of time info to double type
+ *
  * Revision 1.4  2008/05/06 18:42:09  dongx
  * Updated for Run8 analysis
  *
@@ -31,11 +34,11 @@
     Int_t nTofHits;
     Int_t vpdEast, vpdWest;
     Int_t numberOfVpdEast, numberOfVpdWest;
-    Float_t tdcSumEast, tdcSumWest, tdcSum;
-    Float_t pvpdLeadingEdgeTimeEast[19], pvpdTotEast[19];
-    Float_t pvpdLeadingEdgeTimeWest[19], pvpdTotWest[19];
+    Double_t tdcSumEast, tdcSumWest, tdcSum;
+    Double_t pvpdLeadingEdgeTimeEast[19], pvpdTotEast[19];
+    Double_t pvpdLeadingEdgeTimeWest[19], pvpdTotWest[19];
     Int_t tray[kMaxTracks], module[kMaxTracks], cell[kMaxTracks], daq[kMaxTracks];
-    Float_t leadingEdgeTime[kMaxTracks], tot[kMaxTracks];
+    Double_t leadingEdgeTime[kMaxTracks], tot[kMaxTracks];
 //    Int_t matchFlag[kMaxTracks];
     Float_t xlocal[kMaxTracks], ylocal[kMaxTracks], zlocal[kMaxTracks], deltay[kMaxTracks];
     Int_t trackId[kMaxTracks], charge[kMaxTracks];
