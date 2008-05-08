@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.43 2008/05/08 04:40:04 tai Exp $
+// $Id: StConeJetFinder.h,v 1.44 2008/05/08 05:02:13 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
@@ -33,6 +33,8 @@ private:
   CellList generateMidpointList(const CellList& protoJetCellList);
 
   CellList findProtoJetsAroundMidpoints(CellList& midpointList);
+
+  bool shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const;
 
   bool isInTheVolume(double eta, double phi);
 

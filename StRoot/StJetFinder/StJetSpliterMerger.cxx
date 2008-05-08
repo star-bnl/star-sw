@@ -1,4 +1,4 @@
-// $Id: StJetSpliterMerger.cxx,v 1.8 2008/05/05 21:21:14 tai Exp $
+// $Id: StJetSpliterMerger.cxx,v 1.9 2008/05/08 05:02:13 tai Exp $
 //StJetSpliterMerger.cxx
 //M.L. Miller (Yale Software)
 //10/02
@@ -118,3 +118,23 @@ void StJetSpliterMerger::split(StEtaPhiCell& root, StEtaPhiCell& neighbor, CellV
 
 }
 
+
+void PreJetLazyUpdater ::operator()(StEtaPhiCell& cell)
+{
+    sumEt += cell.eT();
+}
+
+void PreJetLazyUpdater ::operator()(StEtaPhiCell* cell)
+{
+    (*this)(*cell);
+}
+
+void PostMergeUpdater::operator()(StEtaPhiCell& cell)
+{
+    //now update each cell:
+    PreJetLazyUpdater updater;
+    updater = for_each( cell.cellList().begin(), cell.cellList().end(), updater );
+	
+    //now update jet-eT
+    cell.mEt = updater.sumEt;
+}

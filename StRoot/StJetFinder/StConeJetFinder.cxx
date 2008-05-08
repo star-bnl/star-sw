@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.50 2008/05/08 04:40:03 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.51 2008/05/08 05:02:13 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
@@ -86,7 +86,6 @@ StEtaPhiCell* StConeJetFinder::findJetAroundThis(StEtaPhiCell* cell)
     return findJetWithStableCone();
   } else {
     formCone();
-    addToPrejets(*mWorkCell);
     return createJetCellFor(*mWorkCell);
   }
 
@@ -139,16 +138,21 @@ StEtaPhiCell::CellList StConeJetFinder::findProtoJetsAroundMidpoints(CellList& m
       const StProtoJet& centroid = mWorkCell->centroid();
       if (isInTheVolume(centroid.eta(), centroid.phi())) {
 	if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) {
-	  addToPrejets(*mWorkCell);
 	  ret.push_back(createJetCellFor(*mWorkCell));
 	}	
       }
     } else {
-      addToPrejets(*mWorkCell);
 	  ret.push_back(createJetCellFor(*mWorkCell));
     }
   }
   return ret;
+}
+
+bool StConeJetFinder::shouldNotAddToTheCell(const StEtaPhiCell& theCell, const StEtaPhiCell& otherCell) const
+{
+  if (otherCell.empty()) return true;
+  if (otherCell.eT() <= mPars.assocEtMin()) return true; 
+  return false;
 }
 
 void StConeJetFinder::storeTheResults(JetList& protoJetList, const CellList& protoJetCellList)
@@ -182,7 +186,6 @@ StEtaPhiCell* StConeJetFinder::findJetWithStableCone()
     if (!isInTheVolume(centroid.eta(), centroid.phi())) break;
 
     if(areTheyInTheSameCell(mWorkCell->eta(), mWorkCell->phi(), centroid.eta(), centroid.phi())) {
-      addToPrejets(*mWorkCell);
       ret = createJetCellFor(*mWorkCell);
       break;
     }			
