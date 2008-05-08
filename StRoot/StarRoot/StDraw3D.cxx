@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.18 2008/05/06 17:55:54 fine Exp $
+// $Id: StDraw3D.cxx,v 1.19 2008/05/08 22:18:43 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -52,15 +52,20 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad)
       if (     !gSystem->Load(ivrootDir+"libSoQt") 
             && !gSystem->Load(ivrootDir+"libCoin")
             && !gSystem->Load(ivrootDir+"libSmallChange"));
-      CheckCoin = true;
+      if (!StCheckQtEnv::SetQtEnv(false)) {   CheckCoin = true; }
    }
 
-   if (CheckCoin && pad && (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")))
-   {
-      // Create Open GL viewer
-//      TGQt::SetCoinFlag(1);
-      viewer->BeginScene();
-      viewer->EndScene();
+   if (CheckCoin && pad ) {
+      // define the background image
+      const char *backShape = "$STAR/StRoot/macros/graphics/StarTPC.iv";
+      printf(" Setting the background shape to be 	%s\n", backShape);
+      gEnv->SetValue("Gui.InventorBackgroundShape",backShape);
+      if  (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")) {
+         // Create Open GL viewer
+//        TGQt::SetCoinFlag(1);
+         viewer->BeginScene();
+         viewer->EndScene();
+      }
     }
     return viewer;
 }
@@ -201,7 +206,6 @@ TObject *StDraw3D::Draw(TObject *o)
    // Draw the 3d object 
    // and set the new background color if needed
    if (o) {
-      if (!fgDraw_3d_init) Draw3DInit();
       TVirtualPad *sav = gPad;
       if (!fPad)        InitPad();
       if (fPad != sav)  fPad->cd();
@@ -233,19 +237,6 @@ const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
 }
 
 //___________________________________________________
-int StDraw3D::Draw3DInit(){
-   // check the correct env and load the plugins
-   if (fgDraw_3d_init) return 1;
-   fgDraw_3d_init = 1;
-   if (!StCheckQtEnv::SetQtEnv(false)) {
-      // define the background image
-      const char *backShape = "$STAR/StRoot/macros/graphics/StarTPC.iv";
-      printf(" Setting the background shape to be 	%s\n", backShape);
-      gEnv->SetValue("Gui.InventorBackgroundShape",backShape);
-   }
-   return 1;
-}
-//___________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_t siz)
 { 
    //
@@ -254,7 +245,6 @@ TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_
    // with the ROOT color, style, size attributes
    //
    
-   if (!fgDraw_3d_init) Draw3DInit();
    poly_marker_3D *plMk  = new poly_marker_3D(n,(Float_t*)xyz);
    if (col != colorDefault) plMk->SetMarkerColor(col);
    if (sty != styDefault)   plMk->SetMarkerStyle(sty);
@@ -287,7 +277,6 @@ TObject *StDraw3D::Draw3D(int n,  const float *xyz)
    // This is an overloaded member function, provided for convenience.
    // It behaves essentially like the above function.
    //
-   if (!fgDraw_3d_init) Draw3DInit();
    return Points(n,xyz,kVtx);
 }
 //___________________________________________________
@@ -298,7 +287,6 @@ TObject *StDraw3D::Point(float x, float y, float z, Color_t col,Style_t sty,Size
    // with the ROOT color, style, size attributes
    //
    
-   if (!fgDraw_3d_init) Draw3DInit();
    float xyz[]={x,y,z};
    return Points(1,xyz,col,sty,siz);
 }
@@ -325,7 +313,6 @@ TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t
    // with ROOT TPolyline3D class
    // with the ROOT color, style, size attributes
    //
-   if (!fgDraw_3d_init) Draw3DInit();
    poly_line_3D *plLine  = new poly_line_3D(n,(Float_t*)xyz);
    if (col != colorDefault) plLine->SetLineColor(col);
    if (sty != styDefault)   plLine->SetLineStyle(sty);
