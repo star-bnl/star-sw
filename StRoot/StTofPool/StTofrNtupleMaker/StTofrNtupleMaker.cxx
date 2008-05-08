@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.7 2008/05/06 18:42:09 dongx Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.8 2008/05/08 21:09:37 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.8  2008/05/08 21:09:37  dongx
+ * Changed precision of time info to double type
+ *
  * Revision 1.7  2008/05/06 18:42:09  dongx
  * Updated for Run8 analysis
  *
@@ -501,10 +504,10 @@ void StTofrNtupleMaker::bookNtuples(){
   mPvpdTuple->Branch("vpdWest",&mCellData.vpdWest,"vpdWest/I");
   mPvpdTuple->Branch("numberOfVpdEast",&mCellData.numberOfVpdEast,"numberOfVpdEast/I");
   mPvpdTuple->Branch("numberOfVpdWest",&mCellData.numberOfVpdWest,"numberOfVpdWest/I");
-  mPvpdTuple->Branch("pvpdLeadingEdgeTimeEast",&mCellData.pvpdLeadingEdgeTimeEast,"pvpdLeadingEdgeTimeEast[19]/F");
-  mPvpdTuple->Branch("pvpdLeadingEdgeTimeWest",&mCellData.pvpdLeadingEdgeTimeWest,"pvpdLeadingEdgeTimeWest[19]/F");
-  mPvpdTuple->Branch("pvpdTotEast",&mCellData.pvpdTotEast,"pvpdTotEast[19]/F");
-  mPvpdTuple->Branch("pvpdTotWest",&mCellData.pvpdTotWest,"pvpdTotWest[19]/F");
+  mPvpdTuple->Branch("pvpdLeadingEdgeTimeEast",&mCellData.pvpdLeadingEdgeTimeEast,"pvpdLeadingEdgeTimeEast[19]/D");
+  mPvpdTuple->Branch("pvpdLeadingEdgeTimeWest",&mCellData.pvpdLeadingEdgeTimeWest,"pvpdLeadingEdgeTimeWest[19]/D");
+  mPvpdTuple->Branch("pvpdTotEast",&mCellData.pvpdTotEast,"pvpdTotEast[19]/D");
+  mPvpdTuple->Branch("pvpdTotWest",&mCellData.pvpdTotWest,"pvpdTotWest[19]/D");
 
   // Tofr calibration ntuple
   mCellTuple = new TTree("tofr","Tofr cell data");
@@ -518,17 +521,17 @@ void StTofrNtupleMaker::bookNtuples(){
   mCellTuple->Branch("vpdWest",&mCellData.vpdWest,"vpdWest/I");
   mCellTuple->Branch("numberOfVpdEast",&mCellData.numberOfVpdEast,"numberOfVpdEast/I");
   mCellTuple->Branch("numberOfVpdWest",&mCellData.numberOfVpdWest,"numberOfVpdWest/I");
-  mCellTuple->Branch("pvpdLeadingEdgeTimeEast",&mCellData.pvpdLeadingEdgeTimeEast,"pvpdLeadingEdgeTimeEast[19]/F");
-  mCellTuple->Branch("pvpdLeadingEdgeTimeWest",&mCellData.pvpdLeadingEdgeTimeWest,"pvpdLeadingEdgeTimeWest[19]/F");
-  mCellTuple->Branch("pvpdTotEast",&mCellData.pvpdTotEast,"pvpdTotEast[19]/F");
-  mCellTuple->Branch("pvpdTotWest",&mCellData.pvpdTotWest,"pvpdTotWest[19]/F");
+  mCellTuple->Branch("pvpdLeadingEdgeTimeEast",&mCellData.pvpdLeadingEdgeTimeEast,"pvpdLeadingEdgeTimeEast[19]/D");
+  mCellTuple->Branch("pvpdLeadingEdgeTimeWest",&mCellData.pvpdLeadingEdgeTimeWest,"pvpdLeadingEdgeTimeWest[19]/D");
+  mCellTuple->Branch("pvpdTotEast",&mCellData.pvpdTotEast,"pvpdTotEast[19]/D");
+  mCellTuple->Branch("pvpdTotWest",&mCellData.pvpdTotWest,"pvpdTotWest[19]/D");
   mCellTuple->Branch("nTofHits",&mCellData.nTofHits,"nTofHits/I");
   mCellTuple->Branch("tray",&mCellData.tray,"tray[nTofHits]/I");
-  mCellTuple->Branch("module",&mCellData.module,"mocule[nTofHits]/I");
+  mCellTuple->Branch("module",&mCellData.module,"module[nTofHits]/I");
   mCellTuple->Branch("cell",&mCellData.cell,"cell[nTofHits]/I");
   mCellTuple->Branch("daq",&mCellData.daq,"daq[nTofHits]/I");
-  mCellTuple->Branch("leadingEdgeTime",&mCellData.leadingEdgeTime,"leadingEdgeTime[nTofHits]/F");
-  mCellTuple->Branch("tot",&mCellData.tot,"tot[nTofHits]/F");
+  mCellTuple->Branch("leadingEdgeTime",&mCellData.leadingEdgeTime,"leadingEdgeTime[nTofHits]/D");
+  mCellTuple->Branch("tot",&mCellData.tot,"tot[nTofHits]/D");
 //  mCellTuple->Branch("matchFlag",&mCellData.matchFlag,"matchFlag/I");
   mCellTuple->Branch("xlocal",&mCellData.xlocal,"xlocal[nTofHits]/F");
   mCellTuple->Branch("ylocal",&mCellData.ylocal,"ylocal[nTofHits]/F");
