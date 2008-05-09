@@ -1,9 +1,7 @@
-// $Id: StParticleCollector.cxx,v 1.5 2008/05/02 17:07:12 tai Exp $
+// $Id: StParticleCollector.cxx,v 1.6 2008/05/09 02:11:55 tai Exp $
 #include "StParticleCollector.h"
 
 #include <StJetFinder/AbstractFourVec.h>
-
-#include <StMuDSTMaker/COMMON/StMuTrack.h>
 
 #include "StMuTrackFourVec.h"
 #include "StJet.h"
@@ -56,11 +54,10 @@ bool StParticleCollector::shoudNotPassToJetFinder(const AbstractFourVec* particl
 
   if(isChargedTrack(p)) {
 
-    StMuTrack* track = p->particle();
+    StMuTrackEmu* track = p->track();
     if (track->flag() <= _anaPar.mFlagMin) return true;
 
     if (track->nHits() <= _anaPar.mNhits)  return true;
-
   }
 
   return false;
@@ -68,7 +65,7 @@ bool StParticleCollector::shoudNotPassToJetFinder(const AbstractFourVec* particl
 	
 bool StParticleCollector::isChargedTrack(const StMuTrackFourVec* p) const
 {
-  return p->particle() != 0;
+  return p->track() != 0;
 }
 
 
