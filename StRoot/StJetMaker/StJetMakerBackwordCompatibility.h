@@ -1,6 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerBackwordCompatibility.h,v 1.3 2008/05/03 01:06:31 tai Exp $
-// Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
+// $Id: StJetMakerBackwordCompatibility.h,v 1.4 2008/05/09 02:14:52 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETMAKERBACKWORDCOMPATIBILITY_H
 #define STJETMAKERBACKWORDCOMPATIBILITY_H
 

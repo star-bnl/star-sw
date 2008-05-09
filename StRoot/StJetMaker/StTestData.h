@@ -1,5 +1,5 @@
-// $Id: StTestData.h,v 1.2 2008/05/03 03:56:02 tai Exp $
-// Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
+// $Id: StTestData.h,v 1.3 2008/05/09 02:14:53 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STTESTDATA_H
 #define STTESTDATA_H
 
