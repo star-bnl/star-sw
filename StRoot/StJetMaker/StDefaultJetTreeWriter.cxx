@@ -1,4 +1,4 @@
-// $Id: StDefaultJetTreeWriter.cxx,v 1.4 2008/05/09 02:14:51 tai Exp $
+// $Id: StDefaultJetTreeWriter.cxx,v 1.5 2008/05/09 03:10:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StDefaultJetTreeWriter.h"
 
@@ -6,13 +6,14 @@
 #include "StJet.h"
 #include "StMuTrackFourVec.h"
 
+#include "StMuTrackEmu.h"
+
 #include <StJetFinder/StProtoJet.h>
 
 #include <StMuDSTMaker/COMMON/StMuDst.h>
 #include <StMuDSTMaker/COMMON/StMuEvent.h>
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 
-#include <StFourPMakers/StMuEmcPosition.h>
 #include <StFourPMakers/StFourPMaker.h>
 #include "StFourPMakers/StBET4pMaker.h"
 
@@ -102,60 +103,51 @@ void StDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
   StJet aJet(pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0);
   aJet.zVertex = _uDstMaker.muDst()->event()->primaryVertexPosition().z();
 
-  StProtoJet::FourVecList &trackList = pj.list();
-  for(StProtoJet::FourVecList::iterator it2 = trackList.begin(); it2 != trackList.end(); ++it2)  {
-    const StMuTrackFourVec *track = dynamic_cast<const StMuTrackFourVec*>(*it2);
-    if (!track) {
+  StProtoJet::FourVecList &particleList = pj.list();
+  for(StProtoJet::FourVecList::iterator it2 = particleList.begin(); it2 != particleList.end(); ++it2)  {
+    const StMuTrackFourVec *particle = dynamic_cast<const StMuTrackFourVec*>(*it2);
+    if (!particle) {
       cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
       return;
     }
-    int muTrackIndex = track->getIndex();
+    int muTrackIndex = particle->getIndex();
     if (muTrackIndex <0) {
       cout <<"Error, muTrackIndex<0. abort()"<<endl;
       abort();
     }
       
-    TrackToJetIndex t2j( jets.nJets(), muTrackIndex, track->detectorId() );
-    t2j.SetPxPyPzE(track->px(), track->py(), track->pz(), track->e() );
+    TrackToJetIndex t2j( jets.nJets(), muTrackIndex, particle->detectorId() );
+    t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e() );
       
-    //and cache some properties if it really came from a StMuTrack:
-    StMuTrack* muTrack = track->particle();
-    if (muTrack) {  //this will fail for calorimeter towers
-
-      double bField(0.5); // to put it in Tesla
-      double rad(238.6);// geom->Radius()+5.;
-
-      StThreeVectorD momentumAt, positionAt;
-      StMuEmcPosition mMuPosition;
-      mMuPosition.trackOnEmc(&positionAt, &momentumAt, muTrack, bField, rad );
-
-      t2j.setCharge( muTrack->charge() );
-      t2j.setNhits( muTrack->nHits() );
-      t2j.setNhitsPoss( muTrack->nHitsPoss() );
-      t2j.setNhitsDedx( muTrack->nHitsDedx() );
-      t2j.setNhitsFit( muTrack->nHitsFit() );
-      t2j.setNsigmaPion( muTrack->nSigmaPion() );
-      t2j.setTdca ( muTrack->dcaGlobal().mag() );
-      t2j.setTdcaz ( muTrack->dcaZ() );
-      t2j.setTdcaxy ( muTrack->dcaD() );
-      t2j.setetaext ( positionAt.pseudoRapidity() );
-      t2j.setphiext ( positionAt.phi() );
+    StMuTrackEmu* track = particle->track();
+    if (track) {
+      t2j.setCharge( track->charge() );
+      t2j.setNhits( track->nHits() );
+      t2j.setNhitsPoss( track->nHitsPoss() );
+      t2j.setNhitsDedx( track->nHitsDedx() );
+      t2j.setNhitsFit( track->nHitsFit() );
+      t2j.setNsigmaPion( track->nSigmaPion() );
+      t2j.setTdca ( track->Tdca() );
+      t2j.setTdcaz ( track->dcaZ() );
+      t2j.setTdcaxy ( track->dcaD() );
+      t2j.setetaext ( track->etaext() );
+      t2j.setphiext ( track->phiext() );
     }
      
     jets.addTrackToIndex(t2j);
 
-    StDetectorId mDetId = track->detectorId();
+    StDetectorId mDetId = particle->detectorId();
     if (mDetId==kTpcId) {
       aJet.nTracks++;
-      aJet.tpcEtSum += track->eT();
+      aJet.tpcEtSum += particle->eT();
     }
     else if (mDetId==kBarrelEmcTowerId) {
       aJet.nBtowers++;
-      aJet.btowEtSum += track->eT();
+      aJet.btowEtSum += particle->eT();
     }
     else if (mDetId==kEndcapEmcTowerId) {
       aJet.nEtowers++;
-      aJet.etowEtSum += track->eT();
+      aJet.etowEtSum += particle->eT();
     }
   }
 

@@ -1,11 +1,10 @@
-// $Id: StParticleCollector.cxx,v 1.7 2008/05/09 02:14:52 tai Exp $
+// $Id: StParticleCollector.cxx,v 1.8 2008/05/09 03:10:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StParticleCollector.h"
 
 #include <StJetFinder/AbstractFourVec.h>
 
 #include "StMuTrackFourVec.h"
-#include "StJet.h"
 #include "StFourPMakers/StFourPMaker.h"
 
 #include <vector>
