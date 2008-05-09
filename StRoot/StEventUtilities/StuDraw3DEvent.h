@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.4 2008/05/06 17:55:56 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.5 2008/05/09 23:02:19 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
@@ -34,7 +34,7 @@ class StuDraw3DEvent : public StDraw3D
      void operator=(const StuDraw3DEvent&){;}
 
   public:
-     StuDraw3DEvent(TVirtualPad *pad = 0);
+     StuDraw3DEvent(TVirtualPad *pad = 0, const char *detectorName="TPC");
      virtual ~StuDraw3DEvent(){;}
      static StuDraw3DEvent *Display();
      virtual void     Tracks(const StEvent* event, StTrackType type=global);

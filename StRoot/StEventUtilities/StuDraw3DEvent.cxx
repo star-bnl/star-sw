@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.5 2008/05/06 17:55:56 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.6 2008/05/09 23:02:19 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -28,8 +28,13 @@ ClassImp(StuDraw3DEvent)
   //
   ////////////////////////////////////////////////////////////////////////
 //___________________________________________________
-StuDraw3DEvent::StuDraw3DEvent(TVirtualPad *pad): StDraw3D(pad)
-{ }
+StuDraw3DEvent::StuDraw3DEvent(TVirtualPad *pad, const char *detectorName): 
+StDraw3D(pad,detectorName)
+{
+   // The detectorName is a comma separated list of the OpenInventor files with no extension
+   // For all names on the list one should provide the iv file with the "iv extension:
+   //                         <name>.iv
+}
 
 //___________________________________________________
 TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size_t siz)

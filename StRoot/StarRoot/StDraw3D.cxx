@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.21 2008/05/09 00:50:23 fine Exp $
+// $Id: StDraw3D.cxx,v 1.22 2008/05/09 23:02:20 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -39,7 +39,7 @@ ClassImp(StDraw3D)
   ////////////////////////////////////////////////////////////////////////
 
 //___________________________________________________
-static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad) 
+static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorName) 
 {
    TVirtualViewer3D *viewer = 0;
    // check Coin env and load if present
@@ -57,11 +57,14 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad)
 
    if (CheckCoin && pad ) {
       // define the background image
-      const char *backShape = "StarTPC.iv";
+//      const char *backShape = "StarTPC.iv";
+      TString backShape = detectorName;
+      backShape.ReplaceAll(",",".iv;");
+      backShape+= ".iv";
 //      const char *backShape = "$STAR/StRoot/macros/graphics/StarTPC.iv";
-      printf(" Setting the background shape to be 	%s\n", backShape);
+      printf(" Setting the background shape to be 	%s\n", backShape.Data());
       gEnv->SetValue("Gui.InventorShapeDir",":.:$STAR/StRoot/macros/graphics");
-      gEnv->SetValue("Gui.InventorBackgroundShape",backShape);
+      gEnv->SetValue("Gui.InventorBackgroundShape",backShape.Data());
       if  (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")) {
          // Create Open GL viewer
 //        TGQt::SetCoinFlag(1);
@@ -148,8 +151,14 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
      }
 };
 //___________________________________________________
-StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
+StDraw3D::StDraw3D(TVirtualPad *pad, const char *detectorName): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
+      , fDetectorName(detectorName)
 {
+
+   // The detectorName is a comma separated list of the OpenInventor files with no extension
+   // For all names on the list one should provide the iv file with the "iv extension:
+   //                         <name>.iv
+
    static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
    static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
    static const Style_t TrakSty = 1; static const Size_t TrakSiz = 1.00; static const Color_t TrakCol=kRed;
@@ -163,7 +172,7 @@ StDraw3D::StDraw3D(TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),f
    AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
 }
 
-//___________________________________________________
+//__________________________________________________________________________________
 TVirtualPad *StDraw3D::InitPad() 
 {
    if (!fPad) {
@@ -191,6 +200,39 @@ StDraw3D::~StDraw3D()
     }
 }
 
+//__________________________________________________________________________________
+const TString &StDraw3D::DetectorNames() const 
+{
+   // return the list of the names 
+   return fDetectorName; 
+}
+//__________________________________________________________________________________
+void StDraw3D::SetDetectors(const char*nameDetectors)
+{
+   // The detectorName is a comma separated list of the OpenInventor files with no extension
+   // For all names on the list one should provide the iv file with the "iv extension:
+   //                         <name>.iv
+   if (fViewer) {
+      Warning("StDraw3D::SetDetectors","Can not change the detector names. It is too late. The viewer had been created");
+   } else {
+      fDetectorName = nameDetectors;
+   }
+}
+//__________________________________________________________________________________
+void StDraw3D::AddDetectors(const char*nameDetectors)
+{ 
+   // The detectorName is a comma separated list of the OpenInventor files with no extension
+   // For all names on the list one should provide the iv file with the "iv extension:
+   //                         <name>.iv
+
+   if (fViewer) {
+      Warning("StDraw3D::AddDetectors","Can not the change detector names. It is too late. The viewer had been created");
+   } else if (nameDetectors && nameDetectors[0]){
+      fDetectorName += ",";
+      fDetectorName += nameDetectors;
+   }
+}
+
 //___________________________________________________
 void  StDraw3D::Clear(Option_t *opt)
 {
@@ -213,7 +255,7 @@ TObject *StDraw3D::Draw(TObject *o)
       if (fPad != sav)  fPad->cd();
       o->Draw();
       if (sav && (fPad != sav)) sav->cd();
-      if (!fViewer) fViewer = InitCoin(fPad);
+      if (!fViewer) fViewer = InitCoin(fPad,fDetectorName);
    }
    return o;
 }
