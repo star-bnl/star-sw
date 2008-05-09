@@ -1,10 +1,11 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.16 2008/05/08 22:18:43 fine Exp $
+// $Id: StDraw3D.h,v 1.17 2008/05/09 23:02:20 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
 #include "Gtypes.h"
+#include "TString.h"
 #include <map>
 
   //
@@ -65,6 +66,7 @@ class StDraw3D : public TObject
        Color_t  fBkColor; // background color
        TVirtualViewer3D *fViewer; 
        view_3D *fView;
+       TString fDetectorName;
 
        static Color_t fgColorDefault;
        static Style_t fgStyDefault;
@@ -74,13 +76,16 @@ class StDraw3D : public TObject
        TVirtualPad *InitPad();
 
 public:
-   StDraw3D(TVirtualPad *pad = 0);
+   StDraw3D(TVirtualPad *pad = 0, const char *detectorName="TPC");
    virtual ~StDraw3D();
    virtual const StDraw3DStyle &AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz);
    TVirtualPad *Pad() const { return fPad;}
    virtual void  Clear(Option_t *opt="");
    virtual TObject *Draw(TObject *o);
-   virtual void  Draw(Option_t *option="") {TObject::Draw(option);} 
+   virtual const TString &DetectorNames() const;
+   virtual void  SetDetectors(const char*nameDetectors);
+   virtual void  AddDetectors(const char*nameDetectors);
+   virtual void  Draw(Option_t *option="") {TObject::Draw(option);}
    virtual const StDraw3DStyle &Style(EDraw3DStyle type);
    virtual void  SetBkColor(Color_t newBkColor);
 
