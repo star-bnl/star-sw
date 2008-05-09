@@ -2,6 +2,12 @@
 # \
 exec tclsh "$0" "$@"
 
+if {[file exists /star/u/prindle/bin/lib]} {
+    if {[lsearch $auto_path /star/u/prindle/bin/lib] < 0} {
+        lappend auto_path /star/u/prindle/bin/lib
+    }
+}
+
 # We assume jobMonitor.tcl is in the same directory that runJobMonitor.tcl is.
 # Following code is supposed to take care of cases where an alias
 # or soft link was used to invoke runJobMonitor. Seems to screw up
