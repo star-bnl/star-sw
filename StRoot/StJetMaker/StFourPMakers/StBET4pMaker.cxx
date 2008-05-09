@@ -29,7 +29,9 @@
 //StJetMaker
 #include "../StMuTrackFourVec.h"
 
-//local subdirectory
+#include "../StMuTrackEmu.h"
+#include "../StMuTrackEmuFactory.h"
+
 #include "StMuEmcPosition.h"
 
 #include <string>
@@ -159,7 +161,8 @@ void StBET4pMaker::collectChargedTracksFromTPC()
     StLorentzVectorF p4(energy, momentum);
 
     //now construct StMuTrackFourVec object for jetfinding
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(track, p4, i, kTpcId);
+    StSpinJet::StMuTrackEmuFactory factory;
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, i, kTpcId);
     tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
   }
 }
