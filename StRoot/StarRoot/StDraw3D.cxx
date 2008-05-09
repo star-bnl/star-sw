@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.22 2008/05/09 23:02:20 fine Exp $
+// $Id: StDraw3D.cxx,v 1.23 2008/05/09 23:06:17 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -63,7 +63,7 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
       backShape+= ".iv";
 //      const char *backShape = "$STAR/StRoot/macros/graphics/StarTPC.iv";
       printf(" Setting the background shape to be 	%s\n", backShape.Data());
-      gEnv->SetValue("Gui.InventorShapeDir",":.:$STAR/StRoot/macros/graphics");
+      gEnv->SetValue("Gui.InventorShapeDir",":.:StRoot/macros/graphics:$STAR/StRoot/macros/graphics");
       gEnv->SetValue("Gui.InventorBackgroundShape",backShape.Data());
       if  (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")) {
          // Create Open GL viewer
