@@ -1,15 +1,15 @@
-// $Id: StEEmcFilterMaker.h,v 1.2 2008/05/09 22:14:35 balewski Exp $
+// $Id: StEEmcOnlyFilterMaker.h,v 1.1 2008/05/09 22:14:35 balewski Exp $
 
-#ifndef STAR_StEEmcFilterMaker
-#define STAR_StEEmcFilterMaker
+#ifndef STAR_StEEmcOnlyFilterMaker
+#define STAR_StEEmcOnlyFilterMaker
 
 /*!
  *                                                                     
- * \class  StEEmcFilterMaker
+ * \class  StEEmcOnlyFilterMaker
  * \author Jan Balewski
  * \date   April 2008
  * \brief  aborts events based on Endcap response
- *  cuts: reco vertex in some Z-range and EEMC 3x3 cluster event-eta ET>thres 
+ *  cuts: EEMC 3x3 cluster pseudo-event-eta ET>thres using predefined fixed Z-vertex location 
  *  instruction how to use in in BFC is a the end of this .h file
  */                                                                      
 
@@ -21,20 +21,20 @@ class TH1F;
 class EEmcGeomSimple;
 class StEEmcTower;
 
-class StEEmcFilterMaker : public StMaker {
+class StEEmcOnlyFilterMaker : public StMaker {
  private:
-  int nInpEve, nRecVert,nZverOK, nAccEve;
+  int nInpEve,nAccEve;
   TH1F * mH0;
   EEmcGeomSimple*  mGeomE;
   Float_t transverseNRG(Float_t vertexPosZ, StEEmcTower * tower);
   Int_t triggerCondition( Float_t vertexPosZ, StEEmcTower *highTow,  Float_t &patchEt);
-  float par_Et_thres, par_Z0_vert, par_delZ_vert;
+  float par_Et_thres, par_Z0_vert;
   
  public: 
   void setEtThres(float x) { par_Et_thres=x;}  
-  void setZvertCut(float z0, float dz) {  par_Z0_vert=z0; par_delZ_vert=dz;}
-  StEEmcFilterMaker(const char *name="EEmcFullFilter");
-  virtual       ~StEEmcFilterMaker();
+  void setFixedZvert(float z0) {  par_Z0_vert=z0;}
+  StEEmcOnlyFilterMaker(const char *name="EEmcOnlyFilter");
+  virtual       ~StEEmcOnlyFilterMaker();
   virtual Int_t Init();
   virtual Int_t  Make();
 
@@ -43,11 +43,11 @@ class StEEmcFilterMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFilterMaker.h,v 1.2 2008/05/09 22:14:35 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcOnlyFilterMaker.h,v 1.1 2008/05/09 22:14:35 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
-  ClassDef(StEEmcFilterMaker,0)  
+  ClassDef(StEEmcOnlyFilterMaker,0)  
 };
 
 #endif
@@ -59,14 +59,14 @@ class StEEmcFilterMaker : public StMaker {
 ADD those lines to BFC to make use of this maker
 
   gSystem->Load("StEEmcA2EMaker");
-  gSystem->Load("EEmcFilterMaker");
+  gSystem->Load("EEmcOnlyFilterMaker");
 
   StEEmcA2EMaker *EEa2eMK=new StEEmcA2EMaker("EE_A2E");
   EEa2eMK->database("eeDb");   // sets db connection
   EEa2eMK->source("StEventMaker",2);
   EEa2eMK->scale(1.0);      // scale reco Endcap energy by a factor
 
-  StEEmcFilterMaker *eeFltMk=new StEEmcFilterMaker; // aborts events
+  StEEmcOnlyFilterMaker *eeFltMk=new StEEmcOnlyFilterMaker; // aborts events
   eeFltMk->setEtThres(15.);// (GeV), event-eta
   eeFltMk->setZvertCut(-60.,15.); // (cm), Z0, delatZ
   chain->AddBefore("MuDst",EEa2eMK);// WARN, order is important
@@ -75,8 +75,8 @@ ADD those lines to BFC to make use of this maker
   chain->ls(3);
 
   ========================== */
-// $Log: StEEmcFilterMaker.h,v $
-// Revision 1.2  2008/05/09 22:14:35  balewski
+// $Log: StEEmcOnlyFilterMaker.h,v $
+// Revision 1.1  2008/05/09 22:14:35  balewski
 // new there are 2 filters
 //
 // Revision 1.1  2008/04/21 15:47:09  balewski

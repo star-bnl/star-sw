@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.3 2008/04/21 18:01:55 balewski Exp $
+// $Id: bfc.C,v 1.4 2008/05/09 22:14:38 balewski Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -121,7 +121,7 @@ void bfc(Int_t First, Int_t Last,
   StMaker *dbMk = chain->GetMaker("db");
   if (dbMk) dbMk->SetDebug(1);
   //JAN
-  dbMk->SetFlavor("simfgt", "vertexSeed"); //to match kumac
+  dbMk->SetFlavor("simfgt", "vertexSeed"); //to match kumac used for FGT simulations
 
   dbMk->SetFlavor("sim","eemcPMTcal");
   dbMk->SetFlavor("sim","eemcPIXcal");//use ideal calibration w/o this line
@@ -144,11 +144,22 @@ void bfc(Int_t First, Int_t Last,
   EEa2eMK->source("StEventMaker",2);
   EEa2eMK->scale(1.0);      // scale reco Endcap energy by a factor
 
-  StEEmcFilterMaker *eeFltMk=new StEEmcFilterMaker; // Brian's filter
-  eeFltMk->setEtThres(16.);// (GeV), event-eta used 
-  eeFltMk->setZvertCut(-60.,15.); // (cm), Z0, delatZ
-  chain->AddBefore("MuDst",EEa2eMK);// WARN, order is important
-  chain->AddBefore("MuDst",eeFltMk);
+  /*  this filter assumes fixed Zvertex,
+      needs only Endcap slow simu */
+  StEEmcOnlyFilterMaker *eeFlt1Mk=new StEEmcOnlyFilterMaker; 
+  eeFlt1Mk->setEtThres(14.);// (GeV), event-eta used 
+  eeFlt1Mk->setFixedZvert(-60.); // (cm), Z0
+
+  //  this filter requires reco vertex
+  StEEmcFilterMaker *eeFlt2Mk=new StEEmcFilterMaker; 
+  eeFlt2Mk->setEtThres(16.);// (GeV), event-eta used 
+  eeFlt2Mk->setZvertCut(-60.,15.); // (cm), Z0, delatZ
+
+  // position makers at the right location in the chain
+  chain->AddAfter("eefs",eeFlt1Mk);// WARN, order is important
+  chain->AddAfter("eefs",EEa2eMK);
+  chain->AddBefore("MuDst",eeFlt2Mk);
+
 #endif
   chain->ls(3);
 
