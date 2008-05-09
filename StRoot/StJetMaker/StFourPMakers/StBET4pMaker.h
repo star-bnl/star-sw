@@ -12,6 +12,7 @@
 
 #include "StFourPMaker.h"
 
+class StMuTrack;
 class StEmcCollection;
 class StMuTrackFourVec;
 class StMuDstMaker;
