@@ -58,15 +58,23 @@ Int_t StTreeMaker::Open(const char*)
 
 
     if (!fTree) {//Make tree
-
-      TFile tf(fFile,"read","BFC StTree file");
+      class TFilePtr {
+         private:
+           TFile *fFile;
+         public:
+           TFilePtr(TFile *f): fFile(f){;}
+           ~TFilePtr(){ delete fFile;};
+           operator TFile *(){ return fFile; }
+           Bool_t IsZombie() const { return fFile?fFile->IsZombie():kTRUE;}
+      };
+      TFilePtr tf = TFile::Open(fFile,"read","BFC StTree file");
       if (tf.IsZombie()) {
 	Error("Init","Wrong input file %s\n",(const char*)fFile);
 	return kStErr;
       }
 
       
-      fTree = StTree::GetTree(&tf,GetTreeName()); assert(fTree);
+      fTree = StTree::GetTree(tf,GetTreeName()); assert(fTree);
       if (GetDebug()) 
 	printf("<%s(%s)::Init> FOUND Tree %s in file %s\n",
 	ClassName(),GetName(),
