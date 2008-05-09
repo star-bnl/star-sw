@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StJetFinderRunner.h,v 1.8 2008/05/08 02:31:46 tai Exp $
+// $Id: StJetFinderRunner.h,v 1.9 2008/05/09 02:14:51 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETFINDERRUNNER_HH
 #define STJETFINDERRUNNER_HH
 

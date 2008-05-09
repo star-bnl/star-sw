@@ -1,6 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StTestDataCreator.h,v 1.4 2008/05/03 03:13:34 tai Exp $
-// Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
+// $Id: StTestDataCreator.h,v 1.5 2008/05/09 02:14:53 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STTESTDATACREATOR_H
 #define STTESTDATACREATOR_H
 

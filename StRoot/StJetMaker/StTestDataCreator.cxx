@@ -1,5 +1,5 @@
-// $Id: StTestDataCreator.cxx,v 1.5 2008/05/03 03:56:02 tai Exp $
-// Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
+// $Id: StTestDataCreator.cxx,v 1.6 2008/05/09 02:14:53 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StTestDataCreator.h"
 
 #include <StJetFinder/AbstractFourVec.h>

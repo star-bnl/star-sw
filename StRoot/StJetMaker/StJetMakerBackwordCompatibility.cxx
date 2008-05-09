@@ -1,5 +1,5 @@
-// $Id: StJetMakerBackwordCompatibility.cxx,v 1.1 2008/05/03 01:06:31 tai Exp $
-// Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
+// $Id: StJetMakerBackwordCompatibility.cxx,v 1.2 2008/05/09 02:14:52 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetMakerBackwordCompatibility.h"
 
 #include "StDefaultJetTreeWriter.h"

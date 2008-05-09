@@ -1,6 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StDefaultJetTreeWriter.h,v 1.3 2008/05/03 01:06:31 tai Exp $
-// Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
+// $Id: StDefaultJetTreeWriter.h,v 1.4 2008/05/09 02:14:51 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STDEFAULTJETTREEWRITER_H
 #define STDEFAULTJETTREEWRITER_H
 
