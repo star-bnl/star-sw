@@ -1,5 +1,7 @@
-// $Id: StJetFinderRunner.cxx,v 1.10 2008/05/09 02:14:51 tai Exp $
+// $Id: StJetFinderRunner.cxx,v 1.11 2008/05/09 02:17:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
+#include "StJetFinderRunner.h"
+
 #include <StJetFinder/StJetFinder.h>
 #include <StJetFinder/StJetPars.h>
 
