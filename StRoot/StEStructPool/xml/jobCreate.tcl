@@ -1807,19 +1807,24 @@ proc ::jobCreate::isReadable { fid fLog } {
 # startJobMonitor sources and start a program that monitors running and
 # output of batch jobs. We assume it is in the same directory as jobCreate.
 ################################################################################
-#>>>>> Can we put jobMonitors into slave interpreters?
-#      Would like to have more than one, and they coul
+# Put jobMonitor into slave interpreters.
+# Can start multiple job monitors from jobCreate and they don't interfere with each other.
 proc ::jobCreate::startJobMonitor {} {
     set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
     set path [$node text]
 
-#    if {![info exists ::jobCreate::slaveInterpCount]} {
-#        set ::jobCreate::slaveInterpCount 1
-#    } else {
-#        incr ::jobCreate::slaveInterpCount
-#    }
     incr ::jobCreate::slaveInterpCount
     interp create slave$::jobCreate::slaveInterpCount
+    # Slave interpreter will be create with its own environment.
+    # Need to set auto_path on rcf or it won't find packages.
+    if {[file exists /star/u/prindle/bin/lib]} {
+        set i_auto_path [interp eval slave$::jobCreate::slaveInterpCount {set auto_path}]
+        if {[lsearch $i_auto_path /star/u/prindle/bin/lib] < 0} {
+            interp eval slave$::jobCreate::slaveInterpCount {
+                lappend auto_path /star/u/prindle/bin/lib
+            }
+        }
+    }
     interp eval slave$::jobCreate::slaveInterpCount "
         source [file join $::jobCreate::jobCreatePath jobMonitor.tcl]
         ::jobMonitor::createWindow $path
