@@ -1,7 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.7 2008/04/19 02:09:55 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.8 2008/05/09 02:11:55 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
+
+#include "StMuTrackEmu.h"
+#include "StMuTrackEmuFactory.h"
 
 #include "StJetFinder/AbstractFourVec.h"
 
@@ -18,11 +21,12 @@ class StMuTrackFourVec : public AbstractFourVec {
 
 public:
     
-  StMuTrackFourVec() : mTrack(NULL), index(0), mDetId(kUnknownId), mCharge(0) { }
+  StMuTrackFourVec() : mTrack(NULL), _track(0), index(0), mDetId(kUnknownId), mCharge(0) { }
   StMuTrackFourVec(StMuTrack* t, StLorentzVectorF P, Int_t i, StDetectorId detId)
-    : mTrack(t), mVec(P), index(i), mDetId(detId), mCharge(!t ? 0 : (double)t->charge()) { }
+    : mTrack(t), _track(_trackFactory.createStMuTrackEmu(mTrack)), mVec(P), index(i), mDetId(detId), mCharge(!t ? 0 : (double)t->charge())
+  { }
 
-  virtual ~StMuTrackFourVec() { }
+  virtual ~StMuTrackFourVec() { if(_track) delete _track; _track = 0; }
     
   ///momenta
   double pt() const { return mVec.perp(); }
@@ -45,6 +49,7 @@ public:
 
   // Mu Track (null if it's an emc tower/hit/point) this will change soon
   StMuTrack* particle() const {return mTrack;}
+  StSpinJet::StMuTrackEmu* track() const { return _track; }
 
   //Index of the track/tower/cluster/point in the container that it came from
   Int_t getIndex(void) const { return index; }
@@ -59,6 +64,8 @@ private:
   double p() const  { return mVec.vect().mag(); }
 
   StMuTrack* mTrack;
+  StSpinJet::StMuTrackEmuFactory _trackFactory;
+  StSpinJet::StMuTrackEmu *_track;
   StLorentzVectorF mVec;
   Int_t index;
   StDetectorId mDetId;
