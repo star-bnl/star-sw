@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.4 2008/05/09 22:14:38 balewski Exp $
+// $Id: bfc.C,v 1.5 2008/05/11 18:49:21 balewski Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -146,20 +146,24 @@ void bfc(Int_t First, Int_t Last,
 
   /*  this filter assumes fixed Zvertex,
       needs only Endcap slow simu */
-  StEEmcOnlyFilterMaker *eeFlt1Mk=new StEEmcOnlyFilterMaker; 
+  StEEmcFilterMaker *eeFlt1Mk=new StEEmcFilterMaker("EEmcFilterPreTPC"); 
   eeFlt1Mk->setEtThres(14.);// (GeV), event-eta used 
-  eeFlt1Mk->setFixedZvert(-60.); // (cm), Z0
+  eeFlt1Mk->setFixedVertex(-60.); // (cm), Z0
 
   //  this filter requires reco vertex
-  StEEmcFilterMaker *eeFlt2Mk=new StEEmcFilterMaker; 
+  StEEmcFilterMaker *eeFlt2Mk=new StEEmcFilterMaker("EEmcFilterPostTPC"); 
   eeFlt2Mk->setEtThres(16.);// (GeV), event-eta used 
   eeFlt2Mk->setZvertCut(-60.,15.); // (cm), Z0, delatZ
 
   // position makers at the right location in the chain
-  chain->AddAfter("eefs",eeFlt1Mk);// WARN, order is important
-  chain->AddAfter("eefs",EEa2eMK);
-  chain->AddBefore("MuDst",eeFlt2Mk);
-
+  // WARN, order of operations below is important
+  StMaker *tpcMk = chain->GetMaker("tpcChain");
+  chain->AddAfter("eefs",tpcMk); // now TPC-chain is after EMC-makers
+ 
+  chain->AddAfter("eefs",eeFlt1Mk);
+  chain->AddAfter("eefs",EEa2eMK); // filter 1 is before TPC-chain
+  chain->AddBefore("MuDst",eeFlt2Mk); // filter 2 is after vertex finder
+  
 #endif
   chain->ls(3);
 
