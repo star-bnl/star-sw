@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.22 2007/01/15 08:23:02 jcs Exp $
+// $Id: StFtpcVertex.cc,v 1.23 2008/05/12 22:15:54 jcs Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.23  2008/05/12 22:15:54  jcs
+// cleanup comments
+//
 // Revision 1.22  2007/01/15 08:23:02  jcs
 // replace printf, cout and gMesMgr with Logger commands
 //
@@ -370,7 +373,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   low = z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())-20;
   upp = z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())+20;
   h1h.Set(&z_hist,low,upp);
-  if (h1h.GetNonZeros()<=2) { //Bad case, foit will failed
+  if (h1h.GetNonZeros()<=2) { //Bad case, fit will fail
     SetZ(h1h.GetMean());
     SetZerr(h1h.GetRMS());
   } else {  
@@ -396,7 +399,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   low = x_hist.GetXaxis()->GetBinCenter(x_hist.GetMaximumBin())-3;
   upp = x_hist.GetXaxis()->GetBinCenter(x_hist.GetMaximumBin())+3;
   h1h.Set(&x_hist,low,upp);
-  if (h1h.GetNonZeros()<=2) { //Bad case, fit will failed
+  if (h1h.GetNonZeros()<=2) { //Bad case, fit will fail
     SetX(h1h.GetMean());
     SetXerr(h1h.GetRMS());
   } else {  
@@ -408,7 +411,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   low = y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())-3;
   upp = y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())+3;
   h1h.Set(&y_hist,low,upp);
-  if (h1h.GetNonZeros()<=2) { //Bad case, fit will failed
+  if (h1h.GetNonZeros()<=2) { //Bad case, fit will fail
     SetY(h1h.GetMean());
     SetYerr(h1h.GetRMS());
   } else {  
