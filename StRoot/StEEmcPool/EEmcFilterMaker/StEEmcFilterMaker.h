@@ -1,4 +1,4 @@
-// $Id: StEEmcFilterMaker.h,v 1.3 2008/05/11 18:49:18 balewski Exp $
+// $Id: StEEmcFilterMaker.h,v 1.4 2008/05/12 15:33:01 balewski Exp $
 
 #ifndef STAR_StEEmcFilterMaker
 #define STAR_StEEmcFilterMaker
@@ -51,7 +51,7 @@ class StEEmcFilterMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFilterMaker.h,v 1.3 2008/05/11 18:49:18 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFilterMaker.h,v 1.4 2008/05/12 15:33:01 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -64,26 +64,42 @@ class StEEmcFilterMaker : public StMaker {
 /* ===================================
 
 #if 1 
-ADD those lines to BFC to make use of this maker
-
   gSystem->Load("StEEmcA2EMaker");
-  gSystem->Load("EEmcFilterMaker");
+  gSystem->Load("StEEmcPoolEEmcFilterMaker");
 
   StEEmcA2EMaker *EEa2eMK=new StEEmcA2EMaker("EE_A2E");
   EEa2eMK->database("eeDb");   // sets db connection
   EEa2eMK->source("StEventMaker",2);
   EEa2eMK->scale(1.0);      // scale reco Endcap energy by a factor
 
-  StEEmcFilterMaker *eeFltMk=new StEEmcFilterMaker; // aborts events
-  eeFltMk->setEtThres(15.);// (GeV), event-eta
-  eeFltMk->setZvertCut(-60.,15.); // (cm), Z0, delatZ
-  chain->AddBefore("MuDst",EEa2eMK);// WARN, order is important
-  chain->AddBefore("MuDst",eeFltMk);
+  //  this filter-1 _assumes_ fixed Zvertex,
+  //    needs only Endcap slow simu 
+  StEEmcFilterMaker *eeFlt1Mk=new StEEmcFilterMaker("EEmcFilterPreTPC"); 
+  eeFlt1Mk->setEtThres(14.);// (GeV), event-eta used 
+  eeFlt1Mk->setFixedVertex(-60.); // (cm), Z0
 
+  //  this filter-2 requires reco vertex
+  StEEmcFilterMaker *eeFlt2Mk=new StEEmcFilterMaker("EEmcFilterPostTPC"); 
+  eeFlt2Mk->setEtThres(16.);// (GeV), event-eta used 
+  eeFlt2Mk->setZvertCut(-60.,15.); // (cm), Z0, delatZ
+
+  // position makers at the right location in the chain
+  // WARN, order of operations below is important
+  StMaker *tpcMk = chain->GetMaker("tpcChain");
+  chain->AddAfter("eefs",tpcMk); // now TPC-chain is after EMC-makers
+ 
+  chain->AddAfter("eefs",eeFlt1Mk);
+  chain->AddAfter("eefs",EEa2eMK); // filter 1 is before TPC-chain
+  chain->AddBefore("MuDst",eeFlt2Mk); // filter 2 is after vertex finder
   chain->ls(3);
+ #endif
 
+ 
   ========================== */
 // $Log: StEEmcFilterMaker.h,v $
+// Revision 1.4  2008/05/12 15:33:01  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2008/05/11 18:49:18  balewski
 // merged 2 makers, now one can us it before and after TPC tracking, run 2 independent copies
 //
