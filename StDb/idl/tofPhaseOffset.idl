@@ -1,0 +1,11 @@
+/* tofPhaseOffset.idl
+ *
+ * Tables: tofPhaseOffset
+ *
+ * description: PhaseOffset of each THUB (valid since Run8)
+ *
+ */
+
+struct tofPhaseOffset {
+  float T0[10];      /* Phase offset for each THUB */
+};
