@@ -20,7 +20,7 @@ void GeomDrawUsage() {
           printf("One always can select the geometry from the \"file menu\" of the GUI interface later on too\n");          
           printf("\n");                
           printf("---------------\n"); 
-          printf("\n$Id: GeomBrowse.C,v 1.7 2008/05/03 22:09:10 fine Exp $\n");
+          printf("\n$Id: GeomBrowse.C,v 1.8 2008/05/12 20:36:17 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 void GeomBrowse(const char *fzFile="complete")
@@ -33,8 +33,8 @@ void GeomBrowse(const char *fzFile="complete")
    gSystem->ExpandPathName(ivrootDir);
    bool CheckCoin = true;
    if (!gSystem->AccessPathName(ivrootDir.Data())) {
-      printf(" Loading ... libSoQt.so %d     \n",gSystem->Load(ivrootDir+"libSoQt"));
       printf(" Loading ... libCoin.so %d     \n",gSystem->Load(ivrootDir+"libCoin"));
+      printf(" Loading ... libSoQt.so %d     \n",gSystem->Load(ivrootDir+"libSoQt"));
       printf(" Loading ... libSmallChange %d \n",gSystem->Load(ivrootDir+"libSmallChange"));
       CheckCoin = false;
    }
