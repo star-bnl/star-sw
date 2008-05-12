@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.22 2008/05/06 18:41:39 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.23 2008/05/12 17:16:37 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.23  2008/05/12 17:16:37  dongx
+ * letime and tetime in StTofCell stored in nano-seconds
+ *
  * Revision 1.22  2008/05/06 18:41:39  dongx
  * - Fixed bug in ouput histogram filename switch
  * - Added switch for tpc track tree output
@@ -2345,12 +2348,12 @@ Int_t StTofrMatchMaker::processEventYear8(){
     int tmptdc = (mSortTofRawData->GetLeadingTdc(tray,jj,kTRUE))[0];
     int bin = (int)tmptdc&0x3ff;
     double tmptdc_f = tmptdc + mTofINLCorr->getTrayINLCorr(tray, jj, bin);
-    double letime = tmptdc_f*VHRBIN2PS;
+    double letime = tmptdc_f*VHRBIN2PS / 1000.;
 
     tmptdc=(mSortTofRawData->GetTrailingTdc(tray,jj,kTRUE))[0];
     bin = (int)tmptdc&0x3ff;
     tmptdc_f = tmptdc + mTofINLCorr->getTrayINLCorr(tray, jj, bin);
-    double tetime = tmptdc_f*VHRBIN2PS;
+    double tetime = tmptdc_f*VHRBIN2PS / 1000.;
 
     // get track-id from cell hit vector
     unsigned int trackNode = FinalMatchedCellsVec[ii].trackIdVec[0];
@@ -2406,12 +2409,12 @@ Int_t StTofrMatchMaker::processEventYear8(){
     int tmptdc = aData->leadingTdc();
     int bin = (int)tmptdc&0x3ff;
     double tmptdc_f = tmptdc + mTofINLCorr->getVpdINLCorr(ewId, lechan, bin);
-    double letime = tmptdc_f*VHRBIN2PS;
+    double letime = tmptdc_f*VHRBIN2PS / 1000.;
 
     tmptdc = aData->trailingTdc();
     bin = (int)tmptdc&0x3ff;
     tmptdc_f = tmptdc + mTofINLCorr->getVpdINLCorr(ewId, techan, bin);
-    double tetime = tmptdc_f*VHRBIN2PS;
+    double tetime = tmptdc_f*VHRBIN2PS / 1000.;
 
     StThreeVectorF zero(0.,0.,0.);
     StTofCell *tofCell = new StTofCell(120+ewId, 0, tubeId, lechan, 0, 0, 0, zero);
