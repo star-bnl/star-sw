@@ -263,9 +263,14 @@ vector<StiHit*> & StiHitContainer::getHits()
   for(HitMapToVectorAndEndType::const_iterator iter= _map.begin(); iter !=_map.end(); iter++)
    {
       const vector<StiHit*> & t_hits = (*iter).second.theHitVec;
-      for (vector<StiHit*>::const_iterator it=t_hits.begin();it!=t_hits.end();++it)
-        _selectedHits.push_back(*it);
-   }  
+      int n_hits = t_hits.size();
+      if (!n_hits) continue;
+      for (int ihit=0;ihit<n_hits;ihit++) {
+        StiHit *hit =  t_hits[ihit]; if (!hit) 	continue;
+        assert ( (void*)hit > (void*)1000000);
+        _selectedHits.push_back(hit);
+   } }  
+
   return _selectedHits;
 }
 
