@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.40 2007/11/13 10:54:37 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.41 2008/05/13 19:12:00 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.41  2008/05/13 19:12:00  jcs
+// added laserTZero to Calibrations_ftpc/ftpcElectronics
+//
 // Revision 1.40  2007/11/13 10:54:37  jcs
 // Code to mask out Ftpc East sectors 1,3 and 5
 // Necessary for calculating rotation offset values when one sector is turned off
@@ -529,6 +532,7 @@ Int_t StFtpcDbReader::FtpcElectronics(St_ftpcElectronics *electronics)
   ftpcElectronics_st *electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
      mTZero = electronicsTable->tZero;
+     mLaserTZero = electronicsTable->laserTZero;
      if (electronicsTable->uSecondsPerTimebin != 0 ) 
        mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
      return kStOK;
