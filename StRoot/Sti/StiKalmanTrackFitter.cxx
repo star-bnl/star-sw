@@ -21,7 +21,6 @@ Int_t StiKalmanTrackFitter::_debug = 0;
 //______________________________________________________________________________
 int StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
 {
-  enum {kMaxNErr=333};
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
 
@@ -31,7 +30,7 @@ StiKalmanTrackNode::Break(nCall);
   StiKalmanTrackNode *targetNode=0; // parent node
   const StiDetector * targetDet=0;  // parent detector
   
-  StiKTNBidirectionalIterator source;
+  StiKTNIterator source;
   double chi2;
   int status = 0,nerr =0;
   if (!fitDirection) {source = track->begin() ;}
@@ -45,14 +44,13 @@ StiKalmanTrackNode::Break(nCall);
   StiKalmanTrackNode *pNode = 0;		//parent node
   int iNode=0; status = 0;
  for (;(targetNode=source());source++) {
-    if (nerr>kMaxNErr) return nerr;
+    if (!pNode && !targetNode->isValid()) 	continue;
+    targetNode->setReady();
     do { //do refit block
       iNode++;
       targetDet = targetNode->getDetector();
       targetHit = targetNode->getHit();
-      Double_t oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
-static Int_t myKount=0;myKount++;
-      if (!pNode && !targetNode->isValid()) continue;
+      double oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
       //begin refit at first hit
       status = 0;
       if (pNode) {
@@ -67,8 +65,9 @@ static Int_t myKount=0;myKount++;
 	if (debug()) {
 	  targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
 	  targetNode->PrintpT("S");}
-//        pNode = targetNode;		continue;
-        pNode = targetNode;		
+
+          targetNode->resetError(0);
+          pNode = targetNode;			break;
       }
 // target node has parameters now but not fitted
 // if targetNode has hit, get chi2 and update track parameters accordingly
@@ -93,7 +92,7 @@ static Int_t myKount=0;myKount++;
     } while(0);//end refit block
   }//end for of nodes
   nGoodNodes = track->getNNodes(3);
-  if (nGoodNodes<3) return 1;
-  return (nerr>kMaxNErr)? nerr:0;
+  if (nGoodNodes<=3) return 1;
+  return 0;
 }
 
