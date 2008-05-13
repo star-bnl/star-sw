@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.107 2008/05/03 02:33:27 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.107 2008/05/03 02:33:27 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.108 2008/05/13 19:05:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.108 2008/05/13 19:05:16 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.108  2008/05/13 19:05:16  perev
+ * more robust refit() and approx
+ *
  * Revision 2.107  2008/05/03 02:33:27  perev
  * Geo modif ON, refit OFF
  *
@@ -954,7 +957,6 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
     if(!hit) 				continue;
     const StiDetector *det = hit->detector();
     if (!det) 				continue;
-    if (node->getDedx()<=0.)		continue;   
     if (detectorId!=det->getGroupId())	continue;
     nodeVec.push_back(node);
   }
@@ -1333,7 +1335,7 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   for (int ITER=0;ITER<mgMaxRefiter;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
-      sTNH.set(maxXi2 ,maxXi2Vtx*100,errConfidence,iter);
+      sTNH.set(maxXi2*10 ,maxXi2Vtx*100,errConfidence,iter);
       pPrev = inn->fitPars();
       ePrev = inn->fitErrs(); 
       
@@ -1447,40 +1449,24 @@ static int nCall=0;nCall++;
 
   StiKTNIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
-  int iNode=0, status = 0,isStarted=0,restIsWrong=0;
-  for (source=rbegin();source!=rend();source++) {
+  int iNode=0, status = 0;
+  for (source=rbegin();(targetNode=source());++source) {
     iNode++;
-    targetNode = &(*source);
-    if (restIsWrong) { targetNode->setInvalid(); continue;}
-
-    if (!isStarted) {
-      if (!targetNode->getHit()) 	targetNode->setInvalid();		
-      if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
-      if (!targetNode->isValid()) 	continue;
-    }
-    isStarted++;
+    if (!pNode && !targetNode->isValid()) 	continue;
+    targetNode->setReady();
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
-    if (!targetNode->isValid()) 	continue;
+    if (status) {targetNode->setInvalid();	continue;}
     pNode = targetNode;
   }//end for of nodes
 
-    pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
-  for (source=begin();source!=end();source++) {
+  pNode = 0; iNode=0;
+  for (source=begin();(targetNode=source());++source) {
     iNode++;
-    targetNode = &(*source);
-    if (restIsWrong) { targetNode->setInvalid(); continue;}
-    if (!isStarted) {
-      if (!targetNode->getHit()) 	targetNode->setInvalid();		
-      if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
-      if (!targetNode->isValid()) 	continue;
-    }
-    isStarted++;
+    if (!targetNode->isValid()) 		continue;
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
-    if (!targetNode->isValid()) 	continue;
+    if (status) {targetNode->setInvalid(); 	continue;}
     pNode = targetNode;
   }//end for of nodes
   return 0;
@@ -1528,6 +1514,7 @@ int StiKalmanTrack::approx(int mode)
 {
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
+
 #ifdef APPROX_DEBUG
 static TCanvas *myCanvas=0;
 static TH1  *H[4];
@@ -1542,8 +1529,9 @@ if(!myCanvas) {
    for (int i=0;i<4;i++) {myCanvas->cd(i+1); H[i]->Draw();}
 }
 #endif // APPROX_DEBUG
-const double BAD_XI2[2]={77,6}/*,XI2_FACT=1.0*/;
-int nNode,nNodeIn;
+
+const double BAD_XI2[2]={99,22},XI2_FACT=9;
+int nNode,nNodeIn,iNode=0;
 double Xi2=0;
   StiHitErrs hr;
 //		Loop over nodes and collect global xyz
@@ -1554,11 +1542,11 @@ double Xi2=0;
   double hz=0; 
   THelixFitter circ;
   THelixTrack  cirl;
-  for (source=rbegin();source!=rend();source++) {
-    targetNode = &(*source);
+  for (source=rbegin();(targetNode=source());++source) {
+    iNode++;
     if (!hz) hz = targetNode->getHz();
     if (!targetNode->isValid()) 	continue;
-    StiHit * hit = targetNode->getHit();
+    const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
     if (targetNode->getChi2()>1000)	continue;
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
@@ -1578,18 +1566,21 @@ double Xi2=0;
   
   
   Xi2 =circ.Fit();
+
 #ifdef APPROX_DEBUG
   H[mode+0]->Fill(log(Xi2)/log(10.));
   H[mode+2]->Fill(nNode,Xi2);
 #endif // APPROX_DEBUG
+
   circ.MakeErrs();
   
   double s=0,xyz[3]; 
   double curv = circ.GetRho();
-  for (source=rbegin();source!=rend();source++) {
-    targetNode = &(*source);
+  iNode = 0;
+  for (source=rbegin();(targetNode=source());++source) {
+    iNode++;
     if (!targetNode->isValid()) 	continue;
-    StiHit * hit = targetNode->getHit();
+    const StiHit *hit = targetNode->getHit();
     if (hit) {
       xyz[0] = hit->x_g();
       xyz[1] = hit->y_g();
@@ -1621,7 +1612,7 @@ double Xi2=0;
     int ians = targetNode->nudge();
     if(ians) {nNode--; targetNode->setInvalid();continue;}
     P = targetNode->fitPars();
-#if 0
+#if 1
     if (mode==0) {
       StiNodeErrs &E = targetNode->fitErrs();
       cirl.StiEmx(E.A);
