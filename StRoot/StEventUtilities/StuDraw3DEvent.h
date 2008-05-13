@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.5 2008/05/09 23:02:19 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.6 2008/05/13 19:56:17 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
@@ -30,12 +30,12 @@ enum EStuDraw3DEvent {kUnusedHitsOnly=-1,kUsedHits=0,kUsedHitsTracks=1,kTracksOn
 class StuDraw3DEvent : public StDraw3D
 {
   private:
-     StuDraw3DEvent(const StuDraw3DEvent&){;}
+     StuDraw3DEvent(const StuDraw3DEvent&):StDraw3D(){;}
      void operator=(const StuDraw3DEvent&){;}
 
   public:
      StuDraw3DEvent(TVirtualPad *pad = 0, const char *detectorName="TPC");
-     virtual ~StuDraw3DEvent(){;}
+     virtual ~StuDraw3DEvent();
      static StuDraw3DEvent *Display();
      virtual void     Tracks(const StEvent* event, StTrackType type=global);
      virtual void     Tracks(const StSPtrVecTrackNode &tracks, StTrackType type=global);

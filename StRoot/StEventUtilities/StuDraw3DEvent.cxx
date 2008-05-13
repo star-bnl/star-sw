@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.6 2008/05/09 23:02:19 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.7 2008/05/13 19:56:11 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -34,6 +34,13 @@ StDraw3D(pad,detectorName)
    // The detectorName is a comma separated list of the OpenInventor files with no extension
    // For all names on the list one should provide the iv file with the "iv extension:
    //                         <name>.iv
+   if (!gEventDisplay) gEventDisplay = this;
+}
+
+//___________________________________________________
+StuDraw3DEvent::~StuDraw3DEvent()
+{
+   if (gEventDisplay == this) gEventDisplay = 0;
 }
 
 //___________________________________________________
