@@ -6,6 +6,9 @@ class     St_db_Maker;
 St_db_Maker *dbMk =0;
 
 Int_t iEvt=0,istat=0,nEvents=0;
+void doEvents(const Char_t *inname = "/star/institutions/lbl/dongx/tof/Run8/prod/9054010/reco/st_toftpx_9054010_raw_1370001.event.root",
+              const Char_t *histname = "test.hist.root",
+              const Char_t *ntuplename = "test.ntuple.root");
 // ------------------ Here is the actual method -----------------------------------------
 void doEvents(const Char_t *inname, const Char_t *histname,  const Char_t *ntuplename)
 {
