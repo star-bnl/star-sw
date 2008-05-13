@@ -115,8 +115,8 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     rotPars._sinCA /= nor;
     rotPars._eta= NICE(parPars._eta-alpha); 
   }// end of rotation part
-  ierr = rotPars.check();
-  if (ierr) return 1;
+//   ierr = rotPars.check();
+//   if (ierr) return 1;
   
 //  	Propagation 
   x1 = rotPars._x;
@@ -152,8 +152,8 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   proPars._tanl = rotPars._tanl;
   proPars._sinCA   = sinCA2;
   proPars._cosCA   = cosCA2;
-  ierr = proPars.check();
-  if (ierr) return 2;
+//   ierr = proPars.check();
+//   if (ierr) return 2;
   return 0;
 } 
 //______________________________________________________________________________
@@ -175,8 +175,8 @@ int StiTrackNodeHelper::propagateFitd()
    mPredPars._ptin *= (1+mMcs._ptinCorr);
    mPredPars._curv *= (1+mMcs._ptinCorr);
    mPredPars.ready();
-   ierr = mPredPars.check();
-   if (ierr) return 2;
+//    ierr = mPredPars.check();
+//    if (ierr) return 2;
    return 0;
 }
 
@@ -233,8 +233,8 @@ int StiTrackNodeHelper::propagateError()
   mPredErrs._cPP+=mMcs._cPP;    	//add err to <curv*curv>		 //add err to <curv*curv>
   mPredErrs._cTP+=mMcs._cTP;    	//add err to <tanL*curv>		 //add err to <tanL*curv>
   mPredErrs._cTT+=mMcs._cTT;    	//add err to <tanL*tanL>		 //add err to <tanL*tanL>
-  int ierr = mPredErrs.check();
-  if (ierr) return 1;
+//   int ierr = mPredErrs.check();
+//   if (ierr) return 1;
   return 0;
 }
 
@@ -289,9 +289,9 @@ StiDebug::Break(nCall);
   if (!mParentNode) {
     if (!smooth) mgCutStep = 0;
     mPredErrs = mTargetNode->mFE;
-    ierr = mPredErrs.check(); 	if (ierr) return 11;
+//    ierr = mPredErrs.check(); 	if (ierr) return 11;
     mPredPars = mTargetNode->mFP;
-    ierr = mPredPars.check();	if (ierr) return 12;
+//    ierr = mPredPars.check();		if (ierr) return 12;
     mBestPars = mPredPars;
     mBestDelta = mPredErrs.getDelta();
     mJoinPars = mPredPars;
@@ -309,11 +309,11 @@ StiDebug::Break(nCall);
     if (nudge())			return 13;
     mChi2 = 3e33;
     double chi2 = evalChi2();
-    if (mTargetNode == mVertexNode) {
-      if (chi2>mChi2Vtx) 		return 14;
-    } else {
-      if (chi2>mChi2Max)		break;
-    }
+//     if (mTargetNode == mVertexNode) {
+//       if (chi2>mChi2Vtx) 		return 14;
+//     } else {
+//       if (chi2>mChi2Max)		break;
+//     }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
     if (!ians) 	break;
@@ -364,12 +364,6 @@ int StiTrackNodeHelper::join()
   StiDebug::Break(mTargetNode->mId);
   int kase = mTargetNode->isValid();
   if (mState==StiTrackNode::kTNFitEnd) kase |=kNewFitd;
-static int oldJoinPrim = StiDebug::iFlag("StiOldJoinPrim");
-if (!oldJoinPrim) {
-  if (mTargetNode==mVertexNode) kase = kNewFitd; //ignore old info for primVtx
-						 //Hack to accoont specific 
-						 //fit to primVtx
-}
   do {
     switch(kase) {
       case 0:					// Old invalid & New UnFitd
