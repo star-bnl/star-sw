@@ -1,6 +1,10 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.7 2008/04/11 17:00:55 nav Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.8 2008/05/13 19:14:58 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.8  2008/05/13 19:14:58  jcs
+// get  Laser t0 from Calibrations_ftpc/ftpcElectronics offline database table
+// clean up comments
+//
 // Revision 1.7  2008/04/11 17:00:55  nav
 // *** empty log message ***
 //
@@ -199,11 +203,10 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
   if (ftpc == 1) deltap = deltapW;
   if (ftpc == 2) deltap = deltapE;
 
-  // Laser t0 = 1.0
-  // tZero = 1.0;
 
- // Laser t0 = 1.57
-  tZero = 1.57;//changed 04/03/08 by navneet
+ // get  Laser t0 from Calibrations_ftpc/ftpcElectronics offline database table
+  tZero = dbReader->laserTZero();
+  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - laserTZero = "<<tZero<<endm;
 
   if (atof(t0)!=0 || atof(gas)!=0)
     {
@@ -235,7 +238,7 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
  
   Int_t maxentries=l->btcluster->GetEntries();
   LOG_INFO<<" "<<endm;
-  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - processing Cluster-on-Track-Tree with "<<maxentries<<" clusters... please be patien"<<endm; 
+  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - processing Cluster-on-Track-Tree with "<<maxentries<<" clusters... please be patient"<<endm; 
   LOG_INFO<<" "<<endm;
 
   for (int k=0;k<=maxentries;k++)
@@ -311,7 +314,7 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
 
 /**
  *
- *  Use the time step from data runs to check to
+ *  Use the time step from data runs to check t0
  *
  */
 
