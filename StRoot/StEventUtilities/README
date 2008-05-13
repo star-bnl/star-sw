@@ -301,7 +301,7 @@ Known Problems: The side view and text are not compatible. It works
 
 ** StuDraw3DEvent: OpenInventor Event Display
 ------------------------------------------
-Files:       StuDraw3DEvent.h StuDraw3DEvent.h
+Files:       StuDraw3DEvent.h StuDraw3DEvent.h EveDis.C
 Author:      Valeri Fine
 Date:        May 2008
 Description: The class derived from the StDraw3D (StarRoot package) 
@@ -318,6 +318,9 @@ Description: The class derived from the StDraw3D (StarRoot package)
 
                           gEventDisplay->Draw3DTest();
                           
+EveDis.C is a ROOT macro that can be used as a templatee to create the custom
+         implementation by the end-user
+
 Example:   For example to draw  all tracks for StEvent object the 
            ROOT sessionas follows can be used:
            
@@ -333,6 +336,22 @@ Example:   For example to draw  all tracks for StEvent object the
 
            http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/StEventTpcTracks.png               
 
+           To create the custom display, for example> to provide the custom cuts
+           one has to
+
+             - Copy the template from $STAR/StRoot/StEventUtilities/EveDis.C
+             - Edit he method EveDis::Hits() 
+               (see the comments inside of the EveDis.C file
+             - Start ROOT
+             - Load the standard STAR libraries
+             - Invoke AClIC
+             - Create the custom display instance as follows:
+
+                root.exe
+                   root [0].x Load.C
+                   root [1].L EveDis.C++
+                   root [2] EveDis display;
+                   root [3] display.Draw3DTest()
 
 
 * Template
