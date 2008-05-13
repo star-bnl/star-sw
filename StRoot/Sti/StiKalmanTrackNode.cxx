@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.115 2008/04/03 20:03:36 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.116 2008/05/13 19:17:05 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.116  2008/05/13 19:17:05  perev
+ * more robust nudge()
+ *
  * Revision 2.115  2008/04/03 20:03:36  fisyak
  * Straighten out DB access via chairs
  *
@@ -998,11 +1001,12 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   double deltaX = 0;
   if (hit) { deltaX = hit->x()-mFP._x;}
   else     { if (_detector) deltaX = _detector->getPlacement()->getNormalRadius()-mFP._x;}
-  if(fabs(deltaX)>5)		return -1;
-  if (fabs(deltaX) <1.e-3) 	return  0;
+  if (fabs(deltaX) <1.e-4) 	return  0;
   double deltaS = mFP._curv*(deltaX);
   double sCA2 = mFP._sinCA + deltaS;
-  if (fabs(sCA2)>0.99) 		return -2;
+  if (sCA2 <-0.99) {sCA2= -0.99; deltaS= sCA2-mFP._sinCA; deltaX = deltaS/mFP._curv;}
+  if (sCA2 > 0.99) {sCA2=  0.99; deltaS= sCA2-mFP._sinCA; deltaX = deltaS/mFP._curv;}
+
   double cCA2,deltaY,deltaL,sind;
   if (fabs(deltaS) < 1e-3 && fabs(mFP._eta)<1) { //Small angle approx
     cCA2= mFP._cosCA - mFP._sinCA/mFP._cosCA*deltaS;
@@ -1035,14 +1039,8 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   mgP.dl   += deltaL;
 
 
-//  assert(fabs(mFP._sinCA) <  1.);
-  if (fabs(mFP._sinCA)>=1) {
-    LOG_DEBUG << Form("StiKalmanTrackNode::nudge WRONG WRONG WRONG sinCA=%g",mFP._sinCA)
-    << endm;          
-    mFP.print();
-    return -13;
-  }
   assert(fabs(mFP._cosCA) <= 1.);
+  assert(fabs(mFP._sinCA) <= 1.);
   mPP() = mFP;
   return 0;
 }
