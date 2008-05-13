@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.87 2008/01/07 14:45:06 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.88 2008/05/13 12:20:58 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.88  2008/05/13 12:20:58  jcs
+// only write FTPC calibration vertices with successful fit to StEvent
+//
 // Revision 1.87  2008/01/07 14:45:06  jcs
 // create and fill the special set of Ftpc track histograms used to evaluate
 // the Ftpc gain scan runs when the bfc option fgain is in the chain
@@ -667,21 +670,28 @@ Int_t StFtpcTrackMaker::Make()
   // momentum fit, dE/dx calculation
   tracker.GlobalFitAnddEdx();
 
+  // calculate FTPC calibration vertices
   if (tracker.GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
     tracker.EstimateVertex(tracker.GetVertex(), 1);
     
-    // write FTPC vertices (east and west) to StEvent
-    const StThreeVectorF east(tracker.GetVertexEast()->GetX(), tracker.GetVertexEast()->GetY(), tracker.GetVertexEast()->GetZ());
-    StCalibrationVertex *ftpcEastVertex = new StCalibrationVertex();
-    ftpcEastVertex->setPosition(east);
-    ftpcEastVertex->setType(kFtpcEastCalVtxId);
-    event->addCalibrationVertex(ftpcEastVertex);
+     // write FTPC calibration vertices (east and west) to StEvent
+    if (tracker.GetVertexEast()->GetIFlag() == 0) {
+       const StThreeVectorF east(tracker.GetVertexEast()->GetX(), tracker.GetVertexEast()->GetY(), tracker.GetVertexEast()->GetZ());
+       StCalibrationVertex *ftpcEastVertex = new StCalibrationVertex();
+       ftpcEastVertex->setPosition(east);
+       ftpcEastVertex->setType(kFtpcEastCalVtxId);
+       event->addCalibrationVertex(ftpcEastVertex);
+       LOG_INFO << "Added FTPC East calibration vertex: x = "<<tracker.GetVertexEast()->GetX()<<" y = "<<tracker.GetVertexEast()->GetY()<<" z = "<<tracker.GetVertexEast()->GetZ() << endm;
+    }
 
-    StThreeVectorF west(tracker.GetVertexWest()->GetX(), tracker.GetVertexWest()->GetY(), tracker.GetVertexWest()->GetZ());
-    StCalibrationVertex *ftpcWestVertex = new StCalibrationVertex();
-    ftpcWestVertex->setPosition(west);
-    ftpcWestVertex->setType(kFtpcWestCalVtxId);
-    event->addCalibrationVertex(ftpcWestVertex);
+    if (tracker.GetVertexWest()->GetIFlag() == 0) {
+       StThreeVectorF west(tracker.GetVertexWest()->GetX(), tracker.GetVertexWest()->GetY(), tracker.GetVertexWest()->GetZ());
+       StCalibrationVertex *ftpcWestVertex = new StCalibrationVertex();
+       ftpcWestVertex->setPosition(west);
+       ftpcWestVertex->setType(kFtpcWestCalVtxId);
+       event->addCalibrationVertex(ftpcWestVertex);
+       LOG_INFO << "Added FTPC West calibration vertex: x = "<<tracker.GetVertexWest()->GetX()<<" y = "<<tracker.GetVertexWest()->GetY()<<" z = "<<tracker.GetVertexWest()->GetZ() << endm;
+    }
   }
 
   StFtpcSoftwareMonitor* ftpcMon = NULL;
@@ -992,7 +1002,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.87 2008/01/07 14:45:06 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.88 2008/05/13 12:20:58 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
