@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.23 2008/05/12 22:15:54 jcs Exp $
+// $Id: StFtpcVertex.cc,v 1.24 2008/05/13 12:23:33 jcs Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.24  2008/05/13 12:23:33  jcs
+// set FTPC calibration vertex flag: 0 = fit successful, 1 = fit unsuccessful
+//
 // Revision 1.23  2008/05/12 22:15:54  jcs
 // cleanup comments
 //
@@ -419,7 +422,11 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
     SetY(gauss_y.GetParameter(1));
     SetYerr(gauss_y.GetParameter(2));
   }
-  SetIFlag(0);
+  if (GetX()==0 && GetY()==0 && GetZ()==0) {
+    SetIFlag(1); 
+  } else {
+    SetIFlag(0);
+  }
   SetId(0);
 }
 
