@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.26 2006/10/17 19:11:43 fisyak Exp $
+// $Id: StFtpcDbReader.hh,v 1.27 2008/05/13 19:12:00 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.27  2008/05/13 19:12:00  jcs
+// added laserTZero to Calibrations_ftpc/ftpcElectronics
+//
 // Revision 1.26  2006/10/17 19:11:43  fisyak
 // Add definition of mPadPitch
 //
@@ -180,6 +183,7 @@ protected:
   Float_t mAdjustAverageEast;
 
   Float_t mTZero;
+  Float_t mLaserTZero;
   Float_t mMicrosecondsPerTimebin;
 
   Float_t mOffsetCathodeWest;
@@ -349,6 +353,7 @@ public:
   Float_t adjustAverageEast() {return mAdjustAverageEast;}
 
   Float_t tZero() {return mTZero;}
+  Float_t laserTZero() {return mLaserTZero;}
   Float_t microsecondsPerTimebin() {return mMicrosecondsPerTimebin;}
 
   Float_t driftCathodeVoltage() {return mDriftCathodeVoltage;}
