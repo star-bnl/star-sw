@@ -103,10 +103,7 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   // in the base class nothing is actually done
   // but ROOT stuff is built in the drawable version of this class.
   detector->setGroupId(_groupId);
-  if (_trackingParameters) 
-    detector->setTrackingParameters(_trackingParameters);
-  else 
-    detector->setTrackingParameters(StiDefaultTrackingParameters::instance());
+  detector->setTrackingParameters(StiDefaultTrackingParameters::instance());
   return detector;
 }
 
@@ -247,4 +244,26 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setElossCalculator(ElossCalculator);
   Int_t layer = getNRows();
   add(layer+1,0,pDetector);
+}
+///Returns the number of sectors (or segments) in a the
+///given row. Sector are expected to be azimuthally
+///distributed.
+unsigned int  StiDetectorBuilder::getNSectors(unsigned int row) const
+{
+  assert(row<_detectors.size());
+  return _detectors[row].size();
+}
+
+
+StiDetector * StiDetectorBuilder::getDetector(unsigned int row, unsigned int sector) const
+{
+  assert(row<_detectors.size());
+  assert(sector<_detectors[row].size());
+  return _detectors[row][sector];
+}
+
+void StiDetectorBuilder::setDetector(unsigned int row, unsigned int sector, StiDetector *detector)
+{
+  setNSectors(row+1,sector+1);
+   _detectors[row][sector] = detector;
 }
