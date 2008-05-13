@@ -6,6 +6,9 @@ class     St_db_Maker;
 St_db_Maker *dbMk =0;
 
 Int_t iEvt=0,istat=0,nEvents=0;
+void doMuDstEvents(const Char_t *fileList = "StRoot/StTofPool/macros/test.lis",
+                   const Char_t *histname = "test.hist.root",
+                   const Char_t *ntuplename = "test.ntuple.root");
 // ------------------ Here is the actual method -----------------------------------------
 void doMuDstEvents(const Char_t *fileList, const Char_t *histname, const Char_t *ntuplename)
 {
