@@ -1,6 +1,9 @@
-// $Id: lasertest.C,v 1.6 2008/04/23 19:42:18 jcs Exp $
+// $Id: lasertest.C,v 1.7 2008/05/14 21:46:01 jcs Exp $
 //
 // $Log: lasertest.C,v $
+// Revision 1.7  2008/05/14 21:46:01  jcs
+// remove minz,maxz,minrad,maxrad from argument list and set values in macro
+//
 // Revision 1.6  2008/04/23 19:42:18  jcs
 // load the libStDb_Tables.so and StDetectorDbMaker.so which are needed as of STAR version SL07d
 //
@@ -18,15 +21,30 @@
 // add lines for listing CVS update info
 //
 
-void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad,char* t0, char* gas,float mbfield)
+void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char* t0, char* gas,float mbfield)
 {
 
+  Int_t minz, maxz;
+  Int_t minrad = 0;
+  Int_t maxrad = 30;
   cout<<"Starting lasertest.C:"<<endl;
   cout<<"                            filename = "<<filename<<".root"<<endl;
-  cout<<"                            ftpc     = "<<ftpc<<endl;
+  cout<<"                            ftpc     = "<<ftpc;
+  if ( ftpc == 1 ) cout<<" FTPC West"<<endl;
+  if ( ftpc == 2 ) cout<<" FTPC East"<<endl;
   cout<<"                            lsec     = "<<lsec<<endl;
   cout<<"                            straight = "<<straight<<endl;
   cout<<"                            gfit     = "<<gfit<<endl;
+  // for FTPC West
+  if ( ftpc == 1 ) {
+     minz = 0;
+     maxz = 300;
+  }
+  // for FTPC East
+  if ( ftpc == 2 ) {
+     minz = -300;
+     maxz = 0;
+  }
   cout<<"                            minz     = "<<minz<<endl;
   cout<<"                            maxz     = "<<maxz<<endl;
   cout<<"                            minrad   = "<<minrad<<endl;
