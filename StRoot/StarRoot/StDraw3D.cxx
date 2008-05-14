@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.26 2008/05/14 21:37:29 fine Exp $
+// $Id: StDraw3D.cxx,v 1.27 2008/05/14 22:01:26 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -45,7 +45,6 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
    // check Coin env and load if present
    TString ivrootDir = gSystem->Getenv("IVROOT");
    if (ivrootDir.IsNull() )  ivrootDir = "$ROOT/5.99.99/Coin2/.$STAR_HOST_SYS";
-//   if (ivrootDir.IsNull() ) ivrootDir = "$ROOT/5.99.99/coin.2.5.0/Coin2/installDir/sl44_gcc346/coin3d";
    ivrootDir +=   "/lib/";
    gSystem->ExpandPathName(ivrootDir);
    static bool CheckCoin = false;
@@ -414,7 +413,20 @@ void StDraw3D::Joint(StDraw3D *dsp)
    // the original TPad of "dsp" is to be abandoned if exi
 
    if (dsp) dsp->SetMaster(this);
-
+}
+//___________________________________________________
+void StDraw3D::Redraw()
+{
+   // Move all existent view to the master window if any
+   if (fMaster && fPad) {
+      TList *p = fPad->GetListOfPrimitives();
+      if (p) {
+         TObject *o = 0;
+         TIter next(p);
+         while (o=next())  Draw(o);
+         p->Clear();
+      }
+   }
 }
 //___________________________________________________
 void StDraw3D::SetMaster(StDraw3D *master) 
@@ -425,7 +437,8 @@ void StDraw3D::SetMaster(StDraw3D *master)
          Error("StDraw3D::SetMaster"
                ,"The object (StDraw3D*)%p already has another master %p", this, fMaster);
      fMaster = master;
- }
+     Redraw();
+   }
 }
 
 //___________________________________________________
