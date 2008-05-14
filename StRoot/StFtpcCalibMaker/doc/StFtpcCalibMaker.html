@@ -73,7 +73,7 @@ float mbfield)
  Runs for the one specified delta t0, delta gas value
    
 For example:
- lasertest_single.C("run_6082062_laser_test",1,2,1,1,0,300,0,30,"0.000001","0",1)
+ lasertest_single.C("run_6082062_laser_test",1,2,1,1,"0.000001","0",1)
  produces the following 6 files
   run_6082062_laser_test-pos_w_lsec_2_g_dt0.000001_dg0.log
   run_6082062_laser_test-pos_w_lsec_2_g_dt0.000001_dg0_padpos2.log
@@ -87,7 +87,7 @@ range of delta t0 and delta gas values and produces a set of the 6 output files
 for each delta t0/delta gas setting.       
    
 For example:
- lasertest.C("run_6082062_laser_test",1,2,1,1,0,300,0,30,"0.000001","0",1)
+ lasertest.C("run_6082062_laser_test",1,2,1,1,"0.000001","0",1)
 produces 156 sets of the 6 files listed for lasertest_single.C; one set for each delta t0 
 from -0.50<=deltat0<=0.60 with each deltaGas from  -0.50<=deltaGas<=0.70  
 (12 deltat0 * 13 deltaGas)
