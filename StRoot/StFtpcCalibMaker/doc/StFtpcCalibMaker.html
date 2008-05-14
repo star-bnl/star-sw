@@ -42,7 +42,7 @@ This will produce a root file named <font color="#FF0000">run_6082062_laser_test
 which can then be analyzed using the StFtpcCalibMaker macros:
 
 <font color="#FF0000">lasertest_single.C</font>(TString filename,int ftpc, int lsec, 
-int straight, int gfit, int minz, int maxz, int minrad, int maxrad,char* t0, char* gas, 
+int straight, int gfit, char* t0, char* gas, 
 float mbfield)
 
         filename    = "run_6082062_laser_test"                         
@@ -61,10 +61,6 @@ float mbfield)
                       3           all lasers            ("_all")   
          gfit       = 0           no gauss fit
                       1           gauss fit
-         minz                     minimum z (FTPC West =   0;  FTPC East = -300)
-         maxz                     maximum z (FTPC West = 300;  FTPC East =    0)
-         minrad     =  0          minimum radius
-         maxrad     = 30          maximim radius
          t0         = "0.000001"  delta t0   (for delta t0 = 0 use "0.000001" to
                                   avoid problems)
         gas         = "0"         delta gas  
