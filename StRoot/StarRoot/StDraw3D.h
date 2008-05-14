@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.17 2008/05/09 23:02:20 fine Exp $
+// $Id: StDraw3D.h,v 1.18 2008/05/14 21:37:29 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -67,6 +67,7 @@ class StDraw3D : public TObject
        TVirtualViewer3D *fViewer; 
        view_3D *fView;
        TString fDetectorName;
+       StDraw3D *fMaster;
 
        static Color_t fgColorDefault;
        static Style_t fgStyDefault;
@@ -74,12 +75,15 @@ class StDraw3D : public TObject
        static Color_t fgBkColor;
        static Int_t   fDrawCanvasCounter;
        TVirtualPad *InitPad();
+       void SetMaster(StDraw3D *master);
+       void InitViewer();
 
 public:
    StDraw3D(TVirtualPad *pad = 0, const char *detectorName="TPC");
    virtual ~StDraw3D();
    virtual const StDraw3DStyle &AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz);
-   TVirtualPad *Pad() const { return fPad;}
+   TVirtualPad *Pad() const;
+   TVirtualViewer3D *Viewer() const;
    virtual void  Clear(Option_t *opt="");
    virtual TObject *Draw(TObject *o);
    virtual const TString &DetectorNames() const;
@@ -114,7 +118,7 @@ public:
 
    virtual TObject *Line(int n,  const float *xyz
          ,  EDraw3DStyle sty);
-   
+   virtual void Joint(StDraw3D *dsp);
    virtual void SetModel(TObject *model);
    virtual void SetComment(const char *cmnt);
    virtual void AddComment(const char *cmnt);

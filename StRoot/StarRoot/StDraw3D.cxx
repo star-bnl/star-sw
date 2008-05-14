@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.25 2008/05/12 20:34:48 fine Exp $
+// $Id: StDraw3D.cxx,v 1.26 2008/05/14 21:37:29 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -44,7 +44,8 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
    TVirtualViewer3D *viewer = 0;
    // check Coin env and load if present
    TString ivrootDir = gSystem->Getenv("IVROOT");
-   if (ivrootDir.IsNull() ) ivrootDir = "$ROOT/5.99.99/Coin2/.$STAR_HOST_SYS";
+   if (ivrootDir.IsNull() )  ivrootDir = "$ROOT/5.99.99/Coin2/.$STAR_HOST_SYS";
+//   if (ivrootDir.IsNull() ) ivrootDir = "$ROOT/5.99.99/coin.2.5.0/Coin2/installDir/sl44_gcc346/coin3d";
    ivrootDir +=   "/lib/";
    gSystem->ExpandPathName(ivrootDir);
    static bool CheckCoin = false;
@@ -150,7 +151,7 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
 };
 //___________________________________________________
 StDraw3D::StDraw3D(TVirtualPad *pad, const char *detectorName): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
-      , fDetectorName(detectorName)
+      , fDetectorName(detectorName),fMaster(0)
 {
 
    // The detectorName is a comma separated list of the OpenInventor files with no extension
@@ -173,7 +174,8 @@ StDraw3D::StDraw3D(TVirtualPad *pad, const char *detectorName): fPad(pad),fBkCol
 //__________________________________________________________________________________
 TVirtualPad *StDraw3D::InitPad() 
 {
-   if (!fPad) {
+   if (fMaster) fMaster->InitPad();
+   else if (!fPad ) {
       fDrawCanvasCounter++;
       TString canvasName = "STAR";
       if (fDrawCanvasCounter) {
@@ -185,16 +187,25 @@ TVirtualPad *StDraw3D::InitPad()
       fPad->Modified();
       fPad->Update();
    }
-   return fPad;
+   return Pad();
 }
+//__________________________________________________________________________________
+void StDraw3D::InitViewer()
+{
+   //Create 3D viewer if  no master provided
 
+   if (fMaster) fMaster->InitViewer();
+   else if ( !fViewer ) fViewer = InitCoin(fPad,fDetectorName);
+   assert(Viewer());
+}
 //___________________________________________________
 StDraw3D::~StDraw3D()
 {
     if (fPad) {
-       fPad->Clear();
+       if (!fMaster) fPad->Clear();
        delete fPad;
-       fPad = 0;
+       fPad    = 0;
+       fMaster = 0;
     }
 }
 
@@ -203,7 +214,19 @@ const TString &StDraw3D::DetectorNames() const
 {
    // return the list of the names 
    return fDetectorName; 
+} 
+//__________________________________________________________________________________
+TVirtualPad *StDraw3D::Pad() const 
+{ 
+   return fMaster ? fMaster->Pad() : fPad;
 }
+
+//__________________________________________________________________________________
+TVirtualViewer3D *StDraw3D::Viewer() const
+{
+   return fMaster ? fMaster->Viewer() : fViewer;
+}
+
 //__________________________________________________________________________________
 void StDraw3D::SetDetectors(const char*nameDetectors)
 {
@@ -235,8 +258,9 @@ void StDraw3D::AddDetectors(const char*nameDetectors)
 void  StDraw3D::Clear(Option_t *opt)
 {
    // Clear the view
-   if (fPad) {
-      fPad->Clear(opt);
+   TVirtualPad *pad = Pad();
+   if (pad) {
+      pad->Clear(opt);
       Modified();
       Update();
    }
@@ -249,11 +273,11 @@ TObject *StDraw3D::Draw(TObject *o)
    // and set the new background color if needed
    if (o) {
       TVirtualPad *sav = gPad;
-      if (!fPad)        InitPad();
-      if (fPad != sav)  fPad->cd();
+      if (!Pad())        InitPad();
+      if (Pad() != sav)  Pad()->cd();
       o->Draw();
-      if (sav && (fPad != sav)) sav->cd();
-      if (!fViewer) fViewer = InitCoin(fPad,fDetectorName);
+      if (sav && (Pad() != sav)) sav->cd();
+      if (!Viewer()) InitViewer();
    }
    return o;
 }
@@ -262,8 +286,9 @@ void StDraw3D::SetBkColor(Color_t newBkColor)
 {
    // Set the canvas background color;
    fBkColor = newBkColor;
-   if (fPad && fPad->GetFillColor() != fBkColor)
-       fPad->SetFillColor(fBkColor);
+   TVirtualPad *pad = Pad();
+   if (pad && pad->GetFillColor() != fBkColor)
+       pad->SetFillColor(fBkColor);
 }
 //___________________________________________________
 const StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz)
@@ -376,6 +401,32 @@ TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
    const StDraw3DStyle &style =  Style(sty);
    return Line(n,xyz,  style.Col(),style.Sty(),style.Siz() );
 }
+//___________________________________________________
+void StDraw3D::Joint(StDraw3D *dsp)
+{
+   // The method to force tow different instancses
+   // of the StDraw3D class  paint on to one and the same
+   // TPad.
+   // Force "dsp" to share the fPad of this object
+   // As result of the "Joint method both objects 
+   //  this as "well" as "dsp"
+   // will sahe "this" object TPad.
+   // the original TPad of "dsp" is to be abandoned if exi
+
+   if (dsp) dsp->SetMaster(this);
+
+}
+//___________________________________________________
+void StDraw3D::SetMaster(StDraw3D *master) 
+{
+   //Make this object slave of the "master" object
+   if (fMaster != master) {
+      if (fMaster) 
+         Error("StDraw3D::SetMaster"
+               ,"The object (StDraw3D*)%p already has another master %p", this, fMaster);
+     fMaster = master;
+ }
+}
 
 //___________________________________________________
 void StDraw3D::SetModel(TObject *model)
@@ -401,13 +452,15 @@ void StDraw3D::AddComment(const char *cmnt)
 //___________________________________________________
 void StDraw3D::Update()
 {
-   if (fPad) fPad->Update();
+   TVirtualPad *pad = Pad();
+   if (pad) pad->Update();
 }
 
 //___________________________________________________
 void StDraw3D::Modified()
 {
-   if (fPad) fPad->Modified();
+   TVirtualPad *pad = Pad();
+   if (pad) pad->Modified();
 }
 
 //___________________________________________________
