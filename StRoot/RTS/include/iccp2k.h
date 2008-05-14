@@ -25,8 +25,7 @@ struct iccp2k {
   u_short token;
   u_char cmd;
   u_char pad1;
-  u_char pad2;
-  u_char pad3;
+  u_short pad2;
 };
 /* #else */
 /* struct iccp2k {    */
