@@ -10,13 +10,13 @@ StFileI *setFiles =0;
 Int_t iEvt=0,istat=0,nEvents=0;
 //		ProtoTypes
 
-void doEvents(const Char_t *file="test.list", const Char_t *outputname="test.root");
+void doEvents(const Char_t *file="StRoot/StTofPool/StTofMuDstReader/macros/test.lis", const Char_t *outputname="test.root");
 
               
 // ------------------ Here is the actual method -----------------------------------------
 void doEvents(const Char_t *fileList, const Char_t *outputname)
 {
-  Int_t nEvents = 99999;
+  Int_t nEvents = 100;
   Int_t nfiles = 100;
 
   //
@@ -31,23 +31,26 @@ void doEvents(const Char_t *fileList, const Char_t *outputname)
   gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StTpcDb");
-  gSystem->Load("StDbUtilities");
+//  gSystem->Load("StDbUtilities");
   gSystem->Load("StDaqLib");
   gSystem->Load("StDbBroker");
-  gSystem->Load("St_db_Maker");
-  gSystem->Load("libgeometry_Tables");
-
-  gSystem->Load("StarMagField");
-  gSystem->Load("StTofUtil");
-
-  gSystem->Load("libtpc_Tables");
   gSystem->Load("StDetectorDbMaker");
-  
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("St_db_Maker");
+
+  gSystem->Load("StEvent");
+  gSystem->Load("StEventMaker");
+  gSystem->Load("StarMagField");
+  gSystem->Load("StTofUtil");   
+  gSystem->Load("StTofMaker");  
+ 
+  gSystem->Load("libtpc_Tables");
   gSystem->Load("libGeom");
-  gSystem->Load("St_g2t");
+  gSystem->Load("St_g2t"); 
   gSystem->Load("geometry");
   gSystem->Load("St_geant_Maker");
-  
+
+  gSystem->Load("StTofMuDstReader");
     //
     // Handling depends on whether file is a ROOT file or XDF file
     //
