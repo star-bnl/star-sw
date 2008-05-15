@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.cc,v 1.6 2007/01/22 13:08:15 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.7 2008/05/15 22:39:47 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.7  2008/05/15 22:39:47  jcs
+// re-activate helix fit
+//
 // Revision 1.6  2007/01/22 13:08:15  jcs
 // replace cout with LOG
 //
@@ -23,7 +26,7 @@
 #include "StFtpcTrackMaker/StFtpcVertex.hh"
 #include "TObjArray.h"
 
-//#define HELIX_FIT
+#define HELIX_FIT
 
 const Float_t rad2grad=180/TMath::Pi();
 
@@ -49,7 +52,8 @@ StFtpcLaserCalib::StFtpcLaserCalib()
 
 //______________________________________________________________________________
 
-StFtpcLaserCalib::StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, StFtpcLaserTrafo *trafo, StMagUtilities *gmagf)
+//StFtpcLaserCalib::StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, StFtpcLaserTrafo *trafo, StMagUtilities *gmagf)
+StFtpcLaserCalib::StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, StFtpcLaserTrafo *trafo, StarMagField *gmagf)
 {
   FTPC=ftpc;
   LSEC=lsec;
@@ -183,6 +187,7 @@ void StFtpcLaserCalib::calc_res()
   //LOG_DEBUG<<"Calculate residuals in x,y & r,phi  ..."<<endm;
   //LOG_DEBUG<<" "<<endm;
 
+
   TF1 *fxz=new TF1("fxz","[0]*x+[1]",0,6);
   TF1 *fyz=new TF1("fyz","[0]*x+[1]",0,6); 
 
@@ -280,7 +285,6 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
     }
   
 #ifdef HELIX_FIT
-/*  This code may be obsolete - if still useful it must be updated
   // ************************************************************************
   // * include Helix fit & B-field distortion corrections (StFtpcTrack) !!!) *
   // * keine Trafo noetig da nur im Global, ggf. fuer East !???             *
@@ -299,7 +303,8 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
   // create new point and add to track
   for (int i=0;i<nhits;i++)
     {
-      StFtpcPoint *mNewPoint=new StFtpcPoint(softrow[i],softsec[i],0,0,0,0,x[i],y[i],z[i],ex[i],ey[i],0,0,0,0);
+//      StFtpcPoint *mNewPoint=new StFtpcPoint(softrow[i],softsec[i],0,0,0,0,x[i],y[i],z[i],ex[i],ey[i],0,0,0,0);
+      StFtpcPoint *mNewPoint=new StFtpcPoint(softrow[i],softsec[i],0,0,0,0,0,0,0,0,x[i],y[i],z[i],ex[i],ey[i],0,0,0,0);
       mTrackHits->AddLast(mNewPoint);
       //LOG_DEBUG<<mNewPoint->GetX()<<" "<<mNewPoint->GetY()<<" "<<mNewPoint->GetZ()<<endm;
       mLaserTrack->AddPoint((StFtpcPoint*) mTrackHits->Last());
@@ -314,7 +319,8 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
   // * Fit laser track with Helix ! *
   // ********************************
 
-  mLaserTrack->Fit(laser_vertex,2.0,-1,magf);
+//  mLaserTrack->Fit(laser_vertex,10.,true);
+  mLaserTrack->Fit(laser_vertex,10.,false);
   
   // DEBUG :
   //LOG_DEBUG<<"p = "<<mLaserTrack->GetP()<<" | pt = "<<mLaserTrack->GetPt()<<" | charge = "<<mLaserTrack->GetCharge()<<endm;
@@ -330,10 +336,10 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
   for (int i=0;i<nhits;i++)
     {
       
-      resx2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetXResidual();
-      resy2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetYResidual();
-      resrad2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetRResidual();
-      resphi2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetPhiResidual();
+      resx2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetXGlobResidual();
+      resy2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetYGlobResidual();
+      resrad2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetRGlobResidual();
+      resphi2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetPhiGlobResidual();
       
       // DEBUG :
       //LOG_DEBUG<<" i = "<<i<<endm;
@@ -347,20 +353,20 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
 
       // create shiftet space position !!!
 
-      if (i<nhits-1)
-	{
-	  x_s[i]=((StFtpcPoint*) mTrackHits->At(i))->GetXS();
-	  y_s[i]=((StFtpcPoint*) mTrackHits->At(i))->GetYS();
-	}
-      else
-	{
+//      if (i<nhits-1)
+//	{
+//	  x_s[i]=((StFtpcPoint*) mTrackHits->At(i))->GetXS();
+//	  y_s[i]=((StFtpcPoint*) mTrackHits->At(i))->GetYS();
+//	}
+//      else
+//	{
 	  x_s[i]=((StFtpcPoint*) mTrackHits->At(i))->GetX();
 	  y_s[i]=((StFtpcPoint*) mTrackHits->At(i))->GetY();
-	}
+//	}
 
       //LOG_DEBUG<<x_s[i]-x[i]<<endm;
 
-      // calc differenz as check !!!
+      // calc difference as check !!!
       x_d[i]=x[i]-x_s[i];y_d[i]=y[i]-y_s[i];
 
       delete (StFtpcPoint*) mTrackHits->At(i);
@@ -388,7 +394,6 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
       y[i]=y_s[i];
     }
 
- */
 #endif
 
   minuit_init();
