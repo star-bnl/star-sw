@@ -126,7 +126,7 @@ class StMessMgr : public ostrstream {
    virtual std::ostream& OperatorShift(std::ostream& os, StMessage* stm) = 0;
 
 // Generic Messages:
-   virtual StMessMgr& Message(const char* mess="", const char* type="",
+   virtual ostrstream& Message(const char* mess="", const char* type="",
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1)= 0;
    virtual       void Print() =0;
    virtual        int PrintList(messVec* list) =0;
@@ -201,7 +201,7 @@ protected:
          
 public:
 // Info Messages:
-   virtual StMessMgr& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)=0;
+   virtual ostrstream& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)=0;
    virtual        int PrintInfos() =0;
    virtual const messVec* GetInfos() =0;
    virtual StMessage* FindInfo(const char* s1, const char* s2="",
@@ -210,7 +210,7 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // Warning Messages:
-   virtual StMessMgr& Warning(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)= 0;
+   virtual ostrstream& Warning(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)= 0;
    virtual        int PrintWarnings() =0;
    virtual const messVec* GetWarnings() =0;
    virtual StMessage* FindWarning(const char* s1, const char* s2="",
@@ -219,7 +219,7 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // Error Messages:
-   virtual StMessMgr& Error(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1) = 0;
+   virtual ostrstream& Error(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1) = 0;
    virtual        int PrintErrors() =0;
    virtual const messVec* GetErrors() =0;
    virtual StMessage* FindError(const char* s1, const char* s2="",
@@ -228,7 +228,7 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // Debug Messages:
-   virtual StMessMgr& Debug(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
+   virtual ostrstream& Debug(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
    virtual        int PrintDebug() =0;
    virtual const messVec* GetDebugs() =0;
    virtual StMessage* FindDebug(const char* s1, const char* s2="",
@@ -237,7 +237,7 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // QAInfo Messages:
-   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
+   virtual ostrstream& QAInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
    virtual        int PrintQAInfo() =0;
    virtual const messVec* GetQAInfos() =0;
    virtual StMessage* FindQAInfo(const char* s1, const char* s2="",
@@ -246,12 +246,12 @@ public:
          const char* s3="", const char* s4="") =0;
 
 // "As is" Messages:
-   virtual StMessMgr& out(const char* mess="") = 0;
-   virtual StMessMgr& err(const char* mess="") = 0;
+   virtual ostrstream& out(const char* mess="") = 0;
+   virtual ostrstream& err(const char* mess="") = 0;
 
    virtual       void PrintInfo() =0;
    // Fatal Messages:
-   virtual StMessMgr& Fatal(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
+   virtual ostrstream& Fatal(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
 
 #ifdef __ROOT__
    ClassDef(StMessMgr,0)
@@ -262,7 +262,7 @@ public:
 //
 //  StTurnLogger - an aux class to simply "save/restore the "current" logger
 //______________________________________________________________________________
-class StTurnLogger 
+class StTurnLogger
 {
    private:
      StMessMgr* fMessager; // hold the messager to restore it at dtor
@@ -320,4 +320,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.11 2007/01/25 18:36:39 fine Exp $
+// $Id: StMessMgr.h,v 1.12 2008/05/15 23:40:25 fine Exp $

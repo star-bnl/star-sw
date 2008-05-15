@@ -224,12 +224,12 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     const char *proEnv = 0;
 #ifndef __ROOT__
     String propertyFile = "log4j.xml";
-#else    
+#else
     TString fullPropertyFileName = gEnv->GetValue("Logger.Configuration","log4j.xml");
     gSystem->ExpandPathName(fullPropertyFileName);
     String propertyFile = (const char*)fullPropertyFileName;
     proEnv = gSystem->Getenv("STAR_LOGGER_PROPERTY");
-#endif    
+#endif
     StarOptionFilterPtr filter;
     if (proEnv && proEnv[0] ) propertyFile=proEnv;
     if (!gSystem->AccessPathName(propertyFile.c_str())) {
@@ -279,7 +279,7 @@ bool  StLoggerManager::isEnabledFor()    const{ return true; /*fLogger->isEnable
 //______________________________________________________________________________
 bool  StLoggerManager::isQAInfoEnabled() const{ return fgQALogger? fgQALogger->isInfoEnabled():false; }
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::Message(const char* mess, const char* type,
+ostrstream& StLoggerManager::Message(const char* mess, const char* type,
   const char* opt,const char *sourceFileName,int lineNumber) {
 //
 // Message declarator - creates a new message if mess is not empty,
@@ -458,7 +458,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.28 2007/08/08 20:50:22 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.29 2008/05/15 23:40:23 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -469,7 +469,7 @@ void StLoggerManager::PrintInfo() {
 //
 // Info Messages:
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::Info(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+ostrstream& StLoggerManager::Info(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "I", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 int StLoggerManager::PrintInfos() 
@@ -506,7 +506,7 @@ messVec* StLoggerManager::FindInfoList(const char* s1, const char* s2,
 //
 // Warning Messages:
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::Warning(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+ostrstream& StLoggerManager::Warning(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "W", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 int StLoggerManager::PrintWarnings() 
@@ -543,7 +543,7 @@ messVec* StLoggerManager::FindWarningList(const char* s1, const char* s2,
 //
 // Error Messages:
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::Error(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+ostrstream& StLoggerManager::Error(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "E", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 int StLoggerManager::PrintErrors() 
@@ -580,7 +580,7 @@ messVec* StLoggerManager::FindErrorList(const char* s1, const char* s2,
 //
 // Debug Messages:
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::Debug(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+ostrstream& StLoggerManager::Debug(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "D", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 int StLoggerManager::PrintDebug() 
@@ -615,7 +615,7 @@ _NO_IMPLEMENTATION_;   return 0;
 //
 // QAInfo Messages:
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::QAInfo(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+ostrstream& StLoggerManager::QAInfo(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "Q", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 void StLoggerManager::IgnoreRepeats()
@@ -673,15 +673,15 @@ _NO_IMPLEMENTATION_;   return 0;
 }
 
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::Fatal(const char* mess, const char* opt,const char *sourceFileName, int lineNumber)
+ostrstream& StLoggerManager::Fatal(const char* mess, const char* opt,const char *sourceFileName, int lineNumber)
 { return Message(mess,"F",opt,sourceFileName,lineNumber);}
 
 // "As is" Messages:
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::out(const char* mess)
+ostrstream& StLoggerManager::out(const char* mess)
 {return Message(mess,"I","OP-");}
 //_____________________________________________________________________________
-StMessMgr& StLoggerManager::err(const char* mess)
+ostrstream& StLoggerManager::err(const char* mess)
 {return Message(mess,"E","EP-");}
 
 
@@ -816,14 +816,14 @@ void StLoggerManager::SetLevel(Int_t level)
 Int_t StLoggerManager::GetLevel(Int_t) const 
 {
    // Map the current logger level to the STAR one
-#if 0   
+#if 0
    const LevelPtr &level = fLogger->getLevel();
         if (level == &Level::DEBUG)  return kDebug; 
    else if (level == &Level::FATAL)  return kFatal;  
    else if (level == &Level::ERROR)  return kError;
    else if (level == &Level::WARN )  return kWarning;
    else if (level == &Level::INFO )  return kInfo;
-#endif   
+#endif
    return kAll;
 }
 #if 0
@@ -839,13 +839,16 @@ const char *GetName()
   // Instantiate the (singleton) class upon loading
   //
 // static StMessMgr* temp=StLoggerManager::Instance();
-// StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
+// ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.28 2007/08/08 20:50:22 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.29 2008/05/15 23:40:23 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.29  2008/05/15 23:40:23  fine
+// Change the abstarct class return type to separate the different STAR streams
+//
 // Revision 1.28  2007/08/08 20:50:22  fine
-// Fix bug: some messages submitted via the old interface were lost
+//  Fix bug: some messages submitted via the old interface were lost
 //
 // Revision 1.27  2007/08/03 21:34:51  fine
 // fix StStarLogger for Sl 4.4
