@@ -128,17 +128,17 @@ struct rtsMonStruct {
 
 struct rtsMonGB {
 	struct {
-//used to exist in real GB		char name[32] ;	// if strlen() == NULL, unused..
-		u_int off_id ;		// offline id number i.e. 5001
-		u_int fired ;		// received from trigger
-		u_int rate ;		// rate of above
-		u_int l3_sent ;		// sent to L3
-		u_int aborted_gb ;	// released by GB
-		u_int aborted_l3 ;	// released by L3
-		u_int aborted_l25 ;	// released as L2.5
-		u_int err ;		// events with error
-		u_int built ;		// events built _successfully_
-		u_int xpress ;		// events sent to xpress stream
+	  char name[32] ;	// if strlen() == NULL, unused..
+	  u_int off_id ;		// offline id number i.e. 5001
+	  u_int fired ;		// received from trigger
+	  u_int rate ;		// rate of above
+	  u_int l3_sent ;		// sent to L3
+	  u_int aborted_gb ;	// released by GB
+	  u_int aborted_l3 ;	// released by L3
+	  u_int aborted_l25 ;	// released as L2.5
+	  u_int err ;		// events with error
+	  u_int built ;		// events built _successfully_
+	  u_int xpress ;		// events sent to xpress stream
 	} trgs[33] ;	// 0-31 are the usual, 32 is the sum
 } ;
 
@@ -165,6 +165,36 @@ struct rtsMonEVB {
 	u_int run_number ;	// hm, this is old, why do I have this here? *shrug*
 	struct rtsMonGB gb ;	// new in FY09 -- EVB sends GB stuff as well!
 } ;
+
+struct rtsMonEVB_supertask {
+  u_int mon[RTS_MON_SYS_WORDS];
+  // General
+  u_int mb_run;     // total data size for this run
+  u_int gb_free;    // free disk space
+  u_int gb_all;     // total disk space
+
+  // RCF
+  u_int mb_sent;     // sent within last 15 minutes
+  u_int mb_waiting;  // waiting to be sent
+
+  // By trigger Information
+  struct {
+    char name[32] ;	   // if strlen() == NULL, unused..
+    u_int off_id ;	   // offline id number i.e. 5001
+  
+    u_int fired ;	   // received from trigger
+    u_int rate ;	   // rate of above
+    u_int built ;	   // events built _successfully_
+
+    u_int aborted_l25 ;	   // released as L2.5
+    u_int err ;		   // events with error (det timeout, evb resources)
+    u_int spurious;        // events with spurious (trg timeout, evt overrun)
+
+    u_int stream;	   // which stream evts sent to
+
+  } trgs[33] ;	           // 0-31 are the usual, 32 is the sum
+};
+
 
 
 // RCF writers structure
