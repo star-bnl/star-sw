@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.19 2008/05/14 22:01:26 fine Exp $
+// $Id: StDraw3D.h,v 1.20 2008/05/15 22:11:17 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -16,7 +16,7 @@
   //  primitives in 3D quickly against of the STAR detector 
   //  geometry.
   //
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
+  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
   
 class TVirtualPad;
 class TVirtualViewer3D;

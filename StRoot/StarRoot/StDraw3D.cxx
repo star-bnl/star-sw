@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.27 2008/05/14 22:01:26 fine Exp $
+// $Id: StDraw3D.cxx,v 1.28 2008/05/15 22:11:17 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -10,8 +10,6 @@
 #include "StCheckQtEnv.h"
 #include "TStyle.h"
 #include "TVirtualViewer3D.h"
-
-int StDraw3D::fgDraw_3d_init = 0;
 
 static Color_t colorDefault = Color_t(-1);
 static Style_t styDefault   = Style_t(-1);
@@ -34,7 +32,7 @@ ClassImp(StDraw3D)
   //  It provides the simple way to visualize the event 
   //  primitives in 3D quickly against of the STAR detector 
   //  geometry.
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
+  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
   //
   ////////////////////////////////////////////////////////////////////////
 
@@ -177,11 +175,14 @@ TVirtualPad *StDraw3D::InitPad()
    else if (!fPad ) {
       fDrawCanvasCounter++;
       TString canvasName = "STAR";
+      TString canvasTitle = "STAR Event Viewer";
       if (fDrawCanvasCounter) {
            canvasName+="_";
-           canvasName += fDrawCanvasCounter;
+           canvasTitle += ":";
+           canvasName  += fDrawCanvasCounter;
+           canvasTitle += fDrawCanvasCounter;
       }
-      fPad = new TCanvas(canvasName.Data(),"Event Viewer", 400,400);
+      fPad = new TCanvas(canvasName.Data(),canvasTitle.Data(), 400,400);
       fPad->SetFillColor(fBkColor);
       fPad->Modified();
       fPad->Update();
@@ -481,7 +482,7 @@ void StDraw3D::Draw3DTest(){
    //  ------------------------------------------------
    //  The  method to test the class
    //   It should produce the #D Coin widget:
-   //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
+   //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
    //  ------------------------------------------------
    //                 x             y              z  
    //  ------------------------------------------------
