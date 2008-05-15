@@ -1,6 +1,9 @@
-// $Id: t0.C,v 1.3 2006/04/05 08:50:36 jcs Exp $
+// $Id: t0.C,v 1.4 2008/05/15 21:05:54 jcs Exp $
 //
 // $Log: t0.C,v $
+// Revision 1.4  2008/05/15 21:05:54  jcs
+// load StDetectorDbMaker.so
+//
 // Revision 1.3  2006/04/05 08:50:36  jcs
 // set t0 = ".000001" if t0 = "0" and gas = "0" to avoid seg fault
 //
@@ -35,6 +38,7 @@ void t0(TString filename, char* t0, char* gas,float mbfield)
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StDetectorDbMaker.so");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StFtpcCalibMaker");
   gSystem->Load("libftpc_Tables");
