@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.40 2008/02/06 23:31:32 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.41 2008/05/15 19:37:17 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.41  2008/05/15 19:37:17  genevb
+// Changes to FTPC radial step plots/fits
+//
 // Revision 2.40  2008/02/06 23:31:32  genevb
 // missing reset of logZ
 //
@@ -151,6 +154,7 @@
 
 #include "St_DataSetIter.h"
 #include "StMaker.h"
+#include "TF1.h"
 
 #include "StHistUtil.h"
 
@@ -172,7 +176,6 @@ char* possibleSuffixes[9] = {
 
 int sizeOfCharPtr = sizeof(Char_t*);
 int sizeOfTH1Ptr = sizeof(TH1*);
-
 
 ClassImp(StHistUtil)
   
@@ -375,15 +378,14 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   Bool_t started = kFALSE;
 
 
-  TH1* hobj1 = NULL;
-  TH1* hobj2 = NULL;
-  TH1* hobjradialW = NULL;
-  TH1* hobjradialE = NULL;
-
   TObject *obj = 0;
   Int_t chkdim=0;
   TLine ruler;
   TLatex latex;
+
+  // function to fit FTPC radial step
+  static TF1* fitFRS = 0;
+  if (!fitFRS) fitFRS = new TF1("fitFRS","[0]*(x<[1]-[2])+([0]+([3]-[0])*(x-([1]-[2]))/(2*[2]))*(x>[1]-[2])*(x<[1]+[2])+[3]*(x>[1]+[2])",6.5, 9.0);
 
   while ((obj = nextHist())) {
 
@@ -552,39 +554,33 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             }
 	    hobj->SetLineWidth(2);
             if (oName.EndsWith("Mass")) hobj->Draw("e");
-	    else if (oName.BeginsWith("fcl_radial")) {
-	      if (oName.EndsWith("W")) hobjradialW = hobj;
-	      else hobjradialE = hobj;
-	      hobj->SetStats(kFALSE);     
-              hobj->GetXaxis()->SetRangeUser(7.0,9.0);
-              hobj->SetTitle("FTPCW+E cluster radial position");
-	      if ( hobjradialW && hobjradialE) {
-		if ( hobjradialW->GetMaximum() >= hobjradialE->GetMaximum()) {     
-                  hobj1 = hobjradialW; hobj2 = hobjradialE;
-                } else {
-                  hobj1 = hobjradialE; hobj2 = hobjradialW;
-                }
-                hobj1->SetMinimum(0);
-		hobj1->Draw();
-		gPad->Modified();
-		ruler.SetLineColor(kBlack);
-                ruler.SetLineWidth(2);
-                ruler.DrawLine(7.8,0.,7.8,hobj1->GetMaximum());
-	        hobj2->Draw("Same");
-
-                // make a legend
-                TLegend *legend = new TLegend(0.75,0.85,0.98,0.95);
-                legend->SetFillColor(0);
-                legend->SetHeader("Legend");
-                legend->SetMargin(0.25);
-                legend->AddEntry(hobjradialE,"FtpcEast","l");
-                legend->AddEntry(hobjradialW,"FtpcWest","l");
-                legend->Draw();
-	      } else {
-	        padAdvance = kFALSE; // wait for both histograms before drawing
-	      }
-            }
 	    else hobj->Draw();
+	    if (oName.BeginsWith("fcl_radial")) {
+              //Fits to radial steps FTPCE+W/////05/14/08///nav+gvb
+	      hobj->GetXaxis()->SetRangeUser(6.5,9.0);
+	      hobj->Fit("pol0","","", 6.5, 7.2);
+	      double n1= hobj->GetFunction("pol0")->GetParameter(0);
+	      hobj->Fit("pol0","","",8.3,9.0);
+	      double n2= hobj->GetFunction("pol0")->GetParameter(0);
+	      fitFRS->SetParameters(n1, 7.85, 0.35, n2);
+	      hobj->Fit(fitFRS, "R");
+
+              double rstep = fitFRS->GetParameter(1);
+              double erstep = fitFRS->GetParError(1);
+              float hmin = hobj->GetMinimum();
+              float hmax = hobj->GetMaximum();
+	      ruler.SetLineColor(kBlack);
+	      ruler.SetLineWidth(2);
+	      ruler.DrawLine(7.8,hmin,7.8,hmax);
+	      ruler.SetLineColor(kGreen);
+	      ruler.SetLineWidth(3);
+	      ruler.DrawLine(rstep,hmin,rstep,hmax);
+	      ruler.SetLineWidth(1);
+	      ruler.DrawLine(rstep-erstep,hmin,rstep-erstep,hmax);
+	      ruler.DrawLine(rstep+erstep,hmin,rstep+erstep,hmax);
+	    }
+
+
 	  }
 
           if (oName.Contains("NullPrimVtx")) {
