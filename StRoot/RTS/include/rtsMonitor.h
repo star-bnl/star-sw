@@ -162,7 +162,7 @@ struct rtsMonEVB {
 	u_int gb_all ;	// total capacity on all discs (for %-free calc...)
 	// stuff pertaining to RCF goes here..
 
-//deleted        u_int run_number ;	// hm, this is old, why do I have this here? *shrug*
+	u_int run_number ;	// hm, this is old, why do I have this here? *shrug*
 	struct rtsMonGB gb ;	// new in FY09 -- EVB sends GB stuff as well!
 } ;
 
