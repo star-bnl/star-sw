@@ -110,7 +110,7 @@ protected:
 
 
 // Generic Messages:
-   virtual StMessMgr& Message(const char* mess="", const char* type="",
+   virtual ostrstream& Message(const char* mess="", const char* type="",
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1);
    virtual       void Print();
 //    virtual        int PrintList(messVec* list);
@@ -144,7 +144,7 @@ protected:
 //   virtual const char *GetName();
 
 // Info Messages:
-   virtual StMessMgr& Info(const char* mess="", const char* opt="O"
+   virtual ostrstream& Info(const char* mess="", const char* opt="O"
                           ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintInfos();
    virtual const messVec* GetInfos();
@@ -154,7 +154,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // Warning Messages:
-   virtual StMessMgr& Warning(const char* mess="", const char* opt="E"
+   virtual ostrstream& Warning(const char* mess="", const char* opt="E"
                              ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintWarnings();
    virtual const messVec* GetWarnings();
@@ -164,7 +164,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // Error Messages:
-   virtual StMessMgr& Error(const char* mess="", const char* opt="E"
+   virtual ostrstream& Error(const char* mess="", const char* opt="E"
                            ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintErrors();
    virtual const messVec* GetErrors();
@@ -174,7 +174,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // Debug Messages:
-   virtual StMessMgr& Debug(const char* mess="", const char* opt="OT"
+   virtual ostrstream& Debug(const char* mess="", const char* opt="OT"
                            ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintDebug();
    virtual const messVec* GetDebugs();
@@ -184,7 +184,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // QAInfo Messages:
-   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OS"
+   virtual ostrstream& QAInfo(const char* mess="", const char* opt="OS"
                             ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintQAInfo();
    virtual const messVec* GetQAInfos();
@@ -194,13 +194,13 @@ protected:
          const char* s3="", const char* s4="");
 
 // "As is" Messages:
-   virtual StMessMgr& out(const char* mess="");
-   virtual StMessMgr& err(const char* mess="");
+   virtual ostrstream& out(const char* mess="");
+   virtual ostrstream& err(const char* mess="");
 
    virtual       void PrintInfo();
 
    // Fatal Messages:
-   virtual StMessMgr& Fatal(const char* mess="", const char* opt="F",const char *sourceFileName=0, int lineNumber=-1);
+   virtual ostrstream& Fatal(const char* mess="", const char* opt="F",const char *sourceFileName=0, int lineNumber=-1);
 
    //  "Extra Logger" methods
    void PrintLogger(const char* mess, const char* type, const char* opt, const char *sourceFileName=0, int lineNumber=-1);
@@ -232,4 +232,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.11 2007/08/03 21:34:52 fine Exp $
+// $Id: StLoggerManager.h,v 1.12 2008/05/15 23:40:23 fine Exp $

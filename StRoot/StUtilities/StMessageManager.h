@@ -59,7 +59,7 @@ class StMessageManager : public StMessMgr {
    virtual std::ostream& OperatorShift(std::ostream& os, StMessage* stm);
 
 // Generic Messages:
-   virtual StMessMgr& Message(const char* mess="", const char* type="",
+   virtual ostrstream& Message(const char* mess="", const char* type="",
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1);
    virtual       void Print();
    virtual        int PrintList(messVec* list);
@@ -94,7 +94,7 @@ class StMessageManager : public StMessMgr {
    virtual        int ListTypes() {return messTypeList->ListTypes();}
 
 // Info Messages:
-   virtual StMessMgr& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)
+   virtual ostrstream& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)
          { return Message(mess, "I", opt);}
    virtual        int PrintInfos() {return PrintList(messCollection[1]); }
    virtual const messVec* GetInfos() {return (messCollection[1]);}
@@ -106,7 +106,7 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[1]);}
 
 // Warning Messages:
-   virtual StMessMgr& Warning(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
+   virtual ostrstream& Warning(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
          { return Message(mess, "W", opt,sourceFileName,lineNumber);}
    virtual        int PrintWarnings() {return PrintList(messCollection[2]); }
    virtual const messVec* GetWarnings() {return (messCollection[2]);}
@@ -118,7 +118,7 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[2]);}
 
 // Error Messages:
-   virtual StMessMgr& Error(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
+   virtual ostrstream& Error(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
          { return Message(mess, "E", opt,sourceFileName,lineNumber);}
    virtual        int PrintErrors() {return PrintList(messCollection[3]); }
    virtual const messVec* GetErrors() {return (messCollection[3]);}
@@ -130,7 +130,7 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[3]);}
 
 // Debug Messages:
-   virtual StMessMgr& Debug(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)
+   virtual ostrstream& Debug(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)
          { return Message(mess, "D", opt,sourceFileName,lineNumber);}
    virtual        int PrintDebug() {return PrintList(messCollection[4]); }
    virtual const messVec* GetDebugs() {return (messCollection[4]);}
@@ -142,7 +142,7 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[4]);}
 
 // QAInfo Messages:
-   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1)
+   virtual ostrstream& QAInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1)
          { return Message(mess, "Q", opt,sourceFileName,lineNumber);}
    virtual        int PrintQAInfo() {return PrintList(messCollection[5]); }
    virtual const messVec* GetQAInfos() {return (messCollection[5]);}
@@ -154,14 +154,14 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[5]);}
 
 // "As is" Messages:
-   virtual StMessMgr& out(const char* mess="")
+   virtual ostrstream& out(const char* mess="")
 	 {return Message(mess,"I","OP-");}
-   virtual StMessMgr& err(const char* mess="")
+   virtual ostrstream& err(const char* mess="")
 	 {return Message(mess,"E","EP-");}
 
    virtual       void PrintInfo();
 // Fatal Messages:
-   virtual StMessMgr& Fatal(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
+   virtual ostrstream& Fatal(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
    { return Message(mess, "E", opt,sourceFileName,lineNumber);}
 
 };
@@ -169,8 +169,11 @@ class StMessageManager : public StMessMgr {
 
 #endif
 
-// $Id: StMessageManager.h,v 1.27 2007/01/25 06:28:06 fine Exp $
+// $Id: StMessageManager.h,v 1.28 2008/05/15 23:40:24 fine Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.28  2008/05/15 23:40:24  fine
+// Change the abstarct class return type to separate the different STAR streams
+//
 // Revision 1.27  2007/01/25 06:28:06  fine
 // connect Logger and Maker debug levels
 //

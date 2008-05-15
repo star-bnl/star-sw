@@ -113,7 +113,7 @@ StMessMgr* StMessageManager::Instance() {
   return mInstance;
 }
 //_____________________________________________________________________________
-StMessMgr& StMessageManager::Message(const char* mess, const char* type,
+ostrstream& StMessageManager::Message(const char* mess, const char* type,
   const char* opt,const char *,int) {
 //
 // Message declarator - creates a new message if mess is not empty,
@@ -437,7 +437,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.46 2007/01/25 06:28:06 fine Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.47 2008/05/15 23:40:24 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -467,8 +467,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.46 2007/01/25 06:28:06 fine Exp $
+// $Id: StMessageManager.cxx,v 1.47 2008/05/15 23:40:24 fine Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.47  2008/05/15 23:40:24  fine
+// Change the abstarct class return type to separate the different STAR streams
+//
 // Revision 1.46  2007/01/25 06:28:06  fine
 // connect Logger and Maker debug levels
 //
