@@ -1,6 +1,10 @@
-// $Id: res_laser.C,v 1.4 2008/04/23 20:28:56 jcs Exp $
+// $Id: res_laser.C,v 1.5 2008/05/15 21:00:06 jcs Exp $
 //
 // $Log: res_laser.C,v $
+// Revision 1.5  2008/05/15 21:00:06  jcs
+// change histogram limits
+// add improved comments
+//
 // Revision 1.4  2008/04/23 20:28:56  jcs
 // clean up code
 //
@@ -8,7 +12,8 @@
 // add lines for listing CVS update info
 //
 
-// analyze the *_res.log files produced by lasertest.C macro
+// plots the rms width of the residual distribution in radius and in phi vs. change in gas composition delta Ar 
+// from  the *_res.log files produced by lasertest.C macro
 // to use create the res.log file with the following 2 commands
 //       touch res.log
 //       cat *_res.log >> res.log
@@ -37,12 +42,13 @@ void res_laser()
   plain->SetOptStat(0000000);
   plain->SetOptFit(00000000);
 
-  TH2F *hr = new TH2F("hr","",10,-0.5,0.5,10,0.005,0.05);
+  TH2F *hr = new TH2F("hr","",10,-0.5,0.5,10,0.0,0.1);
   hr->SetTitle("#sigma_{res} vs. #Delta Argon");
   hr->GetYaxis()->SetTitleOffset(1.2);
   hr->GetYaxis()->SetTitle("#sigma_{res}");
   hr->GetXaxis()->SetTitleOffset(1.2);
   hr->GetXaxis()->SetTitle("#Delta Argon");
+  hr->SetStats(0);
   hr->DrawCopy(); 
   //
 
@@ -106,7 +112,7 @@ void res_laser()
 
   //cout<<"Min rad = "<<calc_min(g->GetParameter(0),g->GetParameter(1))<<endl;
 
-  leg = new TLegend(0.46,0.72,0.72,0.86); 
+  leg = new TLegend(0.66,0.82,0.92,0.96); 
   leg->SetTextSize(0.05);
   leg->AddEntry(gerad,"#sigma_{res,#phi}","P");
   leg->AddEntry(gerad1,"#sigma_{res,r}","P");
