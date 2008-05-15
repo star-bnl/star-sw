@@ -8,6 +8,7 @@
 // Bufferbox:
 #ifndef RTS_PROJECT_PP
 #define EVB_MON_SEG              1
+#define EVB_SUPERMON_SEG         3
 #define EVB_CTL_SEG              4
 #define EVB_SCA_SEG              5
 #define SPOOL_CTL_SEG            8
