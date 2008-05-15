@@ -128,7 +128,7 @@ struct rtsMonStruct {
 
 struct rtsMonGB {
 	struct {
-		char name[32] ;	// if strlen() == NULL, unused..
+//used to exist in real GB		char name[32] ;	// if strlen() == NULL, unused..
 		u_int off_id ;		// offline id number i.e. 5001
 		u_int fired ;		// received from trigger
 		u_int rate ;		// rate of above
@@ -159,7 +159,10 @@ struct rtsMonSCA {
 struct rtsMonEVB {
 	u_int mb_run ;	// MB stored in this run 
 	u_int gb_free ;	// still free on all disks
-        u_int run_number ;
+	u_int gb_all ;	// total capacity on all discs (for %-free calc...)
+	// stuff pertaining to RCF goes here..
+
+//deleted        u_int run_number ;	// hm, this is old, why do I have this here? *shrug*
 	struct rtsMonGB gb ;	// new in FY09 -- EVB sends GB stuff as well!
 } ;
 
