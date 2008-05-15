@@ -13,165 +13,18 @@ VLINK="#088888" ALINK="#08DEB5" TYPE="FADEIN">
 <h1><center>  StFtpcCalibMaker </center></h1>
 
 <h2>
-StFtpcCalibMaker programs and macros analyze the data in a special root file which is produced by 
-StFtpcClusterMaker/StFtpcClusterDebug.cc.  
+The StFtpcCalibMaker programs and macros analyze the data in the root file produced 
+when the bfc option "fdbg" is selected.  
 
-To produce this file
-
-     - create an input file named <font color="#FF0000">debug.ini</font> with one line 
-       containing 3 options:
-               fname drawclhisto drawvertexhisto
-         fname is a string which is used to create the name of the output root file 
-         "run_%d_%s.root",run,fname 
-         For example when checking the laser we usually set fname  to laser_test           
-         if drawclhisto and/or drawvertexhisto are non-zero the cluster and/or vertex 
-         histograms are filled and output to the root file 
-       
-         There is an example debug.ini in the StRoot/StFtpcCalibMaker/examples sub-directory 
-         which you can copy into your working directory with
-
-           cp StRoot/StFtpcCalibMaker/examples/debug.ini .
-
-Then, using  laser run 6082062 as an example
-      - reconstruct a minimum of 200 laser events with the following chain 
-
-         bfc.C(200,"fdbg flaser ftpc db globT detDb tpcDb dbutil in dst event",
-               "/star/data03/daq/ftpc/st_laser_6082062_raw_1090001.daq")
-
-This will produce a root file named <font color="#FF0000">run_6082062_laser_test.root</font> 
-which can then be analyzed using the StFtpcCalibMaker macros:
-
-<font color="#FF0000">lasertest_single.C</font>(TString filename,int ftpc, int lsec, 
-int straight, int gfit, char* t0, char* gas, 
-float mbfield)
-
-        filename    = "run_6082062_laser_test"                         
-        ftpc        = 1           FTPC West                            
-                      2           FTPC East
-        lsec        = 0           all laser sectors
-                      1           sectors  2, 8,14,20,26 for FTPC West
-                                  sectors 32,38,44,50,56 for FTPC East
-                      2           sectors  4,10,16,22,28 for FTPC West
-                                  sectors 34,40,46,52,58 for FTPC East
-                      3           sectors  6,12,18,24,30 for FTPC West
-                                  sectors 36,42,48,54,60 for FTPC East
-         straight   = 0           first inclined laser  ("_s")
-                      1           straight lasers       ("_g")
-                      2           second inclined laser ("_s2")
-                      3           all lasers            ("_all")   
-         gfit       = 0           no gauss fit
-                      1           gauss fit
-         t0         = "0.000001"  delta t0   (for delta t0 = 0 use "0.000001" to
-                                  avoid problems)
-        gas         = "0"         delta gas  
-        mbfield     =  1          full field positive
-                       0.5        half field positive
-                       0          zero field
-                      -0.5        half field negative
-                      -1          full field negative
-
- Runs for the one specified delta t0, delta gas value
-   
-For example:
- lasertest_single.C("run_6082062_laser_test",1,2,1,1,"0.000001","0",1)
- produces the following 6 files
-  run_6082062_laser_test-pos_w_lsec_2_g_dt0.000001_dg0.log
-  run_6082062_laser_test-pos_w_lsec_2_g_dt0.000001_dg0_padpos2.log
-  run_6082062_laser_test-pos_w_lsec_2_g_dt0.000001_dg0_padpos.log
-  run_6082062_laser_test-pos_w_lsec_2_g_dt0.000001_dg0.ps
-  run_6082062_laser_test-pos_w_lsec_2_g_dt0.000001_dg0_res.log
-  run_6082062_laser_test-pos_w_lsec_2_g_dt0.000001_dg0.root
-   
-<font color="#FF0000">lasertest.C</font>  has the same arguments as lasertest_single.C but it loops over a
-range of delta t0 and delta gas values and produces a set of the 6 output files 
-for each delta t0/delta gas setting.       
-   
-For example:
- lasertest.C("run_6082062_laser_test",1,2,1,1,"0.000001","0",1)
-produces 156 sets of the 6 files listed for lasertest_single.C; one set for each delta t0 
-from -0.50<=deltat0<=0.60 with each deltaGas from  -0.50<=deltaGas<=0.70  
-(12 deltat0 * 13 deltaGas)
-
-The following macros analyze the *_res.log files produced by lasertest.C 
-Copy the *_res.log files into one file with
-     touch res.log
-     cat *_res.log >> res.log
-
-laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
-   laser_2d_pos reads res.log file and draws the reconstructed position histograms
-   Inputs to macro:
-     ftpc   - 1 Ftpc West
-              2 Ftpc East
-     lsec   - laser sector
-        a    - select value(s) to be histogrammed
-               "a"  Laser I - straight track at lpos1
-               "b"  Laser II - straight track at lpos2
-               "c"  Laser III - straight track at lpos3
-               "d"  all 3 straight lasers
-      opt    - set Draw Options (usually "colz")
-               (see ftp://root.cern.ch/root/doc/chapter3.pdf, pages 5-6)
-
-laser_2d_opt.C
-   laser_2d_opt reads the res.log file and draws the histograms for the residuals
-   Inputs to macro:
-        a    - select value(s) to be histogrammed
-               "x"   resx
-               "y"   resy
-               "r"   resrad
-               "p"   resphi
-               "c"   c2
-               "e"   rad3-28.56  
-               "a"   resx, resy, resrad, resphi 
-      opt    - set Draw Options (usually "colz")
-               (see ftp://root.cern.ch/root/doc/chapter3.pdf, pages 5-6)
-
-fit_laser.C  ?????
-      draws a plot from data in the macro
-
-For a more detailed explanation of the FTPC laser analysis and sample output
-consult the <a href="http://www.star.bnl.gov/protected/ftpc/tjt/ftpc_calibration_list.pdf"> FTPC Software and Calibration Overview </a> writeup (pgs. 8-16).  
-
-If the drawclhisto option was set to non-zero in the debug.ini file when you created the 
-special FTPC root.file,
-you can analyze the cluster histograms with the following 2 macros:
-
-hits2cluster_laser.C(TString eingabe,int evt,int laser_sec)
-    histograms the cluster.flag variable for pad vs. timebin
-    Inputs to macro
-       eingabe   filename (prefix; i.e. without .root)
-       evt       event number to analyze
-       laser_sec laser sector (0,1,2,3)
-   
-hits2cluster-2.C(TString eingabe,int evt)
-    same as for hits2cluster_laser.C but no sector selection is made
-
-res_laser.C    ??????
-laser_2d_opt.C ??????
-
-You can also study t0 on physics data. In this case create a debug.ini file and include the "fdbg" option
-in your bfc.C chain to write out the special FTPC debug root file.  
-
-The following macros are used for t0 calibration:
-t0_single.C(TString filename, char* t0, char* gas,float mbfield)
-     Inputs to macros
-        filename  filename (prefix; i.e. without .root)
-        t0        = "0.000001"  delta t0   (for delta t0 = 0 use "0.000001" to                                  avoid problems) 
-        gas       = "0" delta gas
-        mbfield     =  1          full field positive
-                       0.5        half field positive
-                       0          zero field
-                      -0.5        half field negative
-                      -1          full field negative
-t0.C
-t0_ana.C
-t0_opt.C
-
+For further information go to 
+            http://www.star.bnl.gov/public/ftpc/Software/ftpc_soft.html 
+or <A HREF="http://www.star.bnl.gov/public/ftpc/Software/ftpc_soft.html">click here</A>
 
 </h2>
 </pre>
 
 <p> 
 <i> This page was created by <a href=mailto:jcs@mppmu.mpg.de> Janet Seyboth</a> on December 16, 2005 </i><br>
-<i> This page was last updated by <a href=mailto:jcs@mppmu.mpg.de> Janet Seyboth</a> on  April 24, 2008</i>
+<i> This page was last updated by <a href=mailto:jcs@mppmu.mpg.de> Janet Seyboth</a> on  May 15, 2008</i>
 
 </html>
