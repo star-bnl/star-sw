@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.8 2008/05/13 19:14:58 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.9 2008/05/15 22:39:47 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.9  2008/05/15 22:39:47  jcs
+// re-activate helix fit
+//
 // Revision 1.8  2008/05/13 19:14:58  jcs
 // get  Laser t0 from Calibrations_ftpc/ftpcElectronics offline database table
 // clean up comments
@@ -77,6 +80,7 @@ void StFtpcCalibMaker::GetRunInfo(TString filename){
   j->Init(filename);
   j->GetTreeEntry(0);
   //LOG_DEBUG<<"StFtpcCalibMaker::GetRunInfo  j->Run.run = "<<j->Run.run<<" j->Run.date = "<<j->Run.date<<" j->Run.time = "<<j->Run.time<<" j->Run.micropertimebin = "<<j->Run.micropertimebin<<" j->Run.deltapW = "<<j->Run.deltapW<<" j->Run.deltapE = "<<j->Run.deltapE<<endm;
+  run  = j->Run.run;
   date = j->Run.date;
   time = j->Run.time;
   micropertime = j->Run.micropertimebin;
@@ -208,6 +212,18 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
   tZero = dbReader->laserTZero();
   LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - laserTZero = "<<tZero<<endm;
 
+  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() ..."<<endm;
+
+  // for (int step=0;step<10;step++)
+
+  LOG_INFO<<" "<<endm;
+  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - Reading Magnetic-Field maps..."<<endm;
+  LOG_INFO<<" "<<endm;
+//  StMagUtilities *m_magf=new StMagUtilities(kMapped,mbfield,0);
+  StarMagField *m_magf=new StarMagField(StarMagField::kMapped, mbfield, kTRUE);
+  // analoges Problem bei Magnetfeld 0 shift nicht machen in Track !!!
+
+
   if (atof(t0)!=0 || atof(gas)!=0)
     {
       trafo=new StFtpcLaserTrafo(dbReader,paramReader,atof(t0),atof(gas),micropertime,deltap,mbfield,tZero);
@@ -220,16 +236,6 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
         return;
       }
     }
-
-  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() ..."<<endm;
-
-  // for (int step=0;step<10;step++)
-
-  LOG_INFO<<" "<<endm;
-  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - Reading Magnetic-Field maps..."<<endm;
-  LOG_INFO<<" "<<endm;
-  StMagUtilities *m_magf=new StMagUtilities(kMapped,mbfield,0);
-  // analoges Problem bei Magnetfeld 0 shift nicht machen in Track !!!
 
   StFtpcLaserCalib *l=new StFtpcLaserCalib(ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,atof(t0),atof(gas),trafo,m_magf);
  

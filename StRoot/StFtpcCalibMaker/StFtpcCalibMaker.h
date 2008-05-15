@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.h,v 1.4 2006/04/04 14:34:39 jcs Exp $
+// $Id: StFtpcCalibMaker.h,v 1.5 2008/05/15 22:39:47 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.h,v $
+// Revision 1.5  2008/05/15 22:39:47  jcs
+// re-activate helix fit
+//
 // Revision 1.4  2006/04/04 14:34:39  jcs
 // replace assert with a warning message and return kStWarn
 //
@@ -37,6 +40,7 @@
 #include "StMaker.h"
 #endif
 
+#include "StarMagField.h"
 
 class StFtpcLaserCalib;
 class StFtpcLaserTrafo;
@@ -92,6 +96,7 @@ class StFtpcCalibMaker : public StMaker
 
  protected:
  
+ Int_t run;
  Int_t date;
  Int_t time;
    
@@ -120,11 +125,12 @@ class StFtpcCalibMaker : public StMaker
 
    // inline get functions
 
+   Int_t RunNum() {return run;}
    Int_t Date() {return date;}
    Int_t Time() {return time;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.4 2006/04/04 14:34:39 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.5 2008/05/15 22:39:47 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(StFtpcCalibMaker,1)   //StAF chain virtual base class for Makers
