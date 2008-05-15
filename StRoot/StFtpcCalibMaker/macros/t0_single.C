@@ -1,6 +1,9 @@
-// $Id: t0_single.C,v 1.3 2006/04/05 08:50:36 jcs Exp $
+// $Id: t0_single.C,v 1.4 2008/05/15 21:05:55 jcs Exp $
 //
 // $Log: t0_single.C,v $
+// Revision 1.4  2008/05/15 21:05:55  jcs
+// load StDetectorDbMaker.so
+//
 // Revision 1.3  2006/04/05 08:50:36  jcs
 // set t0 = ".000001" if t0 = "0" and gas = "0" to avoid seg fault
 //
@@ -31,6 +34,7 @@ void t0_single(TString filename, char* t0, char* gas,float mbfield)
   gSystem->Load("StUtilities");
   gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
+  gSystem->Load("StDetectorDbMaker.so");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
