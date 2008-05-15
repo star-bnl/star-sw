@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.hh,v 1.3 2006/04/04 10:57:05 jcs Exp $
+// $Id: StFtpcLaserCalib.hh,v 1.4 2008/05/15 21:12:49 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.hh,v $
+// Revision 1.4  2008/05/15 21:12:49  jcs
+// replace StMagUtilities.h with StarMagField.h - necessary for HELIX_FIT
+//
 // Revision 1.3  2006/04/04 10:57:05  jcs
 // Fix memory leak
 //
@@ -15,7 +18,7 @@
 
 #include "StFtpcLaser.hh"
 #include "StFtpcLaserTrafo.hh"
-#include "StDbUtilities/StMagUtilities.h"
+#include "StarMagField/StarMagField.h"
 
 const Float_t radcutmin[11]={0,8.5,10.5,12.5,14.5,16.5,18.5,21,22.5,25,26.5};
 const Float_t radcutmax[11]={0,10,11.5,14,15.5,18,20,22,24,26,28};
@@ -66,7 +69,8 @@ class StFtpcLaserCalib : public StFtpcLaser
   TString filename;
 
   StFtpcLaserTrafo *mtrafo;
-  StMagUtilities *magf;
+//  StMagUtilities *magf;
+  StarMagField *magf;
 
   //TMinuit *gMinuit;
   Double_t arglist[10];
@@ -114,7 +118,7 @@ class StFtpcLaserCalib : public StFtpcLaser
   Float_t radius[11];
 
   StFtpcLaserCalib();
-  StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, StFtpcLaserTrafo *trafo,StMagUtilities *gmagf);
+  StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, StFtpcLaserTrafo *trafo,StarMagField *gmagf);
   virtual ~StFtpcLaserCalib();
 
   //Double_t funcxz(float x,float z,Double_t *par);
