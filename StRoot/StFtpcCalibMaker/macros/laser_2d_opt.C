@@ -1,6 +1,9 @@
-// $Id: laser_2d_opt.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: laser_2d_opt.C,v 1.3 2008/05/15 20:58:34 jcs Exp $
 //
 // $Log: laser_2d_opt.C,v $
+// Revision 1.3  2008/05/15 20:58:34  jcs
+// removed debug print out statement
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
@@ -26,6 +29,7 @@
 
 void laser_2d_opt(TString a,char *opt)
 {
+cout<<"a = "<<a<<" opt "<<opt<<endl;
   TCanvas *c1 = new TCanvas("c1","ps",200,10,700,500);
   gStyle->SetPalette(1);
   gStyle->SetOptStat(0);
