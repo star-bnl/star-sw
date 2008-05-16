@@ -275,6 +275,7 @@ int main(int argc, char *argv[])
 		*(stime+strlen(stime)-1) = 0 ;
 
 		LOG(NOTE,"     Trigger Word 0x%02X, time %u (%s), daqbits 0x%04X, evpgroups 0x%04X",evp->trgword,evp->evt_time,(int)stime,evp->daqbits,evp->evpgroups) ;
+	
 
 		LOG(NOTE,"     Dets: 0x%x/0x%x    evpgroups: 0x%x/0x%x",
 		    evp->detectors,evp->detsinrun,evp->evpgroups,evp->evpgroupsinrun,0);

@@ -57,6 +57,8 @@ public:
 	u_int trgword ;		// the Trigger Word
 	u_int phyword ;		// the Physics Word
 	u_int daqbits ;		// "offline" bits aka L3 summary...
+	u_int daqbits_l1;       // triggers satisfying l1 
+	u_int daqbits_l2;       // triggers satisfying l2
         u_int evpgroups ;       // evp groups aka L3 summary[2]     
 
 	u_int evt_time ;	// time in UNIX seconds

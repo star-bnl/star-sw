@@ -851,6 +851,8 @@ char *evpReader::get(int num, int type)
 	  sumdatap = datap;
 	}
 
+	daqbits_l1 = sumdatap->TRG_L1_summary[0];
+	daqbits_l2 = sumdatap->TRG_L2_summary[0];
 	daqbits = sumdatap->L3_Summary[0] ;
 	evpgroups = sumdatap->L3_Summary[2] ;
 	// end event summary hack...
@@ -867,6 +869,8 @@ char *evpReader::get(int num, int type)
 		evt_time = swap32(evt_time) ;
 		detectors = swap32(detectors) ;
 		seq = swap32(seq) ;
+		daqbits_l1 = swap32(daqbits_l1);
+		daqbits_l2 = swap32(daqbits_l2);
 		daqbits = swap32(daqbits) ;
 		evpgroups = swap32(evpgroups) ;
 
