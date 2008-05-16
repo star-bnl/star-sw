@@ -1,6 +1,9 @@
-// $Id: t0_ana.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: t0_ana.C,v 1.3 2008/05/16 18:36:56 jcs Exp $
 //
 // $Log: t0_ana.C,v $
+// Revision 1.3  2008/05/16 18:36:56  jcs
+// update FTPC calibration macros
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
@@ -64,7 +67,8 @@ void t0_ana(TString input)
       if (i==0)
 	{
 	  filename +="_";
-	  filename += "0";
+	 // filename += "0";
+	  filename += "0.000001";
 	  filename +="_0_t0.root";
 	  
 	  sprintf(t,"%.2f",step);

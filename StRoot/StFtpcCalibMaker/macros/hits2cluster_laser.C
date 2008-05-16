@@ -1,6 +1,9 @@
-// $Id: hits2cluster_laser.C,v 1.3 2007/01/19 08:23:07 jcs Exp $
+// $Id: hits2cluster_laser.C,v 1.4 2008/05/16 18:36:56 jcs Exp $
 //
 // $Log: hits2cluster_laser.C,v $
+// Revision 1.4  2008/05/16 18:36:56  jcs
+// update FTPC calibration macros
+//
 // Revision 1.3  2007/01/19 08:23:07  jcs
 // replace true, false with kTRUE, kFALSE
 //
@@ -101,7 +104,6 @@ void hits2cluster_laser(TString eingabe,int evt,int laser_sec)
   
   for (int i=1;i<=60;i++)
     {
-      //if (!(i==1 || i==7 || i==13 || i==19 || i==25))
       if (laser_sector(1,laser_sec,i))
       {
 	fps->NewPage();
@@ -238,10 +240,11 @@ void hits2cluster_laser(TString eingabe,int evt,int laser_sec)
 	  
 	  }
       }
+      else break
     }     
  
   cout<<"Ps-file created !"<<endl;
-  fps->Close();
+  //fps->Close();
   //f2->Write();
   //f2->Close();
   f->Close();
@@ -322,8 +325,8 @@ bool laser_sector(int whichftpc,int whichsec,int sec)
 	  }
 	}
     }
-  else
+  else {
     cout<<"ERROR : Keine FTPC gewaehlt !"<<endl;
-
-  return kFALSE;
+    return kFALSE;
+  }
 }
