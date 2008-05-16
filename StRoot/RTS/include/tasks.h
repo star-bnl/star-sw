@@ -11,6 +11,7 @@
 
 #define EVB_TASK             20
 #define EVB_DATA_TASK(x)     (60+x)
+#define EVB_SUPERMON_TASK    65
 
 #define TAPER_TASK           30    /* this is the mainstream taper */
 #define TAPER_2_TASK         31    /* this is the aux-taper       */
