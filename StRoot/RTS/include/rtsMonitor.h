@@ -179,7 +179,6 @@ struct rtsMonEVB_supertask {
 
   // By trigger Information
   struct {
-    char name[32] ;	   // if strlen() == NULL, unused..
     u_int off_id ;	   // offline id number i.e. 5001
   
     u_int fired ;	   // received from trigger
