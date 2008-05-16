@@ -1,10 +1,11 @@
-// $Id: hits2cluster-2.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: hits2cluster_all.C,v 1.1 2008/05/16 18:36:56 jcs Exp $
 //
-// $Log: hits2cluster-2.C,v $
-// Revision 1.2  2006/03/15 15:14:06  jcs
-// add lines for listing CVS update info
+// $Log: hits2cluster_all.C,v $
+// Revision 1.1  2008/05/16 18:36:56  jcs
+// update FTPC calibration macros
 //
 
+// plot clusters for all sectors of all rows of both FTPC West and East
 // will only work if drawclhisto and/or drawvertexhisto activated in debug.ini file used to produce run*_laser_test.root file
 
 struct HIT 
@@ -32,7 +33,7 @@ struct EVENT
 };
 
 
-void hits2cluster_2(TString eingabe,int evt)
+void hits2cluster_all(TString eingabe,int evt)
 {
 
   CLUSTER cluster;

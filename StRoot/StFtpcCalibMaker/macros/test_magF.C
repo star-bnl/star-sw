@@ -1,13 +1,16 @@
-// $Id: test_magF.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: test_magF.C,v 1.3 2008/05/16 18:36:57 jcs Exp $
 //
 // $Log: test_magF.C,v $
+// Revision 1.3  2008/05/16 18:36:57  jcs
+// update FTPC calibration macros
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
 
 void test_magF()
 {
-//testB.C macro to read in and run over the magnetic field map grid.
+// macro to read in and run over the magnetic field map grid.
   gROOT->Reset();
 
   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
@@ -18,6 +21,7 @@ void test_magF()
   gSystem->Load("StUtilities");
   gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
+  gSystem->Load("StDetectorDbMaker.so");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");

@@ -1,6 +1,9 @@
-// $Id: t0_opt.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: t0_opt.C,v 1.3 2008/05/16 18:36:57 jcs Exp $
 //
 // $Log: t0_opt.C,v $
+// Revision 1.3  2008/05/16 18:36:57  jcs
+// update FTPC calibration macros
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
@@ -29,6 +32,7 @@ void t0_opt(int bf)
 
   //hvrad->DrawCopy();
   TH2F *hr = new TH2F("hr","",10,-0.1,0.7,10,0.005,0.03);
+  hr->SetOptStat(0);
   hr->SetTitle("#sigma_{res} vs. t_{0}");
   hr->GetYaxis()->SetTitleOffset(1.2);
   hr->GetYaxis()->SetTitle("#sigma_{res}");
