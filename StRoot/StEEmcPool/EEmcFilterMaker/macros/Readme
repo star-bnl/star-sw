@@ -1,4 +1,7 @@
-Pythia filtering:
+Pythia filtering.
+Details are given here:
+http://drupal.star.bnl.gov/STAR/subsys/upgr/fgt/filtering-pythia-events-starsim
+
 is done by instering a custom fortran code in to a private directory and add/replace the following files (remove '-example')
 
 pyevnt.F-example 
