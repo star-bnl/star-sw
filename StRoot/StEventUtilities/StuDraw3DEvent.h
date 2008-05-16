@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.6 2008/05/13 19:56:17 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.7 2008/05/16 17:36:52 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
@@ -15,7 +15,7 @@
   // decoratated with the STAR detector geometry
   //
   //
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
+  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
   //
   ///////////////////////////////////////////////////////////////////////
   
@@ -34,7 +34,7 @@ class StuDraw3DEvent : public StDraw3D
      void operator=(const StuDraw3DEvent&){;}
 
   public:
-     StuDraw3DEvent(TVirtualPad *pad = 0, const char *detectorName="TPC");
+     StuDraw3DEvent(const char *detectorName="TPC",TVirtualPad *pad = 0);
      virtual ~StuDraw3DEvent();
      static StuDraw3DEvent *Display();
      virtual void     Tracks(const StEvent* event, StTrackType type=global);

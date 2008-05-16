@@ -1,4 +1,4 @@
-// $Id: EveDis.C,v 1.1 2008/05/13 20:04:30 fine Exp $
+// $Id: EveDis.C,v 1.2 2008/05/16 17:36:52 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #ifndef __CINT__
@@ -37,8 +37,8 @@ class EveDis : public StuDraw3DEvent {
   ////////////////////////////////////////////////////////////////////////
 public:
 //___________________________________________________
-EveDis(TVirtualPad *pad=0, const char *detectorName="TPC")
-: StuDraw3DEvent(pad,detectorName)
+EveDis(const char *detectorName="TPC",TVirtualPad *pad=0)
+: StuDraw3DEvent(detectorName,pad)
 {
    // The detectorName is a comma separated list of the OpenInventor files with no extension
    // For all names on the list one should provide the iv file with the "iv extension:

@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.7 2008/05/13 19:56:11 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.8 2008/05/16 17:36:52 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -24,12 +24,12 @@ ClassImp(StuDraw3DEvent)
   //  It provides the simple way to visualize the event 
   //  primitives in 3D quickly against of the STAR detector 
   //  geometry.
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/Draw3DClass.png">end_html
+  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
   //
   ////////////////////////////////////////////////////////////////////////
 //___________________________________________________
-StuDraw3DEvent::StuDraw3DEvent(TVirtualPad *pad, const char *detectorName): 
-StDraw3D(pad,detectorName)
+StuDraw3DEvent::StuDraw3DEvent( const char *detectorName,TVirtualPad *pad): 
+StDraw3D(detectorName,pad)
 {
    // The detectorName is a comma separated list of the OpenInventor files with no extension
    // For all names on the list one should provide the iv file with the "iv extension:

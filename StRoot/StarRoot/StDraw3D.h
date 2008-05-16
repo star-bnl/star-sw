@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.20 2008/05/15 22:11:17 fine Exp $
+// $Id: StDraw3D.h,v 1.21 2008/05/16 17:36:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -80,7 +80,7 @@ class StDraw3D : public TObject
        void Redraw();
 
 public:
-   StDraw3D(TVirtualPad *pad = 0, const char *detectorName="TPC");
+   StDraw3D(const char *detectorName="TPC",TVirtualPad *pad = 0);
    virtual ~StDraw3D();
    virtual const StDraw3DStyle &AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz);
    TVirtualPad *Pad() const;

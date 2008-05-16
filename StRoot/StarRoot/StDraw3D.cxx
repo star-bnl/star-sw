@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.28 2008/05/15 22:11:17 fine Exp $
+// $Id: StDraw3D.cxx,v 1.29 2008/05/16 17:36:50 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -147,7 +147,7 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
      }
 };
 //___________________________________________________
-StDraw3D::StDraw3D(TVirtualPad *pad, const char *detectorName): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
+StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
       , fDetectorName(detectorName),fMaster(0)
 {
 
