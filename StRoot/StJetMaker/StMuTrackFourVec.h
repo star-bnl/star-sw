@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.9 2008/05/09 03:33:00 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.10 2008/05/18 15:37:43 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
@@ -12,8 +12,6 @@
 
 #include <iostream>
 #include <string>
-
-#include "StarClassLibrary/StParticleTypes.hh"
 
 class StMuTrackFourVec : public AbstractFourVec {
 
