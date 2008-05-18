@@ -166,7 +166,7 @@ void StBET4pMaker::collectChargedTracksFromTPC()
 
     //now construct StMuTrackFourVec object for jetfinding
     StSpinJet::StMuTrackEmuFactory factory;
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, i, kTpcId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, track->charge(), i, kTpcId);
     tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
   }
 }
@@ -267,7 +267,7 @@ void StBET4pMaker::collectEnergyFromBEMC()
     TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), corrected_energy);
 	    
     //now construct StMuTrackFourVec object for jetfinding
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, bemcTowerId, kBarrelEmcTowerId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
     tracks.push_back(pmu); //for jet finding interface
   }
 }
@@ -339,7 +339,7 @@ void StBET4pMaker::collectEnergyFromEEMC()
       TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 	    
       //now construct StMuTrackFourVec object for jetfinding
-      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, id, kEndcapEmcTowerId);
+      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, id, kEndcapEmcTowerId);
       tracks.push_back(pmu); //for jet finding interface
     }
   }
