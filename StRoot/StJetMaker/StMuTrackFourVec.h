@@ -1,11 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.12 2008/05/18 16:54:26 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.13 2008/05/18 22:15:40 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
-#include "StMuTrackEmu.h"
-
 #include "StJetFinder/AbstractFourVec.h"
+
+#include "StMuTrackEmu.h"
 
 #include "StDetectorId.h"
 
@@ -20,12 +20,12 @@ public:
     
   StMuTrackFourVec() : _track(0), index(0), mDetId(kUnknownId), mCharge(0) { }
 
-  StMuTrackFourVec(StSpinJet::StMuTrackEmu* t, const TLorentzVector& p, Int_t i, StDetectorId detId)
+  StMuTrackFourVec(StSpinJet::StMuTrackEmu* t, const TLorentzVector& p, double charge, Int_t i, StDetectorId detId)
     : _track(t)
     , _vec(p)
     , index(i)
     , mDetId(detId)
-    , mCharge(!t ? 0 : (double)t->charge())
+    , mCharge(charge)
   { }
 
   virtual ~StMuTrackFourVec() { if(_track) delete _track; _track = 0; }
