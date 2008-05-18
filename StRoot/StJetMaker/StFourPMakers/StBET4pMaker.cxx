@@ -34,6 +34,8 @@
 
 #include "StMuEmcPosition.h"
 
+#include <TLorentzVector.h>
+
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -158,7 +160,9 @@ void StBET4pMaker::collectChargedTracksFromTPC()
     StThreeVectorF momentum = track->momentum();
     double mass = 0.1395700; //assume pion+ mass for now
     float energy = sqrt(mass*mass + momentum.mag()*momentum.mag());
-    StLorentzVectorF p4(energy, momentum);
+    //    StLorentzVectorF p4(energy, momentum);
+
+    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 
     //now construct StMuTrackFourVec object for jetfinding
     StSpinJet::StMuTrackEmuFactory factory;
@@ -259,7 +263,8 @@ void StBET4pMaker::collectEnergyFromBEMC()
     momentum.setPhi(phi);
     momentum.setTheta(towerLocation.theta()); //use corrected theta
     momentum.setMag(pMag);
-    StLorentzVectorF p4(corrected_energy, momentum);
+    //    StLorentzVectorF p4(corrected_energy, momentum);
+    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), corrected_energy);
 	    
     //now construct StMuTrackFourVec object for jetfinding
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, bemcTowerId, kBarrelEmcTowerId);
@@ -330,7 +335,8 @@ void StBET4pMaker::collectEnergyFromEEMC()
       momentum.setPhi( towerCenter.Phi() );
       momentum.setTheta( towerLocation.theta() ); //use theta from vertex subtracted point.
       momentum.setMag(pMag);
-      StLorentzVectorF p4(energy, momentum);
+      //      StLorentzVectorF p4(energy, momentum);
+      TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 	    
       //now construct StMuTrackFourVec object for jetfinding
       StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, id, kEndcapEmcTowerId);

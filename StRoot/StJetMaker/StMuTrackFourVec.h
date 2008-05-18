@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.11 2008/05/18 16:28:58 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.12 2008/05/18 16:54:26 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
@@ -7,7 +7,6 @@
 
 #include "StJetFinder/AbstractFourVec.h"
 
-#include "StarClassLibrary/StLorentzVectorF.hh"
 #include "StDetectorId.h"
 
 #include <TLorentzVector.h>
@@ -21,9 +20,9 @@ public:
     
   StMuTrackFourVec() : _track(0), index(0), mDetId(kUnknownId), mCharge(0) { }
 
-  StMuTrackFourVec(StSpinJet::StMuTrackEmu* t, StLorentzVectorF P, Int_t i, StDetectorId detId)
+  StMuTrackFourVec(StSpinJet::StMuTrackEmu* t, const TLorentzVector& p, Int_t i, StDetectorId detId)
     : _track(t)
-    , _vec(P.x(), P.y(), P.z(), P.t())
+    , _vec(p)
     , index(i)
     , mDetId(detId)
     , mCharge(!t ? 0 : (double)t->charge())

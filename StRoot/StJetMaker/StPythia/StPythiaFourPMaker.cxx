@@ -39,6 +39,8 @@ using namespace std;
 #include "StJetMaker/StPythia/StPythiaFourPMaker.h"
 #include "StJetMaker/StPythia/StPythiaMuTrackFourVec.h"
 
+#include <TLorentzVector.h>
+
 ClassImp(StPythiaFourPMaker)
     
     StPythiaFourPMaker::StPythiaFourPMaker(const char* name, StMCAsymMaker* sim,  StMcEventMaker* mc) 
@@ -112,9 +114,11 @@ Int_t StPythiaFourPMaker::Make()
 									);
 			
 			double energy = particleTable[i].phep[3]; //E
-			StLorentzVectorF p4( energy, momentum);
+			//			StLorentzVectorF p4( energy, momentum);
+			TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 			
-			if (fabs(p4.pseudoRapidity())<5.0) {
+			//			if (fabs(p4.pseudoRapidity())<5.0) {
+			if (fabs(p4.Eta()) < 5.0) {
 				
 				StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, i, kUnknownId);
 				
