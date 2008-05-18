@@ -1,16 +1,10 @@
-/*!
-  \class StBET4pMaker
-  \author M.L. Miller (MIT Software)
+#ifndef STBET4PMAKERIMP_HH
+#define STBET4PMAKERIMP_HH
 
-  StBET4pMaker is used to fill the list of 4-momenta that is then passed to a
-  StJetFinder instance.  StBET4pMaker simply instantiates an object of type
-  StBETMuTrackFourVec for every final state particle in the event.
-*/
+#include <Rtypes.h>
 
-#ifndef STBET4PMAKER_HH
-#define STBET4PMAKER_HH
-
-#include "StFourPMaker.h"
+#include "../StMuTrackFourVec.h"
+#include "StJetFinder/AbstractFourVec.h"
 
 class StMuTrack;
 class StEmcCollection;
@@ -20,36 +14,45 @@ class StEmcRawHit;
 class EEmcGeomSimple;
 class StBemcTables;
 class StEEmcDbMaker;
+class StEmcADCtoEMaker;
+class StEvent;
 
-class StBET4pMakerImp;
+typedef std::vector<AbstractFourVec*> FourList;
 
-class StBET4pMaker : public StFourPMaker {
+class StBET4pMakerImp {
 
 public:
     
-  StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix = true);
+  StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix = true);
     
-  virtual ~StBET4pMaker() {};
+  virtual ~StBET4pMakerImp() {};
     
-  Int_t Init();    
-  Int_t Make();
+  void Init(StEEmcDbMaker* eedb, StEmcADCtoEMaker* adc2e);
+  void Make(StEvent* event);
     
   void Clear(Option_t* opt);
 
-  Int_t InitRun(Int_t runId);
+  Int_t InitRun(Int_t runId, StBemcTables* tables);
 
-  FourList &getTracks();
-
-  void setUseEndcap(bool v);
-  void setUse2003Cuts(bool v);
-  void setUse2005Cuts(bool v);
-  void setUse2006Cuts(bool v);
+  void setUseEndcap(bool v) { mUseEndcap = v; }
+  void setUse2003Cuts(bool v) { mUse2003Cuts = v; }
+  void setUse2005Cuts(bool v) { mUse2005Cuts = v; }
+  void setUse2006Cuts(bool v) { mUse2006Cuts = v; }
 
   int nDylanPoints() const { return mDylanPoints; }
   double sumEmcEt() const { return mSumEmcEt; }
 
   bool bemcCorrupt() const { return mCorrupt; }
     
+  Float_t          eta_high_lim;
+  Float_t          eta_low_lim;
+
+  FourList &getTracks() { return tracks; };
+  Int_t numTracks(void) { return tracks.size(); };
+
+  Float_t GetEtaLow(void) const { return eta_low_lim; };
+  Float_t GetEtaHigh(void) const { return eta_high_lim; };
+
 private:
 
   void collectChargedTracksFromTPC();
@@ -61,14 +64,18 @@ private:
 
   void collectEnergyFromEEMC();
 
-  StEmcCollection *find_StEmCCollection();
-  bool isCorrupted();
+  StEmcCollection *find_StEmCCollection(StEvent* event);
+  bool isCorrupted(StEvent* event);
 
-  void fillBemcTowerHits();
+  void fillBemcTowerHits(StEvent* event);
   double sumEnergyOverBemcTowers(double minE);
   int numberOfBemcTowersWithEnergyAbove(double minE);
 
   bool shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID);
+
+  bool accept2003Tower(int id);
+
+  FourList tracks;
 
   bool mCorrupt;
   bool mUseEndcap;
@@ -90,10 +97,8 @@ private:
         
   EEmcGeomSimple* mEeGeom;
   StEEmcDbMaker* mEeDb;
-
-  StBET4pMakerImp* _imp;
+  StEmcADCtoEMaker* _adc2e;
   
-  ClassDef(StBET4pMaker,1)
 };
 
-#endif // STBET4PMAKER_HH
+#endif // STBET4PMAKERIMP_HH

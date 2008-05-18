@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StFourPMaker.h,v 1.7 2008/05/08 23:00:29 tai Exp $
+// $Id: StFourPMaker.h,v 1.8 2008/05/18 23:23:06 tai Exp $
 #ifndef StFourPMaker_h
 #define StFourPMaker_h
 #include <map>
@@ -27,7 +27,7 @@ public:
     virtual Int_t Finish();
     virtual void Clear(const Option_t*);
 
-    FourList &getTracks() { return tracks; };
+  virtual FourList &getTracks() { return tracks; };
     Int_t numTracks(void) { return tracks.size(); };
 
     void SetEtaLow(Float_t eta_low) { eta_low_lim = eta_low; };

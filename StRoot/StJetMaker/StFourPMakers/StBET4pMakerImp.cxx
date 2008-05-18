@@ -1,6 +1,4 @@
 
-#include "StBET4pMaker.h"
-
 #include "StBET4pMakerImp.h"
 
 //STAR
@@ -45,14 +43,11 @@
 
 using namespace std;
 
-bool accept2003Tower(int id);
+const int StBET4pMakerImp::mNOfBemcTowers;
 
-ClassImp(StBET4pMaker)
-    
-const int StBET4pMaker::mNOfBemcTowers;
-
-StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
-  : StFourPMaker(name, 0)
+StBET4pMakerImp::StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
+  : eta_high_lim(2.0)
+  , eta_low_lim(-2.0)
   , mCorrupt(false)
   , mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
@@ -64,113 +59,84 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , mSumEmcEt(0.0)
   , mEeGeom(0)
   , mEeDb(0)
-  , _imp(new StBET4pMakerImp(name, uDstMaker, doTowerSwapFix))
 {
-  cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
+  cout <<"StBET4pMakerImp::StBET4pMakerImp()"<<endl;
   assert(mMuDstMaker);
 }
 
-void StBET4pMaker::setUseEndcap(bool v)   { _imp->setUseEndcap(v); }
-void StBET4pMaker::setUse2003Cuts(bool v) { _imp->setUse2003Cuts(v); }
-void StBET4pMaker::setUse2005Cuts(bool v) { _imp->setUse2005Cuts(v); }
-void StBET4pMaker::setUse2006Cuts(bool v) { _imp->setUse2006Cuts(v); }
-
-Int_t StBET4pMaker::InitRun(Int_t runId)
+Int_t StBET4pMakerImp::InitRun(Int_t runId, StBemcTables* tables)
 {
-  mTables->loadTables((StMaker*)this);
+  //  mTables->loadTables((StMaker*)this);
+  mTables = tables;
 
-  _imp->InitRun(runId, mTables);
   return kStOk;
+    
 }
 
-Int_t StBET4pMaker::Init()
+void StBET4pMakerImp::Init(StEEmcDbMaker* eedb, StEmcADCtoEMaker* adc2e)
 {
-//   cout <<"StBET4pMaker::Init()"<<endl;
-//     
-//   mEeGeom = new EEmcGeomSimple();
-//   mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
-//   assert(mEeDb); // eemcDB must be in the chain, fix it
-//   mEeDb->setThreshold(3);
-//     
-//   return StMaker::Init();
-
-  mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
-
-  StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
-
-  _imp->Init(mEeDb, adc2e);
-  return StMaker::Init();
+  cout <<"StBET4pMakerImp::Init()"<<endl;
+    
+  mEeGeom = new EEmcGeomSimple();
+  //  mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
+  mEeDb = eedb;
+  assert(mEeDb); // eemcDB must be in the chain, fix it
+  mEeDb->setThreshold(3);
+  
+  _adc2e = adc2e;
 }
 
-void StBET4pMaker::Clear(Option_t* opt)
+void StBET4pMakerImp::Clear(Option_t* opt)
 {
-  _imp->Clear(opt);
+  LOG_DEBUG <<"void StBET4pMakerImp::Clear(Option_t* opt)" << endm;
+  mCorrupt = false;
+  mDylanPoints = 0;
+  mSumEmcEt = 0.;
+    
+  for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
+    delete (*it);
+    (*it) = 0;
+  }
+  tracks.clear();
 
-//  LOG_DEBUG <<"void StBET4pMaker::Clear(Option_t* opt)" << endm;
-//  mCorrupt = false;
-//  mDylanPoints = 0;
-//  mSumEmcEt = 0.;
-//    
-//  for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
-//    delete (*it);
-//    (*it) = 0;
-//  }
-//  tracks.clear();
-//
-//  //reset pointers to Barrel hits
-//  for (int i = 1; i <= mNOfBemcTowers; ++i) {
-//    mBTowHits[i] = 0;
-//    mNtracksOnTower[i] = 0;
-//  }
-//    
-  return StMaker::Clear(opt);
+  //reset pointers to Barrel hits
+  for (int i = 1; i <= mNOfBemcTowers; ++i) {
+    mBTowHits[i] = 0;
+    mNtracksOnTower[i] = 0;
+  }
+    
 }
 
-FourList &StBET4pMaker::getTracks()
+void StBET4pMakerImp::Make(StEvent* event)
 {
-  return _imp->getTracks();
+  LOG_DEBUG <<"StBET4pMakerImp::Make()"<<endm;
+
+  fillBemcTowerHits(event);
+
+  mSumEmcEt = sumEnergyOverBemcTowers(0.4);
+
+  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4);
+
+  //check for barrel corruption (only works for P04ik and later!
+  if (mCorrupt) {
+    tracks.clear();
+    LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\tFlag this as a corrupt event.  Clear 4-p container and return"<<endm;
+    return;
+  }
+
+  if (mSumEmcEt > 200.) {
+    tracks.clear();
+    LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\ttoo much energy:\t"<<mSumEmcEt<<"\tflag as corrupt. Clear 4-p container and return"<<endm;
+    return;
+  }
+
+  collectChargedTracksFromTPC();
+  collectEnergyFromBEMC();
+  collectEnergyFromEEMC();
+
 }
 
-Int_t StBET4pMaker::Make()
-{
-  StEvent* event = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
-  _imp->Make(event);
-
-  mSumEmcEt = _imp->sumEmcEt();
-  mDylanPoints = _imp->nDylanPoints();
-  mCorrupt =  _imp->bemcCorrupt();
-
-//  LOG_DEBUG <<"StBET4pMaker::Make()"<<endm;
-//
-//  fillBemcTowerHits();
-//
-//  mSumEmcEt = sumEnergyOverBemcTowers(0.4);
-//
-//  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4);
-//
-//  //check for barrel corruption (only works for P04ik and later!
-//  if (mCorrupt) {
-//    tracks.clear();
-//    LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\tFlag this as a corrupt event.  Clear 4-p container and return"<<endm;
-//    return kStOk;
-//  }
-//
-//  if (mSumEmcEt > 200.) {
-//    tracks.clear();
-//    LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\ttoo much energy:\t"<<mSumEmcEt<<"\tflag as corrupt. Clear 4-p container and return"<<endm;
-//    return kStOk;
-//  }
-//
-//  collectChargedTracksFromTPC();
-//  collectEnergyFromBEMC();
-//  collectEnergyFromEEMC();
-//
-//  LOG_DEBUG <<StMaker::GetName()<<"::Make()\tAdded:\t"<<tracks.size()<<"\tparticles to track container"<<endm;
-//
-  return StMaker::Make();
-}
-
-void StBET4pMaker::collectChargedTracksFromTPC()
+void StBET4pMakerImp::collectChargedTracksFromTPC()
 {
   StMuDst* uDst = mMuDstMaker->muDst();
 
@@ -200,7 +166,7 @@ void StBET4pMaker::collectChargedTracksFromTPC()
   }
 }
 
-bool StBET4pMaker::isUsableTrack(const StMuTrack& track) const
+bool StBET4pMakerImp::isUsableTrack(const StMuTrack& track) const
 {
     if(track.flag() < 0) 
       return false;
@@ -234,7 +200,7 @@ bool StBET4pMaker::isUsableTrack(const StMuTrack& track) const
   return true;
 }
 
-void StBET4pMaker::countTracksOnBemcTower(const StMuTrack& track)
+void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
 {
   StMuDst* uDst = mMuDstMaker->muDst();
 
@@ -255,7 +221,7 @@ void StBET4pMaker::countTracksOnBemcTower(const StMuTrack& track)
   }
 }
 
-void StBET4pMaker::collectEnergyFromBEMC()
+void StBET4pMakerImp::collectEnergyFromBEMC()
 {
   StMuDst* uDst = mMuDstMaker->muDst();
 
@@ -301,7 +267,7 @@ void StBET4pMaker::collectEnergyFromBEMC()
   }
 }
 
-double StBET4pMaker::correctBemcTowerEnergyForTracks(double energy, int bemcTowerId)
+double StBET4pMakerImp::correctBemcTowerEnergyForTracks(double energy, int bemcTowerId)
 {
 
     //Get eta, phi
@@ -319,7 +285,7 @@ double StBET4pMaker::correctBemcTowerEnergyForTracks(double energy, int bemcTowe
     return energy - mNtracksOnTower[bemcTowerId]*MipE;
 }
 
-void StBET4pMaker::collectEnergyFromEEMC()
+void StBET4pMakerImp::collectEnergyFromEEMC()
 {
   StMuDst* uDst = mMuDstMaker->muDst();
 
@@ -374,7 +340,7 @@ void StBET4pMaker::collectEnergyFromEEMC()
   }
 }
 
-StEmcCollection *StBET4pMaker::find_StEmCCollection() {
+StEmcCollection *StBET4pMakerImp::find_StEmCCollection(StEvent* event) {
 
   StEmcCollection* emc(0);
 
@@ -385,12 +351,12 @@ StEmcCollection *StBET4pMaker::find_StEmCCollection() {
     scratch using DB gains, so we _don't_ take what's in the MuDst collection
   */
 
-  StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+  //  StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   if (event) {
-    LOG_DEBUG <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from StEvent"<<endm;
+    LOG_DEBUG <<"StBET4pMakerImp::Make()\tRetrieve StEmcCollection from StEvent"<<endm;
     emc = event->emcCollection();
   } else {
-    LOG_DEBUG <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from MuDst"<<endm;
+    LOG_DEBUG <<"StBET4pMakerImp::Make()\tRetrieve StEmcCollection from MuDst"<<endm;
     emc = mMuDstMaker->muDst()->emcCollection();
   }
   assert(emc);
@@ -398,9 +364,9 @@ StEmcCollection *StBET4pMaker::find_StEmCCollection() {
   return emc;
 }
 
-bool StBET4pMaker::isCorrupted()
+bool StBET4pMakerImp::isCorrupted(StEvent* event)
 {
-  StEmcCollection* emc = find_StEmCCollection();
+  StEmcCollection* emc = find_StEmCCollection(event);
   StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
 
   //if detector==null, this means it's corrupt for pre-October 2004 BEMC code.  However, not all corrupt events give detector==0
@@ -419,12 +385,12 @@ bool StBET4pMaker::isCorrupted()
   }
 
   //And now we can implement Alex's new StEmcAdc2EMaker test (thank god, this takes care of pre-P04k production)
-  StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
-  if (!adc2e) {
-    LOG_ERROR <<"StBET4pMaker::fillBarrelHits()\tno adc2e in chain"<<endm;
+  //  StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
+  if (!_adc2e) {
+    LOG_ERROR <<"StBET4pMakerImp::fillBarrelHits()\tno adc2e in chain"<<endm;
   } else {
-    LOG_DEBUG <<"StBET4pMaker::fillBarrelHits()\tfound adc2e in chain"<<endm;
-    if (adc2e->isCorrupted()) {
+    LOG_DEBUG <<"StBET4pMakerImp::fillBarrelHits()\tfound adc2e in chain"<<endm;
+    if (_adc2e->isCorrupted()) {
       return true;
     }
   }
@@ -433,12 +399,12 @@ bool StBET4pMaker::isCorrupted()
 }
 
 
-void StBET4pMaker::fillBemcTowerHits()
+void StBET4pMakerImp::fillBemcTowerHits(StEvent* event)
 {
-  mCorrupt = isCorrupted();
+  mCorrupt = isCorrupted(event);
   if(mCorrupt) return;
 
-  StEmcCollection* emc = find_StEmCCollection();
+  StEmcCollection* emc = find_StEmCCollection(event);
   StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
 
   static const int nBemcModules = 120;
@@ -465,7 +431,7 @@ void StBET4pMaker::fillBemcTowerHits()
 
 }
 
-bool StBET4pMaker::shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID)
+bool StBET4pMakerImp::shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID)
 {
   //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
   int status;
@@ -496,7 +462,7 @@ bool StBET4pMaker::shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID
 }
 
 
-double StBET4pMaker::sumEnergyOverBemcTowers(double minE)
+double StBET4pMakerImp::sumEnergyOverBemcTowers(double minE)
 {
   double ret(0.0);
   for(int bemcTowerID = 1; bemcTowerID <= mNOfBemcTowers; ++bemcTowerID) {
@@ -507,7 +473,7 @@ double StBET4pMaker::sumEnergyOverBemcTowers(double minE)
   return ret;
 }
 
-int StBET4pMaker::numberOfBemcTowersWithEnergyAbove(double minE)
+int StBET4pMakerImp::numberOfBemcTowersWithEnergyAbove(double minE)
 {
   int ret(0);
   for(int bemcTowerID = 1; bemcTowerID <= mNOfBemcTowers; ++bemcTowerID) {
@@ -518,7 +484,7 @@ int StBET4pMaker::numberOfBemcTowersWithEnergyAbove(double minE)
   return ret;
 }
 
-bool accept2003Tower(int id)
+bool StBET4pMakerImp::accept2003Tower(int id)
 {
     if( id==555
 	|| id==615
