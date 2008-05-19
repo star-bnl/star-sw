@@ -67,7 +67,7 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   }
   if (mTargetNode->isValid()) {
     mTargetNode->mFP.check("1StiTrackNodeHelper::set");
-    assert(fabs(mTargetHz-mTargetNode->mFP._hz)<1e-10);
+//    assert(fabs(mTargetHz-mTargetNode->mFP._hz)<1e-10);
   }
 
   mDetector   = mTargetNode->getDetector();
@@ -116,7 +116,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   x1 = rotPars._x;
   x2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHitPars[0];
   dx = x2-x1;
-  rho = 0.5*(mTargetHz*rotPars._ptin+rotPars._curv);
+  rho = 0.5*(mParentHz*rotPars._ptin+rotPars._curv);
   dsin = rho*dx;
   sinCA2=rotPars._sinCA + dsin; 
   if (sinCA2> 0.95) sinCA2= 0.95;
