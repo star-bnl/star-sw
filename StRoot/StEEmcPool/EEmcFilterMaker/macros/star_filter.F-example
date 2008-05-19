@@ -111,7 +111,9 @@ C     x  (may be not good for BEMC,jan)         IF ( R_PZ .LT. 0. ) GOTO 555
          R_PX=P(I,1)
          R_PY=P(I,2)
          R_PT=SQRT(R_PX**2 + R_PY**2)
-         R_ETA = -LOG(TAN(0.5*ATAN2(R_PT,R_PZ)))
+C...      R_ETA = -LOG(TAN(0.5*ATAN2(R_PT,R_PZ)))
+          R_ETA = LOG((SQRT(R_PT**2 + R_PZ**2) + R_PZ)/R_PT)
+
          
 C...  reject particle out of EEMC eta range
          IF ( R_ETA .LT. GRID_ETA_LOW )  GOTO 555
