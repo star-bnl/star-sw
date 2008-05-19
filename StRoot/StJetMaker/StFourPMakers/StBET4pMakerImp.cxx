@@ -36,6 +36,7 @@
 
 #include <TLorentzVector.h>
 
+#include <vector>
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -136,12 +137,21 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
 {
   StMuDst* uDst = mMuDstMaker->muDst();
 
-  //next, loop on tracks and add to the 4p list:
   long nTracks = uDst->numberOfPrimaryTracks();
+
+  vector<StMuTrack*> trackList;
 
   for(int i = 0; i < nTracks; ++i) {
     StMuTrack* track = uDst->primaryTracks(i);
-    assert(track);
+
+    trackList.push_back(track);
+  }
+
+  int i(-1);
+  for(vector<StMuTrack*>::iterator it = trackList.begin(); it != trackList.end(); ++it) {
+    StMuTrack* track = *it;
+
+    ++i;
 
     if (!isUsableTrack(*track)) continue;
 
