@@ -24,7 +24,7 @@
 #define  _NO_IMPLEMENTATION_   {       \
    const char *text = __FUNCTION__;    \
    NDC::push(_T("NO IMPLEMENTATION")); \
-   PrintLogger(text,"D","");           \
+   PrintLogger(text,'D',"");           \
    NDC::pop();                         \
 }
 #endif 
@@ -121,16 +121,14 @@ if (gErrorIgnoreLevel == kUnset) {
 //________________________________________
 std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
 // std::ostream& operator<<(std::ostream& os, StMessage* stm) {
-  if (((&os) == (std::ostream*) StMessMgr::CurrentMessager()) && (stm == endm)) {
+  ostrstream &thisStream =  Stream();
+  if ( (&thisStream == &os) && (stm == endm) ) {
     // There was a StMessage terminator
-    *this << ends;
+     os << ends;
      StMessMgr::CurrentMessager()->Print();
-     seekp(0);*this << ends;seekp(0);
+     os.seekp(0);os<< ends;os.seekp(0);
   } else {
-    // fprintf(stderr,"StLoggerManager::OperatorShift os  %p StMessMgr = %Lp, stm = %Lp endm = %Lp\n",
-    //       &os, (std::ostream*) StMessMgr::Instance(), stm, endm);
      assert(0);
-    // if (stm) os << stm->GetMessage();  // Output this message to the ostream
   }
   return os;
 }
@@ -151,7 +149,7 @@ ClassImp(StLoggerManager)
 #endif
 //_____________________________________________________________________________
 StLoggerManager::StLoggerManager(const char *loggerName) 
-                : StMessMgr(), fAllowRepeat(-1),fLastRepeatCounter(0),fStarOptionFilter(0)
+                : StMessMgr(), fCurType(0),fAllowRepeat(-1),fLastRepeatCounter(0),fStarOptionFilter(0)
 {
 //
 // Constructor - only called once when the library is loaded to
@@ -184,7 +182,7 @@ StLoggerManager::StLoggerManager(const char *loggerName)
   }
   fLogger   = Logger::getLogger(_T(loggerName));
   fDefaultLevel = fLogger->getLevel();
-  fCurType     = new char[ 2];  fCurType[0] = 0; fCurType[1] = 0;
+//  fCurType     = new char[ 2];  fCurType[0] = 0; fCurType[1] = 0;
   fCurOpt      = new char[32];  fCurOpt [0] = 0; 
   SwitchOff("D");
   MemoryOn();
@@ -196,7 +194,8 @@ StLoggerManager::~StLoggerManager() {
 // Destructor - must delete the message lists
 //
   if (StLoggerManager::Instance() == this) gMessMgr = 0;
-  delete [] fCurType; fCurType = 0;
+//  delete [] fCurType; 
+  fCurType = 0;
   delete [] fCurOpt;  fCurOpt = 0;
 }
 log4cxx::LoggerPtr StLoggerManager::fgQALogger;      //!  Logger to server QA stream
@@ -265,6 +264,23 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
   return mInstance;
 }
 //______________________________________________________________________________
+ostrstream &StLoggerManager::Stream()
+{
+   // return the stream allocated for the particular "fCurType"
+   // Create the new stream if there was none.
+   // ( I am too lazy to intreodcue the enumare here :-(()
+   switch (fCurType)  {
+      case 'F': return fStreams[0];
+      case 'E': return fStreams[1];
+      case 'W': return fStreams[2];
+      case 'I': return fStreams[3];
+      case 'D': return fStreams[4];
+      case 'Q': return fStreams[5];
+      default:  return fStreams[6];
+   };
+}
+
+//______________________________________________________________________________
 bool  StLoggerManager::isDebugEnabled()  const{ return fLogger->isDebugEnabled(); }
 //______________________________________________________________________________
 bool  StLoggerManager::isWarnEnabled()   const{ return fLogger->isWarnEnabled(); }
@@ -306,19 +322,21 @@ ostrstream& StLoggerManager::Message(const char* mess, const char* type,
   if (type && type[0]) typeChar = type[0];
   if (!opt) opt = "";
   size_t messSize = (mess && mess[0]) ? strlen(mess) : 0;
-  *fCurType = typeChar;
+//  *fCurType = typeChar;
+  fCurType = typeChar;
   strcpy(fCurOpt,opt);
-  if (tellp() > 0 ) *this << endm;  // print out the previous line if any
+//  if (tellp() > 0 ) *this << endm;  // print out the previous line if any
   
-  if (sourceFileName && sourceFileName[0] ) fSourceFileNames[LevelIndex(*fCurType)] = sourceFileName;
-  else fSourceFileNames[LevelIndex(*fCurType)].clear();
-  fLineNumbers[LevelIndex(*fCurType)]     = lineNumber;
+  if (sourceFileName && sourceFileName[0] ) fSourceFileNames[LevelIndex(fCurType)] = sourceFileName;
+  else fSourceFileNames[LevelIndex(fCurType)].clear();
+  fLineNumbers[LevelIndex(fCurType)]     = lineNumber;
  
-  if (messSize > 0) *this << mess << endm; // print out the previous this message if present
-  return *((StMessMgr*) this);
+//  if (messSize > 0) *this << mess << endm; // print out the previous this message if present
+//   return *((StMessMgr*) this);
+  return Stream();
 }
 //_____________________________________________________________________________
-void StLoggerManager::BuildMessage(const char* mess, const char* type,
+void StLoggerManager::BuildMessage(const char* mess, unsigned char type,
   const char* opt,const char *sourceFileName, int lineNumber) {
 //
 // Instantiate an StMessage and place on the lists of known messages
@@ -343,12 +361,13 @@ void StLoggerManager::BuildMessage(const char* mess, const char* type,
      PrintLogger(mess,type,opt,sourceFileName,lineNumber);
 }
 //_____________________________________________________________________________
-void StLoggerManager::PrintLogger(const char* mess, const char* type,
+void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
     const char* opt,const char *sourceFileName, int lineNumber) 
 {
    if (!opt) opt = "";
    unsigned char typeChar = 'I';
-   if (type && type[0]) typeChar = type[0];
+ //  if (type && type[0]) typeChar = type[0];
+   if (type) typeChar = type;
    if (!(sourceFileName || fSourceFileNames[LevelIndex(typeChar)].empty() ) ) 
    {
       sourceFileName = fSourceFileNames[LevelIndex(typeChar)].c_str();
@@ -391,7 +410,7 @@ void StLoggerManager::Print() {
 // Empty the buffer into the current message and print it.
 // If not currenty building a message, print the last one created.
 //
-  string message = ostringstream::str();
+  string message = Stream().str();
   BuildMessage(message.c_str(),fCurType,fCurOpt);
 }
 //_____________________________________________________________________________
@@ -458,7 +477,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.29 2008/05/15 23:40:23 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.30 2008/05/19 15:08:20 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -842,8 +861,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.29 2008/05/15 23:40:23 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.30 2008/05/19 15:08:20 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.30  2008/05/19 15:08:20  fine
+// allow complex formating with several logger stream concurrently. Thanx Victor
+//
 // Revision 1.29  2008/05/15 23:40:23  fine
 // Change the abstarct class return type to separate the different STAR streams
 //
