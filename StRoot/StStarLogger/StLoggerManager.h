@@ -19,7 +19,7 @@
 #ifndef __CINT__
 # include <log4cxx/logger.h>
 # include <vector>
-#  include "StarOptionFilter.h"
+# include "StarOptionFilter.h"
 #endif
 
 
@@ -51,11 +51,12 @@ class StLoggerManager : public StMessMgr {
    static const char *fgLevels;       //!
    // StMessTypeList* messTypeList;   //!
    // StMessageCounter* messCounter;  //!
-   char* fCurType;                    //!
+   unsigned char  fCurType;           //!
    char* fCurOpt;                     //!
 #ifndef __CINT__
    std::vector<std::string>  fSourceFileNames;
    std::string fLastMessage;
+   ostrstream fStreams[7];
 #endif
    int   fLineNumbers[10];
    int   fAllowRepeat;        // the total number one and the same message can be printed out
@@ -76,12 +77,13 @@ class StLoggerManager : public StMessMgr {
  protected:
    StLoggerManager(const char *loggerName="BFC");
    StLoggerManager(const StLoggerManager&);
-   virtual        void BuildMessage(const char* mess="", const char* type="",
+   virtual        void BuildMessage(const char* mess="", unsigned char type=0,
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1);
 #ifndef __CINT__
   void SetStarOptionFilter(const log4cxx::varia::StarOptionFilterPtr& filter);
   const log4cxx::varia::StarOptionFilterPtr& GetStarOptionFilter() const;
   log4cxx::varia::StarOptionFilterPtr& GetStarOptionFilter();
+  ostrstream &Stream();
 #endif
 
 protected:
@@ -203,7 +205,7 @@ protected:
    virtual ostrstream& Fatal(const char* mess="", const char* opt="F",const char *sourceFileName=0, int lineNumber=-1);
 
    //  "Extra Logger" methods
-   void PrintLogger(const char* mess, const char* type, const char* opt, const char *sourceFileName=0, int lineNumber=-1);
+   void PrintLogger(const char* mess, unsigned char type, const char* opt, const char *sourceFileName=0, int lineNumber=-1);
 
 #ifdef __ROOT__
    ClassDef(StLoggerManager,0)
@@ -232,4 +234,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.12 2008/05/15 23:40:23 fine Exp $
+// $Id: StLoggerManager.h,v 1.13 2008/05/19 15:08:21 fine Exp $
