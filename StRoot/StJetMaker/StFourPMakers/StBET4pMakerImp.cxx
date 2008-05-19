@@ -109,8 +109,6 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make(StEvent* event)
 {
-  LOG_DEBUG <<"StBET4pMakerImp::Make()"<<endm;
-
   fillBemcTowerHits(event);
 
   mSumEmcEt = sumEnergyOverBemcTowers(0.4);
@@ -120,13 +118,11 @@ void StBET4pMakerImp::Make(StEvent* event)
   //check for barrel corruption (only works for P04ik and later!
   if (mCorrupt) {
     tracks.clear();
-    LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\tFlag this as a corrupt event.  Clear 4-p container and return"<<endm;
     return;
   }
 
   if (mSumEmcEt > 200.) {
     tracks.clear();
-    LOG_DEBUG <<"StEmcTpcFourPMaker::Maker():\ttoo much energy:\t"<<mSumEmcEt<<"\tflag as corrupt. Clear 4-p container and return"<<endm;
     return;
   }
 
