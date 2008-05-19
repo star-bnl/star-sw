@@ -35,12 +35,9 @@ void StiTrackNodeHelper::set(double chi2Max,double chi2Vtx,double errConfidence,
   reset();
   mChi2Max = chi2Max;
   mChi2Vtx = chi2Vtx;
-  mNodeErrFactor = 10;
-  mHitsErrFactor = 1.;
-  if (errConfidence>0.1) {
-    mNodeErrFactor = (1./(errConfidence));
-    mHitsErrFactor = (1./(1. - errConfidence));
-  }
+  if (errConfidence<0.1) errConfidence=0.1;
+  mNodeErrFactor = (1./(errConfidence));
+  mHitsErrFactor = (1./(1. - errConfidence));
   mIter = iter;
   if (!mIter) mFlipFlopNode = 0;
 }
@@ -91,7 +88,6 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
                                      ,      StiNodePars &rotPars
 			             ,      StiNodePars &proPars)
 {
-  int ierr = 0;
   alpha = mTargetNode->_alpha - mParentNode->_alpha;
   ca=1;sa=0;
   parPars.check("1propagatePars");
@@ -115,8 +111,6 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     rotPars._sinCA /= nor;
     rotPars._eta= NICE(parPars._eta-alpha); 
   }// end of rotation part
-//   ierr = rotPars.check();
-//   if (ierr) return 1;
   
 //  	Propagation 
   x1 = rotPars._x;
@@ -146,14 +140,13 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   proPars._z= rotPars._z + dl*rotPars._tanl;
   proPars._eta = (rotPars._eta+rho*dl);  					
   proPars._eta = NICE(proPars._eta);  					
+  if (fabs(proPars._eta) >kMaxEta) return 1;
   proPars._ptin = rotPars._ptin;
   proPars._hz   = mTargetHz;
   proPars._curv = proPars._ptin*mTargetHz;
   proPars._tanl = rotPars._tanl;
   proPars._sinCA   = sinCA2;
   proPars._cosCA   = cosCA2;
-//   ierr = proPars.check();
-//   if (ierr) return 2;
   return 0;
 } 
 //______________________________________________________________________________
@@ -1023,7 +1016,7 @@ int StiTrackNodeHelper::nudge()
     pars->_cosCA -= pars->_sinCA *deltaE;
     pars->_sinCA += pars->_cosCA *deltaE;
     if (pars->_cosCA>=1.) pars->ready();
-    if (pars->check()) return 1;
+//VP    if (pars->check()) return 1;
   }
   return 0;
 }

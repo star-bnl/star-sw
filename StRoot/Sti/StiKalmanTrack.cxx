@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.108 2008/05/13 19:05:16 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.108 2008/05/13 19:05:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.109 2008/05/19 04:21:20 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.109 2008/05/19 04:21:20 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.109  2008/05/19 04:21:20  perev
+ * Fix asserts and cycling
+ *
  * Revision 2.108  2008/05/13 19:05:16  perev
  * more robust refit() and approx
  *
@@ -1316,7 +1319,7 @@ int StiKalmanTrack::refit()
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
-static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
+static double defConfidence = 0.1;
   double maxXi2    = StiKalmanTrackFitterParameters::instance()->getMaxChi2();
   double maxXi2Vtx = StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx();
 
@@ -1347,12 +1350,8 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
         inn = getInnerMostNode(3); fail=-1;continue;}	
       qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
       if (qA <1 && errConfidence>0.1) errConfidence = 0.1;
-      if (qA>0.01)		{fail=-2;continue;} 
-      if (sTNH.isCutStep())	{fail=-2;continue;} 
-
-      double info[2][8];
-      sTNH.mCurvQa.getInfo(info[0]);
-      sTNH.mTanlQa.getInfo(info[1]);
+      if (qA>0.1)		{fail=-2;continue;} 
+      if (sTNH.isCutStep())	{fail=-3;continue;} 
       break;
     }
     if (fail>0) 						break;
@@ -1449,26 +1448,37 @@ static int nCall=0;nCall++;
 
   StiKTNIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
-  int iNode=0, status = 0;
+  int iNode=0, status = 0,isStarted=0,restIsWrong=0;
   for (source=rbegin();(targetNode=source());++source) {
     iNode++;
-    if (!pNode && !targetNode->isValid()) 	continue;
-    targetNode->setReady();
+    if (restIsWrong) { targetNode->setInvalid();continue;}
+
+    if (!isStarted && !targetNode->isValid())	continue;
+    isStarted++;
+//		Even if target is not valid, may be it will 
+    if (!targetNode->isValid()) targetNode->setReady();
+
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
-    if (status) {targetNode->setInvalid();	continue;}
+    if (status) {restIsWrong = 2005; targetNode->setInvalid(); continue;}
     pNode = targetNode;
   }//end for of nodes
 
-  pNode = 0; iNode=0;
+    pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
   for (source=begin();(targetNode=source());++source) {
     iNode++;
-    if (!targetNode->isValid()) 		continue;
+    if (restIsWrong) { targetNode->setInvalid(); continue;}
+    if (!isStarted && !targetNode->isValid()) 	 continue;
+    isStarted++;
+//		Even if target is not valid, may be it will 
+    if (!targetNode->isValid()) targetNode->setReady();
+
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
-    if (status) {targetNode->setInvalid(); 	continue;}
+    if (status) {restIsWrong = 2005; targetNode->setInvalid(); continue;}
     pNode = targetNode;
   }//end for of nodes
+
   return 0;
 }
 //_____________________________________________________________________________
@@ -1488,19 +1498,18 @@ void StiKalmanTrack::unset()
 //_____________________________________________________________________________
 void StiKalmanTrack::print(const char *opt) const
 {
-  LOG_DEBUG <<
-    Form("Track %p",(void*)this) << endm;
+  if (!opt) opt="";
+  printf("Track %p\n",(void*)this);
 
   StiKTNIterator it;
   int n=0;
-  for (it=begin();it!=end();++it) {
-    StiKalmanTrackNode *node = &(*it);
+  StiKalmanTrackNode *node=0;
+  for (it=begin();(node=it());++it) {
     StiHit *hit = node->getHit();
     if (!hit && strchr(opt,'h')) continue;
     if (!hit && strchr(opt,'H')) continue;
     n++;
-    LOG_DEBUG << Form("%3d - ",n);
-    node->print(opt);
+    printf("%3d - ",n); node->print(opt);
   }
 }
 //#define APPROX_DEBUG

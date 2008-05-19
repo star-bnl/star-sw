@@ -624,7 +624,7 @@ static  const double ref1a  = 110.*degToRad;
       testNode.reduce();testNode.reset();
       testNode.setChi2(1e55);
       position = testNode.propagate(leadNode,tDet,direction);
-      if (position == kEnded) { continue;}
+      if (position == kEnded) 	{ gLevelOfFind--; return ;}
       if (debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
       if (debug() >= 1) StiKalmanTrackNode::PrintStep();
       if (position<0 || position>kEdgeZplus) { 
@@ -634,7 +634,7 @@ static  const double ref1a  = 110.*degToRad;
       }
       if (!direction) {
 	double dot = mBegXyz[0]*testNode.x_g()+ mBegXyz[1]*testNode.y_g();
-	if (dot<0) 		continue;
+	if (dot<0) 	     	{ gLevelOfFind--; return ;}
       }	 
       
 
@@ -645,7 +645,7 @@ static  const double ref1a  = 110.*degToRad;
       int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
       if (debug() > 2) cout << " vol active:" << active<<endl;
-      double maxChi2 = StiKalmanTrackFitterParameters::instance()->getMaxChi2()*10;
+      double maxChi2 = StiKalmanTrackFitterParameters::instance()->getMaxChi2()*3;
       StiHitContino hitCont;
 
       if (active) {
