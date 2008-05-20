@@ -145,6 +145,8 @@ public:
 
     static Double_t getPartonicALL(double s, double t, double u, int pid, int flavor1, int flavor2, int flavor3, int flavor4);
 
+    static Double_t getProtonA1(double x, double Q2);
+
     StMCAsymMaker(const char *name="MCAsym");
     virtual  ~StMCAsymMaker();
     virtual Int_t Init();
@@ -157,7 +159,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.8 2008/05/01 01:36:39 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.9 2008/05/20 21:10:51 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 
