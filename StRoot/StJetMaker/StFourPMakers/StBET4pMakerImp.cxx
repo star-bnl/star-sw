@@ -139,19 +139,17 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
 
   long nTracks = uDst->numberOfPrimaryTracks();
 
-  vector<StMuTrack*> trackList;
+  vector<pair<StMuTrack*, int> > trackiList;
 
   for(int i = 0; i < nTracks; ++i) {
     StMuTrack* track = uDst->primaryTracks(i);
 
-    trackList.push_back(track);
+    trackiList.push_back(make_pair(track, i));
+
   }
 
-  int i(-1);
-  for(vector<StMuTrack*>::iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    StMuTrack* track = *it;
-
-    ++i;
+  for(vector<pair<StMuTrack*, int> > ::iterator it = trackiList.begin(); it != trackiList.end(); ++it) {
+    StMuTrack* track = (*it).first;
 
     if (!isUsableTrack(*track)) continue;
 
@@ -167,7 +165,7 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
 
     //now construct StMuTrackFourVec object for jetfinding
     StSpinJet::StMuTrackEmuFactory factory;
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, track->charge(), i, kTpcId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, track->charge(), (*it).second, kTpcId);
     tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
   }
 }
