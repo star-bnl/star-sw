@@ -477,7 +477,6 @@ Int_t StMCAsymMaker::Make() {
     f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
     weight_NLO_DNS2=(df1_NLO_DNS2*df2_NLO_DNS2*partonic_all)/(f1_NLO*f2_NLO);
 
-
     if (0) {
       printf("LO:  df1_LO=%f, df2_LO=%f, f1_LO=%f, f2_LO=%f, weight_LO=%f\n",df1_LO,df2_LO,f1_LO,f2_LO,weight_LO);
       printf("NLO:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO,df2_NLO,f1_NLO,f2_NLO,weight_NLO);
@@ -1427,3 +1426,40 @@ Double_t StMCAsymMaker::getPartonicALL(double s, double t, double u, int sub, in
     return all;
 }
 
+Double_t StMCAsymMaker::getProtonA1(Double_t x,Double_t Q2){
+
+  // Virtual photon-nucleon asymmetry measured from deep inelatic scattering
+  // of polarized charged lepton beams from polarized targets. It is defined
+  // as the sum of polarized PDF weighted by charge square over the sum of
+  // unpolarized PDF weighted by charge square for all quark/antiquark flavors.
+
+  // Flavors are PDG codes for the quarks and gluons:
+  // down=1, up=2, strange=3, charm=4, bottom=5, top=6 
+  // The weights are proportional to the square of the  
+  // quark charge (in units of e) and indexed by flavor.
+  // d=-1/3, u=2/3, s=-1/3, c=2/3, b=-1/3, t=2/3.
+  // The PDG code for an antiquark is just the negative
+  // of its partner quark. The charge is also the negative
+  // of its partner quark charge, so the weights are the
+  // same for quarks and antiquarks. The PDF are GRSV-standard
+  
+  const float weights[] = { -1, 1, 4, 1, 4, 1, 4 };
+  float polSum = 0;
+  float unpolSum = 0;
+  for (int flavor = 1; flavor <= 6; ++flavor) 
+    {
+      Double_t polPdf = get_polPDF_NLO(flavor, x, Q2);
+      polPdf += get_polPDF_NLO(-flavor, x, Q2);
+      polPdf *= weights[flavor];
+      polSum += polPdf;
+      Double_t unpolPdf = get_unpolPDF_NLO(flavor, x, Q2);
+      unpolPdf += get_unpolPDF_NLO(-flavor, x, Q2);
+      unpolPdf *= weights[flavor];
+      unpolSum += unpolPdf;     
+    }
+  
+  Double_t A1 = polSum / unpolSum;
+  
+  return A1;
+
+}
