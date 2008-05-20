@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.20 2008/01/29 18:54:30 perev Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.21 2008/05/20 00:44:42 fine Exp $
 //
 // $log$
 //
@@ -438,24 +438,24 @@ static const char EW[4]={'E','W','p','n'};
   LOG_DEBUG << "Make()/Active Ladders: ";
   for (int i=0;i<mConfig->getTotalNumberOfLadders();i++){ 
     if (mConfig->getLadderIsActive(i+1)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<i+1<<" ";
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<i+1<<" ";
   } }
-  *gMessMgr<<endm;
+  LOG_DEBUG <<endm;
   LOG_DEBUG << "Make()/Counts (p-side): ";
   for (int i=0;i<mConfig->getTotalNumberOfLadders();i++){ 
     if (mConfig->getLadderIsActive(i+1)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<ladderCountP[i]<<" ";
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<ladderCountP[i]<<" ";
   } }
-  *gMessMgr<<endm;
+  LOG_DEBUG << endm;
   LOG_DEBUG << "Make()/Counts (n-side): "; 
   for (int i=0;i<mConfig->getTotalNumberOfLadders();i++){
     if (mConfig->getLadderIsActive(i+1)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<ladderCountN[i]<<" ";
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<ladderCountN[i]<<" ";
   } }
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
   if((spa_strip->GetNRows()==0)&&(ssdPedStrip && ssdPedStrip->GetNRows()!=0)){
     LOG_INFO << "Make()/ Read Pedestal & Noise"<< endm; 
     LOG_INFO << "Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm; 
@@ -504,17 +504,17 @@ void StSsdDaqMaker::PrintConfiguration(Int_t runumber,ssdConfiguration_st *confi
   Int_t totladderPresent =0;
   LOG_INFO << "PrintLadderSummary:ladder id                 :";
   for (i=1;i<=config->nMaxLadders;i++){ 
-    gMessMgr->width(3);
-    *gMessMgr<<i;
+    LOG_INFO.width(3);
+    LOG_INFO << i;
   }
-  *gMessMgr<<endm;
+  LOG_INFO <<endm;
   LOG_INFO << "PrintLadderSummary:Active Ladders on sectors: ";
   for (i=1;i<=config->nMaxLadders;i++){ 
-    gMessMgr->width(3);
-    *gMessMgr<<mConfig->getLadderIsActive(i);
+    LOG_INFO.width(3);
+    LOG_INFO <<mConfig->getLadderIsActive(i);
     if(mConfig->getLadderIsActive(i)>0)totladderPresent++;
 
   }
-  *gMessMgr<<endm;
+  LOG_INFO << endm;
   LOG_INFO << "totLadderActive = "<<totladderPresent<<endm; 
 }
