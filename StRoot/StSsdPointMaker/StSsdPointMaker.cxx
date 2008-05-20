@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.58 2008/05/07 22:45:24 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.59 2008/05/20 03:05:54 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.59  2008/05/20 03:05:54  bouchet
+// fix improper STAR logger(#1185) ; thanks to Valeri
+//
 // Revision 1.58  2008/05/07 22:45:24  bouchet
 // add mcEvent dependence for embedding
 //
@@ -652,25 +655,25 @@ void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
   LOG_INFO << "PrintStripSummary : Active Ladders : ";
   for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr<<i+1;
+      LOG_DEBUG.width(5);
+      LOG_DEBUG<<i+1;
     }
   
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
   LOG_INFO << "PrintStripSummary : Counts (p-side): ";
   for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<ladderCountP[i];
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<ladderCountP[i];
     }
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
   LOG_INFO << "PrintStripSummary : Counts (n-side): ";
   for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<ladderCountN[i];
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<ladderCountN[i];
     }
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
 }
 
 //_____________________________________________________________________________
@@ -699,25 +702,25 @@ void StSsdPointMaker::PrintClusterSummary(StSsdBarrel *mySsd)
   LOG_INFO << "PrintClusterSummary : Active Ladders : ";
   for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr<<i+1;
+      LOG_DEBUG.width(5);
+      LOG_DEBUG<<i+1;
     }
   
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
   LOG_INFO << "PrintClusterSummary : Counts (p-side): ";
   for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<ladderCountP[i];
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<ladderCountP[i];
     }
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
   LOG_INFO << "PrintClusterSummary : Counts (n-side): ";
   for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<ladderCountN[i];
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<ladderCountN[i];
     }
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
@@ -740,25 +743,25 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
   LOG_INFO<< "PrintPointSummary : Active Ladders : ";
   for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr<<i+1;
+      LOG_DEBUG.width(5);
+      LOG_DEBUG<<i+1;
     }
   
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
   LOG_INFO << "PrintPointSummary : Counts         : ";
   for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<ladderCount[i];
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<ladderCount[i];
     }
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
   LOG_INFO << "PrintPointSummary : Counts  (11)   : ";
   for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
-      gMessMgr->width(5);
-      *gMessMgr <<ladderCount11[i];
+      LOG_DEBUG.width(5);
+      LOG_DEBUG <<ladderCount11[i];
     }
-  *gMessMgr<<endm;
+  LOG_DEBUG<<endm;
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::WriteStripTuple(StSsdBarrel *mySsd)
