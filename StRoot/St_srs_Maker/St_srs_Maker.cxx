@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.40 2008/04/02 20:46:31 perev Exp $
+//$Id: St_srs_Maker.cxx,v 1.41 2008/05/21 19:09:30 fine Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.41  2008/05/21 19:09:30  fine
+//fix the STAR messager interface # 1190
+//
 //Revision 1.40  2008/04/02 20:46:31  perev
 //Debug level for ls() increased
 //
@@ -190,7 +193,7 @@ Int_t St_srs_Maker::InitRun(Int_t runnuber) {
 
    if (!m_geom) {
      if (!(m_shape && m_config)){
-       cout << " St_srs_Maker::InitRun svt/svgpars/geom do not exist" << endl;
+       LOG_INFO  << " St_srs_Maker::InitRun svt/svgpars/geom do not exist" << endm;
      }
      else {
        m_geom = new St_svg_geom("geom",216);
@@ -215,7 +218,7 @@ Int_t St_srs_Maker::InitRun(Int_t runnuber) {
    direct.sd = TMath::Sqrt(SsdHitErrors->coeff[0]);
    direct.st = TMath::Sqrt(SsdHitErrors->coeff[3]);
    m_srs_direct->AddAt(&direct.sd,1);
-   cout << "Replace hit errors from Calibrations/tracker/(ssd|svt)HitError" << endl;
+   LOG_INFO << "Replace hit errors from Calibrations/tracker/(ssd|svt)HitError" << endm;
    m_srs_direct->Print(0,2);
    //   Get Bad Anodes
 
@@ -231,13 +234,13 @@ Int_t St_srs_Maker::GetBadAnodes()
   
   dataSet = GetDataSet("StSvtBadAnodes");
   if( !dataSet) {
-    gMessMgr->Warning() << " No Svt Bad Anodes data set" << endm;
+    LOG_WARN << " No Svt Bad Anodes data set" << endm;
     return kStWarn;
   }
 
   mSvtBadAnodes = (StSvtHybridCollection*)(dataSet->GetObject());
   if( !mSvtBadAnodes) {
-    gMessMgr->Warning() << " No Svt Bad Anodes data " << endm;
+    LOG_WARN << " No Svt Bad Anodes data " << endm;
     return kStWarn;
   }
   return kStOK;
@@ -277,7 +280,7 @@ Int_t St_srs_Maker::Make()
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtGeometry");
   if(!dataSet) {
-    gMessMgr->Error("Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    LOG_ERROR << "Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!!" << endm;
     
     return kStOK;
   }
@@ -345,7 +348,7 @@ Int_t St_srs_Maker::Make()
 	
 	if( WaferCoord.timebucket() < 0. || WaferCoord.timebucket() > MaxTimeBucket){
 	  spc->flag = 7;
-	  gMessMgr->Warning() << " Moved hit off of wafer" << endl;
+	  LOG_WARN << " Moved hit off of wafer" << endm;
 	}
 	else{
 	  mCoordTransform->operator()(WaferCoord,GlobalCoord);
@@ -353,7 +356,7 @@ Int_t St_srs_Maker::Make()
 	  
 	  if( GlobalCoord.position().x() < -99){
 	    spc->flag = 8;
-	    cout << " Moved hit off of wafer" << endl;
+	    LOG_INFO << " Moved hit off of wafer" << endm;
 	  }
 	}
 	
@@ -469,7 +472,7 @@ Int_t St_srs_Maker::setConfig(StSvtConfig* config)
 Int_t St_srs_Maker::setConfig(const char* config)
 {
 
-  gMessMgr->Message() <<"St_srs_Maker:Setting configuration to "<< config << endm;
+  LOG_INFO << "St_srs_Maker:Setting configuration to "<< config << endm;
   mConfigString = config;
   return kStOK;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.10 2002/05/06 00:36:12 munhoz Exp $
+ * $Id: StSvtConfig.cc,v 1.11 2008/05/21 19:09:30 fine Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.11  2008/05/21 19:09:30  fine
+ * fix the STAR messager interface # 1190
+ *
  * Revision 1.10  2002/05/06 00:36:12  munhoz
  * correct hybrid swapping
  *
@@ -166,8 +169,9 @@ void StSvtConfig::setConfiguration(const char* config)
     setNumberOfHybrids(2);
     setTotalNumberOfHybrids(432);
   }
-  else
-    gMessMgr->Message("Configuration of SVT not defined! It must be SYST, Y1L or FULL","E");
+  else {
+    LOG_ERROR << "Configuration of SVT not defined! It must be SYST, Y1L or FULL"<< endm;
+ }
 }
 
 const char* StSvtConfig::getConfiguration()
@@ -214,8 +218,8 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
     break;
     
   default:
-    gMessMgr->Error() << "There is NO barrel number " << barrelID << " !!!";
-    gMessMgr->Print();
+    LOG_ERROR << "There is NO barrel number " << barrelID << " !!!" << endm;
+    // gMessMgr->Print();
     index = -1;
     break;
   }
