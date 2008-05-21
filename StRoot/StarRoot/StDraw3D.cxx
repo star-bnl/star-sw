@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.31 2008/05/21 01:15:54 fine Exp $
+// $Id: StDraw3D.cxx,v 1.32 2008/05/21 01:21:30 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -523,6 +523,16 @@ void StDraw3D::Draw3DTest(){
 //______________________________________________________________________________
 void StDraw3D::ShowTest()
 {
+    // More complex test.
+    //
+    // It creates TWO different widgets
+    // One is decorated with the detector geometry, 
+    // another one "plain"
+    //
+    // Method does not recreate the widgets when it is called 
+    // for several times
+    //
+    // It creates the widget at once and reuses it with each call.
 
    static StDraw3D *fine[2]={0};
    if (!fine[0]) {
