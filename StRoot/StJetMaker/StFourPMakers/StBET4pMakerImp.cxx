@@ -178,16 +178,18 @@ bool StBET4pMakerImp::isUsableTrack(const StMuTrack& track) const
     if (track.dcaGlobal().mag() > 3.)
       return false;
       
-    int dcaFlag=1;
+    //    int dcaFlag=1;
     if (mUse2006Cuts){
       Double_t limit=3.-2.*track.pt();
-      if(!((track.pt()<0.5&&track.dcaGlobal().mag()<=2.) ||
-	   ((track.pt()>=0.5&&track.pt()<1.0)&&
-	    track.dcaGlobal().mag()<=limit) ||
-	   (track.pt()>=1.0&&track.dcaGlobal().mag()<=1.0))) dcaFlag=0;
+      if(
+	 
+	 !(track.pt()<0.5&&track.dcaGlobal().mag()<=2.) && !((track.pt()>=0.5&&track.pt()<1.0) && track.dcaGlobal().mag()<=limit) && !(track.pt()>=1.0&&track.dcaGlobal().mag()<=1.0)
+	 
+	 ) 
+	return false;
     }
-    if(dcaFlag == 0)
-      return false;
+    //    if(dcaFlag == 0)
+    //      return false;
 
     if(track.eta() < GetEtaLow())
       return false;
