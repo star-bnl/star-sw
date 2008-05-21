@@ -135,11 +135,29 @@ void StBET4pMakerImp::Make(StEvent* event)
 
 void StBET4pMakerImp::collectChargedTracksFromTPC()
 {
+  TrackList trackiList = getTracksFromTPC();
+
+  TrackList trackiList2 = selectTracksToPassToJetFinder(trackiList);
+
+
+  for(TrackList::const_iterator it = trackiList2.begin(); it != trackiList2.end(); ++it) {
+    const StMuTrack* track = (*it).first;
+    countTracksOnBemcTower(*track);
+  }
+
+  FourList trackList3 = constructFourMomentumListFrom(trackiList2);
+
+  tracks.insert(tracks.end(), trackList3.begin(), trackList3.end());
+}
+
+
+StBET4pMakerImp::TrackList StBET4pMakerImp::getTracksFromTPC()
+{
+  TrackList ret;
+
   StMuDst* uDst = mMuDstMaker->muDst();
 
   long nTracks = uDst->numberOfPrimaryTracks();
-
-  vector<pair<const StMuTrack*, int> > trackiList;
 
   for(int i = 0; i < nTracks; ++i) {
     const StMuTrack* track = uDst->primaryTracks(i);
@@ -148,41 +166,25 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
 
     if(track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) continue;
 
-    trackiList.push_back(make_pair(track, i));
+    ret.push_back(make_pair(track, i));
   }
 
-  vector<pair<const StMuTrack*, int> > trackiList2;
+  return ret;
+}
 
-  for(vector<pair<const StMuTrack*, int> >::iterator it = trackiList.begin(); it != trackiList.end(); ++it) {
+StBET4pMakerImp::TrackList StBET4pMakerImp::selectTracksToPassToJetFinder(const TrackList& trackList)
+{
+  TrackList ret;
+
+  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     const StMuTrack* track = (*it).first;
 
     if (shoudNotPassToJetFinder(*track)) continue;
 
-    trackiList2.push_back(make_pair((*it).first, (*it).second));
+    ret.push_back(make_pair((*it).first, (*it).second));
   }
 
-  FourList trackList3;
-
-  for(vector<pair<const StMuTrack*, int> >::iterator it = trackiList2.begin(); it != trackiList2.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-
-    countTracksOnBemcTower(*track);
-
-    //construct four momentum
-    StThreeVectorF momentum = track->momentum();
-    double mass = 0.1395700; //assume pion+ mass for now
-    float energy = sqrt(mass*mass + momentum.mag()*momentum.mag());
-    //    StLorentzVectorF p4(energy, momentum);
-
-    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
-
-    //now construct StMuTrackFourVec object for jetfinding
-    StSpinJet::StMuTrackEmuFactory factory;
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, track->charge(), (*it).second, kTpcId);
-    trackList3.push_back(pmu);
-  }
-
-  tracks.insert(tracks.end(), trackList3.begin(), trackList3.end());
+  return ret;
 }
 
 bool StBET4pMakerImp::shoudNotPassToJetFinder(const StMuTrack& track) const
@@ -210,6 +212,26 @@ bool StBET4pMakerImp::shoudNotPassToJetFinder(const StMuTrack& track) const
       return true;
 
   return false;
+}
+
+FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackList)
+{
+  FourList ret;
+
+  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+    const StMuTrack* track = (*it).first;
+
+    StThreeVectorF momentum = track->momentum();
+    double mass = 0.1395700; //assume pion+ mass for now
+    float energy = sqrt(mass*mass + momentum.mag()*momentum.mag());
+
+    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
+
+    StSpinJet::StMuTrackEmuFactory factory;
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, track->charge(), (*it).second, kTpcId);
+    ret.push_back(pmu);
+  }
+  return ret;
 }
 
 void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
