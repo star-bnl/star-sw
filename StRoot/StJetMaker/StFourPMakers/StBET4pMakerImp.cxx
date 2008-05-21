@@ -144,8 +144,11 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
   for(int i = 0; i < nTracks; ++i) {
     StMuTrack* track = uDst->primaryTracks(i);
 
-    trackiList.push_back(make_pair(track, i));
+    if(track->flag() < 0) continue;
 
+    if(track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) continue;
+
+    trackiList.push_back(make_pair(track, i));
   }
 
   for(vector<pair<StMuTrack*, int> > ::iterator it = trackiList.begin(); it != trackiList.end(); ++it) {
@@ -172,9 +175,6 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
 
 bool StBET4pMakerImp::isUsableTrack(const StMuTrack& track) const
 {
-    if(track.flag() < 0) 
-      return false;
-
     if (track.dcaGlobal().mag() > 3.)
       return false;
       
@@ -187,9 +187,6 @@ bool StBET4pMakerImp::isUsableTrack(const StMuTrack& track) const
 	   (track.pt()>=1.0&&track.dcaGlobal().mag()<=1.0))) dcaFlag=0;
     }
     if(dcaFlag == 0)
-      return false;
-
-    if (track.topologyMap().trackFtpcEast() || track.topologyMap().trackFtpcWest())
       return false;
 
     if(track.eta() < GetEtaLow())
