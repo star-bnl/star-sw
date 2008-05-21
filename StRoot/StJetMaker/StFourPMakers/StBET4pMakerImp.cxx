@@ -139,10 +139,10 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
 
   long nTracks = uDst->numberOfPrimaryTracks();
 
-  vector<pair<StMuTrack*, int> > trackiList;
+  vector<pair<const StMuTrack*, int> > trackiList;
 
   for(int i = 0; i < nTracks; ++i) {
-    StMuTrack* track = uDst->primaryTracks(i);
+    const StMuTrack* track = uDst->primaryTracks(i);
 
     if(track->flag() < 0) continue;
 
@@ -151,10 +151,10 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
     trackiList.push_back(make_pair(track, i));
   }
 
-  vector<pair<StMuTrack*, int> > trackiList2;
+  vector<pair<const StMuTrack*, int> > trackiList2;
 
-  for(vector<pair<StMuTrack*, int> >::iterator it = trackiList.begin(); it != trackiList.end(); ++it) {
-    StMuTrack* track = (*it).first;
+  for(vector<pair<const StMuTrack*, int> >::iterator it = trackiList.begin(); it != trackiList.end(); ++it) {
+    const StMuTrack* track = (*it).first;
 
     if (shoudNotPassToJetFinder(*track)) continue;
 
@@ -163,8 +163,8 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
 
   FourList trackList3;
 
-  for(vector<pair<StMuTrack*, int> >::iterator it = trackiList2.begin(); it != trackiList2.end(); ++it) {
-    StMuTrack* track = (*it).first;
+  for(vector<pair<const StMuTrack*, int> >::iterator it = trackiList2.begin(); it != trackiList2.end(); ++it) {
+    const StMuTrack* track = (*it).first;
 
     countTracksOnBemcTower(*track);
 
