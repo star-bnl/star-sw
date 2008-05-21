@@ -70,9 +70,12 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
   }
 
   StThreeVectorF pvert = primVtx->position();
+  StThreeVectorF epvert = primVtx->positionError();
   zvertex = pvert.z();
   yvertex = pvert.y();
   xvertex = pvert.x();
+  eyvertex = epvert.y();
+  exvertex = epvert.x();
   mult = (float)(primVtx->numberOfDaughters());
   rank = primVtx->ranking();
 
@@ -102,14 +105,17 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.3 2007/05/16 02:59:25 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.4 2008/05/21 17:48:38 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.3 2007/05/16 02:59:25 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.4 2008/05/21 17:48:38 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.4  2008/05/21 17:48:38  genevb
+// Use vertex errors for weighting
+//
 // Revision 1.3  2007/05/16 02:59:25  genevb
 // printf => LOG_INFO
 //
