@@ -56,7 +56,7 @@ public:
 private:
 
   void collectChargedTracksFromTPC();
-  bool isUsableTrack(const StMuTrack& track) const;
+  bool shoudNotPassToJetFinder(const StMuTrack& track) const;
   void countTracksOnBemcTower(const StMuTrack& track);
 
   void collectEnergyFromBEMC();
