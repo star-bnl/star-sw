@@ -59,7 +59,10 @@ private:
   bool shoudNotPassToJetFinder(const StMuTrack& track) const;
   void countTracksOnBemcTower(const StMuTrack& track);
 
-  //  std::vector<std::pair<StMuTrack*, int> >
+  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
+  TrackList getTracksFromTPC();
+  TrackList selectTracksToPassToJetFinder(const TrackList& trackList);
+  FourList constructFourMomentumListFrom(const TrackList& trackList);
 
   void collectEnergyFromBEMC();
   double correctBemcTowerEnergyForTracks(double energy, int bemcTowerId);
