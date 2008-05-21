@@ -151,10 +151,20 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
     trackiList.push_back(make_pair(track, i));
   }
 
-  for(vector<pair<StMuTrack*, int> > ::iterator it = trackiList.begin(); it != trackiList.end(); ++it) {
+  vector<pair<StMuTrack*, int> > trackiList2;
+
+  for(vector<pair<StMuTrack*, int> >::iterator it = trackiList.begin(); it != trackiList.end(); ++it) {
     StMuTrack* track = (*it).first;
 
     if (shoudNotPassToJetFinder(*track)) continue;
+
+    trackiList2.push_back(make_pair((*it).first, (*it).second));
+  }
+
+  FourList trackList3;
+
+  for(vector<pair<StMuTrack*, int> >::iterator it = trackiList2.begin(); it != trackiList2.end(); ++it) {
+    StMuTrack* track = (*it).first;
 
     countTracksOnBemcTower(*track);
 
@@ -169,8 +179,10 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
     //now construct StMuTrackFourVec object for jetfinding
     StSpinJet::StMuTrackEmuFactory factory;
     StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, track->charge(), (*it).second, kTpcId);
-    tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
+    trackList3.push_back(pmu);
   }
+
+  tracks.insert(tracks.end(), trackList3.begin(), trackList3.end());
 }
 
 bool StBET4pMakerImp::shoudNotPassToJetFinder(const StMuTrack& track) const
