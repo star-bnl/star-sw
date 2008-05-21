@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.109 2008/05/19 04:21:20 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.109 2008/05/19 04:21:20 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.110 2008/05/21 05:03:49 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.110 2008/05/21 05:03:49 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.110  2008/05/21 05:03:49  perev
+ * additional check for accepted nodes in refitL
+ *
  * Revision 2.109  2008/05/19 04:21:20  perev
  * Fix asserts and cycling
  *
@@ -1448,7 +1451,7 @@ static int nCall=0;nCall++;
 
   StiKTNIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
-  int iNode=0, status = 0,isStarted=0,restIsWrong=0;
+  int iNode=0, status = 0,isStarted=0,restIsWrong=0,nGood=0;
   for (source=rbegin();(targetNode=source());++source) {
     iNode++;
     if (restIsWrong) { targetNode->setInvalid();continue;}
@@ -1461,10 +1464,12 @@ static int nCall=0;nCall++;
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
     if (status) {restIsWrong = 2005; targetNode->setInvalid(); continue;}
+    nGood++;
     pNode = targetNode;
   }//end for of nodes
-
-    pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
+  if (nGood<3) return 1;
+  
+  pNode = 0; iNode=0;isStarted=0;restIsWrong=0,nGood=0;
   for (source=begin();(targetNode=source());++source) {
     iNode++;
     if (restIsWrong) { targetNode->setInvalid(); continue;}
@@ -1476,10 +1481,11 @@ static int nCall=0;nCall++;
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
     if (status) {restIsWrong = 2005; targetNode->setInvalid(); continue;}
+    nGood++;
     pNode = targetNode;
   }//end for of nodes
 
-  return 0;
+  return nGood<3;
 }
 //_____________________________________________________________________________
 void StiKalmanTrack::reduce() 
