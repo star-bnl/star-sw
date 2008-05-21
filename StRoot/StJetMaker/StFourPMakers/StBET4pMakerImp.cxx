@@ -154,7 +154,7 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
   for(vector<pair<StMuTrack*, int> > ::iterator it = trackiList.begin(); it != trackiList.end(); ++it) {
     StMuTrack* track = (*it).first;
 
-    if (!isUsableTrack(*track)) continue;
+    if (shoudNotPassToJetFinder(*track)) continue;
 
     countTracksOnBemcTower(*track);
 
@@ -173,34 +173,31 @@ void StBET4pMakerImp::collectChargedTracksFromTPC()
   }
 }
 
-bool StBET4pMakerImp::isUsableTrack(const StMuTrack& track) const
+bool StBET4pMakerImp::shoudNotPassToJetFinder(const StMuTrack& track) const
 {
     if (track.dcaGlobal().mag() > 3.)
-      return false;
+      return true;
       
-    //    int dcaFlag=1;
     if (mUse2006Cuts){
-      Double_t limit=3.-2.*track.pt();
-      if(
-	 
-	 !(track.pt()<0.5&&track.dcaGlobal().mag()<=2.) && !((track.pt()>=0.5&&track.pt()<1.0) && track.dcaGlobal().mag()<=limit) && !(track.pt()>=1.0&&track.dcaGlobal().mag()<=1.0)
-	 
-	 ) 
-	return false;
+      if(track.pt() < 0.5) {
+	if(track.dcaGlobal().mag() > 2.0) return true;
+      } else if(track.pt() < 1.0) {
+	if(track.dcaGlobal().mag() > 3.-2.*track.pt()) return true;
+      } else {
+	if(track.dcaGlobal().mag() > 1.0) return true;
+      }
     }
-    //    if(dcaFlag == 0)
-    //      return false;
 
     if(track.eta() < GetEtaLow())
-      return false;
+      return true;
 
     if(track.eta() > GetEtaHigh())
-      return false;
+      return true;
 
     if(static_cast<double>(track.nHits())/static_cast<double>(track.nHitsPoss()) < .51)
-      return false;
+      return true;
 
-  return true;
+  return false;
 }
 
 void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
