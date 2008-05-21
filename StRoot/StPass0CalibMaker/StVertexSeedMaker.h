@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.9 2008/04/29 23:30:34 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.10 2008/05/21 17:48:39 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -52,7 +52,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.9 2008/04/29 23:30:34 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.10 2008/05/21 17:48:39 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -78,6 +78,8 @@ class StVertexSeedMaker : public StMaker {
   float zvertex;
   float yvertex;
   float xvertex;
+  float eyvertex;
+  float exvertex;
   float mult;
   float trig;
   float eventNumber;
@@ -104,7 +106,6 @@ class StVertexSeedMaker : public StMaker {
   double a[4];  // database params
   double ea[4]; // database errs
   double chi;
-  double weight;
   TString defDir;
   St_vertexSeedTriggers* dbTriggersTable;
 
@@ -126,8 +127,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.9 2008/04/29 23:30:34 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.10 2008/05/21 17:48:39 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.10  2008/05/21 17:48:39  genevb
+// Use vertex errors for weighting
+//
 // Revision 1.9  2008/04/29 23:30:34  genevb
 // Added cuts capability to Aggregate
 //
