@@ -1428,6 +1428,7 @@ Double_t StMCAsymMaker::getPartonicALL(double s, double t, double u, int sub, in
 
 Double_t StMCAsymMaker::getProtonA1(Double_t x,Double_t Q2){
 
+  // This piece coded by Pibero
   // Virtual photon-nucleon asymmetry measured from deep inelatic scattering
   // of polarized charged lepton beams from polarized targets. It is defined
   // as the sum of polarized PDF weighted by charge square over the sum of
@@ -1443,9 +1444,10 @@ Double_t StMCAsymMaker::getProtonA1(Double_t x,Double_t Q2){
   // of its partner quark charge, so the weights are the
   // same for quarks and antiquarks. The PDF are GRSV-standard
   
-  const float weights[] = { -1, 1, 4, 1, 4, 1, 4 };
-  float polSum = 0;
-  float unpolSum = 0;
+  const Double_t weights[] = { -1, 1, 4, 1, 4, 1, 4 };
+  Double_t polSum = 0;
+  Double_t unpolSum = 0;
+
   for (int flavor = 1; flavor <= 6; ++flavor) 
     {
       Double_t polPdf = get_polPDF_NLO(flavor, x, Q2);
