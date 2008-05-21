@@ -206,7 +206,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       rank = pvtx->ranking();
     }
   }
-  if (!pvtx || pvtx->numberOfDaughters()<10) return kStOk;
+  if (!pvtx) return kStOk;
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   unsigned int nnodes = theNodes.size();
   if (!nnodes) return kStOk;
@@ -292,18 +292,14 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
           Float_t eta=pvec.pseudoRapidity();
           //Float_t DCA=hh.geometricSignedDistance(0,0); // for testing only
-          Float_t DCA3=-999;
-          Float_t DCA2=-999;
+          Float_t DCA=0;
           StDcaGeometry* triDcaGeom = ((StGlobalTrack*) tri)->dcaGeometry();
           if (triDcaGeom) {
             StPhysicalHelixD dcahh = triDcaGeom->helix();
-            DCA3 = dcahh.distance(ooo,kFALSE);
-            DCA2 = dcahh.geometricSignedDistance(ooo.x(),ooo.y());
+            DCA=dcahh.geometricSignedDistance(ooo.x(),ooo.y());
           } else {
-            DCA3 = hh.distance(ooo,kFALSE);
-            DCA2 = hh.geometricSignedDistance(ooo.x(),ooo.y());
+            DCA=hh.geometricSignedDistance(ooo.x(),ooo.y());
           }
-          if (DCA3 > 4) continue; // cut out pileup tracks!
           Int_t ch = (int) triGeom->charge();
 
           Float_t rerrors[64];
@@ -334,12 +330,12 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           
           Float_t space = 10000.;
           if (!(m_ExB->PredictSpaceChargeDistortion(ch,oldPt,ooo.z(),
-	  //   eta,DCA2,map.data(0),map.data(1),space))) continue;
-	     eta,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
+	  //   eta,DCA,map.data(0),map.data(1),space))) continue;
+	     eta,DCA,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
 
 	  space += lastsc;  // Assumes additive linearity of space charge!
 	  schists[curhist]->Fill(space);
-          FillQAHists(DCA2,space,ch,hh,e_or_w);
+          FillQAHists(DCA,space,ch,hh,e_or_w);
 
 
           if ((doGaps) &&
@@ -592,7 +588,6 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
     dcahist  = new TH3F("DcaEvt","psDCA vs. Phi vs. Event",
 			EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
     dczhist  = new TH2F("DcaZ","psDCA vs. Z",
-			//80,-200,200,250,-5.0,5.0);
 			ZN,ZL,ZH,DCN,DCL,DCH);
     myhistN  = new TH3F("SpcEvtN","SpaceCharge vs. Phi vs. Event Neg",
 			EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
@@ -910,11 +905,8 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.17 2008/04/30 14:52:15 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.16 2008/01/14 19:22:49 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
-// Revision 1.17  2008/04/30 14:52:15  genevb
-// Reduce pileup contributions
-//
 // Revision 1.16  2008/01/14 19:22:49  genevb
 // Fine tuning of parameters, removal of excess text in messages
 //

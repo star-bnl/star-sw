@@ -1,9 +1,0 @@
-StPi0Simulation
-
-----------------------------------------------------------------------------
-This is a part of pi0 analysis code.
-See StPi0Common/README for details.
-----------------------------------------------------------------------------
-
-There is no source code here, the Monte-Carlo simulation is done by running 'starsim'
-to produce *.fzd files, then running bfc.C to produce the reconstructed data.
