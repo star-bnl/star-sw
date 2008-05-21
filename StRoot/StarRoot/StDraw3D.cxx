@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.30 2008/05/20 20:06:46 fine Exp $
+// $Id: StDraw3D.cxx,v 1.31 2008/05/21 01:15:54 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -46,7 +46,7 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
    ivrootDir +=   "/lib/";
    gSystem->ExpandPathName(ivrootDir);
    static bool CheckCoin = false;
-   if (!gSystem->AccessPathName(ivrootDir.Data())) {
+   if (!CheckCoin && !gSystem->AccessPathName(ivrootDir.Data())) {
       if (     !gSystem->Load(ivrootDir+"libCoin") 
             && !gSystem->Load(ivrootDir+"libSoQt")
             && !gSystem->Load(ivrootDir+"libSmallChange"));
@@ -261,7 +261,6 @@ void  StDraw3D::Clear(Option_t *opt)
    TVirtualPad *pad = Pad();
    if (pad) {
       pad->Clear(opt);
-      Modified();
       Update();
    }
 }
@@ -275,6 +274,7 @@ TObject *StDraw3D::Draw(TObject *o)
       TVirtualPad *sav = gPad;
       if (!Pad())        InitPad();
       if (Pad() != sav)  Pad()->cd();
+      assert (fPad==gPad);
       o->Draw();
       if (sav && (Pad() != sav)) sav->cd();
       if (!Viewer()) InitViewer();
@@ -467,14 +467,28 @@ void StDraw3D::AddComment(const char *cmnt)
 void StDraw3D::Update()
 {
    TVirtualPad *pad = Pad();
-   if (pad) pad->Update();
+   if (pad) {
+      TVirtualPad *sav = gPad;
+      if (pad != sav)  pad->cd();
+      assert (pad==gPad);
+      pad->Update();
+      if (sav && (pad != sav)) sav->cd();
+   }
 }
 
 //___________________________________________________
 void StDraw3D::Modified()
 {
+   // One doesn't need to call this method
+   // because one can not change any object yet
    TVirtualPad *pad = Pad();
-   if (pad) pad->Modified();
+   if (pad) {
+      TVirtualPad *sav = gPad;
+      if (pad != sav)  pad->cd();
+      assert (pad==gPad);
+      pad->Modified();
+      if (sav && (pad != sav)) sav->cd();
+   }
 }
 
 //___________________________________________________
@@ -510,10 +524,14 @@ void StDraw3D::Draw3DTest(){
 void StDraw3D::ShowTest()
 {
 
-static StDraw3D *fine[2]={0};
-if (!fine[0]) {fine[0] = new StDraw3D;fine[1] = new StDraw3D(0,0);}
-fine[0]->Clear();
-fine[1]->Clear();
+   static StDraw3D *fine[2]={0};
+   if (!fine[0]) {
+      fine[0] = new StDraw3D;
+      fine[1] = new StDraw3D(0);// View with no detector geometry decoration
+   } else {
+      fine[0]->Clear();
+      fine[1]->Clear();
+   }
 //        P  G         P  G
   float NodX[100][3]= {{189.195,       27.951,       123.966}
                       ,{187.195,       28.6187,      122.89 }
@@ -553,11 +571,17 @@ fine[1]->Clear();
                       ,{171.195+5       ,33.8552+10      ,114.016-50}};
   int nN=9,nH=9;
   // Draw the test points
-  fine[0]->Line  (nN, NodX[0], kGlobalTrack);
   fine[0]->Points(nH, HitX[0], kVtx);
-
-  fine[1]->Line  (nN, NodL[0], kGlobalTrack);
+  fine[0]->SetComment("Hits and Geometry");
+  
+  fine[0]->Line  (nN, NodX[0], kGlobalTrack);  
+  fine[0]->SetComment("Track and Geometry");
+  
   fine[1]->Points(nH, HitL[0], kVtx);
-  for (int i=0;i<2;i++) {fine[i]->Modified(); fine[i]->Update();}
+  fine[1]->SetComment("Hits no Geometry");
+  
+  fine[1]->Line  (nN, NodL[0], kGlobalTrack);
+  fine[1]->SetComment("Track no Geometry");
+  for (int i=0;i<2;i++) { fine[i]->Modified(); fine[i]->Update();}
 //  while(!gSystem->ProcessEvents()){}; 
 }
