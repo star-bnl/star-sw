@@ -174,8 +174,8 @@ struct rtsMonEVB_supertask {
   u_int gb_all;     // total disk space
 
   // RCF
-  u_int mb_sent;     // sent within last 15 minutes
-  u_int mb_waiting;  // waiting to be sent
+  u_int files_sent;     // sent within last resets on the hour
+  u_int files_waiting;  // waiting to be sent
 
   // By trigger Information
   struct {
