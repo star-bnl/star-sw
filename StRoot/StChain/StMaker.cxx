@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.207 2008/03/20 18:59:35 perev Exp $
+// $Id: StMaker.cxx,v 1.208 2008/05/22 16:22:34 fine Exp $
 //
 //
 /*!
@@ -1037,7 +1037,9 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
 void StMaker::PrintInfo() 
 {
    const char *cvs = GetCVS();
-   const char *built = strstr(cvs,"built");
+   const char *built = 0;
+   if (cvs && cvs[0]) built = strstr(cvs,"built");
+   else cvs = "No CVS tag was defined";
 #ifdef STAR_LOGGER       
    if (built > cvs) LOG_QA << Form("QAInfo:%-20s %s from %.*s",ClassName(),built,built-cvs,cvs)<< endm;
    else             LOG_QA << Form("QAInfo:%-20s    from %s",ClassName(),cvs) << endm;
@@ -1846,6 +1848,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.208  2008/05/22 16:22:34  fine
+// Protection against of the carsh with cvs=0, Issue #1005
+//
 // Revision 1.207  2008/03/20 18:59:35  perev
 // upgr15 added
 //
