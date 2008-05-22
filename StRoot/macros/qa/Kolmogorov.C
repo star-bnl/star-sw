@@ -1,5 +1,40 @@
 // $ID:$
 // Compare with Kolmogorov test set of QA Histogram into *.hist.root files
+//________________________________________________________________________________
+#if !defined(__CINT__) || defined(__MAKECINT__)
+#include "Riostream.h"
+#include <stdio.h>
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TMath.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TH3.h"
+#include "TStyle.h"
+#include "TF1.h"
+#include "TProfile.h"
+#include "TTree.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TNtuple.h"
+#include "TCanvas.h"
+#include "TFileSet.h"
+#include "TDataSetIter.h"
+#include "TDataSet.h"
+#include "TDataSetIter.h"
+#include "TClassTable.h"
+//#include "DeDxTree.C"
+#include "TMinuit.h"
+#include "TSpectrum.h"
+#include "TString.h"
+#include "TLine.h"
+#include "TText.h"
+#include "TList.h"
+#include "TPolyMarker.h"
+#include "TKey.h"
+#include "TLegend.h"
+#include "StTree.h"
+#endif
 TCanvas *c1 = 0;
 TFile *F12[2] = {0,0};
 //________________________________________________________________________________
@@ -8,13 +43,19 @@ void Kolmogorov(const Char_t *file1 = "", const Char_t *file2 = "",
 		Bool_t allProc = kTRUE,
 		Bool_t makePNG = kTRUE,
 		Double_t probCut = 1.e-2) {
-  
+  TString File1(file1);
+  TString File2(file2);
+  if (File1 == "" && File2 == "") {
+    cout << "Usage: " << endl;
+    cout << "root.exe \'Kolmogorov.C+("
+	 << "\"/star/rcf/test/dev/trs_sl302/Tue/year_2005/cucu200_minbias/rcf1216_05_200evts.hist.root\","
+	 << "\"/star/rcf/test/dev/trs_sl302/Wed/year_2005/cucu200_minbias/rcf1216_05_200evts.hist.root\")\'" << endl;
+    return;
+  }
   if ( gClassTable->GetID("StIOEvent") < 0) { 
     gSystem->Load("St_base");
     gSystem->Load("StUtilities");
   }
-  TString File1(file1);
-  TString File2(file2);
   TString HistName(histName);
   cout << "Run Kolmogorov Test for files:" << File1 << " and " << File2;
   if (HistName != "") cout << " for Histogram: " << HistName;
@@ -25,30 +66,50 @@ void Kolmogorov(const Char_t *file1 = "", const Char_t *file2 = "",
   if (makePNG)        cout << " Create png files with result of failed comparision" << endl;
   cout << "Probability cut is " << probCut << endl;
   Int_t NF = 0;
-  if (File1 != "")  F12[0] = TFile::Open(File1);
-  if (File2 != "")  F12[1] = TFile::Open(File2);
-  TList *files = gROOT->GetListOfFiles();
+  if (File1 != "")  F12[0] = TFile::Open(file1);
+  if (File2 != "")  F12[1] = TFile::Open(file2);
+  TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
-  TIter next(files);
+  TIter nextF(files);
   TFile *f = 0;
   TString FileN[2];
-  while ((f = (TFile *) next())) {
+  while ((f = (TFile *) nextF())) {
     if (NF == 2) {cout << "more than " << NF << " files. Skip the rest." << endl; break;}
     F12[NF] = f;
     FileN[NF] = f->GetName();
     FileN[NF].ReplaceAll(".hist.root","");
     if (NF == 1) {FileN[NF].ReplaceAll(FileN[0].Data(),""); FileN[NF].ReplaceAll("/star/rcf/test/","");}
-    TIter nextkey( f->GetListOfKeys() );
+    TListIter nextkey( f->GetListOfKeys() );
     TKey *key = 0;
-    Int_t ok = 0;
     while ((key = (TKey*) nextkey())) {
       TString Name(key->GetName());
-      if (Name.BeginsWith("histBranch")) f->Get(key->GetName());
+      Int_t nh  = 0;
+      if (Name.BeginsWith("histBranch")) {
+	StIOEvent *io = (StIOEvent *) f->Get(key->GetName());
+	TList *makerList = (TList *) io->fObj;
+	if (makerList) {
+	  TListIter nextMaker(makerList);
+	  TObjectSet *o = 0;
+	  while ((o = (TObjectSet *) nextMaker())) {
+	    TList *histList = (TList *) o->GetObject();
+	    if (histList) {
+	      TH1 *h = 0;
+	      TListIter nextH(histList);
+	      while ((h = (TH1 *) nextH())) {
+		if (h->InheritsFrom("TH1")) {
+		  h->SetDirectory(f);
+		  nh++;
+		}
+	      }
+	    }
+	  }
+	}
+	cout << "Source file " << NF++ << ": " << f->GetName() << " with " << nh << " Histograms" <<  endl;
+      }
     }
-    cout << "Source file " << NF++ << ": " << f->GetName() << endl;
   }
   if (NF != 2) {cout << "Problem to get 2 files" << endl; return;}
-  TIter next(F12[0]->GetList());
+  TListIter next(F12[0]->GetList());
   TObject *obj = 0;
   TH1 *h, *h1, *h2;
   if (! gROOT->IsBatch()) c1 = new TCanvas("c1","c1",800,500);
@@ -115,14 +176,14 @@ void Kolmogorov(const Char_t *file1 = "", const Char_t *file2 = "",
 	c1->SetName(cName.Data());
 #endif
 	c1->Divide(2,1);
-
-        if (  h1->InheritsFrom( "TH2" ) ) {// && !obj->IsA()->InheritsFrom( "StMultiH1F" )) {
+	
+	if (  h1->InheritsFrom( "TH2" ) ) {// && !obj->IsA()->InheritsFrom( "StMultiH1F" )) {
 	  c1->cd(1);
-          h1->Draw();
+	  h1->Draw();
 	  leg.Draw();
-          c1->cd(2);
+	  c1->cd(2);
 	  h2->Draw();
-	} else (h1->InheritsFrom( "TH1" )) {
+	} else if (h1->InheritsFrom( "TH1" )) {
 	  c1->cd(2);
 	  h2->Draw();
 	  c1->cd(1);
@@ -135,7 +196,8 @@ void Kolmogorov(const Char_t *file1 = "", const Char_t *file2 = "",
 	pngName += ".png";
 	pngName.ReplaceAll(" ","");
 	if (makepng)
-	  TVirtualX::Instance()->WritePixmap(c1->GetCanvasID(),-1,-1,pngName.Data());
+	  c1->SaveAs(pngName);
+	//	  TVirtualX::Instance()->WritePixmap(c1->GetCanvasID(),-1,-1,pngName.Data());
       }
       if (prob < probCut || probN < probCut) {
 	cout << "========  KolmogorovTest fails for " <<  h1->GetName() << " with  prob " 
