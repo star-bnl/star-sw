@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.32 2008/05/21 01:21:30 fine Exp $
+// $Id: StDraw3D.cxx,v 1.33 2008/05/22 21:26:21 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -175,13 +175,14 @@ TVirtualPad *StDraw3D::InitPad()
    else if (!fPad ) {
       fDrawCanvasCounter++;
       TString canvasName = "STAR";
-      TString canvasTitle = "STAR Event Viewer";
+      TString canvasTitle;
       if (fDrawCanvasCounter) {
            canvasName+="_";
-           canvasTitle += ":";
            canvasName  += fDrawCanvasCounter;
            canvasTitle += fDrawCanvasCounter;
-      }
+           canvasTitle += " : ";
+     }
+      canvasTitle += "STAR Event Viewer";
       fPad = new TCanvas(canvasName.Data(),canvasTitle.Data(), 400,400);
       fPad->SetFillColor(fBkColor);
       fPad->Modified();
