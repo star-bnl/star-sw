@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.41 2008/05/15 19:37:17 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.42 2008/05/23 17:09:22 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.42  2008/05/23 17:09:22  genevb
+// Allow the use of any file for PrintList specification
+//
 // Revision 2.41  2008/05/15 19:37:17  genevb
 // Changes to FTPC radial step plots/fits
 //
@@ -1295,6 +1298,10 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
 //_____________________________________________________________________________
 // Method SetDefaultPrintList
 //    - create default list of histograms we want drawn,printed
+//    - analType can be one of a number of predefined histogram lists,
+//      or a file which has histogram names listed one per line
+//      (files like $STAR/StRoot/St_QA_Maker/QAhlist*.h are properly
+//      parsed as well, but histogram names are sufficient)
 
 void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 {  
@@ -1398,6 +1405,47 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   };
   if (!strcmp(analType,"Svt")) {
     sdefList = sdefList10; lengofList = sizeof(sdefList10)/sizeOfCharPtr;
+  }
+
+  if (!sdefList) {
+    // Try reading in a file as specified by analType
+    ifstream analFile(analType);
+    if (analFile.good()) {
+      LOG_INFO << "Reading print list from: " << analType << endm;
+      sdefList = new Char_t*[4096];
+      char analBuffer[256];
+      TString analString;
+      Bool_t commenting = kFALSE;
+      Int_t commentIdx = -1;
+      while (analFile.getline(analBuffer,255)) {
+        analString = analBuffer;
+        if (commenting) {
+          commentIdx = analString.Index("*/");
+          if (commentIdx>=0) {
+             analString.Remove(0,commentIdx+2);
+             commenting = kFALSE;
+          } else continue;
+        }
+        if (!commenting) {
+          commentIdx = analString.Index("/*");
+          if (commentIdx>=0) {
+            analString.Remove(commentIdx);
+            commenting = kTRUE;
+          }
+        }
+        commentIdx = analString.Index("//");
+        if (commentIdx>=0) analString.Remove(commentIdx);
+        analString.Remove(TString::kBoth,' ').Remove(TString::kBoth,',').Remove(TString::kBoth,' ').Remove(TString::kBoth,'"'); 
+        Int_t alen = analString.Length();
+        if (alen<1) continue;
+        Char_t* tempc = new Char_t[alen+1];
+        strcpy(tempc,analString.Data());
+        sdefList[lengofList] = tempc;
+        lengofList++;
+      }
+    } else {
+      LOG_WARN << "Could not find list of histograms specified by: " << analType << endm;
+    }
   }
 
   Int_t numPrt = 0;
