@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_extract.C,v 3.2 2006/08/15 21:42:38 jeromel Exp $ 
+// $Id: bfcread_hist_extract.C,v 3.3 2008/05/23 17:54:55 genevb Exp $ 
 // $Log: bfcread_hist_extract.C,v $
+// Revision 3.3  2008/05/23 17:54:55  genevb
+// Allow subset histogram list when copying/extracting
+//
 // Revision 3.2  2006/08/15 21:42:38  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -28,6 +31,9 @@
 //            NOTE: if you ran bfc, then the TopDirTree = bfcTree !!
 //         OutFile - file where histograms will be written. Default is
 //                same as MainFile with last part of MakerHistDir in the name.
+//         PrintList - name of subset histogram list that you want extracted
+//                   - these are defined in StHistUtil, method SetDefaultPrintList
+//                   - default = 0, extracts all histograms in directory MakerHistDir
 //
 // standard Maker names in bfc 
 //   (but if you run your own Maker here, then use whatever name you give it)
@@ -55,7 +61,8 @@ void bfcread_hist_extract(
     "/afs/rhic.bnl.gov/star/data/samples/gstar.hist.root",
   const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree",
-  Char_t *OutFile=0)
+  Char_t *OutFile=0,
+  const Char_t *PrintList="")
 {
 
   cout << "bfcread_hist_extract.C, input hist file = " 
@@ -102,6 +109,7 @@ void bfcread_hist_extract(
    Int_t NoHist=0;
    //NoHist = HU->ListHists(MakerHistDir);
    TList* dList = HU->FindHists(MakerHistDir);
+   if (PrintList) HU->SetDefaultPrintList(MakerHistDir,PrintList);
    NoHist = HU->CopyHists(dList);
    TH1** nh = HU->getNewHist();
 

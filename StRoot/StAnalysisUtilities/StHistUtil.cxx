@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.42 2008/05/23 17:09:22 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.43 2008/05/23 17:54:54 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.43  2008/05/23 17:54:54  genevb
+// Allow subset histogram list when copying/extracting
+//
 // Revision 2.42  2008/05/23 17:09:22  genevb
 // Allow the use of any file for PrintList specification
 //
@@ -162,6 +165,7 @@
 #include "StHistUtil.h"
 
 typedef TH1* TH1ptr;
+typedef char* charptr;
 
 Int_t numOfPosPrefixes = 9;
 char* possiblePrefixes[9] = {"","LM","MM","HM","HP","XX","MB","CL","HT"};
@@ -836,7 +840,8 @@ Int_t StHistUtil::CopyHists(TList *dirList)
    TIter nextObj(dirList);
    TObject *obj = 0;
     while ((obj = nextObj())) {    
-     if (obj->InheritsFrom("TH1")) {
+     if (obj->InheritsFrom("TH1") &&
+         (!m_ListOfPrint || (m_ListOfPrint->FindObject(obj->GetName())))) {
        histCopyCount++;         
        if (ijk>=maxHistCopy){
          Int_t newMaxHistCopy = maxHistCopy * 4;
@@ -1412,7 +1417,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
     ifstream analFile(analType);
     if (analFile.good()) {
       LOG_INFO << "Reading print list from: " << analType << endm;
-      sdefList = new Char_t*[4096];
+      sdefList = new charptr[4096];
       char analBuffer[256];
       TString analString;
       Bool_t commenting = kFALSE;
