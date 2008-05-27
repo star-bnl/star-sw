@@ -154,13 +154,6 @@ Bool_t StEmcADCtoEMaker::makeBemc()
         StEmcCollection *emc = mEvent->emcCollection();
         if(emc)
         {
-            if(!mEmbed) // try StEmcRawData
-            {
-                StEmcRawData *BemcData = emc->bemcRawData();
-                LOG_DEBUG <<"Copying EMC information from StEmcRawData "<<endm;
-                if(BemcData)
-                    return mBemcData->make(BemcData,mEvent);
-            }
             LOG_DEBUG <<"Copying EMC information from StEmcCollection "<<endm;
             return mBemcData->make(emc,mEvent);
         }
