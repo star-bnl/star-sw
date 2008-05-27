@@ -3,6 +3,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 // wait till dictionary will be created for StarClassLibrary template classes
+#pragma link C++ class StTpcCoordinate!-;
 #pragma link C++ class StTpcLocalCoordinate!-;
 #pragma link C++ class StTpcLocalDirection!-;
 #pragma link C++ class StTpcLocalSectorAlignedCoordinate!-;

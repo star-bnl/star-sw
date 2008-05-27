@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.29 2007/07/12 19:22:00 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.30 2008/05/27 14:26:40 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.30  2008/05/27 14:26:40  fisyak
+ * Use TChairs, absorb shift tau shift, introduce sector to sector time offset
+ *
  * Revision 1.29  2007/07/12 19:22:00  fisyak
  * Tpc Drift Velocity depends on West/East half
  *
@@ -193,6 +196,9 @@
 #include "StMatrix.hh"
 #include <unistd.h>
 #include "StMessMgr.h"
+#include "StDetectorDbMaker/St_tpcSectorT0offsetC.h"
+#include "StDetectorDbMaker/St_tss_tssparC.h"
+#include "TMath.h"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
@@ -202,9 +208,6 @@ using namespace units;
 //ClassImp(StTpcCoordinateTransform);
 static Int_t _debug = 0;
 StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
-#if 0
-: mRotation(2,2,1), mRotate(2,1,0), mResult(2,1,0), mTpcToGlobalRotation(3,3,1), mGlobalToTpcRotation(3,3,1)
-#endif
  {
   
 //     mTPCdb = geomdb;
@@ -229,10 +232,10 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
         mDriftDistance = gTpcDbPtr->Dimensions()->gatingGridZ();
         mInnerSectorzOffset = gTpcDbPtr->Dimensions()->zInnerOffset();
         mOuterSectorzOffset = gTpcDbPtr->Dimensions()->zOuterOffset();
-	double beta = 0;
-	int numSectors = gTpcDbPtr->Dimensions()->numberOfSectors();
-	double deg_2_rad = M_PI/180.;
-	for (int sector = 1; sector <= numSectors;
+	Double_t beta = 0;
+	Int_t numSectors = gTpcDbPtr->Dimensions()->numberOfSectors();
+	Double_t deg_2_rad = M_PI/180.;
+	for (Int_t sector = 1; sector <= numSectors;
 	     sector++) {
 	    beta = (sector>12) ? (numSectors-sector)*2.*M_PI/(static_cast<double>(numSectors)/2.)
 		: sector*2.*M_PI/(static_cast<double>(numSectors)/2.);
@@ -242,7 +245,7 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 // 	    }
 	    mCosForSector[sector-1] = cos(beta); // careful, sector is the sector number, not index
 	    mSinForSector[sector-1] = sin(beta); // careful, sector is the sector number, not index
-	    double s = -1;
+	    Double_t s = -1;
 	    if (sector > 12) s = +1;
 	    mInnerPositionOffsetX[sector-1] = s*gTpcDbPtr->SectorPosition(sector)->innerPositionOffsetX();
 	    mOuterPositionOffsetX[sector-1] = s*gTpcDbPtr->SectorPosition(sector)->outerPositionOffsetX();
@@ -253,39 +256,6 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 // 	    PR(sin(beta));
 	    
 	}
-#if 0
-	double phi = 0.0;  //large uncertainty, so set to 0
-        double theta = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisY();
-        double psi = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisX();
-	// R = R_x(psi)*R_y(theta)*R_z(phi)
-	//        gMessMgr->QAInfo()  << cos(theta) << " " << cos(phi) << endm;
-        mGlobalToTpcRotation(1,1) = cos(theta)*cos(phi);
-	mGlobalToTpcRotation(1,2) = cos(theta)*sin(phi);
-        mGlobalToTpcRotation(1,3) = -sin(theta);
-        mGlobalToTpcRotation(2,1) = sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi);
-        mGlobalToTpcRotation(2,2) = sin(psi)*sin(theta)*sin(phi) + cos(psi)*cos(phi);
-        mGlobalToTpcRotation(2,3) = cos(theta)*sin(psi);
-        mGlobalToTpcRotation(3,1) = cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi);
-        mGlobalToTpcRotation(3,2) = cos(psi)*sin(theta)*sin(phi)-sin(psi)*cos(phi);
-        mGlobalToTpcRotation(3,3) = cos(theta)*cos(psi);
-        size_t ierr;
-        mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
-  	if (ierr!=0){ 
-            gMessMgr->Error()  "StTpcCoordinateTransform::Cant invert rotation matrix" << endm;
-            gMessMgr->QAInfo()  << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
-  	  gMessMgr->QAInfo()  << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
-        }
-        mTpcPositionInGlobal.setX(gTpcDbPtr->GlobalPosition()->TpcCenterPositionX());
-        mTpcPositionInGlobal.setY(gTpcDbPtr->GlobalPosition()->TpcCenterPositionY());
-        mTpcPositionInGlobal.setZ(gTpcDbPtr->GlobalPosition()->TpcCenterPositionZ());
-	//        gMessMgr->QAInfo()  << "Global Position of TPC center" << mTpcPositionInGlobal << endm;
-	if (_debug) {
-	  gMessMgr->QAInfo()  << "mTpcToGlobalRotation" << endm;
-	  gMessMgr->QAInfo()  << mGlobalToTpcRotation << endm;
-	  gMessMgr->QAInfo()  << "mTpcPositionInGlobal" << mTpcPositionInGlobal << endm;
-	  gTpcDbPtr->Tpc2GlobalMatrix().Print();
-	}
-#endif
     }
     else {
 	gMessMgr->Error() << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
@@ -298,91 +268,80 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 StTpcCoordinateTransform::~StTpcCoordinateTransform() { /* nopt */ }
 
 //      Raw Data          <-->  Global Coordinate
-void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StGlobalCoordinate& b)
-{
+void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StGlobalCoordinate& b, Bool_t useT0, Bool_t useTau)
+{// useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and  = kFALSE for MC
     StTpcLocalCoordinate tmp2;
     StTpcLocalSectorCoordinate tmp1;
-    this->operator()(a,tmp1);
+    this->operator()(a,tmp1, useT0, useTau);
     this->operator()(tmp1,tmp2); 
     this->operator()(tmp2,b);
 }
 
-void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcPadCoordinate& b, int sector, int row)
-{
+void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcPadCoordinate& b, Int_t sector, Int_t row, Bool_t useT0, Bool_t useTau)
+{ // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and  = kFALSE for MC
     StTpcLocalCoordinate tmp1;
     StTpcLocalSectorCoordinate tmp2;
     this->operator()(a,tmp1,sector,row);
     this->operator()(tmp1,tmp2); 
-    this->operator()(tmp2,b);
+    this->operator()(tmp2,b, useT0, useTau);
 }
 //      Raw Data          <-->  TPC Local  Coordinate
-void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StTpcLocalCoordinate& b)
-{
+void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StTpcLocalCoordinate& b, Bool_t useT0, Bool_t useTau)
+{ // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and  = kFALSE for MC
     
     StTpcLocalSectorCoordinate tmp;
-    this->operator()(a,tmp);
+    this->operator()(a,tmp, useT0, useTau);
   
     this->operator()(tmp,b);
 }
 
-void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcPadCoordinate& b)
-{
+void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcPadCoordinate& b, Bool_t useT0, Bool_t useTau)
+{ // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and  = kFALSE for MC
 
    
     StTpcLocalSectorCoordinate tmp;
     this->operator()(a,tmp);
     
-    this->operator()(tmp,b);
+    this->operator()(tmp,b, useT0, useTau);
 }
 
 
-
+//________________________________________________________________________________
 //      Local Sector Coordnate    <->  Tpc Raw Pad Coordinate
-void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcPadCoordinate& b)
-{
-  
-    int sector = a.fromSector();
-  int row    = a.fromRow();
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcPadCoordinate& b, Bool_t useT0, Bool_t useTau)
+{ // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and  = kFALSE for MC
+  Int_t sector = a.fromSector();
+  Int_t row    = a.fromRow();
   if (row < 1 || row > 45) row    = rowFromLocal(a);
     
-    int probablePad =padFromLocal(a);
-    double zoffset=(row>13) ?
-// 	gTpcDbPtr->PadPlaneGeometry()->outerSectorzOffSet()
-//       :gTpcDbPtr->PadPlaneGeometry()->innerSectorzOffSet() ;
-	mOuterSectorzOffset
-	:mInnerSectorzOffset;
-    double t0zoffset;
-    if (sector>=1&&sector<=24){
-     t0zoffset = 
-       gTpcDbPtr->DriftVelocity(sector)*1e-6*   //cm/s -> cm/us
-       (gTpcDbPtr->T0(sector)->getT0(row,probablePad) *mTimeBinWidth);  
-       //t0 offset -- DH  27-Mar-00
-    }
-    else{
-     t0zoffset = 0;
-    }
-    int tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector);  
-    b = StTpcPadCoordinate(sector, row, probablePad, tb);
+  Float_t probablePad = padFromLocal(a);
+  Double_t zoffset=(row>13) ?
+    mOuterSectorzOffset
+    :mInnerSectorzOffset;
+  Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? gTpcDbPtr->T0(sector)->getT0(row, TMath::Nint (probablePad)) : 0;
+  t0offset += St_tpcSectorT0offsetC::instance()->t0offset(sector);
+  t0offset *= mTimeBinWidth;
+  if (! useT0 && useTau) // for cluster
+    t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
+  Double_t t0zoffset = t0offset*gTpcDbPtr->DriftVelocity(sector)*1e-6;
+  Float_t tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector);  
+  b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
-void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b)
-{
-    StThreeVector<double>  tmp=xyFromRaw(a);
-    double zoffset= (a.row()>13) ?
-// 	gTpcDbPtr->PadPlaneGeometry()->outerSectorzOffSet()
-// 	:gTpcDbPtr->PadPlaneGeometry()->innerSectorzOffSet() ;
-	mOuterSectorzOffset
-	:mInnerSectorzOffset;
-
-    double t0zoffset = 
-      gTpcDbPtr->DriftVelocity(a.sector())*1e-6*    //cm/s -> cm/us
-      (gTpcDbPtr->T0(a.sector())->getT0(a.row(),a.pad()) *mTimeBinWidth);  
-      //t0 offset -- DH  27-Mar-00
-    Double_t z = zFromTB(a.timeBucket(),a.sector())-zoffset+t0zoffset;
-#if 0
-    if (z <= 0) z = 1.e-5;
-#endif
-    tmp.setZ(z);
-    b = StTpcLocalSectorCoordinate(tmp,a.sector(),a.row());
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b, Bool_t useT0, Bool_t useTau) 
+{ // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and = kFALSE for MC
+  StThreeVector<double>  tmp=xyFromRaw(a);
+  Double_t zoffset= (a.row()>13) ? mOuterSectorzOffset : mInnerSectorzOffset;
+  Double_t t0offset = useT0 ? gTpcDbPtr->T0(a.sector())->getT0(a.row(),TMath::Nint(a.pad())) : 0;
+  t0offset += St_tpcSectorT0offsetC::instance()->t0offset(a.sector());
+  t0offset *= mTimeBinWidth;
+  if (! useT0 && useTau) // for cluster
+    t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
+  Double_t t0zoffset = t0offset*gTpcDbPtr->DriftVelocity(a.sector())*1e-6;
+  //t0 offset -- DH  27-Mar-00
+  Double_t z = zFromTB(a.timeBucket(),a.sector())-zoffset+t0zoffset;
+  tmp.setZ(z);
+  b = StTpcLocalSectorCoordinate(tmp,a.sector(),a.row());
 }
 //  Tpc Local Sector <--> Global
  
@@ -393,13 +352,13 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
      this->operator()(tmp,b); 
     
 }
-void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a,  StTpcLocalSectorCoordinate& b, int sector, int row)
+void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a,  StTpcLocalSectorCoordinate& b, Int_t sector, Int_t row)
 {
     StTpcLocalCoordinate tmp;
     this->operator()(a,tmp, sector,row);
     this->operator()(tmp,b); 
 }
-void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a,  StTpcLocalSectorAlignedCoordinate& b, int sector, int row)
+void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a,  StTpcLocalSectorAlignedCoordinate& b, Int_t sector, Int_t row)
 {
     StTpcLocalCoordinate tmp;
     this->operator()(a,tmp, sector,row);
@@ -409,8 +368,8 @@ void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a,  StTpcLoc
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcLocalCoordinate& b)
 {
    
-  int sector = a.fromSector();
-  int row    = a.fromRow();  
+  Int_t sector = a.fromSector();
+  Int_t row    = a.fromRow();  
 
 
     StThreeVector<double> sector12Position(a.position().x(),
@@ -424,8 +383,8 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedCoordinate& a, StTpcLocalCoordinate& b)
 {
    
-  int sector = a.fromSector();
-  int row    = a.fromRow();  
+  Int_t sector = a.fromSector();
+  Int_t row    = a.fromRow();  
 
 
     StThreeVector<double> sector12Position(a.position().x(),
@@ -438,13 +397,13 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedCoordinat
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, 
 					  StTpcLocalSectorAlignedCoordinate& b) {
-  int sector = a.fromSector(); 
-  int row    = a.fromRow();
+  Int_t sector = a.fromSector(); 
+  Int_t row    = a.fromRow();
   if (row < 1 || row > 45) row    = rowFromLocal(a);
-  double offset = row <14 ? mInnerPositionOffsetX[sector-1] : mOuterPositionOffsetX[sector-1];
-  double xx  = a.position().x() - offset;
-  double yy  = a.position().y() - 123;
-  double rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
+  Double_t offset = row <14 ? mInnerPositionOffsetX[sector-1] : mOuterPositionOffsetX[sector-1];
+  Double_t xx  = a.position().x() - offset;
+  Double_t yy  = a.position().y() - 123;
+  Double_t rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
   b = StTpcLocalSectorAlignedCoordinate(StThreeVector<double>(xx*cos(rot) + yy*sin(rot),
 						       -xx*sin(rot) + yy*cos(rot) + 123,
 						       a.position().z()),sector,row);
@@ -452,14 +411,14 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a,
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedCoordinate& a, 
 					  StTpcLocalSectorCoordinate& b) {
-  int sector = a.fromSector(); 
-  int row    = a.fromRow();
+  Int_t sector = a.fromSector(); 
+  Int_t row    = a.fromRow();
   if (row < 1 || row > 45) row    = rowFromLocal(a);
   
-  double xx  = a.position().x();
-  double yy  = a.position().y() - 123;
-  double offset = row <14 ? mInnerPositionOffsetX[sector-1] : mOuterPositionOffsetX[sector-1];
-  double rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
+  Double_t xx  = a.position().x();
+  Double_t yy  = a.position().y() - 123;
+  Double_t offset = row <14 ? mInnerPositionOffsetX[sector-1] : mOuterPositionOffsetX[sector-1];
+  Double_t rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
   b = StTpcLocalSectorCoordinate(StThreeVector<double>(xx*cos(rot) - yy*sin(rot) + offset,
 						       xx*sin(rot) + yy*cos(rot) + 123,
 						       a.position().z()),sector,row);
@@ -467,12 +426,12 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedCoordinat
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcLocalSectorCoordinate& b)
 {
-  int sector = a.fromSector(); 
+  Int_t sector = a.fromSector(); 
   if (sector < 1 || sector > 24) sector= sectorFromCoordinate(a);
   StThreeVector<double> tmp=rotateFromLocal(a.position(),sector);
     
   b = StTpcLocalSectorCoordinate(tmp,sector,a.fromRow());
-  int row    = b.fromRow();
+  Int_t row    = b.fromRow();
   if (row < 1 || row > 45) {
     row    = rowFromLocal(b);
     b  = StTpcLocalSectorCoordinate(b.position(),sector,row);
@@ -481,11 +440,11 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcLo
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcLocalSectorAlignedCoordinate& b)
 {
-  int sector = a.fromSector(); 
+  Int_t sector = a.fromSector(); 
   if (sector < 1 || sector > 24) sector= sectorFromCoordinate(a);
   StThreeVector<double> tmp=rotateFromLocal(a.position(),sector);
   b = StTpcLocalSectorAlignedCoordinate(tmp,sector,a.fromRow());
-  int row    = b.fromRow();
+  Int_t row    = b.fromRow();
   if (row < 1 || row > 45) {
     row    = rowFromLocal(b);
     b  = StTpcLocalSectorAlignedCoordinate(b.position(),sector,row);
@@ -496,45 +455,37 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StGloba
 {
     // Requires survey DB i/o!
     // Use matrix rotations and offset from database.  Hardtke, 22-may-2001
-#if 0
-    b = StGlobalCoordinate(mTpcToGlobalRotation*a.position()+mTpcPositionInGlobal);
-#else
     Double_t xyzL[3] = {a.position().x(),a.position().y(),a.position().z()};
     Double_t xyzG[3];
     gTpcDbPtr->Tpc2GlobalMatrix().LocalToMaster(xyzL,xyzG);
     b = StGlobalCoordinate(xyzG[0],xyzG[1],xyzG[2]);
-#endif
 }
 
-void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLocalCoordinate& b, int sector, int row)
+void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLocalCoordinate& b, Int_t sector, Int_t row)
 {
     // Requires survey DB i/o!
     // Use matrix rotations and offset from database.  Hardtke, 22-may-2001
-#if 0
-    b = StTpcLocalCoordinate(mGlobalToTpcRotation*(a.position()-mTpcPositionInGlobal),sector,row);   
-#else
     Double_t xyzG[3] = {a.position().x(),a.position().y(),a.position().z()};
     Double_t xyzL[3];
     gTpcDbPtr->Tpc2GlobalMatrix().MasterToLocal(xyzG,xyzL);
     b = StTpcLocalCoordinate(xyzL[0],xyzL[1],xyzL[2],sector,row);
-#endif
     if (sector < 1 || sector > 24) {
       sector= sectorFromCoordinate(b);
       b = StTpcLocalCoordinate(b.position(),sector,row);
     }
 }
 
-StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector<double>& v, int *sector)
+StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector<double>& v, Int_t *sector)
 {
     *sector = sectorFromCoordinate(v);
     return  rotateFromLocal(v,*sector);
 }
 
 StThreeVector<double>
-StTpcCoordinateTransform::padCentroid(StTpcLocalSectorCoordinate& localSector, int *pad, int *row)
+StTpcCoordinateTransform::padCentroid(StTpcLocalSectorCoordinate& localSector, Int_t *pad, Int_t *row)
 {
     StTpcLocalSectorCoordinate centerOfPad;
-    int nRow    = localSector.fromRow();
+    Int_t nRow    = localSector.fromRow();
     if (nRow < 1 || nRow > 45) nRow    = rowFromLocal(localSector);
     StTpcPadCoordinate tmp(12,                      //sector
 			   nRow,     //row
@@ -549,14 +500,14 @@ StTpcCoordinateTransform::padCentroid(StTpcLocalSectorCoordinate& localSector, i
 /*                       TRANSFORMATION ROUTINES                       */
 
 // sector from Tpc local coordinates
-int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVector<double>& a) const
+Int_t StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVector<double>& a) const
 {
     // 30 degrees should be from db
 
-    double angle = atan2(a.y(),a.x());
+    Double_t angle = atan2(a.y(),a.x());
     if(angle<0) angle+= 2*M_PI;
-//     int sectorNumber= (int)( (angle+4*M_PI/3.)/(2*M_PI/3.));
-    int sectorNumber= (int)( (angle+2*M_PI/24.)/(2*M_PI/12.));
+//     Int_t sectorNumber= (int)( (angle+4*M_PI/3.)/(2*M_PI/3.));
+    Int_t sectorNumber= (int)( (angle+2*M_PI/24.)/(2*M_PI/12.));
     if(a.z()>0){
                sectorNumber=15-sectorNumber;
                if(sectorNumber>12)sectorNumber-=12;
@@ -571,12 +522,12 @@ int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVector<double>& 
 }
 
 // FOR SECTOR 12 ONLY!!!! (Local coordinate);
-int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
+Int_t StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
 {
-    double referencePosition;
-    double rowPitch;
-    int    offset;
-    double boundary =
+    Double_t referencePosition;
+    Double_t rowPitch;
+    Int_t    offset;
+    Double_t boundary =
 	gTpcDbPtr->PadPlaneGeometry()->outerSectorEdge();
     if(b.y() > boundary) {    // in the outer sector
 	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(14);
@@ -598,7 +549,7 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
 //     PR(referencePosition);
 //     PR(rowPitch);
 //     PR(offset);
-    int probableRow =
+    Int_t probableRow =
 	static_cast<int>( (b.y() - (referencePosition-rowPitch/2))/rowPitch )+offset;
 
     if(b.y() < boundary && probableRow>13) {
@@ -618,27 +569,23 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
 }
 
 
-int StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, const int row) const
+Float_t StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, Int_t row) const
 {
   return padFromX(b.x(), row);
 }
-int StTpcCoordinateTransform::padFromX(const double x, const int row) const
+Float_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t row) const
 {
-  int probablePad = gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)/2;
-  double pitch = (row<14) ?
+  Double_t pitch = (row<14) ?
     gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() :
     gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
   // x coordinate in sector 12
-  double shift =  -x/pitch;
-  int numberOfPads = static_cast<int>(shift); 
-  numberOfPads  = (x > 0) ?  numberOfPads :numberOfPads+1 ;
-  probablePad += numberOfPads; 
+  Float_t probablePad = (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2. - x/pitch;
   // CAUTION: pad cannot be <1
-    if(probablePad<1) {
+    if(probablePad<0.500001) {
 // 	gMessMgr->Error() << "ERROR in pad From Local.\n";
 // 	gMessMgr->Error() << "Pad is calculated to be '" << probablePad << "'\n";
 // 	gMessMgr->Error() << "Assigning Pad='1'"<< endm;
-      probablePad=1;
+      probablePad=0.500001;
     }
     return (probablePad);
   
@@ -651,62 +598,60 @@ int StTpcCoordinateTransform::padFromX(const double x, const int row) const
 //
 StThreeVector<double> StTpcCoordinateTransform::xyFromRaw(const StTpcPadCoordinate& a)
 {
-    double localY = yFromRow(a.row());
-    double localX = xFromPad(a.row(),a.pad());
+    Double_t localY = yFromRow(a.row());
+    Double_t localX = xFromPad(a.row(),a.pad());
     
     return(StThreeVector<double>(localX,localY,0));
 }
 
 //Local Transformation...
-double StTpcCoordinateTransform::yFromRow(const int row)  const
+Double_t StTpcCoordinateTransform::yFromRow(Int_t row)  const
 {
     // Returns y coordinate in sector 12
     return (gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(row));
 }
 
 
-double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
+Double_t StTpcCoordinateTransform::xFromPad(Int_t row, Float_t pad) const
 {
     // x coordinate in sector 12
-    double pitch = (row<14) ?
+    Double_t pitch = (row<14) ?
 	gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() :
 	gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
-
-    double pads2move = pad - (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row))/2.;
-    double dist2move = -pitch*(pads2move-.5);
- 
-    return(dist2move);
+    Double_t x = -pitch*(pad - (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2.);
+    return x;
 }
 
-double StTpcCoordinateTransform::zFromTB(const int tb, Int_t sector) const
+Double_t StTpcCoordinateTransform::zFromTB(Float_t tb, Int_t sector) const
 {
-    double timeBin = tb; // to avoid using const_cast<int> & static_cast<double>
-    //    double z = 
+    Double_t timeBin = tb; // to avoid using const_cast<int> & static_cast<double>
+    //    Double_t z = 
     //      gTpcDbPtr->DriftVelocity()*1e-6*         //cm/s->cm/us
       //        (-gTpcDbPtr->Electronics()->tZero() + (timeBin+.5)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
-       double z = 
-         gTpcDbPtr->DriftVelocity(sector)*1e-6*         //cm/s->cm/us
-	 (gTpcDbPtr->triggerTimeOffset()*1e6   // units are s
-	+ gTpcDbPtr->Electronics()->tZero()    // units are us 
-        +    (timeBin)*mTimeBinWidth );  // 
+       Double_t z = 
+         gTpcDbPtr->DriftVelocity(sector)*1e-6*                //units are cm/s->cm/us
+	 (gTpcDbPtr->triggerTimeOffset()*1e6                   // units are s
+	  + gTpcDbPtr->Electronics()->tZero()                  // units are us 
+	  + (timeBin + St_tpcSectorT0offsetC::instance()->t0offset(sector))*(mTimeBinWidth));  // 
    
     return(z);
 }
 
-int StTpcCoordinateTransform::tBFromZ(const double z, Int_t sector) const
+Float_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector) const
 {
     //PR(gTpcDbPtr->PadPlaneGeometry->driftDistance()); // Not available yet.
     //PR(z);
   // z is in tpc local sector coordinate system. z>=0;
    
    
-    double time = (
-	 -1*(gTpcDbPtr->triggerTimeOffset()*1e6  // units are s
-	   + gTpcDbPtr->Electronics()->tZero())   // units are us 
-	 + ( z / (gTpcDbPtr->DriftVelocity(sector)*1e-6))
-		   ); // tZero + (z/v_drift); the z already has the proper offset
+    Double_t time = (
+		     -1*(gTpcDbPtr->triggerTimeOffset()*1e6  // units are s
+			 + gTpcDbPtr->Electronics()->tZero()
+			 )   // units are us 
+		     + ( z / (gTpcDbPtr->DriftVelocity(sector)*1e-6))
+		     ); // tZero + (z/v_drift); the z already has the proper offset
     
-    return((int)(time/(mTimeBinWidth) + 1e-5));//time bin starts at 0,HL,9/1/99
+    return((Float_t)(time/(mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(sector))));
 }
 
 //
@@ -715,7 +660,7 @@ int StTpcCoordinateTransform::tBFromZ(const double z, Int_t sector) const
 
 StThreeVector<double>
 StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
-				     const int sector, const int idir)
+				     Int_t sector, Int_t idir)
 {   //  to local means " from sector 12 local to tpc local"
 
     // Speed up the code, don't use matrices.
@@ -727,7 +672,7 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
     // ( cos Þ  sin Þ )
     // ( -sin Þ   cos Þ )
   // idir != 1 means transform direction
-    double x = (sector>12)?a.x():-a.x(); // Undo the sign flip before rotation
+    Double_t x = (sector>12)?a.x():-a.x(); // Undo the sign flip before rotation
     
     StThreeVector<double> result(x*mCosForSector[sector-1] + a.y()*mSinForSector[sector-1],
 			  -x*mSinForSector[sector-1] + a.y()*mCosForSector[sector-1],
@@ -736,11 +681,7 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
     if (idir == 1) {
 //       return (sector>12)? (StThreeVector<double>(result.x(),result.y(),a.z()-mDriftDistance))
 // 	: (StThreeVector<double>(result.x(),result.y(),-a.z()+mDriftDistance));
-      double z = mDriftDistance-a.z();
-#if 0
-      if (z > mDriftDistance) z = mDriftDistance;
-      if (z < 1.e-5) z = 1.e-5;
-#endif
+      Double_t z = mDriftDistance-a.z();
       if (sector > 12) z = -z;
       return StThreeVector<double>(result.x(),result.y(),z);
     }
@@ -751,7 +692,7 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
  
 StThreeVector<double> 
 StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
-						     const int sector, const int idir)
+					  Int_t sector, Int_t idir)
 {   
     // FromLocal means " from the tpc local to sector 12 local"
     // define 2x2 rotation matrix
@@ -771,17 +712,11 @@ StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
       //      return (sector>12) ? (StThreeVector<double>(result.x(),result.y(),a.z()+mDriftDistance))
       //	: (StThreeVector<double>(-result.x(),result.y(),-a.z()+mDriftDistance));
       if (sector > 12) {
-	double z = a.z()+mDriftDistance; 
-#if 0
-	if (z < 1.e-5) z = 1.e-5;
-#endif
+	Double_t z = a.z()+mDriftDistance; 
 	return StThreeVector<double>(result.x(),result.y(),z);
       }
       else {
-	double z = a.z()-mDriftDistance;
-#if 0
-	if (z > -1.e-5) z = -1.e-5;
-#endif
+	Double_t z = a.z()-mDriftDistance;
 	return StThreeVector<double>(-result.x(),result.y(),-z);
       }
     }
@@ -792,26 +727,26 @@ StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
 
 /****************************************************************/
 /*                         UTILITIES                            */
-double StTpcCoordinateTransform::rad2deg(double a) const
+Double_t StTpcCoordinateTransform::rad2deg(Double_t a) const
 {
     return(57.2957795*a);
 }
 
-int StTpcCoordinateTransform::nearestInteger(double a) const
+Int_t StTpcCoordinateTransform::nearestInteger(Double_t a) const
 {
     return static_cast<int>(a);
 }
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalDirection& a, StTpcLocalSectorDirection& b) {   
-  int sector= a.fromSector();
-  int row   = a.fromRow();  
+  Int_t sector= a.fromSector();
+  Int_t row   = a.fromRow();  
   StThreeVector<double> tmp=rotateFromLocal(a.position(),sector,2);
   b = StTpcLocalSectorDirection(tmp,sector,row);
 }
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalDirection& a, StTpcLocalSectorAlignedDirection& b) {   
-  int sector= a.fromSector();
-  int row   = a.fromRow();  
+  Int_t sector= a.fromSector();
+  Int_t row   = a.fromRow();  
   StThreeVector<double> tmp=rotateFromLocal(a.position(),sector,2);
   b = StTpcLocalSectorAlignedDirection(tmp,sector,row);
 }
@@ -822,21 +757,21 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection& a, St
   this->operator()(tmp,b); 
 }
 //________________________________________________________________________________
-void StTpcCoordinateTransform::operator()(const StGlobalDirection& a,  StTpcLocalSectorDirection& b,int sector, int row) {
+void StTpcCoordinateTransform::operator()(const StGlobalDirection& a,  StTpcLocalSectorDirection& b,Int_t sector, Int_t row) {
   StTpcLocalDirection tmp;
   this->operator()(a,tmp,sector,row);
   this->operator()(tmp,b); 
 }
 //________________________________________________________________________________
-void StTpcCoordinateTransform::operator()(const StGlobalDirection& a,  StTpcLocalSectorAlignedDirection& b,int sector, int row) {
+void StTpcCoordinateTransform::operator()(const StGlobalDirection& a,  StTpcLocalSectorAlignedDirection& b,Int_t sector, Int_t row) {
   StTpcLocalDirection tmp;
   this->operator()(a,tmp,sector,row);
   this->operator()(tmp,b); 
 }
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection& a, StTpcLocalDirection& b) {
-  int sector = a.fromSector();
-  int row    = a.fromRow();
+  Int_t sector = a.fromSector();
+  Int_t row    = a.fromRow();
   StThreeVector<double> sector12Position(a.position().x(),
 					 a.position().y() ,
 					 a.position().z());
@@ -845,8 +780,8 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection& a, St
 }
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedDirection& a, StTpcLocalDirection& b) {
-  int sector = a.fromSector();
-  int row    = a.fromRow();
+  Int_t sector = a.fromSector();
+  Int_t row    = a.fromRow();
   StThreeVector<double> sector12Position(a.position().x(),
 					 a.position().y() ,
 					 a.position().z());
@@ -856,11 +791,11 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedDirection
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection& a, 
 					  StTpcLocalSectorAlignedDirection& b) {
-  int sector = a.fromSector(); 
-  int row    = a.fromRow();
-  double xx  = a.position().x();
-  double yy  = a.position().y();
-  double rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
+  Int_t sector = a.fromSector(); 
+  Int_t row    = a.fromRow();
+  Double_t xx  = a.position().x();
+  Double_t yy  = a.position().y();
+  Double_t rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
   b = StTpcLocalSectorAlignedDirection(StThreeVector<double>(xx*cos(rot) + yy*sin(rot),
 							     -xx*sin(rot) + yy*cos(rot),
 							     a.position().z()),sector,row);
@@ -868,11 +803,11 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection& a,
 //________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedDirection& a, 
 					  StTpcLocalSectorDirection& b) {
-  int sector = a.fromSector(); 
-  int row    = a.fromRow();
-  double xx  = a.position().x();
-  double yy  = a.position().y();
-  double rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
+  Int_t sector = a.fromSector(); 
+  Int_t row    = a.fromRow();
+  Double_t xx  = a.position().x();
+  Double_t yy  = a.position().y();
+  Double_t rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
   b = StTpcLocalSectorDirection(StThreeVector<double>(xx*cos(rot) - yy*sin(rot),
 					       xx*sin(rot) + yy*cos(rot),
 					       a.position().z()),sector,row);
@@ -882,29 +817,19 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalDirection& a, StGlobal
 {
     // Requires survey DB i/o!
     // Use matrix rotations and offset from database.  Hardtke, 22-may-2001
-#if 0
-    b = StGlobalDirection(mTpcToGlobalRotation*a.position());
-#else
     Double_t dirL[3] = {a.position().x(),a.position().y(),a.position().z()};
     Double_t dirG[3];
     gTpcDbPtr->Tpc2GlobalMatrix().LocalToMasterVect(dirL,dirG);
     b = StGlobalDirection(dirG[0],dirG[1],dirG[2]);
-#endif
 }
 //________________________________________________________________________________
-void StTpcCoordinateTransform::operator()(const StGlobalDirection& a, StTpcLocalDirection& b, int sector, int row)
+void StTpcCoordinateTransform::operator()(const StGlobalDirection& a, StTpcLocalDirection& b, Int_t sector, Int_t row)
 {
   // Requires survey DB i/o!
   // Use matrix rotations and offset from database.  Hardtke, 22-may-2001
-#if 0    
-  b = StTpcLocalDirection(mGlobalToTpcRotation*a.position(),sector,row);   
-#else
     Double_t dirG[3] = {a.position().x(),a.position().y(),a.position().z()};
     Double_t dirL[3];
     gTpcDbPtr->Tpc2GlobalMatrix().MasterToLocalVect(dirG,dirL);
     b = StTpcLocalDirection(dirL[0],dirL[1],dirL[2]);
-#endif
 }
 //________________________________________________________________________________
-
-
