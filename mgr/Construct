@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.157 2008/04/09 22:03:46 fine Exp $
+# $Id: Construct,v 1.158 2008/05/27 15:17:46 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -198,7 +198,7 @@ if ( defined($SKIP_DIRS) ){ $items .= join("|",split(" ",$SKIP_DIRS));}
 if ($STAR_LEVEL =~ /\.dev/ or $STAR_LEVEL =~ /\.DEV/) {
   if ($items ne "(") { $items .= "|";}
 #  $items .= "SpinPool|StEStructPool|StEmcPool|StL2Emulator|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp";
-  $items .= "SpinPool|StEStructPool|StEmcPool|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp";
+  $items .= "SpinPool|StEStructPool|StEmcPool|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp|QM2006";#|StTriggerUtilities";
 #  
 }
 if ($items ne '(') {$items .= ')';}
@@ -218,7 +218,7 @@ foreach my $dir( "pams", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
   closedir DIR;
   foreach my $sub_dir (@subdirS) {# print "sub_dir = $sub_dir\n";
     next if $sub_dir eq '.' || $sub_dir eq '..';
-    #	if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $SKIP_DIRS\n"; next;}
+    #  if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $SKIP_DIRS\n"; next;}
     if ($sub_dir =~ $items and ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
       #		  print "param::include = $param::include $subsub_dir \n";
       if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
@@ -291,7 +291,7 @@ my $sub_DIR = $dir . "/" . $sub_dir;
 		       $sub_dir =~ /^gen$/    ||
 		       $sub_dir =~ /Pool$/    ||
 #		       $sub_dir =~ /StJetMaker/ ||
-		       $sub_dir =~ /Client$/ ) ){
+		       $sub_dir =~ /StRTSClient$/) ){
 #                    if ( $SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir ) {
                     if ( $items && $sub_dir =~ /$items/ ) {
                         print "skip dir: $subsub_dir \t=> $items\n";
@@ -320,6 +320,7 @@ my @Targets = ();
 my @sysdirlist = qw(asps/Simulation/agetof 
 		    asps/staf/sdd 
 		    asps/rexe 
+		    asps/DAQBrowser
 		    StDb 
 		    asps/Simulation/geant321 
 		    asps/Simulation/gcalor 
