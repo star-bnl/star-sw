@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.38 2008/03/04 14:52:29 fisyak Exp $
+ * $Id: FCFMaker.cxx,v 1.39 2008/05/27 14:31:01 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
- * Revision 1.38  2008/03/04 14:52:29  fisyak
- * Add drift velocity dependence on sector
+ * Revision 1.39  2008/05/27 14:31:01  fisyak
+ * Move coorditane transformation into StTpcCoordinateTransformation from StDbUtilities
  *
  * Revision 1.37  2008/01/29 18:41:53  perev
  * WarnOff
@@ -306,8 +306,11 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 #endif
   doT0Corrections = 1;  // do the t0 corrections
   doGainCorrections = 1; // done by St_tpcdaq_Maker - shouldn't be!!! Tonko
-  //  doZeroTruncation = 0; // do it, but leave 5 cm... 
+#if 0
+  doZeroTruncation = 0; // do it, but leave 5 cm... 
+#else
   doZeroTruncation = 1; // do it, but leave 5 cm... 
+#endif
   fillDeconFlag = 1;
 
   mStEvent = NULL;
@@ -841,7 +844,7 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
 
 	raw_s = k;
 	
-	if( (r>45) || (p>184) || (raw_s>31) ||
+	if( (r>45) || (p>184) || // (raw_s>31) ||
 	    (r<1)  || (p<1)   || (raw_s<0)) {
 	  LOG_ERROR << "got an illegal sequence row=" << r 
 		    << ", pad=" << p 
@@ -1073,16 +1076,9 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
 void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector, int cl_id, int id_simtrk, int id_quality)
 {
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
-
-  double lx = lxFromPad(r+1,(((double)(cl_x))/64.0));
-  double ly = lyFromRow(r+1);
-  double lz = lzFromTB((((double)(cl_t))/64.0), sector, r+1, (cl_x+32)/64);
-  lz -= 3.0 * tsspar->tau * gStTpcDb->DriftVelocity(sector) * 1.0e-6;   // correct for convolution lagtime
-
-
-  StTpcLocalSectorCoordinate local(lx,ly,lz,sector);
-  StTpcLocalCoordinate global;   // tpt does the local --> global (DB adjustments?)
-  (*mCTransform)(local,global);
+  StTpcPadCoordinate Pad(sector,r+1,((Float_t) cl_x)/64.0, ((Float_t) cl_t)/64.0);
+  static StTpcLocalCoordinate global;   // tpt does the local --> global (DB adjustments?)
+  (*mCTransform)(Pad,global,kFALSE);
 
   // Use the tphit table structure to accumulate info...	
   tcl_tphit_st hit;
