@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTpcPadCoordinate.cc,v 1.2 2000/02/02 23:01:39 calderon Exp $
+ * $Id: StTpcPadCoordinate.cc,v 1.3 2008/05/27 14:26:40 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -11,6 +11,9 @@
  *******************************************************************
  *
  * $Log: StTpcPadCoordinate.cc,v $
+ * Revision 1.3  2008/05/27 14:26:40  fisyak
+ * Use TChairs, absorb shift tau shift, introduce sector to sector time offset
+ *
  * Revision 1.2  2000/02/02 23:01:39  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -36,30 +39,7 @@
  *******************************************************************/
 #include "StTpcPadCoordinate.hh"
 
-static const char rcsid[] = "$Id: StTpcPadCoordinate.cc,v 1.2 2000/02/02 23:01:39 calderon Exp $";
-
-StTpcPadCoordinate::StTpcPadCoordinate() {/**/}
-
-StTpcPadCoordinate::StTpcPadCoordinate(const int sector, const int row, const int pad, const int tb)
-    : mSector(sector), mRow(row), mPad(pad), mTimeBucket(tb) {/**/}
-
-StTpcPadCoordinate::~StTpcPadCoordinate() {/**/}
-
-int
-StTpcPadCoordinate::operator==(const StTpcPadCoordinate& p) const
-{
-    return (p.mSector     == mSector &&
-	    p.mRow        == mRow    &&
-	    p.mPad        == mPad    &&
-	    p.mTimeBucket == mTimeBucket);
-}
-
-int
-StTpcPadCoordinate::operator!=(const StTpcPadCoordinate& p) const
-{
-    return !(*this == p);  // use operator==()
-}
-
+static const char rcsid[] = "$Id: StTpcPadCoordinate.cc,v 1.3 2008/05/27 14:26:40 fisyak Exp $";
 // Non-Member function
 ostream& operator<<(ostream& os, const StTpcPadCoordinate& a)
 {

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcPadCoordinate.hh,v 1.4 2004/01/14 22:40:05 fisyak Exp $
+ * $Id: StTpcPadCoordinate.hh,v 1.5 2008/05/27 14:26:40 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StTpcPadCoordinate.hh,v $
+ * Revision 1.5  2008/05/27 14:26:40  fisyak
+ * Use TChairs, absorb shift tau shift, introduce sector to sector time offset
+ *
  * Revision 1.4  2004/01/14 22:40:05  fisyak
  * remove constness to make alpha happy
  *
@@ -44,40 +47,34 @@
 #ifndef ST_TPC_PAD_COORDINATE_HH
 #define ST_TPC_PAD_COORDINATE_HH
 #include <Stiostream.h>
-
-class StTpcPadCoordinate
-{
+#include "Rtypes.h"
+class StTpcPadCoordinate {
 public:
-    StTpcPadCoordinate();
-    StTpcPadCoordinate(const int, const int, const int, const int);
-
-    virtual ~StTpcPadCoordinate();
-    //StTpcPadCoordinate(const StTpcPadCoordinate&);
-    //StTpcPadCoordinate& operator=(cont StTpcPadCoordinate&);
-    
-    int operator==(const StTpcPadCoordinate&) const;
-    int operator!=(const StTpcPadCoordinate&) const;
-    // access functions
-    int sector()           const {return mSector;}    
-    int row()              const {return mRow;}       
-    int pad()          	   const {return mPad;}       
-    int timeBucket()       const {return mTimeBucket;}
-    int sector()                 {return mSector;}    
-    int row()          		 {return mRow;}       
-    int pad()          		 {return mPad;}       
-    int timeBucket()    	 {return mTimeBucket;}
-
-    void setSector(int s)        {mSector = s;}
-    void setRow(int r)           {mRow = r;}
-    void setPad(int p)           {mPad = p;}
-    void setTimeBucket(int t)    {mTimeBucket = t;}
-    
+  StTpcPadCoordinate(const Int_t sector = 0, const Int_t row = 0, const Float_t pad = 0, const Float_t tb = 0) : mSector(sector), mRow(row), mPad(pad), mTimeBucket(tb) {/**/}
+  virtual ~StTpcPadCoordinate() {/**/}
+  Int_t operator==(const StTpcPadCoordinate& p) const {return (p.mSector == mSector && p.mRow == mRow && p.mPad == mPad && p.mTimeBucket == mTimeBucket);}
+  Int_t operator!=(const StTpcPadCoordinate& p) const {return !(*this == p);};
+  // access functions
+  Int_t sector()           const {return mSector;}    
+  Int_t row()              const {return mRow;}       
+  Float_t pad()            const {return mPad;}       
+  Float_t timeBucket()     const {return mTimeBucket;}
+  Int_t sector()                 {return mSector;}    
+  Int_t row()          		 {return mRow;}       
+  Float_t pad()          	 {return mPad;}       
+  Float_t timeBucket()    	 {return mTimeBucket;}
+  
+  void setSector(Int_t s)        {mSector = s;}
+  void setRow(Int_t r)           {mRow = r;}
+  void setPad(Float_t p)           {mPad = p;}
+  void setTimeBucket(Float_t t)    {mTimeBucket = t;}
+  
 protected:
-    int mSector;
-    int mRow;
-    int mPad;
-    int mTimeBucket;
-
+  Int_t mSector;
+  Int_t mRow;
+  Float_t mPad;
+  Float_t mTimeBucket;
+  
 };
 // Non-member
 ostream& operator<<(ostream&, const StTpcPadCoordinate&);

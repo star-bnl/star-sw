@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.72 2008/03/27 00:11:23 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.73 2008/05/27 14:26:40 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.73  2008/05/27 14:26:40  fisyak
+ * Use TChairs, absorb shift tau shift, introduce sector to sector time offset
+ *
  * Revision 1.72  2008/03/27 00:11:23  jhthomas
  * Modify previous magfield changes and set 'zero' field to ~1 gauss in a more robust way.
  * Add SpaceChargeEWRatio and appropriate functions that allow us to calibrate d-au collisions.
@@ -307,6 +310,7 @@ To do:  <br>
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_MagFactor_Table.h"
 #include "tables/St_tpcFieldCageShort_Table.h"
+#include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
@@ -414,17 +418,16 @@ void StMagUtilities::GetSpaceChargeR2 ()
 
 void StMagUtilities::GetShortedRing ()
 {
-  St_tpcFieldCageShort* shortedRingsTable = (St_tpcFieldCageShort*) ( thedb->FindTable("tpcFieldCageShort",1) ) ;
-  tpcFieldCageShort_st* shortTable  = shortedRingsTable->GetTable();  
-  ShortTableRows = (Int_t) shortedRingsTable->GetNRows() ;
-  for ( Int_t i = 0 ; i < ShortTableRows ; i++, shortTable++ )
+  St_tpcFieldCageShortC* shortedRingsChair = St_tpcFieldCageShortC::instance();
+  ShortTableRows = (Int_t) shortedRingsChair->GetNRows() ;
+  for ( Int_t i = 0 ; i < ShortTableRows ; i++)
     {
       if ( i >= 10 ) break ;
-      Side[i]              =  (Int_t)   shortTable->side              ;   // Location of Short E=0 / W=1
-      Cage[i]              =  (Int_t)   shortTable->cage              ;   // Location of Short IFC=0 / OFC=1
-      Ring[i]              =  (Float_t) shortTable->ring              ;   // Location of Short counting out from the CM.  CM==0 
-      MissingResistance[i] =  (Float_t) shortTable->MissingResistance ;   // Amount of Missing Resistance due to this short (MOhm)
-      Resistor[i]          =  (Float_t) shortTable->resistor          ;   // Amount of compensating resistance added for this short
+      Side[i]              =  (Int_t)   shortedRingsChair->side(i)              ;   // Location of Short E=0 / W=1
+      Cage[i]              =  (Int_t)   shortedRingsChair->cage(i)              ;   // Location of Short IFC=0 / OFC=1
+      Ring[i]              =  (Float_t) shortedRingsChair->ring(i)              ;   // Location of Short counting out from the CM.  CM==0 
+      MissingResistance[i] =  (Float_t) shortedRingsChair->MissingResistance(i) ;   // Amount of Missing Resistance due to this short (MOhm)
+      Resistor[i]          =  (Float_t) shortedRingsChair->resistor(i)          ;   // Amount of compensating resistance added for this short
     }
 }
 
@@ -432,8 +435,8 @@ Bool_t StMagUtilities::UpdateShortedRing ()
 {
   static tpcFieldCageShort_st* shortsTable = 0;
 
-  St_tpcFieldCageShort* shortedRingsTable = (St_tpcFieldCageShort*) ( thedb->FindTable("tpcFieldCageShort",1) ) ;
-  tpcFieldCageShort_st* new_shortsTable = shortedRingsTable->GetTable();
+  St_tpcFieldCageShortC* shortedRingsChair = St_tpcFieldCageShortC::instance();
+  tpcFieldCageShort_st* new_shortsTable = shortedRingsChair->Struct();
   Bool_t update = (new_shortsTable != shortsTable);
   if (update) { GetShortedRing(); shortsTable = new_shortsTable; }
   return update;
