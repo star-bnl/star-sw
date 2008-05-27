@@ -100,15 +100,16 @@ print "idlL = @idlL\n" if $param::debug;
 my (@src, @h_files, @idlM);
 my $CPPPATH = $env1->{CPPPATH};
 #print "CPPPATH = $CPPPATH\n";
-my @RTS_pkgs = qw(SFS DAQ_TPX RTS_READER DAQ_TOF); #print "RTS_pkgs = @RTS_pkgs\n";
-foreach my $p (@RTS_pkgs) {
-  #  print "compare $p with pkg = $pkg\n";
-  if ($pkg eq $p) {
-    $CPPPATH = $main::PATH_SEPARATOR . "#online/RTS/include" . $main::PATH_SEPARATOR . "#online/RTS/trg/include" . $main::PATH_SEPARATOR . $CPPPATH;
-    #    print "new CPPPATH = $CPPPATH\n";
-    last;
-  }
-}
+#my @RTS_pkgs = qw(SFS DAQ_TPX RTS_READER DAQ_TOF); #print "RTS_pkgs = @RTS_pkgs\n";
+#foreach my $p (@RTS_pkgs) {
+#  #  print "compare $p with pkg = $pkg\n";
+#  if ($pkg eq $p) {
+##    $CPPPATH = $main::PATH_SEPARATOR . "#online/RTS/include" . $main::PATH_SEPARATOR . "#online/RTS/trg/include" . $main::PATH_SEPARATOR . $CPPPATH;
+#    $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" . $main::PATH_SEPARATOR . $CPPPATH;
+#    #    print "new CPPPATH = $CPPPATH\n";
+#    last;
+#  }
+#}
 if ($pkg eq "RTS") {
   $CPPFLAGS .= ' -DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
   $CPPFLAGS =~ s/-D__ROOT__//;# print " ------------  CPPFLAGS ==== " .  $CPPFLAGS . "\n";
@@ -120,7 +121,7 @@ if ($pkg eq "RTS") {
 	  $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
 	    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
 }
-my @VF_daq_pkgs = qw(StDaqAdcMaker  StDAQMaker  StRtsReaderMaker  StTpcClusters    StTpxReaderMaker StRTSMaker  StTofEventMaker  StTpxEventMaker  OnlinePlots  );
+my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  );
 foreach my $p (@VF_daq_pkgs) {
   #  print "compare $p with pkg = $pkg\n";
   if ($pkg eq $p) {
@@ -131,6 +132,7 @@ foreach my $p (@VF_daq_pkgs) {
 }
 if ($pkg eq "StDAQMaker") {
    $CPPFLAGS .= " -DNEW_EVP_READER"; # we should uncomment that later
+   $LIBS = "-lStDaqLib -lRTS";
 }
 my ($i, $obj);
 my $LIBPKG = ""; 
