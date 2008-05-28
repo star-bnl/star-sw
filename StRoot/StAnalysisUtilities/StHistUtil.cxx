@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.43 2008/05/23 17:54:54 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.44 2008/05/28 05:16:06 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.44  2008/05/28 05:16:06  genevb
+// Allow summing over (ignoring) histogram prefixes
+//
 // Revision 2.43  2008/05/23 17:54:54  genevb
 // Allow subset histogram list when copying/extracting
 //
@@ -167,9 +170,8 @@
 typedef TH1* TH1ptr;
 typedef char* charptr;
 
-Int_t numOfPosPrefixes = 9;
-char* possiblePrefixes[9] = {"","LM","MM","HM","HP","XX","MB","CL","HT"};
-char* possibleSuffixes[9] = {
+char* possibleQAPrefixes[9] = {"","LM","MM","HM","HP","XX","MB","CL","HT"};
+char* possibleQASuffixes[9] = {
   "General",
   "Low Mult",
   "Mid Mult",
@@ -192,6 +194,10 @@ ClassImp(StHistUtil)
 
 StHistUtil::StHistUtil(){
 
+  numOfPosPrefixes = 9;
+  possiblePrefixes = possibleQAPrefixes;
+  possibleSuffixes = possibleQASuffixes;
+
   m_ListOfLogY = 0;
   m_ListOfLogX = 0;
   m_ListOfPrint = 0;
@@ -207,6 +213,7 @@ StHistUtil::StHistUtil(){
   memset(newHist,0,maxHistCopy*sizeOfTH1Ptr);
   m_dirName[0] = 0;
 
+  ignorePrefixes = kFALSE;
 }
 //_____________________________________________________________________________
 
@@ -275,18 +282,33 @@ void StHistUtil::CloseOutFile() {
   }
 }
 //_____________________________________________________________________________
+TString StHistUtil::StripPrefixes(const Char_t* histName, Int_t& prenum) {
+  // Figure out and strip appropriate prefix index
+  TString hName(histName);
+  Char_t makerBuffer[4];
+  memset(makerBuffer,0,4);
+  if ((hName.BeginsWith("Tab")) || (hName.BeginsWith("StE"))) {
+    memcpy(makerBuffer,histName,3);
+    hName.Remove(0,3);
+  }
+  prenum = 0; // Possible prefix=0 means no prefix
+  for (Int_t i=1; i<numOfPosPrefixes; i++) {
+    if (hName.BeginsWith(possiblePrefixes[i])) {
+      prenum = i;
+      hName.Remove(0,strlen(possiblePrefixes[i]));
+      break;
+    }
+  }
+  hName.Prepend(makerBuffer);
+  return hName;
+}
+//_____________________________________________________________________________
 Bool_t StHistUtil::CheckOutFile(const Char_t *histName) {
 // Method to determine appropriate PostScript file for output
 
   // Figure out appropriate prefix index
-  Int_t newPrefix = 0;
-  TString hName = histName;
-  if ((hName.BeginsWith("Tab")) || (hName.BeginsWith("StE"))) {
-    hName.Remove(0,3);
-  }
-  for (Int_t i=1; i<numOfPosPrefixes; i++) {
-    if (hName.BeginsWith(possiblePrefixes[i])) newPrefix = i;
-  }
+  Int_t newPrefix = -1;
+  StripPrefixes(histName,newPrefix);
 
   if (newPrefix != m_CurPrefix) {
     CloseOutFile();
@@ -622,7 +644,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 //_____________________________________________________________________________
 
 
-TList* StHistUtil::FindHists(Char_t *dirName) 
+TList* StHistUtil::FindHists(Char_t *dirName, Char_t *withPrefix) 
 {  
 
 // NOTE - must have already used method SetPntrToMaker to get the
@@ -712,6 +734,29 @@ TList* StHistUtil::FindHists(Char_t *dirName)
 	   << dirName <<  endm;
      }
 
+  }
+
+  if (dList && (withPrefix || m_ListOfPrint)) {
+    TList* dList2 = new TList;
+
+    //Now want to loop over all histograms
+    // Create an iterator
+    TIter nextObj(dList);
+    TObject *obj = 0;
+    int withPrefixNumber = -1;
+    int prefixNumber = -1;
+    if (withPrefix) StripPrefixes(withPrefix,withPrefixNumber);
+    while ((obj = nextObj())) {
+      Bool_t addIt = kTRUE;
+      if (withPrefix) {
+        StripPrefixes(obj->GetName(),prefixNumber);
+        if (prefixNumber != withPrefixNumber) addIt = kFALSE;
+      }
+      if (addIt && ((!m_ListOfPrint) ||
+                    (obj->InheritsFrom("TH1") &&
+                     m_ListOfPrint->FindObject(obj->GetName())))) dList2->AddLast(obj);
+    }
+    dList = dList2;
   }
 
   LOG_INFO << " FindHists, dList pointer = " << dList << endm;
@@ -833,7 +878,7 @@ Int_t StHistUtil::CopyHists(TList *dirList)
 
 // create array of pointers to the new histograms I will create
 
-  Int_t ijk=0;
+  Int_t tempint,ijk=0;
   Int_t histCopyCount = 0;
 
   if (dirList){
@@ -853,6 +898,10 @@ Int_t StHistUtil::CopyHists(TList *dirList)
          maxHistCopy = newMaxHistCopy;
        } // if ijk
        newHist[ijk] = ((TH1 *)obj->Clone());
+       if (ignorePrefixes) {
+         newHist[ijk]->SetName (StripPrefixes(newHist[ijk]->GetName (),tempint).Data());
+         newHist[ijk]->SetTitle(StripPrefixes(newHist[ijk]->GetTitle(),tempint).Data());
+       }
        ijk++;
      }   // if obj
     }    // while obj
@@ -892,6 +941,7 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
         " StHistUtil::AddHists - histogram Pointer not set! " << endm;
 
   Int_t histAddCount = 0;
+  Int_t tempInt=0;
 
   if (dirList){
     if (numHistCopy < 0) numHistCopy = dirList->GetSize();
@@ -900,11 +950,15 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 
     while ((obj = nextObj())) {
       if (obj->InheritsFrom("TH1")) {
+        TString oName = obj->GetName();
+        if (ignorePrefixes) oName = StripPrefixes(oName.Data(),tempInt);
 // now want to add these histograms to the copied ones:
 	Int_t imk = 0;
 	for (imk=0;imk<numHistCopy;imk++) {
           if (newHist[imk]) {		
-	     if (strcmp( (newHist[imk]->GetName()), (obj->GetName()) )==0) {
+             TString nName = newHist[imk]->GetName();
+             if (ignorePrefixes) nName = StripPrefixes(nName.Data(),tempInt);
+             if (! (nName.CompareTo(oName))) {
 	       //LOG_INFO << "  ---- hist num to add --- " << imk << endm;
 	       newHist[imk]->Add((TH1 *)obj);
 	       histAddCount++;
