@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.6 2007/03/13 18:42:28 genevb Exp $
+// $Id: StHistUtil.h,v 2.7 2008/05/28 05:16:06 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.7  2008/05/28 05:16:06  genevb
+// Allow summing over (ignoring) histogram prefixes
+//
 // Revision 2.6  2007/03/13 18:42:28  genevb
 // Add Svt list, simplified hlist include files, handle StMultiH2F, store dirName
 //
@@ -78,10 +81,15 @@ class StHistUtil {
   Bool_t  debug;
   Int_t   m_RunYear;    // Run year
   Char_t  m_dirName[256];//! Directory name for histograms in StIO tree
+  Bool_t  ignorePrefixes;// whether or not to ignore prefixes when combining histograms
+  Int_t numOfPosPrefixes; // number of possible prefixes
+  Char_t** possiblePrefixes; //!
+  Char_t** possibleSuffixes; //!
 
 
  protected:
   virtual void    CloseOutFile();
+  virtual TString StripPrefixes(const Char_t* histName, Int_t& prenum);
   virtual Bool_t  CheckOutFile(const Char_t* histName);
 
 
@@ -92,9 +100,10 @@ class StHistUtil {
   virtual Bool_t  Debug() { return debug; }
   virtual Int_t   DrawHists(Char_t *dirName="EventQA");
   virtual Int_t   ListHists(Char_t *dirName="EventQA");
-  virtual TList*  FindHists(Char_t *dirName="EventQA");
+  virtual TList*  FindHists(Char_t *dirName="EventQA", Char_t *withPrefix=0);
   virtual Int_t   CopyHists(TList  *dirList);
   virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=-1);
+  virtual void    IgnorePrefixes(Bool_t ignore=kTRUE) {ignorePrefixes = ignore;}
   virtual Int_t   PrintInfoHists(TList  *dirList,  const Char_t *fname="printinfo.out");
 
   virtual void    SetDefaultLogYList(Char_t *dirName="EventQA");
@@ -133,9 +142,13 @@ class StHistUtil {
   TH1** getNewHist();
   Int_t getNewHistSize();
   
+  Int_t GetNumOfPosPrefixes() {return numOfPosPrefixes;}
+  Char_t* GetPrefix(Int_t n) {return possiblePrefixes[n];}
+  Char_t* GetSuffix(Int_t n) {return possibleSuffixes[n];}
+
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.6 2007/03/13 18:42:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.7 2008/05/28 05:16:06 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
