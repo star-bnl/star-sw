@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.15 2008/05/07 22:59:11 bouchet Exp $
+ * $Id: St_spa_Maker.cxx,v 1.16 2008/05/29 03:07:28 bouchet Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.16  2008/05/29 03:07:28  bouchet
+ * remove inactive variables;fix a potential memory leak
+ *
  * Revision 1.15  2008/05/07 22:59:11  bouchet
  * EmbeddingMaker:initial version ; modified reading of GEANT hits
  *
@@ -61,7 +64,6 @@
 #include "tables/St_sdm_calib_db_Table.h"
 #include "tables/St_ssdStripCalib_Table.h"
 #include "tables/St_ssdWafersPosition_Table.h"
-#include "tables/St_ssdConfiguration_Table.h"
 ClassImp(St_spa_Maker)
   
 //_____________________________________________________________________________
@@ -100,13 +102,6 @@ Int_t St_spa_Maker::InitRun(Int_t runnumber){
     LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;
   } 
-  St_ssdConfiguration* configTable = (St_ssdConfiguration*) local("ssdConfiguration");
-  if (!configTable) {
-    LOG_ERROR << "InitRun : No access to ssdConfiguration database" << endm;
-    return kStFatal;
-  }
-  //mConfig = new StSsdConfig();
-  
   return kStOK;
 }
 //_____________________________________________________________________________
