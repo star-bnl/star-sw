@@ -31,21 +31,20 @@ class St_slsCtrl;
 class St_g2t_track;
 class St_ssdDimensions;
 class St_ssdWafersPosition;
-class ssdConfiguration_st;
 class StMcEvent;
 class StDAQReader;
+class StMcSsdHit;
 
 class St_sls_Maker : public StMaker {
   private :
   St_slsCtrl           *m_ctrl;//!
   St_ssdDimensions     *m_dimensions;//!
   St_ssdWafersPosition *m_positions; //!
-  ssdConfiguration_st  *m_config;    //!
   double mBField; // z component of BField; 
-
+  StMcSsdHit *mHit;//!
  public: 
-  St_sls_Maker(const char *name="sls_strip") : StMaker(name), m_ctrl(0) {}
-  virtual       ~St_sls_Maker() {}
+ St_sls_Maker(const char *name="sls_strip");   
+  virtual       ~St_sls_Maker();
   virtual Int_t  Init();
   virtual Int_t  InitRun(Int_t runNumber);
   virtual Int_t  Make();
@@ -58,14 +57,14 @@ class St_sls_Maker : public StMaker {
   Int_t          removeInactiveHitInTable(St_g2t_svt_hit *g2t_svt_hit) {return removeInactiveHitInTable((St_g2t_ssd_hit *) g2t_svt_hit);}
   void           chargeSharingOverStrip(slsCtrl_st  *ctrl);
   Int_t          writeStripToTable(St_sls_strip *sls_strip);
-  Int_t          readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,St_g2t_track *g2t_track,St_ssdWafersPosition *m_positions);
+  Int_t          readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,St_g2t_track *g2t_track,Int_t N,ssdWafersPosition_st *positions);
   void           setSsdParameters(ssdDimensions_st *geom_par);  
   void           printSsdParameters();  
   Int_t          idWaferToWaferNumb(Int_t idWafer); //  idwafer = layer*1000+waf*100+ladder => waferNumb = mNWaferPerLadder*(ladder-1) + waf - 1
   Int_t          idWaferToLadderNumb(Int_t idWafer);//  idwafer => ladder-1
   Int_t          waferNumbToIdWafer(Int_t waferNumb);// waferNumb = mNWaferPerLadder*(ladder-1) + waf - 1 => idwafer
   Int_t          idWaferToWafer(Int_t idWafer) {return (idWafer-7000)/100-1;}
-  Int_t          ideal2RealTranslation(StThreeVector<double> *pos, StThreeVector<double> *mtm, double charge, int wafId, int index, St_ssdWafersPosition  *m_positions,Int_t *IL, Int_t *IW);
+  Int_t          ideal2RealTranslation(StThreeVector<double> *pos, StThreeVector<double> *mtm, double charge, int wafId, int index, ssdWafersPosition_st  *positions,Int_t *IL, Int_t *IW);
   int            IsOnWafer(const StThreeVector<double>& LocalPosition);
   void           debugUnPeu(); 
   
@@ -84,9 +83,11 @@ class St_sls_Maker : public StMaker {
   ssdDimensions_st *mDimensions;
    protected:
   StMcEvent            *mcEvent;
-  
+  Int_t                N;
+  ssdWafersPosition_st *positions;
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.11 2008/05/07 22:59:11 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.12 2008/05/29 03:07:27 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 
@@ -95,9 +96,12 @@ class St_sls_Maker : public StMaker {
 #endif
 
  /**************************************************************************
- * $Id: St_sls_Maker.h,v 1.11 2008/05/07 22:59:11 bouchet Exp $
+ * $Id: St_sls_Maker.h,v 1.12 2008/05/29 03:07:27 bouchet Exp $
  *
  * $Log: St_sls_Maker.h,v $
+ * Revision 1.12  2008/05/29 03:07:27  bouchet
+ * remove inactive variables;fix a potential memory leak
+ *
  * Revision 1.11  2008/05/07 22:59:11  bouchet
  * EmbeddingMaker:initial version ; modified reading of GEANT hits
  *

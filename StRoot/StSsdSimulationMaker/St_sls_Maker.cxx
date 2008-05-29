@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.16 2008/05/07 22:59:11 bouchet Exp $
+ * $Id: St_sls_Maker.cxx,v 1.17 2008/05/29 03:07:27 bouchet Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.17  2008/05/29 03:07:27  bouchet
+ * remove inactive variables;fix a potential memory leak
+ *
  * Revision 1.16  2008/05/07 22:59:11  bouchet
  * EmbeddingMaker:initial version ; modified reading of GEANT hits
  *
@@ -60,7 +63,6 @@
 #include "tables/St_ssdDimensions_Table.h"
 //#include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_slsCtrl_Table.h"
-#include "tables/St_ssdConfiguration_Table.h"
 #include "StSsdUtil/StSsdBarrel.hh"
 
 #include "StBFChain.h"
@@ -80,7 +82,15 @@
 #include "St_ObjectSet.h"
 #include "StThreeVectorF.hh"
 
-ClassImp(St_sls_Maker);
+ClassImp(St_sls_Maker)
+  St_sls_Maker::St_sls_Maker(const char *name):StMaker(name){
+  mHit  = new StMcSsdHit();
+  m_ctrl = 0;
+};
+//____________________________________________________________________________
+St_sls_Maker::~St_sls_Maker(){ 
+  delete mHit;
+}
 //_____________________________________________________________________________
 Int_t St_sls_Maker::Init(){
   if (IAttr(".histos")) {
@@ -104,12 +114,14 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
     LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;
   }   
-  St_ssdConfiguration* configTable = (St_ssdConfiguration*) local("ssdConfiguration");
-  if (!configTable) {
-    LOG_ERROR << "InitRun : No access to ssdConfiguration database" << endm;
+  if ((!m_dimensions)||(!m_positions)) {
+    LOG_ERROR << "No  access to geometry parameters" << endm;
     return kStFatal;
   }
-  m_config = (ssdConfiguration_st*) configTable->GetTable() ;
+  if(m_positions){
+    positions = m_positions->GetTable(); 
+    N = m_positions->GetNRows();
+  }
   Float_t center[3]={0,0,0}; 
   Float_t B[3]={0,0,0};  
   StarMagField::Instance()->BField(center,B);
@@ -156,7 +168,7 @@ Int_t St_sls_Maker::Make()
        }
        LOG_INFO<<Form("Num of SSD geant hits =%ld",g2t_ssd_hit->GetNRows());
        //nSsdHits = readPointFromTable(g2t_ssd_hit);
-       nSsdHits = readPointFromTableWithEmbedding(g2t_ssd_hit,g2t_track,m_positions);
+       nSsdHits = readPointFromTableWithEmbedding(g2t_ssd_hit,g2t_track,N,positions);
        if(g2t_ssd_hit->GetNRows())hRejected->Fill((float)nSsdHits/g2t_ssd_hit->GetNRows());
      }
    if (nSsdHits == 0)
@@ -383,7 +395,7 @@ Int_t St_sls_Maker::writeStripToTable(St_sls_strip *sls_strip) {
 }
 //_______________________________________________________________
 
-Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,St_g2t_track *g2t_track,St_ssdWafersPosition *m_positions){
+Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit, St_g2t_track *g2t_track,Int_t N,ssdWafersPosition_st *positions){
   StMcEvent* mcEvent = 0;
   mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
  
@@ -412,9 +424,9 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
   g2tTrack                        = g2t_track->GetTable();
   LOG_DEBUG << "Size of track Table=" << g2t_track->GetNRows()   << endm;
   LOG_DEBUG << "Size of SSD Table="   << g2t_ssd_hit->GetNRows() << endm;
-  ssdWafersPosition_st *positions = m_positions->GetTable(); 
+  //ssdWafersPosition_st *positions = m_positions->GetTable(); 
   if(Debug()){
-    for(Int_t i =0;i<m_positions->GetNRows();i++)
+    for(Int_t i =0;i<N;i++)
       {
 	for(Int_t ii=0;ii<3;ii++){
 	  LOG_INFO <<"Id " << positions[i].id <<" drift["<<ii<<"] ="<< positions[i].driftDirection[ii]<< endm;
@@ -437,7 +449,6 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
   Int_t   trackId       = 0;
   Int_t   FinalLadder   = 0;
   Int_t   FinalWafer    = 0;
-  Int_t   N             = 0;
   Int_t   idWafer       = 0;
   Int_t   iWaf          = 0;
   Float_t Flag_Energy   = 1.0;
@@ -474,7 +485,7 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 		}
 	      }
 	      LOG_DEBUG << " idWafer =" << idWafer << " TrackId="<<trackId <<" hit id="<<g2t[j].id <<endm; 
-	      Int_t iok = ideal2RealTranslation(&VecG,&mtm,(double)g2tTrack[trackId].charge,currWafId,i,m_positions,&FinalLadder,&FinalWafer);
+	      Int_t iok = ideal2RealTranslation(&VecG,&mtm,(double)g2tTrack[trackId-1].charge,currWafId,i,positions,&FinalLadder,&FinalWafer);
 	      if(iok==kStSkip){
 		LOG_DEBUG << "Not found correct wafer "<<endm;
 		Flag_Energy =-1.0;// we mark the energy as -1*energy for this hit : do not use hit 
@@ -586,18 +597,17 @@ void St_sls_Maker::debugUnPeu() {
    */
  }
 //____________________________________________________________________________
-Int_t St_sls_Maker::ideal2RealTranslation(StThreeVector<double> *pos, StThreeVector<double> *mtm, double charge, int wafId, int index, St_ssdWafersPosition *m_positions,Int_t *IL,Int_t *IW){
+Int_t St_sls_Maker::ideal2RealTranslation(StThreeVector<double> *pos, StThreeVector<double> *mtm, double charge, int wafId, int index, ssdWafersPosition_st *positions,Int_t *IL,Int_t *IW){
   StThreeVector<double> x(0,0,0);
   // Get normal and center position of the wafer geom
-  ssdWafersPosition_st *WafersPosition    = m_positions->GetTable(); 
   StThreeVector<double> wafCent(0,0,0);
   StThreeVector<double> wafNorm(0,0,0);
-  wafCent.setX(WafersPosition[index].centerPosition[0]);
-  wafCent.setY(WafersPosition[index].centerPosition[1]);
-  wafCent.setZ(WafersPosition[index].centerPosition[2]);
-  wafNorm.setX(WafersPosition[index].normalDirection[0]);
-  wafNorm.setY(WafersPosition[index].normalDirection[1]);
-  wafNorm.setZ(WafersPosition[index].normalDirection[2]);
+  wafCent.setX(positions[index].centerPosition[0]);
+  wafCent.setY(positions[index].centerPosition[1]);
+  wafCent.setZ(positions[index].centerPosition[2]);
+  wafNorm.setX(positions[index].normalDirection[0]);
+  wafNorm.setY(positions[index].normalDirection[1]);
+  wafNorm.setZ(positions[index].normalDirection[2]);
   Int_t Ladder  = idWaferToLadderNumb(wafId);  
   Int_t Wafer   = idWaferToWafer(wafId);  
   // Move helix of track from IDEAL geom to find where it hit REAL wafer geom
@@ -648,12 +658,12 @@ Int_t St_sls_Maker::ideal2RealTranslation(StThreeVector<double> *pos, StThreeVec
       Int_t NewLadder  = idWaferToLadderNumb(wafId);  
       Int_t NewWafer   = idWaferToWafer(wafId);  
       index = idWaferToWaferNumb(wafId);
-      wafCent.setX(WafersPosition[index].centerPosition[0]);
-      wafCent.setY(WafersPosition[index].centerPosition[1]);
-      wafCent.setZ(WafersPosition[index].centerPosition[2]);
-      wafNorm.setX(WafersPosition[index].normalDirection[0]);
-      wafNorm.setY(WafersPosition[index].normalDirection[1]);
-      wafNorm.setZ(WafersPosition[index].normalDirection[2]);
+      wafCent.setX(positions[index].centerPosition[0]);
+      wafCent.setY(positions[index].centerPosition[1]);
+      wafCent.setZ(positions[index].centerPosition[2]);
+      wafNorm.setX(positions[index].normalDirection[0]);
+      wafNorm.setY(positions[index].normalDirection[1]);
+      wafNorm.setZ(positions[index].normalDirection[2]);
       double news = tHelix.pathLength(wafCent,wafNorm);
       if(TMath::Abs(news)>5) continue;
       newx = tHelix.at(news); 
