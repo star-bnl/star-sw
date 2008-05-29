@@ -41,14 +41,15 @@ struct TOFRawHit {
 
 class StSortTofRawData : public StObject {
  private:
-  tofRawHitVector mRawHitVec;
+  static const UInt_t mNTRAY = 122;
+  tofRawHitVector mRawHitVec[mNTRAY];
   
   static const Int_t mNTOF = 192;
   Int_t mTDIGLeChan2WestPMT[mNTOF], mTDIGTeChan2WestPMT[mNTOF]; //
   Int_t mTDIGLeChan2EastPMT[mNTOF], mTDIGTeChan2EastPMT[mNTOF]; //
   
   //--added by Zebo 
-  Float_t mTimeWindow[122][2];  
+  Float_t mTimeWindow[mNTRAY][2];  
   //--end
  public:
   StSortTofRawData();
@@ -75,7 +76,7 @@ class StSortTofRawData : public StObject {
   
   void SetVPDMap(StTofrDaqMap* daqMap);
 
-  ClassDef(StSortTofRawData,3)
+  ClassDef(StSortTofRawData,4)
 };
 #endif
 
