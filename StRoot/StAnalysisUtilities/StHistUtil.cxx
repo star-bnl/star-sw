@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.44 2008/05/28 05:16:06 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.45 2008/05/30 05:48:03 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.45  2008/05/30 05:48:03  genevb
+// Add ability to write out histogram data to .C files
+//
 // Revision 2.44  2008/05/28 05:16:06  genevb
 // Allow summing over (ignoring) histogram prefixes
 //
@@ -255,6 +258,7 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
     else if (m_OutFileName.EndsWith(".svg")) m_OutType="svg";
     else if (m_OutFileName.EndsWith(".xpm")) m_OutType="xpm";
     else if (m_OutFileName.EndsWith(".png")) m_OutType="png";
+    else if (m_OutFileName.EndsWith("C")) m_OutType="C";
     else {
       LOG_INFO << "SetHistUtil::SetOutFile(): unknown type, assuming ps" << endm;
       m_OutType = "ps";
@@ -412,6 +416,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   TLine ruler;
   TLatex latex;
 
+  ofstream* C_ostr = 0;
+  if (!m_OutType.CompareTo("C")) C_ostr = new ofstream(m_OutFileName);
+
   // function to fit FTPC radial step
   static TF1* fitFRS = 0;
   if (!fitFRS) fitFRS = new TF1("fitFRS","[0]*(x<[1]-[2])+([0]+([3]-[0])*(x-([1]-[2]))/(2*[2]))*(x>[1]-[2])*(x<[1]+[2])+[3]*(x>[1]+[2])",6.5, 9.0);
@@ -440,6 +447,11 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
         // If there's no print list, then print all histograms in directory
         // If there is a print list, then only print if hist name is on list
 	if (!m_ListOfPrint || (m_ListOfPrint->FindObject(oname))) {
+
+          if (C_ostr) {
+            hobj->SavePrimitive(*C_ostr);
+            continue;
+          }
 
           // this histogram will actually be printed/drawn!!
           LOG_INFO << Form("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
@@ -636,6 +648,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
     }
   }
+
+  if (C_ostr) delete C_ostr;
 
   CloseOutFile();
   return histCounter;
