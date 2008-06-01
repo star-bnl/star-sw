@@ -43,13 +43,12 @@
 #include <sys/times.h>
 
 using namespace std;
+using namespace StSpinJet;
 
 const int StBET4pMakerImp::mNOfBemcTowers;
 
 StBET4pMakerImp::StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
-  : eta_high_lim(2.0)
-  , eta_low_lim(-2.0)
-  , mCorrupt(false)
+  : mCorrupt(false)
   , mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
   , mTables(new StBemcTables(doTowerSwapFix))
@@ -60,6 +59,7 @@ StBET4pMakerImp::StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker, bool
   , mSumEmcEt(0.0)
   , mEeGeom(0)
   , mEeDb(0)
+  , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(uDstMaker))
 {
   cout <<"StBET4pMakerImp::StBET4pMakerImp()"<<endl;
   assert(mMuDstMaker);
@@ -72,6 +72,12 @@ Int_t StBET4pMakerImp::InitRun(Int_t runId, StBemcTables* tables)
 
   return kStOk;
     
+}
+
+void StBET4pMakerImp::setUse2006Cuts(bool v)
+{
+  mUse2006Cuts = v;
+  _collectChargedTracksFromTPC->setUse2006Cuts(v);
 }
 
 void StBET4pMakerImp::Init(StEEmcDbMaker* eedb, StEmcADCtoEMaker* adc2e)
@@ -110,7 +116,7 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make(StEvent* event)
 {
-  TrackList trackList = collectChargedTracksFromTPC();
+  TrackList trackList = _collectChargedTracksFromTPC->Do();
 
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     const StMuTrack* track = (*it).first;
@@ -144,79 +150,6 @@ void StBET4pMakerImp::Make(StEvent* event)
 
 }
 
-StBET4pMakerImp::TrackList StBET4pMakerImp::collectChargedTracksFromTPC()
-{
-  TrackList trackiList = getTracksFromTPC();
-
-  trackiList = selectTracksToPassToJetFinder(trackiList);
-
-  return trackiList;
-
-}
-
-
-StBET4pMakerImp::TrackList StBET4pMakerImp::getTracksFromTPC()
-{
-  TrackList ret;
-
-  StMuDst* uDst = mMuDstMaker->muDst();
-
-  long nTracks = uDst->numberOfPrimaryTracks();
-
-  for(int i = 0; i < nTracks; ++i) {
-    const StMuTrack* track = uDst->primaryTracks(i);
-
-    if(track->flag() < 0) continue;
-
-    if(track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) continue;
-
-    ret.push_back(make_pair(track, i));
-  }
-
-  return ret;
-}
-
-StBET4pMakerImp::TrackList StBET4pMakerImp::selectTracksToPassToJetFinder(const TrackList& trackList)
-{
-  TrackList ret;
-
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-
-    if (shoudNotPassToJetFinder(*track)) continue;
-
-    ret.push_back(make_pair((*it).first, (*it).second));
-  }
-
-  return ret;
-}
-
-bool StBET4pMakerImp::shoudNotPassToJetFinder(const StMuTrack& track) const
-{
-    if (track.dcaGlobal().mag() > 3.)
-      return true;
-      
-    if (mUse2006Cuts){
-      if(track.pt() < 0.5) {
-	if(track.dcaGlobal().mag() > 2.0) return true;
-      } else if(track.pt() < 1.0) {
-	if(track.dcaGlobal().mag() > 3.-2.*track.pt()) return true;
-      } else {
-	if(track.dcaGlobal().mag() > 1.0) return true;
-      }
-    }
-
-    if(track.eta() < GetEtaLow())
-      return true;
-
-    if(track.eta() > GetEtaHigh())
-      return true;
-
-    if(static_cast<double>(track.nHits())/static_cast<double>(track.nHitsPoss()) < .51)
-      return true;
-
-  return false;
-}
 
 FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackList)
 {
