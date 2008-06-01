@@ -1,10 +1,12 @@
-// $Id: StJets.cxx,v 1.19 2008/06/01 02:14:28 tai Exp $
+// $Id: StJets.cxx,v 1.20 2008/06/01 02:44:38 tai Exp $
 #include "StJet.h"
 #include "StJets.h"
 
 #include "TrackToJetIndex.h"
 
 ClassImp(StJets)
+
+using namespace std;
 
 StJets::StJets()
   : mDylanPoints(0)
