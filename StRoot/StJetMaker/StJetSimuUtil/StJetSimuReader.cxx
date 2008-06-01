@@ -227,10 +227,10 @@ Int_t StJetSimuReader::Make()
     for (JetBranchesMap::iterator it=mStJetsMap.begin(); it!=mStJetsMap.end(); ++it) {
       StJets* j = (*it).second;
       
-      if ( !j->isSameEvent(mudst) ) {
-	LOG_DEBUG <<"StJetSimuReader::Maker() ERROR:\tisSameEvent()==false.  abort"<<endm;
-	abort();
-      }
+//      if ( !j->isSameEvent(mudst) ) {
+//	LOG_DEBUG <<"StJetSimuReader::Maker() ERROR:\tisSameEvent()==false.  abort"<<endm;
+//	abort();
+//      }
     }
   }
   return kStOk;

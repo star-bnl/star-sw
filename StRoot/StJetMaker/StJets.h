@@ -1,125 +1,5 @@
-//////////////////////////////////////////////////////////////////////
-//
-// $Id: StJets.h,v 1.15 2008/03/27 00:41:09 tai Exp $
-// $Log: StJets.h,v $
-// Revision 1.15  2008/03/27 00:41:09  tai
-// moved the method addProtoJet() from the class StJets
-// to the class StJetMaker.
-//
-// Revision 1.14  2008/03/26 23:42:03  tai
-// initialize all member variables at their constructors.
-// StJets::addProtoJet()
-//    -  this method will be moved to the class StJetMaker
-//    -  to prepare for the move
-//         +  fixed a memory leak from mMuPosition
-//         +  cleaned up the codes
-//         +  changed the direct operations on the member variables
-//            to operations through member methods
-// added StJets::addTrackToIndex()
-// added StJets::addJet()
-//
-// Revision 1.13  2008/03/26 01:13:13  tai
-// moved the definitions of some inline functions inside the class definition.
-// add four setter functions.
-//
-// Revision 1.12  2008/03/24 22:43:17  tai
-// added particles_() to make test easier.
-//
-// Revision 1.11  2008/01/28 03:37:26  staszak
-// A number of updates: i) Murad's use2006cuts function which extends tracks to SMD, and includes DCA cuts, ii) emulated L2 results now included and data L2 results restructured, iii) StJet zVertex and detEta now filled
-//
-// Revision 1.10  2007/05/17 14:33:22  mmiller
-// Added Murad's dca update.
-//
-// Revision 1.9  2007/01/17 16:43:46  mmiller
-// Added StMuTrack info on track charge, dedx, and hit information to StJets.h.  Updated exampleFastJetAna() accordingly.
-//
-// Revision 1.8  2006/03/06 20:03:06  mmiller
-// Added extra protection agains events with SumEmcEnergy>200 GeV (flag as corrupt, return w/o jet finding).  Also added nDylanPoints() and sumEmcE() methods to StJets.
-//
-// Revision 1.7  2005/01/27 18:39:03  mmiller
-// Added some extra accessors to StJet object to keep track of Et from TPC, BTOW, ETOW, etc.
-//
-// Revision 1.6  2004/12/07 20:03:35  mmiller
-// Fixed the tracking of the software-id (tower index) of barrel towers in the jet.
-//
-// Revision 1.5  2004/11/30 19:01:38  mmiller
-// Back compatibility for pre P04k bemc corrupt events
-//
-// Revision 1.4  2004/09/22 15:46:21  mmiller
-// Added a double check to verify that jet 4p is equal to the vector sum of
-// the particles 4-p.  Removed troublesome access methods to StJets.  See
-// StJetReader::exampleEventAna() for access to jet-particles.
-//
-// Revision 1.3  2004/09/20 23:15:52  mmiller
-// Fixed bug in retreiving emc towers for jet, introduced
-// TrackToJetIndex inherits from TLorentzVector now.  See StJetReader::exampleAna
-// for example of how to retreive the corrected 4-momenta used for barrel towers.
-//
-// Revision 1.2  2004/09/10 18:13:53  mmiller
-// Two fixes:
-// 1) add StDetectorId to the TTree to allow sorting of jet particles into
-// StMuTrack and BemcTowers.  See StJetReader::exampleEventAna() for usage
-//
-// 2) removed a continue line in StJetMaker::Make that created a non-synch between
-// the jet tree and the MuDst
-//
-// Revision 1.1  2004/07/08 15:41:04  mmiller
-// First release of StJetMaker.  Mike's commit of full clean of StJetFinder, StJetMaker, and StSpinMaker.  builds and runs in dev.
-//
-// Revision 1.5  2003/09/02 17:59:01  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.4  2003/05/20 20:22:45  thenry
-// Moved body of jetTrackIndices to cxx.
-//
-// Revision 1.3  2003/05/15 17:48:27  thenry
-// Previous versions of StJets expected only primary TPC tracks to be used by
-// the jet maker.  That changed with the introduction of EMC points.
-// Therefore, a bug existed in jetParticles, because this function
-// assumed that all the TrackToJetIndices were valid primary TPC track indices.
-// This bug has been fixed, so that if the TrackToJetIndex is greater than
-// the number of primary tracks, that index is skipped in the construction
-// of the StJets::TrackVec.  Therefore, the StJets::jetParticles function NOW
-// does exactly what it did before, completely ignoring EMC Points, even when
-// they contribute to the jet.
-//
-// In addition, a new function was added: jetTrackIndices(), which returns a
-// vector of integers corresponding to TPC track indices with the addition of
-// (EMC Point index + number TPC primary tracks)).  This function then allows
-// us to determine which tracks and which points (their indexes at least) are
-// part of each jet, even if we do not have a correctly filled StppEvent*.
-//
-// Revision 1.2  2003/04/01 23:45:04  thenry
-// Added jet track accessor functions:
-// numTracks, tracksPt, tracksPhi, tracksEta
-//
-// Revision 1.1  2002/12/04 20:28:08  thenry
-// StppuDstMaker was modified to allow multiple jet analysis modules to be
-// run simultaneosly with various parameters while the Maker loads the events
-// and analyses them.  Four different jet analyzers exist:
-//
-// Konstanin's Analyzers:
-//     Kt type: StppKonstKtJetAnalyzer
-//     Cone type: StppKonstConeJetAnalyzer
-//
-// Mike's Analyzers:
-//     Kt type: StppMikeKtJetAnalyzer
-//     Cone type: StppMikeConeJetAnalyzer
-//
-// These modules all require the StJetFinder modules.
-//
-//
-// Revision 1.0  2002/02/11 20:30:48  Henry
-// Adapted from StJet.h by Akio Ogawa
-//
-//////////////////////////////////////////////////////////////////////
-//
-// StJets
-//
-// Branch for multiple jets and an array of track->jet indices
-//
-//////////////////////////////////////////////////////////////////////
+// -*- mode: c++;-*-
+// $Id: StJets.h,v 1.16 2008/06/01 01:57:46 tai Exp $
 #ifndef StJets_h
 #define StJets_h
 
@@ -132,13 +12,9 @@ using std::vector;
 #include "TClonesArray.h"
 #include "TLorentzVector.h"
 #include "StDetectorId.h"
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
 
-class StProtoJet;
 class StJet;
-class StMuDst;
 
-//!class TrackToJetIndex : public TObject
 class TrackToJetIndex : public TLorentzVector
 {
 public:
@@ -203,7 +79,7 @@ private:
 
 inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
 {
-    string idstring;
+  std::string idstring;
     StDetectorId mDetId = t.detectorId();
     if (mDetId==kTpcId) {
 		idstring = "kTpcId";
@@ -231,7 +107,6 @@ inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
 class StJets : public TObject
 {
 public:
-    typedef vector<StMuTrack*> TrackVec;
 
     StJets();
     virtual ~StJets();
@@ -239,12 +114,6 @@ public:
     void Clear(bool clearTracks = false);
     void Clear(const char *opt);
         
-    ///add a jet to the container
-    //    void addProtoJet(StProtoJet& pj, const StMuDst* muDst);
-
-    ///Set event-wise information:
-    void setMuDst(const StMuDst*);
-
     ///Set the BEMC corrupt flag.  true --> event is corrupt, no jet finding was performed
   void setBemcCorrupt(bool v) { mCorrupt = v; }
   bool bemcCorrupt() const { return mCorrupt; }
@@ -269,7 +138,7 @@ public:
     TObjArray particles_(int jetIndex);
     
     ///Access to a container of the charged-tracks associated with a jet
-    TrackVec jetParticles(StMuDst*, int jetIndex);
+  //    TrackVec jetParticles(StMuDst*, int jetIndex);
     
     ///access to event numbers, used to synchronize with StMuDstMaker for simultaneous reading
   int eventId() { return mEventId; }
@@ -283,7 +152,7 @@ public:
   void setrunNumber(int v) { mRunNumber = v; }
 
     ///A double check, used to synchronize with StMuDstMaker for simultaneous reading
-    bool isSameEvent(const StMuDst*);
+  //    bool isSameEvent(const StMuDst*);
 
     ///Number of towers with e>0.4 GeV (after status check)
     int nDylanPoints() const {return mDylanPoints;}
@@ -332,8 +201,5 @@ inline void StJets::Clear(const char *opt)
     mCorrupt = false;
 }
 
+#endif // StJets_h
 
-
-//non-members ---------------------
-
-#endif
