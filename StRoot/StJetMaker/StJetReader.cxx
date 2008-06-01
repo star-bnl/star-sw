@@ -227,17 +227,17 @@ Int_t StJetReader::Make()
 	
 	mCounter++;
 	
-    if (mDstMaker) {//double check consistency:
-		StMuDst* mudst = mDstMaker->muDst();
-		for (JetBranchesMap::iterator it=mStJetsMap.begin(); it!=mStJetsMap.end(); ++it) {
-			StJets* j = (*it).second;
-			
-			if ( !j->isSameEvent(mudst) ) {
-				cout <<"StJetReader::Maker() ERROR:\tisSameEvent()==false.  abort"<<endl;
-				abort();
-			}
-		}
-    }
+//     if (mDstMaker) {//double check consistency:
+// 		StMuDst* mudst = mDstMaker->muDst();
+// 		for (JetBranchesMap::iterator it=mStJetsMap.begin(); it!=mStJetsMap.end(); ++it) {
+// 			StJets* j = (*it).second;
+// 			
+// 			if ( !j->isSameEvent(mudst) ) {
+// 				cout <<"StJetReader::Maker() ERROR:\tisSameEvent()==false.  abort"<<endl;
+// 				abort();
+// 			}
+// 		}
+//     }
     return kStOk;
 }
 
