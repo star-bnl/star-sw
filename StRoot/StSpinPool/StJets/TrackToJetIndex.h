@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.4 2008/06/01 18:28:47 tai Exp $
+// $Id: TrackToJetIndex.h,v 1.5 2008/06/01 18:37:58 tai Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
@@ -34,45 +34,45 @@ public:
 	
   virtual ~TrackToJetIndex() {};
     
-  void setJetIndex(int n) {mJetIndex=n;}
   int jetIndex() const {return mJetIndex;}
 
-  // Note, trackIndex is the index of the track in the primaryTracks array, if detectorId==kTpcId.
-  // If detectorId==kBarrelEmcTowerId, it is the tower index (actually software id)
-  // If detectorId==kEndcapEmcTowerId, it is the tower ID
-  void setTrackIndex(int n) {mTrackIndex=n;}
   int trackIndex() const {return mTrackIndex;}
+  // if detectorId == kTpcId,            the index of the track in the primaryTracks
+  // If detectorId == kBarrelEmcTowerId, the tower index (software id)
+  // If detectorId == kEndcapEmcTowerId, the tower ID
 
-  //Does this come from EEMC, BEMC, or TPC
-  void setDetectorId(StDetectorId v) {mDetId=v;}
-  StDetectorId detectorId() const {return mDetId;}
+  StDetectorId detectorId() const   { return mDetId;      }
 	
-  //Cache extra info if it's from the TPC
-  void setCharge(Short_t v) {mCharge = v;}
-  void setNhits(unsigned short v) {mNhits = v;}
-  void setNhitsPoss(unsigned short v) {mNhitsPoss = v;}
-  void setNhitsDedx(unsigned short v) {mNhitsDedx = v;}
-  void setNhitsFit(unsigned short v) {mNhitsFit =v;}
-  void setNsigmaPion(double v) {mNsigmaPion = v;}
-  void setTdca(double v) {mTdca = v;} //jan 27, 2007
-  void setTdcaz(double v) {mTdcaz = v;} //jan 27, 2007
-  void setTdcaxy(double v) {mTdcaxy = v;} //jan 27, 2007
-  void setetaext(double v) {metaext = v;}
-  void setphiext(double v) {mphiext = v;}
-  void setdEdx(double v) { mdEdx = v; }
+  Short_t        charge()     const { return mCharge;     }
+  unsigned short nHits()      const { return mNhits;      } //< Return total number of hits on track.
+  unsigned short nHitsPoss()  const { return mNhitsPoss;  } //< Return number of possible hits on track.
+  unsigned short nHitsDedx()  const { return mNhitsDedx;  } //< Return number of hits used for dEdx. 
+  unsigned short nHitsFit()   const { return mNhitsFit;   } //< Return total number of hits used in fit. 
+  double         nSigmaPion() const { return mNsigmaPion; } //< Rdistance to the calculated dE/dx band for pions in units of sigma.
+  double         Tdca()       const { return mTdca;       }
+  double         Tdcaz()      const { return mTdcaz;      }
+  double         Tdcaxy()     const { return mTdcaxy;     }
+  double         etaext()     const { return metaext;     }
+  double         phiext()     const { return mphiext;     }
+  double         dEdx()       const { return mdEdx;       }
+
+  void setJetIndex(int n)            { mJetIndex = n; }
+  void setTrackIndex(int n)          { mTrackIndex = n; }
+  void setDetectorId(StDetectorId v) { mDetId = v; }
+
+  void setCharge(Short_t v)           { mCharge = v; }
+  void setNhits(unsigned short v)     { mNhits = v; }
+  void setNhitsPoss(unsigned short v) { mNhitsPoss = v; }
+  void setNhitsDedx(unsigned short v) { mNhitsDedx = v; }
+  void setNhitsFit(unsigned short v)  { mNhitsFit = v; }
+  void setNsigmaPion(double v)        { mNsigmaPion = v; }
+  void setTdca(double v)              { mTdca = v; }
+  void setTdcaz(double v)             { mTdcaz = v; }
+  void setTdcaxy(double v)            { mTdcaxy = v; }
+  void setetaext(double v)            { metaext = v; }
+  void setphiext(double v)            { mphiext = v; }
+  void setdEdx(double v)              { mdEdx = v; }
 	
-  Short_t charge() const {return mCharge;}
-  unsigned short nHits() const {return mNhits;}     //< Return total number of hits on track.
-  unsigned short nHitsPoss() const {return mNhitsPoss;} //< Return number of possible hits on track.
-  unsigned short nHitsDedx() const {return mNhitsDedx;} //< Return number of hits used for dEdx. 
-  unsigned short nHitsFit() const {return mNhitsFit;}  //< Return total number of hits used in fit. 
-  double nSigmaPion() const {return mNsigmaPion;}      //< Rdistance to the calculated dE/dx band for pions in units of sigma.
-  double Tdca() const {return mTdca;} //jan 27, 2007	
-  double Tdcaz() const {return mTdcaz;} //jan 27, 2007	
-  double Tdcaxy() const {return mTdcaxy;} //jan 27, 2007
-  double etaext() const {return metaext;}
-  double phiext() const {return mphiext;}
-  double dEdx() const { return mdEdx;}
 
 private:
   int mJetIndex;
