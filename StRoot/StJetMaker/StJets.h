@@ -1,15 +1,13 @@
 // -*- mode: c++;-*-
-// $Id: StJets.h,v 1.17 2008/06/01 02:14:28 tai Exp $
+// $Id: StJets.h,v 1.18 2008/06/01 02:44:39 tai Exp $
 #ifndef StJets_h
 #define StJets_h
 
-#include <vector>
-#include <iostream>
-#include <string>
-using std::vector;
-#include <cmath>
 #include "TObject.h"
 #include "TClonesArray.h"
+
+#include <vector>
+
 
 #include "TrackToJetIndex.h"
 
@@ -50,7 +48,7 @@ public:
   void addTrackToIndex(TrackToJetIndex &t2j);
     
     ///Here's how you get the 4-momenta of a particles in a given jet.  This contains tracks and energy-corrected-towers.  Use this for Frag. Function
-    vector<TrackToJetIndex*> particles(int jetIndex);
+  std::vector<TrackToJetIndex*> particles(int jetIndex);
 
     // don't use this. this is for test.
     TObjArray particles_(int jetIndex);
