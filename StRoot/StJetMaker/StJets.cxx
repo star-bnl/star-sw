@@ -1,28 +1,10 @@
-// $Id: StJets.cxx,v 1.18 2008/06/01 01:57:46 tai Exp $
+// $Id: StJets.cxx,v 1.19 2008/06/01 02:14:28 tai Exp $
 #include "StJet.h"
 #include "StJets.h"
 
+#include "TrackToJetIndex.h"
+
 ClassImp(StJets)
-ClassImp(TrackToJetIndex)
-
-TrackToJetIndex::TrackToJetIndex(int ji, int ti, StDetectorId id) 
-  : mJetIndex(ji)
-  , mTrackIndex(ti)
-  , mDetId(id)
-  , mCharge(0)
-  , mNhits(0)
-  , mNhitsPoss(0)
-  , mNhitsDedx(0)
-  , mNhitsFit(0)
-  , mNsigmaPion(0.0)
-  , mTdca(0.0)
-  , mTdcaz(0.0)
-  , mTdcaxy(0.0)
-  , metaext(0.0)
-  , mphiext(0.0)
-{
-
-}
 
 StJets::StJets()
   : mDylanPoints(0)
