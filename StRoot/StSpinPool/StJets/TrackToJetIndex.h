@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.3 2008/06/01 18:01:37 tai Exp $
+// $Id: TrackToJetIndex.h,v 1.4 2008/06/01 18:28:47 tai Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
@@ -38,7 +38,8 @@ public:
   int jetIndex() const {return mJetIndex;}
 
   // Note, trackIndex is the index of the track in the primaryTracks array, if detectorId==kTpcId.
-  // If detectorId==kBemcTowerId, it is the tower index (actually software id)
+  // If detectorId==kBarrelEmcTowerId, it is the tower index (actually software id)
+  // If detectorId==kEndcapEmcTowerId, it is the tower ID
   void setTrackIndex(int n) {mTrackIndex=n;}
   int trackIndex() const {return mTrackIndex;}
 
