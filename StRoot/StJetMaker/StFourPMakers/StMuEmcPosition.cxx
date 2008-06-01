@@ -10,6 +10,7 @@
 #include "StEvent.h"
 #include "StEventTypes.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 //StMuDstMaker:
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -132,6 +133,11 @@ bool StMuEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
 
 bool StMuEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum, const StMuTrack* track, double magField, double emcRadius )
 {  
+  return trackOnBEmc(position, momentum, track, magField, emcRadius);
+}
+
+bool StMuEmcPosition::trackOnBEmc( StThreeVectorD* position, StThreeVectorD* momentum, const StMuTrack* track, double magField, double emcRadius )
+{  
     // There's no check for primary or secondary tracks
 
     /* this was for StTrack
@@ -161,6 +167,12 @@ bool StMuEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
 }
 
 bool StMuEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum,
+				  StMcTrack* mcTrack, double magField, double emcRadius )
+{
+  return trackOnBEmc(position, momentum, mcTrack, magField, emcRadius );
+}
+
+bool StMuEmcPosition::trackOnBEmc( StThreeVectorD* position, StThreeVectorD* momentum,
 				  StMcTrack* mcTrack, double magField, double emcRadius )
 {  
     float startVertexX = mcTrack->startVertex()->position().x();
@@ -203,6 +215,24 @@ bool StMuEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
     return kFALSE;
 }
 
+// Project track onto EEMC at SMD depth (magnetic field must be in Tesla)
+bool StMuEmcPosition::trackOnEEmc(StThreeVectorD* position, StThreeVectorD* momentum, const StMuTrack* track, double magField, double z) const
+{
+  if (track->eta() < 0) return false;
+  StPhysicalHelixD outerHelix = track->outerHelix();
+  if (fabs(outerHelix.origin().z()) > fabs(z)) return false;
+  StThreeVectorD r(0,0,z);
+  StThreeVectorD n(0,0,1);
+  double s = outerHelix.pathLength(r,n);
+  if (!finite(s)) return false;
+  if (s == StHelix::NoSolution) return false;
+  if (s < 0) return false;
+  *position = outerHelix.at(s);
+  int sector, subsector, etabin;
+  if (!EEmcGeomSimple::Instance().getTower(position->xyz(), sector, subsector, etabin)) return false;
+  *momentum = outerHelix.momentumAt(s, magField*tesla);
+  return true;
+}
 
 int StMuEmcPosition::getTowerEtaPhi( double eta, double phi, float* towerEta, float* towerPhi )
 {

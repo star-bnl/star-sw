@@ -23,6 +23,7 @@
 
 #include "StarClassLibrary/StThreeVectorD.hh"
 #include "StarClassLibrary/StThreeVectorF.hh"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 class StMuTrack;
 class StMcTrack;
@@ -42,6 +43,10 @@ public:
     
     bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405); ///< Track projection utility
     bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405); ///< Track projection utility
+
+    bool trackOnBEmc(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405); ///< Track projection utility
+    bool trackOnBEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405); ///< Track projection utility
+    bool trackOnEEmc(StThreeVectorD* position, StThreeVectorD* momentum, const StMuTrack* track, double magField = 0.5, double z = kEEmcZSMD) const; ///< Project track into EEMC at SMD depth (magnetic field must be in Tesla)
     
     int getTowerEtaPhi(double, double, float*, float*); ///< Return tower eta/phi
 
