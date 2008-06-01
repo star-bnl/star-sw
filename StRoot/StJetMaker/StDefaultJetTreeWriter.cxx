@@ -1,6 +1,10 @@
-// $Id: StDefaultJetTreeWriter.cxx,v 1.5 2008/05/09 03:10:22 tai Exp $
+// $Id: StDefaultJetTreeWriter.cxx,v 1.6 2008/06/01 03:06:41 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StDefaultJetTreeWriter.h"
+
+#include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 
 #include "StJets.h"
 #include "StJet.h"
@@ -10,9 +14,6 @@
 
 #include <StJetFinder/StProtoJet.h>
 
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 
 #include <StFourPMakers/StFourPMaker.h>
 #include "StFourPMakers/StBET4pMaker.h"
