@@ -368,7 +368,8 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
       TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 	    
       //now construct StMuTrackFourVec object for jetfinding
-      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, id, kEndcapEmcTowerId);
+      int towerID= (sec*5 + sub)*12 + etabin;
+      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, towerID, kEndcapEmcTowerId);
       tracks.push_back(pmu); //for jet finding interface
     }
   }
