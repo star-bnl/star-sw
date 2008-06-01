@@ -10,7 +10,7 @@ using namespace std;
 //local
 #include "StJetSkimEvent.h"
 
-#include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"
+#include <StSpinPool/StMCAsymMaker/StPythiaEvent.h>
 
 ClassImp(StJetSkimTrigHeader)
 ClassImp(StJetSkimTrig)

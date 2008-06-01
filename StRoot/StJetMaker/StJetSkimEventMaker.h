@@ -9,11 +9,15 @@
 #include <string>
 using namespace std;
 
+#include <TRef.h>
+
 class TFile;
 class StMuDstMaker;
 class StMCAsymMaker;
 class TTree;
 class StJetSkimEvent;
+class StJetSkimTrig;
+class StJetSkimTrigHeader;
 
 class StJetSkimEventMaker : public StMaker 
 {
@@ -45,8 +49,8 @@ private:
     vector<int>     mSimuTrigIds;       //!
     bool            isRealData;         //!
 	
-	void fillTriggerSimulationInfo(StJetSkimTrig &trig);
-    void fillThresholds(StJetSkimTrigHeader &header);
+  void fillTriggerSimulationInfo(StJetSkimTrig &trig);
+  void fillThresholds(StJetSkimTrigHeader &header);
 	
     ClassDef(StJetSkimEventMaker,0)
 };
