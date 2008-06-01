@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.2 2008/06/01 17:22:07 tai Exp $
+// $Id: TrackToJetIndex.h,v 1.3 2008/06/01 18:01:37 tai Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
@@ -58,6 +58,7 @@ public:
   void setTdcaxy(double v) {mTdcaxy = v;} //jan 27, 2007
   void setetaext(double v) {metaext = v;}
   void setphiext(double v) {mphiext = v;}
+  void setdEdx(double v) { mdEdx = v; }
 	
   Short_t charge() const {return mCharge;}
   unsigned short nHits() const {return mNhits;}     //< Return total number of hits on track.
@@ -70,6 +71,8 @@ public:
   double Tdcaxy() const {return mTdcaxy;} //jan 27, 2007
   double etaext() const {return metaext;}
   double phiext() const {return mphiext;}
+  double dEdx() const { return mdEdx;}
+
 private:
   int mJetIndex;
   int mTrackIndex;
@@ -86,7 +89,10 @@ private:
   double mTdcaxy; //jan 27, 2007
   double metaext;
   double mphiext;
-  ClassDef(TrackToJetIndex,2)
+  double mdEdx;
+
+  ClassDef(TrackToJetIndex,3)
+
 };
 
 inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
