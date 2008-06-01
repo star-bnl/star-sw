@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.1  2008/06/01 05:31:42  tai
+// moved StPythiaEvent to StSpinPool/StJetSkimEvent
+//
 // Revision 1.5  2008/05/01 01:36:39  rfatemi
 // check in D. Staszak modifications - additional grids
 //
