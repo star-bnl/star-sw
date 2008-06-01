@@ -1,4 +1,4 @@
-// $Id: StMuTrackEmuFactory.cxx,v 1.5 2008/06/01 19:11:18 tai Exp $
+// $Id: StMuTrackEmuFactory.cxx,v 1.6 2008/06/01 19:42:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StMuTrackEmuFactory.h"
 
@@ -31,10 +31,18 @@ StMuTrackEmu* StMuTrackEmuFactory::createStMuTrackEmu(const StMuTrack* track) co
   double rad(238.6);// geom->Radius()+5.;
   StThreeVectorD momentumAt, positionAt;
   StMuEmcPosition EmcPosition;
-  EmcPosition.trackOnEmc(&positionAt, &momentumAt, track, bField, rad);
+  if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, track, bField, rad) ||
+      EmcPosition.trackOnEEmc(&positionAt, &momentumAt, track))
+    {
+      trackEmu->_etaext = positionAt.pseudoRapidity();
+      trackEmu->_phiext = positionAt.phi();
+    }
+  else
+    {
+      trackEmu->_etaext = -999;
+      trackEmu->_phiext = -999;
+    }
 
-  trackEmu->_etaext = positionAt.pseudoRapidity();
-  trackEmu->_phiext = positionAt.phi();
 
   trackEmu->_dEdx = track->dEdx();
 
