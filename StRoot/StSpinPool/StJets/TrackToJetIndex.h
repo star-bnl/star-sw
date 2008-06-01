@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.1 2008/06/01 03:41:46 tai Exp $
+// $Id: TrackToJetIndex.h,v 1.2 2008/06/01 17:22:07 tai Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
@@ -61,52 +61,52 @@ public:
 	
   Short_t charge() const {return mCharge;}
   unsigned short nHits() const {return mNhits;}     //< Return total number of hits on track.
-    unsigned short nHitsPoss() const {return mNhitsPoss;} //< Return number of possible hits on track.
-      unsigned short nHitsDedx() const {return mNhitsDedx;} //< Return number of hits used for dEdx. 
-    unsigned short nHitsFit() const {return mNhitsFit;}  //< Return total number of hits used in fit. 
-    double nSigmaPion() const {return mNsigmaPion;}      //< Rdistance to the calculated dE/dx band for pions in units of sigma.
-    double Tdca() const {return mTdca;} //jan 27, 2007	
-    double Tdcaz() const {return mTdcaz;} //jan 27, 2007	
-    double Tdcaxy() const {return mTdcaxy;} //jan 27, 2007
-    double etaext() const {return metaext;}
-    double phiext() const {return mphiext;}
+  unsigned short nHitsPoss() const {return mNhitsPoss;} //< Return number of possible hits on track.
+  unsigned short nHitsDedx() const {return mNhitsDedx;} //< Return number of hits used for dEdx. 
+  unsigned short nHitsFit() const {return mNhitsFit;}  //< Return total number of hits used in fit. 
+  double nSigmaPion() const {return mNsigmaPion;}      //< Rdistance to the calculated dE/dx band for pions in units of sigma.
+  double Tdca() const {return mTdca;} //jan 27, 2007	
+  double Tdcaz() const {return mTdcaz;} //jan 27, 2007	
+  double Tdcaxy() const {return mTdcaxy;} //jan 27, 2007
+  double etaext() const {return metaext;}
+  double phiext() const {return mphiext;}
 private:
-    int mJetIndex;
-    int mTrackIndex;
-    StDetectorId mDetId;
+  int mJetIndex;
+  int mTrackIndex;
+  StDetectorId mDetId;
 	
-    Short_t mCharge;
-    unsigned short mNhits;
-    unsigned short mNhitsPoss;
-    unsigned short mNhitsDedx;
-    unsigned short mNhitsFit;
-    double mNsigmaPion;
-    double mTdca; //jan 27, 2007	
-    double mTdcaz; //jan 27, 2007
-    double mTdcaxy; //jan 27, 2007
-    double metaext;
-    double mphiext;
-    ClassDef(TrackToJetIndex,2)
+  Short_t mCharge;
+  unsigned short mNhits;
+  unsigned short mNhitsPoss;
+  unsigned short mNhitsDedx;
+  unsigned short mNhitsFit;
+  double mNsigmaPion;
+  double mTdca; //jan 27, 2007	
+  double mTdcaz; //jan 27, 2007
+  double mTdcaxy; //jan 27, 2007
+  double metaext;
+  double mphiext;
+  ClassDef(TrackToJetIndex,2)
 };
 
 inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
 {
   std::string idstring;
-    StDetectorId mDetId = t.detectorId();
-    if (mDetId==kTpcId) {
-		idstring = "kTpcId";
-    }
-    else if (mDetId==kBarrelEmcTowerId) {
-		idstring = "kBarrelEmcTowerId";
-    }
-    else if (mDetId==kEndcapEmcTowerId) {
-		idstring = "kEndcapEmcTowerId";
-    }
-    else {
-		idstring = "kUnknown";
-    }
+  StDetectorId mDetId = t.detectorId();
+  if (mDetId==kTpcId) {
+    idstring = "kTpcId";
+  }
+  else if (mDetId==kBarrelEmcTowerId) {
+    idstring = "kBarrelEmcTowerId";
+  }
+  else if (mDetId==kEndcapEmcTowerId) {
+    idstring = "kEndcapEmcTowerId";
+  }
+  else {
+    idstring = "kUnknown";
+  }
     
-    return os <<"jetIndex:\t"<<t.jetIndex()<<"\ttrackIndex:\t"<<t.trackIndex()<<"\tdetId:\t"<<t.detectorId()<<"\t"<<idstring;
+  return os <<"jetIndex:\t"<<t.jetIndex()<<"\ttrackIndex:\t"<<t.trackIndex()<<"\tdetId:\t"<<t.detectorId()<<"\t"<<idstring;
 }
 
 
