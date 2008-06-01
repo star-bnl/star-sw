@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.6 2008/06/01 18:01:32 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.7 2008/06/01 19:11:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -31,6 +31,8 @@ public:
 
   int            trackIndex() const { return _trackIndex; }
 
+  short          id()         const { return _id; }
+
 private:
 
   friend class StMuTrackEmuFactory;
@@ -51,6 +53,7 @@ private:
 
   int            _trackIndex;
 
+  short          _id;
 };
 
 }

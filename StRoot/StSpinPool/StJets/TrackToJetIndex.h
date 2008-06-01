@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.6 2008/06/01 18:57:27 tai Exp $
+// $Id: TrackToJetIndex.h,v 1.7 2008/06/01 19:11:23 tai Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
@@ -42,6 +42,7 @@ public:
   // If detectorId == kEndcapEmcTowerId, the tower ID
 
   int          towerID()    const   { return mTowerID; }
+  short        trackID()    const   { return mTrackID; }
 
   StDetectorId detectorId() const   { return mDetId;      }
 	
@@ -76,6 +77,7 @@ public:
   void setphiext(double v)            { mphiext = v; }
   void setdEdx(double v)              { mdEdx = v; }
   void setTowerID(int v)              { mTowerID = v; }
+  void setTrackID(int v)              { mTrackID = v; }
 	
 
 private:
@@ -97,9 +99,10 @@ private:
   double mphiext;
   double mdEdx;
 
-  int mTowerID;
+  int   mTowerID;
+  short mTrackID;
 
-  ClassDef(TrackToJetIndex, 4)
+  ClassDef(TrackToJetIndex, 5)
 
 };
 
