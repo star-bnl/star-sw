@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.8 2008/06/01 04:33:33 tai Exp $
+// $Id: StPythiaEvent.h,v 1.9 2008/06/01 04:59:22 tai Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.9  2008/06/01 04:59:22  tai
+// removed the dependency of StPythiaEvent on St_particle_Table.h
+//
 // Revision 1.8  2008/06/01 04:33:33  tai
 // *** empty log message ***
 //
@@ -36,8 +39,6 @@
 
 #include "TParticle.h"
 #include "TClonesArray.h"
-
-#include "tables/St_particle_Table.h"
 
 class StPythiaEvent : public TObject {
 public:
@@ -90,7 +91,7 @@ public:
   void setF1(PDF scenario, float val);
   void setF2(PDF scenario, float val);
   
-  void addParticle(const particle_st& particle);
+  void addParticle(const TParticle& particle);
   
 private:
   int mRunId;
@@ -186,17 +187,9 @@ inline TClonesArray* StPythiaEvent::particles() { return mParticles; }
 inline int StPythiaEvent::numberOfParticles() const { return mParticles->GetEntriesFast(); }
 inline TParticle* StPythiaEvent::particle(int i) { return (TParticle*)mParticles->At(i); }
 
-inline void StPythiaEvent::addParticle(const particle_st& particle)
+inline void StPythiaEvent::addParticle(const TParticle& particle)
 {
-    new ((*mParticles)[mParticles->GetEntriesFast()])
-        TParticle(particle.idhep,
-        particle.isthep,
-        particle.jmohep[0],
-        particle.jmohep[1],
-        particle.jdahep[0],
-        particle.jdahep[1],
-        TLorentzVector(particle.phep),
-        TLorentzVector(particle.vhep));
+  new ((*mParticles)[mParticles->GetEntriesFast()]) TParticle(particle);
 }
 
 inline void StPythiaEvent::Clear(Option_t* option)

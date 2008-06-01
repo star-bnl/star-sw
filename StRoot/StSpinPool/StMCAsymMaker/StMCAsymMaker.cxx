@@ -18,6 +18,8 @@
 //#include "StMCAsymEvent.h"
 #include "StPythiaEvent.h"
 
+#include "tables/St_particle_Table.h"
+
 ClassImp(StMCAsymMaker)
 
 StMCAsymMaker::StMCAsymMaker(const char *name):StMaker(name) {
@@ -609,7 +611,16 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
 
     particle_st* particleTable = particleTabPtr->GetTable();
 
-    for (int i = 4; i < 8; ++i) pythia->addParticle(particleTable[i]);
+    for (int i = 4; i < 8; ++i)
+      pythia->addParticle(TParticle(particleTable[i].idhep,
+				    particleTable[i].isthep,
+				    particleTable[i].jmohep[0],
+				    particleTable[i].jmohep[1],
+				    particleTable[i].jdahep[0],
+				    particleTable[i].jdahep[1],
+				    TLorentzVector(particleTable[i].phep),
+				    TLorentzVector(particleTable[i].vhep)));
+
 }
 
 //Gehrmann-Stirling NL0 Set A
