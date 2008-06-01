@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.5 2008/06/01 18:37:58 tai Exp $
+// $Id: TrackToJetIndex.h,v 1.6 2008/06/01 18:57:27 tai Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
@@ -41,6 +41,8 @@ public:
   // If detectorId == kBarrelEmcTowerId, the tower index (software id)
   // If detectorId == kEndcapEmcTowerId, the tower ID
 
+  int          towerID()    const   { return mTowerID; }
+
   StDetectorId detectorId() const   { return mDetId;      }
 	
   Short_t        charge()     const { return mCharge;     }
@@ -55,6 +57,7 @@ public:
   double         etaext()     const { return metaext;     }
   double         phiext()     const { return mphiext;     }
   double         dEdx()       const { return mdEdx;       }
+
 
   void setJetIndex(int n)            { mJetIndex = n; }
   void setTrackIndex(int n)          { mTrackIndex = n; }
@@ -72,9 +75,11 @@ public:
   void setetaext(double v)            { metaext = v; }
   void setphiext(double v)            { mphiext = v; }
   void setdEdx(double v)              { mdEdx = v; }
+  void setTowerID(int v)              { mTowerID = v; }
 	
 
 private:
+
   int mJetIndex;
   int mTrackIndex;
   StDetectorId mDetId;
@@ -92,7 +97,9 @@ private:
   double mphiext;
   double mdEdx;
 
-  ClassDef(TrackToJetIndex,3)
+  int mTowerID;
+
+  ClassDef(TrackToJetIndex, 4)
 
 };
 
