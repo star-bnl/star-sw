@@ -47,19 +47,20 @@ public:
   Float_t          eta_high_lim;
   Float_t          eta_low_lim;
 
-  FourList &getTracks() { return tracks; };
-  Int_t numTracks(void) { return tracks.size(); };
+  FourList &getTracks() { return _tracks; };
+  Int_t numTracks(void) { return _tracks.size(); };
 
   Float_t GetEtaLow(void) const { return eta_low_lim; };
   Float_t GetEtaHigh(void) const { return eta_high_lim; };
 
 private:
 
-  void collectChargedTracksFromTPC();
+  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
+
+  TrackList collectChargedTracksFromTPC();
   bool shoudNotPassToJetFinder(const StMuTrack& track) const;
   void countTracksOnBemcTower(const StMuTrack& track);
 
-  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
   TrackList getTracksFromTPC();
   TrackList selectTracksToPassToJetFinder(const TrackList& trackList);
   FourList constructFourMomentumListFrom(const TrackList& trackList);
@@ -80,7 +81,7 @@ private:
 
   bool accept2003Tower(int id);
 
-  FourList tracks;
+  FourList _tracks;
 
   bool mCorrupt;
   bool mUseEndcap;

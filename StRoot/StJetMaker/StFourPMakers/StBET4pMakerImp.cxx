@@ -94,11 +94,11 @@ void StBET4pMakerImp::Clear(Option_t* opt)
   mDylanPoints = 0;
   mSumEmcEt = 0.;
     
-  for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
+  for (FourList::iterator it = _tracks.begin(); it != _tracks.end(); ++it) {
     delete (*it);
     (*it) = 0;
   }
-  tracks.clear();
+  _tracks.clear();
 
   //reset pointers to Barrel hits
   for (int i = 1; i <= mNOfBemcTowers; ++i) {
@@ -110,6 +110,17 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make(StEvent* event)
 {
+  TrackList trackList = collectChargedTracksFromTPC();
+
+  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+    const StMuTrack* track = (*it).first;
+    countTracksOnBemcTower(*track);
+  }
+
+  FourList fourPList = constructFourMomentumListFrom(trackList);
+
+  _tracks.insert(_tracks.end(), fourPList.begin(), fourPList.end());
+
   fillBemcTowerHits(event);
 
   mSumEmcEt = sumEnergyOverBemcTowers(0.4);
@@ -118,36 +129,29 @@ void StBET4pMakerImp::Make(StEvent* event)
 
   //check for barrel corruption (only works for P04ik and later!
   if (mCorrupt) {
-    tracks.clear();
+    _tracks.clear();
     return;
   }
 
   if (mSumEmcEt > 200.) {
-    tracks.clear();
+    _tracks.clear();
     return;
   }
 
-  collectChargedTracksFromTPC();
+
   collectEnergyFromBEMC();
   collectEnergyFromEEMC();
 
 }
 
-void StBET4pMakerImp::collectChargedTracksFromTPC()
+StBET4pMakerImp::TrackList StBET4pMakerImp::collectChargedTracksFromTPC()
 {
   TrackList trackiList = getTracksFromTPC();
 
-  TrackList trackiList2 = selectTracksToPassToJetFinder(trackiList);
+  trackiList = selectTracksToPassToJetFinder(trackiList);
 
+  return trackiList;
 
-  for(TrackList::const_iterator it = trackiList2.begin(); it != trackiList2.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-    countTracksOnBemcTower(*track);
-  }
-
-  FourList trackList3 = constructFourMomentumListFrom(trackiList2);
-
-  tracks.insert(tracks.end(), trackList3.begin(), trackList3.end());
 }
 
 
@@ -297,7 +301,7 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
 	    
     //now construct StMuTrackFourVec object for jetfinding
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
-    tracks.push_back(pmu); //for jet finding interface
+    _tracks.push_back(pmu); //for jet finding interface
   }
 }
 
@@ -370,7 +374,7 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
       //now construct StMuTrackFourVec object for jetfinding
       int towerID= (sec*5 + sub)*12 + etabin;
       StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, towerID, kEndcapEmcTowerId);
-      tracks.push_back(pmu); //for jet finding interface
+      _tracks.push_back(pmu); //for jet finding interface
     }
   }
 }
