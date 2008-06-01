@@ -1,4 +1,4 @@
-// $Id: TrackToJetIndex.cxx,v 1.3 2008/06/01 18:57:27 tai Exp $
+// $Id: TrackToJetIndex.cxx,v 1.4 2008/06/01 19:11:22 tai Exp $
 #include "TrackToJetIndex.h"
 
 ClassImp(TrackToJetIndex)
@@ -20,6 +20,7 @@ TrackToJetIndex::TrackToJetIndex(int ji, int ti, StDetectorId id)
   , mphiext(0.0)
   , mdEdx(0.0)
   , mTowerID(0)
+  , mTrackID(0)
 {
 
 }

@@ -1,4 +1,4 @@
-// $Id: StMuTrackEmuFactory.cxx,v 1.4 2008/06/01 18:01:32 tai Exp $
+// $Id: StMuTrackEmuFactory.cxx,v 1.5 2008/06/01 19:11:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StMuTrackEmuFactory.h"
 
@@ -37,6 +37,8 @@ StMuTrackEmu* StMuTrackEmuFactory::createStMuTrackEmu(const StMuTrack* track) co
   trackEmu->_phiext = positionAt.phi();
 
   trackEmu->_dEdx = track->dEdx();
+
+  trackEmu->_id = track->id();
 
   return trackEmu;
 }

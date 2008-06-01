@@ -1,4 +1,4 @@
-// $Id: StDefaultJetTreeWriter.cxx,v 1.8 2008/06/01 18:57:24 tai Exp $
+// $Id: StDefaultJetTreeWriter.cxx,v 1.9 2008/06/01 19:11:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StDefaultJetTreeWriter.h"
 
@@ -134,6 +134,7 @@ void StDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
       t2j.setetaext ( track->etaext() );
       t2j.setphiext ( track->phiext() );
       t2j.setdEdx ( track->dEdx() );
+      t2j.setTrackID( track->id() );
     } else {
       t2j.setTowerID(muTrackIndex);
     }
