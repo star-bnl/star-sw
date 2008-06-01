@@ -1,13 +1,31 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.1 2008/06/01 02:14:29 tai Exp $
+// $Id: TrackToJetIndex.h,v 1.2 2008/06/01 03:06:41 tai Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
+
+#include "TLorentzVector.h"
 
 #include <ostream>
 #include <string>
 
-#include "StDetectorId.h"
-#include "TLorentzVector.h"
+
+#ifndef StEnumerations_hh
+#define StEnumerations_hh
+
+#define kUnknownIdentifier             0
+#define kTpcIdentifier                 1
+#define kBarrelEmcTowerIdentifier      9
+#define kEndcapEmcTowerIdentifier     13
+
+enum StDetectorId {
+  kUnknownId            = kUnknownIdentifier,
+  kTpcId                = kTpcIdentifier,
+  kBarrelEmcTowerId     = kBarrelEmcTowerIdentifier,
+  kEndcapEmcTowerId     = kEndcapEmcTowerIdentifier,
+};
+
+#endif // StEnumerations_hh
+
 
 class TrackToJetIndex : public TLorentzVector
 {
