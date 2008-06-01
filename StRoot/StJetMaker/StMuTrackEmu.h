@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.5 2008/05/20 23:42:57 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.6 2008/06/01 18:01:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -27,6 +27,7 @@ public:
   Float_t        dcaD()       const { return _dcaD; }
   double         etaext()     const { return _etaext; }
   double         phiext()     const { return _phiext; }
+  double         dEdx()       const { return _dEdx; }
 
   int            trackIndex() const { return _trackIndex; }
 
@@ -46,6 +47,7 @@ private:
   Float_t        _dcaD;
   double         _etaext;
   double         _phiext;
+  double         _dEdx;
 
   int            _trackIndex;
 
