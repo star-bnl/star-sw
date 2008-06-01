@@ -6,6 +6,8 @@
 #include "../StMuTrackFourVec.h"
 #include "StJetFinder/AbstractFourVec.h"
 
+#include "CollectChargedTracksFromTPC.h"
+
 class StMuTrack;
 class StEmcCollection;
 class StMuTrackFourVec;
@@ -37,32 +39,23 @@ public:
   void setUseEndcap(bool v) { mUseEndcap = v; }
   void setUse2003Cuts(bool v) { mUse2003Cuts = v; }
   void setUse2005Cuts(bool v) { mUse2005Cuts = v; }
-  void setUse2006Cuts(bool v) { mUse2006Cuts = v; }
+  void setUse2006Cuts(bool v);
 
   int nDylanPoints() const { return mDylanPoints; }
   double sumEmcEt() const { return mSumEmcEt; }
 
   bool bemcCorrupt() const { return mCorrupt; }
     
-  Float_t          eta_high_lim;
-  Float_t          eta_low_lim;
-
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
 
-  Float_t GetEtaLow(void) const { return eta_low_lim; };
-  Float_t GetEtaHigh(void) const { return eta_high_lim; };
 
 private:
 
   typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
 
-  TrackList collectChargedTracksFromTPC();
-  bool shoudNotPassToJetFinder(const StMuTrack& track) const;
   void countTracksOnBemcTower(const StMuTrack& track);
 
-  TrackList getTracksFromTPC();
-  TrackList selectTracksToPassToJetFinder(const TrackList& trackList);
   FourList constructFourMomentumListFrom(const TrackList& trackList);
 
   void collectEnergyFromBEMC();
@@ -104,6 +97,8 @@ private:
   EEmcGeomSimple* mEeGeom;
   StEEmcDbMaker* mEeDb;
   StEmcADCtoEMaker* _adc2e;
+
+  StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   
 };
 
