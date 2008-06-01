@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.cxx,v 1.4 2008/03/27 02:25:04 tai Exp $
+// $Id: StJet.cxx,v 1.1 2008/06/01 03:41:44 tai Exp $
 // $Log: StJet.cxx,v $
+// Revision 1.1  2008/06/01 03:41:44  tai
+// moved StJet, StJets, and TrackToJetIndex to StSpinPool/StJets
+//
 // Revision 1.4  2008/03/27 02:25:04  tai
 // moved the definitions of the construcors from .h to .cxx
 // set jetEt and 3 other variables in a constructor
