@@ -1,6 +1,9 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.14 2007/10/16 15:26:03 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.15 2008/06/02 13:48:03 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.15  2008/06/02 13:48:03  fisyak
+// Add  t0 handlers for Tpx/Tpc time offsets
+//
 // Revision 1.14  2007/10/16 15:26:03  fisyak
 // Freeze version for Run VII
 //
@@ -17,7 +20,10 @@
 // Before Selection of good runs
 //
 #define CORRECT_LASER_POSITIONS
+#define __TRACKHITS__
+#ifndef __TRACKHITS__
 #define ADDPRIMTRACKHITS
+#endif
 #include <assert.h>
 #include "TFile.h"
 #include "StEventTypes.h"
@@ -242,10 +248,10 @@ Int_t StLaserAnalysisMaker::Make(){
     if (!node) continue;
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     if (! gTrack) continue;
-    if (gTrack->numberOfPossiblePoints(kTpcId) < 25) continue;
+    //    if (gTrack->numberOfPossiblePoints(kTpcId) < 25) continue;
     StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
     StTrackFitTraits&  fitTraits =  gTrack->fitTraits();
-    if (fitTraits.numberOfFitPoints(kTpcId) < 25) continue;
+    //    if (fitTraits.numberOfFitPoints(kTpcId) < 25) continue;
     StThreeVectorD g3 = gTrack->outerGeometry()->momentum();
     if (g3.mag() < 10) continue;
     StThreeVectorD unit = g3.unit();
@@ -267,9 +273,13 @@ Int_t StLaserAnalysisMaker::Make(){
     for (unsigned int j=0; j<hvec.size(); j++) {// hit loop
       if (hvec[j]->detector() != kTpcId) continue;
       tpcHit = static_cast<StTpcHit *> (hvec[j]);
+#ifndef __TRACKHITS__
 #ifdef ADDPRIMTRACKHITS
       if (pTrack) 
 	event->AddHit(tpcHit);
+#endif
+#else
+      event->AddHit(tpcHit);
 #endif
       if (tpcHit->position().perp() > rMax) {
 	rMax = tpcHit->position().perp();
@@ -307,7 +317,7 @@ Int_t StLaserAnalysisMaker::Make(){
     if (mmax < 0 || dPhimin > 0.1) goto ADDTRACK;
     theLaser = Lasers[s][bundle][mmax];
   ADDTRACK:
-    t = event->AddTrack(sector,gTrack,theLaser);
+    t = event->AddTrack(sector,gTrack,theLaser,tpcHit->position().z());
     if (theLaser) {
       Int_t raft = theLaser->Raft;
       Int_t bundle = theLaser->Bundle;

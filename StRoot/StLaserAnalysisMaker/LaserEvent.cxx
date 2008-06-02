@@ -1,5 +1,8 @@
-//$Id: LaserEvent.cxx,v 1.5 2007/12/10 19:54:02 fisyak Exp $
+//$Id: LaserEvent.cxx,v 1.6 2008/06/02 13:48:02 fisyak Exp $
 // $Log: LaserEvent.cxx,v $
+// Revision 1.6  2008/06/02 13:48:02  fisyak
+// Add  t0 handlers for Tpx/Tpc time offsets
+//
 // Revision 1.5  2007/12/10 19:54:02  fisyak
 // Add Id and Log, correct spelling error in README
 //
@@ -18,6 +21,7 @@
 #include "StGlobalTrack.h"
 #include "StTrackNode.h"
 #include "StTpcDb/StTpcDb.h"
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StEventTypes.h"
 #include "TGeoMatrix.h"
 ClassImp(LaserRaft);
@@ -75,10 +79,10 @@ Vertex *LaserEvent::AddVertex(StPrimaryVertex *vertex) {
   return vx;
 }
 //______________________________________________________________________________
-Track *LaserEvent::AddTrack(Int_t sector, StTrack *track, LaserB *laser) {
+Track *LaserEvent::AddTrack(Int_t sector, StTrack *track, LaserB *laser, Double_t z) {
   if (! track) return 0;
   TClonesArray &tracks = *fTracks;
-  Track *t = new(tracks[fNtrack++]) Track(sector, track, laser);
+  Track *t = new(tracks[fNtrack++]) Track(sector, track, laser, z);
   return t;
 }
 //______________________________________________________________________________
@@ -150,8 +154,9 @@ void LaserEvent::SetHeader(Int_t i, Int_t run, Int_t date, Int_t time,
    fEvtHdr.SetE(tzero, drivel, clock, trigger);
 }
 //______________________________________________________________________________
-Track::Track(Int_t sector, StTrack *track, LaserB *theLaser) : Flag(0),mType(kUndefinedVtxId),  mSector(sector), 
-							       fpTInv(-999), thePath(0), dPhi(-999), dTheta(-999) {
+Track::Track(Int_t sector, StTrack *track, LaserB *theLaser, Double_t z) : 
+  Flag(0),mType(kUndefinedVtxId),  mSector(sector), 
+  fpTInv(-999), thePath(0), dPhi(-999), dTheta(-999), zLastHit(z) {
   StTrackNode*   node = track->node();
   StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
   fgeoIn = *((StHelixModel *) gTrack->geometry());
@@ -160,6 +165,8 @@ Track::Track(Int_t sector, StTrack *track, LaserB *theLaser) : Flag(0),mType(kUn
   fpTInv = fgeoOut.charge()/g3.perp();
   fTheta = fgeoOut.momentum().theta();
   fPhi   = fgeoOut.momentum().phi();
+  StPhysicalHelixD helixO = fgeoOut.helix();
+  thePath = helixO.pathLength(Laser.XyzG.x(),Laser.XyzG.y());
   if (theLaser) Laser = *theLaser;
   if (gTrack) {
     StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
@@ -295,6 +302,30 @@ Hit::Hit(StTpcHit *tpcHit)  : sector(0),row(0),charge(0),flag(0),usedInFit(0) {
     charge = tpcHit->charge();
     flag = tpcHit->flag();
     usedInFit = tpcHit->usedInFit();
-    xyz = tpcHit->position();
+    xyz = tpcHit->position(); // from StTpcHitMover
+    static StTpcCoordinateTransform transform(gStTpcDb);
+    StGlobalCoordinate glob(xyz.x(),xyz.y(),xyz.z());
+#if 0
+    static StTpcLocalCoordinate  coorLT;
+    transform(glob,coorLT);
+    static StTpcLocalSectorAlignedCoordinate  coorLSA;
+    transform(coorLT,coorLSA); //
+    static StTpcLocalSectorCoordinate  local;
+    transform(coorLSA,local); 
+#else
+    static StTpcLocalSectorCoordinate  local;
+    transform(glob,local); 
+#endif
+    xyzL = StThreeVectorF(local.position().x(),local.position().y(),local.position().z());
+    static const Int_t NumberOfPadsAtRow[45] = {
+      88, 96,104,112,118,126,134,142,150,158,
+      166,174,182,  
+      98,100,102,104,106,106,108,
+      110,112,112,114,116,118,120,122,122,124,
+      126,128,128,130,132,134,136,138,138,140,
+      142,144,144,144,144
+    };
+    pad  = tpcHit->pad() - NumberOfPadsAtRow[row-1]/2 - 1;
+    tbk  = tpcHit->timeBucket();
   }
 }

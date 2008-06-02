@@ -1,12 +1,16 @@
-// $Id: LoopOverLaserTrees.C,v 1.4 2007/12/28 13:20:25 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.5 2008/06/02 13:48:03 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.5  2008/06/02 13:48:03  fisyak
+// Add  t0 handlers for Tpx/Tpc time offsets
+//
 // Revision 1.4  2007/12/28 13:20:25  fisyak
 // Use average drift velocity from East and West
 //
 // Revision 1.3  2007/12/10 19:54:02  fisyak
 // Add Id and Log, correct spelling error in README
 //
-#define ADJUSTABLE_BINNING
+//#define ADJUSTABLE_BINNING
+//#define __REFIT__
 #define INTEGRATE_OVER_HOURS
 //#define SeparateWestandEast
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -41,6 +45,7 @@ static Int_t Time = 0;
 //             Delta/dv  All,West,East
 static Double_t  DVAll[2][3];
 static Double_t dDVAll[2][3];
+static Int_t  _debug = 0; 
 TH2D *dv = 0;
 TH2D *slope = 0;
 TNtuple *runNT = 0;
@@ -148,11 +153,11 @@ void Fit() {
 	if (k == 0) fit->Fit(pol0,"er","",xmin,xmax); 
 	if (k == 1) {
 	  if (xmin >= 13) continue;
-	  fit->Fit(pol0,"er+","",xmin,14);
+	  fit->Fit(pol0,"er+","",xmin,12.5);
 	}
 	if (k == 2) {
 	  if (xmax <= 15) continue;
-	  fit->Fit(pol0,"er+","",14,xmax);
+	  fit->Fit(pol0,"er+","",13.5,xmax);
 	}
 	DVAll[l][k]  = pol0->GetParameter(0);
 	dDVAll[l][k] = pol0->GetParError(0);
@@ -166,7 +171,7 @@ void Fit() {
   MakeTable();
 }
 //________________________________________________________________________________
-void LoopOverLaserTrees(const Char_t *files="./2007B/st_laser_*.tags.root") {
+void LoopOverLaserTrees(const Char_t *files="./st_laser_*.tags.root") {
   TDirIter Dir(files);
   TTreeIter iter("laser");
   iter.AddFile(files);
@@ -183,63 +188,27 @@ void LoopOverLaserTrees(const Char_t *files="./2007B/st_laser_*.tags.root") {
   //  const Float_t&     fEvtHdr_fOuterSectorzOffset              = iter("fEvtHdr.fOuterSectorzOffset");
   //  const Float_t&     fEvtHdr_ftriggerTimeOffset               = iter("fEvtHdr.ftriggerTimeOffset");
   const Float_t&     fEvtHdr_fOnlClock                        = iter("fEvtHdr.fOnlClock");
-  //  const Int_t*&      fTracks_Flag                             = iter("fTracks.Flag");
-  //  const UShort_t*&   fHits_sector                             = iter("fHits.sector");
+  const Int_t*&      fFit_N                                   = iter("fFit.N");
   const Int_t*&      fFit_Sector                              = iter("fFit.Sector");
-  //  const Double32_t*& fFit_offset                              = iter("fFit.offset");
+#ifdef __REFIT__
+  const Int_t*&     fFit_Bundle                              = (Int_t **) iter("fFit.Bundle[42]");
+  const Int_t*&     fFit_Mirror                              = (Int_t **) iter("fFit.Mirror[42]");
+#endif
+  const Double32_t*& fFit_offset                              = iter("fFit.offset");
   const Double32_t*& fFit_slope                               = iter("fFit.slope");
-//   const Double32_t*& fFit_doffset                             = iter("fFit.doffset");
-//   const Double32_t*& fFit_dslope                              = iter("fFit.dslope");
-//   const Double32_t*& fFit_chisq                               = iter("fFit.chisq");
+  const Double32_t*& fFit_doffset                             = iter("fFit.doffset");
+  const Double32_t*& fFit_dslope                              = iter("fFit.dslope");
+  const Double32_t*& fFit_chisq                               = iter("fFit.chisq");
+#ifdef __REFIT__
+  const Double32_t**&  fFit_X                                   = (Double_t **) iter("fFit.X[42]");
+  const Double32_t**&  fFit_Y                                   = (Double_t **) iter("fFit.Y[42]");
+#endif
   const Double32_t*& fFit_Prob                                = iter("fFit.Prob");
   const Int_t*&      fFit_ndf                                 = iter("fFit.ndf");
+  //  const Int_t*&      fFit_Flag                                = (Int_t **) iter("fFit.Flag[42]");
   TFile *fOut = new TFile("LaserPlots.root","recreate");
   runNT = new TNtuple("RunNT","Run date time",vRun);
-  /* Wrong frequency 
-     mysql RunLog -h onldb.starp.bnl.gov -P 3501 -e 'select beginTime,runNumber,entryTag,frequency from clockFrequency  where entryTag = 0 and runNumber in 
-     (select runNumber  from runDescriptor where glbSetupName = "laser_localclock") and abs(frequency-9.21588993)>0.0001;'
-     +---------------------+-----------+----------+------------+
-     | beginTime           | runNumber | entryTag | frequency  |
-     +---------------------+-----------+----------+------------+
-     | 2007-04-04 11:44:07 |   8094011 |        0 | 9.38315010 |
-     | 2007-04-04 12:59:13 |   8094013 |        0 | 9.38315010 |
-     | 2007-05-04 18:56:46 |   8124070 |        0 | 9.38314915 |
-     | 2007-05-10 15:38:06 |   8130015 |        0 | 9.38314915 |
-     | 2007-05-17 14:48:42 |   8137035 |        0 | 9.38314915 |
-     | 2007-05-18 13:51:40 |   8138043 |        0 | 9.38314915 |
-     | 2007-05-24 12:57:58 |   8144002 |        0 | 9.38314915 |
-     | 2007-06-06 18:53:38 |   8157053 |        0 | 9.38314915 |
-     | 2007-06-12 17:54:07 |   8163044 |        0 | 9.38314915 |
-     | 2007-06-12 17:57:49 |   8163045 |        0 | 9.38314915 |
-     | 2007-06-16 00:26:28 |   8166085 |        0 | 9.38314915 |
-     | 2007-06-21 05:37:45 |   8172017 |        0 | 9.38314915 |
-     +---------------------+-----------+----------+------------+
-zero Field runs
-8086022
-8086061
-8087063
-8101057
-8101058
-8157053
-big Laser Runs
-+-----------+----------------+
-| runNumber | numberOfEvents |
-+-----------+----------------+
-|   8101058 |          29670 |
-|   8102110 |          29975 |+
-|   8144002 |           9285 |
-|   8163045 |          29959 |
-+-----------+----------------+
-
-  */
   static const Double_t EastWRTWestDiff = 0;//3.55700e-01; // +/- 1.77572e-01   3.38530e-01; // +/- 1.39566e-01 permill
-  static const Int_t NBad = 12;
-  static const Int_t BadRuns[NBad] = {
-    8094011,   8094013,   8124070,   8130015,   8137035,   8138043,
-    8144002,   8157053,   8163044,   8163045,   8166085,   8172017  
-  };
-  //  static const Int_t NZFR = 6;
-  //  static const Int_t ZFieldRuns[NZFR] = {8086022,8086061,8087063,8101057,8101058,8157053};
 
   Double_t OnlFreq = 0;
   Int_t oldRun = -1;
@@ -254,7 +223,6 @@ big Laser Runs
 #endif
     if (fEvtHdr_fRun != oldRun) {
       OnlFreq = fEvtHdr_fOnlClock;
-      for (Int_t i = 0; i < NBad; i++) {if (fEvtHdr_fRun == BadRuns[i]) {OnlFreq = 9.21588898; break;}}
       fOut->cd();
       TDatime t(fEvtHdr_fDate,fEvtHdr_fTime);
       UInt_t ut = t.Convert();
@@ -297,18 +265,110 @@ big Laser Runs
       Run.time = fEvtHdr_fTime;
     }
     for (Int_t k = 0; k < 12; k++) {
+#ifndef __REFIT__
       if (fFit_ndf[k] > 4 && fFit_Prob[k] > 1.e-2) {
 	Double_t Slope = 1e3*fFit_slope[k];
 	if (fFit_Sector[k] > 12) Slope -= EastWRTWestDiff;
 	slope->Fill(fFit_Sector[k], Slope);
 	Double_t Vm = OnlFreq/fEvtHdr_fClock*fEvtHdr_fDriVel;
 	Double_t V = 1e-6*Vm/(1.+1e-3*Slope-Vm/TMath::Ccgs());
-	  dv->Fill(fFit_Sector[k],V);
+	dv->Fill(fFit_Sector[k],V);
       }
-    }    
+#else
+      Int_t N = fFit_N[k];
+      if (N > 2) {
+	Double_t Flag[42];
+	memset (Flag, 0, 42*sizeof(Double_t));
+	Double_t YA = 0;
+	for (Int_t i = 0; i < N; i++) {
+	  YA += fFit_Y[42*k+i];
+	}
+	YA /= N;
+	for (Int_t i = 0; i < N; i++) {if (TMath::Abs(fFit_Y[42*k+i] - YA) > 10) Flag[i] = 1;}
+	for (;;) {
+	  TRVector Y;
+	  TRMatrix A(0,2);
+	  for (Int_t i = 0; i < N; i++) {
+	    if (! fFit_Flag[42*k+i]) {
+	      Double_t dev = fFit_Y[42*k+i]/sigma;
+	      Y.AddRow(&dev);
+	      Double_t a[2] = {1./sigma, fFit_X[42*k+i]/sigma};
+	      A.AddRow(a);
+	    }
+	  }
+	  Int_t ndf = A.GetNrows() - 2;
+	  if (ndf < 1) break;
+	  TRSymMatrix S(A,TRArray::kATxA);        if (_debug) cout << "S: " << S << endl;
+	  TRVector    B(A,TRArray::kATxB,Y);      if (_debug) cout << "B: " << B << endl;
+	  TRSymMatrix SInv(S,TRArray::kInverted); if (_debug) cout << "SInv: " << SInv << endl;
+	  TRVector    X(SInv,TRArray::kSxA,B);    if (_debug) cout << "X: " << X << endl;
+	  TRVector    R(Y);               
+	  R -= TRVector(A,TRArray::kAxB,X);       if (_debug) cout << "R: " << R << endl;
+	  Double_t chisq = R*R;
+	  Double_t prob = TMath::Prob(chisq,ndf);
+	  if (prob > 0.01) {
+	    Double_t offset  = X[0];
+	    Double_t slope   = X[1];
+	    Double_t chisq   = chisq;
+	    Double_t dslope  = SInv[2];
+	    Double_t doffset = SInv[0];
+	    if (ndf > 4 && prob > 1.e-2) {
+	      Double_t Slope = 1e3*slope;
+	      if (fFit_Sector[k] > 12) Slope -= EastWRTWestDiff;
+	      slope->Fill(fFit_Sector[k], Slope);
+	      Double_t Vm = OnlFreq/fEvtHdr_fClock*fEvtHdr_fDriVel;
+	      Double_t V = 1e-6*Vm/(1.+1e-3*Slope-Vm/TMath::Ccgs());
+	      dv->Fill(fFit_Sector[k],V);
+	    }
+	  }
+	  break;
+	} else {
+	  Int_t j = -1;
+	  Int_t imax = -1;
+	  Double_t Rmax = 0;
+	  for (Int_t i = 0; i < N; i++) {
+	    if (! fit->Flag[i]) {
+	      j++;
+	      Double_t RR = TMath::Abs(R[j]);
+	      if (RR > Rmax) {
+		imax = i;
+		Rmax = RR;
+	      }
+	    }
+	  }
+	  if (imax < 0) break;
+	  Flag[imax] = 1;
+	}
+      }
+#endif
+    }
   }  
   Fit();
   runNT->Write();
   delete fOut;
 }
+//________________________________________________________________________________
+/*
+  A.Lebedev 02/11/08
+  Delays for laser rafts.
+  T-zero is a moment, when a laser arrived to TPC wheel surface. 
+  All other numbers corresponded to time for laser light to propagate to particular raft (TPC sector). 
+  Estimated error in table   0.1ns
+  West:     sector             2             4         6        8             12
+  Time(ns)       10.33          3.34      6.14    13.11          17.31
+  East:     sector            14            16        18       20      22     24
+  Time(ns)       19.88         12.95      5.97     3.18   10.17  17.14
   
+*/  
+//________________________________________________________________________________
+Double_t OffSets(Double_t *x, Double_t *par = 0) {
+  // TF1 *f = new TF1("Off",OffSets,0,24,0)
+  //                                  2      4      6      8    10      12
+  static Double_t Toffsets[12] = {10.33,  3.34,  6.14, 13.11,   -1., 17.31, // ns
+				  19.88, 12.95,  5.97,  3.18, 10.17, 17.14};
+  static Double_t DV = 55.42840e-4; // cm/ns
+  Int_t sector2 = (Int_t) ((x[0]-1)/2.);
+  Double_t off = -1;
+  if (sector2 < 0 || sector2 > 12) return off;
+  return DV*Toffsets[sector2];
+}
