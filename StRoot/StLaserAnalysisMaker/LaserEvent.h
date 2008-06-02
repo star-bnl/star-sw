@@ -1,5 +1,8 @@
-//$Id: LaserEvent.h,v 1.6 2007/12/10 19:54:02 fisyak Exp $
+//$Id: LaserEvent.h,v 1.7 2008/06/02 13:48:03 fisyak Exp $
 //$Log: LaserEvent.h,v $
+//Revision 1.7  2008/06/02 13:48:03  fisyak
+//Add  t0 handlers for Tpx/Tpc time offsets
+//
 //Revision 1.6  2007/12/10 19:54:02  fisyak
 //Add Id and Log, correct spelling error in README
 //
@@ -184,7 +187,10 @@ class Hit : public TObject {
   UInt_t   flag;
   Int_t    usedInFit;
   StThreeVectorF xyz;
-  ClassDef(Hit,1) 
+  StThreeVectorF xyzL;
+  Float_t  pad;
+  Float_t  tbk;
+  ClassDef(Hit,2) 
 };
 class Track : public TObject {
  public:
@@ -229,9 +235,10 @@ class Track : public TObject {
 #if 0
   FitDV          fit;
 #endif
+  Double32_t     zLastHit;
  public:
   Track() {};
-  Track(Int_t sector, StTrack *track, LaserB *laser = 0);
+  Track(Int_t sector, StTrack *track, LaserB *laser = 0, Double_t z=0);
   virtual ~Track() { }
   Int_t Matched();
   void SetPredictions(TGeoHMatrix *Raft2Tpc = 0, TGeoHMatrix *Bundle2Tpc = 0, TGeoHMatrix *Mirror2Tpc = 0);
@@ -246,7 +253,7 @@ class Track : public TObject {
     Laser.Print();
     cout << "\tdTheta " << dTheta << " dPhi " << dPhi << endl;
   }
-  ClassDef(Track,1)  //An expanded tpt_track rep of a laser track. 
+  ClassDef(Track,2)  
 };
 class LaserEvent : public TObject {
 
@@ -285,7 +292,7 @@ private:
    void          SetDVWest(Float_t dv) {fEvtHdr.fDriVelWest = dv;}
    void          SetDVEast(Float_t dv) {fEvtHdr.fDriVelEast = dv;}
    Vertex       *AddVertex(StPrimaryVertex *vertex = 0);
-   Track        *AddTrack(Int_t sector = 0, StTrack *track = 0, LaserB *laser = 0);
+   Track        *AddTrack(Int_t sector = 0, StTrack *track = 0, LaserB *laser = 0, Double_t zLastHit=0);
    Hit          *AddHit(StTpcHit *tpcHit = 0);
    void          AddTrackFit(Track *t = 0);
    Int_t         GetNtrack() const { return fNtrack; }
