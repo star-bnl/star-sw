@@ -116,6 +116,9 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make(StEvent* event)
 {
+  mCorrupt = isBemcCorrupted(event);
+  if(mCorrupt) return;
+
   TrackList trackList = _collectChargedTracksFromTPC->Do();
 
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
@@ -134,10 +137,10 @@ void StBET4pMakerImp::Make(StEvent* event)
   mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4);
 
   //check for barrel corruption (only works for P04ik and later!
-  if (mCorrupt) {
-    _tracks.clear();
-    return;
-  }
+  //  if (mCorrupt) {
+  //    _tracks.clear();
+  //    return;
+  //  }
 
   if (mSumEmcEt > 200.) {
     _tracks.clear();
@@ -336,7 +339,7 @@ StEmcCollection *StBET4pMakerImp::find_StEmCCollection(StEvent* event) {
   return emc;
 }
 
-bool StBET4pMakerImp::isCorrupted(StEvent* event)
+bool StBET4pMakerImp::isBemcCorrupted(StEvent* event)
 {
   StEmcCollection* emc = find_StEmCCollection(event);
   StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
@@ -373,8 +376,8 @@ bool StBET4pMakerImp::isCorrupted(StEvent* event)
 
 void StBET4pMakerImp::fillBemcTowerHits(StEvent* event)
 {
-  mCorrupt = isCorrupted(event);
-  if(mCorrupt) return;
+  //  mCorrupt = isBemcCorrupted(event);
+  //  if(mCorrupt) return;
 
   StEmcCollection* emc = find_StEmCCollection(event);
   StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
