@@ -1,4 +1,4 @@
-// $Id: StDefaultJetTreeWriter.cxx,v 1.9 2008/06/01 19:11:18 tai Exp $
+// $Id: StDefaultJetTreeWriter.cxx,v 1.10 2008/06/02 01:28:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StDefaultJetTreeWriter.h"
 
@@ -80,7 +80,7 @@ void StDefaultJetTreeWriter::fillJetTree()
 void StDefaultJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
 {
   jets.Clear();
-  jets.setBemcCorrupt(fourPMaker->bemcCorrupt() );
+  jets.setBemcCorrupt(fourPMaker->bemcCorrupt());
 
   StMuEvent* event = _uDstMaker.muDst()->event();
   jets.seteventId(event->eventId());
