@@ -1,4 +1,4 @@
-// $Id: StFourPMaker.cxx,v 1.4 2008/05/08 21:11:49 tai Exp $
+// $Id: StFourPMaker.cxx,v 1.5 2008/06/02 01:28:34 tai Exp $
 #include <string>
 #include <iostream>
 
@@ -22,9 +22,8 @@ ClassImp(StFourPMaker)
   
 StFourPMaker::StFourPMaker(const char* name, StMuDstMaker* uDstMaker) 
   : StMaker(name)
-  , eta_high_lim(2.0)
-  , eta_low_lim(-2.0)
 {
+
 }
 
 Int_t StFourPMaker::Init() 
@@ -32,11 +31,8 @@ Int_t StFourPMaker::Init()
   return StMaker::Init();
 }
 
-Int_t StFourPMaker::Make() {
-  cout <<" Start StFourPMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
-
-  // This class does nothing!
-
+Int_t StFourPMaker::Make() 
+{
   return kStOk;
 }
 
