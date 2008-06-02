@@ -64,7 +64,7 @@ private:
   void collectEnergyFromEEMC();
 
   StEmcCollection *find_StEmCCollection(StEvent* event);
-  bool isCorrupted(StEvent* event);
+  bool isBemcCorrupted(StEvent* event);
 
   void fillBemcTowerHits(StEvent* event);
   double sumEnergyOverBemcTowers(double minE);
