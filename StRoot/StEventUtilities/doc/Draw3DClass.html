@@ -5,8 +5,32 @@ StuDraw3DEvent C++ class
 <body>
 The new class 
 <a href=" html/StuDraw3DEvent.html">StuDraw3DEvent</a>
-implementation (StEventUtilities package) is available from STAR "dev" area. 
-It provides the simple way to visualize the event primitives in 3D quickly against of the STAR detector geometry.
+implementation (StEventUtilities package) is available from STAR "dev" area.
+It provides the <b>simple</b> way to visualize the event primitives in 3D quickly against of the STAR detector geometry.
+<p>
+The main advantage  of the class is it is "self-sufficient" and ready-to-use 
+"on demand".
+<p>
+For example, 
+<ul>
+<li> The STAR <a href="http://www.star.bnl.gov/public/comp/vis/OnLineEventDisplay.html">
+ONLINE EventDisplay</a> is the stand-alone application. 
+To use it one has to provide the file in the special DAQ format and 
+launch that application.
+
+<li>STAR <a href="http://www.rhic.bnl.gov/~fine/EventDisplay">
+offline EventDisplay</a> is the instance of the STAR StMaker class. 
+As such it can be used from within the STAR production chain only. 
+<br>
+It can not be used  from the non-"chain" applications easily.
+</ul>
+The new C++ class can be used directly from any C++ application, 
+from the ROOT Cint interpreter and even from the gdb UNIX debugger break point 
+as needed. 
+It can be used to customize the STAR applications mentioned above also. 
+On the other hands it is backed by the same well-known poweful 
+3D engine; and it shares with the full-fledged STAR 3D applications the powerfull
+and flexbible GUI interface.
 
 
 The GUI interface is described <a href="http://www.star.bnl.gov/public/comp/vis">"STAR visualization and plotting" </a>
