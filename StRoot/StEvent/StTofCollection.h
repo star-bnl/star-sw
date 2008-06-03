@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCollection.h,v 2.9 2007/04/03 18:16:48 ullrich Exp $
+ * $Id: StTofCollection.h,v 2.10 2008/06/03 17:41:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.h,v $
+ * Revision 2.10  2008/06/03 17:41:05  ullrich
+ * Add new member vzVpd and related access methods.
+ *
  * Revision 2.9  2007/04/03 18:16:48  ullrich
  * Add new data members and methods in preperation for new ToF.
  *
@@ -72,11 +75,13 @@ public:
     unsigned int    vpdWest() const;
     float           tstart() const;
     float           tdiff() const;
+    float           vzVpd() const;
 
     void setVpdEast(unsigned int);
     void setVpdWest(unsigned int);
     void setTstart(float);
     void setTdiff(float);
+    void setVzVpd(float);
 
     const StSPtrVecTofCell&    tofCells() const;
     StSPtrVecTofCell&          tofCells();
@@ -110,6 +115,7 @@ private:
     UInt_t   mVpdWest;
     Float_t  mTstart;
     Float_t  mTdiff;
+    Float_t  mVzVpd;
 
     StSPtrVecTofSlat           mTofSlats;
     StSPtrVecTofCell           mTofCells;
@@ -117,7 +123,7 @@ private:
     StSPtrVecTofData           mTofData;
     StSPtrVecTofRawData        mTofRawData;
   
-    ClassDef(StTofCollection, 5)
+    ClassDef(StTofCollection, 6)
 };
 
 inline unsigned int StTofCollection::vpdEast() const { return mVpdEast; }
@@ -132,8 +138,12 @@ inline float StTofCollection::tstart() const { return mTstart; }
 
 inline float StTofCollection::tdiff() const { return mTdiff; }
 
+inline float StTofCollection::vzVpd() const { return mVzVpd; }
+
 inline void StTofCollection::setTstart(float t) { mTstart = t; }
 
 inline void StTofCollection::setTdiff(float t)  { mTdiff = t;}
+
+inline void StTofCollection::setVzVpd(float vz) { mVzVpd = vz; }
 
 #endif
