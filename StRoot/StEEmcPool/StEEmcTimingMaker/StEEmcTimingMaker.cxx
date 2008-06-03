@@ -485,8 +485,8 @@ Int_t StEEmcTimingMaker::Finish()
 
 
   // setup summary TTree
-  TFile *ff = new TFile(mOutputFile,"RECREATE");
-  ff->cd();
+//  TFile *ff = new TFile(mOutputFile,"RECREATE");
+//  ff->cd();
   TTree *tree=new TTree("timing","EEmc timing scan TTree");
   mTree=tree;
 
@@ -521,8 +521,8 @@ Int_t StEEmcTimingMaker::Finish()
 
   tree->Fill();
   
-  //$$$ AddObj(tree,".hist");
-  ff->Write();
+  AddObj(tree,".hist");
+//  ff->Write();
 
   return kStOK;
 }
