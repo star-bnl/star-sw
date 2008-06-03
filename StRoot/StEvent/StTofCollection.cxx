@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCollection.cxx,v 2.9 2007/08/27 22:57:49 ullrich Exp $
+ * $Id: StTofCollection.cxx,v 2.10 2008/06/03 17:41:28 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.cxx,v $
+ * Revision 2.10  2008/06/03 17:41:28  ullrich
+ * Assign defaults values in constructor.
+ *
  * Revision 2.9  2007/08/27 22:57:49  ullrich
  * Fixed problem in numberOfVpdEast() and numberOfVpdWest() - X. Dong
  *
@@ -46,11 +49,17 @@
  **************************************************************************/
 #include "StTofCollection.h"
 
-static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.9 2007/08/27 22:57:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.10 2008/06/03 17:41:28 ullrich Exp $";
 
 ClassImp(StTofCollection)
     
-StTofCollection::StTofCollection() { /* noop */ }
+StTofCollection::StTofCollection() {
+    mVpdEast = 0;
+    mVpdWest = 0;
+    mTstart = -999.;
+    mTdiff = -999.;
+    mVzVpd = -999.;
+}
 
 StTofCollection::~StTofCollection() { /* noop */ }
 
