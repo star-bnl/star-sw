@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.9 2008/05/08 05:02:13 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.10 2008/06/03 23:21:34 tai Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -9,8 +9,6 @@
 #include <time.h>
 #include <map>
 using std::sort;
-
-#include "StMessMgr.h"
 
 //StJetFinder
 #include "StJetEtCell.h"
