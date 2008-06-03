@@ -54,7 +54,6 @@ StMaker(name),m_EvtHddr(0)
    mNTotal = 0; mNFailed = 0;
    if ( UseOwnHeader || !(dynamic_cast<StEvtHddr*>(GetDataSet("EvtHddr"))))  
 			  m_EvtHddr = new StEvtHddr(m_ConstSet); 
-   gROOT->GetListOfBrowsables()->Add(this,GetName());
 
 }
 
@@ -260,8 +259,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.68 2008/03/05 00:01:51 fisyak Exp $
+// $Id: StChain.cxx,v 1.69 2008/06/03 22:33:14 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.69  2008/06/03 22:33:14  fisyak
+// Add geometries for y2005g, y2006g and y2007g; use ROOT convention for variable definitions
+//
 // Revision 1.68  2008/03/05 00:01:51  fisyak
 // Move Skip method in base class
 //

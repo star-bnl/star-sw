@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.208 2008/05/22 16:22:34 fine Exp $
+// $Id: StMaker.cxx,v 1.209 2008/06/03 22:33:14 fisyak Exp $
 //
 //
 /*!
@@ -158,15 +158,18 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005d",      20041201,     1, "y2005d",   "y2005c + new SVT"},   //       {"y2005d",      20041201,     0}
   {"y2005e",      20041201,     2, "y2005e",   "y2005d + new SSD"},   //       {"y2005e",      20041201,     0}
   {"y2005f",      20041201,     3, "y2005f",   "y2005e + SSD5/CALB2"},//       {"y2005e",      20041201,     0}
+  {"y2005g",      20041201,     4, "y2005g",   "y2005f + SVT dead material"},//{"y2005e",      20041201,     0}
 
   // Dead area in SSD, in version y2006b
   {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane"},
   {"y2006a",      20051201,     1, "y2006a",   "y2006+new FPD"},
   {"y2006b",      20051201,     2, "y2006b",   "y2006+new FPD+SSD5/CALB2"},// code versions indicated
   {"y2006c",      20051201,     3, "y2006c",   "y2006+new FPD+SSD5/CALB2+noPMD"},// 
+  {"y2006g",      20051201,     4, "y2006g",   "y2006c + SVT dead material"},
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
+  {"y2007g",      20061105,     4, "y2007g",   "y2007b + SVT dead material"},
 
   // SVT/SSD is out
   {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone in separate SCON"},
@@ -206,10 +209,10 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
         
 ClassImp(StMaker)
 
-static void doPs(const char *who,const char *where);
+static void doPs(const Char_t *who,const Char_t *where);
 
 //_____________________________________________________________________________
-StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),
+StMaker::StMaker(const Char_t *name,const Char_t *):TDataSet(name,".maker"),
 						m_Mode(0), m_Number(0), m_LastRun(-3),
 						m_DebugLevel(0),m_MakeReturn(0),fStatus(0),
 						fLogger(0),fLoggerHold(0)
@@ -218,6 +221,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgTopChain = fgStChain = this;
+     gROOT->GetListOfBrowsables()->Add(this,GetName());
      AddData(0,".make");
    } else         {	// add this maker to chain  
      fgStChain->AddData(this,".make");
@@ -256,10 +260,10 @@ StMaker::~StMaker()
   StMkDeb::Cancel(this);
 }
 //_____________________________________________________________________________
-const char *StMaker::GetName() const
+const Char_t *StMaker::GetName() const
 {
-  static int occ = 0;
-  const char *name = TNamed::GetName();
+  static Int_t occ = 0;
+  const Char_t *name = TNamed::GetName();
   if (name && *name ) return name;
   TString ts(ClassName());
   ts+="#"; ts+=(occ++);		
@@ -288,20 +292,20 @@ StMaker *StMaker::GetParentMaker() const
   return (StMaker*)par->GetParent();
 }
 //______________________________________________________________________________
-StMaker *StMaker::GetMaker(const char *mkname) 
+StMaker *StMaker::GetMaker(const Char_t *mkname) 
 { 
   TString path(".make/"); path+=mkname;
   return (StMaker*)GetDataSet((const char*)path);
 }
 //______________________________________________________________________________
-TObject *StMaker::GetDirObj(const char *dir) const
+TObject *StMaker::GetDirObj(const Char_t *dir) const
 {
   TObjectSet *h = (TObjectSet*)Find(dir);
   if (!h) return 0;
   return h->GetObject();
 }
 //______________________________________________________________________________
-void StMaker::SetDirObj(TObject *obj,const char *dir)
+void StMaker::SetDirObj(TObject *obj,const Char_t *dir)
 { 
   TObjectSet *set = (TObjectSet *)Find(dir);
   if (!set) { // No dir, make it
@@ -309,7 +313,7 @@ void StMaker::SetDirObj(TObject *obj,const char *dir)
   set->SetObject(obj);
 }
 //______________________________________________________________________________
-TObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
+TObjectSet *StMaker::AddObj(TObject *obj,const Char_t *dir)
 { 
   assert (dir[0]=='.');
   TObjectSet *set = (TObjectSet*)Find(dir);
@@ -325,7 +329,7 @@ TObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
   return set;
 }
 //______________________________________________________________________________
- void StMaker::AddHist(TH1 *h,const char *dir)
+ void StMaker::AddHist(TH1 *h,const Char_t *dir)
 {  
   if (dir){/*unused*/}
   if (!h) {AddObj(0,".hist");return;}
@@ -333,13 +337,13 @@ TObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
   AddObj(h,".hist");
 }    
 //______________________________________________________________________________
- void StMaker::AddRunco (double par,const char* name,const char* comment)
+ void StMaker::AddRunco (Double_t par,const Char_t *name,const Char_t *comment)
 {
    assert (name && name && comment[0]); 
 
    TDataSet *dp = new TDataSet(name,m_Runco);
    TString ts("  // "); ts += comment;
-   char buf[40];
+   Char_t buf[40];
    sprintf(buf,"%f",par);
    ts.Replace(0,0,buf);
    dp->SetTitle((const char*)ts);
@@ -347,15 +351,15 @@ TObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
 
 
 //______________________________________________________________________________
-TDataSet *StMaker::AddData(TDataSet *ds, const char* dir)
+TDataSet *StMaker::AddData(TDataSet *ds, const Char_t *dir)
 { 
   assert (dir); assert(dir[0]=='.');
   TDataSet *set = Find(dir);
   if (!set) { // No dir, make it
     set = new TObjectSet(dir); Add(set);}
   if (!ds) return set;
-  int dotMake = (strcmp(dir,".make")==0);
-  int inhMake = ds->InheritsFrom(StMaker::Class());
+  Int_t dotMake = (strcmp(dir,".make")==0);
+  Int_t inhMake = ds->InheritsFrom(StMaker::Class());
   if (dotMake!=inhMake) {
      Error("AddData","Add to %s is NOT allowed: %s.%s\n"
              ,dir,ds->ClassName(),ds->GetName());
@@ -371,42 +375,42 @@ TDataSet *StMaker::AddData(TDataSet *ds, const char* dir)
   return set;
 }
 //______________________________________________________________________________
-TDataSet  *StMaker::GetData(const char *name, const char* dir) const
+TDataSet  *StMaker::GetData(const Char_t *name, const Char_t *dir) const
 { 
   TDataSet *set = Find(dir);
   if (!set) return 0;
   return set->Find(name);
 }
 //______________________________________________________________________________
-void StMaker::ToWhiteBoard(const char *name, void *dat)
+void StMaker::ToWhiteBoard(const Char_t *name, void *dat)
 {
    TObjectSet *envelop = new TObjectSet(name,(TObject*)dat,0);
    envelop->SetTitle(".envelop");
    AddData(envelop,".data");
 }
 //______________________________________________________________________________
-void StMaker::ToWhiteConst(const char *name, void *dat)
+void StMaker::ToWhiteConst(const Char_t *name, void *dat)
 {
    TObjectSet *envelop = new TObjectSet(name,(TObject*)dat,0);
    envelop->SetTitle(".envelop");
    AddData(envelop,".const");
 }
 //______________________________________________________________________________
-void StMaker::ToWhiteBoard(const char *name, TObject *dat, int owner)
+void StMaker::ToWhiteBoard(const Char_t *name, TObject *dat, Int_t owner)
 {
    TObjectSet *envelop = new TObjectSet(name,dat,owner);
    envelop->SetTitle(".envelop");
    AddData(envelop,".data");
 }
 //______________________________________________________________________________
-void StMaker::ToWhiteConst(const char *name, TObject *dat, int owner)
+void StMaker::ToWhiteConst(const Char_t *name, TObject *dat, Int_t owner)
 {
    TObjectSet *envelop = new TObjectSet(name,dat,owner);
    envelop->SetTitle(".envelop");
    AddData(envelop,".const");
 }
 //______________________________________________________________________________
-void *StMaker::WhiteBoard(const char *name, void *v) const
+void *StMaker::WhiteBoard(const Char_t *name, void *v) const
 {
   void **dat = (void **)v;
   *dat = 0;
@@ -417,20 +421,20 @@ void *StMaker::WhiteBoard(const char *name, void *v) const
   return ds->GetObject();
 }
 //______________________________________________________________________________
-void StMaker::AddAlias(const char* log, const char* act,const char* dir)
+void StMaker::AddAlias(const Char_t *log, const Char_t *act,const Char_t *dir)
 {
   TDataSet *ali = new TDataSet(log); 
   ali->SetTitle(act);
   AddData(ali,dir);
 }
 //______________________________________________________________________________
-void StMaker::SetNotify(const char* about, StMaker *mk)
+void StMaker::SetNotify(const Char_t *about, StMaker *mk)
 {
   TDataSet *ali = new TObjectSet(about,mk,0); 
   AddData(ali,".notify");
 }
 //______________________________________________________________________________
-void StMaker::NotifyEm(const char* about, const void *ptr)
+void StMaker::NotifyEm(const Char_t *about, const void *ptr)
 {
 // Turn the logger of the current maker
   TURN_LOGGER(this);
@@ -449,7 +453,7 @@ void StMaker::NotifyEm(const char* about, const void *ptr)
 
 }
 //______________________________________________________________________________
-void StMaker::SetAlias(const char* log, const char* act,const char* dir)
+void StMaker::SetAlias(const Char_t *log, const Char_t *act,const Char_t *dir)
 { 
   TDataSet *ali = GetData(log,dir);
   if (ali) {
@@ -469,10 +473,10 @@ void StMaker::SetAlias(const char* log, const char* act,const char* dir)
  }
 }
 //______________________________________________________________________________
-void StMaker::SetOutput(const char* log,TDataSet *ds)
+void StMaker::SetOutput(const Char_t *log,TDataSet *ds)
 {
-  int idx;
-  const char* logname = log;
+  Int_t idx;
+  const Char_t *logname = log;
   if (!logname || !logname[0]) logname = ds->GetName();
   TString act = ds->Path();
   while ((idx=act.Index(".make/"))>=0) act.Replace(0,idx+6,"");  
@@ -494,9 +498,9 @@ TList *StMaker::GetMakeList() const
   return ds->GetList();
 }
 //______________________________________________________________________________
-TString StMaker::GetAlias(const char* log,const char* dir) const
+TString StMaker::GetAlias(const Char_t *log,const Char_t *dir) const
 {
-  int nspn = strcspn(log," /");
+  Int_t nspn = strcspn(log," /");
   TString act(log,nspn);
   TDataSet *in = GetData(act,dir);
   act ="";
@@ -504,7 +508,7 @@ TString StMaker::GetAlias(const char* log,const char* dir) const
   return act;
 }
 //______________________________________________________________________________
-TDataSet *StMaker::FindDataSet(const char* logInput,
+TDataSet *StMaker::FindDataSet(const Char_t *logInput,
                                 const StMaker *uppMk,
                                 const StMaker *dowMk) const
 {
@@ -514,7 +518,7 @@ TDataSetIter nextMk(0);
 TString actInput,findString,tmp;
 TDataSet *dataset,*dir;
 StMaker    *parent,*mk;
-int icol,islas;
+Int_t icol,islas;
   
   actInput = GetInput(logInput);
   if (actInput.IsNull()) actInput = logInput;
@@ -588,7 +592,7 @@ UP: if (uppMk) return 0;
 
 //		Not FOUND
 NOTFOUND:
-  if (!dowMk && GetDebug()>1) //Print Warning message
+  if (!dowMk && GetDebug()>1) //PrintWarning message
     if ((MaxWarnings--) > 0) Warning("GetDataSet"," \"%s\" Not Found ***\n",(const char*)actInput);
   return 0;
 
@@ -602,7 +606,7 @@ FOUND: if (uppMk || dowMk) 	return dataset;
 
 }
 //______________________________________________________________________________
-TDataSet *StMaker::GetDataBase(const char* logInput,const TDatime *td)
+TDataSet *StMaker::GetDataBase(const Char_t *logInput,const TDatime *td)
 {
   TURN_LOGGER(this);
   TDataSet *ds = 0;
@@ -611,7 +615,7 @@ TDataSet *StMaker::GetDataBase(const char* logInput,const TDatime *td)
   return ds;
 }
 //______________________________________________________________________________
-StMaker *StMaker::GetMakerInheritsFrom (const char *mktype)
+StMaker *StMaker::GetMakerInheritsFrom (const Char_t *mktype)
 {
   TURN_LOGGER(this);
   StMaker  *mk = 0;
@@ -622,7 +626,7 @@ StMaker *StMaker::GetMakerInheritsFrom (const char *mktype)
   return mk;
 }
 //______________________________________________________________________________
-void StMaker::SetFlavor(const char *flav,const char *tabname)
+void StMaker::SetFlavor(const Char_t *flav,const Char_t *tabname)
 {
   StMaker *mk = GetMakerInheritsFrom("St_db_Maker");
   if (mk) mk->SetFlavor(flav,tabname);
@@ -648,7 +652,7 @@ void StMaker::Clear(Option_t *option)
    
    TIter next(GetMakeList(),kIterBackward);
    StMaker *maker;
-   int curr = StMkDeb::GetCurrent();
+   Int_t curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker* )next())) {
       assert(maker->TestBIT(kCleaBeg)==0);
       StMkDeb::SetCurrent(maker,3);
@@ -681,7 +685,7 @@ Int_t StMaker::Init()
    
    TIter nextMaker(tl);
    StMaker *maker;
-   int curr = StMkDeb::GetCurrent();
+   Int_t curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker* )nextMaker())) {
 
       TURN_LOGGER(maker);
@@ -723,7 +727,7 @@ Int_t StMaker::Init()
 // 		and remove it from the ROOT system directory
       gROOT->cd();
       TIter nextHist(gDirectory->GetList());
-      int ready = !objLast;
+      Int_t ready = !objLast;
       while((objHist=nextHist())) {// loop over gDirectory
         if (!ready && objHist!=objLast)		continue;
         ready = 1999;
@@ -767,7 +771,7 @@ void StMaker::StartMaker()
   StartTimer();
 }
 //_____________________________________________________________________________
-void StMaker::EndMaker(int ierr)
+void StMaker::EndMaker(Int_t ierr)
 {
   SetMakeReturn(ierr);
   fgTallyMaker[ierr%10]++;
@@ -807,8 +811,8 @@ Int_t StMaker::Finish()
    if (TestBIT(kFiniEnd)) return 1;
    TURN_LOGGER(this);
 
-   int nerr = 0;
-   int run = GetRunNumber();
+   Int_t nerr = 0;
+   Int_t run = GetRunNumber();
    if (run>-1) FinishRun(run);   
 
    TIter next(GetMakeList(),kIterBackward);
@@ -821,12 +825,12 @@ Int_t StMaker::Finish()
       totalRealTime += maker->RealTime();      
    }
 
-   // Print relative time
+   // Printrelative time
    if (!totalRealTime) totalRealTime = 1;
    if (!totalCpuTime ) totalCpuTime  = 1;
 
    next.Reset();
-   int fst=1;
+   Int_t fst=1;
    while ((maker = (StMaker*)next())) {
  #ifdef STAR_LOGGER  
       TURN_LOGGER(maker);
@@ -847,11 +851,11 @@ Int_t StMaker::Finish()
              ,maker->CpuTime()
              ,100*maker->CpuTime()/totalCpuTime) << endm;
 
-      static const char *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
+      static const Char_t *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
       TString tail("");
-      for (int j=0;j<=kStFatal;j++) {
+      for (Int_t j=0;j<=kStFatal;j++) {
         if (fTallyMaker[j]) tail += Form(" %s=%d",ee[j],fTallyMaker[j]);}
-      if (tail != "") LOG_QA << (const char *) tail << endm;     
+      if (tail != "") LOG_QA << (const Char_t *) tail << endm;     
 #else
      if (fst) {
         fst=0;
@@ -866,15 +870,15 @@ Int_t StMaker::Finish()
              ,maker->CpuTime()
              ,100*maker->CpuTime()/totalCpuTime);
 
-      static const char *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
-      for (int j=0;j<=kStFatal;j++) {
+      static const Char_t *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
+      for (Int_t j=0;j<=kStFatal;j++) {
         if (fTallyMaker[j]) printf(" %s=%d",ee[j],fTallyMaker[j]);}
       printf("\n");
 #endif      
    }
 
    next.Reset();
-   int curr = StMkDeb::GetCurrent();
+   Int_t curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker* )next())) 
    {
       TURN_LOGGER(maker);
@@ -895,14 +899,14 @@ Int_t StMaker::Finish()
      LOG_INFO << "--------------Error Codes-------------------------" << endm;
      LOG_INFO << "     nStOK   nStWarn    nStEOF    nStErr  nStFatal" << endm;
      TString tail("");
-     for( int i=0; i<=kStFatal; i++) tail += Form("%10d",fgTallyMaker[i]); 
+     for( Int_t i=0; i<=kStFatal; i++) tail += Form("%10d",fgTallyMaker[i]); 
      if (tail != "") 
-       LOG_INFO << (const char *)tail << endm;
+       LOG_INFO << (const Char_t *)tail << endm;
      LOG_INFO << "--------------------------------------------------" << endm;
 #else
      printf("\n--------------Error Codes-------------------------\n");
      printf("     nStOK   nStWarn    nStEOF    nStErr  nStFatal  \n");
-     for( int i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
+     for( Int_t i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
      printf("\n--------------------------------------------------\n");
 #endif          
    }  
@@ -935,7 +939,7 @@ Int_t StMaker::Make()
    TIter nextMaker(tl);
    StMaker *maker;
    fgFailedMaker = 0;
-   int curr = StMkDeb::GetCurrent();
+   Int_t curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker* )nextMaker())) {
      if (!maker->IsActive()) continue;
      TURN_LOGGER(maker);
@@ -989,7 +993,7 @@ Int_t StMaker::Make()
    return kStOK;
 }
 //_____________________________________________________________________________
-void StMaker::FatalErr(int Ierr, const char *com)
+void StMaker::FatalErr(Int_t Ierr, const Char_t *com)
 {
 #ifdef STAR_LOGGER     
     LOG_QA    << Form("QAInfo:%s::Fatal: Error %d %s",GetName(),Ierr,com) << endm;
@@ -1047,7 +1051,7 @@ void StMaker::PrintInfo()
    if (built > cvs) printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
    else             printf("QAInfo:%-20s    from %s\n",ClassName(),cvs);
 #endif   
-//     Print info for all defined Makers
+//     Printinfo for all defined Makers
    TIter next(GetMakeList());
    StMaker *maker;
    while ((maker = (StMaker* )next())) {
@@ -1109,7 +1113,7 @@ const Char_t *StMaker::GetEventType() const
 
 //_____________________________________________________________________________
 /*!
-  Print timer information of this maker.
+  Printtimer information of this maker.
   Entries counts how many times the methods: Init(), Make() and Finish ()
   were called.
  */
@@ -1127,12 +1131,12 @@ void StMaker::PrintTimer(Option_t *option)
 void StMaker::lsMakers(const StMaker *top)
 {
   TDataSetIter   iter((TDataSet*)top,20);
-  int N=0;
+  Int_t N=0;
   for(const TDataSet *mk=top;mk;mk = iter.Next()) {
     if(strncmp(".maker",mk->GetTitle(),6)!=0) continue;
-    int l=iter.GetDepth();
+    Int_t l=iter.GetDepth();
     N++;
-    char space[20]; memset(space,' ',sizeof(space));space[l]=0;
+    Char_t space[20]; memset(space,' ',sizeof(space));space[l]=0;
     
     printf("%3d(%d) - %s %s::%s\n",N,l/2,space,mk->ClassName(),mk->GetName());
   }
@@ -1421,9 +1425,9 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 }
 #endif
 //_____________________________________________________________________________
-static void doPs(const char *who, const char *where)
+static void doPs(const Char_t *who, const Char_t *where)
 {
-  static const char *ps =0;
+  static const Char_t *ps =0;
   if (!ps) {
 //		execute shell      
     ps = gSystem->Getenv("StarEndMakerShell"); 
@@ -1491,7 +1495,7 @@ void StMaker::SetDEBUG(Int_t l)
 }
 //_____________________________________________________________________________
 /*!
- * SetAttr(const char *key, const char *val, const char *to)
+ * SetAttr(const Char_t *key, const Char_t *val, const Char_t *to)
  * key is a keyname, val is a value
  * key is any character string. Spaces and case are ignored
  * The "." at the beginning is reserved for the frame work only
@@ -1503,23 +1507,23 @@ void StMaker::SetDEBUG(Int_t l)
  * to =="*" means for all makers down of the first
  * to =="name" means for maker with this name only
  */
-int StMaker::SetAttr(const char *key, const char *val, const char *to)
+Int_t StMaker::SetAttr(const Char_t *key, const Char_t *val, const Char_t *to)
 {
 
-   int count = 0;
+   Int_t count = 0;
    TString tk(key);tk.ToLower();tk.ReplaceAll(" ","");tk.ReplaceAll("\t","");
    if (!val) val ="";
    TString tv(val);tv = tv.Strip(TString::kBoth)     ;tv.ReplaceAll("\t","");
    if (!to || !to[0]) to  =".";
    TString tt(to );             tt.ReplaceAll(" ","");tt.ReplaceAll("\t","");
    TString tn(tt),tc("*");
-   int idx = tt.Index("::");
+   Int_t idx = tt.Index("::");
    if (idx>=0) {//Case with class name
      tn.Replace(0  ,idx+2,""); if (!tn.Length()) tn = "*";
      tc=tt;
      tc.Replace(idx,999  ,""); if (!tc.Length()) tc = "*";
    }  
-   int act=0;
+   Int_t act=0;
         if (tn==".") 			{act = 1;}
    else if (tn=="*") 			{act = 5;}
    else if (tn==GetName()) 		{act = 1;}
@@ -1534,7 +1538,7 @@ int StMaker::SetAttr(const char *key, const char *val, const char *to)
      count++;
      if (tk == ".call") {
          TString command("(("); command += ClassName(); command+="*)";
-         char buf[20]; sprintf(buf,"%p",(void*)this);
+         Char_t buf[20]; sprintf(buf,"%p",(void*)this);
 	 command +=buf; command +=")->"; command+=tv;command+=";";
 	 gROOT->ProcessLineFast(command.Data(),0);}
      else {
@@ -1556,7 +1560,7 @@ int StMaker::SetAttr(const char *key, const char *val, const char *to)
    while ((maker = (StMaker*)nextMaker())) count += maker->SetAttr(tk.Data(),tv.Data(),to);
    return count;
 }
-int StMaker::SetAttr(const StMaker *mk)
+Int_t StMaker::SetAttr(const StMaker *mk)
 {
   if (!mk) return 0;
   if (!mk->m_Attr) return 0;
@@ -1564,41 +1568,41 @@ int StMaker::SetAttr(const StMaker *mk)
   return m_Attr->SetAttr(mk->m_Attr);
 }  
 //_____________________________________________________________________________
-int StMaker::SetAttr(const char *key, int val, const char *to)
+Int_t StMaker::SetAttr(const Char_t *key, Int_t val, const Char_t *to)
 {
    TString ts; ts+=val; return SetAttr(key, ts.Data(), to);
 }
 //_____________________________________________________________________________
-int StMaker::SetAttr(const char *key, UInt_t val, const char *to)
+Int_t StMaker::SetAttr(const Char_t *key, UInt_t val, const Char_t *to)
 {
    TString ts; ts+=val; return SetAttr(key, ts.Data(), to);
 }
 //_____________________________________________________________________________
-int StMaker::SetAttr(const char *key, double val, const char *to)
+Int_t StMaker::SetAttr(const Char_t *key, Double_t val, const Char_t *to)
 {
    TString ts; ts+=val; return SetAttr(key, ts.Data(), to);
 }
 
 //_____________________________________________________________________________
-const char *StMaker::SAttr(const char *key) const
+const Char_t *StMaker::SAttr(const Char_t *key) const
 {
    if (!m_Attr) return "";
    return m_Attr->SAttr(key);
 }   
 //_____________________________________________________________________________
-int StMaker::IAttr(const char *key) const
+Int_t StMaker::IAttr(const Char_t *key) const
 {
    if (!m_Attr) return 0;
    return m_Attr->IAttr(key);
 }
 //_____________________________________________________________________________
-UInt_t StMaker::UAttr(const char *key) const
+UInt_t StMaker::UAttr(const Char_t *key) const
 {
    if (!m_Attr) return 0;
    return m_Attr->UAttr(key);
 }
 //_____________________________________________________________________________
-double StMaker::DAttr(const char *key) const
+Double_t StMaker::DAttr(const Char_t *key) const
 {
    if (!m_Attr) return 0;
    return m_Attr->DAttr(key);
@@ -1611,12 +1615,12 @@ void StMaker::PrintAttr() const
 }
 
 //_____________________________________________________________________________
-Int_t StMaker::InitRun  (int runumber) {return 0;}
+Int_t StMaker::InitRun  (Int_t runumber) {return 0;}
 //_____________________________________________________________________________
-Int_t StMaker::FinishRun(int runumber) {return 0;}
+Int_t StMaker::FinishRun(Int_t runumber) {return 0;}
 
 //_____________________________________________________________________________
-int StMaker::Cleanup(TDataSet *&ds) 
+Int_t StMaker::Cleanup(TDataSet *&ds) 
 {
 
    if (!ds->TObject::TestBit(TObject::kNotDeleted)) {ds=0;return 0;}	
@@ -1624,11 +1628,11 @@ int StMaker::Cleanup(TDataSet *&ds)
    if (!list)                        		return 0;
    assert(list->IsA()==TList::Class() || list->IsA()==TObjArray::Class()); 
 
-   int kount = 0;
+   Int_t kount = 0;
    TIter iter(list);
    TDataSet *son;	
-   int num = list->Capacity();
-   for (int i=0; i<num; i++) {
+   Int_t num = list->Capacity();
+   for (Int_t i=0; i<num; i++) {
      son = (TDataSet*)iter.Next();
      if (!son) continue;
      if (!son->TObject::TestBit(TObject::kNotDeleted)) 	{list->Remove(son); continue;}
@@ -1657,30 +1661,30 @@ StEvtHddr *StMaker::GetEvtHddr() const
   return hddr;
 }
 //_____________________________________________________________________________
-  void StMaker::SetDateTime(int idat,int itim)
+  void StMaker::SetDateTime(Int_t idat,Int_t itim)
 {
   StEvtHddr *hddr = GetEvtHddr();
   hddr->SetDateTime(idat,itim);
 }
 
 //_____________________________________________________________________________
-const char *StMaker::RetCodeAsString(int kode)
+const Char_t *StMaker::RetCodeAsString(Int_t kode)
 {
-static const char* retCodes[] = {
+static const Char_t *retCodes[] = {
   "StOK"  ,"StWarn"  ,"StEOF"  ,"StERR"  ,"StFATAL" ,0,0,0,0,0,	
   "StOK!" ,"StWarn!" ,"StEOF!" ,"StSKIP" ,"StSTOP"  ,0,0,0,0,0,
   "StOK!!","StWarn!!","StEOF!!","StSKIP!","StSTOP!" ,0,0,0,0,0};
 
   assert(kode>=0);
   if (kode>=30) kode = kode%10+20;
-  const char *res = retCodes[kode];
+  const Char_t *res = retCodes[kode];
   if (!res) res = "StUNKNOWN";	
   return res;	
 	
 }
 
 //_____________________________________________________________________________
-StMakerIter::StMakerIter(StMaker *mk,int secondary)
+StMakerIter::StMakerIter(StMaker *mk,Int_t secondary)
 {
   fState = 0;
   fMaker = mk;
@@ -1739,32 +1743,32 @@ AGAIN: switch (fState) {
   assert(0); return 0;
 }
 //_____________________________________________________________________________
-Int_t StMaker::AliasDate(const char *alias)
+Int_t StMaker::AliasDate(const Char_t *alias)
 
 {
 
-  int n = strcspn(alias," ."); if (n<3) return 0;
-  int i;
+  Int_t n = strcspn(alias," ."); if (n<3) return 0;
+  Int_t i;
   for (i=0;fDbAlias[i].tag && strncmp(alias,fDbAlias[i].tag,n);i++) {} 
   return fDbAlias[i].date;
 }
 //_____________________________________________________________________________
-Int_t StMaker::AliasTime(const char *alias)
+Int_t StMaker::AliasTime(const Char_t *alias)
 
 {
 
-  int n = strcspn(alias," ."); if (n<3) return 0;
-  int i;
+  Int_t n = strcspn(alias," ."); if (n<3) return 0;
+  Int_t i;
   for (i=0;fDbAlias[i].tag && strncmp(alias,fDbAlias[i].tag,n);i++) {} 
   return fDbAlias[i].time;
 }
 //_____________________________________________________________________________
-Char_t *StMaker::AliasGeometry(const char *alias)
+Char_t *StMaker::AliasGeometry(const Char_t *alias)
 
 {
 
-  int n = strcspn(alias," ."); if (n<3) return 0;
-  int i;
+  Int_t n = strcspn(alias," ."); if (n<3) return 0;
+  Int_t i;
   for (i=0;fDbAlias[i].tag && strncmp(alias,fDbAlias[i].tag,n);i++) {} 
   return fDbAlias[i].geometry;
 }
@@ -1801,7 +1805,7 @@ TFile *StMaker::GetTFile() const
 
 ClassImp(StTestMaker)
 //_____________________________________________________________________________
-StTestMaker::StTestMaker(const char *name):StMaker(name)
+StTestMaker::StTestMaker(const Char_t *name):StMaker(name)
 {
    fNext=0; fLast=0;
    if (fgStChain == this ) {fgStChain=0;}
@@ -1815,7 +1819,7 @@ void StTestMaker::SetNext(StMaker *mk)
   fNext=mk;
 }
 //_____________________________________________________________________________
-void StTestMaker::Print(const char *) const
+void StTestMaker::Print(const Char_t *) const
 {
 #ifdef STAR_LOGGER    
    if (fLast) { LOG_INFO << Form("%s: Last Maker %s::%s(%p)",
@@ -1848,6 +1852,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.209  2008/06/03 22:33:14  fisyak
+// Add geometries for y2005g, y2006g and y2007g; use ROOT convention for variable definitions
+//
 // Revision 1.208  2008/05/22 16:22:34  fine
 // Protection against of the carsh with cvs=0, Issue #1005
 //
@@ -1955,7 +1962,7 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 // Add y2006,upgr01 and upgr02
 //
 // Revision 1.173  2005/12/18 23:17:02  perev
-// uint attributes fix
+// uInt_t attributes fix
 //
 // Revision 1.172  2005/12/07 18:56:16  perev
 // PrintAttr() method added
@@ -2041,7 +2048,7 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 // SetDateTime(int,int) added
 //
 // Revision 1.145  2004/04/09 21:10:20  jeromel
-// Print Info only in debug mode
+// PrintInfo only in debug mode
 //
 // Revision 1.144  2004/04/09 01:59:00  jeromel
 // Bug fix.
@@ -2059,7 +2066,7 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 // Make more robust
 //
 // Revision 1.139  2004/01/28 04:37:26  perev
-// Print of new Run added
+// Printof new Run added
 //
 // Revision 1.138  2004/01/26 22:47:26  perev
 // Account stage (init,make,..)
@@ -2161,13 +2168,13 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 // Add warning for failed Initialization
 //
 // Revision 1.105  2000/08/07 22:41:37  perev
-// remove redundant print in case of error
+// remove redundant prInt_t in case of error
 //
 // Revision 1.104  2000/08/04 21:03:38  perev
 // Leaks + Clear() cleanup
 //
 // Revision 1.103  2000/07/30 01:39:04  perev
-// StMem::Print added
+// StMem::Printadded
 //
 // Revision 1.102  2000/07/27 19:05:34  perev
 // Small memleak in StMakerIter fixed, thanx Akio
