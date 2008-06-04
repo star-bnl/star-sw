@@ -186,13 +186,19 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
 
      if (dbDataSet) {
        vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
-
+       if(vSeed==0){
+	 LOG_ERROR << "StGenericVertexMaker -- No 'vertexSeed' table in Database for beamline, makse no sens to proceed, Jan" << endm;
+	 assert(1==2);
+       }
+       
+       
        x0 = vSeed->x0;
        y0 = vSeed->y0;
        dxdz = vSeed->dxdz;
        dydz = vSeed->dydz;
      } else {
-       LOG_INFO << "StGenericVertexMaker -- No Database for beamline" << endm;
+       LOG_ERROR << "StGenericVertexMaker -- No 'Calibrations/rhic' Database for beamline, makse no sens to proceed, Jan" << endm;
+       assert(1==2);
      }
      LOG_INFO << "BeamLine Constraint: " << endm;
      LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
