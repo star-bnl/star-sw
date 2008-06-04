@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.30 2008/05/27 14:26:40 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.31 2008/06/04 19:18:11 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.31  2008/06/04 19:18:11  fisyak
+ * Account sector t0 shift only once
+ *
  * Revision 1.30  2008/05/27 14:26:40  fisyak
  * Use TChairs, absorb shift tau shift, introduce sector to sector time offset
  *
@@ -319,7 +322,6 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     mOuterSectorzOffset
     :mInnerSectorzOffset;
   Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? gTpcDbPtr->T0(sector)->getT0(row, TMath::Nint (probablePad)) : 0;
-  t0offset += St_tpcSectorT0offsetC::instance()->t0offset(sector);
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
@@ -333,7 +335,6 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
   StThreeVector<double>  tmp=xyFromRaw(a);
   Double_t zoffset= (a.row()>13) ? mOuterSectorzOffset : mInnerSectorzOffset;
   Double_t t0offset = useT0 ? gTpcDbPtr->T0(a.sector())->getT0(a.row(),TMath::Nint(a.pad())) : 0;
-  t0offset += St_tpcSectorT0offsetC::instance()->t0offset(a.sector());
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
