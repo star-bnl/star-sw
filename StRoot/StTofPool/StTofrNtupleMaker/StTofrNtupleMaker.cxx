@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.8 2008/05/08 21:09:37 dongx Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.9 2008/06/05 18:33:45 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,10 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.9  2008/06/05 18:33:45  dongx
+ * -added members in tree: tDiff, tofcorr and beta for check
+ * -beamLine read from database
+ *
  * Revision 1.8  2008/05/08 21:09:37  dongx
  * Changed precision of time info to double type
  *
@@ -151,7 +155,7 @@ Int_t StTofrNtupleMaker::InitRun(int runnumber) {
   double dydz = 0.;
 
   // Get Current Beam Line Constraint from database
-  TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic");
+  /*TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic");
 
   if (dbDataSet) {
     vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
@@ -164,13 +168,16 @@ Int_t StTofrNtupleMaker::InitRun(int runnumber) {
   else {
     LOG_INFO << "StGenericVertexMaker -- No Database for beamline" << endm;
   }
+  */
+  LOG_INFO<< " beamline is set by hand "<<endl;
+
   LOG_INFO << "BeamLine Constraint: " << endm;
   LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
   LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
   
   //beam line not be calibrated yet
   //x0 shift by 0.5
-  x0 = 0.5;
+  //x0 = 0.5;
  
   StThreeVectorD origin(x0,y0,0.0);
   double pt = 88889999;
@@ -199,6 +206,7 @@ Int_t StTofrNtupleMaker::FinishRun(int runnumber)
     if(mTofrGeom) delete mTofrGeom;
   }
   mTofrGeom = 0;
+  delete mBeamHelix;
   
   return kStOK;
 }
@@ -213,7 +221,11 @@ Int_t StTofrNtupleMaker::Finish() {
     LOG_INFO << "StTofrNtupleMaker::Finish() ntuple file " 
 	 << mTupleFileName  << " closed." << endm;
   }
-  
+ 
+  //delete mPvpdTuple;
+  //delete mCellTuple;
+  //delete mTupleFile;
+ 
   LOG_INFO << "StTofrNtupleMaker -- statistics" << endm;
   LOG_INFO << " accepted events     : " << mAcceptedEvents << endm;
   LOG_INFO << " pVPD entries        : " << mPvpdEntries << endm;
@@ -349,7 +361,8 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
         StThreeVectorD localHit(local[0], local[1], local[2]);
         float ycenter = (thisCell->cellIndex()-1)*3.45-8.625;
         delete sensor;
-    
+       
+       cout<<"zHit local = "<<local[2]<<"  "<< thisCell->zHit()<<endl; 
         mCellData.xlocal[ntofhits] = (Float_t) localHit.x();
         mCellData.ylocal[ntofhits] = (Float_t) localHit.y();
         mCellData.zlocal[ntofhits] = (Float_t) localHit.z();
@@ -364,8 +377,7 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
         StTrack *thisTrack = thisCell->associatedTrack();
         StTrack *globalTrack = thisTrack->node()->track(global);
 
-        StTrackGeometry *theTrackGeometry = 
-	(mOuterTrackGeometry)?thisTrack->outerGeometry():thisTrack->geometry();
+        StTrackGeometry *theTrackGeometry = thisTrack->geometry();
         const StThreeVectorF momentum = theTrackGeometry->momentum();
         //- dig out from the dedx and rich pid traits
         float dedx(0.), cherang(0), dedxerror(0);
@@ -391,7 +403,8 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
 	  }
         }
    
-        StThreeVector<double> dcatof =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
+        StThreeVector<double> tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
+        StThreeVector<double> dcatof = tofPos - mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);//real dca
 
         float mNSigmaElectron;
         float mNSigmaPion;
@@ -416,7 +429,7 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
         //tofPathLength(&event->primaryVertex()->position(),
         //  				&thisCell->position(),
         //  				theTrackGeometry->helix().curvature());
-        pathLength = tofPathLength(&dcatof, &thisCell->position(), theTrackGeometry->helix().curvature());
+        pathLength = tofPathLength(&tofPos, &thisCell->position(), theTrackGeometry->helix().curvature());
         if(Debug()) LOG_INFO << "dca(x,y,z) = (" << dcatof.x() <<", " << dcatof.y() 
                              <<", " << dcatof.z() << "), tof pathLength = " << pathLength<<endm;
         mCellData.trackId[ntofhits]     = (Int_t)thisTrack->key();
@@ -429,7 +442,7 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
         mCellData.nHitsFit[ntofhits]    = thisTrack->fitTraits().numberOfFitPoints(kTpcId);
         mCellData.dcaX[ntofhits]         = dcatof.x();
         mCellData.dcaY[ntofhits]         = dcatof.y();
-        mCellData.dcaZ[ntofhits]         = dcatof.z();
+        mCellData.dcaZ[ntofhits]         = tofPos.z();
         //globalTrack->geometry()->helix().distance(event->primaryVertex()->position());
         mCellData.length[ntofhits]      = (float)fabs(pathLength);
         mCellData.p[ntofhits]           = momentum.mag();
@@ -447,6 +460,22 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
         mCellData.nSigPi[ntofhits]      = mNSigmaPion;
         mCellData.nSigK[ntofhits]       = mNSigmaKaon;
         mCellData.nSigP[ntofhits]       = mNSigmaProton;
+
+
+        mCellData.tofcorr[ntofhits]     = -999.;
+        mCellData.beta[ntofhits]     = -999.;
+        StSPtrVecTofHit& hitTofVec = theTof->tofHits();
+        for(size_t ih=0;ih<hitTofVec.size();ih++) {
+           StTofHit *aHit = (StTofHit *)hitTofVec[ih];
+           if(!aHit) continue;
+           if(aHit->trayIndex() == thisCell->trayIndex() &&
+              aHit->moduleIndex() == thisCell->moduleIndex() &&
+              aHit->cellIndex() == thisCell->cellIndex()) {
+              mCellData.tofcorr[ntofhits] = aHit->timeOfFlight();
+              mCellData.beta[ntofhits] = aHit->beta();
+           }
+            
+        }
         
         ntofhits++;
       }//end of tofr loop
@@ -455,6 +484,7 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
     mCellData.vpdWest = vpdWest;
     mCellData.numberOfVpdEast = nVpdEast;
     mCellData.numberOfVpdWest = nVpdWest;
+    mCellData.tDiff = theTof->tdiff();
     mCellData.nTofHits = ntofhits;
     mPvpdTuple->Fill();
     mCellTuple->Fill();
@@ -494,6 +524,7 @@ void StTofrNtupleMaker::bookNtuples(){
 
   // pVPD timing
   mPvpdTuple = new TTree("pvpd","tofr timing");
+  mPvpdTuple->SetAutoSave(1000);
   mPvpdTuple->Branch("run",&mCellData.run,"run/I");
   mPvpdTuple->Branch("evt",&mCellData.evt,"evt/I");
   mPvpdTuple->Branch("trgword",&mCellData.trgword,"trgword/I");
@@ -504,6 +535,7 @@ void StTofrNtupleMaker::bookNtuples(){
   mPvpdTuple->Branch("vpdWest",&mCellData.vpdWest,"vpdWest/I");
   mPvpdTuple->Branch("numberOfVpdEast",&mCellData.numberOfVpdEast,"numberOfVpdEast/I");
   mPvpdTuple->Branch("numberOfVpdWest",&mCellData.numberOfVpdWest,"numberOfVpdWest/I");
+  mPvpdTuple->Branch("tDiff",&mCellData.tDiff,"tDiff/F");
   mPvpdTuple->Branch("pvpdLeadingEdgeTimeEast",&mCellData.pvpdLeadingEdgeTimeEast,"pvpdLeadingEdgeTimeEast[19]/D");
   mPvpdTuple->Branch("pvpdLeadingEdgeTimeWest",&mCellData.pvpdLeadingEdgeTimeWest,"pvpdLeadingEdgeTimeWest[19]/D");
   mPvpdTuple->Branch("pvpdTotEast",&mCellData.pvpdTotEast,"pvpdTotEast[19]/D");
@@ -511,6 +543,7 @@ void StTofrNtupleMaker::bookNtuples(){
 
   // Tofr calibration ntuple
   mCellTuple = new TTree("tofr","Tofr cell data");
+  mCellTuple->SetAutoSave(1000);
   mCellTuple->Branch("run",&mCellData.run,"run/I");
   mCellTuple->Branch("evt",&mCellData.evt,"evt/I");
   mCellTuple->Branch("trgword",&mCellData.trgword,"trgword/I");
@@ -521,6 +554,7 @@ void StTofrNtupleMaker::bookNtuples(){
   mCellTuple->Branch("vpdWest",&mCellData.vpdWest,"vpdWest/I");
   mCellTuple->Branch("numberOfVpdEast",&mCellData.numberOfVpdEast,"numberOfVpdEast/I");
   mCellTuple->Branch("numberOfVpdWest",&mCellData.numberOfVpdWest,"numberOfVpdWest/I");
+  mCellTuple->Branch("tDiff",&mCellData.tDiff,"tDiff/F");
   mCellTuple->Branch("pvpdLeadingEdgeTimeEast",&mCellData.pvpdLeadingEdgeTimeEast,"pvpdLeadingEdgeTimeEast[19]/D");
   mCellTuple->Branch("pvpdLeadingEdgeTimeWest",&mCellData.pvpdLeadingEdgeTimeWest,"pvpdLeadingEdgeTimeWest[19]/D");
   mCellTuple->Branch("pvpdTotEast",&mCellData.pvpdTotEast,"pvpdTotEast[19]/D");
@@ -560,6 +594,8 @@ void StTofrNtupleMaker::bookNtuples(){
   mCellTuple->Branch("nSigPi",&mCellData.nSigPi,"nSigPi[nTofHits]/F");
   mCellTuple->Branch("nSigK",&mCellData.nSigK,"nSigK[nTofHits]/F");
   mCellTuple->Branch("nSigP",&mCellData.nSigP,"nSigP[nTofHits]/F");
+  mCellTuple->Branch("tofcorr",&mCellData.tofcorr,"tofcorr[nTofHits]/F");
+  mCellTuple->Branch("beta",&mCellData.beta,"beta[nTofHits]/F");
   
   return;
 }

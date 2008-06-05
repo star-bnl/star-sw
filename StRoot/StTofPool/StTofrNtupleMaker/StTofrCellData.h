@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrCellData.h,v 1.5 2008/05/08 21:09:36 dongx Exp $
+ * $Id: StTofrCellData.h,v 1.6 2008/06/05 18:33:45 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,10 @@
  *****************************************************************
  *
  * $Log: StTofrCellData.h,v $
+ * Revision 1.6  2008/06/05 18:33:45  dongx
+ * -added members in tree: tDiff, tofcorr and beta for check
+ * -beamLine read from database
+ *
  * Revision 1.5  2008/05/08 21:09:36  dongx
  * Changed precision of time info to double type
  *
@@ -35,6 +39,7 @@
     Int_t vpdEast, vpdWest;
     Int_t numberOfVpdEast, numberOfVpdWest;
     Double_t tdcSumEast, tdcSumWest, tdcSum;
+    Float_t tDiff;
     Double_t pvpdLeadingEdgeTimeEast[19], pvpdTotEast[19];
     Double_t pvpdLeadingEdgeTimeWest[19], pvpdTotWest[19];
     Int_t tray[kMaxTracks], module[kMaxTracks], cell[kMaxTracks], daq[kMaxTracks];
@@ -49,5 +54,6 @@
     Float_t dedx[kMaxTracks], dedxError[kMaxTracks], cherenkovAngle[kMaxTracks];
     Int_t nHitsDedx[kMaxTracks], cherenkovPhotons[kMaxTracks];
     Float_t nSigE[kMaxTracks], nSigPi[kMaxTracks], nSigK[kMaxTracks], nSigP[kMaxTracks];
-  };
+    Float_t tofcorr[kMaxTracks], beta[kMaxTracks];
+  };  
 #endif
