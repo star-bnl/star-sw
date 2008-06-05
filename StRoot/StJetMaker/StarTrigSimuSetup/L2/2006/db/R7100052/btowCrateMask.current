@@ -1,0 +1,10 @@
+# EMPTY  Replace stat & fail  masks for channels already initialized from the DB 
+#     in specified crate
+#     format : {hexCrateID hexStat hexFatal ,  anythingElse}
+#     lines starting with '#' are ignored
+#     empty lines are not permitted
+#
+#  ...............BTOW......................
+#
+#0x02 0x00 0x22 - example, remove '#' to activate
+#
