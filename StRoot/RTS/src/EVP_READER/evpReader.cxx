@@ -69,6 +69,7 @@ evpReader::evpReader(char *name)
 
 	sfs = NULL;
 	sfs_lastevt = 0;
+	sumdatap = NULL;
 
 	memset(&runconfig,0,sizeof(runconfig));
 
@@ -280,6 +281,8 @@ char *evpReader::get(int num, int type)
 	u_int offset ;
 	char _evp_basedir_[40];
 	static char _last_evp_dir_[40];
+
+	sumdatap = NULL;
 
 	LOG(DBG,"get event %d of type %d; file %d, dir %d, evp %d",num,type,isfile,isdir,isevp) ;
 
@@ -841,7 +844,7 @@ char *evpReader::get(int num, int type)
 
 	// summaries need a hack for a bug present 
 	// oct to dec 2007
-	DATAP *sumdatap;  // which datap to use for summaries?
+	//sumdatap;  // which datap to use for summaries?
 
 	DATAP *legdatap = getlegacydatap(mem, data_bytes) ;
 	if(legdatap) {
@@ -1156,6 +1159,26 @@ static int evtwait(int desc, ic_msg *m)
 
 	return STAT_ERROR ;	// critical - please reboot
 
+}
+
+// Fixes the summary fields for a randomly supplied datap
+// Returns -1 if error
+int evpReader::fixDatapSummary(DATAP *datap)
+{
+  if(!sumdatap) return -1;
+
+  datap->len = sumdatap->len;
+  datap->time = sumdatap->time;
+  datap->seq = sumdatap->seq;
+  datap->trg_word = sumdatap->trg_word;
+  datap->trg_in_word = sumdatap->trg_in_word;
+  datap->detector = sumdatap->detector;
+  memcpy(datap->TRG_L1_summary, sumdatap->TRG_L1_summary, sizeof(datap->TRG_L1_summary));
+  memcpy(datap->TRG_L2_summary, sumdatap->TRG_L2_summary, sizeof(datap->TRG_L2_summary));
+  memcpy(datap->L3_Summary, sumdatap->L3_Summary, sizeof(datap->L3_Summary));
+  memcpy(&datap->evtdes, &sumdatap->evtdes, sizeof(datap->evtdes));
+
+  return 0;
 }
 
 int evpReader::reconnect(void)
