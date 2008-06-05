@@ -73,6 +73,7 @@ public:
 	int isevp ;		// ... or the active run from EVP?
 
 	char *mem ;	
+	DATAP *sumdatap;         // pointer to a datap with valid summaries...
         sfs_index *sfs;         // the sfs reader object...
         int sfs_lastevt;
 
@@ -87,6 +88,9 @@ public:
 	u_int tot_bytes ;
 	char *mem_mapped ;
 	int page_size ;
+
+	int fixDatapSummary(DATAP *datap);
+
 private:	// one shouldn't care...
 	int reconnect(void) ;
 
