@@ -4,7 +4,7 @@ TDataSet *CreateTable() {
   const double drift_10 = 28578.; // less 10 cathods in microns
   const double drift_20 = 27228.; // less 20 cathods in microns
   // t,s idx nrows Np  Id  B   L  W  H    tmin           tmax             v[]
-  svtHybridDriftVelocity_st row[] = {//Mar 20 01:40 ~/kotov/macros/drift/tfit_CuCu200_021.txt 
+  svtHybridDriftVelocity_st row[346] = {//Mar 20 01:40 ~/kotov/macros/drift/tfit_CuCu200_021.txt 
     {0,0, 0, 432, 0,10111, 1,  1, 1, 1,   9.962,  0.040, 119.544,  0.220, 6.8278, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},  // B1L01W1H1 
     {0,0, 0, 432, 0,10112, 1,  1, 1, 2,   9.923,  0.031, 122.241,  0.214, 6.6614, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},  // B1L01W1H2 
     {0,0, 0, 432, 0,10121, 1,  1, 2, 1,   9.987,  0.043, 119.261,  0.225, 6.8470, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},  // B1L01W2H1 
@@ -352,7 +352,7 @@ TDataSet *CreateTable() {
     {0,0, 0, 432, 0,31471, 3, 14, 7, 1,   9.910,  0.526, 120.438,  0.213, 6.7693, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},  // B3L14W7H1 
     {0,0, 0, 432, 0,31472, 3, 14, 7, 2,   9.585,  0.024, 120.320,  0.168, 6.7567, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}   // B3L14W7H2 
   };
-  Int_t N = sizeof(row)/sizeof(svtHybridDriftVelocity_st);// Printf("row %i, st %i, N = %i\n",sizeof(row),sizeof(svtHybridDriftVelocity_st),N);
+  Int_t N = sizeof(row)/sizeof(svtHybridDriftVelocity_st);//  Printf("row %i, st %i, N = %i\n",sizeof(row),sizeof(svtHybridDriftVelocity_st),N);
   St_svtHybridDriftVelocity *tableSet = new St_svtHybridDriftVelocity("svtHybridDriftVelocity",N);
   for (Int_t i = 0; i < N; i++) {
     row[i].idx = i+1;
