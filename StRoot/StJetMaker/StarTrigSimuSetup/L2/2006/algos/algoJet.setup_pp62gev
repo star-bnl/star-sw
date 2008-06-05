@@ -1,0 +1,18 @@
+# L2-jet algo parameters, 62 GeV, 2006
+# first int[], next float[], ignores lines starting w/ #, one param per line
+INTS  # needs it as key-word 
+ 22  /* cutTag, whatever value, not used for anything  */
+ 3  /* useBtow 1=East, 2=West, 3=E+W*/
+ 1  /* useEndcap   */
+ 8  /* threshold for ADC-ped */
+ 5  /* min phi dist J1-J2 in L2phiBins */ 
+# some text
+FLOATS  # needs it as key-word 
+4.0  /* oneJetThr , slideing  */
+3.1  /* diJet1thr , higher */
+3.0  /* diJet2thr , lower */
+0.0 // rndAccProb - we don't want it for for offline simu
+0    // debug level
+#nothing more
+
+

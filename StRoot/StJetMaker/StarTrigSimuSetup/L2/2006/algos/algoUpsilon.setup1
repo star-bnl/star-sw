@@ -1,0 +1,15 @@
+setup1
+# L2upsilon parameters
+# first int[], next float[], ignores lines starting w/ #, one param per line
+INTS  # needs it as key-word
+14 /*  6-bit ADC threshold for high-pt electron */
+75 /* 12-bit ADC threshold for low-pt  electron */
+0  /* Use z-vertex */
+0  /* Use CTB-matching */
+3  /* Number of towers per cluster */
+FLOATS  # needs it as key-word
+4.0  /* Energy threshold for high-pt cluster */
+2.5  /* Energy threshold for low-pt  cluster */
+6.0  /* Minimum invariant mass */
+15.0 /* Maximum invariant mass */
+0.5  /* Maximum cos(theta) */
