@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.12 2008/06/06 20:13:13 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.13 2008/06/06 23:37:46 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -9,6 +9,9 @@
 #include "StJetFinder/AbstractFourVec.h"
 
 #include "CollectChargedTracksFromTPC.h"
+
+#include <TVector3.h>
+#include <TLorentzVector.h>
 
 #include <map>
 
@@ -71,6 +74,10 @@ private:
   bool shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID);
 
   bool accept2003Tower(int id);
+
+  TVector3 getBemcTowerLocation(int bemcTowerId);
+  TVector3 getVertex();
+  TLorentzVector constructBemcFourMomentum(int bemcTowerId, double energy);
 
   FourList _tracks;
 
