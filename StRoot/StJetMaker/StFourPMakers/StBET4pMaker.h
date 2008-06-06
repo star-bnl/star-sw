@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.20 2008/05/18 23:44:20 tai Exp $
+// $Id: StBET4pMaker.h,v 1.21 2008/06/06 01:17:50 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -47,6 +47,8 @@ private:
         
   StBET4pMakerImp* _imp;
   
+  bool isBemcCorrupted();
+
   ClassDef(StBET4pMaker,1)
 };
 

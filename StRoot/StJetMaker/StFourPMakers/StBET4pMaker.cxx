@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.30 2008/05/18 23:44:20 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.31 2008/06/06 01:17:50 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -8,6 +8,10 @@
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 #include "StEmcRawMaker/StBemcTables.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
+
+#include <iostream>
+
+using namespace std;
 
 ClassImp(StBET4pMaker)
     
@@ -59,13 +63,24 @@ FourList &StBET4pMaker::getTracks()
 
 Int_t StBET4pMaker::Make()
 {
-  StEvent* event = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
-  _imp->Make(event);
+  mCorrupt = isBemcCorrupted();
+  if(mCorrupt) return kStOk;
+
+  //  cout << "+++++++++++++++++++++++++ " << dynamic_cast<StEmcADCtoEMaker*>(GetMaker("Eread"))->isCorrupted() << endl;
+
+  _imp->Make();
 
   mSumEmcEt = _imp->sumEmcEt();
   mDylanPoints = _imp->nDylanPoints();
-  mCorrupt =  _imp->bemcCorrupt();
+  // mCorrupt =  _imp->bemcCorrupt();
 
   return StMaker::Make();
 }
 
+bool StBET4pMaker::isBemcCorrupted()
+{
+  if(StEmcADCtoEMaker* adc2e = dynamic_cast<StEmcADCtoEMaker*>(GetMaker("Eread")))
+    return adc2e->isCorrupted();
+    
+  return false;
+}
