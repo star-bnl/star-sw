@@ -1,6 +1,7 @@
 #ifndef _EVP_READERCLASS_HH_
 #define _EVP_READERCLASS_HH_
 #include <sys/stat.h> 
+#include <daqFormats.h>
 
 typedef unsigned int UINT32;
 
