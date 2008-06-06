@@ -33,9 +33,6 @@
 
 #include "StMuEmcPosition.h"
 
-#include <TVector3.h>
-#include <TLorentzVector.h>
-
 #include <vector>
 #include <string>
 #include <iostream>
@@ -213,43 +210,59 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
 
   }
 
-  StMuDst* uDst = mMuDstMaker->muDst();
-  StThreeVectorF vertex_ = uDst->event()->primaryVertexPosition();
-
-  TVector3 vertex(vertex_.x(), vertex_.y(), vertex_.z());
-
-
   for(map<BemcTowerID, double>::iterator it = bemcCorrectedEnergy.begin(); it != bemcCorrectedEnergy.end(); ++it) {
 
     const int bemcTowerId = (*it).first;
     const double corrected_energy = (*it).second;
 
-    float eta, phi;
-    StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-    geom->getEtaPhi(bemcTowerId,eta,phi); // to convert software bemcTowerId into eta/phi
-
-    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
-
-    double pMag = (corrected_energy > mass) ? sqrt(corrected_energy*corrected_energy - mass*mass) : corrected_energy;
-
-    //now correct for eta-shift due to non-zero z_vertex (but note, no correction to Energy!)
-    //double RSMD = 2.2625*100.; //radius of SMD in cm
-    float towerX, towerY, towerZ;
-    geom->getXYZ(bemcTowerId, towerX, towerY, towerZ);
-    TVector3 towerLocation(towerX, towerY, towerZ);
-
-    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
-	    
-    TVector3 momentum(1., 1., 1.);
-    momentum.SetPhi(phi);
-    momentum.SetTheta(towerLocation.Theta()); //use corrected theta
-    momentum.SetMag(pMag);
-    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), corrected_energy);
+    TLorentzVector p4 = constructBemcFourMomentum(bemcTowerId, corrected_energy);
 	    
     //now construct StMuTrackFourVec object for jetfinding
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
     _tracks.push_back(pmu); //for jet finding interface
   }
+}
+
+TLorentzVector StBET4pMakerImp::constructBemcFourMomentum(int bemcTowerId, double energy)
+{
+    float eta, phi;
+    StEmcGeom* geom = StEmcGeom::instance("bemc");
+    geom->getEtaPhi(bemcTowerId,eta,phi); // to convert software bemcTowerId into eta/phi
+
+    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
+
+    double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy;
+
+
+    TVector3 towerLocation = getBemcTowerLocation(bemcTowerId);
+
+    towerLocation -= getVertex(); //shift the origin to the vertex, not (0., 0., 0.)
+	    
+    TVector3 momentum(1., 1., 1.);
+    momentum.SetPhi(phi);
+    momentum.SetTheta(towerLocation.Theta()); //use corrected theta
+    momentum.SetMag(pMag);
+
+    return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), energy);
+}
+
+TVector3 StBET4pMakerImp::getBemcTowerLocation(int bemcTowerId)
+{
+  StEmcGeom* geom = StEmcGeom::instance("bemc");
+
+  float towerX, towerY, towerZ;
+
+  geom->getXYZ(bemcTowerId, towerX, towerY, towerZ);
+
+  return TVector3(towerX, towerY, towerZ);
+}
+
+TVector3 StBET4pMakerImp::getVertex()
+{
+  StMuDst* uDst = mMuDstMaker->muDst();
+  StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+
+  return TVector3(vertex.x(), vertex.y(), vertex.z());
 }
 
 double StBET4pMakerImp::correctBemcTowerEnergyForTracks(double energy, int bemcTowerId)
