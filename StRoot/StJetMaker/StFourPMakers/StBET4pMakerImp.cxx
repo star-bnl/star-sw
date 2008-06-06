@@ -33,6 +33,7 @@
 
 #include "StMuEmcPosition.h"
 
+#include <TVector3.h>
 #include <TLorentzVector.h>
 
 #include <vector>
@@ -213,7 +214,10 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
   }
 
   StMuDst* uDst = mMuDstMaker->muDst();
-  StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+  StThreeVectorF vertex_ = uDst->event()->primaryVertexPosition();
+
+  TVector3 vertex(vertex_.x(), vertex_.y(), vertex_.z());
+
 
   for(map<BemcTowerID, double>::iterator it = bemcCorrectedEnergy.begin(); it != bemcCorrectedEnergy.end(); ++it) {
 
@@ -232,16 +236,14 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
     //double RSMD = 2.2625*100.; //radius of SMD in cm
     float towerX, towerY, towerZ;
     geom->getXYZ(bemcTowerId, towerX, towerY, towerZ);
-    StThreeVectorF towerLocation(towerX, towerY, towerZ);
+    TVector3 towerLocation(towerX, towerY, towerZ);
 
-    //    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
     towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
 	    
-    StThreeVectorF momentum(1., 1., 1.);
-    momentum.setPhi(phi);
-    momentum.setTheta(towerLocation.theta()); //use corrected theta
-    momentum.setMag(pMag);
-    //    StLorentzVectorF p4(corrected_energy, momentum);
+    TVector3 momentum(1., 1., 1.);
+    momentum.SetPhi(phi);
+    momentum.SetTheta(towerLocation.Theta()); //use corrected theta
+    momentum.SetMag(pMag);
     TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), corrected_energy);
 	    
     //now construct StMuTrackFourVec object for jetfinding
