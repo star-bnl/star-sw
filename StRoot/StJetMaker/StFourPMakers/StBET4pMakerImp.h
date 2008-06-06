@@ -30,7 +30,7 @@ public:
   virtual ~StBET4pMakerImp() {};
     
   void Init(StEEmcDbMaker* eedb, StEmcADCtoEMaker* adc2e);
-  void Make(StEvent* event);
+  void Make();
     
   void Clear(Option_t* opt);
 
@@ -63,10 +63,10 @@ private:
 
   void collectEnergyFromEEMC();
 
-  StEmcCollection *find_StEmCCollection(StEvent* event);
-  bool isBemcCorrupted(StEvent* event);
+  StEmcCollection *find_StEmCCollection();
+  bool isBemcCorrupted();
 
-  void fillBemcTowerHits(StEvent* event);
+  void fillBemcTowerHits();
   double sumEnergyOverBemcTowers(double minE);
   int numberOfBemcTowersWithEnergyAbove(double minE);
 

@@ -114,10 +114,10 @@ void StBET4pMakerImp::Clear(Option_t* opt)
     
 }
 
-void StBET4pMakerImp::Make(StEvent* event)
+void StBET4pMakerImp::Make()
 {
-  mCorrupt = isBemcCorrupted(event);
-  if(mCorrupt) return;
+  //  mCorrupt = isBemcCorrupted();
+  //  if(mCorrupt) return;
 
   TrackList trackList = _collectChargedTracksFromTPC->Do();
 
@@ -130,7 +130,7 @@ void StBET4pMakerImp::Make(StEvent* event)
 
   _tracks.insert(_tracks.end(), fourPList.begin(), fourPList.end());
 
-  fillBemcTowerHits(event);
+  fillBemcTowerHits();
 
   mSumEmcEt = sumEnergyOverBemcTowers(0.4);
 
@@ -315,33 +315,14 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
   }
 }
 
-StEmcCollection *StBET4pMakerImp::find_StEmCCollection(StEvent* event) {
-
-  StEmcCollection* emc(0);
-
-  //new loop on data:
-  /*first look for StEvent in memory.  This should only happen if
-    (a) StEmcADC2EMaker is running (e.g., year 2003 and before)
-    (b) StEmcSimulatorMaker is running (all pythia!).  In this case simulator recalculates ADC from
-    scratch using DB gains, so we _don't_ take what's in the MuDst collection
-  */
-
-  //  StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-  if (event) {
-    LOG_DEBUG <<"StBET4pMakerImp::Make()\tRetrieve StEmcCollection from StEvent"<<endm;
-    emc = event->emcCollection();
-  } else {
-    LOG_DEBUG <<"StBET4pMakerImp::Make()\tRetrieve StEmcCollection from MuDst"<<endm;
-    emc = mMuDstMaker->muDst()->emcCollection();
-  }
-  assert(emc);
-
-  return emc;
+StEmcCollection *StBET4pMakerImp::find_StEmCCollection()
+{
+  return mMuDstMaker->muDst()->emcCollection();
 }
 
-bool StBET4pMakerImp::isBemcCorrupted(StEvent* event)
+bool StBET4pMakerImp::isBemcCorrupted()
 {
-  StEmcCollection* emc = find_StEmCCollection(event);
+  StEmcCollection* emc = find_StEmCCollection();
   StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
 
   //if detector==null, this means it's corrupt for pre-October 2004 BEMC code.  However, not all corrupt events give detector==0
@@ -362,7 +343,7 @@ bool StBET4pMakerImp::isBemcCorrupted(StEvent* event)
   //And now we can implement Alex's new StEmcAdc2EMaker test (thank god, this takes care of pre-P04k production)
   //  StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
   if (!_adc2e) {
-    LOG_ERROR <<"StBET4pMakerImp::fillBarrelHits()\tno adc2e in chain"<<endm;
+    cout <<"StBET4pMakerImp::fillBarrelHits()\tno adc2e in chain"<< endl;
   } else {
     LOG_DEBUG <<"StBET4pMakerImp::fillBarrelHits()\tfound adc2e in chain"<<endm;
     if (_adc2e->isCorrupted()) {
@@ -374,12 +355,9 @@ bool StBET4pMakerImp::isBemcCorrupted(StEvent* event)
 }
 
 
-void StBET4pMakerImp::fillBemcTowerHits(StEvent* event)
+void StBET4pMakerImp::fillBemcTowerHits()
 {
-  //  mCorrupt = isBemcCorrupted(event);
-  //  if(mCorrupt) return;
-
-  StEmcCollection* emc = find_StEmCCollection(event);
+  StEmcCollection* emc = find_StEmCCollection();
   StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
 
   static const int nBemcModules = 120;
