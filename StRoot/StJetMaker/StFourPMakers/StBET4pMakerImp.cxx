@@ -185,21 +185,40 @@ void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
 
 void StBET4pMakerImp::collectEnergyFromBEMC()
 {
-  StMuDst* uDst = mMuDstMaker->muDst();
-  StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+  map<BemcTowerID, double> bemcEnergy;
 
   for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = _bemcTowerHits.begin(); it != _bemcTowerHits.end(); ++it) {
 
     const int bemcTowerId = (*it).first;
     const StEmcRawHit* hit = (*it).second;
 
+    if(hit->energy() <= 0) continue;
 
-    double energy = hit->energy();
-    if(energy <= 0.) continue; //skip it, E=0 can happen from gain=0. in calib table
+    bemcEnergy[bemcTowerId] = hit->energy();
+  }
+
+  map<BemcTowerID, double> bemcCorrectedEnergy;
+
+  for(map<BemcTowerID, double>::iterator it = bemcEnergy.begin(); it != bemcEnergy.end(); ++it) {
+
+    const int bemcTowerId = (*it).first;
+    const double energy = (*it).second;
 
     double corrected_energy = correctBemcTowerEnergyForTracks(energy, bemcTowerId);
     
-    if (corrected_energy <= 0.) continue;
+    if(corrected_energy <= 0) continue;
+
+    bemcCorrectedEnergy[bemcTowerId] = corrected_energy;
+
+  }
+
+  StMuDst* uDst = mMuDstMaker->muDst();
+  StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+
+  for(map<BemcTowerID, double>::iterator it = bemcCorrectedEnergy.begin(); it != bemcCorrectedEnergy.end(); ++it) {
+
+    const int bemcTowerId = (*it).first;
+    const double corrected_energy = (*it).second;
 
     float eta, phi;
     StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
