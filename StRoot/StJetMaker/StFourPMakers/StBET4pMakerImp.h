@@ -16,7 +16,6 @@ class StEmcRawHit;
 class EEmcGeomSimple;
 class StBemcTables;
 class StEEmcDbMaker;
-class StEmcADCtoEMaker;
 class StEvent;
 
 typedef std::vector<AbstractFourVec*> FourList;
@@ -29,7 +28,7 @@ public:
     
   virtual ~StBET4pMakerImp() {};
     
-  void Init(StEEmcDbMaker* eedb, StEmcADCtoEMaker* adc2e);
+  void Init(StEEmcDbMaker* eedb);
   void Make();
     
   void Clear(Option_t* opt);
@@ -44,8 +43,6 @@ public:
   int nDylanPoints() const { return mDylanPoints; }
   double sumEmcEt() const { return mSumEmcEt; }
 
-  bool bemcCorrupt() const { return mCorrupt; }
-    
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
 
@@ -63,9 +60,6 @@ private:
 
   void collectEnergyFromEEMC();
 
-  StEmcCollection *find_StEmCCollection();
-  bool isBemcCorrupted();
-
   void fillBemcTowerHits();
   double sumEnergyOverBemcTowers(double minE);
   int numberOfBemcTowersWithEnergyAbove(double minE);
@@ -76,7 +70,6 @@ private:
 
   FourList _tracks;
 
-  bool mCorrupt;
   bool mUseEndcap;
 
   //these arrays are used to correlate tracks w/ towers
@@ -96,7 +89,6 @@ private:
         
   EEmcGeomSimple* mEeGeom;
   StEEmcDbMaker* mEeDb;
-  StEmcADCtoEMaker* _adc2e;
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   

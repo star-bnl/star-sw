@@ -17,7 +17,6 @@
 
 //StEmc
 #include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 #include "StEmcRawMaker/defines.h"
 #include "StEmcRawMaker/StBemcTables.h"
 
@@ -48,8 +47,7 @@ using namespace StSpinJet;
 const int StBET4pMakerImp::mNOfBemcTowers;
 
 StBET4pMakerImp::StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
-  : mCorrupt(false)
-  , mUseEndcap(false)
+  : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
   , mTables(new StBemcTables(doTowerSwapFix))
   , mUse2003Cuts(false)
@@ -80,7 +78,7 @@ void StBET4pMakerImp::setUse2006Cuts(bool v)
   _collectChargedTracksFromTPC->setUse2006Cuts(v);
 }
 
-void StBET4pMakerImp::Init(StEEmcDbMaker* eedb, StEmcADCtoEMaker* adc2e)
+void StBET4pMakerImp::Init(StEEmcDbMaker* eedb)
 {
   cout <<"StBET4pMakerImp::Init()"<<endl;
     
@@ -90,13 +88,11 @@ void StBET4pMakerImp::Init(StEEmcDbMaker* eedb, StEmcADCtoEMaker* adc2e)
   assert(mEeDb); // eemcDB must be in the chain, fix it
   mEeDb->setThreshold(3);
   
-  _adc2e = adc2e;
 }
 
 void StBET4pMakerImp::Clear(Option_t* opt)
 {
   LOG_DEBUG <<"void StBET4pMakerImp::Clear(Option_t* opt)" << endm;
-  mCorrupt = false;
   mDylanPoints = 0;
   mSumEmcEt = 0.;
     
@@ -116,9 +112,6 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make()
 {
-  //  mCorrupt = isBemcCorrupted();
-  //  if(mCorrupt) return;
-
   TrackList trackList = _collectChargedTracksFromTPC->Do();
 
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
@@ -135,12 +128,6 @@ void StBET4pMakerImp::Make()
   mSumEmcEt = sumEnergyOverBemcTowers(0.4);
 
   mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4);
-
-  //check for barrel corruption (only works for P04ik and later!
-  //  if (mCorrupt) {
-  //    _tracks.clear();
-  //    return;
-  //  }
 
   if (mSumEmcEt > 200.) {
     _tracks.clear();
@@ -315,49 +302,9 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
   }
 }
 
-StEmcCollection *StBET4pMakerImp::find_StEmCCollection()
-{
-  return mMuDstMaker->muDst()->emcCollection();
-}
-
-bool StBET4pMakerImp::isBemcCorrupted()
-{
-  StEmcCollection* emc = find_StEmCCollection();
-  StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
-
-  //if detector==null, this means it's corrupt for pre-October 2004 BEMC code.  However, not all corrupt events give detector==0
-  if (!detector) {
-    return true;
-  }
-    
-  //now, check for corruption in post-October 2004 BEMC code (P04k and later)
-  //cout <<"StEmcTpcFourPMaker::Make()\tcheck  crate corruption with key: crateUnknown=0, crateNotPresent=1, crateOK=2, crateHeaderCorrupt=3"<<endl;
-  for(int crate = 1; crate<=MAXCRATES; crate++) {
-    StEmcCrateStatus crateStatus = detector->crateStatus(crate);
-    //cout <<"crate:\t"<<crate<<"\tstauts:\t"<<crateStatus<<endl;
-    if (crateStatus==crateHeaderCorrupt) {
-      return true;
-    }
-  }
-
-  //And now we can implement Alex's new StEmcAdc2EMaker test (thank god, this takes care of pre-P04k production)
-  //  StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
-  if (!_adc2e) {
-    cout <<"StBET4pMakerImp::fillBarrelHits()\tno adc2e in chain"<< endl;
-  } else {
-    LOG_DEBUG <<"StBET4pMakerImp::fillBarrelHits()\tfound adc2e in chain"<<endm;
-    if (_adc2e->isCorrupted()) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-
 void StBET4pMakerImp::fillBemcTowerHits()
 {
-  StEmcCollection* emc = find_StEmCCollection();
+  StEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
   StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
 
   static const int nBemcModules = 120;

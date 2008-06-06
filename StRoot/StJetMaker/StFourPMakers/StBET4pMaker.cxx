@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.31 2008/06/06 01:17:50 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.32 2008/06/06 01:30:42 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -43,15 +43,15 @@ Int_t StBET4pMaker::Init()
 {
   StEEmcDbMaker* mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
 
-  StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
-
-  _imp->Init(mEeDb, adc2e);
+  _imp->Init(mEeDb);
   return StMaker::Init();
 }
 
 void StBET4pMaker::Clear(Option_t* opt)
 {
   _imp->Clear(opt);
+
+  mCorrupt = false;
 
   return StMaker::Clear(opt);
 }
@@ -66,13 +66,10 @@ Int_t StBET4pMaker::Make()
   mCorrupt = isBemcCorrupted();
   if(mCorrupt) return kStOk;
 
-  //  cout << "+++++++++++++++++++++++++ " << dynamic_cast<StEmcADCtoEMaker*>(GetMaker("Eread"))->isCorrupted() << endl;
-
   _imp->Make();
 
   mSumEmcEt = _imp->sumEmcEt();
   mDylanPoints = _imp->nDylanPoints();
-  // mCorrupt =  _imp->bemcCorrupt();
 
   return StMaker::Make();
 }
