@@ -319,15 +319,20 @@ void StBET4pMakerImp::fillBemcTowerHits()
       StEmcGeom* geom = StEmcGeom::instance("bemc"); 
       int bemcTowerID;
       geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
-  
-      if (shouldKeepThisBemcHit(theRawHit, bemcTowerID)) 
-	mBTowHits[bemcTowerID] = theRawHit;
-      else
-	mBTowHits[bemcTowerID] = 0;
 
+      mBTowHits[bemcTowerID] = theRawHit;
+  
     }
   }
   
+  for(int bemcTowerID = 1; bemcTowerID <= mNOfBemcTowers; ++bemcTowerID) {
+
+    if(!mBTowHits[bemcTowerID]) continue;
+
+    if (!shouldKeepThisBemcHit(mBTowHits[bemcTowerID], bemcTowerID)) 
+      mBTowHits[bemcTowerID] = 0;
+    
+  }
 
 }
 
