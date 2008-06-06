@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.11 2008/06/06 19:46:37 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.12 2008/06/06 20:13:13 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -79,11 +79,10 @@ private:
   //these arrays are used to correlate tracks w/ towers
   static const int mNOfBemcTowers = 4800;
 
-  StEmcRawHit* mBTowHits[mNOfBemcTowers + 1]; // indexed from [1,4800]
   int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
 
   typedef int BemcTowerID;
-  std::map<BemcTowerID, StEmcRawHit*> _bemcTowerHits;
+  std::map<BemcTowerID, const StEmcRawHit*> _bemcTowerHits;
 
   StMuDstMaker* mMuDstMaker;
   StBemcTables* mTables;
