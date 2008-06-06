@@ -33,6 +33,8 @@ void RunJetFinder2(
      gSystem->Load("StTriggerUtilities");
      gSystem->Load("StMCAsymMaker");
      gSystem->Load("StJetFinder");
+     gSystem->Load("StJetSkimEvent");
+     gSystem->Load("StJets");
      gSystem->Load("StJetMaker");
      
      double pi = atan(1.0)*4.0;

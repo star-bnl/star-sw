@@ -12,6 +12,9 @@ void RunFastJetReader(
     cout <<"Jet tree file:\t"<<jetInFile<<endl;
     cout <<"SkimEvent tree file:\t"<<skimInFile<<endl;
     
+    gSystem->Load("StJetSkimEvent");
+    gSystem->Load("StJets");
+
     gROOT->Macro("loadMuDst.C");
     gSystem->Load("StTpcDb");
     gSystem->Load("StDetectorDbMaker");
