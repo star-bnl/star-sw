@@ -185,6 +185,7 @@ void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
 void StBET4pMakerImp::collectEnergyFromBEMC()
 {
   StMuDst* uDst = mMuDstMaker->muDst();
+  StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
 
   //now loop on Barrel hits, correct energy, and push back for jet finding:
   for (int bemcTowerId = 1; bemcTowerId <= mNOfBemcTowers; ++bemcTowerId) { //bemcTowerId==software bemcTowerId: [1,4800]
@@ -212,7 +213,7 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
     geom->getXYZ(bemcTowerId, towerX, towerY, towerZ);
     StThreeVectorF towerLocation(towerX, towerY, towerZ);
 
-    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+    //    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
     towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
 	    
     StThreeVectorF momentum(1., 1., 1.);

@@ -1,3 +1,5 @@
+// -*- mode: c++;-*-
+// $Id: StBET4pMakerImp.h,v 1.10 2008/06/06 19:14:48 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
