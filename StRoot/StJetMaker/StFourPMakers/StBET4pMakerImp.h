@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.10 2008/06/06 19:14:48 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.11 2008/06/06 19:46:37 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -9,6 +9,8 @@
 #include "StJetFinder/AbstractFourVec.h"
 
 #include "CollectChargedTracksFromTPC.h"
+
+#include <map>
 
 class StMuTrack;
 class StEmcCollection;
@@ -66,7 +68,7 @@ private:
   double sumEnergyOverBemcTowers(double minE);
   int numberOfBemcTowersWithEnergyAbove(double minE);
 
-  bool shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID);
+  bool shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID);
 
   bool accept2003Tower(int id);
 
@@ -79,6 +81,9 @@ private:
 
   StEmcRawHit* mBTowHits[mNOfBemcTowers + 1]; // indexed from [1,4800]
   int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
+
+  typedef int BemcTowerID;
+  std::map<BemcTowerID, StEmcRawHit*> _bemcTowerHits;
 
   StMuDstMaker* mMuDstMaker;
   StBemcTables* mTables;
