@@ -107,6 +107,8 @@ void StBET4pMakerImp::Clear(Option_t* opt)
     mBTowHits[i] = 0;
     mNtracksOnTower[i] = 0;
   }
+
+  _bemcTowerHits.clear();
     
 }
 
@@ -189,9 +191,15 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
 
   //now loop on Barrel hits, correct energy, and push back for jet finding:
   for (int bemcTowerId = 1; bemcTowerId <= mNOfBemcTowers; ++bemcTowerId) { //bemcTowerId==software bemcTowerId: [1,4800]
-    StEmcRawHit* hit = mBTowHits[bemcTowerId];
-    if (!hit) continue; //either no hit here or status!=1
-	
+
+    //    StEmcRawHit* hit = mBTowHits[bemcTowerId];
+    //    if (!hit) continue; //either no hit here or status!=1
+
+    map<BemcTowerID, StEmcRawHit*>::const_iterator it = _bemcTowerHits.find(bemcTowerId);
+    if(it == _bemcTowerHits.end()) continue;
+
+    const StEmcRawHit* hit = (*it).second;
+
     float energy = hit->energy();
     if(energy <= 0.) continue; //skip it, E=0 can happen from gain=0. in calib table
 
@@ -322,7 +330,9 @@ void StBET4pMakerImp::fillBemcTowerHits()
       geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
 
       mBTowHits[bemcTowerID] = theRawHit;
-  
+
+      _bemcTowerHits[bemcTowerID] = theRawHit;
+
     }
   }
   
@@ -335,9 +345,20 @@ void StBET4pMakerImp::fillBemcTowerHits()
     
   }
 
+  map<BemcTowerID, StEmcRawHit*> BemcTowerHits(_bemcTowerHits);
+  _bemcTowerHits.clear();
+
+  for(map<BemcTowerID, StEmcRawHit*>::const_iterator it = BemcTowerHits.begin(); it != BemcTowerHits.end(); ++it) {
+
+    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
+      continue;
+
+    _bemcTowerHits.insert(*it);
+  }
+
 }
 
-bool StBET4pMakerImp::shouldKeepThisBemcHit(StEmcRawHit* theRawHit, int bemcTowerID)
+bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
 {
   //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
   int status;
