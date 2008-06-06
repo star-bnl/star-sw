@@ -239,7 +239,7 @@ TLorentzVector StBET4pMakerImp::constructBemcFourMomentum(int bemcTowerId, doubl
     towerLocation -= getVertex(); //shift the origin to the vertex, not (0., 0., 0.)
 	    
     TVector3 momentum(1., 1., 1.);
-    momentum.SetPhi(phi);
+    momentum.SetPhi(towerLocation.Phi());
     momentum.SetTheta(towerLocation.Theta()); //use corrected theta
     momentum.SetMag(pMag);
 
