@@ -194,7 +194,7 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
     const StEmcRawHit* hit = (*it).second;
 
 
-    float energy = hit->energy();
+    double energy = hit->energy();
     if(energy <= 0.) continue; //skip it, E=0 can happen from gain=0. in calib table
 
     double corrected_energy = correctBemcTowerEnergyForTracks(energy, bemcTowerId);
