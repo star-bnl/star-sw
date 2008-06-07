@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.14 2008/06/07 03:16:16 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.15 2008/06/07 03:47:10 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -75,6 +75,7 @@ private:
   typedef std::map<BemcTowerID, const StEmcRawHit*> BemcTowerIdHitMap;
 
   BemcTowerIdHitMap getTowerHitsFromBEMC();
+  BemcTowerIdHitMap selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits);
 
   bool shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID);
 
