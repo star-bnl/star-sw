@@ -225,22 +225,14 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
 
 TLorentzVector StBET4pMakerImp::constructBemcFourMomentum(int bemcTowerId, double energy)
 {
-    float eta, phi;
-    StEmcGeom* geom = StEmcGeom::instance("bemc");
-    geom->getEtaPhi(bemcTowerId,eta,phi); // to convert software bemcTowerId into eta/phi
+    TVector3 towerLocation = getBemcTowerLocation(bemcTowerId);
 
-    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
+    TVector3 momentum = towerLocation - getVertex();
+
+    double mass(0); // assume photon mass
 
     double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy;
 
-
-    TVector3 towerLocation = getBemcTowerLocation(bemcTowerId);
-
-    towerLocation -= getVertex(); //shift the origin to the vertex, not (0., 0., 0.)
-	    
-    TVector3 momentum(1., 1., 1.);
-    momentum.SetPhi(towerLocation.Phi());
-    momentum.SetTheta(towerLocation.Theta()); //use corrected theta
     momentum.SetMag(pMag);
 
     return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), energy);
