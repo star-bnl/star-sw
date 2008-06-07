@@ -333,29 +333,9 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
 
 void StBET4pMakerImp::fillBemcTowerHits()
 {
-  StEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
-  StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
+  BemcTowerIdHitMap BemcTowerHits = getTowerHitsFromBEMC();
 
-  static const int nBemcModules = 120;
-  for(int m = 1; m <= nBemcModules; ++m) { //loop on modules...
-    StEmcModule* module = detector->module(m);
-    assert(module);
-  	
-    StSPtrVecEmcRawHit& rawHits = module->hits();
-    for(UInt_t k = 0; k < rawHits.size(); ++k) { //loop on hits in modules
-      StEmcRawHit* theRawHit = rawHits[k];
-  	    
-      StEmcGeom* geom = StEmcGeom::instance("bemc"); 
-      int bemcTowerID;
-      geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
-
-      _bemcTowerHits[bemcTowerID] = theRawHit;
-
-    }
-  }
-  
-  map<BemcTowerID, const StEmcRawHit*> BemcTowerHits(_bemcTowerHits);
-  _bemcTowerHits.clear();
+  //  _bemcTowerHits.clear();
 
   for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = BemcTowerHits.begin(); it != BemcTowerHits.end(); ++it) {
 
@@ -366,6 +346,32 @@ void StBET4pMakerImp::fillBemcTowerHits()
   }
 
 }
+
+StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::getTowerHitsFromBEMC()
+{
+  BemcTowerIdHitMap ret;
+
+  StEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
+  StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
+
+  static const int nBemcModules = 120;
+  for(int m = 1; m <= nBemcModules; ++m) { //loop on modules...
+    StEmcModule* module = detector->module(m);
+  	
+    StSPtrVecEmcRawHit& rawHits = module->hits();
+    for(UInt_t k = 0; k < rawHits.size(); ++k) { //loop on hits in modules
+      StEmcRawHit* theRawHit = rawHits[k];
+  	    
+      StEmcGeom* geom = StEmcGeom::instance("bemc"); 
+      int bemcTowerID;
+      geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
+
+      ret[bemcTowerID] = theRawHit;
+    }
+  }
+  return ret;
+}
+
 
 bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
 {
