@@ -333,17 +333,13 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
 
 void StBET4pMakerImp::fillBemcTowerHits()
 {
-  BemcTowerIdHitMap BemcTowerHits = getTowerHitsFromBEMC();
+  BemcTowerIdHitMap allBemcTowerHits = getTowerHitsFromBEMC();
 
-  //  _bemcTowerHits.clear();
+  BemcTowerIdHitMap selectedBemcTowerHits = selectBemcTowerHits(allBemcTowerHits);
 
-  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = BemcTowerHits.begin(); it != BemcTowerHits.end(); ++it) {
-
-    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
-      continue;
-
+  for(BemcTowerIdHitMap::const_iterator it = selectedBemcTowerHits.begin(); it != selectedBemcTowerHits.end(); ++it)
     _bemcTowerHits.insert(*it);
-  }
+    
 
 }
 
@@ -372,6 +368,19 @@ StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::getTowerHitsFromBEMC()
   return ret;
 }
 
+StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits)
+{
+  BemcTowerIdHitMap ret;
+
+  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+
+    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
+      continue;
+
+    ret.insert(*it);
+  }
+  return ret;
+}
 
 bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
 {
