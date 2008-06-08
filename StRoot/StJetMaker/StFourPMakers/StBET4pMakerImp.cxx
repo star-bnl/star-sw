@@ -189,19 +189,42 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
 {
   BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(_bemcTowerHits);
 
-  map<BemcTowerID, double> bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy);
+  BemcTowerIdEnergyMap bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy);
 
-  for(map<BemcTowerID, double>::iterator it = bemcCorrectedEnergy.begin(); it != bemcCorrectedEnergy.end(); ++it) {
+//   for(map<BemcTowerID, double>::iterator it = bemcCorrectedEnergy.begin(); it != bemcCorrectedEnergy.end(); ++it) {
+// 
+//     const int bemcTowerId = (*it).first;
+//     const double corrected_energy = (*it).second;
+// 
+//     TLorentzVector p4 = constructBemcFourMomentum(bemcTowerId, corrected_energy);
+// 	    
+//     //now construct StMuTrackFourVec object for jetfinding
+//     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
+//     _tracks.push_back(pmu); //for jet finding interface
+//   }
+
+  FourList fourPList = constructFourMomentumListFrom(bemcCorrectedEnergy);
+
+  _tracks.insert(_tracks.end(), fourPList.begin(), fourPList.end());
+
+}
+
+FourList StBET4pMakerImp::constructFourMomentumListFrom(const BemcTowerIdEnergyMap &bemcEnergy)
+{
+  FourList ret;
+
+  for(BemcTowerIdEnergyMap::const_iterator it = bemcEnergy.begin(); it != bemcEnergy.end(); ++it) {
 
     const int bemcTowerId = (*it).first;
     const double corrected_energy = (*it).second;
 
     TLorentzVector p4 = constructBemcFourMomentum(bemcTowerId, corrected_energy);
 	    
-    //now construct StMuTrackFourVec object for jetfinding
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
-    _tracks.push_back(pmu); //for jet finding interface
+    ret.push_back(pmu);
   }
+
+  return ret;
 }
 
 StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits)
