@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.17 2008/06/08 23:34:48 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.18 2008/06/08 23:47:36 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -66,8 +66,6 @@ private:
   typedef std::map<BemcTowerID, const StEmcRawHit*> BemcTowerIdHitMap;
   typedef double Energy;
   typedef std::map<BemcTowerID, Energy> BemcTowerIdEnergyMap;
-
-  void collectEnergyFromBEMC();
 
   BemcTowerIdEnergyMap readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
   BemcTowerIdEnergyMap correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy);
