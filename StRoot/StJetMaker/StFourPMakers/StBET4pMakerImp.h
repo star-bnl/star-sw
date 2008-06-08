@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.16 2008/06/08 23:26:01 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.17 2008/06/08 23:34:48 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -72,6 +72,8 @@ private:
   BemcTowerIdEnergyMap readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
   BemcTowerIdEnergyMap correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy);
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
+
+  FourList constructFourMomentumListFrom(const BemcTowerIdEnergyMap &bemcEnergy);
 
   void collectEnergyFromEEMC();
 
