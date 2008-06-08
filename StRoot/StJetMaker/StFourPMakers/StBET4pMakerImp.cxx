@@ -113,11 +113,6 @@ void StBET4pMakerImp::Make()
 {
   TrackList trackList = _collectChargedTracksFromTPC->Do();
 
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-    countTracksOnBemcTower(*track);
-  }
-
   FourList tpcFourMomentumList = constructFourMomentumListFrom(trackList);
 
   _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
@@ -138,9 +133,12 @@ void StBET4pMakerImp::Make()
   for(BemcTowerIdHitMap::const_iterator it = selectedBemcTowerHits.begin(); it != selectedBemcTowerHits.end(); ++it)
     _bemcTowerHits.insert(*it);
 
-  //  collectEnergyFromBEMC();
-
   BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(_bemcTowerHits);
+
+  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+    const StMuTrack* track = (*it).first;
+    countTracksOnBemcTower(*track);
+  }
 
   BemcTowerIdEnergyMap bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy);
 
@@ -172,39 +170,6 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
     ret.push_back(pmu);
   }
   return ret;
-}
-
-void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
-{
-  StMuDst* uDst = mMuDstMaker->muDst();
-
-  //check projection to BEMC and remember for later: ---------------------------------------------
-  StThreeVectorD momentumAt, positionAt;
-	
-  double magneticField = uDst->event()->magneticField()/10.0; //to put it in Tesla
-  StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-  StMuEmcPosition muEmcPosition;
-  bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, &track, magneticField, geom->Radius());
-  if(tok) {
-    int m,e,s,id=0;
-    geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
-    int bad = geom->getId(m,e,s,id);
-    if(bad == 0) {
-      mNtracksOnTower[id]++; //increment number of tracks on this tower
-    }
-  }
-}
-
-void StBET4pMakerImp::collectEnergyFromBEMC()
-{
-  BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(_bemcTowerHits);
-
-  BemcTowerIdEnergyMap bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy);
-
-  FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergy);
-
-  _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
-
 }
 
 FourList StBET4pMakerImp::constructFourMomentumListFrom(const BemcTowerIdEnergyMap &bemcEnergy)
@@ -259,6 +224,27 @@ StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::correctBemcTowerEnergyFor
 
   }
   return ret;
+}
+
+void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
+{
+  StMuDst* uDst = mMuDstMaker->muDst();
+
+  //check projection to BEMC and remember for later: ---------------------------------------------
+  StThreeVectorD momentumAt, positionAt;
+	
+  double magneticField = uDst->event()->magneticField()/10.0; //to put it in Tesla
+  StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
+  StMuEmcPosition muEmcPosition;
+  bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, &track, magneticField, geom->Radius());
+  if(tok) {
+    int m,e,s,id=0;
+    geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
+    int bad = geom->getId(m,e,s,id);
+    if(bad == 0) {
+      mNtracksOnTower[id]++; //increment number of tracks on this tower
+    }
+  }
 }
 
 double StBET4pMakerImp::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId)
