@@ -118,9 +118,9 @@ void StBET4pMakerImp::Make()
     countTracksOnBemcTower(*track);
   }
 
-  FourList fourPList = constructFourMomentumListFrom(trackList);
+  FourList tpcFourMomentumList = constructFourMomentumListFrom(trackList);
 
-  _tracks.insert(_tracks.end(), fourPList.begin(), fourPList.end());
+  _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
 
   BemcTowerIdHitMap allBemcTowerHits = getTowerHitsFromBEMC();
 
@@ -138,7 +138,17 @@ void StBET4pMakerImp::Make()
   for(BemcTowerIdHitMap::const_iterator it = selectedBemcTowerHits.begin(); it != selectedBemcTowerHits.end(); ++it)
     _bemcTowerHits.insert(*it);
 
-  collectEnergyFromBEMC();
+  //  collectEnergyFromBEMC();
+
+  BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(_bemcTowerHits);
+
+  BemcTowerIdEnergyMap bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy);
+
+  FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergy);
+
+  _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
+
+
   collectEnergyFromEEMC();
 
 }
@@ -191,21 +201,9 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
 
   BemcTowerIdEnergyMap bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy);
 
-//   for(map<BemcTowerID, double>::iterator it = bemcCorrectedEnergy.begin(); it != bemcCorrectedEnergy.end(); ++it) {
-// 
-//     const int bemcTowerId = (*it).first;
-//     const double corrected_energy = (*it).second;
-// 
-//     TLorentzVector p4 = constructBemcFourMomentum(bemcTowerId, corrected_energy);
-// 	    
-//     //now construct StMuTrackFourVec object for jetfinding
-//     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
-//     _tracks.push_back(pmu); //for jet finding interface
-//   }
+  FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergy);
 
-  FourList fourPList = constructFourMomentumListFrom(bemcCorrectedEnergy);
-
-  _tracks.insert(_tracks.end(), fourPList.begin(), fourPList.end());
+  _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
 
 }
 
