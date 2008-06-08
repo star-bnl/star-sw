@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.15 2008/06/07 03:47:10 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.16 2008/06/08 23:26:01 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -62,17 +62,22 @@ private:
 
   FourList constructFourMomentumListFrom(const TrackList& trackList);
 
+  typedef int BemcTowerID;
+  typedef std::map<BemcTowerID, const StEmcRawHit*> BemcTowerIdHitMap;
+  typedef double Energy;
+  typedef std::map<BemcTowerID, Energy> BemcTowerIdEnergyMap;
+
   void collectEnergyFromBEMC();
-  double correctBemcTowerEnergyForTracks(double energy, int bemcTowerId);
+
+  BemcTowerIdEnergyMap readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
+  BemcTowerIdEnergyMap correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy);
+  double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
 
   void collectEnergyFromEEMC();
 
-  void fillBemcTowerHits();
-  double sumEnergyOverBemcTowers(double minE);
-  int numberOfBemcTowersWithEnergyAbove(double minE);
+  double sumEnergyOverBemcTowers(double minE, const BemcTowerIdHitMap& bemcTowerHits);
+  int numberOfBemcTowersWithEnergyAbove(double minE, const BemcTowerIdHitMap& bemcTowerHits);
 
-  typedef int BemcTowerID;
-  typedef std::map<BemcTowerID, const StEmcRawHit*> BemcTowerIdHitMap;
 
   BemcTowerIdHitMap getTowerHitsFromBEMC();
   BemcTowerIdHitMap selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits);

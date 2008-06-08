@@ -122,17 +122,21 @@ void StBET4pMakerImp::Make()
 
   _tracks.insert(_tracks.end(), fourPList.begin(), fourPList.end());
 
-  fillBemcTowerHits();
+  BemcTowerIdHitMap allBemcTowerHits = getTowerHitsFromBEMC();
 
-  mSumEmcEt = sumEnergyOverBemcTowers(0.4);
+  BemcTowerIdHitMap selectedBemcTowerHits = selectBemcTowerHits(allBemcTowerHits);
 
-  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4);
+  mSumEmcEt = sumEnergyOverBemcTowers(0.4, selectedBemcTowerHits);
+
+  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, selectedBemcTowerHits);
 
   if (mSumEmcEt > 200.) {
     _tracks.clear();
     return;
   }
 
+  for(BemcTowerIdHitMap::const_iterator it = selectedBemcTowerHits.begin(); it != selectedBemcTowerHits.end(); ++it)
+    _bemcTowerHits.insert(*it);
 
   collectEnergyFromBEMC();
   collectEnergyFromEEMC();
@@ -183,32 +187,9 @@ void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
 
 void StBET4pMakerImp::collectEnergyFromBEMC()
 {
-  map<BemcTowerID, double> bemcEnergy;
+  BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(_bemcTowerHits);
 
-  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = _bemcTowerHits.begin(); it != _bemcTowerHits.end(); ++it) {
-
-    const int bemcTowerId = (*it).first;
-    const StEmcRawHit* hit = (*it).second;
-
-    if(hit->energy() <= 0) continue;
-
-    bemcEnergy[bemcTowerId] = hit->energy();
-  }
-
-  map<BemcTowerID, double> bemcCorrectedEnergy;
-
-  for(map<BemcTowerID, double>::iterator it = bemcEnergy.begin(); it != bemcEnergy.end(); ++it) {
-
-    const int bemcTowerId = (*it).first;
-    const double energy = (*it).second;
-
-    double corrected_energy = correctBemcTowerEnergyForTracks(energy, bemcTowerId);
-    
-    if(corrected_energy <= 0) continue;
-
-    bemcCorrectedEnergy[bemcTowerId] = corrected_energy;
-
-  }
+  map<BemcTowerID, double> bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy);
 
   for(map<BemcTowerID, double>::iterator it = bemcCorrectedEnergy.begin(); it != bemcCorrectedEnergy.end(); ++it) {
 
@@ -221,6 +202,60 @@ void StBET4pMakerImp::collectEnergyFromBEMC()
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
     _tracks.push_back(pmu); //for jet finding interface
   }
+}
+
+StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits)
+{
+  BemcTowerIdEnergyMap ret;
+
+  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+
+    const int bemcTowerId = (*it).first;
+    const StEmcRawHit* hit = (*it).second;
+
+    if(hit->energy() <= 0) continue;
+
+    ret[bemcTowerId] = hit->energy();
+  }
+
+  return ret;
+}
+
+StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy)
+{
+  BemcTowerIdEnergyMap ret;
+
+  for(BemcTowerIdEnergyMap::const_iterator it = bemcEnergy.begin(); it != bemcEnergy.end(); ++it) {
+
+    const int bemcTowerId = (*it).first;
+    const double energy = (*it).second;
+
+    double corrected_energy = correctBemcTowerEnergyForTracks_(energy, bemcTowerId);
+    
+    if(corrected_energy <= 0) continue;
+
+    ret[bemcTowerId] = corrected_energy;
+
+  }
+  return ret;
+}
+
+double StBET4pMakerImp::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId)
+{
+
+    //Get eta, phi
+    float eta, phi;
+    StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
+    geom->getEtaPhi(bemcTowerId,eta,phi); // to convert software bemcTowerId into eta/phi
+
+    //construct four momentum
+	    
+    float theta=2.*atan(exp(-eta));
+
+    //do a quick correction for hadronic MIP eneryg deposition:
+    double MipE = 0.261*(1.+0.056*eta*eta)/sin(theta); //GeV
+
+    return energy - mNtracksOnTower[bemcTowerId]*MipE;
 }
 
 TLorentzVector StBET4pMakerImp::constructBemcFourMomentum(int bemcTowerId, double energy)
@@ -255,24 +290,6 @@ TVector3 StBET4pMakerImp::getVertex()
   StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
 
   return TVector3(vertex.x(), vertex.y(), vertex.z());
-}
-
-double StBET4pMakerImp::correctBemcTowerEnergyForTracks(double energy, int bemcTowerId)
-{
-
-    //Get eta, phi
-    float eta, phi;
-    StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-    geom->getEtaPhi(bemcTowerId,eta,phi); // to convert software bemcTowerId into eta/phi
-
-    //construct four momentum
-	    
-    float theta=2.*atan(exp(-eta));
-
-    //do a quick correction for hadronic MIP eneryg deposition:
-    double MipE = 0.261*(1.+0.056*eta*eta)/sin(theta); //GeV
-
-    return energy - mNtracksOnTower[bemcTowerId]*MipE;
 }
 
 void StBET4pMakerImp::collectEnergyFromEEMC()
@@ -329,18 +346,6 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
       _tracks.push_back(pmu); //for jet finding interface
     }
   }
-}
-
-void StBET4pMakerImp::fillBemcTowerHits()
-{
-  BemcTowerIdHitMap allBemcTowerHits = getTowerHitsFromBEMC();
-
-  BemcTowerIdHitMap selectedBemcTowerHits = selectBemcTowerHits(allBemcTowerHits);
-
-  for(BemcTowerIdHitMap::const_iterator it = selectedBemcTowerHits.begin(); it != selectedBemcTowerHits.end(); ++it)
-    _bemcTowerHits.insert(*it);
-    
-
 }
 
 StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::getTowerHitsFromBEMC()
@@ -413,20 +418,20 @@ bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int be
 }
 
 
-double StBET4pMakerImp::sumEnergyOverBemcTowers(double minE)
+double StBET4pMakerImp::sumEnergyOverBemcTowers(double minE, const BemcTowerIdHitMap& bemcTowerHits)
 {
   double ret(0.0);
-  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = _bemcTowerHits.begin(); it != _bemcTowerHits.end(); ++it) {
+  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
     if((*it).second->energy() > minE)
       ret += (*it).second->energy();
   }
   return ret;
 }
 
-int StBET4pMakerImp::numberOfBemcTowersWithEnergyAbove(double minE)
+int StBET4pMakerImp::numberOfBemcTowersWithEnergyAbove(double minE, const BemcTowerIdHitMap& bemcTowerHits)
 {
   int ret(0);
-  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = _bemcTowerHits.begin(); it != _bemcTowerHits.end(); ++it) {
+  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
     if((*it).second->energy() > minE)
       ret++;
   }
