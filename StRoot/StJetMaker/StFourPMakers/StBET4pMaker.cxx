@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.34 2008/06/09 22:19:35 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.35 2008/06/09 22:30:35 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -20,7 +20,7 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , mTables(new StBemcTables(doTowerSwapFix))
   , mDylanPoints(0)
   , mSumEmcEt(0.0)
-  , _imp(new StBET4pMakerImp(uDstMaker))
+  , _imp(new StBET4pMakerImp(uDstMaker, mTables))
 {
   cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
 }
@@ -34,7 +34,7 @@ Int_t StBET4pMaker::InitRun(Int_t runId)
 {
   mTables->loadTables((StMaker*)this);
 
-  _imp->InitRun(runId, mTables);
+  _imp->InitRun(runId);
   return kStOk;
 }
 
