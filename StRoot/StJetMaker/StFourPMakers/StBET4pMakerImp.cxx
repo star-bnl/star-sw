@@ -168,7 +168,9 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const BemcTowerIdEnergyM
     const int bemcTowerId = (*it).first;
     const double corrected_energy = (*it).second;
 
-    TLorentzVector p4 = constructBemcFourMomentum(bemcTowerId, corrected_energy);
+    TVector3 towerLocation = getBemcTowerLocation(bemcTowerId);
+    
+    TLorentzVector p4 = constructFourMomentum(towerLocation, corrected_energy);
 	    
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
     ret.push_back(pmu);
@@ -254,13 +256,6 @@ double StBET4pMakerImp::correctBemcTowerEnergyForTracks_(double energy, int bemc
     double MipE = 0.261*(1.+0.056*eta*eta)/sin(theta); //GeV
 
     return energy - mNtracksOnTower[bemcTowerId]*MipE;
-}
-
-TLorentzVector StBET4pMakerImp::constructBemcFourMomentum(int bemcTowerId, double energy)
-{
-    TVector3 towerLocation = getBemcTowerLocation(bemcTowerId);
-    
-    return constructFourMomentum(towerLocation, energy);
 }
 
 TLorentzVector StBET4pMakerImp::constructFourMomentum(const TVector3& towerLocation, double energy)
@@ -436,8 +431,6 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
 {
   if (!mUseEndcap) return;
 
-  StMuDst* uDst = mMuDstMaker->muDst();
-	
   StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
 
   for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
@@ -460,23 +453,6 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
     double adc = rawadc - (dbItem->ped);
     double energy = adc/(dbItem->gain);
     if(energy < 0.01) continue; // drop if less than 10MeV for now
-	    
-//    //construct four momentum
-//    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
-//    double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
-//
-//    //correct for eta shift
-//    StThreeVectorD towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
-//    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
-//    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
-//
-//    //construct momentum 3-vector
-//    StThreeVectorF momentum(1., 1., 1.);
-//    momentum.setPhi( towerLocation.phi() );
-//    momentum.setTheta( towerLocation.theta() ); //use theta from vertex subtracted point.
-//    momentum.setMag(pMag);
-//    //      StLorentzVectorF p4(energy, momentum);
-//    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 	    
     TVector3 towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
 
