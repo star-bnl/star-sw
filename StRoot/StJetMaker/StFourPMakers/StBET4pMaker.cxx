@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.35 2008/06/09 22:30:35 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.36 2008/06/09 23:00:37 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -17,12 +17,12 @@ ClassImp(StBET4pMaker)
     
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
-  , mTables(new StBemcTables(doTowerSwapFix))
+  , _bemcTables(new StBemcTables(doTowerSwapFix))
   , mDylanPoints(0)
   , mSumEmcEt(0.0)
-  , _imp(new StBET4pMakerImp(uDstMaker, mTables))
+  , _imp(new StBET4pMakerImp(uDstMaker, _bemcTables))
 {
-  cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
+
 }
 
 void StBET4pMaker::setUseEndcap(bool v)   { _imp->setUseEndcap(v); }
@@ -32,9 +32,8 @@ void StBET4pMaker::setUse2006Cuts(bool v) { _imp->setUse2006Cuts(v); }
 
 Int_t StBET4pMaker::InitRun(Int_t runId)
 {
-  mTables->loadTables((StMaker*)this);
+  _bemcTables->loadTables((StMaker*)this);
 
-  _imp->InitRun(runId);
   return kStOk;
 }
 

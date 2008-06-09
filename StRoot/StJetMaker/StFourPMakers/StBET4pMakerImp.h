@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.28 2008/06/09 22:30:36 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.29 2008/06/09 23:00:51 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -39,8 +39,6 @@ public:
   void Make();
     
   void Clear(Option_t* opt);
-
-  Int_t InitRun(Int_t runId);
 
   void setUseEndcap(bool v) { mUseEndcap = v; }
   void setUse2003Cuts(bool v) { mUse2003Cuts = v; }

@@ -61,11 +61,6 @@ StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,  StBemcTables* bemcTab
   assert(mMuDstMaker);
 }
 
-Int_t StBET4pMakerImp::InitRun(Int_t runId)
-{
-  return kStOk;
-}
-
 void StBET4pMakerImp::setUse2006Cuts(bool v)
 {
   mUse2006Cuts = v;
