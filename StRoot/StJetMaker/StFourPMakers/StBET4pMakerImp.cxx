@@ -78,19 +78,15 @@ void StBET4pMakerImp::setUse2006Cuts(bool v)
 
 void StBET4pMakerImp::Init(StEEmcDbMaker* eedb)
 {
-  cout <<"StBET4pMakerImp::Init()"<<endl;
     
   mEeGeom = new EEmcGeomSimple();
-  //  mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
   mEeDb = eedb;
-  assert(mEeDb); // eemcDB must be in the chain, fix it
   mEeDb->setThreshold(3);
   
 }
 
 void StBET4pMakerImp::Clear(Option_t* opt)
 {
-  LOG_DEBUG <<"void StBET4pMakerImp::Clear(Option_t* opt)" << endm;
   mDylanPoints = 0;
   mSumEmcEt = 0.;
     
@@ -185,6 +181,49 @@ StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::getTowerHitsFromBEMC()
   return ret;
 }
 
+StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits)
+{
+  BemcTowerIdHitMap ret;
+
+  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+
+    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
+      continue;
+
+    ret.insert(*it);
+  }
+  return ret;
+}
+
+bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
+{
+  //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
+  int status;
+  mTables->getStatus(BTOW, bemcTowerID, status);
+  
+  //check for ADC that is 2-sigma above RMS:
+  float pedestal, rms;
+  int CAP(0); //this arument matters only for SMD
+  mTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
+  
+  int ADC = theRawHit->adc(); //not pedestal subtracted!
+
+  if (status != 1) return false;
+
+  if (mUse2003Cuts)
+    if (!accept2003Tower(bemcTowerID)) return false;
+
+  if (mUse2005Cuts)
+    if (bemcTowerID > 2400) return false;
+
+  if (ADC-pedestal <= 0) return false;
+
+  if ((ADC-pedestal) <= 2.*rms) return false;
+
+  return true;
+
+}
+
 FourList StBET4pMakerImp::constructFourMomentumListFrom(const TowerEnergyDepositList& energyDepositList)
 {
   FourList ret;
@@ -220,50 +259,6 @@ StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::readBemcTowerEnergy(con
   }
 
   return ret;
-}
-
-StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits)
-{
-  BemcTowerIdHitMap ret;
-
-  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
-
-    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
-      continue;
-
-    ret.insert(*it);
-  }
-  return ret;
-}
-
-bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
-{
-  //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
-  int status;
-  mTables->getStatus(BTOW, bemcTowerID, status);
-  
-  //check for ADC that is 2-sigma above RMS:
-  float pedestal, rms;
-  int CAP(0); //this arument matters only for SMD
-  mTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
-  
-  int ADC = theRawHit->adc(); //not pedestal subtracted!
-
-  if (mUse2003Cuts)
-    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(bemcTowerID) )
-      return true;
-    else
-      return false;
-  else if (mUse2005Cuts)
-    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && bemcTowerID <= 2400)
-      return true;
-    else
-      return false;
-  else
-    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1)
-      return true;
-    else
-      return false;
 }
 
 void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
