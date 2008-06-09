@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.27 2008/06/09 22:19:36 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.28 2008/06/09 22:30:36 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -31,7 +31,7 @@ class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(StMuDstMaker* uDstMaker);
+  StBET4pMakerImp(StMuDstMaker* uDstMaker, StBemcTables* bemcTables);
     
   virtual ~StBET4pMakerImp() {};
     
@@ -40,7 +40,7 @@ public:
     
   void Clear(Option_t* opt);
 
-  Int_t InitRun(Int_t runId, StBemcTables* tables);
+  Int_t InitRun(Int_t runId);
 
   void setUseEndcap(bool v) { mUseEndcap = v; }
   void setUse2003Cuts(bool v) { mUse2003Cuts = v; }

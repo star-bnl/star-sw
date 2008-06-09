@@ -44,10 +44,10 @@ using namespace StSpinJet;
 
 const int StBET4pMakerImp::mNOfBemcTowers;
 
-StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker)
+StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,  StBemcTables* bemcTables)
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
-  , _bemcTables(0)
+  , _bemcTables(bemcTables)
   , mUse2003Cuts(false)
   , mUse2005Cuts(false)
   , mUse2006Cuts(false)
@@ -61,13 +61,9 @@ StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker)
   assert(mMuDstMaker);
 }
 
-Int_t StBET4pMakerImp::InitRun(Int_t runId, StBemcTables* tables)
+Int_t StBET4pMakerImp::InitRun(Int_t runId)
 {
-  //  mTables->loadTables((StMaker*)this);
-  _bemcTables = tables;
-
   return kStOk;
-    
 }
 
 void StBET4pMakerImp::setUse2006Cuts(bool v)
