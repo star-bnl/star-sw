@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.18 2008/06/08 23:47:36 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.19 2008/06/09 00:01:33 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -68,7 +68,7 @@ private:
   typedef std::map<BemcTowerID, Energy> BemcTowerIdEnergyMap;
 
   BemcTowerIdEnergyMap readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
-  BemcTowerIdEnergyMap correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy);
+  BemcTowerIdEnergyMap correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy, const TrackList& trackList);
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
 
   FourList constructFourMomentumListFrom(const BemcTowerIdEnergyMap &bemcEnergy);
@@ -98,8 +98,6 @@ private:
   static const int mNOfBemcTowers = 4800;
 
   int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
-
-  BemcTowerIdHitMap _bemcTowerHits;
 
   StMuDstMaker* mMuDstMaker;
   StBemcTables* mTables;

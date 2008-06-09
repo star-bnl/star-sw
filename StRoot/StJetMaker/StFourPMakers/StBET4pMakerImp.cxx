@@ -105,8 +105,6 @@ void StBET4pMakerImp::Clear(Option_t* opt)
     mNtracksOnTower[i] = 0;
   }
 
-  _bemcTowerHits.clear();
-    
 }
 
 void StBET4pMakerImp::Make()
@@ -115,7 +113,6 @@ void StBET4pMakerImp::Make()
 
   FourList tpcFourMomentumList = constructFourMomentumListFrom(trackList);
 
-  _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
 
   BemcTowerIdHitMap allBemcTowerHits = getTowerHitsFromBEMC();
 
@@ -125,25 +122,15 @@ void StBET4pMakerImp::Make()
 
   mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, selectedBemcTowerHits);
 
-  if (mSumEmcEt > 200.) {
-    _tracks.clear();
-    return;
-  }
+  if (mSumEmcEt > 200.) return;
 
-  for(BemcTowerIdHitMap::const_iterator it = selectedBemcTowerHits.begin(); it != selectedBemcTowerHits.end(); ++it)
-    _bemcTowerHits.insert(*it);
+  BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(selectedBemcTowerHits);
 
-  BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(_bemcTowerHits);
-
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-    countTracksOnBemcTower(*track);
-  }
-
-  BemcTowerIdEnergyMap bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy);
+  BemcTowerIdEnergyMap bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy, trackList);
 
   FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergy);
 
+  _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
   _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
 
 
@@ -207,8 +194,13 @@ StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::readBemcTowerEnergy(const
   return ret;
 }
 
-StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy)
+StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy, const TrackList& trackList)
 {
+  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+    const StMuTrack* track = (*it).first;
+    countTracksOnBemcTower(*track);
+  }
+
   BemcTowerIdEnergyMap ret;
 
   for(BemcTowerIdEnergyMap::const_iterator it = bemcEnergy.begin(); it != bemcEnergy.end(); ++it) {
