@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.64 2008/03/11 15:10:47 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.65 2008/06/09 16:11:34 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.65  2008/06/09 16:11:34  fine
+ * restore the DATAP summary information if needed. Thanx Jeff
+ *
  * Revision 1.64  2008/03/11 15:10:47  fine
  * adjust evpReaderClass header file
  *
@@ -412,6 +415,8 @@ int StDAQReader::readEvent()
 #if 1
      fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes);
      memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes);
+     // Fix the DATAP Summary data
+     fDaqFileReader->fixDatapSummary((DATAP*)fDATAP);
 #else
      fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes_mapped);
      memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes_mapped);
