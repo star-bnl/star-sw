@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.24 2008/06/09 19:45:01 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.25 2008/06/09 20:51:44 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -89,9 +89,7 @@ private:
 
   FourList constructFourMomentumListFrom(const TowerEnergyDepositList& energyDepositList);
 
-  void collectEnergyFromEEMC();
-
-
+  TowerEnergyDepositList collectEnergyFromEEMC();
 
   bool accept2003Tower(int id);
 
