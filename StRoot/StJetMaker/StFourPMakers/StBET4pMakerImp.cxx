@@ -472,7 +472,7 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
 
     //construct momentum 3-vector
     StThreeVectorF momentum(1., 1., 1.);
-    momentum.setPhi( towerCenter.Phi() );
+    momentum.setPhi( towerLocation.phi() );
     momentum.setTheta( towerLocation.theta() ); //use theta from vertex subtracted point.
     momentum.setMag(pMag);
     //      StLorentzVectorF p4(energy, momentum);
