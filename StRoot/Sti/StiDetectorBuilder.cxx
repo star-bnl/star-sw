@@ -13,7 +13,6 @@
 #include "StThreeVector.hh"
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
-#include "TMath.h"
 StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 int StiDetectorBuilder::_debug = 0;
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const string & inputFile)
@@ -103,7 +102,10 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   // in the base class nothing is actually done
   // but ROOT stuff is built in the drawable version of this class.
   detector->setGroupId(_groupId);
-  detector->setTrackingParameters(StiDefaultTrackingParameters::instance());
+  if (_trackingParameters) 
+    detector->setTrackingParameters(_trackingParameters);
+  else 
+    detector->setTrackingParameters(StiDefaultTrackingParameters::instance());
   return detector;
 }
 
@@ -113,9 +115,9 @@ void StiDetectorBuilder::build(StMaker& source)
   mDetectorIterator = mDetectorMap.begin();
 }
 
-//________________________________________________________________________________
 void StiDetectorBuilder::buildDetectors(StMaker& source)
 {}
+
 //________________________________________________________________________________
 void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   if (debug()) {cout << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;}
@@ -123,57 +125,54 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   TGeoMaterial *matP   = volP->GetMaterial(); if (debug()) matP->Print("");
   TGeoShape    *shapeP = nodeP->GetShape();   if (debug()) {cout << "New Shape\t"; StiVMCToolKit::PrintShape(shapeP);}
   TGeoHMatrix  *hmat   = nodeP->GetMatrix();  if (debug()) hmat->Print("");
-  double PotI = StiVMCToolKit::GetPotI(matP);
+  Double_t PotI = StiVMCToolKit::GetPotI(matP);
   StiMaterial *matS = add(new StiMaterial(matP->GetName(),
 						matP->GetZ(),
 						matP->GetA(),
 						matP->GetDensity(),
 						matP->GetDensity()*matP->GetRadLen(),
 						PotI));
-  double ionization = matS->getIonization();
+  Double_t ionization = matS->getIonization();
   StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), ionization*ionization, matS->getA(), matS->getZ(),matS->getDensity());
-  StiShape   *sh     = findShape(volP->GetName());
-  double     *xyz    = hmat->GetTranslation();
-  double     *rot    = hmat->GetRotationMatrix();
-  double      Phi    = 0;
-  //  double xc,yc,zc,rc,rn, nx,ny,nz,yOff;
+  StiShape     *sh     = findShape(volP->GetName());
+  Double_t     *xyz    = hmat->GetTranslation();
+  Double_t     *rot    = hmat->GetRotationMatrix();
+  Double_t      Phi    = 0;
+  //  Double_t xc,yc,zc,rc,rn, nx,ny,nz,yOff;
   StiPlacement *pPlacement = 0;
-  do {//only once
-    if (!shapeP->TestShapeBit(TGeoShape::kGeoTube)) 	break;
-    TGeoTube *shapeC = (TGeoTube *)shapeP;
-    double Rmax = shapeC->GetRmax();
-    double Rmin = shapeC->GetRmin();
-    double delta=fabs(xyz[0])+fabs(xyz[1]);
-    if (delta>0.1*Rmin) 				break;
-    double dZ   = shapeC->GetDz();
-    double radius = (Rmin + Rmax)/2;
-    double dPhi = 2*TMath::Pi();
-    double dR   = Rmax - Rmin;
+  if (xyz[0]*xyz[0] + xyz[1]*xyz[1] < 1.e-3 && 
+      TMath::Abs(rot[0]*rot[0] + rot[4]*rot[4] + rot[8]*rot[8] - 3) < 1e-5 &&
+      (shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg) ||
+       shapeP->TestShapeBit(TGeoShape::kGeoTube))) {
+    Double_t paramsBC[3];
+    shapeP->GetBoundingCylinder(paramsBC);
+    TGeoTube *shapeC = (TGeoTube *) shapeP;
+    Double_t Rmax = shapeC->GetRmax();
+    Double_t Rmin = shapeC->GetRmin();
+    Double_t dZ   = shapeC->GetDz();
+    Double_t radius = (Rmin + Rmax)/2;
+    Double_t dPhi = 2*TMath::Pi();
+    Double_t dR   = Rmax - Rmin;
     dR = TMath::Min(0.2*dZ, dR);
     if (dR < 0.1) dR = 0.1;
     int Nr = (int) ((Rmax - Rmin)/dR);
     if (Nr <= 0) Nr = 1;
     dR = (Rmax - Rmin)/Nr;
-
     if (shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg)) {
       TGeoTubeSeg *shapeS = (TGeoTubeSeg *) shapeP;
-      double gloV[3];
-      double Phi1 = TMath::DegToRad()*shapeS->GetPhi1();
-      double Phi2 = TMath::DegToRad()*shapeS->GetPhi2();
-      if (Phi2<Phi1) Phi2+=M_PI*2;
-      double PhiM = (Phi2+Phi1)/2;
-      dPhi        = (Phi2-Phi1);
-      double locV[3]={cos(PhiM),sin(PhiM),0};
-      hmat->LocalToMaster(locV,gloV);	       	       
-      Phi = atan2(gloV[1],gloV[0]);
+      Phi =  TMath::DegToRad()*(shapeS->GetPhi2() + shapeS->GetPhi1())/2;
+      Phi =  StiVMCToolKit::Nice(Phi);
+      dPhi = TMath::DegToRad()*(shapeS->GetPhi2() - shapeS->GetPhi1());
     }
-    
     for (Int_t ir = 0; ir < Nr; ir++) {
       TString Name(volP->GetName());
-      if (ir) {Name += "__";Name += ir;}
+      if (ir > 0) {
+	Name += "__";
+	Name += ir;
+      }
       sh     = findShape(Name.Data());
       if (! sh) {// I assume that the shape name is unique
-	sh = new StiCylindricalShape(Name.Data(),   // Name
+	sh = new StiCylindricalShape(volP->GetName(), // Name
 				     dZ,              // halfDepth
 				     dR,              // thickness
 				     Rmin + (ir+1)*dR,// outerRadius
@@ -187,39 +186,24 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
       pPlacement->setRegion(StiPlacement::kMidRapidity);
       pPlacement->setNormalRep(Phi,radius, 0); 
     }
-  } while(0);
-
-  if (!pPlacement)  {// BBox
+  }
+  else {// BBox
     shapeP->ComputeBBox();
-    TGeoBBox *box = (TGeoBBox *)shapeP;
-    Double_t dx = box->GetDX();
-    Double_t dy = box->GetDY();
-    StThreeVectorD centerVector(xyz[0],xyz[1],xyz[2]);
-    StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
-    double prod = centerVector*normalVector;
-    if (prod < -1e-7) normalVector *= -1;
-    double phi  = centerVector.phi();
-    double phiD = normalVector.phi();
-    Double_t dPhi = phi - phiD;
-    if (dPhi < - TMath::Pi()) dPhi += 2*TMath::Pi();
-    if (dPhi >   TMath::Pi()) dPhi -= 2*TMath::Pi();
-    if (TMath::Abs(TMath::Abs(dPhi) - TMath::Pi()/2) < 1e-7) { // x <==> y
-      normalVector = StThreeVectorD(rot[0],rot[3],rot[6]);
-      prod = centerVector*normalVector;
-      if (prod < -1e-7) normalVector *= -1;
-      phiD = normalVector.phi();
-      Double_t temp = dy;
-      dy = dx;
-      dy = temp;
-    }
-    double r = centerVector.perp();
+    TGeoBBox *box = (TGeoBBox *) shapeP;
     if (! sh) {
       sh = new StiPlanarShape(volP->GetName(),// Name
 			      box->GetDZ(),   // halfDepth
-			      dx,             // thickness
-			      dy);            // halfWidth
+			      box->GetDX(),   // thickness
+			      box->GetDY());  // halfWidth
       add(sh);
     }
+    StThreeVectorD centerVector(xyz[0],xyz[1],xyz[2]);
+    StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
+    Double_t prod = centerVector*normalVector;
+    if (prod < 0) normalVector *= -1;
+    Double_t phi  = centerVector.phi();
+    Double_t phiD = normalVector.phi();
+    Double_t r = centerVector.perp();
     pPlacement = new StiPlacement;
     pPlacement->setZcenter(xyz[2]);
     pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
@@ -245,25 +229,4 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   Int_t layer = getNRows();
   add(layer+1,0,pDetector);
 }
-///Returns the number of sectors (or segments) in a the
-///given row. Sector are expected to be azimuthally
-///distributed.
-unsigned int  StiDetectorBuilder::getNSectors(unsigned int row) const
-{
-  assert(row<_detectors.size());
-  return _detectors[row].size();
-}
 
-
-StiDetector * StiDetectorBuilder::getDetector(unsigned int row, unsigned int sector) const
-{
-  assert(row<_detectors.size());
-  assert(sector<_detectors[row].size());
-  return _detectors[row][sector];
-}
-
-void StiDetectorBuilder::setDetector(unsigned int row, unsigned int sector, StiDetector *detector)
-{
-  setNSectors(row+1,sector+1);
-   _detectors[row][sector] = detector;
-}

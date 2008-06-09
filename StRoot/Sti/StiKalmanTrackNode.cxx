@@ -1,15 +1,12 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.117 2008/05/19 04:21:21 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.118 2008/06/09 20:12:09 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
- * Revision 2.117  2008/05/19 04:21:21  perev
- * Fix asserts and cycling
- *
- * Revision 2.116  2008/05/13 19:17:05  perev
- * more robust nudge()
+ * Revision 2.118  2008/06/09 20:12:09  perev
+ * BigStepBack
  *
  * Revision 2.115  2008/04/03 20:03:36  fisyak
  * Straighten out DB access via chairs
@@ -21,7 +18,7 @@
  * getPt non positive bug fix. introduces 3 month ago
  *
  * Revision 2.112  2007/08/30 19:13:27  fine
- * replace the repmaining cout with LOG_INFO
+ * replace the repmaining cout with LOG_DEBUG
  *
  * Revision 2.111  2007/08/16 20:21:24  fine
  * replace printf with logger
@@ -219,7 +216,7 @@
  * Fix sign in dE/dx; move from upper to lower triangular matrix convention (StEvent) for px,py,pz
  *
  * Revision 2.45  2004/12/05 00:39:07  fisyak
- * Add test suit for matrix manipulation debugging under overall CPPFLAGS=-DSti_INFO
+ * Add test suit for matrix manipulation debugging under overall CPPFLAGS=-DSti_DEBUG
  *
  * Revision 2.44  2004/12/01 14:04:57  pruneau
  * z propagation fix
@@ -376,8 +373,8 @@ using namespace std;
 #include "TMath.h"
 #include "StMessMgr.h"
 
-#define PrP(A)    { LOG_INFO << "\t" << (#A) << " = \t" << ( A ) }
-#define PrPP(A,B) {LOG_INFO  << "=== StiKalmanTrackNode::" << (#A); PrP((B)); LOG_INFO << endm;}
+#define PrP(A)    { LOG_DEBUG << "\t" << (#A) << " = \t" << ( A ) }
+#define PrPP(A,B) {LOG_DEBUG  << "=== StiKalmanTrackNode::" << (#A); PrP((B)); LOG_DEBUG << endm;}
 // Local Track Model
 //
 // x[0] = y  coordinate
@@ -423,7 +420,7 @@ void StiKalmanTrackNode::Break(int kase)
 {
 static int myBreak=-2005;
 if (kase!=myBreak) return;
-  LOG_INFO << Form("*** Break(%d) ***",kase)<< endm;
+  LOG_DEBUG << Form("*** Break(%d) ***",kase)<< endm;
 }		
 /* bit mask for debug printout  
    0   => 1 - covariance and propagate matrices 
@@ -945,7 +942,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
   double dsin = mFP._curv*mgP.dx;
   mgP.sinCA2=mgP.sinCA1 + dsin; 
 //	Orientation is bad. Fit is non reliable
-  if (fabs(mgP.sinCA2)>kMaxSinEta) 				return kEnded;
+  if (fabs(mgP.sinCA2)>kMaxSinEta) 				return -4;
   mgP.cosCA2   = ::sqrt((1.-mgP.sinCA2)*(1.+mgP.sinCA2));
 //	Check what sign of cosCA2 must be
   test = (2*dir-1)*mgP.dx*mgP.cosCA1;
@@ -1004,12 +1001,11 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   double deltaX = 0;
   if (hit) { deltaX = hit->x()-mFP._x;}
   else     { if (_detector) deltaX = _detector->getPlacement()->getNormalRadius()-mFP._x;}
-  if (fabs(deltaX) <1.e-4) 	return  0;
+  if(fabs(deltaX)>5)		return -1;
+  if (fabs(deltaX) <1.e-3) 	return  0;
   double deltaS = mFP._curv*(deltaX);
   double sCA2 = mFP._sinCA + deltaS;
-  if (sCA2 <-0.99) {sCA2= -0.99; deltaS= sCA2-mFP._sinCA; deltaX = deltaS/mFP._curv;}
-  if (sCA2 > 0.99) {sCA2=  0.99; deltaS= sCA2-mFP._sinCA; deltaX = deltaS/mFP._curv;}
-
+  if (fabs(sCA2)>0.99) 		return -2;
   double cCA2,deltaY,deltaL,sind;
   if (fabs(deltaS) < 1e-3 && fabs(mFP._eta)<1) { //Small angle approx
     cCA2= mFP._cosCA - mFP._sinCA/mFP._cosCA*deltaS;
@@ -1042,8 +1038,14 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   mgP.dl   += deltaL;
 
 
+//  assert(fabs(mFP._sinCA) <  1.);
+  if (fabs(mFP._sinCA)>=1) {
+    LOG_DEBUG << Form("StiKalmanTrackNode::nudge WRONG WRONG WRONG sinCA=%g",mFP._sinCA)
+    << endm;          
+    mFP.print();
+    return -13;
+  }
   assert(fabs(mFP._cosCA) <= 1.);
-  assert(fabs(mFP._sinCA) <= 1.);
   mPP() = mFP;
   return 0;
 }
@@ -1104,18 +1106,18 @@ void StiKalmanTrackNode::propagateError()
   
   if (debug() & 1) 
     {
-      LOG_INFO << "Prior Error:"
+      LOG_DEBUG << "Prior Error:"
 	   << "cYY:"<<mFE._cYY<<endm;
-	   LOG_INFO << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
-      LOG_INFO << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
-      LOG_INFO << "cPY:"<<mFE._cPY<<" cPZ:"<<mFE._cPZ<<endm;
-      LOG_INFO << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
+	   LOG_DEBUG << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
+      LOG_DEBUG << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
+      LOG_DEBUG << "cPY:"<<mFE._cPY<<" cPZ:"<<mFE._cPZ<<endm;
+      LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
     }
   propagateMtx();
   errPropag6(mFE.A,mMtx().A,kNPars);
   int smallErr = !(mFE._cYY>1e-20 && mFE._cZZ>1e-20 && mFE._cEE>1e-20&& mFE._cPP>1.e-30&& mFE._cTT>1.e-20);
   if (smallErr) {
-    LOG_INFO << Form("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g"
+    LOG_DEBUG << Form("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g"
           ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cPP,mFE._cTT) << endm;
     assert(mFE._cYY>0 && mFE._cZZ>0 && mFE._cEE>0 && mFE._cPP>0 && mFE._cTT>0);
   }
@@ -1125,7 +1127,7 @@ void StiKalmanTrackNode::propagateError()
   mFE.recov();
   mFE.check("StiKalmanTrackNode::propagateError");
 
-#ifdef Sti_INFO
+#ifdef Sti_DEBUG
   if (debug() & 4) {
     PrPP(propagateError,C);
     TRMatrix F(kNPars,kNPars,f[0]); PrPP(propagateError,F);
@@ -1137,12 +1139,12 @@ void StiKalmanTrackNode::propagateError()
 #endif
   if (debug() & 1) 
     {
-      LOG_INFO << "Post Error:"
+      LOG_DEBUG << "Post Error:"
 	   << "cYY:"<<mFE._cYY<<endm;
-	   LOG_INFO << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
-	   LOG_INFO << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
-	   LOG_INFO << "cCY:"<<mFE._cPY<<" cCZ:"<<mFE._cPZ<<endm;
-	   LOG_INFO << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
+	   LOG_DEBUG << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
+	   LOG_DEBUG << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
+	   LOG_DEBUG << "cCY:"<<mFE._cPY<<" cCZ:"<<mFE._cPZ<<endm;
+	   LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
     }
 // now set hiterrors
    if (_hit) setHitErrors();
@@ -1219,14 +1221,14 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   r01=mHrr.hZY+mFE._cZY;  
   r11=mHrr.hZZ+mFE._cZZ;
 
-#ifdef Sti_INFO
+#ifdef Sti_DEBUG
   TRSymMatrix R(2,
 		r00,
 		r01, r11);
 #endif
   _det=r00*r11 - r01*r01;
   if (_det<r00*r11*1.e-5) {
-    LOG_INFO << Form("StiKalmanTrackNode::evalChi2 *** zero determinant %g",_det)<< endm;
+    LOG_DEBUG << Form("StiKalmanTrackNode::evalChi2 *** zero determinant %g",_det)<< endm;
     return 1e60;
   }
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
@@ -1238,7 +1240,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double dzt=(mFP._z-hit->z()) + deltaZ;
   double cc= (dyt*r00*dyt + 2*r01*dyt*dzt + dzt*r11*dzt)/_det;
 
-#ifdef Sti_INFO
+#ifdef Sti_DEBUG
   if (debug() & 4) {
     TRSymMatrix G(R,TRArray::kInverted);
     TRVector r(2,hit->y()-mFP._y,hit->z()-mFP._z);
@@ -1246,7 +1248,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
     Double_t diff = chisq - cc;
     Double_t sum  = chisq + cc;
     if (diff > 1e-7 || (sum > 2. && (2 * diff ) / sum > 1e-7)) {
-      LOG_INFO << "Failed:\t" << chisq << "\t" << cc << "\tdiff\t" << diff << endm;
+      LOG_DEBUG << "Failed:\t" << chisq << "\t" << cc << "\tdiff\t" << diff << endm;
     }
   }
 #endif
@@ -1428,7 +1430,7 @@ static int nCall=0; nCall++;
   r00 = mHrr.hYY + mFE._cYY;
   r01 = mHrr.hZY + mFE._cZY;
   r11 = mHrr.hZZ + mFE._cZZ;
-#ifdef Sti_INFO
+#ifdef Sti_DEBUG
   TRSymMatrix V(2,mHrr.hYY,
 		  mHrr.hZY, mHrr.hZZ);  
   TRSymMatrix R1(2,r00,
@@ -1438,7 +1440,7 @@ static int nCall=0; nCall++;
 #endif
   _det=r00*r11 - r01*r01;
   if (!finite(_det) || _det<(r00*r11)*1.e-5) {
-    LOG_INFO << Form("StiKalmanTrackNode::updateNode *** zero determinant %g",_det)
+    LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** zero determinant %g",_det)
     << endm;
     return -11;
   }
@@ -1455,7 +1457,7 @@ static int nCall=0; nCall++;
   double dp3  = k30*dyt + k31*dzt;
   double dp2  = k20*dyt + k21*dzt;
   double dp4  = k40*dyt + k41*dzt;
-#ifdef Sti_INFO
+#ifdef Sti_DEBUG
   double dp0  = k00*dyt + k01*dz;
   double dp1  = k10*dyt + k11*dz;
   if (debug() & 4) {
@@ -1503,13 +1505,13 @@ static int nCall=0; nCall++;
 //VP  mFP._y += k00*dy + k01*dz;
   if (fabs(p0)>200.) 
     {
-      LOG_INFO << "updateNode()[1] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endm;
+      LOG_DEBUG << "updateNode()[1] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endm;
       return -12;
     }
   double p1 = mFP._z + k10*dyt + k11*dzt;
   if (fabs(p1)>200.) 
     {
-      LOG_INFO << "updateNode()[2] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endm;
+      LOG_DEBUG << "updateNode()[2] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endm;
       return -13;
     }
   //mFP._tanl += k40*dyt + k41*dzt;
@@ -1539,13 +1541,13 @@ static int nCall=0; nCall++;
   mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTP-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
 
   if (mFE._cYY >= mHrr.hYY || mFE._cZZ >= mHrr.hZZ) {
-    LOG_INFO << Form("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g"
+    LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g"
           ,mFE._cYY,mHrr.hYY,mFE._cZZ,mHrr.hZZ)<< endm;
     return -14;
   }
   if (mFE.check()) return -14;
 
-#ifdef Sti_INFO
+#ifdef Sti_DEBUG
   TRSymMatrix W(H,TRArray::kATxSxA,G); 
   TRSymMatrix C0(C);
   C0 -= TRSymMatrix(C,TRArray::kRxSxR,W);
@@ -1615,7 +1617,7 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   mFP._eta= nice(mFP._eta-alpha); /*VP*/
   mFP._sinCA = sin(mFP._eta);
   mFP._cosCA = cos(mFP._eta);
-#ifdef Sti_INFO  
+#ifdef Sti_DEBUG  
   TRSymMatrix C(kNPars,mFE.A);
   if (debug() & 4) {PrPP(rotate,C);}
 #endif
@@ -1845,12 +1847,12 @@ int StiKalmanTrackNode::testError(double *emx, int begend)
   for (j1=0; j1<5;j1++){
     jj = idx55[j1][j1];
     if (!(emx[jj]>0)) {;
-      LOG_INFO << Form("<StiKalmanTrackNode::testError> Negative diag %g[%d][%d]",emx[jj],j1,j1)
+      LOG_DEBUG << Form("<StiKalmanTrackNode::testError> Negative diag %g[%d][%d]",emx[jj],j1,j1)
       << endm;
  	continue;}
     if (emx[jj]<=10*dia[j1] )	continue;
     assert(finite(emx[jj]));
-    LOG_INFO << Form("<StiKalmanTrackNode::testError> Huge diag %g[%d][%d]",emx[jj],j1,j1)
+    LOG_DEBUG << Form("<StiKalmanTrackNode::testError> Huge diag %g[%d][%d]",emx[jj],j1,j1)
     << endm;
     				continue;
 //    ians++; emx[jj]=dia[j1];
@@ -1937,7 +1939,7 @@ int StiKalmanTrackNode::testDeriv(double *der)
      if (fabs(dif) <= 1.e-5) 				continue;
      if (fabs(dif) <= 0.2*0.5*fabs(num[i]+der[i]))	continue;
      nerr++;
-     LOG_INFO << Form("***Wrong deriv [%d][%d] = %g %g %g",ipar,jpar,num[i],der[i],dif)
+     LOG_DEBUG << Form("***Wrong deriv [%d][%d] = %g %g %g",ipar,jpar,num[i],der[i],dif)
      << endm;
   }
   fDerivTestOn=0;
@@ -1998,51 +2000,47 @@ void   StiKalmanTrackNode::PrintpT(Char_t *opt) {
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {
-  LOG_INFO << comment << "\t" << commentdEdx << endm;
+  LOG_DEBUG << comment << "\t" << commentdEdx << endm;
   ResetComment();
 }
 //________________________________________________________________________________
 int   StiKalmanTrackNode::print(const char *opt) const
 {
-//                        0123456789012345
-static const char *txt = "xyzeptcbXYZEPTCB";
+static const char *txt = "xyzeptchXYZEPTCH";
 static const char *hhh = "uvwUVW";
 static const char *HHH = "xyzXYZ";
-  if (!opt || !opt[0]) opt = "2xe";
+  if (!opt || !opt[0]) opt = "2xh";
   StiHit *hit = getHit();
   if (strchr(opt,'h') && !hit) 	return 0;
   TString ts;
   if (!isValid()) ts+="*";
   if (hit) {ts+=(getChi2()>1e3)? "h":"H";}
-  printf("%p(%s)",(void*)this,ts.Data());
-  if (strchr(opt,'2')) printf("\t%s=%g","ch2",getChi2());
+  LOG_DEBUG << Form("%p(%s)",(void*)this,ts.Data());
+  if (strchr(opt,'2')) LOG_DEBUG << Form("\t%s=%g","ch2",getChi2());
 
-  double val,err;
   for (int i=0;txt[i];i++) {
     if (!strchr(opt,txt[i])) continue;
-    val=-777,err=0;
-    switch (i) {
-      case  0:;case  1:;case  2:;case  3:;
-      case  4:;case  5:;case  6:;case  7:;
-      case 12:;case 13:;case 14:;case 15:;
-      {int j=i; if (j>7) j-=8;
-        val = mFP[j];
-        int jj = idx66[j][j];
-        err=0;
-        if (j<6) {err = sqrt(fabs(mFE.A[jj])); if (mFE.A[jj]<0) err*= -1;}
-        break;}
-        case  8: val = x_g(); 	break;
-        case  9: val = y_g(); 	break;
-        case 10: val = z_g(); 	break;
-        case 11: val = getPsi();break;
-    }  
-    printf("\t%c=%g",txt[i],val);
-    if (err) printf("(%6.1g)",err);
+    int j = i%8;
+    double val=0,err=0;
+    if (i<=8 || i>11) { //local coord
+      val = mFP[j];
+      int jj = idx66[j][j];
+      err=0;
+      if (j<6) {err = sqrt(fabs(mFE.A[jj])); if (mFE.A[jj]<0) err*= -1;}
+    } else {//global coordinate
+      switch (j) {
+        case 0: val = x_g(); 	break;
+        case 1: val = y_g(); 	break;
+        case 2: val = z_g(); 	break;
+        case 3: val = getPsi();	break;
+    } }
+    LOG_DEBUG << Form("\t%c=%g",txt[i],val);
+    if (err) LOG_DEBUG << Form("(%6.1g)",err);
   }//end for i
 
   for (int i=0;hit && hhh[i];i++) {
     if (!strchr(opt,hhh[i])) continue;
-    val=-777,err=0;
+    double val=0,err=0;
     switch(i) {
       case 0:val = hit->x(); 	break;
       case 1:val = hit->y(); 	err = ::sqrt(getEyy());break;
@@ -2051,10 +2049,10 @@ static const char *HHH = "xyzXYZ";
       case 4:val = hit->y_g(); 	break;
       case 5:val = hit->z_g();	err = ::sqrt(getEzz());break;
     }
-    printf("\th%c=%g",HHH[i],val);
-    if (err) printf("(%6.1g)",err);
-  }//end for i
-  printf("\n");
+    LOG_DEBUG << Form("\th%c=%g",HHH[i],val);
+    if (err) LOG_DEBUG << Form("(%6.1g)",err);
+  }
+  LOG_DEBUG << endm;
   return 1;
 }    
 //________________________________________________________________________________

@@ -12,14 +12,12 @@
 class StiKalmanTrack; 
 class TH1; 
 class TObjArray;
-class StiHit;
+
 class StiDebug 
 {
 public:
 static void   Break(int kase);
 static void   show(StiKalmanTrack *kt);
-static void   showHits(int nHts,const StiHit **Hts, int mode=1|2);
-static void   hits(int mode=1|2);
 static void   Init();
 static void   Finish();
 static void   hist (const char *name,double val);
