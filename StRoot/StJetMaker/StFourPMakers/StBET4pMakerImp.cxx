@@ -222,7 +222,6 @@ void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
 {
   StMuDst* uDst = mMuDstMaker->muDst();
 
-  //check projection to BEMC and remember for later: ---------------------------------------------
   StThreeVectorD momentumAt, positionAt;
 	
   double magneticField = uDst->event()->magneticField()/10.0; //to put it in Tesla
@@ -234,7 +233,7 @@ void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
     geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
     int bad = geom->getId(m,e,s,id);
     if(bad == 0) {
-      mNtracksOnTower[id]++; //increment number of tracks on this tower
+      mNtracksOnTower[id]++;
     }
   }
 }
@@ -289,62 +288,6 @@ TVector3 StBET4pMakerImp::getVertex()
   StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
 
   return TVector3(vertex.x(), vertex.y(), vertex.z());
-}
-
-void StBET4pMakerImp::collectEnergyFromEEMC()
-{
-  StMuDst* uDst = mMuDstMaker->muDst();
-
-  if (mUseEndcap) {
-	
-    // Now add endcap points --------------------------
-    StMuEmcCollection* muEmc = uDst->muEmcCollection();
-    assert(muEmc);
-
-    for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
-
-      int rawadc, sec, sub, etabin;
-      muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
-      assert(sec >0 && sec <= MaxSectors);
-	
-      //find eta and phi values from sector, subsector and etabin assuming z=0,0,0
-      TVector3 towerCenter = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1); //careful, this is indexed from 0
-	
-      const EEmcDbItem *dbItem = mEeDb->getT(sec,sub-1+'A',etabin);
-      assert(dbItem); 
-	
-      if(dbItem->fail) continue; //drop broken channels
-      if(dbItem->stat) continue; // drop not working channels and jumpy pedestal channels
-      if(dbItem->gain<=0.) continue; // drop it, unless you work with ADC spectra
-      if(rawadc<dbItem->thr) continue; // drop raw ADC < ped+N*sigPed, N==3 in init
-	    
-      double adc = rawadc - (dbItem->ped);
-      double energy = adc/(dbItem->gain);
-      if(energy < 0.01) continue; // drop if less than 10MeV for now
-	    
-      //construct four momentum
-      double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
-      double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
-
-      //correct for eta shift
-      StThreeVectorD towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
-      StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
-      towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
-
-      //construct momentum 3-vector
-      StThreeVectorF momentum(1., 1., 1.);
-      momentum.setPhi( towerCenter.Phi() );
-      momentum.setTheta( towerLocation.theta() ); //use theta from vertex subtracted point.
-      momentum.setMag(pMag);
-      //      StLorentzVectorF p4(energy, momentum);
-      TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
-	    
-      //now construct StMuTrackFourVec object for jetfinding
-      int towerID= (sec*5 + sub)*12 + etabin;
-      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, towerID, kEndcapEmcTowerId);
-      _tracks.push_back(pmu); //for jet finding interface
-    }
-  }
 }
 
 StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::getTowerHitsFromBEMC()
@@ -480,4 +423,61 @@ bool StBET4pMakerImp::accept2003Tower(int id)
     else {
 	return true;
     }
+}
+
+
+void StBET4pMakerImp::collectEnergyFromEEMC()
+{
+  StMuDst* uDst = mMuDstMaker->muDst();
+
+  if (mUseEndcap) {
+	
+    // Now add endcap points --------------------------
+    StMuEmcCollection* muEmc = uDst->muEmcCollection();
+    assert(muEmc);
+
+    for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
+
+      int rawadc, sec, sub, etabin;
+      muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
+      assert(sec >0 && sec <= MaxSectors);
+	
+      //find eta and phi values from sector, subsector and etabin assuming z=0,0,0
+      TVector3 towerCenter = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1); //careful, this is indexed from 0
+	
+      const EEmcDbItem *dbItem = mEeDb->getT(sec,sub-1+'A',etabin);
+      assert(dbItem); 
+	
+      if(dbItem->fail) continue; //drop broken channels
+      if(dbItem->stat) continue; // drop not working channels and jumpy pedestal channels
+      if(dbItem->gain<=0.) continue; // drop it, unless you work with ADC spectra
+      if(rawadc<dbItem->thr) continue; // drop raw ADC < ped+N*sigPed, N==3 in init
+	    
+      double adc = rawadc - (dbItem->ped);
+      double energy = adc/(dbItem->gain);
+      if(energy < 0.01) continue; // drop if less than 10MeV for now
+	    
+      //construct four momentum
+      double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
+      double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
+
+      //correct for eta shift
+      StThreeVectorD towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
+      StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+      towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
+
+      //construct momentum 3-vector
+      StThreeVectorF momentum(1., 1., 1.);
+      momentum.setPhi( towerCenter.Phi() );
+      momentum.setTheta( towerLocation.theta() ); //use theta from vertex subtracted point.
+      momentum.setMag(pMag);
+      //      StLorentzVectorF p4(energy, momentum);
+      TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
+	    
+      //now construct StMuTrackFourVec object for jetfinding
+      int towerID= (sec*5 + sub)*12 + etabin;
+      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, towerID, kEndcapEmcTowerId);
+      _tracks.push_back(pmu); //for jet finding interface
+    }
+  }
 }
