@@ -434,6 +434,8 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
 
   StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
 
+  FourList eemcFourMomentumList;
+
   for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
 
     int rawadc, sec, sub, etabin;
@@ -462,6 +464,9 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
     //now construct StMuTrackFourVec object for jetfinding
     int towerID= (sec*5 + sub)*12 + etabin;
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, towerID, kEndcapEmcTowerId);
-    _tracks.push_back(pmu); //for jet finding interface
+    eemcFourMomentumList.push_back(pmu); //for jet finding interface
   }
+
+  _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
+
 }
