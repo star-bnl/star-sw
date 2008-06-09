@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.23 2008/06/09 06:32:57 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.24 2008/06/09 19:45:01 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -79,8 +79,8 @@ private:
 
   void countTracksOnBemcTower(const StMuTrack& track);
 
-  double sumEnergyOverBemcTowers(double minE, const BemcTowerIdHitMap& bemcTowerHits);
-  int numberOfBemcTowersWithEnergyAbove(double minE, const BemcTowerIdHitMap& bemcTowerHits);
+  double sumEnergyOverBemcTowers(double minE, const TowerEnergyDepositList &energyDepositList);
+  int numberOfBemcTowersWithEnergyAbove(double minE, const TowerEnergyDepositList &energyDepositList);
 
 
   TowerEnergyDepositList readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
