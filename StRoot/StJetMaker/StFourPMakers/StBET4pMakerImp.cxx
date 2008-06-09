@@ -44,10 +44,10 @@ using namespace StSpinJet;
 
 const int StBET4pMakerImp::mNOfBemcTowers;
 
-StBET4pMakerImp::StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker)
+StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker)
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
-  , mTables(0)
+  , _bemcTables(0)
   , mUse2003Cuts(false)
   , mUse2005Cuts(false)
   , mUse2006Cuts(false)
@@ -64,7 +64,7 @@ StBET4pMakerImp::StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker)
 Int_t StBET4pMakerImp::InitRun(Int_t runId, StBemcTables* tables)
 {
   //  mTables->loadTables((StMaker*)this);
-  mTables = tables;
+  _bemcTables = tables;
 
   return kStOk;
     
@@ -211,12 +211,12 @@ bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int be
 {
   //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
   int status;
-  mTables->getStatus(BTOW, bemcTowerID, status);
+  _bemcTables->getStatus(BTOW, bemcTowerID, status);
   
   //check for ADC that is 2-sigma above RMS:
   float pedestal, rms;
   int CAP(0); //this arument matters only for SMD
-  mTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
+  _bemcTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
   
   if (status != 1) return false;
 

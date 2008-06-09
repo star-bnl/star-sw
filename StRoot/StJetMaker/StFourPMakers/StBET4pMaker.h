@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.21 2008/06/06 01:17:50 tai Exp $
+// $Id: StBET4pMaker.h,v 1.22 2008/06/09 22:19:36 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -34,11 +34,9 @@ public:
   int nDylanPoints() const { return mDylanPoints; }
   double sumEmcEt() const { return mSumEmcEt; }
 
-  bool bemcCorrupt() const { return mCorrupt; }
+  bool bemcCorrupt() const { return isBemcCorrupted(); }
     
 private:
-
-  bool mCorrupt;
 
   StBemcTables* mTables;
 
@@ -47,7 +45,7 @@ private:
         
   StBET4pMakerImp* _imp;
   
-  bool isBemcCorrupted();
+  bool isBemcCorrupted() const;
 
   ClassDef(StBET4pMaker,1)
 };
