@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.22 2008/06/09 22:19:36 tai Exp $
+// $Id: StBET4pMaker.h,v 1.23 2008/06/09 23:00:50 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -38,7 +38,7 @@ public:
     
 private:
 
-  StBemcTables* mTables;
+  StBemcTables* _bemcTables;
 
   int mDylanPoints;
   double mSumEmcEt;
