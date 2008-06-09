@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.19 2008/06/09 00:01:33 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.20 2008/06/09 02:45:11 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -89,6 +89,8 @@ private:
   TVector3 getBemcTowerLocation(int bemcTowerId);
   TVector3 getVertex();
   TLorentzVector constructBemcFourMomentum(int bemcTowerId, double energy);
+
+  TLorentzVector constructFourMomentum(const TVector3& towerLocation, double energy);
 
   FourList _tracks;
 
