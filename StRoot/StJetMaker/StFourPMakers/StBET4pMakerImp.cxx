@@ -461,23 +461,27 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
     double energy = adc/(dbItem->gain);
     if(energy < 0.01) continue; // drop if less than 10MeV for now
 	    
-    //construct four momentum
-    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
-    double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
-
-    //correct for eta shift
-    StThreeVectorD towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
-    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
-    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
-
-    //construct momentum 3-vector
-    StThreeVectorF momentum(1., 1., 1.);
-    momentum.setPhi( towerLocation.phi() );
-    momentum.setTheta( towerLocation.theta() ); //use theta from vertex subtracted point.
-    momentum.setMag(pMag);
-    //      StLorentzVectorF p4(energy, momentum);
-    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
+//    //construct four momentum
+//    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
+//    double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
+//
+//    //correct for eta shift
+//    StThreeVectorD towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
+//    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+//    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
+//
+//    //construct momentum 3-vector
+//    StThreeVectorF momentum(1., 1., 1.);
+//    momentum.setPhi( towerLocation.phi() );
+//    momentum.setTheta( towerLocation.theta() ); //use theta from vertex subtracted point.
+//    momentum.setMag(pMag);
+//    //      StLorentzVectorF p4(energy, momentum);
+//    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 	    
+    TVector3 towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
+
+    TLorentzVector p4 = constructFourMomentum(towerLocation, energy);
+
     //now construct StMuTrackFourVec object for jetfinding
     int towerID= (sec*5 + sub)*12 + etabin;
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, towerID, kEndcapEmcTowerId);
