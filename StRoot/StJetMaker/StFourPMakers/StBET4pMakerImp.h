@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.21 2008/06/09 04:45:49 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.22 2008/06/09 06:19:43 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -56,6 +56,16 @@ public:
 
 private:
 
+  struct TowerEnergyDeposit {
+    StDetectorId detectorId;
+    int towerId;
+    TVector3 towerLocation;
+    double energy;
+  };
+
+  typedef std::vector<TowerEnergyDeposit> TowerEnergyDepositList;
+
+
   typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
 
   void countTracksOnBemcTower(const StMuTrack& track);
@@ -67,11 +77,14 @@ private:
   typedef double Energy;
   typedef std::map<BemcTowerID, Energy> BemcTowerIdEnergyMap;
 
-  BemcTowerIdEnergyMap readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
-  BemcTowerIdEnergyMap correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy, const TrackList& trackList);
+  TowerEnergyDepositList co(const BemcTowerIdEnergyMap &bemcEnergy);
+
+  //  BemcTowerIdEnergyMap readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
+  TowerEnergyDepositList readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
+  TowerEnergyDepositList correctBemcTowerEnergyForTracks(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList);
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
 
-  FourList constructFourMomentumListFrom(const BemcTowerIdEnergyMap &bemcEnergy);
+  FourList constructFourMomentumListFrom(const TowerEnergyDepositList& energyDepositList);
 
   void collectEnergyFromEEMC();
 
