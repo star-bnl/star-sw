@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.33 2008/06/09 21:11:00 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.34 2008/06/09 22:19:35 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -17,11 +17,10 @@ ClassImp(StBET4pMaker)
     
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
-  , mCorrupt(false)
   , mTables(new StBemcTables(doTowerSwapFix))
   , mDylanPoints(0)
   , mSumEmcEt(0.0)
-  , _imp(new StBET4pMakerImp(name, uDstMaker))
+  , _imp(new StBET4pMakerImp(uDstMaker))
 {
   cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
 }
@@ -51,8 +50,6 @@ void StBET4pMaker::Clear(Option_t* opt)
 {
   _imp->Clear(opt);
 
-  mCorrupt = false;
-
   return StMaker::Clear(opt);
 }
 
@@ -63,8 +60,7 @@ FourList &StBET4pMaker::getTracks()
 
 Int_t StBET4pMaker::Make()
 {
-  mCorrupt = isBemcCorrupted();
-  if(mCorrupt) return kStOk;
+  if(isBemcCorrupted()) return kStOk;
 
   _imp->Make();
 
@@ -74,9 +70,9 @@ Int_t StBET4pMaker::Make()
   return StMaker::Make();
 }
 
-bool StBET4pMaker::isBemcCorrupted()
+bool StBET4pMaker::isBemcCorrupted() const
 {
-  if(StEmcADCtoEMaker* adc2e = dynamic_cast<StEmcADCtoEMaker*>(GetMaker("Eread")))
+  if(StEmcADCtoEMaker* adc2e = dynamic_cast<StEmcADCtoEMaker*>(const_cast<StBET4pMaker*>(this)->GetMaker("Eread")))
     return adc2e->isCorrupted();
     
   return false;

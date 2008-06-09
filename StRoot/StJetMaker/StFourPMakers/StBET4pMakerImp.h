@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.26 2008/06/09 21:11:00 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.27 2008/06/09 22:19:36 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -31,7 +31,7 @@ class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker);
+  StBET4pMakerImp(StMuDstMaker* uDstMaker);
     
   virtual ~StBET4pMakerImp() {};
     
@@ -108,7 +108,7 @@ private:
   int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
 
   StMuDstMaker* mMuDstMaker;
-  StBemcTables* mTables;
+  StBemcTables* _bemcTables;
 
   bool mUse2003Cuts;
   bool mUse2005Cuts;
