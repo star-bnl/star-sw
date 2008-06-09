@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.25 2008/06/09 20:51:44 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.26 2008/06/09 21:11:00 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -31,7 +31,7 @@ class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix = true);
+  StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker);
     
   virtual ~StBET4pMakerImp() {};
     

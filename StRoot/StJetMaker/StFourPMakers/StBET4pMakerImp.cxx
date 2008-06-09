@@ -44,10 +44,10 @@ using namespace StSpinJet;
 
 const int StBET4pMakerImp::mNOfBemcTowers;
 
-StBET4pMakerImp::StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
+StBET4pMakerImp::StBET4pMakerImp(const char* name, StMuDstMaker* uDstMaker)
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
-  , mTables(new StBemcTables(doTowerSwapFix))
+  , mTables(0)
   , mUse2003Cuts(false)
   , mUse2005Cuts(false)
   , mUse2006Cuts(false)
