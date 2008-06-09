@@ -434,16 +434,13 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
 
   StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
 
-  FourList eemcFourMomentumList;
+  TowerEnergyDepositList energyDepositList;
 
   for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
 
     int rawadc, sec, sub, etabin;
     muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
     assert(sec >0 && sec <= MaxSectors);
-	
-    //find eta and phi values from sector, subsector and etabin assuming z=0,0,0
-    TVector3 towerCenter = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1); //careful, this is indexed from 0
 	
     const EEmcDbItem *dbItem = mEeDb->getT(sec,sub-1+'A',etabin);
     assert(dbItem); 
@@ -457,15 +454,17 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
     double energy = adc/(dbItem->gain);
     if(energy < 0.01) continue; // drop if less than 10MeV for now
 	    
-    TVector3 towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
+    TowerEnergyDeposit energyDeposit;
+    energyDeposit.detectorId = kEndcapEmcTowerId;
+    energyDeposit.towerId = (sec*5 + sub)*12 + etabin;
+    energyDeposit.towerLocation = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1);
+    energyDeposit.energy = energy;
 
-    TLorentzVector p4 = constructFourMomentum(towerLocation, energy);
+    energyDepositList.push_back(energyDeposit);
 
-    //now construct StMuTrackFourVec object for jetfinding
-    int towerID= (sec*5 + sub)*12 + etabin;
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, towerID, kEndcapEmcTowerId);
-    eemcFourMomentumList.push_back(pmu); //for jet finding interface
   }
+
+  FourList eemcFourMomentumList = constructFourMomentumListFrom(energyDepositList);
 
   _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
 
