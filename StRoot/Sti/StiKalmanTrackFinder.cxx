@@ -38,7 +38,6 @@ using namespace std;
 #include "StiTrackFinderFilter.h"
 #include "StiUtilities/StiDebug.h"
 #include "Sti/StiKalmanTrackFinderParameters.h"
-#include "Sti/StiKalmanTrackFitterParameters.h"
 #include "StMessMgr.h"
 
 #define TIME_StiKalmanTrackFinder
@@ -500,11 +499,6 @@ StiKalmanTrackNode::Break(nCall);
   nnBef = track->getNNodes(3);
   lnBef = track->getTrackLength();
 
-  StiKalmanTrackNode *begNode = track->getInnOutMostNode(!direction,2);
-  mBegXyz[0] = begNode->x_g();
-  mBegXyz[1] = begNode->y_g();
-  mBegXyz[2] = begNode->z_g();
-
   StiKalmanTrackNode *leadNode = track->getInnOutMostNode(direction,2);
   if (!leadNode) return 0;
   leadNode->cutTail(direction);
@@ -569,6 +563,9 @@ static  const double ref1a  = 110.*degToRad;
 
   if (debug() > 2) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;
 
+#ifdef ASSIGNVP
+  int vpSelected=0;
+#endif// ASSIGNVP
   
   while (((!direction)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial()))
   {do{//technical do
@@ -576,6 +573,7 @@ static  const double ref1a  = 110.*degToRad;
     vector<StiDetector*> detectors;
     if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
 
+//#define PEREV
 
       //find all relevant detectors to visit.
     sector = (!direction)? _detectorContainer->beginPhi(rlayer):_detectorContainer->beginPhi(layer);
@@ -585,6 +583,16 @@ static  const double ref1a  = 110.*degToRad;
        double angle  = detector->getPlacement()->getNormalRefAngle();
        double radius = detector->getPlacement()->getNormalRadius();
        assert(radius>0 && radius<1000);
+#ifdef ASSIGNVP
+       double ladius = detector->getPlacement()->getLayerRadius();
+       if (!direction && vpAssign==2 && vpHit && fabs(ladius-vpLayer)<1e-5) {
+         if (detector!=vpDetector) continue;
+         detectors.clear();
+         detectors.push_back(detector);
+         vpSelected = 2005;
+         break;
+       }
+#endif// ASSIGNVP
        if (radius < qa.rmin) {gLevelOfFind--;return;}
        double diff = radius-leadRadius;if (!direction) diff = -diff;
        if (diff<-1e-6 && debug()>3) {
@@ -624,7 +632,7 @@ static  const double ref1a  = 110.*degToRad;
       testNode.reduce();testNode.reset();
       testNode.setChi2(1e55);
       position = testNode.propagate(leadNode,tDet,direction);
-      if (position == kEnded) 	{ gLevelOfFind--; return ;}
+      if (position == kEnded) { gLevelOfFind--; return;}
       if (debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
       if (debug() >= 1) StiKalmanTrackNode::PrintStep();
       if (position<0 || position>kEdgeZplus) { 
@@ -632,20 +640,14 @@ static  const double ref1a  = 110.*degToRad;
 	if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
 	continue; // will try the next available volume on this layer
       }
-      if (!direction) {
-	double dot = mBegXyz[0]*testNode.x_g()+ mBegXyz[1]*testNode.y_g();
-	if (dot<0) 	     	{ gLevelOfFind--; return ;}
-      }	 
-      
-
-
       if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
       testNode.setDetector(tDet);
       int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
       if (debug() > 2) cout << " vol active:" << active<<endl;
-      double maxChi2 = StiKalmanTrackFitterParameters::instance()->getMaxChi2()*3;
+      double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
+
       StiHitContino hitCont;
 
       if (active) {

@@ -223,6 +223,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   StThreeVectorD* getLengths(StiKalmanTrackNode *nextNode);
 
   double length(const StThreeVector<double>& delta, double curv);
+  double getDedx() const;
   static double nice(double angle);
   /// Return center of helix circle in global coordinates
   StThreeVector<double> getHelixCenter() const;
@@ -415,6 +416,16 @@ inline StThreeVectorD* StiKalmanTrackNode::getLengths(StiKalmanTrackNode* nextNo
 			    x3/nextNode->getX0());
 }
 
+inline double StiKalmanTrackNode::getDedx() const
+{
+
+  StiHit *hit = getHit();
+  if (!hit) return -1;
+  double de=hit->getEloss();
+  double dx=pathlength();
+  if(dx>0 && de>0) return de/dx;
+  return -1;
+}
 
 #endif
 

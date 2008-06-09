@@ -101,6 +101,22 @@ public:
   static   int     _debug;
 };
 
+///Returns the number of sectors (or segments) in a the
+///given row. Sector are expected to be azimuthally
+///distributed.
+inline unsigned int  StiDetectorBuilder::getNSectors(unsigned int row) const
+{
+  if (row>_detectors.size())
+    {
+      string message = "StiDetectorBuilder::getNSectors() - ERROR - argument row out of bound:";
+      message+=row;
+      message+=">";
+      message+=_detectors.size();
+      throw runtime_error(message.c_str());
+    }
+  return _detectors[row].size();
+}
+
 inline double StiDetectorBuilder::nice(double angle) const 
 {
   while(angle >=  M_PI){ angle -= 2.*M_PI; }
@@ -108,5 +124,25 @@ inline double StiDetectorBuilder::nice(double angle) const
   return angle;
 }
 
+inline  StiDetector * StiDetectorBuilder::getDetector(unsigned int row, unsigned int sector) const
+{
+  if (row>_detectors.size())
+    {
+      string message = "StiDetectorBuilder::getDetector() - ERROR - argument row out of bound:";
+      throw runtime_error(message.c_str());
+    }
+  if (sector>_detectors[row].size())
+    {
+      string message = "StiDetectorBuilder::getDetector() - ERROR - argument sector out of bound";
+      throw runtime_error(message.c_str());
+    }
+  return _detectors[row][sector];
+}
+
+inline  void StiDetectorBuilder::setDetector(unsigned int row, unsigned int sector, StiDetector *detector)
+{
+  setNSectors(row+1,sector+1);
+   _detectors[row][sector] = detector;
+}
 
 #endif // ifndef STI_DETECTOR_BUILDER_H

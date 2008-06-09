@@ -8,36 +8,17 @@
 #include "TGraph.h"
 #include "TSystem.h"
 #include "TObjArray.h"
-#include "TArrayD.h"
 #include "TH1.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
-#include "Sti/StiHitContainer.h"
-#include "Sti/StiToolkit.h"
 static int myReady=0;
 TObjArray *StiDebug::mgHist=0;
 TObjArray *StiDebug::mgTally=0;
-static TCanvas *gC[4  ]={0};
-static TH1     *gH[100]={0};
-
 
 //______________________________________________________________________________
 void StiDebug::Init()
 {
   if (gROOT->IsBatch()) return;
-  gC[0]=0;gH[0]=0;//avoid warning about not used static
-#if 0
-  mgHist = new TObjArray;
-  int nH = 2;
-  gC[0] = new TCanvas("StiDebug","",600,800);
-  gC[0]->Divide(1,nH);
-  gH[0] = new TH1F("Zpl","Zpl",100,-200,200);
-  gH[1] = new TH1F("Ang","Zpl",100,-3.2,3.2);
-  for (int iH=0;iH<nH;iH++) { 
-    gC[0]->cd(iH+1); gH[iH]->Draw();
-    mgHist->Add(gH[iH]);
-  }
-#endif //0
 }
 //______________________________________________________________________________
 int  StiDebug::iFlag(const char *flagName,int dflt)
@@ -163,7 +144,7 @@ static TGraph  *graph[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
         xPrev = xNode;
         yPrev = yNode;
 
-	const StiHit *hit = node->getHit();
+	StiHit *hit = node->getHit();
 	if (hit &&  node->getChi2()>1000)	hit=0;
         if (ig==2 && !hit) 	continue;
         if (ig==0) { curv += node->getCurvature(); nCurv++; continue;}
@@ -229,72 +210,6 @@ static const char *opt[]={"AP","Same CP","Same *"};
   myReady = 2005;
   while(!gSystem->ProcessEvents()){}; 
 }  
-//______________________________________________________________________________
-void StiDebug::showHits(int nHts,const StiHit **Hts, int mode) 
-{
-if (!mode) mode = 3;
-static TCanvas *myCanvas = 0;
-static TGraph  *ptGraph  = 0;
-TArrayD X(nHts);
-TArrayD Y(nHts); 
-
-  int nhits=0;
-  for (int ih=0;ih<nHts;ih++) {
-    if(!Hts[ih])		break;
-    int jk = Hts[ih]->timesUsed()!=0;
-    if (!(mode&(jk+1)))		continue;
-    X[nhits  ] = Hts[ih]->x_g();
-    Y[nhits++] = Hts[ih]->y_g();
-  }
-  
-  if(!myCanvas) myCanvas = new TCanvas("StiDebug_Show","",600,800);
-  myCanvas->Clear();
-  delete ptGraph; 
-
-  ptGraph  = new TGraph(nhits  , X.GetArray(), Y.GetArray());
-  ptGraph->SetMarkerColor(kRed);
-  ptGraph->Draw("A*");
-
-  myCanvas->Modified();
-  myCanvas->Update();
-  while(!gSystem->ProcessEvents()){}; 
-
-}
-//______________________________________________________________________________
-void StiDebug::hits(int mode) 
-{
-if (!mode) mode = 3;
-static TCanvas *myCanvas = 0;
-static TGraph  *ptGraph  = 0;
-TArrayD X(1000);
-TArrayD Y(1000); 
-StiHitContainer *hitCon = StiToolkit::instance()->getHitContainer();
-const std::vector<StiHit*> &hits = hitCon->getHits();
-  int nhits=hits.size();
-  for (int ihit=0;ihit<nhits; ++ihit) {
-    StiHit *hit = hits[ihit];
-    assert((void*)hit > (void*)1000000);
-    int jk = hit->timesUsed()!=0;
-    if (!(mode&(jk+1)))		continue;
-    if (nhits>=X.GetSize()) { X.Set(nhits*2); Y.Set(nhits*2);}
-    X[ihit] = hit->x_g();
-    Y[ihit] = hit->y_g();
-  }
-  
-  if(!myCanvas) myCanvas = new TCanvas("StiDebug_Show","",600,800);
-  myCanvas->Clear();
-  delete ptGraph; 
-
-  ptGraph  = new TGraph(nhits  , X.GetArray(), Y.GetArray());
-  ptGraph->SetMarkerColor(kRed);
-  ptGraph->Draw("A*");
-
-  myCanvas->Modified();
-  myCanvas->Update();
-  while(!gSystem->ProcessEvents()){}; 
-
-}
-//______________________________________________________________________________
 
 ClassImp(StiAux)
 //______________________________________________________________________________
@@ -332,6 +247,7 @@ static const char* tit[] = {
   printf("%d4 - ",id);
   for (int i=0;tit[i];i++) { printf("%s%g ",tit[i],aux[i]);}
   printf("\n");
+    
 }    
 
 

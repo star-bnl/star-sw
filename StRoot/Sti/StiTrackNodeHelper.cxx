@@ -35,9 +35,12 @@ void StiTrackNodeHelper::set(double chi2Max,double chi2Vtx,double errConfidence,
   reset();
   mChi2Max = chi2Max;
   mChi2Vtx = chi2Vtx;
-  if (errConfidence<0.1) errConfidence=0.1;
-  mNodeErrFactor = (1./(errConfidence));
-  mHitsErrFactor = (1./(1. - errConfidence));
+  mNodeErrFactor = 10;
+  mHitsErrFactor = 1.;
+  if (errConfidence>0.1) {
+    mNodeErrFactor = (1./(errConfidence));
+    mHitsErrFactor = (1./(1. - errConfidence));
+  }
   mIter = iter;
   if (!mIter) mFlipFlopNode = 0;
 }
@@ -67,7 +70,7 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   }
   if (mTargetNode->isValid()) {
     mTargetNode->mFP.check("1StiTrackNodeHelper::set");
-//    assert(fabs(mTargetHz-mTargetNode->mFP._hz)<1e-10);
+    assert(fabs(mTargetHz-mTargetNode->mFP._hz)<1e-10);
   }
 
   mDetector   = mTargetNode->getDetector();
@@ -88,6 +91,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
                                      ,      StiNodePars &rotPars
 			             ,      StiNodePars &proPars)
 {
+  int ierr = 0;
   alpha = mTargetNode->_alpha - mParentNode->_alpha;
   ca=1;sa=0;
   parPars.check("1propagatePars");
@@ -111,12 +115,14 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     rotPars._sinCA /= nor;
     rotPars._eta= NICE(parPars._eta-alpha); 
   }// end of rotation part
+  ierr = rotPars.check();
+  if (ierr) return 1;
   
 //  	Propagation 
   x1 = rotPars._x;
   x2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHitPars[0];
   dx = x2-x1;
-  rho = 0.5*(mParentHz*rotPars._ptin+rotPars._curv);
+  rho = 0.5*(mTargetHz*rotPars._ptin+rotPars._curv);
   dsin = rho*dx;
   sinCA2=rotPars._sinCA + dsin; 
   if (sinCA2> 0.95) sinCA2= 0.95;
@@ -140,13 +146,14 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   proPars._z= rotPars._z + dl*rotPars._tanl;
   proPars._eta = (rotPars._eta+rho*dl);  					
   proPars._eta = NICE(proPars._eta);  					
-  if (fabs(proPars._eta) >kMaxEta) return 1;
   proPars._ptin = rotPars._ptin;
   proPars._hz   = mTargetHz;
   proPars._curv = proPars._ptin*mTargetHz;
   proPars._tanl = rotPars._tanl;
   proPars._sinCA   = sinCA2;
   proPars._cosCA   = cosCA2;
+  ierr = proPars.check();
+  if (ierr) return 2;
   return 0;
 } 
 //______________________________________________________________________________
@@ -168,8 +175,8 @@ int StiTrackNodeHelper::propagateFitd()
    mPredPars._ptin *= (1+mMcs._ptinCorr);
    mPredPars._curv *= (1+mMcs._ptinCorr);
    mPredPars.ready();
-//    ierr = mPredPars.check();
-//    if (ierr) return 2;
+   ierr = mPredPars.check();
+   if (ierr) return 2;
    return 0;
 }
 
@@ -226,8 +233,8 @@ int StiTrackNodeHelper::propagateError()
   mPredErrs._cPP+=mMcs._cPP;    	//add err to <curv*curv>		 //add err to <curv*curv>
   mPredErrs._cTP+=mMcs._cTP;    	//add err to <tanL*curv>		 //add err to <tanL*curv>
   mPredErrs._cTT+=mMcs._cTT;    	//add err to <tanL*tanL>		 //add err to <tanL*tanL>
-//   int ierr = mPredErrs.check();
-//   if (ierr) return 1;
+  int ierr = mPredErrs.check();
+  if (ierr) return 1;
   return 0;
 }
 
@@ -282,9 +289,9 @@ StiDebug::Break(nCall);
   if (!mParentNode) {
     if (!smooth) mgCutStep = 0;
     mPredErrs = mTargetNode->mFE;
-//    ierr = mPredErrs.check(); 	if (ierr) return 11;
+    ierr = mPredErrs.check(); 	if (ierr) return 11;
     mPredPars = mTargetNode->mFP;
-//    ierr = mPredPars.check();		if (ierr) return 12;
+    ierr = mPredPars.check();	if (ierr) return 12;
     mBestPars = mPredPars;
     mBestDelta = mPredErrs.getDelta();
     mJoinPars = mPredPars;
@@ -302,11 +309,11 @@ StiDebug::Break(nCall);
     if (nudge())			return 13;
     mChi2 = 3e33;
     double chi2 = evalChi2();
-//     if (mTargetNode == mVertexNode) {
-//       if (chi2>mChi2Vtx) 		return 14;
-//     } else {
-//       if (chi2>mChi2Max)		break;
-//     }
+    if (mTargetNode == mVertexNode) {
+      if (chi2>mChi2Vtx) 		return 14;
+    } else {
+      if (chi2>mChi2Max)		break;
+    }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
     if (!ians) 	break;
@@ -357,6 +364,12 @@ int StiTrackNodeHelper::join()
   StiDebug::Break(mTargetNode->mId);
   int kase = mTargetNode->isValid();
   if (mState==StiTrackNode::kTNFitEnd) kase |=kNewFitd;
+static int oldJoinPrim = StiDebug::iFlag("StiOldJoinPrim");
+if (!oldJoinPrim) {
+  if (mTargetNode==mVertexNode) kase = kNewFitd; //ignore old info for primVtx
+						 //Hack to accoont specific 
+						 //fit to primVtx
+}
   do {
     switch(kase) {
       case 0:					// Old invalid & New UnFitd
@@ -1016,7 +1029,7 @@ int StiTrackNodeHelper::nudge()
     pars->_cosCA -= pars->_sinCA *deltaE;
     pars->_sinCA += pars->_cosCA *deltaE;
     if (pars->_cosCA>=1.) pars->ready();
-//VP    if (pars->check()) return 1;
+    if (pars->check()) return 1;
   }
   return 0;
 }

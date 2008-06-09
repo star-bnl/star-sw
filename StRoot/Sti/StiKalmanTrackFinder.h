@@ -88,7 +88,7 @@ class QAFind;
     StiTrackContainer           * _trackContainer;
 
 private:
-    double mBegXyz[3];
+        
     double    chi2;
     TStopwatch *mTimg[3]; //seeds,traks,prims
     static int   _debug;
