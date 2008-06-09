@@ -124,11 +124,16 @@ void StBET4pMakerImp::Make()
 
   if (mSumEmcEt > 200.) return;
 
-  BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(selectedBemcTowerHits);
+  //  BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(selectedBemcTowerHits);
 
-  BemcTowerIdEnergyMap bemcCorrectedEnergy = correctBemcTowerEnergyForTracks(bemcEnergy, trackList);
+  TowerEnergyDepositList bemcEnergy_ = readBemcTowerEnergy(selectedBemcTowerHits);
 
-  FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergy);
+  //  TowerEnergyDepositList bemcEnergy_ = co(bemcEnergy);
+
+  TowerEnergyDepositList bemcCorrectedEnergy_ = correctBemcTowerEnergyForTracks(bemcEnergy_, trackList);
+
+  FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergy_);
+
 
   _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
   _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
@@ -159,64 +164,98 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
   return ret;
 }
 
-FourList StBET4pMakerImp::constructFourMomentumListFrom(const BemcTowerIdEnergyMap &bemcEnergy)
+StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::co(const BemcTowerIdEnergyMap &bemcEnergy)
 {
-  FourList ret;
+  TowerEnergyDepositList ret;
 
   for(BemcTowerIdEnergyMap::const_iterator it = bemcEnergy.begin(); it != bemcEnergy.end(); ++it) {
 
-    const int bemcTowerId = (*it).first;
-    const double corrected_energy = (*it).second;
+    TowerEnergyDeposit energyDeposit;
+    energyDeposit.detectorId = kBarrelEmcTowerId;
+    energyDeposit.towerId = (*it).first;
+    energyDeposit.towerLocation = getBemcTowerLocation(energyDeposit.towerId);
+    energyDeposit.energy = (*it).second;
 
-    TVector3 towerLocation = getBemcTowerLocation(bemcTowerId);
-    
-    TLorentzVector p4 = constructFourMomentum(towerLocation, corrected_energy);
-	    
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, bemcTowerId, kBarrelEmcTowerId);
-    ret.push_back(pmu);
+    ret.push_back(energyDeposit);
   }
 
   return ret;
 }
 
-StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits)
+FourList StBET4pMakerImp::constructFourMomentumListFrom(const TowerEnergyDepositList& energyDepositList)
 {
-  BemcTowerIdEnergyMap ret;
+  FourList ret;
+
+  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
+
+    TLorentzVector p4 = constructFourMomentum((*it).towerLocation, (*it).energy);
+	    
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, (*it).towerId, (*it).detectorId);
+
+    ret.push_back(pmu);
+  }
+  return ret;
+}
+
+StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits)
+{
+  TowerEnergyDepositList ret;
 
   for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
 
-    const int bemcTowerId = (*it).first;
     const StEmcRawHit* hit = (*it).second;
 
     if(hit->energy() <= 0) continue;
 
-    ret[bemcTowerId] = hit->energy();
+    TowerEnergyDeposit energyDeposit;
+    energyDeposit.detectorId = kBarrelEmcTowerId;
+    energyDeposit.towerId = (*it).first;
+    energyDeposit.towerLocation = getBemcTowerLocation(energyDeposit.towerId);
+    energyDeposit.energy = hit->energy();
+
+    ret.push_back(energyDeposit);
   }
 
   return ret;
 }
 
-StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::correctBemcTowerEnergyForTracks(const BemcTowerIdEnergyMap &bemcEnergy, const TrackList& trackList)
+// StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits)
+// {
+//   BemcTowerIdEnergyMap ret;
+// 
+//   for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+// 
+//     const int bemcTowerId = (*it).first;
+//     const StEmcRawHit* hit = (*it).second;
+// 
+//     if(hit->energy() <= 0) continue;
+// 
+//     ret[bemcTowerId] = hit->energy();
+//   }
+// 
+//   return ret;
+// }
+
+StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::correctBemcTowerEnergyForTracks(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList)
 {
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     const StMuTrack* track = (*it).first;
     countTracksOnBemcTower(*track);
   }
 
-  BemcTowerIdEnergyMap ret;
+  TowerEnergyDepositList ret;
 
-  for(BemcTowerIdEnergyMap::const_iterator it = bemcEnergy.begin(); it != bemcEnergy.end(); ++it) {
+  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
-    const int bemcTowerId = (*it).first;
-    const double energy = (*it).second;
+    TowerEnergyDeposit energyDeposit(*it);
 
-    double corrected_energy = correctBemcTowerEnergyForTracks_(energy, bemcTowerId);
-    
-    if(corrected_energy <= 0) continue;
+    energyDeposit.energy = correctBemcTowerEnergyForTracks_(energyDeposit.energy, energyDeposit.towerId);
 
-    ret[bemcTowerId] = corrected_energy;
+    if(energyDeposit.energy <= 0) continue;
 
+    ret.push_back(energyDeposit);
   }
+
   return ret;
 }
 
