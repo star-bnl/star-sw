@@ -124,11 +124,7 @@ void StBET4pMakerImp::Make()
 
   if (mSumEmcEt > 200.) return;
 
-  //  BemcTowerIdEnergyMap bemcEnergy = readBemcTowerEnergy(selectedBemcTowerHits);
-
   TowerEnergyDepositList bemcEnergy_ = readBemcTowerEnergy(selectedBemcTowerHits);
-
-  //  TowerEnergyDepositList bemcEnergy_ = co(bemcEnergy);
 
   TowerEnergyDepositList bemcCorrectedEnergy_ = correctBemcTowerEnergyForTracks(bemcEnergy_, trackList);
 
@@ -164,21 +160,28 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
   return ret;
 }
 
-StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::co(const BemcTowerIdEnergyMap &bemcEnergy)
+StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::getTowerHitsFromBEMC()
 {
-  TowerEnergyDepositList ret;
+  BemcTowerIdHitMap ret;
 
-  for(BemcTowerIdEnergyMap::const_iterator it = bemcEnergy.begin(); it != bemcEnergy.end(); ++it) {
+  StEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
+  StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
 
-    TowerEnergyDeposit energyDeposit;
-    energyDeposit.detectorId = kBarrelEmcTowerId;
-    energyDeposit.towerId = (*it).first;
-    energyDeposit.towerLocation = getBemcTowerLocation(energyDeposit.towerId);
-    energyDeposit.energy = (*it).second;
+  static const int nBemcModules = 120;
+  for(int m = 1; m <= nBemcModules; ++m) { //loop on modules...
+    StEmcModule* module = detector->module(m);
+  	
+    StSPtrVecEmcRawHit& rawHits = module->hits();
+    for(UInt_t k = 0; k < rawHits.size(); ++k) { //loop on hits in modules
+      StEmcRawHit* theRawHit = rawHits[k];
+  	    
+      StEmcGeom* geom = StEmcGeom::instance("bemc"); 
+      int bemcTowerID;
+      geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
 
-    ret.push_back(energyDeposit);
+      ret[bemcTowerID] = theRawHit;
+    }
   }
-
   return ret;
 }
 
@@ -219,22 +222,89 @@ StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::readBemcTowerEnergy(con
   return ret;
 }
 
-// StBET4pMakerImp::BemcTowerIdEnergyMap StBET4pMakerImp::readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits)
-// {
-//   BemcTowerIdEnergyMap ret;
-// 
-//   for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
-// 
-//     const int bemcTowerId = (*it).first;
-//     const StEmcRawHit* hit = (*it).second;
-// 
-//     if(hit->energy() <= 0) continue;
-// 
-//     ret[bemcTowerId] = hit->energy();
-//   }
-// 
-//   return ret;
-// }
+StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits)
+{
+  BemcTowerIdHitMap ret;
+
+  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+
+    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
+      continue;
+
+    ret.insert(*it);
+  }
+  return ret;
+}
+
+bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
+{
+  //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
+  int status;
+  mTables->getStatus(BTOW, bemcTowerID, status);
+  
+  //check for ADC that is 2-sigma above RMS:
+  float pedestal, rms;
+  int CAP(0); //this arument matters only for SMD
+  mTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
+  
+  int ADC = theRawHit->adc(); //not pedestal subtracted!
+
+  if (mUse2003Cuts)
+    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(bemcTowerID) )
+      return true;
+    else
+      return false;
+  else if (mUse2005Cuts)
+    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && bemcTowerID <= 2400)
+      return true;
+    else
+      return false;
+  else
+    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1)
+      return true;
+    else
+      return false;
+}
+
+void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
+{
+  StMuDst* uDst = mMuDstMaker->muDst();
+
+  StThreeVectorD momentumAt, positionAt;
+	
+  double magneticField = uDst->event()->magneticField()/10.0; //to put it in Tesla
+  StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
+  StMuEmcPosition muEmcPosition;
+  bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, &track, magneticField, geom->Radius());
+  if(tok) {
+    int m,e,s,id=0;
+    geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
+    int bad = geom->getId(m,e,s,id);
+    if(bad == 0) {
+      mNtracksOnTower[id]++;
+    }
+  }
+}
+
+double StBET4pMakerImp::sumEnergyOverBemcTowers(double minE, const BemcTowerIdHitMap& bemcTowerHits)
+{
+  double ret(0.0);
+  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+    if((*it).second->energy() > minE)
+      ret += (*it).second->energy();
+  }
+  return ret;
+}
+
+int StBET4pMakerImp::numberOfBemcTowersWithEnergyAbove(double minE, const BemcTowerIdHitMap& bemcTowerHits)
+{
+  int ret(0);
+  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+    if((*it).second->energy() > minE)
+      ret++;
+  }
+  return ret;
+}
 
 StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::correctBemcTowerEnergyForTracks(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList)
 {
@@ -259,25 +329,6 @@ StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::correctBemcTowerEnergyF
   return ret;
 }
 
-void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
-{
-  StMuDst* uDst = mMuDstMaker->muDst();
-
-  StThreeVectorD momentumAt, positionAt;
-	
-  double magneticField = uDst->event()->magneticField()/10.0; //to put it in Tesla
-  StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-  StMuEmcPosition muEmcPosition;
-  bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, &track, magneticField, geom->Radius());
-  if(tok) {
-    int m,e,s,id=0;
-    geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
-    int bad = geom->getId(m,e,s,id);
-    if(bad == 0) {
-      mNtracksOnTower[id]++;
-    }
-  }
-}
 
 double StBET4pMakerImp::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId)
 {
@@ -330,95 +381,6 @@ TVector3 StBET4pMakerImp::getVertex()
   return TVector3(vertex.x(), vertex.y(), vertex.z());
 }
 
-StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::getTowerHitsFromBEMC()
-{
-  BemcTowerIdHitMap ret;
-
-  StEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
-  StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
-
-  static const int nBemcModules = 120;
-  for(int m = 1; m <= nBemcModules; ++m) { //loop on modules...
-    StEmcModule* module = detector->module(m);
-  	
-    StSPtrVecEmcRawHit& rawHits = module->hits();
-    for(UInt_t k = 0; k < rawHits.size(); ++k) { //loop on hits in modules
-      StEmcRawHit* theRawHit = rawHits[k];
-  	    
-      StEmcGeom* geom = StEmcGeom::instance("bemc"); 
-      int bemcTowerID;
-      geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
-
-      ret[bemcTowerID] = theRawHit;
-    }
-  }
-  return ret;
-}
-
-StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits)
-{
-  BemcTowerIdHitMap ret;
-
-  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
-
-    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
-      continue;
-
-    ret.insert(*it);
-  }
-  return ret;
-}
-
-bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
-{
-  //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
-  int status;
-  mTables->getStatus(BTOW, bemcTowerID, status);
-  
-  //check for ADC that is 2-sigma above RMS:
-  float pedestal, rms;
-  int CAP(0); //this arument matters only for SMD
-  mTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
-  
-  int ADC = theRawHit->adc(); //not pedestal subtracted!
-
-  if (mUse2003Cuts)
-    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && accept2003Tower(bemcTowerID) )
-      return true;
-    else
-      return false;
-  else if (mUse2005Cuts)
-    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1 && bemcTowerID <= 2400)
-      return true;
-    else
-      return false;
-  else
-    if (ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1)
-      return true;
-    else
-      return false;
-}
-
-
-double StBET4pMakerImp::sumEnergyOverBemcTowers(double minE, const BemcTowerIdHitMap& bemcTowerHits)
-{
-  double ret(0.0);
-  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
-    if((*it).second->energy() > minE)
-      ret += (*it).second->energy();
-  }
-  return ret;
-}
-
-int StBET4pMakerImp::numberOfBemcTowersWithEnergyAbove(double minE, const BemcTowerIdHitMap& bemcTowerHits)
-{
-  int ret(0);
-  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
-    if((*it).second->energy() > minE)
-      ret++;
-  }
-  return ret;
-}
 
 bool StBET4pMakerImp::accept2003Tower(int id)
 {

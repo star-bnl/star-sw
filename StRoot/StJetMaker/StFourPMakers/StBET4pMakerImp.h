@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.22 2008/06/09 06:19:43 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.23 2008/06/09 06:32:57 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -56,6 +56,10 @@ public:
 
 private:
 
+  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
+
+  FourList constructFourMomentumListFrom(const TrackList& trackList);
+
   struct TowerEnergyDeposit {
     StDetectorId detectorId;
     int towerId;
@@ -65,21 +69,20 @@ private:
 
   typedef std::vector<TowerEnergyDeposit> TowerEnergyDepositList;
 
+  typedef int BemcTowerID;
+  typedef std::map<BemcTowerID, const StEmcRawHit*> BemcTowerIdHitMap;
 
-  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
+  BemcTowerIdHitMap getTowerHitsFromBEMC();
+  BemcTowerIdHitMap selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits);
+
+  bool shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID);
 
   void countTracksOnBemcTower(const StMuTrack& track);
 
-  FourList constructFourMomentumListFrom(const TrackList& trackList);
+  double sumEnergyOverBemcTowers(double minE, const BemcTowerIdHitMap& bemcTowerHits);
+  int numberOfBemcTowersWithEnergyAbove(double minE, const BemcTowerIdHitMap& bemcTowerHits);
 
-  typedef int BemcTowerID;
-  typedef std::map<BemcTowerID, const StEmcRawHit*> BemcTowerIdHitMap;
-  typedef double Energy;
-  typedef std::map<BemcTowerID, Energy> BemcTowerIdEnergyMap;
 
-  TowerEnergyDepositList co(const BemcTowerIdEnergyMap &bemcEnergy);
-
-  //  BemcTowerIdEnergyMap readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
   TowerEnergyDepositList readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
   TowerEnergyDepositList correctBemcTowerEnergyForTracks(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList);
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
@@ -88,14 +91,7 @@ private:
 
   void collectEnergyFromEEMC();
 
-  double sumEnergyOverBemcTowers(double minE, const BemcTowerIdHitMap& bemcTowerHits);
-  int numberOfBemcTowersWithEnergyAbove(double minE, const BemcTowerIdHitMap& bemcTowerHits);
 
-
-  BemcTowerIdHitMap getTowerHitsFromBEMC();
-  BemcTowerIdHitMap selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits);
-
-  bool shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID);
 
   bool accept2003Tower(int id);
 
