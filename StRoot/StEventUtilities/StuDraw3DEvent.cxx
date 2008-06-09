@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.8 2008/05/16 17:36:52 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.9 2008/06/09 15:03:25 fisyak Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -12,6 +12,7 @@
 #include "StTrackGeometry.h"
 #include "StTpcHitCollection.h"
 #include "StMeasuredPoint.h"
+#include "TMath.h"
 #include "StTrackDetectorInfo.h"
 
 ClassImp(StuDraw3DEvent)
