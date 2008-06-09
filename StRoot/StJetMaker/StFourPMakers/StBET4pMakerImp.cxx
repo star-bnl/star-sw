@@ -131,8 +131,13 @@ void StBET4pMakerImp::Make()
   _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
   _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
 
+  if (!mUseEndcap) return;
 
-  collectEnergyFromEEMC();
+  TowerEnergyDepositList energyDepositList = collectEnergyFromEEMC();
+
+  FourList eemcFourMomentumList = constructFourMomentumListFrom(energyDepositList);
+
+  _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
 
 }
 
@@ -422,10 +427,8 @@ bool StBET4pMakerImp::accept2003Tower(int id)
 }
 
 
-void StBET4pMakerImp::collectEnergyFromEEMC()
+StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::collectEnergyFromEEMC()
 {
-  if (!mUseEndcap) return;
-
   StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
 
   TowerEnergyDepositList energyDepositList;
@@ -458,8 +461,10 @@ void StBET4pMakerImp::collectEnergyFromEEMC()
 
   }
 
-  FourList eemcFourMomentumList = constructFourMomentumListFrom(energyDepositList);
+  return energyDepositList;
 
-  _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
+  //  FourList eemcFourMomentumList = constructFourMomentumListFrom(energyDepositList);
+
+  //  _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
 
 }
