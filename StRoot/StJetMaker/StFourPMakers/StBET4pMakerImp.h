@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.36 2008/06/10 08:07:09 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.37 2008/06/10 08:31:08 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -19,9 +19,6 @@
 class StMuTrack;
 class StMuTrackFourVec;
 class StMuDstMaker;
-class EEmcGeomSimple;
-class StEEmcDbMaker;
-class StEvent;
 
 #include "CollectEnergyDepositsFromBEMC.h"
 #include "CollectEnergyDepositsFromEEMC.h"
@@ -40,7 +37,6 @@ public:
     
   virtual ~StBET4pMakerImp() {};
     
-  void Init(StEEmcDbMaker* eedb);
   void Make();
     
   void Clear(Option_t* opt);
@@ -64,8 +60,6 @@ private:
 
   FourList constructFourMomentumListFrom(const StSpinJet::TowerEnergyDepositList& energyDepositList);
 
-  StSpinJet::TowerEnergyDepositList collectEnergyFromEEMC();
-
 
   TVector3 getVertex();
 
@@ -81,9 +75,6 @@ private:
   int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
 
   StMuDstMaker* mMuDstMaker;
-
-  EEmcGeomSimple* mEeGeom;
-  StEEmcDbMaker* mEeDb;
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;

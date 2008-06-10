@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.57 2008/06/10 08:07:09 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.58 2008/06/10 08:31:08 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -17,11 +17,6 @@
 
 ////StEmc
 #include "StEmcUtil/geometry/StEmcGeom.h"
-
-//Endcap
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 //StJetMaker
 #include "../StMuTrackFourVec.h"
@@ -45,22 +40,11 @@ StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,
 				 )
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
-  , mEeGeom(0)
-  , mEeDb(0)
   , _collectChargedTracksFromTPC(collectChargedTracksFromTPC)
   , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
   , _collectEnergyDepositsFromEEMC(collectEnergyDepositsFromEEMC)
 {
 
-}
-
-void StBET4pMakerImp::Init(StEEmcDbMaker* eedb)
-{
-    
-  mEeGeom = new EEmcGeomSimple();
-  mEeDb = eedb;
-  mEeDb->setThreshold(3);
-  
 }
 
 void StBET4pMakerImp::Clear(Option_t* opt)
@@ -97,7 +81,7 @@ void StBET4pMakerImp::Make()
 
   if (!mUseEndcap) return;
 
-  TowerEnergyDepositList eemcCorrectedEnergyDepositList = collectEnergyFromEEMC();
+  TowerEnergyDepositList eemcCorrectedEnergyDepositList = _collectEnergyDepositsFromEEMC->Do();
 
   FourList eemcFourMomentumList = constructFourMomentumListFrom(eemcCorrectedEnergyDepositList);
 
@@ -225,40 +209,3 @@ TVector3 StBET4pMakerImp::getVertex()
 }
 
 
-StSpinJet::TowerEnergyDepositList StBET4pMakerImp::collectEnergyFromEEMC()
-{
-  StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
-
-  TowerEnergyDepositList energyDepositList;
-
-  for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
-
-    int rawadc, sec, sub, etabin;
-    muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
-    assert(sec >0 && sec <= MaxSectors);
-	
-    const EEmcDbItem *dbItem = mEeDb->getT(sec,sub-1+'A',etabin);
-    assert(dbItem); 
-	
-    if(dbItem->fail) continue; //drop broken channels
-    if(dbItem->stat) continue; // drop not working channels and jumpy pedestal channels
-    if(dbItem->gain<=0.) continue; // drop it, unless you work with ADC spectra
-    if(rawadc<dbItem->thr) continue; // drop raw ADC < ped+N*sigPed, N==3 in init
-	    
-    double adc = rawadc - (dbItem->ped);
-    double energy = adc/(dbItem->gain);
-    if(energy < 0.01) continue; // drop if less than 10MeV for now
-	    
-    TowerEnergyDeposit energyDeposit;
-    energyDeposit.detectorId = kEndcapEmcTowerId;
-    energyDeposit.towerId = (sec*5 + sub)*12 + etabin;
-    energyDeposit.towerLocation = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1);
-    energyDeposit.energy = energy;
-
-    energyDepositList.push_back(energyDeposit);
-
-  }
-
-  return energyDepositList;
-
-}
