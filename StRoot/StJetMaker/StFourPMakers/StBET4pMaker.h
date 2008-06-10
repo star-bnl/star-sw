@@ -1,11 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.28 2008/06/10 06:51:36 tai Exp $
+// $Id: StBET4pMaker.h,v 1.29 2008/06/10 08:07:09 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
 #include "StFourPMaker.h"
 
 #include "CollectEnergyDepositsFromBEMC.h"
+#include "CollectEnergyDepositsFromEEMC.h"
 
 class StMuDstMaker;
 class StBemcTables;
@@ -50,6 +51,7 @@ private:
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
+  StSpinJet::CollectEnergyDepositsFromEEMC *_collectEnergyDepositsFromEEMC;
   StBET4pMakerImp* _imp;
 
   StSpinJet::BemcEnergySumCalculator* _bemcEnergySumCalculator;

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.35 2008/06/10 06:35:40 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.36 2008/06/10 08:07:09 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -24,7 +24,7 @@ class StEEmcDbMaker;
 class StEvent;
 
 #include "CollectEnergyDepositsFromBEMC.h"
-
+#include "CollectEnergyDepositsFromEEMC.h"
 
 typedef std::vector<AbstractFourVec*> FourList;
 
@@ -32,7 +32,11 @@ class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(StMuDstMaker* uDstMaker, StSpinJet::CollectChargedTracksFromTPC* collectChargedTracksFromTPC,  StSpinJet::CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC);
+  StBET4pMakerImp(StMuDstMaker* uDstMaker,
+		  StSpinJet::CollectChargedTracksFromTPC* collectChargedTracksFromTPC,
+		  StSpinJet::CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC,
+		  StSpinJet::CollectEnergyDepositsFromEEMC *collectEnergyDepositsFromEEMC
+		  );
     
   virtual ~StBET4pMakerImp() {};
     
@@ -83,6 +87,7 @@ private:
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
+  StSpinJet::CollectEnergyDepositsFromEEMC *_collectEnergyDepositsFromEEMC;
 
 };
 
