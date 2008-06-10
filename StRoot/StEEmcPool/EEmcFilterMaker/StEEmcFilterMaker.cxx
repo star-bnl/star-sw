@@ -1,6 +1,6 @@
 //*-- Author : Jan Balewski
 // 
-// $Id: StEEmcFilterMaker.cxx,v 1.3 2008/05/11 18:49:17 balewski Exp $
+// $Id: StEEmcFilterMaker.cxx,v 1.4 2008/06/10 12:59:12 balewski Exp $
 
 #include <StThreeVector.hh>
 #include <StPrimaryVertex.h>
@@ -51,8 +51,8 @@ Int_t StEEmcFilterMaker::Init(){
 //_____________________________________________________________
 //_____________________________________________________________
 Int_t StEEmcFilterMaker::FinishRun(int runumber){
-  LOG_INFO << Form("Finish cuts: ET>%.2f  Zvert=%.2f +/-%.2f (cm) fixVertexMode=", par_Et_thres, par_Z0_vert, par_delZ_vert,myMode)<<endm;
-  LOG_INFO << Form("Finish run=%d nInp=%d,nRecVer=%d, nZverOK=%d nAcc=%d",runumber,nInpEve,nRecVert,nZverOK,nAccEve) << endm;
+  LOG_INFO << Form("Finish cuts: ET>%.2f  Zvert=%.2f +/-%.2f (cm) fixVertexMode=%d", par_Et_thres, par_Z0_vert, par_delZ_vert,myMode)<<endm;
+  LOG_INFO << Form("%s::Finish run=%d nInp=%d,nRecVer=%d, nZverOK=%d nAcc=%d",GetName(),runumber,nInpEve,nRecVert,nZverOK,nAccEve) << endm;
   return kStOK;
 }; 
 
@@ -161,6 +161,9 @@ Float_t StEEmcFilterMaker::transverseNRG(Float_t vertexPosZ, StEEmcTower *tower)
 }
 
 // $Log: StEEmcFilterMaker.cxx,v $
+// Revision 1.4  2008/06/10 12:59:12  balewski
+// fix printout
+//
 // Revision 1.3  2008/05/11 18:49:17  balewski
 // merged 2 makers, now one can us it before and after TPC tracking, run 2 independent copies
 //
