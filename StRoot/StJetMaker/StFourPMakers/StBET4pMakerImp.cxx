@@ -1,9 +1,8 @@
+// $Id: StBET4pMakerImp.cxx,v 1.51 2008/06/10 00:59:09 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
 //STAR
-#include "SystemOfUnits.h"
-#include "StMessMgr.h"
 
 //StMuDstMaker
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -31,11 +30,7 @@
 
 #include "StMuEmcPosition.h"
 
-#include <vector>
-#include <string>
 #include <iostream>
-#include <cmath>
-#include <sys/times.h>
 
 using namespace std;
 using namespace StSpinJet;
