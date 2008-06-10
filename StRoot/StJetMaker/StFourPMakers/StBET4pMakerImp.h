@@ -1,7 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.29 2008/06/09 23:00:51 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.30 2008/06/10 00:51:40 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
+
+
+#include "CollectEnergyDepositsFromBEMC.h"
 
 #include <Rtypes.h>
 
@@ -16,10 +19,8 @@
 #include <map>
 
 class StMuTrack;
-class StEmcCollection;
 class StMuTrackFourVec;
 class StMuDstMaker;
-class StEmcRawHit;
 class EEmcGeomSimple;
 class StBemcTables;
 class StEEmcDbMaker;
@@ -41,8 +42,8 @@ public:
   void Clear(Option_t* opt);
 
   void setUseEndcap(bool v) { mUseEndcap = v; }
-  void setUse2003Cuts(bool v) { mUse2003Cuts = v; }
-  void setUse2005Cuts(bool v) { mUse2005Cuts = v; }
+  void setUse2003Cuts(bool v);
+  void setUse2005Cuts(bool v);
   void setUse2006Cuts(bool v);
 
   int nDylanPoints() const { return mDylanPoints; }
@@ -58,40 +59,20 @@ private:
 
   FourList constructFourMomentumListFrom(const TrackList& trackList);
 
-  struct TowerEnergyDeposit {
-    StDetectorId detectorId;
-    int towerId;
-    TVector3 towerLocation;
-    double energy;
-  };
-
-  typedef std::vector<TowerEnergyDeposit> TowerEnergyDepositList;
-
-  typedef int BemcTowerID;
-  typedef std::map<BemcTowerID, const StEmcRawHit*> BemcTowerIdHitMap;
-
-  BemcTowerIdHitMap getTowerHitsFromBEMC();
-  BemcTowerIdHitMap selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits);
-
-  bool shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID);
-
   void countTracksOnBemcTower(const StMuTrack& track);
 
-  double sumEnergyOverBemcTowers(double minE, const TowerEnergyDepositList &energyDepositList);
-  int numberOfBemcTowersWithEnergyAbove(double minE, const TowerEnergyDepositList &energyDepositList);
+  double sumEnergyOverBemcTowers(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
+  int numberOfBemcTowersWithEnergyAbove(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
 
 
-  TowerEnergyDepositList readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
-  TowerEnergyDepositList correctBemcTowerEnergyForTracks(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList);
+  StSpinJet::TowerEnergyDepositList correctBemcTowerEnergyForTracks(const StSpinJet::TowerEnergyDepositList &energyDepositList, const TrackList& trackList);
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
 
-  FourList constructFourMomentumListFrom(const TowerEnergyDepositList& energyDepositList);
+  FourList constructFourMomentumListFrom(const StSpinJet::TowerEnergyDepositList& energyDepositList);
 
-  TowerEnergyDepositList collectEnergyFromEEMC();
+  StSpinJet::TowerEnergyDepositList collectEnergyFromEEMC();
 
-  bool accept2003Tower(int id);
 
-  TVector3 getBemcTowerLocation(int bemcTowerId);
   TVector3 getVertex();
 
   TLorentzVector constructFourMomentum(const TVector3& towerLocation, double energy);
@@ -106,11 +87,7 @@ private:
   int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
 
   StMuDstMaker* mMuDstMaker;
-  StBemcTables* _bemcTables;
 
-  bool mUse2003Cuts;
-  bool mUse2005Cuts;
-  bool mUse2006Cuts;
   int mDylanPoints;
   double mSumEmcEt;
         
@@ -118,7 +95,8 @@ private:
   StEEmcDbMaker* mEeDb;
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
-  
+  StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
+
 };
 
 #endif // STBET4PMAKERIMP_HH
