@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.31 2008/06/10 02:20:56 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.32 2008/06/10 05:40:44 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -81,9 +81,6 @@ private:
 
   StMuDstMaker* mMuDstMaker;
 
-  //  int mDylanPoints;
-  //  double mSumEmcEt;
-        
   EEmcGeomSimple* mEeGeom;
   StEEmcDbMaker* mEeDb;
 
