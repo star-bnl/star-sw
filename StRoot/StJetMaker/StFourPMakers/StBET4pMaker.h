@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.25 2008/06/10 05:58:00 tai Exp $
+// $Id: StBET4pMaker.h,v 1.26 2008/06/10 06:08:21 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -10,6 +10,12 @@
 class StMuDstMaker;
 class StBemcTables;
 class StBET4pMakerImp;
+
+namespace StSpinJet {
+
+class CollectChargedTracksFromTPC;
+
+}
 
 class StBET4pMaker : public StFourPMaker {
 
@@ -48,6 +54,7 @@ private:
   int mDylanPoints;
   double mSumEmcEt;
         
+  StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
 
   StBET4pMakerImp* _imp;
