@@ -245,7 +245,8 @@ void StBemcTriggerSimu::getTowerStatus(){
   if (mConfig==kOffline){
     for (int did=1; did<=kNTowers; did++){
       Int_t tpid;
-      mTables->getStatus(BTOW, did, TowerStatus[did-1]); 
+      mTables->getStatus(BTOW, did, TowerStatus[did-1]);
+      if (mTables->status(BTOW,did,"calib")!=1) TowerStatus[did-1]=0; 
       mDecoder->GetTriggerPatchFromTowerId(did,tpid);
       if (TowerStatus[did-1]!=1) numMaskTow[tpid]++;
     }
