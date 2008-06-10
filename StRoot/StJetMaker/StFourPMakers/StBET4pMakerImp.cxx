@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.56 2008/06/10 06:35:40 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.57 2008/06/10 08:07:09 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -38,13 +38,18 @@ using namespace StSpinJet;
 
 const int StBET4pMakerImp::mNOfBemcTowers;
 
-StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker, CollectChargedTracksFromTPC* collectChargedTracksFromTPC, CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC)
+StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,
+				 CollectChargedTracksFromTPC* collectChargedTracksFromTPC,
+				 CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC,
+				 CollectEnergyDepositsFromEEMC *collectEnergyDepositsFromEEMC
+				 )
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
   , mEeGeom(0)
   , mEeDb(0)
   , _collectChargedTracksFromTPC(collectChargedTracksFromTPC)
   , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
+  , _collectEnergyDepositsFromEEMC(collectEnergyDepositsFromEEMC)
 {
 
 }
