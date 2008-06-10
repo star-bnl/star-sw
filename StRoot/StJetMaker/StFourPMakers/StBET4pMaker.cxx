@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.40 2008/06/10 06:35:40 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.41 2008/06/10 06:51:36 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -21,8 +21,6 @@ ClassImp(StBET4pMaker)
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
   , _bemcTables(new StBemcTables(doTowerSwapFix))
-  , mDylanPoints(0)
-  , mSumEmcEt(0.0)
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(uDstMaker))
   , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(uDstMaker, _bemcTables))
   , _imp(new StBET4pMakerImp(uDstMaker, _collectChargedTracksFromTPC, _collectEnergyDepositsFromBEMC))
@@ -86,11 +84,7 @@ Int_t StBET4pMaker::Make()
 
   _bemcEnergySumCalculator->Make();
 
-  mSumEmcEt = _bemcEnergySumCalculator->sumEmcEt();
-
-  mDylanPoints = _bemcEnergySumCalculator->nDylanPoints();
-
-  if (mSumEmcEt > 200.) return kStOk;
+  if (_bemcEnergySumCalculator->sumEmcEt() > 200.) return kStOk;
 
   _imp->Make();
 
@@ -106,3 +100,12 @@ bool StBET4pMaker::isBemcCorrupted() const
   return false;
 }
 
+int StBET4pMaker::nDylanPoints() const
+{ 
+  return _bemcEnergySumCalculator->nDylanPoints();
+}
+
+double StBET4pMaker::sumEmcEt() const 
+{ 
+  return _bemcEnergySumCalculator->sumEmcEt();
+}
