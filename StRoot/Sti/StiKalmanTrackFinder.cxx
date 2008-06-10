@@ -342,7 +342,7 @@ StiDebug::Break(nCall);
   trackExtended |=trackExtendedOut;
   if (trackExtended) {
     status = track->approx(1);
-    if (status) return -1;
+//    if (status) return -1;
     status = track->refit();
     if (status) return -1;
   }
