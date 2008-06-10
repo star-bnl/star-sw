@@ -15,10 +15,8 @@
 //StEvent
 #include "StEventTypes.h"
 
-//StEmc
+////StEmc
 #include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StEmcRawMaker/defines.h"
-#include "StEmcRawMaker/StBemcTables.h"
 
 //Endcap
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
@@ -47,23 +45,29 @@ const int StBET4pMakerImp::mNOfBemcTowers;
 StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,  StBemcTables* bemcTables)
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
-  , _bemcTables(bemcTables)
-  , mUse2003Cuts(false)
-  , mUse2005Cuts(false)
-  , mUse2006Cuts(false)
   , mDylanPoints(0)
   , mSumEmcEt(0.0)
   , mEeGeom(0)
   , mEeDb(0)
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(uDstMaker))
+  , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(uDstMaker, bemcTables))
 {
   cout <<"StBET4pMakerImp::StBET4pMakerImp()"<<endl;
   assert(mMuDstMaker);
 }
 
+void StBET4pMakerImp::setUse2003Cuts(bool v)
+{ 
+  _collectEnergyDepositsFromBEMC->setUse2003Cuts(v);
+}
+
+void StBET4pMakerImp::setUse2005Cuts(bool v)
+{ 
+  _collectEnergyDepositsFromBEMC->setUse2005Cuts(v);
+}
+
 void StBET4pMakerImp::setUse2006Cuts(bool v)
 {
-  mUse2006Cuts = v;
   _collectChargedTracksFromTPC->setUse2006Cuts(v);
 }
 
@@ -100,23 +104,18 @@ void StBET4pMakerImp::Make()
 
   FourList tpcFourMomentumList = constructFourMomentumListFrom(trackList);
 
+  TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();
 
-  BemcTowerIdHitMap allBemcTowerHits = getTowerHitsFromBEMC();
+  mSumEmcEt = sumEnergyOverBemcTowers(0.4, bemcEnergyDepositList);
 
-  BemcTowerIdHitMap selectedBemcTowerHits = selectBemcTowerHits(allBemcTowerHits);
-
-  TowerEnergyDepositList bemcEnergy_ = readBemcTowerEnergy(selectedBemcTowerHits);
-
-  mSumEmcEt = sumEnergyOverBemcTowers(0.4, bemcEnergy_);
-
-  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, bemcEnergy_);
+  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, bemcEnergyDepositList);
 
   if (mSumEmcEt > 200.) return;
 
 
-  TowerEnergyDepositList bemcCorrectedEnergy_ = correctBemcTowerEnergyForTracks(bemcEnergy_, trackList);
+  TowerEnergyDepositList bemcCorrectedEnergyDepositList = correctBemcTowerEnergyForTracks(bemcEnergyDepositList, trackList);
 
-  FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergy_);
+  FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergyDepositList);
 
 
   _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
@@ -124,14 +123,13 @@ void StBET4pMakerImp::Make()
 
   if (!mUseEndcap) return;
 
-  TowerEnergyDepositList energyDepositList = collectEnergyFromEEMC();
+  TowerEnergyDepositList eemcCorrectedEnergyDepositList = collectEnergyFromEEMC();
 
-  FourList eemcFourMomentumList = constructFourMomentumListFrom(energyDepositList);
+  FourList eemcFourMomentumList = constructFourMomentumListFrom(eemcCorrectedEnergyDepositList);
 
   _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
 
 }
-
 
 FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackList)
 {
@@ -153,72 +151,6 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
   return ret;
 }
 
-StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::getTowerHitsFromBEMC()
-{
-  BemcTowerIdHitMap ret;
-
-  StEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
-  StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
-
-  static const int nBemcModules = 120;
-  for(int m = 1; m <= nBemcModules; ++m) { //loop on modules...
-    StEmcModule* module = detector->module(m);
-  	
-    StSPtrVecEmcRawHit& rawHits = module->hits();
-    for(UInt_t k = 0; k < rawHits.size(); ++k) { //loop on hits in modules
-      StEmcRawHit* theRawHit = rawHits[k];
-  	    
-      StEmcGeom* geom = StEmcGeom::instance("bemc"); 
-      int bemcTowerID;
-      geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
-
-      if (mUse2003Cuts)
-	if (!accept2003Tower(bemcTowerID)) continue;
-
-      if (mUse2005Cuts)
-	if (bemcTowerID > 2400) continue;
-
-      ret[bemcTowerID] = theRawHit;
-    }
-  }
-  return ret;
-}
-
-StBET4pMakerImp::BemcTowerIdHitMap StBET4pMakerImp::selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits)
-{
-  BemcTowerIdHitMap ret;
-
-  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
-
-    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
-      continue;
-
-    ret.insert(*it);
-  }
-  return ret;
-}
-
-bool StBET4pMakerImp::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
-{
-  //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
-  int status;
-  _bemcTables->getStatus(BTOW, bemcTowerID, status);
-  
-  //check for ADC that is 2-sigma above RMS:
-  float pedestal, rms;
-  int CAP(0); //this arument matters only for SMD
-  _bemcTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
-  
-  if (status != 1) return false;
-
-  if (theRawHit->adc() - pedestal <= 0) return false;
-
-  if ((theRawHit->adc() - pedestal) <= 2.*rms) return false;
-
-  return true;
-
-}
-
 FourList StBET4pMakerImp::constructFourMomentumListFrom(const TowerEnergyDepositList& energyDepositList)
 {
   FourList ret;
@@ -231,28 +163,6 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TowerEnergyDeposit
 
     ret.push_back(pmu);
   }
-  return ret;
-}
-
-StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits)
-{
-  TowerEnergyDepositList ret;
-
-  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
-
-    const StEmcRawHit* hit = (*it).second;
-
-    if(hit->energy() <= 0) continue;
-
-    TowerEnergyDeposit energyDeposit;
-    energyDeposit.detectorId = kBarrelEmcTowerId;
-    energyDeposit.towerId = (*it).first;
-    energyDeposit.towerLocation = getBemcTowerLocation(energyDeposit.towerId);
-    energyDeposit.energy = hit->energy();
-
-    ret.push_back(energyDeposit);
-  }
-
   return ret;
 }
 
@@ -296,7 +206,7 @@ int StBET4pMakerImp::numberOfBemcTowersWithEnergyAbove(double minE, const TowerE
   return ret;
 }
 
-StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::correctBemcTowerEnergyForTracks(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList)
+StSpinJet::TowerEnergyDepositList StBET4pMakerImp::correctBemcTowerEnergyForTracks(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList)
 {
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     const StMuTrack* track = (*it).first;
@@ -352,17 +262,6 @@ TLorentzVector StBET4pMakerImp::constructFourMomentum(const TVector3& towerLocat
     return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), energy);
 }
 
-TVector3 StBET4pMakerImp::getBemcTowerLocation(int bemcTowerId)
-{
-  StEmcGeom* geom = StEmcGeom::instance("bemc");
-
-  float towerX, towerY, towerZ;
-
-  geom->getXYZ(bemcTowerId, towerX, towerY, towerZ);
-
-  return TVector3(towerX, towerY, towerZ);
-}
-
 TVector3 StBET4pMakerImp::getVertex()
 {
   StMuDst* uDst = mMuDstMaker->muDst();
@@ -372,53 +271,7 @@ TVector3 StBET4pMakerImp::getVertex()
 }
 
 
-bool StBET4pMakerImp::accept2003Tower(int id)
-{
-    if( id==555
-	|| id==615
-	|| id==656
-	|| id==772
-	|| id==1046
-	|| id==1048
-	|| id==1408
-	|| id==1555
-	|| id==1750
-	|| id==1773
-	|| id==2073
-	|| id==2093
-	|| id==2096
-	|| (id>=1866 && id<=1894)
-	|| id==511
-	|| id==1614
-	|| id==1615
-	|| id==1616
-	|| id==1636
-	|| id==1899
-	|| id==2127
-	|| id==953
-	|| id==1418
-	|| id==1419
-	|| id==1878
-	|| id==1879
-	|| id==1881
-	|| (id>=1042 && id<=1045)
-	|| (id>=1385 && id<=1387)
-	|| (id>=1705 && id<=1708)
-	|| (id>=1725 && id<=1728)
-	|| (id>=1745 && id<=1748)
-	|| (id>=1765 && id<=1768)
-	|| (id>=1785 && id<=1788))
-	{
-	    cout <<"rejecting tower:\t"<<id<<endl;
-	    return false;
-	}
-    else {
-	return true;
-    }
-}
-
-
-StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::collectEnergyFromEEMC()
+StSpinJet::TowerEnergyDepositList StBET4pMakerImp::collectEnergyFromEEMC()
 {
   StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
 
@@ -453,9 +306,5 @@ StBET4pMakerImp::TowerEnergyDepositList StBET4pMakerImp::collectEnergyFromEEMC()
   }
 
   return energyDepositList;
-
-  //  FourList eemcFourMomentumList = constructFourMomentumListFrom(energyDepositList);
-
-  //  _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
 
 }
