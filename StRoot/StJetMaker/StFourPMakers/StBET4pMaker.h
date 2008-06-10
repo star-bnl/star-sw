@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.24 2008/06/10 02:20:56 tai Exp $
+// $Id: StBET4pMaker.h,v 1.25 2008/06/10 05:58:00 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -48,9 +48,10 @@ private:
   int mDylanPoints;
   double mSumEmcEt;
         
+  StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
+
   StBET4pMakerImp* _imp;
   
-  StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
 
   bool isBemcCorrupted() const;
 

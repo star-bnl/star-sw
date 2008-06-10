@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.37 2008/06/10 02:20:55 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.38 2008/06/10 05:57:59 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -21,8 +21,8 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _bemcTables(new StBemcTables(doTowerSwapFix))
   , mDylanPoints(0)
   , mSumEmcEt(0.0)
-  , _imp(new StBET4pMakerImp(uDstMaker, _bemcTables))
   , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(uDstMaker, _bemcTables))
+  , _imp(new StBET4pMakerImp(uDstMaker, _collectEnergyDepositsFromBEMC))
 {
 
 }
@@ -31,13 +31,13 @@ void StBET4pMaker::setUseEndcap(bool v)   { _imp->setUseEndcap(v); }
 
 void StBET4pMaker::setUse2003Cuts(bool v)
 { 
-  _imp->setUse2003Cuts(v);
+  //  _imp->setUse2003Cuts(v);
   _collectEnergyDepositsFromBEMC->setUse2003Cuts(v);
 }
 
 void StBET4pMaker::setUse2005Cuts(bool v)
 {
-  _imp->setUse2005Cuts(v);
+  //  _imp->setUse2005Cuts(v);
   _collectEnergyDepositsFromBEMC->setUse2005Cuts(v);
 }
 
