@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.27 2008/06/10 06:35:40 tai Exp $
+// $Id: StBET4pMaker.h,v 1.28 2008/06/10 06:51:36 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -39,8 +39,8 @@ public:
   void setUse2005Cuts(bool v);
   void setUse2006Cuts(bool v);
 
-  int nDylanPoints() const { return mDylanPoints; }
-  double sumEmcEt() const { return mSumEmcEt; }
+  int nDylanPoints() const;
+  double sumEmcEt() const;
 
   bool bemcCorrupt() const { return isBemcCorrupted(); }
     
@@ -48,9 +48,6 @@ private:
 
   StBemcTables* _bemcTables;
 
-  int mDylanPoints;
-  double mSumEmcEt;
-        
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
   StBET4pMakerImp* _imp;
