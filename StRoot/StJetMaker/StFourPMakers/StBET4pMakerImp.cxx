@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.55 2008/06/10 06:08:22 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.56 2008/06/10 06:35:40 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -46,24 +46,8 @@ StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker, CollectChargedTracksFr
   , _collectChargedTracksFromTPC(collectChargedTracksFromTPC)
   , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
 {
-  cout <<"StBET4pMakerImp::StBET4pMakerImp()"<<endl;
-  assert(mMuDstMaker);
+
 }
-
-//void StBET4pMakerImp::setUse2003Cuts(bool v)
-//{ 
-//  _collectEnergyDepositsFromBEMC->setUse2003Cuts(v);
-//}
-//
-//void StBET4pMakerImp::setUse2005Cuts(bool v)
-//{ 
-//  _collectEnergyDepositsFromBEMC->setUse2005Cuts(v);
-//}
-
-//void StBET4pMakerImp::setUse2006Cuts(bool v)
-//{
-//  _collectChargedTracksFromTPC->setUse2006Cuts(v);
-//}
 
 void StBET4pMakerImp::Init(StEEmcDbMaker* eedb)
 {
@@ -76,8 +60,6 @@ void StBET4pMakerImp::Init(StEEmcDbMaker* eedb)
 
 void StBET4pMakerImp::Clear(Option_t* opt)
 {
-  //  mDylanPoints = 0;
-  //  mSumEmcEt = 0.;
     
   for (FourList::iterator it = _tracks.begin(); it != _tracks.end(); ++it) {
     delete (*it);
