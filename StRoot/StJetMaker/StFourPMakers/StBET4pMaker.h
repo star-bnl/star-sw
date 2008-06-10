@@ -1,9 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.23 2008/06/09 23:00:50 tai Exp $
+// $Id: StBET4pMaker.h,v 1.24 2008/06/10 02:20:56 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
 #include "StFourPMaker.h"
+
+#include "CollectEnergyDepositsFromBEMC.h"
 
 class StMuDstMaker;
 class StBemcTables;
@@ -38,6 +40,9 @@ public:
     
 private:
 
+  double sumEnergyOverBemcTowers(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
+  int numberOfBemcTowersWithEnergyAbove(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
+
   StBemcTables* _bemcTables;
 
   int mDylanPoints;
@@ -45,6 +50,8 @@ private:
         
   StBET4pMakerImp* _imp;
   
+  StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
+
   bool isBemcCorrupted() const;
 
   ClassDef(StBET4pMaker,1)

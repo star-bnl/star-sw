@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.51 2008/06/10 00:59:09 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.52 2008/06/10 02:20:56 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -40,8 +40,8 @@ const int StBET4pMakerImp::mNOfBemcTowers;
 StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,  StBemcTables* bemcTables)
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
-  , mDylanPoints(0)
-  , mSumEmcEt(0.0)
+    //  , mDylanPoints(0)
+    //  , mSumEmcEt(0.0)
   , mEeGeom(0)
   , mEeDb(0)
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(uDstMaker))
@@ -77,8 +77,8 @@ void StBET4pMakerImp::Init(StEEmcDbMaker* eedb)
 
 void StBET4pMakerImp::Clear(Option_t* opt)
 {
-  mDylanPoints = 0;
-  mSumEmcEt = 0.;
+  //  mDylanPoints = 0;
+  //  mSumEmcEt = 0.;
     
   for (FourList::iterator it = _tracks.begin(); it != _tracks.end(); ++it) {
     delete (*it);
@@ -100,13 +100,6 @@ void StBET4pMakerImp::Make()
   FourList tpcFourMomentumList = constructFourMomentumListFrom(trackList);
 
   TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();
-
-  mSumEmcEt = sumEnergyOverBemcTowers(0.4, bemcEnergyDepositList);
-
-  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, bemcEnergyDepositList);
-
-  if (mSumEmcEt > 200.) return;
-
 
   TowerEnergyDepositList bemcCorrectedEnergyDepositList = correctBemcTowerEnergyForTracks(bemcEnergyDepositList, trackList);
 
@@ -179,26 +172,6 @@ void StBET4pMakerImp::countTracksOnBemcTower(const StMuTrack& track)
       mNtracksOnTower[id]++;
     }
   }
-}
-
-double StBET4pMakerImp::sumEnergyOverBemcTowers(double minE, const TowerEnergyDepositList &energyDepositList)
-{
-  double ret(0.0);
-
-  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it)
-    if((*it).energy > minE) ret += (*it).energy;
-
-  return ret;
-}
-
-int StBET4pMakerImp::numberOfBemcTowersWithEnergyAbove(double minE, const TowerEnergyDepositList &energyDepositList)
-{
-  int ret(0);
-
-  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it)
-    if((*it).energy > minE) ret ++;
-
-  return ret;
 }
 
 StSpinJet::TowerEnergyDepositList StBET4pMakerImp::correctBemcTowerEnergyForTracks(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList)
