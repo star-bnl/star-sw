@@ -1,4 +1,4 @@
-#include "LASERINO.h"
+#include "LASERINO_TABLE.h"
 void ConverL() {
   ofstream &out = cout;
   //  out.open("laserino.h", ios::out);
