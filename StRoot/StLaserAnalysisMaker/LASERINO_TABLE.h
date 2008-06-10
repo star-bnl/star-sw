@@ -1,5 +1,8 @@
-// $Id: LASERINO.h,v 1.2 2007/12/10 19:54:01 fisyak Exp $
-// $Log: LASERINO.h,v $
+// $Id: LASERINO_TABLE.h,v 1.1 2008/06/10 16:04:46 fisyak Exp $
+// $Log: LASERINO_TABLE.h,v $
+// Revision 1.1  2008/06/10 16:04:46  fisyak
+// Rename LASERINO.h => LASERINO_TABLE.h
+//
 // Revision 1.2  2007/12/10 19:54:01  fisyak
 // Add Id and Log, correct spelling error in README
 //
