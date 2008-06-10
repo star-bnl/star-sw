@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.26 2008/06/10 06:08:21 tai Exp $
+// $Id: StBET4pMaker.h,v 1.27 2008/06/10 06:35:40 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -14,7 +14,7 @@ class StBET4pMakerImp;
 namespace StSpinJet {
 
 class CollectChargedTracksFromTPC;
-
+class BemcEnergySumCalculator;
 }
 
 class StBET4pMaker : public StFourPMaker {
@@ -46,9 +46,6 @@ public:
     
 private:
 
-  double sumEnergyOverBemcTowers(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
-  int numberOfBemcTowersWithEnergyAbove(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
-
   StBemcTables* _bemcTables;
 
   int mDylanPoints;
@@ -56,8 +53,10 @@ private:
         
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
-
   StBET4pMakerImp* _imp;
+
+  StSpinJet::BemcEnergySumCalculator* _bemcEnergySumCalculator;
+
   
 
   bool isBemcCorrupted() const;

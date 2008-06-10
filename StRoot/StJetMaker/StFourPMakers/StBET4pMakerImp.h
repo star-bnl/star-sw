@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.34 2008/06/10 06:08:22 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.35 2008/06/10 06:35:40 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -42,9 +42,6 @@ public:
   void Clear(Option_t* opt);
 
   void setUseEndcap(bool v) { mUseEndcap = v; }
-  //  void setUse2003Cuts(bool v);
-  //  void setUse2005Cuts(bool v);
-  //  void setUse2006Cuts(bool v);
 
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
