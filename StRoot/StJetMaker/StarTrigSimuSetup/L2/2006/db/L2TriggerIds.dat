@@ -10,13 +10,13 @@
 ped-algo:     20060101  40001  20060731   40001   algoPed.setup2  -112233   #	dummy	trigger	ID	for	L2ped-algo,	for	testing	
 # L2gammaAlgo, bemc-http-mb-l2gamma
 btow_gamma:  20060406 202847 20060510 204714 l2gamma_bemc.setup1 127611	#	L2gammaAlgo,	ppTrans	
-btow_gamma:  20060510 204714 20060513 215248 l2gamma_bemc.setup2 6	#	L2gammaAlgo,	ppLong	
-btow_gamma:  20060513 215249 20060516 004500 l2gamma_bemc.setup3 6	#	L2gammaAlgo,	ppLong	
+btow_gamma:  20060510 204714 20060513 215248 l2gamma_bemc.setup2 5	#	L2gammaAlgo,	ppLong	
+btow_gamma:  20060513 215249 20060516 004500 l2gamma_bemc.setup3 5	#	L2gammaAlgo,	ppLong	
 btow_gamma:  20060516 004501 20060607 234011 l2gamma_bemc.setup4 137611	#	L2gammaAlgo,	ppLong	
 # L2gammaAlgo, eemc-http-mb-l2gamma
 etow_gamma:  20060406 202847 20060510 204714 l2gamma_eemc.setup1 127641	#	L2gammaAlgo,	ppTrans	
-etow_gamma:  20060510 204714 20060513 215248 l2gamma_eemc.setup2 5	#	L2gammaAlgo,	ppLong	
-etow_gamma:  20060513 215249 20060516 004500 l2gamma_eemc.setup3 5	#	L2gammaAlgo,	ppLong	
+etow_gamma:  20060510 204714 20060513 215248 l2gamma_eemc.setup2 6	#	L2gammaAlgo,	ppLong	
+etow_gamma:  20060513 215249 20060516 004500 l2gamma_eemc.setup3 6	#	L2gammaAlgo,	ppLong	
 etow_gamma:  20060516 004501 20060607 234011 l2gamma_eemc.setup4 137641	#	L2gammaAlgo,	ppLong	
 # L2JET >> eemc-jp0-etot-mb-L2jet << algos are listed below, bemc-L2jet trigger IDs are added in software 
 jet06-algo:  20060406 202847 20060509 215010 algoJet.setup_ppTrans 127622	#	ppTrans	period	
