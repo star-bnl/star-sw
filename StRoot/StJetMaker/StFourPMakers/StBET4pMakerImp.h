@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.33 2008/06/10 05:58:02 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.34 2008/06/10 06:08:22 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -32,7 +32,7 @@ class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(StMuDstMaker* uDstMaker, StSpinJet::CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC);
+  StBET4pMakerImp(StMuDstMaker* uDstMaker, StSpinJet::CollectChargedTracksFromTPC* collectChargedTracksFromTPC,  StSpinJet::CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC);
     
   virtual ~StBET4pMakerImp() {};
     
@@ -44,7 +44,7 @@ public:
   void setUseEndcap(bool v) { mUseEndcap = v; }
   //  void setUse2003Cuts(bool v);
   //  void setUse2005Cuts(bool v);
-  void setUse2006Cuts(bool v);
+  //  void setUse2006Cuts(bool v);
 
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
