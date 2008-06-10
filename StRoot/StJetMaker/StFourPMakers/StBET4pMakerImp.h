@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.30 2008/06/10 00:51:40 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.31 2008/06/10 02:20:56 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -46,9 +46,6 @@ public:
   void setUse2005Cuts(bool v);
   void setUse2006Cuts(bool v);
 
-  int nDylanPoints() const { return mDylanPoints; }
-  double sumEmcEt() const { return mSumEmcEt; }
-
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
 
@@ -60,10 +57,6 @@ private:
   FourList constructFourMomentumListFrom(const TrackList& trackList);
 
   void countTracksOnBemcTower(const StMuTrack& track);
-
-  double sumEnergyOverBemcTowers(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
-  int numberOfBemcTowersWithEnergyAbove(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
-
 
   StSpinJet::TowerEnergyDepositList correctBemcTowerEnergyForTracks(const StSpinJet::TowerEnergyDepositList &energyDepositList, const TrackList& trackList);
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
@@ -88,8 +81,8 @@ private:
 
   StMuDstMaker* mMuDstMaker;
 
-  int mDylanPoints;
-  double mSumEmcEt;
+  //  int mDylanPoints;
+  //  double mSumEmcEt;
         
   EEmcGeomSimple* mEeGeom;
   StEEmcDbMaker* mEeDb;
