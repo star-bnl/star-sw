@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.43 2008/06/10 08:31:08 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.44 2008/06/10 09:17:57 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -24,7 +24,8 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(uDstMaker))
   , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(uDstMaker, _bemcTables))
   , _collectEnergyDepositsFromEEMC(new CollectEnergyDepositsFromEEMC(uDstMaker))
-  , _imp(new StBET4pMakerImp(uDstMaker, _collectChargedTracksFromTPC, _collectEnergyDepositsFromBEMC, _collectEnergyDepositsFromEEMC))
+  , _correctTowerEnergyForTracks(new CorrectTowerEnergyForTracks(uDstMaker))
+  , _imp(new StBET4pMakerImp(uDstMaker, _collectChargedTracksFromTPC, _collectEnergyDepositsFromBEMC, _collectEnergyDepositsFromEEMC, _correctTowerEnergyForTracks))
   , _bemcEnergySumCalculator(new BemcEnergySumCalculator(_collectEnergyDepositsFromBEMC))
 {
 
