@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.42 2008/06/10 08:07:08 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.43 2008/06/10 08:31:08 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -61,7 +61,8 @@ Int_t StBET4pMaker::Init()
 {
   StEEmcDbMaker* mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
 
-  _imp->Init(mEeDb);
+  _collectEnergyDepositsFromEEMC->Init(mEeDb);
+
   return StMaker::Init();
 }
 
