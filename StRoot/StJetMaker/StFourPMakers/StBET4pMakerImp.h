@@ -1,10 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.32 2008/06/10 05:40:44 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.33 2008/06/10 05:58:02 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
-
-#include "CollectEnergyDepositsFromBEMC.h"
 
 #include <Rtypes.h>
 
@@ -22,9 +20,11 @@ class StMuTrack;
 class StMuTrackFourVec;
 class StMuDstMaker;
 class EEmcGeomSimple;
-class StBemcTables;
 class StEEmcDbMaker;
 class StEvent;
+
+#include "CollectEnergyDepositsFromBEMC.h"
+
 
 typedef std::vector<AbstractFourVec*> FourList;
 
@@ -32,7 +32,7 @@ class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(StMuDstMaker* uDstMaker, StBemcTables* bemcTables);
+  StBET4pMakerImp(StMuDstMaker* uDstMaker, StSpinJet::CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC);
     
   virtual ~StBET4pMakerImp() {};
     
@@ -42,8 +42,8 @@ public:
   void Clear(Option_t* opt);
 
   void setUseEndcap(bool v) { mUseEndcap = v; }
-  void setUse2003Cuts(bool v);
-  void setUse2005Cuts(bool v);
+  //  void setUse2003Cuts(bool v);
+  //  void setUse2005Cuts(bool v);
   void setUse2006Cuts(bool v);
 
   FourList &getTracks() { return _tracks; };

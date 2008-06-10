@@ -1,8 +1,9 @@
-// $Id: StBET4pMakerImp.cxx,v 1.53 2008/06/10 05:40:43 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.54 2008/06/10 05:58:01 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
-//STAR
+#include "CollectEnergyDepositsFromBEMC.h"
+
 
 //StMuDstMaker
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -37,27 +38,27 @@ using namespace StSpinJet;
 
 const int StBET4pMakerImp::mNOfBemcTowers;
 
-StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,  StBemcTables* bemcTables)
+StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker, CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC)
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
   , mEeGeom(0)
   , mEeDb(0)
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(uDstMaker))
-  , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(uDstMaker, bemcTables))
+  , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
 {
   cout <<"StBET4pMakerImp::StBET4pMakerImp()"<<endl;
   assert(mMuDstMaker);
 }
 
-void StBET4pMakerImp::setUse2003Cuts(bool v)
-{ 
-  _collectEnergyDepositsFromBEMC->setUse2003Cuts(v);
-}
-
-void StBET4pMakerImp::setUse2005Cuts(bool v)
-{ 
-  _collectEnergyDepositsFromBEMC->setUse2005Cuts(v);
-}
+//void StBET4pMakerImp::setUse2003Cuts(bool v)
+//{ 
+//  _collectEnergyDepositsFromBEMC->setUse2003Cuts(v);
+//}
+//
+//void StBET4pMakerImp::setUse2005Cuts(bool v)
+//{ 
+//  _collectEnergyDepositsFromBEMC->setUse2005Cuts(v);
+//}
 
 void StBET4pMakerImp::setUse2006Cuts(bool v)
 {
