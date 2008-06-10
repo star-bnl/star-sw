@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.52 2008/06/10 02:20:56 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.53 2008/06/10 05:40:43 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -40,8 +40,6 @@ const int StBET4pMakerImp::mNOfBemcTowers;
 StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,  StBemcTables* bemcTables)
   : mUseEndcap(false)
   , mMuDstMaker(uDstMaker)
-    //  , mDylanPoints(0)
-    //  , mSumEmcEt(0.0)
   , mEeGeom(0)
   , mEeDb(0)
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(uDstMaker))
