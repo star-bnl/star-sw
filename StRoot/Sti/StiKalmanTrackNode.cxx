@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.118 2008/06/09 20:12:09 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.119 2008/06/11 22:04:37 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.119  2008/06/11 22:04:37  fisyak
+ * Add dead material
+ *
  * Revision 2.118  2008/06/09 20:12:09  perev
  * BigStepBack
  *
@@ -373,8 +376,8 @@ using namespace std;
 #include "TMath.h"
 #include "StMessMgr.h"
 
-#define PrP(A)    { LOG_DEBUG << "\t" << (#A) << " = \t" << ( A ) }
-#define PrPP(A,B) {LOG_DEBUG  << "=== StiKalmanTrackNode::" << (#A); PrP((B)); LOG_DEBUG << endm;}
+#define PrP(A)    { LOG_INFO << "\t" << (#A) << " = \t" << ( A ) }
+#define PrPP(A,B) {LOG_INFO  << "=== StiKalmanTrackNode::" << (#A); PrP((B)); LOG_INFO << endm;}
 // Local Track Model
 //
 // x[0] = y  coordinate
@@ -1117,7 +1120,7 @@ void StiKalmanTrackNode::propagateError()
   errPropag6(mFE.A,mMtx().A,kNPars);
   int smallErr = !(mFE._cYY>1e-20 && mFE._cZZ>1e-20 && mFE._cEE>1e-20&& mFE._cPP>1.e-30&& mFE._cTT>1.e-20);
   if (smallErr) {
-    LOG_DEBUG << Form("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g"
+    LOG_INFO << Form("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g"
           ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cPP,mFE._cTT) << endm;
     assert(mFE._cYY>0 && mFE._cZZ>0 && mFE._cEE>0 && mFE._cPP>0 && mFE._cTT>0);
   }
@@ -2000,7 +2003,7 @@ void   StiKalmanTrackNode::PrintpT(Char_t *opt) {
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {
-  LOG_DEBUG << comment << "\t" << commentdEdx << endm;
+  LOG_INFO << comment << "\t" << commentdEdx << endm;
   ResetComment();
 }
 //________________________________________________________________________________
