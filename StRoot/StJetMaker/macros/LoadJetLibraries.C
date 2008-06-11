@@ -1,9 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.1 2008/06/11 01:05:39 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.2 2008/06/11 02:42:05 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries ()
 {
+  setLibraryPath();
+
   TString LoadJetLibraries_STAR_VERSION = TString("LoadJetLibraries_") + gSystem->Getenv("STAR_VERSION") + "()";
 
   gROOT->ProcessLine(LoadJetLibraries_STAR_VERSION.Data());
@@ -83,3 +85,20 @@ void LoadJetLibraries_SL08b()
   gSystem->Load("StChargedPionAnalysisMaker");
   gSystem->Load("StSkimPionMaker");
 }
+
+
+void setLibraryPath()
+{
+  TString path(gSystem->GetDynamicPath());
+  TString pwd(gSystem->pwd());
+  if(TString("StRoot") == gSystem->BaseName(pwd)) {
+    path = TString("../.") + gSystem->Getenv("STAR_HOST_SYS") + "/lib:" + path;
+  } else if("StRoot/StJetMaker" == pwd(pwd.Length() - TString("StRoot/StJetMaker").Length(), TString("StRoot/StJetMaker").Length())) {
+    path = TString("../../.") + gSystem->Getenv("STAR_HOST_SYS") + "/lib:" + path;
+  } else if("StRoot/StJetMaker/macros" == pwd(pwd.Length() - TString("StRoot/StJetMaker/macros").Length(), TString("StRoot/StJetMaker/macros").Length())) {
+    path = TString("../../../.") + gSystem->Getenv("STAR_HOST_SYS") + "/lib:" + path;
+  }
+  path = ".:" + path;
+  gSystem->SetDynamicPath(path);
+}
+
