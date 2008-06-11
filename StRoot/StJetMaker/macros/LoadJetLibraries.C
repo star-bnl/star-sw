@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.2 2008/06/11 02:42:05 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.3 2008/06/11 02:44:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
-void LoadJetLibraries ()
+void LoadJetLibraries()
 {
   setLibraryPath();
 
