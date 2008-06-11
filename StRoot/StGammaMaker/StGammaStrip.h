@@ -11,22 +11,22 @@ class StGammaStrip : public TObject
 {
  public:
   StGammaStrip();
-  ~StGammaStrip(){ /* nada */ };
-  UInt_t  index;   // index of strip in plane
-  UChar_t sector;  // or bemc module
-  UChar_t plane;   // 0=esmd-u 1=esmdv 10=bsmd-eta 11=bsmd-phi
+  ~StGammaStrip(){ /* nada */ }
+  Int_t index;   // index of strip in plane
+  Int_t sector;  // or bemc module
+  Int_t plane;   // 0=esmd-u 1=esmdv 10=bsmd-eta 11=bsmd-phi
   Float_t energy;  // energy deposited
   Float_t position; // Reference position for the calculation of moments
                     // bsmd-eta -> theta
                     // bsmd-phi -> phi
                     // esmd-u -> u index
                     // esmd-v -> v index
-  UChar_t stat;  // status bits (non fatal HW problems)
-  UChar_t fail;    // fail bits (fatal HW problems)
+  Int_t stat;  // status bits (non fatal HW problems)
+  Int_t fail;    // fail bits (fatal HW problems)
   TRefArray candidates; // referencing candidates
   void print();
 
-  ClassDef(StGammaStrip,1);
+  ClassDef(StGammaStrip,2);
 };
 typedef std::vector<StGammaStrip> StGammaStripVec_t;
 

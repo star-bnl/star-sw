@@ -1,17 +1,11 @@
 #include "StGammaRawMaker.h"
 
-#include "StMessMgr.h"
-
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 #include "StEventTypes.h"
-
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/others/emcDetectorName.h"
@@ -59,17 +53,14 @@ Int_t StGammaRawMaker::Init()
 // event processing
 Int_t StGammaRawMaker::Make()
 {
-
-  StMuDstMaker *mumk=(StMuDstMaker*)GetMaker("MuDst");
-  if ( !mumk )
+  if ( !GetDataSet("MuDst") )
     {
       LOG_WARN<<"No MuDst, you fool!"<<endm;
       return kStWarn;
     }
 
 #ifndef __HACK_VERTEX__
-  StMuPrimaryVertex *pv=mumk->muDst()->primaryVertex();
-  if ( !pv ) 
+  if ( !StMuDst::numberOfPrimaryVertices() ) 
     {
       return kStOK;
     }
@@ -128,20 +119,18 @@ void StGammaRawMaker::GetBarrel(){
   }
 
   // get gamma event
-  StGammaEvent *gevent = 0;
-  if ( !GetMaker("gemaker") ) 
+  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
+  if (!gemaker)
     {
       LOG_DEBUG << " StGammaEventMaker not in chain, no tree for you" << endm;
-    }
-  else 
-    {
-      StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMaker("gemaker");
-      gevent = gemaker -> event();
+      return;
     }
 
-  StEmcCollection* emc = 0;
+  StGammaEvent* gevent = gemaker -> event();
+  assert(gevent);
+
   StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-  emc = event ? event->emcCollection() : StMuDst::emcCollection();
+  StEmcCollection* emc = event ? event->emcCollection() : StMuDst::emcCollection();
   if (!emc) return;
 
   StEmcDetector* btow = emc->detector(kBarrelEmcTowerId); // BTOW
@@ -170,7 +159,7 @@ void StGammaRawMaker::GetBarrel(){
   }
   
   //And now we can implement Alex's new StEmcAdc2EMaker test
-  StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
+  StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMakerInheritsFrom("StEmcADCtoEMaker");
   if (!adc2e) {
     LOG_DEBUG << "adc2e in chain" << endm;
   }
@@ -359,18 +348,16 @@ void StGammaRawMaker::GetTracks(){
     return;
   }
 
-  // get gamma event
-  StGammaEvent *gevent = 0;
-  if ( !GetMaker("gemaker") ) 
+  // Get gamma event
+  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
+  if ( !gemaker )
     {
       LOG_DEBUG<<" StGammaEventMaker not in chain, no tree for you"<<endm;
-    }
-  else 
-    {
-      StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMaker("gemaker");
-      gevent = gemaker -> event();
+      return;
     }
 
+  StGammaEvent* gevent = gemaker -> event();
+  assert(gevent);
 
 #ifdef __GLOBAL_TRACKS__
   TIter next(StMuDst::globalTracks()); // do we want global tracks here?????
@@ -391,44 +378,34 @@ void StGammaRawMaker::GetTracks(){
 void StGammaRawMaker::GetEndcap()
 {
 
-  StMuDstMaker *mumk=(StMuDstMaker*)GetMaker("MuDst");
-  if ( !mumk )
-    {
-      return;
-    }
-
 #ifndef __HACK_VERTEX__
-  StMuPrimaryVertex *pv=mumk->muDst()->primaryVertex();
-  if ( !pv ) 
+  if ( !StMuDst::numberOfPrimaryVertices()  ) 
     {
       return; // we're going to need tracking, therefore vertex
     }
-  Float_t zvertex = pv->position().z();
+  Float_t zvertex = StMuDst::event()->primaryVertexPosition().z();
 #endif
+
 #ifdef __HACK_VERTEX__
   Float_t zvertex = 0.0;
 #endif
 
-  StEEmcA2EMaker *adc2e=(StEEmcA2EMaker*)GetMaker("mEEanalysis");
+  StEEmcA2EMaker *adc2e=(StEEmcA2EMaker*)GetMakerInheritsFrom("StEEmcA2EMaker");
   if ( !adc2e )
     {
       LOG_WARN<<"StEEmcA2EMaker not found, no endcap for you"<<endm;
       return;
     }
 
-  // get gamma event
-  StGammaEvent *gevent = 0;
-  if ( !GetMaker("gemaker") ) 
-    {
-      LOG_DEBUG<<" StGammaEventMaker not in chain, no tree for you"<<endm;
-    }
-  else 
-    {
-      StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMaker("gemaker");
-      gevent = gemaker -> event();
-    }
+  // Get gamma event
+  StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
+  if (!gemaker) {
+    LOG_DEBUG<<" StGammaEventMaker not in chain, no tree for you"<<endm;
+    return;
+  }
 
-
+  StGammaEvent* gevent = gemaker -> event();
+  assert(gevent);
 
   // define the momentum of the tower as pointing from the
   // vertex to the following depths

@@ -19,11 +19,11 @@ ClassImp(StBarrelEmcClusterMaker);
 int StBarrelEmcClusterMaker::Init()
 {
   // Get gamma event maker
-  mGammaEventMaker = (StGammaEventMaker*)GetMaker("gemaker");
+  mGammaEventMaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
   assert(mGammaEventMaker);
 
   // Get gamma raw maker
-  mGammaRawMaker = (StGammaRawMaker*)GetMaker("grawmaker");
+  mGammaRawMaker = (StGammaRawMaker*)GetMakerInheritsFrom("StGammaRawMaker");
   assert(mGammaRawMaker);
   return StMaker::Init();
 }
@@ -31,7 +31,7 @@ int StBarrelEmcClusterMaker::Init()
 void StBarrelEmcClusterMaker::Clear(Option_t* option)
 {
   mVertex.SetXYZ(0,0,0);
-  for (unsigned i = 0; i < mClusters.size(); ++i) {
+  for (size_t i = 0; i < mClusters.size(); ++i) {
     delete mClusters[i];
     mClusters[i] = 0;
   }

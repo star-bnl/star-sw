@@ -33,7 +33,7 @@ int StGammaPythiaEventMaker::Make()
     }
 
   // Get base StPythiaEvent pointer from StMCAsymMaker
-  StMCAsymMaker* asym = (StMCAsymMaker*)GetMaker("MCAsym");
+  StMCAsymMaker* asym = (StMCAsymMaker*)GetMakerInheritsFrom("StMCAsymMaker");
   if (!asym) {
     LOG_WARN << "No StMCAsymMaker" << endm;
     return kStWarn;

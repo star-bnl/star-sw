@@ -4,16 +4,20 @@
 // 28 July 2007
 //
 
-#include "TVirtualFitter.h"
+// ROOT
+#include "TFile.h"
 #include "TH1.h"
 #include "TF1.h"
+#include "TCanvas.h"
 
-#include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
+// STAR
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StEEmcUtil/EEmcSmdMap/EEmcSmdMap.h"
 #include "StEEmcUtil/StEEmcSmd/EEmcSmdGeom.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
+// Local
+#include "StGammaEvent.h"
 #include "StGammaCandidate.h"
 #include "StGammaFitterResult.h"
 #include "StGammaFitter.h"
@@ -21,36 +25,42 @@
 ClassImp(StGammaFitter);
 
 StGammaFitter* StGammaFitter::mInstance = 0;
-const char* StGammaFitter::mFormula = "[0]*(0.69*exp(-0.5*((x-[1])/0.87)**2)/(sqrt(2*pi)*0.87)+0.31*exp(-0.5*((x-[1])/3.3)**2)/(sqrt(2*pi)*3.3))";
-
-TVirtualFitter* StGammaFitter::mMinuit = 0;
 TH1* StGammaFitter::hU = 0;
 TH1* StGammaFitter::hV = 0;
-TF1* StGammaFitter::fU = 0;
-TF1* StGammaFitter::fV = 0;
+TF1* StGammaFitter::fFit[2];
 TF1* StGammaFitter::fResidualCut = 0;
+int StGammaFitter::mNdf = 0;
+TCanvas* StGammaFitter::mCanvas = 0;
+TF1* StGammaFitter::mShowerShapes[3];
 
 StGammaFitter::StGammaFitter()
 {
-  mMinuit = TVirtualFitter::Fitter(0, 3);
-  mMinuit->SetFCN(fcn);
-
   hU = new TH1F("hU", "hU", 288, 0, 288);
   hV = new TH1F("hV", "hV", 288, 0, 288);
 
-  fU = new TF1("fU", mFormula, 0, 288);
-  fV = new TF1("fV", mFormula, 0, 288);
-
   fResidualCut = new TF1("fResidualCut", "pol2", 0, 200);
   fResidualCut->SetParameters(100, 0, 0.05);
+
+  // Initialize shower shapes with fits from Ilya based on his gamma-jet analysis for
+  // different preshower conditions.
+  // See http://www.star.bnl.gov/protected/spin/seluzhen/gammaJet/2008.05.27/showerShapes_comparison.html
+  static const char* formula[] = {
+    "[0]*(0.669864*exp(-0.5*sq((x-[1])/0.574864))+0.272997*exp(-0.5*sq((x-[1])/-1.84608))+0.0585682*exp(-0.5*sq((x-[1])/5.49802)))", // pre1=0, pre2=0
+    "[0]*(0.0694729*exp(-0.5*sq((x-[1])/5.65413))+0.615724*exp(-0.5*sq((x-[1])/0.590723))+0.314777*exp(-0.5*sq((x-[1])/2.00192)))", // pre1=0, pre2>0
+    "[0]*(0.0955638*exp(-0.5*sq((x-[1])/5.59675))+0.558661*exp(-0.5*sq((x-[1])/0.567596))+0.345896*exp(-0.5*sq((x-[1])/1.9914)))" // pre1>0, pre2>0
+  };
+
+  for (int i = 0; i < 3; ++i) {
+    const char* name = Form("mShowerShapes%d", i);
+    mShowerShapes[i] = new TF1(name, formula[i], 0, 288);
+  }
 }
 
 StGammaFitter::~StGammaFitter()
 {
+  // Never called???
   delete hU;
   delete hV;
-  delete fU;
-  delete fV;
   delete fResidualCut;
 }
 
@@ -60,110 +70,72 @@ StGammaFitter* StGammaFitter::instance()
   return mInstance;
 }
 
-int StGammaFitter::fitSector(StGammaCandidate* candidate, StGammaFitterResult* fit)
+int StGammaFitter::fit(StGammaCandidate* candidate, StGammaFitterResult* fits)
 {
-  // Require at least 2 hits in each plane
-  if (candidate->numberOfSmdu() < 2 || candidate->numberOfSmdv() < 2)
-    return 9;			// reserved status code
+  // Require at least 5 strips in each SMD plane
+  if (candidate->numberOfSmdu() < 5) return 9;
+  if (candidate->numberOfSmdv() < 5) return 9;
 
-  // Get EEMC hits
-  hU->Reset();
+  // Clear fit results
+  memset(fits, 0, 2 * sizeof(StGammaFitterResult));
 
-  for (int i = 0; i < candidate->numberOfSmdu(); ++i) {
-    StGammaStrip* strip = candidate->smdu(i);
-    hU->Fill(strip->index, 1000 * strip->energy); // MeV
+  TF1* fit = 0;
+
+  if (candidate->pre1Energy() == 0 && candidate->pre2Energy() == 0)
+    fit = mShowerShapes[0];
+  else if (candidate->pre1Energy() == 0 && candidate->pre2Energy() > 0)
+    fit = mShowerShapes[1];
+  else if (candidate->pre1Energy() > 0 && candidate->pre2Energy() > 0)
+    fit = mShowerShapes[2];
+  else
+    return 9;
+
+  // Loop over planes
+  for (int plane = 0; plane < 2; ++plane) {
+    static TH1* hStrips = new TH1F("hStrips", "hStrips", 288, 0, 288);
+    hStrips->Reset();
+
+    switch (plane) {
+    case 0:
+      for (int i = 0; i < candidate->numberOfSmdu(); ++i) {
+	StGammaStrip* strip = candidate->smdu(i);
+	hStrips->Fill(strip->index, strip->energy);
+      }
+      break;
+    case 1:
+      for (int i = 0; i < candidate->numberOfSmdv(); ++i) {
+	StGammaStrip* strip = candidate->smdv(i);
+	hStrips->Fill(strip->index, strip->energy);
+      }
+      break;
+    }
+
+    // Find maximum strip
+    int mean = hStrips->GetMaximumBin();
+
+    // Integrate yield from +/- 2 strips of max strip
+    int bin1 = max(1,   mean - 2);
+    int bin2 = min(288, mean + 2);
+
+    // Fit to Ilya's shower shape
+    float yield = hStrips->Integral(bin1, bin2);
+    fit->SetParameters(yield, hStrips->GetBinLowEdge(mean));
+    hStrips->Fit(fit, "WW", "", hStrips->GetBinLowEdge(bin1), hStrips->GetBinLowEdge(bin2));
+
+    // Save fit results
+    fits[plane].yield = yield;
+    fits[plane].yieldError = 0;
+    fits[plane].centroid = fit->GetParameter(1);
+    fits[plane].centroidError = fit->GetParError(1);
+    fits[plane].residual = residual(hStrips, fit);
+    fits[plane].mean = hStrips->GetMean();
+    fits[plane].rms = hStrips->GetRMS();
+    fits[plane].chiSquare = fit->GetChisquare();
+    fits[plane].ndf = fit->GetNDF();
+    fits[plane].prob = fit->GetProb();
   }
 
-  hV->Reset();
-
-  for (int i = 0; i < candidate->numberOfSmdv(); ++i) {
-    StGammaStrip* strip = candidate->smdv(i);
-    hV->Fill(strip->index, 1000 * strip->energy); // MeV
-  }  
-
-  // Get seed tower
-  int sector, subsector, etabin;
-  StGammaTower* tower = candidate->mytower(0);
-  if (tower) {
-    sector    = tower->sector();
-    subsector = tower->subsector();
-    etabin    = tower->etabin();
-  }
-  else {
-    EEmcGeomSimple::Instance().getTower(candidate->position(), sector, subsector, etabin);
-  }
-
-  // Get range of SMD strips under the seed tower
-  int uMin, uMax, vMin, vMax;
-  EEmcSmdMap::instance()->getRangeU(sector, subsector, etabin, uMin, uMax);
-  EEmcSmdMap::instance()->getRangeV(sector, subsector, etabin, vMin, vMax);
-
-  hU->SetAxisRange(uMin, uMax);
-  hV->SetAxisRange(vMin, vMax);
-
-  float uyield = 0;
-  float vyield = 0;
-  float umean = 0;
-  float vmean = 0;
-
-  estimateYieldMean(hU, uyield, umean);
-  estimateYieldMean(hV, vyield, vmean);
-
-  float yield = 0.5 * (uyield + vyield);
-
-  mMinuit->SetParameter(0, "yield", yield, 0.1, 0, 1000);
-  mMinuit->SetParameter(1, "umean", umean, 0.1, umean-5, umean+5);
-  mMinuit->SetParameter(2, "vmean", vmean, 0.1, vmean-5, vmean+5);
-
-  mMinuit->ExecuteCommand("CALL FCN", 0, 0);
-  int status = mMinuit->ExecuteCommand("MINImize", 0, 0);
-
-  //
-  //  Returns the status of the execution:
-  //    = 0: command executed normally
-  //      1: command is blank, ignored
-  //      2: command line unreadable, ignored
-  //      3: unknown command, ignored
-  //      4: abnormal termination (e.g., MIGRAD not converged)
-  //      5: command is a request to read PARAMETER definitions
-  //      6: 'SET INPUT' command
-  //      7: 'SET TITLE' command
-  //      8: 'SET COVAR' command
-  //      9: reserved
-  //     10: END command
-  //     11: EXIT or STOP command
-  //     12: RETURN command
-  //
-
-  mMinuit->PrintResults(1, 0);
-
-  double par[] = {
-    mMinuit->GetParameter(0),
-    mMinuit->GetParameter(1),
-    mMinuit->GetParameter(2)
-  };
-
-  int npar;
-  double chiSquare;
-  fcn(npar, 0, chiSquare, par, 0);
-
-  float ures = residual(hU, fU);
-  float vres = residual(hV, fV);
-  float totalYield = 2 * mMinuit->GetParameter(0);
-  float likelihood = distanceToQuadraticCut(ures + vres, totalYield);
-
-  fit->setYield(mMinuit->GetParameter(0), mMinuit->GetParError(0));
-  fit->setUmean(mMinuit->GetParameter(1), mMinuit->GetParError(1));
-  fit->setVmean(mMinuit->GetParameter(2), mMinuit->GetParError(2));
-  fit->setUresidual(ures);
-  fit->setVresidual(vres);
-  fit->setUsigma(hU->GetRMS());
-  fit->setVsigma(hV->GetRMS());
-  fit->setChiSquare(chiSquare);
-  fit->setNdf(npar);
-  fit->setLikelihood(likelihood);
-
-  return status;
+  return 0;
 }
 
 void StGammaFitter::estimateYieldMean(TH1* h1, float& yield, float& mean)
@@ -179,13 +151,10 @@ float StGammaFitter::residual(TH1* h1, TF1* f1)
 {
   int mean = h1->FindBin(f1->GetParameter(1));
 
-  int leftMin = max(mean - 40, 1);
-  int leftMax = max(mean -  2, 1);
-
-  int rightMin = min(mean +  2, 288);
-  int rightMax = min(mean + 40, 288);
-
+  int leftMin = 1;
+  int leftMax = max(mean - 3, 1);
   float leftResidual = 0;
+
   for (int bin = leftMin; bin <= leftMax; ++bin) {
     float data = h1->GetBinContent(bin);
     float x = h1->GetBinCenter(bin);
@@ -193,7 +162,10 @@ float StGammaFitter::residual(TH1* h1, TF1* f1)
     leftResidual += data - fit;
   }
 
+  int rightMin = min(mean + 3, 288);
+  int rightMax = 288;
   float rightResidual = 0;
+
   for (int bin = rightMin; bin <= rightMax; ++bin) {
     float data = h1->GetBinContent(bin);
     float x = h1->GetBinCenter(bin);
@@ -202,47 +174,6 @@ float StGammaFitter::residual(TH1* h1, TF1* f1)
   }
 
   return max(leftResidual, rightResidual);
-}
-
-void StGammaFitter::fcn(int& npar, double* gin, double& f, double* par, int iflag)
-{
-  npar = 0;
-  f = 0;
-
-  fU->SetParameters(par[0], par[1]);
-  fV->SetParameters(par[0], par[2]);
-
-  int umean = hU->FindBin(par[1]);
-  int umin = max(umean - 40, 1);
-  int umax = min(umean + 40, 288);
-
-  for (int bin = umin; bin <= umax; ++bin) {
-    double y = hU->GetBinContent(bin);
-    if (!y) continue;
-    ++npar;
-    double dy = hU->GetBinError(bin);
-    double x  = hU->GetBinCenter(bin);
-    double fx = fU->Eval(x);
-    double chi = (y - fx) / dy;
-    f += chi * chi;
-  }
-
-  int vmean = hV->FindBin(par[2]);
-  int vmin = max(vmean - 40, 1);
-  int vmax = min(vmean + 40, 288);
-
-  for (int bin = vmin; bin <= vmax; ++bin) {
-    double y = hV->GetBinContent(bin);
-    if (!y) continue;
-    ++npar;
-    double dy = hV->GetBinError(bin);
-    double x  = hV->GetBinCenter(bin);
-    double fx = fV->Eval(x);
-    double chi = (y - fx) / dy;
-    f += chi * chi;
-  }
-
-  npar -= 3;
 }
 
 double StGammaFitter::distanceToQuadraticCut(double x, double y)
@@ -271,7 +202,24 @@ double StGammaFitter::distanceToQuadraticCut(double x, double y)
       LOG_ERROR << "Can't find positive root" << endm;
     }
   }
+
   double y1 = fResidualCut->Eval(x1);
   double d = hypot(x - x1, y - y1);
+
   return (y > fResidualCut->Eval(x)) ? d : -d;
+}
+
+float StGammaFitter::GetMaximum(TH1* h1, float xmin, float xmax)
+{
+  int bin1 = h1->FindBin(xmin);
+  int bin2 = h1->FindBin(xmax);
+
+  float ymax = 0;
+
+  for (int bin = bin1; bin <= bin2; ++bin) {
+    float y = h1->GetBinContent(bin);
+    if (y > ymax) ymax = y;
+  }
+
+  return ymax;
 }

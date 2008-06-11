@@ -17,9 +17,9 @@ StGammaEventMaker::StGammaEventMaker(const Char_t *name):StMaker(name) { /* nada
 // -------------------------------------------------------------------
 Int_t StGammaEventMaker::Init()
 {
-  mGammaEvent=new StGammaEvent();
+  mGammaEvent = new StGammaEvent;
   mPythia = 0;
-  mPythiaMaker = (StGammaPythiaEventMaker*)GetMaker("GammaPythia");
+  mPythiaMaker = (StGammaPythiaEventMaker*)GetMakerInheritsFrom("StGammaPythiaEventMaker");
   if (mPythiaMaker) {
     mPythia = new StGammaPythiaEvent;
     mPythiaMaker->SetPythia(mPythia);
@@ -28,7 +28,8 @@ Int_t StGammaEventMaker::Init()
   AddObj(mGammaEvent,".data"); // ok, but what can I do with this?
  
   // Instantiate mDustMaker
-  muDstMaker  = dynamic_cast<StMuDstMaker*>(GetMaker("MuDst")); assert(muDstMaker);
+  muDstMaker  = dynamic_cast<StMuDstMaker*>(GetMakerInheritsFrom("StMuDstMaker"));
+  assert(muDstMaker);
 
   return StMaker::Init();
 }
@@ -43,18 +44,8 @@ Int_t StGammaEventMaker::Make()
       return kStFatal;
     }
 
-  StMuPrimaryVertex *pv = StMuDst::primaryVertex();
-  if ( pv )
-    {
-      mGammaEvent->SetVertex(TVector3(pv->position().xyz()));
-      mGammaEvent->mFlags |= TPC_VERTEX;
-    }
-  else
-    {
-      mGammaEvent->SetVertex(TVector3(0.,0.,0.));
-      mGammaEvent->mFlags |= !(TPC_VERTEX);
-    }
-
+  mGammaEvent -> mFlags |= StMuDst::numberOfPrimaryVertices() ? TPC_VERTEX : !TPC_VERTEX;
+  mGammaEvent -> SetVertex( StMuDst::event()->primaryVertexPosition().xyz() );
   mGammaEvent -> SetRunNumber( StMuDst::event()->runNumber() );
   mGammaEvent -> SetEventNumber( StMuDst::event()->eventNumber() );
   mGammaEvent -> SetMudstFileName( muDstMaker->chain()->GetFile()->GetName() );

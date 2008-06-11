@@ -1,5 +1,5 @@
 //-- switch should be commented out when analysing real data
-#define MONTE_CARLO
+//#define MONTE_CARLO
 
 class StChain;
 class St_db_Maker;
@@ -22,21 +22,14 @@ Int_t               stat          = 0;
 Int_t prescale = 1; 
 
 void runGammaTreeMaker( Int_t nevents = -1, 
-			 //Char_t *name = "7146009.list", 
-			 //Char_t *ofile= "7146009.root",
-			 Char_t *name="/star/institutions/mit/betan/Simulation/photon_9_11_1.MuDst.root",
-			 Char_t *ofile="photon_9_11_1.gtree.root",
-			 Char_t *path = "", 
-			 Int_t nfiles = 100
-			 )
+			Char_t *name = "/star/institutions/iucf/hew/2006ppLongRuns/7136022/st_physics_7136022_raw_1010001.MuDst.root",
+			Char_t *ofile = "st_physics_7136022_raw_1010001.gtree.root",
+			Char_t *path = "", 
+			Int_t nfiles = 100
+			)
 {
  
-  // Char_t *gname="*.geant.root";
-
-  gROOT->LoadMacro("StRoot/StGammaMaker/macros/loadGammaLibs.C"); 
-  loadGammaLibs(); 
-  gMessMgr -> SwitchOff("D");
-  gMessMgr -> SwitchOff("I");
+  gROOT->Macro("StRoot/StGammaMaker/macros/loadGammaLibs.C"); 
   TString pathname = path; 
   pathname += name;
   mChain = new StChain("chain");
@@ -69,10 +62,14 @@ void runGammaTreeMaker( Int_t nevents = -1,
   mMuDstMaker->SetStatus("MuEvent",1);
   mMuDstMaker->SetStatus("EmcAll",1);
   mMuDstMaker->SetStatus("PrimaryTracks",1);
-#endif 
+#endif
 
   //StMuDbReader *db = StMuDbReader::instance();
   //StDetectorDbMaker *detdb = new StDetectorDbMaker();  
+
+  StTriggerFilterMaker *filterMaker = new StTriggerFilterMaker;
+  filterMaker->addTrigger(137641);
+
   //  mStarDatabase = new St_db_Maker("StarDb", "MySQL:StarDb");
   mStarDatabase = new St_db_Maker("StarDb", "MySQL:StarDb", "$STAR/StarDb");
 
@@ -139,17 +136,22 @@ void runGammaTreeMaker( Int_t nevents = -1,
   StGammaPythiaEventMaker* pythia = new StGammaPythiaEventMaker;
 #endif
 
-  StGammaEventMaker    *gemaker = new StGammaEventMaker;
-  StGammaRawMaker       *raw    = new StGammaRawMaker; 
-  StBarrelEmcClusterMaker* ecl  = new StBarrelEmcClusterMaker;
-  StGammaCandidateMaker *gcm    = new StGammaCandidateMaker;
-  StGammaTreeMaker      *gtm    = new StGammaTreeMaker;
+  StGammaEventMaker* gemaker = new StGammaEventMaker;
+  StGammaRawMaker* raw = new StGammaRawMaker; 
+  StBarrelEmcClusterMaker* ecl = new StBarrelEmcClusterMaker;
+  StGammaCandidateMaker* gcm = new StGammaCandidateMaker;
+  gcm->SetCompressLevel(0); // 0=No compression, 1=Compress SMD, 2=Compress All
+
+#ifndef MONTE_CARLO
+  StSpinDbMaker* spinDb = new StSpinDbMaker;
+  StGammaSpinMaker* gspmaker = new StGammaSpinMaker;
+#endif
+
+  StGammaTreeMaker* gtm = new StGammaTreeMaker;
   gtm->SetFilename(ofile);
 
   mChain->ls(3);
-
   mChain->Init();
-
 
   //-----------------------------------------------------------------
   //--

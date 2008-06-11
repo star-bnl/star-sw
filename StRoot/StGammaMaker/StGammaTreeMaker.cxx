@@ -3,13 +3,11 @@
 #include <TFile.h>
 #include <TTree.h>
 
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StEventTypes.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 #include "StGammaEventMaker.h"
-#include   "StGammaEvent.h"
+#include  "StGammaEvent.h"
 
 #include "StGammaRawMaker.h"
 
@@ -20,7 +18,10 @@ ClassImp(StGammaTreeMaker);
 // ---------------------------------------------------------------------
 StGammaTreeMaker::StGammaTreeMaker(const Char_t *name):StMaker(name)
 {
-  mFilename="gamma_tree.root";
+  mFilename   = "gammas.gtree.root";
+  mGammaFile  = 0;
+  mGammaTree  = 0;
+  mGammaEvent = 0;
 }
 
 // ---------------------------------------------------------------------
@@ -29,11 +30,11 @@ Int_t StGammaTreeMaker::Init()
   if ( !mGammaFile )
     mGammaFile=new TFile(mFilename,"RECREATE");
   if ( !mGammaTree ) {
-    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.6 2007/07/24 22:22:54 pibero Exp $ built "__DATE__" "__TIME__);    
+    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.7 2008/06/11 20:49:35 pibero Exp $ built "__DATE__" "__TIME__);    
     mGammaTree->SetDirectory(mGammaFile);
   }
 
-  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMaker("gemaker");
+  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
   assert(gemaker);
 
   mGammaEvent = gemaker->event();
@@ -60,25 +61,8 @@ Int_t StGammaTreeMaker::Finish()
 
 Int_t StGammaTreeMaker::Make()
 {
-
-  if ( !GetDataSet("MuDst") ) 
-    {
-      LOG_DEBUG<<" +++++ MuDst is missing from the chain +++++" << endm;
-      return kStFatal;
-    }
-
-
-  // copy raw information into the event
-  StGammaRawMaker *rawmk = (StGammaRawMaker*)GetMaker("grawmaker");
-  if ( !rawmk ) 
-    {
-      LOG_WARN<<"StGammaRawMaker not in chain"<<endm;
-    }  
-
-
   // write out the tree
-  if ( mGammaEvent->numberOfCandidates() > 0 ) mGammaTree->Fill();
-
+  mGammaTree->Fill();
   return kStOK;
 
 }
@@ -87,4 +71,5 @@ Int_t StGammaTreeMaker::Make()
 void StGammaTreeMaker::Clear(Option_t *opts)
 {
   mGammaEvent->Clear();
+  StMaker::Clear(opts);
 }
