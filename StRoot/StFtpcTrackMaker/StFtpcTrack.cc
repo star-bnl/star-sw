@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.33 2007/01/15 08:23:02 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.34 2008/06/11 18:41:31 fine Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.34  2008/06/11 18:41:31  fine
+// Add FATAL_ERROR message
+//
 // Revision 1.33  2007/01/15 08:23:02  jcs
 // replace printf, cout and gMesMgr with Logger commands
 //
@@ -712,6 +715,13 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
     StThreeVector<Double_t> rvec(0., 0., zval[i]);
     StThreeVector<Double_t> nvec(0., 0., 1.);
     Double_t plength = pathLength(rvec, nvec);
+    if (plength >= NoSolution/2) {
+       LOG_FATAL << "This track "<< *this 
+                 << " with " 
+                 << i 
+                 << " points does not cross any plane."
+                 << endm;
+    }
     xhelix[i] = x(plength);
     yhelix[i] = y(plength);
     zhelix[i] = z(plength);
