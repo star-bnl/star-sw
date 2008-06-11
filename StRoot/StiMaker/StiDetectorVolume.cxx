@@ -1,4 +1,4 @@
-// $Id: StiDetectorVolume.cxx,v 2.4 2008/02/29 16:28:00 fisyak Exp $
+// $Id: StiDetectorVolume.cxx,v 2.5 2008/06/11 22:04:38 fisyak Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiDetectorVolume.h"
@@ -149,16 +149,43 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
               delete translate;
            } else {
               position = new TVolumePosition(0
-                                       ,place->getNormalYoffset()
-                                       ,place->getNormalRadius()
-                                       ,place->getZcenter()
-                                      );
+					     ,place->getNormalYoffset()
+					     ,place->getNormalRadius()
+					     ,place->getZcenter()
+					     ,GetMatrix(place->getNormalRefAngle())
+					     );
            }
         }  else  {
            position = new TVolumePosition(0, 0, 0, place->getZcenter());
         }
         position->SetNode(nextVolume);
         Add(nextVolume,position);
+#if 1
+	nextVolume->Print(); 
+	TShape *sh = nextVolume->GetShape();
+	sh->Print();
+	//	cout << "Material: " << sh->GetMaterial()->GetName() << " RadL. = " << sh->GetMaterial()->GetRadLength() << endl;
+	if (sh->InheritsFrom("TBRIK")) {
+	  TBRIK *brik = (TBRIK *) sh;
+	  cout << " dx " << brik->GetDx()
+	       << " dy " << brik->GetDy()
+	       << " dz " << brik->GetDz() << endl;
+	} else {
+	  if (sh->InheritsFrom("TTUBE")) {
+	    TTUBE *tube = (TTUBE *) sh;
+	    cout << " Rmin " << tube->GetRmin()
+		 << " Rmax " << tube->GetRmax()
+		 << " dz " << tube->GetDz();
+	  }
+	  if (sh->InheritsFrom("TTUBS")) {
+	    TTUBS *tubs = (TTUBS *) sh;
+	    cout << " Phi1 " << tubs->GetPhi1()
+		 << " Phi2 " << tubs->GetPhi2();
+	  }
+	  cout << endl;
+	}
+	position->Print();
+#endif
      }
   }
 }      
@@ -189,7 +216,7 @@ TShape *StiDetectorVolume::MakeShape(const StiPlanarShape &shape,const char*mate
              , "StiPlanarShape"
              , material
              , shape.getHalfWidth()
-             , shape.getThickness()
+             , shape.getThickness()/2
              , shape.getHalfDepth() );
 }
 

@@ -26,7 +26,7 @@
 /*
   Geant names: SVTT the mother of all SVT volumes
                  SFMO: is the mother of all Silicon Strip Detector volumes
-	         SOUM: Outer shileding structure
+	         SOUM: Outer shielding structure
 	         SXR[L,1,2]: Circular water feeds
 	         SCBM: Mother of All Cables
 	         SALM: aluminum shield mesh
@@ -151,9 +151,9 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
     // Si wafer
     sprintf(name, "Svt/Layer_%d/Wafers", layer);
     _waferShape[layer] = new StiPlanarShape(name,
-					    nWafers*_geometry->getWaferLength(),
+					    nWafers*3.15, //_geometry->getWaferLength(),
 					    2.*_geometry->getWaferThickness(),
-					    _geometry->getWaferWidth() );
+					    3.15);        //_geometry->getWaferWidth() );
     add(_waferShape[layer]);
     int nSectors = _config->getNumberOfLadders(svtBarrel)/2;
     setNSectors(layer,nSectors); 
@@ -277,6 +277,14 @@ void StiSvtDetectorBuilder::useVMCGeometry() {
 //     {"SLY3", "layer mother","HALL_1/CAVE_1/SVTT_1/SLY3_4/*","",""},
 //     {"SLY4", "layer mother","HALL_1/CAVE_1/SVTT_1/SLY4_5/*","",""},
 //     {"SLY5", "layer mother","HALL_1/CAVE_1/SVTT_1/SLY5_6/*","",""},
+    {"SELE","electronics mother volume","HALL_1/CAVE_1/SVTT_1/SLYD_1/SLSD_1/SELE_1","",""},//	Weight = 0.0422223[kG]
+#if 1
+    {"SEL1","electronics mother volume","HALL_1/CAVE_1/SVTT_1/SLYD_2/SLSD_1/SELE_1","",""},//	Weight = 0.0422223[kG]
+    {"SEL2","electronics mother volume","HALL_1/CAVE_1/SVTT_1/SLYD_3/SLSD_1/SELE_1","",""},//	Weight = 0.048099[kG]
+    {"SEL3","electronics mother volume","HALL_1/CAVE_1/SVTT_1/SLYD_4/SLSD_1/SELE_1","",""},//	Weight = 0.048099[kG]
+    {"SEL4","electronics mother volume","HALL_1/CAVE_1/SVTT_1/SLYD_5/SLSD_1/SELE_1","",""},//	Weight = 0.0510373[kG]
+    {"SEL5","electronics mother volume","HALL_1/CAVE_1/SVTT_1/SLYD_6/SLSD_1/SELE_1","",""},//	Weight = 0.0510373[kG]
+#endif
     //  {"SVTD", "an active wafer volume","HALL_1/CAVE_1/SVTT_1/SLY*/SLS*/SLD*/STL*/STS*/SVTD_1","svt","SVTD"}, // <+++
     {"SROD", "Support rod","HALL_1/CAVE_1/SVTT_1/SROD_1-2","",""},
     {"SBSP", "Beampipe support mother","HALL_1/CAVE_1/SVTT_1/SBSP_1-2","",""},
@@ -288,8 +296,9 @@ void StiSvtDetectorBuilder::useVMCGeometry() {
     {"SBRG", "Bracket joining the end rungs","HALL_1/CAVE_1/SVTT_1/SBRG_1-2/*","",""},
     {"SOER", "outer end ring","HALL_1/CAVE_1/SVTT_1/SOER_1-2/*","",""},
     {"SIRT", "inner end ring tube piece ","HALL_1/CAVE_1/SVTT_1/SIRT_1-2","",""},
-    {"SIRP", "inner end ring polygon piece ","HALL_1/CAVE_1/SVTT_1/SIRP_1-2","",""},
-    {"STAC", "twinax cable approximation, copper","HALL_1/CAVE_1/SVTT_1/SCON_1/STAC_1-2","",""}
+    {"SIRP", "inner end ring polygon piece ","HALL_1/CAVE_1/SVTT_1/SIRP_1-2","",""}
+    //?    {"STAC", "twinax cable approximation, copper","HALL_1/CAVE_1/SVTT_1/SCON_1/STAC_1-2","",""} 
+    // StiDetectorVolume	SVTT_1_SCON_1_STAC_1	StiDetector OBJ: TTUBE	STAC	StiCylindricalShape Rmin 21.935 Rmax 37.77 dz 86.9 
   };
   Int_t NoSvtVols = sizeof(SvtVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1/SVTT_1");

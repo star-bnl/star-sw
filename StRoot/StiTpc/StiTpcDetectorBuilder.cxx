@@ -25,6 +25,7 @@
 #include "StiTpcIsActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StTpcDb/StTpcDb.h"
 #include "StMatrixD.hh"
@@ -129,11 +130,13 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     Double_t dZ = 0;
     if(row<_nInnerPadrows) {
       pShape->setThickness(_padPlane->innerSectorPadLength());
-      dZ = _dimensions->innerEffectiveDriftDistance()/2;
+      //      dZ = _dimensions->innerEffectiveDriftDistance()/2;
+      dZ = St_tpcPadPlanesC::instance()->innerSectorPadPlaneZ();
     }
     else {
       pShape->setThickness(_padPlane->outerSectorPadLength());
-      dZ = _dimensions->outerEffectiveDriftDistance()/2;
+      //      dZ = _dimensions->outerEffectiveDriftDistance()/2;
+      dZ = St_tpcPadPlanesC::instance()->outerSectorPadPlaneZ();
     }
     pShape->setHalfDepth(dZ*24/NoStiSectors);
     pShape->setHalfWidth(_padPlane->PadPitchAtRow(row+1) * _padPlane->numberOfPadsAtRow(row+1) / 2.);
@@ -201,10 +204,12 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       int iRdo = rdoForPadrow(row+1);
       bool west = s_pRdoMasks->isOn(sector+1, iRdo);
       bool east = s_pRdoMasks->isOn( 24-(sector+1)%12, iRdo);
+#if 0
       if (row==12) {
 	east = false;
 	west = false;
       }
+#endif
       pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
       pDetector->setIsContinuousMedium(true);
       pDetector->setIsDiscreteScatterer(false);

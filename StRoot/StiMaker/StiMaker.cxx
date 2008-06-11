@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.187 2008/04/08 14:22:15 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.188 2008/06/11 22:04:38 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.188  2008/06/11 22:04:38  fisyak
+// Add dead material
+//
 // Revision 1.187  2008/04/08 14:22:15  fisyak
 // remove redundant includes
 //
@@ -789,7 +792,7 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   if (ds || strcmp(logInput,"STIGEOM")) return ds;
   
 //  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit->getDetectorBuilder(), kActive);
-  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit, TString(), kActive);
+  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit, TString(), 0);
   
   if (fVolume) { 
      if (gGeometry) {

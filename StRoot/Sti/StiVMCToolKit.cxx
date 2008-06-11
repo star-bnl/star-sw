@@ -770,11 +770,12 @@ void StiVMCToolKit::TestVMC4Reconstruction(){
   cout << "</table>" << endl;
 }
 //________________________________________________________________________________
-TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *pathT, TGeoVolume *volT, TGeoShape *newshape, TGeoMedium* newmed) {
+TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *pathT, 
+					   TGeoVolume *volT, TGeoShape *newshape, TGeoMedium* newmed) {
   // Alignment
   TObjArray *listP = gGeoManager->GetListOfPhysicalNodes();
   TGeoPhysicalNode *nodeP = 0;
-  TGeoTranslation *trP = 0;
+  TGeoCombiTrans *trP = 0;
   if (listP) {
     Int_t N = listP->GetEntries();
     for (Int_t i = 0; i < N; i++) {
@@ -803,12 +804,14 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
   if (Debug()) 
     cout << "\tmaster  x\t" << master[0] << "\ty\t" << master[1] << "\tz\t" << master[2] << endl;
   if (!nodeP) nodeP = gGeoManager->MakePhysicalNode(pathT);
+#if 0
   if (nodeP->IsAligned()) {
-    trP = (TGeoTranslation*)nodeP->GetNode()->GetMatrix();
+    trP = nodeP->GetNode()->GetMatrix();
     trP->SetTranslation(master[0], master[1], master[2]);
   } else {  
-    trP = new TGeoTranslation(master[0], master[1], master[2]);
-  }   
+    trP = new TGeoCombiTrans(master[0], master[1], master[2], nodeP->GetNode()->GetMatrix());
+  }  
+#endif 
   nodeP->Align(trP,newshape);//,kTRUE);
   TGeoVolume *newvol = nodeP->GetNode(-1)->GetVolume();
   if (Debug()) 
