@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.33 2008/05/22 21:26:21 fine Exp $
+// $Id: StDraw3D.cxx,v 1.34 2008/06/11 14:49:22 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -56,12 +56,12 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
    if (CheckCoin && pad ) {
       // define the background image
       TString backShape = detectorName;
-      backShape.ReplaceAll(",",".iv;");
+      backShape.ReplaceAll(",",".iv:");
       backShape+= ".iv";
       printf(" Setting the background shape to be 	%s\n", backShape.Data());
       gEnv->SetValue("Gui.InventorShapeDir",":.:StRoot/macros/graphics:$STAR/StRoot/macros/graphics");
-      gEnv->SetValue("Gui.InventorBackgroundShape",backShape.Data());
       if  (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")) {
+          viewer->SetDrawOption(backShape.Data());
          // Create Open GL viewer
 //        TGQt::SetCoinFlag(1);
          viewer->BeginScene();
@@ -157,7 +157,7 @@ StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColo
 
    static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
    static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
-   static const Style_t TrakSty = 1; static const Size_t TrakSiz = 1.00; static const Color_t TrakCol=kRed;
+   static const Style_t TrakSty = 1; static const Size_t TrakSiz = 2.00; static const Color_t TrakCol=kRed;
    static const Style_t VertSty = 5; static const Size_t VertSiz = 3.50; static const Color_t VertCol=kYellow;
    AddStyle(kVtx,         VertCol,VertSty,VertSiz);
    AddStyle(kPrimaryTrack,TrakCol,TrakSty,TrakSiz);
