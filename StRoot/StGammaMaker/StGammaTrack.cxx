@@ -5,61 +5,60 @@ ClassImp(StGammaTrack);
 
 StGammaTrack::StGammaTrack()
 {
-  mId = 0;
-  mFlag = -1;
-  mCharge = 0;
-  mNhits = 0;
-  mdEdx = 0;
+  id = 0;
+  flag = -1;
+  charge = 0;
+  nhits = 0;
+  dEdx = 0;
 }
 
 StGammaTrack::StGammaTrack(StMuTrack* track)
 {
-  mId = track->id();
-  mFlag = track->flag();
-  mCharge = track->charge();
-  mNhits = track->nHitsFit();
-  mdEdx = track->dEdx() / keV; 
-  mType = track->type();
-  mMomentum = track->momentum().xyz();
-  mDca = track->dcaGlobal().xyz();
-  mHelix = track->helix();
-  mOuterHelix = track->outerHelix();
+  id = track->id();
+  flag = track->flag();
+  charge = track->charge();
+  nhits = track->nHitsFit();
+  dEdx = track->dEdx() / keV; 
+  type = track->type();
+  momentum = track->momentum().xyz();
+  dca = track->dcaGlobal().xyz();
+  helix = track->helix();
+  outerHelix = track->outerHelix();
 }
 
 //
 // See $STAR/StRoot/StEmcUtil/projection/StEmcPosition.h
 //
-TVector3 StGammaTrack::positionAtRadius(double radius) const throw(Exception)
+TVector3 StGammaTrack::positionAtRadius(Double_t radius) const
 {
   static const pair<double, double> VALUE(999999999., 999999999.); // No solution
 
-  if (mOuterHelix.origin().perp() > radius) throw Exception();
-  pair<double, double> ss = mOuterHelix.pathLength(radius);
-  if (!finite(ss.first) || !finite(ss.second)) throw Exception();
-  if (ss == VALUE) throw Exception();
+  if (outerHelix.origin().perp() < radius) {
+    pair<double, double> ss = outerHelix.pathLength(radius);
+    if (finite(ss.first) && finite(ss.second) && ss != VALUE) {
+      double s = 0;
 
-  double s = 0;
+      if (ss.first > 0 && ss.second > 0 || ss.first >= 0 && ss.second < 0)
+	s = ss.first;
+      else if (ss.first < 0 && ss.second >= 0)
+	s = ss.second;
 
-  if (ss.first > 0 && ss.second > 0)
-    s = ss.first;
-  else if (ss.first >= 0 && ss.second < 0)
-    s = ss.first;
-  else if (ss.first < 0 && ss.second >= 0)
-    s = ss.second;
-  else
-    throw Exception();
+      if (s > 0) return outerHelix.at(s).xyz();
+    }
+  }
 
-  return mOuterHelix.at(s).xyz();
+  return TVector3(0,0,0);
 }
 
-TVector3 StGammaTrack::positionAtZ(double z) const throw(Exception)
+TVector3 StGammaTrack::positionAtZ(Double_t z) const
 {
-  if (fabs(mOuterHelix.origin().z()) > fabs(z)) throw Exception();
-  StThreeVector<double> r(0,0,z);
-  StThreeVector<double> n(0,0,1);
-  double s = mOuterHelix.pathLength(r,n);
-  if (!finite(s)) throw Exception();
-  if (s == StHelix::NoSolution) throw Exception();
-  if (s < 0) throw Exception();
-  return mOuterHelix.at(s).xyz();
+  if (fabs(outerHelix.origin().z()) < fabs(z)) {
+    StThreeVector<double> r(0,0,z);
+    StThreeVector<double> n(0,0,1);
+    double s = outerHelix.pathLength(r,n);
+    if (finite(s) && s != StHelix::NoSolution && s > 0)
+      return outerHelix.at(s).xyz();
+  }
+
+  return TVector3(0,0,0);
 }

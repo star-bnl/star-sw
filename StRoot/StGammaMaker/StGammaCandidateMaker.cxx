@@ -23,6 +23,7 @@ StGammaCandidateMaker::StGammaCandidateMaker( const Char_t *name ):StMaker(name)
   SetMinimumET(5.0);
   SetRadius(0.7);
   SetSmdRange(20.0);
+  SetCompressLevel(0);
 }
 
 // ----------------------------------------------------------------------------
@@ -44,10 +45,11 @@ Int_t StGammaCandidateMaker::Make()
 void StGammaCandidateMaker::Clear( Option_t *opts )
 {
   mId=0;
+  StMaker::Clear(opts);
 }
 
 // ----------------------------------------------------------------------------
-TVector3 momentum( StEEmcCluster cluster, TVector3 vertex )
+TVector3 momentum( StEEmcCluster& cluster, const TVector3& vertex )
 {
   TVector3 d=cluster.momentum().Unit();
   d.SetMag( kEEmcZSMD / d.CosTheta() );
@@ -55,36 +57,37 @@ TVector3 momentum( StEEmcCluster cluster, TVector3 vertex )
   d=d.Unit();
   d*=cluster.energy();
   return d;
-};
+}
 
 // ----------------------------------------------------------------------------
 Int_t StGammaCandidateMaker::MakeEndcap()
 {
 
-  StEEmcGenericClusterMaker *mEEclusters = (StEEmcGenericClusterMaker*)GetMaker("mEEclusters");
+  StEEmcGenericClusterMaker *mEEclusters = (StEEmcGenericClusterMaker*)GetMakerInheritsFrom("StEEmcGenericClusterMaker");
   if ( !mEEclusters )
     {
       LOG_DEBUG << "no EEmc Clusters"<<endm;
       return kStWarn;
     }
 
-  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMaker("gemaker");
+  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
   if ( !gemaker )
     {
       LOG_DEBUG << "no gamma event maker" << endm;
       return kStWarn;
     }
+
   StGammaEvent *gevent = gemaker->event();
   assert(gevent);
 
-  StEEmcA2EMaker *mEEanalysis=(StEEmcA2EMaker*)GetMaker("mEEanalysis");
+  StEEmcA2EMaker *mEEanalysis=(StEEmcA2EMaker*)GetMakerInheritsFrom("StEEmcA2EMaker");
   if ( !mEEanalysis )
     {
       LOG_DEBUG<<"no EEmc adc to energy"<<endm;
       return kStWarn;
     }
 
-  StGammaRawMaker *grawmaker = (StGammaRawMaker*)GetMaker("grawmaker");
+  StGammaRawMaker *grawmaker = (StGammaRawMaker*)GetMakerInheritsFrom("StGammaRawMaker");
   if ( !grawmaker )
     {
       LOG_DEBUG<<"no gamma raw maker" <<endm;
@@ -101,7 +104,12 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	{
 
 	  StEEmcCluster cluster = clusters[i];
-	  TVector3 pcluster = momentum( cluster, gevent->vertex() );
+	  TVector3 position = getEEmcClusterPosition(cluster);
+	  //position.Print();
+	  if (position == TVector3(0,0,0)) position = cluster.position();
+	  //TVector3 pcluster = momentum( cluster, gevent->vertex() );
+	  TVector3 pcluster = position - gevent->vertex();
+	  pcluster.SetMag(cluster.energy());
 	  Float_t ET = pcluster.Perp();
 	  if ( ET < mMinimumET ) continue; // min ET threshold
 
@@ -112,7 +120,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 	  can -> SetDetectorId( StGammaCandidate::kEEmc );
 	  
 	  can->SetMomentum( pcluster );
-	  can->SetPosition( cluster.position() );
+	  can->SetPosition( position );
 	  can->SetEnergy( cluster.energy() );
 
 	  StEEmcTower seed = cluster.tower(0);
@@ -177,23 +185,21 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 		for (int k = 0; k < gevent->numberOfTracks(); ++k) {
 		  StGammaTrack* track = gevent->track(k);
 		  if (!track || track->pz() < 0) continue;
-		  try
-		    {
-		      EEmcGeomSimple& geom = EEmcGeomSimple::Instance();
-		      TVector3 position = track->positionAtZ(geom.getZ1());
-		      int sector, subsector, etabin;
-		      if (geom.getTower(position, sector, subsector, etabin))
-			{
-			  if (gtower->sector   () == sector    &&
-			      gtower->subsector() == subsector &&
-			      gtower->etabin   () == etabin)
-			    {
-			      can -> addMyTrack( track );
-			      track -> candidates.Add( can );
-			    }
-			}
-		    }
-		  catch (StGammaTrack::Exception& e) {}
+		  EEmcGeomSimple& geom = EEmcGeomSimple::Instance();
+		  TVector3 position = track->positionAtZ(geom.getZ1());
+		  if (position != TVector3(0,0,0)) {
+		    int sector, subsector, etabin;
+		    if (geom.getTower(position, sector, subsector, etabin))
+		      {
+			if (gtower->sector   () == sector    &&
+			    gtower->subsector() == subsector &&
+			    gtower->etabin   () == etabin)
+			  {
+			    can -> addMyTrack( track );
+			    track -> candidates.Add( can );
+			  }
+		      }
+		  }
 		}
 	      }
 	    }
@@ -316,7 +322,6 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 		  can -> addPostshower( tower );
 		  if (!tower -> candidates.FindObject( can )) tower -> candidates.Add( can );
 		}
-	      
 	    }
 
 	  /*
@@ -411,7 +416,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
     StGammaCandidate* candidate = gevent->candidate(i);
     if (candidate->detectorId() == StGammaCandidate::kEEmc) {
       StGammaFitterResult fit;
-      int status = StGammaFitter::instance()->fitSector(candidate, &fit);
+      int status = StGammaFitter::instance()->fit(candidate, &fit);
       if (status == 0) candidate->SetSmdFit(fit);
     }
   }
@@ -423,7 +428,7 @@ Int_t StGammaCandidateMaker::MakeEndcap()
 Int_t StGammaCandidateMaker::MakeBarrel()
 {
   // Get gamma event maker
-  StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMaker("gemaker");
+  StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
   if (!gemaker) {
     LOG_WARN << "MakeBarrel - No gamma event maker" << endm;
     return kStWarn;
@@ -437,14 +442,14 @@ Int_t StGammaCandidateMaker::MakeBarrel()
   }
 
   // Get gamma raw maker
-  StGammaRawMaker* grawmaker = (StGammaRawMaker*)GetMaker("grawmaker");
+  StGammaRawMaker* grawmaker = (StGammaRawMaker*)GetMakerInheritsFrom("StGammaRawMaker");
   if (!grawmaker) {
     LOG_WARN << "MakeBarrel - No gamma raw maker" << endm;
     return kStWarn;
   }
 
   // Get BEMC cluster maker
-  StBarrelEmcClusterMaker* ecl = (StBarrelEmcClusterMaker*)GetMaker("bemc_cluster");
+  StBarrelEmcClusterMaker* ecl = (StBarrelEmcClusterMaker*)GetMakerInheritsFrom("StBarrelEmcClusterMaker");
   if (!ecl) {
     LOG_WARN << "MakeBarrel - No BEMC clusters" << endm;
     return kStWarn;
@@ -490,9 +495,9 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 	  for (int k = 0; k < gevent->numberOfTracks(); ++k) {
 	    StGammaTrack* track = gevent->track(k);
 	    if (!track) continue;
-	    try {
-	      StEmcGeom* geom = StEmcGeom::instance("bemc");
-	      TVector3 position = track->positionAtRadius(geom->Radius());
+	    StEmcGeom* geom = StEmcGeom::instance("bemc");
+	    TVector3 position = track->positionAtRadius(geom->Radius());
+	    if (position != TVector3(0,0,0)) {
 	      int id;
 	      if (geom->getId(position.Phi(), position.Eta(), id) == 0 &&
 		  id == static_cast<int>(tower->id)) {
@@ -500,7 +505,6 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 		track->candidates.Add(candidate);
 	      }
 	    }
-	    catch (StGammaTrack::Exception& e) {}
 	  }
 	}
       }
@@ -592,8 +596,11 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 
 Int_t StGammaCandidateMaker::Compress()
 {
+  // No compression
+  if (mCompressLevel == 0) return kStOk;
+
   // Get gamma event maker
-  StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMaker("gemaker");
+  StGammaEventMaker* gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
   if (!gemaker) {
     LOG_WARN << "MakeBarrel - No gamma event maker" << endm;
     return kStWarn;
@@ -606,15 +613,25 @@ Int_t StGammaCandidateMaker::Compress()
     return kStWarn;
   }
 
-  // Drop strips, tracks, towers without candidates
+  // Drop strips without candidates
   Compress<StGammaStrip>(gevent->mStrips);
+
+  // Compress SMD strips only
+  if (mCompressLevel == 1) return kStOk;
+
+  // Drop tracks, towers without candidates
   Compress<StGammaTrack>(gevent->mTracks);
   Compress<StGammaTower>(gevent->mTowers);
   Compress<StGammaTower>(gevent->mPreshower1);
   Compress<StGammaTower>(gevent->mPreshower2);
   Compress<StGammaTower>(gevent->mPostshower);
 
-  return kStOk;
+  // Compress all
+  if (mCompressLevel == 2) return kStOk;
+
+  LOG_WARN << Form("Unknown compression level (%d)", mCompressLevel) << endm;
+
+  return kStWarn;
 }
 
 template<class T>
@@ -623,4 +640,47 @@ void StGammaCandidateMaker::Compress(TClonesArray* clones)
   TIter next(clones);
   while (T* x = (T*)next()) if (x->candidates.IsEmpty()) clones->Remove(x);
   clones->Compress();
+}
+
+TVector3 StGammaCandidateMaker::getEEmcClusterPosition(const StEEmcCluster& cluster)
+{
+  // Get gamma raw maker
+  StGammaRawMaker* grawmaker = (StGammaRawMaker*)GetMakerInheritsFrom("StGammaRawMaker");
+  assert(grawmaker);
+
+  // Get cluster seed tower
+  StEEmcTower seed = cluster.tower(0);
+
+  // Get ranges of ESMD strips under seed tower
+  int sector    = seed.sector();
+  int subsector = seed.subsector();
+  int etabin    = seed.etabin();
+  int xmin[2], xmax[2];
+  EEmcSmdMap::instance()->getRangeU(sector, subsector, etabin, xmin[0], xmax[0]);
+  EEmcSmdMap::instance()->getRangeV(sector, subsector, etabin, xmin[1], xmax[1]);
+
+  // Find max strips within ranges
+  StGammaStrip* maxStrips[2] = { 0, 0 };
+  for (int plane = 0; plane < 2; ++plane) {
+    for (int i = xmin[plane]; i <= xmax[plane]; ++i) {
+      StGammaStrip* strip = grawmaker->strip(sector, plane, i);
+      if (strip) {
+	if (!maxStrips[plane] || strip->energy > maxStrips[plane]->energy) {
+	  maxStrips[plane] = strip;
+	}
+      }
+    }
+  }
+
+  // Get intersection of max strips and check that it lies within
+  // the fiducial volume of the seed tower.
+  if (maxStrips[0] && maxStrips[1]) {
+    TVector3 position = EEmcSmdGeom::instance()->getIntersection(sector, maxStrips[0]->index, maxStrips[1]->index);
+    int sec, sub, eta;
+    if (position.z() != -999 && EEmcGeomSimple::Instance().getTower(position, sec, sub, eta) && sector == sec && subsector == sub && etabin == eta)
+      return position;
+  }
+
+  // Failed to calculate cluster position using ESMD strips
+  return TVector3(0,0,0);
 }

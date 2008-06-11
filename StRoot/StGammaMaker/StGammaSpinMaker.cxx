@@ -42,7 +42,7 @@ Int_t StGammaSpinMaker::Make()
       return kStFatal;
     }
 
-  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMaker("gemaker");
+  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
   if ( !gemaker ) 
     {
       LOG_DEBUG<<" +++++ gamme event maker is missing from the chain +++++" << endm;
@@ -61,7 +61,7 @@ Int_t StGammaSpinMaker::Make()
   //
   gevent->SetDsmVertex(  mudst -> event() -> bbcTriggerDetector().onlineTimeDifference() );
 
-  mSpinDb = (StSpinDbMaker *)GetMaker("mSpin");
+  mSpinDb = (StSpinDbMaker *)GetMakerInheritsFrom("StSpinDbMaker");
   if ( !mSpinDb )
     {
       LOG_WARN<<" +++++ spindb maker not in the chain, so why am I in the chain? +++++" << endm;

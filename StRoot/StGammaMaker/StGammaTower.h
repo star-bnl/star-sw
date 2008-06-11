@@ -12,25 +12,23 @@ class StGammaTower : public TObject
 {
  public:
   StGammaTower();
-  ~StGammaTower(){ /* nada */ };
-  UInt_t  id;      // ID of the tower
+  ~StGammaTower(){ /* nada */ }
+  Int_t   id;	   // ID of the tower
   Float_t energy;  // scalar energy
   Float_t eta;     // eta (from event vertex to smd depth, or pre/post depth)
   Float_t phi;     // phi (from event vertex to smd depth, or pre/post depth)
-  UChar_t stat;    // status bits (non fatal HW problems)
-  UChar_t fail;    // fail bits (fatal HW problems)
-  UChar_t layer;   // see below
+  Int_t   stat;    // status bits (non fatal HW problems)
+  Int_t   fail;    // fail bits (fatal HW problems)
+  Int_t   layer;   // see below
   Float_t pt(){ return energy / TMath::CosH(eta); }
 
   Int_t sector();    // returns eemc sector [0,11]
   Int_t subsector(); // returns eemc subsector [0,4]
   Int_t etabin();    // returns eemc etabin [0,11] 
   Int_t phibin();
-  //Int_t module();
-  //Int_t submodule();
 
   TRefArray candidates; // referencing candidates
-  ClassDef(StGammaTower,1);
+  ClassDef(StGammaTower,2);
 };
 
 typedef std::vector<StGammaTower> StGammaTowerVec_t;

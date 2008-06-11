@@ -35,13 +35,19 @@
 #ifndef ST_GAMMA_FITTER_H
 #define ST_GAMMA_FITTER_H
 
-class TVirtualFitter;
+// ROOT
 class TH1;
 class TF1;
+class TFile;
+class TCanvas;
 
+// Local
+class StGammaEvent;
 class StGammaCandidate;
+class StGammaTrack;
 class StGammaFitterResult;
 
+// ROOT
 #include "TObject.h"
 
 class StGammaFitter : public TObject {
@@ -71,13 +77,16 @@ public:
   ///     10: END command
   ///     11: EXIT or STOP command
   ///     12: RETURN command
-  int fitSector(StGammaCandidate* candidate, StGammaFitterResult* fit);
+  int fit(StGammaCandidate* candidate, StGammaFitterResult* fits);
+
+  /// \brief distance in yield vs. maximal-sided residual plane
+  /// between the quadratic residual cut and the point (x, y).
+  static double distanceToQuadraticCut(double x, double y);
 
   static TH1* getUhistogram();
   static TH1* getVhistogram();
   static TF1* getUfunction();
   static TF1* getVfunction();
-  static TVirtualFitter* fitter();
 
 protected:
   /// \brief Constructor in protected section to prevent user from creating
@@ -88,9 +97,6 @@ private:
   /// \brief Single instance of this singleton class.
   static StGammaFitter* mInstance;
 
-  /// \brief Formula for SMD response in each plane: double-Gaussian with common mean
-  static const char* mFormula;
-
   void estimateYieldMean(TH1* h1, float& yield, float& mean);
 
   /// \brief Computes maximal sided fit residual.
@@ -99,27 +105,23 @@ private:
   /// \return Maximaml sided fit residual from h1 fitted with f1
   float residual(TH1* h1, TF1* f1);
 
-  /// \brief chi square function for fitter
-  static void fcn(int& npar, double* gin, double& f, double* par, int iflag);
+  /// \brief returns maximum value of histogram in x-axis range [xmin, xmax]
+  static float GetMaximum(TH1* h1, float xmin, float xmax);
 
-  /// \brief distance in yield vs. maximal-sided residual plane
-  /// between the quadratic residual cut and the point (x, y).
-  static double distanceToQuadraticCut(double x, double y);
-
-  static TVirtualFitter* mMinuit;
   static TH1* hU;
   static TH1* hV;
-  static TF1* fU;
-  static TF1* fV;
+  static TF1* fFit[2];
   static TF1* fResidualCut;
+  static int  mNdf;
+  static TCanvas* mCanvas;
+  static TF1* mShowerShapes[3];
 
   ClassDef(StGammaFitter, 1);
 };
 
 inline TH1* StGammaFitter::getUhistogram() { return hU; }
 inline TH1* StGammaFitter::getVhistogram() { return hV; }
-inline TF1* StGammaFitter::getUfunction() { return fU; }
-inline TF1* StGammaFitter::getVfunction() { return fV; }
-inline TVirtualFitter* StGammaFitter::fitter() { return mMinuit; }
+inline TF1* StGammaFitter::getUfunction() { return fFit[0]; }
+inline TF1* StGammaFitter::getVfunction() { return fFit[1]; }
 
 #endif
