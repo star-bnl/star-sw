@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.10 2005/07/23 03:37:33 perev Exp $
+ * $Id: StSvtHybridData.cc,v 1.11 2008/06/12 14:22:12 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.11  2008/06/12 14:22:12  fisyak
+ * Add default no. of anodes and timeBins
+ *
  * Revision 1.10  2005/07/23 03:37:33  perev
  * IdTruth + Cleanup
  *
@@ -46,7 +49,7 @@
 // This is the class to access the data from each hybrid.                 //
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
-
+#include <assert.h>
 #include <string.h>
 #include "StSvtHybridData.hh"
 #include "StSequence.hh"
