@@ -16,6 +16,10 @@
 
 class StGammaFitterResult : public TObject {
 public:
+  StGammaFitterResult();
+
+  void Clear(Option_t* option = "");
+
   float yield;
   float yieldError;
   float centroid;
