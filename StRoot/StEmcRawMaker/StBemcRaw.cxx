@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.21 2007/09/10 22:21:41 kocolosk Exp $
+// $Id: StBemcRaw.cxx,v 1.22 2008/06/12 13:25:32 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.22  2008/06/12 13:25:32  mattheww
+// Added a check on the pedestal status in makeHit
+//
 // Revision 1.21  2007/09/10 22:21:41  kocolosk
 // Support for new BPRS swap fixes (off by default for 06/07 production, on for analysis).
 // StBemcTables now matches map fixes in case end users want to use this copy.
@@ -637,6 +640,10 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
     Float_t PEDESTAL = 0,RMS = 0;
     if(mControlADCtoE->DeductPedestal[det-1]>0)
     {
+        Int_t STATUS;
+        mTables->getStatus(det,id,STATUS,"pedestal");
+	if(STATUS!=STATUS_OK)return kPed;
+
         mTables->getPedestal(det,id,CAP,PEDESTAL,RMS);
         // do not consider hits wih capacitor number CAP1 and CAP2 for
         // PSD and SMD as valid hits
