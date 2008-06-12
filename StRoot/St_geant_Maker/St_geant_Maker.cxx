@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.119 2007/07/12 20:34:02 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.120 2008/06/12 20:35:27 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.120  2008/06/12 20:35:27  fisyak
+// Move creation of TGiant from ctor to Init
+//
 // Revision 1.119  2007/07/12 20:34:02  fisyak
 // use StarLogger
 //
@@ -601,21 +604,6 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
   fgGeom  = new TDataSet("geom");  
   m_ConstSet->Add(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
-  // Initialize GEANT
-  if (! geant3) {
-    PrintInfo();
-    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
-    assert(geant3);
-    cquest = (Quest_t  *) geant3->Quest();
-    clink  = (Gclink_t *) geant3->Gclink();
-    cflag  = (Gcflag_t *) geant3->Gcflag();
-    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
-    cnum   = (Gcnum_t  *) geant3->Gcnum();
-    z_iq   = (Int_t    *) geant3->Iq();
-    z_lq   = (Int_t    *) geant3->Lq();
-    z_q    = (Float_t  *) geant3->Q();
-    csets  = (Gcsets_t *) geant3->Gcsets();
-  }
 }
 //_____________________________________________________________________________
 TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
@@ -683,6 +671,21 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
+  // Initialize GEANT
+  if (! geant3) {
+    PrintInfo();
+    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+    assert(geant3);
+    cquest = (Quest_t  *) geant3->Quest();
+    clink  = (Gclink_t *) geant3->Gclink();
+    cflag  = (Gcflag_t *) geant3->Gcflag();
+    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+    cnum   = (Gcnum_t  *) geant3->Gcnum();
+    z_iq   = (Int_t    *) geant3->Iq();
+    z_lq   = (Int_t    *) geant3->Lq();
+    z_q    = (Float_t  *) geant3->Q();
+    csets  = (Gcsets_t *) geant3->Gcsets();
+  }
   TString InputFile(fInputFile);
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
@@ -819,7 +822,7 @@ Int_t St_geant_Maker::Init(){
       }	
       if (Debug() > 1) {
 	Do("debug on;");
-	Do("swit 2 3;");
+	Do("swit 2 2;");
       }
   }
   return StMaker::Init();
