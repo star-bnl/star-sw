@@ -398,7 +398,7 @@ int main(int argc, char *argv[])
   //  char fn[256];
   
   rtsLogOutput(2);
-  rtsLogLevel(WARN);
+  rtsLogLevel(DBG);
   strcpy(g_filename, "none");
 
   idx = NULL;
