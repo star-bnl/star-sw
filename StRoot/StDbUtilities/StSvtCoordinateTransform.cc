@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.41 2007/08/31 22:15:28 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.42 2008/06/12 14:24:50 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -243,22 +243,12 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   //  Int_t barrel = (layer - 1)/2 + 1;
   Int_t ladder = Id%100;
   Int_t wafer  = (Id - 1000*layer)/100;
-  if (! IsOnWaferR(a.position(),Id) ) {
-    b.setWafer(-99);
-    b.setLayer(-99);
-    b.setLadder(-99);
-    b.position().setX(-99);
-    b.position().setY(-99);
-    b.position().setZ(-99);
-  }
-  else{
-    b.setLayer(layer);
-    b.setLadder(ladder);
-    b.setWafer(wafer);
-    GlobaltoLocal( a.position(), b, Id, -1);
-    b.setHybrid(2);
-    if( b.position().x() < 0) b.setHybrid(1);
-  }
+  b.setLayer(layer);
+  b.setLadder(ladder);
+  b.setWafer(wafer);
+  GlobaltoLocal( a.position(), b, Id, -1);
+  b.setHybrid(2);
+  if( b.position().x() < 0) b.setHybrid(1);
 }
 
 //_____________________________________________________________________________
