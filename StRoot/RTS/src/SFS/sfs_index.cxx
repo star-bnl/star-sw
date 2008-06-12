@@ -494,6 +494,9 @@ int SFS_ittr::next()
     }
   }
   // Read File Desc
+  // clear entrybuff
+  memset(entryBuff, 0, sizeof(entryBuff));
+  
   ret = wfile->read(entryBuff,16);
   if(ret == 0) {
     filepos = -1;
