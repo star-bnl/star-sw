@@ -22,6 +22,8 @@ using std::stable_partition;
 ostream& operator<<(ostream& os, const StiHit& hit);
 ostream& operator<<(ostream&, const HitMapKey&);
 
+int VectorAndEnd::fIdCounter = 0;
+
 StiHitContainer::StiHitContainer(const string & name, 
 				 const string & description,
 				 Factory<StiHit> *hitFactory)
@@ -175,17 +177,22 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 	//<< "   dZ:"<<dZ<<endl;
   _minPoint.set(ref.position(),ref.refangle(),ref.y()-dY,ref.z()-dZ );
   _maxPoint.set(ref.position(),ref.refangle(),ref.y()+dY,ref.z()+dZ );
+
+  static int id = 0;
+  if (_map.find(_key) != _map.end()) {
+  id = _map[_key].fId;
+
   vector<StiHit*>& tempvec = _map[_key].theHitVec;
   vector<StiHit*>::iterator& tempend = _map[_key].theEffectiveEnd;
 
-#if 1   
+#if 1
    //sanity check block
    vector<StiHit*>::iterator  tmptest = tempvec.begin();
    vector<StiHit*>::iterator  tmpend  = tempvec.end();
    Double_t Z=-999;
   
-   cout << "-- Doing tmptest " << (&tmpend - &tmptest) 
-        << " cmp " << (&tempend - &tmptest) 
+   cout << "-- Doing tmptest for id:" <<  id<< " " << ( tmpend != tmptest )
+        << " cmp " << ( tempend !=  tmptest )
         << " " << tempvec.size() << " --> " << endl;
 
    for (;tmptest!= tempend;++tmptest){
@@ -215,6 +222,14 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 	    _selectedHits.push_back(hit);
 	}
     }
+ } 
+#if 0 
+ else {
+     cout << "-- Go ahead to test thing ------------------ last id =" << id << endl;
+     id = _map[_key].fId;
+     cout << "-- Go ahead to test thing ------------------ next id =" << id << endl;
+  }
+#endif  
   return _selectedHits;
 }
 
