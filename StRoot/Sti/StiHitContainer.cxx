@@ -177,7 +177,25 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
   _maxPoint.set(ref.position(),ref.refangle(),ref.y()+dY,ref.z()+dZ );
   vector<StiHit*>& tempvec = _map[_key].theHitVec;
   vector<StiHit*>::iterator& tempend = _map[_key].theEffectiveEnd;
-  //Search first by distance along z
+
+#if 1   
+   //sanity check block
+   vector<StiHit*>::iterator  tmptest = tempvec.begin();
+   vector<StiHit*>::iterator  tmpend  = tempvec.end();
+   Double_t Z=-999;
+  
+   cout << "-- Doing tmptest " << (&tmpend - &tmptest) 
+        << " cmp " << (&tempend - &tmptest) 
+        << " " << tempvec.size() << " --> " << endl;
+
+   for (;tmptest!= tempend;++tmptest){
+      assert(*tmptest);
+      Z = (*tmptest)->z();
+   }
+   cout << "<-- end of tmptest --" << endl;
+#endif   
+   
+   //Search first by distance along z
   _start = lower_bound(tempvec.begin(), tempend, &_minPoint, StizHitLessThan());
   if (_start!=tempend) 
     _stop = upper_bound(tempvec.begin(), tempend, &_maxPoint, StizHitLessThan());
