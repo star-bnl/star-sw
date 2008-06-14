@@ -172,7 +172,7 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
   _selectedHits.clear();
   _key.refangle = ref.refangle();
   _key.position = ref.position();
-	//cout << "StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bool fetchAll) -I- " << endl;
+	// cout << "StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bool fetchAll) -I- " << endl;
 	//cout << "   dY:"<<dY<<endl
 	//<< "   dZ:"<<dZ<<endl;
   _minPoint.set(ref.position(),ref.refangle(),ref.y()-dY,ref.z()-dZ );
@@ -180,28 +180,24 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 
   static int id = 0;
   if (_map.find(_key) != _map.end()) {
+  vector<StiHit*>& tempvec = _map[_key].theHitVec;
+  if (tempvec.size()) {
   id = _map[_key].fId;
 
-  vector<StiHit*>& tempvec = _map[_key].theHitVec;
   vector<StiHit*>::iterator& tempend = _map[_key].theEffectiveEnd;
 
 #if 1
    //sanity check block
    vector<StiHit*>::iterator  tmptest = tempvec.begin();
    vector<StiHit*>::iterator  tmpend  = tempvec.end();
-   Double_t Z=-999;
-  
-   cout << "-- Doing tmptest for id:" <<  id<< " " << ( tmpend != tmptest )
-        << " cmp " << ( tempend !=  tmptest )
-        << " " << tempvec.size() << " --> " << endl;
-
-   for (;tmptest!= tempend;++tmptest){
-      assert(*tmptest);
-      Z = (*tmptest)->z();
+   if (!tempvec.size()) {
+       cout  << "-- Doing tmptest for id:" <<  id<< " " << ( tmpend != tmptest )
+            << " cmp " << ( tempend !=  tmptest )
+            << " " << tempvec.size() << " --> " << endl;
+       assert(0);
    }
-   cout << "<-- end of tmptest --" << endl;
 #endif   
-   
+
    //Search first by distance along z
   _start = lower_bound(tempvec.begin(), tempend, &_minPoint, StizHitLessThan());
   if (_start!=tempend) 
@@ -222,8 +218,11 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 	    _selectedHits.push_back(hit);
 	}
     }
- } 
-#if 0 
+ }   //  StiHit vector size ==0; This is workround. 
+     //  we do not knpw why do we need this proptection  yet
+    cout << "Warning: Fix me, please !" << endl;
+  } //  NO _key was provided
+#if 0
  else {
      cout << "-- Go ahead to test thing ------------------ last id =" << id << endl;
      id = _map[_key].fId;
