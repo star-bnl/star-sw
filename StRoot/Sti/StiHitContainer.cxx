@@ -23,14 +23,22 @@ ostream& operator<<(ostream& os, const StiHit& hit);
 ostream& operator<<(ostream&, const HitMapKey&);
 
 int VectorAndEnd::fIdCounter = 0;
+//________________________________________
 VectorAndEnd::VectorAndEnd() {
    fId=fIdCounter++; 
    theEffectiveEnd=theHitVec.end();
-   if ( fId == 568) {
-       printf(" Id = %d \n",fId);
-   }
+   TestId(568);
 }
-
+   
+//________________________________________
+void VectorAndEnd::TestId(int id)
+{
+   if ( fId == id) {
+       printf(" Id = %d \n",fId);
+   }   
+}
+      
+//________________________________________
 StiHitContainer::StiHitContainer(const string & name, 
 				 const string & description,
 				 Factory<StiHit> *hitFactory)
@@ -136,6 +144,7 @@ vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
     _key.refangle = layer->getPlacement()->getLayerAngle();
     //_key.position = layer->getPlacement()->getNormalRadius();
     _key.position = layer->getPlacement()->getLayerRadius();
+    assert(_map.find(_key) != _map.end());
     return _map[_key].theHitVec.begin();
 }
 
@@ -145,6 +154,7 @@ vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
   _key.refangle = layer->getPlacement()->getLayerAngle();
   //_key.position = layer->getPlacement()->getNormalRadius();
   _key.position = layer->getPlacement()->getLayerRadius();
+  assert(_map.find(_key) != _map.end());
   return _map[_key].theEffectiveEnd;
 }
 

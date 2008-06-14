@@ -115,6 +115,7 @@ using namespace std;
 struct VectorAndEnd
 {	
     VectorAndEnd();
+    void TestId(int id);
     vector<StiHit*> theHitVec;
     vector<StiHit*>::iterator theEffectiveEnd;
     int  fId;
@@ -160,6 +161,8 @@ public:
   Factory<StiHit> * getHitFactory();
   /// Get a hit instance from the factory
   StiHit * getHit();
+  bool hasKey(double refangle, double position);
+  bool hasDetector(const StiDetector* layer);
  protected:
   // Utility key used in hit retrieval (avoid constructor call per search)
   HitMapToVectorAndEndType::key_type _key; 
@@ -227,14 +230,28 @@ inline vector<StiHit*>& StiHitContainer::getHits(double refangle, double positio
 {
     _key.refangle = refangle;
     _key.position = position; 
+    assert(_map.find(_key) != _map.end());
     return _map[_key].theHitVec;
 }
-
+inline bool StiHitContainer::hasKey(double refangle, double position)
+{
+    HitMapToVectorAndEndType::key_type key; 
+    key.refangle = refangle;
+    key.position = position; 
+    return _map.find(key) != _map.end();
+} 
+inline bool StiHitContainer::hasDetector(const StiDetector* layer)
+{  
+   double refangle = layer->getPlacement()->getLayerAngle();
+   double position = layer->getPlacement()->getLayerRadius();
+   return  layer ? hasKey(refangle,position) : false;  
+}
 /// Get all hits from the specified detector component
 inline vector<StiHit*>& StiHitContainer::getHits(const StiDetector* layer)
 {
     _key.refangle = layer->getPlacement()->getLayerAngle();
     _key.position = layer->getPlacement()->getLayerRadius();
+    assert(_map.find(_key) != _map.end());
     return _map[_key].theHitVec;
 }
 
