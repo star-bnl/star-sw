@@ -118,7 +118,7 @@ struct VectorAndEnd
     vector<StiHit*>::iterator theEffectiveEnd;
     int  fId;
     static int fIdCounter;
-    VectorAndEnd() {fId=fIdCounter++; theEffectiveEnd=theHitVec.end();
+    VectorAndEnd() {fId=fIdCounter++; theHitVec.resize(1); theHitVec.resize(0);theEffectiveEnd=theHitVec.end();
     }
 };
 ///We define this globally for convenience of users.
