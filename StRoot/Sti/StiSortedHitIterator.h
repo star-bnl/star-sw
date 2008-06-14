@@ -134,9 +134,11 @@ inline StiSortedHitIterator& StiSortedHitIterator::operator++()
 	  while (_currentDet<_lastDet && go )
 	    {
 	      ++_currentDet;
-	      if (_currentDet<_lastDet)
+	      if (_currentDet<_lastDet )
 		{
 		  // valid detector
+        if (_hitContainer->hasDetector(*_currentDet)) {
+
 		  _currentDetHit =  _hitContainer->hitsBegin(*_currentDet);
 		  _lastDetHit    =  _hitContainer->hitsEnd(*_currentDet);
 		  if (_currentDetHit < _lastDetHit)
@@ -146,6 +148,7 @@ inline StiSortedHitIterator& StiSortedHitIterator::operator++()
 		      _currentHit = *_currentDetHit;
 		      go = false;
 		    }
+       }
 		}
 	      else
 		{
