@@ -114,12 +114,11 @@ using namespace std;
 ///We define this globally for convenience of users.
 struct VectorAndEnd
 {	
+    VectorAndEnd();
     vector<StiHit*> theHitVec;
     vector<StiHit*>::iterator theEffectiveEnd;
     int  fId;
     static int fIdCounter;
-    VectorAndEnd() {fId=fIdCounter++; theHitVec.resize(1); theHitVec.resize(0);theEffectiveEnd=theHitVec.end();
-    }
 };
 ///We define this globally for convenience of users.
 typedef map<HitMapKey, VectorAndEnd, MapKeyLessThan> HitMapToVectorAndEndType;

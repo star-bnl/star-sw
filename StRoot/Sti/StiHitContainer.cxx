@@ -23,6 +23,13 @@ ostream& operator<<(ostream& os, const StiHit& hit);
 ostream& operator<<(ostream&, const HitMapKey&);
 
 int VectorAndEnd::fIdCounter = 0;
+VectorAndEnd::VectorAndEnd() {
+   fId=fIdCounter++; 
+   theEffectiveEnd=theHitVec.end();
+   if ( fId == 568) {
+       printf(" Id = %d \n",fId);
+   }
+}
 
 StiHitContainer::StiHitContainer(const string & name, 
 				 const string & description,
@@ -181,7 +188,8 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
   static int id = 0;
   if (_map.find(_key) != _map.end()) {
   vector<StiHit*>& tempvec = _map[_key].theHitVec;
-  if (tempvec.size()) {
+  if (tempvec.size() || true )
+      {
   id = _map[_key].fId;
 
   vector<StiHit*>::iterator& tempend = _map[_key].theEffectiveEnd;
@@ -190,7 +198,7 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
    //sanity check block
    vector<StiHit*>::iterator  tmptest = tempvec.begin();
    vector<StiHit*>::iterator  tmpend  = tempvec.end();
-   if (!tempvec.size()) {
+   if (!tempvec.size() ) {
        cout  << "-- Doing tmptest for id:" <<  id<< " " << ( tmpend != tmptest )
             << " cmp " << ( tempend !=  tmptest )
             << " " << tempvec.size() << " --> " << endl;
@@ -218,9 +226,9 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 	    _selectedHits.push_back(hit);
 	}
     }
- }   //  StiHit vector size ==0; This is workround. 
+ }  else {  //  StiHit vector size ==0; This is workround. 
      //  we do not knpw why do we need this proptection  yet
-    cout << "Warning: Fix me, please !" << endl;
+    cout << "Warning: Fix me, please !" << endl; }
   } //  NO _key was provided
 #if 0
  else {
