@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.537 2008/04/15 18:03:56 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.538 2008/06/16 16:39:53 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -519,13 +519,6 @@ Int_t StBFChain::Instantiate()
       }
       ProcessLine(cmd);
     }
-    if (  maker == "StTpcHitMaker") {
-      Char_t *options[] = {"TpcDoPulser", "TpcPadMonitor", "TpcDumpPixels2Ntuple","TpcRawData",0};
-      Int_t i = 0;
-      for (; options[i]; i++) {
-	if (GetOption(options[i])) mk->SetAttr(options[i],1);
-      }
-    }
     if ( (maker == "StTpcHitMover" || maker == "St_tpt_Maker") && GetOption("ExB")){
       // bit 0 is ExB ON or OFF
       // The next 3 bits are reserved for yearly changes.
@@ -585,7 +578,7 @@ Int_t StBFChain::Instantiate()
       }
       if (kopts) ProcessLine(cmd);
     }
-    if (maker == "StTrsMiniMaker" && ! GetOption("TrsToF")) {
+    if (maker == "StTpcRSMaker" && ! GetOption("TrsToF")) {
       Int_t mode = mk->GetMode();
       mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
       mk->SetMode(mode);
@@ -602,7 +595,7 @@ Int_t StBFChain::Instantiate()
       
       // Beware of those ...
       Int_t                                                  mode = 0; // daq
-      if      (GetOption("Trs") || GetOption("Embedding") || GetOption("TrsMini"))
+      if      (GetOption("Trs") || GetOption("Embedding") || GetOption("TpcRS"))
                                                              mode = 1; // trs
       else if (GetOption("Simu"))                            mode = 2; // daq, no gain
       if (mode) mk->SetMode(mode);
@@ -832,7 +825,7 @@ Int_t StBFChain::Init() {
   SetChainOpt(new StBFChainOpt(this));
   //  SetDbOptions(); moved to Instantiation
   if (fNoChainOptions) {
-    //  SetGeantOptions(); move to Instantiation
+    //  SetGeantOptions(); move back to Init 
     if (GetOption("Simu")) {
       StEvtHddr *fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
       if (!fEvtHddr) {
@@ -1438,45 +1431,6 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
     }
     if ((GetOption("fzin") || GetOption("ntin")) && fInFile != "")
       ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
-    if (GetOption("gstar") && fInFile == "") {
-      StMaker *geantMk = GetMaker("geant");
-      if (geantMk && !geantMk->InheritsFrom("St_geant_Maker")) geantMk = 0;
-      if (geantMk) {
-	ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"subevent 0;\");",geantMk));
-	// gkine #particles partid ptrange yrange phirange vertexrange
-	ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;\");",geantMk));
-	ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"mode g2tm prin 1;\");",geantMk));
-	//  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"next;\");",geantMk));
-	//  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"dcut cave z 1 10 10 0.03 0.03;\");",geantMk));
-	if (GetOption("Debug") || GetOption("Debug2")) {
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"debug on;\");",geantMk));
-	  if (GetOption("Debug2")) ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"swit 2 3;\");",geantMk));
-	}
-	if (GetOption("phys_off")) {
-	  LOG_INFO << "St_geant_Maker::Init switch off physics" << endm;
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"DCAY 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"ANNI 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"BREM 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"COMP 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"HADR 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"MUNU 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"PAIR 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"PFIS 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"PHOT 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"RAYL 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"LOSS 4\");",geantMk)); // no fluctuations
-	  //  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"LOSS 1\");",geantMk)); // with delta electron above dcute
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"DRAY 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"MULS 0\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"STRA 0\");",geantMk));
-	  //                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6\");",
-			   geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"gclose all\");",geantMk));
-	  ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"physi\");",geantMk));
-	}
-      }
-    }
   } 
 }
 //_____________________________________________________________________
@@ -1614,7 +1568,7 @@ void StBFChain::SetTreeOptions()
       treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
     }
     if (GetOption("fss"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
-    if (GetOption("tpc_daq") || GetOption("TrsMini"))
+    if (GetOption("tpc_daq") || GetOption("TpcRS"))
       treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
     if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
     if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
