@@ -24,7 +24,9 @@ ostream& operator<<(ostream&, const HitMapKey&);
 
 int VectorAndEnd::fIdCounter = 0;
 //________________________________________
-VectorAndEnd::VectorAndEnd() {
+VectorAndEnd::VectorAndEnd(): fEffectiveEndValid(false)
+{
+   invalidateEnd();
    fId=fIdCounter++; 
    theEffectiveEnd=theHitVec.end();
    TestId(568);
@@ -37,7 +39,12 @@ void VectorAndEnd::TestId(int id)
        printf(" Id = %d \n",fId);
    }   
 }
-      
+//________________________________________
+void VectorAndEnd:: clear()
+{
+   theHitVec.clear();
+   invalidateEnd();
+}
 //________________________________________
 StiHitContainer::StiHitContainer(const string & name, 
 				 const string & description,
@@ -86,7 +93,7 @@ void StiHitContainer::add(StiHit* hit)
   _key.refangle = det->getPlacement()->getLayerAngle();
   //_key.position = det->getPlacement()->getNormalRadius();
   _key.position = det->getPlacement()->getLayerRadius();
-  _map[_key].theHitVec.push_back(hit);
+  _map[_key].push_back(hit);
   return;
 }
 
@@ -97,7 +104,7 @@ void StiHitContainer::reset()
    //cout << "StiHitContainer::reset() -i- XXXXXXXXXXXXXXXXXXXXXXXX _map.size() ="<<_map.size()<<endl;
    for (it=_map.begin(); it!=_map.end(); it++) 
      {
-       vector<StiHit*> &hits = (*it).second.theHitVec;
+       vector<StiHit*> &hits = (*it).second.hits();
        //cout << ":"<<hits.size();
        for (iter=hits.begin();iter!=hits.end();iter++)
 	 {
@@ -117,8 +124,7 @@ void StiHitContainer::clear()
     HitMapToVectorAndEndType::iterator it;
     for (it=_map.begin(); it!=_map.end(); it++) 
 			{
-				(*it).second.theHitVec.clear();
-				(*it).second.theEffectiveEnd = (*it).second.theHitVec.end();
+             (*it).second.clear();
 			}
     cout<<"StiHitContainer::clear() -I- Done"<<endl;
 }
@@ -132,7 +138,7 @@ unsigned int StiHitContainer::size() const
     unsigned int thesize = 0;
     HitMapToVectorAndEndType::const_iterator it;
     for (it=_map.begin(); it!=_map.end(); it++) {
-	thesize+=(*it).second.theHitVec.size();
+	thesize+=(*it).second.size();
     }
     return thesize;
 }
@@ -145,7 +151,7 @@ vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
     //_key.position = layer->getPlacement()->getNormalRadius();
     _key.position = layer->getPlacement()->getLayerRadius();
     assert(_map.find(_key) != _map.end());
-    return _map[_key].theHitVec.begin();
+    return _map[_key].begin();
 }
 
 vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
@@ -155,7 +161,7 @@ vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
   //_key.position = layer->getPlacement()->getNormalRadius();
   _key.position = layer->getPlacement()->getLayerRadius();
   assert(_map.find(_key) != _map.end());
-  return _map[_key].theEffectiveEnd;
+  return _map[_key].TheEffectiveEnd();
 }
 
 
@@ -197,12 +203,12 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 
   static int id = 0;
   if (_map.find(_key) != _map.end()) {
-  vector<StiHit*>& tempvec = _map[_key].theHitVec;
-  if (tempvec.size() || true )
+  vector<StiHit*>& tempvec = _map[_key].hits();
+  if (tempvec.size())
       {
   id = _map[_key].fId;
 
-  vector<StiHit*>::iterator& tempend = _map[_key].theEffectiveEnd;
+  vector<StiHit*>::iterator tempend = _map[_key].TheEffectiveEnd();
 
 #if 1
    //sanity check block
@@ -269,9 +275,9 @@ void StiHitContainer::sortHits()
   HitMapToVectorAndEndType::iterator it;
   for (it=_map.begin(); it!=_map.end(); ++it) 
     {
-      vector<StiHit*>& tempvec = (*it).second.theHitVec;
+      vector<StiHit*>& tempvec = (*it).second.hits();
       sort(tempvec.begin(), tempvec.end(), StizHitLessThan());
-      (*it).second.theEffectiveEnd =(*it).second.theHitVec.end();
+      (*it).second.invalidateEnd();
     }
   return;
 }
@@ -280,10 +286,10 @@ void StiHitContainer::partitionUsedHits()
 {
     for (HitMapToVectorAndEndType::iterator it=_map.begin(); it!=_map.end(); ++it)
       {
-      vector<StiHit*>& tempvec = (*it).second.theHitVec;
+      vector<StiHit*>& tempvec = (*it).second.hits();
       vector<StiHit*>::iterator where =
         stable_partition(tempvec.begin(), tempvec.end(), StiHitIsUsed() );
-      (*it).second.theEffectiveEnd = where;
+      (*it).second.setEnd(where);
     }
 }
 
@@ -299,7 +305,7 @@ ostream& operator<<(ostream& os, const StiHitContainer& store)
 {
     for (HitMapToVectorAndEndType::const_iterator it=store._map.begin(); it!=store._map.end(); it++) {
 	os <<endl;
-	os <<(*it).second.theHitVec;
+	os <<(*it).second.hits();
     }
     return os;   
 }
@@ -312,7 +318,7 @@ vector<StiHit*> & StiHitContainer::getHits()
   _selectedHits.clear();
   for(HitMapToVectorAndEndType::const_iterator iter= _map.begin(); iter !=_map.end(); iter++)
    {
-      const vector<StiHit*> & t_hits = (*iter).second.theHitVec;
+      const vector<StiHit*> & t_hits = (*iter).second.hits();
       for (vector<StiHit*>::const_iterator it=t_hits.begin();it!=t_hits.end();++it)
         _selectedHits.push_back(*it);
    }  
@@ -328,7 +334,7 @@ vector<StiHit*> & StiHitContainer::getHits(Filter<StiHit> & filter)
   StiHit * hit;
   for(HitMapToVectorAndEndType::const_iterator iter= _map.begin(); iter !=_map.end(); iter++)
     {
-    const vector<StiHit*> & t_hits = (*iter).second.theHitVec;
+    const vector<StiHit*> & t_hits = (*iter).second.hits();
     for (vector<StiHit*>::const_iterator it=t_hits.begin();
          it!=t_hits.end();
          ++it)

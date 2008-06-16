@@ -112,15 +112,35 @@
 using namespace std;
 
 ///We define this globally for convenience of users.
-struct VectorAndEnd
+class VectorAndEnd
 {	
+ private:
+    bool fEffectiveEndValid;
+    vector<StiHit*>::iterator theEffectiveEnd;
+protected:
+    friend class StiHitContainer;
+    vector<StiHit*>::iterator TheEffectiveEnd() { 
+       return fEffectiveEndValid ? theEffectiveEnd
+             : theHitVec.end();
+    }
+ public:
     VectorAndEnd();
     void TestId(int id);
     vector<StiHit*> theHitVec;
-    vector<StiHit*>::iterator theEffectiveEnd;
     int  fId;
     static int fIdCounter;
-};
+    void clear();
+    void setEnd(vector<StiHit*>::iterator &endHit) {
+      theEffectiveEnd    = endHit;
+      fEffectiveEndValid = true;
+    }
+    void invalidateEnd(){ fEffectiveEndValid = false; }
+    vector<StiHit*>  &hits() { return theHitVec; }
+    const vector<StiHit*>  &hits() const { return theHitVec; }
+    size_t  size() const  { return theHitVec.size(); }
+    void push_back(StiHit *hit) { theHitVec.push_back(hit); }
+    vector<StiHit*>::iterator begin() { return theHitVec.begin() ; }
+ };
 ///We define this globally for convenience of users.
 typedef map<HitMapKey, VectorAndEnd, MapKeyLessThan> HitMapToVectorAndEndType;
 
