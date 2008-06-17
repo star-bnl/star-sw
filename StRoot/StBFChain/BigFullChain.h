@@ -329,8 +329,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
   // Year 7 chains - Geometry 2007 hopefully fine
-  {"T2007","","","ry2007,MakeEvent,in,tpc_daq,tpcI,fcf,Tree,evout","","","TPC only chain,   2007 ITTF",kFALSE},
-  {"B2007","","","ry2007,MakeEvent,in,tpc_daq,tpcI,fcf,svt_daq,SvtD,ssddat,spt,Idst,l0,tags,Tree,evout",
+  {"T2007","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,fcf,Tree,evout","","","TPC only chain,  2007 ITTF",kFALSE},
+  {"B2007","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,fcf,svt_daq,SvtD,ssddat,spt,Idst,l0,tags,Tree,evout",
                                                         "","","Base chain for 2007 ITTF (tpc+svt+ssd)",kFALSE},
   {"P2007"       ,"" ,"",
    "B2007,IAna,KeepSvtHit,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr5",
@@ -348,8 +348,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   //  {"testing"      ,"" ,"",   // just a damned test
   //   "B2006b,sdt20061211,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
   //                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
-  {"B2008"       ,""       ,"","ry2008,in,tpc_daq,tpcI,fcf,Idst,tags,Tree,evout","",""
-                                                              ,"Base chain for 2008 ITTF (tpc)",kFALSE},
+  {"B2008" ,"","","ry2008,in,tpcX,ToFx,Idst,tags,Tree,evout","","","Base chain for 2008 ITTF (tpc+tof)",kFALSE},
   // startup for calib
   {"P2008a"       ,"" ,"",
    "B2008,IAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr3,analysis",
@@ -423,7 +422,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"IdTruth"     ,""  ,"",""              ,"","","Enable IdTruth association in StAssociationMaker",kFALSE},
   {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
-  {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noHistos"    ,""  ,"",""                                    ,"","","Disables Attributes histos",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
@@ -898,6 +896,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
     
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
+  {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
   {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
                                                                               "TOF Data base chain",kFALSE},
   {"tofXDat" ,  "tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
