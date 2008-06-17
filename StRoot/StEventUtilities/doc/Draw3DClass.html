@@ -30,15 +30,42 @@ as needed.
 It can be used to customize the STAR applications mentioned above also. 
 On the other hands it is backed by the same well-known poweful 
 3D engine; and it shares with the full-fledged STAR 3D applications the powerfull
-and flexbible GUI interface.
-
+and flexible GUI interface.
 
 The GUI interface is described <a href="http://www.star.bnl.gov/public/comp/vis">"STAR visualization and plotting" </a>
 by <a href="http://www.rhic.bnl.gov/~fine/EventDisplay">"Offline Event Display"</a> and 
 <a href="http://www.star.bnl.gov/public/comp/vis/STAR_GeometryBrowser.12.06.2006.ppt">"Star Geometry Browser"</a>
 links.
 <P>
-To see how it works, you  need two things to do
+<hr>
+The base <a href="html/StDraw3D.html">StDraw3D</a> class is a controller connecting the arbitrary "model" object to the arbitrary ROOT 3D class "view" object to implement the so-called   "Model / View" paradigm.
+In our case, the "Model" is an arbitrary object and the "View" is an instance of some ROOT 3D class. 
+To render views the <a href="html/StDraw3D.html">StDraw3D</a>
+instantiates the
+<a href="http://root.cern.ch/root/html/TCanvas.html">TCanvas</a>
+and <a href="http://root.cern.ch/root/html/TVirtualViewer3D.html">TVirtualViewer3D</a>
+to allow the user select interactively the "view"  instance  and invoke the model methods like: 
+
+<ul>
+  <li><a href="http://root.cern.ch/root/html/TObject.html#TObject:Inspect">TObject::Inspect()</a>
+        to inspect the model data-member values;
+  <li>  <a href="http://root.cern.ch/root/html/TObject.html#TObject:GetObjectInfo">
+   TObject::GetObjectInfo</a>  to label the view with the current model information;
+  <li>	<a href="http://root.cern.ch/root/html/TVirtualPadEditor.html">
+  TVirtualPadEditor</a> to set the model attributes.
+</ul>
+<P>
+For example, <a href="html/StuDraw3DEvent.html">StuDraw3DEvent</a> class applies: 
+<ul>
+  <li>	"Model" -  StTrack , "View" -  
+  <a href="http://root.cern.ch/root/html/TPolyLine3D.html">TPolyLine3D</a>
+  <li>	"Model" StHitCollection, "View" - 
+  <a href="http://root.cern.ch/root/html/TPolyMarker3D.html">TPolyMarker3D</a>
+</ul>
+
+<hr>
+<P>
+<h2>To see how it works, you  need two things to do</h2>
 <OL>
 <li>Create the custom ".rootrc" file to turn the Qt-layer on 
 <code><bold><pre>
