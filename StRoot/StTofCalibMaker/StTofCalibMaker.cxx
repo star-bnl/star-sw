@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.14 2007/11/30 17:11:23 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.15 2008/06/17 17:49:19 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.15  2008/06/17 17:49:19  dongx
+ * Update for Run 8 - first release
+ *
  * Revision 1.14  2007/11/30 17:11:23  dongx
  * removed tdcId in tofZCorr for tofZCorr.tdcId is not defined in db, and removed from idl definition
  *
@@ -97,6 +100,11 @@
 #include "tables/St_tofTotCorr_Table.h"
 #include "tables/St_tofZCorr_Table.h"
 
+#include "tables/St_vertexSeed_Table.h"
+
+#include "tables/St_tofTOffset_Table.h"
+#include "tables/St_tofPhaseOffset_Table.h"
+
 #include "StTofUtil/tofPathLength.hh"
 #include "StTofUtil/StTofDataCollection.h"
 #include "StTofUtil/StTofSlatCollection.h"
@@ -130,6 +138,7 @@ StTofCalibMaker::StTofCalibMaker(const char *name) : StMaker(name)
 
   mValidStartTime = kTRUE;
   mEastPVPDValid = kTRUE;
+  mSlewingCorr = kTRUE;
 
   resetPars();
 }
@@ -204,6 +213,38 @@ void StTofCalibMaker::resetPars()
       mPVPDTotCorr[i][j] = 0.0;
     }
   }
+
+  // run8
+  for(int i=0;i<mNTray;i++) {
+    for(int j=0;j<mNTDIG;j++) {
+      for(int k=0;k<mNBinMax;k++) {
+	mTofTotEdge[i][j][k] = 0.0;
+	mTofTotCorr[i][j][k] = 0.0;
+	mTofZEdge[i][j][k] = 0.0;
+	mTofZCorr[i][j][k] = 0.0;
+      }
+    }
+    for(int j=0;j<mNModule;j++) {
+      for(int k=0;k<mNCell;k++) {
+	mTofTZero[i][j][k] = 0.0;
+      }
+    }
+  }
+  for(int i=0;i<2*mNVPD;i++) {
+    for(int j=0;j<mNBinMax;j++) {
+      mVPDTotEdge[i][j] = 0.0;
+      mVPDTotCorr[i][j] = 0.0;
+    }
+    mVPDTZero[i] = 0.0;
+    mVPDLeTime[i] = 0.0;
+    mVPDTot[i] = 0.0;
+  }
+
+  mTDiff = -9999.;
+  mVPDVtxZ = -9999.;
+  mProjVtxZ = -9999.;
+  mVPDHitPatternEast = 0;
+  mVPDHitPatternWest = 0;
 }
 
 //____________________________________________________________________________
@@ -269,6 +310,7 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
   mYear3 = (runnumber>4000000&&runnumber<5000000);
   mYear4 = (runnumber>5000000&&runnumber<6000000);
   mYear5 = (runnumber>6000000&&runnumber<7000000);
+  mYear8 = (runnumber>9000000&&runnumber<10000000);
   /// initialize the calibrations parameters from dbase
   /// read in and check the size
   gMessMgr->Info("    -- retrieving run parameters from Calibrations_tof","OS");
@@ -277,187 +319,193 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
     gMessMgr->Error("unable to get TOF run parameters","OS");
     return kStErr;
   }
-
+  
+  /////////////////////////////
+  /// year 2,3,4
+  /////////////////////////////
   if(mYear2||mYear3||mYear4) {
     gMessMgr->Info("     loading parameters for Run II/III/IV","OS");
-  // -- T0 parameters --
-  St_tofTzero* tofT0 = static_cast<St_tofTzero*>(mDbDataSet->Find("tofTzero"));
-  if(!tofT0) {
+    // -- T0 parameters --
+    St_tofTzero* tofT0 = static_cast<St_tofTzero*>(mDbDataSet->Find("tofTzero"));
+    if(!tofT0) {
     gMessMgr->Error("unable to get Tzero table","OS");
     return kStErr;
-  } else {
-  tofTzero_st* t0 = static_cast<tofTzero_st*>(tofT0->GetArray());
-  Int_t nRows = t0[0].entries;
-  if(nRows<0||nRows>mNMax) {
-    gMessMgr->Error("# of Tzero out of range","OS");
-    return kStErr;
-  }
-  for(Int_t i=0;i<nRows;i++) {
-    int daqId = t0[0].daqChannel[i];
-    int tdcChan = t0[0].tdcChan[i];
-    // check the daqId
-    if(daqId<0) continue;
-    if(tdcChan<42) {
-      mTofpT0[daqId] =  (Double_t)(t0[0].Tzero[i]);
-      if(Debug()) {
-	gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " tdcChan=" << tdcChan << " T0=" << mTofpT0[daqId] << endm;
-      }
     } else {
-      mTofrT0[daqId] = (Double_t)(t0[0].Tzero[i]);
-      if(Debug()) {
-	gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " tdcChan=" << tdcChan << " T0=" << mTofrT0[daqId] << endm;
+      tofTzero_st* t0 = static_cast<tofTzero_st*>(tofT0->GetArray());
+      Int_t nRows = t0[0].entries;
+      if(nRows<0||nRows>mNMax) {
+	gMessMgr->Error("# of Tzero out of range","OS");
+	return kStErr;
+      }
+      for(Int_t i=0;i<nRows;i++) {
+	int daqId = t0[0].daqChannel[i];
+	int tdcChan = t0[0].tdcChan[i];
+	// check the daqId
+	if(daqId<0) continue;
+	if(tdcChan<42) {
+	  mTofpT0[daqId] =  (Double_t)(t0[0].Tzero[i]);
+	  if(Debug()) {
+	    gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " tdcChan=" << tdcChan << " T0=" << mTofpT0[daqId] << endm;
+	  }
+	} else {
+	  mTofrT0[daqId] = (Double_t)(t0[0].Tzero[i]);
+	  if(Debug()) {
+	    gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " tdcChan=" << tdcChan << " T0=" << mTofrT0[daqId] << endm;
+	  }
+	}
       }
     }
-  }
-  }
-  // -- TA slewing parameters --
-  St_tofTACorr *tofTA = static_cast<St_tofTACorr*>(mDbDataSet->Find("tofTACorr"));
-  if(!tofTA) {
-    gMessMgr->Error("unable to find TA slewing parameters","OS");
-    return kStErr;
-  }
-  tofTACorr_st *tofta = static_cast<tofTACorr_st*>(tofTA->GetArray());
-  for(Int_t i=0;i<mNMax;i++) {
-    int daqId = tofta[0].daqChannel[i];
-    int tdcChan = tofta[0].tdcChan[i];
-    // check the daqId
-    if(daqId<0) continue;
-    for(int j=0;j<mNPar;j++) {
-      int ijdaq = daqId*mNPar+j;
-      int ij = i*mNPar+j;
+    // -- TA slewing parameters --
+    St_tofTACorr *tofTA = static_cast<St_tofTACorr*>(mDbDataSet->Find("tofTACorr"));
+    if(!tofTA) {
+      gMessMgr->Error("unable to find TA slewing parameters","OS");
+      return kStErr;
+    }
+    tofTACorr_st *tofta = static_cast<tofTACorr_st*>(tofTA->GetArray());
+    for(Int_t i=0;i<mNMax;i++) {
+      int daqId = tofta[0].daqChannel[i];
+      int tdcChan = tofta[0].tdcChan[i];
+      // check the daqId
+      if(daqId<0) continue;
+      for(int j=0;j<mNPar;j++) {
+	int ijdaq = daqId*mNPar+j;
+	int ij = i*mNPar+j;
+	if(tdcChan<42) {
+	  if(daqId>=mNTOFp) {
+	    gMessMgr->Warning("More than expected TOFp channels read in","OS");
+	  } else {
+	    mTofpTAPar[ijdaq] = (Double_t)(tofta[0].a[ij]);
+	    if(Debug()) {
+	      gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " tdcChan=" << tdcChan << " TA Corr[" << j << "]=" << mTofpTAPar[ijdaq] << endm;
+	    }	  
+	  }
+	} else if(tdcChan<48) {
+	  if(daqId>=mNPVPD) {
+	    gMessMgr->Warning("More than expected pVPD channels read in","OS");
+	  } else {
+	    mPVPDTAPar[ijdaq] = (Double_t)(tofta[0].a[ij]);
+	    if(Debug()) {
+	      gMessMgr->Info("","OS") << " -pVPD- daqId=" << daqId << " tdcChan=" << tdcChan << " TA Corr[" << j << "]=" << mPVPDTAPar[ijdaq] << endm;
+	    }	  
+	  }
+	} else {
+	  if(daqId>=mNTOFr) {
+	    gMessMgr->Warning("More than expected TOFr channels read in","OS");
+	  } else {
+	    mTofrTAPar[ijdaq] = (Double_t)(tofta[0].a[ij]);
+	    if(Debug()) {
+	      gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " tdcChan=" << tdcChan << " TA Corr[" << j << "]=" << mTofrTAPar[ij] << endm;
+	    }	  
+	  }
+	}
+      }
+    }
+    
+    // -- Z corr parameters --
+    St_tofCorrection *tofrZCorr = static_cast<St_tofCorrection*>(mDbDataSet->Find("tofrZhitCorr"));
+    St_tofCorrection *tofpZCorr = static_cast<St_tofCorrection*>(mDbDataSet->Find("tofpZhitCorr"));
+    if(!tofrZCorr && !tofpZCorr) {
+      gMessMgr->Error("unable to find Zhit corr parameters","OS");
+      return kStErr;
+    }
+    if(tofrZCorr) {
+      tofCorrection_st *tofrZ = static_cast<tofCorrection_st*>(tofrZCorr->GetArray());
+      for(int i=0;i<mNPar;i++) {
+	mTofrZPar[i] = tofrZ[0].a[i];
+	if(Debug()) {
+	  gMessMgr->Info("","OS") << " -TOFr- Zcorr[" << i << "]=" << mTofrZPar[i] << endm;
+	} 
+      }
+    }
+    if(tofpZCorr) {
+      tofCorrection_st *tofpZ = static_cast<tofCorrection_st*>(tofpZCorr->GetArray());
+      for(int i=0;i<mNPar;i++) {
+	mTofpZPar[i] = tofpZ[0].a[i];
+	if(Debug()) {
+	  gMessMgr->Info("","OS") << " -TOFp- Zcorr[" << i << "]=" << mTofpZPar[i] << endm;
+	} 
+      }
+    }
+    
+    // ADC range parameters ( specially for TOFp in Run IV )
+    St_tofAdcRange *tofAdc = static_cast<St_tofAdcRange*>(mDbDataSet->Find("tofAdcRange"));
+    if(!tofAdc) {
+      gMessMgr->Warning("unable to find ADC range parameters, use default values!","OS");
+    }
+    tofAdcRange_st *tofadc = static_cast<tofAdcRange_st*>(tofAdc->GetArray());
+    for(Int_t i=0;i<mNMax;i++) {
+      int daqId = tofadc[0].daqChannel[i];
+      int adcChan = tofadc[0].adcChan[i];
+      if(daqId<0) continue;
+      if(adcChan<42) {
+	if(daqId>=mNTOFp) {
+	  gMessMgr->Warning("More than expected TOFp channels read in","OS");
+	} else {
+	  mTofpADCMin[daqId] = tofadc[0].adcMin[i];
+	  mTofpADCMax[daqId] = tofadc[0].adcMax[i];
+	  if(Debug()) {
+	    gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " adcChan=" << adcChan << " min=" << mTofpADCMin[daqId] << " max=" << mTofpADCMax[daqId] << endm;
+	  }
+	}
+      }
+      if(adcChan>=60) {
+	if(daqId>=mNTOFr) {
+	  gMessMgr->Warning("More than expected TOFr channels read in","OS");
+	} else {
+	  mTofrADCMin[daqId] = tofadc[0].adcMin[i];
+	  mTofrADCMax[daqId] = tofadc[0].adcMax[i];
+	  if(Debug()) {
+	    gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " adcChan=" << adcChan << " min=" << mTofrADCMin[daqId] << " max=" << mTofrADCMax[daqId] << endm;
+	  }
+	}
+      }
+    }
+    
+    // res parameters ( specially for TOFp in Run IV )
+    St_tofResolution *tofRes = static_cast<St_tofResolution*>(mDbDataSet->Find("tofResolution"));
+    if(!tofRes) {
+      gMessMgr->Warning("unable to find resolution parameters, nSimgaTof UNAVAILABLE!","OS");
+    }
+    tofResolution_st *tofres = static_cast<tofResolution_st*>(tofRes->GetArray());
+    for(Int_t i=0;i<mNMax;i++) {
+      int daqId = tofres[0].daqChannel[i];
+      int tdcChan = tofres[0].tdcChan[i];
+      if(daqId<0) continue;
       if(tdcChan<42) {
 	if(daqId>=mNTOFp) {
 	  gMessMgr->Warning("More than expected TOFp channels read in","OS");
 	} else {
-	  mTofpTAPar[ijdaq] = (Double_t)(tofta[0].a[ij]);
+	  mTofpRes[daqId] = tofres[0].resolution[i];
 	  if(Debug()) {
-	    gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " tdcChan=" << tdcChan << " TA Corr[" << j << "]=" << mTofpTAPar[ijdaq] << endm;
-	  }	  
+	    gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mTofpRes[daqId] << endm;
+	  }
 	}
       } else if(tdcChan<48) {
 	if(daqId>=mNPVPD) {
-	  gMessMgr->Warning("More than expected pVPD channels read in","OS");
+	  gMessMgr->Warning("More than expected PVPD channels read in","OS");
 	} else {
-	  mPVPDTAPar[ijdaq] = (Double_t)(tofta[0].a[ij]);
+	  mPVPDRes[daqId] = tofres[0].resolution[i];
 	  if(Debug()) {
-	    gMessMgr->Info("","OS") << " -pVPD- daqId=" << daqId << " tdcChan=" << tdcChan << " TA Corr[" << j << "]=" << mPVPDTAPar[ijdaq] << endm;
-	  }	  
+	    gMessMgr->Info("","OS") << " -PVPD- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mPVPDRes[daqId] << endm;
+	  }
 	}
       } else {
 	if(daqId>=mNTOFr) {
 	  gMessMgr->Warning("More than expected TOFr channels read in","OS");
 	} else {
-	  mTofrTAPar[ijdaq] = (Double_t)(tofta[0].a[ij]);
+	  mTofrRes[daqId] = tofres[0].resolution[i];
 	  if(Debug()) {
-	    gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " tdcChan=" << tdcChan << " TA Corr[" << j << "]=" << mTofrTAPar[ij] << endm;
-	  }	  
+	    gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mTofrRes[daqId] << endm;
+	  }
 	}
       }
     }
-  }
-
-  // -- Z corr parameters --
-  St_tofCorrection *tofrZCorr = static_cast<St_tofCorrection*>(mDbDataSet->Find("tofrZhitCorr"));
-  St_tofCorrection *tofpZCorr = static_cast<St_tofCorrection*>(mDbDataSet->Find("tofpZhitCorr"));
-  if(!tofrZCorr && !tofpZCorr) {
-    gMessMgr->Error("unable to find Zhit corr parameters","OS");
-    return kStErr;
-  }
-  if(tofrZCorr) {
-    tofCorrection_st *tofrZ = static_cast<tofCorrection_st*>(tofrZCorr->GetArray());
-    for(int i=0;i<mNPar;i++) {
-      mTofrZPar[i] = tofrZ[0].a[i];
-      if(Debug()) {
-	gMessMgr->Info("","OS") << " -TOFr- Zcorr[" << i << "]=" << mTofrZPar[i] << endm;
-      } 
-    }
-  }
-  if(tofpZCorr) {
-    tofCorrection_st *tofpZ = static_cast<tofCorrection_st*>(tofpZCorr->GetArray());
-    for(int i=0;i<mNPar;i++) {
-      mTofpZPar[i] = tofpZ[0].a[i];
-      if(Debug()) {
-	gMessMgr->Info("","OS") << " -TOFp- Zcorr[" << i << "]=" << mTofpZPar[i] << endm;
-      } 
-    }
-  }
-
-  // ADC range parameters ( specially for TOFp in Run IV )
-  St_tofAdcRange *tofAdc = static_cast<St_tofAdcRange*>(mDbDataSet->Find("tofAdcRange"));
-  if(!tofAdc) {
-    gMessMgr->Warning("unable to find ADC range parameters, use default values!","OS");
-  }
-  tofAdcRange_st *tofadc = static_cast<tofAdcRange_st*>(tofAdc->GetArray());
-  for(Int_t i=0;i<mNMax;i++) {
-    int daqId = tofadc[0].daqChannel[i];
-    int adcChan = tofadc[0].adcChan[i];
-    if(daqId<0) continue;
-    if(adcChan<42) {
-      if(daqId>=mNTOFp) {
-	gMessMgr->Warning("More than expected TOFp channels read in","OS");
-      } else {
-	mTofpADCMin[daqId] = tofadc[0].adcMin[i];
-	mTofpADCMax[daqId] = tofadc[0].adcMax[i];
-	if(Debug()) {
-	  gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " adcChan=" << adcChan << " min=" << mTofpADCMin[daqId] << " max=" << mTofpADCMax[daqId] << endm;
-	}
-      }
-    }
-    if(adcChan>=60) {
-      if(daqId>=mNTOFr) {
-	gMessMgr->Warning("More than expected TOFr channels read in","OS");
-      } else {
-	mTofrADCMin[daqId] = tofadc[0].adcMin[i];
-	mTofrADCMax[daqId] = tofadc[0].adcMax[i];
-	if(Debug()) {
-	  gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " adcChan=" << adcChan << " min=" << mTofrADCMin[daqId] << " max=" << mTofrADCMax[daqId] << endm;
-	}
-      }
-    }
-  }
-  
-  // res parameters ( specially for TOFp in Run IV )
-  St_tofResolution *tofRes = static_cast<St_tofResolution*>(mDbDataSet->Find("tofResolution"));
-  if(!tofRes) {
-    gMessMgr->Warning("unable to find resolution parameters, nSimgaTof UNAVAILABLE!","OS");
-  }
-  tofResolution_st *tofres = static_cast<tofResolution_st*>(tofRes->GetArray());
-  for(Int_t i=0;i<mNMax;i++) {
-    int daqId = tofres[0].daqChannel[i];
-    int tdcChan = tofres[0].tdcChan[i];
-    if(daqId<0) continue;
-    if(tdcChan<42) {
-      if(daqId>=mNTOFp) {
-	gMessMgr->Warning("More than expected TOFp channels read in","OS");
-      } else {
-	mTofpRes[daqId] = tofres[0].resolution[i];
-	if(Debug()) {
-	  gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mTofpRes[daqId] << endm;
-	}
-      }
-    } else if(tdcChan<48) {
-      if(daqId>=mNPVPD) {
-	gMessMgr->Warning("More than expected PVPD channels read in","OS");
-      } else {
-	mPVPDRes[daqId] = tofres[0].resolution[i];
-	if(Debug()) {
-	  gMessMgr->Info("","OS") << " -PVPD- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mPVPDRes[daqId] << endm;
-	}
-      }
-    } else {
-      if(daqId>=mNTOFr) {
-	gMessMgr->Warning("More than expected TOFr channels read in","OS");
-      } else {
-	mTofrRes[daqId] = tofres[0].resolution[i];
-	if(Debug()) {
-	  gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mTofrRes[daqId] << endm;
-	}
-      }
-    }
-  }
+    /////////////////////////////
+    /// year 5
+    /////////////////////////////
   } else if(mYear5) {
     gMessMgr->Info("     loading parameters for Run V","OS");
-
+    
     // read INL table
     St_tofr5INLtable* tofr5INLtable = static_cast<St_tofr5INLtable*>(mDbDataSet->Find("tofr5INLtable"));
     if(!tofr5INLtable) {
@@ -570,8 +618,279 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
       } // end j 0->mNBinMax
     } // end i 0->numRows
 
+    /////////////////////////////
+    /// year 8
+    /////////////////////////////
+  }  else if(mYear8) {
+    gMessMgr->Info("     loading parameters for Run VIII","OS");
 
-  }
+    // read tofTotCorr table
+    St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(mDbDataSet->Find("tofTotCorr"));
+    if(!tofTotCorr) {
+      gMessMgr->Error("unable to get tof TotCorr table parameters","OS");
+      //    assert(tofTotCorr);
+      return kStErr;
+    }
+    tofTotCorr_st* totCorr = static_cast<tofTotCorr_st*>(tofTotCorr->GetArray());
+    Int_t numRows = tofTotCorr->GetNRows();
+
+    if(numRows!=mNTray8*mNTDIG+mNVPD*2) {
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotCorr table! " << endm;
+      //      return kStErr;
+    }
+
+    if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for ToT correction" << endm;
+
+    for (Int_t i=0;i<mNTray8*mNTDIG+mNVPD*2;i++) {
+      short trayId = totCorr[i].trayId;
+      short moduleId = totCorr[i].moduleId;
+      short boardId = (moduleId-1)/4+1;      // used for trays
+      short cellId = totCorr[i].cellId;      // used for vpds
+
+      int index = (trayId-mNTray-1)*mNVPD+(cellId-1);   // used for vpd index
+
+      if(Debug()) gMessMgr->Info("","OS") << " tray " << trayId << " board " << boardId << " cell " << cellId << endm;
+      for(Int_t j=0;j<mNBinMax;j++) {
+	if(trayId==mWestVpdTrayId||trayId==mEastVpdTrayId) { // upVPD east west
+	  mVPDTotEdge[index][j] = totCorr[i].tot[j];
+	  mVPDTotCorr[index][j] = totCorr[i].corr[j];
+	} else if(trayId>0&&trayId<=mNTray){ // trays
+	  mTofTotEdge[trayId-1][boardId-1][j] = totCorr[i].tot[j];
+	  mTofTotCorr[trayId-1][boardId-1][j] = totCorr[i].corr[j];
+	  if(Debug()&&j%10==0) gMessMgr->Info("","OS") << " j=" << j << " tot " << mTofTotEdge[trayId-1][boardId-1][j] << " corr " << mTofTotCorr[trayId-1][boardId-1][j] << endm; 
+	}
+      } // end j 0->mNBinMax
+    } // end i 0->numRows
+
+
+    // read tofZCorr table
+    St_tofZCorr* tofZCorr = static_cast<St_tofZCorr*>(mDbDataSet->Find("tofZCorr"));
+    if(!tofZCorr) {
+      gMessMgr->Error("unable to get tof ZCorr table parameters","OS");
+      //    assert(tofZCorr);
+      return kStErr;
+    }
+    tofZCorr_st* zCorr = static_cast<tofZCorr_st*>(tofZCorr->GetArray());
+    numRows = tofZCorr->GetNRows();
+
+    if(numRows!=mNTray8*mNTDIG) {
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofZCorr table! " << endm;
+      //      return kStErr;
+    }
+    if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for Z correction" << endm;
+
+    for (Int_t i=0;i<mNTray8*mNTDIG;i++) {
+      short trayId = totCorr[i].trayId;
+      short moduleId = totCorr[i].moduleId;
+      short boardId = (moduleId-1)/4+1;      // used for trays
+      short cellId = totCorr[i].cellId;      // used for vpds
+
+      if(Debug()) gMessMgr->Info("","OS") << " tray " << trayId << " board " << boardId << " cell " << cellId << endm;
+      for(Int_t j=0;j<mNBinMax;j++) {
+	if(trayId>0&&trayId<=120) {  // trays
+	  mTofZEdge[trayId-1][boardId-1][j] = zCorr[i].z[j];
+	  mTofZCorr[trayId-1][boardId-1][j] = zCorr[i].corr[j];
+	  if(Debug()&&j%10==0) gMessMgr->Info("","OS") << " j=" << j << " tot " << mTofZEdge[trayId-1][boardId-1][j] << " corr " << mTofZCorr[trayId-1][boardId-1][j] << endm; 
+	}
+      } // end j 0->mNBinMax
+    } // end i 0->numRows
+
+    // read tofTOffset table
+    St_tofTOffset* tofTOffset = static_cast<St_tofTOffset*>(mDbDataSet->Find("tofTOffset"));
+    if(!tofTOffset) {
+      gMessMgr->Error("unable to get tof TOffset table parameters","OS");
+      //    assert(tofTOffset);
+      return kStErr;
+    }
+    tofTOffset_st* tZero = static_cast<tofTOffset_st*>(tofTOffset->GetArray());
+    numRows = tofTOffset->GetNRows();
+
+    if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for TOffset correction" << endm;
+
+    if(numRows!=mNTray8) {
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTOffset table! " << endm;
+      //      return kStErr;
+    }
+    for (Int_t i=0;i<mNTray8;i++) {
+      short trayId = tZero[i].trayId;
+      if(Debug()) gMessMgr->Info("","OS") << " tray " << trayId << endm;
+      
+      if(trayId>0&&trayId<=mNTray) {
+	for(int j=0;j<mNTOF;j++) {
+	  mTofTZero[trayId-1][j/6][j%6] = tZero[i].T0[j];
+	  if(Debug()&&j%10==0) gMessMgr->Info("","OS") << " j=" << j << " T0 " << mTofTZero[trayId-1][j/6][j%6] << endm; 
+	}
+      }
+    }
+
+    // read tofPhaseOffset table
+    St_tofPhaseOffset* tofPhaseOffset = static_cast<St_tofPhaseOffset*>(mDbDataSet->Find("tofPhaseOffset"));
+    if(!tofPhaseOffset) {
+      gMessMgr->Error("unable to get tof PhaseOffset table parameters","OS");
+      //    assert(tofPhaseOffset);
+      return kStErr;
+    }
+    tofPhaseOffset_st* tPhaseDiff = static_cast<tofPhaseOffset_st*>(tofPhaseOffset->GetArray());
+
+    mPhaseOffset8 = tPhaseDiff[0].T0[0] + tPhaseDiff[0].T0[1]; // run 8, only e/w difference, to double precision
+    if(Debug()) gMessMgr->Info("","OS") << " PhaseOffset = " << mPhaseOffset8 << endm;
+
+    /*
+    // test -- read in from data files
+    ifstream inData;
+
+    inData.open("/star/u/dongx/TOFr/y8update/dbase/dat/pvpdCali_9050074.dat");
+    for (Int_t i=0;i<mNVPD*2;i++) {
+      int tubeId, nbin;
+      inData>>tubeId;
+      inData>>nbin;  // nbin intervals, nbin+1 edges
+
+      short trayId = (tubeId-1)/mNVPD + mNTray + 1;
+      short cellId = (tubeId-1)%mNVPD + 1;      // used for vpds
+
+      if(Debug()) gMessMgr->Info("","OS") << " tray " << trayId << " cell " << cellId << endm;
+      int index = (trayId-mNTray-1)*mNVPD+(cellId-1);
+      for(Int_t j=0;j<=nbin;j++) {
+	double xedge;
+	inData>>xedge;
+	if(trayId==mWestVpdTrayId||trayId==mEastVpdTrayId) { // upVPD east west
+	  mVPDTotEdge[index][j] = xedge;
+	}
+      }
+      for(Int_t j=0;j<=nbin;j++) {
+	double ycorr;
+	inData>>ycorr;
+	if(trayId==mWestVpdTrayId||trayId==mEastVpdTrayId) { // upVPD east west
+	  mVPDTotCorr[index][j] = ycorr;
+	}
+      } // end j 0->mNBinMax
+      for(Int_t j=0;j<=nbin;j++) {
+	if(Debug()&&j%10==0) gMessMgr->Info("","OS") << " j=" << j << " tot " << mVPDTotEdge[index][j] << " corr " << mVPDTotCorr[index][j] << endm; 
+      } // end j 0->mNBinMax
+    } // end i 0->numRows
+    inData.close();
+
+    inData.open("/star/u/dongx/TOFr/y8update/dbase/dat/totCali_9050074.dat");
+    for (Int_t i=0;i<mNTray8*mNTDIG;i++) {
+      int trayId, boardId, nbin;
+      inData >> trayId >> boardId;
+      inData >> nbin;
+
+      if(Debug()) gMessMgr->Info("","OS") << " tray " << trayId << " board " << boardId << endm;
+      for(Int_t j=0;j<=nbin;j++) {
+	if (trayId>0&&trayId<=mNTray){ // trays
+	  double xedge;
+	  inData>>xedge;
+	  mTofTotEdge[trayId-1][boardId-1][j] = xedge;
+	}
+      }
+      for(Int_t j=0;j<=nbin;j++) {
+	if (trayId>0&&trayId<=mNTray){ // trays
+	  double ycorr;
+	  inData>>ycorr;
+	  mTofTotCorr[trayId-1][boardId-1][j] = ycorr;
+	}
+      }
+      for(Int_t j=0;j<=nbin;j++) {
+	if(Debug()&&j%10==0) gMessMgr->Info("","OS") << " j=" << j << " tot " << mTofTotEdge[trayId-1][boardId-1][j] << " corr " << mTofTotCorr[trayId-1][boardId-1][j] << endm; 
+      } // end j 0->mNBinMax
+    } // end i 0->numRows
+    inData.close();
+
+    inData.open("/star/u/dongx/TOFr/y8update/dbase/dat/zCali_9050074.dat");
+    for (Int_t i=0;i<mNTray8*mNTDIG;i++) {
+      int trayId, boardId, nbin;
+      inData >> trayId >> boardId;
+      inData >> nbin;
+
+      if(Debug()) gMessMgr->Info("","OS") << " tray " << trayId << " board " << boardId << endm;
+      for(Int_t j=0;j<=nbin;j++) {
+	if (trayId>0&&trayId<=mNTray){ // trays
+	  double xedge;
+	  inData>>xedge;
+	  mTofZEdge[trayId-1][boardId-1][j] = xedge;
+	}
+      }
+      for(Int_t j=0;j<=nbin;j++) {
+	if (trayId>0&&trayId<=mNTray){ // trays
+	  double ycorr;
+	  inData>>ycorr;
+	  mTofZCorr[trayId-1][boardId-1][j] = ycorr;
+	}
+      }
+      for(Int_t j=0;j<=nbin;j++) {
+	if(Debug()&&j%10==0) gMessMgr->Info("","OS") << " j=" << j << " z " << mTofZEdge[trayId-1][boardId-1][j] << " corr " << mTofZCorr[trayId-1][boardId-1][j] << endm; 
+      } // end j 0->mNBinMax
+    } // end i 0->numRows
+    inData.close();
+
+    inData.open("/star/u/dongx/TOFr/y8update/dbase/dat/t0_9050074.dat");
+    for (Int_t i=0;i<mNTray8;i++) {
+      for (Int_t j=0;j<mNModule;j++) {
+	for (Int_t k=0;k<mNCell;k++) {
+	  int trayId, moduleId, cellId;
+	  inData>>trayId>>moduleId>>cellId;
+      
+	  double t0;
+	  inData >> t0;
+	  mTofTZero[trayId-1][moduleId-1][cellId-1] = t0;
+	  if(Debug()&&k==0) gMessMgr->Info("","OS") << " trayId=" << trayId << " moduleId=" << moduleId << " cellId=" << cellId << " T0 " << mTofTZero[trayId-1][moduleId-1][cellId-1] << endm; 
+	}
+      }
+    }
+    inData.close();
+
+    //mPhaseOffset8 = -33796.; // run 8, only e/w difference
+    mPhaseOffset8 = - 27945.8; //9058055  
+    */
+
+    // ========== Set Beam Line ===================== 
+    double x0 = 0.;
+    double y0 = 0.;
+    double dxdz = 0.;
+    double dydz = 0.;
+    
+    // Get Current Beam Line Constraint from database
+    TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic");
+    
+    if (dbDataSet) {
+      vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
+      
+      x0 = vSeed->x0;
+      y0 = vSeed->y0;
+      dxdz = vSeed->dxdz;
+      dydz = vSeed->dydz;
+    }
+    else {
+      LOG_INFO << "StGenericVertexMaker -- No Database for beamline" << endm;
+    }
+
+    LOG_INFO << "BeamLine Constraint: " << endm;
+    LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
+    LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
+    
+    //**********
+    //beam line not be calibrated yet
+    //x0 shift by 0.5
+    //x0 = 0.5;
+    //**********    
+    StThreeVectorD origin(x0,y0,0.0);
+    double pt = 88889999;
+    double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
+    if(nxy<1.e-5){ // beam line _MUST_ be tilted
+      LOG_WARN << "StTofCalibMaker:: Beam line must be tilted!" << endm;
+      nxy=dxdz=1.e-5;
+    }
+    double p0=pt/nxy;
+    double px   = p0*dxdz;
+    double py   = p0*dydz;
+    double pz   = p0; // approximation: nx,ny<<0
+    StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+    if(mBeamHelix) delete mBeamHelix;
+    mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
+    
+    
+  } // end if (mYear8)
 
   return kStOK;
 }
@@ -612,6 +931,8 @@ Int_t StTofCalibMaker::Make()
     iret = processEventYear2to4();
   } else if(mYear5) {
     iret = processEventYear5();
+  } else if(mYear8) {
+    iret = processEventYear8();
   }
   return kStOK;
 }
@@ -815,8 +1136,8 @@ Int_t StTofCalibMaker::processEventYear2to4(){
     if (Debug())
       gMessMgr->Info("","OS") << "storing " << j << "  " << "  tray:"
 			      << tofHit->getHit(j)->trayIndex() << "  module:"
-			      << tofHit->getHit(j)->moduleIndex() << "  cell:"
-			      << tofHit->getHit(j)->cellIndex() << endm;
+			      << tofHit->getHit(j)->moduleIndex() << "  cell "
+			      << tofHit->getHit(j)->cellIndex()  << endm;
   }
 
   // add the tof pidtraits
@@ -1059,6 +1380,222 @@ Int_t StTofCalibMaker::processEventYear5(){
   return kStOK;
 }
 
+//____________________________________________________________________________
+Int_t StTofCalibMaker::processEventYear8(){
+
+  mEvent = (StEvent *) GetInputDS("StEvent");
+  
+  // event selection  // no primary vertex in run8
+  if( !mEvent ||
+      !mEvent->tofCollection() ||
+      (!mEvent->tofCollection()->dataPresent() &&
+       !mEvent->tofCollection()->rawdataPresent()) ||
+      (!mEvent->tofCollection()->cellsPresent()) ) {
+    gMessMgr->Info("","OS") << "StTofCalibMaker -- nothing to do ... bye-bye" << endm;
+    return kStOK;
+  }
+
+  StTofCollection *theTof = mEvent->tofCollection();
+  StSPtrVecTofCell &tofCell = theTof->tofCells();
+  Int_t ncells = tofCell.size();
+  gMessMgr->Info("","OS") << " TOFr matched cells + upVPD fired tubes : " << ncells << endm;
+
+  
+  //added by Zebo, projVtxZ from track cloest to beam line
+  float dcaRmin = 9999;
+  for(int i=0;i<ncells;i++) {
+    StTofHit *aHit = new StTofHit;
+    StTofCell *aCell = dynamic_cast<StTofCell*>(tofCell[i]);
+    int trayId = aCell->trayIndex();
+    if(trayId<=0 || trayId>120) continue;
+   StTrack *thisTrack = aCell->associatedTrack();
+    aHit->setAssociatedTrack(thisTrack);
+    StTrackGeometry *theTrackGeometry = thisTrack->geometry();
+
+    StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
+    cout<<"tofPos(x,y,z)= "<<tofPos.x()<<"  "<<tofPos.y()<<"  "<<tofPos.z()<<endl;
+    StThreeVectorD dcatof = tofPos - mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
+    cout<<"dcatof(x,y)= "<<dcatof.x()<<"  "<<dcatof.y()<<endl;
+
+    if(dcaRmin>dcatof.perp()) {
+       mProjVtxZ = tofPos.z();
+       dcaRmin = dcatof.perp();
+    }
+    delete aHit;
+  }
+  //end
+
+  //-------------------------------------------------
+  // pVPD calibration and calculate the start timing
+  //-------------------------------------------------
+  for(int i=0;i<2*mNVPD;i++) {
+    mVPDLeTime[i] = -999.;
+    mVPDTot[i] = -999.;
+  }
+  for(int i=0;i<ncells;i++) {
+    StTofCell *aCell = dynamic_cast<StTofCell*>(tofCell[i]);
+    if(!aCell) continue;
+    int trayId = aCell->trayIndex();
+
+    if(trayId!=mWestVpdTrayId && trayId!=mEastVpdTrayId) continue;
+
+    int tubeId = aCell->cellIndex();
+    mVPDLeTime[(trayId-121)*mNVPD+(tubeId-1)] = aCell->leadingEdgeTime();
+    mVPDTot[(trayId-121)*mNVPD+(tubeId-1)] = aCell->tot();
+
+    // T0 is calculated one-by-one according to different vz.    
+//     Double_t T0 = tstart5(mVPDTot, mVPDLeTime, vz);
+//     if(T0<0.) {
+//       gMessMgr->Info(" Not a good PVPD-required event!","OS");
+//       mValidStartTime = kFALSE;
+//       //    return kStOK;
+//     } 
+  }
+  tsum8(mVPDTot, mVPDLeTime);
+
+  gMessMgr->Info("","OS") << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
+
+  /// Fill vpd information in StTofCollection
+  theTof->setVpdEast(mVPDHitPatternEast);
+  theTof->setVpdWest(mVPDHitPatternWest);
+  theTof->setTdiff(mTDiff);
+
+  gMessMgr->Info("","OS") << " TofCollection: NWest = " << theTof->numberOfVpdWest() << " NEast = " << theTof->numberOfVpdEast() << endm;
+  gMessMgr->Info("","OS") << "Tdiff = " << mTDiff <<" vpd vz = " << mVPDVtxZ << " proj vz = " << mProjVtxZ<<endm;
+ 
+  StTofHitCollection *tofHit = new StTofHitCollection();
+
+  //---------------------------------------
+  // Tofr calibrations cells -> hits
+  //---------------------------------------
+
+  for(int i=0;i<ncells;i++) {
+    StTofHit *aHit = new StTofHit;
+    StTofCell *aCell = dynamic_cast<StTofCell*>(tofCell[i]);
+    int trayId = aCell->trayIndex();
+    if(trayId<=0 || trayId>120) continue;
+
+    aHit->setTrayIndex(aCell->trayIndex());
+    aHit->setModuleIndex(aCell->moduleIndex());
+    aHit->setCellIndex(aCell->cellIndex());
+    aHit->setCellCollIndex(i);
+
+    int daqId = aCell->daqIndex();
+    aHit->setDaqIndex(daqId);
+
+    StTrack *thisTrack = aCell->associatedTrack();
+    aHit->setAssociatedTrack(thisTrack);
+    StTrackGeometry *theTrackGeometry = thisTrack->geometry();
+
+    StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
+    StThreeVectorD dcatof = tofPos - mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
+
+    Double_t L = tofPathLength(&tofPos, &aCell->position(), theTrackGeometry->helix().curvature());
+    aHit->setPathLength((Float_t)L);
+
+    //double T0 = tstart8(dcatof.z());
+    double T0 = tstart8(mProjVtxZ);
+    gMessMgr->Info("","OS") << " p(x,y,z) = "<<theTrackGeometry->momentum().x()<<"  "<<theTrackGeometry->momentum().y()<<"  "<<theTrackGeometry->momentum().z()<<endm;
+    gMessMgr->Info("","OS") << " Project Z = " << tofPos.z() << " T0 = " << T0 << endm;
+    if(T0<-1000.) {
+      gMessMgr->Info("","OS") << " T0 not available!" << endm;
+      mValidStartTime = kFALSE;
+    } else {
+      mValidStartTime = kTRUE;
+    }
+
+    double tot = aCell->tot(); // ns
+    double tdc = aCell->leadingEdgeTime();
+    tdc -= mPhaseOffset8;
+    while(tdc>TMAX) tdc -= TMAX;
+    double tof = tdc - T0;
+    Double_t zhit = (Double_t)aCell->zHit();
+
+    gMessMgr->Info("","OS") << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
+    
+    if(mValidCalibPar&&mValidStartTime) {
+      int moduleChan = (aCell->moduleIndex()-1)*6 + (aCell->cellIndex()-1);
+      Double_t tofcorr = tofr8AllCorr(tof, tot, zhit, trayId, moduleChan);
+      aHit->setTimeOfFlight((Float_t)tofcorr);
+      
+      Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
+      aHit->setBeta((Float_t)beta);
+      
+      const StThreeVectorF momentum = thisTrack->geometry()->momentum();
+      Double_t ptot = momentum.mag();
+      Double_t tofe = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON)/ptot;
+      Double_t tofpi = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_PION_PLUS*M_PION_PLUS)/ptot;
+      Double_t tofk = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_KAON_PLUS*M_KAON_PLUS)/ptot;
+      Double_t tofp = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_PROTON*M_PROTON)/ptot;
+      
+      aHit->setTofExpectedAsElectron((Float_t)tofe);
+      aHit->setTofExpectedAsPion((Float_t)tofpi);
+      aHit->setTofExpectedAsKaon((Float_t)tofk);
+      aHit->setTofExpectedAsProton((Float_t)tofp);
+
+      float sigmae = 999.;
+      float sigmapi = 999.;
+      float sigmak = 999.;
+      float sigmap = 999.;
+      float res = 0.085;  // 85 ps by default
+      if(fabs(res)>1.e-5) {
+	sigmae = (Float_t)((tofcorr-tofe)/res);
+	sigmapi = (Float_t)((tofcorr-tofpi)/res);
+	sigmak = (Float_t)((tofcorr-tofk)/res);
+	sigmap = (Float_t)((tofcorr-tofp)/res);
+      }
+      aHit->setSigmaElectron(sigmae);
+      aHit->setSigmaPion(sigmapi);
+      aHit->setSigmaKaon(sigmak);
+      aHit->setSigmaProton(sigmap);
+
+    } else {
+      aHit->setTimeOfFlight(9999.);
+      aHit->setBeta(9999.);
+    }
+
+    tofHit->push_back(aHit); 
+  }
+
+
+  // store the hit collection in StEvent
+  for (size_t j=0;j<tofHit->size();j++){
+    theTof->addHit(tofHit->getHit(j)); 
+    if (Debug())
+      gMessMgr->Info("","OS") << "storing " << j << "  " << "  tray:"
+			      << tofHit->getHit(j)->trayIndex() << "  module:"
+			      << tofHit->getHit(j)->moduleIndex() << "  cell:"
+			      << tofHit->getHit(j)->cellIndex() << "  TOF:"
+                              << tofHit->getHit(j)->timeOfFlight() << "  beta:"
+                              << tofHit->getHit(j)->beta() << endm;
+  }
+
+  // add the tof pidtraits
+  StSPtrVecTofHit& tofHitVec = theTof->tofHits();
+  StSPtrVecTrackNode& nodes = mEvent->trackNodes();
+  for (unsigned int iNode=0; iNode<nodes.size(); iNode++){
+    StTrack *theTrack = nodes[iNode]->track(primary);
+    if(!theTrack) continue;
+    unsigned short trkId = theTrack->key();
+    for (size_t j=0;j<tofHitVec.size();j++){
+      StTrack *aTrack = tofHitVec[j]->associatedTrack();
+      if(!aTrack) continue;
+      if(aTrack->key()!=trkId) continue;
+      StTofPidTraits* pidTof = new StTofPidTraits(tofHitVec[j]->trayIndex(), tofHitVec[j]->moduleIndex(), tofHitVec[j]->cellIndex(), tofHitVec[j]->timeOfFlight(), tofHitVec[j]->pathLength(), tofHitVec[j]->beta());
+      pidTof->setSigmaElectron(tofHitVec[j]->sigmaElectron());
+      pidTof->setSigmaPion(tofHitVec[j]->sigmaPion());
+      pidTof->setSigmaKaon(tofHitVec[j]->sigmaKaon());
+      pidTof->setSigmaProton(tofHitVec[j]->sigmaProton());
+      
+      theTrack->addPidTraits(pidTof);
+    }
+  }
+
+  delete tofHit;
+  
+  return kStOK;
+}
+
 //_____________________________________________________________________________
 Double_t StTofCalibMaker::tofrT0Corr(const Double_t tof, const Double_t Tstart, const Int_t iDaqChan)
 {
@@ -1170,7 +1707,7 @@ Double_t StTofCalibMaker::tofr5AllCorr(const Double_t tof, const Double_t tot, c
   if(iTotBin>=0&&iTotBin<mNBinMax) {
     tofcorr -= mTofr5TotCorr[iModuleChan][iTotBin];
   } else {
-    tofcorr -= 0.;
+    tofcorr = -9999.;
   }
 
   int iZBin = -1;
@@ -1183,7 +1720,75 @@ Double_t StTofCalibMaker::tofr5AllCorr(const Double_t tof, const Double_t tot, c
   if(iZBin>=0&&iZBin<mNBinMax) {
     tofcorr -= mTofr5ZCorr[iModuleChan][iZBin];
   } else {
-    tofcorr -= 0.;
+    tofcorr = -9999.;
+  }
+
+  gMessMgr->Info("","OS") << "  Corrected tof: tofcorr = " << tofcorr << endm;
+  return tofcorr;
+}
+
+//_____________________________________________________________________________
+Double_t StTofCalibMaker::tofr8AllCorr(const Double_t tof, const Double_t tot, const Double_t z, const Int_t iTray, const Int_t iModuleChan)
+{
+  int tray = iTray;
+  int module = iModuleChan/6 + 1;
+  int cell = iModuleChan%6 + 1;
+  int board = iModuleChan/24 + 1;
+  gMessMgr->Info("","OS") << "\nStTofCalibMaker::tofr8AllCorr: Tofr8 calibrating...\n" 
+			  << "\tDoing Calibration in TOFr8 Tray " << tray << " Module " << module << " Cell " << cell
+			  << "\n\tinput tof = " << tof
+			  << "  TOT = " << tot << "  Zlocal = " << z 
+			  << "\n" << endm;
+  
+  Double_t tofcorr = tof;
+
+  tofcorr -= mTofTZero[tray-1][module-1][cell-1];
+
+  if(Debug()) gMessMgr->Info("","OS") << "T0 correction: "<<mTofTZero[tray-1][module-1][cell-1]<<endm;
+
+  if(mSlewingCorr) {
+    int iTotBin = -1;
+    for(int i=0;i<mNBinMax-1;i++) {
+      if(tot>=mTofTotEdge[tray-1][board-1][i] && tot<mTofTotEdge[tray-1][board-1][i+1]) {
+	iTotBin = i;
+	break;
+      }
+    }
+    if(iTotBin>=0&&iTotBin<mNBinMax) {
+      double x1 = mTofTotEdge[tray-1][board-1][iTotBin];
+      double x2 = mTofTotEdge[tray-1][board-1][iTotBin+1];
+      double y1 = mTofTotCorr[tray-1][board-1][iTotBin];
+      double y2 = mTofTotCorr[tray-1][board-1][iTotBin+1];
+      double dcorr = y1 + (tot-x1)*(y2-y1)/(x2-x1);
+      if(Debug()) gMessMgr->Info("","OS") << "TOT correction: "<<dcorr<<endm;
+
+      tofcorr -= dcorr;
+    } else {
+      tofcorr = -9999.;
+    }
+
+    int iZBin = -1;
+    for(int i=0;i<mNBinMax-1;i++) {
+      if(z>=mTofZEdge[tray-1][board-1][i] && z<mTofZEdge[tray-1][board-1][i+1]) {
+	iZBin = i;
+	break;
+      }
+    }
+    if(iZBin>=0&&iZBin<mNBinMax) {
+      double x1 = mTofZEdge[tray-1][board-1][iZBin];
+      double x2 = mTofZEdge[tray-1][board-1][iZBin+1];
+      double y1 = mTofZCorr[tray-1][board-1][iZBin];
+      double y2 = mTofZCorr[tray-1][board-1][iZBin+1];
+//      double dcorr = y1 + (tot-x1)*(y2-y1)/(x2-x1);
+      double dcorr = y1 + (z-x1)*(y2-y1)/(x2-x1);
+
+      tofcorr -= dcorr;
+     if(Debug()) gMessMgr->Info("","OS") << "zHit correction: "<<dcorr<<endm;
+
+    } else {
+      tofcorr = -9999.;
+    }
+    
   }
 
   gMessMgr->Info("","OS") << "  Corrected tof: tofcorr = " << tofcorr << endm;
@@ -1282,6 +1887,110 @@ Double_t StTofCalibMaker::tstart5(const Double_t *tot, const Double_t *time, con
   
   if ( Ieast>=mPVPDEastHitsCut && Iwest>=mPVPDWestHitsCut ) {
     Tstart = (TSum-(Ieast-Iwest)*vz/(C_C_LIGHT/1.e9))/(Ieast+Iwest);
+  }
+
+  return Tstart;
+}
+
+//_____________________________________________________________________________
+void StTofCalibMaker::tsum8(const Double_t *tot, const Double_t *time)
+{
+  /// Sum vpd informations
+  mTSumEast = 0.;
+  mTSumWest = 0.;
+  mNEast = 0;
+  mNWest = 0;
+  mVPDHitPatternWest = 0;
+  mVPDHitPatternEast = 0;
+
+  // West
+  for(int i=0;i<mNVPD;i++) {
+    if( time[i]>0. && tot[i]>0. ) {
+      // west no offset
+      if(mSlewingCorr) {   // a switch
+	int ibin = -1;
+	for(int j=0;j<mNBinMax-1;j++) {
+	  if(tot[i]>=mVPDTotEdge[i][j] && tot[i]<mVPDTotEdge[i][j+1]) {
+	    ibin = j;
+	    break;
+	  }
+	}
+	if(ibin>=0&&ibin<mNBinMax) {
+	  mNWest++;
+
+	  double x1 = mVPDTotEdge[i][ibin];
+	  double x2 = mVPDTotEdge[i][ibin+1];
+	  double y1 = mVPDTotCorr[i][ibin];
+	  double y2 = mVPDTotCorr[i][ibin+1];
+	  double dcorr = y1 + (tot[i]-x1)*(y2-y1)/(x2-x1);
+
+	  mVPDLeTime[i] = time[i] - dcorr;
+	  mTSumWest += mVPDLeTime[i];
+
+	  mVPDHitPatternWest |= 1<<i;
+	}
+      } else {
+	mNWest++;
+	mVPDLeTime[i] = time[i];
+	mTSumWest += mVPDLeTime[i];
+
+	mVPDHitPatternWest |= 1<<i;
+      }
+    }
+      
+    // East
+    if( time[i+mNVPD]>0. && tot[i+mNVPD]>0. ) {
+      double tmp = time[i+mNVPD] - mPhaseOffset8;
+      while(tmp>TMAX) tmp -= TMAX;
+      if(mSlewingCorr) {   // a switch
+	int ibin = -1;
+	for(int j=0;j<mNBinMax-1;j++) {
+	  if(tot[i+mNVPD]>=mVPDTotEdge[i+mNVPD][j] && tot[i+mNVPD]<mVPDTotEdge[i+mNVPD][j+1]) {
+	    ibin = j;
+	    break;
+	  }
+	}
+	if(ibin>=0&&ibin<mNBinMax) {
+	  mNEast++;
+
+	  double x1 = mVPDTotEdge[i+mNVPD][ibin];
+	  double x2 = mVPDTotEdge[i+mNVPD][ibin+1];
+	  double y1 = mVPDTotCorr[i+mNVPD][ibin];
+	  double y2 = mVPDTotCorr[i+mNVPD][ibin+1];
+	  double dcorr = y1 + (tot[i+mNVPD]-x1)*(y2-y1)/(x2-x1);
+
+	  mVPDLeTime[i+mNVPD] = tmp - dcorr;
+	  mTSumEast += mVPDLeTime[i+mNVPD];
+
+	  mVPDHitPatternEast |= 1<<i;
+
+	}
+      } else {
+	mNEast++;
+	mVPDLeTime[i+mNVPD] = tmp;
+	mTSumEast += mVPDLeTime[i+mNVPD];
+
+	mVPDHitPatternEast |= 1<<i;
+      }
+    }
+  }
+
+  if ( mNEast>=mPVPDEastHitsCut && mNWest>=mPVPDWestHitsCut ) {
+    mTDiff = (mTSumEast/mNEast - mTSumWest/mNWest)/2. - mProjVtxZ/(C_C_LIGHT/1.e9);
+    mVPDVtxZ = (mTSumEast/mNEast - mTSumWest/mNWest)/2.*(C_C_LIGHT/1.e9);
+  }
+  
+  return;
+}
+//_____________________________________________________________________________
+Double_t StTofCalibMaker::tstart8(const Double_t vz)
+{
+  Double_t Tstart = -9999.;
+
+  Double_t TSum = mTSumEast + mTSumWest;
+  
+  if ( mNEast>=mPVPDEastHitsCut && mNWest>=mPVPDWestHitsCut ) {
+    Tstart = (TSum-(mNEast-mNWest)*vz/(C_C_LIGHT/1.e9))/(mNEast+mNWest);
   }
 
   return Tstart;
