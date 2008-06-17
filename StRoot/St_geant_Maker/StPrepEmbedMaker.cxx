@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.4 2008/01/21 01:23:37 perev Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.5 2008/06/17 16:08:56 fisyak Exp $
  *
  */
 
@@ -58,39 +58,6 @@ StPrepEmbedMaker::~StPrepEmbedMaker() {
 }
 //________________________________________________________________________________
 Int_t StPrepEmbedMaker::Init() {
-  //Input settings from setup file
-  
-  //Call geant maker, set defaults
-  mGeant3 = TGiant3::Geant3();
-  if( ! mGeant3)
-    {
-      LOG_ERROR << "Geant3 pointer not found. exiting."<<endm;
-      return kStErr;
-    }
-  if (mTagFile == "") {
-    LOG_ERROR << "TagFile has not been defined" << endm;
-    return kStErr;
-  }
-  mFile = new TFile(mTagFile);
-  if (! mFile ) {
-    LOG_ERROR << "TagFile : " << mTagFile << " cannot be opened" << endm;
-    return kStErr;
-  }
-  mTree = (TTree *) mFile->Get("Tag");
-    if (! mTree ) {
-      LOG_ERROR << "In TagFile : " << mTagFile << " cannot find TTree \"Tag\"" << endm;
-      return kStErr;
-    }
-  
-
-
-    Do("detp  hadr_on");
-    TString cmd("rndm ");
-    cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
-    Do(cmd.Data());
-
-    Do("user/output o temp.fz");
-
     return StMaker::Init();
 }
 
@@ -99,6 +66,40 @@ Int_t StPrepEmbedMaker::InitRun(int runnum)
 {
   //Field can change from event to event (malformed event headers?) - set once per run
   //  Do("field = 5.");
+  //Input settings from setup file
+  
+  //Call geant maker, set defaults
+  if (! mGeant3) {
+    mGeant3 = TGiant3::Geant3();
+    if( ! mGeant3)
+      {
+	LOG_ERROR << "Geant3 pointer not found. exiting."<<endm;
+	return kStErr;
+      }
+    if (mTagFile == "") {
+      LOG_ERROR << "TagFile has not been defined" << endm;
+      return kStErr;
+    }
+    mFile = new TFile(mTagFile);
+    if (! mFile ) {
+      LOG_ERROR << "TagFile : " << mTagFile << " cannot be opened" << endm;
+      return kStErr;
+    }
+    mTree = (TTree *) mFile->Get("Tag");
+    if (! mTree ) {
+      LOG_ERROR << "In TagFile : " << mTagFile << " cannot find TTree \"Tag\"" << endm;
+      return kStErr;
+    }
+    
+    
+    
+    Do("detp  hadr_on");
+    TString cmd("rndm ");
+    cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
+    Do(cmd.Data());
+    
+    Do("user/output o temp.fz");
+  }
   return 0;
 }
 
@@ -206,6 +207,9 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.5  2008/06/17 16:08:56  fisyak
+ * Move access to TGiant into InitRun
+ *
  * Revision 1.4  2008/01/21 01:23:37  perev
  * WarnOff
  *
