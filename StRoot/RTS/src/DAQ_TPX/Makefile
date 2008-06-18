@@ -24,7 +24,7 @@ endif
 
 
 
-OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxStat.o daq_tpx.o
+OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxStat.o daq_tpx.o tpxQA.o
 
 LIBS = libtpx.a
 #BINS = sim_tester
@@ -93,6 +93,10 @@ tpxPed.o: ../DAQ_TPX/tpxCore.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxPed.o: ../DAQ_TPX/tpxPed.h
 tpxPed.o: tpxCore.h
+tpxQA.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpxQA.o: ../../../../StRoot/RTS/include/TPC/fee_readout.h
+tpxQA.o: tpxCore.h
+tpxQA.o: tpxQA.h
 tpxStat.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxStat.o: ../../../../StRoot/RTS/include/daqModes.h
 tpxStat.o: ../DAQ_TPX/tpxCore.h
@@ -109,3 +113,4 @@ daq_tpx.o: ../RTS_READER/daq_det.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxGain.o: tpxCore.h
 tpxPed.o: tpxCore.h
+tpxQA.o: tpxCore.h

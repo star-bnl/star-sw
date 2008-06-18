@@ -848,15 +848,20 @@ int tpxGain::summarize(char *fname, FILE *log)
 					
 				}
 
+				// new as of Jun 11, 08:
+				// override fch to be J1 pin number as given to Tonko by Bob!
+				u_char j1 = tpx_altro_to_j1[a&1][ch] ;
+
 				if(err > 1) {
 					notes++ ;
 					if(log) {
-						fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,fch,a,ch,row,pad,
+						fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
 							g,t0,err,reason) ;
 					}
 				}
 
-				fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,fch,a,ch,row,pad,
+
+				fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
 				       g,t0,err,reason) ;
 
 				fee_found[s][r].ch_count[a][ch] *= -1 ;	// mark as seen and done!
@@ -865,15 +870,16 @@ int tpxGain::summarize(char *fname, FILE *log)
 
 		for(a=0;a<256;a++) {
 			for(int ch=0;ch<16;ch++) {
+				u_char j1 = tpx_altro_to_j1[a&1][ch] ;
 				if(fee_found[s][r].ch_count[a][ch] > 0) {
 					int fee = tpx_altro_to_fee(r,a) ;
 					notes++ ;
 					if(log) {
-						fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,tpx_altro_ch_to_fee(a,ch),a,ch,-1,-1,
+						fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,-1,-1,
 							0.0,0.0,3,"[Spurious channel]") ;
 
 					}
-					fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,tpx_altro_ch_to_fee(a,ch),a,ch,-1,-1,
+					fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,-1,-1,
 					       0.0,0.0,3,"[Spurious channel]") ;
 				}
 			}
