@@ -256,6 +256,8 @@ void daq_dta::commit(u_int bytes)
 */
 void daq_dta::rewind() 
 {
+	if(store == 0) return ;	// not yet created!
+
 	store_cur = store ;
 	nitems = store->nitems ;
 	

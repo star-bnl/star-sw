@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 		while(dta && dta->iterate()) {
 			// and now get the content
 			for(u_int i=0;i<dta->ncontent;i++) {
-				if(do_print) {
+				if(1) {
 					printf("%d %d %f %d %d %f %d %d %d 0x%X\n",r.cur_event,dta->row,
 					       dta->cld[i].pad,dta->cld[i].p1,dta->cld[i].p2,
 					       dta->cld[i].tb,dta->cld[i].t1,dta->cld[i].t2,
@@ -249,14 +249,14 @@ int main(int argc, char *argv[])
 		/****** adc example ************/
 		dta = r.det("tpc")->get("adc",do_sector) ;
 		while(dta && dta->iterate()) {
-			printf("tpc adc: sector %d, row %d, pad %d: %d\n",dta->sec,dta->row,dta->pad,dta->ncontent) ;
+			if(do_print) printf("tpc adc: sector %d, row %d, pad %d: %d\n",dta->sec,dta->row,dta->pad,dta->ncontent) ;
 		}
 
 		
 		/******* CLD example *****************/
 		dta = r.det("tpc")->get("cld",do_sector) ;
 		while(dta && dta->iterate()) {
-			printf("tpc cld: sector %d, row %d: %d\n",dta->sec,dta->row,dta->ncontent) ;
+			if(do_print) printf("tpc cld: sector %d, row %d: %d\n",dta->sec,dta->row,dta->ncontent) ;
 		}
 
 
