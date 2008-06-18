@@ -68,9 +68,11 @@ extern u_char tpx_rdo_fees(int rdo, int cou) ;
 extern u_char tpx_altro_ch_to_fee(int a, int ch) ;
 
 extern void tpx_analyze_log(int sector, int rdo, char *buff) ;
-extern int  tpx_analyze_msc(int sector, int rdo, char *buff) ;
+extern int  tpx_analyze_msc(int sector, int rdo, char *buff, int *altro_list=0) ;
+extern int tpx_show_status(int sector, int rb_mask, int *altro_list=0) ;
 
 extern struct tpx_rdo tpx_rdo[6] ;
 extern struct tpx_rdo_dbg tpx_rdo_dbg[6] ;
+extern int tpx_fee_check ;
 
 #endif

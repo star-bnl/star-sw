@@ -121,7 +121,7 @@ tpxFCF::tpxFCF()
 	rbs = 0 ;
 	sector = 0 ;
 	gains = 0 ;
-
+	cl_marker = 0 ;
 
 	do_cuts = 1 ;
 	ch_min = 10 ;
@@ -130,7 +130,8 @@ tpxFCF::tpxFCF()
 	storage = 0 ;
 
 
-	read_version = do_version = 0 ;
+	read_version = 0 ;
+	do_version = FCF_V_FY09 ;
 
 	return ;
 }
@@ -302,7 +303,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 			
 			s->f |= fl | FCF_ONEPAD ;
 
-			//LOG(DBG,"FCF gains: row %2d, pad %3d: gain %f, flags 0x%04X",row,pad,s->g,s->f) ;
+			LOG(DBG,"FCF gains: row %2d, pad %3d: gain %f, flags 0x%04X",row,pad,s->g,s->f) ;
 
 		}
 
@@ -315,6 +316,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 void tpxFCF::start_evt()
 {
+	cl_marker = 1 ;	// used to mark unique clusters sector...
 
 	for(int r=0;r<=45;r++) {
 		if(row_ix[r] < 0) continue ;
@@ -337,7 +339,8 @@ void tpxFCF::start_evt()
 }
 
 
-int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
+
+int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 {
 	struct stage1 *s ;
 
@@ -480,7 +483,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
 	s->count = cl - s->cl ;	// count of 1d clusters
 
 	if(unlikely( s->count == 0 )) {
-		LOG(DBG,"No 1D clusters?") ;
+		//LOG(DBG,"No 1D clusters?") ;
 	}
 	else {
 		if(unlikely( s->count >= FCF_MAX_CL )) {
@@ -501,7 +504,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
 
 #endif
 
-	if(geant_id && modes) {	// FCF_ANNOTATION for simulated data!
+	if(sim_adc && modes) {	// FCF_ANNOTATION for simulated data!
 		cl = s->cl ;
 		
 		for(int j=0;j<s->count;j++) {
@@ -516,21 +519,41 @@ int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
 			u_int adc_sum = 0 ;
 			u_int t_sum = 0 ;
 
+			// position this clusters sim data...
+			int i_min = 0xFFFFFF ;
+			cl->sim = 0 ;
+			cl->sim_length = 0 ;
+			for(int i=0;i<a->count;i++) {
+				if((a->tb[i] >= t_lo) && (a->tb[i]<=t_hi)) {	// belong to this sequence
+					if(i < i_min) i_min = i ;		// need the smallest I
+					cl->sim_length++ ;
+
+					// in case of non-geant data, overwrite the track ids with the current marker...
+					if(sim_adc[i].track_id == 0xFFFF) {
+						modes |= 2 ;		// heuristic to set the correct mode
+						sim_adc[i].track_id = cl_marker ;
+					}
+				}
+			}
+			cl->sim = sim_adc + i_min ;	// this is where the sim data starts...
+
+			
 			// get thr track id from the pixel with the maximum ADC
 			for(int i=0;i<a->count;i++) {
 				if((a->tb[i] >= t_lo) && (a->tb[i]<=t_hi)) {	// belong to this sequence
 					adc_sum += a->adc[i] ;
 
 					if(a->adc[i] >= adc_min) {
-						cl->track_id = geant_id[i] ;
+						cl->track_id = sim_adc[i].track_id ;
 					}
 				}
 			}
 
-			// get thr track id from the pixel with the maximum ADC
+			// sum the pixels whic belong to this track id only
 			for(int i=0;i<a->count;i++) {
 				if((a->tb[i] >= t_lo) && (a->tb[i]<=t_hi)) {	// belong to this sequence
-					if(cl->track_id == geant_id[i]) {
+
+					if(cl->track_id == sim_adc[i].track_id) {
 						t_sum += a->adc[i] ;
 					}
 				}
@@ -545,7 +568,9 @@ int tpxFCF::do_pad(tpx_altro_struct *a, u_short *geant_id)
 			}
 
 
-			//LOG(TERR,"%d: track id %d, qua %d",j,cl->track_id, cl->quality) ;
+			//LOG(TERR,"%d: track id %d, qua %d",cl_marker,cl->track_id, cl->quality) ;
+
+			cl_marker++ ;
 			cl++ ;
 
 		}
@@ -741,6 +766,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 								old->f_t_ave = old->t_ave * old1->g ;
 								old->f_t_ave += old1->g * old1->t0 ;
 
+								old->t_min = old->t1 ;
+								old->t_max = old->t2 ;
+
 								old->p1 = p ;
 								old->p_ave = p * old->f_charge ;
 							}
@@ -770,6 +798,13 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 							cur->quality = (u_int )qua ;
 
+							// need to know what to do here when we 
+							if(modes & 2) {	// local annotation back to track id!
+								cur->track_id = old->track_id ;
+								for(int i=0;i<cur->sim_length;i++) {
+									cur->sim[i].track_id = old->track_id ;
+								}
+							}
 						}
 
 
@@ -780,15 +815,15 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 						cur->p1 = old->p1 ;
 
 
-						if(cur->t1 > old->t1) {
-							cur->t_min = old->t1 ;
+						if(cur->t1 > old->t_min) {
+							cur->t_min = old->t_min ;
 						}
 						else {
 							cur->t_min = cur->t1 ;
 						}
 
-						if(cur->t2 < old->t2) {
-							cur->t_max = old->t2 ;
+						if(cur->t2 < old->t_max) {
+							cur->t_max = old->t_max ;
 						}
 						else {
 							cur->t_max = cur->t2 ;
@@ -837,9 +872,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 		old = old1->cl ;
 
 		//LOG(DBG,"end of row %d: pad %d, leftower count %d",r,p,old1->count) ;
-		if(old1->count) {
-			LOG(DBG,"Leftover at row %d:%d, %d",r,p,old1->count) ;
-		}
+		//if(old1->count) {
+		//	LOG(DBG,"Leftover at row %d:%d, %d",r,p,old1->count) ;
+		//}
 
 		for(c=0;c<old1->count;c++) {	// loop over old
 
@@ -874,7 +909,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	int time_c ;	// time_c can go negative due to T0 corrections!
 	double dp, dt ;
 	u_int p1, p2 ;
-	int div_fact = 64 ;
+	int div_fact ;
 
 	// integerize charge
 	if(cl->flags & FCF_IN_DOUBLE) ;
@@ -911,6 +946,10 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 
 	if(do_version == FCF_V_FY08) {
 		div_fact = 32 ;
+	}
+	else {
+		div_fact = 64 ;
+		//LOG(DBG,"Using div fact %d",div_fact) ;
 	}
 
 	// we dump an integerized version ("fixed point")
