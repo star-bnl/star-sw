@@ -29,8 +29,6 @@ using namespace units;
 #include "tables/St_raw_pad_Table.h"
 #include "tables/St_raw_seq_Table.h"
 #include "tables/St_type_shortdata_Table.h"
-#include "tables/St_asic_thresholds_Table.h"
-#include "tables/St_tss_tsspar_Table.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
@@ -55,7 +53,7 @@ class StTpcRSMaker : public StMaker {
 	      kNoToflight  =10,// don't account for particle time of flight
 	      kTree        =11// make Tree
   };
-  StTpcRSMaker(const char *name="TrsMini");
+  StTpcRSMaker(const char *name="TpcRS");
   virtual              ~StTpcRSMaker();
   virtual Int_t         InitRun(int runnumber);
   virtual Int_t         Make();
@@ -72,13 +70,16 @@ class StTpcRSMaker : public StMaker {
   TF1 *GetPolya()                   {return (TF1 *) mPolya;}
   Double_t GetNoPrimaryClusters(Double_t betaGamma);
   virtual void Print(Option_t *option="") const;
-  void DigiSector(Int_t sector);
+  void DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
   void SetClusterLength(Double_t m=0) {mClusterLength = m;}
+  static Int_t    AsicThresholds(Short_t ADCs[512]);
   static Int_t    SearchT(const void *elem1, const void **elem2);
   static Int_t    CompareT(const void **elem1, const void **elem2);
   static Double_t shapeEI(Double_t *x, Double_t *par=0);
   static Double_t shapeEI_I(Double_t *x, Double_t *par=0);
+  static Double_t shapeEI3(Double_t *x, Double_t *par=0);
+  static Double_t shapeEI3_I(Double_t *x, Double_t *par=0);
   static Double_t expint(Int_t n, Double_t x); // Exponential Integrals En
   static Double_t ei(Double_t x); // Exponential Integral Ei
   SignalSum_t  *GetSignalSum();
@@ -93,14 +94,14 @@ class StTpcRSMaker : public StMaker {
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
+  static TF1     *fgTimeShape3;       //!
   static TF1     *fgTimeShape;        //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mChargeFractionInner;        //!
+  TF1F  *mChargeFractionInner;        //!1
   TF1F  *mPadResponseFunctionInner;   //!
   TF1F  *mChargeFractionOuter;        //!
   TF1F  *mPadResponseFunctionOuter;   //!
   TF1F  *mPolya;                      //!
-  St_tss_tsspar *mtsspar;             //!
   Bool_t mAlignSector;                //! 
   Int_t  mMagUtilitiesMask;           //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
@@ -144,10 +145,6 @@ class StTpcRSMaker : public StMaker {
   Double_t numberOfElectronsPerADCcount; //!
   Double_t anodeWireRadius; //!
   const Double_t FanoFactor; //! // average Fano factor  
-  Int_t mThreshLo; //!
-  Int_t mThreshHi; //!
-  Int_t mNseqLo; //!
-  Int_t mNseqHi; //!
   const Double_t K3IP; //!
   const Double_t K3IR; //!
   const Double_t K3OP; //!
@@ -170,14 +167,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.1.1.1 2008/04/28 14:39:47 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.2 2008/06/19 22:45:43 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.1.1.1 2008/04/28 14:39:47 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.2 2008/06/19 22:45:43 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.2  2008/06/19 22:45:43  fisyak
+// Freeze problem with TPX parameterization
+//
 // Revision 1.1.1.1  2008/04/28 14:39:47  fisyak
 // Start new Tpc Response Simulator
 //
