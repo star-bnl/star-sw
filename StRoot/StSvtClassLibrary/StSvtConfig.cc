@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.11 2008/05/21 19:09:30 fine Exp $
+ * $Id: StSvtConfig.cc,v 1.12 2008/06/12 14:22:11 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.12  2008/06/12 14:22:11  fisyak
+ * Add default no. of anodes and timeBins
+ *
  * Revision 1.11  2008/05/21 19:09:30  fine
  * fix the STAR messager interface # 1190
  *
@@ -93,7 +96,8 @@ void StSvtConfig::setConfiguration(const char* config)
   // set the Collection configuration
 
   mConfig = TString(config);
-
+  setNumberOfAnodes(240);
+  setNumberOfTimeBins(128);
   if ( !strncmp(config, "ASCII", strlen("ASCII")) ) {
     setNumberOfBarrels(1);
     setNumberOfLadders(1,1);

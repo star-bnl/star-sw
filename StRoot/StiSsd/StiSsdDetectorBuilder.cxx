@@ -1,6 +1,12 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.29 2008/04/03 20:04:22 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.31 2008/06/12 16:36:55 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.31  2008/06/12 16:36:55  fisyak
+// Remove all SSD endcap volumes
+//
+// Revision 1.30  2008/06/11 22:04:39  fisyak
+// Add dead material
+//
 // Revision 1.29  2008/04/03 20:04:22  fisyak
 // Straighten out DB access via chairs
 //
@@ -107,7 +113,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
     Double_t width = TMath::Abs(Wafer1->x(2) - Wafer2->x(2))/2. + 2;
     StiPlanarShape *ladderShape = new StiPlanarShape(name,
 						     width,
-						     dimensions->waferHalfThickness,
+						     0.34, // increas by a factor ~10 2*dimensions->waferHalfThickness,
 						     dimensions->waferHalfLength );
     add(ladderShape);
     Int_t layer = 0;
@@ -189,20 +195,20 @@ void StiSsdDetectorBuilder::useVMCGeometry() {
 				    PotI));
   }
   const VolumeMap_t SsdVolumes[] = { 
-  // SSD
-  //  {"SFMO", "the mother of all Silicon Strip Detector volumes","HALL_1/CAVE_1/SVTT_1/SFMO_1","",""},
-  {"SCMP","SSD mounting plate inserted in the cone","HALL_1/CAVE_1/SVTT_1/SFMO_1/SCMP_1-8","",""},
-  {"SCVM","SSD V-shape mouting piece","HALL_1/CAVE_1/SVTT_1/SFMO_1/SCVM_1-8/*","",""},
-  {"SSLT","the linking (sector to the cone) tube","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSLT_1-8","",""},
-  {"SSLB","the linking (sector to the cone)","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSLB_1-8","",""},
-  {"SSRS","the side of the small rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRS_1-4","",""},
-  {"SSRT","the top of the side rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRT_1-4","",""},
-  {"SSSS","Side parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSSS_1-4","",""},
-  {"SSST","Top parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSST_1-4","",""},
-  //  {"SFLM","the mother of the ladder","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/*","",""}, 
-  {"SFSM","the structure mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFSM_1/*","",""}
-  //  {"SFDM","the detectors and adcs mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/*","",""}
-  //  {"SFSD","the strip detector",                  "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""},// <+++
+    // SSD
+    //  {"SFMO", "the mother of all Silicon Strip Detector volumes","HALL_1/CAVE_1/SVTT_1/SFMO_1","",""}, // 17.466824 [kg]
+    //    {"SCMP","SSD mounting plate inserted in the cone","HALL_1/CAVE_1/SVTT_1/SFMO_1/SCMP_1-8","",""},      //  0.024494 [kg]
+    //    {"SCVM","SSD V-shape mouting piece","HALL_1/CAVE_1/SVTT_1/SFMO_1/SCVM_1-8/*","",""},                  //  0.057931 [kg]
+    //    {"SSLT","the linking (sector to the cone) tube","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSLT_1-8","",""},        //  0.027415 [kg]
+    //    {"SSLB","the linking (sector to the cone)","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSLB_1-8","",""},             //  0.073710 [kg]
+    //    {"SSRS","the side of the small rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRS_1-4","",""},                    //  0.462138 [kg]
+    //    {"SSRT","the top of the side rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRT_1-4","",""},                      //  0.172237 [kg]
+    //    {"SSSS","Side parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSSS_1-4","",""},              //  0.462138 [kg]
+    //    {"SSST","Top parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSST_1-4","",""},               //  0.172237 [kg]
+    //  {"SFLM","the mother of the ladder","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/*","",""},              //  0.546171 [kg]
+    //  {"SFSM","the structure mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFSM_1/*","",""}     //   0.451003 [kg]
+    //  {"SFDM","the detectors and adcs mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/*","",""} // 0.095168 [kg]
+    //  {"SFSD","the strip detector",                  "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""},// 0.002041 [kg]
   };
   Int_t NoSsdVols = sizeof(SsdVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1/SVTT_1/SFMO_1");

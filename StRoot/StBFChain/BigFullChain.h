@@ -54,7 +54,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2006","","","db,detDb"                                             ,"","","y2006 for p+p run",kFALSE},
 
   {"RY2007","","","db,detDb"                                            ,"","","y2007 for AuAu run",kFALSE},
-  {"RY2008","","","db,detDb,,NosvtIT,NossdIT"                            ,"","","y2008 for dAu run",kFALSE},
+  {"RY2008","","","db,detDb,NosvtIT,NossdIT"                             ,"","","y2008 for dAu run",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -307,17 +307,17 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
   // Year 6 chains - Geometry 2006 not yet ready, starting with y2005d
-  {"B2006"       ,""       ,"","ry2005d,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+  {"B2006"       ,""       ,"","ry2005d,in,tpc_daq,tpcI,svt_daq,SvtD,Idst,tags,Tree,evout","",""
                                                               ,"Base chain for 2006 ITTF (tpc+svt)",kFALSE},
 #ifndef __CLEANUP__
-  {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
+  {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Idst,-SvtDedx,tags,Tree,evout","",""
                                              ,"Base chain for 2006 with 2005d geom ITTF (tpc only)",kFALSE},
-  {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
+  {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Idst,-SvtDedx,tags,Tree,evout","",""
                                                              ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
 #else
-  {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Physics,Idst,l0,tags,Tree,evout","",""
+  {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Idst,tags,Tree,evout","",""
                                              ,"Base chain for 2006 with 2005d geom ITTF (tpc only)",kFALSE},
-  {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Physics,Idst,l0,tags,Tree,evout","",""
+  {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
 #endif
 
@@ -329,8 +329,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
   // Year 7 chains - Geometry 2007 hopefully fine
-  {"T2007","","","ry2007,MakeEvent,in,tpc_daq,tpcI,fcf,Tree,evout","","","TPC only chain,   2007 ITTF",kFALSE},
-  {"B2007","","","ry2007,MakeEvent,in,tpc_daq,tpcI,fcf,svt_daq,SvtD,ssddat,spt,Physics,Idst,l0,tags,Tree,evout",
+  {"T2007","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,fcf,Tree,evout","","","TPC only chain,  2007 ITTF",kFALSE},
+  {"B2007","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,fcf,svt_daq,SvtD,ssddat,spt,Idst,l0,tags,Tree,evout",
                                                         "","","Base chain for 2007 ITTF (tpc+svt+ssd)",kFALSE},
   {"P2007"       ,"" ,"",
    "B2007,IAna,KeepSvtHit,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr5",
@@ -348,8 +348,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   //  {"testing"      ,"" ,"",   // just a damned test
   //   "B2006b,sdt20061211,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
   //                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
-  {"B2008"       ,""       ,"","ry2008,in,tpc_daq,tpcI,fcf,Idst,tags,Tree,evout","",""
-                                                              ,"Base chain for 2008 ITTF (tpc)",kFALSE},
+  {"B2008" ,"","","ry2008,in,tpcX,ToFx,Idst,tags,Tree,evout","","","Base chain for 2008 ITTF (tpc+tof)",kFALSE},
   // startup for calib
   {"P2008a"       ,"" ,"",
    "B2008,IAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr3,analysis",
@@ -423,7 +422,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"IdTruth"     ,""  ,"",""              ,"","","Enable IdTruth association in StAssociationMaker",kFALSE},
   {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
-  {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noHistos"    ,""  ,"",""                                    ,"","","Disables Attributes histos",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
@@ -596,7 +594,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
-  {"MuDSTDeps"   ,""  ,"","StEvent","","Physics,StEventUtilities,StStrangeMuDstMaker",
+  {"MuDSTDeps"   ,""  ,"","StEvent","","StEventUtilities,StStrangeMuDstMaker,Tree",
                                                               "Load MuDST misc. dependencies (all)",kFALSE},
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","","StMuDSTMaker","Load MuDST library",kFALSE},
   {"geantL","","","geomT,gen_T,sim_T,StarMagField,geomNoField","","Geom,St_g2t,St_geant_Maker"
@@ -637,7 +635,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","" ,"-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField","",
-                                         "Geom,VMC,Physics,EG,Pythia6,EGPythia6,minicern,geant3","",kFALSE},
+                                                 "Geom,VMC,EG,Pythia6,EGPythia6,minicern,geant3","",kFALSE},
   {"VMCAppl"  ,"","","geomT,gen_t,sim_T,RootVMC",""                  ,"StarVMCApplication","VMC G3",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl"    ,"StVMCMaker",   "StVMCMaker","VMC Maker in Passive Mode",kFALSE},
@@ -647,7 +645,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                          "<Early StEvent creation>",kFALSE},
 
 #ifndef __CLEANUP__ 
-  {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
+  {"l0"          ,"l0Chain","","trg_T,globT,trg"                            ,"StMaker","StChain","",kFALSE},
 #else
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
 #endif
@@ -670,8 +668,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"tpcI" ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,TpcHitMover","StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
   {"Trs"         ,"Trs","tpcChain","scl,tpcDB,TrsToF,StEvent"         ,"StTrsMaker","StTrsMaker","",kFALSE},
-  {"TrsMini"    ,"","tpcChain","scl,tpcDB,-Trs,Simu"          ,"StTrsMiniMaker","StTrsMiniMaker","",kFALSE},
-    
+  {"TpcRS"    ,"","tpcChain","scl,tpcDB,-Trs,Simu","StTpcRSMaker","StTpcRSMaker"
+                                                                      ,"New Tpc Response Simulator",kFALSE},
   {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
   {"St_tpc"      ,"","","tpc_T,tpcDb"                                               ,"","St_tpc","",kFALSE},
   {"St_svt"      ,"","","svt_T,tls,svtDb"                                           ,"","St_svt","",kFALSE},
@@ -683,8 +681,17 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"tfs"         ,"tpc_hits","tpcChain","MakeEvent,Simu,-trs,-tcl,-fcf,-tpc_daq,tls,St_tpc,StEvent" 
                                            ,"St_tfs_Maker","St_tcl_Maker","use tfs (no StTrsMaker)",kFALSE},
-  {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,-trs,-tcl,-fcf,-tpc_daq,-tfs,-St_tpc,StEvent,rts" 
-                                    ,"StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx",kFALSE},
+  {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,-trs,-tcl,-fcf,-tpc_daq,-tfs,-St_tpc,StEvent,rts,detDb" 
+                     ,"StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx via EVP_READER",kFALSE},
+  {"TpxPulser","TpxPulser","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker","TPC+TPX pulser analysis"
+                                                                                                  , kFALSE},
+  {"TpxPadMonitor","TpxPadMonitor","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker",
+                                                                             "TPC+TPX pad monitor", kFALSE},
+  {"TpxDumpPxls2Nt","TpxDumpPxls2Nt","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker"
+                                                                   ,"TPC+TPX pixel dump to NTuple", kFALSE},
+  {"TpxRaw","TpxRaw","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker","TPC+TPX Tpc Raw Data", kFALSE},
+  {"TpxClu","tpc_hits","tpcChain","rts,detDb","StTpcRTSHitMaker","StTpcHitMaker"
+                                                                       ,"RTS(online) cluster maker",kFALSE},
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
 #ifndef __CLEANUP__  
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
@@ -725,6 +732,8 @@ Bfc_st BFC2[] = { // ITTF Chains
     
   {"srs","svt_hits","svtChain","svtDb,tls,Simu,St_tpc,St_svt,SvtCL,-sss,-SvtSlowSim,StEvent,MakeEvent"
                                                 ,"St_srs_Maker","StSvtClusterMaker,St_srs_Maker","",kFALSE},
+  {"sfs","svt_hits","svtChain","svtDb,Simu,St_svt,SvtCL,-sss,-srs,-SvtSlowSim,StEvent,MakeEvent"
+                                                                  ,"St_sfs_Maker","St_srs_Maker","",kFALSE},
   {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL"          ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
   {"SvtClu"   ,"SvtClu","svtChain","svt_T,StEvent,SvtCL","StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
   {"SvtCluAnal" ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},
@@ -771,7 +780,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   /*  {"ssd_daq","SpaStrip","","daq,ssddb,St_svt,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker"
       ,"... SSD Daq",                                                                                  kFALSE}, */
   {"ssd_daq","","","ssddb,St_svt,-sls,-spa,ssdUtil","StSsdDaqMaker" ,"StSsdDaqMaker", "... SSD Daq",kFALSE},
-  {"ssdfast"     ,"","","StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
+  {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
    "... SSD fast simulator"                                                                        ,kFALSE},
   {"ssd"         ,"","","sls,spa,spt"                        ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","McEvent,tls,Simu,St_tpc,St_svt,SvtCL","St_sls_Maker","StSsdSimulationMaker",
@@ -887,6 +896,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
     
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
+  {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
   {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
                                                                               "TOF Data base chain",kFALSE},
   {"tofXDat" ,  "tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
@@ -955,7 +965,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"McQa"        ,"","McChain","McEvent",  "StMcQaMaker","StMcQaMaker","QA histogramms for McEvent",kFALSE},
   {"McTpcAna"    ,"","McAnaChain","McEvent,McAss",
-                                    "StTpcMcAnalysisMaker","StTrsMiniMaker,StTpcMcAnalysisMaker","",kFALSE},
+                                      "StTpcMcAnalysisMaker","StTpcRSMaker,StTpcMcAnalysisMaker","",kFALSE},
   {"MiniMcEvent" ,"","","","",                   "StMiniMcEvent","Loads StMiniMcEvent library only",kFALSE},
   {"MiniMcMk"    ,"","","McAss,MiniMcEvent","StMiniMcMaker","StMiniMcMaker",
                                                                  "Creates tree in minimc.root file",kFALSE},
@@ -1003,10 +1013,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"LanaDVtpx"   ,"","","MakeEvent,trgd,in,tpx,TpcHitMover,LaserIT,VFMinuit,Lana,Analysis,Corr4",
    "",""                                                                        ,"get LDV with TPX",kFALSE},
   {"LaserDV.Chain","","","in,LaserCal,fcf,TpcHitMover,OGridLeak3D,OShortR,OSpaceZ2","","","get LDV",kFALSE},
-  {"TpcDoPulser"     ,"","","in,tpx",                              "","","TPC+TPX pulser analysis", kFALSE},
-  {"TpcPadMonitor"     ,"","","in,tpx",                                "","","TPC+TPX pad monitor", kFALSE},
-  {"TpcDumpPixels2Ntuple"     ,"","","in,tpx",                "","","TPC+TPX pixel dump to NTuple", kFALSE},
-  {"TpcRawData"     ,"","","in,tpx",                                  "","","TPC+TPX Tpc Raw Data", kFALSE},
 
   {"Production chain from Db","------------","-----------","-----------------------------","","","",kFALSE},
 #ifndef __BFC2__  /* non ITTF chains */
@@ -1080,11 +1086,11 @@ Bfc_st BFC2[] = { // ITTF Chains
    "ry2001,in,tpc_daq,tpc,rich,l3onl,Physics,Kalman,AlignSectors,Cdst,tags,Tree,evout,ExB,OBmap,OClock,"
    "OPr13,OTwist,NoHits"           	                                                  ,"","","",kFALSE},
   {"trshi.Chain" ,"" ,"","trs,Simu,mdc3,big,evout,fzin"	                                  ,"","","",kFALSE},
-  {"trsgk.Chain" ,"" ,"","y2001,trs,Simu,rrs,tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,big,GeantOut,fzin"
+  {"trsgk.Chain" ,"" ,"","y2001,trs,Simu,rrs,tpc,rich,l0,ctf,Cdst,Kalman,tags,Tree,EvOut,big,GeantOut,fzin"
    ,"","",""                                                                                       ,kFALSE},
   {"p2001e.Chain" ,"" ,"","ry2001,DbV1107,in,tpc_daq,tpc,rich,l3onl,tofDat,Physics,Kalman,AlignSectors,"
    "Cdst,tags,Tree,evout,emcDY2,ExB,OBmap,OClock,OPr13,Otwist"                            ,"","","",kFALSE},
-  {"trsgl.Chain" ,"","","y2001,trs,Simu,rrs,tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,fzin"
+  {"trsgl.Chain" ,"","","y2001,trs,Simu,rrs,tpc,rich,l0,ctf,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,fzin"
                                  	                                                  ,"","","",kFALSE},
   {"p2001l.Chain" ,"" ,"","ry2001,in,tpc_daq,tpc,rich,l3onl,tofDat,Physics,Kalman,AlignSectors,Cdst,tags,"
    "Tree,evout,ExB,OBmap,OClock,OPr13,OTwist,NoHits"                                      ,"","","",kFALSE},
@@ -1099,7 +1105,7 @@ Bfc_st BFC2[] = { // ITTF Chains
    "Cdst,tags,Tree,evout,ExB,OBmap,OClock,OPr13,OTwist,NoHits"                            ,"","","",kFALSE},
   {"pp2001fpd.Chain" ,"" ,"","pp2001,fpd,beamLine,NoHits"	                          ,"","","",kFALSE},
   {"p2001gb.Chain" ,"" ,"","DbV20020226,P2001,ftpc,emcDY2,NoHits"	                  ,"","","",kFALSE},
-  {"trsgb.Chain" ,"" ,"","y2001,trs,Simu,rrs,tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,"
+  {"trsgb.Chain" ,"" ,"","y2001,trs,Simu,rrs,tpc,rich,l0,ctf,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,"
    "fzin"                           	                                                  ,"","","",kFALSE},
   {"p2001gc.Chain" ,"" ,"","DbV20020226,P2001,ZDCvtx,ftpc,emcDY2,NoHits"	          ,"","","",kFALSE},
   {"p2001gcMu.Chain" ,"" ,"","DbV20020226,P2001,ZDCvtx,ftpc,emcDY2,EmcMDST,NoHits"	  ,"","","",kFALSE},
@@ -1115,21 +1121,21 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"p2001ge2.Chain" ,"" ,"","DbV20020226,P2001,ZDCvtx,ftpc,emcDY2,EmcMDST,CMuDst,NoHits"  ,"","","",kFALSE},
   {"pp2001svt.Chain" ,"" ,"","DbV20020520,pp2001,fpd,beamLine,svt_daq,SvtD,est,svtdedx,EmcMDst,CMuDst"	  
    ,"","",""                                                                                       ,kFALSE},
-  {"trsge.Chain" ,"" ,"","y2001,trs,Simu,rrs,tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,"
+  {"trsge.Chain" ,"" ,"","y2001,trs,Simu,rrs,tpc,rich,l0,ctf,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,"
    "fzin"                        	                                                  ,"","","",kFALSE},
-  {"trsgg1.Chain" ,"" ,"","y2001n,trs,Simu,rrs,tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,"
+  {"trsgg1.Chain" ,"" ,"","y2001n,trs,Simu,rrs,tpc,rich,l0,ctf,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,"
    "fzin,sdt20010805"                                                                     ,"","","",kFALSE},
-  {"trsgg2.Chain" ,"" ,"","y2001n,trs,Simu,rrs,tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,"
+  {"trsgg2.Chain" ,"" ,"","y2001n,trs,Simu,rrs,tpc,rich,l0,ctf,Cdst,Kalman,tags,Tree,EvOut,emcY2,big,GeantOut,"
    "fzin,sdt20011125"            	                                                  ,"","","",kFALSE},
   {"p2001gg1.Chain" ,"" ,"","DbV20020802,P2001,ZDCvtx,ftpc,emcDY2,EmcMDST,CMuDst,NoHits"  ,"","","",kFALSE},
   {"dedxDcl.Chain" ,"" ,"","DbV20020802,P2001,ZDCvtx,-tcl,daqclf,CMuDst"	          ,"","","",kFALSE},
   {"ppdedxDcl.Chain" ,"" ,"","DbV20020802,pp2001a,fpd,beamLine,-tcl,daqclf,CMuDst"	  ,"","","",kFALSE},
   {"ppdedxDcl2.Chain" ,"" ,"","DbV20020802,pp2001a,fpd,beamLine,CMuDst"	                  ,"","","",kFALSE},
   {"dedxDclf2.Chain" ,"" ,"","DbV20020802,P2001,ZDCvtx,CMuDst"	                          ,"","","",kFALSE},
-  {"trsgh.Chain" ,"" ,"","y2001n,trs,Simu,rrs,srs,tpc,rich,l0,svt,ftpc,Cdst,Kalman,tags,Tree,EvOut,emcY2,"
+  {"trsgh.Chain" ,"" ,"","y2001n,trs,Simu,rrs,srs,tpc,rich,l0,ctf,svt,ftpc,Cdst,Kalman,tags,Tree,EvOut,emcY2,"
    "big,GeantOut,fzin,sdt20011125"	                                                  ,"","","",kFALSE},
   {"p2001ge3.Chain" ,"" ,"","DbV20020226,P2001,ZDCvtx,CMuDST,NoHits"	                  ,"","","",kFALSE},
-  {"trsgh2.Chain" ,"" ,"","y2001n,trs,Simu,rrs,srs,tpc,rich,l0,svt,ftpc,Cdst,Kalman,tags,Tree,EvOut,emcY2,"
+  {"trsgh2.Chain" ,"" ,"","y2001n,trs,Simu,rrs,srs,tpc,rich,l0,ctf,svt,ftpc,Cdst,Kalman,tags,Tree,EvOut,emcY2,"
    "big,GeantOut,fzin"                                                                    ,"","","",kFALSE},
   {"test_nodaq100.Chain" ,"" ,"","DbV20020802,P2001,ZDCvtx,CMuDst"	                  ,"","","",kFALSE},
   {"test_daq100.Chain" ,"" ,"","DbV20020802,P2001,ZDCvtx,-tcl,daqclf,CMuDst"	          ,"","","",kFALSE},
@@ -1159,7 +1165,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"upcTest.Chain" ,"" ,"","pp2003,est,hitfilt,CMuDst"	                                  ,"","","",kFALSE},
   {"ppProd03.Chain" ,"" ,"","DbV20030703,pp2003,beamLine,est,eemcD,hitfilt,CMuDst"	  ,"","","",kFALSE},
   {"ftpcTest3.Chain" ,"" ,"","DbV20030801,dau2003a,beamLine,hitfilt,CMuDst"	          ,"","","",kFALSE},
-  {"trsie.Chain" ,"" ,"",   "trs,y2003x,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,evout,emcY2,eefs,GeantOut,"
+  {"trsie.Chain" ,"" ,"",   "trs,y2003x,tpc,l0,ctf,svt,Cdst,Kalman,tags,Tree,bbcsim,evout,emcY2,eefs,GeantOut,"
    "big,fzin"                                                                             ,"","","",kFALSE},
   {"ppProd04.Chain" ,"" ,"","DbV20030628,pp2003,beamLine,est,eemcD,hitfilt,CMuDst"	  ,"","","",kFALSE},
   {"ppProd05.Chain" ,"" ,"","DbV20030723,pp2003,beamLine,est,eemcD,hitfilt,CMuDst"	  ,"","","",kFALSE},
@@ -1185,14 +1191,14 @@ Bfc_st BFC2[] = { // ITTF Chains
    "xi2,XiSvt,svtdEdx,SvtMatchVtx,eemcD,CMuDst"                                           ,"","","",kFALSE},
   {"ppProd06.Chain" ,"" ,"","DbV20031114,pp2003,est,l3onl,beamLine,-xi,-v0,SvtHitFilt,HitFilt,"
    "xi2,XiSvt,svtdEdx,SvtMatchVtx,eemcD,CMuDst"                                           ,"","","",kFALSE},
-  {"trsihJ/psi.Chain" ,"" ,"",   "trs,Simu,y2003x,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,evout,emcY2,"
+  {"trsihJ/psi.Chain" ,"" ,"",   "trs,Simu,y2003x,tpc,l0,ctf,svt,Cdst,Kalman,tags,Tree,bbcsim,evout,emcY2,"
    "eefs,GeantOut,big,CMuDst,fzin"                                                        ,"","","",kFALSE},
-  {"auau62prod.Chain" ,"" ,"","trs,Simu,srs,y2004,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,"
+  {"auau62prod.Chain" ,"" ,"","trs,Simu,srs,y2004,tpc,l0,ctf,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,"
    "est,-xi,-v0,xi2,XiSvt,svtdEdx,SvtMatchVtx,emcY2,eefs,GeantOut,big,CMuDst,fzin"        ,"","","",kFALSE},
-  {"trs/omega2.Chain" ,"" ,"","trs,Simu,srs,y2003x,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,evout,est,"
+  {"trs/omega2.Chain" ,"" ,"","trs,Simu,srs,y2003x,tpc,l0,ctf,svt,Cdst,Kalman,tags,Tree,bbcsim,evout,est,"
    "-xi,-v0,xi2,XiSvt,svtdEdx,SvtMatchVtx,emcY2,eefs,GeantOut,big,CMuDst,fzin"            ,"","","",kFALSE},
   {"daq100Test3.Chain" ,"" ,"","DbV20020802,pp2001,-tcl,fcf,beamline,CMuDst"	          ,"","","",kFALSE},
-  {"auau62prod.Chain" ,"" ,"","trs,Simu,srs,fss,y2004,tpc,l0,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
+  {"auau62prod.Chain" ,"" ,"","trs,Simu,srs,fss,y2004,tpc,l0,ctf,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
    "tofsim,evout,est,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,CMuDst,fzin"               ,"","","",kFALSE},
   {"auau62prod2.Chain" ,"" ,"","DbV20040409,P2004,svt_daq,SvtD,-xi,-v0,EST,OShortR,OSpaceZ2,Xi2,XiSvt,"
    "svtdEdx,Kink2,eemcD,pmdRaw,NoHits,CMuDst"                                             ,"","","",kFALSE},
@@ -1202,25 +1208,25 @@ Bfc_st BFC2[] = { // ITTF Chains
    "P2004,DbV20040415,OShortR,svt_daq,svtD,EST,svtdEdx,Xi2,xiSvt,Kink2,CMuDst,ZDCvtx"
    ,"","",""                                                                                       ,kFALSE},
   {"omegaProd.Chain" ,"" ,"",
-   "trs,Simu,srs,y2003x,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,evout,est,xi2,XiSvt,svtdEdx,SvtMatchVtx,"
+   "trs,Simu,srs,y2003x,tpc,l0,ctf,svt,Cdst,Kalman,tags,Tree,bbcsim,evout,est,xi2,XiSvt,svtdEdx,SvtMatchVtx,"
    "emcY2,eefs,GeantOut,big,CMuDst,fzin"                                                  ,"","","",kFALSE},
   {"auau62Prod4.Chain" ,"" ,"","P2004,DbV20040415,OShortR,svt_daq,svtD,EST,svtdEdx,eemcD,pmdRaw,Xi2,xiSvt,"
    "Kink2,CMuDst,ZDCvtx,hitfilt"	                                                  ,"","","",kFALSE},
   {"dauprod3.Chain" ,"" ,"","DbV20040520,dau2003a,-tcl,fcf,est,beamLine,xi2,Kink2,XiSvt,svtdEdx,eemcD,"
    "hitfilt,CMuDst"              	                                                  ,"","","",kFALSE},
-  {"auau200hij.Chain" ,"" ,"","trs,Simu,srs,fss,y2004a,tpc,l0,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
+  {"auau200hij.Chain" ,"" ,"","trs,Simu,srs,fss,y2004a,tpc,l0,ctf,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
    "tofsim,evout,est,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,CMuDst,fzin,sdt2001112"    ,"","","",kFALSE},
-  {"auau62hij.Chain" ,"" ,"","trs,Simu,srs,fss,y2004a,tpc,l0,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
+  {"auau62hij.Chain" ,"" ,"","trs,Simu,srs,fss,y2004a,tpc,l0,ctf,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
    "tofsim,evout,est,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,CMuDst,fzin"               ,"","","",kFALSE},
-  {"pp200pyth.Chain" ,"" ,"","trs,Simu,srs,fss,y2004a,tpc,l0,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
+  {"pp200pyth.Chain" ,"" ,"","trs,Simu,srs,fss,y2004a,tpc,l0,ctf,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
    "tofsim,evout,est,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,CMuDst,fzin"               ,"","","",kFALSE},
-  {"j/psi.prod1.Chain","","","trs,Simu,srs,fss,y2005x,tpc,l0,ftpc,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
+  {"j/psi.prod1.Chain","","","trs,Simu,srs,fss,y2005x,tpc,l0,ctf,ftpc,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
    "evout,EST,Xi2,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin"                    ,"","","",kFALSE},
-  {"j/psi.prod2.Chain" ,"" ,"","trs,Simu,fss,y2005x,tpc,l0,ftpc,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
+  {"j/psi.prod2.Chain" ,"" ,"","trs,Simu,fss,y2005x,tpc,l0,ctf,ftpc,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
    "evout,Xi2,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin"                                ,"","","",kFALSE},
   {"cu22prod.Chain" ,"" ,"","P2005,DbV20060112,useCDV,tofDat,EST,svtdEdx,xiSvt,Xi2,V02,Kink2,pmdRaw,"
    "CMuDst,OShortR,OSpaceZ2,OGridLeak3D,hitfilt"                                          ,"","","",kFALSE},
-  {"auau200.jpsi.hij.Chain" ,"" ,"","trs,Simu,fss,y2004y,tpc,l0,ftpc,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
+  {"auau200.jpsi.hij.Chain" ,"" ,"","trs,Simu,fss,y2004y,tpc,l0,ctf,ftpc,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
    "evout,Xi2,Kink2,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin"                          ,"","","",kFALSE},
   {"auau200y2004.tpt.Chain" ,"" ,"","P2004,DbV20041213,SCEbyE,svt_daq,svtD,EST,svtdEdx,eemcD,Xi2,xiSvt,"
    "Kink2,pmdRaw,CMuDst,hitfilt"                                                          ,"","","",kFALSE},
@@ -1234,9 +1240,9 @@ Bfc_st BFC2[] = { // ITTF Chains
    "P2004,DbV20050312,SCEbyE,OGridLeak,EST,svtdEdx,Xi2,xiSvt,Kink2,pmdRaw,CMuDst,hitfilt" ,"","","",kFALSE},
   {"auau200mb.tpt.Chain" ,"" ,"",
    "P2004,DbV20050215,SCEbyE,OGridLeak,EST,svtdEdx,Xi2,xiSvt,Kink2,pmdRaw,CMuDst,hitfilt" ,"","","",kFALSE},
-  {"cucu200hij.Chain" ,"" ,"","trs,Simu,srs,fss,y2005x,tpc,l0,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
+  {"cucu200hij.Chain" ,"" ,"","trs,Simu,srs,fss,y2005x,tpc,l0,ctf,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
    "tofsim,evout,est,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,CMuDst,fzin"               ,"","","",kFALSE},
-  {"cucu200hij2.Chain" ,"" ,"","trs,Simu,srs,fss,y2005x,tpc,l0,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
+  {"cucu200hij2.Chain" ,"" ,"","trs,Simu,srs,fss,y2005x,tpc,l0,ctf,ftpc,svt,pmd,Cdst,Kalman,tags,Tree,bbcsim,"
    "tofsim,evout,est,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,CMuDst,fzin"               ,"","","",kFALSE},
   {"auau200.prod3.tpt.Chain" ,"" ,"",
    "P2004,DbV20050312,SCEbyE,OGridLeak,EST,svtdEdx,Xi2,xiSvt,Kink2,pmdRaw,CMuDst,hitfilt" ,"","","",kFALSE},
@@ -1244,9 +1250,9 @@ Bfc_st BFC2[] = { // ITTF Chains
    "Xi2,V02,Kink2,-dstout,CMuDst,OShortR,OSpaceZ2"                                        ,"","","",kFALSE},
   {"cucu.prod2.Chain" ,"" ,"","P2005,DbV20050515,useCDV,SCEbyE,OGridLeak,tofDat,EST,svtdEdx,xiSvt,pmdRaw,"
    "Xi2,V02,Kink2,-dstout,CMuDst,OShortR,OSpaceZ2,hitfilt"                                ,"","","",kFALSE},
-  {"pp.special.Chain" ,"" ,"","trs,Simu,fss,y2004c,tpc,l0,ftpc,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
+  {"pp.special.Chain" ,"" ,"","trs,Simu,fss,y2004c,tpc,l0,ctf,ftpc,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
    "evout,Xi2,V02,Kink2,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin"                      ,"","","",kFALSE},
-  {"pp.special2.Chain" ,"" ,"","trs,Simu,fss,y2004y,tpc,l0,ftpc,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
+  {"pp.special2.Chain" ,"" ,"","trs,Simu,fss,y2004y,tpc,l0,ctf,ftpc,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,"
    "evout,Xi2,Kink2,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin,sdt20040427"              ,"","","",kFALSE},
 #else /* ITTF chains */
   {"ppITTFsvt.Chain" ,"" ,"","DbV20020802,pp2001,fpd,beamLine,svt_daq,SvtD,est,svtdedx,CMuDst"
@@ -1254,72 +1260,72 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"ittfMiniMc.Chain" ,"" ,"","RY2005,in,event,svtDb,ITTF,Sti,SvtIT,evOut,InTree,ReadAll,Simu,MiniMc"
    ,"","",""                                                                                       ,kFALSE},
   {"dau.ittf.prod.Chain" ,"" ,"","DbV20040520,dau2003i,ITTF,SvtIT,hitfilt,in"	          ,"","","",kFALSE},
-  {"ppITTFpyth.Chain" ,"" ,"","trs,Simu,srs,fss,y2004,Idst,tpcI,tcl,ftpc,l0,Tree,SvtCL,svtDb,ITTF,Sti,"
+  {"ppITTFpyth.Chain" ,"" ,"","trs,Simu,srs,fss,y2004,Idst,tpcI,tcl,ftpc,l0,ctf,Tree,SvtCL,svtDb,ITTF,Sti,"
    "genvtx,dEdxY2,geant,tags,bbcSim,tofsim,emcY2,"                                        ,"","","",kFALSE},
   {"auau200run2004.ITTF.Chain" ,"" ,"","P2004,DbV20040917,SCEbyE,ITTF,pmdRaw,hitfilt"	  ,"","","",kFALSE},
   {"pp200run2004.ITTF.Chain" ,"" ,"","pp2004,DbV20040917,beamLine,ITTF,hitfilt"	          ,"","","",kFALSE},
   {"auau200y2004.ITTF.Chain" ,"" ,"","P2004,DbV20040804,SCEbyE,ITTF,pmdRaw,hitfilt"       ,"","","",kFALSE},
   {"pp.2005prod.ITTF.Chain","","","DbV20050816,pp2005a,ITTF,OSpaceZ2,OGridLeak3D,hitfilt" ,"","","",kFALSE},
-  {"pp.pythia2.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2004y,Idst,l0,tpcI,fcf,ftpc,Tree,logger,ITTF,Sti,"
+  {"pp.pythia2.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2004y,Idst,l0,ctf,tpcI,fcf,ftpc,Tree,logger,ITTF,Sti,"
    "VFPPV,bbcSim,tofsim,tags,emcY2,EEfs,evout,geantout,big,fzin,MiniMcMk,eemcDb,beamLine,"
    "sdt20050727"                	                                                  ,"","","",kFALSE},
   {"cucu.ITTF.noSvt.Chain" ,"" ,"",   "P2005,DbV20060421,useCDV,ITTF,tofDat,-svtIT,"
    "SCEbyE,OGridLeak,OShortR,OSpaceZ2,hitfilt"                                            ,"","","",kFALSE},
-  {"cucu62.D0.nosvt.prod.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2006,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+  {"cucu62.D0.nosvt.prod.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2006,Idst,IAna,l0,ctf,tpcI,fcf,ftpc,Tree,logger,"
    "ITTF,Sti,VFMCE,-SvtIt,geant,evout,IdTruth,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,-dstout,fzin,"
    "MiniMcMk"          	                                                  ,"","","",kFALSE},
   {"cucu.ITTF.Chain" ,"" ,"","P2005,DbV20060524,useCDV,MakeEvent,ITTF,tofDat,ssddat,spt,SsdIt,"
    "SCEbyE,OGridLeak3D,OShortR,OSpaceZ2,KeepSvtHit,hitfilt"                               ,"","","",kFALSE},
-  {"cucu62.D0.prod.ITTF.Chain" ,"" ,"","trs,Simu,srs,ssd,fss,y2006,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+  {"cucu62.D0.prod.ITTF.Chain" ,"" ,"","trs,Simu,srs,ssd,fss,y2006,Idst,IAna,l0,ctf,tpcI,fcf,ftpc,Tree,logger,"
    "ITTF,Sti,genvtx,SvtIt,SsdIt,geant,evout,IdTruth,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,-dstout,"
    "fzin,MiniMcMk"      	                                                  ,"","","",kFALSE},
-  {"cucu200.D0.prod.ITTF.Chain" ,"" ,"","trs,Simu,srs,ssd,fss,y2006,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+  {"cucu200.D0.prod.ITTF.Chain" ,"" ,"","trs,Simu,srs,ssd,fss,y2006,Idst,IAna,l0,ctf,tpcI,fcf,ftpc,Tree,logger,"
    "ITTF,Sti,genvtx,SvtIt,SsdIt,geant,evout,IdTruth,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,-dstout,"
    "fzin,MiniMcMk"     	                                                  ,"","","",kFALSE},
-  {"cucu200.D0.nosvt.prod.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2006,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+  {"cucu200.D0.nosvt.prod.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2006,Idst,IAna,tpcI,fcf,ftpc,Tree,logger,"
    "ITTF,Sti,genvtx,-SvtIt,geant,evout,IdTruth,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,-dstout,"
    "fzin,MiniMcMk"      	                                                  ,"","","",kFALSE},
   {"cucu.ITTF.test2.Chain","" ,"","P2005,DbV20060620,useCDV,MakeEvent,ITTF,tofDat,ssddat,spt,SsdIt,"
    "SCEbyE,OGridLeak3D,OShortR,OSpaceZ2,KeepSvtHit,hitfilt"                               ,"","","",kFALSE},
-  {"cucu200.D0.prod2.ITTF.Chain","","","trs,Simu,srs,ssd,fss,y2006,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+  {"cucu200.D0.prod2.ITTF.Chain","","","trs,Simu,srs,ssd,fss,y2006,Idst,IAna,tpcI,fcf,ftpc,Tree,logger,"
    "ITTF,Sti,genvtx,SvtIt,SsdIt,geant,evout,IdTruth,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,-dstout,"
    "fzin,MiniMcMk"     	                                                  ,"","","",kFALSE},
-  {"cucu200.D0.nosvt.prod2.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2006,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+  {"cucu200.D0.nosvt.prod2.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2006,Idst,IAna,tpcI,fcf,ftpc,Tree,logger,"
    "ITTF,Sti,genvtx,-SvtIt,geant,evout,IdTruth,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,-dstout,"
    "fzin,MiniMcMk"     	                                                  ,"","","",kFALSE},
   {"ppJpsi.prod2006.ITTF.Chain","","","DbV20060729,pp2006b,ITTF,OSpaceZ2,OGridLeak3D,hitfilt",
    "","",""                                                                                        ,kFALSE},
-  {"pp200.Upmix.prod.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2006,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+  {"pp200.Upmix.prod.ITTF.Chain" ,"" ,"","trs,Simu,fss,y2006,Idst,IAna,tpcI,fcf,ftpc,Tree,logger,"
    "ITTF,Sti,genvtx,-SvtIt,geant,evout,IdTruth,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,-dstout,"
    "fzin,MiniMcMk,beamLine"                                                      ,"","","",kFALSE},
   {"pp2006prod.ITTF.Chain" ,"" ,"","DbV20060915,pp2006b,ITTF,OSpaceZ2,OGridLeak3D,hitfilt","","","",kFALSE},
   {"pp2006prod2.ITTF.Chain","" ,"","DbV20061021,pp2006b,ITTF,OSpaceZ2,OGridLeak3D,hitfilt","","","",kFALSE},
-  {"auauUpgr05.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr05,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr05.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr05,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,HpdIT,IstIT,StiPulls,genvtx,NoSvtIt,SsdIt,MakeEvent,McEvent,geant,evout,"
    "IdTruth,tags,bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut"            ,"","","",kFALSE},
-  {"auauUpgr01.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr01,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr01.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr01,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,StiPulls,genvtx,NoSvtIt,SsdIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut"                         ,"","","",kFALSE},
-  {"auauUpgr07.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr07,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr07.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr07,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,IstIT,StiPulls,genvtx,NoSvtIt,SsdIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut"                         ,"","","",kFALSE},
   {"pp2006prod3.ITTF.Chain" ,"" ,"","DbV20060915,pp2006b,ITTF,hitfilt"	                  ,"","","",kFALSE},
-  {"auauUpgr08.prod.ITTF.Chain" ,"" ,"","trs,Simu,upgr08,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr08.prod.ITTF.Chain" ,"" ,"","trs,Simu,upgr08,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,HpdIT,IstIT,StiPulls,genvtx,NoSvtIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut"                         ,"","","",kFALSE},
-  {"auauUpgr06.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr06,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr06.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr06,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,HpdIT,StiPulls,genvtx,NoSvtIt,SsdIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut"                         ,"","","",kFALSE},
-  {"auauUpgr09.prod.ITTF.Chain" ,"" ,"","trs,Simu,upgr09,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr09.prod.ITTF.Chain" ,"" ,"","trs,Simu,upgr09,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,HpdIT,IstIT,StiPulls,genvtx,NoSvtIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut"                         ,"","","",kFALSE},
-  {"auauUpgr10.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr10,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr10.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr10,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,IstIT,StiPulls,genvtx,NoSvtIt,SsdIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut"                         ,"","","",kFALSE},
-  {"auauUpgr11.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr11,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr11.prod.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr11,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,IstIT,StiPulls,genvtx,NoSvtIt,SsdIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut"                         ,"","","",kFALSE},
-  {"auauUpgr06.prod2.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr06,pixFastSim,Idst,IAna,l0,tpcI,fcf,Tree,logger,"
+  {"auauUpgr06.prod2.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr06,pixFastSim,Idst,IAna,tpcI,fcf,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,HpdIT,StiPulls,genvtx,NoSvtIt,SsdIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut" ,"" ,"",""                       ,kFALSE},
 #endif
@@ -1356,12 +1362,12 @@ Bfc_st BFC2[] = { // ITTF Chains
    "","","/star/rcf/simu/rcf1197_05_5940evts.fzd"                                                  ,kFALSE},
   {"Test.year_2003_ppMinBias_daq", "","","pp2003,v0,xi,l3onl,beamLine,est,eemcD,-dstout,logger,CMuDst",
    "","","/star/rcf/test/daq/2003/095/st_physics_4095050_raw_0010002.daq"                          ,kFALSE},
-  {"Test.year_2004_auau_central_trs", "","","trs,Simu,srs,fss,y2004a,tpc,l0,svt,ftpc,Cdst,Kalman,tags,Tree,"
+  {"Test.year_2004_auau_central_trs", "","","trs,Simu,srs,fss,y2004a,tpc,l0,ctf,svt,ftpc,Cdst,Kalman,tags,Tree,"
    "est,bbcsim,tofsim,evout,EventQA,xi2,Kink2,emcY2,eefs,GeantOut,big,-dstout,logger,CMuDst,fzin",
    "","","/star/rcf/simu/rcf1209_05_80evts.fzd"                                                    ,kFALSE},
   {"Test.year_2004_AuAuMinBias_daq","","","P2004,DbV20050312,EST,-dstout,svtdEdx,Xi2,xiSvt,Kink2,pmdRaw,"
    "logger,CMuDst","","",          "/star/rcf/test/daq/2004/028/st_physics_5028066_raw_1010003.daq",kFALSE},
-  {"Test.year_2004_auau_minbias_trs", "","",   "trs,Simu,srs,fss,y2004,tpc,l0,svt,ftpc,Cdst,Kalman,tags,"
+  {"Test.year_2004_auau_minbias_trs", "","",   "trs,Simu,srs,fss,y2004,tpc,l0,ctf,svt,ftpc,Cdst,Kalman,tags,"
    "Tree,est,bbcsim,tofsim,evout,EventQA,xi2,Kink2,emcY2,eefs,GeantOut,big,-dstout,logger,CMuDst,fzin",
    "","","/star/rcf/simu/rcf1207_01_225evts.fzd"                                                   ,kFALSE},
   {"Test.year_2004_AuAu_prodHigh_daq", "","",   "P2004,DbV20050312,EST,-dstout,svtdEdx,Xi2,xiSvt,Kink2,"
@@ -1376,7 +1382,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Test.year_2005_CuCu200_MinBias_daq", "","",
    "P2005,tofDat,svt_daq,svtD,EST,pmdRaw,Xi2,V02,Kink2,-dstout,logger,CMuDst,OShortR,OSpaceZ2","","",
    "/star/rcf/test/daq/2005/048/st_physics_6048025_raw_1020002.daq"                                ,kFALSE},
-  {"Test.year_2005_cucu200_minbias_trs", "","","trs,Simu,srs,fss,y2005x,tpc,l0,ftpc,svt,Cdst,Kalman,tags,"
+  {"Test.year_2005_cucu200_minbias_trs", "","","trs,Simu,srs,fss,y2005x,tpc,l0,ctf,ftpc,svt,Cdst,Kalman,tags,"
    "Tree,bbcsim,tofsim,evout,est,xi2,Kink2,emcY2,eefs,GeantOut,big,logger,CMuDst,fzin",
    "","","/star/rcf/simu/rcf1216_05_200evts.fzd"                                                   ,kFALSE},
   {"Test.year_2005_CuCu22_MinBias_daq", "","",
@@ -1385,28 +1391,35 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Test.year_2005_CuCu62_MinBias_daq", "","",
    "P2005,tofDat,svt_daq,svtD,EST,pmdRaw,Xi2,V02,Kink2,-dstout,logger,CMuDst,OShortR,OSpaceZ2","","",
    "/star/rcf/test/daq/2005/080/st_physics_6080011_raw_1020004.daq"                                ,kFALSE},
-  {"Test.year_2005_cucu62_minbias_trs", "","","trs,Simu,srs,fss,y2005x,tpc,l0,ftpc,svt,Cdst,Kalman,tags,"
+  {"Test.year_2005_cucu62_minbias_trs", "","","trs,Simu,srs,fss,y2005x,tpc,l0,ctf,ftpc,svt,Cdst,Kalman,tags,"
    "Tree,bbcsim,tofsim,evout,est,xi2,Kink2,emcY2,eefs,GeantOut,big,logger,CMuDst,fzin",
    "","","/star/rcf/simu/rcf1237_01_500evts.fzd"                                                   ,kFALSE},
 #else
-  {"Test.reco.ITTF","","","MakeEvent,tpcI,fcf,ftpc,SvtCL,svtDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,"
-   "EventQA,tags,Tree,EvOut,StarMagField,FieldOn,CMuDst"                                  ,"","","",kFALSE},
+  {"Test.ITTF","","","svtIT,ssdIT,ITTF,genvtx,event,analysis,EventQA,tags,Tree,EvOut,StarMagField,FieldOn"
+   ",CMuDst,Tree,analysis"                                                                ,"","","",kFALSE},
+  {"Test.reco.ITTF","","","MakeEvent,tpcI,fcf,ftpc,SvtCL,Test.ITTF"                       ,"","","",kFALSE},
   {"Test.fast.ITTF","","","gstar,tfs,Simu,srs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,SvtCL,"
    "tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,"
-   "StarMagField,FieldOn,IAna,y2007,CMuDst"
-                                                                                          ,"","","",kFALSE},
+   "StarMagField,FieldOn,IAna,y2007,CMuDst"                                               ,"","","",kFALSE},
+#if 0
   {"Test.default.ITTF","","","gstar,trs,Simu,sss,svt,ssd,fss,bbcSim,emcY2,McEvOut,GeantOut,IdTruth,MakeEvent,"
+   "miniMcMk,McAna,Test.ITTF"                                                             ,"","","",kFALSE},
+#else
+  {"Test.default.ITTF","","","gstar,trs,Simu,sss,svt,ssd,fss,bbcSim,emcY2,GeantOut,IdTruth,MakeEvent,"
    "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
+#endif
+  {"Test.default.Fast.ITTF","","","gstar,tfs,sfs,ssdFast,IdTruth,MakeEvent,miniMcMk,McAna,Test.ITTF",
+   ""                                                                                        ,"","",kFALSE},
   {"Test.srs.ITTF","","",   "gstar,trs,Simu,srs,svt,ssd,fss,bbcSim,emcY2,McEvOut,GeantOut,IdTruth,"
    "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
   {"Test.year_2003_dAuMinBias_daq.ittf", "","","DbV20040520,dau2003i,logger,ITTF,evout,in","","",
    "/star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq"                                ,kFALSE},
-  {"Test.year_2004_auau_central_trs.ittf","","","trs,Simu,srs,fss,y2004a,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,"
+  {"Test.year_2004_auau_central_trs.ittf","","","trs,Simu,srs,fss,y2004a,Idst,IAna,l0,ctf,tpcI,fcf,ftpc,Tree,"
    "logger,ITTF,evout,Sti,genvtx,SvtIT,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,big,fzin,"
    "MiniMcMk",                                "","","/star/rcf/simu/rcf1209_05_80evts.fzd",kFALSE},
   {"Test.year_2004_AuAuMinBias_daq.ittf", "","","P2004,DbV20050312,logger,ITTF,evout,-dstout,pmdRaw",
    "","","/star/rcf/test/daq/2004/028/st_physics_5028066_raw_1010003.daq"                          ,kFALSE},
-  {"Test.year_2004_auau_minbias_trs.ittf", "", "",   "trs,Simu,srs,fss,y2004,Idst,IAna,l0,tpcI,fcf,ftpc,"
+  {"Test.year_2004_auau_minbias_trs.ittf", "", "",   "trs,Simu,srs,fss,y2004,Idst,IAna,l0,ctf,tpcI,fcf,ftpc,"
    "Tree,logger,ITTF,evout,Sti,genvtx,SvtIt,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,big,fzin,"
    "MiniMcMk",                               "","","/star/rcf/simu/rcf1207_01_225evts.fzd",kFALSE},
   {"Test.year_2004_AuAu_prodHigh_daq.ittf","","","P2004,DbV20050312,logger,ITTF,evout,-dstout,"
@@ -1421,7 +1434,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Test.year_2005_CuCu200_MinBias_daq.ittf", "","",
    "P2005,tofDat,logger,useCDV,MakeEvent,ITTF,evout,ssddat,spt,SsdIt,pmdRaw,OShortR,OSpaceZ2",
    "","","/star/rcf/test/daq/2005/048/st_physics_6048025_raw_1020002.daq"                          ,kFALSE},
-  {"Test.year_2005_cucu200_minbias_trs.ittf", "","",   "trs,Simu,srs,fss,ssd,y2005x,Idst,IAna,l0,tpcI,"
+  {"Test.year_2005_cucu200_minbias_trs.ittf", "","",   "trs,Simu,srs,fss,ssd,y2005x,Idst,IAna,l0,ctf,tpcI,"
    "fcf,ftpc,Tree,logger,ITTF,evout,Sti,SsdIt,genvtx,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,"
    "big,fzin,MiniMcMk,SvtIt",                "","","/star/rcf/simu/rcf1216_05_200evts.fzd",kFALSE},
   {"Test.year_2005_CuCu22_MinBias_daq.ittf", "","",
@@ -1430,7 +1443,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Test.year_2005_CuCu62_MinBias_daq.ittf", "","",
    "P2005,tofDat,logger,useCDV,MakeEvent,ITTF,evout,ssddat,spt,SsdIt,pmdRaw,OShortR,OSpaceZ2",
    "","","/star/rcf/test/daq/2005/080/st_physics_6080011_raw_1020004.daq"                          ,kFALSE},
-  {"Test.year_2005_cucu62_minbias_trs.ittf", "", "","trs,Simu,srs,fss,ssd,y2005x,Idst,IAna,l0,tpcI,fcf,"
+  {"Test.year_2005_cucu62_minbias_trs.ittf", "", "","trs,Simu,srs,fss,ssd,y2005x,Idst,IAna,l0,ctf,tpcI,fcf,"
    "ftpc,Tree,logger,ITTF,evout,Sti,SsdIt,genvtx,SvtIT,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,"
    "big,fzin,MiniMcMk",                      "","","/star/rcf/simu/rcf1237_01_500evts.fzd",kFALSE},
   {"Test.year_2005_ppProduction_daq.ittf", "","","pp2005a,tofdat,ITTF,evout,OSpaceZ2,OGridLeak3D",
@@ -1439,6 +1452,13 @@ Bfc_st BFC2[] = { // ITTF Chains
    "/star/rcf/test/daq/2006/155/7155010/st_physics_7155010_raw_1020003.daq"                        ,kFALSE},
   {"Test.year_2006_ppProdTrans_daq.ittf", "","","pp2006b,ITTF,evout,OSpaceZ2,OGridLeak3D","","",
    "/star/rcf/test/daq/2006/129/7129023/st_physics_7129023_raw_1020003.daq"                        ,kFALSE},
+  {"Test.year_2007_auau200_central.ittf", "","","trs,srs,ssd,fss,y2007,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,"
+   "logger,ITTF,Sti,SvtIt,SsdIt,genvtx,MakeEvent,IdTruth,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,"
+   "GeantOut,big,fzin,MiniMcMk,-dstout,clearmem", "","","/star/rcf/simu/rcf1296_02_100evts.fzd"    ,kFALSE},
+  {"Test.year_2008_production_dAu2008.ITTF", "","","P2008b,ittf", "","",
+   "/star/rcf/test/daq/2007/352/st_physics_8352025_raw_1030011.daq"                                ,kFALSE},
+  {"Test.year_2008_ppProduction2008.ITTF",  "","","pp2008a,ittf", "","",
+   "/star/rcf/test/daq/2008/043/st_physics_9043046_raw_2030002.daq"                                ,kFALSE},
 #endif
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Aliased     ","time stamps","-----------","------------------------------------------","","","",kFALSE},

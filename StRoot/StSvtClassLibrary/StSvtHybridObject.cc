@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridObject.cc,v 1.4 2007/12/26 02:30:52 fine Exp $
+ * $Id: StSvtHybridObject.cc,v 1.5 2008/06/12 14:22:12 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridObject.cc,v $
+ * Revision 1.5  2008/06/12 14:22:12  fisyak
+ * Add default no. of anodes and timeBins
+ *
  * Revision 1.4  2007/12/26 02:30:52  fine
  * Dummy impl of the missed StSvtHybridObject::SetName method
  *
@@ -33,6 +36,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 
+#include <assert.h>
 #include "StSvtHybridObject.hh"
 
 ClassImp(StSvtHybridObject)
