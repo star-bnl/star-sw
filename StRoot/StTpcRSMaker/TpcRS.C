@@ -37,13 +37,14 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "TpcRS,fcf",
   TString Opt(opt);
   TString RunOpt(Run);
   RunOpt.ToLower();
-  ChainOpt = "MakeEvent,ITTF,-SsdIt,-SvtIt,Idst,tpcI,VFMinuit,McAna,-EventQA,-EvOut,-dstout,McTpcAna,analysis,dEdxY2,";
+  ChainOpt = "MakeEvent,ITTF,-SsdIt,-SvtIt,Idst,tpcI,VFMinuit,-EventQA,-EvOut,-dstout,analysis,dEdxY2,noHistos,";
+  ChainOpt += "McAna,McTpcAna,IdTruth,useInTracker,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += "tpc_daq,";
     RunOpt.ReplaceAll("TpcRS,","");
     RunOpt.ReplaceAll("trs,","");
   } else {
-    ChainOpt += "TpxClu,";
+    ChainOpt += "TpxRaw,TpxClu,-trs,-tcl,-fcf,-tpc_daq,-tfs,-St_tpc,";
   }
   
   TString FileIn(fileIn);
@@ -76,57 +77,6 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "TpcRS,fcf",
     return;
   }
   bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());
-  St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
-  if (FileIn == "") {
-    //    geant->SetDebug(0);
-    if (! fileIn)       {
-      //            NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
-      //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
-      cout << Opt << endl;
-     if (Opt.Contains("PhysicsOff",TString::kIgnoreCase)) {
-	geant->Do("DCAY 0");
-	geant->Do("ANNI 0");
-	geant->Do("BREM 0");
-	geant->Do("COMP 0");
-	geant->Do("HADR 0");
-	geant->Do("MUNU 0");
-	geant->Do("PAIR 0");
-	geant->Do("PFIS 0");
-	geant->Do("PHOT 0");
-	geant->Do("RAYL 0");
-	geant->Do("LOSS 4"); // no fluctuations 
-	//    geant->Do("LOSS 1"); // with delta electron above dcute
-	geant->Do("DRAY 0");
-	geant->Do("MULS 1");
-	geant->Do("STRA 0");
-	//         CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-	geant->Do("CUTS     1e-4   1e-4   .001   .001   .001  .001  .001  1e-4  .001   .001 50.e-6");
-	//    geant->Do("gclose all");
-	geant->Do("physi");
-      }
-      if ( Opt.Contains("laser",TString::kIgnoreCase)) {
-	gSystem->Load("gstar.so");
-	geant->Do("call gstar");
-	geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
-	geant->Do("gprint kine");
-	geant->Do("gvert 0  54   0");
-	geant->Do("debug on");
-	geant->Do("swit 1 2");
-	geant->Do("swit 2 2");
-	geant->Do("mode TRAC prin 15");
-      } else 
-	if (Opt.Contains("pion",TString::kIgnoreCase)) 
-	  geant->Do("gkine 100  8   0.4     1.  -1     1      0    6.28    -20.    20.;");
-	else if (Opt.Contains("1muon",TString::kIgnoreCase)) 
-	  geant->Do("gkine   1  6   0.4     1.  -.1     .1      0    0     -20.    20.;");
-	else if (Opt.Contains("50muons1GeV",TString::kIgnoreCase)) 
-	  geant->Do("gkine  50  6   1.     1.  -1     1      0    6.28    -20.    20.;");
-	else if (Opt.Contains("deuteron",TString::kIgnoreCase)) 
-	  geant->Do("gkine 100 45   0.05  100.  -1     1      0    6.28    -20.    20.;");
-	else // proton
-	  geant->Do("gkine 100 14   0.05   50.  -1     1      0    6.28    -20.    20.;");
-    }
-  }
   if (ChainOpt.Contains("TpcRS",TString::kIgnoreCase)) {
     StTpcRSMaker *trs = (StTpcRSMaker *) chain->Maker("TpcRS");
     if (trs) {
@@ -192,16 +142,61 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "TpcRS,fcf",
       dEdx->SetMask(mask); 
     }
   }
-  StTpcRSMaker *ass = (StTpcRSMaker *) chain->Maker("StTpcRSMaker");
-  if (ass) {
-    ass->SetDebug(1);
-    ass->useIdAssoc();
-    ass->useInTracker();
-  }
   Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
   if (initStat) {
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
+  }
+  if (FileIn == "") {
+    St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
+    //    geant->SetDebug(0);
+    if (! fileIn)       {
+      //            NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
+      //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
+      cout << Opt << endl;
+     if (Opt.Contains("PhysicsOff",TString::kIgnoreCase)) {
+	geant->Do("DCAY 0");
+	geant->Do("ANNI 0");
+	geant->Do("BREM 0");
+	geant->Do("COMP 0");
+	geant->Do("HADR 0");
+	geant->Do("MUNU 0");
+	geant->Do("PAIR 0");
+	geant->Do("PFIS 0");
+	geant->Do("PHOT 0");
+	geant->Do("RAYL 0");
+	geant->Do("LOSS 4"); // no fluctuations 
+	//    geant->Do("LOSS 1"); // with delta electron above dcute
+	geant->Do("DRAY 0");
+	geant->Do("MULS 1");
+	geant->Do("STRA 0");
+	//         CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+	geant->Do("CUTS     1e-4   1e-4   .001   .001   .001  .001  .001  1e-4  .001   .001 50.e-6");
+	//    geant->Do("gclose all");
+	geant->Do("physi");
+      }
+      if ( Opt.Contains("laser",TString::kIgnoreCase)) {
+	gSystem->Load("gstar.so");
+	geant->Do("call gstar");
+	geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
+	geant->Do("gprint kine");
+	geant->Do("gvert 0  54   0");
+	geant->Do("debug on");
+	geant->Do("swit 1 2");
+	geant->Do("swit 2 2");
+	geant->Do("mode TRAC prin 15");
+      } else 
+	if (Opt.Contains("pion",TString::kIgnoreCase)) 
+	  geant->Do("gkine 100  8   0.4     1.  -1     1      0    6.28    -20.    20.;");
+	else if (Opt.Contains("1muon",TString::kIgnoreCase)) 
+	  geant->Do("gkine   1  6   0.4     1.  -.1     .1      0    0     -20.    20.;");
+	else if (Opt.Contains("50muons1GeV",TString::kIgnoreCase)) 
+	  geant->Do("gkine  50  6   1.     1.  -1     1      0    6.28    -20.    20.;");
+	else if (Opt.Contains("deuteron",TString::kIgnoreCase)) 
+	  geant->Do("gkine 100 45   0.05  100.  -1     1      0    6.28    -20.    20.;");
+	else // proton
+	  geant->Do("gkine 100 14   0.05   50.  -1     1      0    6.28    -20.    20.;");
+    }
   }
   if (NEvents > 0)  chain->EventLoop(First,NEvents);
 }
