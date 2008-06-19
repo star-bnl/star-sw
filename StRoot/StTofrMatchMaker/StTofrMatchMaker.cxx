@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.23 2008/05/12 17:16:37 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.24 2008/06/19 16:11:54 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.24  2008/06/19 16:11:54  dongx
+ * fixed bug of filling an undefined histogram in case of production
+ *
  * Revision 1.23  2008/05/12 17:16:37  dongx
  * letime and tetime in StTofCell stored in nano-seconds
  *
@@ -2063,7 +2066,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
       int hisIndex = daqIter->tray - 76;
       int daqAllIndex = (daqIter->tray - 76)*192 + daqIndex;
       int proAllIndex = (proIter->tray - 76)*192 + proIndex;
-      mHitCorrAll->Fill(proAllIndex,daqAllIndex);
+      if (mHisto) mHitCorrAll->Fill(proAllIndex,daqAllIndex);
       if(daqIter->tray==proIter->tray) {
 	if (mHisto) {
 	  if(hisIndex>=0&&hisIndex<5) {
