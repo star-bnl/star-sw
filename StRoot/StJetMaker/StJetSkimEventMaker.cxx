@@ -22,6 +22,9 @@
 //StEvent
 #include "StEvent.h"
 
+//
+#include "St_db_Maker/St_db_Maker.h"
+
 //StMuDstMaker
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -175,9 +178,18 @@ Int_t StJetSkimEventMaker::Make()
             if(skimTrig.didFire() || (skimTrig.shouldFire() > 0)) mEvent->setTrig(skimTrig);
             skimTrig.clear();
         }
-        TArrayI& l2Array = muEvent->L2Result();
-        //mEvent->setL2Result(l2Array);
-	mEvent->setL2Result(l2Array.GetArray() + 14);
+
+	St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("StarDb");
+	assert(mydb);
+	int theYear=mydb->GetDateTime().GetYear();
+
+	if(theYear >= 2006)
+	  {
+
+	    TArrayI& l2Array = muEvent->L2Result();
+            //mEvent->setL2Result(l2Array);
+	    mEvent->setL2Result(l2Array.GetArray() + 14);
+	  }
     }
     else {
         StJetSkimTrig skimTrig;
