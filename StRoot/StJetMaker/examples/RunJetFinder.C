@@ -33,11 +33,6 @@ void RunJetFinder(
   simL2Mk->setOutPath(outPath);
   simuTrig->useL2(simL2Mk);
 
-  StPreEclMaker *pre_ecl=new StPreEclMaker();
-  pre_ecl->setPrint(kFALSE);
-  StEpcMaker *epc=new StEpcMaker();
-  epc->setPrint(kFALSE);
-
   bool doTowerSwapFix = true;
   StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker, doTowerSwapFix);
   bet4pMaker->setUse2003Cuts(false);
@@ -80,12 +75,6 @@ void RunJetFinder(
 
   chain->Init();
 
-  pre_ecl->SetClusterConditions("bemc", 4, 0.4, 0.05, 0.02, kFALSE);
-  pre_ecl->SetClusterConditions("bsmde", 5, 0.4,0.005, 0.1,kFALSE);
-  pre_ecl->SetClusterConditions("bsmdp", 5, 0.4,0.005, 0.1,kFALSE);
-  pre_ecl->SetClusterConditions("bprs", 1, 500., 500., 501., kFALSE);
-
-
   for (Int_t iev = 0; iev < nevents; ++iev) {
 
     if(iev % 1 == 0) {
@@ -112,6 +101,7 @@ void setMacroPath()
   path = "./StRoot/StJetMaker/macros:" + path;
   path = "./StJetMaker/macros:" + path;
   path = "./macros:" + path;
+  path = "../macros:" + path;
   path = ".:" + path;
   gROOT->SetMacroPath(path);
 }

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.3 2008/06/11 02:44:51 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.4 2008/06/20 18:59:37 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -96,6 +96,8 @@ void setLibraryPath()
   } else if("StRoot/StJetMaker" == pwd(pwd.Length() - TString("StRoot/StJetMaker").Length(), TString("StRoot/StJetMaker").Length())) {
     path = TString("../../.") + gSystem->Getenv("STAR_HOST_SYS") + "/lib:" + path;
   } else if("StRoot/StJetMaker/macros" == pwd(pwd.Length() - TString("StRoot/StJetMaker/macros").Length(), TString("StRoot/StJetMaker/macros").Length())) {
+    path = TString("../../../.") + gSystem->Getenv("STAR_HOST_SYS") + "/lib:" + path;
+  } else if("StRoot/StJetMaker/examples" == pwd(pwd.Length() - TString("StRoot/StJetMaker/examples").Length(), TString("StRoot/StJetMaker/examples").Length())) {
     path = TString("../../../.") + gSystem->Getenv("STAR_HOST_SYS") + "/lib:" + path;
   }
   path = ".:" + path;
