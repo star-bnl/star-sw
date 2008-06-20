@@ -316,7 +316,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 void tpxFCF::start_evt()
 {
-	cl_marker = 1 ;	// used to mark unique clusters sector...
+	cl_marker = 10000 ;	// used to mark unique clusters sector...
 
 	for(int r=0;r<=45;r++) {
 		if(row_ix[r] < 0) continue ;

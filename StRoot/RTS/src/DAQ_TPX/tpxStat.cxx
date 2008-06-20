@@ -402,7 +402,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 		//LOG(TERR,"Got A %3d:%02d, count %d: ped %f, rms %f, charge %f, t0 %f",a.id,a.ch,a.count,ped,rms,d_sum,d_t0) ;
 
 
-		}
+		}	// end of fee_check_on
 
 		if(data_end == rdo.data_start) {
 			LOG(WARN,"Data end == data start...") ;
@@ -412,8 +412,5 @@ void tpxStat::accum(char *rdobuff, int bytes)
 
 
 	return ;
-
-
-
 
 }
