@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcSlowControl.hh,v 1.3 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTpcSlowControl.hh,v 1.4 2008/06/20 15:01:02 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSlowControl.hh,v $
+ * Revision 1.4  2008/06/20 15:01:02  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.3  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -40,7 +43,7 @@ class StTpcSlowControl {
 public:
     virtual ~StTpcSlowControl() {/* nopt */}
 
-    virtual double driftVelocity()                const = 0;
+    virtual double driftVelocity(int sector)      const = 0;
 
     // Environment
     virtual double hallTemperature()              const = 0;

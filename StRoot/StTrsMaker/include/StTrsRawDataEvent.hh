@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsRawDataEvent.hh,v 1.5 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsRawDataEvent.hh,v 1.6 2008/06/20 15:01:04 fisyak Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsRawDataEvent.hh,v $
+ * Revision 1.6  2008/06/20 15:01:04  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.5  2005/09/09 22:12:48  perev
  * Bug fix + IdTruth added
  *
@@ -33,29 +36,6 @@
  **************************************************************************/
 #ifndef ST_TRS_RAW_DATA_EVENT_HH
 #define ST_TRS_RAW_DATA_EVENT_HH
-
-#include <vector>
-
-// FROM SCL
-#include "StTpcRawDataEvent.hh"
-
-// FROM TRS
-#include "StTrsDigitalSector.hh"
-
-class StTrsRawDataEvent : public StTpcRawDataEvent {
-public:
-    StTrsRawDataEvent(int);
-    virtual ~StTrsRawDataEvent();
-    
-    //StTrsRawDataEvent(const StTrsRawDataEvent&);
-    //StTrsRawDataEvent& operator=(const StTrsRawDataEvent&);
-    
-    unsigned long size();
-    
-    void          clear();
-    
-public:
-    vector<StTrsDigitalSector*, allocator<StTrsDigitalSector*> > mSectors;
-};
-
+#include "StTpcRawData.h"
+typedef StTpcRawData StTrsRawDataEvent;
 #endif

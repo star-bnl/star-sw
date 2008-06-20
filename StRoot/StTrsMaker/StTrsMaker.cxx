@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.81 2007/07/12 20:25:04 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.82 2008/06/20 15:00:57 fisyak Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.82  2008/06/20 15:00:57  fisyak
+// move from StTrsData to StTpcRawData
+//
 // Revision 1.81  2007/07/12 20:25:04  fisyak
 // Use StarLogger, use time of flight, fix cluster shape
 //
@@ -290,9 +293,6 @@
 // When using TPC_DATABASE, change also definition in
 // StTrsChargeSegment.cc
 // StTrsAnalogSignalGenerator.hh
-#define TPC_DATABASE_PARAMETERS
-//#define ROOT_DATABASE_PARAMETERS
-//#define aSCII_DATABASE_PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -332,7 +332,6 @@ using std::max;
 
 // TRS
 // DataBase Initialization
-#ifdef TPC_DATABASE_PARAMETERS
 // Dave's Header file
 #include "StTpcDb/StTpcDb.h"
 
@@ -340,20 +339,8 @@ using std::max;
 #include "StTpcDbSlowControl.hh"
 #include "StTpcDbElectronics.hh"
 //#include "StDbMagneticField.hh" // To be done
-#endif
-#ifdef ROOT_DATABASE_PARAMETERS
-#include "StTpcROOTGeometry.hh"
-#include "StTpcROOTSlowControl.hh"
-#include "StTpcROOTElectronics.hh"
-#include "StROOTMagneticField.hh"
-#endif
 
 #include "StSimpleMagneticField.hh"
-#ifdef ASCII_DATABASE_PARAMETERS
-#include "StTpcSimpleGeometry.hh"
-#include "StTpcSimpleSlowControl.hh"
-#include "StTpcSimpleElectronics.hh"
-#endif
 #ifdef __ROOT__
 #define gufld   gufld_
 //#define gufld   GUFLD
@@ -385,7 +372,6 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 #include "StTrsDigitalSector.hh"
 
 // outPut Data--decoder
-#include "StTrsRawDataEvent.hh"
 #include "StTrsDetectorReader.hh"
 #include "StTrsZeroSuppressedReader.hh"
 #include "StDaqLib/GENERIC/EventReader.hh"
@@ -402,7 +388,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.81 2007/07/12 20:25:04 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.82 2008/06/20 15:00:57 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -420,7 +406,7 @@ StTrsMaker::StTrsMaker(const char *name):StMaker(name)
    mFirstSectorToProcess		=(1);
    mLastSectorToProcess			=(24); 
    mUseParameterizedSignalGenerator	=(1); // test trial,Hui Long
-   mNormalFactor 			= 1.;
+   mNormalFactor 			= 1.25;
 }
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
@@ -438,7 +424,6 @@ Int_t StTrsMaker::Init()
 Int_t StTrsMaker::InitRun(int runnumber)
 {
   if (mAllTheData) {gMessMgr->QAInfo()  << "StTrsMaker::InitRun Already called" << endm; return kStOK;}
-#ifdef TPC_DATABASE_PARAMETERS
     // The global pointer to the Db is gStTpcDb and it should be created in the macro.
     
     if (!gStTpcDb) {
@@ -474,98 +459,6 @@ Int_t StTrsMaker::InitRun(int runnumber)
    mMagneticFieldDb =
       StSimpleMagneticField::instance(Bfield);  // default is .5T field in z direction
 
-#endif
-#ifdef ROOT_DATABASE_PARAMETERS
-    
-//     // Create tables
-  
-    //
-    // Set up the DataBase access
-  TDataSet *TrsPars = GetDataBase("tpc/trspars");
-  assert(TrsPars);
-  // should use dynamic_cast when available
-  geometryDataSet *Geometry    =
-      static_cast<geometryDataSet*>(TrsPars->Find("Trs/Geometry"));
-  electronicsDataSet *Electronics =
-      static_cast<electronicsDataSet*>(TrsPars->Find("Trs/Electronics"));
-  slowcontrolDataSet *SlowControl =
-      static_cast<slowcontrolDataSet*>(TrsPars->Find("Trs/SlowControl"));
-
-  mGeometryDb =
-     StTpcROOTGeometry::instance(Geometry);
-  if (Debug()) mGeometryDb->print();
-
-  mSlowControlDb =
-       StTpcROOTSlowControl::instance(SlowControl);
-  if (Debug()) mSlowControlDb->print();
-
-//   mMagneticFieldDb =
-//       StROOTMagneticField::instance();  // default is .5T field in z direction
-   /////////// Magnetic Field
-   float x[3] = {0,0,0};
-   float B[3];
-   gufld(x,B);
-   StThreeVector<double> Bfield(B[0],B[1],B[2]);
-   Bfield*=kilogauss;
-   PR(Bfield/tesla);
-   mMagneticFieldDb =
-      StSimpleMagneticField::instance(Bfield);  // default is .5T field in z direction
-  
-  mElectronicsDb =
-      StTpcROOTElectronics::instance(Electronics);
-   if (Debug()) mElectronicsDb->print();
-#endif
-#ifdef ASCII_DATABASE_PARAMETERS
-    //
-    // Check File access
-    //
-    gMessMgr->QAInfo()  << "StTrsMaker::Init()" << endm;
-    string geoFile = "StRoot/StTrsMaker/run/TPCgeo.conf";
-    if (access(geoFile.c_str(),R_OK)) {
-	gMessMgr->Error()  "ERROR:\n" << geoFile.c_str() << " cannot be opened" << endm;
-	gMessMgr->Error()  "Exitting..." << endm;
-	exit(1);
-    }
-
-    string scFile = "StRoot/StTrsMaker/run/sc.conf";
-    if (access(scFile.c_str(),R_OK)) {
-     gMessMgr->Error()  "ERROR:\n" << scFile.c_str() << " cannot be opened" << endm;
-     gMessMgr->Error()  "Exitting..." << endm;
-     exit(1);
-    }
-
-    string electronicsFile = "StRoot/StTrsMaker/run/electronics.conf";
-    if (access(electronicsFile.c_str(),R_OK)) {
-	gMessMgr->Error()  "ERROR:\n" << electronicsFile.c_str() << " cannot be opened" << endm;
-	gMessMgr->Error()  "Exitting..." << endm;
-	exit(1);
-    }
-
-    string magFile = "StRoot/StTrsMaker/run/example.conf";         // contains B field
-    if (access(magFile.c_str(),R_OK)) {
-	gMessMgr->Error()  "ERROR:\n" << magFile.c_str() << " cannot be opened" << endm;
-	gMessMgr->Error()  "Exitting..." << endm;
-	exit(1);
-    }
-
-   //
-   // The DataBases
-   //
-   mGeometryDb =
-     StTpcSimpleGeometry::instance(geoFile.c_str());
-   if (Debug()) mGeometryDb->print();
-
-   mSlowControlDb =
-       StTpcSimpleSlowControl::instance(scFile.c_str());
-   if (Debug()) mSlowControlDb->print();
-
-   mMagneticFieldDb =
-       StSimpleMagneticField::instance(magFile.c_str());
-
-   mElectronicsDb =
-       StTpcSimpleElectronics::instance(electronicsFile.c_str());
-   if (Debug()) mElectronicsDb->print();
-#endif
 
    //
    // Select the gas: Ar, NeCO2, P10 available
@@ -708,7 +601,9 @@ Int_t StTrsMaker::Make(){
     time_t trsMakeBegin = time(0);
     gMessMgr->QAInfo()  << "\n -- Begin TRS Processing -- " << endm; 
     gMessMgr->QAInfo()  << "Started at: " << ctime(&trsMakeBegin);    
-    gMessMgr->QAInfo()  << "========= TRS driftVelocity used = " << mSlowControlDb->driftVelocity() << endm;
+    gMessMgr->QAInfo()  << "========= TRS driftVelocity used = " 
+			<< mSlowControlDb->driftVelocity(13) << "(East) " 
+			<< mSlowControlDb->driftVelocity(1)  << "(West)" << endm;
     int seed = IAttr("trsMakeSeed");
     if (seed) StTrsRandom::inst().SetSeed(seed);
     gMessMgr->QAInfo()  << "========= TRS Seed  used = " <<  StTrsRandom::inst().GetSeed()<< endm;
@@ -784,7 +679,8 @@ Int_t StTrsMaker::Make(){
     for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
       int id2=tpc_hit->track_p;
       int id3=tpc_track[id2-1].start_vertex_p; //  "-1" is (Fortran-->C++)
-      float BunchZoffset=(gver[id3-1].ge_tof+tpc_hit->tof)* mSlowControlDb->driftVelocity();
+      whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
+      float BunchZoffset=(gver[id3-1].ge_tof+tpc_hit->tof)* mSlowControlDb->driftVelocity(bsectorOfHit);
       float absHitZ=fabs(tpc_hit->x[2]);
       
 	      if(PILEUP_ON)
@@ -805,7 +701,6 @@ Int_t StTrsMaker::Make(){
 // 		    << tpc_hit->p[1]        << ' '
 // 		    << tpc_hit->p[2]        << ' '  << endm;
         
-	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
 // 	PR(bsectorOfHit);
 // 	gMessMgr->QAInfo() << mFirstSectorToProcess<<" "<< mLastSectorToProcess<<endm;
 	if(bsectorOfHit >= mFirstSectorToProcess &&
@@ -1125,7 +1020,8 @@ Int_t StTrsMaker::Make(){
 	//
 	// First make a sector where the data can go...
 	StTrsDigitalSector* aDigitalSector =
-	    new StTrsDigitalSector(mGeometryDb);
+	  new StTrsDigitalSector(mGeometryDb);
+	aDigitalSector->setSector(currentSectorProcessed);
 	//
 	// Point to the object you want to fill
 	//
@@ -1146,7 +1042,7 @@ Int_t StTrsMaker::Make(){
 	// Fill it into the event structure...
 	// and you better check the sector number!
 	
-	mAllTheData->mSectors[(currentSectorProcessed-1)] = aDigitalSector;
+	mAllTheData->setSector(currentSectorProcessed,aDigitalSector);
 	// Clear and reset for next sector:
 	mWireHistogram->clear();
 	mSector->clear();
@@ -1193,7 +1089,7 @@ Int_t StTrsMaker::Make(){
 	      
 	      StSequence* listOfSequences;
 	      //Sequence* listOfSequences;
-	      int      ** listOfIds = 0;
+	      UShort_t      ** listOfIds = 0;
 	      zsr->getSequences(irow,
 				static_cast<int>(padList[ipad]),
 				&nseq,
@@ -1252,7 +1148,7 @@ Int_t StTrsMaker::Make(){
 //
 void  StTrsMaker::Clear(const char *)
 {
-    if (mAllTheData)   mAllTheData   ->clear(); //This deletes all the StTrsDigitalSectors in the StTrsRawDataEvent
+    if (mAllTheData)   mAllTheData   ->clear(); //This deletes all the StTpcDigitalSectors in the StTrsRawDataEvent
     if (mWireHistogram)mWireHistogram->clear();
 
     StMaker::Clear();
@@ -1293,7 +1189,8 @@ void StTrsMaker::setNormalFactor(double FudgeFactor) {
 
 void StTrsMaker::CheckTruth(int no_tpc_hits, g2t_tpc_hit_st *tpc_hit)
 {
-   StSequence *seq; int nSeq;int **ids;
+   StSequence *seq; int nSeq;
+   UShort_t **ids;
    int sector, row,pad,tim;
    TObjectSet *trsEvent=(TObjectSet*)GetDataSet("Event"); 			if(!trsEvent)  	return;
    StTrsZeroSuppressedReader *mZsr=0;
@@ -1303,13 +1200,13 @@ void StTrsMaker::CheckTruth(int no_tpc_hits, g2t_tpc_hit_st *tpc_hit)
 
   int noData=0,lowTruth=0;
   for (int ih=0;ih<no_tpc_hits;ih++) {
-    int idtru =tpc_hit[ih].track_p;
+    UShort_t idtru = (UShort_t) tpc_hit[ih].track_p;
     StGlobalCoordinate global(tpc_hit[ih].x[0],tpc_hit[ih].x[1],tpc_hit[ih].x[2]);
     StTpcPadCoordinate Pad;      transform(global,Pad);
     sector = Pad.sector();
-    pad = Pad.pad();
+    pad = (Int_t) Pad.pad();
     row = Pad.row();
-    tim = Pad.timeBucket();
+    tim = (Int_t) Pad.timeBucket();
     mZsr=mTdr.getZeroSuppressedReader(sector);
     if (!mZsr) {
        noData++;

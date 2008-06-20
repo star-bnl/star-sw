@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.9 2004/05/03 23:31:12 perev Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.10 2008/06/20 15:01:16 fisyak Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
+ * Revision 1.10  2008/06/20 15:01:16  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.9  2004/05/03 23:31:12  perev
  * Possible non init WarnOff
  *
@@ -74,7 +77,7 @@ StTrsChargeTransporter::StTrsChargeTransporter(StTpcGeometry* geodb, StTpcSlowCo
     mGasDb      = gasdb;
     mMagDb      = magdb;
 
-    mDriftVelocity = scdb->driftVelocity();
+    mDriftVelocity = scdb->driftVelocity(13); // East Drift velocity
     mAttachment = gasdb->attachmentCoefficient();
     // should actually use a Global Coordinate
     StThreeVector<double> tmp(0,0,0);

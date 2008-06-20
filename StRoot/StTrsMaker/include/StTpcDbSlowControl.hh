@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.hh,v 1.5 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTpcDbSlowControl.hh,v 1.6 2008/06/20 15:00:59 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.hh,v $
+ * Revision 1.6  2008/06/20 15:00:59  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.5  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -55,7 +58,7 @@ public:
     static StTpcSlowControl* instance();
     static StTpcSlowControl* instance(StTpcDb*);
     
-    double driftVelocity()                const;
+    double driftVelocity(int sector=13)   const;
 
     // voltage
     double driftVoltage()                 const;
@@ -113,7 +116,7 @@ private:
 //     double mOSGasGainb;
 };
 
-inline double StTpcDbSlowControl::driftVelocity() const {return gTpcDbPtr->DriftVelocity()*(centimeter/(second));}
+inline double StTpcDbSlowControl::driftVelocity(int sector) const {return gTpcDbPtr->DriftVelocity(sector)*(centimeter/(second));}
     // Voltages
 inline double StTpcDbSlowControl::driftVoltage() const{return gTpcDbPtr->SlowControlSim()->driftVoltage()*volt;}
 inline double StTpcDbSlowControl::innerSectorAnodeVoltage() const{return gTpcDbPtr->SlowControlSim()->innerSectorAnodeVoltage()*volt;}

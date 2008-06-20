@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.31  2008/06/20 15:01:17  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.30  2007/07/12 20:25:05  fisyak
  * Use StarLogger, use time of flight, fix cluster shape
  *
@@ -125,7 +128,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
   
    
     // Make a digital Pad!
-      digitalTimeBins  digPadData;
+      StDigitalTimeBins  digPadData;
     // Remember mSector is the "normal" analog sector! 
       //      cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
       for(int irow=1; irow<=mSector->numberOfRows(); irow++) { 
@@ -150,7 +153,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 
 	    int timeBinIndex = int(currentPad[icur].time()+1e-3);
             assert(timeBinIndex > currentTimeBin);
-            if (timeBinIndex != currentTimeBin+1) digPadData.push_back(digitalPair(timeBinIndex));
+            if (timeBinIndex != currentTimeBin+1) digPadData.push_back(StDigitalPair(timeBinIndex));
             currentTimeBin = timeBinIndex;
 
 	    unsigned char digitalAmplitude = do10to8Translation(temporary_digitalAmplitude);

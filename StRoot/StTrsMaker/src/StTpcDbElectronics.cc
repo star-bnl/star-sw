@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbElectronics.cc,v 1.5 2000/03/15 17:39:48 calderon Exp $
+ * $Id: StTpcDbElectronics.cc,v 1.6 2008/06/20 15:01:12 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbElectronics.cc,v $
+ * Revision 1.6  2008/06/20 15:01:12  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.5  2000/03/15 17:39:48  calderon
  * Remove beeps
  *
@@ -117,7 +120,7 @@ double StTpcDbElectronics::channelGain(int sector, int row, int pad) const
 
 double StTpcDbElectronics::channelGain(StTpcPadCoordinate& coord) const
 {
-    return channelGain(coord.sector(), coord.row(), coord.pad());
+  return channelGain(coord.sector(), coord.row(), (Int_t) coord.pad());
 }
 
 int StTpcDbElectronics::pedestal(int sector, int row, int pad, int timeB) const
@@ -127,7 +130,7 @@ int StTpcDbElectronics::pedestal(int sector, int row, int pad, int timeB) const
 
 int StTpcDbElectronics::pedestal(StTpcPadCoordinate& coord) const
 {
-    return pedestal(coord.sector(), coord.row(), coord.pad(), coord.timeBucket());
+  return pedestal(coord.sector(), coord.row(), (Int_t) coord.pad(), (Int_t) coord.timeBucket());
 }
 double StTpcDbElectronics::tZero(int sector, int row, int pad) const
 {
@@ -135,7 +138,7 @@ double StTpcDbElectronics::tZero(int sector, int row, int pad) const
 }
 double StTpcDbElectronics::tZero(StTpcPadCoordinate& coord) const
 {
-    return tZero(coord.sector(), coord.row(), coord.pad());
+  return tZero(coord.sector(), coord.row(), (Int_t) coord.pad());
 }
 void StTpcDbElectronics::print(ostream& os) const
 {

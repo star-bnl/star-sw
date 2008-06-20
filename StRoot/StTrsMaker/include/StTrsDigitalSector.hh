@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.12 2007/07/12 20:25:05 fisyak Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.13 2008/06/20 15:01:03 fisyak Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,6 +24,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
+ * Revision 1.13  2008/06/20 15:01:03  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.12  2007/07/12 20:25:05  fisyak
  * Use StarLogger, use time of flight, fix cluster shape
  *
@@ -74,92 +77,6 @@
  **************************************************************************/
 #ifndef ST_TRS_DIGITAL_SECTOR_HH
 #define ST_TRS_DIGITAL_SECTOR_HH
-
-#include <vector>
-#include <utility>
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
-using std::vector;
-#endif
-
-#include "StTrsAnalogSignal.hh"
-#include "StTpcGeometry.hh"
-
-#include "StDbUtilities/StTpcPadCoordinate.hh"
-
-typedef std::vector<unsigned char, allocator<unsigned char > >  vectorADC;
-typedef std::vector<          int, allocator<           int> >  vectorIDT;
-
-class digitalPair {
- private:
-  int mTime;
-  vectorADC mAdc;
-  vectorIDT mIdt; 
- public:
-  digitalPair(int time)         {mTime=time;}
-  void add(int adc,int idt=0)   {mAdc.push_back((unsigned char )adc);
-                                 mIdt.push_back((unsigned short)idt);}
-
-  unsigned char* adc() const  {return (unsigned char*)&mAdc[0];}			
-  int*           idt() const  {return (          int*)&mIdt[0];}			
-  int           size() const  {return mAdc.size();}
-  int           time() const  {return mTime;}
-
-};
-typedef vector<unsigned char, allocator<unsigned char> >     digitalPadData;
-typedef vector<digitalPair, allocator<digitalPair> >         digitalTimeBins;
-typedef vector<digitalTimeBins, allocator<digitalTimeBins> > digitalPadRow;
-typedef vector<digitalPadRow, allocator<digitalPadRow> >     digitalSector;
-typedef vector<digitalPair, allocator<digitalPair> >::iterator digitalTimeBinIterator;
-
-typedef digitalPadData::iterator                 digitalPadDataIterator;
-typedef digitalTimeBins::iterator                digitalTimeBinsIterator;
-typedef digitalPadRow::iterator                  digitalPadRowIterator;
-typedef digitalSector::iterator                  digitalRowIterator;
-
-class StTrsDigitalSector {
-public:
-    StTrsDigitalSector(StTpcGeometry*);
-    ~StTrsDigitalSector();
-    
-
-    // access functions
-    digitalTimeBins*   timeBinsOfRowAndPad(int rowN, int padN);
-    digitalPadRow*     padsOfRow(int rowN);
-    digitalSector*     rows();
-
-    int  numberOfRows()             		const;
-    int  numberOfPadsInRow(int rowN)		const;
-    int  numberOfTimeBins(int rowN, int padN) 	const;
-    
-    // Adding
-    void clear();
-
-//obsolete(VP)    void assignTimeBins(int rowN, int padN, digitalPadData* tbins);
-    void assignTimeBins(int, int, digitalTimeBins*);
-    void assignTimeBins(StTpcPadCoordinate&, digitalTimeBins*);
-    // When writing, make sure we don't carry unnecessary zeros:
-    int cleanup();
-public:
-    digitalSector mData;
-//     digitalSector mZeros;
-private:
-    StTrsDigitalSector(const StTrsDigitalSector&);
-    StTrsDigitalSector& operator=(const StTrsDigitalSector&);
-
-};
-inline digitalTimeBins* StTrsDigitalSector::timeBinsOfRowAndPad(int rowN, int padN)
-{
-    return (&mData[(rowN-1)][(padN-1)]);
-}
-inline digitalPadRow* StTrsDigitalSector::padsOfRow(int rowN)
-{
-    return(&mData[(rowN-1)]);
-}
-inline digitalSector* StTrsDigitalSector::rows()
-{
-    return (&mData);
-}
-inline int StTrsDigitalSector::numberOfRows() const { return mData.size();}
-inline int StTrsDigitalSector::numberOfPadsInRow(int rowN) const { return mData[(rowN-1)].size();}
-inline int StTrsDigitalSector::numberOfTimeBins(int rowN, int padN) const { return mData[(rowN-1)][(padN-1)].size();}
+#include "StTpcRawData.h"
+typedef StTpcDigitalSector StTrsDigitalSector;
 #endif
