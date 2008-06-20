@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.3 2008/05/27 14:40:03 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.4 2008/06/20 14:56:34 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.4  2008/06/20 14:56:34  fisyak
+ * Add protection for pad no.
+ *
  * Revision 2.3  2008/05/27 14:40:03  fisyak
  * keep pixel raw data as short istead of uchar
  *
@@ -42,25 +45,30 @@ Int_t StTpcDigitalSector::numberOfPadsAtRow(Int_t row) {return (row >= 1 && row 
 //________________________________________________________________________________
 StTpcDigitalSector::StTpcDigitalSector(void *db) {
   StDigitalTimeBins  timeBins;
-  StDigitalPadRow    padRow;
-  for(UInt_t irow=0; irow< __NumberOfRows__; irow++) {
-    padRow.resize(NumberOfPadsAtRow[irow], timeBins);
+  for(UInt_t row=0; row< __NumberOfRows__; row++) {
+    StDigitalPadRow    padRow;
+    for (Int_t pad = 0; pad < NumberOfPadsAtRow[row]; pad++) {
+      padRow.push_back( timeBins);
+    }
     mData.push_back(padRow);
   }
 }
 //________________________________________________________________________________
 void StTpcDigitalSector::clear() {// clears only the time bins
-  for(UInt_t irow=0; irow<mData.size(); irow++) {
-    for(UInt_t ipad=0; ipad<mData[irow].size(); ipad++) {
-      mData[irow][ipad].clear();
+  for(UInt_t row=0; row<mData.size(); row++) {
+    for(UInt_t ipad=0; ipad<mData[row].size(); ipad++) {
+      mData[row][ipad].clear();
     }
   }
 }
 //________________________________________________________________________________
 void StTpcDigitalSector::assignTimeBins(Int_t rowN, Int_t padN, StDigitalTimeBins* tbins) {
-  if (mData[(rowN-1)][(padN-1)].size())
-    mData[(rowN-1)][(padN-1)].clear();
-  mData[(rowN-1)][(padN-1)].swap(*tbins);
+  if (rowN < 0 || rowN > __NumberOfRows__ ||
+      padN < 0 || padN > NumberOfPadsAtRow[rowN]) return;
+  StDigitalPadRow    &Row = mData[(rowN-1)];
+  StDigitalTimeBins  &Pad = Row[(padN-1)];
+  if (Pad.size() > 0)  Pad.clear();
+  Pad.swap(*tbins);
 }
 //________________________________________________________________________________
 Int_t StTpcDigitalSector::cleanup() {
