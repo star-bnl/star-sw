@@ -16,13 +16,13 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "St_DataSet.h"
+#include "TDataSet.h"
 
 class St_raw_row;
 class St_raw_pad;
 class St_raw_seq;
 class St_type_shortdata;
-class StTpcRawDataEvent;
+#include "StTpcRawDataEvent.hh"
 class StTpcUnpacker;
 class StSequence;
 class TH1F;
@@ -92,7 +92,7 @@ class St_tpcdaq_Maker : public StMaker {
           int nPadsWithSignal,int pixTblWhere,int ipadrow);
    void MkTables(
       int isect,
-      St_DataSet *sector,
+      TDataSet *sector,
       St_raw_row **raw_row_in,
       St_raw_row **raw_row_out,
       St_raw_pad **raw_pad_in,
@@ -109,8 +109,8 @@ class St_tpcdaq_Maker : public StMaker {
    int getSector(Int_t isect);
    int getPadList(int whichPadRow,unsigned char **padlist);
    int mNseqLo,mNseqHi,mThreshLo,mThreshHi; // ASICS parameters
-   void AsicThresholds(float gain,int *nseq,StSequence **lst,int ***idt);
-   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList, int ***listOfIds);
+   void AsicThresholds(float gain,int *nseq,StSequence **lst,UShort_t ***idt);
+   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList, UShort_t ***listOfIds);
    void SetDAQFlag(Int_t);
    void SetNoiseEliminationStuff();
    void WriteStructToScreenAndExit();
@@ -129,7 +129,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
    // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.41 2005/09/09 22:14:17 perev Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.42 2008/06/20 14:58:08 fisyak Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
@@ -140,8 +140,11 @@ class St_tpcdaq_Maker : public StMaker {
 
 
 
-// $Id: St_tpcdaq_Maker.h,v 1.41 2005/09/09 22:14:17 perev Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.42 2008/06/20 14:58:08 fisyak Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.42  2008/06/20 14:58:08  fisyak
+// Change interal presentation for ADC from UChat_t to Short_t
+//
 // Revision 1.41  2005/09/09 22:14:17  perev
 // IdTruth added
 //

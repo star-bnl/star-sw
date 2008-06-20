@@ -47,11 +47,9 @@
 // containers
 #include "StTrsMaker/include/StTrsAnalogSignal.hh"
 #include "StTrsMaker/include/StTrsSector.hh"
-#include "StTrsMaker/include/StTrsDigitalSector.hh"
 #include "StTrsMaker/include/StTpcElectronics.hh"
 
 // outPut Data--decoder
-#include "StTrsMaker/include/StTrsRawDataEvent.hh"
 #include "StTrsMaker/include/StTrsDetectorReader.hh"
 #include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
 //VP#include "StDaqLib/GENERIC/EventReader.hh"
@@ -119,10 +117,12 @@ static const char *input[2] = {"Input1","Input2"};
       tpcReader->SetSequenceMerging(mMergeSequences);
       mReader[ir].Set(tpcReader);
     } else {
-      StTpcRawDataEvent* trsEvent = (StTpcRawDataEvent*)dataset->GetObject(); 
-      string version = "TrsDatav1.0"; 
-      StTrsDetectorReader *trsDetReader = new StTrsDetectorReader(trsEvent, version); 
-      mReader[ir].Set(trsDetReader);
+      if (strcmp(gConfig[ir],"trs")==0) {
+	StTpcRawDataEvent* trsEvent = (StTpcRawDataEvent*)dataset->GetObject(); 
+	string version = "TrsDatav1.0"; 
+	StTrsDetectorReader *trsDetReader = new StTrsDetectorReader(trsEvent, version); 
+	mReader[ir].Set(trsDetReader);
+      }
     }
   }
   
@@ -130,6 +130,7 @@ static const char *input[2] = {"Input1","Input2"};
   for(int sector=mFirstSector; sector<=mLastSector; sector++) {
     mSector->clear();
     for (int ir=0;ir<2;ir++) {//readers loop
+      if (! (mReader[ir].TpcReader() || mReader[ir].TrsDetectorReader())) continue;
       for(int irow=0; irow<numberOfRows; irow++) { //loop over rows
         unsigned char* padList; 
         int numberOfPads = mReader[ir].getPadList(sector,irow+1,&padList);
@@ -139,7 +140,7 @@ static const char *input[2] = {"Input1","Input2"};
           assert(pad);
 	  int nseq=0;
 	  StSequence* listOfSequences=0; 
-	  int **listIdTruth =0;
+	  UShort_t **listIdTruth =0;
 	  mReader[ir].getSequences(sector,irow+1,pad,&nseq,&listOfSequences,&listIdTruth);
 
 	      // Note that ipad is an index, NOT the pad number. 
@@ -180,7 +181,7 @@ static const char *input[2] = {"Input1","Input2"};
     // Fill it into the event structure...
     // and you better check the sector number!
     
-    mAllTheDataMixer->mSectors[(sector-1)] = aDigitalSector;
+    mAllTheDataMixer->setSector(sector,aDigitalSector);
     // Clear and reset for next sector:
     
   }// sector loop
@@ -235,7 +236,7 @@ void StMixerReader::Set(StTPCReader *r)
 //______________________________________________________________________________
 void StMixerReader::Set(StTrsDetectorReader *r)
 {
-  mSector=-1; mTrsReader=0;mTpcReader=0;mTrsDetectorReader=r;;
+  mSector=-1; mTrsReader=0;mTpcReader=0;mTrsDetectorReader=r;
 }
 //______________________________________________________________________________
 void StMixerReader::SetSector(int sector)
@@ -245,7 +246,7 @@ void StMixerReader::SetSector(int sector)
   mTrsReader = mTrsDetectorReader->getZeroSuppressedReader(sector);
 }
 //______________________________________________________________________________
-int  StMixerReader::getSequences(int sector,int row,int pad,int *nseq,StSequence **listOfSequences, int ***listIdTruth)
+int  StMixerReader::getSequences(int sector,int row,int pad,int *nseq,StSequence **listOfSequences, UShort_t ***listIdTruth)
 {
   if (mTrsDetectorReader) {
     SetSector(sector);
@@ -264,9 +265,11 @@ int StMixerReader::getPadList(int sector,int row, unsigned char **padList)
     SetSector(sector);
     if (!mTrsReader) return 0;
     return mTrsReader->getPadList(row,padList);
-  } else {
+  } 
+  if (mTpcReader) {
     return mTpcReader->getPadList(sector,row,*padList);
   }
+  return 1;
 }
 
 //______________________________________________________________________________
