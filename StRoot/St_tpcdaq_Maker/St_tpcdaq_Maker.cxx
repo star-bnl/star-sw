@@ -14,10 +14,9 @@
 #include "StTrsMaker/include/StTrsDetectorReader.hh"
 #include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
 #include "St_tpcdaq_Maker.h"
-#include "St_DataSetIter.h"
-#include "St_ObjectSet.h"
+#include "TDataSetIter.h"
+#include "TObjectSet.h"
 #include "TH1.h"
-#include "StTpcRawDataEvent.hh"
 #include "StDaqLib/TPC/trans_table.hh"
 #include "StSequence.hh"
 
@@ -91,7 +90,7 @@ Int_t St_tpcdaq_Maker::Init() {
 }
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
-  St_DataSet *herb; 
+  TDataSet *herb; 
   //int junk;
   if(mCorrectionMask&kNoiseElim) { SetNoiseEliminationStuff(); /*WriteStructToScreenAndExit();*/ }
   if(mCorrectionMask&kAsicTHold) {
@@ -127,14 +126,14 @@ char *St_tpcdaq_Maker::NameOfSector(int isect) {
   return rv;
 }
 //________________________________________________________________________________
-void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
+void St_tpcdaq_Maker::MkTables(int isect,TDataSet *sector,
       St_raw_row **raw_row_in,St_raw_row **raw_row_out,
       St_raw_pad **raw_pad_in,St_raw_pad **raw_pad_out, 
       St_raw_seq **raw_seq_in,St_raw_seq **raw_seq_out,
       St_type_shortdata **pixel_data_in,St_type_shortdata **pixel_data_out,
       St_type_shortdata **pixel_indx_in,St_type_shortdata **pixel_indx_out) {
 
-  St_DataSetIter sect(sector);
+  TDataSetIter sect(sector);
 
   *raw_row_in=(St_raw_row*) sect("raw_row_in");
   if (!(*raw_row_in)) {
@@ -270,10 +269,10 @@ int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
   return rv;
 }
 //________________________________________________________________________________
-void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst,int ***idt)
+void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst,UShort_t ***idt)
 {
   static vector<StSequence, allocator<StSequence> > seqArr;
-  static vector<int*      , allocator<int*      > > idtArr;
+  static vector<UShort_t* , allocator<UShort_t* > > idtArr;
   if(mNseqLo<0) return; 	/* There is no asic.tpcdaq file. */
   seqArr.resize(0);idtArr.resize(0);
 
@@ -282,7 +281,7 @@ void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst,in
     StSequence *seqOld = (*lst)+iseq;
     int npix = seqOld->length;  
     int inSeq=0,numberAboveThresh=0;
-    int *idtNew=0;
+    UShort_t *idtNew=0;
     for(int ipix=0;ipix<=npix;ipix++) {
       float conversion = (ipix<npix)? gain*seqOld->firstAdc[ipix]:0;
       int kase = inSeq;
@@ -319,7 +318,7 @@ void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst,in
   if (*idt) *idt = &idtArr[0];
 }
 //________________________________________________________________________________
-int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst, int ***listOfIdt)
+int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst, UShort_t ***listOfIdt)
 {
   if(listOfIdt)  *listOfIdt=0;
   int rv=0; TPCSequence *lstPrelim;
@@ -486,8 +485,8 @@ int St_tpcdaq_Maker::Output() {
   unsigned char *pointerToAdc;
   unsigned short conversion;
   char dataOuter[NSECT],dataInner[NSECT];
-  St_DataSet *sector;
-  St_DataSetIter raw_data_tpc(m_DataSet); //raw_data_tpc=iterator on St_tpcdaq_Maker's top level
+  TDataSet *sector;
+  TDataSetIter raw_data_tpc(m_DataSet); //raw_data_tpc=iterator on St_tpcdaq_Maker's top level
   raw_sec_m_st singlerow;
   int pad=-1,sectorStatus,ipadrow,npad,ipad,seqStatus,iseq,nseq,startTimeBin,ibin;
   int numberOfUnskippedSeq,prevStartTimeBin,rowR,padR,seqR;  // row counters
@@ -498,7 +497,7 @@ int St_tpcdaq_Maker::Output() {
   int isect,pixSave,pixR;
   unsigned long int nPixelThisPadRow;
   StSequence *listOfSequences;
-  int       **listOfIdt = 0;
+  UShort_t       **listOfIdt = 0;
   St_raw_sec_m  *raw_sec_m;
 
   raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
@@ -601,7 +600,7 @@ int St_tpcdaq_Maker::Output() {
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++; conversion=log8to10_table[*(pointerToAdc++)];
-	    int idt = (listOfIdt)? listOfIdt[iseq][ibin]:0; 
+	    UShort_t idt = (listOfIdt)? listOfIdt[iseq][ibin]:0; 
             if(mCorrectionMask&kGainCorr) {
               if(fGain[ipadrow][pad-1]>22.0) {
                 printf("Fatal error in %s, line %d.\n",__FILE__,__LINE__);
@@ -652,7 +651,7 @@ timeOff     pad         SeqWrite SeqWrite m              0x100
 // BBB Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
   if(m_Mode != 1) return 0;
- St_ObjectSet *trsEvent=(St_ObjectSet*)GetDataSet("Event"); if(!trsEvent) return 1;
+ TObjectSet *trsEvent=(TObjectSet*)GetDataSet("Event"); if(!trsEvent) return 1;
  mEvent=(StTpcRawDataEvent*)(trsEvent->GetObject());   if(!mEvent) return 3;
  mTdr = new StTrsDetectorReader(mEvent);
  return 0;
@@ -695,7 +694,7 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int receiverBoard,unsigned int m
 
   // Open the daq100cl root4star table for output in append mode.
   daq100cl_st singlerow;
-  St_DataSetIter rootIterator(m_DataSet);
+  TDataSetIter rootIterator(m_DataSet);
   St_daq100cl *daq100cl = (St_daq100cl*) rootIterator("daq100cl");
   if(!daq100cl) {
     daq100cl=new St_daq100cl("daq100cl",1000);
@@ -891,6 +890,9 @@ char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.93  2008/06/20 14:58:08  fisyak
+// Change interal presentation for ADC from UChat_t to Short_t
+//
 // Revision 1.92  2008/04/24 20:54:00  fisyak
 // Bug(1141) in logic of dead pads accounting
 //

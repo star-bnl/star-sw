@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.10 2005/09/09 22:08:11 perev Exp $
+ * $Id: StMixerMaker.h,v 1.11 2008/06/20 14:57:43 fisyak Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
+ * Revision 1.11  2008/06/20 14:57:43  fisyak
+ * Change interal presentation for ADC from UChat_t to Short_t
+ *
  * Revision 1.10  2005/09/09 22:08:11  perev
  * IdTruth added
  *
@@ -66,13 +69,12 @@ class StTrsDigitalSignalGenerator;
 // Containers
 class StTrsAnalogSignal;
 class StTrsSector;
-class StTrsDigitalSector;
+#include "StTrsMaker/include/StTrsDigitalSector.hh"
 
 // Output Data
-class StTrsRawDataEvent;
+#include "StTrsMaker/include/StTrsRawDataEvent.hh"
 
 class StTrsOstream;
-class StTpcRawDataEvent;
 class StSequence;
 class StTPCReader;
 class StTrsDetectorReader;
@@ -83,8 +85,10 @@ public:
  StMixerReader();
  void Set(StTPCReader         *r);
  void Set(StTrsDetectorReader *r);
- int  getSequences(int sector,int row,int pad,int *nseq,StSequence **listOfSequences, int ***listIdTruth=0);//!
+ int  getSequences(int sector,int row,int pad,int *nseq,StSequence **listOfSequences, UShort_t ***listIdTruth=0);//!
  int  getPadList  (int sector,int row, unsigned char **padList);
+ StTPCReader 		   *TpcReader()         const {return mTpcReader;}
+ StTrsDetectorReader       *TrsDetectorReader() const {return mTrsDetectorReader;}
  void Clear();
 private:
  void SetSector(int sector);
@@ -146,7 +150,7 @@ class StMixerMaker : public StMaker {
 
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.10 2005/09/09 22:08:11 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.11 2008/06/20 14:57:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StMixerMaker, 0)  // 
 };
