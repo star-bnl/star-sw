@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawDataEvent.hh,v 1.1 1999/02/19 16:27:48 fisyak Exp $
+ * $Id: StTpcRawDataEvent.hh,v 1.2 2008/06/20 15:23:15 fisyak Exp $
  *
  * Author: bl, Jan 20, 1999
  *         based on design outlined in:
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawDataEvent.hh,v $
+ * Revision 1.2  2008/06/20 15:23:15  fisyak
+ * Unified TpcRaw data
+ *
  * Revision 1.1  1999/02/19 16:27:48  fisyak
  * Add from StarClassLibary
  *
@@ -31,18 +34,6 @@
  **************************************************************************/
 #ifndef ST_TPC_RAW_DATA_EVENT_HH
 #define ST_TPC_RAW_DATA_EVENT_HH
-
-#include "TObject.h"
-
-#ifndef __ROOT__
-class StTpcRawDataEvent
-#else
-class StTpcRawDataEvent : public TObject
-#endif
-{
-public:
-    virtual ~StTpcRawDataEvent() {/*nopt*/};
-    
-    virtual unsigned long size() = 0;
-};
+#include "StTpcRawData.h"
+typedef StTpcRawData StTpcRawDataEvent;
 #endif
