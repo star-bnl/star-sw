@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.17 2003/09/07 03:49:06 perev Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.18 2008/06/20 15:01:17 fisyak Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.18  2008/06/20 15:01:17  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.17  2003/09/07 03:49:06  perev
  * gcc 3.2 + WarnOff
  *
@@ -224,5 +227,5 @@ double StTrsFastChargeTransporter::chargeAttachment(double driftL) const
 //     double suppression = 1.-mAttachment*(mO2Concentration/1.e+6)*sqr(.760*bar)*driftL/mSCDb->driftVelocity();
 //     PR(suppression);
 
-    return 1.-mAttachment*(mO2Concentration/1.e+6)*sqr(.760*bar)*driftL/mSCDb->driftVelocity(); 
+    return 1.-mAttachment*(mO2Concentration/1.e+6)*sqr(.760*bar)*driftL/mSCDb->driftVelocity(13); 
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.13 2005/09/09 22:12:49 perev Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.14 2008/06/20 15:01:21 fisyak Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.14  2008/06/20 15:01:21  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.13  2005/09/09 22:12:49  perev
  * Bug fix + IdTruth added
  *
@@ -71,133 +74,39 @@ using std::distance;
 
 #include "StGlobals.hh"
 #include "StTrsRawDataEvent.hh"
-#include "StTrsDigitalSector.hh"
-
-
 //________________________________________________________________________________
-StTrsZeroSuppressedReader::StTrsZeroSuppressedReader()
-    :mSector(-1), mTheSector(0), mPadList(0), mSequence(0), mTrsEvent(0)
-{ 
-  assert(sizeof(StSequence) == sizeof(Sequence)); 
-}
-
-// StTrsZeroSuppressedReader::StTrsZeroSuppressedReader(int sector, StTpcRawEvent& theEvent) : mSector(sector), mTheEvent(theEvent)
-// {  }
-
-//________________________________________________________________________________
-StTrsZeroSuppressedReader::StTrsZeroSuppressedReader(StTpcRawDataEvent* ev)
-    :mSector(-1), mTheSector(0), mPadList(0), mSequence(0)
-{
-  assert(sizeof(StSequence) == sizeof(Sequence)); 
+StTrsZeroSuppressedReader::StTrsZeroSuppressedReader(StTpcRawData* ev) :mSector(-1), mTheSector(0), mTrsEvent(0) {
   
+  assert(sizeof(StSequence) == sizeof(Sequence)); 
+  if (ev) {
     mTrsEvent = dynamic_cast<StTrsRawDataEvent*>(ev);
     if (!mTrsEvent) {
-	cerr << "Error constructing StTrsZeroSuppressedReader" << endl;
-	cerr << "Cast Failed! ev not of required type (StTrsRawDataEvent*)\n";
+      cerr << "Error constructing StTrsZeroSuppressedReader" << endl;
+      cerr << "Cast Failed! ev not of required type (StTrsRawDataEvent*)\n";
     }
+  }
 }
-
 //________________________________________________________________________________
-int StTrsZeroSuppressedReader::setSector(int sector)
+Int_t StTrsZeroSuppressedReader::setSector(Int_t sector)
 {
-    clear();
+  //    clear();
     // Check if the data is there --> getSector() in the Unpacker!
     // ...you may even want to check the mVersion to return the
     // proper mZSR...
     
     if(checkTheData(sector)) {
 	    mSector = sector;
-	    mTheSector = mTrsEvent->mSectors[sector-1];
+	    mTheSector = mTrsEvent->getSector(sector);
 	    return 1;
     }
     return 0;
 }
-
-
 //________________________________________________________________________________
-StTrsZeroSuppressedReader::~StTrsZeroSuppressedReader()
+Int_t StTrsZeroSuppressedReader::checkTheData(UInt_t which)
 {
-}
-
-int StTrsZeroSuppressedReader::checkTheData(unsigned int which)
-{
-    int status(0);
+    Int_t status(0);
     
-    if(mTrsEvent->mSectors.size() >= which)  // bounds check
-	if ( (mTrsEvent->mSectors[(which-1)]) ) status = 1;
+    if(mTrsEvent->size() >= which)  // bounds check
+      if ( (mTrsEvent->getSector(which)) ) status = 1;
     return status;   
-}
-
-int StTrsZeroSuppressedReader::getPadList(int padRow, unsigned char **padList)
-{
-    mPadList.clear();
-    //
-    //
-    // Should be data base derived quatities...
-    if(padRow<1 || padRow>45) {
-#ifndef ST_NO_EXCEPTIONS
-	throw out_of_range("Pad Row out of range");
-#else
-	cerr << "Pad Row " << padRow << " out of range" << endl;
-	cerr << "Normally one would throw an exception here" << endl;
-	abort();
-#endif
-    }
-    
-//     PR(padRow);
-//     PR(mTheSector->numberOfPadsInRow(padRow));
-
-    // Loop over all the pads:
-    for(int ii=1; ii<=mTheSector->numberOfPadsInRow(padRow); ii++) {
-	if (mTheSector->numberOfTimeBins(padRow,ii) > 0) {
-  	    //cout << " pad " << ii << " " << (mTheSector->numberOfTimeBins(padRow,ii)) << endl;
-	    mPadList.push_back(ii);
-	}
-    }
-
-    *padList = &mPadList[0];
-
-    return mPadList.size();
-}
-
-//int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, StSequence** Seq)
-//________________________________________________________________________________
-int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, Sequence** Seq, int ***Ids) {
-  return getSequences(PadRow, Pad, nSeq, (StSequence**) Seq, Ids);
-}
-//________________________________________________________________________________
-int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, StSequence** Seq, int ***Ids) {
-
-  *Seq=0;if (Ids) *Ids=0;*nSeq=0;
-  mSequence.clear();
-  mIds.clear();
-  digitalTimeBins* TrsPadData = mTheSector->timeBinsOfRowAndPad(PadRow,Pad);
-  if (!TrsPadData) return 1;
-  digitalTimeBins &trsPadData = *TrsPadData;
-  int nTimeBins = trsPadData.size();
-  if (!nTimeBins) return 2;
-
-  // Construct the sequences:
-  StSequence aSequence;
-
-  for (int ibin=0;ibin<nTimeBins;ibin++)  {
-    aSequence.length       = trsPadData[ibin].size();
-    aSequence.startTimeBin = trsPadData[ibin].time();
-    aSequence.firstAdc     = trsPadData[ibin].adc();
-    mSequence.push_back(aSequence);
-    mIds.push_back(trsPadData[ibin].idt());
-  }
-  *nSeq = mSequence.size();
-  *Seq = &mSequence[0];
-  if (Ids) *Ids = &mIds[0];
-  
-  return 0;
-}
-//________________________________________________________________________________
-void StTrsZeroSuppressedReader::clear()
-{
-    //cout << "StTrsZeroSuppressedReader::clear()" << endl;
-    mPadList.clear();
-    mSequence.clear();
-    mIds.clear();
 }

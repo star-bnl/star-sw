@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.36 2007/07/12 20:25:05 fisyak Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.37 2008/06/20 15:01:18 fisyak Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.37  2008/06/20 15:01:18  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.36  2007/07/12 20:25:05  fisyak
  * Use StarLogger, use time of flight, fix cluster shape
  *
@@ -200,7 +203,7 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
   // Define here instead of calculating...
   //
   
-  mDriftVelocity             = mSCDb->driftVelocity();
+  mDriftVelocity             = mSCDb->driftVelocity(13);
  
   mSamplingFrequency         = mElectronicsDb->samplingFrequency();//hz
   mTimeBinWidth              = 1./mSamplingFrequency;//s
@@ -210,7 +213,7 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
   //                                              for inner and outer setor.
   //
   mFractionSampled=1.0;//HL,8/31/99
-  normalFactor= 1.0;//Default DH  5/2/03
+  normalFactor= 1.25; // YF from comparision AdcSum wrt data 04/04/08 | 1.0;//Default DH  5/2/03
   
 //   PR(mDriftVelocity/(centimeter/(1.e-6*second)));
 //   PR(mSamplingFrequency/MHz);
@@ -425,7 +428,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
         double tZero;
         tZero=mElectronicsDb->tZero();
 	//reset all the datatbase value to keep them updated
-       mDriftVelocity             = mSCDb->driftVelocity();
+       mDriftVelocity             = mSCDb->driftVelocity(13);
  
        mSamplingFrequency         = mElectronicsDb->samplingFrequency();
        mTimeBinWidth              = 1./mSamplingFrequency;
@@ -626,7 +629,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	       
                 if(Repeat<0.5){ 
                   
-                   mCentralPad = transformer.padFromLocal(iter->position(),irow2+1)-1;
+		  mCentralPad = (Int_t) transformer.padFromLocal(iter->position(),irow2+1)-1;
 		   if(mCentralPad>  PadsAtRow)mCentralPad= PadsAtRow;//upper limit boundary check.
 
                  

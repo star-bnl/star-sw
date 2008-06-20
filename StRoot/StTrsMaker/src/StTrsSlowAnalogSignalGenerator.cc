@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.27 2007/07/12 20:25:05 fisyak Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.28 2008/06/20 15:01:20 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.28  2008/06/20 15:01:20  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.27  2007/07/12 20:25:05  fisyak
  * Use StarLogger, use time of flight, fix cluster shape
  *
@@ -156,7 +159,7 @@ StTrsSlowAnalogSignalGenerator::StTrsSlowAnalogSignalGenerator(StTpcGeometry* ge
   // Define here instead of calculating...
   //
   
-  mDriftVelocity      = mSCDb->driftVelocity();
+  mDriftVelocity      = mSCDb->driftVelocity(13);
   mSamplingFrequency  = mElectronicsDb->samplingFrequency();
   
   mTimeBinWidth         = 1./mSamplingFrequency;
@@ -391,7 +394,7 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 // 	    cout << "**Transform2Raw" << endl;
 	    transformer(xyCoord,tpcRaw);
 //  	    PR(tpcRaw);
-	    int centralPad = tpcRaw.pad();
+	    int centralPad = (Int_t) tpcRaw.pad();
 	    int centralRow = tpcRaw.row();
 //  	    PR(centralRow);
 //   	    PR(mDeltaRow);
@@ -471,11 +474,11 @@ void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wire
 		    // otherwise code has to be changed twice!
 		    //
 		    double timeOfSignal =
-			(iter->position().z() + mElectronicsDb->tZero()*mSCDb->driftVelocity())
-			/mSCDb->driftVelocity();
+			(iter->position().z() + mElectronicsDb->tZero()*mSCDb->driftVelocity(13))
+			/mSCDb->driftVelocity(13);
 		    // OH-OH OFFSET (replaced!...)
 		    timeOfSignal =
-			iter->position().z()/mSCDb->driftVelocity();
+			iter->position().z()/mSCDb->driftVelocity(13);
 
 
 		    // Check the threshold before you

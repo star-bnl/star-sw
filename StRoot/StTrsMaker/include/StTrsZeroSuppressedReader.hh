@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.hh,v 1.6 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsZeroSuppressedReader.hh,v 1.7 2008/06/20 15:01:04 fisyak Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,13 +10,13 @@
  *              interface
  *
  *
- * int getPadList(int PadRow, u_char **padList);
+ * Int_t getPadList(Int_t PadRow, u_char **padList);
  *
  *        Fills (*padList[]) with the list of pad numbers containing hits
  *        returns number of pads in (*padList)[]
  *        or negative if call fails
  *
- * int getSequences(int PadRow, int Pad, int *nSeq, StSequence **SeqData)
+ * Int_t getSequences(Int_t PadRow, Int_t Pad, Int_t *nSeq, StSequence **SeqData)
  *
  *        Fills (*SeqData)[] along with the ADC
  *        buffers pointed to by (*SeqData)[]
@@ -32,6 +32,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.hh,v $
+ * Revision 1.7  2008/06/20 15:01:04  fisyak
+ * move from StTrsData to StTpcRawData
+ *
  * Revision 1.6  2005/09/09 22:12:48  perev
  * Bug fix + IdTruth added
  *
@@ -59,46 +62,32 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include <vector>
 
-class StTpcRawDataEvent;
-class StTrsRawDataEvent;
-class StTrsDigitalSector;
+#include "StTrsRawDataEvent.hh"
+#include "StTrsDigitalSector.hh"
 
-class StTrsZeroSuppressedReader {//: public ZeroSuppressedReader {
-
-typedef std::vector<StSequence> 	VecSequence;
-typedef std::vector<int*> 		VecIds;
-typedef std::vector<unsigned char> 	VecPads;
-typedef std::vector<unsigned char> 	VecUChar;
-typedef std::vector<int> 	        VecInt;
-
+class StTrsZeroSuppressedReader {
+  
 public:
-    StTrsZeroSuppressedReader();
-    StTrsZeroSuppressedReader(StTpcRawDataEvent*);
-    ~StTrsZeroSuppressedReader();
+  StTrsZeroSuppressedReader(StTpcRawData* ev=0);
+  ~StTrsZeroSuppressedReader() {}
 
-    //StTrsZeroSuppressedReader(StTrsZeroSuppressedReader&);
-
-    int getPadList(int padRow, unsigned char **padList);
-  //    int getSequences(int padRow, int Pad, int *nSeq, StTrsSequence*& SeqData);
-    int getSequences(int padRow, int Pad, int *nSeq, StSequence** SeqData, int ***Id=0);
-    int getSequences(int padRow, int Pad, int *nSeq, Sequence**   SeqData, int ***Id=0);
-#if 0
-    int getSpacePts(int, int*, SpacePt**);
-    int MemUsed();
-#endif
-    int setSector(int);
-    void clear();
+  Int_t getPadList(Int_t padRow, unsigned char **padList) {return mTheSector->getPadList(padRow,padList);}
+  Int_t getSequences(Int_t padRow, Int_t Pad, Int_t *nSeq, StSequence** SeqData, UShort_t ***Ids=0) {
+    return mTheSector->getSequences(padRow,Pad,nSeq, SeqData, Ids);
+  }
+  Int_t getSequences(Int_t padRow, Int_t Pad, Int_t *nSeq, Sequence**   SeqData, UShort_t ***Ids=0) {
+    return getSequences(padRow, Pad, nSeq, (StSequence**) SeqData, Ids);
+  }
+  Int_t setSector(Int_t);
+  void clear() {if (mTheSector) mTheSector->clear();}
 
 private:
-    StTrsZeroSuppressedReader(int);    
+    StTrsZeroSuppressedReader(Int_t);    
 
-    int checkTheData(unsigned int);
+    Int_t checkTheData(UInt_t);
 
-    int                 mSector;
+    Int_t                 mSector;
     StTrsDigitalSector* mTheSector;
-    VecPads             mPadList;
-    VecSequence         mSequence;
-    VecIds              mIds;
     StTrsRawDataEvent*  mTrsEvent;
 
 };
