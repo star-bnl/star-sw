@@ -39,10 +39,11 @@ void StSortTofRawData::Init(StTofCollection *tofColl) {
     StSPtrVecTofRawData &tofRawData = tofColl->tofRawData();
     for(size_t i=0; i<tofRawData.size(); i++) {
       if(tofRawData[i]->leteFlag()!=1) continue; // leading
-      int itray = tofRawData[i]->tray();
+      // int itray = tofRawData[i]->tray();  /// tray() is not available in Run V
+      int itray = 93;   /// 93 imposed
       int ichan = tofRawData[i]->channel();
       bool iexist = kFALSE;
-      for(size_t ii=0; ii<mRawHitVec[itray-1].size(); ii++) {
+      for(size_t ii=0; ii<mRawHitVec[0].size(); ii++) {
         if(itray==mRawHitVec[itray-1][ii].tray && ichan==mRawHitVec[itray-1][ii].channel) {
           iexist = kTRUE;
           break;
@@ -55,7 +56,7 @@ void StSortTofRawData::Init(StTofCollection *tofColl) {
       aRawHit.leadingTdc.push_back((int)(tofRawData[i]->tdc()));
       for(size_t j=i+1;j<tofRawData.size();j++) {
         if(tofRawData[j]->leteFlag()==1 &&
-           itray==tofRawData[j]->tray() && ichan==tofRawData[j]->channel()) {
+           itray==93 && ichan==tofRawData[j]->channel()) {
           aRawHit.leadingTdc.push_back((int)(tofRawData[j]->tdc()));
         }
       }  
@@ -63,7 +64,7 @@ void StSortTofRawData::Init(StTofCollection *tofColl) {
       // trailing
       for(size_t j=0;j<tofRawData.size();j++) {
         if(tofRawData[j]->leteFlag()==2 &&
-           itray==tofRawData[j]->tray() && ichan==tofRawData[j]->channel()) {
+           itray==93 && ichan==tofRawData[j]->channel()) {
           aRawHit.trailingTdc.push_back((int)(tofRawData[j]->tdc()));
         }
       }  
