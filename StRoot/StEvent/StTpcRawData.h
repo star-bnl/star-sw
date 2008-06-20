@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.3 2008/05/27 14:40:08 fisyak Exp $
+ * $Id: StTpcRawData.h,v 2.4 2008/06/20 14:56:34 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.4  2008/06/20 14:56:34  fisyak
+ * Add protection for pad no.
+ *
  * Revision 2.3  2008/05/27 14:40:08  fisyak
  * keep pixel raw data as short istead of uchar
  *
@@ -36,6 +39,7 @@ typedef std::vector<UShort_t> StVectorIDT;
 class StDigitalPair {
 public:
     StDigitalPair(UShort_t time=0)      {mTime=time;}
+    virtual ~StDigitalPair() {}
     void add(Short_t adc)               {mAdc.push_back(adc);}
     void add(Short_t adc,Int_t idt)     {mAdc.push_back(adc); mIdt.push_back(idt);}
     
