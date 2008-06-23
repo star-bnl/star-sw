@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.4 2008/06/20 14:56:34 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.5 2008/06/23 19:16:19 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.5  2008/06/23 19:16:19  fisyak
+ * fix memset size
+ *
  * Revision 2.4  2008/06/20 14:56:34  fisyak
  * Add protection for pad no.
  *
@@ -172,8 +175,8 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
 				     UShort_t IDTs[__MaxNumberOfTimeBins__]) { 
   // no conversion
   UInt_t nTimeSeqs = 0;
-  memset (ADCs, 0, sizeof(ADCs));
-  memset (IDTs, 0, sizeof(IDTs));
+  memset (ADCs, 0, __MaxNumberOfTimeBins__*sizeof(Short_t));
+  memset (IDTs, 0, __MaxNumberOfTimeBins__*sizeof(UShort_t));
   StDigitalTimeBins* TrsPadData = timeBinsOfRowAndPad(row,pad);
   if (! TrsPadData) return nTimeSeqs;
   StDigitalTimeBins &trsPadData = *TrsPadData;
@@ -198,8 +201,8 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
   // 10-> 8 conversion
   // no conversion
   UInt_t nTimeSeqs = 0;
-  memset (ADCs, 0, sizeof(ADCs));
-  memset (IDTs, 0, sizeof(IDTs));
+  memset (ADCs, 0, __MaxNumberOfTimeBins__*sizeof(UChar_t));
+  memset (IDTs, 0, __MaxNumberOfTimeBins__*sizeof(UShort_t));
   StDigitalTimeBins* TrsPadData = timeBinsOfRowAndPad(row,pad);
   if (! TrsPadData) return nTimeSeqs;
   StDigitalTimeBins &trsPadData = *TrsPadData;
