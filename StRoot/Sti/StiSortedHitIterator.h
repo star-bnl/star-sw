@@ -103,6 +103,7 @@ inline bool StiSortedHitIterator::operator!=(const StiSortedHitIterator& rhs)
 /// Returns a reference to the hit pointed at by this iterator
 inline StiHit& StiSortedHitIterator::operator*()
 {
+  assert(_currentHit);
   return *_currentHit;
 }
 
