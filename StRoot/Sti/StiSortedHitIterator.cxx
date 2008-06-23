@@ -15,12 +15,12 @@ StiSortedHitIterator::StiSortedHitIterator()
 /// Constructor using a StiHitContainer
 StiSortedHitIterator::StiSortedHitIterator(StiHitContainer * hitContainer,
 					   vector<StiDetector*>::iterator firstDet,
-					   vector<StiDetector*>::iterator lastDet)
+					   vector<StiDetector*>::iterator lastDet): _currentHit(0)
 {
   _hitContainer = hitContainer;
   _currentDet = firstDet;
   _lastDet    = lastDet;
-  if (_currentDet<_lastDet)
+ if (_currentDet<_lastDet && _hitContainer->hasDetector(*_currentDet) )
     {
       _currentDetHit =  _hitContainer->hitsBegin(*_currentDet);
       _lastDetHit    =  _hitContainer->hitsEnd(*_currentDet);
@@ -36,7 +36,9 @@ StiSortedHitIterator::StiSortedHitIterator(StiHitContainer * hitContainer,
 	    {
 	      ++_currentDet;
 	      if (_currentDet<_lastDet)
-		{  // valid detector
+		{  
+         if ( _hitContainer->hasDetector(*_currentDet) ) {
+            // valid detector
 		  _currentDetHit =  _hitContainer->hitsBegin(*_currentDet);
 		  _lastDetHit    =  _hitContainer->hitsEnd(*_currentDet);
 		  if (_currentDetHit < _lastDetHit)
@@ -45,7 +47,7 @@ StiSortedHitIterator::StiSortedHitIterator(StiHitContainer * hitContainer,
 		      _currentHit = *_currentDetHit;
 		      go = false;
 		    }
-		}
+		} }
 	      else
 		{
 		  // reached past the last detector
