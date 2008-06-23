@@ -1,12 +1,11 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.1.1.1 2008/05/27 14:22:41 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.2 2008/06/23 20:13:53 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
  *
  * Description:  Make clusters from StTpcRawData and fill the StEvent      */
-#define SIM_VERIFY
 #include <assert.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -50,15 +49,12 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     for(int row=1;row<=45;row++) {
       daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
       assert(gain);
-      LOG_DEBUG << Form("sec %d, row %d",sec,row) << endm;
       gain[0].gain = 0.0;	// kill pad0 just in case..
       
       for(int pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
-	gain[pad].gain = gStTpcDb->tpcGain()->Gain(sec,row,pad);
-	gain[pad].t0   = gStTpcDb->T0(sec)->getT0(row,pad);
+	gain[pad].gain = 1.; // gStTpcDb->tpcGain()->Gain(sec,row,pad);
+	gain[pad].t0   = 0.; // gStTpcDb->T0(sec)->getT0(row,pad);
       }
-      LOG_DEBUG << Form("finilize sec %d, row %d",sec,row) << endm;
-      
       dta->finalize(183,sec,row);
     }
   }
@@ -73,6 +69,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Make() {
+  static  Short_t ADCs[__MaxNumberOfTimeBins__];
+  static UShort_t IDTs[__MaxNumberOfTimeBins__];
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");
   if (! rEvent) {
     LOG_WARN << "There is no StEvent" << endm;
@@ -97,20 +95,21 @@ Int_t StTpcRTSHitMaker::Make() {
     if (! digitalSector) continue;
     for (Int_t row = 1; row <= 45; row++) {
       Double_t gain = (row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
-      Double_t wire_coupling = (row<=13) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
+      Double_t wire_coupling = (row<=13) ? 
+	St_tss_tssparC::instance()->wire_coupling_in() : 
+	St_tss_tssparC::instance()->wire_coupling_out();
       Double_t ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
 			  (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
-      UInt_t npads = digitalSector->numberOfPadsInRow(row);
-      if (! npads) continue;
+      Int_t Npads = digitalSector->numberOfPadsInRow(row);
+      if (! Npads) continue;
       daq_dta *dta = r.det("tpx")->put("adc_sim"); // used for any kind of data; transparent pointer
-      for(UInt_t pad = 1; pad <= npads; pad++) {
+      Int_t nup = 0;
+      for(UInt_t pad = 1; pad <= Npads; pad++) {
 	UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	if (! ntimebins) continue;
 	// allocate space for at least 512 pixels (timebins)
 	daq_sim_adc_tb *d = (daq_sim_adc_tb *) dta->request(__MaxNumberOfTimeBins__);
 	// add adc data for this specific sector:row:pad
-	static  Short_t ADCs[__MaxNumberOfTimeBins__];
-	static UShort_t IDTs[__MaxNumberOfTimeBins__];
 	memset (ADCs, 0, sizeof(ADCs));
 	memset (IDTs, 0, sizeof(IDTs));
 	digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
@@ -125,21 +124,20 @@ Int_t StTpcRTSHitMaker::Make() {
 	}
 	dta->finalize(l,sec,row,pad);
       }
-#ifdef SIM_VERIFY
-      // verify data!
-      dta = r.det("tpx")->get("adc_sim");
-      while(dta->iterate()) {
-	printf("*** sec %2d, row %2d, pad %3d: %3d pixels\n",dta->sec,dta->row,dta->pad,dta->ncontent);
-	
-	for(UInt_t i=0;i<dta->ncontent;i++) {
-	  printf("    %2d: adc %4d, tb %3d: track %4d\n",i,
-		 dta->sim_adc[i].adc,
-		 dta->sim_adc[i].tb,
-		 dta->sim_adc[i].track_id
-		 );
+      if (Debug() > 1) {
+	// verify data!
+	dta = r.det("tpx")->get("adc_sim");
+	while(dta->iterate()) {
+	  LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
+	  for(UInt_t i=0;i<dta->ncontent;i++) {
+	    LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
+			     dta->sim_adc[i].adc,
+			     dta->sim_adc[i].tb,
+			     dta->sim_adc[i].track_id
+			     ) << endm;
+	  }
 	}
       }
-#endif
       
       static StTpcCoordinateTransform transform(gStTpcDb);
       static StTpcLocalSectorCoordinate local;
@@ -150,22 +148,27 @@ Int_t StTpcRTSHitMaker::Make() {
       dta = r.det("tpx")->get("cld_sim"); // rerun the cluster finder on the simulated data...
       
       while(dta->iterate()) {
-	printf("CLD sec %2d: row %2d: %d clusters\n",dta->sec, dta->row, dta->ncontent);    
+	if (Debug() > 1) {
+	  LOG_INFO << Form("CLD sec %2d: row %2d: %d clusters",dta->sec, dta->row, dta->ncontent) << endm;
+	}
 	if (sec != dta->sec || row != dta->row) continue;
 	for(UInt_t i=0;i<dta->ncontent;i++) {
-	  printf("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d \n",
-		 dta->sim_cld[i].cld.pad,
-		 dta->sim_cld[i].cld.p1,
-		 dta->sim_cld[i].cld.p2,
-		 dta->sim_cld[i].cld.tb,
-		 dta->sim_cld[i].cld.t1,
-		 dta->sim_cld[i].cld.t2,
-		 dta->sim_cld[i].cld.charge,
-		 dta->sim_cld[i].cld.flags,
-		 dta->sim_cld[i].track_id,
-		 dta->sim_cld[i].quality
-		 );
+	  if (Debug() > 1) {
+	    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
+			     dta->sim_cld[i].cld.pad,
+			     dta->sim_cld[i].cld.p1,
+			     dta->sim_cld[i].cld.p2,
+			     dta->sim_cld[i].cld.tb,
+			     dta->sim_cld[i].cld.t1,
+			     dta->sim_cld[i].cld.t2,
+			     dta->sim_cld[i].cld.charge,
+			     dta->sim_cld[i].cld.flags,
+			     dta->sim_cld[i].track_id,
+			     dta->sim_cld[i].quality
+			     ) << endm;
+	  }
 	  if (! dta->sim_cld[i].cld.pad) continue;
+	  if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
 	  if (! hitCollection )  {
 	    hitCollection = new StTpcHitCollection();
 	    rEvent->setTpcHitCollection(hitCollection);
@@ -199,6 +202,41 @@ Int_t StTpcRTSHitMaker::Make() {
 	  hit->setFlag(dta->sim_cld[i].cld.flags);
 	  hitCollection->addHit(hit);
 	}
+      }
+      for(Int_t pad = 1; pad <= Npads; pad++) {
+	UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
+	if (! ntimebins) continue;
+	digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
+	// Update pixels if any
+	dta = r.det("tpx")->get("adc_sim",sec);
+	Int_t Updated = 0;
+	while(dta->iterate()) {
+	  Int_t secC  = dta->sec;
+	  Int_t rowC  = dta->row;
+	  Int_t padC  = dta->pad;
+	  if (secC != sec || rowC != row || padC != pad) continue;
+	  for(UInt_t i=0;i<dta->ncontent;i++) {
+	    Int_t tb = dta->sim_adc[i].tb;
+	    if (ADCs[tb] != dta->sim_adc[i].adc ||
+		IDTs[tb] != dta->sim_adc[i].track_id) {
+	      if (Debug() > 1) {
+		LOG_INFO << Form("tb %3d    adc %4d => %4d, track %4d => %4d",tb,
+				 ADCs[tb],dta->sim_adc[i].adc,
+				 IDTs[tb],dta->sim_adc[i].track_id) << endm;
+	      }
+	      ADCs[tb] = dta->sim_adc[i].adc;
+	      IDTs[tb] = dta->sim_adc[i].track_id;
+	      Updated++;
+	    }
+	  }
+	}
+	if (Updated) {
+	  digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
+	  nup += Updated;
+	}
+      }
+      if (nup && Debug() > 1) {
+	LOG_INFO << "Update total " << nup << " pixels from Sector / row = " << sec << " / " << row <<   endm;
       }
     }
   }

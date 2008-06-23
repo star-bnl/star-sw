@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.1.1.1 2008/05/27 14:22:41 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.2 2008/06/23 20:13:53 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.2  2008/06/23 20:13:53  fisyak
+ * Add real data pixel annotation
+ *
  * Revision 1.1.1.1  2008/05/27 14:22:41  fisyak
  * Maker to access TPC DAQ information via EVP_READER
  *
@@ -496,6 +499,9 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
 //________________________________________________________________________________
 void StTpcHitMaker::RawData(Int_t sector) {
   static Short_t ADCs[512];
+  static UShort_t IDTs[512];
+  memset(ADCs, 0, sizeof(ADCs));
+  memset(IDTs, 0, sizeof(IDTs));
   StTpcDigitalSector *digitalSector = 0;
   Int_t some_data = 0;
   Int_t r_old = -1;
@@ -513,8 +519,14 @@ void StTpcHitMaker::RawData(Int_t sector) {
 	Total_data += some_data;
 	some_data = 0;
 	if (! digitalSector) digitalSector = GetDigitalSector(sector);
-	digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs);
+	Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
+	if (ntbold) {
+	  LOG_INFO << "digitalSector " << sector 
+		   << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+	}
+	digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
 	memset(ADCs, 0, sizeof(ADCs));
+	memset(IDTs, 0, sizeof(IDTs));
       }
       r_old = r;
       p_old = p;
@@ -523,6 +535,7 @@ void StTpcHitMaker::RawData(Int_t sector) {
       int tb = dta->adc[i].tb ;
       int adc = dta->adc[i].adc ;
       ADCs[tb] = adc;
+      IDTs[tb] = 65535;
       some_data++ ;	// I don't know the bytecount but I'll return something...
     }
   }
@@ -530,7 +543,17 @@ void StTpcHitMaker::RawData(Int_t sector) {
     Total_data += some_data;
     some_data = 0;
     if (! digitalSector) digitalSector = GetDigitalSector(sector);
-    digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs);
+    Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
+    if (ntbold) {
+      LOG_INFO << "digitalSector " << sector 
+	       << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+    }
+    digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
+    memset(ADCs, 0, sizeof(ADCs));
+    memset(IDTs, 0, sizeof(IDTs));
+  }
+  if (Total_data) {
+    LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
   }
   if (Total_data) return;
   for (Int_t row = 1;  row <= __NumberOfRows__; row++) {
@@ -538,15 +561,26 @@ void StTpcHitMaker::RawData(Int_t sector) {
     for (Int_t pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
       Int_t p = pad - 1;
       memset(ADCs, 0, sizeof(ADCs));
+      memset(IDTs, 0, sizeof(IDTs));
       Int_t ncounts = tpc.counts[r][p];
       if (! ncounts) continue;
       for (Int_t i = 0; i < ncounts; i++) {
 	Int_t tb = tpc.timebin[r][p][i];
 	ADCs[tb] = log8to10_table[tpc.adc[r][p][i]]; 
+	IDTs[tb] = 65535;
+	Total_data++;
       }
       if (! digitalSector) digitalSector = GetDigitalSector(sector);
-      digitalSector->putTimeAdc(row,pad,ADCs);
+      Int_t ntbold = digitalSector->numberOfTimeBins(row,pad);
+      if (ntbold) {
+	LOG_INFO << "digitalSector " << sector 
+		 << " already has " << ntbold << " at row/pad " << row <<  "/" << pad << endm;
+      }
+      digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
     }
+  }									
+  if (Total_data) {
+    LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
   }
 }
 //________________________________________________________________________________
@@ -563,4 +597,9 @@ StTpcHitCollection *StTpcHitMaker::GetHitCollection() {
     }
   }
   return hitCollection;
+}
+//--------------------------------------------------------------------------------
+void StTpcHitMaker::Clear(Option_t *option) {
+  TDataSet *event = GetData("Event");
+  SafeDelete(event);
 }
