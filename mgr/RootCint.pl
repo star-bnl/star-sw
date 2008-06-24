@@ -10,6 +10,7 @@ use File::Basename;
 my $Cint_cxx = shift;
 my $Cint_h  = $Cint_cxx;
 $Cint_h  =~ s/_Cint\.cxx/_Cint\.h/g;
+
 my $DirName = dirname($Cint_cxx);		#print "DirName = $DirName\n";
 my $LinkDef = $DirName . "/" . "LinkDef.h"; 	#print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
 
@@ -24,8 +25,10 @@ my %class_hfile_depens_on = (); #
 my %class_written = ();
 my @classes = 0; 		# list of classes
 my $h_files = "";
+my $h_dir   = "";
 my $coll = 0;
 my $col  = 0;
+my $IncDirName = "";
 # count no. of classes in LinkDef's
 my $ListOfWrittenClasses = ":";
 my $ListOfDefinedClasses = "";
@@ -47,9 +50,11 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
   open (In, $def) or die "Can't open $def";
   $LinkDefDirName = dirname($def);
 
-  while ($line = <In>) {# print "$line";
-#  if LinkDef.h file contains "//IncFile=aaa/bbb/ccc.h"
-#  this file included to the list of files to process(VP)
+  while ($line = <In>) {
+    # print "$line";
+      
+    #  if LinkDef.h file contains "//IncFile=aaa/bbb/ccc.h"
+    #  this file included to the list of files to process(VP)
     if (($line  =~ /^\/\/IncFile *=/))	{
       my @words = split /(=)/, $line;
       chomp(@words[2]);
@@ -83,7 +88,9 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
     if ($class_written{$class} and $class eq $classG)		{next;}
     push @classes, $classG;
     $class_written{$classG} = 1; 	#print "class: $class, written: $class_written{$class}\n";
-PRINT: print Out $line;
+
+      PRINT: 
+	print Out $line;
   }
 }
 close (Out);
@@ -92,8 +99,14 @@ close (Out);
 for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
   next if !$h;
   next if $h =~ /LinkDef/;
-  if ($h =~ /Stypes/)  {$h_files .= " " . basename($h); next;}
 
+    
+  if ($h =~ /Stypes/)  {
+      $h_files .= " " . basename($h); 
+      next;
+  } 
+  $h_dir = dirname($h);
+    
   my $hh = $h;
 
   if (!-f $hh) {($hh = $h) =~ s/.*.share/StRoot/;}
@@ -102,7 +115,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 
   if ($h != $hh ){
       print "=== RootCint-Info :: massaging h = hh = $h --> hh = $hh\n";
-  #} else {
+  # } else {
   #    print "=== RootCint-Info :: $h ok (without .share)\n";
   }
 
@@ -111,50 +124,76 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
   my $class;
   my $includes = "";
   my $com = 0;
-  while ($line = <In>) {#    print $line;
-    if ($line =~ /\/\//) {$line =~ s/\/\/.*$//;# print "==> $line";
-			}
-#    next if $line =~ /^\s*\/\//; # c++ comment '//'
-#			print "==> $line";
-    if ($com) {
-      if ($line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///; #print "==> $line";
-			  }
-      else {#print "==> skip\n"; 
-	    next;}
-    }
-    if ($line =~ /\/\*/) {
-      $com = 1;
-      if ($line =~ /\*\//) {
-	$line =~ s/\/\*.*\*\///;
-	$com = 0;
+
+  while ($line = <In>) {
+#      print $line;
+      if ($line =~ /\/\//) {
+	  $line =~ s/\/\/.*$//;
+	  # print "==> $line";
       }
-      else {$line =~ s/\/\*.*$//;}
-    }
-#    next if ($com);
-    if ($line =~ /\#include/ && $line !~ /(<>)/ && $line !~ /Table\.h/) {
-      (my $inc_h = $line) =~ s/\#include\s//g; chop ($inc_h);
-      $inc_h =~ s/\"//g; #		print "inc_h = $inc_h\n";
-      my $inc_hh = basename($inc_h);
-      if ($sources =~ /$inc_hh/) {
-	$includes .= ":" . $inc_hh;# 	print "--includes for $h: $includes\n";
+      
+#      next if $line =~ /^\s*\/\//; # c++ comment '//'
+#      print "==> $line";
+      if ($com) {
+	  if ($line =~ /\*\//) {
+	      $com = 0; 
+	      $line =~ s/^*\*\///; # print "==> $line";
+			  
+	  } else {
+	      # print "==> skip\n";
+	      next;
+	  }
       }
-    } 
-    if ($line =~/ClassDef/ && $line !~ /ClassDefChair/) { #print "================================ $line \n";
-      if ($line =~ /\#\#/) {next;} # ClassDefs in macro definition
-      my @words = split /([\(,\-\!\)])/, $line;
-      my $class = $words[2];      	#print "=================class = ",$class,"\n";
-      if ($class) {
-	push @classes, $class;
-	$class_hfile{$class} = $h; 	#print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n";
-	$class_hfile_depens_on{$class} = $includes;
+      if ($line =~ /\/\*/) {
+	  $com = 1;
+	  if ($line =~ /\*\//) {
+	      $line =~ s/\/\*.*\*\///;
+	      $com = 0;
+	  } else {
+	      $line =~ s/\/\*.*$//;
+	  }
       }
-    }
-    if ($line =~ /\#define/) {next;}
-    if ($line =~ /StCollectionDef/) {
-      $coll++;  #print "$coll, $line\n";
-    }
+      #  next if ($com);
+      
+      if ($line =~ /\#include/ && $line !~ /(<>)/ && $line !~ /Table\.h/) {
+	  (my $inc_h = $line) =~ s/\#include\s//g; chop ($inc_h);
+	  $inc_h =~ s/\"//g; 
+	  # print "inc_h = $inc_h\n";
+	  
+	  my $inc_hh = basename($inc_h);
+	  if ($sources =~ /$inc_hh/) {
+	      $includes .= ":" . $inc_hh;   	
+	      # print "--includes for $h: $includes\n";
+	  }
+      }
+      
+      if ($line =~/ClassDef/ && $line !~ /ClassDefChair/) { 
+	  # print "================================ $line \n";
+	  if ($line =~ /\#\#/) { next;} # ClassDefs in macro definition
+	  my @words = split /([\(,\-\!\)])/, $line;
+	  my $class = $words[2];      	
+	  # print "=================class = ",$class," ($h_dir)\n";
+	  if ( index($IncDirName,$h_dir) == -1 && $h_dir ne $DirName){
+	      # print "=> Adding $h_dir to [$IncDirname]\n";
+	      $IncDirName .= "-I$h_dir ";
+	  }
+	  
+	  if ($class) {
+	      push @classes, $class;
+	      $class_hfile{$class} = $h; 	
+	      # print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n";
+	      
+	      $class_hfile_depens_on{$class} = $includes;
+	  }
+      }
+      if ($line =~ /\#define/) { next;}
+      if ($line =~ /StCollectionDef/) {
+	  $coll++;  #print "$coll, $line\n";
+      }
   }
   close (In);
+    
+    
   if ($coll) {			# Collection Definition
     my $macro = "./StRoot/St_base/StArray.h";
     if (-f $macro) {}
@@ -229,8 +268,13 @@ for my $class (@classes) {
 	}
 	else {
 #	  print "======> |$class|\n";
-	  if ($class =~ /-$/) {print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";}
-	  else {print Out "#pragma link C++ class $class+;\n"; print  "#pragma link C++ class $class+;\n";}
+	  if ($class =~ /-$/) {
+	      print Out "#pragma link C++ class $class;\n"; 
+	      print     "#pragma link C++ class $class;\n";
+	  } else {
+	      print Out "#pragma link C++ class $class+;\n"; 
+	      print     "#pragma link C++ class $class+;\n";
+	  }
 	}
       }
       $class_written{$class} = "YES";
@@ -299,19 +343,24 @@ foreach my $h (@h_files) {
   else                    {$h_filesR .= $h . " ";}
 }
 $h_files = $h_filesC . " " . $h_filesR;
-							#print "h_files= $h_files\n";
+							# print "h_files= $h_files\n";
 my $hfile = $DirName . "/Stypes.h";
 if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
-  $h_files .= " " . "LinkDef.h";
-#  my $local_cint = basename($Cint_cxx);  		#print "files = $#files\n";
-  $CPPFLAGS = " -I" . $DirName . " " . $CPPFLAGS;
+    $h_files .= " " . "LinkDef.h";
+
+
 #  $CPPFLAGS .= " -I" . $DirName;
 #  my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files";
-  my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
-  print "cmd = ",$cmd,"\n";
-  my $flag = `$cmd`; if ($?) {exit 2;}
 
+    $CPPFLAGS = " -I" . $DirName . " " . $IncDirName . $CPPFLAGS;
+    
+    my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+
+    print "cmd = ",$cmd,"\n";
+    my $flag = `$cmd`; if ($?) {exit 2;}
 }
+
 exit(0);
+
 # last line
