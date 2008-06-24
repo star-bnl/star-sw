@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.24 2008/06/19 16:11:54 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.25 2008/06/24 21:58:13 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.25  2008/06/24 21:58:13  dongx
+ * fixed a bug of crashing due to potential empty track in trackNodes
+ *
  * Revision 1.24  2008/06/19 16:11:54  dongx
  * fixed bug of filling an undefined histogram in case of production
  *
@@ -1908,6 +1911,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     tofCellHitVector cellHitVec;
     //    cellHitVec.clear();
     StTrack *theTrack = nodes[iNode]->track(global);
+    if(!theTrack) continue;
 
     StThreeVectorF mom = trackGeometry(theTrack)->momentum();
     float pt = mom.perp();
