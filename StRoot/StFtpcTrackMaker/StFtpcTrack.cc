@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.34 2008/06/11 18:41:31 fine Exp $
+// $Id: StFtpcTrack.cc,v 1.35 2008/06/24 08:12:48 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.35  2008/06/24 08:12:48  jcs
+// If NoSolution found for MomentumFit with primary vertex, set mFromMainVertex = kFALSE for the track to avoid looping in StarMagField  3D field interpolation
+//
 // Revision 1.34  2008/06/11 18:41:31  fine
 // Add FATAL_ERROR message
 //
@@ -576,11 +579,17 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit
     
     else {
       MomentumFit(vertex); // refit
-      CalcPrimResiduals();
+      if (pathLength(lastPoint, nv)  >= NoSolution/2){
+        LOG_WARN << "NoSolution found for MomentumFit with primary vertex - set mFromMainVertex = kFALSE for track " <<mTrackNumber<< endm;
+        mFromMainVertex = (Bool_t)kFALSE;
+      }
+      else {
+         CalcPrimResiduals();
       
-      firstPoint = StThreeVector<Double_t>(vertexPos.x(), vertexPos.y(), vertexPos.z());
-      mFromMainVertex = (Bool_t)kTRUE;
-      mDca = distance(vertexPos); // change dca (even if this dca isn't very useful)
+         firstPoint = StThreeVector<Double_t>(vertexPos.x(), vertexPos.y(), vertexPos.z());
+         mFromMainVertex = (Bool_t)kTRUE;
+         mDca = distance(vertexPos); // change dca (even if this dca isn't very useful)
+      }
     }
   }
 
@@ -716,11 +725,7 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
     StThreeVector<Double_t> nvec(0., 0., 1.);
     Double_t plength = pathLength(rvec, nvec);
     if (plength >= NoSolution/2) {
-       LOG_FATAL << "This track "<< *this 
-                 << " with " 
-                 << i 
-                 << " points does not cross any plane."
-                 << endm;
+       continue;
     }
     xhelix[i] = x(plength);
     yhelix[i] = y(plength);
