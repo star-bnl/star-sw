@@ -666,8 +666,19 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     }
     Depends $env2 [@CintFiles], @h_files;
     Depends $env2 [@CintFiles], ($env2->{Packages}->{ROOT}->{ROOTCINT});
-    Command $env2 [@CintFiles], @defs,
-      qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
+
+    my $RCINTPL;
+
+    # use local if available  
+    if ( -e "mgr/RootCint.pl") {
+	$RCINTPL = "mgr/RootCint.pl";
+    } else {
+	$RCINTPL = "RootCint.pl";
+    }
+	Command $env2 [@CintFiles], @defs,
+	qq($RCINTPL "%>" "%<" "$ROOTCINT_CPPPATH" );
+
+      
 #    if ($#LinkDefs < 0) { push @LinkDefs, "LinkDef.h";}
     @LinkDefs = ("LinkDef.h");
     my @objfiles = Objects $envCint ($CintFiles[0]);#
