@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.15 2008/06/17 17:49:19 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.16 2008/06/24 21:33:37 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.16  2008/06/24 21:33:37  dongx
+ * Added the filling of vzvpd into StTofCollection
+ *
  * Revision 1.15  2008/06/17 17:49:19  dongx
  * Update for Run 8 - first release
  *
@@ -1459,6 +1462,7 @@ Int_t StTofCalibMaker::processEventYear8(){
   theTof->setVpdEast(mVPDHitPatternEast);
   theTof->setVpdWest(mVPDHitPatternWest);
   theTof->setTdiff(mTDiff);
+  theTof->setVzVpd(mVPDVtxZ);
 
   gMessMgr->Info("","OS") << " TofCollection: NWest = " << theTof->numberOfVpdWest() << " NEast = " << theTof->numberOfVpdEast() << endm;
   gMessMgr->Info("","OS") << "Tdiff = " << mTDiff <<" vpd vz = " << mVPDVtxZ << " proj vz = " << mProjVtxZ<<endm;
