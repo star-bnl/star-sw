@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.31 2007/08/22 15:06:52 kocolosk Exp $
+// $Id: StBemcTrigger.cxx,v 1.32 2008/06/24 03:19:03 rfatemi Exp $
 //
 //
 
@@ -903,7 +903,7 @@ int StBemcTrigger::get2005Trigger()
                         Int_t e=rawHit[k]->eta();
                         Int_t s=abs(rawHit[k]->sub());
                         mGeo->getId(mod,e,s,did);
-                        if(mTrigger.TowerStatus[did-1]==1)
+                        if ((mTrigger.TowerStatus[did-1]==1)&&(mTables->status(BTOW,did,"calib")==1))
                         {
                             adc12[did-1]=rawHit[k]->adc();
                             adc10[did-1] = adc12[did-1]>>2;
@@ -1296,7 +1296,7 @@ int StBemcTrigger::get2006Trigger()
                         Int_t s=abs(rawHit[k]->sub());
                         mGeo->getId(mod,e,s,did);
                         
-                        if(mTrigger.TowerStatus[did-1] == 1)
+                        if ((mTrigger.TowerStatus[did-1]==1)&&(mTables->status(BTOW,did,"calib")==1))
                         {
                         
                             adc12[did-1]=rawHit[k]->adc();
