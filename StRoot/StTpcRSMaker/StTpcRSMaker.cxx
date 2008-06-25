@@ -1,6 +1,6 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.2 2008/06/19 22:45:43 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.3 2008/06/25 20:02:32 fisyak Exp $
 // doxygen info here
 /*
  */
@@ -31,7 +31,7 @@
 #include "StTpcRawData.h"
 #include "Altro.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.2 2008/06/19 22:45:43 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.3 2008/06/25 20:02:32 fisyak Exp $";
 static  Gccuts_t *ccuts = 0;
 
 #define Laserino 170
@@ -433,8 +433,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	ipart      = tpc_track[Id-1].ge_pid;
       }
 #endif
-      Double_t padsdE[32]; memset (padsdE, 0, sizeof(padsdE));
-      Double_t tbksdE[32]; memset (tbksdE,  0, sizeof(tbksdE));
       for (Int_t s_index = 0; s_index < 1; s_index++, sortedIndex++) {
 	Int_t isDet  = tpc_hit->volume_id/100000;
 	if (isDet) continue; // skip pseudo padrow
@@ -506,7 +504,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	static StTpcLocalSectorCoordinate xyzLocalSector;
 	transform(xyzA,xyzLocalSector);
 	static StTpcPadCoordinate Pad;
-	transform(xyzLocalSector,Pad,kFALSE);
+	transform(xyzLocalSector,Pad,kFALSE,kFALSE);
 	Double_t padH = Pad.pad();        Int_t pad0 = TMath::Nint(padH + xmin[0]);
 	Double_t tbkH = Pad.timeBucket(); Int_t tbk0 = TMath::Nint(tbkH + xmin[1]);
 	static StTpcLocalSectorAlignedDirection  dirA;
@@ -578,6 +576,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t newPosition = s_low;
 	Double_t dESum = 0;
 	Double_t dSSum = 0;
+	Double_t padsdE[32]; memset (padsdE, 0, sizeof(padsdE));
+	Double_t tbksdE[64]; memset (tbksdE,  0, sizeof(tbksdE));
 	do {// Clusters
 	  Float_t dS = 0;
 	  Float_t dE = 0;
@@ -688,11 +688,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      TF1F *mShaperResponse = mShaperResponses[io][sector-1];
 	      for(Int_t pad = padMin; pad <= padMax; pad++, xPad++) {
 		Double_t dt = dT;
+#if 0
 		if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
 		  Double_t gain   = gStTpcDb->tpcGain()->Gain(sector,row,pad);
 		  if (gain <= 0.0) continue;
 		  dt -= gStTpcDb->T0(sector)->getT0(row,pad);
 		}
+#endif
 		Double_t localXDirectionCoupling = PadResponseFunction->GetSaveL(TMath::Abs(xPad));
 		if (localXDirectionCoupling < minSignal) continue;
 		Double_t XYcoupling = localYDirectionCoupling*localXDirectionCoupling;
@@ -707,7 +709,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		  TotalSignal += signal;
 		  SignalSum[index].Sum += signal;
 		  if (pad >= pad0 && pad < pad0 + 32 && 
-		      itbin >= tbk0 &&  itbin < tbk0 + 32) {
+		      itbin >= tbk0 &&  itbin < tbk0 + 64) {
 		    padsdE[pad-pad0]   += signal;
 		    tbksdE[itbin-tbk0] += signal;
 		  }
@@ -736,7 +738,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    for (Int_t p = 0; p < 32; p++) hist[ioH][0]->Fill((p+pad0)-padH,xyzL.position().z(),padsdE[p]/dESum);
 	  }								                          
 	  if (hist[ioH][1]) {						                          
-	    for (Int_t t = 0; t < 32; t++) hist[ioH][1]->Fill((t+tbk0+0.5)-tbkH,xyzL.position().z(),tbksdE[t]/dESum);
+	    for (Int_t t = 0; t < 64; t++) hist[ioH][1]->Fill((t+tbk0+0.5)-tbkH,xyzL.position().z(),tbksdE[t]/dESum);
 	  }
 	}
 	NoHitsInTheSector++;
@@ -871,6 +873,7 @@ void  StTpcRSMaker::Print(Option_t *option) const {
 //________________________________________________________________________________
 void  StTpcRSMaker::DigitizeSector(Int_t sector){
   static Altro * altro = 0;
+  static Int_t PedestalMem[512];
   TDataSet *event = GetData("Event");
   StTpcRawData *data = 0;
   if (! event) {
@@ -897,12 +900,15 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
     Int_t NoOfPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
     for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
       gain = 1;
+#if 0
       if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
 	gain   = gStTpcDb->tpcGain()->Gain(Sector,row,pad);
 	if (gain <= 0.0) continue;
       }
+#endif
       ped    = mAveragePedestal;
       pedRMS = 0; 
+#if 0
       if (! TESTBIT(m_Mode, kNONOISE)) {
 	if (TESTBIT(m_Mode, kAVERAGEPEDESTAL)) {
 	  ped = gRandom->Gaus(mAveragePedestal,mAveragePedestalRMS);
@@ -913,6 +919,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
 	  pedRMS = gStTpcDb->Pedestal()->Rms(sector,row,pad);
 	}
       }
+#endif
       if (pedRMS > 5.0) continue; // noisy pads
       static  Short_t ADCs[512];
       static UShort_t IDTs[512];
@@ -920,9 +927,18 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
       memset(IDTs, 0, sizeof(IDTs));
       if (St_TpcAltroParametersC::instance()->N(sector-1) > 0 && ! altro) {
 	altro = new Altro(512,ADCs);
+	//from ~/public/sources/Altro++/AltroConfigs/AltroConfig.globaltcf.v1.data
+	// ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
+	altro->ConfigAltro(                    1,                      1,                         1,              1,                     0);
+	//     ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
+	altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);
 	Int_t *altro_reg = St_TpcAltroParametersC::instance()->altro_reg(sector-1);
 	altro->ConfigTailCancellationFilter(altro_reg[0],altro_reg[1],altro_reg[2], // K1-3
 					    altro_reg[3],altro_reg[4],altro_reg[5]);// L1-3
+	//     ConfigBaselineCorrection_2(int HighThreshold, int LowThreshold, int Offset, int Presamples, int Postsamples);
+	altro->ConfigBaselineCorrection_2(                3,                3,          0,              0,               0);
+	//void ConfigZerosuppression(int Threshold, int MinSamplesaboveThreshold, int Presamples, int Postsamples);
+	altro->ConfigZerosuppression(            3,                            3,              2,               3);
 	altro->PrintParameters();
       }
       Int_t NoTB = 0;
@@ -1231,6 +1247,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.3  2008/06/25 20:02:32  fisyak
+// The first set of parametrs for Altro, Remove gains for the moment
+//
 // Revision 1.2  2008/06/19 22:45:43  fisyak
 // Freeze problem with TPX parameterization
 //

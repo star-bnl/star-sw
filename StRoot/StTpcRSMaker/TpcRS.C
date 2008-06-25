@@ -28,7 +28,7 @@ class St_db_Maker;
 St_db_Maker *dbMk = 0;
 #endif
 //________________________________________________________________________________
-void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "TpcRS,fcf",  
+void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",  
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "PAI") 
 {
   gROOT->LoadMacro("bfc.C"); 
@@ -37,25 +37,26 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "TpcRS,fcf",
   TString Opt(opt);
   TString RunOpt(Run);
   RunOpt.ToLower();
-  ChainOpt = "MakeEvent,ITTF,-SsdIt,-SvtIt,Idst,tpcI,VFMinuit,-EventQA,-EvOut,-dstout,analysis,dEdxY2,noHistos,";
+  ChainOpt = "MakeEvent,ITTF,-SsdIt,-SvtIt,Idst,VFMinuit,-EventQA,-EvOut,-dstout,analysis,dEdxY2,noHistos,";
   ChainOpt += "McAna,McTpcAna,IdTruth,useInTracker,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
-    ChainOpt += "tpc_daq,";
+    ChainOpt += "tpc_daq,tpcI";
     RunOpt.ReplaceAll("TpcRS,","");
     RunOpt.ReplaceAll("trs,","");
   } else {
-    ChainOpt += "TpxRaw,TpxClu,-trs,-tcl,-fcf,-tpc_daq,-tfs,-St_tpc,";
+    ChainOpt += "tpcDB,TpcHitMover,TpxClu,";
   }
   
   TString FileIn(fileIn);
   if (FileIn == "") {
-    ChainOpt += "gstar,Y2004,"; RootFile += "gstar_y4";
+    ChainOpt += "gstar,"; RootFile += "gstar_y4";
+    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2004,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
     else                                                     ChainOpt += "FieldOn,";
   }
   if (FileIn.Contains(".daq",TString::kIgnoreCase)) {
-    ChainOpt += "in,";
+    ChainOpt += "in,TpxRaw,";
     RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
     RootFile.ReplaceAll(".daq","");
   } else {
