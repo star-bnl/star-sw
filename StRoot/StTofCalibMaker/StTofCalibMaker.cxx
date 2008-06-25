@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.16 2008/06/24 21:33:37 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.17 2008/06/25 21:45:29 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.17  2008/06/25 21:45:29  dongx
+ * Reset time values when tot/z is out of range
+ *
  * Revision 1.16  2008/06/24 21:33:37  dongx
  * Added the filling of vzvpd into StTofCollection
  *
@@ -1768,7 +1771,8 @@ Double_t StTofCalibMaker::tofr8AllCorr(const Double_t tof, const Double_t tot, c
 
       tofcorr -= dcorr;
     } else {
-      tofcorr = -9999.;
+      gMessMgr->Info("","OS") << " TOT out of range! EXIT! " << endm;
+      return -9999.;
     }
 
     int iZBin = -1;
@@ -1790,7 +1794,8 @@ Double_t StTofCalibMaker::tofr8AllCorr(const Double_t tof, const Double_t tot, c
      if(Debug()) gMessMgr->Info("","OS") << "zHit correction: "<<dcorr<<endm;
 
     } else {
-      tofcorr = -9999.;
+      gMessMgr->Info("","OS") << " Z our of range! EXIT! " << endm;
+      return -9999.;
     }
     
   }
@@ -1934,11 +1939,8 @@ void StTofCalibMaker::tsum8(const Double_t *tot, const Double_t *time)
 	  mVPDHitPatternWest |= 1<<i;
 	}
       } else {
-	mNWest++;
-	mVPDLeTime[i] = time[i];
-	mTSumWest += mVPDLeTime[i];
-
-	mVPDHitPatternWest |= 1<<i;
+        gMessMgr->Info("","OS") << " Vpd West tube " << i+1 << " TOT out of range!" << endm;
+        // out of range, remove this hit
       }
     }
       
@@ -1970,11 +1972,8 @@ void StTofCalibMaker::tsum8(const Double_t *tot, const Double_t *time)
 
 	}
       } else {
-	mNEast++;
-	mVPDLeTime[i+mNVPD] = tmp;
-	mTSumEast += mVPDLeTime[i+mNVPD];
-
-	mVPDHitPatternEast |= 1<<i;
+        gMessMgr->Info("","OS") << " Vpd East tube " << i+1 << " TOT out of range!" << endm;
+        // out of range, remove this hit
       }
     }
   }
