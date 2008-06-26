@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.17 2008/02/20 09:00:48 mvl Exp $
+ * $Id: StMuEvent.cxx,v 1.18 2008/06/26 15:46:13 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -128,6 +128,7 @@ void StMuEvent::fill(const StEvent* event){
     mVpdWest = event->tofCollection()->vpdWest();
     mVpdTstart = event->tofCollection()->tstart();
     mVpdTdiff = event->tofCollection()->tdiff();
+    mVpdVz = event->tofCollection()->vzVpd();
   }
   //
 } 
@@ -182,6 +183,9 @@ unsigned short StMuEvent::refMultFtpc(int vtx_id) {return refMultFtpcEast(vtx_id
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.18  2008/06/26 15:46:13  tone421
+ * Add getter and setter for the vpd z vertex position
+ *
  * Revision 1.17  2008/02/20 09:00:48  mvl
  * Included FMS data (StFMSTriggerDetector) (code by Akio)
  *
