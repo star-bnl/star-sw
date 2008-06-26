@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.42 2007/09/18 02:29:57 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.43 2008/06/26 15:48:04 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -341,13 +341,15 @@ StEvent* StMuDst::createStEvent() {
   for(int i=0;i<nTofRawData;i++) {
     StTofRawData *aRawData;
     if(tofRawData(i)) {
+      unsigned short tray = tofRawData(i)->tray();
       unsigned short leteFlag = tofRawData(i)->leteFlag();
       unsigned short channel = tofRawData(i)->channel();
       unsigned int tdc = tofRawData(i)->tdc();
+      unsigned int triggertime = tofRawData(i)->triggertime();
       unsigned short quality = tofRawData(i)->quality();
-      aRawData = new StTofRawData(leteFlag,channel,tdc,quality);
+      aRawData = new StTofRawData(leteFlag,tray,channel,tdc,triggertime,quality);
     } else {
-      aRawData = new StTofRawData(0, 0, 0, 0);
+      aRawData = new StTofRawData(0, 0, 0, 0, 0, 0);
     }
     tofcoll->addRawData(aRawData);
   }
@@ -521,6 +523,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.43  2008/06/26 15:48:04  tone421
+ * Get info from StEvent so vpd z vertex infomation is available in StMuEvent
+ *
  * Revision 1.42  2007/09/18 02:29:57  mvl
  * Added basic printing functionality. For convenience and to assist data consistency checks
  *
