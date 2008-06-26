@@ -7,10 +7,10 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t*,
 
 //==========================================================================================
 //==========================================================================================
-void StMuDstMaker(const Int_t nevents=10,
+void StMuDstMaker(const Int_t nevents=1000,
 		    const Char_t *path="-",
 		    //		    const Char_t *file="/star/data20/reco/productionCentral/ReversedFullField/P01gl/2001/303/st_physics_2303036_raw_0535.event.root",
-		    const Char_t *file="/star/data13/reco/dev/2001/10/st_physics_2304060_raw_0303.event.root",
+		    const Char_t *file="/star/data48/reco/ppProduction2008/ReversedFullField/P08ic/2008/054/9054010/st_toftpx_9054010_raw_2400010.event.root",
 		    const Char_t* outDir="./",		
 		    const Char_t* outFile="dummy",
 		    const Char_t* appendix="test.microDst")		
@@ -34,8 +34,22 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* 
 
   //  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
   //  gSystem->Load("/afs/rhic.bnl.gov/star/packages/DEV/.i386_redhat61/lib/libJprof"); 
-  cout << " loading done " << endl;
 
+  gSystem->Load("StarMagField");
+  gSystem->Load("StMagF");
+  gSystem->Load("StTpcDb");
+//  gSystem->Load("StDbUtilities");
+  gSystem->Load("StDaqLib");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StEventMaker");
+  gSystem->Load("StarMagField");
+  gSystem->Load("StTofUtil");
+  gSystem->Load("StTofCalibMaker");
+ 
+ cout << " loading done " << endl;
   chain = new StChain("StChain"); 
   chain->SetDebug();
 
@@ -61,7 +75,11 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* 
   ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
   ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
   ioMaker->SetBranch("runcoBranch",0,"r"); //activate evt.root Branch
-  
+ 
+  //TOF Maker
+  St_db_Maker *dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
+  StTofCalibMaker *tofCalib = new StTofCalibMaker();
+ 
   // ***********************
   // the StStrangeMuDstMaker
   // ***********************
