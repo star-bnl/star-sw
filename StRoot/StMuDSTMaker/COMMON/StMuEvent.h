@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.20 2008/02/20 09:00:48 mvl Exp $
+ * $Id: StMuEvent.h,v 1.21 2008/06/26 15:41:29 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -102,6 +102,7 @@ class StMuEvent : public TObject {
   unsigned int numberOfVpdWestHits();
   float vpdTstart();
   float vpdTdiff(); 
+  float vpdVz();
 
  protected:
   void clear();
@@ -140,12 +141,13 @@ class StMuEvent : public TObject {
   UInt_t  mVpdWest;    // VPD West Hit pattern
   Float_t mVpdTstart;  // VPD start time (calibrated)
   Float_t mVpdTdiff;   // VPD time difference (calibrated)
+  Float_t mVpdVz;      // VPD vertex z
 
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,11)
+  ClassDef(StMuEvent,12)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -203,10 +205,14 @@ inline unsigned int StMuEvent::numberOfVpdWestHits() {
 }
 inline float StMuEvent::vpdTstart() { return mVpdTstart; }
 inline float StMuEvent::vpdTdiff() { return mVpdTdiff; }
+inline float StMuEvent::vpdVz() { return mVpdVz; }
 #endif
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.21  2008/06/26 15:41:29  tone421
+ * Add getter and setter for vpd z vertex position
+ *
  * Revision 1.20  2008/02/20 09:00:48  mvl
  * Included FMS data (StFMSTriggerDetector) (code by Akio)
  *
