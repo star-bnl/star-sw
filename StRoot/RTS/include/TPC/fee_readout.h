@@ -64,7 +64,7 @@ static unsigned char fee_position[6][36] = {
 */
 
 
-#ifdef FEE_ORDER_NEED
+
 static int fee_order[6][72] ={
   /* RDO 1 */
  {0,1,2,3,4,5,6,7,8,9,10,11,12,13,
@@ -184,4 +184,3 @@ static int fee_upper[6][72] = {
                        1, 1, 1, 1, 1, 1, 1, 1, 1}  /*  18B..35B */
 };
 
-#endif

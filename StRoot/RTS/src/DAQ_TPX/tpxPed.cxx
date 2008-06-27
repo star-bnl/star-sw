@@ -14,8 +14,6 @@
 #include <DAQ_TPX/tpxPed.h>
 
 
-
-	
 tpxPed::tpxPed()
 {
 	smoothed = 0 ;
@@ -563,4 +561,3 @@ int tpxPed::summarize(FILE *log)
 
 	return notes ;
 }
-
