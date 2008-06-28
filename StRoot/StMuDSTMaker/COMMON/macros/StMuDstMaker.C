@@ -34,20 +34,6 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* 
 
   //  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
   //  gSystem->Load("/afs/rhic.bnl.gov/star/packages/DEV/.i386_redhat61/lib/libJprof"); 
-
-  gSystem->Load("StarMagField");
-  gSystem->Load("StMagF");
-  gSystem->Load("StTpcDb");
-//  gSystem->Load("StDbUtilities");
-  gSystem->Load("StDaqLib");
-  gSystem->Load("StDbBroker");
-  gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("St_db_Maker");
-  gSystem->Load("StEventMaker");
-  gSystem->Load("StarMagField");
-  gSystem->Load("StTofUtil");
-  gSystem->Load("StTofCalibMaker");
  
  cout << " loading done " << endl;
   chain = new StChain("StChain"); 
@@ -75,11 +61,7 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* 
   ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
   ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
   ioMaker->SetBranch("runcoBranch",0,"r"); //activate evt.root Branch
- 
-  //TOF Maker
-  St_db_Maker *dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
-  StTofCalibMaker *tofCalib = new StTofCalibMaker();
- 
+  
   // ***********************
   // the StStrangeMuDstMaker
   // ***********************
