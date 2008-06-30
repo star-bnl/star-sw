@@ -22,6 +22,10 @@ public:
   void SetPythia(StGammaPythiaEvent* pythia) { mPythia = pythia; }
   int Make();
 
+  virtual const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaEventMaker.h,v 1.2 2008/06/30 14:58:42 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
+
 private:
   void collectDecayPhotons();
   void collectDecayPhotons(StMcVertex* vertex);

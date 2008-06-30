@@ -30,6 +30,9 @@ class StGammaEvent : public TObject {
   StGammaEvent();
   ~StGammaEvent(){ /* nada */ }
 
+  virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaEvent.h,v 1.11 2008/06/30 14:58:38 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
   void Clear(Option_t *opts="");
   UShort_t mFlags;  /// Event flags (see above)
   UShort_t flags() const { return mFlags; }
@@ -118,8 +121,9 @@ class StGammaEvent : public TObject {
   void SetPolarizationType( UShort_t t ){ mPolarizationType=t; }
   void SetDsmVertex( UShort_t v ){ mDsmVertex=v; }
 
-
-
+  UShort_t spin4(){ return mSpin4; }
+  UShort_t polarization(){ return mPolarizationType; }
+  UShort_t valid(){ return mSpinDbValid; }
 
  private:
   //                                                 Towers, tracks and strips

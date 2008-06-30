@@ -8,6 +8,8 @@ class TFile;
 class StGammaEvent;
 class StSpinDbMaker;
 
+#include <map>
+
 class StGammaSpinMaker : public StMaker
 {
 
@@ -19,6 +21,10 @@ class StGammaSpinMaker : public StMaker
   Int_t Make();
   void  Clear(Option_t *opts="");
   Int_t Finish();
+
+  virtual const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StGammaSpinMaker.h,v 1.2 2008/06/30 14:58:43 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
 
  private:
  protected:

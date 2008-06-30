@@ -24,6 +24,9 @@ class StGammaCandidate : public TObject
   StGammaCandidate();
   ~StGammaCandidate();
 
+  virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaCandidate.h,v 1.10 2008/06/30 14:58:37 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
 
   //
   // Functions to access raw data and return (simple) isolation sums
@@ -69,9 +72,9 @@ class StGammaCandidate : public TObject
   void SetDetectorId( Int_t id ){ mDetector=id; }
   enum CalorimeterId { kEEmc=0, kBEmc, kUnknown }; 
 
-  Int_t detectorId(){ return mDetector; }
-  Int_t id(){ return mGammaId; }
-
+  Int_t detectorId(){ return mDetector; } /// Returns detector ID (0=EEMC, 1=BEMC) 
+  Int_t id(){ return mGammaId; }          /// Returns unique ID for each gamma in the event
+  Int_t towerId(){ return mTowerId; }     /// Returns seed tower ID
 
 
 

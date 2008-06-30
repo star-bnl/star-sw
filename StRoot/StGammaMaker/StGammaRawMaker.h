@@ -86,6 +86,10 @@ class StGammaRawMaker : public StMaker {
   Int_t Init();
   Int_t Make();
   void  Clear(Option_t *opts="");
+
+  virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.3 2008/06/30 14:58:43 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
   
   ClassDef(StGammaRawMaker,1);
 

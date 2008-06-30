@@ -22,6 +22,9 @@ public:
   StBarrelEmcClusterMaker(const Char_t* name = "bemc_cluster" ) : StMaker(name) {}
   ~StBarrelEmcClusterMaker() {}
 
+  virtual const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StBarrelEmcClusterMaker.h,v 1.4 2008/06/30 14:58:36 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
   void Clear(Option_t* option = "");
   int  Init();
   int  Make();

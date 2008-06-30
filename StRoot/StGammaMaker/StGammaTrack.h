@@ -16,6 +16,10 @@ public:
   StGammaTrack(StMuTrack* track);
   ~StGammaTrack() {}
 
+  virtual const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StGammaTrack.h,v 1.7 2008/06/30 14:58:45 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
+
   Int_t    id;     /// id of the track
   Int_t    flag;   /// track flag
   Int_t    type;   /// track type 0=global 1=primary ...
