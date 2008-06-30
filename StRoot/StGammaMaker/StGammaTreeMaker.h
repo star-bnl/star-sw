@@ -7,7 +7,31 @@
 class TTree;
 class TFile;
 class StGammaEvent;
+class StGammaTreeMaker;
 
+#include <vector>
+
+class StGammaTreeVersion : public TNamed
+{
+
+ public:
+  StGammaTreeVersion( const Char_t *name="version", const Char_t *title="versioning information for StGammaMaker chain"):TNamed(name,title){ /* nada */ };
+  ~StGammaTreeVersion(){ /* nada */ };
+
+  void print();
+
+ private:
+ protected:
+
+  std::vector<TString> mMakerTags;   
+  std::vector<TString> mStorageTags;
+
+  friend class StGammaTreeMaker;
+  
+  ClassDef(StGammaTreeVersion,1);
+
+};
+ 
 class StGammaTreeMaker : public StMaker
 {
 
@@ -34,7 +58,7 @@ class StGammaTreeMaker : public StMaker
   StGammaEvent *event(){ return mGammaEvent; }
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGammaTreeMaker.h,v 1.3 2008/06/30 14:58:47 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaTreeMaker.h,v 1.4 2008/06/30 16:34:15 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
 
  private:
  protected:
@@ -44,6 +68,8 @@ class StGammaTreeMaker : public StMaker
 
   StGammaEvent *mGammaEvent;
   TString mFilename;
+
+  StGammaTreeVersion mVersion; /// code versioning information
 
   ClassDef(StGammaTreeMaker,1);
 
