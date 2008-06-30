@@ -40,6 +40,10 @@ class StGammaEventMaker : public StMaker
     
   StGammaEvent *event(){ return mGammaEvent; }
 
+  virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaEventMaker.h,v 1.5 2008/06/30 14:58:39 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
+
  private:
  protected:
 

@@ -59,6 +59,10 @@ public:
   /// \return Pointer to single instance of this singleton class.
   static StGammaFitter* instance();
 
+  virtual const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StGammaFitter.h,v 1.5 2008/06/30 14:58:40 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
+
   /// \brief Fit transverse SMD profile to predetermined peak in u- and v-plane.
   /// \param candidate cluster to be fitted in the SMD plane.
   /// \param u holds the result of the fit in the SMD u-plane.

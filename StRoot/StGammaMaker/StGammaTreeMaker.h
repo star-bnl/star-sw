@@ -33,6 +33,9 @@ class StGammaTreeMaker : public StMaker
   /// create a gamma event
   StGammaEvent *event(){ return mGammaEvent; }
 
+  virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaTreeMaker.h,v 1.3 2008/06/30 14:58:47 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
  private:
  protected:
 

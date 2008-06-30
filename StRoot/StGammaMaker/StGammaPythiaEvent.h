@@ -21,6 +21,9 @@ public:
   StGammaPythiaEvent(const StPythiaEvent* pythia) : StPythiaEvent(*pythia) {}
   ~StGammaPythiaEvent() {}
 
+  virtual const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaEvent.h,v 1.4 2008/06/30 14:58:41 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
   void Clear(Option_t* option = "");
 
   int numberOfPion0() const;

@@ -30,7 +30,7 @@ Int_t StGammaTreeMaker::Init()
   if ( !mGammaFile )
     mGammaFile=new TFile(mFilename,"RECREATE");
   if ( !mGammaTree ) {
-    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.7 2008/06/11 20:49:35 pibero Exp $ built "__DATE__" "__TIME__);    
+    mGammaTree=new TTree("gammas","Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.8 2008/06/30 14:58:46 jwebb Exp $ built "__DATE__" "__TIME__);    
     mGammaTree->SetDirectory(mGammaFile);
   }
 
@@ -50,6 +50,18 @@ Int_t StGammaTreeMaker::Init()
 
 Int_t StGammaTreeMaker::Finish()
 {
+
+  // QA information
+  TString cvstag=GetCVS();
+  LOG_QA << " [StGamma] " << cvstag.Data() << endm;
+  TIter next( GetParentChain()->GetMakeList());
+  StMaker *maker;
+  while ((maker = (StMaker* )next())) {
+    cvstag=maker->GetCVS();
+    LOG_QA << " [StGamma] " << cvstag.Data() << endm;
+  }
+
+
   mGammaFile->cd();
   mGammaTree->Write();
   return kStOK;

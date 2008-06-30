@@ -12,6 +12,11 @@ class StGammaStrip : public TObject
  public:
   StGammaStrip();
   ~StGammaStrip(){ /* nada */ }
+
+  virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaStrip.h,v 1.5 2008/06/30 14:58:44 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
+
   Int_t index;   // index of strip in plane
   Int_t sector;  // or bemc module
   Int_t plane;   // 0=esmd-u 1=esmdv 10=bsmd-eta 11=bsmd-phi
