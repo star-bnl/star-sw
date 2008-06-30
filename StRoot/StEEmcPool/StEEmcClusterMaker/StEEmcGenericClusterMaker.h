@@ -218,6 +218,10 @@ class StEEmcGenericClusterMaker : public StMaker
   /// a unique cluster id (key).
   Int_t nextClusterId(){ return mClusterId++; }
 
+    virtual const char* GetCVS() const
+	        {static const char cvs[]="Tag $Name:  $ $Id: StEEmcGenericClusterMaker.h,v 1.6 2008/06/30 21:15:23 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+
+
  private:
  protected:
 
