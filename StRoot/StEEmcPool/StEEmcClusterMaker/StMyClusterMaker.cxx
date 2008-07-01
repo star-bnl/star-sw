@@ -79,7 +79,7 @@ Int_t StMyClusterMaker::buildLayer(Int_t layer )
 
   const Char_t *clayers[]={"T","P","Q","R","U","V"};
 
-  LOG_INFO << " build clusters for layer=" << clayers[layer] << endm;
+  LOG_DEBUG << " build clusters for layer=" << clayers[layer] << endm;
 
   // get list of hit towers
   StEEmcTowerVec_t hits=mEEanalysis->towers(layer);
@@ -195,7 +195,7 @@ Int_t StMyClusterMaker::buildPostshowerClusters()
 Int_t StMyClusterMaker::buildSmdClusters()
 {
 
-  LOG_INFO << " building SMD clusters" << endm;
+  LOG_DEBUG << " building SMD clusters" << endm;
     
   for ( Int_t sector=0;sector<12;sector++ ) {
 
@@ -216,7 +216,7 @@ Int_t StMyClusterMaker::buildSmdClusters()
       mSmdMinEnergy  = 0.1 * mSmdSeedEnergy;
     }
 
-    LOG_INFO<<GetName()<<" sector="<<sector<<" seed energy="<<mSmdSeedEnergy<<endm;
+    LOG_DEBUG<<GetName()<<" sector="<<sector<<" seed energy="<<mSmdSeedEnergy<<endm;
 
     for ( Int_t plane=0;plane<2;plane++ ) 
       {
@@ -415,7 +415,7 @@ Int_t StMyClusterMaker::buildSmdClusters()
 	    // add smd cluster to list of clusters
 	    if ( cluster.size() >= mMinStrips ) {
 	      add(cluster);
-	      LOG_INFO << " adding " << cluster << endm;
+	      LOG_DEBUG << " adding " << cluster << endm;
 	      Int_t index=seed.index();
 	      // for narrow clusters, no additional seeds w/in +/- 3 smd strips are allowed
 	      for ( Int_t ii=index-3;ii<=index+3; ii++ ) 
