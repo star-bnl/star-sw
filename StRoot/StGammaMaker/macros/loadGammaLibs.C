@@ -29,7 +29,15 @@ void loadGammaLibs()
   gSystem->Load("StEEmcClusterMaker");
   gSystem->Load("StEEmcPointMaker");
   gSystem->Load("StEEmcPi0Mixer");
+  gSystem->Load("StSpinDbMaker");
   gSystem->Load("StMCAsymMaker");
+  gSystem->Load("StEmcTriggerMaker");
+  gSystem->Load("StTriggerUtilities");
+  gSystem->Load("StMCAsymMaker");
+  gSystem->Load("StJetFinder");
+  gSystem->Load("StJets");
+  gSystem->Load("StJetSkimEvent");
+  gSystem->Load("StJetMaker");
   gSystem->Load("StSpinDbMaker");
   gSystem->Load("StGammaMaker");
 
