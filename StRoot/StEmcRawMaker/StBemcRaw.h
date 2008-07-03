@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.10 2007/09/10 22:21:41 kocolosk Exp $
+// $Id: StBemcRaw.h,v 1.11 2008/07/03 20:58:49 mattheww Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.11  2008/07/03 20:58:49  mattheww
+// Added checking of every status table for each hit. Status table checks can be toggled using an option added to setCheckStatus. Also fixed a small bug.
+//
 // Revision 1.10  2007/09/10 22:21:41  kocolosk
 // Support for new BPRS swap fixes (off by default for 06/07 production, on for analysis).
 // StBemcTables now matches map fixes in case end users want to use this copy.
@@ -97,7 +100,7 @@ protected:
     Float_t                  mTOTALE[MAXDETBARREL];
     Int_t                    mCrateStatus[MAXDETBARREL][MAXCRATES];
     Bool_t                   mIsCorrupted[MAXDETBARREL];
-
+    Int_t                    mCheckStatus[MAXDETBARREL][4];
 public:
 
     StBemcRaw(); ///< StBemcRaw constructor
@@ -121,6 +124,10 @@ public:
         return mIsCorrupted[det-1];
     } // return kTRUE if the event is corrupted for that detector
 
+    ///setCheckStatus toggles checking status for adding hits to StEmcCollection
+    ///accepts options="status","pedestal","calib","gain" to toggle individual tables
+    ///default is all tables are checked
+    void                      setCheckStatus(Int_t det, Int_t flag, const char* option = "");
     void                      clearStats(Int_t); ///< Clear statistics for detector 'det'
     void                      updateStats(Int_t,Int_t,Int_t, Float_t); ///< Update statistics for detector 'det'
     void                      printStats(Int_t); ///< Print statistics for detector 'det'
