@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.36 2008/07/03 05:25:44 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.37 2008/07/03 07:22:35 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.37  2008/07/03 07:22:35  jcs
+// improved LOG_WARN message
+//
 // Revision 1.36  2008/07/03 05:25:44  jcs
 // exit momentum fit if plength >= NoSolution/2 for any hit
 //
@@ -728,7 +731,7 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
     StThreeVector<Double_t> nvec(0., 0., 1.);
     Double_t plength = pathLength(rvec, nvec);
     if (plength >= NoSolution/2) {
-       LOG_WARN << "Helix Fit plength >= NoSolution/2 for Hit  " << i <<" leaving MomentumFit for this track"<< endm;
+       LOG_WARN << "Helix Fit found NoSolution for hit  " << i <<" - not possible to track helix momentum through measured field for this track"<< endm;
        return;
     }
     xhelix[i] = x(plength);
