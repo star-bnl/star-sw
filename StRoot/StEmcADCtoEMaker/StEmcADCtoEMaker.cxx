@@ -17,6 +17,7 @@
 #include "StMuDSTMaker/COMMON/StMuDebug.h"
 #include "StMuDSTMaker/COMMON/StMuEmcUtil.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StEnumerations.h"
 
 
 ClassImp(StEmcADCtoEMaker)
@@ -307,4 +308,10 @@ void  StEmcADCtoEMaker::testCorruption()
     if(nModulesWithNoHits != nModulesOff)
         mIsCorrupted = kTRUE;
     return;
+}
+
+void StEmcADCtoEMaker::setCheckStatus(StDetectorId det, int flag, const char* option)
+{
+  mBemcData->setCheckStatus(det-kBarrelEmcTowerId, flag, option);
+  return;
 }
