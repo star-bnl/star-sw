@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StConePars.h,v 1.7 2008/04/25 01:50:59 tai Exp $
+// $Id: StConePars.h,v 1.8 2008/07/06 01:13:43 tai Exp $
 #ifndef STCONEPARS_H
 #define STCONEPARS_H
 
@@ -10,6 +10,25 @@
 class StConePars : public StJetPars {
 
 public:
+
+  StConePars()
+    : mNeta(105)
+    , mNphi(120)
+    , mEtaMin(-3.0)
+    , mEtaMax(3.0)
+    , mPhiMin(-atan(1.0)*4.0)
+    , mPhiMax(atan(1.0)*4.0)
+    , mR(0.7)
+    , mSeedEtMin(0.5)
+    , mAssocEtMin(0.1)
+    , mSplitFraction(0.5)
+    , mDoMinimization(true)
+    , mAddMidpoints(true)
+    , mRequireStableMidpoints(true)
+    , mDoSplitMerge(true)
+    , mDebug(false)
+  { }
+    
 
   virtual StJetFinder* constructJetFinder();
 
