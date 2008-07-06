@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.42 2008/05/03 22:00:57 tai Exp $
+// $Id: StJetMaker.h,v 1.43 2008/07/06 02:08:07 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -42,6 +42,8 @@ public:
     
   typedef StSpinJet::StJetMakerBackwordCompatibility::jetBranchesMap jetBranchesMap;
   jetBranchesMap& getJets() const { return _backwordCompatibility->getJets(); }
+
+  StSpinJet::StJetTreeWriter* getTreeWriter() { return _treeWriter; }
 
 private:
 
