@@ -1,8 +1,0 @@
-#!/bin/bash
-
-export DATA_NAME='Pure MC photon simulation using 2003 geometry and BFC chain and MinBias timestamps, no calibration spread'
-export DATA_TAG='dAu2003Simulation'
-export DATA_SUBTAG=$DATA_TAG'_gamma_MB_nospread'
-export DATA_QUERY="file:$DATA_PATH/starsim_gamma_dAu2003/*.event.root"
-export DATA_CONFIG='config_simulation_dAu2003_MB_nospread.C'
-export DATA_DIR=$DATA_PATH'/simu_dAu2003_gamma_MB_nospread'

@@ -1,9 +1,0 @@
-#ifdef __CINT__
-#pragma link off all globals;
-#pragma link off all classes;
-#pragma link off all functions;
-
-#pragma link C++ class St_PolyLine3D-;
-#pragma link C++ class StEventDisplayMaker;
-#pragma link C++ enum  StEventDisplayMaker::EDisplayEvents;
-#endif
