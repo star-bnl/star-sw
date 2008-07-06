@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StppAnaPars.h,v 1.6 2008/05/01 21:55:13 tai Exp $
+// $Id: StppAnaPars.h,v 1.7 2008/07/06 02:07:46 tai Exp $
 #ifndef STPPANAPARS_h
 #define STPPANAPARS_h
 
@@ -14,6 +14,17 @@ namespace StSpinJet {
 class StppAnaPars : public TObject {
 
 public:
+
+  StppAnaPars()
+    : mPtMin(0.2)
+    , mEtaMax(100.0)
+    , mNhits(12)
+    , mFlagMin(0)
+    , mJetPtMin(3.5)
+    , mJetEtaMax(100.0)
+    , mJetEtaMin(0.0)
+    , mJetNmin(0)
+  { }
 
   void setCutPtMin(double v) { mPtMin = v; }
   double ptMin() const { return mPtMin; }
