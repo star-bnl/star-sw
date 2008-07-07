@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.61 2008/07/07 17:40:03 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.62 2008/07/07 17:55:28 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -92,14 +92,15 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     const StMuTrack* track = (*it).first;
 
+    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second);
+
     StThreeVectorF momentum = track->momentum();
     double mass = 0.1395700; //assume pion+ mass for now
     float energy = sqrt(mass*mass + momentum.mag()*momentum.mag());
 
     TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 
-    StSpinJet::StMuTrackEmuFactory factory;
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track, (*it).second), p4, track->charge(), (*it).second, kTpcId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(trackEmu, p4, track->charge(), (*it).second, kTpcId);
     ret.push_back(pmu);
   }
   return ret;
