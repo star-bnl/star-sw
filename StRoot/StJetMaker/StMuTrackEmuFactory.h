@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmuFactory.h,v 1.4 2008/07/07 17:55:24 tai Exp $
+// $Id: StMuTrackEmuFactory.h,v 1.5 2008/07/07 21:03:38 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMUFACTORY_H
 #define STMUTRACKEMUFACTORY_H
@@ -17,7 +17,7 @@ public:
   StMuTrackEmuFactory() { }
   virtual ~StMuTrackEmuFactory() { }
 
-  static StMuTrackEmu* createStMuTrackEmu(const StMuTrack* track, int trackIndex);
+  static StMuTrackEmu* createStMuTrackEmu(const StMuTrack* track, int trackIndex, double BTesla = 0.5);
 
 };
 
