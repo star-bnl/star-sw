@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CorrectTowerEnergyForTracks.h,v 1.1 2008/06/10 09:17:57 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.h,v 1.2 2008/07/07 22:12:29 tai Exp $
 #ifndef CORRECTTOWERENERGYFORTRACKS_H
 #define CORRECTTOWERENERGYFORTRACKS_H
 
@@ -14,19 +14,22 @@ class StMuDstMaker;
 
 namespace StSpinJet {
 
+class StMuTrackEmu;
+
 class CorrectTowerEnergyForTracks {
 
 public:
   CorrectTowerEnergyForTracks(StMuDstMaker* uDstMaker);
   virtual ~CorrectTowerEnergyForTracks() { }
 
-  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
+  //  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
+  typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
 
   TowerEnergyDepositList Do(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList);
 
 private:
 
-  void countTracksOnBemcTower(const StMuTrack& track);
+  void countTracksOnBemcTower(const StMuTrackEmu& track);
 
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
 

@@ -1,4 +1,4 @@
-// $Id: StMuTrackEmuFactory.cxx,v 1.10 2008/07/07 21:03:37 tai Exp $
+// $Id: StMuTrackEmuFactory.cxx,v 1.11 2008/07/07 22:12:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StMuTrackEmuFactory.h"
 
@@ -11,7 +11,7 @@
 
 namespace StSpinJet {
 
-  StMuTrackEmu* StMuTrackEmuFactory::createStMuTrackEmu(const StMuTrack* track, int trackIndex, double BTesla)
+StMuTrackEmu* StMuTrackEmuFactory::createStMuTrackEmu(const StMuTrack* track, int trackIndex, double BTesla)
 {
   if(!track) return 0;
 
@@ -31,13 +31,12 @@ namespace StSpinJet {
   trackEmu->_dcaZ       = track->dcaZ();
   trackEmu->_dcaD       = track->dcaD();
 
-  double bField(0.5); // to put it in Tesla
-  StEmcGeom* geom = StEmcGeom::instance("bemc");
-  double rad = geom->Radius() + 5;
-  //  double rad(238.6);// geom->Radius()+5.;
+  trackEmu->_BField      = BTesla;
+  trackEmu->_bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
+
   StThreeVectorD momentumAt, positionAt;
   StMuEmcPosition EmcPosition;
-  if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, track, BTesla, rad) ||
+  if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, track, trackEmu->_BField, trackEmu->_bemcRadius) ||
       EmcPosition.trackOnEEmc(&positionAt, &momentumAt, track))
     {
       trackEmu->_etaext = positionAt.pseudoRapidity();
