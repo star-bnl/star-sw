@@ -1,19 +1,15 @@
-// $Id: CorrectTowerEnergyForTracks.cxx,v 1.2 2008/07/07 22:12:29 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.cxx,v 1.3 2008/07/07 22:20:53 tai Exp $
 #include "CorrectTowerEnergyForTracks.h"
-
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
-#include "StMuEmcPosition.h"
 #include "../StMuTrackEmu.h"
 
 namespace StSpinJet {
 
 const int CorrectTowerEnergyForTracks::mNOfBemcTowers;
 
-CorrectTowerEnergyForTracks::CorrectTowerEnergyForTracks(StMuDstMaker* uDstMaker)
-  : mMuDstMaker(uDstMaker)
+CorrectTowerEnergyForTracks::CorrectTowerEnergyForTracks()
 {
 
 }
@@ -24,9 +20,8 @@ TowerEnergyDepositList CorrectTowerEnergyForTracks::Do(const TowerEnergyDepositL
     mNtracksOnTower[i] = 0;
   }
 
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrackEmu* track = *it;
-    countTracksOnBemcTower(*track);
+  for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
+    countTracksOnBemcTower(**track);
   }
 
   TowerEnergyDepositList ret;
@@ -47,16 +42,7 @@ TowerEnergyDepositList CorrectTowerEnergyForTracks::Do(const TowerEnergyDepositL
 
 void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const StMuTrackEmu& track)
 {
-  //  int m, e, s, id = 0;
   int id = 0;
-
-  //  StEmcGeom::instance("bemc")->getBin(track.phiext(), track.etaext(), m, e, s);
-
-  //  int bad = StEmcGeom::instance("bemc")->getId(m,e,s,id);
-
-  //  int bad = StEmcGeom::instance("bemc")->getId(track.phiext(), track.etaext(), id);
-
-  //  if(bad == 0)  mNtracksOnTower[id]++;
 
   if(StEmcGeom::instance("bemc")->getId(track.phiext(), track.etaext(), id) == 0)
     mNtracksOnTower[id]++;
