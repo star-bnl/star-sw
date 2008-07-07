@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.66 2008/07/07 20:35:17 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.67 2008/07/07 21:03:41 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -63,10 +63,11 @@ void StBET4pMakerImp::Make()
 
   vector<StMuTrackEmu*> trackmuList;
 
+  double magneticField = mMuDstMaker->muDst()->event()->magneticField()/10.0; //to put it in Tesla
   for(TrackList__::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     const StMuTrack* track = (*it).first;
 
-    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second);
+    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second, magneticField);
 
     trackmuList.push_back(trackEmu);
   }
