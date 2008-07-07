@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.67 2008/07/07 21:03:41 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.68 2008/07/07 22:12:29 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -79,7 +79,7 @@ void StBET4pMakerImp::Make()
   if(mUseBEMC) {
     TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();
 
-    TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyDepositList, trackList);
+    TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyDepositList, trackmuList);
 
     FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergyDepositList);
 

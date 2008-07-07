@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.8 2008/07/07 19:24:46 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.9 2008/07/07 22:12:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -15,26 +15,28 @@ public:
   StMuTrackEmu() { }
   virtual ~StMuTrackEmu() { }
 
-  double         px()         const { return _px; }
-  double         py()         const { return _py; }
-  double         pz()         const { return _pz; }
-  short          flag()       const { return _flag; }
-  unsigned short nHits()      const { return _nHits; }
-  Short_t        charge()     const { return _charge; }
-  unsigned short nHitsPoss()  const { return _nHitsPoss; }
-  unsigned short nHitsDedx()  const { return _nHitsDedx; }
-  unsigned short nHitsFit()   const { return _nHitsFit; }
-  double         nSigmaPion() const { return _nSigmaPion; }
-  double         Tdca()       const { return _Tdca; }
-  Float_t        dcaZ()       const { return _dcaZ; }
-  Float_t        dcaD()       const { return _dcaD; }
-  double         etaext()     const { return _etaext; }
-  double         phiext()     const { return _phiext; }
-  double         dEdx()       const { return _dEdx; }
-
-  int            trackIndex() const { return _trackIndex; }
-
-  short          id()         const { return _id; }
+  double         px()          const { return _px; }
+  double         py()          const { return _py; }
+  double         pz()          const { return _pz; }
+  short          flag()        const { return _flag; }
+  unsigned short nHits()       const { return _nHits; }
+  Short_t        charge()      const { return _charge; }
+  unsigned short nHitsPoss()   const { return _nHitsPoss; }
+  unsigned short nHitsDedx()   const { return _nHitsDedx; }
+  unsigned short nHitsFit()    const { return _nHitsFit; }
+  double         nSigmaPion()  const { return _nSigmaPion; }
+  double         Tdca()        const { return _Tdca; }
+  Float_t        dcaZ()        const { return _dcaZ; }
+  Float_t        dcaD()        const { return _dcaD; }
+  double         BField()      const { return _BField; }
+  double         bemcRadius() const { return _bemcRadius; }
+  double         etaext()      const { return _etaext; }
+  double         phiext()      const { return _phiext; }
+  double         dEdx()        const { return _dEdx; }
+			       
+  int            trackIndex()  const { return _trackIndex; }
+			       
+  short          id()          const { return _id; }
 
 private:
 
@@ -53,6 +55,8 @@ private:
   double         _Tdca;
   Float_t        _dcaZ;
   Float_t        _dcaD;
+  double         _BField;
+  double         _bemcRadius;
   double         _etaext;
   double         _phiext;
   double         _dEdx;

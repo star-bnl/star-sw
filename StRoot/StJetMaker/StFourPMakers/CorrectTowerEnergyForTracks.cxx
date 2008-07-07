@@ -1,12 +1,12 @@
-// $Id: CorrectTowerEnergyForTracks.cxx,v 1.1 2008/06/10 09:17:57 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.cxx,v 1.2 2008/07/07 22:12:29 tai Exp $
 #include "CorrectTowerEnergyForTracks.h"
 
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
 #include "StMuEmcPosition.h"
+#include "../StMuTrackEmu.h"
 
 namespace StSpinJet {
 
@@ -25,7 +25,7 @@ TowerEnergyDepositList CorrectTowerEnergyForTracks::Do(const TowerEnergyDepositL
   }
 
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrack* track = (*it).first;
+    const StMuTrackEmu* track = *it;
     countTracksOnBemcTower(*track);
   }
 
@@ -45,24 +45,21 @@ TowerEnergyDepositList CorrectTowerEnergyForTracks::Do(const TowerEnergyDepositL
   return ret;
 }
 
-void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const StMuTrack& track)
+void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const StMuTrackEmu& track)
 {
-  StMuDst* uDst = mMuDstMaker->muDst();
+  //  int m, e, s, id = 0;
+  int id = 0;
 
-  StThreeVectorD momentumAt, positionAt;
-	
-  double magneticField = uDst->event()->magneticField()/10.0; //to put it in Tesla
-  StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-  StMuEmcPosition muEmcPosition;
-  bool tok = muEmcPosition.trackOnEmc(&positionAt, &momentumAt, &track, magneticField, geom->Radius());
-  if(tok) {
-    int m,e,s,id=0;
-    geom->getBin(positionAt.phi(), positionAt.pseudoRapidity(), m, e, s);
-    int bad = geom->getId(m,e,s,id);
-    if(bad == 0) {
-      mNtracksOnTower[id]++;
-    }
-  }
+  //  StEmcGeom::instance("bemc")->getBin(track.phiext(), track.etaext(), m, e, s);
+
+  //  int bad = StEmcGeom::instance("bemc")->getId(m,e,s,id);
+
+  //  int bad = StEmcGeom::instance("bemc")->getId(track.phiext(), track.etaext(), id);
+
+  //  if(bad == 0)  mNtracksOnTower[id]++;
+
+  if(StEmcGeom::instance("bemc")->getId(track.phiext(), track.etaext(), id) == 0)
+    mNtracksOnTower[id]++;
 }
 
 double CorrectTowerEnergyForTracks::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId)
