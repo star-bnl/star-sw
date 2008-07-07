@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.63 2008/07/07 18:52:38 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.64 2008/07/07 20:03:00 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -89,18 +89,27 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
 {
   FourList ret;
 
+  vector<StMuTrackEmu*> trackmuList;
+
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     const StMuTrack* track = (*it).first;
 
     StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second);
 
-    TVector3 momentum(track->momentum().x(), track->momentum().y(), track->momentum().z());
+    trackmuList.push_back(trackEmu);
+  }
+
+  for(vector<StMuTrackEmu*>::const_iterator it = trackmuList.begin(); it != trackmuList.end(); ++it) {
+
+    StMuTrackEmu* trackEmu = (*it);
+
+    TVector3 momentum(trackEmu->px(), trackEmu->py(), trackEmu->pz());
     double mass = 0.1395700; //assume pion+ mass for now
     float energy = sqrt(mass*mass + momentum.Mag()*momentum.Mag());
 
-    TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
+    TLorentzVector p4(momentum, energy);
 
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(trackEmu, p4, track->charge(), (*it).second, kTpcId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(trackEmu, p4, trackEmu->charge(), trackEmu->trackIndex(), kTpcId);
     ret.push_back(pmu);
   }
   return ret;
