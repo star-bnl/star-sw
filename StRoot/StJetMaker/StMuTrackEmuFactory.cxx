@@ -1,4 +1,4 @@
-// $Id: StMuTrackEmuFactory.cxx,v 1.6 2008/06/01 19:42:46 tai Exp $
+// $Id: StMuTrackEmuFactory.cxx,v 1.7 2008/07/07 17:39:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StMuTrackEmuFactory.h"
 
@@ -10,7 +10,7 @@
 
 namespace StSpinJet {
 
-StMuTrackEmu* StMuTrackEmuFactory::createStMuTrackEmu(const StMuTrack* track) const
+StMuTrackEmu* StMuTrackEmuFactory::createStMuTrackEmu(const StMuTrack* track, int trackIndex) const
 {
   if(!track) return 0;
 
@@ -45,6 +45,8 @@ StMuTrackEmu* StMuTrackEmuFactory::createStMuTrackEmu(const StMuTrack* track) co
 
 
   trackEmu->_dEdx = track->dEdx();
+
+  trackEmu->_trackIndex = trackIndex;
 
   trackEmu->_id = track->id();
 

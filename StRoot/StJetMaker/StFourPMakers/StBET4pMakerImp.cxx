@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.60 2008/07/07 07:19:04 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.61 2008/07/07 17:40:03 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -99,7 +99,7 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
     TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
 
     StSpinJet::StMuTrackEmuFactory factory;
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track), p4, track->charge(), (*it).second, kTpcId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(factory.createStMuTrackEmu(track, (*it).second), p4, track->charge(), (*it).second, kTpcId);
     ret.push_back(pmu);
   }
   return ret;
