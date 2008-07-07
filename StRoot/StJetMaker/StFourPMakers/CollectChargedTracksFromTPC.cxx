@@ -1,4 +1,4 @@
-// $Id: CollectChargedTracksFromTPC.cxx,v 1.1 2008/06/01 22:46:44 tai Exp $
+// $Id: CollectChargedTracksFromTPC.cxx,v 1.2 2008/07/07 20:35:16 tai Exp $
 #include "CollectChargedTracksFromTPC.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -19,18 +19,18 @@ CollectChargedTracksFromTPC::~CollectChargedTracksFromTPC()
 
 }
 
-CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::Do()
+CollectChargedTracksFromTPC::TrackList__ CollectChargedTracksFromTPC::Do()
 {
-  TrackList trackiList = getTracksFromTPC();
+  TrackList__ trackiList = getTracksFromTPC();
 
   trackiList = selectTracksToPassToJetFinder(trackiList);
 
   return trackiList;
 }
 
-CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::getTracksFromTPC()
+CollectChargedTracksFromTPC::TrackList__ CollectChargedTracksFromTPC::getTracksFromTPC()
 {
-  TrackList ret;
+  TrackList__ ret;
 
   StMuDst* uDst = _uDstMaker->muDst();
 
@@ -49,11 +49,11 @@ CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::getTracksFro
   return ret;
 }
 
-CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::selectTracksToPassToJetFinder(const TrackList& trackList)
+CollectChargedTracksFromTPC::TrackList__ CollectChargedTracksFromTPC::selectTracksToPassToJetFinder(const TrackList__& trackList)
 {
-  TrackList ret;
+  TrackList__ ret;
 
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+  for(TrackList__::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     const StMuTrack* track = (*it).first;
 
     if (shoudNotPassToJetFinder(*track)) continue;

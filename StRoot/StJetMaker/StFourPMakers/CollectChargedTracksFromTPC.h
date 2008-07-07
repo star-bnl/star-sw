@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectChargedTracksFromTPC.h,v 1.1 2008/06/01 22:46:44 tai Exp $
+// $Id: CollectChargedTracksFromTPC.h,v 1.2 2008/07/07 20:35:17 tai Exp $
 #ifndef COLLECTCHARGEDTRACKSFROMTPC_H
 #define COLLECTCHARGEDTRACKSFROMTPC_H
 
@@ -12,23 +12,27 @@ class StMuDstMaker;
 
 namespace StSpinJet {
 
+class StMuTrackEmu;
+
 class CollectChargedTracksFromTPC {
 
 public:
+
   CollectChargedTracksFromTPC(StMuDstMaker* uDstMaker);
   virtual ~CollectChargedTracksFromTPC();
 
-  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
+  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList__;
+  typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
 
-  TrackList Do();
+  TrackList__ Do();
 
   void setUse2006Cuts(bool v) { _use2006Cuts = v; }
 
 private:
 
-  TrackList getTracksFromTPC();
+  TrackList__ getTracksFromTPC();
 
-  TrackList selectTracksToPassToJetFinder(const TrackList& trackList);
+  TrackList__ selectTracksToPassToJetFinder(const TrackList__& trackList);
 
   bool shoudNotPassToJetFinder(const StMuTrack& track) const;
 
