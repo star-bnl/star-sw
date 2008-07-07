@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.68 2008/07/07 22:12:29 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.69 2008/07/07 22:28:48 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -6,7 +6,6 @@
 
 
 //StMuDstMaker
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -18,7 +17,6 @@
 #include "../StMuTrackFourVec.h"
 
 #include "../StMuTrackEmu.h"
-#include "../StMuTrackEmuFactory.h"
 
 #include "StMuEmcPosition.h"
 
@@ -57,20 +55,7 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make()
 {
-  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList__;
-
-  TrackList__ trackList = _collectChargedTracksFromTPC->Do();
-
-  vector<StMuTrackEmu*> trackmuList;
-
-  double magneticField = mMuDstMaker->muDst()->event()->magneticField()/10.0; //to put it in Tesla
-  for(TrackList__::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-
-    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second, magneticField);
-
-    trackmuList.push_back(trackEmu);
-  }
+  TrackList trackmuList = _collectChargedTracksFromTPC->Do();
 
   FourList tpcFourMomentumList = constructFourMomentumListFrom(trackmuList);
 

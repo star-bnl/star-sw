@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectChargedTracksFromTPC.h,v 1.2 2008/07/07 20:35:17 tai Exp $
+// $Id: CollectChargedTracksFromTPC.h,v 1.3 2008/07/07 22:28:48 tai Exp $
 #ifndef COLLECTCHARGEDTRACKSFROMTPC_H
 #define COLLECTCHARGEDTRACKSFROMTPC_H
 
@@ -24,7 +24,7 @@ public:
   typedef std::vector<std::pair<const StMuTrack*, int> > TrackList__;
   typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
 
-  TrackList__ Do();
+  TrackList Do();
 
   void setUse2006Cuts(bool v) { _use2006Cuts = v; }
 
