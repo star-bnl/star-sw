@@ -1,4 +1,4 @@
-// $Id: StMuTrackEmuFactory.cxx,v 1.8 2008/07/07 17:55:24 tai Exp $
+// $Id: StMuTrackEmuFactory.cxx,v 1.9 2008/07/07 19:24:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StMuTrackEmuFactory.h"
 
@@ -16,6 +16,9 @@ StMuTrackEmu* StMuTrackEmuFactory::createStMuTrackEmu(const StMuTrack* track, in
 
   StMuTrackEmu* trackEmu = new StMuTrackEmu();
 
+  trackEmu->_px         = track->momentum().x();
+  trackEmu->_py         = track->momentum().y();
+  trackEmu->_pz         = track->momentum().z();
   trackEmu->_flag       = track->flag();
   trackEmu->_nHits      = track->nHits(); 
   trackEmu->_charge     = track->charge();

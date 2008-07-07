@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.7 2008/06/01 19:11:18 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.8 2008/07/07 19:24:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -15,6 +15,9 @@ public:
   StMuTrackEmu() { }
   virtual ~StMuTrackEmu() { }
 
+  double         px()         const { return _px; }
+  double         py()         const { return _py; }
+  double         pz()         const { return _pz; }
   short          flag()       const { return _flag; }
   unsigned short nHits()      const { return _nHits; }
   Short_t        charge()     const { return _charge; }
@@ -37,6 +40,9 @@ private:
 
   friend class StMuTrackEmuFactory;
 
+  double         _px;
+  double         _py;
+  double         _pz;
   short          _flag;
   unsigned short _nHits;
   Short_t        _charge;
