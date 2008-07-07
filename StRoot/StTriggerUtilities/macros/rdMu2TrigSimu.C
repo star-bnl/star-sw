@@ -1,42 +1,28 @@
-//This macro is set up to allow the user to emulate the trigger for the offline condition set
-//by the date in the dbMaker. This macro runs on real data (flagMC=0) and MC files (flagMC=1)
+// Before running macro create an output directory "outL2" if you want a copy of the L2 output histos
+// This macro runs on real data (flagMC=0) and MC files (flagMC=1)
+// Set flag ==1 for those detectors you want included in the trigger decisions 
+// Set configuration for BEMC (online, offline or custom).  EEMC is the same for offline and online
+// Choose the correct configuration year you want to use for L2
 
 int total=0;
+class StChain *chain=0; 
+char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
 
-void rdMu2TrigSimu( int nevents = 200,
-		    int flagMC=0,  // 0== off, 1=Alan
-		    int useEemc=1, // 0== off, 1=kOnline, 2=kExpert
-		    int useBemc=1, // 0== off
-		    int useL2=1,   // 0== off
-		    int L2ConfigYear=2006, // possible: 2006, 2008
-		    int bemcConfig=1, // enum: kOnline=1, kOffline, kExpert
-		    int playConfig=0, // jan:100_199
-		    int emcEveDump=0, // extrating raw EMC data in a custom format
-		    char *file="R7132024.lis")
-{
-		    //R7100052.lis  R7101078.lis  R7133064.lis R70908001.lis    R7132001.lis  
-
-  int nFiles = 1000; // make this big if you want to read all events from a run
+void rdMu2TrigSimu(char *file="/star/institutions/mit/common/mudst/7136033/st_physics_7136033_raw_*.MuDst.root"){
   
-  //char *eemcSetupPath="/star/institutions/iucf/balewski/StarTrigSimuSetup/";  
-  char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";  
-  TString outDir="./out2/"; 
-  char *dirIn ="runList/";
+  int nevents = 200;
+  int flagMC=0;  // 0/1 == Using Real/Simulation data files 
+  int useEemc=1; // 0/1 == Exclude/Include EEMC in Trigger Decisions 
+  int useBemc=1; // 0/1 == Exclude/Include BEMC in Trigger Decisions 
+  int useL2=1;   // 0/1 == Exclude/Include L2 in Trigger Decisions 
+  int L2ConfigYear=2006; // possible: 2006, 2008
+  int bemcConfig=2; // Online==1, Offline==2, Expert==2
+  int playConfig=0; // jan:100_199
+  int emcEveDump=0; // extrating raw EMC data in a custom format
+  int outputL2Histo=0;//output L2 histos to directory outL2
+  TString outDir="./outL2/"; 
 
-  if (flagMC==1){
-    //Alan's file
-    file="rcf1308_186_2000evts.MuDst.root";
-    dirIn ="/star/u/ahoffman/MonteCarloStudies/";
-    // Pibero's file
-    //file = "rcf1275_01_3348evts_161_mix.MuDst.root";
-    // char *dirIn = "/star/data13/reco/pp200/pythia6_205/Upsminbias/cdf_a/y2006/gheisha_on/p06id/";
-  }
-  if (flagMC==0){
-    //char *dirIn="/star/u/balewski/2008-trigAlgo-v4/runList/";
-    //file="st_physics_7142017_raw_2030005.MuDst.root"; dirIn="/star/u/ahoffman/ForJan/";
-   }
-  
- 
+
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   assert( !gSystem->Load("StDetectorDbMaker"));
@@ -59,12 +45,10 @@ void rdMu2TrigSimu( int nevents = 200,
   gROOT->Macro("LoadLogger.C");
   cout << " loading done " << endl;
   
-  StChain *chain= new StChain("StChain"); 
- if (flagMC){
-    //Need ioMaker in order to access geant branch in MC
+  chain= new StChain("StChain"); 
+
+  if (flagMC){
     TString geantFile;
-    geantFile += dirIn;
-    geantFile += "/";
     geantFile += file;
     geantFile.ReplaceAll("MuDst.root", "geant.root");
     printf("geantFile=%s\n", geantFile.Data());
@@ -73,18 +57,13 @@ void rdMu2TrigSimu( int nevents = 200,
     ioMaker->SetIOMode("r");
     ioMaker->SetBranch("*",0,"0");             //deactivate all branches
     ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
-
-    //Need StMCEventMaker to get g2t tables
     StMcEventMaker *evtMaker = new StMcEventMaker();
   }
 
   //Need MuDstMaker to get data
-  printf(" dirIn=%s=  file=%s=\n",dirIn,file);  
-  StMuDstMaker* muDstMaker =new StMuDstMaker(0,0,dirIn,file,"MuDst.root",nFiles);
+  printf(" Analyzing file=%s\n",file);  
+  StMuDstMaker* muDstMaker =new StMuDstMaker(0,0,"",file,"",1000);
 
-  TChain* tree=muDstMaker->chain(); assert(tree); int nEntries=(int) tree->GetEntries();
-  cout << "Avaliable number of events  " << nEntries << endl;  
-  
   //Database -- get a real calibration from the database
   St_db_Maker* dbMk =0;
   if(useEemc || useL2) // full DB access
@@ -93,29 +72,15 @@ void rdMu2TrigSimu( int nevents = 200,
     dbMk  = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
     
   //If MC then must set database time and date
-  // if Endcap fast simu is used tower gains in DB do not matter,JB
-  if(flagMC) {
-    // dbMk->SetDateTime(20070101,1 ); // for Pibero
-    dbMk->SetDateTime(20060522, 55000);//Alans timestamp R7142018
- }
-
- //Collect all output histograms 
+  //If Endcap fast simu is used tower gains in DB do not matter,JB
+  if (flagMC) dbMk->SetDateTime(20060522, 55000);//timestamp R7142018
+  
+  //Collect all output histograms 
   TObjArray* HList=new TObjArray; 
-
+  
   //Endcap DB
   if(useEemc || useL2) new StEEmcDbMaker("eemcDb");
- 
-#if 0 // I'll clean it up next time, Jan
-  /*  Activate it only once to _produce_ L2 input gain files from off-line DB
-      will write to directory: L2setup-yyyymmdd/
-      yyyymmdd depends on the DB time stamp 
-   */
-  StEmcAsciiDbMaker * asciiDb=new StEmcAsciiDbMaker();
-  // asciiDb->setGain60Et(); //force  gains for B+ETOW , ignore oflDB
-  asciiDb->SetHList(HList);
-#endif
-
-
+  
   //Get BEMC adc values
   if (flagMC && useBemc) {
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
@@ -175,22 +140,20 @@ void rdMu2TrigSimu( int nevents = 200,
     simL2Mk->setSetupPath(eemcSetupPath);
     simL2Mk->setOutPath(outDir.Data());
     if (flagMC) simL2Mk->setMC();
-    //simL2Mk->useStEvent(); // default : use muDst
     simuTrig->useL2(simL2Mk);
   }
 
-  if(emcEveDump) new StJanEventMaker;
   
+  //if(emcEveDump) new StJanEventMaker;
+    
   StTriggerSimuPlayMaker *playMk= new StTriggerSimuPlayMaker; // to develope user  analysis of trigQA 
   playMk->setConfig(playConfig);
   playMk->setHList(HList);
-
-
+  
+  
   chain->ls(3);
   chain->Init();
  
-  int t1=time(0);
-
   for (Int_t iev=0;iev<nevents; iev++) {
     cout << "\n****************************************** " << endl;
     cout << "Working on eventNumber:\t" << iev <<"\tof:\t"<<nevents<<endl;
@@ -203,50 +166,71 @@ void rdMu2TrigSimu( int nevents = 200,
       break;
     }
 
-    int trigID=137611;
-    //StMuDst *muDst = muDstMaker->muDst();
-    //StMuEvent *muEvent = muDst->event();    
-    //StMuTriggerIdCollection trig = muEvent -> triggerIdCollection();
-    //StTriggerId l1trig = trig.nominal();
-    //if( l1trig.isTrigger(trigID)) {
-    cout<<" SimuTrigger 137611 ="<<simuTrig->isTrigger(trigID)<<" BEMC="<<simuTrig->bemc->triggerDecision(trigID)<<" L2="<<simuTrig->lTwo->triggerDecision(trigID)<<endl;
-      //}
+    int trigID[3]={127213,117211,137611};
+    StMuDst *muDst = muDstMaker->muDst();
+    StMuEvent *muEvent = muDst->event();    
+    StMuTriggerIdCollection trig = muEvent -> triggerIdCollection();
+    StTriggerId l1trig = trig.nominal();
+    if( l1trig.isTrigger(trigID[0])) {
+      cout<<" SimuTrigger 127213 ="<<simuTrig->isTrigger(trigID[0])<<" BEMC="<<simuTrig->bemc->triggerDecision(trigID[0])<<" L2="<<simuTrig->lTwo->triggerDecision(trigID[0])<<endl;
+     }
+    if( l1trig.isTrigger(trigID[1])) {
+      cout<<" SimuTrigger 117211 ="<<simuTrig->isTrigger(trigID[1])<<" BEMC="<<simuTrig->bemc->triggerDecision(trigID[1])<<" L2="<<simuTrig->lTwo->triggerDecision(trigID[1])<<endl;
+     }
+    if( l1trig.isTrigger(trigID[2])) {
+      cout<<" SimuTrigger 137611 ="<<simuTrig->isTrigger(trigID[2])<<" BEMC="<<simuTrig->bemc->triggerDecision(trigID[2])<<" L2="<<simuTrig->lTwo->triggerDecision(trigID[2])<<endl;
+    }
 
     
+    StTriggerSimuResult trigResult = simuTrig->detailedResult(trigID[2]);
+    if (trigResult.bemcDecision()==1){
+       vector<short> towerId = trigResult.highTowerIds();
+      for (unsigned i=0; i<towerId.size(); i++) {
+      	cout<<" LO Trigger BEMC Tower="<<towerId[i]<<" adc="<<trigResult.highTowerAdc(towerId[i])<<endl;
+      }
+    }
 
+
+   if (trigResult.l2Decision()==1){
+       vector<short> towerId = trigResult.highTowerIds();
+      for (unsigned i=0; i<towerId.size(); i++) {
+      	cout<<" L2 Trigger BEMC Tower="<<towerId[i]<<" adc="<<trigResult.highTowerAdc(towerId[i])<<endl;
+      }
+    }
+ 
   }
-  int t2=time(0);
-  if(t2==t1) t2=t1+1;
-  float tMnt=(t2-t1)/60.;
-  float rate=1.*total/(t2-t1);
-  
-    
 
+ 
   chain->Finish();
   cout << "****************************************** " << endl;
   cout << "total number of events  " << total << endl;
   cout << "****************************************** " << endl;
 
 
-  TString fileMu=file;
-  printf("=%s=\n",fileMu.Data());
-  if(fileMu.Contains(".lis")) fileMu.ReplaceAll(".lis",".trgSim");
-  if(fileMu.Contains(".MuDst.root")) fileMu.ReplaceAll(".MuDst.root",".trgSim");
-  TString outF=outDir+fileMu;
-  outF+=".hist.root";
-  printf("=%s=\n",outF.Data());
-  hf=new TFile(outF,"recreate");
-  if(hf->IsOpen()) {
-    //HList->ls();
-    HList->Write();
-    printf("\n Histo saved -->%s<\n",outF.Data());
-  } else {
-    printf("\n Failed to open Histo-file -->%s<, continue\n",outF.Data());
+  if (outputL2Histo==1) {
+  
+    TString fileMu=file;
+    printf("=%s=\n",fileMu.Data());
+    if(fileMu.Contains(".lis")) fileMu.ReplaceAll(".lis",".trgSim");
+    if(fileMu.Contains(".MuDst.root")) fileMu.ReplaceAll(".MuDst.root",".trgSim");
+    TString outF=outDir+fileMu;
+    outF+=".hist.root";
+    printf("=%s=\n",outF.Data());
+    hf=new TFile(outF,"recreate");
+    if(hf->IsOpen()) {
+      HList->Write();
+      printf("\n Histo saved -->%s<\n",outF.Data());
+    } 
+    else {
+      printf("\n Failed to open Histo-file -->%s<, continue\n",outF.Data());
+    }
   }
+  
   cout <<Form("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",total,nEntries,rate,tMnt)<<endl;
-
-
+ 
 }
+
+
 
 
 //========================================
