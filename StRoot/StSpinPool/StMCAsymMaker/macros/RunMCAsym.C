@@ -15,6 +15,7 @@ void RunMCAsym(
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StEEmcUtil");
     gSystem->Load("StMCAsymMaker");
+    gSystem->Load("StJetSkimEvent");
 
     chain= new StChain("StChain"); 
     chain->SetDebug(1);
