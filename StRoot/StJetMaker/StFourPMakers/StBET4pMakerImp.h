@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.40 2008/07/07 20:21:37 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.41 2008/07/07 20:35:17 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -56,7 +56,6 @@ public:
 
 private:
 
-  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList__;
   typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
 
   FourList constructFourMomentumListFrom(const TrackList& trackList);

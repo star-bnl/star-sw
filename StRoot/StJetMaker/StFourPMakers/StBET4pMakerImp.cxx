@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.65 2008/07/07 20:21:37 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.66 2008/07/07 20:35:17 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -57,6 +57,8 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make()
 {
+  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList__;
+
   TrackList__ trackList = _collectChargedTracksFromTPC->Do();
 
   vector<StMuTrackEmu*> trackmuList;
