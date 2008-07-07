@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.39 2008/07/07 07:19:05 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.40 2008/07/07 20:21:37 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -19,6 +19,10 @@
 class StMuTrack;
 class StMuTrackFourVec;
 class StMuDstMaker;
+
+namespace StSpinJet {
+  class StMuTrackEmu;
+}
 
 #include "CollectEnergyDepositsFromBEMC.h"
 #include "CollectEnergyDepositsFromEEMC.h"
@@ -52,7 +56,8 @@ public:
 
 private:
 
-  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList;
+  typedef std::vector<std::pair<const StMuTrack*, int> > TrackList__;
+  typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
 
   FourList constructFourMomentumListFrom(const TrackList& trackList);
 

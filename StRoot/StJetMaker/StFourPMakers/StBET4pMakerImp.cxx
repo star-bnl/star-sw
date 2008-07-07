@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.64 2008/07/07 20:03:00 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.65 2008/07/07 20:21:37 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -57,9 +57,19 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make()
 {
-  TrackList trackList = _collectChargedTracksFromTPC->Do();
+  TrackList__ trackList = _collectChargedTracksFromTPC->Do();
 
-  FourList tpcFourMomentumList = constructFourMomentumListFrom(trackList);
+  vector<StMuTrackEmu*> trackmuList;
+
+  for(TrackList__::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+    const StMuTrack* track = (*it).first;
+
+    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second);
+
+    trackmuList.push_back(trackEmu);
+  }
+
+  FourList tpcFourMomentumList = constructFourMomentumListFrom(trackmuList);
 
   _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
 
@@ -89,27 +99,15 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
 {
   FourList ret;
 
-  vector<StMuTrackEmu*> trackmuList;
+  for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
 
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-
-    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second);
-
-    trackmuList.push_back(trackEmu);
-  }
-
-  for(vector<StMuTrackEmu*>::const_iterator it = trackmuList.begin(); it != trackmuList.end(); ++it) {
-
-    StMuTrackEmu* trackEmu = (*it);
-
-    TVector3 momentum(trackEmu->px(), trackEmu->py(), trackEmu->pz());
+    TVector3 momentum((*track)->px(), (*track)->py(), (*track)->pz());
     double mass = 0.1395700; //assume pion+ mass for now
     float energy = sqrt(mass*mass + momentum.Mag()*momentum.Mag());
 
     TLorentzVector p4(momentum, energy);
 
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(trackEmu, p4, trackEmu->charge(), trackEmu->trackIndex(), kTpcId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec((*track), p4, (*track)->charge(), (*track)->trackIndex(), kTpcId);
     ret.push_back(pmu);
   }
   return ret;
