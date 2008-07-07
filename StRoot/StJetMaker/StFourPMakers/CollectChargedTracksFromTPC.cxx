@@ -1,9 +1,12 @@
-// $Id: CollectChargedTracksFromTPC.cxx,v 1.2 2008/07/07 20:35:16 tai Exp $
+// $Id: CollectChargedTracksFromTPC.cxx,v 1.3 2008/07/07 22:28:48 tai Exp $
 #include "CollectChargedTracksFromTPC.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+
+#include "../StMuTrackEmu.h"
+#include "../StMuTrackEmuFactory.h"
 
 namespace StSpinJet {
 
@@ -19,13 +22,24 @@ CollectChargedTracksFromTPC::~CollectChargedTracksFromTPC()
 
 }
 
-CollectChargedTracksFromTPC::TrackList__ CollectChargedTracksFromTPC::Do()
+CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::Do()
 {
-  TrackList__ trackiList = getTracksFromTPC();
+  TrackList__ trackList = getTracksFromTPC();
 
-  trackiList = selectTracksToPassToJetFinder(trackiList);
+  trackList = selectTracksToPassToJetFinder(trackList);
 
-  return trackiList;
+  vector<StMuTrackEmu*> trackmuList;
+
+  double magneticField = _uDstMaker->muDst()->event()->magneticField()/10.0; //to put it in Tesla
+  for(TrackList__::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+    const StMuTrack* track = (*it).first;
+
+    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second, magneticField);
+
+    trackmuList.push_back(trackEmu);
+  }
+
+  return trackmuList;
 }
 
 CollectChargedTracksFromTPC::TrackList__ CollectChargedTracksFromTPC::getTracksFromTPC()
