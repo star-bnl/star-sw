@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.59 2008/06/10 09:17:58 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.60 2008/07/07 07:19:04 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -34,6 +34,7 @@ StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,
 				 CorrectTowerEnergyForTracks* correctTowerEnergyForTracks
 				 )
   : mUseEndcap(false)
+  , mUseBEMC(true)
   , mMuDstMaker(uDstMaker)
   , _collectChargedTracksFromTPC(collectChargedTracksFromTPC)
   , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
@@ -60,23 +61,27 @@ void StBET4pMakerImp::Make()
 
   FourList tpcFourMomentumList = constructFourMomentumListFrom(trackList);
 
-  TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();
-
-  TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyDepositList, trackList);
-
-  FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergyDepositList);
-
-
   _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
-  _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
 
-  if (!mUseEndcap) return;
+  if(mUseBEMC) {
+    TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();
 
-  TowerEnergyDepositList eemcCorrectedEnergyDepositList = _collectEnergyDepositsFromEEMC->Do();
+    TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyDepositList, trackList);
 
-  FourList eemcFourMomentumList = constructFourMomentumListFrom(eemcCorrectedEnergyDepositList);
+    FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergyDepositList);
 
-  _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
+    _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
+  }
+
+
+  if(mUseEndcap) {
+
+    TowerEnergyDepositList eemcCorrectedEnergyDepositList = _collectEnergyDepositsFromEEMC->Do();
+
+    FourList eemcFourMomentumList = constructFourMomentumListFrom(eemcCorrectedEnergyDepositList);
+
+    _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
+  }
 
 }
 
