@@ -1,13 +1,15 @@
-// $Id: CollectEnergyDepositsFromEEMC.cxx,v 1.2 2008/06/10 08:31:07 tai Exp $
+// $Id: CollectEnergyDepositsFromEEMC.cxx,v 1.3 2008/07/08 10:35:30 tai Exp $
 #include "CollectEnergyDepositsFromEEMC.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+
 
 namespace StSpinJet {
 
@@ -51,8 +53,26 @@ TowerEnergyDepositList CollectEnergyDepositsFromEEMC::Do()
     TowerEnergyDeposit energyDeposit;
     energyDeposit.detectorId = kEndcapEmcTowerId;
     energyDeposit.towerId = (sec*5 + sub)*12 + etabin;
-    energyDeposit.towerLocation = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1);
-    energyDeposit.energy = energy;
+
+
+    TVector3 towerLocation = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1);
+    energyDeposit.towerLocation = towerLocation;
+    energyDeposit.towerX = towerLocation.x();
+    energyDeposit.towerY = towerLocation.y();
+    energyDeposit.towerZ = towerLocation.z();
+
+    StThreeVectorF vertex = mMuDstMaker->muDst()->event()->primaryVertexPosition();
+    energyDeposit.vertex = TVector3(vertex.x(), vertex.y(), vertex.z());
+
+    energyDeposit.vertexX = vertex.x();
+    energyDeposit.vertexY = vertex.y();
+    energyDeposit.vertexZ = vertex.z(); 
+
+    energyDeposit.energy   = energy;
+    energyDeposit.adc      = rawadc;
+    energyDeposit.pedestal = dbItem->ped;
+    energyDeposit.rms      = 0.0;
+    energyDeposit.status   = dbItem->stat;
 
     ret.push_back(energyDeposit);
 
