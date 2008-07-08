@@ -1,4 +1,4 @@
-// $Id: CollectChargedTracksFromTPC.cxx,v 1.4 2008/07/08 02:26:40 tai Exp $
+// $Id: CollectChargedTracksFromTPC.cxx,v 1.5 2008/07/08 02:40:30 tai Exp $
 #include "CollectChargedTracksFromTPC.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -26,33 +26,22 @@ CollectChargedTracksFromTPC::~CollectChargedTracksFromTPC()
 
 CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::Do()
 {
-  TrackList__ trackList = getTracksFromTPC();
+  TrackList trackList = getTracksFromTPC();
 
-  vector<StMuTrackEmu*> trackmuList;
+  trackList = selectTracksToPassToJetFinder(trackList);
 
-  double magneticField = _uDstMaker->muDst()->event()->magneticField()/10.0; //to put it in Tesla
-  for(TrackList__::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-
-    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, (*it).second, magneticField);
-
-    trackmuList.push_back(trackEmu);
-  }
-
-  trackmuList = selectTracksToPassToJetFinder(trackmuList);
-
-
-  return trackmuList;
+  return trackList;
 }
 
-CollectChargedTracksFromTPC::TrackList__ CollectChargedTracksFromTPC::getTracksFromTPC()
+CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::getTracksFromTPC()
 {
-  TrackList__ ret;
+  TrackList ret;
 
   StMuDst* uDst = _uDstMaker->muDst();
 
   long nTracks = uDst->numberOfPrimaryTracks();
 
+  double magneticField = _uDstMaker->muDst()->event()->magneticField()/10.0; // Tesla
   for(int i = 0; i < nTracks; ++i) {
     const StMuTrack* track = uDst->primaryTracks(i);
 
@@ -60,52 +49,12 @@ CollectChargedTracksFromTPC::TrackList__ CollectChargedTracksFromTPC::getTracksF
 
     if(track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) continue;
 
-    ret.push_back(make_pair(track, i));
+    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, i, magneticField);
+
+    ret.push_back(trackEmu);
   }
 
   return ret;
-}
-
-CollectChargedTracksFromTPC::TrackList__ CollectChargedTracksFromTPC::selectTracksToPassToJetFinder(const TrackList__& trackList)
-{
-  TrackList__ ret;
-
-  for(TrackList__::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
-    const StMuTrack* track = (*it).first;
-
-    if (shoudNotPassToJetFinder(*track)) continue;
-
-    ret.push_back(make_pair((*it).first, (*it).second));
-  }
-
-  return ret;
-}
-
-bool CollectChargedTracksFromTPC::shoudNotPassToJetFinder(const StMuTrack& track) const
-{
-    if (track.dcaGlobal().mag() > 3.)
-      return true;
-      
-    if (_use2006Cuts){
-      if(track.pt() < 0.5) {
-	if(track.dcaGlobal().mag() > 2.0) return true;
-      } else if(track.pt() < 1.0) {
-	if(track.dcaGlobal().mag() > 3.-2.*track.pt()) return true;
-      } else {
-	if(track.dcaGlobal().mag() > 1.0) return true;
-      }
-    }
-
-    if(track.eta() < -2.0)
-      return true;
-
-    if(track.eta() > 2.0)
-      return true;
-
-    if(static_cast<double>(track.nHits())/static_cast<double>(track.nHitsPoss()) < .51)
-      return true;
-
-  return false;
 }
 
 CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::selectTracksToPassToJetFinder(const TrackList& trackList)
