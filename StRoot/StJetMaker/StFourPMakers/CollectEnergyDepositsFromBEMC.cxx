@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.5 2008/07/08 23:04:54 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.6 2008/07/08 23:18:09 tai Exp $
 #include "CollectEnergyDepositsFromBEMC.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -18,8 +18,78 @@ using namespace std;
 
 namespace StSpinJet {
 
-CollectEnergyDepositsFromBEMC::CollectEnergyDepositsFromBEMC(StMuDstMaker* uDstMaker, StBemcTables* bemcTables)
+StJetBEMC::StJetBEMC(StMuDstMaker* uDstMaker, StBemcTables* bemcTables)
   : mMuDstMaker(uDstMaker)
+  , _bemcTables(bemcTables)
+{
+
+}
+
+TowerEnergyDepositList StJetBEMC::getEnergyList()
+{
+  TowerEnergyDepositList ret;
+
+  StEmcDetector* detector = mMuDstMaker->muDst()->emcCollection()->detector(kBarrelEmcTowerId);
+
+  static const int nBemcModules = 120;
+
+  for(int m = 1; m <= nBemcModules; ++m) {
+
+    StSPtrVecEmcRawHit& rawHits = detector->module(m)->hits();
+
+    for(UInt_t k = 0; k < rawHits.size(); ++k) {
+  	    
+      ret.push_back(readTowerHit(*rawHits[k]));
+    }
+  }
+
+  return ret;
+}
+
+TowerEnergyDeposit StJetBEMC::readTowerHit(const StEmcRawHit& hit)
+{
+  TowerEnergyDeposit ret;
+
+  ret.detectorId = kBarrelEmcTowerId;
+
+  int towerId;
+  StEmcGeom::instance("bemc")->getId(hit.module(), hit.eta(), abs(hit.sub()), towerId);
+
+  ret.towerId = towerId;
+
+  float towerX, towerY, towerZ;
+  StEmcGeom::instance("bemc")->getXYZ(towerId, towerX, towerY, towerZ);
+
+  ret.towerX = towerX;
+  ret.towerY = towerY;
+  ret.towerZ = towerZ;
+
+  StThreeVectorF vertex = mMuDstMaker->muDst()->event()->primaryVertexPosition();
+
+  ret.vertexX = vertex.x();
+  ret.vertexY = vertex.y();
+  ret.vertexZ = vertex.z(); 
+
+  ret.energy = hit.energy();
+  ret.adc    = hit.adc();
+
+  float pedestal, rms;
+  int CAP(0);
+  _bemcTables->getPedestal(BTOW, towerId, CAP, pedestal, rms);
+  ret.pedestal = pedestal;
+  ret.rms = rms;
+
+  int status;
+  _bemcTables->getStatus(BTOW, towerId, status);
+  ret.status = status;
+
+  return ret;
+}
+
+
+CollectEnergyDepositsFromBEMC::CollectEnergyDepositsFromBEMC(StMuDstMaker* uDstMaker, StBemcTables* bemcTables)
+  : _bemc(new StJetBEMC(uDstMaker, bemcTables))
+  , mMuDstMaker(uDstMaker)
   , _bemcTables(bemcTables)
   , mUse2003Cuts(false)
   , mUse2005Cuts(false)
@@ -27,9 +97,12 @@ CollectEnergyDepositsFromBEMC::CollectEnergyDepositsFromBEMC(StMuDstMaker* uDstM
 
 }
 
+
 TowerEnergyDepositList CollectEnergyDepositsFromBEMC::Do()
 {
-  TowerEnergyDepositList energyList = getTowerHitsFromBEMC();
+  //  TowerEnergyDepositList energyList = getTowerHitsFromBEMC();
+
+  TowerEnergyDepositList energyList = _bemc->getEnergyList();
 
   energyList = selectBemcTowerHits(energyList);
 
