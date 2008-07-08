@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectEnergyDepositsFromBEMC.h,v 1.6 2008/07/08 23:35:16 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.h,v 1.7 2008/07/08 23:45:43 tai Exp $
 #ifndef COLLECTENERGYDEPOSITSFROMBEMC_H
 #define COLLECTENERGYDEPOSITSFROMBEMC_H
 
@@ -16,8 +16,17 @@ namespace StSpinJet {
 class StJetBEMC {
 
 public:
-  StJetBEMC(StMuDstMaker* uDstMaker, StBemcTables* bemcTables);
+  StJetBEMC() { }
   virtual ~StJetBEMC() { }
+
+  virtual TowerEnergyDepositList getEnergyList() = 0;
+};
+
+class StJetBEMCMuDst : public StJetBEMC {
+
+public:
+  StJetBEMCMuDst(StMuDstMaker* uDstMaker, StBemcTables* bemcTables);
+  virtual ~StJetBEMCMuDst() { }
 
   TowerEnergyDepositList getEnergyList();
 
