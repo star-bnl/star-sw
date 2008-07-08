@@ -1,13 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: CollectEnergyDepositsFromBEMC.h,v 1.3 2008/07/08 11:21:56 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.h,v 1.4 2008/07/08 23:04:54 tai Exp $
 #ifndef COLLECTENERGYDEPOSITSFROMBEMC_H
 #define COLLECTENERGYDEPOSITSFROMBEMC_H
 
 #include "TowerEnergyDeposit.h"
 
 #include <TVector3.h>
-
-#include <map>
 
 class StEmcRawHit;
 class StMuDstMaker;
@@ -28,15 +26,12 @@ public:
 
 private:
 
-  typedef int BemcTowerID;
-  typedef std::map<BemcTowerID, const StEmcRawHit*> BemcTowerIdHitMap;
+  TowerEnergyDepositList getTowerHitsFromBEMC();
 
-  BemcTowerIdHitMap getTowerHitsFromBEMC();
-  BemcTowerIdHitMap selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits);
+  TowerEnergyDepositList selectBemcTowerHits(const TowerEnergyDepositList &energyList);
+  bool shouldKeepThisBemcHit(const TowerEnergyDeposit& energyDeposit);
 
-  bool shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID);
-
-  StSpinJet::TowerEnergyDepositList readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits);
+  TowerEnergyDeposit readTowerHit(const StEmcRawHit& hit);
 
   bool accept2003Tower(int id);
 
