@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectChargedTracksFromTPC.h,v 1.3 2008/07/07 22:28:48 tai Exp $
+// $Id: CollectChargedTracksFromTPC.h,v 1.4 2008/07/08 02:26:40 tai Exp $
 #ifndef COLLECTCHARGEDTRACKSFROMTPC_H
 #define COLLECTCHARGEDTRACKSFROMTPC_H
 
@@ -35,6 +35,9 @@ private:
   TrackList__ selectTracksToPassToJetFinder(const TrackList__& trackList);
 
   bool shoudNotPassToJetFinder(const StMuTrack& track) const;
+
+  TrackList selectTracksToPassToJetFinder(const TrackList& trackList);
+  bool shoudNotPassToJetFinder(const StMuTrackEmu& track) const;
 
   StMuDstMaker* _uDstMaker;
 
