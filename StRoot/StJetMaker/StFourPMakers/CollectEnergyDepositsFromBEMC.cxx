@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.1 2008/06/10 00:51:39 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.2 2008/07/08 06:20:07 tai Exp $
 #include "CollectEnergyDepositsFromBEMC.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -50,12 +50,6 @@ CollectEnergyDepositsFromBEMC::BemcTowerIdHitMap CollectEnergyDepositsFromBEMC::
       int bemcTowerID;
       geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
 
-      if (mUse2003Cuts)
-	if (!accept2003Tower(bemcTowerID)) continue;
-
-      if (mUse2005Cuts)
-	if (bemcTowerID > 2400) continue;
-
       ret[bemcTowerID] = theRawHit;
     }
   }
@@ -78,6 +72,13 @@ CollectEnergyDepositsFromBEMC::BemcTowerIdHitMap CollectEnergyDepositsFromBEMC::
 
 bool CollectEnergyDepositsFromBEMC::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
 {
+
+  if (mUse2003Cuts)
+    if (!accept2003Tower(bemcTowerID)) return false;
+
+  if (mUse2005Cuts)
+    if (bemcTowerID > 2400) return false;
+
   //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
   int status;
   _bemcTables->getStatus(BTOW, bemcTowerID, status);
