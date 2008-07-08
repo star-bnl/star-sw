@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectEnergyDepositsFromBEMC.h,v 1.5 2008/07/08 23:18:09 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.h,v 1.6 2008/07/08 23:35:16 tai Exp $
 #ifndef COLLECTENERGYDEPOSITSFROMBEMC_H
 #define COLLECTENERGYDEPOSITSFROMBEMC_H
 
@@ -44,22 +44,13 @@ public:
 
 private:
 
-  TowerEnergyDepositList getTowerHitsFromBEMC();
-
   TowerEnergyDepositList selectBemcTowerHits(const TowerEnergyDepositList &energyList);
   bool shouldKeepThisBemcHit(const TowerEnergyDeposit& energyDeposit);
 
-  TowerEnergyDeposit readTowerHit(const StEmcRawHit& hit);
-
   bool accept2003Tower(int id);
-
-  TVector3 getBemcTowerLocation(int bemcTowerId);
 
   StJetBEMC* _bemc;
 
-  StMuDstMaker* mMuDstMaker;
-
-  StBemcTables* _bemcTables;
 
   bool mUse2003Cuts;
   bool mUse2005Cuts;
