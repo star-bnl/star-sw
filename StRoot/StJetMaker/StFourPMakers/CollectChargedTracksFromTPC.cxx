@@ -1,4 +1,4 @@
-// $Id: CollectChargedTracksFromTPC.cxx,v 1.5 2008/07/08 02:40:30 tai Exp $
+// $Id: CollectChargedTracksFromTPC.cxx,v 1.6 2008/07/08 03:14:41 tai Exp $
 #include "CollectChargedTracksFromTPC.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -12,28 +12,14 @@
 
 namespace StSpinJet {
 
-CollectChargedTracksFromTPC::CollectChargedTracksFromTPC(StMuDstMaker* uDstMaker)
+
+StJetTPCMuDst::StJetTPCMuDst(StMuDstMaker* uDstMaker)
   : _uDstMaker(uDstMaker)
-  , _use2006Cuts(false)
 {
 
 }
 
-CollectChargedTracksFromTPC::~CollectChargedTracksFromTPC()
-{
-
-}
-
-CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::Do()
-{
-  TrackList trackList = getTracksFromTPC();
-
-  trackList = selectTracksToPassToJetFinder(trackList);
-
-  return trackList;
-}
-
-CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::getTracksFromTPC()
+StJetTPCMuDst::TrackList StJetTPCMuDst::getTrackList()
 {
   TrackList ret;
 
@@ -56,6 +42,28 @@ CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::getTracksFro
 
   return ret;
 }
+
+CollectChargedTracksFromTPC::CollectChargedTracksFromTPC(StMuDstMaker* uDstMaker)
+  : _tpc(new StJetTPCMuDst(uDstMaker))
+  , _use2006Cuts(false)
+{
+
+}
+
+CollectChargedTracksFromTPC::~CollectChargedTracksFromTPC()
+{
+
+}
+
+CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::Do()
+{
+  TrackList trackList = _tpc->getTrackList();
+
+  trackList = selectTracksToPassToJetFinder(trackList);
+
+  return trackList;
+}
+
 
 CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::selectTracksToPassToJetFinder(const TrackList& trackList)
 {
