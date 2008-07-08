@@ -1,31 +1,21 @@
-// $Id: StBET4pMakerImp.cxx,v 1.71 2008/07/08 10:35:31 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.72 2008/07/08 11:21:56 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
 #include "CollectEnergyDepositsFromBEMC.h"
 
 
-//StMuDstMaker
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-
-//StEmc
-#include "StEmcUtil/geometry/StEmcGeom.h"
-
 //StJetMaker
 #include "../StMuTrackFourVec.h"
 
 #include "../StMuTrackEmu.h"
-
-#include "StMuEmcPosition.h"
 
 #include <iostream>
 
 using namespace std;
 using namespace StSpinJet;
 
-StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,
+StBET4pMakerImp::StBET4pMakerImp(
 				 CollectChargedTracksFromTPC* collectChargedTracksFromTPC,
 				 CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC,
 				 CollectEnergyDepositsFromEEMC *collectEnergyDepositsFromEEMC,
@@ -33,7 +23,6 @@ StBET4pMakerImp::StBET4pMakerImp(StMuDstMaker* uDstMaker,
 				 )
   : mUseEndcap(false)
   , mUseBEMC(true)
-  , mMuDstMaker(uDstMaker)
   , _collectChargedTracksFromTPC(collectChargedTracksFromTPC)
   , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
   , _collectEnergyDepositsFromEEMC(collectEnergyDepositsFromEEMC)
@@ -107,7 +96,6 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TowerEnergyDeposit
 
   for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
-    //    TLorentzVector p4 = constructFourMomentum((*it).towerLocation, (*it).energy);
     TLorentzVector p4 = constructFourMomentum((*it));
 	    
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, (*it).towerId, (*it).detectorId);
@@ -117,20 +105,7 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TowerEnergyDeposit
   return ret;
 }
 
-TLorentzVector StBET4pMakerImp::constructFourMomentum(const TVector3& towerLocation, double energy)
-{
-  TVector3 momentum = towerLocation - getVertex();
-
-  double mass(0); // assume photon mass
-
-  double pMag = (energy > mass) ? sqrt(energy*energy - mass*mass) : energy;
-
-  momentum.SetMag(pMag);
-
-  return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), energy);
-}
-
-TLorentzVector StBET4pMakerImp::constructFourMomentum(const StSpinJet::TowerEnergyDeposit& deposit)
+TLorentzVector StBET4pMakerImp::constructFourMomentum(const TowerEnergyDeposit& deposit)
 {
   TVector3 towerLocation(deposit.towerX, deposit.towerY, deposit.towerZ); 
   TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);
@@ -144,13 +119,6 @@ TLorentzVector StBET4pMakerImp::constructFourMomentum(const StSpinJet::TowerEner
   momentum.SetMag(pMag);
 
   return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), deposit.energy);
-}
-
-TVector3 StBET4pMakerImp::getVertex()
-{
-  StThreeVectorF vertex = mMuDstMaker->muDst()->event()->primaryVertexPosition();
-
-  return TVector3(vertex.x(), vertex.y(), vertex.z());
 }
 
 

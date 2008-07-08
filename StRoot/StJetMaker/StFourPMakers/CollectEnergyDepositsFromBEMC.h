@@ -1,9 +1,13 @@
 // -*- mode: c++;-*-
-// $Id: CollectEnergyDepositsFromBEMC.h,v 1.2 2008/06/10 08:07:08 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.h,v 1.3 2008/07/08 11:21:56 tai Exp $
 #ifndef COLLECTENERGYDEPOSITSFROMBEMC_H
 #define COLLECTENERGYDEPOSITSFROMBEMC_H
 
 #include "TowerEnergyDeposit.h"
+
+#include <TVector3.h>
+
+#include <map>
 
 class StEmcRawHit;
 class StMuDstMaker;

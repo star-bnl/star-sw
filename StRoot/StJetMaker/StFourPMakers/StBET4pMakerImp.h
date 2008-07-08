@@ -1,12 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.43 2008/07/08 10:35:31 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.44 2008/07/08 11:21:57 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
 
 #include <Rtypes.h>
 
-#include "../StMuTrackFourVec.h"
 #include "StJetFinder/AbstractFourVec.h"
 
 #include "CollectChargedTracksFromTPC.h"
@@ -16,8 +15,6 @@
 
 #include <map>
 
-class StMuTrackFourVec;
-class StMuDstMaker;
 
 namespace StSpinJet {
   class StMuTrackEmu;
@@ -33,7 +30,7 @@ class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(StMuDstMaker* uDstMaker,
+  StBET4pMakerImp(
 		  StSpinJet::CollectChargedTracksFromTPC* collectChargedTracksFromTPC,
 		  StSpinJet::CollectEnergyDepositsFromBEMC* collectEnergyDepositsFromBEMC,
 		  StSpinJet::CollectEnergyDepositsFromEEMC* collectEnergyDepositsFromEEMC,
@@ -62,17 +59,12 @@ private:
   FourList constructFourMomentumListFrom(const StSpinJet::TowerEnergyDepositList& energyDepositList);
 
 
-  TVector3 getVertex();
-
-  TLorentzVector constructFourMomentum(const TVector3& towerLocation, double energy);
   TLorentzVector constructFourMomentum(const StSpinJet::TowerEnergyDeposit& deposit);
 
   FourList _tracks;
 
   bool mUseEndcap;
   bool mUseBEMC;
-
-  StMuDstMaker* mMuDstMaker;
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
