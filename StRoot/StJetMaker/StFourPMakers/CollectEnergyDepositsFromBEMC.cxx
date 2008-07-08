@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.7 2008/07/08 23:35:16 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.8 2008/07/08 23:45:43 tai Exp $
 #include "CollectEnergyDepositsFromBEMC.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -18,14 +18,14 @@ using namespace std;
 
 namespace StSpinJet {
 
-StJetBEMC::StJetBEMC(StMuDstMaker* uDstMaker, StBemcTables* bemcTables)
+StJetBEMCMuDst::StJetBEMCMuDst(StMuDstMaker* uDstMaker, StBemcTables* bemcTables)
   : mMuDstMaker(uDstMaker)
   , _bemcTables(bemcTables)
 {
 
 }
 
-TowerEnergyDepositList StJetBEMC::getEnergyList()
+TowerEnergyDepositList StJetBEMCMuDst::getEnergyList()
 {
   TowerEnergyDepositList ret;
 
@@ -46,7 +46,7 @@ TowerEnergyDepositList StJetBEMC::getEnergyList()
   return ret;
 }
 
-TowerEnergyDeposit StJetBEMC::readTowerHit(const StEmcRawHit& hit)
+TowerEnergyDeposit StJetBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
 {
   TowerEnergyDeposit ret;
 
@@ -88,7 +88,7 @@ TowerEnergyDeposit StJetBEMC::readTowerHit(const StEmcRawHit& hit)
 
 
 CollectEnergyDepositsFromBEMC::CollectEnergyDepositsFromBEMC(StMuDstMaker* uDstMaker, StBemcTables* bemcTables)
-  : _bemc(new StJetBEMC(uDstMaker, bemcTables))
+  : _bemc(new StJetBEMCMuDst(uDstMaker, bemcTables))
   , mUse2003Cuts(false)
   , mUse2005Cuts(false)
 {
