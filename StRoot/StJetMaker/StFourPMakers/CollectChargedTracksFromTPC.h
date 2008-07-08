@@ -1,8 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: CollectChargedTracksFromTPC.h,v 1.6 2008/07/08 03:14:41 tai Exp $
+// $Id: CollectChargedTracksFromTPC.h,v 1.7 2008/07/08 04:16:04 tai Exp $
 #ifndef COLLECTCHARGEDTRACKSFROMTPC_H
 #define COLLECTCHARGEDTRACKSFROMTPC_H
-
 
 #include <vector>
 #include <utility>
@@ -11,38 +10,14 @@ class StMuDstMaker;
 
 namespace StSpinJet {
 
-
 class StMuTrackEmu;
-
-class StJetTPC {
-
-public:
-  StJetTPC() { }
-  virtual ~StJetTPC() { }
-
-  typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
-
-  virtual TrackList getTrackList() = 0;
-};
-
-class StJetTPCMuDst : public StJetTPC {
-
-public:
-  StJetTPCMuDst(StMuDstMaker* uDstMaker);
-  virtual ~StJetTPCMuDst() { }
-
-  TrackList getTrackList();
-
-private:
-  StMuDstMaker* _uDstMaker;
-
-};
+class StJetTPC;
 
 class CollectChargedTracksFromTPC {
 
 public:
 
-  CollectChargedTracksFromTPC(StMuDstMaker* uDstMaker);
+  CollectChargedTracksFromTPC(StJetTPC* tpc);
   virtual ~CollectChargedTracksFromTPC();
 
   typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
