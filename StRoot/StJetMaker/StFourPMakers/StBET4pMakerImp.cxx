@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.70 2008/07/08 02:14:50 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.71 2008/07/08 10:35:31 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -107,7 +107,8 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TowerEnergyDeposit
 
   for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
-    TLorentzVector p4 = constructFourMomentum((*it).towerLocation, (*it).energy);
+    //    TLorentzVector p4 = constructFourMomentum((*it).towerLocation, (*it).energy);
+    TLorentzVector p4 = constructFourMomentum((*it));
 	    
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, (*it).towerId, (*it).detectorId);
 
@@ -127,6 +128,22 @@ TLorentzVector StBET4pMakerImp::constructFourMomentum(const TVector3& towerLocat
   momentum.SetMag(pMag);
 
   return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), energy);
+}
+
+TLorentzVector StBET4pMakerImp::constructFourMomentum(const StSpinJet::TowerEnergyDeposit& deposit)
+{
+  TVector3 towerLocation(deposit.towerX, deposit.towerY, deposit.towerZ); 
+  TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);
+
+  TVector3 momentum = towerLocation - vertex;
+
+  double mass(0); // assume photon mass
+
+  double pMag = (deposit.energy > mass) ? sqrt(deposit.energy*deposit.energy - mass*mass) : deposit.energy;
+
+  momentum.SetMag(pMag);
+
+  return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), deposit.energy);
 }
 
 TVector3 StBET4pMakerImp::getVertex()
