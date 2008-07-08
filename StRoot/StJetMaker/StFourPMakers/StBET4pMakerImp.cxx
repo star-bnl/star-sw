@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.69 2008/07/07 22:28:48 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.70 2008/07/08 02:14:50 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -90,8 +90,8 @@ FourList StBET4pMakerImp::constructFourMomentumListFrom(const TrackList& trackLi
   for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
 
     TVector3 momentum((*track)->px(), (*track)->py(), (*track)->pz());
-    double mass = 0.1395700; //assume pion+ mass for now
-    float energy = sqrt(mass*mass + momentum.Mag()*momentum.Mag());
+    double pionMass = 0.1395700;
+    float energy = sqrt(pionMass*pionMass + momentum.Mag()*momentum.Mag());
 
     TLorentzVector p4(momentum, energy);
 
