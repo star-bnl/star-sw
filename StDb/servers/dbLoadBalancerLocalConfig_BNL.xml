@@ -56,6 +56,10 @@
                         <Host name="db10.star.bnl.gov" port="3316"/>
                 </Server>
 
+               <Server scope="Analysis" user="krus" accessMode="read">
+                        <Host name="db11.star.bnl.gov" port="3316"  machinePower = "100"/>
+               </Server>
+
 <!--               <Server scope="Analysis" user="deph" accessMode="write">
                         <Host name="db01.star.bnl.gov" machinePower = "100" port="3316"/>
                         
