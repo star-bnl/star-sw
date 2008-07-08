@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.4 2008/07/08 11:21:56 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.5 2008/07/08 23:04:54 tai Exp $
 #include "CollectEnergyDepositsFromBEMC.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -29,122 +29,107 @@ CollectEnergyDepositsFromBEMC::CollectEnergyDepositsFromBEMC(StMuDstMaker* uDstM
 
 TowerEnergyDepositList CollectEnergyDepositsFromBEMC::Do()
 {
-  BemcTowerIdHitMap allBemcTowerHits = getTowerHitsFromBEMC();
+  TowerEnergyDepositList energyList = getTowerHitsFromBEMC();
 
-  BemcTowerIdHitMap selectedBemcTowerHits = selectBemcTowerHits(allBemcTowerHits);
+  energyList = selectBemcTowerHits(energyList);
 
-  return readBemcTowerEnergy(selectedBemcTowerHits);
+  return energyList;
 }
 
-CollectEnergyDepositsFromBEMC::BemcTowerIdHitMap CollectEnergyDepositsFromBEMC::getTowerHitsFromBEMC()
+StSpinJet::TowerEnergyDepositList CollectEnergyDepositsFromBEMC::getTowerHitsFromBEMC()
 {
-  BemcTowerIdHitMap ret;
+  TowerEnergyDepositList ret;
 
-  StEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
-  StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
+  StEmcDetector* detector = mMuDstMaker->muDst()->emcCollection()->detector(kBarrelEmcTowerId);
 
   static const int nBemcModules = 120;
-  for(int m = 1; m <= nBemcModules; ++m) { //loop on modules...
-    StEmcModule* module = detector->module(m);
-  	
-    StSPtrVecEmcRawHit& rawHits = module->hits();
-    for(UInt_t k = 0; k < rawHits.size(); ++k) { //loop on hits in modules
-      StEmcRawHit* theRawHit = rawHits[k];
-  	    
-      StEmcGeom* geom = StEmcGeom::instance("bemc"); 
-      int bemcTowerID;
-      geom->getId(theRawHit->module(), theRawHit->eta(), abs(theRawHit->sub()),bemcTowerID); // to get the software id
 
-      ret[bemcTowerID] = theRawHit;
+  for(int m = 1; m <= nBemcModules; ++m) {
+
+    StSPtrVecEmcRawHit& rawHits = detector->module(m)->hits();
+
+    for(UInt_t k = 0; k < rawHits.size(); ++k) {
+  	    
+      ret.push_back(readTowerHit(*rawHits[k]));
     }
   }
+
   return ret;
 }
 
-CollectEnergyDepositsFromBEMC::BemcTowerIdHitMap CollectEnergyDepositsFromBEMC::selectBemcTowerHits(const BemcTowerIdHitMap &bemcTowerHits)
+StSpinJet::TowerEnergyDepositList CollectEnergyDepositsFromBEMC::selectBemcTowerHits(const TowerEnergyDepositList &energyList)
 {
-  BemcTowerIdHitMap ret;
+  TowerEnergyDepositList ret;
 
-  for(map<BemcTowerID, const StEmcRawHit*>::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+  for(TowerEnergyDepositList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
 
-    if (!shouldKeepThisBemcHit((*it).second, (*it).first))
-      continue;
+    if(!shouldKeepThisBemcHit(*it)) continue;
 
-    ret.insert(*it);
+    ret.push_back(*it);
+
   }
+
   return ret;
 }
 
-bool CollectEnergyDepositsFromBEMC::shouldKeepThisBemcHit(const StEmcRawHit* theRawHit, int bemcTowerID)
+
+bool CollectEnergyDepositsFromBEMC::shouldKeepThisBemcHit(const TowerEnergyDeposit& energyDeposit)
 {
 
-  if (mUse2003Cuts)
-    if (!accept2003Tower(bemcTowerID)) return false;
+  if(mUse2003Cuts)
+    if(!accept2003Tower(energyDeposit.towerId)) return false;
 
   if (mUse2005Cuts)
-    if (bemcTowerID > 2400) return false;
+    if(energyDeposit.towerId > 2400) return false;
 
-  //now check the status: (//BTOW defined in StEmcRawMaker/defines.h
-  int status;
-  _bemcTables->getStatus(BTOW, bemcTowerID, status);
-  
-  //check for ADC that is 2-sigma above RMS:
-  float pedestal, rms;
-  int CAP(0); //this arument matters only for SMD
-  _bemcTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
-  
-  if (status != 1) return false;
+  if(energyDeposit.energy <= 0) return false;
 
-  if (theRawHit->adc() - pedestal <= 0) return false;
+  if(energyDeposit.status != 1) return false;
 
-  if ((theRawHit->adc() - pedestal) <= 2.*rms) return false;
+  if(energyDeposit.adc - energyDeposit.pedestal <= 0) return false;
+
+  if((energyDeposit.adc - energyDeposit.pedestal) <= 2.*energyDeposit.rms) return false;
 
   return true;
 
 }
 
-StSpinJet::TowerEnergyDepositList CollectEnergyDepositsFromBEMC::readBemcTowerEnergy(const BemcTowerIdHitMap &bemcTowerHits)
+TowerEnergyDeposit CollectEnergyDepositsFromBEMC::readTowerHit(const StEmcRawHit& hit)
 {
-  TowerEnergyDepositList ret;
+  TowerEnergyDeposit ret;
 
-  for(BemcTowerIdHitMap::const_iterator it = bemcTowerHits.begin(); it != bemcTowerHits.end(); ++it) {
+  ret.detectorId = kBarrelEmcTowerId;
 
-    const StEmcRawHit* hit = (*it).second;
-    int bemcTowerID = (*it).first;
+  int towerId;
+  StEmcGeom::instance("bemc")->getId(hit.module(), hit.eta(), abs(hit.sub()), towerId);
 
-    if(hit->energy() <= 0) continue;
+  ret.towerId = towerId;
 
-    TowerEnergyDeposit energyDeposit;
-    energyDeposit.detectorId = kBarrelEmcTowerId;
-    energyDeposit.towerId = (*it).first;
+  float towerX, towerY, towerZ;
+  StEmcGeom::instance("bemc")->getXYZ(towerId, towerX, towerY, towerZ);
 
-    TVector3 towerLocation = getBemcTowerLocation(energyDeposit.towerId);
+  ret.towerX = towerX;
+  ret.towerY = towerY;
+  ret.towerZ = towerZ;
 
-    energyDeposit.towerX = towerLocation.x();
-    energyDeposit.towerY = towerLocation.y();
-    energyDeposit.towerZ = towerLocation.z();
+  StThreeVectorF vertex = mMuDstMaker->muDst()->event()->primaryVertexPosition();
 
-    StThreeVectorF vertex = mMuDstMaker->muDst()->event()->primaryVertexPosition();
+  ret.vertexX = vertex.x();
+  ret.vertexY = vertex.y();
+  ret.vertexZ = vertex.z(); 
 
-    energyDeposit.vertexX = vertex.x();
-    energyDeposit.vertexY = vertex.y();
-    energyDeposit.vertexZ = vertex.z(); 
+  ret.energy = hit.energy();
+  ret.adc    = hit.adc();
 
-    energyDeposit.energy = hit->energy();
-    energyDeposit.adc    = hit->adc();
+  float pedestal, rms;
+  int CAP(0);
+  _bemcTables->getPedestal(BTOW, towerId, CAP, pedestal, rms);
+  ret.pedestal = pedestal;
+  ret.rms = rms;
 
-    float pedestal, rms;
-    int CAP(0);
-    _bemcTables->getPedestal(BTOW, bemcTowerID, CAP, pedestal, rms);
-    energyDeposit.pedestal = pedestal;
-    energyDeposit.rms = rms;
-
-    int status;
-    _bemcTables->getStatus(BTOW, bemcTowerID, status);
-    energyDeposit.status = status;
-
-    ret.push_back(energyDeposit);
-  }
+  int status;
+  _bemcTables->getStatus(BTOW, towerId, status);
+  ret.status = status;
 
   return ret;
 }
