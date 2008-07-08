@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.9 2008/07/07 22:12:23 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.10 2008/07/08 04:57:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -29,7 +29,7 @@ public:
   Float_t        dcaZ()        const { return _dcaZ; }
   Float_t        dcaD()        const { return _dcaD; }
   double         BField()      const { return _BField; }
-  double         bemcRadius() const { return _bemcRadius; }
+  double         bemcRadius()  const { return _bemcRadius; }
   double         etaext()      const { return _etaext; }
   double         phiext()      const { return _phiext; }
   double         dEdx()        const { return _dEdx; }

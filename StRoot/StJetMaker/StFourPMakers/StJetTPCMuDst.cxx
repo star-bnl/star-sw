@@ -1,4 +1,4 @@
-// $Id: StJetTPCMuDst.cxx,v 1.1 2008/07/08 04:16:05 tai Exp $
+// $Id: StJetTPCMuDst.cxx,v 1.2 2008/07/08 04:57:53 tai Exp $
 #include "StJetTPCMuDst.h"
 
 #include "../StMuTrackEmuFactory.h"
@@ -23,7 +23,7 @@ StJetTPCMuDst::TrackList StJetTPCMuDst::getTrackList()
 
   long nTracks = uDst->numberOfPrimaryTracks();
 
-  double magneticField = _uDstMaker->muDst()->event()->magneticField()/10.0; // Tesla
+  double magneticField = uDst->event()->magneticField()/10.0; // Tesla
   for(int i = 0; i < nTracks; ++i) {
     const StMuTrack* track = uDst->primaryTracks(i);
 
