@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromEEMC.cxx,v 1.3 2008/07/08 10:35:30 tai Exp $
+// $Id: CollectEnergyDepositsFromEEMC.cxx,v 1.4 2008/07/08 11:21:56 tai Exp $
 #include "CollectEnergyDepositsFromEEMC.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -56,13 +56,11 @@ TowerEnergyDepositList CollectEnergyDepositsFromEEMC::Do()
 
 
     TVector3 towerLocation = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1);
-    energyDeposit.towerLocation = towerLocation;
     energyDeposit.towerX = towerLocation.x();
     energyDeposit.towerY = towerLocation.y();
     energyDeposit.towerZ = towerLocation.z();
 
     StThreeVectorF vertex = mMuDstMaker->muDst()->event()->primaryVertexPosition();
-    energyDeposit.vertex = TVector3(vertex.x(), vertex.y(), vertex.z());
 
     energyDeposit.vertexX = vertex.x();
     energyDeposit.vertexY = vertex.y();
