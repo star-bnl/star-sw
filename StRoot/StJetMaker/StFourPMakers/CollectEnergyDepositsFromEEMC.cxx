@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromEEMC.cxx,v 1.4 2008/07/08 11:21:56 tai Exp $
+// $Id: CollectEnergyDepositsFromEEMC.cxx,v 1.5 2008/07/09 04:26:38 tai Exp $
 #include "CollectEnergyDepositsFromEEMC.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -28,6 +28,14 @@ void CollectEnergyDepositsFromEEMC::Init(StEEmcDbMaker* eedb)
 
 TowerEnergyDepositList CollectEnergyDepositsFromEEMC::Do()
 {
+  TowerEnergyDepositList energyList = getEnergyList();
+
+  return energyList;
+}
+
+TowerEnergyDepositList CollectEnergyDepositsFromEEMC::getEnergyList()
+{
+
   StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
 
   TowerEnergyDepositList ret;
@@ -36,10 +44,8 @@ TowerEnergyDepositList CollectEnergyDepositsFromEEMC::Do()
 
     int rawadc, sec, sub, etabin;
     muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
-    assert(sec >0 && sec <= MaxSectors);
 	
     const EEmcDbItem *dbItem = mEeDb->getT(sec,sub-1+'A',etabin);
-    assert(dbItem); 
 	
     if(dbItem->fail) continue; //drop broken channels
     if(dbItem->stat) continue; // drop not working channels and jumpy pedestal channels
@@ -48,7 +54,6 @@ TowerEnergyDepositList CollectEnergyDepositsFromEEMC::Do()
 	    
     double adc = rawadc - (dbItem->ped);
     double energy = adc/(dbItem->gain);
-    if(energy < 0.01) continue; // drop if less than 10MeV for now
 	    
     TowerEnergyDeposit energyDeposit;
     energyDeposit.detectorId = kEndcapEmcTowerId;
@@ -71,6 +76,8 @@ TowerEnergyDepositList CollectEnergyDepositsFromEEMC::Do()
     energyDeposit.pedestal = dbItem->ped;
     energyDeposit.rms      = 0.0;
     energyDeposit.status   = dbItem->stat;
+
+    if(energyDeposit.energy < 0.01) continue; // drop if less than 10MeV for now
 
     ret.push_back(energyDeposit);
 

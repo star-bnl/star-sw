@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectEnergyDepositsFromEEMC.h,v 1.2 2008/06/10 08:31:07 tai Exp $
+// $Id: CollectEnergyDepositsFromEEMC.h,v 1.3 2008/07/09 04:26:39 tai Exp $
 #ifndef COLLECTENERGYDEPOSITSFROMEEMC_H
 #define COLLECTENERGYDEPOSITSFROMEEMC_H
 
@@ -22,6 +22,8 @@ public:
   TowerEnergyDepositList Do();
 
 private:
+
+  TowerEnergyDepositList CollectEnergyDepositsFromEEMC::getEnergyList();
 
   StMuDstMaker* mMuDstMaker;
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.10 2008/07/08 04:57:46 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.11 2008/07/09 04:26:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -12,7 +12,29 @@ class StMuTrackEmu {
 
 public:
 
-  StMuTrackEmu() { }
+  StMuTrackEmu()
+    : _px(0)
+    , _py(0)
+    , _pz(0)
+    , _flag(0)
+    , _nHits(0)
+    , _charge(0)
+    , _nHitsPoss(0)
+    , _nHitsDedx(0)
+    , _nHitsFit(0)
+    , _nSigmaPion(0)
+    , _Tdca(0)
+    , _dcaZ(0)
+    , _dcaD(0)
+    , _BField(0)
+    , _bemcRadius(0)
+    , _etaext(0)
+    , _phiext(0)
+    , _dEdx(0)
+    , _trackIndex(0)
+    , _id(0)
+ { }
+
   virtual ~StMuTrackEmu() { }
 
   double         px()          const { return _px; }
@@ -41,6 +63,7 @@ public:
 private:
 
   friend class StMuTrackEmuFactory;
+  friend class StJetTPCTxt;
 
   double         _px;
   double         _py;

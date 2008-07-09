@@ -1,9 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTxt.h,v 1.1 2008/07/09 02:40:04 tai Exp $
+// $Id: StJetTPCTxt.h,v 1.2 2008/07/09 04:26:39 tai Exp $
 #ifndef STJETTPCTXT_H
 #define STJETTPCTXT_H
 
 #include "StJetTPC.h"
+
+#include <fstream>
 
 namespace StSpinJet {
 
@@ -17,6 +19,7 @@ public:
 
 private:
 
+  std::ifstream _dataFile;
 
 };
 
