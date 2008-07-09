@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTrackCut.h,v 1.1 2008/07/08 04:56:12 tai Exp $
+// $Id: StJetTPCTrackCut.h,v 1.2 2008/07/09 23:53:38 tai Exp $
 #ifndef STJETTPCTRACKCUT_H
 #define STJETTPCTRACKCUT_H
 
@@ -21,6 +21,8 @@ public:
   void setUse2006Cuts(bool v) { _use2006Cuts = v; }
 
   TrackList operator()(const TrackList& trackList);
+
+  bool Use2006Cuts() const { return _use2006Cuts; }
 
 private:
 

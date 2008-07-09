@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCEnergyCut.h,v 1.1 2008/07/09 10:24:33 tai Exp $
+// $Id: StJetBEMCEnergyCut.h,v 1.2 2008/07/09 23:53:38 tai Exp $
 #ifndef STJETBEMCENERGYCUT_H
 #define STJETBEMCENERGYCUT_H
 
@@ -18,6 +18,9 @@ public:
 
   void setUse2003Cuts(bool v) { mUse2003Cuts = v; }
   void setUse2005Cuts(bool v) { mUse2005Cuts = v; }
+
+  bool Use2003Cuts() const { return mUse2003Cuts; }
+  bool Use2005Cuts() const { return mUse2005Cuts; }
 
 private:
 

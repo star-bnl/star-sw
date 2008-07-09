@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.14 2008/07/09 10:24:30 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.15 2008/07/09 23:53:30 tai Exp $
 #include "CollectEnergyDepositsFromBEMC.h"
 
 #include "StJetBEMC.h"
@@ -9,9 +9,9 @@ using namespace std;
 
 namespace StSpinJet {
 
-CollectEnergyDepositsFromBEMC::CollectEnergyDepositsFromBEMC(StJetBEMC* bemc)
+CollectEnergyDepositsFromBEMC::CollectEnergyDepositsFromBEMC(StJetBEMC* bemc, StJetBEMCEnergyCut* cut)
   : _bemc(bemc)
-  , _cut(new StJetBEMCEnergyCut)
+  , _cut(cut)
 {
 
 }

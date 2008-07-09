@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectChargedTracksFromTPC.h,v 1.8 2008/07/08 04:56:12 tai Exp $
+// $Id: CollectChargedTracksFromTPC.h,v 1.9 2008/07/09 23:53:28 tai Exp $
 #ifndef COLLECTCHARGEDTRACKSFROMTPC_H
 #define COLLECTCHARGEDTRACKSFROMTPC_H
 
@@ -16,7 +16,7 @@ class CollectChargedTracksFromTPC {
 
 public:
 
-  CollectChargedTracksFromTPC(StJetTPC* tpc);
+  CollectChargedTracksFromTPC(StJetTPC* tpc, StJetTPCTrackCut* cut);
   virtual ~CollectChargedTracksFromTPC();
 
   typedef std::vector<StMuTrackEmu*> TrackList;

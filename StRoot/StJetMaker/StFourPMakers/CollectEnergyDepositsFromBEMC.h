@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectEnergyDepositsFromBEMC.h,v 1.9 2008/07/09 10:24:31 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.h,v 1.10 2008/07/09 23:53:32 tai Exp $
 #ifndef COLLECTENERGYDEPOSITSFROMBEMC_H
 #define COLLECTENERGYDEPOSITSFROMBEMC_H
 
@@ -15,7 +15,7 @@ class StJetBEMC;
 class CollectEnergyDepositsFromBEMC {
 
 public:
-  CollectEnergyDepositsFromBEMC(StJetBEMC* bemc);
+  CollectEnergyDepositsFromBEMC(StJetBEMC* bemc, StJetBEMCEnergyCut* cut);
   virtual ~CollectEnergyDepositsFromBEMC() { }
 
   void setUse2003Cuts(bool v) { _cut->setUse2003Cuts(v); }
