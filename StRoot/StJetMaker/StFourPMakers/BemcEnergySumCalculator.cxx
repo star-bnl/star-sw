@@ -1,31 +1,35 @@
-// $Id: BemcEnergySumCalculator.cxx,v 1.2 2008/06/10 06:35:39 tai Exp $
+// $Id: BemcEnergySumCalculator.cxx,v 1.3 2008/07/09 23:53:27 tai Exp $
 #include "BemcEnergySumCalculator.h"
 
-#include "CollectEnergyDepositsFromBEMC.h"
+#include "StJetBEMC.h"
+#include "StJetBEMCEnergyCut.h"
 
 namespace StSpinJet {
 
-BemcEnergySumCalculator::BemcEnergySumCalculator(CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC)
- : _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
-  , mDylanPoints(0)
-  , mSumEmcEt(0.0)
+BemcEnergySumCalculator::BemcEnergySumCalculator(StJetBEMC* bemc, StJetBEMCEnergyCut* cut)
+  : _bemc(bemc)
+  , _cut(cut)
+  , _DylanPoints(0)
+  , _SumEmcEt(0.0)
 {
 
 }
 
 void BemcEnergySumCalculator::Make()
 {
-  TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();
+  TowerEnergyDepositList energyList = _bemc->getEnergyList();
 
-  mSumEmcEt = sumEnergyOverBemcTowers(0.4, bemcEnergyDepositList);
+  energyList = _cut->Apply(energyList);
 
-  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, bemcEnergyDepositList);
+  _SumEmcEt = sumEnergyOverBemcTowers(0.4, energyList);
+
+  _DylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, energyList);
 }
 
 void BemcEnergySumCalculator::Clear()
 {
-  mSumEmcEt = 0;
-  mDylanPoints = 0;
+  _SumEmcEt = 0;
+  _DylanPoints = 0;
 }
 
 double BemcEnergySumCalculator::sumEnergyOverBemcTowers(double minE, const TowerEnergyDepositList &energyDepositList)

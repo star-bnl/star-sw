@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.48 2008/07/09 10:58:10 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.49 2008/07/09 23:53:37 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -18,7 +18,11 @@
 
 namespace StSpinJet {
   class StMuTrackEmu;
+  class StJetTPC;
+  class StJetBEMC;
   class StJetEEMC;
+  class StJetTPCTrackCut;
+  class StJetBEMCEnergyCut;
   class TrackListToFourList;
   class EnergyListToFourList;
 }
@@ -39,6 +43,15 @@ public:
 		  StSpinJet::StJetEEMC* eemc
 		  );
     
+  StBET4pMakerImp(
+		  StSpinJet::StJetTPC* tpc,
+		  StSpinJet::StJetTPCTrackCut* tpcCut,
+		  StSpinJet::StJetBEMC* bemc,
+		  StSpinJet::StJetBEMCEnergyCut* bemcCut,
+		  StSpinJet::CorrectTowerEnergyForTracks* correctTowerEnergyForTracks,
+		  StSpinJet::StJetEEMC* eemc
+		  );
+    
   virtual ~StBET4pMakerImp() {};
     
   void Make();
@@ -51,6 +64,8 @@ public:
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
 
+
+  bool UseEEMC() const { return mUseEndcap; }
 
 private:
 

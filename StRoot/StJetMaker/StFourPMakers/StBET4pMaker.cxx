@@ -1,12 +1,14 @@
-// $Id: StBET4pMaker.cxx,v 1.52 2008/07/09 11:47:34 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.53 2008/07/09 23:53:35 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 
 #include "StJetTPCMuDst.h"
+#include "StJetTPCTrackCut.h"
 #include "StJetBEMCMuDst.h"
+#include "StJetBEMCEnergyCut.h"
+#include "StJetEEMCMuDst.h"
 
-#include "CollectChargedTracksFromTPC.h"
 #include "BemcEnergySumCalculator.h"
 
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
@@ -22,13 +24,15 @@ ClassImp(StBET4pMaker)
     
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
+  , _tpc(new StJetTPCMuDst(uDstMaker))
+  , _tpcCut(new StJetTPCTrackCut())
   , _eemc(new StJetEEMCMuDst(uDstMaker))
   , _bemcTables(new StBemcTables(doTowerSwapFix))
-  , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(new StJetTPCMuDst(uDstMaker)))
-  , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(new StJetBEMCMuDst(uDstMaker, _bemcTables)))
+  , _bemc(new StJetBEMCMuDst(uDstMaker, _bemcTables))
+  , _bemcCut(new StJetBEMCEnergyCut)
   , _correctTowerEnergyForTracks(new CorrectTowerEnergyForTracks())
-  , _imp(new StBET4pMakerImp(_collectChargedTracksFromTPC, _collectEnergyDepositsFromBEMC,  _correctTowerEnergyForTracks, _eemc))
-  , _bemcEnergySumCalculator(new BemcEnergySumCalculator(_collectEnergyDepositsFromBEMC))
+  , _imp(new StBET4pMakerImp(_tpc, _tpcCut, _bemc, _bemcCut, _correctTowerEnergyForTracks, _eemc))
+  , _bemcEnergySumCalculator(new BemcEnergySumCalculator(_bemc, _bemcCut))
 {
 
 }
@@ -40,17 +44,17 @@ void StBET4pMaker::setUseEndcap(bool v)
 
 void StBET4pMaker::setUse2003Cuts(bool v)
 { 
-  _collectEnergyDepositsFromBEMC->setUse2003Cuts(v);
+  _bemcCut->setUse2003Cuts(v);
 }
 
 void StBET4pMaker::setUse2005Cuts(bool v)
 {
-  _collectEnergyDepositsFromBEMC->setUse2005Cuts(v);
+  _bemcCut->setUse2005Cuts(v);
 }
 
 void StBET4pMaker::setUse2006Cuts(bool v)
 { 
-  _collectChargedTracksFromTPC->setUse2006Cuts(v);
+  _tpcCut->setUse2006Cuts(v);
 }
 
 Int_t StBET4pMaker::InitRun(Int_t runId)
@@ -63,7 +67,7 @@ Int_t StBET4pMaker::InitRun(Int_t runId)
 Int_t StBET4pMaker::Init()
 {
   StEEmcDbMaker* mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
-  _eemc->Init(mEeDb);
+  if(mEeDb) _eemc->Init(mEeDb);
 
   return StMaker::Init();
 }

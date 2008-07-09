@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.33 2008/07/09 05:35:57 tai Exp $
+// $Id: StBET4pMaker.h,v 1.34 2008/07/09 23:53:36 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
 #include "StFourPMaker.h"
 
-#include "CollectEnergyDepositsFromBEMC.h"
-#include "CollectEnergyDepositsFromEEMC.h"
 #include "CorrectTowerEnergyForTracks.h"
 #include "StJetEEMCMuDst.h"
 
@@ -18,6 +16,13 @@ namespace StSpinJet {
 
 class CollectChargedTracksFromTPC;
 class BemcEnergySumCalculator;
+
+class StJetTPC;
+class StJetTPCTrackCut;
+class StJetBEMC;
+class StJetBEMCEnergyCut;
+class StJetEEMC;
+
 }
 
 class StBET4pMaker : public StFourPMaker {
@@ -46,15 +51,23 @@ public:
   double sumEmcEt() const;
 
   bool bemcCorrupt() const { return isBemcCorrupted(); }
-    
+
+
+  StBET4pMakerImp* GetImp() { return _imp; }
+  StSpinJet::StJetBEMCEnergyCut* getBEMCEnergyCut() { return _bemcCut; }
+  StSpinJet::StJetTPCTrackCut* getTPCTrackCut() { return _tpcCut; }
+
 private:
+
+  StSpinJet::StJetTPC* _tpc;
+  StSpinJet::StJetTPCTrackCut* _tpcCut;
 
   StSpinJet::StJetEEMCMuDst* _eemc;
   StBemcTables* _bemcTables;
 
-  StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
-  StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
-  StSpinJet::CollectEnergyDepositsFromEEMC *_collectEnergyDepositsFromEEMC;
+  StSpinJet::StJetBEMC* _bemc;
+  StSpinJet::StJetBEMCEnergyCut* _bemcCut;
+
   StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
   StBET4pMakerImp* _imp;
 
