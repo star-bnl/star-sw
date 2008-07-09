@@ -1,11 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTxt.h,v 1.2 2008/07/09 04:26:39 tai Exp $
+// $Id: StJetTPCTxt.h,v 1.3 2008/07/09 08:16:05 tai Exp $
 #ifndef STJETTPCTXT_H
 #define STJETTPCTXT_H
 
 #include "StJetTPC.h"
 
 #include <fstream>
+#include <string>
 
 namespace StSpinJet {
 
@@ -20,6 +21,8 @@ public:
 private:
 
   std::ifstream _dataFile;
+  long _currentEvent;
+  std::string _oldLine;
 
 };
 

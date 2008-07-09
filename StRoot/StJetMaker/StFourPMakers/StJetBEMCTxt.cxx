@@ -1,4 +1,4 @@
-// $Id: StJetBEMCTxt.cxx,v 1.1 2008/07/09 05:35:58 tai Exp $
+// $Id: StJetBEMCTxt.cxx,v 1.2 2008/07/09 08:16:04 tai Exp $
 #include "StJetBEMCTxt.h"
 
 #include <iostream>
@@ -10,25 +10,25 @@ using namespace std;
 namespace StSpinJet {
 
 StJetBEMCTxt::StJetBEMCTxt(const char* path)
+  : _currentEvent(-1)
+  , _oldLine("")
 {
   _dataFile.open(path);
 }
 
 TowerEnergyDepositList StJetBEMCTxt::getEnergyList()
 {
-  static long currentEvent(-1);
-  ++currentEvent;
+  ++_currentEvent;
 
-  static string oldLine("");
   string line;
 
   vector<string> currentLines;
 
   while(!_dataFile.eof()) {
 
-    if(oldLine.size()) {
-      line = oldLine;
-      oldLine = "";
+    if(_oldLine.size()) {
+      line = _oldLine;
+      _oldLine = "";
     } else {
       getline(_dataFile, line);
     }
@@ -37,8 +37,8 @@ TowerEnergyDepositList StJetBEMCTxt::getEnergyList()
     long i;
     ist >> i;
 
-    if (currentEvent != i) {
-      oldLine = line;
+    if (_currentEvent != i) {
+      _oldLine = line;
       break;
     }
 
