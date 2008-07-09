@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CollectEnergyDepositsFromEEMC.h,v 1.4 2008/07/09 05:13:14 tai Exp $
+// $Id: CollectEnergyDepositsFromEEMC.h,v 1.5 2008/07/09 05:25:11 tai Exp $
 #ifndef COLLECTENERGYDEPOSITSFROMEEMC_H
 #define COLLECTENERGYDEPOSITSFROMEEMC_H
 
@@ -14,8 +14,21 @@ namespace StSpinJet {
 class StJetEEMC {
 
 public:
-  StJetEEMC(StMuDstMaker* uDstMaker);
+
+  StJetEEMC() { }
   virtual ~StJetEEMC() { }
+
+  virtual TowerEnergyDepositList getEnergyList() = 0;
+
+private:
+
+};
+
+class StJetEEMCMuDst : public StJetEEMC {
+
+public:
+  StJetEEMCMuDst(StMuDstMaker* uDstMaker);
+  virtual ~StJetEEMCMuDst() { }
 
   void Init(StEEmcDbMaker* eedb);
 
