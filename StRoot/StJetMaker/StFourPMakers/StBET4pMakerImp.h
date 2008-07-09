@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.47 2008/07/09 10:44:07 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.48 2008/07/09 10:58:10 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -20,6 +20,7 @@ namespace StSpinJet {
   class StMuTrackEmu;
   class StJetEEMC;
   class TrackListToFourList;
+  class EnergyListToFourList;
 }
 
 #include "CollectEnergyDepositsFromBEMC.h"
@@ -55,11 +56,6 @@ private:
 
   typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
 
-  FourList constructFourMomentumListFrom(const StSpinJet::TowerEnergyDepositList& energyDepositList);
-
-
-  TLorentzVector constructFourMomentum(const StSpinJet::TowerEnergyDeposit& deposit);
-
   FourList _tracks;
 
   bool mUseEndcap;
@@ -72,7 +68,7 @@ private:
   StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
 
   StSpinJet::TrackListToFourList& _track2four;
-
+  StSpinJet::EnergyListToFourList& _energy2four;
 };
 
 #endif // STBET4PMAKERIMP_HH
