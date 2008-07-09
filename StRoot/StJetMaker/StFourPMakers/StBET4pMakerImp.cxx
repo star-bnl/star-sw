@@ -1,10 +1,11 @@
-// $Id: StBET4pMakerImp.cxx,v 1.75 2008/07/09 10:44:07 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.76 2008/07/09 10:58:09 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
 #include "CollectEnergyDepositsFromBEMC.h"
 #include "StJetEEMC.h"
 #include "TrackListToFourList.h"
+#include "EnergyListToFourList.h"
 
 //StJetMaker
 #include "../StMuTrackFourVec.h"
@@ -27,6 +28,7 @@ StBET4pMakerImp::StBET4pMakerImp(CollectChargedTracksFromTPC* collectChargedTrac
   , _eemc(eemc)
   , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
   , _track2four(*(new TrackListToFourList))
+  , _energy2four(*(new EnergyListToFourList))
 {
 
 }
@@ -55,7 +57,7 @@ void StBET4pMakerImp::Make()
 
     TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyDepositList, trackmuList);
 
-    FourList bemcFourMomentumList = constructFourMomentumListFrom(bemcCorrectedEnergyDepositList);
+    FourList bemcFourMomentumList = _energy2four(bemcCorrectedEnergyDepositList);
 
     _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
   }
@@ -65,43 +67,12 @@ void StBET4pMakerImp::Make()
 
     TowerEnergyDepositList eemcEnergyList = _eemc->getEnergyList();
 
-    FourList eemcFourMomentumList = constructFourMomentumListFrom(eemcEnergyList);
+    FourList eemcFourMomentumList = _energy2four(eemcEnergyList);
 
     _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
   }
 
 }
 
-
-FourList StBET4pMakerImp::constructFourMomentumListFrom(const TowerEnergyDepositList& energyDepositList)
-{
-  FourList ret;
-
-  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
-
-    TLorentzVector p4 = constructFourMomentum((*it));
-	    
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, (*it).towerId, (*it).detectorId);
-
-    ret.push_back(pmu);
-  }
-  return ret;
-}
-
-TLorentzVector StBET4pMakerImp::constructFourMomentum(const TowerEnergyDeposit& deposit)
-{
-  TVector3 towerLocation(deposit.towerX, deposit.towerY, deposit.towerZ); 
-  TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);
-
-  TVector3 momentum = towerLocation - vertex;
-
-  double mass(0); // assume photon mass
-
-  double pMag = (deposit.energy > mass) ? sqrt(deposit.energy*deposit.energy - mass*mass) : deposit.energy;
-
-  momentum.SetMag(pMag);
-
-  return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), deposit.energy);
-}
 
 
