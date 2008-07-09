@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.44 2008/07/08 11:21:57 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.45 2008/07/09 10:24:32 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -18,10 +18,10 @@
 
 namespace StSpinJet {
   class StMuTrackEmu;
+  class StJetEEMC;
 }
 
 #include "CollectEnergyDepositsFromBEMC.h"
-#include "CollectEnergyDepositsFromEEMC.h"
 #include "CorrectTowerEnergyForTracks.h"
 
 typedef std::vector<AbstractFourVec*> FourList;
@@ -33,8 +33,8 @@ public:
   StBET4pMakerImp(
 		  StSpinJet::CollectChargedTracksFromTPC* collectChargedTracksFromTPC,
 		  StSpinJet::CollectEnergyDepositsFromBEMC* collectEnergyDepositsFromBEMC,
-		  StSpinJet::CollectEnergyDepositsFromEEMC* collectEnergyDepositsFromEEMC,
-		  StSpinJet::CorrectTowerEnergyForTracks* correctTowerEnergyForTracks
+		  StSpinJet::CorrectTowerEnergyForTracks* correctTowerEnergyForTracks,
+		  StSpinJet::StJetEEMC* eemc
 		  );
     
   virtual ~StBET4pMakerImp() {};
@@ -68,7 +68,7 @@ private:
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
-  StSpinJet::CollectEnergyDepositsFromEEMC *_collectEnergyDepositsFromEEMC;
+  StSpinJet::StJetEEMC* _eemc;
 
   StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
 
