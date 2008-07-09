@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.12 2008/07/09 08:15:41 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.13 2008/07/09 08:38:38 tai Exp $
 #include "CollectEnergyDepositsFromBEMC.h"
 
 #include "StJetBEMC.h"
@@ -104,7 +104,6 @@ bool CollectEnergyDepositsFromBEMC::accept2003Tower(int id)
 	|| id>2400
 	)
 	{
-	    cout <<"rejecting tower:\t"<<id<<endl;
 	    return false;
 	}
     else {
