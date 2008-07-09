@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.32 2008/07/09 05:25:12 tai Exp $
+// $Id: StBET4pMaker.h,v 1.33 2008/07/09 05:35:57 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -8,6 +8,7 @@
 #include "CollectEnergyDepositsFromBEMC.h"
 #include "CollectEnergyDepositsFromEEMC.h"
 #include "CorrectTowerEnergyForTracks.h"
+#include "StJetEEMCMuDst.h"
 
 class StMuDstMaker;
 class StBemcTables;
