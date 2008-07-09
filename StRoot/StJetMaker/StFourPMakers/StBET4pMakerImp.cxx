@@ -1,9 +1,10 @@
-// $Id: StBET4pMakerImp.cxx,v 1.73 2008/07/09 10:24:31 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.74 2008/07/09 10:41:26 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
 #include "CollectEnergyDepositsFromBEMC.h"
 #include "StJetEEMC.h"
+#include "TrackListToFourList.h"
 
 //StJetMaker
 #include "../StMuTrackFourVec.h"
@@ -25,6 +26,7 @@ StBET4pMakerImp::StBET4pMakerImp(CollectChargedTracksFromTPC* collectChargedTrac
   , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
   , _eemc(eemc)
   , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
+  , _track2four(*(new TrackListToFourList))
 {
 
 }
@@ -44,7 +46,8 @@ void StBET4pMakerImp::Make()
 {
   TrackList trackmuList = _collectChargedTracksFromTPC->Do();
 
-  FourList tpcFourMomentumList = constructFourMomentumListFrom(trackmuList);
+  //  FourList tpcFourMomentumList = constructFourMomentumListFrom(trackmuList);
+  FourList tpcFourMomentumList = _track2four(trackmuList);
 
   _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
 
