@@ -1,4 +1,4 @@
-// $Id: StJetTPCTxt.cxx,v 1.2 2008/07/09 04:26:39 tai Exp $
+// $Id: StJetTPCTxt.cxx,v 1.3 2008/07/09 08:16:05 tai Exp $
 #include "StJetTPCTxt.h"
 
 #include "../StMuTrackEmu.h"
@@ -12,25 +12,25 @@ using namespace std;
 namespace StSpinJet {
 
 StJetTPCTxt::StJetTPCTxt(const char* path)
+ : _currentEvent(-1)
+ , _oldLine("")
 {
   _dataFile.open(path);
 }
 
 StJetTPCTxt::TrackList StJetTPCTxt::getTrackList()
 {
-  static long currentEvent(-1);
-  ++currentEvent;
+  ++_currentEvent;
 
-  static string oldLine("");
   string line;
 
   vector<string> currentLines;
 
   while(!_dataFile.eof()) {
 
-    if(oldLine.size()) {
-      line = oldLine;
-      oldLine = "";
+    if(_oldLine.size()) {
+      line = _oldLine;
+      _oldLine = "";
     } else {
       getline(_dataFile, line);
     }
@@ -39,8 +39,8 @@ StJetTPCTxt::TrackList StJetTPCTxt::getTrackList()
     long i;
     ist >> i;
 
-    if (currentEvent != i) {
-      oldLine = line;
+    if (_currentEvent != i) {
+      _oldLine = line;
       break;
     }
 
