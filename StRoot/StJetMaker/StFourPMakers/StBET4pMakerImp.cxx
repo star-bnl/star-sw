@@ -1,9 +1,9 @@
-// $Id: StBET4pMakerImp.cxx,v 1.72 2008/07/08 11:21:56 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.73 2008/07/09 10:24:31 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
 #include "CollectEnergyDepositsFromBEMC.h"
-
+#include "StJetEEMC.h"
 
 //StJetMaker
 #include "../StMuTrackFourVec.h"
@@ -15,17 +15,15 @@
 using namespace std;
 using namespace StSpinJet;
 
-StBET4pMakerImp::StBET4pMakerImp(
-				 CollectChargedTracksFromTPC* collectChargedTracksFromTPC,
+StBET4pMakerImp::StBET4pMakerImp(CollectChargedTracksFromTPC* collectChargedTracksFromTPC,
 				 CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC,
-				 CollectEnergyDepositsFromEEMC *collectEnergyDepositsFromEEMC,
-				 CorrectTowerEnergyForTracks* correctTowerEnergyForTracks
-				 )
+				 CorrectTowerEnergyForTracks* correctTowerEnergyForTracks,
+				 StJetEEMC* eemc)
   : mUseEndcap(false)
   , mUseBEMC(true)
   , _collectChargedTracksFromTPC(collectChargedTracksFromTPC)
   , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
-  , _collectEnergyDepositsFromEEMC(collectEnergyDepositsFromEEMC)
+  , _eemc(eemc)
   , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
 {
 
@@ -63,9 +61,9 @@ void StBET4pMakerImp::Make()
 
   if(mUseEndcap) {
 
-    TowerEnergyDepositList eemcCorrectedEnergyDepositList = _collectEnergyDepositsFromEEMC->Do();
+    TowerEnergyDepositList eemcEnergyList = _eemc->getEnergyList();
 
-    FourList eemcFourMomentumList = constructFourMomentumListFrom(eemcCorrectedEnergyDepositList);
+    FourList eemcFourMomentumList = constructFourMomentumListFrom(eemcEnergyList);
 
     _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
   }
