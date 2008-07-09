@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTrackPrint.h,v 1.1 2008/07/09 01:01:11 tai Exp $
+// $Id: StJetTPCTrackPrint.h,v 1.2 2008/07/09 02:40:04 tai Exp $
 #ifndef STJETTPCTRACKPRINT_H
 #define STJETTPCTRACKPRINT_H
 
@@ -22,7 +22,7 @@ public:
 
 private:
 
-  void print(const StMuTrackEmu& track) const;
+  void print(const StMuTrackEmu& track, long i) const;
 
 };
 

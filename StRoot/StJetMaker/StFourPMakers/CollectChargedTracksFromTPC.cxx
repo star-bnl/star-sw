@@ -1,9 +1,11 @@
-// $Id: CollectChargedTracksFromTPC.cxx,v 1.8 2008/07/08 04:56:11 tai Exp $
+// $Id: CollectChargedTracksFromTPC.cxx,v 1.9 2008/07/09 02:40:04 tai Exp $
 #include "CollectChargedTracksFromTPC.h"
 
 #include "StJetTPC.h"
 
 #include "StJetTPCTrackCut.h"
+
+#include "StJetTPCTrackPrint.h"
 
 namespace StSpinJet {
 
@@ -22,6 +24,9 @@ CollectChargedTracksFromTPC::~CollectChargedTracksFromTPC()
 CollectChargedTracksFromTPC::TrackList CollectChargedTracksFromTPC::Do()
 {
   TrackList trackList = _tpc->getTrackList();
+
+  //  StJetTPCTrackPrint print;
+  //  print(trackList);
 
   trackList = _cut(trackList);
 
