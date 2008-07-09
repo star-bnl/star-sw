@@ -1,32 +1,30 @@
-// $Id: StJetBEMCEnergyPrint.cxx,v 1.1 2008/07/09 01:53:28 tai Exp $
-#include "StJetBEMCEnergyPrint.h"
+// $Id: StJetTowerEnergyPrint.cxx,v 1.1 2008/07/09 05:13:16 tai Exp $
+#include "StJetTowerEnergyPrint.h"
 
 #include <TVector3.h>
 
 #include <iostream>
-#include <fstream>
 
 using namespace std;
 
 namespace StSpinJet {
 
-void StJetBEMCEnergyPrint::operator()(const TowerEnergyDepositList &energyList)
+void StJetTowerEnergyPrint::operator()(const TowerEnergyDepositList &energyList)
 {
-  static long i(0);
+  if(_i == 0) _ofs.open(_fileName.c_str());
+
   for(TowerEnergyDepositList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
 
-    print(*it, i);
+    print(*it);
 
   }
-  ++i;
+  ++_i;
 }
 
-void StJetBEMCEnergyPrint::print(const TowerEnergyDeposit& energyDeposit, long i) const
+void StJetTowerEnergyPrint::print(const TowerEnergyDeposit& energyDeposit)
 {
-  static ofstream ofs("./bemcenergy.txt");
-
-  ofs 
-    << i << " "
+  _ofs 
+    << _i << " "
     << energyDeposit.towerId << " "
     << energyDeposit.towerX << " "
     << energyDeposit.towerY << " "

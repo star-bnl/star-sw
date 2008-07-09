@@ -1,4 +1,4 @@
-// $Id: CollectEnergyDepositsFromEEMC.cxx,v 1.5 2008/07/09 04:26:38 tai Exp $
+// $Id: CollectEnergyDepositsFromEEMC.cxx,v 1.6 2008/07/09 05:13:14 tai Exp $
 #include "CollectEnergyDepositsFromEEMC.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -13,29 +13,21 @@
 
 namespace StSpinJet {
 
-CollectEnergyDepositsFromEEMC::CollectEnergyDepositsFromEEMC(StMuDstMaker* uDstMaker)
-  : mMuDstMaker(uDstMaker)
+StJetEEMC::StJetEEMC(StMuDstMaker* uDstMaker)
+ : mMuDstMaker(uDstMaker)
 {
 
 }
 
-void CollectEnergyDepositsFromEEMC::Init(StEEmcDbMaker* eedb)
+void StJetEEMC::Init(StEEmcDbMaker* eedb)
 {
   mEeGeom = new EEmcGeomSimple();
   mEeDb = eedb;
   mEeDb->setThreshold(3);
 }
 
-TowerEnergyDepositList CollectEnergyDepositsFromEEMC::Do()
+TowerEnergyDepositList StJetEEMC::getEnergyList()
 {
-  TowerEnergyDepositList energyList = getEnergyList();
-
-  return energyList;
-}
-
-TowerEnergyDepositList CollectEnergyDepositsFromEEMC::getEnergyList()
-{
-
   StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
 
   TowerEnergyDepositList ret;
@@ -85,5 +77,19 @@ TowerEnergyDepositList CollectEnergyDepositsFromEEMC::getEnergyList()
 
   return ret;
 }
+
+CollectEnergyDepositsFromEEMC::CollectEnergyDepositsFromEEMC(StJetEEMC* eemc)
+  : _eemc(eemc)
+{
+
+}
+
+TowerEnergyDepositList CollectEnergyDepositsFromEEMC::Do()
+{
+  TowerEnergyDepositList energyList = _eemc->getEnergyList();
+
+  return energyList;
+}
+
 
 }
