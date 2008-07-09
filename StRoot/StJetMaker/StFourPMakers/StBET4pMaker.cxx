@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.51 2008/07/09 10:24:31 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.52 2008/07/09 11:47:34 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -9,7 +9,6 @@
 #include "CollectChargedTracksFromTPC.h"
 #include "BemcEnergySumCalculator.h"
 
-#include "StEventTypes.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 #include "StEmcRawMaker/StBemcTables.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
