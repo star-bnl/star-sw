@@ -1,4 +1,4 @@
-// $Id: StJetTPCTrackPrint.cxx,v 1.1 2008/07/09 01:01:10 tai Exp $
+// $Id: StJetTPCTrackPrint.cxx,v 1.2 2008/07/09 01:04:56 tai Exp $
 #include "StJetTPCTrackPrint.h"
 
 #include "../StMuTrackEmu.h"
@@ -16,7 +16,7 @@ void StJetTPCTrackPrint::operator()(const TrackList& trackList)
   for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     StMuTrackEmu* track = *it;
 
-    if (print(*track)) continue;
+    print(*track);
 
   }
 
