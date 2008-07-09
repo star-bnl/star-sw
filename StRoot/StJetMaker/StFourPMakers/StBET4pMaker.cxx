@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.49 2008/07/09 05:13:15 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.50 2008/07/09 05:25:11 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -23,7 +23,7 @@ ClassImp(StBET4pMaker)
     
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
-  , _eemc(new StJetEEMC(uDstMaker))
+  , _eemc(new StJetEEMCMuDst(uDstMaker))
   , _bemcTables(new StBemcTables(doTowerSwapFix))
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(new StJetTPCMuDst(uDstMaker)))
   , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(new StJetBEMCMuDst(uDstMaker, _bemcTables)))
