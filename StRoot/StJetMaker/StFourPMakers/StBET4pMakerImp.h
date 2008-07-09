@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.45 2008/07/09 10:24:32 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.46 2008/07/09 10:41:27 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -19,6 +19,7 @@
 namespace StSpinJet {
   class StMuTrackEmu;
   class StJetEEMC;
+  class TrackListToFourList;
 }
 
 #include "CollectEnergyDepositsFromBEMC.h"
@@ -71,6 +72,8 @@ private:
   StSpinJet::StJetEEMC* _eemc;
 
   StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
+
+  StSpinJet::TrackListToFourList& _track2four;
 
 };
 
