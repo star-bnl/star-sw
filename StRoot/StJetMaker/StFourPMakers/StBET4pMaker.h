@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.30 2008/06/10 09:17:58 tai Exp $
+// $Id: StBET4pMaker.h,v 1.31 2008/07/09 05:13:15 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -48,6 +48,7 @@ public:
     
 private:
 
+  StSpinJet::StJetEEMC* _eemc;
   StBemcTables* _bemcTables;
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;

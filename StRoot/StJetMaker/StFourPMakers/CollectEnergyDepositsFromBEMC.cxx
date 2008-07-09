@@ -1,8 +1,7 @@
-// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.10 2008/07/09 02:40:04 tai Exp $
+// $Id: CollectEnergyDepositsFromBEMC.cxx,v 1.11 2008/07/09 05:13:14 tai Exp $
 #include "CollectEnergyDepositsFromBEMC.h"
 
 #include "StJetBEMC.h"
-#include "StJetBEMCEnergyPrint.h"
 
 #include <iostream>
 
@@ -22,9 +21,6 @@ CollectEnergyDepositsFromBEMC::CollectEnergyDepositsFromBEMC(StJetBEMC* bemc)
 TowerEnergyDepositList CollectEnergyDepositsFromBEMC::Do()
 {
   TowerEnergyDepositList energyList = _bemc->getEnergyList();
-
-  //  StJetBEMCEnergyPrint print;
-  //  print(energyList);
 
   energyList = selectBemcTowerHits(energyList);
 
