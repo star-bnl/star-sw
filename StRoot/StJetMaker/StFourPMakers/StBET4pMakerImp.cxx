@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.84 2008/07/10 19:35:30 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.85 2008/07/10 19:48:17 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -29,7 +29,7 @@ StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
 				 StJetBEMC* bemc, StJetBEMCEnergyCut* bemcCut,
 				 CorrectTowerEnergyForTracks* correctTowerEnergyForTracks,
 				 StJetEEMC* eemc)
-  :  _tpc(tpc), _bemc(bemc), _eemc(eemc)
+  : _tpc(tpc), _bemc(bemc), _eemc(eemc)
   , _tpcCut(tpcCut), _bemcCut(bemcCut)
   , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
   , _track2four(*(new TrackListToFourList))
@@ -83,6 +83,3 @@ void StBET4pMakerImp::Make()
   _tracks.insert(_tracks.end(), eemc4pList.begin(), eemc4pList.end());
 }
 
-bool StBET4pMakerImp::UseTPC()  const { return _tpc->isUsed();  }
-bool StBET4pMakerImp::UseBEMC() const { return _bemc->isUsed(); }
-bool StBET4pMakerImp::UseEEMC() const { return _eemc->isUsed(); }
