@@ -1,9 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StJetTowerEnergyPrint.h,v 1.1 2008/07/09 05:13:16 tai Exp $
+// $Id: StJetTowerEnergyPrint.h,v 1.2 2008/07/10 20:15:23 tai Exp $
 #ifndef STJETTOWERENERGYPRINT_H
 #define STJETTOWERENERGYPRINT_H
 
-#include "TowerEnergyDeposit.h"
+#include "TowerEnergyList.h"
 
 #include <fstream>
 #include <string>
@@ -18,11 +18,11 @@ public:
     : _i(0), _fileName(fileName) { }
   virtual ~StJetTowerEnergyPrint() { }
 
-  void operator()(const TowerEnergyDepositList& energyList);
+  void operator()(const TowerEnergyList& energyList);
 
 private:
 
-  void print(const TowerEnergyDeposit& energyDeposit);
+  void print(const TowerEnergy& energyDeposit);
 
   long _i;
 

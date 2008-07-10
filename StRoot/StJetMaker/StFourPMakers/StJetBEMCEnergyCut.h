@@ -1,9 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCEnergyCut.h,v 1.2 2008/07/09 23:53:38 tai Exp $
+// $Id: StJetBEMCEnergyCut.h,v 1.3 2008/07/10 20:15:20 tai Exp $
 #ifndef STJETBEMCENERGYCUT_H
 #define STJETBEMCENERGYCUT_H
 
-#include "TowerEnergyDeposit.h"
+#include "TowerEnergyList.h"
 
 namespace StSpinJet {
 
@@ -14,7 +14,7 @@ public:
     : mUse2003Cuts(false), mUse2005Cuts(false) { }
   virtual ~StJetBEMCEnergyCut() { }
   
-  TowerEnergyDepositList Apply(const TowerEnergyDepositList& energyList);
+  TowerEnergyList Apply(const TowerEnergyList& energyList);
 
   void setUse2003Cuts(bool v) { mUse2003Cuts = v; }
   void setUse2005Cuts(bool v) { mUse2005Cuts = v; }
@@ -24,7 +24,7 @@ public:
 
 private:
 
-  bool shouldKeep(const TowerEnergyDeposit& energyDeposit);
+  bool shouldKeep(const TowerEnergy& energyDeposit);
   bool accept2003Tower(int id);
 
   bool mUse2003Cuts;

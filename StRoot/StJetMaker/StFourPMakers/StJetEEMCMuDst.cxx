@@ -1,4 +1,4 @@
-// $Id: StJetEEMCMuDst.cxx,v 1.3 2008/07/10 03:09:37 tai Exp $
+// $Id: StJetEEMCMuDst.cxx,v 1.4 2008/07/10 20:15:21 tai Exp $
 #include "StJetEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -27,11 +27,11 @@ void StJetEEMCMuDst::Init()
   if(mEeDb) mEeDb->setThreshold(3);
 }
 
-TowerEnergyDepositList StJetEEMCMuDst::getEnergyList()
+TowerEnergyList StJetEEMCMuDst::getEnergyList()
 {
   StMuEmcCollection* muEmc = mMuDstMaker->muDst()->muEmcCollection();
 
-  TowerEnergyDepositList ret;
+  TowerEnergyList ret;
 
   for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
 
@@ -48,7 +48,7 @@ TowerEnergyDepositList StJetEEMCMuDst::getEnergyList()
     double adc = rawadc - (dbItem->ped);
     double energy = adc/(dbItem->gain);
 	    
-    TowerEnergyDeposit energyDeposit;
+    TowerEnergy energyDeposit;
     energyDeposit.detectorId = kEndcapEmcTowerId;
     energyDeposit.towerId = (sec*5 + sub)*12 + etabin;
 

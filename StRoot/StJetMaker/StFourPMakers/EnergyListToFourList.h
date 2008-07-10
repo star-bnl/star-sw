@@ -1,11 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: EnergyListToFourList.h,v 1.1 2008/07/09 10:58:09 tai Exp $
+// $Id: EnergyListToFourList.h,v 1.2 2008/07/10 20:15:20 tai Exp $
 #ifndef ENERGYLISTTOFOURLIST_H
 #define ENERGYLISTTOFOURLIST_H
 
 #include <StJetFinder/AbstractFourVec.h>
 
-#include <TowerEnergyDeposit.h>
+#include <TowerEnergyList.h>
 
 #include <TLorentzVector.h>
 
@@ -19,11 +19,11 @@ public:
   EnergyListToFourList() { }
   virtual ~EnergyListToFourList() { }
 
-  FourList operator()(const TowerEnergyDepositList& energyDepositList);
+  FourList operator()(const TowerEnergyList& energyDepositList);
 
 private:
 
-  TLorentzVector constructFourMomentum(const TowerEnergyDeposit& deposit);
+  TLorentzVector constructFourMomentum(const TowerEnergy& deposit);
 
 };
 

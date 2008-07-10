@@ -1,4 +1,4 @@
-// $Id: CorrectTowerEnergyForTracks.cxx,v 1.3 2008/07/07 22:20:53 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.cxx,v 1.4 2008/07/10 20:15:19 tai Exp $
 #include "CorrectTowerEnergyForTracks.h"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
@@ -14,7 +14,7 @@ CorrectTowerEnergyForTracks::CorrectTowerEnergyForTracks()
 
 }
 
-TowerEnergyDepositList CorrectTowerEnergyForTracks::Do(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList)
+TowerEnergyList CorrectTowerEnergyForTracks::Do(const TowerEnergyList &energyDepositList, const TrackList& trackList)
 {
   for (int i = 1; i <= mNOfBemcTowers; ++i) {
     mNtracksOnTower[i] = 0;
@@ -24,11 +24,11 @@ TowerEnergyDepositList CorrectTowerEnergyForTracks::Do(const TowerEnergyDepositL
     countTracksOnBemcTower(**track);
   }
 
-  TowerEnergyDepositList ret;
+  TowerEnergyList ret;
 
-  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
+  for(TowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
-    TowerEnergyDeposit energyDeposit(*it);
+    TowerEnergy energyDeposit(*it);
 
     energyDeposit.energy = correctBemcTowerEnergyForTracks_(energyDeposit.energy, energyDeposit.towerId);
 

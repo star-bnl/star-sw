@@ -1,15 +1,15 @@
-// $Id: EnergyListToFourList.cxx,v 1.1 2008/07/09 10:58:09 tai Exp $
+// $Id: EnergyListToFourList.cxx,v 1.2 2008/07/10 20:15:19 tai Exp $
 #include "EnergyListToFourList.h"
 
 #include "../StMuTrackFourVec.h"
 
 namespace StSpinJet {
 
-FourList EnergyListToFourList::operator()(const TowerEnergyDepositList& energyDepositList)
+FourList EnergyListToFourList::operator()(const TowerEnergyList& energyDepositList)
 {
   FourList ret;
 
-  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
+  for(TowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
     TLorentzVector p4 = constructFourMomentum((*it));
 	    
@@ -20,7 +20,7 @@ FourList EnergyListToFourList::operator()(const TowerEnergyDepositList& energyDe
   return ret;
 }
 
-TLorentzVector EnergyListToFourList::constructFourMomentum(const TowerEnergyDeposit& deposit)
+TLorentzVector EnergyListToFourList::constructFourMomentum(const TowerEnergy& deposit)
 {
   TVector3 towerLocation(deposit.towerX, deposit.towerY, deposit.towerZ); 
   TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);

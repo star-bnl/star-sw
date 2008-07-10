@@ -1,4 +1,4 @@
-// $Id: StJetBEMCMuDst.cxx,v 1.2 2008/07/10 01:20:24 tai Exp $
+// $Id: StJetBEMCMuDst.cxx,v 1.3 2008/07/10 20:15:20 tai Exp $
 #include "StJetBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -33,11 +33,11 @@ StJetBEMCMuDst::StJetBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix)
  }
 
 
-TowerEnergyDepositList StJetBEMCMuDst::getEnergyList()
+TowerEnergyList StJetBEMCMuDst::getEnergyList()
 {
   _bemcTables->loadTables((StMaker*)mMuDstMaker);
 
-  TowerEnergyDepositList ret;
+  TowerEnergyList ret;
 
   StEmcDetector* detector = mMuDstMaker->muDst()->emcCollection()->detector(kBarrelEmcTowerId);
 
@@ -56,9 +56,9 @@ TowerEnergyDepositList StJetBEMCMuDst::getEnergyList()
   return ret;
 }
 
-TowerEnergyDeposit StJetBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
+TowerEnergy StJetBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
 {
-  TowerEnergyDeposit ret;
+  TowerEnergy ret;
 
   ret.detectorId = kBarrelEmcTowerId;
 

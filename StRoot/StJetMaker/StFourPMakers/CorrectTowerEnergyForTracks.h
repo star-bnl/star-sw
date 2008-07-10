@@ -1,9 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: CorrectTowerEnergyForTracks.h,v 1.3 2008/07/07 22:20:53 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.h,v 1.4 2008/07/10 20:15:19 tai Exp $
 #ifndef CORRECTTOWERENERGYFORTRACKS_H
 #define CORRECTTOWERENERGYFORTRACKS_H
 
-#include "TowerEnergyDeposit.h"
+#include "TowerEnergyList.h"
 
 #include <vector>
 #include <utility>
@@ -20,7 +20,7 @@ public:
 
   typedef std::vector<StMuTrackEmu*> TrackList;
 
-  TowerEnergyDepositList Do(const TowerEnergyDepositList &energyDepositList, const TrackList& trackList);
+  TowerEnergyList Do(const TowerEnergyList &energyDepositList, const TrackList& trackList);
 
 private:
 

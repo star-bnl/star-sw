@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.86 2008/07/10 19:55:50 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.87 2008/07/10 20:15:20 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -58,13 +58,13 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 void StBET4pMakerImp::Make()
 {
   TrackList trackList = _tpc->getTrackList();
-  TowerEnergyDepositList bemcEnergyList = _bemc->getEnergyList();
-  TowerEnergyDepositList eemcEnergyList = _eemc->getEnergyList();
+  TowerEnergyList bemcEnergyList = _bemc->getEnergyList();
+  TowerEnergyList eemcEnergyList = _eemc->getEnergyList();
 
   trackList = (*_tpcCut)(trackList);
   bemcEnergyList = _bemcCut->Apply(bemcEnergyList);
 
-  TowerEnergyDepositList bemcCorrectedEnergyList = _correctTowerEnergyForTracks->Do(bemcEnergyList, trackList);
+  TowerEnergyList bemcCorrectedEnergyList = _correctTowerEnergyForTracks->Do(bemcEnergyList, trackList);
 
   FourList tpc4pList = _track2four(trackList);
   _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());

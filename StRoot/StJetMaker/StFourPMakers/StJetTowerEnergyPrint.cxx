@@ -1,4 +1,4 @@
-// $Id: StJetTowerEnergyPrint.cxx,v 1.1 2008/07/09 05:13:16 tai Exp $
+// $Id: StJetTowerEnergyPrint.cxx,v 1.2 2008/07/10 20:15:22 tai Exp $
 #include "StJetTowerEnergyPrint.h"
 
 #include <TVector3.h>
@@ -9,11 +9,11 @@ using namespace std;
 
 namespace StSpinJet {
 
-void StJetTowerEnergyPrint::operator()(const TowerEnergyDepositList &energyList)
+void StJetTowerEnergyPrint::operator()(const TowerEnergyList &energyList)
 {
   if(_i == 0) _ofs.open(_fileName.c_str());
 
-  for(TowerEnergyDepositList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
+  for(TowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
 
     print(*it);
 
@@ -21,7 +21,7 @@ void StJetTowerEnergyPrint::operator()(const TowerEnergyDepositList &energyList)
   ++_i;
 }
 
-void StJetTowerEnergyPrint::print(const TowerEnergyDeposit& energyDeposit)
+void StJetTowerEnergyPrint::print(const TowerEnergy& energyDeposit)
 {
   _ofs 
     << _i << " "

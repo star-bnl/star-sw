@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEEMCMuDst.h,v 1.2 2008/07/10 01:56:09 tai Exp $
+// $Id: StJetEEMCMuDst.h,v 1.3 2008/07/10 20:15:22 tai Exp $
 #ifndef STJETEEMCMUDST_H
 #define STJETEEMCMUDST_H
 
@@ -18,7 +18,7 @@ public:
 
   void Init();
 
-  TowerEnergyDepositList getEnergyList();
+  TowerEnergyList getEnergyList();
 
 
 private:
