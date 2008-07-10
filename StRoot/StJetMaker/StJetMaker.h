@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.43 2008/07/06 02:08:07 tai Exp $
+// $Id: StJetMaker.h,v 1.44 2008/07/10 01:20:14 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -44,6 +44,9 @@ public:
   jetBranchesMap& getJets() const { return _backwordCompatibility->getJets(); }
 
   StSpinJet::StJetTreeWriter* getTreeWriter() { return _treeWriter; }
+
+  const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.44 2008/07/10 01:20:14 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
