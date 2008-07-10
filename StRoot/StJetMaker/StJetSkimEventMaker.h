@@ -35,6 +35,9 @@ public:
     TTree* tree();
     
     void addSimuTrigger(int trigId) {mSimuTrigIds.push_back(trigId);}
+
+    const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.5 2008/07/10 01:20:14 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
     	
 protected:
 	StMuDstMaker*   muDstMaker;         //!
