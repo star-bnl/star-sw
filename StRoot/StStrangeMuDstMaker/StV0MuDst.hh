@@ -52,6 +52,8 @@ public:
   Float_t clPos()   const;        // Confidence level of pos. daughter
   Float_t chi2Neg() const;        // Chi square of neg. daughter
   Float_t clNeg()   const;        // Confidence level of neg. daughter
+  void setPosBad();               // Set the pos. daughter as bad
+  void setNegBad();               // Set the neg. daughter as bad
   Long_t  detectorIdV0();         // Detector ID for V0 Vertex
   virtual Long_t detectorIdPars();// Detector ID for pars used in V0 finder
   Float_t dedxPos() const;        // dE/dX of pos. daughter
@@ -134,10 +136,12 @@ inline Float_t StV0MuDst::momV0Y()  const { return mMomPosY + mMomNegY; }
 inline Float_t StV0MuDst::momV0Z()  const { return mMomPosZ + mMomNegZ; }
 inline Float_t StV0MuDst::chi2V0()  const { return mChi2V0; }
 inline Float_t StV0MuDst::clV0()    const { return mClV0; }
-inline Float_t StV0MuDst::chi2Pos() const { return mChi2Pos; }
+inline Float_t StV0MuDst::chi2Pos() const { return TMath::Abs(mChi2Pos); }
 inline Float_t StV0MuDst::clPos()   const { return mClPos; }
-inline Float_t StV0MuDst::chi2Neg() const { return mChi2Neg; }
+inline Float_t StV0MuDst::chi2Neg() const { return TMath::Abs(mChi2Neg); }
 inline Float_t StV0MuDst::clNeg()   const { return mClNeg; }
+inline void StV0MuDst::setPosBad() { mChi2Pos = -chi2Pos(); }
+inline void StV0MuDst::setNegBad() { mChi2Neg = -chi2Neg(); }
 inline Float_t StV0MuDst::dedxPos() const { return mDedxPos; }
 inline Float_t StV0MuDst::dedxNeg() const { return mDedxNeg; }
 inline Float_t StV0MuDst::errDedxPos() const { return mErrDedxPos; }
@@ -150,8 +154,11 @@ inline Float_t StV0MuDst::lenDedxNeg() const { return (mNumDedxNeg/100); }
 
 
 /***********************************************************************
- * $Id: StV0MuDst.hh,v 3.8 2005/03/17 05:02:20 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.9 2008/07/10 16:16:55 genevb Exp $
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.9  2008/07/10 16:16:55  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.8  2005/03/17 05:02:20  genevb
  * Add StMuMomentumShiftMaker friend
  *

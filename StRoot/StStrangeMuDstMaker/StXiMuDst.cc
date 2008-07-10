@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.cc,v 3.4 2003/08/26 22:36:28 genevb Exp $
+ * $Id: StXiMuDst.cc,v 3.5 2008/07/10 16:16:55 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.cc,v $
+ * Revision 3.5  2008/07/10 16:16:55  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.4  2003/08/26 22:36:28  genevb
  * Calculate Xi momenta at/near primary vertex
  *
@@ -85,6 +88,7 @@ void StXiMuDst::FillXi(StXiVertex* xiVertex) {
   mTopologyMapBachelor = trk->topologyMap();
   mChi2Bachelor = trk->fitTraits().chi2(0);
   mClBachelor = trk->fitTraits().chi2(1);
+  if (trk->bad()) setBachelorBad();
   mDedxBachelor = 0.;
   mNumDedxBachelor = 0;
   // For now, get the truncated mean dE/dX from the TPC
