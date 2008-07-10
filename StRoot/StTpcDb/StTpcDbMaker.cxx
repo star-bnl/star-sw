@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.41 2007/12/28 00:30:06 fine Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.42 2008/07/10 20:25:31 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.42  2008/07/10 20:25:31  fisyak
+ * Warn of
+ *
  * Revision 1.41  2007/12/28 00:30:06  fine
  * Add a function to calculate the tpc coord transfoirmation in one step
  *
@@ -311,7 +314,7 @@ int type_of_call tpc_z_to_time_(float* z, int* padin, int* padrow, int* sector, 
 	 zoff = gStTpcDb->Dimensions()->zOuterOffset(); 
        }
        zin = *z + zoff;
-       *time = trans->tBFromZ(zin);
+       *time = (Int_t )trans->tBFromZ(zin);
 
 //    int temp[1];
 //    *temp = 100;
