@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.82 2008/07/10 10:09:03 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.83 2008/07/10 18:48:31 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -29,8 +29,7 @@ StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
 				 StJetBEMC* bemc, StJetBEMCEnergyCut* bemcCut,
 				 CorrectTowerEnergyForTracks* correctTowerEnergyForTracks,
 				 StJetEEMC* eemc)
-  : mUseEndcap(false)
-  , mUseBEMC(true)
+  : mUseBEMC(true)
   , mUseTPC(true)
   , _tpc(tpc), _bemc(bemc), _eemc(eemc)
   , _tpcCut(tpcCut), _bemcCut(bemcCut)
@@ -45,7 +44,7 @@ void StBET4pMakerImp::Init()
 {
   _tpc->Init();
   _bemc->Init();
-  if(mUseEndcap) _eemc->Init();
+  _eemc->Init();
 }
 
 void StBET4pMakerImp::Clear(Option_t* opt)
@@ -86,17 +85,17 @@ void StBET4pMakerImp::Make()
     _tracks.insert(_tracks.end(), bemc4pList.begin(), bemc4pList.end());
   }
 
+  TowerEnergyDepositList eemcEnergyList = _eemc->getEnergyList();
 
-  if(mUseEndcap) {
+  FourList eemc4pList = _energy2four(eemcEnergyList);
 
-    TowerEnergyDepositList eemcEnergyList = _eemc->getEnergyList();
-
-    FourList eemc4pList = _energy2four(eemcEnergyList);
-
-    _tracks.insert(_tracks.end(), eemc4pList.begin(), eemc4pList.end());
-  }
-
+  _tracks.insert(_tracks.end(), eemc4pList.begin(), eemc4pList.end());
 }
+
+bool StBET4pMakerImp::UseTPC() const { return mUseTPC; }
+bool StBET4pMakerImp::UseBEMC() const { return mUseBEMC; }
+bool StBET4pMakerImp::UseEEMC() const { return _eemc->isUsed(); }
+
 
 
 
