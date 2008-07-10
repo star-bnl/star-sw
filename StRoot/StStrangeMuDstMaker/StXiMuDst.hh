@@ -52,6 +52,7 @@ public:
   Float_t clXi()   const;              // Confidence level of Xi
   Float_t chi2Bachelor() const;        // Chi square of bachelor
   Float_t clBachelor()   const;        // Confidence level of bachelor
+  void setBachelorBad();               // Set the bachelor as bad
   Long_t  detectorIdXi();              // Detector ID for Xi vertex
   virtual Long_t detectorIdPars();     // Detector ID for pars used in Xi finder
   Float_t dedxBachelor() const;        // dE/dX of bachelor
@@ -125,8 +126,9 @@ inline StTrackTopologyMap& StXiMuDst::topologyMapBachelor()
              { return mTopologyMapBachelor; }
 inline Float_t StXiMuDst::chi2Xi() const { return mChi2Xi; }
 inline Float_t StXiMuDst::clXi()   const { return mClXi; }
-inline Float_t StXiMuDst::chi2Bachelor() const { return mChi2Bachelor; }
+inline Float_t StXiMuDst::chi2Bachelor() const { return TMath::Abs(mChi2Bachelor); }
 inline Float_t StXiMuDst::clBachelor()   const { return mClBachelor; }
+inline void StXiMuDst::setBachelorBad() { mChi2Bachelor = -chi2Bachelor(); }
 inline Float_t StXiMuDst::dedxBachelor() const { return mDedxBachelor; }
 inline Float_t StXiMuDst::errDedxBachelor() const { return mErrDedxBachelor; }
 inline UShort_t StXiMuDst::numDedxBachelor() const
@@ -138,8 +140,11 @@ inline Float_t StXiMuDst::lenDedxBachelor() const
 
 
 /***********************************************************************
- * $Id: StXiMuDst.hh,v 3.10 2005/07/06 22:32:07 fisyak Exp $
+ * $Id: StXiMuDst.hh,v 3.11 2008/07/10 16:16:56 genevb Exp $
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.11  2008/07/10 16:16:56  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.10  2005/07/06 22:32:07  fisyak
  * Use templated StPhysicalHelixD
  *

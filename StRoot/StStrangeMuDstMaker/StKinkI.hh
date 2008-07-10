@@ -114,6 +114,12 @@ public:
   virtual Float_t  chi2Daughter()    const {return 0;}
   /// Confidence level of daughter
   virtual Float_t  clDaughter()      const {return 0;}
+  /// Set the parent as bad
+  virtual void setParentBad() {}
+  /// Set the daughter as bad
+  virtual void setDaughterBad() {}
+  /// Test whether either daughter is bad
+  virtual Bool_t bad() const {return (chi2Parent()<0 || chi2Daughter()<0);}
   //@}
 };
 
@@ -125,8 +131,11 @@ inline Float_t StKinkI::parentPrimPsi() const
 
 
 /***********************************************************************
- * $Id: StKinkI.hh,v 3.5 2004/02/03 03:49:27 genevb Exp $
+ * $Id: StKinkI.hh,v 3.6 2008/07/10 16:16:54 genevb Exp $
  * $Log: StKinkI.hh,v $
+ * Revision 3.6  2008/07/10 16:16:54  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.5  2004/02/03 03:49:27  genevb
  * Added keys (IDs) for Kink parent and daughter
  *
