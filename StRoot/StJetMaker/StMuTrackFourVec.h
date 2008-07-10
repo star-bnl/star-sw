@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.13 2008/05/18 22:15:40 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.14 2008/07/10 20:48:54 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
@@ -20,11 +20,11 @@ public:
     
   StMuTrackFourVec() : _track(0), index(0), mDetId(kUnknownId), mCharge(0) { }
 
-  StMuTrackFourVec(StSpinJet::StMuTrackEmu* t, const TLorentzVector& p, double charge, Int_t i, StDetectorId detId)
+  StMuTrackFourVec(StSpinJet::StMuTrackEmu* t, const TLorentzVector& p, double charge, Int_t i, int detectorId)
     : _track(t)
     , _vec(p)
     , index(i)
-    , mDetId(detId)
+    , mDetId(detectorId)
     , mCharge(charge)
   { }
 
@@ -56,14 +56,14 @@ public:
   Int_t getIndex(void) const { return index; }
     
   //Id of the detector that generated this 4-vector
-  StDetectorId detectorId() const {return mDetId;}
+  int detectorId() const {return mDetId;}
     
 private:
 
   StSpinJet::StMuTrackEmu *_track;
   TLorentzVector _vec;
   Int_t index;
-  StDetectorId mDetId;
+  int mDetId;
   double mCharge;
 };
 

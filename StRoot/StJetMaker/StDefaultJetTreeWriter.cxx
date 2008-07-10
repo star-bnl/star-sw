@@ -1,4 +1,4 @@
-// $Id: StDefaultJetTreeWriter.cxx,v 1.10 2008/06/02 01:28:31 tai Exp $
+// $Id: StDefaultJetTreeWriter.cxx,v 1.11 2008/07/10 20:48:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StDefaultJetTreeWriter.h"
 
@@ -116,8 +116,19 @@ void StDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
       cout <<"Error, muTrackIndex<0. abort()"<<endl;
       abort();
     }
+
+    StDetectorId detectorId;
+    int mDetId = particle->detectorId();
+    if (mDetId==kTpcIdentifier)
+      detectorId = kTpcId;
+    else if (mDetId==kBarrelEmcTowerIdentifier)
+      detectorId = kBarrelEmcTowerId;
+    else if (mDetId==kEndcapEmcTowerIdentifier)
+      detectorId = kEndcapEmcTowerId;
+    else
+      detectorId = kUnknownId;
       
-    TrackToJetIndex t2j( jets.nJets(), muTrackIndex, particle->detectorId() );
+    TrackToJetIndex t2j( jets.nJets(), muTrackIndex, detectorId );
     t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e() );
       
     StMuTrackEmu* track = particle->track();
@@ -141,16 +152,15 @@ void StDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
      
     jets.addTrackToIndex(t2j);
 
-    StDetectorId mDetId = particle->detectorId();
-    if (mDetId==kTpcId) {
+    if (mDetId==kTpcIdentifier) {
       aJet.nTracks++;
       aJet.tpcEtSum += particle->eT();
     }
-    else if (mDetId==kBarrelEmcTowerId) {
+    else if (mDetId==kBarrelEmcTowerIdentifier) {
       aJet.nBtowers++;
       aJet.btowEtSum += particle->eT();
     }
-    else if (mDetId==kEndcapEmcTowerId) {
+    else if (mDetId==kEndcapEmcTowerIdentifier) {
       aJet.nEtowers++;
       aJet.etowEtSum += particle->eT();
     }

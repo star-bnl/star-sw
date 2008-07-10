@@ -1,4 +1,4 @@
-// $Id: StJetEEMCTxt.cxx,v 1.3 2008/07/10 20:15:22 tai Exp $
+// $Id: StJetEEMCTxt.cxx,v 1.4 2008/07/10 20:49:00 tai Exp $
 #include "StJetEEMCTxt.h"
 
 #include <iostream>
@@ -52,6 +52,8 @@ TowerEnergyList StJetEEMCTxt::getEnergyList()
     long i;
 
     TowerEnergy dep;
+
+    dep.detectorId = 13;
 
     ist >> i
 	>> dep.towerId

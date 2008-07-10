@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TowerEnergyList.h,v 1.1 2008/07/10 20:15:23 tai Exp $
+// $Id: TowerEnergyList.h,v 1.2 2008/07/10 20:49:00 tai Exp $
 #ifndef TOWERENERGYLIST_H
 #define TOWERENERGYLIST_H
 
@@ -10,7 +10,7 @@
 namespace StSpinJet {
 
 struct TowerEnergy {
-  StDetectorId   detectorId;
+  int            detectorId; // 9: BEMC, 13: EEMC
   int            towerId;
   double         towerX;
   double         towerY;
@@ -22,7 +22,7 @@ struct TowerEnergy {
   unsigned int   adc;
   float          pedestal;
   float          rms;
-  int            status;
+  int            status;     // 1 is good for BEMC. 0 is good for EEMC
 };
 
 typedef std::vector<TowerEnergy> TowerEnergyList;

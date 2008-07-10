@@ -1,4 +1,4 @@
-// $Id: StJetEEMCMuDst.cxx,v 1.4 2008/07/10 20:15:21 tai Exp $
+// $Id: StJetEEMCMuDst.cxx,v 1.5 2008/07/10 20:48:59 tai Exp $
 #include "StJetEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -49,7 +49,7 @@ TowerEnergyList StJetEEMCMuDst::getEnergyList()
     double energy = adc/(dbItem->gain);
 	    
     TowerEnergy energyDeposit;
-    energyDeposit.detectorId = kEndcapEmcTowerId;
+    energyDeposit.detectorId = 13;
     energyDeposit.towerId = (sec*5 + sub)*12 + etabin;
 
 
