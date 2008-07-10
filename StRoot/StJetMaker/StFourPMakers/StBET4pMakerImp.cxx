@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.83 2008/07/10 18:48:31 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.84 2008/07/10 19:35:30 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -29,9 +29,7 @@ StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
 				 StJetBEMC* bemc, StJetBEMCEnergyCut* bemcCut,
 				 CorrectTowerEnergyForTracks* correctTowerEnergyForTracks,
 				 StJetEEMC* eemc)
-  : mUseBEMC(true)
-  , mUseTPC(true)
-  , _tpc(tpc), _bemc(bemc), _eemc(eemc)
+  :  _tpc(tpc), _bemc(bemc), _eemc(eemc)
   , _tpcCut(tpcCut), _bemcCut(bemcCut)
   , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
   , _track2four(*(new TrackListToFourList))
@@ -60,30 +58,23 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make()
 {
-  TrackList trackList;
+  TrackList trackList = _tpc->getTrackList();
 
-  if(mUseTPC) {
-    trackList = _tpc->getTrackList();
+  trackList = (*_tpcCut)(trackList);
 
-    trackList = (*_tpcCut)(trackList);
+  FourList tpc4pList = _track2four(trackList);
 
-    FourList tpc4pList = _track2four(trackList);
+  _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());
 
-    _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());
-  }
+  TowerEnergyDepositList bemcEnergyList = _bemc->getEnergyList();
 
+  bemcEnergyList = _bemcCut->Apply(bemcEnergyList);
 
-  if(mUseBEMC) {
-    TowerEnergyDepositList bemcEnergyList = _bemc->getEnergyList();
+  TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyList, trackList);
 
-    bemcEnergyList = _bemcCut->Apply(bemcEnergyList);
+  FourList bemc4pList = _energy2four(bemcCorrectedEnergyDepositList);
 
-    TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyList, trackList);
-
-    FourList bemc4pList = _energy2four(bemcCorrectedEnergyDepositList);
-
-    _tracks.insert(_tracks.end(), bemc4pList.begin(), bemc4pList.end());
-  }
+  _tracks.insert(_tracks.end(), bemc4pList.begin(), bemc4pList.end());
 
   TowerEnergyDepositList eemcEnergyList = _eemc->getEnergyList();
 
@@ -92,10 +83,6 @@ void StBET4pMakerImp::Make()
   _tracks.insert(_tracks.end(), eemc4pList.begin(), eemc4pList.end());
 }
 
-bool StBET4pMakerImp::UseTPC() const { return mUseTPC; }
-bool StBET4pMakerImp::UseBEMC() const { return mUseBEMC; }
+bool StBET4pMakerImp::UseTPC()  const { return _tpc->isUsed();  }
+bool StBET4pMakerImp::UseBEMC() const { return _bemc->isUsed(); }
 bool StBET4pMakerImp::UseEEMC() const { return _eemc->isUsed(); }
-
-
-
-
