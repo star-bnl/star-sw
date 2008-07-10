@@ -1,9 +1,18 @@
-// $Id: StBET4pMakerImp.cxx,v 1.79 2008/07/10 06:47:49 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.80 2008/07/10 09:36:00 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
-#include "CollectEnergyDepositsFromBEMC.h"
+#include "StJetTPC.h"
+#include "StJetBEMC.h"
 #include "StJetEEMC.h"
+
+#include "StJetTPCTrackCut.h"
+#include "StJetBEMCEnergyCut.h"
+
+#include "CorrectTowerEnergyForTracks.h"
+
+#include "CollectEnergyDepositsFromBEMC.h"
+
 #include "TrackListToFourList.h"
 #include "EnergyListToFourList.h"
 
@@ -17,22 +26,6 @@
 using namespace std;
 using namespace StSpinJet;
 
-StBET4pMakerImp::StBET4pMakerImp(CollectChargedTracksFromTPC* collectChargedTracksFromTPC,
-				 CollectEnergyDepositsFromBEMC *collectEnergyDepositsFromBEMC,
-				 CorrectTowerEnergyForTracks* correctTowerEnergyForTracks,
-				 StJetEEMC* eemc)
-  : mUseEndcap(false)
-  , mUseBEMC(true)
-  , mUseTPC(true)
-  , _collectChargedTracksFromTPC(collectChargedTracksFromTPC)
-  , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
-  , _eemc(eemc)
-  , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
-  , _track2four(*(new TrackListToFourList))
-  , _energy2four(*(new EnergyListToFourList))
-{
-
-}
 
 StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
 				 StJetBEMC* bemc, StJetBEMCEnergyCut* bemcCut,
@@ -50,6 +43,13 @@ StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
   , _energy2four(*(new EnergyListToFourList))
 {
 
+}
+
+void StBET4pMakerImp::Init()
+{
+  _tpc->Init();
+  _bemc->Init();
+  if(mUseEndcap) _eemc->Init();
 }
 
 void StBET4pMakerImp::Clear(Option_t* opt)

@@ -1,16 +1,8 @@
-// $Id: StBET4pMaker.cxx,v 1.58 2008/07/10 07:42:05 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.59 2008/07/10 09:36:00 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
-
-#include "StJetTPCMuDst.h"
-#include "StJetBEMCMuDst.h"
-#include "StJetEEMCMuDst.h"
-
-#include "StJetTPCTrackCut.h"
-#include "StJetBEMCEnergyCut.h"
-
-#include "CorrectTowerEnergyForTracks.h"
+#include "StBET4pMakerImpBuilder.h"
 
 #include "BemcEnergySumCalculator.h"
 #include "BemcEnergySumCalculatorBuilder.h"
@@ -28,7 +20,7 @@ ClassImp(StBET4pMaker)
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
   , _uDstMaker(uDstMaker), _doTowerSwapFix(doTowerSwapFix)
-  , _useTPC(true), _useBEMC(true), _useEndcap(false)
+  , _useTPC(true), _useBEMC(true), _useEEMC(false)
   , _use2003Cuts(false), _use2005Cuts(false), _use2006Cuts(false)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
@@ -38,31 +30,13 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
 
 Int_t StBET4pMaker::Init()
 {
-  StJetTPCMuDst*  tpc  = new StJetTPCMuDst(_uDstMaker);
-  StJetBEMCMuDst* bemc = new StJetBEMCMuDst(_uDstMaker, _doTowerSwapFix);
-  StJetEEMCMuDst* eemc = new StJetEEMCMuDst(_uDstMaker);
-
-  StJetTPCTrackCut*   tpcCut  = new StJetTPCTrackCut();
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-
-  CorrectTowerEnergyForTracks* correctTowerEnergyForTracks = new CorrectTowerEnergyForTracks();
-
-  _imp = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);
-
-
-  _imp->setUseTPC(_useTPC);
-  _imp->setUseBEMC(_useBEMC);
-  _imp->setUseEndcap(_useEndcap);
-  bemcCut->setUse2003Cuts(_use2003Cuts);
-  bemcCut->setUse2005Cuts(_use2005Cuts);
-  tpcCut->setUse2006Cuts(_use2006Cuts);
-
-  tpc->Init();
-  bemc->Init();
-  if(_useEndcap) eemc->Init();
+  StBET4pMakerImpBuilder impBuilder;
+  _imp = impBuilder.build(_useTPC, _useBEMC, _useEEMC, _use2003Cuts, _use2005Cuts, _use2006Cuts, _uDstMaker, _doTowerSwapFix);
+  _imp->Init();
 
   BemcEnergySumCalculatorBuilder bemcEnergySumCalculatorBuilder;
   _bemcEnergySumCalculator = bemcEnergySumCalculatorBuilder.build(_useBEMC, _use2003Cuts, _use2005Cuts, _uDstMaker, _doTowerSwapFix);
+  _bemcEnergySumCalculator->Init();
 
   return StMaker::Init();
 }
