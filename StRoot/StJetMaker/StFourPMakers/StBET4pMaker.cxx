@@ -1,13 +1,14 @@
-// $Id: StBET4pMaker.cxx,v 1.54 2008/07/10 01:20:24 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.55 2008/07/10 01:56:07 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 
 #include "StJetTPCMuDst.h"
-#include "StJetTPCTrackCut.h"
 #include "StJetBEMCMuDst.h"
-#include "StJetBEMCEnergyCut.h"
 #include "StJetEEMCMuDst.h"
+
+#include "StJetTPCTrackCut.h"
+#include "StJetBEMCEnergyCut.h"
 
 #include "BemcEnergySumCalculator.h"
 
@@ -23,14 +24,15 @@ ClassImp(StBET4pMaker)
     
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
+  , _uDstMaker(uDstMaker)
   , _useEndcap(false)
   , _use2003Cuts(false)
   , _use2005Cuts(false)
   , _use2006Cuts(false)
-  , _tpc(new StJetTPCMuDst(uDstMaker))
+  , _tpc(new StJetTPCMuDst(_uDstMaker))
+  , _bemc(new StJetBEMCMuDst(_uDstMaker, doTowerSwapFix))
+  , _eemc(new StJetEEMCMuDst(_uDstMaker))
   , _tpcCut(new StJetTPCTrackCut())
-  , _eemc(new StJetEEMCMuDst(uDstMaker))
-  , _bemc(new StJetBEMCMuDst(uDstMaker, doTowerSwapFix))
   , _bemcCut(new StJetBEMCEnergyCut)
   , _correctTowerEnergyForTracks(new CorrectTowerEnergyForTracks())
   , _imp(new StBET4pMakerImp(_tpc, _tpcCut, _bemc, _bemcCut, _correctTowerEnergyForTracks, _eemc))
@@ -46,8 +48,9 @@ Int_t StBET4pMaker::Init()
   _bemcCut->setUse2005Cuts(_use2005Cuts);
   _tpcCut->setUse2006Cuts(_use2006Cuts);
 
-  StEEmcDbMaker* mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
-  if(mEeDb) _eemc->Init(mEeDb);
+  _tpc->Init();
+  _bemc->Init();
+  _eemc->Init();
 
   return StMaker::Init();
 }

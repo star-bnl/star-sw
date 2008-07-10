@@ -1,12 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.35 2008/07/10 01:20:24 tai Exp $
+// $Id: StBET4pMaker.h,v 1.36 2008/07/10 01:56:08 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
 #include "StFourPMaker.h"
 
 #include "CorrectTowerEnergyForTracks.h"
-#include "StJetEEMCMuDst.h"
 
 class StMuDstMaker;
 class StBET4pMakerImp;
@@ -17,10 +16,11 @@ class CollectChargedTracksFromTPC;
 class BemcEnergySumCalculator;
 
 class StJetTPC;
-class StJetTPCTrackCut;
 class StJetBEMC;
-class StJetBEMCEnergyCut;
 class StJetEEMC;
+
+class StJetTPCTrackCut;
+class StJetBEMCEnergyCut;
 
 }
 
@@ -35,7 +35,7 @@ public:
   Int_t Init();    
   Int_t Make();
     
-  void Clear(Option_t* opt);
+  void Clear(Option_t* opt = "");
 
   FourList &getTracks();
 
@@ -55,9 +55,11 @@ public:
   StSpinJet::StJetTPCTrackCut* getTPCTrackCut() { return _tpcCut; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.35 2008/07/10 01:20:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.36 2008/07/10 01:56:08 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
+
+  StMuDstMaker* _uDstMaker;
 
   bool _useEndcap;
   bool _use2003Cuts;
@@ -65,11 +67,10 @@ private:
   bool _use2006Cuts;
 
   StSpinJet::StJetTPC* _tpc;
-  StSpinJet::StJetTPCTrackCut* _tpcCut;
-
-  StSpinJet::StJetEEMCMuDst* _eemc;
-
   StSpinJet::StJetBEMC* _bemc;
+  StSpinJet::StJetEEMC* _eemc;
+
+  StSpinJet::StJetTPCTrackCut* _tpcCut;
   StSpinJet::StJetBEMCEnergyCut* _bemcCut;
 
   StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
