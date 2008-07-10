@@ -1,9 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: BemcEnergySumCalculator.h,v 1.5 2008/07/10 09:36:00 tai Exp $
+// $Id: BemcEnergySumCalculator.h,v 1.6 2008/07/10 20:15:16 tai Exp $
 #ifndef BEMCENERGYSUMCALCULATOR_H
 #define BEMCENERGYSUMCALCULATOR_H
 
-#include "TowerEnergyDeposit.h"
+#include "TowerEnergyList.h"
 
 namespace StSpinJet {
 
@@ -62,9 +62,9 @@ public:
 
 private:
 
-  double sumEnergyOverBemcTowers(double minE, const TowerEnergyDepositList &energyDepositList);
+  double sumEnergyOverBemcTowers(double minE, const TowerEnergyList &energyDepositList);
 
-  int numberOfBemcTowersWithEnergyAbove(double minE, const TowerEnergyDepositList &energyDepositList);
+  int numberOfBemcTowersWithEnergyAbove(double minE, const TowerEnergyList &energyDepositList);
 
   StJetBEMC* _bemc;
   StJetBEMCEnergyCut* _cut;

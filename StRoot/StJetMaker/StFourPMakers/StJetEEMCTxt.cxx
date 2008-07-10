@@ -1,4 +1,4 @@
-// $Id: StJetEEMCTxt.cxx,v 1.2 2008/07/09 08:16:05 tai Exp $
+// $Id: StJetEEMCTxt.cxx,v 1.3 2008/07/10 20:15:22 tai Exp $
 #include "StJetEEMCTxt.h"
 
 #include <iostream>
@@ -16,7 +16,7 @@ StJetEEMCTxt::StJetEEMCTxt(const char* path)
   _dataFile.open(path);
 }
 
-TowerEnergyDepositList StJetEEMCTxt::getEnergyList()
+TowerEnergyList StJetEEMCTxt::getEnergyList()
 {
   ++_currentEvent;
 
@@ -45,13 +45,13 @@ TowerEnergyDepositList StJetEEMCTxt::getEnergyList()
     currentLines.push_back(line);
   }
 
-  TowerEnergyDepositList ret;
+  TowerEnergyList ret;
 
   for(vector<string>::const_iterator it = currentLines.begin(); it != currentLines.end(); ++it) {
     istringstream ist(*it);
     long i;
 
-    TowerEnergyDeposit dep;
+    TowerEnergy dep;
 
     ist >> i
 	>> dep.towerId

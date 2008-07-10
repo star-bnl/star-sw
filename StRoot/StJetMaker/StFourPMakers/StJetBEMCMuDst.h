@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCMuDst.h,v 1.2 2008/07/10 01:20:24 tai Exp $
+// $Id: StJetBEMCMuDst.h,v 1.3 2008/07/10 20:15:21 tai Exp $
 #ifndef STJETBEMCMUDST_H
 #define STJETBEMCMUDST_H
 
@@ -18,11 +18,11 @@ public:
   StJetBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix = true);
   virtual ~StJetBEMCMuDst() { }
 
-  TowerEnergyDepositList getEnergyList();
+  TowerEnergyList getEnergyList();
 
 private:
 
-  TowerEnergyDeposit readTowerHit(const StEmcRawHit& hit);
+  TowerEnergy readTowerHit(const StEmcRawHit& hit);
 
   StMuDstMaker* mMuDstMaker;
 

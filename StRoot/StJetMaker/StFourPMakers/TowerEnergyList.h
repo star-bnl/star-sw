@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: TowerEnergyDeposit.h,v 1.3 2008/07/08 11:21:57 tai Exp $
-#ifndef TOWERENERGYDEPOSIT_H
-#define TOWERENERGYDEPOSIT_H
+// $Id: TowerEnergyList.h,v 1.1 2008/07/10 20:15:23 tai Exp $
+#ifndef TOWERENERGYLIST_H
+#define TOWERENERGYLIST_H
 
 #include <StDetectorId.h>
 
@@ -9,7 +9,7 @@
 
 namespace StSpinJet {
 
-struct TowerEnergyDeposit {
+struct TowerEnergy {
   StDetectorId   detectorId;
   int            towerId;
   double         towerX;
@@ -25,8 +25,8 @@ struct TowerEnergyDeposit {
   int            status;
 };
 
-typedef std::vector<TowerEnergyDeposit> TowerEnergyDepositList;
+typedef std::vector<TowerEnergy> TowerEnergyList;
 
 }
 
-#endif // TOWERENERGYDEPOSIT_H
+#endif // TOWERENERGYLIST_H

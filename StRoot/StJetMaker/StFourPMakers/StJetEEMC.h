@@ -1,9 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StJetEEMC.h,v 1.4 2008/07/10 19:48:18 tai Exp $
+// $Id: StJetEEMC.h,v 1.5 2008/07/10 20:15:21 tai Exp $
 #ifndef STJETEEMC_H
 #define STJETEEMC_H
 
-#include "TowerEnergyDeposit.h"
+#include "TowerEnergyList.h"
 
 namespace StSpinJet {
 
@@ -15,7 +15,7 @@ public:
 
   virtual void Init() { }
 
-  virtual TowerEnergyDepositList getEnergyList() = 0;
+  virtual TowerEnergyList getEnergyList() = 0;
 };
 
 
@@ -25,7 +25,7 @@ public:
   StJetEEMCNull() { }
   virtual ~StJetEEMCNull() { }
 
-  TowerEnergyDepositList getEnergyList() { return TowerEnergyDepositList(); }
+  TowerEnergyList getEnergyList() { return TowerEnergyList(); }
 };
 
 

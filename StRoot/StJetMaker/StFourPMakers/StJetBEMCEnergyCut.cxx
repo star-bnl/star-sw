@@ -1,4 +1,4 @@
-// $Id: StJetBEMCEnergyCut.cxx,v 1.1 2008/07/09 10:24:32 tai Exp $
+// $Id: StJetBEMCEnergyCut.cxx,v 1.2 2008/07/10 20:15:20 tai Exp $
 #include "StJetBEMCEnergyCut.h"
 
 #include <iostream>
@@ -8,11 +8,11 @@ using namespace std;
 namespace StSpinJet {
 
 
-StSpinJet::TowerEnergyDepositList StJetBEMCEnergyCut::Apply(const TowerEnergyDepositList &energyList)
+StSpinJet::TowerEnergyList StJetBEMCEnergyCut::Apply(const TowerEnergyList &energyList)
 {
-  TowerEnergyDepositList ret;
+  TowerEnergyList ret;
 
-  for(TowerEnergyDepositList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
+  for(TowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
 
     if(!shouldKeep(*it)) continue;
 
@@ -24,7 +24,7 @@ StSpinJet::TowerEnergyDepositList StJetBEMCEnergyCut::Apply(const TowerEnergyDep
 }
 
 
-bool StJetBEMCEnergyCut::shouldKeep(const TowerEnergyDeposit& energyDeposit)
+bool StJetBEMCEnergyCut::shouldKeep(const TowerEnergy& energyDeposit)
 {
 
   if(mUse2003Cuts)

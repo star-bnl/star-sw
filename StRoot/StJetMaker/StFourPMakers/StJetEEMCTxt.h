@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEEMCTxt.h,v 1.2 2008/07/09 08:16:05 tai Exp $
+// $Id: StJetEEMCTxt.h,v 1.3 2008/07/10 20:15:22 tai Exp $
 #ifndef STJETEEMCTXT_H
 #define STJETEEMCTXT_H
 
@@ -16,7 +16,7 @@ public:
   StJetEEMCTxt(const char* path);
   virtual ~StJetEEMCTxt() { }
 
-  TowerEnergyDepositList getEnergyList();
+  TowerEnergyList getEnergyList();
 
 private:
 
