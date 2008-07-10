@@ -75,7 +75,7 @@ int OLDEVP::ssdReader(char *m)
 	struct DATAPX *datapx ;
 
 
-        ssd.check();
+   ssd.check();
 	// clear total channels 
 	ssd.reset() ;
 
@@ -118,7 +118,6 @@ int OLDEVP::ssdReader(char *m)
 
 		init = 1 ;
 	}
-
 
 	// clear the raw contrib
 	memset(ssd.raw,0,sizeof(ssd.raw)) ;
@@ -206,7 +205,7 @@ int OLDEVP::ssdReader(char *m)
 							stop = start + length ;
 
 							for(tbin=start;tbin<stop;tbin++) {
-								u_char val ;
+                        u_char val ;
 								int counter ;
 
 								val = adcd->adc[adccou++] ;
@@ -285,8 +284,7 @@ int OLDEVP::ssdReader(char *m)
 					ssd.mode = 1 ;	// pedestal data!
 
 				}
-				
-				
+								
 			}
 				
 		}
@@ -363,11 +361,11 @@ static int unpackRaw(int rb, int mz, int what, char *mem)
 	for(as=0;as<5;as++) {
 		row = rb*10+mz*5+as ;	// pseudo-row
 
-		cou = 0 ;
 		for(ch=0;ch<64;ch++) {
 
 			dta = adcdata + (as*64*512) + ch*512 ;
 
+		   cou = 0 ;
 			for(strip=0;strip<192;strip++) {
 
 				if(*dta) {
