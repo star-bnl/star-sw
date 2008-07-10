@@ -248,33 +248,18 @@ Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_ded
     nrows = (((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable())->nrows;
     switch (type) {
     case 0: // I70
-      if (nrows > 0) {
-	dedx.dedx[0]   *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(0,LogTrackLength));
-	dedx.dedx[1]    =             m_Corrections[k].Chair->CalcCorrection(1,LogTrackLength);
-      }
-      if (nrows > 6) {
-	dedx.dedx[0]   *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(6,LogTrackLength));
-      }
-#ifdef OldClusterFinder
-      if (nrows > 10) {
-	dedx.dedx[0]   *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(10,LogTrackLength));
-      }
-#endif      
-      break;
     case 1: // fit
-      dedx.dedx[0]   *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(4,LogTrackLength));
-      dedx.dedx[1]    =             m_Corrections[k].Chair->CalcCorrection(5,LogTrackLength);
-#ifdef OldClusterFinder
-      if (nrows > 12) {
-	dedx.dedx[0]   *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(12,LogTrackLength));
+      if (nrows > 1+4*type) {
+	dedx.dedx[0]   *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(  4*type,LogTrackLength));
+	dedx.dedx[1]    =             m_Corrections[k].Chair->CalcCorrection(1+4*type,LogTrackLength);
       }
-#endif      
-      
+      if (nrows > 6+2*type) {
+	dedx.dedx[0]   *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(6+2*type,LogTrackLength));
+      }
       break;
     default:
       break;
     }
-    
     break;
   case kTpcdEdxCor:
     I70L = TMath::Log(1.e6*dedx.dedx[0]);
