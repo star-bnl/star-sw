@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.81 2008/07/10 09:47:02 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.82 2008/07/10 10:09:03 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -61,29 +61,29 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make()
 {
-  TrackList trackmuList;
+  TrackList trackList;
 
   if(mUseTPC) {
-    trackmuList = _tpc->getTrackList();
+    trackList = _tpc->getTrackList();
 
-    trackmuList = (*_tpcCut)(trackmuList);
+    trackList = (*_tpcCut)(trackList);
 
-    FourList tpcFourMomentumList = _track2four(trackmuList);
+    FourList tpc4pList = _track2four(trackList);
 
-    _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
+    _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());
   }
 
 
   if(mUseBEMC) {
-    TowerEnergyDepositList bemcEnergyDepositList = _bemc->getEnergyList();
+    TowerEnergyDepositList bemcEnergyList = _bemc->getEnergyList();
 
-    bemcEnergyDepositList = _bemcCut->Apply(bemcEnergyDepositList);
+    bemcEnergyList = _bemcCut->Apply(bemcEnergyList);
 
-    TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyDepositList, trackmuList);
+    TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyList, trackList);
 
-    FourList bemcFourMomentumList = _energy2four(bemcCorrectedEnergyDepositList);
+    FourList bemc4pList = _energy2four(bemcCorrectedEnergyDepositList);
 
-    _tracks.insert(_tracks.end(), bemcFourMomentumList.begin(), bemcFourMomentumList.end());
+    _tracks.insert(_tracks.end(), bemc4pList.begin(), bemc4pList.end());
   }
 
 
@@ -91,9 +91,9 @@ void StBET4pMakerImp::Make()
 
     TowerEnergyDepositList eemcEnergyList = _eemc->getEnergyList();
 
-    FourList eemcFourMomentumList = _energy2four(eemcEnergyList);
+    FourList eemc4pList = _energy2four(eemcEnergyList);
 
-    _tracks.insert(_tracks.end(), eemcFourMomentumList.begin(), eemcFourMomentumList.end());
+    _tracks.insert(_tracks.end(), eemc4pList.begin(), eemc4pList.end());
   }
 
 }
