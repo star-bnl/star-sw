@@ -1,4 +1,4 @@
-// $Id: StJetEEMCMuDst.cxx,v 1.2 2008/07/10 01:56:09 tai Exp $
+// $Id: StJetEEMCMuDst.cxx,v 1.3 2008/07/10 03:09:37 tai Exp $
 #include "StJetEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -16,14 +16,15 @@ namespace StSpinJet {
 
 StJetEEMCMuDst::StJetEEMCMuDst(StMuDstMaker* uDstMaker)
  : mMuDstMaker(uDstMaker)
+ , mEeDb(0)
 {
 
 }
 
 void StJetEEMCMuDst::Init()
 {
-  mEeDb = (StEEmcDbMaker*)mMuDstMaker->GetMaker("eemcDb");
-  mEeDb->setThreshold(3);
+  if(mMuDstMaker) mEeDb = (StEEmcDbMaker*)mMuDstMaker->GetMaker("eemcDb");
+  if(mEeDb) mEeDb->setThreshold(3);
 }
 
 TowerEnergyDepositList StJetEEMCMuDst::getEnergyList()
