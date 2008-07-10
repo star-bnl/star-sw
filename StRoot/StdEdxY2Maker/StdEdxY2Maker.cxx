@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.60 2007/09/26 21:47:18 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.61 2008/07/10 20:26:17 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -709,7 +709,7 @@ Int_t StdEdxY2Maker::Make(){
 	}
 	CdEdx[NdEdx].sector = sector; 
 	CdEdx[NdEdx].row    = row;
-	CdEdx[NdEdx].pad    = Pad.pad();
+	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
 	if (CdEdx[NdEdx].edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
 	  CdEdx[NdEdx].edge += 1 - gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
