@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.57 2008/07/10 19:35:30 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.58 2008/07/10 19:48:18 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -50,10 +50,9 @@ public:
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
 
-
-  bool UseTPC()  const;
-  bool UseBEMC() const;
-  bool UseEEMC() const;
+  StSpinJet::StJetTPC*  TPC()  { return _tpc;  }
+  StSpinJet::StJetBEMC* BEMC() { return _bemc; }
+  StSpinJet::StJetEEMC* EEMC() { return _eemc; }
 
   StSpinJet::StJetTPCTrackCut* getTPCTrackCut()     { return _tpcCut; }
   StSpinJet::StJetBEMCEnergyCut* getBEMCEnergyCut() { return _bemcCut; }

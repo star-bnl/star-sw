@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPC.h,v 1.3 2008/07/10 19:35:30 tai Exp $
+// $Id: StJetTPC.h,v 1.4 2008/07/10 19:48:18 tai Exp $
 #ifndef STJETTPC_H
 #define STJETTPC_H
 
@@ -20,8 +20,6 @@ public:
   typedef std::vector<StMuTrackEmu*> TrackList;
 
   virtual TrackList getTrackList() = 0;
-
-  virtual bool isUsed() const { return true; }
 };
 
 
@@ -34,8 +32,6 @@ public:
   void Init() { }
 
   TrackList getTrackList() { return TrackList(); }
-
-  bool isUsed() const { return false; }
 };
 
 }
