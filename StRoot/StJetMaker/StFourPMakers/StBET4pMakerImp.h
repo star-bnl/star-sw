@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.53 2008/07/10 09:36:00 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.54 2008/07/10 09:47:03 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -7,8 +7,6 @@
 #include <Rtypes.h>
 
 #include "StJetFinder/AbstractFourVec.h"
-
-#include "CollectChargedTracksFromTPC.h"
 
 #include <TVector3.h>
 #include <TLorentzVector.h>
@@ -27,7 +25,6 @@ namespace StSpinJet {
   class EnergyListToFourList;
 }
 
-#include "CollectEnergyDepositsFromBEMC.h"
 #include "CorrectTowerEnergyForTracks.h"
 
 typedef std::vector<AbstractFourVec*> FourList;
@@ -81,9 +78,6 @@ private:
 
   StSpinJet::StJetTPCTrackCut* _tpcCut;
   StSpinJet::StJetBEMCEnergyCut* _bemcCut;
-
-  StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
-  StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
 
   StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
 
