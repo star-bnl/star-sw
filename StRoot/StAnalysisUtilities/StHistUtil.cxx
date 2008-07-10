@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.46 2008/07/09 20:52:16 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.47 2008/07/10 21:25:08 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.47  2008/07/10 21:25:08  genevb
+// Add canvas-to-code output with .CC suffix
+//
 // Revision 2.46  2008/07/09 20:52:16  genevb
 // allow saving histograms to plain ROOT file
 //
@@ -262,7 +265,8 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
     else if (m_OutFileName.EndsWith(".svg")) m_OutType="svg";
     else if (m_OutFileName.EndsWith(".xpm")) m_OutType="xpm";
     else if (m_OutFileName.EndsWith(".png")) m_OutType="png";
-    else if (m_OutFileName.EndsWith(".C")) m_OutType="C";
+    else if (m_OutFileName.EndsWith(".CC")) m_OutType="CC"; // Save canvases as code
+    else if (m_OutFileName.EndsWith(".C")) m_OutType="C"; // Save histograms as code
     else if (m_OutFileName.EndsWith(".root")) m_OutType="root";
     else {
       LOG_INFO << "SetHistUtil::SetOutFile(): unknown type, assuming ps" << endm;
@@ -285,7 +289,10 @@ void StHistUtil::CloseOutFile() {
   m_HistCanvas->Update();
   if (!m_CurFileName.IsNull()) {
     if (m_OutMultiPage) m_CurFileName.Append(")");
-    m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
+    if (m_OutType.CompareTo("CC"))
+      m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
+    else
+      m_HistCanvas->SaveSource(m_CurFileName.Data());
   } else {
     LOG_INFO << "StHistUtil::CloseOutFile(): No output file" << endm;
   }
@@ -483,8 +490,10 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             m_HistCanvas->Modified();
             m_HistCanvas->Update();
 	    if (Ipagenum>0 && !m_CurFileName.IsNull()) {
-	      m_HistCanvas->Print(m_CurFileName.Data(),
-	        m_OutType.Data());
+              if (m_OutType.CompareTo("CC"))
+	        m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
+              else
+                m_HistCanvas->SaveSource(m_CurFileName.Data());
 	      m_CurFileName.ReplaceAll("(",0); // doesn't hurt to do > once
             } else {
 	      m_HistCanvas->Draw();
