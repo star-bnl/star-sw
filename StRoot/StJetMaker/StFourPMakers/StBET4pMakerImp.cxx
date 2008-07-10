@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.80 2008/07/10 09:36:00 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.81 2008/07/10 09:47:02 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -10,8 +10,6 @@
 #include "StJetBEMCEnergyCut.h"
 
 #include "CorrectTowerEnergyForTracks.h"
-
-#include "CollectEnergyDepositsFromBEMC.h"
 
 #include "TrackListToFourList.h"
 #include "EnergyListToFourList.h"
@@ -36,8 +34,6 @@ StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
   , mUseTPC(true)
   , _tpc(tpc), _bemc(bemc), _eemc(eemc)
   , _tpcCut(tpcCut), _bemcCut(bemcCut)
-  , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(tpc, tpcCut))
-  , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(bemc, bemcCut))
   , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
   , _track2four(*(new TrackListToFourList))
   , _energy2four(*(new EnergyListToFourList))
@@ -68,7 +64,9 @@ void StBET4pMakerImp::Make()
   TrackList trackmuList;
 
   if(mUseTPC) {
-    trackmuList = _collectChargedTracksFromTPC->Do();
+    trackmuList = _tpc->getTrackList();
+
+    trackmuList = (*_tpcCut)(trackmuList);
 
     FourList tpcFourMomentumList = _track2four(trackmuList);
 
@@ -77,7 +75,9 @@ void StBET4pMakerImp::Make()
 
 
   if(mUseBEMC) {
-    TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();
+    TowerEnergyDepositList bemcEnergyDepositList = _bemc->getEnergyList();
+
+    bemcEnergyDepositList = _bemcCut->Apply(bemcEnergyDepositList);
 
     TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyDepositList, trackmuList);
 
