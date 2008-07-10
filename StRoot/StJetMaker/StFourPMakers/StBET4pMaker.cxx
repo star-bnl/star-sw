@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.53 2008/07/09 23:53:35 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.54 2008/07/10 01:20:24 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -12,7 +12,6 @@
 #include "BemcEnergySumCalculator.h"
 
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
-#include "StEmcRawMaker/StBemcTables.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 
 #include <iostream>
@@ -24,11 +23,14 @@ ClassImp(StBET4pMaker)
     
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
+  , _useEndcap(false)
+  , _use2003Cuts(false)
+  , _use2005Cuts(false)
+  , _use2006Cuts(false)
   , _tpc(new StJetTPCMuDst(uDstMaker))
   , _tpcCut(new StJetTPCTrackCut())
   , _eemc(new StJetEEMCMuDst(uDstMaker))
-  , _bemcTables(new StBemcTables(doTowerSwapFix))
-  , _bemc(new StJetBEMCMuDst(uDstMaker, _bemcTables))
+  , _bemc(new StJetBEMCMuDst(uDstMaker, doTowerSwapFix))
   , _bemcCut(new StJetBEMCEnergyCut)
   , _correctTowerEnergyForTracks(new CorrectTowerEnergyForTracks())
   , _imp(new StBET4pMakerImp(_tpc, _tpcCut, _bemc, _bemcCut, _correctTowerEnergyForTracks, _eemc))
@@ -37,40 +39,19 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
 
 }
 
-void StBET4pMaker::setUseEndcap(bool v)
-{ 
-  _imp->setUseEndcap(v);
-}
-
-void StBET4pMaker::setUse2003Cuts(bool v)
-{ 
-  _bemcCut->setUse2003Cuts(v);
-}
-
-void StBET4pMaker::setUse2005Cuts(bool v)
-{
-  _bemcCut->setUse2005Cuts(v);
-}
-
-void StBET4pMaker::setUse2006Cuts(bool v)
-{ 
-  _tpcCut->setUse2006Cuts(v);
-}
-
-Int_t StBET4pMaker::InitRun(Int_t runId)
-{
-  _bemcTables->loadTables((StMaker*)this);
-
-  return kStOk;
-}
-
 Int_t StBET4pMaker::Init()
 {
+  _imp->setUseEndcap(_useEndcap);
+  _bemcCut->setUse2003Cuts(_use2003Cuts);
+  _bemcCut->setUse2005Cuts(_use2005Cuts);
+  _tpcCut->setUse2006Cuts(_use2006Cuts);
+
   StEEmcDbMaker* mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
   if(mEeDb) _eemc->Init(mEeDb);
 
   return StMaker::Init();
 }
+
 
 void StBET4pMaker::Clear(Option_t* opt)
 {

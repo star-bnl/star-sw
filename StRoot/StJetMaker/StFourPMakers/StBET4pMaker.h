@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.34 2008/07/09 23:53:36 tai Exp $
+// $Id: StBET4pMaker.h,v 1.35 2008/07/10 01:20:24 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -9,7 +9,6 @@
 #include "StJetEEMCMuDst.h"
 
 class StMuDstMaker;
-class StBemcTables;
 class StBET4pMakerImp;
 
 namespace StSpinJet {
@@ -38,14 +37,12 @@ public:
     
   void Clear(Option_t* opt);
 
-  Int_t InitRun(Int_t runId);
-
   FourList &getTracks();
 
-  void setUseEndcap(bool v);
-  void setUse2003Cuts(bool v);
-  void setUse2005Cuts(bool v);
-  void setUse2006Cuts(bool v);
+  void setUseEndcap(bool v) { _useEndcap = v; }
+  void setUse2003Cuts(bool v) { _use2003Cuts = v; }
+  void setUse2005Cuts(bool v) { _use2005Cuts = v; }
+  void setUse2006Cuts(bool v) { _use2006Cuts = v; }
 
   int nDylanPoints() const;
   double sumEmcEt() const;
@@ -57,13 +54,20 @@ public:
   StSpinJet::StJetBEMCEnergyCut* getBEMCEnergyCut() { return _bemcCut; }
   StSpinJet::StJetTPCTrackCut* getTPCTrackCut() { return _tpcCut; }
 
+  const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.35 2008/07/10 01:20:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+
 private:
+
+  bool _useEndcap;
+  bool _use2003Cuts;
+  bool _use2005Cuts;
+  bool _use2006Cuts;
 
   StSpinJet::StJetTPC* _tpc;
   StSpinJet::StJetTPCTrackCut* _tpcCut;
 
   StSpinJet::StJetEEMCMuDst* _eemc;
-  StBemcTables* _bemcTables;
 
   StSpinJet::StJetBEMC* _bemc;
   StSpinJet::StJetBEMCEnergyCut* _bemcCut;
