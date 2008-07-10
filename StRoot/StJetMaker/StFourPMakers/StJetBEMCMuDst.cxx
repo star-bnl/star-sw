@@ -1,17 +1,19 @@
-// $Id: StJetBEMCMuDst.cxx,v 1.1 2008/07/09 00:04:16 tai Exp $
+// $Id: StJetBEMCMuDst.cxx,v 1.2 2008/07/10 01:20:24 tai Exp $
 #include "StJetBEMCMuDst.h"
-
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 #include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuEvent.h>
+
 #include <StEvent/StEmcRawHit.h>
 #include <StEvent/StEmcCollection.h>
 #include <StEvent/StEmcModule.h>
 #include <StEvent/StEmcDetector.h>
+
 #include <StEmcUtil/geometry/StEmcGeom.h>
+
 #include <StEmcRawMaker/defines.h>
 #include <StEmcRawMaker/StBemcTables.h>
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
 
 namespace StSpinJet {
 
@@ -23,8 +25,18 @@ StJetBEMCMuDst::StJetBEMCMuDst(StMuDstMaker* uDstMaker, StBemcTables* bemcTables
 
 }
 
+StJetBEMCMuDst::StJetBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix)
+  : mMuDstMaker(uDstMaker)
+  , _bemcTables(new StBemcTables(doTowerSwapFix))
+ {
+
+ }
+
+
 TowerEnergyDepositList StJetBEMCMuDst::getEnergyList()
 {
+  _bemcTables->loadTables((StMaker*)mMuDstMaker);
+
   TowerEnergyDepositList ret;
 
   StEmcDetector* detector = mMuDstMaker->muDst()->emcCollection()->detector(kBarrelEmcTowerId);
