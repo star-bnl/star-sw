@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPC.h,v 1.1 2008/07/08 04:16:04 tai Exp $
+// $Id: StJetTPC.h,v 1.2 2008/07/10 01:56:09 tai Exp $
 #ifndef STJETTPC_H
 #define STJETTPC_H
 
@@ -14,6 +14,8 @@ class StJetTPC {
 public:
   StJetTPC() { }
   virtual ~StJetTPC() { }
+
+  virtual void Init() { }
 
   typedef std::vector<StMuTrackEmu*> TrackList;
 

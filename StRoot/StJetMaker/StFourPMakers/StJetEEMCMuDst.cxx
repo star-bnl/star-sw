@@ -1,4 +1,4 @@
-// $Id: StJetEEMCMuDst.cxx,v 1.1 2008/07/09 05:36:01 tai Exp $
+// $Id: StJetEEMCMuDst.cxx,v 1.2 2008/07/10 01:56:09 tai Exp $
 #include "StJetEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -20,10 +20,9 @@ StJetEEMCMuDst::StJetEEMCMuDst(StMuDstMaker* uDstMaker)
 
 }
 
-void StJetEEMCMuDst::Init(StEEmcDbMaker* eedb)
+void StJetEEMCMuDst::Init()
 {
-  mEeGeom = new EEmcGeomSimple();
-  mEeDb = eedb;
+  mEeDb = (StEEmcDbMaker*)mMuDstMaker->GetMaker("eemcDb");
   mEeDb->setThreshold(3);
 }
 
@@ -53,7 +52,9 @@ TowerEnergyDepositList StJetEEMCMuDst::getEnergyList()
     energyDeposit.towerId = (sec*5 + sub)*12 + etabin;
 
 
-    TVector3 towerLocation = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1);
+    EEmcGeomSimple geom;
+    TVector3 towerLocation = geom.getTowerCenter(sec-1,sub-1,etabin-1);
+
     energyDeposit.towerX = towerLocation.x();
     energyDeposit.towerY = towerLocation.y();
     energyDeposit.towerZ = towerLocation.z();
