@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMC.h,v 1.2 2008/07/10 01:56:08 tai Exp $
+// $Id: StJetBEMC.h,v 1.3 2008/07/10 19:35:30 tai Exp $
 #ifndef STJETBEMC_H
 #define STJETBEMC_H
 
@@ -17,8 +17,20 @@ public:
 
   virtual TowerEnergyDepositList getEnergyList() = 0;
 
+  virtual bool isUsed() const { return true; }
 };
 
+
+class StJetBEMCNull : public StJetBEMC {
+
+public:
+  StJetBEMCNull() { }
+  virtual ~StJetBEMCNull() { }
+
+  TowerEnergyDepositList getEnergyList() { return TowerEnergyDepositList(); }
+
+  bool isUsed() const { return false; }
+};
 
 }
 

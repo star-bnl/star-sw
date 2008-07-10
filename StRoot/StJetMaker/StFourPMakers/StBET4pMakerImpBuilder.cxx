@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.2 2008/07/10 18:48:31 tai Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.3 2008/07/10 19:35:30 tai Exp $
 
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -18,8 +18,19 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
 					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts,
 					       StMuDstMaker* uDstMaker, bool doTowerSwapFix)
 {
-  StJetTPCMuDst*  tpc  = new StJetTPCMuDst(uDstMaker);
-  StJetBEMCMuDst* bemc = new StJetBEMCMuDst(uDstMaker, doTowerSwapFix);
+  StJetTPC*  tpc;
+  if( !useTPC ) {
+    tpc  = new StJetTPCNull();
+  } else {
+    tpc  = new StJetTPCMuDst(uDstMaker);
+  }
+
+  StJetBEMC* bemc;
+  if( !useBEMC ) {
+    bemc = new StJetBEMCNull();
+  } else {
+    bemc = new StJetBEMCMuDst(uDstMaker, doTowerSwapFix);
+  }
 
   StJetEEMC* eemc;
   if( !useEEMC ) {
@@ -35,9 +46,6 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
 
   StBET4pMakerImp* ret = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);
 
-
-  ret->setUseTPC(useTPC);
-  ret->setUseBEMC(useBEMC);
 
   bemcCut->setUse2003Cuts(use2003Cuts);
   bemcCut->setUse2005Cuts(use2005Cuts);

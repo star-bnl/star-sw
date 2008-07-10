@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.56 2008/07/10 18:48:31 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.57 2008/07/10 19:35:30 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -47,14 +47,11 @@ public:
     
   void Clear(Option_t* opt = "");
 
-  void setUseTPC(bool v) { mUseTPC = v; }
-  void setUseBEMC(bool v) { mUseBEMC = v; }
-
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
 
 
-  bool UseTPC() const;
+  bool UseTPC()  const;
   bool UseBEMC() const;
   bool UseEEMC() const;
 
@@ -66,9 +63,6 @@ private:
   typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
 
   FourList _tracks;
-
-  bool mUseBEMC;
-  bool mUseTPC;
 
   StSpinJet::StJetTPC*  _tpc;
   StSpinJet::StJetBEMC* _bemc;
