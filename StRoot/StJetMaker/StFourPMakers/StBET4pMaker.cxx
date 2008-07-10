@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.56 2008/07/10 03:09:36 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.57 2008/07/10 06:47:48 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
@@ -9,6 +9,8 @@
 
 #include "StJetTPCTrackCut.h"
 #include "StJetBEMCEnergyCut.h"
+
+#include "CorrectTowerEnergyForTracks.h"
 
 #include "BemcEnergySumCalculator.h"
 
@@ -27,9 +29,6 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _uDstMaker(uDstMaker), _doTowerSwapFix(doTowerSwapFix)
   , _useTPC(true), _useBEMC(true), _useEndcap(false)
   , _use2003Cuts(false), _use2005Cuts(false), _use2006Cuts(false)
-  , _tpc(0), _bemc(0), _eemc(0)
-  , _tpcCut(0), _bemcCut(0)
-  , _correctTowerEnergyForTracks(0)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
 {
@@ -38,25 +37,36 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
 
 Int_t StBET4pMaker::Init()
 {
-  _tpc = new StJetTPCMuDst(_uDstMaker);
-  _bemc =new StJetBEMCMuDst(_uDstMaker, _doTowerSwapFix);
-  _eemc = new StJetEEMCMuDst(_uDstMaker);
-  _tpcCut = new StJetTPCTrackCut();
-  _bemcCut = new StJetBEMCEnergyCut();
-  _correctTowerEnergyForTracks = new CorrectTowerEnergyForTracks();
-  _imp = new StBET4pMakerImp(_tpc, _tpcCut, _bemc, _bemcCut, _correctTowerEnergyForTracks, _eemc);
-  _bemcEnergySumCalculator =new BemcEnergySumCalculator(_bemc, _bemcCut);
+  StJetTPCMuDst*  tpc  = new StJetTPCMuDst(_uDstMaker);
+  StJetBEMCMuDst* bemc = new StJetBEMCMuDst(_uDstMaker, _doTowerSwapFix);
+  StJetEEMCMuDst* eemc = new StJetEEMCMuDst(_uDstMaker);
+
+  StJetTPCTrackCut*   tpcCut  = new StJetTPCTrackCut();
+  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
+
+  CorrectTowerEnergyForTracks* correctTowerEnergyForTracks = new CorrectTowerEnergyForTracks();
+
+  _imp = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);
+
 
   _imp->setUseTPC(_useTPC);
   _imp->setUseBEMC(_useBEMC);
   _imp->setUseEndcap(_useEndcap);
-  _bemcCut->setUse2003Cuts(_use2003Cuts);
-  _bemcCut->setUse2005Cuts(_use2005Cuts);
-  _tpcCut->setUse2006Cuts(_use2006Cuts);
+  bemcCut->setUse2003Cuts(_use2003Cuts);
+  bemcCut->setUse2005Cuts(_use2005Cuts);
+  tpcCut->setUse2006Cuts(_use2006Cuts);
 
-  _tpc->Init();
-  _bemc->Init();
-  if(_useEndcap) _eemc->Init();
+  tpc->Init();
+  bemc->Init();
+  if(_useEndcap) eemc->Init();
+
+  
+  StJetBEMCMuDst* bemc_ = new StJetBEMCMuDst(_uDstMaker, _doTowerSwapFix);
+  StJetBEMCEnergyCut* bemcCut_ = new StJetBEMCEnergyCut();
+  bemc_->Init();
+  bemcCut_->setUse2003Cuts(_use2003Cuts);
+  bemcCut_->setUse2005Cuts(_use2005Cuts);
+  _bemcEnergySumCalculator =new BemcEnergySumCalculatorImp(bemc_, bemcCut_);
 
   return StMaker::Init();
 }
