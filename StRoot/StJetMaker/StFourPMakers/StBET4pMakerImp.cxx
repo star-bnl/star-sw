@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.85 2008/07/10 19:48:17 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.86 2008/07/10 19:55:50 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -14,7 +14,6 @@
 #include "TrackListToFourList.h"
 #include "EnergyListToFourList.h"
 
-//StJetMaker
 #include "../StMuTrackFourVec.h"
 
 #include "../StMuTrackEmu.h"
@@ -59,27 +58,21 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 void StBET4pMakerImp::Make()
 {
   TrackList trackList = _tpc->getTrackList();
-
-  trackList = (*_tpcCut)(trackList);
-
-  FourList tpc4pList = _track2four(trackList);
-
-  _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());
-
   TowerEnergyDepositList bemcEnergyList = _bemc->getEnergyList();
-
-  bemcEnergyList = _bemcCut->Apply(bemcEnergyList);
-
-  TowerEnergyDepositList bemcCorrectedEnergyDepositList = _correctTowerEnergyForTracks->Do(bemcEnergyList, trackList);
-
-  FourList bemc4pList = _energy2four(bemcCorrectedEnergyDepositList);
-
-  _tracks.insert(_tracks.end(), bemc4pList.begin(), bemc4pList.end());
-
   TowerEnergyDepositList eemcEnergyList = _eemc->getEnergyList();
 
-  FourList eemc4pList = _energy2four(eemcEnergyList);
+  trackList = (*_tpcCut)(trackList);
+  bemcEnergyList = _bemcCut->Apply(bemcEnergyList);
 
+  TowerEnergyDepositList bemcCorrectedEnergyList = _correctTowerEnergyForTracks->Do(bemcEnergyList, trackList);
+
+  FourList tpc4pList = _track2four(trackList);
+  _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());
+
+  FourList bemc4pList = _energy2four(bemcCorrectedEnergyList);
+  _tracks.insert(_tracks.end(), bemc4pList.begin(), bemc4pList.end());
+
+  FourList eemc4pList = _energy2four(eemcEnergyList);
   _tracks.insert(_tracks.end(), eemc4pList.begin(), eemc4pList.end());
 }
 
