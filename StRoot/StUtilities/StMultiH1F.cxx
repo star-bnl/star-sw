@@ -52,7 +52,7 @@ void StMultiH1F::Draw(Option_t *option) {
   // make a legend
   TLegend *legend = new TLegend(0.80,0.84,0.98,0.98,"Legend","NDC");
   legend->SetFillColor(0);
-  legend->SetFillStyle(4000);
+  legend->SetFillStyle(0);
   legend->SetMargin(0.25);
 
   Int_t ybin;
@@ -106,6 +106,7 @@ void StMultiH1F::Draw(Option_t *option) {
     temp[maxbin]->Draw();
   } else {
     TH1F* tempb = new TH1F(*(temp[maxbin]));
+    tempb->SetName(Form("%s_%d",GetName(),ybins+1));
     tempb->SetBinContent(1,maxval);
     tempb->SetBinContent(2,minval);
     tempb->SetMarkerStyle(1); tempb->SetMarkerColor(0);
@@ -134,7 +135,7 @@ void StMultiH1F::Draw(Option_t *option) {
 TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
   static char buf[256];
   if (ybin<0) sprintf(buf,"%s.",name);
-  else sprintf(buf,"%s.%d.%s",GetName(),ybin,name);
+  else sprintf(buf,"%s_%d_%s",GetName(),ybin,name);
 
   TList* tgList = gDirectory->GetList();
   TH1F* temp = (TH1F*) tgList->FindObject(buf);
@@ -266,8 +267,11 @@ void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
   TH1::SavePrimitiveHelp(out, option);
 }
 
-// $Id: StMultiH1F.cxx,v 1.13 2008/07/09 20:52:38 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.14 2008/07/10 21:26:59 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.14  2008/07/10 21:26:59  genevb
+// Allow SavePrimitive of fully drawn TPad to work properly
+//
 // Revision 1.13  2008/07/09 20:52:38  genevb
 // Implement SavePrimitive functions
 //

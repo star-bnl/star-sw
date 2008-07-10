@@ -58,7 +58,7 @@ void StMultiH2F::Draw(Option_t *option) {
   // make a legend
   TLegend *legend = new TLegend(0.80,0.84,0.98,0.98,"Legend","NDC");
   legend->SetFillColor(0);
-  legend->SetFillStyle(4000);
+  legend->SetFillStyle(0);
   legend->SetMargin(0.25);
 
   Int_t zbin;
@@ -118,7 +118,7 @@ void StMultiH2F::Draw(Option_t *option) {
 TH2D* StMultiH2F::XYProjection(const char* name, Int_t zbin) {
   static char buf[256];
   if (zbin<0) sprintf(buf,"%s.",name);
-  else sprintf(buf,"%s.%d.%s",GetName(),zbin,name);
+  else sprintf(buf,"%s_%d_%s",GetName(),zbin,name);
 
   TList* tgList = gDirectory->GetList();
   TH2D* temp = (TH2D*) tgList->FindObject(buf);
@@ -214,8 +214,11 @@ void StMultiH2F::SavePrimitive(ostream& out, Option_t* option) {
   TH1::SavePrimitiveHelp(out, option);
 }
 
-// $Id: StMultiH2F.cxx,v 1.4 2008/07/09 20:52:38 genevb Exp $
+// $Id: StMultiH2F.cxx,v 1.5 2008/07/10 21:26:59 genevb Exp $
 // $Log: StMultiH2F.cxx,v $
+// Revision 1.5  2008/07/10 21:26:59  genevb
+// Allow SavePrimitive of fully drawn TPad to work properly
+//
 // Revision 1.4  2008/07/09 20:52:38  genevb
 // Implement SavePrimitive functions
 //
