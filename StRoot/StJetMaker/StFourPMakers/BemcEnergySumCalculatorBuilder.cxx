@@ -1,4 +1,4 @@
-// $Id: BemcEnergySumCalculatorBuilder.cxx,v 1.1 2008/07/10 06:47:48 tai Exp $
+// $Id: BemcEnergySumCalculatorBuilder.cxx,v 1.2 2008/07/10 09:36:00 tai Exp $
 #include "BemcEnergySumCalculatorBuilder.h"
 #include "BemcEnergySumCalculator.h"
 
@@ -13,7 +13,6 @@ BemcEnergySumCalculator* BemcEnergySumCalculatorBuilder::build(bool useBEMC, boo
 
   StJetBEMCMuDst* bemc = new StJetBEMCMuDst(uDstMaker, doTowerSwapFix);
   StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-  bemc->Init();
   bemcCut->setUse2003Cuts(use2003Cuts);
   bemcCut->setUse2005Cuts(use2005Cuts);
 

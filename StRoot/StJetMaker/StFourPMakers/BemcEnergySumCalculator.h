@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: BemcEnergySumCalculator.h,v 1.4 2008/07/10 06:47:48 tai Exp $
+// $Id: BemcEnergySumCalculator.h,v 1.5 2008/07/10 09:36:00 tai Exp $
 #ifndef BEMCENERGYSUMCALCULATOR_H
 #define BEMCENERGYSUMCALCULATOR_H
 
@@ -17,8 +17,8 @@ public:
   BemcEnergySumCalculator() { }
   virtual ~BemcEnergySumCalculator() { }
 
+  virtual void Init() { }
   virtual void Make() { }
-
   virtual void Clear() { }
 
   virtual int nDylanPoints() const = 0;
@@ -35,8 +35,8 @@ public:
   BemcEnergySumCalculatorNull() { }
   virtual ~BemcEnergySumCalculatorNull() { }
 
+  void Init() { }
   void Make() { }
-
   void Clear() { }
 
   int nDylanPoints() const { return 0; } 
@@ -53,8 +53,8 @@ public:
   BemcEnergySumCalculatorImp(StJetBEMC* bemc, StJetBEMCEnergyCut* cut);
   virtual ~BemcEnergySumCalculatorImp() { }
 
+  void Init();
   void Make();
-
   void Clear();
 
   int nDylanPoints() const { return _DylanPoints; }

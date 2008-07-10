@@ -1,4 +1,4 @@
-// $Id: BemcEnergySumCalculator.cxx,v 1.4 2008/07/10 06:47:47 tai Exp $
+// $Id: BemcEnergySumCalculator.cxx,v 1.5 2008/07/10 09:35:59 tai Exp $
 #include "BemcEnergySumCalculator.h"
 
 #include "StJetBEMC.h"
@@ -13,6 +13,10 @@ BemcEnergySumCalculatorImp::BemcEnergySumCalculatorImp(StJetBEMC* bemc, StJetBEM
   , _SumEmcEt(0.0)
 {
 
+}
+void BemcEnergySumCalculatorImp::Init()
+{
+  _bemc->Init();
 }
 
 void BemcEnergySumCalculatorImp::Make()
