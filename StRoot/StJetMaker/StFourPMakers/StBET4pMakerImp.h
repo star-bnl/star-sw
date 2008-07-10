@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.51 2008/07/10 03:09:37 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.52 2008/07/10 06:47:49 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -70,6 +70,9 @@ public:
   bool UseBEMC() const { return mUseBEMC; }
   bool UseEEMC() const { return mUseEndcap; }
 
+  StSpinJet::StJetTPCTrackCut* getTPCTrackCut()     { return _tpcCut; }
+  StSpinJet::StJetBEMCEnergyCut* getBEMCEnergyCut() { return _bemcCut; }
+
 private:
 
   typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
@@ -80,9 +83,15 @@ private:
   bool mUseBEMC;
   bool mUseTPC;
 
+  StSpinJet::StJetTPC*  _tpc;
+  StSpinJet::StJetBEMC* _bemc;
+  StSpinJet::StJetEEMC* _eemc;
+
+  StSpinJet::StJetTPCTrackCut* _tpcCut;
+  StSpinJet::StJetBEMCEnergyCut* _bemcCut;
+
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
-  StSpinJet::StJetEEMC* _eemc;
 
   StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
 

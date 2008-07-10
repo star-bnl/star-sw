@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.78 2008/07/10 03:09:37 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.79 2008/07/10 06:47:49 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -41,9 +41,10 @@ StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
   : mUseEndcap(false)
   , mUseBEMC(true)
   , mUseTPC(true)
+  , _tpc(tpc), _bemc(bemc), _eemc(eemc)
+  , _tpcCut(tpcCut), _bemcCut(bemcCut)
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(tpc, tpcCut))
   , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(bemc, bemcCut))
-  , _eemc(eemc)
   , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
   , _track2four(*(new TrackListToFourList))
   , _energy2four(*(new EnergyListToFourList))
