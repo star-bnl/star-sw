@@ -1,13 +1,14 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.54 2008/07/10 09:47:03 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.55 2008/07/10 10:09:03 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
 
-#include <Rtypes.h>
+#include "CorrectTowerEnergyForTracks.h"
 
 #include "StJetFinder/AbstractFourVec.h"
 
+#include <Rtypes.h>
 #include <TVector3.h>
 #include <TLorentzVector.h>
 
@@ -25,7 +26,6 @@ namespace StSpinJet {
   class EnergyListToFourList;
 }
 
-#include "CorrectTowerEnergyForTracks.h"
 
 typedef std::vector<AbstractFourVec*> FourList;
 
