@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.77 2008/07/09 23:53:37 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.78 2008/07/10 03:09:37 tai Exp $
 
 #include "StBET4pMakerImp.h"
 
@@ -23,6 +23,7 @@ StBET4pMakerImp::StBET4pMakerImp(CollectChargedTracksFromTPC* collectChargedTrac
 				 StJetEEMC* eemc)
   : mUseEndcap(false)
   , mUseBEMC(true)
+  , mUseTPC(true)
   , _collectChargedTracksFromTPC(collectChargedTracksFromTPC)
   , _collectEnergyDepositsFromBEMC(collectEnergyDepositsFromBEMC)
   , _eemc(eemc)
@@ -39,6 +40,7 @@ StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
 				 StJetEEMC* eemc)
   : mUseEndcap(false)
   , mUseBEMC(true)
+  , mUseTPC(true)
   , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(tpc, tpcCut))
   , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(bemc, bemcCut))
   , _eemc(eemc)
@@ -62,11 +64,16 @@ void StBET4pMakerImp::Clear(Option_t* opt)
 
 void StBET4pMakerImp::Make()
 {
-  TrackList trackmuList = _collectChargedTracksFromTPC->Do();
+  TrackList trackmuList;
 
-  FourList tpcFourMomentumList = _track2four(trackmuList);
+  if(mUseTPC) {
+    trackmuList = _collectChargedTracksFromTPC->Do();
 
-  _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
+    FourList tpcFourMomentumList = _track2four(trackmuList);
+
+    _tracks.insert(_tracks.end(), tpcFourMomentumList.begin(), tpcFourMomentumList.end());
+  }
+
 
   if(mUseBEMC) {
     TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();

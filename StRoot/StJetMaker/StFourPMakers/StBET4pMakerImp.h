@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.50 2008/07/10 01:56:08 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.51 2008/07/10 03:09:37 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -58,13 +58,16 @@ public:
     
   void Clear(Option_t* opt = "");
 
-  void setUseEndcap(bool v) { mUseEndcap = v; }
+  void setUseTPC(bool v) { mUseTPC = v; }
   void setUseBEMC(bool v) { mUseBEMC = v; }
+  void setUseEndcap(bool v) { mUseEndcap = v; }
 
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
 
 
+  bool UseTPC() const { return mUseTPC; }
+  bool UseBEMC() const { return mUseBEMC; }
   bool UseEEMC() const { return mUseEndcap; }
 
 private:
@@ -75,6 +78,7 @@ private:
 
   bool mUseEndcap;
   bool mUseBEMC;
+  bool mUseTPC;
 
   StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
   StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;

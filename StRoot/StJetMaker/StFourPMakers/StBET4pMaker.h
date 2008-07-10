@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.36 2008/07/10 01:56:08 tai Exp $
+// $Id: StBET4pMaker.h,v 1.37 2008/07/10 03:09:36 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -39,7 +39,9 @@ public:
 
   FourList &getTracks();
 
-  void setUseEndcap(bool v) { _useEndcap = v; }
+  void setUseTPC(bool v)      { _useTPC      = v; }
+  void setUseBEMC(bool v)     { _useBEMC     = v; }
+  void setUseEndcap(bool v)   { _useEndcap   = v; }
   void setUse2003Cuts(bool v) { _use2003Cuts = v; }
   void setUse2005Cuts(bool v) { _use2005Cuts = v; }
   void setUse2006Cuts(bool v) { _use2006Cuts = v; }
@@ -55,12 +57,15 @@ public:
   StSpinJet::StJetTPCTrackCut* getTPCTrackCut() { return _tpcCut; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.36 2008/07/10 01:56:08 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.37 2008/07/10 03:09:36 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
   StMuDstMaker* _uDstMaker;
+  bool _doTowerSwapFix;
 
+  bool _useTPC;
+  bool _useBEMC;
   bool _useEndcap;
   bool _use2003Cuts;
   bool _use2005Cuts;
