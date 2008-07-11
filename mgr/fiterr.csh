@@ -23,7 +23,7 @@
 # All questions to Victor Perev
 # Victor Perev Feb 17, 2007
 ############################################################################
-source ${GROUP_DIR}/.starver  .DEV
+source ${GROUP_DIR}/.starver  DEV
 
 
 #		Check input file
