@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCMuDst.h,v 1.3 2008/07/10 20:15:21 tai Exp $
+// $Id: StJetBEMCMuDst.h,v 1.4 2008/07/11 23:24:46 tai Exp $
 #ifndef STJETBEMCMUDST_H
 #define STJETBEMCMUDST_H
 
@@ -24,7 +24,7 @@ private:
 
   TowerEnergy readTowerHit(const StEmcRawHit& hit);
 
-  StMuDstMaker* mMuDstMaker;
+  StMuDstMaker* _uDstMaker;
 
   StBemcTables* _bemcTables;
 

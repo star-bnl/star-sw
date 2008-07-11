@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetEEMCMuDst.h,v 1.3 2008/07/10 20:15:22 tai Exp $
+// $Id: StJetEEMCMuDst.h,v 1.4 2008/07/11 23:24:47 tai Exp $
 #ifndef STJETEEMCMUDST_H
 #define STJETEEMCMUDST_H
 
@@ -23,7 +23,7 @@ public:
 
 private:
 
-  StMuDstMaker* mMuDstMaker;
+  StMuDstMaker* _uDstMaker;
   StEEmcDbMaker* mEeDb;
 
 };
