@@ -137,12 +137,12 @@ inline Float_t StKinkMuDst::rapidityKaon() const { return mRapidityKaon; }
 inline Float_t StKinkMuDst::rapidityPion() const { return mRapidityPion; }
 inline Float_t StKinkMuDst::chi2Kink()     const { return mChi2Kink; }
 inline Float_t StKinkMuDst::clKink()       const { return mClKink; }
-inline Float_t StKinkMuDst::chi2Parent()   const { return TMath::Abs(mChi2Parent); }
+inline Float_t StKinkMuDst::chi2Parent()   const { return mChi2Parent; }
 inline Float_t StKinkMuDst::clParent()     const { return mClParent; }
-inline Float_t StKinkMuDst::chi2Daughter() const { return TMath::Abs(mChi2Daughter); }
+inline Float_t StKinkMuDst::chi2Daughter() const { return mChi2Daughter; }
 inline Float_t StKinkMuDst::clDaughter()   const { return mClDaughter; }
-inline void StKinkMuDst::setParentBad() { mChi2Parent = -chi2Parent(); }
-inline void StKinkMuDst::setDaughterBad() { mChi2Daughter = -chi2Daughter(); }
+inline void StKinkMuDst::setParentBad() { mChi2Parent = -TMath::Abs(mChi2Parent); }
+inline void StKinkMuDst::setDaughterBad() { mChi2Daughter = -TMath::Abs(mChi2Daughter); }
 inline Float_t StKinkMuDst::dedxParent()   const { return mDedxParent; }
 inline Float_t StKinkMuDst::dedxDaughter() const { return mDedxDaughter; }
 inline Float_t StKinkMuDst::errDedxParent()   const { return mErrDedxParent; }
@@ -161,8 +161,11 @@ inline UShort_t StKinkMuDst::keyDaughter() const { return mKeyDaughter; }
 
 
 /***********************************************************************
- * $Id: StKinkMuDst.hh,v 3.11 2008/07/10 16:16:55 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.12 2008/07/11 16:23:08 genevb Exp $
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.12  2008/07/11 16:23:08  genevb
+ * bad() won't work unless chi2 allows to return negative values
+ *
  * Revision 3.11  2008/07/10 16:16:55  genevb
  * Allow for marking of bad tracks -> bad secondary vertices
  *
