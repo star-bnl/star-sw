@@ -136,12 +136,12 @@ inline Float_t StV0MuDst::momV0Y()  const { return mMomPosY + mMomNegY; }
 inline Float_t StV0MuDst::momV0Z()  const { return mMomPosZ + mMomNegZ; }
 inline Float_t StV0MuDst::chi2V0()  const { return mChi2V0; }
 inline Float_t StV0MuDst::clV0()    const { return mClV0; }
-inline Float_t StV0MuDst::chi2Pos() const { return TMath::Abs(mChi2Pos); }
+inline Float_t StV0MuDst::chi2Pos() const { return mChi2Pos; }
 inline Float_t StV0MuDst::clPos()   const { return mClPos; }
-inline Float_t StV0MuDst::chi2Neg() const { return TMath::Abs(mChi2Neg); }
+inline Float_t StV0MuDst::chi2Neg() const { return mChi2Neg; }
 inline Float_t StV0MuDst::clNeg()   const { return mClNeg; }
-inline void StV0MuDst::setPosBad() { mChi2Pos = -chi2Pos(); }
-inline void StV0MuDst::setNegBad() { mChi2Neg = -chi2Neg(); }
+inline void StV0MuDst::setPosBad() { mChi2Pos = -TMath::Abs(mChi2Pos); }
+inline void StV0MuDst::setNegBad() { mChi2Neg = -TMath::Abs(mChi2Neg); }
 inline Float_t StV0MuDst::dedxPos() const { return mDedxPos; }
 inline Float_t StV0MuDst::dedxNeg() const { return mDedxNeg; }
 inline Float_t StV0MuDst::errDedxPos() const { return mErrDedxPos; }
@@ -154,8 +154,11 @@ inline Float_t StV0MuDst::lenDedxNeg() const { return (mNumDedxNeg/100); }
 
 
 /***********************************************************************
- * $Id: StV0MuDst.hh,v 3.9 2008/07/10 16:16:55 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.10 2008/07/11 16:23:09 genevb Exp $
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.10  2008/07/11 16:23:09  genevb
+ * bad() won't work unless chi2 allows to return negative values
+ *
  * Revision 3.9  2008/07/10 16:16:55  genevb
  * Allow for marking of bad tracks -> bad secondary vertices
  *
