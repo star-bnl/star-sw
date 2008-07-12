@@ -1,9 +1,7 @@
-// $Id: StJetScratch.cxx,v 1.2 2008/07/12 02:56:26 tai Exp $
-#include "StJetScratch.h"
+// $Id: StJetTPCTrackMaker.cxx,v 1.1 2008/07/12 02:56:26 tai Exp $
+#include "StJetTPCTrackMaker.h"
 
 #include "StJetTPCMuDst.h"
-#include "StJetBEMCMuDst.h"
-#include "StJetEEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 #include <StMuDSTMaker/COMMON/StMuDst.h>
@@ -17,19 +15,18 @@
 using namespace std;
 using namespace StSpinJet;
 
-ClassImp(StJetScratch)
+ClassImp(StJetTPCTrackMaker)
   
 
-StJetScratch::StJetScratch(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
+StJetTPCTrackMaker::StJetTPCTrackMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
   : StMaker(name)
   , _file(file)
   , _uDstMaker(uDstMaker)
 { }
 
-Int_t StJetScratch::Init()
+Int_t StJetTPCTrackMaker::Init()
 {
   _tpc  = new StJetTPCMuDst(_uDstMaker);
-  _bemc = new StJetBEMCMuDst(_uDstMaker, true);
 
   _file->cd();
   _tree = new TTree("tpcTracks", "tpcTracks");
@@ -61,10 +58,9 @@ Int_t StJetScratch::Init()
   return kStOk;
 }
 
-Int_t StJetScratch::Make()
+Int_t StJetTPCTrackMaker::Make()
 {
   TrackList trackList = _tpc->getTrackList();
-  TowerEnergyList bemcEnergyList = _bemc->getEnergyList();
 
   _runNumber = _uDstMaker->muDst()->event()->runId();
   _eventId = _uDstMaker->muDst()->event()->eventId();
@@ -100,7 +96,7 @@ Int_t StJetScratch::Make()
 
 }
 
-Int_t StJetScratch::Finish()
+Int_t StJetTPCTrackMaker::Finish()
 {
   _tree->BuildIndex("runNumber", "eventId");
 
