@@ -1,9 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: CorrectTowerEnergyForTracks.h,v 1.4 2008/07/10 20:15:19 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.h,v 1.5 2008/07/12 01:32:06 tai Exp $
 #ifndef CORRECTTOWERENERGYFORTRACKS_H
 #define CORRECTTOWERENERGYFORTRACKS_H
 
 #include "TowerEnergyList.h"
+#include "TrackList.h"
 
 #include <vector>
 #include <utility>
@@ -18,13 +19,11 @@ public:
   CorrectTowerEnergyForTracks();
   virtual ~CorrectTowerEnergyForTracks() { }
 
-  typedef std::vector<StMuTrackEmu*> TrackList;
-
   TowerEnergyList Do(const TowerEnergyList &energyDepositList, const TrackList& trackList);
 
 private:
 
-  void countTracksOnBemcTower(const StMuTrackEmu& track);
+  void countTracksOnBemcTower(const Track& track);
 
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
 

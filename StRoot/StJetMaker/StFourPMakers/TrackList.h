@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackList.h,v 1.1 2008/07/11 23:35:27 tai Exp $
+// $Id: TrackList.h,v 1.2 2008/07/12 01:32:08 tai Exp $
 #ifndef TRACKLIST_H
 #define TRACKLIST_H
 
@@ -22,7 +22,7 @@ struct Track {
   double         nSigmaPion;
   double         Tdca;
   float          dcaZ;
-  flot           dcaD;
+  float          dcaD;
   double         BField;
   double         bemcRadius;
   double         etaext;

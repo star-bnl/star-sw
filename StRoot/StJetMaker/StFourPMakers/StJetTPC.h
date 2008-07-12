@@ -1,9 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPC.h,v 1.4 2008/07/10 19:48:18 tai Exp $
+// $Id: StJetTPC.h,v 1.5 2008/07/12 01:32:07 tai Exp $
 #ifndef STJETTPC_H
 #define STJETTPC_H
 
-#include <vector>
+#include "TrackList.h"
 
 namespace StSpinJet {
 
@@ -16,8 +16,6 @@ public:
   virtual ~StJetTPC() { }
 
   virtual void Init() { }
-
-  typedef std::vector<StMuTrackEmu*> TrackList;
 
   virtual TrackList getTrackList() = 0;
 };
