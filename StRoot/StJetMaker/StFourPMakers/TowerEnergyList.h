@@ -1,9 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: TowerEnergyList.h,v 1.3 2008/07/11 23:24:47 tai Exp $
+// $Id: TowerEnergyList.h,v 1.4 2008/07/12 01:32:08 tai Exp $
 #ifndef TOWERENERGYLIST_H
 #define TOWERENERGYLIST_H
-
-#include <StDetectorId.h>
 
 #include <vector>
 

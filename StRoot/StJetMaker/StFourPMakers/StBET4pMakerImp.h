@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.58 2008/07/10 19:48:18 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.59 2008/07/12 01:32:06 tai Exp $
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
@@ -58,8 +58,6 @@ public:
   StSpinJet::StJetBEMCEnergyCut* getBEMCEnergyCut() { return _bemcCut; }
 
 private:
-
-  typedef std::vector<StSpinJet::StMuTrackEmu*> TrackList;
 
   FourList _tracks;
 

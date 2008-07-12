@@ -1,4 +1,4 @@
-// $Id: StJetTPCTxt.cxx,v 1.3 2008/07/09 08:16:05 tai Exp $
+// $Id: StJetTPCTxt.cxx,v 1.4 2008/07/12 01:32:08 tai Exp $
 #include "StJetTPCTxt.h"
 
 #include "../StMuTrackEmu.h"
@@ -18,7 +18,7 @@ StJetTPCTxt::StJetTPCTxt(const char* path)
   _dataFile.open(path);
 }
 
-StJetTPCTxt::TrackList StJetTPCTxt::getTrackList()
+TrackList StJetTPCTxt::getTrackList()
 {
   ++_currentEvent;
 
@@ -35,6 +35,8 @@ StJetTPCTxt::TrackList StJetTPCTxt::getTrackList()
       getline(_dataFile, line);
     }
 
+    if(0 == line.size()) break; 
+
     istringstream ist(line);
     long i;
     ist >> i;
@@ -43,7 +45,6 @@ StJetTPCTxt::TrackList StJetTPCTxt::getTrackList()
       _oldLine = line;
       break;
     }
-
     currentLines.push_back(line);
   }
 
@@ -53,29 +54,29 @@ StJetTPCTxt::TrackList StJetTPCTxt::getTrackList()
     istringstream ist(*it);
     long i;
 
-    StMuTrackEmu* track = new StMuTrackEmu();
+    Track track;
 
     ist >> i
-	>> track->_px
-	>> track->_py
-	>> track->_pz
-	>> track->_flag
-	>> track->_nHits
-	>> track->_charge
-	>> track->_nHitsPoss
-	>> track->_nHitsDedx
-	>> track->_nHitsFit
-	>> track->_nSigmaPion
-	>> track->_Tdca
-	>> track->_dcaZ
-	>> track->_dcaD
-	>> track->_BField
-	>> track->_bemcRadius
-	>> track->_etaext
-	>> track->_phiext
-	>> track->_dEdx
-	>> track->_trackIndex
-	>> track->_id;
+	>> track.px
+	>> track.py
+	>> track.pz
+	>> track.flag
+	>> track.nHits
+	>> track.charge
+	>> track.nHitsPoss
+	>> track.nHitsDedx
+	>> track.nHitsFit
+	>> track.nSigmaPion
+	>> track.Tdca
+	>> track.dcaZ
+	>> track.dcaD
+	>> track.BField
+	>> track.bemcRadius
+	>> track.etaext
+	>> track.phiext
+	>> track.dEdx
+	>> track.trackIndex
+	>> track.id;
 
     ret.push_back(track);
   }

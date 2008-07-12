@@ -1,9 +1,7 @@
-// $Id: CorrectTowerEnergyForTracks.cxx,v 1.4 2008/07/10 20:15:19 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.cxx,v 1.5 2008/07/12 01:32:06 tai Exp $
 #include "CorrectTowerEnergyForTracks.h"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
-
-#include "../StMuTrackEmu.h"
 
 namespace StSpinJet {
 
@@ -21,7 +19,7 @@ TowerEnergyList CorrectTowerEnergyForTracks::Do(const TowerEnergyList &energyDep
   }
 
   for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
-    countTracksOnBemcTower(**track);
+    countTracksOnBemcTower(*track);
   }
 
   TowerEnergyList ret;
@@ -40,11 +38,11 @@ TowerEnergyList CorrectTowerEnergyForTracks::Do(const TowerEnergyList &energyDep
   return ret;
 }
 
-void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const StMuTrackEmu& track)
+void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const Track& track)
 {
   int id = 0;
 
-  if(StEmcGeom::instance("bemc")->getId(track.phiext(), track.etaext(), id) == 0)
+  if(StEmcGeom::instance("bemc")->getId(track.phiext, track.etaext, id) == 0)
     mNtracksOnTower[id]++;
 }
 

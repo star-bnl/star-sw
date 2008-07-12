@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCMuDst.h,v 1.1 2008/07/08 04:16:05 tai Exp $
+// $Id: StJetTPCMuDst.h,v 1.2 2008/07/12 01:32:07 tai Exp $
 #ifndef STJETTPCMUDST_H
 #define STJETTPCMUDST_H
 
@@ -10,8 +10,6 @@
 class StMuDstMaker;
 
 namespace StSpinJet {
-
-class StMuTrackEmu;
 
 class StJetTPCMuDst : public StJetTPC {
 

@@ -1,4 +1,4 @@
-// $Id: TrackListToFourList.cxx,v 1.1 2008/07/09 10:41:27 tai Exp $
+// $Id: TrackListToFourList.cxx,v 1.2 2008/07/12 01:32:08 tai Exp $
 #include "TrackListToFourList.h"
 
 #include "../StMuTrackEmu.h"
@@ -12,15 +12,46 @@ FourList TrackListToFourList::operator()(const TrackList& trackList)
 
   for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
 
-    TVector3 momentum((*track)->px(), (*track)->py(), (*track)->pz());
+    TVector3 momentum((*track).px, (*track).py, (*track).pz);
     double pionMass = 0.1395700;
     float energy = sqrt(pionMass*pionMass + momentum.Mag()*momentum.Mag());
 
     TLorentzVector p4(momentum, energy);
 
-    StMuTrackFourVec* pmu = new StMuTrackFourVec((*track), p4, (*track)->charge(), (*track)->trackIndex(), kTpcId);
+    StMuTrackEmu *trackEmu = createTrackEmu(*track);
+
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(trackEmu, p4, (*track).charge, (*track).trackIndex, kTpcId);
     ret.push_back(pmu);
   }
+
+  return ret;
+}
+
+StMuTrackEmu* TrackListToFourList::createTrackEmu(const Track& track)
+{
+  StMuTrackEmu *ret = new StMuTrackEmu();
+
+  ret->_px             =  track.px	     ;
+  ret->_py	       =  track.py	     ;
+  ret->_pz	       =  track.pz	     ;
+  ret->_flag	       =  track.flag	     ;
+  ret->_nHits	       =  track.nHits	     ;
+  ret->_charge	       =  track.charge	     ;
+  ret->_nHitsPoss      =  track.nHitsPoss    ;
+  ret->_nHitsDedx      =  track.nHitsDedx    ;
+  ret->_nHitsFit       =  track.nHitsFit     ;
+  ret->_nSigmaPion     =  track.nSigmaPion   ;
+  ret->_Tdca	       =  track.Tdca	     ;
+  ret->_dcaZ	       =  track.dcaZ	     ;
+  ret->_dcaD	       =  track.dcaD	     ;
+  ret->_BField	       =  track.BField	     ;
+  ret->_bemcRadius     =  track.bemcRadius   ;
+  ret->_etaext	       =  track.etaext	     ;
+  ret->_phiext	       =  track.phiext	     ;
+  ret->_dEdx	       =  track.dEdx	     ;
+  ret->_trackIndex     =  track.trackIndex   ;
+  ret->_id             =  track.id           ;
+
   return ret;
 }
 
