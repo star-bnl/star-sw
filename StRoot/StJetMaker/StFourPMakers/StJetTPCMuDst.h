@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCMuDst.h,v 1.2 2008/07/12 01:32:07 tai Exp $
+// $Id: StJetTPCMuDst.h,v 1.3 2008/07/12 01:40:24 tai Exp $
 #ifndef STJETTPCMUDST_H
 #define STJETTPCMUDST_H
 
@@ -8,6 +8,7 @@
 #include <vector>
 
 class StMuDstMaker;
+class StMuTrack;
 
 namespace StSpinJet {
 
@@ -20,6 +21,9 @@ public:
   TrackList getTrackList();
 
 private:
+
+  Track createTrack(const StMuTrack* mutrack, int i, double magneticField);
+
   StMuDstMaker* _uDstMaker;
 
 };
