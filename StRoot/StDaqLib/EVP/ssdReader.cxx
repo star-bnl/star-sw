@@ -58,7 +58,7 @@ int OLDEVP::ssdReader(char *m)
 	int rb, mz ;
 	int len ;
 	u_int off ;
-	static int init ;
+	static int init=0 ;
 
 	struct TPCP *ssdp ;
 	struct TPCSECP *secp ;
