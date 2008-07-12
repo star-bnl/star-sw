@@ -1,4 +1,4 @@
-// $Id: StJetTPCMuDst.cxx,v 1.3 2008/07/12 01:32:07 tai Exp $
+// $Id: StJetTPCMuDst.cxx,v 1.4 2008/07/12 01:40:24 tai Exp $
 #include "StJetTPCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -32,49 +32,7 @@ TrackList StJetTPCMuDst::getTrackList()
 
     if(mutrack->topologyMap().trackFtpcEast() || mutrack->topologyMap().trackFtpcWest()) continue;
 
-    //    StMuTrackEmu* trackEmu = StMuTrackEmuFactory::createStMuTrackEmu(track, i, magneticField);
-    Track track;
-    track.runNumber = _uDstMaker->muDst()->event()->runId();
-    track.eventId = _uDstMaker->muDst()->event()->eventId();
-
-    track.px         = mutrack->momentum().x();
-    track.py         = mutrack->momentum().y();
-    track.pz         = mutrack->momentum().z();
-    track.flag       = mutrack->flag();
-    track.nHits      = mutrack->nHits(); 
-    track.charge     = mutrack->charge();
-    track.nHitsPoss  = mutrack->nHitsPoss();
-    track.nHitsDedx  = mutrack->nHitsDedx();
-    track.nHitsFit   = mutrack->nHitsFit();
-    track.nSigmaPion = mutrack->nSigmaPion();
-    track.Tdca       = mutrack->dcaGlobal().mag();
-    track.dcaZ       = mutrack->dcaZ();
-    track.dcaD       = mutrack->dcaD();
-
-    track.BField      = magneticField;
-    track.bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
-
-    StThreeVectorD momentumAt, positionAt;
-    StMuEmcPosition EmcPosition;
-    if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, track.BField, track.bemcRadius) ||
-	EmcPosition.trackOnEEmc(&positionAt, &momentumAt, mutrack))
-      {
-	track.etaext = positionAt.pseudoRapidity();
-	track.phiext = positionAt.phi();
-      }
-    else
-      {
-	track.etaext = -999;
-	track.phiext = -999;
-      }
-
-
-    track.dEdx = mutrack->dEdx();
-
-    track.trackIndex = i;
-
-    track.id = mutrack->id();
-
+    Track track = createTrack(mutrack, i, magneticField);
 
     ret.push_back(track);
   }
@@ -82,5 +40,52 @@ TrackList StJetTPCMuDst::getTrackList()
   return ret;
 }
 
+Track StJetTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magneticField)
+{
+  Track track;
+
+  track.runNumber = _uDstMaker->muDst()->event()->runId();
+  track.eventId = _uDstMaker->muDst()->event()->eventId();
+
+  track.px         = mutrack->momentum().x();
+  track.py         = mutrack->momentum().y();
+  track.pz         = mutrack->momentum().z();
+  track.flag       = mutrack->flag();
+  track.nHits      = mutrack->nHits(); 
+  track.charge     = mutrack->charge();
+  track.nHitsPoss  = mutrack->nHitsPoss();
+  track.nHitsDedx  = mutrack->nHitsDedx();
+  track.nHitsFit   = mutrack->nHitsFit();
+  track.nSigmaPion = mutrack->nSigmaPion();
+  track.Tdca       = mutrack->dcaGlobal().mag();
+  track.dcaZ       = mutrack->dcaZ();
+  track.dcaD       = mutrack->dcaD();
+
+  track.BField      = magneticField;
+  track.bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
+
+  StThreeVectorD momentumAt, positionAt;
+  StMuEmcPosition EmcPosition;
+  if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, track.BField, track.bemcRadius) ||
+      EmcPosition.trackOnEEmc(&positionAt, &momentumAt, mutrack))
+    {
+      track.etaext = positionAt.pseudoRapidity();
+      track.phiext = positionAt.phi();
+    }
+  else
+    {
+      track.etaext = -999;
+      track.phiext = -999;
+    }
+
+
+  track.dEdx = mutrack->dEdx();
+
+  track.trackIndex = i;
+
+  track.id = mutrack->id();
+
+  return track;
+}
 
 }
