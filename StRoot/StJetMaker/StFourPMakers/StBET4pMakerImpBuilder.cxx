@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.4 2008/07/13 02:38:50 tai Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.5 2008/07/13 08:23:28 tai Exp $
 
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -13,6 +13,7 @@
 #include "CorrectTowerEnergyForTracks.h"
 
 using namespace StJetTowerEnergyCut;
+using namespace StJetTrackCut;
 
 namespace StSpinJet {
 
@@ -21,10 +22,15 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
 					       StMuDstMaker* uDstMaker, bool doTowerSwapFix)
 {
   StJetTPC*  tpc;
+  StJetTPCTrackCut* tpcCut  = new StJetTPCTrackCut();
   if( !useTPC ) {
     tpc  = new StJetTPCNull();
   } else {
     tpc  = new StJetTPCMuDst(uDstMaker);
+    tpcCut->addCut(new TrackCutDca());
+    if(use2006Cuts)  tpcCut->addCut(new TrackCutDcaPtDependent());
+    tpcCut->addCut(new TrackCutEta());
+    tpcCut->addCut(new TrackCutPossibleHitRatio());
   }
 
   StJetBEMC* bemc;
@@ -48,14 +54,11 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
     eemc = new StJetEEMCMuDst(uDstMaker);
   }
 
-  StJetTPCTrackCut*   tpcCut  = new StJetTPCTrackCut();
 
 
   CorrectTowerEnergyForTracks* correctTowerEnergyForTracks = new CorrectTowerEnergyForTracks();
 
   StBET4pMakerImp* ret = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);
-
-  tpcCut->setUse2006Cuts(use2006Cuts);
 
   return ret;
 }
