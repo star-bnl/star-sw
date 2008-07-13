@@ -1,4 +1,4 @@
-// $Id: StJetTPCTxt.cxx,v 1.4 2008/07/12 01:32:08 tai Exp $
+// $Id: StJetTPCTxt.cxx,v 1.5 2008/07/13 06:04:41 tai Exp $
 #include "StJetTPCTxt.h"
 
 #include "../StMuTrackEmu.h"
@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
+#include <TVector3.h>
 
 using namespace std;
 
@@ -56,10 +58,12 @@ TrackList StJetTPCTxt::getTrackList()
 
     Track track;
 
+    double px, py, pz;
+
     ist >> i
-	>> track.px
-	>> track.py
-	>> track.pz
+	>> px
+	>> py
+	>> pz
 	>> track.flag
 	>> track.nHits
 	>> track.charge
@@ -77,6 +81,11 @@ TrackList StJetTPCTxt::getTrackList()
 	>> track.dEdx
 	>> track.trackIndex
 	>> track.id;
+
+    TVector3 p(px, py, pz);
+    track.pt  = p.Pt();
+    track.eta = p.Eta();
+    track.phi = p.Phi();
 
     ret.push_back(track);
   }

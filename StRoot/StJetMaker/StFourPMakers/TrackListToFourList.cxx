@@ -1,4 +1,4 @@
-// $Id: TrackListToFourList.cxx,v 1.2 2008/07/12 01:32:08 tai Exp $
+// $Id: TrackListToFourList.cxx,v 1.3 2008/07/13 06:04:42 tai Exp $
 #include "TrackListToFourList.h"
 
 #include "../StMuTrackEmu.h"
@@ -12,7 +12,8 @@ FourList TrackListToFourList::operator()(const TrackList& trackList)
 
   for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
 
-    TVector3 momentum((*track).px, (*track).py, (*track).pz);
+    TVector3 momentum;
+    momentum.SetPtEtaPhi((*track).pt, (*track).eta, (*track).phi);
     double pionMass = 0.1395700;
     float energy = sqrt(pionMass*pionMass + momentum.Mag()*momentum.Mag());
 
@@ -31,9 +32,12 @@ StMuTrackEmu* TrackListToFourList::createTrackEmu(const Track& track)
 {
   StMuTrackEmu *ret = new StMuTrackEmu();
 
-  ret->_px             =  track.px	     ;
-  ret->_py	       =  track.py	     ;
-  ret->_pz	       =  track.pz	     ;
+  TVector3 momentum;
+  momentum.SetPtEtaPhi(track.pt, track.eta, track.phi);
+
+  ret->_px             =  momentum.Px()	     ;
+  ret->_py	       =  momentum.Py()	     ;
+  ret->_pz	       =  momentum.Pz()	     ;
   ret->_flag	       =  track.flag	     ;
   ret->_nHits	       =  track.nHits	     ;
   ret->_charge	       =  track.charge	     ;

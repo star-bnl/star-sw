@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackList.h,v 1.2 2008/07/12 01:32:08 tai Exp $
+// $Id: TrackList.h,v 1.3 2008/07/13 06:04:41 tai Exp $
 #ifndef TRACKLIST_H
 #define TRACKLIST_H
 
@@ -10,9 +10,9 @@ namespace StSpinJet {
 struct Track {
   int            runNumber;
   int            eventId;
-  double         px;
-  double         py;
-  double         pz;
+  double         pt;
+  double         eta;
+  double         phi;
   short          flag;
   unsigned short nHits;
   short          charge;

@@ -1,4 +1,4 @@
-// $Id: StJetTPCTrackMaker.cxx,v 1.3 2008/07/13 04:59:37 tai Exp $
+// $Id: StJetTPCTrackMaker.cxx,v 1.4 2008/07/13 06:04:35 tai Exp $
 #include "StJetTPCTrackMaker.h"
 
 #include "StJetTPCMuDst.h"
@@ -29,12 +29,12 @@ Int_t StJetTPCTrackMaker::Init()
 
   _tree->Branch("eventId"    , &_eventId      , "eventId/I"      );
   _tree->Branch("nTracks"    , &_nTracks      , "nTracks/I"      );
+  _tree->Branch("pt"         ,  _pt           , "pt[nTracks]/D"           );
+  _tree->Branch("eta"        ,  _eta          , "eta[nTracks]/D"          );
+  _tree->Branch("phi"        ,  _phi          , "phi[nTracks]/D"          );
   _tree->Branch("etaext"     ,  _etaext       , "etaext[nTracks]/D"       );
   _tree->Branch("phiext"     ,  _phiext       , "phiext[nTracks]/D"       );
   _tree->Branch("trackId"    ,  _trackId      , "trackId[nTracks]/S"      );
-  _tree->Branch("px"         ,  _px           , "px[nTracks]/D"           );
-  _tree->Branch("py"         ,  _py           , "py[nTracks]/D"           );
-  _tree->Branch("pz"         ,  _pz           , "pz[nTracks]/D"           );
   _tree->Branch("flag"       ,  _flag         , "flag[nTracks]/S"         );
   _tree->Branch("nHits"      ,  _nHits        , "nHits[nTracks]/s"        );
   _tree->Branch("charge"     ,  _charge       , "charge[nTracks]/S"       );
@@ -66,9 +66,9 @@ Int_t StJetTPCTrackMaker::Make()
   _nTracks = trackList.size();
   for(int i = 0; i < _nTracks; ++i) {
     const Track& track = trackList[i];
-    _px[i]         = track.px;
-    _py[i]         = track.py;
-    _pz[i]         = track.pz;
+    _pt[i]         = track.pt;
+    _eta[i]        = track.eta;
+    _phi[i]        = track.phi;
     _flag[i]       = track.flag;
     _nHits[i]      = track.nHits;
     _charge[i]     = track.charge;
