@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrgHTWriter.h,v 1.2 2008/07/13 00:05:25 tai Exp $
+// $Id: StJetTrgHTWriter.h,v 1.3 2008/07/13 09:37:51 tai Exp $
 #ifndef STJETTRGHTWRITER_H
 #define STJETTRGHTWRITER_H
 
@@ -45,7 +45,7 @@ private:
   Double_t _vertexZ;
   Int_t _trigID;
   Double_t _prescale;
-  Int_t _pass;
+  Int_t _passed;
   Int_t _nTowers;
   Int_t _towerId[4800];
 

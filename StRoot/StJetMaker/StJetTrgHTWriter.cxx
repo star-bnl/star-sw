@@ -1,4 +1,4 @@
-// $Id: StJetTrgHTWriter.cxx,v 1.2 2008/07/13 00:05:25 tai Exp $
+// $Id: StJetTrgHTWriter.cxx,v 1.3 2008/07/13 09:37:51 tai Exp $
 #include "StJetTrgHTWriter.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -30,7 +30,7 @@ void StJetTrgHTWriter::Init()
   _tree->Branch("vertexZ"    , &_vertexZ      , "vertexZ/D"      );
   _tree->Branch("trigID"     , &_trigID       , "trigID/I"       );
   _tree->Branch("prescale"   , &_prescale     , "prescale/D"     );
-  _tree->Branch("pass"       , &_pass         , "pass/I"         );
+  _tree->Branch("passed"     , &_passed       , "passed/I"         );
   _tree->Branch("nTowers"    , &_nTowers      , "nTowers/I"      );
   _tree->Branch("towerId"    ,  _towerId      , "towerId[nTowers]/I");
 
@@ -41,7 +41,7 @@ void StJetTrgHTWriter::Init()
 void StJetTrgHTWriter::Make()
 {
 
-  _pass = (_uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId) && _emcTrigMaker->isTrigger(_trgId));
+  _passed = (_uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId) && _emcTrigMaker->isTrigger(_trgId));
 
   _runNumber = _uDstMaker->muDst()->event()->runId();
   _eventId = _uDstMaker->muDst()->event()->eventId();

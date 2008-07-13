@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrgJPWriter.h,v 1.2 2008/07/13 00:05:26 tai Exp $
+// $Id: StJetTrgJPWriter.h,v 1.3 2008/07/13 09:37:52 tai Exp $
 #ifndef STJETTRGJPWRITER_H
 #define STJETTRGJPWRITER_H
 
@@ -45,7 +45,7 @@ private:
   Double_t _vertexZ;
   Int_t _trigID;
   Double_t _prescale;
-  Int_t _pass;
+  Int_t _passed;
   Int_t _nJetPatches;
   Int_t _jetPatchId[12];
 

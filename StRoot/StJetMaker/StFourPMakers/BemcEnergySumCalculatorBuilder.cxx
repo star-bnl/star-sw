@@ -1,9 +1,15 @@
-// $Id: BemcEnergySumCalculatorBuilder.cxx,v 1.3 2008/07/13 02:38:50 tai Exp $
+// $Id: BemcEnergySumCalculatorBuilder.cxx,v 1.4 2008/07/13 09:37:58 tai Exp $
 #include "BemcEnergySumCalculatorBuilder.h"
 #include "BemcEnergySumCalculator.h"
 
 #include "StJetBEMCMuDst.h"
 #include "StJetBEMCEnergyCut.h"
+
+#include "TowerEnergyCut2003BemcTower.h"
+#include "TowerEnergyCutBemcWestOnly.h"
+#include "TowerEnergyCutEnergy.h"
+#include "TowerEnergyCutBemcStatus.h"
+#include "TowerEnergyCutAdc.h"
 
 using namespace StJetTowerEnergyCut;
 
