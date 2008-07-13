@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCEnergyCut.h,v 1.4 2008/07/13 01:43:07 tai Exp $
+// $Id: StJetBEMCEnergyCut.h,v 1.5 2008/07/13 02:38:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETBEMCENERGYCUT_H
 #define STJETBEMCENERGYCUT_H
@@ -136,26 +136,22 @@ namespace StSpinJet {
 class StJetBEMCEnergyCut {
 
 public:
-  StJetBEMCEnergyCut()
-    : mUse2003Cuts(false), mUse2005Cuts(false) { }
+  StJetBEMCEnergyCut() { }
   virtual ~StJetBEMCEnergyCut() { }
   
   TowerEnergyList Apply(const TowerEnergyList& energyList);
 
-  void setUse2003Cuts(bool v) { mUse2003Cuts = v; }
-  void setUse2005Cuts(bool v) { mUse2005Cuts = v; }
+  void addCut(StJetTowerEnergyCut::TowerEnergyCut* cut) {
+    _cutList.push_back(cut);
+  }
 
-  bool Use2003Cuts() const { return mUse2003Cuts; }
-  bool Use2005Cuts() const { return mUse2005Cuts; }
+  typedef std::vector<StJetTowerEnergyCut::TowerEnergyCut*> CutList;
+  CutList getCutList() { return _cutList; }
 
 private:
 
   bool shouldNotKeep(const TowerEnergy& deposit);
 
-  bool mUse2003Cuts;
-  bool mUse2005Cuts;
-
-  typedef std::vector<StJetTowerEnergyCut::TowerEnergyCut*> CutList;
   CutList _cutList;
 
 };
