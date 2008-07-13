@@ -1,4 +1,4 @@
-// $Id: StJetEEMCMuDst.cxx,v 1.6 2008/07/11 23:24:47 tai Exp $
+// $Id: StJetEEMCMuDst.cxx,v 1.7 2008/07/13 05:36:46 tai Exp $
 #include "StJetEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -58,9 +58,9 @@ TowerEnergyList StJetEEMCMuDst::getEnergyList()
     EEmcGeomSimple geom;
     TVector3 towerLocation = geom.getTowerCenter(sec-1,sub-1,etabin-1);
 
-    energyDeposit.towerX = towerLocation.x();
-    energyDeposit.towerY = towerLocation.y();
-    energyDeposit.towerZ = towerLocation.z();
+    energyDeposit.towerR = towerLocation.Perp();
+    energyDeposit.towerEta = towerLocation.Eta();
+    energyDeposit.towerPhi = towerLocation.Phi();
 
     StThreeVectorF vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
 

@@ -1,9 +1,11 @@
-// $Id: StJetEEMCTxt.cxx,v 1.4 2008/07/10 20:49:00 tai Exp $
+// $Id: StJetEEMCTxt.cxx,v 1.5 2008/07/13 05:36:46 tai Exp $
 #include "StJetEEMCTxt.h"
 
 #include <iostream>
 #include <string>
 #include <sstream>
+
+#include <TVector3.h>
 
 using namespace std;
 
@@ -55,11 +57,13 @@ TowerEnergyList StJetEEMCTxt::getEnergyList()
 
     dep.detectorId = 13;
 
+    double x, y, z;
+
     ist >> i
 	>> dep.towerId
-	>> dep.towerX
-	>> dep.towerY
-	>> dep.towerZ
+	>> x
+	>> y
+	>> z
 	>> dep.vertexX
 	>> dep.vertexY
 	>> dep.vertexZ
@@ -68,6 +72,11 @@ TowerEnergyList StJetEEMCTxt::getEnergyList()
 	>> dep.pedestal
 	>> dep.rms
 	>> dep.status;
+
+    TVector3 tower(x, y, z);
+    dep.towerR = tower.Perp();
+    dep.towerEta = tower.Eta();
+    dep.towerPhi = tower.Phi();
 
     ret.push_back(dep);
   }

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCTowerMaker.h,v 1.3 2008/07/13 04:59:37 tai Exp $
+// $Id: StJetBEMCTowerMaker.h,v 1.4 2008/07/13 05:36:39 tai Exp $
 #ifndef STJETBEMCTOWERMAKER_HH
 #define STJETBEMCTOWERMAKER_HH
 
@@ -28,7 +28,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetBEMCTowerMaker.h,v 1.3 2008/07/13 04:59:37 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetBEMCTowerMaker.h,v 1.4 2008/07/13 05:36:39 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -46,9 +46,9 @@ private:
   Int_t _detectorId; // 9: BEMC, 13: EEMC
   Int_t _nTowers;
   Int_t    _towerId[4800];
-  Double_t _towerX[4800];
-  Double_t _towerY[4800];
-  Double_t _towerZ[4800];
+  Double_t _towerR[4800];
+  Double_t _towerEta[4800];
+  Double_t _towerPhi[4800];
   Double_t _vertexX[4800];
   Double_t _vertexY[4800];
   Double_t _vertexZ[4800];

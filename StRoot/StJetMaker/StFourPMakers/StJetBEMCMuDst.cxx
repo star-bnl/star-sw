@@ -1,4 +1,4 @@
-// $Id: StJetBEMCMuDst.cxx,v 1.5 2008/07/11 23:24:46 tai Exp $
+// $Id: StJetBEMCMuDst.cxx,v 1.6 2008/07/13 05:36:45 tai Exp $
 #include "StJetBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -14,6 +14,12 @@
 
 #include <StEmcRawMaker/defines.h>
 #include <StEmcRawMaker/StBemcTables.h>
+
+#include <TVector3.h>
+
+#include <iostream>
+
+using namespace std;
 
 namespace StSpinJet {
 
@@ -72,10 +78,11 @@ TowerEnergy StJetBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
 
   float towerX, towerY, towerZ;
   StEmcGeom::instance("bemc")->getXYZ(towerId, towerX, towerY, towerZ);
+  TVector3 tower(towerX, towerY, towerZ);
 
-  ret.towerX = towerX;
-  ret.towerY = towerY;
-  ret.towerZ = towerZ;
+  ret.towerR   = tower.Perp();
+  ret.towerEta = tower.Eta();
+  ret.towerPhi = tower.Phi();
 
   StThreeVectorF vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
 
