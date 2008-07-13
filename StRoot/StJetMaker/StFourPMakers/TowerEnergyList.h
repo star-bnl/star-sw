@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TowerEnergyList.h,v 1.5 2008/07/13 00:05:32 tai Exp $
+// $Id: TowerEnergyList.h,v 1.6 2008/07/13 05:36:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYLIST_H
 #define TOWERENERGYLIST_H
@@ -14,9 +14,9 @@ struct TowerEnergy {
   int            eventId;
   int            detectorId; // 9: BEMC, 13: EEMC
   int            towerId;
-  double         towerX;
-  double         towerY;
-  double         towerZ;
+  double         towerR;
+  double         towerEta;
+  double         towerPhi;
   double         vertexX;
   double         vertexY;
   double         vertexZ;
@@ -35,9 +35,9 @@ inline bool operator==(const TowerEnergy& v1, const TowerEnergy& v2)
   if(v1.eventId    != v2.eventId)    return false;	  
   if(v1.detectorId != v2.detectorId) return false;  
   if(v1.towerId    != v2.towerId)    return false;	  
-  if(v1.towerX     != v2.towerX)     return false;	  
-  if(v1.towerY     != v2.towerY)     return false;	  
-  if(v1.towerZ     != v2.towerZ)     return false;	  
+  if(v1.towerR     != v2.towerR)     return false;	  
+  if(v1.towerEta   != v2.towerEta)   return false;	  
+  if(v1.towerPhi   != v2.towerPhi)   return false;	  
   if(v1.vertexX    != v2.vertexX)    return false;	  
   if(v1.vertexY    != v2.vertexY)    return false;	  
   if(v1.vertexZ    != v2.vertexZ)    return false;	  

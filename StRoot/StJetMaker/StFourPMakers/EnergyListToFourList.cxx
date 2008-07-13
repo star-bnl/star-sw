@@ -1,4 +1,4 @@
-// $Id: EnergyListToFourList.cxx,v 1.2 2008/07/10 20:15:19 tai Exp $
+// $Id: EnergyListToFourList.cxx,v 1.3 2008/07/13 05:36:45 tai Exp $
 #include "EnergyListToFourList.h"
 
 #include "../StMuTrackFourVec.h"
@@ -22,7 +22,8 @@ FourList EnergyListToFourList::operator()(const TowerEnergyList& energyDepositLi
 
 TLorentzVector EnergyListToFourList::constructFourMomentum(const TowerEnergy& deposit)
 {
-  TVector3 towerLocation(deposit.towerX, deposit.towerY, deposit.towerZ); 
+  TVector3 towerLocation;
+  towerLocation.SetPtEtaPhi(deposit.towerR, deposit.towerEta, deposit.towerPhi); 
   TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);
 
   TVector3 momentum = towerLocation - vertex;

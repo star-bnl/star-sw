@@ -1,4 +1,4 @@
-// $Id: StJetTowerEnergyPrint.cxx,v 1.2 2008/07/10 20:15:22 tai Exp $
+// $Id: StJetTowerEnergyPrint.cxx,v 1.3 2008/07/13 05:36:46 tai Exp $
 #include "StJetTowerEnergyPrint.h"
 
 #include <TVector3.h>
@@ -26,9 +26,9 @@ void StJetTowerEnergyPrint::print(const TowerEnergy& energyDeposit)
   _ofs 
     << _i << " "
     << energyDeposit.towerId << " "
-    << energyDeposit.towerX << " "
-    << energyDeposit.towerY << " "
-    << energyDeposit.towerZ << " "
+    << energyDeposit.towerR << " "
+    << energyDeposit.towerEta << " "
+    << energyDeposit.towerPhi << " "
     << energyDeposit.vertexX << " "
     << energyDeposit.vertexY << " "
     << energyDeposit.vertexZ << " "
