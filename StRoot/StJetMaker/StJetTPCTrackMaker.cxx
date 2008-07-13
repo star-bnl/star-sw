@@ -1,4 +1,4 @@
-// $Id: StJetTPCTrackMaker.cxx,v 1.2 2008/07/13 00:05:25 tai Exp $
+// $Id: StJetTPCTrackMaker.cxx,v 1.3 2008/07/13 04:59:37 tai Exp $
 #include "StJetTPCTrackMaker.h"
 
 #include "StJetTPCMuDst.h"
@@ -27,9 +27,10 @@ Int_t StJetTPCTrackMaker::Init()
   _file->cd();
   _tree = new TTree("tpcTracks", "tpcTracks");
 
-  _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
   _tree->Branch("eventId"    , &_eventId      , "eventId/I"      );
   _tree->Branch("nTracks"    , &_nTracks      , "nTracks/I"      );
+  _tree->Branch("etaext"     ,  _etaext       , "etaext[nTracks]/D"       );
+  _tree->Branch("phiext"     ,  _phiext       , "phiext[nTracks]/D"       );
   _tree->Branch("trackId"    ,  _trackId      , "trackId[nTracks]/S"      );
   _tree->Branch("px"         ,  _px           , "px[nTracks]/D"           );
   _tree->Branch("py"         ,  _py           , "py[nTracks]/D"           );
@@ -46,10 +47,9 @@ Int_t StJetTPCTrackMaker::Init()
   _tree->Branch("dcaD"       ,  _dcaD         , "dcaD[nTracks]/D"         );
   _tree->Branch("BField"     ,  _BField       , "BField[nTracks]/D"       );
   _tree->Branch("bemcRadius" ,  _bemcRadius   , "bemcRadius[nTracks]/D"   );
-  _tree->Branch("etaext"     ,  _etaext       , "etaext[nTracks]/D"       );
-  _tree->Branch("phiext"     ,  _phiext       , "phiext[nTracks]/D"       );
   _tree->Branch("dEdx"       ,  _dEdx         , "dEdx[nTracks]/D"         );
   _tree->Branch("trackIndex" ,  _trackIndex   , "trackIndex[nTracks]/I"   );
+  _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
 
   return kStOk;
 }
