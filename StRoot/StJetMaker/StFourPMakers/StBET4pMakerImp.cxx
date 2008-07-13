@@ -1,5 +1,5 @@
-// $Id: StBET4pMakerImp.cxx,v 1.87 2008/07/10 20:15:20 tai Exp $
-
+// $Id: StBET4pMakerImp.cxx,v 1.88 2008/07/13 10:02:31 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImp.h"
 
 #include "StJetTPC.h"

@@ -1,4 +1,5 @@
-// $Id: StJetTowerEnergyPrint.cxx,v 1.3 2008/07/13 05:36:46 tai Exp $
+// $Id: StJetTowerEnergyPrint.cxx,v 1.4 2008/07/13 10:02:34 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetTowerEnergyPrint.h"
 
 #include <TVector3.h>

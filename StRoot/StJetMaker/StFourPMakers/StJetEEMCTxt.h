@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StJetEEMCTxt.h,v 1.3 2008/07/10 20:15:22 tai Exp $
+// $Id: StJetEEMCTxt.h,v 1.4 2008/07/13 10:02:33 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETEEMCTXT_H
 #define STJETEEMCTXT_H
 

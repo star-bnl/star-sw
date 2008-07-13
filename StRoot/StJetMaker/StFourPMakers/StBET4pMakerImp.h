@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.59 2008/07/12 01:32:06 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.60 2008/07/13 10:02:31 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 

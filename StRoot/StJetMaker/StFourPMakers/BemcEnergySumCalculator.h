@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: BemcEnergySumCalculator.h,v 1.6 2008/07/10 20:15:16 tai Exp $
+// $Id: BemcEnergySumCalculator.h,v 1.7 2008/07/13 10:02:30 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef BEMCENERGYSUMCALCULATOR_H
 #define BEMCENERGYSUMCALCULATOR_H
 

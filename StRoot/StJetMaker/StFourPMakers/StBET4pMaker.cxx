@@ -1,5 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.59 2008/07/10 09:36:00 tai Exp $
-
+// $Id: StBET4pMaker.cxx,v 1.60 2008/07/13 10:02:31 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -18,7 +17,7 @@ using namespace StSpinJet;
 ClassImp(StBET4pMaker)
     
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
-  : StFourPMaker(name, 0)
+  : StFourPMaker(name)
   , _uDstMaker(uDstMaker), _doTowerSwapFix(doTowerSwapFix)
   , _useTPC(true), _useBEMC(true), _useEEMC(false)
   , _use2003Cuts(false), _use2005Cuts(false), _use2006Cuts(false)

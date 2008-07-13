@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: EnergyListToFourList.h,v 1.2 2008/07/10 20:15:20 tai Exp $
+// $Id: EnergyListToFourList.h,v 1.3 2008/07/13 10:02:31 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef ENERGYLISTTOFOURLIST_H
 #define ENERGYLISTTOFOURLIST_H
 

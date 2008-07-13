@@ -44,7 +44,7 @@ using namespace std;
 ClassImp(StPythiaFourPMaker)
     
     StPythiaFourPMaker::StPythiaFourPMaker(const char* name, StMCAsymMaker* sim,  StMcEventMaker* mc) 
-	: StFourPMaker(name, 0), mSimuMaker(sim), mMcEventMaker(mc)
+	: StFourPMaker(name), mSimuMaker(sim), mMcEventMaker(mc)
 {
     cout <<"StPythiaFourPMaker::StPythiaFourPMaker()"<<endl;
 

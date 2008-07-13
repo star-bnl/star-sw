@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCTxt.h,v 1.3 2008/07/10 20:15:21 tai Exp $
+// $Id: StJetBEMCTxt.h,v 1.4 2008/07/13 10:02:32 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETBEMCTXT_H
 #define STJETBEMCTXT_H
 
