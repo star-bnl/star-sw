@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrgHTWriter.h,v 1.1 2008/07/11 23:32:18 tai Exp $
+// $Id: StJetTrgHTWriter.h,v 1.2 2008/07/13 00:05:25 tai Exp $
 #ifndef STJETTRGHTWRITER_H
 #define STJETTRGHTWRITER_H
 
@@ -42,6 +42,7 @@ private:
 
   Int_t _runNumber;
   Int_t _eventId;
+  Double_t _vertexZ;
   Int_t _trigID;
   Double_t _prescale;
   Int_t _pass;
