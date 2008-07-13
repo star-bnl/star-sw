@@ -1,9 +1,12 @@
-// $Id: StJetBEMCEnergyCut.cxx,v 1.2 2008/07/10 20:15:20 tai Exp $
+// $Id: StJetBEMCEnergyCut.cxx,v 1.3 2008/07/13 01:43:07 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetBEMCEnergyCut.h"
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
+using namespace StJetTowerEnergyCut;
 
 namespace StSpinJet {
 
@@ -14,7 +17,7 @@ StSpinJet::TowerEnergyList StJetBEMCEnergyCut::Apply(const TowerEnergyList &ener
 
   for(TowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
 
-    if(!shouldKeep(*it)) continue;
+    if(shouldNotKeep(*it)) continue;
 
     ret.push_back(*it);
 
@@ -24,74 +27,33 @@ StSpinJet::TowerEnergyList StJetBEMCEnergyCut::Apply(const TowerEnergyList &ener
 }
 
 
-bool StJetBEMCEnergyCut::shouldKeep(const TowerEnergy& energyDeposit)
+bool StJetBEMCEnergyCut::shouldNotKeep(const TowerEnergy& energyDeposit)
 {
+  TowerEnergyCut* cut1 = new TowerEnergyCut2003BemcTower();
+  TowerEnergyCut* cut2 = new TowerEnergyCutBemcWestOnly();
+  TowerEnergyCut* cut3 = new TowerEnergyCutEnergy();
+  TowerEnergyCut* cut4 = new TowerEnergyCutBemcStatus();
+  TowerEnergyCut* cut5 = new TowerEnergyCutAdc();
 
-  if(mUse2003Cuts)
-    if(!accept2003Tower(energyDeposit.towerId)) return false;
+  if(mUse2003Cuts) _cutList.push_back(cut1);
+  if(mUse2005Cuts) _cutList.push_back(cut2);
+  _cutList.push_back(cut3);
+  _cutList.push_back(cut4);
+  _cutList.push_back(cut5);
 
-  if (mUse2005Cuts)
-    if(energyDeposit.towerId > 2400) return false;
+  for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
+    if((**cut)(energyDeposit)) return true;
+  }
 
-  if(energyDeposit.energy <= 0) return false;
+  for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
+    delete *cut;
+  }
+  
+  _cutList.clear();
 
-  if(energyDeposit.status != 1) return false;
-
-  if(energyDeposit.adc - energyDeposit.pedestal <= 0) return false;
-
-  if((energyDeposit.adc - energyDeposit.pedestal) <= 2.*energyDeposit.rms) return false;
-
-  return true;
+  return false;
 
 }
-
-
-bool StJetBEMCEnergyCut::accept2003Tower(int id)
-{
-    if( id==555
-	|| id==615
-	|| id==656
-	|| id==772
-	|| id==1046
-	|| id==1048
-	|| id==1408
-	|| id==1555
-	|| id==1750
-	|| id==1773
-	|| id==2073
-	|| id==2093
-	|| id==2096
-	|| (id>=1866 && id<=1894)
-	|| id==511
-	|| id==1614
-	|| id==1615
-	|| id==1616
-	|| id==1636
-	|| id==1899
-	|| id==2127
-	|| id==953
-	|| id==1418
-	|| id==1419
-	|| id==1878
-	|| id==1879
-	|| id==1881
-	|| (id>=1042 && id<=1045)
-	|| (id>=1385 && id<=1387)
-	|| (id>=1705 && id<=1708)
-	|| (id>=1725 && id<=1728)
-	|| (id>=1745 && id<=1748)
-	|| (id>=1765 && id<=1768)
-	|| (id>=1785 && id<=1788)
-	|| id>2400
-	)
-	{
-	    return false;
-	}
-    else {
-	return true;
-    }
-}
-
 
 
 }
