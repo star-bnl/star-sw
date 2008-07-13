@@ -1,4 +1,4 @@
-// $Id: StJetTrgMBWriter.cxx,v 1.2 2008/07/13 00:05:26 tai Exp $
+// $Id: StJetTrgMBWriter.cxx,v 1.3 2008/07/13 09:37:52 tai Exp $
 #include "StJetTrgMBWriter.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -28,7 +28,7 @@ void StJetTrgMBWriter::Init()
   _tree->Branch("vertexZ"    , &_vertexZ      , "vertexZ/D"      );
   _tree->Branch("trigID"     , &_trigID       , "trigID/I"       );
   _tree->Branch("prescale"   , &_prescale     , "prescale/D"     );
-  _tree->Branch("pass"       , &_pass         , "pass/I"         );
+  _tree->Branch("passed"     , &_passed       , "passed/I"         );
 
   _trigID = _trgId;
 
@@ -37,7 +37,7 @@ void StJetTrgMBWriter::Init()
 void StJetTrgMBWriter::Make()
 {
 
-  _pass = (_uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId));
+  _passed = (_uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId));
 
   _runNumber = _uDstMaker->muDst()->event()->runId();
   _eventId = _uDstMaker->muDst()->event()->eventId();

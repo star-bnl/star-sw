@@ -1,10 +1,16 @@
-// $Id: StJetBEMCTowerMaker.cxx,v 1.4 2008/07/13 05:36:38 tai Exp $
+// $Id: StJetBEMCTowerMaker.cxx,v 1.5 2008/07/13 09:37:51 tai Exp $
 #include "StJetBEMCTowerMaker.h"
 
 #include "StJetTPCMuDst.h"
 #include "StJetBEMCMuDst.h"
 #include "StJetEEMCMuDst.h"
 #include "StJetBEMCEnergyCut.h"
+
+#include "TowerEnergyCut2003BemcTower.h"
+#include "TowerEnergyCutBemcWestOnly.h"
+#include "TowerEnergyCutEnergy.h"
+#include "TowerEnergyCutBemcStatus.h"
+#include "TowerEnergyCutAdc.h"
 
 #include "StJetBEMCTxt.h"
 
@@ -40,6 +46,8 @@ Int_t StJetBEMCTowerMaker::Init()
 
   _file->cd();
   _tree = new TTree("bemcTowers", "bemcTowers");
+  _tree->SetAutoSave(kMaxLong64);
+  _tree->SetMaxTreeSize(kMaxLong64);
 
   _tree->Branch("eventId"    , &_eventId      , "eventId/I"      );
   _tree->Branch("nTowers"    , &_nTowers      , "nTowers/I"      );

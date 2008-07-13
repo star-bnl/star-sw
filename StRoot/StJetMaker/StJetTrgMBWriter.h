@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrgMBWriter.h,v 1.2 2008/07/13 00:05:26 tai Exp $
+// $Id: StJetTrgMBWriter.h,v 1.3 2008/07/13 09:37:52 tai Exp $
 #ifndef STJETTRGMBWRITER_H
 #define STJETTRGMBWRITER_H
 
@@ -43,7 +43,7 @@ private:
   Double_t _vertexZ;
   Int_t _trigID;
   Double_t _prescale;
-  Int_t _pass;
+  Int_t _passed;
 
   StMuDstMaker* _uDstMaker;
 };

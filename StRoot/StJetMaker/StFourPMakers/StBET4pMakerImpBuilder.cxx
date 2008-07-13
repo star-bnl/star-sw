@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.5 2008/07/13 08:23:28 tai Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.6 2008/07/13 09:37:58 tai Exp $
 
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -8,7 +8,19 @@
 #include "StJetEEMCMuDst.h"
 
 #include "StJetTPCTrackCut.h"
+
+#include "TrackCutDca.h"
+#include "TrackCutDcaPtDependent.h"
+#include "TrackCutEta.h"
+#include "TrackCutPossibleHitRatio.h"
+
 #include "StJetBEMCEnergyCut.h"
+
+#include "TowerEnergyCut2003BemcTower.h"
+#include "TowerEnergyCutBemcWestOnly.h"
+#include "TowerEnergyCutEnergy.h"
+#include "TowerEnergyCutBemcStatus.h"
+#include "TowerEnergyCutAdc.h"
 
 #include "CorrectTowerEnergyForTracks.h"
 
