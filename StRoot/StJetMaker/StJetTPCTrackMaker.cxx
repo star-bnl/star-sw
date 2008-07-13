@@ -1,11 +1,7 @@
-// $Id: StJetTPCTrackMaker.cxx,v 1.1 2008/07/12 02:56:26 tai Exp $
+// $Id: StJetTPCTrackMaker.cxx,v 1.2 2008/07/13 00:05:25 tai Exp $
 #include "StJetTPCTrackMaker.h"
 
 #include "StJetTPCMuDst.h"
-
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
 
 #include <TFile.h>
 #include <TTree.h>
@@ -33,8 +29,8 @@ Int_t StJetTPCTrackMaker::Init()
 
   _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
   _tree->Branch("eventId"    , &_eventId      , "eventId/I"      );
-  _tree->Branch("trackId"    ,  _trackId      , "trackId[nTracks]/S"      );
   _tree->Branch("nTracks"    , &_nTracks      , "nTracks/I"      );
+  _tree->Branch("trackId"    ,  _trackId      , "trackId[nTracks]/S"      );
   _tree->Branch("px"         ,  _px           , "px[nTracks]/D"           );
   _tree->Branch("py"         ,  _py           , "py[nTracks]/D"           );
   _tree->Branch("pz"         ,  _pz           , "pz[nTracks]/D"           );
@@ -62,8 +58,10 @@ Int_t StJetTPCTrackMaker::Make()
 {
   TrackList trackList = _tpc->getTrackList();
 
-  _runNumber = _uDstMaker->muDst()->event()->runId();
-  _eventId = _uDstMaker->muDst()->event()->eventId();
+  if(trackList.empty()) return kStOk;
+
+  _runNumber = trackList[0].runNumber;
+  _eventId = trackList[0].eventId;
 
   _nTracks = trackList.size();
   for(int i = 0; i < _nTracks; ++i) {

@@ -1,4 +1,4 @@
-// $Id: StJetTrgMBWriter.cxx,v 1.1 2008/07/11 23:32:21 tai Exp $
+// $Id: StJetTrgMBWriter.cxx,v 1.2 2008/07/13 00:05:26 tai Exp $
 #include "StJetTrgMBWriter.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -25,6 +25,7 @@ void StJetTrgMBWriter::Init()
 
   _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
   _tree->Branch("eventId"    , &_eventId      , "eventId/I"      );
+  _tree->Branch("vertexZ"    , &_vertexZ      , "vertexZ/D"      );
   _tree->Branch("trigID"     , &_trigID       , "trigID/I"       );
   _tree->Branch("prescale"   , &_prescale     , "prescale/D"     );
   _tree->Branch("pass"       , &_pass         , "pass/I"         );
@@ -40,6 +41,8 @@ void StJetTrgMBWriter::Make()
 
   _runNumber = _uDstMaker->muDst()->event()->runId();
   _eventId = _uDstMaker->muDst()->event()->eventId();
+
+  _vertexZ = _uDstMaker->muDst()->event()->primaryVertexPosition().z();
 
   _prescale = StDetectorDbTriggerID::instance()->getTotalPrescales()[_trgId];
 

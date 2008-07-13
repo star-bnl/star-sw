@@ -1,15 +1,13 @@
 // -*- mode: c++;-*-
-// $Id: StJetScratch.h,v 1.3 2008/07/13 00:05:25 tai Exp $
-#ifndef STJETSCRATCH_HH
-#define STJETSCRATCH_HH
+// $Id: StJetBEMCTowerMaker.h,v 1.1 2008/07/13 00:05:24 tai Exp $
+#ifndef STJETBEMCTOWERMAKER_HH
+#define STJETBEMCTOWERMAKER_HH
 
 #include "StMaker.h"
 #include <Rtypes.h>
 
 class TDirectory;
 class TTree;
-
-class StJetTrgWriter;
 
 class StMuDstMaker;
 
@@ -19,19 +17,19 @@ namespace StSpinJet {
   class StJetEEMC;
 }
 
-class StJetScratch : public StMaker {
+class StJetBEMCTowerMaker : public StMaker {
 
 public:
 
-  StJetScratch(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker);
-  virtual ~StJetScratch() { }
+  StJetBEMCTowerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker);
+  virtual ~StJetBEMCTowerMaker() { }
 
   Int_t Init();
   Int_t Make();
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetScratch.h,v 1.3 2008/07/13 00:05:25 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetBEMCTowerMaker.h,v 1.1 2008/07/13 00:05:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -60,8 +58,8 @@ private:
   Double_t _rms[4800];
   Int_t    _status[4800];     // 1 is good for BEMC. 0 is good for EEMC
 
-  ClassDef(StJetScratch, 0)
+  ClassDef(StJetBEMCTowerMaker, 0)
 
 };
 
-#endif // STJETSCRATCH_HH
+#endif // STJETBEMCTOWERMAKER_HH
