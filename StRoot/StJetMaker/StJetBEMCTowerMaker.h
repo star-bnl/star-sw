@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCTowerMaker.h,v 1.1 2008/07/13 00:05:24 tai Exp $
+// $Id: StJetBEMCTowerMaker.h,v 1.2 2008/07/13 04:07:12 tai Exp $
 #ifndef STJETBEMCTOWERMAKER_HH
 #define STJETBEMCTOWERMAKER_HH
 
@@ -12,9 +12,8 @@ class TTree;
 class StMuDstMaker;
 
 namespace StSpinJet {
-  class StJetTPC;
   class StJetBEMC;
-  class StJetEEMC;
+  class StJetBEMCEnergyCut;
 }
 
 class StJetBEMCTowerMaker : public StMaker {
@@ -29,7 +28,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetBEMCTowerMaker.h,v 1.1 2008/07/13 00:05:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetBEMCTowerMaker.h,v 1.2 2008/07/13 04:07:12 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -38,6 +37,7 @@ private:
   StMuDstMaker* _uDstMaker;
 
   StSpinJet::StJetBEMC* _bemc;
+  StSpinJet::StJetBEMCEnergyCut* _bemcCut;
 
   TTree* _tree;
 

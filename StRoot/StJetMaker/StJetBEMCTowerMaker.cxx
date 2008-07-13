@@ -1,9 +1,12 @@
-// $Id: StJetBEMCTowerMaker.cxx,v 1.1 2008/07/13 00:05:24 tai Exp $
+// $Id: StJetBEMCTowerMaker.cxx,v 1.2 2008/07/13 04:07:12 tai Exp $
 #include "StJetBEMCTowerMaker.h"
 
 #include "StJetTPCMuDst.h"
 #include "StJetBEMCMuDst.h"
 #include "StJetEEMCMuDst.h"
+#include "StJetBEMCEnergyCut.h"
+
+#include "StJetBEMCTxt.h"
 
 #include <TFile.h>
 #include <TTree.h>
@@ -12,6 +15,7 @@
 
 using namespace std;
 using namespace StSpinJet;
+using namespace StJetTowerEnergyCut;
 
 ClassImp(StJetBEMCTowerMaker)
   
@@ -25,16 +29,24 @@ StJetBEMCTowerMaker::StJetBEMCTowerMaker(const Char_t *name, TDirectory* file, S
 Int_t StJetBEMCTowerMaker::Init()
 {
   _bemc = new StJetBEMCMuDst(_uDstMaker, true);
+  //  _bemc = new StJetBEMCNull();
+  //  _bemc = new StJetBEMCTxt("./testStJetMaker/bemcenergy.txt");
+
+  _bemcCut = new StJetBEMCEnergyCut();
+  _bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
+  _bemcCut->addCut(new TowerEnergyCutEnergy());
+  _bemcCut->addCut(new TowerEnergyCutBemcStatus());
+  _bemcCut->addCut(new TowerEnergyCutAdc());
 
   _file->cd();
   _tree = new TTree("bemcTowers", "bemcTowers");
 
-  _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
   _tree->Branch("eventId"    , &_eventId      , "eventId/I"      );
   _tree->Branch("nTowers"    , &_nTowers      , "nTowers/I"      );
+  _tree->Branch("energy"     , &_energy       , "energy[nTowers]/D"     );     
+  _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
   _tree->Branch("detectorId" , &_detectorId   , "detectorId[nTowers]/I" ); 
   _tree->Branch("towerId"    , &_towerId      , "towerId[nTowers]/I"    );    
-  _tree->Branch("energy"     , &_energy       , "energy[nTowers]/D"     );     
   _tree->Branch("towerX"     , &_towerX       , "towerX[nTowers]/D"     );     
   _tree->Branch("towerY"     , &_towerY       , "towerY[nTowers]/D"     );     
   _tree->Branch("towerZ"     , &_towerZ       , "towerZ[nTowers]/D"     );     
@@ -52,6 +64,8 @@ Int_t StJetBEMCTowerMaker::Init()
 Int_t StJetBEMCTowerMaker::Make()
 {
   TowerEnergyList energyList = _bemc->getEnergyList();
+
+  energyList = _bemcCut->Apply(energyList);
 
   if(energyList.empty()) return kStOk;
 
