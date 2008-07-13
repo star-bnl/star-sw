@@ -1,4 +1,4 @@
-// $Id: StJetTPCTrackCut.cxx,v 1.2 2008/07/12 01:32:07 tai Exp $
+// $Id: StJetTPCTrackCut.cxx,v 1.3 2008/07/13 06:04:41 tai Exp $
 #include "StJetTPCTrackCut.h"
 
 #include "../StMuTrackEmu.h"
@@ -26,22 +26,20 @@ bool StJetTPCTrackCut::shoudNotPass(const Track& track) const
     if (track.Tdca > 3.)
       return true;
 
-    TVector3 p(track.px, track.py, track.pz);
-
     if (_use2006Cuts){
-      if(p.Pt() < 0.5) {
+      if(track.pt < 0.5) {
 	if(track.Tdca > 2.0) return true;
-      } else if(p.Pt() < 1.0) {
-	if(track.Tdca > 3.-2.*p.Pt()) return true;
+      } else if(track.pt < 1.0) {
+	if(track.Tdca > 3.-2.*track.pt) return true;
       } else {
 	if(track.Tdca > 1.0) return true;
       }
     }
 
-    if(p.Eta() < -2.0)
+    if(track.eta < -2.0)
       return true;
 
-    if(p.Eta() > 2.0)
+    if(track.eta > 2.0)
       return true;
 
     if(static_cast<double>(track.nHits)/static_cast<double>(track.nHitsPoss) < .51)

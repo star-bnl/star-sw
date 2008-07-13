@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTrackMaker.h,v 1.1 2008/07/12 02:56:27 tai Exp $
+// $Id: StJetTPCTrackMaker.h,v 1.2 2008/07/13 06:04:35 tai Exp $
 #ifndef STJETTPCTRACKMAKER_HH
 #define STJETTPCTRACKMAKER_HH
 
@@ -29,7 +29,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetTPCTrackMaker.h,v 1.1 2008/07/12 02:56:27 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetTPCTrackMaker.h,v 1.2 2008/07/13 06:04:35 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -44,9 +44,9 @@ private:
   Int_t _runNumber;
   Int_t _eventId;
   Int_t _nTracks;
-  Double_t _px[4096];
-  Double_t _py[4096];
-  Double_t _pz[4096];
+  Double_t _pt[4096];
+  Double_t _eta[4096];
+  Double_t _phi[4096];
   Short_t  _flag[4096];
   UShort_t _nHits[4096];
   Short_t  _charge[4096];

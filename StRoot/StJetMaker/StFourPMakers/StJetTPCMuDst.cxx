@@ -1,4 +1,4 @@
-// $Id: StJetTPCMuDst.cxx,v 1.4 2008/07/12 01:40:24 tai Exp $
+// $Id: StJetTPCMuDst.cxx,v 1.5 2008/07/13 06:04:41 tai Exp $
 #include "StJetTPCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -7,6 +7,8 @@
 
 #include <StFourPMakers/StMuEmcPosition.h>
 #include <StEmcUtil/geometry/StEmcGeom.h>
+
+#include <TVector3.h>
 
 namespace StSpinJet {
 
@@ -47,9 +49,11 @@ Track StJetTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magneti
   track.runNumber = _uDstMaker->muDst()->event()->runId();
   track.eventId = _uDstMaker->muDst()->event()->eventId();
 
-  track.px         = mutrack->momentum().x();
-  track.py         = mutrack->momentum().y();
-  track.pz         = mutrack->momentum().z();
+  TVector3 p(mutrack->momentum().x(), mutrack->momentum().y(), mutrack->momentum().z());
+
+  track.pt         = p.Pt();
+  track.eta        = p.Eta();
+  track.phi        = p.Phi();
   track.flag       = mutrack->flag();
   track.nHits      = mutrack->nHits(); 
   track.charge     = mutrack->charge();
