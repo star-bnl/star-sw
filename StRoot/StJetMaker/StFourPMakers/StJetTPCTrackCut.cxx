@@ -1,4 +1,4 @@
-// $Id: StJetTPCTrackCut.cxx,v 1.3 2008/07/13 06:04:41 tai Exp $
+// $Id: StJetTPCTrackCut.cxx,v 1.4 2008/07/13 08:23:28 tai Exp $
 #include "StJetTPCTrackCut.h"
 
 #include "../StMuTrackEmu.h"
@@ -21,29 +21,11 @@ TrackList StJetTPCTrackCut::operator()(const TrackList& trackList)
   return ret;
 }
 
-bool StJetTPCTrackCut::shoudNotPass(const Track& track) const
+bool StJetTPCTrackCut::shoudNotPass(const Track& track)
 {
-    if (track.Tdca > 3.)
-      return true;
-
-    if (_use2006Cuts){
-      if(track.pt < 0.5) {
-	if(track.Tdca > 2.0) return true;
-      } else if(track.pt < 1.0) {
-	if(track.Tdca > 3.-2.*track.pt) return true;
-      } else {
-	if(track.Tdca > 1.0) return true;
-      }
-    }
-
-    if(track.eta < -2.0)
-      return true;
-
-    if(track.eta > 2.0)
-      return true;
-
-    if(static_cast<double>(track.nHits)/static_cast<double>(track.nHitsPoss) < .51)
-      return true;
+  for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
+    if((**cut)(track)) return true;
+  }
 
   return false;
 }
