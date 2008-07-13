@@ -1,4 +1,5 @@
-// $Id: StJetEEMCTxt.cxx,v 1.5 2008/07/13 05:36:46 tai Exp $
+// $Id: StJetEEMCTxt.cxx,v 1.6 2008/07/13 10:02:33 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetEEMCTxt.h"
 
 #include <iostream>

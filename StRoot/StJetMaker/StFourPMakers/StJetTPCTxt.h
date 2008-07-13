@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTxt.h,v 1.3 2008/07/09 08:16:05 tai Exp $
+// $Id: StJetTPCTxt.h,v 1.4 2008/07/13 10:02:34 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPCTXT_H
 #define STJETTPCTXT_H
 

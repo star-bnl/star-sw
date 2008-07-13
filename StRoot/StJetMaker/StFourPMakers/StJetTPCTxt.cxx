@@ -1,4 +1,5 @@
-// $Id: StJetTPCTxt.cxx,v 1.5 2008/07/13 06:04:41 tai Exp $
+// $Id: StJetTPCTxt.cxx,v 1.6 2008/07/13 10:02:34 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetTPCTxt.h"
 
 #include "../StMuTrackEmu.h"

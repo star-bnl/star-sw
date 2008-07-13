@@ -1,4 +1,5 @@
-// $Id: BemcEnergySumCalculatorBuilder.cxx,v 1.4 2008/07/13 09:37:58 tai Exp $
+// $Id: BemcEnergySumCalculatorBuilder.cxx,v 1.5 2008/07/13 10:02:30 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "BemcEnergySumCalculatorBuilder.h"
 #include "BemcEnergySumCalculator.h"
 

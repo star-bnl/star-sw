@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTrackPrint.h,v 1.2 2008/07/09 02:40:04 tai Exp $
+// $Id: StJetTPCTrackPrint.h,v 1.3 2008/07/13 10:02:34 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPCTRACKPRINT_H
 #define STJETTPCTRACKPRINT_H
 

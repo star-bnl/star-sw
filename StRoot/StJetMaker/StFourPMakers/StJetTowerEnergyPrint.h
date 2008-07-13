@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: StJetTowerEnergyPrint.h,v 1.2 2008/07/10 20:15:23 tai Exp $
+// $Id: StJetTowerEnergyPrint.h,v 1.3 2008/07/13 10:02:34 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTOWERENERGYPRINT_H
 #define STJETTOWERENERGYPRINT_H
 

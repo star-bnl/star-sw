@@ -1,5 +1,6 @@
 // -*- mode: c++;-*-
-// $Id: TrackList.h,v 1.4 2008/07/13 06:35:59 tai Exp $
+// $Id: TrackList.h,v 1.5 2008/07/13 10:02:34 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKLIST_H
 #define TRACKLIST_H
 
