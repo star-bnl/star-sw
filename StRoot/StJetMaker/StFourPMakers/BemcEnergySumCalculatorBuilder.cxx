@@ -1,9 +1,11 @@
-// $Id: BemcEnergySumCalculatorBuilder.cxx,v 1.2 2008/07/10 09:36:00 tai Exp $
+// $Id: BemcEnergySumCalculatorBuilder.cxx,v 1.3 2008/07/13 02:38:50 tai Exp $
 #include "BemcEnergySumCalculatorBuilder.h"
 #include "BemcEnergySumCalculator.h"
 
 #include "StJetBEMCMuDst.h"
 #include "StJetBEMCEnergyCut.h"
+
+using namespace StJetTowerEnergyCut;
 
 namespace StSpinJet {
 
@@ -13,8 +15,11 @@ BemcEnergySumCalculator* BemcEnergySumCalculatorBuilder::build(bool useBEMC, boo
 
   StJetBEMCMuDst* bemc = new StJetBEMCMuDst(uDstMaker, doTowerSwapFix);
   StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-  bemcCut->setUse2003Cuts(use2003Cuts);
-  bemcCut->setUse2005Cuts(use2005Cuts);
+  if(use2003Cuts) bemcCut->addCut(new TowerEnergyCut2003BemcTower());
+  if(use2005Cuts) bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
+  bemcCut->addCut(new TowerEnergyCutEnergy());
+  bemcCut->addCut(new TowerEnergyCutBemcStatus());
+  bemcCut->addCut(new TowerEnergyCutAdc());
 
   return new BemcEnergySumCalculatorImp(bemc, bemcCut);
 }
