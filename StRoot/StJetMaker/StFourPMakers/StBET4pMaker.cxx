@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.62 2008/07/14 19:59:54 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.63 2008/07/14 21:02:00 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -62,8 +62,6 @@ Int_t StBET4pMaker::Init()
 
 void StBET4pMaker::Clear(Option_t* opt)
 {
-  _imp->Clear(opt);
-
   _bemcEnergySumCalculator->Clear();
 
   return StMaker::Clear(opt);
