@@ -1,13 +1,20 @@
-// $Id: StJetTPCTree.cxx,v 1.1 2008/07/13 22:30:03 tai Exp $
+// $Id: StJetTPCTree.cxx,v 1.2 2008/07/14 03:35:53 tai Exp $
 #include "StJetTPCTree.h"
 
 #include <TTree.h>
 
 namespace StSpinJet {
 
-StJetTPCTree::StJetTPCTree(TTree *tree)
+StJetTPCTree::StJetTPCTree(TTree *tree,
+	       const Int_t& indexMajor, const Int_t& indexMinor,
+	       const char* indexMajorName,
+	       const char* indexMinorName
+	       )
  : _tree(tree)
+ , _indexMajor(indexMajor), _indexMinor(indexMinor)
 {
+  _tree->BuildIndex(indexMajorName, indexMinorName);
+
   _tree->SetBranchAddress("eventId"    , &_eventId     );
   _tree->SetBranchAddress("nTracks"    , &_nTracks     );
   _tree->SetBranchAddress("pt"         ,  _pt          );
@@ -37,6 +44,8 @@ TrackList StJetTPCTree::getTrackList()
 {
   TrackList ret;
 
+  if(_tree->GetEntryWithIndex(_indexMajor, _indexMinor) <= 0) return ret;
+
   for(int i = 0; i < _nTracks; ++i) {
 
     Track track;
@@ -62,7 +71,7 @@ TrackList StJetTPCTree::getTrackList()
     track.phiext     = _phiext[i];
     track.dEdx       = _dEdx[i];
     track.trackIndex = _trackIndex[i];
-    track.id         =  _trackId[i];
+    track.id         = _trackId[i];
 
     ret.push_back(track);
   }

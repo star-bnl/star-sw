@@ -1,13 +1,20 @@
-// $Id: StJetBEMCTree.cxx,v 1.1 2008/07/13 22:30:02 tai Exp $
+// $Id: StJetBEMCTree.cxx,v 1.2 2008/07/14 03:35:52 tai Exp $
 #include "StJetBEMCTree.h"
 
 #include <TTree.h>
 
 namespace StSpinJet {
 
-StJetBEMCTree::StJetBEMCTree(TTree *tree)
+StJetBEMCTree::StJetBEMCTree(TTree *tree,
+			       const Int_t& indexMajor, const Int_t& indexMinor,
+			       const char* indexMajorName,
+			       const char* indexMinorName
+			       )
  : _tree(tree)
+ , _indexMajor(indexMajor), _indexMinor(indexMinor)
  {
+  _tree->BuildIndex(indexMajorName, indexMinorName);
+
   _tree->SetBranchAddress("eventId"    , &_eventId      );
   _tree->SetBranchAddress("nTowers"    , &_nTowers      );
   _tree->SetBranchAddress("energy"     ,  _energy       );
@@ -30,6 +37,8 @@ StJetBEMCTree::StJetBEMCTree(TTree *tree)
 TowerEnergyList StJetBEMCTree::getEnergyList()
 {
   TowerEnergyList ret;
+
+  if(_tree->GetEntryWithIndex(_indexMajor, _indexMinor) <= 0) return ret;
 
   for(int i = 0; i < _nTowers; ++i) {
 
