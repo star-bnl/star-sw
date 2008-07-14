@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.61 2008/07/14 20:47:23 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.62 2008/07/14 21:02:01 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
@@ -44,7 +44,6 @@ public:
   void Init();
   void Make();
     
-  void Clear(Option_t* opt = "");
 
   std::pair<StSpinJet::TrackList, StSpinJet::TowerEnergyList> getTrackAndEnergyList();
 
@@ -59,6 +58,8 @@ public:
   StSpinJet::StJetBEMCEnergyCut* getBEMCEnergyCut() { return _bemcCut; }
 
 private:
+
+  void Clear(Option_t* opt = "");
 
   FourList _tracks;
 
