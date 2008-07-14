@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.60 2008/07/13 10:02:31 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.61 2008/07/14 06:45:06 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -21,6 +21,7 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _uDstMaker(uDstMaker), _doTowerSwapFix(doTowerSwapFix)
   , _useTPC(true), _useBEMC(true), _useEEMC(false)
   , _use2003Cuts(false), _use2005Cuts(false), _use2006Cuts(false)
+  , _useBEMCEnergySum(true)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
 {
@@ -34,7 +35,7 @@ Int_t StBET4pMaker::Init()
   _imp->Init();
 
   BemcEnergySumCalculatorBuilder bemcEnergySumCalculatorBuilder;
-  _bemcEnergySumCalculator = bemcEnergySumCalculatorBuilder.build(_useBEMC, _use2003Cuts, _use2005Cuts, _uDstMaker, _doTowerSwapFix);
+  _bemcEnergySumCalculator = bemcEnergySumCalculatorBuilder.build(_useBEMCEnergySum && _useBEMC, _use2003Cuts, _use2005Cuts, _uDstMaker, _doTowerSwapFix);
   _bemcEnergySumCalculator->Init();
 
   return StMaker::Init();

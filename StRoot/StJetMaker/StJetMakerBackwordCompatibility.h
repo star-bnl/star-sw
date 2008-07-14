@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerBackwordCompatibility.h,v 1.4 2008/05/09 02:14:52 tai Exp $
+// $Id: StJetMakerBackwordCompatibility.h,v 1.5 2008/07/14 06:44:57 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETMAKERBACKWORDCOMPATIBILITY_H
 #define STJETMAKERBACKWORDCOMPATIBILITY_H
@@ -9,9 +9,9 @@
 #include <string>
 #include <map>
 
-namespace StSpinJet {
-
 class StJetTreeWriter;
+
+namespace StSpinJet {
 
 class StJetMakerBackwordCompatibility {
 
