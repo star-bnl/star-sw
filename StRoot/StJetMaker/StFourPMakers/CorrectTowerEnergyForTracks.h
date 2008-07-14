@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CorrectTowerEnergyForTracks.h,v 1.5 2008/07/12 01:32:06 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.h,v 1.6 2008/07/14 23:07:30 tai Exp $
 #ifndef CORRECTTOWERENERGYFORTRACKS_H
 #define CORRECTTOWERENERGYFORTRACKS_H
 
@@ -25,7 +25,7 @@ private:
 
   void countTracksOnBemcTower(const Track& track);
 
-  double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId);
+  double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId, float eta, float phi);
 
   static const int mNOfBemcTowers = 4800;
 

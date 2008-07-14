@@ -1,4 +1,4 @@
-// $Id: CorrectTowerEnergyForTracks.cxx,v 1.5 2008/07/12 01:32:06 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.cxx,v 1.6 2008/07/14 23:07:29 tai Exp $
 #include "CorrectTowerEnergyForTracks.h"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
@@ -28,9 +28,9 @@ TowerEnergyList CorrectTowerEnergyForTracks::Do(const TowerEnergyList &energyDep
 
     TowerEnergy energyDeposit(*it);
 
-    energyDeposit.energy = correctBemcTowerEnergyForTracks_(energyDeposit.energy, energyDeposit.towerId);
+    energyDeposit.energy = correctBemcTowerEnergyForTracks_(energyDeposit.energy, energyDeposit.towerId, energyDeposit.towerEta, energyDeposit.towerPhi);
 
-    if(energyDeposit.energy <= 0) continue;
+    energyDeposit.energy = (energyDeposit.energy <= 0) ? 0 : energyDeposit.energy;
 
     ret.push_back(energyDeposit);
   }
@@ -46,16 +46,8 @@ void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const Track& track)
     mNtracksOnTower[id]++;
 }
 
-double CorrectTowerEnergyForTracks::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId)
+double CorrectTowerEnergyForTracks::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId, float eta, float phi)
 {
-
-    //Get eta, phi
-    float eta, phi;
-    StEmcGeom* geom = StEmcGeom::instance("bemc"); // for towers
-    geom->getEtaPhi(bemcTowerId,eta,phi); // to convert software bemcTowerId into eta/phi
-
-    //construct four momentum
-	    
     float theta=2.*atan(exp(-eta));
 
     //do a quick correction for hadronic MIP eneryg deposition:
