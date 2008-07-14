@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.41 2008/07/14 19:59:54 tai Exp $
+// $Id: StBET4pMaker.h,v 1.42 2008/07/14 23:38:36 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
@@ -15,6 +15,8 @@ class BemcEnergySumCalculator;
 
 class StJetTPCTrackCut;
 class StJetBEMCEnergyCut;
+class TrackListToFourList;
+class EnergyListToFourList;
 
 }
 
@@ -52,7 +54,7 @@ public:
   bool useTree() const { return _useTree; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.41 2008/07/14 19:59:54 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.42 2008/07/14 23:38:36 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -75,7 +77,9 @@ private:
 
   StSpinJet::BemcEnergySumCalculator* _bemcEnergySumCalculator;
 
-  
+  StSpinJet::TrackListToFourList& _track2four;
+  StSpinJet::EnergyListToFourList& _energy2four;
+  FourList _tracks;
 
   bool isBemcCorrupted() const;
 
