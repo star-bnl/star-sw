@@ -8,6 +8,6 @@
 
 struct tpcGain { 
 
-   float  Gain[45][182];   /*  Gains per */
+   float  Gain[45][182];   /*  Gains per pad*/
 
  };  
