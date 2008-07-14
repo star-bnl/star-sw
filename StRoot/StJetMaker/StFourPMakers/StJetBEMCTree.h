@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCTree.h,v 1.1 2008/07/13 22:30:02 tai Exp $
+// $Id: StJetBEMCTree.h,v 1.2 2008/07/14 03:35:53 tai Exp $
 #ifndef STJETBEMCTREE_H
 #define STJETBEMCTREE_H
 
@@ -14,7 +14,11 @@ namespace StSpinJet {
 class StJetBEMCTree : public StJetBEMC {
 
 public:
-  StJetBEMCTree(TTree *tree);
+  StJetBEMCTree(TTree *tree,
+		const Int_t& indexMajor, const Int_t& indexMinor,
+		const char* indexMajorName = "runNumber",
+		const char* indexMinorName = "eventId"
+		);
   virtual ~StJetBEMCTree() { }
 
   TowerEnergyList getEnergyList();
@@ -22,6 +26,9 @@ public:
 private:
 
   TTree* _tree;
+
+  const Int_t& _indexMajor;
+  const Int_t& _indexMinor;
 
   Int_t    _runNumber;
   Int_t    _eventId;
