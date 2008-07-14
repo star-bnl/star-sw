@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTreeEntryCoordinator.h,v 1.1 2008/07/14 03:35:41 tai Exp $
+// $Id: StJetTreeEntryCoordinator.h,v 1.2 2008/07/14 07:12:03 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTREEENTRYCOORDINATOR_H
 #define STJETTREEENTRYCOORDINATOR_H
@@ -37,6 +37,8 @@ public:
 
   void AddTrgTreeName(const char* treeName) { _trgTreeNameList.push_back(treeName); }
 
+  typedef std::vector<std::string> TrgTreeNameList;
+  TrgTreeNameList trgTreeNameList() const { return _trgTreeNameList; }
 
 private:
 
@@ -70,7 +72,6 @@ private:
 
   bool _eof;
 
-  typedef std::vector<std::string> TrgTreeNameList;
   TrgTreeNameList _trgTreeNameList;
 
 };
