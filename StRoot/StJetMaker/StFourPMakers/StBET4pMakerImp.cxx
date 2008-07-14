@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.90 2008/07/14 23:38:36 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.91 2008/07/14 23:53:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImp.h"
 
@@ -10,13 +10,6 @@
 #include "StJetBEMCEnergyCut.h"
 
 #include "CorrectTowerEnergyForTracks.h"
-
-#include "TrackListToFourList.h"
-#include "EnergyListToFourList.h"
-
-#include "../StMuTrackFourVec.h"
-
-#include "../StMuTrackEmu.h"
 
 #include <iostream>
 
@@ -31,8 +24,6 @@ StBET4pMakerImp::StBET4pMakerImp(StJetTPC* tpc, StJetTPCTrackCut* tpcCut,
   : _tpc(tpc), _bemc(bemc), _eemc(eemc)
   , _tpcCut(tpcCut), _bemcCut(bemcCut)
   , _correctTowerEnergyForTracks(correctTowerEnergyForTracks)
-  , _track2four(*(new TrackListToFourList))
-  , _energy2four(*(new EnergyListToFourList))
 {
 
 }
@@ -42,15 +33,6 @@ void StBET4pMakerImp::Init()
   _tpc->Init();
   _bemc->Init();
   _eemc->Init();
-}
-
-void StBET4pMakerImp::Clear(Option_t* opt)
-{
-  for (FourList::iterator it = _tracks.begin(); it != _tracks.end(); ++it) {
-    delete (*it);
-    (*it) = 0;
-  }
-  _tracks.clear();
 }
 
 std::pair<TrackList, TowerEnergyList> StBET4pMakerImp::getTrackAndEnergyList()
@@ -70,17 +52,3 @@ std::pair<TrackList, TowerEnergyList> StBET4pMakerImp::getTrackAndEnergyList()
 
   return pair<TrackList, TowerEnergyList>(trackList, energyList);
 }
-
-void StBET4pMakerImp::Make()
-{
-  pair<TrackList, TowerEnergyList> trackAndEnergyList = getTrackAndEnergyList();
-
-  Clear(0);
-
-  FourList tpc4pList = _track2four(trackAndEnergyList.first);
-  _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());
-
-  FourList energy4pList = _energy2four(trackAndEnergyList.second);
-  _tracks.insert(_tracks.end(), energy4pList.begin(), energy4pList.end());
-}
-

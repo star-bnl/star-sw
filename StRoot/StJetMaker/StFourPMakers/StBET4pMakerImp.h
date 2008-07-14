@@ -1,32 +1,23 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.62 2008/07/14 21:02:01 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.63 2008/07/14 23:53:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
 
-
-#include "CorrectTowerEnergyForTracks.h"
-
-#include "StJetFinder/AbstractFourVec.h"
-
-#include <Rtypes.h>
-#include <TLorentzVector.h>
+#include "TowerEnergyList.h"
+#include "TrackList.h"
 
 #include <utility>
 
 namespace StSpinJet {
-  class StMuTrackEmu;
   class StJetTPC;
   class StJetBEMC;
   class StJetEEMC;
   class StJetTPCTrackCut;
   class StJetBEMCEnergyCut;
-  class TrackListToFourList;
-  class EnergyListToFourList;
+
+  class CorrectTowerEnergyForTracks;
 }
-
-
-typedef std::vector<AbstractFourVec*> FourList;
 
 class StBET4pMakerImp {
 
@@ -42,13 +33,8 @@ public:
   virtual ~StBET4pMakerImp() { };
 
   void Init();
-  void Make();
-    
 
   std::pair<StSpinJet::TrackList, StSpinJet::TowerEnergyList> getTrackAndEnergyList();
-
-  FourList &getTracks() { return _tracks; };
-  Int_t numTracks(void) { return _tracks.size(); };
 
   StSpinJet::StJetTPC*  TPC()  { return _tpc;  }
   StSpinJet::StJetBEMC* BEMC() { return _bemc; }
@@ -59,10 +45,6 @@ public:
 
 private:
 
-  void Clear(Option_t* opt = "");
-
-  FourList _tracks;
-
   StSpinJet::StJetTPC*  _tpc;
   StSpinJet::StJetBEMC* _bemc;
   StSpinJet::StJetEEMC* _eemc;
@@ -72,8 +54,6 @@ private:
 
   StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
 
-  StSpinJet::TrackListToFourList& _track2four;
-  StSpinJet::EnergyListToFourList& _energy2four;
 };
 
 #endif // STBET4PMAKERIMP_HH
