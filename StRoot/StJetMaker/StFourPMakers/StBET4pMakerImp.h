@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.60 2008/07/13 10:02:31 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.61 2008/07/14 20:47:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
@@ -10,11 +10,9 @@
 #include "StJetFinder/AbstractFourVec.h"
 
 #include <Rtypes.h>
-#include <TVector3.h>
 #include <TLorentzVector.h>
 
-#include <map>
-
+#include <utility>
 
 namespace StSpinJet {
   class StMuTrackEmu;
@@ -47,6 +45,8 @@ public:
   void Make();
     
   void Clear(Option_t* opt = "");
+
+  std::pair<StSpinJet::TrackList, StSpinJet::TowerEnergyList> getTrackAndEnergyList();
 
   FourList &getTracks() { return _tracks; };
   Int_t numTracks(void) { return _tracks.size(); };
