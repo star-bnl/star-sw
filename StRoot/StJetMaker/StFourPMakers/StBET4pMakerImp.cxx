@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.89 2008/07/14 20:47:22 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.90 2008/07/14 23:38:36 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImp.h"
 
@@ -46,13 +46,11 @@ void StBET4pMakerImp::Init()
 
 void StBET4pMakerImp::Clear(Option_t* opt)
 {
-    
   for (FourList::iterator it = _tracks.begin(); it != _tracks.end(); ++it) {
     delete (*it);
     (*it) = 0;
   }
   _tracks.clear();
-
 }
 
 std::pair<TrackList, TowerEnergyList> StBET4pMakerImp::getTrackAndEnergyList()

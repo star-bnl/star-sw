@@ -1,7 +1,10 @@
-// $Id: StBET4pMaker.cxx,v 1.63 2008/07/14 21:02:00 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.64 2008/07/14 23:38:35 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
+
+#include "TrackListToFourList.h"
+#include "EnergyListToFourList.h"
 
 #include "BemcEnergySumCalculator.h"
 #include "BemcEnergySumCalculatorBuilder.h"
@@ -26,6 +29,8 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _useTree(false)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
+  , _track2four(*(new TrackListToFourList))
+  , _energy2four(*(new EnergyListToFourList))
 { }
 
 StBET4pMaker::StBET4pMaker(const char* name, StJetTreeEntryMaker* maker)
@@ -38,6 +43,8 @@ StBET4pMaker::StBET4pMaker(const char* name, StJetTreeEntryMaker* maker)
   , _useTree(true)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
+  , _track2four(*(new TrackListToFourList))
+  , _energy2four(*(new EnergyListToFourList))
 { }
 
 
@@ -62,6 +69,12 @@ Int_t StBET4pMaker::Init()
 
 void StBET4pMaker::Clear(Option_t* opt)
 {
+  for (FourList::iterator it = _tracks.begin(); it != _tracks.end(); ++it) {
+    delete (*it);
+    (*it) = 0;
+  }
+  _tracks.clear();
+
   _bemcEnergySumCalculator->Clear();
 
   return StMaker::Clear(opt);
@@ -75,15 +88,23 @@ Int_t StBET4pMaker::Make()
 
   if (_bemcEnergySumCalculator->sumEmcEt() > 200.) return kStOk;
 
-  _imp->Make();
+  //  _imp->Make();
 
+  pair<TrackList, TowerEnergyList> trackAndEnergyList = _imp->getTrackAndEnergyList();
+
+  FourList tpc4pList = _track2four(trackAndEnergyList.first);
+  _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());
+
+  FourList energy4pList = _energy2four(trackAndEnergyList.second);
+  _tracks.insert(_tracks.end(), energy4pList.begin(), energy4pList.end());
 
   return StMaker::Make();
 }
 
 FourList &StBET4pMaker::getTracks()
 {
-  return _imp->getTracks();
+  return _tracks;
+  //  return _imp->getTracks();
 }
 
 bool StBET4pMaker::isBemcCorrupted() const
