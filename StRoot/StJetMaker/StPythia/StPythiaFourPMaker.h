@@ -26,6 +26,9 @@ public:
     ///Default destructor
     virtual ~StPythiaFourPMaker() {};
     
+  virtual FourList &getTracks() { return tracks; };
+  Int_t numTracks(void) { return tracks.size(); };
+
     ///Fill the lists
     virtual Int_t Make();
     
@@ -33,6 +36,8 @@ public:
     virtual void Clear(Option_t* opt);
     
 protected:
+  FourList tracks;
+
     //!typedef vector<StPythiaMuTrackFourVec*> Pythia4Vec;
     typedef vector<StMuTrackFourVec*> Pythia4Vec;
     Pythia4Vec mVec;

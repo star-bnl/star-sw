@@ -58,7 +58,8 @@ void StPythiaFourPMaker::Clear(Option_t* opt)
 	(*it) = 0;
     }
     mVec.clear();
-    StFourPMaker::Clear(opt);
+    //    StFourPMaker::Clear(opt);
+    tracks.clear();
     cout <<"\tvec:\t"<<mVec.size()<<"\ttracks:\t"<<tracks.size()<<endl;
     return;
 }
