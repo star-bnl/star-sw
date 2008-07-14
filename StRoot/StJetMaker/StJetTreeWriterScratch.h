@@ -1,12 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StDefaultJetTreeWriter.h,v 1.5 2008/07/14 06:44:56 tai Exp $
+// $Id: StJetTreeWriterScratch.h,v 1.1 2008/07/14 06:44:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STDEFAULTJETTREEWRITER_H
-#define STDEFAULTJETTREEWRITER_H
+#ifndef STJETTREEWRITERSCRATCH_H
+#define STJETTREEWRITERSCRATCH_H
 
 #include "StJetTreeWriter.h"
 
-class StMuDstMaker;
 class StJets;
 class StProtoJet;
 class StFourPMaker;
@@ -18,21 +17,20 @@ class TFile;
 #include <vector>
 #include <list>
 
-class StDefaultJetTreeWriter : public StJetTreeWriter {
+class StJetTreeWriterScratch : public StJetTreeWriter {
 
 public:
-  StDefaultJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName);
-  virtual ~StDefaultJetTreeWriter();
+  StJetTreeWriterScratch();
+  virtual ~StJetTreeWriterScratch();
 
   void Init();
   void Finish();
 
   void addJetFinder(StFourPMaker* fourPMaker, const std::vector<const AbstractFourVec*>* particleList, std::list<StProtoJet>* protoJetList, const char* name);
 
-  TTree* jetTree() const { return _jetTree; }
-
   void fillJetTree();
-  StJets *getLastStJets() { return _analyzerCtlList[_analyzerCtlList.size()]._jets; }
+
+  TTree* jetTree() const { return (TTree*)0; }
 
 private:
   
@@ -46,14 +44,11 @@ private:
     StJets *_jets;
   };
 
-  StMuDstMaker& _uDstMaker;
-  std::string _OutFileName;
-  TTree *_jetTree;
-  TFile *_outFile;
-
   std::vector<AnalyzerCtl> _analyzerCtlList;
+
+  ClassDef(StJetTreeWriterScratch, 0)
 };
 
-#endif // STDEFAULTJETTREEWRITER_H
+#endif // STJETTREEWRITERSCRATCH_H
 
 

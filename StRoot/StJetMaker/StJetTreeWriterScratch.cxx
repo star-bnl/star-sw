@@ -1,10 +1,6 @@
-// $Id: StDefaultJetTreeWriter.cxx,v 1.12 2008/07/14 06:44:55 tai Exp $
+// $Id: StJetTreeWriterScratch.cxx,v 1.1 2008/07/14 06:44:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StDefaultJetTreeWriter.h"
-
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
+#include "StJetTreeWriterScratch.h"
 
 #include "StJets.h"
 #include "StJet.h"
@@ -14,30 +10,27 @@
 
 #include <StJetFinder/StProtoJet.h>
 
-
-#include <StFourPMakers/StFourPMaker.h>
-#include "StFourPMakers/StBET4pMaker.h"
+#include "./StFourPMakers/StFourPMaker.h"
+#include "./StFourPMakers/StBET4pMaker.h"
 
 #include <TTree.h>
 
 using namespace std;
 using namespace StSpinJet;
 
-StDefaultJetTreeWriter::StDefaultJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName)
-  : _uDstMaker(uDstMaker)
-  , _OutFileName(outFileName)
-  , _jetTree(0)
-  , _outFile(0)
+ClassImp(StJetTreeWriterScratch)
+
+StJetTreeWriterScratch::StJetTreeWriterScratch()
 {
 
 }
 
-StDefaultJetTreeWriter::~StDefaultJetTreeWriter()
+StJetTreeWriterScratch::~StJetTreeWriterScratch()
 {
 
 }
 
-void StDefaultJetTreeWriter::addJetFinder(StFourPMaker* fourPMaker, const vector<const AbstractFourVec*>* particleList, list<StProtoJet>* protoJetList, const char* name)
+void StJetTreeWriterScratch::addJetFinder(StFourPMaker* fourPMaker, const vector<const AbstractFourVec*>* particleList, list<StProtoJet>* protoJetList, const char* name)
 {
   AnalyzerCtl anaCtl;
   anaCtl._branchName = name;
@@ -48,44 +41,29 @@ void StDefaultJetTreeWriter::addJetFinder(StFourPMaker* fourPMaker, const vector
   _analyzerCtlList.push_back(anaCtl);
 }
 
-void StDefaultJetTreeWriter::Init()
+void StJetTreeWriterScratch::Init()
 {
-  _outFile = new TFile(_OutFileName.c_str(), "recreate");
-  _jetTree  = new TTree("jet", "jetTree");
 
-  for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
-    _jetTree->Branch((*it)._branchName.c_str(), "StJets", &((*it)._jets));
-  }
 }
 
-void StDefaultJetTreeWriter::Finish()
+void StJetTreeWriterScratch::Finish()
 {
-  _outFile->Write();
-  _outFile->Close();
-  delete _outFile;
-  _outFile = 0;
+
 }
 
-void StDefaultJetTreeWriter::fillJetTree()
+void StJetTreeWriterScratch::fillJetTree()
 {
   for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
     StFourPMaker* fourPMaker = (*it)._fourPMaker;
     std::list<StProtoJet>* protoJetList = (*it)._protoJetList;
     fillJetTreeForOneJetFindingAlgorithm(*(*it)._jets, protoJetList, fourPMaker);
   }
-  _jetTree->Fill();
 }
 
-void StDefaultJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
+void StJetTreeWriterScratch::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
 {
   jets.Clear();
   jets.setBemcCorrupt(fourPMaker->bemcCorrupt());
-
-  StMuEvent* event = _uDstMaker.muDst()->event();
-  jets.seteventId(event->eventId());
-  jets.seteventNumber(event->eventNumber());
-  jets.setrunId(event->runId());
-  jets.setrunNumber(event->runNumber());
 
   StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
   if (bet4p) {
@@ -98,10 +76,9 @@ void StDefaultJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, 
   }
 }
 
-void StDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
+void StJetTreeWriterScratch::fillJet(StJets &jets, StProtoJet& pj)
 {
   StJet aJet(pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0);
-  aJet.zVertex = _uDstMaker.muDst()->event()->primaryVertexPosition().z();
 
   StProtoJet::FourVecList &particleList = pj.list();
   for(StProtoJet::FourVecList::iterator it2 = particleList.begin(); it2 != particleList.end(); ++it2)  {

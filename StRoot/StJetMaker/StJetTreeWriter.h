@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTreeWriter.h,v 1.10 2008/05/09 02:14:52 tai Exp $
+// $Id: StJetTreeWriter.h,v 1.11 2008/07/14 06:44:57 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTREEWRITER_H
 #define STJETTREEWRITER_H
@@ -14,8 +14,6 @@ class TTree;
 
 #include <list>
 #include <vector>
-
-namespace StSpinJet {
 
 class StJetTreeWriter : public TObject {
 
@@ -36,8 +34,6 @@ public:
 private:
 
 };
-
-}
 
 #endif // STJETTREEWRITER_H
 

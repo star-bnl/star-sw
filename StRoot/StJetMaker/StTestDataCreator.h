@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StTestDataCreator.h,v 1.5 2008/05/09 02:14:53 tai Exp $
+// $Id: StTestDataCreator.h,v 1.6 2008/07/14 06:44:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STTESTDATACREATOR_H
 #define STTESTDATACREATOR_H
@@ -17,7 +17,7 @@ class TFile;
 #include <string>
 #include <list>
 
-class StTestDataCreator : public StSpinJet::StJetTreeWriter {
+class StTestDataCreator : public StJetTreeWriter {
 
 public:
 

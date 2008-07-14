@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.44 2008/07/10 01:20:14 tai Exp $
+// $Id: StJetMaker.h,v 1.45 2008/07/14 06:44:56 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -20,8 +20,9 @@ namespace StSpinJet {
   class StParticleCollector;
   class StJetFinderRunner;
   class StJetCuts;
-  class StJetTreeWriter;
 }
+
+class StJetTreeWriter;
 
 class StJetMaker : public StMaker {
 
@@ -36,17 +37,17 @@ public:
     
   TTree* tree() const;
     
-  void SetTreeWriter(StSpinJet::StJetTreeWriter *treeWriter);
+  void SetTreeWriter(StJetTreeWriter *treeWriter);
 
   void addAnalyzer(const StppAnaPars*, StJetPars*, StFourPMaker*, const char* anaName);
     
   typedef StSpinJet::StJetMakerBackwordCompatibility::jetBranchesMap jetBranchesMap;
   jetBranchesMap& getJets() const { return _backwordCompatibility->getJets(); }
 
-  StSpinJet::StJetTreeWriter* getTreeWriter() { return _treeWriter; }
+  StJetTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.44 2008/07/10 01:20:14 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.45 2008/07/14 06:44:56 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -56,8 +57,8 @@ private:
 
   std::vector<StSpinJet::StJetCuts*> _jetCutsList;
 
-  StSpinJet::StJetTreeWriter *_defaultTreeWriter;
-  StSpinJet::StJetTreeWriter *_treeWriter;
+  StJetTreeWriter *_defaultTreeWriter;
+  StJetTreeWriter *_treeWriter;
 
   StSpinJet::StJetMakerBackwordCompatibility *_backwordCompatibility;
 
