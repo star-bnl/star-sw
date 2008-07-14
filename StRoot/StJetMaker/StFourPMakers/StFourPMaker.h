@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StFourPMaker.h,v 1.10 2008/07/13 10:02:32 tai Exp $
+// $Id: StFourPMaker.h,v 1.11 2008/07/14 19:59:54 tai Exp $
 #ifndef StFourPMaker_h
 #define StFourPMaker_h
 
@@ -16,6 +16,8 @@ public:
 
   StFourPMaker(const char *name)
     : StMaker(name) { }
+
+  virtual void Clear(const Option_t*);
 
   virtual FourList &getTracks() { return tracks; };
   Int_t numTracks(void) { return tracks.size(); };

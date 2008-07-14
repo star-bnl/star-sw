@@ -1,11 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.40 2008/07/14 06:45:06 tai Exp $
+// $Id: StBET4pMaker.h,v 1.41 2008/07/14 19:59:54 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
 #include "StFourPMaker.h"
 
 class StMuDstMaker;
+class StJetTreeEntryMaker;
 class StBET4pMakerImp;
 
 namespace StSpinJet {
@@ -21,7 +22,8 @@ class StBET4pMaker : public StFourPMaker {
 
 public:
     
-  StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix = true);
+  StBET4pMaker(const char* name, StMuDstMaker* maker, bool doTowerSwapFix = true);
+  StBET4pMaker(const char* name, StJetTreeEntryMaker* maker);
     
   virtual ~StBET4pMaker() {};
     
@@ -45,13 +47,16 @@ public:
 
   bool bemcCorrupt() const { return isBemcCorrupted(); }
 
-
   StBET4pMakerImp* GetImp() { return _imp; }
 
+  bool useTree() const { return _useTree; }
+
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.40 2008/07/14 06:45:06 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.41 2008/07/14 19:59:54 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
+
+  StJetTreeEntryMaker* _entryMaker;
 
   StMuDstMaker* _uDstMaker;
   bool _doTowerSwapFix;
@@ -63,6 +68,8 @@ private:
   bool _use2005Cuts;
   bool _use2006Cuts;
   bool _useBEMCEnergySum;
+
+  bool _useTree;
 
   StBET4pMakerImp* _imp;
 
