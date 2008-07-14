@@ -1,4 +1,4 @@
-// $Id: StJetTreeWriterScratch.cxx,v 1.1 2008/07/14 06:44:58 tai Exp $
+// $Id: StJetTreeWriterScratch.cxx,v 1.2 2008/07/14 19:59:44 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetTreeWriterScratch.h"
 
@@ -65,12 +65,6 @@ void StJetTreeWriterScratch::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, 
   jets.Clear();
   jets.setBemcCorrupt(fourPMaker->bemcCorrupt());
 
-  StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
-  if (bet4p) {
-    jets.setDylanPoints( bet4p->nDylanPoints() );
-    jets.setSumEmcE( bet4p->sumEmcEt() );
-  }
-	
   for(list<StProtoJet>::iterator it = protoJetList->begin(); it != protoJetList->end(); ++it) {
     fillJet(jets, *it);
   }
@@ -79,6 +73,8 @@ void StJetTreeWriterScratch::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, 
 void StJetTreeWriterScratch::fillJet(StJets &jets, StProtoJet& pj)
 {
   StJet aJet(pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0);
+
+  cout << pj.e() << endl;
 
   StProtoJet::FourVecList &particleList = pj.list();
   for(StProtoJet::FourVecList::iterator it2 = particleList.begin(); it2 != particleList.end(); ++it2)  {
