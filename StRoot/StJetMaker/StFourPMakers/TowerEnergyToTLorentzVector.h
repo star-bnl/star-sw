@@ -1,13 +1,14 @@
 // -*- mode: c++;-*-
-// $Id: TowerEnergyToTLorentzVector.h,v 1.1 2008/07/15 03:42:25 tai Exp $
+// $Id: TowerEnergyToTLorentzVector.h,v 1.2 2008/07/15 04:19:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYTOTLORENTZVECTOR_H
 #define TOWERENERGYTOTLORENTZVECTOR_H
 
-#include <TowerEnergyList.h>
 #include <TLorentzVector.h>
 
 namespace StSpinJet {
+
+class TowerEnergy;
 
 class TowerEnergyToTLorentzVector {
 

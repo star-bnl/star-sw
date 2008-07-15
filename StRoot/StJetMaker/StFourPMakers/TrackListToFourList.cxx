@@ -1,10 +1,16 @@
-// $Id: TrackListToFourList.cxx,v 1.3 2008/07/13 06:04:42 tai Exp $
+// $Id: TrackListToFourList.cxx,v 1.4 2008/07/15 04:19:53 tai Exp $
 #include "TrackListToFourList.h"
+
+#include "TrackToTLorentzVector.h"
 
 #include "../StMuTrackEmu.h"
 #include "../StMuTrackFourVec.h"
 
 namespace StSpinJet {
+
+TrackListToFourList::TrackListToFourList() 
+  : _trackTo4p(*(new TrackToTLorentzVector)) { }
+
 
 FourList TrackListToFourList::operator()(const TrackList& trackList)
 {
@@ -12,14 +18,9 @@ FourList TrackListToFourList::operator()(const TrackList& trackList)
 
   for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
 
-    TVector3 momentum;
-    momentum.SetPtEtaPhi((*track).pt, (*track).eta, (*track).phi);
-    double pionMass = 0.1395700;
-    float energy = sqrt(pionMass*pionMass + momentum.Mag()*momentum.Mag());
-
-    TLorentzVector p4(momentum, energy);
-
     StMuTrackEmu *trackEmu = createTrackEmu(*track);
+
+    TLorentzVector p4 = _trackTo4p(*track);
 
     StMuTrackFourVec* pmu = new StMuTrackFourVec(trackEmu, p4, (*track).charge, (*track).trackIndex, kTpcId);
     ret.push_back(pmu);
