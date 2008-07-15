@@ -1,30 +1,29 @@
 // -*- mode: c++;-*-
-// $Id: EnergyListToFourList.h,v 1.3 2008/07/13 10:02:31 tai Exp $
+// $Id: EnergyListToFourList.h,v 1.4 2008/07/15 03:42:24 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef ENERGYLISTTOFOURLIST_H
 #define ENERGYLISTTOFOURLIST_H
 
-#include <StJetFinder/AbstractFourVec.h>
-
 #include <TowerEnergyList.h>
 
-#include <TLorentzVector.h>
-
+#include <StJetFinder/AbstractFourVec.h>
 typedef std::vector<AbstractFourVec*> FourList;
 
 namespace StSpinJet {
 
+class TowerEnergyToTLorentzVector;
+
 class EnergyListToFourList {
 
 public:
-  EnergyListToFourList() { }
+  EnergyListToFourList();
   virtual ~EnergyListToFourList() { }
 
   FourList operator()(const TowerEnergyList& energyDepositList);
 
 private:
 
-  TLorentzVector constructFourMomentum(const TowerEnergy& deposit);
+  TowerEnergyToTLorentzVector& _energyTo4p;
 
 };
 

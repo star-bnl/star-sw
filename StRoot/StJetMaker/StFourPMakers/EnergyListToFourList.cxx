@@ -1,10 +1,15 @@
-// $Id: EnergyListToFourList.cxx,v 1.4 2008/07/13 10:02:31 tai Exp $
+// $Id: EnergyListToFourList.cxx,v 1.5 2008/07/15 03:42:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "EnergyListToFourList.h"
+
+#include "TowerEnergyToTLorentzVector.h"
 
 #include "../StMuTrackFourVec.h"
 
 namespace StSpinJet {
+
+EnergyListToFourList::EnergyListToFourList()
+  : _energyTo4p(*(new TowerEnergyToTLorentzVector)) { }
 
 FourList EnergyListToFourList::operator()(const TowerEnergyList& energyDepositList)
 {
@@ -12,30 +17,13 @@ FourList EnergyListToFourList::operator()(const TowerEnergyList& energyDepositLi
 
   for(TowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
-    TLorentzVector p4 = constructFourMomentum((*it));
-	    
+    TLorentzVector p4 = _energyTo4p((*it));	    
+
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, (*it).towerId, (*it).detectorId);
 
     ret.push_back(pmu);
   }
   return ret;
-}
-
-TLorentzVector EnergyListToFourList::constructFourMomentum(const TowerEnergy& deposit)
-{
-  TVector3 towerLocation;
-  towerLocation.SetPtEtaPhi(deposit.towerR, deposit.towerEta, deposit.towerPhi); 
-  TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);
-
-  TVector3 momentum = towerLocation - vertex;
-
-  double mass(0); // assume photon mass
-
-  double pMag = (deposit.energy > mass) ? sqrt(deposit.energy*deposit.energy - mass*mass) : deposit.energy;
-
-  momentum.SetMag(pMag);
-
-  return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), deposit.energy);
 }
 
 
