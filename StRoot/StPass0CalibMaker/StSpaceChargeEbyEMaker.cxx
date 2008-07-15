@@ -109,6 +109,7 @@ Int_t StSpaceChargeEbyEMaker::Finish() {
       if (PrePassdone) WriteTableToFile();
       else gMessMgr->Warning("StSpaceChargeEbyEMaker: NO SC => NO OUTPUT");
     }
+    if (!Calibmode) EvalCalib();
     WriteQAHists();
   } else {
     gMessMgr->Warning("StSpaceChargeEbyEMaker: NO EVENTS => NO OUTPUT");
@@ -910,8 +911,88 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.17 2008/04/30 14:52:15 genevb Exp $
+#include "TPad.h"
+float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
+
+  if (hdir) {
+    dcehist = (TH2F*) (hdir->Get("DcaEve"));
+    timehist = (TH1F*) (hdir->Get("EvtTime"));
+    scehist = (TH1F*) (hdir->Get("SpcChgEvt"));
+    if (!(dcehist && timehist && scehist)) {
+      LOG_ERROR << "Problems finding SC histograms" << endm;
+      return 999.;
+    }
+  }
+
+  TH1D* dcaproj = dcehist->ProjectionY();
+
+  // Initial fits to DCA distribution
+  ga1.SetParameters(1.,0.,1.);
+  dcaproj->Fit("ga1","Q");
+  float hm = ga1.GetParameter(1);
+  float hw = TMath::Abs(ga1.GetParameter(2));
+  float hd = 0.6*hw;
+  ga1.SetRange(hm-hd,hm+hd);
+  dcaproj->Fit("ga1","RQ");
+  float gm = ga1.GetParameter(1);
+  float gw = TMath::Abs(ga1.GetParameter(2));
+  float gm1 = gm;
+  float gw1 = gw;
+
+  // Iterate fit to get best answer
+  ga1.SetRange(gm-0.9*gw,gm+0.9*gw);
+  dcaproj->Fit("ga1","RQ");
+  gm = ga1.GetParameter(1);
+  gw = TMath::Abs(ga1.GetParameter(2));
+  ga1.SetRange(gm-0.8*gw,gm+0.8*gw);
+  dcaproj->Fit("ga1","RQ");
+  gm = ga1.GetParameter(1);
+  gw = TMath::Abs(ga1.GetParameter(2));
+  ga1.SetRange(gm-0.7*gw,gm+0.7*gw);
+  dcaproj->Fit("ga1","RQ");
+  gm = ga1.GetParameter(1);
+  gw = TMath::Abs(ga1.GetParameter(2));
+  float gme = TMath::Abs(ga1.GetParError(1));
+  float gwe = TMath::Abs(ga1.GetParError(2));
+
+  // Average SC
+  scehist->Fit("pol0","Q");
+  TF1* pl0 = scehist->GetFunction("pol0");
+  float pm = pl0->GetParameter(0);
+  float pw = pl0->GetParError(0);
+
+  // Other counts
+  float spc = (float) (scehist->GetEntries());
+  float dcc = (float) (dcehist->GetEntries());
+  float evc = (float) (timehist->GetEntries());
+  timehist->GetXaxis()->SetRange(1,(int) evc);
+  timehist->Fit("pol0","LQ");
+  pl0 = timehist->GetFunction("pol0");
+  float epsec = pl0->GetParameter(0); // events per second
+
+  // Quality measures
+  float wid = TMath::Min(10.,TMath::Log10(gw1*gw1+gw*gw));
+  float frac = spc/evc; // fraction of events for which SC was found
+
+  float code=0;
+  if (frac<0.2) code = 1. + frac;               // code = 1.x
+  else if (wid>0) code = 2. + 0.1*wid;          // code = 2.x
+
+  LOG_INFO << Form("SCeval: %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
+    hm,hw,gm,gw,pm,pw,gm1,gw1,spc,dcc,evc,epsec,gme,gwe) << endm;
+
+  if (code>0) {
+    LOG_ERROR << "BAD SpaceCharge performance! code = " << code << endm;
+  }
+
+  return code;
+}
+//_____________________________________________________________________________
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.18 2008/07/15 22:30:38 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.18  2008/07/15 22:30:38  genevb
+// Added evaluation of calibration performance
+//
 // Revision 1.17  2008/04/30 14:52:15  genevb
 // Reduce pileup contributions
 //
