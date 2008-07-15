@@ -33,7 +33,6 @@ void loadGammaLibs()
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
-  //gSystem->Load("StJets");
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StGammaMaker");
 }
