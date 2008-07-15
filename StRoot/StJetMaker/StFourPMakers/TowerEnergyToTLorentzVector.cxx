@@ -1,4 +1,4 @@
-// $Id: TowerEnergyToTLorentzVector.cxx,v 1.2 2008/07/15 04:19:53 tai Exp $
+// $Id: TowerEnergyToTLorentzVector.cxx,v 1.3 2008/07/15 06:23:43 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "TowerEnergyToTLorentzVector.h"
 
@@ -17,8 +17,8 @@ TLorentzVector TowerEnergyToTLorentzVector::operator()(const TowerEnergy& deposi
   double pMag = (deposit.energy > _mass) ? sqrt(deposit.energy*deposit.energy - _mass*_mass) : deposit.energy;
 
   momentum.SetMag(pMag);
-
-  return TLorentzVector(momentum.x(), momentum.y(), momentum.z(), deposit.energy);
+  TLorentzVector ret(momentum.x(), momentum.y(), momentum.z(), deposit.energy);
+  return ret;
 }
 
 }
