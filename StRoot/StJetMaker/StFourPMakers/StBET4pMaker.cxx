@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.64 2008/07/14 23:38:35 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.65 2008/07/15 07:10:07 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -88,8 +88,6 @@ Int_t StBET4pMaker::Make()
 
   if (_bemcEnergySumCalculator->sumEmcEt() > 200.) return kStOk;
 
-  //  _imp->Make();
-
   pair<TrackList, TowerEnergyList> trackAndEnergyList = _imp->getTrackAndEnergyList();
 
   FourList tpc4pList = _track2four(trackAndEnergyList.first);
@@ -104,7 +102,6 @@ Int_t StBET4pMaker::Make()
 FourList &StBET4pMaker::getTracks()
 {
   return _tracks;
-  //  return _imp->getTracks();
 }
 
 bool StBET4pMaker::isBemcCorrupted() const
