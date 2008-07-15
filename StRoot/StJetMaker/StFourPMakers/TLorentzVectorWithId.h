@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TLorentzVectorWithId.h,v 1.1 2008/07/15 03:42:24 tai Exp $
+// $Id: TLorentzVectorWithId.h,v 1.2 2008/07/15 04:44:13 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TLORENTZVECTORWITHID_H
 #define TLORENTZVECTORWITHID_H
@@ -9,6 +9,9 @@
 class TLorentzVectorWithId : public TLorentzVector {
 
 public:
+  TLorentzVectorWithId(const TLorentzVector& lorentzvector)
+    : TLorentzVector(lorentzvector) { }
+
   TLorentzVectorWithId(const TVector3& vector3, Double_t t)
     : TLorentzVector(vector3, t) { }
 
