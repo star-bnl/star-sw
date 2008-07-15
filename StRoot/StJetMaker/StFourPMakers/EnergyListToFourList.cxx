@@ -1,4 +1,4 @@
-// $Id: EnergyListToFourList.cxx,v 1.5 2008/07/15 03:42:23 tai Exp $
+// $Id: EnergyListToFourList.cxx,v 1.6 2008/07/15 04:19:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "EnergyListToFourList.h"
 
@@ -17,7 +17,7 @@ FourList EnergyListToFourList::operator()(const TowerEnergyList& energyDepositLi
 
   for(TowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
-    TLorentzVector p4 = _energyTo4p((*it));	    
+    TLorentzVector p4 = _energyTo4p(*it);	    
 
     StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, (*it).towerId, (*it).detectorId);
 

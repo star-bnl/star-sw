@@ -1,24 +1,23 @@
 // -*- mode: c++;-*-
-// $Id: TrackListToFourList.h,v 1.2 2008/07/12 01:32:08 tai Exp $
+// $Id: TrackListToFourList.h,v 1.3 2008/07/15 04:19:53 tai Exp $
 #ifndef TRACKLISTTOFOURLIST_H
 #define TRACKLISTTOFOURLIST_H
 
-#include <StJetFinder/AbstractFourVec.h>
-
 #include "TrackList.h"
 
-#include <vector>
-
+#include <StJetFinder/AbstractFourVec.h>
 typedef std::vector<AbstractFourVec*> FourList;
 
 namespace StSpinJet {
+
+class TrackToTLorentzVector;
 
 class StMuTrackEmu;
 
 class TrackListToFourList {
 
 public:
-  TrackListToFourList() { }
+  TrackListToFourList();
   virtual ~TrackListToFourList() { }
 
   FourList operator()(const TrackList& trackList);
@@ -27,9 +26,10 @@ private:
 
   StMuTrackEmu* createTrackEmu(const Track& track);
 
+  TrackToTLorentzVector& _trackTo4p;
+
 };
 
 }
-
 
 #endif // TRACKLISTTOFOURLIST_H
