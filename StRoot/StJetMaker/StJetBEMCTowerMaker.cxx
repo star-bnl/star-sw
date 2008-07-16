@@ -1,4 +1,4 @@
-// $Id: StJetBEMCTowerMaker.cxx,v 1.5 2008/07/13 09:37:51 tai Exp $
+// $Id: StJetBEMCTowerMaker.cxx,v 1.6 2008/07/16 22:28:25 tai Exp $
 #include "StJetBEMCTowerMaker.h"
 
 #include "StJetTPCMuDst.h"
@@ -73,7 +73,7 @@ Int_t StJetBEMCTowerMaker::Make()
 {
   TowerEnergyList energyList = _bemc->getEnergyList();
 
-  energyList = _bemcCut->Apply(energyList);
+  energyList = (*_bemcCut)(energyList);
 
   if(energyList.empty()) return kStOk;
 
