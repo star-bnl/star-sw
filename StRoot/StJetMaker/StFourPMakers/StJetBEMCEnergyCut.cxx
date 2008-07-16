@@ -1,4 +1,4 @@
-// $Id: StJetBEMCEnergyCut.cxx,v 1.4 2008/07/13 02:38:50 tai Exp $
+// $Id: StJetBEMCEnergyCut.cxx,v 1.5 2008/07/16 22:28:29 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetBEMCEnergyCut.h"
 
@@ -7,7 +7,7 @@ using namespace std;
 namespace StSpinJet {
 
 
-StSpinJet::TowerEnergyList StJetBEMCEnergyCut::Apply(const TowerEnergyList &energyList)
+StSpinJet::TowerEnergyList StJetBEMCEnergyCut::operator()(const TowerEnergyList &energyList)
 {
   TowerEnergyList ret;
 

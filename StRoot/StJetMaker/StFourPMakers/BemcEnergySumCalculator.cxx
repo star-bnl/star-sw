@@ -1,4 +1,4 @@
-// $Id: BemcEnergySumCalculator.cxx,v 1.7 2008/07/13 10:02:30 tai Exp $
+// $Id: BemcEnergySumCalculator.cxx,v 1.8 2008/07/16 22:28:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "BemcEnergySumCalculator.h"
 
@@ -24,7 +24,7 @@ void BemcEnergySumCalculatorImp::Make()
 {
   TowerEnergyList energyList = _bemc->getEnergyList();
 
-  energyList = _cut->Apply(energyList);
+  energyList = (*_cut)(energyList);
 
   _SumEmcEt = sumEnergyOverBemcTowers(0.4, energyList);
 

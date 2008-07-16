@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: CorrectTowerEnergyForTracks.h,v 1.6 2008/07/14 23:07:30 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.h,v 1.7 2008/07/16 22:28:29 tai Exp $
 #ifndef CORRECTTOWERENERGYFORTRACKS_H
 #define CORRECTTOWERENERGYFORTRACKS_H
 
@@ -16,10 +16,13 @@ class StMuTrackEmu;
 class CorrectTowerEnergyForTracks {
 
 public:
-  CorrectTowerEnergyForTracks();
+  CorrectTowerEnergyForTracks() { }
   virtual ~CorrectTowerEnergyForTracks() { }
 
+  TowerEnergyList operator()(const TowerEnergyList &energyDepositList, const TrackList& trackList);
+
   TowerEnergyList Do(const TowerEnergyList &energyDepositList, const TrackList& trackList);
+
 
 private:
 

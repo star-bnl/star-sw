@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.1 2008/07/16 21:53:20 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.2 2008/07/16 22:28:26 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -24,6 +24,10 @@
 #include "TowerEnergyCutEnergy.h"
 #include "TowerEnergyCutBemcStatus.h"
 #include "TowerEnergyCutAdc.h"
+
+#include <StJetTowerEnergyVariation.h>
+
+#include <CorrectTowerEnergyForTracks.h>
 
 #include <TTree.h>
 
@@ -56,10 +60,22 @@ Int_t StJetMakerII::Init()
   StJetTreeEntryCoordinator* coord = _entryMaker->coordinator();
   TTree *treeTpc = dynamic_cast<TTree*>(coord->file()->Get("tpcTracks"));
   StJetTPC* tpc = new StJetTPCTree(treeTpc, coord->indexMajor(), coord->indexMinor());
+
+  TTree *treeBemc = dynamic_cast<TTree*>(coord->file()->Get("bemcTowers"));
+  StJetBEMC* bemc = new StJetBEMCTree(treeBemc, coord->indexMajor(), coord->indexMinor());
+
   StJetTPCTrackCut* tpcCut  = new StJetTPCTrackCut();
   tpcCut->addCut(new TrackCutDca());
   tpcCut->addCut(new TrackCutEta());
   tpcCut->addCut(new TrackCutPossibleHitRatio());
+
+  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
+  bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
+  bemcCut->addCut(new TowerEnergyCutEnergy());
+  bemcCut->addCut(new TowerEnergyCutBemcStatus());
+  bemcCut->addCut(new TowerEnergyCutAdc());
+
+  CorrectTowerEnergyForTracks* correctTowerEnergyForTracks = new CorrectTowerEnergyForTracks();
 
   return kStOk;
 }

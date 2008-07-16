@@ -1,4 +1,4 @@
-// $Id: CorrectTowerEnergyForTracks.cxx,v 1.6 2008/07/14 23:07:29 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.cxx,v 1.7 2008/07/16 22:28:28 tai Exp $
 #include "CorrectTowerEnergyForTracks.h"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
@@ -7,9 +7,9 @@ namespace StSpinJet {
 
 const int CorrectTowerEnergyForTracks::mNOfBemcTowers;
 
-CorrectTowerEnergyForTracks::CorrectTowerEnergyForTracks()
-{
-
+TowerEnergyList CorrectTowerEnergyForTracks::operator()(const TowerEnergyList &energyDepositList, const TrackList& trackList)
+ {
+   return Do(energyDepositList, trackList);
 }
 
 TowerEnergyList CorrectTowerEnergyForTracks::Do(const TowerEnergyList &energyDepositList, const TrackList& trackList)

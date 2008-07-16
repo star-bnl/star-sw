@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCEnergyCut.h,v 1.6 2008/07/13 09:37:59 tai Exp $
+// $Id: StJetBEMCEnergyCut.h,v 1.7 2008/07/16 22:28:29 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETBEMCENERGYCUT_H
 #define STJETBEMCENERGYCUT_H
@@ -15,7 +15,7 @@ public:
   StJetBEMCEnergyCut() { }
   virtual ~StJetBEMCEnergyCut() { }
   
-  TowerEnergyList Apply(const TowerEnergyList& energyList);
+  TowerEnergyList operator()(const TowerEnergyList& energyList);
 
   void addCut(StJetTowerEnergyCut::TowerEnergyCut* cut) {
     _cutList.push_back(cut);
