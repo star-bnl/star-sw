@@ -1,11 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: TowerEnergyList.h,v 1.6 2008/07/13 05:36:47 tai Exp $
+// $Id: TowerEnergyList.h,v 1.7 2008/07/16 18:18:19 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYLIST_H
 #define TOWERENERGYLIST_H
 
 #include <vector>
 #include <ostream>
+#include <cmath>
 
 namespace StSpinJet {
 
@@ -41,7 +42,7 @@ inline bool operator==(const TowerEnergy& v1, const TowerEnergy& v2)
   if(v1.vertexX    != v2.vertexX)    return false;	  
   if(v1.vertexY    != v2.vertexY)    return false;	  
   if(v1.vertexZ    != v2.vertexZ)    return false;	  
-  if(v1.energy     != v2.energy)     return false;	  
+  if(fabs(v1.energy - v2.energy) > 0.0001*fabs(v1.energy))     return false;	  
   if(v1.adc        != v2.adc)        return false;	  
   if(v1.pedestal   != v2.pedestal)   return false;	  
   if(v1.rms        != v2.rms)        return false;	  
@@ -62,7 +63,7 @@ inline bool operator==(const TowerEnergyList& v1, const TowerEnergyList& v2){
 
 inline std::ostream& operator<<(std::ostream& out, const TowerEnergy& v)
 {
-  out << "towerId: " << v.towerId << ", evergy: " << v.energy << ", .... ";
+  out << "towerId: " << v.towerId << ", energy: " << v.energy << ", .... ";
   return out;
 }
 
