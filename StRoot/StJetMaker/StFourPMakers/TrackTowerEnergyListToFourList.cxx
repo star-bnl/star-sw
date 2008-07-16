@@ -1,4 +1,4 @@
-// $Id: TrackTowerEnergyListToFourList.cxx,v 1.2 2008/07/16 03:54:32 tai Exp $
+// $Id: TrackTowerEnergyListToFourList.cxx,v 1.3 2008/07/16 05:36:53 tai Exp $
 #include "TrackTowerEnergyListToFourList.h"
 
 #include "TLorentzVectorWithId.h"
@@ -7,7 +7,7 @@
 
 namespace StSpinJet {
 
-TClonesArray TrackTowerEnergyListToFourList::operator()(const std::pair<TrackList, TowerEnergyList>& inList)
+TObjArray TrackTowerEnergyListToFourList::operator()(const std::pair<TrackList, TowerEnergyList>& inList)
 {
   const TrackList& trackList = inList.first;
   const TowerEnergyList& energyList = inList.second;
@@ -15,16 +15,16 @@ TClonesArray TrackTowerEnergyListToFourList::operator()(const std::pair<TrackLis
   TrackToTLorentzVectorWithId track2p4;
   TowerEnergyToTLorentzVectorWithId tower2p4;
 
-  TClonesArray ret("TLorentzVectorWithId", 10000);
+  TObjArray ret(40000);
   Int_t iPar(0);
   for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
-    new(ret[iPar]) TLorentzVectorWithId(track2p4(*track));
+    ret[iPar] = new TLorentzVectorWithId(track2p4(*track));
     ((TLorentzVectorWithId*)ret[iPar])->particleId = iPar + 1;
     ++iPar;
   }
 
   for(TowerEnergyList::const_iterator tower = energyList.begin(); tower != energyList.end(); ++tower) {
-    new(ret[iPar]) TLorentzVectorWithId(tower2p4(*tower));
+    ret[iPar] = new TLorentzVectorWithId(tower2p4(*tower));
     ((TLorentzVectorWithId*)ret[iPar])->particleId = iPar + 1;
     ++iPar;
   }

@@ -1,12 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: TLorentzVectorForJet.h,v 1.1 2008/07/16 03:54:31 tai Exp $
+// $Id: TLorentzVectorForJet.h,v 1.2 2008/07/16 05:36:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TLORENTZVECTORFORJET_H
 #define TLORENTZVECTORFORJET_H
 
 #include "TLorentzVectorWithId.h"
 
-#include <TClonesArray.h>
+#include <TObjArray.h>
 
 class TLorentzVectorForJet : public TLorentzVector {
 
@@ -14,14 +14,23 @@ public:
   TLorentzVectorForJet(const TLorentzVectorForJet& p) 
     : TLorentzVector(p)
     , runNumber(p.runNumber), eventId(p.eventId), jetId(p.jetId)
-    , particleList(p.particleList) { }
+    , particleList(p.particleList)
+  {
+    particleList.SetOwner(kTRUE);
+  }
 
-  TLorentzVectorForJet() 
-    : particleList("TLorentzVectorWithId", 100000) { }
+  TLorentzVectorForJet()
+    : particleList(1000)
+  {
+    particleList.SetOwner(kTRUE);
+  }
 
   TLorentzVectorForJet(const TLorentzVector& p)
     : TLorentzVector(p)
-    , particleList("TLorentzVectorWithId", 100000) { }
+    , particleList(1000)
+  {
+    particleList.SetOwner(kTRUE);
+  }
 
   virtual ~TLorentzVectorForJet()
   {
@@ -32,7 +41,7 @@ public:
   Int_t    eventId;
   Int_t    jetId;
 
-  TClonesArray particleList;
+  TObjArray particleList;
 
   ClassDef(TLorentzVectorForJet, 1)
 };

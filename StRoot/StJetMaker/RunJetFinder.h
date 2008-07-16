@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: RunJetFinder.h,v 1.1 2008/07/16 03:54:25 tai Exp $
+// $Id: RunJetFinder.h,v 1.2 2008/07/16 05:36:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef RUNJETFINDER_HH
 #define RUNJETFINDER_HH
@@ -12,7 +12,7 @@
 class StJetPars;
 class StJetFinder;
 
-class TClonesArray;
+class TObjArray;
 
 namespace StSpinJet {
 
@@ -25,7 +25,7 @@ public:
 
   void Init();
 
-  TClonesArray operator()(const TClonesArray& fourList);
+  TObjArray operator()(const TObjArray& fourList);
 
 private:
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackTowerEnergyListToFourList.h,v 1.1 2008/07/15 08:39:07 tai Exp $
+// $Id: TrackTowerEnergyListToFourList.h,v 1.2 2008/07/16 05:36:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKTOWERENERGYLISTTOFOURLIST_H
 #define TRACKTOWERENERGYLISTTOFOURLIST_H
@@ -7,7 +7,7 @@
 #include "TrackList.h"
 #include "TowerEnergyList.h"
 
-#include <TClonesArray.h>
+#include <TObjArray.h>
 
 #include <utility>
 
@@ -17,7 +17,7 @@ class TrackTowerEnergyListToFourList {
 
 public:
 
-  TClonesArray operator()(const std::pair<TrackList, TowerEnergyList>& inList);
+  TObjArray operator()(const std::pair<TrackList, TowerEnergyList>& inList);
 
 
 };
