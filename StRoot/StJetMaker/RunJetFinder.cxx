@@ -1,4 +1,4 @@
-// $Id: RunJetFinder.cxx,v 1.1 2008/07/16 03:54:22 tai Exp $
+// $Id: RunJetFinder.cxx,v 1.2 2008/07/16 05:36:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "RunJetFinder.h"
 
@@ -10,7 +10,7 @@
 #include <TLorentzVectorWithId.h>
 #include <TLorentzVectorForJet.h>
 
-#include <TClonesArray.h>
+#include <TObjArray.h>
 
 #include <iostream>
 
@@ -27,7 +27,7 @@ void RunJetFinder::Init()
   _jetFinder->Init();
 }
 
-TClonesArray RunJetFinder::operator()(const TClonesArray& fourList)
+TObjArray RunJetFinder::operator()(const TObjArray& fourList)
 {
   typedef std::list<StProtoJet> ProtoJetList;
   typedef std::vector<const AbstractFourVec*> ParticleList;
@@ -43,7 +43,7 @@ TClonesArray RunJetFinder::operator()(const TClonesArray& fourList)
 
   _jetFinder->findJets(protoJetList, particleList);
 
-  TClonesArray ret("TLorentzVectorForJet", 10000);
+  TObjArray ret;
 
   size_t iJet = 0;
   for(list<StProtoJet>::iterator it = protoJetList.begin(); it != protoJetList.end(); ++it) {
@@ -51,7 +51,7 @@ TClonesArray RunJetFinder::operator()(const TClonesArray& fourList)
 
     TLorentzVector p;
     p.SetPtEtaPhiM(protoJet.pt(), protoJet.eta(), protoJet.phi(), protoJet.mass());
-    new(ret[iJet]) TLorentzVectorForJet(p);
+    ret[iJet] = new TLorentzVectorForJet(p);
     ((TLorentzVectorForJet*)ret[iJet])->jetId = iJet + 1;
 
     ParticleList parList = protoJet.list();
@@ -60,7 +60,7 @@ TClonesArray RunJetFinder::operator()(const TClonesArray& fourList)
       TLorentzVectorWithId part = (dynamic_cast<const FourVecWithId*>(*it))->vec();
       ((TLorentzVectorForJet*)ret[iJet])->runNumber = part.runNumber;
       ((TLorentzVectorForJet*)ret[iJet])->eventId   = part.eventId;
-      new(((TLorentzVectorForJet*)ret[iJet])->particleList[iPart]) TLorentzVectorWithId(part);
+      ((TLorentzVectorForJet*)ret[iJet])->particleList[iPart] = new TLorentzVectorWithId(part);
       ++iPart;
     }
 
