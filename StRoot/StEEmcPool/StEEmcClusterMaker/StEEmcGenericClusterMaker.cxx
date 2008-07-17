@@ -243,12 +243,12 @@ void StEEmcGenericClusterMaker::makeClusterMap()
 void StEEmcGenericClusterMaker::makeTrackMap()
 {
 
-  LOG_DEBUG << GetName() << " -I- entering makeTrackMap()" << endm;
+  gMessMgr->Info() << GetName() << " -I- entering makeTrackMap()" << endm;
 
   StMuDstMaker *maker = (StMuDstMaker*)GetMaker("MuDst");
   if ( !maker )
     {
-      LOG_DEBUG << GetName() << " -I- mudst maker not in chain?" << endm;
+      gMessMgr->Info() << GetName() << " -I- mudst maker not in chain?" << endm;
       return;
     }
 
@@ -259,7 +259,7 @@ void StEEmcGenericClusterMaker::makeTrackMap()
   //--
   Int_t nprimary = (Int_t)mudst->numberOfPrimaryTracks();
 
-  LOG_DEBUG<<" checking nprimary="<<nprimary<< " tracks"<<endm;
+  LOG_INFO<<" checking nprimary="<<nprimary<< " tracks"<<endm;
 
   for ( Int_t iprimary = 0; iprimary < nprimary; iprimary++ )
     {
@@ -279,7 +279,7 @@ void StEEmcGenericClusterMaker::makeTrackMap()
 		  StEEmcCluster mycluster = cluster(sec,layer,ii);
 		  if ( match(mycluster, track) )
 		    {
-		      LOG_DEBUG << GetName() << " -I- matched cluster to track in layer=" << layer << endm;		  
+		      gMessMgr->Info() << GetName() << " -I- matched cluster to track in layer=" << layer << endm;		  
 		      //mycluster.print();
 		      //std::cout << "cluster: eta=" << mycluster.momentum().Eta() << " phi=" << mycluster.momentum().Phi() << std::endl;
 		      //std::cout << "track:   eta=" << track->eta() << " phi=" << track->phi() << std::endl;
@@ -320,7 +320,7 @@ void StEEmcGenericClusterMaker::makeTrackMap()
 		  StEEmcCluster mycluster = cluster(sec,layer,ii);
 		  if ( matchBackgroundTrack(mycluster, track) )
 		    {
-		      LOG_DEBUG << GetName() << " -I- matched cluster to background track in layer=" << layer << endm;		  
+		      gMessMgr->Info() << GetName() << " -I- matched cluster to background track in layer=" << layer << endm;		  
 		      //mycluster.print();
 		      //std::cout << "cluster: eta=" << mycluster.momentum().Eta() << " phi=" << mycluster.momentum().Phi() << std::endl;
 		      //std::cout << "track:   eta=" << track->eta() << " phi=" << track->phi() << std::endl;

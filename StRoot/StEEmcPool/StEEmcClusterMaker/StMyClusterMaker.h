@@ -129,9 +129,6 @@ class StMyClusterMaker : public StEEmcGenericClusterMaker, public StMyClusterPar
   /// control flag which activates the cut.
   void setFloor( Float_t relative_yield, Float_t width ){ mFloorParams[0]=relative_yield; mFloorParams[1]=width; }
 
-    virtual const char* GetCVS() const
-	        {static const char cvs[]="Tag $Name:  $ $Id: StMyClusterMaker.h,v 1.4 2008/06/30 21:15:24 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
-
 
  private:
  protected:

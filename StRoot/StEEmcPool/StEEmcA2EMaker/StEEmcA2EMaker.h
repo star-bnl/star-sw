@@ -128,10 +128,6 @@ class StEEmcA2EMaker : public StMaker {
   /// Set a "scale" parameter for reconstructing MC.  Energies
   /// will be multiplied by scale.
   void scale(Float_t s){ mScale=s; }
-
-  virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.3 2008/06/30 21:15:09 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
-
   
   private:
   protected:

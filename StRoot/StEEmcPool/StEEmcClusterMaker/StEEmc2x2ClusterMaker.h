@@ -129,9 +129,6 @@ class StEEmc2x2ClusterMaker : public StEEmcGenericClusterMaker, public StEEmc2x2
   /// control flag which activates the cut.
   void setFloor( Float_t relative_yield, Float_t width ){ mFloorParams[0]=relative_yield; mFloorParams[1]=width; }
 
-    virtual const char* GetCVS() const
-	        {static const char cvs[]="Tag $Name:  $ $Id: StEEmc2x2ClusterMaker.h,v 1.2 2008/06/30 21:15:23 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
-
 
  private:
  protected:
