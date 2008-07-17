@@ -982,14 +982,17 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
     hm,hw,gm,gw,pm,pw,gm1,gw1,spc,dcc,evc,epsec,gme,gwe) << endm;
 
   if (code>0) {
-    LOG_ERROR << "CheckFail: BAD SpaceCharge performance! code = " << code << endm;
+    LOG_ERROR << "CheckFail: Break of SpaceCharge performance! code = " << code << endm;
   }
 
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.19 2008/07/16 03:42:15 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.20 2008/07/17 23:35:33 jeromel Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.20  2008/07/17 23:35:33  jeromel
+// Small format change
+//
 // Revision 1.19  2008/07/16 03:42:15  genevb
 // Use CheckFail in failed performance check error message
 //
