@@ -1397,7 +1397,7 @@ Double_t StMCAsymMaker::getPartonicALL(double s, double t, double u, int sub, in
     //Werner definitions:
     //1: qq'->qq' (qqbar'->qqbar') 2: qq->qq   3: qqbar->q'qbar'  4: qqbar->qqbar 5: qqbar->gg   6: gg->qqbar  7: qg->qg   8: gg->gg
     //PYTHIA definitions:
-    //1: 11a                       2:11b       3: 12a             4:12b           5: 13          6: 53         7: 28       8: 68
+    //1: 11a                       2:11b       3: 12a             4:11 and 12b    5: 13          6: 53         7: 28       8: 68
     //NOTES:
     // 3==5==6==-1  1==7  1!=2 and 1!=4
 
@@ -1421,7 +1421,10 @@ Double_t StMCAsymMaker::getPartonicALL(double s, double t, double u, int sub, in
 
 
     if ((sub==11)&&(abs(inA)!=abs(inB))) all=N1/D1;
-    if ((sub==11)&&(abs(inA)==abs(inB))) all=N2/D2;
+    if ((sub==11)&&(inA==inB)&&(outA==outB)) all=N2/D2;
+    //This line added as bug fix 07/17/08 RHF
+    //Before then these events given all=N2/D2
+    if ((sub==11)&&(inA==(-1*inB))&&(outA==(-1*outB))&&(inA==outA)&&(inB==outB)) all=N4/D4;
     if ((sub==12)&&(abs(inA)!=abs(outA))) all=N3/D3;
     if ((sub==12)&&(abs(inA)==abs(outA))) all=N4/D4;
     if (sub==13) all=N5/D5;
