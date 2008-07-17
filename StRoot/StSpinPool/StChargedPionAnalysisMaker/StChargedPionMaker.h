@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.h,v 1.8 2008/01/21 23:19:46 kocolosk Exp $
+* $Id: StChargedPionMaker.h,v 1.9 2008/07/17 17:06:31 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.h,v $
+* Revision 1.9  2008/07/17 17:06:31  kocolosk
+* big-bang integration StChargedPionMcEvent framework
+*
 * Revision 1.8  2008/01/21 23:19:46  kocolosk
 * store geomTriggers in jet and work with new trigger emulator
 *
@@ -51,64 +54,79 @@ class TTree;
 class TClonesArray;
 class TString;
 
-class StMuDstMaker;
-class StSpinDbMaker;
 class StEmcTriggerMaker;
 class StJetMaker;
+// class StMCAsymMaker;
+class StMuDstMaker;
+class StSpinDbMaker;
 class StTriggerSimuMaker;
 
-class StMuTrack;
-class StJetSkimEvent;
-class StJet;
+// class StJet;
 class StJets;
-class TrackToJetIndex;
+// class StJetSkimEvent;
+// class StMcEvent;
+class StMiniMcEvent;
+// class StMuTrack;
+// class StPythiaEvent;
+// class TrackToJetIndex;
+
+class StChargedPionBaseEv;
 class StChargedPionEvent;
-class StChargedPionTrack;
 class StChargedPionJet;
+class StChargedPionMcEvent;
+class StChargedPionTrack;
 
 class StChargedPionMaker : public StMaker {
 public:
     StChargedPionMaker(const char *name = "chargedPionMaker", const char *outfile = "test.tracks.root");
     virtual ~StChargedPionMaker();
     
-    virtual void Clear(const char *option="");
-    virtual Int_t Init();
-    virtual Int_t InitRun(int runnumber);
-    virtual Int_t Make();
-    virtual Int_t Finish();
+    void Clear(const char *option="");
+    Int_t Init();
+    Int_t InitRun(int runnumber);
+    Int_t Make();
+    Int_t Finish();
     
-    static void translateEvent(StJetSkimEvent *skimEvent, StChargedPionEvent *ev);
-    static void translateJet(StJet* oldJet, vector<TrackToJetIndex*> particles, StChargedPionJet* jet);
-    static void translateJets(StJets* jets, StChargedPionEvent *ev);
+    void addTrigger(int trigId);
     
-    virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.8 2008/01/21 23:19:46 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
+    const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.9 2008/07/17 17:06:31 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 private:
     TFile *mFile;                           //!
     TTree *mTree;                           //!
-    StChargedPionEvent *mEvent;             //!
+    StChargedPionBaseEv *mEvent;            //!
     
     TFile *mJetFile;                        //!
     TTree *mJetTree;                        //!
     StJets *mJets;                          //!
+    StJets *mPyJets;                        //!
     
     TH1 *mBadTracks;                        //!
     enum badTrackTypes {kFlagged=1, kBadHelix, kBadOuterHelix, kMissingGlobal};
     
-    TString currentFile;                    //!
+    TString mCurrentFile;                   //!
+        
+    TFile *mMiniMcFile;                     //!
+    TTree *mMiniMcTree;                     //!
+    StMiniMcEvent *mMiniMcEvent;            //!
 
     //pointers to makers - get them in Init()
-    StMuDstMaker *muDstMaker;               //!
-    StSpinDbMaker *spDbMaker;               //!
-    StEmcTriggerMaker *emcTrgMaker;         //!
-    StJetMaker *jetMaker;                   //!
-    StTriggerSimuMaker *trigSimuMaker;      //!
+    StMuDstMaker *mMuDstMk;                 //!
+    StSpinDbMaker *mSpDbMk;                 //!
+    StEmcTriggerMaker *mEmcTrgMk;           //!
+    StJetMaker *mJetMk;                     //!
+    StTriggerSimuMaker *mTrgSimuMk;         //!
+    // StMCAsymMaker *mAsymMk;                 //!
     
-    //translate StMuTrack into StChargedPionTrack so we can read it anywhere
-    StChargedPionTrack & chargedPionTrack(StMuTrack *track);
+    vector<int> mTriggers;                  //!
+    
+    void makeTriggerSimu(StChargedPionBaseEv*);
     
     ClassDef(StChargedPionMaker,1)
 };
+
+inline void StChargedPionMaker::
+addTrigger(int trigId) { mTriggers.push_back(trigId); }
 
 #endif
