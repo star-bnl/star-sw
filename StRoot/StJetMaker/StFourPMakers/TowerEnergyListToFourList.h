@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: EnergyListToFourList.h,v 1.4 2008/07/15 03:42:24 tai Exp $
+// $Id: TowerEnergyListToFourList.h,v 1.1 2008/07/17 06:36:41 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef ENERGYLISTTOFOURLIST_H
-#define ENERGYLISTTOFOURLIST_H
+#ifndef TOWERENERGYLISTTOFOURLIST_H
+#define TOWERENERGYLISTTOFOURLIST_H
 
 #include <TowerEnergyList.h>
 
@@ -13,11 +13,11 @@ namespace StSpinJet {
 
 class TowerEnergyToTLorentzVector;
 
-class EnergyListToFourList {
+class TowerEnergyListToFourList {
 
 public:
-  EnergyListToFourList();
-  virtual ~EnergyListToFourList() { }
+  TowerEnergyListToFourList();
+  virtual ~TowerEnergyListToFourList() { }
 
   FourList operator()(const TowerEnergyList& energyDepositList);
 
@@ -30,4 +30,4 @@ private:
 }
 
 
-#endif // ENERGYLISTTOFOURLIST_H
+#endif // TOWERENERGYLISTTOFOURLIST_H
