@@ -1,4 +1,4 @@
-// $Id: TrackListToFourList.cxx,v 1.4 2008/07/15 04:19:53 tai Exp $
+// $Id: TrackListToFourList.cxx,v 1.5 2008/07/17 07:34:15 tai Exp $
 #include "TrackListToFourList.h"
 
 #include "TrackToTLorentzVector.h"
@@ -51,8 +51,8 @@ StMuTrackEmu* TrackListToFourList::createTrackEmu(const Track& track)
   ret->_dcaD	       =  track.dcaD	     ;
   ret->_BField	       =  track.BField	     ;
   ret->_bemcRadius     =  track.bemcRadius   ;
-  ret->_etaext	       =  track.etaext	     ;
-  ret->_phiext	       =  track.phiext	     ;
+  ret->_etaext	       =  track.exitEta      ;
+  ret->_phiext	       =  track.exitPhi      ;
   ret->_dEdx	       =  track.dEdx	     ;
   ret->_trackIndex     =  track.trackIndex   ;
   ret->_id             =  track.id           ;

@@ -1,4 +1,4 @@
-// $Id: StJetTPCTxt.cxx,v 1.6 2008/07/13 10:02:34 tai Exp $
+// $Id: StJetTPCTxt.cxx,v 1.7 2008/07/17 07:34:14 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetTPCTxt.h"
 
@@ -77,8 +77,8 @@ TrackList StJetTPCTxt::getTrackList()
 	>> track.dcaD
 	>> track.BField
 	>> track.bemcRadius
-	>> track.etaext
-	>> track.phiext
+	>> track.exitEta
+	>> track.exitPhi
 	>> track.dEdx
 	>> track.trackIndex
 	>> track.id;

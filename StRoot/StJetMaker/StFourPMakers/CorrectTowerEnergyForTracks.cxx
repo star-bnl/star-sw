@@ -1,4 +1,4 @@
-// $Id: CorrectTowerEnergyForTracks.cxx,v 1.7 2008/07/16 22:28:28 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.cxx,v 1.8 2008/07/17 07:34:14 tai Exp $
 #include "CorrectTowerEnergyForTracks.h"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
@@ -42,7 +42,7 @@ void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const Track& track)
 {
   int id = 0;
 
-  if(StEmcGeom::instance("bemc")->getId(track.phiext, track.etaext, id) == 0)
+  if(StEmcGeom::instance("bemc")->getId(track.exitPhi, track.exitEta, id) == 0)
     mNtracksOnTower[id]++;
 }
 

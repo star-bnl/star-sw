@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTrackMaker.h,v 1.2 2008/07/13 06:04:35 tai Exp $
+// $Id: StJetTPCTrackMaker.h,v 1.3 2008/07/17 07:34:11 tai Exp $
 #ifndef STJETTPCTRACKMAKER_HH
 #define STJETTPCTRACKMAKER_HH
 
@@ -29,7 +29,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetTPCTrackMaker.h,v 1.2 2008/07/13 06:04:35 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetTPCTrackMaker.h,v 1.3 2008/07/17 07:34:11 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -41,9 +41,10 @@ private:
 
   TTree* _tree;
 
-  Int_t _runNumber;
-  Int_t _eventId;
-  Int_t _nTracks;
+  Int_t    _runNumber;
+  Int_t    _eventId;
+  Int_t    _detectorId; // 1: TPC
+  Int_t    _nTracks;
   Double_t _pt[4096];
   Double_t _eta[4096];
   Double_t _phi[4096];
@@ -59,8 +60,10 @@ private:
   Double_t _dcaD[4096];
   Double_t _BField[4096];
   Double_t _bemcRadius[4096];
-  Double_t _etaext[4096];
-  Double_t _phiext[4096];
+  Int_t    _exitDetectorId[4096]; // 9: BEMC, 13: EEMC
+  Int_t    _exitTowerId[4096];
+  Double_t _exitEta[4096];
+  Double_t _exitPhi[4096];
   Double_t _dEdx[4096];
   Int_t    _trackIndex[4096];
   Short_t  _trackId[4096];
