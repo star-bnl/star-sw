@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.27 2007/12/22 20:31:20 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.28 2008/07/17 22:50:52 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,10 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.28  2008/07/17 22:50:52  calderon
+ * Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
+ * This cut was affecting heavy particles thrown flat in rapidity for embedding.
+ *
  * Revision 1.27  2007/12/22 20:31:20  calderon
  * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
  *
@@ -133,6 +137,10 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.28  2008/07/17 22:50:52  calderon
+ * Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
+ * This cut was affecting heavy particles thrown flat in rapidity for embedding.
+ *
  * Revision 1.27  2007/12/22 20:31:20  calderon
  * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
  *
@@ -254,7 +262,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.27 2007/12/22 20:31:20 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.28 2008/07/17 22:50:52 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -2094,9 +2102,14 @@ StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
 Bool_t
 StMiniMcMaker::acceptRaw(StMcTrack* mcTrack)
 {
-  return (mcTrack &&
+  return (mcTrack);
+  // commented out the cuts below, as they made sense for
+  // single particle spectra in the TPC, but minimc is now
+  // more general, so as long as there is a valid track pointer
+  // we take it.
+  //return (mcTrack &&
 	  //	  mcTrack->particleDefinition()->charge()!=0&&
-	  fabs(mcTrack->momentum().pseudoRapidity())<=4.);	  
+          //fabs(mcTrack->momentum().pseudoRapidity())<=4.);	  
 }
 
 /*
@@ -2495,6 +2508,10 @@ size_t StMiniMcMaker::getIndex(size_t mult) {
 }
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.28  2008/07/17 22:50:52  calderon
+// Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
+// This cut was affecting heavy particles thrown flat in rapidity for embedding.
+//
 // Revision 1.27  2007/12/22 20:31:20  calderon
 // Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
 //
