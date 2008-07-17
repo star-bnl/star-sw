@@ -7,18 +7,15 @@ using std::string;
 #include <vector>
 using std::vector;
 
-#include <map>
-using std::map;
-
-#include "TObject.h"
 #include "TClonesArray.h"
 #include "StEvent/StRunInfo.h"
+#include "StChargedPionBaseEv.h"
 
 class StChargedPionVertex;
 class StChargedPionTrack;
 class StChargedPionJet;
 
-class StChargedPionEvent : public TObject
+class StChargedPionEvent : public StChargedPionBaseEv
 {
 public:
     StChargedPionEvent();
@@ -48,7 +45,6 @@ public:
     bool isTrigger(unsigned int trigId) const;
     bool isSimuTrigger(unsigned int trigId) const;
     float prescale(unsigned int trigId) const;
-    static unsigned int triggerBit(unsigned int trigId);
     
     int highTowerAdc(short towerId) const;
     int triggerPatchAdc(short patchId) const;
@@ -116,7 +112,6 @@ private:
     
     string mMuDstName;
     
-    static map<unsigned int, unsigned int> mTriggerLookup; //!
     map<unsigned int, float> mTriggerPrescales;
     UInt_t mTriggerBits;
     UInt_t mSimuTriggerBits;
@@ -133,9 +128,13 @@ private:
     TClonesArray *mTracks;
     TClonesArray *mJets;
     
-    enum {kIsPolValid=0x01, kIsPolLong=0x02, kIsPolTrans=0x04, kIsBxingMasked=0x8, kNullOffset=0x10}; //!
+    enum {kIsPolValid=0x01, 
+          kIsPolLong=0x02, 
+          kIsPolTrans=0x04, 
+          kIsBxingMasked=0x8, 
+          kNullOffset=0x10}; //!
     
-    ClassDef(StChargedPionEvent,3)
+    ClassDef(StChargedPionEvent,4)
 };
 
 inline unsigned int StChargedPionEvent::runId() const { return mRunId; }
@@ -152,17 +151,32 @@ inline bool StChargedPionEvent::isPolTrans() const { return mSpinQA & kIsPolTran
 inline bool StChargedPionEvent::isBxingMasked() const { return mSpinQA & kIsBxingMasked; }
 inline bool StChargedPionEvent::isNullOffset() const { return mSpinQA & kNullOffset; }
 
-inline unsigned int StChargedPionEvent::nVertices() const { return mVertices->GetEntriesFast(); }
-inline TClonesArray* StChargedPionEvent::vertices() { return mVertices; }
-inline const TClonesArray* StChargedPionEvent::vertices() const { return mVertices; }
+inline unsigned int StChargedPionEvent::
+nVertices() const { return mVertices->GetEntriesFast(); }
 
-inline unsigned int StChargedPionEvent::nTracks() const { return mTracks->GetEntriesFast(); }
-inline TClonesArray* StChargedPionEvent::tracks() { return mTracks; }
-inline const TClonesArray* StChargedPionEvent::tracks() const { return mTracks; }
+inline TClonesArray* StChargedPionEvent::
+vertices() { return mVertices; }
 
-inline unsigned int StChargedPionEvent::nJets() const { return mJets->GetEntriesFast(); }
-inline TClonesArray* StChargedPionEvent::jets() { return mJets; }
-inline const TClonesArray* StChargedPionEvent::jets() const { return mJets; }
+inline const TClonesArray* StChargedPionEvent::
+vertices() const { return mVertices; }
+
+inline unsigned int StChargedPionEvent::
+nTracks() const { return mTracks->GetEntriesFast(); }
+
+inline TClonesArray* StChargedPionEvent::
+tracks() { return mTracks; }
+
+inline const TClonesArray* StChargedPionEvent::
+tracks() const { return mTracks; }
+
+inline unsigned int StChargedPionEvent::
+nJets() const { return mJets->GetEntriesFast(); }
+
+inline TClonesArray* StChargedPionEvent::
+jets() { return mJets; }
+
+inline const TClonesArray* StChargedPionEvent::
+jets() const { return mJets; }
 
 inline void StChargedPionEvent::setRunId(unsigned int a) { mRunId = a; }
 inline void StChargedPionEvent::setEventId(unsigned int a) { mEventId = a; }
@@ -171,17 +185,34 @@ inline void StChargedPionEvent::setBbcTimeBin(unsigned short a) { mBbcTimeBin = 
 inline void StChargedPionEvent::setMuDstName(const char* a) { mMuDstName = a; }
 inline void StChargedPionEvent::setRunInfo(const StRunInfo& a) { mRunInfo = a; }
 
-inline void StChargedPionEvent::setSpinBit(unsigned char a) { mSpinBit = a; }
-inline void StChargedPionEvent::setPolValid(bool a) { a ? mSpinQA |= kIsPolValid : mSpinQA &= ~kIsPolValid; }
-inline void StChargedPionEvent::setPolLong(bool a) { a ? mSpinQA |= kIsPolLong : mSpinQA &= ~kIsPolLong; }
-inline void StChargedPionEvent::setPolTrans(bool a) { a ? mSpinQA |= kIsPolTrans : mSpinQA &= ~kIsPolTrans; }
-inline void StChargedPionEvent::setBxingMasked(bool a) { a ? mSpinQA |= kIsBxingMasked : mSpinQA &= ~kIsBxingMasked; }
-inline void StChargedPionEvent::setBxingOffset(int a) { (a==0) ? mSpinQA |= kNullOffset : mSpinQA &= ~kNullOffset; }
+inline void StChargedPionEvent::
+setSpinBit(unsigned char a) { mSpinBit = a; }
 
-inline void StChargedPionEvent::setPrescale(unsigned int trigId, float prescale) { mTriggerPrescales[trigId] = prescale; }
+inline void StChargedPionEvent::
+setPolValid(bool a) { a ? mSpinQA |= kIsPolValid : mSpinQA &= ~kIsPolValid; }
 
-inline void StChargedPionEvent::addHighTower(short towerId, int ADC) { mHighTowers[towerId] = ADC; }
-inline void StChargedPionEvent::addTriggerPatch(short patchId, int ADC) { mTriggerPatches[patchId] = ADC; }
-inline void StChargedPionEvent::addJetPatch(short patchId, int ADC) { mJetPatches[patchId] = ADC; }
+inline void StChargedPionEvent::
+setPolLong(bool a) { a ? mSpinQA |= kIsPolLong : mSpinQA &= ~kIsPolLong; }
+
+inline void StChargedPionEvent::
+setPolTrans(bool a) { a ? mSpinQA |= kIsPolTrans : mSpinQA &= ~kIsPolTrans; }
+
+inline void StChargedPionEvent::
+setBxingMasked(bool a) { a ? mSpinQA |= kIsBxingMasked : mSpinQA &= ~kIsBxingMasked; }
+
+inline void StChargedPionEvent::
+setBxingOffset(int a) { (a==0) ? mSpinQA |= kNullOffset : mSpinQA &= ~kNullOffset; }
+
+inline void StChargedPionEvent::
+setPrescale(unsigned int trigId, float prescale) { mTriggerPrescales[trigId] = prescale; }
+
+inline void StChargedPionEvent::
+addHighTower(short towerId, int ADC) { mHighTowers[towerId] = ADC; }
+
+inline void StChargedPionEvent::
+addTriggerPatch(short patchId, int ADC) { mTriggerPatches[patchId] = ADC; }
+
+inline void StChargedPionEvent::
+addJetPatch(short patchId, int ADC) { mJetPatches[patchId] = ADC; }
 
 #endif
