@@ -1,4 +1,4 @@
-// $Id: TrackTowerEnergyListToFourList.cxx,v 1.3 2008/07/16 05:36:53 tai Exp $
+// $Id: TrackTowerEnergyListToFourList.cxx,v 1.4 2008/07/17 02:39:53 tai Exp $
 #include "TrackTowerEnergyListToFourList.h"
 
 #include "TLorentzVectorWithId.h"
@@ -9,9 +9,13 @@ namespace StSpinJet {
 
 TObjArray TrackTowerEnergyListToFourList::operator()(const std::pair<TrackList, TowerEnergyList>& inList)
 {
-  const TrackList& trackList = inList.first;
-  const TowerEnergyList& energyList = inList.second;
+  //  const TrackList& trackList = inList.first;
+  //  const TowerEnergyList& energyList = inList.second;
+  return operator()(inList.first, inList.second);
+}
 
+TObjArray TrackTowerEnergyListToFourList::operator()(const TrackList& trackList, const TowerEnergyList& energyList)
+{
   TrackToTLorentzVectorWithId track2p4;
   TowerEnergyToTLorentzVectorWithId tower2p4;
 
