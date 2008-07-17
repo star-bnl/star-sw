@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.2 2008/07/16 22:28:26 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.3 2008/07/17 02:19:09 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -18,6 +18,9 @@
 #include "TrackCutDcaPtDependent.h"
 #include "TrackCutEta.h"
 #include "TrackCutPossibleHitRatio.h"
+#include "TrackCutNHits.h"
+#include "TrackCutFlag.h"
+
 #include "StJetBEMCEnergyCut.h"
 #include "TowerEnergyCut2003BemcTower.h"
 #include "TowerEnergyCutBemcWestOnly.h"
@@ -25,9 +28,16 @@
 #include "TowerEnergyCutBemcStatus.h"
 #include "TowerEnergyCutAdc.h"
 
+#include "TrackList.h"
+#include "TowerEnergyList.h"
+
 #include <StJetTowerEnergyVariation.h>
 
 #include <CorrectTowerEnergyForTracks.h>
+
+#include "RunJetFinder.h"
+
+#include <StJetFinder/StConePars.h>
 
 #include <TTree.h>
 
@@ -59,29 +69,62 @@ Int_t StJetMakerII::Init()
 {
   StJetTreeEntryCoordinator* coord = _entryMaker->coordinator();
   TTree *treeTpc = dynamic_cast<TTree*>(coord->file()->Get("tpcTracks"));
-  StJetTPC* tpc = new StJetTPCTree(treeTpc, coord->indexMajor(), coord->indexMinor());
+  _tpc = new StJetTPCTree(treeTpc, coord->indexMajor(), coord->indexMinor());
 
   TTree *treeBemc = dynamic_cast<TTree*>(coord->file()->Get("bemcTowers"));
-  StJetBEMC* bemc = new StJetBEMCTree(treeBemc, coord->indexMajor(), coord->indexMinor());
+  _bemc = new StJetBEMCTree(treeBemc, coord->indexMajor(), coord->indexMinor());
 
-  StJetTPCTrackCut* tpcCut  = new StJetTPCTrackCut();
-  tpcCut->addCut(new TrackCutDca());
-  tpcCut->addCut(new TrackCutEta());
-  tpcCut->addCut(new TrackCutPossibleHitRatio());
+  _tpcCut1  = new StJetTPCTrackCut();
+  _tpcCut1->addCut(new TrackCutDca(3.0));
+  _tpcCut1->addCut(new TrackCutEta(-2.0, 2.0));
+  _tpcCut1->addCut(new TrackCutPossibleHitRatio(0.51));
 
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-  bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
-  bemcCut->addCut(new TowerEnergyCutEnergy());
-  bemcCut->addCut(new TowerEnergyCutBemcStatus());
-  bemcCut->addCut(new TowerEnergyCutAdc());
+  _bemcCut = new StJetBEMCEnergyCut();
+  _bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
+  _bemcCut->addCut(new TowerEnergyCutEnergy(0.0));
+  _bemcCut->addCut(new TowerEnergyCutBemcStatus(1));
+  _bemcCut->addCut(new TowerEnergyCutAdc(0, 2.0));
 
-  CorrectTowerEnergyForTracks* correctTowerEnergyForTracks = new CorrectTowerEnergyForTracks();
+  _towerEnergyCorrectionForTracks = new CorrectTowerEnergyForTracks();
+
+  _tpcCut2  = new StJetTPCTrackCut();
+  _tpcCut2->addCut(new TrackCutFlag(0));
+  _tpcCut2->addCut(new TrackCutNHits(20));
+
+  _energyVariationNull    = new StJetTowerEnergyVariation(0);
+  _energyVariationPlus5   = new StJetTowerEnergyVariation(0.05);
+  _energyVariationMinus5  = new StJetTowerEnergyVariation(-0.05);
+  _energyVariationPlus10  = new StJetTowerEnergyVariation(0.1);
+  _energyVariationMinus10 = new StJetTowerEnergyVariation(-0.1);
+
+  StConePars* cpars = new StConePars();
+  cpars->setGridSpacing(56, -1.6, 1.6, 120, -3.141592613589793, 3.141592613589793);
+  cpars->setConeRadius(0.4);
+  cpars->setSeedEtMin(0.5);
+  cpars->setAssocEtMin(0.1);
+  cpars->setSplitFraction(0.5);
+  cpars->setPerformMinimization(true);
+  cpars->setAddMidpoints(true);
+  cpars->setRequireStableMidpoints(true);
+  cpars->setDoSplitMerge(true);
+  cpars->setDebug(false);
+  _jetFinder = new RunJetFinder(cpars);
+  _jetFinder->Init();
 
   return kStOk;
 }
 
 Int_t StJetMakerII::Make()
 {
+
+  TrackList trackList = _tpc->getTrackList();
+  TowerEnergyList energyList = _bemc->getEnergyList();
+
+  pair<TrackList, TowerEnergyList> trackAndEnergy = pair<TrackList, TowerEnergyList>(trackList, energyList);
+
+  TObjArray fourList = _toP4(trackAndEnergy);
+  fourList.SetOwner(kTRUE);
+
   return kStOk;
 }
 
