@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTree.h,v 1.2 2008/07/14 03:35:53 tai Exp $
+// $Id: StJetTPCTree.h,v 1.3 2008/07/17 07:51:44 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPCTREE_H
 #define STJETTPCTREE_H
@@ -30,9 +30,10 @@ private:
   const Int_t& _indexMajor;
   const Int_t& _indexMinor;
 
-  Int_t _runNumber;
-  Int_t _eventId;
-  Int_t _nTracks;
+  Int_t    _runNumber;
+  Int_t    _eventId;
+  Int_t    _detectorId; // 1: TPC
+  Int_t    _nTracks;
   Double_t _pt[4096];
   Double_t _eta[4096];
   Double_t _phi[4096];
@@ -48,11 +49,14 @@ private:
   Double_t _dcaD[4096];
   Double_t _BField[4096];
   Double_t _bemcRadius[4096];
-  Double_t _etaext[4096];
-  Double_t _phiext[4096];
+  Int_t    _exitDetectorId[4096]; // 9: BEMC, 13: EEMC
+  Int_t    _exitTowerId[4096];
+  Double_t _exitEta[4096];
+  Double_t _exitPhi[4096];
   Double_t _dEdx[4096];
   Int_t    _trackIndex[4096];
   Short_t  _trackId[4096];
+
 };
 
 }
