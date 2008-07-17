@@ -1,23 +1,26 @@
 // -*- mode: c++;-*-
-// $Id: FourVecWithId.h,v 1.2 2008/07/17 17:49:29 tai Exp $
-#ifndef FOURVECWITHID_H
-#define FOURVECWITHID_H
+// $Id: FourVecForJetFinder.h,v 1.1 2008/07/17 17:49:28 tai Exp $
+#ifndef FOURVECFORJETFINDER_H
+#define FOURVECFORJETFINDER_H
 
 #include "StJetFinder/AbstractFourVec.h"
 
-#include "TLorentzVectorWithId.h"
+#include "FourVecList.h"
+#include "TLorentzVector.h"
 
-class FourVecWithId : public AbstractFourVec {
+class FourVecForJetFinder : public AbstractFourVec {
 
 public:
     
-  FourVecWithId() { }
+  FourVecForJetFinder() { }
 
-  FourVecWithId(const TLorentzVectorWithId& p)
-    : _vec(p)
-  { }
+  FourVecForJetFinder(const StSpinJet::FourVec& p)
+    : _fourVec(p)
+  { 
+    _vec.SetPtEtaPhiM(p.pt, p.eta, p.phi, p.m);
+  }
 
-  virtual ~FourVecWithId() { }
+  virtual ~FourVecForJetFinder() { }
     
   double pt() const { return _vec.Pt(); }
   double px() const { return _vec.Px(); } 
@@ -34,11 +37,13 @@ public:
 
   double charge() const { return 0; }
 
-  TLorentzVectorWithId vec() const { return _vec; }
+  StSpinJet::FourVec fourVec() const { return _fourVec; }
 
 private:
 
-  TLorentzVectorWithId _vec;
+  TLorentzVector _vec;
+  StSpinJet::FourVec _fourVec;
+
 };
 
 #endif // FOURVECWITHID_H
