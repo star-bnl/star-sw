@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackList.h,v 1.5 2008/07/13 10:02:34 tai Exp $
+// $Id: TrackList.h,v 1.6 2008/07/17 07:34:15 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKLIST_H
 #define TRACKLIST_H
@@ -12,6 +12,7 @@ namespace StSpinJet {
 struct Track {
   int            runNumber;
   int            eventId;
+  int            detectorId; // 1: TPC
   double         pt;
   double         eta;
   double         phi;
@@ -27,8 +28,10 @@ struct Track {
   float          dcaD;
   double         BField;
   double         bemcRadius;
-  double         etaext;
-  double         phiext;
+  int            exitDetectorId; // 9: BEMC, 13: EEMC
+  int            exitTowerId;
+  double         exitEta;
+  double         exitPhi;
   double         dEdx;
   int            trackIndex;
   short          id;
@@ -38,28 +41,31 @@ typedef std::vector<Track> TrackList;
 
 inline bool operator==(const Track& v1, const Track& v2)
 {
-  if(v1.runNumber  != v2.runNumber)  return false;
-  if(v1.eventId    != v2.eventId)    return false;   
-  if(v1.pt         != v2.pt)         return false;  
-  if(v1.eta        != v2.eta)        return false;   
-  if(v1.phi        != v2.phi)        return false;   
-  if(v1.flag       != v2.flag)       return false;   
-  if(v1.nHits      != v2.nHits)      return false;   
-  if(v1.charge     != v2.charge)     return false;   
-  if(v1.nHitsPoss  != v2.nHitsPoss)  return false;   
-  if(v1.nHitsDedx  != v2.nHitsDedx)  return false;   
-  if(v1.nHitsFit   != v2.nHitsFit)   return false;   
-  if(v1.nSigmaPion != v2.nSigmaPion) return false;   
-  if(v1.Tdca       != v2.Tdca)       return false;   
-  if(v1.dcaZ       != v2.dcaZ)       return false;   
-  if(v1.dcaD       != v2.dcaD)       return false;   
-  if(v1.BField     != v2.BField)     return false;   
-  if(v1.bemcRadius != v2.bemcRadius) return false;   
-  if(v1.etaext     != v2.etaext)     return false;   
-  if(v1.phiext     != v2.phiext)     return false;   
-  if(v1.dEdx       != v2.dEdx)       return false;   
-  if(v1.trackIndex != v2.trackIndex) return false;   
-  if(v1.id         != v2.id)         return false;   
+  if(v1.runNumber      != v2.runNumber)      return false;
+  if(v1.eventId        != v2.eventId)        return false;   
+  if(v1.detectorId     != v2.detectorId)     return false;   
+  if(v1.pt             != v2.pt)             return false;  
+  if(v1.eta            != v2.eta)            return false;   
+  if(v1.phi            != v2.phi)            return false;   
+  if(v1.flag           != v2.flag)           return false;   
+  if(v1.nHits          != v2.nHits)          return false;   
+  if(v1.charge         != v2.charge)         return false;   
+  if(v1.nHitsPoss      != v2.nHitsPoss)      return false;   
+  if(v1.nHitsDedx      != v2.nHitsDedx)      return false;   
+  if(v1.nHitsFit       != v2.nHitsFit)       return false;   
+  if(v1.nSigmaPion     != v2.nSigmaPion)     return false;   
+  if(v1.Tdca           != v2.Tdca)           return false;   
+  if(v1.dcaZ           != v2.dcaZ)           return false;   
+  if(v1.dcaD           != v2.dcaD)           return false;   
+  if(v1.BField         != v2.BField)         return false;   
+  if(v1.bemcRadius     != v2.bemcRadius)     return false;   
+  if(v1.exitDetectorId != v2.exitDetectorId) return false;   
+  if(v1.exitTowerId    != v2.exitTowerId)    return false;   
+  if(v1.exitEta        != v2.exitEta)        return false;   
+  if(v1.exitPhi        != v2.exitPhi)        return false;   
+  if(v1.dEdx           != v2.dEdx)           return false;   
+  if(v1.trackIndex     != v2.trackIndex)     return false;   
+  if(v1.id             != v2.id)             return false;   
   return true;
   }
 

@@ -1,4 +1,4 @@
-// $Id: StJetTPCTree.cxx,v 1.2 2008/07/14 03:35:53 tai Exp $
+// $Id: StJetTPCTree.cxx,v 1.3 2008/07/17 07:34:14 tai Exp $
 #include "StJetTPCTree.h"
 
 #include <TTree.h>
@@ -67,8 +67,8 @@ TrackList StJetTPCTree::getTrackList()
     track.dcaD       = _dcaD[i];
     track.BField     = _BField[i];
     track.bemcRadius = _bemcRadius[i];
-    track.etaext     = _etaext[i];
-    track.phiext     = _phiext[i];
+    track.exitEta    = _etaext[i];
+    track.exitPhi    = _phiext[i];
     track.dEdx       = _dEdx[i];
     track.trackIndex = _trackIndex[i];
     track.id         = _trackId[i];

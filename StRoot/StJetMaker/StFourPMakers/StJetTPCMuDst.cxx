@@ -1,4 +1,4 @@
-// $Id: StJetTPCMuDst.cxx,v 1.5 2008/07/13 06:04:41 tai Exp $
+// $Id: StJetTPCMuDst.cxx,v 1.6 2008/07/17 07:34:14 tai Exp $
 #include "StJetTPCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -48,6 +48,7 @@ Track StJetTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magneti
 
   track.runNumber = _uDstMaker->muDst()->event()->runId();
   track.eventId = _uDstMaker->muDst()->event()->eventId();
+  track.detectorId = 1;
 
   TVector3 p(mutrack->momentum().x(), mutrack->momentum().y(), mutrack->momentum().z());
 
@@ -70,16 +71,26 @@ Track StJetTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magneti
 
   StThreeVectorD momentumAt, positionAt;
   StMuEmcPosition EmcPosition;
-  if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, track.BField, track.bemcRadius) ||
-      EmcPosition.trackOnEEmc(&positionAt, &momentumAt, mutrack))
+  if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, track.BField, track.bemcRadius))
     {
-      track.etaext = positionAt.pseudoRapidity();
-      track.phiext = positionAt.phi();
+      track.exitDetectorId = 9;
+      int id(0);
+      StEmcGeom::instance("bemc")->getId(track.exitPhi, track.exitEta, id);
+      track.exitTowerId = id;
+      track.exitEta = positionAt.pseudoRapidity();
+      track.exitPhi = positionAt.phi();
+    }
+  else if(EmcPosition.trackOnEEmc(&positionAt, &momentumAt, mutrack))
+    {
+      track.exitDetectorId = 13;
+      track.exitTowerId = 0; // todo 
+      track.exitEta = positionAt.pseudoRapidity();
+      track.exitPhi = positionAt.phi();
     }
   else
     {
-      track.etaext = -999;
-      track.phiext = -999;
+      track.exitEta = -999;
+      track.exitPhi = -999;
     }
 
 
