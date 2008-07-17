@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.3 2008/07/17 02:19:09 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.4 2008/07/17 02:39:51 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -28,6 +28,9 @@
 #include "TowerEnergyCutBemcStatus.h"
 #include "TowerEnergyCutAdc.h"
 
+#include "StJetFourListCut.h"
+#include "FourCutPt.h"
+
 #include "TrackList.h"
 #include "TowerEnergyList.h"
 
@@ -49,6 +52,7 @@ using namespace std;
 using namespace StSpinJet;
 using namespace StJetTowerEnergyCut;
 using namespace StJetTrackCut;
+using namespace StJetFourCut;
 
 ClassImp(StJetMakerII)
   
@@ -96,6 +100,9 @@ Int_t StJetMakerII::Init()
   _energyVariationMinus5  = new StJetTowerEnergyVariation(-0.05);
   _energyVariationPlus10  = new StJetTowerEnergyVariation(0.1);
   _energyVariationMinus10 = new StJetTowerEnergyVariation(-0.1);
+
+  _fourCut = new StJetFourListCut;
+  _fourCut->addCut(new FourCutPt(0.2));
 
   StConePars* cpars = new StConePars();
   cpars->setGridSpacing(56, -1.6, 1.6, 120, -3.141592613589793, 3.141592613589793);

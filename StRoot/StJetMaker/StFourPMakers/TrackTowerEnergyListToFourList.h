@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackTowerEnergyListToFourList.h,v 1.2 2008/07/16 05:36:53 tai Exp $
+// $Id: TrackTowerEnergyListToFourList.h,v 1.3 2008/07/17 02:39:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKTOWERENERGYLISTTOFOURLIST_H
 #define TRACKTOWERENERGYLISTTOFOURLIST_H
@@ -18,6 +18,7 @@ class TrackTowerEnergyListToFourList {
 public:
 
   TObjArray operator()(const std::pair<TrackList, TowerEnergyList>& inList);
+  TObjArray operator()(const TrackList& trackList, const TowerEnergyList& energyList);
 
 
 };
