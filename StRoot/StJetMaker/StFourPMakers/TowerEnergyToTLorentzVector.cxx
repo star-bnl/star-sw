@@ -1,8 +1,8 @@
-// $Id: TowerEnergyToTLorentzVector.cxx,v 1.3 2008/07/15 06:23:43 tai Exp $
+// $Id: TowerEnergyToTLorentzVector.cxx,v 1.4 2008/07/17 16:54:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "TowerEnergyToTLorentzVector.h"
 
-#include <TowerEnergyList.h>
+#include "TowerEnergyList.h"
 
 namespace StSpinJet {
 
