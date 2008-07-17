@@ -1,10 +1,10 @@
-// $Id: StBET4pMaker.cxx,v 1.65 2008/07/15 07:10:07 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.66 2008/07/17 06:36:40 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
 
 #include "TrackListToFourList.h"
-#include "EnergyListToFourList.h"
+#include "TowerEnergyListToFourList.h"
 
 #include "BemcEnergySumCalculator.h"
 #include "BemcEnergySumCalculatorBuilder.h"
@@ -30,7 +30,7 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _imp(0)
   , _bemcEnergySumCalculator(0)
   , _track2four(*(new TrackListToFourList))
-  , _energy2four(*(new EnergyListToFourList))
+  , _energy2four(*(new TowerEnergyListToFourList))
 { }
 
 StBET4pMaker::StBET4pMaker(const char* name, StJetTreeEntryMaker* maker)
@@ -44,7 +44,7 @@ StBET4pMaker::StBET4pMaker(const char* name, StJetTreeEntryMaker* maker)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
   , _track2four(*(new TrackListToFourList))
-  , _energy2four(*(new EnergyListToFourList))
+  , _energy2four(*(new TowerEnergyListToFourList))
 { }
 
 

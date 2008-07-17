@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.4 2008/07/17 02:39:51 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.5 2008/07/17 06:36:36 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -127,9 +127,7 @@ Int_t StJetMakerII::Make()
   TrackList trackList = _tpc->getTrackList();
   TowerEnergyList energyList = _bemc->getEnergyList();
 
-  pair<TrackList, TowerEnergyList> trackAndEnergy = pair<TrackList, TowerEnergyList>(trackList, energyList);
-
-  TObjArray fourList = _toP4(trackAndEnergy);
+  TObjArray fourList = _toP4(trackList, energyList);
   fourList.SetOwner(kTRUE);
 
   return kStOk;
