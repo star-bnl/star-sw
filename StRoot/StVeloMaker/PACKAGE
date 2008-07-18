@@ -1,5 +1,0 @@
-# $Id $
-# package StVeloMaker
-# author: 
-Library:libStVeloMaker.so:LIBS +=   -lStChain  -lStTableUtilities
-#Library:libStVeloMaker.so:LIBS +=   -lStChain  -lStTableUtilities
