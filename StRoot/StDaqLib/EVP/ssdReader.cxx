@@ -259,38 +259,36 @@ int OLDEVP::ssdReader(char *m)
 						// LOG(ERR,"Problems in RAW data in sector %d, RB %d, MZ %d - skipping...",
 						//    sec+1,rb+1,mz+1,0,0) ;
 					}
-
+					
 					// LOG(DBG,"SSD Raw data bank in sector %d, RB %d, MZ %d!",
 					//    sec+1,rb+1,mz+1,0,0) ;
 					continue ;
 				}
-
+				
 				if(mzp->banks[TPC_PEDR].len != 0) {	// pedestal data!
 					pedr = (struct TPCPEDR *)((u_int *)mzp + l2h32(mzp->banks[TPC_PEDR].off)) ; 
 
 					if(checkBank((char *)pedr,"SSDPEDR") < 0) assert(0);
-
+					
 					unpackRaw(rb, mz, 1,(char *)pedr) ;
-					ssd.mode = 1 ;	// pedestal data!
-			
-				}
-
-				if(mzp->banks[TPC_RMSR].len != 0) {	// RMS too 
-					rmsr = (struct TPCRMSR *)((u_int *)mzp + l2h32(mzp->banks[TPC_RMSR].off)) ; 
-
-					if(checkBank((char *)rmsr,"SSDRMSR") < 0) assert(0);
-
-					unpackRaw(rb, mz, 2, (char *)rmsr) ;
-					ssd.mode = 1 ;	// pedestal data!
-
-				}
-								
-			}
+					 ssd.mode = 1 ;
+				}	// pedestal data!
 				
-		}
+				
+				if(mzp->banks[TPC_RMSR].len != 0) {	// RMS too 
+				  rmsr = (struct TPCRMSR *)((u_int *)mzp + l2h32(mzp->banks[TPC_RMSR].off)) ; 
+				  
+				  if(checkBank((char *)rmsr,"SSDRMSR") < 0) assert(0);
+				  unpackRaw(rb, mz, 2, (char *)rmsr) ;
+				  ssd.mode = 1 ;
+				}	// pedestal data!
+				
+			}
 			
+		}
+		
 	}
-
+	
 	
         ssd.check();
 	return len ;
@@ -338,9 +336,8 @@ static int unpackRaw(int rb, int mz, int what, char *mem)
 				memcpy(ssd.adc[row][ch],dta,192) ;
 			}
 		}
-
 		ssd.channels += 5*64*192 ;
-		return 0 ;
+		return 0;
 	case 2 :	// RMSR
 		adcdata = ((struct TPCRMSR *)mem)->rms ;
 		for(as=0;as<5;as++) {
@@ -351,38 +348,42 @@ static int unpackRaw(int rb, int mz, int what, char *mem)
 			}
 		}
 		return 0 ;
-
+	default :printf("WARN,unknown case, do nothing \n"); 
+	  break;
+	  //LOG(WARN,"unknown case, do nothing \n");
+	  
 	}
 
 
-
+	/*
 	// I'll go over the first 5 ASIC blocks
-
+	
 	for(as=0;as<5;as++) {
-		row = rb*10+mz*5+as ;	// pseudo-row
-
-		for(ch=0;ch<64;ch++) {
-
-			dta = adcdata + (as*64*512) + ch*512 ;
-
-		   cou = 0 ;
-			for(strip=0;strip<192;strip++) {
-
-				if(*dta) {
-					ssd.channels++ ;
-					ssd.strip[row][ch][cou] = strip ;
-					ssd.adc[row][ch][cou] = *dta ;
-					cou++ ;
-				}
-
-				dta++ ;
-			}
-		}
-
-		ssd.counts[row][ch] = cou ;
+	  row = rb*10+mz*5+as ;	// pseudo-row
+	  
+	  for(ch=0;ch<64;ch++) {
+	    
+	    dta = adcdata + (as*64*512) + ch*512 ;
+	    
+	    cou = 0 ;
+	    for(strip=0;strip<192;strip++) {
+	      
+	      if(*dta) {
+		ssd.channels++ ;
+		ssd.strip[row][ch][cou] = strip ;
+		ssd.adc[row][ch][cou] = *dta ;
+		cou++ ;
+	      }
+	      
+	      dta++ ;
+	    }
+	  }
+	  
+	  ssd.counts[row][ch] = cou ;
 	}
 	
 
 	return 0 ;
-
+	*/
+	return 0;
 }
