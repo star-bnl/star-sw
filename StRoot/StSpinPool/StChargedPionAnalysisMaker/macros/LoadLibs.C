@@ -28,20 +28,19 @@ void LoadLibs() {
     gSystem->Load("StSpinDbMaker");
     gSystem->Load("St_db_Maker");
     gSystem->Load("StTriggerUtilities");
+    gSystem->Load("StEEmcUtil");
+    gSystem->Load("StEmcRawMaker");
+    gSystem->Load("StEmcADCtoEMaker");
+    gSystem->Load("StMcEvent");
+    gSystem->Load("StMcEventMaker");
+    gSystem->Load("StEmcSimulatorMaker");
+    gSystem->Load("StEEmcDbMaker");
+    gSystem->Load("StDbBroker");
+//    gSystem->Load("libMySQL");
+    gSystem->Load("StTriggerFilterMaker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
     gSystem->Load("StSpinTree");
     gSystem->Load("StMiniMcEvent");
     gSystem->Load("StChargedPionAnalysisMaker");
-    
-    gSystem->Load("StMcEvent");
-    gSystem->Load("StMcEventMaker");
-    gSystem->Load("StEmcSimulatorMaker");
-    gSystem->Load("StEEmcUtil");
-    gSystem->Load("StEEmcDbMaker");
-    gSystem->Load("StDbBroker");
-    gSystem->Load("libMySQL");
-    gSystem->Load("StTriggerFilterMaker");
-    gSystem->Load("StEmcRawMaker");
-    gSystem->Load("StEmcADCtoEMaker");
 }
