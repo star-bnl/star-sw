@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerII.h,v 1.5 2008/07/18 05:00:24 tai Exp $
+// $Id: StJetMakerII.h,v 1.6 2008/07/18 19:20:09 tai Exp $
 #ifndef STJETMAKERII_HH
 #define STJETMAKERII_HH
 
@@ -10,10 +10,13 @@
 #include <vector>
 
 class TTree;
+class TDirectory;
 
 class StJetPars;
 class StJetTreeEntryMaker;
 class StBET4pMakerImp;
+
+class StJetJetListWriter;
 
 namespace StSpinJet {
 class StJetTPC;
@@ -27,11 +30,12 @@ class StJetTowerEnergyVariation;
 class StJetJetListCut;
 }
 
+
 class StJetMakerII : public StMaker {
 
 public:
 
-  StJetMakerII(const Char_t *name, StJetTreeEntryMaker* entryMaker);
+  StJetMakerII(const Char_t *name, TDirectory* file, StJetTreeEntryMaker* entryMaker);
   virtual ~StJetMakerII();
 
   Int_t Init();
@@ -39,9 +43,11 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.5 2008/07/18 05:00:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.6 2008/07/18 19:20:09 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
+
+  TDirectory* _file;
 
   StJetTreeEntryMaker* _entryMaker;
   StBET4pMakerImp* _dataSource;
@@ -69,6 +75,12 @@ private:
   StSpinJet::StJetFourVecListCut *_fourCut;
 
   StSpinJet::StJetJetListCut* _jetCut;
+
+  StJetJetListWriter* _jetTreeWriter0;
+  StJetJetListWriter* _jetTreeWriterP5;
+  StJetJetListWriter* _jetTreeWriterM5;
+  StJetJetListWriter* _jetTreeWriterP10;
+  StJetJetListWriter* _jetTreeWriterM10;
 
   ClassDef(StJetMakerII, 0)
 };

@@ -1,18 +1,19 @@
 // -*- mode: c++;-*-
-// $Id: StJetTreeEntryMaker.h,v 1.2 2008/07/14 07:12:03 tai Exp $
+// $Id: StJetTreeEntryMaker.h,v 1.3 2008/07/18 19:20:10 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTREEENTRYMAKER_H
 #define STJETTREEENTRYMAKER_H
 
 #include "StMaker.h"
 
-class TFile;
+class TDirectory;
 
 class StJetTreeEntryCoordinator;
 
 class StJetTreeEntryMaker : public StMaker {
 
 public:
+  StJetTreeEntryMaker(const Char_t *name, TDirectory* file);
   StJetTreeEntryMaker(const Char_t *name, const char* inputFileName);
   virtual ~StJetTreeEntryMaker() { }
 
@@ -25,7 +26,7 @@ public:
 
 private:
 
-  TFile* _file;
+  TDirectory* _file;
   StJetTreeEntryCoordinator* _coord;
 
   ClassDef(StJetTreeEntryMaker, 0)

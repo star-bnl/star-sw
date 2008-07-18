@@ -1,4 +1,4 @@
-// $Id: StJetTreeEntryMaker.cxx,v 1.1 2008/07/16 03:54:25 tai Exp $
+// $Id: StJetTreeEntryMaker.cxx,v 1.2 2008/07/18 19:20:10 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 #include "StJetTreeEntryMaker.h"
@@ -8,6 +8,13 @@
 #include <TFile.h>
 
 ClassImp(StJetTreeEntryMaker)
+
+StJetTreeEntryMaker::StJetTreeEntryMaker(const Char_t *name, TDirectory* file)
+  : _file(file)
+  , _coord(new StJetTreeEntryCoordinator(_file))
+{
+
+}
 
 StJetTreeEntryMaker::StJetTreeEntryMaker(const Char_t *name, const char* inputFileName)
   : _file(new TFile(inputFileName))
