@@ -1,4 +1,4 @@
-// $Id: StJetTPCMuDst.cxx,v 1.6 2008/07/17 07:34:14 tai Exp $
+// $Id: StJetTPCMuDst.cxx,v 1.7 2008/07/18 04:11:58 tai Exp $
 #include "StJetTPCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -68,6 +68,9 @@ Track StJetTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magneti
 
   track.BField      = magneticField;
   track.bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
+
+  StThreeVectorF vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
+  track.vertexZ = vertex.z(); 
 
   StThreeVectorD momentumAt, positionAt;
   StMuEmcPosition EmcPosition;

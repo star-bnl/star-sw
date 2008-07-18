@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: FourVecList.h,v 1.1 2008/07/17 16:54:29 tai Exp $
+// $Id: FourVecList.h,v 1.2 2008/07/18 04:11:57 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef FOURVECLIST_H
 #define FOURVECLIST_H
@@ -21,6 +21,7 @@ struct FourVec {
   double         eta;
   double         phi;
   double         m;
+  double         vertexZ;
 };
 
 typedef std::vector<FourVec> FourVecList;

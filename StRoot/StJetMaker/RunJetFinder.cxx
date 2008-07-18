@@ -1,4 +1,4 @@
-// $Id: RunJetFinder.cxx,v 1.3 2008/07/17 17:49:29 tai Exp $
+// $Id: RunJetFinder.cxx,v 1.4 2008/07/18 04:11:54 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "RunJetFinder.h"
 
@@ -10,6 +10,8 @@
 
 #include <TLorentzVectorWithId.h>
 #include <TLorentzVectorForJet.h>
+
+#include <EtaToDetectorEta.h>
 
 #include <TObjArray.h>
 
@@ -61,9 +63,11 @@ JetList RunJetFinder::operator()(const FourVecList& fourVecList)
       FourVec fourVec = (dynamic_cast<const FourVecForJetFinder*>(*it))->fourVec();
       jet.runNumber = fourVec.runNumber;
       jet.eventId = fourVec.eventId;
+      jet.vertexZ = fourVec.vertexZ;
       jet.fourVecList.push_back(fourVec);
     }
-
+    EtaToDetectorEta eta2deta;
+    jet.detectorEta = eta2deta(jet.eta, jet.vertexZ);
     jetList.push_back(jet);
   }
 

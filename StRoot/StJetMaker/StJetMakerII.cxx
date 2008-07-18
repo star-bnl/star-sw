@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.6 2008/07/18 01:39:51 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.7 2008/07/18 04:11:54 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -163,6 +163,8 @@ Int_t StJetMakerII::Make()
       << (*it).eta   << " "
       << (*it).phi  << " "
       << (*it).m   << " "
+      << (*it).vertexZ   << " "
+      << (*it).detectorEta   << " "
       << endl;
     for(FourVecList::const_iterator jt = (*it).fourVecList.begin(); jt != (*it).fourVecList.end(); ++jt) {
       cout 

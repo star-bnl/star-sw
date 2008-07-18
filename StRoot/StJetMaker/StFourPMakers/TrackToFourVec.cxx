@@ -1,4 +1,4 @@
-// $Id: TrackToFourVec.cxx,v 1.1 2008/07/17 16:54:31 tai Exp $
+// $Id: TrackToFourVec.cxx,v 1.2 2008/07/18 04:11:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "TrackToFourVec.h"
 
@@ -16,6 +16,7 @@ FourVec TrackToFourVec::operator()(const Track& track)
   ret.detectorId  = track.detectorId;
   ret.trackId     = track.id;
   ret.towerId     = 0;
+  ret.vertexZ     = track.vertexZ;
 
   TLorentzVector p4(_track2tlorentzvector(track));
   ret.pt  = p4.Pt();
