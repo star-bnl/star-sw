@@ -68,6 +68,7 @@ int SSD_Reader::ssdData(int  ladder,
       pos=0;
       for(time=0;time<192;time++) { // Though "time" is not used explicitly, it's involved in incrementeing "pos".
         for(pad=0;pad<64;pad++) {
+	  if (!ssd.counts[daqLadder][pad]) continue;
           for(mtime=0;mtime<ssd.counts[daqLadder][pad];mtime++) {
             if (time==ssd.strip[daqLadder][pad][mtime])
             {
@@ -84,7 +85,6 @@ int SSD_Reader::ssdData(int  ladder,
       pos=0;
       for(time=0;time<192;time++) {
         for(pad=0;pad<64;pad++) {
-          if (!ssd.counts[daqLadder][pad]) continue;
           cache1[pos]=ssd.adc[daqLadder][pad][time];
           cache2[pos]=ssd.strip[daqLadder][pad][time]; // "strip"s role in ped data is completely different than in real data.
           pos++;
