@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.7 2008/07/18 04:11:54 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.8 2008/07/18 05:00:24 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -38,6 +38,12 @@
 
 #include "JetList.h"
 
+#include "StJetJetListCut.h"
+
+#include "JetCutPt.h"
+#include "JetCutEta.h"
+#include "JetCutNFourVecs.h"
+
 #include <StJetTowerEnergyVariation.h>
 
 #include <CorrectTowerEnergyForTracks.h>
@@ -57,6 +63,7 @@ using namespace StSpinJet;
 using namespace StJetTowerEnergyCut;
 using namespace StJetTrackCut;
 using namespace StJetFourVecCut;
+using namespace StJetJetCut;
 
 ClassImp(StJetMakerII)
   
@@ -125,6 +132,9 @@ Int_t StJetMakerII::Init()
   _jetFinder = new RunJetFinder(cpars);
   _jetFinder->Init();
 
+  _jetCut = new StJetJetListCut();
+  _jetCut->addCut(new JetCutPt(5.0));
+
   return kStOk;
 }
 
@@ -140,9 +150,22 @@ Int_t StJetMakerII::Make()
 
   //  printEnergy(energyList);
 
-  energyList = (*_towerEnergyCorrectionForTracks)(energyList, trackList);
+  TowerEnergyList energyList0 = (*_energyVariationNull)(energyList);
+  TowerEnergyList energyListP5 = (*_energyVariationPlus5)(energyList);
+  TowerEnergyList energyListM5 = (*_energyVariationMinus5)(energyList);
+  TowerEnergyList energyListP10 = (*_energyVariationPlus10)(energyList);
+  TowerEnergyList energyListM10 = (*_energyVariationMinus10)(energyList);
 
-  //  printEnergy(energyList);
+  energyList0 = (*_towerEnergyCorrectionForTracks)(energyList0, trackList);
+  energyListP5 = (*_towerEnergyCorrectionForTracks)(energyListP5, trackList);
+  energyListM5 = (*_towerEnergyCorrectionForTracks)(energyListM5, trackList);
+  energyListP10 = (*_towerEnergyCorrectionForTracks)(energyListP10, trackList);
+  energyListM10 = (*_towerEnergyCorrectionForTracks)(energyListM10, trackList);
+
+  printEnergy(energyList0);
+  printEnergy(energyListP10);
+
+  return kStOk;
 
   trackList = (*_tpcCut2)(trackList);
   energyList = (*_bemcCut2)(energyList);
@@ -153,6 +176,8 @@ Int_t StJetMakerII::Make()
   fourList = (*_fourCut)(fourList);
 
   JetList jetList = (*_jetFinder)(fourList);
+
+  jetList = (*_jetCut)(jetList);
 
   for(JetList::const_iterator it = jetList.begin(); it != jetList.end(); ++it) {
     cout 
