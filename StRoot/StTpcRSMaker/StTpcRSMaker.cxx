@@ -1,6 +1,6 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.4 2008/07/18 16:21:16 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.5 2008/07/18 16:22:50 fisyak Exp $
 // doxygen info here
 /*
  */
@@ -31,7 +31,7 @@
 #include "StTpcRawData.h"
 #include "Altro.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.4 2008/07/18 16:21:16 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.5 2008/07/18 16:22:50 fisyak Exp $";
 static  Gccuts_t *ccuts = 0;
 
 #define Laserino 170
@@ -41,7 +41,7 @@ static const Int_t NoOfRows     =  45;
 static const Int_t NoOfInnerRows=  13;
 static const Int_t NoOfPads           = 182;
 static const Int_t NoOfTimeBins = 512;
-static const Double_t tauIntegraton        =  74.6e-9; // secs
+static const Double_t tauIntegraton        = 2.5* 74.6e-9; // secs
 static const Double_t tauF                 = 394.0e-9; 
 static const Double_t tauP                 = 775.0e-9;
 //                                    Inner        Outer
@@ -1239,7 +1239,7 @@ Double_t StTpcRSMaker::ei(Double_t x)
 Double_t StTpcRSMaker::shapeEI(Double_t *x, Double_t *par) {// does not work. It is needed to 1/s
   Double_t t0    = par[0];
   Double_t tau_I = par[1];
-#if 0
+#if 1
   Double_t a = - 1./tau_I;
   Double_t t  = x[0];
   Double_t value = 0;
@@ -1276,7 +1276,7 @@ Double_t StTpcRSMaker::shapeEI3(Double_t *x, Double_t *par) {// does not work. I
   Double_t tau_P = par[2];
   Double_t tau_I = par[3];
   Double_t d =   1./tau_P;
-#if 0
+#if 1
   Double_t a[2] = {- 1./tau_I, - 1./tau_F};
   Double_t A[2] = {(a[0]+d)/(a[0]-a[1]), (a[1]+d)/(a[1]-a[0])};
   Double_t t  = x[0];
@@ -1325,8 +1325,8 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
-// Revision 1.4  2008/07/18 16:21:16  fisyak
-// Remove TF1F
+// Revision 1.5  2008/07/18 16:22:50  fisyak
+// put a factor 2.5 for tauIntegraton
 //
 // Revision 1.3  2008/06/25 20:02:32  fisyak
 // The first set of parametrs for Altro, Remove gains for the moment
