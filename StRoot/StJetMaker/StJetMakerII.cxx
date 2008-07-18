@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.8 2008/07/18 05:00:24 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.9 2008/07/18 19:20:08 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -29,6 +29,11 @@
 #include "TowerEnergyCutAdc.h"
 
 #include "StJetTowerEnergyPrint.h"
+#include "StJetJetPrint.h"
+#include "StJetTrackPrint.h"
+#include "StJetFourVecPrint.h"
+
+#include "StJetJetListWriter.h"
 
 #include "StJetFourVecListCut.h"
 #include "FourVecCutPt.h"
@@ -43,6 +48,8 @@
 #include "JetCutPt.h"
 #include "JetCutEta.h"
 #include "JetCutNFourVecs.h"
+
+#include "StJetJetListWriter.h"
 
 #include <StJetTowerEnergyVariation.h>
 
@@ -67,8 +74,9 @@ using namespace StJetJetCut;
 
 ClassImp(StJetMakerII)
   
-StJetMakerII::StJetMakerII(const Char_t *name, StJetTreeEntryMaker* entryMaker) 
+StJetMakerII::StJetMakerII(const Char_t *name, TDirectory* file, StJetTreeEntryMaker* entryMaker) 
   : StMaker(name)
+  , _file(file)
   , _entryMaker(entryMaker)
   , _dataSource(0)
 {
@@ -135,6 +143,12 @@ Int_t StJetMakerII::Init()
   _jetCut = new StJetJetListCut();
   _jetCut->addCut(new JetCutPt(5.0));
 
+  _jetTreeWriter0 = new StJetJetListWriter("jets", "four", _file);
+  _jetTreeWriterP5 = new StJetJetListWriter("jetsP5", "fourP5", _file);
+  _jetTreeWriterM5 = new StJetJetListWriter("jetsM5", "fourM5", _file);
+  _jetTreeWriterP10 = new StJetJetListWriter("jetsP10", "fourP10", _file);
+  _jetTreeWriterM10 = new StJetJetListWriter("jetsM10", "fourM10", _file);
+
   return kStOk;
 }
 
@@ -162,58 +176,71 @@ Int_t StJetMakerII::Make()
   energyListP10 = (*_towerEnergyCorrectionForTracks)(energyListP10, trackList);
   energyListM10 = (*_towerEnergyCorrectionForTracks)(energyListM10, trackList);
 
-  printEnergy(energyList0);
-  printEnergy(energyListP10);
-
-  return kStOk;
+  //  printEnergy(energyList0);
 
   trackList = (*_tpcCut2)(trackList);
-  energyList = (*_bemcCut2)(energyList);
+
+  energyList0 = (*_bemcCut2)(energyList0);
+  energyListP5 = (*_bemcCut2)(energyListP5);
+  energyListM5 = (*_bemcCut2)(energyListM5);
+  energyListP10 = (*_bemcCut2)(energyListP10);
+  energyListM10 = (*_bemcCut2)(energyListM10);
+
+  //  StJetTrackPrint printTrack;
+  //  printTrack(trackList);
+
+  FourVecList fourList0 = _toP4(trackList, energyList0);
+  FourVecList fourListP5 = _toP4(trackList, energyListP5);
+  FourVecList fourListM5 = _toP4(trackList, energyListM5);
+  FourVecList fourListP10 = _toP4(trackList, energyListP10);
+  FourVecList fourListM10 = _toP4(trackList, energyListM10);
 
 
-  FourVecList fourList = _toP4(trackList, energyList);
+  fourList0 = (*_fourCut)(fourList0);
+  fourListP5 = (*_fourCut)(fourListP5);
+  fourListM5 = (*_fourCut)(fourListM5);
+  fourListP10 = (*_fourCut)(fourListP10);
+  fourListM10 = (*_fourCut)(fourListM10);
 
-  fourList = (*_fourCut)(fourList);
+  StJetFourVecPrint printFour;
+  //  printFour(fourList0);
 
-  JetList jetList = (*_jetFinder)(fourList);
+  JetList jetList0 = (*_jetFinder)(fourList0);
+  JetList jetListP5 = (*_jetFinder)(fourListP5);
+  JetList jetListM5 = (*_jetFinder)(fourListM5);
+  JetList jetListP10 = (*_jetFinder)(fourListP10);
+  JetList jetListM10 = (*_jetFinder)(fourListM10);
 
-  jetList = (*_jetCut)(jetList);
+  StJetJetPrint jetprint;
+  //  jetprint(jetList0);
+  //  jetprint(jetListM5);
 
-  for(JetList::const_iterator it = jetList.begin(); it != jetList.end(); ++it) {
-    cout 
-      << (*it).runNumber << " "
-      << (*it).eventId  << " "
-      << (*it).jetId   << " "
-      << (*it).pt     << " "
-      << (*it).eta   << " "
-      << (*it).phi  << " "
-      << (*it).m   << " "
-      << (*it).vertexZ   << " "
-      << (*it).detectorEta   << " "
-      << endl;
-    for(FourVecList::const_iterator jt = (*it).fourVecList.begin(); jt != (*it).fourVecList.end(); ++jt) {
-      cout 
-	<< "       "
-	<< (*jt).runNumber  << " "
-	<< (*jt).eventId    << " "
-	<< (*jt).fourvecId  << " "
-	<< (*jt).type       << " "
-	<< (*jt).detectorId << " "
-	<< (*jt).trackId   << " "
-	<< (*jt).towerId  << " "
-	<< (*jt).pt      << " "
-	<< (*jt).eta    << " "
-	<< (*jt).phi   << " "
-	<< (*jt).m   << " "
-	<< endl;
-    }
+  jetList0 = (*_jetCut)(jetList0);
+  jetListP5 = (*_jetCut)(jetListP5);
+  jetListM5 = (*_jetCut)(jetListM5);
+  jetListP10 = (*_jetCut)(jetListP10);
+  jetListM10 = (*_jetCut)(jetListM10);
 
-    }
+
+  //  jetprint(jetList0);
+  //  jetprint(jetListM5);
+
+  _jetTreeWriter0->Fill(jetList0, fourList0);
+  _jetTreeWriterP5->Fill(jetListP5, fourListP5);
+  _jetTreeWriterM5->Fill(jetListM5, fourListM5);
+  _jetTreeWriterP10->Fill(jetListP10, fourListP10);
+  _jetTreeWriterM10->Fill(jetListM10, fourListM10);
 
   return kStOk;
 }
 
 Int_t StJetMakerII::Finish()
 {
+  _jetTreeWriter0->Finish();
+  _jetTreeWriterP5->Finish();
+  _jetTreeWriterM5->Finish();
+  _jetTreeWriterP10->Finish();
+  _jetTreeWriterM10->Finish();
+
   return kStOK;
 }
