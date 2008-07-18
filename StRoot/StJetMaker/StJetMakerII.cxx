@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.5 2008/07/17 06:36:36 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.6 2008/07/18 01:39:51 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -28,11 +28,15 @@
 #include "TowerEnergyCutBemcStatus.h"
 #include "TowerEnergyCutAdc.h"
 
-#include "StJetFourListCut.h"
-#include "FourCutPt.h"
+#include "StJetTowerEnergyPrint.h"
+
+#include "StJetFourVecListCut.h"
+#include "FourVecCutPt.h"
 
 #include "TrackList.h"
 #include "TowerEnergyList.h"
+
+#include "JetList.h"
 
 #include <StJetTowerEnergyVariation.h>
 
@@ -52,7 +56,7 @@ using namespace std;
 using namespace StSpinJet;
 using namespace StJetTowerEnergyCut;
 using namespace StJetTrackCut;
-using namespace StJetFourCut;
+using namespace StJetFourVecCut;
 
 ClassImp(StJetMakerII)
   
@@ -83,11 +87,11 @@ Int_t StJetMakerII::Init()
   _tpcCut1->addCut(new TrackCutEta(-2.0, 2.0));
   _tpcCut1->addCut(new TrackCutPossibleHitRatio(0.51));
 
-  _bemcCut = new StJetBEMCEnergyCut();
-  _bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
-  _bemcCut->addCut(new TowerEnergyCutEnergy(0.0));
-  _bemcCut->addCut(new TowerEnergyCutBemcStatus(1));
-  _bemcCut->addCut(new TowerEnergyCutAdc(0, 2.0));
+  _bemcCut1 = new StJetBEMCEnergyCut();
+  _bemcCut1->addCut(new TowerEnergyCutBemcWestOnly());
+  _bemcCut1->addCut(new TowerEnergyCutEnergy(0.0));
+  _bemcCut1->addCut(new TowerEnergyCutBemcStatus(1));
+  _bemcCut1->addCut(new TowerEnergyCutAdc(0, 2.0));
 
   _towerEnergyCorrectionForTracks = new CorrectTowerEnergyForTracks();
 
@@ -95,14 +99,17 @@ Int_t StJetMakerII::Init()
   _tpcCut2->addCut(new TrackCutFlag(0));
   _tpcCut2->addCut(new TrackCutNHits(20));
 
+  _bemcCut2 = new StJetBEMCEnergyCut();
+  _bemcCut2->addCut(new TowerEnergyCutEnergy(0.0));
+
   _energyVariationNull    = new StJetTowerEnergyVariation(0);
   _energyVariationPlus5   = new StJetTowerEnergyVariation(0.05);
   _energyVariationMinus5  = new StJetTowerEnergyVariation(-0.05);
   _energyVariationPlus10  = new StJetTowerEnergyVariation(0.1);
   _energyVariationMinus10 = new StJetTowerEnergyVariation(-0.1);
 
-  _fourCut = new StJetFourListCut;
-  _fourCut->addCut(new FourCutPt(0.2));
+  _fourCut = new StJetFourVecListCut;
+  _fourCut->addCut(new FourVecCutPt(0.2));
 
   StConePars* cpars = new StConePars();
   cpars->setGridSpacing(56, -1.6, 1.6, 120, -3.141592613589793, 3.141592613589793);
@@ -123,12 +130,58 @@ Int_t StJetMakerII::Init()
 
 Int_t StJetMakerII::Make()
 {
-
   TrackList trackList = _tpc->getTrackList();
   TowerEnergyList energyList = _bemc->getEnergyList();
 
-  TObjArray fourList = _toP4(trackList, energyList);
-  fourList.SetOwner(kTRUE);
+  StJetTowerEnergyPrint printEnergy;
+
+  trackList = (*_tpcCut1)(trackList);
+  energyList = (*_bemcCut1)(energyList);
+
+  //  printEnergy(energyList);
+
+  energyList = (*_towerEnergyCorrectionForTracks)(energyList, trackList);
+
+  //  printEnergy(energyList);
+
+  trackList = (*_tpcCut2)(trackList);
+  energyList = (*_bemcCut2)(energyList);
+
+
+  FourVecList fourList = _toP4(trackList, energyList);
+
+  fourList = (*_fourCut)(fourList);
+
+  JetList jetList = (*_jetFinder)(fourList);
+
+  for(JetList::const_iterator it = jetList.begin(); it != jetList.end(); ++it) {
+    cout 
+      << (*it).runNumber << " "
+      << (*it).eventId  << " "
+      << (*it).jetId   << " "
+      << (*it).pt     << " "
+      << (*it).eta   << " "
+      << (*it).phi  << " "
+      << (*it).m   << " "
+      << endl;
+    for(FourVecList::const_iterator jt = (*it).fourVecList.begin(); jt != (*it).fourVecList.end(); ++jt) {
+      cout 
+	<< "       "
+	<< (*jt).runNumber  << " "
+	<< (*jt).eventId    << " "
+	<< (*jt).fourvecId  << " "
+	<< (*jt).type       << " "
+	<< (*jt).detectorId << " "
+	<< (*jt).trackId   << " "
+	<< (*jt).towerId  << " "
+	<< (*jt).pt      << " "
+	<< (*jt).eta    << " "
+	<< (*jt).phi   << " "
+	<< (*jt).m   << " "
+	<< endl;
+    }
+
+    }
 
   return kStOk;
 }

@@ -1,11 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerII.h,v 1.3 2008/07/17 02:39:51 tai Exp $
+// $Id: StJetMakerII.h,v 1.4 2008/07/18 01:39:52 tai Exp $
 #ifndef STJETMAKERII_HH
 #define STJETMAKERII_HH
 
 #include "StMaker.h"
 
-#include "TrackTowerEnergyListToFourList.h"
+#include "TrackTowerEnergyListToFourVecList.h"
 
 #include <vector>
 
@@ -20,7 +20,7 @@ class StJetTPC;
 class StJetBEMC;
 class StJetTPCTrackCut;
 class StJetBEMCEnergyCut;
-class StJetFourListCut;
+class StJetFourVecListCut;
 class CorrectTowerEnergyForTracks;
 class RunJetFinder;
 class StJetTowerEnergyVariation;
@@ -38,7 +38,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.3 2008/07/17 02:39:51 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.4 2008/07/18 01:39:52 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -51,7 +51,8 @@ private:
   StSpinJet::StJetTPCTrackCut* _tpcCut1;
   StSpinJet::StJetTPCTrackCut* _tpcCut2;
 
-  StSpinJet::StJetBEMCEnergyCut* _bemcCut;
+  StSpinJet::StJetBEMCEnergyCut* _bemcCut1;
+  StSpinJet::StJetBEMCEnergyCut* _bemcCut2;
 
   StSpinJet::CorrectTowerEnergyForTracks* _towerEnergyCorrectionForTracks;
 
@@ -62,9 +63,9 @@ private:
   StSpinJet::StJetTowerEnergyVariation* _energyVariationMinus10;
 
   StSpinJet::RunJetFinder *_jetFinder;
-  StSpinJet::TrackTowerEnergyListToFourList _toP4;
+  StSpinJet::TrackTowerEnergyListToFourVecList _toP4;
 
-  StSpinJet::StJetFourListCut *_fourCut;
+  StSpinJet::StJetFourVecListCut *_fourCut;
 
   ClassDef(StJetMakerII, 0)
 

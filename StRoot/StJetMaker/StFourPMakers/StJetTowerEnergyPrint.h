@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTowerEnergyPrint.h,v 1.3 2008/07/13 10:02:34 tai Exp $
+// $Id: StJetTowerEnergyPrint.h,v 1.4 2008/07/18 01:39:56 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTOWERENERGYPRINT_H
 #define STJETTOWERENERGYPRINT_H
@@ -15,8 +15,7 @@ class StJetTowerEnergyPrint {
 
 public:
 
-  StJetTowerEnergyPrint(const char* fileName = "./energy.txt")
-    : _i(0), _fileName(fileName) { }
+  StJetTowerEnergyPrint() { }
   virtual ~StJetTowerEnergyPrint() { }
 
   void operator()(const TowerEnergyList& energyList);
@@ -24,11 +23,6 @@ public:
 private:
 
   void print(const TowerEnergy& energyDeposit);
-
-  long _i;
-
-  std::string _fileName;
-  std::ofstream _ofs;
 
 };
 
