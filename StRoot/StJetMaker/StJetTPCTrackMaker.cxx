@@ -1,4 +1,4 @@
-// $Id: StJetTPCTrackMaker.cxx,v 1.5 2008/07/17 07:34:10 tai Exp $
+// $Id: StJetTPCTrackMaker.cxx,v 1.6 2008/07/18 04:11:55 tai Exp $
 #include "StJetTPCTrackMaker.h"
 
 #include "StJetTPCMuDst.h"
@@ -51,6 +51,7 @@ Int_t StJetTPCTrackMaker::Init()
   _tree->Branch("trackIndex"    ,  _trackIndex      , "trackIndex[nTracks]/I"    );
   _tree->Branch("exitDetectorId",  _exitDetectorId  , "exitDetectorId[nTracks]/I");    
   _tree->Branch("exitTowerId"   ,  _exitTowerId     , "exitTowerId[nTracks]/I"   );    
+  _tree->Branch("vertexZ"       ,  _vertexZ         , "vertexZ[nTracks]/D"       );    
   _tree->Branch("detectorId"    , &_detectorId      , "detectorId/I"             ); 
   _tree->Branch("runNumber"     , &_runNumber       , "runNumber/I"              );
 
@@ -92,6 +93,7 @@ Int_t StJetTPCTrackMaker::Make()
     _dEdx[i]           = track.dEdx;
     _trackIndex[i]     = track.trackIndex;
     _trackId[i]        = track.id;
+    _vertexZ[i]        = track.vertexZ;
   }
 
   _tree->Fill();

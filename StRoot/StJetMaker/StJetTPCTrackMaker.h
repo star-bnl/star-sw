@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTrackMaker.h,v 1.3 2008/07/17 07:34:11 tai Exp $
+// $Id: StJetTPCTrackMaker.h,v 1.4 2008/07/18 04:11:55 tai Exp $
 #ifndef STJETTPCTRACKMAKER_HH
 #define STJETTPCTRACKMAKER_HH
 
@@ -29,7 +29,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetTPCTrackMaker.h,v 1.3 2008/07/17 07:34:11 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetTPCTrackMaker.h,v 1.4 2008/07/18 04:11:55 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -59,6 +59,7 @@ private:
   Double_t _dcaZ[4096];
   Double_t _dcaD[4096];
   Double_t _BField[4096];
+  Double_t _vertexZ[4096];
   Double_t _bemcRadius[4096];
   Int_t    _exitDetectorId[4096]; // 9: BEMC, 13: EEMC
   Int_t    _exitTowerId[4096];

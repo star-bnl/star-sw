@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: JetList.h,v 1.1 2008/07/17 17:49:32 tai Exp $
+// $Id: JetList.h,v 1.2 2008/07/18 04:11:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STSPINJET_JET_H
 #define STSPINJET_JET_H
@@ -19,6 +19,8 @@ struct Jet {
   double         eta;
   double         phi;
   double         m;
+  double         vertexZ;
+  double         detectorEta;
   FourVecList    fourVecList;
 };
 

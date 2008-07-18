@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackList.h,v 1.6 2008/07/17 07:34:15 tai Exp $
+// $Id: TrackList.h,v 1.7 2008/07/18 04:11:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKLIST_H
 #define TRACKLIST_H
@@ -28,6 +28,7 @@ struct Track {
   float          dcaD;
   double         BField;
   double         bemcRadius;
+  double         vertexZ;
   int            exitDetectorId; // 9: BEMC, 13: EEMC
   int            exitTowerId;
   double         exitEta;

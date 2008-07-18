@@ -1,4 +1,4 @@
-// $Id: StJetTPCTree.cxx,v 1.4 2008/07/17 07:51:44 tai Exp $
+// $Id: StJetTPCTree.cxx,v 1.5 2008/07/18 04:11:58 tai Exp $
 #include "StJetTPCTree.h"
 
 #include <TTree.h>
@@ -39,6 +39,7 @@ StJetTPCTree::StJetTPCTree(TTree *tree,
   _tree->SetBranchAddress("trackIndex"     ,  _trackIndex      );
   _tree->SetBranchAddress("exitDetectorId" ,  _exitDetectorId  );
   _tree->SetBranchAddress("exitTowerId"    ,  _exitTowerId     );
+  _tree->SetBranchAddress("vertexZ"        ,  _vertexZ      );
   _tree->SetBranchAddress("detectorId"     , &_detectorId      );
   _tree->SetBranchAddress("runNumber"      , &_runNumber       );
 }
@@ -78,6 +79,7 @@ TrackList StJetTPCTree::getTrackList()
     track.dEdx           = _dEdx[i];
     track.trackIndex     = _trackIndex[i];
     track.id             = _trackId[i];
+    track.vertexZ        = _vertexZ[i];
 
     ret.push_back(track);
   }

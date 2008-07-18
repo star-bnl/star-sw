@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTree.h,v 1.3 2008/07/17 07:51:44 tai Exp $
+// $Id: StJetTPCTree.h,v 1.4 2008/07/18 04:11:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPCTREE_H
 #define STJETTPCTREE_H
@@ -48,6 +48,7 @@ private:
   Double_t _dcaZ[4096];
   Double_t _dcaD[4096];
   Double_t _BField[4096];
+  Double_t _vertexZ[4096];
   Double_t _bemcRadius[4096];
   Int_t    _exitDetectorId[4096]; // 9: BEMC, 13: EEMC
   Int_t    _exitTowerId[4096];
