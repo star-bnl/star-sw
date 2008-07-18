@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerII.h,v 1.4 2008/07/18 01:39:52 tai Exp $
+// $Id: StJetMakerII.h,v 1.5 2008/07/18 05:00:24 tai Exp $
 #ifndef STJETMAKERII_HH
 #define STJETMAKERII_HH
 
@@ -24,6 +24,7 @@ class StJetFourVecListCut;
 class CorrectTowerEnergyForTracks;
 class RunJetFinder;
 class StJetTowerEnergyVariation;
+class StJetJetListCut;
 }
 
 class StJetMakerII : public StMaker {
@@ -38,7 +39,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.4 2008/07/18 01:39:52 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.5 2008/07/18 05:00:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -67,8 +68,9 @@ private:
 
   StSpinJet::StJetFourVecListCut *_fourCut;
 
-  ClassDef(StJetMakerII, 0)
+  StSpinJet::StJetJetListCut* _jetCut;
 
+  ClassDef(StJetMakerII, 0)
 };
 
 #endif // STJETMAKER_HH

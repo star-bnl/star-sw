@@ -1,4 +1,4 @@
-// $Id: StJetTPCMuDst.cxx,v 1.7 2008/07/18 04:11:58 tai Exp $
+// $Id: StJetTPCMuDst.cxx,v 1.8 2008/07/18 05:00:27 tai Exp $
 #include "StJetTPCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -77,23 +77,25 @@ Track StJetTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magneti
   if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, track.BField, track.bemcRadius))
     {
       track.exitDetectorId = 9;
+      track.exitEta = positionAt.pseudoRapidity();
+      track.exitPhi = positionAt.phi();
       int id(0);
       StEmcGeom::instance("bemc")->getId(track.exitPhi, track.exitEta, id);
       track.exitTowerId = id;
-      track.exitEta = positionAt.pseudoRapidity();
-      track.exitPhi = positionAt.phi();
     }
   else if(EmcPosition.trackOnEEmc(&positionAt, &momentumAt, mutrack))
     {
       track.exitDetectorId = 13;
-      track.exitTowerId = 0; // todo 
       track.exitEta = positionAt.pseudoRapidity();
       track.exitPhi = positionAt.phi();
+      track.exitTowerId = 0; // todo 
     }
   else
     {
+      track.exitDetectorId = 0;
       track.exitEta = -999;
       track.exitPhi = -999;
+      track.exitTowerId = 0;
     }
 
 
