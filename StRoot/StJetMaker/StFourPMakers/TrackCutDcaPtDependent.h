@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackCutDcaPtDependent.h,v 1.1 2008/07/13 09:38:02 tai Exp $
+// $Id: TrackCutDcaPtDependent.h,v 1.2 2008/07/18 01:39:56 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKCUTDCAPTDEPENDENT_H
 #define TRACKCUTDCAPTDEPENDENT_H
@@ -41,11 +41,11 @@ public:
   bool operator()(const StSpinJet::Track& track)
   {
     if(track.pt < _pt1) {
-      if(track.Tdca > _dcaMax1) return true;
+      if(track.dcaD > _dcaMax1) return true;
     } else if(track.pt < _pt2) {
-      if(track.Tdca*(_pt2 - _pt1) > (_pt2*_dcaMax1 - _pt1*_dcaMax2) + (_dcaMax2 - _dcaMax1)*track.pt) return true;
+      if(track.dcaD*(_pt2 - _pt1) > (_pt2*_dcaMax1 - _pt1*_dcaMax2) + (_dcaMax2 - _dcaMax1)*track.pt) return true;
     } else {
-       if(track.Tdca > _dcaMax2) return true;
+       if(track.dcaD > _dcaMax2) return true;
     }
 
     return false;
