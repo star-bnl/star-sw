@@ -15,7 +15,7 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
-#include "TF1F.h"
+#include "TF1.h"
 #include "TH1.h"
 #include "TTree.h"
 #include "PAI.h"
@@ -68,6 +68,8 @@ class StTpcRSMaker : public StMaker {
   TF1 *GetChargeFractionOuter()     {return (TF1 *) mChargeFractionOuter;}     
   TF1 *GetPadResponseFunctionOuter(){return (TF1 *) mPadResponseFunctionOuter;}
   TF1 *GetPolya()                   {return (TF1 *) mPolya;}
+  TF1 *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
+  TF1 *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
   Double_t GetNoPrimaryClusters(Double_t betaGamma);
   virtual void Print(Option_t *option="") const;
   void DigitizeSector(Int_t sector);
@@ -94,14 +96,14 @@ class StTpcRSMaker : public StMaker {
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
-  static TF1     *fgTimeShape3;       //!
-  static TF1     *fgTimeShape;        //!
-  TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mChargeFractionInner;        //!1
-  TF1F  *mPadResponseFunctionInner;   //!
-  TF1F  *mChargeFractionOuter;        //!
-  TF1F  *mPadResponseFunctionOuter;   //!
-  TF1F  *mPolya;                      //!
+  static TF1     *fgTimeShape3[2];    //!
+  static TF1     *fgTimeShape0[2];    //!
+  TF1  *mShaperResponses[2][24];     //!
+  TF1  *mChargeFractionInner;        //!1
+  TF1  *mPadResponseFunctionInner;   //!
+  TF1  *mChargeFractionOuter;        //!
+  TF1  *mPadResponseFunctionOuter;   //!
+  TF1  *mPolya;                      //!
   Bool_t mAlignSector;                //! 
   Int_t  mMagUtilitiesMask;           //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
@@ -167,14 +169,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.2 2008/06/19 22:45:43 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.3 2008/07/18 16:21:17 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.2 2008/06/19 22:45:43 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.3 2008/07/18 16:21:17 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.3  2008/07/18 16:21:17  fisyak
+// Remove TF1F
+//
 // Revision 1.2  2008/06/19 22:45:43  fisyak
 // Freeze problem with TPX parameterization
 //
@@ -197,7 +202,7 @@ class StTpcRSMaker : public StMaker {
 // Fix pad direction, add sorting for ADC/cluster nonlinearity, replace product by sum of logs
 //
 // Revision 1.8  2004/05/04 13:39:06  fisyak
-// Add TF1F
+// Add TF1
 //
 // Revision 1.7  2004/04/22 01:05:03  fisyak
 // Freeze the version before modification parametrization for K3
