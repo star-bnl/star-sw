@@ -1,4 +1,4 @@
-// $Id: StJetJetListWriter.cxx,v 1.1 2008/07/18 19:20:07 tai Exp $
+// $Id: StJetJetListWriter.cxx,v 1.2 2008/07/19 00:01:24 tai Exp $
 #include "StJetJetListWriter.h"
 
 #include <TFile.h>
@@ -26,7 +26,7 @@ StJetJetListWriter::StJetJetListWriter(const char* jetTreeName, const char* jetF
   _jetTree->Branch("detectorEta",  _jet_detectorEta  , "detectorEta[nJets]/D");    
   _jetTree->Branch("phi"        ,  _jet_phi          , "phi[nJets]/D"    );
   _jetTree->Branch("m"          ,  _jet_m            , "m[nJets]/D"      );
-  _jetTree->Branch("vertexZ"    ,  _jet_vertexZ      , "vertexZ[nJets]/D");    
+  _jetTree->Branch("vertexZ"    , &_jet_vertexZ      , "vertexZ/D");    
   _jetTree->Branch("runNumber"  , &_jet_runNumber    , "runNumber/I"     );
 
   _jetFourVecTree = new TTree(jetFourVecTreeName, jetFourVecTreeName);
@@ -59,7 +59,8 @@ void StJetJetListWriter::fillJetTree(const JetList& jetList)
   if(jetList.empty()) return;
 
   _jet_runNumber = jetList[0].runNumber;
-  _jet_eventId = jetList[0].eventId;
+  _jet_eventId   = jetList[0].eventId;
+  _jet_vertexZ   = jetList[0].vertexZ;
 
   _jet_nJets = jetList.size();
   for(int i = 0; i < _jet_nJets; ++i) {
@@ -69,7 +70,6 @@ void StJetJetListWriter::fillJetTree(const JetList& jetList)
     _jet_eta[i]         = jet.eta;
     _jet_phi[i]         = jet.phi;
     _jet_m[i]           = jet.m;
-    _jet_vertexZ[i]     = jet.vertexZ;
     _jet_detectorEta[i] = jet.detectorEta;
   }
 
