@@ -1,4 +1,4 @@
-// $Id: StJetTrgJPWriter.cxx,v 1.3 2008/07/13 09:37:52 tai Exp $
+// $Id: StJetTrgJPWriter.cxx,v 1.4 2008/07/20 06:17:09 tai Exp $
 #include "StJetTrgJPWriter.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -31,6 +31,8 @@ void StJetTrgJPWriter::Init()
   _tree->Branch("trigID"     , &_trigID       , "trigID/I"       );
   _tree->Branch("prescale"   , &_prescale     , "prescale/D"     );
   _tree->Branch("passed"     , &_passed       , "passed/I"         );
+  _tree->Branch("hard"       , &_hard         , "hard/I"         );
+  _tree->Branch("soft"       , &_soft         , "soft/I"         );
   _tree->Branch("nJetPatches", &_nJetPatches  , "nJetPatches/I"  );
   _tree->Branch("jetPatchId"   ,  _jetPatchId     , "jetPatchId[nJetPatches]/I");
 
@@ -40,10 +42,16 @@ void StJetTrgJPWriter::Init()
 
 void StJetTrgJPWriter::Make()
 {
+  _hard = _uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId);
 
-  _passed = (_uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId) && _emcTrigMaker->isTrigger(_trgId));
+  _soft = _emcTrigMaker->isTrigger(_trgId);
+
+  if(!(_hard || _soft)) return;
+
+  _passed = (_hard && _soft);
 
   _runNumber = _uDstMaker->muDst()->event()->runId();
+
   _eventId = _uDstMaker->muDst()->event()->eventId();
 
   _vertexZ = _uDstMaker->muDst()->event()->primaryVertexPosition().z();

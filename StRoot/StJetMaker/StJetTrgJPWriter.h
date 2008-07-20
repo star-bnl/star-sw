@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrgJPWriter.h,v 1.3 2008/07/13 09:37:52 tai Exp $
+// $Id: StJetTrgJPWriter.h,v 1.4 2008/07/20 06:17:09 tai Exp $
 #ifndef STJETTRGJPWRITER_H
 #define STJETTRGJPWRITER_H
 
@@ -38,16 +38,18 @@ private:
   int _trgId;
 
   TDirectory* _file;
-  TTree* _tree;
+  TTree*      _tree;
 
-  Int_t _runNumber;
-  Int_t _eventId;
+  Int_t    _runNumber;
+  Int_t    _eventId;
   Double_t _vertexZ;
-  Int_t _trigID;
+  Int_t    _trigID;
   Double_t _prescale;
-  Int_t _passed;
-  Int_t _nJetPatches;
-  Int_t _jetPatchId[12];
+  Int_t    _passed;
+  Int_t    _hard;
+  Int_t    _soft;
+  Int_t    _nJetPatches;
+  Int_t    _jetPatchId[12];
 
   StMuDstMaker* _uDstMaker;
   StEmcTriggerMaker* _emcTrigMaker;
