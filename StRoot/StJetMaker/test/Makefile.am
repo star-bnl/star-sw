@@ -45,6 +45,7 @@ libStJetMakerTest_la_CXXFLAGS = \
 	-I../../StTriggerUtilities \
 	-I$(STAR)/.$(STAR_HOST_SYS)/include \
 	-I$(STAR)/StRoot \
+	-I$(STAR)/StRoot/StJetFinder \
 	-I$(STAR)/StRoot/St_base \
 	-I$(STAR)/StRoot/StarClassLibrary \
 	-I$(STAR)/StRoot/StEvent \
