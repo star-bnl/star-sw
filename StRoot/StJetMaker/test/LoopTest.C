@@ -20,9 +20,9 @@
 #include <StJet.h>
 #include <StJets.h>
 
-#include <StFourPMakers/StBET4pMakerImp.h>
-#include <StFourPMakers/StJetTPCMuDst.h>
-#include <StFourPMakers/StJetBEMCMuDst.h>
+#include <StBET4pMakerImp.h>
+#include <StJetTPCMuDst.h>
+#include <StJetBEMCMuDst.h>
 
 #include <StEmcRawMaker/StBemcTables.h>
 

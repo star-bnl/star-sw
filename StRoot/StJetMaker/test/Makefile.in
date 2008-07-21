@@ -279,6 +279,7 @@ libStJetMakerTest_la_CXXFLAGS = \
 	-I../../StJetFinder \
 	-I.. \
 	-I../StFourPMakers \
+	-I../emulator \
 	-I../../StSpinPool \
 	-I../../StTriggerUtilities \
 	-I$(STAR)/.$(STAR_HOST_SYS)/include \
