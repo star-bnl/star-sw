@@ -1,21 +1,16 @@
 // -*- mode: c++;-*-
-// $Id: RunJetFinder.h,v 1.3 2008/07/17 17:49:29 tai Exp $
+// $Id: RunJetFinder.h,v 1.4 2008/07/21 22:15:36 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef RUNJETFINDER_HH
 #define RUNJETFINDER_HH
 
 #include <StJetFinder/StProtoJet.h>
 
-#include "FourVecList.h"
-#include "JetList.h"
-
-#include <list>
-#include <vector>
+#include "base/FourVecList.h"
+#include "base/JetList.h"
 
 class StJetPars;
 class StJetFinder;
-
-class TObjArray;
 
 namespace StSpinJet {
 
@@ -28,7 +23,6 @@ public:
 
   void Init();
 
-  TObjArray operator()(const TObjArray& fourList);
   JetList operator()(const FourVecList& fourList);
 
 private:

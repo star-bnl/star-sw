@@ -8,7 +8,6 @@ class RunJetFinderTest : public CPPUNIT_NS::TestFixture
 {
   CPPUNIT_TEST_SUITE( RunJetFinderTest );
   CPPUNIT_TEST( testRun );
-  CPPUNIT_TEST( testScratch );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -16,7 +15,6 @@ public:
   void tearDown();
 
   void testRun();
-  void testScratch();
 
 };
 

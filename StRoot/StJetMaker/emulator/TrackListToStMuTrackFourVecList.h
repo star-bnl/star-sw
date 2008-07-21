@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: TrackListToFourList.h,v 1.1 2008/07/21 02:00:27 tai Exp $
-#ifndef TRACKLISTTOFOURLIST_H
-#define TRACKLISTTOFOURLIST_H
+// $Id: TrackListToStMuTrackFourVecList.h,v 1.1 2008/07/21 22:15:50 tai Exp $
+#ifndef TRACKLISTTOSTMUTRACKFOURVECLIST_H
+#define TRACKLISTTOSTMUTRACKFOURVECLIST_H
 
 #include "TrackList.h"
 
@@ -14,11 +14,11 @@ class TrackToTLorentzVector;
 
 class StMuTrackEmu;
 
-class TrackListToFourList {
+class TrackListToStMuTrackFourVecList {
 
 public:
-  TrackListToFourList();
-  virtual ~TrackListToFourList() { }
+  TrackListToStMuTrackFourVecList();
+  virtual ~TrackListToStMuTrackFourVecList() { }
 
   FourList operator()(const TrackList& trackList);
 
@@ -32,4 +32,4 @@ private:
 
 }
 
-#endif // TRACKLISTTOFOURLIST_H
+#endif // TRACKLISTTOSTMUTRACKFOURVECLIST_H
