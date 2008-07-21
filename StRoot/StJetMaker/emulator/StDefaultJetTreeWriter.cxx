@@ -1,4 +1,4 @@
-// $Id: StDefaultJetTreeWriter.cxx,v 1.1 2008/07/21 02:00:22 tai Exp $
+// $Id: StDefaultJetTreeWriter.cxx,v 1.2 2008/07/21 19:12:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StDefaultJetTreeWriter.h"
 
@@ -15,8 +15,8 @@
 #include <StJetFinder/StProtoJet.h>
 
 
-#include <StFourPMakers/StFourPMaker.h>
-#include "StFourPMakers/StBET4pMaker.h"
+#include <StFourPMaker.h>
+#include <StBET4pMaker.h>
 
 #include <TTree.h>
 
