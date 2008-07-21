@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.1 2008/07/21 02:00:25 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.2 2008/07/21 02:39:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -62,7 +62,6 @@ public:
 
 private:
 
-  friend class StMuTrackEmuFactory;
   friend class TrackListToFourList;
 
   double         _px;
