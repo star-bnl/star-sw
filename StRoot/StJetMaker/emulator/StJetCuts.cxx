@@ -1,4 +1,4 @@
-// $Id: StJetCuts.cxx,v 1.2 2008/05/01 22:23:47 tai Exp $
+// $Id: StJetCuts.cxx,v 1.1 2008/07/21 02:48:15 tai Exp $
 #include "StJetCuts.h"
 
 #include <StJetFinder/StProtoJet.h>
