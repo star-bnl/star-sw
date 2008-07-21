@@ -4,11 +4,11 @@
 #include <TowerEnergyList.h>
 
 
-#include <StFourPMakers/TowerEnergyCut2003BemcTower.h>
-#include <StFourPMakers/TowerEnergyCutBemcWestOnly.h>
-#include <StFourPMakers/TowerEnergyCutEnergy.h>
-#include <StFourPMakers/TowerEnergyCutBemcStatus.h>
-#include <StFourPMakers/TowerEnergyCutAdc.h>
+#include <TowerEnergyCut2003BemcTower.h>
+#include <TowerEnergyCutBemcWestOnly.h>
+#include <TowerEnergyCutEnergy.h>
+#include <TowerEnergyCutBemcStatus.h>
+#include <TowerEnergyCutAdc.h>
 
 #include <iostream>
 #include <set>
