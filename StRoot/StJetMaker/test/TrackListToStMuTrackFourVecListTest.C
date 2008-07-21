@@ -1,28 +1,28 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include <TrackListToFourList.h>
+#include <TrackListToStMuTrackFourVecList.h>
 #include <StMuTrackFourVec.h>
 
-#include "TrackListToFourListTest.hh"
+#include "TrackListToStMuTrackFourVecListTest.hh"
 
 using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( TrackListToFourListTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( TrackListToStMuTrackFourVecListTest );
 
-void TrackListToFourListTest::setUp() 
+void TrackListToStMuTrackFourVecListTest::setUp() 
 {
 
 }
 
-void TrackListToFourListTest::tearDown() 
+void TrackListToStMuTrackFourVecListTest::tearDown() 
 {
 
 }
 
-void TrackListToFourListTest::testOne() 
+void TrackListToStMuTrackFourVecListTest::testOne() 
 {
-  TrackListToFourList ttof;
+  TrackListToStMuTrackFourVecList ttof;
   TrackList tlist;
 
   Track track;
