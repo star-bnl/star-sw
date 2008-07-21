@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetCuts.h,v 1.2 2008/05/01 22:23:48 tai Exp $
+// $Id: StJetCuts.h,v 1.1 2008/07/21 02:48:15 tai Exp $
 #ifndef STJETCUTS_HH
 #define STJETCUTS_HH
 
