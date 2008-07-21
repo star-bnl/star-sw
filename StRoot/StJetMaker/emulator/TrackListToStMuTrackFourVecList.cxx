@@ -1,5 +1,5 @@
-// $Id: TrackListToFourList.cxx,v 1.1 2008/07/21 02:00:27 tai Exp $
-#include "TrackListToFourList.h"
+// $Id: TrackListToStMuTrackFourVecList.cxx,v 1.1 2008/07/21 22:15:50 tai Exp $
+#include "TrackListToStMuTrackFourVecList.h"
 
 #include "TrackToTLorentzVector.h"
 
@@ -8,11 +8,11 @@
 
 namespace StSpinJet {
 
-TrackListToFourList::TrackListToFourList() 
+TrackListToStMuTrackFourVecList::TrackListToStMuTrackFourVecList() 
   : _trackTo4p(*(new TrackToTLorentzVector)) { }
 
 
-FourList TrackListToFourList::operator()(const TrackList& trackList)
+FourList TrackListToStMuTrackFourVecList::operator()(const TrackList& trackList)
 {
   FourList ret;
 
@@ -29,7 +29,7 @@ FourList TrackListToFourList::operator()(const TrackList& trackList)
   return ret;
 }
 
-StMuTrackEmu* TrackListToFourList::createTrackEmu(const Track& track)
+StMuTrackEmu* TrackListToStMuTrackFourVecList::createTrackEmu(const Track& track)
 {
   StMuTrackEmu *ret = new StMuTrackEmu();
 
