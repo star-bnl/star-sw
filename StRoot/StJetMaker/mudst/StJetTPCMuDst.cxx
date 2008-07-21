@@ -1,11 +1,11 @@
-// $Id: StJetTPCMuDst.cxx,v 1.1 2008/07/21 17:25:15 tai Exp $
+// $Id: StJetTPCMuDst.cxx,v 1.2 2008/07/21 19:12:55 tai Exp $
 #include "StJetTPCMuDst.h"
 
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include <StMuDSTMaker/COMMON/StMuTrack.h>
+#include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 
-#include <StFourPMakers/StMuEmcPosition.h>
+#include <mudst/StMuEmcPosition.h>
 #include <StEmcUtil/geometry/StEmcGeom.h>
 
 #include <TVector3.h>
