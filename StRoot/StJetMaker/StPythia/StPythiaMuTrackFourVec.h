@@ -8,7 +8,7 @@
 #ifndef StPythiaMuTrackFourVec_HH
 #define StPythiaMuTrackFourVec_HH
 
-#include "StJetMaker/StMuTrackFourVec.h"
+#include <emulator/StMuTrackFourVec.h>
 
 class StPythiaParticle;
 

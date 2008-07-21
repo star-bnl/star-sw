@@ -15,7 +15,8 @@
 #include <StMuDSTMaker/COMMON/StMuPrimaryVertex.h>
 #include <StJetFinder/StProtoJet.h>
 #include <StEmcUtil/geometry/StEmcGeom.h>
-#include <StFourPMakers/StMuEmcPosition.h>
+
+#include <StMuEmcPosition.h>
 #include <StMuTrackFourVec.h>
 #include <StJet.h>
 #include <StJets.h>
