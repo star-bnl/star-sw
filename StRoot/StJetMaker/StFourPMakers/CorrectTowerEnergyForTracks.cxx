@@ -1,7 +1,5 @@
-// $Id: CorrectTowerEnergyForTracks.cxx,v 1.8 2008/07/17 07:34:14 tai Exp $
+// $Id: CorrectTowerEnergyForTracks.cxx,v 1.9 2008/07/21 03:03:23 tai Exp $
 #include "CorrectTowerEnergyForTracks.h"
-
-#include "StEmcUtil/geometry/StEmcGeom.h"
 
 namespace StSpinJet {
 
@@ -40,10 +38,8 @@ TowerEnergyList CorrectTowerEnergyForTracks::Do(const TowerEnergyList &energyDep
 
 void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const Track& track)
 {
-  int id = 0;
-
-  if(StEmcGeom::instance("bemc")->getId(track.exitPhi, track.exitEta, id) == 0)
-    mNtracksOnTower[id]++;
+  if(track.exitDetectorId == 9 && track.exitTowerId != 0)
+    mNtracksOnTower[track.exitTowerId]++;
 }
 
 double CorrectTowerEnergyForTracks::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId, float eta, float phi)
