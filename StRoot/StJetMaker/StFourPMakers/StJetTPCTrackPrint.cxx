@@ -1,8 +1,8 @@
-// $Id: StJetTPCTrackPrint.cxx,v 1.4 2008/07/13 10:02:33 tai Exp $
+// $Id: StJetTPCTrackPrint.cxx,v 1.5 2008/07/21 02:00:02 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetTPCTrackPrint.h"
 
-#include "../StMuTrackEmu.h"
+#include "../emulator/StMuTrackEmu.h"
 
 #include <TVector3.h>
 

@@ -1,11 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.45 2008/07/14 06:44:56 tai Exp $
+// $Id: StJetMaker.h,v 1.46 2008/07/21 01:59:46 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
 #include "StMaker.h"
 
-#include "StJetMakerBackwordCompatibility.h"
+#include "emulator/StJetMakerBackwordCompatibility.h"
 
 #include <vector>
 
@@ -47,7 +47,7 @@ public:
   StJetTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.45 2008/07/14 06:44:56 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.46 2008/07/21 01:59:46 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 

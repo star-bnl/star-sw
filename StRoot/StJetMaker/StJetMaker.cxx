@@ -1,12 +1,12 @@
-// $Id: StJetMaker.cxx,v 1.59 2008/05/03 22:00:57 tai Exp $
+// $Id: StJetMaker.cxx,v 1.60 2008/07/21 01:59:46 tai Exp $
 #include "StJetMaker.h"
 
 #include "StParticleCollector.h"
 #include "StJetFinderRunner.h"
 #include "StJetCuts.h"
 
-#include "StJetTreeWriter.h"
-#include "StDefaultJetTreeWriter.h"
+#include "emulator/StJetTreeWriter.h"
+#include "emulator/StDefaultJetTreeWriter.h"
 
 #include "StppJetAnalyzer.h"
 

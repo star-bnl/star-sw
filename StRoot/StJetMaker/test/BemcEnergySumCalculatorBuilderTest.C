@@ -1,7 +1,7 @@
 // Copyright (C) 2007 Tai Sakuma <sakuma@mit.edu>
 
-#include <StFourPMakers/BemcEnergySumCalculator.h>
-#include <StFourPMakers/BemcEnergySumCalculatorBuilder.h>
+#include <BemcEnergySumCalculator.h>
+#include <BemcEnergySumCalculatorBuilder.h>
 
 
 #include "BemcEnergySumCalculatorBuilderTest.hh"
