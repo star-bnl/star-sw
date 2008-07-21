@@ -109,7 +109,7 @@ Int_t StSpaceChargeEbyEMaker::Finish() {
       if (PrePassdone) WriteTableToFile();
       else gMessMgr->Warning("StSpaceChargeEbyEMaker: NO SC => NO OUTPUT");
     }
-    if (!Calibmode) EvalCalib();
+    if ((!Calibmode)&&(!PrePassdone)) EvalCalib();
     WriteQAHists();
   } else {
     gMessMgr->Warning("StSpaceChargeEbyEMaker: NO EVENTS => NO OUTPUT");
@@ -988,8 +988,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.20 2008/07/17 23:35:33 jeromel Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.21 2008/07/21 21:17:10 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.21  2008/07/21 21:17:10  genevb
+// No call to EvalCalib() if Prepass runs successfully
+//
 // Revision 1.20  2008/07/17 23:35:33  jeromel
 // Small format change
 //
