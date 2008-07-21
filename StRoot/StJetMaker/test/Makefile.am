@@ -26,15 +26,16 @@ libStJetMakerTest_la_SOURCES = 	\
 	StJetBEMCTreeTest.C StJetBEMCTreeTest.hh \
 	StJetTreeEntryCoordinatorTest.C StJetTreeEntryCoordinatorTest.hh \
 	StJetTreeEntryMakerTest.C StJetTreeEntryMakerTest.hh \
-	TowerEnergyListToFourListTest.C TowerEnergyListToFourListTest.hh \
-	TrackListToFourListTest.C TrackListToFourListTest.hh \
+	TowerEnergyListToStMuTrackFourVecListTest.C TowerEnergyListToStMuTrackFourVecListTest.hh \
+	TrackListToStMuTrackFourVecListTest.C TrackListToStMuTrackFourVecListTest.hh \
 	TrackTowerEnergyListToFourListTest.C TrackTowerEnergyListToFourListTest.hh \
 	RunJetFinderTest.C RunJetFinderTest.hh \
 	StJetTowerEnergyVariationTest.C StJetTowerEnergyVariationTest.hh \
 	StJetFourListCutTest.C StJetFourListCutTest.hh \
 	TrackTowerEnergyListToFourVecListTest.C TrackTowerEnergyListToFourVecListTest.hh \
 	StJetFourVecListCutTest.C StJetFourVecListCutTest.hh \
-	StJetJetListCutTest.C StJetJetListCutTest.hh
+	StJetJetListCutTest.C StJetJetListCutTest.hh \
+	StPythiaFourPMakerTest.C StPythiaFourPMakerTest.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \

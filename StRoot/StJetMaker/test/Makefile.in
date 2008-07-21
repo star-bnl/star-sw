@@ -79,15 +79,16 @@ am_libStJetMakerTest_la_OBJECTS =  \
 	libStJetMakerTest_la-StJetBEMCTreeTest.lo \
 	libStJetMakerTest_la-StJetTreeEntryCoordinatorTest.lo \
 	libStJetMakerTest_la-StJetTreeEntryMakerTest.lo \
-	libStJetMakerTest_la-TowerEnergyListToFourListTest.lo \
-	libStJetMakerTest_la-TrackListToFourListTest.lo \
+	libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.lo \
+	libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo \
 	libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo \
 	libStJetMakerTest_la-RunJetFinderTest.lo \
 	libStJetMakerTest_la-StJetTowerEnergyVariationTest.lo \
 	libStJetMakerTest_la-StJetFourListCutTest.lo \
 	libStJetMakerTest_la-TrackTowerEnergyListToFourVecListTest.lo \
 	libStJetMakerTest_la-StJetFourVecListCutTest.lo \
-	libStJetMakerTest_la-StJetJetListCutTest.lo
+	libStJetMakerTest_la-StJetJetListCutTest.lo \
+	libStJetMakerTest_la-StPythiaFourPMakerTest.lo
 libStJetMakerTest_la_OBJECTS = $(am_libStJetMakerTest_la_OBJECTS)
 am__EXEEXT_1 = TestApp$(EXEEXT)
 am_TestApp_OBJECTS = TestApp-TestMain.$(OBJEXT)
@@ -264,15 +265,16 @@ libStJetMakerTest_la_SOURCES = \
 	StJetBEMCTreeTest.C StJetBEMCTreeTest.hh \
 	StJetTreeEntryCoordinatorTest.C StJetTreeEntryCoordinatorTest.hh \
 	StJetTreeEntryMakerTest.C StJetTreeEntryMakerTest.hh \
-	TowerEnergyListToFourListTest.C TowerEnergyListToFourListTest.hh \
-	TrackListToFourListTest.C TrackListToFourListTest.hh \
+	TowerEnergyListToStMuTrackFourVecListTest.C TowerEnergyListToStMuTrackFourVecListTest.hh \
+	TrackListToStMuTrackFourVecListTest.C TrackListToStMuTrackFourVecListTest.hh \
 	TrackTowerEnergyListToFourListTest.C TrackTowerEnergyListToFourListTest.hh \
 	RunJetFinderTest.C RunJetFinderTest.hh \
 	StJetTowerEnergyVariationTest.C StJetTowerEnergyVariationTest.hh \
 	StJetFourListCutTest.C StJetFourListCutTest.hh \
 	TrackTowerEnergyListToFourVecListTest.C TrackTowerEnergyListToFourVecListTest.hh \
 	StJetFourVecListCutTest.C StJetFourVecListCutTest.hh \
-	StJetJetListCutTest.C StJetJetListCutTest.hh
+	StJetJetListCutTest.C StJetJetListCutTest.hh \
+	StPythiaFourPMakerTest.C StPythiaFourPMakerTest.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \
@@ -401,9 +403,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetTowerEnergyVariationTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetTreeEntryCoordinatorTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetTreeEntryMakerTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StPythiaFourPMakerTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StppAnaParsTest.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToFourListTest.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TrackListToFourListTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourVecListTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TreeContentTest.Plo@am__quote@
@@ -527,19 +530,19 @@ libStJetMakerTest_la-StJetTreeEntryMakerTest.lo: StJetTreeEntryMakerTest.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StJetTreeEntryMakerTest.lo `test -f 'StJetTreeEntryMakerTest.C' || echo '$(srcdir)/'`StJetTreeEntryMakerTest.C
 
-libStJetMakerTest_la-TowerEnergyListToFourListTest.lo: TowerEnergyListToFourListTest.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-TowerEnergyListToFourListTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToFourListTest.Tpo" -c -o libStJetMakerTest_la-TowerEnergyListToFourListTest.lo `test -f 'TowerEnergyListToFourListTest.C' || echo '$(srcdir)/'`TowerEnergyListToFourListTest.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToFourListTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToFourListTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToFourListTest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TowerEnergyListToFourListTest.C' object='libStJetMakerTest_la-TowerEnergyListToFourListTest.lo' libtool=yes @AMDEPBACKSLASH@
+libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.lo: TowerEnergyListToStMuTrackFourVecListTest.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.Tpo" -c -o libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.lo `test -f 'TowerEnergyListToStMuTrackFourVecListTest.C' || echo '$(srcdir)/'`TowerEnergyListToStMuTrackFourVecListTest.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TowerEnergyListToStMuTrackFourVecListTest.C' object='libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-TowerEnergyListToFourListTest.lo `test -f 'TowerEnergyListToFourListTest.C' || echo '$(srcdir)/'`TowerEnergyListToFourListTest.C
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.lo `test -f 'TowerEnergyListToStMuTrackFourVecListTest.C' || echo '$(srcdir)/'`TowerEnergyListToStMuTrackFourVecListTest.C
 
-libStJetMakerTest_la-TrackListToFourListTest.lo: TrackListToFourListTest.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-TrackListToFourListTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-TrackListToFourListTest.Tpo" -c -o libStJetMakerTest_la-TrackListToFourListTest.lo `test -f 'TrackListToFourListTest.C' || echo '$(srcdir)/'`TrackListToFourListTest.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-TrackListToFourListTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-TrackListToFourListTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-TrackListToFourListTest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TrackListToFourListTest.C' object='libStJetMakerTest_la-TrackListToFourListTest.lo' libtool=yes @AMDEPBACKSLASH@
+libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo: TrackListToStMuTrackFourVecListTest.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.Tpo" -c -o libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo `test -f 'TrackListToStMuTrackFourVecListTest.C' || echo '$(srcdir)/'`TrackListToStMuTrackFourVecListTest.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TrackListToStMuTrackFourVecListTest.C' object='libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-TrackListToFourListTest.lo `test -f 'TrackListToFourListTest.C' || echo '$(srcdir)/'`TrackListToFourListTest.C
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo `test -f 'TrackListToStMuTrackFourVecListTest.C' || echo '$(srcdir)/'`TrackListToStMuTrackFourVecListTest.C
 
 libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo: TrackTowerEnergyListToFourListTest.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.Tpo" -c -o libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo `test -f 'TrackTowerEnergyListToFourListTest.C' || echo '$(srcdir)/'`TrackTowerEnergyListToFourListTest.C; \
@@ -589,6 +592,13 @@ libStJetMakerTest_la-StJetJetListCutTest.lo: StJetJetListCutTest.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StJetJetListCutTest.C' object='libStJetMakerTest_la-StJetJetListCutTest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StJetJetListCutTest.lo `test -f 'StJetJetListCutTest.C' || echo '$(srcdir)/'`StJetJetListCutTest.C
+
+libStJetMakerTest_la-StPythiaFourPMakerTest.lo: StPythiaFourPMakerTest.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StPythiaFourPMakerTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StPythiaFourPMakerTest.Tpo" -c -o libStJetMakerTest_la-StPythiaFourPMakerTest.lo `test -f 'StPythiaFourPMakerTest.C' || echo '$(srcdir)/'`StPythiaFourPMakerTest.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StPythiaFourPMakerTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StPythiaFourPMakerTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StPythiaFourPMakerTest.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StPythiaFourPMakerTest.C' object='libStJetMakerTest_la-StPythiaFourPMakerTest.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StPythiaFourPMakerTest.lo `test -f 'StPythiaFourPMakerTest.C' || echo '$(srcdir)/'`StPythiaFourPMakerTest.C
 
 TestApp-TestMain.o: TestMain.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(TestApp_CXXFLAGS) $(CXXFLAGS) -MT TestApp-TestMain.o -MD -MP -MF "$(DEPDIR)/TestApp-TestMain.Tpo" -c -o TestApp-TestMain.o `test -f 'TestMain.C' || echo '$(srcdir)/'`TestMain.C; \

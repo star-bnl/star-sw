@@ -1,29 +1,29 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include <TowerEnergyListToFourList.h>
+#include <TowerEnergyListToStMuTrackFourVecList.h>
 #include <StMuTrackFourVec.h>
 
-#include "TowerEnergyListToFourListTest.hh"
+#include "TowerEnergyListToStMuTrackFourVecListTest.hh"
 
 
 using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( TowerEnergyListToFourListTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( TowerEnergyListToStMuTrackFourVecListTest );
 
-void TowerEnergyListToFourListTest::setUp() 
+void TowerEnergyListToStMuTrackFourVecListTest::setUp() 
 {
 
 }
 
-void TowerEnergyListToFourListTest::tearDown() 
+void TowerEnergyListToStMuTrackFourVecListTest::tearDown() 
 {
 
 }
 
-void TowerEnergyListToFourListTest::testOne() 
+void TowerEnergyListToStMuTrackFourVecListTest::testOne() 
 {
-  TowerEnergyListToFourList etof;
+  TowerEnergyListToStMuTrackFourVecList etof;
   TowerEnergyList elist;
 
   TowerEnergy energy;
