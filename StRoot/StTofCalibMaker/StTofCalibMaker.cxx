@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.17 2008/06/25 21:45:29 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.18 2008/07/22 00:16:47 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.18  2008/07/22 00:16:47  dongx
+ * initialization added for global variables in StTofCollection in each event
+ *
  * Revision 1.17  2008/06/25 21:45:29  dongx
  * Reset time values when tot/z is out of range
  *
@@ -932,6 +935,13 @@ void StTofCalibMaker::clearFormulars()
 Int_t StTofCalibMaker::Make()
 {
   gMessMgr->Info(" StTofCalibMaker::Maker: starting ...","OS");
+
+  mTDiff = -9999.;
+  mVPDVtxZ = -9999.;
+  mProjVtxZ = -9999.;
+  mVPDHitPatternEast = 0;
+  mVPDHitPatternWest = 0;
+
   Int_t iret = kStOK;
   if(mYear2||mYear3||mYear4){
     iret = processEventYear2to4();
