@@ -16,39 +16,43 @@ using namespace std;
 #include "StFourPMaker.h"
 #include "StPythia/StPythiaMuTrackFourVec.h"
 
+#include <MCParticleList.h>
+
 class StMcEventMaker;
 class StMCAsymMaker;
 
 class StPythiaFourPMaker : public StFourPMaker
 {
+
 public:
     
-    ///Must pass a valid instance of Renee's StMCAsymMaker in constructor
-    StPythiaFourPMaker(const char *name, StMCAsymMaker*, StMcEventMaker*);
-    ///Default destructor
-    virtual ~StPythiaFourPMaker() {};
+  StPythiaFourPMaker(const char *name, StMCAsymMaker*, StMcEventMaker*);
+  virtual ~StPythiaFourPMaker() { };
     
   virtual FourList &getTracks() { return tracks; };
   Int_t numTracks(void) { return tracks.size(); };
 
-    ///Fill the lists
-    virtual Int_t Make();
+  virtual Int_t Make();
     
-    ///Clear the lists
-    virtual void Clear(Option_t* opt);
+  virtual void Clear(Option_t* opt);
     
 protected:
+
   FourList tracks;
 
-    //!typedef vector<StPythiaMuTrackFourVec*> Pythia4Vec;
-    typedef vector<StMuTrackFourVec*> Pythia4Vec;
-    Pythia4Vec mVec;
+  typedef vector<StMuTrackFourVec*> Pythia4Vec;
+  Pythia4Vec mVec;
     
-    StMCAsymMaker* mSimuMaker;
-    StMcEventMaker* mMcEventMaker;
+  StMCAsymMaker* mSimuMaker;
+  StMcEventMaker* mMcEventMaker;
     
-    ClassDef(StPythiaFourPMaker,1)
-	};
+private:
+
+  StSpinJet::MCParticleList getMCPartilceList();
+
+  ClassDef(StPythiaFourPMaker,1)
+
+};
 
 
 #endif

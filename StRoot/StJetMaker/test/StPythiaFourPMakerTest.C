@@ -21,6 +21,9 @@ void StPythiaFourPMakerTest::tearDown()
 
 void StPythiaFourPMakerTest::testMake() 
 {
-  //  StPythiaFourPMaker* maker = new StPythiaFourPMaker();
-  //  delete maker;
+  StPythiaFourPMaker* maker = new StPythiaFourPMaker("StPythiaFourPMaker", 0, 0);
+
+  maker->Make();
+
+  delete maker;
 }
