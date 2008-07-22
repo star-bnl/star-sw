@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.61 2008/07/21 02:48:12 tai Exp $
+// $Id: StJetMaker.cxx,v 1.62 2008/07/22 17:40:59 tai Exp $
 #include "StJetMaker.h"
 
 #include "emulator/StParticleCollector.h"
@@ -9,6 +9,8 @@
 #include "emulator/StppJetAnalyzer.h"
 
 #include <StJetFinder/StProtoJet.h>
+
+#include <StSpinPool/StJets/StJets.h>
 
 #include <string>
 #include <list>
@@ -41,14 +43,17 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 
   vector<const AbstractFourVec*> *particleList = new vector<const AbstractFourVec*>;
 
+  StJets* stjets = new StJets();
+
   _particleCollectorList.push_back(new StParticleCollector(ap, fp, *particleList));
 
   _jetFinderList.push_back(new StJetFinderRunner(jp, *particleList, *protoJetList));
 
   _jetCutsList.push_back(new StJetCuts(ap, *protoJetList));
 
-  _treeWriter->addJetFinder(fp, particleList, protoJetList, name);
+  _treeWriter->addJetFinder(fp, particleList, protoJetList, name, stjets);
 
+  _stjetsMap[string(name)] = stjets;
 
   _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), _treeWriter, name);
 }
