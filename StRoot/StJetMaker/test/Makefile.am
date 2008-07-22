@@ -28,10 +28,8 @@ libStJetMakerTest_la_SOURCES = 	\
 	StJetTreeEntryMakerTest.C StJetTreeEntryMakerTest.hh \
 	TowerEnergyListToStMuTrackFourVecListTest.C TowerEnergyListToStMuTrackFourVecListTest.hh \
 	TrackListToStMuTrackFourVecListTest.C TrackListToStMuTrackFourVecListTest.hh \
-	TrackTowerEnergyListToFourListTest.C TrackTowerEnergyListToFourListTest.hh \
 	RunJetFinderTest.C RunJetFinderTest.hh \
 	StJetTowerEnergyVariationTest.C StJetTowerEnergyVariationTest.hh \
-	StJetFourListCutTest.C StJetFourListCutTest.hh \
 	TrackTowerEnergyListToFourVecListTest.C TrackTowerEnergyListToFourVecListTest.hh \
 	StJetFourVecListCutTest.C StJetFourVecListCutTest.hh \
 	StJetJetListCutTest.C StJetJetListCutTest.hh \
