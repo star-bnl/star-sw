@@ -1,3 +1,5 @@
+// -*- mode: c++;-*-
+// $Id: StPythiaFourPMaker.h,v 1.3 2008/07/22 05:06:23 tai Exp $
 /*!
   \class StPythiaFourPMaker
   \author M.L. Miller (MIT Software)
@@ -6,52 +8,51 @@
   StJetFinder instance.  StPythiaFourPMaker simply instantiates an object of type
   StPythiaMuTrackFourVec for every final state particle in the event.
 */
-
 #ifndef StPythiaFourPMaker_HH
 #define StPYthiaFourPMaker_HH
 
-#include <vector>
-using namespace std;
 
 #include "StFourPMaker.h"
-#include "StPythia/StPythiaMuTrackFourVec.h"
 
 #include <MCParticleList.h>
 
+#include <vector>
+
 class StMcEventMaker;
 class StMCAsymMaker;
+class StMuTrackFourVec;
 
-class StPythiaFourPMaker : public StFourPMaker
-{
+namespace StSpinJet {
+  class StJetMC;
+}
+
+class StPythiaFourPMaker : public StFourPMaker {
 
 public:
     
   StPythiaFourPMaker(const char *name, StMCAsymMaker*, StMcEventMaker*);
   virtual ~StPythiaFourPMaker() { };
     
-  virtual FourList &getTracks() { return tracks; };
+  FourList &getTracks() { return tracks; };
   Int_t numTracks(void) { return tracks.size(); };
 
-  virtual Int_t Make();
+  Int_t Init();
+  Int_t Make();
     
-  virtual void Clear(Option_t* opt);
+  void Clear(Option_t* opt);
     
 protected:
 
   FourList tracks;
 
-  typedef vector<StMuTrackFourVec*> Pythia4Vec;
+  typedef std::vector<StMuTrackFourVec*> Pythia4Vec;
   Pythia4Vec mVec;
-    
-  StMCAsymMaker* mSimuMaker;
-  StMcEventMaker* mMcEventMaker;
     
 private:
 
-  StSpinJet::MCParticleList getMCPartilceList();
+  StSpinJet::StJetMC* _mc;
 
   ClassDef(StPythiaFourPMaker,1)
-
 };
 
 
