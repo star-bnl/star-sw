@@ -81,10 +81,8 @@ am_libStJetMakerTest_la_OBJECTS =  \
 	libStJetMakerTest_la-StJetTreeEntryMakerTest.lo \
 	libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.lo \
 	libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo \
-	libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo \
 	libStJetMakerTest_la-RunJetFinderTest.lo \
 	libStJetMakerTest_la-StJetTowerEnergyVariationTest.lo \
-	libStJetMakerTest_la-StJetFourListCutTest.lo \
 	libStJetMakerTest_la-TrackTowerEnergyListToFourVecListTest.lo \
 	libStJetMakerTest_la-StJetFourVecListCutTest.lo \
 	libStJetMakerTest_la-StJetJetListCutTest.lo \
@@ -267,10 +265,8 @@ libStJetMakerTest_la_SOURCES = \
 	StJetTreeEntryMakerTest.C StJetTreeEntryMakerTest.hh \
 	TowerEnergyListToStMuTrackFourVecListTest.C TowerEnergyListToStMuTrackFourVecListTest.hh \
 	TrackListToStMuTrackFourVecListTest.C TrackListToStMuTrackFourVecListTest.hh \
-	TrackTowerEnergyListToFourListTest.C TrackTowerEnergyListToFourListTest.hh \
 	RunJetFinderTest.C RunJetFinderTest.hh \
 	StJetTowerEnergyVariationTest.C StJetTowerEnergyVariationTest.hh \
-	StJetFourListCutTest.C StJetFourListCutTest.hh \
 	TrackTowerEnergyListToFourVecListTest.C TrackTowerEnergyListToFourVecListTest.hh \
 	StJetFourVecListCutTest.C StJetFourVecListCutTest.hh \
 	StJetJetListCutTest.C StJetJetListCutTest.hh \
@@ -394,7 +390,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StBET4pMakerTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetBEMCEnergyCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetBEMCTreeTest.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetFourListCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetFourVecListCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetJetListCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetMakerTest.Plo@am__quote@
@@ -407,7 +402,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StppAnaParsTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TowerEnergyListToStMuTrackFourVecListTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourVecListTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TreeContentTest.Plo@am__quote@
 
@@ -544,13 +538,6 @@ libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo: TrackListToStMuTrac
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-TrackListToStMuTrackFourVecListTest.lo `test -f 'TrackListToStMuTrackFourVecListTest.C' || echo '$(srcdir)/'`TrackListToStMuTrackFourVecListTest.C
 
-libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo: TrackTowerEnergyListToFourListTest.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.Tpo" -c -o libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo `test -f 'TrackTowerEnergyListToFourListTest.C' || echo '$(srcdir)/'`TrackTowerEnergyListToFourListTest.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='TrackTowerEnergyListToFourListTest.C' object='libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-TrackTowerEnergyListToFourListTest.lo `test -f 'TrackTowerEnergyListToFourListTest.C' || echo '$(srcdir)/'`TrackTowerEnergyListToFourListTest.C
-
 libStJetMakerTest_la-RunJetFinderTest.lo: RunJetFinderTest.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-RunJetFinderTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-RunJetFinderTest.Tpo" -c -o libStJetMakerTest_la-RunJetFinderTest.lo `test -f 'RunJetFinderTest.C' || echo '$(srcdir)/'`RunJetFinderTest.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-RunJetFinderTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-RunJetFinderTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-RunJetFinderTest.Tpo"; exit 1; fi
@@ -564,13 +551,6 @@ libStJetMakerTest_la-StJetTowerEnergyVariationTest.lo: StJetTowerEnergyVariation
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StJetTowerEnergyVariationTest.C' object='libStJetMakerTest_la-StJetTowerEnergyVariationTest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StJetTowerEnergyVariationTest.lo `test -f 'StJetTowerEnergyVariationTest.C' || echo '$(srcdir)/'`StJetTowerEnergyVariationTest.C
-
-libStJetMakerTest_la-StJetFourListCutTest.lo: StJetFourListCutTest.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StJetFourListCutTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StJetFourListCutTest.Tpo" -c -o libStJetMakerTest_la-StJetFourListCutTest.lo `test -f 'StJetFourListCutTest.C' || echo '$(srcdir)/'`StJetFourListCutTest.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StJetFourListCutTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StJetFourListCutTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StJetFourListCutTest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StJetFourListCutTest.C' object='libStJetMakerTest_la-StJetFourListCutTest.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StJetFourListCutTest.lo `test -f 'StJetFourListCutTest.C' || echo '$(srcdir)/'`StJetFourListCutTest.C
 
 libStJetMakerTest_la-TrackTowerEnergyListToFourVecListTest.lo: TrackTowerEnergyListToFourVecListTest.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-TrackTowerEnergyListToFourVecListTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-TrackTowerEnergyListToFourVecListTest.Tpo" -c -o libStJetMakerTest_la-TrackTowerEnergyListToFourVecListTest.lo `test -f 'TrackTowerEnergyListToFourVecListTest.C' || echo '$(srcdir)/'`TrackTowerEnergyListToFourVecListTest.C; \
