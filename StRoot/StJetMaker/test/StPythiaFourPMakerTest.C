@@ -23,7 +23,7 @@ void StPythiaFourPMakerTest::testMake()
 {
   StPythiaFourPMaker* maker = new StPythiaFourPMaker("StPythiaFourPMaker", 0, 0);
 
-  maker->Make();
+  //  maker->Make();
 
   delete maker;
 }
