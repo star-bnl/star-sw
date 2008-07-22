@@ -42,6 +42,8 @@ using namespace std;
 
 #include <TLorentzVector.h>
 
+using namespace StSpinJet;
+
 ClassImp(StPythiaFourPMaker)
     
 StPythiaFourPMaker::StPythiaFourPMaker(const char* name, StMCAsymMaker* sim,  StMcEventMaker* mc) 
@@ -59,48 +61,56 @@ void StPythiaFourPMaker::Clear(Option_t* opt)
   return;
 }
 
-Int_t StPythiaFourPMaker::Make()
+MCParticleList StPythiaFourPMaker::getMCPartilceList()
 {
-  //SubProcess ID from StMcEventMaker
   StMcEvent* mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
-  //StMcEvent* mcEvent = dynamic_cast<StMcEvent*>( mMcEventMaker->currentMcEvent() );
-  if(!mcEvent)  {
-    cout <<"No McEvent!!!"<<endl;
-    return kStErr;
-  }
   
-  //access the ptyhia particle table.  Should access via StMcEvent, but that's not yet updated for Maxim's newest additions
   const St_particle* particleTabPtr = mSimuMaker->particleTable();
   const particle_st* particleTable = particleTabPtr->GetTable();
 
+  MCParticleList theList;
+
   for (int i=0; i<particleTabPtr->GetNRows();++i) {
-    int status = particleTable[i].isthep;   //status
 		
-    if (status==1) { //ok, showering is finished, but these particles could decay further (e.g., pi0 -> gamma gamma)
+    MCParticle particle;
+    particle.status          = particleTable[i].isthep;
+    particle.mcparticleId    = i + 1;
+    particle.pdg             = particleTable[i].idhep;
+    particle.firstMotherId   = particleTable[i].jmohep[0];
+    particle.lastMotherId    = particleTable[i].jmohep[1];
+    particle.firstDaughterId = particleTable[i].jdahep[0];
+    particle.lastDaughterId  = particleTable[i].jdahep[1];
+
+    TLorentzVector p4(particleTable[i].phep[0], particleTable[i].phep[1], particleTable[i].phep[2], particleTable[i].phep[3]);
+    particle.pt  = p4.Pt();
+    particle.eta = p4.Eta();
+    particle.phi = p4.Phi();
+    particle.m   = p4.M();
+
+    theList.push_back(particle);
+  }
+
+  return theList;
+}
+
+Int_t StPythiaFourPMaker::Make()
+{
+  MCParticleList theList = getMCPartilceList();
+
+  for(MCParticleList::const_iterator it = theList.begin(); it != theList.end(); ++it) {
+
+    if((*it).status != 1) continue;
+    
+    TLorentzVector p4_;
+    p4_.SetPtEtaPhiM((*it).pt, (*it).eta, (*it).phi, (*it).m);
 			
-      //particleTable[i].idhep;// particle id
-      //particleTable[i].phep[4];//
-      StThreeVectorF momentum(particleTable[i].phep[0],//px
-			      particleTable[i].phep[1],//py
-			      particleTable[i].phep[2]//pz
-			      );
-			
-      double energy = particleTable[i].phep[3]; //E
-      // StLorentzVectorF p4( energy, momentum);
-      TLorentzVector p4(momentum.x(), momentum.y(), momentum.z(), energy);
-			
-      // if (fabs(p4.pseudoRapidity())<5.0) {
-      if (fabs(p4.Eta()) < 5.0) {
+    if (fabs((*it).eta) < 5.0) {
 				
-	StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4, 0, i, kUnknownId);
+      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4_, 0, (*it).mcparticleId - 1, kUnknownId);
 				
-	//void Init(StMuTrack* track, StLorentzVectorF P, Int_t i, StDetectorId detId);
-	// pmu->Init(0, p4, i, kUnknownId);
+      mVec.push_back(pmu);
+      tracks.push_back(pmu);
 				
-	mVec.push_back(pmu);
-	tracks.push_back(pmu);
-				
-      }
     }
   }
 	
