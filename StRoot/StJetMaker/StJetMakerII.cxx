@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.9 2008/07/18 19:20:08 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.10 2008/07/22 19:23:56 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -49,13 +49,13 @@
 #include "JetCutEta.h"
 #include "JetCutNFourVecs.h"
 
-#include "StJetJetListWriter.h"
+#include "tree/StJetJetListWriter.h"
 
 #include <StJetTowerEnergyVariation.h>
 
 #include <CorrectTowerEnergyForTracks.h>
 
-#include "RunJetFinder.h"
+#include "misc/RunJetFinder.h"
 
 #include <StJetFinder/StConePars.h>
 
