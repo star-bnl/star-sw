@@ -1,8 +1,7 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.4 2008/07/22 05:06:23 tai Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.5 2008/07/22 05:48:27 tai Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "emulator/StMuTrackFourVec.h"
-#include "emulator/StPythiaMuTrackFourVec.h"
 
 #include "mudst/StJetMCMuDst.h"
 
@@ -15,26 +14,22 @@ using namespace StSpinJet;
     
 ClassImp(StPythiaFourPMaker)
 
-StPythiaFourPMaker::StPythiaFourPMaker(const char* name, StMCAsymMaker* sim,  StMcEventMaker* mc)
-: StFourPMaker(name)
+Int_t StPythiaFourPMaker::Init()
 {
-  _mc = new StJetMCMuDst(sim, mc);
+  _mc = new StJetMCMuDst(this);
+
+  return kStOK;
 }
 
 void StPythiaFourPMaker::Clear(Option_t* opt)
 {
-  for (Pythia4Vec::iterator it=mVec.begin(); it!=mVec.end(); ++it) {
+  for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
     delete (*it);
-    (*it) = 0;
   }
-  mVec.clear();
-  tracks.clear();
-  return;
-}
 
-Int_t StPythiaFourPMaker::Init()
-{
-  return kStOK;
+  tracks.clear();
+
+  return;
 }
 
 Int_t StPythiaFourPMaker::Make()
@@ -48,14 +43,12 @@ Int_t StPythiaFourPMaker::Make()
     TLorentzVector p4_;
     p4_.SetPtEtaPhiM((*it).pt, (*it).eta, (*it).phi, (*it).m);
 			
-    if (fabs((*it).eta) < 5.0) {
+    if (fabs((*it).eta) >= 5.0) continue;
+    
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4_, 0, (*it).mcparticleId - 1, kUnknownId);
 				
-      StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4_, 0, (*it).mcparticleId - 1, kUnknownId);
+    tracks.push_back(pmu);
 				
-      mVec.push_back(pmu);
-      tracks.push_back(pmu);
-				
-    }
   }
 	
   return kStOK;

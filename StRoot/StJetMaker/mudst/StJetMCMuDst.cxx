@@ -1,8 +1,11 @@
-// $Id: StJetMCMuDst.cxx,v 1.1 2008/07/22 05:06:46 tai Exp $
+// $Id: StJetMCMuDst.cxx,v 1.2 2008/07/22 05:48:38 tai Exp $
 
 #include <StJetMCMuDst.h>
 
-#include <StSpinPool/StMCAsymMaker/StMCAsymMaker.h>
+#include <StMaker.h>
+
+#include <TDataSet.h>
+#include <TDataSetIter.h>
 
 #include <tables/St_particle_Table.h>
 
@@ -12,14 +15,15 @@ namespace StSpinJet {
 
 MCParticleList StJetMCMuDst::getMCPartilceList()
 {
-  StMcEvent* mcEvent = (StMcEvent*)mSimuMaker->GetDataSet("StMcEvent");
-  
-  const St_particle* particleTabPtr = mSimuMaker->particleTable();
+  TDataSet *Event = _maker->GetDataSet("geant");
+
+  TDataSetIter geantDstI(Event);
+  const St_particle* particleTabPtr = (St_particle*)geantDstI("particle");
   const particle_st* particleTable = particleTabPtr->GetTable();
 
   MCParticleList theList;
 
-  for (int i=0; i<particleTabPtr->GetNRows();++i) {
+  for (int i = 0; i < particleTabPtr->GetNRows(); ++i) {
 		
     MCParticle particle;
     particle.status          = particleTable[i].isthep;
