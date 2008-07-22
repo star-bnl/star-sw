@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StDefaultJetTreeWriter.h,v 1.2 2008/07/22 17:41:03 tai Exp $
+// $Id: StDefaultJetTreeWriter.h,v 1.3 2008/07/22 17:44:45 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STDEFAULTJETTREEWRITER_H
 #define STDEFAULTJETTREEWRITER_H
@@ -32,7 +32,7 @@ public:
   TTree* jetTree() const { return _jetTree; }
 
   void fillJetTree();
-  StJets *getLastStJets() { return _analyzerCtlList[_analyzerCtlList.size()]._jets; }
+  StJets *getLastStJets() { return _analyzerCtlList[_analyzerCtlList.size() - 1]._jets; }
 
 private:
   
