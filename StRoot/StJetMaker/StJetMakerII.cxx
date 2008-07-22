@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.10 2008/07/22 19:23:56 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.11 2008/07/22 19:25:17 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -32,8 +32,6 @@
 #include "StJetJetPrint.h"
 #include "StJetTrackPrint.h"
 #include "StJetFourVecPrint.h"
-
-#include "StJetJetListWriter.h"
 
 #include "StJetFourVecListCut.h"
 #include "FourVecCutPt.h"
