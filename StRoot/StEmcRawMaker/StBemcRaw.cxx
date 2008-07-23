@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.23 2008/07/03 20:58:49 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.24 2008/07/23 23:53:24 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.24  2008/07/23 23:53:24  mattheww
+// Changed default status check mode to off
+//
 // Revision 1.23  2008/07/03 20:58:49  mattheww
 // Added checking of every status table for each hit. Status table checks can be toggled using an option added to setCheckStatus. Also fixed a small bug.
 //
@@ -126,7 +129,7 @@ StBemcRaw::StBemcRaw():TObject()
         mControlADCtoE->CheckCrate[i]=crate[i];
         mBarrelQAHisto[i] = 0;
 	for(int j = 0; j < 4; j++){
-	  mCheckStatus[i][j]=1;
+	  mCheckStatus[i][j]=0;
 	}
     }
 
