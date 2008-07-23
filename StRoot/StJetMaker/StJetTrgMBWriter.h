@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrgMBWriter.h,v 1.4 2008/07/23 02:34:05 tai Exp $
+// $Id: StJetTrgMBWriter.h,v 1.5 2008/07/23 20:25:42 tai Exp $
 #ifndef STJETTRGMBWRITER_H
 #define STJETTRGMBWRITER_H
 
@@ -37,14 +37,16 @@ private:
   int _trgId;
 
   TDirectory* _file;
-  TTree* _tree;
+  TTree*      _tree;
 
-  Int_t _runNumber;
-  Int_t _eventId;
+  Int_t    _runNumber;
+  Int_t    _eventId;
   Double_t _vertexZ;
-  Int_t _trigID;
+  Int_t    _trigID;
   Double_t _prescale;
-  Int_t _passed;
+  Int_t    _passed;
+  Int_t    _hard;
+  Int_t    _soft;
 
   StJetTrg* _trg;
 

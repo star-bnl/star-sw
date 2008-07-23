@@ -1,4 +1,4 @@
-// $Id: StJetTrgMBWriter.cxx,v 1.4 2008/07/23 02:34:05 tai Exp $
+// $Id: StJetTrgMBWriter.cxx,v 1.5 2008/07/23 20:25:42 tai Exp $
 #include "StJetTrgMBWriter.h"
 
 #include "StJetTrg.h"
@@ -18,7 +18,9 @@ void StJetTrgMBWriter::Init()
   _tree->Branch("vertexZ"    , &_vertexZ      , "vertexZ/D"      );
   _tree->Branch("trigID"     , &_trigID       , "trigID/I"       );
   _tree->Branch("prescale"   , &_prescale     , "prescale/D"     );
-  _tree->Branch("passed"     , &_passed       , "passed/I"         );
+  _tree->Branch("passed"     , &_passed       , "passed/I"       );
+  _tree->Branch("hard"       , &_hard         , "hard/I"         );
+  _tree->Branch("soft"       , &_soft         , "soft/I"         );
 
   _trigID = _trgId;
 
@@ -26,7 +28,13 @@ void StJetTrgMBWriter::Init()
 
 void StJetTrgMBWriter::Make()
 {
-  _passed = _trg->hard(_trgId);
+  _hard = _trg->hard(_trgId);
+
+  _soft = _trg->soft(_trgId);
+
+  if(!(_hard || _soft)) return;
+
+  _passed = (_hard && _soft);
 
   _runNumber = _trg->runNumber();
 
