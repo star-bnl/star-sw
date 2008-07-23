@@ -1,23 +1,15 @@
-// $Id: StJetTriggerMaker.cxx,v 1.1 2008/07/11 23:32:21 tai Exp $
+// $Id: StJetTriggerMaker.cxx,v 1.2 2008/07/23 02:34:05 tai Exp $
 #include "StJetTriggerMaker.h"
+
+#include "StJetTrg.h"
 
 #include "StJetTrgJPWriter.h"
 #include "StJetTrgHTWriter.h"
 #include "StJetTrgMBWriter.h"
 
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include "StJetTrg.h"
 
-#include <StEmcTriggerMaker/StEmcTriggerMaker.h>
-
-#include <TFile.h>
-#include <TTree.h>
-
-#include <map>
-#include <iostream>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
@@ -38,15 +30,18 @@ StJetTriggerMaker::StJetTriggerMaker(const Char_t *name, TDirectory* file, StMuD
 
 Int_t StJetTriggerMaker::Init()
 {
-  _minbWriter = new StJetTrgMBWriter("trgMINB", "trgMINB", 96011, _file, _uDstMaker);
+  StJetTrg* trg = new StJetTrg(_uDstMaker, new StJetTrgSoftware(_emcTrigMaker));
 
-  _bht1Writer = new StJetTrgHTWriter("trgBHT1", "trgBHT1", 96201, _file, _uDstMaker, _emcTrigMaker);
 
-  _bht2Writer = new StJetTrgHTWriter("trgBHT2", "trgBHT2", 96211, _file, _uDstMaker, _emcTrigMaker);
+  _minbWriter = new StJetTrgMBWriter("trgMINB", "trgMINB", 96011, _file, trg);
 
-  _bjp1Writer = new StJetTrgJPWriter("trgBJP1", "trgBJP1", 96221, _file, _uDstMaker, _emcTrigMaker);
+  _bht1Writer = new StJetTrgHTWriter("trgBHT1", "trgBHT1", 96201, _file, trg);
 
-  _bjp2Writer = new StJetTrgJPWriter("trgBJP2", "trgBJP2", 96233, _file, _uDstMaker, _emcTrigMaker);
+  _bht2Writer = new StJetTrgHTWriter("trgBHT2", "trgBHT2", 96211, _file, trg);
+
+  _bjp1Writer = new StJetTrgJPWriter("trgBJP1", "trgBJP1", 96221, _file, trg);
+
+  _bjp2Writer = new StJetTrgJPWriter("trgBJP2", "trgBJP2", 96233, _file, trg);
 
 
   _minbWriter->Init();

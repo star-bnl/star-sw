@@ -1,22 +1,12 @@
-// $Id: StJetTrgMBWriter.cxx,v 1.3 2008/07/13 09:37:52 tai Exp $
+// $Id: StJetTrgMBWriter.cxx,v 1.4 2008/07/23 02:34:05 tai Exp $
 #include "StJetTrgMBWriter.h"
 
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include "StJetTrg.h"
 
-#include <StDetectorDbMaker/StDetectorDbTriggerID.h>
-
-#include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 
-#include <map>
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
 using namespace std;
-
 
 void StJetTrgMBWriter::Init()
 {
@@ -36,15 +26,15 @@ void StJetTrgMBWriter::Init()
 
 void StJetTrgMBWriter::Make()
 {
+  _passed = _trg->hard(_trgId);
 
-  _passed = (_uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId));
+  _runNumber = _trg->runNumber();
 
-  _runNumber = _uDstMaker->muDst()->event()->runId();
-  _eventId = _uDstMaker->muDst()->event()->eventId();
+  _eventId = _trg->eventId();
 
-  _vertexZ = _uDstMaker->muDst()->event()->primaryVertexPosition().z();
+  _vertexZ = _trg->vertexZ();
 
-  _prescale = StDetectorDbTriggerID::instance()->getTotalPrescales()[_trgId];
+  _prescale = _trg->prescale(_trgId);
 
   _tree->Fill();
 }

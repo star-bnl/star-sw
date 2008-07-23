@@ -1,21 +1,12 @@
-// $Id: StJetTrgJPWriter.cxx,v 1.4 2008/07/20 06:17:09 tai Exp $
+// $Id: StJetTrgJPWriter.cxx,v 1.5 2008/07/23 02:34:04 tai Exp $
 #include "StJetTrgJPWriter.h"
 
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include "StJetTrg.h"
 
-#include <StDetectorDbMaker/StDetectorDbTriggerID.h>
-
-#include <StEmcTriggerMaker/StEmcTriggerMaker.h>
-
-#include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 
-#include <map>
-#include <iostream>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
@@ -37,40 +28,31 @@ void StJetTrgJPWriter::Init()
   _tree->Branch("jetPatchId"   ,  _jetPatchId     , "jetPatchId[nJetPatches]/I");
 
   _trigID = _trgId;
-
 }
 
 void StJetTrgJPWriter::Make()
 {
-  _hard = _uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId);
-
-  _soft = _emcTrigMaker->isTrigger(_trgId);
+  _hard = _trg->hard(_trgId);
+  _soft = _trg->soft(_trgId);
 
   if(!(_hard || _soft)) return;
 
   _passed = (_hard && _soft);
 
-  _runNumber = _uDstMaker->muDst()->event()->runId();
+  _runNumber = _trg->runNumber();
 
-  _eventId = _uDstMaker->muDst()->event()->eventId();
+  _eventId = _trg->eventId();
 
-  _vertexZ = _uDstMaker->muDst()->event()->primaryVertexPosition().z();
+  _vertexZ = _trg->vertexZ();
 
-  _prescale = StDetectorDbTriggerID::instance()->getTotalPrescales()[_trgId];
+  _prescale = _trg->prescale(_trgId);
 
-  vector<int> jps;
-  map<int,int> jetPatchMap = _emcTrigMaker->barrelJetPatchesAboveThreshold(_trgId);
-  for(map<int,int>::const_iterator jp = jetPatchMap.begin(); jp != jetPatchMap.end(); ++jp) {
-    jps.push_back(jp->first);
-  }
-
-  sort(jps.begin(), jps.end());
+  vector<int> jps = _trg->jetPatches(_trgId);
 
   _nJetPatches = jps.size();
 
-  int i(0);
-  for(vector<int>::const_iterator jp = jps.begin(); jp != jps.end(); ++jp) {
-    _jetPatchId[i++] = *jp;
+  for(int i = 0; i < _nJetPatches; ++i) {
+    _jetPatchId[i] = jps[i];
   }
 
   _tree->Fill();

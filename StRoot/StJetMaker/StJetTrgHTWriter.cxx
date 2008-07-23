@@ -1,21 +1,12 @@
-// $Id: StJetTrgHTWriter.cxx,v 1.4 2008/07/20 06:17:08 tai Exp $
+// $Id: StJetTrgHTWriter.cxx,v 1.5 2008/07/23 02:34:04 tai Exp $
 #include "StJetTrgHTWriter.h"
 
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include "StJetTrg.h"
 
-#include <StEmcTriggerMaker/StEmcTriggerMaker.h>
-
-#include <StDetectorDbMaker/StDetectorDbTriggerID.h>
-
-#include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 
-#include <map>
-#include <iostream>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
@@ -30,47 +21,39 @@ void StJetTrgHTWriter::Init()
   _tree->Branch("vertexZ"    , &_vertexZ      , "vertexZ/D"      );
   _tree->Branch("trigID"     , &_trigID       , "trigID/I"       );
   _tree->Branch("prescale"   , &_prescale     , "prescale/D"     );
-  _tree->Branch("passed"     , &_passed       , "passed/I"         );
+  _tree->Branch("passed"     , &_passed       , "passed/I"       );
   _tree->Branch("hard"       , &_hard         , "hard/I"         );
   _tree->Branch("soft"       , &_soft         , "soft/I"         );
   _tree->Branch("nTowers"    , &_nTowers      , "nTowers/I"      );
   _tree->Branch("towerId"    ,  _towerId      , "towerId[nTowers]/I");
 
   _trigID = _trgId;
-
 }
+
 
 void StJetTrgHTWriter::Make()
 {
-  _hard = _uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId);
-
-  _soft = _emcTrigMaker->isTrigger(_trgId);
+  _hard = _trg->hard(_trgId);
+  _soft = _trg->soft(_trgId);
 
   if(!(_hard || _soft)) return;
 
   _passed = (_hard && _soft);
 
-  _runNumber = _uDstMaker->muDst()->event()->runId();
+  _runNumber = _trg->runNumber();
 
-  _eventId = _uDstMaker->muDst()->event()->eventId();
+  _eventId = _trg->eventId();
 
-  _vertexZ = _uDstMaker->muDst()->event()->primaryVertexPosition().z();
+  _vertexZ = _trg->vertexZ();
 
-  _prescale = StDetectorDbTriggerID::instance()->getTotalPrescales()[_trgId];
+  _prescale = _trg->prescale(_trgId);
 
-  vector<int> towers;
-  map<int,int> towerMap = _emcTrigMaker->barrelTowersAboveThreshold(_trgId);
-  for(map<int,int>::const_iterator tower = towerMap.begin(); tower != towerMap.end(); ++tower) {
-    towers.push_back(tower->first);
-  }
-
-  sort(towers.begin(), towers.end());
+  vector<int> towers = _trg->towers(_trgId);
 
   _nTowers = towers.size();
 
-  int i(0);
-  for(vector<int>::const_iterator tower = towers.begin(); tower != towers.end(); ++tower) {
-    _towerId[i++] = *tower;
+  for(int i = 0; i < _nTowers; ++i) {
+    _towerId[i] = towers[i];
   }
 
   _tree->Fill();
