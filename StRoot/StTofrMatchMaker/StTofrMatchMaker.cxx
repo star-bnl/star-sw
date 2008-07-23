@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.25 2008/06/24 21:58:13 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.26 2008/07/23 19:22:03 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.26  2008/07/23 19:22:03  dongx
+ * New track quality cuts for Run8
+ *
  * Revision 1.25  2008/06/24 21:58:13  dongx
  * fixed a bug of crashing due to potential empty track in trackNodes
  *
@@ -95,6 +98,7 @@
 #include "StThreeVectorF.hh"
 #include "StHelix.hh"
 #include "StTrackGeometry.h"
+#include "StDcaGeometry.h"
 #include "StDedxPidTraits.h"
 #include "StTrackPidTraits.h"
 #include "StarClassLibrary/StParticleTypes.hh"
@@ -1910,10 +1914,10 @@ Int_t StTofrMatchMaker::processEventYear8(){
   for (unsigned int iNode=0; iNode<nodes.size(); iNode++){
     tofCellHitVector cellHitVec;
     //    cellHitVec.clear();
-    StTrack *theTrack = nodes[iNode]->track(global);
+    StGlobalTrack *theTrack = dynamic_cast<StGlobalTrack*>(nodes[iNode]->track(global));
     if(!theTrack) continue;
 
-    StThreeVectorF mom = trackGeometry(theTrack)->momentum();
+    StThreeVectorF mom = theTrack->geometry()->momentum();
     float pt = mom.perp();
     float eta = mom.pseudoRapidity();
     float phi = mom.phi();
@@ -1939,7 +1943,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
 //    if (pt<0.2) continue;
 
     // make sure we have a track, a miniDST might have removed it...
-    if (validTrack(theTrack)){
+    if (validTrackRun8(theTrack)){
       if(mHisto) {
         mTrackPtEta->Fill(pt, eta);
         mTrackPtPhi->Fill(pt, phi);
@@ -2799,6 +2803,33 @@ bool StTofrMatchMaker::validTrack(StTrack *track){
   // 5. minimum #fit points over #maximum points
   float ratio = (1.0*track->fitTraits().numberOfFitPoints(kTpcId)) / (1.0*track->numberOfPossiblePoints(kTpcId));
   if (ratio < mMinFitPointsOverMax) return false;
+
+  return true;
+}
+
+//---------------------------------------------------------------------------
+// determine whether this is a valid TPC track
+bool StTofrMatchMaker::validTrackRun8(StGlobalTrack *track){
+  // 1. no track, no go.
+  if (!track) return false;
+
+  // 2. track quality flag, should be >0
+  if (track->flag()<=0) return false;
+
+  // 3. minimum #hits per track
+  if (track->topologyMap().numberOfHits(kTpcId) < mMinHitsPerTrack) return false;
+  // 4. minimum #fit points per track
+  if (track->fitTraits().numberOfFitPoints(kTpcId) < mMinFitPointsPerTrack) return false;
+  // 5. chi2 per track
+  float chi2 = track->fitTraits().chi2(0);
+  if ( chi2 > 10. ) return false;
+  
+  // 6. error
+  StDcaGeometry *dcaGeom = track->dcaGeometry();
+  if(!dcaGeom) return false;
+  float pt = dcaGeom->pt();
+  float sigma_pT = sqrt(dcaGeom->errMatrix()[9])*pt*pt;
+  if ( sigma_pT/pt > 0.3 ) return false;
 
   return true;
 }
