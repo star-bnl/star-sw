@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrgMBWriter.h,v 1.3 2008/07/13 09:37:52 tai Exp $
+// $Id: StJetTrgMBWriter.h,v 1.4 2008/07/23 02:34:05 tai Exp $
 #ifndef STJETTRGMBWRITER_H
 #define STJETTRGMBWRITER_H
 
@@ -10,19 +10,20 @@
 class TDirectory;
 class TTree;
 
-class StMuDstMaker;
-
 #include <string>
+
+class StJetTrg;
 
 class StJetTrgMBWriter : public StJetTrgWriter {
 
 public:
 
-  StJetTrgMBWriter(const char *treeName, const char* treeTitle, int trgId, TDirectory* file, StMuDstMaker* uDstMaker)
+  StJetTrgMBWriter(const char *treeName, const char* treeTitle, int trgId, TDirectory* file, StJetTrg* trg)
     : _treeName(treeName), _treeTitle(treeName)
     , _trgId(trgId)
     , _file(file)
-    , _uDstMaker(uDstMaker) { }
+    , _trg(trg)
+  { }
   virtual ~StJetTrgMBWriter() { }
 
   void Init();
@@ -45,7 +46,8 @@ private:
   Double_t _prescale;
   Int_t _passed;
 
-  StMuDstMaker* _uDstMaker;
+  StJetTrg* _trg;
+
 };
 
 #endif // STJETTRGMBWRITER_H

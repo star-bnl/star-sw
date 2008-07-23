@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrgJPWriter.h,v 1.4 2008/07/20 06:17:09 tai Exp $
+// $Id: StJetTrgJPWriter.h,v 1.5 2008/07/23 02:34:04 tai Exp $
 #ifndef STJETTRGJPWRITER_H
 #define STJETTRGJPWRITER_H
 
@@ -10,21 +10,20 @@
 class TDirectory;
 class TTree;
 
-class StMuDstMaker;
-class StEmcTriggerMaker;
-
 #include <string>
+
+class StJetTrg;
 
 class StJetTrgJPWriter : public StJetTrgWriter {
 
 public:
 
-  StJetTrgJPWriter(const char *treeName, const char* treeTitle, int trgId, TDirectory* file, StMuDstMaker* uDstMaker, StEmcTriggerMaker* emcTrigMaker)
+  StJetTrgJPWriter(const char *treeName, const char* treeTitle, int trgId, TDirectory* file, StJetTrg* trg)
     : _treeName(treeName), _treeTitle(treeName)
     , _trgId(trgId)
     , _file(file)
-    , _uDstMaker(uDstMaker)
-    , _emcTrigMaker(emcTrigMaker) { }
+    , _trg(trg)
+  { }
   virtual ~StJetTrgJPWriter() { }
 
   void Init();
@@ -51,8 +50,7 @@ private:
   Int_t    _nJetPatches;
   Int_t    _jetPatchId[12];
 
-  StMuDstMaker* _uDstMaker;
-  StEmcTriggerMaker* _emcTrigMaker;
+  StJetTrg* _trg;
 
 };
 
