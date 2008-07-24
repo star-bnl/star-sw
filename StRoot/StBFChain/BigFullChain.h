@@ -50,10 +50,14 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2005d","","","db,detDb"                                             ,"","","y2005d + new SVT",kFALSE},
   {"RY2005e","","","db,detDb"                                             ,"","","y2005e + new SVT",kFALSE},
   {"RY2005f","","","db,detDb"                                             ,"","","y2005f + new SVT",kFALSE},
+  {"RY2005g","","","db,detDb"                                             ,"","","y2005g + new SVT",kFALSE},
 
-  {"RY2006","","","db,detDb"                                             ,"","","y2006 for p+p run",kFALSE},
+  {"RY2006","","" ,"db,detDb"                                            ,"","","y2006 for p+p run",kFALSE},
+  {"RY2006g","","","db,detDb"                                           ,"","","y2006g for p+p run",kFALSE},
 
-  {"RY2007","","","db,detDb"                                            ,"","","y2007 for AuAu run",kFALSE},
+  {"RY2007","","" ,"db,detDb"                                            ,"","","y2007 for AuAu run",kFALSE},
+  {"RY2007g","","","db,detDb"                                           ,"","","y2007g for AuAu run",kFALSE},
+
   {"RY2008","","","db,detDb,NosvtIT,NossdIT"                             ,"","","y2008 for dAu run",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
@@ -309,16 +313,22 @@ Bfc_st BFC2[] = { // ITTF Chains
   // Year 6 chains - Geometry 2006 not yet ready, starting with y2005d
   {"B2006"       ,""       ,"","ry2005d,in,tpc_daq,tpcI,svt_daq,SvtD,Idst,tags,Tree,evout","",""
                                                               ,"Base chain for 2006 ITTF (tpc+svt)",kFALSE},
+ 
 #ifndef __CLEANUP__
   {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Idst,-SvtDedx,tags,Tree,evout","",""
                                              ,"Base chain for 2006 with 2005d geom ITTF (tpc only)",kFALSE},
   {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Idst,-SvtDedx,tags,Tree,evout","",""
                                                              ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
+  {"B2006g"      ,""       ,"","ry2006g,in,tpc_daq,tpcI,Idst,-SvtDedx,tags,Tree,evout","",""
+                                                       ,"Base chain for 2006 ITTF geo g (tpc only)",kFALSE},
+
 #else
   {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Idst,tags,Tree,evout","",""
                                              ,"Base chain for 2006 with 2005d geom ITTF (tpc only)",kFALSE},
   {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
+  {"B2006g"      ,""       ,"","ry2006g,in,tpc_daq,tpcI,Idst,l0,tags,Tree,evout","",""
+                                                       ,"Base chain for 2006 ITTF geo g (tpc only)",kFALSE},
 #endif
 
   {"pp2006a"      ,"" ,"",   // We cannot start with VFPPV as there are many asserts. ppLMV5 is safe until adjustment
@@ -327,6 +337,12 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"pp2006b"      ,"" ,"",   // We cannot start with VFPPV as there are many asserts. ppLMV5 is safe until adjustment
    "B2006b,IAna,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4,BeamBack",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
+  {"pp2006g"      ,"" ,"",     // added 2008 after geometry corrections
+   "B2006g,IAna,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4,BeamBack",
+          "","","Production chain for 2005 pp data geo g (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
+
 
   // Year 7 chains - Geometry 2007 hopefully fine
   {"T2007","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,fcf,Tree,evout","","","TPC only chain,  2007 ITTF",kFALSE},
@@ -373,23 +389,22 @@ Bfc_st BFC2[] = { // ITTF Chains
    "B2008,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr4,analysis",
                  "","","Production chain for 2008 data Corr3 (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
  
- 
-  // convergence chain
   {"P2008c"       ,"" ,"",   // ATTENTION: the below chain was used for preliminary results on low energy
    "B2008,IAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr4,analysis",
                       "","","Production chain for 2008 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   
+  {"pp2008c"      ,"" ,"",  // Note: this chain was not used and may be removed
+   "B2008,IAna,hitfilt,ppOpt,Minuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr4,analysis",
+                 "","","Production chain for 2008 data Corr3 (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
+  // convergence chains
+  {"pp2008"     ,"" ,"",   // VFPPV was chosen for p+p as final production chain
+   "B2008a,IAna,hitfilt,ppOpt,VFPPV,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr4,analysis",
+                 "","","Production chain for 2008 data Corr3 (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},   
   {"P2008"       ,"" ,"",  // this one is final and official production ready, June 2008
    "B2008a,IAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr4,analysis",
                       "","","Production chain for 2008 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
    
-  {"pp2008c"      ,"" ,"",  // Note: this chain was not used and may be removed
-   "B2008,IAna,hitfilt,ppOpt,Minuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr4,analysis",
-                 "","","Production chain for 2008 data Corr3 (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
-  {"pp2008"     ,"" ,"",  // VFPPV was chosen for p+p as final production chain
-   "B2008a,IAna,hitfilt,ppOpt,VFPPV,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,Corr4,analysis",
-                 "","","Production chain for 2008 data Corr3 (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},   
-
 
 #endif /* __BFC2__ */
   // Other chains/Calibration
