@@ -1,4 +1,4 @@
-// $Id: StJetTrgJPWriter.cxx,v 1.6 2008/07/23 23:21:04 tai Exp $
+// $Id: StJetTrgJPWriter.cxx,v 1.7 2008/07/24 02:14:48 tai Exp $
 #include "StJetTrgJPWriter.h"
 
 #include "StJetTrg.h"
@@ -17,7 +17,7 @@ void StJetTrgJPWriter::createBranch_trgSpecific(TTree* tree)
 
 void StJetTrgJPWriter::fillBranch_trgSpecific()
 {
-  vector<int> jps = _trg->jetPatches(_trgId);
+  vector<int> jps = _trg->jetPatches();
 
   _nJetPatches = jps.size();
 

@@ -1,4 +1,4 @@
-// $Id: StJetTrgHTWriter.cxx,v 1.6 2008/07/23 23:21:03 tai Exp $
+// $Id: StJetTrgHTWriter.cxx,v 1.7 2008/07/24 02:14:48 tai Exp $
 #include "StJetTrgHTWriter.h"
 
 #include "StJetTrg.h"
@@ -17,7 +17,7 @@ void StJetTrgHTWriter::createBranch_trgSpecific(TTree* tree)
 
 void StJetTrgHTWriter::fillBranch_trgSpecific()
 {
-  vector<int> towers = _trg->towers(_trgId);
+  vector<int> towers = _trg->towers();
 
   _nTowers = towers.size();
 

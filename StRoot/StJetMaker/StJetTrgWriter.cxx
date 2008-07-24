@@ -1,4 +1,4 @@
-// $Id: StJetTrgWriter.cxx,v 1.1 2008/07/23 23:21:05 tai Exp $
+// $Id: StJetTrgWriter.cxx,v 1.2 2008/07/24 02:14:51 tai Exp $
 #include "StJetTrgWriter.h"
 
 #include "StJetTrg.h"
@@ -46,11 +46,11 @@ void StJetTrgWriter::createBranch_general(TTree* tree)
 
 void StJetTrgWriter::fillBranch_general()
 {
-  _trigID = _trgId;
+  _trigID = _trg->id();
 
-  _hard = _trg->hard(_trgId);
+  _hard = _trg->hard();
 
-  _soft = _trg->soft(_trgId);
+  _soft = _trg->soft();
 
   _passed = (*_passCondition)();
 
@@ -60,6 +60,6 @@ void StJetTrgWriter::fillBranch_general()
 
   _vertexZ = _trg->vertexZ();
 
-  _prescale = _trg->prescale(_trgId);
+  _prescale = _trg->prescale();
 }
 
