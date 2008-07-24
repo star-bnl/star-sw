@@ -1,14 +1,14 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.6 2008/07/22 06:36:53 tai Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.7 2008/07/24 21:37:01 tai Exp $
 #include "StPythiaFourPMaker.h"
 
-#include "emulator/StMuTrackFourVec.h"
+#include "StMuTrackFourVec.h"
 
-#include "mudst/StJetMCMuDst.h"
+#include "StJetMCMuDst.h"
 
-#include "base/StJetMCParticleListCut.h"
-#include "base/MCParticleCut.h"
-#include "base/MCParticleCutEta.h"
-#include "base/MCParticleCutStatus.h"
+#include "StJetMCParticleListCut.h"
+#include "MCParticleCut.h"
+#include "MCParticleCutEta.h"
+#include "MCParticleCutStatus.h"
 
 #include <TLorentzVector.h>
 

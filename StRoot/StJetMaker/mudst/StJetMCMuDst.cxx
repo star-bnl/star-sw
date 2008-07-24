@@ -1,8 +1,12 @@
-// $Id: StJetMCMuDst.cxx,v 1.2 2008/07/22 05:48:38 tai Exp $
+// $Id: StJetMCMuDst.cxx,v 1.3 2008/07/24 21:37:05 tai Exp $
 
 #include <StJetMCMuDst.h>
 
 #include <StMaker.h>
+
+#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 
 #include <TDataSet.h>
 #include <TDataSetIter.h>
@@ -15,6 +19,7 @@ namespace StSpinJet {
 
 MCParticleList StJetMCMuDst::getMCPartilceList()
 {
+
   TDataSet *Event = _maker->GetDataSet("geant");
 
   TDataSetIter geantDstI(Event);
@@ -23,9 +28,14 @@ MCParticleList StJetMCMuDst::getMCPartilceList()
 
   MCParticleList theList;
 
+  StMuDstMaker *uDstMaker = dynamic_cast<StMuDstMaker*>(_maker->GetMaker("MuDst"));
+
+  MCParticle particle;
+  particle.runNumber = uDstMaker->muDst()->event()->runId();
+  particle.eventId = uDstMaker->muDst()->event()->eventId();
+
   for (int i = 0; i < particleTabPtr->GetNRows(); ++i) {
 		
-    MCParticle particle;
     particle.status          = particleTable[i].isthep;
     particle.mcparticleId    = i + 1;
     particle.pdg             = particleTable[i].idhep;
