@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.24 2008/07/23 23:53:24 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.25 2008/07/24 15:08:30 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.25  2008/07/24 15:08:30  mattheww
+// Minor bug fix and exception handling in setCheckStatus
+//
 // Revision 1.24  2008/07/23 23:53:24  mattheww
 // Changed default status check mode to off
 //
@@ -746,6 +749,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
 
 void StBemcRaw::setCheckStatus(Int_t det, Int_t flag, const char* option)
 {
+  //change the status if a particular option is chosen
   if(!strcmp(option,"status")){
     mCheckStatus[det][0]=flag;
     return;
@@ -761,6 +765,16 @@ void StBemcRaw::setCheckStatus(Int_t det, Int_t flag, const char* option)
   if(!strcmp(option,"gain")){
     mCheckStatus[det][3]=flag;
     return;
+  }
+
+  if(strcmp(option,"")){
+    LOG_WARN<<option<<" is not a valid option to setCheckStatus"<<endm;
+    return;
+  }
+
+  //if no options chosen, change all status flags
+  for(int i = 0; i < 4; i++){
+    mCheckStatus[det][i]=flag;
   }
 
   getControlTable()->CheckStatus[det] = flag;
