@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrg.h,v 1.2 2008/07/23 20:25:42 tai Exp $
+// $Id: StJetTrg.h,v 1.3 2008/07/24 02:14:48 tai Exp $
 #ifndef STJETTRG_H
 #define STJETTRG_H
 
@@ -10,21 +10,25 @@ class StMuDstMaker;
 class StJetTrg {
 
 public:
-  StJetTrg(StMuDstMaker* uDstMaker, StJetTrgSoftware* soft)
-    : _soft(soft), _uDstMaker(uDstMaker)
+  StJetTrg(int trgId, StMuDstMaker* uDstMaker, StJetTrgSoftware* soft)
+    : _trgId(trgId), _soft(soft), _uDstMaker(uDstMaker)
   { }
   virtual ~StJetTrg() { }
 
+  int id() { return _trgId; }
+
   int runNumber();
   int eventId();
-  bool hard(int trgId);
-  bool soft(int trgId);
-  double prescale(int trgId);
+  bool hard();
+  bool soft();
+  double prescale();
   double vertexZ();
-  std::vector<int> towers(int trgId);
-  std::vector<int> jetPatches(int trgId);
+  std::vector<int> towers();
+  std::vector<int> jetPatches();
 
 private:
+
+  int _trgId;
 
   StJetTrgSoftware* _soft;
 

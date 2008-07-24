@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTriggerMaker.h,v 1.2 2008/07/23 20:25:43 tai Exp $
+// $Id: StJetTriggerMaker.h,v 1.3 2008/07/24 02:14:51 tai Exp $
 #ifndef STJETTRIGGERMAKER_HH
 #define STJETTRIGGERMAKER_HH
 
@@ -17,14 +17,16 @@ class StMuDstMaker;
 class StEmcTriggerMaker;
 class StTriggerSimuMaker;
 
+class StJetTrgSoftwareFactory;
+
 class StJetTrg;
 
 class StJetTriggerMaker : public StMaker {
 
 public:
 
-  StJetTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StEmcTriggerMaker* emcTrigMaker);
-  StJetTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StTriggerSimuMaker* simuTrig);
+  StJetTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StEmcTriggerMaker* emcTrigMaker, bool isMC = false);
+  StJetTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StTriggerSimuMaker* simuTrig, bool isMC = false);
   virtual ~StJetTriggerMaker() { }
 
   Int_t Init();
@@ -37,14 +39,17 @@ public:
 
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetTriggerMaker.h,v 1.2 2008/07/23 20:25:43 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetTriggerMaker.h,v 1.3 2008/07/24 02:14:51 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
 
   TDirectory* _file;
 
-  StJetTrg* _trg;
+  bool _isMC;
+
+  StMuDstMaker* _uDstMaker;
+  StJetTrgSoftwareFactory* _softTrgFactory;
 
   typedef std::vector<StJetTrgWriter*> WriterList;
   WriterList _writerList;
