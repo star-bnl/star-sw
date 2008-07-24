@@ -1,15 +1,15 @@
 // -*- mode: c++;-*-
-// $Id: StJetTPCTrackMaker.h,v 1.4 2008/07/18 04:11:55 tai Exp $
+// $Id: StJetTPCTrackMaker.h,v 1.5 2008/07/24 20:57:03 tai Exp $
 #ifndef STJETTPCTRACKMAKER_HH
 #define STJETTPCTRACKMAKER_HH
 
 #include "StMaker.h"
 #include <Rtypes.h>
 
+class StJetTrackListWriter;
+
 class TDirectory;
 class TTree;
-
-class StJetTrgWriter;
 
 class StMuDstMaker;
 
@@ -29,7 +29,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetTPCTrackMaker.h,v 1.4 2008/07/18 04:11:55 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetTPCTrackMaker.h,v 1.5 2008/07/24 20:57:03 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -39,35 +39,7 @@ private:
 
   StSpinJet::StJetTPC*  _tpc;
 
-  TTree* _tree;
-
-  Int_t    _runNumber;
-  Int_t    _eventId;
-  Int_t    _detectorId; // 1: TPC
-  Int_t    _nTracks;
-  Double_t _pt[4096];
-  Double_t _eta[4096];
-  Double_t _phi[4096];
-  Short_t  _flag[4096];
-  UShort_t _nHits[4096];
-  Short_t  _charge[4096];
-  UShort_t _nHitsPoss[4096];
-  UShort_t _nHitsDedx[4096];
-  UShort_t _nHitsFit[4096];
-  Double_t _nSigmaPion[4096];
-  Double_t _Tdca[4096];
-  Double_t _dcaZ[4096];
-  Double_t _dcaD[4096];
-  Double_t _BField[4096];
-  Double_t _vertexZ[4096];
-  Double_t _bemcRadius[4096];
-  Int_t    _exitDetectorId[4096]; // 9: BEMC, 13: EEMC
-  Int_t    _exitTowerId[4096];
-  Double_t _exitEta[4096];
-  Double_t _exitPhi[4096];
-  Double_t _dEdx[4096];
-  Int_t    _trackIndex[4096];
-  Short_t  _trackId[4096];
+  StJetTrackListWriter* _writer;
 
   ClassDef(StJetTPCTrackMaker, 0)
 

@@ -1,10 +1,6 @@
-// $Id: StJetBEMCTowerMaker.cxx,v 1.8 2008/07/21 02:41:55 tai Exp $
+// $Id: StJetBEMCTowerMaker.cxx,v 1.9 2008/07/24 20:57:02 tai Exp $
 #include "StJetBEMCTowerMaker.h"
 
-#include "StJetTPCMuDst.h"
-#include "StJetBEMCMuDst.h"
-#include "StJetEEMCMuDst.h"
-#include "StJetBEMCEnergyCut.h"
 
 #include "TowerEnergyCut2003BemcTower.h"
 #include "TowerEnergyCutBemcWestOnly.h"
@@ -12,10 +8,13 @@
 #include "TowerEnergyCutBemcStatus.h"
 #include "TowerEnergyCutAdc.h"
 
+#include "StJetTowerEnergyListWriter.h"
+
+#include "StJetBEMCMuDst.h"
+#include "StJetBEMCEnergyCut.h"
 #include "StJetBEMCTxt.h"
 
-#include <TFile.h>
-#include <TTree.h>
+#include <TDirectory.h>
 
 #include <iostream>
 
@@ -44,27 +43,7 @@ Int_t StJetBEMCTowerMaker::Init()
   _bemcCut->addCut(new TowerEnergyCutBemcStatus());
   _bemcCut->addCut(new TowerEnergyCutAdc());
 
-  _file->cd();
-  _tree = new TTree("bemcTowers", "bemcTowers");
-  _tree->SetAutoSave(kMaxLong64);
-  _tree->SetMaxTreeSize(kMaxLong64);
-
-  _tree->Branch("eventId"    , &_eventId      , "eventId/I"      );
-  _tree->Branch("nTowers"    , &_nTowers      , "nTowers/I"      );
-  _tree->Branch("energy"     ,  _energy       , "energy[nTowers]/D"     );     
-  _tree->Branch("towerId"    ,  _towerId      , "towerId[nTowers]/I"    );    
-  _tree->Branch("towerEta"   ,  _towerEta     , "towerEta[nTowers]/D"   );     
-  _tree->Branch("towerPhi"   ,  _towerPhi     , "towerPhi[nTowers]/D"   );     
-  _tree->Branch("adc"        ,  _adc          , "adc[nTowers]/i"        );	            
-  _tree->Branch("pedestal"   ,  _pedestal     , "pedestal[nTowers]/D"   );   
-  _tree->Branch("rms"        ,  _rms          ,	"rms[nTowers]/D"        );	            
-  _tree->Branch("towerR"     ,  _towerR       , "towerR[nTowers]/D"     );     
-  _tree->Branch("vertexX"    ,  _vertexX      , "vertexX[nTowers]/D"    );    
-  _tree->Branch("vertexY"    ,  _vertexY      , "vertexY[nTowers]/D"    );    
-  _tree->Branch("vertexZ"    ,  _vertexZ      , "vertexZ[nTowers]/D"    );    
-  _tree->Branch("status"     ,  _status       , "status[nTowers]/I"     );      
-  _tree->Branch("detectorId" , &_detectorId   , "detectorId/I" ); 
-  _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
+  _writer = new StJetTowerEnergyListWriter("bemcTowers", _file);
 
   return kStOk;
 }
@@ -75,30 +54,7 @@ Int_t StJetBEMCTowerMaker::Make()
 
   energyList = (*_bemcCut)(energyList);
 
-  if(energyList.empty()) return kStOk;
-
-  _runNumber = energyList[0].runNumber;
-  _eventId = energyList[0].eventId;
-  _detectorId = energyList[0].detectorId;
-
-  _nTowers = energyList.size();
-  for(int i = 0; i < _nTowers; ++i) {
-    const TowerEnergy& tower = energyList[i];
-    _towerId[i]      =	tower.towerId;
-    _towerR[i]       =	tower.towerR;
-    _towerEta[i]     =	tower.towerEta;
-    _towerPhi[i]     =	tower.towerPhi;
-    _vertexX[i]      =	tower.vertexX;
-    _vertexY[i]      =	tower.vertexY;
-    _vertexZ[i]      =	tower.vertexZ;
-    _energy[i]       =	tower.energy;
-    _adc[i]          =	tower.adc;
-    _pedestal[i]     =	tower.pedestal;
-    _rms[i]          =	tower.rms;
-    _status[i]       =  tower.status;
-  }
-
-  _tree->Fill();
+  _writer->Fill(energyList);
 
   return kStOk;
 
@@ -106,7 +62,7 @@ Int_t StJetBEMCTowerMaker::Make()
 
 Int_t StJetBEMCTowerMaker::Finish()
 {
-  _tree->BuildIndex("runNumber", "eventId");
+  _writer->Finish();
 
   return kStOk;
 }

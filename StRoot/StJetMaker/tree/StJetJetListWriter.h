@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetJetListWriter.h,v 1.1 2008/07/22 19:24:09 tai Exp $
+// $Id: StJetJetListWriter.h,v 1.2 2008/07/24 20:57:12 tai Exp $
 #ifndef STJETJETLISTWRITER_HH
 #define STJETJETLISTWRITER_HH
 
@@ -22,8 +22,6 @@ public:
   void Fill(const StSpinJet::JetList& jetList, const StSpinJet::FourVecList& fourVecList);
   void Finish();
 
-  Int_t Fill();
-    
 private:
 
   void fillJetTree(const StSpinJet::JetList& jetList);
