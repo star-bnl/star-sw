@@ -508,6 +508,8 @@ void StGammaRawMaker::GetEndcap()
 	  {
 	    StEEmcStrip strip=adc2e->hitstrip(sector,plane,ihit);
 
+	    if (strip.fail()) continue;
+
 	    StGammaStrip *gstrip = gevent->newStrip();
 	    gstrip->index = strip.index();
 	    gstrip->sector = strip.sector();
