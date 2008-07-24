@@ -541,7 +541,7 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
       return kStStop; // We're happy! Let's stop!
     }
     if (Calibmode) doReset = kTRUE;
-    else m_ExB->ManualSpaceChargeR2(sc);
+    else m_ExB->ManualSpaceChargeR2(sc,m_ExB->CurrentSpaceChargeEWRatio());
   }
   return kStOk;
 }
@@ -817,6 +817,8 @@ St_spaceChargeCor* StSpaceChargeEbyEMaker::SCTable() {
   row->satRate = 1.0;
   row->factor = 1.0;
   row->detector = 3;
+  row->offset = 0;
+  row->ewratio = m_ExB->CurrentSpaceChargeEWRatio();
   table->SetNRows(1);
   return table;
 }
@@ -988,8 +990,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.21 2008/07/21 21:17:10 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.22 2008/07/24 19:17:55 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.22  2008/07/24 19:17:55  genevb
+// SpaceChargeEWRatio must be written to prepass output table
+//
 // Revision 1.21  2008/07/21 21:17:10  genevb
 // No call to EvalCalib() if Prepass runs successfully
 //
