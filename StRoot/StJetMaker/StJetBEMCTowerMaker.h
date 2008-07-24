@@ -1,10 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StJetBEMCTowerMaker.h,v 1.6 2008/07/21 02:41:56 tai Exp $
+// $Id: StJetBEMCTowerMaker.h,v 1.7 2008/07/24 20:57:03 tai Exp $
 #ifndef STJETBEMCTOWERMAKER_HH
 #define STJETBEMCTOWERMAKER_HH
 
 #include "StMaker.h"
 #include <Rtypes.h>
+
+class StJetTowerEnergyListWriter;
 
 class TDirectory;
 class TTree;
@@ -28,7 +30,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetBEMCTowerMaker.h,v 1.6 2008/07/21 02:41:56 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetBEMCTowerMaker.h,v 1.7 2008/07/24 20:57:03 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -39,24 +41,7 @@ private:
   StSpinJet::StJetBEMC* _bemc;
   StSpinJet::StJetBEMCEnergyCut* _bemcCut;
 
-  TTree* _tree;
-
-  Int_t _runNumber;
-  Int_t _eventId;
-  Int_t _detectorId; // 9: BEMC, 13: EEMC
-  Int_t _nTowers;
-  Int_t    _towerId[4800];
-  Double_t _towerR[4800];
-  Double_t _towerEta[4800];
-  Double_t _towerPhi[4800];
-  Double_t _vertexX[4800];
-  Double_t _vertexY[4800];
-  Double_t _vertexZ[4800];
-  Double_t _energy[4800];
-  UInt_t   _adc[4800];
-  Double_t _pedestal[4800];
-  Double_t _rms[4800];
-  Int_t    _status[4800];     // 1 is good for BEMC. 0 is good for EEMC
+  StJetTowerEnergyListWriter* _writer;
 
   ClassDef(StJetBEMCTowerMaker, 0)
 
