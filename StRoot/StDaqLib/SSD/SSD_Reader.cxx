@@ -68,8 +68,10 @@ int SSD_Reader::ssdData(int  ladder,
       pos=0;
       for(time=0;time<192;time++) { // Though "time" is not used explicitly, it's involved in incrementeing "pos".
         for(pad=0;pad<64;pad++) {
+	  if (!ssd.counts[daqLadder][pad]) continue;
           for(mtime=0;mtime<ssd.counts[daqLadder][pad];mtime++) {
-            if(time==ssd.strip[daqLadder][pad][mtime]) {
+            if (time==ssd.strip[daqLadder][pad][mtime])
+            {
               det=pos/768; strip=pos%768;
               assert(pos>=0&&pos<12288);
               cache1[pos]=log8to10_table[ssd.adc[daqLadder][pad][mtime]];

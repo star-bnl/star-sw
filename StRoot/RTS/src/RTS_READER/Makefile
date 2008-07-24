@@ -90,11 +90,5 @@ root_example.o: ../RTS_READER/daq_dta.h
 root_example.o: ../../../../StRoot/RTS/include/rts.h
 root_example.o: daq_dta_structs.h
 root_example.o: ../RTS_READER/daq_det.h
-tpx_simulation.o: ../../../../StRoot/RTS/include/rtsLog.h
-tpx_simulation.o: ../RTS_READER/rts_reader.h
-tpx_simulation.o: ../RTS_READER/daq_dta.h
-tpx_simulation.o: ../../../../StRoot/RTS/include/rts.h
-tpx_simulation.o: daq_dta_structs.h
-tpx_simulation.o: ../RTS_READER/daq_det.h
 daq_dta.o: ../../../../StRoot/RTS/include/rts.h
 daq_dta.o: daq_dta_structs.h

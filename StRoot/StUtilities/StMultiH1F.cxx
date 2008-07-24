@@ -52,7 +52,7 @@ void StMultiH1F::Draw(Option_t *option) {
   // make a legend
   TLegend *legend = new TLegend(0.80,0.84,0.98,0.98,"Legend","NDC");
   legend->SetFillColor(0);
-  legend->SetFillStyle(4000);
+  legend->SetFillStyle(0);
   legend->SetMargin(0.25);
 
   Int_t ybin;
@@ -106,6 +106,7 @@ void StMultiH1F::Draw(Option_t *option) {
     temp[maxbin]->Draw();
   } else {
     TH1F* tempb = new TH1F(*(temp[maxbin]));
+    tempb->SetName(Form("%s_%d",GetName(),ybins+1));
     tempb->SetBinContent(1,maxval);
     tempb->SetBinContent(2,minval);
     tempb->SetMarkerStyle(1); tempb->SetMarkerColor(0);
@@ -134,7 +135,7 @@ void StMultiH1F::Draw(Option_t *option) {
 TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
   static char buf[256];
   if (ybin<0) sprintf(buf,"%s.",name);
-  else sprintf(buf,"%s.%d.%s",GetName(),ybin,name);
+  else sprintf(buf,"%s_%d_%s",GetName(),ybin,name);
 
   TList* tgList = gDirectory->GetList();
   TH1F* temp = (TH1F*) tgList->FindObject(buf);
@@ -205,8 +206,75 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
   return maximum;
 }
 
-// $Id: StMultiH1F.cxx,v 1.12 2007/07/12 20:26:03 fisyak Exp $
+void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
+  // Save primitive as a C++ statement(s) on output stream out
+
+  Bool_t nonEqiX = kFALSE;
+  Int_t i;
+
+  // Check if the histogram has equidistant X bins or not.  If not, we
+  // create an array holding the bins.
+  if (GetXaxis()->GetXbins()->fN && GetXaxis()->GetXbins()->fArray) {
+    nonEqiX = kTRUE;
+    out << "   Double_t xAxis[" << GetXaxis()->GetXbins()->fN
+        << "] = {";
+    for (i = 0; i < GetXaxis()->GetXbins()->fN; i++) {
+      if (i != 0) out << ", ";
+      out << GetXaxis()->GetXbins()->fArray[i];
+    }
+    out << "}; " << endl;
+  }
+
+  char quote = '"';
+  out <<"   "<<endl;
+  out <<"   TH1 *" << GetName() << " = new " << ClassName() << "("
+      << quote << GetName() << quote << "," << quote << GetTitle() << quote
+      << "," << GetXaxis()->GetNbins();
+  if (nonEqiX)
+    out << ", xAxis";
+  else
+    out << "," << GetXaxis()->GetXmin()
+        << "," << GetXaxis()->GetXmax();
+  out << "," << GetYaxis()->GetNbins() << ");" << endl;
+
+  // save bin contents
+  Int_t bin;
+  for (bin=0;bin<fNcells;bin++) {
+    Double_t bc = GetBinContent(bin);
+    if (bc) {
+      out<<"   "<<GetName()<<"->SetBinContent("<<bin<<","<<bc<<");"<<endl;
+    }
+  }
+
+  // save bin errors
+  if (fSumw2.fN) {
+    for (bin=0;bin<fNcells;bin++) {
+      Double_t be = GetBinError(bin);
+      if (be) {
+        out <<"   "<<GetName()<<"->SetBinError("<<bin<<","<<be<<");"<<endl;
+      }
+    }
+  }
+
+  for (bin=0;bin<GetYaxis()->GetNbins();bin++) {
+    if (!(names[bin].IsNull()))
+      out <<"   "<<GetName()<< "->Rebin(" << bin << ","
+          << quote << names[bin] << quote << ");" << endl;
+  }
+  if (fMOffset != 0)
+    out <<"   "<<GetName()<< "->SetBarOffset(" << fMOffset << ");" << endl;
+
+  TH1::SavePrimitiveHelp(out, option);
+}
+
+// $Id: StMultiH1F.cxx,v 1.14 2008/07/10 21:26:59 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.14  2008/07/10 21:26:59  genevb
+// Allow SavePrimitive of fully drawn TPad to work properly
+//
+// Revision 1.13  2008/07/09 20:52:38  genevb
+// Implement SavePrimitive functions
+//
 // Revision 1.12  2007/07/12 20:26:03  fisyak
 // Add includes for ROOT 5.16
 //

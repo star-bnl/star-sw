@@ -1,5 +1,11 @@
-// $Id: StFtpcTrack.cc,v 1.35 2008/06/24 08:12:48 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.37 2008/07/03 07:22:35 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.37  2008/07/03 07:22:35  jcs
+// improved LOG_WARN message
+//
+// Revision 1.36  2008/07/03 05:25:44  jcs
+// exit momentum fit if plength >= NoSolution/2 for any hit
+//
 // Revision 1.35  2008/06/24 08:12:48  jcs
 // If NoSolution found for MomentumFit with primary vertex, set mFromMainVertex = kFALSE for the track to avoid looping in StarMagField  3D field interpolation
 //
@@ -725,7 +731,8 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
     StThreeVector<Double_t> nvec(0., 0., 1.);
     Double_t plength = pathLength(rvec, nvec);
     if (plength >= NoSolution/2) {
-       continue;
+       LOG_WARN << "Helix Fit found NoSolution for hit  " << i <<" - not possible to track helix momentum through measured field for this track"<< endm;
+       return;
     }
     xhelix[i] = x(plength);
     yhelix[i] = y(plength);
