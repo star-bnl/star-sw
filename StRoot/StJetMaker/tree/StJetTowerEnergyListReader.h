@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTowerEnergyListReader.h,v 1.1 2008/07/24 20:57:13 tai Exp $
+// $Id: StJetTowerEnergyListReader.h,v 1.2 2008/07/25 01:06:01 tai Exp $
 #ifndef STJETTOWERENERGYLISTREADER_H
 #define STJETTOWERENERGYLISTREADER_H
 
@@ -28,9 +28,9 @@ private:
   Double_t _towerR[4800];
   Double_t _towerEta[4800];
   Double_t _towerPhi[4800];
-  Double_t _vertexX[4800];
-  Double_t _vertexY[4800];
-  Double_t _vertexZ[4800];
+  Double_t _vertexX;
+  Double_t _vertexY;
+  Double_t _vertexZ;
   Double_t _energy[4800];
   UInt_t   _adc[4800];
   Double_t _pedestal[4800];

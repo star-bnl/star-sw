@@ -1,4 +1,4 @@
-// $Id: StJetMCMuDst.cxx,v 1.3 2008/07/24 21:37:05 tai Exp $
+// $Id: StJetMCMuDst.cxx,v 1.4 2008/07/25 01:05:53 tai Exp $
 
 #include <StJetMCMuDst.h>
 
@@ -33,6 +33,7 @@ MCParticleList StJetMCMuDst::getMCPartilceList()
   MCParticle particle;
   particle.runNumber = uDstMaker->muDst()->event()->runId();
   particle.eventId = uDstMaker->muDst()->event()->eventId();
+  particle.vertexZ = uDstMaker->muDst()->event()->primaryVertexPosition().z();
 
   for (int i = 0; i < particleTabPtr->GetNRows(); ++i) {
 		
@@ -49,6 +50,7 @@ MCParticleList StJetMCMuDst::getMCPartilceList()
     particle.eta = p4.Eta();
     particle.phi = p4.Phi();
     particle.m   = p4.M();
+    particle.e   = p4.E();
 
     theList.push_back(particle);
   }

@@ -1,4 +1,4 @@
-// $Id: StJetTrackListReader.cxx,v 1.1 2008/07/24 20:57:15 tai Exp $
+// $Id: StJetTrackListReader.cxx,v 1.2 2008/07/25 01:06:02 tai Exp $
 #include "StJetTrackListReader.h"
 
 #include <TTree.h>
@@ -26,13 +26,13 @@ StJetTrackListReader::StJetTrackListReader(TTree *tree)
   _tree->SetBranchAddress("Tdca"           ,  _Tdca            );
   _tree->SetBranchAddress("dcaZ"           ,  _dcaZ            );
   _tree->SetBranchAddress("dcaD"           ,  _dcaD            );
-  _tree->SetBranchAddress("BField"         ,  _BField          );
-  _tree->SetBranchAddress("bemcRadius"     ,  _bemcRadius      );
+  _tree->SetBranchAddress("BField"         , &_BField          );
+  _tree->SetBranchAddress("bemcRadius"     , &_bemcRadius      );
   _tree->SetBranchAddress("dEdx"           ,  _dEdx            );
   _tree->SetBranchAddress("trackIndex"     ,  _trackIndex      );
   _tree->SetBranchAddress("exitDetectorId" ,  _exitDetectorId  );
   _tree->SetBranchAddress("exitTowerId"    ,  _exitTowerId     );
-  _tree->SetBranchAddress("vertexZ"        ,  _vertexZ      );
+  _tree->SetBranchAddress("vertexZ"        , &_vertexZ      );
   _tree->SetBranchAddress("detectorId"     , &_detectorId      );
   _tree->SetBranchAddress("runNumber"      , &_runNumber       );
 }
@@ -65,8 +65,8 @@ TrackList StJetTrackListReader::GetEntry(Long64_t entry)
     track.Tdca           = _Tdca[i];
     track.dcaZ           = _dcaZ[i];
     track.dcaD           = _dcaD[i];
-    track.BField         = _BField[i];
-    track.bemcRadius     = _bemcRadius[i];
+    track.BField         = _BField;
+    track.bemcRadius     = _bemcRadius;
     track.exitDetectorId = _exitDetectorId[i];
     track.exitTowerId    = _exitTowerId[i];
     track.exitEta        = _exitEta[i];
@@ -74,7 +74,7 @@ TrackList StJetTrackListReader::GetEntry(Long64_t entry)
     track.dEdx           = _dEdx[i];
     track.trackIndex     = _trackIndex[i];
     track.id             = _trackId[i];
-    track.vertexZ        = _vertexZ[i];
+    track.vertexZ        = _vertexZ;
 
     ret.push_back(track);
   }

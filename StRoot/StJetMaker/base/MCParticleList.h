@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: MCParticleList.h,v 1.1 2008/07/22 03:56:56 tai Exp $
+// $Id: MCParticleList.h,v 1.2 2008/07/25 01:05:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef MCPARTICLELIST_H
 #define MCPARTICLELIST_H
@@ -22,6 +22,7 @@ struct MCParticle {
   double         eta;
   double         phi;
   double         m;
+  double         e;
   int            status; // 1: stable  2: unstable  3: incoming and parton
   double         vertexZ;
 };
@@ -42,6 +43,7 @@ inline bool operator==(const MCParticle& v1, const MCParticle& v2)
   if(v1.eta             != v2.eta)             return false;   
   if(v1.phi             != v2.phi)            return false;   
   if(v1.m               != v2.m)            return false;   
+  if(v1.e               != v2.e)            return false;   
   if(v1.vertexZ         != v2.vertexZ)  return false;   
   return true;
   }

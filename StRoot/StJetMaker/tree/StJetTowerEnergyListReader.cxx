@@ -1,4 +1,4 @@
-// $Id: StJetTowerEnergyListReader.cxx,v 1.1 2008/07/24 20:57:13 tai Exp $
+// $Id: StJetTowerEnergyListReader.cxx,v 1.2 2008/07/25 01:06:01 tai Exp $
 #include "StJetTowerEnergyListReader.h"
 
 #include <TTree.h>
@@ -18,9 +18,9 @@ StJetTowerEnergyListReader::StJetTowerEnergyListReader(TTree *tree)
   _tree->SetBranchAddress("pedestal"   ,  _pedestal     );
   _tree->SetBranchAddress("rms"        ,  _rms          );
   _tree->SetBranchAddress("towerR"     ,  _towerR       );
-  _tree->SetBranchAddress("vertexX"    ,  _vertexX      );
-  _tree->SetBranchAddress("vertexY"    ,  _vertexY      );
-  _tree->SetBranchAddress("vertexZ"    ,  _vertexZ      );
+  _tree->SetBranchAddress("vertexX"    , &_vertexX      );
+  _tree->SetBranchAddress("vertexY"    , &_vertexY      );
+  _tree->SetBranchAddress("vertexZ"    , &_vertexZ      );
   _tree->SetBranchAddress("status"     ,  _status       );
   _tree->SetBranchAddress("detectorId" , &_detectorId   );
   _tree->SetBranchAddress("runNumber"  , &_runNumber    );
@@ -46,9 +46,9 @@ TowerEnergyList StJetTowerEnergyListReader::GetEntry(Long64_t entry)
     energy.towerR     =  _towerR[i];              
     energy.towerEta   =  _towerEta[i];              
     energy.towerPhi   =  _towerPhi[i];              
-    energy.vertexX    =  _vertexX[i];              
-    energy.vertexY    =  _vertexY[i];              
-    energy.vertexZ    =  _vertexZ[i];              
+    energy.vertexX    =  _vertexX;              
+    energy.vertexY    =  _vertexY;              
+    energy.vertexZ    =  _vertexZ;              
     energy.energy     =  _energy[i];              
     energy.adc        =  _adc[i];       
     energy.pedestal   =  _pedestal[i];                    
