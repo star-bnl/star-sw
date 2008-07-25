@@ -1,4 +1,4 @@
-// $Id: StJetTrackListWriter.cxx,v 1.1 2008/07/24 20:57:15 tai Exp $
+// $Id: StJetTrackListWriter.cxx,v 1.2 2008/07/25 01:06:02 tai Exp $
 #include "StJetTrackListWriter.h"
 
 #include <TDirectory.h>
@@ -35,13 +35,13 @@ StJetTrackListWriter::StJetTrackListWriter(const char* treeName, TDirectory* fil
   _tree->Branch("Tdca"          ,  _Tdca            , "Tdca[nTracks]/D"          );
   _tree->Branch("dcaZ"          ,  _dcaZ            , "dcaZ[nTracks]/D"          );
   _tree->Branch("dcaD"          ,  _dcaD            , "dcaD[nTracks]/D"          );
-  _tree->Branch("BField"        ,  _BField          , "BField[nTracks]/D"        );
-  _tree->Branch("bemcRadius"    ,  _bemcRadius      , "bemcRadius[nTracks]/D"    );
+  _tree->Branch("BField"        , &_BField          , "BField/D"                 );
+  _tree->Branch("bemcRadius"    , &_bemcRadius      , "bemcRadius/D"             );
   _tree->Branch("dEdx"          ,  _dEdx            , "dEdx[nTracks]/D"          );
   _tree->Branch("trackIndex"    ,  _trackIndex      , "trackIndex[nTracks]/I"    );
   _tree->Branch("exitDetectorId",  _exitDetectorId  , "exitDetectorId[nTracks]/I");    
   _tree->Branch("exitTowerId"   ,  _exitTowerId     , "exitTowerId[nTracks]/I"   );    
-  _tree->Branch("vertexZ"       ,  _vertexZ         , "vertexZ[nTracks]/D"       );    
+  _tree->Branch("vertexZ"       , &_vertexZ         , "vertexZ/D"                );    
   _tree->Branch("detectorId"    , &_detectorId      , "detectorId/I"             ); 
   _tree->Branch("runNumber"     , &_runNumber       , "runNumber/I"              );
 }
@@ -50,9 +50,13 @@ void StJetTrackListWriter::Fill(const StSpinJet::TrackList& trackList)
 {
   if(trackList.empty()) return;
 
-  _runNumber = trackList[0].runNumber;
-  _eventId   = trackList[0].eventId;
-  _detectorId =trackList[0].detectorId; 
+  _runNumber  = trackList[0].runNumber;
+  _eventId    = trackList[0].eventId;
+  _detectorId = trackList[0].detectorId; 
+  _vertexZ    = trackList[0].vertexZ;
+
+  _BField     = trackList[0].BField;
+  _bemcRadius = trackList[0].bemcRadius;
 
   _nTracks = trackList.size();
   for(int i = 0; i < _nTracks; ++i) {
@@ -70,8 +74,6 @@ void StJetTrackListWriter::Fill(const StSpinJet::TrackList& trackList)
     _Tdca[i]           = track.Tdca;
     _dcaZ[i]           = track.dcaZ;
     _dcaD[i]           = track.dcaD;
-    _BField[i]         = track.BField;
-    _bemcRadius[i]     = track.bemcRadius;
     _exitDetectorId[i] = track.exitDetectorId;
     _exitTowerId[i]    = track.exitTowerId;
     _exitEta[i]        = track.exitEta;
@@ -79,7 +81,6 @@ void StJetTrackListWriter::Fill(const StSpinJet::TrackList& trackList)
     _dEdx[i]           = track.dEdx;
     _trackIndex[i]     = track.trackIndex;
     _trackId[i]        = track.id;
-    _vertexZ[i]        = track.vertexZ;
   }
 
   _tree->Fill();

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrackListReader.h,v 1.1 2008/07/24 20:57:15 tai Exp $
+// $Id: StJetTrackListReader.h,v 1.2 2008/07/25 01:06:02 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTRACKLISTREADER_H
 #define STJETTRACKLISTREADER_H
@@ -38,9 +38,9 @@ private:
   Double_t _Tdca[4096];
   Double_t _dcaZ[4096];
   Double_t _dcaD[4096];
-  Double_t _BField[4096];
-  Double_t _vertexZ[4096];
-  Double_t _bemcRadius[4096];
+  Double_t _BField;
+  Double_t _vertexZ;
+  Double_t _bemcRadius;
   Int_t    _exitDetectorId[4096]; // 9: BEMC, 13: EEMC
   Int_t    _exitTowerId[4096];
   Double_t _exitEta[4096];

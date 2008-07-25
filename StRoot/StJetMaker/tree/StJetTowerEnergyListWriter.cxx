@@ -1,4 +1,4 @@
-// $Id: StJetTowerEnergyListWriter.cxx,v 1.1 2008/07/24 20:57:14 tai Exp $
+// $Id: StJetTowerEnergyListWriter.cxx,v 1.2 2008/07/25 01:06:01 tai Exp $
 #include "StJetTowerEnergyListWriter.h"
 
 #include <TDirectory.h>
@@ -27,9 +27,9 @@ StJetTowerEnergyListWriter::StJetTowerEnergyListWriter(const char* treeName, TDi
   _tree->Branch("pedestal"   ,  _pedestal     , "pedestal[nTowers]/D"   );   
   _tree->Branch("rms"        ,  _rms          ,	"rms[nTowers]/D"        );	            
   _tree->Branch("towerR"     ,  _towerR       , "towerR[nTowers]/D"     );     
-  _tree->Branch("vertexX"    ,  _vertexX      , "vertexX[nTowers]/D"    );    
-  _tree->Branch("vertexY"    ,  _vertexY      , "vertexY[nTowers]/D"    );    
-  _tree->Branch("vertexZ"    ,  _vertexZ      , "vertexZ[nTowers]/D"    );    
+  _tree->Branch("vertexX"    , &_vertexX      , "vertexX/D"    );    
+  _tree->Branch("vertexY"    , &_vertexY      , "vertexY/D"    );    
+  _tree->Branch("vertexZ"    , &_vertexZ      , "vertexZ/D"    );    
   _tree->Branch("status"     ,  _status       , "status[nTowers]/I"     );      
   _tree->Branch("detectorId" , &_detectorId   , "detectorId/I" ); 
   _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
@@ -43,6 +43,10 @@ void StJetTowerEnergyListWriter::Fill(const TowerEnergyList& energyList)
   _eventId    = energyList[0].eventId;
   _detectorId = energyList[0].detectorId;
 
+  _vertexX    = energyList[0].vertexX;
+  _vertexY    = energyList[0].vertexY;
+  _vertexZ    = energyList[0].vertexZ;
+
   _nTowers = energyList.size();
   for(int i = 0; i < _nTowers; ++i) {
     const TowerEnergy& tower = energyList[i];
@@ -50,9 +54,6 @@ void StJetTowerEnergyListWriter::Fill(const TowerEnergyList& energyList)
     _towerR[i]       =	tower.towerR;
     _towerEta[i]     =	tower.towerEta;
     _towerPhi[i]     =	tower.towerPhi;
-    _vertexX[i]      =	tower.vertexX;
-    _vertexY[i]      =	tower.vertexY;
-    _vertexZ[i]      =	tower.vertexZ;
     _energy[i]       =	tower.energy;
     _adc[i]          =	tower.adc;
     _pedestal[i]     =	tower.pedestal;

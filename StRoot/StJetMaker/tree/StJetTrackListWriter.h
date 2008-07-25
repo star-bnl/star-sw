@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetTrackListWriter.h,v 1.1 2008/07/24 20:57:16 tai Exp $
+// $Id: StJetTrackListWriter.h,v 1.2 2008/07/25 01:06:02 tai Exp $
 #ifndef STJETTRACKLISTWRITER_HH
 #define STJETTRACKLISTWRITER_HH
 
@@ -41,9 +41,9 @@ private:
   Double_t _Tdca[4096];
   Double_t _dcaZ[4096];
   Double_t _dcaD[4096];
-  Double_t _BField[4096];
-  Double_t _vertexZ[4096];
-  Double_t _bemcRadius[4096];
+  Double_t _BField;
+  Double_t _vertexZ;
+  Double_t _bemcRadius;
   Int_t    _exitDetectorId[4096]; // 9: BEMC, 13: EEMC
   Int_t    _exitTowerId[4096];
   Double_t _exitEta[4096];

@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: MCParticleCutEta.h,v 1.1 2008/07/22 06:36:58 tai Exp $
+// $Id: MCParticleCutEta.h,v 1.2 2008/07/25 01:05:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef JETCUTETA_H
-#define JETCUTETA_H
+#ifndef MCPARTICLECUTETA_H
+#define MCPARTICLECUTETA_H
 
 #include "MCParticleCut.h"
 
@@ -32,4 +32,4 @@ private:
 
 }
 
-#endif // JETCUTETA_H
+#endif // MCPARTICLECUTETA_H
