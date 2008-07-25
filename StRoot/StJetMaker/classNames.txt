@@ -20,7 +20,6 @@ class MCParticleCutEtaForStatus
 class MCParticleCutStatus
 class RunJetFinder
 class RunJetFinderTest
-class StBemcTables
 class StBET4pMaker
 class StBET4pMakerImp
 class StBET4pMakerImpBuilder
@@ -28,12 +27,6 @@ class StBET4pMakerImpBuilderTest
 class StBET4pMakerImpTest
 class StBET4pMakerTest
 class StDefaultJetTreeWriter
-class StEEmcDbMaker
-class StEmcADCtoEMaker
-class StEmcGeom
-class StEmcRawHit
-class StEmcSimulatorMaker
-class StEmcTriggerMaker
 class StFourPMaker
 class StJetBEMC
 class StJetBEMCEnergyCut
@@ -122,13 +115,6 @@ class StJetTrgSoftwareTriggerSimuMaker
 class StJetTrgSoftwareTriggerSimuMakerFactory
 class StJetTrgWriter
 class StJetTriggerMaker
-class StMaker
-class StMCAsymMaker
-class StMcEventMaker
-class StMcTrack
-class StMcVertex
-class StMuDst
-class StMuDstMaker
 class StMuEmcPosition
 class StMuTrack
 class StMuTrackEmu
@@ -140,11 +126,6 @@ class StppJetAnalyzer
 class StProtoJet
 class StPythiaFourPMaker
 class StPythiaFourPMakerTest
-class StTriggerSimuMaker
-class StVertex
-class TDirectory
-class TFile
-class TNtuple
 class TowerEnergy
 class TowerEnergyCut
 class TowerEnergyCut2003BemcTower
@@ -174,7 +155,6 @@ class TrackToTLorentzVector
 class TrackTowerEnergyListToFourVecList
 class TrackTowerEnergyListToFourVecListTest
 class TreeContentTest
-class TTree
 struct AnalyzerCtl
 struct FourVec
 struct index_t
