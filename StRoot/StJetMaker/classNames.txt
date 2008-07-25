@@ -1,272 +1,199 @@
-    ///A useful typedef for the StJets map
-  ///A useful typedef for the StJets map
-class AbstractFourVec;
-class BemcEnergySumCalculator {
-class BemcEnergySumCalculator;
-class BemcEnergySumCalculatorBuilder {
-class BemcEnergySumCalculatorBuilderTest : public CPPUNIT_NS::TestFixture
-class BemcEnergySumCalculatorImp : public BemcEnergySumCalculator {
-class BemcEnergySumCalculatorNull : public BemcEnergySumCalculator {
-  class CorrectTowerEnergyForTracks;
-class CorrectTowerEnergyForTracks {
-class CorrectTowerEnergyForTracks;
-class EtaToDetectorEta {
-class FourVecCut {
-class FourVecCutPt : public FourVecCut {
-class FourVecForJetFinder : public AbstractFourVec {
-class JetCut {
-class JetCutEta : public JetCut {
-class JetCutNFourVecs : public JetCut {
-class JetCutPt : public JetCut {
-class LoopTest : public CPPUNIT_NS::TestFixture
-class MCParticleCut {
-class MCParticleCutEtaForStatus : public MCParticleCut {
-class MCParticleCutEta : public MCParticleCut {
-class MCParticleCutStatus : public MCParticleCut {
-class RunJetFinder {
-class RunJetFinder;
-class RunJetFinderTest : public CPPUNIT_NS::TestFixture
-class StBemcTables;
-class StBET4pMakerImp {
-class StBET4pMakerImp;
-class StBET4pMakerImpBuilder { 
-class StBET4pMakerImpBuilderTest : public CPPUNIT_NS::TestFixture
-class StBET4pMakerImpTest : public CPPUNIT_NS::TestFixture
-class StBET4pMaker : public StFourPMaker {
-class StBET4pMakerTest : public CPPUNIT_NS::TestFixture
-class StDefaultJetTreeWriter : public StJetTreeWriter {
-class StEEmcDbMaker;
-class StEmcADCtoEMaker;
-class StEmcGeom;
-class StEmcRawHit;
-class StEmcSimulatorMaker;
-class StEmcTriggerMaker;
-class StFourPMaker;
-class StFourPMaker : public StMaker {
-  class StJetBEMC;
-class StJetBEMC {
-class StJetBEMC;
-  class StJetBEMCEnergyCut;
-class StJetBEMCEnergyCut {
-class StJetBEMCEnergyCut;
-class StJetBEMCEnergyCutTest : public CPPUNIT_NS::TestFixture
-  class StJetBEMCMock : public StSpinJet::StJetBEMC {
-class StJetBEMCMuDst : public StJetBEMC {
-class StJetBEMCNull : public StJetBEMC {
-class StJetBEMCTowerMaker : public StMaker {
-class StJetBEMCTree : public StJetBEMC {
-class StJetBEMCTreeTest : public CPPUNIT_NS::TestFixture
-class StJetBEMCTxt : public StJetBEMC {
-  class StJetCuts;
-class StJetCuts {
-  class StJetEEMC;
-class StJetEEMC {
-  class StJetEEMCMock : public StSpinJet::StJetEEMC {
-class StJetEEMCMuDst : public StJetEEMC {
-class StJetEEMCNull : public StJetEEMC {
-class StJetEEMCTxt : public StJetEEMC {
-class StJetFinder;
-  class StJetFinderRunner;
-class StJetFinderRunner {
-class StJetFourVecListCut {
-class StJetFourVecListCut;
-class StJetFourVecListCutTest : public CPPUNIT_NS::TestFixture
-class StJetFourVecPrint {
-class StJetHistMaker : public StMaker
-class StJetJetListCut {
-class StJetJetListCut;
-class StJetJetListCutTest : public CPPUNIT_NS::TestFixture
-class StJetJetListWriter {
-class StJetJetListWriter;
-class StJetJetPrint {
-class StJetMakerBackwordCompatibility {
-class StJetMakerII : public StMaker {
-class StJetMaker : public StMaker {
-class StJetMakerTest : public CPPUNIT_NS::TestFixture
-  class StJetMC;
-class StJetMC {
-class StJetMCMuDst : public StJetMC {
-class StJetMCNull : public StJetMC {
-  class StJetMCParticleListCut;
-class StJetMCParticleListCut {
-class StJetMCParticleListWriter {
-class StJetMCParticleListWriter;
-class StJetMCParticleMaker : public StMaker {
-class StJetPars;
-  \class StJetReader
-class StJetReader : public StMaker
-class StJets;
-class StJetScratch : public StMaker {
-class StJetSimuReader : public StMaker{
-class StJetSkimEvent;
-class StJetSkimEventMaker : public StMaker 
-class StJetSkimTrig;
-class StJetSkimTrigHeader;
-class StJetSpinMaker : public StMaker {
-class StJetTowerEnergyListReader {
-class StJetTowerEnergyListReader;
-class StJetTowerEnergyListWriter {
-class StJetTowerEnergyListWriter;
-class StJetTowerEnergyPrint {
-class StJetTowerEnergyVariation {
-class StJetTowerEnergyVariation;
-class StJetTowerEnergyVariationTest : public CPPUNIT_NS::TestFixture
-  class StJetTPC;
-class StJetTPC {
-class StJetTPC;
-  class StJetTPCMock : public StSpinJet::StJetTPC {
-class StJetTPCMuDst : public StJetTPC {
-class StJetTPCNull : public StJetTPC {
-  class StJetTPCTrackCut;
-class StJetTPCTrackCut {
-class StJetTPCTrackCut;
-class StJetTPCTrackCutTest : public CPPUNIT_NS::TestFixture
-class StJetTPCTrackMaker : public StMaker {
-class StJetTPCTrackPrint {
-class StJetTPCTree : public StJetTPC {
-class StJetTPCTreeTest : public CPPUNIT_NS::TestFixture
-class StJetTPCTxt : public StJetTPC {
-class StJetTrackListReader {
-class StJetTrackListReader;
-class StJetTrackListWriter {
-class StJetTrackListWriter;
-class StJetTrackPrint {
-class StJetTreeEntryCoordinator {
-class StJetTreeEntryCoordinator;
-class StJetTreeEntryCoordinatorTest : public CPPUNIT_NS::TestFixture
-class StJetTreeEntryMaker;
-class StJetTreeEntryMaker : public StMaker {
-class StJetTreeEntryMakerTest : public CPPUNIT_NS::TestFixture
-class StJetTreeWriter;
-class StJetTreeWriter : public TObject {
-class StJetTrg {
-class StJetTrg;
-class StJetTrgHTWriter : public StJetTrgWriter {
-class StJetTrgJPWriter : public StJetTrgWriter {
-class StJetTrgMBWriter : public StJetTrgWriter {
-class StJetTrgPassCondition {
-class StJetTrgPassConditionHardAndSoft : public StJetTrgPassCondition {
-class StJetTrgPassConditionHardOnly : public StJetTrgPassCondition {
-class StJetTrgPassConditionHardOrSoft : public StJetTrgPassCondition {
-class StJetTrgPassConditionSoftOnly : public StJetTrgPassCondition {
-class StJetTrgSoftware {
-class StJetTrgSoftware;
-class StJetTrgSoftwareEmcTriggerMakerFactory : public StJetTrgSoftwareFactory {
-class StJetTrgSoftwareEmcTriggerMaker : public StJetTrgSoftware {
-class StJetTrgSoftwareFactory {
-class StJetTrgSoftwareFactory;
-class StJetTrgSoftwareTriggerSimuMakerFactory : public StJetTrgSoftwareFactory {
-class StJetTrgSoftwareTriggerSimuMaker : public StJetTrgSoftware {
-class StJetTrgWriter {
-class StJetTrgWriter;
-class StJetTriggerMaker : public StMaker {
-class StMaker;
-class StMCAsymMaker;
-class StMcEventMaker;
-class StMcTrack;
-class StMcVertex;
-class StMuDst;
-class StMuDstMaker;
-    /*! \class StMuEmcPosition
-class StMuEmcPosition : public TObject
-class StMuTrack;
-class StMuTrackEmu {
-class StMuTrackEmu;
-class StMuTrackFourVec;
-class StMuTrackFourVec : public AbstractFourVec {
-  class StParticleCollector;
-class StParticleCollector {
-class StppAnaPars;
-class StppAnaPars : public TObject {
-class StppAnaParsTest : public CPPUNIT_NS::TestFixture
-class StppJetAnalyzer : public TObject {
-class StProtoJet;
-class StPythiaFourPMaker : public StFourPMaker {
-class StPythiaFourPMakerTest : public CPPUNIT_NS::TestFixture
-class StTriggerSimuMaker;
-class StVertex;
-class TDirectory;
-class TFile;
-class TNtuple;
-class TowerEnergy;
-class TowerEnergyCut {
-class TowerEnergyCut2003BemcTower : public TowerEnergyCut {
-class TowerEnergyCutAdc : public TowerEnergyCut {
-class TowerEnergyCutBemcStatus : public TowerEnergyCut {
-class TowerEnergyCutBemcWestOnly : public TowerEnergyCut {
-class TowerEnergyCutEnergy : public TowerEnergyCut {
-  class TowerEnergyCutMock : public StJetTowerEnergyCut::TowerEnergyCut {
-class TowerEnergyListToStMuTrackFourVecList {
-class TowerEnergyListToStMuTrackFourVecList;
-class TowerEnergyListToStMuTrackFourVecListTest : public CPPUNIT_NS::TestFixture
-class TowerEnergyToFourVec {
-class TowerEnergyToTLorentzVector {
-class TowerEnergyToTLorentzVector;
-class Track;
-class TrackCut {
-class TrackCutDcaPtDependent : public TrackCut {
-class TrackCutDca : public TrackCut {
-class TrackCutEta : public TrackCut {
-class TrackCutFlag : public TrackCut {
-  class TrackCutMock : public StJetTrackCut::TrackCut {
-class TrackCutNHits : public TrackCut {
-class TrackCutPossibleHitRatio : public TrackCut {
-class TrackListToFourListTest : public CPPUNIT_NS::TestFixture
-class TrackListToStMuTrackFourVecList {
-class TrackListToStMuTrackFourVecList;
-class TrackListToStMuTrackFourVecListTest : public CPPUNIT_NS::TestFixture
-class TrackToFourVec {
-class TrackToTLorentzVector {
-class TrackToTLorentzVector;
-class TrackTowerEnergyListToFourVecList {
-class TrackTowerEnergyListToFourVecListTest : public CPPUNIT_NS::TestFixture
-class TreeContentTest : public CPPUNIT_NS::TestFixture
-class TTree;
-  CPPUNIT_TEST( testConstruct );
-  CPPUNIT_TEST( testMacroInterface_Construct_mudst );
-  CPPUNIT_TEST( testMacroInterface_Construct_mudst_swap );
-  CPPUNIT_TEST( testMacroInterface_Construct_tree );
-  friend class StppJetAnalyzer;
-  friend class StSpinJet::StJetCuts;
-  friend class StSpinJet::StJetFinderRunner;
-  friend class StSpinJet::StParticleCollector;
-  friend class TrackListToStMuTrackFourVecList;
-  It consists of a set of classes that encapsulate various jet finding algorithms. These algorithms
-  struct AnalyzerCtl {
-struct FourVec {
-  struct index_t {
-struct Jet {
-struct MCParticle {
-struct TowerEnergy {
-struct Track {
-    ///The constructor requires a valid instance of StMuDstMaker
-  ///The constructor requires a valid instance of StMuDstMaker
-// This class exists solely for backword compatibility
-      This class has a set of track projection utilities for EMC and a few tools to get neighbor
-    typedef map<string, StJets*, less<string> > JetBranchesMap;
-  typedef map<string, StJets*, less<string> > JetBranchesMap;
-  typedef std::list<StProtoJet> JetList;
-  typedef std::list<StProtoJet> ProtoJetList;
-  typedef std::map<std::string, StppJetAnalyzer*> jetBranchesMap;
-  typedef std::set<index_t> IndexSet;
-typedef std::vector<AbstractFourVec*> FourList;
-  typedef std::vector<const AbstractFourVec*> ParticleList;
-typedef std::vector<FourVec> FourVecList;
-  typedef std::vector<index_t> IndexList;
-typedef std::vector<Jet> JetList;
-typedef std::vector<MCParticle> MCParticleList;
-  typedef std::vector<std::string> TrgTreeNameList;
-  typedef std::vector<StJetFourVecCut::FourVecCut*> CutList;
-  typedef std::vector<StJetJetCut::JetCut*> CutList;
-  typedef std::vector<StJetMCParticleCut::MCParticleCut*> CutList;
-  typedef std::vector<StJetTowerEnergyCut::TowerEnergyCut*> CutList;
-  typedef std::vector<StJetTrackCut::TrackCut*> CutList;
-  typedef std::vector<StJetTrgWriter*> WriterList;
-typedef std::vector<TowerEnergy> TowerEnergyList;
-typedef std::vector<Track> TrackList;
-  typedef StSpinJet::StJetMakerBackwordCompatibility::jetBranchesMap jetBranchesMap;
-  void testConstruct();
-  void testMacroInterface_Construct_mudst();
-  void testMacroInterface_Construct_mudst_swap();
-  void testMacroInterface_Construct_tree();
-  your own histograms, simply write a function or class and follow the example found in
+class AbstractFourVec
+class BemcEnergySumCalculator
+class BemcEnergySumCalculatorBuilder
+class BemcEnergySumCalculatorBuilderTest
+class BemcEnergySumCalculatorImp
+class BemcEnergySumCalculatorNull
+class CorrectTowerEnergyForTracks
+class EtaToDetectorEta
+class FourVecCut
+class FourVecCutPt
+class FourVecForJetFinder
+class JetCut
+class JetCutEta
+class JetCutNFourVecs
+class JetCutPt
+class LoopTest
+class MCParticleCut
+class MCParticleCutEta
+class MCParticleCutEtaForStatus
+class MCParticleCutStatus
+class RunJetFinder
+class RunJetFinderTest
+class StBemcTables
+class StBET4pMaker
+class StBET4pMakerImp
+class StBET4pMakerImpBuilder
+class StBET4pMakerImpBuilderTest
+class StBET4pMakerImpTest
+class StBET4pMakerTest
+class StDefaultJetTreeWriter
+class StEEmcDbMaker
+class StEmcADCtoEMaker
+class StEmcGeom
+class StEmcRawHit
+class StEmcSimulatorMaker
+class StEmcTriggerMaker
+class StFourPMaker
+class StJetBEMC
+class StJetBEMCEnergyCut
+class StJetBEMCEnergyCutTest
+class StJetBEMCMock
+class StJetBEMCMuDst
+class StJetBEMCNull
+class StJetBEMCTowerMaker
+class StJetBEMCTree
+class StJetBEMCTreeTest
+class StJetBEMCTxt
+class StJetCuts
+class StJetEEMC
+class StJetEEMCMock
+class StJetEEMCMuDst
+class StJetEEMCNull
+class StJetEEMCTxt
+class StJetFinder
+class StJetFinderRunner
+class StJetFourVecListCut
+class StJetFourVecListCutTest
+class StJetFourVecPrint
+class StJetHistMaker
+class StJetJetListCut
+class StJetJetListCutTest
+class StJetJetListWriter
+class StJetJetPrint
+class StJetMaker
+class StJetMakerBackwordCompatibility
+class StJetMakerII
+class StJetMakerTest
+class StJetMC
+class StJetMCMuDst
+class StJetMCNull
+class StJetMCParticleListCut
+class StJetMCParticleListWriter
+class StJetMCParticleMaker
+class StJetPars
+class StJetReader
+class StJets
+class StJetScratch
+class StJetSimuReader
+class StJetSkimEvent
+class StJetSkimEventMaker
+class StJetSkimTrig
+class StJetSkimTrigHeader
+class StJetSpinMaker
+class StJetTowerEnergyListReader
+class StJetTowerEnergyListWriter
+class StJetTowerEnergyPrint
+class StJetTowerEnergyVariation
+class StJetTowerEnergyVariationTest
+class StJetTPC
+class StJetTPCMock
+class StJetTPCMuDst
+class StJetTPCNull
+class StJetTPCTrackCut
+class StJetTPCTrackCutTest
+class StJetTPCTrackMaker
+class StJetTPCTrackPrint
+class StJetTPCTree
+class StJetTPCTreeTest
+class StJetTPCTxt
+class StJetTrackListReader
+class StJetTrackListWriter
+class StJetTrackPrint
+class StJetTreeEntryCoordinator
+class StJetTreeEntryCoordinatorTest
+class StJetTreeEntryMaker
+class StJetTreeEntryMakerTest
+class StJetTreeWriter
+class StJetTrg
+class StJetTrgHTWriter
+class StJetTrgJPWriter
+class StJetTrgMBWriter
+class StJetTrgPassCondition
+class StJetTrgPassConditionHardAndSoft
+class StJetTrgPassConditionHardOnly
+class StJetTrgPassConditionHardOrSoft
+class StJetTrgPassConditionSoftOnly
+class StJetTrgSoftware
+class StJetTrgSoftwareEmcTriggerMaker
+class StJetTrgSoftwareEmcTriggerMakerFactory
+class StJetTrgSoftwareFactory
+class StJetTrgSoftwareTriggerSimuMaker
+class StJetTrgSoftwareTriggerSimuMakerFactory
+class StJetTrgWriter
+class StJetTriggerMaker
+class StMaker
+class StMCAsymMaker
+class StMcEventMaker
+class StMcTrack
+class StMcVertex
+class StMuDst
+class StMuDstMaker
+class StMuEmcPosition
+class StMuTrack
+class StMuTrackEmu
+class StMuTrackFourVec
+class StParticleCollector
+class StppAnaPars
+class StppAnaParsTest
+class StppJetAnalyzer
+class StProtoJet
+class StPythiaFourPMaker
+class StPythiaFourPMakerTest
+class StTriggerSimuMaker
+class StVertex
+class TDirectory
+class TFile
+class TNtuple
+class TowerEnergy
+class TowerEnergyCut
+class TowerEnergyCut2003BemcTower
+class TowerEnergyCutAdc
+class TowerEnergyCutBemcStatus
+class TowerEnergyCutBemcWestOnly
+class TowerEnergyCutEnergy
+class TowerEnergyCutMock
+class TowerEnergyListToStMuTrackFourVecList
+class TowerEnergyListToStMuTrackFourVecListTest
+class TowerEnergyToFourVec
+class TowerEnergyToTLorentzVector
+class Track
+class TrackCut
+class TrackCutDca
+class TrackCutDcaPtDependent
+class TrackCutEta
+class TrackCutFlag
+class TrackCutMock
+class TrackCutNHits
+class TrackCutPossibleHitRatio
+class TrackListToFourListTest
+class TrackListToStMuTrackFourVecList
+class TrackListToStMuTrackFourVecListTest
+class TrackToFourVec
+class TrackToTLorentzVector
+class TrackTowerEnergyListToFourVecList
+class TrackTowerEnergyListToFourVecListTest
+class TreeContentTest
+class TTree
+struct AnalyzerCtl
+struct FourVec
+struct index_t
+struct Jet
+struct MCParticle
+struct TowerEnergy
+struct Track
+typedef CutList
+typedef FourList
+typedef FourVecList
+typedef IndexList
+typedef IndexSet
+typedef jetBranchesMap
+typedef JetBranchesMap
+typedef JetList
+typedef MCParticleList
+typedef ParticleList
+typedef ProtoJetList
+typedef TowerEnergyList
+typedef TrackList
+typedef TrgTreeNameList
+typedef WriterList
