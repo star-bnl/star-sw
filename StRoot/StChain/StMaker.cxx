@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.209 2008/06/03 22:33:14 fisyak Exp $
+// $Id: StMaker.cxx,v 1.210 2008/07/26 01:54:37 perev Exp $
 //
 //
 /*!
@@ -169,6 +169,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
+  {"y2007a",      20061105,     1, "y2007a",    "the material of the water channels is now carbon "}, // advertized simu 20061101
   {"y2007g",      20061105,     4, "y2007g",   "y2007b + SVT dead material"},
 
   // SVT/SSD is out
@@ -1852,6 +1853,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.210  2008/07/26 01:54:37  perev
+// add y2007a
+//
 // Revision 1.209  2008/06/03 22:33:14  fisyak
 // Add geometries for y2005g, y2006g and y2007g; use ROOT convention for variable definitions
 //
