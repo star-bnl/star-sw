@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.25 2008/07/24 15:08:30 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.26 2008/07/28 12:51:45 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.26  2008/07/28 12:51:45  mattheww
+// Minor bug fix in StBemcRaw::createDecoder
+//
 // Revision 1.25  2008/07/24 15:08:30  mattheww
 // Minor bug fix and exception handling in setCheckStatus
 //
@@ -172,7 +175,7 @@ void StBemcRaw::createDecoder(Int_t date, Int_t time)
         delete mDecoder;
     mDecoder = new StEmcDecoder(date,time);
     mDate = date;
-    mTime = date;
+    mTime = time;
 }
 void StBemcRaw::initHisto()
 {
