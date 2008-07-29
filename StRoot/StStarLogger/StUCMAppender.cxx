@@ -219,18 +219,26 @@ void StUCMAppender::flushBuffer()
          TString userKeys = sql.c_str();
          fprintf(stderr,"\n===== 1. StUCMAppender::flushBuffer()======= userKeys : %s\n"
                , userKeys.Data());
-         TObjArray *pair = userKeys.Tokenize(" ");
+         TObjArray *pair = userKeys.Tokenize(",");
          // Parse the statement
+         fprintf(stderr,"\n===== 1.5 StUCMAppender::flushBuffer()======= pair size = %d\n"
+               , pair->GetSize());
          TIter next(pair);
          TObjString *nextPair = 0;
          while (nextPair = (TObjString *)next()) {
-             TObjArray &keyValue = *(nextPair->String()).Tokenize("=");
-             if (keyValue.GetSize() != 2) continue;
-             TString key    = ((TObjString *)keyValue[0])->String().Strip();
-             TString value  = ((TObjString *)keyValue[1])->String().Strip();
+             TString nextString = nextPair->String();
+             fprintf(stderr,"\n===== 2. StUCMAppender::flushBuffer()======= nextString %s \n"
+                , nextString.Data());
+             TObjArray &keyValue = nextString.Tokenize("=");
+             // if (keyValue.GetSize() != 2) continue;
+             // expect:
+             // StageID='1',MessageKey='ProgSize',MessageValue='419
+             TString stage  = ((TObjString *)keyValue[0])->String().Strip();
+             TString key    = ((TObjString *)keyValue[1])->String().Strip();
+             TString value  = ((TObjString *)keyValue[2])->String().Strip();
              String context = logEvent->getNDC();
-             fprintf(stderr,"\n===== 2. StUCMAppender::flushBuffer()======= Key : %s; value = %s\n"
-                , key.Data(), value.Data());
+             fprintf(stderr,"\n===== 2. StUCMAppender::flushBuffer()======= Stage %s Key : %s; value = %s\n"
+                , stage.Data(), key.Data(), value.Data());
              try {
                 connection->logUserEvent(TxEventLog::STATUS
                                         , trackingLevel
