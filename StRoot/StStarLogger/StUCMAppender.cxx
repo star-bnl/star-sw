@@ -193,14 +193,13 @@ static void ReplaceVariable(TString &string, const char *var)
 //_________________________________________________________________________
 void StUCMAppender::flushBuffer()
 {
-	//Do the actual logging
-	//removes.ensureCapacity(buffer.size());
-	std::list<spi::LoggingEventPtr>::iterator i;
+   //Do the actual logging
+   //removes.ensureCapacity(buffer.size());
+   std::list<spi::LoggingEventPtr>::iterator i;
    if ( getConnection()) {
       for (i = buffer.begin(); i != buffer.end(); i++)
-	   {
-//           expandCommand +=  "stateID=\"4\"";  // (4, 'Active', 'Scheduler running job', 'ucmAdmin', '2007-07-12 10:25:35')
-// Job tracking block
+      {
+         // Job tracking block
          const LoggingEventPtr& logEvent = *i;
          const LevelPtr &level = logEvent->getLevel();
          TxEventLog::Level trackingLevel =TxEventLog::LEVEL_INFO;
@@ -217,42 +216,39 @@ void StUCMAppender::flushBuffer()
          //      const std::string& userKey, const std::string& userMsg);
          String sql = getLogStatement(logEvent);
          TString userKeys = sql.c_str();
-         fprintf(stderr,"\n===== 1. StUCMAppender::flushBuffer()======= userKeys : %s\n"
-               , userKeys.Data());
          TObjArray *pair = userKeys.Tokenize(",");
          // Parse the statement
-         fprintf(stderr,"\n===== 1.5 StUCMAppender::flushBuffer()======= pair size = %d\n"
-               , pair->GetSize());
          TIter next(pair);
          TObjString *nextPair = 0;
-         while (nextPair = (TObjString *)next()) {
+         int keyCounter=0; // to workaround of the ROOT error
+         TString ucmParamters[3];
+         while ( (nextPair = (TObjString *)next()) && (keyCounter<3)) {
+             assert(nextPair);
              TString nextString = nextPair->String();
-             fprintf(stderr,"\n===== 2. StUCMAppender::flushBuffer()======= nextString %s \n"
-                , nextString.Data());
-             TObjArray &keyValue = nextString.Tokenize("=");
-             // if (keyValue.GetSize() != 2) continue;
+             TObjArray &keyValue = *nextString.Tokenize("=");
              // expect:
              // StageID='1',MessageKey='ProgSize',MessageValue='419
-             TString stage  = ((TObjString *)keyValue[0])->String().Strip();
-             TString key    = ((TObjString *)keyValue[1])->String().Strip();
-             TString value  = ((TObjString *)keyValue[2])->String().Strip();
-             String context = logEvent->getNDC();
-             fprintf(stderr,"\n===== 2. StUCMAppender::flushBuffer()======= Stage %s Key : %s; value = %s\n"
-                , stage.Data(), key.Data(), value.Data());
-             try {
-                connection->logUserEvent(TxEventLog::STATUS
+             ucmParamters[keyCounter]  = ((TObjString *)keyValue[1])->String().Strip();
+             delete &keyValue;
+             keyCounter++;
+          }
+          String context = logEvent->getNDC();
+          // Map Stage tp TxEventLog Stage
+          ucmParamters[0].ReplaceAll("'","");ucmParamters[1].ReplaceAll("'","");ucmParamters[2].ReplaceAll("'","");
+          int ucmStage = ucmParamters[0].Atoi();
+          assert (ucmStage >=TxEventLog::START && ucmStage <=TxEventLog::END);
+          try {
+               connection->logUserEvent(  TxEventLog::Stage(ucmStage)
                                         , trackingLevel
                                         , context
-                                        , key.Data()
-                                        , value.Data());
-             } catch (const TxUCMException& e) {
-               fprintf(stderr,"Exception:  StUCMAppender::flushBuffer() %s \n"
+                                        , ucmParamters[1].Data()
+                                        , ucmParamters[2].Data());
+          } catch (const TxUCMException& e) {
+              fprintf(stderr,"Exception:  StUCMAppender::flushBuffer() %s \n"
                   , e.getDescription().c_str());
-             }
-             delete &keyValue;
-         }
-         pair->Delete();
-         delete pair;
+          }
+          pair->Delete();
+          delete pair;
       }
       buffer.clear();
    }
