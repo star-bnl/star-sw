@@ -33,7 +33,7 @@ IMPLEMENT_LOG4CXX_OBJECT(StUCMAppender)
 
 //_________________________________________________________________________
 StUCMAppender::StUCMAppender()
-: connection(0), bufferSize(5),fLastId(0),fIsConnectionOpen(false)
+: connection(0), bufferSize(1),fLastId(0),fIsConnectionOpen(false)
 { 
    fprintf(stderr,"StUCMAppender::StUCMAppender() \n");
 }
@@ -217,6 +217,8 @@ void StUCMAppender::flushBuffer()
          //      const std::string& userKey, const std::string& userMsg);
          String sql = getLogStatement(logEvent);
          TString userKeys = sql.c_str();
+         fprintf(stderr,"\n===== 1. StUCMAppender::flushBuffer()======= userKeys : %s\n"
+               , userKeys.Data());
          TObjArray *pair = userKeys.Tokenize(" ");
          // Parse the statement
          TIter next(pair);
@@ -227,14 +229,22 @@ void StUCMAppender::flushBuffer()
              TString key    = ((TObjString *)keyValue[0])->String().Strip();
              TString value  = ((TObjString *)keyValue[1])->String().Strip();
              String context = logEvent->getNDC();
-             connection->logUserEvent(TxEventLog::STATUS
+             fprintf(stderr,"\n===== 2. StUCMAppender::flushBuffer()======= Key : %s; value = %s\n"
+                , key.Data(), value.Data());
+             try {
+                connection->logUserEvent(TxEventLog::STATUS
                                         , trackingLevel
                                         , context
                                         , key.Data()
                                         , value.Data());
-              delete &keyValue;
-          }
-          delete pair;
+             } catch (const TxUCMException& e) {
+               fprintf(stderr,"Exception:  StUCMAppender::flushBuffer() %s \n"
+                  , e.getDescription().c_str());
+             }
+             delete &keyValue;
+         }
+         pair->Delete();
+         delete pair;
       }
       buffer.clear();
    }
