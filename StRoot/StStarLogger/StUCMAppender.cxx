@@ -194,7 +194,6 @@ static void ReplaceVariable(TString &string, const char *var)
 void StUCMAppender::flushBuffer()
 {
    //Do the actual logging
-   //removes.ensureCapacity(buffer.size());
    std::list<spi::LoggingEventPtr>::iterator i;
    if ( getConnection()) {
       for (i = buffer.begin(); i != buffer.end(); i++)
@@ -227,7 +226,8 @@ void StUCMAppender::flushBuffer()
              TString nextString = nextPair->String();
              TObjArray &keyValue = *nextString.Tokenize("=");
              // expect:
-             // StageID='1',MessageKey='ProgSize',MessageValue='419
+             // StageID='1',MessageKey='ProgSize',MessageValue='419'
+             // More srobust parser should be added later on
              ucmParamters[keyCounter]  = ((TObjString *)keyValue[1])->String().Strip();
              delete &keyValue;
              keyCounter++;
