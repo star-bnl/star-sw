@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: FourVecForJetFinder.h,v 1.1 2008/07/17 17:49:28 tai Exp $
+// $Id: FourVecForJetFinder.h,v 1.1 2008/07/29 00:16:44 tai Exp $
 #ifndef FOURVECFORJETFINDER_H
 #define FOURVECFORJETFINDER_H
 
