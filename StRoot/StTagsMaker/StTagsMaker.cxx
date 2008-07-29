@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.19 2007/04/26 04:15:40 perev Exp $
+// $Id: StTagsMaker.cxx,v 1.20 2008/07/29 14:43:51 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.20  2008/07/29 14:43:51  fisyak
+// Check that StTriggerIdCollection exists
+//
 // Revision 1.19  2007/04/26 04:15:40  perev
 // Remove StBFChain dependency
 //
@@ -123,22 +126,24 @@ Int_t StTagsMaker::Make(){
       //      row.zdcWestHardSum = trigData->zdcAttenuated(west); Jamie said that this is wrong
       row.zdcHardSum = trigData->zdcAtChannel(10);
     StTriggerIdCollection *trgcol = event->triggerIdCollection();
+    if (trgcol) {
 #if 0
-    const StTriggerId *l1 = trgcol->l1();
-    const StTriggerId *l2 = trgcol->l2();
-    const StTriggerId *l3 = trgcol->l3();
+      const StTriggerId *l1 = trgcol->l1();
+      const StTriggerId *l2 = trgcol->l2();
+      const StTriggerId *l3 = trgcol->l3();
 #endif
-    const StTriggerId *nominal = trgcol->nominal();
-    if(nominal) {
-      vector<unsigned int> nominalVec = nominal->triggerIds();
-      Int_t i = 0;
-      for (vector<unsigned int>::iterator viter = nominalVec.begin();
-	   viter != nominalVec.end(); ++viter) {
-	row.TriggerId[i++] = (*viter); //    Trigger Id's satisfied by an event
+      const StTriggerId *nominal = trgcol->nominal();
+      if(nominal) {
+	vector<unsigned int> nominalVec = nominal->triggerIds();
+	Int_t i = 0;
+	for (vector<unsigned int>::iterator viter = nominalVec.begin();
+	     viter != nominalVec.end(); ++viter) {
+	  row.TriggerId[i++] = (*viter); //    Trigger Id's satisfied by an event
+	}
       }
     }
+    tagtab->AddAt(&row); if (Debug()) tagtab->Print(0,1);
   }
-  tagtab->AddAt(&row); if (Debug()) tagtab->Print(0,1);
   if (!fTree) InitTags();
   if (fTree && fTagsList && tabClass) {
     TDataSetIter next(fTagsList);
