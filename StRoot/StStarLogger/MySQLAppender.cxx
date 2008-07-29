@@ -247,7 +247,7 @@ void MySQLAppender::flushBuffer()
              sql = expandCommand.Data();
 		       if (!execute(sql))  TaskEntryDone = true;
        }
-// -- TaksDescription block 
+// -- TaskDescription block 
        if (TaskEntryDone) {
 //--- Job description         
 
