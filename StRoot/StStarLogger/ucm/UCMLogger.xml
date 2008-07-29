@@ -10,9 +10,10 @@
  </appender>
 
 
-  <appender name="UCM" class="org.apache.log4j.StUCMAppender">
+<!--   <appender name="UCM" class="org.apache.log4j.ConsoleAppender"> -->
+   <appender name="UCM" class="org.apache.log4j.StUCMAppender">
     <layout class="org.apache.log4j.PatternLayout">
-    <param name="ConversionPattern" value="context=&quot;%-3c{2}&quot;,levelID=&quot;1&quot; %m; " /> 
+    <param name="ConversionPattern" value="%m" /> 
 
     </layout>
      <!--  Define the pattern  -->
