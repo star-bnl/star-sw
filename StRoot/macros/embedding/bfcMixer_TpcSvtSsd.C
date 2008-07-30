@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.1 2008/05/07 00:56:30 fisyak Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.2 2008/07/30 15:02:21 lbarnby Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,13 +13,15 @@ StChain  *Chain=0;
 class StBFChain;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
-void bfcMixer_TpcSvtSsd(const Int_t Nevents=1,Int_t isSvtIn=1, Int_t isSsdIn=1,
+void bfcMixer_TpcSvtSsd(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsdIn=1,
 		    const Char_t *daqfile="/star/rcf/test/daq/2005/051/st_physics_adc_6051006_raw_1050001.daq",
 		    const Char_t *tagfile="/star/rcf/test/embedding/cuProductionMinBias/FullField/P07ic/2005/051/st_physics_adc_6051006_raw_1050001.tags.root",
-		    const Float_t zvertex_low=-175.0,
-		    const Float_t zvertex_high=175.0,
-		    const Char_t *mode="strange",
-		    const Char_t *acc_mode="off") {
+		    const Double_t pt_low=0.1,
+		    const Double_t pt_high=5.0,
+		    const Double_t eta_low=-1.0,
+		    const Double_t eta_high=1.0,
+		    const Int_t pid=9,
+		    const Double_t mult = 0.1) {
   // production chain for P07ib
   TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF ToF spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 ssd_daq");// KeepSvtHit hitfilt skip1row");
   TString geomP07ib("ry2005f");
@@ -97,9 +99,9 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=1,Int_t isSvtIn=1, Int_t isSsdIn=1,
   if (! embMk) return;
   embMk->SetTagFile(tagfile);
   //            pTlow,ptHigh,etaLow,etaHigh,phiLow,phiHigh
-  embMk->SetOpt(  0.1,    5.,  -1.3,    1.3,    0.,   6.28); 
+  embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185); 
   //                pid, mult
-  embMk->SetPartOpt(  8,0.05);
+  embMk->SetPartOpt(  pid,mult);
   TAttr::SetDebug(0);
   Chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   Chain->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
