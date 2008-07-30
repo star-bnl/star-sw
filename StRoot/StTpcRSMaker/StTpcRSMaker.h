@@ -32,6 +32,7 @@ using namespace units;
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
+class Altro;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
@@ -86,6 +87,9 @@ class StTpcRSMaker : public StMaker {
   static Double_t ei(Double_t x); // Exponential Integral Ei
   SignalSum_t  *GetSignalSum();
   SignalSum_t  *ResetSignalSum();
+  void SetTauC(Double_t p = 0) {mTauC = p;}
+  void SettauIntegrationX(Double_t p =      74.6e-9) {mtauIntegrationX = p;}
+  void SettauIntegration (Double_t p = 2.5* 74.6e-9) {mtauIntegration  = p;}
  private:
   TTree   *fTree;                     //!
   TGiant3 *mGeant;                    //!
@@ -166,17 +170,32 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangePower; //!
   const Double_t CrossTalkInner; //!
   const Double_t CrossTalkOuter; //!
+  Double_t      mTauC; //! for TPX
+  Double_t      mtauIntegrationX; //! for TPX
+  Double_t      mtauIntegration;  //! for TPC
+  const Int_t NoOfSectors;//!
+  const Int_t NoOfRows;   //!
+  const Int_t NoOfInnerRows;//!
+  const Int_t NoOfPads;//!
+  const Int_t NoOfTimeBins;//!
+  const Double_t tauF;//!
+  const Double_t tauFx;//!
+  const Double_t tauP;//!
+  Altro *mAltro;//!
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.3 2008/07/18 16:21:17 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.4 2008/07/30 23:53:19 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.3 2008/07/18 16:21:17 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.4 2008/07/30 23:53:19 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.4  2008/07/30 23:53:19  fisyak
+// Freeze
+//
 // Revision 1.3  2008/07/18 16:21:17  fisyak
 // Remove TF1F
 //
