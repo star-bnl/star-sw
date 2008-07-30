@@ -1,6 +1,0 @@
-# $Id $
-# package geometry
-# author: 
-#Library:libgeometry_Tables.so:LIBS += 
-#Library:libgeometryNoField.so:LIBS +=   -lgeant3  -lgeometry  -lminicern  -lStarMagField  -lStarVMCApplication
-#Library:libgeometry.so:LIBS +=   -lgeant3  -lminicern  -lStarVMCApplication
