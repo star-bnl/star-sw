@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.hh,v 1.27 2008/05/13 19:12:00 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.28 2008/07/30 14:47:32 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.28  2008/07/30 14:47:32  jcs
+// if microsecondsPerTimebin calculated from RHIC clock, write the new value for mMicrosecondsPerTimebin back into
+// Calibrations_ftpc/ftpcElectronics table
+//
 // Revision 1.27  2008/05/13 19:12:00  jcs
 // added laserTZero to Calibrations_ftpc/ftpcElectronics
 //
@@ -201,6 +205,7 @@ protected:
   ftpcAmpSlope_st   *ampslopeTable;
   ftpcAmpOffset_st  *ampoffsetTable;
   ftpcTimeOffset_st *timeoffsetTable;
+  ftpcElectronics_st *electronicsTable;
   //SlowSimulator parameters
   Float_t mPadLength;
   Float_t mPadPitch;

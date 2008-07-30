@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.98  2008/07/30 14:47:29  jcs
+// if microsecondsPerTimebin calculated from RHIC clock, write the new value for mMicrosecondsPerTimebin back into
+// Calibrations_ftpc/ftpcElectronics table
+//
 // Revision 1.97  2008/07/17 18:43:14  jcs
 // insure that the correct microsecondsPerTimebin is used for every event, not just for the first event
 //
@@ -633,15 +637,10 @@ Int_t StFtpcClusterMaker::Make()
      return kStERR;
   }
 
-  // if microsecondsPerTimebin calculated from RHIC Clock Frequency,use it
-  // otherwise use default value from database (Calibrations_ftpc/ftpcElectronics.uSecondsPerTimebin)
-  if (microsecondsPerTimebin > 0.0 ) {
-      dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
-  }
-
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
      LOG_INFO<<"Using the following values from database:"<<endm;
      if (microsecondsPerTimebin > 0.0 ) {
+        dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
         LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" (calculated from RHIC Clock Frequency)"<<endm;
      } else {
         LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" (default value from database)"<<endm;
@@ -662,7 +661,7 @@ Int_t StFtpcClusterMaker::Make()
      LOG_INFO<<"          angleOffsetEast           = "<<dbReader.angleOffsetEast()<<endm;
      LOG_INFO<<"          minChargeWindow           = "<<dbReader.minChargeWindow()<<endm;
   }
-        LOG_DEBUG<<" Using    microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" for this event"<<endm;
+        LOG_DEBUG<<" Using microsecondsPerTimebin = "<<dbReader.microsecondsPerTimebin()<<" for this event"<<endm;
 
   St_DataSet *daqDataset;
   StDAQReader *daqReader;

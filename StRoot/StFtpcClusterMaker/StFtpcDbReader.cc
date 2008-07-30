@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.41 2008/05/13 19:12:00 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.42 2008/07/30 14:47:30 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.42  2008/07/30 14:47:30  jcs
+// if microsecondsPerTimebin calculated from RHIC clock, write the new value for mMicrosecondsPerTimebin back into
+// Calibrations_ftpc/ftpcElectronics table
+//
 // Revision 1.41  2008/05/13 19:12:00  jcs
 // added laserTZero to Calibrations_ftpc/ftpcElectronics
 //
@@ -178,7 +182,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcInnerCathode(cathode);
   returnCode += FtpcClusterGeom(clustergeo);
 
-  //LOG_INFO << "StFtpcDbReader constructed for StFtpcClusterMaker" << endm;
+  //LOG_DEBUG << "StFtpcDbReader constructed for StFtpcClusterMaker" << endm;
 
 }
 
@@ -216,7 +220,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcTimeOffset(timeoffset);
   returnCode += FtpcInnerCathode(cathode);
 
-  //LOG_INFO << "StFtpcDbReader constructed for StFtpcSlowSimMaker" << endm;
+  //LOG_DEBUG << "StFtpcDbReader constructed for StFtpcSlowSimMaker" << endm;
 }
 
 // for StFtpcDriftMapMaker
@@ -243,7 +247,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcGas(gas);
   returnCode += FtpcDriftField(driftfield);
 
-  //LOG_INFO << "StFtpcDbReader constructed for StFtpcDriftMapMaker" << endm;
+  //LOG_DEBUG << "StFtpcDbReader constructed for StFtpcDriftMapMaker" << endm;
 }
 
 // for StFtpcCalibMaker
@@ -272,7 +276,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcGas(gas);
   returnCode += FtpcDriftField(driftfield);
 
-  //LOG_INFO << "StFtpcDbReader constructed for StFtpcCalibMaker" << endm;
+  //LOG_DEBUG << "StFtpcDbReader constructed for StFtpcCalibMaker" << endm;
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 // for Sti/StFtpcDetectorBuilder
@@ -285,13 +289,13 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcDimensions(dimensions);
   returnCode += FtpcPadrowZ(zrow);
 
-  //LOG_INFO << "StFtpcDbReader constructed for Sti/StFtpcDetectorBuilder" << endm;
+  //LOG_DEBUG << "StFtpcDbReader constructed for Sti/StFtpcDetectorBuilder" << endm;
  
 }
 
 StFtpcDbReader::~StFtpcDbReader()
 {
-//   LOG_INFO << "StFtpcDbReader destructed" << endm;
+//   LOG_DEBUG << "StFtpcDbReader destructed" << endm;
 }
 
 //===============================================================
@@ -529,7 +533,7 @@ Int_t StFtpcDbReader::FtpcGas(St_ftpcGas *gas)
 Int_t StFtpcDbReader::FtpcElectronics(St_ftpcElectronics *electronics)
 {
   //  just copy electronics table start to pointer
-  ftpcElectronics_st *electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
+  electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
      mTZero = electronicsTable->tZero;
      mLaserTZero = electronicsTable->laserTZero;
@@ -790,5 +794,8 @@ Int_t StFtpcDbReader::setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t ne
 Int_t StFtpcDbReader::setMicrosecondsPerTimebin(Float_t newvalue)
 {
    mMicrosecondsPerTimebin = newvalue;
+  // write the new value for mMicrosecondsPerTimebin back into electronicsTable
+  electronicsTable->uSecondsPerTimebin = mMicrosecondsPerTimebin;
+
    return 0;
 }
