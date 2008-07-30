@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackCutFlag.h,v 1.1 2008/07/21 17:25:00 tai Exp $
+// $Id: TrackCutFlag.h,v 1.2 2008/07/30 01:14:37 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKCUTFLAG_H
 #define TRACKCUTFLAG_H
@@ -18,9 +18,9 @@ public:
 
   bool operator()(const StSpinJet::Track& track)
   {
-    if(track.nHits <= _min) return true;
+    if(track.flag <= _min) return true;
 
-    if(track.nHits > _max) return true;
+    if(track.flag > _max) return true;
 
     return false;
   }
