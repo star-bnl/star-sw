@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.42 2007/07/12 20:36:03 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.43 2008/07/30 15:04:36 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.43  2008/07/30 15:04:36  fisyak
+// Remove custom SetDebug, fix bug #1252
+//
 // Revision 1.42  2007/07/12 20:36:03  fisyak
 // Add includes for ROOT 5.16
 //
@@ -141,7 +144,6 @@ public:
                                  float theta3, float phi3);
 
 
-   virtual void  SetDebug(Int_t dbl=kDebug); 
            Int_t SetInputFile(const char* file);
 
    TDataSet* GetVolume() { return fVolume; }
@@ -199,7 +201,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.42 2007/07/12 20:36:03 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.43 2008/07/30 15:04:36 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
