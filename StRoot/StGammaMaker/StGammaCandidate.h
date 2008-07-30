@@ -25,7 +25,7 @@ class StGammaCandidate : public TObject
   ~StGammaCandidate();
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGammaCandidate.h,v 1.10 2008/06/30 14:58:37 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaCandidate.h,v 1.11 2008/07/30 14:56:11 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 
   //
@@ -59,7 +59,13 @@ class StGammaCandidate : public TObject
   UChar_t mDetector;      /// 0=EEMC 1=BEMC
 
  public:
-  void SetId(Int_t id){ mGammaId=id; }
+
+  // Enumerate detector ID's  
+  enum CalorimeterId { kEEmc=0, kBEmc, kUnknown=255 }; 
+
+  // Use above enumerations
+  void SetId(Int_t id){ if ( id=kEEmc||id==kBEmc ) {mGammaId=id;} else mGammaId=kUnknown; }
+
   void SetTowerId( Int_t id ){ mTowerId=id; }
   void SetTowerClusterId( Int_t id ){ mTowerClusterId=id; }
   void SetSmduClusterId( Int_t id ){ mSmduClusterId=id; }
@@ -70,7 +76,6 @@ class StGammaCandidate : public TObject
 
 
   void SetDetectorId( Int_t id ){ mDetector=id; }
-  enum CalorimeterId { kEEmc=0, kBEmc, kUnknown }; 
 
   Int_t detectorId(){ return mDetector; } /// Returns detector ID (0=EEMC, 1=BEMC) 
   Int_t id(){ return mGammaId; }          /// Returns unique ID for each gamma in the event
@@ -110,6 +115,7 @@ class StGammaCandidate : public TObject
 
   TVector3 momentum() const { return mMomentum; }
   TVector3 position() const { return mPosition; }
+  //  TVector3 position( Int_t nstrips=10 );
   Float_t  energy() const { return mEnergy; }
   Float_t  seedEnergy() const { return mSeedEnergy; }
   Float_t  pre1Energy() const { return mPre1Energy; }
@@ -120,7 +126,9 @@ class StGammaCandidate : public TObject
   Float_t  smdEtaEnergy() const { return mSmduEnergy; }
   Float_t  smdPhiEnergy() const { return mSmdvEnergy; }
 
-
+  TVector3 momentum1x1();
+  TVector3 momentum1x1c();
+  TVector3 momentum2x1();
 
   // Tower and track information w/in given radius
  
