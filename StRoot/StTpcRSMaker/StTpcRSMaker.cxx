@@ -1,6 +1,6 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.5 2008/07/18 16:22:50 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.6 2008/07/30 23:53:19 fisyak Exp $
 // doxygen info here
 /*
  */
@@ -31,19 +31,11 @@
 #include "StTpcRawData.h"
 #include "Altro.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.5 2008/07/18 16:22:50 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.6 2008/07/30 23:53:19 fisyak Exp $";
 static  Gccuts_t *ccuts = 0;
 
 #define Laserino 170
 #define Chasrino 171
-static const Int_t NoOfSectors  =  24;
-static const Int_t NoOfRows     =  45;
-static const Int_t NoOfInnerRows=  13;
-static const Int_t NoOfPads           = 182;
-static const Int_t NoOfTimeBins = 512;
-static const Double_t tauIntegraton        = 2.5* 74.6e-9; // secs
-static const Double_t tauF                 = 394.0e-9; 
-static const Double_t tauP                 = 775.0e-9;
 //                                    Inner        Outer
 static       Double_t t0IO[2]   = {1.20868e-9, 1.43615e-9}; // recalculated in InducedCharge
 static const Double_t tauC[2]   = {999.655e-9, 919.183e-9}; 
@@ -108,8 +100,19 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   ElectronRange(0.0055), // Electron Range(.055mm)
   ElectronRangeEnergy(3000), // eV
   ElectronRangePower(1.78), // sigma =  ElectronRange*(eEnery/ElectronRangeEnergy)**ElectronRangePower
-  CrossTalkInner    (4e-3), //0.15),
-  CrossTalkOuter    (4e-3)  //0.025)
+  CrossTalkInner    (0), //(4e-3), //0.15),
+  CrossTalkOuter    (0), //(4e-3)  //0.025)
+  mTauC(0),
+  mtauIntegrationX(74.6e-9), // secs
+  mtauIntegration (2.5* 74.6e-9), // secs
+  NoOfSectors(24),
+  NoOfRows(45),
+  NoOfInnerRows(13),
+  NoOfPads(182),
+  NoOfTimeBins(512),
+  tauF(394.0e-9), 
+  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
+  tauP(775.0e-9)
 {
   memset (mShaperResponses, 0, sizeof(mShaperResponses));
   SETBIT(m_Mode,kPAI); 
@@ -208,12 +211,10 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   longitudinalDiffusionConstant = gStTpcDb->PadResponse()->longitudinalDiffusionConstant();
   //  transverseDiffusionConstant   = gStTpcDb->PadResponse()->transverseDiffusionConstant();
   //  firstOuterSectorAnodeWire  = gStTpcDb->WirePlaneGeometry()->firstOuterSectorAnodeWire();
-  innerSectorzOffSet = gStTpcDb->Dimensions()->zInnerOffset(); 
   samplingFrequency = 1.e6*gStTpcDb->Electronics()->samplingFrequency(); // Hz
   mTimeBinWidth     = 1./samplingFrequency;
   //  static Double_t Gain;
   //  Gain             =  gStTpcDb->Electronics()->nominalGain();
-  outerSectorzOffSet = gStTpcDb->Dimensions()->zOuterOffset();
   numberOfInnerSectorAnodeWires  = gStTpcDb->WirePlaneGeometry()->numberOfInnerSectorAnodeWires ();
   firstInnerSectorAnodeWire = gStTpcDb->WirePlaneGeometry()->firstInnerSectorAnodeWire();
   lastInnerSectorAnodeWire  = gStTpcDb->WirePlaneGeometry()->lastInnerSectorAnodeWire ();
@@ -246,19 +247,19 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
 					  anodeWireRadius,
 					  outerSectorAnodeVoltage, t0IO[io]);
     }
-    Double_t params3[7] = {t0IO[io], tauF, tauP, tauIntegraton, mTimeBinWidth, 0, io};
-    Double_t params0[5] = {t0IO[io],             tauIntegraton, mTimeBinWidth, 0, io};
+    Double_t params3[7] = {t0IO[io], tauF, tauP, mtauIntegration , mTimeBinWidth,     0, io};
+    Double_t params0[5] = {t0IO[io],             mtauIntegrationX, mTimeBinWidth, mTauC, io};
     if (! fgTimeShape3[io]) {// old electronics, intergation + shaper alltogether
       fgTimeShape3[io] = new TF1(Form("TimeShape3%s",Names[io]),
 				 shapeEI3,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,7);
-      fgTimeShape3[io]->SetParNames("t0","tauF","tauP", "tauI");
+      fgTimeShape3[io]->SetParNames("t0","tauF","tauP", "tauI","width","tauC","io");
       fgTimeShape3[io]->SetParameters(params3);
       params3[5] = fgTimeShape3[io]->Integral(timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth);
     }
     if (! fgTimeShape0[io]) {// new electronics only integration
       fgTimeShape0[io] = new TF1(Form("TimeShape%s",Names[io]),
 			    shapeEI,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,5);
-      fgTimeShape0[io]->SetParNames("t0","tauI");
+      fgTimeShape0[io]->SetParNames("t0","tauI","width","norm","io");
       fgTimeShape0[io]->SetParameters(params0);
       params0[3] = fgTimeShape0[io]->Integral(0,timeBinMax*mTimeBinWidth);
     }
@@ -434,9 +435,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   Int_t sortedIndex = 0;
   tpc_hit = tpc_hit_begin;
   for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
-    //    offset=transform.zFromTB(0);
-    Double_t driftVelocity = gStTpcDb->DriftVelocity(sector);
-    //    tauGlobalOffSet = (3*(mTau - 55e-9) + 22.7e-9)*driftVelocity; // offset due to new mTau
     Idebug = 0;
     Int_t NoHitsInTheSector = 0;
     SignalSum_t *SignalSum = ResetSignalSum();
@@ -476,7 +474,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t TotalSignal  = 0;
 	Double_t tof = gver[id3-1].ge_tof;
 	if (! TESTBIT(m_Mode, kNoToflight)) tof += tpc_hit->tof;
-	Double_t zToFoffset = tof*driftVelocity;
 	Double_t lgam = tpc_hit->lgam;
 	Double_t gamma = TMath::Power(10.,lgam) + 1;
 	Double_t betaGamma = TMath::Sqrt(gamma*gamma - 1.);
@@ -530,7 +527,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	static StTpcLocalSectorCoordinate xyzLocalSector;
 	transform(xyzA,xyzLocalSector);
 	static StTpcPadCoordinate Pad;
-	transform(xyzLocalSector,Pad,kFALSE,kFALSE);
+	transform(xyzLocalSector,Pad,kTRUE,kFALSE); // use T0, don't use Tau
 	Double_t padH = Pad.pad();        Int_t pad0 = TMath::Nint(padH + xmin[0]);
 	Double_t tbkH = Pad.timeBucket(); Int_t tbk0 = TMath::Nint(tbkH + xmin[1]);
 	static StTpcLocalSectorAlignedDirection  dirA;
@@ -660,7 +657,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 					    xyzC.y()+gRandom->Gaus(0,sigmaT),
 					    xyzC.z()+gRandom->Gaus(0,sigmaL), sector, iPadrow);
 	    Double_t y = xyzE.position().y();
-	    Double_t zoffset = innerSectorzOffSet;
 	    Double_t alphaVariation = InnerAlphaVariation;
 	    Double_t CrossTalk = CrossTalkInner;
 	    // Transport to wire
@@ -674,13 +670,12 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      WireIndex = (int) ((y - firstOuterSectorAnodeWire)/anodeWirePitch + 0.5);
 	      yOnWire = firstOuterSectorAnodeWire + WireIndex*anodeWirePitch;
 	      WireIndex += (int) ((lastInnerSectorAnodeWire - firstInnerSectorAnodeWire)/anodeWirePitch) + 1;
-	      zoffset = outerSectorzOffSet;
 	      alphaVariation = OuterAlphaVariation;
 	      CrossTalk = CrossTalkOuter;
 	    }
 	    Double_t distanceToWire = y - yOnWire; // Calculated effective distance to wire affected by Lorentz shift 
 	    xOnWire = xyzE.position().x();
-	    zOnWire = xyzE.position().z() + zToFoffset + zoffset; 
+	    zOnWire = xyzE.position().z();
 	    // Grid plane (1 mm spacing) focusing effect + Lorentz angle in drift volume 
 	    Int_t iGridWire = (Int_t ) TMath::Abs(10.*distanceToWire);
 	    Double_t dist2Grid = TMath::Sign(0.05 + 0.1*iGridWire, distanceToWire);
@@ -694,7 +689,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    zOnWire += TMath::Abs(distFocused);
 	    if (! iGroundWire ) QAv *= TMath::Exp( alphaVariation);
 	    else                QAv *= TMath::Exp(-alphaVariation);
-	    Float_t bin = transform.tBFromZ(zOnWire,sector);
+	    StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, iPadrow);
+	    transform(xyzW,Pad,kTRUE,kFALSE); // use T0, don't use Tau
+	    Float_t bin = Pad.timeBucket();
 	    Int_t binT = (Int_t) bin;
 	    if (binT < 0 || binT >= NoOfTimeBins) continue;
 	    Double_t dT = bin -  binT;
@@ -702,7 +699,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      Double_t dely           = TMath::Abs(transform.yFromRow(row)-yOnWire);            
 	      Double_t localYDirectionCoupling = ChargeFraction->GetSave(&dely);
 	      if(localYDirectionCoupling < minSignal) continue;
-	      Float_t padX = transform.padFromX(xOnWire,row);
+	      Float_t padX = Pad.pad();
 	      Int_t CentralPad = TMath::Nint(padX);
 	      if (CentralPad < 1) continue;
 	      Int_t PadsAtRow = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
@@ -714,13 +711,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      TF1 *mShaperResponse = mShaperResponses[io][sector-1];
 	      for(Int_t pad = padMin; pad <= padMax; pad++, xPad++) {
 		Double_t dt = dT;
-#if 0
 		if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
 		  Double_t gain   = gStTpcDb->tpcGain()->Gain(sector,row,pad);
 		  if (gain <= 0.0) continue;
-		  dt -= gStTpcDb->T0(sector)->getT0(row,pad);
 		}
-#endif
 		Double_t xpad[1] = {TMath::Abs(xPad)};
 		Double_t localXDirectionCoupling = PadResponseFunction->GetSave(xpad);
 		if (localXDirectionCoupling < minSignal) continue;
@@ -878,9 +872,6 @@ void  StTpcRSMaker::Print(Option_t *option) const {
   PrPP(Print, Outer_wire_to_plane_couplingScale);
   PrPP(Print, numberOfElectronsPerADCcount);
   PrPP(Print, anodeWireRadius);
-  PrPP(Print, innerSectorzOffSet);
-  PrPP(Print, outerSectorzOffSet);
-  //  PrPP(Print, offset);
   if (TESTBIT(m_Mode, kAVERAGEPEDESTAL)) {
     PrPP(Print, mAveragePedestal);
     PrPP(Print, mAveragePedestalRMS);
@@ -899,7 +890,7 @@ void  StTpcRSMaker::Print(Option_t *option) const {
 }
 //________________________________________________________________________________
 void  StTpcRSMaker::DigitizeSector(Int_t sector){
-  static Altro * altro = 0;
+  static Altro *altro = 0;
   //  static Int_t PedestalMem[512];
   TDataSet *event = GetData("Event");
   StTpcRawData *data = 0;
@@ -927,12 +918,10 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
     Int_t NoOfPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
     for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
       gain = 1;
-#if 0
       if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
 	gain   = gStTpcDb->tpcGain()->Gain(Sector,row,pad);
 	if (gain <= 0.0) continue;
       }
-#endif
       ped    = mAveragePedestal;
       pedRMS = 0; 
 #if 0
@@ -952,7 +941,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
       static UShort_t IDTs[512];
       memset(ADCs, 0, sizeof(ADCs));
       memset(IDTs, 0, sizeof(IDTs));
-      if (St_TpcAltroParametersC::instance()->N(sector-1) > 0 && ! altro) {
+      if (St_TpcAltroParametersC::instance()->N(sector-1) >= 0 && ! altro) {
 	/* Tonk 06/25/08
 First, there is no BSL1 (which is the pedestal subtraction) since
 you're data is already subtracted.
@@ -975,17 +964,24 @@ Can you get it from the RC databases?
 	//from ~/public/sources/Altro++/AltroConfigs/AltroConfig.globaltcf.v1.data
 	// ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
 	//	altro->ConfigAltro(                    1,                      1,                         1,              1,                     0);
-	altro->ConfigAltro(                    0,                      1,                         0,              1,                     0); // Tonko 06/25/08
-	//     ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
-	//	altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
-	Int_t *altro_reg = St_TpcAltroParametersC::instance()->altro_reg(sector-1);
-	altro->ConfigTailCancellationFilter(altro_reg[0],altro_reg[1],altro_reg[2], // K1-3
-					    altro_reg[3],altro_reg[4],altro_reg[5]);// L1-3
-	//     ConfigBaselineCorrection_2(int HighThreshold, int LowThreshold, int Offset, int Presamples, int Postsamples);
-	//altro->ConfigBaselineCorrection_2(                3,                3,          0,              0,               0); // Tonko 06/25/08
-	//void ConfigZerosuppression(int Threshold, int MinSamplesaboveThreshold, int Presamples, int Postsamples);
-	//	altro->ConfigZerosuppression(            3,                            3,              2,               3);
-	altro->ConfigZerosuppression(            2,                            2,              0,               0); // Tonko 06/25/08
+	if (St_TpcAltroParametersC::instance()->N(sector-1) > 0) {// Tonko 06/25/08
+	  // ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
+	  altro->ConfigAltro(                    0,                      1,                         0,              1,                     0); 
+	  //     ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
+	  //	altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
+	  Int_t *altro_reg = St_TpcAltroParametersC::instance()->altro_reg(sector-1);
+	  altro->ConfigTailCancellationFilter(altro_reg[0],altro_reg[1],altro_reg[2], // K1-3
+					      altro_reg[3],altro_reg[4],altro_reg[5]);// L1-3
+	  //     ConfigBaselineCorrection_2(int HighThreshold, int LowThreshold, int Offset, int Presamples, int Postsamples);
+	  //void ConfigZerosuppression(int Threshold, int MinSamplesaboveThreshold, int Presamples, int Postsamples);
+	  //	altro->ConfigZerosuppression(            3,                            3,              2,               3);
+	  altro->ConfigZerosuppression(            2,                            2,              0,               0); // Tonko 06/25/08
+	} else {
+	  // ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
+	  altro->ConfigAltro(                    0,                      0,                         1,              1,                     0); 
+	  //     ConfigBaselineCorrection_2(int HighThreshold, int LowThreshold, int Offset, int Presamples, int Postsamples);
+	  altro->ConfigBaselineCorrection_2(                2,                2,          0,              0,               0); // Tonko 06/25/08
+	}
 	altro->PrintParameters();
       }
       Int_t NoTB = 0;
@@ -1237,25 +1233,50 @@ Double_t StTpcRSMaker::ei(Double_t x)
 }
 //________________________________________________________________________________
 Double_t StTpcRSMaker::shapeEI(Double_t *x, Double_t *par) {// does not work. It is needed to 1/s
+  Double_t t  = x[0];
+  Double_t value = 0;
+  if (t <= 0) return value;
   Double_t t0    = par[0];
   Double_t tau_I = par[1];
-#if 1
-  Double_t a = - 1./tau_I;
-  Double_t t  = x[0];
-  Double_t value = 0;
-  if (t <= 0) return value;
-  value = TMath::Exp(a*(t+t0))*(ei(-a*(t+t0))-ei(-a*t0));
-#else
-  Int_t io = (Int_t) par[4];
-  Double_t a[2] = {- 1./tau_I, - 1./tauC[io]};
-  Double_t A[2] = {a[0]/(a[0]-a[1]), a[1]/(a[1]-a[0])};
-  Double_t t  = x[0];
-  Double_t value = 0;
-  if (t <= 0) return value;
-  for (Int_t i = 0; i < 2; i++) {
+  Double_t tau_C = par[3];
+  Double_t a[2] = {- 1./tau_I, 0};
+  Double_t A[2] = {  1., 0.};
+  Int_t N = 1;
+  if (tau_C > 0) {
+    N = 2;
+    a[1] = - 1./tau_C;
+    A[0] = 1./(a[0]-a[1]);
+    A[1] = -A[0];
+  }
+  for (Int_t i = 0; i < N; i++) {
     value += A[i]*TMath::Exp(a[i]*(t+t0))*(ei(-a[i]*(t+t0))-ei(-a[i]*t0));
   }
-#endif
+  return value;
+}
+//________________________________________________________________________________
+Double_t StTpcRSMaker::shapeEI3(Double_t *x, Double_t *par) {// does not work. It is needed to 1/s
+  Double_t t  = x[0];
+  Double_t value = 0;
+  if (t <= 0) return value;
+  Double_t t0    = par[0];
+  Double_t tau_F = par[1];
+  Double_t tau_P = par[2];
+  Double_t tau_I = par[3];
+  Double_t tau_C = par[5];
+  Double_t d =   1./tau_P;
+  Double_t a[3] = {- 1./tau_I, - 1./tau_F, 0};
+  Double_t A[3] = {(a[0]+d)/(a[0]-a[1]), (a[1]+d)/(a[1]-a[0]), 0};
+  Int_t N = 2;
+  if (tau_C > 0) {
+    N = 3;
+    a[2] = -1./tau_C;
+    A[0] = (a[0] + d)/a[0]/(a[0] - a[1])/(a[0] - a[2]);
+    A[1] = (a[1] + d)/a[1]/(a[1] - a[0])/(a[1] - a[2]);
+    A[2] = (a[2] + d)/a[2]/(a[2] - a[0])/(a[2] - a[1]); 
+  }
+  for (Int_t i = 0; i < N; i++) {
+    value += A[i]*TMath::Exp(a[i]*(t+t0))*(ei(-a[i]*(t+t0))-ei(-a[i]*t0));
+  }
   return value;
 }
 //________________________________________________________________________________
@@ -1268,36 +1289,6 @@ Double_t StTpcRSMaker::shapeEI_I(Double_t *x, Double_t *par) { //Integral of sha
   Int_t io = (Int_t) par[4];
   assert(io >= 0 && io <= 1);
   return sqrt2*fgTimeShape0[io]->Integral(t1,t2)/norm;
-}
-//________________________________________________________________________________
-Double_t StTpcRSMaker::shapeEI3(Double_t *x, Double_t *par) {// does not work. It is needed to 1/s
-  Double_t t0    = par[0];
-  Double_t tau_F = par[1];
-  Double_t tau_P = par[2];
-  Double_t tau_I = par[3];
-  Double_t d =   1./tau_P;
-#if 1
-  Double_t a[2] = {- 1./tau_I, - 1./tau_F};
-  Double_t A[2] = {(a[0]+d)/(a[0]-a[1]), (a[1]+d)/(a[1]-a[0])};
-  Double_t t  = x[0];
-  Double_t value = 0;
-  if (t <= 0) return value;
-  for (Int_t i = 0; i < 2; i++) {
-    value += A[i]*TMath::Exp(a[i]*(t+t0))*(ei(-a[i]*(t+t0))-ei(-a[i]*t0));
-  }
-#else
-  Int_t io = (Int_t) par[6];
-  Double_t a[3] = {- 1./tau_I, - 1./tau_F, - 1./tauC[io]};
-  Double_t A[3] = {(a[0] + d)/a[0]/(a[0] - a[1])/(a[0] - a[2]),
-		   (a[1] + d)/a[1]/(a[1] - a[0])/(a[1] - a[2]),
-		   (a[2] + d)/a[2]/(a[2] - a[0])/(a[2] - a[1])}; 
-  Double_t t  = x[0];
-  Double_t value = - d/(a[0]*a[1]*a[2])/(t + t0);
-  for (Int_t i = 0; i < 3; i++) {
-    value += A[i]*TMath::Exp(a[i]*(t+t0))*(ei(-a[i]*(t+t0))-ei(-a[i]*t0));
-  }
-#endif
-  return value;
 }
 //________________________________________________________________________________
 Double_t StTpcRSMaker::shapeEI3_I(Double_t *x, Double_t *par) { //Integral of shape over time bin
@@ -1325,8 +1316,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.6  2008/07/30 23:53:19  fisyak
+// Freeze
+//
 // Revision 1.5  2008/07/18 16:22:50  fisyak
-// put a factor 2.5 for tauIntegraton
+// put a factor 2.5 for tauIntegration
 //
 // Revision 1.3  2008/06/25 20:02:32  fisyak
 // The first set of parametrs for Altro, Remove gains for the moment
