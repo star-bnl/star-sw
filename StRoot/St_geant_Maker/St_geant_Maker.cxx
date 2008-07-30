@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.120 2008/06/12 20:35:27 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.121 2008/07/30 15:04:35 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.121  2008/07/30 15:04:35  fisyak
+// Remove custom SetDebug, fix bug #1252
+//
 // Revision 1.120  2008/06/12 20:35:27  fisyak
 // Move creation of TGiant from ctor to Init
 //
@@ -833,7 +836,7 @@ Int_t St_geant_Maker::Make()
 
   Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
-  
+  if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
   int iRes = 0; if(iRes) {/*touch*/};
   Do("trig");
   
@@ -1665,13 +1668,6 @@ TString St_geant_Maker::GetVolumeSrcFile(const char *volumeName) const
      }
   }
   return "";
-}
-
-//_____________________________________________________________________________
-void  St_geant_Maker::SetDebug(Int_t dbl)
-{
-  StMaker::SetDebug(dbl);
-  if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::SetInputFile(const char *file)
