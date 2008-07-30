@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.5 2008/06/17 16:08:56 fisyak Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.6 2008/07/30 14:11:55 lbarnby Exp $
  *
  */
 
@@ -112,7 +112,7 @@ Int_t StPrepEmbedMaker::Make() {
     LOG_ERROR << "StPrepEmbedMaker::Make EvtHddr has not been found" << endm;
     return kStErr;
   }
-  Int_t nFound = mTree->Draw("numberOfPrimaryTracks",
+  Int_t nFound = mTree->Draw("uncorrectedNumberOfPrimaries",
 			     Form("mRunNumber==%i&&mEventNumber==%i",EvtHddr->GetRunNumber(),EvtHddr->GetEventNumber()),
 			     "goff");
   if (nFound != 1) {
@@ -207,6 +207,9 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.6  2008/07/30 14:11:55  lbarnby
+ * Changed tags used to get multiplicity for calculating how many particle to embed from numberOfPrimaryTracks to uncorrectedNumberOfPrimaries because former is created by StPCollTagMaker which was not used in P08ic Au+Au 9 GeV production whereas latter is from StTagsMaker
+ *
  * Revision 1.5  2008/06/17 16:08:56  fisyak
  * Move access to TGiant into InitRun
  *
