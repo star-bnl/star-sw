@@ -1,10 +1,11 @@
-//  $Id: StEmcAsciiDbMaker.cxx,v 1.1 2008/07/29 14:43:11 balewski Exp $ 
+//  $Id: StEmcAsciiDbMaker.cxx,v 1.2 2008/07/31 14:18:37 balewski Exp $ 
 // Emulates  L2 in offline for algorithm testing
 // Interface to online/L2jetAlgo/
 // Jan Balewski, Fall 2005
 
 #include <stdio.h>
 #include <TH2.h>
+#include <TFile.h>
 
 #include <StMessMgr.h>
 
@@ -166,13 +167,17 @@ void StEmcAsciiDbMaker::exportBtowDb(TString fname, int runNo, int yyyymmdd,int 
     
     int kPhi=24-(int)( phiF/C_PI*60.);
     if(kPhi<0) kPhi+=120;
+    // convention:  kPhi=[0,119], kEta=[1,40]
+
     char name[10]="nnn", pname[100];
     int sec=1+kPhi/10;
     char sub='a'+kPhi%10;
     sprintf(name,"%02dt%c%02d",sec,sub,kEta);
-    
-    //  printf("phiF/deg=%.1f  kPhi=%d %s\n",phiF/C_PI*180.,kPhi,name);
-    
+
+    hA[2]->Fill(softID,1000*kPhi+(kEta-1));
+    hA[3]->SetBinContent(kEta,kPhi+1,softID);
+
+    //  printf("phiF/deg=%.1f  kPhi=%d %s\n",phiF/C_PI*180.,kPhi,name);    
      float myGain=-2;
      if(gain>0) {
        myGain=1/gain;
@@ -202,6 +207,18 @@ void StEmcAsciiDbMaker::exportBtowDb(TString fname, int runNo, int yyyymmdd,int 
   fclose(fd);
  
   LOG_INFO << Form("exportBtowDb -->%s ,nTw=%d nNotFail=%d nGoodGain=%d",fname.Data(),nA,nB,nC) <<endm;
+
+#if  0 // tmp, somehow HList does not write, fix it
+  TString outName="btowMap.hist.root";
+  TFile f( outName,"recreate");
+  assert(f.IsOpen());
+  printf("BTOW map histos are written  to '%s' ...\n",outName.Data());
+  hA[2]->Write();
+  hA[3]->Write();
+  f.Close();
+ 
+#endif
+ 
 
 }
 
@@ -276,17 +293,21 @@ void StEmcAsciiDbMaker::initAuxHisto() {
 
   hA[1]=new TH2F("eGn","ETOW gains from DB in [ch/GeV] ; eta bins reversed, (eta[+1,+2]); phi bin (5*sec-1 +sub-1)",12,0.5,12.5,60,-0.5,59.5);
  
- mHList->Add( hA[0]);
- mHList->Add( hA[1]);
+
+  hA[2]=new TH1I("L2mapBTOWrev","map BTOW(softID) --> 1000*#phi_{bin} + #eta_{bin} , L2 di-jet convention; BTOW softID; composite {#eta,#phi} index ",4800,0.5,4800.5); 
+
+  hA[3]=new TH2I("L2mapBTOW","map BTOW(#eta_{bin},#phi_{bin}) --> softID , L2 di-jet convention ;BTOW #eta_{bin} ;BTOW #phi_{bin} ",40,-0.5,39.5,120,-0.5,119.5); 
 
 
+  for(int i;i<4;i++) mHList->Add( hA[i]);
+  mHList->Print();
 
 }
 
 /* *******************************
  $Log: StEmcAsciiDbMaker.cxx,v $
- Revision 1.1  2008/07/29 14:43:11  balewski
- start
+ Revision 1.2  2008/07/31 14:18:37  balewski
+ saves BTOW reative location mapping, needs manual activatio
 
  Revision 1.1  2006/03/09 01:33:10  balewski
  start
