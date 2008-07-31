@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.5 2008/06/23 19:16:19 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.6 2008/07/31 20:47:26 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.6  2008/07/31 20:47:26  fisyak
+ * Modify operator += and =
+ *
  * Revision 2.5  2008/06/23 19:16:19  fisyak
  * fix memset size
  *
@@ -233,8 +236,8 @@ StTpcDigitalSector &StTpcDigitalSector::operator+= (StTpcDigitalSector& v) {
       if (! ntb2) continue;
       Int_t ntb1 =    numberOfTimeBins(row,pad);
       if (! ntb1) {
-	StDigitalTimeBins *tbins2 = v.timeBinsOfRowAndPad(row,pad);
-	assignTimeBins(row,pad,tbins2);
+	StDigitalTimeBins tbins2 = *v.timeBinsOfRowAndPad(row,pad);
+	assignTimeBins(row,pad,&tbins2);
 	continue;
       }
       getTimeAdc(row,pad,ADCs1,IDTs1);
@@ -247,6 +250,21 @@ StTpcDigitalSector &StTpcDigitalSector::operator+= (StTpcDigitalSector& v) {
       }
       if (ifIDT) putTimeAdc(row, pad, ADCs1, IDTs1);
       else       putTimeAdc(row, pad, ADCs1);
+    }
+  }
+  return *this;
+}
+//________________________________________________________________________________
+StTpcDigitalSector &StTpcDigitalSector::operator= (const StTpcDigitalSector& v) {
+  for (Int_t row = 1; row <= __NumberOfRows__; row++) {
+    Int_t npad2 = v.numberOfPadsInRow(row);
+    if (! npad2) continue;
+    for (Int_t pad = 1; pad <= NumberOfPadsAtRow[row-1]; pad++) {
+      Int_t ntb2 =  v.numberOfTimeBins(row,pad);
+      if (! ntb2) continue;
+      StDigitalTimeBins tbins2 = *v.timeBinsOfRowAndPad(row,pad);
+      assignTimeBins(row,pad,&tbins2);
+      continue;
     }
   }
   return *this;
@@ -278,20 +296,6 @@ void StTpcRawData::Clear(const Option_t*) {
   for (UInt_t ii=0; ii<mSectors.size(); ii++) {SafeDelete(mSectors[ii]);}
 }
 //________________________________________________________________________________
-StTpcRawData &StTpcRawData::operator+=(StTpcRawData &v) {
-  for (Int_t i = 1; i <= 24; i++) {
-    StTpcDigitalSector *s1 =   GetSector(i);
-    StTpcDigitalSector *s2 = v.GetSector(i);
-    if (! s2) continue;
-    if (! s1) {
-      setSector(i, s2);
-      continue;
-    }
-    *s1 += *s2;
-  }
-  return *this;
-}
-//________________________________________________________________________________
 Int_t StTpcRawData::getVecOfPixels(StVectPixel &pixels, Int_t sector, Int_t row, Int_t padMin, Int_t padMax, Int_t tMin, Int_t tMax) {
   pixels.clear();
   StTpcDigitalSector *s =   GetSector(sector);
@@ -315,4 +319,20 @@ Int_t StTpcRawData::getVecOfPixels(StVectPixel &pixels, Int_t sector, Int_t row,
 void StTpcRawData::Print(const Option_t *opt) const {
   Int_t N = ((StTpcRawData *) this)->size();
   for (Int_t i = 0; i < N; i++) ((StTpcDigitalSector* )mSectors[i])->Print(opt);
+}
+//________________________________________________________________________________
+StTpcRawData &StTpcRawData::operator+= (StTpcRawData& v) {
+  for (Int_t sec = 1; sec <= 24; sec++) {
+    StTpcDigitalSector *a = getSector(sec);
+    StTpcDigitalSector *b = v.getSector(sec);
+    if (!b ) continue;
+    if (!a) {
+      a = new StTpcDigitalSector();
+      *a = *b;
+      setSector(sec, a);
+      continue;
+    }
+    *a += *b;
+  }
+  return *this;
 }
