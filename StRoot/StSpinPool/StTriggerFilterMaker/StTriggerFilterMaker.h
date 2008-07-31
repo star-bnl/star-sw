@@ -1,7 +1,7 @@
 #ifndef ST_TRIGGER_FILTER_MAKER_HH
 #define ST_TRIGGER_FILTER_MAKER_HH
 
-// $Id: StTriggerFilterMaker.h,v 1.1 2008/01/23 04:45:08 kocolosk Exp $
+// $Id: StTriggerFilterMaker.h,v 1.2 2008/07/31 18:02:14 mattheww Exp $
 
 /*****************************************************************************
  * @class StTriggerFilterMaker
@@ -30,8 +30,10 @@ public:
     
     void addTrigger(unsigned int trigId) { mGoodTriggers.push_back(trigId); }
     
+    const vector<unsigned int> getTriggers() const {return mGoodTriggers;}
+
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.1 2008/01/23 04:45:08 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.2 2008/07/31 18:02:14 mattheww Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 private:
     vector<unsigned int> mGoodTriggers; //!
@@ -43,6 +45,9 @@ private:
 
 /*****************************************************************************
  * $Log: StTriggerFilterMaker.h,v $
+ * Revision 1.2  2008/07/31 18:02:14  mattheww
+ * Added method to get trigger list
+ *
  * Revision 1.1  2008/01/23 04:45:08  kocolosk
  * Privileged Maker which skips events unless they fired any one of a set of supplied trigIDs
  *
