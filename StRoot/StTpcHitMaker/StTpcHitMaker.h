@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.2 2008/06/23 20:13:53 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.3 2008/07/31 20:45:27 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.3  2008/07/31 20:45:27  fisyak
+ * Add TpcMixer
+ *
  * Revision 1.2  2008/06/23 20:13:53  fisyak
  * Add real data pixel annotation
  *
@@ -48,7 +51,6 @@ class StTpcHitMaker : public StRTSBaseMaker {
 
   Int_t   Init();
   Int_t   Make();
-  void    Clear(Option_t *option="");
   void    DoPulser(Int_t sector);
   void    PadMonitor(Int_t sector);
   void    UpdateHitCollection(Int_t sector);

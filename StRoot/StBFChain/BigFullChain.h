@@ -725,8 +725,10 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                              "TPC+TPX pad monitor", kFALSE},
   {"TpxDumpPxls2Nt","TpxDumpPxls2Nt","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker"
                                                                    ,"TPC+TPX pixel dump to NTuple", kFALSE},
-  {"TpxRaw","TpxRaw","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker","TPC+TPX Tpc Raw Data", kFALSE},
-  {"TpxClu","tpc_hits","tpcChain","rts,detDb","StTpcRTSHitMaker","StTpcHitMaker"
+  {"TpxRaw","TpxRaw","tpcChain","rts,detDb,StEvent"
+   ,                                        "StTpcHitMaker","StTpcHitMaker","TPC+TPX Tpc Raw Data", kFALSE},
+  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer"              ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
+  {"TpxClu","tpc_hits","tpcChain","rts,detDb,-tpx","StTpcRTSHitMaker","StTpcHitMaker"
                                                                        ,"RTS(online) cluster maker",kFALSE},
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
 #ifndef __CLEANUP__  

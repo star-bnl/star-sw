@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.2 2008/06/23 20:13:53 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.3 2008/07/31 20:45:26 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.3  2008/07/31 20:45:26  fisyak
+ * Add TpcMixer
+ *
  * Revision 1.2  2008/06/23 20:13:53  fisyak
  * Add real data pixel annotation
  *
@@ -116,18 +119,18 @@ evpReader *StTpcHitMaker::InitReader() {
   // Init EVP_READER 
   if (!fDaqReader) { 
     StDAQReader *daqReader = 0;
-    LOG_INFO << "StTpcHitMaker::InitReader"  << endm;
     St_DataSet *dr = GetDataSet("StDAQReader");
     if(dr) daqReader = (StDAQReader *)(dr->GetObject());
-    
     if(daqReader == NULL) {
-      LOG_INFO << "StTpcHitMaker::InitRun No daqReader available..." << endm;
+      LOG_INFO << "StTpcHitMaker::InitReader No daqReader available..." << endm;
     } else {
       fDaqReader = daqReader->getFileReader();
       if(fDaqReader == NULL) {
 	LOG_INFO << "StTpcHitMaker::InitRun No DaqReader available..." << endm;
       } else {
-	LOG_INFO << "StTpcHitMaker::InitReader: "  << fDaqReader << endm;
+	if (Debug()) {
+	  LOG_INFO << "StTpcHitMaker::InitReader: "  << fDaqReader << endm;
+	}
 	fRtsReader = fDaqReader->rts_rr;
       }
     }
@@ -597,9 +600,4 @@ StTpcHitCollection *StTpcHitMaker::GetHitCollection() {
     }
   }
   return hitCollection;
-}
-//--------------------------------------------------------------------------------
-void StTpcHitMaker::Clear(Option_t *option) {
-  TDataSet *event = GetData("Event");
-  SafeDelete(event);
 }
