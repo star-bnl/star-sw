@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.4 2008/06/20 14:56:34 fisyak Exp $
+ * $Id: StTpcRawData.h,v 2.5 2008/07/31 20:47:27 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.5  2008/07/31 20:47:27  fisyak
+ * Modify operator += and =
+ *
  * Revision 2.4  2008/06/20 14:56:34  fisyak
  * Add protection for pad no.
  *
@@ -101,9 +104,9 @@ public:
     virtual void   Print(const Option_t *opt="") const;
     StTpcDigitalSector &operator+= (StTpcDigitalSector& v);
     static Int_t numberOfPadsAtRow(Int_t row);
+    StTpcDigitalSector& operator=(const StTpcDigitalSector&);
 private:
     StTpcDigitalSector(const StTpcDigitalSector&);
-    StTpcDigitalSector& operator=(const StTpcDigitalSector&);
 
 private:
     StDigitalSector       mData;
@@ -128,8 +131,8 @@ public:
     void   setSector(UInt_t sector, StTpcDigitalSector* digitSector);
     void   clear() {Clear();}
     void   Clear(const Option_t *opt = ""); 
+    StTpcRawData &operator+= (StTpcRawData& v);
     virtual void Print(const Option_t *opt="") const; 
-    StTpcRawData& operator+=(StTpcRawData& v);
 private:
     std::vector<StTpcDigitalSector*> mSectors;
     ClassDef(StTpcRawData,1)
