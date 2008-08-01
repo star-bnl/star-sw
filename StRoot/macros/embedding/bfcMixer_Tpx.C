@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.2 2008/08/01 13:06:20 lbarnby Exp $
+// $Id: bfcMixer_Tpx.C,v 1.3 2008/08/01 14:26:10 lbarnby Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -21,14 +21,23 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
                   const Double_t eta_low=-1.0,
                   const Double_t eta_high=1.0,
 		  const Int_t pid=9,
-		  const Double_t mult=0.05) {
-  // production chain for P08ic
-  TString prodP08ic("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine");
+		  const Double_t mult=0.05,
+                  const Char_t *prodName = "P08icpp") {
+  // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
+  TString prodP08icpp("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine");
+  TString prodP08icAuAu9("DbV20080709 P2008 ITTF");
+  TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine");
   TString geomP08ic("ry2008");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
   chain2Opt += " "; chain2Opt += geomP08ic;
-  TString chain3Opt = prodP08ic;
+  if (prodName == "P08icpp") {   TString chain3Opt = prodP08icpp; }
+  else if (prodName == "P08icAuAu9") {   TString chain3Opt = prodP08icAuAu9; }
+  else if (prodName == "P08icdAu") {   TString chain3Opt = prodP08icdAu; }
+  else {
+    cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
+    return;
+  }
   chain3Opt += ",Embedding,TpcMixer,TpxClu,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
   chain3Opt += ","; chain3Opt += geomP08ic;
   // Dynamically link some shared libs
