@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.cxx,v 1.13 2007/09/25 13:36:51 bouchet Exp $
+// $Id: StSsdDbMaker.cxx,v 1.14 2008/08/01 22:07:31 bouchet Exp $
 //
 // $Log: StSsdDbMaker.cxx,v $
+// Revision 1.14  2008/08/01 22:07:31  bouchet
+// fix bug for geometry : simulation takes ideal geometry
+//
 // Revision 1.13  2007/09/25 13:36:51  bouchet
 // add m_Mode to constructor
 //
@@ -73,7 +76,12 @@ Int_t StSsdDbMaker::InitRun(Int_t runNumber) {
     return kStFatal;
   }   
   m_dimensions    =  (St_ssdDimensions     *) GetInputDB("Geometry/ssd/ssdDimensions"); 
-  m_positions = CalculateWafersPosition();  
+  if(m_Mode ==1 ){
+    m_positions = (St_ssdWafersPosition  *) GetInputDB("Geometry/ssd/ssdWafersPosition");}
+  else
+    {
+      m_positions = CalculateWafersPosition();  
+    }
   if ((!m_dimensions)||(!m_positions)) {
     gMessMgr->Error() << "No  access to geometry parameters" << endm;
     return kStFatal;
