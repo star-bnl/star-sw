@@ -8,6 +8,8 @@ using namespace ROOT::Math;
 #include "StarClassLibrary/StThreeVectorF.hh"
 #include "StEvent/StDetectorId.h"
 
+#include "TLorentzVector.h"
+
 class StChargedPionJetParticle : public LorentzVector< PtEtaPhiE4D<Double32_t> > {
 public:
     StChargedPionJetParticle();
@@ -25,6 +27,8 @@ public:
     
     StThreeVectorF&         globalDca();
     const StThreeVectorF&   globalDca() const;
+    
+    double z(const TLorentzVector&) const;
     
     void setIndex(short);
     void setDetectorId(StDetectorId);

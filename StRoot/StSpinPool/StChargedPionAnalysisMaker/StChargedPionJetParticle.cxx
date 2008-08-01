@@ -6,3 +6,6 @@ StChargedPionJetParticle::StChargedPionJetParticle() : LorentzVector< PtEtaPhiE4
 
 StChargedPionJetParticle::~StChargedPionJetParticle() { /* no-op */ }
 
+double StChargedPionJetParticle::z(const TLorentzVector& jet) const {
+    return (X()*jet.X() + Y()*jet.Y() + Z()*jet.Z()) / ::pow(jet.P(),2);
+}
