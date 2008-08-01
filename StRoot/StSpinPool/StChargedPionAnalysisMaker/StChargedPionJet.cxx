@@ -58,3 +58,15 @@ void StChargedPionJet::addTrigger(unsigned int trigId) {
 void StChargedPionJet::addParticle(StChargedPionJetParticle* p) {
     mParticles.push_back(*p);
 }
+
+const StChargedPionJetParticle& StChargedPionJet::leadingParticle() const {
+    const StChargedPionJetParticle *p = NULL;
+    for(unsigned i=0; i< particles().size(); i++) {
+        if(!p) p = &(particles()[i]);
+        else {
+            if(p->z(*this) < particles()[i].z(*this) ) 
+                p = &(particles()[i]);
+        }
+    }
+    return *p;
+}

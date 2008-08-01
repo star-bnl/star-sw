@@ -36,6 +36,8 @@ public:
     vector<StChargedPionJetParticle>&       particles();
     const vector<StChargedPionJetParticle>& particles() const;
     
+    const StChargedPionJetParticle& leadingParticle() const;
+    
     void setCharge(char);
     void setNTpcTracks(unsigned short);
     void setNBarrelTowers(unsigned short);
