@@ -35,22 +35,22 @@ MakeChairInstance(tpcPedestal,Calibrations/tpc/tpcPedestal);
 MakeChairInstance(tpcPadResponse,Calibrations/tpc/tpcPadResponse);
 #include "St_tpcSlowControlSimC.h"
 MakeChairInstance(tpcSlowControlSim,Calibrations/tpc/tpcSlowControlSim);
-#include "St_tpcOSTimeOffsetsC.h"
-MakeChairInstance(tpcOSTimeOffsets,Calibrations/tpc/tpcOSTimeOffsets);
-#include "St_tpcISTimeOffsetsC.h"
-MakeChairInstance(tpcISTimeOffsets,Calibrations/tpc/tpcISTimeOffsets);
 #include "St_tpcHitErrorsC.h"
 MakeChairInstance(tpcHitErrors,Calibrations/tpc/tpcHitErrors);
 #include "St_tpcGainMonitorC.h"
 MakeChairInstance(tpcGainMonitor,Calibrations/tpc/tpcGainMonitor);
-#include "St_tpcISGainsC.h"
-MakeChairInstance(tpcISGains,Calibrations/tpc/tpcISGains);
-#include "St_tpcOSGainsC.h"
-MakeChairInstance(tpcOSGains,Calibrations/tpc/tpcOSGains);
 #include "St_tpcHighVoltagesC.h"
 MakeChairInstance(tpcHighVoltages,Calibrations/tpc/tpcHighVoltages);
 #include "St_tpcGainC.h"
 MakeChairInstance(tpcGain,Calibrations/tpc/tpcGain);
+#include "St_tpcT0C.h"
+MakeChairInstance(tpcT0,Calibrations/tpc/tpcT0);
+#include "St_tpcSectorT0offsetC.h"
+MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
+#include "St_TpcAltroParametersC.h"
+MakeChairInstance(TpcAltroParameters,Calibrations/tpc/TpcAltroParameters);
+#include "St_asic_thresholdsC.h"
+MakeChairInstance(asic_thresholds,Calibrations/tpc/asic_thresholds);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -214,6 +214,3 @@ MakeChairInstance(tpcPadPlanes,Geometry/tpc/tpcPadPlanes);
 MakeChairInstance(tpcGlobalPosition,Geometry/tpc/tpcGlobalPosition);
 #include "St_tpcFieldCageShortC.h"
 MakeChairInstance(tpcFieldCageShort,Geometry/tpc/tpcFieldCageShort);
-//___________________Calibration/tpc_____________________________________________________________
-#include "St_tpcSectorT0offsetC.h"
-MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
