@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.42 2008/07/10 20:25:31 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.43 2008/08/01 14:28:34 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.43  2008/08/01 14:28:34  fisyak
+ * Add new getT0, clean up
+ *
  * Revision 1.42  2008/07/10 20:25:31  fisyak
  * Warn of
  *
@@ -369,8 +372,8 @@ int type_of_call tpc_sec24_to_sec12_(int *isecin, int *isecout){
   return 1;
 }
 int type_of_call tpc_pad_time_offset_(int *isec, int *irow, int *ipad, float *t0value){
-  if (gStTpcDb->T0(*isec)) {
-   *t0value = gStTpcDb->T0(*isec)->getT0(*irow, *ipad);
+  if (gStTpcDb->tpcT0()) {
+    *t0value = gStTpcDb->tpcT0()->T0(*isec,*irow, *ipad);
   }
   else {
    *t0value = 0;
@@ -528,7 +531,6 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     Int_t option = (m_Mode & 0xfffc) >> 2;
     m_TpcDb->SetExB(new StMagUtilities(gStTpcDb, RunLog, option));
   }
-  SetTpc2Global();
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
   m_tpg_pad_plane->SetNRows(1);
   m_tpg_detector = new St_tpg_detector("tpg_detector",1);
@@ -541,35 +543,38 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
       tpcDbInterface()->DriftVelocity()) 
    Update_tpg_detector();
   //Here I fill in the arrays for the row parameterization ax+by=1
-  for (int i=0;i<24;i++){
-    for (int j=0;j<45;j++){
-     int time[1] = {10}; 
-     int ipad[2] = {20,40};
-     StTpcPadCoordinate pad1(i+1, j+1, ipad[0], *time);
-     StTpcPadCoordinate pad2(i+1, j+1, ipad[1], *time);
-     StGlobalCoordinate gc1,gc2;
-     StTpcCoordinateTransform transform(gStTpcDb);
-     transform(pad1,gc1);
-     transform(pad2,gc2);
-     double x1,y1,x2,y2;
-     double m,bb; // y = mx + bb
-     x1 = gc1.position().x();
-     y1 = gc1.position().y();
-     x2 = gc2.position().x();
-     y2 = gc2.position().y();
-     if (fabs(x2-x1)<0.000001) {
-        aline[i][j] = 1/x1;
-        bline[i][j] = 0.;
-        continue;
-     }
-     m = (y2 - y1)/(x2 - x1);
-     bb = y1 - m*x1;
-     if (bb == 0) {
-      gMessMgr->Warning() << "StTpcDbMaker::Init() Row intersects 0,0" << endm;
-      continue;
-     }
-     aline[i][j] = (float) -m/bb;
-     bline[i][j] = (float) 1.0/bb;
+  if (m_TpcDb->GlobalPosition()) {
+    SetTpc2Global();
+    for (int i=0;i<24;i++){
+      for (int j=0;j<45;j++){
+	int time[1] = {10}; 
+	int ipad[2] = {20,40};
+	StTpcPadCoordinate pad1(i+1, j+1, ipad[0], *time);
+	StTpcPadCoordinate pad2(i+1, j+1, ipad[1], *time);
+	StGlobalCoordinate gc1,gc2;
+	StTpcCoordinateTransform transform(gStTpcDb);
+	transform(pad1,gc1);
+	transform(pad2,gc2);
+	double x1,y1,x2,y2;
+	double m,bb; // y = mx + bb
+	x1 = gc1.position().x();
+	y1 = gc1.position().y();
+	x2 = gc2.position().x();
+	y2 = gc2.position().y();
+	if (fabs(x2-x1)<0.000001) {
+	  aline[i][j] = 1/x1;
+	  bline[i][j] = 0.;
+	  continue;
+	}
+	m = (y2 - y1)/(x2 - x1);
+	bb = y1 - m*x1;
+	if (bb == 0) {
+	  gMessMgr->Warning() << "StTpcDbMaker::Init() Row intersects 0,0" << endm;
+	  continue;
+	}
+	aline[i][j] = (float) -m/bb;
+	bline[i][j] = (float) 1.0/bb;
+      }
     }
   }
   return 0;
@@ -626,18 +631,21 @@ void StTpcDbMaker::Update_tpg_detector(){
 }
 //_____________________________________________________________________________
 void StTpcDbMaker::SetTpc2Global() {
-  double phi   = 0.0;  //large uncertainty, so set to 0
-  double theta = m_TpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisY()*180./TMath::Pi();
-  double psi   = m_TpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisX()*180./TMath::Pi();
+  Double_t phi   = 0.0;  //large uncertainty, so set to 0
+  Double_t theta = 0.0;
+  Double_t psi   = 0.0;
+  Double_t xyz[3] = {0,0,0};
+  if (m_TpcDb->GlobalPosition()) {
+    theta = m_TpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisY()*180./TMath::Pi();
+    psi   = m_TpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisX()*180./TMath::Pi();
+    xyz[0] =  m_TpcDb->GlobalPosition()->TpcCenterPositionX();
+    xyz[1] =  m_TpcDb->GlobalPosition()->TpcCenterPositionY();
+    xyz[2] =  m_TpcDb->GlobalPosition()->TpcCenterPositionZ();
+  };
   TGeoHMatrix Tpc2Global("Tpc2Global");
   Tpc2Global.RotateX(-psi);
   Tpc2Global.RotateY(-theta);
   Tpc2Global.RotateZ(-phi);
-  Double_t xyz[3] = {
-    m_TpcDb->GlobalPosition()->TpcCenterPositionX(),
-    m_TpcDb->GlobalPosition()->TpcCenterPositionY(),
-    m_TpcDb->GlobalPosition()->TpcCenterPositionZ()
-  };
   Tpc2Global.SetTranslation(xyz);
   m_TpcDb->SetTpc2GlobalMatrix(&Tpc2Global);
 }

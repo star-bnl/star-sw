@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.47 2007/10/29 21:37:27 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.48 2008/08/01 14:28:22 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.48  2008/08/01 14:28:22  fisyak
+ * Add new getT0, clean up
+ *
  * Revision 1.47  2007/10/29 21:37:27  fisyak
  * add protection from laserDriftVelocity and cathodeDriftVelocity mixing
  *
@@ -143,7 +146,6 @@ ClassImp(StTpcDb)
 ClassImp(StTpcWirePlaneI)
 ClassImp(StTpcDimensionsI)
 ClassImp(StTpcElectronicsI)
-ClassImp(StTpcGainI)
 ClassImp(StTpcPadPlaneI)
 ClassImp(StTpcSlowControlSimI)
 ClassImp(StTpcT0I)
@@ -238,11 +240,10 @@ StTpcDb::~StTpcDb() {
 for (int i = 0;i<24;i++) {
   //    delete gain[i]; delete t0[i];
 }
- delete  mPedestal; mPedestal = 0;
- delete  mGain; mGain = 0;
  SafeDelete(mTpc2GlobalMatrix);
 gStTpcDb = 0;
 }
+
 //_____________________________________________________________________________
 
 StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
@@ -411,35 +412,6 @@ StTpcHitErrorsI* StTpcDb::HitErrors(){
 }
 
 //_____________________________________________________________________________
-StTpcGainI* StTpcDb::Gain(int sector){
-  if(sector<1||sector>24){
-    gMessMgr->Message("StTpcDb::Gains request for invalid sector","E");
-    return 0;
-  }
-  if(!gain[sector-1]){
-   const int dbIndex = kCalibration;
-   char dbname[25],dbname2[25];
-   sprintf(dbname,"Sector_%.2d/tpcISGains",sector);
-   sprintf(dbname2,"Sector_%.2d/tpcOSGains",sector);
-   //   printf("Getting %s , %s\n",dbname,dbname2);
-   if (tpctrg[dbIndex]){
-     //    TDataSet* tpd = tpctrg[dbIndex]->Find(dbname);
-     //    TDataSet* tpd2 = tpctrg[dbIndex]->Find(dbname2);
-     TDataSet *tpd = FindTable(dbname,dbIndex);
-     TDataSet *tpd2 = FindTable(dbname2,dbIndex);
-    if (!(tpd && tpd->HasData() && tpd2 && tpd2->HasData()) ){
-     gMessMgr->Message("StTpcDb::Error Finding Tpc Gain Factors","E");
-     return 0;
-    }
-    StRTpcGain* wptemp = new StRTpcGain((St_tpcISGains*)tpd,(St_tpcOSGains*)tpd2);
-    wptemp->SetPadPlanePointer(PadPlaneGeometry());
-    gain[sector-1] = (StTpcGainI*)wptemp;
-   }
-  }
- return gain[sector-1];
-}
-
-//_____________________________________________________________________________
 StTpcT0I* StTpcDb::T0(int sector){
   if(sector<1||sector>24){
     gMessMgr->Message("StTpcDb::T0s request for invalid sector","E");
@@ -467,7 +439,6 @@ StTpcT0I* StTpcDb::T0(int sector){
   }
  return t0[sector-1];
 }
-
 //_____________________________________________________________________________
 StTpcSectorPositionI* StTpcDb::SectorPosition(int sector){
   
@@ -616,32 +587,10 @@ TTable *StTpcDb::FindTable(const Char_t *name, Int_t dbIndex) {
   return table;
 }
 //________________________________________________________________________________
-St_tpcPedestalC *StTpcDb::Pedestal() {
-  if (!mPedestal){
-    St_tpcPedestal *table = (St_tpcPedestal *) FindTable("tpcPedestal",kCalibration);
-    if (! table) return 0;
-    mPedestal = new St_tpcPedestalC(table);
-  }
-  return mPedestal;
-}
-//________________________________________________________________________________
-St_tpcGainC     *StTpcDb::tpcGain() {
-  if (! mGain){
-    St_tpcGain *table = (St_tpcGain *) FindTable("tpcGain",kCalibration);
-    if (! table) return 0;
-    mGain = new St_tpcGainC(table);
-  }
-  return mGain;
-}
-//________________________________________________________________________________
-St_tpcPadResponseC     *StTpcDb::PadResponse() {
-  if (! mPadResponse){
-    St_tpcPadResponse *table = (St_tpcPadResponse *) FindTable("tpcPadResponse",kCalibration);
-    if (! table) return 0;
-    mPadResponse = new St_tpcPadResponseC(table);
-  }
-  return mPadResponse;
-}
+St_tpcPedestalC        *StTpcDb::Pedestal() {return St_tpcPedestalC::instance();}
+St_tpcGainC            *StTpcDb::tpcGain() {return St_tpcGainC::instance();}
+St_tpcT0C              *StTpcDb::tpcT0() {return St_tpcT0C::instance();}
+St_tpcPadResponseC     *StTpcDb::PadResponse() {  return St_tpcPadResponseC::instance();}
 //________________________________________________________________________________
 void StTpcDb::SetTpc2GlobalMatrix(TGeoHMatrix *m) {
   if (m) {

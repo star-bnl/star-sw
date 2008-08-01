@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.29 2007/08/12 15:06:30 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.30 2008/08/01 14:28:25 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.30  2008/08/01 14:28:25  fisyak
+ * Add new getT0, clean up
+ *
  * Revision 1.29  2007/08/12 15:06:30  fisyak
  * Use separated East/West drift velocities only >= 2007, for back compartibility
  *
@@ -110,7 +113,6 @@
 #include "StRTpcWirePlane.h"
 #include "StRTpcDimensions.h"
 #include "StRTpcElectronics.h"
-#include "StRTpcGain.h"
 #include "StRTpcT0.h"
 #include "StRTpcSlowControlSim.h"
 #include "StRTpcGlobalPosition.h"
@@ -118,9 +120,10 @@
 #include "StRTpcFieldCage.h"
 #include "StRTpcHitErrors.h"
 #include "TTable.h"
-#include "St_tpcPedestalC.h"
-#include "St_tpcGainC.h"
-#include "St_tpcPadResponseC.h"
+#include "StDetectorDbMaker/St_tpcPedestalC.h"
+#include "StDetectorDbMaker/St_tpcT0C.h"
+#include "StDetectorDbMaker/St_tpcGainC.h"
+#include "StDetectorDbMaker/St_tpcPadResponseC.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "TGeoMatrix.h"
 class StMaker;
@@ -138,7 +141,6 @@ class StTpcDb {
  StTpcDimensionsI*     dimensions;    //! 
  StTpcSlowControlSimI* slowControlSim;//! 
  StTpcElectronicsI*    electronics;   //!
- StTpcGainI*           gain[24];      //!
  StTpcT0I*             t0[24];        //!
  StTpcSectorPositionI* sect[24];    //! 
  StTpcGlobalPositionI* GlobPos; //!
@@ -149,9 +151,6 @@ class StTpcDb {
  St_trgTimeOffset*     toff;          //!
  St_dst_L0_Trigger*    trigtype;      //!
  // StTpcCoordinateTransform* transform; //!
- St_tpcPedestalC*      mPedestal;      //!
- St_tpcGainC*          mGain;          //!
- St_tpcPadResponseC*   mPadResponse;   //!
  StMagUtilities*       mExB;           //!
  Int_t                 m_Debug;        //!
  TGeoHMatrix          *mTpc2GlobalMatrix;//!
@@ -171,12 +170,12 @@ class StTpcDb {
    StTpcGlobalPositionI* GlobalPosition();
    StTpcFieldCageI* FieldCage();
    StTpcHitErrorsI* HitErrors();
-   StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
    StTpcSectorPositionI* SectorPosition(int sector);
    TTable *getTpcTable(int i);
    St_tpcPedestalC *Pedestal();
    St_tpcGainC     *tpcGain();
+   St_tpcT0C       *tpcT0();
    St_tpcPadResponseC *PadResponse();
    TTable          *FindTable(const Char_t *name, Int_t dbIndex=kCalibration);
    //small pieces of data:
