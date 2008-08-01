@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.1 2008/07/31 20:48:21 fisyak Exp $
+// $Id: bfcMixer_Tpx.C,v 1.2 2008/08/01 13:06:20 lbarnby Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -16,10 +16,12 @@ StBFChain *chain1, *chain2, *chain3;
 void bfcMixer_Tpx(const Int_t Nevents=100,
 		  const Char_t *daqfile="/star/rcf/test/daq/2008/070/st_physics_adc_9070006_raw_1410001.daq",
 		  const Char_t *tagfile="/star/rcf/test/embedding/ppProduction2008/2008/070/st_physics_adc_9070006_raw_1410001.tags.root",
-		  const Float_t zvertex_low=-175.0,
-		  const Float_t zvertex_high=175.0,
-		  const Char_t *mode="strange",
-		  const Char_t *acc_mode="off" ) {
+		  const Double_t pt_low=0.1,
+		  const Double_t pt_high=5.0,
+                  const Double_t eta_low=-1.0,
+                  const Double_t eta_high=1.0,
+		  const Int_t pid=9,
+		  const Double_t mult=0.05) {
   // production chain for P08ic
   TString prodP08ic("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine");
   TString geomP08ic("ry2008");
@@ -82,9 +84,9 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   if (! embMk) return;
   embMk->SetTagFile(tagfile);
   //            pTlow,ptHigh,etaLow,etaHigh,phiLow,phiHigh
-  embMk->SetOpt(  0.1,    5.,  -1.3,    1.3,    0.,   6.28); 
+  embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185); 
   //                pid, mult
-  embMk->SetPartOpt(  8,0.05);
+  embMk->SetPartOpt(  pid,mult);
   TAttr::SetDebug(0);
   Chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   Chain->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
@@ -100,3 +102,5 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   gMessMgr->QAInfo() << "Run completed " << endm;
   gSystem->Exec("date");
 }
+
+//$LOG$
