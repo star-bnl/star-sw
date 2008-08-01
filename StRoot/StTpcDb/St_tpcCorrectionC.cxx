@@ -20,7 +20,13 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x) {
     switch  (cor->type) {
     case 10:// ADC correction offset + poly for ADC
       X = TMath::Log(x);      break;
-    case 3:
+    case 1: // Tchebyshev [-1,1] 
+      if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      break;
+    case 2: // Shifted TChebyshev [0,1]
+      if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      break;
+    case 3: 
       if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
       else                                       X = TMath::Log(1. - TMath::Abs(x));
       break;
@@ -31,7 +37,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x) {
     default:      X = x;    break;
     }
   }
-  if (cor->min < cor->max) {
+  if (cor->type != 1 && cor->type != 2 &&
+      cor->min < cor->max) {
     if (X < cor->min) X = cor->min;
     if (X > cor->max) X = cor->max;
   }
