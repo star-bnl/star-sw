@@ -4,7 +4,7 @@
 #include <StJetMaker.h>
 #include <StppAnaPars.h>
 #include <StConePars.h>
-#include <StDefaultJetTreeWriter.h>
+#include <StjeDefaultJetTreeWriter.h>
 
 using namespace std;
 using namespace StSpinJet;
