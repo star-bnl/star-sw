@@ -46,7 +46,7 @@ void StJetMakerTest::testTreeWriter()
   StConePars* cpars = new StConePars();
   jetmaker->addAnalyzer(anapars, cpars, 0, "ConeJets12");
 
-  CPPUNIT_ASSERT(static_cast<StDefaultJetTreeWriter*>(jetmaker->getTreeWriter()));
+  CPPUNIT_ASSERT(static_cast<StjeDefaultJetTreeWriter*>(jetmaker->getTreeWriter()));
 
   jetmaker->Init();
   delete jetmaker;

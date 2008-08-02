@@ -1,4 +1,4 @@
-// $Id: StJetMakerBackwordCompatibility.cxx,v 1.3 2008/08/02 21:26:23 tai Exp $
+// $Id: StJetMakerBackwordCompatibility.cxx,v 1.4 2008/08/02 21:37:35 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetMakerBackwordCompatibility.h"
 
@@ -10,7 +10,7 @@ void StJetMakerBackwordCompatibility::addAnalyzer(StppJetAnalyzer* analyzer, Stj
 {
   _jetBranches[name] = analyzer;
 
-  StDefaultJetTreeWriter* defaultWriter = dynamic_cast<StDefaultJetTreeWriter*>(treeWriter);
+  StjeDefaultJetTreeWriter* defaultWriter = dynamic_cast<StjeDefaultJetTreeWriter*>(treeWriter);
   if (!defaultWriter) return;
 
   analyzer->setmuDstJets(defaultWriter->getLastStJets());
