@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftwareTriggerSimuMakerFactory.cxx,v 1.2 2008/08/02 19:22:31 tai Exp $
+// $Id: StjTrgSoftwareTriggerSimuMakerFactory.cxx,v 1.1 2008/08/02 22:21:34 tai Exp $
 #include "StjTrgSoftwareTriggerSimuMakerFactory.h"
 
 #include "StjTrgSoftwareTriggerSimuMaker.h"

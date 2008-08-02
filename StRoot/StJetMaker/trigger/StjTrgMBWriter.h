@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMBWriter.h,v 1.2 2008/08/02 19:22:29 tai Exp $
+// $Id: StjTrgMBWriter.h,v 1.1 2008/08/02 22:21:32 tai Exp $
 #ifndef STJETTRGMBWRITER_H
 #define STJETTRGMBWRITER_H
 

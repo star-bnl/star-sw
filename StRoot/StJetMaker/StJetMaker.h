@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.48 2008/08/02 19:22:24 tai Exp $
+// $Id: StJetMaker.h,v 1.49 2008/08/02 22:21:09 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -21,7 +21,7 @@ class StJets;
 namespace StSpinJet {
   class StParticleCollector;
   class StJetFinderRunner;
-  class StJetCuts;
+  class StjeJetCuts;
 }
 
 class StjTreeWriter;
@@ -57,7 +57,7 @@ public:
   StjTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.48 2008/08/02 19:22:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.49 2008/08/02 22:21:09 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -65,7 +65,7 @@ private:
 
   std::vector<StSpinJet::StJetFinderRunner*> _jetFinderList;
 
-  std::vector<StSpinJet::StJetCuts*> _jetCutsList;
+  std::vector<StSpinJet::StjeJetCuts*> _jetCutsList;
 
   std::map<std::string, StJets*> _stjetsMap;
 

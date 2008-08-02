@@ -1,11 +1,11 @@
-// $Id: StJetMaker.cxx,v 1.66 2008/08/02 21:37:32 tai Exp $
+// $Id: StJetMaker.cxx,v 1.67 2008/08/02 22:21:09 tai Exp $
 #include "StJetMaker.h"
 
 #include "StParticleCollector.h"
 #include "StJetFinderRunner.h"
-#include "StJetCuts.h"
+#include "StjeJetCuts.h"
 #include "StjTreeWriter.h"
-#include "emulator/StjeDefaultJetTreeWriter.h"
+#include "StjeDefaultJetTreeWriter.h"
 #include "StppJetAnalyzer.h"
 
 #include <StJetFinder/StProtoJet.h>
@@ -49,7 +49,7 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 
   _jetFinderList.push_back(new StJetFinderRunner(jp, *particleList, *protoJetList));
 
-  _jetCutsList.push_back(new StJetCuts(ap, *protoJetList));
+  _jetCutsList.push_back(new StjeJetCuts(ap, *protoJetList));
 
   _treeWriter->addJetFinder(fp, particleList, protoJetList, name, stjets);
 
@@ -84,7 +84,7 @@ Int_t StJetMaker::Make()
     (*jetFinder)->Run();
   }
 
-  for(vector<StJetCuts*>::iterator jetCuts = _jetCutsList.begin(); jetCuts != _jetCutsList.end(); ++jetCuts) {
+  for(vector<StjeJetCuts*>::iterator jetCuts = _jetCutsList.begin(); jetCuts != _jetCutsList.end(); ++jetCuts) {
     (*jetCuts)->Apply();
   }
 

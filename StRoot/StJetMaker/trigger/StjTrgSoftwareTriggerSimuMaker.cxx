@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftwareTriggerSimuMaker.cxx,v 1.2 2008/08/02 19:22:31 tai Exp $
+// $Id: StjTrgSoftwareTriggerSimuMaker.cxx,v 1.1 2008/08/02 22:21:33 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftwareTriggerSimuMaker.h"
 
