@@ -1,15 +1,18 @@
 #!/bin/bash
 
-toRemove=""
-toAdd=""
-for file in *.h *.cxx; do
-    new=$(grep "^${file%.*} " cha.txt | cut -d " " -f 2)
-    if [ ! -z $new ]; then
-	new=$new\.${file#*.}
-	echo "mv $file $new"
-	toRemove="$toRemove $file"
-	toAdd="$toAdd $new"
-    fi
-done
-echo "cvs rm $toRemove"
-echo "cvs add $toAdd"
+old=$1
+new=$2
+
+oldhdr=$(find ./ -regex ".*$old\.hh?" -print)
+oldsrc=$(find ./ -regex ".*$old\.\(cxx\|C\)" -print)
+
+newhdr=$(echo $oldhdr | sed -e "s/$old/$new/g")
+newsrc=$(echo $oldsrc | sed -e "s/$old/$new/g")
+
+echo "mv $oldhdr $newhdr"
+echo "mv $oldsrc $newsrc"
+echo "cvs rm $oldhdr $oldsrc"
+echo "cvs add $newhdr $newsrc"
+
+./scratch/renameInclude.sh $oldhdr $newhdr
+./scratch/renameClass.sh $old $new

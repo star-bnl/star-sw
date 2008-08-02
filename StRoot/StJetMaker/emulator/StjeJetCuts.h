@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetCuts.h,v 1.1 2008/07/21 02:48:15 tai Exp $
+// $Id: StjeJetCuts.h,v 1.1 2008/08/02 22:21:25 tai Exp $
 #ifndef STJETCUTS_HH
 #define STJETCUTS_HH
 
@@ -14,15 +14,15 @@ class StJetFinder;
 
 namespace StSpinJet {
 
-class StJetCuts {
+class StjeJetCuts {
 
 public:
 
   typedef std::list<StProtoJet> ProtoJetList;
 
-  StJetCuts(const StppAnaPars* ap, ProtoJetList& protoJets);
+  StjeJetCuts(const StppAnaPars* ap, ProtoJetList& protoJets);
 
-  virtual ~StJetCuts();
+  virtual ~StjeJetCuts();
 
   void Apply();
 

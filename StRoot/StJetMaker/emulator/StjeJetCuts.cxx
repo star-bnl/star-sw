@@ -1,5 +1,5 @@
-// $Id: StJetCuts.cxx,v 1.1 2008/07/21 02:48:15 tai Exp $
-#include "StJetCuts.h"
+// $Id: StjeJetCuts.cxx,v 1.1 2008/08/02 22:21:24 tai Exp $
+#include "StjeJetCuts.h"
 
 #include <StJetFinder/StProtoJet.h>
 #include <StJetFinder/StJetPars.h>
@@ -11,19 +11,19 @@ using namespace std;
 
 namespace StSpinJet {
 
-StJetCuts::StJetCuts(const StppAnaPars* ap, ProtoJetList& protoJets)
+StjeJetCuts::StjeJetCuts(const StppAnaPars* ap, ProtoJetList& protoJets)
   : _protoJetList(protoJets)
   , _anaPar(*ap)
 {
 
 }
 
-StJetCuts::~StJetCuts()
+StjeJetCuts::~StjeJetCuts()
 {
 
 }
 
-void StJetCuts::Apply()
+void StjeJetCuts::Apply()
 {
   ProtoJetList newList;
 
@@ -40,7 +40,7 @@ void StJetCuts::Apply()
   copy(newList.begin(), newList.end(), back_inserter(_protoJetList));
 }
 
-bool StJetCuts::shouldNotKeep(StProtoJet &pj)
+bool StjeJetCuts::shouldNotKeep(StProtoJet &pj)
 {
   if(pj.pt() <= _anaPar.mJetPtMin) return true;
 
