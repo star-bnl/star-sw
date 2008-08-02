@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbElectronics.cc,v 1.6 2008/06/20 15:01:12 fisyak Exp $
+ * $Id: StTpcDbElectronics.cc,v 1.7 2008/08/02 14:33:09 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbElectronics.cc,v $
+ * Revision 1.7  2008/08/02 14:33:09  fisyak
+ * new interface to tpcT0
+ *
  * Revision 1.6  2008/06/20 15:01:12  fisyak
  * move from StTrsData to StTpcRawData
  *
@@ -115,7 +118,7 @@ double StTpcDbElectronics::channelGain(int sector, int row, int pad) const
     // This should be where channel by channel gains are looked up
     // Note: the DB has getGain(), getOnlineGain(), getNominalGain(), and
     //       getRelativeGain().  We use Nominal gain I believe.
-    return gTpcDbPtr->Gain(sector)->getNominalGain(row,pad);
+  return 1.;//gTpcDbPtr->Gain(sector)->getNominalGain(row,pad);
 }
 
 double StTpcDbElectronics::channelGain(StTpcPadCoordinate& coord) const
@@ -134,7 +137,7 @@ int StTpcDbElectronics::pedestal(StTpcPadCoordinate& coord) const
 }
 double StTpcDbElectronics::tZero(int sector, int row, int pad) const
 {
-    return gTpcDbPtr->T0(sector)->getT0(row,pad);
+  return gTpcDbPtr->tpcT0()->T0(sector,row,pad);
 }
 double StTpcDbElectronics::tZero(StTpcPadCoordinate& coord) const
 {
