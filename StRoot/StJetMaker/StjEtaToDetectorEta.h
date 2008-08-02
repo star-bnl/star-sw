@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjEtaToDetectorEta.h,v 1.1 2008/08/02 04:04:26 tai Exp $
+// $Id: StjEtaToDetectorEta.h,v 1.2 2008/08/02 19:22:26 tai Exp $
 #ifndef ETATODETECTORETA_H
 #define ETATODETECTORETA_H
 
@@ -7,12 +7,12 @@
 
 namespace StSpinJet {
 
-class EtaToDetectorEta {
+class StjEtaToDetectorEta {
 
 public:
-  EtaToDetectorEta(double BEMCy = 222.625, double EEMCz = 270.0)
+  StjEtaToDetectorEta(double BEMCy = 222.625, double EEMCz = 270.0)
     : _BEMCy(BEMCy), _EEMCz(EEMCz) { }
-  virtual ~EtaToDetectorEta() { }
+  virtual ~StjEtaToDetectorEta() { }
 
   double operator()(double eta, double z) 
   {

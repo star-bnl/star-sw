@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListCut.h,v 1.1 2008/08/02 04:16:33 tai Exp $
+// $Id: StjTrackListCut.h,v 1.2 2008/08/02 19:22:55 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPCTRACKCUT_H
 #define STJETTPCTRACKCUT_H
@@ -11,25 +11,25 @@
 
 namespace StSpinJet {
 
-class StJetTPCTrackCut {
+class StjTrackListCut {
 
 public:
 
-  StJetTPCTrackCut() { }
-  virtual ~StJetTPCTrackCut() { }
+  StjTrackListCut() { }
+  virtual ~StjTrackListCut() { }
 
-  TrackList operator()(const TrackList& trackList);
+  StjTrackList operator()(const StjTrackList& trackList);
 
-  void addCut(StJetTrackCut::TrackCut* cut) {
+  void addCut(StJetTrackCut::StjTrackCut* cut) {
     _cutList.push_back(cut);
   }
 
-  typedef std::vector<StJetTrackCut::TrackCut*> CutList;
+  typedef std::vector<StJetTrackCut::StjTrackCut*> CutList;
   CutList getCutList() { return _cutList; }
 
 private:
 
-  bool shoudNotPass(const Track& track);
+  bool shoudNotPass(const StjTrack& track);
 
   CutList _cutList;
 

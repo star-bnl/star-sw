@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTxt.h,v 1.1 2008/08/02 04:15:46 tai Exp $
+// $Id: StjTPCTxt.h,v 1.2 2008/08/02 19:22:49 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPCTXT_H
 #define STJETTPCTXT_H
@@ -11,13 +11,13 @@
 
 namespace StSpinJet {
 
-class StJetTPCTxt : public StJetTPC {
+class StjTPCTxt : public StjTPC {
 
 public:
-  StJetTPCTxt(const char* path);
-  virtual ~StJetTPCTxt() { }
+  StjTPCTxt(const char* path);
+  virtual ~StjTPCTxt() { }
 
-  TrackList getTrackList();
+  StjTrackList getTrackList();
 
 private:
 

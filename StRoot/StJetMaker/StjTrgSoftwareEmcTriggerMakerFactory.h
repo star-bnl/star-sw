@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftwareEmcTriggerMakerFactory.h,v 1.1 2008/08/02 04:07:46 tai Exp $
+// $Id: StjTrgSoftwareEmcTriggerMakerFactory.h,v 1.2 2008/08/02 19:22:30 tai Exp $
 #ifndef STJETTRGSOFTWAREEMCTRIGGERMAKERFACTORY_H
 #define STJETTRGSOFTWAREEMCTRIGGERMAKERFACTORY_H
 
@@ -7,14 +7,14 @@
 
 class StEmcTriggerMaker;
 
-class StJetTrgSoftwareEmcTriggerMakerFactory : public StJetTrgSoftwareFactory {
+class StjTrgSoftwareEmcTriggerMakerFactory : public StjTrgSoftwareFactory {
 
 public:
-  StJetTrgSoftwareEmcTriggerMakerFactory(StEmcTriggerMaker* emcTrigMaker)
+  StjTrgSoftwareEmcTriggerMakerFactory(StEmcTriggerMaker* emcTrigMaker)
     : _emcTrigMaker(emcTrigMaker) { }
-  virtual ~StJetTrgSoftwareEmcTriggerMakerFactory() { }
+  virtual ~StjTrgSoftwareEmcTriggerMakerFactory() { }
 
-  StJetTrgSoftware* create();
+  StjTrgSoftware* create();
 
 private:
   StEmcTriggerMaker* _emcTrigMaker;

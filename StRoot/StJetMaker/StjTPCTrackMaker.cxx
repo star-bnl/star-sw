@@ -1,4 +1,4 @@
-// $Id: StjTPCTrackMaker.cxx,v 1.1 2008/08/02 04:05:21 tai Exp $
+// $Id: StjTPCTrackMaker.cxx,v 1.2 2008/08/02 19:22:27 tai Exp $
 #include "StjTPCTrackMaker.h"
 
 #include "StjTPCMuDst.h"
@@ -12,33 +12,33 @@
 using namespace std;
 using namespace StSpinJet;
 
-ClassImp(StJetTPCTrackMaker)
+ClassImp(StjTPCTrackMaker)
 
-StJetTPCTrackMaker::StJetTPCTrackMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
+StjTPCTrackMaker::StjTPCTrackMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
   : StMaker(name)
   , _file(file)
   , _uDstMaker(uDstMaker)
 { }
 
-Int_t StJetTPCTrackMaker::Init()
+Int_t StjTPCTrackMaker::Init()
 {
-  _tpc  = new StJetTPCMuDst(_uDstMaker);
+  _tpc  = new StjTPCMuDst(_uDstMaker);
 
-  _writer = new StJetTrackListWriter("tpcTracks", _file);
+  _writer = new StjTrackListWriter("tpcTracks", _file);
 
   return kStOk;
 }
 
-Int_t StJetTPCTrackMaker::Make()
+Int_t StjTPCTrackMaker::Make()
 {
-  TrackList trackList = _tpc->getTrackList();
+  StjTrackList trackList = _tpc->getTrackList();
 
   _writer->Fill(trackList);
 
   return kStOk;
 }
 
-Int_t StJetTPCTrackMaker::Finish()
+Int_t StjTPCTrackMaker::Finish()
 {
   _writer->Finish();
 

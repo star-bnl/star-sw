@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListToStMuTrackFourVecList.h,v 1.1 2008/08/02 04:18:34 tai Exp $
+// $Id: StjTrackListToStMuTrackFourVecList.h,v 1.2 2008/08/02 19:23:07 tai Exp $
 #ifndef TRACKLISTTOSTMUTRACKFOURVECLIST_H
 #define TRACKLISTTOSTMUTRACKFOURVECLIST_H
 
@@ -10,23 +10,23 @@ typedef std::vector<AbstractFourVec*> FourList;
 
 namespace StSpinJet {
 
-class TrackToTLorentzVector;
+class StjTrackToTLorentzVector;
 
 class StMuTrackEmu;
 
-class TrackListToStMuTrackFourVecList {
+class StjTrackListToStMuTrackFourVecList {
 
 public:
-  TrackListToStMuTrackFourVecList();
-  virtual ~TrackListToStMuTrackFourVecList() { }
+  StjTrackListToStMuTrackFourVecList();
+  virtual ~StjTrackListToStMuTrackFourVecList() { }
 
-  FourList operator()(const TrackList& trackList);
+  FourList operator()(const StjTrackList& trackList);
 
 private:
 
-  StMuTrackEmu* createTrackEmu(const Track& track);
+  StMuTrackEmu* createTrackEmu(const StjTrack& track);
 
-  TrackToTLorentzVector& _trackTo4p;
+  StjTrackToTLorentzVector& _trackTo4p;
 
 };
 

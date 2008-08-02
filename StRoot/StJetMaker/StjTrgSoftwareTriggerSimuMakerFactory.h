@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftwareTriggerSimuMakerFactory.h,v 1.1 2008/08/02 04:08:21 tai Exp $
+// $Id: StjTrgSoftwareTriggerSimuMakerFactory.h,v 1.2 2008/08/02 19:22:31 tai Exp $
 #ifndef STJETTRGSOFTWARETRIGGERSIMUMAKERFACTORY_H
 #define STJETTRGSOFTWARETRIGGERSIMUMAKERFACTORY_H
 
@@ -7,14 +7,14 @@
 
 class StTriggerSimuMaker;
 
-class StJetTrgSoftwareTriggerSimuMakerFactory : public StJetTrgSoftwareFactory {
+class StjTrgSoftwareTriggerSimuMakerFactory : public StjTrgSoftwareFactory {
 
 public:
-  StJetTrgSoftwareTriggerSimuMakerFactory(StTriggerSimuMaker* simuTrig)
+  StjTrgSoftwareTriggerSimuMakerFactory(StTriggerSimuMaker* simuTrig)
     : _simuTrig(simuTrig) { }
-  virtual ~StJetTrgSoftwareTriggerSimuMakerFactory() { }
+  virtual ~StjTrgSoftwareTriggerSimuMakerFactory() { }
 
-  StJetTrgSoftware* create();
+  StjTrgSoftware* create();
 
 private:
   StTriggerSimuMaker* _simuTrig;

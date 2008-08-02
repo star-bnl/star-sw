@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyListToStMuTrackFourVecList.h,v 1.1 2008/08/02 04:18:33 tai Exp $
+// $Id: StjTowerEnergyListToStMuTrackFourVecList.h,v 1.2 2008/08/02 19:23:07 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYLISTTOSTMUTRACKFOURVECLIST_H
 #define TOWERENERGYLISTTOSTMUTRACKFOURVECLIST_H
@@ -11,19 +11,19 @@ typedef std::vector<AbstractFourVec*> FourList;
 
 namespace StSpinJet {
 
-class TowerEnergyToTLorentzVector;
+class StjTowerEnergyToTLorentzVector;
 
-class TowerEnergyListToStMuTrackFourVecList {
+class StjTowerEnergyListToStMuTrackFourVecList {
 
 public:
-  TowerEnergyListToStMuTrackFourVecList();
-  virtual ~TowerEnergyListToStMuTrackFourVecList() { }
+  StjTowerEnergyListToStMuTrackFourVecList();
+  virtual ~StjTowerEnergyListToStMuTrackFourVecList() { }
 
-  FourList operator()(const TowerEnergyList& energyDepositList);
+  FourList operator()(const StjTowerEnergyList& energyDepositList);
 
 private:
 
-  TowerEnergyToTLorentzVector& _energyTo4p;
+  StjTowerEnergyToTLorentzVector& _energyTo4p;
 
 };
 

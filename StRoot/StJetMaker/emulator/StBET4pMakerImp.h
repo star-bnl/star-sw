@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.2 2008/08/02 04:18:30 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.3 2008/08/02 19:23:06 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMP_HH
 #define STBET4PMAKERIMP_HH
@@ -10,49 +10,49 @@
 #include <utility>
 
 namespace StSpinJet {
-  class StJetTPC;
-  class StJetBEMC;
-  class StJetEEMC;
-  class StJetTPCTrackCut;
-  class StJetBEMCEnergyCut;
+  class StjTPC;
+  class StjBEMC;
+  class StjEEMC;
+  class StjTrackListCut;
+  class StjTowerEnergyListCut;
 
-  class CorrectTowerEnergyForTracks;
+  class StjTowerEnergyCorrectionForTracks;
 }
 
 class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(StSpinJet::StJetTPC* tpc,
-		  StSpinJet::StJetTPCTrackCut* tpcCut,
-		  StSpinJet::StJetBEMC* bemc,
-		  StSpinJet::StJetBEMCEnergyCut* bemcCut,
-		  StSpinJet::CorrectTowerEnergyForTracks* correctTowerEnergyForTracks,
-		  StSpinJet::StJetEEMC* eemc);
+  StBET4pMakerImp(StSpinJet::StjTPC* tpc,
+		  StSpinJet::StjTrackListCut* tpcCut,
+		  StSpinJet::StjBEMC* bemc,
+		  StSpinJet::StjTowerEnergyListCut* bemcCut,
+		  StSpinJet::StjTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks,
+		  StSpinJet::StjEEMC* eemc);
     
   virtual ~StBET4pMakerImp() { };
 
   void Init();
 
-  std::pair<StSpinJet::TrackList, StSpinJet::TowerEnergyList> getTrackAndEnergyList();
+  std::pair<StSpinJet::StjTrackList, StSpinJet::StjTowerEnergyList> getTrackAndEnergyList();
 
-  StSpinJet::StJetTPC*  TPC()  { return _tpc;  }
-  StSpinJet::StJetBEMC* BEMC() { return _bemc; }
-  StSpinJet::StJetEEMC* EEMC() { return _eemc; }
+  StSpinJet::StjTPC*  TPC()  { return _tpc;  }
+  StSpinJet::StjBEMC* BEMC() { return _bemc; }
+  StSpinJet::StjEEMC* EEMC() { return _eemc; }
 
-  StSpinJet::StJetTPCTrackCut* getTPCTrackCut()     { return _tpcCut; }
-  StSpinJet::StJetBEMCEnergyCut* getBEMCEnergyCut() { return _bemcCut; }
+  StSpinJet::StjTrackListCut* getTPCTrackCut()     { return _tpcCut; }
+  StSpinJet::StjTowerEnergyListCut* getBEMCEnergyCut() { return _bemcCut; }
 
 private:
 
-  StSpinJet::StJetTPC*  _tpc;
-  StSpinJet::StJetBEMC* _bemc;
-  StSpinJet::StJetEEMC* _eemc;
+  StSpinJet::StjTPC*  _tpc;
+  StSpinJet::StjBEMC* _bemc;
+  StSpinJet::StjEEMC* _eemc;
 
-  StSpinJet::StJetTPCTrackCut* _tpcCut;
-  StSpinJet::StJetBEMCEnergyCut* _bemcCut;
+  StSpinJet::StjTrackListCut* _tpcCut;
+  StSpinJet::StjTowerEnergyListCut* _bemcCut;
 
-  StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
+  StSpinJet::StjTowerEnergyCorrectionForTracks* _correctTowerEnergyForTracks;
 
 };
 

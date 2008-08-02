@@ -1,4 +1,4 @@
-// $Id: StjBEMCMuDst.cxx,v 1.1 2008/08/02 04:19:17 tai Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.2 2008/08/02 19:23:19 tai Exp $
 #include "StjBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -24,7 +24,7 @@ using namespace std;
 namespace StSpinJet {
 
 
-StJetBEMCMuDst::StJetBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix)
+StjBEMCMuDst::StjBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : _uDstMaker(uDstMaker)
   , _bemcTables(new StBemcTables(doTowerSwapFix))
  {
@@ -32,11 +32,11 @@ StJetBEMCMuDst::StJetBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix)
  }
 
 
-TowerEnergyList StJetBEMCMuDst::getEnergyList()
+StjTowerEnergyList StjBEMCMuDst::getEnergyList()
 {
   _bemcTables->loadTables((StMaker*)_uDstMaker);
 
-  TowerEnergyList ret;
+  StjTowerEnergyList ret;
 
   StEmcDetector* detector = _uDstMaker->muDst()->emcCollection()->detector(kBarrelEmcTowerId);
 
@@ -55,9 +55,9 @@ TowerEnergyList StJetBEMCMuDst::getEnergyList()
   return ret;
 }
 
-TowerEnergy StJetBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
+StjTowerEnergy StjBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
 {
-  TowerEnergy ret;
+  StjTowerEnergy ret;
 
   ret.runNumber = _uDstMaker->muDst()->event()->runId();
   ret.eventId = _uDstMaker->muDst()->event()->eventId();

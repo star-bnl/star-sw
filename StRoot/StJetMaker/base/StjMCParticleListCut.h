@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleListCut.h,v 1.1 2008/08/02 04:15:39 tai Exp $
+// $Id: StjMCParticleListCut.h,v 1.2 2008/08/02 19:22:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETMCPARTICLELISTCUT_H
 #define STJETMCPARTICLELISTCUT_H
@@ -10,24 +10,24 @@
 
 namespace StSpinJet {
 
-class StJetMCParticleListCut {
+class StjMCParticleListCut {
 
 public:
-  StJetMCParticleListCut() { }
-  virtual ~StJetMCParticleListCut() { }
+  StjMCParticleListCut() { }
+  virtual ~StjMCParticleListCut() { }
   
-  MCParticleList operator()(const MCParticleList& aList);
+  StjMCParticleList operator()(const StjMCParticleList& aList);
 
-  void addCut(StJetMCParticleCut::MCParticleCut* cut) {
+  void addCut(StJetMCParticleCut::StjMCParticleCut* cut) {
     _cutList.push_back(cut);
   }
 
-  typedef std::vector<StJetMCParticleCut::MCParticleCut*> CutList;
+  typedef std::vector<StJetMCParticleCut::StjMCParticleCut*> CutList;
   CutList getCutList() { return _cutList; }
 
 private:
 
-  bool shouldNotKeep(const MCParticle& p);
+  bool shouldNotKeep(const StjMCParticle& p);
 
   CutList _cutList;
 

@@ -1,4 +1,4 @@
-// $Id: StjJetListCut.cxx,v 1.1 2008/08/02 04:15:29 tai Exp $
+// $Id: StjJetListCut.cxx,v 1.2 2008/08/02 19:22:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetListCut.h"
 
@@ -6,11 +6,11 @@ using namespace std;
 
 namespace StSpinJet {
 
-JetList StJetJetListCut::operator()(const JetList &fourList)
+StjJetList StjJetListCut::operator()(const StjJetList &fourList)
 {
-  JetList ret;
+  StjJetList ret;
 
-  for(JetList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
+  for(StjJetList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
 
     if(shouldNotKeep(*it)) continue;
 
@@ -21,7 +21,7 @@ JetList StJetJetListCut::operator()(const JetList &fourList)
 }
 
 
-bool StJetJetListCut::shouldNotKeep(const Jet& p4)
+bool StjJetListCut::shouldNotKeep(const StjJet& p4)
 {
   for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
     if((**cut)(p4)) return true;

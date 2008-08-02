@@ -1,4 +1,4 @@
-// $Id: StjTrackToFourVec.cxx,v 1.1 2008/08/02 04:16:37 tai Exp $
+// $Id: StjTrackToFourVec.cxx,v 1.2 2008/08/02 19:22:55 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrackToFourVec.h"
 
@@ -7,9 +7,9 @@
 
 namespace StSpinJet {
 
-FourVec TrackToFourVec::operator()(const Track& track)
+StjFourVec StjTrackToFourVec::operator()(const StjTrack& track)
 {
-  FourVec ret;
+  StjFourVec ret;
   ret.runNumber   = track.runNumber;
   ret.eventId     = track.eventId;
   ret.type        = 1;     

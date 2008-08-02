@@ -22,57 +22,57 @@ public:
 
 private:
 
-  class StJetTPCMock : public StSpinJet::StJetTPC {
+  class StjTPCMock : public StSpinJet::StjTPC {
   public:
-    StJetTPCMock(int n) : _n(n) { }
-    StSpinJet::TrackList getTrackList()
+    StjTPCMock(int n) : _n(n) { }
+    StSpinJet::StjTrackList getTrackList()
     { 
-      StSpinJet::TrackList ret;
+      StSpinJet::StjTrackList ret;
       for(int i = 0; i < _n; ++i)
-	ret.push_back(StSpinJet::Track());
+	ret.push_back(StSpinJet::StjTrack());
       return ret; 
     };
   private:
     int _n;
   };
 
-  class StJetBEMCMock : public StSpinJet::StJetBEMC {
+  class StjBEMCMock : public StSpinJet::StjBEMC {
   public:
-    StJetBEMCMock(int n) : _n(n) { }
-    StSpinJet::TowerEnergyList getEnergyList()
+    StjBEMCMock(int n) : _n(n) { }
+    StSpinJet::StjTowerEnergyList getEnergyList()
     { 
-      StSpinJet::TowerEnergyList ret;
+      StSpinJet::StjTowerEnergyList ret;
       for(int i = 0; i < _n; ++i)
-	ret.push_back(StSpinJet::TowerEnergy());
+	ret.push_back(StSpinJet::StjTowerEnergy());
       return ret; 
     };
   private:
     int _n;
   };
 
-  class StJetEEMCMock : public StSpinJet::StJetEEMC {
+  class StjEEMCMock : public StSpinJet::StjEEMC {
   public:
-    StJetEEMCMock(int n) : _n(n) { }
-    StSpinJet::TowerEnergyList getEnergyList()
+    StjEEMCMock(int n) : _n(n) { }
+    StSpinJet::StjTowerEnergyList getEnergyList()
     { 
-      StSpinJet::TowerEnergyList ret;
+      StSpinJet::StjTowerEnergyList ret;
       for(int i = 0; i < _n; ++i)
-	ret.push_back(StSpinJet::TowerEnergy());
+	ret.push_back(StSpinJet::StjTowerEnergy());
       return ret; 
     };
   private:
     int _n;
   };
 
-  class TrackCutMock : public StJetTrackCut::TrackCut {
-    bool operator()(const StSpinJet::Track& track)
+  class StjTrackCutMock : public StJetTrackCut::StjTrackCut {
+    bool operator()(const StSpinJet::StjTrack& track)
     {
       return true;
     }
   };
 
-  class TowerEnergyCutMock : public StJetTowerEnergyCut::TowerEnergyCut {
-    bool operator()(const StSpinJet::TowerEnergy& energy)
+  class StjTowerEnergyCutMock : public StJetTowerEnergyCut::StjTowerEnergyCut {
+    bool operator()(const StSpinJet::StjTowerEnergy& energy)
     {
       return true;
     }
@@ -81,13 +81,13 @@ private:
   void assertResults(const char *path);
   void writeExpected(const char *path);
 
-  StSpinJet::StJetTPC* tpc;
-  StSpinJet::StJetTPCTrackCut* tpcCut;
-  StSpinJet::StJetBEMC* bemc;
-  StSpinJet::StJetBEMCEnergyCut *bemcCut;
-  StSpinJet::StJetEEMC* eemc;
+  StSpinJet::StjTPC* tpc;
+  StSpinJet::StjTrackListCut* tpcCut;
+  StSpinJet::StjBEMC* bemc;
+  StSpinJet::StjTowerEnergyListCut *bemcCut;
+  StSpinJet::StjEEMC* eemc;
 
-  StSpinJet::CorrectTowerEnergyForTracks* corr;
+  StSpinJet::StjTowerEnergyCorrectionForTracks* corr;
   StBET4pMakerImp *imp;
 
 };

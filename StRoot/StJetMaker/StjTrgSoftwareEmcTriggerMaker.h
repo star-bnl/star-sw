@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftwareEmcTriggerMaker.h,v 1.1 2008/08/02 04:07:33 tai Exp $
+// $Id: StjTrgSoftwareEmcTriggerMaker.h,v 1.2 2008/08/02 19:22:30 tai Exp $
 #ifndef STJETTRGSOFTWAREEMCTRIGGERMAKER_H
 #define STJETTRGSOFTWAREEMCTRIGGERMAKER_H
 
@@ -10,14 +10,14 @@
 
 class StEmcTriggerMaker;
 
-class StJetTrgSoftwareEmcTriggerMaker : public StJetTrgSoftware {
+class StjTrgSoftwareEmcTriggerMaker : public StjTrgSoftware {
 
 public:
-  StJetTrgSoftwareEmcTriggerMaker(StEmcTriggerMaker* emcTrigMaker)
+  StjTrgSoftwareEmcTriggerMaker(StEmcTriggerMaker* emcTrigMaker)
     : _emcTrigMaker(emcTrigMaker) { }
-  StJetTrgSoftwareEmcTriggerMaker(int trgId, StEmcTriggerMaker* emcTrigMaker)
+  StjTrgSoftwareEmcTriggerMaker(int trgId, StEmcTriggerMaker* emcTrigMaker)
     : _trgId(trgId), _emcTrigMaker(emcTrigMaker) { }
-  virtual ~StJetTrgSoftwareEmcTriggerMaker() { }
+  virtual ~StjTrgSoftwareEmcTriggerMaker() { }
 
   bool soft(int trgId);
 

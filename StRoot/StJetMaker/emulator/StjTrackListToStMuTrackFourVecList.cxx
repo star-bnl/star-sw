@@ -1,4 +1,4 @@
-// $Id: StjTrackListToStMuTrackFourVecList.cxx,v 1.1 2008/08/02 04:18:34 tai Exp $
+// $Id: StjTrackListToStMuTrackFourVecList.cxx,v 1.2 2008/08/02 19:23:07 tai Exp $
 #include "StjTrackListToStMuTrackFourVecList.h"
 
 #include "StjTrackToTLorentzVector.h"
@@ -8,15 +8,15 @@
 
 namespace StSpinJet {
 
-TrackListToStMuTrackFourVecList::TrackListToStMuTrackFourVecList() 
-  : _trackTo4p(*(new TrackToTLorentzVector)) { }
+StjTrackListToStMuTrackFourVecList::StjTrackListToStMuTrackFourVecList() 
+  : _trackTo4p(*(new StjTrackToTLorentzVector)) { }
 
 
-FourList TrackListToStMuTrackFourVecList::operator()(const TrackList& trackList)
+FourList StjTrackListToStMuTrackFourVecList::operator()(const StjTrackList& trackList)
 {
   FourList ret;
 
-  for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
+  for(StjTrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
 
     StMuTrackEmu *trackEmu = createTrackEmu(*track);
 
@@ -29,7 +29,7 @@ FourList TrackListToStMuTrackFourVecList::operator()(const TrackList& trackList)
   return ret;
 }
 
-StMuTrackEmu* TrackListToStMuTrackFourVecList::createTrackEmu(const Track& track)
+StMuTrackEmu* StjTrackListToStMuTrackFourVecList::createTrackEmu(const StjTrack& track)
 {
   StMuTrackEmu *ret = new StMuTrackEmu();
 

@@ -1,4 +1,4 @@
-// $Id: StjBEMCTxt.cxx,v 1.1 2008/08/02 04:15:13 tai Exp $
+// $Id: StjBEMCTxt.cxx,v 1.2 2008/08/02 19:22:42 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjBEMCTxt.h"
 
@@ -12,14 +12,14 @@ using namespace std;
 
 namespace StSpinJet {
 
-StJetBEMCTxt::StJetBEMCTxt(const char* path)
+StjBEMCTxt::StjBEMCTxt(const char* path)
   : _currentEvent(-1)
   , _oldLine("")
 {
   _dataFile.open(path);
 }
 
-TowerEnergyList StJetBEMCTxt::getEnergyList()
+StjTowerEnergyList StjBEMCTxt::getEnergyList()
 {
   ++_currentEvent;
 
@@ -48,13 +48,13 @@ TowerEnergyList StJetBEMCTxt::getEnergyList()
     currentLines.push_back(line);
   }
 
-  TowerEnergyList ret;
+  StjTowerEnergyList ret;
 
   for(vector<string>::const_iterator it = currentLines.begin(); it != currentLines.end(); ++it) {
     istringstream ist(*it);
     long i;
 
-    TowerEnergy dep;
+    StjTowerEnergy dep;
 
     dep.detectorId = 9;
 

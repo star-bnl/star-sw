@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyToFourVec.h,v 1.1 2008/08/02 04:16:05 tai Exp $
+// $Id: StjTowerEnergyToFourVec.h,v 1.2 2008/08/02 19:22:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYTOFOURVEC_H
 #define TOWERENERGYTOFOURVEC_H
@@ -10,17 +10,17 @@
 
 namespace StSpinJet {
 
-class TowerEnergy;
+class StjTowerEnergy;
 
-class TowerEnergyToFourVec {
+class StjTowerEnergyToFourVec {
 public:
-  TowerEnergyToFourVec(double mass = 0 /* photon mass as default */)
-    : _towerenergy2tlorentzvector(*(new TowerEnergyToTLorentzVector(mass))) { }
-  virtual ~TowerEnergyToFourVec() { delete &_towerenergy2tlorentzvector; }
-  FourVec operator()(const TowerEnergy& towerEnergy);
+  StjTowerEnergyToFourVec(double mass = 0 /* photon mass as default */)
+    : _towerenergy2tlorentzvector(*(new StjTowerEnergyToTLorentzVector(mass))) { }
+  virtual ~StjTowerEnergyToFourVec() { delete &_towerenergy2tlorentzvector; }
+  StjFourVec operator()(const StjTowerEnergy& towerEnergy);
 
 private:
-  TowerEnergyToTLorentzVector& _towerenergy2tlorentzvector;
+  StjTowerEnergyToTLorentzVector& _towerenergy2tlorentzvector;
 };
 
 }

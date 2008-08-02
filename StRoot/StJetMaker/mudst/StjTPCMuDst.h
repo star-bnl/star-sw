@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCMuDst.h,v 1.1 2008/08/02 04:19:27 tai Exp $
+// $Id: StjTPCMuDst.h,v 1.2 2008/08/02 19:23:20 tai Exp $
 #ifndef STJETTPCMUDST_H
 #define STJETTPCMUDST_H
 
@@ -12,17 +12,17 @@ class StMuTrack;
 
 namespace StSpinJet {
 
-class StJetTPCMuDst : public StJetTPC {
+class StjTPCMuDst : public StjTPC {
 
 public:
-  StJetTPCMuDst(StMuDstMaker* uDstMaker);
-  virtual ~StJetTPCMuDst() { }
+  StjTPCMuDst(StMuDstMaker* uDstMaker);
+  virtual ~StjTPCMuDst() { }
 
-  TrackList getTrackList();
+  StjTrackList getTrackList();
 
 private:
 
-  Track createTrack(const StMuTrack* mutrack, int i, double magneticField);
+  StjTrack createTrack(const StMuTrack* mutrack, int i, double magneticField);
 
   StMuDstMaker* _uDstMaker;
 

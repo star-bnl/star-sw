@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyList.h,v 1.1 2008/08/02 04:15:56 tai Exp $
+// $Id: StjTowerEnergyList.h,v 1.2 2008/08/02 19:22:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYLIST_H
 #define TOWERENERGYLIST_H
@@ -10,7 +10,7 @@
 
 namespace StSpinJet {
 
-struct TowerEnergy {
+struct StjTowerEnergy {
   int            runNumber;
   int            eventId;
   int            detectorId; // 9: BEMC, 13: EEMC
@@ -28,9 +28,9 @@ struct TowerEnergy {
   int            status;     // 1 is good for BEMC. 0 is good for EEMC
 };
 
-typedef std::vector<TowerEnergy> TowerEnergyList;
+typedef std::vector<StjTowerEnergy> StjTowerEnergyList;
 
-inline bool operator==(const TowerEnergy& v1, const TowerEnergy& v2)
+inline bool operator==(const StjTowerEnergy& v1, const StjTowerEnergy& v2)
 {
   if(v1.runNumber  != v2.runNumber)  return false;
   if(v1.eventId    != v2.eventId)    return false;	  
@@ -50,24 +50,24 @@ inline bool operator==(const TowerEnergy& v1, const TowerEnergy& v2)
   return true;
   }
 
-inline bool operator!=(const TowerEnergy& v1, const TowerEnergy& v2)
+inline bool operator!=(const StjTowerEnergy& v1, const StjTowerEnergy& v2)
 {
   return(!(v1 == v2));
 }
 
-inline bool operator==(const TowerEnergyList& v1, const TowerEnergyList& v2){
+inline bool operator==(const StjTowerEnergyList& v1, const StjTowerEnergyList& v2){
   if(v1.size() != v2.size()) return false;
   for(size_t i = 0; i < v1.size(); ++i) if(v1[i] != v2[i]) return false;
   return true;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const TowerEnergy& v)
+inline std::ostream& operator<<(std::ostream& out, const StjTowerEnergy& v)
 {
   out << "towerId: " << v.towerId << ", energy: " << v.energy << ", .... ";
   return out;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const TowerEnergyList& v)
+inline std::ostream& operator<<(std::ostream& out, const StjTowerEnergyList& v)
 {
   out << "TowerEnergyList size: " << v.size();
   return out;

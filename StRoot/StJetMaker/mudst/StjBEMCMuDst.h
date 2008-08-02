@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCMuDst.h,v 1.1 2008/08/02 04:19:19 tai Exp $
+// $Id: StjBEMCMuDst.h,v 1.2 2008/08/02 19:23:20 tai Exp $
 #ifndef STJETBEMCMUDST_H
 #define STJETBEMCMUDST_H
 
@@ -11,18 +11,18 @@ class StBemcTables;
 
 namespace StSpinJet {
 
-class StJetBEMCMuDst : public StJetBEMC {
+class StjBEMCMuDst : public StjBEMC {
 
 public:
 
-  StJetBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix = true);
-  virtual ~StJetBEMCMuDst() { }
+  StjBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix = true);
+  virtual ~StjBEMCMuDst() { }
 
-  TowerEnergyList getEnergyList();
+  StjTowerEnergyList getEnergyList();
 
 private:
 
-  TowerEnergy readTowerHit(const StEmcRawHit& hit);
+  StjTowerEnergy readTowerHit(const StEmcRawHit& hit);
 
   StMuDstMaker* _uDstMaker;
 

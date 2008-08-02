@@ -1,4 +1,4 @@
-// $Id: StjTreeEntryCoordinator.cxx,v 1.1 2008/08/02 04:05:40 tai Exp $
+// $Id: StjTreeEntryCoordinator.cxx,v 1.2 2008/08/02 19:22:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTreeEntryCoordinator.h"
 
@@ -9,14 +9,14 @@
 
 using namespace std;
 
-void StJetTreeEntryCoordinator::Init()
+void StjTreeEntryCoordinator::Init()
 {
   _indexList = buildIndexListToRun();
   _currentIndexOfIndexList = 0;
   _eof = _indexList.empty();
 }
 
-void StJetTreeEntryCoordinator::Make()
+void StjTreeEntryCoordinator::Make()
 {
   _indexMajor = _indexList[_currentIndexOfIndexList].major;
   _indexMinor = _indexList[_currentIndexOfIndexList].minor;
@@ -24,7 +24,7 @@ void StJetTreeEntryCoordinator::Make()
   if(_indexList.size() == _currentIndexOfIndexList) _eof = true;
 }
 
-StJetTreeEntryCoordinator::IndexList StJetTreeEntryCoordinator::buildIndexListToRun()
+StjTreeEntryCoordinator::IndexList StjTreeEntryCoordinator::buildIndexListToRun()
 {
   IndexSet indexSet;
   for(TrgTreeNameList::const_iterator trgName = _trgTreeNameList.begin(); trgName != _trgTreeNameList.end(); ++trgName) {
@@ -37,7 +37,7 @@ StJetTreeEntryCoordinator::IndexList StJetTreeEntryCoordinator::buildIndexListTo
   return ret;
 }
 
-StJetTreeEntryCoordinator::IndexList StJetTreeEntryCoordinator::getIndexListOfRunsPassedFor(const char* treeName)
+StjTreeEntryCoordinator::IndexList StjTreeEntryCoordinator::getIndexListOfRunsPassedFor(const char* treeName)
 {
   IndexList ret;
   TTree *tree = dynamic_cast<TTree*>(_file->Get(treeName));

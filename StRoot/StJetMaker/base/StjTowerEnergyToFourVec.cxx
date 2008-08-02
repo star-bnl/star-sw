@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyToFourVec.cxx,v 1.1 2008/08/02 04:16:04 tai Exp $
+// $Id: StjTowerEnergyToFourVec.cxx,v 1.2 2008/08/02 19:22:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyToFourVec.h"
 
@@ -7,9 +7,9 @@
 
 namespace StSpinJet {
 
-FourVec TowerEnergyToFourVec::operator()(const TowerEnergy& towerEnergy)
+StjFourVec StjTowerEnergyToFourVec::operator()(const StjTowerEnergy& towerEnergy)
 {
-  FourVec ret;
+  StjFourVec ret;
   ret.runNumber   = towerEnergy.runNumber;
   ret.eventId     = towerEnergy.eventId;
   ret.type        = 2;     

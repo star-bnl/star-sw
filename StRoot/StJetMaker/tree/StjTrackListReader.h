@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListReader.h,v 1.1 2008/08/02 04:22:18 tai Exp $
+// $Id: StjTrackListReader.h,v 1.2 2008/08/02 19:23:39 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTRACKLISTREADER_H
 #define STJETTRACKLISTREADER_H
@@ -9,13 +9,13 @@
 
 class TTree;
 
-class StJetTrackListReader {
+class StjTrackListReader {
 
 public:
-  StJetTrackListReader(TTree *tree);
-  virtual ~StJetTrackListReader() { }
+  StjTrackListReader(TTree *tree);
+  virtual ~StjTrackListReader() { }
 
-  StSpinJet::TrackList GetEntry(Long64_t entry);
+  StSpinJet::StjTrackList GetEntry(Long64_t entry);
 
 private:
 

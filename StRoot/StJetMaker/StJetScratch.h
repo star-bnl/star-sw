@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetScratch.h,v 1.4 2008/07/13 05:36:39 tai Exp $
+// $Id: StJetScratch.h,v 1.5 2008/08/02 19:22:25 tai Exp $
 #ifndef STJETSCRATCH_HH
 #define STJETSCRATCH_HH
 
@@ -9,7 +9,7 @@
 class TDirectory;
 class TTree;
 
-class StJetTrgWriter;
+class StjTrgWriter;
 
 class StMuDstMaker;
 
@@ -29,7 +29,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetScratch.h,v 1.4 2008/07/13 05:36:39 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetScratch.h,v 1.5 2008/08/02 19:22:25 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 

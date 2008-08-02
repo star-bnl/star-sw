@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyPrint.h,v 1.1 2008/08/02 04:16:02 tai Exp $
+// $Id: StjTowerEnergyPrint.h,v 1.2 2008/08/02 19:22:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTOWERENERGYPRINT_H
 #define STJETTOWERENERGYPRINT_H
@@ -11,18 +11,18 @@
 
 namespace StSpinJet {
 
-class StJetTowerEnergyPrint {
+class StjTowerEnergyPrint {
 
 public:
 
-  StJetTowerEnergyPrint() { }
-  virtual ~StJetTowerEnergyPrint() { }
+  StjTowerEnergyPrint() { }
+  virtual ~StjTowerEnergyPrint() { }
 
-  void operator()(const TowerEnergyList& energyList);
+  void operator()(const StjTowerEnergyList& energyList);
 
 private:
 
-  void print(const TowerEnergy& energyDeposit);
+  void print(const StjTowerEnergy& energyDeposit);
 
 };
 

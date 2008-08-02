@@ -17,37 +17,37 @@ using namespace StSpinJet;
 using namespace StJetFourVecCut;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StJetFourVecListCutTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjFourVecListCutTest );
 
-void StJetFourVecListCutTest::setUp()
+void StjFourVecListCutTest::setUp()
 {
 
 }
 
-void StJetFourVecListCutTest::tearDown()
+void StjFourVecListCutTest::tearDown()
 {
 
 }
 
-void StJetFourVecListCutTest::testPt()
+void StjFourVecListCutTest::testPt()
 {
-  StJetFourVecListCut* cut = new StJetFourVecListCut();
-  cut->addCut(new FourVecCutPt(0.2));
+  StjFourVecListCut* cut = new StjFourVecListCut();
+  cut->addCut(new StjFourVecCutPt(0.2));
 
-  FourVecList listIn;
+  StjFourVecList listIn;
 
-  FourVec p1;
+  StjFourVec p1;
   p1.pt = 0.3;
   listIn.push_back(p1);
 
-  FourVec p2;
+  StjFourVec p2;
   p2.pt = 0.1;
   listIn.push_back(p2);
 
-  FourVecList listExpected;
+  StjFourVecList listExpected;
   listExpected.push_back(p1);
 
-  FourVecList listActual = (*cut)(listIn);
+  StjFourVecList listActual = (*cut)(listIn);
 
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
 

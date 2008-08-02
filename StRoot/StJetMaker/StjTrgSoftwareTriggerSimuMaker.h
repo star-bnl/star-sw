@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftwareTriggerSimuMaker.h,v 1.1 2008/08/02 04:08:09 tai Exp $
+// $Id: StjTrgSoftwareTriggerSimuMaker.h,v 1.2 2008/08/02 19:22:31 tai Exp $
 #ifndef STJETTRGSOFTWARETRIGGERSIMUMAKER_H
 #define STJETTRGSOFTWARETRIGGERSIMUMAKER_H
 
@@ -10,12 +10,12 @@
 
 class StTriggerSimuMaker;
 
-class StJetTrgSoftwareTriggerSimuMaker : public StJetTrgSoftware {
+class StjTrgSoftwareTriggerSimuMaker : public StjTrgSoftware {
 
 public:
-  StJetTrgSoftwareTriggerSimuMaker(StTriggerSimuMaker* simuTrig)
+  StjTrgSoftwareTriggerSimuMaker(StTriggerSimuMaker* simuTrig)
     : _simuTrig(simuTrig) { }
-  virtual ~StJetTrgSoftwareTriggerSimuMaker() { }
+  virtual ~StjTrgSoftwareTriggerSimuMaker() { }
 
   bool soft(int trgId);
 

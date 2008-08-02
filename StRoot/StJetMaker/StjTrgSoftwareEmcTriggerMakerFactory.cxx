@@ -1,10 +1,10 @@
-// $Id: StjTrgSoftwareEmcTriggerMakerFactory.cxx,v 1.1 2008/08/02 04:07:39 tai Exp $
+// $Id: StjTrgSoftwareEmcTriggerMakerFactory.cxx,v 1.2 2008/08/02 19:22:30 tai Exp $
 #include "StjTrgSoftwareEmcTriggerMakerFactory.h"
 
 #include "StjTrgSoftwareEmcTriggerMaker.h"
 
-StJetTrgSoftware* StJetTrgSoftwareEmcTriggerMakerFactory::create()
+StjTrgSoftware* StjTrgSoftwareEmcTriggerMakerFactory::create()
 {
-  return new StJetTrgSoftwareEmcTriggerMaker(_emcTrigMaker);
+  return new StjTrgSoftwareEmcTriggerMaker(_emcTrigMaker);
 }
 

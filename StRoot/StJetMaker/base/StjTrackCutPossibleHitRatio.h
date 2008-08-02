@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutPossibleHitRatio.h,v 1.1 2008/08/02 04:16:28 tai Exp $
+// $Id: StjTrackCutPossibleHitRatio.h,v 1.2 2008/08/02 19:22:54 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKCUTPOSSIBLEHITRATIO_H
 #define TRACKCUTPOSSIBLEHITRATIO_H
@@ -8,14 +8,14 @@
 
 namespace StJetTrackCut {
 
-class TrackCutPossibleHitRatio : public TrackCut {
+class StjTrackCutPossibleHitRatio : public StjTrackCut {
   // to avoid split tracks
 
 public:
-  TrackCutPossibleHitRatio(double minRatio = 0.51) :_minRatio(minRatio) { }
-  virtual ~TrackCutPossibleHitRatio() { }
+  StjTrackCutPossibleHitRatio(double minRatio = 0.51) :_minRatio(minRatio) { }
+  virtual ~StjTrackCutPossibleHitRatio() { }
 
-  bool operator()(const StSpinJet::Track& track)
+  bool operator()(const StSpinJet::StjTrack& track)
   {
     if(static_cast<double>(track.nHits)/static_cast<double>(track.nHitsPoss) < .51) return true;
 

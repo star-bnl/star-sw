@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyToTLorentzVector.cxx,v 1.1 2008/08/02 04:16:08 tai Exp $
+// $Id: StjTowerEnergyToTLorentzVector.cxx,v 1.2 2008/08/02 19:22:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyToTLorentzVector.h"
 
@@ -6,7 +6,7 @@
 
 namespace StSpinJet {
 
-TLorentzVector TowerEnergyToTLorentzVector::operator()(const TowerEnergy& deposit)
+TLorentzVector StjTowerEnergyToTLorentzVector::operator()(const StjTowerEnergy& deposit)
 {
   TVector3 towerLocation;
   towerLocation.SetPtEtaPhi(deposit.towerR, deposit.towerEta, deposit.towerPhi); 

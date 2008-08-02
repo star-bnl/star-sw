@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCTxt.h,v 1.1 2008/08/02 04:15:14 tai Exp $
+// $Id: StjBEMCTxt.h,v 1.2 2008/08/02 19:22:42 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETBEMCTXT_H
 #define STJETBEMCTXT_H
@@ -11,13 +11,13 @@
 
 namespace StSpinJet {
 
-class StJetBEMCTxt : public StJetBEMC {
+class StjBEMCTxt : public StjBEMC {
 
 public:
-  StJetBEMCTxt(const char* path);
-  virtual ~StJetBEMCTxt() { }
+  StjBEMCTxt(const char* path);
+  virtual ~StjBEMCTxt() { }
 
-  TowerEnergyList getEnergyList();
+  StjTowerEnergyList getEnergyList();
 
 private:
 

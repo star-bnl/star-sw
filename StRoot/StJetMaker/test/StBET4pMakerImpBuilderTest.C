@@ -62,25 +62,25 @@ void StBET4pMakerImpBuilderTest::test2003()
 
   imp->Init();
 
-  CPPUNIT_ASSERT(  dynamic_cast<StJetTPCMuDst*>(imp->TPC())   );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetBEMCMuDst*>(imp->BEMC()) );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetEEMCNull*>(imp->EEMC())  );
+  CPPUNIT_ASSERT(  dynamic_cast<StjTPCMuDst*>(imp->TPC())   );
+  CPPUNIT_ASSERT(  dynamic_cast<StjBEMCMuDst*>(imp->BEMC()) );
+  CPPUNIT_ASSERT(  dynamic_cast<StjEEMCNull*>(imp->EEMC())  );
 
-  StJetBEMCEnergyCut* bemcCut = imp->getBEMCEnergyCut();
-  StJetBEMCEnergyCut::CutList bemcCutList = bemcCut->getCutList();
+  StjTowerEnergyListCut* bemcCut = imp->getBEMCEnergyCut();
+  StjTowerEnergyListCut::CutList bemcCutList = bemcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)4, bemcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCut2003BemcTower*>(bemcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutEnergy*>(bemcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutBemcStatus*>(bemcCutList[2])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutAdc*>(bemcCutList[3])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCut2003BemcTower*>(bemcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutEnergy*>(bemcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcStatus*>(bemcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutAdc*>(bemcCutList[3])     );
 
 
-  StJetTPCTrackCut* tpcCut    = imp->getTPCTrackCut();
-  StJetTPCTrackCut::CutList tpcCutList = tpcCut->getCutList();
+  StjTrackListCut* tpcCut    = imp->getTPCTrackCut();
+  StjTrackListCut::CutList tpcCutList = tpcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)3, tpcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutDca*>(tpcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutEta*>(tpcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutPossibleHitRatio*>(tpcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutDca*>(tpcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutEta*>(tpcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutPossibleHitRatio*>(tpcCutList[2])     );
 
   delete imp;
 }
@@ -102,24 +102,24 @@ void StBET4pMakerImpBuilderTest::test2003()
   imp->Init();
 
 
-  CPPUNIT_ASSERT(  dynamic_cast<StJetTPCMuDst*>(imp->TPC())   );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetBEMCMuDst*>(imp->BEMC()) );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetEEMCNull*>(imp->EEMC())  );
+  CPPUNIT_ASSERT(  dynamic_cast<StjTPCMuDst*>(imp->TPC())   );
+  CPPUNIT_ASSERT(  dynamic_cast<StjBEMCMuDst*>(imp->BEMC()) );
+  CPPUNIT_ASSERT(  dynamic_cast<StjEEMCNull*>(imp->EEMC())  );
 
-  StJetBEMCEnergyCut* bemcCut = imp->getBEMCEnergyCut();
-  StJetBEMCEnergyCut::CutList bemcCutList = bemcCut->getCutList();
+  StjTowerEnergyListCut* bemcCut = imp->getBEMCEnergyCut();
+  StjTowerEnergyListCut::CutList bemcCutList = bemcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)4, bemcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutBemcWestOnly*>(bemcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutEnergy*>(bemcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutBemcStatus*>(bemcCutList[2])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutAdc*>(bemcCutList[3])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcWestOnly*>(bemcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutEnergy*>(bemcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcStatus*>(bemcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutAdc*>(bemcCutList[3])     );
 
-  StJetTPCTrackCut* tpcCut    = imp->getTPCTrackCut();
-  StJetTPCTrackCut::CutList tpcCutList = tpcCut->getCutList();
+  StjTrackListCut* tpcCut    = imp->getTPCTrackCut();
+  StjTrackListCut::CutList tpcCutList = tpcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)3, tpcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutDca*>(tpcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutEta*>(tpcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutPossibleHitRatio*>(tpcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutDca*>(tpcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutEta*>(tpcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutPossibleHitRatio*>(tpcCutList[2])     );
 
   delete imp;
  }
@@ -141,25 +141,25 @@ void StBET4pMakerImpBuilderTest::test2003()
   imp->Init();
 
 
-  CPPUNIT_ASSERT(  dynamic_cast<StJetTPCMuDst*>(imp->TPC())   );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetBEMCMuDst*>(imp->BEMC()) );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetEEMCMuDst*>(imp->EEMC())  );
+  CPPUNIT_ASSERT(  dynamic_cast<StjTPCMuDst*>(imp->TPC())   );
+  CPPUNIT_ASSERT(  dynamic_cast<StjBEMCMuDst*>(imp->BEMC()) );
+  CPPUNIT_ASSERT(  dynamic_cast<StjEEMCMuDst*>(imp->EEMC())  );
 
-  StJetBEMCEnergyCut* bemcCut = imp->getBEMCEnergyCut();
-  StJetBEMCEnergyCut::CutList bemcCutList = bemcCut->getCutList();
+  StjTowerEnergyListCut* bemcCut = imp->getBEMCEnergyCut();
+  StjTowerEnergyListCut::CutList bemcCutList = bemcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)3, bemcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutEnergy*>(bemcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutBemcStatus*>(bemcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutAdc*>(bemcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutEnergy*>(bemcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcStatus*>(bemcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutAdc*>(bemcCutList[2])     );
 
 
-  StJetTPCTrackCut* tpcCut    = imp->getTPCTrackCut();
-  StJetTPCTrackCut::CutList tpcCutList = tpcCut->getCutList();
+  StjTrackListCut* tpcCut    = imp->getTPCTrackCut();
+  StjTrackListCut::CutList tpcCutList = tpcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)4, tpcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutDca*>(tpcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutDcaPtDependent*>(tpcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutEta*>(tpcCutList[2])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutPossibleHitRatio*>(tpcCutList[3])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutDca*>(tpcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutDcaPtDependent*>(tpcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutEta*>(tpcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutPossibleHitRatio*>(tpcCutList[3])     );
 
   delete imp;
  }
@@ -181,21 +181,21 @@ void StBET4pMakerImpBuilderTest::test2003()
   imp->Init();
 
 
-  CPPUNIT_ASSERT(  dynamic_cast<StJetTPCMuDst*>(imp->TPC())   );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetBEMCNull*>(imp->BEMC()) );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetEEMCMuDst*>(imp->EEMC())  );
+  CPPUNIT_ASSERT(  dynamic_cast<StjTPCMuDst*>(imp->TPC())   );
+  CPPUNIT_ASSERT(  dynamic_cast<StjBEMCNull*>(imp->BEMC()) );
+  CPPUNIT_ASSERT(  dynamic_cast<StjEEMCMuDst*>(imp->EEMC())  );
 
-  StJetBEMCEnergyCut* bemcCut = imp->getBEMCEnergyCut();
-  StJetBEMCEnergyCut::CutList bemcCutList = bemcCut->getCutList();
+  StjTowerEnergyListCut* bemcCut = imp->getBEMCEnergyCut();
+  StjTowerEnergyListCut::CutList bemcCutList = bemcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)0, bemcCutList.size() );
 
-  StJetTPCTrackCut* tpcCut    = imp->getTPCTrackCut();
-  StJetTPCTrackCut::CutList tpcCutList = tpcCut->getCutList();
+  StjTrackListCut* tpcCut    = imp->getTPCTrackCut();
+  StjTrackListCut::CutList tpcCutList = tpcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)4, tpcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutDca*>(tpcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutDcaPtDependent*>(tpcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutEta*>(tpcCutList[2])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutPossibleHitRatio*>(tpcCutList[3])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutDca*>(tpcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutDcaPtDependent*>(tpcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutEta*>(tpcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutPossibleHitRatio*>(tpcCutList[3])     );
 
   delete imp;
  }
@@ -217,20 +217,20 @@ void StBET4pMakerImpBuilderTest::test2003()
   imp->Init();
 
 
-  CPPUNIT_ASSERT(  dynamic_cast<StJetTPCNull*>(imp->TPC())   );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetBEMCMuDst*>(imp->BEMC()) );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetEEMCMuDst*>(imp->EEMC())  );
+  CPPUNIT_ASSERT(  dynamic_cast<StjTPCNull*>(imp->TPC())   );
+  CPPUNIT_ASSERT(  dynamic_cast<StjBEMCMuDst*>(imp->BEMC()) );
+  CPPUNIT_ASSERT(  dynamic_cast<StjEEMCMuDst*>(imp->EEMC())  );
 
-  StJetBEMCEnergyCut* bemcCut = imp->getBEMCEnergyCut();
-  StJetBEMCEnergyCut::CutList bemcCutList = bemcCut->getCutList();
+  StjTowerEnergyListCut* bemcCut = imp->getBEMCEnergyCut();
+  StjTowerEnergyListCut::CutList bemcCutList = bemcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)3, bemcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutEnergy*>(bemcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutBemcStatus*>(bemcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutAdc*>(bemcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutEnergy*>(bemcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcStatus*>(bemcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutAdc*>(bemcCutList[2])     );
 
 
-  StJetTPCTrackCut* tpcCut    = imp->getTPCTrackCut();
-  StJetTPCTrackCut::CutList tpcCutList = tpcCut->getCutList();
+  StjTrackListCut* tpcCut    = imp->getTPCTrackCut();
+  StjTrackListCut::CutList tpcCutList = tpcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)0, tpcCutList.size() );
 
   delete imp;
@@ -238,8 +238,8 @@ void StBET4pMakerImpBuilderTest::test2003()
 
  void StBET4pMakerImpBuilderTest::testReadTree()
  {
-   //  StJetTreeEntryMaker *maker = new StJetTreeEntryMaker("entryMaker", "/star/institutions/mit/tai/testData/jetpart_6143024.root");
-  StJetTreeEntryMaker *maker = new StJetTreeEntryMaker("entryMaker", "./jetpart_6143024.root");
+   //  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", "/star/institutions/mit/tai/testData/jetpart_6143024.root");
+  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", "./jetpart_6143024.root");
   bool         useTPC = true;
   bool        useBEMC = true;
   bool        useEEMC = false;
@@ -253,24 +253,24 @@ void StBET4pMakerImpBuilderTest::test2003()
   imp->Init();
 
 
-  CPPUNIT_ASSERT(  dynamic_cast<StJetTPCTree*>(imp->TPC())   );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetBEMCTree*>(imp->BEMC()) );
-  CPPUNIT_ASSERT(  dynamic_cast<StJetEEMCNull*>(imp->EEMC())  );
+  CPPUNIT_ASSERT(  dynamic_cast<StjTPCTree*>(imp->TPC())   );
+  CPPUNIT_ASSERT(  dynamic_cast<StjBEMCTree*>(imp->BEMC()) );
+  CPPUNIT_ASSERT(  dynamic_cast<StjEEMCNull*>(imp->EEMC())  );
 
-  StJetBEMCEnergyCut* bemcCut = imp->getBEMCEnergyCut();
-  StJetBEMCEnergyCut::CutList bemcCutList = bemcCut->getCutList();
+  StjTowerEnergyListCut* bemcCut = imp->getBEMCEnergyCut();
+  StjTowerEnergyListCut::CutList bemcCutList = bemcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)4, bemcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutBemcWestOnly*>(bemcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutEnergy*>(bemcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutBemcStatus*>(bemcCutList[2])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TowerEnergyCutAdc*>(bemcCutList[3])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcWestOnly*>(bemcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutEnergy*>(bemcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcStatus*>(bemcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutAdc*>(bemcCutList[3])     );
 
-  StJetTPCTrackCut* tpcCut    = imp->getTPCTrackCut();
-  StJetTPCTrackCut::CutList tpcCutList = tpcCut->getCutList();
+  StjTrackListCut* tpcCut    = imp->getTPCTrackCut();
+  StjTrackListCut::CutList tpcCutList = tpcCut->getCutList();
   CPPUNIT_ASSERT_EQUAL( (size_t)3, tpcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutDca*>(tpcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutEta*>(tpcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<TrackCutPossibleHitRatio*>(tpcCutList[2])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutDca*>(tpcCutList[0])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutEta*>(tpcCutList[1])     );
+  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutPossibleHitRatio*>(tpcCutList[2])     );
 
   delete imp;
  }

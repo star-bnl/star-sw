@@ -1,18 +1,18 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCut.h,v 1.1 2008/08/02 04:16:18 tai Exp $
+// $Id: StjTrackCut.h,v 1.2 2008/08/02 19:22:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKCUT_H
 #define TRACKCUT_H
 
 namespace StJetTrackCut {
 
-class TrackCut {
+class StjTrackCut {
 
 public:
-  TrackCut() { }
-  virtual ~TrackCut() { }
+  StjTrackCut() { }
+  virtual ~StjTrackCut() { }
 
-  virtual bool operator()(const StSpinJet::Track& track) = 0;
+  virtual bool operator()(const StSpinJet::StjTrack& track) = 0;
 
 };
 

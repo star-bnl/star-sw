@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutPt.h,v 1.1 2008/08/02 04:15:26 tai Exp $
+// $Id: StjJetCutPt.h,v 1.2 2008/08/02 19:22:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef JETCUTPT_H
 #define JETCUTPT_H
@@ -8,14 +8,14 @@
 
 namespace StJetJetCut {
 
-class JetCutPt : public JetCut {
+class StjJetCutPt : public StjJetCut {
 
 public:
-  JetCutPt(double min = 0, double max = std::numeric_limits<double>::max())
+  StjJetCutPt(double min = 0, double max = std::numeric_limits<double>::max())
     : _min(min), _max(max) { }
-  virtual ~JetCutPt() { }
+  virtual ~StjJetCutPt() { }
 
-  bool operator()(const StSpinJet::Jet& jet)
+  bool operator()(const StSpinJet::StjJet& jet)
   {
     if(jet.pt <= _min) return true;
 

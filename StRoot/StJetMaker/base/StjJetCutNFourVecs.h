@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutNFourVecs.h,v 1.1 2008/08/02 04:15:25 tai Exp $
+// $Id: StjJetCutNFourVecs.h,v 1.2 2008/08/02 19:22:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef JETCUTNFOURVECS_H
 #define JETCUTNFOURVECS_H
@@ -8,14 +8,14 @@
 
 namespace StJetJetCut {
 
-class JetCutNFourVecs : public JetCut {
+class StjJetCutNFourVecs : public StjJetCut {
 
 public:
-  JetCutNFourVecs(size_t min = 0, size_t max = std::numeric_limits<size_t>::max())
+  StjJetCutNFourVecs(size_t min = 0, size_t max = std::numeric_limits<size_t>::max())
     :_min(min), _max(max) { }
-  virtual ~JetCutNFourVecs() { }
+  virtual ~StjJetCutNFourVecs() { }
 
-  bool operator()(const StSpinJet::Jet& jet)
+  bool operator()(const StSpinJet::StjJet& jet)
   {
     if(jet.fourVecList.size() < _min) return true;
 

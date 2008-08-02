@@ -4,9 +4,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class StJetTPCTrackCutTest : public CPPUNIT_NS::TestFixture
+class StjTrackListCutTest : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( StJetTPCTrackCutTest );
+  CPPUNIT_TEST_SUITE( StjTrackListCutTest );
   CPPUNIT_TEST( testNHits );
   CPPUNIT_TEST( testFlag );
   CPPUNIT_TEST( test2005 );

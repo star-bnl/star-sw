@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.1 2008/08/02 04:19:26 tai Exp $
+// $Id: StjTPCMuDst.cxx,v 1.2 2008/08/02 19:23:20 tai Exp $
 #include "StjTPCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
@@ -13,15 +13,15 @@
 
 namespace StSpinJet {
 
-StJetTPCMuDst::StJetTPCMuDst(StMuDstMaker* uDstMaker)
+StjTPCMuDst::StjTPCMuDst(StMuDstMaker* uDstMaker)
   : _uDstMaker(uDstMaker)
 {
 
 }
 
-TrackList StJetTPCMuDst::getTrackList()
+StjTrackList StjTPCMuDst::getTrackList()
 {
-  TrackList ret;
+  StjTrackList ret;
 
   StMuDst* uDst = _uDstMaker->muDst();
 
@@ -35,7 +35,7 @@ TrackList StJetTPCMuDst::getTrackList()
 
     if(mutrack->topologyMap().trackFtpcEast() || mutrack->topologyMap().trackFtpcWest()) continue;
 
-    Track track = createTrack(mutrack, i, magneticField);
+    StjTrack track = createTrack(mutrack, i, magneticField);
 
     ret.push_back(track);
   }
@@ -43,9 +43,9 @@ TrackList StJetTPCMuDst::getTrackList()
   return ret;
 }
 
-Track StJetTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magneticField)
+StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magneticField)
 {
-  Track track;
+  StjTrack track;
 
   track.runNumber = _uDstMaker->muDst()->event()->runId();
   track.eventId = _uDstMaker->muDst()->event()->eventId();

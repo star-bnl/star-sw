@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCMuDst.h,v 1.1 2008/08/02 04:19:25 tai Exp $
+// $Id: StjMCMuDst.h,v 1.2 2008/08/02 19:23:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETMCMUDST_H
 #define STJETMCMUDST_H
@@ -10,14 +10,14 @@ class StMaker;
 
 namespace StSpinJet {
 
-class StJetMCMuDst : public StJetMC {
+class StjMCMuDst : public StjMC {
 
 public:
 
-  StJetMCMuDst(StMaker* maker) : _maker(maker) { }
-  virtual ~StJetMCMuDst() { }
+  StjMCMuDst(StMaker* maker) : _maker(maker) { }
+  virtual ~StjMCMuDst() { }
 
-  MCParticleList getMCPartilceList();
+  StjMCParticleList getMCPartilceList();
 
 private:
 

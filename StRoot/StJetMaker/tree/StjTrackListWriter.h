@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListWriter.h,v 1.1 2008/08/02 04:22:22 tai Exp $
+// $Id: StjTrackListWriter.h,v 1.2 2008/08/02 19:23:39 tai Exp $
 #ifndef STJETTRACKLISTWRITER_HH
 #define STJETTRACKLISTWRITER_HH
 
@@ -9,14 +9,14 @@
 class TDirectory;
 class TTree;
 
-class StJetTrackListWriter {
+class StjTrackListWriter {
 
 public:
 
-  StJetTrackListWriter(const char* treeName, TDirectory* file);
-  virtual ~StJetTrackListWriter() { }
+  StjTrackListWriter(const char* treeName, TDirectory* file);
+  virtual ~StjTrackListWriter() { }
 
-  void Fill(const StSpinJet::TrackList& theList);
+  void Fill(const StSpinJet::StjTrackList& theList);
   void Finish();
     
 private:

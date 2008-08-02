@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMC.h,v 1.1 2008/08/02 04:15:33 tai Exp $
+// $Id: StjMC.h,v 1.2 2008/08/02 19:22:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETMC_H
 #define STJETMC_H
@@ -8,27 +8,27 @@
 
 namespace StSpinJet {
 
-class StJetMC {
+class StjMC {
 
 public:
-  StJetMC() { }
-  virtual ~StJetMC() { }
+  StjMC() { }
+  virtual ~StjMC() { }
 
   virtual void Init() { }
 
-  virtual MCParticleList getMCPartilceList() = 0;
+  virtual StjMCParticleList getMCPartilceList() = 0;
 };
 
 
-class StJetMCNull : public StJetMC {
+class StjMCNull : public StjMC {
 
 public:
-  StJetMCNull() { }
-  virtual ~StJetMCNull() { }
+  StjMCNull() { }
+  virtual ~StjMCNull() { }
 
   void Init() { }
 
-  MCParticleList getMCPartilceList() { return MCParticleList(); }
+  StjMCParticleList getMCPartilceList() { return StjMCParticleList(); }
 };
 
 }

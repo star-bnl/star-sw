@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.12 2008/08/02 03:57:25 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.13 2008/08/02 19:22:25 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -72,7 +72,7 @@ using namespace StJetJetCut;
 
 ClassImp(StJetMakerII)
   
-StJetMakerII::StJetMakerII(const Char_t *name, TDirectory* file, StJetTreeEntryMaker* entryMaker) 
+StJetMakerII::StJetMakerII(const Char_t *name, TDirectory* file, StjTreeEntryMaker* entryMaker) 
   : StMaker(name)
   , _file(file)
   , _entryMaker(entryMaker)
@@ -88,41 +88,41 @@ StJetMakerII::~StJetMakerII()
 
 Int_t StJetMakerII::Init() 
 {
-  StJetTreeEntryCoordinator* coord = _entryMaker->coordinator();
+  StjTreeEntryCoordinator* coord = _entryMaker->coordinator();
   TTree *treeTpc = dynamic_cast<TTree*>(coord->file()->Get("tpcTracks"));
-  _tpc = new StJetTPCTree(treeTpc, coord->indexMajor(), coord->indexMinor());
+  _tpc = new StjTPCTree(treeTpc, coord->indexMajor(), coord->indexMinor());
 
   TTree *treeBemc = dynamic_cast<TTree*>(coord->file()->Get("bemcTowers"));
-  _bemc = new StJetBEMCTree(treeBemc, coord->indexMajor(), coord->indexMinor());
+  _bemc = new StjBEMCTree(treeBemc, coord->indexMajor(), coord->indexMinor());
 
-  _tpcCut1  = new StJetTPCTrackCut();
-  _tpcCut1->addCut(new TrackCutDca(3.0));
-  _tpcCut1->addCut(new TrackCutEta(-2.0, 2.0));
-  _tpcCut1->addCut(new TrackCutPossibleHitRatio(0.51));
+  _tpcCut1  = new StjTrackListCut();
+  _tpcCut1->addCut(new StjTrackCutDca(3.0));
+  _tpcCut1->addCut(new StjTrackCutEta(-2.0, 2.0));
+  _tpcCut1->addCut(new StjTrackCutPossibleHitRatio(0.51));
 
-  _bemcCut1 = new StJetBEMCEnergyCut();
-  _bemcCut1->addCut(new TowerEnergyCutBemcWestOnly());
-  _bemcCut1->addCut(new TowerEnergyCutEnergy(0.0));
-  _bemcCut1->addCut(new TowerEnergyCutBemcStatus(1));
-  _bemcCut1->addCut(new TowerEnergyCutAdc(0, 2.0));
+  _bemcCut1 = new StjTowerEnergyListCut();
+  _bemcCut1->addCut(new StjTowerEnergyCutBemcWestOnly());
+  _bemcCut1->addCut(new StjTowerEnergyCutEnergy(0.0));
+  _bemcCut1->addCut(new StjTowerEnergyCutBemcStatus(1));
+  _bemcCut1->addCut(new StjTowerEnergyCutAdc(0, 2.0));
 
-  _towerEnergyCorrectionForTracks = new CorrectTowerEnergyForTracks();
+  _towerEnergyCorrectionForTracks = new StjTowerEnergyCorrectionForTracks();
 
-  _tpcCut2  = new StJetTPCTrackCut();
-  _tpcCut2->addCut(new TrackCutFlag(0));
-  _tpcCut2->addCut(new TrackCutNHits(20));
+  _tpcCut2  = new StjTrackListCut();
+  _tpcCut2->addCut(new StjTrackCutFlag(0));
+  _tpcCut2->addCut(new StjTrackCutNHits(20));
 
-  _bemcCut2 = new StJetBEMCEnergyCut();
-  _bemcCut2->addCut(new TowerEnergyCutEnergy(0.0));
+  _bemcCut2 = new StjTowerEnergyListCut();
+  _bemcCut2->addCut(new StjTowerEnergyCutEnergy(0.0));
 
-  _energyVariationNull    = new StJetTowerEnergyVariation(0);
-  _energyVariationPlus5   = new StJetTowerEnergyVariation(0.05);
-  _energyVariationMinus5  = new StJetTowerEnergyVariation(-0.05);
-  _energyVariationPlus10  = new StJetTowerEnergyVariation(0.1);
-  _energyVariationMinus10 = new StJetTowerEnergyVariation(-0.1);
+  _energyVariationNull    = new StjTowerEnergyVariation(0);
+  _energyVariationPlus5   = new StjTowerEnergyVariation(0.05);
+  _energyVariationMinus5  = new StjTowerEnergyVariation(-0.05);
+  _energyVariationPlus10  = new StjTowerEnergyVariation(0.1);
+  _energyVariationMinus10 = new StjTowerEnergyVariation(-0.1);
 
-  _fourCut = new StJetFourVecListCut;
-  _fourCut->addCut(new FourVecCutPt(0.2));
+  _fourCut = new StjFourVecListCut;
+  _fourCut->addCut(new StjFourVecCutPt(0.2));
 
   StConePars* cpars = new StConePars();
   cpars->setGridSpacing(56, -1.6, 1.6, 120, -3.141592613589793, 3.141592613589793);
@@ -138,35 +138,35 @@ Int_t StJetMakerII::Init()
   _jetFinder = new RunJetFinder(cpars);
   _jetFinder->Init();
 
-  _jetCut = new StJetJetListCut();
-  _jetCut->addCut(new JetCutPt(5.0));
+  _jetCut = new StjJetListCut();
+  _jetCut->addCut(new StjJetCutPt(5.0));
 
-  _jetTreeWriter0 = new StJetJetListWriter("jets", "four", _file);
-  _jetTreeWriterP5 = new StJetJetListWriter("jetsP5", "fourP5", _file);
-  _jetTreeWriterM5 = new StJetJetListWriter("jetsM5", "fourM5", _file);
-  _jetTreeWriterP10 = new StJetJetListWriter("jetsP10", "fourP10", _file);
-  _jetTreeWriterM10 = new StJetJetListWriter("jetsM10", "fourM10", _file);
+  _jetTreeWriter0 = new StjJetListWriter("jets", "four", _file);
+  _jetTreeWriterP5 = new StjJetListWriter("jetsP5", "fourP5", _file);
+  _jetTreeWriterM5 = new StjJetListWriter("jetsM5", "fourM5", _file);
+  _jetTreeWriterP10 = new StjJetListWriter("jetsP10", "fourP10", _file);
+  _jetTreeWriterM10 = new StjJetListWriter("jetsM10", "fourM10", _file);
 
   return kStOk;
 }
 
 Int_t StJetMakerII::Make()
 {
-  TrackList trackList = _tpc->getTrackList();
-  TowerEnergyList energyList = _bemc->getEnergyList();
+  StjTrackList trackList = _tpc->getTrackList();
+  StjTowerEnergyList energyList = _bemc->getEnergyList();
 
-  StJetTowerEnergyPrint printEnergy;
+  StjTowerEnergyPrint printEnergy;
 
   trackList = (*_tpcCut1)(trackList);
   energyList = (*_bemcCut1)(energyList);
 
   //  printEnergy(energyList);
 
-  TowerEnergyList energyList0 = (*_energyVariationNull)(energyList);
-  TowerEnergyList energyListP5 = (*_energyVariationPlus5)(energyList);
-  TowerEnergyList energyListM5 = (*_energyVariationMinus5)(energyList);
-  TowerEnergyList energyListP10 = (*_energyVariationPlus10)(energyList);
-  TowerEnergyList energyListM10 = (*_energyVariationMinus10)(energyList);
+  StjTowerEnergyList energyList0 = (*_energyVariationNull)(energyList);
+  StjTowerEnergyList energyListP5 = (*_energyVariationPlus5)(energyList);
+  StjTowerEnergyList energyListM5 = (*_energyVariationMinus5)(energyList);
+  StjTowerEnergyList energyListP10 = (*_energyVariationPlus10)(energyList);
+  StjTowerEnergyList energyListM10 = (*_energyVariationMinus10)(energyList);
 
   energyList0 = (*_towerEnergyCorrectionForTracks)(energyList0, trackList);
   energyListP5 = (*_towerEnergyCorrectionForTracks)(energyListP5, trackList);
@@ -184,14 +184,14 @@ Int_t StJetMakerII::Make()
   energyListP10 = (*_bemcCut2)(energyListP10);
   energyListM10 = (*_bemcCut2)(energyListM10);
 
-  //  StJetTrackPrint printTrack;
+  //  StjTrackPrint printTrack;
   //  printTrack(trackList);
 
-  FourVecList fourList0 = _toP4(trackList, energyList0);
-  FourVecList fourListP5 = _toP4(trackList, energyListP5);
-  FourVecList fourListM5 = _toP4(trackList, energyListM5);
-  FourVecList fourListP10 = _toP4(trackList, energyListP10);
-  FourVecList fourListM10 = _toP4(trackList, energyListM10);
+  StjFourVecList fourList0 = _toP4(trackList, energyList0);
+  StjFourVecList fourListP5 = _toP4(trackList, energyListP5);
+  StjFourVecList fourListM5 = _toP4(trackList, energyListM5);
+  StjFourVecList fourListP10 = _toP4(trackList, energyListP10);
+  StjFourVecList fourListM10 = _toP4(trackList, energyListM10);
 
 
   fourList0 = (*_fourCut)(fourList0);
@@ -200,16 +200,16 @@ Int_t StJetMakerII::Make()
   fourListP10 = (*_fourCut)(fourListP10);
   fourListM10 = (*_fourCut)(fourListM10);
 
-  StJetFourVecPrint printFour;
+  StjFourVecPrint printFour;
   //  printFour(fourList0);
 
-  JetList jetList0 = (*_jetFinder)(fourList0);
-  JetList jetListP5 = (*_jetFinder)(fourListP5);
-  JetList jetListM5 = (*_jetFinder)(fourListM5);
-  JetList jetListP10 = (*_jetFinder)(fourListP10);
-  JetList jetListM10 = (*_jetFinder)(fourListM10);
+  StjJetList jetList0 = (*_jetFinder)(fourList0);
+  StjJetList jetListP5 = (*_jetFinder)(fourListP5);
+  StjJetList jetListM5 = (*_jetFinder)(fourListM5);
+  StjJetList jetListP10 = (*_jetFinder)(fourListP10);
+  StjJetList jetListM10 = (*_jetFinder)(fourListM10);
 
-  StJetJetPrint jetprint;
+  StjJetPrint jetprint;
   //  jetprint(jetList0);
   //  jetprint(jetListM5);
 

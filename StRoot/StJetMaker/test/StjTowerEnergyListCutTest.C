@@ -21,38 +21,38 @@ using namespace StSpinJet;
 using namespace StJetTowerEnergyCut;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StJetBEMCEnergyCutTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTowerEnergyListCutTest );
 
-void StJetBEMCEnergyCutTest::setUp()
+void StjTowerEnergyListCutTest::setUp()
 {
 
 }
 
-void StJetBEMCEnergyCutTest::tearDown()
+void StjTowerEnergyListCutTest::tearDown()
 {
 
 }
 
-void StJetBEMCEnergyCutTest::testEnergy()
+void StjTowerEnergyListCutTest::testEnergy()
 {
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-  bemcCut->addCut(new TowerEnergyCutEnergy());
+  StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
+  bemcCut->addCut(new StjTowerEnergyCutEnergy());
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
 
-  TowerEnergy energy_energyPositive;
+  StjTowerEnergy energy_energyPositive;
   energy_energyPositive.energy = 0.01;
   listIn.push_back(energy_energyPositive);
 
-  TowerEnergy energy_energyNegative;
+  StjTowerEnergy energy_energyNegative;
   energy_energyNegative.energy = -0.01;
   listIn.push_back(energy_energyNegative);
 
-  TowerEnergyList listExpected;
+  StjTowerEnergyList listExpected;
   listExpected.push_back(energy_energyPositive);
 
   // excercise
-  TowerEnergyList listActual = (*bemcCut)(listIn);
+  StjTowerEnergyList listActual = (*bemcCut)(listIn);
 
   // verify
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
@@ -60,26 +60,26 @@ void StJetBEMCEnergyCutTest::testEnergy()
   delete bemcCut;
 }
 
-void StJetBEMCEnergyCutTest::testStatus()
+void StjTowerEnergyListCutTest::testStatus()
 {
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-  bemcCut->addCut(new TowerEnergyCutBemcStatus());
+  StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
+  bemcCut->addCut(new StjTowerEnergyCutBemcStatus());
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
 
-  TowerEnergy energy_statusNotOne;
+  StjTowerEnergy energy_statusNotOne;
   energy_statusNotOne.status = 0;
   listIn.push_back(energy_statusNotOne);
 
-  TowerEnergy energy_statusOne;
+  StjTowerEnergy energy_statusOne;
   energy_statusOne.status = 1;
   listIn.push_back(energy_statusOne);
 
-  TowerEnergyList listExpected;
+  StjTowerEnergyList listExpected;
   listExpected.push_back(energy_statusOne);
 
   // excercise
-  TowerEnergyList listActual = (*bemcCut)(listIn);
+  StjTowerEnergyList listActual = (*bemcCut)(listIn);
 
   // verify
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
@@ -87,30 +87,30 @@ void StJetBEMCEnergyCutTest::testStatus()
   delete bemcCut;
 }
 
-void StJetBEMCEnergyCutTest::testAdc()
+void StjTowerEnergyListCutTest::testAdc()
 {
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-  bemcCut->addCut(new TowerEnergyCutAdc());
+  StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
+  bemcCut->addCut(new StjTowerEnergyCutAdc());
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
 
-  TowerEnergy energy1;
+  StjTowerEnergy energy1;
   energy1.pedestal = 37;
   energy1.rms = 1.04;
   energy1.adc = (unsigned int)(energy1.pedestal + ceil(2.*energy1.rms));
   listIn.push_back(energy1);
 
-  TowerEnergy energy2;
+  StjTowerEnergy energy2;
   energy2.pedestal = 37;
   energy2.rms = 1.04;
   energy2.adc = (unsigned int)(energy1.pedestal + floor(2.*energy2.rms));
   listIn.push_back(energy2);
 
-  TowerEnergyList listExpected;
+  StjTowerEnergyList listExpected;
   listExpected.push_back(energy1);
 
   // excercise
-  TowerEnergyList listActual = (*bemcCut)(listIn);
+  StjTowerEnergyList listActual = (*bemcCut)(listIn);
 
   // verify
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
@@ -118,20 +118,20 @@ void StJetBEMCEnergyCutTest::testAdc()
   delete bemcCut;
 }
 
-void StJetBEMCEnergyCutTest::testTowerId2006()
+void StjTowerEnergyListCutTest::testTowerId2006()
 {
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
+  StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
   for(size_t i = 1; i < 4801; ++i) {
-    TowerEnergy energy;
+    StjTowerEnergy energy;
     energy.detectorId = 9;
     energy.towerId = i;
     listIn.push_back(energy);
   }
 
   // excercise
-  TowerEnergyList listActual = (*bemcCut)(listIn);
+  StjTowerEnergyList listActual = (*bemcCut)(listIn);
 
   // verify
   CPPUNIT_ASSERT_EQUAL( listIn, listActual );
@@ -139,21 +139,21 @@ void StJetBEMCEnergyCutTest::testTowerId2006()
   delete bemcCut;
 }
 
-void StJetBEMCEnergyCutTest::testTowerId2005()
+void StjTowerEnergyListCutTest::testTowerId2005()
 {
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-  bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
+  StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
+  bemcCut->addCut(new StjTowerEnergyCutBemcWestOnly());
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
   for(size_t i = 1; i < 4801; ++i) {
-    TowerEnergy energy;
+    StjTowerEnergy energy;
     energy.detectorId = 9;
     energy.towerId = i;
     listIn.push_back(energy);
   }
 
   // excercise
-  TowerEnergyList listActual = (*bemcCut)(listIn);
+  StjTowerEnergyList listActual = (*bemcCut)(listIn);
 
   // verify
   CPPUNIT_ASSERT_EQUAL( (size_t)2400, listActual.size() );
@@ -164,22 +164,22 @@ void StJetBEMCEnergyCutTest::testTowerId2005()
   delete bemcCut;
 }
 
-void StJetBEMCEnergyCutTest::testTowerId2003()
+void StjTowerEnergyListCutTest::testTowerId2003()
 {
   // setup
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
-  bemcCut->addCut(new TowerEnergyCut2003BemcTower());
+  StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
+  bemcCut->addCut(new StjTowerEnergyCut2003BemcTower());
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
   for(size_t i = 1; i < 4801; ++i) {
-    TowerEnergy energy;
+    StjTowerEnergy energy;
     energy.detectorId = 9;
     energy.towerId = i;
     listIn.push_back(energy);
   }
 
   // excercise
-  TowerEnergyList listActual = (*bemcCut)(listIn);
+  StjTowerEnergyList listActual = (*bemcCut)(listIn);
 
   // verify
   set<int> towerIdSetActual;
@@ -197,7 +197,7 @@ void StJetBEMCEnergyCutTest::testTowerId2003()
   delete bemcCut;
 }
 
-const int StJetBEMCEnergyCutTest::_2003TowerIdList[] = { 
+const int StjTowerEnergyListCutTest::_2003TowerIdList[] = { 
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
   25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
   46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66,
@@ -352,7 +352,7 @@ const int StJetBEMCEnergyCutTest::_2003TowerIdList[] = {
   2387, 2388, 2389, 2390, 2391, 2392, 2393, 2394, 2395, 2396, 2397, 2398, 2399, 2400
 };
 
-set<int> StJetBEMCEnergyCutTest::get2003TowerIdSet()
+set<int> StjTowerEnergyListCutTest::get2003TowerIdSet()
 {
   return set<int>(_2003TowerIdList, _2003TowerIdList + sizeof(_2003TowerIdList)/sizeof(int));
 }

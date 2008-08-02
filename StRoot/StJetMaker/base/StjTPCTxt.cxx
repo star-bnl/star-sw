@@ -1,4 +1,4 @@
-// $Id: StjTPCTxt.cxx,v 1.1 2008/08/02 04:15:45 tai Exp $
+// $Id: StjTPCTxt.cxx,v 1.2 2008/08/02 19:22:49 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTPCTxt.h"
 
@@ -12,14 +12,14 @@ using namespace std;
 
 namespace StSpinJet {
 
-StJetTPCTxt::StJetTPCTxt(const char* path)
+StjTPCTxt::StjTPCTxt(const char* path)
  : _currentEvent(-1)
  , _oldLine("")
 {
   _dataFile.open(path);
 }
 
-TrackList StJetTPCTxt::getTrackList()
+StjTrackList StjTPCTxt::getTrackList()
 {
   ++_currentEvent;
 
@@ -49,13 +49,13 @@ TrackList StJetTPCTxt::getTrackList()
     currentLines.push_back(line);
   }
 
-  TrackList ret;
+  StjTrackList ret;
 
   for(vector<string>::const_iterator it = currentLines.begin(); it != currentLines.end(); ++it) {
     istringstream ist(*it);
     long i;
 
-    Track track;
+    StjTrack track;
 
     double px, py, pz;
 

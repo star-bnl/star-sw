@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutBemcWestOnly.h,v 1.1 2008/08/02 04:15:54 tai Exp $
+// $Id: StjTowerEnergyCutBemcWestOnly.h,v 1.2 2008/08/02 19:22:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYCUTBEMCWESTONLY_H
 #define TOWERENERGYCUTBEMCWESTONLY_H
@@ -8,13 +8,13 @@
 
 namespace StJetTowerEnergyCut {
 
-class TowerEnergyCutBemcWestOnly : public TowerEnergyCut {
+class StjTowerEnergyCutBemcWestOnly : public StjTowerEnergyCut {
 
 public:
-  TowerEnergyCutBemcWestOnly() { }
-  virtual ~TowerEnergyCutBemcWestOnly() { }
+  StjTowerEnergyCutBemcWestOnly() { }
+  virtual ~StjTowerEnergyCutBemcWestOnly() { }
 
-  bool operator()(const StSpinJet::TowerEnergy& tower)
+  bool operator()(const StSpinJet::StjTowerEnergy& tower)
   {
     if(tower.detectorId != 9) return true;
 

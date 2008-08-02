@@ -4,9 +4,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class TrackListToFourListTest : public CPPUNIT_NS::TestFixture
+class StjTrackListToFourListTest : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( TrackListToFourListTest );
+  CPPUNIT_TEST_SUITE( StjTrackListToFourListTest );
   CPPUNIT_TEST( testOne );
   CPPUNIT_TEST_SUITE_END();
 

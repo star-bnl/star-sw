@@ -1,10 +1,10 @@
-// $Id: StjTrgSoftwareTriggerSimuMakerFactory.cxx,v 1.1 2008/08/02 04:08:16 tai Exp $
+// $Id: StjTrgSoftwareTriggerSimuMakerFactory.cxx,v 1.2 2008/08/02 19:22:31 tai Exp $
 #include "StjTrgSoftwareTriggerSimuMakerFactory.h"
 
 #include "StjTrgSoftwareTriggerSimuMaker.h"
 
-StJetTrgSoftware* StJetTrgSoftwareTriggerSimuMakerFactory::create()
+StjTrgSoftware* StjTrgSoftwareTriggerSimuMakerFactory::create()
 {
-  return new StJetTrgSoftwareTriggerSimuMaker(_simuTrig);
+  return new StjTrgSoftwareTriggerSimuMaker(_simuTrig);
 }
 

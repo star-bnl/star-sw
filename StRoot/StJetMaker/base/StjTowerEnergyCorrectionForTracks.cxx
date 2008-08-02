@@ -1,30 +1,30 @@
-// $Id: StjTowerEnergyCorrectionForTracks.cxx,v 1.1 2008/08/02 04:15:47 tai Exp $
+// $Id: StjTowerEnergyCorrectionForTracks.cxx,v 1.2 2008/08/02 19:22:50 tai Exp $
 #include "StjTowerEnergyCorrectionForTracks.h"
 
 namespace StSpinJet {
 
-const int CorrectTowerEnergyForTracks::mNOfBemcTowers;
+const int StjTowerEnergyCorrectionForTracks::mNOfBemcTowers;
 
-TowerEnergyList CorrectTowerEnergyForTracks::operator()(const TowerEnergyList &energyDepositList, const TrackList& trackList)
+StjTowerEnergyList StjTowerEnergyCorrectionForTracks::operator()(const StjTowerEnergyList &energyDepositList, const StjTrackList& trackList)
  {
    return Do(energyDepositList, trackList);
 }
 
-TowerEnergyList CorrectTowerEnergyForTracks::Do(const TowerEnergyList &energyDepositList, const TrackList& trackList)
+StjTowerEnergyList StjTowerEnergyCorrectionForTracks::Do(const StjTowerEnergyList &energyDepositList, const StjTrackList& trackList)
 {
   for (int i = 1; i <= mNOfBemcTowers; ++i) {
     mNtracksOnTower[i] = 0;
   }
 
-  for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
+  for(StjTrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
     countTracksOnBemcTower(*track);
   }
 
-  TowerEnergyList ret;
+  StjTowerEnergyList ret;
 
-  for(TowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
+  for(StjTowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
-    TowerEnergy energyDeposit(*it);
+    StjTowerEnergy energyDeposit(*it);
 
     energyDeposit.energy = correctBemcTowerEnergyForTracks_(energyDeposit.energy, energyDeposit.towerId, energyDeposit.towerEta, energyDeposit.towerPhi);
 
@@ -36,13 +36,13 @@ TowerEnergyList CorrectTowerEnergyForTracks::Do(const TowerEnergyList &energyDep
   return ret;
 }
 
-void CorrectTowerEnergyForTracks::countTracksOnBemcTower(const Track& track)
+void StjTowerEnergyCorrectionForTracks::countTracksOnBemcTower(const StjTrack& track)
 {
   if(track.exitDetectorId == 9 && track.exitTowerId != 0)
     mNtracksOnTower[track.exitTowerId]++;
 }
 
-double CorrectTowerEnergyForTracks::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId, float eta, float phi)
+double StjTowerEnergyCorrectionForTracks::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId, float eta, float phi)
 {
     float theta=2.*atan(exp(-eta));
 

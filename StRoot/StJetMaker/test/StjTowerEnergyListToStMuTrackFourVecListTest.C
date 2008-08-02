@@ -9,24 +9,24 @@ using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( TowerEnergyListToStMuTrackFourVecListTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTowerEnergyListToStMuTrackFourVecListTest );
 
-void TowerEnergyListToStMuTrackFourVecListTest::setUp() 
+void StjTowerEnergyListToStMuTrackFourVecListTest::setUp() 
 {
 
 }
 
-void TowerEnergyListToStMuTrackFourVecListTest::tearDown() 
+void StjTowerEnergyListToStMuTrackFourVecListTest::tearDown() 
 {
 
 }
 
-void TowerEnergyListToStMuTrackFourVecListTest::testOne() 
+void StjTowerEnergyListToStMuTrackFourVecListTest::testOne() 
 {
-  TowerEnergyListToStMuTrackFourVecList etof;
-  TowerEnergyList elist;
+  StjTowerEnergyListToStMuTrackFourVecList etof;
+  StjTowerEnergyList elist;
 
-  TowerEnergy energy;
+  StjTowerEnergy energy;
   energy.energy   =  1.8530849;
   energy.towerR   =  225.40499;
   energy.towerEta =  0.8750000;

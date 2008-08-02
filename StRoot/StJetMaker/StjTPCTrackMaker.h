@@ -1,12 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTrackMaker.h,v 1.1 2008/08/02 04:05:30 tai Exp $
+// $Id: StjTPCTrackMaker.h,v 1.2 2008/08/02 19:22:27 tai Exp $
 #ifndef STJETTPCTRACKMAKER_HH
 #define STJETTPCTRACKMAKER_HH
 
 #include "StMaker.h"
 #include <Rtypes.h>
 
-class StJetTrackListWriter;
+class StjTrackListWriter;
 
 class TDirectory;
 class TTree;
@@ -14,22 +14,22 @@ class TTree;
 class StMuDstMaker;
 
 namespace StSpinJet {
-  class StJetTPC;
+  class StjTPC;
 }
 
-class StJetTPCTrackMaker : public StMaker {
+class StjTPCTrackMaker : public StMaker {
 
 public:
 
-  StJetTPCTrackMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker);
-  virtual ~StJetTPCTrackMaker() { }
+  StjTPCTrackMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker);
+  virtual ~StjTPCTrackMaker() { }
 
   Int_t Init();
   Int_t Make();
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackMaker.h,v 1.1 2008/08/02 04:05:30 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackMaker.h,v 1.2 2008/08/02 19:22:27 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -37,11 +37,11 @@ private:
 
   StMuDstMaker* _uDstMaker;
 
-  StSpinJet::StJetTPC*  _tpc;
+  StSpinJet::StjTPC*  _tpc;
 
-  StJetTrackListWriter* _writer;
+  StjTrackListWriter* _writer;
 
-  ClassDef(StJetTPCTrackMaker, 0)
+  ClassDef(StjTPCTrackMaker, 0)
 
 };
 

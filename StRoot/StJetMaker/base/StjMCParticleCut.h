@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleCut.h,v 1.1 2008/08/02 04:15:34 tai Exp $
+// $Id: StjMCParticleCut.h,v 1.2 2008/08/02 19:22:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef MCPARTICLECUT_H
 #define MCPARTICLECUT_H
@@ -8,13 +8,13 @@
 
 namespace StJetMCParticleCut {
 
-class MCParticleCut {
+class StjMCParticleCut {
 
 public:
-  MCParticleCut() { }
-  virtual ~MCParticleCut() { }
+  StjMCParticleCut() { }
+  virtual ~StjMCParticleCut() { }
 
-  virtual bool operator()(const StSpinJet::MCParticle& p4) = 0;
+  virtual bool operator()(const StSpinJet::StjMCParticle& p4) = 0;
 
 private:
 

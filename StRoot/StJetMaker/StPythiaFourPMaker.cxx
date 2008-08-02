@@ -1,4 +1,4 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.8 2008/08/02 04:03:59 tai Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.9 2008/08/02 19:22:25 tai Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
@@ -22,10 +22,10 @@ ClassImp(StPythiaFourPMaker)
 
 Int_t StPythiaFourPMaker::Init()
 {
-  _mc = new StJetMCMuDst(this);
-  _cut = new StJetMCParticleListCut();
-  _cut->addCut(new MCParticleCutStatus(1));
-  _cut->addCut(new MCParticleCutEta(-5.0, 5.0));
+  _mc = new StjMCMuDst(this);
+  _cut = new StjMCParticleListCut();
+  _cut->addCut(new StjMCParticleCutStatus(1));
+  _cut->addCut(new StjMCParticleCutEta(-5.0, 5.0));
   return kStOK;
 }
 
@@ -42,11 +42,11 @@ void StPythiaFourPMaker::Clear(Option_t* opt)
 
 Int_t StPythiaFourPMaker::Make()
 {
-  MCParticleList theList = _mc->getMCPartilceList();
+  StjMCParticleList theList = _mc->getMCPartilceList();
 
   theList = (*_cut)(theList);
 
-  for(MCParticleList::const_iterator it = theList.begin(); it != theList.end(); ++it) {
+  for(StjMCParticleList::const_iterator it = theList.begin(); it != theList.end(); ++it) {
 
     TLorentzVector p4_;
     p4_.SetPtEtaPhiM((*it).pt, (*it).eta, (*it).phi, (*it).m);

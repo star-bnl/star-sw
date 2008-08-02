@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: RunJetFinder.h,v 1.2 2008/08/02 04:18:57 tai Exp $
+// $Id: RunJetFinder.h,v 1.3 2008/08/02 19:23:14 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef RUNJETFINDER_HH
 #define RUNJETFINDER_HH
@@ -23,7 +23,7 @@ public:
 
   void Init();
 
-  JetList operator()(const FourVecList& fourList);
+  StjJetList operator()(const StjFourVecList& fourList);
 
 private:
 

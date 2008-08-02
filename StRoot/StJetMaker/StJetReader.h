@@ -50,7 +50,7 @@ public:
 	///BUG: this doesn't work with MuDst since 2005 and on...
     virtual void InitTree(TTree* tree);
 	
-	///Check if we are all ready to read the Skim and Jet trees together
+	///Check if we are all ready to read the Skim and StjJet trees together
 	int preparedForDualRead();
     
     ///Access to the StJetsMap

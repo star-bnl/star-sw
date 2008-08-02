@@ -4,9 +4,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class StJetBEMCEnergyCutTest : public CPPUNIT_NS::TestFixture
+class StjTowerEnergyListCutTest : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( StJetBEMCEnergyCutTest );
+  CPPUNIT_TEST_SUITE( StjTowerEnergyListCutTest );
   CPPUNIT_TEST( testEnergy );
   CPPUNIT_TEST( testStatus );
   CPPUNIT_TEST( testAdc );

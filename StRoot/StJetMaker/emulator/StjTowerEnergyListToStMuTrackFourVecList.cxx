@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyListToStMuTrackFourVecList.cxx,v 1.1 2008/08/02 04:18:33 tai Exp $
+// $Id: StjTowerEnergyListToStMuTrackFourVecList.cxx,v 1.2 2008/08/02 19:23:07 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyListToStMuTrackFourVecList.h"
 
@@ -8,14 +8,14 @@
 
 namespace StSpinJet {
 
-TowerEnergyListToStMuTrackFourVecList::TowerEnergyListToStMuTrackFourVecList()
-  : _energyTo4p(*(new TowerEnergyToTLorentzVector)) { }
+StjTowerEnergyListToStMuTrackFourVecList::StjTowerEnergyListToStMuTrackFourVecList()
+  : _energyTo4p(*(new StjTowerEnergyToTLorentzVector)) { }
 
-FourList TowerEnergyListToStMuTrackFourVecList::operator()(const TowerEnergyList& energyDepositList)
+FourList StjTowerEnergyListToStMuTrackFourVecList::operator()(const StjTowerEnergyList& energyDepositList)
 {
   FourList ret;
 
-  for(TowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
+  for(StjTowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it) {
 
     TLorentzVector p4 = _energyTo4p(*it);	    
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.47 2008/07/22 17:40:59 tai Exp $
+// $Id: StJetMaker.h,v 1.48 2008/08/02 19:22:24 tai Exp $
 #ifndef STJETMAKER_HH
 #define STJETMAKER_HH
 
@@ -24,7 +24,7 @@ namespace StSpinJet {
   class StJetCuts;
 }
 
-class StJetTreeWriter;
+class StjTreeWriter;
 
 class StJetMaker : public StMaker {
 
@@ -39,7 +39,7 @@ public:
     
   TTree* tree() const;
     
-  void SetTreeWriter(StJetTreeWriter *treeWriter);
+  void SetTreeWriter(StjTreeWriter *treeWriter);
 
   void addAnalyzer(const StppAnaPars*, StJetPars*, StFourPMaker*, const char* anaName);
 
@@ -54,10 +54,10 @@ public:
   jetBranchesMap& getJets() const { return _backwordCompatibility->getJets(); }
   //
 
-  StJetTreeWriter* getTreeWriter() { return _treeWriter; }
+  StjTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.47 2008/07/22 17:40:59 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.48 2008/08/02 19:22:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -69,8 +69,8 @@ private:
 
   std::map<std::string, StJets*> _stjetsMap;
 
-  StJetTreeWriter *_defaultTreeWriter;
-  StJetTreeWriter *_treeWriter;
+  StjTreeWriter *_defaultTreeWriter;
+  StjTreeWriter *_treeWriter;
 
   StSpinJet::StJetMakerBackwordCompatibility *_backwordCompatibility;
 

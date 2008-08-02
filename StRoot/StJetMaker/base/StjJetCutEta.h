@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutEta.h,v 1.1 2008/08/02 04:15:24 tai Exp $
+// $Id: StjJetCutEta.h,v 1.2 2008/08/02 19:22:45 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef JETCUTETA_H
 #define JETCUTETA_H
@@ -8,13 +8,13 @@
 
 namespace StJetJetCut {
 
-class JetCutEta : public JetCut {
+class StjJetCutEta : public StjJetCut {
 
 public:
-  JetCutEta(double min = -10.0, double max = 10.0) :_min(min), _max(max) { }
-  virtual ~JetCutEta() { }
+  StjJetCutEta(double min = -10.0, double max = 10.0) :_min(min), _max(max) { }
+  virtual ~StjJetCutEta() { }
 
-  bool operator()(const StSpinJet::Jet& jet)
+  bool operator()(const StSpinJet::StjJet& jet)
   {
     if(jet.eta < _min) return true;
 

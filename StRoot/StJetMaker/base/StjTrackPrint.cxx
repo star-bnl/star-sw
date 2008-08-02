@@ -1,4 +1,4 @@
-// $Id: StjTrackPrint.cxx,v 1.1 2008/08/02 04:16:35 tai Exp $
+// $Id: StjTrackPrint.cxx,v 1.2 2008/08/02 19:22:55 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrackPrint.h"
 
@@ -8,14 +8,14 @@ using namespace std;
 
 namespace StSpinJet {
 
-void StJetTrackPrint::operator()(const TrackList &trackList)
+void StjTrackPrint::operator()(const StjTrackList &trackList)
 {
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+  for(StjTrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     print(*it);
   }
 }
 
-void StJetTrackPrint::print(const Track& track)
+void StjTrackPrint::print(const StjTrack& track)
 {
   cout 
     << track.runNumber      << " "

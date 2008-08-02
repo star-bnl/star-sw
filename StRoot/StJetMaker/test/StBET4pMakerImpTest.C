@@ -48,20 +48,20 @@ void StBET4pMakerImpTest::tearDown()
 
 void StBET4pMakerImpTest::testGetTrackAndEnergyList_withCut() 
 {
-  tpc = new StJetTPCMock(35);
-  bemc = new StJetBEMCMock(4500);
-  eemc = new StJetEEMCMock(1000);
+  tpc = new StjTPCMock(35);
+  bemc = new StjBEMCMock(4500);
+  eemc = new StjEEMCMock(1000);
 
-  tpcCut = new StJetTPCTrackCut();
-  tpcCut->addCut(new TrackCutMock());
+  tpcCut = new StjTrackListCut();
+  tpcCut->addCut(new StjTrackCutMock());
 
-  bemcCut = new StJetBEMCEnergyCut();
-  bemcCut->addCut(new TowerEnergyCutMock());
+  bemcCut = new StjTowerEnergyListCut();
+  bemcCut->addCut(new StjTowerEnergyCutMock());
 
-  corr = new CorrectTowerEnergyForTracks();
+  corr = new StjTowerEnergyCorrectionForTracks();
   imp = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, corr, eemc);
 
-  pair<TrackList, TowerEnergyList> actual = imp->getTrackAndEnergyList();
+  pair<StjTrackList, StjTowerEnergyList> actual = imp->getTrackAndEnergyList();
   CPPUNIT_ASSERT_EQUAL( (size_t)0, actual.first.size() );
   CPPUNIT_ASSERT_EQUAL( (size_t)1000, actual.second.size() );
 
@@ -76,18 +76,18 @@ void StBET4pMakerImpTest::testGetTrackAndEnergyList_withCut()
 
 void StBET4pMakerImpTest::testGetTrackAndEnergyList_withoutCut() 
 {
-  tpc = new StJetTPCMock(35);
-  bemc = new StJetBEMCMock(4500);
-  eemc = new StJetEEMCMock(1000);
+  tpc = new StjTPCMock(35);
+  bemc = new StjBEMCMock(4500);
+  eemc = new StjEEMCMock(1000);
 
-  tpcCut = new StJetTPCTrackCut();
+  tpcCut = new StjTrackListCut();
 
-  bemcCut = new StJetBEMCEnergyCut();
+  bemcCut = new StjTowerEnergyListCut();
 
-  corr = new CorrectTowerEnergyForTracks();
+  corr = new StjTowerEnergyCorrectionForTracks();
   imp = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, corr, eemc);
 
-  pair<TrackList, TowerEnergyList> actual = imp->getTrackAndEnergyList();
+  pair<StjTrackList, StjTowerEnergyList> actual = imp->getTrackAndEnergyList();
   CPPUNIT_ASSERT_EQUAL( (size_t)35, actual.first.size() );
   CPPUNIT_ASSERT_EQUAL( (size_t)5500, actual.second.size() );
 

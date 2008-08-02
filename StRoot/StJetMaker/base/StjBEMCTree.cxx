@@ -1,4 +1,4 @@
-// $Id: StjBEMCTree.cxx,v 1.1 2008/08/02 04:15:10 tai Exp $
+// $Id: StjBEMCTree.cxx,v 1.2 2008/08/02 19:22:41 tai Exp $
 #include "StjBEMCTree.h"
 
 #include "StjTowerEnergyListReader.h"
@@ -7,7 +7,7 @@
 
 namespace StSpinJet {
 
-StJetBEMCTree::StJetBEMCTree(TTree *tree,
+StjBEMCTree::StjBEMCTree(TTree *tree,
 			       const Int_t& indexMajor, const Int_t& indexMinor,
 			       const char* indexMajorName, const char* indexMinorName
 			       )
@@ -15,11 +15,11 @@ StJetBEMCTree::StJetBEMCTree(TTree *tree,
  , _indexMajor(indexMajor), _indexMinor(indexMinor)
  {
   _tree->BuildIndex(indexMajorName, indexMinorName);
-  _reader = new StJetTowerEnergyListReader(_tree);
+  _reader = new StjTowerEnergyListReader(_tree);
  }
 
 
-TowerEnergyList StJetBEMCTree::getEnergyList()
+StjTowerEnergyList StjBEMCTree::getEnergyList()
 {
   Long64_t entry = _tree->GetEntryNumberWithIndex(_indexMajor, _indexMinor);
   return _reader->GetEntry(entry);

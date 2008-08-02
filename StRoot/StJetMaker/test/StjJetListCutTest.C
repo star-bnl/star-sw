@@ -19,92 +19,92 @@ using namespace StSpinJet;
 using namespace StJetJetCut;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StJetJetListCutTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjJetListCutTest );
 
-void StJetJetListCutTest::setUp()
+void StjJetListCutTest::setUp()
 {
 
 }
 
-void StJetJetListCutTest::tearDown()
+void StjJetListCutTest::tearDown()
 {
 
 }
 
-void StJetJetListCutTest::testPt()
+void StjJetListCutTest::testPt()
 {
-  StJetJetListCut* cut = new StJetJetListCut();
-  cut->addCut(new JetCutPt(5.0));
+  StjJetListCut* cut = new StjJetListCut();
+  cut->addCut(new StjJetCutPt(5.0));
 
-  JetList listIn;
+  StjJetList listIn;
 
-  Jet p1;
+  StjJet p1;
   p1.pt = 4.8;
   listIn.push_back(p1);
 
-  Jet p2;
+  StjJet p2;
   p2.pt = 5.1;
   listIn.push_back(p2);
 
-  JetList listExpected;
+  StjJetList listExpected;
   listExpected.push_back(p2);
 
-  JetList listActual = (*cut)(listIn);
+  StjJetList listActual = (*cut)(listIn);
 
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
 
   delete cut;
 }
 
-void StJetJetListCutTest::testEta()
+void StjJetListCutTest::testEta()
 {
-  StJetJetListCut* cut = new StJetJetListCut();
-  cut->addCut(new JetCutEta(-5.0, 5.0));
+  StjJetListCut* cut = new StjJetListCut();
+  cut->addCut(new StjJetCutEta(-5.0, 5.0));
 
-  JetList listIn;
+  StjJetList listIn;
 
-  Jet p1;
+  StjJet p1;
   p1.eta = 4.8;
   listIn.push_back(p1);
 
-  Jet p2;
+  StjJet p2;
   p2.eta = 5.1;
   listIn.push_back(p2);
 
-  JetList listExpected;
+  StjJetList listExpected;
   listExpected.push_back(p1);
 
-  JetList listActual = (*cut)(listIn);
+  StjJetList listActual = (*cut)(listIn);
 
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
 
   delete cut;
 }
 
-void StJetJetListCutTest::testNFourVecs()
+void StjJetListCutTest::testNFourVecs()
 {
-  StJetJetListCut* cut = new StJetJetListCut();
-  cut->addCut(new JetCutNFourVecs(4));
+  StjJetListCut* cut = new StjJetListCut();
+  cut->addCut(new StjJetCutNFourVecs(4));
 
-  JetList listIn;
+  StjJetList listIn;
 
-  Jet p1;
-  p1.fourVecList.push_back(FourVec());
-  p1.fourVecList.push_back(FourVec());
-  p1.fourVecList.push_back(FourVec());
+  StjJet p1;
+  p1.fourVecList.push_back(StjFourVec());
+  p1.fourVecList.push_back(StjFourVec());
+  p1.fourVecList.push_back(StjFourVec());
   listIn.push_back(p1);
 
-  Jet p2;
-  p2.fourVecList.push_back(FourVec());
-  p2.fourVecList.push_back(FourVec());
-  p2.fourVecList.push_back(FourVec());
-  p2.fourVecList.push_back(FourVec());
+  StjJet p2;
+  p2.fourVecList.push_back(StjFourVec());
+  p2.fourVecList.push_back(StjFourVec());
+  p2.fourVecList.push_back(StjFourVec());
+  p2.fourVecList.push_back(StjFourVec());
   listIn.push_back(p2);
 
-  JetList listExpected;
+  StjJetList listExpected;
   listExpected.push_back(p2);
 
-  JetList listActual = (*cut)(listIn);
+  StjJetList listActual = (*cut)(listIn);
 
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
 

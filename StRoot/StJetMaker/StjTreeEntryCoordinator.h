@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryCoordinator.h,v 1.1 2008/08/02 04:05:49 tai Exp $
+// $Id: StjTreeEntryCoordinator.h,v 1.2 2008/08/02 19:22:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTREEENTRYCOORDINATOR_H
 #define STJETTREEENTRYCOORDINATOR_H
@@ -12,17 +12,17 @@
 
 class TDirectory;
 
-class StJetTreeEntryCoordinator {
+class StjTreeEntryCoordinator {
 
 public:
-  StJetTreeEntryCoordinator(TDirectory* file) 
+  StjTreeEntryCoordinator(TDirectory* file) 
     : _indexMajorName("runNumber")
     , _indexMinorName("eventId")
     , _file(file)
     , _eof(false)
   { }
 
-  virtual ~StJetTreeEntryCoordinator() { }
+  virtual ~StjTreeEntryCoordinator() { }
 
   void Init();
   void Make();

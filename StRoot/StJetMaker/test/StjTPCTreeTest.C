@@ -11,19 +11,19 @@ using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StJetTPCTreeTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTPCTreeTest );
 
-void StJetTPCTreeTest::setUp()
+void StjTPCTreeTest::setUp()
 {
 
 }
 
-void StJetTPCTreeTest::tearDown()
+void StjTPCTreeTest::tearDown()
 {
 
 }
 
-void StJetTPCTreeTest::testGetEntry() 
+void StjTPCTreeTest::testGetEntry() 
 {
   //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
   TFile* file = new TFile("./jetpart_6143024.root");
@@ -32,10 +32,10 @@ void StJetTPCTreeTest::testGetEntry()
 
   Int_t runNumber = 6143024;
   Int_t evenId;
-  StJetTPCTree* tpc = new StJetTPCTree(tree, runNumber, evenId);
+  StjTPCTree* tpc = new StjTPCTree(tree, runNumber, evenId);
 
   evenId = 38;
-  TrackList trackList = tpc->getTrackList();
+  StjTrackList trackList = tpc->getTrackList();
   CPPUNIT_ASSERT_EQUAL( (size_t)13, trackList.size() );
   CPPUNIT_ASSERT_EQUAL((Short_t) 87, trackList[0].id );
   CPPUNIT_ASSERT_EQUAL((Short_t) 80, trackList[1].id );

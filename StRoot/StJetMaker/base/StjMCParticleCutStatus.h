@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleCutStatus.h,v 1.1 2008/08/02 04:15:36 tai Exp $
+// $Id: StjMCParticleCutStatus.h,v 1.2 2008/08/02 19:22:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef MCPARTICLECUTSTATUS_H
 #define MCPARTICLECUTSTATUS_H
@@ -10,16 +10,16 @@
 
 namespace StJetMCParticleCut {
 
-class MCParticleCutStatus : public MCParticleCut {
+class StjMCParticleCutStatus : public StjMCParticleCut {
 
 public:
-  MCParticleCutStatus(int goodStatus = 1)
+  StjMCParticleCutStatus(int goodStatus = 1)
     : _goodStatusSet(&goodStatus, &goodStatus + 1) { }
-  MCParticleCutStatus(int nGoodStatuses, int* goodStatuses)
+  StjMCParticleCutStatus(int nGoodStatuses, int* goodStatuses)
     : _goodStatusSet(goodStatuses, goodStatuses + nGoodStatuses) { }
-  virtual ~MCParticleCutStatus() { }
+  virtual ~StjMCParticleCutStatus() { }
 
-  bool operator()(const StSpinJet::MCParticle& p4)
+  bool operator()(const StSpinJet::StjMCParticle& p4)
   {
     if( _goodStatusSet.count(p4.status) == 0 ) return true;
 

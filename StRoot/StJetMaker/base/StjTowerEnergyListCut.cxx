@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyListCut.cxx,v 1.1 2008/08/02 04:15:58 tai Exp $
+// $Id: StjTowerEnergyListCut.cxx,v 1.2 2008/08/02 19:22:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyListCut.h"
 
@@ -7,11 +7,11 @@ using namespace std;
 namespace StSpinJet {
 
 
-StSpinJet::TowerEnergyList StJetBEMCEnergyCut::operator()(const TowerEnergyList &energyList)
+StSpinJet::StjTowerEnergyList StjTowerEnergyListCut::operator()(const StjTowerEnergyList &energyList)
 {
-  TowerEnergyList ret;
+  StjTowerEnergyList ret;
 
-  for(TowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
+  for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
 
     if(shouldNotKeep(*it)) continue;
 
@@ -23,7 +23,7 @@ StSpinJet::TowerEnergyList StJetBEMCEnergyCut::operator()(const TowerEnergyList 
 }
 
 
-bool StJetBEMCEnergyCut::shouldNotKeep(const TowerEnergy& energyDeposit)
+bool StjTowerEnergyListCut::shouldNotKeep(const StjTowerEnergy& energyDeposit)
 {
   for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
     if((**cut)(energyDeposit)) return true;

@@ -1,4 +1,4 @@
-// $Id: StjBEMCTowerMaker.cxx,v 1.1 2008/08/02 04:04:09 tai Exp $
+// $Id: StjBEMCTowerMaker.cxx,v 1.2 2008/08/02 19:22:26 tai Exp $
 #include "StjBEMCTowerMaker.h"
 
 
@@ -22,35 +22,35 @@ using namespace std;
 using namespace StSpinJet;
 using namespace StJetTowerEnergyCut;
 
-ClassImp(StJetBEMCTowerMaker)
+ClassImp(StjBEMCTowerMaker)
   
 
-StJetBEMCTowerMaker::StJetBEMCTowerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
+StjBEMCTowerMaker::StjBEMCTowerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
   : StMaker(name)
   , _file(file)
   , _uDstMaker(uDstMaker)
 { }
 
-Int_t StJetBEMCTowerMaker::Init()
+Int_t StjBEMCTowerMaker::Init()
 {
-  _bemc = new StJetBEMCMuDst(_uDstMaker, true);
-  // _bemc = new StJetBEMCNull();
-  // _bemc = new StJetBEMCTxt("./testStJetMaker/bemcenergy.txt");
+  _bemc = new StjBEMCMuDst(_uDstMaker, true);
+  // _bemc = new StjBEMCNull();
+  // _bemc = new StjBEMCTxt("./testStJetMaker/bemcenergy.txt");
 
-  _bemcCut = new StJetBEMCEnergyCut();
-  _bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
-  _bemcCut->addCut(new TowerEnergyCutEnergy());
-  _bemcCut->addCut(new TowerEnergyCutBemcStatus());
-  _bemcCut->addCut(new TowerEnergyCutAdc());
+  _bemcCut = new StjTowerEnergyListCut();
+  _bemcCut->addCut(new StjTowerEnergyCutBemcWestOnly());
+  _bemcCut->addCut(new StjTowerEnergyCutEnergy());
+  _bemcCut->addCut(new StjTowerEnergyCutBemcStatus());
+  _bemcCut->addCut(new StjTowerEnergyCutAdc());
 
-  _writer = new StJetTowerEnergyListWriter("bemcTowers", _file);
+  _writer = new StjTowerEnergyListWriter("bemcTowers", _file);
 
   return kStOk;
 }
 
-Int_t StJetBEMCTowerMaker::Make()
+Int_t StjBEMCTowerMaker::Make()
 {
-  TowerEnergyList energyList = _bemc->getEnergyList();
+  StjTowerEnergyList energyList = _bemc->getEnergyList();
 
   energyList = (*_bemcCut)(energyList);
 
@@ -60,7 +60,7 @@ Int_t StJetBEMCTowerMaker::Make()
 
 }
 
-Int_t StJetBEMCTowerMaker::Finish()
+Int_t StjBEMCTowerMaker::Finish()
 {
   _writer->Finish();
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackToFourVec.h,v 1.1 2008/08/02 04:16:38 tai Exp $
+// $Id: StjTrackToFourVec.h,v 1.2 2008/08/02 19:22:55 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKTOFOURVEC_H
 #define TRACKTOFOURVEC_H
@@ -10,17 +10,17 @@
 
 namespace StSpinJet {
 
-class Track;
+class StjTrack;
 
-class TrackToFourVec {
+class StjTrackToFourVec {
 public:
-  TrackToFourVec(double mass = 0.1395700 /* pion mass as default */)
-    : _track2tlorentzvector(*(new TrackToTLorentzVector(mass))) { }
-  virtual ~TrackToFourVec() { delete &_track2tlorentzvector; }
-  FourVec operator()(const Track& track);
+  StjTrackToFourVec(double mass = 0.1395700 /* pion mass as default */)
+    : _track2tlorentzvector(*(new StjTrackToTLorentzVector(mass))) { }
+  virtual ~StjTrackToFourVec() { delete &_track2tlorentzvector; }
+  StjFourVec operator()(const StjTrack& track);
 
 private:
-  TrackToTLorentzVector& _track2tlorentzvector;
+  StjTrackToTLorentzVector& _track2tlorentzvector;
 };
 
 }

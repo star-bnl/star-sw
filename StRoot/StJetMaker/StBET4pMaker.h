@@ -1,22 +1,22 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.2 2008/07/21 22:15:36 tai Exp $
+// $Id: StBET4pMaker.h,v 1.3 2008/08/02 19:22:24 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
 #include "StFourPMaker.h"
 
 class StMuDstMaker;
-class StJetTreeEntryMaker;
+class StjTreeEntryMaker;
 class StBET4pMakerImp;
 
 namespace StSpinJet {
 
-class BemcEnergySumCalculator;
+class StjeBemcEnergySumCalculator;
 
-class StJetTPCTrackCut;
-class StJetBEMCEnergyCut;
-class TrackListToStMuTrackFourVecList;
-class TowerEnergyListToStMuTrackFourVecList;
+class StjTrackListCut;
+class StjTowerEnergyListCut;
+class StjTrackListToStMuTrackFourVecList;
+class StjTowerEnergyListToStMuTrackFourVecList;
 
 }
 
@@ -25,7 +25,7 @@ class StBET4pMaker : public StFourPMaker {
 public:
     
   StBET4pMaker(const char* name, StMuDstMaker* maker, bool doTowerSwapFix = true);
-  StBET4pMaker(const char* name, StJetTreeEntryMaker* maker);
+  StBET4pMaker(const char* name, StjTreeEntryMaker* maker);
     
   virtual ~StBET4pMaker() {};
     
@@ -54,11 +54,11 @@ public:
   bool useTree() const { return _useTree; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.2 2008/07/21 22:15:36 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.3 2008/08/02 19:22:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
-  StJetTreeEntryMaker* _entryMaker;
+  StjTreeEntryMaker* _entryMaker;
 
   StMuDstMaker* _uDstMaker;
   bool _doTowerSwapFix;
@@ -75,10 +75,10 @@ private:
 
   StBET4pMakerImp* _imp;
 
-  StSpinJet::BemcEnergySumCalculator* _bemcEnergySumCalculator;
+  StSpinJet::StjeBemcEnergySumCalculator* _bemcEnergySumCalculator;
 
-  StSpinJet::TrackListToStMuTrackFourVecList& _track2four;
-  StSpinJet::TowerEnergyListToStMuTrackFourVecList& _energy2four;
+  StSpinJet::StjTrackListToStMuTrackFourVecList& _track2four;
+  StSpinJet::StjTowerEnergyListToStMuTrackFourVecList& _energy2four;
   FourList _tracks;
 
   bool isBemcCorrupted() const;
