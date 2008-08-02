@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjMC.h,v 1.2 2008/08/02 19:22:47 tai Exp $
+// $Id: StjMC.h,v 1.3 2008/08/02 22:43:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETMC_H
-#define STJETMC_H
+#ifndef STJMC_H
+#define STJMC_H
 
 #include <StjMCParticleList.h>
 
@@ -33,4 +33,4 @@ public:
 
 }
 
-#endif // STJETMC_H
+#endif // STJMC_H

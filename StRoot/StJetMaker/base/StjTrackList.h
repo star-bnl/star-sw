@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.2 2008/08/02 19:22:54 tai Exp $
+// $Id: StjTrackList.h,v 1.3 2008/08/02 22:43:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKLIST_H
-#define TRACKLIST_H
+#ifndef STJTRACKLIST_H
+#define STJTRACKLIST_H
 
 #include <ostream>
 #include <vector>
@@ -96,4 +96,4 @@ inline std::ostream& operator<<(std::ostream& out, const StjTrackList& v)
 
 }
 
-#endif // TRACKLIST_H
+#endif // STJTRACKLIST_H

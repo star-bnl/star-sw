@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecCutPt.h,v 1.2 2008/08/02 19:22:43 tai Exp $
+// $Id: StjFourVecCutPt.h,v 1.3 2008/08/02 22:43:16 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef FOURVECCUTPT_H
-#define FOURVECCUTPT_H
+#ifndef STJFOURVECCUTPT_H
+#define STJFOURVECCUTPT_H
 
 #include "StjFourVecCut.h"
 
@@ -32,4 +32,4 @@ private:
 
 }
 
-#endif // FOURVECCUTPT_H
+#endif // STJFOURVECCUTPT_H

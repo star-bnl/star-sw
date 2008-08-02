@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCTree.h,v 1.2 2008/08/02 19:22:41 tai Exp $
-#ifndef STJETBEMCTREE_H
-#define STJETBEMCTREE_H
+// $Id: StjBEMCTree.h,v 1.3 2008/08/02 22:43:15 tai Exp $
+#ifndef STJBEMCTREE_H
+#define STJBEMCTREE_H
 
 #include "StjBEMC.h"
 #include <Rtypes.h>
@@ -37,4 +37,4 @@ private:
 
 }
 
-#endif // STJETBEMCTREE_H
+#endif // STJBEMCTREE_H

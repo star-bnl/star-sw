@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleList.h,v 1.2 2008/08/02 19:22:48 tai Exp $
+// $Id: StjMCParticleList.h,v 1.3 2008/08/02 22:43:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef MCPARTICLELIST_H
-#define MCPARTICLELIST_H
+#ifndef STJMCPARTICLELIST_H
+#define STJMCPARTICLELIST_H
 
 #include <ostream>
 #include <vector>
@@ -73,4 +73,4 @@ inline std::ostream& operator<<(std::ostream& out, const StjMCParticleList& v)
 
 }
 
-#endif // MCPARTICLELIST_H
+#endif // STJMCPARTICLELIST_H

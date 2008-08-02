@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftware.h,v 1.1 2008/08/02 22:21:32 tai Exp $
-#ifndef STJETTRGSOFTWARE_H
-#define STJETTRGSOFTWARE_H
+// $Id: StjTrgSoftware.h,v 1.2 2008/08/02 22:43:43 tai Exp $
+#ifndef STJTRGSOFTWARE_H
+#define STJTRGSOFTWARE_H
 
 #include <vector>
 
@@ -22,4 +22,4 @@ private:
 };
 
 
-#endif // STJETTRGSOFTWARE_H
+#endif // STJTRGSOFTWARE_H

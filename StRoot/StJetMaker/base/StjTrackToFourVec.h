@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackToFourVec.h,v 1.2 2008/08/02 19:22:55 tai Exp $
+// $Id: StjTrackToFourVec.h,v 1.3 2008/08/02 22:43:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKTOFOURVEC_H
-#define TRACKTOFOURVEC_H
+#ifndef STJTRACKTOFOURVEC_H
+#define STJTRACKTOFOURVEC_H
 
 #include "StjFourVecList.h"
 
@@ -25,4 +25,4 @@ private:
 
 }
 
-#endif // TRACKTOFOURVEC_H
+#endif // STJTRACKTOFOURVEC_H

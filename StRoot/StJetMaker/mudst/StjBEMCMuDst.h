@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCMuDst.h,v 1.2 2008/08/02 19:23:20 tai Exp $
-#ifndef STJETBEMCMUDST_H
-#define STJETBEMCMUDST_H
+// $Id: StjBEMCMuDst.h,v 1.3 2008/08/02 22:43:38 tai Exp $
+#ifndef STJBEMCMUDST_H
+#define STJBEMCMUDST_H
 
 #include "StjBEMC.h"
 
@@ -32,4 +32,4 @@ private:
 
 }
 
-#endif // STJETBEMCMUDST_H
+#endif // STJBEMCMUDST_H

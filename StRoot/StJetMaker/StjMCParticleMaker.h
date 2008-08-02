@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleMaker.h,v 1.2 2008/08/02 19:22:26 tai Exp $
-#ifndef STJETMCPARTICLEMAKER_HH
-#define STJETMCPARTICLEMAKER_HH
+// $Id: StjMCParticleMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $
+#ifndef STJMCPARTICLEMAKER_H
+#define STJMCPARTICLEMAKER_H
 
 #include "StMaker.h"
 #include <Rtypes.h>
@@ -30,7 +30,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleMaker.h,v 1.2 2008/08/02 19:22:26 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -47,4 +47,4 @@ private:
 
 };
 
-#endif // STJETMCPARTICLEMAKER_HH
+#endif // STJMCPARTICLEMAKER_H

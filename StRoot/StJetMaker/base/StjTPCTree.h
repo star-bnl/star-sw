@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTree.h,v 1.2 2008/08/02 19:22:49 tai Exp $
+// $Id: StjTPCTree.h,v 1.3 2008/08/02 22:43:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTPCTREE_H
-#define STJETTPCTREE_H
+#ifndef STJTPCTREE_H
+#define STJTPCTREE_H
 
 #include "StjTPC.h"
 #include <Rtypes.h>
@@ -38,4 +38,4 @@ private:
 
 }
 
-#endif // STJETTPCTREE_H
+#endif // STJTPCTREE_H

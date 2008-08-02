@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleListCut.h,v 1.2 2008/08/02 19:22:48 tai Exp $
+// $Id: StjMCParticleListCut.h,v 1.3 2008/08/02 22:43:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETMCPARTICLELISTCUT_H
-#define STJETMCPARTICLELISTCUT_H
+#ifndef STJMCPARTICLELISTCUT_H
+#define STJMCPARTICLELISTCUT_H
 
 #include "StjMCParticleCut.h"
 
@@ -35,4 +35,4 @@ private:
 
 }
 
-#endif // STJETMCPARTICLELISTCUT_H
+#endif // STJMCPARTICLELISTCUT_H

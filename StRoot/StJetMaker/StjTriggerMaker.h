@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTriggerMaker.h,v 1.2 2008/08/02 19:22:32 tai Exp $
-#ifndef STJETTRIGGERMAKER_HH
-#define STJETTRIGGERMAKER_HH
+// $Id: StjTriggerMaker.h,v 1.3 2008/08/02 22:43:07 tai Exp $
+#ifndef STJTRIGGERMAKER_H
+#define STJTRIGGERMAKER_H
 
 #include "StMaker.h"
 #include <Rtypes.h>
@@ -39,7 +39,7 @@ public:
 
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTriggerMaker.h,v 1.2 2008/08/02 19:22:32 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTriggerMaker.h,v 1.3 2008/08/02 22:43:07 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -58,4 +58,4 @@ private:
 
 };
 
-#endif // STJETTRIGGERMAKER_HH
+#endif // STJTRIGGERMAKER_H

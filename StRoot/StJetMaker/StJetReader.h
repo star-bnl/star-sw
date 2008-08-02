@@ -3,8 +3,8 @@
 //MIT Software
 //6/04
 
-#ifndef StJetReader_HH
-#define StJetReader_HH
+#ifndef STJETREADER_H
+#define STJETREADER_H
 
 #include "StMaker.h"
 #include "StJetMaker.h"
@@ -96,4 +96,4 @@ inline StJetReader::JetBranchesMap& StJetReader::jetsMap()
 }
 
 
-#endif
+#endif // STJETREADER_H

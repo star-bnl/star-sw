@@ -2,8 +2,8 @@
 //M.L. Miller (MIT)
 //12/06
 
-#ifndef StJetSkimEventMaker_HH
-#define StJetSkimEventMaker_HH
+#ifndef STJETSKIMEVENTMAKER_H
+#define STJETSKIMEVENTMAKER_H
 
 #include "StMaker.h"
 #include <string>
@@ -37,7 +37,7 @@ public:
     void addSimuTrigger(int trigId) {mSimuTrigIds.push_back(trigId);}
 
     const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.5 2008/07/10 01:20:14 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.6 2008/08/02 22:43:05 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
     	
 protected:
 	StMuDstMaker*   muDstMaker;         //!
@@ -59,4 +59,4 @@ private:
 };
 
 
-#endif
+#endif // STJETSKIMEVENTMAKER_H

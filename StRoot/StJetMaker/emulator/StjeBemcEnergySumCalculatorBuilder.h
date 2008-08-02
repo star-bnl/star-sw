@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjeBemcEnergySumCalculatorBuilder.h,v 1.2 2008/08/02 19:23:08 tai Exp $
+// $Id: StjeBemcEnergySumCalculatorBuilder.h,v 1.3 2008/08/02 22:43:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef BEMCENERGYSUMCALCULATORBUILDER_H
-#define BEMCENERGYSUMCALCULATORBUILDER_H
+#ifndef STJEBEMCENERGYSUMCALCULATORBUILDER_H
+#define STJEBEMCENERGYSUMCALCULATORBUILDER_H
 
 class StMuDstMaker;
 
@@ -25,4 +25,4 @@ private:
 
 }
 
-#endif // BEMCENERGYSUMCALCULATORBUILDER_H
+#endif // STJEBEMCENERGYSUMCALCULATORBUILDER_H

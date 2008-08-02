@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyToFourVec.h,v 1.2 2008/08/02 19:22:52 tai Exp $
+// $Id: StjTowerEnergyToFourVec.h,v 1.3 2008/08/02 22:43:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TOWERENERGYTOFOURVEC_H
-#define TOWERENERGYTOFOURVEC_H
+#ifndef STJTOWERENERGYTOFOURVEC_H
+#define STJTOWERENERGYTOFOURVEC_H
 
 #include "StjFourVecList.h"
 
@@ -25,4 +25,4 @@ private:
 
 }
 
-#endif // TOWERENERGYTOFOURVEC_H
+#endif // STJTOWERENERGYTOFOURVEC_H

@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutFlag.h,v 1.2 2008/08/02 19:22:54 tai Exp $
+// $Id: StjTrackCutFlag.h,v 1.3 2008/08/02 22:43:21 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKCUTFLAG_H
-#define TRACKCUTFLAG_H
+#ifndef STJTRACKCUTFLAG_H
+#define STJTRACKCUTFLAG_H
 
 #include "StjTrackCut.h"
 
@@ -34,4 +34,4 @@ private:
 
 }
 
-#endif // TRACKCUTFLAG_H
+#endif // STJTRACKCUTFLAG_H

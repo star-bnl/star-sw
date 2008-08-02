@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyVariation.h,v 1.2 2008/08/02 19:22:53 tai Exp $
+// $Id: StjTowerEnergyVariation.h,v 1.3 2008/08/02 22:43:21 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTOWERENERGYVARIATION_H
-#define STJETTOWERENERGYVARIATION_H
+#ifndef STJTOWERENERGYVARIATION_H
+#define STJTOWERENERGYVARIATION_H
 
 #include "StjTowerEnergyList.h"
 
@@ -26,4 +26,4 @@ private:
 
 }
 
-#endif // STJETTOWERENERGYVARIATION_H
+#endif // STJTOWERENERGYVARIATION_H

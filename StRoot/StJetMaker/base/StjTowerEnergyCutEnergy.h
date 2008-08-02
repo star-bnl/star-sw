@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutEnergy.h,v 1.2 2008/08/02 19:22:51 tai Exp $
+// $Id: StjTowerEnergyCutEnergy.h,v 1.3 2008/08/02 22:43:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TOWERENERGYCUTENERGY_H
-#define TOWERENERGYCUTENERGY_H
+#ifndef STJTOWERENERGYCUTENERGY_H
+#define STJTOWERENERGYCUTENERGY_H
 
 #include "StjTowerEnergyCut.h"
 
@@ -32,4 +32,4 @@ private:
 
 }
 
-#endif // TOWERENERGYCUTENERGY_H
+#endif // STJTOWERENERGYCUTENERGY_H

@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgWriter.h,v 1.1 2008/08/02 22:21:35 tai Exp $
-#ifndef STJETTRGWRITER_H
-#define STJETTRGWRITER_H
+// $Id: StjTrgWriter.h,v 1.2 2008/08/02 22:43:44 tai Exp $
+#ifndef STJTRGWRITER_H
+#define STJTRGWRITER_H
 
 #include "StjTrgPassCondition.h"
 
@@ -65,4 +65,4 @@ private:
 
 };
 
-#endif // STJETTRGWRITER_H
+#endif // STJTRGWRITER_H

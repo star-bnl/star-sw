@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackToTLorentzVector.h,v 1.2 2008/08/02 19:22:56 tai Exp $
+// $Id: StjTrackToTLorentzVector.h,v 1.3 2008/08/02 22:43:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKTOTLORENTZVECTOR_H
-#define TRACKTOTLORENTZVECTOR_H
+#ifndef STJTRACKTOTLORENTZVECTOR_H
+#define STJTRACKTOTLORENTZVECTOR_H
 
 #include <TLorentzVector.h>
 
@@ -23,4 +23,4 @@ private:
 
 }
 
-#endif // TRACKTOTLORENTZVECTOR_H
+#endif // STJTRACKTOTLORENTZVECTOR_H

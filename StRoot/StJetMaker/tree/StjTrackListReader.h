@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListReader.h,v 1.2 2008/08/02 19:23:39 tai Exp $
+// $Id: StjTrackListReader.h,v 1.3 2008/08/02 22:43:40 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTRACKLISTREADER_H
-#define STJETTRACKLISTREADER_H
+#ifndef STJTRACKLISTREADER_H
+#define STJTRACKLISTREADER_H
 
 #include "StjTrackList.h"
 #include <Rtypes.h>
@@ -51,4 +51,4 @@ private:
 
 };
 
-#endif // STJETTRACKLISTREADER_H
+#endif // STJTRACKLISTREADER_H

@@ -3,8 +3,8 @@
 //MIT Software
 //6/04
 
-#ifndef StJetSimuReader_HH
-#define StJetSimuReader_HH
+#ifndef STJETSIMUREADER_H
+#define STJETSIMUREADER_H
 
 #include "StMaker.h"
 #include "StJetMaker/StJetMaker.h"
@@ -80,4 +80,4 @@ class StJetSimuReader : public StMaker{
       return mStJetsMap;
     }
 
-#endif
+#endif // STJETSIMUREADER_H

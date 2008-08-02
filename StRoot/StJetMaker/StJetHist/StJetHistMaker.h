@@ -1,5 +1,5 @@
-#ifndef StJetHistMaker_h
-#define StJetHistMaker_h
+#ifndef STJETHISTMAKER_H
+#define STJETHISTMAKER_H
 #include "StMaker.h"
 
 #include "TH3.h"
@@ -72,4 +72,4 @@ protected:
     ClassDef(StJetHistMaker,0)
 	};
 
-#endif
+#endif // STJETHISTMAKER_H

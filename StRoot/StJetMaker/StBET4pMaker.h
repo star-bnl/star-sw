@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.3 2008/08/02 19:22:24 tai Exp $
-#ifndef STBET4PMAKER_HH
-#define STBET4PMAKER_HH
+// $Id: StBET4pMaker.h,v 1.4 2008/08/02 22:43:04 tai Exp $
+#ifndef STBET4PMAKER_H
+#define STBET4PMAKER_H
 
 #include "StFourPMaker.h"
 
@@ -54,7 +54,7 @@ public:
   bool useTree() const { return _useTree; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.3 2008/08/02 19:22:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.4 2008/08/02 22:43:04 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -86,4 +86,4 @@ private:
   ClassDef(StBET4pMaker,1)
 };
 
-#endif // STBET4PMAKER_HH
+#endif // STBET4PMAKER_H

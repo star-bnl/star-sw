@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: RunJetFinder.h,v 1.3 2008/08/02 19:23:14 tai Exp $
+// $Id: RunJetFinder.h,v 1.4 2008/08/02 22:43:35 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef RUNJETFINDER_HH
-#define RUNJETFINDER_HH
+#ifndef RUNJETFINDER_H
+#define RUNJETFINDER_H
 
 #include <StJetFinder/StProtoJet.h>
 
@@ -33,5 +33,5 @@ private:
 
 }
 
-#endif // RUNJETFINDER_HH
+#endif // RUNJETFINDER_H
 

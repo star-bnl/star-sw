@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTrackMaker.h,v 1.2 2008/08/02 19:22:27 tai Exp $
-#ifndef STJETTPCTRACKMAKER_HH
-#define STJETTPCTRACKMAKER_HH
+// $Id: StjTPCTrackMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $
+#ifndef STJTPCTRACKMAKER_H
+#define STJTPCTRACKMAKER_H
 
 #include "StMaker.h"
 #include <Rtypes.h>
@@ -29,7 +29,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackMaker.h,v 1.2 2008/08/02 19:22:27 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -45,4 +45,4 @@ private:
 
 };
 
-#endif // STJETTPCTRACKMAKER_HH
+#endif // STJTPCTRACKMAKER_H

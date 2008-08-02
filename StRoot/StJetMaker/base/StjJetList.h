@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjJetList.h,v 1.2 2008/08/02 19:22:46 tai Exp $
+// $Id: StjJetList.h,v 1.3 2008/08/02 22:43:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STSPINJET_JET_H
-#define STSPINJET_JET_H
+#ifndef STJJETLIST_H
+#define STJJETLIST_H
 
 #include "StjFourVecList.h"
 
@@ -64,5 +64,5 @@ inline std::ostream& operator<<(std::ostream& out, const StjJetList& v)
 
 }
 
-#endif // STSPINJET_JET_H
+#endif // STJJETLIST_H
 

@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgPassCondition.h,v 1.1 2008/08/02 22:21:32 tai Exp $
-#ifndef STJETTRGPASSCONDITION_H
-#define STJETTRGPASSCONDITION_H
+// $Id: StjTrgPassCondition.h,v 1.2 2008/08/02 22:43:43 tai Exp $
+#ifndef STJTRGPASSCONDITION_H
+#define STJTRGPASSCONDITION_H
 
 #include "StjTrg.h"
 
@@ -64,4 +64,4 @@ public:
 
 };
 
-#endif // STJETTRGPASSCONDITION_H
+#endif // STJTRGPASSCONDITION_H

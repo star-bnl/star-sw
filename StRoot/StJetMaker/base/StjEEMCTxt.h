@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMCTxt.h,v 1.2 2008/08/02 19:22:42 tai Exp $
+// $Id: StjEEMCTxt.h,v 1.3 2008/08/02 22:43:15 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETEEMCTXT_H
-#define STJETEEMCTXT_H
+#ifndef STJEEMCTXT_H
+#define STJEEMCTXT_H
 
 #include "StjEEMC.h"
 
@@ -29,4 +29,4 @@ private:
 
 }
 
-#endif // STJETEEMCTXT_H
+#endif // STJEEMCTXT_H

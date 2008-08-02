@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleCutEtaForStatus.h,v 1.2 2008/08/02 19:22:47 tai Exp $
+// $Id: StjMCParticleCutEtaForStatus.h,v 1.3 2008/08/02 22:43:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef MCPARTICLECUTETAFORSTATUS_H
-#define MCPARTICLECUTETAFORSTATUS_H
+#ifndef STJMCPARTICLECUTETAFORSTATUS_H
+#define STJMCPARTICLECUTETAFORSTATUS_H
 
 #include "StjMCParticleCut.h"
 
@@ -37,4 +37,4 @@ private:
 
 }
 
-#endif // MCPARTICLECUTETAFORSTATUS_H
+#endif // STJMCPARTICLECUTETAFORSTATUS_H

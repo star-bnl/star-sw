@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutPt.h,v 1.2 2008/08/02 19:22:46 tai Exp $
+// $Id: StjJetCutPt.h,v 1.3 2008/08/02 22:43:16 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef JETCUTPT_H
-#define JETCUTPT_H
+#ifndef STJJETCUTPT_H
+#define STJJETCUTPT_H
 
 #include "StjJetCut.h"
 
@@ -32,4 +32,4 @@ private:
 
 }
 
-#endif // JETCUTPT_H
+#endif // STJJETCUTPT_H

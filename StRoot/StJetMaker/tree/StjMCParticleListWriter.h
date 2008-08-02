@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleListWriter.h,v 1.2 2008/08/02 19:23:38 tai Exp $
-#ifndef STJETMCPARTICLELISTWRITER_HH
-#define STJETMCPARTICLELISTWRITER_HH
+// $Id: StjMCParticleListWriter.h,v 1.3 2008/08/02 22:43:40 tai Exp $
+#ifndef STJMCPARTICLELISTWRITER_H
+#define STJMCPARTICLELISTWRITER_H
 
 #include "StjMCParticleList.h"
 #include <Rtypes.h>
@@ -42,4 +42,4 @@ private:
   Double_t _vertexZ;
 };
 
-#endif // STJETMCPARTICLELISTWRITER_HH
+#endif // STJMCPARTICLELISTWRITER_H

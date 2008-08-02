@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMCMuDst.h,v 1.2 2008/08/02 19:23:20 tai Exp $
-#ifndef STJETEEMCMUDST_H
-#define STJETEEMCMUDST_H
+// $Id: StjEEMCMuDst.h,v 1.3 2008/08/02 22:43:38 tai Exp $
+#ifndef STJEEMCMUDST_H
+#define STJEEMCMUDST_H
 
 #include "StjEEMC.h"
 
@@ -30,4 +30,4 @@ private:
 
 }
 
-#endif // STJETEEMCMUDST_H
+#endif // STJEEMCMUDST_H
