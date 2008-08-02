@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.4 2008/08/02 19:23:07 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.5 2008/08/02 23:10:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -62,7 +62,7 @@ public:
 
 private:
 
-  friend class StjTrackListToStMuTrackFourVecList;
+  friend class StjeTrackListToStMuTrackFourVecList;
 
   double         _px;
   double         _py;

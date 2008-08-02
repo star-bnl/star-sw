@@ -1,13 +1,13 @@
-// $Id: StJetFinderRunner.cxx,v 1.1 2008/07/21 02:00:24 tai Exp $
+// $Id: StjeJetFinderRunner.cxx,v 1.1 2008/08/02 23:10:19 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StJetFinderRunner.h"
+#include "StjeJetFinderRunner.h"
 
 #include <StJetFinder/StJetFinder.h>
 #include <StJetFinder/StJetPars.h>
 
 namespace StSpinJet {
 
-StJetFinderRunner::StJetFinderRunner(StJetPars* pars, const ParticleList& particleList, ProtoJetList& protoJets)
+StjeJetFinderRunner::StjeJetFinderRunner(StJetPars* pars, const ParticleList& particleList, ProtoJetList& protoJets)
   : _jetFinder(pars->constructJetFinder())
   , _particleList(particleList)
   , _protoJetList(protoJets)
@@ -15,17 +15,17 @@ StJetFinderRunner::StJetFinderRunner(StJetPars* pars, const ParticleList& partic
 
 }
 
-StJetFinderRunner::~StJetFinderRunner()
+StjeJetFinderRunner::~StjeJetFinderRunner()
 {
 
 }
 
-void StJetFinderRunner::Init()
+void StjeJetFinderRunner::Init()
 {
   _jetFinder->Init();
 }
 
-void StJetFinderRunner::Run()
+void StjeJetFinderRunner::Run()
 {
   _jetFinder->findJets(_protoJetList, _particleList);
 }

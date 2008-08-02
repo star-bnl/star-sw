@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTREEENTRYMAKERTEST_HH
-#define STJETTREEENTRYMAKERTEST_HH
+#ifndef STJTREEENTRYMAKERTEST_HH
+#define STJTREEENTRYMAKERTEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -20,4 +20,4 @@ private:
 
 };
 
-#endif // STJETTREEENTRYMAKERTEST_HH
+#endif // STJTREEENTRYMAKERTEST_HH

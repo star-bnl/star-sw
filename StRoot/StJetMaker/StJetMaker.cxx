@@ -1,10 +1,10 @@
-// $Id: StJetMaker.cxx,v 1.67 2008/08/02 22:21:09 tai Exp $
+// $Id: StJetMaker.cxx,v 1.68 2008/08/02 23:10:06 tai Exp $
 #include "StJetMaker.h"
 
-#include "StParticleCollector.h"
-#include "StJetFinderRunner.h"
+#include "StjeParticleCollector.h"
+#include "StjeJetFinderRunner.h"
 #include "StjeJetCuts.h"
-#include "StjTreeWriter.h"
+#include "StjeTreeWriter.h"
 #include "StjeDefaultJetTreeWriter.h"
 #include "StppJetAnalyzer.h"
 
@@ -45,9 +45,9 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 
   StJets* stjets = new StJets();
 
-  _particleCollectorList.push_back(new StParticleCollector(ap, fp, *particleList));
+  _particleCollectorList.push_back(new StjeParticleCollector(ap, fp, *particleList));
 
-  _jetFinderList.push_back(new StJetFinderRunner(jp, *particleList, *protoJetList));
+  _jetFinderList.push_back(new StjeJetFinderRunner(jp, *particleList, *protoJetList));
 
   _jetCutsList.push_back(new StjeJetCuts(ap, *protoJetList));
 
@@ -58,14 +58,14 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
   _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), _treeWriter, name);
 }
 
-void StJetMaker::SetTreeWriter(StjTreeWriter *treeWriter)
+void StJetMaker::SetTreeWriter(StjeTreeWriter *treeWriter)
 {
   _treeWriter = treeWriter;
 }
 
 Int_t StJetMaker::Init() 
 {
-  for(vector<StJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
+  for(vector<StjeJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
     (*jetFinder)->Init();
   }
 
@@ -76,11 +76,11 @@ Int_t StJetMaker::Init()
 
 Int_t StJetMaker::Make()
 {
-  for(vector<StParticleCollector*>::iterator particleCollector = _particleCollectorList.begin(); particleCollector != _particleCollectorList.end(); ++particleCollector) {
+  for(vector<StjeParticleCollector*>::iterator particleCollector = _particleCollectorList.begin(); particleCollector != _particleCollectorList.end(); ++particleCollector) {
     (*particleCollector)->Do();
   }
 
-  for(vector<StJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
+  for(vector<StjeJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
     (*jetFinder)->Run();
   }
 

@@ -1,4 +1,4 @@
-// $Id: StJetMakerBackwordCompatibility.cxx,v 1.4 2008/08/02 21:37:35 tai Exp $
+// $Id: StJetMakerBackwordCompatibility.cxx,v 1.5 2008/08/02 23:10:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetMakerBackwordCompatibility.h"
 
@@ -6,7 +6,7 @@
 
 namespace StSpinJet {
 
-void StJetMakerBackwordCompatibility::addAnalyzer(StppJetAnalyzer* analyzer, StjTreeWriter* treeWriter, const char* name)
+void StJetMakerBackwordCompatibility::addAnalyzer(StppJetAnalyzer* analyzer, StjeTreeWriter* treeWriter, const char* name)
 {
   _jetBranches[name] = analyzer;
 

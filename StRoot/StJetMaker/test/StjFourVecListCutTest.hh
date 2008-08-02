@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETFOURVECLISTCUTTEST_HH
-#define STJETFOURVECLISTCUTTEST_HH
+#ifndef STJFOURVECLISTCUTTEST_HH
+#define STJFOURVECLISTCUTTEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -20,5 +20,5 @@ private:
 
 };
 
-#endif // STJETFOURVECLISTCUTTEST_HH
+#endif // STJFOURVECLISTCUTTEST_HH
 

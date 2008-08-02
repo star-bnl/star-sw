@@ -1,5 +1,5 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include <StjTowerEnergyListToStMuTrackFourVecList.h>
+#include <StjeTowerEnergyListToStMuTrackFourVecList.h>
 #include <StMuTrackFourVec.h>
 
 #include "StjTowerEnergyListToStMuTrackFourVecListTest.hh"
@@ -23,7 +23,7 @@ void StjTowerEnergyListToStMuTrackFourVecListTest::tearDown()
 
 void StjTowerEnergyListToStMuTrackFourVecListTest::testOne() 
 {
-  StjTowerEnergyListToStMuTrackFourVecList etof;
+  StjeTowerEnergyListToStMuTrackFourVecList etof;
   StjTowerEnergyList elist;
 
   StjTowerEnergy energy;

@@ -1,5 +1,5 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include <StjTrackListToStMuTrackFourVecList.h>
+#include <StjeTrackListToStMuTrackFourVecList.h>
 #include <StMuTrackFourVec.h>
 
 #include "StjTrackListToStMuTrackFourVecListTest.hh"
@@ -22,7 +22,7 @@ void StjTrackListToStMuTrackFourVecListTest::tearDown()
 
 void StjTrackListToStMuTrackFourVecListTest::testOne() 
 {
-  StjTrackListToStMuTrackFourVecList ttof;
+  StjeTrackListToStMuTrackFourVecList ttof;
   StjTrackList tlist;
 
   StjTrack track;

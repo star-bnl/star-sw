@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
-#ifndef TRACKLISTTOFOURLIST_HH
-#define TRACKLISTTOFOURLIST_HH
+#ifndef STJTRACKLISTTOFOURLISTTEST_HH
+#define STJTRACKLISTTOFOURLISTTEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -18,4 +18,4 @@ public:
 
 };
 
-#endif // TRACKLISTTOFOURLIST_HH
+#endif // STJTRACKLISTTOFOURLISTTEST_HH

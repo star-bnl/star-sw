@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StParticleCollector.h,v 1.2 2008/08/02 22:43:31 tai Exp $
+// $Id: StjeParticleCollector.h,v 1.1 2008/08/02 23:10:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STPARTICLECOLLECTOR_H
 #define STPARTICLECOLLECTOR_H
@@ -14,15 +14,15 @@ class StMuTrackFourVec;
 
 namespace StSpinJet {
 
-class StParticleCollector {
+class StjeParticleCollector {
 
 public:
 
   typedef std::vector<const AbstractFourVec*> ParticleList;
 
-  StParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ParticleList& particleList);
+  StjeParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ParticleList& particleList);
 
-  virtual ~StParticleCollector();
+  virtual ~StjeParticleCollector();
 
   void Do();
 

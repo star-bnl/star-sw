@@ -29,4 +29,4 @@ private:
 
 };
 
-#endif // STBET4PMAKERIMPTEST_HH
+#endif // STBET4PMAKERTEST_HH

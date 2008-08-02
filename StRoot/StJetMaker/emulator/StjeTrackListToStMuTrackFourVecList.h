@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListToStMuTrackFourVecList.h,v 1.3 2008/08/02 22:43:32 tai Exp $
+// $Id: StjeTrackListToStMuTrackFourVecList.h,v 1.1 2008/08/02 23:10:21 tai Exp $
 #ifndef STJTRACKLISTTOSTMUTRACKFOURVECLIST_H
 #define STJTRACKLISTTOSTMUTRACKFOURVECLIST_H
 
@@ -14,11 +14,11 @@ class StjTrackToTLorentzVector;
 
 class StMuTrackEmu;
 
-class StjTrackListToStMuTrackFourVecList {
+class StjeTrackListToStMuTrackFourVecList {
 
 public:
-  StjTrackListToStMuTrackFourVecList();
-  virtual ~StjTrackListToStMuTrackFourVecList() { }
+  StjeTrackListToStMuTrackFourVecList();
+  virtual ~StjeTrackListToStMuTrackFourVecList() { }
 
   FourList operator()(const StjTrackList& trackList);
 

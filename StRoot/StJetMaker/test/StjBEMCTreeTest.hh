@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETBEMCTREETEST_HH
-#define STJETBEMCTREETEST_HH
+#ifndef STJBEMCTREETEST_HH
+#define STJBEMCTREETEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -21,4 +21,4 @@ private:
 };
 
 
-#endif // STJETBEMCTREETEST_HH
+#endif // STJBEMCTREETEST_HH
