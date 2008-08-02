@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListWriter.h,v 1.2 2008/08/02 19:23:39 tai Exp $
-#ifndef STJETTRACKLISTWRITER_HH
-#define STJETTRACKLISTWRITER_HH
+// $Id: StjTrackListWriter.h,v 1.3 2008/08/02 22:43:40 tai Exp $
+#ifndef STJTRACKLISTWRITER_H
+#define STJTRACKLISTWRITER_H
 
 #include "StjTrackList.h"
 #include <Rtypes.h>
@@ -54,4 +54,4 @@ private:
 
 };
 
-#endif // STJETTRACKLISTWRITER_HH
+#endif // STJTRACKLISTWRITER_H

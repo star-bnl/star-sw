@@ -16,8 +16,8 @@
 
     */
 
-#ifndef StMuEmcPosition_HH
-#define StMuEmcPosition_HH
+#ifndef STMUEMCPOSITION_H
+#define STMUEMCPOSITION_H
 
 #include "TObject.h"
 
@@ -73,4 +73,4 @@ protected:
     ClassDef(StMuEmcPosition,1)
 
 	};
-#endif
+#endif // STMUEMCPOSITION_H

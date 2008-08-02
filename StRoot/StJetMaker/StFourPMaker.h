@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StFourPMaker.h,v 1.5 2008/07/29 00:16:35 tai Exp $
-#ifndef StFourPMaker_h
-#define StFourPMaker_h
+// $Id: StFourPMaker.h,v 1.6 2008/08/02 22:43:04 tai Exp $
+#ifndef STFOURPMAKER_H
+#define STFOURPMAKER_H
 
 #include <StMaker.h>
 
@@ -23,7 +23,7 @@ public:
 
   ClassDef(StFourPMaker,0)
 };
-#endif
+#endif // STFOURPMAKER_H
 
 
 

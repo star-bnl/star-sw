@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjeBemcEnergySumCalculator.h,v 1.2 2008/08/02 19:23:08 tai Exp $
+// $Id: StjeBemcEnergySumCalculator.h,v 1.3 2008/08/02 22:43:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef BEMCENERGYSUMCALCULATOR_H
-#define BEMCENERGYSUMCALCULATOR_H
+#ifndef STJEBEMCENERGYSUMCALCULATOR_H
+#define STJEBEMCENERGYSUMCALCULATOR_H
 
 #include "StjTowerEnergyList.h"
 
@@ -77,4 +77,4 @@ private:
 
 }
 
-#endif // BEMCENERGYSUMCALCULATOR_H
+#endif // STJEBEMCENERGYSUMCALCULATOR_H

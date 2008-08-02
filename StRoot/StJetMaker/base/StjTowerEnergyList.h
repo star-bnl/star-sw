@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyList.h,v 1.2 2008/08/02 19:22:51 tai Exp $
+// $Id: StjTowerEnergyList.h,v 1.3 2008/08/02 22:43:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TOWERENERGYLIST_H
-#define TOWERENERGYLIST_H
+#ifndef STJTOWERENERGYLIST_H
+#define STJTOWERENERGYLIST_H
 
 #include <vector>
 #include <ostream>
@@ -75,4 +75,4 @@ inline std::ostream& operator<<(std::ostream& out, const StjTowerEnergyList& v)
 
 }
 
-#endif // TOWERENERGYLIST_H
+#endif // STJTOWERENERGYLIST_H

@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjeDefaultJetTreeWriter.h,v 1.2 2008/08/02 21:37:35 tai Exp $
+// $Id: StjeDefaultJetTreeWriter.h,v 1.3 2008/08/02 22:43:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STDEFAULTJETTREEWRITER_H
-#define STDEFAULTJETTREEWRITER_H
+#ifndef STJEDEFAULTJETTREEWRITER_H
+#define STJEDEFAULTJETTREEWRITER_H
 
 #include "StjTreeWriter.h"
 
@@ -54,6 +54,6 @@ private:
   std::vector<AnalyzerCtl> _analyzerCtlList;
 };
 
-#endif // STDEFAULTJETTREEWRITER_H
+#endif // STJEDEFAULTJETTREEWRITER_H
 
 

@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftwareTriggerSimuMaker.h,v 1.1 2008/08/02 22:21:34 tai Exp $
-#ifndef STJETTRGSOFTWARETRIGGERSIMUMAKER_H
-#define STJETTRGSOFTWARETRIGGERSIMUMAKER_H
+// $Id: StjTrgSoftwareTriggerSimuMaker.h,v 1.2 2008/08/02 22:43:44 tai Exp $
+#ifndef STJTRGSOFTWARETRIGGERSIMUMAKER_H
+#define STJTRGSOFTWARETRIGGERSIMUMAKER_H
 
 #include "StjTrgSoftware.h"
 
@@ -29,4 +29,4 @@ private:
 
 };
 
-#endif // STJETTRGSOFTWARETRIGGERSIMUMAKER_H
+#endif // STJTRGSOFTWARETRIGGERSIMUMAKER_H

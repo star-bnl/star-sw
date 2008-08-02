@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StPythiaFourPMaker.h,v 1.7 2008/08/02 19:22:25 tai Exp $
-#ifndef STPYTHIAFOURPMAKER_HH
-#define STPYTHIAFOURPMAKER_HH
+// $Id: StPythiaFourPMaker.h,v 1.8 2008/08/02 22:43:05 tai Exp $
+#ifndef STPYTHIAFOURPMAKER_H
+#define STPYTHIAFOURPMAKER_H
 
 #include "StFourPMaker.h"
 
@@ -45,4 +45,4 @@ private:
 };
 
 
-#endif // STPYTHIAFOURPMAKER_HH
+#endif // STPYTHIAFOURPMAKER_H

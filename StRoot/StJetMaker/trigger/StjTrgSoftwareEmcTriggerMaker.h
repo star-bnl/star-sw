@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftwareEmcTriggerMaker.h,v 1.1 2008/08/02 22:21:33 tai Exp $
-#ifndef STJETTRGSOFTWAREEMCTRIGGERMAKER_H
-#define STJETTRGSOFTWAREEMCTRIGGERMAKER_H
+// $Id: StjTrgSoftwareEmcTriggerMaker.h,v 1.2 2008/08/02 22:43:43 tai Exp $
+#ifndef STJTRGSOFTWAREEMCTRIGGERMAKER_H
+#define STJTRGSOFTWAREEMCTRIGGERMAKER_H
 
 #include "StjTrgSoftware.h"
 
@@ -33,4 +33,4 @@ private:
 
 };
 
-#endif // STJETTRGSOFTWAREEMCTRIGGERMAKER_H
+#endif // STJTRGSOFTWAREEMCTRIGGERMAKER_H

@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjJetPrint.h,v 1.2 2008/08/02 19:22:47 tai Exp $
+// $Id: StjJetPrint.h,v 1.3 2008/08/02 22:43:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETJETPRINT_H
-#define STJETJETPRINT_H
+#ifndef STJJETPRINT_H
+#define STJJETPRINT_H
 
 #include "StjJetList.h"
 
@@ -28,4 +28,4 @@ private:
 
 }
 
-#endif // STJETJETPRINT_H
+#endif // STJJETPRINT_H

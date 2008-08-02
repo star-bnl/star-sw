@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftwareFactory.h,v 1.1 2008/08/02 22:21:33 tai Exp $
-#ifndef STJETTRGSOFTWAREFACTORY_H
-#define STJETTRGSOFTWAREFACTORY_H
+// $Id: StjTrgSoftwareFactory.h,v 1.2 2008/08/02 22:43:44 tai Exp $
+#ifndef STJTRGSOFTWAREFACTORY_H
+#define STJTRGSOFTWAREFACTORY_H
 
 class StjTrgSoftware;
 
@@ -16,4 +16,4 @@ public:
 };
 
 
-#endif // STJETTRGSOFTWAREFACTORY_H
+#endif // STJTRGSOFTWAREFACTORY_H

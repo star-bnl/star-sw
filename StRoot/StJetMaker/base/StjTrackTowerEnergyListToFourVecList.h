@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackTowerEnergyListToFourVecList.h,v 1.2 2008/08/02 19:22:56 tai Exp $
+// $Id: StjTrackTowerEnergyListToFourVecList.h,v 1.3 2008/08/02 22:43:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKTOWERENERGYLISTTOFOURVECLIST_H
-#define TRACKTOWERENERGYLISTTOFOURVECLIST_H
+#ifndef STJTRACKTOWERENERGYLISTTOFOURVECLIST_H
+#define STJTRACKTOWERENERGYLISTTOFOURVECLIST_H
 
 #include "StjTrackList.h"
 #include "StjTowerEnergyList.h"
@@ -23,4 +23,4 @@ public:
 
 }
 
-#endif // TRACKTOWERENERGYLISTTOFOURVECLIST_H
+#endif // STJTRACKTOWERENERGYLISTTOFOURVECLIST_H

@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutBemcStatus.h,v 1.2 2008/08/02 19:22:50 tai Exp $
+// $Id: StjTowerEnergyCutBemcStatus.h,v 1.3 2008/08/02 22:43:19 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TOWERENERGYCUTBEMCSTATUS_H
-#define TOWERENERGYCUTBEMCSTATUS_H
+#ifndef STJTOWERENERGYCUTBEMCSTATUS_H
+#define STJTOWERENERGYCUTBEMCSTATUS_H
 
 #include "StjTowerEnergyCut.h"
 
@@ -29,4 +29,4 @@ private:
 
 }
 
-#endif // TOWERENERGYCUTBEMCSTATUS_H
+#endif // STJTOWERENERGYCUTBEMCSTATUS_H

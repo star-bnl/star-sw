@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjMCMuDst.h,v 1.2 2008/08/02 19:23:20 tai Exp $
+// $Id: StjMCMuDst.h,v 1.3 2008/08/02 22:43:38 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETMCMUDST_H
-#define STJETMCMUDST_H
+#ifndef STJMCMUDST_H
+#define STJMCMUDST_H
 
 #include <StjMC.h>
 
@@ -27,4 +27,4 @@ private:
 
 }
 
-#endif // STJETMCMUDST_H
+#endif // STJMCMUDST_H

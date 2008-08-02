@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMC.h,v 1.2 2008/08/02 19:22:41 tai Exp $
+// $Id: StjBEMC.h,v 1.3 2008/08/02 22:43:14 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETBEMC_H
-#define STJETBEMC_H
+#ifndef STJBEMC_H
+#define STJBEMC_H
 
 #include "StjTowerEnergyList.h"
 
@@ -31,4 +31,4 @@ public:
 
 }
 
-#endif // STJETBEMC_H
+#endif // STJBEMC_H

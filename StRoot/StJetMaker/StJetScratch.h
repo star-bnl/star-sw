@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StJetScratch.h,v 1.5 2008/08/02 19:22:25 tai Exp $
-#ifndef STJETSCRATCH_HH
-#define STJETSCRATCH_HH
+// $Id: StJetScratch.h,v 1.6 2008/08/02 22:43:05 tai Exp $
+#ifndef STJETSCRATCH_H
+#define STJETSCRATCH_H
 
 #include "StMaker.h"
 #include <Rtypes.h>
@@ -29,7 +29,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetScratch.h,v 1.5 2008/08/02 19:22:25 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetScratch.h,v 1.6 2008/08/02 22:43:05 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -42,4 +42,4 @@ private:
 
 };
 
-#endif // STJETSCRATCH_HH
+#endif // STJETSCRATCH_H

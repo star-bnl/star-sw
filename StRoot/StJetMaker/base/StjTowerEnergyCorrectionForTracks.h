@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCorrectionForTracks.h,v 1.2 2008/08/02 19:22:50 tai Exp $
-#ifndef CORRECTTOWERENERGYFORTRACKS_H
-#define CORRECTTOWERENERGYFORTRACKS_H
+// $Id: StjTowerEnergyCorrectionForTracks.h,v 1.3 2008/08/02 22:43:19 tai Exp $
+#ifndef STJTOWERENERGYCORRECTIONFORTRACKS_H
+#define STJTOWERENERGYCORRECTIONFORTRACKS_H
 
 #include "StjTowerEnergyList.h"
 #include "StjTrackList.h"
@@ -33,4 +33,4 @@ private:
 
 }
 
-#endif // CORRECTTOWERENERGYFORTRACKS_H
+#endif // STJTOWERENERGYCORRECTIONFORTRACKS_H

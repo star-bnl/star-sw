@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyToTLorentzVector.h,v 1.2 2008/08/02 19:22:52 tai Exp $
+// $Id: StjTowerEnergyToTLorentzVector.h,v 1.3 2008/08/02 22:43:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TOWERENERGYTOTLORENTZVECTOR_H
-#define TOWERENERGYTOTLORENTZVECTOR_H
+#ifndef STJTOWERENERGYTOTLORENTZVECTOR_H
+#define STJTOWERENERGYTOTLORENTZVECTOR_H
 
 #include <TLorentzVector.h>
 
@@ -23,4 +23,4 @@ private:
 
 }
 
-#endif // TOWERENERGYTOTLORENTZVECTOR_H
+#endif // STJTOWERENERGYTOTLORENTZVECTOR_H

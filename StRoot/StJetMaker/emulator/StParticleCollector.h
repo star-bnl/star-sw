@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StParticleCollector.h,v 1.1 2008/07/21 02:00:26 tai Exp $
+// $Id: StParticleCollector.h,v 1.2 2008/08/02 22:43:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STPARTICLECOLLECTOR_HH
-#define STPARTICLECOLLECTOR_HH
+#ifndef STPARTICLECOLLECTOR_H
+#define STPARTICLECOLLECTOR_H
 
 #include "StppAnaPars.h"
 
@@ -41,4 +41,4 @@ private:
 
 }
 
-#endif // STPARTICLECOLLECTOR_HH
+#endif // STPARTICLECOLLECTOR_H

@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutPossibleHitRatio.h,v 1.2 2008/08/02 19:22:54 tai Exp $
+// $Id: StjTrackCutPossibleHitRatio.h,v 1.3 2008/08/02 22:43:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKCUTPOSSIBLEHITRATIO_H
-#define TRACKCUTPOSSIBLEHITRATIO_H
+#ifndef STJTRACKCUTPOSSIBLEHITRATIO_H
+#define STJTRACKCUTPOSSIBLEHITRATIO_H
 
 #include "StjTrackCut.h"
 
@@ -30,4 +30,4 @@ private:
 
 }
 
-#endif // TRACKCUTPOSSIBLEHITRATIO_H
+#endif // STJTRACKCUTPOSSIBLEHITRATIO_H

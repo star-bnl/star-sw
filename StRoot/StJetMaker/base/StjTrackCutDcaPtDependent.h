@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutDcaPtDependent.h,v 1.2 2008/08/02 19:22:53 tai Exp $
+// $Id: StjTrackCutDcaPtDependent.h,v 1.3 2008/08/02 22:43:21 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKCUTDCAPTDEPENDENT_H
-#define TRACKCUTDCAPTDEPENDENT_H
+#ifndef STJTRACKCUTDCAPTDEPENDENT_H
+#define STJTRACKCUTDCAPTDEPENDENT_H
 
 #include "StjTrackCut.h"
 
@@ -62,4 +62,4 @@ private:
 
 }
 
-#endif // TRACKCUTDCAPTDEPENDENT_H
+#endif // STJTRACKCUTDCAPTDEPENDENT_H

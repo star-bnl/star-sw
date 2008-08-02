@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.2 2008/08/02 19:23:07 tai Exp $
-#ifndef StMuTrackFourVec_HH
-#define StMuTrackFourVec_HH
+// $Id: StMuTrackFourVec.h,v 1.3 2008/08/02 22:43:31 tai Exp $
+#ifndef STMUTRACKFOURVEC_H
+#define STMUTRACKFOURVEC_H
 
 #include "StJetFinder/AbstractFourVec.h"
 
@@ -67,4 +67,4 @@ private:
   double mCharge;
 };
 
-#endif // StMuTrackFourVec_HH
+#endif // STMUTRACKFOURVEC_H

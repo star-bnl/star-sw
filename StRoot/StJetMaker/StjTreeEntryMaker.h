@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryMaker.h,v 1.2 2008/08/02 19:22:28 tai Exp $
+// $Id: StjTreeEntryMaker.h,v 1.3 2008/08/02 22:43:07 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTREEENTRYMAKER_H
-#define STJETTREEENTRYMAKER_H
+#ifndef STJTREEENTRYMAKER_H
+#define STJTREEENTRYMAKER_H
 
 #include "StMaker.h"
 
@@ -33,4 +33,4 @@ private:
 
 };
 
-#endif // #define STJETTREEENTRYMAKER_H
+#endif // STJTREEENTRYMAKER_H

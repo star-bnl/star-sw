@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListWriter.h,v 1.2 2008/08/02 19:23:38 tai Exp $
-#ifndef STJETJETLISTWRITER_HH
-#define STJETJETLISTWRITER_HH
+// $Id: StjJetListWriter.h,v 1.3 2008/08/02 22:43:40 tai Exp $
+#ifndef STJJETLISTWRITER_H
+#define STJJETLISTWRITER_H
 
 #include "StjFourVecList.h"
 #include "StjJetList.h"
@@ -59,4 +59,4 @@ private:
   Double_t _four_m[4096];
 };
 
-#endif // STJETJETLISTWRITER_HH
+#endif // STJJETLISTWRITER_H

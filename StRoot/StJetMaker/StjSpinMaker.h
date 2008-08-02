@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjSpinMaker.h,v 1.2 2008/08/02 19:22:27 tai Exp $
-#ifndef STJETSPINMAKER_HH
-#define STJETSPINMAKER_HH
+// $Id: StjSpinMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $
+#ifndef STJSPINMAKER_H
+#define STJSPINMAKER_H
 
 #include "StMaker.h"
 #include <Rtypes.h>
@@ -23,7 +23,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjSpinMaker.h,v 1.2 2008/08/02 19:22:27 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjSpinMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -36,4 +36,4 @@ private:
 
 };
 
-#endif // STJETSPINMAKER_HH
+#endif // STJSPINMAKER_H

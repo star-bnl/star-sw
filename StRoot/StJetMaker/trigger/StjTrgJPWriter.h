@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgJPWriter.h,v 1.1 2008/08/02 22:21:31 tai Exp $
-#ifndef STJETTRGJPWRITER_H
-#define STJETTRGJPWRITER_H
+// $Id: StjTrgJPWriter.h,v 1.2 2008/08/02 22:43:43 tai Exp $
+#ifndef STJTRGJPWRITER_H
+#define STJTRGJPWRITER_H
 
 #include "StjTrgWriter.h"
 
@@ -38,4 +38,4 @@ private:
   StjTrg* _trg;
 };
 
-#endif // STJETTRGJPWRITER_H
+#endif // STJTRGJPWRITER_H

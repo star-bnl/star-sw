@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjEtaToDetectorEta.h,v 1.2 2008/08/02 19:22:26 tai Exp $
-#ifndef ETATODETECTORETA_H
-#define ETATODETECTORETA_H
+// $Id: StjEtaToDetectorEta.h,v 1.3 2008/08/02 22:43:06 tai Exp $
+#ifndef STJETATODETECTORETA_H
+#define STJETATODETECTORETA_H
 
 #include <cmath>
 
@@ -42,5 +42,5 @@ private:
 }
 
 
-#endif // ETATODETECTORETA_H
+#endif // STJETATODETECTORETA_H
 

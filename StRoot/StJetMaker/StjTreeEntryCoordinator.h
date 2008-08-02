@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryCoordinator.h,v 1.2 2008/08/02 19:22:27 tai Exp $
+// $Id: StjTreeEntryCoordinator.h,v 1.3 2008/08/02 22:43:06 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTREEENTRYCOORDINATOR_H
-#define STJETTREEENTRYCOORDINATOR_H
+#ifndef STJTREEENTRYCOORDINATOR_H
+#define STJTREEENTRYCOORDINATOR_H
 
 #include <Rtypes.h>
 
@@ -78,4 +78,4 @@ private:
 
 };
 
-#endif // STJETTREEENTRYCOORDINATOR_H
+#endif // STJTREEENTRYCOORDINATOR_H

@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerII.h,v 1.8 2008/08/02 19:22:25 tai Exp $
-#ifndef STJETMAKERII_HH
-#define STJETMAKERII_HH
+// $Id: StJetMakerII.h,v 1.9 2008/08/02 22:43:05 tai Exp $
+#ifndef STJETMAKERII_H
+#define STJETMAKERII_H
 
 #include "StMaker.h"
 
@@ -43,7 +43,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.8 2008/08/02 19:22:25 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.9 2008/08/02 22:43:05 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -85,4 +85,4 @@ private:
   ClassDef(StJetMakerII, 0)
 };
 
-#endif // STJETMAKER_HH
+#endif // STJETMAKERII_H

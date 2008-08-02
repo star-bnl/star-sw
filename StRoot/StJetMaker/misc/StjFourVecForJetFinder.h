@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecForJetFinder.h,v 1.2 2008/08/02 19:23:14 tai Exp $
-#ifndef FOURVECFORJETFINDER_H
-#define FOURVECFORJETFINDER_H
+// $Id: StjFourVecForJetFinder.h,v 1.3 2008/08/02 22:43:35 tai Exp $
+#ifndef STJFOURVECFORJETFINDER_H
+#define STJFOURVECFORJETFINDER_H
 
 #include "StJetFinder/AbstractFourVec.h"
 
@@ -46,5 +46,5 @@ private:
 
 };
 
-#endif // FOURVECWITHID_H
+#endif // STJFOURVECFORJETFINDER_H
 

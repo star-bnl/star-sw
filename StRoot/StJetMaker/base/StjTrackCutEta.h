@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutEta.h,v 1.2 2008/08/02 19:22:53 tai Exp $
+// $Id: StjTrackCutEta.h,v 1.3 2008/08/02 22:43:21 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKCUTETA_H
-#define TRACKCUTETA_H
+#ifndef STJTRACKCUTETA_H
+#define STJTRACKCUTETA_H
 
 #include "StjTrackCut.h"
 
@@ -32,4 +32,4 @@ private:
 
 }
 
-#endif // TRACKCUTETA_H
+#endif // STJTRACKCUTETA_H

@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCMuDst.h,v 1.2 2008/08/02 19:23:20 tai Exp $
-#ifndef STJETTPCMUDST_H
-#define STJETTPCMUDST_H
+// $Id: StjTPCMuDst.h,v 1.3 2008/08/02 22:43:38 tai Exp $
+#ifndef STJTPCMUDST_H
+#define STJTPCMUDST_H
 
 #include "StjTPC.h"
 
@@ -30,4 +30,4 @@ private:
 
 }
 
-#endif // STJETTPCMUDST_H
+#endif // STJTPCMUDST_H

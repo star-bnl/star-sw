@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTPC.h,v 1.2 2008/08/02 19:22:48 tai Exp $
+// $Id: StjTPC.h,v 1.3 2008/08/02 22:43:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTPC_H
-#define STJETTPC_H
+#ifndef STJTPC_H
+#define STJTPC_H
 
 #include "StjTrackList.h"
 
@@ -33,4 +33,4 @@ public:
 
 }
 
-#endif // STJETTPC_H
+#endif // STJTPC_H

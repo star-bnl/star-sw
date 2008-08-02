@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecList.h,v 1.2 2008/08/02 19:22:44 tai Exp $
+// $Id: StjFourVecList.h,v 1.3 2008/08/02 22:43:16 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef FOURVECLIST_H
-#define FOURVECLIST_H
+#ifndef STJFOURVECLIST_H
+#define STJFOURVECLIST_H
 
 #include <ostream>
 #include <vector>
@@ -67,4 +67,4 @@ inline std::ostream& operator<<(std::ostream& out, const StjFourVecList& v)
 
 }
 
-#endif // FOURVECLIST_H
+#endif // STJFOURVECLIST_H

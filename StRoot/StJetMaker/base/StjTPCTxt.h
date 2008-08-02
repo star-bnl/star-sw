@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTxt.h,v 1.2 2008/08/02 19:22:49 tai Exp $
+// $Id: StjTPCTxt.h,v 1.3 2008/08/02 22:43:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTPCTXT_H
-#define STJETTPCTXT_H
+#ifndef STJTPCTXT_H
+#define STJTPCTXT_H
 
 #include "StjTPC.h"
 
@@ -29,4 +29,4 @@ private:
 
 }
 
-#endif // STJETTPCTXT_H
+#endif // STJTPCTXT_H

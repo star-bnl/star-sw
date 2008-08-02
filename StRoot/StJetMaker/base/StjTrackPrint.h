@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackPrint.h,v 1.2 2008/08/02 19:22:55 tai Exp $
+// $Id: StjTrackPrint.h,v 1.3 2008/08/02 22:43:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTRACKPRINT_H
-#define STJETTRACKPRINT_H
+#ifndef STJTRACKPRINT_H
+#define STJTRACKPRINT_H
 
 #include "StjTrackList.h"
 
@@ -28,4 +28,4 @@ private:
 
 }
 
-#endif // STJETTRACKPRINT_H
+#endif // STJTRACKPRINT_H

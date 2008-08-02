@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutNHits.h,v 1.2 2008/08/02 19:22:54 tai Exp $
+// $Id: StjTrackCutNHits.h,v 1.3 2008/08/02 22:43:21 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef TRACKCUTNHITS_H
-#define TRACKCUTNHITS_H
+#ifndef STJTRACKCUTNHITS_H
+#define STJTRACKCUTNHITS_H
 
 #include "StjTrackCut.h"
 
@@ -34,4 +34,4 @@ private:
 
 }
 
-#endif // TRACKCUTNHITS_H
+#endif // STJTRACKCUTNHITS_H

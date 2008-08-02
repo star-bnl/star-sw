@@ -1,8 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMC.h,v 1.2 2008/08/02 19:22:42 tai Exp $
+// $Id: StjEEMC.h,v 1.3 2008/08/02 22:43:15 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETEEMC_H
-#define STJETEEMC_H
+#ifndef STJEEMC_H
+#define STJEEMC_H
 
 #include "StjTowerEnergyList.h"
 
@@ -32,4 +32,4 @@ public:
 
 }
 
-#endif // STJETEEMC_H
+#endif // STJEEMC_H

@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyListReader.h,v 1.2 2008/08/02 19:23:38 tai Exp $
-#ifndef STJETTOWERENERGYLISTREADER_H
-#define STJETTOWERENERGYLISTREADER_H
+// $Id: StjTowerEnergyListReader.h,v 1.3 2008/08/02 22:43:40 tai Exp $
+#ifndef STJTOWERENERGYLISTREADER_H
+#define STJTOWERENERGYLISTREADER_H
 
 #include "StjTowerEnergyList.h"
 #include <Rtypes.h>
@@ -39,4 +39,4 @@ private:
 
 };
 
-#endif // STJETTOWERENERGYLISTREADER_H
+#endif // STJTOWERENERGYLISTREADER_H
