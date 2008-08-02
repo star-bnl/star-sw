@@ -22,8 +22,8 @@
 #include <StJets.h>
 
 #include <StBET4pMakerImp.h>
-#include <StJetTPCMuDst.h>
-#include <StJetBEMCMuDst.h>
+#include <StjTPCMuDst.h>
+#include <StjBEMCMuDst.h>
 
 #include <StEmcRawMaker/StBemcTables.h>
 

@@ -1,0 +1,40 @@
+// -*- mode: c++;-*-
+// $Id: StjTrackListCut.h,v 1.1 2008/08/02 04:16:33 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
+#ifndef STJETTPCTRACKCUT_H
+#define STJETTPCTRACKCUT_H
+
+#include "StjTrackList.h"
+#include "StjTrackCut.h"
+
+#include <vector>
+
+namespace StSpinJet {
+
+class StJetTPCTrackCut {
+
+public:
+
+  StJetTPCTrackCut() { }
+  virtual ~StJetTPCTrackCut() { }
+
+  TrackList operator()(const TrackList& trackList);
+
+  void addCut(StJetTrackCut::TrackCut* cut) {
+    _cutList.push_back(cut);
+  }
+
+  typedef std::vector<StJetTrackCut::TrackCut*> CutList;
+  CutList getCutList() { return _cutList; }
+
+private:
+
+  bool shoudNotPass(const Track& track);
+
+  CutList _cutList;
+
+};
+
+}
+
+#endif // STJETTPCTRACKCUT_H

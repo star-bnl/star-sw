@@ -1,26 +1,26 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 #include <StBET4pMakerImp.h>
-#include <StJetTPCTxt.h>
-#include <StJetBEMCTxt.h>
-#include <StJetEEMCTxt.h>
+#include <StjTPCTxt.h>
+#include <StjBEMCTxt.h>
+#include <StjEEMCTxt.h>
 
-#include "StJetTPCTrackCut.h"
+#include "StjTrackListCut.h"
 
-#include <TrackCutDca.h>
-#include <TrackCutDcaPtDependent.h>
-#include <TrackCutEta.h>
-#include <TrackCutPossibleHitRatio.h>
+#include <StjTrackCutDca.h>
+#include <StjTrackCutDcaPtDependent.h>
+#include <StjTrackCutEta.h>
+#include <StjTrackCutPossibleHitRatio.h>
 
-#include "StJetBEMCEnergyCut.h"
+#include "StjTowerEnergyListCut.h"
 
-#include <TowerEnergyCut2003BemcTower.h>
-#include <TowerEnergyCutBemcWestOnly.h>
-#include <TowerEnergyCutEnergy.h>
-#include <TowerEnergyCutBemcStatus.h>
-#include <TowerEnergyCutAdc.h>
+#include <StjTowerEnergyCut2003BemcTower.h>
+#include <StjTowerEnergyCutBemcWestOnly.h>
+#include <StjTowerEnergyCutEnergy.h>
+#include <StjTowerEnergyCutBemcStatus.h>
+#include <StjTowerEnergyCutAdc.h>
 
-#include "CorrectTowerEnergyForTracks.h"
+#include "StjTowerEnergyCorrectionForTracks.h"
 
 #include <iostream>
 #include <fstream>

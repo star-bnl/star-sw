@@ -1,10 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StDefaultJetTreeWriter.h,v 1.3 2008/07/22 17:44:45 tai Exp $
+// $Id: StDefaultJetTreeWriter.h,v 1.4 2008/08/02 04:18:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STDEFAULTJETTREEWRITER_H
 #define STDEFAULTJETTREEWRITER_H
 
-#include "StJetTreeWriter.h"
+#include "StjTreeWriter.h"
 
 class StMuDstMaker;
 class StJets;
@@ -27,7 +27,7 @@ public:
   void Init();
   void Finish();
 
-  void addJetFinder(StFourPMaker* fourPMaker, const std::vector<const AbstractFourVec*>* particleList, std::list<StProtoJet>* protoJetList, const char* name, StJets* stjets);
+  void addJetFinder(StFourPMaker* fourPMaker, const std::vector<const AbstractFourVec*>* particleList, std::list<StProtoJet>* protoJetList, const char* name, StJets* stjets = 0);
 
   TTree* jetTree() const { return _jetTree; }
 

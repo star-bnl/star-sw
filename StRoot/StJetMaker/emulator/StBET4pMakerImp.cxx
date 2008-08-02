@@ -1,15 +1,15 @@
-// $Id: StBET4pMakerImp.cxx,v 1.1 2008/07/21 02:00:21 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.2 2008/08/02 04:18:30 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImp.h"
 
-#include "StJetTPC.h"
-#include "StJetBEMC.h"
-#include "StJetEEMC.h"
+#include "StjTPC.h"
+#include "StjBEMC.h"
+#include "StjEEMC.h"
 
-#include "StJetTPCTrackCut.h"
-#include "StJetBEMCEnergyCut.h"
+#include "StjTrackListCut.h"
+#include "StjTowerEnergyListCut.h"
 
-#include "CorrectTowerEnergyForTracks.h"
+#include "StjTowerEnergyCorrectionForTracks.h"
 
 #include <iostream>
 

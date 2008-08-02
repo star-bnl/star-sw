@@ -1,11 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerII.h,v 1.6 2008/07/18 19:20:09 tai Exp $
+// $Id: StJetMakerII.h,v 1.7 2008/08/02 03:57:29 tai Exp $
 #ifndef STJETMAKERII_HH
 #define STJETMAKERII_HH
 
 #include "StMaker.h"
 
-#include "TrackTowerEnergyListToFourVecList.h"
+#include "StjTrackTowerEnergyListToFourVecList.h"
 
 #include <vector>
 
@@ -43,7 +43,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.6 2008/07/18 19:20:09 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.7 2008/08/02 03:57:29 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 

@@ -2,10 +2,10 @@
 
 #include <RunJetFinder.h>
 
-#include <StJetTreeEntryCoordinator.h>
-#include <StJetBEMCTree.h>
-#include <StJetTPCTree.h>
-#include <TrackTowerEnergyListToFourVecList.h>
+#include <StjTreeEntryCoordinator.h>
+#include <StjBEMCTree.h>
+#include <StjTPCTree.h>
+#include <StjTrackTowerEnergyListToFourVecList.h>
 
 
 #include <StProtoJet.h>

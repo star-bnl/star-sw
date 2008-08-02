@@ -1,13 +1,13 @@
-// $Id: RunJetFinder.cxx,v 1.1 2008/07/22 19:24:03 tai Exp $
+// $Id: RunJetFinder.cxx,v 1.2 2008/08/02 04:18:57 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "RunJetFinder.h"
 
 #include <StJetFinder/StJetFinder.h>
 #include <StJetFinder/StJetPars.h>
 
-#include <FourVecForJetFinder.h>
+#include <StjFourVecForJetFinder.h>
 
-#include <EtaToDetectorEta.h>
+#include <StjEtaToDetectorEta.h>
 
 #include <iostream>
 

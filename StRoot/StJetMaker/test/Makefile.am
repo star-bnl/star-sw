@@ -19,20 +19,20 @@ libStJetMakerTest_la_SOURCES = 	\
 	StBET4pMakerImpTest.C StBET4pMakerImpTest.hh \
 	StBET4pMakerTest.C StBET4pMakerTest.hh \
 	LoopTest.C LoopTest.hh \
-	StJetTPCTrackCutTest.C StJetTPCTrackCutTest.hh \
-	StJetBEMCEnergyCutTest.C StJetBEMCEnergyCutTest.hh \
-	BemcEnergySumCalculatorBuilderTest.C BemcEnergySumCalculatorBuilderTest.hh \
-	StJetTPCTreeTest.C StJetTPCTreeTest.hh \
-	StJetBEMCTreeTest.C StJetBEMCTreeTest.hh \
-	StJetTreeEntryCoordinatorTest.C StJetTreeEntryCoordinatorTest.hh \
-	StJetTreeEntryMakerTest.C StJetTreeEntryMakerTest.hh \
-	TowerEnergyListToStMuTrackFourVecListTest.C TowerEnergyListToStMuTrackFourVecListTest.hh \
-	TrackListToStMuTrackFourVecListTest.C TrackListToStMuTrackFourVecListTest.hh \
+	StjTrackListCutTest.C StjTrackListCutTest.hh \
+	StjTowerEnergyListCutTest.C StjTowerEnergyListCutTest.hh \
+	StjeBemcEnergySumCalculatorBuilderTest.C StjeBemcEnergySumCalculatorBuilderTest.hh \
+	StjTPCTreeTest.C StjTPCTreeTest.hh \
+	StjBEMCTreeTest.C StjBEMCTreeTest.hh \
+	StjTreeEntryCoordinatorTest.C StjTreeEntryCoordinatorTest.hh \
+	StjTreeEntryMakerTest.C StjTreeEntryMakerTest.hh \
+	StjTowerEnergyListToStMuTrackFourVecListTest.C StjTowerEnergyListToStMuTrackFourVecListTest.hh \
+	StjTrackListToStMuTrackFourVecListTest.C StjTrackListToStMuTrackFourVecListTest.hh \
 	RunJetFinderTest.C RunJetFinderTest.hh \
-	StJetTowerEnergyVariationTest.C StJetTowerEnergyVariationTest.hh \
-	TrackTowerEnergyListToFourVecListTest.C TrackTowerEnergyListToFourVecListTest.hh \
-	StJetFourVecListCutTest.C StJetFourVecListCutTest.hh \
-	StJetJetListCutTest.C StJetJetListCutTest.hh \
+	StjTowerEnergyVariationTest.C StjTowerEnergyVariationTest.hh \
+	StjTrackTowerEnergyListToFourVecListTest.C StjTrackTowerEnergyListToFourVecListTest.hh \
+	StjFourVecListCutTest.C StjFourVecListCutTest.hh  \
+	StjJetListCutTest.C StjJetListCutTest.hh \
 	StPythiaFourPMakerTest.C StPythiaFourPMakerTest.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
