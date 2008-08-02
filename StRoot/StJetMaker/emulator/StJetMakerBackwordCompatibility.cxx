@@ -1,8 +1,8 @@
-// $Id: StJetMakerBackwordCompatibility.cxx,v 1.2 2008/08/02 19:23:06 tai Exp $
+// $Id: StJetMakerBackwordCompatibility.cxx,v 1.3 2008/08/02 21:26:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetMakerBackwordCompatibility.h"
 
-#include "StDefaultJetTreeWriter.h"
+#include "StjeDefaultJetTreeWriter.h"
 
 namespace StSpinJet {
 
