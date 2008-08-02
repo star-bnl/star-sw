@@ -1,10 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjeDefaultJetTreeWriter.h,v 1.3 2008/08/02 22:43:32 tai Exp $
+// $Id: StjeDefaultJetTreeWriter.h,v 1.4 2008/08/02 23:10:19 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJEDEFAULTJETTREEWRITER_H
 #define STJEDEFAULTJETTREEWRITER_H
 
-#include "StjTreeWriter.h"
+#include "StjeTreeWriter.h"
 
 class StMuDstMaker;
 class StJets;
@@ -18,7 +18,7 @@ class TFile;
 #include <vector>
 #include <list>
 
-class StjeDefaultJetTreeWriter : public StjTreeWriter {
+class StjeDefaultJetTreeWriter : public StjeTreeWriter {
 
 public:
   StjeDefaultJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName);

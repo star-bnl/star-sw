@@ -1,6 +1,6 @@
-// $Id: StParticleCollector.cxx,v 1.2 2008/07/21 19:12:53 tai Exp $
+// $Id: StjeParticleCollector.cxx,v 1.1 2008/08/02 23:10:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StParticleCollector.h"
+#include "StjeParticleCollector.h"
 
 #include <StJetFinder/AbstractFourVec.h>
 
@@ -13,7 +13,7 @@ using namespace std;
 
 namespace StSpinJet {
 
-StParticleCollector::StParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ParticleList& particleList)
+StjeParticleCollector::StjeParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ParticleList& particleList)
   : _fourPMaker(fp)
   , _particleList(particleList)
   , _anaPar(*ap)
@@ -21,12 +21,12 @@ StParticleCollector::StParticleCollector(const StppAnaPars* ap, StFourPMaker* fp
 
 }
 
-StParticleCollector::~StParticleCollector()
+StjeParticleCollector::~StjeParticleCollector()
 {
 
 }
 
-void StParticleCollector::Do()
+void StjeParticleCollector::Do()
 {
   const vector<AbstractFourVec*> &particleList = _fourPMaker->getTracks();
   
@@ -42,7 +42,7 @@ void StParticleCollector::Do()
 }
 
 
-bool StParticleCollector::shoudNotPassToJetFinder(const AbstractFourVec* particle) const
+bool StjeParticleCollector::shoudNotPassToJetFinder(const AbstractFourVec* particle) const
 {
   const StMuTrackFourVec* p = dynamic_cast<const StMuTrackFourVec*>(particle);
 
@@ -63,7 +63,7 @@ bool StParticleCollector::shoudNotPassToJetFinder(const AbstractFourVec* particl
   return false;
 }
 	
-bool StParticleCollector::isChargedTrack(const StMuTrackFourVec* p) const
+bool StjeParticleCollector::isChargedTrack(const StMuTrackFourVec* p) const
 {
   return p->track() != 0;
 }

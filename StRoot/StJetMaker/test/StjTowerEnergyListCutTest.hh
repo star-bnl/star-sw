@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETBEMCENERGYCUTTEST_HH
-#define STJETBEMCENERGYCUTTEST_HH
+#ifndef STJTOWERENERGYLISTCUTTEST_HH
+#define STJTOWERENERGYLISTCUTTEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -33,4 +33,4 @@ private:
   const static int _2003TowerIdList[];
 };
 
-#endif // STJETBEMCENERGYCUTTEST_HH
+#endif // STJTOWERENERGYLISTCUTTEST_HH

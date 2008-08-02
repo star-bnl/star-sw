@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjEtaToDetectorEta.h,v 1.3 2008/08/02 22:43:06 tai Exp $
+// $Id: StjEtaToDetectorEta.h,v 1.1 2008/08/02 23:10:27 tai Exp $
 #ifndef STJETATODETECTORETA_H
 #define STJETATODETECTORETA_H
 

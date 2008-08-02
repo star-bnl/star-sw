@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTREEENTRYCOORDINATORTEST_HH
-#define STJETTREEENTRYCOORDINATORTEST_HH
+#ifndef STJTREEENTRYCOORDINATORTEST_HH
+#define STJTREEENTRYCOORDINATORTEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -20,4 +20,4 @@ private:
 
 };
 
-#endif // STJETTREEENTRYCOORDINATORTEST_HH
+#endif // STJTREEENTRYCOORDINATORTEST_HH

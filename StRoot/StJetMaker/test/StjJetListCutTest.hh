@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETJETLISTCUTTEST_HH
-#define STJETJETLISTCUTTEST_HH
+#ifndef STJJETLISTCUTTEST_HH
+#define STJJETLISTCUTTEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -24,5 +24,5 @@ private:
 
 };
 
-#endif // STJETJETLISTCUTTEST_HH
+#endif // STJJETLISTCUTTEST_HH
 

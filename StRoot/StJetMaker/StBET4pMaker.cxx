@@ -1,10 +1,10 @@
-// $Id: StBET4pMaker.cxx,v 1.4 2008/08/02 19:22:23 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.5 2008/08/02 23:10:06 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
 
-#include "StjTrackListToStMuTrackFourVecList.h"
-#include "StjTowerEnergyListToStMuTrackFourVecList.h"
+#include "StjeTrackListToStMuTrackFourVecList.h"
+#include "StjeTowerEnergyListToStMuTrackFourVecList.h"
 
 #include "StjeBemcEnergySumCalculator.h"
 #include "StjeBemcEnergySumCalculatorBuilder.h"
@@ -29,8 +29,8 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _useTree(false)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
-  , _track2four(*(new StjTrackListToStMuTrackFourVecList))
-  , _energy2four(*(new StjTowerEnergyListToStMuTrackFourVecList))
+  , _track2four(*(new StjeTrackListToStMuTrackFourVecList))
+  , _energy2four(*(new StjeTowerEnergyListToStMuTrackFourVecList))
 { }
 
 StBET4pMaker::StBET4pMaker(const char* name, StjTreeEntryMaker* maker)
@@ -43,8 +43,8 @@ StBET4pMaker::StBET4pMaker(const char* name, StjTreeEntryMaker* maker)
   , _useTree(true)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
-  , _track2four(*(new StjTrackListToStMuTrackFourVecList))
-  , _energy2four(*(new StjTowerEnergyListToStMuTrackFourVecList))
+  , _track2four(*(new StjeTrackListToStMuTrackFourVecList))
+  , _energy2four(*(new StjeTowerEnergyListToStMuTrackFourVecList))
 { }
 
 

@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTOWERENERGYVARIATIONTEST_HH
-#define STJETTOWERENERGYVARIATIONTEST_HH
+#ifndef STJTOWERENERGYVARIATIONTEST_HH
+#define STJTOWERENERGYVARIATIONTEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -26,4 +26,4 @@ public:
 
 };
 
-#endif // STJETTOWERENERGYVARIATIONTEST_HH
+#endif // STJTOWERENERGYVARIATIONTEST_HH

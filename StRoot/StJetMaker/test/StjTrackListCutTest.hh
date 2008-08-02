@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJETTPCTRACKCUTTEST_HH
-#define STJETTPCTRACKCUTTEST_HH
+#ifndef STJTRACKLISTCUTTEST_HH
+#define STJTRACKLISTCUTTEST_HH
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -26,4 +26,4 @@ private:
 
 };
 
-#endif // STJETTPCTRACKCUTTEST_HH
+#endif // STJTRACKLISTCUTTEST_HH

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetFinderRunner.h,v 1.2 2008/08/02 22:43:31 tai Exp $
+// $Id: StjeJetFinderRunner.h,v 1.1 2008/08/02 23:10:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETFINDERRUNNER_H
 #define STJETFINDERRUNNER_H
@@ -14,16 +14,16 @@ class StJetFinder;
 
 namespace StSpinJet {
 
-class StJetFinderRunner {
+class StjeJetFinderRunner {
 
 public:
 
   typedef std::list<StProtoJet> ProtoJetList;
   typedef std::vector<const AbstractFourVec*> ParticleList;
 
-  StJetFinderRunner(StJetPars* jp, const ParticleList& particleList, ProtoJetList& protoJets);
+  StjeJetFinderRunner(StJetPars* jp, const ParticleList& particleList, ProtoJetList& protoJets);
 
-  virtual ~StJetFinderRunner();
+  virtual ~StjeJetFinderRunner();
 
   void Init();
 
