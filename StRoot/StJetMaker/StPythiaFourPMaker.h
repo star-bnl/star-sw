@@ -1,11 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StPythiaFourPMaker.h,v 1.5 2008/07/22 06:36:54 tai Exp $
+// $Id: StPythiaFourPMaker.h,v 1.6 2008/08/02 04:04:03 tai Exp $
 #ifndef STPYTHIAFOURPMAKER_HH
 #define STPYTHIAFOURPMAKER_HH
 
 #include "StFourPMaker.h"
 
-#include <MCParticleList.h>
+#include <StjMCParticleList.h>
 
 #include <vector>
 

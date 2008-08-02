@@ -1,9 +1,9 @@
-// $Id: StJetScratch.cxx,v 1.4 2008/07/13 05:36:39 tai Exp $
+// $Id: StJetScratch.cxx,v 1.5 2008/08/02 03:57:36 tai Exp $
 #include "StJetScratch.h"
 
-#include "StJetTPCMuDst.h"
-#include "StJetBEMCMuDst.h"
-#include "StJetEEMCMuDst.h"
+#include "StjTPCMuDst.h"
+#include "StjBEMCMuDst.h"
+#include "StjEEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 #include <StMuDSTMaker/COMMON/StMuDst.h>
