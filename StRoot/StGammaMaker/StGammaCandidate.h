@@ -25,7 +25,7 @@ class StGammaCandidate : public TObject
   ~StGammaCandidate();
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGammaCandidate.h,v 1.11 2008/07/30 14:56:11 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGammaCandidate.h,v 1.12 2008/08/02 19:46:05 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 
   //
@@ -64,7 +64,7 @@ class StGammaCandidate : public TObject
   enum CalorimeterId { kEEmc=0, kBEmc, kUnknown=255 }; 
 
   // Use above enumerations
-  void SetId(Int_t id){ if ( id=kEEmc||id==kBEmc ) {mGammaId=id;} else mGammaId=kUnknown; }
+  void SetId(Int_t id){ if ( id==kEEmc||id==kBEmc ) {mGammaId=id;} else mGammaId=kUnknown; }
 
   void SetTowerId( Int_t id ){ mTowerId=id; }
   void SetTowerClusterId( Int_t id ){ mTowerClusterId=id; }
