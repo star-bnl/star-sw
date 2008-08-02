@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjeJetCuts.h,v 1.1 2008/08/02 22:21:25 tai Exp $
-#ifndef STJETCUTS_HH
-#define STJETCUTS_HH
+// $Id: StjeJetCuts.h,v 1.2 2008/08/02 22:33:28 tai Exp $
+#ifndef STJEJETCUTS_H
+#define STJEJETCUTS_H
 
 #include "StppAnaPars.h"
 
@@ -38,5 +38,5 @@ private:
 
 }
 
-#endif // STJETCUTS_HH
+#endif // STJEJETCUTS_H
 
