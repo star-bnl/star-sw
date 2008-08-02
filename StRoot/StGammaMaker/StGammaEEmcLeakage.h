@@ -30,7 +30,7 @@ class StGammaEEmcLeakage : public TObject
   /// the place, so don't go crazy with this.
   TCanvas *draw( const TVector3 &gamma );
 
-  static StGammaEEmcLeakage *StGammaEEmcLeakage::instance();
+  static StGammaEEmcLeakage *instance();
 
  private:
  protected:
