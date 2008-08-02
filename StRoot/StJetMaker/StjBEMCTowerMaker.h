@@ -1,12 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCTowerMaker.h,v 1.1 2008/08/02 04:04:18 tai Exp $
+// $Id: StjBEMCTowerMaker.h,v 1.2 2008/08/02 19:22:26 tai Exp $
 #ifndef STJETBEMCTOWERMAKER_HH
 #define STJETBEMCTOWERMAKER_HH
 
 #include "StMaker.h"
 #include <Rtypes.h>
 
-class StJetTowerEnergyListWriter;
+class StjTowerEnergyListWriter;
 
 class TDirectory;
 class TTree;
@@ -14,23 +14,23 @@ class TTree;
 class StMuDstMaker;
 
 namespace StSpinJet {
-  class StJetBEMC;
-  class StJetBEMCEnergyCut;
+  class StjBEMC;
+  class StjTowerEnergyListCut;
 }
 
-class StJetBEMCTowerMaker : public StMaker {
+class StjBEMCTowerMaker : public StMaker {
 
 public:
 
-  StJetBEMCTowerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker);
-  virtual ~StJetBEMCTowerMaker() { }
+  StjBEMCTowerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker);
+  virtual ~StjBEMCTowerMaker() { }
 
   Int_t Init();
   Int_t Make();
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjBEMCTowerMaker.h,v 1.1 2008/08/02 04:04:18 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjBEMCTowerMaker.h,v 1.2 2008/08/02 19:22:26 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -38,12 +38,12 @@ private:
 
   StMuDstMaker* _uDstMaker;
 
-  StSpinJet::StJetBEMC* _bemc;
-  StSpinJet::StJetBEMCEnergyCut* _bemcCut;
+  StSpinJet::StjBEMC* _bemc;
+  StSpinJet::StjTowerEnergyListCut* _bemcCut;
 
-  StJetTowerEnergyListWriter* _writer;
+  StjTowerEnergyListWriter* _writer;
 
-  ClassDef(StJetBEMCTowerMaker, 0)
+  ClassDef(StjBEMCTowerMaker, 0)
 
 };
 

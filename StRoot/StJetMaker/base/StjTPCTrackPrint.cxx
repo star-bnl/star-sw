@@ -1,4 +1,4 @@
-// $Id: StjTPCTrackPrint.cxx,v 1.1 2008/08/02 04:15:41 tai Exp $
+// $Id: StjTPCTrackPrint.cxx,v 1.2 2008/08/02 19:22:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTPCTrackPrint.h"
 
@@ -9,14 +9,14 @@ using namespace std;
 
 namespace StSpinJet {
 
-void StJetTPCTrackPrint::operator()(const TrackList& trackList)
+void StjTPCTrackPrint::operator()(const StjTrackList& trackList)
 {
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+  for(StjTrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
     print(*it);
   }
 }
 
-void StJetTPCTrackPrint::print(const Track& track) const
+void StjTPCTrackPrint::print(const StjTrack& track) const
 {
   static ofstream ofs("./tpctracks.txt");
 

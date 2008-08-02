@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyListReader.h,v 1.1 2008/08/02 04:22:11 tai Exp $
+// $Id: StjTowerEnergyListReader.h,v 1.2 2008/08/02 19:23:38 tai Exp $
 #ifndef STJETTOWERENERGYLISTREADER_H
 #define STJETTOWERENERGYLISTREADER_H
 
@@ -8,13 +8,13 @@
 
 class TTree;
 
-class StJetTowerEnergyListReader {
+class StjTowerEnergyListReader {
 
 public:
-  StJetTowerEnergyListReader(TTree *tree);
-  virtual ~StJetTowerEnergyListReader() { }
+  StjTowerEnergyListReader(TTree *tree);
+  virtual ~StjTowerEnergyListReader() { }
 
-  StSpinJet::TowerEnergyList GetEntry(Long64_t entry);
+  StSpinJet::StjTowerEnergyList GetEntry(Long64_t entry);
 
 private:
 

@@ -14,23 +14,23 @@ using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( TrackTowerEnergyListToFourVecListTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTrackTowerEnergyListToFourVecListTest );
 
-void TrackTowerEnergyListToFourVecListTest::setUp() 
+void StjTrackTowerEnergyListToFourVecListTest::setUp() 
 {
 
 }
 
-void TrackTowerEnergyListToFourVecListTest::tearDown()
+void StjTrackTowerEnergyListToFourVecListTest::tearDown()
 {
 
 }
 
-void TrackTowerEnergyListToFourVecListTest::testOne()
+void StjTrackTowerEnergyListToFourVecListTest::testOne()
 {
-  TrackList trackList;
+  StjTrackList trackList;
 
-  Track track1;
+  StjTrack track1;
   track1.runNumber  = 100;
   track1.eventId    = 10;
   track1.detectorId = 1;
@@ -40,7 +40,7 @@ void TrackTowerEnergyListToFourVecListTest::testOne()
   track1.phi = 0.1;
   trackList.push_back(track1);
 
-  Track track2;
+  StjTrack track2;
   track2.runNumber  = 100;
   track2.eventId    = 10;
   track2.detectorId = 1;
@@ -50,9 +50,9 @@ void TrackTowerEnergyListToFourVecListTest::testOne()
   track2.phi = 0.2;
   trackList.push_back(track2);
 
-  TowerEnergyList energyList;
+  StjTowerEnergyList energyList;
 
-  TowerEnergy energy1;
+  StjTowerEnergy energy1;
   energy1.runNumber  = 100;
   energy1.eventId    = 10;
   energy1.detectorId = 9;
@@ -67,7 +67,7 @@ void TrackTowerEnergyListToFourVecListTest::testOne()
   energy1.vertexZ    = 0.0;
   energyList.push_back(energy1);
 
-  TowerEnergy energy2;
+  StjTowerEnergy energy2;
   energy2.runNumber  = 100;
   energy2.eventId    = 10;
   energy2.detectorId = 9;
@@ -82,7 +82,7 @@ void TrackTowerEnergyListToFourVecListTest::testOne()
   energy2.vertexZ    = 0.0;
   energyList.push_back(energy2);
 
-  TowerEnergy energy3;
+  StjTowerEnergy energy3;
   energy3.runNumber  = 100;
   energy3.eventId    = 10;
   energy3.detectorId = 9;
@@ -97,12 +97,12 @@ void TrackTowerEnergyListToFourVecListTest::testOne()
   energy3.vertexZ    = 0.0;
   energyList.push_back(energy3);
 
-  TrackTowerEnergyListToFourVecList toFourVec;
+  StjTrackTowerEnergyListToFourVecList toFourVec;
 
-  FourVecList fourList = toFourVec(trackList, energyList);
+  StjFourVecList fourList = toFourVec(trackList, energyList);
 
   CPPUNIT_ASSERT_EQUAL( (size_t)5, fourList.size());
-  for(FourVecList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
+  for(StjFourVecList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
 //    cout << (*it).runNumber << " "
 //	 << (*it).eventId   << " "
 //	 << (*it).detectorId << " "

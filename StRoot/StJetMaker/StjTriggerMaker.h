@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTriggerMaker.h,v 1.1 2008/08/02 04:08:49 tai Exp $
+// $Id: StjTriggerMaker.h,v 1.2 2008/08/02 19:22:32 tai Exp $
 #ifndef STJETTRIGGERMAKER_HH
 #define STJETTRIGGERMAKER_HH
 
@@ -11,23 +11,23 @@
 class TDirectory;
 class TTree;
 
-class StJetTrgWriter;
+class StjTrgWriter;
 
 class StMuDstMaker;
 class StEmcTriggerMaker;
 class StTriggerSimuMaker;
 
-class StJetTrgSoftwareFactory;
+class StjTrgSoftwareFactory;
 
-class StJetTrg;
+class StjTrg;
 
-class StJetTriggerMaker : public StMaker {
+class StjTriggerMaker : public StMaker {
 
 public:
 
-  StJetTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StEmcTriggerMaker* emcTrigMaker, bool isMC = false);
-  StJetTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StTriggerSimuMaker* simuTrig, bool isMC = false);
-  virtual ~StJetTriggerMaker() { }
+  StjTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StEmcTriggerMaker* emcTrigMaker, bool isMC = false);
+  StjTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StTriggerSimuMaker* simuTrig, bool isMC = false);
+  virtual ~StjTriggerMaker() { }
 
   Int_t Init();
   Int_t Make();
@@ -39,7 +39,7 @@ public:
 
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTriggerMaker.h,v 1.1 2008/08/02 04:08:49 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTriggerMaker.h,v 1.2 2008/08/02 19:22:32 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -49,12 +49,12 @@ private:
   bool _isMC;
 
   StMuDstMaker* _uDstMaker;
-  StJetTrgSoftwareFactory* _softTrgFactory;
+  StjTrgSoftwareFactory* _softTrgFactory;
 
-  typedef std::vector<StJetTrgWriter*> WriterList;
+  typedef std::vector<StjTrgWriter*> WriterList;
   WriterList _writerList;
 
-  ClassDef(StJetTriggerMaker, 0)
+  ClassDef(StjTriggerMaker, 0)
 
 };
 

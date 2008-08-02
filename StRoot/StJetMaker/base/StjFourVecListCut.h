@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecListCut.h,v 1.1 2008/08/02 04:15:21 tai Exp $
+// $Id: StjFourVecListCut.h,v 1.2 2008/08/02 19:22:45 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETFOURVECLISTCUT_H
 #define STJETFOURVECLISTCUT_H
@@ -10,24 +10,24 @@
 
 namespace StSpinJet {
 
-class StJetFourVecListCut {
+class StjFourVecListCut {
 
 public:
-  StJetFourVecListCut() { }
-  virtual ~StJetFourVecListCut() { }
+  StjFourVecListCut() { }
+  virtual ~StjFourVecListCut() { }
   
-  FourVecList operator()(const FourVecList& fourList);
+  StjFourVecList operator()(const StjFourVecList& fourList);
 
-  void addCut(StJetFourVecCut::FourVecCut* cut) {
+  void addCut(StJetFourVecCut::StjFourVecCut* cut) {
     _cutList.push_back(cut);
   }
 
-  typedef std::vector<StJetFourVecCut::FourVecCut*> CutList;
+  typedef std::vector<StJetFourVecCut::StjFourVecCut*> CutList;
   CutList getCutList() { return _cutList; }
 
 private:
 
-  bool shouldNotKeep(const FourVec& p4);
+  bool shouldNotKeep(const StjFourVec& p4);
 
   CutList _cutList;
 

@@ -45,7 +45,7 @@ void RunJetFinderTest::testRun()
   //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
   TFile* file = new TFile("./jetpart_6143024.root");
 
-  StJetTreeEntryCoordinator* coord = new StJetTreeEntryCoordinator(file);
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(file);
   coord->AddTrgTreeName("trgBJP2");
   coord->AddTrgTreeName("trgBHT2");
 
@@ -53,12 +53,12 @@ void RunJetFinderTest::testRun()
   const Int_t& indexMinor = coord->indexMinor();
 
   TTree *treeTpc = dynamic_cast<TTree*>(file->Get("tpcTracks"));
-  StJetTPCTree* tpc = new StJetTPCTree(treeTpc, indexMajor, indexMinor);
+  StjTPCTree* tpc = new StjTPCTree(treeTpc, indexMajor, indexMinor);
 
   TTree *treeBemc = dynamic_cast<TTree*>(file->Get("bemcTowers"));
-  StJetBEMCTree* bemc = new StJetBEMCTree(treeBemc, indexMajor, indexMinor);
+  StjBEMCTree* bemc = new StjBEMCTree(treeBemc, indexMajor, indexMinor);
 
-  TrackTowerEnergyListToFourVecList toP4;
+  StjTrackTowerEnergyListToFourVecList toP4;
 
   StConePars* cpars = new StConePars();
   cpars->setGridSpacing(56, -1.6, 1.6, 120, -3.141592613589793, 3.141592613589793);
@@ -79,14 +79,14 @@ void RunJetFinderTest::testRun()
   for (Long64_t i = 0; i < 10; ++i) {
     if(coord->eof()) break;
     coord->Make();
-    TrackList trackList = tpc->getTrackList();
-    TowerEnergyList energyList = bemc->getEnergyList();
+    StjTrackList trackList = tpc->getTrackList();
+    StjTowerEnergyList energyList = bemc->getEnergyList();
     
-    FourVecList fourList = toP4(trackList, energyList);
+    StjFourVecList fourList = toP4(trackList, energyList);
 
-    JetList jetList = jetFinder(fourList);
+    StjJetList jetList = jetFinder(fourList);
 
-    for(JetList::const_iterator it = jetList.begin(); it != jetList.end(); ++it) {
+    for(StjJetList::const_iterator it = jetList.begin(); it != jetList.end(); ++it) {
       cout 
 	<< (*it).runNumber << " "
 	<< (*it).eventId  << " "
@@ -96,7 +96,7 @@ void RunJetFinderTest::testRun()
     	<< (*it).phi  << " "
     	<< (*it).m   << " "
     	<< endl;
-      for(FourVecList::const_iterator jt = (*it).fourVecList.begin(); jt != (*it).fourVecList.end(); ++jt) {
+      for(StjFourVecList::const_iterator jt = (*it).fourVecList.begin(); jt != (*it).fourVecList.end(); ++jt) {
 	cout 
 	  << "       "
 	  << (*jt).runNumber  << " "

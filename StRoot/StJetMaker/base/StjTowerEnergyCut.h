@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCut.h,v 1.1 2008/08/02 04:15:50 tai Exp $
+// $Id: StjTowerEnergyCut.h,v 1.2 2008/08/02 19:22:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYCUT_H
 #define TOWERENERGYCUT_H
@@ -8,13 +8,13 @@
 
 namespace StJetTowerEnergyCut {
 
-class TowerEnergyCut {
+class StjTowerEnergyCut {
 
 public:
-  TowerEnergyCut() { }
-  virtual ~TowerEnergyCut() { }
+  StjTowerEnergyCut() { }
+  virtual ~StjTowerEnergyCut() { }
 
-  virtual bool operator()(const StSpinJet::TowerEnergy& deposit) = 0;
+  virtual bool operator()(const StSpinJet::StjTowerEnergy& deposit) = 0;
 
 private:
 

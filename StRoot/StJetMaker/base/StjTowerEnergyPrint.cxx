@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyPrint.cxx,v 1.1 2008/08/02 04:16:00 tai Exp $
+// $Id: StjTowerEnergyPrint.cxx,v 1.2 2008/08/02 19:22:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyPrint.h"
 
@@ -8,14 +8,14 @@ using namespace std;
 
 namespace StSpinJet {
 
-void StJetTowerEnergyPrint::operator()(const TowerEnergyList &energyList)
+void StjTowerEnergyPrint::operator()(const StjTowerEnergyList &energyList)
 {
-  for(TowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
+  for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
     print(*it);
   }
 }
 
-void StJetTowerEnergyPrint::print(const TowerEnergy& energyDeposit)
+void StjTowerEnergyPrint::print(const StjTowerEnergy& energyDeposit)
 {
   cout 
     << energyDeposit.runNumber      << " "

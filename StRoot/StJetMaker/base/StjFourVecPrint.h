@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecPrint.h,v 1.1 2008/08/02 04:15:23 tai Exp $
+// $Id: StjFourVecPrint.h,v 1.2 2008/08/02 19:22:45 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETFOURVECPRINT_H
 #define STJETFOURVECPRINT_H
@@ -11,18 +11,18 @@
 
 namespace StSpinJet {
 
-class StJetFourVecPrint {
+class StjFourVecPrint {
 
 public:
 
-  StJetFourVecPrint() { }
-  virtual ~StJetFourVecPrint() { }
+  StjFourVecPrint() { }
+  virtual ~StjFourVecPrint() { }
 
-  void operator()(const FourVecList& fourList);
+  void operator()(const StjFourVecList& fourList);
 
 private:
 
-  void print(const FourVec& four);
+  void print(const StjFourVec& four);
 
 };
 

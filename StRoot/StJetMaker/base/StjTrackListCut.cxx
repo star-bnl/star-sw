@@ -1,14 +1,14 @@
-// $Id: StjTrackListCut.cxx,v 1.1 2008/08/02 04:16:33 tai Exp $
+// $Id: StjTrackListCut.cxx,v 1.2 2008/08/02 19:22:54 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrackListCut.h"
 
 namespace StSpinJet {
 
-TrackList StJetTPCTrackCut::operator()(const TrackList& trackList)
+StjTrackList StjTrackListCut::operator()(const StjTrackList& trackList)
 {
-  TrackList ret;
+  StjTrackList ret;
 
-  for(TrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
+  for(StjTrackList::const_iterator it = trackList.begin(); it != trackList.end(); ++it) {
 
     if (shoudNotPass(*it)) continue;
 
@@ -18,7 +18,7 @@ TrackList StJetTPCTrackCut::operator()(const TrackList& trackList)
   return ret;
 }
 
-bool StJetTPCTrackCut::shoudNotPass(const Track& track)
+bool StjTrackListCut::shoudNotPass(const StjTrack& track)
 {
   for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
     if((**cut)(track)) return true;

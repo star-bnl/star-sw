@@ -1,4 +1,4 @@
-// $Id: StjTreeEntryMaker.cxx,v 1.1 2008/08/02 04:05:57 tai Exp $
+// $Id: StjTreeEntryMaker.cxx,v 1.2 2008/08/02 19:22:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 #include "StjTreeEntryMaker.h"
@@ -7,34 +7,34 @@
 
 #include <TFile.h>
 
-ClassImp(StJetTreeEntryMaker)
+ClassImp(StjTreeEntryMaker)
 
-StJetTreeEntryMaker::StJetTreeEntryMaker(const Char_t *name, TDirectory* file)
+StjTreeEntryMaker::StjTreeEntryMaker(const Char_t *name, TDirectory* file)
   : _file(file)
-  , _coord(new StJetTreeEntryCoordinator(_file))
+  , _coord(new StjTreeEntryCoordinator(_file))
 {
 
 }
 
-StJetTreeEntryMaker::StJetTreeEntryMaker(const Char_t *name, const char* inputFileName)
+StjTreeEntryMaker::StjTreeEntryMaker(const Char_t *name, const char* inputFileName)
   : _file(new TFile(inputFileName))
-  , _coord(new StJetTreeEntryCoordinator(_file))
+  , _coord(new StjTreeEntryCoordinator(_file))
 {
 
 }
 
-void StJetTreeEntryMaker::AddTrgTreeName(const char* treeName)
+void StjTreeEntryMaker::AddTrgTreeName(const char* treeName)
 {
   _coord->AddTrgTreeName(treeName);
 }
 
-Int_t StJetTreeEntryMaker::Init()
+Int_t StjTreeEntryMaker::Init()
 {
   _coord->Init();
   return kStOk;
 }
 
-Int_t StJetTreeEntryMaker::Make()
+Int_t StjTreeEntryMaker::Make()
 {
   _coord->Make();
   if(_coord->eof()) return kStEOF;

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StPythiaFourPMaker.h,v 1.6 2008/08/02 04:04:03 tai Exp $
+// $Id: StPythiaFourPMaker.h,v 1.7 2008/08/02 19:22:25 tai Exp $
 #ifndef STPYTHIAFOURPMAKER_HH
 #define STPYTHIAFOURPMAKER_HH
 
@@ -14,8 +14,8 @@ class StMCAsymMaker;
 class StMuTrackFourVec;
 
 namespace StSpinJet {
-  class StJetMC;
-  class StJetMCParticleListCut;
+  class StjMC;
+  class StjMCParticleListCut;
 }
 
 class StPythiaFourPMaker : public StFourPMaker {
@@ -38,8 +38,8 @@ private:
 
   FourList tracks;
 
-  StSpinJet::StJetMC* _mc;
-  StSpinJet::StJetMCParticleListCut* _cut;
+  StSpinJet::StjMC* _mc;
+  StSpinJet::StjMCParticleListCut* _cut;
 
   ClassDef(StPythiaFourPMaker,1)
 };

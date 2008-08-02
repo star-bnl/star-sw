@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTree.h,v 1.1 2008/08/02 04:15:44 tai Exp $
+// $Id: StjTPCTree.h,v 1.2 2008/08/02 19:22:49 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPCTREE_H
 #define STJETTPCTREE_H
@@ -9,21 +9,21 @@
 
 class TTree;
 
-class StJetTrackListReader;
+class StjTrackListReader;
 
 namespace StSpinJet {
 
-class StJetTPCTree : public StJetTPC {
+class StjTPCTree : public StjTPC {
 
 public:
-  StJetTPCTree(TTree *tree,
+  StjTPCTree(TTree *tree,
 	       const Int_t& indexMajor, const Int_t& indexMinor,
 	       const char* indexMajorName = "runNumber",
 	       const char* indexMinorName = "eventId"
 	       );
-  virtual ~StJetTPCTree() { }
+  virtual ~StjTPCTree() { }
 
-  TrackList getTrackList();
+  StjTrackList getTrackList();
 
 private:
 
@@ -32,7 +32,7 @@ private:
   const Int_t& _indexMajor;
   const Int_t& _indexMinor;
 
-  StJetTrackListReader* _reader;
+  StjTrackListReader* _reader;
 
 };
 

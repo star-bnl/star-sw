@@ -38,14 +38,14 @@ public:
     StMuEmcPosition();
     virtual  ~StMuEmcPosition();
 
-    bool projTrack(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405,int=1); ///< Track projection utility
-    bool projTrack(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405,int=1); ///< Track projection utility
+    bool projTrack(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405,int=1); ///< StjTrack projection utility
+    bool projTrack(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405,int=1); ///< StjTrack projection utility
     
-    bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405); ///< Track projection utility
-    bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405); ///< Track projection utility
+    bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405); ///< StjTrack projection utility
+    bool trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405); ///< StjTrack projection utility
 
-    bool trackOnBEmc(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405); ///< Track projection utility
-    bool trackOnBEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405); ///< Track projection utility
+    bool trackOnBEmc(StThreeVectorD*,StThreeVectorD*,const StMuTrack*,double,double=225.405); ///< StjTrack projection utility
+    bool trackOnBEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,double,double=225.405); ///< StjTrack projection utility
     bool trackOnEEmc(StThreeVectorD* position, StThreeVectorD* momentum, const StMuTrack* track, double magField = 0.5, double z = kEEmcZSMD) const; ///< Project track into EEMC at SMD depth (magnetic field must be in Tesla)
     
     int getTowerEtaPhi(double, double, float*, float*); ///< Return tower eta/phi

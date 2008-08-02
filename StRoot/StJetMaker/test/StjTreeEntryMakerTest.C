@@ -14,29 +14,29 @@
 using namespace std;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StJetTreeEntryMakerTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTreeEntryMakerTest );
 
-void StJetTreeEntryMakerTest::setUp() 
+void StjTreeEntryMakerTest::setUp() 
 {
 
 }
 
-void StJetTreeEntryMakerTest::tearDown() 
+void StjTreeEntryMakerTest::tearDown() 
 {
 
 }
 
-void StJetTreeEntryMakerTest::testMake() 
+void StjTreeEntryMakerTest::testMake() 
 {
-  StJetTreeEntryMaker *maker = new StJetTreeEntryMaker("entryMaker", "./jetpart_6143024.root");
-  //  StJetTreeEntryMaker *maker = new StJetTreeEntryMaker("entryMaker", "/star/institutions/mit/tai/testData/jetpart_6143024.root");
+  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", "./jetpart_6143024.root");
+  //  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", "/star/institutions/mit/tai/testData/jetpart_6143024.root");
   maker->AddTrgTreeName("trgBJP2");
   maker->AddTrgTreeName("trgBHT2");
 
-  StJetTreeEntryCoordinator* coord = maker->coordinator();
+  StjTreeEntryCoordinator* coord = maker->coordinator();
 
   CPPUNIT_ASSERT( coord );
-  StJetTreeEntryCoordinator::TrgTreeNameList trgTreeNameList = coord->trgTreeNameList(); 
+  StjTreeEntryCoordinator::TrgTreeNameList trgTreeNameList = coord->trgTreeNameList(); 
   CPPUNIT_ASSERT_EQUAL( (size_t)2,  trgTreeNameList.size() );
   CPPUNIT_ASSERT_EQUAL( string("trgBJP2"),  trgTreeNameList[0] );
   CPPUNIT_ASSERT_EQUAL( string("trgBHT2"),  trgTreeNameList[1] );

@@ -1,4 +1,4 @@
-// $Id: StjJetListWriter.cxx,v 1.1 2008/08/02 04:22:04 tai Exp $
+// $Id: StjJetListWriter.cxx,v 1.2 2008/08/02 19:23:37 tai Exp $
 #include "StjJetListWriter.h"
 
 #include <TFile.h>
@@ -9,7 +9,7 @@
 using namespace std;
 using namespace StSpinJet;
 
-StJetJetListWriter::StJetJetListWriter(const char* jetTreeName, const char* jetFourVecTreeName, TDirectory* file)
+StjJetListWriter::StjJetListWriter(const char* jetTreeName, const char* jetFourVecTreeName, TDirectory* file)
   : _file(file)
 {
   _file->cd();
@@ -48,13 +48,13 @@ StJetJetListWriter::StJetJetListWriter(const char* jetTreeName, const char* jetF
   _jetFourVecTree->Branch("runNumber"  , &_four_runNumber    , "runNumber/I"     );
 }
 
-void StJetJetListWriter::Fill(const JetList& jetList, const FourVecList& fourVecList)
+void StjJetListWriter::Fill(const StjJetList& jetList, const StjFourVecList& fourVecList)
 {
   fillJetTree(jetList);
   fillFourVecTree(jetList, fourVecList);
 }
 
-void StJetJetListWriter::fillJetTree(const JetList& jetList)
+void StjJetListWriter::fillJetTree(const StjJetList& jetList)
 {
   if(jetList.empty()) return;
 
@@ -64,7 +64,7 @@ void StJetJetListWriter::fillJetTree(const JetList& jetList)
 
   _jet_nJets = jetList.size();
   for(int i = 0; i < _jet_nJets; ++i) {
-    const Jet& jet = jetList[i];
+    const StjJet& jet = jetList[i];
     _jet_jetId[i]       = jet.jetId;
     _jet_pt[i]          = jet.pt;
     _jet_eta[i]         = jet.eta;
@@ -76,7 +76,7 @@ void StJetJetListWriter::fillJetTree(const JetList& jetList)
   _jetTree->Fill();
 }
 
-void StJetJetListWriter::fillFourVecTree(const JetList& jetList, const FourVecList& fourVecList)
+void StjJetListWriter::fillFourVecTree(const StjJetList& jetList, const StjFourVecList& fourVecList)
 {
   if(fourVecList.empty()) return;
 
@@ -85,7 +85,7 @@ void StJetJetListWriter::fillFourVecTree(const JetList& jetList, const FourVecLi
 
   _four_nFourVecs = fourVecList.size();
   for(int i = 0; i < _four_nFourVecs; ++i) {
-    const FourVec& four = fourVecList[i];
+    const StjFourVec& four = fourVecList[i];
     _four_fourvecId[i]  = four.fourvecId;
     _four_jetId[i]      = findJetId(four, jetList);
     _four_type[i]       = four.type;
@@ -102,10 +102,10 @@ void StJetJetListWriter::fillFourVecTree(const JetList& jetList, const FourVecLi
   _jetFourVecTree->Fill();
 }
 
-Int_t StJetJetListWriter::findJetId(const FourVec& four, const JetList& jetList)
+Int_t StjJetListWriter::findJetId(const StjFourVec& four, const StjJetList& jetList)
 {
-  for(JetList::const_iterator jet = jetList.begin(); jet != jetList.end(); ++jet) {
-    for(FourVecList::const_iterator it = (*jet).fourVecList.begin(); it != (*jet).fourVecList.end(); ++it) {
+  for(StjJetList::const_iterator jet = jetList.begin(); jet != jetList.end(); ++jet) {
+    for(StjFourVecList::const_iterator it = (*jet).fourVecList.begin(); it != (*jet).fourVecList.end(); ++it) {
       if(four.fourvecId == (*it).fourvecId) return (*jet).jetId;
     }
   }
@@ -113,7 +113,7 @@ Int_t StJetJetListWriter::findJetId(const FourVec& four, const JetList& jetList)
 }
 
 
-void StJetJetListWriter::Finish()
+void StjJetListWriter::Finish()
 {
   _jetTree->BuildIndex("runNumber", "eventId");
   _jetFourVecTree->BuildIndex("runNumber", "eventId");

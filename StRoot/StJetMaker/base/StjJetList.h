@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetList.h,v 1.1 2008/08/02 04:15:27 tai Exp $
+// $Id: StjJetList.h,v 1.2 2008/08/02 19:22:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STSPINJET_JET_H
 #define STSPINJET_JET_H
@@ -11,7 +11,7 @@
 
 namespace StSpinJet {
 
-struct Jet {
+struct StjJet {
   int            runNumber;
   int            eventId;
   int            jetId;
@@ -21,12 +21,12 @@ struct Jet {
   double         m;
   double         vertexZ;
   double         detectorEta;
-  FourVecList    fourVecList;
+  StjFourVecList    fourVecList;
 };
 
-typedef std::vector<Jet> JetList;
+typedef std::vector<StjJet> StjJetList;
 
-inline bool operator==(const Jet& v1, const Jet& v2)
+inline bool operator==(const StjJet& v1, const StjJet& v2)
 {
   if(v1.runNumber   != v2.runNumber)    return false;
   if(v1.eventId     != v2.eventId)    return false;   
@@ -39,24 +39,24 @@ inline bool operator==(const Jet& v1, const Jet& v2)
   return true;
   }
 
-inline bool operator!=(const Jet& v1, const Jet& v2)
+inline bool operator!=(const StjJet& v1, const StjJet& v2)
 {
   return(!(v1 == v2));
 }
 
-inline bool operator==(const JetList& v1, const JetList& v2){
+inline bool operator==(const StjJetList& v1, const StjJetList& v2){
   if(v1.size() != v2.size()) return false;
   for(size_t i = 0; i < v1.size(); ++i) if(v1[i] != v2[i]) return false;
   return true;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const Jet& v)
+inline std::ostream& operator<<(std::ostream& out, const StjJet& v)
 {
   out << "jetId: " << v.jetId << ", pt: " << v.pt << ", .... ";
   return out;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const JetList& v)
+inline std::ostream& operator<<(std::ostream& out, const StjJetList& v)
 {
   out << "JetList size: " << v.size();
   return out;

@@ -11,20 +11,20 @@ using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StJetBEMCTreeTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjBEMCTreeTest );
 
-void StJetBEMCTreeTest::setUp()
+void StjBEMCTreeTest::setUp()
 {
 
 }
 
-void StJetBEMCTreeTest::tearDown()
+void StjBEMCTreeTest::tearDown()
 {
 
 }
 
 
-void StJetBEMCTreeTest::testGetEntry() 
+void StjBEMCTreeTest::testGetEntry() 
 {
   //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
   TFile* file = new TFile("./jetpart_6143024.root");
@@ -33,11 +33,11 @@ void StJetBEMCTreeTest::testGetEntry()
 
   Int_t runNumber = 6143024;
   Int_t evenId;
-  StJetBEMCTree* bemc = new StJetBEMCTree(tree, runNumber, evenId);
+  StjBEMCTree* bemc = new StjBEMCTree(tree, runNumber, evenId);
 
 
   evenId = 38;
-  TowerEnergyList energyList = bemc->getEnergyList();
+  StjTowerEnergyList energyList = bemc->getEnergyList();
   CPPUNIT_ASSERT_EQUAL( (size_t)65, energyList.size() );
 
   evenId = 41;

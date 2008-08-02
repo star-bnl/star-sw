@@ -1,4 +1,4 @@
-// $Id: StjTrackListWriter.cxx,v 1.1 2008/08/02 04:22:20 tai Exp $
+// $Id: StjTrackListWriter.cxx,v 1.2 2008/08/02 19:23:39 tai Exp $
 #include "StjTrackListWriter.h"
 
 #include <TDirectory.h>
@@ -9,7 +9,7 @@
 using namespace std;
 using namespace StSpinJet;
 
-StJetTrackListWriter::StJetTrackListWriter(const char* treeName, TDirectory* file)
+StjTrackListWriter::StjTrackListWriter(const char* treeName, TDirectory* file)
   : _file(file)
 {
   _file->cd();
@@ -46,7 +46,7 @@ StJetTrackListWriter::StJetTrackListWriter(const char* treeName, TDirectory* fil
   _tree->Branch("runNumber"     , &_runNumber       , "runNumber/I"              );
 }
 
-void StJetTrackListWriter::Fill(const StSpinJet::TrackList& trackList)
+void StjTrackListWriter::Fill(const StSpinJet::StjTrackList& trackList)
 {
   if(trackList.empty()) return;
 
@@ -60,7 +60,7 @@ void StJetTrackListWriter::Fill(const StSpinJet::TrackList& trackList)
 
   _nTracks = trackList.size();
   for(int i = 0; i < _nTracks; ++i) {
-    const Track& track = trackList[i];
+    const StjTrack& track = trackList[i];
     _pt[i]             = track.pt;
     _eta[i]            = track.eta;
     _phi[i]            = track.phi;
@@ -86,7 +86,7 @@ void StJetTrackListWriter::Fill(const StSpinJet::TrackList& trackList)
   _tree->Fill();
 }
 
-void StJetTrackListWriter::Finish()
+void StjTrackListWriter::Finish()
 {
   _tree->BuildIndex("runNumber", "eventId");
 }

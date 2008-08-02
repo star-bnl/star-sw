@@ -34,7 +34,7 @@ void StBET4pMakerTest::testMacroInterface_Construct_mudst()
 
 void StBET4pMakerTest::testMacroInterface_Construct_tree()
 {
-  StBET4pMaker* maker = new StBET4pMaker("BET4pMaker", (StJetTreeEntryMaker*)0);
+  StBET4pMaker* maker = new StBET4pMaker("BET4pMaker", (StjTreeEntryMaker*)0);
   CPPUNIT_ASSERT_EQUAL(   true, maker->useTree() );
   delete maker;
 }

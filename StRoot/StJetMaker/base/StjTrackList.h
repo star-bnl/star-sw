@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.1 2008/08/02 04:16:30 tai Exp $
+// $Id: StjTrackList.h,v 1.2 2008/08/02 19:22:54 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKLIST_H
 #define TRACKLIST_H
@@ -9,7 +9,7 @@
 
 namespace StSpinJet {
 
-struct Track {
+struct StjTrack {
   int            runNumber;
   int            eventId;
   int            detectorId; // 1: TPC
@@ -38,9 +38,9 @@ struct Track {
   short          id;
 };
 
-typedef std::vector<Track> TrackList;
+typedef std::vector<StjTrack> StjTrackList;
 
-inline bool operator==(const Track& v1, const Track& v2)
+inline bool operator==(const StjTrack& v1, const StjTrack& v2)
 {
   if(v1.runNumber      != v2.runNumber)      return false;
   if(v1.eventId        != v2.eventId)        return false;   
@@ -70,25 +70,25 @@ inline bool operator==(const Track& v1, const Track& v2)
   return true;
   }
 
-inline bool operator!=(const Track& v1, const Track& v2)
+inline bool operator!=(const StjTrack& v1, const StjTrack& v2)
 {
   return(!(v1 == v2));
 }
 
-inline bool operator==(const TrackList& v1, const TrackList& v2){
+inline bool operator==(const StjTrackList& v1, const StjTrackList& v2){
   if(v1.size() != v2.size()) return false;
   for(size_t i = 0; i < v1.size(); ++i) if(v1[i] != v2[i]) return false;
   return true;
 }
 
 
-inline std::ostream& operator<<(std::ostream& out, const Track& v)
+inline std::ostream& operator<<(std::ostream& out, const StjTrack& v)
 {
   out << "trackId: " << v.id << ", pt: " << v.pt << ", .... ";
   return out;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const TrackList& v)
+inline std::ostream& operator<<(std::ostream& out, const StjTrackList& v)
 {
   out << "TrackList size: " << v.size();
   return out;

@@ -4,9 +4,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class StJetBEMCTreeTest : public CPPUNIT_NS::TestFixture
+class StjBEMCTreeTest : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( StJetBEMCTreeTest );
+  CPPUNIT_TEST_SUITE( StjBEMCTreeTest );
   CPPUNIT_TEST( testGetEntry );
   CPPUNIT_TEST_SUITE_END();
 

@@ -1,4 +1,4 @@
-// $Id: StjEEMCMuDst.cxx,v 1.1 2008/08/02 04:19:20 tai Exp $
+// $Id: StjEEMCMuDst.cxx,v 1.2 2008/08/02 19:23:20 tai Exp $
 #include "StjEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -14,24 +14,24 @@
 namespace StSpinJet {
 
 
-StJetEEMCMuDst::StJetEEMCMuDst(StMuDstMaker* uDstMaker)
+StjEEMCMuDst::StjEEMCMuDst(StMuDstMaker* uDstMaker)
  : _uDstMaker(uDstMaker)
  , mEeDb(0)
 {
 
 }
 
-void StJetEEMCMuDst::Init()
+void StjEEMCMuDst::Init()
 {
   if(_uDstMaker) mEeDb = (StEEmcDbMaker*)_uDstMaker->GetMaker("eemcDb");
   if(mEeDb) mEeDb->setThreshold(3);
 }
 
-TowerEnergyList StJetEEMCMuDst::getEnergyList()
+StjTowerEnergyList StjEEMCMuDst::getEnergyList()
 {
   StMuEmcCollection* muEmc = _uDstMaker->muDst()->muEmcCollection();
 
-  TowerEnergyList ret;
+  StjTowerEnergyList ret;
 
   for (int id = 0; id < muEmc->getNEndcapTowerADC(); ++id) {
 
@@ -48,7 +48,7 @@ TowerEnergyList StJetEEMCMuDst::getEnergyList()
     double adc = rawadc - (dbItem->ped);
     double energy = adc/(dbItem->gain);
 	    
-    TowerEnergy energyDeposit;
+    StjTowerEnergy energyDeposit;
     energyDeposit.runNumber = _uDstMaker->muDst()->event()->runId();
     energyDeposit.eventId = _uDstMaker->muDst()->event()->eventId();
     energyDeposit.detectorId = 13;

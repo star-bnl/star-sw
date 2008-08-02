@@ -4,9 +4,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class TrackTowerEnergyListToFourVecListTest : public CPPUNIT_NS::TestFixture
+class StjTrackTowerEnergyListToFourVecListTest : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( TrackTowerEnergyListToFourVecListTest );
+  CPPUNIT_TEST_SUITE( StjTrackTowerEnergyListToFourVecListTest );
   CPPUNIT_TEST( testOne );
   CPPUNIT_TEST_SUITE_END();
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryMaker.h,v 1.1 2008/08/02 04:06:05 tai Exp $
+// $Id: StjTreeEntryMaker.h,v 1.2 2008/08/02 19:22:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTREEENTRYMAKER_H
 #define STJETTREEENTRYMAKER_H
@@ -8,16 +8,16 @@
 
 class TDirectory;
 
-class StJetTreeEntryCoordinator;
+class StjTreeEntryCoordinator;
 
-class StJetTreeEntryMaker : public StMaker {
+class StjTreeEntryMaker : public StMaker {
 
 public:
-  StJetTreeEntryMaker(const Char_t *name, TDirectory* file);
-  StJetTreeEntryMaker(const Char_t *name, const char* inputFileName);
-  virtual ~StJetTreeEntryMaker() { }
+  StjTreeEntryMaker(const Char_t *name, TDirectory* file);
+  StjTreeEntryMaker(const Char_t *name, const char* inputFileName);
+  virtual ~StjTreeEntryMaker() { }
 
-  StJetTreeEntryCoordinator* coordinator() { return _coord; }
+  StjTreeEntryCoordinator* coordinator() { return _coord; }
 
   Int_t Init();
   Int_t Make();
@@ -27,9 +27,9 @@ public:
 private:
 
   TDirectory* _file;
-  StJetTreeEntryCoordinator* _coord;
+  StjTreeEntryCoordinator* _coord;
 
-  ClassDef(StJetTreeEntryMaker, 0)
+  ClassDef(StjTreeEntryMaker, 0)
 
 };
 

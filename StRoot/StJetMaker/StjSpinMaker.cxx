@@ -1,4 +1,4 @@
-// $Id: StjSpinMaker.cxx,v 1.1 2008/08/02 04:05:00 tai Exp $
+// $Id: StjSpinMaker.cxx,v 1.2 2008/08/02 19:22:27 tai Exp $
 #include "StjSpinMaker.h"
 
 #include <StMuDSTMaker/COMMON/StMuDst.h>
@@ -13,22 +13,22 @@
 
 using namespace std;
 
-ClassImp(StJetSpinMaker)
+ClassImp(StjSpinMaker)
   
 
-StJetSpinMaker::StJetSpinMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
+StjSpinMaker::StjSpinMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
   : StMaker(name)
   , _file(file)
   , _uDstMaker(uDstMaker)
 { }
 
-Int_t StJetSpinMaker::Init()
+Int_t StjSpinMaker::Init()
 {
 
   return kStOk;
 }
 
-Int_t StJetSpinMaker::Make()
+Int_t StjSpinMaker::Make()
 {
   int runNumber = _uDstMaker->muDst()->event()->runId();
   int eventId = _uDstMaker->muDst()->event()->eventId();
@@ -52,7 +52,7 @@ Int_t StJetSpinMaker::Make()
   return kStOk;
 }
 
-Int_t StJetSpinMaker::Finish()
+Int_t StjSpinMaker::Finish()
 {
   return kStOk;
 }

@@ -65,13 +65,13 @@ void LoopTest::testOne()
 //
 //  StEmcADCtoEMaker *adc = new StEmcADCtoEMaker("Eread");
 //
-//  StJetTPC* tpc = new StJetTPCMuDst(mudstMaker);
+//  StjTPC* tpc = new StjTPCMuDst(mudstMaker);
 //  CollectChargedTracksFromTPC* collTrack = new CollectChargedTracksFromTPC(tpc);
 //  StBemcTables* bemcTbl = new StBemcTables(true);
-//  StJetBEMC *bemc = new StJetBEMCMuDst(mudstMaker, bemcTbl);
+//  StjBEMC *bemc = new StjBEMCMuDst(mudstMaker, bemcTbl);
 //  CollectEnergyDepositsFromBEMC* collBemc = new CollectEnergyDepositsFromBEMC(bemc);
 //  CollectEnergyDepositsFromEEMC* collEemc = new CollectEnergyDepositsFromEEMC(mudstMaker);
-//  CorrectTowerEnergyForTracks* corr = new CorrectTowerEnergyForTracks();
+//  StjTowerEnergyCorrectionForTracks* corr = new StjTowerEnergyCorrectionForTracks();
 //  StBET4pMakerImp *imp = new StBET4pMakerImp(collTrack, collBemc, collEemc, corr);
 //  imp->setUseEndcap(false);
 //  imp->setUseBEMC(false);

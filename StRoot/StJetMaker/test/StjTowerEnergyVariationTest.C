@@ -13,41 +13,41 @@ using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StJetTowerEnergyVariationTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTowerEnergyVariationTest );
 
-void StJetTowerEnergyVariationTest::setUp()
+void StjTowerEnergyVariationTest::setUp()
 {
 
 }
 
-void StJetTowerEnergyVariationTest::tearDown()
+void StjTowerEnergyVariationTest::tearDown()
 {
 
 }
 
 
-void StJetTowerEnergyVariationTest::testEnergyPlus5()
+void StjTowerEnergyVariationTest::testEnergyPlus5()
 {
-  StJetTowerEnergyVariation* variation = new StJetTowerEnergyVariation(0.05);
+  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(0.05);
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
 
-  TowerEnergy energy1;
+  StjTowerEnergy energy1;
   energy1.energy = 3.0;
   listIn.push_back(energy1);
 
-  TowerEnergy energy2;
+  StjTowerEnergy energy2;
   energy2.energy = 5.0;
   listIn.push_back(energy2);
 
-  TowerEnergyList listExpected;
+  StjTowerEnergyList listExpected;
   energy1.energy *= (1.0 + 0.05);
   energy2.energy *= (1.0 + 0.05);
   listExpected.push_back(energy1);
   listExpected.push_back(energy2);
   
   // excercise
-  TowerEnergyList listActual = (*variation)(listIn);
+  StjTowerEnergyList listActual = (*variation)(listIn);
   
   // verify
   //CPPUNIT_ASSERT_EQUAL( listExpected.size(), listActual.size() );
@@ -75,28 +75,28 @@ void StJetTowerEnergyVariationTest::testEnergyPlus5()
   delete variation;
 }
 
-void StJetTowerEnergyVariationTest::testEnergyMinus5()
+void StjTowerEnergyVariationTest::testEnergyMinus5()
 {
-  StJetTowerEnergyVariation* variation = new StJetTowerEnergyVariation(-0.05);
+  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(-0.05);
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
 
-  TowerEnergy energy1;
+  StjTowerEnergy energy1;
   energy1.energy = 3.0;
   listIn.push_back(energy1);
 
-  TowerEnergy energy2;
+  StjTowerEnergy energy2;
   energy2.energy = 5.0;
   listIn.push_back(energy2);
 
-  TowerEnergyList listExpected;
+  StjTowerEnergyList listExpected;
   energy1.energy *= (1.0 - 0.05);
   energy2.energy *= (1.0 - 0.05);
   listExpected.push_back(energy1);
   listExpected.push_back(energy2);
   
   // excercise
-  TowerEnergyList listActual = (*variation)(listIn);
+  StjTowerEnergyList listActual = (*variation)(listIn);
   
   // verify
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
@@ -104,28 +104,28 @@ void StJetTowerEnergyVariationTest::testEnergyMinus5()
   delete variation;
 }
 
-void StJetTowerEnergyVariationTest::testEnergyPlus10()
+void StjTowerEnergyVariationTest::testEnergyPlus10()
 {
-  StJetTowerEnergyVariation* variation = new StJetTowerEnergyVariation(0.1);
+  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(0.1);
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
 
-  TowerEnergy energy1;
+  StjTowerEnergy energy1;
   energy1.energy = 3.0;
   listIn.push_back(energy1);
 
-  TowerEnergy energy2;
+  StjTowerEnergy energy2;
   energy2.energy = 5.0;
   listIn.push_back(energy2);
 
-  TowerEnergyList listExpected;
+  StjTowerEnergyList listExpected;
   energy1.energy *= (1.0 + 0.1);
   energy2.energy *= (1.0 + 0.1);
   listExpected.push_back(energy1);
   listExpected.push_back(energy2);
   
   // excercise
-  TowerEnergyList listActual = (*variation)(listIn);
+  StjTowerEnergyList listActual = (*variation)(listIn);
   
   // verify
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
@@ -133,28 +133,28 @@ void StJetTowerEnergyVariationTest::testEnergyPlus10()
   delete variation;
 }
 
-void StJetTowerEnergyVariationTest::testEnergyMinus10()
+void StjTowerEnergyVariationTest::testEnergyMinus10()
 {
-  StJetTowerEnergyVariation* variation = new StJetTowerEnergyVariation(-0.1);
+  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(-0.1);
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
 
-  TowerEnergy energy1;
+  StjTowerEnergy energy1;
   energy1.energy = 3.0;
   listIn.push_back(energy1);
 
-  TowerEnergy energy2;
+  StjTowerEnergy energy2;
   energy2.energy = 5.0;
   listIn.push_back(energy2);
 
-  TowerEnergyList listExpected;
+  StjTowerEnergyList listExpected;
   energy1.energy *= (1.0 - 0.1);
   energy2.energy *= (1.0 - 0.1);
   listExpected.push_back(energy1);
   listExpected.push_back(energy2);
   
   // excercise
-  TowerEnergyList listActual = (*variation)(listIn);
+  StjTowerEnergyList listActual = (*variation)(listIn);
   
   // verify
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );
@@ -163,26 +163,26 @@ void StJetTowerEnergyVariationTest::testEnergyMinus10()
 }
 
 
-void StJetTowerEnergyVariationTest::testEnergyNull()
+void StjTowerEnergyVariationTest::testEnergyNull()
 {
-  StJetTowerEnergyVariation* variation = new StJetTowerEnergyVariation(0);
+  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(0);
 
-  TowerEnergyList listIn;
+  StjTowerEnergyList listIn;
 
-  TowerEnergy energy1;
+  StjTowerEnergy energy1;
   energy1.energy = 3.0;
   listIn.push_back(energy1);
 
-  TowerEnergy energy2;
+  StjTowerEnergy energy2;
   energy2.energy = 5.0;
   listIn.push_back(energy2);
 
-  TowerEnergyList listExpected;
+  StjTowerEnergyList listExpected;
   listExpected.push_back(energy1);
   listExpected.push_back(energy2);
   
   // excercise
-  TowerEnergyList listActual = (*variation)(listIn);
+  StjTowerEnergyList listActual = (*variation)(listIn);
   
   // verify
   CPPUNIT_ASSERT_EQUAL( listExpected, listActual );

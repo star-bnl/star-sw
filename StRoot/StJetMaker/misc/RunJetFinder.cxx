@@ -1,4 +1,4 @@
-// $Id: RunJetFinder.cxx,v 1.2 2008/08/02 04:18:57 tai Exp $
+// $Id: RunJetFinder.cxx,v 1.3 2008/08/02 19:23:14 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "RunJetFinder.h"
 
@@ -24,28 +24,28 @@ void RunJetFinder::Init()
   _jetFinder->Init();
 }
 
-JetList RunJetFinder::operator()(const FourVecList& fourVecList)
+StjJetList RunJetFinder::operator()(const StjFourVecList& fourVecList)
 {
  typedef std::list<StProtoJet> ProtoJetList;
  typedef std::vector<const AbstractFourVec*> FourList;
 
  FourList fourList;
 
- for(FourVecList::const_iterator p4 = fourVecList.begin(); p4 != fourVecList.end(); ++p4) {
-   fourList.push_back(new FourVecForJetFinder(*p4));
+ for(StjFourVecList::const_iterator p4 = fourVecList.begin(); p4 != fourVecList.end(); ++p4) {
+   fourList.push_back(new StjFourVecForJetFinder(*p4));
  }
 
   ProtoJetList protoJetList;
 
   _jetFinder->findJets(protoJetList, fourList);
 
-  JetList jetList;
+  StjJetList jetList;
 
   int jetId(1);
   for(list<StProtoJet>::iterator it = protoJetList.begin(); it != protoJetList.end(); ++it) {
     StProtoJet& protoJet = *it;
 
-    Jet jet;
+    StjJet jet;
     jet.jetId = jetId++;
     jet.pt =  protoJet.pt();
     jet.eta = protoJet.eta();
@@ -54,13 +54,13 @@ JetList RunJetFinder::operator()(const FourVecList& fourVecList)
     
     FourList parList = protoJet.list();
     for(FourList::const_iterator it = parList.begin(); it != parList.end(); ++it) {
-      FourVec fourVec = (dynamic_cast<const FourVecForJetFinder*>(*it))->fourVec();
+      StjFourVec fourVec = (dynamic_cast<const StjFourVecForJetFinder*>(*it))->fourVec();
       jet.runNumber = fourVec.runNumber;
       jet.eventId = fourVec.eventId;
       jet.vertexZ = fourVec.vertexZ;
       jet.fourVecList.push_back(fourVec);
     }
-    EtaToDetectorEta eta2deta;
+    StjEtaToDetectorEta eta2deta;
     jet.detectorEta = eta2deta(jet.eta, jet.vertexZ);
     jetList.push_back(jet);
   }

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMC.h,v 1.1 2008/08/02 04:15:09 tai Exp $
+// $Id: StjBEMC.h,v 1.2 2008/08/02 19:22:41 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETBEMC_H
 #define STJETBEMC_H
@@ -8,25 +8,25 @@
 
 namespace StSpinJet {
 
-class StJetBEMC {
+class StjBEMC {
 
 public:
-  StJetBEMC() { }
-  virtual ~StJetBEMC() { }
+  StjBEMC() { }
+  virtual ~StjBEMC() { }
 
   virtual void Init() { }
 
-  virtual TowerEnergyList getEnergyList() = 0;
+  virtual StjTowerEnergyList getEnergyList() = 0;
 };
 
 
-class StJetBEMCNull : public StJetBEMC {
+class StjBEMCNull : public StjBEMC {
 
 public:
-  StJetBEMCNull() { }
-  virtual ~StJetBEMCNull() { }
+  StjBEMCNull() { }
+  virtual ~StjBEMCNull() { }
 
-  TowerEnergyList getEnergyList() { return TowerEnergyList(); }
+  StjTowerEnergyList getEnergyList() { return StjTowerEnergyList(); }
 };
 
 }

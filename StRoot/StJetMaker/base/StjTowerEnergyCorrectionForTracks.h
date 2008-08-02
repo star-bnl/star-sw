@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCorrectionForTracks.h,v 1.1 2008/08/02 04:15:49 tai Exp $
+// $Id: StjTowerEnergyCorrectionForTracks.h,v 1.2 2008/08/02 19:22:50 tai Exp $
 #ifndef CORRECTTOWERENERGYFORTRACKS_H
 #define CORRECTTOWERENERGYFORTRACKS_H
 
@@ -8,20 +8,20 @@
 
 namespace StSpinJet {
 
-class CorrectTowerEnergyForTracks {
+class StjTowerEnergyCorrectionForTracks {
 
 public:
-  CorrectTowerEnergyForTracks() { }
-  virtual ~CorrectTowerEnergyForTracks() { }
+  StjTowerEnergyCorrectionForTracks() { }
+  virtual ~StjTowerEnergyCorrectionForTracks() { }
 
-  TowerEnergyList operator()(const TowerEnergyList &energyDepositList, const TrackList& trackList);
+  StjTowerEnergyList operator()(const StjTowerEnergyList &energyDepositList, const StjTrackList& trackList);
 
-  TowerEnergyList Do(const TowerEnergyList &energyDepositList, const TrackList& trackList);
+  StjTowerEnergyList Do(const StjTowerEnergyList &energyDepositList, const StjTrackList& trackList);
 
 
 private:
 
-  void countTracksOnBemcTower(const Track& track);
+  void countTracksOnBemcTower(const StjTrack& track);
 
   double correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId, float eta, float phi);
 

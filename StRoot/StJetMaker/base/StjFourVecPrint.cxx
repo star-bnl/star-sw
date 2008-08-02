@@ -1,4 +1,4 @@
-// $Id: StjFourVecPrint.cxx,v 1.1 2008/08/02 04:15:22 tai Exp $
+// $Id: StjFourVecPrint.cxx,v 1.2 2008/08/02 19:22:45 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecPrint.h"
 
@@ -8,14 +8,14 @@ using namespace std;
 
 namespace StSpinJet {
 
-void StJetFourVecPrint::operator()(const FourVecList &fourList)
+void StjFourVecPrint::operator()(const StjFourVecList &fourList)
 {
-  for(FourVecList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
+  for(StjFourVecList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
     print(*it);
   }
 }
 
-void StJetFourVecPrint::print(const FourVec& four)
+void StjFourVecPrint::print(const StjFourVec& four)
 {
   cout 
     << four.runNumber  << " "

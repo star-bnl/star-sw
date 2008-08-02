@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.2 2008/08/02 04:18:31 tai Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.3 2008/08/02 19:23:06 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -42,42 +42,42 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
 					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts,
 					       StMuDstMaker* uDstMaker, bool doTowerSwapFix)
 {
-  StJetTPC*  tpc;
-  StJetTPCTrackCut* tpcCut  = new StJetTPCTrackCut();
+  StjTPC*  tpc;
+  StjTrackListCut* tpcCut  = new StjTrackListCut();
   if( !useTPC ) {
-    tpc  = new StJetTPCNull();
+    tpc  = new StjTPCNull();
   } else {
-    tpc  = new StJetTPCMuDst(uDstMaker);
-    tpcCut->addCut(new TrackCutDca());
-    if(use2006Cuts)  tpcCut->addCut(new TrackCutDcaPtDependent());
-    tpcCut->addCut(new TrackCutEta());
-    tpcCut->addCut(new TrackCutPossibleHitRatio());
+    tpc  = new StjTPCMuDst(uDstMaker);
+    tpcCut->addCut(new StjTrackCutDca());
+    if(use2006Cuts)  tpcCut->addCut(new StjTrackCutDcaPtDependent());
+    tpcCut->addCut(new StjTrackCutEta());
+    tpcCut->addCut(new StjTrackCutPossibleHitRatio());
   }
 
-  StJetBEMC* bemc;
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
+  StjBEMC* bemc;
+  StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
   if( !useBEMC ) {
-    bemc = new StJetBEMCNull();
+    bemc = new StjBEMCNull();
   } else {
-    bemc = new StJetBEMCMuDst(uDstMaker, doTowerSwapFix);
+    bemc = new StjBEMCMuDst(uDstMaker, doTowerSwapFix);
 
-    if(use2003Cuts) bemcCut->addCut(new TowerEnergyCut2003BemcTower());
-    if(use2005Cuts) bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
-    bemcCut->addCut(new TowerEnergyCutEnergy());
-    bemcCut->addCut(new TowerEnergyCutBemcStatus());
-    bemcCut->addCut(new TowerEnergyCutAdc());
+    if(use2003Cuts) bemcCut->addCut(new StjTowerEnergyCut2003BemcTower());
+    if(use2005Cuts) bemcCut->addCut(new StjTowerEnergyCutBemcWestOnly());
+    bemcCut->addCut(new StjTowerEnergyCutEnergy());
+    bemcCut->addCut(new StjTowerEnergyCutBemcStatus());
+    bemcCut->addCut(new StjTowerEnergyCutAdc());
   }
 
-  StJetEEMC* eemc;
+  StjEEMC* eemc;
   if( !useEEMC ) {
-    eemc = new StJetEEMCNull();
+    eemc = new StjEEMCNull();
   } else {
-    eemc = new StJetEEMCMuDst(uDstMaker);
+    eemc = new StjEEMCMuDst(uDstMaker);
   }
 
 
 
-  CorrectTowerEnergyForTracks* correctTowerEnergyForTracks = new CorrectTowerEnergyForTracks();
+  StjTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks = new StjTowerEnergyCorrectionForTracks();
 
   StBET4pMakerImp* ret = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);
 
@@ -86,49 +86,49 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
 
 StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool useEEMC,
 					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts,
-					       StJetTreeEntryMaker* maker)
+					       StjTreeEntryMaker* maker)
 {
-  StJetTPC*  tpc;
-  StJetTPCTrackCut* tpcCut  = new StJetTPCTrackCut();
+  StjTPC*  tpc;
+  StjTrackListCut* tpcCut  = new StjTrackListCut();
   if( !useTPC ) {
-    tpc  = new StJetTPCNull();
+    tpc  = new StjTPCNull();
   } else {
-    StJetTreeEntryCoordinator* coord = maker->coordinator();
+    StjTreeEntryCoordinator* coord = maker->coordinator();
     TTree *treeTpc = dynamic_cast<TTree*>(coord->file()->Get("tpcTracks"));
-    tpc = new StJetTPCTree(treeTpc, coord->indexMajor(), coord->indexMinor());
+    tpc = new StjTPCTree(treeTpc, coord->indexMajor(), coord->indexMinor());
 
-    tpcCut->addCut(new TrackCutDca());
-    if(use2006Cuts)  tpcCut->addCut(new TrackCutDcaPtDependent());
-    tpcCut->addCut(new TrackCutEta());
-    tpcCut->addCut(new TrackCutPossibleHitRatio());
+    tpcCut->addCut(new StjTrackCutDca());
+    if(use2006Cuts)  tpcCut->addCut(new StjTrackCutDcaPtDependent());
+    tpcCut->addCut(new StjTrackCutEta());
+    tpcCut->addCut(new StjTrackCutPossibleHitRatio());
   }
 
-  StJetBEMC* bemc;
-  StJetBEMCEnergyCut* bemcCut = new StJetBEMCEnergyCut();
+  StjBEMC* bemc;
+  StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
   if( !useBEMC ) {
-    bemc = new StJetBEMCNull();
+    bemc = new StjBEMCNull();
   } else {
-    StJetTreeEntryCoordinator* coord = maker->coordinator();
+    StjTreeEntryCoordinator* coord = maker->coordinator();
     TTree *treeBemc = dynamic_cast<TTree*>(coord->file()->Get("bemcTowers"));
-    bemc = new StJetBEMCTree(treeBemc, coord->indexMajor(), coord->indexMinor());
+    bemc = new StjBEMCTree(treeBemc, coord->indexMajor(), coord->indexMinor());
 
-    if(use2003Cuts) bemcCut->addCut(new TowerEnergyCut2003BemcTower());
-    if(use2005Cuts) bemcCut->addCut(new TowerEnergyCutBemcWestOnly());
-    bemcCut->addCut(new TowerEnergyCutEnergy());
-    bemcCut->addCut(new TowerEnergyCutBemcStatus());
-    bemcCut->addCut(new TowerEnergyCutAdc());
+    if(use2003Cuts) bemcCut->addCut(new StjTowerEnergyCut2003BemcTower());
+    if(use2005Cuts) bemcCut->addCut(new StjTowerEnergyCutBemcWestOnly());
+    bemcCut->addCut(new StjTowerEnergyCutEnergy());
+    bemcCut->addCut(new StjTowerEnergyCutBemcStatus());
+    bemcCut->addCut(new StjTowerEnergyCutAdc());
   }
 
-  StJetEEMC* eemc;
+  StjEEMC* eemc;
   if( !useEEMC ) {
-    eemc = new StJetEEMCNull();
+    eemc = new StjEEMCNull();
   } else {
-    eemc = new StJetEEMCNull();
+    eemc = new StjEEMCNull();
   }
 
 
 
-  CorrectTowerEnergyForTracks* correctTowerEnergyForTracks = new CorrectTowerEnergyForTracks();
+  StjTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks = new StjTowerEnergyCorrectionForTracks();
 
   StBET4pMakerImp* ret = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);
 

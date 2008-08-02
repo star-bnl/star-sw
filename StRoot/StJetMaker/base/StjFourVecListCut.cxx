@@ -1,4 +1,4 @@
-// $Id: StjFourVecListCut.cxx,v 1.1 2008/08/02 04:15:20 tai Exp $
+// $Id: StjFourVecListCut.cxx,v 1.2 2008/08/02 19:22:44 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecListCut.h"
 
@@ -6,11 +6,11 @@ using namespace std;
 
 namespace StSpinJet {
 
-FourVecList StJetFourVecListCut::operator()(const FourVecList &fourList)
+StjFourVecList StjFourVecListCut::operator()(const StjFourVecList &fourList)
 {
-  FourVecList ret;
+  StjFourVecList ret;
 
-  for(FourVecList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
+  for(StjFourVecList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
 
     if(shouldNotKeep(*it)) continue;
 
@@ -21,7 +21,7 @@ FourVecList StJetFourVecListCut::operator()(const FourVecList &fourList)
 }
 
 
-bool StJetFourVecListCut::shouldNotKeep(const FourVec& p4)
+bool StjFourVecListCut::shouldNotKeep(const StjFourVec& p4)
 {
   for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
     if((**cut)(p4)) return true;

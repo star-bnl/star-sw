@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgWriter.h,v 1.1 2008/08/02 04:08:34 tai Exp $
+// $Id: StjTrgWriter.h,v 1.2 2008/08/02 19:22:32 tai Exp $
 #ifndef STJETTRGWRITER_H
 #define STJETTRGWRITER_H
 
@@ -12,23 +12,23 @@ class TTree;
 
 #include <string>
 
-class StJetTrg;
+class StjTrg;
 
-class StJetTrgWriter {
+class StjTrgWriter {
 
 public:
 
-  StJetTrgWriter(const char *treeName, const char* treeTitle,
-		 TDirectory* file, StJetTrg* trg,
-		 StJetTrgPassCondition* fillCondition,
-		 StJetTrgPassCondition* passCondition)
+  StjTrgWriter(const char *treeName, const char* treeTitle,
+		 TDirectory* file, StjTrg* trg,
+		 StjTrgPassCondition* fillCondition,
+		 StjTrgPassCondition* passCondition)
     : _treeName(treeName), _treeTitle(treeName)
     , _file(file)
     , _trg(trg)
     , _fillCondition(fillCondition)
     , _passCondition(passCondition)
   { }
-  virtual ~StJetTrgWriter() { }
+  virtual ~StjTrgWriter() { }
 
   virtual void Init();
   virtual void Make();
@@ -49,7 +49,7 @@ private:
   TDirectory* _file;
   TTree*      _tree;
 
-  StJetTrg* _trg;
+  StjTrg* _trg;
 
   Int_t    _runNumber;
   Int_t    _eventId;
@@ -60,8 +60,8 @@ private:
   Int_t    _hard;
   Int_t    _soft;
 
-  StJetTrgPassCondition* _fillCondition;
-  StJetTrgPassCondition* _passCondition;
+  StjTrgPassCondition* _fillCondition;
+  StjTrgPassCondition* _passCondition;
 
 };
 

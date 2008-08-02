@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyListWriter.cxx,v 1.1 2008/08/02 04:22:14 tai Exp $
+// $Id: StjTowerEnergyListWriter.cxx,v 1.2 2008/08/02 19:23:38 tai Exp $
 #include "StjTowerEnergyListWriter.h"
 
 #include <TDirectory.h>
@@ -9,7 +9,7 @@
 using namespace std;
 using namespace StSpinJet;
 
-StJetTowerEnergyListWriter::StJetTowerEnergyListWriter(const char* treeName, TDirectory* file)
+StjTowerEnergyListWriter::StjTowerEnergyListWriter(const char* treeName, TDirectory* file)
   : _file(file)
 {
   _file->cd();
@@ -35,7 +35,7 @@ StJetTowerEnergyListWriter::StJetTowerEnergyListWriter(const char* treeName, TDi
   _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
 }
 
-void StJetTowerEnergyListWriter::Fill(const TowerEnergyList& energyList)
+void StjTowerEnergyListWriter::Fill(const StjTowerEnergyList& energyList)
 {
   if(energyList.empty()) return;
 
@@ -49,7 +49,7 @@ void StJetTowerEnergyListWriter::Fill(const TowerEnergyList& energyList)
 
   _nTowers = energyList.size();
   for(int i = 0; i < _nTowers; ++i) {
-    const TowerEnergy& tower = energyList[i];
+    const StjTowerEnergy& tower = energyList[i];
     _towerId[i]      =	tower.towerId;
     _towerR[i]       =	tower.towerR;
     _towerEta[i]     =	tower.towerEta;
@@ -64,7 +64,7 @@ void StJetTowerEnergyListWriter::Fill(const TowerEnergyList& energyList)
   _tree->Fill();
 }
 
-void StJetTowerEnergyListWriter::Finish()
+void StjTowerEnergyListWriter::Finish()
 {
   _tree->BuildIndex("runNumber", "eventId");
 }

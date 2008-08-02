@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleListWriter.h,v 1.1 2008/08/02 04:22:08 tai Exp $
+// $Id: StjMCParticleListWriter.h,v 1.2 2008/08/02 19:23:38 tai Exp $
 #ifndef STJETMCPARTICLELISTWRITER_HH
 #define STJETMCPARTICLELISTWRITER_HH
 
@@ -9,14 +9,14 @@
 class TDirectory;
 class TTree;
 
-class StJetMCParticleListWriter {
+class StjMCParticleListWriter {
 
 public:
 
-  StJetMCParticleListWriter(const char* treeName, TDirectory* file);
-  virtual ~StJetMCParticleListWriter() { }
+  StjMCParticleListWriter(const char* treeName, TDirectory* file);
+  virtual ~StjMCParticleListWriter() { }
 
-  void Fill(const StSpinJet::MCParticleList& theList);
+  void Fill(const StSpinJet::StjMCParticleList& theList);
   void Finish();
     
 private:

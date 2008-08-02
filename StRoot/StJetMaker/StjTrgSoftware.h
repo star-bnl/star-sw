@@ -1,15 +1,15 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftware.h,v 1.1 2008/08/02 04:07:14 tai Exp $
+// $Id: StjTrgSoftware.h,v 1.2 2008/08/02 19:22:30 tai Exp $
 #ifndef STJETTRGSOFTWARE_H
 #define STJETTRGSOFTWARE_H
 
 #include <vector>
 
-class StJetTrgSoftware {
+class StjTrgSoftware {
 
 public:
-  StJetTrgSoftware() { }
-  virtual ~StJetTrgSoftware() { }
+  StjTrgSoftware() { }
+  virtual ~StjTrgSoftware() { }
 
   virtual bool soft(int trgId) = 0;
 

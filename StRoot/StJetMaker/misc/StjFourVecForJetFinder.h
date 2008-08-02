@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecForJetFinder.h,v 1.1 2008/08/02 04:18:57 tai Exp $
+// $Id: StjFourVecForJetFinder.h,v 1.2 2008/08/02 19:23:14 tai Exp $
 #ifndef FOURVECFORJETFINDER_H
 #define FOURVECFORJETFINDER_H
 
@@ -8,19 +8,19 @@
 #include "StjFourVecList.h"
 #include "TLorentzVector.h"
 
-class FourVecForJetFinder : public AbstractFourVec {
+class StjFourVecForJetFinder : public AbstractFourVec {
 
 public:
     
-  FourVecForJetFinder() { }
+  StjFourVecForJetFinder() { }
 
-  FourVecForJetFinder(const StSpinJet::FourVec& p)
+  StjFourVecForJetFinder(const StSpinJet::StjFourVec& p)
     : _fourVec(p)
   { 
     _vec.SetPtEtaPhiM(p.pt, p.eta, p.phi, p.m);
   }
 
-  virtual ~FourVecForJetFinder() { }
+  virtual ~StjFourVecForJetFinder() { }
     
   double pt() const { return _vec.Pt(); }
   double px() const { return _vec.Px(); } 
@@ -37,12 +37,12 @@ public:
 
   double charge() const { return 0; }
 
-  StSpinJet::FourVec fourVec() const { return _fourVec; }
+  StSpinJet::StjFourVec fourVec() const { return _fourVec; }
 
 private:
 
   TLorentzVector _vec;
-  StSpinJet::FourVec _fourVec;
+  StSpinJet::StjFourVec _fourVec;
 
 };
 

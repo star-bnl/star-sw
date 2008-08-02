@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutEnergy.h,v 1.1 2008/08/02 04:15:55 tai Exp $
+// $Id: StjTowerEnergyCutEnergy.h,v 1.2 2008/08/02 19:22:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TOWERENERGYCUTENERGY_H
 #define TOWERENERGYCUTENERGY_H
@@ -8,14 +8,14 @@
 
 namespace StJetTowerEnergyCut {
 
-class TowerEnergyCutEnergy : public TowerEnergyCut {
+class StjTowerEnergyCutEnergy : public StjTowerEnergyCut {
 
 public:
-  TowerEnergyCutEnergy(double min = 0, double max = std::numeric_limits<double>::max())
+  StjTowerEnergyCutEnergy(double min = 0, double max = std::numeric_limits<double>::max())
     : _min(min), _max(max) { }
-  virtual ~TowerEnergyCutEnergy() { }
+  virtual ~StjTowerEnergyCutEnergy() { }
 
-  bool operator()(const StSpinJet::TowerEnergy& deposit)
+  bool operator()(const StSpinJet::StjTowerEnergy& deposit)
   {
     if(deposit.energy <= _min) return true;
 

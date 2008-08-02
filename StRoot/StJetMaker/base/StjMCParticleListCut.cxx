@@ -1,4 +1,4 @@
-// $Id: StjMCParticleListCut.cxx,v 1.1 2008/08/02 04:15:38 tai Exp $
+// $Id: StjMCParticleListCut.cxx,v 1.2 2008/08/02 19:22:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjMCParticleListCut.h"
 
@@ -6,11 +6,11 @@ using namespace std;
 
 namespace StSpinJet {
 
-MCParticleList StJetMCParticleListCut::operator()(const MCParticleList &aList)
+StjMCParticleList StjMCParticleListCut::operator()(const StjMCParticleList &aList)
 {
-  MCParticleList ret;
+  StjMCParticleList ret;
 
-  for(MCParticleList::const_iterator it = aList.begin(); it != aList.end(); ++it) {
+  for(StjMCParticleList::const_iterator it = aList.begin(); it != aList.end(); ++it) {
 
     if(shouldNotKeep(*it)) continue;
 
@@ -21,7 +21,7 @@ MCParticleList StJetMCParticleListCut::operator()(const MCParticleList &aList)
 }
 
 
-bool StJetMCParticleListCut::shouldNotKeep(const MCParticle& p4)
+bool StjMCParticleListCut::shouldNotKeep(const StjMCParticle& p4)
 {
   for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
     if((**cut)(p4)) return true;

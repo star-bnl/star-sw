@@ -1,4 +1,4 @@
-// $Id: StjMCParticleMaker.cxx,v 1.1 2008/08/02 04:04:38 tai Exp $
+// $Id: StjMCParticleMaker.cxx,v 1.2 2008/08/02 19:22:26 tai Exp $
 #include "StjMCParticleMaker.h"
 
 
@@ -21,33 +21,33 @@ using namespace std;
 using namespace StSpinJet;
 using namespace StJetMCParticleCut;
 
-ClassImp(StJetMCParticleMaker)
+ClassImp(StjMCParticleMaker)
   
 
-StJetMCParticleMaker::StJetMCParticleMaker(const Char_t *name, TDirectory* file, StMaker* uDstMaker)
+StjMCParticleMaker::StjMCParticleMaker(const Char_t *name, TDirectory* file, StMaker* uDstMaker)
   : StMaker(name)
   , _file(file)
   , _uDstMaker(uDstMaker)
 { }
 
-Int_t StJetMCParticleMaker::Init()
+Int_t StjMCParticleMaker::Init()
 {
-  _mc = new StJetMCMuDst(_uDstMaker);
+  _mc = new StjMCMuDst(_uDstMaker);
 
-  _mcCut = new StJetMCParticleListCut();
+  _mcCut = new StjMCParticleListCut();
 
   int goodStatus[] = {1, 3};
-  _mcCut->addCut(new MCParticleCutStatus(2, goodStatus));
-  _mcCut->addCut(new MCParticleCutEtaForStatus(-2.0, 2.0, 1));
+  _mcCut->addCut(new StjMCParticleCutStatus(2, goodStatus));
+  _mcCut->addCut(new StjMCParticleCutEtaForStatus(-2.0, 2.0, 1));
 
-  _writer = new StJetMCParticleListWriter("mcParticles", _file);
+  _writer = new StjMCParticleListWriter("mcParticles", _file);
 
   return kStOk;
 }
 
-Int_t StJetMCParticleMaker::Make()
+Int_t StjMCParticleMaker::Make()
 {
-  MCParticleList theList = _mc->getMCPartilceList();
+  StjMCParticleList theList = _mc->getMCPartilceList();
 
   theList = (*_mcCut)(theList);
 
@@ -57,7 +57,7 @@ Int_t StJetMCParticleMaker::Make()
 
 }
 
-Int_t StJetMCParticleMaker::Finish()
+Int_t StjMCParticleMaker::Finish()
 {
   _writer->Finish();
 

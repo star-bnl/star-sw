@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMCMuDst.h,v 1.1 2008/08/02 04:19:21 tai Exp $
+// $Id: StjEEMCMuDst.h,v 1.2 2008/08/02 19:23:20 tai Exp $
 #ifndef STJETEEMCMUDST_H
 #define STJETEEMCMUDST_H
 
@@ -10,15 +10,15 @@ class StEEmcDbMaker;
 
 namespace StSpinJet {
 
-class StJetEEMCMuDst : public StJetEEMC {
+class StjEEMCMuDst : public StjEEMC {
 
 public:
-  StJetEEMCMuDst(StMuDstMaker* uDstMaker);
-  virtual ~StJetEEMCMuDst() { }
+  StjEEMCMuDst(StMuDstMaker* uDstMaker);
+  virtual ~StjEEMCMuDst() { }
 
   void Init();
 
-  TowerEnergyList getEnergyList();
+  StjTowerEnergyList getEnergyList();
 
 
 private:

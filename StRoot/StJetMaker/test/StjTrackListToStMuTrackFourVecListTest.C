@@ -8,24 +8,24 @@ using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( TrackListToStMuTrackFourVecListTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTrackListToStMuTrackFourVecListTest );
 
-void TrackListToStMuTrackFourVecListTest::setUp() 
+void StjTrackListToStMuTrackFourVecListTest::setUp() 
 {
 
 }
 
-void TrackListToStMuTrackFourVecListTest::tearDown() 
+void StjTrackListToStMuTrackFourVecListTest::tearDown() 
 {
 
 }
 
-void TrackListToStMuTrackFourVecListTest::testOne() 
+void StjTrackListToStMuTrackFourVecListTest::testOne() 
 {
-  TrackListToStMuTrackFourVecList ttof;
-  TrackList tlist;
+  StjTrackListToStMuTrackFourVecList ttof;
+  StjTrackList tlist;
 
-  Track track;
+  StjTrack track;
   track.pt  = 0.7650294;
   track.eta = 1.0071259;
   track.phi = 1.1558674;

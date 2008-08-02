@@ -1,4 +1,4 @@
-// $Id: StjTrackTowerEnergyListToFourVecList.cxx,v 1.1 2008/08/02 04:16:41 tai Exp $
+// $Id: StjTrackTowerEnergyListToFourVecList.cxx,v 1.2 2008/08/02 19:22:56 tai Exp $
 #include "StjTrackTowerEnergyListToFourVecList.h"
 
 #include "StjTrackToFourVec.h"
@@ -6,27 +6,27 @@
 
 namespace StSpinJet {
 
-FourVecList TrackTowerEnergyListToFourVecList::operator()(const std::pair<TrackList, TowerEnergyList>& inList)
+StjFourVecList StjTrackTowerEnergyListToFourVecList::operator()(const std::pair<StjTrackList, StjTowerEnergyList>& inList)
 {
   return operator()(inList.first, inList.second);
 }
 
-FourVecList TrackTowerEnergyListToFourVecList::operator()(const TrackList& trackList, const TowerEnergyList& energyList)
+StjFourVecList StjTrackTowerEnergyListToFourVecList::operator()(const StjTrackList& trackList, const StjTowerEnergyList& energyList)
 {
-  FourVecList ret;
+  StjFourVecList ret;
 
-  TrackToFourVec track2four;
-  TowerEnergyToFourVec tower2four;
+  StjTrackToFourVec track2four;
+  StjTowerEnergyToFourVec tower2four;
 
   int fourvecId(1);
-  for(TrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
-    FourVec four = track2four(*track);
+  for(StjTrackList::const_iterator track = trackList.begin(); track != trackList.end(); ++track) {
+    StjFourVec four = track2four(*track);
     four.fourvecId = fourvecId++;
     ret.push_back(four);
   }
 
-  for(TowerEnergyList::const_iterator tower = energyList.begin(); tower != energyList.end(); ++tower) {
-    FourVec four = tower2four(*tower);
+  for(StjTowerEnergyList::const_iterator tower = energyList.begin(); tower != energyList.end(); ++tower) {
+    StjFourVec four = tower2four(*tower);
     four.fourvecId = fourvecId++;
     ret.push_back(four);
   }

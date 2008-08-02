@@ -17,24 +17,24 @@ using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StJetTreeEntryCoordinatorTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTreeEntryCoordinatorTest );
 
-void StJetTreeEntryCoordinatorTest::setUp() 
+void StjTreeEntryCoordinatorTest::setUp() 
 {
 
 }
 
-void StJetTreeEntryCoordinatorTest::tearDown() 
+void StjTreeEntryCoordinatorTest::tearDown() 
 {
 
 }
 
-void StJetTreeEntryCoordinatorTest::testMake() 
+void StjTreeEntryCoordinatorTest::testMake() 
 {
   //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
   TFile* file = new TFile("./jetpart_6143024.root");
 
-  StJetTreeEntryCoordinator* coord = new StJetTreeEntryCoordinator(file);
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(file);
   coord->AddTrgTreeName("trgBJP2");
   coord->AddTrgTreeName("trgBHT2");
 
@@ -45,17 +45,17 @@ void StJetTreeEntryCoordinatorTest::testMake()
   const Int_t& indexMinor = coord->indexMinor();
 
   TTree *treeTpc = dynamic_cast<TTree*>(file->Get("tpcTracks"));
-  StJetTPCTree* tpc = new StJetTPCTree(treeTpc, indexMajor, indexMinor);
+  StjTPCTree* tpc = new StjTPCTree(treeTpc, indexMajor, indexMinor);
 
   TTree *treeBemc = dynamic_cast<TTree*>(file->Get("bemcTowers"));
-  StJetBEMCTree* bemc = new StJetBEMCTree(treeBemc, indexMajor, indexMinor);
+  StjBEMCTree* bemc = new StjBEMCTree(treeBemc, indexMajor, indexMinor);
 
   coord->Init();
 
   while(!coord->eof()) {
     coord->Make();
-    //    TrackList trackList = tpc->getTrackList();
-    //    TowerEnergyList energyList = bemc->getEnergyList();
+    //    StjTrackList trackList = tpc->getTrackList();
+    //    StjTowerEnergyList energyList = bemc->getEnergyList();
     //    cout << indexMajor << " " << indexMinor << " " << trackList.size() << " " << energyList.size() << endl;
   }
 

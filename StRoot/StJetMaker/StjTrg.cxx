@@ -1,4 +1,4 @@
-// $Id: StjTrg.cxx,v 1.1 2008/08/02 04:06:13 tai Exp $
+// $Id: StjTrg.cxx,v 1.2 2008/08/02 19:22:28 tai Exp $
 #include "StjTrg.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -9,42 +9,42 @@
 
 using namespace std;
 
-int StJetTrg::runNumber()
+int StjTrg::runNumber()
 {
   return _uDstMaker->muDst()->event()->runId();
 }
 
-int StJetTrg::eventId()
+int StjTrg::eventId()
 {
   return _uDstMaker->muDst()->event()->eventId();
 }
 
-bool StJetTrg::hard()
+bool StjTrg::hard()
 {
   return _uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId);
 }
 
-bool StJetTrg::soft()
+bool StjTrg::soft()
 {
   return _soft->soft(_trgId);
 }
 
-double StJetTrg::prescale()
+double StjTrg::prescale()
 {
   return StDetectorDbTriggerID::instance()->getTotalPrescales()[_trgId];
 }
 
-double StJetTrg::vertexZ()
+double StjTrg::vertexZ()
 {
   return _uDstMaker->muDst()->event()->primaryVertexPosition().z();
 }
 
-vector<int> StJetTrg::towers()
+vector<int> StjTrg::towers()
 {
   return _soft->towers(_trgId);
 }
 
-vector<int> StJetTrg::jetPatches()
+vector<int> StjTrg::jetPatches()
 {
   return _soft->jetPatches(_trgId);
 }

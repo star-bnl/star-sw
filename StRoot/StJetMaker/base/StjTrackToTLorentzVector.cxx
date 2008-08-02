@@ -1,4 +1,4 @@
-// $Id: StjTrackToTLorentzVector.cxx,v 1.1 2008/08/02 04:16:39 tai Exp $
+// $Id: StjTrackToTLorentzVector.cxx,v 1.2 2008/08/02 19:22:55 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrackToTLorentzVector.h"
 
@@ -6,7 +6,7 @@
 
 namespace StSpinJet {
 
-TLorentzVector TrackToTLorentzVector::operator()(const Track& track)
+TLorentzVector StjTrackToTLorentzVector::operator()(const StjTrack& track)
 {
   TLorentzVector p4;
   p4.SetPtEtaPhiM(track.pt, track.eta, track.phi, _mass);

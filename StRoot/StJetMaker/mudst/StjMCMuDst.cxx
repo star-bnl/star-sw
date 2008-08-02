@@ -1,4 +1,4 @@
-// $Id: StjMCMuDst.cxx,v 1.1 2008/08/02 04:19:23 tai Exp $
+// $Id: StjMCMuDst.cxx,v 1.2 2008/08/02 19:23:20 tai Exp $
 
 #include <StjMCMuDst.h>
 
@@ -17,7 +17,7 @@
 
 namespace StSpinJet {
 
-MCParticleList StJetMCMuDst::getMCPartilceList()
+StjMCParticleList StjMCMuDst::getMCPartilceList()
 {
 
   TDataSet *Event = _maker->GetDataSet("geant");
@@ -26,11 +26,11 @@ MCParticleList StJetMCMuDst::getMCPartilceList()
   const St_particle* particleTabPtr = (St_particle*)geantDstI("particle");
   const particle_st* particleTable = particleTabPtr->GetTable();
 
-  MCParticleList theList;
+  StjMCParticleList theList;
 
   StMuDstMaker *uDstMaker = dynamic_cast<StMuDstMaker*>(_maker->GetMaker("MuDst"));
 
-  MCParticle particle;
+  StjMCParticle particle;
   particle.runNumber = uDstMaker->muDst()->event()->runId();
   particle.eventId = uDstMaker->muDst()->event()->eventId();
   particle.vertexZ = uDstMaker->muDst()->event()->primaryVertexPosition().z();

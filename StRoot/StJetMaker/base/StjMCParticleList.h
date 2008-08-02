@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleList.h,v 1.1 2008/08/02 04:15:37 tai Exp $
+// $Id: StjMCParticleList.h,v 1.2 2008/08/02 19:22:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef MCPARTICLELIST_H
 #define MCPARTICLELIST_H
@@ -9,7 +9,7 @@
 
 namespace StSpinJet {
 
-struct MCParticle {
+struct StjMCParticle {
   int            runNumber;
   int            eventId;
   int            mcparticleId;
@@ -27,9 +27,9 @@ struct MCParticle {
   double         vertexZ;
 };
 
-typedef std::vector<MCParticle> MCParticleList;
+typedef std::vector<StjMCParticle> StjMCParticleList;
 
-inline bool operator==(const MCParticle& v1, const MCParticle& v2)
+inline bool operator==(const StjMCParticle& v1, const StjMCParticle& v2)
 {
   if(v1.runNumber       != v2.runNumber)  return false;
   if(v1.eventId         != v2.eventId)     return false;   
@@ -48,24 +48,24 @@ inline bool operator==(const MCParticle& v1, const MCParticle& v2)
   return true;
   }
 
-inline bool operator!=(const MCParticle& v1, const MCParticle& v2)
+inline bool operator!=(const StjMCParticle& v1, const StjMCParticle& v2)
 {
   return(!(v1 == v2));
 }
 
-inline bool operator==(const MCParticleList& v1, const MCParticleList& v2){
+inline bool operator==(const StjMCParticleList& v1, const StjMCParticleList& v2){
   if(v1.size() != v2.size()) return false;
   for(size_t i = 0; i < v1.size(); ++i) if(v1[i] != v2[i]) return false;
   return true;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const MCParticle& v)
+inline std::ostream& operator<<(std::ostream& out, const StjMCParticle& v)
 {
   out << "mcparticleId: " << v.mcparticleId << ", pt: " << v.pt << ", .... ";
   return out;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const MCParticleList& v)
+inline std::ostream& operator<<(std::ostream& out, const StjMCParticleList& v)
 {
   out << "MCParticleList size: " << v.size();
   return out;

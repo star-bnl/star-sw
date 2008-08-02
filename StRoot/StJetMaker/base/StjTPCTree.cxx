@@ -1,4 +1,4 @@
-// $Id: StjTPCTree.cxx,v 1.1 2008/08/02 04:15:42 tai Exp $
+// $Id: StjTPCTree.cxx,v 1.2 2008/08/02 19:22:49 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTPCTree.h"
 
@@ -8,7 +8,7 @@
 
 namespace StSpinJet {
 
-StJetTPCTree::StJetTPCTree(TTree *tree,
+StjTPCTree::StjTPCTree(TTree *tree,
 	       const Int_t& indexMajor, const Int_t& indexMinor,
 	       const char* indexMajorName, const char* indexMinorName
 	       )
@@ -16,10 +16,10 @@ StJetTPCTree::StJetTPCTree(TTree *tree,
  , _indexMajor(indexMajor), _indexMinor(indexMinor)
 {
   _tree->BuildIndex(indexMajorName, indexMinorName);
-  _reader = new StJetTrackListReader(_tree);
+  _reader = new StjTrackListReader(_tree);
 }
 
-TrackList StJetTPCTree::getTrackList()
+StjTrackList StjTPCTree::getTrackList()
 {
   Long64_t entry = _tree->GetEntryNumberWithIndex(_indexMajor, _indexMinor);
   return _reader->GetEntry(entry);

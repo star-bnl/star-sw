@@ -1,11 +1,11 @@
-// $Id: StjTrackListReader.cxx,v 1.1 2008/08/02 04:22:17 tai Exp $
+// $Id: StjTrackListReader.cxx,v 1.2 2008/08/02 19:23:39 tai Exp $
 #include "StjTrackListReader.h"
 
 #include <TTree.h>
 
 using namespace StSpinJet;
 
-StJetTrackListReader::StJetTrackListReader(TTree *tree)
+StjTrackListReader::StjTrackListReader(TTree *tree)
  : _tree(tree)
 {
   _tree->SetBranchAddress("eventId"        , &_eventId         );
@@ -37,9 +37,9 @@ StJetTrackListReader::StJetTrackListReader(TTree *tree)
   _tree->SetBranchAddress("runNumber"      , &_runNumber       );
 }
 
-TrackList StJetTrackListReader::GetEntry(Long64_t entry)
+StjTrackList StjTrackListReader::GetEntry(Long64_t entry)
 {
-  TrackList ret;
+  StjTrackList ret;
 
   if(entry < 0) return ret;
 
@@ -47,7 +47,7 @@ TrackList StJetTrackListReader::GetEntry(Long64_t entry)
 
   for(int i = 0; i < _nTracks; ++i) {
 
-    Track track;
+    StjTrack track;
 
     track.runNumber      = _runNumber;
     track.eventId        = _eventId;

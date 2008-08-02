@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeWriter.h,v 1.1 2008/08/02 04:18:35 tai Exp $
+// $Id: StjTreeWriter.h,v 1.2 2008/08/02 19:23:08 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTREEWRITER_H
 #define STJETTREEWRITER_H
@@ -16,12 +16,12 @@ class TTree;
 #include <list>
 #include <vector>
 
-class StJetTreeWriter : public TObject {
+class StjTreeWriter : public TObject {
 
 public:
 
-  StJetTreeWriter() { }
-  virtual ~StJetTreeWriter() { }
+  StjTreeWriter() { }
+  virtual ~StjTreeWriter() { }
 
   virtual void Init() { }
   virtual void Finish() { }

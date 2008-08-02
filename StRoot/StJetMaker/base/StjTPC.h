@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPC.h,v 1.1 2008/08/02 04:15:40 tai Exp $
+// $Id: StjTPC.h,v 1.2 2008/08/02 19:22:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPC_H
 #define STJETTPC_H
@@ -8,27 +8,27 @@
 
 namespace StSpinJet {
 
-class StJetTPC {
+class StjTPC {
 
 public:
-  StJetTPC() { }
-  virtual ~StJetTPC() { }
+  StjTPC() { }
+  virtual ~StjTPC() { }
 
   virtual void Init() { }
 
-  virtual TrackList getTrackList() = 0;
+  virtual StjTrackList getTrackList() = 0;
 };
 
 
-class StJetTPCNull : public StJetTPC {
+class StjTPCNull : public StjTPC {
 
 public:
-  StJetTPCNull() { }
-  virtual ~StJetTPCNull() { }
+  StjTPCNull() { }
+  virtual ~StjTPCNull() { }
 
   void Init() { }
 
-  TrackList getTrackList() { return TrackList(); }
+  StjTrackList getTrackList() { return StjTrackList(); }
 };
 
 }

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeBemcEnergySumCalculator.h,v 1.1 2008/08/02 04:18:36 tai Exp $
+// $Id: StjeBemcEnergySumCalculator.h,v 1.2 2008/08/02 19:23:08 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef BEMCENERGYSUMCALCULATOR_H
 #define BEMCENERGYSUMCALCULATOR_H
@@ -8,15 +8,15 @@
 
 namespace StSpinJet {
 
-class StJetBEMC;
-class StJetBEMCEnergyCut;
+class StjBEMC;
+class StjTowerEnergyListCut;
 
-class BemcEnergySumCalculator {
+class StjeBemcEnergySumCalculator {
 
 public:
 
-  BemcEnergySumCalculator() { }
-  virtual ~BemcEnergySumCalculator() { }
+  StjeBemcEnergySumCalculator() { }
+  virtual ~StjeBemcEnergySumCalculator() { }
 
   virtual void Init() { }
   virtual void Make() { }
@@ -29,12 +29,12 @@ private:
 
 };
 
-class BemcEnergySumCalculatorNull : public BemcEnergySumCalculator {
+class StjeBemcEnergySumCalculatorNull : public StjeBemcEnergySumCalculator {
 
 public:
 
-  BemcEnergySumCalculatorNull() { }
-  virtual ~BemcEnergySumCalculatorNull() { }
+  StjeBemcEnergySumCalculatorNull() { }
+  virtual ~StjeBemcEnergySumCalculatorNull() { }
 
   void Init() { }
   void Make() { }
@@ -47,12 +47,12 @@ private:
 
 };
 
-class BemcEnergySumCalculatorImp : public BemcEnergySumCalculator {
+class StjeBemcEnergySumCalculatorImp : public StjeBemcEnergySumCalculator {
 
 public:
 
-  BemcEnergySumCalculatorImp(StJetBEMC* bemc, StJetBEMCEnergyCut* cut);
-  virtual ~BemcEnergySumCalculatorImp() { }
+  StjeBemcEnergySumCalculatorImp(StjBEMC* bemc, StjTowerEnergyListCut* cut);
+  virtual ~StjeBemcEnergySumCalculatorImp() { }
 
   void Init();
   void Make();
@@ -63,12 +63,12 @@ public:
 
 private:
 
-  double sumEnergyOverBemcTowers(double minE, const TowerEnergyList &energyDepositList);
+  double sumEnergyOverBemcTowers(double minE, const StjTowerEnergyList &energyDepositList);
 
-  int numberOfBemcTowersWithEnergyAbove(double minE, const TowerEnergyList &energyDepositList);
+  int numberOfBemcTowersWithEnergyAbove(double minE, const StjTowerEnergyList &energyDepositList);
 
-  StJetBEMC* _bemc;
-  StJetBEMCEnergyCut* _cut;
+  StjBEMC* _bemc;
+  StjTowerEnergyListCut* _cut;
 
   int _DylanPoints;
   double _SumEmcEt;

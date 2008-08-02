@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrg.h,v 1.1 2008/08/02 04:06:19 tai Exp $
+// $Id: StjTrg.h,v 1.2 2008/08/02 19:22:28 tai Exp $
 #ifndef STJETTRG_H
 #define STJETTRG_H
 
@@ -7,13 +7,13 @@
 
 class StMuDstMaker;
 
-class StJetTrg {
+class StjTrg {
 
 public:
-  StJetTrg(int trgId, StMuDstMaker* uDstMaker, StJetTrgSoftware* soft)
+  StjTrg(int trgId, StMuDstMaker* uDstMaker, StjTrgSoftware* soft)
     : _trgId(trgId), _soft(soft), _uDstMaker(uDstMaker)
   { }
-  virtual ~StJetTrg() { }
+  virtual ~StjTrg() { }
 
   int id() { return _trgId; }
 
@@ -30,7 +30,7 @@ private:
 
   int _trgId;
 
-  StJetTrgSoftware* _soft;
+  StjTrgSoftware* _soft;
 
   StMuDstMaker* _uDstMaker;
 

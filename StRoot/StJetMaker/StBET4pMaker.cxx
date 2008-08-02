@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.3 2008/08/02 03:56:20 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.4 2008/08/02 19:22:23 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -29,11 +29,11 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _useTree(false)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
-  , _track2four(*(new TrackListToStMuTrackFourVecList))
-  , _energy2four(*(new TowerEnergyListToStMuTrackFourVecList))
+  , _track2four(*(new StjTrackListToStMuTrackFourVecList))
+  , _energy2four(*(new StjTowerEnergyListToStMuTrackFourVecList))
 { }
 
-StBET4pMaker::StBET4pMaker(const char* name, StJetTreeEntryMaker* maker)
+StBET4pMaker::StBET4pMaker(const char* name, StjTreeEntryMaker* maker)
   : StFourPMaker(name)
   , _entryMaker(maker)
   , _uDstMaker(0), _doTowerSwapFix(true)
@@ -43,8 +43,8 @@ StBET4pMaker::StBET4pMaker(const char* name, StJetTreeEntryMaker* maker)
   , _useTree(true)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
-  , _track2four(*(new TrackListToStMuTrackFourVecList))
-  , _energy2four(*(new TowerEnergyListToStMuTrackFourVecList))
+  , _track2four(*(new StjTrackListToStMuTrackFourVecList))
+  , _energy2four(*(new StjTowerEnergyListToStMuTrackFourVecList))
 { }
 
 
@@ -58,7 +58,7 @@ Int_t StBET4pMaker::Init()
   }
   _imp->Init();
 
-  BemcEnergySumCalculatorBuilder bemcEnergySumCalculatorBuilder;
+  StjeBemcEnergySumCalculatorBuilder bemcEnergySumCalculatorBuilder;
   if(_useTree) _useBEMCEnergySum = false;
   _bemcEnergySumCalculator = bemcEnergySumCalculatorBuilder.build(_useBEMCEnergySum && _useBEMC, _use2003Cuts, _use2005Cuts, _uDstMaker, _doTowerSwapFix);
   _bemcEnergySumCalculator->Init();
@@ -88,7 +88,7 @@ Int_t StBET4pMaker::Make()
 
   if (_bemcEnergySumCalculator->sumEmcEt() > 200.) return kStOk;
 
-  pair<TrackList, TowerEnergyList> trackAndEnergyList = _imp->getTrackAndEnergyList();
+  pair<StjTrackList, StjTowerEnergyList> trackAndEnergyList = _imp->getTrackAndEnergyList();
 
   FourList tpc4pList = _track2four(trackAndEnergyList.first);
   _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());

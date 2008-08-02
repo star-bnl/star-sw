@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleCutEta.h,v 1.1 2008/08/02 04:15:35 tai Exp $
+// $Id: StjMCParticleCutEta.h,v 1.2 2008/08/02 19:22:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef MCPARTICLECUTETA_H
 #define MCPARTICLECUTETA_H
@@ -8,13 +8,13 @@
 
 namespace StJetMCParticleCut {
 
-class MCParticleCutEta : public MCParticleCut {
+class StjMCParticleCutEta : public StjMCParticleCut {
 
 public:
-  MCParticleCutEta(double min = -10.0, double max = 10.0) :_min(min), _max(max) { }
-  virtual ~MCParticleCutEta() { }
+  StjMCParticleCutEta(double min = -10.0, double max = 10.0) :_min(min), _max(max) { }
+  virtual ~StjMCParticleCutEta() { }
 
-  bool operator()(const StSpinJet::MCParticle& p4)
+  bool operator()(const StSpinJet::StjMCParticle& p4)
   {
     if(p4.eta < _min) return true;
 

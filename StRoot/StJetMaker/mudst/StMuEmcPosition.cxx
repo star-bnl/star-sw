@@ -56,7 +56,7 @@ bool StMuEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
     bool goProj;
     goProj = kFALSE;
 
-    if (finite(s1) == 0 && finite(s2) == 0) { return kFALSE;} // Track couldn't be projected!
+    if (finite(s1) == 0 && finite(s2) == 0) { return kFALSE;} // StjTrack couldn't be projected!
 
     if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
 	// first point of track. The smaller solution is taken when both are positive
@@ -104,7 +104,7 @@ bool StMuEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
     bool goProj;
     goProj = kFALSE;
 
-    if (finite(s1) == 0 && finite(s2) == 0) { return kFALSE;} // Track couldn't be projected!
+    if (finite(s1) == 0 && finite(s2) == 0) { return kFALSE;} // StjTrack couldn't be projected!
 
     if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
 	// first point of track. The smaller solution is taken when both are positive

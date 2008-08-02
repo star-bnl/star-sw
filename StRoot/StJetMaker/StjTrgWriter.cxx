@@ -1,4 +1,4 @@
-// $Id: StjTrgWriter.cxx,v 1.1 2008/08/02 04:08:27 tai Exp $
+// $Id: StjTrgWriter.cxx,v 1.2 2008/08/02 19:22:32 tai Exp $
 #include "StjTrgWriter.h"
 
 #include "StjTrg.h"
@@ -6,14 +6,14 @@
 #include <TDirectory.h>
 #include <TTree.h>
 
-void StJetTrgWriter::Init()
+void StjTrgWriter::Init()
 {
   _tree = createTree();
   createBranch_general(_tree);
   createBranch_trgSpecific(_tree);
 }
 
-void StJetTrgWriter::Make()
+void StjTrgWriter::Make()
 {
   if( !(*_fillCondition)() ) return;
   fillBranch_general();
@@ -21,18 +21,18 @@ void StJetTrgWriter::Make()
   _tree->Fill();
 }
 
-void StJetTrgWriter::Finish()
+void StjTrgWriter::Finish()
 {
   _tree->BuildIndex("runNumber", "eventId");
 }
 
-TTree* StJetTrgWriter::createTree()
+TTree* StjTrgWriter::createTree()
 {
   _file->cd();
   return new TTree(_treeName.c_str(), _treeTitle.c_str());
 }
 
-void StJetTrgWriter::createBranch_general(TTree* tree)
+void StjTrgWriter::createBranch_general(TTree* tree)
 {
   tree->Branch("runNumber"  , &_runNumber    , "runNumber/I"    );
   tree->Branch("eventId"    , &_eventId      , "eventId/I"      );
@@ -44,7 +44,7 @@ void StJetTrgWriter::createBranch_general(TTree* tree)
   tree->Branch("soft"       , &_soft         , "soft/I"         );
 }
 
-void StJetTrgWriter::fillBranch_general()
+void StjTrgWriter::fillBranch_general()
 {
   _trigID = _trg->id();
 

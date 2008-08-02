@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecCutPt.h,v 1.1 2008/08/02 04:15:18 tai Exp $
+// $Id: StjFourVecCutPt.h,v 1.2 2008/08/02 19:22:43 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef FOURVECCUTPT_H
 #define FOURVECCUTPT_H
@@ -8,14 +8,14 @@
 
 namespace StJetFourVecCut {
 
-class FourVecCutPt : public FourVecCut {
+class StjFourVecCutPt : public StjFourVecCut {
 
 public:
-  FourVecCutPt(double min = 0, double max = std::numeric_limits<double>::max())
+  StjFourVecCutPt(double min = 0, double max = std::numeric_limits<double>::max())
     : _min(min), _max(max) { }
-  virtual ~FourVecCutPt() { }
+  virtual ~StjFourVecCutPt() { }
 
-  bool operator()(const StSpinJet::FourVec& p4)
+  bool operator()(const StSpinJet::StjFourVec& p4)
   {
     if(p4.pt <= _min) return true;
 

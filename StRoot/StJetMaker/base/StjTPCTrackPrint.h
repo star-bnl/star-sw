@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTrackPrint.h,v 1.1 2008/08/02 04:15:41 tai Exp $
+// $Id: StjTPCTrackPrint.h,v 1.2 2008/08/02 19:22:48 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETTPCTRACKPRINT_H
 #define STJETTPCTRACKPRINT_H
@@ -10,18 +10,18 @@
 
 namespace StSpinJet {
 
-class StJetTPCTrackPrint {
+class StjTPCTrackPrint {
 
 public:
 
-  StJetTPCTrackPrint() { }
-  virtual ~StJetTPCTrackPrint() { }
+  StjTPCTrackPrint() { }
+  virtual ~StjTPCTrackPrint() { }
 
-  void operator()(const TrackList& trackList);
+  void operator()(const StjTrackList& trackList);
 
 private:
 
-  void print(const Track& track) const;
+  void print(const StjTrack& track) const;
 
 };
 

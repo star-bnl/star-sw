@@ -4,9 +4,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class BemcEnergySumCalculatorBuilderTest : public CPPUNIT_NS::TestFixture
+class StjeBemcEnergySumCalculatorBuilderTest : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( BemcEnergySumCalculatorBuilderTest );
+  CPPUNIT_TEST_SUITE( StjeBemcEnergySumCalculatorBuilderTest );
   CPPUNIT_TEST( testBuildImp );
   CPPUNIT_TEST( testBuildNull );
   CPPUNIT_TEST_SUITE_END();

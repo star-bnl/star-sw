@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyVariation.cxx,v 1.1 2008/08/02 04:16:13 tai Exp $
+// $Id: StjTowerEnergyVariation.cxx,v 1.2 2008/08/02 19:22:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyVariation.h"
 
@@ -7,11 +7,11 @@ using namespace std;
 namespace StSpinJet {
 
 
-StSpinJet::TowerEnergyList StJetTowerEnergyVariation::operator()(const TowerEnergyList &energyList)
+StSpinJet::StjTowerEnergyList StjTowerEnergyVariation::operator()(const StjTowerEnergyList &energyList)
 {
-  TowerEnergyList ret;
+  StjTowerEnergyList ret;
 
-  for(TowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
+  for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
     ret.push_back(vary(*it));
   }
 
@@ -19,9 +19,9 @@ StSpinJet::TowerEnergyList StJetTowerEnergyVariation::operator()(const TowerEner
 }
 
 
-TowerEnergy StJetTowerEnergyVariation::vary(const TowerEnergy& energyDeposit)
+StjTowerEnergy StjTowerEnergyVariation::vary(const StjTowerEnergy& energyDeposit)
 {
-  TowerEnergy ret(energyDeposit);
+  StjTowerEnergy ret(energyDeposit);
   ret.energy *= (1.0 + _ratio);
   return ret;
 }

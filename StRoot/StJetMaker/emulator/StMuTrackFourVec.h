@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.1 2008/07/21 02:00:26 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.2 2008/08/02 19:23:07 tai Exp $
 #ifndef StMuTrackFourVec_HH
 #define StMuTrackFourVec_HH
 
@@ -49,7 +49,7 @@ public:
   //charge
   double charge() const { return mCharge; }
 
-  // Mu Track (null if it's an emc tower/hit/point) this will change soon
+  // Mu StjTrack (null if it's an emc tower/hit/point) this will change soon
   StSpinJet::StMuTrackEmu* track() const { return _track; }
 
   //Index of the track/tower/cluster/point in the container that it came from

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackToTLorentzVector.h,v 1.1 2008/08/02 04:16:39 tai Exp $
+// $Id: StjTrackToTLorentzVector.h,v 1.2 2008/08/02 19:22:56 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKTOTLORENTZVECTOR_H
 #define TRACKTOTLORENTZVECTOR_H
@@ -8,13 +8,13 @@
 
 namespace StSpinJet {
 
-class Track;
+class StjTrack;
 
-class TrackToTLorentzVector {
+class StjTrackToTLorentzVector {
 public:
-  TrackToTLorentzVector(double mass = 0.1395700 /* pion mass as default */)
+  StjTrackToTLorentzVector(double mass = 0.1395700 /* pion mass as default */)
     : _mass(mass) { }
-  TLorentzVector operator()(const Track& track);
+  TLorentzVector operator()(const StjTrack& track);
 
 private:
   double _mass;

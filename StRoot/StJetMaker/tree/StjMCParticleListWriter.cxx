@@ -1,4 +1,4 @@
-// $Id: StjMCParticleListWriter.cxx,v 1.1 2008/08/02 04:22:06 tai Exp $
+// $Id: StjMCParticleListWriter.cxx,v 1.2 2008/08/02 19:23:38 tai Exp $
 #include "StjMCParticleListWriter.h"
 
 #include <TDirectory.h>
@@ -9,7 +9,7 @@
 using namespace std;
 using namespace StSpinJet;
 
-StJetMCParticleListWriter::StJetMCParticleListWriter(const char* treeName, TDirectory* file)
+StjMCParticleListWriter::StjMCParticleListWriter(const char* treeName, TDirectory* file)
   : _file(file)
 {
   _file->cd();
@@ -35,7 +35,7 @@ StJetMCParticleListWriter::StJetMCParticleListWriter(const char* treeName, TDire
   _tree->Branch("runNumber"       , &_runNumber       , "runNumber/I"                     );
 }
 
-void StJetMCParticleListWriter::Fill(const StSpinJet::MCParticleList& theList)
+void StjMCParticleListWriter::Fill(const StSpinJet::StjMCParticleList& theList)
 {
   if(theList.empty()) return;
 
@@ -45,7 +45,7 @@ void StJetMCParticleListWriter::Fill(const StSpinJet::MCParticleList& theList)
 
   _nMCParticles = theList.size();
   for(int i = 0; i < _nMCParticles; ++i) {
-    const MCParticle& particle = theList[i];
+    const StjMCParticle& particle = theList[i];
     _mcparticleId[i]    = particle.mcparticleId;
     _pdg[i]             = particle.pdg;
     _firstMotherId[i]   = particle.firstMotherId;
@@ -63,7 +63,7 @@ void StJetMCParticleListWriter::Fill(const StSpinJet::MCParticleList& theList)
   _tree->Fill();
 }
 
-void StJetMCParticleListWriter::Finish()
+void StjMCParticleListWriter::Finish()
 {
   _tree->BuildIndex("runNumber", "eventId");
 }

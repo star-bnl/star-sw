@@ -1,17 +1,17 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftwareFactory.h,v 1.1 2008/08/02 04:07:53 tai Exp $
+// $Id: StjTrgSoftwareFactory.h,v 1.2 2008/08/02 19:22:31 tai Exp $
 #ifndef STJETTRGSOFTWAREFACTORY_H
 #define STJETTRGSOFTWAREFACTORY_H
 
-class StJetTrgSoftware;
+class StjTrgSoftware;
 
-class StJetTrgSoftwareFactory {
+class StjTrgSoftwareFactory {
 
 public:
-  StJetTrgSoftwareFactory() { }
-  virtual ~StJetTrgSoftwareFactory() { }
+  StjTrgSoftwareFactory() { }
+  virtual ~StjTrgSoftwareFactory() { }
 
-  virtual StJetTrgSoftware* create() = 0;
+  virtual StjTrgSoftware* create() = 0;
 
 };
 

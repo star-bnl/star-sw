@@ -1,4 +1,4 @@
-// $Id: StjJetPrint.cxx,v 1.1 2008/08/02 04:15:31 tai Exp $
+// $Id: StjJetPrint.cxx,v 1.2 2008/08/02 19:22:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetPrint.h"
 
@@ -8,14 +8,14 @@ using namespace std;
 
 namespace StSpinJet {
 
-void StJetJetPrint::operator()(const JetList &jetList)
+void StjJetPrint::operator()(const StjJetList &jetList)
 {
-  for(JetList::const_iterator it = jetList.begin(); it != jetList.end(); ++it) {
+  for(StjJetList::const_iterator it = jetList.begin(); it != jetList.end(); ++it) {
     print(*it);
   }
 }
 
-void StJetJetPrint::print(const Jet& jet)
+void StjJetPrint::print(const StjJet& jet)
 {
   cout 
     << jet.runNumber      << " "
@@ -29,7 +29,7 @@ void StJetJetPrint::print(const Jet& jet)
     << jet.detectorEta    << " "
     << endl;
 
-  for(FourVecList::const_iterator jt = jet.fourVecList.begin(); jt != jet.fourVecList.end(); ++jt) {
+  for(StjFourVecList::const_iterator jt = jet.fourVecList.begin(); jt != jet.fourVecList.end(); ++jt) {
     cout 
       << "       "
       << (*jt).runNumber  << " "

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetPrint.h,v 1.1 2008/08/02 04:15:32 tai Exp $
+// $Id: StjJetPrint.h,v 1.2 2008/08/02 19:22:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETJETPRINT_H
 #define STJETJETPRINT_H
@@ -11,18 +11,18 @@
 
 namespace StSpinJet {
 
-class StJetJetPrint {
+class StjJetPrint {
 
 public:
 
-  StJetJetPrint() { }
-  virtual ~StJetJetPrint() { }
+  StjJetPrint() { }
+  virtual ~StjJetPrint() { }
 
-  void operator()(const JetList& jetList);
+  void operator()(const StjJetList& jetList);
 
 private:
 
-  void print(const Jet& jet);
+  void print(const StjJet& jet);
 
 };
 

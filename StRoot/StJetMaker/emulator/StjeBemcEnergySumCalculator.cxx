@@ -1,4 +1,4 @@
-// $Id: StjeBemcEnergySumCalculator.cxx,v 1.1 2008/08/02 04:18:35 tai Exp $
+// $Id: StjeBemcEnergySumCalculator.cxx,v 1.2 2008/08/02 19:23:08 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeBemcEnergySumCalculator.h"
 
@@ -7,7 +7,7 @@
 
 namespace StSpinJet {
 
-BemcEnergySumCalculatorImp::BemcEnergySumCalculatorImp(StJetBEMC* bemc, StJetBEMCEnergyCut* cut)
+StjeBemcEnergySumCalculatorImp::StjeBemcEnergySumCalculatorImp(StjBEMC* bemc, StjTowerEnergyListCut* cut)
   : _bemc(bemc)
   , _cut(cut)
   , _DylanPoints(0)
@@ -15,14 +15,14 @@ BemcEnergySumCalculatorImp::BemcEnergySumCalculatorImp(StJetBEMC* bemc, StJetBEM
 {
 
 }
-void BemcEnergySumCalculatorImp::Init()
+void StjeBemcEnergySumCalculatorImp::Init()
 {
   _bemc->Init();
 }
 
-void BemcEnergySumCalculatorImp::Make()
+void StjeBemcEnergySumCalculatorImp::Make()
 {
-  TowerEnergyList energyList = _bemc->getEnergyList();
+  StjTowerEnergyList energyList = _bemc->getEnergyList();
 
   energyList = (*_cut)(energyList);
 
@@ -31,27 +31,27 @@ void BemcEnergySumCalculatorImp::Make()
   _DylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, energyList);
 }
 
-void BemcEnergySumCalculatorImp::Clear()
+void StjeBemcEnergySumCalculatorImp::Clear()
 {
   _SumEmcEt = 0;
   _DylanPoints = 0;
 }
 
-double BemcEnergySumCalculatorImp::sumEnergyOverBemcTowers(double minE, const TowerEnergyList &energyDepositList)
+double StjeBemcEnergySumCalculatorImp::sumEnergyOverBemcTowers(double minE, const StjTowerEnergyList &energyDepositList)
 {
   double ret(0.0);
 
-  for(TowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it)
+  for(StjTowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it)
     if((*it).energy > minE) ret += (*it).energy;
 
   return ret;
 }
 
-int BemcEnergySumCalculatorImp::numberOfBemcTowersWithEnergyAbove(double minE, const TowerEnergyList &energyDepositList)
+int StjeBemcEnergySumCalculatorImp::numberOfBemcTowersWithEnergyAbove(double minE, const StjTowerEnergyList &energyDepositList)
 {
   int ret(0);
 
-  for(TowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it)
+  for(StjTowerEnergyList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it)
     if((*it).energy > minE) ret ++;
 
   return ret;

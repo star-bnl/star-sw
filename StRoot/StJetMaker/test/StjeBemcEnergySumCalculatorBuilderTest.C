@@ -10,29 +10,29 @@ using namespace std;
 using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( BemcEnergySumCalculatorBuilderTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjeBemcEnergySumCalculatorBuilderTest );
 
-void BemcEnergySumCalculatorBuilderTest::setUp() 
+void StjeBemcEnergySumCalculatorBuilderTest::setUp() 
 {
 
 }
 
-void BemcEnergySumCalculatorBuilderTest::tearDown() 
+void StjeBemcEnergySumCalculatorBuilderTest::tearDown() 
 {
 
 }
 
-void BemcEnergySumCalculatorBuilderTest::testBuildImp() 
+void StjeBemcEnergySumCalculatorBuilderTest::testBuildImp() 
 {
-  BemcEnergySumCalculatorBuilder builder;
+  StjeBemcEnergySumCalculatorBuilder builder;
   bool useBEMC = true;
-  CPPUNIT_ASSERT(dynamic_cast<BemcEnergySumCalculatorImp*>(builder.build(useBEMC)));
+  CPPUNIT_ASSERT(dynamic_cast<StjeBemcEnergySumCalculatorImp*>(builder.build(useBEMC)));
 }
 
-void BemcEnergySumCalculatorBuilderTest::testBuildNull() 
+void StjeBemcEnergySumCalculatorBuilderTest::testBuildNull() 
 {
-  BemcEnergySumCalculatorBuilder builder;
+  StjeBemcEnergySumCalculatorBuilder builder;
   bool useBEMC = false;
-  CPPUNIT_ASSERT(dynamic_cast<BemcEnergySumCalculatorNull*>(builder.build(useBEMC)));
+  CPPUNIT_ASSERT(dynamic_cast<StjeBemcEnergySumCalculatorNull*>(builder.build(useBEMC)));
 }
 

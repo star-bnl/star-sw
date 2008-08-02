@@ -1,11 +1,11 @@
-// $Id: StjTowerEnergyListReader.cxx,v 1.1 2008/08/02 04:22:10 tai Exp $
+// $Id: StjTowerEnergyListReader.cxx,v 1.2 2008/08/02 19:23:38 tai Exp $
 #include "StjTowerEnergyListReader.h"
 
 #include <TTree.h>
 
 using namespace StSpinJet;
 
-StJetTowerEnergyListReader::StJetTowerEnergyListReader(TTree *tree)
+StjTowerEnergyListReader::StjTowerEnergyListReader(TTree *tree)
  : _tree(tree)
  {
   _tree->SetBranchAddress("eventId"    , &_eventId      );
@@ -27,9 +27,9 @@ StJetTowerEnergyListReader::StJetTowerEnergyListReader(TTree *tree)
  }
 
 
-TowerEnergyList StJetTowerEnergyListReader::GetEntry(Long64_t entry)
+StjTowerEnergyList StjTowerEnergyListReader::GetEntry(Long64_t entry)
 {
-  TowerEnergyList ret;
+  StjTowerEnergyList ret;
 
   if(entry < 0) return ret;
 
@@ -37,7 +37,7 @@ TowerEnergyList StJetTowerEnergyListReader::GetEntry(Long64_t entry)
 
   for(int i = 0; i < _nTowers; ++i) {
 
-    TowerEnergy energy;
+    StjTowerEnergy energy;
 
     energy.runNumber  =  _runNumber;             
     energy.eventId    =  _eventId;             

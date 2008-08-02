@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutNHits.h,v 1.1 2008/08/02 04:16:27 tai Exp $
+// $Id: StjTrackCutNHits.h,v 1.2 2008/08/02 19:22:54 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef TRACKCUTNHITS_H
 #define TRACKCUTNHITS_H
@@ -8,15 +8,15 @@
 
 namespace StJetTrackCut {
 
-class TrackCutNHits : public TrackCut {
+class StjTrackCutNHits : public StjTrackCut {
 
 public:
-  TrackCutNHits(unsigned short min = 12,
+  StjTrackCutNHits(unsigned short min = 12,
 		unsigned short max = std::numeric_limits<unsigned short>::max())
     : _min(min), _max(max) { }
-  virtual ~TrackCutNHits() { }
+  virtual ~StjTrackCutNHits() { }
 
-  bool operator()(const StSpinJet::Track& track)
+  bool operator()(const StSpinJet::StjTrack& track)
   {
     if(track.nHits <= _min) return true;
 
