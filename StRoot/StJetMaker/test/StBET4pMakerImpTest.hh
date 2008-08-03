@@ -22,57 +22,57 @@ public:
 
 private:
 
-  class StjTPCMock : public StSpinJet::StjTPC {
+  class StjTPCMock : public StjTPC {
   public:
     StjTPCMock(int n) : _n(n) { }
-    StSpinJet::StjTrackList getTrackList()
+    StjTrackList getTrackList()
     { 
-      StSpinJet::StjTrackList ret;
+      StjTrackList ret;
       for(int i = 0; i < _n; ++i)
-	ret.push_back(StSpinJet::StjTrack());
+	ret.push_back(StjTrack());
       return ret; 
     };
   private:
     int _n;
   };
 
-  class StjBEMCMock : public StSpinJet::StjBEMC {
+  class StjBEMCMock : public StjBEMC {
   public:
     StjBEMCMock(int n) : _n(n) { }
-    StSpinJet::StjTowerEnergyList getEnergyList()
+    StjTowerEnergyList getEnergyList()
     { 
-      StSpinJet::StjTowerEnergyList ret;
+      StjTowerEnergyList ret;
       for(int i = 0; i < _n; ++i)
-	ret.push_back(StSpinJet::StjTowerEnergy());
+	ret.push_back(StjTowerEnergy());
       return ret; 
     };
   private:
     int _n;
   };
 
-  class StjEEMCMock : public StSpinJet::StjEEMC {
+  class StjEEMCMock : public StjEEMC {
   public:
     StjEEMCMock(int n) : _n(n) { }
-    StSpinJet::StjTowerEnergyList getEnergyList()
+    StjTowerEnergyList getEnergyList()
     { 
-      StSpinJet::StjTowerEnergyList ret;
+      StjTowerEnergyList ret;
       for(int i = 0; i < _n; ++i)
-	ret.push_back(StSpinJet::StjTowerEnergy());
+	ret.push_back(StjTowerEnergy());
       return ret; 
     };
   private:
     int _n;
   };
 
-  class StjTrackCutMock : public StJetTrackCut::StjTrackCut {
-    bool operator()(const StSpinJet::StjTrack& track)
+  class StjTrackCutMock : public StjTrackCut {
+    bool operator()(const StjTrack& track)
     {
       return true;
     }
   };
 
-  class StjTowerEnergyCutMock : public StJetTowerEnergyCut::StjTowerEnergyCut {
-    bool operator()(const StSpinJet::StjTowerEnergy& energy)
+  class StjTowerEnergyCutMock : public StjTowerEnergyCut {
+    bool operator()(const StjTowerEnergy& energy)
     {
       return true;
     }
@@ -81,13 +81,13 @@ private:
   void assertResults(const char *path);
   void writeExpected(const char *path);
 
-  StSpinJet::StjTPC* tpc;
-  StSpinJet::StjTrackListCut* tpcCut;
-  StSpinJet::StjBEMC* bemc;
-  StSpinJet::StjTowerEnergyListCut *bemcCut;
-  StSpinJet::StjEEMC* eemc;
+  StjTPC* tpc;
+  StjTrackListCut* tpcCut;
+  StjBEMC* bemc;
+  StjTowerEnergyListCut *bemcCut;
+  StjEEMC* eemc;
 
-  StSpinJet::StjTowerEnergyCorrectionForTracks* corr;
+  StjTowerEnergyCorrectionForTracks* corr;
   StBET4pMakerImp *imp;
 
 };

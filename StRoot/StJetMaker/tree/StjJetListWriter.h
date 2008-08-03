@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListWriter.h,v 1.3 2008/08/02 22:43:40 tai Exp $
+// $Id: StjJetListWriter.h,v 1.4 2008/08/03 00:29:12 tai Exp $
 #ifndef STJJETLISTWRITER_H
 #define STJJETLISTWRITER_H
 
@@ -19,15 +19,15 @@ public:
   StjJetListWriter(const char* jetTreeName, const char* jetFourVecTreeName, TDirectory* file);
   virtual ~StjJetListWriter() { }
 
-  void Fill(const StSpinJet::StjJetList& jetList, const StSpinJet::StjFourVecList& fourVecList);
+  void Fill(const StjJetList& jetList, const StjFourVecList& fourVecList);
   void Finish();
 
 private:
 
-  void fillJetTree(const StSpinJet::StjJetList& jetList);
-  void fillFourVecTree(const StSpinJet::StjJetList& jetList, const StSpinJet::StjFourVecList& fourVecList);
+  void fillJetTree(const StjJetList& jetList);
+  void fillFourVecTree(const StjJetList& jetList, const StjFourVecList& fourVecList);
 
-  Int_t findJetId(const StSpinJet::StjFourVec& four, const StSpinJet::StjJetList& jetList);
+  Int_t findJetId(const StjFourVec& four, const StjJetList& jetList);
 
   TDirectory* _file;
   TTree* _jetTree;

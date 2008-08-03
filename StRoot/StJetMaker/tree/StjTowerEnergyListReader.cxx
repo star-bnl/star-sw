@@ -1,9 +1,7 @@
-// $Id: StjTowerEnergyListReader.cxx,v 1.2 2008/08/02 19:23:38 tai Exp $
+// $Id: StjTowerEnergyListReader.cxx,v 1.3 2008/08/03 00:29:13 tai Exp $
 #include "StjTowerEnergyListReader.h"
 
 #include <TTree.h>
-
-using namespace StSpinJet;
 
 StjTowerEnergyListReader::StjTowerEnergyListReader(TTree *tree)
  : _tree(tree)

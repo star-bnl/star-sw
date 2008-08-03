@@ -1,4 +1,4 @@
-// $Id: StjTrackListWriter.cxx,v 1.2 2008/08/02 19:23:39 tai Exp $
+// $Id: StjTrackListWriter.cxx,v 1.3 2008/08/03 00:29:13 tai Exp $
 #include "StjTrackListWriter.h"
 
 #include <TDirectory.h>
@@ -7,7 +7,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
 
 StjTrackListWriter::StjTrackListWriter(const char* treeName, TDirectory* file)
   : _file(file)
@@ -46,7 +45,7 @@ StjTrackListWriter::StjTrackListWriter(const char* treeName, TDirectory* file)
   _tree->Branch("runNumber"     , &_runNumber       , "runNumber/I"              );
 }
 
-void StjTrackListWriter::Fill(const StSpinJet::StjTrackList& trackList)
+void StjTrackListWriter::Fill(const StjTrackList& trackList)
 {
   if(trackList.empty()) return;
 

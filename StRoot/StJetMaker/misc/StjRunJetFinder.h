@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: RunJetFinder.h,v 1.4 2008/08/02 22:43:35 tai Exp $
+// $Id: StjRunJetFinder.h,v 1.1 2008/08/03 00:28:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef RUNJETFINDER_H
 #define RUNJETFINDER_H
@@ -12,14 +12,12 @@
 class StJetPars;
 class StJetFinder;
 
-namespace StSpinJet {
-
-class RunJetFinder {
+class StjRunJetFinder {
 
 public:
 
-  RunJetFinder(StJetPars* jp); 
-  virtual ~RunJetFinder() { }
+  StjRunJetFinder(StJetPars* jp); 
+  virtual ~StjRunJetFinder() { }
 
   void Init();
 
@@ -30,8 +28,6 @@ private:
   StJetFinder* _jetFinder;
 
 };
-
-}
 
 #endif // RUNJETFINDER_H
 

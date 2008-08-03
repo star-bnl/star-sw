@@ -29,9 +29,6 @@
 #include "StBET4pMakerImpTest.hh"
 
 using namespace std;
-using namespace StSpinJet;
-using namespace StJetTowerEnergyCut;
-using namespace StJetTrackCut;
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( StBET4pMakerImpTest );

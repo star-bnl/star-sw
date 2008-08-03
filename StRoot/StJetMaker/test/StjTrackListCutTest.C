@@ -18,8 +18,6 @@
 #include "StjTrackListCutTest.hh"
 
 using namespace std;
-using namespace StSpinJet;
-using namespace StJetTrackCut;
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( StjTrackListCutTest );

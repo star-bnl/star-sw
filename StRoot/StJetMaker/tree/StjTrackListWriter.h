@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListWriter.h,v 1.3 2008/08/02 22:43:40 tai Exp $
+// $Id: StjTrackListWriter.h,v 1.4 2008/08/03 00:29:13 tai Exp $
 #ifndef STJTRACKLISTWRITER_H
 #define STJTRACKLISTWRITER_H
 
@@ -16,7 +16,7 @@ public:
   StjTrackListWriter(const char* treeName, TDirectory* file);
   virtual ~StjTrackListWriter() { }
 
-  void Fill(const StSpinJet::StjTrackList& theList);
+  void Fill(const StjTrackList& theList);
   void Finish();
     
 private:

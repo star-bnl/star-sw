@@ -1,11 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StjEtaToDetectorEta.h,v 1.1 2008/08/02 23:10:27 tai Exp $
+// $Id: StjEtaToDetectorEta.h,v 1.2 2008/08/03 00:28:58 tai Exp $
 #ifndef STJETATODETECTORETA_H
 #define STJETATODETECTORETA_H
 
 #include <cmath>
-
-namespace StSpinJet {
 
 class StjEtaToDetectorEta {
 
@@ -38,9 +36,6 @@ private:
   double _EEMCz;
 
 };
-
-}
-
 
 #endif // STJETATODETECTORETA_H
 

@@ -1,4 +1,4 @@
-// $Id: StjMCMuDst.cxx,v 1.2 2008/08/02 19:23:20 tai Exp $
+// $Id: StjMCMuDst.cxx,v 1.3 2008/08/03 00:29:03 tai Exp $
 
 #include <StjMCMuDst.h>
 
@@ -14,8 +14,6 @@
 #include <tables/St_particle_Table.h>
 
 #include <TLorentzVector.h>
-
-namespace StSpinJet {
 
 StjMCParticleList StjMCMuDst::getMCPartilceList()
 {
@@ -56,7 +54,5 @@ StjMCParticleList StjMCMuDst::getMCPartilceList()
   }
 
   return theList;
-}
-
 }
 

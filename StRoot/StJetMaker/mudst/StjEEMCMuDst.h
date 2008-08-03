@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMCMuDst.h,v 1.3 2008/08/02 22:43:38 tai Exp $
+// $Id: StjEEMCMuDst.h,v 1.4 2008/08/03 00:29:03 tai Exp $
 #ifndef STJEEMCMUDST_H
 #define STJEEMCMUDST_H
 
@@ -7,8 +7,6 @@
 
 class StMuDstMaker;
 class StEEmcDbMaker;
-
-namespace StSpinJet {
 
 class StjEEMCMuDst : public StjEEMC {
 
@@ -27,7 +25,5 @@ private:
   StEEmcDbMaker* mEeDb;
 
 };
-
-}
 
 #endif // STJEEMCMUDST_H
