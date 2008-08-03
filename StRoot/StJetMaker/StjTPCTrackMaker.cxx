@@ -1,4 +1,4 @@
-// $Id: StjTPCTrackMaker.cxx,v 1.2 2008/08/02 19:22:27 tai Exp $
+// $Id: StjTPCTrackMaker.cxx,v 1.3 2008/08/03 00:26:18 tai Exp $
 #include "StjTPCTrackMaker.h"
 
 #include "StjTPCMuDst.h"
@@ -10,7 +10,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
 
 ClassImp(StjTPCTrackMaker)
 

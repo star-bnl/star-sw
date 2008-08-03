@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.1 2008/08/02 22:21:24 tai Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.2 2008/08/03 00:26:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -21,7 +21,6 @@
 #include <TTree.h>
 
 using namespace std;
-using namespace StSpinJet;
 
 StjeDefaultJetTreeWriter::StjeDefaultJetTreeWriter(StMuDstMaker& uDstMaker, std::string outFileName)
   : _uDstMaker(uDstMaker)

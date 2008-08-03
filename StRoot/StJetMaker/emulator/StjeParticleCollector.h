@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeParticleCollector.h,v 1.1 2008/08/02 23:10:20 tai Exp $
+// $Id: StjeParticleCollector.h,v 1.2 2008/08/03 00:26:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STPARTICLECOLLECTOR_H
 #define STPARTICLECOLLECTOR_H
@@ -11,8 +11,6 @@
 class AbstractFourVec;
 class StFourPMaker;
 class StMuTrackFourVec;
-
-namespace StSpinJet {
 
 class StjeParticleCollector {
 
@@ -38,7 +36,5 @@ private:
   StppAnaPars _anaPar;
 
 };
-
-}
 
 #endif // STPARTICLECOLLECTOR_H

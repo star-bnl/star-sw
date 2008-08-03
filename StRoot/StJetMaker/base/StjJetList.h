@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetList.h,v 1.3 2008/08/02 22:43:17 tai Exp $
+// $Id: StjJetList.h,v 1.4 2008/08/03 00:26:29 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETLIST_H
 #define STJJETLIST_H
@@ -8,8 +8,6 @@
 
 #include <ostream>
 #include <vector>
-
-namespace StSpinJet {
 
 struct StjJet {
   int            runNumber;
@@ -60,8 +58,6 @@ inline std::ostream& operator<<(std::ostream& out, const StjJetList& v)
 {
   out << "JetList size: " << v.size();
   return out;
-}
-
 }
 
 #endif // STJJETLIST_H

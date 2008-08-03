@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTree.h,v 1.3 2008/08/02 22:43:18 tai Exp $
+// $Id: StjTPCTree.h,v 1.4 2008/08/03 00:26:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTPCTREE_H
 #define STJTPCTREE_H
@@ -10,8 +10,6 @@
 class TTree;
 
 class StjTrackListReader;
-
-namespace StSpinJet {
 
 class StjTPCTree : public StjTPC {
 
@@ -35,7 +33,5 @@ private:
   StjTrackListReader* _reader;
 
 };
-
-}
 
 #endif // STJTPCTREE_H

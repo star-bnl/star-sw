@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.5 2008/08/02 23:10:17 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.6 2008/08/03 00:26:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
 
 #include <Rtypes.h>
-
-namespace StSpinJet {
 
 class StMuTrackEmu {
 
@@ -87,7 +85,5 @@ private:
 
   short          _id;
 };
-
-}
 
 #endif // STMUTRACKEMU_H

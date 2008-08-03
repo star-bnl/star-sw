@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCorrectionForTracks.h,v 1.3 2008/08/02 22:43:19 tai Exp $
+// $Id: StjTowerEnergyCorrectionForTracks.h,v 1.4 2008/08/03 00:26:33 tai Exp $
 #ifndef STJTOWERENERGYCORRECTIONFORTRACKS_H
 #define STJTOWERENERGYCORRECTIONFORTRACKS_H
 
 #include "StjTowerEnergyList.h"
 #include "StjTrackList.h"
-
-namespace StSpinJet {
 
 class StjTowerEnergyCorrectionForTracks {
 
@@ -30,7 +28,5 @@ private:
   int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
 
 };
-
-}
 
 #endif // STJTOWERENERGYCORRECTIONFORTRACKS_H

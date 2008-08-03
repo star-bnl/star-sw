@@ -1,12 +1,10 @@
-// $Id: StjJetPrint.cxx,v 1.2 2008/08/02 19:22:46 tai Exp $
+// $Id: StjJetPrint.cxx,v 1.3 2008/08/03 00:26:30 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetPrint.h"
 
 #include <iostream>
 
 using namespace std;
-
-namespace StSpinJet {
 
 void StjJetPrint::operator()(const StjJetList &jetList)
 {
@@ -45,9 +43,5 @@ void StjJetPrint::print(const StjJet& jet)
       << (*jt).m   << " "
       << endl;
     }
-
-}
-
-
 
 }

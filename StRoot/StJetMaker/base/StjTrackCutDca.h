@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutDca.h,v 1.3 2008/08/02 22:43:21 tai Exp $
+// $Id: StjTrackCutDca.h,v 1.4 2008/08/03 00:26:36 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTDCA_H
 #define STJTRACKCUTDCA_H
 
 #include "StjTrackCut.h"
-
-namespace StJetTrackCut {
 
 class StjTrackCutDca : public StjTrackCut {
   // to reduce pile up tracks
@@ -15,7 +13,7 @@ public:
   StjTrackCutDca(double max = 3.0, double min = 0.0) : _max(max), _min(min) { }
   virtual ~StjTrackCutDca() { }
 
-  bool operator()(const StSpinJet::StjTrack& track)
+  bool operator()(const StjTrack& track)
   {
     if(track.Tdca > _max) return true;
 
@@ -30,7 +28,5 @@ private:
   double  _min;
 
 };
-
-}
 
 #endif // STJTRACKCUTDCA_H

@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackToTLorentzVector.h,v 1.3 2008/08/02 22:43:22 tai Exp $
+// $Id: StjTrackToTLorentzVector.h,v 1.4 2008/08/03 00:26:38 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKTOTLORENTZVECTOR_H
 #define STJTRACKTOTLORENTZVECTOR_H
 
 #include <TLorentzVector.h>
-
-namespace StSpinJet {
 
 class StjTrack;
 
@@ -20,7 +18,5 @@ private:
   double _mass;
 
 };
-
-}
 
 #endif // STJTRACKTOTLORENTZVECTOR_H

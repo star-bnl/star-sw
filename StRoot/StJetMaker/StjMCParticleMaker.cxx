@@ -1,4 +1,4 @@
-// $Id: StjMCParticleMaker.cxx,v 1.2 2008/08/02 19:22:26 tai Exp $
+// $Id: StjMCParticleMaker.cxx,v 1.3 2008/08/03 00:26:18 tai Exp $
 #include "StjMCParticleMaker.h"
 
 
@@ -18,8 +18,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
-using namespace StJetMCParticleCut;
 
 ClassImp(StjMCParticleMaker)
   

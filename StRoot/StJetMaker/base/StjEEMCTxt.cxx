@@ -1,4 +1,4 @@
-// $Id: StjEEMCTxt.cxx,v 1.2 2008/08/02 19:22:42 tai Exp $
+// $Id: StjEEMCTxt.cxx,v 1.3 2008/08/03 00:26:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjEEMCTxt.h"
 
@@ -9,8 +9,6 @@
 #include <TVector3.h>
 
 using namespace std;
-
-namespace StSpinJet {
 
 StjEEMCTxt::StjEEMCTxt(const char* path)
   : _currentEvent(-1)
@@ -83,7 +81,4 @@ StjTowerEnergyList StjEEMCTxt::getEnergyList()
   }
 
   return ret;
-}
-
-
 }

@@ -1,8 +1,6 @@
-// $Id: StjTrackListCut.cxx,v 1.2 2008/08/02 19:22:54 tai Exp $
+// $Id: StjTrackListCut.cxx,v 1.3 2008/08/03 00:26:37 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrackListCut.h"
-
-namespace StSpinJet {
 
 StjTrackList StjTrackListCut::operator()(const StjTrackList& trackList)
 {
@@ -25,8 +23,4 @@ bool StjTrackListCut::shoudNotPass(const StjTrack& track)
   }
 
   return false;
-}
-
-
-
 }

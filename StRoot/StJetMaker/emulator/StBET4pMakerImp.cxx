@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.3 2008/08/02 19:23:05 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.4 2008/08/03 00:26:49 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImp.h"
 
@@ -14,8 +14,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
-
 
 StBET4pMakerImp::StBET4pMakerImp(StjTPC* tpc, StjTrackListCut* tpcCut,
 				 StjBEMC* bemc, StjTowerEnergyListCut* bemcCut,

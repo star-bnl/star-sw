@@ -1,4 +1,4 @@
-// $Id: StJetScratch.cxx,v 1.5 2008/08/02 03:57:36 tai Exp $
+// $Id: StJetScratch.cxx,v 1.6 2008/08/03 00:26:17 tai Exp $
 #include "StJetScratch.h"
 
 #include "StjTPCMuDst.h"
@@ -15,7 +15,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
 
 ClassImp(StJetScratch)
   

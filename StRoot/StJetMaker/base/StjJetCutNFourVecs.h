@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutNFourVecs.h,v 1.3 2008/08/02 22:43:16 tai Exp $
+// $Id: StjJetCutNFourVecs.h,v 1.4 2008/08/03 00:26:29 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTNFOURVECS_H
 #define STJJETCUTNFOURVECS_H
 
 #include "StjJetCut.h"
-
-namespace StJetJetCut {
 
 class StjJetCutNFourVecs : public StjJetCut {
 
@@ -15,7 +13,7 @@ public:
     :_min(min), _max(max) { }
   virtual ~StjJetCutNFourVecs() { }
 
-  bool operator()(const StSpinJet::StjJet& jet)
+  bool operator()(const StjJet& jet)
   {
     if(jet.fourVecList.size() < _min) return true;
 
@@ -30,7 +28,5 @@ private:
   size_t  _max;
 
 };
-
-}
 
 #endif // STJJETCUTNFOURVECS_H

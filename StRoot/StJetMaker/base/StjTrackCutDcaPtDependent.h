@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutDcaPtDependent.h,v 1.3 2008/08/02 22:43:21 tai Exp $
+// $Id: StjTrackCutDcaPtDependent.h,v 1.4 2008/08/03 00:26:36 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTDCAPTDEPENDENT_H
 #define STJTRACKCUTDCAPTDEPENDENT_H
 
 #include "StjTrackCut.h"
-
-namespace StJetTrackCut {
 
 class StjTrackCutDcaPtDependent : public StjTrackCut {
   // to reduce pile up tracks
@@ -38,7 +36,7 @@ public:
     : _pt1(pt1), _dcaMax1(dcaMax1), _pt2(pt2), _dcaMax2(dcaMax2) { }
   virtual ~StjTrackCutDcaPtDependent() { }
 
-  bool operator()(const StSpinJet::StjTrack& track)
+  bool operator()(const StjTrack& track)
   {
     if(track.pt < _pt1) {
       if(track.dcaD > _dcaMax1) return true;
@@ -59,7 +57,5 @@ private:
   double  _dcaMax2;
 
 };
-
-}
 
 #endif // STJTRACKCUTDCAPTDEPENDENT_H

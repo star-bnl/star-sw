@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyList.h,v 1.3 2008/08/02 22:43:20 tai Exp $
+// $Id: StjTowerEnergyList.h,v 1.4 2008/08/03 00:26:34 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYLIST_H
 #define STJTOWERENERGYLIST_H
@@ -7,8 +7,6 @@
 #include <vector>
 #include <ostream>
 #include <cmath>
-
-namespace StSpinJet {
 
 struct StjTowerEnergy {
   int            runNumber;
@@ -71,8 +69,6 @@ inline std::ostream& operator<<(std::ostream& out, const StjTowerEnergyList& v)
 {
   out << "TowerEnergyList size: " << v.size();
   return out;
-}
-
 }
 
 #endif // STJTOWERENERGYLIST_H

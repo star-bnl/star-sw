@@ -1,13 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleList.h,v 1.3 2008/08/02 22:43:18 tai Exp $
+// $Id: StjMCParticleList.h,v 1.4 2008/08/03 00:26:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJMCPARTICLELIST_H
 #define STJMCPARTICLELIST_H
 
 #include <ostream>
 #include <vector>
-
-namespace StSpinJet {
 
 struct StjMCParticle {
   int            runNumber;
@@ -69,8 +67,6 @@ inline std::ostream& operator<<(std::ostream& out, const StjMCParticleList& v)
 {
   out << "MCParticleList size: " << v.size();
   return out;
-}
-
 }
 
 #endif // STJMCPARTICLELIST_H

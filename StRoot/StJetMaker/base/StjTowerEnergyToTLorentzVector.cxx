@@ -1,10 +1,8 @@
-// $Id: StjTowerEnergyToTLorentzVector.cxx,v 1.2 2008/08/02 19:22:52 tai Exp $
+// $Id: StjTowerEnergyToTLorentzVector.cxx,v 1.3 2008/08/03 00:26:35 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyToTLorentzVector.h"
 
 #include "StjTowerEnergyList.h"
-
-namespace StSpinJet {
 
 TLorentzVector StjTowerEnergyToTLorentzVector::operator()(const StjTowerEnergy& deposit)
 {
@@ -19,6 +17,4 @@ TLorentzVector StjTowerEnergyToTLorentzVector::operator()(const StjTowerEnergy& 
   momentum.SetMag(pMag);
   TLorentzVector ret(momentum.x(), momentum.y(), momentum.z(), deposit.energy);
   return ret;
-}
-
 }

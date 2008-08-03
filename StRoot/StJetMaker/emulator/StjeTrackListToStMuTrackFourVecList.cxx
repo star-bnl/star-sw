@@ -1,12 +1,10 @@
-// $Id: StjeTrackListToStMuTrackFourVecList.cxx,v 1.1 2008/08/02 23:10:21 tai Exp $
+// $Id: StjeTrackListToStMuTrackFourVecList.cxx,v 1.2 2008/08/03 00:26:52 tai Exp $
 #include "StjeTrackListToStMuTrackFourVecList.h"
 
 #include "StjTrackToTLorentzVector.h"
 
 #include "../emulator/StMuTrackEmu.h"
 #include "../emulator/StMuTrackFourVec.h"
-
-namespace StSpinJet {
 
 StjeTrackListToStMuTrackFourVecList::StjeTrackListToStMuTrackFourVecList() 
   : _trackTo4p(*(new StjTrackToTLorentzVector)) { }
@@ -58,6 +56,4 @@ StMuTrackEmu* StjeTrackListToStMuTrackFourVecList::createTrackEmu(const StjTrack
   ret->_id             =  track.id           ;
 
   return ret;
-}
-
 }

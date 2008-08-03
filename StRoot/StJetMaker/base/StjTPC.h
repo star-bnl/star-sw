@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTPC.h,v 1.3 2008/08/02 22:43:18 tai Exp $
+// $Id: StjTPC.h,v 1.4 2008/08/03 00:26:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTPC_H
 #define STJTPC_H
 
 #include "StjTrackList.h"
-
-namespace StSpinJet {
 
 class StjTPC {
 
@@ -30,7 +28,5 @@ public:
 
   StjTrackList getTrackList() { return StjTrackList(); }
 };
-
-}
 
 #endif // STJTPC_H

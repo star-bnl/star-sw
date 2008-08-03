@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackFourVec.h,v 1.3 2008/08/02 22:43:31 tai Exp $
+// $Id: StMuTrackFourVec.h,v 1.4 2008/08/03 00:26:50 tai Exp $
 #ifndef STMUTRACKFOURVEC_H
 #define STMUTRACKFOURVEC_H
 
@@ -20,7 +20,7 @@ public:
     
   StMuTrackFourVec() : _track(0), index(0), mDetId(kUnknownId), mCharge(0) { }
 
-  StMuTrackFourVec(StSpinJet::StMuTrackEmu* t, const TLorentzVector& p, double charge, Int_t i, int detectorId)
+  StMuTrackFourVec(StMuTrackEmu* t, const TLorentzVector& p, double charge, Int_t i, int detectorId)
     : _track(t)
     , _vec(p)
     , index(i)
@@ -50,7 +50,7 @@ public:
   double charge() const { return mCharge; }
 
   // Mu StjTrack (null if it's an emc tower/hit/point) this will change soon
-  StSpinJet::StMuTrackEmu* track() const { return _track; }
+  StMuTrackEmu* track() const { return _track; }
 
   //Index of the track/tower/cluster/point in the container that it came from
   Int_t getIndex(void) const { return index; }
@@ -60,7 +60,7 @@ public:
     
 private:
 
-  StSpinJet::StMuTrackEmu *_track;
+  StMuTrackEmu *_track;
   TLorentzVector _vec;
   Int_t index;
   int mDetId;

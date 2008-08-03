@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutNHits.h,v 1.3 2008/08/02 22:43:21 tai Exp $
+// $Id: StjTrackCutNHits.h,v 1.4 2008/08/03 00:26:37 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTNHITS_H
 #define STJTRACKCUTNHITS_H
 
 #include "StjTrackCut.h"
-
-namespace StJetTrackCut {
 
 class StjTrackCutNHits : public StjTrackCut {
 
@@ -16,7 +14,7 @@ public:
     : _min(min), _max(max) { }
   virtual ~StjTrackCutNHits() { }
 
-  bool operator()(const StSpinJet::StjTrack& track)
+  bool operator()(const StjTrack& track)
   {
     if(track.nHits <= _min) return true;
 
@@ -31,7 +29,5 @@ private:
   unsigned short _max;
 
 };
-
-}
 
 #endif // STJTRACKCUTNHITS_H

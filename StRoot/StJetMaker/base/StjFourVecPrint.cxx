@@ -1,12 +1,10 @@
-// $Id: StjFourVecPrint.cxx,v 1.2 2008/08/02 19:22:45 tai Exp $
+// $Id: StjFourVecPrint.cxx,v 1.3 2008/08/03 00:26:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecPrint.h"
 
 #include <iostream>
 
 using namespace std;
-
-namespace StSpinJet {
 
 void StjFourVecPrint::operator()(const StjFourVecList &fourList)
 {
@@ -31,9 +29,5 @@ void StjFourVecPrint::print(const StjFourVec& four)
     << four.m          << " "
     << four.vertexZ    << " "
     << endl;
-
-}
-
-
 
 }

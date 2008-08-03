@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $
+// $Id: StjMCParticleMaker.h,v 1.4 2008/08/03 00:26:18 tai Exp $
 #ifndef STJMCPARTICLEMAKER_H
 #define STJMCPARTICLEMAKER_H
 
@@ -13,10 +13,8 @@ class TTree;
 
 class StMaker;
 
-namespace StSpinJet {
-  class StjMC;
-  class StjMCParticleListCut;
-}
+class StjMC;
+class StjMCParticleListCut;
 
 class StjMCParticleMaker : public StMaker {
 
@@ -30,7 +28,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleMaker.h,v 1.4 2008/08/03 00:26:18 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -38,8 +36,8 @@ private:
 
   StMaker* _uDstMaker;
 
-  StSpinJet::StjMC* _mc;
-  StSpinJet::StjMCParticleListCut* _mcCut;
+  StjMC* _mc;
+  StjMCParticleListCut* _mcCut;
 
   StjMCParticleListWriter* _writer;
 

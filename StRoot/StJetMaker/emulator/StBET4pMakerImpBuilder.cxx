@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.3 2008/08/02 19:23:06 tai Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.4 2008/08/03 00:26:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -33,10 +33,6 @@
 #include <TFile.h>
 #include <TTree.h>
 
-using namespace StJetTowerEnergyCut;
-using namespace StJetTrackCut;
-
-namespace StSpinJet {
 
 StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool useEEMC,
 					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts,
@@ -133,7 +129,4 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
   StBET4pMakerImp* ret = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);
 
   return ret;
-}
-
-
 }

@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleCutEtaForStatus.h,v 1.3 2008/08/02 22:43:17 tai Exp $
+// $Id: StjMCParticleCutEtaForStatus.h,v 1.4 2008/08/03 00:26:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJMCPARTICLECUTETAFORSTATUS_H
 #define STJMCPARTICLECUTETAFORSTATUS_H
 
 #include "StjMCParticleCut.h"
-
-namespace StJetMCParticleCut {
 
 class StjMCParticleCutEtaForStatus : public StjMCParticleCut {
 
@@ -15,7 +13,7 @@ public:
     : _min(min), _max(max), _status(status) { }
   virtual ~StjMCParticleCutEtaForStatus() { }
 
-  bool operator()(const StSpinJet::StjMCParticle& p4)
+  bool operator()(const StjMCParticle& p4)
   {
     if(p4.status != _status) return false;
 
@@ -34,7 +32,5 @@ private:
   int _status;
 
 };
-
-}
 
 #endif // STJMCPARTICLECUTETAFORSTATUS_H

@@ -1,12 +1,10 @@
-// $Id: StjeTowerEnergyListToStMuTrackFourVecList.cxx,v 1.1 2008/08/02 23:10:20 tai Exp $
+// $Id: StjeTowerEnergyListToStMuTrackFourVecList.cxx,v 1.2 2008/08/03 00:26:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeTowerEnergyListToStMuTrackFourVecList.h"
 
 #include "StjTowerEnergyToTLorentzVector.h"
 
 #include "../emulator/StMuTrackFourVec.h"
-
-namespace StSpinJet {
 
 StjeTowerEnergyListToStMuTrackFourVecList::StjeTowerEnergyListToStMuTrackFourVecList()
   : _energyTo4p(*(new StjTowerEnergyToTLorentzVector)) { }
@@ -24,7 +22,4 @@ FourList StjeTowerEnergyListToStMuTrackFourVecList::operator()(const StjTowerEne
     ret.push_back(pmu);
   }
   return ret;
-}
-
-
 }
