@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.5 2008/08/02 23:10:06 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.6 2008/08/03 00:26:16 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -15,7 +15,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
 
 ClassImp(StBET4pMaker)
     

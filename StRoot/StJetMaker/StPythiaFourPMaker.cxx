@@ -1,4 +1,4 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.9 2008/08/02 19:22:25 tai Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.10 2008/08/03 00:26:17 tai Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
@@ -15,8 +15,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
-using namespace StJetMCParticleCut;
     
 ClassImp(StPythiaFourPMaker)
 

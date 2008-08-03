@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.5 2008/08/02 23:10:06 tai Exp $
+// $Id: StBET4pMaker.h,v 1.6 2008/08/03 00:26:16 tai Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -9,16 +9,12 @@ class StMuDstMaker;
 class StjTreeEntryMaker;
 class StBET4pMakerImp;
 
-namespace StSpinJet {
-
 class StjeBemcEnergySumCalculator;
 
 class StjTrackListCut;
 class StjTowerEnergyListCut;
 class StjeTrackListToStMuTrackFourVecList;
 class StjeTowerEnergyListToStMuTrackFourVecList;
-
-}
 
 class StBET4pMaker : public StFourPMaker {
 
@@ -54,7 +50,7 @@ public:
   bool useTree() const { return _useTree; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.5 2008/08/02 23:10:06 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.6 2008/08/03 00:26:16 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -75,10 +71,10 @@ private:
 
   StBET4pMakerImp* _imp;
 
-  StSpinJet::StjeBemcEnergySumCalculator* _bemcEnergySumCalculator;
+  StjeBemcEnergySumCalculator* _bemcEnergySumCalculator;
 
-  StSpinJet::StjeTrackListToStMuTrackFourVecList& _track2four;
-  StSpinJet::StjeTowerEnergyListToStMuTrackFourVecList& _energy2four;
+  StjeTrackListToStMuTrackFourVecList& _track2four;
+  StjeTowerEnergyListToStMuTrackFourVecList& _energy2four;
   FourList _tracks;
 
   bool isBemcCorrupted() const;

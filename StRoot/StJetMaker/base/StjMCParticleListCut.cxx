@@ -1,10 +1,8 @@
-// $Id: StjMCParticleListCut.cxx,v 1.2 2008/08/02 19:22:48 tai Exp $
+// $Id: StjMCParticleListCut.cxx,v 1.3 2008/08/03 00:26:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjMCParticleListCut.h"
 
 using namespace std;
-
-namespace StSpinJet {
 
 StjMCParticleList StjMCParticleListCut::operator()(const StjMCParticleList &aList)
 {
@@ -28,7 +26,4 @@ bool StjMCParticleListCut::shouldNotKeep(const StjMCParticle& p4)
   }
 
   return false;
-}
-
-
 }

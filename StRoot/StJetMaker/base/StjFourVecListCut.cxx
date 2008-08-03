@@ -1,10 +1,8 @@
-// $Id: StjFourVecListCut.cxx,v 1.2 2008/08/02 19:22:44 tai Exp $
+// $Id: StjFourVecListCut.cxx,v 1.3 2008/08/03 00:26:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecListCut.h"
 
 using namespace std;
-
-namespace StSpinJet {
 
 StjFourVecList StjFourVecListCut::operator()(const StjFourVecList &fourList)
 {
@@ -28,7 +26,4 @@ bool StjFourVecListCut::shouldNotKeep(const StjFourVec& p4)
   }
 
   return false;
-}
-
-
 }

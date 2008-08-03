@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImpBuilder.h,v 1.3 2008/08/02 22:43:31 tai Exp $
+// $Id: StBET4pMakerImpBuilder.h,v 1.4 2008/08/03 00:26:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMPBUILDER_H
 #define STBET4PMAKERIMPBUILDER_H
@@ -7,9 +7,6 @@
 class StMuDstMaker;
 class StBET4pMakerImp;
 class StjTreeEntryMaker;
-
-namespace StSpinJet {
-
 
 class StBET4pMakerImpBuilder { 
 
@@ -24,7 +21,5 @@ public:
 private:
 
 };
-
-}
 
 #endif // STBET4PMAKERIMPBUILDER_H

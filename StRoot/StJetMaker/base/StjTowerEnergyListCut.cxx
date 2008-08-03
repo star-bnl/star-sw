@@ -1,13 +1,10 @@
-// $Id: StjTowerEnergyListCut.cxx,v 1.2 2008/08/02 19:22:51 tai Exp $
+// $Id: StjTowerEnergyListCut.cxx,v 1.3 2008/08/03 00:26:34 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyListCut.h"
 
 using namespace std;
 
-namespace StSpinJet {
-
-
-StSpinJet::StjTowerEnergyList StjTowerEnergyListCut::operator()(const StjTowerEnergyList &energyList)
+StjTowerEnergyList StjTowerEnergyListCut::operator()(const StjTowerEnergyList &energyList)
 {
   StjTowerEnergyList ret;
 
@@ -30,7 +27,4 @@ bool StjTowerEnergyListCut::shouldNotKeep(const StjTowerEnergy& energyDeposit)
   }
 
   return false;
-}
-
-
 }

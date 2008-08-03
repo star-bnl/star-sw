@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerII.h,v 1.9 2008/08/02 22:43:05 tai Exp $
+// $Id: StJetMakerII.h,v 1.10 2008/08/03 00:26:17 tai Exp $
 #ifndef STJETMAKERII_H
 #define STJETMAKERII_H
 
@@ -18,18 +18,15 @@ class StBET4pMakerImp;
 
 class StjJetListWriter;
 
-namespace StSpinJet {
 class StjTPC;
 class StjBEMC;
 class StjTrackListCut;
 class StjTowerEnergyListCut;
 class StjFourVecListCut;
 class StjTowerEnergyCorrectionForTracks;
-class RunJetFinder;
+class StjRunJetFinder;
 class StjTowerEnergyVariation;
 class StjJetListCut;
-}
-
 
 class StJetMakerII : public StMaker {
 
@@ -43,7 +40,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.9 2008/08/02 22:43:05 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.10 2008/08/03 00:26:17 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -52,29 +49,29 @@ private:
   StjTreeEntryMaker* _entryMaker;
   StBET4pMakerImp* _dataSource;
 
-  StSpinJet::StjTPC*  _tpc;
-  StSpinJet::StjBEMC* _bemc;
+  StjTPC*  _tpc;
+  StjBEMC* _bemc;
 
-  StSpinJet::StjTrackListCut* _tpcCut1;
-  StSpinJet::StjTrackListCut* _tpcCut2;
+  StjTrackListCut* _tpcCut1;
+  StjTrackListCut* _tpcCut2;
 
-  StSpinJet::StjTowerEnergyListCut* _bemcCut1;
-  StSpinJet::StjTowerEnergyListCut* _bemcCut2;
+  StjTowerEnergyListCut* _bemcCut1;
+  StjTowerEnergyListCut* _bemcCut2;
 
-  StSpinJet::StjTowerEnergyCorrectionForTracks* _towerEnergyCorrectionForTracks;
+  StjTowerEnergyCorrectionForTracks* _towerEnergyCorrectionForTracks;
 
-  StSpinJet::StjTowerEnergyVariation* _energyVariationNull;
-  StSpinJet::StjTowerEnergyVariation* _energyVariationPlus5; 
-  StSpinJet::StjTowerEnergyVariation* _energyVariationMinus5;
-  StSpinJet::StjTowerEnergyVariation* _energyVariationPlus10;
-  StSpinJet::StjTowerEnergyVariation* _energyVariationMinus10;
+  StjTowerEnergyVariation* _energyVariationNull;
+  StjTowerEnergyVariation* _energyVariationPlus5; 
+  StjTowerEnergyVariation* _energyVariationMinus5;
+  StjTowerEnergyVariation* _energyVariationPlus10;
+  StjTowerEnergyVariation* _energyVariationMinus10;
 
-  StSpinJet::RunJetFinder *_jetFinder;
-  StSpinJet::StjTrackTowerEnergyListToFourVecList _toP4;
+  StjRunJetFinder *_jetFinder;
+  StjTrackTowerEnergyListToFourVecList _toP4;
 
-  StSpinJet::StjFourVecListCut *_fourCut;
+  StjFourVecListCut *_fourCut;
 
-  StSpinJet::StjJetListCut* _jetCut;
+  StjJetListCut* _jetCut;
 
   StjJetListWriter* _jetTreeWriter0;
   StjJetListWriter* _jetTreeWriterP5;

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeTrackListToStMuTrackFourVecList.h,v 1.1 2008/08/02 23:10:21 tai Exp $
+// $Id: StjeTrackListToStMuTrackFourVecList.h,v 1.2 2008/08/03 00:26:53 tai Exp $
 #ifndef STJTRACKLISTTOSTMUTRACKFOURVECLIST_H
 #define STJTRACKLISTTOSTMUTRACKFOURVECLIST_H
 
@@ -7,8 +7,6 @@
 
 #include <StJetFinder/AbstractFourVec.h>
 typedef std::vector<AbstractFourVec*> FourList;
-
-namespace StSpinJet {
 
 class StjTrackToTLorentzVector;
 
@@ -29,7 +27,5 @@ private:
   StjTrackToTLorentzVector& _trackTo4p;
 
 };
-
-}
 
 #endif // STJTRACKLISTTOSTMUTRACKFOURVECLIST_H

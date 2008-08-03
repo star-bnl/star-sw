@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.4 2008/08/02 22:43:31 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.5 2008/08/03 00:26:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMP_H
 #define STBET4PMAKERIMP_H
@@ -9,50 +9,48 @@
 
 #include <utility>
 
-namespace StSpinJet {
-  class StjTPC;
-  class StjBEMC;
-  class StjEEMC;
-  class StjTrackListCut;
-  class StjTowerEnergyListCut;
+class StjTPC;
+class StjBEMC;
+class StjEEMC;
+class StjTrackListCut;
+class StjTowerEnergyListCut;
 
-  class StjTowerEnergyCorrectionForTracks;
-}
+class StjTowerEnergyCorrectionForTracks;
 
 class StBET4pMakerImp {
 
 public:
     
-  StBET4pMakerImp(StSpinJet::StjTPC* tpc,
-		  StSpinJet::StjTrackListCut* tpcCut,
-		  StSpinJet::StjBEMC* bemc,
-		  StSpinJet::StjTowerEnergyListCut* bemcCut,
-		  StSpinJet::StjTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks,
-		  StSpinJet::StjEEMC* eemc);
+  StBET4pMakerImp(StjTPC* tpc,
+		  StjTrackListCut* tpcCut,
+		  StjBEMC* bemc,
+		  StjTowerEnergyListCut* bemcCut,
+		  StjTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks,
+		  StjEEMC* eemc);
     
   virtual ~StBET4pMakerImp() { };
 
   void Init();
 
-  std::pair<StSpinJet::StjTrackList, StSpinJet::StjTowerEnergyList> getTrackAndEnergyList();
+  std::pair<StjTrackList, StjTowerEnergyList> getTrackAndEnergyList();
 
-  StSpinJet::StjTPC*  TPC()  { return _tpc;  }
-  StSpinJet::StjBEMC* BEMC() { return _bemc; }
-  StSpinJet::StjEEMC* EEMC() { return _eemc; }
+  StjTPC*  TPC()  { return _tpc;  }
+  StjBEMC* BEMC() { return _bemc; }
+  StjEEMC* EEMC() { return _eemc; }
 
-  StSpinJet::StjTrackListCut* getTPCTrackCut()     { return _tpcCut; }
-  StSpinJet::StjTowerEnergyListCut* getBEMCEnergyCut() { return _bemcCut; }
+  StjTrackListCut* getTPCTrackCut()     { return _tpcCut; }
+  StjTowerEnergyListCut* getBEMCEnergyCut() { return _bemcCut; }
 
 private:
 
-  StSpinJet::StjTPC*  _tpc;
-  StSpinJet::StjBEMC* _bemc;
-  StSpinJet::StjEEMC* _eemc;
+  StjTPC*  _tpc;
+  StjBEMC* _bemc;
+  StjEEMC* _eemc;
 
-  StSpinJet::StjTrackListCut* _tpcCut;
-  StSpinJet::StjTowerEnergyListCut* _bemcCut;
+  StjTrackListCut* _tpcCut;
+  StjTowerEnergyListCut* _bemcCut;
 
-  StSpinJet::StjTowerEnergyCorrectionForTracks* _correctTowerEnergyForTracks;
+  StjTowerEnergyCorrectionForTracks* _correctTowerEnergyForTracks;
 
 };
 

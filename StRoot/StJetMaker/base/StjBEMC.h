@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMC.h,v 1.3 2008/08/02 22:43:14 tai Exp $
+// $Id: StjBEMC.h,v 1.4 2008/08/03 00:26:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJBEMC_H
 #define STJBEMC_H
 
 #include "StjTowerEnergyList.h"
-
-namespace StSpinJet {
 
 class StjBEMC {
 
@@ -28,7 +26,5 @@ public:
 
   StjTowerEnergyList getEnergyList() { return StjTowerEnergyList(); }
 };
-
-}
 
 #endif // STJBEMC_H

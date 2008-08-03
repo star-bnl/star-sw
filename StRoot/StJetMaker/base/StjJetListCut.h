@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListCut.h,v 1.3 2008/08/02 22:43:17 tai Exp $
+// $Id: StjJetListCut.h,v 1.4 2008/08/03 00:26:30 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETLISTCUT_H
 #define STJJETLISTCUT_H
@@ -7,8 +7,6 @@
 #include "StjJetCut.h"
 
 #include "StjJetList.h"
-
-namespace StSpinJet {
 
 class StjJetListCut {
 
@@ -18,11 +16,11 @@ public:
   
   StjJetList operator()(const StjJetList& fourList);
 
-  void addCut(StJetJetCut::StjJetCut* cut) {
+  void addCut(StjJetCut* cut) {
     _cutList.push_back(cut);
   }
 
-  typedef std::vector<StJetJetCut::StjJetCut*> CutList;
+  typedef std::vector<StjJetCut*> CutList;
   CutList getCutList() { return _cutList; }
 
 private:
@@ -32,7 +30,5 @@ private:
   CutList _cutList;
 
 };
-
-}
 
 #endif // STJJETLISTCUT_H

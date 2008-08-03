@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeJetCuts.h,v 1.2 2008/08/02 22:33:28 tai Exp $
+// $Id: StjeJetCuts.h,v 1.3 2008/08/03 00:26:51 tai Exp $
 #ifndef STJEJETCUTS_H
 #define STJEJETCUTS_H
 
@@ -11,8 +11,6 @@
 
 class StJetPars;
 class StJetFinder;
-
-namespace StSpinJet {
 
 class StjeJetCuts {
 
@@ -35,8 +33,6 @@ private:
   StppAnaPars _anaPar;
 
 };
-
-}
 
 #endif // STJEJETCUTS_H
 

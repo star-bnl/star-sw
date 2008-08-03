@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjeBemcEnergySumCalculator.h,v 1.3 2008/08/02 22:43:32 tai Exp $
+// $Id: StjeBemcEnergySumCalculator.h,v 1.4 2008/08/03 00:26:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJEBEMCENERGYSUMCALCULATOR_H
 #define STJEBEMCENERGYSUMCALCULATOR_H
 
 #include "StjTowerEnergyList.h"
-
-namespace StSpinJet {
 
 class StjBEMC;
 class StjTowerEnergyListCut;
@@ -74,7 +72,5 @@ private:
   double _SumEmcEt;
 
 };
-
-}
 
 #endif // STJEBEMCENERGYSUMCALCULATOR_H

@@ -1,4 +1,4 @@
-// $Id: StjTPCTrackPrint.cxx,v 1.2 2008/08/02 19:22:48 tai Exp $
+// $Id: StjTPCTrackPrint.cxx,v 1.3 2008/08/03 00:26:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTPCTrackPrint.h"
 
@@ -6,8 +6,6 @@
 #include <fstream>
 
 using namespace std;
-
-namespace StSpinJet {
 
 void StjTPCTrackPrint::operator()(const StjTrackList& trackList)
 {
@@ -48,9 +46,5 @@ void StjTPCTrackPrint::print(const StjTrack& track) const
     << track.trackIndex   << " "
     << track.id          << " "
     << endl;
-
-}
-
-
 
 }

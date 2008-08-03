@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutBemcWestOnly.h,v 1.3 2008/08/02 22:43:20 tai Exp $
+// $Id: StjTowerEnergyCutBemcWestOnly.h,v 1.4 2008/08/03 00:26:33 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYCUTBEMCWESTONLY_H
 #define STJTOWERENERGYCUTBEMCWESTONLY_H
 
 #include "StjTowerEnergyCut.h"
-
-namespace StJetTowerEnergyCut {
 
 class StjTowerEnergyCutBemcWestOnly : public StjTowerEnergyCut {
 
@@ -14,7 +12,7 @@ public:
   StjTowerEnergyCutBemcWestOnly() { }
   virtual ~StjTowerEnergyCutBemcWestOnly() { }
 
-  bool operator()(const StSpinJet::StjTowerEnergy& tower)
+  bool operator()(const StjTowerEnergy& tower)
   {
     if(tower.detectorId != 9) return true;
 
@@ -26,7 +24,5 @@ public:
 private:
   
 };
-
-}
 
 #endif // STJTOWERENERGYCUTBEMCWESTONLY_H

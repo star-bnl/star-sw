@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.13 2008/08/02 19:22:25 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.14 2008/08/03 00:26:17 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -53,7 +53,7 @@
 
 #include <StjTowerEnergyCorrectionForTracks.h>
 
-#include "misc/RunJetFinder.h"
+#include "StjRunJetFinder.h"
 
 #include <StJetFinder/StConePars.h>
 
@@ -64,11 +64,6 @@
 #include <vector>
 
 using namespace std;
-using namespace StSpinJet;
-using namespace StJetTowerEnergyCut;
-using namespace StJetTrackCut;
-using namespace StJetFourVecCut;
-using namespace StJetJetCut;
 
 ClassImp(StJetMakerII)
   
@@ -135,7 +130,7 @@ Int_t StJetMakerII::Init()
   cpars->setRequireStableMidpoints(true);
   cpars->setDoSplitMerge(true);
   cpars->setDebug(false);
-  _jetFinder = new RunJetFinder(cpars);
+  _jetFinder = new StjRunJetFinder(cpars);
   _jetFinder->Init();
 
   _jetCut = new StjJetListCut();

@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutPt.h,v 1.3 2008/08/02 22:43:16 tai Exp $
+// $Id: StjJetCutPt.h,v 1.4 2008/08/03 00:26:29 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTPT_H
 #define STJJETCUTPT_H
 
 #include "StjJetCut.h"
-
-namespace StJetJetCut {
 
 class StjJetCutPt : public StjJetCut {
 
@@ -15,7 +13,7 @@ public:
     : _min(min), _max(max) { }
   virtual ~StjJetCutPt() { }
 
-  bool operator()(const StSpinJet::StjJet& jet)
+  bool operator()(const StjJet& jet)
   {
     if(jet.pt <= _min) return true;
 
@@ -29,7 +27,5 @@ private:
   double _min;
   double _max;
 };
-
-}
 
 #endif // STJJETCUTPT_H

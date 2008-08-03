@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTrackPrint.h,v 1.3 2008/08/02 22:43:18 tai Exp $
+// $Id: StjTPCTrackPrint.h,v 1.4 2008/08/03 00:26:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTPCTRACKPRINT_H
 #define STJTPCTRACKPRINT_H
@@ -7,8 +7,6 @@
 #include "StjTrackList.h"
 
 #include <vector>
-
-namespace StSpinJet {
 
 class StjTPCTrackPrint {
 
@@ -24,7 +22,5 @@ private:
   void print(const StjTrack& track) const;
 
 };
-
-}
 
 #endif // STJTPCTRACKPRINT_H

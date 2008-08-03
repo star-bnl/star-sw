@@ -1,11 +1,9 @@
-// $Id: StjeBemcEnergySumCalculator.cxx,v 1.2 2008/08/02 19:23:08 tai Exp $
+// $Id: StjeBemcEnergySumCalculator.cxx,v 1.3 2008/08/03 00:26:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeBemcEnergySumCalculator.h"
 
 #include "StjBEMC.h"
 #include "StjTowerEnergyListCut.h"
-
-namespace StSpinJet {
 
 StjeBemcEnergySumCalculatorImp::StjeBemcEnergySumCalculatorImp(StjBEMC* bemc, StjTowerEnergyListCut* cut)
   : _bemc(bemc)
@@ -55,6 +53,4 @@ int StjeBemcEnergySumCalculatorImp::numberOfBemcTowersWithEnergyAbove(double min
     if((*it).energy > minE) ret ++;
 
   return ret;
-}
-
 }

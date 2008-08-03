@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeJetFinderRunner.h,v 1.1 2008/08/02 23:10:20 tai Exp $
+// $Id: StjeJetFinderRunner.h,v 1.2 2008/08/03 00:26:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJETFINDERRUNNER_H
 #define STJETFINDERRUNNER_H
@@ -11,8 +11,6 @@
 
 class StJetPars;
 class StJetFinder;
-
-namespace StSpinJet {
 
 class StjeJetFinderRunner {
 
@@ -38,8 +36,6 @@ private:
   ProtoJetList& _protoJetList;
 
 };
-
-}
 
 #endif // STJETFINDERRUNNER_H
 

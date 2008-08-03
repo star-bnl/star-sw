@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTrackMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $
+// $Id: StjTPCTrackMaker.h,v 1.4 2008/08/03 00:26:18 tai Exp $
 #ifndef STJTPCTRACKMAKER_H
 #define STJTPCTRACKMAKER_H
 
@@ -13,9 +13,7 @@ class TTree;
 
 class StMuDstMaker;
 
-namespace StSpinJet {
-  class StjTPC;
-}
+class StjTPC;
 
 class StjTPCTrackMaker : public StMaker {
 
@@ -29,7 +27,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackMaker.h,v 1.3 2008/08/02 22:43:06 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackMaker.h,v 1.4 2008/08/03 00:26:18 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -37,7 +35,7 @@ private:
 
   StMuDstMaker* _uDstMaker;
 
-  StSpinJet::StjTPC*  _tpc;
+  StjTPC*  _tpc;
 
   StjTrackListWriter* _writer;
 

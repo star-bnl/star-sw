@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyVariation.h,v 1.3 2008/08/02 22:43:21 tai Exp $
+// $Id: StjTowerEnergyVariation.h,v 1.4 2008/08/03 00:26:36 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYVARIATION_H
 #define STJTOWERENERGYVARIATION_H
 
 #include "StjTowerEnergyList.h"
-
-namespace StSpinJet {
 
 class StjTowerEnergyVariation {
 
@@ -23,7 +21,5 @@ private:
 
   double _ratio;
 };
-
-}
 
 #endif // STJTOWERENERGYVARIATION_H

@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjMC.h,v 1.3 2008/08/02 22:43:17 tai Exp $
+// $Id: StjMC.h,v 1.4 2008/08/03 00:26:30 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJMC_H
 #define STJMC_H
 
 #include <StjMCParticleList.h>
-
-namespace StSpinJet {
 
 class StjMC {
 
@@ -30,7 +28,5 @@ public:
 
   StjMCParticleList getMCPartilceList() { return StjMCParticleList(); }
 };
-
-}
 
 #endif // STJMC_H

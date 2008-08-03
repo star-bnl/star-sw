@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleListCut.h,v 1.3 2008/08/02 22:43:18 tai Exp $
+// $Id: StjMCParticleListCut.h,v 1.4 2008/08/03 00:26:31 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJMCPARTICLELISTCUT_H
 #define STJMCPARTICLELISTCUT_H
@@ -7,8 +7,6 @@
 #include "StjMCParticleCut.h"
 
 #include "StjMCParticleList.h"
-
-namespace StSpinJet {
 
 class StjMCParticleListCut {
 
@@ -18,11 +16,11 @@ public:
   
   StjMCParticleList operator()(const StjMCParticleList& aList);
 
-  void addCut(StJetMCParticleCut::StjMCParticleCut* cut) {
+  void addCut(StjMCParticleCut* cut) {
     _cutList.push_back(cut);
   }
 
-  typedef std::vector<StJetMCParticleCut::StjMCParticleCut*> CutList;
+  typedef std::vector<StjMCParticleCut*> CutList;
   CutList getCutList() { return _cutList; }
 
 private:
@@ -32,7 +30,5 @@ private:
   CutList _cutList;
 
 };
-
-}
 
 #endif // STJMCPARTICLELISTCUT_H

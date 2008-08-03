@@ -1,7 +1,5 @@
-// $Id: StjTowerEnergyCorrectionForTracks.cxx,v 1.2 2008/08/02 19:22:50 tai Exp $
+// $Id: StjTowerEnergyCorrectionForTracks.cxx,v 1.3 2008/08/03 00:26:33 tai Exp $
 #include "StjTowerEnergyCorrectionForTracks.h"
-
-namespace StSpinJet {
 
 const int StjTowerEnergyCorrectionForTracks::mNOfBemcTowers;
 
@@ -50,7 +48,4 @@ double StjTowerEnergyCorrectionForTracks::correctBemcTowerEnergyForTracks_(doubl
     double MipE = 0.261*(1.+0.056*eta*eta)/sin(theta); //GeV
 
     return energy - mNtracksOnTower[bemcTowerId]*MipE;
-}
-
-
 }

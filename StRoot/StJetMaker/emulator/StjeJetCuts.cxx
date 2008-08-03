@@ -1,4 +1,4 @@
-// $Id: StjeJetCuts.cxx,v 1.1 2008/08/02 22:21:24 tai Exp $
+// $Id: StjeJetCuts.cxx,v 1.2 2008/08/03 00:26:51 tai Exp $
 #include "StjeJetCuts.h"
 
 #include <StJetFinder/StProtoJet.h>
@@ -8,8 +8,6 @@
 #include <iterator>
 
 using namespace std;
-
-namespace StSpinJet {
 
 StjeJetCuts::StjeJetCuts(const StppAnaPars* ap, ProtoJetList& protoJets)
   : _protoJetList(protoJets)
@@ -51,6 +49,4 @@ bool StjeJetCuts::shouldNotKeep(StProtoJet &pj)
   if((int)pj.numberOfParticles() < _anaPar.mJetNmin)  return true;
 
   return false;
-}
-
 }

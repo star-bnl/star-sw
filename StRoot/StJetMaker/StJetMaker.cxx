@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.68 2008/08/02 23:10:06 tai Exp $
+// $Id: StJetMaker.cxx,v 1.69 2008/08/03 00:26:16 tai Exp $
 #include "StJetMaker.h"
 
 #include "StjeParticleCollector.h"
@@ -17,7 +17,6 @@
 #include <vector>
 
 using namespace std;
-using namespace StSpinJet;
 
 ClassImp(StJetMaker)
   

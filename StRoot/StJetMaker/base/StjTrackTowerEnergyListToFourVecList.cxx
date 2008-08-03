@@ -1,10 +1,8 @@
-// $Id: StjTrackTowerEnergyListToFourVecList.cxx,v 1.2 2008/08/02 19:22:56 tai Exp $
+// $Id: StjTrackTowerEnergyListToFourVecList.cxx,v 1.3 2008/08/03 00:26:38 tai Exp $
 #include "StjTrackTowerEnergyListToFourVecList.h"
 
 #include "StjTrackToFourVec.h"
 #include "StjTowerEnergyToFourVec.h"
-
-namespace StSpinJet {
 
 StjFourVecList StjTrackTowerEnergyListToFourVecList::operator()(const std::pair<StjTrackList, StjTowerEnergyList>& inList)
 {
@@ -32,7 +30,4 @@ StjFourVecList StjTrackTowerEnergyListToFourVecList::operator()(const StjTrackLi
   }
 
   return ret;
-}
-
-
 }

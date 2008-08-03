@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackToFourVec.h,v 1.3 2008/08/02 22:43:22 tai Exp $
+// $Id: StjTrackToFourVec.h,v 1.4 2008/08/03 00:26:38 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKTOFOURVEC_H
 #define STJTRACKTOFOURVEC_H
@@ -7,8 +7,6 @@
 #include "StjFourVecList.h"
 
 #include "StjTrackToTLorentzVector.h"
-
-namespace StSpinJet {
 
 class StjTrack;
 
@@ -22,7 +20,5 @@ public:
 private:
   StjTrackToTLorentzVector& _track2tlorentzvector;
 };
-
-}
 
 #endif // STJTRACKTOFOURVEC_H

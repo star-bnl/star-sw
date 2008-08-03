@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackTowerEnergyListToFourVecList.h,v 1.3 2008/08/02 22:43:23 tai Exp $
+// $Id: StjTrackTowerEnergyListToFourVecList.h,v 1.4 2008/08/03 00:26:38 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKTOWERENERGYLISTTOFOURVECLIST_H
 #define STJTRACKTOWERENERGYLISTTOFOURVECLIST_H
@@ -10,8 +10,6 @@
 
 #include <utility>
 
-namespace StSpinJet {
-
 class StjTrackTowerEnergyListToFourVecList {
 
 public:
@@ -20,7 +18,5 @@ public:
   StjFourVecList operator()(const StjTrackList& trackList, const StjTowerEnergyList& energyList);
 
 };
-
-}
 
 #endif // STJTRACKTOWERENERGYLISTTOFOURVECLIST_H

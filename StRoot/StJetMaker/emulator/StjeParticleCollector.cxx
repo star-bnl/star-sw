@@ -1,4 +1,4 @@
-// $Id: StjeParticleCollector.cxx,v 1.1 2008/08/02 23:10:20 tai Exp $
+// $Id: StjeParticleCollector.cxx,v 1.2 2008/08/03 00:26:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeParticleCollector.h"
 
@@ -10,8 +10,6 @@
 #include <vector>
 
 using namespace std;
-
-namespace StSpinJet {
 
 StjeParticleCollector::StjeParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ParticleList& particleList)
   : _fourPMaker(fp)
@@ -67,7 +65,3 @@ bool StjeParticleCollector::isChargedTrack(const StMuTrackFourVec* p) const
 {
   return p->track() != 0;
 }
-
-
-}
-

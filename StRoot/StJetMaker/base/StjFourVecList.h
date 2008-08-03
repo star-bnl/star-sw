@@ -1,13 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecList.h,v 1.3 2008/08/02 22:43:16 tai Exp $
+// $Id: StjFourVecList.h,v 1.4 2008/08/03 00:26:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJFOURVECLIST_H
 #define STJFOURVECLIST_H
 
 #include <ostream>
 #include <vector>
-
-namespace StSpinJet {
 
 struct StjFourVec {
   int            runNumber;
@@ -63,8 +61,6 @@ inline std::ostream& operator<<(std::ostream& out, const StjFourVecList& v)
 {
   out << "FourVecList size: " << v.size();
   return out;
-}
-
 }
 
 #endif // STJFOURVECLIST_H

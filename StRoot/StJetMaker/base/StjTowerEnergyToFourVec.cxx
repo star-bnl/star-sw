@@ -1,11 +1,9 @@
-// $Id: StjTowerEnergyToFourVec.cxx,v 1.2 2008/08/02 19:22:52 tai Exp $
+// $Id: StjTowerEnergyToFourVec.cxx,v 1.3 2008/08/03 00:26:35 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyToFourVec.h"
 
 #include "StjTowerEnergyList.h"
 #include "StjFourVecList.h"
-
-namespace StSpinJet {
 
 StjFourVec StjTowerEnergyToFourVec::operator()(const StjTowerEnergy& towerEnergy)
 {
@@ -23,6 +21,4 @@ StjFourVec StjTowerEnergyToFourVec::operator()(const StjTowerEnergy& towerEnergy
   ret.phi = p4.Phi();
   ret.m   = p4.M();
   return ret;
-}
-
 }

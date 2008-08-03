@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCTree.h,v 1.3 2008/08/02 22:43:15 tai Exp $
+// $Id: StjBEMCTree.h,v 1.4 2008/08/03 00:26:26 tai Exp $
 #ifndef STJBEMCTREE_H
 #define STJBEMCTREE_H
 
@@ -9,8 +9,6 @@
 class TTree;
 
 class StjTowerEnergyListReader;
-
-namespace StSpinJet {
 
 class StjBEMCTree : public StjBEMC {
 
@@ -34,7 +32,5 @@ private:
   StjTowerEnergyListReader* _reader;
 
 };
-
-}
 
 #endif // STJBEMCTREE_H

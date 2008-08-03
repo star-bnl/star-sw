@@ -1,13 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.3 2008/08/02 22:43:22 tai Exp $
+// $Id: StjTrackList.h,v 1.4 2008/08/03 00:26:37 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLIST_H
 #define STJTRACKLIST_H
 
 #include <ostream>
 #include <vector>
-
-namespace StSpinJet {
 
 struct StjTrack {
   int            runNumber;
@@ -92,8 +90,6 @@ inline std::ostream& operator<<(std::ostream& out, const StjTrackList& v)
 {
   out << "TrackList size: " << v.size();
   return out;
-}
-
 }
 
 #endif // STJTRACKLIST_H

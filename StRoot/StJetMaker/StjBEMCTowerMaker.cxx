@@ -1,4 +1,4 @@
-// $Id: StjBEMCTowerMaker.cxx,v 1.2 2008/08/02 19:22:26 tai Exp $
+// $Id: StjBEMCTowerMaker.cxx,v 1.3 2008/08/03 00:26:18 tai Exp $
 #include "StjBEMCTowerMaker.h"
 
 
@@ -19,8 +19,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
-using namespace StJetTowerEnergyCut;
 
 ClassImp(StjBEMCTowerMaker)
   

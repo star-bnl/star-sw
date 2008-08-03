@@ -1,12 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutAdc.h,v 1.3 2008/08/02 22:43:19 tai Exp $
+// $Id: StjTowerEnergyCutAdc.h,v 1.4 2008/08/03 00:26:33 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYCUTADC_H
 #define STJTOWERENERGYCUTADC_H
 
 #include "StjTowerEnergyCut.h"
 
-namespace StJetTowerEnergyCut {
+namespace {
 
 class StjTowerEnergyCutAdc : public StjTowerEnergyCut {
 
@@ -15,7 +15,7 @@ public:
     : _min(min), _factor(factor) { }
   virtual ~StjTowerEnergyCutAdc() { }
 
-  bool operator()(const StSpinJet::StjTowerEnergy& tower)
+  bool operator()(const StjTowerEnergy& tower)
   {
     if(tower.adc - tower.pedestal <= _min) return true;
 

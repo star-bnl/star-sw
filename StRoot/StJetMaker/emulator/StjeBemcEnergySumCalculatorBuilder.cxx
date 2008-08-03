@@ -1,4 +1,4 @@
-// $Id: StjeBemcEnergySumCalculatorBuilder.cxx,v 1.2 2008/08/02 19:23:08 tai Exp $
+// $Id: StjeBemcEnergySumCalculatorBuilder.cxx,v 1.3 2008/08/03 00:26:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeBemcEnergySumCalculatorBuilder.h"
 #include "StjeBemcEnergySumCalculator.h"
@@ -11,10 +11,6 @@
 #include "StjTowerEnergyCutEnergy.h"
 #include "StjTowerEnergyCutBemcStatus.h"
 #include "StjTowerEnergyCutAdc.h"
-
-using namespace StJetTowerEnergyCut;
-
-namespace StSpinJet {
 
 StjeBemcEnergySumCalculator* StjeBemcEnergySumCalculatorBuilder::build(bool useBEMC, bool use2003Cuts, bool use2005Cuts, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
 {
@@ -29,6 +25,4 @@ StjeBemcEnergySumCalculator* StjeBemcEnergySumCalculatorBuilder::build(bool useB
   bemcCut->addCut(new StjTowerEnergyCutAdc());
 
   return new StjeBemcEnergySumCalculatorImp(bemc, bemcCut);
-}
-
 }

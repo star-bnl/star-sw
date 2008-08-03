@@ -1,10 +1,8 @@
-// $Id: StJetMakerBackwordCompatibility.cxx,v 1.5 2008/08/02 23:10:17 tai Exp $
+// $Id: StJetMakerBackwordCompatibility.cxx,v 1.6 2008/08/03 00:26:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StJetMakerBackwordCompatibility.h"
 
 #include "StjeDefaultJetTreeWriter.h"
-
-namespace StSpinJet {
 
 void StJetMakerBackwordCompatibility::addAnalyzer(StppJetAnalyzer* analyzer, StjeTreeWriter* treeWriter, const char* name)
 {
@@ -14,7 +12,4 @@ void StJetMakerBackwordCompatibility::addAnalyzer(StppJetAnalyzer* analyzer, Stj
   if (!defaultWriter) return;
 
   analyzer->setmuDstJets(defaultWriter->getLastStJets());
-}
-
-
 }
