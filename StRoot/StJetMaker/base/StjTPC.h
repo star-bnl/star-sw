@@ -1,12 +1,14 @@
 // -*- mode: c++;-*-
-// $Id: StjTPC.h,v 1.4 2008/08/03 00:26:31 tai Exp $
+// $Id: StjTPC.h,v 1.5 2008/08/03 22:04:16 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTPC_H
 #define STJTPC_H
 
+#include <TObject.h>
+
 #include "StjTrackList.h"
 
-class StjTPC {
+class StjTPC : public TObject {
 
 public:
   StjTPC() { }
@@ -15,18 +17,9 @@ public:
   virtual void Init() { }
 
   virtual StjTrackList getTrackList() = 0;
-};
 
+  ClassDef(StjTPC, 1)
 
-class StjTPCNull : public StjTPC {
-
-public:
-  StjTPCNull() { }
-  virtual ~StjTPCNull() { }
-
-  void Init() { }
-
-  StjTrackList getTrackList() { return StjTrackList(); }
 };
 
 #endif // STJTPC_H

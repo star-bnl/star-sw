@@ -1,4 +1,4 @@
-// $Id: StjTreeEntryCoordinator.cxx,v 1.1 2008/08/02 23:10:27 tai Exp $
+// $Id: StjTreeEntryCoordinator.cxx,v 1.2 2008/08/03 22:04:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTreeEntryCoordinator.h"
 
@@ -6,6 +6,8 @@
 #include <TTree.h>
 
 #include <iostream>
+
+ClassImp(StjTreeEntryCoordinator)
 
 using namespace std;
 
