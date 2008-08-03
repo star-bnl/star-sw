@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.6 2008/07/10 23:41:18 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.7 2008/08/03 23:04:11 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -10,6 +10,9 @@ void LoadJetLibraries()
 
   gROOT->ProcessLine(LoadJetLibraries_STAR_VERSION.Data());
 
+  setIncludePath();
+
+  gROOT->ProcessLine(".L StjDict.C+");
 }
 
 void LoadJetLibraries_DEV()
@@ -321,5 +324,15 @@ void setLibraryPath()
   }
   path = ".:" + path;
   gSystem->SetDynamicPath(path);
+}
+
+void setIncludePath()
+{
+  TString path(gSystem->GetIncludePath());
+  path = "-I./StRoot/StJetMaker/base " + path;
+  path = "-I./StRoot " + path;
+  path = "-I./.$STAR_HOST_SYS/include. " + path;
+  path = "-I. " + path;
+  gSystem->SetIncludePath(path);
 }
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCTree.h,v 1.4 2008/08/03 00:26:32 tai Exp $
+// $Id: StjTPCTree.h,v 1.5 2008/08/03 23:04:06 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTPCTREE_H
 #define STJTPCTREE_H
@@ -31,6 +31,8 @@ private:
   const Int_t& _indexMinor;
 
   StjTrackListReader* _reader;
+
+  ClassDef(StjTPCTree, 1)
 
 };
 

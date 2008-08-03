@@ -1,15 +1,17 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackPrint.h,v 1.4 2008/08/03 00:26:37 tai Exp $
+// $Id: StjTrackPrint.h,v 1.5 2008/08/03 23:04:07 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKPRINT_H
 #define STJTRACKPRINT_H
+
+#include <TObject.h>
 
 #include "StjTrackList.h"
 
 #include <fstream>
 #include <string>
 
-class StjTrackPrint {
+class StjTrackPrint : public TObject {
 
 public:
 
@@ -21,6 +23,8 @@ public:
 private:
 
   void print(const StjTrack& track);
+
+  ClassDef(StjTrackPrint, 1)
 
 };
 

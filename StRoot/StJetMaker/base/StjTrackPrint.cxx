@@ -1,8 +1,10 @@
-// $Id: StjTrackPrint.cxx,v 1.3 2008/08/03 00:26:37 tai Exp $
+// $Id: StjTrackPrint.cxx,v 1.4 2008/08/03 23:04:06 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrackPrint.h"
 
 #include <iostream>
+
+ClassImp(StjTrackPrint)
 
 using namespace std;
 

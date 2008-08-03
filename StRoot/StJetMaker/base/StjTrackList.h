@@ -1,13 +1,16 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.4 2008/08/03 00:26:37 tai Exp $
+// $Id: StjTrackList.h,v 1.5 2008/08/03 23:04:06 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLIST_H
 #define STJTRACKLIST_H
 
+#include <TObject.h>
+
 #include <ostream>
 #include <vector>
 
-struct StjTrack {
+class StjTrack : public TObject {
+public:
   int            runNumber;
   int            eventId;
   int            detectorId; // 1: TPC
@@ -34,6 +37,7 @@ struct StjTrack {
   double         dEdx;
   int            trackIndex;
   short          id;
+  ClassDef(StjTrack, 1)
 };
 
 typedef std::vector<StjTrack> StjTrackList;
