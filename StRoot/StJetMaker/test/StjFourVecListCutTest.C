@@ -13,8 +13,6 @@
 #include "StjFourVecListCutTest.hh"
 
 using namespace std;
-using namespace StSpinJet;
-using namespace StJetFourVecCut;
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( StjFourVecListCutTest );

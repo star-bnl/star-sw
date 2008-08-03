@@ -1,6 +1,6 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
-#include <RunJetFinder.h>
+#include <StjRunJetFinder.h>
 
 #include <StjTreeEntryCoordinator.h>
 #include <StjBEMCTree.h>
@@ -24,7 +24,6 @@
 #include "RunJetFinderTest.hh"
 
 using namespace std;
-using namespace StSpinJet;
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( RunJetFinderTest );
@@ -71,7 +70,7 @@ void RunJetFinderTest::testRun()
   cpars->setRequireStableMidpoints(true);
   cpars->setDoSplitMerge(true);
   cpars->setDebug(false);
-  RunJetFinder jetFinder(cpars);
+  StjRunJetFinder jetFinder(cpars);
   jetFinder.Init();
 
   coord->Init();

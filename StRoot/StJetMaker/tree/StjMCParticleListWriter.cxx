@@ -1,4 +1,4 @@
-// $Id: StjMCParticleListWriter.cxx,v 1.2 2008/08/02 19:23:38 tai Exp $
+// $Id: StjMCParticleListWriter.cxx,v 1.3 2008/08/03 00:29:12 tai Exp $
 #include "StjMCParticleListWriter.h"
 
 #include <TDirectory.h>
@@ -7,7 +7,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
 
 StjMCParticleListWriter::StjMCParticleListWriter(const char* treeName, TDirectory* file)
   : _file(file)
@@ -35,7 +34,7 @@ StjMCParticleListWriter::StjMCParticleListWriter(const char* treeName, TDirector
   _tree->Branch("runNumber"       , &_runNumber       , "runNumber/I"                     );
 }
 
-void StjMCParticleListWriter::Fill(const StSpinJet::StjMCParticleList& theList)
+void StjMCParticleListWriter::Fill(const StjMCParticleList& theList)
 {
   if(theList.empty()) return;
 

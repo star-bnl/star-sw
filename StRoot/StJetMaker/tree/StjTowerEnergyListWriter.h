@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyListWriter.h,v 1.3 2008/08/02 22:43:40 tai Exp $
+// $Id: StjTowerEnergyListWriter.h,v 1.4 2008/08/03 00:29:13 tai Exp $
 #ifndef STJTOWERENERGYLISTWRITER_H
 #define STJTOWERENERGYLISTWRITER_H
 
@@ -16,7 +16,7 @@ public:
   StjTowerEnergyListWriter(const char* treeName, TDirectory* file);
   virtual ~StjTowerEnergyListWriter() { }
 
-  void Fill(const StSpinJet::StjTowerEnergyList& theList);
+  void Fill(const StjTowerEnergyList& theList);
   void Finish();
     
 private:

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCMuDst.h,v 1.3 2008/08/02 22:43:38 tai Exp $
+// $Id: StjBEMCMuDst.h,v 1.4 2008/08/03 00:29:02 tai Exp $
 #ifndef STJBEMCMUDST_H
 #define STJBEMCMUDST_H
 
@@ -8,8 +8,6 @@
 class StEmcRawHit;
 class StMuDstMaker;
 class StBemcTables;
-
-namespace StSpinJet {
 
 class StjBEMCMuDst : public StjBEMC {
 
@@ -29,7 +27,5 @@ private:
   StBemcTables* _bemcTables;
 
 };
-
-}
 
 #endif // STJBEMCMUDST_H

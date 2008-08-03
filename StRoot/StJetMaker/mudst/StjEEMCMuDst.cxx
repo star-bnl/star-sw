@@ -1,4 +1,4 @@
-// $Id: StjEEMCMuDst.cxx,v 1.2 2008/08/02 19:23:20 tai Exp $
+// $Id: StjEEMCMuDst.cxx,v 1.3 2008/08/03 00:29:02 tai Exp $
 #include "StjEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -9,9 +9,6 @@
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
-
-
-namespace StSpinJet {
 
 
 StjEEMCMuDst::StjEEMCMuDst(StMuDstMaker* uDstMaker)
@@ -82,6 +79,3 @@ StjTowerEnergyList StjEEMCMuDst::getEnergyList()
 
   return ret;
 }
-
-}
-

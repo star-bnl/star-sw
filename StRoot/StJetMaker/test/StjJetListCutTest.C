@@ -15,8 +15,6 @@
 #include "StjJetListCutTest.hh"
 
 using namespace std;
-using namespace StSpinJet;
-using namespace StJetJetCut;
 
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( StjJetListCutTest );

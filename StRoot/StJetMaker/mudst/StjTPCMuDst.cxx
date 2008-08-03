@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.2 2008/08/02 19:23:20 tai Exp $
+// $Id: StjTPCMuDst.cxx,v 1.3 2008/08/03 00:29:03 tai Exp $
 #include "StjTPCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
@@ -10,8 +10,6 @@
 #include <StEmcUtil/geometry/StEmcGeom.h>
 
 #include <TVector3.h>
-
-namespace StSpinJet {
 
 StjTPCMuDst::StjTPCMuDst(StMuDstMaker* uDstMaker)
   : _uDstMaker(uDstMaker)
@@ -107,6 +105,4 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.id = mutrack->id();
 
   return track;
-}
-
 }

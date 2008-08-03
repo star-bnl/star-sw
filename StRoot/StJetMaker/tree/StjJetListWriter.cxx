@@ -1,4 +1,4 @@
-// $Id: StjJetListWriter.cxx,v 1.2 2008/08/02 19:23:37 tai Exp $
+// $Id: StjJetListWriter.cxx,v 1.3 2008/08/03 00:29:12 tai Exp $
 #include "StjJetListWriter.h"
 
 #include <TFile.h>
@@ -7,7 +7,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
 
 StjJetListWriter::StjJetListWriter(const char* jetTreeName, const char* jetFourVecTreeName, TDirectory* file)
   : _file(file)

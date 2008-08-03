@@ -1,6 +1,6 @@
-// $Id: RunJetFinder.cxx,v 1.3 2008/08/02 19:23:14 tai Exp $
+// $Id: StjRunJetFinder.cxx,v 1.1 2008/08/03 00:28:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "RunJetFinder.h"
+#include "StjRunJetFinder.h"
 
 #include <StJetFinder/StJetFinder.h>
 #include <StJetFinder/StJetPars.h>
@@ -13,18 +13,16 @@
 
 using namespace std;
 
-namespace StSpinJet {
-
-RunJetFinder::RunJetFinder(StJetPars* pars)
+StjRunJetFinder::StjRunJetFinder(StJetPars* pars)
   : _jetFinder(pars->constructJetFinder())
 { }
 
-void RunJetFinder::Init()
+void StjRunJetFinder::Init()
 {
   _jetFinder->Init();
 }
 
-StjJetList RunJetFinder::operator()(const StjFourVecList& fourVecList)
+StjJetList StjRunJetFinder::operator()(const StjFourVecList& fourVecList)
 {
  typedef std::list<StProtoJet> ProtoJetList;
  typedef std::vector<const AbstractFourVec*> FourList;
@@ -70,6 +68,4 @@ StjJetList RunJetFinder::operator()(const StjFourVecList& fourVecList)
   }
 
   return jetList;
-}
-
 }

@@ -1,9 +1,7 @@
-// $Id: StjTrackListReader.cxx,v 1.2 2008/08/02 19:23:39 tai Exp $
+// $Id: StjTrackListReader.cxx,v 1.3 2008/08/03 00:29:13 tai Exp $
 #include "StjTrackListReader.h"
 
 #include <TTree.h>
-
-using namespace StSpinJet;
 
 StjTrackListReader::StjTrackListReader(TTree *tree)
  : _tree(tree)

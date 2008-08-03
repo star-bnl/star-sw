@@ -1,4 +1,4 @@
-// $Id: StjBEMCMuDst.cxx,v 1.2 2008/08/02 19:23:19 tai Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.3 2008/08/03 00:29:02 tai Exp $
 #include "StjBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -20,8 +20,6 @@
 #include <iostream>
 
 using namespace std;
-
-namespace StSpinJet {
 
 
 StjBEMCMuDst::StjBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix)
@@ -99,5 +97,3 @@ StjTowerEnergy StjBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
   return ret;
 }
 
-
-}

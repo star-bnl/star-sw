@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyListWriter.cxx,v 1.2 2008/08/02 19:23:38 tai Exp $
+// $Id: StjTowerEnergyListWriter.cxx,v 1.3 2008/08/03 00:29:13 tai Exp $
 #include "StjTowerEnergyListWriter.h"
 
 #include <TDirectory.h>
@@ -7,7 +7,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace StSpinJet;
 
 StjTowerEnergyListWriter::StjTowerEnergyListWriter(const char* treeName, TDirectory* file)
   : _file(file)
