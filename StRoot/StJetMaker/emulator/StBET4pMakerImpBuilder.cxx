@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.4 2008/08/03 00:26:50 tai Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.5 2008/08/03 22:04:21 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -6,6 +6,9 @@
 #include "StjTPCMuDst.h"
 #include "StjBEMCMuDst.h"
 #include "StjEEMCMuDst.h"
+#include "StjTPCNull.h"
+#include "StjBEMCNull.h"
+#include "StjEEMCNull.h"
 
 #include "StjTPCTree.h"
 #include "StjBEMCTree.h"

@@ -1,8 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryCoordinator.h,v 1.1 2008/08/02 23:10:27 tai Exp $
+// $Id: StjTreeEntryCoordinator.h,v 1.2 2008/08/03 22:04:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEENTRYCOORDINATOR_H
 #define STJTREEENTRYCOORDINATOR_H
+
+#include <TObject.h>
 
 #include <Rtypes.h>
 
@@ -12,7 +14,7 @@
 
 class TDirectory;
 
-class StjTreeEntryCoordinator {
+class StjTreeEntryCoordinator : public TObject {
 
 public:
   StjTreeEntryCoordinator(TDirectory* file) 
@@ -75,6 +77,8 @@ private:
   bool _eof;
 
   TrgTreeNameList _trgTreeNameList;
+
+  ClassDef(StjTreeEntryCoordinator, 1)
 
 };
 
