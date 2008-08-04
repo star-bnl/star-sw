@@ -1,33 +1,35 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
-#include <StjTowerEnergyVariation.h>
+#include <StjTowerEnergyListVariation.h>
 #include <StjTowerEnergyList.h>
 
 #include <iostream>
 #include <set>
 #include <cmath>
 
-#include "StjTowerEnergyVariationTest.hh"
+#include "StjTowerEnergyListVariationTest.hh"
 
 using namespace std;
 
 // Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StjTowerEnergyVariationTest );
+CPPUNIT_TEST_SUITE_REGISTRATION( StjTowerEnergyListVariationTest );
 
-void StjTowerEnergyVariationTest::setUp()
+void StjTowerEnergyListVariationTest::setUp()
 {
 
 }
 
-void StjTowerEnergyVariationTest::tearDown()
+void StjTowerEnergyListVariationTest::tearDown()
 {
 
 }
 
 
-void StjTowerEnergyVariationTest::testEnergyPlus5()
+void StjTowerEnergyListVariationTest::testEnergyPlus5()
 {
-  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(0.05);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(0.05);
+
+  //  variation->addVariation(new StjTowerEnergyVariationEnergy(0.05));
 
   StjTowerEnergyList listIn;
 
@@ -74,9 +76,9 @@ void StjTowerEnergyVariationTest::testEnergyPlus5()
   delete variation;
 }
 
-void StjTowerEnergyVariationTest::testEnergyMinus5()
+void StjTowerEnergyListVariationTest::testEnergyMinus5()
 {
-  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(-0.05);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(-0.05);
 
   StjTowerEnergyList listIn;
 
@@ -103,9 +105,9 @@ void StjTowerEnergyVariationTest::testEnergyMinus5()
   delete variation;
 }
 
-void StjTowerEnergyVariationTest::testEnergyPlus10()
+void StjTowerEnergyListVariationTest::testEnergyPlus10()
 {
-  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(0.1);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(0.1);
 
   StjTowerEnergyList listIn;
 
@@ -132,9 +134,9 @@ void StjTowerEnergyVariationTest::testEnergyPlus10()
   delete variation;
 }
 
-void StjTowerEnergyVariationTest::testEnergyMinus10()
+void StjTowerEnergyListVariationTest::testEnergyMinus10()
 {
-  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(-0.1);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(-0.1);
 
   StjTowerEnergyList listIn;
 
@@ -162,9 +164,9 @@ void StjTowerEnergyVariationTest::testEnergyMinus10()
 }
 
 
-void StjTowerEnergyVariationTest::testEnergyNull()
+void StjTowerEnergyListVariationTest::testEnergyNull()
 {
-  StjTowerEnergyVariation* variation = new StjTowerEnergyVariation(0);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(0);
 
   StjTowerEnergyList listIn;
 

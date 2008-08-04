@@ -4,9 +4,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class StjTowerEnergyVariationTest : public CPPUNIT_NS::TestFixture
+class StjTowerEnergyListVariationTest : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( StjTowerEnergyVariationTest );
+  CPPUNIT_TEST_SUITE( StjTowerEnergyListVariationTest );
   CPPUNIT_TEST( testEnergyNull   );
   CPPUNIT_TEST( testEnergyPlus5   );
   CPPUNIT_TEST( testEnergyMinus5  );

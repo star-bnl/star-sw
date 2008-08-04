@@ -82,7 +82,7 @@ am_libStJetMakerTest_la_OBJECTS =  \
 	libStJetMakerTest_la-StjTowerEnergyListToStMuTrackFourVecListTest.lo \
 	libStJetMakerTest_la-StjTrackListToStMuTrackFourVecListTest.lo \
 	libStJetMakerTest_la-RunJetFinderTest.lo \
-	libStJetMakerTest_la-StjTowerEnergyVariationTest.lo \
+	libStJetMakerTest_la-StjTowerEnergyListVariationTest.lo \
 	libStJetMakerTest_la-StjTrackTowerEnergyListToFourVecListTest.lo \
 	libStJetMakerTest_la-StjFourVecListCutTest.lo \
 	libStJetMakerTest_la-StjJetListCutTest.lo \
@@ -266,7 +266,7 @@ libStJetMakerTest_la_SOURCES = \
 	StjTowerEnergyListToStMuTrackFourVecListTest.C StjTowerEnergyListToStMuTrackFourVecListTest.hh \
 	StjTrackListToStMuTrackFourVecListTest.C StjTrackListToStMuTrackFourVecListTest.hh \
 	RunJetFinderTest.C RunJetFinderTest.hh \
-	StjTowerEnergyVariationTest.C StjTowerEnergyVariationTest.hh \
+	StjTowerEnergyListVariationTest.C StjTowerEnergyListVariationTest.hh \
 	StjTrackTowerEnergyListToFourVecListTest.C StjTrackTowerEnergyListToFourVecListTest.hh \
 	StjFourVecListCutTest.C StjFourVecListCutTest.hh  \
 	StjJetListCutTest.C StjJetListCutTest.hh \
@@ -397,7 +397,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTPCTreeTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyListCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyListToStMuTrackFourVecListTest.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyVariationTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyListVariationTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrackListCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrackListToStMuTrackFourVecListTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrackTowerEnergyListToFourVecListTest.Plo@am__quote@
@@ -547,12 +547,12 @@ libStJetMakerTest_la-RunJetFinderTest.lo: RunJetFinderTest.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-RunJetFinderTest.lo `test -f 'RunJetFinderTest.C' || echo '$(srcdir)/'`RunJetFinderTest.C
 
-libStJetMakerTest_la-StjTowerEnergyVariationTest.lo: StjTowerEnergyVariationTest.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StjTowerEnergyVariationTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyVariationTest.Tpo" -c -o libStJetMakerTest_la-StjTowerEnergyVariationTest.lo `test -f 'StjTowerEnergyVariationTest.C' || echo '$(srcdir)/'`StjTowerEnergyVariationTest.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyVariationTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyVariationTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyVariationTest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjTowerEnergyVariationTest.C' object='libStJetMakerTest_la-StjTowerEnergyVariationTest.lo' libtool=yes @AMDEPBACKSLASH@
+libStJetMakerTest_la-StjTowerEnergyListVariationTest.lo: StjTowerEnergyListVariationTest.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StjTowerEnergyListVariationTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyListVariationTest.Tpo" -c -o libStJetMakerTest_la-StjTowerEnergyListVariationTest.lo `test -f 'StjTowerEnergyListVariationTest.C' || echo '$(srcdir)/'`StjTowerEnergyListVariationTest.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyListVariationTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyListVariationTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyListVariationTest.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjTowerEnergyListVariationTest.C' object='libStJetMakerTest_la-StjTowerEnergyListVariationTest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjTowerEnergyVariationTest.lo `test -f 'StjTowerEnergyVariationTest.C' || echo '$(srcdir)/'`StjTowerEnergyVariationTest.C
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjTowerEnergyListVariationTest.lo `test -f 'StjTowerEnergyListVariationTest.C' || echo '$(srcdir)/'`StjTowerEnergyListVariationTest.C
 
 libStJetMakerTest_la-StjTrackTowerEnergyListToFourVecListTest.lo: StjTrackTowerEnergyListToFourVecListTest.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StjTrackTowerEnergyListToFourVecListTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StjTrackTowerEnergyListToFourVecListTest.Tpo" -c -o libStJetMakerTest_la-StjTrackTowerEnergyListToFourVecListTest.lo `test -f 'StjTrackTowerEnergyListToFourVecListTest.C' || echo '$(srcdir)/'`StjTrackTowerEnergyListToFourVecListTest.C; \

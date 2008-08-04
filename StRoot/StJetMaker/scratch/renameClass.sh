@@ -10,3 +10,11 @@ for file in $(find ./ -regex '.*\.\(cxx\|C\|hh?\)' -print); do
 	echo "mv -f ${file}_ $file"
     fi
 done
+
+for file in $(find ./ -name Makefile.am -print); do
+    found=$(cat $file | sed -n -e "/${old}/p")
+    if [ -n "$found" ]; then
+	echo "sed -e \"s/$old/$new/g\" $file > ${file}_"
+	echo "mv -f ${file}_ $file"
+    fi
+done
