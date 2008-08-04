@@ -1,14 +1,16 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListCut.h,v 1.4 2008/08/03 00:26:30 tai Exp $
+// $Id: StjJetListCut.h,v 1.5 2008/08/04 06:10:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETLISTCUT_H
 #define STJJETLISTCUT_H
+
+#include <TObject.h>
 
 #include "StjJetCut.h"
 
 #include "StjJetList.h"
 
-class StjJetListCut {
+class StjJetListCut : public TObject {
 
 public:
   StjJetListCut() { }
@@ -28,6 +30,8 @@ private:
   bool shouldNotKeep(const StjJet& p4);
 
   CutList _cutList;
+
+  ClassDef(StjJetListCut, 1)
 
 };
 

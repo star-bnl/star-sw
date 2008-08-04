@@ -1,13 +1,16 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleList.h,v 1.4 2008/08/03 00:26:31 tai Exp $
+// $Id: StjMCParticleList.h,v 1.5 2008/08/04 06:10:25 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJMCPARTICLELIST_H
 #define STJMCPARTICLELIST_H
 
+#include <TObject.h>
+
 #include <ostream>
 #include <vector>
 
-struct StjMCParticle {
+struct StjMCParticle : public TObject {
+public:
   int            runNumber;
   int            eventId;
   int            mcparticleId;
@@ -23,6 +26,7 @@ struct StjMCParticle {
   double         e;
   int            status; // 1: stable  2: unstable  3: incoming and parton
   double         vertexZ;
+  ClassDef(StjMCParticle, 1)
 };
 
 typedef std::vector<StjMCParticle> StjMCParticleList;

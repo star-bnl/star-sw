@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecCutPt.h,v 1.4 2008/08/03 00:26:27 tai Exp $
+// $Id: StjFourVecCutPt.h,v 1.5 2008/08/04 06:10:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJFOURVECCUTPT_H
 #define STJFOURVECCUTPT_H
@@ -9,7 +9,7 @@
 class StjFourVecCutPt : public StjFourVecCut {
 
 public:
-  StjFourVecCutPt(double min = 0, double max = std::numeric_limits<double>::max())
+  StjFourVecCutPt(double min = 0, double max = 50000.0)
     : _min(min), _max(max) { }
   virtual ~StjFourVecCutPt() { }
 
@@ -26,6 +26,9 @@ private:
 
   double _min;
   double _max;
+
+  ClassDef(StjFourVecCutPt, 1)
+
 };
 
 #endif // STJFOURVECCUTPT_H

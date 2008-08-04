@@ -1,10 +1,12 @@
-// $Id: StjMCParticleListWriter.cxx,v 1.3 2008/08/03 00:29:12 tai Exp $
+// $Id: StjMCParticleListWriter.cxx,v 1.4 2008/08/04 06:10:46 tai Exp $
 #include "StjMCParticleListWriter.h"
 
 #include <TDirectory.h>
 #include <TTree.h>
 
 #include <iostream>
+
+ClassImp(StjMCParticleListWriter)
 
 using namespace std;
 

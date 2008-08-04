@@ -1,13 +1,16 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecList.h,v 1.4 2008/08/03 00:26:28 tai Exp $
+// $Id: StjFourVecList.h,v 1.5 2008/08/04 06:10:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJFOURVECLIST_H
 #define STJFOURVECLIST_H
 
+#include <TObject.h>
+
 #include <ostream>
 #include <vector>
 
-struct StjFourVec {
+class StjFourVec : public TObject {
+public:
   int            runNumber;
   int            eventId;
   int            fourvecId;
@@ -20,6 +23,7 @@ struct StjFourVec {
   double         phi;
   double         m;
   double         vertexZ;
+  ClassDef(StjFourVec, 1)
 };
 
 typedef std::vector<StjFourVec> StjFourVecList;

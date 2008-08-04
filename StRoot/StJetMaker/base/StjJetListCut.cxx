@@ -1,6 +1,8 @@
-// $Id: StjJetListCut.cxx,v 1.3 2008/08/03 00:26:30 tai Exp $
+// $Id: StjJetListCut.cxx,v 1.4 2008/08/04 06:10:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetListCut.h"
+
+ClassImp(StjJetListCut)
 
 using namespace std;
 

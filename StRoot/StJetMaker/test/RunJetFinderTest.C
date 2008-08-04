@@ -70,8 +70,8 @@ void RunJetFinderTest::testRun()
   cpars->setRequireStableMidpoints(true);
   cpars->setDoSplitMerge(true);
   cpars->setDebug(false);
-  StjRunJetFinder jetFinder(cpars);
-  jetFinder.Init();
+  StjRunJetFinder jetFinder;
+  jetFinder.Init(cpars);
 
   coord->Init();
 

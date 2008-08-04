@@ -1,7 +1,9 @@
-// $Id: StjTowerEnergyListReader.cxx,v 1.3 2008/08/03 00:29:13 tai Exp $
+// $Id: StjTowerEnergyListReader.cxx,v 1.4 2008/08/04 06:10:46 tai Exp $
 #include "StjTowerEnergyListReader.h"
 
 #include <TTree.h>
+
+ClassImp(StjTowerEnergyListReader)
 
 StjTowerEnergyListReader::StjTowerEnergyListReader(TTree *tree)
  : _tree(tree)

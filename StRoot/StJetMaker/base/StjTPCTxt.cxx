@@ -1,4 +1,4 @@
-// $Id: StjTPCTxt.cxx,v 1.3 2008/08/03 00:26:32 tai Exp $
+// $Id: StjTPCTxt.cxx,v 1.4 2008/08/04 06:10:25 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTPCTxt.h"
 
@@ -7,6 +7,8 @@
 #include <sstream>
 
 #include <TVector3.h>
+
+ClassImp(StjTPCTxt)
 
 using namespace std;
 

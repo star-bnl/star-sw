@@ -1,8 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackToFourVec.h,v 1.4 2008/08/03 00:26:38 tai Exp $
+// $Id: StjTrackToFourVec.h,v 1.5 2008/08/04 06:10:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKTOFOURVEC_H
 #define STJTRACKTOFOURVEC_H
+
+#include <TObject.h>
 
 #include "StjFourVecList.h"
 
@@ -10,7 +12,7 @@
 
 class StjTrack;
 
-class StjTrackToFourVec {
+class StjTrackToFourVec : public TObject {
 public:
   StjTrackToFourVec(double mass = 0.1395700 /* pion mass as default */)
     : _track2tlorentzvector(*(new StjTrackToTLorentzVector(mass))) { }
@@ -19,6 +21,8 @@ public:
 
 private:
   StjTrackToTLorentzVector& _track2tlorentzvector;
+  ClassDef(StjTrackToFourVec, 1)
+
 };
 
 #endif // STJTRACKTOFOURVEC_H

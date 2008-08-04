@@ -1,7 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyListWriter.h,v 1.4 2008/08/03 00:29:13 tai Exp $
+// $Id: StjTowerEnergyListWriter.h,v 1.5 2008/08/04 06:10:46 tai Exp $
 #ifndef STJTOWERENERGYLISTWRITER_H
 #define STJTOWERENERGYLISTWRITER_H
+
+#include <TObject.h>
 
 #include "StjTowerEnergyList.h"
 #include <Rtypes.h>
@@ -9,7 +11,7 @@
 class TDirectory;
 class TTree;
 
-class StjTowerEnergyListWriter {
+class StjTowerEnergyListWriter : public TObject {
 
 public:
 
@@ -40,6 +42,8 @@ private:
   Double_t _pedestal[4800];
   Double_t _rms[4800];
   Int_t    _status[4800];     // 1 is good for BEMC. 0 is good for EEMC
+
+  ClassDef(StjTowerEnergyListWriter, 1)
 
 };
 

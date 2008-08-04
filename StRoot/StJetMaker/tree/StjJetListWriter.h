@@ -1,7 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListWriter.h,v 1.4 2008/08/03 00:29:12 tai Exp $
+// $Id: StjJetListWriter.h,v 1.5 2008/08/04 06:10:46 tai Exp $
 #ifndef STJJETLISTWRITER_H
 #define STJJETLISTWRITER_H
+
+#include <TObject.h>
 
 #include "StjFourVecList.h"
 #include "StjJetList.h"
@@ -12,7 +14,7 @@ class TDirectory;
 class TTree;
 
 
-class StjJetListWriter {
+class StjJetListWriter : public TObject {
 
 public:
 
@@ -57,6 +59,8 @@ private:
   Double_t _four_eta[4096];
   Double_t _four_phi[4096];
   Double_t _four_m[4096];
+  ClassDef(StjJetListWriter, 1)
+
 };
 
 #endif // STJJETLISTWRITER_H

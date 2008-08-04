@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutEta.h,v 1.4 2008/08/03 00:26:29 tai Exp $
+// $Id: StjJetCutEta.h,v 1.5 2008/08/04 06:10:21 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTETA_H
 #define STJJETCUTETA_H
@@ -25,6 +25,8 @@ private:
 
   double  _min;
   double  _max;
+
+  ClassDef(StjJetCutEta, 1)
 
 };
 

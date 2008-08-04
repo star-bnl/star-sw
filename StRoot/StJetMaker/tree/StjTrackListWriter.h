@@ -1,7 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListWriter.h,v 1.4 2008/08/03 00:29:13 tai Exp $
+// $Id: StjTrackListWriter.h,v 1.5 2008/08/04 06:10:47 tai Exp $
 #ifndef STJTRACKLISTWRITER_H
 #define STJTRACKLISTWRITER_H
+
+#include <TObject.h>
 
 #include "StjTrackList.h"
 #include <Rtypes.h>
@@ -9,7 +11,7 @@
 class TDirectory;
 class TTree;
 
-class StjTrackListWriter {
+class StjTrackListWriter : public TObject {
 
 public:
 
@@ -51,6 +53,8 @@ private:
   Double_t _dEdx[4096];
   Int_t    _trackIndex[4096];
   Short_t  _trackId[4096];
+
+  ClassDef(StjTrackListWriter, 1)
 
 };
 

@@ -1,7 +1,9 @@
-// $Id: StjTrackListReader.cxx,v 1.3 2008/08/03 00:29:13 tai Exp $
+// $Id: StjTrackListReader.cxx,v 1.4 2008/08/04 06:10:47 tai Exp $
 #include "StjTrackListReader.h"
 
 #include <TTree.h>
+
+ClassImp(StjTrackListReader)
 
 StjTrackListReader::StjTrackListReader(TTree *tree)
  : _tree(tree)
