@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.15 2008/08/04 06:10:10 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.16 2008/08/04 20:47:39 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -49,7 +49,7 @@
 
 #include "StjJetListWriter.h"
 
-#include <StjTowerEnergyVariation.h>
+#include <StjTowerEnergyListVariation.h>
 
 #include <StjTowerEnergyCorrectionForTracks.h>
 
@@ -110,11 +110,11 @@ Int_t StJetMakerII::Init()
   _bemcCut2 = new StjTowerEnergyListCut();
   _bemcCut2->addCut(new StjTowerEnergyCutEnergy(0.0));
 
-  _energyVariationNull    = new StjTowerEnergyVariation(0);
-  _energyVariationPlus5   = new StjTowerEnergyVariation(0.05);
-  _energyVariationMinus5  = new StjTowerEnergyVariation(-0.05);
-  _energyVariationPlus10  = new StjTowerEnergyVariation(0.1);
-  _energyVariationMinus10 = new StjTowerEnergyVariation(-0.1);
+  _energyVariationNull    = new StjTowerEnergyListVariation(0);
+  _energyVariationPlus5   = new StjTowerEnergyListVariation(0.05);
+  _energyVariationMinus5  = new StjTowerEnergyListVariation(-0.05);
+  _energyVariationPlus10  = new StjTowerEnergyListVariation(0.1);
+  _energyVariationMinus10 = new StjTowerEnergyListVariation(-0.1);
 
   _fourCut = new StjFourVecListCut;
   _fourCut->addCut(new StjFourVecCutPt(0.2));

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMakerII.h,v 1.10 2008/08/03 00:26:17 tai Exp $
+// $Id: StJetMakerII.h,v 1.11 2008/08/04 20:47:39 tai Exp $
 #ifndef STJETMAKERII_H
 #define STJETMAKERII_H
 
@@ -25,7 +25,7 @@ class StjTowerEnergyListCut;
 class StjFourVecListCut;
 class StjTowerEnergyCorrectionForTracks;
 class StjRunJetFinder;
-class StjTowerEnergyVariation;
+class StjTowerEnergyListVariation;
 class StjJetListCut;
 
 class StJetMakerII : public StMaker {
@@ -40,7 +40,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.10 2008/08/03 00:26:17 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMakerII.h,v 1.11 2008/08/04 20:47:39 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -60,11 +60,11 @@ private:
 
   StjTowerEnergyCorrectionForTracks* _towerEnergyCorrectionForTracks;
 
-  StjTowerEnergyVariation* _energyVariationNull;
-  StjTowerEnergyVariation* _energyVariationPlus5; 
-  StjTowerEnergyVariation* _energyVariationMinus5;
-  StjTowerEnergyVariation* _energyVariationPlus10;
-  StjTowerEnergyVariation* _energyVariationMinus10;
+  StjTowerEnergyListVariation* _energyVariationNull;
+  StjTowerEnergyListVariation* _energyVariationPlus5; 
+  StjTowerEnergyListVariation* _energyVariationMinus5;
+  StjTowerEnergyListVariation* _energyVariationPlus10;
+  StjTowerEnergyListVariation* _energyVariationMinus10;
 
   StjRunJetFinder *_jetFinder;
   StjTrackTowerEnergyListToFourVecList _toP4;

@@ -1,12 +1,12 @@
-// $Id: StjTowerEnergyVariation.cxx,v 1.4 2008/08/04 06:10:26 tai Exp $
+// $Id: StjTowerEnergyListVariation.cxx,v 1.1 2008/08/04 20:47:42 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StjTowerEnergyVariation.h"
+#include "StjTowerEnergyListVariation.h"
 
-ClassImp(StjTowerEnergyVariation)
+ClassImp(StjTowerEnergyListVariation)
 
 using namespace std;
 
-StjTowerEnergyList StjTowerEnergyVariation::operator()(const StjTowerEnergyList &energyList)
+StjTowerEnergyList StjTowerEnergyListVariation::operator()(const StjTowerEnergyList &energyList)
 {
   StjTowerEnergyList ret;
 
@@ -18,7 +18,7 @@ StjTowerEnergyList StjTowerEnergyVariation::operator()(const StjTowerEnergyList 
 }
 
 
-StjTowerEnergy StjTowerEnergyVariation::vary(const StjTowerEnergy& energyDeposit)
+StjTowerEnergy StjTowerEnergyListVariation::vary(const StjTowerEnergy& energyDeposit)
 {
   StjTowerEnergy ret(energyDeposit);
   ret.energy *= (1.0 + _ratio);

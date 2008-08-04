@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyVariation.h,v 1.5 2008/08/04 06:10:26 tai Exp $
+// $Id: StjTowerEnergyListVariation.h,v 1.1 2008/08/04 20:47:42 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYVARIATION_H
 #define STJTOWERENERGYVARIATION_H
@@ -8,12 +8,12 @@
 
 #include "StjTowerEnergyList.h"
 
-class StjTowerEnergyVariation : public TObject {
+class StjTowerEnergyListVariation : public TObject {
 
 public:
-  StjTowerEnergyVariation(double ratio = 0.1)
+  StjTowerEnergyListVariation(double ratio = 0.1)
     : _ratio(ratio) { }
-  virtual ~StjTowerEnergyVariation() { }
+  virtual ~StjTowerEnergyListVariation() { }
   
   StjTowerEnergyList operator()(const StjTowerEnergyList& energyList);
 
@@ -23,7 +23,7 @@ private:
 
   double _ratio;
 
-  ClassDef(StjTowerEnergyVariation, 1)
+  ClassDef(StjTowerEnergyListVariation, 1)
 
 };
 
