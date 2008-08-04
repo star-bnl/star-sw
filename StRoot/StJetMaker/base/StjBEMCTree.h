@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCTree.h,v 1.4 2008/08/03 00:26:26 tai Exp $
+// $Id: StjBEMCTree.h,v 1.5 2008/08/04 00:55:27 tai Exp $
 #ifndef STJBEMCTREE_H
 #define STJBEMCTREE_H
 
@@ -30,6 +30,8 @@ private:
   const Int_t& _indexMinor;
 
   StjTowerEnergyListReader* _reader;
+
+  ClassDef(StjBEMCTree, 1)
 
 };
 

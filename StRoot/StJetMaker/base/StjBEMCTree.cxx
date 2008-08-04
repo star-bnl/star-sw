@@ -1,9 +1,11 @@
-// $Id: StjBEMCTree.cxx,v 1.3 2008/08/03 00:26:26 tai Exp $
+// $Id: StjBEMCTree.cxx,v 1.4 2008/08/04 00:55:26 tai Exp $
 #include "StjBEMCTree.h"
 
 #include "StjTowerEnergyListReader.h"
 
 #include <TTree.h>
+
+ClassImp(StjBEMCTree)
 
 StjBEMCTree::StjBEMCTree(TTree *tree,
 			       const Int_t& indexMajor, const Int_t& indexMinor,

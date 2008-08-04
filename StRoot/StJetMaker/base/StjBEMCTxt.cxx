@@ -1,4 +1,4 @@
-// $Id: StjBEMCTxt.cxx,v 1.3 2008/08/03 00:26:27 tai Exp $
+// $Id: StjBEMCTxt.cxx,v 1.4 2008/08/04 00:55:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjBEMCTxt.h"
 
@@ -9,6 +9,8 @@
 #include <TVector3.h>
 
 using namespace std;
+
+ClassImp(StjBEMCTxt)
 
 StjBEMCTxt::StjBEMCTxt(const char* path)
   : _currentEvent(-1)

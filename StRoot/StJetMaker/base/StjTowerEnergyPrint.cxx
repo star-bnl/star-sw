@@ -1,8 +1,10 @@
-// $Id: StjTowerEnergyPrint.cxx,v 1.3 2008/08/03 00:26:35 tai Exp $
+// $Id: StjTowerEnergyPrint.cxx,v 1.4 2008/08/04 00:55:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyPrint.h"
 
 #include <iostream>
+
+ClassImp(StjTowerEnergyPrint)
 
 using namespace std;
 
