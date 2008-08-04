@@ -6,6 +6,9 @@
 #include <StjTPCMuDst.h>
 #include <StjBEMCMuDst.h>
 #include <StjEEMCMuDst.h>
+#include <StjTPCNull.h>
+#include <StjBEMCNull.h>
+#include <StjEEMCNull.h>
 #include <StjTPCTree.h>
 #include <StjBEMCTree.h>
 

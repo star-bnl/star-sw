@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCTxt.h,v 1.4 2008/08/03 00:26:27 tai Exp $
+// $Id: StjBEMCTxt.h,v 1.5 2008/08/04 00:55:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJBEMCTXT_H
 #define STJBEMCTXT_H
@@ -23,6 +23,8 @@ private:
   long _currentEvent;
   std::string _oldLine;
   
+  ClassDef(StjBEMCTxt, 1)
+
 };
 
 #endif // STJBEMCTXT_H

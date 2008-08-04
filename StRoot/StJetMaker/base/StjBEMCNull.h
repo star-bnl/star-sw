@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCNull.h,v 1.1 2008/08/03 22:04:16 tai Exp $
+// $Id: StjBEMCNull.h,v 1.2 2008/08/04 00:55:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJBEMCNULL_H
 #define STJBEMCNULL_H
@@ -13,6 +13,8 @@ public:
   virtual ~StjBEMCNull() { }
 
   StjTowerEnergyList getEnergyList() { return StjTowerEnergyList(); }
+
+  ClassDef(StjBEMCNull, 1)
 
 };
 

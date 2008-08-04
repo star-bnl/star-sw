@@ -1,14 +1,17 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyList.h,v 1.4 2008/08/03 00:26:34 tai Exp $
+// $Id: StjTowerEnergyList.h,v 1.5 2008/08/04 00:55:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYLIST_H
 #define STJTOWERENERGYLIST_H
+
+#include <TObject.h>
 
 #include <vector>
 #include <ostream>
 #include <cmath>
 
-struct StjTowerEnergy {
+class StjTowerEnergy : public TObject {
+public:
   int            runNumber;
   int            eventId;
   int            detectorId; // 9: BEMC, 13: EEMC
@@ -24,6 +27,7 @@ struct StjTowerEnergy {
   float          pedestal;
   float          rms;
   int            status;     // 1 is good for BEMC. 0 is good for EEMC
+  ClassDef(StjTowerEnergy, 1)
 };
 
 typedef std::vector<StjTowerEnergy> StjTowerEnergyList;

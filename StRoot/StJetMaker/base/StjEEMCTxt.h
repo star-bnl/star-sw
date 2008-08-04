@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMCTxt.h,v 1.4 2008/08/03 00:26:27 tai Exp $
+// $Id: StjEEMCTxt.h,v 1.5 2008/08/04 00:55:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJEEMCTXT_H
 #define STJEEMCTXT_H
@@ -22,6 +22,8 @@ private:
   std::ifstream _dataFile;
   long _currentEvent;
   std::string _oldLine;
+
+  ClassDef(StjEEMCTxt, 1)
 
 };
 
