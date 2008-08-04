@@ -2,6 +2,8 @@
 
 #include <StjTowerEnergyListVariation.h>
 #include <StjTowerEnergyList.h>
+#include "StjTowerEnergyVariation.h"
+#include "StjTowerEnergyVariationEnergy.h"
 
 #include <iostream>
 #include <set>
@@ -27,9 +29,9 @@ void StjTowerEnergyListVariationTest::tearDown()
 
 void StjTowerEnergyListVariationTest::testEnergyPlus5()
 {
-  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(0.05);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation;
 
-  //  variation->addVariation(new StjTowerEnergyVariationEnergy(0.05));
+  variation->addVariation(new StjTowerEnergyVariationEnergy(0.05));
 
   StjTowerEnergyList listIn;
 
@@ -78,7 +80,9 @@ void StjTowerEnergyListVariationTest::testEnergyPlus5()
 
 void StjTowerEnergyListVariationTest::testEnergyMinus5()
 {
-  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(-0.05);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation;
+
+  variation->addVariation(new StjTowerEnergyVariationEnergy(-0.05));
 
   StjTowerEnergyList listIn;
 
@@ -107,7 +111,9 @@ void StjTowerEnergyListVariationTest::testEnergyMinus5()
 
 void StjTowerEnergyListVariationTest::testEnergyPlus10()
 {
-  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(0.1);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation;
+
+  variation->addVariation(new StjTowerEnergyVariationEnergy(0.1));
 
   StjTowerEnergyList listIn;
 
@@ -136,7 +142,9 @@ void StjTowerEnergyListVariationTest::testEnergyPlus10()
 
 void StjTowerEnergyListVariationTest::testEnergyMinus10()
 {
-  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(-0.1);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation;
+
+  variation->addVariation(new StjTowerEnergyVariationEnergy(-0.1));
 
   StjTowerEnergyList listIn;
 
@@ -166,7 +174,7 @@ void StjTowerEnergyListVariationTest::testEnergyMinus10()
 
 void StjTowerEnergyListVariationTest::testEnergyNull()
 {
-  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation(0);
+  StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation;
 
   StjTowerEnergyList listIn;
 

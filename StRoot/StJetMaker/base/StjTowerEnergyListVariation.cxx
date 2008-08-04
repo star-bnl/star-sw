@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyListVariation.cxx,v 1.1 2008/08/04 20:47:42 tai Exp $
+// $Id: StjTowerEnergyListVariation.cxx,v 1.2 2008/08/04 21:27:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyListVariation.h"
 
@@ -21,6 +21,10 @@ StjTowerEnergyList StjTowerEnergyListVariation::operator()(const StjTowerEnergyL
 StjTowerEnergy StjTowerEnergyListVariation::vary(const StjTowerEnergy& energyDeposit)
 {
   StjTowerEnergy ret(energyDeposit);
-  ret.energy *= (1.0 + _ratio);
+
+  for(VarList::iterator var = _varList.begin(); var != _varList.end(); ++var){
+    ret = (**var)(ret);
+  }
+
   return ret;
 }
