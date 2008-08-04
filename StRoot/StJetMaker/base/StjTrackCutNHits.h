@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutNHits.h,v 1.4 2008/08/03 00:26:37 tai Exp $
+// $Id: StjTrackCutNHits.h,v 1.5 2008/08/04 02:37:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTNHITS_H
 #define STJTRACKCUTNHITS_H
@@ -9,8 +9,8 @@
 class StjTrackCutNHits : public StjTrackCut {
 
 public:
-  StjTrackCutNHits(unsigned short min = 12,
-		unsigned short max = std::numeric_limits<unsigned short>::max())
+  StjTrackCutNHits(UShort_t min = 12,
+		   UShort_t max = kMaxUShort)
     : _min(min), _max(max) { }
   virtual ~StjTrackCutNHits() { }
 
@@ -25,8 +25,10 @@ public:
 
 private:
 
-  unsigned short _min;
-  unsigned short _max;
+  UShort_t _min;
+  UShort_t _max;
+
+  ClassDef(StjTrackCutNHits, 1)
 
 };
 

@@ -1,5 +1,9 @@
-// $Id: StjTowerEnergyCorrectionForTracks.cxx,v 1.3 2008/08/03 00:26:33 tai Exp $
+// $Id: StjTowerEnergyCorrectionForTracks.cxx,v 1.4 2008/08/04 02:37:22 tai Exp $
 #include "StjTowerEnergyCorrectionForTracks.h"
+
+#include <iostream>
+
+using namespace std;
 
 const int StjTowerEnergyCorrectionForTracks::mNOfBemcTowers;
 
@@ -36,16 +40,18 @@ StjTowerEnergyList StjTowerEnergyCorrectionForTracks::Do(const StjTowerEnergyLis
 
 void StjTowerEnergyCorrectionForTracks::countTracksOnBemcTower(const StjTrack& track)
 {
-  if(track.exitDetectorId == 9 && track.exitTowerId != 0)
+  if(track.exitDetectorId == 9 && track.exitTowerId != 0 && track.exitTowerId <= mNOfBemcTowers)
     mNtracksOnTower[track.exitTowerId]++;
 }
 
 double StjTowerEnergyCorrectionForTracks::correctBemcTowerEnergyForTracks_(double energy, int bemcTowerId, float eta, float phi)
 {
-    float theta=2.*atan(exp(-eta));
+  if(bemcTowerId > mNOfBemcTowers) return energy;
 
-    //do a quick correction for hadronic MIP eneryg deposition:
-    double MipE = 0.261*(1.+0.056*eta*eta)/sin(theta); //GeV
+  float theta=2.*atan(exp(-eta));
 
-    return energy - mNtracksOnTower[bemcTowerId]*MipE;
+  //do a quick correction for hadronic MIP eneryg deposition:
+  double MipE = 0.261*(1.+0.056*eta*eta)/sin(theta); //GeV
+
+  return energy - mNtracksOnTower[bemcTowerId]*MipE;
 }
