@@ -1,15 +1,17 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListCut.h,v 1.4 2008/08/03 00:26:37 tai Exp $
+// $Id: StjTrackListCut.h,v 1.5 2008/08/04 02:37:24 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLISTCUT_H
 #define STJTRACKLISTCUT_H
+
+#include <TObject.h>
 
 #include "StjTrackList.h"
 #include "StjTrackCut.h"
 
 #include <vector>
 
-class StjTrackListCut {
+class StjTrackListCut : public TObject {
 
 public:
 
@@ -30,6 +32,8 @@ private:
   bool shoudNotPass(const StjTrack& track);
 
   CutList _cutList;
+
+  ClassDef(StjTrackListCut, 1)
 
 };
 

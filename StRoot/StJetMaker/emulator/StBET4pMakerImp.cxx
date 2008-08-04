@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.4 2008/08/03 00:26:49 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.5 2008/08/04 02:37:28 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImp.h"
 
@@ -47,6 +47,7 @@ std::pair<StjTrackList, StjTowerEnergyList> StBET4pMakerImp::getTrackAndEnergyLi
   StjTowerEnergyList energyList;
   copy(bemcEnergyList.begin(), bemcEnergyList.end(), back_inserter(energyList));
   copy(eemcEnergyList.begin(), eemcEnergyList.end(), back_inserter(energyList));
+
 
   return pair<StjTrackList, StjTowerEnergyList>(trackList, energyList);
 }

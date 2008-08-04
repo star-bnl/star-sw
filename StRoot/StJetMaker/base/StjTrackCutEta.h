@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutEta.h,v 1.4 2008/08/03 00:26:36 tai Exp $
+// $Id: StjTrackCutEta.h,v 1.5 2008/08/04 02:37:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTETA_H
 #define STJTRACKCUTETA_H
@@ -25,6 +25,8 @@ private:
 
   double  _min;
   double  _max;
+
+  ClassDef(StjTrackCutEta, 1)
 
 };
 

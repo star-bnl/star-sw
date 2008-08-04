@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutPossibleHitRatio.h,v 1.4 2008/08/03 00:26:37 tai Exp $
+// $Id: StjTrackCutPossibleHitRatio.h,v 1.5 2008/08/04 02:37:24 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTPOSSIBLEHITRATIO_H
 #define STJTRACKCUTPOSSIBLEHITRATIO_H
@@ -23,6 +23,8 @@ public:
 private:
 
   double  _minRatio;
+
+  ClassDef(StjTrackCutPossibleHitRatio, 1)
 
 };
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutFlag.h,v 1.4 2008/08/03 00:26:36 tai Exp $
+// $Id: StjTrackCutFlag.h,v 1.5 2008/08/04 02:37:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTFLAG_H
 #define STJTRACKCUTFLAG_H
@@ -9,8 +9,8 @@
 class StjTrackCutFlag : public StjTrackCut {
 
 public:
-  StjTrackCutFlag(short min = 0,
-	       short max = std::numeric_limits<short>::max())
+  StjTrackCutFlag(Short_t min = 0,
+		  Short_t max = kMaxShort)
     : _min(min), _max(max) { }
   virtual ~StjTrackCutFlag() { }
 
@@ -25,8 +25,10 @@ public:
 
 private:
 
-  short _min;
-  short _max;
+  Short_t _min;
+  Short_t _max;
+
+  ClassDef(StjTrackCutFlag, 1)
 
 };
 
