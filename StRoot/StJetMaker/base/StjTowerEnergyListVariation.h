@@ -1,30 +1,39 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyListVariation.h,v 1.1 2008/08/04 20:47:42 tai Exp $
+// $Id: StjTowerEnergyListVariation.h,v 1.2 2008/08/04 21:27:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJTOWERENERGYVARIATION_H
-#define STJTOWERENERGYVARIATION_H
+#ifndef STJTOWERENERGYLISTVARIATION_H
+#define STJTOWERENERGYLISTVARIATION_H
 
 #include <TObject.h>
 
 #include "StjTowerEnergyList.h"
+#include "StjTowerEnergyVariation.h"
+
+#include <vector>
 
 class StjTowerEnergyListVariation : public TObject {
 
 public:
-  StjTowerEnergyListVariation(double ratio = 0.1)
-    : _ratio(ratio) { }
+  StjTowerEnergyListVariation() { }
   virtual ~StjTowerEnergyListVariation() { }
   
   StjTowerEnergyList operator()(const StjTowerEnergyList& energyList);
+
+  void addVariation(StjTowerEnergyVariation* var) {
+    _varList.push_back(var);
+  }
+
+  typedef std::vector<StjTowerEnergyVariation*> VarList;
+  VarList getVariationList() { return _varList; }
 
 private:
 
   StjTowerEnergy vary(const StjTowerEnergy& deposit);
 
-  double _ratio;
+  VarList _varList;
 
   ClassDef(StjTowerEnergyListVariation, 1)
 
 };
 
-#endif // STJTOWERENERGYVARIATION_H
+#endif // STJTOWERENERGYLISTVARIATION_H
