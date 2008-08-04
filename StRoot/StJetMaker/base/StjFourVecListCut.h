@@ -1,14 +1,16 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecListCut.h,v 1.4 2008/08/03 00:26:28 tai Exp $
+// $Id: StjFourVecListCut.h,v 1.5 2008/08/04 06:10:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJFOURVECLISTCUT_H
 #define STJFOURVECLISTCUT_H
+
+#include <TObject.h>
 
 #include "StjFourVecCut.h"
 
 #include "StjFourVecList.h"
 
-class StjFourVecListCut {
+class StjFourVecListCut : public TObject {
 
 public:
   StjFourVecListCut() { }
@@ -28,6 +30,8 @@ private:
   bool shouldNotKeep(const StjFourVec& p4);
 
   CutList _cutList;
+
+  ClassDef(StjFourVecListCut, 1)
 
 };
 

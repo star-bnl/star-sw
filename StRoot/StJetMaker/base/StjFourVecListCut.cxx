@@ -1,6 +1,8 @@
-// $Id: StjFourVecListCut.cxx,v 1.3 2008/08/03 00:26:28 tai Exp $
+// $Id: StjFourVecListCut.cxx,v 1.4 2008/08/04 06:10:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecListCut.h"
+
+ClassImp(StjFourVecListCut)
 
 using namespace std;
 

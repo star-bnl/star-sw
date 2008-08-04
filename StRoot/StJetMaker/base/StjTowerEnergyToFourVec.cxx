@@ -1,9 +1,11 @@
-// $Id: StjTowerEnergyToFourVec.cxx,v 1.3 2008/08/03 00:26:35 tai Exp $
+// $Id: StjTowerEnergyToFourVec.cxx,v 1.4 2008/08/04 06:10:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyToFourVec.h"
 
 #include "StjTowerEnergyList.h"
 #include "StjFourVecList.h"
+
+ClassImp(StjTowerEnergyToFourVec)
 
 StjFourVec StjTowerEnergyToFourVec::operator()(const StjTowerEnergy& towerEnergy)
 {

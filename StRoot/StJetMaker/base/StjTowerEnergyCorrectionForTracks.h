@@ -1,12 +1,14 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCorrectionForTracks.h,v 1.4 2008/08/03 00:26:33 tai Exp $
+// $Id: StjTowerEnergyCorrectionForTracks.h,v 1.5 2008/08/04 06:10:26 tai Exp $
 #ifndef STJTOWERENERGYCORRECTIONFORTRACKS_H
 #define STJTOWERENERGYCORRECTIONFORTRACKS_H
+
+#include <TObject.h>
 
 #include "StjTowerEnergyList.h"
 #include "StjTrackList.h"
 
-class StjTowerEnergyCorrectionForTracks {
+class StjTowerEnergyCorrectionForTracks : public TObject {
 
 public:
   StjTowerEnergyCorrectionForTracks() { }
@@ -26,6 +28,8 @@ private:
   static const int mNOfBemcTowers = 4800;
 
   int mNtracksOnTower[mNOfBemcTowers + 1]; // indexed form [1,4800] (number of tracks incident on this tower)
+
+  ClassDef(StjTowerEnergyCorrectionForTracks, 1)
 
 };
 

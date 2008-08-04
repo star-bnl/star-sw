@@ -1,7 +1,9 @@
-// $Id: StjTowerEnergyCorrectionForTracks.cxx,v 1.4 2008/08/04 02:37:22 tai Exp $
+// $Id: StjTowerEnergyCorrectionForTracks.cxx,v 1.5 2008/08/04 06:10:26 tai Exp $
 #include "StjTowerEnergyCorrectionForTracks.h"
 
 #include <iostream>
+
+ClassImp(StjTowerEnergyCorrectionForTracks)
 
 using namespace std;
 

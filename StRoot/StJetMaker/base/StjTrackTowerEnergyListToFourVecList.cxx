@@ -1,8 +1,10 @@
-// $Id: StjTrackTowerEnergyListToFourVecList.cxx,v 1.3 2008/08/03 00:26:38 tai Exp $
+// $Id: StjTrackTowerEnergyListToFourVecList.cxx,v 1.4 2008/08/04 06:10:27 tai Exp $
 #include "StjTrackTowerEnergyListToFourVecList.h"
 
 #include "StjTrackToFourVec.h"
 #include "StjTowerEnergyToFourVec.h"
+
+ClassImp(StjTrackTowerEnergyListToFourVecList)
 
 StjFourVecList StjTrackTowerEnergyListToFourVecList::operator()(const std::pair<StjTrackList, StjTowerEnergyList>& inList)
 {

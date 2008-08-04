@@ -1,10 +1,12 @@
-// $Id: StjTowerEnergyListWriter.cxx,v 1.3 2008/08/03 00:29:13 tai Exp $
+// $Id: StjTowerEnergyListWriter.cxx,v 1.4 2008/08/04 06:10:46 tai Exp $
 #include "StjTowerEnergyListWriter.h"
 
 #include <TDirectory.h>
 #include <TTree.h>
 
 #include <iostream>
+
+ClassImp(StjTowerEnergyListWriter)
 
 using namespace std;
 

@@ -1,15 +1,18 @@
 // -*- mode: c++;-*-
-// $Id: StjJetList.h,v 1.4 2008/08/03 00:26:29 tai Exp $
+// $Id: StjJetList.h,v 1.5 2008/08/04 06:10:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETLIST_H
 #define STJJETLIST_H
+
+#include <TObject.h>
 
 #include "StjFourVecList.h"
 
 #include <ostream>
 #include <vector>
 
-struct StjJet {
+class StjJet : public TObject {
+public:
   int            runNumber;
   int            eventId;
   int            jetId;
@@ -20,6 +23,7 @@ struct StjJet {
   double         vertexZ;
   double         detectorEta;
   StjFourVecList    fourVecList;
+  ClassDef(StjJet, 1)
 };
 
 typedef std::vector<StjJet> StjJetList;

@@ -1,8 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjRunJetFinder.h,v 1.1 2008/08/03 00:28:59 tai Exp $
+// $Id: StjRunJetFinder.h,v 1.2 2008/08/04 06:10:35 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef RUNJETFINDER_H
 #define RUNJETFINDER_H
+
+#include <TObject.h>
 
 #include <StJetFinder/StProtoJet.h>
 
@@ -12,20 +14,22 @@
 class StJetPars;
 class StJetFinder;
 
-class StjRunJetFinder {
+class StjRunJetFinder : public TObject {
 
 public:
 
-  StjRunJetFinder(StJetPars* jp); 
+  StjRunJetFinder() { }
   virtual ~StjRunJetFinder() { }
 
-  void Init();
+  void Init(StJetPars* pars);
 
   StjJetList operator()(const StjFourVecList& fourList);
 
 private:
 
   StJetFinder* _jetFinder;
+
+  ClassDef(StjRunJetFinder, 1)
 
 };
 

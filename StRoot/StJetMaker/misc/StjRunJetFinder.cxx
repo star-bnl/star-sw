@@ -1,4 +1,4 @@
-// $Id: StjRunJetFinder.cxx,v 1.1 2008/08/03 00:28:59 tai Exp $
+// $Id: StjRunJetFinder.cxx,v 1.2 2008/08/04 06:10:35 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjRunJetFinder.h"
 
@@ -11,14 +11,13 @@
 
 #include <iostream>
 
+ClassImp(StjRunJetFinder)
+
 using namespace std;
 
-StjRunJetFinder::StjRunJetFinder(StJetPars* pars)
-  : _jetFinder(pars->constructJetFinder())
-{ }
-
-void StjRunJetFinder::Init()
+void StjRunJetFinder::Init(StJetPars* pars)
 {
+  _jetFinder = pars->constructJetFinder();
   _jetFinder->Init();
 }
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutNFourVecs.h,v 1.4 2008/08/03 00:26:29 tai Exp $
+// $Id: StjJetCutNFourVecs.h,v 1.5 2008/08/04 06:10:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTNFOURVECS_H
 #define STJJETCUTNFOURVECS_H
@@ -9,7 +9,7 @@
 class StjJetCutNFourVecs : public StjJetCut {
 
 public:
-  StjJetCutNFourVecs(size_t min = 0, size_t max = std::numeric_limits<size_t>::max())
+  StjJetCutNFourVecs(size_t min = 0, size_t max = 60000)
     :_min(min), _max(max) { }
   virtual ~StjJetCutNFourVecs() { }
 
@@ -26,6 +26,8 @@ private:
 
   size_t  _min;
   size_t  _max;
+
+  ClassDef(StjJetCutNFourVecs, 1)
 
 };
 

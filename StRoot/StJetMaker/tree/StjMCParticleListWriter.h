@@ -1,7 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleListWriter.h,v 1.4 2008/08/03 00:29:12 tai Exp $
+// $Id: StjMCParticleListWriter.h,v 1.5 2008/08/04 06:10:46 tai Exp $
 #ifndef STJMCPARTICLELISTWRITER_H
 #define STJMCPARTICLELISTWRITER_H
+
+#include <TObject.h>
 
 #include "StjMCParticleList.h"
 #include <Rtypes.h>
@@ -9,7 +11,7 @@
 class TDirectory;
 class TTree;
 
-class StjMCParticleListWriter {
+class StjMCParticleListWriter : public TObject {
 
 public:
 
@@ -40,6 +42,8 @@ private:
   Double_t _e[4096];
   Int_t    _status[4096]; // 1: stable  2: unstable  3: incoming and parton
   Double_t _vertexZ;
+  ClassDef(StjMCParticleListWriter, 1)
+
 };
 
 #endif // STJMCPARTICLELISTWRITER_H

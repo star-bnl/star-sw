@@ -1,15 +1,17 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListReader.h,v 1.4 2008/08/03 00:29:13 tai Exp $
+// $Id: StjTrackListReader.h,v 1.5 2008/08/04 06:10:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLISTREADER_H
 #define STJTRACKLISTREADER_H
+
+#include <TObject.h>
 
 #include "StjTrackList.h"
 #include <Rtypes.h>
 
 class TTree;
 
-class StjTrackListReader {
+class StjTrackListReader : public TObject {
 
 public:
   StjTrackListReader(TTree *tree);
@@ -48,6 +50,8 @@ private:
   Double_t _dEdx[4096];
   Int_t    _trackIndex[4096];
   Short_t  _trackId[4096];
+
+  ClassDef(StjTrackListReader, 1)
 
 };
 

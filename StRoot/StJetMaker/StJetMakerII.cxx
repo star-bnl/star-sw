@@ -1,4 +1,4 @@
-// $Id: StJetMakerII.cxx,v 1.14 2008/08/03 00:26:17 tai Exp $
+// $Id: StJetMakerII.cxx,v 1.15 2008/08/04 06:10:10 tai Exp $
 #include "StJetMakerII.h"
 
 #include <StJetFinder/StJetPars.h>
@@ -130,8 +130,8 @@ Int_t StJetMakerII::Init()
   cpars->setRequireStableMidpoints(true);
   cpars->setDoSplitMerge(true);
   cpars->setDebug(false);
-  _jetFinder = new StjRunJetFinder(cpars);
-  _jetFinder->Init();
+  _jetFinder = new StjRunJetFinder();
+  _jetFinder->Init(cpars);
 
   _jetCut = new StjJetListCut();
   _jetCut->addCut(new StjJetCutPt(5.0));

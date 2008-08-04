@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleCutEtaForStatus.h,v 1.4 2008/08/03 00:26:31 tai Exp $
+// $Id: StjMCParticleCutEtaForStatus.h,v 1.5 2008/08/04 06:10:24 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJMCPARTICLECUTETAFORSTATUS_H
 #define STJMCPARTICLECUTETAFORSTATUS_H
@@ -30,6 +30,8 @@ private:
   double  _max;
 
   int _status;
+
+  ClassDef(StjMCParticleCutEtaForStatus, 1)
 
 };
 

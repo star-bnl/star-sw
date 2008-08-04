@@ -1,8 +1,10 @@
-// $Id: StjJetPrint.cxx,v 1.3 2008/08/03 00:26:30 tai Exp $
+// $Id: StjJetPrint.cxx,v 1.4 2008/08/04 06:10:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetPrint.h"
 
 #include <iostream>
+
+ClassImp(StjJetPrint)
 
 using namespace std;
 
