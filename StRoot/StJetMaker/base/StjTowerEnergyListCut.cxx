@@ -1,6 +1,8 @@
-// $Id: StjTowerEnergyListCut.cxx,v 1.3 2008/08/03 00:26:34 tai Exp $
+// $Id: StjTowerEnergyListCut.cxx,v 1.4 2008/08/04 02:48:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyListCut.h"
+
+ClassImp(StjTowerEnergyListCut)
 
 using namespace std;
 

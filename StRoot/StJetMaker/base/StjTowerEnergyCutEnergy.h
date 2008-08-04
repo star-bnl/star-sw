@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutEnergy.h,v 1.4 2008/08/03 00:26:34 tai Exp $
+// $Id: StjTowerEnergyCutEnergy.h,v 1.5 2008/08/04 02:48:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYCUTENERGY_H
 #define STJTOWERENERGYCUTENERGY_H
@@ -9,7 +9,7 @@
 class StjTowerEnergyCutEnergy : public StjTowerEnergyCut {
 
 public:
-  StjTowerEnergyCutEnergy(double min = 0, double max = std::numeric_limits<double>::max())
+  StjTowerEnergyCutEnergy(double min = 0, double max = 50000.0)
     : _min(min), _max(max) { }
   virtual ~StjTowerEnergyCutEnergy() { }
 
@@ -26,6 +26,9 @@ private:
 
   double _min;
   double _max;
+
+  ClassDef(StjTowerEnergyCutEnergy, 1)
+
 };
 
 #endif // STJTOWERENERGYCUTENERGY_H

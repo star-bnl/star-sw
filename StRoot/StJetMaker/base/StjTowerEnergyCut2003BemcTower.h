@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCut2003BemcTower.h,v 1.4 2008/08/03 00:26:33 tai Exp $
+// $Id: StjTowerEnergyCut2003BemcTower.h,v 1.5 2008/08/04 02:48:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYCUT2003BEMCTOWER_H
 #define STJTOWERENERGYCUT2003BEMCTOWER_H
@@ -30,6 +30,8 @@ public:
 
 private:
   
+  ClassDef(StjTowerEnergyCut2003BemcTower, 1)
+
 };
 
 #endif // STJTOWERENERGYCUT2003BEMCTOWER_H

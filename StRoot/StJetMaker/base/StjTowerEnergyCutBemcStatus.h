@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutBemcStatus.h,v 1.4 2008/08/03 00:26:33 tai Exp $
+// $Id: StjTowerEnergyCutBemcStatus.h,v 1.5 2008/08/04 02:48:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYCUTBEMCSTATUS_H
 #define STJTOWERENERGYCUTBEMCSTATUS_H
@@ -23,6 +23,8 @@ public:
 private:
 
   int _goodStatus;
+  ClassDef(StjTowerEnergyCutBemcStatus, 1)
+
 };
 
 #endif // STJTOWERENERGYCUTBEMCSTATUS_H

@@ -1,12 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCutAdc.h,v 1.4 2008/08/03 00:26:33 tai Exp $
+// $Id: StjTowerEnergyCutAdc.h,v 1.5 2008/08/04 02:48:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYCUTADC_H
 #define STJTOWERENERGYCUTADC_H
 
 #include "StjTowerEnergyCut.h"
-
-namespace {
 
 class StjTowerEnergyCutAdc : public StjTowerEnergyCut {
 
@@ -28,8 +26,9 @@ private:
 
   int _min;
   double _factor;
-};
 
-}
+  ClassDef(StjTowerEnergyCutAdc, 1)
+
+};
 
 #endif // STJTOWERENERGYCUTADC_H
