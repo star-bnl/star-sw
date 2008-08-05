@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofINLCorr.cxx,v 1.3 2008/03/27 00:15:38 dongx Exp $
+ * $Id: StTofINLCorr.cxx,v 1.4 2008/08/05 19:36:48 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,8 +10,12 @@
  *****************************************************************
  *
  * $Log: StTofINLCorr.cxx,v $
+ * Revision 1.4  2008/08/05 19:36:48  dongx
+ * fixed a bug of empty lines in log file under no-debug mode
+ * LOGGER print corrected with an if statement
+ *
  * Revision 1.3  2008/03/27 00:15:38  dongx
- * Update for Run8 finished.
+ *  Update for Run8 finished.
  *
  * Revision 1.2  2007/11/22 00:04:13  dongx
  * - update for tof8++
@@ -104,13 +108,13 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
 
   numRows = tofINLCorr->GetNRows();
   if(numRows>mNTDIGMAX*mNChanOnTDIG) {
-    LOG_INFO << " !!! # of Rows in tofINLCorr table exceed the array limit in this function !!! Trancated !!! " << endm;
+    { LOG_INFO << " !!! # of Rows in tofINLCorr table exceed the array limit in this function !!! Trancated !!! " << endm; }
   }
   Int_t NTdig = 0;
   Int_t tdigId_old = 0;
   for (Int_t i=0;i<numRows;i++) {
     if(NTdig>mNTDIGMAX) {
-      LOG_INFO << " !!! # of boards read-in exceeds the array limit in this function !!! Trancated !!! " << endm;
+      { LOG_INFO << " !!! # of boards read-in exceeds the array limit in this function !!! Trancated !!! " << endm; }
       NTdig = mNTDIGMAX;
       break;
     }
@@ -124,7 +128,7 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
         
     tdigId_old = tdigId;
 
-    if(maker->Debug()) LOG_INFO << " tdigId=" << tdigId << "  tdcChanId=" << tdcChanId << endm;
+    if(maker->Debug()) { LOG_INFO << " tdigId=" << tdigId << "  tdcChanId=" << tdcChanId << endm; }
     for(Int_t j=0;j<mNChanMAX;j++) {
       float corr = (Float_t)(inlcorr[i].INLCorr[j]);
       mINLCorr[NTdig-1][tdcChanId][j] = corr;
@@ -133,7 +137,7 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
 	cout << " " << corr;
       }
     }
-    cout << endl;
+    if(maker->Debug()) cout << endl;
   }
 
   LOG_INFO << " Total # of boards read in : " << NTdig << endm;
@@ -144,7 +148,7 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
     if(boardId>0 && boardId<=mNBoardIdMAX) {
       mBoardId2Index[boardId] = i;
     } else {
-      LOG_INFO << " Warning! boardId " << boardId << " out of range!" << endm;
+      { LOG_INFO << " Warning! boardId " << boardId << " out of range!" << endm; }
     }
   }
 
