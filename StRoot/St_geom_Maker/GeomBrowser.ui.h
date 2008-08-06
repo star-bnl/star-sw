@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.32 2008/04/22 20:29:18 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.33 2008/08/06 01:24:46 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -26,6 +26,7 @@
 #endif
 
 #include <qcolordialog.h> 
+#include <qwhatsthis.h> 
 #include "TColor.h" 
 
 //_____________________________________________________________________________
@@ -70,6 +71,57 @@ static void RefreshCanvas(TQtWidget *w)
       if (savePad) savePad->cd(); 
    }
 }
+//________________________________________________________________
+static pair<QString,QString> MakeVolumeDsc(const QString &s) 
+{
+  // First 4  symbols are the string key
+  
+  QString key = s.left(4);
+  pair<QString, QString> volumeDiscriptor(key,s);
+  return volumeDiscriptor;
+}
+//________________________________________________________________
+static map<QString,QString> MakeVolumeMap(const QString &fileName)
+{
+    QFile file( fileName );
+    map<QString,QString> thisMap;
+    if ( file.open( IO_ReadOnly ) ) {
+        QTextStream stream( &file );
+        QString line;
+        while ( !stream.atEnd() ) {
+            line = stream.readLine(); // line of text excluding '\n'
+            thisMap.insert(MakeVolumeDsc(line));
+        }
+        file.close();
+    }
+    return thisMap;
+}
+
+//________________________________________________________________
+static const QString  &GetVolumeDescriptor(const QString &volumeName,bool richText=false)
+{
+   static bool first = true;
+   static map<QString,QString> volumeMap;
+   static QString dsc;
+   if (first) {
+      first = false;
+      TString helpFile = "volumes.txt";
+      const char *fullPath = gSystem->Which("./:./StDb/geometry:$STAR/StDb/geometry",helpFile);
+      if (fullPath) {
+        volumeMap = MakeVolumeMap(fullPath);
+      }
+      delete [] fullPath;  fullPath=0;
+   }
+   map<QString,QString>::iterator it;
+   it = volumeMap.find(volumeName);
+   if (it!=volumeMap.end())  {
+      dsc = richText ? "<p><b>" : "";
+      dsc += it->second;
+   } else dsc = "";
+   dsc.replace(" comment =",richText ? ":</b> ": ": ");
+   return dsc;
+}
+
 //_____________________________________________________________________________
 void GeomBrowser::fileNew()
 {
@@ -494,9 +546,12 @@ void GeomBrowser::listView1_onItem( QListViewItem *item )
          TVolume::ENodeSEEN s = ((TVolume *)obj)->GetVisibility();
          if ( s & TVolume::kThisUnvisible) m += "in";
          m += "visible volume: ";
+#if 0         
          const char *info = obj->GetObjectInfo(gPad->XtoPixel(0),gPad->YtoPixel(0));
          if (info) m += info;
-
+#else
+         m += GetVolumeDescriptor(obj->GetName());
+#endif
          statusBar()->message(m);            
       }
 #if 0      
@@ -533,6 +588,7 @@ void GeomBrowser::init()
 
    }
 #endif
+  QWhatsThis::whatsThisButton(geometry);
 #ifdef  NO_GEANT_MAKER
    comboBox2->setEnabled(FALSE);
    comboBox2->hide();
@@ -715,9 +771,9 @@ void GeomBrowser::listView1_clicked( QListViewItem *item )
             QString m = "The ";
             if ( s & TVolume::kThisUnvisible) m += "in";
             m += "visible volume: ";
-            m += obj->GetObjectInfo(gPad->XtoPixel(0),gPad->YtoPixel(0));
-
-            statusBar()->message(m);           
+            const char *info = obj->GetObjectInfo(gPad->XtoPixel(0),gPad->YtoPixel(0));
+            if (info) m += info;
+            statusBar()->message(m);            
 
             // adjust 1 level view
             if (item == item->listView()->selectedItem() ) 
@@ -726,6 +782,8 @@ void GeomBrowser::listView1_clicked( QListViewItem *item )
             // adjust multi-level  view
             if (fCurrentDrawn) RefreshCanvas(tQtWidget1);
          }
+         QWhatsThis::display(GetVolumeDescriptor(volume->GetName(),true)
+               , QCursor::pos()+QPoint(100,0));
       }
    }
 }
