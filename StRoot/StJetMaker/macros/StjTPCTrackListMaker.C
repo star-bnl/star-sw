@@ -14,6 +14,9 @@ public:
   : StMaker(name), _file(file), _uDstMaker(uDstMaker) { }
   virtual ~StjTPCTrackListMaker() { }
 
+  const char* GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackListMaker.C,v 1.2 2008/08/06 05:49:52 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+
 private:
 
   TDirectory* _file;

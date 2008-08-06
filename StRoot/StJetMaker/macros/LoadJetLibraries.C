@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.8 2008/08/06 05:16:13 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.9 2008/08/06 05:49:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -334,6 +334,7 @@ void setIncludePath()
   path = "-I./StRoot/StJetMaker/emulator " + path;
   path = "-I./StRoot/StJetMaker/misc " + path;
   path = "-I./StRoot/StJetMaker/mudst " + path;
+  path = "-I./StRoot/StJetMaker/trigger " + path;
   path = "-I./StRoot/StJetMaker/tree " + path;
   path = "-I./StRoot " + path;
   path = TString("-I./.") + gSystem->Getenv("STAR_HOST_SYS") + "/include. " + path;
