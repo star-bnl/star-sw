@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.7 2008/08/03 23:04:11 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.8 2008/08/06 05:16:13 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -329,9 +329,14 @@ void setLibraryPath()
 void setIncludePath()
 {
   TString path(gSystem->GetIncludePath());
+  path = TString("-I/afs/rhic.bnl.gov/star/packages/") + gSystem->Getenv("STAR_VERSION") + "/." + gSystem->Getenv("STAR_HOST_SYS") + "/include " + path;
   path = "-I./StRoot/StJetMaker/base " + path;
+  path = "-I./StRoot/StJetMaker/emulator " + path;
+  path = "-I./StRoot/StJetMaker/misc " + path;
+  path = "-I./StRoot/StJetMaker/mudst " + path;
+  path = "-I./StRoot/StJetMaker/tree " + path;
   path = "-I./StRoot " + path;
-  path = "-I./.$STAR_HOST_SYS/include. " + path;
+  path = TString("-I./.") + gSystem->Getenv("STAR_HOST_SYS") + "/include. " + path;
   path = "-I. " + path;
   gSystem->SetIncludePath(path);
 }
