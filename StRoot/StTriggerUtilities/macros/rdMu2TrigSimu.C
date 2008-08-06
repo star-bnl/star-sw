@@ -2,7 +2,7 @@
 // This macro runs on real data (flagMC=0) and MC files (flagMC=1)
 // Set flag ==1 for those detectors you want included in the trigger decisions 
 // Set configuration for BEMC (online, offline or custom).  EEMC is the same for offline and online
-// Choose the correct configuration year you want to use for L2
+// Choose the correct configuration year if you want to use L2
 
 int total=0;
 class StChain *chain=0; 
@@ -16,7 +16,7 @@ void rdMu2TrigSimu(char *file="/star/institutions/mit/common/mudst/7136033/st_ph
   int useBemc=1; // 0/1 == Exclude/Include BEMC in Trigger Decisions 
   int useL2=1;   // 0/1 == Exclude/Include L2 in Trigger Decisions 
   int L2ConfigYear=2006; // possible: 2006, 2008
-  int bemcConfig=2; // Online==1, Offline==2, Expert==2
+  int bemcConfig=2; // Online==1, Offline==2, Expert==3
   int playConfig=0; // jan:100_199
   int emcEveDump=0; // extrating raw EMC data in a custom format
   int outputL2Histo=0;//output L2 histos to directory outL2
