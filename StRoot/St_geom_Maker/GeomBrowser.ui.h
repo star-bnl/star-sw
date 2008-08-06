@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.33 2008/08/06 01:24:46 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.34 2008/08/06 14:12:18 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -103,12 +103,20 @@ static const QString  &GetVolumeDescriptor(const QString &volumeName,bool richTe
    static bool first = true;
    static map<QString,QString> volumeMap;
    static QString dsc;
+   static bool errorMessage = false;// show it at once;
    if (first) {
       first = false;
       TString helpFile = "volumes.txt";
       const char *fullPath = gSystem->Which("./:./StDb/geometry:$STAR/StDb/geometry",helpFile);
       if (fullPath) {
         volumeMap = MakeVolumeMap(fullPath);
+      } else if (!errorMessage) {
+        errorMessage = true; // show it at once;
+        QMessageBox::critical(0
+              ,"STAR Geometry narrative description"
+              ,QString("No file <%1> file under %2 was found")
+                       .arg(helpFile.Data())
+                       .arg("./:./StDb/geometry:$STAR/StDb/geometry"));
       }
       delete [] fullPath;  fullPath=0;
    }
@@ -546,12 +554,13 @@ void GeomBrowser::listView1_onItem( QListViewItem *item )
          TVolume::ENodeSEEN s = ((TVolume *)obj)->GetVisibility();
          if ( s & TVolume::kThisUnvisible) m += "in";
          m += "visible volume: ";
-#if 0         
-         const char *info = obj->GetObjectInfo(gPad->XtoPixel(0),gPad->YtoPixel(0));
-         if (info) m += info;
-#else
-         m += GetVolumeDescriptor(obj->GetName());
-#endif
+         QString dsc= GetVolumeDescriptor(obj->GetName());
+         if (dsc.isEmpty() ) {
+            const char *info = obj->GetObjectInfo(gPad->XtoPixel(0),gPad->YtoPixel(0));
+            if (info) m += info;
+         } else {
+           m += dsc;
+         }
          statusBar()->message(m);            
       }
 #if 0      
@@ -782,8 +791,13 @@ void GeomBrowser::listView1_clicked( QListViewItem *item )
             // adjust multi-level  view
             if (fCurrentDrawn) RefreshCanvas(tQtWidget1);
          }
-         QWhatsThis::display(GetVolumeDescriptor(volume->GetName(),true)
-               , QCursor::pos()+QPoint(100,0));
+         QString dsc = GetVolumeDescriptor(volume->GetName(),true);
+         if (dsc.isEmpty()) {
+            dsc = QString("<p>No desciption was found for <b>%1</b><br>Edit the <code>volumes.txt</code> file")
+                          .arg(volume->GetName());
+         }
+         QWhatsThis::display(dsc, QCursor::pos()+QPoint(100,0)); 
+
       }
    }
 }
