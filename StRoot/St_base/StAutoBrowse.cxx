@@ -37,7 +37,7 @@ void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, co
   int ln = strcspn(name,"[ ");
   TString iname(name,ln);
   
-  G__ClassInfo *classInfo = kl->GetClassInfo();  	
+  G__ClassInfo *classInfo = (G__ClassInfo*) kl->GetClassInfo();  	
   if (!classInfo)		return;
   G__ClassInfo &cl = *classInfo;
 
