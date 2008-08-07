@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.159 2008/06/24 23:31:02 jeromel Exp $
+# $Id: Construct,v 1.158 2008/05/27 15:17:46 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -164,11 +164,9 @@ PrintHash($env,"\$env->{") if ($param::debug);
 my @packages = ();
 #find_PACKAGE(\&find_PACKAGE,"."); #print "Packages found: @packages\n";
 my @subdirs = ();
-
 # install includes
-my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/*/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg  StRoot/RTS/src/RTS_READER/.includes_for_export.flg";
+my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg  StRoot/RTS/src/RTS_READER/.includes_for_export.flg";
 @DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
-
 my @DirsIdlInc = glob "pams/*/idl pams/*/inc";
 print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
 foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
@@ -365,9 +363,6 @@ Export qw( env CWD INCLUDE LIB BIN BUILD OBJ);
 Default qw (   .  );
 
 Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";
-
-
-
 Build @Targets;
 #if ($env->{Packages}->{ROOT}->{RLIBMAP}) {
 #  # Create libraries map

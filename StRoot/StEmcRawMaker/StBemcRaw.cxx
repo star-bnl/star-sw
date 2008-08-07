@@ -1,6 +1,15 @@
 //
-// $Id: StBemcRaw.cxx,v 1.22 2008/06/12 13:25:32 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.25 2008/07/24 15:08:30 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.25  2008/07/24 15:08:30  mattheww
+// Minor bug fix and exception handling in setCheckStatus
+//
+// Revision 1.24  2008/07/23 23:53:24  mattheww
+// Changed default status check mode to off
+//
+// Revision 1.23  2008/07/03 20:58:49  mattheww
+// Added checking of every status table for each hit. Status table checks can be toggled using an option added to setCheckStatus. Also fixed a small bug.
+//
 // Revision 1.22  2008/06/12 13:25:32  mattheww
 // Added a check on the pedestal status in makeHit
 //
@@ -122,6 +131,9 @@ StBemcRaw::StBemcRaw():TObject()
         mControlADCtoE->CheckStatus[i]=status[i];
         mControlADCtoE->CheckCrate[i]=crate[i];
         mBarrelQAHisto[i] = 0;
+	for(int j = 0; j < 4; j++){
+	  mCheckStatus[i][j]=0;
+	}
     }
 
 }
@@ -631,20 +643,35 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
 
     if(mControlADCtoE->CheckStatus[det-1]==1)
     {
+      if(mCheckStatus[det-1][0]==1 && !mSaveAllStEvent){
         Int_t STATUS;
         mTables->getStatus(det,id,STATUS);
         if(STATUS!=STATUS_OK && !mSaveAllStEvent)
             return kStatus;
+      }
+      if(mCheckStatus[det-1][1]==1 && !mSaveAllStEvent){
+	Int_t pedSTATUS;
+	mTables->getStatus(det,id,pedSTATUS,"pedestal");
+	if(pedSTATUS!=STATUS_OK && !mSaveAllStEvent)return kStatus;
+      }
+      if(mCheckStatus[det-1][2]==1 && !mSaveAllStEvent){
+	Int_t calibSTATUS;
+	mTables->getStatus(det,id,calibSTATUS,"calib");
+        if(calibSTATUS!=STATUS_OK && !mSaveAllStEvent)return kStatus;
+      }
+      if(mCheckStatus[det-1][3]==1 && !mSaveAllStEvent){
+	Int_t gainSTATUS;
+	mTables->getStatus(det,id,gainSTATUS,"gain");
+	if(gainSTATUS!=STATUS_OK && !mSaveAllStEvent)return kStatus;
+      }
+
     }
 
     Float_t PEDESTAL = 0,RMS = 0;
+    mTables->getPedestal(det,id,CAP,PEDESTAL,RMS);
+
     if(mControlADCtoE->DeductPedestal[det-1]>0)
     {
-        Int_t STATUS;
-        mTables->getStatus(det,id,STATUS,"pedestal");
-	if(STATUS!=STATUS_OK)return kPed;
-
-        mTables->getPedestal(det,id,CAP,PEDESTAL,RMS);
         // do not consider hits wih capacitor number CAP1 and CAP2 for
         // PSD and SMD as valid hits
 	// for 2006 keep these hits by setting DeductPedestal == 2
@@ -654,7 +681,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
                 return kPed;
     }
 
-    if(mControlADCtoE->CutOffType[det-1]==1 && !mSaveAllStEvent) // pedestal cut
+    if(mControlADCtoE->CutOffType[det-1]==1 && !mSaveAllStEvent && mControlADCtoE->DeductPedestal[det-1] > 0) // pedestal cut
     {
         if(RMS<=0)
             return kRms;
@@ -718,4 +745,39 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
     hit->setCalibrationType(CAP);
     detector->addHit(hit);
     return kOK;
+}
+
+void StBemcRaw::setCheckStatus(Int_t det, Int_t flag, const char* option)
+{
+  //change the status if a particular option is chosen
+  if(!strcmp(option,"status")){
+    mCheckStatus[det][0]=flag;
+    return;
+  }
+  if(!strcmp(option,"pedestal")){
+    mCheckStatus[det][1]=flag;
+    return;
+  }
+  if(!strcmp(option,"calib")){
+    mCheckStatus[det][2]=flag;
+    return;
+  }
+  if(!strcmp(option,"gain")){
+    mCheckStatus[det][3]=flag;
+    return;
+  }
+
+  if(strcmp(option,"")){
+    LOG_WARN<<option<<" is not a valid option to setCheckStatus"<<endm;
+    return;
+  }
+
+  //if no options chosen, change all status flags
+  for(int i = 0; i < 4; i++){
+    mCheckStatus[det][i]=flag;
+  }
+
+  getControlTable()->CheckStatus[det] = flag;
+  return;
+
 }

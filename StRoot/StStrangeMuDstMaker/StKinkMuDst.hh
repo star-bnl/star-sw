@@ -49,6 +49,8 @@ public:
   Float_t  clParent()     const;       // Confidence level of parent
   Float_t  chi2Daughter() const;       // Chi square of daughter
   Float_t  clDaughter()   const;       // Confidence level of daughter
+  void     setParentBad();             // Set the parent as bad
+  void     setDaughterBad();           // Set the daughter as bad
   Float_t  dedxParent()   const;       // dE/dX of parent
   Float_t  dedxDaughter() const;       // dE/dX of daughter
   Float_t  errDedxParent()   const;    // Error on mean of dE/dX of parent
@@ -139,6 +141,8 @@ inline Float_t StKinkMuDst::chi2Parent()   const { return mChi2Parent; }
 inline Float_t StKinkMuDst::clParent()     const { return mClParent; }
 inline Float_t StKinkMuDst::chi2Daughter() const { return mChi2Daughter; }
 inline Float_t StKinkMuDst::clDaughter()   const { return mClDaughter; }
+inline void StKinkMuDst::setParentBad() { mChi2Parent = -TMath::Abs(mChi2Parent); }
+inline void StKinkMuDst::setDaughterBad() { mChi2Daughter = -TMath::Abs(mChi2Daughter); }
 inline Float_t StKinkMuDst::dedxParent()   const { return mDedxParent; }
 inline Float_t StKinkMuDst::dedxDaughter() const { return mDedxDaughter; }
 inline Float_t StKinkMuDst::errDedxParent()   const { return mErrDedxParent; }
@@ -157,8 +161,14 @@ inline UShort_t StKinkMuDst::keyDaughter() const { return mKeyDaughter; }
 
 
 /***********************************************************************
- * $Id: StKinkMuDst.hh,v 3.10 2005/03/17 05:02:20 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.12 2008/07/11 16:23:08 genevb Exp $
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.12  2008/07/11 16:23:08  genevb
+ * bad() won't work unless chi2 allows to return negative values
+ *
+ * Revision 3.11  2008/07/10 16:16:55  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.10  2005/03/17 05:02:20  genevb
  * Add StMuMomentumShiftMaker friend
  *

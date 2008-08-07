@@ -1,5 +1,11 @@
-// $Id: StHistUtil.cxx,v 2.45 2008/05/30 05:48:03 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.47 2008/07/10 21:25:08 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.47  2008/07/10 21:25:08  genevb
+// Add canvas-to-code output with .CC suffix
+//
+// Revision 2.46  2008/07/09 20:52:16  genevb
+// allow saving histograms to plain ROOT file
+//
 // Revision 2.45  2008/05/30 05:48:03  genevb
 // Add ability to write out histogram data to .C files
 //
@@ -149,6 +155,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Stsstream.h>
+#include "TFile.h"
 
 #include "PhysicalConstants.h"
 #include "TStyle.h"
@@ -258,7 +265,9 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
     else if (m_OutFileName.EndsWith(".svg")) m_OutType="svg";
     else if (m_OutFileName.EndsWith(".xpm")) m_OutType="xpm";
     else if (m_OutFileName.EndsWith(".png")) m_OutType="png";
-    else if (m_OutFileName.EndsWith("C")) m_OutType="C";
+    else if (m_OutFileName.EndsWith(".CC")) m_OutType="CC"; // Save canvases as code
+    else if (m_OutFileName.EndsWith(".C")) m_OutType="C"; // Save histograms as code
+    else if (m_OutFileName.EndsWith(".root")) m_OutType="root";
     else {
       LOG_INFO << "SetHistUtil::SetOutFile(): unknown type, assuming ps" << endm;
       m_OutType = "ps";
@@ -280,7 +289,10 @@ void StHistUtil::CloseOutFile() {
   m_HistCanvas->Update();
   if (!m_CurFileName.IsNull()) {
     if (m_OutMultiPage) m_CurFileName.Append(")");
-    m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
+    if (m_OutType.CompareTo("CC"))
+      m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
+    else
+      m_HistCanvas->SaveSource(m_CurFileName.Data());
   } else {
     LOG_INFO << "StHistUtil::CloseOutFile(): No output file" << endm;
   }
@@ -314,22 +326,23 @@ Bool_t StHistUtil::CheckOutFile(const Char_t *histName) {
   Int_t newPrefix = -1;
   StripPrefixes(histName,newPrefix);
 
-  if (newPrefix != m_CurPrefix) {
-    CloseOutFile();
-    m_CurPrefix = newPrefix;
+  if (newPrefix == m_CurPrefix) return kFALSE;
+
+  CloseOutFile();
+  m_CurPrefix = newPrefix;
+  if (m_OutType.CompareTo("C") && m_OutType.CompareTo("root")) {
     m_CurFileName = m_OutFileName;
     Ssiz_t insertPos = m_CurFileName.Last('.');
     if (insertPos<0) insertPos = m_CurFileName.Length();
     if (m_OutMultiPage) m_CurFileName.Append("(");
     else m_CurFileName.Insert(insertPos,"_");
     m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
-
-    Ldesc->Clear();
-    Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
-    Ldesc->AddText("Hists");
-    return kTRUE;
   }
-  return kFALSE;
+
+  Ldesc->Clear();
+  Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
+  Ldesc->AddText("Hists");
+  return kTRUE;
 }
 //_____________________________________________________________________________
 Int_t StHistUtil::DrawHists(Char_t *dirName) {
@@ -417,7 +430,13 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   TLatex latex;
 
   ofstream* C_ostr = 0;
-  if (!m_OutType.CompareTo("C")) C_ostr = new ofstream(m_OutFileName);
+  TFile* root_ofile = 0;
+  if (!m_OutType.CompareTo("C")) {
+    C_ostr = new ofstream(m_OutFileName);
+    (*C_ostr) << "   gSystem->Load(\"St_base\");" << endl;
+    (*C_ostr) << "   gSystem->Load(\"StUtilities\");" << endl;
+  } else if (!m_OutType.CompareTo("root"))
+     root_ofile = new TFile(m_OutFileName,"RECREATE");
 
   // function to fit FTPC radial step
   static TF1* fitFRS = 0;
@@ -452,6 +471,10 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             hobj->SavePrimitive(*C_ostr);
             continue;
           }
+          if (root_ofile) {
+            root_ofile->cd();
+            hobj->Write();
+          }
 
           // this histogram will actually be printed/drawn!!
           LOG_INFO << Form("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
@@ -467,8 +490,10 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             m_HistCanvas->Modified();
             m_HistCanvas->Update();
 	    if (Ipagenum>0 && !m_CurFileName.IsNull()) {
-	      m_HistCanvas->Print(m_CurFileName.Data(),
-	        m_OutType.Data());
+              if (m_OutType.CompareTo("CC"))
+	        m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
+              else
+                m_HistCanvas->SaveSource(m_CurFileName.Data());
 	      m_CurFileName.ReplaceAll("(",0); // doesn't hurt to do > once
             } else {
 	      m_HistCanvas->Draw();
@@ -650,6 +675,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   }
 
   if (C_ostr) delete C_ostr;
+  if (root_ofile) delete root_ofile;
 
   CloseOutFile();
   return histCounter;
