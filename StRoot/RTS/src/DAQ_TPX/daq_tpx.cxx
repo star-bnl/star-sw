@@ -283,22 +283,15 @@ int daq_tpx::InitRun(int run)
 	// offline setup: try our canonical location first
 	gain_algo->from_file("/RTS/conf/tpx/tpx_gains.txt",0) ;	// all sectors!
 
-	// if we have externally applied gains we will use them,
-	// otherwise we'll try to use them from the canonical location...
-	// look into "gains and set the found channels there
-	daq_dta *g = get("gain") ;
+	// look into "gains" and set the found channels there
+	daq_dta *g = get("gains") ;
 
-	LOG(DBG,"get(gain) returns %p",g) ;
-	if(g) {
-		LOG(TERR,"Using externally generated gains") ;
-		while(g->iterate()) {
-			LOG(DBG,"\tsec %d, row %d: %d",g->sec,g->row,g->ncontent) ;
-			for(u_int pad=1;pad<g->ncontent;pad++) {
-				LOG(DBG,"Gains: %d %d %d %f %f",g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
-				gain_algo->set_gains(g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
-			}
+	while(g && g->iterate()) {
+		for(u_int pad=1;pad<g->ncontent;pad++) {
+			gain_algo->set_gains(g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
 		}
 	}
+
 
 	
 	if(mode & m_Mode_DAQ_PED) {
@@ -389,12 +382,10 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 
 	// list created banks first...
 	if(strcasecmp(bank,"adc_sim")==0) {
-		if(adc_sim->store == 0) return 0 ;
 		adc_sim->rewind() ;
 		return adc_sim ;
 	}
 	else if(strcasecmp(bank,"gain")==0) {
-		if(gain->store == 0) return 0 ;	// not created!
 		gain->rewind() ;	// we want to use the bank...
 		return gain ;
 	}
@@ -1039,7 +1030,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 		if(fcf_algo[sim->sec]==0) {
 			LOG(NOTE,"No algo assigned for sector %d -- creating one!",sim->sec) ;
 			fcf_algo[sim->sec] = new tpxFCF ;
-			fcf_algo[sim->sec]->config(0x3F,1) ;	// assume all 6 RDOs; extra data + annotations
+			fcf_algo[sim->sec]->config(0x3F,3) ;	// assume all 6 RDOs; extra data + annotations
 
 			fcf_algo[sim->sec]->apply_gains(sim->sec,gain_algo) ;
 			fcf_algo[sim->sec]->start_evt() ;
@@ -1069,8 +1060,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			a.count++ ;
 		}
 
-
-		fcf_algo[sim->sec]->do_pad(&a, sim->sim_adc) ;
+		fcf_algo[sim->sec]->do_pad(&a, track_id) ;
 		LOG(DBG,"do_pad(): sec %d, row %d, pad %d: %d",sim->sec,a.row,a.pad,a.count) ;
 	}
 

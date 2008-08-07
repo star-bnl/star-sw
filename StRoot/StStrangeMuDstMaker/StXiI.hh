@@ -215,6 +215,10 @@ public:
   virtual Long_t  detectorIdXi() {return 0;}
   /// Detector ID for pars used in Xi finder
   virtual Long_t detectorIdPars() {return 0;}
+  /// Set the bachelor as bad
+  virtual void setBachelorBad() {}
+  /// Test whether any child is bad
+  virtual Bool_t bad() const {return (chi2Bachelor()<0 || StV0I::bad());}
   //@}
 
 
@@ -462,8 +466,11 @@ inline TVector3 StXiI::momXiFrame(Float_t m1, Float_t m2, StXiDaughter type) {
 
 
 /***********************************************************************
- * $Id: StXiI.hh,v 3.12 2003/10/26 06:06:01 genevb Exp $
+ * $Id: StXiI.hh,v 3.13 2008/07/10 16:16:55 genevb Exp $
  * $Log: StXiI.hh,v $
+ * Revision 3.13  2008/07/10 16:16:55  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.12  2003/10/26 06:06:01  genevb
  * Added checks for sqrt of neg. numbers
  *

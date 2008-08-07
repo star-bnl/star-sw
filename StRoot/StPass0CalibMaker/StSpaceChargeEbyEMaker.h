@@ -41,9 +41,10 @@ public:
           void   DoGaps() { doGaps = kTRUE; }
           void   DontReset() { doReset = kFALSE; }
           void   DoCalib() { Calibmode = kTRUE; DoQAmode(); DoNtuple(); }
+          float  EvalCalib(TDirectory* hdir=0);
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.7 2006/08/15 23:40:59 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.8 2008/07/15 22:30:39 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -158,8 +159,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.7 2006/08/15 23:40:59 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.8 2008/07/15 22:30:39 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.8  2008/07/15 22:30:39  genevb
+// Added evaluation of calibration performance
+//
 // Revision 1.7  2006/08/15 23:40:59  genevb
 // Averaging was done improperly in DontReset mode
 //

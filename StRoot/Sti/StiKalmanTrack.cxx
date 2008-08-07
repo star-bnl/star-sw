@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.111 2008/06/09 20:12:07 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.111 2008/06/09 20:12:07 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.112 2008/07/23 18:41:52 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.112 2008/07/23 18:41:52 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.112  2008/07/23 18:41:52  fisyak
+ * Remove 100 cm cut on hit radius to calculate DcaGeometry,,bug 1243, left after big step back
+ *
  * Revision 2.111  2008/06/09 20:12:07  perev
  * BigStepBack
  *
@@ -1026,8 +1029,6 @@ static int nCall=0; nCall++;
 
   StiKalmanTrackNode * innerMostHitNode = getInnerMostHitNode();
   if (!innerMostHitNode) 		return 0;
-  // track with hits in the outer portion of the TPC only are not considered
-  if (innerMostHitNode->getX()>100.) 	return 0;
 		
   StiHit localVertex = *vertex;
   sNode = getInnerMostNode();
