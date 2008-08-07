@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.539 2008/07/31 18:11:08 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.540 2008/08/07 19:53:53 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -626,6 +626,9 @@ Int_t StBFChain::Instantiate()
 	     << Form(" SetDAQFlag(%d) SetMode(%d) SetCorrection(%d) SetSequenceMerging(%d)",
 		     DMode,mk->GetMode(),Correction,SequenceMerging) << endm;
       ProcessLine(cmd);
+    }
+    if (maker == "StTpcRTSHitMaker") {
+      if (GetOption("Trs") || GetOption("Embedding"))  mk->SetMode(2); // daq, no gain
     }
     if (maker == "StRTSClientFCFMaker"){
       Int_t DMode=0;
