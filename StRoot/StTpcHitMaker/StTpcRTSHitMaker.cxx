@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.3 2008/07/31 20:45:28 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.4 2008/08/07 19:54:37 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -52,8 +52,16 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
       gain[0].gain = 0.0;	// kill pad0 just in case..
       
       for(int pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
-	gain[pad].gain = gStTpcDb->tpcGain()->Gain(sec,row,pad);
-	gain[pad].t0   = gStTpcDb->tpcT0()->T0(sec,row,pad);
+	if (m_Mode == 2) {
+	  if (gStTpcDb->tpcGain()->Gain(sec,row,pad) > 0) 
+	    gain[pad].gain = 1.;
+	  else 
+	    gain[pad].gain = .0;
+	  gain[pad].t0   = 0.;
+	} else {
+	  gain[pad].gain = gStTpcDb->tpcGain()->Gain(sec,row,pad);
+	  gain[pad].t0   = gStTpcDb->tpcT0()->T0(sec,row,pad);
+	}
       }
       dta->finalize(183,sec,row);
     }
