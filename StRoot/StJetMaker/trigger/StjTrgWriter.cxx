@@ -1,4 +1,4 @@
-// $Id: StjTrgWriter.cxx,v 1.2 2008/08/08 21:16:45 tai Exp $
+// $Id: StjTrgWriter.cxx,v 1.3 2008/08/08 22:53:19 tai Exp $
 #include "StjTrgWriter.h"
 
 #include "StjTrgMuDst.h"
@@ -15,7 +15,7 @@ void StjTrgWriter::Init()
 
 void StjTrgWriter::Make()
 {
-  if( !(*_fillCondition)() ) return;
+  if( !(*_fillCondition)(_trg) ) return;
   fillBranch_general();
   fillBranch_trgSpecific();
   _tree->Fill();
@@ -52,7 +52,7 @@ void StjTrgWriter::fillBranch_general()
 
   _soft = _trg->soft();
 
-  _passed = (*_passCondition)();
+  _passed = _trg->pass();
 
   _runNumber = _trg->runNumber();
 
