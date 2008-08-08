@@ -1,7 +1,7 @@
-// $Id: StjTrgWriter.cxx,v 1.1 2008/08/02 22:21:35 tai Exp $
+// $Id: StjTrgWriter.cxx,v 1.2 2008/08/08 21:16:45 tai Exp $
 #include "StjTrgWriter.h"
 
-#include "StjTrg.h"
+#include "StjTrgMuDst.h"
 
 #include <TDirectory.h>
 #include <TTree.h>

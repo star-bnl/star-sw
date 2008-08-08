@@ -1,24 +1,24 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgPassCondition.h,v 1.2 2008/08/02 22:43:43 tai Exp $
+// $Id: StjTrgPassCondition.h,v 1.3 2008/08/08 21:16:44 tai Exp $
 #ifndef STJTRGPASSCONDITION_H
 #define STJTRGPASSCONDITION_H
 
-#include "StjTrg.h"
+#include "StjTrgMuDst.h"
 
 class StjTrgPassCondition {
 public:
-  StjTrgPassCondition(StjTrg* trg)
+  StjTrgPassCondition(StjTrgMuDst* trg)
     : _trg(trg) { }
   virtual ~StjTrgPassCondition() { }
   virtual bool operator()() = 0;
 
 protected:
-  StjTrg* _trg;
+  StjTrgMuDst* _trg;
 };
 
 class StjTrgPassConditionHardAndSoft : public StjTrgPassCondition {
 public:
-  StjTrgPassConditionHardAndSoft(StjTrg* trg)
+  StjTrgPassConditionHardAndSoft(StjTrgMuDst* trg)
     : StjTrgPassCondition(trg) { }
   virtual ~StjTrgPassConditionHardAndSoft() { }
   bool operator()() 
@@ -30,7 +30,7 @@ public:
 
 class StjTrgPassConditionHardOrSoft : public StjTrgPassCondition {
 public:
-  StjTrgPassConditionHardOrSoft(StjTrg* trg)
+  StjTrgPassConditionHardOrSoft(StjTrgMuDst* trg)
     : StjTrgPassCondition(trg) { }
   virtual ~StjTrgPassConditionHardOrSoft() { }
   bool operator()() 
@@ -42,7 +42,7 @@ public:
 
 class StjTrgPassConditionHardOnly : public StjTrgPassCondition {
 public:
-  StjTrgPassConditionHardOnly(StjTrg* trg)
+  StjTrgPassConditionHardOnly(StjTrgMuDst* trg)
     : StjTrgPassCondition(trg) { }
   virtual ~StjTrgPassConditionHardOnly() { }
   bool operator()() 
@@ -54,7 +54,7 @@ public:
 
 class StjTrgPassConditionSoftOnly : public StjTrgPassCondition {
 public:
-  StjTrgPassConditionSoftOnly(StjTrg* trg)
+  StjTrgPassConditionSoftOnly(StjTrgMuDst* trg)
     : StjTrgPassCondition(trg) { }
   virtual ~StjTrgPassConditionSoftOnly() { }
   bool operator()() 

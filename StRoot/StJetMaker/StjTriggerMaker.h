@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTriggerMaker.h,v 1.3 2008/08/02 22:43:07 tai Exp $
+// $Id: StjTriggerMaker.h,v 1.4 2008/08/08 21:16:34 tai Exp $
 #ifndef STJTRIGGERMAKER_H
 #define STJTRIGGERMAKER_H
 
@@ -19,7 +19,7 @@ class StTriggerSimuMaker;
 
 class StjTrgSoftwareFactory;
 
-class StjTrg;
+class StjTrgMuDst;
 
 class StjTriggerMaker : public StMaker {
 
@@ -39,7 +39,7 @@ public:
 
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTriggerMaker.h,v 1.3 2008/08/02 22:43:07 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTriggerMaker.h,v 1.4 2008/08/08 21:16:34 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
