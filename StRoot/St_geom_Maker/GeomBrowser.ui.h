@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.34 2008/08/06 14:12:18 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.35 2008/08/08 18:31:29 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -796,7 +796,7 @@ void GeomBrowser::listView1_clicked( QListViewItem *item )
             dsc = QString("<p>No desciption was found for <b>%1</b><br>Edit the <code>volumes.txt</code> file")
                           .arg(volume->GetName());
          }
-         QWhatsThis::display(dsc, QCursor::pos()+QPoint(100,0)); 
+         // ???QWhatsThis::display(dsc, QCursor::pos()+QPoint(100,0)); 
 
       }
    }
