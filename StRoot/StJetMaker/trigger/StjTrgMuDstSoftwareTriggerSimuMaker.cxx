@@ -1,16 +1,16 @@
-// $Id: StjTrgSoftwareTriggerSimuMaker.cxx,v 1.1 2008/08/02 22:21:33 tai Exp $
+// $Id: StjTrgMuDstSoftwareTriggerSimuMaker.cxx,v 1.1 2008/08/08 23:12:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StjTrgSoftwareTriggerSimuMaker.h"
+#include "StjTrgMuDstSoftwareTriggerSimuMaker.h"
 
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
 
-bool StjTrgSoftwareTriggerSimuMaker::soft(int trgId)
+bool StjTrgMuDstSoftwareTriggerSimuMaker::soft(int trgId)
 {
   return _simuTrig->isTrigger(trgId);
 }
 
-std::vector<int> StjTrgSoftwareTriggerSimuMaker::towers(int trgId)
+std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::towers(int trgId)
 {
   StTriggerSimuResult trigResult = _simuTrig->detailedResult(trgId);
 
@@ -24,7 +24,7 @@ std::vector<int> StjTrgSoftwareTriggerSimuMaker::towers(int trgId)
   return ret;
 }
 
-std::vector<int> StjTrgSoftwareTriggerSimuMaker::jetPatches(int trgId)
+std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::jetPatches(int trgId)
 {
   StTriggerSimuResult trigResult = _simuTrig->detailedResult(trgId);
 
