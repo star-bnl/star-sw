@@ -1,4 +1,4 @@
-// $Id: StjTriggerMaker.cxx,v 1.3 2008/08/08 21:16:34 tai Exp $
+// $Id: StjTriggerMaker.cxx,v 1.4 2008/08/08 22:53:13 tai Exp $
 #include "StjTriggerMaker.h"
 
 #include "StjTrgPassCondition.h"
@@ -39,47 +39,47 @@ StjTriggerMaker::StjTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMa
 
 void StjTriggerMaker::addTrgMB(const char *treeName, const char* treeTitle, int trgId)
 {
-  StjTrgMuDst* trg = new StjTrgMuDst(trgId, _uDstMaker, _softTrgFactory->create());
   StjTrgPassCondition* fillCondition;
   StjTrgPassCondition* passCondition;
   if(_isMC) {
-    fillCondition = new StjTrgPassConditionSoftOnly(trg);
-    passCondition = new StjTrgPassConditionSoftOnly(trg);
+    fillCondition = new StjTrgPassConditionSoftOnly;
+    passCondition = new StjTrgPassConditionSoftOnly;
   } else {
-    fillCondition = new StjTrgPassConditionHardOnly(trg);
-    passCondition = new StjTrgPassConditionHardOnly(trg);
+    fillCondition = new StjTrgPassConditionHardOnly;
+    passCondition = new StjTrgPassConditionHardOnly;
   }
-  _writerList.push_back(new StjTrgMBWriter(treeTitle, treeTitle, _file, trg, fillCondition, passCondition));
+  StjTrgMuDst* trg = new StjTrgMuDst(trgId, passCondition, _uDstMaker, _softTrgFactory->create());
+  _writerList.push_back(new StjTrgMBWriter(treeTitle, treeTitle, _file, trg, fillCondition));
 }
 
 void StjTriggerMaker::addTrgHT(const char *treeName, const char* treeTitle, int trgId)
 {
-  StjTrgMuDst* trg = new StjTrgMuDst(trgId, _uDstMaker, _softTrgFactory->create());
   StjTrgPassCondition* fillCondition;
   StjTrgPassCondition* passCondition;
   if(_isMC) {
-    fillCondition = new StjTrgPassConditionSoftOnly(trg);
-    passCondition = new StjTrgPassConditionSoftOnly(trg);
+    fillCondition = new StjTrgPassConditionSoftOnly;
+    passCondition = new StjTrgPassConditionSoftOnly;
   } else {
-    fillCondition = new StjTrgPassConditionHardOrSoft(trg);
-    passCondition = new StjTrgPassConditionHardAndSoft(trg);
+    fillCondition = new StjTrgPassConditionHardOrSoft;
+    passCondition = new StjTrgPassConditionHardAndSoft;
   }
-  _writerList.push_back(new StjTrgHTWriter(treeTitle, treeTitle, _file, trg, fillCondition, passCondition));
+  StjTrgMuDst* trg = new StjTrgMuDst(trgId, passCondition, _uDstMaker, _softTrgFactory->create());
+  _writerList.push_back(new StjTrgHTWriter(treeTitle, treeTitle, _file, trg, fillCondition));
 }
 
 void StjTriggerMaker::addTrgJP(const char *treeName, const char* treeTitle, int trgId)
 {
-  StjTrgMuDst* trg = new StjTrgMuDst(trgId, _uDstMaker, _softTrgFactory->create());
   StjTrgPassCondition* fillCondition;
   StjTrgPassCondition* passCondition;
   if(_isMC) {
-    fillCondition = new StjTrgPassConditionSoftOnly(trg);
-    passCondition = new StjTrgPassConditionSoftOnly(trg);
+    fillCondition = new StjTrgPassConditionSoftOnly;
+    passCondition = new StjTrgPassConditionSoftOnly;
   } else {
-    fillCondition = new StjTrgPassConditionHardOrSoft(trg);
-    passCondition = new StjTrgPassConditionHardAndSoft(trg);
+    fillCondition = new StjTrgPassConditionHardOrSoft;
+    passCondition = new StjTrgPassConditionHardAndSoft;
   }
-  _writerList.push_back(new StjTrgJPWriter(treeTitle, treeTitle, _file, trg, fillCondition, passCondition));
+  StjTrgMuDst* trg = new StjTrgMuDst(trgId, passCondition, _uDstMaker, _softTrgFactory->create());
+  _writerList.push_back(new StjTrgJPWriter(treeTitle, treeTitle, _file, trg, fillCondition));
 }
 
 Int_t StjTriggerMaker::Init()

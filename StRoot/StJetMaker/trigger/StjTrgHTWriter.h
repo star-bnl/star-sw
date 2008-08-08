@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgHTWriter.h,v 1.3 2008/08/08 21:16:42 tai Exp $
+// $Id: StjTrgHTWriter.h,v 1.4 2008/08/08 22:53:18 tai Exp $
 #ifndef STJTRGHTWRITER_H
 #define STJTRGHTWRITER_H
 
@@ -19,10 +19,9 @@ class StjTrgHTWriter : public StjTrgWriter {
 public:
 
   StjTrgHTWriter(const char *treeName, const char* treeTitle,
-		   TDirectory* file, StjTrgMuDst* trg,
-		   StjTrgPassCondition* fillCondition,
-		   StjTrgPassCondition* passCondition)
-    : StjTrgWriter(treeName, treeTitle, file, trg, fillCondition, passCondition)
+		 TDirectory* file, StjTrgMuDst* trg,
+		 StjTrgPassCondition* fillCondition)
+    : StjTrgWriter(treeName, treeTitle, file, trg, fillCondition)
     , _trg(trg)
   { }
   virtual ~StjTrgHTWriter() { }

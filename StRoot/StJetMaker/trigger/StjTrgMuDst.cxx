@@ -1,5 +1,8 @@
-// $Id: StjTrgMuDst.cxx,v 1.1 2008/08/08 21:16:43 tai Exp $
+// $Id: StjTrgMuDst.cxx,v 1.2 2008/08/08 22:53:18 tai Exp $
 #include "StjTrgMuDst.h"
+
+#include "StjTrgSoftware.h"
+#include "StjTrgPassCondition.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 #include <StMuDSTMaker/COMMON/StMuDst.h>
@@ -21,14 +24,19 @@ int StjTrgMuDst::eventId()
   return _uDstMaker->muDst()->event()->eventId();
 }
 
-bool StjTrgMuDst::hard()
+bool StjTrgMuDst::hard() const
 {
   return _uDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(_trgId);
 }
 
-bool StjTrgMuDst::soft()
+bool StjTrgMuDst::soft() const
 {
   return _soft->soft(_trgId);
+}
+
+bool StjTrgMuDst::pass()
+{
+  return (*_passCondition)(this);
 }
 
 double StjTrgMuDst::prescale()

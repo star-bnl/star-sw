@@ -1,65 +1,58 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgPassCondition.h,v 1.3 2008/08/08 21:16:44 tai Exp $
+// $Id: StjTrgPassCondition.h,v 1.4 2008/08/08 22:53:19 tai Exp $
 #ifndef STJTRGPASSCONDITION_H
 #define STJTRGPASSCONDITION_H
 
-#include "StjTrgMuDst.h"
+#include "StjTrg.h"
 
 class StjTrgPassCondition {
 public:
-  StjTrgPassCondition(StjTrgMuDst* trg)
-    : _trg(trg) { }
+  StjTrgPassCondition() { }
   virtual ~StjTrgPassCondition() { }
-  virtual bool operator()() = 0;
+  virtual bool operator()(const StjTrg* trg) = 0;
 
-protected:
-  StjTrgMuDst* _trg;
 };
 
 class StjTrgPassConditionHardAndSoft : public StjTrgPassCondition {
 public:
-  StjTrgPassConditionHardAndSoft(StjTrgMuDst* trg)
-    : StjTrgPassCondition(trg) { }
+  StjTrgPassConditionHardAndSoft() { }
   virtual ~StjTrgPassConditionHardAndSoft() { }
-  bool operator()() 
+  bool operator()(const StjTrg* trg) 
   {
-    return (_trg->hard() && _trg->soft());
+    return (trg->hard() && trg->soft());
   }
 
 };
 
 class StjTrgPassConditionHardOrSoft : public StjTrgPassCondition {
 public:
-  StjTrgPassConditionHardOrSoft(StjTrgMuDst* trg)
-    : StjTrgPassCondition(trg) { }
+  StjTrgPassConditionHardOrSoft() { }
   virtual ~StjTrgPassConditionHardOrSoft() { }
-  bool operator()() 
+  bool operator()(const StjTrg* trg) 
   {
-    return (_trg->hard() || _trg->soft());
+    return (trg->hard() || trg->soft());
   }
 
 };
 
 class StjTrgPassConditionHardOnly : public StjTrgPassCondition {
 public:
-  StjTrgPassConditionHardOnly(StjTrgMuDst* trg)
-    : StjTrgPassCondition(trg) { }
+  StjTrgPassConditionHardOnly() { }
   virtual ~StjTrgPassConditionHardOnly() { }
-  bool operator()() 
+  bool operator()(const StjTrg* trg) 
   {
-    return (_trg->hard());
+    return (trg->hard());
   }
 
 };
 
 class StjTrgPassConditionSoftOnly : public StjTrgPassCondition {
 public:
-  StjTrgPassConditionSoftOnly(StjTrgMuDst* trg)
-    : StjTrgPassCondition(trg) { }
+  StjTrgPassConditionSoftOnly() { }
   virtual ~StjTrgPassConditionSoftOnly() { }
-  bool operator()() 
+  bool operator()(const StjTrg* trg) 
   {
-    return (_trg->soft());
+    return (trg->soft());
   }
 
 };
