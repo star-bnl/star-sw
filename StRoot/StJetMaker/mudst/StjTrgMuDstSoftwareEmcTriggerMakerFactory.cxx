@@ -1,4 +1,4 @@
-// $Id: StjTrgMuDstSoftwareEmcTriggerMakerFactory.cxx,v 1.1 2008/08/08 23:12:26 tai Exp $
+// $Id: StjTrgMuDstSoftwareEmcTriggerMakerFactory.cxx,v 1.1 2008/08/08 23:18:50 tai Exp $
 #include "StjTrgMuDstSoftwareEmcTriggerMakerFactory.h"
 
 #include "StjTrgMuDstSoftwareEmcTriggerMaker.h"

@@ -1,16 +1,19 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgPassCondition.h,v 1.4 2008/08/08 22:53:19 tai Exp $
+// $Id: StjTrgPassCondition.h,v 1.5 2008/08/08 23:18:59 tai Exp $
 #ifndef STJTRGPASSCONDITION_H
 #define STJTRGPASSCONDITION_H
 
+#include <TObject.h>
+
 #include "StjTrg.h"
 
-class StjTrgPassCondition {
+class StjTrgPassCondition : public TObject {
 public:
   StjTrgPassCondition() { }
   virtual ~StjTrgPassCondition() { }
   virtual bool operator()(const StjTrg* trg) = 0;
 
+  ClassDef(StjTrgPassCondition, 1)
 };
 
 class StjTrgPassConditionHardAndSoft : public StjTrgPassCondition {
@@ -22,6 +25,7 @@ public:
     return (trg->hard() && trg->soft());
   }
 
+  ClassDef(StjTrgPassConditionHardAndSoft, 1)
 };
 
 class StjTrgPassConditionHardOrSoft : public StjTrgPassCondition {
@@ -33,6 +37,7 @@ public:
     return (trg->hard() || trg->soft());
   }
 
+  ClassDef(StjTrgPassConditionHardOrSoft, 1)
 };
 
 class StjTrgPassConditionHardOnly : public StjTrgPassCondition {
@@ -44,6 +49,7 @@ public:
     return (trg->hard());
   }
 
+  ClassDef(StjTrgPassConditionHardOnly, 1)
 };
 
 class StjTrgPassConditionSoftOnly : public StjTrgPassCondition {
@@ -55,6 +61,7 @@ public:
     return (trg->soft());
   }
 
+  ClassDef(StjTrgPassConditionSoftOnly, 1)
 };
 
 #endif // STJTRGPASSCONDITION_H
