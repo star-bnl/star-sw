@@ -1,19 +1,21 @@
 // -*- mode: c++;-*-
-// $Id: StjTrg.h,v 1.2 2008/08/02 22:43:43 tai Exp $
-#ifndef STJTRG_H
-#define STJTRG_H
+// $Id: StjTrgMuDst.h,v 1.1 2008/08/08 21:16:44 tai Exp $
+#ifndef STJTRGMUDST_H
+#define STJTRGMUDST_H
+
+#include "StjTrg.h"
 
 #include "StjTrgSoftware.h"
 
 class StMuDstMaker;
 
-class StjTrg {
+class StjTrgMuDst : public StjTrg {
 
 public:
-  StjTrg(int trgId, StMuDstMaker* uDstMaker, StjTrgSoftware* soft)
+  StjTrgMuDst(int trgId, StMuDstMaker* uDstMaker, StjTrgSoftware* soft)
     : _trgId(trgId), _soft(soft), _uDstMaker(uDstMaker)
   { }
-  virtual ~StjTrg() { }
+  virtual ~StjTrgMuDst() { }
 
   int id() { return _trgId; }
 
@@ -34,7 +36,9 @@ private:
 
   StMuDstMaker* _uDstMaker;
 
+  ClassDef(StjTrgMuDst, 1)
+
 };
 
 
-#endif // STJTRG_H
+#endif // STJTRGMUDST_H

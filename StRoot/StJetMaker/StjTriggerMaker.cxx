@@ -1,15 +1,15 @@
-// $Id: StjTriggerMaker.cxx,v 1.2 2008/08/02 19:22:32 tai Exp $
+// $Id: StjTriggerMaker.cxx,v 1.3 2008/08/08 21:16:34 tai Exp $
 #include "StjTriggerMaker.h"
 
 #include "StjTrgPassCondition.h"
 
-#include "StjTrg.h"
+#include "StjTrgMuDst.h"
 
 #include "StjTrgJPWriter.h"
 #include "StjTrgHTWriter.h"
 #include "StjTrgMBWriter.h"
 
-#include "StjTrg.h"
+#include "StjTrgMuDst.h"
 
 #include "StjTrgSoftwareEmcTriggerMakerFactory.h"
 #include "StjTrgSoftwareTriggerSimuMakerFactory.h"
@@ -39,7 +39,7 @@ StjTriggerMaker::StjTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMa
 
 void StjTriggerMaker::addTrgMB(const char *treeName, const char* treeTitle, int trgId)
 {
-  StjTrg* trg = new StjTrg(trgId, _uDstMaker, _softTrgFactory->create());
+  StjTrgMuDst* trg = new StjTrgMuDst(trgId, _uDstMaker, _softTrgFactory->create());
   StjTrgPassCondition* fillCondition;
   StjTrgPassCondition* passCondition;
   if(_isMC) {
@@ -54,7 +54,7 @@ void StjTriggerMaker::addTrgMB(const char *treeName, const char* treeTitle, int 
 
 void StjTriggerMaker::addTrgHT(const char *treeName, const char* treeTitle, int trgId)
 {
-  StjTrg* trg = new StjTrg(trgId, _uDstMaker, _softTrgFactory->create());
+  StjTrgMuDst* trg = new StjTrgMuDst(trgId, _uDstMaker, _softTrgFactory->create());
   StjTrgPassCondition* fillCondition;
   StjTrgPassCondition* passCondition;
   if(_isMC) {
@@ -69,7 +69,7 @@ void StjTriggerMaker::addTrgHT(const char *treeName, const char* treeTitle, int 
 
 void StjTriggerMaker::addTrgJP(const char *treeName, const char* treeTitle, int trgId)
 {
-  StjTrg* trg = new StjTrg(trgId, _uDstMaker, _softTrgFactory->create());
+  StjTrgMuDst* trg = new StjTrgMuDst(trgId, _uDstMaker, _softTrgFactory->create());
   StjTrgPassCondition* fillCondition;
   StjTrgPassCondition* passCondition;
   if(_isMC) {

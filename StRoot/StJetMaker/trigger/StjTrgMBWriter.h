@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMBWriter.h,v 1.2 2008/08/02 22:43:43 tai Exp $
+// $Id: StjTrgMBWriter.h,v 1.3 2008/08/08 21:16:43 tai Exp $
 #ifndef STJTRGMBWRITER_H
 #define STJTRGMBWRITER_H
 
@@ -12,14 +12,14 @@ class TTree;
 
 #include <string>
 
-class StjTrg;
+class StjTrgMuDst;
 
 class StjTrgMBWriter : public StjTrgWriter {
 
 public:
 
   StjTrgMBWriter(const char *treeName, const char* treeTitle,
-		   TDirectory* file, StjTrg* trg,
+		   TDirectory* file, StjTrgMuDst* trg,
 		   StjTrgPassCondition* fillCondition,
 		   StjTrgPassCondition* passCondition)
     : StjTrgWriter(treeName, treeTitle, file, trg, fillCondition, passCondition)

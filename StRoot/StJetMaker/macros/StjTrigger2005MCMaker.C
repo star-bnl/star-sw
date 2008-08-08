@@ -2,13 +2,13 @@
 
 #include "StjTrgPassCondition.h"
 
-#include "StjTrg.h"
+#include "StjTrgMuDst.h"
 
 #include "StjTrgJPWriter.h"
 #include "StjTrgHTWriter.h"
 #include "StjTrgMBWriter.h"
 
-#include "StjTrg.h"
+#include "StjTrgMuDst.h"
 
 #include "StjTrgSoftwareEmcTriggerMakerFactory.h"
 #include "StjTrgSoftwareTriggerSimuMakerFactory.h"
@@ -30,7 +30,7 @@ public:
   virtual ~StjTrigger2005MCMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2005MCMaker.C,v 1.1 2008/08/06 06:36:27 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2005MCMaker.C,v 1.2 2008/08/08 21:16:38 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -49,27 +49,27 @@ public:
 
   Int_t Init()
   {
-    StjTrg* minbTrg = new StjTrg(96011, _uDstMaker, _softTrgFactory->create());
+    StjTrgMuDst* minbTrg = new StjTrgMuDst(96011, _uDstMaker, _softTrgFactory->create());
     StjTrgPassCondition* minbFillCondition = new StjTrgPassConditionSoftOnly(minbTrg);
     StjTrgPassCondition* minbPassCondition = new StjTrgPassConditionSoftOnly(minbTrg);
     _minbWriter = new StjTrgMBWriter("trgMINB", "trgMINB", _file, minbTrg, minbFillCondition, minbPassCondition);
 
-    StjTrg* bht1Trg = new StjTrg(96201, _uDstMaker, _softTrgFactory->create());
+    StjTrgMuDst* bht1Trg = new StjTrgMuDst(96201, _uDstMaker, _softTrgFactory->create());
     StjTrgPassCondition* bht1FillCondition = new StjTrgPassConditionSoftOnly(bht1Trg);
     StjTrgPassCondition* bht1PassCondition = new StjTrgPassConditionSoftOnly(bht1Trg);
     _bht1Writer = new StjTrgHTWriter("trgBHT1", "trgBHT1", _file, bht1Trg, bht1FillCondition, bht1PassCondition);
 
-    StjTrg* bht2Trg = new StjTrg(96211, _uDstMaker, _softTrgFactory->create());
+    StjTrgMuDst* bht2Trg = new StjTrgMuDst(96211, _uDstMaker, _softTrgFactory->create());
     StjTrgPassCondition* bht2FillCondition = new StjTrgPassConditionSoftOnly(bht2Trg);
     StjTrgPassCondition* bht2PassCondition = new StjTrgPassConditionSoftOnly(bht2Trg);
     _bht2Writer = new StjTrgHTWriter("trgBHT2", "trgBHT2", _file, bht2Trg, bht2FillCondition, bht2PassCondition);
 
-    StjTrg* bjp1Trg = new StjTrg(96221, _uDstMaker, _softTrgFactory->create());
+    StjTrgMuDst* bjp1Trg = new StjTrgMuDst(96221, _uDstMaker, _softTrgFactory->create());
     StjTrgPassCondition* bjp1FillCondition = new StjTrgPassConditionSoftOnly(bjp1Trg);
     StjTrgPassCondition* bjp1PassCondition = new StjTrgPassConditionSoftOnly(bjp1Trg);
     _bjp1Writer = new StjTrgJPWriter("trgBJP1", "trgBJP1", _file, bjp1Trg, bjp1FillCondition, bjp1PassCondition);
 
-    StjTrg* bjp2Trg = new StjTrg(96233, _uDstMaker, _softTrgFactory->create());
+    StjTrgMuDst* bjp2Trg = new StjTrgMuDst(96233, _uDstMaker, _softTrgFactory->create());
     StjTrgPassCondition* bjp2FillCondition = new StjTrgPassConditionSoftOnly(bjp2Trg);
     StjTrgPassCondition* bjp2PassCondition = new StjTrgPassConditionSoftOnly(bjp2Trg);
     _bjp2Writer = new StjTrgJPWriter("trgBJP2", "trgBJP2", _file, bjp2Trg, bjp2FillCondition, bjp2PassCondition);
