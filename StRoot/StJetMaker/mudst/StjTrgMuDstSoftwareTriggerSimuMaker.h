@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftwareTriggerSimuMaker.h,v 1.1 2008/08/08 23:12:26 tai Exp $
+// $Id: StjTrgMuDstSoftwareTriggerSimuMaker.h,v 1.1 2008/08/08 23:18:51 tai Exp $
 #ifndef STJTRGMUDSTSOFTWARETRIGGERSIMUMAKER_H
 #define STJTRGMUDSTSOFTWARETRIGGERSIMUMAKER_H
 

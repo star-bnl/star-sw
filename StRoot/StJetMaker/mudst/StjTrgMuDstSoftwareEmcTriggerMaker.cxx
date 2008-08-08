@@ -1,4 +1,4 @@
-// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.cxx,v 1.1 2008/08/08 23:12:25 tai Exp $
+// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.cxx,v 1.1 2008/08/08 23:18:49 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgMuDstSoftwareEmcTriggerMaker.h"
 
