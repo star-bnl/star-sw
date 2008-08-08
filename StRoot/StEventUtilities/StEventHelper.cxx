@@ -99,7 +99,7 @@ void StEventInspector::Inspect(TClass* kl, const char* tit , const char* name, c
   if (iName[1]=='P' && strcmp(iName,"fParent"       )==0) 	return;
   if (iName[0]=='G' && strcmp(iName,"G__virtualinfo")==0)	return;
 
-  G__ClassInfo *classInfo = kl->GetClassInfo();  	
+  G__ClassInfo *classInfo = (G__ClassInfo *)kl->GetClassInfo();  	
   if (!classInfo)		return;
   G__ClassInfo &cl = *classInfo;
 
