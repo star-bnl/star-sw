@@ -1,7 +1,7 @@
-// $Id: StjTrgMuDst.cxx,v 1.2 2008/08/08 22:53:18 tai Exp $
+// $Id: StjTrgMuDst.cxx,v 1.3 2008/08/08 23:12:24 tai Exp $
 #include "StjTrgMuDst.h"
 
-#include "StjTrgSoftware.h"
+#include "StjTrgMuDstSoftware.h"
 #include "StjTrgPassCondition.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>

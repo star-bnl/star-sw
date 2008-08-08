@@ -10,8 +10,8 @@
 
 #include "StjTrgMuDst.h"
 
-#include "StjTrgSoftwareEmcTriggerMakerFactory.h"
-#include "StjTrgSoftwareTriggerSimuMakerFactory.h"
+#include "StjTrgMuDstSoftwareEmcTriggerMakerFactory.h"
+#include "StjTrgMuDstSoftwareTriggerSimuMakerFactory.h"
 
 class StjTrigger2005MCMaker : public StMaker {
 
@@ -19,25 +19,25 @@ public:
 
   StjTrigger2005MCMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StEmcTriggerMaker* emcTrigMaker)
   : StMaker(name), _file(file), _uDstMaker(uDstMaker)
-  , _softTrgFactory(new StjTrgSoftwareEmcTriggerMakerFactory(emcTrigMaker))
+  , _softTrgFactory(new StjTrgMuDstSoftwareEmcTriggerMakerFactory(emcTrigMaker))
   { }
 
   StjTrigger2005MCMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StTriggerSimuMaker* simuTrig)
   : StMaker(name), _file(file), _uDstMaker(uDstMaker)
-  , _softTrgFactory(new StjTrgSoftwareTriggerSimuMakerFactory(simuTrig))
+  , _softTrgFactory(new StjTrgMuDstSoftwareTriggerSimuMakerFactory(simuTrig))
   { }
 
   virtual ~StjTrigger2005MCMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2005MCMaker.C,v 1.3 2008/08/08 22:53:16 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2005MCMaker.C,v 1.4 2008/08/08 23:12:21 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
   TDirectory* _file;
 
   StMuDstMaker* _uDstMaker;
-  StjTrgSoftwareFactory* _softTrgFactory;
+  StjTrgMuDstSoftwareFactory* _softTrgFactory;
 
   StjTrgWriter* _minbWriter;
   StjTrgWriter* _bht1Writer;
@@ -65,7 +65,7 @@ public:
     _bht2Writer = new StjTrgHTWriter("trgBHT2", "trgBHT2", _file, bht2Trg, bht2FillCondition);
 
     StjTrgPassCondition* bjp1PassCondition = new StjTrgPassConditionSoftOnly;
-    StjTrgMuDst* bjp1Trg = new StjTrgMuDst(96221, bjp1PassCondition _uDstMaker, _softTrgFactory->create());
+    StjTrgMuDst* bjp1Trg = new StjTrgMuDst(96221, bjp1PassCondition, _uDstMaker, _softTrgFactory->create());
     StjTrgPassCondition* bjp1FillCondition = new StjTrgPassConditionSoftOnly;
     _bjp1Writer = new StjTrgJPWriter("trgBJP1", "trgBJP1", _file, bjp1Trg, bjp1FillCondition);
 

@@ -1,15 +1,15 @@
-// $Id: StjTrgSoftwareEmcTriggerMaker.cxx,v 1.1 2008/08/02 22:21:32 tai Exp $
+// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.cxx,v 1.1 2008/08/08 23:12:25 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StjTrgSoftwareEmcTriggerMaker.h"
+#include "StjTrgMuDstSoftwareEmcTriggerMaker.h"
 
 #include <StEmcTriggerMaker/StEmcTriggerMaker.h>
 
-bool StjTrgSoftwareEmcTriggerMaker::soft(int trgId)
+bool StjTrgMuDstSoftwareEmcTriggerMaker::soft(int trgId)
 {
   return _emcTrigMaker->isTrigger(trgId);
 }
 
-std::vector<int> StjTrgSoftwareEmcTriggerMaker::towers(int trgId)
+std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::towers(int trgId)
 {
   std::vector<int> ret;
   std::map<int,int> towerMap = _emcTrigMaker->barrelTowersAboveThreshold(trgId);
@@ -20,7 +20,7 @@ std::vector<int> StjTrgSoftwareEmcTriggerMaker::towers(int trgId)
   return ret;
 }
 
-std::vector<int> StjTrgSoftwareEmcTriggerMaker::jetPatches(int trgId)
+std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::jetPatches(int trgId)
 {
   vector<int> ret;
   map<int,int> jetPatchMap = _emcTrigMaker->barrelJetPatchesAboveThreshold(trgId);

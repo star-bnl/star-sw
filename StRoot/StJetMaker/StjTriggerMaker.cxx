@@ -1,4 +1,4 @@
-// $Id: StjTriggerMaker.cxx,v 1.4 2008/08/08 22:53:13 tai Exp $
+// $Id: StjTriggerMaker.cxx,v 1.5 2008/08/08 23:12:19 tai Exp $
 #include "StjTriggerMaker.h"
 
 #include "StjTrgPassCondition.h"
@@ -11,8 +11,8 @@
 
 #include "StjTrgMuDst.h"
 
-#include "StjTrgSoftwareEmcTriggerMakerFactory.h"
-#include "StjTrgSoftwareTriggerSimuMakerFactory.h"
+#include "StjTrgMuDstSoftwareEmcTriggerMakerFactory.h"
+#include "StjTrgMuDstSoftwareTriggerSimuMakerFactory.h"
 
 #include <vector>
 
@@ -26,7 +26,7 @@ StjTriggerMaker::StjTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMa
   , _file(file)
   , _isMC(isMC)
   , _uDstMaker(uDstMaker)
-  , _softTrgFactory(new StjTrgSoftwareEmcTriggerMakerFactory(emcTrigMaker))
+  , _softTrgFactory(new StjTrgMuDstSoftwareEmcTriggerMakerFactory(emcTrigMaker))
 { }
 
 StjTriggerMaker::StjTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StTriggerSimuMaker* simuTrig, bool isMC)
@@ -34,7 +34,7 @@ StjTriggerMaker::StjTriggerMaker(const Char_t *name, TDirectory* file, StMuDstMa
   , _file(file)
   , _isMC(isMC)
   , _uDstMaker(uDstMaker)
-  , _softTrgFactory(new StjTrgSoftwareTriggerSimuMakerFactory(simuTrig))
+  , _softTrgFactory(new StjTrgMuDstSoftwareTriggerSimuMakerFactory(simuTrig))
 { }
 
 void StjTriggerMaker::addTrgMB(const char *treeName, const char* treeTitle, int trgId)
