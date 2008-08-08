@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: QExGeoDrawHelper.cxx,v 1.1 2006/12/06 15:18:47 fine Exp $
+** $Id: QExGeoDrawHelper.cxx,v 1.2 2008/08/08 18:31:30 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -23,7 +23,7 @@
 
 #include "TGeoNode.h"
 #include "TGeoManager.h"
-
+#include "TGeoMatrix.h"
 #include "TGeoShape.h"
 #include "TGeoBBox.h"
 #include "TGeoPara.h"
