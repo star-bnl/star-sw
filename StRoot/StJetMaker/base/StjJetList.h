@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetList.h,v 1.5 2008/08/04 06:10:22 tai Exp $
+// $Id: StjJetList.h,v 1.6 2008/08/10 23:04:40 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETLIST_H
 #define STJJETLIST_H
@@ -10,6 +10,7 @@
 
 #include <ostream>
 #include <vector>
+#include <cmath>
 
 class StjJet : public TObject {
 public:
@@ -31,12 +32,12 @@ typedef std::vector<StjJet> StjJetList;
 inline bool operator==(const StjJet& v1, const StjJet& v2)
 {
   if(v1.runNumber   != v2.runNumber)    return false;
-  if(v1.eventId     != v2.eventId)    return false;   
-  if(v1.jetId       != v2.jetId)    return false;   
-  if(v1.pt          != v2.pt)      return false;   
-  if(v1.eta         != v2.eta)     return false;   
-  if(v1.phi         != v2.phi)      return false;   
-  if(v1.m           != v2.m)          return false;   
+  if(v1.eventId     != v2.eventId)      return false;   
+  if(v1.jetId       != v2.jetId)        return false;   
+  if(fabs(v1.pt  - v2.pt  ) > 0.0001*fabs( v1.pt  )) return false;   
+  if(fabs(v1.eta - v2.eta ) > 0.0001*fabs( v1.eta )) return false;   
+  if(fabs(v1.phi - v2.phi ) > 0.0001*fabs( v1.phi )) return false;   
+  if(fabs(v1.m   - v2.m   ) > 0.0001*fabs( v1.m   )) return false;   
   if(v1.fourVecList != v2.fourVecList)  return false;   
   return true;
   }

@@ -1,4 +1,4 @@
-// $Id: StjTreeEntryMaker.cxx,v 1.2 2008/08/02 19:22:28 tai Exp $
+// $Id: StjTreeEntryMaker.cxx,v 1.3 2008/08/10 23:04:36 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 #include "StjTreeEntryMaker.h"
@@ -8,25 +8,6 @@
 #include <TFile.h>
 
 ClassImp(StjTreeEntryMaker)
-
-StjTreeEntryMaker::StjTreeEntryMaker(const Char_t *name, TDirectory* file)
-  : _file(file)
-  , _coord(new StjTreeEntryCoordinator(_file))
-{
-
-}
-
-StjTreeEntryMaker::StjTreeEntryMaker(const Char_t *name, const char* inputFileName)
-  : _file(new TFile(inputFileName))
-  , _coord(new StjTreeEntryCoordinator(_file))
-{
-
-}
-
-void StjTreeEntryMaker::AddTrgTreeName(const char* treeName)
-{
-  _coord->AddTrgTreeName(treeName);
-}
 
 Int_t StjTreeEntryMaker::Init()
 {

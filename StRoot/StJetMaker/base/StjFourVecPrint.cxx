@@ -1,8 +1,9 @@
-// $Id: StjFourVecPrint.cxx,v 1.4 2008/08/04 06:10:20 tai Exp $
+// $Id: StjFourVecPrint.cxx,v 1.5 2008/08/10 23:04:40 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecPrint.h"
 
 #include <iostream>
+#include <iomanip>
 
 ClassImp(StjFourVecPrint)
 
@@ -18,18 +19,18 @@ void StjFourVecPrint::operator()(const StjFourVecList &fourList)
 void StjFourVecPrint::print(const StjFourVec& four)
 {
   cout 
-    << four.runNumber  << " "
-    << four.eventId    << " "
-    << four.fourvecId  << " "
-    << four.type       << " "
-    << four.detectorId << " "
-    << four.trackId    << " "
-    << four.towerId    << " "
-    << four.pt         << " "
-    << four.eta        << " "
-    << four.phi        << " "
-    << four.m          << " "
-    << four.vertexZ    << " "
+    << setw(7) << four.runNumber   << ", "
+    << setw(7) << four.eventId     << ", "
+    << setw(4) << four.fourvecId   << ", "
+    << setw(1) << four.type        << ", "
+    << setw(1) << four.detectorId  << ", "
+    << setw(4) << four.trackId     << ", "
+    << setw(4) << four.towerId     << ", "
+    << setw(10) << four.pt         << ", "
+    << setw(10) << four.eta        << ", "
+    << setw(10) << four.phi        << ", "
+    << setw(14) << four.m          << ", "
+    << setw(10) << four.vertexZ    << ", "
     << endl;
 
 }

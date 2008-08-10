@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgJPWriter.h,v 1.4 2008/08/08 22:53:18 tai Exp $
+// $Id: StjTrgJPWriter.h,v 1.5 2008/08/10 23:04:57 tai Exp $
 #ifndef STJTRGJPWRITER_H
 #define STJTRGJPWRITER_H
 
@@ -12,14 +12,14 @@ class TTree;
 
 #include <string>
 
-class StjTrgMuDst;
+class StjTrg;
 
 class StjTrgJPWriter : public StjTrgWriter {
 
 public:
 
   StjTrgJPWriter(const char *treeName, const char* treeTitle,
-		 TDirectory* file, StjTrgMuDst* trg,
+		 TDirectory* file, StjTrg* trg,
 		 StjTrgPassCondition* fillCondition)
     : StjTrgWriter(treeName, treeTitle, file, trg, fillCondition)
     , _trg(trg)
@@ -34,7 +34,7 @@ private:
   Int_t    _nJetPatches;
   Int_t    _jetPatchId[12];
 
-  StjTrgMuDst* _trg;
+  StjTrg* _trg;
 };
 
 #endif // STJTRGJPWRITER_H
