@@ -16,6 +16,23 @@ public:
 
   void testRun();
 
+private:
+
+  StjFourVecList createFourVecList();
+  StjFourVec createFourVec(int runNumber, int eventId,
+			   int fourvecId, int type, int detectorId,  short trackId, int towerId,
+			   double pt, double eta, double phi, double m,
+			   double vertexZ);
+
+  StjJetList createJetList();
+
+  StjJet createJet(
+		   int runNumber, int eventId,
+		   int jetId,
+		   double pt, double eta, double phi, double m,
+		   double vertexZ, double detectorEta,
+		   const StjFourVecList&    fourVecList);
+
 };
 
 

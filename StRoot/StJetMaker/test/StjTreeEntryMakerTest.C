@@ -28,7 +28,8 @@ void StjTreeEntryMakerTest::tearDown()
 
 void StjTreeEntryMakerTest::testMake() 
 {
-  TDirectory *inFile = TFile::Open("./jetpart_6143024.root");
+  //  TDirectory *inFile = TFile::Open("./jetpart_6143024.root");
+  TDirectory* inFile = new TFile("./part_run6143024.root");
 
   StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(inFile);
   coord->AddTrgTreeName("trgBJP2");
