@@ -1,6 +1,6 @@
-// $Id: StjTrgMBWriter.cxx,v 1.2 2008/08/08 21:16:43 tai Exp $
+// $Id: StjTrgMBWriter.cxx,v 1.3 2008/08/10 23:04:58 tai Exp $
 #include "StjTrgMBWriter.h"
-#include "StjTrgMuDst.h"
+#include "StjTrg.h"
 
 
 

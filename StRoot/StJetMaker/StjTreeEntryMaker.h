@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryMaker.h,v 1.3 2008/08/02 22:43:07 tai Exp $
+// $Id: StjTreeEntryMaker.h,v 1.4 2008/08/10 23:04:36 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEENTRYMAKER_H
 #define STJTREEENTRYMAKER_H
@@ -13,8 +13,8 @@ class StjTreeEntryCoordinator;
 class StjTreeEntryMaker : public StMaker {
 
 public:
-  StjTreeEntryMaker(const Char_t *name, TDirectory* file);
-  StjTreeEntryMaker(const Char_t *name, const char* inputFileName);
+  StjTreeEntryMaker(const Char_t *name, StjTreeEntryCoordinator* coord)
+  : StMaker(name), _coord(coord) { }
   virtual ~StjTreeEntryMaker() { }
 
   StjTreeEntryCoordinator* coordinator() { return _coord; }
@@ -22,11 +22,8 @@ public:
   Int_t Init();
   Int_t Make();
 
-  void AddTrgTreeName(const char* treeName);
-
 private:
 
-  TDirectory* _file;
   StjTreeEntryCoordinator* _coord;
 
   ClassDef(StjTreeEntryMaker, 0)

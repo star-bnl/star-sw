@@ -1,7 +1,7 @@
-// $Id: StjTrgJPWriter.cxx,v 1.2 2008/08/08 21:16:42 tai Exp $
+// $Id: StjTrgJPWriter.cxx,v 1.3 2008/08/10 23:04:57 tai Exp $
 #include "StjTrgJPWriter.h"
 
-#include "StjTrgMuDst.h"
+#include "StjTrg.h"
 
 #include <TTree.h>
 
