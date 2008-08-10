@@ -2,7 +2,11 @@
 
 #include "UniqueStringGenerator.hh"
 
+#include <StjTreeIndex.h>
+#include <StjTreeIndexCreator.h>
+
 #include <TDirectory.h>
+#include <TFile.h>
 #include <TTree.h>
 
 #include <string>
@@ -27,14 +31,29 @@ void StjTreeIndexCreatorTest::tearDown()
 void StjTreeIndexCreatorTest::testOne()
 {
   TDirectory* testDir = setupTestTDirecotry();
+  testDir->ls();
+
+  StjTreeIndexCreator idxCreator(testDir);
+  idxCreator.AddTrgTreeName("trgBHT2");
+  idxCreator.AddTrgTreeName("trgBJP2");
+
+  StjTreeIndex actualIdx = idxCreator.create();
+
+  StjTreeIndex expectedIdx = createExpectedIdx();
+
+  CPPUNIT_ASSERT_EQUAL( expectedIdx, actualIdx);
+
 }
 
 TDirectory *StjTreeIndexCreatorTest::setupTestTDirecotry()
 {
-  string testdir(UniqueStringGenerator::generate());
-  gROOT->cd();
-  gDirectory->mkdir(testdir.c_str());
-  gDirectory->cd(testdir.c_str());
-  new TTree("bemcTowers", "bemcTowers");
-  new TTree("tpcTracks", "tpcTracks");
+  return new TFile("./part_run6143024.root");
 }
+
+StjTreeIndex StjTreeIndexCreatorTest::createExpectedIdx()
+{
+  StjTreeIndex ret;
+  return ret;
+}
+
+

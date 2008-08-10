@@ -26,8 +26,7 @@ private:
 
   StjJetList createJetList();
 
-  StjJet createJet(
-		   int runNumber, int eventId,
+  StjJet createJet(int runNumber, int eventId,
 		   int jetId,
 		   double pt, double eta, double phi, double m,
 		   double vertexZ, double detectorEta,
