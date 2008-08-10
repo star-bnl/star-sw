@@ -28,6 +28,8 @@ public:
 
 private:
 
+  TDirectory *setupTestTDirecotry();
+
 };
 
 #endif // STBET4PMAKERIMPBUILDERTEST_HH

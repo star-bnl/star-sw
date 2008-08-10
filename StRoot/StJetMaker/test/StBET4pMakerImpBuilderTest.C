@@ -28,8 +28,18 @@
 #include <StjTowerEnergyCutAdc.h>
 
 #include <StjTreeEntryMaker.h>
+#include <StjTreeEntryCoordinator.h>
+
+#include <TTree.h>
+#include <TFile.h>
+#include <TDirectory.h>
+
+#include <string>
+
+#include "UniqueStringGenerator.hh"
 
 #include "StBET4pMakerImpBuilderTest.hh"
+
 
 using namespace std;
 
@@ -236,10 +246,25 @@ void StBET4pMakerImpBuilderTest::test2003()
   delete imp;
  }
 
- void StBET4pMakerImpBuilderTest::testReadTree()
- {
-   //  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", "/star/institutions/mit/tai/testData/jetpart_6143024.root");
-  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", "./jetpart_6143024.root");
+TDirectory *StBET4pMakerImpBuilderTest::setupTestTDirecotry()
+{
+  string testdir(UniqueStringGenerator::generate());
+  gROOT->cd();
+  gDirectory->mkdir(testdir.c_str());
+  gDirectory->cd(testdir.c_str());
+  new TTree("bemcTowers", "bemcTowers");
+  new TTree("tpcTracks", "tpcTracks");
+}
+
+void StBET4pMakerImpBuilderTest::testReadTree()
+{
+  TDirectory* testDir = setupTestTDirecotry();
+
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(gDirectory);
+  coord->AddTrgTreeName("trgBJP2");
+  coord->AddTrgTreeName("trgBHT2");
+
+  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", coord);
   bool         useTPC = true;
   bool        useBEMC = true;
   bool        useEEMC = false;
@@ -249,9 +274,6 @@ void StBET4pMakerImpBuilderTest::test2003()
 
   StBET4pMakerImpBuilder builder;
   StBET4pMakerImp* imp =  builder.build(useTPC, useBEMC, useEEMC, use2003Cuts, use2005Cuts, use2006Cuts, maker);
-
-  imp->Init();
-
 
   CPPUNIT_ASSERT(  dynamic_cast<StjTPCTree*>(imp->TPC())   );
   CPPUNIT_ASSERT(  dynamic_cast<StjBEMCTree*>(imp->BEMC()) );

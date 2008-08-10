@@ -28,14 +28,14 @@ void StjTreeEntryMakerTest::tearDown()
 
 void StjTreeEntryMakerTest::testMake() 
 {
-  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", "./jetpart_6143024.root");
-  //  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", "/star/institutions/mit/tai/testData/jetpart_6143024.root");
-  maker->AddTrgTreeName("trgBJP2");
-  maker->AddTrgTreeName("trgBHT2");
+  TDirectory *inFile = TFile::Open("./jetpart_6143024.root");
 
-  StjTreeEntryCoordinator* coord = maker->coordinator();
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(inFile);
+  coord->AddTrgTreeName("trgBJP2");
+  coord->AddTrgTreeName("trgBHT2");
 
-  CPPUNIT_ASSERT( coord );
+  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", coord);
+
   StjTreeEntryCoordinator::TrgTreeNameList trgTreeNameList = coord->trgTreeNameList(); 
   CPPUNIT_ASSERT_EQUAL( (size_t)2,  trgTreeNameList.size() );
   CPPUNIT_ASSERT_EQUAL( string("trgBJP2"),  trgTreeNameList[0] );
