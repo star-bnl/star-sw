@@ -1,0 +1,5 @@
+// $Id: StjTreeIndex.cxx,v 1.1 2008/08/10 23:41:45 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
+#include "StjTreeIndex.h"
+
+ClassImp(StjTreeIndex)

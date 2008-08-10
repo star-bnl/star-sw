@@ -20,6 +20,9 @@ private:
 
   TDirectory *setupTestTDirecotry();
 
+  StjTreeIndex createExpectedIdx();
+  
+
 };
 
 #endif // STJTREEINDEXCREATORTEST_HH
