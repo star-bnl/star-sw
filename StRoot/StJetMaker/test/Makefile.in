@@ -65,6 +65,7 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libStJetMakerTest_la_LIBADD =
 am_libStJetMakerTest_la_OBJECTS =  \
+	libStJetMakerTest_la-UniqueStringGenerator.lo \
 	libStJetMakerTest_la-TreeContentTest.lo \
 	libStJetMakerTest_la-StJetMakerTest.lo \
 	libStJetMakerTest_la-StppAnaParsTest.lo \
@@ -249,6 +250,8 @@ TestApp_LDADD = \
 
 lib_LTLIBRARIES = libStJetMakerTest.la
 libStJetMakerTest_la_SOURCES = \
+	Misc.hh \
+	UniqueStringGenerator.C UniqueStringGenerator.hh \
 	TreeContentTest.C TreeContentTest.hh \
 	StJetMakerTest.C StJetMakerTest.hh \
 	StppAnaParsTest.C StppAnaParsTest.hh \
@@ -406,6 +409,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjeBemcEnergySumCalculatorBuilderTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StppAnaParsTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-TreeContentTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-UniqueStringGenerator.Plo@am__quote@
 
 .C.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -427,6 +431,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+libStJetMakerTest_la-UniqueStringGenerator.lo: UniqueStringGenerator.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-UniqueStringGenerator.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-UniqueStringGenerator.Tpo" -c -o libStJetMakerTest_la-UniqueStringGenerator.lo `test -f 'UniqueStringGenerator.C' || echo '$(srcdir)/'`UniqueStringGenerator.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-UniqueStringGenerator.Tpo" "$(DEPDIR)/libStJetMakerTest_la-UniqueStringGenerator.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-UniqueStringGenerator.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='UniqueStringGenerator.C' object='libStJetMakerTest_la-UniqueStringGenerator.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-UniqueStringGenerator.lo `test -f 'UniqueStringGenerator.C' || echo '$(srcdir)/'`UniqueStringGenerator.C
 
 libStJetMakerTest_la-TreeContentTest.lo: TreeContentTest.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-TreeContentTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-TreeContentTest.Tpo" -c -o libStJetMakerTest_la-TreeContentTest.lo `test -f 'TreeContentTest.C' || echo '$(srcdir)/'`TreeContentTest.C; \
