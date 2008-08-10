@@ -25,7 +25,9 @@ void StjTPCTreeTest::tearDown()
 void StjTPCTreeTest::testGetEntry() 
 {
   //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
-  TFile* file = new TFile("./jetpart_6143024.root");
+  //  TFile* file = new TFile("./jetpart_6143024.root");
+  TFile* file = new TFile("./part_run6143024.root");
+  
 
   TTree *tree = dynamic_cast<TTree*>(file->Get("tpcTracks"));
 

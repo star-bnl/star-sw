@@ -31,7 +31,8 @@ void StjTreeEntryCoordinatorTest::tearDown()
 void StjTreeEntryCoordinatorTest::testMake() 
 {
   //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
-  TFile* file = new TFile("./jetpart_6143024.root");
+  //  TFile* file = new TFile("./jetpart_6143024.root");
+  TFile* file = new TFile("./part_run6143024.root");
 
   StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(file);
   coord->AddTrgTreeName("trgBJP2");
