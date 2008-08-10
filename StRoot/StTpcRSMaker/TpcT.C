@@ -1,4 +1,7 @@
-//#define __REAL_DATA__
+#define PRINT
+#define __REAL_DATA__
+#if !defined(__CINT__)
+// code that should be seen ONLY by the compiler
 #include "TH1.h"
 #include "TH2.h"
 #include "TStyle.h"
@@ -15,6 +18,10 @@
 #include "TDirectory.h"
 #include "TROOT.h"
 #include "TFile.h"
+#include "TVector3.h"
+#include "TRMatrix.h"
+#endif
+TFile *fOut = 0;
 //#include "StTpcMcAnalysisMaker/TpcCluster.h"
 TF1  *mShaperResponse = 0;             //!
 TF1  *mChargeFractionInner = 0;        //!
@@ -27,7 +34,8 @@ TF1  *mConvolution = 0;                //!
 static const Double_t K3IP = 0.68;    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 0.5
 static const Double_t K3OP = 0.55;    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 1
 static const Double_t tau     = 71e-9; // from pulser fit
-static const Double_t pShaper = 5.15;  //     -"-         ?
+//static const Double_t pShaper = 5.15;  //     -"-         ?
+static const Double_t FWHM = 2.0;  //     FWHM = sqrt(p)*tau*(2*TMath::Sqrt(2*TMath::Log(2.)));
 static const Double_t CrossTalkInner = 0.004;
 static const Double_t CrossTalkOuter = 0.004;
 static const Double_t innerSectorAnodeVoltage = 1170;
@@ -58,22 +66,47 @@ static const Double_t tauC[2]   = {999.655e-9, 919.183e-9};
 */
 static const  Double_t mTimeBinWidth              = 1.06580379191673078e-07;//1.e-6/gStTpcDb->Electronics()->samplingFrequency();
 #include "HardWarePosition.C"
+#include "tables/St_tpcGain_Table.h"
+#include "tables/St_tpcT0_Table.h"
+//#include "DrawList.C"
 //--------------------------------------------------------------------------------
-void TpcT(const Char_t *files="rcf1207_01_*.root", const Char_t *Out = "") {
+void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *Out = "", const Char_t *Time = "20080208.174701") {
   //	   Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Double_t pMomax) {
-  
+  gSystem->Load("libStDb_Tables.so");
+  TFile *f = new TFile(Form("$STAR/StarDb/Calibrations/tpc/tpcGain.%s.root",Time));
+  if (! f) return;
+  St_tpcGain *G = (St_tpcGain*) f->Get("tpcGain");
+  delete f;
+  if (! G) return;
+  cout << "Got " << G->GetName() << endl;
+  f = new TFile(Form("$STAR/StarDb/Calibrations/tpc/tpcT0.%s.root",Time));
+  if (! f) return;
+  St_tpcT0 *T = (St_tpcT0*) f->Get("tpcT0");
+  delete f;
+  if (! T) return;
+  cout << "Got " << T->GetName() << endl;
+  tpcGain_st *gains = G->GetTable();
+  tpcT0_st   *t0s   = T->GetTable();
   TDirIter Dir(files);
   Char_t *file = 0;
   Char_t *file1 = 0;
   Int_t NFiles = 0;
   TTreeIter iter("TpcT");
-  while ((file = (Char_t *) Dir.NextFile())) {iter.AddFile(file); NFiles++; file1 = file;}
+  while ((file = (Char_t *) Dir.NextFile())) {
+    TString File(file);
+    if (File.Contains("Plot") || File.Contains("Fit")|| File.Contains("hist")) continue;
+    iter.AddFile(file); 
+    NFiles++; 
+    file1 = file;
+  }
   cout << files << "\twith " << NFiles << " files" << endl; 
   if (! file1 ) return;
   TString output(Out);
   if (output == "") {
     output = file1;
-    output.ReplaceAll(".root",".Plots.root");
+    output.ReplaceAll(".root",".Plots.");
+    output += opt;
+    output += ".root";
   }
   cout << "Output for " << output << endl;
 	const Int_t&       fNoPixels                                = iter("fNoPixels");
@@ -86,8 +119,8 @@ void TpcT(const Char_t *files="rcf1207_01_*.root", const Char_t *Out = "") {
 #if 0
 	const Int_t&       fPixels_                                 = iter("fPixels");
 	const UChar_t*&    fPixels_mDetector                        = iter("fPixels.mDetector");
-	const UChar_t*&    fPixels_mSector                          = iter("fPixels.mSector");
 #endif
+	const UChar_t*&    fPixels_mSector                          = iter("fPixels.mSector");
 	const UChar_t*&    fPixels_mRow                             = iter("fPixels.mRow");
 	const UChar_t*&    fPixels_mPad                             = iter("fPixels.mPad");
 	const UShort_t*&   fPixels_mTimeBin                         = iter("fPixels.mTimeBin");
@@ -132,7 +165,9 @@ void TpcT(const Char_t *files="rcf1207_01_*.root", const Char_t *Out = "") {
 	const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
 	const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
 #endif
+#ifndef __REAL_DATA__
 	const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+#endif
 #if 0
 	const UChar_t*&    fRcHit_mFitFlag                          = iter("fRcHit.mFitFlag");
 	const UChar_t*&    fRcHit_mTrackRefCount                    = iter("fRcHit.mTrackRefCount");
@@ -156,19 +191,13 @@ void TpcT(const Char_t *files="rcf1207_01_*.root", const Char_t *Out = "") {
 	const Int_t*&      fRcTrack_fNpoints                        = iter("fRcTrack.fNpoints");
 #endif
 	const Int_t*&      fRcTrack_fNfitpoints                     = iter("fRcTrack.fNfitpoints");
-#if 0
 	const Int_t*&      fRcTrack_fifPrim                         = iter("fRcTrack.fifPrim");
-#endif
-#ifdef PRINT
 	const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
 	const Float_t*&    fRcTrack_fpy                             = iter("fRcTrack.fpy");
-#endif
-#if 0
 	const Float_t*&    fRcTrack_fpz                             = iter("fRcTrack.fpz");
-#endif
   static Int_t nx = 200;
-  static Double_t xmin =  -10.;
-  static Double_t xmax =   10.;
+  static Double_t xmin =   -5.;
+  static Double_t xmax =   15.;
   static Int_t nz = 42;
   static Double_t zmin = -210;
   static Double_t zmax = -zmin;
@@ -177,14 +206,17 @@ void TpcT(const Char_t *files="rcf1207_01_*.root", const Char_t *Out = "") {
   static Double_t ymin = -4;
   static Double_t ymax = 10;
 #endif
-  TFile *fOut = new TFile(output,"update");
+  if (! fOut) fOut = new TFile(output,"update");
+  fOut->cd();
   struct Name_t {
     Char_t *Name;
     Char_t *Title;
   };
-  Name_t InOut[2] = {
-    {"Inner","Inner"},
-    {"Outer","Outer"}
+  Name_t InOut[4] = {
+    {"Inner","Inner for all except 16"},
+    {"Outer","Outer for all except 16"},
+    {"InnerX","Inner for Sector 16"},
+    {"OuterX","Outer for Sector 16"}
   };
   Name_t RcMcTk[3] = {
     {"Rc","Rc"},
@@ -196,10 +228,10 @@ void TpcT(const Char_t *files="rcf1207_01_*.root", const Char_t *Out = "") {
     {"Time","Time"}
   };
   //               io r  pt
-  TProfile2D *hist[2][3][2];
+  TProfile2D *hist[4][3][2];
   memset (hist, 0, sizeof(hist));
-  Int_t color = 1;
-  for (Int_t io = 0; io < 2; io++) {
+  for (Int_t io = 0; io < 4; io++) {// TPC + TPX
+    Int_t color = 1;
     for (Int_t rmt = 0; rmt < 3; rmt++) {
 #ifdef __REAL_DATA__
       if (rmt == 1) continue;
@@ -216,78 +248,167 @@ void TpcT(const Char_t *files="rcf1207_01_*.root", const Char_t *Out = "") {
       }
     }
   }
+#ifdef PRINT
+  Int_t entry = 0;
+#endif
   while (iter.Next()) {
+    if (! fNoPixels ) continue;
+    if (fRcTrack_fNfitpoints[0] < 25) continue;
+#if 0
+    if (! fRcTrack_fifPrim[0]) continue;
+#endif
+    TVector3 mom(fRcTrack_fpx[0],fRcTrack_fpy[0],fRcTrack_fpz[0]);
+#if 0    
+    if (mom.Pt() < 0.5) continue;
+    if (TMath::Abs(mom.Eta()) > 0.05) continue;
+#endif
+    //    if (fNoPixels > 80) continue;
+    //    if (fNoRcHit < NpadCut) continue;
+    if (fRcHit_mCharge[0] < 1.e-6 || fRcHit_mCharge[0] > 100.e-6) continue;
+#if 0
+    Double_t pmag = mom.Mag();
+    //    if (pMomin > 0 && pmag < pMomin || pMomax >0 && pmag > pMomax) continue;
+    //    if (tanCut > 0 && TMath::Abs(fRcTrack_fpy[0]) > 1e-7 && TMath::Abs(fRcTrack_fpx[0]/fRcTrack_fpy[0]) > tanCut) continue;
+    // if (Cut(ientry) < 0) continue;
+#endif
+    if (fNoRcHit != 1) continue;
+#ifndef __REAL_DATA__
+    if (fRcHit_mQuality[0] < 95) continue;
+#endif
+    if (fAdcSum < 500 || fAdcSum > 2.e4) continue;
+    Int_t kPadMin = 999;
+    Int_t kPadMax =   0;
+    Int_t kTbMin  = 999;
+    Int_t kTbMax  =   0;
+    Int_t pad  = 0;
+    Int_t tb   = 0;
+    Double_t sum = 0;
+    Double_t pav = 0;
+    Double_t tav = 0;
+    Int_t sector = fPixels_mSector[0];
+    Int_t row    = fPixels_mRow[0];
+    for (Int_t i = 0; i < fNoPixels; i++) {
+      pad = fPixels_mPad[i];
+      tb  = fPixels_mTimeBin[i];
+      if (tb  >= 512) continue;
+      if (pad > 182) continue;
+      if (pad < kPadMin) kPadMin = pad;
+      if (pad > kPadMax) kPadMax = pad;
+      if (tb  < kTbMin) kTbMin = tb;
+      if (tb  > kTbMax) kTbMax = tb;
+    }
+    const Int_t NP = kPadMax - kPadMin + 3;
+    const Int_t NT = kTbMax  - kTbMin  + 2;
+    TRMatrix adcs(NP,NT);
+    for  (Int_t i = 0; i < fNoPixels; i++) {
+      pad = fPixels_mPad[i];
+      tb  = fPixels_mTimeBin[i];
+      if (tb  < kTbMin  || tb  > kTbMax) continue;
+      if (pad < kPadMin || pad > kPadMax) continue;
+      Double_t ADC = fPixels_mAdc[i]*gains[sector-1].Gain[row-1][pad-1];
+      adcs(pad     - kPadMin,tb - kTbMin) = ADC;
+      adcs(pad     - kPadMin,NT-1)       += ADC;
+      adcs(NP-2,tb - kTbMin)             += ADC;
+      adcs(NP-1,tb - kTbMin)             += (tb+t0s[sector-1].T0[row-1][pad-1])*ADC;
+      adcs(NP-1,NT-1)                    += ADC;
+      pav                                += pad*ADC;
+      tav                                += (tb+t0s[sector-1].T0[row-1][pad-1])*ADC;
+    }
+    sum = adcs(NP-1,NT-1);
+    if (sum <= 0) continue;
+    pav /= sum;
+    tav /= sum;
+    if (adcs(NP-1,NT-1) <= 0) continue;
+    Int_t tMax = -1;
+    Double_t AtMax = -1; 
+    Int_t pMax = -1;
+    Double_t ApMax = -1; 
+    for (Int_t j = 0; j < NT-1; j++) {
+      if (adcs(NP-2,j) > 0) adcs(NP-1,j) /= adcs(NP-2,j);
+      if (adcs(NP-2,j) > AtMax) {AtMax = adcs(NP-2,j); tMax = j;}
+    }
+    for (Int_t i = 0; i < NP-1 ; i++) {
+      for (Int_t j = 0; j < NT; j++) {
+	adcs(i,j) /= adcs(NP-1,NT-1);
+      }
+      if (adcs(i,NT-1) > ApMax) {ApMax = adcs(i,NT-1); pMax = i;}
+    }
+#if 0
+    //    adcs.Print();
+    //    cout << "old tav/pav = " << tav << "/" << pav << endl;
+    tav = 0;
+    pav = 0;
+    sum = 0;
+    for (Int_t j = TMath::Max(0, tMax-1); j <= TMath::Min(NT-2,tMax+1); j++) {
+      sum += adcs(NP-2,j); 
+      tav += adcs(NP-1,j)*adcs(NP-2,j);
+    }
+    if (sum <= 0) continue;
+    tav /= sum;
+    sum = 0;
+    for (Int_t i = TMath::Max(0, pMax-1); i <= TMath::Min(NP-3,pMax+1); i++) {
+      sum += adcs(i,NT-1);
+      pav += i*adcs(i,NT-1);
+    }
+    if (sum <= 0) continue;
+    pav /= sum;
+    pav += kPadMin;
+    //    cout << "new tav/pav = " << tav << "/" << pav << endl;
+#endif
 #ifdef PRINT
     entry++;
     if (entry%1000 == 1) {
       cout << entry << "\t =======================================================" << endl;
-      cout << "fNoPixels \t" << fNoPixels << "\tNPads " << endl; // fNoRcHit << endl;
+      if (sector == 16) {
+	cout << "\t =======================================================" << endl;
+      }
+      cout << "Sector/Row = " << sector << " / " << row;
+      cout << "\tfNoPixels \t" << fNoPixels << "\tNPads " << endl; // fNoRcHit << endl;
       cout << "Charge(keV) \t" << 1e6*fRcHit_mCharge[0];
       if (TMath::Abs(fRcTrack_fpy[0]) > 1e-7) 
 	cout << "\tpx/py\t" << fRcTrack_fpx[0]/fRcTrack_fpy[0] 
 	     << "\tpT\t" << TMath::Sqrt(fRcTrack_fpx[0]*fRcTrack_fpx[0]+fRcTrack_fpy[0]*fRcTrack_fpy[0]);
       cout << endl;
-      cout << "\tfAdcSum " << fAdcSum << endl;
-      cout << "Rc:Pad\t" << fRcHit_mMcl_x[0]/64        << "\tRc:dX\t" << (fRcHit_mMcl_x[0]%64)/64.
-	   << "\tRc:Time\t" << fRcHit_mMcl_t[0]/64 << "\tRc:dZ\t" << (fRcHit_mMcl_t[0]%64)/64. << endl;
+      cout << "\tfAdcSum "  << fAdcSum;
+      cout << "\tRc:Pad\t"    << fRcHit_mMcl_x[0]/64.  
+	   << "\tRc:Time\t" << fRcHit_mMcl_t[0]/64.  << endl;
 #ifndef __REAL_DATA__
-      cout << "Mc:Pad\t" << fMcHit_mMcl_x[0]/64        << "\tMc:dX\t" << (fMcHit_mMcl_x[0]%64)/64.
-	   << "\tMc:Time\t" << fMcHit_mMcl_t[0]/64 << "\tMc:dZ\t" << (fMcHit_mMcl_t[0]%64)/64. << endl;
+      cout << "Mc:Pad\t" << fMcHit_mMcl_x[0]/64.
+	   << "\tMc:Time\t" << fMcHit_mMcl_t[0]/64. << endl;
 #endif
-      Int_t kPadMin = 999;
-      Int_t kPadMax =   0;
-      Int_t kTbMin  = 999;
-      Int_t kTbMax  =   0;
-      Int_t pad  = 0;
-      Int_t tb   = 0;
-      Int_t indx = 0;
-      for (Int_t i = 0; i < fNoPixels; i++) {
-	pad = fPixels_mPad[i];
-	tb  = fPixels_mTimeBin[i];
-	if (tb  >= 512) continue;
-	if (pad > 182) continue;
-	if (pad < kPadMin) kPadMin = pad;
-	if (pad > kPadMax) kPadMax = pad;
-	if (tb  < kTbMin) kTbMin = tb;
-	if (tb  > kTbMax) kTbMax = tb;
-      }
-      Int_t *adcs = new Int_t[(kPadMax-kPadMin+2)*(kTbMax-kTbMin+2)];
+      cout << "\tsum = " << sum << "\tpav = " << pav << "\ttav = " << tav << endl;
       cout << "kPadMin/kPadMax\t" << kPadMin << "/" << kPadMax
 	   << "\tkTbMin/kTbMax\t" << kTbMin << "/" << kTbMax << endl;
-      memset (adcs, 0, (kPadMax-kPadMin+2)*(kTbMax-kTbMin+2)*sizeof(Int_t));
-      for  (Int_t i = 0; i < fNoPixels; i++) {
-	pad = fPixels_mPad[i];
-	tb  = fPixels_mTimeBin[i];
-	if (tb >= 512) tb = kTbMax + 1;
-	if (pad > 182) pad = kPadMax + 1;
-	indx = (kTbMax-kTbMin+2)*(pad - kPadMin) + tb - kTbMin;
-	adcs[indx] = fPixels_mAdc[i];
-      }
+      adcs.Print();
       cout << " ";
       for (tb = kTbMin; tb <= kTbMax + 1; tb++) cout << "\t|" << tb;
       cout << endl;
       cout << "_";
       for (tb = kTbMin; tb <= kTbMax + 1; tb++) cout << "\t|____";
       cout << endl;
-      for (pad = kPadMin; pad <= kPadMax + 1; pad++) {
-	if (pad == kPadMax + 1) cout << "---------------------------------------------" << endl;
+      for (pad = kPadMin; pad <= kPadMax + 2; pad++) {
+	if (pad >= kPadMax + 1) cout << "---------------------------------------------" << endl;
+#if 0
+	cout << pad << "|" << "G:" << gains[sector-1].Gain[row-1][pad-1] 
+	     << "|T0:" << t0s[sector-1].T0[row-1][pad-1] << "|";
+#else
 	cout << pad << "|";
+#endif
 	for (tb = kTbMin; tb <= kTbMax + 1; tb++) {
-	  indx = (kTbMax-kTbMin+2)*(pad - kPadMin) + tb - kTbMin;
-	  if (tb <= kTbMax) cout << "\t" << adcs[indx];
-	  else              cout << "\t|" << adcs[indx];
+	  if (tb <= kTbMax) cout << "\t";
+	  else              cout << "\t|";
+	  cout << Form("%4.2f",adcs(pad-kPadMin,tb-kTbMin));
 	}
 	cout << endl;
       }
-      delete [] adcs;
-#if 1
+#if 0
       for (Int_t i = 0; i < fNoPixels; i++) 
 	cout << i 
-	     << "\tRow\t" << (int) fPixels_mRow[i]
-	     << "\tPad\t" << fPixels_mPad[i]
+	     << "\tRow\t" << (Int_t) row[i]
+	     << "\tPad\t" << (Int_t)fPixels_mPad[i]
 	     << "\tTimeBin\t" << fPixels_mTimeBin[i]
-	     << "\tadc\t" << (int) fPixels_mAdc[i]
-	     << "\tId\t" << (int) fPixels_mIdTruth[i]
+	     << "\tadc\t" << (Int_t) fPixels_mAdc[i]
+	     << "\tId\t" << (Int_t) fPixels_mIdTruth[i]
 	     << "\tR\t" << ((Double_t) fPixels_mAdc[i])/((Double_t) fAdcSum)
 	     << endl;
       for (Int_t i = 0; i < fNoRcHit; i++) 
@@ -306,46 +427,41 @@ void TpcT(const Char_t *files="rcf1207_01_*.root", const Char_t *Out = "") {
     } // end of print
 //________________________________________________________________________________
 #endif
-    if (! fNoPixels ) continue;
-    if (fRcTrack_fNfitpoints[0] < 25) continue;
-    if (fNoPixels > 80) continue;
-    //    if (fNoRcHit < NpadCut) continue;
-    if (fRcHit_mCharge[0] < 1.e-6 || fRcHit_mCharge[0] > 100.e-6) continue;
-#if 0
-    Double_t pmom = TMath::Sqrt(fRcTrack_fpx[0]*fRcTrack_fpx[0]+fRcTrack_fpy[0]*fRcTrack_fpy[0]);//+fRcTrack_fpz[0]*fRcTrack_fpz[0]);
-#endif
-    //    if (pMomin > 0 && pmom < pMomin || pMomax >0 && pmom > pMomax) continue;
-    //    if (tanCut > 0 && TMath::Abs(fRcTrack_fpy[0]) > 1e-7 && TMath::Abs(fRcTrack_fpx[0]/fRcTrack_fpy[0]) > tanCut) continue;
-    // if (Cut(ientry) < 0) continue;
-    if (fNoRcHit != 1) continue;
-#ifndef __REAL_DATA__
-    if (fRcHit_mQuality[0] < 95) continue;
-#endif
-    if (fAdcSum < 100 || fAdcSum > 2.e3) continue;
     // Sector 1; RDO 4;
     //    if (fRcTrack_fSector[0] == 1 && fRcTrack_fRow[0] >= 22 && fRcTrack_fRow[0] <= 29) continue;
-    for (Int_t i = 0; i < fNoPixels; i++) {
-      Int_t io = 0;
-      if (fPixels_mRow[i] > 13) io = 1;
-      Double_t ratio = ((Double_t) fPixels_mAdc[i])/((Double_t) fAdcSum);
-      if (fPixels_mTimeBin[i] > 512 && fPixels_mPad[i] < 200) {
-	  hist[io][0][0]->Fill(fPixels_mPad[i]-(fRcHit_mMcl_x[0]/64.), fRcHit_mPosition_mX3[0], ratio);
+    Int_t io = 0;
+    if (row > 13) io = 1;
+    if (sector  == 16) io += 2;
+    Double_t zRc = fRcHit_mPosition_mX3[0];
 #ifndef __REAL_DATA__
-	if (fNoMcHit == 1)
-	  hist[io][1][0]->Fill(fPixels_mPad[i]-(fMcHit_mMcl_x[0]/64.), fMcHit_mPosition_mX3[0],ratio);
+    Double_t zMc = fMcHit_mPosition_mX3[0];
 #endif
-	if (fNoRcTrack == 1)
-	  hist[io][2][0]->Fill(fPixels_mPad[i]-(fRcTrack_mMcl_x[0]/64.), fRcHit_mPosition_mX3[0],ratio);
-      }
-      if (fPixels_mPad[i] > 200 && fPixels_mTimeBin[i] <= 512) {
-	  hist[io][0][1]->Fill(fPixels_mTimeBin[i]-(fRcHit_mMcl_t[0]/64.), fRcHit_mPosition_mX3[0],ratio);
+    for (Int_t i = 0; i < NP - 2; i++) {
+      Double_t ratio = adcs(i,NT-1);
+      Double_t delPadRc = i + kPadMin - pav;
+      Double_t delPadTk = i + kPadMin - (fRcTrack_mMcl_x[0]/64.);
+      hist[io][0][0]->Fill(delPadRc, zRc, ratio);
+      if (fNoRcTrack == 1)
+	hist[io][2][0]->Fill(delPadTk, zRc,ratio);
 #ifndef __REAL_DATA__
-	if (fNoMcHit == 1)
-	  hist[io][1][1]->Fill(fPixels_mTimeBin[i]-(fMcHit_mMcl_t[0]/64.),   fMcHit_mPosition_mX3[0],ratio);
+      Double_t delPadMc = i + kPadMin - (fMcHit_mMcl_x[0]/64.);
+      if (fNoMcHit == 1)
+	hist[io][1][0]->Fill(delPadMc, zMc,ratio);
 #endif
-	if (fNoRcTrack == 1)
-	  hist[io][2][1]->Fill(fPixels_mTimeBin[i]-(fRcTrack_mMcl_t[0]/64.), fRcHit_mPosition_mX3[0],ratio);
-      }
+    }
+    for (Int_t j = 0; j < NT - 1; j++) {
+      Double_t ratio = adcs(NP-2,j);
+      Double_t tb    = adcs(NP-1,j);
+      Double_t delTbRc = tb + 0.5 - tav;
+      Double_t delTbTk = tb + 0.5 - (fRcTrack_mMcl_t[0]/64.);
+      hist[io][0][1]->Fill(delTbRc, zRc,ratio);
+      if (fNoRcTrack == 1)
+	hist[io][2][1]->Fill(delTbTk, zRc,ratio);
+#ifndef __REAL_DATA__
+      Double_t delTbMc = tb  + 0.5 - (fMcHit_mMcl_t[0]/64.);
+      if (fNoMcHit == 1)
+	hist[io][1][1]->Fill(delTbMc,   zMc,ratio);
+#endif
     }
   }
   fOut->Write();
@@ -409,14 +525,17 @@ void DrawTpcTPlots(const Char_t *histname="OuterPad",const Char_t *Option="") {
 Double_t ShaperFunc(Double_t *x, Double_t *par) {
   Double_t tau = par[0];
   Double_t width = par[1];
-  Double_t p = par[2];
-  Double_t t = x[0]*width/tau;
+  Double_t FWHM = par[2];
+  Double_t t = (x[0]-par[3])*width/tau;
   Double_t Delta = width/tau;
   Double_t t1 = t - Delta/2.;
   Double_t t2 = t1 + Delta;
+  if (t1 < 0) t1 = 0;
+  if (t2 < 0) t2 = 0;
+  Double_t p = TMath::Power(FWHM/((2*TMath::Sqrt(2*TMath::Log(2.)))*tau),2);
   Double_t val = TMath::Gamma(p,t2) - TMath::Gamma(p,t1);
   //  return (val > 0) ? TMath::Log(val) : -999.;
-  return val;
+  return par[4]*val;
 }
 //________________________________________________________________________________
 Double_t Gatti(Double_t *x, Double_t *par) {
@@ -484,13 +603,17 @@ Double_t ConvolutionF(Double_t *x, Double_t *par) {
   }
   else if (icase == 2) {
     pfunc = mShaperResponse;
-    pfunc->SetParameter(3,par[7]); // p
     pfunc->SetParameter(0,par[8]); // tau
+    pfunc->SetParameter(2,par[7]); // FWHM
+    pfunc->SetParameter(3,par[5]); // t0
   }
   if (! pfunc) return 0;
   Double_t Area   = par[1];
   Double_t sigma2 = TMath::Abs(par[2]);
   Double_t sigma  = TMath::Sqrt(sigma2);
+  Double_t Frac   = par[10];
+  Double_t Sigma = par[11];
+  if (Frac < 0.0 || Frac > 1.0 || Sigma <= 0.0) Frac = 0;
   Double_t sg = 5;
   static const Int_t N = 100;
   Double_t dx = 2*sg/N;
@@ -501,7 +624,9 @@ Double_t ConvolutionF(Double_t *x, Double_t *par) {
       Double_t xx = xc + sigma*(-sg + dx*i);
       Double_t xa = xx;
       if (icase < 2) xa = TMath::Abs(xx);
-      value += pfunc->Eval(xa)*TMath::Gaus(xx, xc, sigma, 1);
+      Double_t pfuncXa = pfunc->Eval(xa);
+      value               += pfuncXa*TMath::Gaus(xx, xc, sigma, 1)*(1 - Frac);
+      if (Frac > 0) value += pfuncXa*TMath::Gaus(xx, xc, Sigma, 1)*Frac;
     }
     value *= dx*Area*sigma;
   }
@@ -545,9 +670,11 @@ void MakeFunctions() {
   Double_t timeBinMin = -0.5;
   Double_t timeBinMax = 10.5;
   if (! mShaperResponse) 
-    mShaperResponse = new TF1("ShaperFunc",ShaperFunc,timeBinMin,timeBinMax,3);  
-  Double_t mTau                       = tau; //1.e-9*gStTpcDb->Electronics()->tau();// s 
-  mShaperResponse->SetParameters(mTau,mTimeBinWidth,pShaper);
+    mShaperResponse = new TF1("ShaperResponse",ShaperFunc,timeBinMin,timeBinMax,5);  
+  //  Double_t mTau                       = tau; //1.e-9*gStTpcDb->Electronics()->tau();// s 
+  //  mShaperResponse->SetParameters(mTau,mTimeBinWidth,FWHM,   0,     1);
+  mShaperResponse->SetParameters(0.5,        1.,         FWHM,   0,     1);
+  mShaperResponse->SetParNames("#tau","tbWidth",        "FWHM","t0","Norm");
   Double_t params[10];
   params[0] = 2.85e-01;//gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();                     // w = width of pad       
   params[1] = 0.2;//gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
@@ -596,7 +723,7 @@ void MakeFunctions() {
   mChargeFractionOuter->SetParameters(params);
   //  mChargeFractionOuter->Save(xmin,xmax,0,0,0,0);
   if (! mConvolution) 
-    mConvolution = new TF1("Convolution",ConvolutionF,-8,8,10);
+    mConvolution = new TF1("Convolution",ConvolutionF,-8,8,12);
   mConvolution->SetParName(0,"icase"); mConvolution->FixParameter(0,0);
   mConvolution->SetParName(1,"Area");  mConvolution->FixParameter(1,1); mConvolution->SetParLimits(1,0,1e5);
   mConvolution->SetParName(2,"#sigma^{2}");  mConvolution->SetParLimits(2,0,10);
@@ -604,13 +731,18 @@ void MakeFunctions() {
   mConvolution->SetParName(4,"K3O");   mConvolution->FixParameter(4,K3OP);
   mConvolution->SetParName(5,"Shift"); mConvolution->FixParameter(5,0);
   mConvolution->SetParName(6,"Noise"); mConvolution->FixParameter(6,0);
-  mConvolution->SetParName(7,"p"); mConvolution->FixParameter(7,pShaper);
-  mConvolution->SetParName(8,"#tau"); mConvolution->FixParameter(8,tau);
+  mConvolution->SetParName(7,"FWHM"); mConvolution->FixParameter(7,FWHM);
+  mConvolution->SetParName(8,"#tau"); mConvolution->FixParameter(8,1);// tau);
   mConvolution->SetParName(9,"CrossTalk"); mConvolution->FixParameter(9,0);
+  mConvolution->SetParName(10,"frac"); mConvolution->FixParameter(10,0);  
+  mConvolution->SetParName(11,"#Sigma"); mConvolution->FixParameter(11,0); 
 }
 //________________________________________________________________________________
-void FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
-  TProfile2D *h = (TProfile2D *) gDirectory->Get(name);
+void FitSlices(const Char_t *name="OuterPadRc", const Char_t *opt="K3", Int_t iy=0) {
+  TDirectory *fIn = gDirectory;
+  if (! fIn) return;
+  TProfile2D *h = (TProfile2D *) fIn->Get(name);
+  if (! h) return;
   TString Opt(opt);
   Int_t nx = h->GetNbinsX();
   Int_t ny = h->GetNbinsY();
@@ -657,15 +789,20 @@ void FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
     if (Name.Contains("Inner",TString::kIgnoreCase))         ga->FixParameter(0,0);
     else  {if (Name.Contains("Outer", TString::kIgnoreCase)) ga->FixParameter(0,1);}
   else                                                       ga->FixParameter(0,2); // Time
-  ga->ReleaseParameter(2); ga->SetParLimits(2,0,10); ga->SetParameter(2,1e-5);
+  ga->FixParameter(2,0);
+  if (Opt.Contains("Conv",TString::kIgnoreCase)) {
+    ga->ReleaseParameter(2); ga->SetParLimits(2,0,10); ga->SetParameter(2,1e-5); //#sigma^{2}
+  }
   ga->FixParameter(3,K3IP); 
   ga->FixParameter(4,K3OP);
   ga->FixParameter(5,0); // shift
   ga->FixParameter(6,0); // noise
-  ga->FixParameter(7,pShaper);
-  ga->FixParameter(8,tau);
+  ga->FixParameter(7,FWHM);
+  ga->FixParameter(8,1);//tau);
   if (Name.Contains("Inner",TString::kIgnoreCase)) ga->FixParameter(9,CrossTalkInner); 
   else                                             ga->FixParameter(9,CrossTalkOuter);
+  ga->FixParameter(10,tau); // frac
+  ga->FixParameter(11,0);   // Sigma for the 2-nd Gauss 
   // Pads
   if (Name.Contains("Pad",TString::kIgnoreCase)) {
     // Cross Talk fit
@@ -682,16 +819,32 @@ void FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
       if (! Opt.Contains("K3S")) ga->FixParameter(2,0);
     }
   }
+  if (Opt.Contains("Noise",TString::kIgnoreCase)) {
+    ga->ReleaseParameter(6);  ga->SetParameter(6,0);  ga->SetParLimits(6, 0,1); // noise
+  }
+  if (Opt.Contains("Sigma",TString::kIgnoreCase)) {
+    ga->ReleaseParameter(10);
+    ga->SetParLimits(10,0,1);
+    ga->ReleaseParameter(11);
+    ga->SetParameter(11,5);
+    ga->SetParLimits(11,1,100);
+  }
   if (Name.Contains("Time",TString::kIgnoreCase)) {
-    ga->ReleaseParameter(5);    ga->SetParLimits(5,-5,5); // shift
-    ga->ReleaseParameter(6);    ga->SetParLimits(6, 0,1); // noise
-    if (Opt.Contains("pShape",TString::kIgnoreCase)) {
-      ga->ReleaseParameter(7); // 
-      ga->SetParLimits(7,2,10);
-    }
-    if (Opt.Contains("Tau",TString::kIgnoreCase)) {
-      ga->SetParLimits(8,20e-9,100e-9);
-    }
+    ga->ReleaseParameter(5);   ga->SetParameter(5,0);  ga->SetParLimits(5,-15,5); // shift
+  }
+  if (Opt.Contains("FWHM",TString::kIgnoreCase)) {
+    ga->ReleaseParameter(7); // 
+    ga->SetParameter(7,FWHM);
+    ga->SetParLimits(7,1,100);
+    ga->ReleaseParameter(8); // 
+    ga->SetParameter(8,0.5);
+    ga->SetParLimits(8,0.1,10);
+  }
+  TString OutFile(fIn->GetName());
+  OutFile.ReplaceAll(".root",".Fit.root");
+  if (! iy) {
+    if (! fOut) fOut = new TFile(OutFile,"update");
+    fOut->cd();
   }
   Int_t Npar = ga->GetNpar();
   TH1D **out = new TH1D*[Npar+1];
@@ -699,7 +852,7 @@ void FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
   Double_t pmin, pmax;
   TString pName("");
   TString pTitle("");
-  for (Int_t i = 0; i <= Npar; i++) {
+  for (Int_t i = 1; i < Npar; i++) {
     pmin = -1.;
     pmax =  1.;
     if (i < Npar) {
@@ -712,12 +865,16 @@ void FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
       pTitle = Form("Chisq for %s",ga->GetParName(i));
     }
     if (pmin < pmax) { 
-      out[i] = (TH1D *) gDirectory->Get(pName.Data());
-      if (! out[i]) 
+      out[i] = (TH1D *) fIn->Get(pName.Data());
+      if (! out[i]) {
 	out[i] = new TH1D(pName.Data(),pTitle.Data(),
 			  ny,h->GetYaxis()->GetXmin(),h->GetYaxis()->GetXmax());
+	out[i]->SetXTitle("Z (cm)");
+	out[i]->SetStats(1000000001);
+      }
     }
   }
+  TCanvas *c1 = new TCanvas(Name.Data(),Name.Data());
   Int_t iy1 = 1;
   Int_t iy2 = ny;
   if (iy) {iy1 = iy2 = iy;}
@@ -725,32 +882,39 @@ void FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
     TH1D *proj = h->ProjectionX(Form("%s_%i%s",Name.Data(),i,opt),i,i);
     proj->SetTitle(Form("Projection in [%4.0f,%4.0f] z range",h->GetYaxis()->GetBinLowEdge(i),h->GetYaxis()->GetBinUpEdge(i)));
     if (proj->GetEntries() < 10) continue;
+    Double_t sum = proj->GetSum();
     proj->Reset();
     Double_t xmin =  9999.;
     Double_t xmax = -9999.;
-    for (Int_t j = 1; j <= nx; j++) {
+    
+    for (Int_t j = 2; j <= nx; j++) {
       Int_t bin    = h->GetBin(j,i);
       Double_t ent = h->GetBinEntries(bin); 
       Double_t val = h->GetBinContent(bin);
       Double_t err = h->GetBinError(bin);
-      Double_t xce = h->GetXaxis()->GetBinCenter(j);
+      Double_t xle = h->GetXaxis()->GetBinLowEdge(j);
+      Double_t xue = h->GetXaxis()->GetBinUpEdge(j);
       //      cout << "j" << "\t" << xce << "\t" << ent << "\t" << val << "\t+/-\t" << err << endl;
       if (ent > 2) {
 	//      if (ent > 10 && val > 3*err && err > 0) {
+	val /= (sum*(xue-xle));
+	err /= (sum*(xue-xle));
 	proj->SetBinContent(j,val);
 	proj->SetBinError(j,err);
 	if (val > 0.01) {
-	  if (xmin > xce) xmin = xce;
-	  if (xmax < xce) xmax = xce;
+	  if (xmin > xle) xmin = xle;
+	  if (xmax < xue) xmax = xue;
 	}
       }
     }
+    //    proj->SetAxisRange(xmin,xmax);
     proj->Fit(ga);
+    c1->Update();
     //    Double_t prob = ga->GetProb();
     Double_t chisq = ga->GetChisquare(); 
-    out[Npar]->SetBinContent(i,chisq);
+    //    out[Npar]->SetBinContent(i,chisq);
     if (chisq < 1.e5) {
-      for (Int_t j = 0; j < Npar; j++) {
+      for (Int_t j = 2; j < Npar; j++) {
 	if (out[j]) {
 	  out[j]->SetBinContent(i,ga->GetParameter(j));
 	  out[j]->SetBinError(i,ga->GetParError(j));
@@ -763,6 +927,29 @@ void FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
     if (Name.Contains("Outer",TString::kIgnoreCase)) out[2]->SetMarkerColor(2);
     out[2]->Fit(gd);
   }
+  for (Int_t j = 2; j < Npar; j++) {
+    if (out[j]) {
+      Double_t ymin = 1e9;
+      Double_t ymax = -1e9;
+      for (Int_t i = iy1; i <= iy2; i++) {
+	Double_t y = out[j]->GetBinContent(i);
+	Double_t dy = out[j]->GetBinError(i);
+	if (dy > 0) {
+	  if (y > ymax) ymax = y;
+	  if (y < ymin) ymin = y;
+	}
+      }
+      if (ymin < ymax) {
+	out[j]->SetMinimum(ymin);
+	out[j]->SetMaximum(ymax);
+      }
+    }
+  } 
+  if (! iy) {
+    fOut->Write();
+    delete fOut; fOut = 0;
+  }
+  fIn->cd();
 }
 //________________________________________________________________________________
 TH1D *RMSSlices(const Char_t *name="InnerPadRc", const Char_t *opt="") {
@@ -845,6 +1032,7 @@ Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va) {
   }
   return r;
 }
+#if 0
 //________________________________________________________________________________
 void AlphaVariation() {
   
@@ -859,6 +1047,7 @@ void AlphaVariation() {
 					       anodeWireRadius,
 					       innerSectorAnodeVoltage);
 }
+#endif
 //______________ EXPONENTIAL INTEGRALS En __________________________________________________________________
 // define: E_n(x) = \int_1^infty{exp(-xt)/t^n}dt, x>0, n=0,1,...
 Double_t expint(Int_t n, Double_t x) {
@@ -987,6 +1176,19 @@ Double_t shapeEI(Double_t *x, Double_t *par) {
   return value;
 }
 //________________________________________________________________________________
+Double_t shapeEI1(Double_t *x, Double_t *par) {
+  Int_t                          k = 0; // Inner
+  if (TMath::Abs(par[0]) > 1e-3) k = 1; // Outer
+  Double_t t0 = t0IO[k];
+  Double_t a = - 1./tauIntegraton;
+  Double_t t  = x[0];
+  Double_t value = 0;
+  if (t <= 0) return value;
+  value = TMath::Exp(a*(t+t0))*(ei(-a*(t+t0))-ei(-a*t0));
+  return value;
+}
+#if 0
+//________________________________________________________________________________
 Double_t shape(Double_t *x, Double_t *par=0) {
   Double_t d =   1./tauP;
   Double_t a[2] = {- 1./tauIntegraton, - 1./tauF};
@@ -998,6 +1200,7 @@ Double_t shape(Double_t *x, Double_t *par=0) {
   }
   return value;
 }
+#endif
 //________________________________________________________________________________
 Double_t shapeEI3(Double_t *x, Double_t *par) {// does not work. It is needed to 1/s
   Int_t                          k = 0; // Inner
@@ -1015,6 +1218,7 @@ Double_t shapeEI3(Double_t *x, Double_t *par) {// does not work. It is needed to
   }
   return value;
 }
+#if 0
 //________________________________________________________________________________
 Double_t shapeEI_Inner(Double_t *x, Double_t *par=0) {
   static TF1* sI = 0;
@@ -1033,7 +1237,8 @@ Double_t shapeEI_Outer(Double_t *x, Double_t *par=0) {
   Double_t t2 = t1 + mTimeBinWidth;
   return sO->Integral(t1,t2)/norm;
 }
-//================================================================================
+#endif
+//________________________________________________________________________________
 void TpcTFitSlices(const Char_t *name = "OuterPadRc") {
   TProfile2D *h = (TProfile2D *) gDirectory->Get(name);
   if (! h) return;
@@ -1042,7 +1247,6 @@ void TpcTFitSlices(const Char_t *name = "OuterPadRc") {
   ga->SetParLimits(1,0.1,100);
   h->FitSlicesX(ga,0,0,10,"r");
 }
-//================================================================================
 #if 0
 //____________________________________________________________
 void CrossTalk(const Char_t *fN = "PadResponseFunctionInner") {
@@ -1098,3 +1302,58 @@ void CrossTalk(const Char_t *fN = "PadResponseFunctionInner") {
   cout << " ========================================================= " << endl;
 }
 #endif
+//________________________________________________________________________________
+void Fits(const Char_t *opt="Rc") {
+  Char_t *InOut[2] = {"Inner","Outer"};
+  Char_t *PadTime[2] =           {"Time"         ,"Pad"};
+  //  Char_t *PadTimeFitOptions[2] = {"FWHMNoise","NoiseConv"};
+  Char_t *PadTimeFitOptions[2] = {"ConvFWHM","Conv"};
+  Char_t *X[2]                 = {"","X"};
+  for (Int_t ix = 0; ix < 2; ix++) {
+    for (Int_t ip = 0; ip < 2; ip++) {
+      for (Int_t io = 0; io < 2; io++) {
+	TString Name(Form("%s%s%s%s",InOut[io],X[ix],PadTime[ip],opt));
+	FitSlices(Name,PadTimeFitOptions[ip]);
+
+	//  FitSlices(Form("InnerTime%s",opt),"FWHMNoiseConv");
+	//  FitSlices(Form("OuterTime%s",opt),"FWHMNoiseConv");
+	//  FitSlices(Form("InnerXTime%s",opt),"FWHMNoiseConv");
+	//  FitSlices(Form("OuterXTime%s",opt),"FWHMNoiseConv");
+	//  FitSlices(Form("InnerPad%s",opt),"NoiseConv");
+	//  FitSlices(Form("OuterPad%s",opt),"NoiseConv");
+	//   FitSlices(Form("InnerXPad%s",opt),"NoiseConv");
+	//   FitSlices(Form("OuterXPad%s",opt),"NoiseConv");
+// 	Name += "_*";
+// 	DrawList(Name);
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+Double_t exp2f(Double_t *x, Double_t *p) {
+  Double_t t = x[0] - p[0];
+  Double_t Value = 0;
+  if (t <= 0.0) return Value;
+  Double_t t1 = t - 0.5;
+  Double_t t2 = t1 + 1;
+  if (t1 < 0) t1 = 0;
+  Double_t Norm = p[1];
+  Double_t a    = p[2];
+  Double_t b    = p[3];
+  if (a != b) {
+    Value = 1./(a-b)*((TMath::Exp(a*t2)-TMath::Exp(a*t1))/a-(TMath::Exp(b*t2)-TMath::Exp(b*t1))/b);
+  } else {
+    Value = TMath::Gamma(2,t2) - TMath::Gamma(2,t1);
+  }
+  return Norm*Value;
+}
+//________________________________________________________________________________
+TF1 *Exp2F() {
+  TF1 *f = new TF1("Exp2F",exp2f,-5,15,4);
+  f->SetParNames("t_0","Norm","a","b");
+  f->SetParameters(-5,1,-1,-2);
+  f->SetParLimits(0,-10,5);
+  f->SetParLimits(2,-100,0);
+  f->SetParLimits(3,-100,0);
+  return f;
+}
