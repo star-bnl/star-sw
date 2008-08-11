@@ -1,7 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgJPWriter.h,v 1.5 2008/08/10 23:04:57 tai Exp $
-#ifndef STJTRGJPWRITER_H
-#define STJTRGJPWRITER_H
+// $Id: StjTrgHTWriter.h,v 1.1 2008/08/11 04:48:30 tai Exp $
+#ifndef STJTRGHTWRITER_H
+#define STJTRGHTWRITER_H
 
 #include "StjTrgWriter.h"
 
@@ -14,27 +14,27 @@ class TTree;
 
 class StjTrg;
 
-class StjTrgJPWriter : public StjTrgWriter {
+class StjTrgHTWriter : public StjTrgWriter {
 
 public:
 
-  StjTrgJPWriter(const char *treeName, const char* treeTitle,
+  StjTrgHTWriter(const char *treeName, const char* treeTitle,
 		 TDirectory* file, StjTrg* trg,
 		 StjTrgPassCondition* fillCondition)
     : StjTrgWriter(treeName, treeTitle, file, trg, fillCondition)
     , _trg(trg)
   { }
-  virtual ~StjTrgJPWriter() { }
+  virtual ~StjTrgHTWriter() { }
 
 private:
 
   virtual void createBranch_trgSpecific(TTree* tree);
   virtual void fillBranch_trgSpecific();
 
-  Int_t    _nJetPatches;
-  Int_t    _jetPatchId[12];
+  Int_t    _nTowers;
+  Int_t    _towerId[4800];
 
   StjTrg* _trg;
 };
 
-#endif // STJTRGJPWRITER_H
+#endif // STJTRGHTWRITER_H

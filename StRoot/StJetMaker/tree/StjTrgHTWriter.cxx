@@ -1,4 +1,4 @@
-// $Id: StjTrgHTWriter.cxx,v 1.3 2008/08/10 23:04:57 tai Exp $
+// $Id: StjTrgHTWriter.cxx,v 1.1 2008/08/11 04:48:29 tai Exp $
 #include "StjTrgHTWriter.h"
 
 #include "StjTrg.h"
