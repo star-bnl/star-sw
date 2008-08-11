@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryCoordinator.h,v 1.2 2008/08/03 22:04:23 tai Exp $
+// $Id: StjTreeEntryCoordinator.h,v 1.1 2008/08/11 01:51:40 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEENTRYCOORDINATOR_H
 #define STJTREEENTRYCOORDINATOR_H
