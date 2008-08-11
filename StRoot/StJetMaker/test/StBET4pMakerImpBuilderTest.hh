@@ -12,7 +12,6 @@ class StBET4pMakerImpBuilderTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( test2006 );
   CPPUNIT_TEST( testBEMCout );
   CPPUNIT_TEST( testTPCout );
-  CPPUNIT_TEST( testReadTree );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -24,11 +23,8 @@ public:
   void test2006();
   void testBEMCout();
   void testTPCout();
-  void testReadTree();
 
 private:
-
-  TDirectory *setupTestTDirecotry();
 
 };
 

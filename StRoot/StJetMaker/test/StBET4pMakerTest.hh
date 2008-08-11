@@ -9,7 +9,6 @@ class StBET4pMakerTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST_SUITE( StBET4pMakerTest );
   CPPUNIT_TEST( testMacroInterface_Construct_mudst_swap );
   CPPUNIT_TEST( testMacroInterface_Construct_mudst );
-  CPPUNIT_TEST( testMacroInterface_Construct_tree );
   CPPUNIT_TEST( testMacroInterface );
   CPPUNIT_TEST( testInit );
   CPPUNIT_TEST_SUITE_END();
@@ -20,7 +19,6 @@ public:
 
   void testMacroInterface_Construct_mudst_swap();
   void testMacroInterface_Construct_mudst();
-  void testMacroInterface_Construct_tree();
   void testMacroInterface();
   void testInit();
 

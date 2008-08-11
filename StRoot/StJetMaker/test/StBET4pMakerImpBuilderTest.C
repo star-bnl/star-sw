@@ -27,17 +27,6 @@
 #include <StjTowerEnergyCutBemcStatus.h>
 #include <StjTowerEnergyCutAdc.h>
 
-#include <StjTreeEntryMaker.h>
-#include <StjTreeEntryCoordinator.h>
-
-#include <TTree.h>
-#include <TFile.h>
-#include <TDirectory.h>
-
-#include <string>
-
-#include "UniqueStringGenerator.hh"
-
 #include "StBET4pMakerImpBuilderTest.hh"
 
 
@@ -246,53 +235,3 @@ void StBET4pMakerImpBuilderTest::test2003()
   delete imp;
  }
 
-TDirectory *StBET4pMakerImpBuilderTest::setupTestTDirecotry()
-{
-  string testdir(UniqueStringGenerator::generate());
-  gROOT->cd();
-  gDirectory->mkdir(testdir.c_str());
-  gDirectory->cd(testdir.c_str());
-  new TTree("bemcTowers", "bemcTowers");
-  new TTree("tpcTracks", "tpcTracks");
-}
-
-void StBET4pMakerImpBuilderTest::testReadTree()
-{
-  TDirectory* testDir = setupTestTDirecotry();
-
-  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(gDirectory);
-  coord->AddTrgTreeName("trgBJP2");
-  coord->AddTrgTreeName("trgBHT2");
-
-  StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", coord);
-  bool         useTPC = true;
-  bool        useBEMC = true;
-  bool        useEEMC = false;
-  bool    use2003Cuts = false;
-  bool    use2005Cuts = true;
-  bool    use2006Cuts = false;
-
-  StBET4pMakerImpBuilder builder;
-  StBET4pMakerImp* imp =  builder.build(useTPC, useBEMC, useEEMC, use2003Cuts, use2005Cuts, use2006Cuts, maker);
-
-  CPPUNIT_ASSERT(  dynamic_cast<StjTPCTree*>(imp->TPC())   );
-  CPPUNIT_ASSERT(  dynamic_cast<StjBEMCTree*>(imp->BEMC()) );
-  CPPUNIT_ASSERT(  dynamic_cast<StjEEMCNull*>(imp->EEMC())  );
-
-  StjTowerEnergyListCut* bemcCut = imp->getBEMCEnergyCut();
-  StjTowerEnergyListCut::CutList bemcCutList = bemcCut->getCutList();
-  CPPUNIT_ASSERT_EQUAL( (size_t)4, bemcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcWestOnly*>(bemcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutEnergy*>(bemcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutBemcStatus*>(bemcCutList[2])     );
-  CPPUNIT_ASSERT(   dynamic_cast<StjTowerEnergyCutAdc*>(bemcCutList[3])     );
-
-  StjTrackListCut* tpcCut    = imp->getTPCTrackCut();
-  StjTrackListCut::CutList tpcCutList = tpcCut->getCutList();
-  CPPUNIT_ASSERT_EQUAL( (size_t)3, tpcCutList.size() );
-  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutDca*>(tpcCutList[0])     );
-  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutEta*>(tpcCutList[1])     );
-  CPPUNIT_ASSERT(   dynamic_cast<StjTrackCutPossibleHitRatio*>(tpcCutList[2])     );
-
-  delete imp;
- }

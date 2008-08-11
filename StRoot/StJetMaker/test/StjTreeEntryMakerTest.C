@@ -3,6 +3,10 @@
 #include <StjTreeEntryMaker.h>
 #include <StjTreeEntryCoordinator.h>
 
+#include <StjTreeIndex.h>
+#include <StjTreeIndexList.h>
+#include <StjTreeIndexListCreator.h>
+
 #include <TFile.h>
 #include <TTree.h>
 
@@ -28,26 +32,23 @@ void StjTreeEntryMakerTest::tearDown()
 
 void StjTreeEntryMakerTest::testMake() 
 {
-  //  TDirectory *inFile = TFile::Open("./jetpart_6143024.root");
   TDirectory* inFile = new TFile("./part_run6143024.root");
 
-  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(inFile);
-  coord->AddTrgTreeName("trgBJP2");
-  coord->AddTrgTreeName("trgBHT2");
+  StjTreeIndexListCreator idxCreator(inFile);
+  idxCreator.AddTrgTreeName("trgBHT2");
+  idxCreator.AddTrgTreeName("trgBJP2");
+  StjTreeIndexList idxList = idxCreator.create();
+
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(idxList);
 
   StjTreeEntryMaker *maker = new StjTreeEntryMaker("entryMaker", coord);
-
-  StjTreeEntryCoordinator::TrgTreeNameList trgTreeNameList = coord->trgTreeNameList(); 
-  CPPUNIT_ASSERT_EQUAL( (size_t)2,  trgTreeNameList.size() );
-  CPPUNIT_ASSERT_EQUAL( string("trgBJP2"),  trgTreeNameList[0] );
-  CPPUNIT_ASSERT_EQUAL( string("trgBHT2"),  trgTreeNameList[1] );
 
   maker->Init();
 
   for(int i = 0; i < 9313; ++i) {
     Int_t ret =  maker->Make();
     if(ret == kStEOF) break;
-    CPPUNIT_ASSERT( 9312 != i );
+    CPPUNIT_ASSERT( 37 != i );
   }
 
 

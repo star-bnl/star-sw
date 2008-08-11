@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.6 2008/08/03 00:26:16 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.7 2008/08/11 02:22:10 tai Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -25,40 +25,19 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _useTPC(true), _useBEMC(true), _useEEMC(false)
   , _use2003Cuts(false), _use2005Cuts(false), _use2006Cuts(false)
   , _useBEMCEnergySum(true)
-  , _useTree(false)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
   , _track2four(*(new StjeTrackListToStMuTrackFourVecList))
   , _energy2four(*(new StjeTowerEnergyListToStMuTrackFourVecList))
 { }
-
-StBET4pMaker::StBET4pMaker(const char* name, StjTreeEntryMaker* maker)
-  : StFourPMaker(name)
-  , _entryMaker(maker)
-  , _uDstMaker(0), _doTowerSwapFix(true)
-  , _useTPC(true), _useBEMC(true), _useEEMC(false)
-  , _use2003Cuts(false), _use2005Cuts(false), _use2006Cuts(false)
-  , _useBEMCEnergySum(false)
-  , _useTree(true)
-  , _imp(0)
-  , _bemcEnergySumCalculator(0)
-  , _track2four(*(new StjeTrackListToStMuTrackFourVecList))
-  , _energy2four(*(new StjeTowerEnergyListToStMuTrackFourVecList))
-{ }
-
 
 Int_t StBET4pMaker::Init()
 {
   StBET4pMakerImpBuilder impBuilder;
-  if(_useTree) {
-    _imp = impBuilder.build(_useTPC, _useBEMC, _useEEMC, _use2003Cuts, _use2005Cuts, _use2006Cuts, _entryMaker);
-  } else {
-    _imp = impBuilder.build(_useTPC, _useBEMC, _useEEMC, _use2003Cuts, _use2005Cuts, _use2006Cuts, _uDstMaker, _doTowerSwapFix);
-  }
+  _imp = impBuilder.build(_useTPC, _useBEMC, _useEEMC, _use2003Cuts, _use2005Cuts, _use2006Cuts, _uDstMaker, _doTowerSwapFix);
   _imp->Init();
 
   StjeBemcEnergySumCalculatorBuilder bemcEnergySumCalculatorBuilder;
-  if(_useTree) _useBEMCEnergySum = false;
   _bemcEnergySumCalculator = bemcEnergySumCalculatorBuilder.build(_useBEMCEnergySum && _useBEMC, _use2003Cuts, _use2005Cuts, _uDstMaker, _doTowerSwapFix);
   _bemcEnergySumCalculator->Init();
 
