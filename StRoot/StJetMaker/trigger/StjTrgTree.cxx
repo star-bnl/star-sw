@@ -1,75 +1,59 @@
-// $Id: StjTrgTree.cxx,v 1.1 2008/08/10 23:04:58 tai Exp $
+// $Id: StjTrgTree.cxx,v 1.2 2008/08/11 06:07:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgTree.h"
 
-// #include "StjTrgReader.h"
-
-#include <TTree.h>
-
-#include <iostream>
+#include "StjTrgReader.h"
 
 ClassImp(StjTrgTree)
 
 using namespace std;
 
-StjTrgTree::StjTrgTree(TTree *tree,
-		       const Int_t& indexMajor, const Int_t& indexMinor,
-		       const char* indexMajorName, const char* indexMinorName
-		       )
-  : _tree(tree)
-  , _indexMajor(indexMajor), _indexMinor(indexMinor)
-{
-  _tree->BuildIndex(indexMajorName, indexMinorName);
-  //  _reader = new StjTrgReader(_tree);
-}
-
 int StjTrgTree::id()
 {
-
+  return _reader->id();
 }
 
 int StjTrgTree::runNumber()
 {
-
+  return _reader->runNumber();
 }
  
 int StjTrgTree::eventId()
 {
-
+  return _reader->eventId();
 }
 
 bool StjTrgTree::hard() const
 {
-
+  return _reader->hard();
 }
 
 bool StjTrgTree::soft() const
 {
-
+  return _reader->soft();
 }
 
 bool StjTrgTree::pass()
 {
-
+  return _reader->pass();
 }
 
 double StjTrgTree::prescale()
 {
-
+  return _reader->prescale();
 }
 
 double StjTrgTree::vertexZ()
 {
-
+  return _reader->vertexZ();
 }
 
 vector<int> StjTrgTree::towers()
 {
-
+  return _reader->towers();
 }
 
 vector<int> StjTrgTree::jetPatches()
 {
-
+  return _reader->jetPatches();
 }
-

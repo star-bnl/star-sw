@@ -36,7 +36,8 @@ libStJetMakerTest_la_SOURCES = 	\
 	StjFourVecListCutTest.C StjFourVecListCutTest.hh  \
 	StjJetListCutTest.C StjJetListCutTest.hh \
 	StPythiaFourPMakerTest.C StPythiaFourPMakerTest.hh \
-	StjTreeIndexListCreatorTest.C StjTreeIndexListCreatorTest.hh
+	StjTreeIndexListCreatorTest.C StjTreeIndexListCreatorTest.hh \
+	StjTrgTreeTest.C StjTrgTreeTest.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \
@@ -48,6 +49,7 @@ libStJetMakerTest_la_CXXFLAGS = \
 	-I../misc \
 	-I../mudst \
 	-I../tree \
+	-I../trigger \
 	-I../../StSpinPool \
 	-I../../StTriggerUtilities \
 	-I$(STAR)/.$(STAR_HOST_SYS)/include \
