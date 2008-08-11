@@ -2,6 +2,10 @@
 
 #include <StjTreeEntryCoordinator.h>
 
+#include <StjTreeIndex.h>
+#include <StjTreeIndexList.h>
+#include <StjTreeIndexListCreator.h>
+
 #include <StjBEMCTree.h>
 #include <StjTPCTree.h>
 
@@ -28,10 +32,20 @@ void StjTreeEntryCoordinatorTest::tearDown()
 
 }
 
+void StjTreeEntryCoordinatorTest::testOne() 
+{
+  TFile* testDir = new TFile("./part_run6143024.root");
+  StjTreeIndexListCreator idxCreator(testDir);
+  idxCreator.AddTrgTreeName("trgBHT2");
+  idxCreator.AddTrgTreeName("trgBJP2");
+  StjTreeIndexList idxList = idxCreator.create();
+
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(idxList);
+
+}
+
 void StjTreeEntryCoordinatorTest::testMake() 
 {
-  //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
-  //  TFile* file = new TFile("./jetpart_6143024.root");
   TFile* file = new TFile("./part_run6143024.root");
 
   StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(file);
