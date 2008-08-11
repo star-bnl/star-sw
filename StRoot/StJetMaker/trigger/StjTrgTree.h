@@ -1,21 +1,18 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgTree.h,v 1.1 2008/08/10 23:04:58 tai Exp $
+// $Id: StjTrgTree.h,v 1.2 2008/08/11 06:07:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGTREE_H
 #define STJTRGTREE_H
 
 #include "StjTrg.h"
 
-class TTree;
+class StjTrgReader;
 
 class StjTrgTree : public StjTrg {
 
 public:
-  StjTrgTree(TTree *tree,
-	     const Int_t& indexMajor, const Int_t& indexMinor,
-	     const char* indexMajorName = "runNumber",
-	     const char* indexMinorName = "eventId"
-	     );
+  StjTrgTree(StjTrgReader* reader)
+    : _reader(reader) { }
   virtual ~StjTrgTree() { }
 
   int id();
@@ -32,10 +29,7 @@ public:
 
 private:
 
-  TTree* _tree;
-
-  const Int_t& _indexMajor;
-  const Int_t& _indexMinor;
+  StjTrgReader* _reader;
 
   ClassDef(StjTrgTree, 1)
 

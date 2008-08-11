@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListReader.h,v 1.6 2008/08/11 03:51:00 tai Exp $
+// $Id: StjTrackListReader.h,v 1.7 2008/08/11 06:07:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLISTREADER_H
 #define STJTRACKLISTREADER_H
@@ -7,9 +7,8 @@
 #include "StjTreeReader.h"
 
 #include "StjTrackList.h"
-#include <Rtypes.h>
 
-class TTree;
+#include <Rtypes.h>
 
 class StjTrackListReader : public StjTreeReader {
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2007 Tai Sakuma <sakuma@mit.edu>
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StppAnaParsTest.hh"
 
 #include <StppAnaPars.h>
