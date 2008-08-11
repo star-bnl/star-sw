@@ -1,26 +1,31 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyListReader.h,v 1.5 2008/08/04 06:10:46 tai Exp $
+// $Id: StjTowerEnergyListReader.h,v 1.6 2008/08/11 03:51:00 tai Exp $
 #ifndef STJTOWERENERGYLISTREADER_H
 #define STJTOWERENERGYLISTREADER_H
 
-#include <TObject.h>
+#include "StjTreeReader.h"
 
 #include "StjTowerEnergyList.h"
 #include <Rtypes.h>
 
 class TTree;
 
-class StjTowerEnergyListReader : public TObject {
+class StjTowerEnergyListReader : public StjTreeReader {
 
 public:
-  StjTowerEnergyListReader(TTree *tree);
+  StjTowerEnergyListReader(TTree *tree) : StjTreeReader(tree) { }
   virtual ~StjTowerEnergyListReader() { }
 
-  StjTowerEnergyList GetEntry(Long64_t entry);
+  StjTowerEnergyList getEnergyList() { return _list; }
 
 private:
 
-  TTree* _tree;
+  void SetBranchAddress(TTree *tree);
+
+  void clearEntry();
+  void readEntry();
+
+  StjTowerEnergyList _list;
 
   Int_t    _runNumber;
   Int_t    _eventId;

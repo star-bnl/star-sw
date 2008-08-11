@@ -1,39 +1,38 @@
-// $Id: StjTowerEnergyListReader.cxx,v 1.4 2008/08/04 06:10:46 tai Exp $
+// $Id: StjTowerEnergyListReader.cxx,v 1.5 2008/08/11 03:50:59 tai Exp $
 #include "StjTowerEnergyListReader.h"
 
 #include <TTree.h>
 
 ClassImp(StjTowerEnergyListReader)
 
-StjTowerEnergyListReader::StjTowerEnergyListReader(TTree *tree)
- : _tree(tree)
+void StjTowerEnergyListReader::SetBranchAddress(TTree *tree)
  {
-  _tree->SetBranchAddress("eventId"    , &_eventId      );
-  _tree->SetBranchAddress("nTowers"    , &_nTowers      );
-  _tree->SetBranchAddress("energy"     ,  _energy       );
-  _tree->SetBranchAddress("towerId"    ,  _towerId      );
-  _tree->SetBranchAddress("towerEta"   ,  _towerEta     );
-  _tree->SetBranchAddress("towerPhi"   ,  _towerPhi     );
-  _tree->SetBranchAddress("adc"        ,  _adc          );
-  _tree->SetBranchAddress("pedestal"   ,  _pedestal     );
-  _tree->SetBranchAddress("rms"        ,  _rms          );
-  _tree->SetBranchAddress("towerR"     ,  _towerR       );
-  _tree->SetBranchAddress("vertexX"    , &_vertexX      );
-  _tree->SetBranchAddress("vertexY"    , &_vertexY      );
-  _tree->SetBranchAddress("vertexZ"    , &_vertexZ      );
-  _tree->SetBranchAddress("status"     ,  _status       );
-  _tree->SetBranchAddress("detectorId" , &_detectorId   );
-  _tree->SetBranchAddress("runNumber"  , &_runNumber    );
+  tree->SetBranchAddress("eventId"    , &_eventId      );
+  tree->SetBranchAddress("nTowers"    , &_nTowers      );
+  tree->SetBranchAddress("energy"     ,  _energy       );
+  tree->SetBranchAddress("towerId"    ,  _towerId      );
+  tree->SetBranchAddress("towerEta"   ,  _towerEta     );
+  tree->SetBranchAddress("towerPhi"   ,  _towerPhi     );
+  tree->SetBranchAddress("adc"        ,  _adc          );
+  tree->SetBranchAddress("pedestal"   ,  _pedestal     );
+  tree->SetBranchAddress("rms"        ,  _rms          );
+  tree->SetBranchAddress("towerR"     ,  _towerR       );
+  tree->SetBranchAddress("vertexX"    , &_vertexX      );
+  tree->SetBranchAddress("vertexY"    , &_vertexY      );
+  tree->SetBranchAddress("vertexZ"    , &_vertexZ      );
+  tree->SetBranchAddress("status"     ,  _status       );
+  tree->SetBranchAddress("detectorId" , &_detectorId   );
+  tree->SetBranchAddress("runNumber"  , &_runNumber    );
  }
 
-
-StjTowerEnergyList StjTowerEnergyListReader::GetEntry(Long64_t entry)
+void StjTowerEnergyListReader::clearEntry()
 {
-  StjTowerEnergyList ret;
+  _list.clear();
+}
 
-  if(entry < 0) return ret;
-
-  if(_tree->GetEntry(entry) <= 0) return ret;
+void StjTowerEnergyListReader::readEntry()
+{
+  clearEntry();
 
   for(int i = 0; i < _nTowers; ++i) {
 
@@ -55,8 +54,7 @@ StjTowerEnergyList StjTowerEnergyListReader::GetEntry(Long64_t entry)
     energy.rms        =  _rms[i];       
     energy.status    =  _status[i];     // 1 is good for BEMC. 0 is good for EEMC      
    
-    ret.push_back(energy);
+    _list.push_back(energy);
   }
 
-  return ret;
 }

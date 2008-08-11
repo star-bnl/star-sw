@@ -2,6 +2,11 @@
 #include <StjTPCTree.h>
 #include "StjTPCTreeTest.hh"
 
+#include <StjTreeEntryCoordinator.h>
+#include <StjTreeIndexList.h>
+
+#include <StjTrackListReader.h>
+
 #include <TFile.h>
 #include <TTree.h>
 
@@ -24,18 +29,20 @@ void StjTPCTreeTest::tearDown()
 
 void StjTPCTreeTest::testGetEntry() 
 {
-  //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
-  //  TFile* file = new TFile("./jetpart_6143024.root");
   TFile* file = new TFile("./part_run6143024.root");
-  
 
   TTree *tree = dynamic_cast<TTree*>(file->Get("tpcTracks"));
 
-  Int_t runNumber = 6143024;
-  Int_t evenId;
-  StjTPCTree* tpc = new StjTPCTree(tree, runNumber, evenId);
+  StjTrackListReader *reader = new StjTrackListReader(tree);
 
-  evenId = 38;
+  tree->BuildIndex("runNumber", "eventId");
+
+  reader->Init();
+
+  StjTPCTree* tpc = new StjTPCTree(reader);
+
+  reader->GetEntryWithIndex(6143024, 38);
+
   StjTrackList trackList = tpc->getTrackList();
   CPPUNIT_ASSERT_EQUAL( (size_t)13, trackList.size() );
   CPPUNIT_ASSERT_EQUAL((Short_t) 87, trackList[0].id );
@@ -53,7 +60,7 @@ void StjTPCTreeTest::testGetEntry()
   CPPUNIT_ASSERT_EQUAL((Short_t)181, trackList[12].id );
 
   
-  evenId = 41;
+  reader->GetEntryWithIndex(6143024, 41);
   trackList = tpc->getTrackList();
   CPPUNIT_ASSERT_EQUAL( (size_t)0, trackList.size() );
 

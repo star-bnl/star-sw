@@ -1,49 +1,49 @@
-// $Id: StjTrackListReader.cxx,v 1.4 2008/08/04 06:10:47 tai Exp $
+// $Id: StjTrackListReader.cxx,v 1.5 2008/08/11 03:51:00 tai Exp $
 #include "StjTrackListReader.h"
 
 #include <TTree.h>
 
 ClassImp(StjTrackListReader)
 
-StjTrackListReader::StjTrackListReader(TTree *tree)
- : _tree(tree)
+void StjTrackListReader::SetBranchAddress(TTree *tree)
 {
-  _tree->SetBranchAddress("eventId"        , &_eventId         );
-  _tree->SetBranchAddress("nTracks"        , &_nTracks         );
-  _tree->SetBranchAddress("pt"             ,  _pt              );
-  _tree->SetBranchAddress("eta"            ,  _eta             );
-  _tree->SetBranchAddress("phi"            ,  _phi             );
-  _tree->SetBranchAddress("exitEta"        ,  _exitEta         );
-  _tree->SetBranchAddress("exitPhi"        ,  _exitPhi         );
-  _tree->SetBranchAddress("trackId"        ,  _trackId         );
-  _tree->SetBranchAddress("flag"           ,  _flag            );
-  _tree->SetBranchAddress("nHits"          ,  _nHits           );
-  _tree->SetBranchAddress("charge"         ,  _charge          );
-  _tree->SetBranchAddress("nHitsPoss"      ,  _nHitsPoss       );
-  _tree->SetBranchAddress("nHitsDedx"      ,  _nHitsDedx       );
-  _tree->SetBranchAddress("nHitsFit"       ,  _nHitsFit        );
-  _tree->SetBranchAddress("nSigmaPion"     ,  _nSigmaPion      );
-  _tree->SetBranchAddress("Tdca"           ,  _Tdca            );
-  _tree->SetBranchAddress("dcaZ"           ,  _dcaZ            );
-  _tree->SetBranchAddress("dcaD"           ,  _dcaD            );
-  _tree->SetBranchAddress("BField"         , &_BField          );
-  _tree->SetBranchAddress("bemcRadius"     , &_bemcRadius      );
-  _tree->SetBranchAddress("dEdx"           ,  _dEdx            );
-  _tree->SetBranchAddress("trackIndex"     ,  _trackIndex      );
-  _tree->SetBranchAddress("exitDetectorId" ,  _exitDetectorId  );
-  _tree->SetBranchAddress("exitTowerId"    ,  _exitTowerId     );
-  _tree->SetBranchAddress("vertexZ"        , &_vertexZ      );
-  _tree->SetBranchAddress("detectorId"     , &_detectorId      );
-  _tree->SetBranchAddress("runNumber"      , &_runNumber       );
+  tree->SetBranchAddress("eventId"        , &_eventId         );
+  tree->SetBranchAddress("nTracks"        , &_nTracks         );
+  tree->SetBranchAddress("pt"             ,  _pt              );
+  tree->SetBranchAddress("eta"            ,  _eta             );
+  tree->SetBranchAddress("phi"            ,  _phi             );
+  tree->SetBranchAddress("exitEta"        ,  _exitEta         );
+  tree->SetBranchAddress("exitPhi"        ,  _exitPhi         );
+  tree->SetBranchAddress("trackId"        ,  _trackId         );
+  tree->SetBranchAddress("flag"           ,  _flag            );
+  tree->SetBranchAddress("nHits"          ,  _nHits           );
+  tree->SetBranchAddress("charge"         ,  _charge          );
+  tree->SetBranchAddress("nHitsPoss"      ,  _nHitsPoss       );
+  tree->SetBranchAddress("nHitsDedx"      ,  _nHitsDedx       );
+  tree->SetBranchAddress("nHitsFit"       ,  _nHitsFit        );
+  tree->SetBranchAddress("nSigmaPion"     ,  _nSigmaPion      );
+  tree->SetBranchAddress("Tdca"           ,  _Tdca            );
+  tree->SetBranchAddress("dcaZ"           ,  _dcaZ            );
+  tree->SetBranchAddress("dcaD"           ,  _dcaD            );
+  tree->SetBranchAddress("BField"         , &_BField          );
+  tree->SetBranchAddress("bemcRadius"     , &_bemcRadius      );
+  tree->SetBranchAddress("dEdx"           ,  _dEdx            );
+  tree->SetBranchAddress("trackIndex"     ,  _trackIndex      );
+  tree->SetBranchAddress("exitDetectorId" ,  _exitDetectorId  );
+  tree->SetBranchAddress("exitTowerId"    ,  _exitTowerId     );
+  tree->SetBranchAddress("vertexZ"        , &_vertexZ      );
+  tree->SetBranchAddress("detectorId"     , &_detectorId      );
+  tree->SetBranchAddress("runNumber"      , &_runNumber       );
 }
 
-StjTrackList StjTrackListReader::GetEntry(Long64_t entry)
+void StjTrackListReader::clearEntry()
 {
-  StjTrackList ret;
+  _list.clear();
+}
 
-  if(entry < 0) return ret;
-
-  if(_tree->GetEntry(entry) <= 0) return ret;
+void StjTrackListReader::readEntry()
+{
+  clearEntry();
 
   for(int i = 0; i < _nTracks; ++i) {
 
@@ -76,8 +76,6 @@ StjTrackList StjTrackListReader::GetEntry(Long64_t entry)
     track.id             = _trackId[i];
     track.vertexZ        = _vertexZ;
 
-    ret.push_back(track);
+    _list.push_back(track);
   }
-
-  return ret;
 }
