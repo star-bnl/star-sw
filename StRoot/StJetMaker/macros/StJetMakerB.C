@@ -38,22 +38,30 @@
 #include <StjFourVecPrint.h>
 #include <StjJetPrint.h>
 
+#include <StjTrg.h>
+
 #include <TDirectory.h>
 
 class StJetMakerB : public StMaker {
 
 public:
   
-  StJetMakerB(const Char_t *name, StjTPC* tpc, StjBEMC* bemc, TDirectory* file)
-    : _tpc(tpc), _bemc(bemc), _file(file) { }
+  StJetMakerB(const Char_t *name,
+	      StjTPC* tpc, StjBEMC* bemc,
+	      StjTrg* trgBJP1, StjTrg* trgBJP2, StjTrg* trgBHT1, StjTrg* trgBHT2,
+	      TDirectory* file)
+    : StMaker(name), _file(file)
+    , _tpc(tpc), _bemc(bemc)
+    , _trgBJP1(trgBJP1), _trgBJP2(trgBJP2), _trgBHT1(trgBHT1), _trgBHT2(trgBHT2)
+  { }
   virtual ~StJetMakerB() { }
 
 private:
 
+  TDirectory* _file;
+
   StjTPC*  _tpc;
   StjBEMC* _bemc;
-
-  TDirectory* _file;
 
   StjTrackListCut _tpcCut1;
   StjTrackListCut _tpcCut2;
@@ -78,6 +86,12 @@ private:
   StjJetListCut _jetCut;
 
   StjJetListWriter* _jetListWriter;
+
+
+  StjTrg* _trgBJP1;
+  StjTrg* _trgBJP2;
+  StjTrg* _trgBHT1;
+  StjTrg* _trgBHT2;
 
   Int_t Init()
   {
@@ -125,6 +139,7 @@ private:
 
   Int_t Make()
   {
+
     StjTrackPrint trackprint;
     StjTowerEnergyPrint towerprint;
     StjFourVecPrint fourprint;
@@ -155,6 +170,13 @@ private:
     jetprint(jetList);
 
     _jetListWriter->Fill(jetList, fourList);
+
+    for(size_t i = 0; i !=  _trgBJP2->jetPatches().size(); ++i) {
+      cout << "JP " << _trgBJP2->jetPatches()[i] << endl;
+    }
+    for(size_t i = 0; i !=  _trgBHT2->towers().size(); ++i) {
+      cout << "HT " << _trgBHT2->towers()[i] << endl;
+    }
 
     return kStOk;
   }
