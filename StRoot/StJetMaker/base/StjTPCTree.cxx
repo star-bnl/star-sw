@@ -1,26 +1,12 @@
-// $Id: StjTPCTree.cxx,v 1.4 2008/08/03 23:04:06 tai Exp $
+// $Id: StjTPCTree.cxx,v 1.5 2008/08/11 03:50:42 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTPCTree.h"
 
 #include "StjTrackListReader.h"
 
-#include <TTree.h>
-
 ClassImp(StjTPCTree)
-
-StjTPCTree::StjTPCTree(TTree *tree,
-	       const Int_t& indexMajor, const Int_t& indexMinor,
-	       const char* indexMajorName, const char* indexMinorName
-	       )
- : _tree(tree)
- , _indexMajor(indexMajor), _indexMinor(indexMinor)
-{
-  _tree->BuildIndex(indexMajorName, indexMinorName);
-  _reader = new StjTrackListReader(_tree);
-}
 
 StjTrackList StjTPCTree::getTrackList()
 {
-  Long64_t entry = _tree->GetEntryNumberWithIndex(_indexMajor, _indexMinor);
-  return _reader->GetEntry(entry);
+  return _reader->getTrackList();
 }

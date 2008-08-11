@@ -8,7 +8,6 @@ class StjTreeEntryCoordinatorTest : public CPPUNIT_NS::TestFixture
 {
   CPPUNIT_TEST_SUITE( StjTreeEntryCoordinatorTest );
   CPPUNIT_TEST( testOne );
-  CPPUNIT_TEST( testMake );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -16,7 +15,6 @@ public:
   void tearDown();
 
   void testOne();
-  void testMake();
 
 private:
 

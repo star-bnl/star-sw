@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryCoordinator.h,v 1.2 2008/08/11 02:22:20 tai Exp $
+// $Id: StjTreeEntryCoordinator.h,v 1.3 2008/08/11 03:51:01 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEENTRYCOORDINATOR_H
 #define STJTREEENTRYCOORDINATOR_H
@@ -15,6 +15,8 @@
 #include <set>
 
 class TDirectory;
+
+class StjTreeReader;
 
 class StjTreeEntryCoordinator : public TObject {
 
@@ -39,7 +41,12 @@ public:
   const Int_t& indexMajor() const { return _indexMajor; }
   const Int_t& indexMinor() const { return _indexMinor; }
 
+  void AddReader(StjTreeReader* reader) { _readerList.push_back(reader); }
+
 private:
+
+  typedef std::vector<StjTreeReader*> ReaderList;
+  ReaderList _readerList;
 
   std::string _indexMajorName;
   std::string _indexMinorName;

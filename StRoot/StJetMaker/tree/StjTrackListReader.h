@@ -1,27 +1,32 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListReader.h,v 1.5 2008/08/04 06:10:47 tai Exp $
+// $Id: StjTrackListReader.h,v 1.6 2008/08/11 03:51:00 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLISTREADER_H
 #define STJTRACKLISTREADER_H
 
-#include <TObject.h>
+#include "StjTreeReader.h"
 
 #include "StjTrackList.h"
 #include <Rtypes.h>
 
 class TTree;
 
-class StjTrackListReader : public TObject {
+class StjTrackListReader : public StjTreeReader {
 
 public:
-  StjTrackListReader(TTree *tree);
+  StjTrackListReader(TTree *tree) : StjTreeReader(tree) { }
   virtual ~StjTrackListReader() { }
 
-  StjTrackList GetEntry(Long64_t entry);
+  StjTrackList getTrackList() { return _list; }
 
 private:
 
-  TTree* _tree;
+  void SetBranchAddress(TTree *tree);
+
+  void clearEntry();
+  void readEntry();
+
+  StjTrackList _list;
 
   Int_t    _runNumber;
   Int_t    _eventId;

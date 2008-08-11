@@ -2,6 +2,8 @@
 #include <StjBEMCTree.h>
 #include "StjBEMCTreeTest.hh"
 
+#include <StjTowerEnergyListReader.h>
+
 #include <TFile.h>
 #include <TTree.h>
 
@@ -25,22 +27,23 @@ void StjBEMCTreeTest::tearDown()
 
 void StjBEMCTreeTest::testGetEntry() 
 {
-  //  TFile* file = new TFile("/star/institutions/mit/tai/testData/jetpart_6143024.root");
-  //  TFile* file = new TFile("./jetpart_6143024.root");
   TFile* file = new TFile("./part_run6143024.root");
 
   TTree *tree = dynamic_cast<TTree*>(file->Get("bemcTowers"));
 
-  Int_t runNumber = 6143024;
-  Int_t evenId;
-  StjBEMCTree* bemc = new StjBEMCTree(tree, runNumber, evenId);
+  StjTowerEnergyListReader *reader = new StjTowerEnergyListReader(tree);
 
+  tree->BuildIndex("runNumber", "eventId");
 
-  evenId = 38;
+  reader->Init();
+
+  StjBEMCTree* bemc = new StjBEMCTree(reader);
+
+  reader->GetEntryWithIndex(6143024, 38);
   StjTowerEnergyList energyList = bemc->getEnergyList();
   CPPUNIT_ASSERT_EQUAL( (size_t)65, energyList.size() );
 
-  evenId = 41;
+  reader->GetEntryWithIndex(6143024, 41);
   energyList = bemc->getEnergyList();
   CPPUNIT_ASSERT_EQUAL( (size_t)0, energyList.size() );
 
