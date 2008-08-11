@@ -35,7 +35,7 @@ void StjTreeEntryCoordinatorTest::tearDown()
 
 }
 
-void StjTreeEntryCoordinatorTest::testOne() 
+void StjTreeEntryCoordinatorTest::testTree() 
 {
   TFile* testDir = new TFile("./part_run6143024.root");
   StjTreeIndexListCreator idxCreator(testDir);
@@ -57,11 +57,59 @@ void StjTreeEntryCoordinatorTest::testOne()
 
   coord->Init();
 
+  int i(0);
   while(!coord->eof()) {
     coord->Make();
-    //    StjTrackList trackList = tpc->getTrackList();
-    //    StjTowerEnergyList energyList = bemc->getEnergyList();
-    //    cout << trackList.size() << " " << energyList.size() << endl;
+    StjTrackList trackList = tpc->getTrackList();
+    StjTowerEnergyList energyList = bemc->getEnergyList();
+    //    cout << " " << i++ << " " << trackList.size() << " " << energyList.size() << endl;
   }
 
+}
+
+void StjTreeEntryCoordinatorTest::testEmpty() 
+{
+  StjTreeIndexList idxList;
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(idxList);
+
+  coord->Init();
+
+  CPPUNIT_ASSERT( coord->eof() );
+}
+
+void StjTreeEntryCoordinatorTest::testOne() 
+{
+  StjTreeIndexList idxList;
+  idxList.push_back(StjTreeIndex(10, 101));
+
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(idxList);
+
+  coord->Init();
+
+  CPPUNIT_ASSERT( ! coord->eof() );
+
+  coord->Make();
+
+  CPPUNIT_ASSERT( coord->eof() );
+}
+
+void StjTreeEntryCoordinatorTest::testTwo() 
+{
+  StjTreeIndexList idxList;
+  idxList.push_back(StjTreeIndex(10, 101));
+  idxList.push_back(StjTreeIndex(10, 103));
+
+  StjTreeEntryCoordinator* coord = new StjTreeEntryCoordinator(idxList);
+
+  coord->Init();
+
+  CPPUNIT_ASSERT( ! coord->eof() );
+
+  coord->Make();
+
+  CPPUNIT_ASSERT( ! coord->eof() );
+
+  coord->Make();
+
+  CPPUNIT_ASSERT( coord->eof() );
 }
