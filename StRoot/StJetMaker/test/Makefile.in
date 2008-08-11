@@ -64,7 +64,7 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libStJetMakerTest_la_LIBADD =
-am_libStJetMakerTest_la_OBJECTS =  \
+am_libStJetMakerTest_la_OBJECTS = libStJetMakerTest_la-Misc.lo \
 	libStJetMakerTest_la-UniqueStringGenerator.lo \
 	libStJetMakerTest_la-TreeContentTest.lo \
 	libStJetMakerTest_la-StJetMakerTest.lo \
@@ -251,7 +251,7 @@ TestApp_LDADD = \
 
 lib_LTLIBRARIES = libStJetMakerTest.la
 libStJetMakerTest_la_SOURCES = \
-	Misc.hh \
+	Misc.hh Misc.C \
 	UniqueStringGenerator.C UniqueStringGenerator.hh \
 	TreeContentTest.C TreeContentTest.hh \
 	StJetMakerTest.C StJetMakerTest.hh \
@@ -390,6 +390,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestApp-TestMain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-LoopTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-Misc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-RunJetFinderTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StBET4pMakerImpBuilderTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StBET4pMakerImpTest.Plo@am__quote@
@@ -434,6 +435,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+libStJetMakerTest_la-Misc.lo: Misc.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-Misc.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-Misc.Tpo" -c -o libStJetMakerTest_la-Misc.lo `test -f 'Misc.C' || echo '$(srcdir)/'`Misc.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-Misc.Tpo" "$(DEPDIR)/libStJetMakerTest_la-Misc.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-Misc.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Misc.C' object='libStJetMakerTest_la-Misc.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-Misc.lo `test -f 'Misc.C' || echo '$(srcdir)/'`Misc.C
 
 libStJetMakerTest_la-UniqueStringGenerator.lo: UniqueStringGenerator.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-UniqueStringGenerator.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-UniqueStringGenerator.Tpo" -c -o libStJetMakerTest_la-UniqueStringGenerator.lo `test -f 'UniqueStringGenerator.C' || echo '$(srcdir)/'`UniqueStringGenerator.C; \

@@ -1,8 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeEntryCoordinator.h,v 1.1 2008/08/11 01:51:40 tai Exp $
+// $Id: StjTreeEntryCoordinator.h,v 1.2 2008/08/11 02:22:20 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEENTRYCOORDINATOR_H
 #define STJTREEENTRYCOORDINATOR_H
+
+#include "StjTreeIndexList.h"
 
 #include <TObject.h>
 
@@ -17,10 +19,10 @@ class TDirectory;
 class StjTreeEntryCoordinator : public TObject {
 
 public:
-  StjTreeEntryCoordinator(TDirectory* file) 
+  StjTreeEntryCoordinator(const StjTreeIndexList& idxList) 
     : _indexMajorName("runNumber")
     , _indexMinorName("eventId")
-    , _file(file)
+    , _indexList(idxList)
     , _eof(false)
   { }
 
@@ -37,30 +39,7 @@ public:
   const Int_t& indexMajor() const { return _indexMajor; }
   const Int_t& indexMinor() const { return _indexMinor; }
 
-  void AddTrgTreeName(const char* treeName) { _trgTreeNameList.push_back(treeName); }
-
-  typedef std::vector<std::string> TrgTreeNameList;
-  TrgTreeNameList trgTreeNameList() const { return _trgTreeNameList; }
-
-  TDirectory* file() { return _file; }
-
 private:
-
-  struct index_t {
-    Int_t major;
-    Int_t minor;
-  };
-
-  friend bool operator<(const index_t& v1, const index_t& v2) {
-    if(v1.major != v2.major) return v1.major < v2.major;
-    return v1.minor < v2.minor;
-  }
-
-  typedef std::vector<index_t> IndexList;
-  typedef std::set<index_t> IndexSet;
-
-  IndexList buildIndexListToRun();
-  IndexList getIndexListOfRunsPassedFor(const char* treeName);
 
   std::string _indexMajorName;
   std::string _indexMinorName;
@@ -68,18 +47,13 @@ private:
   Int_t _indexMajor;
   Int_t _indexMinor;
 
-  IndexList _indexList;
+  StjTreeIndexList _indexList;
 
   size_t _currentIndexOfIndexList;
 
-  TDirectory *_file;
-
   bool _eof;
 
-  TrgTreeNameList _trgTreeNameList;
-
   ClassDef(StjTreeEntryCoordinator, 1)
-
 };
 
 #endif // STJTREEENTRYCOORDINATOR_H

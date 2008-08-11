@@ -20,21 +20,12 @@ void StBET4pMakerTest::tearDown()
 void StBET4pMakerTest::testMacroInterface_Construct_mudst_swap()
 {
   StBET4pMaker* maker = new StBET4pMaker("BET4pMaker", (StMuDstMaker*)0, true);
-  CPPUNIT_ASSERT_EQUAL(  false, maker->useTree() );
   delete maker;
 }
 
 void StBET4pMakerTest::testMacroInterface_Construct_mudst()
 {
   StBET4pMaker* maker = new StBET4pMaker("BET4pMaker", (StMuDstMaker*)0);
-  CPPUNIT_ASSERT_EQUAL(  false, maker->useTree() );
-  delete maker;
-}
-
-void StBET4pMakerTest::testMacroInterface_Construct_tree()
-{
-  StBET4pMaker* maker = new StBET4pMaker("BET4pMaker", (StjTreeEntryMaker*)0);
-  CPPUNIT_ASSERT_EQUAL(   true, maker->useTree() );
   delete maker;
 }
 

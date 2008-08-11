@@ -12,7 +12,7 @@ TestApp_LDADD = \
 
 lib_LTLIBRARIES = libStJetMakerTest.la
 libStJetMakerTest_la_SOURCES = 	\
-	Misc.hh \
+	Misc.hh Misc.C \
 	UniqueStringGenerator.C UniqueStringGenerator.hh \
 	TreeContentTest.C TreeContentTest.hh \
 	StJetMakerTest.C StJetMakerTest.hh \

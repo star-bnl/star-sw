@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.6 2008/08/03 00:26:16 tai Exp $
+// $Id: StBET4pMaker.h,v 1.7 2008/08/11 02:22:11 tai Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -21,7 +21,6 @@ class StBET4pMaker : public StFourPMaker {
 public:
     
   StBET4pMaker(const char* name, StMuDstMaker* maker, bool doTowerSwapFix = true);
-  StBET4pMaker(const char* name, StjTreeEntryMaker* maker);
     
   virtual ~StBET4pMaker() {};
     
@@ -47,10 +46,8 @@ public:
 
   StBET4pMakerImp* GetImp() { return _imp; }
 
-  bool useTree() const { return _useTree; }
-
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.6 2008/08/03 00:26:16 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.7 2008/08/11 02:22:11 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -66,8 +63,6 @@ private:
   bool _use2005Cuts;
   bool _use2006Cuts;
   bool _useBEMCEnergySum;
-
-  bool _useTree;
 
   StBET4pMakerImp* _imp;
 
