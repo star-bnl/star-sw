@@ -1,4 +1,4 @@
-// $Id: StjTreeEntryCoordinator.cxx,v 1.3 2008/08/11 03:51:00 tai Exp $
+// $Id: StjTreeEntryCoordinator.cxx,v 1.4 2008/08/11 04:32:19 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTreeEntryCoordinator.h"
 
@@ -12,23 +12,20 @@ using namespace std;
 
 void StjTreeEntryCoordinator::Init()
 {
-  for(ReaderList::iterator it = _readerList.begin(); it != _readerList.end(); ++it) {
-    (*it)->Init();
+  for(ReaderList::iterator reader = _readerList.begin(); reader != _readerList.end(); ++reader) {
+    (*reader)->Init();
   }
 
-  _currentIndexOfIndexList = 0;
-  _eof = _indexList.empty();
+  _it = _indexList.begin();
 }
 
 void StjTreeEntryCoordinator::Make()
 {
-  _indexMajor = _indexList[_currentIndexOfIndexList].major();
-  _indexMinor = _indexList[_currentIndexOfIndexList].minor();
-  ++_currentIndexOfIndexList;
-  if(_indexList.size() == _currentIndexOfIndexList) _eof = true;
+  if(eof()) return;
 
-  for(ReaderList::iterator it = _readerList.begin(); it != _readerList.end(); ++it) {
-    (*it)->GetEntryWithIndex(_indexMajor, _indexMinor);
+  for(ReaderList::iterator reader = _readerList.begin(); reader != _readerList.end(); ++reader) {
+    (*reader)->GetEntryWithIndex(*_it);
   }
 
+  ++_it;
 }
