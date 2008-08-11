@@ -32,17 +32,16 @@ void StjTreeIndexListCreatorTest::tearDown()
 void StjTreeIndexListCreatorTest::testOne()
 {
   TDirectory* testDir = setupTestTDirecotry();
-  testDir->ls();
 
   StjTreeIndexListCreator idxCreator(testDir);
   idxCreator.AddTrgTreeName("trgBHT2");
   idxCreator.AddTrgTreeName("trgBJP2");
 
-  StjTreeIndexList* actualList = idxCreator.create();
+  StjTreeIndexList actualList = idxCreator.create();
 
-  StjTreeIndexList* expectedList = createExpectedList();
+  StjTreeIndexList expectedList = createExpectedList();
 
-  CPPUNIT_ASSERT_EQUAL( *expectedList, *actualList);
+  CPPUNIT_ASSERT_EQUAL( expectedList, actualList);
 
 }
 
@@ -51,49 +50,48 @@ TDirectory *StjTreeIndexListCreatorTest::setupTestTDirecotry()
   return new TFile("./part_run6143024.root");
 }
 
-StjTreeIndexList *StjTreeIndexListCreatorTest::createExpectedList()
+StjTreeIndexList StjTreeIndexListCreatorTest::createExpectedList()
 {
-  StjTreeIndexList* ret = new StjTreeIndexList("runNumber", "eventId");
+  StjTreeIndexList ret;
 
-  ret->push_back(StjTreeIndex(6143024, 3));
+  ret.push_back(StjTreeIndex(6143024,     3));;
+  ret.push_back(StjTreeIndex(6143024,     4));
+  ret.push_back(StjTreeIndex(6143024,     6));
+  ret.push_back(StjTreeIndex(6143024,  1095));
+  ret.push_back(StjTreeIndex(6143024,  4823));
+  ret.push_back(StjTreeIndex(6143024, 14619));
+  ret.push_back(StjTreeIndex(6143024, 17180));
+  ret.push_back(StjTreeIndex(6143024, 18358));
+  ret.push_back(StjTreeIndex(6143024, 20875));
+  ret.push_back(StjTreeIndex(6143024, 23411));
+  ret.push_back(StjTreeIndex(6143024, 24897));
+  ret.push_back(StjTreeIndex(6143024, 28661));
+  ret.push_back(StjTreeIndex(6143024, 31930));
+  ret.push_back(StjTreeIndex(6143024, 33177));
+  ret.push_back(StjTreeIndex(6143024, 34414));
+  ret.push_back(StjTreeIndex(6143024, 38442));
+  ret.push_back(StjTreeIndex(6143024, 39305));
+  ret.push_back(StjTreeIndex(6143024, 43061));
+  ret.push_back(StjTreeIndex(6143024, 43439));
+  ret.push_back(StjTreeIndex(6143024, 45577));
+  ret.push_back(StjTreeIndex(6143024, 48044));
+  ret.push_back(StjTreeIndex(6143024, 53010));
+  ret.push_back(StjTreeIndex(6143024, 53026));
+  ret.push_back(StjTreeIndex(6143024, 55446));
+  ret.push_back(StjTreeIndex(6143024, 55474));
+  ret.push_back(StjTreeIndex(6143024, 55720));
+  ret.push_back(StjTreeIndex(6143024, 56694));
+  ret.push_back(StjTreeIndex(6143024, 56712));
+  ret.push_back(StjTreeIndex(6143024, 64039));
+  ret.push_back(StjTreeIndex(6143024, 67815));
+  ret.push_back(StjTreeIndex(6143024, 71596));
+  ret.push_back(StjTreeIndex(6143024, 72863));
+  ret.push_back(StjTreeIndex(6143024, 80160));
+  ret.push_back(StjTreeIndex(6143024, 81099));
+  ret.push_back(StjTreeIndex(6143024, 81290));
+  ret.push_back(StjTreeIndex(6143024, 81384));
+  ret.push_back(StjTreeIndex(6143024, 86137));
 
   return ret;
 }
 
-// 6143024 *         3 *
-// 6143024 *         4 *
-// 6143024 *         6 *
-// 6143024 *      1095 *
-// 6143024 *      4823 *
-// 6143024 *     14619 *
-// 6143024 *     17180 *
-// 6143024 *     18358 *
-// 6143024 *     20875 *
-// 6143024 *     23411 *
-// 6143024 *     24897 *
-// 6143024 *     28661 *
-// 6143024 *     31930 *
-// 6143024 *     33177 *
-// 6143024 *     34414 *
-// 6143024 *     38442 *
-// 6143024 *     39305 *
-// 6143024 *     43061 *
-// 6143024 *     43439 *
-// 6143024 *     45577 *
-// 6143024 *     48044 *
-// 6143024 *     53010 *
-// 6143024 *     53026 *
-// 6143024 *     55446 *
-// 6143024 *     55474 *
-// 6143024 *     55720 *
-// 6143024 *     56694 *
-// 6143024 *     56712 *
-// 6143024 *     64039 *
-// 6143024 *     67815 *
-// 6143024 *     71596 *
-// 6143024 *     72863 *
-// 6143024 *     80160 *
-// 6143024 *     81290 *
-// 6143024 *     81099 *
-// 6143024 *     81384 *
-// 6143024 *     86137 *
