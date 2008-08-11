@@ -20,7 +20,7 @@ private:
 
   TDirectory *setupTestTDirecotry();
 
-  StjTreeIndexList *createExpectedList();
+  StjTreeIndexList createExpectedList();
   
 };
 

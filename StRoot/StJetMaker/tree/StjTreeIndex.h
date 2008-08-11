@@ -1,11 +1,13 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeIndex.h,v 1.3 2008/08/11 00:53:13 tai Exp $
+// $Id: StjTreeIndex.h,v 1.4 2008/08/11 01:28:40 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEINDEX_H
 #define STJTREEINDEX_H
 
 #include <Rtypes.h>
 #include <TObject.h>
+
+#include <ostream>
 
 class StjTreeIndex : public TObject {
 
@@ -24,5 +26,29 @@ private:
   ClassDef(StjTreeIndex, 1)
 
 };
+
+inline bool operator<(const StjTreeIndex& v1, const StjTreeIndex& v2) {
+  if(v1.major() != v2.major()) return v1.major() < v2.major();
+  return v1.minor() < v2.minor();
+}
+
+inline bool operator>(const StjTreeIndex& v1, const StjTreeIndex& v2) {
+    return v2 < v1;
+}
+
+inline bool operator==(const StjTreeIndex& v1, const StjTreeIndex& v2){
+  return !( v1 > v2 ) && !( v2 > v1);
+}
+
+inline bool operator!=(const StjTreeIndex& v1, const StjTreeIndex& v2)
+{
+  return(!(v1 == v2));
+}
+
+inline std::ostream& operator<<(std::ostream& out, const StjTreeIndex& v)
+{
+  out << "StjTreeIndex: " << v.major() << " " << v.minor();
+  return out;
+}
 
 #endif // STJTREEINDEX_H
