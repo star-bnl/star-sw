@@ -1,10 +1,8 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeIndexCreator.h,v 1.1 2008/08/10 23:41:46 tai Exp $
+// $Id: StjTreeIndexListCreator.h,v 1.1 2008/08/11 00:25:14 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#ifndef STJTREEINDEXCREATOR_H
-#define STJTREEINDEXCREATOR_H
-
-#include "StjTreeIndex.h"
+#ifndef STJTREEINDEXLISTCREATOR_H
+#define STJTREEINDEXLISTCREATOR_H
 
 #include <TObject.h>
 
@@ -14,15 +12,17 @@
 
 class TDirectory;
 
-class StjTreeIndexCreator : public TObject {
+class StjTreeIndexList;
+
+class StjTreeIndexListCreator : public TObject {
 
 public:
-  StjTreeIndexCreator(TDirectory *file) { }
-  virtual ~StjTreeIndexCreator() { }
+  StjTreeIndexListCreator(TDirectory *file) { }
+  virtual ~StjTreeIndexListCreator() { }
 
   void AddTrgTreeName(const char* treeName) { _trgTreeNameList.push_back(treeName); }
 
-  StjTreeIndex create() { }
+  StjTreeIndexList* create();
 
   typedef std::vector<std::string> TrgTreeNameList;
   TrgTreeNameList trgTreeNameList() const { return _trgTreeNameList; }
@@ -31,8 +31,8 @@ private:
 
   TrgTreeNameList _trgTreeNameList;
 
-  ClassDef(StjTreeIndexCreator, 1)
+  ClassDef(StjTreeIndexListCreator, 1)
 
 };
 
-#endif // STJTREEINDEXCREATOR_H
+#endif // STJTREEINDEXLISTCREATOR_H
