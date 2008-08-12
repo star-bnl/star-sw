@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.h,v 1.8 2007/09/25 13:36:55 bouchet Exp $
+// $Id: StSsdDbMaker.h,v 1.9 2008/08/12 22:45:47 bouchet Exp $
 //
 // $Log: StSsdDbMaker.h,v $
+// Revision 1.9  2008/08/12 22:45:47  bouchet
+// use of SsdLaddersOnSectors,SsdOnGlobal,SsdSectorsOnGlobal,SsdWafersOnLadders tables to calculate ssdWafersPositions;add Get methods to access the tables
+//
 // Revision 1.8  2007/09/25 13:36:55  bouchet
 // add m_Mode to constructor
 //
@@ -42,6 +45,7 @@ class StSsdDbMaker : public StMaker {
   slsCtrl_st            *m_ctrl;//!
   Int_t                   mode;//!
   static THashList *fRotList;
+
  public: 
   StSsdDbMaker(const char *name="SsdDb");
   virtual       ~StSsdDbMaker();
@@ -55,8 +59,11 @@ class StSsdDbMaker : public StMaker {
   virtual StSsdBarrel  *GetSsd() {return mySsd;}
   virtual slsCtrl_st   *GetSlsCtrl() {return m_ctrl;}
   virtual Int_t        GetMode(){return mode;}
+  virtual St_ssdWafersPosition *GetssdWafersPos(){return m_positions;}
+  virtual St_ssdDimensions     *GetssdDimensions(){return m_dimensions;}
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.8 2007/09/25 13:36:55 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.9 2008/08/12 22:45:47 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSsdDbMaker,0)   //StAF chain virtual base class for Makers
 };
 // Global pointers:
