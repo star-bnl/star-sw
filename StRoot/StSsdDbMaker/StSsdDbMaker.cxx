@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.cxx,v 1.14 2008/08/01 22:07:31 bouchet Exp $
+// $Id: StSsdDbMaker.cxx,v 1.15 2008/08/12 22:45:47 bouchet Exp $
 //
 // $Log: StSsdDbMaker.cxx,v $
+// Revision 1.15  2008/08/12 22:45:47  bouchet
+// use of SsdLaddersOnSectors,SsdOnGlobal,SsdSectorsOnGlobal,SsdWafersOnLadders tables to calculate ssdWafersPositions;add Get methods to access the tables
+//
 // Revision 1.14  2008/08/01 22:07:31  bouchet
 // fix bug for geometry : simulation takes ideal geometry
 //
@@ -61,8 +64,12 @@ Int_t StSsdDbMaker::Init()
 {
   LOG_DEBUG << "Init - Start - " << endm;
   if( m_Mode == 1) {
-    LOG_INFO << "Init setting WafersPostions to sim" << endm;
-    SetFlavor("sim","ssdWafersPosition");   
+    LOG_INFO << "Init setting WafersPositions to simulation" << endm;
+    //SetFlavor("sim","ssdWafersPosition");   
+    SetFlavor("sim","SsdOnGlobal");
+    SetFlavor("sim","SsdSectorsOnGlobal");
+    SetFlavor("sim","SsdLaddersOnSectors");
+    SetFlavor("sim","SsdWafersOnLadders");
   }
   LOG_DEBUG << "StSsdDbMaker::Init() - Done - "<<endm;
   return StMaker::Init();
@@ -76,16 +83,13 @@ Int_t StSsdDbMaker::InitRun(Int_t runNumber) {
     return kStFatal;
   }   
   m_dimensions    =  (St_ssdDimensions     *) GetInputDB("Geometry/ssd/ssdDimensions"); 
-  if(m_Mode ==1 ){
-    m_positions = (St_ssdWafersPosition  *) GetInputDB("Geometry/ssd/ssdWafersPosition");}
-  else
-    {
-      m_positions = CalculateWafersPosition();  
-    }
+  m_positions     =  CalculateWafersPosition();  
+
   if ((!m_dimensions)||(!m_positions)) {
     gMessMgr->Error() << "No  access to geometry parameters" << endm;
     return kStFatal;
-  }  
+  }
+  LOG_DEBUG << " geometry loaded " << endm;
   St_ssdConfiguration* configTable = (St_ssdConfiguration*) GetInputDB("Geometry/ssd/ssdConfiguration");
   if (!configTable) {
     gMessMgr->Error() << "InitRun : No access to ssdConfiguration database" << endm;
@@ -97,6 +101,7 @@ Int_t StSsdDbMaker::InitRun(Int_t runNumber) {
   mySsd = new StSsdBarrel(dimensions, m_config);
   if (Debug()) mySsd->SetDebug(Debug());
   mySsd->initLadders(m_positions);
+  LOG_DEBUG << " StSsdBarrel built " << endm;
   return kStOK;
 }
 //_____________________________________________________________________________
