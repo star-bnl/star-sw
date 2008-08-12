@@ -31,6 +31,10 @@
 
 #include <StjJetListCut.h>
 #include <StjJetCutPt.h>
+#include <StjJetCutTrgBHT.h>
+#include <StjJetCutTrgBJP.h>
+#include <StjTrgBEMCJetPatchTowerIdMap2005.h>
+
 #include <StjJetListWriter.h>
 
 #include <StjTrackPrint.h>
@@ -84,6 +88,8 @@ private:
   StjRunJetFinder _jetFinder;
 
   StjJetListCut _jetCut;
+  StjJetListCut _jetCutBHT2;
+  StjJetListCut _jetCutBJP2;
 
   StjJetListWriter* _jetListWriter;
 
@@ -132,6 +138,9 @@ private:
 
     _jetCut.addCut(new StjJetCutPt(5.0));
 
+    _jetCutBHT2.addCut(new StjJetCutTrgBHT(_trgBHT2));
+    _jetCutBJP2.addCut(new StjJetCutTrgBJP(_trgBJP2, new StjTrgBEMCJetPatchTowerIdMap2005));
+
     _jetListWriter = new StjJetListWriter("jets", "fours", _file);
 
     return kStOk;
@@ -167,7 +176,10 @@ private:
 
     jetList   = _jetCut(jetList);
 
-    jetprint(jetList);
+    vector<StjJet> jetListBHT2 = _jetCutBHT2(jetList);
+    vector<StjJet> jetListBJP2 = _jetCutBJP2(jetList);
+
+    //    jetprint(jetListBJP2);
 
     _jetListWriter->Fill(jetList, fourList);
 
