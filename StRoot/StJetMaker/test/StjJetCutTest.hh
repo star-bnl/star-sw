@@ -10,6 +10,7 @@ class StjJetCutTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testPt );
   CPPUNIT_TEST( testEta );
   CPPUNIT_TEST( testNFourVecs );
+  CPPUNIT_TEST( testDetectorEta );
   CPPUNIT_TEST( testTrgBHT_notPass );
   CPPUNIT_TEST( testTrgBHT_pass );
   CPPUNIT_TEST( testTrgBHT_type );
@@ -28,6 +29,7 @@ public:
 
   void testPt();
   void testEta();
+  void testDetectorEta();
   void testNFourVecs();
   void testTrgBHT_notPass();
   void testTrgBHT_pass();

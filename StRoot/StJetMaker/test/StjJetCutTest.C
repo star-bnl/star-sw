@@ -1,6 +1,7 @@
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include <StjJetCutPt.h>
 #include <StjJetCutEta.h>
+#include <StjJetCutDetectorEta.h>
 #include <StjJetCutNFourVecs.h>
 #include <StjJetCutTrgBHT.h>
 #include <StjJetCutTrgBJP.h>
@@ -57,6 +58,26 @@ void StjJetCutTest::testEta()
 
   StjJet p3;
   p3.eta = -5.1;
+
+  CPPUNIT_ASSERT( cut(p3) );
+}
+
+void StjJetCutTest::testDetectorEta()
+{
+  StjJetCutDetectorEta cut( 0.2, 0.8);
+
+  StjJet p1;
+  p1.detectorEta = 0.3;
+
+  CPPUNIT_ASSERT( ! cut(p1) );
+
+  StjJet p2;
+  p2.detectorEta = 0.1;
+
+  CPPUNIT_ASSERT( cut(p2) );
+
+  StjJet p3;
+  p3.detectorEta = 0.9;
 
   CPPUNIT_ASSERT( cut(p3) );
 }
