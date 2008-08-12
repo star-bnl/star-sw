@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecCutTrgBJP.h,v 1.1 2008/08/12 04:01:24 tai Exp $
+// $Id: StjFourVecCutTrgBJP.h,v 1.2 2008/08/12 04:06:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJFOURVECCUTTRGBJP_H
 #define STJFOURVECCUTTRGBJP_H
@@ -9,12 +9,12 @@
 #include <vector>
 
 class StjTrg;
-class StjTrgJetPatchTowerIdMap;
+class StjTrgBEMCJetPatchTowerIdMap;
 
 class StjFourVecCutTrgBJP : public StjFourVecCut {
 
 public:
-  StjFourVecCutTrgBJP(StjTrg* trg, StjTrgJetPatchTowerIdMap* jetPatchTowerMap)
+  StjFourVecCutTrgBJP(StjTrg* trg, StjTrgBEMCJetPatchTowerIdMap* jetPatchTowerMap)
     : _trg(trg), _jetPatchTowerMap(jetPatchTowerMap) { }
   virtual ~StjFourVecCutTrgBJP() { }
 
@@ -26,7 +26,7 @@ private:
 
   StjTrg* _trg;
 
-  StjTrgJetPatchTowerIdMap* _jetPatchTowerMap;
+  StjTrgBEMCJetPatchTowerIdMap* _jetPatchTowerMap;
 
   ClassDef(StjFourVecCutTrgBJP, 1)
 

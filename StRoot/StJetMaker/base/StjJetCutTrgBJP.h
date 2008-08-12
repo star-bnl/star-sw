@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutTrgBJP.h,v 1.1 2008/08/12 04:01:26 tai Exp $
+// $Id: StjJetCutTrgBJP.h,v 1.2 2008/08/12 04:06:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTTRGBJP_H
 #define STJJETCUTTRGBJP_H
@@ -9,12 +9,12 @@
 #include "StjFourVecListCut.h"
 
 class StjTrg;
-class StjTrgJetPatchTowerIdMap;
+class StjTrgBEMCJetPatchTowerIdMap;
 
 class StjJetCutTrgBJP : public StjJetCut {
 
 public:
-  StjJetCutTrgBJP(StjTrg* trg, StjTrgJetPatchTowerIdMap* jetPatchTowerMap);
+  StjJetCutTrgBJP(StjTrg* trg, StjTrgBEMCJetPatchTowerIdMap* jetPatchTowerMap);
   virtual ~StjJetCutTrgBJP() { }
 
   bool operator()(const StjJet& jet);

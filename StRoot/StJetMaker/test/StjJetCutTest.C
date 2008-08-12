@@ -5,7 +5,7 @@
 #include <StjJetCutTrgBHT.h>
 #include <StjJetCutTrgBJP.h>
 
-#include <StjTrgJetPatchTowerIdMap2005.h>
+#include <StjTrgBEMCJetPatchTowerIdMap2005.h>
 
 #include <StjJetList.h>
 
@@ -175,7 +175,7 @@ void StjJetCutTest::testTrgBJP_notPass()
   StjTrgMock trg;
   trg._pass = false;
 
-  StjJetCutTrgBJP cut(&trg, new StjTrgJetPatchTowerIdMap2005);
+  StjJetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
 
   StjJet p1;
   StjFourVec four1;
@@ -193,7 +193,7 @@ void StjJetCutTest::testTrgBJP_pass()
   trg._pass = true;
   trg._jetPatches.push_back(2);
 
-  StjJetCutTrgBJP cut(&trg, new StjTrgJetPatchTowerIdMap2005);
+  StjJetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
 
   StjJet p1;
   StjFourVec four1;
@@ -211,7 +211,7 @@ void StjJetCutTest::testTrgBJP_type()
   trg._pass = true;
   trg._jetPatches.push_back(2);
 
-  StjJetCutTrgBJP cut(&trg, new StjTrgJetPatchTowerIdMap2005);
+  StjJetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
 
   StjJet p1;
   StjFourVec four1;
@@ -229,7 +229,7 @@ void StjJetCutTest::testTrgBJP_detectorId()
   trg._pass = true;
   trg._jetPatches.push_back(2);
 
-  StjJetCutTrgBJP cut(&trg, new StjTrgJetPatchTowerIdMap2005);
+  StjJetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
 
   StjJet p1;
   StjFourVec four1;
@@ -247,7 +247,7 @@ void StjJetCutTest::testTrgBJP_jetPatchId()
   trg._pass = true;
   trg._jetPatches.push_back(2);
 
-  StjJetCutTrgBJP cut(&trg, new StjTrgJetPatchTowerIdMap2005);
+  StjJetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
 
   StjJet p1;
   StjFourVec four1;
