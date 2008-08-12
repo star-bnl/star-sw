@@ -1,4 +1,4 @@
-// $Id: StjJetListCut.cxx,v 1.4 2008/08/04 06:10:22 tai Exp $
+// $Id: StjJetListCut.cxx,v 1.5 2008/08/12 04:01:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetListCut.h"
 
@@ -6,11 +6,11 @@ ClassImp(StjJetListCut)
 
 using namespace std;
 
-StjJetList StjJetListCut::operator()(const StjJetList &fourList)
+StjJetList StjJetListCut::operator()(const StjJetList &jetList)
 {
   StjJetList ret;
 
-  for(StjJetList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
+  for(StjJetList::const_iterator it = jetList.begin(); it != jetList.end(); ++it) {
 
     if(shouldNotKeep(*it)) continue;
 

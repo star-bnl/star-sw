@@ -89,7 +89,9 @@ am_libStJetMakerTest_la_OBJECTS = libStJetMakerTest_la-Misc.lo \
 	libStJetMakerTest_la-StjJetListCutTest.lo \
 	libStJetMakerTest_la-StPythiaFourPMakerTest.lo \
 	libStJetMakerTest_la-StjTreeIndexListCreatorTest.lo \
-	libStJetMakerTest_la-StjTrgTreeTest.lo
+	libStJetMakerTest_la-StjTrgTreeTest.lo \
+	libStJetMakerTest_la-StjJetCutTest.lo \
+	libStJetMakerTest_la-StjTrgMock.lo
 libStJetMakerTest_la_OBJECTS = $(am_libStJetMakerTest_la_OBJECTS)
 am__EXEEXT_1 = TestApp$(EXEEXT)
 am_TestApp_OBJECTS = TestApp-TestMain.$(OBJEXT)
@@ -277,7 +279,9 @@ libStJetMakerTest_la_SOURCES = \
 	StjJetListCutTest.C StjJetListCutTest.hh \
 	StPythiaFourPMakerTest.C StPythiaFourPMakerTest.hh \
 	StjTreeIndexListCreatorTest.C StjTreeIndexListCreatorTest.hh \
-	StjTrgTreeTest.C StjTrgTreeTest.hh
+	StjTrgTreeTest.C StjTrgTreeTest.hh \
+	StjJetCutTest.C StjJetCutTest.hh \
+	StjTrgMock.C StjTrgMock.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \
@@ -402,6 +406,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StPythiaFourPMakerTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjBEMCTreeTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjFourVecListCutTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjJetCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjJetListCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTPCTreeTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTowerEnergyListCutTest.Plo@am__quote@
@@ -413,6 +418,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTreeEntryCoordinatorTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTreeEntryMakerTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTreeIndexListCreatorTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrgMock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrgTreeTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjeBemcEnergySumCalculatorBuilderTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StppAnaParsTest.Plo@am__quote@
@@ -621,6 +627,20 @@ libStJetMakerTest_la-StjTrgTreeTest.lo: StjTrgTreeTest.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjTrgTreeTest.C' object='libStJetMakerTest_la-StjTrgTreeTest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjTrgTreeTest.lo `test -f 'StjTrgTreeTest.C' || echo '$(srcdir)/'`StjTrgTreeTest.C
+
+libStJetMakerTest_la-StjJetCutTest.lo: StjJetCutTest.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StjJetCutTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StjJetCutTest.Tpo" -c -o libStJetMakerTest_la-StjJetCutTest.lo `test -f 'StjJetCutTest.C' || echo '$(srcdir)/'`StjJetCutTest.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StjJetCutTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StjJetCutTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StjJetCutTest.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjJetCutTest.C' object='libStJetMakerTest_la-StjJetCutTest.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjJetCutTest.lo `test -f 'StjJetCutTest.C' || echo '$(srcdir)/'`StjJetCutTest.C
+
+libStJetMakerTest_la-StjTrgMock.lo: StjTrgMock.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StjTrgMock.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StjTrgMock.Tpo" -c -o libStJetMakerTest_la-StjTrgMock.lo `test -f 'StjTrgMock.C' || echo '$(srcdir)/'`StjTrgMock.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StjTrgMock.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StjTrgMock.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StjTrgMock.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjTrgMock.C' object='libStJetMakerTest_la-StjTrgMock.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjTrgMock.lo `test -f 'StjTrgMock.C' || echo '$(srcdir)/'`StjTrgMock.C
 
 TestApp-TestMain.o: TestMain.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(TestApp_CXXFLAGS) $(CXXFLAGS) -MT TestApp-TestMain.o -MD -MP -MF "$(DEPDIR)/TestApp-TestMain.Tpo" -c -o TestApp-TestMain.o `test -f 'TestMain.C' || echo '$(srcdir)/'`TestMain.C; \

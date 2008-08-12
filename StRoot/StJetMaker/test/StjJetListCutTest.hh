@@ -8,8 +8,6 @@ class StjJetListCutTest : public CPPUNIT_NS::TestFixture
 {
   CPPUNIT_TEST_SUITE( StjJetListCutTest );
   CPPUNIT_TEST( testPt );
-  CPPUNIT_TEST( testEta );
-  CPPUNIT_TEST( testNFourVecs );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -17,8 +15,6 @@ public:
   void tearDown();
 
   void testPt();
-  void testEta();
-  void testNFourVecs();
 
 private:
 

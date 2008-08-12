@@ -37,7 +37,9 @@ libStJetMakerTest_la_SOURCES = 	\
 	StjJetListCutTest.C StjJetListCutTest.hh \
 	StPythiaFourPMakerTest.C StPythiaFourPMakerTest.hh \
 	StjTreeIndexListCreatorTest.C StjTreeIndexListCreatorTest.hh \
-	StjTrgTreeTest.C StjTrgTreeTest.hh
+	StjTrgTreeTest.C StjTrgTreeTest.hh \
+	StjJetCutTest.C StjJetCutTest.hh \
+	StjTrgMock.C StjTrgMock.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \
