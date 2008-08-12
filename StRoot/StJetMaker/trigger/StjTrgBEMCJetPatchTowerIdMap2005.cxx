@@ -1,10 +1,10 @@
-// $Id: StjTrgJetPatchTowerIdMap2005.cxx,v 1.1 2008/08/12 04:01:45 tai Exp $
+// $Id: StjTrgBEMCJetPatchTowerIdMap2005.cxx,v 1.1 2008/08/12 04:07:01 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StjTrgJetPatchTowerIdMap2005.h"
+#include "StjTrgBEMCJetPatchTowerIdMap2005.h"
 
-ClassImp(StjTrgJetPatchTowerIdMap2005)
+ClassImp(StjTrgBEMCJetPatchTowerIdMap2005)
 
-int StjTrgJetPatchTowerIdMap2005::getJetPatchIdForTower(int towerId)
+int StjTrgBEMCJetPatchTowerIdMap2005::getJetPatchIdForTower(int towerId)
 {
   if(2101 <= towerId && towerId <= 2400) return 0;
   if(   1 <= towerId && towerId <=  100) return 0;
