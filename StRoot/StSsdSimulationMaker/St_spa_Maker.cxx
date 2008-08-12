@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.16 2008/05/29 03:07:28 bouchet Exp $
+ * $Id: St_spa_Maker.cxx,v 1.17 2008/08/12 22:48:39 bouchet Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.17  2008/08/12 22:48:39  bouchet
+ * retrieve positions and dimensions tables using Get methods
+ *
  * Revision 1.16  2008/05/29 03:07:28  bouchet
  * remove inactive variables;fix a potential memory leak
  *
@@ -64,6 +67,8 @@
 #include "tables/St_sdm_calib_db_Table.h"
 #include "tables/St_ssdStripCalib_Table.h"
 #include "tables/St_ssdWafersPosition_Table.h"
+#include "StSsdDbMaker/StSsdDbMaker.h"
+
 ClassImp(St_spa_Maker)
   
 //_____________________________________________________________________________
@@ -91,13 +96,7 @@ Int_t St_spa_Maker::InitRun(Int_t runnumber){
     m_noise = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
     if (! m_noise) return kStFATAL;
   }
-  TDataSet *ssdparams = GetInputDB("Geometry/ssd");
-  if (! ssdparams) {
-    LOG_ERROR << "No  access to Geometry/ssd parameters" << endm;
-    return kStErr;
-  }
-  TDataSetIter       local(ssdparams);
-  m_ctrl        = (St_slsCtrl           *)local("slsCtrl");
+  m_ctrl = gStSsdDbMaker->GetSlsCtrl();
   if (!m_ctrl) {
     LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;
@@ -116,7 +115,7 @@ Int_t St_spa_Maker::Make()
   St_spa_strip *spa_strip = new St_spa_strip("spa_strip",40000);
   m_DataSet->Add(spa_strip);
   
-  slsCtrl_st      *ctrl     =  m_ctrl->GetTable(); 
+  //slsCtrl_st      *ctrl     =  m_ctrl->GetTable(); 
 
   LOG_INFO<<"#################################################"<<endm;
   LOG_INFO<<"####    START OF SSD PEDESTAL ANNIHILATOR    ####"<<endm;
@@ -130,9 +129,9 @@ Int_t St_spa_Maker::Make()
   LOG_INFO<<"####       NUMBER OF DB ENTRIES "<<numberOfNoise<<"       ####"<<endm;
   mySsd->readConditionDbFromTable(m_condition);
   LOG_INFO<<"####             ADD SPA NOISE               ####"<<endm;
-  mySsd->addNoiseToStrip(ctrl);
+  mySsd->addNoiseToStrip(m_ctrl);
   LOG_INFO<<"####           DO DAQ SIMULATION             ####"<<endm;
-  mySsd->doDaqSimulation(ctrl);
+  mySsd->doDaqSimulation(m_ctrl);
   Int_t nSsdStrips = mySsd->writeStripToTable(spa_strip,sls_strip);
   //Int_t nSsdStrips = mySsd->writeStripToTable(spa_strip);
   spa_strip->Purge();

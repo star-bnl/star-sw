@@ -22,12 +22,12 @@
 class St_ssdStripCalib;
 class St_sdm_condition_db;
 class St_slsCtrl;
-
+class slsCtrl_st;
 class St_spa_Maker : public StMaker {
  private:
   St_ssdStripCalib     *m_noise;    //!
   St_sdm_condition_db  *m_condition;//!
-  St_slsCtrl           *m_ctrl;     //!
+  slsCtrl_st           *m_ctrl;//!
  public: 
   St_spa_Maker(const char *name="spa_strip");
   virtual       ~St_spa_Maker();
@@ -37,16 +37,19 @@ class St_spa_Maker : public StMaker {
   virtual Int_t  Finish();
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.13 2008/05/29 03:07:28 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.14 2008/08/12 22:48:39 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_spa_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 
  /**************************************************************************
- * $Id: St_spa_Maker.h,v 1.13 2008/05/29 03:07:28 bouchet Exp $
+ * $Id: St_spa_Maker.h,v 1.14 2008/08/12 22:48:39 bouchet Exp $
  *
  * $Log: St_spa_Maker.h,v $
+ * Revision 1.14  2008/08/12 22:48:39  bouchet
+ * retrieve positions and dimensions tables using Get methods
+ *
  * Revision 1.13  2008/05/29 03:07:28  bouchet
  * remove inactive variables;fix a potential memory leak
  *

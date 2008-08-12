@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.19 2008/07/17 02:51:15 bouchet Exp $
+ * $Id: St_sls_Maker.cxx,v 1.20 2008/08/12 22:48:38 bouchet Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.20  2008/08/12 22:48:38  bouchet
+ * retrieve positions and dimensions tables using Get methods
+ *
  * Revision 1.19  2008/07/17 02:51:15  bouchet
  * initialize StMcSsd hits collections
  *
@@ -87,6 +90,7 @@
 #include "StDAQMaker/StDAQReader.h"
 #include "St_ObjectSet.h"
 #include "StThreeVectorF.hh"
+#include "StSsdDbMaker/StSsdDbMaker.h"
 
 ClassImp(St_sls_Maker)
   St_sls_Maker::St_sls_Maker(const char *name):StMaker(name){
@@ -107,15 +111,14 @@ Int_t St_sls_Maker::Init(){
 //_____________________________________________________________________________
 Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
   assert(StSsdBarrel::Instance());
-  TDataSet *ssdparams = GetInputDB("Geometry/ssd");
-  if (! ssdparams) {
-    LOG_ERROR << "No  access to Geometry/ssd parameters" << endm;
-    return kStFatal;
-  }
-  TDataSetIter    local(ssdparams);
-  m_ctrl        = (St_slsCtrl           *)local("slsCtrl");
-  m_dimensions  = (St_ssdDimensions     *)local("ssdDimensions"); 
-  m_positions   = (St_ssdWafersPosition *)local("ssdWafersPosition");
+  LOG_DEBUG << " instance of barrel ... done " << endm;
+
+  m_ctrl       = gStSsdDbMaker->GetSlsCtrl();
+  m_dimensions = 0;
+  m_dimensions = gStSsdDbMaker->GetssdDimensions();
+  m_positions  = 0;
+  m_positions  = gStSsdDbMaker->GetssdWafersPos();
+  
   if (!m_ctrl) {
     LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;
@@ -125,9 +128,12 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
     return kStFatal;
   }
   if(m_positions){
+    LOG_DEBUG << " m_positions found " << endl;
     positions = m_positions->GetTable(); 
     N = m_positions->GetNRows();
+    LOG_DEBUG << " size is : " <<N  << endl;
   }
+  
   Float_t center[3]={0,0,0}; 
   Float_t B[3]={0,0,0};  
   StarMagField::Instance()->BField(center,B);
@@ -154,7 +160,8 @@ Int_t St_sls_Maker::Make()
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
   St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
   
-  slsCtrl_st *ctrl = m_ctrl->GetTable();
+  //table is retrieved directly, not the structure
+  //slsCtrl_st *ctrl = m_ctrl->GetTable();
   
    LOG_INFO<<"#################################################"<<endm;
    LOG_INFO<<"####       START OF SSD LAZY SIMULATOR       ####"<<endm;
@@ -199,7 +206,8 @@ Int_t St_sls_Maker::Make()
          }
      }    
    LOG_INFO<<"####    ->   "<<inactiveHit<<" DEAD ZONE HITS REMOVED      ####"<<endm;
-   chargeSharingOverStrip(ctrl);
+   //chargeSharingOverStrip(ctrl);
+   chargeSharingOverStrip(m_ctrl);
    Int_t nSsdStrips = writeStripToTable(sls_strip);
    sls_strip->Purge();
    LOG_INFO<<"####    -> "<<nSsdStrips<<" FIRED STRIPS INTO TABLE     ####"<<endm;
