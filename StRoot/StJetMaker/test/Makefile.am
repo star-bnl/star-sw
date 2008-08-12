@@ -39,7 +39,8 @@ libStJetMakerTest_la_SOURCES = 	\
 	StjTreeIndexListCreatorTest.C StjTreeIndexListCreatorTest.hh \
 	StjTrgTreeTest.C StjTrgTreeTest.hh \
 	StjJetCutTest.C StjJetCutTest.hh \
-	StjTrgMock.C StjTrgMock.hh
+	StjTrgMock.C StjTrgMock.hh \
+	StjFormDijetTest.C StjFormDijetTest.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \
