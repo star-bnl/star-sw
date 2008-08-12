@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.31 2008/06/12 16:36:55 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.32 2008/08/12 20:54:40 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.32  2008/08/12 20:54:40  fisyak
+// If StSsdBarrel does not exist then take SSD as dead material from whatever exist in GEANT
+//
 // Revision 1.31  2008/06/12 16:36:55  fisyak
 // Remove all SSD endcap volumes
 //
@@ -83,10 +86,13 @@ StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
 void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 {
     char name[50];  
-    assert(StiVMCToolKit::GetVMC());
     gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
     StSsdBarrel *mySsd = StSsdBarrel::Instance();
-    assert(mySsd);
+    if (! mySsd) {// no active SSD
+      gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - there is no SSD barrel - take whatever exist in GEANT" << endm;
+      StiVMCToolKit::GetVMC();
+      return;
+    }
     int nRows = 1 ;
     setNRows(nRows);
     if (! _gasMat)
@@ -205,10 +211,10 @@ void StiSsdDetectorBuilder::useVMCGeometry() {
     //    {"SSRT","the top of the side rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRT_1-4","",""},                      //  0.172237 [kg]
     //    {"SSSS","Side parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSSS_1-4","",""},              //  0.462138 [kg]
     //    {"SSST","Top parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSST_1-4","",""},               //  0.172237 [kg]
-    //  {"SFLM","the mother of the ladder","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/*","",""},              //  0.546171 [kg]
+    {"SFLM","the mother of the ladder","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/*","",""}              //  0.546171 [kg]
     //  {"SFSM","the structure mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFSM_1/*","",""}     //   0.451003 [kg]
     //  {"SFDM","the detectors and adcs mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/*","",""} // 0.095168 [kg]
-    //  {"SFSD","the strip detector",                  "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""},// 0.002041 [kg]
+    // {"SFSD","the strip detector",                  "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""}// 0.002041 [kg]
   };
   Int_t NoSsdVols = sizeof(SsdVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1/SVTT_1/SFMO_1");
