@@ -37,7 +37,8 @@ class StMcSsdHit;
 
 class St_sls_Maker : public StMaker {
   private :
-  St_slsCtrl           *m_ctrl;//!
+
+  slsCtrl_st           *m_ctrl;//!
   St_ssdDimensions     *m_dimensions;//!
   St_ssdWafersPosition *m_positions; //!
   double mBField; // z component of BField; 
@@ -87,7 +88,7 @@ class St_sls_Maker : public StMaker {
   ssdWafersPosition_st *positions;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.12 2008/05/29 03:07:27 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.13 2008/08/12 22:48:38 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 
@@ -96,9 +97,12 @@ class St_sls_Maker : public StMaker {
 #endif
 
  /**************************************************************************
- * $Id: St_sls_Maker.h,v 1.12 2008/05/29 03:07:27 bouchet Exp $
+ * $Id: St_sls_Maker.h,v 1.13 2008/08/12 22:48:38 bouchet Exp $
  *
  * $Log: St_sls_Maker.h,v $
+ * Revision 1.13  2008/08/12 22:48:38  bouchet
+ * retrieve positions and dimensions tables using Get methods
+ *
  * Revision 1.12  2008/05/29 03:07:27  bouchet
  * remove inactive variables;fix a potential memory leak
  *
