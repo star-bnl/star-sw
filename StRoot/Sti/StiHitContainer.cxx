@@ -243,9 +243,10 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
 	}
     }
  }  else {  //  StiHit vector size ==0; This is workround. 
-     //  we do not knpw why do we need this proptection  yet
-    cout << "Warning: Fix me, please !" << endl; }
-  } //  NO _key was provided
+       //  we do not know why do we need this proptection  yet
+       // cout << "Warning: Fix me, please !" << endl; 
+    }
+  }    //  NO _key was provided
 #if 0
  else {
      cout << "-- Go ahead to test thing ------------------ last id =" << id << endl;
