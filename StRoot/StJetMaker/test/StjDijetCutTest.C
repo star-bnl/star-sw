@@ -4,8 +4,14 @@
 #include <StjDijetCutEta.h>
 #include <StjDijetCutEta3MinusEta4.h>
 #include <StjDijetCutDPhi.h>
+#include <StjDijetCutTrgBHT.h>
+#include <StjDijetCutTrgBJP.h>
+
+#include <StjTrgBEMCJetPatchTowerIdMap2005.h>
 
 #include <StjDijetList.h>
+
+#include "StjTrgMock.hh"
 
 #include "StjDijetCutTest.hh"
 
@@ -110,5 +116,192 @@ void StjDijetCutTest::testDPhi()
 
   dijet.dphi = 2.1;
   CPPUNIT_ASSERT( ! cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBHT_notPass()
+{
+  StjTrgMock trg;
+  trg._pass = false;
+
+  StjDijetCutTrgBHT cut(&trg);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 2;
+  four1.detectorId = 9;
+  four1.towerId = 1;
+  dijet.jet3.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBHT_pass()
+{
+  StjTrgMock trg;
+  trg._pass = true;
+  trg._towers.push_back(1);
+
+  StjDijetCutTrgBHT cut(&trg);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 2;
+  four1.detectorId = 9;
+  four1.towerId = 1;
+  dijet.jet3.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( ! cut(dijet) );
+
+  StjDijet dijet2;
+  StjFourVec four2;
+  four2.type = 2;
+  four2.detectorId = 9;
+  four2.towerId = 1;
+  dijet2.jet4.fourVecList.push_back(four2);
+
+  CPPUNIT_ASSERT( ! cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBHT_type()
+{
+  StjTrgMock trg;
+  trg._pass = true;
+  trg._towers.push_back(1);
+
+  StjDijetCutTrgBHT cut(&trg);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 1;
+  four1.detectorId = 0;
+  four1.towerId = 0;
+  dijet.jet3.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBHT_detectorId()
+{
+  StjTrgMock trg;
+  trg._pass = true;
+  trg._towers.push_back(1);
+
+  StjDijetCutTrgBHT cut(&trg);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 2;
+  four1.detectorId = 13;
+  four1.towerId = 1;
+  dijet.jet4.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBHT_towerId()
+{
+  StjTrgMock trg;
+  trg._pass = true;
+  trg._towers.push_back(1);
+
+  StjDijetCutTrgBHT cut(&trg);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 2;
+  four1.detectorId = 9;
+  four1.towerId = 3;
+  dijet.jet3.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBJP_notPass()
+{
+  StjTrgMock trg;
+  trg._pass = false;
+
+  StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 2;
+  four1.detectorId = 9;
+  four1.towerId = 1;
+  dijet.jet4.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBJP_pass()
+{
+  StjTrgMock trg;
+  trg._pass = true;
+  trg._jetPatches.push_back(2);
+
+  StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 2;
+  four1.detectorId = 9;
+  four1.towerId = 503;
+  dijet.jet3.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( ! cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBJP_type()
+{
+  StjTrgMock trg;
+  trg._pass = true;
+  trg._jetPatches.push_back(2);
+
+  StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 1;
+  four1.detectorId = 0;
+  four1.towerId = 0;
+  dijet.jet4.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBJP_detectorId()
+{
+  StjTrgMock trg;
+  trg._pass = true;
+  trg._jetPatches.push_back(2);
+
+  StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 2;
+  four1.detectorId = 13;
+  four1.towerId = 503;
+  dijet.jet4.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( cut(dijet) );
+}
+
+void StjDijetCutTest::testTrgBJP_jetPatchId()
+{
+  StjTrgMock trg;
+  trg._pass = true;
+  trg._jetPatches.push_back(2);
+
+  StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
+
+  StjDijet dijet;
+  StjFourVec four1;
+  four1.type = 2;
+  four1.detectorId = 9;
+  four1.towerId = 101;
+  dijet.jet3.fourVecList.push_back(four1);
+
+  CPPUNIT_ASSERT( cut(dijet) );
 }
 
