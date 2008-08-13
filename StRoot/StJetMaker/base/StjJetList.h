@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetList.h,v 1.6 2008/08/10 23:04:40 tai Exp $
+// $Id: StjJetList.h,v 1.7 2008/08/13 15:34:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETLIST_H
 #define STJJETLIST_H
@@ -18,11 +18,12 @@ public:
   int            eventId;
   int            jetId;
   double         pt;
-  double         eta;
-  double         phi;
+  double       eta;
+  double       phi;
   double         m;
-  double         vertexZ;
-  double         detectorEta;
+  double         neuRt;
+  double          vertexZ;
+  double           detectorEta;
   StjFourVecList    fourVecList;
   ClassDef(StjJet, 1)
 };
@@ -38,6 +39,7 @@ inline bool operator==(const StjJet& v1, const StjJet& v2)
   if(fabs(v1.eta - v2.eta ) > 0.0001*fabs( v1.eta )) return false;   
   if(fabs(v1.phi - v2.phi ) > 0.0001*fabs( v1.phi )) return false;   
   if(fabs(v1.m   - v2.m   ) > 0.0001*fabs( v1.m   )) return false;   
+  if(fabs(v1.neuRt - v2.neuRt   ) > 0.0001*fabs( v1.neuRt   )) return false;   
   if(v1.fourVecList != v2.fourVecList)  return false;   
   return true;
   }

@@ -1,4 +1,4 @@
-// $Id: StjRunJetFinder.cxx,v 1.2 2008/08/04 06:10:35 tai Exp $
+// $Id: StjRunJetFinder.cxx,v 1.3 2008/08/13 15:34:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjRunJetFinder.h"
 
@@ -8,6 +8,8 @@
 #include <StjFourVecForJetFinder.h>
 
 #include <StjEtaToDetectorEta.h>
+
+#include <TLorentzVector.h>
 
 #include <iostream>
 
@@ -57,6 +59,7 @@ StjJetList StjRunJetFinder::operator()(const StjFourVecList& fourVecList)
       jet.vertexZ = fourVec.vertexZ;
       jet.fourVecList.push_back(fourVec);
     }
+    jet.neuRt = computeNeuRt(jet.fourVecList);
     StjEtaToDetectorEta eta2deta;
     jet.detectorEta = eta2deta(jet.eta, jet.vertexZ);
     jetList.push_back(jet);
@@ -68,3 +71,17 @@ StjJetList StjRunJetFinder::operator()(const StjFourVecList& fourVecList)
 
   return jetList;
 }
+
+double StjRunJetFinder::computeNeuRt(const StjFourVecList& fourList)
+{
+  double totalEt = 0.0;
+  double neutralEt = 0.0;
+  for(StjFourVecList::const_iterator it = fourList.begin(); it != fourList.end(); ++it) {
+    TLorentzVector p4;
+    p4.SetPtEtaPhiM((*it).pt, (*it).eta, (*it).phi, (*it).m);
+    totalEt += p4.Et();
+    if((*it).type == 2) neutralEt += p4.Et();
+  }
+  return (totalEt) ? neutralEt/totalEt: 0.0;
+}
+

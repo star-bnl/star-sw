@@ -1,4 +1,4 @@
-// $Id: StjJetPrint.cxx,v 1.5 2008/08/10 23:04:40 tai Exp $
+// $Id: StjJetPrint.cxx,v 1.6 2008/08/13 15:34:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetPrint.h"
 
@@ -28,8 +28,9 @@ void StjJetPrint::print(const StjJet& jet)
     << setw(10) << jet.eta            << ", "
     << setw(10) << jet.phi            << ", "
     << setw(14) << jet.m              << ", "
+    << setw(10) << jet.neuRt          << ", "
     << setw(10) << jet.vertexZ        << ", "
-    << setw(10) << jet.detectorEta    << ", "
+    << setw(10) << jet.detectorEta
     << endl;
 
   StjFourVecPrint fourprint;
