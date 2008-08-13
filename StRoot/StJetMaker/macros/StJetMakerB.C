@@ -33,6 +33,8 @@
 #include <StjJetCutPt.h>
 #include <StjJetCutTrgBHT.h>
 #include <StjJetCutTrgBJP.h>
+#include <StjJetCutDetectorEta.h>
+
 #include <StjTrgBEMCJetPatchTowerIdMap2005.h>
 
 #include <StjJetListWriter.h>
@@ -41,6 +43,12 @@
 #include <StjTowerEnergyPrint.h>
 #include <StjFourVecPrint.h>
 #include <StjJetPrint.h>
+
+
+#include <StjDijetList.h>
+#include <StjDijetPrint.h>
+
+#include <StjFormDijet.h>
 
 #include <StjTrg.h>
 
@@ -90,9 +98,11 @@ private:
   StjJetListCut _jetCut;
   StjJetListCut _jetCutBHT2;
   StjJetListCut _jetCutBJP2;
+  StjJetListCut _jetCut2;
 
   StjJetListWriter* _jetListWriter;
 
+  StjFormDijet _formDijet;
 
   StjTrg* _trgBJP1;
   StjTrg* _trgBJP2;
@@ -143,6 +153,9 @@ private:
 
     _jetListWriter = new StjJetListWriter("jets", "fours", _file);
 
+    _jetCut2.addCut(new StjJetCutDetectorEta(0.2, 0.8));
+
+
     return kStOk;
   }
 
@@ -153,6 +166,7 @@ private:
     StjTowerEnergyPrint towerprint;
     StjFourVecPrint fourprint;
     StjJetPrint jetprint;
+    StjDijetPrint dijetprint;
 
     StjTrackList trackList = _tpc->getTrackList();
     StjTowerEnergyList energyList = _bemc->getEnergyList();
@@ -174,12 +188,11 @@ private:
 
     vector<StjJet> jetList   = _jetFinder(fourList);
 
-    jetList   = _jetCut(jetList);
+    jetList = _jetCut(jetList);
 
     vector<StjJet> jetListBHT2 = _jetCutBHT2(jetList);
     vector<StjJet> jetListBJP2 = _jetCutBJP2(jetList);
 
-    //    jetprint(jetListBJP2);
 
     _jetListWriter->Fill(jetList, fourList);
 
@@ -189,6 +202,14 @@ private:
     for(size_t i = 0; i !=  _trgBHT2->towers().size(); ++i) {
       cout << "HT " << _trgBHT2->towers()[i] << endl;
     }
+
+    jetList = _jetCut2(jetList);
+
+    StjDijetList dijetList = _formDijet(jetList);
+
+    //    jetprint(jetList);
+
+    dijetprint(dijetList);
 
     return kStOk;
   }
