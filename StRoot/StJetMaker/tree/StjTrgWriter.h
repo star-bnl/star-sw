@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgWriter.h,v 1.1 2008/08/11 04:48:32 tai Exp $
+// $Id: StjTrgWriter.h,v 1.2 2008/08/13 19:37:29 tai Exp $
 #ifndef STJTRGWRITER_H
 #define STJTRGWRITER_H
 
@@ -7,10 +7,10 @@
 
 #include <Rtypes.h>
 
+#include <string>
+
 class TDirectory;
 class TTree;
-
-#include <string>
 
 class StjTrg;
 

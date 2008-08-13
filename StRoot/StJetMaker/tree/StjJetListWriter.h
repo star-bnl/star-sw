@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListWriter.h,v 1.5 2008/08/04 06:10:46 tai Exp $
+// $Id: StjJetListWriter.h,v 1.6 2008/08/13 19:37:29 tai Exp $
 #ifndef STJJETLISTWRITER_H
 #define STJJETLISTWRITER_H
 
@@ -43,6 +43,7 @@ private:
   Double_t _jet_eta[128];
   Double_t _jet_phi[128];
   Double_t _jet_m[128];
+  Double_t _jet_neuRt[128];
   Double_t _jet_vertexZ;
   Double_t _jet_detectorEta[128];
 

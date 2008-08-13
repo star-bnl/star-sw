@@ -1,4 +1,4 @@
-// $Id: StjJetListWriter.cxx,v 1.4 2008/08/04 06:10:46 tai Exp $
+// $Id: StjJetListWriter.cxx,v 1.5 2008/08/13 19:37:29 tai Exp $
 #include "StjJetListWriter.h"
 
 #include <TFile.h>
@@ -27,6 +27,7 @@ StjJetListWriter::StjJetListWriter(const char* jetTreeName, const char* jetFourV
   _jetTree->Branch("detectorEta",  _jet_detectorEta  , "detectorEta[nJets]/D");    
   _jetTree->Branch("phi"        ,  _jet_phi          , "phi[nJets]/D"    );
   _jetTree->Branch("m"          ,  _jet_m            , "m[nJets]/D"      );
+  _jetTree->Branch("neuRt"      ,  _jet_neuRt        , "neuRt[nJets]/D"  );
   _jetTree->Branch("vertexZ"    , &_jet_vertexZ      , "vertexZ/D");    
   _jetTree->Branch("runNumber"  , &_jet_runNumber    , "runNumber/I"     );
 
@@ -71,6 +72,7 @@ void StjJetListWriter::fillJetTree(const StjJetList& jetList)
     _jet_eta[i]         = jet.eta;
     _jet_phi[i]         = jet.phi;
     _jet_m[i]           = jet.m;
+    _jet_neuRt[i]       = jet.neuRt;
     _jet_detectorEta[i] = jet.detectorEta;
   }
 
