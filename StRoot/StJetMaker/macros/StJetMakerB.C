@@ -51,6 +51,7 @@
 #include <StjFormDijet.h>
 
 #include <StjTrg.h>
+#include <StjVertex.h>
 
 #include <TDirectory.h>
 
@@ -60,10 +61,12 @@ public:
   
   StJetMakerB(const Char_t *name,
 	      StjTPC* tpc, StjBEMC* bemc,
+	      StjVertex* vertex,
 	      StjTrg* trgBJP1, StjTrg* trgBJP2, StjTrg* trgBHT1, StjTrg* trgBHT2,
 	      TDirectory* file)
     : StMaker(name), _file(file)
     , _tpc(tpc), _bemc(bemc)
+    , _vertex(vertex)
     , _trgBJP1(trgBJP1), _trgBJP2(trgBJP2), _trgBHT1(trgBHT1), _trgBHT2(trgBHT2)
   { }
   virtual ~StJetMakerB() { }
@@ -74,6 +77,8 @@ private:
 
   StjTPC*  _tpc;
   StjBEMC* _bemc;
+
+  StjVertex* _vertex;
 
   StjTrackListCut _tpcCut1;
   StjTrackListCut _tpcCut2;
@@ -108,6 +113,7 @@ private:
   StjTrg* _trgBJP2;
   StjTrg* _trgBHT1;
   StjTrg* _trgBHT2;
+
 
   Int_t Init()
   {
@@ -161,7 +167,6 @@ private:
 
   Int_t Make()
   {
-
     StjTrackPrint trackprint;
     StjTowerEnergyPrint towerprint;
     StjFourVecPrint fourprint;
@@ -192,7 +197,6 @@ private:
 
     vector<StjJet> jetListBHT2 = _jetCutBHT2(jetList);
     vector<StjJet> jetListBJP2 = _jetCutBJP2(jetList);
-
 
     _jetListWriter->Fill(jetList, fourList);
 
