@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutEta.h,v 1.5 2008/08/04 06:10:21 tai Exp $
+// $Id: StjJetCutEta.h,v 1.6 2008/08/13 04:55:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTETA_H
 #define STJJETCUTETA_H
@@ -9,7 +9,7 @@
 class StjJetCutEta : public StjJetCut {
 
 public:
-  StjJetCutEta(double min = -10.0, double max = 10.0) :_min(min), _max(max) { }
+  StjJetCutEta(double min = -10.0, double max = 10.0) : _min(min), _max(max) { }
   virtual ~StjJetCutEta() { }
 
   bool operator()(const StjJet& jet)

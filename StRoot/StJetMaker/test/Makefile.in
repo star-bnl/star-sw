@@ -92,7 +92,8 @@ am_libStJetMakerTest_la_OBJECTS = libStJetMakerTest_la-Misc.lo \
 	libStJetMakerTest_la-StjTrgTreeTest.lo \
 	libStJetMakerTest_la-StjJetCutTest.lo \
 	libStJetMakerTest_la-StjTrgMock.lo \
-	libStJetMakerTest_la-StjFormDijetTest.lo
+	libStJetMakerTest_la-StjFormDijetTest.lo \
+	libStJetMakerTest_la-StjDijetCutTest.lo
 libStJetMakerTest_la_OBJECTS = $(am_libStJetMakerTest_la_OBJECTS)
 am__EXEEXT_1 = TestApp$(EXEEXT)
 am_TestApp_OBJECTS = TestApp-TestMain.$(OBJEXT)
@@ -283,7 +284,8 @@ libStJetMakerTest_la_SOURCES = \
 	StjTrgTreeTest.C StjTrgTreeTest.hh \
 	StjJetCutTest.C StjJetCutTest.hh \
 	StjTrgMock.C StjTrgMock.hh \
-	StjFormDijetTest.C StjFormDijetTest.hh
+	StjFormDijetTest.C StjFormDijetTest.hh \
+	StjDijetCutTest.C StjDijetCutTest.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \
@@ -407,6 +409,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StJetMakerTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StPythiaFourPMakerTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjBEMCTreeTest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjDijetCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjFormDijetTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjFourVecListCutTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjJetCutTest.Plo@am__quote@
@@ -651,6 +654,13 @@ libStJetMakerTest_la-StjFormDijetTest.lo: StjFormDijetTest.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjFormDijetTest.C' object='libStJetMakerTest_la-StjFormDijetTest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjFormDijetTest.lo `test -f 'StjFormDijetTest.C' || echo '$(srcdir)/'`StjFormDijetTest.C
+
+libStJetMakerTest_la-StjDijetCutTest.lo: StjDijetCutTest.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StjDijetCutTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StjDijetCutTest.Tpo" -c -o libStJetMakerTest_la-StjDijetCutTest.lo `test -f 'StjDijetCutTest.C' || echo '$(srcdir)/'`StjDijetCutTest.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StjDijetCutTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StjDijetCutTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StjDijetCutTest.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjDijetCutTest.C' object='libStJetMakerTest_la-StjDijetCutTest.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjDijetCutTest.lo `test -f 'StjDijetCutTest.C' || echo '$(srcdir)/'`StjDijetCutTest.C
 
 TestApp-TestMain.o: TestMain.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(TestApp_CXXFLAGS) $(CXXFLAGS) -MT TestApp-TestMain.o -MD -MP -MF "$(DEPDIR)/TestApp-TestMain.Tpo" -c -o TestApp-TestMain.o `test -f 'TestMain.C' || echo '$(srcdir)/'`TestMain.C; \
