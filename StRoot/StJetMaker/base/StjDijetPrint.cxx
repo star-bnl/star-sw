@@ -1,4 +1,4 @@
-// $Id: StjDijetPrint.cxx,v 1.1 2008/08/13 04:03:59 tai Exp $
+// $Id: StjDijetPrint.cxx,v 1.2 2008/08/13 15:34:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjDijetPrint.h"
 
@@ -28,7 +28,7 @@ void StjDijetPrint::print(const StjDijet& dijet)
     << setw(10) << dijet.eta            << ", "
     << setw(10) << dijet.costh          << ", "
     << setw(10) << dijet.dphi           << ", "
-    << setw(10) << dijet.vertexZ        << ", "
+    << setw(10) << dijet.vertexZ
     << endl;
 
   StjJetPrint jetprint;

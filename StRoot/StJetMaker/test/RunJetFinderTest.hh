@@ -29,6 +29,7 @@ private:
   StjJet createJet(int runNumber, int eventId,
 		   int jetId,
 		   double pt, double eta, double phi, double m,
+		   double neuRt,
 		   double vertexZ, double detectorEta,
 		   const StjFourVecList&    fourVecList);
 

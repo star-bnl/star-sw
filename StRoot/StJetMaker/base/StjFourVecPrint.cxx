@@ -1,4 +1,4 @@
-// $Id: StjFourVecPrint.cxx,v 1.5 2008/08/10 23:04:40 tai Exp $
+// $Id: StjFourVecPrint.cxx,v 1.6 2008/08/13 15:34:23 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecPrint.h"
 
@@ -30,7 +30,7 @@ void StjFourVecPrint::print(const StjFourVec& four)
     << setw(10) << four.eta        << ", "
     << setw(10) << four.phi        << ", "
     << setw(14) << four.m          << ", "
-    << setw(10) << four.vertexZ    << ", "
+    << setw(10) << four.vertexZ
     << endl;
 
 }

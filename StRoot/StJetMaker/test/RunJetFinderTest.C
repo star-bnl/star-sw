@@ -175,7 +175,7 @@ StjJetList RunJetFinderTest::createJetList()
   fourveclist.push_back(createFourVec(6143024,   18358,   34, 2, 9,    0, 1015,    0.14217,    1.08734,   -1.33323,   -2.47023e-09,    -118.55));
   fourveclist.push_back(createFourVec(6143024,   18358,   35, 2, 9,    0, 1016,   0.181738,    1.12589,   -1.33323,   -3.02568e-09,    -118.55));
   fourveclist.push_back(createFourVec(6143024,   18358,   33, 2, 9,    0, 1000,    1.32632,    1.27683,   -1.27815,    1.28205e-08,    -118.55));
-  ret.push_back(createJet(6143024,   18358,    1,    7.45059,    1.06812,   -1.28799,        2.04423,    -118.55,   0.693636, fourveclist));
+  ret.push_back(createJet(6143024,   18358,    1,    7.45059,    1.06812,   -1.28799,        2.04423,    0.647659, -118.55,   0.693636, fourveclist));
 
   fourveclist.clear();
 
@@ -187,33 +187,34 @@ StjJetList RunJetFinderTest::createJetList()
   fourveclist.push_back(createFourVec(6143024,   18358,   56, 2, 9,    0, 2232,   0.146151,   0.973198,    1.75205,    1.15832e-09,    -118.55));
   fourveclist.push_back(createFourVec(6143024,   18358,   57, 2, 9,    0, 2233,   0.574076,    1.01187,    1.75205,   -1.38236e-08,    -118.55));
 
-  ret.push_back(createJet(6143024,   18358,    2,    2.67293,   0.949761,    1.63687,       0.534153,    -118.55,   0.539992, fourveclist));
+  ret.push_back(createJet(6143024,   18358,    2,    2.67293,   0.949761,    1.63687,       0.534153,    0.418847, -118.55,   0.539992, fourveclist));
 
   fourveclist.clear();
 
   fourveclist.push_back(createFourVec(6143024,   18358,    3, 1, 1, 2797,    0,   0.747889,  -0.342101,    1.43174,        0.13957,    -118.55));
   fourveclist.push_back(createFourVec(6143024,   18358,    2, 1, 1, 2798,    0,    1.20774,   0.290082,     1.3077,        0.13957,    -118.55));
-  ret.push_back(createJet(6143024,   18358,    3,    1.95208,  0.0483421,    1.35512,       0.684942,    -118.55,  -0.466989, fourveclist));
+  ret.push_back(createJet(6143024,   18358,    3,    1.95208,  0.0483421,    1.35512,       0.684942,    0.0, -118.55,  -0.466989, fourveclist));
 
   fourveclist.clear();
 
   fourveclist.push_back(createFourVec(6143024,   18358,    1, 1, 1, 2799,    0,   0.923283,   0.724552,   0.874879,        0.13957,    -118.55));
   fourveclist.push_back(createFourVec(6143024,   18358,   18, 2, 9,    0,  247,   0.106678,   0.774646,   0.650698,   -2.53721e-10,    -118.55));
-  ret.push_back(createJet(6143024,   18358,    4,    1.02757,   0.731266,   0.851798,       0.164231,    -118.55,   0.262665, fourveclist));
+  ret.push_back(createJet(6143024,   18358,    4,    1.02757,   0.731266,   0.851798,       0.164231,    0.102928, -118.55,   0.262665, fourveclist));
 
   fourveclist.clear();
 
   fourveclist.push_back(createFourVec(6143024,   18358,   12, 1, 1, 2770,    0,   0.749084,   0.124089,    2.32001,        0.13957,    -118.55));
-  ret.push_back(createJet(6143024,   18358,    5,   0.749084,   0.124089,    2.32001,        0.13957,    -118.55,  -0.397547, fourveclist));
+  ret.push_back(createJet(6143024,   18358,    5,   0.749084,   0.124089,    2.32001,        0.13957,    0.0, -118.55,  -0.397547, fourveclist));
 
   return ret;
 }
 
 StjJet RunJetFinderTest::createJet(int runNumber, int eventId,
-		 int jetId,
-		 double pt, double eta, double phi, double m,
-		 double vertexZ, double detectorEta,
-		 const StjFourVecList&    fourVecList)
+				   int jetId,
+				   double pt, double eta, double phi, double m,
+				   double neuRt,
+				   double vertexZ, double detectorEta,
+				   const StjFourVecList&    fourVecList)
 {
   StjJet ret;
   ret.runNumber = runNumber;  
@@ -223,6 +224,7 @@ StjJet RunJetFinderTest::createJet(int runNumber, int eventId,
   ret.eta     = eta;   
   ret.phi       = phi;   
   ret.m          = m;   
+  ret.neuRt       = neuRt;
   ret.vertexZ     = vertexZ;   
   ret.detectorEta = detectorEta;
   ret.fourVecList = fourVecList;
