@@ -1,4 +1,4 @@
-// $Id: StjBEMCMuDst.cxx,v 1.3 2008/08/03 00:29:02 tai Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.4 2008/08/13 22:55:57 tai Exp $
 #include "StjBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -9,8 +9,10 @@
 #include <StEvent/StEmcCollection.h>
 #include <StEvent/StEmcModule.h>
 #include <StEvent/StEmcDetector.h>
+#include <StEvent/StEvent.h>
 
 #include <StEmcUtil/geometry/StEmcGeom.h>
+
 
 #include <StEmcRawMaker/defines.h>
 #include <StEmcRawMaker/StBemcTables.h>
@@ -36,7 +38,8 @@ StjTowerEnergyList StjBEMCMuDst::getEnergyList()
 
   StjTowerEnergyList ret;
 
-  StEmcDetector* detector = _uDstMaker->muDst()->emcCollection()->detector(kBarrelEmcTowerId);
+  StEmcCollection* emcCollection = findEmcCollection();
+  StEmcDetector* detector = emcCollection->detector(kBarrelEmcTowerId);
 
   static const int nBemcModules = 120;
 
@@ -51,6 +54,12 @@ StjTowerEnergyList StjBEMCMuDst::getEnergyList()
   }
 
   return ret;
+}
+
+StEmcCollection* StjBEMCMuDst::findEmcCollection()
+{
+  StEvent* event = dynamic_cast<StEvent*>( _uDstMaker->GetInputDS("StEvent") );
+  return (event) ? event->emcCollection() : _uDstMaker->muDst()->emcCollection();
 }
 
 StjTowerEnergy StjBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
