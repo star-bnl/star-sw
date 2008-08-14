@@ -39,6 +39,8 @@ Int_t StLuminosityMaker::Init()
     return kStErr;
   }
 
+  LOG_INFO<<"Using minbias cross-section: "<<getCrossSectionNB()<<" (nb)"<<endm;
+
   mLumHolder = new TClonesArray("StLuminosityHolder",20);
 
   return StMaker::Init();
@@ -116,13 +118,13 @@ void StLuminosityMaker::setMode(char* newMode)
     mXsec = 13.8e3;
   }else if(!strcmp(newMode,"pp2008")){
     runMode = newMode;
-    mXsec = 25e6;
+    mXsec = 26.1e6;
   }else if(!strcmp(newMode,"AuAu2007")){
     runMode = newMode;
     mXsec = 10e9;
   }else if(!strcmp(newMode,"pp2006")){
     runMode = newMode;
-    mXsec = 25e6;
+    mXsec = 26.1e6;
   }else if(!strcmp(newMode,"pp2006_62GeV")){
     runMode = newMode;
     mXsec = 20e6;
