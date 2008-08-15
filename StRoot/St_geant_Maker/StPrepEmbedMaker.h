@@ -5,11 +5,14 @@
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.2 2007/08/29 23:00:14 andrewar Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.3 2008/08/15 15:10:41 lbarnby Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.3  2008/08/15 15:10:41  lbarnby
+ * Flag to skip embedding events without primary vertex with setter (default is to skip)
+ *
  * Revision 1.2  2007/08/29 23:00:14  andrewar
  * Added calls for embedding particle parameters, Maker methods
  *
@@ -45,7 +48,7 @@ class StPrepEmbedMaker : public StMaker {
   Int_t  InitRun(int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.2 2007/08/29 23:00:14 andrewar Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.3 2008/08/15 15:10:41 lbarnby Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -54,12 +57,14 @@ class StPrepEmbedMaker : public StMaker {
 	      Double_t etalow, Double_t etahigh, Double_t philow,
 	      Double_t phihigh);
   void SetTagFile(const Char_t *file) {mTagFile = file;}
+  void SetSkipMode(Bool_t flag=kTRUE) {mSkipMode = flag;}
  private:
   TGiant3 *mGeant3;
   TString mTagFile;
   Int_t mEventCounter;
   TFile *mFile;
   TTree *mTree;
+  Bool_t mSkipMode;
   ClassDef(StPrepEmbedMaker,0)    
 };
 #endif
